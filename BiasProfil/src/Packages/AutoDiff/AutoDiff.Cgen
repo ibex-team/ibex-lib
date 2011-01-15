@@ -1,0 +1,429 @@
+/************************************************************************
+ *
+ * Implementation of the Automatic Differentiation Type
+ * ----------------------------------------------------
+ *
+ * Copyright (C) 1993, 1997 Olaf Knueppel
+ *
+ * This file is part of PROFIL/BIAS.
+ *
+ * PROFIL/BIAS is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * $Id: AutoDiff.Cgen 478 2006-08-09 13:13:30Z keil $
+ *
+ ************************************************************************/
+
+#define _CONCAT1(a,b) _CONCAT2(a,b)
+#define _CONCAT2(a,b) a ## b
+static const char _CONCAT1 (rcs_id_, AUTODIFF_TYPE)[] = "$Id: AutoDiff.Cgen 478 2006-08-09 13:13:30Z keil $";
+#undef _CONCAT2
+#undef _CONCAT1
+
+// This is a generic file for automatic forward differentiation.
+// The computation of the second derivative is optional.
+// If the second derivative (hessian) is required, the macro
+//   AUTODIFF_COMPUTE_HESSIAN
+// must be defined.
+//
+// The following macros must be defined before this file is included:
+//
+//   AUTODIFF_TYPE         name of the new automatic differentiation type
+//   AUTODIFF_SIMPLE_TYPE  name of the element type
+//   AUTODIFF_VECTOR_TYPE  type name of the gradient for its own
+//   AUTODIFF_MATRIX_TYPE  type name of the hessian (if needed)
+//
+// The generic gradient header file must be included
+// prior reading this file
+
+#include <Functions.h>
+
+#ifdef AUTODIFF_COMPUTE_HESSIAN
+AUTODIFF_MATRIX_TYPE TransposedMul (CONST AUTODIFF_VECTOR_TYPE & a,
+                                    CONST AUTODIFF_VECTOR_TYPE & b)
+{
+  // returns a * b^T
+  INT aDim = Dimension (a);
+  INT bDim = Dimension (b);
+  INT i;
+  AUTODIFF_MATRIX_TYPE t(aDim, bDim);
+
+  for (i = 1; i <= aDim; i++) SetRow (t, i, a(i) * b);
+  return t;
+}
+#endif
+
+AUTODIFF_TYPE::AUTODIFF_TYPE (INT n, INT CompHess)
+{
+  Resize (grdn, n);
+  ComputeHessian = CompHess;
+#ifdef AUTODIFF_COMPUTE_HESSIAN
+  if (ComputeHessian) Resize (hessn, n, n);
+#endif
+}
+
+AUTODIFF_TYPE::AUTODIFF_TYPE (CONST AUTODIFF_VECTOR_TYPE & v,
+                              INT CompHess)
+{
+  grdn = v; value = 0.0;
+  ComputeHessian = CompHess;
+#ifdef AUTODIFF_COMPUTE_HESSIAN
+  if (ComputeHessian) {
+    Resize (hessn, Dimension (v), Dimension (v));
+    Clear (hessn);
+  }
+#endif
+}
+
+AUTODIFF_TYPE & AUTODIFF_TYPE::operator = (CONST AUTODIFF_TYPE & g)
+{
+  value = g.value;
+  grdn = g.grdn;
+#ifdef AUTODIFF_COMPUTE_HESSIAN
+  if (g.ComputeHessian) hessn = g.hessn;
+#endif
+  return *this;
+}
+
+AUTODIFF_TYPE & AUTODIFF_TYPE::operator = (REAL a)
+{
+  Clear (grdn);
+#ifdef AUTODIFF_COMPUTE_HESSIAN
+  if (ComputeHessian) Clear (hessn);
+#endif
+  value = a;
+  return *this;
+}
+
+AUTODIFF_TYPE AUTODIFF_TYPE::operator () (INT i) CONST
+{
+  INT dim = Dimension(*this);
+  AUTODIFF_TYPE h(dim, ComputeHessian);
+
+  h.fkt() = this->grd()(i);
+  Clear(h.grd()); h.grd()(i) = 1.0;
+#ifdef AUTODIFF_COMPUTE_HESSIAN
+  if (ComputeHessian) Clear(h.hessian());
+#endif
+  return h;
+}
+
+AUTODIFF_TYPE operator - (CONST AUTODIFF_TYPE & g)
+{
+  INT dim = Dimension(g);
+  AUTODIFF_TYPE h(dim, g.ComputeHessian);
+
+  h.fkt() = -g.fkt();
+  h.grd() = -g.grd();
+#ifdef AUTODIFF_COMPUTE_HESSIAN
+  if (g.ComputeHessian)
+    h.hessian() = -g.hessian();
+#endif
+  return h;
+}
+
+AUTODIFF_TYPE operator + (CONST AUTODIFF_TYPE & g1, CONST AUTODIFF_TYPE & g2)
+{
+  INT dim = Dimension(g1);
+  AUTODIFF_TYPE h(dim, FALSE);
+
+  h.fkt() = g1.fkt() + g2.fkt();
+  h.grd() = g1.grd() + g2.grd();
+#ifdef AUTODIFF_COMPUTE_HESSIAN
+  if (g1.ComputeHessian && g2.ComputeHessian) {
+    h.hessian() = g1.hessian() + g2.hessian();
+    h.ComputeHessian = TRUE;
+  }
+#endif
+  return h;
+}
+
+AUTODIFF_TYPE operator + (CONST AUTODIFF_TYPE & g, REAL a)
+{
+  INT dim = Dimension(g);
+  AUTODIFF_TYPE h(dim, FALSE);
+
+  h.fkt() = a + g.fkt();
+  h.grd() = g.grd();
+#ifdef AUTODIFF_COMPUTE_HESSIAN
+  if (g.ComputeHessian) {
+    h.hessian() = g.hessian();
+    h.ComputeHessian = TRUE;
+  }
+#endif
+  return h;
+}
+
+AUTODIFF_TYPE operator + (REAL a, CONST AUTODIFF_TYPE & g)
+{
+  INT dim = Dimension(g);
+  AUTODIFF_TYPE h(dim, FALSE);
+
+  h.fkt() = a + g.fkt();
+  h.grd() = g.grd();
+#ifdef AUTODIFF_COMPUTE_HESSIAN
+  if (g.ComputeHessian) {
+    h.hessian() = g.hessian();
+    h.ComputeHessian = TRUE;
+  }
+#endif
+  return h;
+}
+
+AUTODIFF_TYPE operator - (CONST AUTODIFF_TYPE & g1, CONST AUTODIFF_TYPE & g2)
+{
+  INT dim = Dimension(g1);
+  AUTODIFF_TYPE h(dim, FALSE);
+
+  h.fkt() = g1.fkt() - g2.fkt();
+  h.grd() = g1.grd() - g2.grd();
+#ifdef AUTODIFF_COMPUTE_HESSIAN
+  if (g1.ComputeHessian && g2.ComputeHessian) {
+    h.hessian() = g1.hessian() - g2.hessian();
+    h.ComputeHessian = TRUE;
+  }
+#endif
+  return h;
+}
+
+AUTODIFF_TYPE operator - (CONST AUTODIFF_TYPE & g, REAL a)
+{
+  INT dim = Dimension(g);
+  AUTODIFF_TYPE h(dim, FALSE);
+
+  h.fkt() = g.fkt() - a;
+  h.grd() = g.grd();
+#ifdef AUTODIFF_COMPUTE_HESSIAN
+  if (g.ComputeHessian) {
+    h.hessian() = g.hessian();
+    h.ComputeHessian = TRUE;
+  }
+#endif
+  return h;
+}
+
+AUTODIFF_TYPE operator - (REAL a, CONST AUTODIFF_TYPE & g)
+{
+  INT dim = Dimension(g);
+  AUTODIFF_TYPE h(dim, FALSE);
+
+  h.fkt() = a - g.fkt();
+  h.grd() = -g.grd();
+#ifdef AUTODIFF_COMPUTE_HESSIAN
+  if (g.ComputeHessian) {
+    h.hessian() = -g.hessian();
+    h.ComputeHessian = TRUE;
+  }
+#endif
+  return h;
+}
+
+AUTODIFF_TYPE operator * (CONST AUTODIFF_TYPE & g1, CONST AUTODIFF_TYPE & g2)
+{
+  INT dim = Dimension(g1);
+  AUTODIFF_TYPE h(dim, FALSE);
+
+  h.fkt() = g1.fkt() * g2.fkt();
+  h.grd() = g2.fkt() * g1.grd() + g1.fkt() * g2.grd();
+#ifdef AUTODIFF_COMPUTE_HESSIAN
+  if (g1.ComputeHessian && g2.ComputeHessian) {
+    h.hessian() = g1.fkt() * g2.hessian()
+      + TransposedMul (g1.grd(), g2.grd())
+      + TransposedMul (g2.grd(), g1.grd())
+      + g2.fkt() * g1.hessian();
+    h.ComputeHessian = TRUE;
+  }
+#endif
+  return h;
+}
+
+AUTODIFF_TYPE operator * (REAL a, CONST AUTODIFF_TYPE & g)
+{
+  INT dim = Dimension(g);
+  AUTODIFF_TYPE h(dim, FALSE);
+
+  h.fkt() = a * g.fkt();
+  h.grd() = a * g.grd();
+#ifdef AUTODIFF_COMPUTE_HESSIAN
+  if (g.ComputeHessian) {
+    h.hessian() = a * g.hessian();
+    h.ComputeHessian = TRUE;
+  }
+#endif
+  return h;
+}
+
+AUTODIFF_TYPE operator * (CONST AUTODIFF_TYPE & g, REAL a)
+{
+  INT dim = Dimension(g);
+  AUTODIFF_TYPE h(dim, FALSE);
+
+  h.fkt() = a * g.fkt();
+  h.grd() = a * g.grd();
+#ifdef AUTODIFF_COMPUTE_HESSIAN
+  if (g.ComputeHessian) {
+    h.hessian() = a * g.hessian();
+    h.ComputeHessian = TRUE;
+  }
+#endif
+  return h;
+}
+
+AUTODIFF_TYPE operator / (CONST AUTODIFF_TYPE & g1, CONST AUTODIFF_TYPE & g2)
+{
+  INT dim = Dimension(g1);
+  AUTODIFF_TYPE h(dim, FALSE);
+
+  h.fkt() = g1.fkt() / g2.fkt();
+  h.grd() = g1.grd() / g2.fkt() - g1.fkt() * g2.grd() / Sqr(g2.fkt());
+#ifdef AUTODIFF_COMPUTE_HESSIAN
+  if (g1.ComputeHessian && g2.ComputeHessian) {
+    h.hessian() = (g1.hessian()
+		   - TransposedMul (h.grd(), g2.grd())
+		   - TransposedMul (g2.grd(), h.grd())
+		   - h.fkt() * g2.hessian()) / g2.fkt();
+    h.ComputeHessian = TRUE;
+  }
+#endif
+  return h;
+}
+
+AUTODIFF_TYPE operator / (REAL a, CONST AUTODIFF_TYPE & g)
+{
+  INT dim = Dimension(g);
+  AUTODIFF_TYPE h(dim, FALSE);
+
+  h.fkt() = a / g.fkt();
+  h.grd() = -a * g.grd() / Sqr(g.fkt());
+#ifdef AUTODIFF_COMPUTE_HESSIAN
+  if (g.ComputeHessian) {
+    h.hessian() = (TransposedMul (h.grd(), g.grd())
+		   + TransposedMul (g.grd(), h.grd())
+		   + h.fkt() * g.hessian()) / (-g.fkt());
+    h.ComputeHessian = TRUE;
+  }
+#endif
+  return h;
+}
+
+AUTODIFF_TYPE operator / (CONST AUTODIFF_TYPE & g, REAL a)
+{
+  INT dim = Dimension(g);
+  AUTODIFF_TYPE h(dim, FALSE);
+
+  h.fkt() = g.fkt() / a;
+  h.grd() = g.grd() / a;
+#ifdef AUTODIFF_COMPUTE_HESSIAN
+  if (g.ComputeHessian) {
+    h.hessian() = g.hessian() / a;
+    h.ComputeHessian = TRUE;
+  }
+#endif
+  return h;
+}
+
+AUTODIFF_TYPE Sqr (CONST AUTODIFF_TYPE & g)
+{
+  INT dim = Dimension(g);
+  AUTODIFF_TYPE h(dim, FALSE);
+
+  h.fkt() = Sqr(g.fkt());
+  h.grd() = 2.0 * g.fkt() * g.grd();
+#ifdef AUTODIFF_COMPUTE_HESSIAN
+  if (g.ComputeHessian) {
+    h.hessian() = 2.0 * (g.fkt() * g.hessian() + TransposedMul (g.grd(), g.grd()));
+    h.ComputeHessian = TRUE;
+  }
+#endif
+  return h;
+}
+
+AUTODIFF_TYPE Sin (CONST AUTODIFF_TYPE & g)
+{
+  INT dim = Dimension(g);
+  AUTODIFF_TYPE h(dim, FALSE);
+  AUTODIFF_SIMPLE_TYPE s, c;
+
+  s = Sin(g.fkt()); c = Cos(g.fkt());
+  h.fkt() = s;
+  h.grd() = c * g.grd();
+#ifdef AUTODIFF_COMPUTE_HESSIAN
+  if (g.ComputeHessian) {
+    h.hessian() = c * g.hessian() - s * TransposedMul (g.grd(), g.grd());
+    h.ComputeHessian = TRUE;
+  }
+#endif
+  return h;
+}
+
+AUTODIFF_TYPE Cos (CONST AUTODIFF_TYPE & g)
+{
+  INT dim = Dimension(g);
+  AUTODIFF_TYPE h(dim, FALSE);
+  AUTODIFF_SIMPLE_TYPE s, c;
+
+  s = Sin(g.fkt()); c = Cos(g.fkt());
+  h.fkt() = c;
+  h.grd() = -s * g.grd();
+#ifdef AUTODIFF_COMPUTE_HESSIAN
+  if (g.ComputeHessian) {
+    h.hessian() = -s * g.hessian() - c * TransposedMul (g.grd(), g.grd());
+    h.ComputeHessian = TRUE;
+  }
+#endif
+  return h;
+}
+
+AUTODIFF_TYPE Exp (CONST AUTODIFF_TYPE & g)
+{
+  INT dim = Dimension(g);
+  AUTODIFF_TYPE h(dim, FALSE);
+  AUTODIFF_SIMPLE_TYPE s;
+
+  h.fkt() = Exp(g.fkt());
+  s = Exp(g.fkt());
+  h.grd() = s * g.grd();
+#ifdef AUTODIFF_COMPUTE_HESSIAN
+  if (g.ComputeHessian) {
+    h.hessian() = s * (g.hessian() + TransposedMul (g.grd(), g.grd()));
+    h.ComputeHessian = TRUE;
+  }
+#endif
+  return h;
+}
+
+AUTODIFF_TYPE Sqrt (CONST AUTODIFF_TYPE & g)
+{
+  INT dim = Dimension(g);
+  AUTODIFF_TYPE h(dim, FALSE);
+  AUTODIFF_SIMPLE_TYPE s;
+
+  h.fkt() = Sqrt(g.fkt());
+  s = 2.0 * Sqrt(g.fkt());
+  h.grd() = g.grd() / s;
+#ifdef AUTODIFF_COMPUTE_HESSIAN
+  if (g.ComputeHessian) {
+    h.hessian() = (g.hessian() - TransposedMul (g.grd(), g.grd()) / (2.0 * g.fkt())) / s;
+    h.ComputeHessian = TRUE;
+  }
+#endif
+  return h;
+}
+
+/*
+ * Local Variables:
+ * mode: C++
+ * End:
+ */

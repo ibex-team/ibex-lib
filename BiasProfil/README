@@ -1,0 +1,62 @@
+
+  Welcome to the circle of PROFIL/BIAS users! 
+,---------------------------------------------'
+
+What is PROFIL/BIAS
+-------------------
+
+  PROFIL/BIAS is a portable C++/C library for developing and implementing
+interval algorithms in a comfortable but nevertheless efficient way.
+
+  The C part BIAS provides fast implementations of basic interval vector and
+matrix operations in the style of BLAS.
+
+  All interval operations of the C++ part PROFIL are based on BIAS with the
+advantage that PROFIL is independent from the internal representation and the
+implementation of the interval types. It features data types such as vectors,
+matrices, intervals, interval vectors and matrices, and integer vectors and
+matrices, as well as operations between these. Additionally lots of commonly
+used packages like local and glocal optimization methods, automatic
+differentiation, and test matrices are included.
+
+How to get started
+------------------
+
+  The installation consists of three steps:
+
+1) First you have to configure the hardware specific part of PROFIL/BIAS. This
+is done by running
+
+  ./Configure
+
+in the directory in which you unpacked the PROFIL/BIAS sources. Select your
+system from the list and you're done. (For details on the list items please
+check the documentation.)
+
+2) Now you're ready to compile PROFIL/BIAS. Just run
+
+  make all
+
+and after that
+
+  make install
+
+You don't need special rights for this, make install just copies the headers and
+libraries to the subdirectories include und lib, respectively.
+
+3) [optional] There are some example programs for the different parts of
+PROFIL/BIAS, these can be compiled with
+
+  make examples
+
+and can afterwards be found in the subdirectories of the parts they exhibit.
+These are a good starting point to see how to use the parts in your own programs.
+
+Authors and Contact
+-------------------
+
+  PROFIL/BIAS was written by
+Olaf Knueppel, Dirk Husung, Christian Keil
+
+  For questions, bug reports, suggestions, and success stories contact 
+Christian Keil, c.keil@tu-harburg.de

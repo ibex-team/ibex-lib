@@ -1,0 +1,101 @@
+/************************************************************************
+ *
+ * Definition of General Singly Linked Linear Lists
+ * ------------------------------------------------
+ *
+ * Copyright (C) 1994, 1997 Olaf Knueppel
+                 2005 Christian Keil
+ *
+ * This file is part of PROFIL/BIAS.
+ *
+ * PROFIL/BIAS is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * $Id: LinearList.hgen 478 2006-08-09 13:13:30Z keil $
+ *
+ ************************************************************************/
+
+/*
+ * Linear Lists (singly linked):
+ * -----------------------------
+ *
+ * Controlling macros:
+ *   LIST_ELEMENT: Type name of list elements (e.g. class name)
+ *   LIST:         type name of list to be generated
+ *   LISTOBJECT:   type name of single list object
+ *   LISTCMPFUNC:  Type name of list compare function (predefined below)
+ */
+
+#ifndef LIST_NO_DESTRUCTOR // explicit call of destructor doesn't
+			   // seem to be necessary
+#define LIST_NO_DESTRUCTOR
+#endif
+
+#include <Error.h>
+#include <iostream>
+using namespace std;
+
+struct LISTOBJECT {
+  LISTOBJECT *next;
+  LIST_ELEMENT element;
+};
+
+typedef INT (*LISTCMPFUNC)(CONST LIST_ELEMENT &, CONST LIST_ELEMENT &);
+
+class LIST {
+  LISTOBJECT *start;	// start of list
+  LISTOBJECT *end;	// end of list
+  LISTOBJECT *current;	// current position
+  LISTOBJECT *lastcur;	// previous position
+  INT len;		// current list length
+  INT maxlen;		// maximal list length
+  LISTCMPFUNC compare;	// compare function for <<=
+public:
+  LIST()
+    { start = end = current = lastcur = NULL;
+      compare = NULL; len = maxlen = 0; }
+  LIST(LISTCMPFUNC cmp)
+    { start = end = current = lastcur = NULL;
+      compare = cmp; len = maxlen = 0; }
+  ~LIST();
+  LIST (LIST & li)
+    { FatalError("List (Copy): only references allowed"); }
+  friend LIST_ELEMENT & First   (LIST &);
+  friend LIST_ELEMENT & Next    (LIST &);
+  friend LIST_ELEMENT & Last    (CONST LIST &);
+  friend VOID RemoveCurrent     (LIST &);
+  friend LIST_ELEMENT & Current (CONST LIST &);
+  friend INT Finished           (CONST LIST & li)
+    { return (li.current == NULL); }
+  friend INT IsEmpty            (CONST LIST & li)
+    { return (li.start == NULL); }
+  friend INT Length             (CONST LIST & li)
+    { return li.len; }
+  friend INT MaxLength          (CONST LIST & li)
+    { return li.maxlen; }
+  friend VOID ResetLength       (LIST & li)
+    { li.maxlen = li.len; }
+  VOID operator +=  (CONST LIST_ELEMENT &);
+  VOID operator *=  (CONST LIST_ELEMENT &);
+  VOID operator <<= (CONST LIST_ELEMENT &);
+  VOID operator --  ();
+  friend ostream & operator << (ostream &, CONST LIST &);
+};
+
+/*
+ * Local Variables:
+ * mode: C++
+ * End:
+ */

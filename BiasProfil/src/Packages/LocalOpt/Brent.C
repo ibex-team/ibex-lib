@@ -1,0 +1,663 @@
+/************************************************************************
+ *
+ * Implementation of Brent's Minimization Method
+ * ---------------------------------------------
+ *
+ * Copyright (C) 1993, 1997 Olaf Knueppel
+ *               2006 Christian Keil
+ *
+ * This file is part of PROFIL/BIAS.
+ *
+ * PROFIL/BIAS is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * $Id: Brent.C 483 2006-10-05 16:00:37Z keil $
+ *
+ ************************************************************************/
+
+static const char rcs_id[] = "$Id: Brent.C 483 2006-10-05 16:00:37Z keil $";
+
+#include <LocalOpt/Brent.h>
+#include <Misc/MiscFunctions.h>
+#include <Utilities.h>
+#include <math.h>
+#include <stdlib.h>
+
+/*
+ * Compute singular value decomposition of A
+ *
+ * This is a modified version of the Minfit algorithm by Golub and Reinsch
+ * (Singular Value Decomposition and Least Squares Solutions, 
+ * Numer. Math. 14, 403 - 420, 1970). It is adjusted to the case of square A.
+ */
+static VOID Minfit(MATRIX & A, VECTOR & q, REAL eps, REAL tol)
+{
+  /* The idea is to first bidiagonalize A into J through Householder reflections. Then J is
+   * diagonalized with a variant of the QR algorithm, applying the algorithm to JJ'. */
+  INT i, j, k;
+  INT dim = RowDimension(A);
+  INT l, l2, kt;
+  REAL c, f, g, h, s, x, y, z;
+  INT nocancel;
+  VECTOR e(dim);
+
+  g = x = 0.0;
+  /* Householder reduction to bidiagonal form 
+   * after this q(i) holds the diagonal element (i,i), e(i) holds the subdiagonal element (i,i-1) */
+  for (i = 1; i <= dim; i++) {
+    e(i) = g; s = 0.0; l = i + 1;
+    /* first eliminate the elements above the diagonal */
+    for (j = i; j <= dim; j++) s += A(i,j) * A(i,j);
+    if (s < tol) g = 0.0;
+    else {
+      f = A(i,i);
+      g = (f < 0.0) ? sqrt(s) : -sqrt(s);
+      /* A(i,i:) - (g,0) is the reflecting plane's normal vector w (Householder: I - 2/(w'w) * ww')
+       * its squared norm is w'w = ((f=A(i,i)) - g)^2 + (s - f^2) = 2(s - f*g) = -2*h */
+      h = f * g - s;
+      A(i,i) = f - g;
+      for (j = l; j <= dim; j++) {
+	f = 0.0;
+	/* compute f = w'A(j,i:) */
+	for (k = i; k <= dim; k++) f += A(i,k) * A(j,k);
+	/* compute f = -(2/(w'w))w'A(j,i:) */
+	f /= h;
+	for (k = i; k <= dim; k++) A(j,k) += f * A(i,k);
+      }
+    }
+    q(i) = g; s = 0.0;
+    /* now eliminate the elements below the subdiagonal */
+    if (i <= dim) {
+      for (j = l; j <= dim; j++) s += A(j,i) * A(j,i);
+    }
+    if (s < tol) g = 0.0;
+    else {
+      f = A(i+1,i);
+      g = (f < 0.0) ? sqrt(s) : -sqrt(s);
+      h = f * g - s;
+      A(i+1,i) = f - g;
+      for (j = l; j <= dim; j++) e(j) = A(j,i) / h;
+      for (j = l; j <= dim; j++) {
+	s = 0.0;
+	for (k = l; k <= dim; k++) s += A(k,j) * A(k,i);
+	for (k = l; k <= dim; k++) A(k,j) += s * e(k);
+      }
+    }
+    y = fabs(q(i)) + fabs(e(i));
+    if (y > x) x = y;
+  }
+  /* accumulate transposed left-hand transformations 
+   * arriving here A holds the reflecting plane's normal vectors, l = dim+1 */
+  for (i = dim; i >= 1; i--) {
+    /* g is the norm of the reflected vector (subdiagonal element e(i+1)) */
+    if (g != 0.0) {
+      /* compute -1/2 w'w
+       * in terms of the original matrix w = (A(i+1,i) - (g=||A(i+1:,i)||), A(i+2:,i))'
+       * (A(i+1,i) - g) * g = -1/2 w'w = -1/2 [(A(i+1,i)-g)^2 + (||A(i+1:,i)||^2 - A(i+1,i)^2)]
+       *                               = -1/2 [-2A(i+1,i)g + 2g^2] */
+      h = A(i+1,i) * g;
+      /* A(i,i+1:) = -(2/(w'w))w */
+      for (j = l; j <= dim; j++) A(i,j) = A(j,i) / h;
+      /* apply reflection from the right (to the rows) */
+      for (j = l; j <= dim; j++) {
+	s = 0.0;
+	for (k = l; k <= dim; k++) s += A(k,i) * A(j,k);
+	for (k = l; k <= dim; k++) A(j,k) += s * A(i,k);
+      }
+    }
+    for (j = l; j <= dim; j++) A(i,j) = A(j,i) = 0.0;
+    A(i,i) = 1.0; g = e(i); l = i;
+  }
+  eps *= x;
+  /* diagonalize the bidiagonal form */
+  for (k = dim; k >= 1; k--) {
+    kt = 0;
+    while (1) {
+      if (++kt > 30) e(k) = 0.0;
+      nocancel = 0;
+      for (l2 = k; l2 >= 1; l2--) {
+	l = l2;
+	if (fabs(e(l)) <= eps) { nocancel = 1; break; }
+	if (fabs(q(l-1)) <= eps) break;
+      }
+      if (!nocancel) {
+	/* small q(l-1), cancel e(l) with series of Givens rotations
+	 * c and s are the cosine, -sine of the rotation angle */
+	c = 0.0; s = 1.0;
+	for (i = l; i <= k; i++) {
+	  /* compute the entry generated by rotating part of e(i) into the 0 in column l-1 */
+	  f = s * e(i); 
+	  /* compute the new subdiagonal entry after rotating part of it into column l-1 */
+	  e(i) *= c;
+	  if (fabs(f) <= eps) break;
+	  /* ((g=q(i),f) is rotated into (||(f,g)||,0) */
+	  g = q(i); q(i) = h = (fabs(f) < fabs(g)) ?
+	    (fabs(g) * sqrt(1.0 + (f/g)*(f/g))) :
+	      ((f != 0.0) ? (fabs(f) * sqrt(1.0 + (g/f)*(g/f))) : 0.0);
+	  if (h == 0.0) g = h = 1.0;
+	  /* update cosine, -sine */
+	  c = g / h; s = -f / h;
+	}
+      }
+      /* check for convergence */
+      z = q(k);
+      if (l == k) break;
+      /* compute shift from trailing 2x2 submatrix of JJ'
+       * This is quite technical:
+       * The trailing 2x2 submatrix of JJ' is
+       * 
+       * [ e(k-1)^2 + q(k-1)^2     e(k) * q(k-1) ]
+       * [     e(k) * q(k-1)     e(k)^2 + q(k)^2 ]
+       * 
+       * whose eigenvalues are
+       *
+       *         q(k-1)^2 + q(k)^2 + e(k-1)^2 + e(k)^2 
+       * l1/l2 = ------------------------------------- 
+       *                         2                     
+       *                         
+       *         +     [ (q(k-1)^2 - q(k)^2 + e(k-1)^2 - e(k)^2)^2                    ]
+       *           sqrt[ -----------------------------------------  + e(k)^2*q(k-1)^2 ]
+       *         -     [                    4                                         ]
+       *
+       * using
+       *
+       *     q(k-1)^2 - q(k)^2 + e(k-1)^2 - e(k)^2
+       * f = -------------------------------------,  g = sqrt(f^2 + 1)
+       *                2*e(k)*q(k-1)
+       *              
+       * the eigenvalues become
+       *
+       * l1/l2 = f*e(k)*q(k-1) + q(k)^2 + e(k)^2 +- g*e(k)*q(k-1) 
+       *       = (f +- g)*e(k)*q(k-1) + q(k)^2 + e(k)^2
+       *
+       * Finally using f^2 - g^2 = 1
+       *
+       *           (f +- g)*e(k)*q(k-1)                       e(k)*q(k-1)
+       * l1/l2 = - -------------------- + q(k)^2 + e(k)^2 = - ----------- + q(k)^2 + e(k)^2
+       *             (f + g)*(f - g)                            f -+ g
+       * 
+       * */
+      x = q(l); y = q(k-1); g = e(k-1); h = e(k);
+      f = ((y - z) * (y + z) + (g - h) * (g + h)) / (2.0 * h * y);
+      g = sqrt(f * f + 1.0);
+      /* subtracting shift from leading diagonal element of JJ' q(l)^2 and scale first row
+       * (q(l)^2 - shift, q(l)*e(l+1)) by 1/q(l), leading to (f, e(l+1)) */
+      f = ((x - z) * (x + z) + h * (y / ((f < 0.0) ? (f - g) : (f + g)) - h)) / x;
+      /* next QR iteration for submatrix starting at q(l) 
+       * Setting (f,h) to be a multiple of shifted JJ' causes the Givens rotations inside the loop
+       * to actually perform a QR iteration with the given shift. */
+      c = s = 1.0;
+      for (i = l + 1; i <= k; i++) {
+	/* left-rotate the vector (f,h) into (||(f,h)||,0)
+	 * f, g, h, x, y are arranged as follows:
+	 *
+	 * [ f   x            ]
+	 * [ h   g   y(=q(i)) ]
+	 *
+	 * after the rotation e(i-1) becomes ||(f,h)||, h becomes the generated element above y, f
+	 * becomes the modified x 
+	 * in the first loop iteration f and h don't appear in the matrix (s.a), in later loop
+	 * iterations they are updated from the previous right-rotations cosine(c), sine(s) */
+	g = e(i); y = q(i); h = s * g; g *= c;
+	e(i-1) = z = (fabs(f) < fabs(h)) ?
+	  (fabs(h) * sqrt(1.0 + (f/h)*(f/h))) :
+	    ((f != 0.0) ? (fabs(f) * sqrt(1.0 + (h/f)*(h/f))) : 0.0);
+	if (z == 0.0) z = f = 1.0;
+	c = f / z; s = h / z;
+	f = x * c + g * s;
+	g = -x * s + g * c;
+	h = y * s;
+	y *= c;
+	/* apply same rotation to reflection matrix from the left */
+	for (j = 1; j <= dim; j++) {
+	  x = A(i-1,j); z = A(i,j);
+	  A(i-1,j) = x * c + z * s;
+	  A(i,j) = -x * s + z * c;
+	}
+	/* right rotate the vector (f,h) into (||(f,h)||,0)
+	 * f, g, h, y are arranged as follows:
+	 *
+	 * [ f  h ]
+	 * [ g  y ]
+	 *
+	 * after the rotation q(i-1) becomes ||(f,h)||, (f,x) become the modified (g,y)
+	 * */
+	q(i-1) = z = (fabs(f) < fabs(h)) ?
+	  (fabs(h) * sqrt(1.0 + (f/h)*(f/h))) :
+	    ((f != 0.0) ? (fabs(f) * sqrt(1.0 + (h/f)*(h/f))) : 0.0);
+	if (z == 0.0) z = f = 1.0;
+	c = f / z; s = h / z;
+	f = c * g + s * y;
+	x = -s * g + c * y;
+      }
+      /* clean up, reset e(l) to 0, iterates (f,x) are the final (e(k),q(k)) */
+      e(l) = 0.0; e(k) = f; q(k) = x;
+    }
+    if (z < 0.0) {
+      q(k) = -z;
+      for (j = 1; j <= dim; j++) A(k,j) = -A(k,j);
+    }
+  }
+}
+
+static VOID Sort (VECTOR & d, MATRIX & v)
+{
+  INT i, j, k;
+  INT dim = Dimension (d);
+  VECTOR temp(dim);
+  REAL s;
+
+  for (i = 1; i < dim; i++) {
+    k = i; s = d(i);
+    for (j = i + 1; j <= dim; j++) {
+      if (d(j) > s) { 
+	k = j; s = d(j); 
+      }
+    }
+    if (k > i) {
+      d(k) = d(i); d(i) = s;
+      temp = Row(v, i);
+      SetRow(v, i, Row(v, k));
+      SetRow(v, k, temp);
+    }
+  }
+}
+
+static REAL (*pfunc)(CONST VECTOR &);
+static VECTOR q0, q1;
+static REAL qd0, qd1;
+static VECTOR x;
+static MATRIX v;
+static REAL fx, qf1, t, h;
+static REAL small, macheps, m2, m4, dmin, ldt;
+static INT nl;
+
+/*
+ * Compute function along 1 dimension
+ *
+ * Computes the value of pfunc along the dimension specified by j. If j > 0, this is the value of
+ * pfunc at y along the j-th row of v, pfunc(x + y * v(j,:)). Otherwise its the value of pfunc at y
+ * along the parabola through the points (0, x), (qd1, q1), (-qd0, q0). Note that qd1 and qd0 are
+ * the distances of q1 and q0 to x, respectively.
+ */
+static REAL Linear_f (REAL y, INT j)
+{
+  REAL qa, qb, qc;
+
+  if (j > 0) return (*pfunc) (x + y * Row (v, j));
+  else
+    {
+      qa = y * (y - qd1) / (qd0 * (qd0 + qd1));
+      qb = (y + qd0) * (qd1 - y) / (qd0 * qd1);
+      qc = y * (y + qd0) / (qd1 * (qd0 + qd1));
+      return (*pfunc) (qa * q0 + qb * x + qc * q1);
+    }
+}
+
+/*
+ * Minimize function in 1 dimension
+ *
+ * Quadratically minimizes the function in the dimension specified by j. If j > 0, pfunc is
+ * minimized along the j-th row of v. Otherwise along the parabola through (0, x), (qd0, q0), 
+ * (qd1, q1), with qd0, qd1 being the distance of q0, q1 to x, respectively.
+ * 
+ * Input  j      minimize along v(:,j) if j > 0, otherwise minimize along parabola
+ *        nits   number of trial points in parabolic minimization
+ *        d2     zero or estimate of half the 2nd derivative of pfunc
+ *        x1     if fk is true, estimate of the distance from x to the minimum along the
+ *               minimization curve 
+ *        f1     if fk is true, pfunc(x1)
+ *        fk     whether x1 and f1 are considered
+ * Output x1     distance from x to found minimum
+ *        x      is set to the minimizer if j > 0
+ */
+static VOID Min(INT j, INT nits, REAL & d2, REAL & x1, REAL f1, INT fk)
+{
+  INT k;
+  INT dz, leaveit;
+  REAL x2, xm, f0, f2, fm, d1, t2, s, sf1, sx1;
+
+  sf1 = f1; sx1 = x1;
+  k = 0; xm = 0.0; f0 = fm = fx; dz = (d2 < macheps);
+  s = Norm(x);
+  t2 = m4 * sqrt(fabs(fx) / (dz ? dmin : d2) + s * ldt) + m2 * ldt;
+  s = m4 * s + t;
+  if (dz && (t2 > s)) t2 = s;
+  if (t2 < small) t2 = small;
+  if (t2 > h/100.0) t2 = h/100.0;
+  if (fk && (f1 <= fm)) { xm = x1; fm = f1; }
+  if (!fk || (fabs(x1) < t2)) {
+    x1 = (x1 > 0.0) ? t2 : -t2;
+    f1 = Linear_f (x1, j);
+  }
+  if (f1 <= fm) { xm = x1; fm = f1; }
+  leaveit = 0;
+  while (!leaveit) {
+    if (dz) {
+      x2 = (f0 < f1) ? -x1 : (2.0*x1);
+      f2 = Linear_f (x2, j);
+      if (f2 <= fm) { xm = x2; fm = f2; }
+      /* compute half of the 2nd derivative of the parabola through the points
+       * (0, f0=fx), (x1, f1), (x2, f2)
+       * (f(x1) - f(x0))/(x1 - x0) is the exact gradient of a parabola at 0.5*(x1 + x0) */
+      d2 = (x2 * (f1 - f0) - x1 * (f2 - f0)) / (x1 * x2 * (x1 - x2));
+    }
+    /* compute 1st derivative of parabola (s.a) at 0 
+     * d2 is half the 2nd derivative */
+    d1 = (f1 - f0) / x1 - x1 * d2; 
+    dz = 1;
+    /* x2 = -0.5 * d1/d2 moves x2 to the minimum of the parabola
+     * (make a Newton step to zero the gradient, d2 is half the 2nd
+     * derivative) */
+    x2 = (d2 <= small) ? ((d1 < 0.0) ? h : -h) : (-0.5 * d1 / d2);
+    if (fabs(x2) > h) x2 = (x2 > 0.0) ? h : -h;
+    while (1) {
+      f2 = Linear_f (x2, j);
+      if ((k >= nits) || (f2 <= f0)) { leaveit = 1; break; }
+      k++;
+      /* this condition doesn't change throughout the loop, the first loop iteration could
+       * presumably be unrolled to get rid of it inside the loop */
+      if ((f0 < f1) && (x1 * x2 > 0.0)) break;
+      x2 /= 2.0;
+    }
+  }
+  nl++;
+  if (f2 > fm) x2 = xm; else fm = f2;
+  /* estimate half the 2nd derivative */
+  d2 = (fabs(x2 * (x2 - x1)) > small) ?
+    ((x2 * (f1 - f0) - x1 * (fm - f0)) / (x1 * x2 * (x1 - x2))) :
+    ((k > 0) ? 0.0 : d2);
+  if (d2 < small) d2 = small;
+  x1 = x2; fx = fm;
+  /* can this happen? */
+  if (sf1 < fx) { fx = sf1; x1 = sx1; }
+  /* update x for linear but not parabolic minimization */
+  if (j > 0) x += x1 * Row (v, j);
+}
+
+/*
+ * Move to the minimum along parabola
+ *
+ * Moves x to the minimum of the parabola through the points (0, fx), (q0, qd0), (q1, qd1).
+ */
+static VOID Quad()
+{
+  INT dim = Dimension(x);
+  REAL qa, qb, qc, y, s;
+  VECTOR temp(dim);
+
+  s = fx; fx = qf1; qf1 = s;
+  temp = x; x = q1; q1 = temp;
+  y = qd1 = Norm(x - q1);
+  s = 0.0;
+  if ((qd0 > 0.0) && (qd1 > 0.0) && (nl >= 3 * dim * dim)) {
+    Min(0, 2, s, y, qf1, 1);
+    qa = y * (y - qd1) / (qd0 * (qd0 + qd1));
+    qb = (y + qd0) * (qd1 - y) / (qd0 * qd1);
+    qc = y * (y + qd0) / (qd1 * (qd0 + qd1));
+  } else {
+    fx = qf1; qa = qb = 0.0; qc = 1.0;
+  }
+  qd0 = qd1;
+  temp = x;
+  x = qa * q0 + qb * x + qc * q1;
+  q0 = temp;
+}
+
+REAL BrentMinimize_Expert (VECTOR & p, REAL hmin, REAL rtol, REAL atol,
+			   REAL scbd, INT illc, INT ktm,
+			   REAL (*pf)(CONST VECTOR &))
+/*
+ * Minimization method of Brent (expert version)
+ * ---------------------------------------------
+ *
+ * Source: R.P. Brent: Algorithms for Minimization without Derivatives
+ *                     (Prentice-Hall, 1973)
+ * INPUTS:
+ *
+ *   p       start point for the minimization method
+ *           (dimension = n has to be at least 2)
+ *
+ *   hmin    estimated distance from start point to minimum point
+ *
+ *   rtol    relative termination tolerance for the minimum point
+ *           this should in general not be smaller than the square
+ *           root of the machine precision
+ *
+ *   atol    absolute termination tolerance for the minimum point
+ *
+ *   scbd    scale factor (for ill-conditioned problems try 10.0,
+ *           otherwise 1.0 should do)
+ *
+ *   illc    1, if the problem is known to be ill-conditioned
+ *           0, otherwise
+ *
+ *   ktm     number of iterations minus one which are allowed to
+ *           be taken until an improvement must take place
+ *           (4 is a careful value; in most cases, 1 should do)
+ *
+ *   pf      pointer to the function to be minimized
+ *           (parameter:    real vector (dimension = n)
+ *            return value: function value at the point given by
+ *                          the parameter)
+ *
+ * OUTPUTS:
+ *
+ *   p       approximation of the minimum point
+ *           (dimension = n)
+ *
+ * RETURN VALUE:
+ *
+ *           approximation of the minimum value
+ */
+{
+  INT i, j;
+  INT dim = Dimension (p);
+  REAL vsmall, large, vlarge;
+  REAL ldfac, t2, sf, s, df, sl, lds, f1, dn;
+  INT repeat_it;
+  INT kt, k, kl, k2;
+  REAL ten_power_kt;
+  VECTOR y(dim), z(dim), d(dim), temp(dim);
+
+  pfunc = pf;
+  h = hmin;
+  macheps = rtol * rtol;
+  small = macheps * macheps; vsmall = small * small;
+  large = 1.0 / small; vlarge = 1.0 / vsmall;
+  /* was: m2 = sqrt(macheps) */
+  m2 = rtol; m4 = sqrt(m2);
+
+  ldfac = illc ? 0.1 : 0.01;
+  Resize(x, dim); x = p;
+  Resize(v, dim, dim);
+  Resize(q0, dim); Resize(q1, dim);
+
+  nl = 0; qf1 = fx = (*pfunc) (x);
+  kt = 0; ten_power_kt = 1.0;
+  t = t2 = small + atol; dmin = small;
+  if (h < (100.0 * t)) h = 100.0 * t;
+  ldt = h;
+  /* first set of search directions are the canonical unit vectors (rows of v) */
+  v = Id(dim);
+  d(1) = qd0 = 0.0; q0 = q1 = x;
+
+  while (1) {
+    sf = d(1); d(1) = s = 0.0;
+    // minimization along first direction
+    Min(1, 2, d(1), s, fx, 0);
+    if (s <= 0.0) SetRow (v, 1, -Row (v, 1));
+    if ((sf <= 0.9 * d(1)) || (0.9 * sf >= d(1)))
+      for (i = 2; i <= dim; i++) d(i) = 0.0;
+    for (k = 2; k <= dim; k++) {
+      y = x; sf = fx;
+      illc |= (kt > 0);
+      do {
+	repeat_it = 0;
+	kl = k; df = 0.0;
+	if (illc) {
+	  // random step
+	  for (i = 1; i <= dim; i++) {
+	    s = z(i) = (ldt / 10.0 + t2 * ten_power_kt) * (Rand01() - 0.5);
+	    x += s * Row (v, i);
+	  }
+	  fx = (*pfunc) (x);
+	}
+	for (k2 = k; k2 <= dim; k2++) {
+	  sl = fx; s = 0.0;
+	  // minimize along "non-conjugated" directions v(:,k) - v(:,dim)
+	  Min(k2, 2, d(k2), s, fx, 0);
+	  s = illc ? (d(k2) * (s + z(k2)) * (s + z(k2))) : (sl - fx);
+	  if (df < s) { df = s; kl = k2; }
+	}
+	if (!illc && (df < fabs(100.0 * macheps * fx))) {
+	  // no success, try again with illc = 1
+	  illc = 1;
+	  repeat_it = 1;
+	}
+      } while (repeat_it);
+      for (k2 = 1; k2 <= k - 1; k2++) {
+	// minimize along the "conjugate" directions v(:,1) - v(:,k-1)
+	s = 0.0; Min(k2, 2, d(k2), s, fx, 0);
+      }
+      f1 = fx; fx = sf;
+      temp = x - y;
+      lds = Norm(temp);
+      x = y; y = temp;
+      if (lds > small) {
+	/* remove direction "kl" and minimize along new "conjugate" direction
+	 * if illc is false, kl is the direction that yielded the largest decrease */
+	for (i = kl - 1; i >= k; i--) { 
+	  SetRow (v, i + 1, Row (v, i)); 
+	  d(i + 1) = d(i); 
+	}
+	d(k) = 0.0; SetRow (v, k, y / lds);
+	Min(k, 4, d(k), lds, f1, 1);
+	if (lds <= 0.0) { 
+	  lds = -lds; SetRow (v, k, -Row (v, k)); 
+	}
+      }
+      ldt *= ldfac; if (ldt < lds) ldt = lds;
+      t2 = m2 * Norm(x) + t;
+      // check if step width is larger than half of the tolerance
+      if (ldt > t2/2.0) { 
+	kt = 0; ten_power_kt = 1.0; 
+      } else { 
+	kt++; ten_power_kt *= 10.0; 
+      }
+      if (kt > ktm) {
+	p = x;
+	return fx;
+      }
+    }
+    // quadratic interpolation to avoid problems with narrow valleys
+    Quad();
+    /* scale search directions with estimate of 2nd derivative
+     * => v'v = v'd^(-1/2) * d^(-1/2)v = A^(-1) 
+     * with A being the quadratic part of the approximating quadratic form */
+    dn = 0.0;
+    for (i = 1; i <= dim; i++) {
+      d(i) = 1.0 / sqrt(d(i));
+      if (dn < d(i)) dn = d(i);
+    }
+    for (i = 1; i <= dim; i++) {
+      s = d(i) / dn;
+      SetRow(v, i, s * Row(v, i));
+    }
+    if (scbd > 1.0) {
+      /* scaling to reduce the condition number, column equilibrate v */
+      s = vlarge;
+      for (i = 1; i <= dim; i++) {
+	sl = 0.0;
+	for (j = 1; j <= dim; j++) sl += v(j,i) * v(j,i);
+	z(i) = sqrt(sl);
+	if (z(i) < m4) z(i) = m4;
+	if (s > z(i)) s = z(i);
+      }
+      for (i = 1; i <= dim; i++) {
+	sl = s / z(i); z(i) = 1.0 / sl;
+	if (z(i) > scbd) { 
+	  sl = 1.0 / scbd; z(i) = scbd; 
+	}
+	SetCol(v, i, sl * Col(v, i));
+      }
+    }
+    /* compute the singular value decomposition of v'
+     * => q'v'vq = q'v'rr'vq = s^2 = l^(-1) = q'A^(-1)q
+     *    q diagonalizes A^(-1) and thus contains the principal vectors with the principal values
+     *    being the inverse of the squared of the singular values, l = s^(-2) */
+    v = Transpose(v);
+    Minfit(v, d, macheps, vsmall);
+    if (scbd > 1.0) {
+      // undo scaling
+      for (i = 1; i <= dim; i++) {
+	s = z(i);
+	for (j = 1; j <= dim; j++) v(j,i) *= s;
+      }
+      for (i = 1; i <= dim; i++) {
+	s = Norm(Col(v, i));
+	d(i) *= s; s = 1 / s;
+	SetCol(v, i, s * Col(v, i));
+      }
+    }
+    for (i = 1; i <= dim; i++) {
+      d(i) = (dn * d(i) > large) ? vsmall :
+	((dn * d(i) < small) ? vlarge : (1.0 / ((dn * d(i)) * (dn * d(i)))));
+    }
+    // sort new eigenvectors and eigenvalues
+    Sort(d, v);
+    dmin = d(dim); if (dmin < small) dmin = small;
+    illc = (m2 * d(1)) > dmin;
+  }
+}
+
+REAL BrentMinimize (VECTOR & p, CONST VECTOR & diam, REAL rtol, REAL atol,
+		    REAL (*pf)(CONST VECTOR &))
+/*
+ * Minimization method of Brent (simple version)
+ * ---------------------------------------------
+ *
+ * INPUTS:
+ *
+ *   p       start point for the minimization method
+ *           (dimension = n has to be at least 2)
+ *
+ *   diam    estimated diameter of the range containing a minimum
+ *           with minimum contained in (p +/- (diam/2))
+ *           (dimension = n)
+ *
+ *   rtol    relative termination tolerance for the minimum point
+ *           this should in general not be smaller than the square
+ *           root of the machine precision
+ *
+ *   atol    absolute termination tolerance for the minimum point
+ *
+ *   pf      pointer to the function to be minimized
+ *           (parameter:    real vector (dimension = n)
+ *            return value: function value at the point given by
+ *                          the parameter)
+ *
+ * OUTPUTS:
+ *
+ *   p       approximation of the minimum point
+ *           (dimension = n)
+ *
+ * RETURN VALUE:
+ *
+ *           approximation of the minimum value
+ */
+{
+  return BrentMinimize_Expert (p, Norm (diam), rtol, atol, 1.0, 0, 1, pf);
+}

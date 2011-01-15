@@ -1,0 +1,208 @@
+/************************************************************************
+ *
+ * Implementation of General Singly Linked Linear Lists
+ * ----------------------------------------------------
+ *
+ * Copyright (C) 1994, 1997 Olaf Knueppel
+ *
+ * This file is part of PROFIL/BIAS.
+ *
+ * PROFIL/BIAS is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * $Id: LinearList.Cgen 478 2006-08-09 13:13:30Z keil $
+ *
+ ************************************************************************/
+
+#ifndef _LINLIST_SCCSID
+#define _LINLIST_SCCSID
+#define _CONCAT1(a,b) _CONCAT2(a,b)
+#define _CONCAT2(a,b) a ## b
+static const char _CONCAT1 (rcs_id_, LIST)[] = "$Id: LinearList.Cgen 478 2006-08-09 13:13:30Z keil $";
+#undef _CONCAT2
+#undef _CONCAT1
+#endif
+
+/*
+ * Linear Lists (singly linked):
+ * -----------------------------
+ *
+ * Controlling macros:
+ *   LIST_ELEMENT: Type of list elements (e.g. class name)
+ *   LIST:         Name of list to be generated
+ *   LISTOBJECT:   Name of single list object
+ *   LISTCMPFUNC:  Name of list compare function (predefined below)
+ *
+ *
+ * #include <Lists/LinearList.hgen> must be used before including this file!
+ */
+
+LIST::~LIST ()		// delete list
+{
+  LISTOBJECT *temp;
+
+  while (start != NULL) {
+    temp = start; start = start->next;
+#ifndef LIST_NO_DESTRUCTOR
+    temp->element.LIST_ELEMENT::~LIST_ELEMENT();
+#endif
+    delete temp;
+  }
+  start = end = NULL;
+  len = 0;
+}
+
+LIST_ELEMENT & First (LIST & li)
+// return first element of list
+{
+  li.current = li.start;
+  li.lastcur = NULL;
+  if (li.current == NULL) FatalError("List (First): empty list");
+  return li.current->element;
+}
+
+LIST_ELEMENT & Next (LIST & li)
+// return next element of list (following current)
+{
+  if ((li.current == NULL) && (li.lastcur == NULL)) return First(li);
+  if (li.current == NULL) return li.lastcur->element;
+  li.lastcur = li.current;
+  li.current = li.current->next;
+  return (li.current == NULL) ? li.lastcur->element : li.current->element;
+}
+
+LIST_ELEMENT & Last (CONST LIST & li)
+// return last element of list
+// Warning: current is not set!!
+{
+  if (li.end == NULL) FatalError("List (Last): empty list");
+  return li.end->element;
+}
+
+LIST_ELEMENT & Current (CONST LIST & li)
+// return current element of list
+{
+  if (li.current == NULL) FatalError("List (Current): no element");
+  return li.current->element;
+}
+
+VOID RemoveCurrent (LIST & li)
+// remove current element from list
+// (current is pointing to following element afterwards)
+{
+  LISTOBJECT *del_cur = li.current;
+
+  if (li.current == NULL) FatalError("List (RemoveCurrent): no element");
+  li.current = li.current->next;
+#ifndef LIST_NO_DESTRUCTOR
+  del_cur->element.LIST_ELEMENT::~LIST_ELEMENT();
+#endif
+  delete del_cur;
+  li.len--;
+  if (li.lastcur == NULL) li.start = li.current;
+  else li.lastcur->next = li.current;
+  if (li.current == NULL) li.end = li.lastcur;
+}
+
+VOID LIST::operator += (CONST LIST_ELEMENT & obj)
+// Append object to end of list
+{
+  LISTOBJECT *p = new LISTOBJECT;
+  p->element = obj;
+
+  p->next = NULL;
+  if (start == NULL) start = p;
+  else end->next = p;
+  end = p;
+  len++;
+  if (len > maxlen) maxlen = len;
+}
+
+VOID LIST::operator *= (CONST LIST_ELEMENT & obj)
+// Insert object at the beginning of the list
+{
+  LISTOBJECT *p = new LISTOBJECT;
+  p->element = obj;
+
+  p->next = start;
+  if (start == NULL) end = p;
+  start = p;
+  len++;
+  if (len > maxlen) maxlen = len;
+}
+
+VOID LIST::operator <<= (CONST LIST_ELEMENT & obj)
+// Insert object into list. The position the object is inserted
+// is determined by a comparison function.
+// The comparison function gets the element to be inserted as
+// first parameter and the current list element as second
+// parameter (in both cases as references).
+// The comparison function has to return a value not equal to
+// zero, if the element to be inserted should be included before
+// the current element.
+{
+  if (compare == NULL) FatalError("List (<<=): no compare function");
+  LISTOBJECT *p = start;
+  LISTOBJECT *lastp = NULL;
+
+  while (p != NULL) {
+    if ((*compare)(obj, p->element)) break;
+    lastp = p; p = p->next;
+  }
+  LISTOBJECT *q = new LISTOBJECT;
+  q->element = obj;
+
+  q->next = p;
+  if (lastp == NULL) start = q;
+  else lastp->next = q;
+  if (p == NULL) end = q;
+  len++;
+  if (len > maxlen) maxlen = len;
+}
+
+VOID LIST::operator -- ()
+// delete first element of list
+{
+  if (start == NULL) FatalError("List (--): empty list");
+  LISTOBJECT *p = start->next;
+#ifndef LIST_NO_DESTRUCTOR
+  start->element.LIST_ELEMENT::~LIST_ELEMENT();
+#endif
+  delete start;
+  start = p;
+  if (start == NULL) end = NULL;
+  len--;
+}
+
+ostream & operator << (ostream & o, CONST LIST & li)
+{
+  INT i = 0;
+
+  if (li.start == NULL) o << "*EMPTY*\n";
+  else {
+    for (LISTOBJECT *p = li.start; p != NULL; p = p->next) {
+      o.width(3);
+      o << (++i) << ": ";
+      o << (p->element) << '\n';
+    }
+  }
+  return o;
+}
+
+/*
+ * Local Variables:
+ * mode: C++
+ * End:
+ */
