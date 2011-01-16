@@ -64,6 +64,7 @@ namespace ibex {
  *
  *  \return             - true iff \a loup (and \a loup_point) have been updated.
  *
+ *  \precondition       space.box must be *bounded*
  *
  * \author Gilles Chabert, Bertrand Neveu, Ignacio Araya
  * \date October 2010 - January 2010
