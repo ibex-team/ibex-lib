@@ -10,7 +10,6 @@
 #include "IbexPropagation.h"
 
 namespace ibex {
-
   
  /** \ingroup ctcgroup
  * \brief MohcRevise algorithm.

@@ -196,6 +196,8 @@ class OverflowException : public PaverException { };
 class TimeOutException : public PaverException { };
 
 
+ class MemoryException : public PaverException {};
+
 /*================================================================================*/
 /*                                    PARSER                                      */
 /*================================================================================*/

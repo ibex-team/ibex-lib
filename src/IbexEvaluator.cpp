@@ -31,6 +31,7 @@
 #include "IbexProjections.h"
 #include "IbexLinear.h"
 #include "IbexFunction.h"
+#include "IbexInnerProjections.h"
 
 namespace ibex {
 
@@ -620,4 +621,122 @@ static const char* tokentostring(int tok) {
  }
 }
 
-} // end namespace
+
+
+void Evaluator::inner_backward(Space& space) const { 
+  int i   = 0;
+  int ic  = 0;
+  int mc  = 0;
+  int f   = 0;
+  bool sat=true;
+
+  for (int c=0; c<codel; c++) {
+
+    switch (code[c]) {
+    case CST      : ic++; break;
+    
+    case ADD      : //cout << I[info[i]] << "+" << I[info[i+1]] << "=" << I[ic] << endl;
+                    sat  = inner_projection(I[info[i]], I[info[i+1]], I[ic], ADD); 
+//                     cout << "proj:" << I[info[i]] << "+" << I[info[i+1]] << "=" << (I[info[i]]+I[info[i+1]]) << endl;
+		    ic++; i+=2; break;
+    case SUB      :// cout << I[info[i]] << "-" << I[info[i+1]] << "=" << I[ic] << endl;
+                    sat  = inner_projection(I[info[i]], I[info[i+1]], I[ic], SUB); 
+//                     cout << "proj:" << I[info[i]] << "-" << I[info[i+1]] << "=" << (I[info[i]]-I[info[i+1]]) << endl;
+		    ic++; i+=2; break;
+    case MUL      : //cout << I[info[i]] << "*" << I[info[i+1]] << "=" << I[ic] << endl;
+                    sat = inner_projection_nonmonotone(I[info[i]], I[info[i+1]], I[ic], MUL); 
+//                     cout << "proj:" << I[info[i]] << "*" << I[info[i+1]] << "=" << (I[info[i]]*I[info[i+1]]) << endl;
+		    ic++; i+=2; break;
+    case DIV      : //cout << I[info[i]] << "/" << I[info[i+1]] << "=" << I[ic] << endl;
+                    sat = inner_projection_nonmonotone(I[info[i]], I[info[i+1]], I[ic], DIV);
+//                     cout << "proj:" << I[info[i]] << "/" << I[info[i+1]] << "=" << (I[info[i]]/I[info[i+1]]) << endl;
+		    ic++; i+=2; break;
+    case MIN      : sat = proj_min(I[ic++], I[info[i]], I[info[i+1]]); i+=2; break;
+    case MAX      : sat = proj_max(I[ic++], I[info[i]], I[info[i+1]]); i+=2; break;
+    case ARCTAN2  : /* TO DO!!! */ sat = true; ic++; i+=2;                  break;
+    case SIGN     : sat = proj_sign(I[ic++], I[info[i++]]);                 break;
+    case ABS      : sat = proj_abs(I[ic++], I[info[i++]]);                 break;
+    case MINUS    : sat = I[info[i++]] &= -1.0*I[ic++];                     break;
+    case SQRT     : sat = I[info[i++]] &= Sqr(I[ic++]);                     break;
+    case LOG      : sat = I[info[i++]] &= 
+                   INTERVAL(Sup(Exp(INTERVAL(Inf(I[ic])))),
+		            Inf(Exp(INTERVAL(Sup(I[ic++]))))); break;
+    
+    case EXP      : sat = proj_exp(I[ic++], I[info[i++]]);                  break;
+    case POW      : sat = proj_power(I[ic++], I[info[i+1]], info[i]); i+=2; break;
+    case SQR      : sat = innerproj_sqr(I[ic++], I[info[i++]]);                break;
+    case COS      : sat = proj_trigo(I[ic++], I[info[i++]], COS);           break;
+    case SIN      : sat = proj_trigo(I[ic++], I[info[i++]], SIN);           break;
+    case TAN      : sat = proj_trigo(I[ic++], I[info[i++]], TAN);           break;
+    case ARCCOS   : sat = I[info[i++]] &= Cos(I[ic++]);                     break;
+    case ARCSIN   : sat = I[info[i++]] &= Sin(I[ic++]);                     break;
+    case ARCTAN   : sat = I[info[i++]] &= Tan(I[ic++]);                     break;
+    case COSH     : sat = proj_cosh (I[ic++], I[info[i++]]);                break;
+    case SINH     : sat = I[info[i++]] &= ArSinh(I[ic++]);                  break;
+    case TANH     : sat = proj_tanh(I[ic++], I[info[i++]]);                 break;
+    case ARCCOSH  : sat = proj_arccosh(I[ic++], I[info[i++]]);              break;
+    case ARCSINH  : sat = I[info[i++]] &= Sinh(I[ic++]);                    break;
+    case ARCTANH  : sat = I[info[i++]] &= Tanh(I[ic++]);                    break;
+    case SYMBOL   : //if (space.entity(info[i]).type==IBEX_VAR || space.entity(info[i]).type==IBEX_TMP) 
+//      if (space.entity(info[i]).type==IBEX_EPR) 
+//	cout << space.domain(info[i]) << " ^ " <<  I[ic] << endl;
+      
+      if (space.entity(info[i]).type!=IBEX_SYB && space.entity(info[i]).type!=IBEX_UPR) {
+		      sat = space.domain(info[i]) &= I[ic];  i++; ic++;     
+//               cout << space.domain(info[i-1])<< endl;
+      }
+      break;
+    case APPLY    : func[f]->backward(*args[f]); f++; ic++;                 break;
+    case INF      : 
+    case MID      : 
+    case SUP      : i++; ic++; break;
+    case M_CST    : mc++; break;
+    case M_ADD    : sat = (M[info[i]] &= (M[mc] - M[info[i+1]]));
+                    sat &= (M[info[i+1]] &= (M[mc] - M[info[i]])); 
+		    mc++; i+=2; break;
+    case M_SUB    : sat = (M[info[i]] &= (M[mc] + M[info[i+1]]));
+                    sat &= (M[info[i+1]] &= (M[info[i]] - M[mc])); 
+		    mc++; i+=2; break;
+    case M_MUL    : ContractMult(M[info[i]], M[info[i+1]], M[mc], 0.1); 
+		    mc++; i+=2; break;
+    case M_SCAL   : ContractMult(I[info[i]], M[info[i+1]], M[mc], 0.1);
+                    mc++; i+=2; break;
+    case M_VEC    : { INTERVAL_MATRIX right(ColDimension(M[info[i+1]]),1);
+		      INTERVAL_MATRIX res(RowDimension(M[info[i]]),1);
+		      SetCol(right,1,Row(M[info[i+1]],1));
+		      SetCol(res,1,Row(M[mc],1));
+		      ContractMult(M[info[i]], right, res, 0.1);
+		      SetRow(M[info[i+1]],1,Col(right,1)); 
+                      mc++; i+=2; 
+                    } break;
+    case V_DOT    : { INTERVAL_MATRIX right(ColDimension(M[info[i+1]]),1);
+		      INTERVAL_MATRIX res(1,1);
+		      SetCol(right,1,Row(M[info[i+1]],1));
+		      res(1,1)=I[ic]; 
+		      ContractMult(M[info[i]], right, res, 0.1);
+		      SetRow(M[info[i+1]],1,Col(right,1)); 
+		      I[ic]=res(1,1);
+                      ic++; i+=2; break;		      
+                    } 
+    case M_MINUS  : M[info[i++]] &= -M[mc++];                    break;
+    case M_SYMBOL : write_matrix(space, mc++,i); i+=3;           break;
+    case M_TRANS  : M[info[i++]] &= ::Transpose(M[mc++]);        break;
+    case M_APPLY  : func[f]->backward(*args[f]); f++; mc++;      break;
+    case M_INF    : 
+    case M_MID    : 
+    case M_SUP    : i++; mc++; break;
+    default       : throw NonRecoverableException("Internal bug: unknown evaluator code (please report this bug).");  
+    }
+
+    if (!sat) throw EmptyBoxException();    
+  }
+
+
+
+}
+
+}
+
+
+
+ // end namespace

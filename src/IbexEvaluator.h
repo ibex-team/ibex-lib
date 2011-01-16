@@ -64,6 +64,9 @@ class Evaluator {
    *        #UnboundedResultException, #EmptyBoxException. */
   void gradient(const Space& space) const;
 
+  void inner_backward(Space& space) const;
+
+
   /** Streams out internal tables (for debug purpose). */
   friend std::ostream& operator<<(std::ostream&, const Evaluator&);
 

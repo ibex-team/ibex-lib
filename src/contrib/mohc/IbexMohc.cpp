@@ -71,18 +71,23 @@ void MohcRevise::contract() {
      if(ctr_mohc.gradientOG(space)){
         initbox=space.box;
         initialize_apply(); //initialize applyfmin and applyfmax arrays
-        minRevise(); 
-        LazyMonoBoxNarrow(true);
-        maxRevise(); // contract Y, W
-        LazyMonoBoxNarrow(false);
+	if(ctr_mohc.op==EQU || ctr_mohc.op==LEQ || ctr_mohc.op==LT){
+          minRevise(); 
+          LazyMonoBoxNarrow(true);
+	}else
+	  apply_fmin_to_false_except(-1);
+	
+	if(ctr_mohc.op==EQU || ctr_mohc.op==GEQ || ctr_mohc.op==GT){
+	  maxRevise(); // contract Y, W
+          LazyMonoBoxNarrow(false);
+	}else
+	  apply_fmax_to_false_except(-1);
         
         if(epsilon>0)
            MonoBoxNarrow();
         
      }
-     else{
-       hc4Revise();
-     }
+
   }
   else{
     hc4Revise();

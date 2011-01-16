@@ -65,12 +65,34 @@ class ConstraintOG : public Constraint {
   void forward(const Space& space) const{ evlog->forward(space); };
 
   /** Backward evaluation (\a HC4-Revise)*/  
-  void backward(Space& space) const{ 
-    bool sat = evlog->output() &= INTERVAL(0,0);       
+  void backward(Space& space) const{    
+//    bool sat = evlog->output() &= INTERVAL(0,0);       
 
+//    if (!sat) throw EmptyBoxException();
+//    evlog->backward(space);
+
+      switch (op) {      
+	case LT       : 
+	case LEQ      : if (evlog->output().included(INTERVAL(BiasNegInf,0))) return;
+                  break;
+	case GEQ      : 
+	case GT       : if (evlog->output().included(INTERVAL(0,BiasPosInf))) return;
+     }
+
+     bool sat;
+     switch (op) {     
+        case EQU      : sat = evlog->output() &= INTERVAL(0,0);    break;
+	case LT       : 
+	case LEQ      : sat = evlog->output() &= INTERVAL(BiasNegInf,0); break;
+	case GEQ      : 
+	case GT       : sat = evlog->output() &= INTERVAL(0,BiasPosInf); break;    
+    }
+    
+    
     if (!sat) throw EmptyBoxException();
     evlog->backward(space);
-  }
+
+  };
 
   /** Perform automatic differentiation and occurrence grouping 
   * \param space - the space representing current domains of entities.
@@ -160,6 +182,8 @@ class ConstraintOG : public Constraint {
   
   int* nb_occ;
   
+  /** The comparison operator. */
+  CmpOpType op;
   
   bool is_monotonic;
  private:

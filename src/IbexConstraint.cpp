@@ -423,6 +423,42 @@ void NotIn::backward(Space& space) const {
     l_evl.backward(space);
   }
 }
+void Equality::inner_backward(Space& space) const {
+
+  //rien pour le moment
+}
+
+void Inequality::inner_backward(Space& space) const {
+
+  //cout << "backward " << *this << endl;
+
+  switch (op) {     
+  case LT       :
+  case LEQ      : if (evl.output().included(INTERVAL(BiasNegInf,0))) return;
+                  break;
+  case GEQ      :
+  case GT       : if (evl.output().included(INTERVAL(0,BiasPosInf))) return;
+                  break;
+  default       : stringstream s;
+                  s << "Inequality: unexpected comparison operator \"" << op << "\"";
+          throw NonRecoverableException(s.str());
+  }
+
+  bool sat;
+  switch (op) {     
+  case LT       :
+  case LEQ      : sat = evl.output() &= INTERVAL(BiasNegInf,0); break;
+  case GEQ      :
+  case GT       : sat = evl.output() &= INTERVAL(0,BiasPosInf); break;   
+  default       : stringstream s;
+                  s << "Inequality: unexpected comparison operator \"" << op << "\"";
+          throw NonRecoverableException(s.str());
+  }
+  if (!sat) throw EmptyBoxException();
+  evl.inner_backward(space);
+}
+
+
 
 /*================================================================================*/
 

@@ -193,6 +193,8 @@ class ArithConstraint : public Constraint {
   /** Backward evaluation. */
   virtual void backward(Space& space) const=0;
 
+virtual void inner_backward(Space& space) const=0;
+
   /** Return true. */
   virtual bool is_equality() const=0;
 
@@ -264,6 +266,8 @@ class Equality : public ArithConstraint {
   /** Backward evaluation. */
   void backward(Space& space) const;
 
+  void inner_backward(Space& space) const;
+
   /** Return true. */
   virtual bool is_equality() const { return true; }
 
@@ -307,6 +311,8 @@ class Inequality : public ArithConstraint {
 
   /** Backward evaluation. */
   void backward(Space& space) const;
+
+  void inner_backward(Space& space) const;
 
   /** Return false. */
   virtual bool is_equality() const { return false; }

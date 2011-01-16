@@ -1,4 +1,3 @@
-
 #include <vector>
 #include "mohc/IbexConstraintOG.h"
 #include "IbexExprAdjFactory.h"
@@ -15,7 +14,8 @@ hash_map<int, REAL> ConstraintOG::h;
 
 
 ConstraintOG::ConstraintOG(const ArithConstraint& ctr, Space &space) : 
-      expr(ctr.expr), rho_mohc(1.1){
+      expr(ctr.expr), rho_mohc(1.1),
+ op((dynamic_cast<const Inequality*>(&ctr))? (dynamic_cast<const Inequality*>(&ctr))->op:EQU){
  adj = ctr.adj;
  evlog=new EvaluatorOG();
 
@@ -213,8 +213,18 @@ void ConstraintOG::OG_case3(int var, INTERVAL* g, list<int>& X_m, list<int>& X_n
         forwardOG(space, true);
         forwardOG(space, false);
         INTERVAL ev_mon=INTERVAL(Inf(zmin),Sup(zmax));
-        if(existence_test && !ev_mon.contains(0)) 
-           throw EmptyBoxException();
+        if(existence_test)
+	  switch (op) { 
+	    case EQU      : if(!ev_mon.contains(0)) throw EmptyBoxException();
+	           break;
+	    case LT       : 
+	    case LEQ      : if (Inf(zmin) >= 0) throw EmptyBoxException();
+                  break;
+	    case GEQ      : 
+	    case GT       : if (Sup(zmax) <= 0) throw EmptyBoxException();
+	}
+//        if(existence_test && !ev_mon.contains(0)) 
+//           throw EmptyBoxException();
 
         diam_mon=Diam(ev_mon);
         diam_nat=Diam(eval(space));
