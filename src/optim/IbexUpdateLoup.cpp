@@ -128,7 +128,6 @@ bool check_candidate(const System& sys, const Space& space, const Evaluator& goa
     if (is_inner) {
       loup = res;
       loup_point = pt;
-      cout << " update loup 0 " << loup <<  endl;
       return true;
     }
   } 
