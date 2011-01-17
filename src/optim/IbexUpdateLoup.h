@@ -48,6 +48,8 @@ namespace ibex {
  * evaluation is smaller than \a loup, then it tries to prove that x satisfies the 
  * constraints by calling the \a is_inside contractor (which must throw an #ibex::EmptyBoxException).
  *
+ *  \param sys          - the system of equations / inequalities (including the goal constraint y=f(x))
+ *  
  *  \param space        - space.box is the box x belongs to.
  *
  *  \param goal         - the evaluator for the expression f(x) to be minimized.
@@ -62,6 +64,8 @@ namespace ibex {
  *
  *  \param sample_size  - the number of points picked in a box to update the \a loup.
  *
+ *  \param inner_box    - the current inner box we must try to inflate
+ *
  *  \return             - true iff \a loup (and \a loup_point) have been updated.
  *
  *  \precondition       space.box must be *bounded*
@@ -69,7 +73,7 @@ namespace ibex {
  * \author Gilles Chabert, Bertrand Neveu, Ignacio Araya
  * \date October 2010 - January 2010
  */
-bool update_loup(const System& sys, const Space& space, const Evaluator& goal, Contractor& is_inside, REAL& loup, VECTOR& loup_point, int sample_size);
+bool update_loup(const System& sys, const Space& space, const Evaluator& goal, Contractor& is_inside, REAL& loup, VECTOR& loup_point, int sample_size, INTERVAL_VECTOR& inner_box);
 
 //returns true if full_box is an innerbox of the system
 bool isInner(const System& sys, bool full_box);
@@ -77,8 +81,7 @@ bool isInner(const System& sys, bool full_box);
 //The InHC4 algorithm
 bool inHC4(const System& sys, int loup);
 
-
-void MonotonicityAnalysis(const Space& space, const Evaluator& goal);
+void monotonicity_analysis(const Space& space, const Evaluator& goal);
 } // end namespace
 
 #endif

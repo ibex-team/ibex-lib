@@ -40,6 +40,26 @@ namespace ibex {
 
 const int Optimizer::default_sample_size = __IBEX_DEFAULT_MINIMIZER_SAMPLE_SIZE;
 
+
+/**
+ * Each node in the search tree of the optimizer
+ * has an associated inner box, stored as a
+ * backtrackable stucture.
+ *
+ * last update: GCH
+ */
+class InnerBox : public Backtrackable {
+public:
+  // warning: we must resize the "inner_box" field the
+  //          first time an inner box is found
+  //          (by default the size is 1)
+  InnerBox() : inner_box(1) { inner_box(1) = INTERVAL::EMPTY; }
+
+  InnerBox(InnerBox& father, bool side) : inner_box(father.inner_box) { }
+
+  INTERVAL_VECTOR inner_box;
+};
+
 /** Transform a system of inequalities
  * (eg: g_1(x)<=0 ^ ... ^g_m(x)<=0)
  * into the union of all the reversed inequalities 
@@ -113,6 +133,8 @@ Optimizer::Optimizer(const System& sys, int goal_ctr, int y_num, Contractor& con
   const Expr& goal_function=(((const BinOpExpr&)sys.ctr(goal_ctr).expr).right);
   EvaluatorFactory fac(goal_function);
   fac.build(&goal);
+
+  m.add<InnerBox>();
 }
 
 Optimizer::~Optimizer() {
@@ -149,7 +171,10 @@ void Optimizer::contract_and_bound(Cell* c) {
     
     /*========================= update loup ==============================*/
     // update "loup" and "louppoint"
-    int box_loup_changed = update_loup(sys, space, goal, is_inside, loup, loup_point, sample_size);
+
+    InnerBox& i = c->get<InnerBox>(); // get the current inner box (to be inflated by update_loup)
+ 
+    int box_loup_changed = update_loup(sys, space, goal, is_inside, loup, loup_point, sample_size, i.inner_box);
     if (! loup_changed) loup_changed=box_loup_changed;
     /*====================================================================*/    
     

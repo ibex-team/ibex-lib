@@ -31,9 +31,9 @@ namespace ibex {
 /** see IbexUpdateLoup.h */
 
 /* last update: IAR  */
-void MonotonicityAnalysis(const Space& space, const Evaluator& goal) {
+void monotonicity_analysis(const Space& space, const Evaluator& goal) {
   
-  // MonotonicityAnalysis (quand f est monotone par rapport a une variable x_i
+  // monotonicity_analysis (quand f est monotone par rapport a une variable x_i
   // l'intervalle [x_i] est remplace par un point (Inf([x_i]) si x_i est croissante
   // ou Sup([x_i]) si x_i es decroissante.
   INTERVAL_VECTOR G(space.nb_var());
@@ -356,27 +356,31 @@ bool line_probing(const System& sys, const Space& space, const Evaluator& goal, 
  *
  * last update: GCH
  */
-bool update_loup(const System& sys, const Space& space, const Evaluator& goal, Contractor& is_inside, REAL& loup, VECTOR& loup_point, int sample_size) {
+bool update_loup(const System& sys, const Space& space, const Evaluator& goal, Contractor& is_inside, REAL& loup, VECTOR& loup_point, int sample_size, INTERVAL_VECTOR& inner_box) {
 
   bool loup_changed=false; // the return value
   INTERVAL_VECTOR savebox = space.box;
 
   bool innerfound;
-  if (in_HC4) 
+  if (in_HC4) {
     innerfound=inHC4(sys, loup);
-  else 
+    Resize(inner_box, space.nb_var());
+    inner_box = space.box;
+  } else 
     try {
       is_inside.contract();
       innerfound=false;
     } catch(EmptyBoxException) {
+      Resize(inner_box, space.nb_var());
+      inner_box = space.box;
       innerfound=true;
     }
 
   if(space.box.empty()) //if innerHC4 finds nothing, we try with the full current box
-    sys.space.box=savebox;
+    sys.space.box=savebox; // restore the full box
   else if(innerfound){
     if(mono_analysis)
-      MonotonicityAnalysis(space, goal);
+      monotonicity_analysis(space, goal);
   }
 
   //loup_changed = random_probing(sys, space, goal, is_inside, loup, loup_point, sample_size, innerfound);
