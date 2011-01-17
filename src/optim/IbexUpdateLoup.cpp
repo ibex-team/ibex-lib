@@ -128,6 +128,7 @@ bool check_candidate(const System& sys, const Space& space, const Evaluator& goa
     if (is_inner) {
       loup = res;
       loup_point = pt;
+      cout << " update loup 0 " << loup <<  endl;
       return true;
     }
   } 
@@ -329,8 +330,9 @@ bool line_probing(const System& sys, const Space& space, const Evaluator& goal, 
     }
     
     if (recursive) {
-      if (check_candidate(sys, space, goal, is_inside, loup, loup_point, pt, is_inner) && (i<sample_size-1)) {
-	line_probing(sys, space, goal, is_inside, loup,  loup_point, pt, sample_size-i-1, is_inner, true);
+      if (check_candidate(sys, space, goal, is_inside, loup, loup_point, pt, is_inner))  {
+	if (i<sample_size-1) 
+	  line_probing(sys, space, goal, is_inside, loup,  loup_point, pt, sample_size-i-1, is_inner, true);
 	return true;
       }
     }
@@ -383,7 +385,7 @@ bool update_loup(const System& sys, const Space& space, const Evaluator& goal, C
       monotonicity_analysis(space, goal);
   }
 
-  //loup_changed = random_probing(sys, space, goal, is_inside, loup, loup_point, sample_size, innerfound);
+  // loup_changed = random_probing(sys, space, goal, is_inside, loup, loup_point, sample_size, innerfound);
 
   // first option: startpoint = midpoint
   loup_changed = line_probing(sys, space, goal, is_inside, loup, loup_point, Mid(space.box), sample_size, innerfound, true);
