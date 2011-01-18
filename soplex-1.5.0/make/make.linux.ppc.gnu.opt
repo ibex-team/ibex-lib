@@ -1,0 +1,9 @@
+#--- $Id: make.linux.ppc.gnu.opt,v 1.6 2007/10/19 15:44:24 bzforlow Exp $
+CXX	=	g++
+CPPFLAGS=	-Isrc -DNDEBUG -DNO_ADDITIONAL_CHECKS
+CXXFLAGS=	-O3  \
+		-ffast-math -fforce-addr -funroll-loops #-march=
+LDFLAGS	=	-lm
+ARFLAGS	=	crs
+ZLIB_FLAGS	=
+ZLIB_LDFLAGS 	=	-lz

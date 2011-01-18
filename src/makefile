@@ -47,7 +47,7 @@ endif
 
 
 %.o : %.cpp %.h
-	$(CCPLUS) $(CFLAGS) -I$(INC_PROFIL) -I. -I./parser -c -o $@ $<
+	$(CCPLUS) $(CFLAGS) -I$(INC_PROFIL) -I$(INC_SOPLEX) -I. -I./parser -c -o $@ $<
 
 $(LIB_IBEX)/libibex.a : $(OBJS)
 	ar rcs $@ $(OBJS); \

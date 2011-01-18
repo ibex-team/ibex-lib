@@ -1,0 +1,8 @@
+#--- $Id: make.linux.x86.gnu.valgrind-opt-gccold,v 1.1 2010/09/27 15:17:39 bzfwinkm Exp $
+CXX	=	g++
+CPPFLAGS=	-Isrc -DNDEBUG -DNO_ADDITIONAL_CHECKS
+CXXFLAGS=	-O3 -g -ansi $(GCCWARN)
+LDFLAGS	=	-lm
+ARFLAGS	=	crs
+ZLIB_FLAGS	=
+ZLIB_LDFLAGS 	=	-lz

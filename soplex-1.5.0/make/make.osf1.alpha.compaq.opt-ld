@@ -1,0 +1,12 @@
+#--- $Id: make.osf1.alpha.compaq.opt-ld,v 1.4 2007/08/17 14:14:09 bzfpfend Exp $
+CXX	=	cxx
+CPPFLAGS=	-Isrc -DNDEBUG -DNO_ADDITIONAL_CHECKS \
+                -DWITH_LONG_DOUBLE #-I/usr/local/include 
+CXXFLAGS=	-std strict_ansi -O4 -fast -distinguish_nested_enums -nortti -nocleanup \
+		-ptr $(OBJDIR)/cxx_repository   
+REPOSIT	=	$(OBJDIR)/cxx_repository/*.o
+#LDFLAGS	=	-non_shared -L/usr/local/lib -lm -spike
+LDFLAGS	=	-non_shared -lm -spike
+ARFLAGS	=	crs 
+ZLIB_FLAGS	=
+ZLIB_LDFLAGS 	=	-lz

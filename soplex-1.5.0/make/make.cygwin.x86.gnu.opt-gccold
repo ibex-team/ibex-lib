@@ -1,0 +1,8 @@
+#--- $Id: make.cygwin.x86.gnu.opt-gccold,v 1.1 2010/09/27 15:17:38 bzfwinkm Exp $
+CXX	=	g++
+CPPFLAGS=	-Isrc -DNDEBUG -DNO_ADDITIONAL_CHECKS
+CXXFLAGS=	-O3 -ffast-math -fforce-addr -funroll-loops
+LDFLAGS	=	-lm # -static
+ARFLAGS	=	crs
+ZLIB_FLAGS	=
+ZLIB_LDFLAGS 	=	-lz

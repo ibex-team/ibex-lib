@@ -1,0 +1,10 @@
+#--- $Id: make.linux.x86.intel.dbg,v 1.13 2009/06/27 23:50:00 bzfwinkm Exp $
+CXX	=	icpc
+CPPFLAGS=	-Isrc
+CXXFLAGS=	-g -ansi -fp_port -fp-stack-check -fp-model extended -w2 \
+		-wd279,383,444,810,981,1572 -par_report0 -vec_report0
+LDFLAGS	=	-lm -lstdc++ -static
+ARFLAGS	=	crs
+RANLIB	=	true
+ZLIB_FLAGS	=
+ZLIB_LDFLAGS 	=	-lz

@@ -44,7 +44,7 @@ void monotonicity_analysis(const Space& space, const Evaluator& goal) {
   goal.gradient(space);
     
     
-  for (int j=1; j<space.nb_var(); j++) {
+  for (int j=0; j<space.nb_var()-1; j++) {
     if(Inf(G(j+1))>=0) space.box(j+1)=Inf(space.box(j+1));
     if(Sup(G(j+1))<=0) space.box(j+1)=Sup(space.box(j+1));
   }

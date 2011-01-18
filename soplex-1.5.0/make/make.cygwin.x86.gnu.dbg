@@ -1,0 +1,8 @@
+#--- $Id: make.cygwin.x86.gnu.dbg,v 1.2 2007/08/17 14:14:07 bzfpfend Exp $
+CXX	=	g++
+CPPFLAGS=	-Isrc
+CXXFLAGS=	-O0 -g
+LDFLAGS	=	-lm # -static
+ARFLAGS	=	crs
+ZLIB_FLAGS	=
+ZLIB_LDFLAGS 	=	-lz

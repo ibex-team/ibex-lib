@@ -1,0 +1,9 @@
+#--- $Id: make.darwin.x86_64.gnu.opt,v 1.2 2008/09/27 09:44:40 bzfheinz Exp $
+CXX	=	g++
+CPPFLAGS=	-Isrc -DNDEBUG -DNO_ADDITIONAL_CHECKS
+CXXFLAGS=	-O3 -m64 \
+		-ffast-math -fforce-addr -funroll-loops #-march=
+LDFLAGS	=	-lm
+ARFLAGS	=	crs
+ZLIB_FLAGS	=
+ZLIB_LDFLAGS 	=	-lz
