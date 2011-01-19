@@ -644,11 +644,11 @@ void Evaluator::inner_backward(Space& space) const {
 //                     cout << "proj:" << I[info[i]] << "-" << I[info[i+1]] << "=" << (I[info[i]]-I[info[i+1]]) << endl;
 		    ic++; i+=2; break;
     case MUL      : //cout << I[info[i]] << "*" << I[info[i+1]] << "=" << I[ic] << endl;
-                    sat = inner_projection_nonmonotone(I[info[i]], I[info[i+1]], I[ic], MUL); 
+                    sat = inner_projection(I[info[i]], I[info[i+1]], I[ic], MUL); 
 //                     cout << "proj:" << I[info[i]] << "*" << I[info[i+1]] << "=" << (I[info[i]]*I[info[i+1]]) << endl;
 		    ic++; i+=2; break;
     case DIV      : //cout << I[info[i]] << "/" << I[info[i+1]] << "=" << I[ic] << endl;
-                    sat = inner_projection_nonmonotone(I[info[i]], I[info[i+1]], I[ic], DIV);
+                    sat = inner_projection(I[info[i]], I[info[i+1]], I[ic], DIV);
 //                     cout << "proj:" << I[info[i]] << "/" << I[info[i+1]] << "=" << (I[info[i]]/I[info[i+1]]) << endl;
 		    ic++; i+=2; break;
     case MIN      : sat = proj_min(I[ic++], I[info[i]], I[info[i+1]]); i+=2; break;

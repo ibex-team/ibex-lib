@@ -50,403 +50,196 @@ bool innerproj_sqr(const INTERVAL& evl, INTERVAL& exp_evl) { //, bool& continuit
   return (pos_proj | neg_proj);   
 }
 
-/****
-Divide de box in four monotone boxes (if [x] and [y] contains 0). For each subbox an innerbox is found.
-Then, randomly one of them is returned.
-*****/
-bool inner_projection_nonmonotone(INTERVAL& x, INTERVAL& y, INTERVAL z, int op){
-        int nb_boxes=0;
-        INTERVAL initx=x,inity=y;
-        INTERVAL_VECTOR** boxes=new INTERVAL_VECTOR*[4];
-        for(int i=0; i<4; i++)
-           boxes[i]=NULL;
 
-	if(Inf(x)<0){
-	  if(Inf(y)<0 && Sup(z)>=0){
-	    x=INTERVAL(Inf(x),(Sup(x)<0)? Sup(x):0);
-	    y=INTERVAL(Inf(y),(Sup(y)<0)? Sup(y):0);
-            if(inner_projection(x,y,z, op)){
-              boxes[0]=new INTERVAL_VECTOR(2);
-              (*boxes[0])(1)=x;
-              (*boxes[0])(2)=y;
-              nb_boxes++;
-              x=initx;
-              x=inity;
-            }
-	  }
-	  if(Sup(y)>0 && Inf(z)<=0){
-	    x=INTERVAL(Inf(x),(Sup(x)<0)? Sup(x):0);
-	    y=INTERVAL((Inf(y)>0)? Inf(y):0,Sup(y));
-            if(inner_projection(x,y,z, op)){
-              boxes[1]=new INTERVAL_VECTOR(2);
-              (*boxes[1])(1)=x;
-              (*boxes[1])(2)=y;
-              nb_boxes++;
-              x=initx;
-              x=inity;
-            }
-	  }
-	}
-        if(Sup(x)>0){
-	  if(Inf(y)<0 && Inf(z)<=0){
-	    x=INTERVAL((Inf(x)>0)? Inf(x):0,Sup(x));
-	    y=INTERVAL(Inf(y),(Sup(y)<0)? Sup(y):0);
-            if(inner_projection(x,y,z, op)){
-              boxes[2]=new INTERVAL_VECTOR(2);
-              (*boxes[2])(1)=x;
-              (*boxes[2])(2)=y;
-              nb_boxes++;
-              x=initx;
-              x=inity;
-            }
-	  }
-          if(Sup(y)>0 && Sup(z)>=0){
-	    x=INTERVAL((Inf(x)>0)? Inf(x):0,Sup(x));
-	    y=INTERVAL((Inf(y)>0)? Inf(y):0,Sup(y));
-            if(inner_projection(x,y,z, op)){
-              boxes[3]=new INTERVAL_VECTOR(2);
-              (*boxes[3])(1)=x;
-              (*boxes[3])(2)=y;
-              nb_boxes++;
-            }
-	  }
-	}
-        if(nb_boxes==0) return false;
-// 	cout << nb_boxes << endl;
-        int k=rand()%nb_boxes;
-        int i=0, j=0;
-        while(i<=k){
-           if(boxes[j]){
-             if(i==k){ 
-                x=(*boxes[j])(1);
-                y=(*boxes[j])(2);
-                break; 
-             }
-             i++;
-           }
-           j++;
-        }
-
-        for(int i=0; i<4; i++){
-           if(boxes[i])
-             delete boxes[i];
-        }
-        delete[] boxes;
-        return true;	  
+REAL projx(REAL z, REAL y, int op, bool round_up){
+  (round_up)? BiasRoundUp():BiasRoundDown();
+  switch(op){
+    case ADD: return z-y; 
+    case SUB: return z+y;
+    case MUL: return (y==0)? BiasPosInf:z/y;
+    case DIV: return z*y;
+  }
+  BiasRoundNear();
 }
 
+REAL projy(REAL z, REAL x, int op, bool round_up){
+  (round_up)? BiasRoundUp():BiasRoundDown();
+  switch(op){
+    case ADD: return z-x; 
+    case SUB: return x-z;
+    case MUL: return (x==0)? BiasPosInf:z/x;
+    case DIV: return (z==0)? BiasPosInf:x/z;
+  }
+  BiasRoundNear();
+}
+
+INTERVAL eval(INTERVAL x, INTERVAL y, int op){
+  switch(op){
+    case ADD: return x+y; 
+    case SUB: return x-y;
+    case MUL: return x*y;
+    case DIV: return x/y;
+  }
+}
+
+
+
+
+bool leq_inner_projection(INTERVAL& x, INTERVAL& y, REAL z_sup, int op, bool inc_var1, bool inc_var2){
+   REAL xmin, xmax, x0,y0;
+
+   INTERVAL xx=x;  
+
+      xmax=projx(z_sup,(inc_var1 == inc_var2)? Inf(y):Sup(y),op,(inc_var1)?false:true);
+      xmin=projx(z_sup,(inc_var1 == inc_var2)? Sup(y):Inf(y),op,(inc_var1)?false:true);
+
+
+   if(xmax==BiasPosInf) xmax=Sup(x);
+   if(xmin==BiasPosInf) xmin=Inf(x);
+
+   if((inc_var1 && xmax < Inf(x)) || (!inc_var1 && xmin > Sup(x))) {
+      return false;
+   }else if((inc_var1 && xmin > Sup(x)) || (!inc_var1 && xmax < Inf(x))){
+      x0=(inc_var1)? Sup(x):Inf(x);
+   }else{
+//           if(xmin>xmax) xmin=xmax;
+      xx&=INTERVAL(xmin,xmax);
+      x0= Inf(xx) + (REAL)rand()/(REAL)RAND_MAX*(Diam(xx));
+      if(!xx.contains(x0)) x0= (x0 < Inf(xx))? Inf(xx):Sup(xx);
+   }
+   y0=projy(z_sup,x0,op,(inc_var2)?false:true);
+
+   if(y0!=BiasPosInf){
+      if(y0>Sup(y)) y0=Sup(y);
+      else if(y0<Inf(y)) y0=Inf(y);
+      y = (inc_var2)? INTERVAL(Inf(y),y0): INTERVAL(y0,Sup(y));
+   }
+
+   x = (inc_var1)? INTERVAL(Inf(x),x0): INTERVAL(x0,Sup(x));
+   return true;
+}
+
+
+bool geq_inner_projection(INTERVAL& x, INTERVAL& y, REAL z_inf, int op, bool inc_var1, bool inc_var2){
+   REAL xmin, xmax, x0,y0;
+   INTERVAL xx=x;  
+
+      xmax=projx(z_inf,(inc_var1 == inc_var2)? Inf(y):Sup(y),op,(inc_var1)?true:false); //true->ROUND_UP, false->ROUND_DOWN
+      xmin=projx(z_inf,(inc_var1 == inc_var2)? Sup(y):Inf(y),op,(inc_var1)?true:false);
+
+
+   if(xmax==BiasPosInf) xmax=Sup(x);
+   if(xmin==BiasPosInf) xmin=Inf(x);
+
+//    cout << xmin << "," << xmax << endl;
+   if((inc_var1 && xmin > Sup(x)) || (!inc_var1 && xmax < Inf(x))) {
+      return false;
+   }else if((inc_var1 && xmax < Inf(x)) || (!inc_var1 && xmin > Sup(x))){
+      x0=(inc_var1)? Inf(x):Sup(x);
+   }else{
+//           if(xmin>xmax) xmin=xmax;
+      xx&=INTERVAL(xmin,xmax);
+      x0= Inf(xx) + (REAL)rand()/(REAL)RAND_MAX*(Diam(xx));
+      if(!xx.contains(x0)) x0= (x0 < Inf(xx))? Inf(xx):Sup(xx);
+   }
+   y0=projy(z_inf,x0,op,(inc_var2)?true:false);
+
+
+   if(y0!=BiasPosInf){
+      if(y0>Sup(y)) y0=Sup(y);
+      else if(y0<Inf(y)) y0=Inf(y);
+
+      y = (inc_var2)? INTERVAL(y0,Sup(y)): INTERVAL(Inf(y),y0);
+   }
+
+   x = (inc_var1)? INTERVAL(x0,Sup(x)):INTERVAL(Inf(x),x0);
+
+   return true;
+}
+
+
+
+//Requeriments:
+//the function op(x,y) is monotonic wrt x and y in [x] x [y]
+//[xin]x[yin] is contained in [x]x[y]
+//and [op]([xin],[yin]) is contained in [z]
+void inflation(INTERVAL& x, INTERVAL& y, INTERVAL z, const INTERVAL &xin, const INTERVAL& yin, int op){
+  bool inc_var1, inc_var2;
+  switch(op){
+    case ADD: inc_var1=true, inc_var2=true; break;
+    case SUB: inc_var1=true, inc_var2=false; break;
+    case MUL: inc_var1=(Inf(y)>=0), inc_var2=(Inf(x)>=0); break;
+    case DIV: inc_var1=(Inf(y)>=0), inc_var2=(Sup(x)<=0); break;
+  }  
+  INTERVAL x1=(inc_var1)? INTERVAL(Sup(xin),Sup(x)): INTERVAL(Inf(x),Inf(xin));
+  INTERVAL y1=(inc_var2)? INTERVAL(Sup(yin),Sup(y)): INTERVAL(Inf(y),Inf(yin));
+  
+  if(!leq_inner_projection(x1, y1, Sup(z), op, inc_var1, inc_var2)){
+    x1=(inc_var1)? Sup(xin):Inf(xin); //generalized interval
+    y1=(inc_var2)? Sup(yin):Inf(yin); //generalized interval
+  }
+
+  INTERVAL x2=(inc_var1)? INTERVAL(Inf(x),Inf(xin)): INTERVAL(Sup(xin),Sup(x));
+  INTERVAL y2=(inc_var2)? INTERVAL(Inf(y),Inf(yin)): INTERVAL(Sup(yin),Sup(y));
+
+  if(!geq_inner_projection(x2, y2, Sup(z), op, inc_var1, inc_var2)){
+    x2=(inc_var1)? Inf(xin):Sup(xin); //generalized interval
+    y2=(inc_var2)? Inf(yin):Sup(yin); //generalized interval
+  }
+  x=Hull(x1,x2);
+  y=Hull(y1,y2);
+}
 
 
 bool inner_projection(INTERVAL& x, INTERVAL& y, INTERVAL z, int op){
-        INTERVAL evout;
-	INTERVAL t=z;
-	switch (op) { 
-	  case ADD :
-	       evout = x+y;
-	      break;
-	  case SUB :
-	      evout = x-y;
-	      break;
-	  case MUL : 
-	       evout = x*y;
-	      break;
-	  case DIV :
-	       evout=x/y;
-	      break;
-	}  
-        t&=evout;
-
-        if(t.empty()) return false;
-	
-	//we find a point (x0,y0) such that x+y<=sup(z)
-	REAL x0_inf, x0_sup;
-	REAL x0,y0;
-	INTERVAL xx=x;
-	if (Sup(z)<Sup(evout)) //otherwise all the box [x]x[y] satisfies x+y<=sup(z)
-	switch (op) {
-	  case ADD : 
-		     BiasRoundDown(); x0_sup = Sup(z)-Inf(y); 
-                      x0_inf = Sup(z)-Sup(y); //x0_inf + Sup(y) <= Sup(z)
-		     BiasRoundNear();
-
-                     if(x0_sup < Inf(x)) {
-                       return false;
-		     }else if(x0_inf > Sup(x)){
-                       x0=Sup(x);
-                     }else{
-                          if(x0_inf>x0_sup) x0_inf=x0_sup;
-			  xx&=INTERVAL(x0_inf,x0_sup);
-		          x0= Inf(xx) + (REAL)rand()/(REAL)RAND_MAX*(Diam(xx));
-	                  if(!xx.contains(x0)) x0=Mid(xx);
-                     }
-		     BiasRoundDown(); y0= Sup(z)-x0; // x0+y0 <= Sup(z)
-		     BiasRoundNear();
-		     
-		     if(y0>Sup(y)) y0=Sup(y);
-		     else if(y0<Inf(y)) y0=Inf(y);
-                     
-
-		     x = INTERVAL(Inf(x),x0);
-		     y = INTERVAL(Inf(y),y0);
-	             break;
-		     
-	  case SUB :  
-		     BiasRoundDown(); x0_sup = Sup(z)+Sup(y); 
-                                      x0_inf = Sup(z)+Inf(y);  
-		     BiasRoundNear();
-                     
-                     if(x0_sup < Inf(x)){
-                       return false;
-		     }else if(x0_inf > Sup(x)){
-                       x0=Sup(x);
-                     }else{
-                          if(x0_inf>x0_sup) x0_inf=x0_sup;  //this should never happen, but happens!
-			  xx&=INTERVAL(x0_inf,x0_sup);
-		          x0= Inf(xx) + (REAL)rand()/(REAL)RAND_MAX*(Diam(xx));
-	                  if(!xx.contains(x0)) x0=Mid(xx);
-                     }
-		     BiasRoundUp(); y0 = x0-Sup(z); // x0-y0 <= Sup(z)
-		     BiasRoundNear();
-
-
-		     if(y0<Inf(y)) y0=Inf(y);
-		     else if(y0>Sup(y)) y0=Sup(y);
-                     
-
-		     x = INTERVAL(Inf(x),x0);
-		     y = INTERVAL(y0,Sup(y));
-	             break;
-	  case MUL :
-                     (Inf(y)>=0)? BiasRoundDown():BiasRoundUp();
-	    	     if((Inf(x)>=0  && Inf(y)>=0) || (Sup(x)<=0  && Sup(y)<=0)){ //y decroissante
-                       x0_inf = (Sup(y)==0)? Inf(x):Sup(z)/Sup(y);
-		       x0_sup = (Inf(y)==0)? Sup(x):Sup(z)/Inf(y);
-		     }else{// if(Sup(z)<=0){
-		       x0_inf =  (Inf(y)==0)? Inf(x):Sup(z)/Inf(y);
-		       x0_sup = (Sup(y)==0)? Sup(x):Sup(z)/Sup(y);	       
-		     }
-		     BiasRoundNear();
-                    
-                     if((Inf(y)>=0 && x0_sup < Inf(x)) || (Sup(y)<=0 && x0_inf > Sup(x))) {
-                       return false;
-		     }else if(Inf(y)>=0 && x0_inf > Sup(x)){
-                       x0=Sup(x);
-                     }else if(Sup(y)<=0 && x0_sup < Inf(x)){
-                       x0=Inf(x);
-                     }else{
-		        if(!(xx&=INTERVAL(x0_inf,x0_sup))) return false;
-		        x0= Inf(xx) + (REAL)rand()/(REAL)RAND_MAX*(Diam(xx));
-	                if(!xx.contains(x0)) x0=Mid(xx);
-                     }
-
-		    if(x0!=0){
-		     if(Inf(x)>=0){ //y croissante
-		       BiasRoundDown(); y0= Sup(z)/x0; // x0*y0 <= Sup(z)
-		       if(y0<Inf(y)) y0=Inf(y);
-		       if(y0>Sup(y)) y0=Sup(y);
-		       y = INTERVAL(Inf(y),y0); 
-		     }else{ // if(Sup(x)<=0){
-		       BiasRoundUp(); y0= Sup(z)/x0; // x0*y0 <= Sup(z)	       
-		       if(y0>Sup(y)) y0=Sup(y);
-		       if(y0<Inf(y)) y0=Inf(y);
-		       y = INTERVAL(y0, Sup(y)); 
-		     }
-                     BiasRoundNear();	
-		    }
-
-		     x = (Inf(y)>=0)? INTERVAL(Inf(x),x0):INTERVAL(x0,Sup(x));
-		     break;
-	  case DIV:  (Inf(y)>=0)? BiasRoundDown():BiasRoundUp();
-	    	     if(Inf(z)>=0){ //y croissante
-		       x0_inf = Sup(z)*Inf(y);
-		       x0_sup = Sup(z)*Sup(y);
-		     }else{// if(Sup(z)<=0){
-		       x0_inf = Sup(z)*Sup(y);
-		       x0_sup = Sup(z)*Inf(y);	       
-		     }	    
-		     BiasRoundNear();
-
-                     if((Inf(y)>=0 && x0_sup < Inf(x)) || (Sup(y)<=0 && x0_inf > Sup(x))) {
-                       return false;
-		     }else if(Inf(y)>=0 && x0_inf > Sup(x)){
-                       x0=Sup(x);
-                     }else if(Sup(y)<=0 && x0_sup < Inf(x)){
-                       x0=Inf(x);
-                     }else{
-		        if(!(xx&=INTERVAL(x0_inf,x0_sup))) return false;
-		        x0= Inf(xx) + (REAL)rand()/(REAL)RAND_MAX*(Diam(xx));
-	                if(!xx.contains(x0)) x0=Mid(xx);
-                     }
-		    
-		     if(Inf(x)>=0){ //y decroissante
-		       BiasRoundUp(); y0= x0/Sup(z); // x0/y0 <= Sup(z)
-		       if(y0>Sup(y)) y0=Sup(y);
-		       if(y0<Inf(y)) y0=Inf(y);
-		       y = INTERVAL(y0,Sup(y)); 
-		     }else{ // if(Sup(x)<=0){
-		       BiasRoundDown(); y0= x0/Sup(z); // x0/y0 <= Sup(z)
-		       if(y0<Inf(y)) y0=Inf(y);
-		       if(y0>Sup(y)) y0=Sup(y);
-		       y = INTERVAL(Inf(y), y0); 
-		     }
-		     BiasRoundNear();
-
-		     x = (Inf(y)>=0)? INTERVAL(Inf(x),x0):INTERVAL(x0,Sup(x));
-		     break;
-	}
-
-	xx=x;
-	if (Inf(z)>Inf(evout)) //otherwise all the box [x]x[y] satisfies x+y>=inf(z)
-	switch (op) {
-	  case ADD : 
-		     BiasRoundUp(); x0_sup = Inf(z)-Inf(y); 
-                                    x0_inf = Inf(z)-Sup(y); //x0_inf + Sup(y) >= Inf(z)
-		     BiasRoundNear();
-
-                     if(x0_inf > Sup(x)) 
-                       return false;
-		     else if(x0_sup < Inf(x))
-                       x0=Inf(x);
-                     else{
-			  xx&=INTERVAL(x0_inf,x0_sup);
-
-		          x0= Inf(xx) + (REAL)rand()/(REAL)RAND_MAX*(Diam(xx));
-	                  if(!xx.contains(x0)) x0=Mid(xx);
-                     }
-		     BiasRoundUp(); y0= Inf(z)-x0; // x0+y0 >= Inf(z)
-		     BiasRoundNear();
-		     
-		     if(y0<Inf(y)) y0=Inf(y);
-		     else if(y0>Sup(y)) y0=Sup(y);
-
-		     x = INTERVAL(x0,Sup(x));
-		     y = INTERVAL(y0,Sup(y));
-	             break;
-		     
-	  case SUB : 
-		     BiasRoundUp();   x0_sup = Inf(z)+Sup(y); 
-                                      x0_inf = Inf(z)+Inf(y);  
-		     BiasRoundNear();
-                     if(x0_inf > Sup(x)){
-                       return false;
-		     }else if(x0_sup < Inf(x)){
-                       x0=Inf(x);
-                     }else{
-//                           if(x0_inf>x0_sup) x0_inf=x0_sup;  //this should never happen, but happens!
-			  xx&=INTERVAL(x0_inf,x0_sup);
-                          
-		          x0= Inf(xx) + (REAL)rand()/(REAL)RAND_MAX*(Diam(xx));
-	                  if(!xx.contains(x0)) x0=Mid(xx);
-                     }
-		     BiasRoundDown(); y0 = x0-Inf(z); // x0-y0 <= Sup(z)
-		     BiasRoundNear();
-
-		     if(y0>Sup(y)) y0=Sup(y);
-		     else if(y0<Inf(y)){
-//                        x0=Sup(xx); //it is necessary?
-                       y0=Inf(y);
-                     }
-
-		     x = INTERVAL(x0,Sup(x));
-		     y = INTERVAL(Inf(y),y0);
-// 		     if(Sup(SubBounds(x0,y0)) > Sup(z)) cout << "error Sup-" << endl;
-	             break;
-	  case MUL : 
-		     (Inf(y)>=0)? BiasRoundUp():BiasRoundDown();
-	    	     if((Inf(x)>=0  && Inf(y)>=0) || (Sup(x)<=0  && Sup(y)<=0)){ //y decroissante
-                       x0_inf = (Sup(y)==0)? BiasNegInf:Inf(z)/Sup(y);
-		       x0_sup = (Inf(y)==0)? BiasPosInf:Inf(z)/Inf(y);
-		     }else{// if(Sup(z)<=0){
-		       x0_inf =  (Inf(y)==0)? BiasPosInf:Inf(z)/Inf(y);
-		       x0_sup = (Sup(y)==0)? BiasNegInf:Inf(z)/Sup(y);	       
-		     }
-		     BiasRoundNear();
-
-                     if((Inf(y)>=0 && x0_inf > Sup(x)) || (Sup(y)<=0 && x0_sup < Inf(x))) {
-                       return false;
-		     }else if(Inf(y)>=0 && x0_sup < Inf(x)){
-                       x0=Inf(x);
-                     }else if(Sup(y)<=0 && x0_inf > Sup(x)){
-                       x0=Sup(x);
-                     }else{
-// 		        if(x0_sup<x0_inf) return false;
-		        if(!(xx&=INTERVAL(x0_inf,x0_sup))) return false;
-		        x0= Inf(xx) + (REAL)rand()/(REAL)RAND_MAX*(Diam(xx));
-	                if(!xx.contains(x0)) x0=Mid(xx);
-                     }
-		     if(x0!=0){
-		       if(Inf(x)>=0){ //y croissante
-		         BiasRoundUp(); y0= Inf(z)/x0; // x0*y0 <= Sup(z)
-		       }else{ // if(Sup(x)<=0){
-		         BiasRoundDown(); y0= Inf(z)/x0; // x0*y0 <= Sup(z)	       
-		       }
-                       BiasRoundNear();
-		       if(y0>Sup(y)) y0=Sup(y);
-		       if(y0<Inf(y)) y0=Inf(y);	
-                     }
-		     
-
-		     x = (Inf(y)>=0)? INTERVAL(x0,Sup(x)):INTERVAL(Inf(x),x0);
-                     if(x0!=0) y = (Inf(x)>=0)? INTERVAL(y0,Sup(y)):INTERVAL(Inf(y),y0); 
-		     break;
-	  case DIV:  (Inf(y)>=0)? BiasRoundUp():BiasRoundDown();
-	    	     if(Sup(z)>=0){ //y croissante
-		       x0_inf = Inf(z)*Inf(y);
-		       x0_sup = Inf(z)*Sup(y);
-		     }else{// if(Sup(z)<=0){
-		       x0_inf = Inf(z)*Sup(y);
-		       x0_sup = Inf(z)*Inf(y);	       
-		     }	    
-		     BiasRoundNear();
-
-                     if((Inf(y)>=0 && x0_inf > Sup(x)) || (Sup(y)<=0 && x0_sup < Inf(x))) {
-                       return false;
-		     }else if(Inf(y)>=0 && x0_sup < Inf(x)){
-                       x0=Inf(x);
-                     }else if(Sup(y)<=0 && x0_inf > Sup(x)){
-                       x0=Sup(x);
-                     }else{
-// 		        if(x0_sup<x0_inf) return false;
-		        if(!(xx&=INTERVAL(x0_inf,x0_sup))) return false;
-		        x0= Inf(xx) + (REAL)rand()/(REAL)RAND_MAX*(Diam(xx));
-	                if(!xx.contains(x0)) x0=Mid(xx);
-                     }
-		    
-		     if(Inf(x)>=0){ //y decroissante
-		       BiasRoundDown(); y0= x0/Inf(z); // x0/y0 <= Sup(z)
-		     }else{ // if(Sup(x)<=0){
-		       BiasRoundUp(); y0= x0/Inf(z); // x0/y0 <= Sup(z)
-		     }
-		     BiasRoundNear();
-
-		     if(y0>Sup(y)) y0=Sup(y);
-		     if(y0<Inf(y)) y0=Inf(y);
-		     x = (Inf(y)>=0)? INTERVAL(x0,Sup(x)):INTERVAL(Inf(x),x0);
-                     y = (Inf(x)>=0)? INTERVAL(Inf(y),y0):INTERVAL(y0,Sup(y));
-		     break;
-	}
-
-// 	switch (op) {
-// 	  case ADD :
-// 	    if(!((x+y) <= t))  cout << "floating error!"  << x << "+" << y << "=" << (x+y) << " contained in? " << t << endl;
-// 	    if(Diam(x+y)> 1e-7 && Diam(x+y) < 0.9*Diam(t)) cout << "diameter error!"  << x << "+" << y << "=" << (x+y) << " contained in? " << t << endl;
-// 	    break;
-// 	  case SUB :
-// 	    if(! ((x-y) <= t))  cout << "floating error!"  << x << "-" << y << "=" << (x-y) << "contained in? " << t << endl;
-//     	    if(Diam(x-y)> 1e-7 && Diam(x-y) < 0.9*Diam(t)) cout << "diameter error!"  << x << "-" << y << "=" << (x-y) << " contained in? " << t << endl;
-// 
-// 	    break;
-// 	  case MUL:
-// //             cout << "res:" <<x << "*" << y << " in " << t <<endl;
-// 	    if(! ((x*y) <= t))  cout << "floating error!"  << x << "*" << y << "=" << (x*y) << "contained in? "<< t << endl;
-//     	    if(Diam(x*y)> 1e-7 && Diam(x*y) < 0.9*Diam(t)) cout << "diameter error!"  << x << "*" << y << "=" << (x*y) << " contained in? " << t << endl;
-// 	    break;
-// 	  case DIV:
-// 	  if(!((x/y) <= t))  cout << "floating error!: " << x << "/" << y << "=" << (x/y) << "contained in? "<< t << endl;
-//           if(Diam(x/y)> 1e-7 && Diam(x/y) < 0.9*Diam(t)) cout << "diameter error!"  << x << "/" << y << "=" << (x/y) << " contained in? " << t << endl;
-// 	    
-// 	  break;
-// 	}
-	return true;
+  INTERVAL ev=eval(x,y,op);
+  if(!(z&=ev)) return false;
+  bool inc_var1,inc_var2;
+  if(op==MUL || op==DIV){ //One box of the four possible boxes is chosen randomly
+  if(Inf(z)>=0 || Sup(z)<=0){
+    if(Inf(y)>=0)
+      x=(Inf(z)>=0)? INTERVAL(max(0.0,Inf(x)),Sup(x)):INTERVAL(Inf(x),min(0.0,Sup(x))); //the only choice
+    else if(Sup(y)<=0)
+      x=(Sup(z)<=0)? INTERVAL(max(0.0,Inf(x)),Sup(x)):INTERVAL(Inf(x),min(0.0,Sup(x))); //the only choice
+    else{
+       if(Inf(x)<0 && Sup(x)>0) x=(rand()%2)? INTERVAL(0,Sup(x)):INTERVAL(Inf(x),0);
+       if(Inf(x)>=0)
+         y=(Inf(z)>=0)? INTERVAL(max(0.0,Inf(y)),Sup(y)):INTERVAL(Inf(y),min(0.0,Sup(y))); //the only choice
+       else if(Sup(x)<=0)
+         y=(Sup(z)<=0)? INTERVAL(max(0.0,Inf(y)),Sup(y)):INTERVAL(Inf(y),min(0.0,Sup(y))); //the only choice
+    }
+  }else if(Inf(z)<0 && Sup(z)>0){
+    if(Sup(x)>0 && Inf(x)<0)
+      x=(rand()%2)? INTERVAL(0,Sup(x)):INTERVAL(Inf(x),0) ;
+    if(Sup(y)>0 && Inf(y)<0)      
+      y=(rand()%2)? INTERVAL(0,Sup(y)):INTERVAL(Inf(y),0) ;
+      z=((Sup(x)<=0 && Sup(y)<=0) || (Inf(x)>=0 && Inf(y)>=0))? INTERVAL(max(0.0,Inf(z)),Sup(z)):INTERVAL(Inf(z),min(0.0,Sup(z))); //the only choice
+  }
 }
+
+  switch(op){
+    case ADD: inc_var1=true, inc_var2=true; break;
+    case SUB: inc_var1=true, inc_var2=false; break;
+    case MUL: inc_var1=(Inf(y)>=0), inc_var2=(Inf(x)>=0); break;
+    case DIV: inc_var1=(Inf(y)>=0), inc_var2=(Sup(x)<=0); break;
+  } 
+
+  if(Sup(z)<Sup(ev) && !leq_inner_projection(x,y,Sup(z),op,inc_var1,inc_var2))
+     return false;
+  
+  if((Inf(z)>Inf(ev) && !geq_inner_projection(x,y,Inf(z),op,inc_var1,inc_var2)))
+     return false;
+
+//    if(!(eval(x,y,op) <= z)) {
+//       cout << x << " op " << y << "=" << z << endl;
+//       cout << "error!"  << endl;
+//    }
+
+  return true;
 }
+
+  
+
+
+}
+

@@ -102,7 +102,7 @@ bool check_candidate(const System& sys, const Space& space, const Evaluator& goa
   // "res" will contain an upper bound of the criterion
   REAL res = Sup(goal.output());
 
-  (INTERVAL_VECTOR&) space.box = savebox;
+
 
   // check if f(x) is below the "loup" (the current upper bound).
   //
@@ -113,7 +113,8 @@ bool check_candidate(const System& sys, const Space& space, const Evaluator& goa
   if (_LT(res,loup)) {
 
     // to apply [check1] comment next line
-    if (!is_inner) {
+    
+      if (!is_inner) {
       try { 
 	is_inside.contract();
 	
@@ -123,15 +124,17 @@ bool check_candidate(const System& sys, const Space& space, const Evaluator& goa
       } catch(EmptyBoxException) {       
 	is_inner = true; // local assignment (valid for pt only)
       }
-    }
+     
+      }
 
-    if (is_inner) {
-      loup = res;
-      loup_point = pt;
-      return true;
-    }
+      if (is_inner) {
+	loup = res;
+	loup_point = pt;
+	(INTERVAL_VECTOR&) space.box = savebox;
+	return true;
+      }
   } 
-
+  (INTERVAL_VECTOR&) space.box = savebox;
   return false;
 
 }
@@ -198,13 +201,13 @@ bool random_probing(const System& sys, const Space& space, const Evaluator& goal
   return loup_changed;
 }
 
-/* 2nd method for probling: pick equidistant points in the opposite direction of the 
+/* 2nd method for probing: pick equidistant points in the opposite direction of the 
  * gradient calculated at a starting point "start".
  *
  * This function is simpler than a "gradient descent" since the step is calculated
  * by the simple geometrical rule explained below (we do not use rules like Wolfe's criterion, etc.)
  *
- * This function can be called in two differnt mode:
+ * This function can be called in two different modes:
  * - recursive=false: all the points are taken on the same half-line, starting from "start"
  *                    and ending at a facet of the box.
  * - recursive=true:  as soon as the "loup" is modified, a new gradient is calculated and the 
@@ -383,14 +386,17 @@ bool update_loup(const System& sys, const Space& space, const Evaluator& goal, C
     if(mono_analysis)
       monotonicity_analysis(space, goal);
   }
-
-  // loup_changed = random_probing(sys, space, goal, is_inside, loup, loup_point, sample_size, innerfound);
-
-  // first option: startpoint = midpoint
+  //    if (innerfound)
+    // first option: startpoint = midpoint
+    //
   loup_changed = line_probing(sys, space, goal, is_inside, loup, loup_point, Mid(space.box), sample_size, innerfound, true);
-
   // other option: chose startpoint randomly
-  //loup_changed = line_probing(sys, space, goal, is_inside, loup, loup_point, random_point(space.box), sample_size, innerfound, true);
+  //  loup_changed = line_probing(sys, space, goal, is_inside, loup, loup_point, random_point(space.box), sample_size, innerfound, true);
+
+  //    else
+  //      loup_changed = random_probing(sys, space, goal, is_inside, loup, loup_point, sample_size, innerfound);
+
+
 
   
   if (loup_changed) {
