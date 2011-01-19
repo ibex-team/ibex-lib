@@ -98,11 +98,11 @@ bool check_candidate(const System& sys, const Space& space, const Evaluator& goa
   // set the domain to the sample vector 
   (INTERVAL_VECTOR&) space.box = pt;
 
+  bool loup_found=false;
+
   goal.forward(space);
   // "res" will contain an upper bound of the criterion
   REAL res = Sup(goal.output());
-
-
 
   // check if f(x) is below the "loup" (the current upper bound).
   //
@@ -126,16 +126,17 @@ bool check_candidate(const System& sys, const Space& space, const Evaluator& goa
       }
      
       }
-
+    
       if (is_inner) {
 	loup = res;
 	loup_point = pt;
-	(INTERVAL_VECTOR&) space.box = savebox;
-	return true;
+	loup_found = true;
       }
   } 
+  
   (INTERVAL_VECTOR&) space.box = savebox;
-  return false;
+  
+  return loup_found;
 
 }
 
@@ -287,7 +288,7 @@ bool line_probing(const System& sys, const Space& space, const Evaluator& goal, 
   if (mj==-1) {
     // There is a problem: either the inner box is a single point or
     // the gradient is null in all the non-degenerated directions
-    cout << "warning: no gradient descent possible" << endl;
+    //cout << "warning: no gradient descent possible" << endl;
     // Use random probing (by default)
     return random_probing(sys, space, goal, is_inside, loup, loup_point, sample_size, is_inner);
   }
