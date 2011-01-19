@@ -31,7 +31,7 @@
 #include "IbexCellStack.h"
 #include "IbexOptimizer.h"
 
-#include "IbexSimplex.h"
+//#include "IbexSimplex.h"
 
 #include <math.h>
 
@@ -100,7 +100,7 @@ Sequence inverse(const System& sys, int goal_ctr) {
 
     int num=env.add_ctr(Inequality::new_(ineq.expr,new_op));
 
-    new_ctcs.push_back(new HC4Revise(env.constraint(num)));
+    new_ctcs.push_back(new HC4Revise(env.constraint(num), sys.space));
   }
   
   ContractorList new_sys(new_ctcs);
