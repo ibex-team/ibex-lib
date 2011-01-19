@@ -21,6 +21,8 @@
  *
  --------------------------------------------------------------------------------*/
 
+#ifndef _IBEX_INNERPROJECTIONS_H
+#define _IBEX_INNERPROJECTIONS_H
 
 #include "Interval.h"
 
@@ -43,14 +45,45 @@ namespace ibex {
 
 //--------------------------  InnerProjections   -------------------------//
 
-  /** Finds a box [x]x[y], such that [op]([x],[y]) in [y]. op MUST BE monotone wrt x and y **/
-  bool inner_projection(INTERVAL& x, INTERVAL& y, INTERVAL z, int op); 
 
-  /** Finds a box [x]x[y], such that [op]([x],[y]) in [y]. op is a not monotonice operator (*,/) **/
-  bool inner_projection_nonmonotone(INTERVAL& x, INTERVAL& y, INTERVAL z, int op);
-
-  /** Contract x under y=x^2, returns one interval before performing the hull. (It may not be conservative)  **/
+  /** Contract x under y=x^2, returns one interval before performing the hull. (Fiable)  **/
   bool innerproj_sqr(const INTERVAL& y, INTERVAL& x);
+
+//Requeriments:
+//the function op(x,y) is monotonic wrt x and y in [x] x [y]
+//[xin]x[yin] is contained in [x]x[y]
+//[op]([xin],[yin]) is contained in [z]
+//It returns a maximal box [xin]x[yin] contained in [x]x[y] such that
+// every point in the box satisfies the constraint: op(x,y) in [z]
+  void expand2(const INTERVAL &xin, const INTERVAL& yin, INTERVAL& x, INTERVAL& y, INTERVAL z, int op);
+
+void expand_minus(const INTERVAL& x, INTERVAL& X, const INTERVAL& Y);
+
+  INTERVAL eval(INTERVAL x, INTERVAL y, int op);
+  REAL projx(REAL z, REAL y, int op, bool round_up);
+  REAL projy(REAL z, REAL x, int op, bool round_up);
+
+  /** Finds a box [x]x[y], such that [op]([x],[y]) in [y]. op in {+,-,*,/} **/
+  bool inner_projection(INTERVAL& x, INTERVAL& y, INTERVAL z, int op);
+ 
+  // This method returns a box [x]x[y] such that every point in it satisfies the
+  // constraint op(x, y) >= z_inf
+  // the operator MUST BE monotonic wrt x and y.
+  // inc_var1 is true if the operator is increasing wrt x, is false if it is decreasing
+  // inc_var2 is true if the operator is increasing wrt y, is false if it is decreasing
+  bool geq_inner_projection(INTERVAL& x, INTERVAL& y, REAL z_inf, int op, bool inc_var1, bool inc_var2);
+
+
+  //This method returns a box [x]x[y] such that every point in it satisfies the
+  // constraint op(x, y) <= z_sup
+  // the operator MUST BE monotonic wrt x and y.
+  // inc_var1 is true if the operator is increasing wrt x, is false if it is decreasing
+  // inc_var2 is true if the operator is increasing wrt y, is false if it is decreasing
+  bool leq_inner_projection(INTERVAL& x, INTERVAL& y, REAL z_sup, int op, bool inc_var1, bool inc_var2);
+
+  
 //-------------------------------------------------------------------------//
 
 } // end namespace
+
+#endif

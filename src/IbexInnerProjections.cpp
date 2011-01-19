@@ -51,119 +51,11 @@ bool innerproj_sqr(const INTERVAL& evl, INTERVAL& exp_evl) { //, bool& continuit
 }
 
 
-REAL projx(REAL z, REAL y, int op, bool round_up){
-  (round_up)? BiasRoundUp():BiasRoundDown();
-  switch(op){
-    case ADD: return z-y; 
-    case SUB: return z+y;
-    case MUL: return (y==0)? BiasPosInf:z/y;
-    case DIV: return z*y;
-  }
-  BiasRoundNear();
-}
-
-REAL projy(REAL z, REAL x, int op, bool round_up){
-  (round_up)? BiasRoundUp():BiasRoundDown();
-  switch(op){
-    case ADD: return z-x; 
-    case SUB: return x-z;
-    case MUL: return (x==0)? BiasPosInf:z/x;
-    case DIV: return (z==0)? BiasPosInf:x/z;
-  }
-  BiasRoundNear();
-}
-
-INTERVAL eval(INTERVAL x, INTERVAL y, int op){
-  switch(op){
-    case ADD: return x+y; 
-    case SUB: return x-y;
-    case MUL: return x*y;
-    case DIV: return x/y;
-  }
-}
-
-
-
-
-bool leq_inner_projection(INTERVAL& x, INTERVAL& y, REAL z_sup, int op, bool inc_var1, bool inc_var2){
-   REAL xmin, xmax, x0,y0;
-
-   INTERVAL xx=x;  
-
-      xmax=projx(z_sup,(inc_var1 == inc_var2)? Inf(y):Sup(y),op,(inc_var1)?false:true);
-      xmin=projx(z_sup,(inc_var1 == inc_var2)? Sup(y):Inf(y),op,(inc_var1)?false:true);
-
-
-   if(xmax==BiasPosInf) xmax=Sup(x);
-   if(xmin==BiasPosInf) xmin=Inf(x);
-
-   if((inc_var1 && xmax < Inf(x)) || (!inc_var1 && xmin > Sup(x))) {
-      return false;
-   }else if((inc_var1 && xmin > Sup(x)) || (!inc_var1 && xmax < Inf(x))){
-      x0=(inc_var1)? Sup(x):Inf(x);
-   }else{
-//           if(xmin>xmax) xmin=xmax;
-      xx&=INTERVAL(xmin,xmax);
-      x0= Inf(xx) + (REAL)rand()/(REAL)RAND_MAX*(Diam(xx));
-      if(!xx.contains(x0)) x0= (x0 < Inf(xx))? Inf(xx):Sup(xx);
-   }
-   y0=projy(z_sup,x0,op,(inc_var2)?false:true);
-
-   if(y0!=BiasPosInf){
-      if(y0>Sup(y)) y0=Sup(y);
-      else if(y0<Inf(y)) y0=Inf(y);
-      y = (inc_var2)? INTERVAL(Inf(y),y0): INTERVAL(y0,Sup(y));
-   }
-
-   x = (inc_var1)? INTERVAL(Inf(x),x0): INTERVAL(x0,Sup(x));
-   return true;
-}
-
-
-bool geq_inner_projection(INTERVAL& x, INTERVAL& y, REAL z_inf, int op, bool inc_var1, bool inc_var2){
-   REAL xmin, xmax, x0,y0;
-   INTERVAL xx=x;  
-
-      xmax=projx(z_inf,(inc_var1 == inc_var2)? Inf(y):Sup(y),op,(inc_var1)?true:false); //true->ROUND_UP, false->ROUND_DOWN
-      xmin=projx(z_inf,(inc_var1 == inc_var2)? Sup(y):Inf(y),op,(inc_var1)?true:false);
-
-
-   if(xmax==BiasPosInf) xmax=Sup(x);
-   if(xmin==BiasPosInf) xmin=Inf(x);
-
-//    cout << xmin << "," << xmax << endl;
-   if((inc_var1 && xmin > Sup(x)) || (!inc_var1 && xmax < Inf(x))) {
-      return false;
-   }else if((inc_var1 && xmax < Inf(x)) || (!inc_var1 && xmin > Sup(x))){
-      x0=(inc_var1)? Inf(x):Sup(x);
-   }else{
-//           if(xmin>xmax) xmin=xmax;
-      xx&=INTERVAL(xmin,xmax);
-      x0= Inf(xx) + (REAL)rand()/(REAL)RAND_MAX*(Diam(xx));
-      if(!xx.contains(x0)) x0= (x0 < Inf(xx))? Inf(xx):Sup(xx);
-   }
-   y0=projy(z_inf,x0,op,(inc_var2)?true:false);
-
-
-   if(y0!=BiasPosInf){
-      if(y0>Sup(y)) y0=Sup(y);
-      else if(y0<Inf(y)) y0=Inf(y);
-
-      y = (inc_var2)? INTERVAL(y0,Sup(y)): INTERVAL(Inf(y),y0);
-   }
-
-   x = (inc_var1)? INTERVAL(x0,Sup(x)):INTERVAL(Inf(x),x0);
-
-   return true;
-}
-
-
-
 //Requeriments:
 //the function op(x,y) is monotonic wrt x and y in [x] x [y]
 //[xin]x[yin] is contained in [x]x[y]
 //and [op]([xin],[yin]) is contained in [z]
-void inflation(INTERVAL& x, INTERVAL& y, INTERVAL z, const INTERVAL &xin, const INTERVAL& yin, int op){
+void expand2(const INTERVAL &xin, const INTERVAL& yin, INTERVAL& x, INTERVAL& y, INTERVAL z, int op){
   bool inc_var1, inc_var2;
   switch(op){
     case ADD: inc_var1=true, inc_var2=true; break;
@@ -188,6 +80,41 @@ void inflation(INTERVAL& x, INTERVAL& y, INTERVAL z, const INTERVAL &xin, const 
   }
   x=Hull(x1,x2);
   y=Hull(y1,y2);
+}
+
+void expand_minus(const INTERVAL& x, INTERVAL& X, const INTERVAL& Y) {
+  X &= -Y;
+}
+
+INTERVAL eval(INTERVAL x, INTERVAL y, int op){
+  switch(op){
+    case ADD: return x+y; 
+    case SUB: return x-y;
+    case MUL: return x*y;
+    case DIV: return x/y;
+  }
+}
+
+REAL projx(REAL z, REAL y, int op, bool round_up){
+  (round_up)? BiasRoundUp():BiasRoundDown();
+  switch(op){
+    case ADD: return z-y; 
+    case SUB: return z+y;
+    case MUL: return (y==0)? BiasPosInf:z/y;
+    case DIV: return z*y;
+  }
+  BiasRoundNear();
+}
+
+REAL projy(REAL z, REAL x, int op, bool round_up){
+  (round_up)? BiasRoundUp():BiasRoundDown();
+  switch(op){
+    case ADD: return z-x; 
+    case SUB: return x-z;
+    case MUL: return (x==0)? BiasPosInf:z/x;
+    case DIV: return (z==0)? BiasPosInf:x/z;
+  }
+  BiasRoundNear();
 }
 
 
@@ -230,16 +157,89 @@ bool inner_projection(INTERVAL& x, INTERVAL& y, INTERVAL z, int op){
   if((Inf(z)>Inf(ev) && !geq_inner_projection(x,y,Inf(z),op,inc_var1,inc_var2)))
      return false;
 
-//    if(!(eval(x,y,op) <= z)) {
-//       cout << x << " op " << y << "=" << z << endl;
-//       cout << "error!"  << endl;
-//    }
-
   return true;
 }
 
-  
 
 
+
+bool geq_inner_projection(INTERVAL& x, INTERVAL& y, REAL z_inf, int op, bool inc_var1, bool inc_var2){
+   REAL xmin, xmax, x0,y0;
+   INTERVAL xx=x;  
+
+      xmax=projx(z_inf,(inc_var1 == inc_var2)? Inf(y):Sup(y),op,(inc_var1)?true:false); //true->ROUND_UP, false->ROUND_DOWN
+      xmin=projx(z_inf,(inc_var1 == inc_var2)? Sup(y):Inf(y),op,(inc_var1)?true:false);
+
+
+
+   if(xmax==BiasPosInf) xmax=Sup(x);
+   if(xmin==BiasPosInf) xmin=Inf(x);
+
+
+//    cout << xmin << "," << xmax << endl;
+   if((inc_var1 && xmin > Sup(x)) || (!inc_var1 && xmax < Inf(x))) {
+      return false;
+   }else if((inc_var1 && xmax < Inf(x)) || (!inc_var1 && xmin > Sup(x))){
+      x0=(inc_var1)? Inf(x):Sup(x);
+   }else{
+//           if(xmin>xmax) xmin=xmax;
+      xx&=INTERVAL(xmin,xmax);
+      x0= Inf(xx) + (REAL)rand()/(REAL)RAND_MAX*(Diam(xx));
+      if(!xx.contains(x0)) x0= (x0 < Inf(xx))? Inf(xx):Sup(xx);
+   }
+   y0=projy(z_inf,x0,op,(inc_var2)?true:false);
+
+
+   if(y0!=BiasPosInf){
+      if(y0>Sup(y)) y0=Sup(y);
+      else if(y0<Inf(y)) y0=Inf(y);
+
+      y = (inc_var2)? INTERVAL(y0,Sup(y)): INTERVAL(Inf(y),y0);
+   }
+
+   x = (inc_var1)? INTERVAL(x0,Sup(x)):INTERVAL(Inf(x),x0);
+
+
+   return true;
 }
 
+
+bool leq_inner_projection(INTERVAL& x, INTERVAL& y, REAL z_sup, int op, bool inc_var1, bool inc_var2){
+   REAL xmin, xmax, x0,y0;
+
+
+   INTERVAL xx=x;  
+
+
+      xmax=projx(z_sup,(inc_var1 == inc_var2)? Inf(y):Sup(y),op,(inc_var1)?false:true);
+      xmin=projx(z_sup,(inc_var1 == inc_var2)? Sup(y):Inf(y),op,(inc_var1)?false:true);
+
+
+   x = (inc_var1)? INTERVAL(x0,Sup(x)):INTERVAL(Inf(x),x0);
+
+   if(xmax==BiasPosInf) xmax=Sup(x);
+   if(xmin==BiasPosInf) xmin=Inf(x);
+
+   if((inc_var1 && xmax < Inf(x)) || (!inc_var1 && xmin > Sup(x))) {
+      return false;
+   }else if((inc_var1 && xmin > Sup(x)) || (!inc_var1 && xmax < Inf(x))){
+      x0=(inc_var1)? Sup(x):Inf(x);
+   }else{
+//           if(xmin>xmax) xmin=xmax;
+      xx&=INTERVAL(xmin,xmax);
+      x0= Inf(xx) + (REAL)rand()/(REAL)RAND_MAX*(Diam(xx));
+      if(!xx.contains(x0)) x0= (x0 < Inf(xx))? Inf(xx):Sup(xx);
+   }
+   y0=projy(z_sup,x0,op,(inc_var2)?false:true);
+
+   if(y0!=BiasPosInf){
+      if(y0>Sup(y)) y0=Sup(y);
+      else if(y0<Inf(y)) y0=Inf(y);
+      y = (inc_var2)? INTERVAL(Inf(y),y0): INTERVAL(y0,Sup(y));
+   }
+
+   x = (inc_var1)? INTERVAL(Inf(x),x0): INTERVAL(x0,Sup(x));
+   return true;
+}
+
+}
