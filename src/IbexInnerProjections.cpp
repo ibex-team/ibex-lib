@@ -151,6 +151,7 @@ bool inner_projection(INTERVAL& x, INTERVAL& y, INTERVAL z, int op){
     case DIV: inc_var1=(Inf(y)>=0), inc_var2=(Sup(x)<=0); break;
   } 
 
+  
   if(Sup(z)<Sup(ev) && !leq_inner_projection(x,y,Sup(z),op,inc_var1,inc_var2))
      return false;
   
@@ -171,10 +172,8 @@ bool geq_inner_projection(INTERVAL& x, INTERVAL& y, REAL z_inf, int op, bool inc
       xmin=projx(z_inf,(inc_var1 == inc_var2)? Sup(y):Inf(y),op,(inc_var1)?true:false);
 
 
-
    if(xmax==BiasPosInf) xmax=Sup(x);
    if(xmin==BiasPosInf) xmin=Inf(x);
-
 
 //    cout << xmin << "," << xmax << endl;
    if((inc_var1 && xmin > Sup(x)) || (!inc_var1 && xmax < Inf(x))) {
@@ -199,7 +198,6 @@ bool geq_inner_projection(INTERVAL& x, INTERVAL& y, REAL z_inf, int op, bool inc
 
    x = (inc_var1)? INTERVAL(x0,Sup(x)):INTERVAL(Inf(x),x0);
 
-
    return true;
 }
 
@@ -207,15 +205,11 @@ bool geq_inner_projection(INTERVAL& x, INTERVAL& y, REAL z_inf, int op, bool inc
 bool leq_inner_projection(INTERVAL& x, INTERVAL& y, REAL z_sup, int op, bool inc_var1, bool inc_var2){
    REAL xmin, xmax, x0,y0;
 
-
    INTERVAL xx=x;  
-
 
       xmax=projx(z_sup,(inc_var1 == inc_var2)? Inf(y):Sup(y),op,(inc_var1)?false:true);
       xmin=projx(z_sup,(inc_var1 == inc_var2)? Sup(y):Inf(y),op,(inc_var1)?false:true);
 
-
-   x = (inc_var1)? INTERVAL(x0,Sup(x)):INTERVAL(Inf(x),x0);
 
    if(xmax==BiasPosInf) xmax=Sup(x);
    if(xmin==BiasPosInf) xmin=Inf(x);
