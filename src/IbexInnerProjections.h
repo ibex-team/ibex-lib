@@ -46,26 +46,19 @@ namespace ibex {
 //--------------------------  InnerProjections   -------------------------//
 
 
-  /** Contract x under y=x^2, returns one interval before performing the hull. (Fiable)  **/
-  bool innerproj_sqr(const INTERVAL& y, INTERVAL& x);
-
-//Requeriments:
-//the function op(x,y) is monotonic wrt x and y in [x] x [y]
-//[xin]x[yin] is contained in [x]x[y]
-//[op]([xin],[yin]) is contained in [z]
-//It returns a maximal box [xin]x[yin] contained in [x]x[y] such that
-// every point in the box satisfies the constraint: op(x,y) in [z]
-  void expand2(const INTERVAL &xin, const INTERVAL& yin, INTERVAL& x, INTERVAL& y, INTERVAL z, int op);
-
-void expand_minus(const INTERVAL& x, INTERVAL& X, const INTERVAL& Y);
-
-  INTERVAL eval(INTERVAL x, INTERVAL y, int op);
-  REAL projx(REAL z, REAL y, int op, bool round_up);
-  REAL projy(REAL z, REAL x, int op, bool round_up);
-
+  /** Contract x under y=x^2, returns one interval before performing the hull. **/
+  bool innerproj_sqr(const INTERVAL& evl, INTERVAL& exp_evl);
+  /** Contract x under y=log(x) **/
+  bool innerproj_log(const INTERVAL& evl, INTERVAL& exp_evl);
+  /** Contract x under y=x^expon **/
+  bool innerproj_power(const INTERVAL& p_evl, INTERVAL& p_exp_evl, int expon);
+  /** Contract x under y=exp(x) **/
+  bool innerproj_exp(const INTERVAL& evl, INTERVAL& exp_evl);
+  /** Contract x under y=sqrt(x) **/
+  bool innerproj_sqrt(const INTERVAL& evl, INTERVAL& exp_evl);
   /** Finds a box [x]x[y], such that [op]([x],[y]) in [y]. op in {+,-,*,/} **/
   bool inner_projection(INTERVAL& x, INTERVAL& y, INTERVAL z, int op);
- 
+
   // This method returns a box [x]x[y] such that every point in it satisfies the
   // constraint op(x, y) >= z_inf
   // the operator MUST BE monotonic wrt x and y.
@@ -80,6 +73,38 @@ void expand_minus(const INTERVAL& x, INTERVAL& X, const INTERVAL& Y);
   // inc_var1 is true if the operator is increasing wrt x, is false if it is decreasing
   // inc_var2 is true if the operator is increasing wrt y, is false if it is decreasing
   bool leq_inner_projection(INTERVAL& x, INTERVAL& y, REAL z_sup, int op, bool inc_var1, bool inc_var2);
+
+
+
+//Considerations to use the expand* methods:
+// - xin and yin are contained in x and y respectively.
+// - [op]([xin],[yin]) is contained in [z]
+
+
+/** returns a box containing [xin]x[yin] and contained in [x]x[y] such that
+every point in the box satisfies the constraint: op(x,y) in [z]. op in (/,+,-) **/
+  void expand2(const INTERVAL &xin, const INTERVAL& yin, INTERVAL& x, INTERVAL& y, INTERVAL z, int op);
+
+/** returns a box containing [xin]x[yin] and contained in [x]x[y] such that
+every point in the box satisfies the constraint: x*y in [z] **/
+  void expand2_mult(const INTERVAL &xin, const INTERVAL& yin, INTERVAL& x, INTERVAL& y, INTERVAL z);
+
+/** returns an interval containing [xin] and contained in [x] such that
+every point in the box satisfies the constraint: x^2 in [z]. **/
+  void expand_sqr(const INTERVAL& xin,  const INTERVAL& z, INTERVAL& x) ;
+
+/** returns an interval containing [xin] and contained in [x] such that
+every point in the box satisfies the constraint: x^expon in [z]. **/
+  void expand_power(const INTERVAL &xin, const INTERVAL& z, INTERVAL& x, int expon);
+
+/*
+  INTERVAL eval(const INTERVAL& x, const INTERVAL& y, int op);
+  REAL projx(REAL z, REAL y, int op, bool round_up);
+  REAL projy(REAL z, REAL x, int op, bool round_up);*/
+
+
+ 
+
 
   
 //-------------------------------------------------------------------------//

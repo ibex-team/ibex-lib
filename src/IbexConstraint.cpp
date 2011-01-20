@@ -279,6 +279,42 @@ void Equality::backward(Space& space) const {
   evl.backward(space);
 }
 
+void Equality::expand(Space& space, const INTERVAL_VECTOR& dom) const {
+
+  if (op!=EQU) { // M_EQU 
+    throw NonRecoverableException("forbidden regions with matrices not implemented\n");
+  }
+
+  evl.forward(space);
+
+  INTERVAL pt_evl = evl.output();
+
+  if (pt_evl.contains(0)) return; // nothing can be done, space.box=pt
+
+  INTERVAL pt[evl.itvl];
+  for (int ic=0; ic<evl.itvl; ic++) {
+    pt[ic]=evl.I[ic];
+  }
+
+  space.box=dom;
+
+  evl.forward(space);  
+
+  INTERVAL& dom_evl = evl.output();
+
+  if (! (dom_evl.contains(0))) {
+    //cout << "unfeasibility!\n" ;
+    throw EmptyBoxException();
+    //    return; // the whole dom is unfeasible!
+  }
+    
+  if (Inf(pt_evl)>0) evl.output() &= INTERVAL(Succ(0),BiasPosInf);
+  else evl.output() &= INTERVAL(BiasNegInf, Pred(0));
+
+  //cout << "expanding...\n";
+
+  evl.expand(space,pt);
+}
 
 /*================================================================================*/
 
@@ -322,6 +358,61 @@ void Inequality::backward(Space& space) const {
   }
   if (!sat) throw EmptyBoxException();
   evl.backward(space);
+}
+
+
+void Inequality::expand(Space& space, const INTERVAL_VECTOR& dom) const {
+  assert(dom.included(space.box));
+  INTERVAL_VECTOR savebox=space.box;
+  space.box= dom;
+  evl.forward(space);
+  INTERVAL pt[evl.itvl];
+  //inner_eval
+  for (int ic=0; ic<evl.itvl; ic++) {
+    pt[ic]=evl.I[ic];
+  }
+  INTERVAL pt_evl = evl.output();
+
+  space.box=savebox;
+  //outer_eval
+  evl.forward(space);  
+
+//   for (int ic=0; ic<evl.itvl; ic++) {
+//     cout << evl.I[ic]<< " contains " << pt[ic] << ic << endl;
+//   }
+  INTERVAL& out_evl = evl.output();
+
+
+
+  //test if space.box is an innerbox
+  switch (op) {      
+  case LT       : if (Sup(out_evl)<0) return; 
+                  break;
+  case LEQ      : if (Sup(out_evl)<=0) return; 
+                  break;
+  case GT       : if (Inf(out_evl)>0) return; 
+                  break;
+  case GEQ      : if (Inf(out_evl)>=0) return; 
+                  break;
+  }
+  
+
+  switch (op) {      
+  case LT       : out_evl &= INTERVAL(BiasNegInf,Pred(0));
+                  break;
+  case LEQ      : out_evl &= INTERVAL(BiasNegInf,0);
+                  break;
+  case GT       : out_evl &= INTERVAL(Succ(0),BiasPosInf);
+                  break;
+  case GEQ      : out_evl &= INTERVAL(0, BiasPosInf);
+                  break;
+  }
+//   cout << "pt_evl:" << pt_evl << endl;
+//   cout << "out_evl:" << out_evl << endl;
+  evl.expand(space,pt);
+
+
+
 }
 
 

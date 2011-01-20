@@ -622,6 +622,95 @@ static const char* tokentostring(int tok) {
 }
 
 
+void Evaluator::expand(Space& space, const INTERVAL* pt) const {
+  int i   = 0;
+  int ic  = 0;
+  int mc  = 0;
+  int f   = 0;
+
+
+  bool impact[space.nb_var()];
+  for (int i=0; i<space.nb_var(); i++) {
+    impact[i]=false;
+  }
+
+
+  for (int c=0; c<codel; c++) {
+    switch (code[c]) {
+      
+    case CST      : ic++; break;
+    case ADD      : expand2(pt[info[i]],pt[info[i+1]],I[info[i]],I[info[i+1]],I[ic], ADD);
+		    ic++; i+=2; 
+                    break;
+    case SUB      : expand2(pt[info[i]],pt[info[i+1]],I[info[i]],I[info[i+1]],I[ic], SUB);
+		    ic++; i+=2; break;
+    case MUL      : expand2_mult(pt[info[i]],pt[info[i+1]],I[info[i]],I[info[i+1]],I[ic]);
+		    ic++; i+=2; break;
+    case DIV      : expand2(pt[info[i]],pt[info[i+1]],I[info[i]],I[info[i+1]],I[ic], DIV);
+		    ic++; i+=2; break;                   		    
+    case SYMBOL   : 
+                    /* notice: domains of epr should not be reduced to points anyway (that is,
+		     * the domains of epr in pt have to be full intervals). Indeed, a domain 
+		     * is pruned by the sweeping algorithm if all the other *variables* (and not
+		     * eprs) domains are saturated (epr are not considered in sweeping so they should
+		     * always have their domains "saturated"). Hence, the following code 
+		     * could also be executed for epr (but it is not by precaution). */
+                    if (space.entity(info[i]).type==IBEX_VAR) {
+		      int var=space.component(info[i]);
+		      if (!impact[var]) {
+			space.box(var+1)=pt[ic];
+			impact[var]=true;
+		      }
+		      space.box(var+1) |= I[ic]; // or space.domain(info[i])
+		    }
+		    i++; ic++;
+		    break;
+    case MINUS    : I[info[i++]] |= -I[ic++];                     break;
+    case SQR      : expand_sqr(pt[info[i]],  I[ic++], I[info[i]]);i++;  break;
+    case SQRT     : innerproj_sqrt(I[ic++],I[info[i++]]); I[info[i++]]|=pt[info[i]] ;    break;
+    case LOG      : innerproj_log(I[ic++], I[info[i++]]); I[info[i++]]|=pt[info[i]] ;  break;
+    case EXP      : innerproj_exp(I[ic++], I[info[i++]]); I[info[i++]]|=pt[info[i]] ;        break;
+    case POW      : expand_power(pt[info[i+1]], I[ic++], I[info[i+1]], info[i]); i+=2; break;
+    case MIN      : 
+    case MAX      : 
+    case SIGN     : 
+    case ABS      : 
+    case COS      : 
+    case SIN      : 
+    case TAN      : 
+    case ARCCOS   : 
+    case ARCSIN   : 
+    case ARCTAN   : 
+    case COSH     : 
+    case SINH     : 
+    case TANH     : 
+    case ARCCOSH  : 
+    case ARCSINH  : 
+    case ARCTANH  : 
+    case APPLY    : 
+    case INF      : 
+    case MID      : 
+    case SUP      : 
+    case M_CST    : 
+    case M_ADD    : 
+    case M_SUB    : 
+    case M_MUL    : 		    
+    case M_SCAL   :                     
+    case M_VEC    : 
+    case M_MINUS  : 
+    case M_SYMBOL : 
+    case M_TRANS  : 
+    case M_APPLY  : 
+    case M_INF    : 
+    case M_MID    : cout << code[c] << endl; exit(0); break;
+    case M_SUP    : throw NonRecoverableException(string("Forbidden region build not implemented with operator \"")+tokentostring(code[c])+"\"");
+    default       : throw NonRecoverableException("Internal bug: unknown evaluator code (please report this bug).");  
+    }
+  }
+
+
+}
+
 
 void Evaluator::inner_backward(Space& space) const { 
   int i   = 0;
@@ -635,13 +724,9 @@ void Evaluator::inner_backward(Space& space) const {
     switch (code[c]) {
     case CST      : ic++; break;
     
-    case ADD      : //cout << I[info[i]] << "+" << I[info[i+1]] << "=" << I[ic] << endl;
-                    sat  = inner_projection(I[info[i]], I[info[i+1]], I[ic], ADD); 
-//                     cout << "proj:" << I[info[i]] << "+" << I[info[i+1]] << "=" << (I[info[i]]+I[info[i+1]]) << endl;
+    case ADD      : sat  = inner_projection(I[info[i]], I[info[i+1]], I[ic], ADD); 
 		    ic++; i+=2; break;
-    case SUB      :// cout << I[info[i]] << "-" << I[info[i+1]] << "=" << I[ic] << endl;
-                    sat  = inner_projection(I[info[i]], I[info[i+1]], I[ic], SUB); 
-//                     cout << "proj:" << I[info[i]] << "-" << I[info[i+1]] << "=" << (I[info[i]]-I[info[i+1]]) << endl;
+    case SUB      : sat  = inner_projection(I[info[i]], I[info[i+1]], I[ic], SUB); 
 		    ic++; i+=2; break;
     case MUL      : //cout << I[info[i]] << "*" << I[info[i+1]] << "=" << I[ic] << endl;
                     sat = inner_projection(I[info[i]], I[info[i+1]], I[ic], MUL); 
@@ -656,14 +741,12 @@ void Evaluator::inner_backward(Space& space) const {
     case ARCTAN2  : /* TO DO!!! */ sat = true; ic++; i+=2;                  break;
     case SIGN     : sat = proj_sign(I[ic++], I[info[i++]]);                 break;
     case ABS      : sat = proj_abs(I[ic++], I[info[i++]]);                 break;
-    case MINUS    : sat = I[info[i++]] &= -1.0*I[ic++];                     break;
-    case SQRT     : sat = I[info[i++]] &= Sqr(I[ic++]);                     break;
-    case LOG      : sat = I[info[i++]] &= 
-                   INTERVAL(Sup(Exp(INTERVAL(Inf(I[ic])))),
-		            Inf(Exp(INTERVAL(Sup(I[ic++]))))); break;
+    case MINUS    : sat = I[info[i++]] &= -I[ic++];                     break;
+    case SQRT     : sat = innerproj_sqrt(I[ic++],I[info[i++]]);      break;
+    case LOG      : sat = innerproj_log(I[ic++], I[info[i++]]);   break;
     
-    case EXP      : sat = proj_exp(I[ic++], I[info[i++]]);                  break;
-    case POW      : sat = proj_power(I[ic++], I[info[i+1]], info[i]); i+=2; break;
+    case EXP      : sat = innerproj_exp(I[ic++], I[info[i++]]);                  break;
+    case POW      : sat = innerproj_power(I[ic++], I[info[i+1]], info[i]); i+=2; break;
     case SQR      : sat = innerproj_sqr(I[ic++], I[info[i++]]);                break;
     case COS      : sat = proj_trigo(I[ic++], I[info[i++]], COS);           break;
     case SIN      : sat = proj_trigo(I[ic++], I[info[i++]], SIN);           break;
@@ -677,13 +760,9 @@ void Evaluator::inner_backward(Space& space) const {
     case ARCCOSH  : sat = proj_arccosh(I[ic++], I[info[i++]]);              break;
     case ARCSINH  : sat = I[info[i++]] &= Sinh(I[ic++]);                    break;
     case ARCTANH  : sat = I[info[i++]] &= Tanh(I[ic++]);                    break;
-    case SYMBOL   : //if (space.entity(info[i]).type==IBEX_VAR || space.entity(info[i]).type==IBEX_TMP) 
-//      if (space.entity(info[i]).type==IBEX_EPR) 
-//	cout << space.domain(info[i]) << " ^ " <<  I[ic] << endl;
-      
+    case SYMBOL   : 
       if (space.entity(info[i]).type!=IBEX_SYB && space.entity(info[i]).type!=IBEX_UPR) {
 		      sat = space.domain(info[i]) &= I[ic];  i++; ic++;     
-//               cout << space.domain(info[i-1])<< endl;
       }
       break;
     case APPLY    : func[f]->backward(*args[f]); f++; ic++;                 break;
