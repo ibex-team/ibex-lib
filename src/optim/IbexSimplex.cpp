@@ -45,8 +45,8 @@ bool simplex_lower_bounding(const System& sys, const Evaluator& goal) {
 
     if(i==0){
        //Linear variable yl is created
-       //0 <= yl <= diam([y])
-       mysoplex.addCol(LPCol(1.0, dummycol, infinity /* Diam(y)? */, 0.0 ));
+       // yl <= diam([y])
+       mysoplex.addCol(LPCol(1.0, dummycol,  Diam(sys.space.box(n))+1.e-8, -infinity ));
        row1.add(0, -1.0);
  
 
@@ -148,7 +148,7 @@ bool simplex_lower_bounding(const System& sys, const Evaluator& goal) {
     if(i==0){
        //Linear variable yl is created
        //0 <= yl <= loup
-       mysoplex.addCol(LPCol(1.0, dummycol, loup, 0.0 ));
+       mysoplex.addCol(LPCol(1.0, dummycol, infinity, 0.0 ));
        row1.add(0, -1.0);
  
 
