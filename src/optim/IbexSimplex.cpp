@@ -18,13 +18,13 @@ bool simplex_lower_bounding(const System& sys, const Evaluator& goal) {
   sys.space.box=Inf(sys.space.box);
   sys.eval(eval_inf);
   goal.forward(sys.space);
-  INTERVAL midf = goal.output();
+  INTERVAL inf_f = goal.output();
   sys.space.box=savebox;
 
   
   SoPlex mysoplex;
   /* set the objective sense */
-  mysoplex.changeSense(SPxLP::MAXIMIZE);  
+  mysoplex.changeSense(SPxLP::MINIMIZE);  
   DSVector dummycol(0);
 
   //The linear system is generated
@@ -46,7 +46,7 @@ bool simplex_lower_bounding(const System& sys, const Evaluator& goal) {
     if(i==0){
        //Linear variable yl is created
        //0 <= yl <= diam([y])
-       mysoplex.addCol(LPCol(1.0, dummycol, Diam(sys.space.box(n)), 0.0 ));
+       mysoplex.addCol(LPCol(1.0, dummycol, infinity /* Diam(y)? */, 0.0 ));
        row1.add(0, -1.0);
  
 
@@ -73,9 +73,9 @@ bool simplex_lower_bounding(const System& sys, const Evaluator& goal) {
 	 }
        }
        if(op == LEQ || op== LT){
-         mysoplex.addRow(LPRow(Inf(-eval_inf(i+1)), row1, infinity));
-       }else{
          mysoplex.addRow(LPRow(-infinity, row1, Sup(-eval_inf(i+1))));
+       }else{
+         mysoplex.addRow(LPRow(Inf(-eval_inf(i+1)), row1, infinity));
        }
       
     }
@@ -90,34 +90,37 @@ bool simplex_lower_bounding(const System& sys, const Evaluator& goal) {
       //The optimum solution found in the linear system is mapped to the nonlinear system
       //y_opt <-- inf([f]([x])) + yl_opt + eps_error
       //for the moment, I added an epsilon due to the nonfiability of the simplex algorithm.
-      INTERVAL f= midf+ mysoplex.objValue() + INTERVAL(-1e-8,1e-8);
+      INTERVAL f= inf_f+ mysoplex.objValue() + INTERVAL(-1e-8,1e-8);
+//       sys.space.box=savebox;
       if(Inf(f) > Inf(sys.space.box(n)) ){
             if(Inf(f) > Sup(sys.space.box(n)) )
                  return false;
             //if y_opt in [y], then we update the lower bound:
             //[y] <-- [y_opt, sup([y])]
+//            cout << Inf(f) << endl;
            sys.space.box(n)=INTERVAL( Inf(f),Sup(sys.space.box(n) ));
       }
       return true;
   }
+
   return false;
 
  }
  
 //The system is relaxed by using the Taylor extension.
-//Then the simplex algorithm is applied to obtain a new uplo
-//If a new uplo is found the method returns true
+//Then the simplex algorithm is applied to obtain a new uploup loup
+//If a new loup is found the method returns true
  bool simplex_update_loup(const System& sys, const Evaluator& goal, Contractor& is_inside, REAL& loup, VECTOR& loup_point) {
   int n=sys.space.nb_var();
   INTERVAL_VECTOR G(sys.space.nb_var()); // vector to be used by the partial derivatives
-  INTERVAL_VECTOR savebox=sys.space.box; 
+  INTERVAL_VECTOR savebox(sys.space.box); 
   INTERVAL_VECTOR eval_inf(sys.nb_ctr());
   INTERVAL_VECTOR eval_sup(sys.nb_ctr());
   
   sys.space.box=Inf(sys.space.box);
   sys.eval(eval_inf);
   goal.forward(sys.space);
-  INTERVAL midf = goal.output();
+  INTERVAL inf_f = goal.output();
   sys.space.box=savebox;
 
   
@@ -184,7 +187,7 @@ bool simplex_lower_bounding(const System& sys, const Evaluator& goal) {
   stat = mysoplex.solve();
 
   if( stat == SPxSolver::OPTIMAL ){
-      INTERVAL f= midf+ mysoplex.objValue();
+      INTERVAL f= inf_f+ mysoplex.objValue();
 //    if(Sup(f) < loup){
         //the linear solution is mapped to intervals and evaluated
         DVector prim(n);
@@ -212,6 +215,8 @@ bool simplex_lower_bounding(const System& sys, const Evaluator& goal) {
            
 //             }
   }
+  
+  sys.space.box=savebox;
   return false;
 
 }
