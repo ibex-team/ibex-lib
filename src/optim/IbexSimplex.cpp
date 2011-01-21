@@ -8,7 +8,7 @@ namespace ibex {
 //The system is relaxed by using the Taylor extension.
 //Then the simplex algorithm is applied to obtain a new lower bound of [y]
 //If simplex does not find any solution, the method returns false, otherwise true
-bool simplex_lower_bounding(const System& sys, const Evaluator& goal) {
+bool simplex_lower_bounding(const System& sys, const Evaluator& goal, REAL& loup) {
   int n=sys.space.nb_var();
   INTERVAL_VECTOR G(sys.space.nb_var()); // vector to be used by the partial derivatives
   INTERVAL_VECTOR savebox=sys.space.box; 
@@ -46,46 +46,62 @@ bool simplex_lower_bounding(const System& sys, const Evaluator& goal) {
     if(i==0){
        //Linear variable yl is created
        // yl <= diam([y])
-       mysoplex.addCol(LPCol(1.0, dummycol,  Diam(sys.space.box(n))+1.e-8, -infinity ));
+       mysoplex.addCol(LPCol(1.0, dummycol, (loup - Inf(inf_f)), -infinity ));
        row1.add(0, -1.0);
  
 
        for (int j=0; j<n-1; j++){
+	  if(Diam(G(j+1))>1e8) return true; //to avoid problems with SoPleX
 	  //The linear variables are generated
 	  //0 <= xl_j <= diam([x_j])
           mysoplex.addCol(LPCol(0.0, dummycol, Diam(sys.space.box(j+1)),0.0 ));
           row1.add(j+1, Inf(G(j+1)));
        }
        //the first constraint:
-       //inf(df/dx_1) xl_1 + ... + inf(df/dx_n) xl_n <= yl
-       mysoplex.addRow(LPRow(-infinity, row1, 0.0));
+       //inf(df/dx_1) xl_1 + ... + inf(df/dx_n) xl_n <= loup -Inf(eval_inf)
+       mysoplex.addRow(LPRow(-infinity, row1, 0));
     }else{
        int op=-1;
        if(i!=0) op=(dynamic_cast<const Inequality*> (&sys.ctr(i)))->op;
    
        //The contraints i is generated:
       // c_i:  inf([g_i]([x]) + inf(dg_i/dx_1) * xl_1 + ... + inf(dg_i/dx_n) + xl_n  <= 0
+       bool add_constraint=true;
        for (int j=0; j<n-1; j++){
+	 if(Diam(G(j+1))>1e8){
+	   add_constraint=false; //to avoid problems with SoPleX
+	   break;
+	 }
+	 
          if(op == LEQ || op== LT){
 	    row1.add(j+1, Inf(G(j+1)));
 	 }else{
             row1.add(j+1, Sup(G(j+1)));
 	 }
        }
-       if(op == LEQ || op== LT){
-         mysoplex.addRow(LPRow(-infinity, row1, Sup(-eval_inf(i+1))));
-       }else{
-         mysoplex.addRow(LPRow(Inf(-eval_inf(i+1)), row1, infinity));
-       }
+       
+       if(add_constraint)
+         if(op == LEQ || op== LT){
+           mysoplex.addRow(LPRow(-infinity, row1, Sup(-eval_inf(i+1))));
+         }else{
+           mysoplex.addRow(LPRow(Inf(-eval_inf(i+1)), row1, infinity));
+         }
       
     }
   }
 
 
   SPxSolver::Status stat;
-
-  stat = mysoplex.solve();
-
+//    mysoplex.writeFile("dump.lp", NULL, NULL, NULL);
+//   cout << "in" << endl;
+  mysoplex.setTerminationTime(0.1);
+  try{
+    stat = mysoplex.solve();
+  }catch(SPxException){
+    return true;
+  }
+//   cout << stat << endl;
+  
   if( stat == SPxSolver::OPTIMAL ){
       //The optimum solution found in the linear system is mapped to the nonlinear system
       //y_opt <-- inf([f]([x])) + yl_opt + eps_error
@@ -97,13 +113,18 @@ bool simplex_lower_bounding(const System& sys, const Evaluator& goal) {
                  return false;
             //if y_opt in [y], then we update the lower bound:
             //[y] <-- [y_opt, sup([y])]
-//            cout << Inf(f) << endl;
+//            cout << "uplo:" << Inf(f) << endl;
            sys.space.box(n)=INTERVAL( Inf(f),Sup(sys.space.box(n) ));
       }
       return true;
-  }
-
-  return false;
+  }else if(stat == SPxSolver::INFEASIBLE)
+      return false;
+  
+  return true;
+//   else if(stat == SPxSolver::ABORT_TIME){
+//      //counter++
+//      //if counter > limit we should don't call SoPleX again!
+//   }
 
  }
  
@@ -142,13 +163,13 @@ bool simplex_lower_bounding(const System& sys, const Evaluator& goal) {
     else
       sys.ctr(i).gradient(sys.space);
 // ============================================================
-
+    if(G.max_diameter()>1e8) return false; //to avoid problems with SoPleX
     DSVector row1(n);
 
     if(i==0){
        //Linear variable yl is created
        //0 <= yl <= loup
-       mysoplex.addCol(LPCol(1.0, dummycol, infinity, 0.0 ));
+       mysoplex.addCol(LPCol(1.0, dummycol, infinity, -infinity ));
        row1.add(0, -1.0);
  
 
@@ -184,7 +205,13 @@ bool simplex_lower_bounding(const System& sys, const Evaluator& goal) {
 
   SPxSolver::Status stat;
 
-  stat = mysoplex.solve();
+  mysoplex.setTerminationTime(0.1);
+  try{
+    stat = mysoplex.solve();
+  }catch(SPxException){
+  sys.space.box=savebox;
+  return false;
+  }
 
   if( stat == SPxSolver::OPTIMAL ){
       INTERVAL f= inf_f+ mysoplex.objValue();
@@ -206,7 +233,7 @@ bool simplex_lower_bounding(const System& sys, const Evaluator& goal) {
               sys.space.box=savebox;
            } catch(EmptyBoxException) {
 	      loup = res;
-	      cout << "loup(simplex):" << loup<< endl;
+// 	      cout << "loup(simplex):" << loup<< endl;
 	      loup_point = Mid(sys.space.box);
               sys.space.box=savebox;
               return true;
