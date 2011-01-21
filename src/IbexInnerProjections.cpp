@@ -37,7 +37,7 @@ string op_str(int i){
   switch(i){
     case ADD: return " + ";
     case SUB: return " - ";
-    case MUL: return " ";
+    case MUL: return " * ";
     case DIV: return " / ";
   }
 }
@@ -106,8 +106,8 @@ void expand2_mult(const INTERVAL &xin, const INTERVAL& yin, INTERVAL& x, INTERVA
   INTERVAL yin2(INTERVAL::EMPTY);
   INTERVAL z1(INTERVAL::EMPTY);
   INTERVAL z2(INTERVAL::EMPTY);
-  INTERVAL xini(x);
-  INTERVAL yini(y);
+//   INTERVAL xini(x);
+//   INTERVAL yini(y);
 //   assert(xin.included(x));
 //   assert(yin.included(y));
 //   assert(eval(xin,yin,MUL).included(z));
@@ -128,38 +128,38 @@ void expand2_mult(const INTERVAL &xin, const INTERVAL& yin, INTERVAL& x, INTERVA
       else if (Inf(z)<0)
           Intersection(z2,z,INTERVAL(BiasNegInf,0));
 
-
+// cout << z1 << "," << z2 << endl;
 
       if(!xin1.empty() && !yin1.empty() && !z1.empty()){ //first quadrant
         INTERVAL xt; Intersection(xt,x,INTERVAL(0,BiasPosInf));
         INTERVAL yt; Intersection(yt,y,INTERVAL(0,BiasPosInf));
         expand2(xin1, yin1, xt, yt, z1, MUL);
-        x=INTERVAL((Inf(x)<0)? Inf(x):Inf(xt),Sup(xt));
-        y=INTERVAL((Inf(y)<0)? Inf(y):Inf(yt),Sup(yt));
+        x=INTERVAL((Inf(x)<0 && !z2.empty())? Inf(x):Inf(xt),Sup(xt));
+        y=INTERVAL((Inf(y)<0 && !z2.empty())? Inf(y):Inf(yt),Sup(yt));
       }
 
       if(!xin1.empty() && !yin2.empty() && !z2.empty()){ //fourth quadrant
         INTERVAL xt; Intersection(xt,x,INTERVAL(0,BiasPosInf));
         INTERVAL yt; Intersection(yt,y,INTERVAL(BiasNegInf,0));
         expand2(xin1, yin2, xt, yt, z2, MUL);
-        x=INTERVAL((Inf(x)<0)? Inf(x):Inf(xt),Sup(xt));
-        y=INTERVAL(Inf(yt),(Sup(y)>0)? Sup(y):Sup(yt));
+        x=INTERVAL((Inf(x)<0 && !z1.empty())? Inf(x):Inf(xt),Sup(xt));
+        y=INTERVAL(Inf(yt),(Sup(y)>0 && !z1.empty())? Sup(y):Sup(yt));
       }
 
       if(!xin2.empty() && !yin1.empty() && !z2.empty()){ //second quadrant
         INTERVAL xt; Intersection(xt,x,INTERVAL(BiasNegInf,0));
         INTERVAL yt; Intersection(yt,y,INTERVAL(0,BiasPosInf));
-        expand2(xin2, yin1, xt, yt, z1, MUL);
-        x=INTERVAL(Inf(xt),(Sup(x)>0)? Sup(x):Sup(xt));
-        y=INTERVAL((Inf(y)<0)? Inf(y):Inf(yt),Sup(yt));
+        expand2(xin2, yin1, xt, yt, z2, MUL);
+        x=INTERVAL(Inf(xt),(Sup(x)>0 && !z1.empty())? Sup(x):Sup(xt));
+        y=INTERVAL((Inf(y)<0 && !z1.empty())? Inf(y):Inf(yt),Sup(yt));
       }
 
       if(!xin2.empty() && !yin2.empty() && !z1.empty()){ //third quadrant
         INTERVAL xt; Intersection(xt,x,INTERVAL(BiasNegInf,0));
         INTERVAL yt; Intersection(yt,y,INTERVAL(BiasNegInf,0));
         expand2(xin2, yin2, xt, yt, z1, MUL);
-        x=INTERVAL(Inf(xt),(Sup(x)>0)? Sup(x):Sup(xt));
-        y=INTERVAL(Inf(yt),(Sup(y)>0)? Sup(y):Sup(yt));
+        x=INTERVAL(Inf(xt),(Sup(x)>0 && !z2.empty())? Sup(x):Sup(xt));
+        y=INTERVAL(Inf(yt),(Sup(y)>0 && !z2.empty())? Sup(y):Sup(yt));
       }
 
   int op=MUL;
@@ -180,9 +180,9 @@ void expand2_mult(const INTERVAL &xin, const INTERVAL& yin, INTERVAL& x, INTERVA
 //and [op]([xin],[yin]) is contained in [z]
 void expand2(const INTERVAL &xin, const INTERVAL& yin, INTERVAL& x, INTERVAL& y, INTERVAL z, int op){
   bool inc_var1, inc_var2;
-  INTERVAL xini(x);
-  INTERVAL yini(y);
-//     cout << xin << op_str(op) << yin << "=" << eval(xin,yin,op) << " in? " << z << endl;
+//   INTERVAL xini(x);
+//   INTERVAL yini(y);
+//     cout << xin << op_str(op) << yin << " = " << eval(xin,yin,op) << " in? " << z << endl;
 //   assert(xin.included(x));
 //   assert(yin.included(y));
 //   assert(eval(xin,yin,op)<=z);
@@ -242,8 +242,9 @@ bool innerproj_log(const INTERVAL& evl, INTERVAL& exp_evl) {
 }
 
 void expand_power(const INTERVAL &xin, const INTERVAL& p_evl, INTERVAL& p_exp_evl, int expon){
+//    INTERVAL xini(p_exp_evl);
 //    assert(xin.included(p_exp_evl));
-// assert(Power(xin,expon).included(p_evl));
+//    assert(Power(xin,expon).included(p_evl));
    if(xin.contains(0))
         innerproj_power(p_evl, p_exp_evl, expon);
    else if(Inf(xin)>0){
@@ -258,7 +259,50 @@ void expand_power(const INTERVAL &xin, const INTERVAL& p_evl, INTERVAL& p_exp_ev
 //    cout << p_exp_evl << "^" << expon << "=" << Power(p_exp_evl,expon) << "=" << p_evl << endl;
    p_exp_evl|=xin;
 //    assert(Power(p_exp_evl,expon).included(p_evl));
+//    assert(p_exp_evl.included(xini));
 }
+
+
+void expand_sqr(const INTERVAL& xin, const INTERVAL& Y, INTERVAL& X) {
+//   cout << "sqr x=" << xin << " X=" << X << " Y=" << Y << endl;
+// INTERVAL xini(X);  
+//   assert(xin.included(X));
+//   assert(Sqr(xin).included(Y));
+
+  REAL up=LO(Sqrt,Sup(Y));
+  if (up<0) up=0; // may happen because of rounding
+
+  if (Inf(Y)>0) {
+    REAL lo=UP(Sqrt,Inf(Y));
+    if (lo<up) { // may not hold because of rounding      
+      if (Inf(xin)>0) {
+	X &= INTERVAL(lo,up);
+      } else { // we cannot have 0 in x since sqr(x) must be included in Y
+	//if (Sup(x)>0) throw NonRecoverableException("Bug expand_sqr");
+	X &= INTERVAL(-up,-lo);
+      }
+      // it may happen at this point that x is not anymore included inside X
+      // (but still overlapping) because Sqrt can be more pessimistic than Sqr
+      X |= xin; 
+    }
+    else
+      X = xin;
+  } else {    
+    X &= INTERVAL(-up,up);
+    X |= xin; // see comment above
+  }
+
+  // note that Sqr(X) might not be included anymore in Y
+  // if Sqr was more pessimistic than Sqrt 
+//   assert(Sqr(X).included(Y));
+//  assert(X<=xini);
+//  assert(xin <=X);
+  //cout << "new X=" << X << endl;
+}
+
+
+
+
 
 bool innerproj_power(const INTERVAL& p_evl, INTERVAL& p_exp_evl, int expon) {
   
@@ -318,42 +362,6 @@ bool innerproj_sqrt(const INTERVAL& evl, INTERVAL& exp_evl) {
   INTERVAL proj=(Inf(evl)>0? UP(Sqr,Inf(evl)) : 0, LO(Sqr,Sup(evl)));
   exp_evl &= proj;
 }
-
-void expand_sqr(const INTERVAL& xin, const INTERVAL& Y, INTERVAL& X) {
-//   cout << "sqr x=" << xin << " X=" << X << " Y=" << Y << endl;  
-//   assert(xin.included(X));
-//   assert(Sqr(xin).included(Y));
-
-  REAL up=LO(Sqrt,Sup(Y));
-  if (up<0) up=0; // may happen because of rounding
-
-  if (Inf(Y)>0) {
-    REAL lo=UP(Sqrt,Inf(Y));
-    if (lo<up) { // may not hold because of rounding      
-      if (Inf(xin)>0) {
-	X &= INTERVAL(lo,up);
-      } else { // we cannot have 0 in x since sqr(x) must be included in Y
-	//if (Sup(x)>0) throw NonRecoverableException("Bug expand_sqr");
-	X &= INTERVAL(-up,-lo);
-      }
-      // it may happen at this point that x is not anymore included inside X
-      // (but still overlapping) because Sqrt can be more pessimistic than Sqr
-      X |= xin; 
-    }
-    else
-      X = xin;
-  } else {    
-    X &= INTERVAL(-up,up);
-    X |= xin; // see comment above
-  }
-
-  // note that Sqr(X) might not be included anymore in Y
-  // if Sqr was more pessimistic than Sqrt 
-//   assert(Sqr(X).included(Y));
-
-  //cout << "new X=" << X << endl;
-}
-
 
 
 

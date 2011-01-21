@@ -29,9 +29,9 @@ bool simplex_lower_bounding(const System& sys, const Evaluator& goal, REAL& loup
 
   //The linear system is generated
   for (int i=0; i<sys.nb_ctr();i++){
-    
+     if(i>0 && isInner(sys, i)) continue; //the constraint is satified :(
 // =============== Gradient calculation ======================
-      for (int j=0; j<n-1; j++) {
+      for (int j=0; j<n; j++) {
         G(j+1) = 0.0;
         sys.space.ent(IBEX_VAR,j).deriv = &G(j+1);     
       }
@@ -119,12 +119,9 @@ bool simplex_lower_bounding(const System& sys, const Evaluator& goal, REAL& loup
       return true;
   }else if(stat == SPxSolver::INFEASIBLE)
       return false;
-  
+  if(stat == SPxSolver::ABORT_TIME) cout << "Simplex spent too much time" << endl;
   return true;
-//   else if(stat == SPxSolver::ABORT_TIME){
-//      //counter++
-//      //if counter > limit we should don't call SoPleX again!
-//   }
+
 
  }
  
@@ -132,15 +129,25 @@ bool simplex_lower_bounding(const System& sys, const Evaluator& goal, REAL& loup
 //Then the simplex algorithm is applied to obtain a new uploup loup
 //If a new loup is found the method returns true
  bool simplex_update_loup(const System& sys, const Evaluator& goal, Contractor& is_inside, REAL& loup, VECTOR& loup_point) {
+
   int n=sys.space.nb_var();
-  INTERVAL_VECTOR G(sys.space.nb_var()); // vector to be used by the partial derivatives
+  INTERVAL_VECTOR G(sys.nb_var()); // vector to be used by the partial derivatives
   INTERVAL_VECTOR savebox(sys.space.box); 
   INTERVAL_VECTOR eval_inf(sys.nb_ctr());
-  INTERVAL_VECTOR eval_sup(sys.nb_ctr());
-  
+  INTERVAL_VECTOR eval(sys.nb_ctr());
+  goal.forward(sys.space);
+
+
+  if(Diam(goal.output())<1e-8){
+    sys.space.box=savebox;  
+    return false;
+  }
+
   sys.space.box=Inf(sys.space.box);
   sys.eval(eval_inf);
   goal.forward(sys.space);
+
+
   INTERVAL inf_f = goal.output();
   sys.space.box=savebox;
 
@@ -152,9 +159,10 @@ bool simplex_lower_bounding(const System& sys, const Evaluator& goal, REAL& loup
 
   //The linear system is generated
   for (int i=0; i<sys.nb_ctr();i++){
-    
+    if(i>0 && isInner(sys, i)) continue; //the constraint is satified :)
+
 // =============== Gradient calculation ======================
-      for (int j=0; j<n-1; j++) {
+      for (int j=0; j<n; j++) {
         G(j+1) = 0.0;
         sys.space.ent(IBEX_VAR,j).deriv = &G(j+1);     
       }
@@ -196,9 +204,9 @@ bool simplex_lower_bounding(const System& sys, const Evaluator& goal, REAL& loup
 	 }
        }
        if(op == LEQ || op== LT){
-	 mysoplex.addRow(LPRow(-infinity, row1, Inf(-eval_inf(i+1))-1e-9));
+	 mysoplex.addRow(LPRow(-infinity, row1, Inf(-eval_inf(i+1))-1e-10));
        }else{
-         mysoplex.addRow(LPRow(Sup(-eval_inf(i+1))+1e-9, row1, infinity)); 
+         mysoplex.addRow(LPRow(Sup(-eval_inf(i+1))+1e-10, row1, infinity)); 
        }
     }
   }
@@ -206,7 +214,7 @@ bool simplex_lower_bounding(const System& sys, const Evaluator& goal, REAL& loup
   SPxSolver::Status stat;
 
   mysoplex.setTerminationTime(0.1);
-  try{
+  try{;
     stat = mysoplex.solve();
   }catch(SPxException){
   sys.space.box=savebox;
@@ -215,38 +223,21 @@ bool simplex_lower_bounding(const System& sys, const Evaluator& goal, REAL& loup
 
   if( stat == SPxSolver::OPTIMAL ){
       INTERVAL f= inf_f+ mysoplex.objValue();
-//    if(Sup(f) < loup){
+
         //the linear solution is mapped to intervals and evaluated
         DVector prim(n);
         mysoplex.getPrimal(prim);
         for (int j=0; j<n-1; j++)
             sys.space.box(j+1)= Inf(sys.space.box(j+1))+prim[j+1];
         
-        goal.forward(sys.space);
-        REAL res = Sup(goal.output());
-	
-        //if a better loup is found the method updates the loup and returns true
-	//non fiable!, we MUST test if the point satisfies the constraints
-        if(res < loup/* && isInner(sys)*/){ 
-	   try {
-              is_inside.contract();
-              sys.space.box=savebox;
-           } catch(EmptyBoxException) {
-	      loup = res;
-// 	      cout << "loup(simplex):" << loup<< endl;
-	      loup_point = Mid(sys.space.box);
-              sys.space.box=savebox;
-              return true;
-	   }
-        }
-           
-//             }
+        bool ret= check_candidate(sys, sys.space, goal, is_inside, loup, loup_point, Mid(sys.space.box), false);
+           sys.space.box=savebox;
+            return ret;
   }
-  
+
+  if(stat == SPxSolver::ABORT_TIME) cout << "Simplex spent too much time" << endl;
   sys.space.box=savebox;
   return false;
 
 }
- 
- 
 }

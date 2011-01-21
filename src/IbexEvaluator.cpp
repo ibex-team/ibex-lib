@@ -349,7 +349,6 @@ void Evaluator::gradient(const Space& space) const {
     if (G[ic].empty()) throw NotDifferentiableException();
 
     if (G[ic].unbounded()) throw UnboundedResultException();
-    
     switch (code[c]) {
     case CST     : ic++; break;
     case ADD     : G[info[i]]   += G[ic]; 
@@ -398,6 +397,7 @@ void Evaluator::gradient(const Space& space) const {
     default : throw NonRecoverableException("Matrix differentiation not implemented yet");
     }
   }
+
 }
 
 
@@ -637,7 +637,7 @@ void Evaluator::expand(Space& space, const INTERVAL* pt) const {
 
   for (int c=0; c<codel; c++) {
     switch (code[c]) {
-      
+
     case CST      : ic++; break;
     case ADD      : expand2(pt[info[i]],pt[info[i+1]],I[info[i]],I[info[i+1]],I[ic], ADD);
 		    ic++; i+=2; 
@@ -657,15 +657,15 @@ void Evaluator::expand(Space& space, const INTERVAL* pt) const {
 		     * could also be executed for epr (but it is not by precaution). */
                     if (space.entity(info[i]).type==IBEX_VAR) {
 		      int var=space.component(info[i]);
-		      if (!impact[var]) {
-			space.box(var+1)=pt[ic];
-			impact[var]=true;
-		      }
-		      space.box(var+1) |= I[ic]; // or space.domain(info[i])
+// 		      if (!impact[var]) {
+// 			space.box(var+1)=pt[ic];
+// 			impact[var]=true;
+// 		      }
+		      space.box(var+1) &= I[ic]; // or space.domain(info[i])
 		    }
 		    i++; ic++;
 		    break;
-    case MINUS    : I[info[i++]] |= -I[ic++];                     break;
+    case MINUS    : I[info[i++]] &= -I[ic++];                     break;
     case SQR      : expand_sqr(pt[info[i]],  I[ic++], I[info[i]]);i++;  break;
     case SQRT     : innerproj_sqrt(I[ic++],I[info[i++]]); I[info[i++]]|=pt[info[i]] ;    break;
     case LOG      : innerproj_log(I[ic++], I[info[i++]]); I[info[i++]]|=pt[info[i]] ;  break;

@@ -362,7 +362,8 @@ void Inequality::backward(Space& space) const {
 
 
 void Inequality::expand(Space& space, const INTERVAL_VECTOR& dom) const {
-  assert(dom.included(space.box));
+//   assert(dom.included(space.box));
+  
   INTERVAL_VECTOR savebox=space.box;
   space.box= dom;
   evl.forward(space);
@@ -383,19 +384,18 @@ void Inequality::expand(Space& space, const INTERVAL_VECTOR& dom) const {
   INTERVAL& out_evl = evl.output();
 
 
-
+INTERVAL i= out_evl;
   //test if space.box is an innerbox
   switch (op) {      
-  case LT       : if (Sup(out_evl)<0) return; 
+  case LT       : if (Sup(out_evl)<0)return; 
                   break;
-  case LEQ      : if (Sup(out_evl)<=0) return; 
+  case LEQ      : if (Sup(out_evl)<=0)return; 
                   break;
   case GT       : if (Inf(out_evl)>0) return; 
                   break;
-  case GEQ      : if (Inf(out_evl)>=0) return; 
+  case GEQ      : if (Inf(out_evl)>=0)return;
                   break;
   }
-  
 
   switch (op) {      
   case LT       : out_evl &= INTERVAL(BiasNegInf,Pred(0));
@@ -407,10 +407,9 @@ void Inequality::expand(Space& space, const INTERVAL_VECTOR& dom) const {
   case GEQ      : out_evl &= INTERVAL(0, BiasPosInf);
                   break;
   }
-//   cout << "pt_evl:" << pt_evl << endl;
-//   cout << "out_evl:" << out_evl << endl;
-  evl.expand(space,pt);
 
+
+  evl.expand(space,pt);
 
 
 }

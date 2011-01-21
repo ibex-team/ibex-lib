@@ -75,9 +75,17 @@ namespace ibex {
  */
 bool update_loup(const System& sys, const Space& space, const Evaluator& goal, Contractor& is_inside, REAL& loup, VECTOR& loup_point, int sample_size, INTERVAL_VECTOR& inner_box);
 
+/** Try to reduce the loup with the candidate point "pt".
+ * Return true in case of success.
+ * The function does not modify space.box.
+ * The param "is_inner" must be set to true if the box has 
+ * already been proven to be inner (avoir unecessary tests)
+ * last update: GCH  */
+bool check_candidate(const System& sys, const Space& space, const Evaluator& goal, Contractor& is_inside, REAL& loup, VECTOR& loup_point, const VECTOR& pt, bool is_inner);
+
 //returns true if full_box is an innerbox of the system
 bool isInner(const System& sys, bool full_box);
-
+bool isInner(const System& sys, int j);
 //The InHC4 algorithm
 bool inHC4(const System& sys, int loup);
 

@@ -13,7 +13,7 @@ namespace ibex {
  //The system is relaxed by using the Taylor extension.
 //Then the simplex algorithm is applied to obtain a new lower bound of [y]
 //If simplex does not find any solution, the method returns false, otherwise true
-  bool simplex_lower_bounding(const System& sys,  const Evaluator& goal);
+  bool simplex_lower_bounding(const System& sys,  const Evaluator& goal, REAL& loup);
   
 //The system is relaxed by using the Taylor extension.
 //Then the simplex algorithm is applied to obtain a new uplo

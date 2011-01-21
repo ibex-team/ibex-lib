@@ -31,7 +31,7 @@
 #include "IbexCellStack.h"
 #include "IbexOptimizer.h"
 
-//#include "IbexSimplex.h"
+#include "IbexSimplex.h"
 
 #include <math.h>
 
@@ -78,7 +78,7 @@ Sequence inverse(const System& sys, int goal_ctr) {
 
   for (int i=0; i<sys.nb_ctr(); i++) {
 
-    // constraint n°goal_ctr =  criterion to optimize -> skip it
+    // constraint nï¿½goal_ctr =  criterion to optimize -> skip it
     if (i==goal_ctr) continue;
 
     const ArithConstraint& c=sys.ctr(i);
@@ -170,8 +170,9 @@ void Optimizer::contract_and_bound(Cell* c) {
   int ctc_num=contract(*c);
   /*====================================================================*/
 
-//   if(ctc_num == -1 && !simplex_lower_bounding(sys, goal));
-//     ctc_num ==-2; //empty box
+  if(ctc_num == -1 && !simplex_lower_bounding(sys, goal,loup)){
+    delete c; return;
+  }
   
   if (ctc_num == -1)  { // there is still something left to be contracted in the box
     
@@ -179,13 +180,19 @@ void Optimizer::contract_and_bound(Cell* c) {
     // update "loup" and "louppoint"
 
     InnerBox& i = c->get<InnerBox>(); // get the current inner box (to be inflated by update_loup)
- 
+
+    INTERVAL_VECTOR b=space.box;
     int box_loup_changed = update_loup(sys, space, goal, is_inside, loup, loup_point, sample_size, i.inner_box);
-//     box_loup_changed |= simplex_update_loup(sys, goal, is_inside, loup, loup_point);
+    box_loup_changed |= simplex_update_loup(sys, goal, is_inside, loup, loup_point);
 
     if (! loup_changed) loup_changed=box_loup_changed;
     /*====================================================================*/    
-    
+
+    if(loup_changed){
+        if(Dimension(i.inner_box)==1) Resize(i.inner_box, space.nb_var()); 
+        i.inner_box = loup_point;
+    }
+
     c->box = space.box;
     c->epx = space.epx;
     
@@ -243,7 +250,8 @@ int Optimizer::next_box() {
     if (loup_changed) 
       { int prec=cout.precision();
 	cout.precision(12);
-	cout << "uplo " << uplo << endl;
+//         cout << "loup " << loup << endl;
+// 	cout << "uplo " << uplo << endl;
 	cout.precision(prec);}
     manage_cell_buffer();      
 

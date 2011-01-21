@@ -50,6 +50,24 @@ void monotonicity_analysis(const Space& space, const Evaluator& goal) {
   }
 }
 
+  bool isInner(const System& sys, int j){
+        const  Inequality* ineq=dynamic_cast<const Inequality*> (&sys.ctr(j));
+        ineq->forward(sys.space);
+        INTERVAL eval=ineq->eval(sys.space);
+        if((ineq->op==LEQ && Sup(eval) > 0) || (ineq->op==LT && Sup(eval) >= 0) ||
+	    (ineq->op==GEQ && Inf(eval) < 0) || (ineq->op==GT && Inf(eval) <= 0)){
+            
+	    return false;
+	}
+     return true;
+  }
+
+  bool isInner(const System& sys){
+      for (int j=1; j<sys.nb_ctr(); j++)
+        if(!isInner(sys,j)) return false;
+     return true;
+  }
+
 /* last update: IAR  */
 bool inHC4(const System& sys, REAL loup){
 
@@ -79,6 +97,29 @@ bool inHC4(const System& sys, REAL loup){
   sys.space.box(goal_var+1)=y_ini;
   return innerfound;
      
+}
+
+/* added by: IAR  */
+void inHC4_expand(const System& sys, INTERVAL_VECTOR& inner_box){
+  INTERVAL_VECTOR savebox=sys.space.box;
+  sys.space.box=inner_box;
+//   assert(isInner(sys));
+  sys.space.box=savebox;
+  for (int j=1; j<sys.nb_ctr(); j++) {
+    const ArithConstraint& ineq=sys.ctr(j);;
+    try{
+      INTERVAL_VECTOR lastbox=sys.space.box;
+      ineq.expand(sys.space,inner_box); 
+//       assert (sys.space.box<=lastbox);
+    }catch(EmptyBoxException){
+      cout << "error!" << endl;
+    }
+  }
+  inner_box=sys.space.box;
+//   assert(isInner(sys));
+  sys.space.box=savebox; 
+
+//   cout << "expanded:" << inner_box << endl;
 }
 
 
@@ -114,18 +155,22 @@ bool check_candidate(const System& sys, const Space& space, const Evaluator& goa
 
     // to apply [check1] comment next line
     
-      if (!is_inner) {
-      try { 
-	is_inside.contract();
-	
-	// [check1]
+//       if (!is_inner) {
+    try {
+//       is_inside.contract();
+      if(!isInner(sys)){ //the is_inside contractor don't refute thing like 2>2
 	if(is_inner && in_HC4) //error 
-	  cout << "the box returned by inHC4 is not an innerbox!" << endl;  
-      } catch(EmptyBoxException) {       
-	is_inner = true; // local assignment (valid for pt only)
-      }
+	  cout << "the box returned by inHC4 is not an innerbox!" << endl; 
+        is_inner = false;  
+      } else 
+	is_inner = true; 
+      
+    } catch(EmptyBoxException) {
+        is_inner = true; // local assignment (valid for pt only)
+    }
+
      
-      }
+//       }
     
       if (is_inner) {
 	loup = res;
@@ -359,19 +404,18 @@ bool line_probing(const System& sys, const Space& space, const Evaluator& goal, 
  *
  * warning: space.box must be *bounded*
  *
- * last update: GCH
+ * last update: IAZ
  */
 bool update_loup(const System& sys, const Space& space, const Evaluator& goal, Contractor& is_inside, REAL& loup, VECTOR& loup_point, int sample_size, INTERVAL_VECTOR& inner_box) {
 
   bool loup_changed=false; // the return value
   INTERVAL_VECTOR savebox = space.box;
 
-  bool innerfound;
+  bool innerfound=false;
   if (in_HC4) {
     innerfound=inHC4(sys, loup);
-    Resize(inner_box, space.nb_var());
-    inner_box = space.box;
-  } else 
+    
+  }  else 
     try {
       is_inside.contract();
       innerfound=false;
@@ -381,9 +425,26 @@ bool update_loup(const System& sys, const Space& space, const Evaluator& goal, C
       innerfound=true;
     }
 
-  if(space.box.empty()) //if innerHC4 finds nothing, we try with the full current box
+      if(innerfound) {//the current inner_box is updated
+        if(Dimension(inner_box)==1) Resize(inner_box, space.nb_var()); //first innerbox found!
+        inner_box = space.box;
+      }
+
+  if(space.box.empty()){ //if innerHC4 finds nothing, we try with the full current box
     sys.space.box=savebox; // restore the full box
-  else if(innerfound){
+//   //=============the innerbox expansion==============
+//     if(!innerfound && !inner_box.empty()){
+//         inner_box(sys.nb_var())=INTERVAL(-1e8,1e8);
+//         if(inner_box&=sys.space.box){
+//           inHC4_expand(sys, inner_box);
+//           sys.space.box=inner_box;
+//           innerfound=true;
+//         }else 
+//           inner_box.set_empty();
+//    }
+//    //=================================================
+
+  }else if(innerfound){
     if(mono_analysis)
       monotonicity_analysis(space, goal);
   }
@@ -404,7 +465,7 @@ bool update_loup(const System& sys, const Space& space, const Evaluator& goal, C
     //============================== debug =============================
     int prec=cout.precision();
     cout.precision(12);
-    cout << (innerfound? "[in!]" : "") << " loup update " << loup  << " loup point  " << loup_point << endl;
+//     cout << (innerfound? "[in!]" : "") << " loup update " << loup  << " loup point  " << loup_point << endl;
     cout.precision(prec);
     //==================================================================
   }

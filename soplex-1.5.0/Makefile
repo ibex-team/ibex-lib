@@ -53,15 +53,15 @@ LIMIT		=	#
 ZLIB		=	false
 
 COMP		=	gnu
-CXX		=	g++
+CXX		=	g++ -m32
 CXX_c		=	-c # the trailing space is important
 CXX_o		=	-o # the trailing space is important
-LINKCXX		=	g++
+LINKCXX		=	g++ -m32
 LINKCXX_L	=	-L
 LINKCXX_l	=	-l
 LINKCXX_o	=	-o # the trailing space is important
 LINKLIBSUFFIX	=
-DCXX		=	g++
+DCXX		=	g++ -m32
 LINT		=	flexelint
 AR		=	ar
 AR_o		=
@@ -199,12 +199,14 @@ $(BINFILE):	$(BINDIR) $(BINOBJDIR) $(LIBFILE) $(BINOBJFILES)
 		$(LINKCXX_L)$(LIBDIR) $(LINKCXX_l)$(LIBNAME)$(LINKLIBSUFFIX) $(LDFLAGS) $(LINKCXX_o)$@
 
 $(EXAMPLEFILE):	$(BINDIR) $(EXAMPLEOBJDIR) $(LIBFILE) $(EXAMPLEOBJFILES)
-		@echo "-> linking $@"
+		@echo $(LINKCXX) $(EXAMPLEOBJFILES) \
+		@echo $(LINKCXX_L)$(LIBDIR) $(LINKCXX_l)$(LIBNAME)$(LINKLIBSUFFIX) $(LDFLAGS) $(LINKCXX_o)$@
 		$(LINKCXX) $(EXAMPLEOBJFILES) \
 		$(LINKCXX_L)$(LIBDIR) $(LINKCXX_l)$(LIBNAME)$(LINKLIBSUFFIX) $(LDFLAGS) $(LINKCXX_o)$@
 
 $(LIBFILE):	$(LIBDIR) $(LIBOBJDIR) touchexternal $(LIBOBJFILES)
-		@echo "-> generating library $@"
+		@echo -rm -f $(LIBFILE)
+		@echo $(LIBBUILD) $(LIBBUILDFLAGS) $(LIBBUILD_o)$@ $(LIBOBJFILES) $(REPOSIT)
 		-rm -f $(LIBFILE)
 		$(LIBBUILD) $(LIBBUILDFLAGS) $(LIBBUILD_o)$@ $(LIBOBJFILES) $(REPOSIT)
 ifneq ($(RANLIB),)
@@ -281,11 +283,11 @@ depend:
 -include	$(DEPEND)
 
 $(BINOBJDIR)/%.o:	$(SRCDIR)/%.cpp
-		@echo "-> compiling $@"
+		@echo $(CXX) $(CPPFLAGS) $(CXXFLAGS) $(BINOFLAGS) $(CXX_c)$< $(CXX_o)$@
 		$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(BINOFLAGS) $(CXX_c)$< $(CXX_o)$@
 
 $(LIBOBJDIR)/%.o:	$(SRCDIR)/%.cpp
-		@echo "-> compiling $@"
+		@echo $(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LIBOFLAGS) $(CXX_c)$< $(CXX_o)$@
 		$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LIBOFLAGS) $(CXX_c)$< $(CXX_o)$@
 
 
