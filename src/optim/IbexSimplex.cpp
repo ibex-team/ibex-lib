@@ -51,7 +51,7 @@ bool simplex_lower_bounding(const System& sys, const Evaluator& goal, REAL& loup
  
 
        for (int j=0; j<n-1; j++){
-	  if(Diam(G(j+1))>1e8) return true; //to avoid problems with SoPleX
+	  if(Diam(G(j+1))>1e5) return true; //to avoid problems with SoPleX
 	  //The linear variables are generated
 	  //0 <= xl_j <= diam([x_j])
           mysoplex.addCol(LPCol(0.0, dummycol, Diam(sys.space.box(j+1)),0.0 ));
@@ -68,7 +68,7 @@ bool simplex_lower_bounding(const System& sys, const Evaluator& goal, REAL& loup
       // c_i:  inf([g_i]([x]) + inf(dg_i/dx_1) * xl_1 + ... + inf(dg_i/dx_n) + xl_n  <= 0
        bool add_constraint=true;
        for (int j=0; j<n-1; j++){
-	 if(Diam(G(j+1))>1e8){
+	 if(Diam(G(j+1))>1e5){
 	   add_constraint=false; //to avoid problems with SoPleX
 	   break;
 	 }
