@@ -141,7 +141,13 @@ bool check_candidate(const System& sys, const Space& space, const Evaluator& goa
 
   bool loup_found=false;
 
+ try{
   goal.forward(space);
+ }catch(EmptyBoxException){
+   return false;
+   (INTERVAL_VECTOR&) space.box = savebox;
+ }
+
   // "res" will contain an upper bound of the criterion
   REAL res = Sup(goal.output());
 
