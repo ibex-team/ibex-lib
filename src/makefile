@@ -36,11 +36,12 @@ ifeq ($(CCPLUS),)
 else
   ifeq ($(LIBMODE), dynamic)
     all debug : $(LIB_IBEX)/libibex.$(DYNLIBEXT)
+	cd contrib; $(MAKE) $(MAKECMDGOALS)
   else
     all debug : $(LIB_IBEX)/libibex.a
+	cd contrib; $(MAKE) $(MAKECMDGOALS)
   endif
 endif
-
 
 %.o : %.cpp %.h
 	$(CCPLUS) $(CFLAGS) -I$(INC_PROFIL) -I. -I./parser -c  -g -o  $@ $<
@@ -67,4 +68,7 @@ $(PARS_DIR)/lexer.o : $(PARS_DIR)/lexer.c $(PARS_DIR)/parser.h $(PARS_DIR)/Parse
 
 clean : 
 	@rm -f *.o *~ $(LIB_IBEX)/libibex.* $(INC_IBEX)/*.h \
-	$(PARS_DIR)/*.o $(PARS_DIR)/*~ *.output $(PARS_DIR)/parser.h $(PARS_DIR)/parser.c $(PARS_DIR)/lexer.h $(PARS_DIR)/lexer.c
+	$(PARS_DIR)/*.o $(PARS_DIR)/*~ *.output $(PARS_DIR)/parser.h $(PARS_DIR)/parser.c $(PARS_DIR)/lexer.h $(PARS_DIR)/lexer.c; \
+	cd contrib; $(MAKE) clean
+
+
