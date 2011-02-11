@@ -170,10 +170,13 @@ void Optimizer::contract_and_bound(Cell* c) {
   int ctc_num=contract(*c);
   /*====================================================================*/
 
+
+  
   if(ctc_num == -1 && !simplex_lower_bounding(sys, goal,loup)){
     delete c; return;
   }
   
+
   if (ctc_num == -1)  { // there is still something left to be contracted in the box
     
     /*========================= update loup ==============================*/
@@ -242,16 +245,26 @@ int Optimizer::next_box() {
 
     contract_and_bound(c1);
     contract_and_bound(c2);
-
-    if (((CellHeap&) cells).minimum() < uplo_of_solutions)   // updating the uplo
-      uplo= ((CellHeap&) cells).minimum();
+    REAL new_uplo;
+    if (!cells.empty()) 
+      {new_uplo= ((CellHeap&) cells).minimum();}
+    if ((cells.empty() && loup != BiasPosInf) || (new_uplo > loup))
+           // empty heap : uplo is set to loup - precision if a loup has been found
+      {if ((fabs (loup) < 1) || (goal_ceil > 1))  // goal_ceil is a relative precision  and should be less than 1
+	  new_uplo=loup-goal_ceil;
+	else 
+	  new_uplo=loup*(1-goal_ceil);
+      }
+    if (new_uplo < uplo_of_solutions)
+      uplo=new_uplo;
     else
       uplo=uplo_of_solutions;
+  
     if (loup_changed) 
       { int prec=cout.precision();
 	cout.precision(12);
-//         cout << "loup " << loup << endl;
-// 	cout << "uplo " << uplo << endl;
+        // cout << "loup " << loup << endl;
+ 	cout << "uplo " << uplo << endl;
 	cout.precision(prec);}
     manage_cell_buffer();      
 
@@ -260,12 +273,12 @@ int Optimizer::next_box() {
     delete &c;
 
     if (loup != BiasPosInf) {
-      if ((fabs(loup)> 1) && (loup-uplo)/(fabs (loup)) < goal_ceil)
-	throw TimeOutException();
-      else if ((loup-uplo) <  goal_ceil)
-	throw TimeOutException();
+      if (((fabs(loup)> 1) && (loup-uplo)/(fabs (loup)) < goal_ceil)
+	  || (loup-uplo) <  goal_ceil)
+	{report (); throw GoalPrecisionException();}
     }
     
+
   }
   return -1; // means empty stack.
 }
@@ -293,7 +306,10 @@ INTERVAL Optimizer::optimum() const {
 }
 
 VECTOR Optimizer::global_optimizer() const {
-  return loup_point;
+  VECTOR loup_point_noobj (space.nb_var()-1);
+  for (int i=1; i< space.nb_var(); i++)
+    loup_point_noobj(i)=loup_point(i);
+  return loup_point_noobj;
 }
 
 
@@ -308,8 +324,13 @@ void Optimizer:: check_limits()
 void Optimizer::report() {
   Paver::report();
   cout << " best bound in: " << optimum() << endl;
-  if (Sup(optimum()) != BiasPosInf)
+  if (loup != BiasPosInf) {
+    if ((fabs(loup)> 1) && (loup-uplo)/(fabs (loup)) < goal_ceil)
+      cout << " relative  precision on objective function obtained " << (loup-uplo)/(fabs (loup)) << endl;
+    else if (loup-uplo < goal_ceil)
+      cout << " absolute precision  on objective function obtained " << loup-uplo << endl;
     cout << " global optimizer: " << global_optimizer() << endl;
+  }
 }
   
 } //end namespace

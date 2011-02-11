@@ -231,8 +231,14 @@ bool simplex_lower_bounding(const System& sys, const Evaluator& goal, REAL& loup
             sys.space.box(j+1)= Inf(sys.space.box(j+1))+prim[j+1];
         
         bool ret= check_candidate(sys, sys.space, goal, is_inside, loup, loup_point, Mid(sys.space.box), false);
-           sys.space.box=savebox;
-            return ret;
+	sys.space.box=savebox;
+        if (ret)
+	  {int prec=cout.precision();
+	    cout.precision(12);
+	    cout << "[simplex]"  << " loup update " << loup  << " loup point  " << loup_point << endl;
+	    cout.precision(prec);
+	  }
+	return ret;
   }
 
   if(stat == SPxSolver::ABORT_TIME) cout << "Simplex spent too much time" << endl;

@@ -198,6 +198,8 @@ class TimeOutException : public PaverException { };
 
  class MemoryException : public PaverException {};
 
+ class GoalPrecisionException : public PaverException {};
+
 /*================================================================================*/
 /*                                    PARSER                                      */
 /*================================================================================*/

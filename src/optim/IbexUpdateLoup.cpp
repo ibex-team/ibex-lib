@@ -123,9 +123,10 @@ void inHC4_expand(const System& sys, INTERVAL_VECTOR& inner_box){
 }
 
 
-bool in_HC4=true;
-bool mono_analysis=true;
-
+    bool in_HC4=true;
+    bool mono_analysis=true;
+  //      bool in_HC4=false;
+  // bool mono_analysis=false;
 
 /** Try to reduce the loup with the candidate point "pt".
  * Return true in case of success.
@@ -137,7 +138,7 @@ bool check_candidate(const System& sys, const Space& space, const Evaluator& goa
   // save the box
   INTERVAL_VECTOR savebox = space.box;  
   // set the domain to the sample vector 
-  (INTERVAL_VECTOR&) space.box = pt;
+  (INTERVAL_VECTOR&)  space.box = pt;
 
   bool loup_found=false;
 
@@ -454,15 +455,15 @@ bool update_loup(const System& sys, const Space& space, const Evaluator& goal, C
     if(mono_analysis)
       monotonicity_analysis(space, goal);
   }
-  //    if (innerfound)
+  //  if (innerfound)
     // first option: startpoint = midpoint
     //
-  loup_changed = line_probing(sys, space, goal, is_inside, loup, loup_point, Mid(space.box), sample_size, innerfound, true);
+  //    loup_changed = line_probing(sys, space, goal, is_inside, loup, loup_point, Mid(space.box), 5* sample_size, innerfound, true);
   // other option: chose startpoint randomly
-  //  loup_changed = line_probing(sys, space, goal, is_inside, loup, loup_point, random_point(space.box), sample_size, innerfound, true);
+  // loup_changed = line_probing(sys, space, goal, is_inside, loup, loup_point, random_point(space.box), sample_size, innerfound, true);
 
-  //    else
-  //      loup_changed = random_probing(sys, space, goal, is_inside, loup, loup_point, sample_size, innerfound);
+  //  else
+  loup_changed = random_probing(sys, space, goal, is_inside, loup, loup_point, sample_size, innerfound);
 
 
 
@@ -471,7 +472,7 @@ bool update_loup(const System& sys, const Space& space, const Evaluator& goal, C
     //============================== debug =============================
     int prec=cout.precision();
     cout.precision(12);
-//     cout << (innerfound? "[in!]" : "") << " loup update " << loup  << " loup point  " << loup_point << endl;
+    cout << (innerfound? "[in!]" : "") << " loup update " << loup  << " loup point  " << loup_point << endl;
     cout.precision(prec);
     //==================================================================
   }
