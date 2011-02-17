@@ -171,20 +171,19 @@ void Optimizer::contract_and_bound(Cell* c) {
   /*====================================================================*/
 
 
-  
+
   if(ctc_num == -1 && !simplex_lower_bounding(sys, goal,loup)){
     delete c; return;
   }
-  
+
 
   if (ctc_num == -1)  { // there is still something left to be contracted in the box
     
     /*========================= update loup ==============================*/
-    // update "loup" and "louppoint"
 
     InnerBox& i = c->get<InnerBox>(); // get the current inner box (to be inflated by update_loup)
 
-    INTERVAL_VECTOR b=space.box;
+ 
     int box_loup_changed = update_loup(sys, space, goal, is_inside, loup, loup_point, sample_size, i.inner_box);
     box_loup_changed |= simplex_update_loup(sys, goal, is_inside, loup, loup_point);
 
@@ -275,7 +274,7 @@ int Optimizer::next_box() {
     if (loup != BiasPosInf) {
       if (((fabs(loup)> 1) && (loup-uplo)/(fabs (loup)) < goal_ceil)
 	  || (loup-uplo) <  goal_ceil)
-	{report (); throw GoalPrecisionException();}
+	{throw GoalPrecisionException();}
     }
     
 
@@ -306,18 +305,15 @@ INTERVAL Optimizer::optimum() const {
 }
 
 VECTOR Optimizer::global_optimizer() const {
-  VECTOR loup_point_noobj (space.nb_var()-1);
-  for (int i=1; i< space.nb_var(); i++)
-    loup_point_noobj(i)=loup_point(i);
-  return loup_point_noobj;
+  return loup_point;
 }
 
 
 void Optimizer:: check_limits()
 {Paver::check_limits();
 
-  if ((space.nb_var() + 10) * ((CellHeap&) cells).size() *2 * sizeof(double) >  7.e8)
-    {report(); throw MemoryException();}
+  if ((space.nb_var() + 10) * ((CellHeap&) cells).size() *2 * sizeof(double) >  3.e8)
+    { throw MemoryException();}
 
 }
 

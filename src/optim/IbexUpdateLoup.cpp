@@ -123,10 +123,10 @@ void inHC4_expand(const System& sys, INTERVAL_VECTOR& inner_box){
 }
 
 
-    bool in_HC4=true;
-    bool mono_analysis=true;
-  //      bool in_HC4=false;
-  // bool mono_analysis=false;
+  bool in_HC4=true;
+  bool mono_analysis=true;
+  //        bool in_HC4=false;
+  //    bool mono_analysis=false;
 
 /** Try to reduce the loup with the candidate point "pt".
  * Return true in case of success.
@@ -182,6 +182,7 @@ bool check_candidate(const System& sys, const Space& space, const Evaluator& goa
       if (is_inner) {
 	loup = res;
 	loup_point = pt;
+	loup_point(space.nb_var())=loup;
 	loup_found = true;
       }
   } 
