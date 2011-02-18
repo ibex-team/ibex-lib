@@ -292,9 +292,10 @@ public:
    * INTERVAL intv(-10,10);
    * INTERVAL out2;
    * intv.div_intersect(INTERVAL(2,3), INTERVAL(-1,2), &out2);
-   * cout << intv << " " << out2 << endl;  // will display: [-oo,-2] [1,+oo]
+   * cout << intv << " " << out2 << endl;  // will display: [-10,-2] [1,10]
    * \endcode
-
+   * If the result of the generalized division is a single interval, out2 is set to the empty interval.
+   *
    * \return \c true if the intersection is non empty.
    * \note Contrary to the cset theory, the result is empty if \a y=[0,0] (whatever \a x is).<br>
    * The semantics behind infinite bounds rather conforms to the actual 

@@ -83,7 +83,7 @@ qTraj qTraj.exe: traj_ibex.o traj_gui.o viewer.o
 	$(CC) $(CFLAGS) -o $@ $^ $(WIN_FLAGS) `pkg-config --cflags --libs gtk+-2.0 gtkglext-1.0 $(GTK_GL_EXT)` $(LD_IBEX) $(LD_PROFIL) $(LD_OPENGL) -lstdc++
 
 2Dviewer 2Dviewer.exe: 2Dviewer.cpp
-	$(CC) $(CFLAGS) -o $@ $^ $(LD_PROFIL) $(LD_OPENGL)
+	$(CC) $(CFLAGS) -o $@ $^ $(LD_PROFIL) $(LD_OPENGL) -lstdc++
 
 clean :
 	@rm -f *.o $(EXEC) *~ *.dat 
