@@ -22,6 +22,7 @@
 
 
 #include "IbexX_Newton.h"
+#include "optim/IbexOptimizer.h"
 
 namespace ibex {
 
@@ -75,7 +76,7 @@ void X_Newton::contract() {
 }
 
 int X_Newton::X_Linearization(SoPlex& mysoplex, int ctr, corner_point cpoint, vector<INTERVAL>& taylor_ev,
-INTERVAL_VECTOR& G  ){
+INTERVAL_VECTOR& G, bool first_cpoint  ){
   int op=(dynamic_cast<const Inequality*>(&sys.ctr(ctr)))? (dynamic_cast<const Inequality*>(&sys.ctr(ctr)))->op:EQU;
 
   if(op!=EQU && isInner(sys, ctr)) return 0; //the constraint is satified
@@ -83,20 +84,21 @@ INTERVAL_VECTOR& G  ){
     int cont=0;
     if(ctr==goal_ctr) op = LEQ;
     if(op==EQU){
-       cont+=X_Linearization(mysoplex, ctr, cpoint, LEQ, taylor_ev, G);
-       cont+=X_Linearization(mysoplex, ctr, cpoint, GEQ, taylor_ev, G);
+       cont+=X_Linearization(mysoplex, ctr, cpoint, LEQ, taylor_ev, G, first_cpoint);
+       cont+=X_Linearization(mysoplex, ctr, cpoint, GEQ, taylor_ev, G, first_cpoint);
        
     }else
-       cont+=X_Linearization(mysoplex, ctr, cpoint, op, taylor_ev, G);
+       cont+=X_Linearization(mysoplex, ctr, cpoint, op, taylor_ev, G, first_cpoint);
     return cont;
 }
 
 //retutn 0 only when the linearization is not performed
 int X_Newton::X_Linearization(SoPlex& mysoplex, int ctr, corner_point cpoint, int op, vector<INTERVAL>& taylor_ev,
-INTERVAL_VECTOR& G ){
+INTERVAL_VECTOR& G, bool first_point){
 
     int n=space.nb_var();
 
+    if(!first_point && linear[ctr]) return 0;
     //Linear variable y<=loup (should be y<=Sup(y)?)
     INTERVAL_VECTOR savebox(space.box);
     INTERVAL ev(0.0);
@@ -111,7 +113,7 @@ INTERVAL_VECTOR& G ){
           if(j==n-1 && goal_ctr!=-1) continue; //the variable y! 
              
           if(isvar[ctr][j]){
-           if(lmode==HANSEN){
+           if(lmode==HANSEN && !linear[ctr]){
             for (int jj=0; jj<n; jj++) {
               G(jj+1) = 0.0;
               space.ent(IBEX_VAR,jj).deriv = &G(jj+1);     
@@ -123,27 +125,62 @@ INTERVAL_VECTOR& G ){
            }
          }else continue;
 
-	  if(Diam(G(j+1))>max_diam_deriv){ //quasi-linear constraints
+	  if(Diam(G(j+1))>max_diam_deriv){
               space.box=savebox;
               return 0; //to avoid problems with SoPleX
           }
-        
+
+          if(linear[ctr])
+             cpoint=INF_X;
+
           bool inf_x;
-          
+                 INTERVAL_VECTOR save;
+                 REAL fh_inf, fh_sup;
+                 REAL D;
           switch(cpoint){
              case INF_X:
                  inf_x=true; break;
              case SUP_X:
                  inf_x=false; break;
              case RANDOM:
-                 inf_x=(rand()%2==0); break;
+                 inf_x=(rand()%2==0); last_rnd[j]=rand();
+                 break;
+             case RANDOM_INV:
+                 inf_x=(last_rnd[j]%2!=0);
+                 break;
              case GREEDY1:
                  inf_x=((abs(Inf(G(j+1))) < abs(Sup(G(j+1))) && (op == LEQ || op== LT)) ||
-                        (abs(Inf(G(j+1))) >= abs(Sup(G(j+1))) && (op == GEQ || op== GT))  )? true:false; break;
+                        (abs(Inf(G(j+1))) >= abs(Sup(G(j+1))) && (op == GEQ || op== GT))  )? true:false;
+                  break;
+              case GREEDY7:
+                 //select the coin nearest to the loup 
+                 if(goal_ctr!=-1 && Dimension(Optimizer::global_optimizer())>0){
+//                     if(j==0)cout<< Optimizer::global_optimizer()<<end;
+                    inf_x=(abs(Optimizer::global_optimizer()(j+1)-Inf(savebox(j+1))) < 
+                      abs(Optimizer::global_optimizer()(j+1)-Sup(savebox(j+1))))? true:false;
+                 }else{ 
+                   inf_x=(rand()%2==0);
+                 }
+                 break;
+             case GREEDY6:
+                 save=space.box;
+                 fh_inf, fh_sup;
+                 D=Diam(savebox(j+1));
+                 space.box=Mid(space.box);
+                 space.box(j+1)=Inf(savebox(j+1));
+                 fh_inf=Mid(sys.ctr(ctr).eval(space));
+                 space.box(j+1)=Sup(savebox(j+1));
+                 fh_sup=Mid(sys.ctr(ctr).eval(space));
+                 if (op == LEQ || op== LT)
+                    inf_x=((fh_sup-fh_inf)/(REAL)(n-1) - 0.5*D*(Inf(G(j+1))+Sup(G(j+1)))  > 0)? false:true;
+                 else
+                    inf_x=((fh_sup-fh_inf)/(REAL)(n-1) - 0.5*D*(Inf(G(j+1))+Sup(G(j+1))) < 0)? false:true;
+                space.box=save;
+              break;
              case GREEDY5:
-                 INTERVAL_VECTOR save=space.box;
-                 REAL fh_inf, fh_sup;
-                 REAL D=Diam(savebox(j+1));
+                 save=space.box;
+                 fh_inf, fh_sup;
+                 D=Diam(savebox(j+1));
                  space.box=Mid(space.box);
                  space.box(j+1)=Inf(savebox(j+1));
                  fh_inf=Mid(sys.ctr(ctr).eval(space));
@@ -155,6 +192,8 @@ INTERVAL_VECTOR& G ){
                     inf_x=(fh_sup-fh_inf - 0.5*D*(Inf(G(j+1))+Sup(G(j+1))) < 0)? false:true;
                 space.box=save;
               break;
+
+
           }
  
          space.box(j+1)=inf_x? Inf(savebox(j+1)):Sup(savebox(j+1));
@@ -224,7 +263,7 @@ void X_Newton::X_NewtonIter(){
   for(int ctr=0; ctr<sys.nb_ctr();ctr++){
 
     INTERVAL_VECTOR G(space.nb_var());
-    if(lmode==TAYLOR){ //derivatives are computed once (Taylor)
+    if(lmode==TAYLOR || linear[ctr]){ //derivatives are computed once (Taylor)
      for (int jj=0; jj<n; jj++) {
               G(jj+1) = 0.0;
               space.ent(IBEX_VAR,jj).deriv = &G(jj+1);     
@@ -236,7 +275,7 @@ void X_Newton::X_NewtonIter(){
    }
 
      for(int k=0;k<cpoints.size();k++)
-        nb_ctrs+=X_Linearization(mysoplex, ctr, cpoints[k], taylor_ev, G);
+        nb_ctrs+=X_Linearization(mysoplex, ctr, cpoints[k], taylor_ev, G, k==0);
   }
 
 
@@ -297,7 +336,7 @@ void X_Newton::X_NewtonIter(){
 
   SPxSolver::Status stat;
   mysoplex.changeSense(SPxLP::MINIMIZE); 
-  mysoplex.setTerminationIter(30);
+  mysoplex.setTerminationIter(max_iter_soplex);
   mysoplex.setDelta(1e-10);
 //   mysoplex.writeFile("dump.lp", NULL, NULL, NULL);
 
@@ -311,7 +350,8 @@ void X_Newton::X_NewtonIter(){
      if( (sense==SPxLP::MINIMIZE && mysoplex.objValue()<=bound) || 
     (sense==SPxLP::MAXIMIZE && -mysoplex.objValue()>=bound) )
       stat = SPxSolver::UNKNOWN;
-  }
+  }//else if(SPxSolver::ABORT_ITER) stat = SPxSolver::OPTIMAL;
+     
 
   if(stat == SPxSolver::OPTIMAL){
      

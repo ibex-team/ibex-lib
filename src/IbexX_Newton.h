@@ -21,7 +21,7 @@ class X_Newton : public Contractor {
 
  public:
 
-  enum corner_point { INF_X, SUP_X, RANDOM, GREEDY1, GREEDY5 };
+  enum corner_point { INF_X, SUP_X, RANDOM, RANDOM_INV, GREEDY1, GREEDY5, GREEDY6, GREEDY7 };
 
   enum linear_mode  {  TAYLOR, HANSEN  };
 
@@ -40,10 +40,10 @@ class X_Newton : public Contractor {
  */
     X_Newton(const System& sys, Contractor* ctc, vector<corner_point>& cpoints, int goal_ctr=-1,
      REAL ratio_fp=default_ratio_fp, REAL ratio_fp2=default_ratio_fp2, REAL var_min_width=default_var_min_width, 
-     ctc_mode cmode=X_NEWTON, linear_mode lmode=HANSEN, REAL max_diam_deriv=default_max_diam_deriv) : 
+     ctc_mode cmode=X_NEWTON, linear_mode lmode=HANSEN, int max_iter_soplex=100, REAL max_diam_deriv=default_max_diam_deriv) : 
     Operator(sys.space), sys(sys), ctc(ctc? ctc->copy():NULL), goal_ctr(goal_ctr), 
     ratio_fp(ratio_fp), ratio_fp2(ratio_fp2), var_min_width(var_min_width), cmode(cmode), cpoints(cpoints), lmode(lmode),
-    max_diam_deriv(max_diam_deriv) {
+    max_diam_deriv(max_diam_deriv), max_iter_soplex(max_iter_soplex) {
 
     /* get the goal function from the constraint y=f(x) */
       if(goal_ctr!=-1){
@@ -76,6 +76,32 @@ class X_Newton : public Contractor {
     }
 
     // ============================================================
+  linear = new bool[sys.nb_ctr()];
+  last_rnd = new int[space.nb_var()];
+  for(int ctr=0; ctr<sys.nb_ctr();ctr++){
+
+     INTERVAL_VECTOR G(space.nb_var());
+   
+     for (int jj=0; jj<space.nb_var(); jj++) {
+              G(jj+1) = 0.0;
+              space.ent(IBEX_VAR,jj).deriv = &G(jj+1);     
+            }
+            if(ctr==goal_ctr)
+              goal->gradient(space);
+            else
+              sys.ctr(ctr).gradient(space);
+   
+
+   linear[ctr]=true;
+   for(int i=0;i<space.nb_var();i++){
+     if(Diam(G(i+1))>1e-10) {
+        linear[ctr]=false;
+        break;
+      }
+   }
+
+  }
+
 
 
     } 
@@ -85,7 +111,7 @@ class X_Newton : public Contractor {
     X_Newton(const X_Newton& xnwt) : Operator(xnwt.space), Contractor(xnwt), sys(xnwt.sys), 
    ctc((xnwt.ctc)? xnwt.ctc->copy():NULL), ratio_fp(xnwt.ratio_fp), ratio_fp2(xnwt.ratio_fp2),
  var_min_width(xnwt.var_min_width), goal_ctr(xnwt.goal_ctr), cmode(xnwt.cmode), cpoints(xnwt.cpoints), lmode(xnwt.lmode),
-   max_diam_deriv(xnwt.max_diam_deriv) {
+   max_diam_deriv(xnwt.max_diam_deriv), max_iter_soplex(xnwt.max_iter_soplex) {
     isvar=new bool*[sys.nb_ctr()];
        for(int i=0;i<sys.nb_ctr();i++)
            isvar[i]=new bool[space.nb_var()];
@@ -102,6 +128,11 @@ class X_Newton : public Contractor {
        fac.build(goal);
       }else
         goal=NULL;
+
+last_rnd = new int[space.nb_var()];
+  linear = new bool[sys.nb_ctr()];
+  for(int ctr=0; ctr<sys.nb_ctr();ctr++)
+    linear[ctr]=xnwt.linear[ctr];
 
 
 };
@@ -123,6 +154,8 @@ class X_Newton : public Contractor {
        delete[] isvar[i];
     delete[] isvar;
     if(goal) delete goal;
+    if(linear) delete[] linear;
+    delete[] last_rnd;
   }
 
   /** X_Newton iteration. 
@@ -160,7 +193,13 @@ class X_Newton : public Contractor {
   /** isvar[i][j] indicates if the j^th is related to the i^th variable **/
   bool** isvar;
 
+  bool* linear;
+
+  int* last_rnd;
+
   REAL max_diam_deriv;
+
+  int max_iter_soplex;
 
   protected:
 
@@ -182,10 +221,10 @@ class X_Newton : public Contractor {
   SPxSolver::Status run_simplex(SoPlex& mysoplex, SPxLP::SPxSense sense, int var, int n, INTERVAL& obj, REAL bound, vector<INTERVAL>& taylor_ev );
 
   /** Tries to add a linearization in the model mysoplex. Returns true if it is succesful **/
-  int X_Linearization(SoPlex& mysoplex, int ctr, corner_point cpoint, vector<INTERVAL>& taylor_ev, INTERVAL_VECTOR &G  );
+  int X_Linearization(SoPlex& mysoplex, int ctr, corner_point cpoint, vector<INTERVAL>& taylor_ev, INTERVAL_VECTOR &G, bool first_point  );
 
   int X_Linearization(SoPlex& mysoplex, int ctr, corner_point cpoint, int op, vector<INTERVAL>& taylor_ev, 
-  INTERVAL_VECTOR &G);
+  INTERVAL_VECTOR &G, bool first_point);
 
   bool isInner(const System& sys, int j);
 
