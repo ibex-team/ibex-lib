@@ -108,7 +108,7 @@ INTERVAL_VECTOR& G, bool first_point){
     if(ctr==goal_ctr){
        row1.add(n-1, -1.0);
     }
-
+    try{
     for (int j=0; j<n; j++){
           if(j==n-1 && goal_ctr!=-1) continue; //the variable y! 
              
@@ -122,8 +122,9 @@ INTERVAL_VECTOR& G, bool first_point){
               goal->gradient(space);
             else
               sys.ctr(ctr).gradient(space);
-           }
-         }else continue;
+	    }
+         }
+	  else continue;
 
 	  if(Diam(G(j+1))>max_diam_deriv){
               space.box=savebox;
@@ -152,6 +153,7 @@ INTERVAL_VECTOR& G, bool first_point){
                  inf_x=((abs(Inf(G(j+1))) < abs(Sup(G(j+1))) && (op == LEQ || op== LT)) ||
                         (abs(Inf(G(j+1))) >= abs(Sup(G(j+1))) && (op == GEQ || op== GT))  )? true:false;
                   break;
+		  /*
               case GREEDY7:
                  //select the coin nearest to the loup 
                  if(goal_ctr!=-1 && Dimension(Optimizer::global_optimizer())>0){
@@ -162,6 +164,7 @@ INTERVAL_VECTOR& G, bool first_point){
                    inf_x=(rand()%2==0);
                  }
                  break;
+		  */
              case GREEDY6:
                  save=space.box;
                  fh_inf, fh_sup;
@@ -203,7 +206,9 @@ INTERVAL_VECTOR& G, bool first_point){
          ev-=a*space.box(j+1); 
         
     }
-    
+    }
+   catch (UnboundedResultException e)
+     { space.box=savebox; return 0;}
     if(ctr==goal_ctr){
           goal->forward(space);
           ev+=goal->output();
@@ -268,10 +273,13 @@ void X_Newton::X_NewtonIter(){
               G(jj+1) = 0.0;
               space.ent(IBEX_VAR,jj).deriv = &G(jj+1);     
             }
+     try{
             if(ctr==goal_ctr)
               goal->gradient(space);
             else
               sys.ctr(ctr).gradient(space);
+     }
+     catch (UnboundedResultException e) {return;}
    }
 
      for(int k=0;k<cpoints.size();k++)

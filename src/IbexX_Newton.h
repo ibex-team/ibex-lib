@@ -86,19 +86,20 @@ class X_Newton : public Contractor {
               G(jj+1) = 0.0;
               space.ent(IBEX_VAR,jj).deriv = &G(jj+1);     
             }
-            if(ctr==goal_ctr)
-              goal->gradient(space);
-            else
-              sys.ctr(ctr).gradient(space);
-   
-
-   linear[ctr]=true;
-   for(int i=0;i<space.nb_var();i++){
-     if(Diam(G(i+1))>1e-10) {
-        linear[ctr]=false;
-        break;
-      }
-   }
+     try {
+     if(ctr==goal_ctr)
+       goal->gradient(space);
+     else
+       sys.ctr(ctr).gradient(space);
+     }
+     catch (UnboundedResultException e) { linear[ctr]=false;continue;}
+     linear[ctr]=true;
+     for(int i=0;i<space.nb_var();i++){
+       if(Diam(G(i+1))>1e-10) {
+	 linear[ctr]=false;
+	 break;
+       }
+     }
 
   }
 

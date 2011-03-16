@@ -170,12 +170,12 @@ void Optimizer::contract_and_bound(Cell* c) {
   int ctc_num=contract(*c);
   /*====================================================================*/
 
-
+  /*
 
   if(ctc_num == -1 && !simplex_lower_bounding(sys, goal,loup)){
     delete c; return;
   }
-
+  */
 
   if (ctc_num == -1)  { // there is still something left to be contracted in the box
     
@@ -185,9 +185,11 @@ void Optimizer::contract_and_bound(Cell* c) {
 
  
     int box_loup_changed = update_loup(sys, space, goal, is_inside, loup, loup_point, sample_size, i.inner_box);
+
     box_loup_changed |= simplex_update_loup(sys, goal, is_inside, loup, loup_point);
 
     if (! loup_changed) loup_changed=box_loup_changed;
+
     /*====================================================================*/    
 
     if(loup_changed){

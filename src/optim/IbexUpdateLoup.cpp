@@ -41,13 +41,17 @@ void monotonicity_analysis(const Space& space, const Evaluator& goal) {
     G(j+1) = 0.0;
     space.ent(IBEX_VAR,j).deriv = &G(j+1);     
   }
-  goal.gradient(space);
+  try{
+    goal.gradient(space);
     
     
   for (int j=0; j<space.nb_var()-1; j++) {
     if(Inf(G(j+1))>=0) space.box(j+1)=Inf(space.box(j+1));
     if(Sup(G(j+1))<=0) space.box(j+1)=Sup(space.box(j+1));
   }
+  }
+  catch (UnboundedResultException e)
+    {;}
 }
 
   bool isInner(const System& sys, int j){
@@ -291,6 +295,7 @@ bool line_probing(const System& sys, const Space& space, const Evaluator& goal, 
     iG(j+1) = 0.0;
     space.ent(IBEX_VAR,j).deriv = &iG(j+1);     
   }
+  try{
   goal.gradient(space);
 
   ((Space&) space).box = savebox;   // restore domains
@@ -399,6 +404,9 @@ bool line_probing(const System& sys, const Space& space, const Evaluator& goal, 
   }
   
   return loup_changed;
+  }
+  catch (UnboundedResultException e) {
+   return random_probing(sys, space, goal, is_inside, loup, loup_point, sample_size, is_inner);}
 }
 
 
@@ -459,12 +467,12 @@ bool update_loup(const System& sys, const Space& space, const Evaluator& goal, C
   //  if (innerfound)
     // first option: startpoint = midpoint
     //
-  //    loup_changed = line_probing(sys, space, goal, is_inside, loup, loup_point, Mid(space.box), 5* sample_size, innerfound, true);
+  //     loup_changed = line_probing(sys, space, goal, is_inside, loup, loup_point, Mid(space.box), 5* sample_size, innerfound, true);
   // other option: chose startpoint randomly
   // loup_changed = line_probing(sys, space, goal, is_inside, loup, loup_point, random_point(space.box), sample_size, innerfound, true);
 
   //  else
-  loup_changed = random_probing(sys, space, goal, is_inside, loup, loup_point, sample_size, innerfound);
+      loup_changed = random_probing(sys, space, goal, is_inside, loup, loup_point, sample_size, innerfound);
 
 
 

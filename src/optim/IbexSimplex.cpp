@@ -460,6 +460,7 @@ bool simplex_lower_bounding(const System& sys, const Evaluator& goal, REAL& loup
   DSVector dummycol(0);
 
   //The linear system is generated
+ try{
   for (int i=0; i<sys.nb_ctr();i++){
     if(i>0 && isInner(sys, i)) continue; //the constraint is satified :)
 
@@ -538,7 +539,7 @@ bool simplex_lower_bounding(const System& sys, const Evaluator& goal, REAL& loup
         if (ret)
 	  {int prec=cout.precision();
 	    cout.precision(12);
-// 	    cout << "[simplex1]"  << " loup update " << loup  << " loup point  " << loup_point << endl;
+ 	    cout << "[simplex1]"  << " loup update " << loup  << " loup point  " << loup_point << endl;
 	    cout.precision(prec);
 	  }
 	return ret;
@@ -547,6 +548,8 @@ bool simplex_lower_bounding(const System& sys, const Evaluator& goal, REAL& loup
   if(stat == SPxSolver::ABORT_TIME) cout << "Simplex spent too much time" << endl;
   sys.space.box=savebox;
   return false;
-
+}
+  catch (UnboundedResultException e)
+    { return false;}
 }
 }
