@@ -37,7 +37,9 @@ REAL Machine::PosInfinity        = 0.0;
 REAL Machine::NegInfinity        = 0.0;
 REAL Machine::NaN                = 0.0;
 
-Machine MachineConstants; // constructor is called automatically
+//<chabert> --> see below
+//Machine MachineConstants; // constructor is called automatically
+//</chabert>
 
 Machine::Machine ()
 {
@@ -48,8 +50,13 @@ Machine::Machine ()
   Machine::NegInfinity        = BiasNegInf;
   Machine::NaN                = BiasNaN;
 }
-
 // The following routine is only used for reference in Interval.C and Vector.C
 // in order to force the loader to bind this file into the executable code.
 
-VOID RegisterConstants () { }
+VOID RegisterConstants () { 
+
+  // <chabert> Problem: the order in which static data is initialized is
+  // not controllable. We have to force call to BiasInit here
+  Machine();
+
+}

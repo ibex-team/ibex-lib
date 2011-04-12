@@ -56,7 +56,8 @@ VOID RegisterInterval () { RegisterConstants (); }
 
 // <chabert>
 INTERVAL INTERVAL::Pi(3.14159265358979323846, Succ(3.14159265358979323846));
-INTERVAL INTERVAL::EMPTY(BiasNegInf,BiasNegInf);
+
+INTERVAL INTERVAL::EMPTY((RegisterInterval(), BiasNegInf), (RegisterInterval(), BiasNegInf));
 
 #define INF_DIV(n,d) (Inf(INTERVAL(n)/INTERVAL(d)))
 #define SUP_DIV(n,d) (Sup(INTERVAL(n)/INTERVAL(d)))
