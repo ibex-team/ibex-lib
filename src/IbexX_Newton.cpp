@@ -58,7 +58,7 @@ REAL ratio_maxreduction(INTERVAL_VECTOR& box1, INTERVAL_VECTOR& box2){
 	}
      return true;
   }
-
+  /*
 void X_Newton::contract() {
   //const Indicators* indic=current_indic();
   REAL gain1, gain2;
@@ -74,8 +74,39 @@ void X_Newton::contract() {
   }while(gain1 >= ratio_fp && gain2 >= ratio_fp2);
 
 }
+  */
 
-int X_Newton::X_Linearization(SoPlex& mysoplex, int ctr, corner_point cpoint, vector<INTERVAL>& taylor_ev,
+void X_Newton::contract() {
+ REAL gain;
+
+ do{
+
+    INTERVAL_VECTOR savebox=space.box;
+    REAL saveobj= Inf (savebox(space.nb_var()));
+    X_NewtonIter();
+
+    if(ctc) {
+       gain = ratio_maxreduction(savebox,space.box);
+       if (gain >= ratio_fp2) ctc->contract(space,Indicators(ALL_VARS,ALL_VARS));
+       // if (gain >= ratio_fp2) ctc->contract(space,Indicators(space.nb_var()-1,ALL_VARS));
+     }
+		       
+    //gain = ratio_maxreduction(savebox,space.box);
+
+    if (fabs(saveobj) > 1) 
+      gain = (Inf (space.box(space.nb_var())) - saveobj)/fabs(saveobj);
+    else      
+      gain = Inf (space.box(space.nb_var())) - saveobj;
+
+
+ }while(gain >= ratio_fp);
+ 
+}
+
+
+
+
+  int X_Newton::X_Linearization(SoPlex& mysoplex, int ctr, corner_point cpoint, vector<INTERVAL>& taylor_ev,
 INTERVAL_VECTOR& G, bool first_cpoint  ){
   int op=(dynamic_cast<const Inequality*>(&sys.ctr(ctr)))? (dynamic_cast<const Inequality*>(&sys.ctr(ctr)))->op:EQU;
 
@@ -92,7 +123,7 @@ INTERVAL_VECTOR& G, bool first_cpoint  ){
     return cont;
 }
 
-//retutn 0 only when the linearization is not performed
+//return 0 only when the linearization is not performed
 int X_Newton::X_Linearization(SoPlex& mysoplex, int ctr, corner_point cpoint, int op, vector<INTERVAL>& taylor_ev,
 INTERVAL_VECTOR& G, bool first_point){
 
@@ -135,20 +166,20 @@ INTERVAL_VECTOR& G, bool first_point){
              cpoint=INF_X;
 
           bool inf_x;
-                 INTERVAL_VECTOR save;
-                 REAL fh_inf, fh_sup;
-                 REAL D;
+	  INTERVAL_VECTOR save;
+	  REAL fh_inf, fh_sup;
+	  REAL D;
           switch(cpoint){
-             case INF_X:
-                 inf_x=true; break;
+	     case INF_X:
+	       inf_x=true; break;
              case SUP_X:
-                 inf_x=false; break;
+	       inf_x=false; break;
              case RANDOM:
-                 inf_x=(rand()%2==0); last_rnd[j]=rand();
-                 break;
-             case RANDOM_INV:
-                 inf_x=(last_rnd[j]%2!=0);
-                 break;
+	       last_rnd[j]=rand(); inf_x=(last_rnd[j]%2==0); 
+	       break;
+	     case RANDOM_INV:
+	       inf_x=(last_rnd[j]%2!=0);
+	       break;
              case GREEDY1:
                  inf_x=((abs(Inf(G(j+1))) < abs(Sup(G(j+1))) && (op == LEQ || op== LT)) ||
                         (abs(Inf(G(j+1))) >= abs(Sup(G(j+1))) && (op == GEQ || op== GT))  )? true:false;
@@ -162,7 +193,7 @@ INTERVAL_VECTOR& G, bool first_point){
                       abs(Optimizer::global_optimizer()(j+1)-Sup(savebox(j+1))))? true:false;
                  }else{ 
                    inf_x=(rand()%2==0);
-                 }
+             07/0 07/05/20115/2011     }
                  break;
 		  */
              case GREEDY6:
@@ -299,30 +330,60 @@ void X_Newton::X_NewtonIter(){
   /***************************************************/
 
   INTERVAL opt(0);
+  int inf_bound[n]; // indicator inf_bound = 1 means the bound is feasible , call to simplex useless (cf Baharev)
+  int sup_bound[n];// indicator sup_bound = 1 means the bound is feasible , call to simplex useless
+  REAL prec_bound = 1.e-8; // relative precision for the indicators
+  for (int i=0; i<n ;i++) {inf_bound[i]=0;sup_bound[i]=0;}
   // in the case of lower_bounding, only the left bound of y is contracted
   for(int i=(cmode==LOWER_BOUNDING)? n-1:0;i<n;i++){
-      SPxSolver::Status stat = run_simplex(mysoplex, SPxLP::MINIMIZE, i, n, opt,Inf(space.box(i+1)), taylor_ev);
-      if( stat == SPxSolver::OPTIMAL ){
+    if (inf_bound[i]==0)
+      {  
+	SPxSolver::Status stat = run_simplex(mysoplex, SPxLP::MINIMIZE, i, n, opt,Inf(space.box(i+1)), taylor_ev);
+	if( stat == SPxSolver::OPTIMAL ){
+	  if(Inf(opt)>Sup(space.box(i+1))) throw EmptyBoxException();
+	  DVector primal(n);
+	  mysoplex.getPrimal(primal);
+	  for (int j=i;j<n;j++)
+	    { if ((fabs (primal[j]) < 1 && (fabs (primal[j]- Inf(space.box(j+1))) < prec_bound))
+		  ||
+		  (fabs (primal[j]) >= 1 && fabs ((primal[j]- Inf(space.box(j+1)))/primal[j]) < prec_bound))
+		inf_bound[j]=1;
+	      if ((fabs (primal[j]) < 1 && (fabs (primal[j]- Sup(space.box(j+1))) < prec_bound))
+		  ||
+		  (fabs (primal[j]) >= 1 && fabs ((primal[j]- Sup(space.box(j+1))/primal[j])) < prec_bound))
+		sup_bound[j]=1;
+	    }
+	  
+	  if(Inf(opt) > Inf(space.box(i+1)) ){
+	    space.box(i+1)=INTERVAL( Inf(opt),Sup(space.box(i+1) ));
+	    mysoplex.changeLhs(nb_ctrs+i,Inf(opt));
+	  }
+	}
+	else if(stat == SPxSolver::INFEASIBLE) throw EmptyBoxException();
+      }
 
-         if(Inf(opt)>Sup(space.box(i+1))) throw EmptyBoxException();
-
-         if(Inf(opt) > Inf(space.box(i+1)) ){
-           space.box(i+1)=INTERVAL( Inf(opt),Sup(space.box(i+1) ));
-           mysoplex.changeLhs(nb_ctrs+i,Inf(opt));
-         }
-      }else if(stat == SPxSolver::INFEASIBLE) throw EmptyBoxException();
-
-
-      if(goal_ctr==-1 || (i!=n-1)){ //for any variable excepting y
+    if(sup_bound[i]==0 && (goal_ctr==-1 || (i!=n-1))){ //for any variable excepting y
         //max x
-        stat= run_simplex(mysoplex, SPxLP::MAXIMIZE, i, n, opt, Sup(space.box(i+1)), taylor_ev);
+      SPxSolver::Status stat= run_simplex(mysoplex, SPxLP::MAXIMIZE, i, n, opt, Sup(space.box(i+1)), taylor_ev);
 //         stat = SPxSolver::UNKNOWN;
         if( stat == SPxSolver::OPTIMAL ){
          if(Sup(opt)<Inf(space.box(i+1))) throw EmptyBoxException();
-
-           if(Sup(opt) < Sup(space.box(i+1)) ){
-             space.box(i+1)=INTERVAL( Inf(space.box(i+1)), Sup(opt));
-             mysoplex.changeRhs(nb_ctrs+i,Sup(opt));
+	 DVector primal(n);
+	 mysoplex.getPrimal(primal);
+	 for (int j=i+1;j<n;j++)
+	   { if  ((fabs (primal[j]) < 1 && (fabs (primal[j]- Inf(space.box(j+1))) < prec_bound))
+		  ||
+		  (fabs (primal[j]) >= 1 && fabs ((primal[j]- Inf(space.box(j+1))/primal[j])) < prec_bound))
+	       inf_bound[j]=1;
+	     if  ((fabs (primal[j]) < 1 && (fabs (primal[j]- Sup(space.box(j+1))) < prec_bound))
+		  ||
+		  (fabs (primal[j]) >= 1 && fabs ((primal[j]- Sup(space.box(j+1)))/primal[j]) < prec_bound))
+	       sup_bound[j]=1;
+	   }
+        
+	 if(Sup(opt) < Sup(space.box(i+1)) ){
+	   space.box(i+1)=INTERVAL( Inf(space.box(i+1)), Sup(opt));
+	   mysoplex.changeRhs(nb_ctrs+i,Sup(opt));
            }
         } else if(stat == SPxSolver::INFEASIBLE) throw EmptyBoxException();
       }
