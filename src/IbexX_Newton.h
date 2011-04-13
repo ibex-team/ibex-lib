@@ -21,7 +21,7 @@ class X_Newton : public Contractor {
 
  public:
 
-  enum corner_point { INF_X, SUP_X, RANDOM, RANDOM_INV, GREEDY1, GREEDY5, GREEDY6, GREEDY7 };
+  enum corner_point {RANDOM_INV, NEG, INF_X, SUP_X, RANDOM, GREEDY1, GREEDY5, GREEDY6, BEST };
 
   enum linear_mode  {  TAYLOR, HANSEN  };
 
@@ -57,7 +57,7 @@ class X_Newton : public Contractor {
     // =============== isvar array initialization  ======================
     //isvar[i][j] indicates if the j^th variable is related to the i^th constraint
 
-    int nvar=0;                            
+    
 
     isvar=new bool*[sys.nb_ctr()];
        for(int i=0;i<sys.nb_ctr();i++)
@@ -67,13 +67,22 @@ class X_Newton : public Contractor {
       for(int j=0;j<space.nb_var();j++)
         isvar[i][j]=false;
 
-    for(int i=0;i<sys.nb_ctr();i++)
-    for (hash_map<int,int>::const_iterator it = sys.ctr(i).adj.begin(); it!=sys.ctr(i).adj.end(); it++) {
-      int j = it->first; 
-      if (sys.space.entity(j).type!=IBEX_VAR) continue;
-      isvar[i][j]=true;
-      nvar++;
-    }
+   coin_ctrvar=new bool*[sys.nb_ctr()];
+
+    for(int i=0;i<sys.nb_ctr();i++){
+      int nvar=0;                            
+      for (hash_map<int,int>::const_iterator it = sys.ctr(i).adj.begin(); it!=sys.ctr(i).adj.end(); it++) {
+        int j = it->first; 
+        if (sys.space.entity(j).type!=IBEX_VAR) continue;
+        isvar[i][j]=true;
+        nvar++;
+      }
+
+
+
+     for(int i=0; i<sys.nb_ctr();i++)
+       coin_ctrvar[i]=new bool[nvar];
+   } 
 
     // ============================================================
   linear = new bool[sys.nb_ctr()];
@@ -86,20 +95,19 @@ class X_Newton : public Contractor {
               G(jj+1) = 0.0;
               space.ent(IBEX_VAR,jj).deriv = &G(jj+1);     
             }
-     try {
-     if(ctr==goal_ctr)
-       goal->gradient(space);
-     else
-       sys.ctr(ctr).gradient(space);
-     }
-     catch (UnboundedResultException e) { linear[ctr]=false;continue;}
-     linear[ctr]=true;
-     for(int i=0;i<space.nb_var();i++){
-       if(Diam(G(i+1))>1e-10) {
-	 linear[ctr]=false;
-	 break;
-       }
-     }
+            if(ctr==goal_ctr)
+              goal->gradient(space);
+            else
+              sys.ctr(ctr).gradient(space);
+   
+
+   linear[ctr]=true;
+   for(int i=0;i<space.nb_var();i++){
+     if(Diam(G(i+1))>1e-10) {
+        linear[ctr]=false;
+        break;
+      }
+   }
 
   }
 
@@ -112,7 +120,7 @@ class X_Newton : public Contractor {
     X_Newton(const X_Newton& xnwt) : Operator(xnwt.space), Contractor(xnwt), sys(xnwt.sys), 
    ctc((xnwt.ctc)? xnwt.ctc->copy():NULL), ratio_fp(xnwt.ratio_fp), ratio_fp2(xnwt.ratio_fp2),
  var_min_width(xnwt.var_min_width), goal_ctr(xnwt.goal_ctr), cmode(xnwt.cmode), cpoints(xnwt.cpoints), lmode(xnwt.lmode),
-   max_diam_deriv(xnwt.max_diam_deriv), max_iter_soplex(xnwt.max_iter_soplex) {
+   max_diam_deriv(xnwt.max_diam_deriv), max_iter_soplex(xnwt.max_iter_soplex), coin_ctrvar(xnwt.coin_ctrvar) {
     isvar=new bool*[sys.nb_ctr()];
        for(int i=0;i<sys.nb_ctr();i++)
            isvar[i]=new bool[space.nb_var()];
@@ -159,6 +167,7 @@ last_rnd = new int[space.nb_var()];
     delete[] last_rnd;
   }
 
+
   /** X_Newton iteration. 
   Linearize the system and performs 2n calls to Simplex in order to reduce 
   the 2 bounds of each variable **/
@@ -202,6 +211,8 @@ last_rnd = new int[space.nb_var()];
 
   int max_iter_soplex;
 
+  bool** coin_ctrvar;
+
   protected:
 
   vector<corner_point> cpoints;
@@ -222,7 +233,7 @@ last_rnd = new int[space.nb_var()];
   SPxSolver::Status run_simplex(SoPlex& mysoplex, SPxLP::SPxSense sense, int var, int n, INTERVAL& obj, REAL bound, vector<INTERVAL>& taylor_ev );
 
   /** Tries to add a linearization in the model mysoplex. Returns true if it is succesful **/
-  int X_Linearization(SoPlex& mysoplex, int ctr, corner_point cpoint, vector<INTERVAL>& taylor_ev, INTERVAL_VECTOR &G, bool first_point  );
+  int X_Linearization(SoPlex& mysoplex, int ctr, corner_point cpoint, vector<INTERVAL>& taylor_ev, INTERVAL_VECTOR &G, bool first_point);
 
   int X_Linearization(SoPlex& mysoplex, int ctr, corner_point cpoint, int op, vector<INTERVAL>& taylor_ev, 
   INTERVAL_VECTOR &G, bool first_point);
@@ -234,6 +245,12 @@ last_rnd = new int[space.nb_var()];
    inline REAL abs(REAL a){
      return (a>=0)? a:-a;
    }
+
+  //Evaluation of the corner by using relation (4) in Taylorisation par intervalles convexe: premiers résultats, JFPC 
+  REAL eval_corner(int ctr, int op, INTERVAL_VECTOR& G, bool* corner);
+
+  //finds the corner with the minimal evaluation of relation (4) in Taylorisation par intervalles convexe: premiers résultats, JFPC 
+  void best_corner(int ctr, int op, INTERVAL_VECTOR& G, bool* corner);
 
 };
 

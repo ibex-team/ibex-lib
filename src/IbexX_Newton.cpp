@@ -104,7 +104,74 @@ void X_Newton::contract() {
 }
 
 
+void X_Newton::best_corner(int ctr, int op, INTERVAL_VECTOR& G, bool* corner){
+   int n=space.nb_var();
+    //0000000000
+   int total_backtracks=1; int nb_var=0;
+   for(int i=0;i<n;i++){
+      corner[i]=false;
+      if(i==n-1 && goal_ctr!=-1) continue;
+      if(!isvar[ctr][i]) continue;
+      if(Diam(G(i+1))<=1e-11) continue; //linear variable
+      total_backtracks*=2;
+      nb_var++;
+   }
 
+   REAL best_eval=eval_corner(ctr, op, G, corner);
+   bool corner_tmp[n];
+
+   for(int i=1;i<total_backtracks;i++){
+      int ii=i;
+
+      for(int j=0;j<nb_var;j++){
+         if(j==n-1 && goal_ctr!=-1) continue;
+         if(!isvar[ctr][j]) continue;
+         if(Diam(G(j+1))<=1e-11) continue; //linear variable
+         corner_tmp[j]=(ii%2==1);
+         ii/=2;
+      }
+      REAL eval=eval_corner(ctr, op, G, corner_tmp);
+      if(eval>best_eval){
+         best_eval=eval;
+         for(int k=0;k<n;k++){
+            corner[k]=corner_tmp[k];
+         }
+      }
+   }
+}
+
+
+REAL X_Newton::eval_corner(int ctr, int op, INTERVAL_VECTOR& G, bool* corner){
+   INTERVAL_VECTOR savebox(space.box);
+   INTERVAL ev(0.0);
+   int n=space.nb_var();
+
+   for (int j=0; j<n; j++){
+      if(j==n-1 && goal_ctr!=-1) continue; //the variable y! 
+      if(!isvar[ctr][j]) continue;
+      if(Diam(G(j+1))>max_diam_deriv){
+         space.box=savebox;
+         return 0; //to avoid problems with SoPleX
+      }
+      bool inf_x=corner[j];
+      space.box(j+1)=inf_x? Inf(savebox(j+1)):Sup(savebox(j+1));
+      INTERVAL a = ((inf_x && (op == LEQ || op== LT)) ||
+            (!inf_x && (op == GEQ || op== GT)))? Inf(G(j+1)):Sup(G(j+1));
+      ev+=(inf_x)? 0.5*a*Diam(savebox(j+1)):-0.5*a*Diam(savebox(j+1)); 
+   }
+
+    //f(x^c)
+   if(ctr==goal_ctr){
+      goal->forward(space);
+      ev+=goal->output();
+   }else{
+      ev+=sys.ctr(ctr).eval(space);
+          
+   }
+   space.box=savebox;
+   return Mid(ev);
+
+}
 
   int X_Newton::X_Linearization(SoPlex& mysoplex, int ctr, corner_point cpoint, vector<INTERVAL>& taylor_ev,
 INTERVAL_VECTOR& G, bool first_cpoint  ){
@@ -131,6 +198,17 @@ INTERVAL_VECTOR& G, bool first_point){
 
     if(!first_point && linear[ctr]) return 0;
     //Linear variable y<=loup (should be y<=Sup(y)?)
+    
+    
+    bool* corner=NULL;
+
+    if(!linear[ctr]){
+       if(cpoint==BEST){
+          corner= new bool[n];
+          best_corner(ctr, op, G, corner);
+       }
+    }
+    
     INTERVAL_VECTOR savebox(space.box);
     INTERVAL ev(0.0);
     INTERVAL tot_ev(0.0);
@@ -170,6 +248,8 @@ INTERVAL_VECTOR& G, bool first_point){
 	  REAL fh_inf, fh_sup;
 	  REAL D;
           switch(cpoint){
+             case BEST:
+                inf_x=corner[j]; last_rnd[j]=inf_x? 0:1;  break;
 	     case INF_X:
 	       inf_x=true; break;
              case SUP_X:
@@ -180,6 +260,9 @@ INTERVAL_VECTOR& G, bool first_point){
 	     case RANDOM_INV:
 	       inf_x=(last_rnd[j]%2!=0);
 	       break;
+             case NEG:
+                inf_x=(last_rnd[j]%2!=0);
+                break;
              case GREEDY1:
                  inf_x=((abs(Inf(G(j+1))) < abs(Sup(G(j+1))) && (op == LEQ || op== LT)) ||
                         (abs(Inf(G(j+1))) >= abs(Sup(G(j+1))) && (op == GEQ || op== GT))  )? true:false;
@@ -239,7 +322,11 @@ INTERVAL_VECTOR& G, bool first_point){
     }
     }
    catch (UnboundedResultException e)
-     { space.box=savebox; return 0;}
+   {  if(corner) delete[] corner; 
+      space.box=savebox; return 0;}
+      
+      if(corner) delete[] corner;
+      
     if(ctr==goal_ctr){
           goal->forward(space);
           ev+=goal->output();
