@@ -365,6 +365,42 @@ INTERVAL_VECTOR& G, bool first_point){
 
   }
 
+  // The Achterberg heuristic for choosing the next variable (nexti) and its bound (infnexti) to be contracted (cf Baharev paper)
+  // and updating the indicators if a bound has been found feasible (with the precision prec_bound)
+
+  void X_Newton::choose_next_variable ( SoPlex& mysoplex , int & nexti, int & infnexti, int* inf_bound, int* sup_bound)
+  {
+    REAL prec_bound = 1.e-8; // relative precision for the indicators
+    int n=space.nb_var();
+    DVector primal(n);
+    mysoplex.getPrimal(primal);
+    REAL delta=1.e100;
+    REAL deltaj=delta;
+    for (int j=0;j<n;j++)
+      
+      {
+	if (inf_bound[j]==0)
+	  {deltaj= fabs (primal[j]- Inf(space.box(j+1)));
+	    if ((fabs (Inf(space.box(j+1))) < 1 && deltaj < prec_bound)
+		||
+		(fabs (Inf(space.box(j+1))) >= 1 && fabs (deltaj /Inf(space.box(j+1))) < prec_bound))
+	      inf_bound[j]=1;
+	    if (inf_bound[j]==0 && deltaj < delta)
+	      {nexti=j; infnexti=0;delta=deltaj;}
+	  }
+	if (sup_bound[j]==0)
+	  {	deltaj = fabs (primal[j]- Sup(space.box(j+1)));
+	if ((fabs (Sup(space.box(j+1))) < 1 && deltaj < prec_bound)
+	    ||
+	    (fabs (Sup(space.box(j+1))) >= 1 && fabs (deltaj/Sup(space.box(j+1))) < prec_bound))
+	  sup_bound[j]=1;
+	if (sup_bound[j]==0 && deltaj < delta)
+	  {nexti=j; infnexti=1;delta=deltaj;}
+      }
+
+      }
+  }
+
 //the X_NewtonIteration
 void X_Newton::X_NewtonIter(){
 
@@ -417,64 +453,72 @@ void X_Newton::X_NewtonIter(){
   /***************************************************/
 
   INTERVAL opt(0);
-  int inf_bound[n]; // indicator inf_bound = 1 means the bound is feasible , call to simplex useless (cf Baharev)
-  int sup_bound[n];// indicator sup_bound = 1 means the bound is feasible , call to simplex useless
-  REAL prec_bound = 1.e-8; // relative precision for the indicators
+  int inf_bound[n]; // indicator inf_bound = 1 means the inf bound is feasible or already contracted , call to simplex useless (cf Baharev)
+  int sup_bound[n];// indicator sup_bound = 1 means the sup bound is feasible or already contracted, call to simplex useless
+
   for (int i=0; i<n ;i++) {inf_bound[i]=0;sup_bound[i]=0;}
+  if (goal_ctr !=-1)   sup_bound[n-1]=1;  // in case of optimization, for y the left bound only contracted
   // in the case of lower_bounding, only the left bound of y is contracted
-  for(int i=(cmode==LOWER_BOUNDING)? n-1:0;i<n;i++){
-    if (inf_bound[i]==0)
+  int firsti=(cmode==LOWER_BOUNDING)? 2*n-1:0;
+
+  int nexti=-1;  // the next variable to be contracted
+  int infnexti=0; // the bound to be contracted contract  infnexti=0 for the lower bound, infnexti=1 for the upper bound
+  for(int ii=firsti;ii<2*n;ii++){  // at most 2*n calls
+    int i = ii/2; 
+    if (nexti != -1) i=nexti;
+    if (infnexti==0 && inf_bound[i]==0)
       {  
+	  inf_bound[i]=1;
 	SPxSolver::Status stat = run_simplex(mysoplex, SPxLP::MINIMIZE, i, n, opt,Inf(space.box(i+1)), taylor_ev);
 	if( stat == SPxSolver::OPTIMAL ){
+
 	  if(Inf(opt)>Sup(space.box(i+1))) throw EmptyBoxException();
-	  DVector primal(n);
-	  mysoplex.getPrimal(primal);
-	  for (int j=i;j<n;j++)
-	    { if ((fabs (primal[j]) < 1 && (fabs (primal[j]- Inf(space.box(j+1))) < prec_bound))
-		  ||
-		  (fabs (primal[j]) >= 1 && fabs ((primal[j]- Inf(space.box(j+1)))/primal[j]) < prec_bound))
-		inf_bound[j]=1;
-	      if ((fabs (primal[j]) < 1 && (fabs (primal[j]- Sup(space.box(j+1))) < prec_bound))
-		  ||
-		  (fabs (primal[j]) >= 1 && fabs ((primal[j]- Sup(space.box(j+1))/primal[j])) < prec_bound))
-		sup_bound[j]=1;
-	    }
-	  
+	  choose_next_variable(mysoplex ,nexti,infnexti, inf_bound, sup_bound);
+	
 	  if(Inf(opt) > Inf(space.box(i+1)) ){
 	    space.box(i+1)=INTERVAL( Inf(opt),Sup(space.box(i+1) ));
 	    mysoplex.changeLhs(nb_ctrs+i,Inf(opt));
 	  }
 	}
-	else if(stat == SPxSolver::INFEASIBLE) throw EmptyBoxException();
-      }
+	else if(stat == SPxSolver::INFEASIBLE)  throw EmptyBoxException();
+	else if (stat == SPxSolver::UNKNOWN)
+	  {int next=-1;
+	    for (int j=0;j<n;j++)
+	      {if (inf_bound[j]==0) {nexti=j; next=0;infnexti=0;break;}
+	      else if  (sup_bound[j]==0) {nexti=j;next=0; infnexti=1;break;}
+	      }
+	    if (next==-1) break;
+	  }
 
-    if(sup_bound[i]==0 && (goal_ctr==-1 || (i!=n-1))){ //for any variable excepting y
+		    
+      }
+    else
+      if(infnexti==1 && sup_bound[i]==0 ){ 
         //max x
+	  sup_bound[i]=1;
       SPxSolver::Status stat= run_simplex(mysoplex, SPxLP::MAXIMIZE, i, n, opt, Sup(space.box(i+1)), taylor_ev);
-//         stat = SPxSolver::UNKNOWN;
         if( stat == SPxSolver::OPTIMAL ){
+
          if(Sup(opt)<Inf(space.box(i+1))) throw EmptyBoxException();
-	 DVector primal(n);
-	 mysoplex.getPrimal(primal);
-	 for (int j=i+1;j<n;j++)
-	   { if  ((fabs (primal[j]) < 1 && (fabs (primal[j]- Inf(space.box(j+1))) < prec_bound))
-		  ||
-		  (fabs (primal[j]) >= 1 && fabs ((primal[j]- Inf(space.box(j+1))/primal[j])) < prec_bound))
-	       inf_bound[j]=1;
-	     if  ((fabs (primal[j]) < 1 && (fabs (primal[j]- Sup(space.box(j+1))) < prec_bound))
-		  ||
-		  (fabs (primal[j]) >= 1 && fabs ((primal[j]- Sup(space.box(j+1)))/primal[j]) < prec_bound))
-	       sup_bound[j]=1;
-	   }
+	 choose_next_variable(mysoplex ,nexti,infnexti, inf_bound, sup_bound);
         
 	 if(Sup(opt) < Sup(space.box(i+1)) ){
 	   space.box(i+1)=INTERVAL( Inf(space.box(i+1)), Sup(opt));
 	   mysoplex.changeRhs(nb_ctrs+i,Sup(opt));
            }
-        } else if(stat == SPxSolver::INFEASIBLE) throw EmptyBoxException();
-      }
+        } else if(stat == SPxSolver::INFEASIBLE)  throw EmptyBoxException();
+	else if (stat == SPxSolver::UNKNOWN)
+	  {int next=-1;
+	    for (int j=0;j<n;j++)
+	      {if (inf_bound[j]==0) {nexti=j; next=0;infnexti=0;break;}
+	      else if  (sup_bound[j]==0) {nexti=j; next=0;infnexti=1;break;}
+	      }
+	    if (next==-1) break;
+	  }
 
+
+      }
+      else break;  // no more call to soplex
   }
 
 }

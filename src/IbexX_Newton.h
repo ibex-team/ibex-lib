@@ -239,7 +239,7 @@ last_rnd = new int[space.nb_var()];
   INTERVAL_VECTOR &G, bool first_point);
 
   bool isInner(const System& sys, int j);
-
+  void choose_next_variable ( SoPlex& mysoplex , int & nexti, int & infnexti, int* inf_bound, int* sup_bound);
 //   Soplex mysoplex;
 
    inline REAL abs(REAL a){
