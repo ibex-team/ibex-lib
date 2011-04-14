@@ -158,7 +158,13 @@ class BlockSet {
     if (blk>=nb_blk) throw BlockSetException(BlockSetException::BAD_BLK); 
     else return blk2var[blk]==-1;
   }
-  
+
+ /** Return true if the block \a blk is empty. */
+  inline int size(int blk) const throw(BlockSetException) {
+    if (blk>=nb_blk) throw BlockSetException(BlockSetException::BAD_BLK); 
+    else return blksize[blk];
+  }
+
   /** The number of variables to divide up into blocks. */
   const int nb_var;
 
