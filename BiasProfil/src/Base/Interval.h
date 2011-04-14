@@ -262,7 +262,7 @@ public:
    * \return \c true if the intersection is non empty. */
   inline bool operator &=(const INTERVAL& x) {
     if (empty()) return false;
-    if (x.empty()) { set_empty(); return true; }
+    if (x.empty()) { set_empty(); return false; }
 
     bool result;
     INTERVAL tmp;
