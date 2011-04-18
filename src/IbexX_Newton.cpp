@@ -91,13 +91,14 @@ void X_Newton::contract() {
        // if (gain >= ratio_fp2) ctc->contract(space,Indicators(space.nb_var()-1,ALL_VARS));
      }
 		       
-    //gain = ratio_maxreduction(savebox,space.box);
-
+    gain = ratio_maxreduction(savebox,space.box);
+    // variant : gain on objective only
+    /*
     if (fabs(saveobj) > 1) 
       gain = (Inf (space.box(space.nb_var())) - saveobj)/fabs(saveobj);
     else      
       gain = Inf (space.box(space.nb_var())) - saveobj;
-
+    */
 
  }while(gain >= ratio_fp);
  
