@@ -293,7 +293,8 @@ INTERVAL_VECTOR& G, bool first_point){
                     inf_x=((fh_sup-fh_inf)/(REAL)(n-1) - 0.5*D*(Inf(G(j+1))+Sup(G(j+1)))  > 0)? false:true;
                  else
                     inf_x=((fh_sup-fh_inf)/(REAL)(n-1) - 0.5*D*(Inf(G(j+1))+Sup(G(j+1))) < 0)? false:true;
-                space.box=save;
+		 last_rnd[j]=inf_x? 0:1;  
+		 space.box=save;
               break;
              case GREEDY5:
                  save=space.box;
@@ -308,7 +309,8 @@ INTERVAL_VECTOR& G, bool first_point){
                     inf_x=(fh_sup-fh_inf - 0.5*D*(Inf(G(j+1))+Sup(G(j+1)))  > 0)? false:true;
                  else
                     inf_x=(fh_sup-fh_inf - 0.5*D*(Inf(G(j+1))+Sup(G(j+1))) < 0)? false:true;
-                space.box=save;
+		 last_rnd[j]=inf_x? 0:1;  
+		 space.box=save;
               break;
 
 
@@ -458,7 +460,7 @@ void X_Newton::X_NewtonIter(){
   int sup_bound[n];// indicator sup_bound = 1 means the sup bound is feasible or already contracted, call to simplex useless
 
   for (int i=0; i<n ;i++) {inf_bound[i]=0;sup_bound[i]=0;}
-  if (goal_ctr !=-1)   sup_bound[n-1]=1;  // in case of optimization, for y the left bound only contracted
+  if (goal_ctr !=-1)   sup_bound[n-1]=1;  // in case of optimization, for y the left bound only is contracted
   // in the case of lower_bounding, only the left bound of y is contracted
   int firsti=(cmode==LOWER_BOUNDING)? 2*n-1:0;
 
