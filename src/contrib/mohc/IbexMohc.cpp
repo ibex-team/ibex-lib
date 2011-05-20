@@ -446,7 +446,9 @@ Mohc::Mohc(const System& sys, REAL ratio, bool incremental,  REAL tau_mohc, REAL
      mohc->space.sync(mohc->get_preproc()->space);
      mohc->contract_floor=-1;
      const Indicators* indic=current_indic();
-     if (indic && mohc->incremental) mohc->contract(indic->impact);
+
+
+     if (indic && mohc->incremental && indic->impact != Contractor::NO_VAR ) mohc->contract(indic->impact);
      else mohc->contract();
      
      if(m3b){
