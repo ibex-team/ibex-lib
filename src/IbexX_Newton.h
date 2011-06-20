@@ -21,7 +21,7 @@ class X_Newton : public Contractor {
 
  public:
 
-  enum corner_point {RANDOM_INV, NEG, INF_X, SUP_X, RANDOM, GREEDY1, GREEDY5, GREEDY6, BEST };
+    enum corner_point {RANDOM_INV, NEG, INF_X, SUP_X, RANDOM, GREEDY1, GREEDY5, GREEDY6, BEST , MONO,NEGMONO};
 
   enum linear_mode  {  TAYLOR, HANSEN  };
 
@@ -95,11 +95,14 @@ class X_Newton : public Contractor {
               G(jj+1) = 0.0;
               space.ent(IBEX_VAR,jj).deriv = &G(jj+1);     
             }
-            if(ctr==goal_ctr)
-              goal->gradient(space);
-            else
-              sys.ctr(ctr).gradient(space);
-   
+     try {
+     if(ctr==goal_ctr)
+       goal->gradient(space);
+     else
+       sys.ctr(ctr).gradient(space);
+     }
+     catch (UnboundedResultException e)
+       {linear[ctr]=false; break;}
 
    linear[ctr]=true;
    for(int i=0;i<space.nb_var();i++){

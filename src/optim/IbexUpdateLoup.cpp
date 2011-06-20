@@ -6,7 +6,7 @@
  *
  * Copyright (C) 2007-2010 Gilles Chabert
  * 
- * This file is part of IBEX.
+ * This file is part Sof IBEX.
  *
  * IBEX is free software; you can redistribute it and/or modify it under the terms of 
  * the GNU General Public License as published by the Free Software Foundation; either 
@@ -129,8 +129,8 @@ void inHC4_expand(const System& sys, INTERVAL_VECTOR& inner_box){
 
   bool in_HC4=true;
   bool mono_analysis=true;
-  //        bool in_HC4=false;
-  //    bool mono_analysis=false;
+  //  bool in_HC4=false;
+  //  bool mono_analysis=false;
 
 /** Try to reduce the loup with the candidate point "pt".
  * Return true in case of success.

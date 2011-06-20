@@ -262,12 +262,39 @@ INTERVAL_VECTOR& G, bool first_point){
 	       inf_x=(last_rnd[j]%2!=0);
 	       break;
              case NEG:
-                inf_x=(last_rnd[j]%2!=0);
-                break;
+	       inf_x=(last_rnd[j]%2!=0);
+	       break;
              case GREEDY1:
-                 inf_x=((abs(Inf(G(j+1))) < abs(Sup(G(j+1))) && (op == LEQ || op== LT)) ||
+	       inf_x=((abs(Inf(G(j+1))) < abs(Sup(G(j+1))) && (op == LEQ || op== LT)) ||
                         (abs(Inf(G(j+1))) >= abs(Sup(G(j+1))) && (op == GEQ || op== GT))  )? true:false;
-                  break;
+	       break;
+	  case MONO:
+	    if (ctr==goal_ctr && ((Inf(G(j+1)) >0 && (op == LEQ || op== LT)) || 
+				  (Sup (G(j+1)) < 0 && (op == GEQ || op== GT))))
+	      inf_x = true;
+	    else if 
+	      (ctr == goal_ctr  &&
+	      ((Sup(G(j+1)) <0 && (op == LEQ || op== LT)) || 
+	       (Inf(G(j+1)) > 0 && (op == GEQ || op== GT))))
+	      inf_x=false;
+	    else inf_x = (rand()%2==0);
+	    last_rnd[j]=inf_x? 0:1;
+	    break;
+	  case NEGMONO:
+	    if ((Inf(G(j+1)) >0 && (op == LEQ || op== LT)) || 
+		(Sup (G(j+1)) < 0 && (op == GEQ || op== GT)))
+	      inf_x = false;
+	    else if 
+	      ((Sup(G(j+1)) <0 && (op == LEQ || op== LT)) || 
+	       (Inf(G(j+1)) > 0 && (op == GEQ || op== GT)))
+	      inf_x=true;
+	    else inf_x = (rand()%2==0);
+	    last_rnd[j]=inf_x? 0:1;
+	    break;
+
+
+	    
+
 		  /*
               case GREEDY7:
                  //select the coin nearest to the loup 

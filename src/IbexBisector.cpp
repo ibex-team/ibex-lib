@@ -99,6 +99,11 @@ Bisection SmearFunction::bisect(int last_var) const {
     return RoundRobin::bisect(last_var);
   }
   int var = var_to_bisect (J);  // call the var_to_bisect 
+  /*
+// to not call the last variable
+  if (var == last_var)
+    return Bisection(sys.box, random()% sys.nb_var(),ratio);
+  */
   if (var == -1)// throw BoxTooSmallException();
     return RoundRobin::bisect(last_var);
   else
