@@ -99,7 +99,7 @@ class Paver {
   
   /** Create a depth-first search paver on a given space with (a copy of) a list of contractor, 
    * a bisector and (optionnaly) a cell buffer. By default, the cell buffer is a stack. */
-  Paver(Space& space, const ContractorList& ctc, const Bisector& bsc, CellBuffer& cells=default_buffer);
+  Paver(Space& space, const ContractorList& ctc, const Bisector& bsc, CellBuffer& cells=(default_buffer_assign=true, *new CellStack()));
 
   /** Deletes this instance. */
   ~Paver();
@@ -303,7 +303,10 @@ class Paver {
   /** empty box (see rej() */
   INTERVAL_VECTOR emptybox;
 
-  static CellStack default_buffer;
+  bool standalone_buffer;
+
+  //static CellStack default_buffer;
+  static bool default_buffer_assign;
 };
 
 /*@}*/

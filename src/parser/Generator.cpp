@@ -332,8 +332,11 @@ void CtrGenerator::visit(const P_CtrListElemRef& ref) {
   
   unsigned int num = g.value._2int()-1;
   
-  if (num<0 || num>scopes.top().ctr_list(ref.name).size()) 
-    generate_error(string("index exceeds \"")+ref.name+"\" size");
+  if (num<0 || num>=scopes.top().ctr_list(ref.name).size()) {    
+    stringstream ss;
+    ss << "index " << (num+1) << " exceeds \"" << ref.name << "\" size";
+    generate_error(ss.str());
+  }
   
   new_ctr=scopes.top().ctr_list(ref.name)[num];
 }
@@ -358,8 +361,11 @@ void CtcGenerator::visit(const P_CtcListElemRef& ref) {
   
   unsigned int num = g.value._2int()-1;
   
-  if (num<0 || num>scopes.top().ctc_list(ref.name).size()) 
-    generate_error(string("index exceeds \"")+ref.name+"\" size");
+  if (num<0 || num>=scopes.top().ctc_list(ref.name).size()) {
+    stringstream ss;
+    ss << "index " << (num+1) << " exceeds \"" << ref.name << "\" size";
+    generate_error(ss.str());
+  }
   
   new_ctc=scopes.top().ctc_list(ref.name)[num];
 }

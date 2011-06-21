@@ -54,6 +54,11 @@ class PavingNode {
   virtual void acceptVisitor(PavingVisitor&) const=0;
   PavingNode(const INTERVAL_VECTOR& box) : box(box) {}
 
+  /** Return true if this node is a contractor node 
+   * (so that a safe cast can be applied) and false
+   * if it is a bisector node. */
+  virtual bool is_contractor_node()=0;
+
   /** box of the node */
   INTERVAL_VECTOR box;
 
@@ -79,6 +84,9 @@ class ContractorNode : public PavingNode {
   }
 
   virtual ~ContractorNode() { if (rej) delete rej; }
+
+  /** Return true */
+  bool is_contractor_node() { return true; }
 
   /** Return true if this node is a leaf in the paving. */
   bool leaf() const { return rej==NULL; }
@@ -115,6 +123,9 @@ class BisectorNode : public PavingNode {
 
 /*   Return true if left node exists. */ 
 /*   bool exists_right() { l!=NULL; } */
+
+  /** Return true */
+  bool is_contractor_node() { return false; }
 
   virtual ~BisectorNode() { 
     if (l) delete l; 

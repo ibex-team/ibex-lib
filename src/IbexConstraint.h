@@ -65,7 +65,7 @@ class Constraint {
   virtual void accept_printer(const OperatorPrinter& p) const=0;
 
   /** Return true if the constraint is an equality. */
-  virtual bool is_equality() const=0;
+  virtual bool is_equality() const { return false; }
 
   /** Adjacency of the constraint. \a adj[x] equals n if variable whose
    * key is \a x appears n times in the expression of the constraint. 

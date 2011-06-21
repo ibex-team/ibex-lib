@@ -36,13 +36,20 @@ void Precision::contract() {
 
 /*--------------------------------------------------------------------------------*/
 
-CellStack Paver::default_buffer;
+bool Paver::default_buffer_assign=false;
 
 Paver::Paver(Space& space, const ContractorList& _ctc, const Bisector& bsc, CellBuffer& buffer) : 
   capacity(-1), cell_limit(-1), time_limit(0), trace(false), ctc_loop(true),
   solver_mode(false), new_ctc_node_func(NULL), space(space), nb_ctc(_ctc.size()), time(0),
   ctc(_ctc), bsc(bsc.copy()), cells(buffer), m(bsc.req), _nb_cells(0), 
   paving(NULL), accepted(new vector<ContractorNode*>[_ctc.size()]), screen(1) { 
+
+//   if ((standalone_buffer=(&buffer==&default_buffer))) {
+//     buffer = *new CellStack();
+//   }
+
+  if (default_buffer_assign) standalone_buffer=true;
+  default_buffer_assign=false; // reset (by default)
 
   selected_ctc = new bool[nb_ctc];
 
@@ -63,8 +70,10 @@ Paver::Paver(Space& space, const ContractorList& _ctc, const Bisector& bsc, Cell
 Paver::Paver(const Contractor& _ctc, const Bisector& bsc, REAL prec) : 
   capacity(-1), cell_limit(-1), time_limit(0), trace(false), ctc_loop(true), 
   solver_mode(false), new_ctc_node_func(NULL), space(_ctc.space), nb_ctc(2), time(0), 
-  ctc(_ctc, Precision(space,prec)), bsc(bsc.copy()), cells(default_buffer), m(bsc.req), _nb_cells(0),
+  ctc(_ctc, Precision(space,prec)), bsc(bsc.copy()), cells(*new CellStack()), m(bsc.req), _nb_cells(0),
   paving(NULL), accepted(new vector<ContractorNode*>[2]), screen(1) { 
+
+  standalone_buffer=true;
 
   selected_ctc = new bool[nb_ctc];
 
@@ -80,6 +89,7 @@ Paver::~Paver() {
   delete bsc;
   delete[] accepted;
   if (paving) delete paving;
+  if (standalone_buffer) delete &cells;
 }
 
 void Paver::restart() {
@@ -254,7 +264,7 @@ int Paver::next_box() {
 
     _nb_cells+=2;
     delete &c;
-
+    if (trace) cout << "push " << c1->box << " and " << c2->box << endl;
     cells.push(c1);                  // left copy
     cells.push(c2);                  // right copy  
 

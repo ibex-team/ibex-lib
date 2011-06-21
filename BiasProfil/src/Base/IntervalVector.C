@@ -692,7 +692,7 @@ REAL INTERVAL_VECTOR::maxratiodelta(const INTERVAL_VECTOR& x) const {
 
 bool INTERVAL_VECTOR::operator&=(const INTERVAL_VECTOR& x) {
   if (empty()) return false;
-  if (x.empty()) { set_empty(); return true; }
+  if (x.empty()) { set_empty(); return false; }
 
   bool result;
   INTERVAL_VECTOR tmp;

@@ -158,6 +158,14 @@ void Space::sync(const Space& space, unsigned short flag, bool logic_op) {
 
   if (&env != &space.env) throw NonRecoverableException("Cannot synchronize spaces with different environments");  
 
+  if (logic_op==false) {
+    if ((nb_var()>0 && box.empty()) ||
+	(nb_syb()>0 && sbx.empty()) ||
+	(nb_epr()>0 && epx.empty()) ||
+	(nb_upr()>0 && upx.empty()))
+      throw NonRecoverableException("Cannot make the union of an empty space with another");
+  }
+
   const Space *scanned; // the space we scan to detect the common entities
   const Space *other;   // the other space
   

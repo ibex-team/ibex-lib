@@ -41,6 +41,7 @@ namespace parser {
 
 
 class P_Ctc;
+class P_CtcListElemRef;
 class P_CtcRef;
 class P_Shave;
 class P_Newton;
@@ -57,6 +58,7 @@ class P_Load;
 class P_CtcVisitor {
  public:
   virtual void visit(const P_Ctc&)=0;
+  virtual void visit(const P_CtcListElemRef&)=0;
   virtual void visit(const P_CtcRef&)=0;
   virtual void visit(const P_Shave&)=0;
   virtual void visit(const P_Newton&)=0;

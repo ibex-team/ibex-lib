@@ -62,7 +62,7 @@ public:
    * \remark space should be passed by reference in all implementations.*/
   virtual Operator* copy() const=0;
 
-  /* Accept the pretty printer. 
+  /** Accept the pretty printer. 
    * Default implementation: print "operator [please, override me!]" */
   virtual void accept_printer(const OperatorPrinter& p) const;
 
