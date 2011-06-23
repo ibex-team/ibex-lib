@@ -47,8 +47,8 @@ Paver::Paver(Space& space, const ContractorList& _ctc, const Bisector& bsc, Cell
 //   if ((standalone_buffer=(&buffer==&default_buffer))) {
 //     buffer = *new CellStack();
 //   }
+  standalone_buffer=default_buffer_assign;
 
-  if (default_buffer_assign) standalone_buffer=true;
   default_buffer_assign=false; // reset (by default)
 
   selected_ctc = new bool[nb_ctc];
