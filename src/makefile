@@ -26,8 +26,10 @@ include $(IBEX)/common.mak
 
 MAIN_SRC=$(wildcard *.cpp)
 PARS_DIR=parser
+OPTIM_DIR=optim
 PARS_SRC=$(wildcard $(PARS_DIR)/*.cpp) 
-OBJS=$(MAIN_SRC:.cpp=.o) $(PARS_DIR)/lexer.o $(PARS_DIR)/parser.o $(PARS_SRC:.cpp=.o) 
+OPTIM_SRC=$(wildcard $(OPTIM_DIR)/*.cpp) 
+OBJS=$(MAIN_SRC:.cpp=.o) $(PARS_DIR)/lexer.o $(PARS_DIR)/parser.o $(PARS_SRC:.cpp=.o) $(OPTIM_SRC:.cpp=.o)
 
 
 ifeq ($(CCPLUS),)
@@ -43,16 +45,18 @@ else
   endif
 endif
 
+
 %.o : %.cpp %.h
-	$(CCPLUS) $(CFLAGS) -I$(INC_PROFIL) -I. -I./parser -c  -g -o  $@ $<
+	$(CCPLUS) $(CFLAGS) -I$(INC_PROFIL) -I$(INC_SOPLEX) -I. -I./parser -c -o $@ $<
 
 $(LIB_IBEX)/libibex.a : $(OBJS)
 	ar rcs $@ $(OBJS); \
-	find *.h -exec install -m 640 {} $(INC_IBEX)/{} \;
+	mkdir -p $(INC_IBEX)/$(OPTIM_DIR); \
+	find *.h $(OPTIM_DIR)/*.h -exec install -m 640 {} $(INC_IBEX)/{} \;
 
 $(LIB_IBEX)/libibex.$(DYNLIBEXT) : $(OBJS)
 	$(CCPLUS) $(DYNLIBFLAGS) -o $@ $^
-	find *.h -exec install -m 640 {} $(INC_IBEX)/{} \;
+	find *.h $(OPTIM_DIR)/*.h -exec install -m 640 {} $(INC_IBEX)/{} \;
 
 $(PARS_DIR)/parser.o $(PARS_DIR)/parser.h: $(PARS_DIR)/parser.yacc 
 	bison --name-prefix=ibex --defines $(PARS_DIR)/parser.yacc --report=all --file-prefix=parser; \
@@ -68,7 +72,6 @@ $(PARS_DIR)/lexer.o : $(PARS_DIR)/lexer.c $(PARS_DIR)/parser.h $(PARS_DIR)/Parse
 
 clean : 
 	@rm -f *.o *~ $(LIB_IBEX)/libibex.* $(INC_IBEX)/*.h \
+	$(OPTIM_DIR)/*.o $(OPTIM_DIR)/*~ \
 	$(PARS_DIR)/*.o $(PARS_DIR)/*~ *.output $(PARS_DIR)/parser.h $(PARS_DIR)/parser.c $(PARS_DIR)/lexer.h $(PARS_DIR)/lexer.c; \
 	cd contrib; $(MAKE) clean
-
-
