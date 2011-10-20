@@ -138,6 +138,7 @@ Optimizer::Optimizer(const System& sys, int goal_ctr, int y_num, Contractor& con
   fac.build(&goal);
 
   m.add<InnerBox>();
+
 }
 
 Optimizer::~Optimizer() {
@@ -170,12 +171,6 @@ void Optimizer::contract_and_bound(Cell* c) {
   int ctc_num=contract(*c);
   /*====================================================================*/
 
-  /*
-
-  if(ctc_num == -1 && !simplex_lower_bounding(sys, goal,loup)){
-    delete c; return;
-  }
-  */
 
   if (ctc_num == -1)  { // there is still something left to be contracted in the box
     
@@ -286,7 +281,7 @@ int Optimizer::next_box() {
 
 
 // the heap is updated : in case of a new upperbound (loupchange = true)
-// all boxes with a lower bound greater than the loup are removed and deleted.
+// all boxes with a lower bound greater than (loup - precision)  are removed and deleted.
 void Optimizer::manage_cell_buffer() {
 
   if (loup_changed) {
@@ -324,10 +319,13 @@ void Optimizer::report() {
   cout << " best bound in: " << optimum() << endl;
   if (loup != BiasPosInf) {
     if ((fabs(loup)> 1) && (loup-uplo)/(fabs (loup)) < goal_ceil)
-      cout << " relative  precision on objective function obtained " << (loup-uplo)/(fabs (loup)) << endl;
+      cout << " required relative  precision on objective function obtained " << (loup-uplo)/(fabs (loup)) << endl;
     else if (loup-uplo < goal_ceil)
-      cout << " absolute precision  on objective function obtained " << loup-uplo << endl;
-    cout << " global optimizer: " << global_optimizer() << endl;
+      cout << " required  absolute precision  on objective function obtained " << loup-uplo << endl;
+    else if (fabs(loup)> 1)
+      cout << " relative  precision on objective function " << (loup-uplo)/(fabs (loup)) << endl;
+    else
+      cout << " absolute  precision on objective function " << (loup-uplo) << endl;
   }
 }
   

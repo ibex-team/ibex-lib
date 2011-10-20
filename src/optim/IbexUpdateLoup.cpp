@@ -467,12 +467,12 @@ bool update_loup(const System& sys, const Space& space, const Evaluator& goal, C
   //  if (innerfound)
     // first option: startpoint = midpoint
     //
-  //     loup_changed = line_probing(sys, space, goal, is_inside, loup, loup_point, Mid(space.box), 5* sample_size, innerfound, true);
+  //loup_changed = line_probing(sys, space, goal, is_inside, loup, loup_point, Mid(space.box), 5* sample_size, innerfound, true);
   // other option: chose startpoint randomly
-  // loup_changed = line_probing(sys, space, goal, is_inside, loup, loup_point, random_point(space.box), sample_size, innerfound, true);
+  //  loup_changed = line_probing(sys, space, goal, is_inside, loup, loup_point, random_point(space.box), 5* sample_size, innerfound, true);
 
   //  else
-      loup_changed = random_probing(sys, space, goal, is_inside, loup, loup_point, sample_size, innerfound);
+        loup_changed = random_probing(sys, space, goal, is_inside, loup, loup_point, sample_size, innerfound);
 
 
 

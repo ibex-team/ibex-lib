@@ -243,7 +243,7 @@ int Paver::next_box() {
     /*************** contraction ******************/ 
     int i = contract(c);
 
-    if (i != -1) { // the has been taken (made empty) by contractor i
+    if (i != -1) { // the cell has been taken (made empty) by contractor i
       delete &c; 
       return i;
     }  

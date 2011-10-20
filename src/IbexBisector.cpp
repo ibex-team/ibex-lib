@@ -23,6 +23,7 @@
  --------------------------------------------------------------------------------*/
 
 #include "IbexBisector.h"
+#include <math.h>
 
 #define __IBEX_DEFAULT_PRECISION  1e-07
 #define __IBEX_DEFAULT_RATIO_BISS 0.45
@@ -158,6 +159,7 @@ int SmearSumRelative::var_to_bisect(INTERVAL_MATRIX & J) const {
   int var = -1;
   // the normalizing factor per constraint
   REAL ctrjsum[sys.nb_ctr()];
+
   for (int i=0; i<sys.nb_ctr(); i++) 
     {ctrjsum[i]=0;
       for (int j=0; j<nbvars ; j++)
@@ -182,6 +184,7 @@ int SmearSumRelative::var_to_bisect(INTERVAL_MATRIX & J) const {
   return var;
 }
 
+ 
 
 
 
@@ -195,7 +198,7 @@ int SmearMaxRelative::var_to_bisect(INTERVAL_MATRIX & J) const {
   for (int i=0; i<sys.nb_ctr(); i++) 
     {ctrjsum[i]=0;
       for (int j=0; j<nbvars ; j++)
-	{ctrjsum[i]+= Abs(J(i+1,j+1)) * Diam(sys.box(j+1));
+	{ctrjsum[i]+= Abs(J(i+1,j+1)) *  Diam(sys.box(j+1)) ;
 	}
     } 
 

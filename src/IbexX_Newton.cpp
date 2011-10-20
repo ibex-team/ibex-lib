@@ -1,5 +1,5 @@
 /*---------------------------------------------------------------------------------
- * X-Newton Contractor
+ * XNewton Contractor
  * ----------------------------------------------------------------------------
  *
  * Copyright (C) 2007 Gilles Chabert
@@ -30,6 +30,7 @@ const REAL X_Newton::default_ratio_fp = 0.1;
 const REAL X_Newton::default_ratio_fp2 = 0.01;
 const REAL X_Newton::default_var_min_width = 1.e-11;
 const REAL X_Newton::default_max_diam_deriv =1e5;
+const REAL X_Newton::default_max_diam_box =1e4;
 
 
 
@@ -78,7 +79,8 @@ void X_Newton::contract() {
 
 void X_Newton::contract() {
  REAL gain;
-
+ if (space.box.max_diameter() > max_diam_box) return;
+ // if (space.box.max_diameter() > 10*max_diam_deriv) return;
  do{
 
     INTERVAL_VECTOR savebox=space.box;
@@ -150,7 +152,8 @@ REAL X_Newton::eval_corner(int ctr, int op, INTERVAL_VECTOR& G, bool* corner){
    for (int j=0; j<n; j++){
       if(j==n-1 && goal_ctr!=-1) continue; //the variable y! 
       if(!isvar[ctr][j]) continue;
-      if(Diam(G(j+1))>max_diam_deriv){
+      if(Diam(G(j+1))> max_diam_deriv)
+	{
          space.box=savebox;
          return 0; //to avoid problems with SoPleX
       }
@@ -236,7 +239,7 @@ INTERVAL_VECTOR& G, bool first_point){
          }
 	  else continue;
 
-	  if(Diam(G(j+1))>max_diam_deriv){
+	  if(Diam(G(j+1))> max_diam_deriv ){
               space.box=savebox;
               return 0; //to avoid problems with SoPleX
           }
@@ -374,13 +377,13 @@ INTERVAL_VECTOR& G, bool first_point){
   bool added=false;
     if(op == LEQ || op== LT){
         //g(xb) + a1' x1 + ... + an xn <= 0
-        if(Inf(tot_ev)>Sup(-ev)) throw EmptyBoxException(); //the constraint is not satisfied
+      if(Inf(tot_ev)>Sup(-ev))   throw EmptyBoxException(); //the constraint is not satisfied
         if(Sup(-ev)<Sup(tot_ev)){ //otherwise the constraint is satisfied for any point in the box
            mysoplex.addRow(LPRow(-infinity, row1, Sup(-ev)));
            added=true;
         }
     }else{
-        if(Sup(tot_ev)<Inf(-ev)) throw EmptyBoxException();
+      if(Sup(tot_ev)<Inf(-ev))  throw EmptyBoxException();
        if(Inf(-ev)>Inf(tot_ev)){
           mysoplex.addRow(LPRow(Inf(-ev), row1, infinity));
           added=true;
@@ -433,7 +436,6 @@ INTERVAL_VECTOR& G, bool first_point){
 
 //the X_NewtonIteration
 void X_Newton::X_NewtonIter(){
-
   int n=space.nb_var();
 
   SoPlex mysoplex;
@@ -502,7 +504,7 @@ void X_Newton::X_NewtonIter(){
 	SPxSolver::Status stat = run_simplex(mysoplex, SPxLP::MINIMIZE, i, n, opt,Inf(space.box(i+1)), taylor_ev);
 	if( stat == SPxSolver::OPTIMAL ){
 
-	  if(Inf(opt)>Sup(space.box(i+1))) throw EmptyBoxException();
+	  if(Inf(opt)>Sup(space.box(i+1)))    throw EmptyBoxException();
 	  choose_next_variable(mysoplex ,nexti,infnexti, inf_bound, sup_bound);
 	
 	  if(Inf(opt) > Inf(space.box(i+1)) ){
@@ -510,7 +512,7 @@ void X_Newton::X_NewtonIter(){
 	    mysoplex.changeLhs(nb_ctrs+i,Inf(opt));
 	  }
 	}
-	else if(stat == SPxSolver::INFEASIBLE)  throw EmptyBoxException();
+	else if(stat == SPxSolver::INFEASIBLE) throw EmptyBoxException();
 	else if (stat == SPxSolver::UNKNOWN)
 	  {int next=-1;
 	    for (int j=0;j<n;j++)
@@ -529,7 +531,7 @@ void X_Newton::X_NewtonIter(){
       SPxSolver::Status stat= run_simplex(mysoplex, SPxLP::MAXIMIZE, i, n, opt, Sup(space.box(i+1)), taylor_ev);
         if( stat == SPxSolver::OPTIMAL ){
 
-         if(Sup(opt)<Inf(space.box(i+1))) throw EmptyBoxException();
+	  if(Sup(opt)<Inf(space.box(i+1))) throw EmptyBoxException();
 	 choose_next_variable(mysoplex ,nexti,infnexti, inf_bound, sup_bound);
         
 	 if(Sup(opt) < Sup(space.box(i+1)) ){
