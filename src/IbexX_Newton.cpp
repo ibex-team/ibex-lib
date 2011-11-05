@@ -178,7 +178,7 @@ REAL X_Newton::eval_corner(int ctr, int op, INTERVAL_VECTOR& G, bool* corner){
 }
 
   int X_Newton::X_Linearization(SoPlex& mysoplex, int ctr, corner_point cpoint, vector<INTERVAL>& taylor_ev,
-INTERVAL_VECTOR& G, bool first_cpoint  ){
+INTERVAL_VECTOR& G, int id_point, int& nb_nonlinear_vars){
   int op=(dynamic_cast<const Inequality*>(&sys.ctr(ctr)))? (dynamic_cast<const Inequality*>(&sys.ctr(ctr)))->op:EQU;
 
   if(op!=EQU && isInner(sys, ctr)) return 0; //the constraint is satified
@@ -186,21 +186,22 @@ INTERVAL_VECTOR& G, bool first_cpoint  ){
     int cont=0;
     if(ctr==goal_ctr) op = LEQ;
     if(op==EQU){
-       cont+=X_Linearization(mysoplex, ctr, cpoint, LEQ, taylor_ev, G, first_cpoint);
-       cont+=X_Linearization(mysoplex, ctr, cpoint, GEQ, taylor_ev, G, first_cpoint);
+       cont+=X_Linearization(mysoplex, ctr, cpoint, LEQ, taylor_ev, G, id_point, nb_nonlinear_vars);
+       cont+=X_Linearization(mysoplex, ctr, cpoint, GEQ, taylor_ev, G, id_point, nb_nonlinear_vars);
        
     }else
-       cont+=X_Linearization(mysoplex, ctr, cpoint, op, taylor_ev, G, first_cpoint);
+       cont+=X_Linearization(mysoplex, ctr, cpoint, op, taylor_ev, G, id_point, nb_nonlinear_vars);
     return cont;
 }
 
 //return 0 only when the linearization is not performed
 int X_Newton::X_Linearization(SoPlex& mysoplex, int ctr, corner_point cpoint, int op, vector<INTERVAL>& taylor_ev,
-INTERVAL_VECTOR& G, bool first_point){
+INTERVAL_VECTOR& G, int id_point, int& nb_nonlinear_vars){
 
     int n=space.nb_var();
-
-    if(!first_point && linear[ctr]) return 0;
+    int nonlinear_var=0;
+    
+    if(id_point!=0 && linear[ctr]) return 0;
     //Linear variable y<=loup (should be y<=Sup(y)?)
     
     
@@ -243,14 +244,20 @@ INTERVAL_VECTOR& G, bool first_point){
               space.box=savebox;
               return 0; //to avoid problems with SoPleX
           }
+          
+          
 
           if(linear[ctr])
              cpoint=INF_X;
-
+          else if(Diam(G(j+1))>1e-10)
+	     nonlinear_var++;
+	  
           bool inf_x;
 	  INTERVAL_VECTOR save;
 	  REAL fh_inf, fh_sup;
 	  REAL D;
+	  
+
           switch(cpoint){
              case BEST:
                 inf_x=corner[j]; last_rnd[j]=inf_x? 0:1;  break;
@@ -261,6 +268,34 @@ INTERVAL_VECTOR& G, bool first_point){
              case RANDOM:
 	       last_rnd[j]=rand(); inf_x=(last_rnd[j]%2==0); 
 	       break;
+	     case K4:
+
+	       if(id_point==0){
+		  inf_x=(rand()%2==0);
+		  base_coin[j]=inf_x;
+	       }else if(nb_nonlinear_vars < 3){
+		 if(id_point==1) inf_x = !base_coin[j];
+		 else return 0;
+	       }else if(Diam(G(j+1))<=1e-10 ){
+		 inf_x=(rand()%2==0);
+	       }else if(id_point==1){
+		 if((REAL)nonlinear_var <= (REAL)nb_nonlinear_vars / 3.0)
+		   inf_x=base_coin[j];
+		 else
+		   inf_x=!base_coin[j];
+	       }else if(id_point==2){
+		 if((REAL)nonlinear_var > (REAL)nb_nonlinear_vars / 3.0 && 
+		   (REAL)nonlinear_var <= 2*(REAL)nb_nonlinear_vars / 3.0)
+		   inf_x=base_coin[j];
+		 else
+		   inf_x=!base_coin[j];		 
+	       }else if(id_point==3){
+		 if((REAL)nonlinear_var > 2*(REAL)nb_nonlinear_vars / 3.0)
+		   inf_x=base_coin[j];
+		 else
+		   inf_x=!base_coin[j];			 
+	       }
+	     break;
 	     case RANDOM_INV:
 	       inf_x=(last_rnd[j]%2!=0);
 	       break;
@@ -345,7 +380,8 @@ INTERVAL_VECTOR& G, bool first_point){
 
 
           }
- 
+         
+//          if(!linear[ctr] && Diam(G(j+1))>1e-10) cout << inf_x;
          space.box(j+1)=inf_x? Inf(savebox(j+1)):Sup(savebox(j+1));
          INTERVAL a = ((inf_x && (op == LEQ || op== LT)) ||
                             (!inf_x && (op == GEQ || op== GT)))? Inf(G(j+1)):Sup(G(j+1));
@@ -369,8 +405,10 @@ INTERVAL_VECTOR& G, bool first_point){
     }
 
 
-
-    for(int j=0;j<n;j++)
+   if(id_point==0) nb_nonlinear_vars=nonlinear_var;
+  
+   
+   for(int j=0;j<n;j++)
       tot_ev+=row1[j]*savebox(j+1); //natural evaluation of the left side of the linear constraint
 
 
@@ -392,6 +430,8 @@ INTERVAL_VECTOR& G, bool first_point){
     if(added)  taylor_ev.push_back(tot_ev);
 
     space.box=savebox;
+    
+    
     return (added)? 1:0;
   
 
@@ -440,7 +480,7 @@ void X_Newton::X_NewtonIter(){
 
   SoPlex mysoplex;
   DSVector dummycol(0);
- vector<INTERVAL> taylor_ev;
+  vector<INTERVAL> taylor_ev;
 
   /*********generation of the linearized system*********/
   for (int j=0; j<n; j++){
@@ -468,8 +508,17 @@ void X_Newton::X_NewtonIter(){
      catch (UnboundedResultException e) {return;}
    }
 
-     for(int k=0;k<cpoints.size();k++)
-        nb_ctrs+=X_Linearization(mysoplex, ctr, cpoints[k], taylor_ev, G, k==0);
+    int nb_nonlinear_vars;
+//        cout << "coins:" << endl;
+    if(cpoints[0]==K4){
+	 for(int j=0; j<4; j++)
+          nb_ctrs+=X_Linearization(mysoplex, ctr, K4, taylor_ev, G, j, nb_nonlinear_vars);
+    }else
+       for(int k=0;k<cpoints.size();k++){
+	   nb_ctrs+=X_Linearization(mysoplex, ctr, cpoints[k], taylor_ev, G, k, nb_nonlinear_vars);
+// 	cout << endl;
+     }
+     
   }
 
 

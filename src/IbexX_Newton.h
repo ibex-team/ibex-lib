@@ -21,7 +21,7 @@ class X_Newton : public Contractor {
 
  public:
 
-    enum corner_point {RANDOM_INV, NEG, INF_X, SUP_X, RANDOM, GREEDY1, GREEDY5, GREEDY6, BEST , MONO,NEGMONO};
+    enum corner_point {RANDOM_INV, NEG, INF_X, SUP_X, RANDOM, GREEDY1, GREEDY5, GREEDY6, BEST , MONO,NEGMONO, K4};
 
   enum linear_mode  {  TAYLOR, HANSEN  };
 
@@ -87,6 +87,7 @@ class X_Newton : public Contractor {
     // ============================================================
   linear = new bool[sys.nb_ctr()];
   last_rnd = new int[space.nb_var()];
+  base_coin = new int[space.nb_var()];  
   for(int ctr=0; ctr<sys.nb_ctr();ctr++){
 
      INTERVAL_VECTOR G(space.nb_var());
@@ -142,6 +143,7 @@ class X_Newton : public Contractor {
         goal=NULL;
 
 last_rnd = new int[space.nb_var()];
+base_coin = new int[space.nb_var()];
   linear = new bool[sys.nb_ctr()];
   for(int ctr=0; ctr<sys.nb_ctr();ctr++)
     linear[ctr]=xnwt.linear[ctr];
@@ -168,6 +170,7 @@ last_rnd = new int[space.nb_var()];
     if(goal) delete goal;
     if(linear) delete[] linear;
     delete[] last_rnd;
+    delete[] base_coin;
   }
 
 
@@ -212,6 +215,7 @@ last_rnd = new int[space.nb_var()];
   bool* linear;
 
   int* last_rnd;
+  int* base_coin;
 
   REAL max_diam_deriv;
 
@@ -241,10 +245,11 @@ last_rnd = new int[space.nb_var()];
   SPxSolver::Status run_simplex(SoPlex& mysoplex, SPxLP::SPxSense sense, int var, int n, INTERVAL& obj, REAL bound, vector<INTERVAL>& taylor_ev );
 
   /** Tries to add a linearization in the model mysoplex. Returns true if it is succesful **/
-  int X_Linearization(SoPlex& mysoplex, int ctr, corner_point cpoint, vector<INTERVAL>& taylor_ev, INTERVAL_VECTOR &G, bool first_point);
+  int X_Linearization(SoPlex& mysoplex, int ctr, corner_point cpoint, vector<INTERVAL>& taylor_ev, INTERVAL_VECTOR &G, 
+		      int id_point, int& non_linear_vars);
 
   int X_Linearization(SoPlex& mysoplex, int ctr, corner_point cpoint, int op, vector<INTERVAL>& taylor_ev, 
-  INTERVAL_VECTOR &G, bool first_point);
+  INTERVAL_VECTOR &G, int id_point, int& non_linear_vars);
 
   bool isInner(const System& sys, int j);
   void choose_next_variable ( SoPlex& mysoplex , int & nexti, int & infnexti, int* inf_bound, int* sup_bound);
