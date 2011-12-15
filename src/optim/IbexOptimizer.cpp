@@ -21,17 +21,16 @@
  *
  --------------------------------------------------------------------------------*/
 
-//#include "IbexOtherBisector.h"
+
 #include "IbexConstraint.h"
 #include "IbexSequence.h"
 #include "IbexEvaluatorFactory.h"
-#include "IbexUpdateLoup.h"
+
 #include "IbexHC4Revise.h"
 #include "IbexHC4.h"
 #include "IbexCellStack.h"
 #include "IbexOptimizer.h"
 
-#include "IbexSimplex.h"
 
 #include <math.h>
 
@@ -70,7 +69,7 @@ public:
  *
  * The special equation "goal_ctr" is not considered in this process 
 */
-Sequence inverse(const System& sys, int goal_ctr) {
+  Sequence inverse(const System& sys, int goal_ctr) {
 
   Env& env=(Env&) sys.space.env;
 
@@ -113,18 +112,16 @@ Sequence inverse(const System& sys, int goal_ctr) {
   
 }
 
-// the bisections are only done on the variables (not on the objective)
-// The objective must be declared as an EPR (in Quimper: using "Parameters !y;")
-// use the fact that the objective is the last variable in ineq.space
+
 /**
  *
  * \param goal_ctr - The number of the constraint y=f(x) in \a sys
+ * \param y_num - The number of the objective variable y in \a sys.space
  */
 Optimizer::Optimizer(const System& sys, int goal_ctr, int y_num, Contractor& contractor, 
 		       Bisector & bisect,
-		       bool maximize, REAL prec, REAL goal_ceil, int sample_size) :
+		     bool maximize, REAL prec, REAL goal_ceil, int sample_size) :
   Paver(sys.space, ContractorList(contractor, Precision(sys.space,prec)), bisect, *new CellHeapForOptim(y_num)),  
-  is_inside(inverse(sys,goal_ctr)),
   sys(sys),
   y_num(y_num),
   prec_num(1), goal_ceil(goal_ceil),
@@ -141,6 +138,17 @@ Optimizer::Optimizer(const System& sys, int goal_ctr, int y_num, Contractor& con
 
 }
 
+
+ConstrainedOptimizer::ConstrainedOptimizer(const System& sys, int goal_ctr, int y_num, Contractor& contractor, 
+					   Bisector & bisect,
+					   bool maximize, REAL prec, REAL goal_ceil, int sample_size) :
+  Optimizer (sys, goal_ctr, y_num, contractor, bisect, maximize, prec, goal_ceil, sample_size),
+  is_inside(inverse(sys,goal_ctr))
+{;}  
+
+
+ConstrainedOptimizer::~ConstrainedOptimizer(){}
+  
 Optimizer::~Optimizer() {
   delete &cells;
 }
@@ -151,7 +159,7 @@ void Optimizer::contract_and_bound(Cell* c) {
   //cout << c->box << endl;
   
   /*======================== contract with loup ========================*/
-  INTERVAL& y=space.box(y_num+1); // the epr y_num is the objective
+  INTERVAL& y=space.box(y_num+1); //  y_num is the objective
   REAL ymax=loup;
   
   if ((fabs (loup) < 1) || (goal_ceil > 1))  // goal_ceil is a relative precision  and should be less than 1
@@ -176,21 +184,14 @@ void Optimizer::contract_and_bound(Cell* c) {
     
     /*========================= update loup ==============================*/
 
-    InnerBox& i = c->get<InnerBox>(); // get the current inner box (to be inflated by update_loup)
-
- 
-    int box_loup_changed = update_loup(sys, space, goal, is_inside, loup, loup_point, sample_size, i.inner_box);
-
-    box_loup_changed |= simplex_update_loup(sys, goal, is_inside, loup, loup_point);
+    int box_loup_changed= loup_change(*c);
+    
+    
 
     if (! loup_changed) loup_changed=box_loup_changed;
 
     /*====================================================================*/    
 
-    if(loup_changed){
-        if(Dimension(i.inner_box)==1) Resize(i.inner_box, space.nb_var()); 
-        i.inner_box = loup_point;
-    }
 
     c->box = space.box;
     c->epx = space.epx;
@@ -211,6 +212,32 @@ void Optimizer::contract_and_bound(Cell* c) {
 
   }
 }
+
+ bool ConstrainedOptimizer::loup_change(Cell& c)
+      {
+
+	//	innerbox= c.get<InnerBox>().inner_box; // get the current inner box (to be inflated by update_loup)  ?????
+
+ 
+	int box_loup_changed = update_loup(sys, space);
+	innerfound=false;
+	box_loup_changed |= simplex_update_loup(sys);
+	if(box_loup_changed){
+	  if(Dimension(innerbox)==1) Resize(innerbox, space.nb_var()); 
+	  innerbox = loup_point;
+    }
+
+	return box_loup_changed;
+      }
+
+ bool Optimizer::loup_change(Cell& c)
+      {
+ 	int box_loup_changed = update_loup (sys, space);
+	box_loup_changed |= simplex_update_loup(sys);
+	return box_loup_changed;
+      }
+
+
 
 // The schema bisection-contraction is inversed wrt the schema in Paver
 // First the bisection is performed and then each subbox is contracted before being inserted in the heap.

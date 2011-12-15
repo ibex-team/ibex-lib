@@ -22,7 +22,7 @@
  *
  --------------------------------------------------------------------------------*/
 
-#include "IbexUpdateLoup.h"
+#include "IbexOptimizer.h"
 #include <stdlib.h>
 #include <math.h> // for fabs
 
@@ -31,7 +31,7 @@ namespace ibex {
 /** see IbexUpdateLoup.h */
 
 /* last update: IAR  */
-void monotonicity_analysis(const Space& space, const Evaluator& goal) {
+  void Optimizer::monotonicity_analysis(const Space& space, const Evaluator& goal) {
   
   // monotonicity_analysis (quand f est monotone par rapport a une variable x_i
   // l'intervalle [x_i] est remplace par un point (Inf([x_i]) si x_i est croissante
@@ -54,7 +54,7 @@ void monotonicity_analysis(const Space& space, const Evaluator& goal) {
     {;}
 }
 
-  bool isInner(const System& sys, int j){
+  bool ConstrainedOptimizer::isInner(const System& sys, int j){
         const  Inequality* ineq=dynamic_cast<const Inequality*> (&sys.ctr(j));
         ineq->forward(sys.space);
         INTERVAL eval=ineq->eval(sys.space);
@@ -66,14 +66,14 @@ void monotonicity_analysis(const Space& space, const Evaluator& goal) {
      return true;
   }
 
-  bool isInner(const System& sys){
+  bool ConstrainedOptimizer::isInner(const System& sys){
       for (int j=1; j<sys.nb_ctr(); j++)
         if(!isInner(sys,j)) return false;
      return true;
   }
 
 /* last update: IAR  */
-bool inHC4(const System& sys, REAL loup){
+  bool ConstrainedOptimizer::inHC4(const System& sys, REAL loup){
 
   bool innerfound=true;
   int goal_var=sys.nb_var()-1;
@@ -104,6 +104,7 @@ bool inHC4(const System& sys, REAL loup){
 }
 
 /* added by: IAR  */
+/*
 void inHC4_expand(const System& sys, INTERVAL_VECTOR& inner_box){
   INTERVAL_VECTOR savebox=sys.space.box;
   sys.space.box=inner_box;
@@ -126,11 +127,13 @@ void inHC4_expand(const System& sys, INTERVAL_VECTOR& inner_box){
 //   cout << "expanded:" << inner_box << endl;
 }
 
+*/
 
   bool in_HC4=true;
   bool mono_analysis=true;
   //  bool in_HC4=false;
   //  bool mono_analysis=false;
+  
 
 /** Try to reduce the loup with the candidate point "pt".
  * Return true in case of success.
@@ -138,23 +141,26 @@ void inHC4_expand(const System& sys, INTERVAL_VECTOR& inner_box){
  * The param "is_inner" must be set to true if the box has 
  * already been proven to be inner (avoir unecessary tests)
  * last update: GCH  */
-bool check_candidate(const System& sys, const Space& space, const Evaluator& goal, Contractor& is_inside, REAL& loup, VECTOR& loup_point, const VECTOR& pt, bool is_inner) {
+  bool ConstrainedOptimizer::check_candidate(const System& sys, const Space& space, const VECTOR& pt) {
   // save the box
   INTERVAL_VECTOR savebox = space.box;  
   // set the domain to the sample vector 
   (INTERVAL_VECTOR&)  space.box = pt;
 
   bool loup_found=false;
+  
 
  try{
   goal.forward(space);
  }catch(EmptyBoxException){
-   return false;
+
    (INTERVAL_VECTOR&) space.box = savebox;
+   return false;
  }
 
   // "res" will contain an upper bound of the criterion
   REAL res = Sup(goal.output());
+ 
 
   // check if f(x) is below the "loup" (the current upper bound).
   //
@@ -164,26 +170,27 @@ bool check_candidate(const System& sys, const Space& space, const Evaluator& goa
   // is better than the loup (a cheaper test).
   if (_LT(res,loup)) {
 
+
     // to apply [check1] comment next line
     
 //       if (!is_inner) {
     try {
 //       is_inside.contract();
       if(!isInner(sys)){ //the is_inside contractor don't refute thing like 2>2
-	if(is_inner && in_HC4) //error 
+	if(innerfound && in_HC4) //error 
 	  cout << "the box returned by inHC4 is not an innerbox!" << endl; 
-        is_inner = false;  
+        innerfound = false;  
       } else 
-	is_inner = true; 
+	innerfound= true; 
       
     } catch(EmptyBoxException) {
-        is_inner = true; // local assignment (valid for pt only)
+        innerfound = true; // local assignment (valid for pt only)
     }
 
      
 //       }
     
-      if (is_inner) {
+      if (innerfound) {
 	loup = res;
 	loup_point = pt;
 	loup_point(space.nb_var())=loup;
@@ -198,13 +205,52 @@ bool check_candidate(const System& sys, const Space& space, const Evaluator& goa
 }
 
 
+  bool Optimizer::check_candidate (const System& sys, const Space& space, const VECTOR& pt) {
+  // save the box
+  INTERVAL_VECTOR savebox = space.box;  
+  // set the domain to the sample vector 
+  (INTERVAL_VECTOR&)  space.box = pt;
+  
+  bool loup_found=false;
+
+ try{
+  goal.forward(space);
+ }catch(EmptyBoxException){
+   (INTERVAL_VECTOR&) space.box = savebox;
+   return false;
+ }
+
+  // "res" will contain an upper bound of the criterion
+  REAL res = Sup(goal.output());
+
+  // check if f(x) is below the "loup" (the current upper bound).
+  //
+  // The "loup" and the corresponding "loup_point" (the current miminizer) 
+  // will be updated 
+
+  if (_LT(res,loup)) {
+	loup = res;
+	loup_point = pt;
+	loup_point(space.nb_var())=loup;
+	loup_found = true;
+      }
+  
+  
+  (INTERVAL_VECTOR&) space.box = savebox;
+  
+  return loup_found;
+
+}
+
+
 /** Return a random point inside a box.
  * This function is not used yet in "random_probing"
  * just to avoid the recomputation of mid and diam 
  * (maybe this is stupid?)
  *
  * last update: GCH
- */
+
+
 VECTOR random_point(const INTERVAL_VECTOR& box) {
   int n=Dimension(box);
   VECTOR mid = Mid(box);
@@ -222,25 +268,11 @@ VECTOR random_point(const INTERVAL_VECTOR& box) {
   }
   return pt;
 }
+*/
 
-
-/* 1st method for probing: take random points in any directions
- *
- * return true if the loup has been modified 
- *
- * last update: GCH 
- */
-bool random_probing(const System& sys, const Space& space, const Evaluator& goal, Contractor& is_inside, REAL& loup, VECTOR& loup_point, int sample_size, bool is_inner) {
-  int n=space.nb_var();
-  VECTOR mid = Mid(space.box);
-  VECTOR diam = Diam(space.box);
-  VECTOR pt(n);
-  bool loup_changed=false;
-
-  for(int i=0; i<sample_size ; i++){
-    
-    // set each coordinate randomly
-    for (int j=1; j<=n; j++) {
+void compute_random_point (VECTOR& pt, int n, const Space& space, VECTOR& diam, VECTOR& mid)
+// set each coordinate randomly
+  {for (int j=1; j<=n; j++) {
       
       // get a random number in [-0.5,0.5]
       REAL r=rand()/(REAL) RAND_MAX -0.5;
@@ -251,13 +283,53 @@ bool random_probing(const System& sys, const Space& space, const Evaluator& goal
       if (pt(j)<Inf(space.box(j))) pt(j)=Inf(space.box(j));
       else if (pt(j)>Sup(space.box(j))) pt(j)=Sup(space.box(j));
     }
-    
-    loup_changed |= check_candidate(sys, space, goal, is_inside, loup, loup_point, pt, is_inner);
+  }
+
+/* 1st method for probing: take random points in any directions
+ *
+ * return true if the loup has been modified 
+ *
+ * last update: GCH 
+ */
+
+  bool ConstrainedOptimizer::random_probing(const System& sys, const Space& space) {
+  int n=space.nb_var();
+  VECTOR mid = Mid(space.box);
+  VECTOR diam = Diam(space.box);
+  VECTOR pt(n);
+  bool loup_changed=false;
+
+  for(int i=0; i<sample_size ; i++){
+    compute_random_point(pt, n, space, diam, mid);
+
+    loup_changed |= check_candidate(sys, space,pt);
 
   }
 
   return loup_changed;
 }
+
+
+
+
+  bool Optimizer::random_probing (const System& sys, const Space& space) {
+  int n=space.nb_var();
+  VECTOR mid = Mid(space.box);
+  VECTOR diam = Diam(space.box);
+  VECTOR pt(n);
+  bool loup_changed=false;
+
+  for(int i=0; i<sample_size ; i++){
+    compute_random_point(pt, n, space, diam, mid);
+    
+    loup_changed |= check_candidate (sys, space, pt);
+
+  }
+
+  return loup_changed;
+  }
+
+
 
 /* 2nd method for probing: pick equidistant points in the opposite direction of the 
  * gradient calculated at a starting point "start".
@@ -275,7 +347,7 @@ bool random_probing(const System& sys, const Space& space, const Evaluator& goal
  *
  * last update: GCH
  */
-bool line_probing(const System& sys, const Space& space, const Evaluator& goal, Contractor& is_inside, REAL& loup, VECTOR& loup_point, const VECTOR& start, int sample_size, bool is_inner, bool recursive) {
+  bool ConstrainedOptimizer::line_probing(const System& sys, const Space& space, const VECTOR& start, int sample_size, bool recursive) {
   int n=space.nb_var();
   VECTOR diam = Diam(space.box);
 
@@ -348,7 +420,7 @@ bool line_probing(const System& sys, const Space& space, const Evaluator& goal, 
     // the gradient is null in all the non-degenerated directions
     //cout << "warning: no gradient descent possible" << endl;
     // Use random probing (by default)
-    return random_probing(sys, space, goal, is_inside, loup, loup_point, sample_size, is_inner);
+    return random_probing(sys, space);
   }
 
   // max_coeff determines the point where the half-line starting 
@@ -391,14 +463,14 @@ bool line_probing(const System& sys, const Space& space, const Evaluator& goal, 
     }
     
     if (recursive) {
-      if (check_candidate(sys, space, goal, is_inside, loup, loup_point, pt, is_inner))  {
+      if (check_candidate(sys, space,  pt))  {
 	if (i<sample_size-1) 
-	  line_probing(sys, space, goal, is_inside, loup,  loup_point, pt, sample_size-i-1, is_inner, true);
+	  line_probing(sys, space,  pt, sample_size-i-1, true);
 	return true;
       }
     }
     else {
-      loup_changed |= check_candidate(sys, space, goal, is_inside, loup, loup_point, pt, is_inner);
+      loup_changed |= check_candidate(sys, space, pt);
     }
 
   }
@@ -406,7 +478,7 @@ bool line_probing(const System& sys, const Space& space, const Evaluator& goal, 
   return loup_changed;
   }
   catch (UnboundedResultException e) {
-   return random_probing(sys, space, goal, is_inside, loup, loup_point, sample_size, is_inner);}
+   return random_probing(sys, space);}
 }
 
 
@@ -422,28 +494,29 @@ bool line_probing(const System& sys, const Space& space, const Evaluator& goal, 
  *
  * last update: IAZ
  */
-bool update_loup(const System& sys, const Space& space, const Evaluator& goal, Contractor& is_inside, REAL& loup, VECTOR& loup_point, int sample_size, INTERVAL_VECTOR& inner_box) {
+  bool ConstrainedOptimizer:: update_loup(const System& sys, const Space& space) {
 
   bool loup_changed=false; // the return value
   INTERVAL_VECTOR savebox = space.box;
 
-  bool innerfound=false;
+  innerfound=false;
   if (in_HC4) {
     innerfound=inHC4(sys, loup);
     
-  }  else 
+  }  
+  else 
     try {
       is_inside.contract();
       innerfound=false;
     } catch(EmptyBoxException) {
-      Resize(inner_box, space.nb_var());
-      inner_box = space.box;
+      Resize(innerbox, space.nb_var());
+      innerbox = space.box;
       innerfound=true;
     }
 
-      if(innerfound) {//the current inner_box is updated
-        if(Dimension(inner_box)==1) Resize(inner_box, space.nb_var()); //first innerbox found!
-        inner_box = space.box;
+  if(innerfound) {//the current inner_box is updated
+        if(Dimension(innerbox)==1) Resize(innerbox, space.nb_var()); //first innerbox found!
+        innerbox = space.box;
       }
 
   if(space.box.empty()){ //if innerHC4 finds nothing, we try with the full current box
@@ -467,12 +540,12 @@ bool update_loup(const System& sys, const Space& space, const Evaluator& goal, C
   //  if (innerfound)
     // first option: startpoint = midpoint
     //
-  //loup_changed = line_probing(sys, space, goal, is_inside, loup, loup_point, Mid(space.box), 5* sample_size, innerfound, true);
+  //loup_changed = line_probing(sys, space,   Mid(space.box), 5* sample_size, true);
   // other option: chose startpoint randomly
-  //  loup_changed = line_probing(sys, space, goal, is_inside, loup, loup_point, random_point(space.box), 5* sample_size, innerfound, true);
+  //  loup_changed = line_probing(sys, space,  random_point(space.box), 5* sample_size, true);
 
   //  else
-        loup_changed = random_probing(sys, space, goal, is_inside, loup, loup_point, sample_size, innerfound);
+        loup_changed = random_probing(sys, space);
 
 
 
@@ -490,6 +563,40 @@ bool update_loup(const System& sys, const Space& space, const Evaluator& goal, C
   (INTERVAL_VECTOR&) space.box = savebox;
   return loup_changed;
 }
+
+
+
+  bool Optimizer::update_loup(const System& sys, const Space& space) {
+
+  bool loup_changed=false; // the return value
+  INTERVAL_VECTOR savebox = space.box;
+
+    // first option: startpoint = midpoint
+    //
+  //loup_changed = line_probing(sys, space, goal, is_inside, loup, loup_point, Mid(space.box), 5* sample_size, innerfound, true);
+  // other option: chose startpoint randomly
+  //  loup_changed = line_probing(sys, space, goal, is_inside, loup, loup_point, random_point(space.box), 5* sample_size, innerfound, true);
+
+  //  else
+    loup_changed = random_probing (sys, space);
+
+
+
+  
+  if (loup_changed) {
+    //============================== debug =============================
+    int prec=cout.precision();
+    cout.precision(12);
+    cout << " loup update " << loup  << " loup point  " << loup_point << endl;
+    cout.precision(prec);
+    //==================================================================
+  }
+
+    
+  (INTERVAL_VECTOR&) space.box = savebox;
+  return loup_changed;
+}
+
     
 
 } // end namespace
