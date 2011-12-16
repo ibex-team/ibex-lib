@@ -24,7 +24,7 @@ REAL abs(REAL a){
   INTERVAL_VECTOR eval_inf(sys.nb_ctr());
   INTERVAL_VECTOR eval(sys.nb_ctr());
   goal.forward(sys.space);
-
+ 
 
 //   if(Diam(goal.output())<1e-8){
 //     sys.space.box=savebox;  
@@ -55,7 +55,7 @@ REAL abs(REAL a){
         G(j+1) = 0.0;
         sys.space.ent(IBEX_VAR,j).deriv = &G(j+1);     
       }
-    if(i==0)
+    if(i==goal_ctr)
       goal.gradient(sys.space);
     else
       sys.ctr(i).gradient(sys.space);
@@ -63,7 +63,7 @@ REAL abs(REAL a){
 //     if(G.max_diameter()>1e8) return false; //to avoid problems with SoPleX
     DSVector row1(n);
 
-    if(i==0){
+    if(i==goal_ctr){
        //Linear variable yl is created
        //0 <= yl <= loup
        mysoplex.addCol(LPCol(1.0, dummycol, infinity, -infinity ));
@@ -81,7 +81,7 @@ REAL abs(REAL a){
        mysoplex.addRow(LPRow(-infinity, row1, 0.0));
     }else{
        int op=-1;
-       if(i!=0) op=(dynamic_cast<const Inequality*> (&sys.ctr(i)))->op;
+       if(i!=goal_ctr) op=(dynamic_cast<const Inequality*> (&sys.ctr(i)))->op;
    
        //The contraints i is generated:
       // c_i:  inf([g_i]([x]) + sup(dg_i/dx_1) * xl_1 + ... + sup(dg_i/dx_n) + xl_n  <= -eps_error

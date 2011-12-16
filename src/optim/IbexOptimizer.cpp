@@ -118,12 +118,13 @@ public:
  * \param goal_ctr - The number of the constraint y=f(x) in \a sys
  * \param y_num - The number of the objective variable y in \a sys.space
  */
-Optimizer::Optimizer(const System& sys, int goal_ctr, int y_num, Contractor& contractor, 
+Optimizer::Optimizer(const System& sys,  int y_num, Contractor& contractor, 
 		       Bisector & bisect,
-		     bool maximize, REAL prec, REAL goal_ceil, int sample_size) :
+		     bool maximize, REAL prec, REAL goal_ceil, int sample_size, int goal_ctr1) :
   Paver(sys.space, ContractorList(contractor, Precision(sys.space,prec)), bisect, *new CellHeapForOptim(y_num)),  
   sys(sys),
   y_num(y_num),
+  goal_ctr(goal_ctr1),
   prec_num(1), goal_ceil(goal_ceil),
   loup(BiasPosInf), sample_size(sample_size), loup_changed(false),
   uplo(BiasPosInf), uplo_of_solutions(BiasPosInf)
@@ -142,7 +143,7 @@ Optimizer::Optimizer(const System& sys, int goal_ctr, int y_num, Contractor& con
 ConstrainedOptimizer::ConstrainedOptimizer(const System& sys, int goal_ctr, int y_num, Contractor& contractor, 
 					   Bisector & bisect,
 					   bool maximize, REAL prec, REAL goal_ceil, int sample_size) :
-  Optimizer (sys, goal_ctr, y_num, contractor, bisect, maximize, prec, goal_ceil, sample_size),
+  Optimizer (sys, y_num, contractor, bisect, maximize, prec, goal_ceil, sample_size, goal_ctr),
   is_inside(inverse(sys,goal_ctr))
 {;}  
 

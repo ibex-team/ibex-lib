@@ -249,7 +249,7 @@ void inHC4_expand(const System& sys, INTERVAL_VECTOR& inner_box){
  * (maybe this is stupid?)
  *
  * last update: GCH
-
+ */
 
 VECTOR random_point(const INTERVAL_VECTOR& box) {
   int n=Dimension(box);
@@ -268,8 +268,9 @@ VECTOR random_point(const INTERVAL_VECTOR& box) {
   }
   return pt;
 }
-*/
 
+
+/*
 void compute_random_point (VECTOR& pt, int n, const Space& space, VECTOR& diam, VECTOR& mid)
 // set each coordinate randomly
   {for (int j=1; j<=n; j++) {
@@ -292,35 +293,14 @@ void compute_random_point (VECTOR& pt, int n, const Space& space, VECTOR& diam, 
  * last update: GCH 
  */
 
-  bool ConstrainedOptimizer::random_probing(const System& sys, const Space& space) {
-  int n=space.nb_var();
-  VECTOR mid = Mid(space.box);
-  VECTOR diam = Diam(space.box);
-  VECTOR pt(n);
-  bool loup_changed=false;
-
-  for(int i=0; i<sample_size ; i++){
-    compute_random_point(pt, n, space, diam, mid);
-
-    loup_changed |= check_candidate(sys, space,pt);
-
-  }
-
-  return loup_changed;
-}
-
-
 
 
   bool Optimizer::random_probing (const System& sys, const Space& space) {
-  int n=space.nb_var();
-  VECTOR mid = Mid(space.box);
-  VECTOR diam = Diam(space.box);
-  VECTOR pt(n);
+  VECTOR pt(space.nb_var());
   bool loup_changed=false;
 
   for(int i=0; i<sample_size ; i++){
-    compute_random_point(pt, n, space, diam, mid);
+    pt =   random_point(space.box);
     
     loup_changed |= check_candidate (sys, space, pt);
 
@@ -347,7 +327,7 @@ void compute_random_point (VECTOR& pt, int n, const Space& space, VECTOR& diam, 
  *
  * last update: GCH
  */
-  bool ConstrainedOptimizer::line_probing(const System& sys, const Space& space, const VECTOR& start, int sample_size, bool recursive) {
+  bool Optimizer::line_probing(const System& sys, const Space& space, const VECTOR& start, int sample_size, bool recursive) {
   int n=space.nb_var();
   VECTOR diam = Diam(space.box);
 
@@ -545,24 +525,14 @@ void compute_random_point (VECTOR& pt, int n, const Space& space, VECTOR& diam, 
   //  loup_changed = line_probing(sys, space,  random_point(space.box), 5* sample_size, true);
 
   //  else
-        loup_changed = random_probing(sys, space);
+  loup_changed = random_probing(sys, space);
 
 
-
-  
-  if (loup_changed) {
-    //============================== debug =============================
-    int prec=cout.precision();
-    cout.precision(12);
-    cout << (innerfound? "[in!]" : "") << " loup update " << loup  << " loup point  " << loup_point << endl;
-    cout.precision(prec);
-    //==================================================================
-  }
-
+  if (loup_changed)  trace_loup();
     
   (INTERVAL_VECTOR&) space.box = savebox;
   return loup_changed;
-}
+  }
 
 
 
@@ -571,32 +541,40 @@ void compute_random_point (VECTOR& pt, int n, const Space& space, VECTOR& diam, 
   bool loup_changed=false; // the return value
   INTERVAL_VECTOR savebox = space.box;
 
+  if(mono_analysis)
+    monotonicity_analysis(space, goal);
+
     // first option: startpoint = midpoint
     //
-  //loup_changed = line_probing(sys, space, goal, is_inside, loup, loup_point, Mid(space.box), 5* sample_size, innerfound, true);
+  //     loup_changed = line_probing(sys, space,  Mid(space.box), 5* sample_size, true);
   // other option: chose startpoint randomly
-  //  loup_changed = line_probing(sys, space, goal, is_inside, loup, loup_point, random_point(space.box), 5* sample_size, innerfound, true);
+  //  loup_changed = line_probing(sys, space,  random_point(space.box), 5* sample_size,  true);
 
   //  else
-    loup_changed = random_probing (sys, space);
+  loup_changed = random_probing (sys, space);
 
-
-
-  
-  if (loup_changed) {
-    //============================== debug =============================
-    int prec=cout.precision();
-    cout.precision(12);
-    cout << " loup update " << loup  << " loup point  " << loup_point << endl;
-    cout.precision(prec);
-    //==================================================================
-  }
-
+     if (loup_changed) trace_loup();
     
   (INTERVAL_VECTOR&) space.box = savebox;
   return loup_changed;
 }
 
+  void Optimizer::trace_loup ()
+{
+    int prec=cout.precision();
+    cout.precision(12);
+    cout  << " loup update " << loup  << " loup point  " << loup_point << endl;
+    cout.precision(prec);
+  }
+
+
+  void ConstrainedOptimizer::trace_loup ()
+{
+    int prec=cout.precision();
+    cout.precision(12);
+    cout << (innerfound? "[in!]" : "") << " loup update " << loup  << " loup point  " << loup_point << endl;
+    cout.precision(prec);
+  }
     
 
 } // end namespace
