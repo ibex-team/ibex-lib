@@ -2,14 +2,14 @@
 # chose the interval library
 #===================================================
 #!warning: do not insert white space after the name! 
-SUBLIB=gaol
-#SUBLIB=bias
+#SUBLIB=gaol
+SUBLIB=bias
 #===================================================
 
 # where are Ibex, Bias/Profil and Gaol installed?
 #!warning: gdtoa must also be installed in the root directory of Gaol
 #===================================================
-IBEX_DIR:=/home/gchabert/workspace/ibex
+IBEX_DIR:=/home/gchabert/workspace/ibex2.0
 BIAS_DIR:=/home/gchabert/Profil-2.0.8
 GAOL_DIR:=/home/gchabert/gaol-3.1.1
 #===================================================

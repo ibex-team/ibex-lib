@@ -130,7 +130,7 @@ inline bool Interval::is_superset(const Interval& x) const {
 	return itv.set_contains(x.itv);
 }
 
-inline bool Interval::is_strict_supset(const Interval& x) const {
+inline bool Interval::is_strict_superset(const Interval& x) const {
 	return itv.set_strictly_contains(x.itv);
 }
 

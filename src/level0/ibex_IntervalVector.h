@@ -20,16 +20,15 @@
 
 namespace ibex {
 
-/** \brief
+/**
+ * \ingroup arith
+ *
  * \brief Vector of Intervals
  *
  * By convention an empty vector has a dimension. A vector becomes empty
  * when one of its component becomes empty and all the components
  * are set to the empty Interval.
- *
- * \author Gilles Chabert
- * \date Created Dec 05, 2011 - Last Update Dec 05, 2011
- * */
+ */
 class IntervalVector {
 
 public:

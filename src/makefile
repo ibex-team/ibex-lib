@@ -4,9 +4,10 @@ TARGET  :=$(IBEX_LIB_DIR)/libibex.a
 TOOLS   :=tools
 LEVEL0  :=level0
 SUBDIRS :=$(TOOLS) $(LEVEL0) 
-OBJT    :=$(wildcard $(IBEX_DIR)/src/$(TOOLS)/*.o) 
-OBJ0    :=$(wildcard $(IBEX_DIR)/src/$(LEVEL0)/*.o) 
-OBJS    :=$(OBJT) $(OBJ0) 
+
+OBJT     =$(wildcard $(IBEX_DIR)/src/$(TOOLS)/*.o) 
+OBJ0     =$(wildcard $(IBEX_DIR)/src/$(LEVEL0)/*.o) 
+OBJS     =$(OBJT) $(OBJ0) 
 
 all : $(TARGET)
 

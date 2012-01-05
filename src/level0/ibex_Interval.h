@@ -40,7 +40,7 @@
 namespace ibex {
 
 /**
- * \ingroup Arithmetic
+ *  \defgroup arith Interval Arithmetic
  *
  * \brief Interval
  *
@@ -168,7 +168,7 @@ class Interval {
     bool is_superset(const Interval& x) const;
 
     /** Return true iff the interior of *this is a superset of \a x. */
-    bool is_strict_supset(const Interval& x) const;
+    bool is_strict_superset(const Interval& x) const;
 
     /** Return true iff *this contains \a d.
      * \note d can also be an "open bound", i.e., infinity. */

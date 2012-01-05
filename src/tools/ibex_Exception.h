@@ -9,14 +9,17 @@
  * Created     : Dec 13, 2011
  * ---------------------------------------------------------------------------- */
 
-#ifndef IBEX_EXCEPTION_H_
-#define IBEX_EXCEPTION_H_
+#ifndef _IBEX_EXCEPTION_H_
+#define _IBEX_EXCEPTION_H_
 
 #include <iostream>
 #include <string>
 
 namespace ibex {
 
+/**
+ * \brief Root class of all exceptions raised by IBEX
+ */
 class Exception {
 public:
 	/** \brief Create an exception with an associated message.
@@ -31,6 +34,6 @@ private:
 	std::string msg;
 };
 
-} /* namespace ibex */
+} // namespace ibex
 
-#endif /* IBEX_EXCEPTION_H_ */
+#endif // _IBEX_EXCEPTION_H_

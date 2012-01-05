@@ -146,11 +146,11 @@ inline bool Interval::is_strict_subset(const Interval& x) const {
 	return (is_empty() && !x.is_empty()) || (!x.is_empty() && (x.lb()<lb()) && (x.ub()>ub()));
 }
 
-inline bool Interval::is_supset(const Interval& x) const {
+inline bool Interval::is_superset(const Interval& x) const {
 	return x.is_subset(*this);
 }
 
-inline bool Interval::is_strict_supset(const Interval& x) const {
+inline bool Interval::is_strict_superset(const Interval& x) const {
 	return x.is_strict_subset(*this);
 }
 
