@@ -317,6 +317,7 @@ int Optimizer::next_box() {
 }
 
 
+
 // the heap is updated : in case of a new upperbound (loupchange = true)
 // all boxes with a lower bound greater than (loup - precision)  are removed and deleted.
 void Optimizer::manage_cell_buffer() {

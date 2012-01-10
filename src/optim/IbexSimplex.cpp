@@ -18,6 +18,7 @@ REAL abs(REAL a){
 
   bool Optimizer::simplex_update_loup(const System& sys) {
 
+
   int n=sys.space.nb_var();
   INTERVAL_VECTOR G(sys.nb_var()); // vector to be used by the partial derivatives
   INTERVAL_VECTOR savebox(sys.space.box); 

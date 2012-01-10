@@ -69,6 +69,7 @@ class Optimizer : public Paver {
   /** default sample size */
   static const int default_sample_size;
 
+
   int next_box();
   void manage_cell_buffer();
   void report();  
