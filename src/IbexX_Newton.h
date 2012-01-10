@@ -177,7 +177,7 @@ base_coin = new int[space.nb_var()];
   /** X_Newton iteration. 
   Linearize the system and performs 2n calls to Simplex in order to reduce 
   the 2 bounds of each variable **/
-  void X_NewtonIter();
+  void X_NewtonIter( );
 
 
   /** Apply contraction. **/

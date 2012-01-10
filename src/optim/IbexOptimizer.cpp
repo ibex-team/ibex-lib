@@ -43,13 +43,14 @@ namespace ibex {
 const int Optimizer::default_sample_size = __IBEX_DEFAULT_MINIMIZER_SAMPLE_SIZE;
 
 
-/**
+/*
  * Each node in the search tree of the optimizer
  * has an associated inner box, stored as a
  * backtrackable stucture.
  *
  * last update: GCH
- */
+ * not used  put in commentary   BNE
+
 class InnerBox : public Backtrackable {
 public:
   // warning: we must resize the "inner_box" field the
@@ -62,6 +63,7 @@ public:
   INTERVAL_VECTOR inner_box;
 };
 
+*/
 /** Transform a system of inequalities
  * (eg: g_1(x)<=0 ^ ... ^g_m(x)<=0)
  * into the union of all the reversed inequalities 
@@ -108,7 +110,7 @@ public:
     delete new_ctcs[i];
   }
 
-  return Sequence(new_sys, sys.space, false);
+  return Sequence(new_sys, sys.space, false);  // false indicates a disjunction of constraints
   
 }
 
@@ -135,7 +137,7 @@ Optimizer::Optimizer(const System& sys,  int y_num, Contractor& contractor,
   EvaluatorFactory fac(goal_function);
   fac.build(&goal);
 
-  m.add<InnerBox>();
+  //  m.add<InnerBox>();
 
 }
 
@@ -154,10 +156,14 @@ Optimizer::~Optimizer() {
   delete &cells;
 }
 
+  // The main procedure for processing a box 
+  // contract the box corresponding to cell with the loup, with the contractor ctc, 
+  // search for a new loup
+  // push the box onto the heap
+
 void Optimizer::contract_and_bound(Cell* c) {
   space.box = c->box; // rem: c.space == space
   space.epx = c->epx;
-  //cout << c->box << endl;
   
   /*======================== contract with loup ========================*/
   INTERVAL& y=space.box(y_num+1); //  y_num is the objective
@@ -169,7 +175,7 @@ void Optimizer::contract_and_bound(Cell* c) {
     ymax=loup*(1-goal_ceil);
   
   if (Inf (y) > ymax) { 
-    delete c; // if this procedure was in a contractor ---> throw EmptyBoxException();
+    delete c; 
     return;
   }
   if (Sup (y) > ymax) y = INTERVAL(Inf(y),ymax);  
@@ -198,7 +204,7 @@ void Optimizer::contract_and_bound(Cell* c) {
     c->epx = space.epx;
     
     _nb_cells++; 
-    cells.push(c);  // this sub-box is put onto the heap.
+    cells.push(c);  // the box is put onto the heap.
   
 
   } else if (ctc_num == prec_num) { // the box is a "solution"
@@ -214,11 +220,20 @@ void Optimizer::contract_and_bound(Cell* c) {
   }
 }
 
+  // Search for a new loup 
+
+
+ bool Optimizer::loup_change(Cell& c)
+      {
+ 	int box_loup_changed = update_loup (sys, space);
+	box_loup_changed |= simplex_update_loup(sys);
+	return box_loup_changed;
+      }
+
+
  bool ConstrainedOptimizer::loup_change(Cell& c)
       {
-
-	//	innerbox= c.get<InnerBox>().inner_box; // get the current inner box (to be inflated by update_loup)  ?????
-
+	//	innerbox= c.get<InnerBox>().inner_box; // get the current inner box (to be inflated by update_loup)  not used BNE
  
 	int box_loup_changed = update_loup(sys, space);
 	innerfound=false;
@@ -231,24 +246,22 @@ void Optimizer::contract_and_bound(Cell* c) {
 	return box_loup_changed;
       }
 
- bool Optimizer::loup_change(Cell& c)
-      {
- 	int box_loup_changed = update_loup (sys, space);
-	box_loup_changed |= simplex_update_loup(sys);
-	return box_loup_changed;
-      }
 
 
 
-// The schema bisection-contraction is inversed wrt the schema in Paver
-// First the bisection is performed and then each subbox is contracted before being inserted in the heap.
+
+
+// The  bisection-contraction schema is inversed wrt the schema in Paver
+// First the bisection is performed and then each subbox is contracted before being inserted into the heap.
+// returns -1  when the stack is empty
+// exceptions  (precision on the objective reached, memory out or time out) are thrown to end the exploration
 
 int Optimizer::next_box() {
   if (trace) show_stack();
   
   if (!cells.empty()) { 
     Cell& c(*cells.pop());
-    contract_and_bound(&c);
+    contract_and_bound(&c);  // first contraction at the beginning 
   }
   
   while (!cells.empty()) {
@@ -266,7 +279,7 @@ int Optimizer::next_box() {
 
     Cell* c1 = new Cell(bis, false, c, m);
     Cell* c2 = new Cell(bis, true, c, m);
-
+    /*************** contraction ********************/  
     contract_and_bound(c1);
     contract_and_bound(c2);
     REAL new_uplo;
@@ -284,18 +297,14 @@ int Optimizer::next_box() {
     else
       uplo=uplo_of_solutions;
   
-    if (loup_changed) 
-      { int prec=cout.precision();
-	cout.precision(12);
-        // cout << "loup " << loup << endl;
- 	cout << "uplo " << uplo << endl;
-	cout.precision(prec);}
+    if (loup_changed)   trace_uplo();
     manage_cell_buffer();      
 
     check_limits();
 
     delete &c;
 
+    // stopping criterion   the required precision is reached.
     if (loup != BiasPosInf) {
       if (((fabs(loup)> 1) && (loup-uplo)/(fabs (loup)) < goal_ceil)
 	  || (loup-uplo) <  goal_ceil)
@@ -304,7 +313,7 @@ int Optimizer::next_box() {
     
 
   }
-  return -1; // means empty stack.
+  return -1; // means empty stack : end of the algorithm
 }
 
 
@@ -341,6 +350,13 @@ void Optimizer:: check_limits()
     { throw MemoryException();}
 
 }
+
+  void Optimizer::trace_uplo()
+      { int prec=cout.precision();
+	cout.precision(12);
+ 	cout << "uplo " << uplo << endl;
+	cout.precision(prec);}
+
 
 void Optimizer::report() {
   Paver::report();

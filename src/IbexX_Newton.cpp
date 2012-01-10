@@ -80,7 +80,6 @@ void X_Newton::contract() {
 void X_Newton::contract() {
  REAL gain;
  if (space.box.max_diameter() > max_diam_box) return;
- // if (space.box.max_diameter() > 10*max_diam_deriv) return;
  do{
 
     INTERVAL_VECTOR savebox=space.box;
@@ -555,7 +554,6 @@ void X_Newton::X_NewtonIter(){
 
 	  if(Inf(opt)>Sup(space.box(i+1)))    throw EmptyBoxException();
 	  choose_next_variable(mysoplex ,nexti,infnexti, inf_bound, sup_bound);
-	
 	  if(Inf(opt) > Inf(space.box(i+1)) ){
 	    space.box(i+1)=INTERVAL( Inf(opt),Sup(space.box(i+1) ));
 	    mysoplex.changeLhs(nb_ctrs+i,Inf(opt));
@@ -582,7 +580,6 @@ void X_Newton::X_NewtonIter(){
 
 	  if(Sup(opt)<Inf(space.box(i+1))) throw EmptyBoxException();
 	 choose_next_variable(mysoplex ,nexti,infnexti, inf_bound, sup_bound);
-        
 	 if(Sup(opt) < Sup(space.box(i+1)) ){
 	   space.box(i+1)=INTERVAL( Inf(space.box(i+1)), Sup(opt));
 	   mysoplex.changeRhs(nb_ctrs+i,Sup(opt));

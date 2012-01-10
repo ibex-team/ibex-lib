@@ -52,9 +52,9 @@ class Optimizer : public Paver {
    *
    * And optionnaly:
    *   \param maximize  - whether the goal is to be maximized (true) or minimized (false). 
-   *                      The default value is "false".
-   *   \param prec      - precision for the solutions.
-   *   \param goal_ceil - ceil on the precision of the objective (the optimizer stops once reached). */
+   *                      The default value is "false".  NOT IMPLEMENTED
+   *   \param prec      - absolute precision for the solutions.
+   *   \param goal_ceil - ceil on the relative precision of the objective (the optimizer stops once reached). */
     Optimizer(const System& sys, int y_num, Contractor & ctc, Bisector & bsc, bool maximize=false, REAL prec=Bisector::default_prec, REAL goal_ceil=Bisector::default_prec, int sample_size=default_sample_size, int goal_ctr=0);
     
   /** Delete this instance. */
@@ -85,7 +85,7 @@ class Optimizer : public Paver {
   int prec_num;             // number of the precision contractor
   REAL goal_ceil;           // miminal precision on the objective (under which a timeout occurs)
   //CellHeapForOptim* buffer; // buffer of cells
-  //bool maximize;            // true means maximization, false minimization
+  //bool maximize;            // true means maximization, false minimization  :  not implemented
   REAL loup;                // "loup"= lowest upper bound of the minimum
   int sample_size;          // number of samples used to update the loup
   bool loup_changed;        // boolean indicating if the loup has changed during call to Updateloup contractor
@@ -131,11 +131,12 @@ class Optimizer : public Paver {
 /** Try to reduce the loup with the candidate point "pt".
  * Return true in case of success and updates  loup and loup_point
  * The function does not modify space.box.
- * last update BNe
+ * last update BNE
  */
 
 
-virtual bool check_candidate(const System& sys, const Space& space,  const VECTOR& pt);
+bool check_candidate(const System& sys, const Space& space,  const VECTOR& pt);
+virtual bool check_constraints(const System& sys, const Space& space);
  bool line_probing(const System& sys, const Space& space, const VECTOR& start, int sample_size, bool recursive);
  bool random_probing (const System& sys, const Space& space);
 void monotonicity_analysis(const Space& space, const Evaluator& goal);
@@ -149,6 +150,7 @@ void monotonicity_analysis(const Space& space, const Evaluator& goal);
   bool simplex_update_loup(const System& sys);
 
  virtual  void trace_loup();
+ void trace_uplo();
 };
 
 
@@ -167,11 +169,12 @@ class ConstrainedOptimizer : public Optimizer {
    *   \param ctc   - the contractor used for f(x)<= loup and g(x)<= 0
    *   \param bsc   - the bisector
    *
-   * And optionnaly:
-   *   \param maximize  - whether the goal is to be maximized (true) or minimized (false). 
-   *                      The default value is "false".
+   * And optionally:
+   *   \param maximize  - whether the goal is to be maximized (true) or minimized (false).  NOT IMPLEMENTED
+   *                      The default value is "false" :  IbexOpt only solves mimization problems.
    *   \param prec      - precision for the solutions.
-   *   \param goal_ceil - ceil on the precision of the objective (the optimizer stops once reached). */
+   *   \param goal_ceil - ceil on the relative precision of the objective (the optimizer stops once reached).
+   *   \param sample_size -  the number of points picked for updating the loup  */
 
 
 
@@ -183,7 +186,7 @@ class ConstrainedOptimizer : public Optimizer {
     bool innerfound;
     virtual   bool update_loup(const System& sys, const Space& space);
 
- bool check_candidate (const System& sys, const Space& space, const VECTOR& pt);
+ bool check_constraints (const System& sys, const Space& space);
 
 /** The InHC4 algorithm
  * returns true if  an innerbox of the system is found
