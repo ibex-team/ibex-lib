@@ -10,7 +10,7 @@ REAL abs(REAL a){
 }
 
  
-//The system is relaxed by using the Taylor extension.
+//The system is overconstrained by using the Taylor extension.
 //Then the simplex algorithm is applied to obtain a new upper bound loup
 //If a new loup is found the method returns true
 // The objective is the first constraint in system sys
@@ -49,7 +49,7 @@ REAL abs(REAL a){
   //The linear system is generated
  try{
   for (int i=0; i<sys.nb_ctr();i++){
-    if(i>0 && isInner(sys, i)) continue; //the constraint is satified :)
+    if(i>0 && isInner(sys, sys.space, i)) continue; //the constraint is satified :)
 
 // =============== Gradient calculation ======================
       for (int j=0; j<n; j++) {
@@ -94,9 +94,9 @@ REAL abs(REAL a){
 	 }
        }
        if(op == LEQ || op== LT){
-	 mysoplex.addRow(LPRow(-infinity, row1, Inf(-eval_inf(i+1))-1e-10));
-       }else{
-         mysoplex.addRow(LPRow(Sup(-eval_inf(i+1))+1e-10, row1, infinity)); 
+	 mysoplex.addRow(LPRow(-infinity, row1, Inf(-eval_inf(i+1))-1e-10));    //  1e-10 ???  BNE 
+	       }else{
+	 mysoplex.addRow(LPRow(Sup(-eval_inf(i+1))+1e-10, row1, infinity)); 
        }
     }
   }

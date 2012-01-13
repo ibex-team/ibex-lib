@@ -274,7 +274,7 @@ int Paver::next_box() {
 }
 
 void Paver::check_limits() {
-  if (cell_limit!=-1 && _nb_cells>=cell_limit) throw TimeOutException();
+  if (cell_limit!=-1 && _nb_cells>=cell_limit) throw CellLimitException();
   Timer::stop();
   time += Timer::VIRTUAL_TIMELAPSE();    
   if (time_limit >0 &&  time >=time_limit) throw TimeOutException();

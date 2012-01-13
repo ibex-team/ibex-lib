@@ -141,8 +141,8 @@ virtual bool check_constraints(const System& sys, const Space& space);
  bool line_probing(const System& sys, const Space& space, const VECTOR& start, int sample_size, bool recursive);
  bool random_probing (const System& sys, const Space& space);
 void monotonicity_analysis(const Space& space, const Evaluator& goal);
- virtual bool isInner(const System& sys) {return true;}; // used in simplex_update_loup
- virtual bool isInner(const System& sys, int j) {return true;};
+ virtual bool isInner(const System& sys, const Space& space) {return true;}; // used in simplex_update_loup
+ virtual bool isInner(const System& sys, const Space& space, int j) {return true;};
 
  /* The system is overconstrained by using the Taylor extension.
   * Then the simplex algorithm is applied to obtain a new loup
@@ -193,8 +193,8 @@ class ConstrainedOptimizer : public Optimizer {
  * returns true if  an innerbox of the system is found
  */
 bool inHC4(const System& sys, REAL loup);
-bool isInner(const System& sys);
-bool isInner(const System& sys, int j) ;
+ bool isInner(const System& sys, const Space& space);
+ bool isInner(const System& sys, const Space& space, int j) ;
 
  INTERVAL_VECTOR innerbox;
  void trace_loup();

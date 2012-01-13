@@ -53,10 +53,10 @@ namespace ibex {
     {;}
 }
 
-  bool ConstrainedOptimizer::isInner(const System& sys, int j){
+  bool ConstrainedOptimizer::isInner(const System& sys, const Space& space, int j){
         const  Inequality* ineq=dynamic_cast<const Inequality*> (&sys.ctr(j));
-        ineq->forward(sys.space);
-        INTERVAL eval=ineq->eval(sys.space);
+	//	ineq->forward(space);
+        INTERVAL eval=ineq->eval(space);
         if((ineq->op==LEQ && Sup(eval) > 0) || (ineq->op==LT && Sup(eval) >= 0) ||
 	    (ineq->op==GEQ && Inf(eval) < 0) || (ineq->op==GT && Inf(eval) <= 0)){
             
@@ -66,9 +66,9 @@ namespace ibex {
   }
 
   // goal is the first constraint -> start with j=1
-  bool ConstrainedOptimizer::isInner(const System& sys){
+  bool ConstrainedOptimizer::isInner(const System& sys, const Space& space){
       for (int j=1; j<sys.nb_ctr(); j++)
-        if(!isInner(sys,j)) return false;
+        if(!isInner(sys,space,j)) return false;
      return true;
   }
 
@@ -164,11 +164,13 @@ void inHC4_expand(const System& sys, INTERVAL_VECTOR& inner_box){
   // will be updated if the constraints are satisfied.
   // The test of the constraints is done only when the evaluation of the criterion 
   // is better than the loup (a cheaper test).
+
+  //  cout << " res " <<  res << " loup " << loup << endl;
   if (_LT(res,loup)) {
  
     if (check_constraints (sys,  space))
       {loup = res;
-	loup_point = pt;
+       loup_point = pt;
 	loup_point(y_num+1)=loup;
 	loup_found = true;
       }
@@ -190,22 +192,28 @@ bool Optimizer::check_constraints (const System& sys, const Space& space){return
 * already been proven to be inner (avoid unecessary tests)
 */
 bool ConstrainedOptimizer::check_constraints (const System& sys, const Space& space){
+  bool constraints_ok=false;
     // to apply [check1] comment next line
     //       if (!innerfound) {
     try {
 //       is_inside.contract();
-      if(!isInner(sys)){ //the is_inside contractor doesn't refute thing like 2>2    ??? BNE
+      if(!isInner(sys,space)){ //the is_inside contractor doesn't refute thing like 2>2    ??? BNE
 	if(innerfound && in_HC4) //error 
 	  cout << "the box returned by inHC4 is not an innerbox!" << endl; 
-        innerfound = false;  
-      } else 
-	innerfound= true; 
+        constraints_ok= false;  
+	innerfound=false;
+
+      }
+      else 
+	constraints_ok= true; 
       
     } 
+
     catch(EmptyBoxException) {
-        innerfound = true; // local assignment (valid for pt only)  ??? encore utile sans is_inside ???  BNE
+        constraints_ok = true; // local assignment (valid for pt only)  ??? encore utile sans is_inside ???  BNE
     }
-    return innerfound;
+
+    return constraints_ok;
   }
 
 
@@ -244,7 +252,6 @@ VECTOR random_point(const INTERVAL_VECTOR& box) {
   bool Optimizer::random_probing (const System& sys, const Space& space) {
   VECTOR pt(space.nb_var());
   bool loup_changed=false;
-
   for(int i=0; i<sample_size ; i++){
     pt =   random_point(space.box);
     loup_changed |= check_candidate (sys, space, pt);
@@ -464,11 +471,12 @@ VECTOR random_point(const INTERVAL_VECTOR& box) {
   //  if (innerfound)
     // first option: startpoint = midpoint
     //
-  //  loup_changed = line_probing(sys, space,   Mid(space.box), 5* sample_size, true);
+  //    loup_changed = line_probing(sys, space,   Mid(space.box), 5*sample_size, true);
   // other option: chose startpoint randomly
   //  loup_changed = line_probing(sys, space,  random_point(space.box), 5* sample_size, true);
 
   //  else
+  //    if (!loup_changed)
   loup_changed = random_probing(sys, space);
 
   if (loup_changed)  trace_loup();
