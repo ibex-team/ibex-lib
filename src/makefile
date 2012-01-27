@@ -3,11 +3,13 @@ include common.mak
 TARGET  :=$(IBEX_LIB_DIR)/libibex.a
 TOOLS   :=tools
 LEVEL0  :=level0
-SUBDIRS :=$(TOOLS) $(LEVEL0) 
+LEVEL1  :=level1
+SUBDIRS :=$(TOOLS) $(LEVEL0) $(LEVEL1) 
 
 OBJT     =$(wildcard $(IBEX_DIR)/src/$(TOOLS)/*.o) 
 OBJ0     =$(wildcard $(IBEX_DIR)/src/$(LEVEL0)/*.o) 
-OBJS     =$(OBJT) $(OBJ0) 
+OBJ1     =$(wildcard $(IBEX_DIR)/src/$(LEVEL1)/*.o)
+OBJS     =$(OBJT) $(OBJ0) $(OBJ1)
 
 all : $(TARGET)
 

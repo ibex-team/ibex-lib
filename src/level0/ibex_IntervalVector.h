@@ -73,6 +73,8 @@ public:
 	 */
 	const Interval& operator[](int i) const;
 
+	Interval& operator[](int i);
+
 	/** \brief The dimension (number of components)
 	 */
 	int size() const;
@@ -92,6 +94,12 @@ public:
 	 * empty Interval if the IntervalVector was empty.
 	 */
 	void resize(int n2);
+
+	/**
+	 * \brief Return a subvector.
+	 */
+	IntervalVector subvector(int start_index, int end_index);
+
 
 	/** \brief Set the lower bound of the ith component of this
 	 *
@@ -233,6 +241,8 @@ public:
 	/** \brief Subtract x to this
 	 */
 	IntervalVector& operator-=(const IntervalVector& x);
+
+	IntervalVector& operator&=(const IntervalVector& x);
 private:
 
 	int n;             // dimension (size of vec)

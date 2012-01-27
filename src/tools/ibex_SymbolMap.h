@@ -56,8 +56,13 @@ struct equal_string {
 template <typename T>
 class SymbolMap {
 public:
+	/**
+	 * \brief Create a new empty map.
+	 */
+	SymbolMap() { }
 
-	/** \brief Copy constructor.
+	/**
+	 * \brief Copy constructor.
 	 *
 	 * Duplicate all symbols of the table \a tab. */
 	SymbolMap(const SymbolMap<T>& tab) {
@@ -67,19 +72,23 @@ public:
 		}
 	}
 
-	/** \brief Delete this instance. */
+	/**
+	 * \brief Delete this instance.
+	 */
 	~SymbolMap() {
 		clean();
 	}
 
-	/** \brief Size of the structure.
+	/**
+	 * \brief Size of the structure.
 	 *
 	 * Return the number of elements in the structure */
 	size_t size() const {
 		return map.size();
 	}
 
-	/** \brief Clean the structure
+	/**
+	 * \brief Clean the structure
 	 *
 	 * Erase all the elements. */
 	void clean() {
@@ -96,12 +105,15 @@ public:
 		map.clear(); // erases all the elements
 	}
 
-	/** \brief Return true if the symbol \a id exists in the map. */
+	/**
+	 * \brief Return true if the symbol \a id exists in the map.
+	 */
 	bool used(const char* id) const {
 		return map.find(id)!=map.end();
 	}
 
-	/** \brief Insert a new identifier \a id with associated data \a data.
+	/**
+	 * \brief Insert a new identifier \a id with associated data \a data.
 	 *
 	 * The key is a copy of the string pointed to by \a id, not \a id itself.
 	 * \throw  NonRecoverableException- if \a id already exists.
@@ -114,7 +126,8 @@ public:
 		return copy;
 	}
 
-	/** \brief Remove the pair <key,data> where key is the symbol \a id.
+	/**
+	 * \brief Remove the pair <key,data> where key is the symbol \a id.
 	 */
 	void erase(const char* id) {
 		if (used(id)) {
@@ -125,7 +138,8 @@ public:
 		}
 	}
 
-	/** \brief Return the data associated to the symbol \a id.
+	/**
+	 * \brief Return the data associated to the symbol \a id.
 	 *
 	 * \throw NonRecoverableException - if no element could be found with key \a id. */
 	const T& data(const char* id) const {
@@ -134,14 +148,17 @@ public:
 		return it->second;
 	}
 
-	/** \brief Return the data associated to the symbol \a id.
+	/**
+	 * \brief Return the data associated to the symbol \a id.
 	 *
 	 * \throw NonRecoverableException - if no element could be found with key \a id. */
 	T& data(const char* id) {
 		return (T&) ((const SymbolMap<T>*) this)->data(id);
 	}
 
-	/** \brief Output the hash table. */
+	/**
+	 * \brief Output the hash table.
+	 */
 	friend std::ostream& operator<<(std::ostream& os, const SymbolMap<T>& idtab) {
 		int i=0;
 		for (typename IBEXMAP(T)::const_iterator it=idtab.begin(); it!=idtab.end(); it++) {

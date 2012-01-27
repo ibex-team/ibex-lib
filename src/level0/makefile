@@ -1,7 +1,7 @@
 
 include ../common.mak
 
-OBJS=ibex_Interval.o ibex_IntervalVector.o
+OBJS=ibex_Interval.o ibex_IntervalVector.o ibex_IntervalMatrix.o
 TARGET=all
 
 SUBLIB_H:=ibex_$(SUBLIB)_Interval.h
@@ -13,6 +13,9 @@ $(TARGET):	$(OBJS)
 	install -m 640 $(SUBLIB_H) $(IBEX_INC_DIR)/$(SUBLIB_H)
  
 ibex_IntervalVector.o : ibex_IntervalVector.cpp ibex_IntervalVector.h ibex_Interval.h $(SUBLIB_CPP) $(SUBLIB_H) 
+	$(CXX) $(CXXFLAGS) $(INC_DIR_OPT) -c -o  $@ $<
+
+ibex_IntervalMatrix.o : ibex_IntervalMatrix.cpp ibex_IntervalMatrix.h ibex_IntervalVector.h ibex_Interval.h $(SUBLIB_CPP) $(SUBLIB_H) 
 	$(CXX) $(CXXFLAGS) $(INC_DIR_OPT) -c -o  $@ $<
 
 ibex_Interval.o : ibex_Interval.cpp ibex_Interval.h $(SUBLIB_CPP) $(SUBLIB_H) 

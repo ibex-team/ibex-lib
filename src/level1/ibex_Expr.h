@@ -1,0 +1,1238 @@
+/* ============================================================================
+ * I B E X - Expressions
+ * ============================================================================
+ * Copyright   : Ecole des Mines de Nantes (FRANCE)
+ * License     : This program can be distributed under the terms of the GNU LGPL.
+ *               See the file COPYING.LESSER.
+ *
+ * Author(s)   : Gilles Chabert
+ * Created     : Jan 05, 2012
+ * ---------------------------------------------------------------------------- */
+
+#ifndef _IBEX_EXPR_H
+#define _IBEX_EXPR_H
+
+#include <vector>
+#include <iostream>
+
+#include "ibex_SymbolMap.h"
+#include "ibex_FunctionVisitor.h"
+#include "ibex_Interval.h"
+#include "ibex_IntervalVector.h"
+#include "ibex_IntervalMatrix.h"
+#include "ibex_Dim.h"
+
+
+namespace ibex {
+
+class Function;
+class Constraint;
+class Equality;
+class Inequality;
+class ExprIndex;
+
+/**
+ * \ingroup level1
+ * \brief Label of an expression node
+ *
+ */
+class ExprLabel {
+
+};
+
+/**
+ * \ingroup level1
+ * \brief Node in an expression.
+ *
+ * An object of this class is a node in a DAG, reprented by a #Function object.
+ * Each node has a default decoration: the size of the subDAG (number of nodes) it represents
+ * and the height of this node in the global expression.
+
+ * All extra info can be stored in a generic decoration field, \a deco (See #ibex::Decorator).
+ *
+ * Example of <i>expression</i>: sin(x+y)^2*3.14.
+ */
+class ExprNode {
+
+ public:
+  /** Builds a node of a given height, size and dimension.
+   * \see #height, #size, #dim. */
+  ExprNode(Function& expr, int height, int size, const Dim& dim);
+
+  /** Accept an #ibex::ExprVisitor visitor. */
+  virtual void acceptVisitor(FunctionVisitor& v) const = 0;
+
+  friend class Visitor;
+
+  /** Deletes this instance. */
+  virtual ~ExprNode() { }
+
+  /** Streams out this expression. */
+  friend std::ostream& operator<<(std::ostream&, const ExprNode&);
+
+  /** The function where this expression is defined */
+  Function& context;
+
+  /** height (following topological order) of this node in the DAG. */
+  const int height;
+
+  /** Number of subnodes (including itself) in the DAG (not in the TREE:
+   * two subnodes referencing the same object count for 1).*/
+  const int size;
+
+  /** Unique number identifying this node in the global function. */
+  const int id;
+
+  /** Dimensions */
+  const Dim dim;
+
+  /** The label of this node. */
+  mutable ExprLabel *deco;
+
+  /** Return true if this subexpression is the constant 0. */
+  virtual bool is_zero() const { return false; }
+
+  /** Return the type of this subexpression. */
+  Dim::Type type() const { return dim.type(); }
+
+  /** Indexing */
+  const ExprIndex& operator[](int index) const;
+
+  /** Create an equality constraint expr=expr. */
+  const Equality& operator=(const ExprNode& right) const;
+
+  /** Create an equality constraint expr=value. */
+  const Equality& operator=(const Interval& value) const;
+
+  /** Create an inequality constraint expr<=expr. */
+  const Inequality& operator<=(const ExprNode& right) const;
+
+  /** Create an inequality constraint expr<=value. */
+  const Inequality& operator<=(const Interval& value) const;
+
+  /** Create an inequality constraint expr>=expr. */
+  const Inequality& operator>=(const ExprNode& right) const;
+
+  /** Create an inequality constraint expr>=value. */
+  const Inequality& operator>=(const Interval& value) const;
+
+  /** Create an inequality constraint expr<value. */
+  const Inequality& operator<(const ExprNode& right) const;
+
+  /** Create an inequality constraint expr<value. */
+  const Inequality& operator<(const Interval& value) const;
+
+  /** Create an inequality constraint expr>expr. */
+  const Inequality& operator>(const ExprNode& right) const;
+
+  /** Create an inequality constraint expr>value. */
+  const Inequality& operator>(const Interval& value) const;
+};
+
+/**
+ * \ingroup level1
+ * \brief Indexed expression
+ */
+class ExprIndex : public ExprNode {
+
+ public:
+  /** Accept an #ibex::ExprVisitor visitor. */
+   void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); }
+
+  /** Create an equality constraint expr[i]=expr. */
+  const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+
+  /** Create an equality constraint expr[i]=value. */
+  const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+
+   /** The sub-expression */
+   const ExprNode& expr;
+
+   /** The index. */
+    const int index;
+
+   static const ExprIndex& new_(const ExprNode& subexpr, int index) { return *new ExprIndex(subexpr,index); }
+
+ private:
+   /** Create an indexed expression. */
+   ExprIndex(const ExprNode& subexpr, int index) : ExprNode(subexpr.context, subexpr.height+1, subexpr.size+1, subexpr.dim.index_dim()), expr(subexpr), index(index) { }
+
+
+};
+
+/**
+ * \ingroup level1
+ * \brief Vector of expressions
+ */
+class ExprVector : public ExprNode {
+public:
+	/** Accept an #ibex::ExprVisitor visitor. */
+	void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); }
+
+	/** Return the ith component */
+	const ExprNode& operator[](int i) { return *comp[i]; }
+
+	static const ExprVector& new_(const ExprNode& e1, const ExprNode& e2, bool in_rows);
+
+	/** In rows or columns? */
+	const bool in_rows;
+
+	/** Get the ith component.
+	 *
+	 * \warning Can't define it using operator[]... already overwritten in ExprNode */
+	const ExprNode& get(int i) const { return *comp[i]; }
+
+	/** Number of elements (not to be
+	 * confused with the dimension). */
+	int size() const { return comp.size(); }
+
+private:
+	ExprVector(const ExprNode& e1, const ExprNode& e2);
+
+	/* The components */
+	vector<const ExprNode*> comp;
+
+};
+
+/**
+ * \ingroup level1
+ * \brief Symbol
+ *
+ * An instance of this class represents a leaf in the syntax tree. This leaf
+ * merely contains the name of the symbol, a string (char*).
+ */
+class ExprSymbol : public ExprNode {
+
+ public:
+  /** Create an equality constraint symbol=expr. */
+  const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+
+  /** Create an equality constraint symbol=value. */
+  const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+
+  /** Accept an #ibex::ExprVisitor visitor. */
+  virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+
+  /** Deletes this instance. */
+  ~ExprSymbol() { free((char*) name); }
+
+  /** The symbol identifier. */
+  const char* name;
+
+  /** Key of this symbol. Every symbol in an expression is also
+   * an argument of the corresponding function; this key simply corresponds to the
+   * order of this symbol in the list of arguments. */
+  int key;
+
+  static const ExprSymbol& new_(Function& expr, const char* name, const Dim& dim, int key) { return *new ExprSymbol(expr,name,dim,key); }
+
+ private:
+  /** Create a symbol. */
+  ExprSymbol(Function& expr, const char* name, const Dim& dim, int key) : ExprNode(expr,0,1,dim), name(strdup(name)), key(key) { }
+
+  /** Duplicate this symbol: forbidden. */
+  ExprSymbol(const ExprSymbol&);
+};
+
+/**
+ * \ingroup level1
+ * \brief Constant expression
+ */
+class ExprConstant : public ExprNode {
+
+ public:
+  /** Create a scalar constant. */
+  static const ExprConstant& new_scalar(Function& expr, const Interval& value) { return *new ExprConstant(expr,value); }
+
+  /** Create a vector constant. */
+  static const ExprConstant& new_vector(Function& expr, const IntervalVector& value) { return *new ExprConstant(expr,value); }
+
+  /** Create a matrix constant. */
+  static const ExprConstant& new_matrix(Function& expr, const IntervalMatrix& value) { return *new ExprConstant(expr,value); }
+
+  /** Return a copy of a constant. */
+  const ExprConstant& copy() const { return *new ExprConstant(*this); }
+
+  /** Return true if this constant is either 0, the null vector or the null matrix. */
+  virtual bool is_zero() const;
+
+  /** Accept an #ibex::ExprVisitor visitor. */
+  virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+
+  /** Return the value of the constant under the form of an #Interval.
+   *  If the constant is a matrix, the first entry is returned (no error). */
+  const Interval& get_value() const { return value[0][0]; }
+
+  /** Return the value of the constant under the form of an #IntervalVector.
+   *  If the constant is a matrix, the first row is returned (no error). */
+  const IntervalVector& get_vector_value() const { return value[0]; }
+
+  /** Return the value of the constant under the form of an IntervalMatrix.
+   *  If the constant is not a matrix, the returned matrix is 1-row x 1-col. */
+  const IntervalMatrix& get_matrix_value() const { return value; }
+
+ private:
+  friend class Visitor;
+
+  ExprConstant(Function& expr, const Interval& value);
+
+  ExprConstant(Function& expr, const IntervalVector& value);
+
+  ExprConstant(Function& expr, const IntervalMatrix& value);
+
+  ExprConstant(Function& expr, const ExprConstant& c);
+
+  const IntervalMatrix value;
+};
+
+
+/*==========================================================================================================*/
+/*                                         Binary expressions                                               */
+/*==========================================================================================================*/
+
+/**
+ * \ingroup level1
+ * \brief Binary expression
+ */
+class ExprBinaryOp : public ExprNode {
+ public:
+  /** Create an equality constraint expr o expr=expr. */
+  const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+
+  /** Create an equality constraint expr o expr=value. */
+  const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+
+  /** Left subexpression. */
+  const ExprNode& left;
+
+  /** Right subexpression. */
+  const ExprNode& right;
+
+ private:
+  friend class Visitor;
+
+  ExprBinaryOp(const ExprNode& left, const ExprNode& right, int dim);
+
+  ExprBinaryOp(const ExprBinaryOp&); // copy constructor forbidden
+};
+
+/**
+ * \ingroup level1
+ * \brief Addition of 2 expressions
+ */
+class ExprAdd : public ExprBinaryOp {
+public:
+	/** Create an equality constraint expr1+expr2=expr. */
+	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+
+	/** Create an equality constraint expr1+expr2=value. */
+	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+
+	/** Accept an #ibex::ExprVisitor visitor. */
+	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+
+	static const ExprAdd& new_(const ExprNode& left, const ExprNode& right) {
+		return *new ExprAdd(left,right);
+	}
+
+private:
+	 ExprAdd(const ExprNode& left, const ExprNode& right);
+	 ExprAdd(const ExprAdd&); // copy constructor forbidden
+};
+
+/**
+ * \ingroup level1
+ * \brief Multiplication of 2 expressions
+ */
+class ExprMul : public ExprBinaryOp {
+public:
+	/** Create an equality constraint expr1*expr2=expr. */
+	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+
+	/** Create an equality constraint expr1*expr2=value. */
+	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+
+	 /** Accept an #ibex::ExprVisitor visitor. */
+	 virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+
+	 static const ExprMul& new_(const ExprNode& left, const ExprNode& right) {
+		  return *new ExprMul(left,right);
+	 }
+
+private:
+	 ExprMul(const ExprNode& left, const ExprNode& right);
+	 ExprMul(const ExprMul&); // copy constructor forbidden
+};
+
+
+/**
+ * \ingroup level1
+ * \brief Subtraction of 2 expressions
+ */
+class ExprSub : public ExprBinaryOp {
+public:
+	/** Create an equality constraint expr1+expr2=expr. */
+	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+
+	/** Create an equality constraint expr1+expr2=value. */
+	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+
+	 /** Accept an #ibex::ExprVisitor visitor. */
+	 virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+
+	 static const ExprSub& new_(const ExprNode& left, const ExprNode& right) {
+		  return *new ExprSub(left,right);
+	 }
+
+private:
+	 ExprSub(const ExprNode& left, const ExprNode& right);
+	 ExprSub(const ExprSub&); // copy constructor forbidden
+};
+
+/**
+ * \ingroup level1
+ * \brief Division of 2 expressions
+ */
+class ExprDiv : public ExprBinaryOp {
+public:
+	/** Create an equality constraint expr1+expr2=expr. */
+	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+
+	/** Create an equality constraint expr1+expr2=value. */
+	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+
+	 /** Accept an #ibex::ExprVisitor visitor. */
+	 virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+
+	 static const ExprDiv& new_(const ExprNode& left, const ExprNode& right) {
+		  return *new ExprDiv(left,right);
+	 }
+
+private:
+	 ExprDiv(const ExprNode& left, const ExprNode& right);
+	 ExprDiv(const ExprDiv&); // copy constructor forbidden
+};
+
+/**
+ * \ingroup level1
+ * \brief Maximum of 2 expressions
+ */
+class ExprMax : public ExprBinaryOp {
+public:
+	/** Create an equality constraint expr1+expr2=expr. */
+	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+
+	/** Create an equality constraint expr1+expr2=value. */
+	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+
+	 /** Accept an #ibex::ExprVisitor visitor. */
+	 virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+
+	 static const ExprMax& new_(const ExprNode& left, const ExprNode& right) {
+		  return *new ExprMax(left,right);
+	 }
+
+private:
+	 ExprMax(const ExprNode& left, const ExprNode& right);
+	 ExprMax(const ExprMax&); // copy constructor forbidden
+};
+
+/**
+ * \ingroup level1
+ * \brief Minimum of 2 expressions
+ */
+class ExprMin : public ExprBinaryOp {
+public:
+	/** Create an equality constraint expr1+expr2=expr. */
+	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+
+	/** Create an equality constraint expr1+expr2=value. */
+	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+
+	 /** Accept an #ibex::ExprVisitor visitor. */
+	 virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+
+	 static const ExprMin& new_(const ExprNode& left, const ExprNode& right) {
+		  return *new ExprMin(left,right);
+	 }
+
+private:
+	 ExprMin(const ExprNode& left, const ExprNode& right);
+	 ExprMin(const ExprMin&); // copy constructor forbidden
+};
+
+/**
+ * \ingroup level1
+ * \brief Atan2 of 2 expressions
+ */
+class ExprAtan2 : public ExprBinaryOp {
+public:
+	/** Create an equality constraint expr1+expr2=expr. */
+	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+
+	/** Create an equality constraint expr1+expr2=value. */
+	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+
+	 /** Accept an #ibex::ExprVisitor visitor. */
+	 virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+
+	 static const ExprAtan2& new_(const ExprNode& left, const ExprNode& right) {
+		  return *new ExprAtan2(left,right);
+	 }
+
+private:
+	 ExprAtan2(const ExprNode& left, const ExprNode& right);
+	 ExprAtan2(const ExprAtan2&); // copy constructor forbidden
+};
+/*==========================================================================================================*/
+/*                                         unary expressions                                                */
+/*==========================================================================================================*/
+
+/**
+ * \ingroup level1
+ * \brief Unary expression
+ */
+class ExprUnaryOp : public ExprNode {
+
+public:
+	/** Create an equality constraint f(expr)=expr. */
+	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+
+	/** Create an equality constraint f(expr)=value. */
+	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+
+	/** The subexpression */
+	const ExprNode& expr;
+
+ protected:
+  ExprUnaryOp(const ExprNode& subexpr, const Dim& dim) : ExprNode(subexpr.context, subexpr.height+1, subexpr.size+1, dim), expr(expr) { }
+
+};
+
+/**
+ * \ingroup level1
+ * \brief Minus an expression
+ */
+class ExprMinus : public ExprUnaryOp {
+public:
+	/** Create an equality constraint (-expr)=expr. */
+	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+
+	/** Create an equality constraint (-expr)=value. */
+	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+
+	/** Accept an #ibex::ExprVisitor visitor. */
+	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+
+	static const ExprMinus& new_(const ExprNode& expr) { return *new ExprMinus(expr); }
+
+private:
+	ExprMinus(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+	ExprMinus(const ExprMinus&); // copy constructor forbidden
+};
+
+/**
+ * \ingroup level1
+ * \brief Sign of an expression
+ */
+class ExprSign : public ExprUnaryOp {
+public:
+	/** Create an equality constraint (-expr)=expr. */
+	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+
+	/** Create an equality constraint (-expr)=value. */
+	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+
+	/** Accept an #ibex::ExprVisitor visitor. */
+	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+
+	static const ExprSign& new_(const ExprNode& expr) { return *new ExprSign(expr); }
+
+private:
+	ExprSign(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+	ExprSign(const ExprSign&); // copy constructor forbidden
+};
+
+/**
+ * \ingroup level1
+ * \brief Absolute value of an expression
+ */
+class ExprAbs : public ExprUnaryOp {
+public:
+	/** Create an equality constraint (-expr)=expr. */
+	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+
+	/** Create an equality constraint (-expr)=value. */
+	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+
+	/** Accept an #ibex::ExprVisitor visitor. */
+	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+
+	static const ExprAbs& new_(const ExprNode& expr) { return *new ExprAbs(expr); }
+
+private:
+	ExprAbs(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+	ExprAbs(const ExprAbs&); // copy constructor forbidden
+};
+
+
+/**
+ * \ingroup level1
+ * \brief Power expression.
+ */
+class ExprPower : public ExprUnaryOp {
+
+ public:
+	/** Create an equality constraint expr^n=expr. */
+	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+
+	/** Create an equality constraint expr^n=value. */
+	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+
+	/** Accept an #ibex::ExprVisitor visitor. */
+	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+
+	static const ExprPower& new_(const ExprNode& expr, int expon) {
+		return *new ExprPower(expr,expon);
+	}
+
+  const int expon;
+
+ private:
+  ExprPower(const ExprNode& expr, int expon) : ExprUnaryOp(expr,expr.dim), expon(expon) { }
+  ExprPower(const ExprPower&); // copy constructor forbidden
+};
+
+/**
+ * \ingroup level1
+ * \brief Square of an expression.
+ */
+class ExprSqr : public ExprUnaryOp {
+
+ public:
+	/** Create an equality constraint expr^2=expr. */
+	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+
+	/** Create an equality constraint expr^2=value. */
+	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+
+	/** Accept an #ibex::ExprVisitor visitor. */
+	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+
+	static const ExprSqr& new_(const ExprNode& expr) {
+		return *new ExprSqr(expr);
+	}
+
+ private:
+  ExprSqr(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+  ExprSqr(const ExprSqr&); // copy constructor forbidden
+};
+
+/**
+ * \ingroup level1
+ * \brief Square root of an expression.
+ */
+class ExprSqrt : public ExprUnaryOp {
+
+ public:
+	/** Create an equality constraint sqrt(expr)=expr. */
+	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+
+	/** Create an equality constraint sqrt(expr)=value. */
+	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+
+	/** Accept an #ibex::ExprVisitor visitor. */
+	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+
+	static const ExprSqrt& new_(const ExprNode& expr) { return *new ExprSqrt(expr); }
+
+ private:
+  ExprSqrt(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+  ExprSqrt(const ExprSqrt&); // copy constructor forbidden
+};
+
+/**
+ * \ingroup level1
+ * \brief Exponential of an expression.
+ */
+class ExprExp : public ExprUnaryOp {
+
+ public:
+	/** Create an equality constraint e^expr=expr. */
+	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+
+	/** Create an equality constraint e^expr=value. */
+	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+
+	/** Accept an #ibex::ExprVisitor visitor. */
+	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+
+	static const ExprExp& new_(const ExprNode& expr) {
+		return *new ExprExp(expr);
+	}
+
+ private:
+  ExprExp(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+  ExprExp(const ExprExp&); // copy constructor forbidden
+};
+
+/**
+ * \ingroup level1
+ * \brief Neperian logarithm of an expression.
+ */
+class ExprLog : public ExprUnaryOp {
+
+ public:
+	/** Create an equality constraint log(expr)=expr. */
+	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+
+	/** Create an equality constraint log(expr)=value. */
+	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+
+	/** Accept an #ibex::ExprVisitor visitor. */
+	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+
+	static const ExprLog& new_(const ExprNode& expr) {
+		return *new ExprLog(expr);
+	}
+
+ private:
+  ExprLog(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+  ExprLog(const ExprLog&); // copy constructor forbidden
+};
+
+/**
+ * \ingroup level1
+ * \brief Cosine of an expression.
+ */
+class ExprCos : public ExprUnaryOp {
+
+ public:
+	/** Create an equality constraint cos(expr)=expr. */
+	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+
+	/** Create an equality constraint cos(expr)=value. */
+	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+
+	/** Accept an #ibex::ExprVisitor visitor. */
+	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+
+	static const ExprCos& new_(const ExprNode& expr) {
+		return *new ExprCos(expr);
+	}
+
+ private:
+  ExprCos(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+  ExprCos(const ExprCos&); // copy constructor forbidden
+};
+
+/**
+ * \ingroup level1
+ * \brief Sine of an expression.
+ */
+class ExprSin : public ExprUnaryOp {
+
+ public:
+	/** Create an equality constraint sin(expr)=expr. */
+	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+
+	/** Create an equality constraint sin(expr)=value. */
+	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+
+	/** Accept an #ibex::ExprVisitor visitor. */
+	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+
+	static const ExprSin& new_(const ExprNode& expr) {
+		return *new ExprSin(expr);
+	}
+
+ private:
+  ExprSin(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+  ExprSin(const ExprSin&); // copy constructor forbidden
+};
+
+/**
+ * \ingroup level1
+ * \brief Tangent of an expression.
+ */
+class ExprTan : public ExprUnaryOp {
+
+ public:
+	/** Create an equality constraint tan(expr)=expr. */
+	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+
+	/** Create an equality constraint tan(expr)=value. */
+	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+
+	/** Accept an #ibex::ExprVisitor visitor. */
+	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+
+	static const ExprTan& new_(const ExprNode& expr) {
+		return *new ExprTan(expr);
+	}
+
+ private:
+  ExprTan(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+  ExprTan(const ExprTan&); // copy constructor forbidden
+};
+
+/**
+ * \ingroup level1
+ * \brief Hyperbolic cosine of an expression.
+ */
+class ExprCosh : public ExprUnaryOp {
+
+ public:
+	/** Create an equality constraint cosh(expr)=expr. */
+	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+
+	/** Create an equality constraint cosh(expr)=value. */
+	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+
+	/** Accept an #ibex::ExprVisitor visitor. */
+	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+
+	static const ExprCosh& new_(const ExprNode& expr) {
+		return *new ExprCosh(expr);
+	}
+
+ private:
+  ExprCosh(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+  ExprCosh(const ExprCosh&); // copy constructor forbidden
+};
+
+/**
+ * \ingroup level1
+ * \brief Hyperbolic sine of an expression.
+ */
+class ExprSinh : public ExprUnaryOp {
+
+ public:
+	/** Create an equality constraint sinh(expr)=expr. */
+	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+
+	/** Create an equality constraint sinh(expr)=value. */
+	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+
+	/** Accept an #ibex::ExprVisitor visitor. */
+	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+
+	static const ExprSinh& new_(const ExprNode& expr) {
+		return *new ExprSinh(expr);
+	}
+
+ private:
+  ExprSinh(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+  ExprSinh(const ExprSinh&); // copy constructor forbidden
+};
+
+/**
+ * \ingroup level1
+ * \brief Hyperbolic tangent of an expression.
+ */
+class ExprTanh : public ExprUnaryOp {
+
+ public:
+	/** Create an equality constraint tanh(expr)=expr. */
+	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+
+	/** Create an equality constraint tanh(expr)=value. */
+	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+
+	/** Accept an #ibex::ExprVisitor visitor. */
+	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+
+	static const ExprTanh& new_(const ExprNode& expr) {
+		return *new ExprTanh(expr);
+	}
+
+ private:
+  ExprTanh(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+  ExprTanh(const ExprTanh&); // copy constructor forbidden
+};
+
+/**
+ * \ingroup level1
+ * \brief Inverse cosine of an expression.
+ */
+class ExprAcos : public ExprUnaryOp {
+
+ public:
+	/** Create an equality constraint acos(expr)=expr. */
+	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+
+	/** Create an equality constraint acos(expr)=value. */
+	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+
+	/** Accept an #ibex::ExprVisitor visitor. */
+	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+
+	static const ExprAcos& new_(const ExprNode& expr) {
+		return *new ExprAcos(expr);
+	}
+
+ private:
+  ExprAcos(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+  ExprAcos(const ExprAcos&); // copy constructor forbidden
+};
+
+/**
+ * \ingroup level1
+ * \brief Inverse sine of an expression.
+ */
+class ExprAsin : public ExprUnaryOp {
+
+ public:
+	/** Create an equality constraint asin(expr)=expr. */
+	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+
+	/** Create an equality constraint asin(expr)=value. */
+	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+
+	/** Accept an #ibex::ExprVisitor visitor. */
+	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+
+	static const ExprAsin& new_(const ExprNode& expr) {
+		return *new ExprAsin(expr);
+	}
+
+ private:
+  ExprAsin(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+  ExprAsin(const ExprAsin&); // copy constructor forbidden
+};
+
+/**
+ * \ingroup level1
+ * \brief Inverse tangent of an expression.
+ */
+class ExprAtan : public ExprUnaryOp {
+
+ public:
+	/** Create an equality constraint atan(expr)=expr. */
+	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+
+	/** Create an equality constraint atan(expr)=value. */
+	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+
+	/** Accept an #ibex::ExprVisitor visitor. */
+	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+
+	static const ExprAtan& new_(const ExprNode& expr) {
+		return *new ExprAtan(expr);
+	}
+
+ private:
+  ExprAtan(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+  ExprAtan(const ExprAtan&); // copy constructor forbidden
+};
+
+/**
+ * \ingroup level1
+ * \brief Inverse hyperbolic cosine of an expression.
+ */
+class ExprAcosh : public ExprUnaryOp {
+
+ public:
+	/** Create an equality constraint acosh(expr)=expr. */
+	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+
+	/** Create an equality constraint acosh(expr)=value. */
+	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+
+	/** Accept an #ibex::ExprVisitor visitor. */
+	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+
+	static const ExprAcosh& new_(const ExprNode& expr) {
+		return *new ExprAcosh(expr);
+	}
+
+ private:
+  ExprAcosh(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+  ExprAcosh(const ExprAcosh&); // copy constructor forbidden
+};
+
+/**
+ * \ingroup level1
+ * \brief Inverse hyperbolic sine of an expression.
+ */
+class ExprAsinh : public ExprUnaryOp {
+
+ public:
+	/** Create an equality constraint asinh(expr)=expr. */
+	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+
+	/** Create an equality constraint asinh(expr)=value. */
+	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+
+	/** Accept an #ibex::ExprVisitor visitor. */
+	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+
+	static const ExprAsinh& new_(const ExprNode& expr) {
+		return *new ExprAsinh(expr);
+	}
+
+ private:
+  ExprAsinh(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+  ExprAsinh(const ExprAsinh&); // copy constructor forbidden
+};
+
+/**
+ * \ingroup level1
+ * \brief Inverse hyperbolic tangent of an expression.
+ */
+class ExprAtanh : public ExprUnaryOp {
+
+ public:
+	/** Create an equality constraint atanh(expr)=expr. */
+	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+
+	/** Create an equality constraint atanh(expr)=value. */
+	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+
+	/** Accept an #ibex::ExprVisitor visitor. */
+	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+
+	static const ExprAtanh& new_(const ExprNode& expr) {
+		return *new ExprAtanh(expr);
+	}
+
+ private:
+  ExprAtanh(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+  ExprAtanh(const ExprAtanh&); // copy constructor forbidden
+};
+
+
+/**
+ * \ingroup level1
+ * \brief Function application expression
+ *
+ * In the following Quimper example:
+ * \code
+ * Variables
+ *   a in [0,10];
+ *
+ * function z=foo(x,y)
+ *   z=sqrt(x^2+y^2);
+ * end;
+ *
+ * Constraints
+ *   foo(a,1-a)=1
+ * ...
+ * \endcode
+ * \a f(a,1-a) is an instance of Apply, where \link Apply::f f \endlink is "foo" and the
+ * actual arguments arg(0) and arg(1) are the subexpressions \a a and \a 1-a.
+ *
+ * \see #ibex::Function::operator()(const ExprNode&).
+ *
+ */
+class ExprApply : public ExprNode {
+
+ public:
+
+  /** Create an equality constraint apply=expr. */
+  const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+
+  /** Create an equality constraint apply=value. */
+  const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+
+  /** Deletes this instance. */
+  ~ExprApply();
+
+  /** Accept an #ibex::ExprVisitor visitor. */
+  virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+
+  /** The applied function. */
+  const Function& func;
+
+  /** The arguments. */
+  const ExprNode** args;
+
+  int nb_args() const;
+
+  static const ExprApply& new_(const Function& func, const ExprNode** args) {
+    return *new ExprApply(func,args);
+  }
+
+ private:
+
+  ExprApply(const Function& expr, const ExprNode** args);
+};
+
+/** Indexing */
+const ExprIndex& ExprNode::operator[](int index) const {
+	return ExprIndex::new_(*this, index);
+}
+
+/** Addition */
+inline const ExprBinaryOp& operator+(const ExprNode& left, const ExprNode& right) {
+  return ExprAdd::new_(left, right); }
+
+/** Subtraction */
+inline const ExprBinaryOp& operator-(const ExprNode& left, const ExprNode& right) {
+  return ExprSub::new_(left, right); }
+
+/** Multiplication */
+inline const ExprBinaryOp& operator*(const ExprNode& left, const ExprNode& right) {
+  return ExprMul::new_(left, right); }
+
+/** Division */
+inline const ExprBinaryOp& operator/(const ExprNode& left, const ExprNode& right) {
+  return ExprDiv::new_(left, right); }
+
+/** Maximum */
+ inline const ExprBinaryOp& max(const ExprNode& left, const ExprNode& right) {
+  return ExprMax::new_(left, right); }
+
+/** Minimum */
+inline const ExprBinaryOp& min(const ExprNode& left, const ExprNode& right) {
+  return ExprMin::new_(left, right); }
+
+/** Arctangent2 of two expressions */
+inline const ExprBinaryOp& atan2(const ExprNode& exp1, const ExprNode& exp2) {
+	return ExprAtan2::new_(exp1, exp2); }
+
+/** Addition of an expression to a constant */
+inline const ExprBinaryOp& operator+(const ExprNode& left, const Interval& value) {
+  return left+ExprConstant::new_scalar(left.context, value); }
+
+/** Subtraction of an expression from a constant */
+inline const ExprBinaryOp& operator-(const ExprNode& left, const Interval& value) {
+  return left-ExprConstant::new_scalar(left.context, value); }
+
+/** Multiplication of an expression by a constant */
+inline const ExprBinaryOp& operator*(const ExprNode& left, const Interval& value) {
+  return left*ExprConstant::new_scalar(left.context, value); }
+
+/** Division of an expression by a constant */
+inline const ExprBinaryOp& operator/(const ExprNode& left, const Interval& value) {
+  return left/ExprConstant::new_scalar(left.context, value); }
+
+/** Maximum of an expression and a constant */
+ inline const ExprBinaryOp& max(const ExprNode& left, const Interval& value) {
+   return max(left, ExprConstant::new_scalar(left.context, value)); }
+
+/** Minimum of an expression and a constant */
+ inline const ExprBinaryOp& min(const ExprNode& left, const Interval& value) {
+   return min(left, ExprConstant::new_scalar(left.context, value)); }
+
+/** Arctangent2 of an expression and a constant */
+ inline const ExprBinaryOp& atan2(const ExprNode& exp1, const Interval& value) {
+ 	return ExprAtan2::new_(exp1, ExprConstant::new_scalar(exp1.context, value)); }
+
+/** Addition of a constant to an expression */
+inline const ExprBinaryOp& operator+(const Interval& value, const ExprNode& right) {
+  return ExprConstant::new_scalar(right.context, value)+right; }
+
+/** Subtraction of a constant from an expression */
+inline const ExprBinaryOp& operator-(const Interval& value, const ExprNode& right) {
+  return ExprConstant::new_scalar(right.context, value)-right; }
+
+/** Multiplication of a constant by an expression*/
+inline const ExprBinaryOp& operator*(const Interval& value, const ExprNode& right) {
+  return ExprConstant::new_scalar(right.context, value)*right; }
+
+/** Division of a constant by an expression */
+inline const ExprBinaryOp& operator/(const Interval& value, const ExprNode& right) {
+  return ExprConstant::new_scalar(right.context, value)/right; }
+
+/** Maximum of a constant and an expression */
+inline const ExprBinaryOp& max (const Interval& value, const ExprNode& right) {
+  return max(ExprConstant::new_scalar(right.context, value), right); }
+
+/** Minimum of a constant and an expression */
+inline const ExprBinaryOp& min (const Interval& value, const ExprNode& right) {
+  return min(ExprConstant::new_scalar(right.context, value), right); }
+
+/** Arctangent2 of a constant and an expression */
+inline const ExprBinaryOp& atan2(const Interval& value, const ExprNode& exp2) {
+	return ExprAtan2::new_(ExprConstant::new_scalar(exp2.context, value), exp2); }
+
+/** Square of an expresion */
+inline const ExprUnaryOp& sqr  (const ExprNode& exp) { return ExprSqr::new_(exp); }
+
+/** Square root of an expresion */
+inline const ExprUnaryOp& sqrt (const ExprNode& exp) { return ExprSqrt::new_(exp); }
+
+/** Exponential of an expression */
+inline const ExprUnaryOp& exp  (const ExprNode& exp) { return ExprExp::new_(exp); }
+
+/** Neperian logarithm of an expression */
+inline const ExprUnaryOp& log  (const ExprNode& exp) { return ExprLog::new_(exp); }
+
+/** Cosine of an expression */
+inline const ExprUnaryOp& cos  (const ExprNode& exp) { return ExprCos::new_(exp); }
+
+/** Sine of an expression */
+inline const ExprUnaryOp& sin  (const ExprNode& exp) { return ExprSin::new_(exp); }
+
+/** Tangent of an expression */
+inline const ExprUnaryOp& tan  (const ExprNode& exp) { return ExprTan::new_(exp); }
+
+/** Arccosine of an expression */
+inline const ExprUnaryOp& acos (const ExprNode& exp) { return ExprAcos::new_(exp); }
+
+/** Arcsine of an expression */
+inline const ExprUnaryOp& asin (const ExprNode& exp) { return ExprAsin::new_(exp); }
+
+/** Arctangent of an expression */
+inline const ExprUnaryOp& atan (const ExprNode& exp) { return ExprAtan::new_(exp); }
+
+/** Hyperbolic cosine of an expression */
+inline const ExprUnaryOp& cosh (const ExprNode& exp) { return ExprCosh::new_(exp); }
+
+/** Hyperbolic sine of an expression */
+inline const ExprUnaryOp& sinh (const ExprNode& exp) { return ExprSinh::new_(exp); }
+
+/** Hyperbolic tangent of an expression */
+inline const ExprUnaryOp& tanh (const ExprNode& exp) { return ExprTanh::new_(exp); }
+
+/** Inverse hyperbolic cosine of an expression */
+inline const ExprUnaryOp& acosh(const ExprNode& exp) { return ExprAcosh::new_(exp); }
+
+/** Inverse hyperbolic sine of an expression */
+inline const ExprUnaryOp& asinh(const ExprNode& exp) { return ExprAsinh::new_(exp); }
+
+/** Inverse hyperbolic tangent of an expression */
+inline const ExprUnaryOp& atanh(const ExprNode& exp) { return ExprAtanh::new_(exp); }
+
+/** Raises \a left to the power \a expnon.
+    \note operator ^ is not used because its associativity and priority defined in C++ does
+    not match mathematical usage. */
+inline const ExprNode& pow(const ExprNode& left, int expon) {
+  if (expon==1) return left;
+  if (expon==2) return sqr(left);
+  return ExprPower::new_(left, expon);
+}
+
+/** Minus sign */
+inline const ExprUnaryOp& operator-(const ExprNode& expr) {
+  return ExprMinus::new_(expr);
+}
+
+/** Sign */
+inline const ExprUnaryOp& sign(const ExprNode& expr) {
+  return ExprSign::new_(expr);
+}
+
+/** Absolute value */
+inline const ExprUnaryOp& abs(const ExprNode& expr) {
+  return ExprAbs::new_(expr);
+}
+
+/** Expression raised to the power of another expression */
+inline const ExprUnaryOp& pow(const ExprNode& left, const ExprNode& right) {
+  return exp(right*log(left));
+}
+
+/** Expression raised to the power of a constant */
+inline const ExprUnaryOp& pow(const ExprNode& left, const Interval& value) {
+  return exp(ExprConstant::new_scalar(left.context, value)*log(left));
+}
+/** Constant raised to the power of an expression */
+inline const ExprUnaryOp& pow(const Interval& value, const ExprNode& right) {
+  return exp(right*log(ExprConstant::new_scalar(right.context, value)));
+}
+
+} // end namespace ibex
+
+#endif // end _IBEX_EXPR_H
