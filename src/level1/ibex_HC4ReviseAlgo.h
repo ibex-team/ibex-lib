@@ -13,6 +13,7 @@
 
 #include "ibex_Eval.h"
 #include "ibex_CompiledFunction.h"
+#include "ibex_NumConstraint.h"
 
 namespace ibex {
 
@@ -24,7 +25,7 @@ namespace ibex {
 class HC4ReviseAlgo : public BwdAlgorithm<EvalLabel> {
 public:
 
-	HC4ReviseAlgo(const Function& f) : eval(f) { }
+	HC4ReviseAlgo(const NumConstraint& ctr) : eval(ctr.f), equality(ctr.equality) { }
 
 	void contract(Domain& box);
 
@@ -32,6 +33,8 @@ protected:
 	friend class CompiledFunction<EvalLabel>;
 
 	Eval eval;
+
+	bool equality;
 
 	mutable const Domain* box; // current box
 

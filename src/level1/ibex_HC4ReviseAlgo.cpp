@@ -40,6 +40,18 @@ void HC4ReviseAlgo::apply_bwd(const ExprApply& a, EvalLabel** argL, const EvalLa
 
 void HC4ReviseAlgo::contract(Domain& box) {
 	eval.forward(box);
+
+	const ExprNode& root=eval.f.expr;
+	EvalLabel& root_label=(EvalLabel&) *(root.deco);
+	Interval right_cst(equality? 0: NEG_INFINITY, 0);
+
+	switch(root.type()) {
+	case Dim::SCALAR:       root_label.set_domain(right_cst); break;
+	case Dim::VECTOR:       root_label.set_domain(IntervalVector(root.dim.dim3,right_cst)); break;
+	case Dim::MATRIX:       root_label.set_domain(IntervalMatrix(root.dim.dim2,root.dim.dim3,right_cst)); break;
+	case Dim::MATRIX_ARRAY: assert(false); /* impossible */ break;
+	}
+
 	eval.f.backward(*this);
 }
 

@@ -43,17 +43,26 @@ public:
 		visit(expr);
 	}
 
-	/** Run the forward phase of a forward algorithm and
+	/**
+	 * Run the forward phase of a forward algorithm and
 	 * return a reference to the label
 	 * of the root node. V must be a subclass of FwdAlgorithm<T>.
-	 * Note that the type V is just passed in order to have static linkage. */
+	 * Note that the type V is just passed in order to have static linkage.
+	 */
 	template<class V>
 	T& forward(const V& algo) const;
 
-	/** Run the backward phase.  V must be a subclass of BwdAlgorithm<T>.
-	 * Note that the type V is just passed in order to have static linkage.  */
+	/**
+	 * Run the backward phase.  V must be a subclass of BwdAlgorithm<T>.
+	 * Note that the type V is just passed in order to have static linkage.
+	 */
 	template<class V>
 	void backward(const V& algo) const;
+
+	/**
+	 * \brief The root node of the expression
+	 */
+	const ExprNode& expr;
 
 private:
 
@@ -206,7 +215,6 @@ private:
 	void visit(const ExprAtanh&) { code[ptr]=ATANH; }
 
 protected:
-	const ExprNode& expr;
 
 	typedef enum {
 		IDX, VEC, SYM, CST, APPLY,

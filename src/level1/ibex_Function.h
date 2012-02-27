@@ -49,6 +49,24 @@ public:
 	Function();
 
 	/**
+	 * \brief Transform f into (f_1,...f_n)
+	 *
+	 * The vector-valued function f is transformed
+	 * into n real-valued functions f_1, ... f_n
+	 * that can be used independently.
+	 *
+	 * Of course the dimension of the argument x is
+	 * the same for each component. For instance
+	 *
+	 * (x,y,z)->(x+y,z-x) is transformed into:  <br>
+	 *    { (x,y,z)->x+y ; (x,y,z)->z-y } <br>
+	 *
+	 * *not* in:   <br>
+	 *    { (x,y)->x+y ; (z,y)->z-y }
+	 */
+	Function* separate() const;
+
+	/**
 	 * \brief Create a new symbol (argument of the function).
 	 */
 	const ExprSymbol& add_symbol(const char* name);
@@ -57,6 +75,23 @@ public:
 	 * \brief Create a multi-dimensional symbol (new argument of the function).
 	 */
 	const ExprSymbol& add_symbol(const char* name, const Dim& dim);
+
+	/**
+	 * \brief Return true if the symbol (or argument) \a name is
+	 * actually used in the function.
+	 *
+	 * In other words, return true if the output of the function
+	 * may depend on the argument named \a name.
+	 */
+	bool used(const char* name) const;
+
+	/**
+	 * \brief Return true if the ith argument is used in the function.
+	 *
+	 * #see used(const char*) const;
+	 */
+	bool used(int i) const;
+
 
 	/**
 	 * \brief Set the expression f(x)
