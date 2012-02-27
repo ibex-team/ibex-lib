@@ -1,6 +1,6 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : The famous forward-backward contraction algorithm.
+// File        : HC4Revise Algorithm (The famous forward-backward contraction algorithm).
 // Author      : Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
@@ -8,8 +8,8 @@
 // Last Update : 
 //============================================================================
 
-#ifndef _IBEX_HC4_REVISE_H_
-#define _IBEX_HC4R_EVISE_H_
+#ifndef __IBEX_HC4_REVISE_ALGO_H__
+#define __IBEX_HC4R_EVISE_ALGO_H__
 
 #include "ibex_Eval.h"
 #include "ibex_CompiledFunction.h"
@@ -21,10 +21,10 @@ namespace ibex {
  * \brief The famous forward-backward contraction algorithm.
  *
  */
-class HC4Revise : public BwdAlgorithm<EvalLabel> {
+class HC4ReviseAlgo : public BwdAlgorithm<EvalLabel> {
 public:
 
-	HC4Revise(const Function& f) : eval(f) { }
+	HC4ReviseAlgo(const Function& f) : eval(f) { }
 
 	void contract(Domain& box);
 
@@ -71,4 +71,4 @@ protected:
 
 
 } /* namespace ibex */
-#endif /* _IBEX_HC4_REVISE_H_ */
+#endif /* __IBEX_HC4_REVISE_ALGO_H__ */

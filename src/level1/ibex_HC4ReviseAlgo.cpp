@@ -1,6 +1,6 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_HC4Revise.cpp
+// File        : HC4Revise Algorithm
 // Author      : Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
@@ -8,11 +8,11 @@
 // Last Update : 
 //============================================================================
 
-#include "ibex_HC4Revise.h"
+#include "ibex_HC4ReviseAlgo.h"
 
 namespace ibex {
 
-void HC4Revise::vector_bwd(const ExprVector& v, EvalLabel** compL, const EvalLabel& y) {
+void HC4ReviseAlgo::vector_bwd(const ExprVector& v, EvalLabel** compL, const EvalLabel& y) {
 	if (v.type()==Dim::VECTOR) {
 		assert(v.in_rows); // a vector is necessarily a column vector
 		for (int i=0; i<v.size(); i++) compL[i]->i() &= y.v()[i];
@@ -25,7 +25,7 @@ void HC4Revise::vector_bwd(const ExprVector& v, EvalLabel** compL, const EvalLab
 	}
 }
 
-void HC4Revise::apply_bwd(const ExprApply& a, EvalLabel** argL, const EvalLabel& y) {
+void HC4ReviseAlgo::apply_bwd(const ExprApply& a, EvalLabel** argL, const EvalLabel& y) {
 	// download data
 	const Domain& b=((const EvalApplyLabel&) y).fbox;
 	for (int i=0; i<a.nb_args(); i++) {
@@ -38,7 +38,7 @@ void HC4Revise::apply_bwd(const ExprApply& a, EvalLabel** argL, const EvalLabel&
 	}
 }
 
-void HC4Revise::contract(Domain& box) {
+void HC4ReviseAlgo::contract(Domain& box) {
 	eval.forward(box);
 	eval.f.backward(*this);
 }
