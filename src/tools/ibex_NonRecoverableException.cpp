@@ -13,8 +13,10 @@
 
 namespace ibex {
 
-NonRecoverableException::NonRecoverableException(std::string msg) : Exception(msg) {
+NonRecoverableException::NonRecoverableException(std::string msg) : msg(msg) {
 
 }
+
+std::string NonRecoverableException::message() { return msg; }
 
 } /* namespace ibex */

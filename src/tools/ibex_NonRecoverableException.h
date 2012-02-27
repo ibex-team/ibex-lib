@@ -9,8 +9,8 @@
  * Created     : Dec 13, 2011
  * ---------------------------------------------------------------------------- */
 
-#ifndef _IBEX_NON_RECOVERABLE_EXCEPTION_H_
-#define _IBEX_NON_RECOVERABLE_EXCEPTION_H_
+#ifndef __IBEX_NON_RECOVERABLE_EXCEPTION_H__
+#define __IBEX_NON_RECOVERABLE_EXCEPTION_H__
 
 #include "ibex_Exception.h"
 
@@ -23,7 +23,14 @@ namespace ibex {
 class NonRecoverableException : public Exception {
 public:
 	NonRecoverableException(std::string message);
+
+	/** \brief Get the message of this exception
+	 */
+	std::string message();
+
+private:
+	std::string msg;
 };
 
 } // namespace ibex
-#endif // _IBEX_NON_RECOVERABLE_EXCEPTION_H_
+#endif // __IBEX_NON_RECOVERABLE_EXCEPTION_H__

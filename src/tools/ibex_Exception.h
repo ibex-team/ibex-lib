@@ -20,19 +20,7 @@ namespace ibex {
 /**
  * \brief Root class of all exceptions raised by IBEX
  */
-class Exception {
-public:
-	/** \brief Create an exception with an associated message.
-	 */
-	Exception(std::string message);
-
-	/** \brief Get the message of this exception
-	 */
-	std::string message();
-
-private:
-	std::string msg;
-};
+class Exception { };
 
 } // namespace ibex
 

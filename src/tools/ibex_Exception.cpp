@@ -13,10 +13,4 @@
 
 namespace ibex {
 
-Exception::Exception(std::string msg) : msg(msg) {
-
-}
-
-std::string Exception::message() { return msg; }
-
 } /* namespace ibex */
