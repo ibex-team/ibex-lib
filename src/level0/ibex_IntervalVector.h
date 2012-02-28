@@ -20,6 +20,8 @@
 
 namespace ibex {
 
+class Domain;
+
 /**
  * \ingroup arith
  *
@@ -55,27 +57,34 @@ public:
 	 */
 	IntervalVector(int n, double  bounds[][2]);
 
-	/** \brief Create [empty; ...; empty]
+	/**
+	 * \brief Create [empty; ...; empty]
 	 *
 	 * Create an empty IntervalVector of dimension \a n
 	 * (all the components being empty Intervals)
 	 */
 	static IntervalVector empty(int n);
 
-	/** \brief Delete this vector
+	/**
+	 * \brief Delete this vector
 	 */
 	virtual ~IntervalVector();
 
-	/** \brief Return the ith Interval
+	/**
+	 * \brief Return the ith Interval
 	 *
 	 * A return a const reference to the
 	 * i^th component (starting from 0)
 	 */
 	const Interval& operator[](int i) const;
 
+	/**
+	 * \brief Return the ith Interval
+	 */
 	Interval& operator[](int i);
 
-	/** \brief The dimension (number of components)
+	/**
+	 * \brief The dimension (number of components)
 	 */
 	int size() const;
 
@@ -83,11 +92,13 @@ public:
 	 */
 	bool is_empty() const;
 
-	/** \brief Set this IntervalVector to the empty IntervalVector
+	/**
+	 * \brief Set this IntervalVector to the empty IntervalVector
 	 */
 	void set_empty();
 
-	/** \brief Resize the IntervalVector.
+	/**
+	 * \brief Resize the IntervalVector.
 	 *
 	 * If the size is increased, the existing components are not
 	 * modified and the new ones are set to (-inf,+inf), or the
@@ -101,14 +112,16 @@ public:
 	IntervalVector subvector(int start_index, int end_index);
 
 
-	/** \brief Set the lower bound of the ith component of this
+	/**
+	 * \brief Set the lower bound of the ith component of this
 	 *
 	 * Set the bound unless the IntervalVector was empty in which case the ith component remains
 	 * the empty Interval.
 	 */
 	void set_lb(int i, double lb);
 
-	/** \brief Set the upper bound of the ith component of this
+	/**
+	 * \brief Set the upper bound of the ith component of this
 	 *
 	 * Set the bound unless the IntervalVector was empty in which case the ith component remains
 	 * the empty Interval.
@@ -134,6 +147,11 @@ public:
 	 * Dimensions of this and x must match. Emptiness is overridden.
 	 */
 	IntervalVector& operator=(const IntervalVector& x);
+
+	/**
+	 * \brief "Load" the domain into this
+	 */
+	IntervalVector& operator=(const Domain& d);
 
 	/** \brief Return the midpoint (a degenerated IntervalVector)
 	 */

@@ -26,6 +26,13 @@ public:
 	void resize(int nb_rows, int nb_cols);
 
 	IntervalMatrix(int nb_rows, int nb_cols);
+
+	/**
+	 * Create a nb_rows x nb_cols matrix and initialize
+	 * all the elements with x
+	 */
+	IntervalMatrix(int nb_rows, int nb_cols, const Interval& x);
+
 	IntervalMatrix(double d);
 
 	/**

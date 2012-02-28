@@ -39,6 +39,10 @@ const ExprSymbol& Function::add_symbol(const char* id, const Dim& dim) {
   return *sbl;
 }
 
+int Function::nb_symbols() const {
+	return key_count;
+}
+
 int Function::nb_nodes() const {
 	return exprnodes.size();
 }

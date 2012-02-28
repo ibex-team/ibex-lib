@@ -9,8 +9,8 @@
  * Created     : Dec 13, 2011
  * ---------------------------------------------------------------------------- */
 
-#ifndef _IBEX_DOMAIN_H_
-#define _IBEX_DOMAIN_H_
+#ifndef __IBEX_DOMAIN_H__
+#define __IBEX_DOMAIN_H__
 
 #include "ibex_SymbolMap.h"
 #include "ibex_Interval.h"
@@ -38,6 +38,17 @@ namespace ibex {
  */
 class Domain {
 public:
+
+	/**
+	 * \brief Copy the domain.
+	 */
+	Domain(const Domain&);
+
+	/**
+	 * \brief Load the domain from a flat vector
+	 */
+	Domain& operator=(const IntervalVector& v);
+
 	/**
 	 * Add a new component to the domain
 	 * and return the number of this component.
@@ -247,9 +258,19 @@ public:
 	 *
 	 * This variable must be an array of matrices.
 	 */
-	const IntervalMatrixArray matrix_array(int v) const {
+	const IntervalMatrixArray& matrix_array(int v) const {
 		return *((IntervalMatrixArray*) doms[v]);
 	}
+
+
+	/**
+	 * The total size, when the domain is represented as
+	 * a flat vector.
+	 */
+	/*
+	int size() const {
+		return
+	}*/
 
 private:
 	friend std::ostream& operator<<(std::ostream& os, const Domain&);
@@ -268,4 +289,4 @@ private:
 std::ostream& operator<<(std::ostream& os, const Domain&);
 
 } // namespace ibex
-#endif // _IBEX_DOMAIN_H_
+#endif // __IBEX_DOMAIN_H__

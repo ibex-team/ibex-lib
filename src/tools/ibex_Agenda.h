@@ -14,6 +14,7 @@
 
 #include "ibex_Exception.h"
 #include "ibex_HyperGraph.h"
+#include "ibex_BoolMask.h"
 
 namespace ibex {
 
@@ -141,8 +142,10 @@ class ArcAgenda : Agenda {
   }
 
   /**
-   * \brief Initialize the agenda by inserting all the
-   *  arcs of an hypergraph.
+   * \brief Initialize the agenda from an hypergraph.
+   *
+   * Initialize the agenda by inserting all the
+   * arcs of \a g.
    */
   void init(const HyperGraph& g);
 
@@ -152,6 +155,15 @@ class ArcAgenda : Agenda {
    *  \see #ibex::Propagation.
    */
   inline void propagate(const HyperGraph& g, int var) { propagate(g,-1,var); }
+
+  /**
+   * \brief Push in the agenda all the arcs of a graph \a g impacted by
+   *  the reduction of variables set in the mask.
+   *
+   *  \see #ibex::Propagation.
+   */
+  inline void propagate(const HyperGraph& g, const BoolMask& m);
+
 
   /**
    * \brief Push in the agenda all the arcs of a graph \a g impacted by the reduction

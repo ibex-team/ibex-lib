@@ -77,6 +77,11 @@ public:
 	const ExprSymbol& add_symbol(const char* name, const Dim& dim);
 
 	/**
+	 * \brief Return the number of symbols (or arguments).
+	 */
+	int nb_symbols() const;
+
+	/**
 	 * \brief Return true if the symbol (or argument) \a name is
 	 * actually used in the function.
 	 *

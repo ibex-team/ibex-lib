@@ -98,6 +98,12 @@ class Interval {
     /** \brief Return -*this. */
     Interval operator-() const;
 
+    /** \brief Hausdorff distance between *this and x */
+    double distance(const Interval& x);
+
+    /** \brief Relative Hausdorff distance between *this and x */
+    double rel_distance(const Interval& x);
+
     /**
      * Set this interval to the intersection of itself with the division of two others.
      *
