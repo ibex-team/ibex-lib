@@ -41,6 +41,13 @@ void div2(const Interval& num, const Interval& div, Interval& out1, Interval& ou
 	const double& c(div.lb());
 	const double& d(div.ub());
 
+	// notice : we do not consider 0/0=0 but 0/0=emptyset
+	if (c==0 && d==0) {
+		out1.set_empty();
+		out2.set_empty();
+		return;
+	}
+
 	if (a==0 && b==0) {
 		out1 = num;
 		out2.set_empty();
@@ -48,19 +55,16 @@ void div2(const Interval& num, const Interval& div, Interval& out1, Interval& ou
 	}
 
 	if (c>0 || d<0) {
-		out1 = num.itv/div.itv; // do not call "num/div" (that calls "div_intersect -> infinite recursion)
-		out2.set_empty();
-		return;
-	}
-
-	if (c==0 && d==0) {
-		out1.set_empty();
+		out1 = num/div;
 		out2.set_empty();
 		return;
 	}
 
 	if (b<=0 && d==0) {
-		out1 = Interval(INF_DIV(b,c), POS_INFINITY);
+		if (c==NEG_INFINITY)
+			out1 = Interval::POS_REALS;
+		else
+			out1 = Interval(INF_DIV(b,c), POS_INFINITY);
 		out2.set_empty();
 		return;
 	}
@@ -78,13 +82,19 @@ void div2(const Interval& num, const Interval& div, Interval& out1, Interval& ou
 	}
 
 	if (b<=0 && c==0) {
-		out1 = Interval(NEG_INFINITY, SUP_DIV(b,d));
+		if (d==POS_INFINITY)
+			out1 = Interval::NEG_REALS;
+		else
+			out1 = Interval(NEG_INFINITY, SUP_DIV(b,d));
 		out2.set_empty();
 		return;
 	}
 
 	if (a>=0 && d==0) {
-		out1 = Interval(NEG_INFINITY, SUP_DIV(a,c));
+		if (c==NEG_INFINITY)
+			out1 = Interval::NEG_REALS;
+		else
+			out1 = Interval(NEG_INFINITY, SUP_DIV(a,c));
 		out2.set_empty();
 		return;
 	}
@@ -103,7 +113,10 @@ void div2(const Interval& num, const Interval& div, Interval& out1, Interval& ou
 	}
 
 	if (a>=0 && c==0) {
-		out1 = Interval(INF_DIV(a,d), POS_INFINITY);
+		if (d==POS_INFINITY)
+			out1 = Interval::POS_REALS;
+		else
+			out1 = Interval(INF_DIV(a,d), POS_INFINITY);
 		out2.set_empty();
 		return;
 	}
@@ -116,14 +129,15 @@ bool Interval::div2_inter(const Interval& num, const Interval& div, Interval& ou
 	// warning: we may have &num==this
 	Interval out1,_out2;
 	div2(num,div,out1,_out2);
+	cout << "out1=" << out1 << endl;
 	out1 &= *this;
 	if (out1.is_empty()) {
 		*this &= _out2;
 		out2.set_empty();
 		return !this->is_empty();
 	} else {
-		*this = out1;
 		out2 = *this & _out2;
+		*this = out1;
 		return true;
 	}
 }

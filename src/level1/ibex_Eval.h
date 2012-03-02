@@ -266,7 +266,7 @@ inline void Eval::Eval::index_fwd(const ExprIndex& e, const EvalLabel& x, EvalLa
 	case Dim::SCALAR:       y.set_domain(x.v()[e.index]);  break;
 	case Dim::VECTOR:       y.set_domain(x.m()[e.index]);  break;
 	case Dim::MATRIX:       y.set_domain(x.ma()[e.index]); break;
-	case Dim::MATRIX_ARRAY:  assert(false); /* impossible */ break;
+	case Dim::MATRIX_ARRAY: assert(false); /* impossible */ break;
 	}
 }
 
@@ -284,7 +284,7 @@ inline void Eval::cst_fwd(const ExprConstant& c, EvalLabel& y) {
 	case Dim::SCALAR:       y.set_domain(c.get_value());  break;
 	case Dim::VECTOR:       y.set_domain(c.get_vector_value());  break;
 	case Dim::MATRIX:       y.set_domain(c.get_matrix_value());  break;
-	case Dim::MATRIX_ARRAY:  assert(false); /* impossible */ break;
+	case Dim::MATRIX_ARRAY: assert(false); /* impossible */ break;
 	}
 }
 inline void Eval::add_fwd(const ExprAdd&, const EvalLabel& x1, const EvalLabel& x2, EvalLabel& y)     { y.i()=x1.i()+x2.i(); }

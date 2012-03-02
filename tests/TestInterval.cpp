@@ -13,32 +13,123 @@
 
 using namespace std;
 
+#define ERROR 1e-10
+
+void TestInterval::check(double y_actual, double y_expected) {
+	TEST_ASSERT_DELTA("==",y_actual,y_expected,ERROR);
+}
+
 void TestInterval::check(const Interval& y_actual, const Interval& y_expected) {
 	//cout << "check:    " << y_expected << " (expected)        " << y_actual << " (actual)"<< endl;
-	TEST_ASSERT_DELTA("lb", y_actual.lb(),y_expected.lb(),1e-10);
-	TEST_ASSERT_DELTA("ub", y_actual.ub(),y_expected.ub(),1e-10);
+	TEST_ASSERT_DELTA("lb", y_actual.lb(),y_expected.lb(),ERROR);
+	TEST_ASSERT_DELTA("ub", y_actual.ub(),y_expected.ub(),ERROR);
 }
+
+void TestInterval::check_add(const Interval& x, const Interval& z, const Interval& y_expected) {
+	Interval y_actual=x+z;
+	check(y_actual, y_expected);
+
+	// test the symmetrical case
+	y_actual = z+x;
+	check(y_actual, y_expected);
+
+	// test the +=operator
+	y_actual = x;
+	y_actual += z;
+	check(y_actual, y_expected);
+
+	// test the +=operator in the other direction
+	y_actual = z;
+	y_actual += x;
+	check(y_actual, y_expected);
+
+	// test subtraction
+	y_actual=(-x)-z;
+	check(y_actual, -y_expected);
+
+	// test the symmetrical case
+	y_actual = (-z)-x;
+	check(y_actual, -y_expected);
+
+	// test the -=operator
+	y_actual = -x;
+	y_actual -= z;
+	check(y_actual, -y_expected);
+
+	// test the -=operator in the other direction
+	y_actual = -z;
+	y_actual -= x;
+	check(y_actual, -y_expected);
+
+}
+
+void TestInterval::check_add_scal(const Interval& x, double z, const Interval& y_expected) {
+	check(x+z, y_expected);
+	check(z+x, y_expected);
+	check(Interval(x)+=z, y_expected); // test the +=operator
+}
+
 
 void TestInterval::check_mul(const Interval& x, const Interval& z, const Interval& y_expected) {
 	Interval y_actual=x*z;
-	//cout << "check:    " << x << " * " << z << " == " << y_expected << endl;
+	//cout << "check:    " << x << " * " << z << ", " << y_expected << endl;
 	check(y_actual, y_expected);
 
-	y_actual = z*x; // test the symmetrical case
+	// test the symmetrical case
+	y_actual = z*x;
 	check(y_actual, y_expected);
+
+	// test the *=operator
+	y_actual = x;
+	y_actual *= z;
+	check(y_actual, y_expected);
+}
+
+void TestInterval::check_mul_scal(const Interval& x, double z, const Interval& y_expected) {
+	check(x*z, y_expected);
+	check(z*x, y_expected);
+	check(Interval(x)*=z, y_expected); // test the +=operator
 }
 
 void TestInterval::check_div(const Interval& x, const Interval& z, const Interval& y_expected) {
 	Interval y_actual=x/z;
-	//cout << "check:    " << x << " / " << z << " == " << y_expected << " (expected)        " << y_actual << " (actual)"<< endl;
+	//cout << "check:    " << x << " / " << z << ", " << y_expected << " (expected)        " << y_actual << " (actual)"<< endl;
+	check(y_actual, y_expected);
+
+	// test the /=operator
+	y_actual = x;
+	y_actual /= z;
 	check(y_actual, y_expected);
 }
 
-void TestInterval::add01() { check(Interval::EMPTY_SET       + Interval(0,1),      Interval::EMPTY_SET); }
-void TestInterval::add02() { check(Interval(0,1)            + Interval::EMPTY_SET, Interval::EMPTY_SET); }
-void TestInterval::add03() { check(Interval(NEG_INFINITY,1) + Interval(0,1),      Interval(NEG_INFINITY, 2)); }
-void TestInterval::add04() { check(Interval(1,POS_INFINITY) + Interval(0,1),      Interval(1,POS_INFINITY)); }
-void TestInterval::add05() { check(Interval::ALL_REALS       + Interval(0,1),      Interval::ALL_REALS); }
+void TestInterval::check_div_scal(const Interval& x, double z, const Interval& y_expected) {
+	Interval y_actual=x/z;
+	check(y_actual, y_expected);
+
+	// test the /=operator
+	y_actual = x;
+	y_actual /= z;
+	check(y_actual, y_expected);
+}
+
+void TestInterval::cons01() { check(Interval(),Interval(NEG_INFINITY,POS_INFINITY)); }
+void TestInterval::cons02() { check(Interval(1.0),Interval(1.0,1.0)); }
+void TestInterval::cons03() { check(Interval(NEG_INFINITY),Interval::EMPTY_SET); }
+void TestInterval::cons04() { check(Interval(POS_INFINITY),Interval::EMPTY_SET); }
+void TestInterval::cons05() { check(Interval(1,0), Interval::EMPTY_SET); } // reverse bounds
+
+void TestInterval::add01() { check_add(Interval::EMPTY_SET,      Interval(0,1),      Interval::EMPTY_SET); }
+void TestInterval::add02() { check_add(Interval(0,1),            Interval::EMPTY_SET, Interval::EMPTY_SET); }
+void TestInterval::add03() { check_add(Interval(NEG_INFINITY,1), Interval(0,1),      Interval(NEG_INFINITY, 2)); }
+void TestInterval::add04() { check_add(Interval(1,POS_INFINITY), Interval(0,1),      Interval(1,POS_INFINITY)); }
+void TestInterval::add05() { check_add(Interval::ALL_REALS,      Interval(0,1),      Interval::ALL_REALS); }
+
+void TestInterval::add06() { check_add_scal(Interval::EMPTY_SET,      POS_INFINITY,       Interval::EMPTY_SET); }
+void TestInterval::add07() { check_add_scal(Interval::EMPTY_SET,      0,                  Interval::EMPTY_SET); }
+void TestInterval::add08() { check_add_scal(Interval(0,1),            1,                  Interval(1,2)); }
+void TestInterval::add09() { check_add_scal(Interval(0,1),            NEG_INFINITY,       Interval::EMPTY_SET); }
+void TestInterval::add10() { check_add_scal(Interval(0,1),            POS_INFINITY,       Interval::EMPTY_SET); }
+void TestInterval::add11() { check_add_scal(Interval(NEG_INFINITY,1), 1,                  Interval(NEG_INFINITY,2)); }
 
 void TestInterval::mul01() { check_mul(Interval::EMPTY_SET,         Interval(0,1),               Interval::EMPTY_SET); }
 void TestInterval::mul02() { check_mul(Interval::ZERO,              Interval::ALL_REALS,         Interval::ZERO); }
@@ -61,6 +152,10 @@ void TestInterval::mul14() { check_mul(Interval(1,2),               Interval(1,2
 void TestInterval::mul15() { check_mul(Interval(1,2),               Interval(-2,3), 	         Interval(-4,6)); }
 void TestInterval::mul16() { check_mul(Interval(-1,1),              Interval(-2,3), 	         Interval(-3,3)); }
 
+void TestInterval::mul17() { check_mul_scal(Interval(1,2),          NEG_INFINITY, 	        	 Interval::EMPTY_SET); }
+void TestInterval::mul18() { check_mul_scal(Interval(1,2),          POS_INFINITY, 	        	 Interval::EMPTY_SET); }
+void TestInterval::mul19() { check_mul_scal(Interval(1,2),          -1, 	        	         Interval(-2,-1)); }
+
 void TestInterval::div01() { check_div(Interval::EMPTY_SET,         Interval(0,1),               Interval::EMPTY_SET); }
 void TestInterval::div02() { check_div(Interval::ZERO,              Interval::ZERO,              Interval::EMPTY_SET); }
 void TestInterval::div03() { check_div(Interval(1,2),               Interval::ZERO,              Interval::EMPTY_SET); }
@@ -75,6 +170,9 @@ void TestInterval::div11() { check_div(Interval(NEG_INFINITY,-1),   Interval(0,1
 void TestInterval::div12() { check_div(Interval(1,POS_INFINITY),    Interval(-1,0),              Interval(NEG_INFINITY,-1)); }
 void TestInterval::div13() { check_div(Interval(1,POS_INFINITY),    Interval(0,1),               Interval(1,POS_INFINITY)); }
 void TestInterval::div14() { check_div(Interval(-1,1),              Interval(-1,1), 	         Interval::ALL_REALS); }
+void TestInterval::div15() { check_div_scal(Interval(1,2),          NEG_INFINITY, 	        	 Interval::EMPTY_SET); }
+void TestInterval::div16() { check_div_scal(Interval(1,2),          POS_INFINITY, 	        	 Interval::EMPTY_SET); }
+void TestInterval::div17() { check_div_scal(Interval(1,2),          -1, 	        	         Interval(-2,-1)); }
 
 void TestInterval::sqrt01() { check(sqrt(Interval::ALL_REALS), Interval::POS_REALS); }
 void TestInterval::sqrt02() { check(sqrt(Interval::NEG_REALS), Interval::ZERO); }
@@ -86,7 +184,7 @@ void TestInterval::sqrt05() { check(sqrt(Interval(-9,-4)),     Interval::EMPTY_S
 #define NAME2(a,b)         NAME2_HIDDEN(a,b)
 #define NAME2_HIDDEN(a,b)  a ## b
 
-void TestInterval::sqrProj01() { checkproj(sqr, Interval(1,9),            Interval(0,4),        Interval(1,3)); }
+void TestInterval::sqrProj01() { checkproj(sqr, Interval(1,9),            Interval(0,4),       Interval(1,3)); }
 void TestInterval::sqrProj02() { checkproj(sqr, Interval(1,9),            Interval(0,2),       Interval(1,2)); }
 void TestInterval::sqrProj03() { checkproj(sqr, Interval(1,9),            Interval(-4,2),      Interval(-3,2)); }
 void TestInterval::sqrProj04() { checkproj(sqr, Interval(1,9),            Interval(-4,-3),     Interval(-3,-3)); }
@@ -95,3 +193,95 @@ void TestInterval::sqrProj06() { checkproj(sqr, Interval(4,9),            Interv
 void TestInterval::sqrProj07() { checkproj(sqr, Interval(-4,-2),          Interval::ALL_REALS, Interval::EMPTY_SET); }
 
 void TestInterval::sinProj01() { /*check(asin_Proj(Interval(0,1),   Interval(-0.5*pi,3.5*pi)),  Interval(0,3*pi));*/ }
+
+void TestInterval::distance01() { check(ibex::distance(Interval(0,10), Interval(-5,5)), 5); }
+void TestInterval::distance02() { check(ibex::distance(Interval(0,10), Interval(5,10)), 5); }
+void TestInterval::distance03() { check(ibex::distance(Interval(0,10), Interval(5,15)), 5); }
+void TestInterval::distance04() { check(ibex::distance(Interval(0,10), Interval(1,2)), 8); /* 9 */}
+void TestInterval::distance05() { check(ibex::distance(Interval(0,10), Interval(0,10)), 0); }
+void TestInterval::distance06() { check(ibex::distance(Interval(0,10), Interval(-10,20)), 10); /* 0 */}
+
+/* with infinite bounds */
+void TestInterval::distance07() { check(ibex::distance(Interval::POS_REALS, Interval(0,10)), POS_INFINITY); }
+void TestInterval::distance08() { check(ibex::distance(Interval::ALL_REALS, Interval(0,10)), POS_INFINITY); }
+void TestInterval::distance09() { check(ibex::distance(Interval::ALL_REALS, Interval::ALL_REALS), 0); }
+void TestInterval::distance10() { check(ibex::distance(Interval::ALL_REALS, Interval::NEG_REALS), POS_INFINITY); }
+void TestInterval::distance11() { check(ibex::distance(Interval::ALL_REALS, Interval::POS_REALS), POS_INFINITY); }
+void TestInterval::distance12() { check(ibex::distance(Interval::POS_REALS, Interval(NEG_INFINITY,1)), POS_INFINITY); }
+void TestInterval::distance13() { check(ibex::distance(Interval::POS_REALS, Interval(0,1)), POS_INFINITY); }
+void TestInterval::distance14() { check(ibex::distance(Interval::NEG_REALS, Interval(-1,POS_INFINITY)), POS_INFINITY); }
+void TestInterval::distance15() { check(ibex::distance(Interval::NEG_REALS, Interval(NEG_INFINITY,-1)), 1); }
+void TestInterval::distance15b(){ check(ibex::distance(Interval::POS_REALS, Interval(1,POS_INFINITY)), 1); }
+
+/* with degenerated intervals */
+void TestInterval::distance16() { check(ibex::distance(Interval(0,10), Interval(5,5)), 5); /* 10 */}
+void TestInterval::distance17() { check(ibex::distance(Interval(0,10), Interval(0,0)), 10); }
+void TestInterval::distance18() { check(ibex::distance(Interval(0,10), Interval(10,10)), 10); }
+void TestInterval::distance19() { check(ibex::distance(Interval(0,0), Interval(0,0)), 0); }
+
+/* with empty intervals */
+
+void TestInterval::distance20() { check(ibex::distance(Interval(0,10), Interval::EMPTY_SET), 5); /* 10 */}
+void TestInterval::distance21() { check(ibex::distance(Interval(0,0), Interval::EMPTY_SET), 0); }
+
+void TestInterval::distance22() { check(ibex::distance(Interval(0,10), Interval(11,20)), 11); }
+void TestInterval::distance23() { check(ibex::distance(Interval(0,10), Interval(0,5)), 5); }
+
+void TestInterval::rel_distance01() { check(Interval(0,10).rel_distance(Interval(-5,5)), 0.5); }
+void TestInterval::rel_distance02() { check(Interval(0,10).rel_distance(Interval(5,10)), 0.5); }
+void TestInterval::rel_distance03() { check(Interval(0,10).rel_distance(Interval(5,15)), 0.5); }
+void TestInterval::rel_distance04() { check(Interval(0,10).rel_distance(Interval(1,2)), 0.8); }
+void TestInterval::rel_distance05() { check(Interval(0,10).rel_distance(Interval(0,10)), 0); }
+void TestInterval::rel_distance06() { check(Interval(0,10).rel_distance(Interval(-10,20)), 1);/*0*/ }
+
+/* with infinite bounds */
+void TestInterval::rel_distance07() { check(Interval::POS_REALS.rel_distance(Interval(0,10)), 1); }
+void TestInterval::rel_distance08() { check(Interval::ALL_REALS.rel_distance(Interval(0,10)), 1); }
+void TestInterval::rel_distance09() { check(Interval::ALL_REALS.rel_distance(Interval::ALL_REALS), 0); }
+void TestInterval::rel_distance10() { check(Interval::ALL_REALS.rel_distance(Interval::NEG_REALS), 1); }
+void TestInterval::rel_distance11() { check(Interval::ALL_REALS.rel_distance(Interval::POS_REALS), 1); }
+void TestInterval::rel_distance12() { check(Interval::POS_REALS.rel_distance(Interval(NEG_INFINITY,1)), 1); }
+void TestInterval::rel_distance13() { check(Interval::POS_REALS.rel_distance(Interval(0,1)), 1); }
+void TestInterval::rel_distance14() { check(Interval::NEG_REALS.rel_distance(Interval(-1,POS_INFINITY)), 1); }
+void TestInterval::rel_distance15() { check(Interval::NEG_REALS.rel_distance(Interval(NEG_INFINITY,-1)), 0); }
+
+/* with degenerated intervals */
+void TestInterval::rel_distance16() { check(Interval(0,10).rel_distance(Interval(5,5)), 0.5); /*1*/}
+void TestInterval::rel_distance17() { check(Interval(0,10).rel_distance(Interval(0,0)), 1); }
+void TestInterval::rel_distance18() { check(Interval(0,10).rel_distance(Interval(10,10)), 1); }
+void TestInterval::rel_distance19() { check(Interval(0,0).rel_distance(Interval(0,0)), 0); }
+void TestInterval::rel_distance20() { check(Interval(1,4).rel_distance(Interval(1.5,3)), 1.0/3.0); }
+
+void TestInterval::rel_distance21() { check(Interval(0,10).rel_distance(Interval(0,5)), 0.5); }
+
+void TestInterval::check_hull(const Interval& x, const Interval& z, const Interval& y_expected) {
+	check(x|z, y_expected);
+	check(z|x, y_expected);
+    check((Interval(x)|=z), y_expected);
+    check((Interval(z)|=x), y_expected);
+}
+
+void TestInterval::hull01() { check_hull(Interval(0,1), Interval(2,3), Interval(0,3)); }
+void TestInterval::hull02() { check_hull(Interval(0,1), Interval::EMPTY_SET, Interval(0,1)); }
+void TestInterval::hull03() { check_hull(Interval(-1), Interval::POS_REALS, Interval(-1,POS_INFINITY)); }
+
+void TestInterval::check_div2(const Interval& x, const Interval& y, const Interval& out1, const Interval& out2) {
+	Interval _out1,_out2;
+	div2(x,y,_out1,_out2);
+	check(out1,_out1);
+	check(out2,_out2);
+}
+
+void TestInterval::div2_01() { check_div2(Interval(6,12),  Interval(0,0),             Interval::EMPTY_SET,       Interval::EMPTY_SET); }
+void TestInterval::div2_02() { check_div2(Interval(6,12),  Interval(2,3),             Interval(2,6),             Interval::EMPTY_SET); }
+void TestInterval::div2_03() { check_div2(Interval(-2,3),  Interval(-1,1),            Interval::ALL_REALS,       Interval::EMPTY_SET); }
+void TestInterval::div2_04() { check_div2(Interval(2,3),   Interval(-1,1),            Interval(NEG_INFINITY,-2), Interval(2,POS_INFINITY)); }
+void TestInterval::div2_05() { check_div2(Interval(-3,-2), Interval(-1,1),            Interval(NEG_INFINITY,-2), Interval(2,POS_INFINITY)); }
+void TestInterval::div2_06() { check_div2(Interval(2,3),   Interval(NEG_INFINITY,1),  Interval::NEG_REALS,       Interval(2,POS_INFINITY)); }
+void TestInterval::div2_07() { check_div2(Interval(2,3),   Interval(-1,POS_INFINITY), Interval(NEG_INFINITY,-2), Interval::POS_REALS); }
+void TestInterval::div2_08() { check_div2(Interval(-3,-2), Interval(NEG_INFINITY,1),  Interval(NEG_INFINITY,-2), Interval::POS_REALS); }
+void TestInterval::div2_09() { check_div2(Interval(-3,-2), Interval(-1,POS_INFINITY), Interval::NEG_REALS,       Interval(2,POS_INFINITY)); }
+void TestInterval::div2_10() { check_div2(Interval(2,3),   Interval::NEG_REALS,       Interval::NEG_REALS,       Interval::EMPTY_SET); }
+void TestInterval::div2_11() { check_div2(Interval(2,3),   Interval::POS_REALS,       Interval::POS_REALS,       Interval::EMPTY_SET); }
+void TestInterval::div2_12() { check_div2(Interval(-3,-2), Interval::NEG_REALS,       Interval::POS_REALS,       Interval::EMPTY_SET); }
+void TestInterval::div2_13() { check_div2(Interval(-3,-2), Interval::POS_REALS,       Interval::NEG_REALS,       Interval::EMPTY_SET); }

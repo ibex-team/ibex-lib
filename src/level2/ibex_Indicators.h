@@ -31,13 +31,13 @@ public:
 	Indicators();
 
 	/**
-	 * Set whether the a variable has been impacted
+	 * Set whether a variable has been impacted
 	 * since the last call to the contractor.
 	 */
 	BoolMask& impact;
 
 	/**
-	 * Set whether the a variable has to be
+	 * Set whether a variable has to be
 	 * considered by the next call to the contractor.
 	 */
 	BoolMask& scope;

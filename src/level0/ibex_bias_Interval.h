@@ -34,50 +34,188 @@ inline Interval::Interval() : itv(NEG_INFINITY, POS_INFINITY) {
 }
 
 inline Interval::Interval(double a, double b) : itv(a,b) {
-
+	if (a==POS_INFINITY || b==NEG_INFINITY || a>b) *this=EMPTY_SET;
 }
 
 inline Interval::Interval(double a) : itv(a,a) {
+	if (a==NEG_INFINITY || a==POS_INFINITY) *this=EMPTY_SET;
+}
 
+inline bool Interval::operator==(const Interval& x) const {
+	return lb()==x.lb() && ub()==x.ub();
 }
 
 inline Interval& Interval::operator+=(double d) {
-	itv+=d;
+	if (d==NEG_INFINITY || d==POS_INFINITY) *this=EMPTY_SET;
+	else itv+=d;
 	return *this;
 }
 
 inline Interval& Interval::operator-=(double d) {
-	itv-=d;
+	if (d==NEG_INFINITY || d==POS_INFINITY) *this=EMPTY_SET;
+	else itv-=d;
 	return *this;
 }
 
 inline Interval& Interval::operator*=(double d) {
-	itv*=d;
-	return *this;
+	return ((*this)*=Interval(d));
 }
 
 inline Interval& Interval::operator/=(double d) {
-	itv/=d;
-	return *this;
+	return ((*this)/=Interval(d));
 }
 
 inline Interval& Interval::operator+=(const Interval& x) {
-	itv+=x.itv;
-	return *this;
+	if (is_empty()) return *this;
+	else if (x.is_empty()) { *this=Interval::EMPTY_SET; return *this; }
+	else { itv+=x.itv; return *this; }
 }
 
 inline Interval& Interval::operator-=(const Interval& x) {
-	itv-=x.itv;
+	if (is_empty()) return *this;
+	else if (x.is_empty()) { *this=Interval::EMPTY_SET; return *this; }
+	else { itv-=x.itv; return *this; }
+}
+
+/*
+ *  Multiplication
+ *
+ * \note Some situations where Bias/Profil may fail (underscore stands for any value): <ul>
+ *  <li> <tt>[0,0] * [-inf,_]</tt>
+ *  <li> <tt> [0,0] * [_,inf] </tt>
+ *  <li> <tt> [-inf,_] * [_,0] </tt>
+ *  <li> <tt> [_,inf] * [_,0] </tt>
+ *  <li> <tt> [-0,_] * [_,inf] </tt>
+ *  <li> <tt> [inf([0,0])*-1,1] * [1,inf] </tt>
+
+ *  <li> <tt> [inf([0,0])*-1,1] * [-inf,1] </tt>
+ *  </ul> */
+inline Interval& Interval::operator*=(const Interval& y) {
+
+	INTERVAL r;
+
+	if (is_empty()) return *this;
+	if (y.is_empty()) { *this=Interval::EMPTY_SET; return *this; }
+
+	const REAL& a(lb());
+	const REAL& b(ub());
+	const REAL& c(y.lb());
+	const REAL& d(y.ub());
+
+	if ((a==0 && b==0) || (c==0 && d==0)) { *this=Interval(0.0,0.0); return *this; }
+
+	if (((a<0) && (b>0)) && (c==NEG_INFINITY || d==POS_INFINITY)) { *this=Interval(NEG_INFINITY, POS_INFINITY); return *this; }
+
+	if (((c<0) && (d>0)) && (a==NEG_INFINITY || b==POS_INFINITY)) { *this=Interval(NEG_INFINITY, POS_INFINITY); return *this; }
+
+	// [-inf, _] x [_ 0] ou [0,_] x [_, +inf]
+	if (((a==NEG_INFINITY) && (d==0)) || ((d==POS_INFINITY) && (a==0))) {
+		if ((b<=0) || (c>=0)) { *this=Interval(0.0, POS_INFINITY); return *this; }
+		else {
+			BiasMulII (Bias(r), Bias(INTERVAL(b)), Bias(INTERVAL(c)));
+			*this=Interval(Inf(r), POS_INFINITY);
+			return *this;
+		}
+	}
+
+	// [-inf, _] x [0, _] ou [0, _] x [-inf, _]
+	if (((a==NEG_INFINITY) && (c==0)) || ((c==NEG_INFINITY) && (a==0))) {
+		if ((b<=0) || (d<=0)) { *this=Interval(NEG_INFINITY, 0.0); return *this; }
+		else {
+			BiasMulII (Bias(r), Bias(INTERVAL(b)), Bias(INTERVAL(d)));
+			*this=Interval(NEG_INFINITY, Sup(r));
+			return *this;
+		}
+	}
+
+	// [_,0] x [-inf, _] ou [_, +inf] x [0,_]
+	if (((c==NEG_INFINITY) && (b==0)) || ((b==POS_INFINITY) && (c==0))) {
+		if ((d<=0) || (a>=0)) { *this=Interval(0.0, POS_INFINITY); return *this; }
+		else {
+			BiasMulII (Bias(r), Bias(INTERVAL(a)), Bias(INTERVAL(d)));
+			*this=Interval(Inf(r), POS_INFINITY);
+			return *this;
+		}
+	}
+
+	// [_, +inf] x [_,0] ou [_,0] x [_, +inf]
+	if (((b==POS_INFINITY) && (d==0)) || ((d==POS_INFINITY) && (b==0))) {
+		if ((a>=0) || (c>=0)) { *this=Interval(NEG_INFINITY, 0.0); return *this; }
+		else {
+			BiasMulII (Bias(r), Bias(INTERVAL(a)), Bias(INTERVAL(c)));
+			*this=Interval(NEG_INFINITY, Sup(r));
+			return *this;
+		}
+	}
+
+	BiasMulII (Bias(r), Bias(itv), Bias(y.itv));
+	*this=r;
 	return *this;
 }
 
-inline Interval& Interval::operator*=(const Interval& x) {
-	itv*=x.itv;
-	return *this;
-}
+inline Interval& Interval::operator/=(const Interval& y) {
 
-inline Interval& Interval::operator/=(const Interval& x) {
-	return div2_inter(*this,x);
+	if (is_empty()) return *this;
+	if (y.is_empty()) { *this=Interval::EMPTY_SET; return *this; }
+
+	const REAL& a(lb());
+	const REAL& b(ub());
+	const REAL& c(y.lb());
+	const REAL& d(y.ub());
+
+	INTERVAL r;
+
+	if (c==0 && d==0) {
+		*this=Interval::EMPTY_SET;
+		return *this;
+	}
+
+	if (a==0 && b==0) {
+		return *this;
+	}
+
+	if (c>0 || d<0) {
+		BiasDivII (Bias(r), Bias(itv), Bias(y.itv));
+		*this=r;
+		return *this;
+	}
+
+	if ((b<=0) && d==0) {
+		BiasDivII (Bias(r), Bias(INTERVAL(b)), Bias(INTERVAL(c)));
+		*this=Interval(Inf(r), POS_INFINITY);
+		return *this;
+	}
+
+	if (b<=0 && c<0 && d<0) {
+		*this=Interval(NEG_INFINITY, POS_INFINITY);
+		return *this;
+	}
+
+	if (b<=0 && c==0) {
+		BiasDivII (Bias(r), Bias(INTERVAL(b)), Bias(INTERVAL(d)));
+		*this=Interval(NEG_INFINITY, Sup(r));
+		return *this;
+	}
+
+	if (a>=0 && d==0) {
+		BiasDivII (Bias(r), Bias(INTERVAL(a)), Bias(INTERVAL(c)));
+		*this=Interval(NEG_INFINITY, Sup(r));
+		return *this;
+	}
+
+	if (a>=0 && c<0 && d>0) {
+		*this=Interval(NEG_INFINITY, POS_INFINITY);
+		return *this;
+	}
+
+	if (a>=0 && c==0) {
+		BiasDivII (Bias(r), Bias(INTERVAL(a)), Bias(INTERVAL(d)));
+		*this=Interval(Inf(r), POS_INFINITY);
+		return *this;
+	}
+
+	*this=Interval(NEG_INFINITY, POS_INFINITY); // a<0<b et c<=0<=d
+	return *this;
 }
 
 inline Interval Interval::operator+() const {
@@ -92,7 +230,8 @@ inline Interval Interval:: operator-() const {
 inline Interval& Interval::div2_inter(const Interval& x, const Interval& y) {
 	Interval out2;
 	div2_inter(x,y,out2);
-	return *this |= out2;
+	*this |= out2;
+	return *this;
 }
 
 inline void Interval::set_empty() {
@@ -177,6 +316,15 @@ inline bool Interval::is_degenerated() const {
 	return is_empty() || lb()==ub();
 }
 
+inline bool Interval::is_unbounded() const {
+	if (is_empty()) return false;
+	return lb()==NEG_INFINITY || ub()==POS_INFINITY;
+}
+
+inline double Interval::rad() const {
+	return 0.5*Diam(itv);
+}
+
 inline double Interval::diam() const {
 	return Diam(itv);
 }
@@ -203,50 +351,59 @@ inline Interval operator|(const Interval& x1, const Interval& x2) {
 	return Hull(x1.itv,x2.itv);
 }
 
-inline double hausdorff(const Interval &x1, const Interval &x2) {
-	return Distance(x1.itv,x2.itv);
-}
-
 inline Interval operator+(const Interval& x, double d) {
-	return x.itv+d;
+	if (d==NEG_INFINITY || d==POS_INFINITY) return Interval::EMPTY_SET;
+	else return x.itv+d;
 }
 
 inline Interval operator-(const Interval& x, double d) {
-	return x.itv-d;
+	if (d==NEG_INFINITY || d==POS_INFINITY) return Interval::EMPTY_SET;
+	else return x.itv-d;
 }
 
 inline Interval operator*(const Interval& x, double d) {
-	return x.itv*d;
+	if (d==NEG_INFINITY || d==POS_INFINITY) return Interval::EMPTY_SET;
+	else return x.itv*d;
 }
 
 inline Interval operator/(const Interval& x, double d) {
-	return x.itv/INTERVAL(d);
+	if (d==0 || d==NEG_INFINITY || d==POS_INFINITY) return Interval::EMPTY_SET;
+	else return x.itv/INTERVAL(d);
 }
 
 inline Interval operator+(double d,const Interval& x) {
-	return d+x.itv;
+	if (d==NEG_INFINITY || d==POS_INFINITY) return Interval::EMPTY_SET;
+	else return d+x.itv;
 }
 
 inline Interval operator-(double d, const Interval& x) {
-	return d-x.itv;
+	if (d==NEG_INFINITY || d==POS_INFINITY) return Interval::EMPTY_SET;
+	else return d-x.itv;
 }
 
 inline Interval operator*(double d, const Interval& x) {
+	if (d==NEG_INFINITY || d==POS_INFINITY) return Interval::EMPTY_SET;
 	return d*x.itv;
 }
 
 inline Interval operator/(double d, const Interval& x) {
+	if (d==0 || d==NEG_INFINITY || d==POS_INFINITY) return Interval::EMPTY_SET;
 	return INTERVAL(d)/x.itv;
 }
 
 inline Interval operator+(const Interval& x1, const Interval& x2) {
-	return x1.itv+x2.itv;
+	if (x1.is_empty() || x2.is_empty())
+		return Interval::EMPTY_SET;
+	else
+		return x1.itv+x2.itv;
 }
 
 inline Interval operator-(const Interval& x1, const Interval& x2) {
-	return x1.itv-x2.itv;
+	if (x1.is_empty() || x2.is_empty())
+		return Interval::EMPTY_SET;
+	else
+		return x1.itv-x2.itv;
 }
-
 
 /*
  *  Multiplication
@@ -262,105 +419,47 @@ inline Interval operator-(const Interval& x1, const Interval& x2) {
  *  <li> <tt> [inf([0,0])*-1,1] * [-inf,1] </tt>
  *  </ul> */
 inline Interval operator*(const Interval& x, const Interval& y) {
-	INTERVAL r;
-
-	if (x.is_empty() || y.is_empty()) return Interval::EMPTY_SET;
-
-	const REAL& a(x.lb());
-	const REAL& b(x.ub());
-	const REAL& c(y.lb());
-	const REAL& d(y.ub());
-
-	if ((a==0 && b==0) || (c==0 && d==0)) return Interval(0.0,0.0);
-
-	if (((a<0) && (b>0)) && (c==NEG_INFINITY || d==POS_INFINITY)) return Interval(NEG_INFINITY, POS_INFINITY);
-
-	if (((c<0) && (d>0)) && (a==NEG_INFINITY || b==POS_INFINITY)) return Interval(NEG_INFINITY, POS_INFINITY);
-
-	// [-inf, _] x [_ 0] ou [0,_] x [_, +inf]
-	if (((a==NEG_INFINITY) && (d==0)) || ((d==POS_INFINITY) && (a==0))) {
-		if ((b<=0) || (c>=0)) return Interval(0.0, POS_INFINITY);
-		else {
-			BiasMulII (Bias(r), Bias(INTERVAL(b)), Bias(INTERVAL(c)));
-			return Interval(Inf(r), POS_INFINITY);
-		}
-	}
-
-	// [-inf, _] x [0, _] ou [0, _] x [-inf, _]
-	if (((a==NEG_INFINITY) && (c==0)) || ((c==NEG_INFINITY) && (a==0))) {
-		if ((b<=0) || (d<=0)) return Interval(NEG_INFINITY, 0.0);
-		else {
-			BiasMulII (Bias(r), Bias(INTERVAL(b)), Bias(INTERVAL(d)));
-			return Interval(NEG_INFINITY, Sup(r));
-		}
-	}
-
-	// [_,0] x [-inf, _] ou [_, +inf] x [0,_]
-	if (((c==NEG_INFINITY) && (b==0)) || ((b==POS_INFINITY) && (c==0))) {
-		if ((d<=0) || (a>=0)) return Interval(0.0, POS_INFINITY);
-		else {
-			BiasMulII (Bias(r), Bias(INTERVAL(a)), Bias(INTERVAL(d)));
-			return Interval(Inf(r), POS_INFINITY);
-		}
-	}
-
-	// [_, +inf] x [_,0] ou [_,0] x [_, +inf]
-	if (((b==POS_INFINITY) && (d==0)) || ((d==POS_INFINITY) && (b==0))) {
-		if ((a>=0) || (c>=0)) return Interval(NEG_INFINITY, 0.0);
-		else {
-			BiasMulII (Bias(r), Bias(INTERVAL(a)), Bias(INTERVAL(c)));
-			return Interval(NEG_INFINITY, Sup(r));
-		}
-	}
-
-	BiasMulII (Bias(r), Bias(x.itv), Bias(y.itv));
-	return r;
+	return (Interval(x)*=y);
 }
 
 inline Interval operator/(const Interval& x, const Interval& y) {
+	return (Interval(x)/=y);
+}
 
-	if (x.is_empty() || y.is_empty()) return Interval::EMPTY_SET;
+inline double distance(const Interval &x1, const Interval &x2) {
 
-	const REAL& a(x.lb());
-	const REAL& b(x.ub());
-	const REAL& c(y.lb());
-	const REAL& d(y.ub());
+    if (x1.is_empty()) return x2.rad();
 
-	INTERVAL r;
+    if (x2.is_empty()) return x1.rad();
 
-	if (c==0 && d==0) return Interval::EMPTY_SET;
+    if (x1.lb()==NEG_INFINITY) {
+    	if (x2.lb()!=NEG_INFINITY)
+    		return POS_INFINITY;
+    	else if (x1.ub()==POS_INFINITY) {
+    		if (x2.ub()==POS_INFINITY) return 0.0;
+    		else return POS_INFINITY;
+    	}
+    	else if (x2.ub()==POS_INFINITY) return POS_INFINITY;
+    	else return fabs(x1.ub()-x2.ub());
+    }
+    else if (x1.ub()==POS_INFINITY) {
+    	if (x2.ub()!=POS_INFINITY)
+    		return POS_INFINITY;
+    	else if (x2.lb()==NEG_INFINITY)
+    		return POS_INFINITY;
+    	else return fabs(x1.lb()-x2.lb());
+    }
+    else if (x2.is_unbounded())
+    	return POS_INFINITY;
+    else
+    	return Distance(x1.itv,x2.itv);
+}
 
-	if (a==0 && b==0) {
-		return x;
-	}
-
-	if (c>0 || d<0) {
-		BiasDivII (Bias(r), Bias(x.itv), Bias(y.itv));
-		return r;
-	}
-
-	if ((b<=0) && d==0) {
-		BiasDivII (Bias(r), Bias(INTERVAL(b)), Bias(INTERVAL(c)));
-		return Interval(Inf(r), POS_INFINITY);
-	}
-	if (b<=0 && c<0 && d<0)
-		return Interval(NEG_INFINITY, POS_INFINITY);
-	if (b<=0 && c==0) {
-		BiasDivII (Bias(r), Bias(INTERVAL(b)), Bias(INTERVAL(d)));
-		return Interval(NEG_INFINITY, Sup(r));
-	}
-	if (a>=0 && d==0) {
-		BiasDivII (Bias(r), Bias(INTERVAL(a)), Bias(INTERVAL(c)));
-		return Interval(NEG_INFINITY, Sup(r));
-	}
-	if (a>=0 && c<0 && d>0)
-		return Interval(NEG_INFINITY, POS_INFINITY);
-	if (a>=0 && c==0) {
-		BiasDivII (Bias(r), Bias(INTERVAL(a)), Bias(INTERVAL(d)));
-		return Interval(Inf(r), POS_INFINITY);
-	}
-
-	return Interval(NEG_INFINITY, POS_INFINITY); // a<0<b et c<=0<=d
+inline double Interval::rel_distance(const Interval& x) const {
+	  double d=distance(*this,x);
+	  if (d==POS_INFINITY) return 1;
+	  double D=diam();
+	  return (D==0 || D==POS_INFINITY) ? 0.0 : (d/D); // if diam(this)=infinity here, necessarily d=0
 }
 
 inline Interval sqr(const Interval& x) {

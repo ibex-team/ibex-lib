@@ -14,7 +14,7 @@ BIAS_DIR:=/home/gchabert/Profil-2.0.8
 GAOL_DIR:=/home/gchabert/gaol-3.1.1
 #===================================================
 
-CXXFLAGS :=	-O2 -g -Wall -fmessage-length=0
+CXXFLAGS :=	-g -Wall -fmessage-length=0
 
 IBEX_INC_DIR:=$(IBEX_DIR)/include
 IBEX_INC_DIR_OPT:=-I$(IBEX_INC_DIR)

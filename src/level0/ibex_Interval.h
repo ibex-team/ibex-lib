@@ -65,6 +65,9 @@ class Interval {
     /** \brief Create [a,a]. */
     Interval(double a);
 
+    /** \brief True iff *this and x are exactly the same intervals. */
+    bool operator==(const Interval& x) const;
+
     /** \brief Add \a d to *this and return the result.  */
     Interval& operator+=(double d);
 
@@ -98,11 +101,8 @@ class Interval {
     /** \brief Return -*this. */
     Interval operator-() const;
 
-    /** \brief Hausdorff distance between *this and x */
-    double distance(const Interval& x);
-
     /** \brief Relative Hausdorff distance between *this and x */
-    double rel_distance(const Interval& x);
+    double rel_distance(const Interval& x) const;
 
     /**
      * Set this interval to the intersection of itself with the division of two others.
@@ -195,6 +195,15 @@ class Interval {
      * \note An empty interval is considered here as degenerated. */
     bool is_degenerated() const;
 
+    /**
+     * \brief True if one bound of *this is infinite.
+     * \note An empty interval is always bounded.
+     */
+    bool is_unbounded() const;
+
+    /** Return the radius of the interval. */
+    double rad() const;
+
     /** Return the diameter of the interval. */
     double diam() const;
 
@@ -263,7 +272,7 @@ Interval operator&(const Interval& x1, const Interval& x2);
 Interval operator|(const Interval& x1, const Interval& x2);
 
 /** \brief Hausdorff distance of $[x]_1$ and $[x]_2$. */
-double hausdorff(const Interval &x1, const Interval &x2);
+double distance(const Interval &x1, const Interval &x2);
 
 /** \brief $[x]+d$. */
 Interval operator+(const Interval& x, double d);

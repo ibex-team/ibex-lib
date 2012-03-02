@@ -24,7 +24,6 @@ class Propagation : public Contractor {
 public:
  /** Create a AC3-like propagation with a list of contractors.
   * \param cl - The list of contractors.
-  * \param space - the space for this contractor
   * \param ratio (optional) - Criterion for stopping propagation. If a projection does not remove more that \a ratio times
   * the diameter of a variable domain, then this reduction is not propagated. The default value is #default_ratio.
   * \param incremental (optional) - This parameter is only used when contraction is called with a \link Contractor::Indicators
