@@ -68,6 +68,23 @@ class Interval {
     /** \brief True iff *this and x are exactly the same intervals. */
     bool operator==(const Interval& x) const;
 
+    /** \brief True iff *this and x are not exactly the same intervals. */
+    bool operator!=(const Interval& x) const;
+
+    /** \brief Set this interval to the empty set. */
+    void set_empty();
+
+    /** \brief Intersection of *this and x.
+     * \param x - the interval to compute the intersection with.*/
+    Interval& operator&=(const Interval& x);
+
+    /** \brief Union of *this and I.
+     * \param x - the interval to compute the hull with.*/
+    Interval& operator|=(const Interval& x);
+
+    /** \brief Return -*this. */
+    Interval operator-() const;
+
     /** \brief Add \a d to *this and return the result.  */
     Interval& operator+=(double d);
 
@@ -95,15 +112,6 @@ class Interval {
      * the union of *this/x as intermediate result. */
     Interval& operator/=(const Interval& x);
 
-    /** \brief Return *this. */
-    Interval operator+() const;
-
-    /** \brief Return -*this. */
-    Interval operator-() const;
-
-    /** \brief Relative Hausdorff distance between *this and x */
-    double rel_distance(const Interval& x) const;
-
     /**
      * Set this interval to the intersection of itself with the division of two others.
      *
@@ -129,17 +137,6 @@ class Interval {
      */
     Interval& div2_inter(const Interval& x, const Interval& y);
 
-    /** \brief Set this interval to the empty set. */
-    void set_empty();
-
-    /** \brief Intersection of *this and x.
-     * \param x - the interval to compute the intersection with.*/
-    Interval& operator&=(const Interval& x);
-
-    /** \brief Union of *this and I.
-     * \param x - the interval to compute the hull with.*/
-    Interval& operator|=(const Interval& x);
-
     /** \brief Return the lower bound of *this. */
     double lb() const;
 
@@ -159,47 +156,6 @@ class Interval {
      * - [a, +oo]   -> midP = MAXREAL
      * - [a, b]     -> midP ~ a + .5*(b-a) */
     double mid() const;
-
-    /** Return true iff this interval is a subset of \a x.
-     * \note Always return true if *this is empty. */
-    bool is_subset(const Interval& x) const;
-
-    /** Return true iff this interval is in the
-     * interior of \a x.
-     * \note Always return true if *this is empty. */
-    bool is_strict_subset(const Interval& x) const;
-
-    /** Return true iff this interval is a superset of \a x.
-     * \note Always return true if x is empty. */
-    bool is_superset(const Interval& x) const;
-
-    /** Return true iff the interior of *this is a superset of \a x. */
-    bool is_strict_superset(const Interval& x) const;
-
-    /** Return true iff *this contains \a d.
-     * \note d can also be an "open bound", i.e., infinity. */
-    bool contains(double d) const;
-
-    /** Return true iff the interior of *this contains \a d.
-     * \note d can also be an "open bound", i.e., infinity. */
-    bool strictly_contains(double d) const;
-
-    /** Return true iff *this and \a x do not intersect. */
-    bool is_disjoint(const Interval &x) const;
-
-    /** Return true iff *this is empty */
-    bool is_empty() const;
-
-    /** An interval is degenerated if it is of the form [a, a]
-     *
-     * \note An empty interval is considered here as degenerated. */
-    bool is_degenerated() const;
-
-    /**
-     * \brief True if one bound of *this is infinite.
-     * \note An empty interval is always bounded.
-     */
-    bool is_unbounded() const;
 
     /** Return the radius of the interval. */
     double rad() const;
@@ -222,6 +178,59 @@ class Interval {
      * Returns the magnitude of *this:
      * mag(*this)=max(|lower bound|, |upper bound|). */
     double mag() const;
+
+    /** Return true iff this interval is a subset of \a x.
+     * \note Always return true if *this is empty. */
+    bool is_subset(const Interval& x) const;
+
+    /** Return true iff this interval is in the
+     * interior of \a x.
+     * \note In particular, (-oo,oo) is a strict subset of (-oo,oo)
+     * \note Always return true if *this is empty. */
+    bool is_strict_subset(const Interval& x) const;
+
+    /** Return true iff this interval is a superset of \a x.
+     *
+     * \note Always return true if x is empty. */
+    bool is_superset(const Interval& x) const;
+
+    /** Return true iff the interior of *this is a superset of \a x.
+     *
+     * \note In particular, (-oo,oo) is a strict superset of (-oo,oo)
+     */
+    bool is_strict_superset(const Interval& x) const;
+
+    /** Return true iff *this contains \a d.
+     * \note d can also be an "open bound", i.e., infinity.
+     * So this function is not restricted to a set-membership
+     * interpretation. */
+    bool contains(double d) const;
+
+    /** Return true iff the interior of *this contains \a d.
+     * \note d can also be an "open bound", i.e., infinity.
+     * So this function is not restricted to a set-membership
+     * interpretation. */
+    bool strictly_contains(double d) const;
+
+    /** Return true iff *this and \a x do not intersect. */
+    bool is_disjoint(const Interval &x) const;
+
+    /** Return true iff *this is empty */
+    bool is_empty() const;
+
+    /** An interval is degenerated if it is of the form [a, a]
+     *
+     * \note An empty interval is considered here as degenerated. */
+    bool is_degenerated() const;
+
+    /**
+     * \brief True if one bound of *this is infinite.
+     * \note An empty interval is always bounded.
+     */
+    bool is_unbounded() const;
+
+    /** \brief Relative Hausdorff distance between *this and x */
+    double rel_distance(const Interval& x) const;
 
     /** \brief pi. */
     static const Interval PI;
@@ -271,9 +280,6 @@ Interval operator&(const Interval& x1, const Interval& x2);
 /** \brief $\square([x]_1\cup [x]_2)$. */
 Interval operator|(const Interval& x1, const Interval& x2);
 
-/** \brief Hausdorff distance of $[x]_1$ and $[x]_2$. */
-double distance(const Interval &x1, const Interval &x2);
-
 /** \brief $[x]+d$. */
 Interval operator+(const Interval& x, double d);
 
@@ -320,6 +326,9 @@ Interval operator*(const Interval& x1, const Interval& x2);
 
 /** \brief $[x]_1/[x]_2$. */
 Interval operator/(const Interval& x1, const Interval& x2);
+
+/** \brief Hausdorff distance of $[x]_1$ and $[x]_2$. */
+double distance(const Interval &x1, const Interval &x2);
 
 /** \brief $[x]^2$ */
 Interval sqr(const Interval& x);

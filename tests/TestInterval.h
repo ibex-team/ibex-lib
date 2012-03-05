@@ -9,8 +9,8 @@
  * Created     : Dec 07, 2011
  * ---------------------------------------------------------------------------- */
 
-#ifndef TESTInterval_H_
-#define TESTInterval_H_
+#ifndef __TEST_INTERVAL_H__
+#define __TEST_INTERVAL_H__
 
 #include "cpptest.h"
 #include "ibex_Interval.h"
@@ -25,6 +25,29 @@ public:
 		TEST_ADD(TestInterval::cons03);
 		TEST_ADD(TestInterval::cons04);
 		TEST_ADD(TestInterval::cons05);
+
+		TEST_ADD(TestInterval::eq01);
+		TEST_ADD(TestInterval::eq02);
+		TEST_ADD(TestInterval::eq03);
+		TEST_ADD(TestInterval::eq04);
+		TEST_ADD(TestInterval::eq05);
+		TEST_ADD(TestInterval::eq06);
+		TEST_ADD(TestInterval::eq07);
+		TEST_ADD(TestInterval::eq08);
+
+		TEST_ADD(TestInterval::set_empty01);
+		TEST_ADD(TestInterval::set_empty02);
+
+		TEST_ADD(TestInterval::inter01);
+		TEST_ADD(TestInterval::inter02);
+		TEST_ADD(TestInterval::inter03);
+		TEST_ADD(TestInterval::inter04);
+		TEST_ADD(TestInterval::inter05);
+		TEST_ADD(TestInterval::inter06);
+
+		TEST_ADD(TestInterval::hull01);
+		TEST_ADD(TestInterval::hull02);
+		TEST_ADD(TestInterval::hull03);
 
 		TEST_ADD(TestInterval::add01);
 		TEST_ADD(TestInterval::add02);
@@ -76,20 +99,26 @@ public:
 		TEST_ADD(TestInterval::div16);
 		TEST_ADD(TestInterval::div17);
 
-		TEST_ADD(TestInterval::sqrt01);
-		TEST_ADD(TestInterval::sqrt02);
-		TEST_ADD(TestInterval::sqrt03);
-		TEST_ADD(TestInterval::sqrt04);
-		TEST_ADD(TestInterval::sqrt05);
+		TEST_ADD(TestInterval::div2_01);
+		TEST_ADD(TestInterval::div2_02);
+		TEST_ADD(TestInterval::div2_03);
+		TEST_ADD(TestInterval::div2_04);
+		TEST_ADD(TestInterval::div2_05);
+		TEST_ADD(TestInterval::div2_06);
+		TEST_ADD(TestInterval::div2_07);
+		TEST_ADD(TestInterval::div2_08);
+		TEST_ADD(TestInterval::div2_09);
+		TEST_ADD(TestInterval::div2_10);
+		TEST_ADD(TestInterval::div2_11);
+		TEST_ADD(TestInterval::div2_12);
+		TEST_ADD(TestInterval::div2_13);
 
-		TEST_ADD(TestInterval::sqrProj01);
-		TEST_ADD(TestInterval::sqrProj02);
-		TEST_ADD(TestInterval::sqrProj03);
-		TEST_ADD(TestInterval::sqrProj04);
-		TEST_ADD(TestInterval::sqrProj05);
-		TEST_ADD(TestInterval::sqrProj06);
-		TEST_ADD(TestInterval::sqrProj07);
-		TEST_ADD(TestInterval::sinProj01);
+		TEST_ADD(TestInterval::getters01);
+		TEST_ADD(TestInterval::getters02);
+		TEST_ADD(TestInterval::getters03);
+		TEST_ADD(TestInterval::getters04);
+		TEST_ADD(TestInterval::getters05);
+		TEST_ADD(TestInterval::getters06);
 
 		TEST_ADD(TestInterval::distance01);
 		TEST_ADD(TestInterval::distance02);
@@ -116,6 +145,22 @@ public:
 		TEST_ADD(TestInterval::distance22);
 		TEST_ADD(TestInterval::distance23);
 
+		TEST_ADD(TestInterval::sqrt01);
+		TEST_ADD(TestInterval::sqrt02);
+		TEST_ADD(TestInterval::sqrt03);
+		TEST_ADD(TestInterval::sqrt04);
+		TEST_ADD(TestInterval::sqrt05);
+
+		TEST_ADD(TestInterval::sqrProj01);
+		TEST_ADD(TestInterval::sqrProj02);
+		TEST_ADD(TestInterval::sqrProj03);
+		TEST_ADD(TestInterval::sqrProj04);
+		TEST_ADD(TestInterval::sqrProj05);
+		TEST_ADD(TestInterval::sqrProj06);
+		TEST_ADD(TestInterval::sqrProj07);
+		TEST_ADD(TestInterval::sinProj01);
+
+
 		TEST_ADD(TestInterval::rel_distance01);
 		TEST_ADD(TestInterval::rel_distance02);
 		TEST_ADD(TestInterval::rel_distance03);
@@ -138,32 +183,101 @@ public:
 		TEST_ADD(TestInterval::rel_distance20);
 		TEST_ADD(TestInterval::rel_distance21);
 
-		TEST_ADD(TestInterval::hull01);
-		TEST_ADD(TestInterval::hull02);
-		TEST_ADD(TestInterval::hull03);
-
-		TEST_ADD(TestInterval::div2_01);
-		TEST_ADD(TestInterval::div2_02);
-		TEST_ADD(TestInterval::div2_03);
-		TEST_ADD(TestInterval::div2_04);
-		TEST_ADD(TestInterval::div2_05);
-		TEST_ADD(TestInterval::div2_06);
-		TEST_ADD(TestInterval::div2_07);
-		TEST_ADD(TestInterval::div2_08);
-		TEST_ADD(TestInterval::div2_09);
-		TEST_ADD(TestInterval::div2_10);
-		TEST_ADD(TestInterval::div2_11);
-		TEST_ADD(TestInterval::div2_12);
-		TEST_ADD(TestInterval::div2_13);
-
+	    TEST_ADD(TestInterval::is_subset01);
+	    TEST_ADD(TestInterval::is_subset02);
+	    TEST_ADD(TestInterval::is_strict_subset01);
+	    TEST_ADD(TestInterval::is_strict_subset02);
+	    TEST_ADD(TestInterval::is_superset01);
+	    TEST_ADD(TestInterval::is_superset02);
+	    TEST_ADD(TestInterval::is_strict_superset01);
+	    TEST_ADD(TestInterval::is_strict_superset02);
+	    TEST_ADD(TestInterval::contains01);
+	    TEST_ADD(TestInterval::contains02);
+	    TEST_ADD(TestInterval::strictly_contains01);
+	    TEST_ADD(TestInterval::strictly_contains02);
+	    TEST_ADD(TestInterval::is_disjoint01);
+	    TEST_ADD(TestInterval::is_disjoint02);
+	    TEST_ADD(TestInterval::is_empty01);
+	    TEST_ADD(TestInterval::is_empty02);
+	    TEST_ADD(TestInterval::is_degenerated01);
+	    TEST_ADD(TestInterval::is_degenerated02);
+	    TEST_ADD(TestInterval::is_unbounded01);
+	    TEST_ADD(TestInterval::is_unbounded02);
+	    TEST_ADD(TestInterval::is_unbounded03);
+	    TEST_ADD(TestInterval::is_unbounded04);
 	}
 private:
+
+	/* test
+	 * =========
+	 *  Interval()
+	 *  Interval(double a, double b)
+	 *  Interval(double a)
+	 */
 	void cons01();
 	void cons02();
 	void cons03();
 	void cons04();
 	void cons05();
 
+	/* test
+	 * =========
+	 *  operator==(const Interval& x) const;
+     *  operator!=(const Interval& x) const;
+	 */
+	void eq01();
+	void eq02();
+	void eq03();
+	void eq04();
+	void eq05();
+	void eq06();
+	void eq07();
+	void eq08();
+
+	/* test: set_empty() */
+	void set_empty01();
+	void set_empty02();
+
+    /* test
+     * =====
+     *  operator&=(const Interval& x)
+     * 	operator&(const Interval& x1, const Interval& x2)
+     */
+    void inter01();
+    void inter02();
+    void inter03();
+    void inter04();
+    void inter05();
+    void inter06();
+
+    /* test
+     * =====
+     *  operator|=(const Interval& x)
+     * 	operator|(const Interval& x1, const Interval& x2)
+     */
+	void hull01();
+	void hull02();
+	void hull03();
+
+	/* test: operator&=(const Interval& x) */
+	void minus01();
+	void minus02();
+	void minus03();
+	void minus04();
+
+	/* test:
+	 * =======
+	 *   operator+=(double d)
+	 *   operator+=(const Interval& x)
+	 *   operator+(const Interval& x, double d)
+	 *   operator+(double d,const Interval& x)
+	 *   operator+(const Interval& x1, const Interval& x2)
+	 *   operator-=(double d)
+	 *   operator-=(const Interval& x)
+	 *   operator-(const Interval& x, double d)
+	 *   operator-(double d,const Interval& x)
+	 *   operator-(const Interval& x1, const Interval& x2)
+	 */
 	void add01();
 	void add02();
 	void add03();
@@ -176,6 +290,14 @@ private:
 	void add10();
 	void add11();
 
+	/* test:
+	 * =======
+	 *   operator*=(double d)
+	 *   operator*=(const Interval& x)
+	 *   operator*(const Interval& x, double d)
+	 *   operator*(double d,const Interval& x)
+	 *   operator*(const Interval& x1, const Interval& x2)
+	 */
 	void mul01();
 	void mul02();
 	void mul03();
@@ -196,6 +318,15 @@ private:
 	void mul18();
 	void mul19();
 
+	/* test:
+	 * =======
+	 *   operator/=(double d)
+	 *   operator/=(const Interval& x)
+	 *   operator/(const Interval& x, double d)
+	 *   operator/(double d,const Interval& x)
+	 *   operator/(const Interval& x1, const Interval& x2)
+	 */
+
 	void div01();
 	void div02();
 	void div03();
@@ -214,22 +345,110 @@ private:
 	void div16();
 	void div17();
 
-	void sqrt01();
-	void sqrt02();
-	void sqrt03();
-	void sqrt04();
-	void sqrt05();
+	/* test:
+	 * =========
+	 *  div2_inter(const Interval& x, const Interval& y, Interval& out2)
+	 *  div2_inter(const Interval& x, const Interval& y)
+	 *  div2(const Interval& x, const Interval& y, Interval& out1, Interval& out2)
+	 */
+	void div2_01();
+	void div2_02();
+	void div2_03();
+	void div2_04();
+	void div2_05();
+	void div2_06();
+	void div2_07();
+	void div2_08();
+	void div2_09();
+	void div2_10();
+	void div2_11();
+	void div2_12();
+	void div2_13();
 
-	void sqrProj01();
-	void sqrProj02();
-	void sqrProj03();
-	void sqrProj04();
-	void sqrProj05();
-	void sqrProj06();
-	void sqrProj07();
 
-	void sinProj01();
+	/* test
+	 * =============
+	 *  lb() const
+	 *  ub() const
+	 *  mid() const
+	 *  rad() const;
+	 *  diam() const;
+     *  mig() const;
+     *  mag() const;
+     */
+	void getters01();
+	void getters02();
+	void getters03();
+	void getters04();
+	void getters05();
+	void getters06();
 
+	/* test: is_subset */
+    void is_subset01();
+    void is_subset02();
+
+	/* test: is_strict_subset */
+    void is_strict_subset01();
+    void is_strict_subset02();
+
+	/* test: is_superset */
+    void is_superset01();
+    void is_superset02();
+
+	/* test: is_strict_superset */
+    void is_strict_superset01();
+    void is_strict_superset02();
+
+	/* test: contains */
+    void contains01();
+    void contains02();
+
+	/* test: strictly_contains */
+    void strictly_contains01();
+    void strictly_contains02();
+
+	/* test: is_disjoint */
+    void is_disjoint01();
+    void is_disjoint02();
+
+	/* test: is_empty */
+    void is_empty01();
+    void is_empty02();
+
+	/* test: is_degenerated */
+    void is_degenerated01();
+    void is_degenerated02();
+
+	/* test: is_unbounded */
+    void is_unbounded01();
+    void is_unbounded02();
+    void is_unbounded03();
+    void is_unbounded04();
+
+	/* test: rel_distance(const Interval& x) const */
+	void rel_distance01();
+	void rel_distance02();
+	void rel_distance03();
+	void rel_distance04();
+	void rel_distance05();
+	void rel_distance06();
+	void rel_distance07();
+	void rel_distance08();
+	void rel_distance09();
+	void rel_distance10();
+	void rel_distance11();
+	void rel_distance12();
+	void rel_distance13();
+	void rel_distance14();
+	void rel_distance15();
+	void rel_distance16();
+	void rel_distance17();
+	void rel_distance18();
+	void rel_distance19();
+	void rel_distance20();
+	void rel_distance21();
+
+	/* test: distance(const Interval &x1, const Interval &x2); */
 	void distance01();
 	void distance02();
 	void distance03();
@@ -255,48 +474,28 @@ private:
 	void distance22();
 	void distance23();
 
-	void rel_distance01();
-	void rel_distance02();
-	void rel_distance03();
-	void rel_distance04();
-	void rel_distance05();
-	void rel_distance06();
-	void rel_distance07();
-	void rel_distance08();
-	void rel_distance09();
-	void rel_distance10();
-	void rel_distance11();
-	void rel_distance12();
-	void rel_distance13();
-	void rel_distance14();
-	void rel_distance15();
-	void rel_distance16();
-	void rel_distance17();
-	void rel_distance18();
-	void rel_distance19();
-	void rel_distance20();
-	void rel_distance21();
+	/* test: sqrt(const Interval& x); */
+	void sqrt01();
+	void sqrt02();
+	void sqrt03();
+	void sqrt04();
+	void sqrt05();
 
-	void hull01();
-	void hull02();
-	void hull03();
+	/* test: proj_sqrt(const Interval& y, Interval& x) */
+	void sqrProj01();
+	void sqrProj02();
+	void sqrProj03();
+	void sqrProj04();
+	void sqrProj05();
+	void sqrProj06();
+	void sqrProj07();
 
-	void div2_01();
-	void div2_02();
-	void div2_03();
-	void div2_04();
-	void div2_05();
-	void div2_06();
-	void div2_07();
-	void div2_08();
-	void div2_09();
-	void div2_10();
-	void div2_11();
-	void div2_12();
-	void div2_13();
+	/* test: proj_sin(const Interval& y,  Interval& x) */
+	void sinProj01();
 
 	void check(double y_actual, double y_expected);
 	void check(const Interval& y_actual, const Interval& y_expected);
+	void check_eq(const Interval& x, const Interval& y, bool);
 	void check_add_scal(const Interval& x, double z, const Interval& y_expected);
 	void check_add(const Interval& x, const Interval& z, const Interval& y_expected);
 	void check_mul_scal(const Interval& x, double z, const Interval& y_expected);
@@ -304,7 +503,8 @@ private:
 	void check_div_scal(const Interval& x, double z, const Interval& y_expected);
 	void check_div(const Interval& x, const Interval& z, const Interval& y_expected);
 	void check_hull(const Interval& x, const Interval& z, const Interval& y_expected);
+	void check_inter(const Interval& x, const Interval& z, const Interval& y_expected);
 	void check_div2(const Interval& x, const Interval& y, const Interval& out1, const Interval& out2);
 };
 
-#endif /* TESTInterval_H_ */
+#endif

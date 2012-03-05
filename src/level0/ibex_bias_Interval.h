@@ -45,15 +45,23 @@ inline bool Interval::operator==(const Interval& x) const {
 	return lb()==x.lb() && ub()==x.ub();
 }
 
+inline bool Interval::operator!=(const Interval& x) const {
+	return !(*this==x);
+}
+
 inline Interval& Interval::operator+=(double d) {
-	if (d==NEG_INFINITY || d==POS_INFINITY) *this=EMPTY_SET;
-	else itv+=d;
+	if (!is_empty()) {
+		if (d==NEG_INFINITY || d==POS_INFINITY) *this=EMPTY_SET;
+		else itv+=d;
+	}
 	return *this;
 }
 
 inline Interval& Interval::operator-=(double d) {
-	if (d==NEG_INFINITY || d==POS_INFINITY) *this=EMPTY_SET;
-	else itv-=d;
+	if (!is_empty()) {
+		if (d==NEG_INFINITY || d==POS_INFINITY) *this=EMPTY_SET;
+		else itv-=d;
+	}
 	return *this;
 }
 
@@ -218,10 +226,6 @@ inline Interval& Interval::operator/=(const Interval& y) {
 	return *this;
 }
 
-inline Interval Interval::operator+() const {
-	return *this;
-}
-
 inline Interval Interval:: operator-() const {
 	if (is_empty()) return *this;
 	return -itv;
@@ -282,7 +286,9 @@ inline bool Interval::is_subset(const Interval& x) const {
 }
 
 inline bool Interval::is_strict_subset(const Interval& x) const {
-	return (is_empty() && !x.is_empty()) || (!x.is_empty() && (x.lb()<lb()) && (x.ub()>ub()));
+	return (is_empty() && !x.is_empty()) ||
+			(!x.is_empty() && (x.lb()==NEG_INFINITY || x.lb()<lb()) &&
+							  (x.ub()==POS_INFINITY || x.ub()>ub()));
 }
 
 inline bool Interval::is_superset(const Interval& x) const {
@@ -352,43 +358,47 @@ inline Interval operator|(const Interval& x1, const Interval& x2) {
 }
 
 inline Interval operator+(const Interval& x, double d) {
-	if (d==NEG_INFINITY || d==POS_INFINITY) return Interval::EMPTY_SET;
+	if (x.is_empty()) return x;
+		else if (d==NEG_INFINITY || d==POS_INFINITY) return Interval::EMPTY_SET;
 	else return x.itv+d;
 }
 
 inline Interval operator-(const Interval& x, double d) {
-	if (d==NEG_INFINITY || d==POS_INFINITY) return Interval::EMPTY_SET;
+	if (x.is_empty()) return x;
+	else if (d==NEG_INFINITY || d==POS_INFINITY) return Interval::EMPTY_SET;
 	else return x.itv-d;
 }
 
 inline Interval operator*(const Interval& x, double d) {
-	if (d==NEG_INFINITY || d==POS_INFINITY) return Interval::EMPTY_SET;
+	if (x.is_empty()) return x;
+	else if (d==NEG_INFINITY || d==POS_INFINITY) return Interval::EMPTY_SET;
 	else return x.itv*d;
 }
 
 inline Interval operator/(const Interval& x, double d) {
-	if (d==0 || d==NEG_INFINITY || d==POS_INFINITY) return Interval::EMPTY_SET;
+	if (x.is_empty()) return x;
+	else if (d==0 || d==NEG_INFINITY || d==POS_INFINITY) return Interval::EMPTY_SET;
 	else return x.itv/INTERVAL(d);
 }
 
 inline Interval operator+(double d,const Interval& x) {
-	if (d==NEG_INFINITY || d==POS_INFINITY) return Interval::EMPTY_SET;
-	else return d+x.itv;
+	return x+d;
 }
 
 inline Interval operator-(double d, const Interval& x) {
-	if (d==NEG_INFINITY || d==POS_INFINITY) return Interval::EMPTY_SET;
+	if (x.is_empty()) return x;
+	else if (d==NEG_INFINITY || d==POS_INFINITY) return Interval::EMPTY_SET;
 	else return d-x.itv;
 }
 
 inline Interval operator*(double d, const Interval& x) {
-	if (d==NEG_INFINITY || d==POS_INFINITY) return Interval::EMPTY_SET;
-	return d*x.itv;
+	return x*d;
 }
 
 inline Interval operator/(double d, const Interval& x) {
-	if (d==0 || d==NEG_INFINITY || d==POS_INFINITY) return Interval::EMPTY_SET;
-	return INTERVAL(d)/x.itv;
+	if (x.is_empty()) return x;
+	else if (d==0 || d==NEG_INFINITY || d==POS_INFINITY) return Interval::EMPTY_SET;
+	else return INTERVAL(d)/x.itv;
 }
 
 inline Interval operator+(const Interval& x1, const Interval& x2) {

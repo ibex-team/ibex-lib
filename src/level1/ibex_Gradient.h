@@ -9,8 +9,8 @@
  * Created     : Jan 27, 2012
  * ---------------------------------------------------------------------------- */
 
-#ifndef IBEX_GRADIENT_H_
-#define IBEX_GRADIENT_H_
+#ifndef __IBEX_GRADIENT_H__
+#define __IBEX_GRADIENT_H__
 
 #include "ibex_Eval.h"
 #include "ibex_BwdAlgorithm.h"
@@ -154,4 +154,4 @@ private:
 };
 
 } // namespace ibex
-#endif // IBEX_GRADIENT_H_
+#endif // __IBEX_GRADIENT_H__

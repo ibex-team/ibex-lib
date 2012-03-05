@@ -129,7 +129,6 @@ bool Interval::div2_inter(const Interval& num, const Interval& div, Interval& ou
 	// warning: we may have &num==this
 	Interval out1,_out2;
 	div2(num,div,out1,_out2);
-	cout << "out1=" << out1 << endl;
 	out1 &= *this;
 	if (out1.is_empty()) {
 		*this &= _out2;
