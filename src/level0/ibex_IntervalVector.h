@@ -22,6 +22,10 @@ namespace ibex {
 
 class Domain;
 
+#ifdef _IBEX_WITH_BIAS_
+#include "IntervalVector.h"
+#endif
+
 /**
  * \ingroup arith
  *
@@ -37,6 +41,7 @@ public:
 	/** \brief Create [(-oo,+oo) ; ..; (-oo,+oo)]
 	 *
 	 * Create a n-sized vector. All the components are (-oo,+oo)
+	 * \pre n>0
 	 */
 	IntervalVector(int n);
 
@@ -44,8 +49,9 @@ public:
 	 *
 	 * Create a IntervalVector of dimension \a n with
 	 * all the components initialized to \a x.
+	 * \pre n>0
 	 */
-	IntervalVector(int dim, const Interval& x);
+	IntervalVector(int n, const Interval& x);
 
 	/** \brief Create a copy of \a x.
 	 */
@@ -53,7 +59,8 @@ public:
 
 	/** \brief Create the IntervalVector [bounds[0][0],bounds[0][1]]x...x[bounds[n-1][0],bounds[n-1][1]]
 	 *
-	 * @param bounds an nx2 array of doubles
+	 * \param bounds an nx2 array of doubles
+	 * \pre n>0
 	 */
 	IntervalVector(int n, double  bounds[][2]);
 
@@ -62,6 +69,8 @@ public:
 	 *
 	 * Create an empty IntervalVector of dimension \a n
 	 * (all the components being empty Intervals)
+	 *
+	 * \pre n>0
 	 */
 	static IntervalVector empty(int n);
 
@@ -112,21 +121,21 @@ public:
 	IntervalVector subvector(int start_index, int end_index);
 
 
-	/**
+	/*
 	 * \brief Set the lower bound of the ith component of this
 	 *
 	 * Set the bound unless the IntervalVector was empty in which case the ith component remains
 	 * the empty Interval.
 	 */
-	void set_lb(int i, double lb);
+	//void set_lb(int i, double lb);
 
-	/**
+	/*
 	 * \brief Set the upper bound of the ith component of this
 	 *
 	 * Set the bound unless the IntervalVector was empty in which case the ith component remains
 	 * the empty Interval.
 	 */
-	void set_ub(int i, double ub);
+	//void set_ub(int i, double ub);
 
 	/** \brief Assign the ith component to [lb,ub]
 	 *
@@ -263,9 +272,14 @@ public:
 	IntervalVector& operator&=(const IntervalVector& x);
 private:
 
+#ifdef _IBEX_WITH_GAOL_
 	int n;             // dimension (size of vec)
 	Interval *vec;	   // vector of elements
-
+#else
+#ifdef _IBEX_WITH_BIAS_
+    INTERVAL_VECTOR vec;
+#endif
+#endif
 };
 
 /** \brief Display the IntervalVector \a x
@@ -280,45 +294,6 @@ inline std::ostream& operator<<(std::ostream& os, const IntervalVector& x) {
 
 /*================================== inline implementations ========================================*/
 
-inline IntervalVector::IntervalVector(int n) : n(n), vec(new Interval[n]) {
-	assert(n>=1);
-}
-
-inline IntervalVector::IntervalVector(int n, const Interval& x) : n(n), vec(new Interval[n]) {
-	assert(n>=1);
-	for (int i=0; i<n; i++) {
-		vec[i]=x;
-	}
-}
-
-inline IntervalVector::IntervalVector(const IntervalVector& x) : n(x.n), vec(new Interval(x.n)) {
-	for (int i=0; i<n; i++) {
-		vec[i]=x[i];
-	}
-}
-
-inline IntervalVector::IntervalVector(int n, double bounds[][2]) : n(n), vec(new Interval[n]) {
-	for (int i=0; i<n; i++)
-		vec[i]=Interval(bounds[i][0],bounds[i][1]);
-}
-
-inline IntervalVector IntervalVector::empty(int n) {
-	return IntervalVector(n, Interval::EMPTY_SET);
-}
-
-
-inline IntervalVector::~IntervalVector() {
-	delete[] vec;
-}
-
-inline const Interval& IntervalVector::operator[](int i) const {
-	assert(i>=0 && i<n);
-	return vec[i];
-}
-
-inline int IntervalVector::size() const {
-	return n;
-}
 
 bool IntervalVector::is_empty() const {
 	return (*this)[0].is_empty();
@@ -330,26 +305,11 @@ inline void IntervalVector::set_empty() {
 	// because we call set_empty() from set(...) and the first component
 	// may be empty in an intermediate state
 
-	for (int i=0; i<n; i++)
-		vec[i]=Interval::EMPTY_SET;
+	for (int i=0; i<size(); i++)
+		(*this)[i]=Interval::EMPTY_SET;
 }
 
-inline void IntervalVector::resize(int n2) {
-	assert(n2>=1);
-	if (n2==n) return;
-
-	Interval* newVec=new Interval[n2];
-	int i=0;
-	for (; i<n && i<n2; i++)
-		newVec[i]=vec[i];
-	for (; i<n2; i++)
-		newVec[i]=is_empty()? Interval::EMPTY_SET : Interval::ALL_REALS;
-	delete[] vec;
-
-	n   = n2;
-	vec = newVec;
-}
-
+/*
 inline void IntervalVector::set_lb(int i, double lb) {
 	if (!is_empty()) {
 		assert(lb<=vec[i].ub());
@@ -362,12 +322,12 @@ inline void IntervalVector::set_ub(int i, double ub) {
 		assert(ub>=vec[i].lb());
 		vec[i]=Interval(vec[i].lb(),ub);
 	}
-}
+}*/
 
 inline void IntervalVector::set(int i, double lb, double ub) {
 	if (!is_empty()) {
 		assert(ub>=lb);
-		vec[i]=Interval(lb,ub);
+		(*this)[i]=Interval(lb,ub);
 	}
 }
 
@@ -387,7 +347,7 @@ inline IntervalVector& IntervalVector::operator=(const IntervalVector& x) {
 		// may return prematurely in case "this" is empty.
 		// use physical copy instead:
 		for (int i=0; i<size(); i++)
-			vec[i]=x[i];
+			(*this)[i]=x[i];
 
 	return *this;
 }
@@ -403,7 +363,7 @@ inline IntervalVector IntervalVector::mid() const {
 
 inline bool IntervalVector::is_flat() const {
 	if (is_empty()) return false;
-	for (int i=0; i<n; i++)
+	for (int i=0; i<size(); i++)
 		if ((*this)[i].is_degenerated()) // don't use diam() because of roundoff
 			return true;
 	return false;
@@ -422,7 +382,7 @@ inline int IntervalVector::extr_diam_index(bool min) const {
 	double d=min? POS_INFINITY : -1;
 	int selectedIndex=-1;
 	if (is_empty()) throw InvalidIntervalVectorOp("Diameter of an empty IntervalVector is undefined");
-	for (int i=0; i<n; i++) {
+	for (int i=0; i<size(); i++) {
 		double w=(*this)[i].diam();
 		if (min? w<d : w>d) {
 			selectedIndex=i;
@@ -443,8 +403,8 @@ inline double IntervalVector::min_diam() const {
 inline bool IntervalVector::set_to_inter(int i, const Interval& x) {
 	//if (x.isEmpty()) { set_empty(); return false; }
 	//if (is_empty()) return false;
-	vec[i] &= x;
-	if (vec[i].is_empty()) { set_empty(); return false; }
+	(*this)[i] &= x;
+	if ((*this)[i].is_empty()) { set_empty(); return false; }
 	return true;
 }
 
@@ -464,7 +424,7 @@ inline bool IntervalVector::set_to_inter(const IntervalVector& x)  {
 }
 
 inline void IntervalVector::set_to_hull(int i, const Interval& x) {
-	vec[i] |= x;
+	(*this)[i] |= x;
 }
 
 inline void IntervalVector::set_to_hull(const IntervalVector& x)  {
@@ -506,7 +466,7 @@ inline IntervalVector IntervalVector::operator+(const IntervalVector& x) const {
 	else {
 		IntervalVector y(n);
 		for (int i=0; i<n; i++) {
-			(y.vec[i]=(*this)[i])+=x[i]; // faster than y[i]=(*this)[i]+x[i]
+			(y[i]=(*this)[i])+=x[i]; // faster than y[i]=(*this)[i]+x[i]
 		}
 		return y;
 	}
@@ -519,7 +479,7 @@ inline IntervalVector& IntervalVector::operator+=(const IntervalVector& x) {
 		if (x.is_empty()) { set_empty(); }
 		else {
 			for (int i=0; i<n; i++) {
-				vec[i]+=x[i];
+				(*this)[i]+=x[i];
 			}
 		}
 	}
@@ -533,7 +493,7 @@ inline IntervalVector IntervalVector::operator-(const IntervalVector& x) const {
 	else {
 		IntervalVector y(n);
 		for (int i=0; i<n; i++) {
-			(y.vec[i]=(*this)[i])-=x[i]; // faster than y[i]=(*this)[i]-x[i]
+			(y[i]=(*this)[i])-=x[i]; // faster than y[i]=(*this)[i]-x[i]
 		}
 		return y;
 	}
@@ -546,7 +506,7 @@ inline IntervalVector& IntervalVector::operator-=(const IntervalVector& x) {
 		if (x.is_empty()) { set_empty(); }
 		else {
 			for (int i=0; i<n; i++) {
-				vec[i]-=x[i];
+				(*this)[i]-=x[i];
 			}
 		}
 	}

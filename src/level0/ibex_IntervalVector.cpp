@@ -62,7 +62,7 @@ void diffI(const Interval& x, const Interval& y, Interval& c1, Interval& c2) {
 
 
 int IntervalVector::diff(const IntervalVector& y, IntervalVector**& result) const {
-
+	const int n=size();
 	const IntervalVector& x=*this;
 	IntervalVector **tmp = new IntervalVector*[2*n]; // in the worst case, there is 2n boxes
 	Interval c1, c2;

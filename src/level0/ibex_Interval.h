@@ -39,6 +39,8 @@
 
 namespace ibex {
 
+//class IntervalVector; // just to be declared as "friend"
+
 /**
  *  \defgroup arith Interval Arithmetic
  *
@@ -250,6 +252,8 @@ class Interval {
     static const Interval POS_REALS;
     /** \brief (-oo,0]. */
     static const Interval NEG_REALS;
+
+//    friend class IntervalVector;
 
 //private:
 #ifdef _IBEX_WITH_GAOL_
