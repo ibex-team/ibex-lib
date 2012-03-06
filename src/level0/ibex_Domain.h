@@ -22,6 +22,8 @@
 
 namespace ibex {
 
+class IntervalVector; // just for friendship
+
 /**
  * \ingroup level1
  * \brief Domains (ordered list of interval structures).
@@ -42,7 +44,7 @@ public:
 	/**
 	 * \brief Copy the domain.
 	 */
-	Domain(const Domain&);
+	Domain(const Domain&) : size(0) { }
 
 	/**
 	 * \brief Load the domain from a flat vector
@@ -57,10 +59,10 @@ public:
 		int n=symbol_dims.size();
 		symbol_dims.push_back(dim);
 		switch (dim.type()) {
-			case Dim::SCALAR:       doms.push_back(new Interval());  break;
-			case Dim::VECTOR:       doms.push_back(new IntervalVector(dim.dim3)); break;
-			case Dim::MATRIX:       doms.push_back(new IntervalMatrix(dim.dim2,dim.dim3)); break;
-			case Dim::MATRIX_ARRAY: doms.push_back(new IntervalMatrixArray(dim.dim1,dim.dim2,dim.dim3)); break;
+			case Dim::SCALAR:       doms.push_back(new Interval()); size++; break;
+			case Dim::VECTOR:       doms.push_back(new IntervalVector(dim.dim3)); size+=dim.dim3; break;
+			case Dim::MATRIX:       doms.push_back(new IntervalMatrix(dim.dim2,dim.dim3)); size+=dim.dim2*dim.dim3; break;
+			case Dim::MATRIX_ARRAY: doms.push_back(new IntervalMatrixArray(dim.dim1,dim.dim2,dim.dim3)); size+=dim.dim1*dim.dim2*dim.dim3; break;
 			}
 		return n;
 	}
@@ -273,11 +275,16 @@ public:
 	}*/
 
 private:
+	friend class IntervalVector;
+
 	friend std::ostream& operator<<(std::ostream& os, const Domain&);
 
 	std::vector<void*> doms;
 
 	std::vector<Dim> symbol_dims;
+
+	/** Total number of components */
+	int size;
 /*
 	int nb_scalar_symbols;
 	int nb_vector_symbols;

@@ -38,14 +38,16 @@ class Domain;
 class IntervalVector {
 
 public:
-	/** \brief Create [(-oo,+oo) ; ..; (-oo,+oo)]
+	/**
+	 * \brief Create [(-oo,+oo) ; ..; (-oo,+oo)]
 	 *
 	 * Create a n-sized vector. All the components are (-oo,+oo)
 	 * \pre n>0
 	 */
 	IntervalVector(int n);
 
-	/** \brief Create [x; ....; x]
+	/**
+	 * \brief Create [x; ....; x]
 	 *
 	 * Create a IntervalVector of dimension \a n with
 	 * all the components initialized to \a x.
@@ -53,11 +55,13 @@ public:
 	 */
 	IntervalVector(int n, const Interval& x);
 
-	/** \brief Create a copy of \a x.
+	/**
+	 * \brief Create a copy of \a x.
 	 */
 	IntervalVector(const IntervalVector& x);
 
-	/** \brief Create the IntervalVector [bounds[0][0],bounds[0][1]]x...x[bounds[n-1][0],bounds[n-1][1]]
+	/**
+	 * \brief Create the IntervalVector [bounds[0][0],bounds[0][1]]x...x[bounds[n-1][0],bounds[n-1][1]]
 	 *
 	 * \param bounds an nx2 array of doubles
 	 * \pre n>0
@@ -83,31 +87,27 @@ public:
 	 * \brief Return the ith Interval
 	 *
 	 * A return a const reference to the
-	 * i^th component (starting from 0)
+	 * i^th component (i starts from 0)
 	 */
 	const Interval& operator[](int i) const;
 
 	/**
 	 * \brief Return the ith Interval
+	 *
+	 * A return a non-const reference to the
+	 * i^th component (i starts from 0)
 	 */
 	Interval& operator[](int i);
 
 	/**
-	 * \brief The dimension (number of components)
-	 */
-	int size() const;
-
-	/** \brief Return true iff this IntervalVector is empty
-	 */
-	bool is_empty() const;
-
-	/**
 	 * \brief Set this IntervalVector to the empty IntervalVector
+	 *
+	 * The dimension remains the same.
 	 */
 	void set_empty();
 
 	/**
-	 * \brief Resize the IntervalVector.
+	 * \brief Resize this IntervalVector.
 	 *
 	 * If the size is increased, the existing components are not
 	 * modified and the new ones are set to (-inf,+inf), or the
@@ -117,9 +117,10 @@ public:
 
 	/**
 	 * \brief Return a subvector.
+	 *
+	 * \return [ (*this)[start_index]; ...; (*this)[end_index] ].
 	 */
 	IntervalVector subvector(int start_index, int end_index);
-
 
 	/*
 	 * \brief Set the lower bound of the ith component of this
@@ -137,21 +138,23 @@ public:
 	 */
 	//void set_ub(int i, double ub);
 
-	/** \brief Assign the ith component to [lb,ub]
+	/**
+	 * \brief Assign the ith component to [lb,ub]
 	 *
 	 * Assign unless the IntervalVector was empty in which case the ith component remains
 	 * the empty Interval.
 	 */
-	void set(int i, double lb, double ub);
+	//void set(int i, double lb, double ub);
 
 	/** \brief Assign the ith component to x:
 	 *
 	 * Assignment unless the IntervalVector was empty in which case the ith component remains
 	 * the empty Interval. If x is the empty Interval, the IntervalVector becomes empty.
 	 */
-	void set(int i, const Interval& x);
+	//void set(int i, const Interval& x);
 
-	/** \brief Assign this IntervalVector to x.
+	/**
+	 * \brief Assign this IntervalVector to x.
 	 *
 	 * Dimensions of this and x must match. Emptiness is overridden.
 	 */
@@ -162,114 +165,128 @@ public:
 	 */
 	IntervalVector& operator=(const Domain& d);
 
-	/** \brief Return the midpoint (a degenerated IntervalVector)
-	 */
-	IntervalVector mid() const;
-
-	/** \brief Return true iff this IntervalVector is flat
+	/**
+	 * \brief Set *this to its intersection with x
 	 *
-	 * An IntervalVector is "flat" if the radius is 0 on at least one dimension
+	 * \return a reference to this.
+	 * \throws InvalidIntervalVectorOp if the vectors do not have the same dimensions.
 	 */
-	bool is_flat() const;
+	IntervalVector& operator&=(const IntervalVector& x);
 
-	/** \brief Return true if the bounds of this IntervalVector match that of "x".
-	 */
-	bool operator==(const IntervalVector& x) const;
-
-	/** \brief Return the index of the component with minimal/maximal diameter
+	/**
+	 * \brief Set this IntervalVector to the hull of itself and another.
 	 *
-	 *  @param min true => minimal diameter
-	 *  @throws InvalidIntervalVectorOp if the IntervalVector is empty.
+	 * \return a reference to this.
+	 * \throws InvalidIntervalVectorOp if IntervalVectores do not have the same dimensions.
 	 */
-	int extr_diam_index(bool min) const;
+	IntervalVector& operator|=(const IntervalVector& x);
 
-	/** \brief Return the maximal diameter for all the components
-	 *
-	 *  @throws InvalidIntervalVectorOp if the IntervalVector is empty.
-	 */
-	double max_diam() const;
-
-	/** \brief Return the minimal diameter for all the components
-	 *
-	 *  @throws InvalidIntervalVectorOp if the IntervalVector is empty.
-	 */
-	double min_diam() const;
-
-	/** \brief Intersects the ith component of this IntervalVector with another Interval.
-	 *
-	 * @return true iff the intersection is nonempty
-	 */
-	bool set_to_inter(int i, const Interval& x);
-
-	/** \brief Intersects this IntervalVector with another.
-	 *
-	 * @return true iff the intersection is nonempty
-	 * @throws InvalidIntervalVectorOp if IntervalVectores do not have the same dimensions
-	 * and dimensions are not 0 (special case for the empty IntervalVector).
-	 */
-	bool set_to_inter(const IntervalVector& x);
-
-	/** \brief Set the ith component of this IntervalVector to the hull with another Interval.
-	 */
-	void set_to_hull(int i, const Interval& x);
-
-	/** \brief Set this IntervalVector to the hull of itself and another.
-	 *
-	 * @throws InvalidIntervalVectorOp if IntervalVectores do not have the same dimensions
-	 * and dimensions are not 0 (special case for the empty IntervalVector).
-	 */
-	void set_to_hull(const IntervalVector& x);
-
-	/** \brief Return this \ y (set difference)
-	 *
-	 * Store the tmp, under the form of a union of non-overlapping IntervalVectors,
-	 * into result, and return the size of the union.
-	 */
-	int diff(const IntervalVector& y, IntervalVector**& result) const;
-
-	/** \brief Return the complementary of this IntervalVector
-	 *
-	 * Store the tmp, under the form of a union of non-overlapping IntervalVectors,
-	 * into result, and return the size of the union.
-	 */
-	int complementary(IntervalVector**& result) const;
-
-	/** \brief Return a random vector (degenerated box)
-	 */
-	IntervalVector random() const;
-
-	/** \brief Return the intersection of this and x.
-	 * @see inter(const IntervalVector& x)
+	/**
+	 * \brief Return the intersection of this and x.
 	 */
 	IntervalVector operator&(const IntervalVector& x) const;
 
-	/** \brief Return the hull of this & x.
-	 *
-	 * @see set_to_hull(const IntervalVector& x)
+	/**
+	 * \brief Return the hull of this & x.
 	 */
 	IntervalVector operator|(const IntervalVector& x) const;
 
-	/** \brief Opposite of this
+	/**
+	 * \brief Return true if the bounds of this IntervalVector match that of "x".
+	 */
+	bool operator==(const IntervalVector& x) const;
+
+	/**
+	 * \brief The dimension (number of components)
+	 */
+	int size() const;
+
+	/**
+	 * \brief Return the midpoint (a degenerated IntervalVector)
+	 */
+	IntervalVector mid() const;
+
+	/**
+	 * \brief Return true iff this IntervalVector is empty
+	 */
+	bool is_empty() const;
+
+	/**
+	 * \brief Return true iff this IntervalVector is flat.
+	 *
+	 * An IntervalVector is "flat" if the radius is 0 on at least one dimension
+	 * An empty interval vector is considered as flat.
+	 */
+	bool is_flat() const;
+
+	/**
+	 * \brief Return the index of a component with minimal/maximal diameter.
+	 *
+	 *  \param min true => minimal diameter
+	 *  \throws InvalidIntervalVectorOp if the IntervalVector is empty.
+	 */
+	int extr_diam_index(bool min) const;
+
+	/**
+	 * \brief Return the maximal diameter among all the components.
+	 *
+	 *  \throws InvalidIntervalVectorOp if the IntervalVector is empty.
+	 */
+	double max_diam() const;
+
+	/**
+	 * \brief Return the minimal diameter among all the components.
+	 *
+	 * \throws InvalidIntervalVectorOp if the IntervalVector is empty.
+	 */
+	double min_diam() const;
+
+	/**
+	 * \brief The opposite of this.
 	 */
 	IntervalVector operator-() const;
 
-	/** \brief Sum of this and x
+	/**
+	 * \brief Sum of this and x.
 	 */
 	IntervalVector operator+(const IntervalVector& x) const;
 
-	/** \brief Add x to this
+	/**
+	 * \brief Add x to this.
 	 */
 	IntervalVector& operator+=(const IntervalVector& x);
 
-	/** \brief Subtraction of this and x
+	/**
+	 * \brief Subtraction of this and x.
 	 */
 	IntervalVector operator-(const IntervalVector& x) const;
 
-	/** \brief Subtract x to this
+	/**
+	 * \brief Subtract x to this.
 	 */
 	IntervalVector& operator-=(const IntervalVector& x);
 
-	IntervalVector& operator&=(const IntervalVector& x);
+	/**
+	 * \brief Return *this \ y (set difference).
+	 *
+	 * Store the difference under the form of a union of non-overlapping IntervalVectors
+	 * into \a result, and return the size of the union.
+	 */
+	int diff(const IntervalVector& y, IntervalVector**& result) const;
+
+	/**
+	 * \brief Return the complementary of *this.
+	 *
+	 * Store the complementary under the form of a union of non-overlapping IntervalVectors,
+	 * into \a result, and return the size of the union.
+	 */
+	int complementary(IntervalVector**& result) const;
+
+	/**
+	 * \brief Return a random vector (degenerated box) inside *this.
+	 */
+	IntervalVector random() const;
+
 private:
 
 #ifdef _IBEX_WITH_GAOL_
@@ -277,10 +294,31 @@ private:
 	Interval *vec;	   // vector of elements
 #else
 #ifdef _IBEX_WITH_BIAS_
+
+	/* \brief Wrap the bias-vector [x]. */
+    IntervalVector(const INTERVAL_VECTOR& x);
+
+    /* \brief Assign this to the bias-vector [x]. */
+    IntervalVector& operator=(const INTERVAL_VECTOR& x);
+
     INTERVAL_VECTOR vec;
 #endif
 #endif
 };
+
+} // end namespace
+
+#ifdef _IBEX_WITH_GAOL_
+#include "ibex_gaol_IntervalVector.h"
+#else
+#ifdef _IBEX_WITH_BIAS_
+#include "ibex_bias_IntervalVector.h"
+#endif
+#endif
+
+/*================================== inline implementations ========================================*/
+
+namespace ibex {
 
 /** \brief Display the IntervalVector \a x
  */
@@ -292,11 +330,8 @@ inline std::ostream& operator<<(std::ostream& os, const IntervalVector& x) {
 	return os;
 }
 
-/*================================== inline implementations ========================================*/
-
-
-bool IntervalVector::is_empty() const {
-	return (*this)[0].is_empty();
+inline IntervalVector IntervalVector::empty(int n) {
+	return IntervalVector(n, Interval::EMPTY_SET);
 }
 
 inline void IntervalVector::set_empty() {
@@ -307,6 +342,18 @@ inline void IntervalVector::set_empty() {
 
 	for (int i=0; i<size(); i++)
 		(*this)[i]=Interval::EMPTY_SET;
+}
+
+inline IntervalVector IntervalVector::subvector(int start_index, int end_index) {
+	if (end_index>=size() || start_index>end_index)
+		throw NonRecoverableException("Invalid indices for IntervalVector::subvector");
+
+	IntervalVector v(end_index-start_index+1);
+	int j=0;
+	for (int i=start_index; i<=end_index; i++) {
+		v[j++]=(*this)[i];
+	}
+	return v;
 }
 
 /*
@@ -322,7 +369,7 @@ inline void IntervalVector::set_ub(int i, double ub) {
 		assert(ub>=vec[i].lb());
 		vec[i]=Interval(vec[i].lb(),ub);
 	}
-}*/
+}
 
 inline void IntervalVector::set(int i, double lb, double ub) {
 	if (!is_empty()) {
@@ -335,31 +382,43 @@ inline void IntervalVector::set(int i, double lb, double ub) {
 inline void IntervalVector::set(int i, const Interval& x) {
 	if (x.is_empty()) set_empty();
 	else set(i, x.lb(), x.ub());
-}
+}*/
 
-inline IntervalVector& IntervalVector::operator=(const IntervalVector& x) {
-	assert(size()==x.size()); // throw InvalidIntervalVectorOp("Cannot set a IntervalVector to a IntervalVector with different dimension");
 
-	if (x.is_empty())
-		set_empty();
-	else
-		// don't use "set(...)" because the test "is_empty()" called inside
-		// may return prematurely in case "this" is empty.
-		// use physical copy instead:
-		for (int i=0; i<size(); i++)
-			(*this)[i]=x[i];
+inline IntervalVector& IntervalVector::operator&=(const IntervalVector& x)  {
+	// dimensions are non zero henceforth
+	if (size()!=x.size()) throw InvalidIntervalVectorOp("Cannot intersect IntervalVectores with different dimensions");
 
+	if (is_empty()) return *this;
+	if (x.is_empty()) { set_empty(); return *this; }
+
+	for (int i=0; i<size(); i++) {
+		(*this)[i] &= x[i];
+		if ((*this)[i].is_empty()) {
+			set_empty();
+			return *this;
+		}
+	}
 	return *this;
 }
 
-inline IntervalVector IntervalVector::mid() const {
-	IntervalVector mIntervalVector(size());
+inline IntervalVector& IntervalVector::operator|=(const IntervalVector& x)  {
+	// dimensions are non zero henceforth
+	if (size()!=x.size()) throw InvalidIntervalVectorOp("Cannot make the hull of IntervalVectores with different dimensions");
+
+	if (x.is_empty()) return *this;
+	if (is_empty()) { *this=x; return *this; }
+
 	for (int i=0; i<size(); i++) {
-		Interval m =  (*this)[i].mid();
-		mIntervalVector.set(i, m);
+		(*this)[i] |= x[i];
 	}
-	return mIntervalVector;
+	return *this;
 }
+
+bool IntervalVector::is_empty() const {
+	return (*this)[0].is_empty();
+}
+
 
 inline bool IntervalVector::is_flat() const {
 	if (is_empty()) return false;
@@ -368,15 +427,6 @@ inline bool IntervalVector::is_flat() const {
 			return true;
 	return false;
 }
-
-/*
-bool IntervalVector::operator==(const IntervalVector& x) const {
-	if (n!=x.size()) return false;
-	if (is_empty() || x.is_empty()) return is_empty() && x.is_empty();
-	for (int i=0; i<n; i++)
-		if (!(*this)[i].set_eq(x[i])) return false;
-	return true;
-}*/
 
 inline int IntervalVector::extr_diam_index(bool min) const {
 	double d=min? POS_INFINITY : -1;
@@ -398,119 +448,6 @@ inline double IntervalVector::max_diam() const {
 
 inline double IntervalVector::min_diam() const {
 	return (*this)[extr_diam_index(true)].diam();
-}
-
-inline bool IntervalVector::set_to_inter(int i, const Interval& x) {
-	//if (x.isEmpty()) { set_empty(); return false; }
-	//if (is_empty()) return false;
-	(*this)[i] &= x;
-	if ((*this)[i].is_empty()) { set_empty(); return false; }
-	return true;
-}
-
-inline bool IntervalVector::set_to_inter(const IntervalVector& x)  {
-	// dimensions are non zero henceforth
-	if (size()!=x.size()) throw InvalidIntervalVectorOp("Cannot intersect IntervalVectores with different dimensions");
-
-	if (is_empty()) return false;
-	if (x.is_empty()) { set_empty(); return false; }
-
-	for (int i=0; i<size(); i++) {
-		if (!set_to_inter(i,x[i]))
-			set_empty();
-		return false;
-	}
-	return true;
-}
-
-inline void IntervalVector::set_to_hull(int i, const Interval& x) {
-	(*this)[i] |= x;
-}
-
-inline void IntervalVector::set_to_hull(const IntervalVector& x)  {
-	// dimensions are non zero henceforth
-	if (size()!=x.size()) throw InvalidIntervalVectorOp("Cannot make the hull of IntervalVectores with different dimensions");
-
-	if (x.is_empty()) return;
-	if (is_empty()) { *this=x; return; }
-
-	for (int i=0; i<size(); i++) {
-		set_to_hull(i, x[i]);
-	}
-}
-
-inline IntervalVector IntervalVector::operator&(const IntervalVector& x) const {
-	IntervalVector y(*this);
-	y.set_to_inter(x);
-	return y;
-}
-
-IntervalVector IntervalVector::operator|(const IntervalVector& x) const {
-	IntervalVector y(*this);
-	y.set_to_hull(x);
-	return y;
-}
-
-inline IntervalVector IntervalVector::operator-() const {
-	IntervalVector x(size());
-	for (int i=0; i<size(); i++) {
-		x.set(i,-(*this)[i]);
-	}
-	return x;
-}
-
-inline IntervalVector IntervalVector::operator+(const IntervalVector& x) const {
-	const int n=size();
-	assert(x.size()==n);
-	if (is_empty() || x.is_empty()) return empty(n);
-	else {
-		IntervalVector y(n);
-		for (int i=0; i<n; i++) {
-			(y[i]=(*this)[i])+=x[i]; // faster than y[i]=(*this)[i]+x[i]
-		}
-		return y;
-	}
-}
-
-inline IntervalVector& IntervalVector::operator+=(const IntervalVector& x) {
-	const int n=size();
-	assert(x.size()==n);
-	if (!is_empty()) {
-		if (x.is_empty()) { set_empty(); }
-		else {
-			for (int i=0; i<n; i++) {
-				(*this)[i]+=x[i];
-			}
-		}
-	}
-	return *this;
-}
-
-inline IntervalVector IntervalVector::operator-(const IntervalVector& x) const {
-	const int n=size();
-	assert(x.size()==n);
-	if (is_empty() || x.is_empty()) return empty(n);
-	else {
-		IntervalVector y(n);
-		for (int i=0; i<n; i++) {
-			(y[i]=(*this)[i])-=x[i]; // faster than y[i]=(*this)[i]-x[i]
-		}
-		return y;
-	}
-}
-
-inline IntervalVector& IntervalVector::operator-=(const IntervalVector& x) {
-	const int n=size();
-	assert(x.size()==n);
-	if (!is_empty()) {
-		if (x.is_empty()) { set_empty(); }
-		else {
-			for (int i=0; i<n; i++) {
-				(*this)[i]-=x[i];
-			}
-		}
-	}
-	return *this;
 }
 
 } // end namespace

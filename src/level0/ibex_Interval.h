@@ -76,6 +76,14 @@ class Interval {
     /** \brief Set this interval to the empty set. */
     void set_empty();
 
+    /** \brief Set *this to x.
+     */
+    Interval& operator=(const Interval& x);
+
+    /** \brief Set *this to d.
+     */
+    Interval& operator=(double x);
+
     /** \brief Intersection of *this and x.
      * \param x - the interval to compute the intersection with.*/
     Interval& operator&=(const Interval& x);

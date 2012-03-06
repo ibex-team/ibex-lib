@@ -10,9 +10,51 @@
  * ---------------------------------------------------------------------------- */
 
 #include "ibex_IntervalVector.h"
+#include "ibex_Domain.h"
+#include <vector>
 #include <stdlib.h>
 
 namespace ibex {
+
+IntervalVector& IntervalVector::operator=(const Domain& d) {
+	int i=0;
+	assert (size()==d.size);
+	std::vector<Dim>::const_iterator it;
+	std::vector<void*>::const_iterator it2;
+	for (it=d.symbol_dims.begin(), it2=d.doms.begin(); it!=d.symbol_dims.end(); it++,it2++) {
+		Dim dim=*it;
+		switch (dim.type()) {
+		case Dim::SCALAR:
+			(*this)[i++]=*((Interval*) *it2);
+			break;
+		case Dim::VECTOR:
+		    {
+		    	const IntervalVector& v=(*((IntervalVector*) *it2));
+		    	for (int j=0; j<dim.dim3; j++)
+		    		(*this)[i++]=v[j];
+		    }
+		    break;
+		case Dim::MATRIX:
+		    {
+		    	const IntervalMatrix& M=(*((IntervalMatrix*) *it2));
+		    	for (int k=0; k<dim.dim2; k++)
+		    		for (int j=0; j<dim.dim3; j++)
+		    			(*this)[i++]=M[k][j];
+		    }
+		    break;
+		case Dim::MATRIX_ARRAY:
+		    {
+		    	const IntervalMatrixArray& A=(*((IntervalMatrixArray*) *it2));
+		    	for (int l=0; l<dim.dim1; l++)
+		    		for (int k=0; k<dim.dim2; k++)
+		    			for (int j=0; j<dim.dim3; j++)
+		    				(*this)[i++]=A[l][k][j];
+		    }
+		    break;
+		}
+	}
+	return *this;
+}
 
 namespace { // to create anonymous structure/functions
 
@@ -76,15 +118,15 @@ int IntervalVector::diff(const IntervalVector& y, IntervalVector**& result) cons
 
 			if (!c1.is_empty()) {
 				IntervalVector& v=*(tmp[b++]=new IntervalVector(n));
-				for (int i=0; i<var; i++) v.set(i, y[i]);
-				v.set(var, c1);
-				for (int i=var+1; i<n; i++) v.set(i, x[i]);
+				for (int i=0; i<var; i++) v[i]=y[i];
+				v[var]=c1;
+				for (int i=var+1; i<n; i++) v[i]=x[i];
 
 				if (!c2.is_empty()) {
 					IntervalVector& v=*(tmp[b++]=new IntervalVector(n));
-					for (int i=0; i<var; i++) v.set(i, y[i]);
-					v.set(var, c2);
-					for (int i=var+1; i<n; i++) v.set(i, x[i]);
+					for (int i=0; i<var; i++) v[i]=y[i];
+					v[var]=c2;
+					for (int i=var+1; i<n; i++) v[i]=x[i];
 				}
 			}
 		}
@@ -111,7 +153,7 @@ IntervalVector IntervalVector::random() const {
 		// watch dog
 		if (p<xi.lb()) p=xi.lb();
 		else if (p>xi.ub()) p=xi.ub();
-		b.set(i,p);
+		b[i]=p;
 	}
 	return b;
 }

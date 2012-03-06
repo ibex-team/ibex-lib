@@ -242,6 +242,16 @@ inline void Interval::set_empty() {
 	*this=EMPTY_SET;
 }
 
+inline Interval& Interval::operator=(const Interval& x) {
+	itv = x.itv;
+	return *this;
+}
+
+inline Interval& Interval::operator=(double x) {
+	itv = x;
+	return *this;
+}
+
 inline Interval& Interval::operator&=(const Interval& x) {
 	if (is_empty()) return *this;
 	if (x.is_empty()) { set_empty(); return *this; }
