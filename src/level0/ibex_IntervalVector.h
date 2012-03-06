@@ -113,6 +113,7 @@ public:
 	/**
 	 * \brief Return a subvector.
 	 *
+	 * \pre (*this) must not be empty
 	 * \return [ (*this)[start_index]; ...; (*this)[end_index] ].
 	 */
 	IntervalVector subvector(int start_index, int end_index);
@@ -359,6 +360,9 @@ inline void IntervalVector::resize(int n2) {
 }
 
 inline IntervalVector IntervalVector::subvector(int start_index, int end_index) {
+	assert(!is_empty());
+	assert(end_index>=0 && start_index>=0);
+
 	if (end_index>=size() || start_index>end_index)
 		throw NonRecoverableException("Invalid indices for IntervalVector::subvector");
 

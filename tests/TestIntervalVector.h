@@ -28,9 +28,21 @@ public:
 		TEST_ADD(TestIntervalVector::cons04);
 		TEST_ADD(TestIntervalVector::cons05);
 
+		TEST_ADD(TestIntervalVector::set_empty01);
+
 		TEST_ADD(TestIntervalVector::is_empty01);
 		TEST_ADD(TestIntervalVector::is_empty02);
 
+		TEST_ADD(TestIntervalVector::resize01);
+		TEST_ADD(TestIntervalVector::resize02);
+		TEST_ADD(TestIntervalVector::resize03);
+		TEST_ADD(TestIntervalVector::resize04);
+
+		TEST_ADD(TestIntervalVector::subvector01);
+		TEST_ADD(TestIntervalVector::subvector02);
+		TEST_ADD(TestIntervalVector::subvector03);
+		TEST_ADD(TestIntervalVector::subvector04);
+		TEST_ADD(TestIntervalVector::subvector05);
 	}
 
 	/* test:
@@ -49,10 +61,25 @@ public:
 	void cons04();
 	// test: empty(int n)
 	void cons05();
+	// test: set_empty()
+	void set_empty01();
 
-	// test: is_empty()
+	// test: is_empty() const
 	void is_empty01();
 	void is_empty02();
+
+	// test: resize(int)
+	void resize01();
+	void resize02();
+	void resize03();
+	void resize04();
+
+	// test: subvector(int start_index, int end_index)
+	void subvector01();
+	void subvector02();
+	void subvector03();
+	void subvector04();
+	void subvector05();
 
 private:
 	void check(double y_actual, double y_expected);
