@@ -248,7 +248,10 @@ inline Interval& Interval::operator=(const Interval& x) {
 }
 
 inline Interval& Interval::operator=(double x) {
-	itv = x;
+	if (x==NEG_INFINITY || x==POS_INFINITY)
+		*this=EMPTY_SET;
+	else
+		itv = x;
 	return *this;
 }
 

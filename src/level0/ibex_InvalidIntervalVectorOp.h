@@ -25,7 +25,14 @@ class InvalidIntervalVectorOp : public Exception {
 public:
 	/** \brief Create the exception with associated message
 	 */
-	InvalidIntervalVectorOp(const std::string& msg);
+	InvalidIntervalVectorOp(const std::string& msg) : msg(msg) { }
+
+	/** \brief Get the message of this exception
+	 */
+	std::string message() { return msg; }
+
+private:
+	std::string msg;
 };
 
 

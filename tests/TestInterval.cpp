@@ -115,11 +115,26 @@ void TestInterval::check_div_scal(const Interval& x, double z, const Interval& y
 	check(y_actual, y_expected);
 }
 
-void TestInterval::cons01() { check(Interval(),Interval(NEG_INFINITY,POS_INFINITY)); }
-void TestInterval::cons02() { check(Interval(1.0),Interval(1.0,1.0)); }
-void TestInterval::cons03() { check(Interval(NEG_INFINITY),Interval::EMPTY_SET); }
-void TestInterval::cons04() { check(Interval(POS_INFINITY),Interval::EMPTY_SET); }
-void TestInterval::cons05() { check(Interval(1,0), Interval::EMPTY_SET); } // reverse bounds
+void TestInterval::cons01() {
+	check(Interval(),Interval(NEG_INFINITY,POS_INFINITY));
+	check((Interval())=Interval(),Interval(NEG_INFINITY,POS_INFINITY));
+}
+void TestInterval::cons02() {
+	check(Interval(1.0),Interval(1.0,1.0));
+	check((Interval())=1.0, Interval(1.0,1.0));
+}
+void TestInterval::cons03() {
+	check(Interval(NEG_INFINITY),Interval::EMPTY_SET);
+	check((Interval())=NEG_INFINITY, Interval::EMPTY_SET);
+}
+void TestInterval::cons04() {
+	check(Interval(POS_INFINITY),Interval::EMPTY_SET);
+	check((Interval())=POS_INFINITY, Interval::EMPTY_SET);
+}
+void TestInterval::cons05() {
+	check(Interval(1,0), Interval::EMPTY_SET);
+	check((Interval())=Interval(1,0), Interval::EMPTY_SET);
+} // reverse bounds
 
 void TestInterval::check_eq(const Interval& x, const Interval& y, bool is_eq) {
 	TEST_ASSERT(is_eq? x==y : !(x==y));

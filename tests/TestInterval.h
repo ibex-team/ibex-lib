@@ -213,6 +213,9 @@ private:
 	 *  Interval()
 	 *  Interval(double a, double b)
 	 *  Interval(double a)
+	 *  Interval(const Interval&)
+	 *  operator=(const Interval& x)
+	 *  operator=(double x)
 	 */
 	void cons01();
 	void cons02();
@@ -507,4 +510,4 @@ private:
 	void check_div2(const Interval& x, const Interval& y, const Interval& out1, const Interval& out2);
 };
 
-#endif
+#endif // __TEST_INTERVAL__

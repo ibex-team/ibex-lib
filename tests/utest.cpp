@@ -12,11 +12,14 @@
 #include <stdlib.h>
 #include <cpptest.h>
 #include "TestInterval.h"
-#include "ibex_Interval.h"
-#include <iostream>
+#include "TestIntervalVector.h"
 
 int main() {
     Test::TextOutput output(Test::TextOutput::Verbose);
-    TestInterval ets;
-    return ets.run(output,false) ? EXIT_SUCCESS : EXIT_FAILURE;
+
+    Test::Suite ts;
+    ts.add(auto_ptr<Test::Suite>(new TestInterval()));
+    ts.add(auto_ptr<Test::Suite>(new TestIntervalVector()));
+
+    return ts.run(output,false) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
