@@ -14,10 +14,11 @@
 
 #include "cpptest.h"
 #include "ibex_Interval.h"
+#include "utils.h"
 
 using namespace ibex;
 
-class TestInterval : public Test::Suite {
+class TestInterval : public TestIbex {
 public:
 	TestInterval() {
 		TEST_ADD(TestInterval::cons01);
@@ -496,8 +497,6 @@ private:
 	/* test: proj_sin(const Interval& y,  Interval& x) */
 	void sinProj01();
 
-	void check(double y_actual, double y_expected);
-	void check(const Interval& y_actual, const Interval& y_expected);
 	void check_eq(const Interval& x, const Interval& y, bool);
 	void check_add_scal(const Interval& x, double z, const Interval& y_expected);
 	void check_add(const Interval& x, const Interval& z, const Interval& y_expected);

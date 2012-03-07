@@ -10,20 +10,9 @@
  * ---------------------------------------------------------------------------- */
 
 #include "TestInterval.h"
+#include "utils.h"
 
 using namespace std;
-
-#define ERROR 1e-10
-
-void TestInterval::check(double y_actual, double y_expected) {
-	TEST_ASSERT_DELTA("==",y_actual,y_expected,ERROR);
-}
-
-void TestInterval::check(const Interval& y_actual, const Interval& y_expected) {
-	//cout << "check:    " << y_expected << " (expected)        " << y_actual << " (actual)"<< endl;
-	TEST_ASSERT_DELTA("lb", y_actual.lb(),y_expected.lb(),ERROR);
-	TEST_ASSERT_DELTA("ub", y_actual.ub(),y_expected.ub(),ERROR);
-}
 
 void TestInterval::check_add(const Interval& x, const Interval& z, const Interval& y_expected) {
 	Interval y_actual=x+z;
