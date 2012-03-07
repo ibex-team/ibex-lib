@@ -20,6 +20,7 @@
 namespace ibex {
 
 class Domain;
+class IntervalMatrix; // declared only for friendship
 
 /**
  * \ingroup arith
@@ -152,7 +153,8 @@ public:
 	/**
 	 * \brief Assign this IntervalVector to x.
 	 *
-	 * Dimensions of this and x must match. Emptiness is overridden.
+	 * \pre Dimensions of this and x must match. 
+	 * \note Emptiness is overridden.
 	 */
 	IntervalVector& operator=(const IntervalVector& x);
 
@@ -289,6 +291,9 @@ public:
 	IntervalVector random() const;
 
 private:
+	friend class IntervalMatrix;
+
+	IntervalVector() { } // for IntervalMatrix
 
 	int n;             // dimension (size of vec)
 	Interval *vec;	   // vector of elements

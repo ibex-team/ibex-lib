@@ -42,9 +42,14 @@ class Domain {
 public:
 
 	/**
+	 * \brief Create an empty domain.
+	 */
+	Domain() { }
+
+	/**
 	 * \brief Copy the domain.
 	 */
-	Domain(const Domain&) : size(0) { }
+	Domain(const Domain&);
 
 	/**
 	 * \brief Load the domain from a flat vector
@@ -55,16 +60,21 @@ public:
 	 * Add a new component to the domain
 	 * and return the number of this component.
 	 */
-	int add(const Dim& dim) {
-		int n=symbol_dims.size();
-		symbol_dims.push_back(dim);
-		switch (dim.type()) {
-			case Dim::SCALAR:       doms.push_back(new Interval()); size++; break;
-			case Dim::VECTOR:       doms.push_back(new IntervalVector(dim.dim3)); size+=dim.dim3; break;
-			case Dim::MATRIX:       doms.push_back(new IntervalMatrix(dim.dim2,dim.dim3)); size+=dim.dim2*dim.dim3; break;
-			case Dim::MATRIX_ARRAY: doms.push_back(new IntervalMatrixArray(dim.dim1,dim.dim2,dim.dim3)); size+=dim.dim1*dim.dim2*dim.dim3; break;
-			}
-		return n;
+	int add(const Dim& dim);
+
+	/**
+	 * Return the dimensions of the vth variable
+	 */
+	Dim dim(int v) const {
+		return symbol_dims[v];
+	}
+
+	/**
+	 * The total _size, when the domain is represented as
+	 * a flat vector.
+	 */
+	int size() const {
+		return _size;
 	}
 
 	/**
@@ -264,16 +274,6 @@ public:
 		return *((IntervalMatrixArray*) doms[v]);
 	}
 
-
-	/**
-	 * The total size, when the domain is represented as
-	 * a flat vector.
-	 */
-	/*
-	int size() const {
-		return
-	}*/
-
 private:
 	friend class IntervalVector;
 
@@ -283,8 +283,8 @@ private:
 
 	std::vector<Dim> symbol_dims;
 
-	/** Total number of components */
-	int size;
+	/* Total number of components */
+	int _size;
 /*
 	int nb_scalar_symbols;
 	int nb_vector_symbols;

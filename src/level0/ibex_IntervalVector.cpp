@@ -18,7 +18,7 @@ namespace ibex {
 
 IntervalVector& IntervalVector::operator=(const Domain& d) {
 	int i=0;
-	assert (size()==d.size);
+	assert (size()==d._size);
 	std::vector<Dim>::const_iterator it;
 	std::vector<void*>::const_iterator it2;
 	for (it=d.symbol_dims.begin(), it2=d.doms.begin(); it!=d.symbol_dims.end(); it++,it2++) {
