@@ -206,6 +206,7 @@ public:
 
 	/**
 	 * \brief Return the midpoint (a degenerated IntervalVector)
+	 * \pre (*this) must be nonempty
 	 */
 	IntervalVector mid() const;
 
@@ -449,6 +450,8 @@ inline int IntervalVector::size() const {
 }
 
 inline IntervalVector IntervalVector::mid() const {
+	assert(!is_empty());
+
 	IntervalVector mV(size());
 	for (int i=0; i<size(); i++) {
 		Interval m =  (*this)[i].mid();
@@ -463,7 +466,7 @@ inline bool IntervalVector::is_empty() const {
 
 
 inline bool IntervalVector::is_flat() const {
-	if (is_empty()) return false;
+	if (is_empty()) return true;
 	for (int i=0; i<size(); i++)
 		if ((*this)[i].is_degenerated()) // don't use diam() because of roundoff
 			return true;
@@ -471,10 +474,10 @@ inline bool IntervalVector::is_flat() const {
 }
 
 inline int IntervalVector::extr_diam_index(bool min) const {
-	double d=min? POS_INFINITY : -1;
-	int selectedIndex=-1;
+	double d=(*this)[0].diam();
+	int selectedIndex=0;
 	if (is_empty()) throw InvalidIntervalVectorOp("Diameter of an empty IntervalVector is undefined");
-	for (int i=0; i<size(); i++) {
+	for (int i=1; i<size(); i++) {
 		double w=(*this)[i].diam();
 		if (min? w<d : w>d) {
 			selectedIndex=i;
@@ -536,7 +539,6 @@ inline IntervalVector IntervalVector::operator-(const IntervalVector& x) const {
 }
 
 inline IntervalVector& IntervalVector::operator-=(const IntervalVector& x) {
-	return IntervalVector(*this)-=x;
 	const int n=size();
 	assert(x.size()==n);
 	if (!is_empty()) {
