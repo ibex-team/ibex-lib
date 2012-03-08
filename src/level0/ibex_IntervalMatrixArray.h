@@ -35,9 +35,22 @@ public:
 	 */
 	const IntervalMatrix& operator[](int i) const;
 
+private:
+	IntervalMatrix* array;
 };
 
 std::ostream& operator<<(std::ostream& os, const IntervalMatrixArray&);
+
+
+/*================================== inline implementations ========================================*/
+
+inline IntervalMatrix& IntervalMatrixArray::operator[](int i) {
+	return array[i];
+}
+
+inline const IntervalMatrix& IntervalMatrixArray::operator[](int i) const {
+	return array[i];
+}
 
 } // namespace ibex
 #endif // IBEX_INTERVALMATRIXARRAY_H_

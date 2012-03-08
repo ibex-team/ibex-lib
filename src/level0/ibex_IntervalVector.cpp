@@ -13,6 +13,7 @@
 #include "ibex_Domain.h"
 #include <vector>
 #include <stdlib.h>
+#include <math.h>
 
 namespace ibex {
 
@@ -54,6 +55,48 @@ IntervalVector& IntervalVector::operator=(const Domain& d) {
 		}
 	}
 	return *this;
+}
+
+double IntervalVector::volume() const {
+	if ((*this)[0].is_unbounded()) return POS_INFINITY;
+	if ((*this)[0].is_degenerated()) return 0;
+	double vol=::log(((*this)[0]).diam());
+	for (int i=1; i<size(); i++) {
+		if ((*this)[i].is_unbounded()) return POS_INFINITY;
+		if ((*this)[i].is_degenerated()) return 0;
+		vol+=::log(((*this)[i]).diam());
+	}
+	return ::exp(vol);
+}
+
+double IntervalVector::perimeter() const {
+	if ((*this)[0].is_unbounded()) return POS_INFINITY;
+	double per=((*this)[0]).diam();
+	for (int i=1; i<size(); i++) {
+		if ((*this)[i].is_unbounded()) return POS_INFINITY;
+		per+=((*this)[i]).diam();
+	}
+	return per;
+}
+
+double distance(const IntervalVector& x1, const IntervalVector& x2) {
+	assert(x1.size()==x2.size());
+
+	double max = ibex::distance(x1[0],x2[0]);
+	for (int i=1; i<x1.size(); i++) {
+		double cand = ibex::distance(x1[i],x2[i]);
+		if (max<cand) max = cand;
+	}
+	return max;
+}
+
+double IntervalVector::rel_distance(const IntervalVector& x) const {
+	double max = (*this)[0].rel_distance(x[0]);
+	for (int i=1; i<size(); i++) {
+		double cand = (*this)[i].rel_distance(x[i]);
+		if (max<cand) max = cand;
+	}
+	return max;
 }
 
 namespace { // to create anonymous structure/functions
@@ -103,46 +146,63 @@ void diffI(const Interval& x, const Interval& y, Interval& c1, Interval& c2) {
 } // end namespace
 
 
-int IntervalVector::diff(const IntervalVector& y, IntervalVector**& result) const {
+int IntervalVector::diff(const IntervalVector& y, IntervalVector*& result) const {
 	const int n=size();
 	const IntervalVector& x=*this;
-	IntervalVector **tmp = new IntervalVector*[2*n]; // in the worst case, there is 2n boxes
+	IntervalVector *tmp = new IntervalVector[2*n]; // in the worst case, there is 2n boxes
 	Interval c1, c2;
 	int b=0;
-	if (y.is_empty())
-		tmp[b++] = new IntervalVector(x); // copy of this
-	else
+	if (y.is_empty()) {
+		tmp[b].resize(n);
+		tmp[b]=x; // copy of this
+		b++;
+	} else {
 		for (int var=0; var<n; var++) {
 
 			diffI(x[var],y[var],c1,c2);
 
 			if (!c1.is_empty()) {
-				IntervalVector& v=*(tmp[b++]=new IntervalVector(n));
+				tmp[b].resize(n);
+				IntervalVector& v=tmp[b++];
 				for (int i=0; i<var; i++) v[i]=y[i];
 				v[var]=c1;
 				for (int i=var+1; i<n; i++) v[i]=x[i];
 
 				if (!c2.is_empty()) {
-					IntervalVector& v=*(tmp[b++]=new IntervalVector(n));
+					tmp[b].resize(n);
+					IntervalVector& v=tmp[b++];
 					for (int i=0; i<var; i++) v[i]=y[i];
 					v[var]=c2;
 					for (int i=var+1; i<n; i++) v[i]=x[i];
 				}
 			}
 		}
+	}
 
-	result=new IntervalVector*[b];
-	for (int i=0; i<b; i++) result[i]=tmp[i];
+	if (b==0) {
+		result = new IntervalVector[1];
+		result[0].resize(n);
+		result[0].set_empty();
+		b=1;
+	} else {
+		result=new IntervalVector[b];
+		for (int i=0; i<b; i++) {
+			result[i].resize(n);
+			result[i]=tmp[i];
+		}
+	}
 	delete[] tmp;
 
 	return b;
 }
 
-int IntervalVector::complementary(IntervalVector**& result) const {
+int IntervalVector::complementary(IntervalVector*& result) const {
 	return IntervalVector(size()).diff(*this,result);
 }
 
 IntervalVector IntervalVector::random() const {
+	assert(!is_empty());
+
 	IntervalVector b(size());
 	for (int i=0; i<size(); i++) {
 		const Interval& xi=(*this)[i];

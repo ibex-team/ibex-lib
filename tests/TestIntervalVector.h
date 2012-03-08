@@ -61,6 +61,25 @@ public:
 
 		TEST_ADD(TestIntervalVector::mid01);
 
+		TEST_ADD(TestIntervalVector::is_flat01);
+		TEST_ADD(TestIntervalVector::is_flat02);
+		TEST_ADD(TestIntervalVector::is_flat03);
+		TEST_ADD(TestIntervalVector::is_flat04);
+		TEST_ADD(TestIntervalVector::is_flat05);
+
+		TEST_ADD(TestIntervalVector::is_unbounded01);
+		TEST_ADD(TestIntervalVector::is_unbounded02);
+		TEST_ADD(TestIntervalVector::is_unbounded03);
+		TEST_ADD(TestIntervalVector::is_unbounded04);
+
+		TEST_ADD(TestIntervalVector::is_subset01);
+		TEST_ADD(TestIntervalVector::is_subset02);
+		TEST_ADD(TestIntervalVector::is_subset03);
+		TEST_ADD(TestIntervalVector::is_subset04);
+		TEST_ADD(TestIntervalVector::is_subset05);
+		TEST_ADD(TestIntervalVector::is_subset06);
+		TEST_ADD(TestIntervalVector::is_subset07);
+
 		TEST_ADD(TestIntervalVector::extr_diam_index01);
 		TEST_ADD(TestIntervalVector::extr_diam_index02);
 		TEST_ADD(TestIntervalVector::extr_diam_index03);
@@ -75,7 +94,15 @@ public:
 
 		TEST_ADD(TestIntervalVector::sub01);
 
+		TEST_ADD(TestIntervalVector::compl01);
+		TEST_ADD(TestIntervalVector::compl02);
 
+		TEST_ADD(TestIntervalVector::diff01);
+		TEST_ADD(TestIntervalVector::diff02);
+		TEST_ADD(TestIntervalVector::diff03);
+
+		TEST_ADD(TestIntervalVector::random01);
+		TEST_ADD(TestIntervalVector::random02);
 	}
 
 	/* test:
@@ -148,6 +175,25 @@ public:
 	void is_flat04();
 	void is_flat05();
 
+	// test: is_unbounded() const
+	void is_unbounded01();
+	void is_unbounded02();
+	void is_unbounded03();
+	void is_unbounded04();
+
+	// test:
+	//  is_subset(const IntervalVector& x) const
+	//  is_strict_subset(const IntervalVector& x) const
+	//  is_superset(const IntervalVector& x) cons
+	//  is_strict_superset(const IntervalVector& x) const
+	void is_subset01();
+	void is_subset02();
+	void is_subset03();
+	void is_subset04();
+	void is_subset05();
+	void is_subset06();
+	void is_subset07();
+
 	// test:
 	//    extr_diam_index() const
 	//    min_diam() const
@@ -172,6 +218,19 @@ public:
 	//  operator-(const IntervalVector& x) const
 	//  operator-=(const IntervalVector& x)
 	void sub01();
+
+	// test: complementary(IntervalVector*& result) const
+	void compl01();
+	void compl02();
+
+	// test: diff(const IntervalVector& y, IntervalVector*& result) const
+	void diff01();
+	void diff02();
+	void diff03();
+
+	// test: random() const
+	void random01();
+	void random02();
 
 private:
 

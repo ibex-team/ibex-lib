@@ -239,7 +239,11 @@ class Interval {
      */
     bool is_unbounded() const;
 
-    /** \brief Relative Hausdorff distance between *this and x */
+    /**
+     * \brief Relative Hausdorff distance between *this and x,
+     *
+     * The relative distance is basically distance(x)/diam(*this).
+     */
     double rel_distance(const Interval& x) const;
 
     /** \brief pi. */

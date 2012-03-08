@@ -16,16 +16,14 @@ namespace ibex {
 IntervalMatrix::IntervalMatrix(int nb_rows, int nb_cols) : _nb_rows(nb_rows), _nb_cols(nb_cols) {
 	M = new IntervalVector[_nb_rows];
 	for (int i=0; i<_nb_rows; i++) {
-		M[i].n=_nb_cols;
-		M[i].vec=new Interval[_nb_cols];
+		M[i].resize(_nb_cols);
 	}
 }
 
 IntervalMatrix::IntervalMatrix(int nb_rows, int nb_cols, const Interval& x) : _nb_rows(nb_rows), _nb_cols(nb_cols) {
 	M = new IntervalVector[_nb_rows];
 	for (int i=0; i<_nb_rows; i++) {
-		M[i].n=_nb_cols;
-		M[i].vec=new Interval[_nb_cols];
+		M[i].resize(_nb_cols);
 		for (int j=0; j<_nb_cols; j++) M[i].vec[j]=x;
 	}
 }
@@ -33,8 +31,7 @@ IntervalMatrix::IntervalMatrix(int nb_rows, int nb_cols, const Interval& x) : _n
 void IntervalMatrix::resize(int nb_rows, int nb_cols) {
 	IntervalVector* M2 = new IntervalVector[nb_rows];
 	for (int i=0; i<nb_rows; i++) {
-		M2[i].n=nb_cols;
-		M2[i].vec=new Interval[nb_cols]; // ALL_REALS by default
+		M2[i].resize(_nb_cols);  // ALL_REALS by default
 		if (i<_nb_rows) {
 			int min_cols=nb_cols<_nb_cols?nb_cols:_nb_cols;
 			for (int j=0; j<min_cols; j++)
