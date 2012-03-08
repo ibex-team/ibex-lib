@@ -86,6 +86,15 @@ public:
 		TEST_ADD(TestIntervalVector::extr_diam_index04);
 		TEST_ADD(TestIntervalVector::extr_diam_index05);
 
+		TEST_ADD(TestIntervalVector::perimeter01);
+		TEST_ADD(TestIntervalVector::perimeter02);
+
+		TEST_ADD(TestIntervalVector::volume01);
+		TEST_ADD(TestIntervalVector::volume02);
+		TEST_ADD(TestIntervalVector::volume03);
+
+		TEST_ADD(TestIntervalVector::rel_distance01);
+
 		TEST_ADD(TestIntervalVector::minus01);
 		TEST_ADD(TestIntervalVector::minus02);
 		TEST_ADD(TestIntervalVector::minus03);
@@ -203,6 +212,18 @@ public:
 	void extr_diam_index03();
 	void extr_diam_index04();
 	void extr_diam_index05();
+
+	// test: perimeter() const
+	void perimeter01();
+	void perimeter02();
+
+	// test: volume() const
+	void volume01();
+	void volume02();
+	void volume03();
+
+	// test: rel_distance() const
+	void rel_distance01();
 
 	// test: operator-() const
 	void minus01();

@@ -120,37 +120,6 @@ public:
 	 */
 	IntervalVector subvector(int start_index, int end_index);
 
-	/*
-	 * \brief Set the lower bound of the ith component of this
-	 *
-	 * Set the bound unless the IntervalVector was empty in which case the ith component remains
-	 * the empty Interval.
-	 */
-	//void set_lb(int i, double lb);
-
-	/*
-	 * \brief Set the upper bound of the ith component of this
-	 *
-	 * Set the bound unless the IntervalVector was empty in which case the ith component remains
-	 * the empty Interval.
-	 */
-	//void set_ub(int i, double ub);
-
-	/**
-	 * \brief Assign the ith component to [lb,ub]
-	 *
-	 * Assign unless the IntervalVector was empty in which case the ith component remains
-	 * the empty Interval.
-	 */
-	//void set(int i, double lb, double ub);
-
-	/** \brief Assign the ith component to x:
-	 *
-	 * Assignment unless the IntervalVector was empty in which case the ith component remains
-	 * the empty Interval. If x is the empty Interval, the IntervalVector becomes empty.
-	 */
-	//void set(int i, const Interval& x);
-
 	/**
 	 * \brief Assign this IntervalVector to x.
 	 *
@@ -359,6 +328,11 @@ public:
 	IntervalVector& operator-=(const IntervalVector& x);
 
 	/**
+	 * \brief Dot product.
+	 */
+	Interval operator*(const IntervalVector& x) const;
+
+	/**
 	 * \brief Return *this \ y (set difference).
 	 *
 	 * Store the difference under the form of a union of non-overlapping IntervalVectors
@@ -413,6 +387,25 @@ private:
  */
 double distance(const IntervalVector& x1, const IntervalVector& x2);
 
+/**
+ * \brief Scalar multiplication of a vector.
+ */
+inline IntervalVector operator*(double d, const IntervalVector& x) {
+	IntervalVector res(x);
+	for (int i=0; i<x.size(); i++)
+		res[i]*=d;
+	return res;
+}
+
+/**
+ * \brief Scalar multiplication of a vector.
+ */
+inline IntervalVector operator*(const Interval& itv, const IntervalVector& x) {
+	IntervalVector res(x);
+	for (int i=0; i<x.size(); i++)
+		res[i]*=itv;
+	return res;
+}
 
 /*================================== inline implementations ========================================*/
 
@@ -703,6 +696,16 @@ inline IntervalVector& IntervalVector::operator-=(const IntervalVector& x) {
 	return *this;
 }
 
+inline Interval IntervalVector::operator*(const IntervalVector& x) const {
+	const int n=size();
+	assert(x.size()==n);
+	Interval res(0);
+	for (int i=0; i<n; i++) {
+		res+=(*this)[i]*x[i];
+	}
+	return res;
+}
+
 /** \brief Display the IntervalVector \a x
  */
 inline std::ostream& operator<<(std::ostream& os, const IntervalVector& x) {
@@ -712,34 +715,6 @@ inline std::ostream& operator<<(std::ostream& os, const IntervalVector& x) {
 	os << ")";
 	return os;
 }
-
-/*
-inline void IntervalVector::set_lb(int i, double lb) {
-	if (!is_empty()) {
-		assert(lb<=vec[i].ub());
-		vec[i]=Interval(lb, vec[i].ub());
-	}
-}
-
-inline void IntervalVector::set_ub(int i, double ub) {
-	if (!is_empty()) {
-		assert(ub>=vec[i].lb());
-		vec[i]=Interval(vec[i].lb(),ub);
-	}
-}
-
-inline void IntervalVector::set(int i, double lb, double ub) {
-	if (!is_empty()) {
-		assert(ub>=lb);
-		(*this)[i]=Interval(lb,ub);
-	}
-}
-
-
-inline void IntervalVector::set(int i, const Interval& x) {
-	if (x.is_empty()) set_empty();
-	else set(i, x.lb(), x.ub());
-}*/
 
 
 } // end namespace

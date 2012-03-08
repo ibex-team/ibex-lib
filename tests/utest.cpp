@@ -13,6 +13,7 @@
 #include <cpptest.h>
 #include "TestInterval.h"
 #include "TestIntervalVector.h"
+#include "TestIntervalMatrix.h"
 
 int main() {
     Test::TextOutput output(Test::TextOutput::Verbose);
@@ -20,6 +21,7 @@ int main() {
     Test::Suite ts;
     ts.add(auto_ptr<Test::Suite>(new TestInterval()));
     ts.add(auto_ptr<Test::Suite>(new TestIntervalVector()));
+    ts.add(auto_ptr<Test::Suite>(new TestIntervalMatrix()));
 
     return ts.run(output,false) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

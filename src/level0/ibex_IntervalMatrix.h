@@ -35,6 +35,11 @@ public:
 	IntervalMatrix(int nb_rows, int nb_cols, const Interval& x);
 
 	/**
+	 * \brief Duplicate a matrix.
+	 */
+	IntervalMatrix(const IntervalMatrix& m);
+
+	/**
 	 * \brief Resize the matrix
 	 */
 	void resize(int nb_rows, int nb_cols);
@@ -88,6 +93,11 @@ public:
 	IntervalVector col(int i) const;
 
 	/**
+	 * \brief Return a subset of rows.
+	 */
+	IntervalMatrix rows(int start_index, int end_index);
+
+	/**
 	 * \brief Return a subset of columns.
 	 */
 	IntervalMatrix cols(int start_index, int end_index);
@@ -130,9 +140,24 @@ IntervalMatrix operator+(const IntervalMatrix& m1, const IntervalMatrix& m2);
 IntervalMatrix operator-(const IntervalMatrix& m1, const IntervalMatrix& m2);
 
 /**
+ * \brief Scalar multiplication of a matrix.
+ */
+IntervalMatrix operator*(double d, const IntervalMatrix& m);
+
+/**
+ * \brief Scalar multiplication of a matrix.
+ */
+IntervalMatrix operator*(const Interval& x, const IntervalMatrix& m);
+
+/**
  * \brief $[m]_1*[m]_2$.
  */
 IntervalMatrix operator*(const IntervalMatrix& m1, const IntervalMatrix& m2);
+
+/**
+ * \brief $[m]*[x]$.
+ */
+IntervalVector operator*(const IntervalMatrix& m, const IntervalVector& x);
 
 /**
  * \brief Stream out a matrix.
@@ -167,6 +192,10 @@ inline IntervalVector& IntervalMatrix::row(int i) {
 inline const IntervalVector& IntervalMatrix::row(int i) const {
 	assert(i>=0 && i<nb_rows());
 	return M[i];
+}
+
+inline IntervalMatrix IntervalMatrix::rows(int start_index, int end_index) {
+	return submatrix(start_index, end_index, 0, nb_cols()-1);
 }
 
 inline IntervalMatrix IntervalMatrix::cols(int start_index, int end_index) {

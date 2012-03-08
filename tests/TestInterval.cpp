@@ -391,68 +391,68 @@ void TestInterval::div2_13() { check_div2(Interval(-3,-2), Interval::POS_REALS, 
 
 void TestInterval::getters01() {
 	Interval x(0,2);
-	TEST_ASSERT_DELTA("lb",x.lb(),0,ERROR);
-	TEST_ASSERT_DELTA("ub",x.ub(),2,ERROR);
-	TEST_ASSERT_DELTA("mid",x.mid(),1,ERROR);
-	TEST_ASSERT_DELTA("rad",x.rad(),1,ERROR);
-	TEST_ASSERT_DELTA("diam",x.diam(),2,ERROR);
-	TEST_ASSERT_DELTA("mig",x.mig(),0,ERROR);
-	TEST_ASSERT_DELTA("mag",x.mag(),2,ERROR);
+	TEST_ASSERT_DELTA_MSG(x.lb(),0,ERROR,"lb");
+	TEST_ASSERT_DELTA_MSG(x.ub(),2,ERROR,"ub");
+	TEST_ASSERT_DELTA_MSG(x.mid(),1,ERROR,"mid");
+	TEST_ASSERT_DELTA_MSG(x.rad(),1,ERROR,"rad");
+	TEST_ASSERT_DELTA_MSG(x.diam(),2,ERROR,"diam");
+	TEST_ASSERT_DELTA_MSG(x.mig(),0,ERROR,"mig");
+	TEST_ASSERT_DELTA_MSG(x.mag(),2,ERROR,"mag");
 }
 
 void TestInterval::getters02() {
 	Interval x(-3,-1);
-	TEST_ASSERT_DELTA("lb",x.lb(),-3,ERROR);
-	TEST_ASSERT_DELTA("ub",x.ub(),-1,ERROR);
-	TEST_ASSERT_DELTA("mid",x.mid(),-2,ERROR);
-	TEST_ASSERT_DELTA("rad",x.rad(),1,ERROR);
-	TEST_ASSERT_DELTA("diam",x.diam(),2,ERROR);
-	TEST_ASSERT_DELTA("mig",x.mig(),1,ERROR);
-	TEST_ASSERT_DELTA("mag",x.mag(),3,ERROR);
+	TEST_ASSERT_DELTA_MSG(x.lb(),-3,ERROR,"lb");
+	TEST_ASSERT_DELTA_MSG(x.ub(),-1,ERROR,"ub");
+	TEST_ASSERT_DELTA_MSG(x.mid(),-2,ERROR,"mid");
+	TEST_ASSERT_DELTA_MSG(x.rad(),1,ERROR,"rad");
+	TEST_ASSERT_DELTA_MSG(x.diam(),2,ERROR,"diam");
+	TEST_ASSERT_DELTA_MSG(x.mig(),1,ERROR,"mig");
+	TEST_ASSERT_DELTA_MSG(x.mag(),3,ERROR,"mag");
 }
 
 void TestInterval::getters03() {
 	Interval x(-3,1);
-	TEST_ASSERT_DELTA("lb",x.lb(),-3,ERROR);
-	TEST_ASSERT_DELTA("ub",x.ub(),1,ERROR);
-	TEST_ASSERT_DELTA("mid",x.mid(),-1,ERROR);
-	TEST_ASSERT_DELTA("rad",x.rad(),2,ERROR);
-	TEST_ASSERT_DELTA("diam",x.diam(),4,ERROR);
-	TEST_ASSERT_DELTA("mig",x.mig(),0,ERROR);
-	TEST_ASSERT_DELTA("mag",x.mag(),3,ERROR);
+	TEST_ASSERT_DELTA_MSG(x.lb(),-3,ERROR,"lb");
+	TEST_ASSERT_DELTA_MSG(x.ub(),1,ERROR,"ub");
+	TEST_ASSERT_DELTA_MSG(x.mid(),-1,ERROR,"mid");
+	TEST_ASSERT_DELTA_MSG(x.rad(),2,ERROR,"rad");
+	TEST_ASSERT_DELTA_MSG(x.diam(),4,ERROR,"diam");
+	TEST_ASSERT_DELTA_MSG(x.mig(),0,ERROR,"mig");
+	TEST_ASSERT_DELTA_MSG(x.mag(),3,ERROR,"mag");
 }
 
 void TestInterval::getters04() {
 	Interval x(Interval::NEG_REALS);
-	TEST_ASSERT_DELTA("lb",x.lb(),NEG_INFINITY,ERROR);
-	TEST_ASSERT_DELTA("ub",x.ub(),0,ERROR);
-	TEST_ASSERT_DELTA("mid",x.mid(),-DBL_MAX,ERROR);
-	TEST_ASSERT_DELTA("rad",x.rad(),POS_INFINITY,ERROR);
-	TEST_ASSERT_DELTA("diam",x.diam(),POS_INFINITY,ERROR);
-	TEST_ASSERT_DELTA("mig",x.mig(),0,ERROR);
-	TEST_ASSERT_DELTA("mag",x.mag(),POS_INFINITY,ERROR);
+	TEST_ASSERT_DELTA_MSG(x.lb(),NEG_INFINITY,ERROR,"lb");
+	TEST_ASSERT_DELTA_MSG(x.ub(),0,ERROR,"ub");
+	TEST_ASSERT_DELTA_MSG(x.mid(),-DBL_MAX,ERROR,"mid");
+	TEST_ASSERT_DELTA_MSG(x.rad(),POS_INFINITY,ERROR,"rad");
+	TEST_ASSERT_DELTA_MSG(x.diam(),POS_INFINITY,ERROR,"diam");
+	TEST_ASSERT_DELTA_MSG(x.mig(),0,ERROR,"mig");
+	TEST_ASSERT_DELTA_MSG(x.mag(),POS_INFINITY,ERROR,"mag");
 }
 
 void TestInterval::getters05() {
 	Interval x(Interval::ALL_REALS);
-	TEST_ASSERT_DELTA("lb",x.lb(),NEG_INFINITY,ERROR);
-	TEST_ASSERT_DELTA("ub",x.ub(),POS_INFINITY,ERROR);
-	TEST_ASSERT_DELTA("mid",x.mid(),0,ERROR);
-	TEST_ASSERT_DELTA("rad",x.rad(),POS_INFINITY,ERROR);
-	TEST_ASSERT_DELTA("diam",x.diam(),POS_INFINITY,ERROR);
-	TEST_ASSERT_DELTA("mig",x.mig(),0,ERROR);
-	TEST_ASSERT_DELTA("mag",x.mag(),POS_INFINITY,ERROR);
+	TEST_ASSERT_DELTA_MSG(x.lb(),NEG_INFINITY,ERROR,"lb");
+	TEST_ASSERT_DELTA_MSG(x.ub(),POS_INFINITY,ERROR,"ub");
+	TEST_ASSERT_DELTA_MSG(x.mid(),0,ERROR,"mid");
+	TEST_ASSERT_DELTA_MSG(x.rad(),POS_INFINITY,ERROR,"rad");
+	TEST_ASSERT_DELTA_MSG(x.diam(),POS_INFINITY,ERROR,"diam");
+	TEST_ASSERT_DELTA_MSG(x.mig(),0,ERROR,"mig");
+	TEST_ASSERT_DELTA_MSG(x.mag(),POS_INFINITY,ERROR,"mag");
 }
 
 void TestInterval::getters06() {
 	Interval x(DBL_MAX,POS_INFINITY);
-	TEST_ASSERT_DELTA("lb",x.lb(),DBL_MAX,ERROR);
-	TEST_ASSERT_DELTA("ub",x.ub(),POS_INFINITY,ERROR);
-	TEST_ASSERT_DELTA("mid",x.mid(),DBL_MAX,ERROR);
-	TEST_ASSERT_DELTA("rad",x.rad(),POS_INFINITY,ERROR);
-	TEST_ASSERT_DELTA("diam",x.diam(),POS_INFINITY,ERROR);
-	TEST_ASSERT_DELTA("mig",x.mig(),DBL_MAX,ERROR);
-	TEST_ASSERT_DELTA("mag",x.mag(),POS_INFINITY,ERROR);
+	TEST_ASSERT_DELTA_MSG(x.lb(),DBL_MAX,ERROR,"lb");
+	TEST_ASSERT_DELTA_MSG(x.ub(),POS_INFINITY,ERROR,"ub");
+	TEST_ASSERT_DELTA_MSG(x.mid(),DBL_MAX,ERROR,"mid");
+	TEST_ASSERT_DELTA_MSG(x.rad(),POS_INFINITY,ERROR,"rad");
+	TEST_ASSERT_DELTA_MSG(x.diam(),POS_INFINITY,ERROR,"diam");
+	TEST_ASSERT_DELTA_MSG(x.mig(),DBL_MAX,ERROR,"mig");
+	TEST_ASSERT_DELTA_MSG(x.mag(),POS_INFINITY,ERROR,"mag");
 }
 
 

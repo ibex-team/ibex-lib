@@ -398,10 +398,55 @@ void TestIntervalVector::extr_diam_index05() {
 	TEST_ASSERT(x1.max_diam()==POS_INFINITY);
 }
 
+void TestIntervalVector::rel_distance01() {
+  IntervalVector box1(3);
+  IntervalVector box2(3);
+  box1[0]=Interval(0,0);
+  box2[0]=Interval(0,0);
+  box1[1]=Interval(-1,0);
+  box2[1]=Interval(-1,0);
+  box1[2]=Interval(1,4);
+  box2[2]=Interval(1.5,3);
+  TEST_ASSERT_DELTA(box1.rel_distance(box2),1.0/3.0,ERROR);
+}
+
+void TestIntervalVector::perimeter01() {
+  IntervalVector box1(3);
+  IntervalVector box2(3);
+  box1[0]=Interval(0,0);
+  box2[0]=Interval(0,0);
+  box1[1]=Interval(-1,0);
+  box2[1]=Interval(-1,0);
+  box1[2]=Interval(1,4);
+  box2[2]=Interval(1.5,3);
+  TEST_ASSERT_DELTA(box1.perimeter(),4.0,ERROR);
+  TEST_ASSERT_DELTA(box2.perimeter(),2.5,ERROR);
+}
+
+void TestIntervalVector::perimeter02() {
+	double _x1[][2]={{0,1},{0,POS_INFINITY}};
+	TEST_ASSERT(IntervalVector(2,_x1).perimeter()==POS_INFINITY);
+}
+
+void TestIntervalVector::volume01() {
+	double _x1[][2]={{0,1},{0,POS_INFINITY}};
+	TEST_ASSERT(IntervalVector(2,_x1).volume()==POS_INFINITY);
+}
+
+void TestIntervalVector::volume02() {
+	double _x1[][2]={{0,1},{1,1}};
+	TEST_ASSERT(IntervalVector(2,_x1).volume()==0);
+}
+
+void TestIntervalVector::volume03() {
+	double _x1[][2]={{0,2},{2,5},{4,8}};
+	TEST_ASSERT_DELTA(IntervalVector(3,_x1).volume(),24.0,ERROR);
+}
+
 void TestIntervalVector::minus01() {
 	double _x1[][2]={{0,3},{0,2},{0,1}};
 	double _x2[][2]={{-3,0},{-2,0},{-1,0}};
-	check(-IntervalVector(3,_x1),IntervalVector(3,_x2));
+	TEST_ASSERT((-IntervalVector(3,_x1))==IntervalVector(3,_x2));
 }
 
 void TestIntervalVector::minus02() {
