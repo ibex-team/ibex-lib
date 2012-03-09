@@ -40,6 +40,30 @@ public:
 	IntervalMatrix(const IntervalMatrix& m);
 
 	/**
+	 * \brief Create an interval matrix from an array of doubles.
+	 *
+	 * Create the IntervalMatrix: <br>
+	 *  [x[0][0],x[0][1]] ; ... ; [x[n-1][0], x[n-1][1]]   <br>
+	 *  [x[n][0],x[n][1]] ; ... ; [x[2n-1][0],x[2n-1][1]]  <br>
+	 *  ... <br>
+	 *  [x[(m-1)n][0],x[n][1]] ; ... ; [x[mn-1][0],x[2n-1][1]]  <br>
+	 *
+	 * \param bounds an (mxn)x2 array of doubles
+	 * \pre m>0, n>0
+	 */
+	IntervalMatrix(int m, int n, double x[][2]);
+
+	/**
+	 * \brief True if the bounds of (*this) coincide with m.
+	 */
+	bool operator==(const IntervalMatrix& m);
+
+	/**
+	 * \brief True if one bound of (*this) differs from m.
+	 */
+	bool operator!=(const IntervalMatrix& m);
+
+	/**
 	 * \brief Resize the matrix
 	 */
 	void resize(int nb_rows, int nb_cols);
@@ -118,9 +142,19 @@ public:
     IntervalMatrix operator-() const;
 
     /**
-     * \brief Set itself to the intersection with x.
+     * \brief Set *this to (*this)+m.
      */
-	IntervalMatrix& operator&=(const IntervalMatrix& x);
+    IntervalMatrix operator+=(const IntervalMatrix& m);
+
+    /**
+     * \brief Set *this to (*this)-m.
+     */
+    IntervalMatrix operator-=(const IntervalMatrix& m);
+
+    /**
+     * \brief Set *this to (*this)*m.
+     */
+    IntervalMatrix operator*=(const IntervalMatrix& m);
 
 private:
 
@@ -165,6 +199,10 @@ IntervalVector operator*(const IntervalMatrix& m, const IntervalVector& x);
 std::ostream& operator<<(std::ostream& os, const IntervalMatrix&);
 
 /*================================== inline implementations ========================================*/
+
+inline bool IntervalMatrix::operator!=(const IntervalMatrix& m) {
+	return !(*this==m);
+}
 
 inline int IntervalMatrix::nb_cols() const {
 	return _nb_cols;
