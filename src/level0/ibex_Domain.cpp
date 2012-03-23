@@ -85,7 +85,6 @@ int Domain::add(const Dim& dim) {
 		case Dim::MATRIX:       doms.push_back(new IntervalMatrix(dim.dim2,dim.dim3)); _size+=dim.dim2*dim.dim3; break;
 		case Dim::MATRIX_ARRAY: doms.push_back(new IntervalMatrixArray(dim.dim1,dim.dim2,dim.dim3)); _size+=dim.dim1*dim.dim2*dim.dim3; break;
 		}
-	_size++;
 	return n;
 }
 
@@ -94,10 +93,10 @@ std::ostream& operator<<(std::ostream& os, const Domain& d) {
 	for (size_t v=0; v<d.doms. size(); v++) {
 		const Dim& dim=d.symbol_dims[v];
 		switch (dim.type()) {
-		case Dim::SCALAR:       os << d.get(v);          break;
-		case Dim::VECTOR:       os << d.vector(v);       break;
-		case Dim::MATRIX:       os << d.matrix(v);       break;
-		case Dim::MATRIX_ARRAY: os << d.matrix_array(v); break;
+		case Dim::SCALAR:       os << "S " << d.get(v) << endl;          break;
+		case Dim::VECTOR:       os << "V " << d.vector(v) << endl;       break;
+		case Dim::MATRIX:       os << "M " << d.matrix(v) << endl;       break;
+		case Dim::MATRIX_ARRAY: os << "A " << d.matrix_array(v) << endl; break;
 		}
 
 		os << " - ";

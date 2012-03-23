@@ -84,7 +84,7 @@ public:
 	 * (resp. matrix, vector), in lexicographic order.
 	 *
 	 *  Perform also various checks (that the index is in the range, etc.). */
-	int index_num(int this_num, int index) const;
+	//int index_num(int this_num, int index) const;
 
 	//std::pair<int, struct Dim> index_info(int base_num, int index1, int index2, int index3) const;
 

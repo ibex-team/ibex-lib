@@ -13,6 +13,10 @@
 
 namespace ibex {
 
+IntervalMatrix::IntervalMatrix() : _nb_rows(0), _nb_cols(0), M(NULL) {
+
+}
+
 IntervalMatrix::IntervalMatrix(int nb_rows, int nb_cols) : _nb_rows(nb_rows), _nb_cols(nb_cols) {
 	assert(nb_rows>0);
 	assert(nb_cols>0);
@@ -88,7 +92,7 @@ void IntervalMatrix::resize(int nb_rows, int nb_cols) {
 				M2[i][j]=M[i][j];
 		}
 	}
-	delete[] M;
+	if (M!=NULL) delete[] M; // M=NULL only in IntervalMatrixArray
 	M=M2;
 	_nb_rows = nb_rows;
 	_nb_cols = nb_cols;

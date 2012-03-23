@@ -17,6 +17,7 @@ using std::stringstream;
 
 namespace ibex {
 
+
 Dim Dim::index_dim() const {
 
   Dim dim=*this;
@@ -31,6 +32,7 @@ Dim Dim::index_dim() const {
   return dim;
 }
 
+/*
 int Dim::index_num(int this_num, int index) const {
 
   int num=this_num;
@@ -64,6 +66,7 @@ int Dim::index_num(int this_num, int index) const {
   }
   return num;
 }
+*/
 
 std::ostream& operator<<(std::ostream& os, const Dim& d) {
   return os << d.dim1 << ", " << d.dim2 << ", " << d.dim3;

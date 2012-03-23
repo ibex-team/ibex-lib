@@ -17,6 +17,8 @@
 
 namespace ibex {
 
+class IntervalMatrixArray; // declared only for friendship
+
 /**
  * \brief Interval matrix.
  */
@@ -190,6 +192,9 @@ public:
     IntervalMatrix operator*=(const IntervalMatrix& m);
 
 private:
+	friend class IntervalMatrixArray;
+
+	IntervalMatrix(); // for IntervalMatrixArray
 
 	int _nb_rows;
 	int _nb_cols;

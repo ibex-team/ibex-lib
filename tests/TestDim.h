@@ -1,5 +1,5 @@
 /* ============================================================================
- * I B E X - Domain Tests
+ * I B E X - Dim Tests
  * ============================================================================
  * Copyright   : Ecole des Mines de Nantes (FRANCE)
  * License     : This program can be distributed under the terms of the GNU LGPL.
@@ -9,36 +9,31 @@
  * Created     : Mar 2, 2012
  * ---------------------------------------------------------------------------- */
 
-#ifndef __TEST_DOMAIN_H__
-#define __TEST_DOMAIN_H__
+#ifndef __TEST_DIM_H__
+#define __TEST_DIM_H__
 
 #include "cpptest.h"
-#include "ibex_Domain.h"
+#include "ibex_Dim.h"
 #include "utils.h"
 
 namespace ibex {
 
-class TestDomain : public TestIbex {
+class TestDim : public TestIbex {
 
 public:
-	TestDomain() {
+	TestDim() {
 
-		TEST_ADD(TestDomain::cons01);
-		TEST_ADD(TestDomain::scal01);
-		TEST_ADD(TestDomain::vector01);
-		TEST_ADD(TestDomain::matrix01);
-		TEST_ADD(TestDomain::mix01);
+		TEST_ADD(TestDim::test01);
+		TEST_ADD(TestDim::test02);
+		TEST_ADD(TestDim::test03);
+		TEST_ADD(TestDim::test04);
 	}
 
-	// test: Domain()
-	void cons01();
-
-	void scal01();
-	void vector01();
-	void matrix01();
-	void mix01();
-
+	void test01();
+	void test02();
+	void test03();
+	void test04();
 };
 
 } // namespace ibex
-#endif // __TEST_DOMAIN_H__
+#endif // __TEST_DIM_H__

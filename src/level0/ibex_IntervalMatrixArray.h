@@ -9,20 +9,31 @@
  * Created     : Jan 21, 2012
  * ---------------------------------------------------------------------------- */
 
-#ifndef IBEX_INTERVALMATRIXARRAY_H_
-#define IBEX_INTERVALMATRIXARRAY_H_
-
-namespace ibex {
+#ifndef __IBEX_INTERVAL_MATRIX_ARRAY_H__
+#define __IBEX_INTERVAL_MATRIX_ARRAY_H__
 
 #include <iostream>
+#include "ibex_IntervalMatrix.h"
+
+namespace ibex {
 
 class IntervalMatrixArray {
 
 public:
+	/**
+	 * \brief Create an array of n (nb_rowsxnb_cols) interval matrices.
+	 */
 	IntervalMatrixArray(int n, int nb_rows, int nb_cols);
 
-	IntervalMatrixArray();
-	virtual ~IntervalMatrixArray();
+	/**
+	 * \brief Delete this.
+	 */
+	~IntervalMatrixArray();
+
+	/**
+	 * \brief Size of the array.
+	 */
+	int size() const;
 
 	/**
 	 * \brief Return the ith matrix.
@@ -37,12 +48,17 @@ public:
 
 private:
 	IntervalMatrix* array;
+	int n;
 };
 
 std::ostream& operator<<(std::ostream& os, const IntervalMatrixArray&);
 
 
 /*================================== inline implementations ========================================*/
+
+inline int IntervalMatrixArray::size() const {
+	return n;
+}
 
 inline IntervalMatrix& IntervalMatrixArray::operator[](int i) {
 	return array[i];
@@ -53,4 +69,5 @@ inline const IntervalMatrix& IntervalMatrixArray::operator[](int i) const {
 }
 
 } // namespace ibex
-#endif // IBEX_INTERVALMATRIXARRAY_H_
+
+#endif // __IBEX_INTERVAL_MATRIX_ARRAY_H__

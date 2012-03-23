@@ -10,13 +10,27 @@
  * ---------------------------------------------------------------------------- */
 
 #include "ibex_IntervalMatrixArray.h"
+#include <cassert>
 
 namespace ibex {
 
-IntervalMatrixArray::IntervalMatrixArray() {
+IntervalMatrixArray::IntervalMatrixArray(int n, int nb_rows, int nb_cols) : n(n) {
+	assert(n>0);
+
+	array = new IntervalMatrix[n];
+	for (int i=0; i<n; i++)
+		array[i].resize(nb_rows,nb_cols);
 }
 
 IntervalMatrixArray::~IntervalMatrixArray() {
+	delete[] array;
+}
+
+std::ostream& operator<<(std::ostream& os, const IntervalMatrixArray& a) {
+	for (int i=0; i<a.size(); i++) {
+		os << a[i] << std::endl;
+	}
+	return os;
 }
 
 } // namespace ibex

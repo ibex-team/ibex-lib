@@ -12,7 +12,6 @@
 #ifndef __IBEX_DOMAIN_H__
 #define __IBEX_DOMAIN_H__
 
-#include "ibex_SymbolMap.h"
 #include "ibex_Interval.h"
 #include "ibex_IntervalMatrix.h"
 #include "ibex_IntervalMatrixArray.h"
@@ -44,7 +43,7 @@ public:
 	/**
 	 * \brief Create an empty domain.
 	 */
-	Domain() { }
+	Domain();
 
 	/**
 	 * \brief Copy the domain.
@@ -65,214 +64,166 @@ public:
 	/**
 	 * Return the dimensions of the vth variable
 	 */
-	Dim dim(int v) const {
-		return symbol_dims[v];
-	}
+	Dim dim(unsigned int v) const;
 
 	/**
 	 * The total _size, when the domain is represented as
 	 * a flat vector.
 	 */
-	int size() const {
-		return _size;
-	}
+	int size() const;
 
 	/**
 	 * \brief Return the domain of the vth variable.
 	 *
 	 * This variable must be scalar.
 	 */
-	Interval& operator[](int v) {
-		return *((Interval*) doms[v]);
-	}
+	Interval& operator[](unsigned int v);
 
 	/**
 	 * \brief Return the domain of the vth variable.
 	 *
 	 * This variable must be scalar.
 	 */
-	const Interval& operator[](int v) const {
-		return ((Domain&) *this)[v];
-	}
+	const Interval& operator[](unsigned int v) const;
 
 	/**
 	 * \brief Return the domain of the vth variable.
 	 *
 	 * This variable must be scalar.
 	 */
-	Interval& get(int v) {
-		return (*this)[v];
-	}
+	Interval& get(unsigned int v);
 
 	/**
 	 * \brief Return the domain of x[i] where x is the vth variable.
 	 *
 	 * x must be a vector.
 	 */
-	Interval& get(int v, int i) {
-		return (*((IntervalVector*) doms[v]))[i];
-	}
+	Interval& get(unsigned int v, int i);
 
 	/**
 	 * \brief Return the domain of x[i][j] where x is the vth variable.
 	 *
 	 * x must be a matrix.
 	 */
-	Interval& get(int v, int i, int j) {
-			return (*((IntervalMatrix*) doms[v]))[i][j];
-	}
+	Interval& get(unsigned int v, int i, int j);
 
 	/**
 	 * \brief Return the domain of x[i][j][k] where x is the vth variable.
 	 *
 	 * x must be an array of matrices.
 	 */
-	Interval& get(int v, int i, int j, int k) {
-			return (*((IntervalMatrixArray*) doms[v]))[i][j][k];
-	}
+	Interval& get(unsigned int v, int i, int j, int k);
 
 	/**
 	 * \brief Return the domain of the vth variable.
 	 *
 	 * This variable must be a vector.
 	 */
-	IntervalVector& vector(int v) {
-		return *((IntervalVector*) doms[v]);
-	}
+	IntervalVector& vector(unsigned int v);
 
 	/**
 	 * \brief Return the domain of x[i] where x is the vth variable.
 	 *
 	 * x must be a matrix.
 	 */
-	IntervalVector& vector(int v, int i) {
-		return (*((IntervalMatrix*) doms[v]))[i];
-	}
+	IntervalVector& vector(unsigned int v, int i);
 
 	/**
 	 * \brief Return the domain of x[i][j] where x is the vth variable.
 	 *
 	 * x must be an array of matrices.
 	 */
-	IntervalVector& vector(int v, int i, int j) {
-		return (*((IntervalMatrixArray*) doms[v]))[i][j];
-	}
+	IntervalVector& vector(unsigned int v, int i, int j);
 
 	/**
 	 * \brief Return the domain of the vth variable.
 	 *
 	 * This variable must be a matrix.
 	 */
-	IntervalMatrix& matrix(int v) {
-		return *((IntervalMatrix*) doms[v]);
-	}
+	IntervalMatrix& matrix(unsigned int v);
 
 	/**
 	 * \brief Return the domain of x[i] where x is the vth variable.
 	 *
 	 * x must be an array of matrices.
 	 */
-	IntervalMatrix& matrix(int v, int i) {
-		return (*((IntervalMatrixArray*) doms[v]))[i];
-	}
+	IntervalMatrix& matrix(unsigned int v, int i);
 
 	/**
 	 * \brief Return the domain of the vth variable.
 	 *
 	 * This variable must be an array of matrices.
 	 */
-	IntervalMatrixArray matrix_array(int v) {
-		return *((IntervalMatrixArray*) doms[v]);
-	}
+	IntervalMatrixArray matrix_array(unsigned int v);
 
 	/* \brief Return the domain of the vth variable.
 	 *
 	 * This variable must be scalar.
 	 */
-	const Interval& get(int v) const {
-		return (*this)[v];
-	}
+	const Interval& get(unsigned int v) const;
 
 	/**
 	 * \brief Return the domain of x[i] where x is the vth variable.
 	 *
 	 * x must be a vector.
 	 */
-	const Interval& get(int v, int i) const {
-		return (*((IntervalVector*) doms[v]))[i];
-	}
+	const Interval& get(unsigned int v, int i) const;
 
 	/**
 	 * \brief Return the domain of x[i][j] where x is the vth variable.
 	 *
 	 * x must be a matrix.
 	 */
-	const Interval& get(int v, int i, int j) const {
-			return (*((IntervalMatrix*) doms[v]))[i][j];
-	}
+	const Interval& get(unsigned int v, int i, int j) const;
 
 	/**
 	 * \brief Return the domain of x[i][j][k] where x is the vth variable.
 	 *
 	 * x must be an array of matrices.
 	 */
-	const Interval& get(int v, int i, int j, int k) const {
-			return (*((IntervalMatrixArray*) doms[v]))[i][j][k];
-	}
+	const Interval& get(unsigned int v, int i, int j, int k) const;
 
 	/**
 	 * \brief Return the domain of the vth variable.
 	 *
 	 * This variable must be a vector.
 	 */
-	const IntervalVector& vector(int v) const {
-		return *((IntervalVector*) doms[v]);
-	}
+	const IntervalVector& vector(unsigned int v) const;
 
 	/**
 	 * \brief Return the domain of x[i] where x is the vth variable.
 	 *
 	 * x must be a matrix.
 	 */
-	const IntervalVector& vector(int v, int i) const {
-		return (*((IntervalMatrix*) doms[v]))[i];
-	}
+	const IntervalVector& vector(unsigned int v, int i) const;
 
 	/**
 	 * \brief Return the domain of x[i][j] where x is the vth variable.
 	 *
 	 * x must be an array of matrices.
 	 */
-	const IntervalVector& vector(int v, int i, int j) const {
-		return (*((IntervalMatrixArray*) doms[v]))[i][j];
-	}
+	const IntervalVector& vector(unsigned int v, int i, int j) const;
 
 	/**
 	 * \brief Return the domain of the vth variable.
 	 *
 	 * This variable must be a matrix.
 	 */
-	const IntervalMatrix& matrix(int v) const {
-		return *((IntervalMatrix*) doms[v]);
-	}
+	const IntervalMatrix& matrix(unsigned int v) const;
 
 	/**
 	 * \brief Return the domain of x[i] where x is the vth variable.
 	 *
 	 * x must be an array of matrices.
 	 */
-	const IntervalMatrix& matrix(int v, int i) const {
-		return (*((IntervalMatrixArray*) doms[v]))[i];
-	}
+	const IntervalMatrix& matrix(unsigned int v, int i) const;
 
 	/**
 	 * \brief Return the domain of the vth variable.
 	 *
 	 * This variable must be an array of matrices.
 	 */
-	const IntervalMatrixArray& matrix_array(int v) const {
-		return *((IntervalMatrixArray*) doms[v]);
-	}
+	const IntervalMatrixArray& matrix_array(unsigned int v) const;
 
 private:
 	friend class IntervalVector;
@@ -293,7 +244,164 @@ private:
 	*/
 };
 
+
 std::ostream& operator<<(std::ostream& os, const Domain&);
+
+
+/*================================== inline implementations ========================================*/
+
+inline Dim Domain::dim(unsigned int v) const {
+	return symbol_dims[v];
+}
+
+inline int Domain::size() const {
+	return _size;
+}
+
+inline Interval& Domain::operator[](unsigned int v) {
+	assert(v<symbol_dims.size());
+	assert(symbol_dims[v].type()==Dim::SCALAR);
+
+	return *((Interval*) doms[v]);
+}
+
+inline const Interval& Domain::operator[](unsigned int v) const {
+	return ((Domain&) *this)[v];
+}
+
+inline Interval& Domain::get(unsigned int v) {
+	return (*this)[v];
+}
+
+inline Interval& Domain::get(unsigned int v, int i) {
+	assert(v<symbol_dims.size());
+	assert(symbol_dims[v].type()==Dim::VECTOR);
+
+	return (*((IntervalVector*) doms[v]))[i];
+}
+
+inline Interval& Domain::get(unsigned int v, int i, int j) {
+	assert(v<symbol_dims.size());
+	assert(symbol_dims[v].type()==Dim::MATRIX);
+
+	return (*((IntervalMatrix*) doms[v]))[i][j];
+}
+
+inline Interval& Domain::get(unsigned int v, int i, int j, int k) {
+	assert(v<symbol_dims.size());
+	assert(symbol_dims[v].type()==Dim::MATRIX_ARRAY);
+
+	return (*((IntervalMatrixArray*) doms[v]))[i][j][k];
+}
+
+inline IntervalVector& Domain::vector(unsigned int v) {
+	assert(v<symbol_dims.size());
+	assert(symbol_dims[v].type()==Dim::VECTOR);
+
+	return *((IntervalVector*) doms[v]);
+}
+
+inline IntervalVector& Domain::vector(unsigned int v, int i) {
+	assert(v<symbol_dims.size());
+	assert(symbol_dims[v].type()==Dim::MATRIX);
+
+	return (*((IntervalMatrix*) doms[v]))[i];
+}
+
+inline IntervalVector& Domain::vector(unsigned int v, int i, int j) {
+	assert(v<symbol_dims.size());
+	assert(symbol_dims[v].type()==Dim::MATRIX_ARRAY);
+
+	return (*((IntervalMatrixArray*) doms[v]))[i][j];
+}
+
+inline IntervalMatrix& Domain::matrix(unsigned int v) {
+	assert(v<symbol_dims.size());
+	assert(symbol_dims[v].type()==Dim::MATRIX);
+
+	return *((IntervalMatrix*) doms[v]);
+}
+
+inline IntervalMatrix& Domain::matrix(unsigned int v, int i) {
+	assert(v<symbol_dims.size());
+	assert(symbol_dims[v].type()==Dim::MATRIX_ARRAY);
+
+	return (*((IntervalMatrixArray*) doms[v]))[i];
+}
+
+
+inline IntervalMatrixArray Domain::matrix_array(unsigned int v) {
+	assert(v<symbol_dims.size());
+	assert(symbol_dims[v].type()==Dim::MATRIX_ARRAY);
+
+	return *((IntervalMatrixArray*) doms[v]);
+}
+
+inline const Interval& Domain::get(unsigned int v) const {
+	return (*this)[v];
+}
+
+inline const Interval& Domain::get(unsigned int v, int i) const {
+	assert(v<symbol_dims.size());
+	assert(symbol_dims[v].type()==Dim::VECTOR);
+
+	return (*((IntervalVector*) doms[v]))[i];
+}
+
+inline const Interval& Domain::get(unsigned int v, int i, int j) const {
+	assert(v<symbol_dims.size());
+	assert(symbol_dims[v].type()==Dim::MATRIX);
+
+	return (*((IntervalMatrix*) doms[v]))[i][j];
+}
+
+inline const Interval& Domain::get(unsigned int v, int i, int j, int k) const {
+	assert(v<symbol_dims.size());
+	assert(symbol_dims[v].type()==Dim::MATRIX_ARRAY);
+
+	return (*((IntervalMatrixArray*) doms[v]))[i][j][k];
+}
+
+inline const IntervalVector& Domain::vector(unsigned int v) const {
+	assert(v<symbol_dims.size());
+	assert(symbol_dims[v].type()==Dim::VECTOR);
+
+	return *((IntervalVector*) doms[v]);
+}
+
+inline const IntervalVector& Domain::vector(unsigned int v, int i) const {
+	assert(v<symbol_dims.size());
+	assert(symbol_dims[v].type()==Dim::MATRIX);
+
+	return (*((IntervalMatrix*) doms[v]))[i];
+}
+
+inline const IntervalVector& Domain::vector(unsigned int v, int i, int j) const {
+	assert(v<symbol_dims.size());
+	assert(symbol_dims[v].type()==Dim::MATRIX_ARRAY);
+
+	return (*((IntervalMatrixArray*) doms[v]))[i][j];
+}
+
+inline const IntervalMatrix& Domain::matrix(unsigned int v) const {
+	assert(v<symbol_dims.size());
+	assert(symbol_dims[v].type()==Dim::MATRIX);
+
+	return *((IntervalMatrix*) doms[v]);
+}
+
+inline const IntervalMatrix& Domain::matrix(unsigned int v, int i) const {
+	assert(v<symbol_dims.size());
+	assert(symbol_dims[v].type()==Dim::MATRIX_ARRAY);
+	return (*((IntervalMatrixArray*) doms[v]))[i];
+}
+
+inline const IntervalMatrixArray& Domain::matrix_array(unsigned int v) const {
+	assert(v<symbol_dims.size());
+	assert(symbol_dims[v].type()==Dim::MATRIX_ARRAY);
+
+	return *((IntervalMatrixArray*) doms[v]);
+}
 
 } // namespace ibex
 #endif // __IBEX_DOMAIN_H__
