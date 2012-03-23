@@ -5,11 +5,12 @@ TARGET=utest
 
 include ../src/common.mak
  
-CPPTEST_DIR:=/home/gchabert/cpptest
-CPPTEST_INC_DIR:=$(CPPTEST_DIR)/src
-CPPTEST_LIB_DIR:=$(CPPTEST_DIR)/src/.libs
-CPPTEST_INC_DIR_OPT:=-I$(CPPTEST_INC_DIR)
-CPPTEST_LIB_DIR_OPT:=-static -L$(CPPTEST_LIB_DIR)
+#CPPTEST_DIR:=/home/gchabert08/Applications/cpptest
+#CPPTEST_INC_DIR:=$(CPPTEST_DIR)/src
+#CPPTEST_LIB_DIR:=$(CPPTEST_DIR)
+#CPPTEST_INC_DIR_OPT:=-I$(CPPTEST_INC_DIR)
+#CPPTEST_LIB_DIR_OPT:=-static -L$(CPPTEST_LIB_DIR)
+CPPTEST_LIB_DIR_OPT:=-static 
 CPPTEST_LIB_NAME_OPT:=-lcpptest
  		
 INC_DIR_OPT:=$(INC_DIR_OPT) $(CPPTEST_INC_DIR_OPT)
@@ -21,7 +22,7 @@ $(TARGET):	$(OBJS)
 
 utest.o : $(SRCS) $(HEADERS) 
 
-%.o : %.cpp %.h $(IBEX_LIB_DIR)/libibex.a
+%.o : %.cpp %.h #$(IBEX_LIB_DIR)/libibex.a
 	$(CXX) $(CXXFLAGS) $(INC_DIR_OPT) -c  -o  $@ $<
 
 clean:

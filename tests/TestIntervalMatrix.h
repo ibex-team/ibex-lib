@@ -26,11 +26,21 @@ public:
 		TEST_ADD(TestIntervalMatrix::eq01);
 		TEST_ADD(TestIntervalMatrix::eq02);
 		TEST_ADD(TestIntervalMatrix::eq03);
+		TEST_ADD(TestIntervalMatrix::eq04);
 
 		TEST_ADD(TestIntervalMatrix::cons01);
 		TEST_ADD(TestIntervalMatrix::cons02);
 		TEST_ADD(TestIntervalMatrix::cons03);
 		TEST_ADD(TestIntervalMatrix::cons04);
+
+		TEST_ADD(TestIntervalMatrix::empty01);
+		TEST_ADD(TestIntervalMatrix::is_empty01);
+		TEST_ADD(TestIntervalMatrix::is_empty02);
+		TEST_ADD(TestIntervalMatrix::set_empty01);
+
+		TEST_ADD(TestIntervalMatrix::inter01);
+		TEST_ADD(TestIntervalMatrix::inter02);
+		TEST_ADD(TestIntervalMatrix::inter03);
 
 		TEST_ADD(TestIntervalMatrix::set_col01);
 
@@ -46,14 +56,19 @@ public:
 
 		TEST_ADD(TestIntervalMatrix::resize01);
 		TEST_ADD(TestIntervalMatrix::resize02);
+		TEST_ADD(TestIntervalMatrix::resize03);
 
 		TEST_ADD(TestIntervalMatrix::minus01);
+		TEST_ADD(TestIntervalMatrix::minus02);
 
 		TEST_ADD(TestIntervalMatrix::add01);
+		TEST_ADD(TestIntervalMatrix::add02);
 
 		TEST_ADD(TestIntervalMatrix::sub01);
+		TEST_ADD(TestIntervalMatrix::sub02);
 
 		TEST_ADD(TestIntervalMatrix::mul01);
+		TEST_ADD(TestIntervalMatrix::mul02);
 	}
 
 	// test:
@@ -71,7 +86,7 @@ public:
 	 *   operator[](int i)
 	 */
 	void eq03();
-
+	void eq04();
 	/* test:
 	 * =======
 	 *   IntervalMatrix(int nb_rows, int nb_cols)
@@ -94,6 +109,19 @@ public:
 	// test: IntervalMatrix(int m, int n, double x[][2])
 	void cons04();
 
+	// test: static IntervalMatrix empty(int m, int n)
+	void empty01();
+	// test: is_empty() const
+	void is_empty01();
+	void is_empty02();
+	// test: set_empty()
+	void set_empty01();
+
+	// test: IntervalMatrix& operator&=(const IntervalMatrix& x)
+	void inter01();
+	void inter02();
+	void inter03();
+
 	void set_col01();
 
 	// test: rows(int,int)
@@ -111,24 +139,28 @@ public:
 	// test: resize(int)
 	void resize01();
 	void resize02();
+	void resize03();
 
 	// test: operator-() const
 	void minus01();
+	void minus02();
 
 	// test:
 	//  operator+(const IntervalMatrix& x) const
 	//  operator+=(const IntervalMatrix& x)
 	void add01();
+	void add02();
 
 	// test:
 	//  operator-(const IntervalMatrix& x) const
 	//  operator-=(const IntervalMatrix& x)
 	void sub01();
-
+	void sub02();
 	// test:
 	//  operator*(const IntervalMatrix& x) const
 	//  operator*=(const IntervalMatrix& x)
 	void mul01();
+	void mul02();
 };
 
 #endif // __TEST_INTERVAL_MATRIX_H__

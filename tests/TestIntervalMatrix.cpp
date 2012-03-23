@@ -15,6 +15,43 @@
 
 using namespace std;
 
+IntervalMatrix M1() {
+	IntervalMatrix m(2,3);
+	double _r1[][2]={{0,1},{0,2},{0,3}};
+	double _r2[][2]={{-1,0},{-2,0},{-3,0}};
+	IntervalVector r1(3,_r1);
+	IntervalVector r2(3,_r2);
+	m[0]=r1;
+	m[1]=r2;
+	return m;
+}
+
+
+IntervalMatrix M2() { // the transpose of M1
+	IntervalMatrix m(3,2);
+	double _c1[][2]={{0,1},{-1,0}};
+	double _c2[][2]={{0,2},{-2,0}};
+	double _c3[][2]={{0,3},{-3,0}};
+	IntervalVector c1(2,_c1);
+	IntervalVector c2(2,_c2);
+	IntervalVector c3(2,_c3);
+	m[0]=c1;
+	m[1]=c2;
+	m[2]=c3;
+	return m;
+}
+
+IntervalMatrix M3() { // non-null intersection with M1
+	IntervalMatrix m(2,3);
+	double _r1[][2]={{1,2},{1,2},{2,4}};
+	double _r2[][2]={{-2,-1},{-2,-1},{-4,-2}};
+	IntervalVector r1(3,_r1);
+	IntervalVector r2(3,_r2);
+	m[0]=r1;
+	m[1]=r2;
+	return m;
+}
+
 void TestIntervalMatrix::eq01() {
 	IntervalMatrix m(2,3);
 	IntervalMatrix m2(3,2);
@@ -57,6 +94,19 @@ void TestIntervalMatrix::eq03() {
 	m2[1][2]=7;
 	TEST_ASSERT(m!=m2);
 	TEST_ASSERT(!(m==m2));
+}
+
+void TestIntervalMatrix::eq04() {
+	IntervalMatrix m(2,3);
+	IntervalMatrix m2(2,3);
+	m[1][1]=-1;
+	m2[1][1]=-2;
+	TEST_ASSERT(m!=m2);
+	TEST_ASSERT(!(m==m2));
+	m.set_empty();
+	m2.set_empty();
+	TEST_ASSERT(m==m2);
+	TEST_ASSERT(!(m!=m2));
 }
 
 void TestIntervalMatrix::cons01() {
@@ -126,22 +176,54 @@ void TestIntervalMatrix::cons03() {
 	TEST_ASSERT(m==(IntervalMatrix(2,3)=m));
 }
 
-IntervalMatrix M1() {
-	IntervalMatrix m(2,3);
-	double _r1[][2]={{0,1},{0,2},{0,3}};
-	double _r2[][2]={{-1,0},{-2,0},{-3,0}};
-	IntervalVector r1(3,_r1);
-	IntervalVector r2(3,_r2);
-	m[0]=r1;
-	m[1]=r2;
-	return m;
-}
-
 void TestIntervalMatrix::cons04() {
 	double _m[][2]={ {0,1}, {0,2}, {0,3},
 		             {-1,0},{-2,0},{-3,0} };
 	IntervalMatrix m(2,3,_m);
 	TEST_ASSERT(m==M1());
+}
+
+void TestIntervalMatrix::empty01() {
+
+	TEST_ASSERT(IntervalMatrix::empty(2,3).nb_rows()==2);
+	TEST_ASSERT(IntervalMatrix::empty(2,3).nb_cols()==3);
+
+	TEST_ASSERT(IntervalMatrix(IntervalMatrix::empty(2,3))==IntervalMatrix::empty(2,3));
+	TEST_ASSERT((IntervalMatrix(2,3)=IntervalMatrix::empty(2,3))==IntervalMatrix::empty(2,3));
+}
+
+void TestIntervalMatrix::is_empty01() {
+	TEST_ASSERT(!IntervalMatrix(2,3).is_empty());
+}
+
+void TestIntervalMatrix::is_empty02() {
+	TEST_ASSERT(IntervalMatrix::empty(2,3).is_empty());
+}
+
+void TestIntervalMatrix::set_empty01() {
+	IntervalMatrix m(2,3);
+	m.set_empty();
+	TEST_ASSERT(m.is_empty());
+}
+
+// intersection of a matrix with itself
+void TestIntervalMatrix::inter01() {
+	TEST_ASSERT((M1()&=M1())==M1());
+}
+
+// intersection of two overlapping matrices
+void TestIntervalMatrix::inter02() {
+	double _m[][2]={{1,1},  {1,2},  {2,3},
+			        {-1,-1},{-2,-1},{-3,-2}};
+
+	TEST_ASSERT((M1()&=M3())==IntervalMatrix(2,3,_m))
+}
+// intersection of two non-overlapping matrices
+void TestIntervalMatrix::inter03() {
+	IntervalMatrix m3(M3());
+	m3[1][2]=Interval(-5,-4);
+	TEST_ASSERT((M1()&=m3).is_empty());
+
 }
 
 void TestIntervalMatrix::set_col01() {
@@ -165,13 +247,12 @@ void TestIntervalMatrix::rows01() {
 }
 
 void TestIntervalMatrix::rows02() {
-	double _r0[][2]={ {0,1}, {1,2}, {0,3} };
-	cout << M1().rows(0,0) << endl;
+	double _r0[][2]={ {0,1}, {0,2}, {0,3} };
 	TEST_ASSERT(M1().rows(0,0)==IntervalMatrix(1,3,_r0));
 }
 
 void TestIntervalMatrix::rows03() {
-	double _r1[][2]={ {-1,0},{-2,-1},{-3,0} };
+	double _r1[][2]={ {-1,0},{-2,0},{-3,0} };
 	TEST_ASSERT(M1().rows(1,1)==IntervalMatrix(1,3,_r1));
 }
 
@@ -195,8 +276,8 @@ void TestIntervalMatrix::cols04() {
 }
 
 void TestIntervalMatrix::cols05() {
-	double _c12[][2]={ {0,2}, {-2,0}, {0,3}, {-3,0} };
-	TEST_ASSERT(M1().cols(1,2)==IntervalMatrix(2,1,_c12));
+	double _c12[][2]={ {0,2}, {0,3}, {-2,0}, {-3,0} };
+	TEST_ASSERT(M1().cols(1,2)==IntervalMatrix(2,2,_c12));
 }
 
 void TestIntervalMatrix::resize01() {
@@ -227,18 +308,10 @@ void TestIntervalMatrix::resize02() {
 	TEST_ASSERT(m==M1());
 }
 
-IntervalMatrix M2() { // the transpose of M1
-	IntervalMatrix m(3,2);
-	double _c1[][2]={{0,1},{-1,0}};
-	double _c2[][2]={{0,2},{-2,0}};
-	double _c3[][2]={{0,3},{-3,0}};
-	IntervalVector c1(2,_c1);
-	IntervalVector c2(2,_c2);
-	IntervalVector c3(2,_c3);
-	m[0]=c1;
-	m[1]=c2;
-	m[2]=c3;
-	return m;
+void TestIntervalMatrix::resize03() {
+	IntervalMatrix e(IntervalMatrix::empty(1,1));
+	e.resize(2,3);
+	TEST_ASSERT(e.is_empty());
 }
 
 void TestIntervalMatrix::minus01() {
@@ -249,6 +322,10 @@ void TestIntervalMatrix::minus01() {
 			TEST_ASSERT(m2[i][j]==-m[i][j]);
 		}
 	}
+}
+
+void TestIntervalMatrix::minus02() {
+	TEST_ASSERT(-IntervalMatrix::empty(2,3).is_empty());
 }
 
 void TestIntervalMatrix::add01() {
@@ -263,6 +340,15 @@ void TestIntervalMatrix::add01() {
 	TEST_ASSERT(m2==(IntervalMatrix(m)+=m));
 }
 
+void TestIntervalMatrix::add02() {
+	IntervalMatrix m1(IntervalMatrix::empty(2,3));
+	IntervalMatrix m2(2,3);
+
+	TEST_ASSERT((m1+m2).is_empty());
+	TEST_ASSERT((m1+=m2).is_empty());
+	TEST_ASSERT((m2+=m1).is_empty());
+}
+
 void TestIntervalMatrix::sub01() {
 	IntervalMatrix m(M1());
 	IntervalMatrix m2(m-m);
@@ -273,6 +359,15 @@ void TestIntervalMatrix::sub01() {
 	}
 
 	TEST_ASSERT(m2==(IntervalMatrix(m)-=m));
+}
+
+void TestIntervalMatrix::sub02() {
+	IntervalMatrix m1(IntervalMatrix::empty(2,3));
+	IntervalMatrix m2(2,3);
+
+	TEST_ASSERT((m1-m2).is_empty());
+	TEST_ASSERT((m1-=m2).is_empty());
+	TEST_ASSERT((m2-=m1).is_empty());
 }
 
 void TestIntervalMatrix::mul01() {
@@ -289,3 +384,13 @@ void TestIntervalMatrix::mul01() {
 
 	TEST_ASSERT(m3==(IntervalMatrix(m)*=m2));
 }
+
+void TestIntervalMatrix::mul02() {
+	IntervalMatrix m1(IntervalMatrix::empty(2,3));
+	IntervalMatrix m2(3,2);
+
+	TEST_ASSERT((m1*m2).is_empty());
+	TEST_ASSERT((m1*=m2).is_empty());
+	TEST_ASSERT((m2*=m1).is_empty());
+}
+

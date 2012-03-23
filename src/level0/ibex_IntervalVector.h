@@ -452,8 +452,9 @@ inline void IntervalVector::set_empty() {
 	// because we call set_empty() from set(...) and the first component
 	// may be empty in an intermediate state
 
-	for (int i=0; i<size(); i++)
-		(*this)[i]=Interval::EMPTY_SET;
+	//for (int i=0; i<size(); i++)
+	//	(*this)[i]=Interval::EMPTY_SET;
+	(*this)[0]=Interval::EMPTY_SET;
 }
 
 inline void IntervalVector::resize(int n2) {

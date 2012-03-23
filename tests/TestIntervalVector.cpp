@@ -54,8 +54,10 @@ void TestIntervalVector::cons05() {
 	IntervalVector x(2);
 	x[0].set_empty();
 	x[1].set_empty();
-	check(x,IntervalVector::empty(2));
-	check(x,IntervalVector(2)=x);
+	//check(x,IntervalVector::empty(2));
+	TEST_ASSERT(x.is_empty());
+	//check(x,IntervalVector(2)=x);
+	TEST_ASSERT((IntervalVector(2)=x).is_empty());
 }
 
 void TestIntervalVector::set_empty01() {
@@ -470,14 +472,24 @@ void TestIntervalVector::add01() {
 	IntervalVector e(IntervalVector::empty(3));
 
 	check(x1+x2,x3);
-	check(x1+e,e);
-	check(IntervalVector(x1)+=e,e);
-	check(e+x1,e);
-	check(e+=x1,e);
-	check(e+e,e);
-	check(e+=e,e);
+	//check(x1+e,e);
+	TEST_ASSERT((x1+e).is_empty());
+	//check(IntervalVector(x1)+=e,e);
+	TEST_ASSERT((IntervalVector(x1)+=e).is_empty());
+
+	//check(e+x1,e);
+	TEST_ASSERT((e+x1).is_empty());
+	//check(e+=x1,e);
+	TEST_ASSERT((e+=x1).is_empty());
+	//check(e+e,e);
+	TEST_ASSERT((e+e).is_empty());
+	//check(e+=e,e);
+	TEST_ASSERT((e+=e).is_empty());
+
 	check(IntervalVector(x1)+=x2,x3);
-	check(IntervalVector(x1)+=e,e);
+	//check(IntervalVector(x1)+=e,e);
+	TEST_ASSERT((IntervalVector(x1)+=e).is_empty());
+
 	check(IntervalVector(x2)+=x1,x3);
 }
 
@@ -492,12 +504,20 @@ void TestIntervalVector::sub01() {
 
 	check(x1-x2,x3);
 	check(x2-x1,-x3);
-	check(x1-e,e);
-	check(IntervalVector(x1)-=e,e);
-	check(e-x1,e);
-	check(e-=x1,e);
-	check(e-e,e);
-	check(e-=e,e);
+	//check(x1-e,e);
+	TEST_ASSERT((x1-e).is_empty());
+	//check(IntervalVector(x1)-=e,e);
+	TEST_ASSERT((IntervalVector(x1)-=e).is_empty());
+
+	//check(e-x1,e);
+	TEST_ASSERT((e-x1).is_empty());
+	//check(e-=x1,e);
+	TEST_ASSERT((e-=x1).is_empty());
+	//check(e-e,e);
+	TEST_ASSERT((e-e).is_empty());
+	//check(e-=e,e);
+	TEST_ASSERT((e-=e).is_empty());
+
 	check(IntervalVector(x1)-=x2,x3);
 	check(IntervalVector(x2)-=x1,-x3);
 }

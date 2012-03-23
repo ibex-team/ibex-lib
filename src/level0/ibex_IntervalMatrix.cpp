@@ -49,9 +49,25 @@ IntervalMatrix::IntervalMatrix(int m, int n, double bounds[][2]) : _nb_rows(m), 
 	}
 }
 
+IntervalMatrix& IntervalMatrix::operator&=(const IntervalMatrix& m) {
+	assert(nb_rows()==m.nb_rows());
+	assert(nb_cols()==m.nb_cols());
+
+	if (is_empty()) return *this;
+	if (m.is_empty()) { set_empty(); return *this; }
+
+	for (int i=0; i<_nb_rows; i++) {
+		if ((row(i) &= m.row(i)).is_empty()) { set_empty(); return *this; }
+	}
+	return *this;
+}
+
 bool IntervalMatrix::operator==(const IntervalMatrix& m) {
 	if (m.nb_rows()!=nb_rows()) return false;
 	if (m.nb_cols()!=nb_cols()) return false;
+
+	if (is_empty()) return m.is_empty();
+	if (m.is_empty()) return is_empty();
 
 	for (int i=0; i<_nb_rows; i++) {
 		if (row(i)!=m.row(i)) return false;
@@ -95,8 +111,8 @@ IntervalMatrix IntervalMatrix::submatrix(int row_start_index, int row_end_index,
 	assert(col_start_index<=col_end_index);
 
 	IntervalMatrix sub(row_end_index-row_start_index+1, col_end_index-col_start_index+1);
-	cout << "m=" << (row_end_index-row_start_index+1) << "n=" << (col_end_index-col_start_index+1) << endl;
-	cout << sub << endl;
+	//cout << "m=" << (row_end_index-row_start_index+1) << "n=" << (col_end_index-col_start_index+1) << endl;
+	//cout << sub << endl;
 	int i2=0;
 	for (int i=row_start_index; i<=row_end_index; i++, i2++) {
 		int j2=0;

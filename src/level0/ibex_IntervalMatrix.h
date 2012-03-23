@@ -54,7 +54,28 @@ public:
 	IntervalMatrix(int m, int n, double x[][2]);
 
 	/**
+	 * \brief Create a mxn empty matrix
+	 *
+	 * Create an empty IntervalMatrix of dimension \a n x \a m
+	 * (all the components being empty Intervals)
+	 *
+	 * \pre m>0, n>0
+	 */
+	static IntervalMatrix empty(int m, int n);
+
+	/**
+	 * \brief Set *this to its intersection with x
+	 *
+	 * \return a reference to this.
+	 * \throws
+	 */
+	IntervalMatrix& operator&=(const IntervalMatrix& x);
+
+	/**
 	 * \brief True if the bounds of (*this) coincide with m.
+	 *
+	 * If the two matrices are empty and with the same dimensions
+	 * then they are considered as equal.
 	 */
 	bool operator==(const IntervalMatrix& m);
 
@@ -79,6 +100,11 @@ public:
 	int nb_rows() const;
 
 	/**
+	 * \brief Return true iff this IntervalMatrix is empty
+	 */
+	bool is_empty() const;
+
+	/**
 	 * \brief Return the ith row.
 	 *
 	 * Use (*this)[i][j] to get a reference to the element M(i,j).
@@ -91,6 +117,13 @@ public:
 	 * Use (*this)[i][j] to get a reference to the element M(i,j).
 	 */
 	const IntervalVector& operator[](int i) const;
+
+	/**
+	 * \brief Set this IntervalMatrix to the empty IntervalMatrix
+	 *
+	 * The dimensions remain the same.
+	 */
+	void set_empty();
 
 	/**
 	 * \brief Return a submatrix.
@@ -200,6 +233,10 @@ std::ostream& operator<<(std::ostream& os, const IntervalMatrix&);
 
 /*================================== inline implementations ========================================*/
 
+inline IntervalMatrix IntervalMatrix::empty(int m, int n) {
+	return IntervalMatrix(m, n, Interval::EMPTY_SET);
+}
+
 inline bool IntervalMatrix::operator!=(const IntervalMatrix& m) {
 	return !(*this==m);
 }
@@ -220,6 +257,10 @@ inline IntervalVector& IntervalMatrix::operator[](int i) {
 inline const IntervalVector& IntervalMatrix::operator[](int i) const {
 	assert(i>=0 && i<nb_rows());
 	return M[i];
+}
+
+inline void IntervalMatrix::set_empty() {
+	(*this)[0][0]=Interval::EMPTY_SET;
 }
 
 inline IntervalVector& IntervalMatrix::row(int i) {
@@ -244,6 +285,10 @@ inline void IntervalMatrix::set_row(int row, const IntervalVector& v) {
 	assert(row>=0 && row<nb_rows());
 	assert(nb_cols()==v.size());
 	M[row]=v;
+}
+
+inline bool IntervalMatrix::is_empty() const {
+	return (*this)[0][0].is_empty();
 }
 
 } // namespace ibex
