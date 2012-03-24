@@ -44,9 +44,14 @@ namespace ibex {
 class Function {
 public:
 	/**
-	 * \brief Creates a new function.
+	 * \brief Creates a new (anonymous) function.
 	 */
 	Function();
+
+	/**
+	 * \brief Creates a function named \a name.
+	 */
+	Function(const char* name);
 
 	/**
 	 * \brief Transform f into (f_1,...f_n)
@@ -99,7 +104,9 @@ public:
 
 
 	/**
-	 * \brief Set the expression f(x)
+	 * \brief Set the expression f(x).
+	 *
+	 * Also calculates which symbols are actually used.
 	 */
 	void set_expr(const ExprNode&);
 
@@ -109,7 +116,7 @@ public:
 	const ExprApply& operator()(const ExprNode** arg);
 
 	/**
-	 * Return the current number of nodes in the DAG.
+	 * \brief Return the current number of nodes in the DAG.
 	 */
 	int nb_nodes() const;
 
@@ -125,16 +132,40 @@ public:
 	 */
 	const ExprNode& expr() const;
 
+	/**
+	 * \brief Name of the function.
+	 *
+	 * Null pointer if the function is anonymous.
+	 */
+	const char* name;
+
 private:
 	friend class ExprNode;
 	void add_node(const ExprNode&);
 
 	const ExprNode* root;                       // the root node
-	std::vector<const ExprSymbol*> order2info;  // to retrieve symbols by appearing order.
+	std::vector<const ExprSymbol*> order2info;  // to retrieve symbol (node)s by appearing order.
+	std::vector<bool> is_used;                  // tells whether the i^th symbol is used.
 	std::vector<const ExprNode*> exprnodes;     // all the nodes
-	SymbolMap<const ExprSymbol*> id2info;       // to retrieve a symbol object from its name.
+	SymbolMap<const ExprSymbol*> id2info;       // to retrieve a symbol node from its name.
 	int key_count;                              // count the number of symbols
 };
+
+std::ostream& operator<<(std::ostream&, const Function&);
+
+/*================================== inline implementations ========================================*/
+
+inline int Function::nb_symbols() const {
+	return key_count;
+}
+
+inline bool Function::used(const char* name) const {
+	return used(id2info.data(name)->key);
+}
+
+inline bool Function::used(int i) const {
+	return (root!=NULL && is_used[i]);
+}
 
 } // namespace ibex
 #endif // _IBEX_FUNCTION_H_

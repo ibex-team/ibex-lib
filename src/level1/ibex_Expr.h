@@ -73,7 +73,8 @@ class ExprNode {
   /** The function where this expression is defined */
   Function& context;
 
-  /** height (following topological order) of this node in the DAG. */
+  /** height (following topological order) of this node in the DAG.
+   *  A leaf is at height 0. */
   const int height;
 
   /** Number of subnodes (including itself) in the DAG (not in the TREE:
@@ -128,6 +129,8 @@ class ExprNode {
   /** Create an inequality constraint expr>value. */
   const Inequality& operator>(const Interval& value) const;
 };
+
+std::ostream& operator<<(std::ostream&, const ExprNode&);
 
 /**
  * \ingroup level1
@@ -1035,9 +1038,6 @@ class ExprApply : public ExprNode {
   /** Create an equality constraint apply=value. */
   const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
 
-  /** Deletes this instance. */
-  ~ExprApply();
-
   /** Accept an #ibex::ExprVisitor visitor. */
   virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
 
@@ -1059,7 +1059,7 @@ class ExprApply : public ExprNode {
 };
 
 /** Indexing */
-const ExprIndex& ExprNode::operator[](int index) const {
+inline const ExprIndex& ExprNode::operator[](int index) const {
 	return ExprIndex::new_(*this, index);
 }
 

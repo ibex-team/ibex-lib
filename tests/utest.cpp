@@ -11,9 +11,17 @@
 
 #include <stdlib.h>
 #include <cpptest.h>
+
+// ================ level 0 ===============
 #include "TestInterval.h"
 #include "TestIntervalVector.h"
 #include "TestIntervalMatrix.h"
+#include "TestDim.h"
+#include "TestDomain.h"
+
+// ================ level 1 ===============
+#include "TestExpr.h"
+#include "TestFunction.h"
 
 int main() {
     Test::TextOutput output(Test::TextOutput::Verbose);
@@ -22,6 +30,10 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestInterval()));
     ts.add(auto_ptr<Test::Suite>(new TestIntervalVector()));
     ts.add(auto_ptr<Test::Suite>(new TestIntervalMatrix()));
+    ts.add(auto_ptr<Test::Suite>(new TestDim()));
+    ts.add(auto_ptr<Test::Suite>(new TestDomain()));
+    ts.add(auto_ptr<Test::Suite>(new TestExpr()));
+    ts.add(auto_ptr<Test::Suite>(new TestFunction()));
 
     return ts.run(output,false) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

@@ -1,4 +1,4 @@
-/* ============================================================================
+/* =========é===================================================================
  * I B E X - Functions
  * ============================================================================
  * Copyright   : Ecole des Mines de Nantes (FRANCE)
@@ -14,12 +14,70 @@
 
 namespace ibex {
 
-Function::Function() : root(NULL), key_count(0) {
+namespace {
+
+class FindSymbolsUsed: public FunctionVisitor {
+public:
+	vector<int> keys;
+
+	FindSymbolsUsed(const ExprNode& e) {
+		e.acceptVisitor(*this);
+	}
+
+	virtual void visit(const ExprNode& e) {
+		e.acceptVisitor(*this);
+	}
+
+	virtual void visit(const ExprIndex& e) {
+		visit(e.expr);
+	}
+
+	virtual void visit(const ExprVector& e) {
+		for (int i=0; i<e.size(); i++)
+			visit(e.get(i));
+	}
+
+	virtual void visit(const ExprSymbol& e) {
+		keys.push_back(e.key);
+	}
+
+	virtual void visit(const ExprConstant&) {
+		// do nothing
+	}
+
+	virtual void visit(const ExprUnaryOp& e) {
+		visit(e.expr);
+	}
+
+	virtual void visit(const ExprBinaryOp& e) {
+		visit(e.left);
+		visit(e.right);
+	}
+
+	virtual void visit(const ExprApply& a) {
+		for (int i=0; i<a.nb_args(); i++) {
+			visit(*a.args[i]);
+		}
+	}
+};
 
 }
 
+
+Function::Function() : name(NULL), root(NULL), key_count(0) {
+
+}
+
+Function::Function(const char* name) : name(strdup(name)), root(NULL), key_count(0) {
+
+}
+
+Function* Function::separate() const {
+	return 0;
+}
+
 const ExprSymbol& Function::add_symbol(const char* id) {
-	return add_symbol(id, Dim(0,0,1));
+	return add_symbol(id, Dim(0,0,0));
 }
 
 const ExprSymbol& Function::add_symbol(const char* id, const Dim& dim) {
@@ -35,13 +93,11 @@ const ExprSymbol& Function::add_symbol(const char* id, const Dim& dim) {
   key_count ++;
 
   order2info.push_back(sbl);
+  is_used.push_back(false); // unused by default
 
   return *sbl;
 }
 
-int Function::nb_symbols() const {
-	return key_count;
-}
 
 int Function::nb_nodes() const {
 	return exprnodes.size();
@@ -54,6 +110,10 @@ void Function::add_node(const ExprNode& expr)  {
 
 void Function::set_expr(const ExprNode& expr) {
 	root = &expr;
+	FindSymbolsUsed fsu(expr);
+	for (vector<int>::iterator it=fsu.keys.begin(); it!=fsu.keys.end(); it++) {
+		is_used[*it]=true;
+	}
 }
 
 const ExprApply& Function::operator()(const ExprNode** args) {
@@ -66,6 +126,17 @@ const char* Function::symbol_name(int i) const {
 
 const ExprNode& Function::expr() const {
 	return *root;
+}
+
+std::ostream& operator<<(std::ostream& os, const Function& f) {
+	if (f.name!=NULL) os << f.name << ":";
+	os << "(";
+	for (int i=0; i<f.nb_symbols(); i++) {
+		os << f.symbol_name(i);
+		if (i<f.nb_symbols()-1) os << ",";
+	}
+	os << ")->" << f.expr();
+	return os;
 }
 
 
