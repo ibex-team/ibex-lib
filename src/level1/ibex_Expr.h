@@ -311,11 +311,12 @@ class ExprBinaryOp : public ExprNode {
   /** Right subexpression. */
   const ExprNode& right;
 
- private:
+ protected:
   friend class Visitor;
 
-  ExprBinaryOp(const ExprNode& left, const ExprNode& right, int dim);
+  ExprBinaryOp(const ExprNode& left, const ExprNode& right, const Dim& dim);
 
+ private:
   ExprBinaryOp(const ExprBinaryOp&); // copy constructor forbidden
 };
 
@@ -1040,6 +1041,9 @@ class ExprApply : public ExprNode {
 
   /** Accept an #ibex::ExprVisitor visitor. */
   virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+
+  /** Return a reference to the ith argument expression. */
+  const ExprNode& arg(int i) const { return *args[i]; }
 
   /** The applied function. */
   const Function& func;
