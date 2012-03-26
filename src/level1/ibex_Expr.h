@@ -509,7 +509,7 @@ public:
 	const ExprNode& expr;
 
  protected:
-  ExprUnaryOp(const ExprNode& subexpr, const Dim& dim) : ExprNode(subexpr.context, subexpr.height+1, subexpr.size+1, dim), expr(expr) { }
+  ExprUnaryOp(const ExprNode& subexpr, const Dim& dim) : ExprNode(subexpr.context, subexpr.height+1, subexpr.size+1, dim), expr(subexpr) { }
 
 };
 

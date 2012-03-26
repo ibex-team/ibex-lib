@@ -18,7 +18,7 @@
 
 namespace ibex {
 
-namespace {
+//namespace {
 
 int max_height(const ExprNode& n1, const ExprNode& n2) {
 	if (n1.height>n2.height) return n1.height;
@@ -61,38 +61,38 @@ Dim mul_dim(const ExprNode& left, const ExprNode& right) {
 
 class SizeofDAG : public FunctionVisitor {
 public:
+	/* for binary expressions (BinOpExpr). */
+	SizeofDAG(const ExprNode& l, const ExprNode& r) : size(0) {
+		visit(l);
+		visit(r);
+	}
 
-  /* for binary expressions (BinOpExpr). */
-  SizeofDAG(const ExprNode& l, const ExprNode& r) : size(0) {
-    visit(l);
-    visit(r);
-  }
+	/* for n-ary expressions (Apply). */
+	SizeofDAG(const ExprNode** args, int n) : size(0) {
+		for (int i=0; i<n; i++)
+			visit(*args[i]);
+	}
 
-  /* for n-ary expressions (Apply). */
-  SizeofDAG(const ExprNode** args, int n) : size(0) {
-    for (int i=0; i<n; i++)
-      visit(*args[i]);
-  }
-
-  int size;
+	int size;
 
 private:
-  void visit(const ExprNode& e) {
-    if (visited.find(e.id)==visited.end()) {
-      visited.insert(e.id);
-      size++;
-      e.acceptVisitor(*this);
-    }
-  }
+	virtual void visit(const ExprNode& e) {
+		if (visited.find(e.id)==visited.end()) {
+			visited.insert(e.id);
+			size++;
+			e.acceptVisitor(*this);
+		}
+	}
 
-   virtual void visit(const ExprIndex& e) { visit(e.expr); }
-   virtual void visit(const ExprVector& e) { for (int i=0; i<e.size(); i++) visit(e.get(i)); };
-   virtual void visit(const ExprSymbol& e) { };
-   virtual void visit(const ExprConstant& e) { };
-   virtual void visit(const ExprUnaryOp& e) { visit(e.expr); };
-   virtual void visit(const ExprBinaryOp& e) { visit(e.left); visit(e.right); };
-   virtual void visit(const ExprApply& e) { for (int i=0; i<e.nb_args(); i++) visit(e.arg(i)); };
-  std::set<int> visited;
+	virtual void visit(const ExprIndex& e)    { visit(e.expr); }
+	virtual void visit(const ExprVector& e)   { for (int i=0; i<e.size(); i++) visit(e.get(i)); }
+	virtual void visit(const ExprSymbol& e)   { }
+	virtual void visit(const ExprConstant& e) { }
+	virtual void visit(const ExprUnaryOp& e)  { visit(e.expr); }
+	virtual void visit(const ExprBinaryOp& e) { visit(e.left); visit(e.right); }
+	virtual void visit(const ExprApply& e)    { for (int i=0; i<e.nb_args(); i++) visit(e.arg(i)); }
+
+	std::set<int> visited;
 };
 
 int bin_size(const ExprNode& left, const ExprNode& right) {
@@ -103,7 +103,7 @@ int bin_size(const ExprNode& left, const ExprNode& right) {
 int apply_size(const ExprNode** args, int n) {
 	SizeofDAG s(args,n);
 	return s.size;
-}
+//}
 
 } // end anonymous namespace
 

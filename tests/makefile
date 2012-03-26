@@ -17,12 +17,12 @@ INC_DIR_OPT:=$(INC_DIR_OPT) $(CPPTEST_INC_DIR_OPT)
 LIB_DIR_OPT:=$(LIB_DIR_OPT) $(CPPTEST_LIB_DIR_OPT)
 LIB_NAME_OPT:=$(LIB_NAME_OPT) $(CPPTEST_LIB_NAME_OPT)
 
-$(TARGET):	$(OBJS)
+$(TARGET):	$(OBJS) $(IBEX_LIB_DIR)/libibex.a
 	$(CXX) -o $(TARGET) $(LIB_DIR_OPT) $(OBJS) $(LIB_NAME_OPT)  
 
 utest.o : $(SRCS) $(HEADERS) 
 
-%.o : %.cpp %.h #$(IBEX_LIB_DIR)/libibex.a
+%.o : %.cpp %.h 
 	$(CXX) $(CXXFLAGS) $(INC_DIR_OPT) -c  -o  $@ $<
 
 clean:

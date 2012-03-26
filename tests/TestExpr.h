@@ -26,6 +26,18 @@ public:
 		TEST_ADD(TestExpr::addxy02);
 		TEST_ADD(TestExpr::addxy03);
 		TEST_ADD(TestExpr::addxx01);
+
+		TEST_ADD(TestExpr::mulxy01);
+		TEST_ADD(TestExpr::mulxy02);
+		TEST_ADD(TestExpr::mulxy03);
+		TEST_ADD(TestExpr::mulxy04);
+		TEST_ADD(TestExpr::mulxy05);
+		TEST_ADD(TestExpr::mulxy06);
+
+		TEST_ADD(TestExpr::dag01);
+
+		TEST_ADD(TestExpr::unaryOp);
+		TEST_ADD(TestExpr::binaryOp);
 	}
 
 	void symbol();
@@ -34,8 +46,21 @@ public:
 	void addxy03();
 
 	void addxx01();
+
+	void mulxy01();
+	void mulxy02();
+	void mulxy03();
+	void mulxy04();
+	void mulxy05();
+	void mulxy06();
+
+	void dag01();
+
+	void unaryOp();
+	void binaryOp();
 };
 
 } // end namespace
 
 #endif /* __TEST_FUNCTION_H__ */
+

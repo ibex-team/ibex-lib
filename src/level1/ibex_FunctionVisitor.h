@@ -105,88 +105,169 @@ class FunctionVisitor {
   /*===============================================================*/
 
   /*==================== binary operators =========================*/
-  /** Visit an addition (Implementation is not mandatory). */
-  virtual void visit(const ExprAdd&) { }
+  /** Visit an addition (Implementation is not mandatory).
+   * By default: call visit(const ExprBinaryOp& e). */
+  virtual void visit(const ExprAdd& e) {
+	  visit((const ExprBinaryOp&) e);
+  }
 
-  /** Visit an multiplication (Implementation is not mandatory). */
-  virtual void visit(const ExprMul&) { }
+  /** Visit an multiplication (Implementation is not mandatory).
+   * By default: call visit(const ExprBinaryOp& e). */
+  virtual void visit(const ExprMul& e) {
+	  visit((const ExprBinaryOp&) e);
+  }
 
-  /** Visit a subtraction (Implementation is not mandatory). */
-  virtual void visit(const ExprSub&) { }
+  /** Visit a subtraction (Implementation is not mandatory).
+   * By default: call visit(const ExprBinaryOp& e). */
+  virtual void visit(const ExprSub& e) {
+	  visit((const ExprBinaryOp&) e);
+  }
 
-  /** Visit a division (Implementation is not mandatory). */
-  virtual void visit(const ExprDiv&) { }
+  /** Visit a division (Implementation is not mandatory).
+   * By default: call visit(const ExprBinaryOp& e). */
+  virtual void visit(const ExprDiv& e) {
+	  visit((const ExprBinaryOp&) e);
+  }
 
-  /** Visit a max  (Implementation is not mandatory). */
-  virtual void visit(const ExprMax&) { }
+  /** Visit a max  (Implementation is not mandatory).
+   * By default: call visit(const ExprBinaryOp& e). */
+  virtual void visit(const ExprMax& e) {
+	  visit((const ExprBinaryOp&) e);
+  }
 
-  /** Visit a min (Implementation is not mandatory). */
-  virtual void visit(const ExprMin&) { }
+  /** Visit a min (Implementation is not mandatory).
+   * By default: call visit(const ExprBinaryOp& e). */
+  virtual void visit(const ExprMin& e) {
+	  visit((const ExprBinaryOp&) e);
+  }
 
-  /** Visit a arctan2 (Implementation is not mandatory). */
-  virtual void visit(const ExprAtan2&) { }
+  /** Visit a arctan2 (Implementation is not mandatory).
+   * By default: call visit(const ExprBinaryOp& e). */
+  virtual void visit(const ExprAtan2& e) {
+	  visit((const ExprBinaryOp&) e);
+  }
 
 
   /*==================== unary operators =========================*/
-  /** Visit a sqr (Implementation is not mandatory). */
-  virtual void visit(const ExprMinus&) { }
+  /** Visit a sqr (Implementation is not mandatory).
+   * By default call visit(const ExprUnaryOp&). */
+  virtual void visit(const ExprMinus& e) {
+	  visit((const ExprUnaryOp&) e);
+  }
 
-  /** Visit a sign (Implementation is not mandatory). */
-  virtual void visit(const ExprSign&) { }
+  /** Visit a sign (Implementation is not mandatory).
+   * By default call visit(const ExprUnaryOp&). */
+  virtual void visit(const ExprSign& e) {
+	  visit((const ExprUnaryOp&) e);
+  }
 
-    /** Visit an abs (Implementation is not mandatory). */
-  virtual void visit(const ExprAbs&) { }
+  /** Visit an abs (Implementation is not mandatory).
+   * By default call visit(const ExprUnaryOp&). */
+  virtual void visit(const ExprAbs& e) {
+	  visit((const ExprUnaryOp&) e);
+  }
 
-  /** Visit a power expression. */
-  virtual void visit(const ExprPower&) { }
+  /** Visit a power expression.
+   * By default call visit(const ExprUnaryOp&). */
+  virtual void visit(const ExprPower& e) {
+	  visit((const ExprUnaryOp&) e);
+  }
 
-  /** Visit a sqr (Implementation is not mandatory). */
-  virtual void visit(const ExprSqr&) { }
+  /** Visit a sqr (Implementation is not mandatory).
+   * By default call visit(const ExprUnaryOp&). */
+  virtual void visit(const ExprSqr& e) {
+	  visit((const ExprUnaryOp&) e);
+  }
 
-  /** Visit a sqrt (Implementation is not mandatory). */
-  virtual void visit(const ExprSqrt&) { }
+  /** Visit a sqrt (Implementation is not mandatory).
+   * By default call visit(const ExprUnaryOp&). */
+  virtual void visit(const ExprSqrt& e) {
+	  visit((const ExprUnaryOp&) e);
+  }
 
-  /** Visit an exp (Implementation is not mandatory). */
-  virtual void visit(const ExprExp&) { }
+  /** Visit an exp (Implementation is not mandatory).
+   * By default call visit(const ExprUnaryOp&). */
+  virtual void visit(const ExprExp& e) {
+	  visit((const ExprUnaryOp&) e);
+  }
 
-  /** Visit a log (Implementation is not mandatory). */
-  virtual void visit(const ExprLog&) { }
+  /** Visit a log (Implementation is not mandatory).
+   * By default call visit(const ExprUnaryOp&). */
+  virtual void visit(const ExprLog& e) {
+	  visit((const ExprUnaryOp&) e);
+  }
 
-  /** Visit a cos (Implementation is not mandatory). */
-  virtual void visit(const ExprCos&) { }
+  /** Visit a cos (Implementation is not mandatory).
+   * By default call visit(const ExprUnaryOp&). */
+  virtual void visit(const ExprCos& e) {
+	  visit((const ExprUnaryOp&) e);
+  }
 
-  /** Visit a sin (Implementation is not mandatory). */
-  virtual void visit(const ExprSin&) { }
+  /** Visit a sin (Implementation is not mandatory).
+   * By default call visit(const ExprUnaryOp&). */
+  virtual void visit(const ExprSin& e) {
+	  visit((const ExprUnaryOp&) e);
+  }
 
-  /** Visit a tan (Implementation is not mandatory). */
-  virtual void visit(const ExprTan&) { }
+  /** Visit a tan (Implementation is not mandatory).
+   * By default call visit(const ExprUnaryOp&). */
+  virtual void visit(const ExprTan& e) {
+	  visit((const ExprUnaryOp&) e);
+  }
 
-  /** Visit a cosh (Implementation is not mandatory). */
-  virtual void visit(const ExprCosh&) { }
+  /** Visit a cosh (Implementation is not mandatory).
+   * By default call visit(const ExprUnaryOp&). */
+  virtual void visit(const ExprCosh& e) {
+	  visit((const ExprUnaryOp&) e);
+  }
 
-  /** Visit a sinh (Implementation is not mandatory). */
-  virtual void visit(const ExprSinh&) { }
+  /** Visit a sinh (Implementation is not mandatory).
+   * By default call visit(const ExprUnaryOp&). */
+  virtual void visit(const ExprSinh& e) {
+	  visit((const ExprUnaryOp&) e);
+  }
 
-  /** Visit a tanh (Implementation is not mandatory). */
-  virtual void visit(const ExprTanh&) { }
+  /** Visit a tanh (Implementation is not mandatory).
+   * By default call visit(const ExprUnaryOp&). */
+  virtual void visit(const ExprTanh& e) {
+	  visit((const ExprUnaryOp&) e);
+  }
 
-  /** Visit a acos (Implementation is not mandatory). */
-  virtual void visit(const ExprAcos&) { }
+  /** Visit a acos (Implementation is not mandatory).
+   * By default call visit(const ExprUnaryOp&). */
+  virtual void visit(const ExprAcos& e) {
+	  visit((const ExprUnaryOp&) e);
+  }
 
-  /** Visit a asin (Implementation is not mandatory). */
-  virtual void visit(const ExprAsin&) { }
+  /** Visit a asin (Implementation is not mandatory).
+   * By default call visit(const ExprUnaryOp&). */
+  virtual void visit(const ExprAsin& e) {
+	  visit((const ExprUnaryOp&) e);
+  }
 
-  /** Visit a atan (Implementation is not mandatory). */
-  virtual void visit(const ExprAtan&) { }
+  /** Visit a atan (Implementation is not mandatory).
+   * By default call visit(const ExprUnaryOp&). */
+  virtual void visit(const ExprAtan& e) {
+	  visit((const ExprUnaryOp&) e);
+  }
 
-  /** Visit a acosh (Implementation is not mandatory). */
-  virtual void visit(const ExprAcosh&) { }
+  /** Visit a acosh (Implementation is not mandatory).
+   * By default call visit(const ExprUnaryOp&). */
+  virtual void visit(const ExprAcosh& e) {
+	  visit((const ExprUnaryOp&) e);
+  }
 
-  /** Visit a asinh (Implementation is not mandatory). */
-  virtual void visit(const ExprAsinh&) { }
+  /** Visit a asinh (Implementation is not mandatory).
+   * By default call visit(const ExprUnaryOp&). */
+  virtual void visit(const ExprAsinh& e) {
+	  visit((const ExprUnaryOp&) e);
+  }
 
-  /** Visit a atanh (Implementation is not mandatory). */
-  virtual void visit(const ExprAtanh&) { }
+  /** Visit a atanh (Implementation is not mandatory).
+   * By default call visit(const ExprUnaryOp&). */
+  virtual void visit(const ExprAtanh& e) {
+	  visit((const ExprUnaryOp&) e);
+  }
 
  protected:
   /* The following protected methods are introduced because
