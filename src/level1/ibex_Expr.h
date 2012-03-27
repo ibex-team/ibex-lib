@@ -165,16 +165,44 @@ class ExprIndex : public ExprNode {
 
 /**
  * \ingroup level1
+ * \brief N-ary expressions
+ */
+class ExprNAryOp : public ExprNode {
+public:
+
+	/** Accept an #ibex::ExprVisitor visitor. */
+	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+
+	/** Return a reference to the ith argument expression. */
+	const ExprNode& arg(int i) const { return *args[i]; }
+
+	/** The arguments. */
+	const ExprNode** args;
+
+	/** The number of arguments */
+	const int nb_args;
+
+protected:
+	ExprNAryOp(const ExprNode** args, int n, const Dim& dim);
+};
+
+/**
+ * \ingroup level1
  * \brief Vector of expressions
  */
-class ExprVector : public ExprNode {
+class ExprVector : public ExprNAryOp {
 public:
 	/** Accept an #ibex::ExprVisitor visitor. */
 	void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); }
 
-	/** Return the ith component */
-	const ExprNode& operator[](int i) { return *comp[i]; }
+	/**
+	 * \brief Create a vector of expressions.
+	 */
+	static const ExprVector& new_(const ExprNode** components, int n, bool in_rows);
 
+	/**
+	 * \brief Create a vector of two expressions.
+	 */
 	static const ExprVector& new_(const ExprNode& e1, const ExprNode& e2, bool in_rows);
 
 	/** In rows or columns? */
@@ -183,18 +211,65 @@ public:
 	/** Get the ith component.
 	 *
 	 * \warning Can't define it using operator[]... already overwritten in ExprNode */
-	const ExprNode& get(int i) const { return *comp[i]; }
+	const ExprNode& get(int i) const { return arg(i); }
 
 	/** Number of elements (not to be
 	 * confused with the dimension). */
-	int size() const { return comp.size(); }
+	int size() const { return nb_args; }
 
 private:
-	ExprVector(const ExprNode& e1, const ExprNode& e2);
+	ExprVector(const ExprNode**, int n, bool in_rows);
 
-	/* The components */
-	vector<const ExprNode*> comp;
+};
 
+
+
+/**
+ * \ingroup level1
+ * \brief Function application expression
+ *
+ * In the following Quimper example:
+ * \code
+ * Variables
+ *   a in [0,10];
+ *
+ * function z=foo(x,y)
+ *   z=sqrt(x^2+y^2);
+ * end;
+ *
+ * Constraints
+ *   foo(a,1-a)=1
+ * ...
+ * \endcode
+ * \a f(a,1-a) is an instance of Apply, where \link Apply::f f \endlink is "foo" and the
+ * actual arguments arg(0) and arg(1) are the subexpressions \a a and \a 1-a.
+ *
+ * \see #ibex::Function::operator()(const ExprNode&).
+ *
+ */
+class ExprApply : public ExprNAryOp {
+
+ public:
+
+  /** Create an equality constraint apply=expr. */
+  const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+
+  /** Create an equality constraint apply=value. */
+  const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+
+  /** Accept an #ibex::ExprVisitor visitor. */
+  virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+
+  /** The applied function. */
+  const Function& func;
+
+  static const ExprApply& new_(const Function& func, const ExprNode** args) {
+    return *new ExprApply(func,args);
+  }
+
+ private:
+
+  ExprApply(const Function& expr, const ExprNode** args);
 };
 
 /**
@@ -283,6 +358,7 @@ class ExprConstant : public ExprNode {
 
   ExprConstant(Function& expr, const IntervalMatrix& value);
 
+  /** Duplicate this constant: forbidden. */
   ExprConstant(Function& expr, const ExprConstant& c);
 
   const IntervalMatrix value;
@@ -299,11 +375,11 @@ class ExprConstant : public ExprNode {
  */
 class ExprBinaryOp : public ExprNode {
  public:
-  /** Create an equality constraint expr o expr=expr. */
-  const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+  /* Create an equality constraint expr o expr=expr. */
+  //const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
-  /** Create an equality constraint expr o expr=value. */
-  const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+  /* Create an equality constraint expr o expr=value. */
+  //const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
 
   /** Left subexpression. */
   const ExprNode& left;
@@ -499,11 +575,11 @@ private:
 class ExprUnaryOp : public ExprNode {
 
 public:
-	/** Create an equality constraint f(expr)=expr. */
-	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+	/* Create an equality constraint f(expr)=expr. */
+	//const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
-	/** Create an equality constraint f(expr)=value. */
-	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+	/* Create an equality constraint f(expr)=value. */
+	//const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
 
 	/** The subexpression */
 	const ExprNode& expr;
@@ -1005,62 +1081,6 @@ class ExprAtanh : public ExprUnaryOp {
   ExprAtanh(const ExprAtanh&); // copy constructor forbidden
 };
 
-
-/**
- * \ingroup level1
- * \brief Function application expression
- *
- * In the following Quimper example:
- * \code
- * Variables
- *   a in [0,10];
- *
- * function z=foo(x,y)
- *   z=sqrt(x^2+y^2);
- * end;
- *
- * Constraints
- *   foo(a,1-a)=1
- * ...
- * \endcode
- * \a f(a,1-a) is an instance of Apply, where \link Apply::f f \endlink is "foo" and the
- * actual arguments arg(0) and arg(1) are the subexpressions \a a and \a 1-a.
- *
- * \see #ibex::Function::operator()(const ExprNode&).
- *
- */
-class ExprApply : public ExprNode {
-
- public:
-
-  /** Create an equality constraint apply=expr. */
-  const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
-
-  /** Create an equality constraint apply=value. */
-  const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
-
-  /** Accept an #ibex::ExprVisitor visitor. */
-  virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
-
-  /** Return a reference to the ith argument expression. */
-  const ExprNode& arg(int i) const { return *args[i]; }
-
-  /** The applied function. */
-  const Function& func;
-
-  /** The arguments. */
-  const ExprNode** args;
-
-  int nb_args() const;
-
-  static const ExprApply& new_(const Function& func, const ExprNode** args) {
-    return *new ExprApply(func,args);
-  }
-
- private:
-
-  ExprApply(const Function& expr, const ExprNode** args);
-};
 
 /** Indexing */
 inline const ExprIndex& ExprNode::operator[](int index) const {

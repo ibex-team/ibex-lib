@@ -66,7 +66,7 @@ IntervalMatrix& IntervalMatrix::operator&=(const IntervalMatrix& m) {
 	return *this;
 }
 
-bool IntervalMatrix::operator==(const IntervalMatrix& m) {
+bool IntervalMatrix::operator==(const IntervalMatrix& m) const {
 	if (m.nb_rows()!=nb_rows()) return false;
 	if (m.nb_cols()!=nb_cols()) return false;
 

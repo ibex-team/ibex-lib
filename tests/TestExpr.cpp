@@ -16,6 +16,16 @@
 
 namespace ibex {
 
+static IntervalVector v1() {
+	double vec0[][2] = { {0,3}, {0,4}, {0,5} };
+	return IntervalVector(3,vec0);
+}
+
+static IntervalMatrix M1() {
+	double m[][2]={{0,1},{0,2},{0,3},
+			       {-1,0},{-2,0},{-3,0}};
+	return IntervalMatrix(2,3,m);
+}
 
 static bool checkExpr(const ExprNode& node, const char* expr) {
 	std::stringstream s;
@@ -234,6 +244,67 @@ void TestExpr::binaryOp() {
 	TEST_ASSERT(checkExpr(max(x,y),"max(x,y)"));
 	TEST_ASSERT(checkExpr(min(x,y),"min(x,y)"));
 	TEST_ASSERT(checkExpr(atan2(x,y),"atan2(x,y)"));
+}
+
+void TestExpr::cst01() {
+	Function f;
+	const ExprConstant& c=ExprConstant::new_scalar(f,5.0);
+	TEST_ASSERT(&c.context==&f);
+	TEST_ASSERT(c.dim==Dim(0,0,0));
+	TEST_ASSERT(c.height==0);
+	TEST_ASSERT(c.id==0);
+	TEST_ASSERT(c.size==1);
+	TEST_ASSERT(c.deco==NULL);
+	TEST_ASSERT(!c.is_zero());
+	TEST_ASSERT(c.type()==Dim::SCALAR);
+	TEST_ASSERT(c.get_value()==5.0);
+
+	const ExprConstant& z=ExprConstant::new_scalar(f,0);
+	TEST_ASSERT(z.is_zero());
+}
+
+void TestExpr::cst02() {
+	Function f;
+	IntervalVector v(v1());
+	IntervalMatrix M(M1());
+	const ExprConstant& c1=ExprConstant::new_vector(f,v);
+	const ExprConstant& c2=ExprConstant::new_matrix(f,M);
+
+	TEST_ASSERT(c1.dim==Dim(0,0,3));
+	TEST_ASSERT(!c1.is_zero());
+	TEST_ASSERT(c1.type()==Dim::VECTOR);
+	TEST_ASSERT(c1.get_vector_value()==v);
+
+	TEST_ASSERT(c2.dim==Dim(0,2,3));
+	TEST_ASSERT(!c2.is_zero());
+	TEST_ASSERT(c2.type()==Dim::MATRIX);
+	TEST_ASSERT(c2.get_matrix_value()==M);
+
+}
+
+void TestExpr::cst03() {
+	Function f;
+	IntervalVector v(3);
+	IntervalMatrix M(2,3);
+
+	for (int j=0; j<3; j++) {
+		v[j]=0;
+		for (int i=0; i<2; i++) M[i][j]=0;
+	}
+
+	const ExprConstant& z1=ExprConstant::new_vector(f,v);
+	const ExprConstant& z2=ExprConstant::new_matrix(f,M);
+	TEST_ASSERT(z1.is_zero());
+	TEST_ASSERT(z2.is_zero());
+}
+
+void TestExpr::vector() {
+	Function f;
+	const ExprSymbol& x=f.add_symbol("x",Dim(0,0,0));
+	const ExprSymbol& y=f.add_symbol("y",Dim(0,0,0));
+	//const ExprVector& v=f
+
+}
 }
 
 } // end namespace

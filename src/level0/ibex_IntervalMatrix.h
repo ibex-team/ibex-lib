@@ -79,7 +79,7 @@ public:
 	 * If the two matrices are empty and with the same dimensions
 	 * then they are considered as equal.
 	 */
-	bool operator==(const IntervalMatrix& m);
+	bool operator==(const IntervalMatrix& m) const;
 
 	/**
 	 * \brief True if one bound of (*this) differs from m.

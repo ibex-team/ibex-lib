@@ -38,6 +38,10 @@ public:
 
 		TEST_ADD(TestExpr::unaryOp);
 		TEST_ADD(TestExpr::binaryOp);
+
+		TEST_ADD(TestExpr::cst01);
+		TEST_ADD(TestExpr::cst02);
+		TEST_ADD(TestExpr::cst03);
 	}
 
 	void symbol();
@@ -58,6 +62,10 @@ public:
 
 	void unaryOp();
 	void binaryOp();
+
+	void cst01();
+	void cst02();
+	void cst03();
 };
 
 } // end namespace

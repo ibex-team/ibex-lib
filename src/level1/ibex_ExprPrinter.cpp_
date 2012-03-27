@@ -63,9 +63,9 @@ public:
 
 	virtual void visit(const ExprApply& a) {
 		os << a.func.name << "(";
-		for (int i=0; i<a.nb_args(); i++) {
+		for (int i=0; i<a.nb_args; i++) {
 			visit(*a.args[i]);
-			if (i<a.nb_args()-1) os << ",";
+			if (i<a.nb_args-1) os << ",";
 		}
 		os << ")";
 	}

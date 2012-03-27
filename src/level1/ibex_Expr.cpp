@@ -90,7 +90,7 @@ private:
 	virtual void visit(const ExprConstant& e) { }
 	virtual void visit(const ExprUnaryOp& e)  { visit(e.expr); }
 	virtual void visit(const ExprBinaryOp& e) { visit(e.left); visit(e.right); }
-	virtual void visit(const ExprApply& e)    { for (int i=0; i<e.nb_args(); i++) visit(e.arg(i)); }
+	virtual void visit(const ExprApply& e)    { for (int i=0; i<e.nb_args; i++) visit(e.arg(i)); }
 
 	std::set<int> visited;
 };
@@ -100,7 +100,7 @@ int bin_size(const ExprNode& left, const ExprNode& right) {
 	return s.size;
 }
 
-int apply_size(const ExprNode** args, int n) {
+int nary_size(const ExprNode** args, int n) {
 	SizeofDAG s(args,n);
 	return s.size;
 //}
@@ -110,6 +110,47 @@ int apply_size(const ExprNode** args, int n) {
 ExprNode::ExprNode(Function& env, int height, int size, const Dim& dim) :
   context(env), height(height), size(size), id(context.nb_nodes()), dim(dim), deco(NULL) {
   env.add_node(*this);
+}
+
+ExprNAryOp::ExprNAryOp(const ExprNode** args, int n, const Dim& dim) :
+		ExprNode(args[0]->context, max_height(n,args), nary_size(args,n), dim), nb_args(n) {
+
+}
+
+const ExprVector& ExprVector::new_(const ExprNode** comp, int n, bool in_rows) {
+	return *new ExprVector(comp,n,in_rows);
+}
+
+const ExprVector& ExprVector::new_(const ExprNode& e1, const ExprNode& e2, bool in_rows) {
+	const ExprNode** comp=new const ExprNode*[2];
+	comp[0]=&e1;
+	comp[1]=&e2;
+	return *new ExprVector(comp, 2, in_rows);
+}
+
+ExprVector::ExprVector(const ExprNode** comp, int n, bool in_rows) : ExprNAryOp(comp, n, comp[0]->dim), in_rows(in_rows) {
+
+}
+
+ExprConstant::ExprConstant(Function& expr, const Interval& value) : ExprNode(expr,0,1,Dim(0,0,0)), value(1,1) {
+	((Interval&) this->value[0][0])=value;
+}
+
+ExprConstant::ExprConstant(Function& expr, const IntervalVector& v)  : ExprNode(expr,0,1,Dim(0,0,v.size())), value(1,v.size()) {
+	/* warning: we represent a column vector by a row */
+	((IntervalVector&) value[0])=v;
+}
+
+ExprConstant::ExprConstant(Function& expr, const IntervalMatrix& m) : ExprNode(expr,0,1,Dim(0,m.nb_rows(),m.nb_cols())), value(m) {
+
+}
+
+bool ExprConstant::ExprConstant::is_zero() const {
+	for (int i=0; i<value.nb_rows(); i++)
+		for (int j=0; j<value.nb_cols(); j++)
+			if (value[i][j]!=Interval::ZERO) return false;
+
+	return true;
 }
 
 ExprBinaryOp::ExprBinaryOp(const ExprNode& left, const ExprNode& right, const Dim& dim) :
@@ -161,15 +202,10 @@ ExprAtan2::ExprAtan2(const ExprNode& left, const ExprNode& right) :
 }
 
 ExprApply::ExprApply(const Function& f, const ExprNode** args) :
-		ExprNode(	args[0]->context,
-					max_height(f.nb_symbols(),args),
-					apply_size(args,f.nb_symbols()),
-					f.expr().dim ),
-		func(f), args(args ) {
-}
-
-int ExprApply::nb_args() const {
-	return func.nb_symbols();
+		ExprNAryOp(args,f.nb_symbols(),f.expr().dim),
+		func(f) {
+	for (int i=0; i<f.nb_symbols(); i++)
+		assert(args[i]->dim == f.symbol(i).dim);
 }
 
 std::ostream& operator<<(std::ostream& os, const ExprNode& expr) {
