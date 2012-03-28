@@ -25,6 +25,8 @@ public:
 		TEST_ADD(TestExpr::addxy01);
 		TEST_ADD(TestExpr::addxy02);
 		TEST_ADD(TestExpr::addxy03);
+		TEST_ADD(TestExpr::addxy04);
+
 		TEST_ADD(TestExpr::addxx01);
 
 		TEST_ADD(TestExpr::mulxy01);
@@ -42,6 +44,8 @@ public:
 		TEST_ADD(TestExpr::cst01);
 		TEST_ADD(TestExpr::cst02);
 		TEST_ADD(TestExpr::cst03);
+		TEST_ADD(TestExpr::cst04);
+		TEST_ADD(TestExpr::cst05);
 
 		TEST_ADD(TestExpr::vector);
 	}
@@ -50,6 +54,7 @@ public:
 	void addxy01();
 	void addxy02();
 	void addxy03();
+	void addxy04();
 
 	void addxx01();
 
@@ -68,6 +73,8 @@ public:
 	void cst01();
 	void cst02();
 	void cst03();
+	void cst04();
+	void cst05();
 
 	void vector();
 };

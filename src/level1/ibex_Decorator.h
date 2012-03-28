@@ -19,7 +19,7 @@ namespace ibex {
 
 /**
  * \ingroup level1
- * Function decorator.
+ * \brief Function decorator.
  *
  * A class that extends Decorator<T> decorates all the nodes of a function
  * with an object of type "T".

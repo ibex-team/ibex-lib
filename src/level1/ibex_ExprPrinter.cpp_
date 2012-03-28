@@ -33,9 +33,9 @@ public:
 	}
 
 	virtual void visit(const ExprVector& e) {
-		for (int i=0; i<e.size(); i++) {
+		for (int i=0; i<e.length(); i++) {
 			visit(e.get(i));
-			if (i<e.size()-1) os << ",";
+			if (i<e.length()-1) os << ",";
 		}
 		os << ")";
 	}
@@ -46,9 +46,10 @@ public:
 
 	virtual void visit(const ExprConstant& e) {
 		switch (e.type()) {
-		case Dim::SCALAR : os << e.get_value(); break;
-		case Dim::VECTOR : os << e.get_vector_value(); break;
-		case Dim::MATRIX : os << e.get_matrix_value(); break;
+		case Dim::SCALAR:     os << e.get_value(); break;
+		case Dim::COL_VECTOR: 
+		case Dim::ROW_VECTOR: os << e.get_vector_value(); break;
+		case Dim::MATRIX:     os << e.get_matrix_value(); break;
 		default: assert(false); break;
 		}
 	}

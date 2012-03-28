@@ -84,6 +84,16 @@ void TestExpr::addxy02() {
 
 void TestExpr::addxy03() {
 	Function f;
+	const ExprSymbol& x=f.add_symbol("x",Dim(0,3,0));
+	const ExprSymbol& y=f.add_symbol("y",Dim(0,3,0));
+	const ExprNode& e=x+y;
+	TEST_ASSERT(e.dim==Dim(0,3,0));
+	TEST_ASSERT(!e.is_zero());
+	TEST_ASSERT(!e.type()==Dim::SCALAR);
+}
+
+void TestExpr::addxy04() {
+	Function f;
 	const ExprSymbol& x=f.add_symbol("x",Dim(0,2,3));
 	const ExprSymbol& y=f.add_symbol("y",Dim(0,2,3));
 	const ExprNode& e=x+y;
@@ -266,14 +276,18 @@ void TestExpr::cst01() {
 void TestExpr::cst02() {
 	Function f;
 	IntervalVector v(v1());
-	IntervalMatrix M(M1());
-	const ExprConstant& c1=ExprConstant::new_vector(f,v);
-	const ExprConstant& c2=ExprConstant::new_matrix(f,M);
+	const ExprConstant& c1=ExprConstant::new_vector(f,v,false);
 
 	TEST_ASSERT(c1.dim==Dim(0,0,3));
 	TEST_ASSERT(!c1.is_zero());
-	TEST_ASSERT(c1.type()==Dim::VECTOR);
+	TEST_ASSERT(c1.type()==Dim::COL_VECTOR);
 	TEST_ASSERT(c1.get_vector_value()==v);
+}
+
+void TestExpr::cst03() {
+	Function f;
+	IntervalMatrix M(M1());
+	const ExprConstant& c2=ExprConstant::new_matrix(f,M);
 
 	TEST_ASSERT(c2.dim==Dim(0,2,3));
 	TEST_ASSERT(!c2.is_zero());
@@ -282,7 +296,18 @@ void TestExpr::cst02() {
 
 }
 
-void TestExpr::cst03() {
+void TestExpr::cst04() {
+	Function f;
+	IntervalVector v(v1());
+	const ExprConstant& c1=ExprConstant::new_vector(f,v,true);
+
+	TEST_ASSERT(c1.dim==Dim(0,3,0));
+	TEST_ASSERT(!c1.is_zero());
+	TEST_ASSERT(c1.type()==Dim::ROW_VECTOR);
+	TEST_ASSERT(c1.get_vector_value()==v);
+}
+
+void TestExpr::cst05() {
 	Function f;
 	IntervalVector v(3);
 	IntervalMatrix M(2,3);
@@ -292,7 +317,7 @@ void TestExpr::cst03() {
 		for (int i=0; i<2; i++) M[i][j]=0;
 	}
 
-	const ExprConstant& z1=ExprConstant::new_vector(f,v);
+	const ExprConstant& z1=ExprConstant::new_vector(f,v,false);
 	const ExprConstant& z2=ExprConstant::new_matrix(f,M);
 	TEST_ASSERT(z1.is_zero());
 	TEST_ASSERT(z2.is_zero());
@@ -317,9 +342,10 @@ void TestExpr::vector() {
 	TEST_ASSERT(v.dim==Dim(0,3,4));
 	TEST_ASSERT(v.height==3);
 	TEST_ASSERT(v.id==4);
-	TEST_ASSERT(v.in_rows);
+	TEST_ASSERT(v.in_rows());
 	TEST_ASSERT(v.nb_args==4);
-	TEST_ASSERT(v.size()==5);
+	TEST_ASSERT(v.length()==4);
+	TEST_ASSERT(v.size==5);
 	TEST_ASSERT(v.type()==Dim::MATRIX);
 }
 

@@ -33,7 +33,7 @@ public:
 	}
 
 	virtual void visit(const ExprVector& e) {
-		for (int i=0; i<e.size(); i++)
+		for (int i=0; i<e.length(); i++)
 			visit(e.get(i));
 	}
 

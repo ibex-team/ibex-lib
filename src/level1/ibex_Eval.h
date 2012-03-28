@@ -43,7 +43,8 @@ public:
 	EvalLabel(const Dim& dim) {
 		switch (dim.type()) {
 		case Dim::SCALAR:       domain = new Interval(); break;
-		case Dim::VECTOR:       domain = new IntervalVector(dim.size3()); break;
+		case Dim::ROW_VECTOR:   domain = new IntervalVector(dim.size2()); break;
+		case Dim::COL_VECTOR:   domain = new IntervalVector(dim.size3()); break;
 		case Dim::MATRIX:       domain = new IntervalMatrix(dim.size2(),dim.size1()); break;
 		case Dim::MATRIX_ARRAY: throw NonRecoverableException("Matrix arrays not allowed in expressions"); break;
 		}
@@ -263,28 +264,31 @@ inline IntervalMatrix Eval::eval_matrix(const Domain& box) const {
 
 inline void Eval::Eval::index_fwd(const ExprIndex& e, const EvalLabel& x, EvalLabel& y) {
 	switch (e.type()) {
-	case Dim::SCALAR:       y.set_domain(x.v()[e.index]);  break;
-	case Dim::VECTOR:       y.set_domain(x.m()[e.index]);  break;
-	case Dim::MATRIX:       y.set_domain(x.ma()[e.index]); break;
-	case Dim::MATRIX_ARRAY: assert(false); /* impossible */ break;
+	case Dim::SCALAR:       y.set_domain(x.v()[e.index]);     break;
+	case Dim::ROW_VECTOR:   y.set_domain(x.m().col(e.index)); break;
+	case Dim::COL_VECTOR:   y.set_domain(x.m().row(e.index)); break;
+	case Dim::MATRIX:       y.set_domain(x.ma()[e.index]);    break;
+	case Dim::MATRIX_ARRAY: assert(false); /* impossible */   break;
 	}
 }
 
 inline void Eval::symbol_fwd(const ExprSymbol& s, EvalLabel& y) {
 	switch (s.type()) {
-	case Dim::SCALAR:       y.set_domain(box->get(s.key));  break;
-	case Dim::VECTOR:       y.set_domain(box->vector(s.key));  break;
-	case Dim::MATRIX:       y.set_domain(box->matrix(s.key));  break;
+	case Dim::SCALAR:       y.set_domain(box->get(s.key));          break;
+	case Dim::ROW_VECTOR:
+	case Dim::COL_VECTOR:   y.set_domain(box->vector(s.key));       break;
+	case Dim::MATRIX:       y.set_domain(box->matrix(s.key));       break;
 	case Dim::MATRIX_ARRAY: y.set_domain(box->matrix_array(s.key)); break;
 	}
 }
 
 inline void Eval::cst_fwd(const ExprConstant& c, EvalLabel& y) {
 	switch (c.type()) {
-	case Dim::SCALAR:       y.set_domain(c.get_value());  break;
-	case Dim::VECTOR:       y.set_domain(c.get_vector_value());  break;
+	case Dim::SCALAR:       y.set_domain(c.get_value());         break;
+	case Dim::ROW_VECTOR:
+	case Dim::COL_VECTOR:   y.set_domain(c.get_vector_value());  break;
 	case Dim::MATRIX:       y.set_domain(c.get_matrix_value());  break;
-	case Dim::MATRIX_ARRAY: assert(false); /* impossible */ break;
+	case Dim::MATRIX_ARRAY: assert(false); /* impossible */      break;
 	}
 }
 inline void Eval::add_fwd(const ExprAdd&, const EvalLabel& x1, const EvalLabel& x2, EvalLabel& y)     { y.i()=x1.i()+x2.i(); }

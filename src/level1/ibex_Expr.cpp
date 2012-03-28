@@ -25,7 +25,7 @@ int max_height(const ExprNode& n1, const ExprNode& n2) {
 	else return n2.height;
 }
 
-int max_height(int n, const ExprNode** args) {
+int max_height(const ExprNode** args, int n) {
 	int max=0;
 	for (int i=0; i<n; i++)
 		if (args[i]->height > max) max = args[i]->height;
@@ -45,8 +45,8 @@ Dim mul_dim(const ExprNode& left, const ExprNode& right) {
 		if (r.dim3==0)
 			throw NonRecoverableException("Cannot right-multiply by a scalar");
 		if (r.dim2==0)  // matrix-vector multiplication
-			if (l.dim2==0) {
-				if (r.dim3!=l.dim3)
+			if (l.dim3==0) {
+				if (r.dim3!=l.dim2)
 					throw NonRecoverableException("Mismatched dimensions in dot product");
 				else
 					return Dim(0,0,0); // dot product
@@ -59,26 +59,37 @@ Dim mul_dim(const ExprNode& left, const ExprNode& right) {
 	}
 }
 
-int vec_dim(const ExprNode** comp, int n, bool in_rows) {
+Dim vec_dim(const ExprNode** comp, int n, bool in_a_row) {
 	assert (n>0);
 	const Dim& d=comp[0]->dim;
 
 	if (d.type()==Dim::SCALAR) {
-		if (in_rows) {
-			for (int i=1; i<n; i++) {
+		if (in_a_row) {
+			for (int i=0; i<n; i++)
 				if (comp[i]->dim.dim3!=0) goto error;
-				return Dim(0,n,1);
+			return Dim(0,n,0);
 		}
 		else {
-		for (int i=1; i<n; i++) {
-						if (comp[i]->dim.dim2!=0) goto error;
-						if (in_rows && comp[i]->dim.dim3!=0) goto error;
-				}
-
+			// we could allow concatenation of
+			// column vectors of different size
+			// in a single column vector;
+			// (but not implemented yet)
+			for (int i=0; i<n; i++)
+				if (comp[i]->dim.dim3!=0) goto error;
+			return Dim(0,0,n);
+		}
+	} else {
+		if (in_a_row) {
+			for (int i=0; i<n; i++)
+				if (comp[i]->dim.dim2!=0 || comp[i]->dim.dim3!=d.dim3) goto error;
+			return Dim(0,d.dim3,n);
+		} else {
+			for (int i=0; i<n; i++) {
+				if (comp[i]->dim.dim1!=0 || comp[i]->dim.dim3!=0 || comp[i]->dim.dim2!=d.dim2) goto error;
+			}
+			return Dim(0,n,d.dim2);
+		}
 	}
-	for (int i=1; i<n; i++)
-		if (!comp[i]->dim==d) throw NonRecoverableException("Components of a vector must have the same dimension");
-
 	error:
 	throw NonRecoverableException("Components of a vector must have the same dimension");
 }
@@ -109,7 +120,7 @@ private:
 	}
 
 	virtual void visit(const ExprIndex& e)    { visit(e.expr); }
-	virtual void visit(const ExprVector& e)   { for (int i=0; i<e.size(); i++) visit(e.get(i)); }
+	virtual void visit(const ExprVector& e)   { for (int i=0; i<e.length(); i++) visit(e.get(i)); }
 	virtual void visit(const ExprSymbol& e)   { }
 	virtual void visit(const ExprConstant& e) { }
 	virtual void visit(const ExprUnaryOp& e)  { visit(e.expr); }
@@ -121,12 +132,12 @@ private:
 
 int bin_size(const ExprNode& left, const ExprNode& right) {
 	SizeofDAG s(left,right);
-	return s.size;
+	return s.size+1;
 }
 
 int nary_size(const ExprNode** args, int n) {
 	SizeofDAG s(args,n);
-	return s.size;
+	return s.size+1;
 }
 
 } // end anonymous namespace
@@ -136,32 +147,37 @@ ExprNode::ExprNode(Function& env, int height, int size, const Dim& dim) :
   env.add_node(*this);
 }
 
-ExprNAryOp::ExprNAryOp(const ExprNode** args, int n, const Dim& dim) :
-		ExprNode(args[0]->context, max_height(n,args), nary_size(args,n), dim), nb_args(n) {
+ExprNAryOp::ExprNAryOp(const ExprNode** _args, int n, const Dim& dim) :
+		ExprNode(_args[0]->context, max_height(_args,n)+1, nary_size(_args,n), dim), nb_args(n) {
 
+	args = new const ExprNode*[n];
+	for (int i=0; i<n; i++)
+		args[i]=_args[i];
 }
 
-const ExprVector& ExprVector::new_(const ExprNode** comp, int n, bool in_rows) {
-	return *new ExprVector(comp,n,in_rows);
+const ExprVector& ExprVector::new_(const ExprNode** comp, int n, bool in_row) {
+	return *new ExprVector(comp,n,in_row);
 }
 
-const ExprVector& ExprVector::new_(const ExprNode& e1, const ExprNode& e2, bool in_rows) {
+const ExprVector& ExprVector::new_(const ExprNode& e1, const ExprNode& e2, bool in_row) {
 	const ExprNode** comp=new const ExprNode*[2];
 	comp[0]=&e1;
 	comp[1]=&e2;
-	return *new ExprVector(comp, 2, in_rows);
+	return *new ExprVector(comp, 2, in_row);
 }
 
-ExprVector::ExprVector(const ExprNode** comp, int n, bool in_rows) : ExprNAryOp(comp, n, vec_dim(comp,n,in_rows)), in_rows(in_rows) {
-
+ExprVector::ExprVector(const ExprNode** comp, int n, bool in_row) :
+		ExprNAryOp(comp, n, vec_dim(comp,n,in_row)) {
 }
 
 ExprConstant::ExprConstant(Function& expr, const Interval& value) : ExprNode(expr,0,1,Dim(0,0,0)), value(1,1) {
 	((Interval&) this->value[0][0])=value;
 }
 
-ExprConstant::ExprConstant(Function& expr, const IntervalVector& v)  : ExprNode(expr,0,1,Dim(0,0,v.size())), value(1,v.size()) {
-	/* warning: we represent a column vector by a row */
+ExprConstant::ExprConstant(Function& expr, const IntervalVector& v, bool in_row)
+: ExprNode(expr,0,1, in_row? Dim(0,v.size(),0) : Dim(0,0,v.size())),
+  value(1,v.size()) {
+	/* warning: we represent a vector by a row, even if it is a column vector */
 	((IntervalVector&) value[0])=v;
 }
 
@@ -180,7 +196,7 @@ bool ExprConstant::ExprConstant::is_zero() const {
 ExprBinaryOp::ExprBinaryOp(const ExprNode& left, const ExprNode& right, const Dim& dim) :
 		ExprNode(	left.context,
 					max_height(left,right)+1,
-					bin_size(left,right)+1,
+					bin_size(left,right),
 					dim ),
 		left(left), right(right) {
 

@@ -112,7 +112,8 @@ inline Dim::Type Dim::type() const {
 		else
 			if (dim3==0) return ROW_VECTOR;
 			else return MATRIX;
-	else return MATRIX_ARRAY;
+	else
+		return MATRIX_ARRAY;
 }
 
 inline int Dim::size1() const {

@@ -205,24 +205,29 @@ public:
 	 */
 	static const ExprVector& new_(const ExprNode& e1, const ExprNode& e2, bool in_rows);
 
-	/** In rows or columns? */
-	const bool in_rows;
+	/** \brief In rows or columns?
+	 *
+	 * \note A matrix is "in rows" if it is a vector of column vectors.
+	 */
+	bool in_rows() const;
 
 	/** Get the ith component.
 	 *
 	 * \warning Can't define it using operator[]... already overwritten in ExprNode */
 	const ExprNode& get(int i) const { return arg(i); }
 
-	/** Number of elements (not to be
-	 * confused with the dimension). */
-	int size() const { return nb_args; }
+	/**
+	 * \brief Length of the vector.
+	 *
+	 * The length is the number of elements (not to be
+	 * confused with the dimension #dim of the vector
+	 * nor the #size() (that is, of the DAG)). */
+	int length() const { return nb_args; }
 
 private:
-	ExprVector(const ExprNode**, int n, bool in_rows);
+	ExprVector(const ExprNode**, int n, bool in_row);
 
 };
-
-
 
 /**
  * \ingroup level1
@@ -323,7 +328,7 @@ class ExprConstant : public ExprNode {
   static const ExprConstant& new_scalar(Function& expr, const Interval& value) { return *new ExprConstant(expr,value); }
 
   /** Create a vector constant. */
-  static const ExprConstant& new_vector(Function& expr, const IntervalVector& value) { return *new ExprConstant(expr,value); }
+  static const ExprConstant& new_vector(Function& expr, const IntervalVector& value, bool in_row) { return *new ExprConstant(expr,value,in_row); }
 
   /** Create a matrix constant. */
   static const ExprConstant& new_matrix(Function& expr, const IntervalMatrix& value) { return *new ExprConstant(expr,value); }
@@ -354,7 +359,7 @@ class ExprConstant : public ExprNode {
 
   ExprConstant(Function& expr, const Interval& value);
 
-  ExprConstant(Function& expr, const IntervalVector& value);
+  ExprConstant(Function& expr, const IntervalVector& value, bool in_row);
 
   ExprConstant(Function& expr, const IntervalMatrix& value);
 
@@ -1085,6 +1090,12 @@ class ExprAtanh : public ExprUnaryOp {
 /** Indexing */
 inline const ExprIndex& ExprNode::operator[](int index) const {
 	return ExprIndex::new_(*this, index);
+}
+
+inline bool ExprVector::in_rows() const {
+	return (dim.type()==Dim::ROW_VECTOR
+			||
+			get(0).type()==Dim::COL_VECTOR); // case *this is a matrix
 }
 
 /** Addition */

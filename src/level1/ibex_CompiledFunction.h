@@ -85,14 +85,14 @@ private:
 	void visit(const ExprVector& v) {
 		code[ptr]=VEC;
 		nodes[ptr]=&v;
-		nb_args[ptr]=v.size();
-		args[ptr]=new ExprLabel*[v.size()+1];
+		nb_args[ptr]=v.length();
+		args[ptr]=new ExprLabel*[v.length()+1];
 		args[ptr][0]=v.deco;
-		for (int i=1; i<v.size(); i++)
+		for (int i=1; i<v.length(); i++)
 			args[ptr][i]=v.get(i).deco;
 
 		ptr++;
-		for (int i=0; i<v.size(); i++) {
+		for (int i=0; i<v.length(); i++) {
 			visit(v.get(i));
 		}
 	}
@@ -147,15 +147,15 @@ private:
 	void visit(const ExprApply& a) {
 		code[ptr]=APPLY;
 		nodes[ptr]=&a;
-		nb_args[ptr]=a.nb_args();
-		args[ptr]=new ExprLabel*[a.nb_args()];
+		nb_args[ptr]=a.nb_args;
+		args[ptr]=new ExprLabel*[a.nb_args];
 		args[ptr][0]=a.deco;
-		for (int i=0; i<a.nb_args(); i++) {
+		for (int i=0; i<a.nb_args; i++) {
 			args[ptr][i]=a.args[i]->deco;
 		}
 
 		ptr++;
-		for (int i=0; i<a.nb_args(); i++) {
+		for (int i=0; i<a.nb_args; i++) {
 			visit(*a.args[i]);
 		}
 	}

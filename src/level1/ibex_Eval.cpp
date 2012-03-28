@@ -27,25 +27,25 @@ void Eval::Eval::vector_fwd(const ExprVector& v, const EvalLabel** compL, EvalLa
 	assert(v.type()!=Dim::SCALAR);
 	assert(v.type()!=Dim::MATRIX_ARRAY);
 
-	if (v.type()==Dim::VECTOR) {
-		assert(v.in_rows); // a vector is necessarily a column vector
-		for (int i=0; i<v.size(); i++) y.v()[i]=compL[i]->i();
+	if (v.dim.is_vector()) {
+		for (int i=0; i<v.length(); i++) y.v()[i]=compL[i]->i();
 	}
 	else {
-		if (v.in_rows)
-			for (int i=0; i<v.size(); i++) y.m().set_row(i,compL[i]->v());
+		if (v.in_rows())
+			for (int i=0; i<v.length(); i++) y.m().set_row(i,compL[i]->v());
 		else
-			for (int i=0; i<v.size(); i++) y.m().set_col(i,compL[i]->v());
+			for (int i=0; i<v.length(); i++) y.m().set_col(i,compL[i]->v());
 	}
 }
 
 void Eval::apply_fwd(const ExprApply& a, const EvalLabel** argL, EvalLabel& y) {
 	// upload data (in the function arguments' box).
 	Domain& b=((EvalApplyLabel&) y).fbox;
-	for (int i=0; i<a.nb_args(); i++) {
+	for (int i=0; i<a.nb_args; i++) {
 		switch(a.args[i]->type()) {
 		case Dim::SCALAR:       b.get(i)=argL[i]->i(); break;
-		case Dim::VECTOR:       b.vector(i)=argL[i]->v(); break;
+		case Dim::ROW_VECTOR:
+		case Dim::COL_VECTOR:   b.vector(i)=argL[i]->v(); break;
 		case Dim::MATRIX:       b.matrix(i)=argL[i]->m(); break;
 		case Dim::MATRIX_ARRAY: assert(false); /* impossible */ break;
 		}
