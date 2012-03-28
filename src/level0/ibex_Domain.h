@@ -275,7 +275,7 @@ inline Interval& Domain::get(unsigned int v) {
 
 inline Interval& Domain::get(unsigned int v, int i) {
 	assert(v<symbol_dims.size());
-	assert(symbol_dims[v].type()==Dim::VECTOR);
+	assert(symbol_dims[v].is_vector());
 
 	return (*((IntervalVector*) doms[v]))[i];
 }
@@ -296,7 +296,7 @@ inline Interval& Domain::get(unsigned int v, int i, int j, int k) {
 
 inline IntervalVector& Domain::vector(unsigned int v) {
 	assert(v<symbol_dims.size());
-	assert(symbol_dims[v].type()==Dim::VECTOR);
+	assert(symbol_dims[v].is_vector());
 
 	return *((IntervalVector*) doms[v]);
 }
@@ -343,7 +343,7 @@ inline const Interval& Domain::get(unsigned int v) const {
 
 inline const Interval& Domain::get(unsigned int v, int i) const {
 	assert(v<symbol_dims.size());
-	assert(symbol_dims[v].type()==Dim::VECTOR);
+	assert(symbol_dims[v].is_vector());
 
 	return (*((IntervalVector*) doms[v]))[i];
 }
@@ -364,7 +364,7 @@ inline const Interval& Domain::get(unsigned int v, int i, int j, int k) const {
 
 inline const IntervalVector& Domain::vector(unsigned int v) const {
 	assert(v<symbol_dims.size());
-	assert(symbol_dims[v].type()==Dim::VECTOR);
+	assert(symbol_dims[v].is_vector());
 
 	return *((IntervalVector*) doms[v]);
 }

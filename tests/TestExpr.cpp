@@ -300,11 +300,27 @@ void TestExpr::cst03() {
 
 void TestExpr::vector() {
 	Function f;
-	const ExprSymbol& x=f.add_symbol("x",Dim(0,0,0));
-	const ExprSymbol& y=f.add_symbol("y",Dim(0,0,0));
-	//const ExprVector& v=f
+	const ExprSymbol& x=f.add_symbol("x",Dim(0,0,3));
+	const ExprSymbol& y=f.add_symbol("y",Dim(0,0,3));
+	const ExprNode& e1=x+y;
+	const ExprNode& e2=x+e1;
 
-}
+	const ExprNode** c=new const ExprNode*[4];
+	c[0]=&x;
+	c[1]=&y;
+	c[2]=&e1;
+	c[3]=&e2;
+
+	const ExprVector& v=ExprVector::new_(c,4,true);
+	TEST_ASSERT(&v.context==&f);
+	TEST_ASSERT(v.deco==NULL);
+	TEST_ASSERT(v.dim==Dim(0,3,4));
+	TEST_ASSERT(v.height==3);
+	TEST_ASSERT(v.id==4);
+	TEST_ASSERT(v.in_rows);
+	TEST_ASSERT(v.nb_args==4);
+	TEST_ASSERT(v.size()==5);
+	TEST_ASSERT(v.type()==Dim::MATRIX);
 }
 
 } // end namespace

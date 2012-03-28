@@ -27,7 +27,7 @@ void TestDim::test01() {
 	TEST_ASSERT(d==Dim(0,0,0));
 	TEST_ASSERT(!(d==Dim(1,1,1)));
 	TEST_ASSERT(!(d==Dim(2,1,1)));
-	TEST_ASSERT(d.scalar());
+	TEST_ASSERT(d.is_scalar());
 	TEST_ASSERT(d.type()==Dim::SCALAR);
 	TEST_ASSERT(Dim(d)==d);
 	TEST_ASSERT((Dim(1,1,1)=d)==d);
@@ -45,7 +45,7 @@ void TestDim::test02() {
 	TEST_ASSERT(d==Dim(0,0,3));
 	TEST_ASSERT(!(d==Dim(0,1,3)));
 	TEST_ASSERT(!(d==Dim(1,1,3)));
-	TEST_ASSERT(!d.scalar());
+	TEST_ASSERT(!d.is_scalar());
 	TEST_ASSERT(d.type()==Dim::VECTOR);
 	TEST_ASSERT(d.index_dim()==Dim(0,0,0));
 	TEST_ASSERT(Dim(d)==d);
@@ -62,7 +62,7 @@ void TestDim::test03() {
 	TEST_ASSERT(d.size3()==3);
 	TEST_ASSERT(d==Dim(0,2,3));
 	TEST_ASSERT(!(d==Dim(1,2,3)));
-	TEST_ASSERT(!d.scalar());
+	TEST_ASSERT(!d.is_scalar());
 	TEST_ASSERT(d.type()==Dim::MATRIX);
 	TEST_ASSERT(d.index_dim()==Dim(0,0,3));
 	TEST_ASSERT(Dim(d)==d);
@@ -78,7 +78,7 @@ void TestDim::test04() {
 	TEST_ASSERT(d.size2()==2);
 	TEST_ASSERT(d.size3()==3);
 	TEST_ASSERT(d==Dim(1,2,3));
-	TEST_ASSERT(!d.scalar());
+	TEST_ASSERT(!d.is_scalar());
 	TEST_ASSERT(d.type()==Dim::MATRIX_ARRAY);
 	TEST_ASSERT(d.index_dim()==Dim(0,2,3));
 	TEST_ASSERT(Dim(d)==d);

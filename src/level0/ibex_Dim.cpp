@@ -12,24 +12,35 @@
 #include <sstream>
 #include "ibex_Dim.h"
 #include "ibex_NonRecoverableException.h"
+#include <cassert>
 
 using std::stringstream;
 
 namespace ibex {
 
+/** Build the three-dimensional structure. */
+Dim::Dim(int dim1, int dim2, int dim3) : dim1(dim1), dim2(dim2), dim3(dim3) {
+
+	assert(!(dim1>0 && (dim2==0 || dim3==0)));
+}
 
 Dim Dim::index_dim() const {
 
-  Dim dim=*this;
+  const Dim& dim=*this;
 
-  if (dim.dim3==0) {
+  if (dim.dim2==0 && dim.dim3==0) {
     throw NonRecoverableException("Too many subscripts (e.g., a vector symbol cannot be indexed twice)");
   }
-  else if (dim.dim2==0) dim.dim3=0;
-  else if (dim.dim1==0) dim.dim2=0;
-  else dim.dim1=0;
-
-  return dim;
+  if (dim.dim1>0) // array of matrices
+	  return Dim(0,dim.dim2,dim.dim3);
+  else
+	  if (dim.dim2==0) // column vector
+		  return Dim(0,0,0);
+	  else
+		  if (dim.dim3==0)// row vector
+			  return Dim(0,0,0);
+		  else	// matrix
+			  return Dim(0,dim.dim3,0); // return a row vector
 }
 
 /*

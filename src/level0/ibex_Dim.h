@@ -27,7 +27,12 @@ namespace ibex {
  * The values of the three dimensions are represented by the fields dim1, dim2 and dim3. Let x be an expression.
  * If x is scalar, dim1=0, dim2=0, dim3=0. Indeed, x[1] is not a valid symbol. If x is a vector of 2 components,
  * dim1=0, dim2=0, dim3=2 (because x[1] and x[2] are valid symbols but not x[1][1]). If x is a 2x3 matrix, dim1=0,
- * dim2=2, dim3=3, etc.
+ * dim2=2, dim3=3. Special case: if x is a *row vector* of 2 elements, then dim1=0, dim2=2 and dim3=0.
+ * Last case: if x is an array of 4 matrices which are 2x3matrices then dim1=4, dim2=2 and dim3=3.
+ *
+ * <p>
+ * A combination like dim1=1 dim2=0 and dim3=2 is invalid (we cannot represent array of vectors. Use matrices
+ * instead).
  *
  * The "size" of a dimension represents the number of elements in the dimension (this time seen as an array).
  * The size is simply equal to the "value" if it is greater than 0, and 1 otherwise.
@@ -39,42 +44,36 @@ class Dim {
 public:
 
 	/** The 4 different types of "Dim" objects */
-	typedef enum { SCALAR, VECTOR, MATRIX, MATRIX_ARRAY } Type;
+	typedef enum { SCALAR, COL_VECTOR, ROW_VECTOR, MATRIX, MATRIX_ARRAY } Type;
 
-	/** Build the three-dimensional structure. */
-	Dim(int dim1, int dim2, int dim3) : dim1(dim1), dim2(dim2), dim3(dim3) { }
+	/** \brief Build the three-dimensional structure. */
+	Dim(int dim1, int dim2, int dim3);
 
-	/** Return the type of this object */
-	Type type() const {
-		if (dim1==0)
-			if (dim2==0)
-				if (dim3==0) return SCALAR;
-				else return VECTOR;
-			else return MATRIX;
-		else return MATRIX_ARRAY;
-	}
+	/** \brief Return the type of this object */
+	Type type() const;
 
-	/** Return the size of the first dimension. */
-	inline int size1() const { return dim1==0?1:dim1; }
+	/** \brief Return the size of the first dimension. */
+	inline int size1() const;
 
-	/** Return the size of the second dimension. */
-	inline int size2() const { return dim2==0?1:dim2; }
+	/** \brief Return the size of the second dimension. */
+	inline int size2() const;
 
-	/** Return the size of the third dimension. */
-	inline int size3() const { return dim3==0?1:dim3; }
+	/** \brief Return the size of the third dimension. */
+	inline int size3() const;
 
-	/** Return the total number of components */
-	inline int size()  const { return size1()*size2()*size3(); }
+	/** \brief Return the total number of components */
+	inline int size()  const;
 
-	/** True if this is a scalar */
-	bool scalar() const { return dim1==0 && dim2==0 && dim3==0; }
+	/** \brief True if this is a scalar. */
+	bool is_scalar() const;
 
-	/** True if the three dimensions match */
-	bool operator==(const Dim& d) const {
-		return dim1==d.dim1 && dim2==d.dim2 && dim3==d.dim3;
-	}
+	/** \brief True if this is either a row or column vector. */
+	bool is_vector() const;
 
-	/** Compute the dimension of an expression obtained
+	/** \brief True if the three dimensions match */
+	bool operator==(const Dim& d) const;
+
+	/** \brief Compute the dimension of an expression obtained
 	 * by indexing an expression whose dimension is *this. */
 	Dim index_dim() const;
 
@@ -102,6 +101,48 @@ public:
 	 * a matrix or a vector expression. */
 	int dim3;
 };
+
+/*================================== inline implementations ========================================*/
+
+inline Dim::Type Dim::type() const {
+	if (dim1==0)
+		if (dim2==0)
+			if (dim3==0) return SCALAR;
+			else return COL_VECTOR;
+		else
+			if (dim3==0) return ROW_VECTOR;
+			else return MATRIX;
+	else return MATRIX_ARRAY;
+}
+
+inline int Dim::size1() const {
+	return dim1==0?1:dim1;
+}
+
+inline int Dim::size2() const {
+	return dim2==0?1:dim2;
+}
+
+inline int Dim::size3() const {
+	return dim3==0?1:dim3;
+}
+
+inline int Dim::size()  const {
+	return size1()*size2()*size3();
+}
+
+inline bool Dim::is_scalar() const {
+	return type()==SCALAR;
+}
+
+inline bool Dim::is_vector() const {
+	Type t=type();
+	return t==COL_VECTOR || t==ROW_VECTOR;
+}
+
+inline bool Dim::operator==(const Dim& d) const {
+	return dim1==d.dim1 && dim2==d.dim2 && dim3==d.dim3;
+}
 
 /**
  * \ingroup level1

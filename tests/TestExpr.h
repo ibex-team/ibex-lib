@@ -42,6 +42,8 @@ public:
 		TEST_ADD(TestExpr::cst01);
 		TEST_ADD(TestExpr::cst02);
 		TEST_ADD(TestExpr::cst03);
+
+		TEST_ADD(TestExpr::vector);
 	}
 
 	void symbol();
@@ -66,6 +68,8 @@ public:
 	void cst01();
 	void cst02();
 	void cst03();
+
+	void vector();
 };
 
 } // end namespace

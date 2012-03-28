@@ -18,7 +18,7 @@
 
 namespace ibex {
 
-//namespace {
+namespace {
 
 int max_height(const ExprNode& n1, const ExprNode& n2) {
 	if (n1.height>n2.height) return n1.height;
@@ -57,6 +57,30 @@ Dim mul_dim(const ExprNode& left, const ExprNode& right) {
 			if (l.dim3!=r.dim2) throw NonRecoverableException("Mismatched dimensions in matrix multiplication");
 			else return Dim(0,l.dim2,r.dim3);
 	}
+}
+
+int vec_dim(const ExprNode** comp, int n, bool in_rows) {
+	assert (n>0);
+	const Dim& d=comp[0]->dim;
+
+	if (d.type()==Dim::SCALAR) {
+		if (in_rows) {
+			for (int i=1; i<n; i++) {
+				if (comp[i]->dim.dim3!=0) goto error;
+				return Dim(0,n,1);
+		}
+		else {
+		for (int i=1; i<n; i++) {
+						if (comp[i]->dim.dim2!=0) goto error;
+						if (in_rows && comp[i]->dim.dim3!=0) goto error;
+				}
+
+	}
+	for (int i=1; i<n; i++)
+		if (!comp[i]->dim==d) throw NonRecoverableException("Components of a vector must have the same dimension");
+
+	error:
+	throw NonRecoverableException("Components of a vector must have the same dimension");
 }
 
 class SizeofDAG : public FunctionVisitor {
@@ -103,7 +127,7 @@ int bin_size(const ExprNode& left, const ExprNode& right) {
 int nary_size(const ExprNode** args, int n) {
 	SizeofDAG s(args,n);
 	return s.size;
-//}
+}
 
 } // end anonymous namespace
 
@@ -128,7 +152,7 @@ const ExprVector& ExprVector::new_(const ExprNode& e1, const ExprNode& e2, bool 
 	return *new ExprVector(comp, 2, in_rows);
 }
 
-ExprVector::ExprVector(const ExprNode** comp, int n, bool in_rows) : ExprNAryOp(comp, n, comp[0]->dim), in_rows(in_rows) {
+ExprVector::ExprVector(const ExprNode** comp, int n, bool in_rows) : ExprNAryOp(comp, n, vec_dim(comp,n,in_rows)), in_rows(in_rows) {
 
 }
 

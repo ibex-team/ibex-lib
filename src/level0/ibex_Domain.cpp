@@ -26,7 +26,8 @@ Domain::Domain(const Domain& d) : _size(0) {
 		switch (it->type()) {
 			case Dim::SCALAR:
 				*((Interval*) doms.back())=*((Interval*) *it2); break;
-			case Dim::VECTOR:
+			case Dim::COL_VECTOR:
+			case Dim::ROW_VECTOR:
 				*((IntervalVector*) doms.back())=*((IntervalVector*) *it2); break;
 			case Dim::MATRIX:
 				*((IntervalMatrix*) doms.back())=*((IntervalMatrix*) *it2); break;
@@ -47,13 +48,21 @@ Domain& Domain::operator=(const IntervalVector& x) {
 		case Dim::SCALAR:
 			*((Interval*) *it2)=x[i++];
 			break;
-		case Dim::VECTOR:
+		case Dim::ROW_VECTOR:
+		{
+			IntervalVector& v=(*((IntervalVector*) *it2));
+			for (int j=0; j<dim.dim2; j++)
+				v[j]=x[i++];
+		}
+		break;
+		case Dim::COL_VECTOR:
 		{
 			IntervalVector& v=(*((IntervalVector*) *it2));
 			for (int j=0; j<dim.dim3; j++)
 				v[j]=x[i++];
 		}
 		break;
+
 		case Dim::MATRIX:
 		{
 			IntervalMatrix& M=(*((IntervalMatrix*) *it2));
@@ -81,7 +90,8 @@ int Domain::add(const Dim& dim) {
 	symbol_dims.push_back(dim);
 	switch (dim.type()) {
 		case Dim::SCALAR:       doms.push_back(new Interval()); _size++; break;
-		case Dim::VECTOR:       doms.push_back(new IntervalVector(dim.dim3)); _size+=dim.dim3; break;
+		case Dim::ROW_VECTOR:   doms.push_back(new IntervalVector(dim.dim2)); _size+=dim.dim2; break;
+		case Dim::COL_VECTOR:   doms.push_back(new IntervalVector(dim.dim3)); _size+=dim.dim3; break;
 		case Dim::MATRIX:       doms.push_back(new IntervalMatrix(dim.dim2,dim.dim3)); _size+=dim.dim2*dim.dim3; break;
 		case Dim::MATRIX_ARRAY: doms.push_back(new IntervalMatrixArray(dim.dim1,dim.dim2,dim.dim3)); _size+=dim.dim1*dim.dim2*dim.dim3; break;
 		}
@@ -93,10 +103,11 @@ std::ostream& operator<<(std::ostream& os, const Domain& d) {
 	for (size_t v=0; v<d.doms. size(); v++) {
 		const Dim& dim=d.symbol_dims[v];
 		switch (dim.type()) {
-		case Dim::SCALAR:       os << "S " << d.get(v) << endl;          break;
-		case Dim::VECTOR:       os << "V " << d.vector(v) << endl;       break;
-		case Dim::MATRIX:       os << "M " << d.matrix(v) << endl;       break;
-		case Dim::MATRIX_ARRAY: os << "A " << d.matrix_array(v) << endl; break;
+		case Dim::SCALAR:       os << "S  " << d.get(v) << endl;          break;
+		case Dim::ROW_VECTOR:   os << "V' " << d.vector(v) << endl;       break;
+		case Dim::COL_VECTOR:   os << "V  " << d.vector(v) << endl;       break;
+		case Dim::MATRIX:       os << "M  " << d.matrix(v) << endl;       break;
+		case Dim::MATRIX_ARRAY: os << "A  " << d.matrix_array(v) << endl; break;
 		}
 
 		os << " - ";

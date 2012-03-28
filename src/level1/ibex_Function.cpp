@@ -55,7 +55,7 @@ public:
 	}
 
 	virtual void visit(const ExprApply& a) {
-		for (int i=0; i<a.nb_args(); i++) {
+		for (int i=0; i<a.nb_args; i++) {
 			visit(*a.args[i]);
 		}
 	}
