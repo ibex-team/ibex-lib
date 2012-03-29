@@ -26,7 +26,7 @@
 
 namespace ibex {
 
-CellHeapForOptim::CellHeapForOptim(const int y) : y(y) { }
+CellHeapForOptim::CellHeapForOptim(const int y) : y_num(y) { }
 
 /* Old version that used an evaluator "evl" to calculate (on-the-fly) 
  * the evaluation of the criterion (there were no extra variable) */
@@ -54,7 +54,7 @@ REAL CellHeapForOptim::cost(const Cell& c) const {
 /* New version: the cost is already computed, it is the min of the 
  * last variable corresponding to the objective */
 REAL CellHeapForOptim::cost(const Cell& c) const {
-  return Inf(c.space.box(y+1));
+  return Inf(c.space.box(y_num+1));
 }
   
 } // end namespace

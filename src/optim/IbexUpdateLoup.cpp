@@ -130,7 +130,7 @@ void inHC4_expand(const System& sys, INTERVAL_VECTOR& inner_box){
 */
 
   bool in_HC4=true;
-  bool mono_analysis=true;
+ bool mono_analysis=true;
   //  bool in_HC4=false;
   //  bool mono_analysis=false;
   
@@ -471,16 +471,25 @@ VECTOR random_point(const INTERVAL_VECTOR& box) {
   //  if (innerfound)
     // first option: startpoint = midpoint
     //
-  //    loup_changed = line_probing(sys, space,   Mid(space.box), 5*sample_size, true);
+  //  loup_changed = line_probing(sys, space,   Mid(space.box), 3*sample_size, true);
   // other option: chose startpoint randomly
   //  loup_changed = line_probing(sys, space,  random_point(space.box), 5* sample_size, true);
 
   //  else
   //    if (!loup_changed)
-  loup_changed = random_probing(sys, space);
+   loup_changed = random_probing(sys, space);
 
-  if (loup_changed)  trace_loup();
-    
+   if (loup_changed) { trace_loup();
+     if (innerfound)
+       {
+	 nb_inhc4++;
+	 diam_inhc4 = ((nb_inhc4-1) *diam_inhc4 + Max(Diam(savebox))) / nb_inhc4;}
+
+     else 
+       {
+	 nb_rand++;
+	 diam_rand = ((nb_rand-1) *diam_rand + Max(Diam(savebox))) / nb_rand;}
+   }
   (INTERVAL_VECTOR&) space.box = savebox;
   return loup_changed;
   }

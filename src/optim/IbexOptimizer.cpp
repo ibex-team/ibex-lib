@@ -136,18 +136,48 @@ Optimizer::Optimizer(const System& sys,  int y_num, Contractor& contractor,
   const Expr& goal_function=(((const BinOpExpr&)sys.ctr(goal_ctr).expr).right);
   EvaluatorFactory fac(goal_function);
   fac.build(&goal);
+   cout << " nb constraints " << sys.nb_ctr() << endl;
 
+   nb_simplex=0;
+   diam_simplex=0;
+   nb_rand=0;
+   diam_rand=0;
+  //  m.add<InnerBox>();
+
+}
+  Optimizer::Optimizer(const System& sys,  int y_num, Contractor& contractor, Precision & prec,
+		       Bisector & bisect,
+		     bool maximize, REAL goal_ceil, int sample_size, int goal_ctr1) :
+  Paver(sys.space, ContractorList(contractor, prec), bisect, *new CellHeapForOptim(y_num)),  
+  sys(sys),
+  y_num(y_num),
+  goal_ctr(goal_ctr1),
+  prec_num(1), goal_ceil(goal_ceil),
+  loup(BiasPosInf), sample_size(sample_size), loup_changed(false),
+  uplo(BiasPosInf), uplo_of_solutions(BiasPosInf)
+{ 
+
+  /* get the goal function from the constraint y=f(x) */
+  const Expr& goal_function=(((const BinOpExpr&)sys.ctr(goal_ctr).expr).right);
+  EvaluatorFactory fac(goal_function);
+  fac.build(&goal);
+  //   cout << " nb constraints " << sys.nb_ctr() << endl;
+
+   nb_simplex=0;
+   diam_simplex=0;
+   nb_rand=0;
+   diam_rand=0;
   //  m.add<InnerBox>();
 
 }
 
 
-ConstrainedOptimizer::ConstrainedOptimizer(const System& sys, int goal_ctr, int y_num, Contractor& contractor, 
+  ConstrainedOptimizer::ConstrainedOptimizer(const System& sys, int goal_ctr, int y_num, Contractor& contractor, Precision & prec,
 					   Bisector & bisect,
-					   bool maximize, REAL prec, REAL goal_ceil, int sample_size) :
-  Optimizer (sys, y_num, contractor, bisect, maximize, prec, goal_ceil, sample_size, goal_ctr),
+					   bool maximize,  REAL goal_ceil, int sample_size) :
+    Optimizer (sys, y_num, contractor, prec, bisect, maximize, goal_ceil, sample_size, goal_ctr),
   is_inside(inverse(sys,goal_ctr))
-{;}  
+{nb_inhc4=0;diam_inhc4=0;}  
 
 
 ConstrainedOptimizer::~ConstrainedOptimizer(){}
@@ -234,15 +264,16 @@ void Optimizer::contract_and_bound(Cell* c) {
  bool ConstrainedOptimizer::loup_change(Cell& c)
       {
 	//	innerbox= c.get<InnerBox>().inner_box; // get the current inner box (to be inflated by update_loup)  not used BNE
- 
+
+	//	space.box(1)=INTERVAL(1.e-8,1.e-8);   // essai pour algo mixte propagation avec ctes plus fortes que recherche loup
 	int box_loup_changed = update_loup(sys, space);
 	innerfound=false;
 	box_loup_changed |= simplex_update_loup(sys);
 	if(box_loup_changed){
 	  if(Dimension(innerbox)==1) Resize(innerbox, space.nb_var()); 
 	  innerbox = loup_point;
-    }
-
+	}
+	//space.box(1)=INTERVAL(1.e-15,1.e-15); // essai pour algo mixte propagation avec ctes plus fortes que recherche loup
 	return box_loup_changed;
       }
 
@@ -302,7 +333,7 @@ int Optimizer::next_box() {
 
     check_limits();
 
-    delete &c;
+    if (!cells.empty())delete &c; //  bug ???
 
     // stopping criterion   the required precision is reached.
     if (loup != BiasPosInf) {

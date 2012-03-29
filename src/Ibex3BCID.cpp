@@ -50,8 +50,8 @@ bool  _3BCID::equalBoxes (int var, INTERVAL_VECTOR &box1, INTERVAL_VECTOR &box2)
 void _3BCID::contract() {
   //const Indicators* indic=current_indic();
   int nb_var=Dimension(cid_space.box);
-  start_var=nb_var-1;
-  // vhandled=1;
+  start_var=nb_var-1;        //  patch pour l'optim  A RETIRER ??
+
   for (int var=start_var; var<start_var+vhandled; var++) {
     int var_env=cid_space.key(IBEX_VAR, var%nb_var);
     int var_space=space.component(var_env);
@@ -62,8 +62,9 @@ void _3BCID::contract() {
 
   }
 
-  start_var=(start_var+vhandled)%nb_var;
+  start_var=(start_var+vhandled)%nb_var;   //  en contradiction avec le patch pour l'optim
 }
+
 
 
 

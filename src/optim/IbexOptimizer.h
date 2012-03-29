@@ -56,6 +56,8 @@ class Optimizer : public Paver {
    *   \param prec      - absolute precision for the solutions.
    *   \param goal_ceil - ceil on the relative precision of the objective (the optimizer stops once reached). */
     Optimizer(const System& sys, int y_num, Contractor & ctc, Bisector & bsc, bool maximize=false, REAL prec=Bisector::default_prec, REAL goal_ceil=Bisector::default_prec, int sample_size=default_sample_size, int goal_ctr=0);
+Optimizer(const System& sys,  int y_num, Contractor& contractor, Precision & prec,
+		       Bisector & bisect,  bool maximize, REAL goal_ceil, int sample_size, int goal_ctr1=0);
     
   /** Delete this instance. */
   ~Optimizer();
@@ -74,6 +76,14 @@ class Optimizer : public Paver {
   void manage_cell_buffer();
   void report();  
   void check_limits();
+  REAL loup;                // "loup"= lowest upper bound of the minimum
+
+  int nb_simplex;
+  int nb_rand;
+  REAL diam_simplex;
+  REAL diam_rand;
+
+
   protected:
   virtual bool loup_change(Cell& cell);
 
@@ -87,13 +97,13 @@ class Optimizer : public Paver {
   REAL goal_ceil;           // miminal precision on the objective (under which a timeout occurs)
   //CellHeapForOptim* buffer; // buffer of cells
   //bool maximize;            // true means maximization, false minimization  :  not implemented
-  REAL loup;                // "loup"= lowest upper bound of the minimum
+
   int sample_size;          // number of samples used to update the loup
   bool loup_changed;        // boolean indicating if the loup has changed during call to Updateloup contractor
   VECTOR loup_point;        // the point satisfying the constraints corresponding to the loup
-  REAL uplo;                // "uplo"= uppest lower bound of the minimum
-  REAL uplo_of_solutions;   //  lower bound of the small boxes taken by the precision contractor
 
+  REAL uplo_of_solutions;   //  lower bound of the small boxes taken by the precision contractor
+  REAL uplo;                // "uplo"= uppest lower bound of the minimum
 
 
 
@@ -180,11 +190,14 @@ class ConstrainedOptimizer : public Optimizer {
 
 
     ConstrainedOptimizer(const System& sys, int goal_ctr, int y_num, Contractor & ctc, Bisector & bsc, bool maximize=false, REAL prec=Bisector::default_prec, REAL goal_ceil=Bisector::default_prec, int sample_size=default_sample_size);
-    
+    ConstrainedOptimizer(const System& sys, int goal_ctr, int y_num, Contractor& contractor, Precision & prec,
+			 Bisector & bisect,  bool maximize,  REAL goal_ceil, int sample_size);
   /** Delete this instance. */
     ~ConstrainedOptimizer();
     bool loup_change(Cell& c);
     bool innerfound;
+    int nb_inhc4;
+    REAL diam_inhc4;
     virtual   bool update_loup(const System& sys, const Space& space);
 
  bool check_constraints (const System& sys, const Space& space);

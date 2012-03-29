@@ -67,7 +67,7 @@ class CellHeapForOptim : public CellHeap {
   REAL cost(const Cell& c) const;
 
  private:
-  const int y;
+  const int y_num;
 };
 
 } // end namespace

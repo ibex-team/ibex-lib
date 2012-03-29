@@ -128,6 +128,8 @@ REAL abs(REAL a){
 	    cout.precision(12);
  	    cout << "[simplex1]"  << " loup update " << loup  << " loup point  " << loup_point << endl;
 	    cout.precision(prec);
+	    nb_simplex++;
+	    diam_simplex= ((nb_simplex-1) * diam_simplex + Max( Diam (savebox))) / nb_simplex;
 	  }
 	return ret;
   }
