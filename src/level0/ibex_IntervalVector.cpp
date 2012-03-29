@@ -31,14 +31,14 @@ IntervalVector& IntervalVector::operator=(const Domain& d) {
 		case Dim::ROW_VECTOR:
 		{
 			const IntervalVector& v=(*((IntervalVector*) *it2));
-			for (int j=0; j<dim.dim2; j++)
+			for (int j=0; j<dim.dim3; j++)
 				(*this)[i++]=v[j];
 		}
 		break;
 		case Dim::COL_VECTOR:
 		{
 			const IntervalVector& v=(*((IntervalVector*) *it2));
-			for (int j=0; j<dim.dim3; j++)
+			for (int j=0; j<dim.dim2; j++)
 				(*this)[i++]=v[j];
 		}
 		break;

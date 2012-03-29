@@ -25,13 +25,13 @@ namespace ibex {
  * All expressions are considered here as 3-dimensional vectors, except that the "value" of a dimension can be 0.
  * The "value" of the ith dimension means the number of valid expressions obtained by indexing in this dimension.
  * The values of the three dimensions are represented by the fields dim1, dim2 and dim3. Let x be an expression.
- * If x is scalar, dim1=0, dim2=0, dim3=0. Indeed, x[1] is not a valid symbol. If x is a vector of 2 components,
+ * If x is scalar, dim1=0, dim2=0, dim3=0. Indeed, x[1] is not a valid symbol. If x is a row vector of 2 components,
  * dim1=0, dim2=0, dim3=2 (because x[1] and x[2] are valid symbols but not x[1][1]). If x is a 2x3 matrix, dim1=0,
- * dim2=2, dim3=3. Special case: if x is a *row vector* of 2 elements, then dim1=0, dim2=2 and dim3=0.
+ * dim2=2, dim3=3. If x is a column vector of 2 elements, then dim1=0, dim2=2 and dim3=0.
  * Last case: if x is an array of 4 matrices which are 2x3matrices then dim1=4, dim2=2 and dim3=3.
  *
  * <p>
- * A combination like dim1=1 dim2=0 and dim3=2 is invalid (we cannot represent array of vectors. Use matrices
+ * A combination like dim1=1 dim2=0 and dim3=2 is invalid (we cannot represent array of vectors. we use matrices
  * instead).
  *
  * The "size" of a dimension represents the number of elements in the dimension (this time seen as an array).
@@ -44,7 +44,7 @@ class Dim {
 public:
 
 	/** The 4 different types of "Dim" objects */
-	typedef enum { SCALAR, COL_VECTOR, ROW_VECTOR, MATRIX, MATRIX_ARRAY } Type;
+	typedef enum { SCALAR, ROW_VECTOR, COL_VECTOR, MATRIX, MATRIX_ARRAY } Type;
 
 	/** \brief Build the three-dimensional structure. */
 	Dim(int dim1, int dim2, int dim3);
@@ -91,14 +91,14 @@ public:
 	 * where x is an array-of-matrix expression. */
 	int dim1;
 
-	/** The number of i such that x[1][i][1] or x[i][1] is a valid
-	 * expression, where x is resp. an array-of-matrix or a matrix
-	 * expression. */
+	/** The number of i such that x[1][i][1], x[i][1] or x[i] is a valid
+	 * expression, where x is resp. an array-of-matrix, a matrix
+	 * or a column vector expression. */
 	int dim2;
 
-	/** The number of i such that x[1][1][i] or x[1][i] or x[i] is a
+	/** The number of i such that x[1][1][i], x[1][i] or x[i] is a
 	 * valid (scalar) expression, where x is resp. an array-of-matrix,
-	 * a matrix or a vector expression. */
+	 * a matrix or a row vector expression. */
 	int dim3;
 };
 
@@ -108,9 +108,9 @@ inline Dim::Type Dim::type() const {
 	if (dim1==0)
 		if (dim2==0)
 			if (dim3==0) return SCALAR;
-			else return COL_VECTOR;
+			else return ROW_VECTOR;
 		else
-			if (dim3==0) return ROW_VECTOR;
+			if (dim3==0) return COL_VECTOR;
 			else return MATRIX;
 	else
 		return MATRIX_ARRAY;
@@ -145,13 +145,14 @@ inline bool Dim::operator==(const Dim& d) const {
 	return dim1==d.dim1 && dim2==d.dim2 && dim3==d.dim3;
 }
 
-/**
+/*
  * \ingroup level1
  * \brief Indices for an expression.
  *
  * In the expression x[1][0][2], the triple of indices (1,0,2)
  * is represented by an object of this class.
  */
+/*
 class Indices {
 public:
 	Indices() : index1(-1), start_index2(-1), end_index2(-1), start_index3(-1), end_index3(-1) { }
@@ -175,7 +176,7 @@ public:
 	int end_index2;
 	int start_index3;
 	int end_index3;
-};
+};*/
 
 /** Streams out a dimension  */
 std::ostream& operator<<(std::ostream&, const Dim&);

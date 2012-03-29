@@ -34,13 +34,10 @@ Dim Dim::index_dim() const {
   if (dim.dim1>0) // array of matrices
 	  return Dim(0,dim.dim2,dim.dim3);
   else
-	  if (dim.dim2==0) // column vector
+	  if (dim.dim2==0 || dim.dim3==0) // vector
 		  return Dim(0,0,0);
-	  else
-		  if (dim.dim3==0)// row vector
-			  return Dim(0,0,0);
-		  else	// matrix
-			  return Dim(0,dim.dim3,0); // return a row vector
+	  else // matrix
+		  return Dim(0,0,dim.dim3); // return a row vector
 }
 
 /*

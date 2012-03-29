@@ -98,7 +98,7 @@ void TestDomain::vector01() {
 	TEST_ASSERT(d.size()==3);
 	d.add(Dim(0,0,2));
 	TEST_ASSERT(d.size()==5);
-	d.add(Dim(0,0,4));
+	d.add(Dim(0,4,0)); // row vector
 	TEST_ASSERT(d.size()==9);
 
 	d.vector(0)=v0();

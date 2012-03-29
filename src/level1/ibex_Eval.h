@@ -265,8 +265,8 @@ inline IntervalMatrix Eval::eval_matrix(const Domain& box) const {
 inline void Eval::Eval::index_fwd(const ExprIndex& e, const EvalLabel& x, EvalLabel& y) {
 	switch (e.type()) {
 	case Dim::SCALAR:       y.set_domain(x.v()[e.index]);     break;
-	case Dim::ROW_VECTOR:   y.set_domain(x.m().col(e.index)); break;
-	case Dim::COL_VECTOR:   y.set_domain(x.m().row(e.index)); break;
+	case Dim::ROW_VECTOR:   y.set_domain(x.m().row(e.index)); break;
+	case Dim::COL_VECTOR:   assert(false); /* see comment in ExprVector */; break;
 	case Dim::MATRIX:       y.set_domain(x.ma()[e.index]);    break;
 	case Dim::MATRIX_ARRAY: assert(false); /* impossible */   break;
 	}
@@ -275,7 +275,7 @@ inline void Eval::Eval::index_fwd(const ExprIndex& e, const EvalLabel& x, EvalLa
 inline void Eval::symbol_fwd(const ExprSymbol& s, EvalLabel& y) {
 	switch (s.type()) {
 	case Dim::SCALAR:       y.set_domain(box->get(s.key));          break;
-	case Dim::ROW_VECTOR:
+	case Dim::ROW_VECTOR:   // is it possible in the language?
 	case Dim::COL_VECTOR:   y.set_domain(box->vector(s.key));       break;
 	case Dim::MATRIX:       y.set_domain(box->matrix(s.key));       break;
 	case Dim::MATRIX_ARRAY: y.set_domain(box->matrix_array(s.key)); break;

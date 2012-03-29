@@ -65,7 +65,7 @@ class ExprNode {
   friend class Visitor;
 
   /** Deletes this instance. */
-  virtual ~ExprNode() { }
+  virtual ~ExprNode();
 
   /** Streams out this expression. */
   friend std::ostream& operator<<(std::ostream&, const ExprNode&);
@@ -91,10 +91,10 @@ class ExprNode {
   mutable ExprLabel *deco;
 
   /** Return true if this subexpression is the constant 0. */
-  virtual bool is_zero() const { return false; }
+  virtual bool is_zero() const;
 
   /** Return the type of this subexpression. */
-  Dim::Type type() const { return dim.type(); }
+  Dim::Type type() const;
 
   /** Indexing */
   const ExprIndex& operator[](int index) const;
@@ -143,10 +143,10 @@ class ExprIndex : public ExprNode {
    void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); }
 
   /** Create an equality constraint expr[i]=expr. */
-  const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+  const Equality& operator=(const ExprNode& expr) const;
 
   /** Create an equality constraint expr[i]=value. */
-  const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+  const Equality& operator=(const Interval& value) const;
 
    /** The sub-expression */
    const ExprNode& expr;
@@ -154,12 +154,11 @@ class ExprIndex : public ExprNode {
    /** The index. */
     const int index;
 
-   static const ExprIndex& new_(const ExprNode& subexpr, int index) { return *new ExprIndex(subexpr,index); }
+   static const ExprIndex& new_(const ExprNode& subexpr, int index);
 
  private:
    /** Create an indexed expression. */
-   ExprIndex(const ExprNode& subexpr, int index) : ExprNode(subexpr.context, subexpr.height+1, subexpr.size+1, subexpr.dim.index_dim()), expr(subexpr), index(index) { }
-
+   ExprIndex(const ExprNode& subexpr, int index);
 
 };
 
@@ -189,6 +188,15 @@ protected:
 /**
  * \ingroup level1
  * \brief Vector of expressions
+ *
+ * If e_1 and e_n are n column vectors of m elements,and v=[e_1 ... e_n] then
+ * the type of v is a mxn matrix. In particular, by indexing v we get a row
+ * of the matrix and not one of the e_i's. E.g., v[1] is the first row, not e_1 (the first column).
+ * This ensures the consistency of indexing system: if one expression e is a matrix,
+ * e[i] gives a row and e[i][j] the element (i,j) of the matrix.
+ *
+ * So v[i] can either be a scalar if v is a (row or column) vector, a row vector (if v is a matrix) or
+ * a matrix (if v is an array of matrices). A column vector is not possible here.
  */
 class ExprVector : public ExprNAryOp {
 public:
@@ -246,7 +254,7 @@ private:
  *   foo(a,1-a)=1
  * ...
  * \endcode
- * \a f(a,1-a) is an instance of Apply, where \link Apply::f f \endlink is "foo" and the
+ * \a f(a,1-a) is an instance of ExprApply, where \link ExprApply::func func \endlink is "foo" and the
  * actual arguments arg(0) and arg(1) are the subexpressions \a a and \a 1-a.
  *
  * \see #ibex::Function::operator()(const ExprNode&).
@@ -297,7 +305,7 @@ class ExprSymbol : public ExprNode {
   virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
 
   /** Deletes this instance. */
-  ~ExprSymbol() { free((char*) name); }
+  ~ExprSymbol();
 
   /** The symbol identifier. */
   const char* name;
@@ -307,11 +315,11 @@ class ExprSymbol : public ExprNode {
    * order of this symbol in the list of arguments. */
   int key;
 
-  static const ExprSymbol& new_(Function& expr, const char* name, const Dim& dim, int key) { return *new ExprSymbol(expr,name,dim,key); }
+  static const ExprSymbol& new_(Function& expr, const char* name, const Dim& dim, int key);
 
  private:
   /** Create a symbol. */
-  ExprSymbol(Function& expr, const char* name, const Dim& dim, int key) : ExprNode(expr,0,1,dim), name(strdup(name)), key(key) { }
+  ExprSymbol(Function& expr, const char* name, const Dim& dim, int key);
 
   /** Duplicate this symbol: forbidden. */
   ExprSymbol(const ExprSymbol&);
@@ -325,16 +333,16 @@ class ExprConstant : public ExprNode {
 
  public:
   /** Create a scalar constant. */
-  static const ExprConstant& new_scalar(Function& expr, const Interval& value) { return *new ExprConstant(expr,value); }
+  static const ExprConstant& new_scalar(Function& expr, const Interval& value);
 
   /** Create a vector constant. */
-  static const ExprConstant& new_vector(Function& expr, const IntervalVector& value, bool in_row) { return *new ExprConstant(expr,value,in_row); }
+  static const ExprConstant& new_vector(Function& expr, const IntervalVector& value, bool in_row);
 
   /** Create a matrix constant. */
-  static const ExprConstant& new_matrix(Function& expr, const IntervalMatrix& value) { return *new ExprConstant(expr,value); }
+  static const ExprConstant& new_matrix(Function& expr, const IntervalMatrix& value);
 
   /** Return a copy of a constant. */
-  const ExprConstant& copy() const { return *new ExprConstant(*this); }
+  const ExprConstant& copy() const;
 
   /** Return true if this constant is either 0, the null vector or the null matrix. */
   virtual bool is_zero() const;
@@ -344,15 +352,15 @@ class ExprConstant : public ExprNode {
 
   /** Return the value of the constant under the form of an #Interval.
    *  If the constant is a matrix, the first entry is returned (no error). */
-  const Interval& get_value() const { return value[0][0]; }
+  const Interval& get_value() const;
 
   /** Return the value of the constant under the form of an #IntervalVector.
    *  If the constant is a matrix, the first row is returned (no error). */
-  const IntervalVector& get_vector_value() const { return value[0]; }
+  const IntervalVector& get_vector_value() const;
 
   /** Return the value of the constant under the form of an IntervalMatrix.
    *  If the constant is not a matrix, the returned matrix is 1-row x 1-col. */
-  const IntervalMatrix& get_matrix_value() const { return value; }
+  const IntervalMatrix& get_matrix_value() const;
 
  private:
   friend class Visitor;
@@ -590,7 +598,7 @@ public:
 	const ExprNode& expr;
 
  protected:
-  ExprUnaryOp(const ExprNode& subexpr, const Dim& dim) : ExprNode(subexpr.context, subexpr.height+1, subexpr.size+1, dim), expr(subexpr) { }
+  ExprUnaryOp(const ExprNode& subexpr, const Dim& dim);
 
 };
 
@@ -1087,16 +1095,69 @@ class ExprAtanh : public ExprUnaryOp {
 };
 
 
-/** Indexing */
-inline const ExprIndex& ExprNode::operator[](int index) const {
-	return ExprIndex::new_(*this, index);
+/* ============================================================================
+ 	 	 	 	 	 	 	 inline implementation
+  ============================================================================*/
+
+inline ExprNode::~ExprNode() {
 }
 
+inline bool ExprNode::is_zero() const {
+	return false; }
+
+inline Dim::Type ExprNode::type() const {
+	return dim.type(); }
+
+inline const ExprIndex& ExprNode::operator[](int index) const {
+	return ExprIndex::new_(*this, index); }
+
+inline const Equality& ExprIndex::operator=(const ExprNode& expr) const {
+	return ((ExprNode&) *this)=expr; }
+
+inline const Equality& ExprIndex::operator=(const Interval& value) const  {
+	return ((ExprNode&) *this)=value; }
+
+inline const ExprIndex& ExprIndex::new_(const ExprNode& subexpr, int index) {
+	 return *new ExprIndex(subexpr,index); }
+
+inline ExprIndex::ExprIndex(const ExprNode& subexpr, int index)
+  : ExprNode(subexpr.context, subexpr.height+1, subexpr.size+1, subexpr.dim.index_dim()), expr(subexpr), index(index) { }
+
 inline bool ExprVector::in_rows() const {
-	return (dim.type()==Dim::ROW_VECTOR
-			||
-			get(0).type()==Dim::COL_VECTOR); // case *this is a matrix
-}
+	return (dim.type()==Dim::ROW_VECTOR || get(0).type()==Dim::COL_VECTOR); /* case *this is a matrix */ }
+
+inline ExprSymbol::~ExprSymbol() {
+	free((char*) name); }
+
+inline const ExprSymbol& ExprSymbol::new_(Function& expr, const char* name, const Dim& dim, int key) {
+	return *new ExprSymbol(expr,name,dim,key); }
+
+inline ExprSymbol::ExprSymbol(Function& expr, const char* name, const Dim& dim, int key)
+  : ExprNode(expr,0,1,dim), name(strdup(name)), key(key) { }
+
+inline const ExprConstant& ExprConstant::new_scalar(Function& expr, const Interval& value) {
+	return *new ExprConstant(expr,value); }
+
+inline const ExprConstant& ExprConstant::new_vector(Function& expr, const IntervalVector& value, bool in_row) {
+	return *new ExprConstant(expr,value,in_row); }
+
+inline const ExprConstant& ExprConstant::new_matrix(Function& expr, const IntervalMatrix& value) {
+	return *new ExprConstant(expr,value); }
+
+inline  const ExprConstant& ExprConstant::copy() const {
+	return *new ExprConstant(*this); }
+
+inline const Interval& ExprConstant::get_value() const {
+	return value[0][0]; }
+
+inline const IntervalVector& ExprConstant::get_vector_value() const {
+	return value[0]; }
+
+inline const IntervalMatrix& ExprConstant::get_matrix_value() const {
+	return value; }
+
+inline ExprUnaryOp::ExprUnaryOp(const ExprNode& subexpr, const Dim& dim) :
+		ExprNode(subexpr.context, subexpr.height+1, subexpr.size+1, dim), expr(subexpr) { }
 
 /** Addition */
 inline const ExprBinaryOp& operator+(const ExprNode& left, const ExprNode& right) {

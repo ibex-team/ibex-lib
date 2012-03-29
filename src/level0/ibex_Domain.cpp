@@ -51,14 +51,14 @@ Domain& Domain::operator=(const IntervalVector& x) {
 		case Dim::ROW_VECTOR:
 		{
 			IntervalVector& v=(*((IntervalVector*) *it2));
-			for (int j=0; j<dim.dim2; j++)
+			for (int j=0; j<dim.dim3; j++)
 				v[j]=x[i++];
 		}
 		break;
 		case Dim::COL_VECTOR:
 		{
 			IntervalVector& v=(*((IntervalVector*) *it2));
-			for (int j=0; j<dim.dim3; j++)
+			for (int j=0; j<dim.dim2; j++)
 				v[j]=x[i++];
 		}
 		break;
@@ -90,8 +90,8 @@ int Domain::add(const Dim& dim) {
 	symbol_dims.push_back(dim);
 	switch (dim.type()) {
 		case Dim::SCALAR:       doms.push_back(new Interval()); _size++; break;
-		case Dim::ROW_VECTOR:   doms.push_back(new IntervalVector(dim.dim2)); _size+=dim.dim2; break;
-		case Dim::COL_VECTOR:   doms.push_back(new IntervalVector(dim.dim3)); _size+=dim.dim3; break;
+		case Dim::ROW_VECTOR:   doms.push_back(new IntervalVector(dim.dim3)); _size+=dim.dim3; break;
+		case Dim::COL_VECTOR:   doms.push_back(new IntervalVector(dim.dim2)); _size+=dim.dim2; break;
 		case Dim::MATRIX:       doms.push_back(new IntervalMatrix(dim.dim2,dim.dim3)); _size+=dim.dim2*dim.dim3; break;
 		case Dim::MATRIX_ARRAY: doms.push_back(new IntervalMatrixArray(dim.dim1,dim.dim2,dim.dim3)); _size+=dim.dim1*dim.dim2*dim.dim3; break;
 		}
