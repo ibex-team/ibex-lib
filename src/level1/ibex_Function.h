@@ -49,16 +49,16 @@ public:
 	Function();
 
 	/**
+	 * \brief Creates a function named \a name.
+	 */
+	Function(const char* name);
+
+	/**
 	 * \brief Delete the function.
 	 *
 	 * This will delete all the associated expression nodes (including symbols).
 	 */
 	~Function();
-
-	/**
-	 * \brief Creates a function named \a name.
-	 */
-	Function(const char* name);
 
 	/**
 	 * \brief Transform f into (f_1,...f_n)

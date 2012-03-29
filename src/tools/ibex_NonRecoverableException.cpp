@@ -10,11 +10,12 @@
  * ---------------------------------------------------------------------------- */
 
 #include "ibex_NonRecoverableException.h"
+#include <cassert>
 
 namespace ibex {
 
 NonRecoverableException::NonRecoverableException(std::string msg) : msg(msg) {
-
+	assert(false);
 }
 
 std::string NonRecoverableException::message() { return msg; }

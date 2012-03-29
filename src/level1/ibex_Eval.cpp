@@ -103,10 +103,10 @@ void Eval::Eval::vector_fwd(const ExprVector& v, const EvalLabel** compL, EvalLa
 		for (int i=0; i<v.length(); i++) y.v()[i]=compL[i]->i();
 	}
 	else {
-		if (v.in_rows())
-			for (int i=0; i<v.length(); i++) y.m().set_row(i,compL[i]->v());
-		else
+		if (v.row_vector())
 			for (int i=0; i<v.length(); i++) y.m().set_col(i,compL[i]->v());
+		else
+			for (int i=0; i<v.length(); i++) y.m().set_row(i,compL[i]->v());
 	}
 }
 

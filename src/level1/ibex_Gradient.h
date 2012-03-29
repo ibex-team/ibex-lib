@@ -76,9 +76,9 @@ protected:
 		  c.deco = new GradLabel(c.dim);
 	  }
 
-	  /** Visit an unary operator. */
-	  virtual void visit(const ExprUnaryOp& u) {
-		  u.deco = new GradLabel(u.dim);
+	  /** Visit a n-ary operator. */
+	  virtual void visit(const ExprNAryOp& a) {
+		  a.deco = new GradLabel(a.dim);
 	  }
 
 	  /** Visit a binary operator. */
@@ -86,10 +86,11 @@ protected:
 		  b.deco = new GradLabel(b.dim);
 	  }
 
-	  /** Visit a function application. */
-	  virtual void visit(const ExprApply& a) {
-		  a.deco = new GradLabel(a.dim);
+	  /** Visit an unary operator. */
+	  virtual void visit(const ExprUnaryOp& u) {
+		  u.deco = new GradLabel(u.dim);
 	  }
+
 };
 
 /**

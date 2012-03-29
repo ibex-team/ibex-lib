@@ -27,13 +27,14 @@ class FwdAlgorithm {
 	void index_fwd(const ExprIndex&, const T& exprL, T& result);
 
 	/** TO BE DEFINED (by the subclass) */
-	void vector_fwd(const ExprVector&, const T** compL, T& result);
-
-	/** TO BE DEFINED (by the subclass) */
 	void symbol_fwd(const ExprSymbol&, T& result);
 
 	/** TO BE DEFINED (by the subclass) */
 	void cst_fwd(const ExprConstant&, T& result);
+
+	/*==================== n-ary operators =========================*/
+	/** TO BE DEFINED (by the subclass) */
+	void vector_fwd(const ExprVector&, const T** compL, T& result);
 
 	/** TO BE DEFINED (by the subclass) */
 	void apply_fwd(const ExprApply&, const T** argL, T& result);
@@ -60,6 +61,7 @@ class FwdAlgorithm {
 	/** TO BE DEFINED (by the subclass) */
 	void atan2_fwd(const ExprAtan2&, const T& leftL, const T& rightL, T& result);
 
+	/*==================== unary operators =========================*/
 	/** TO BE DEFINED (by the subclass) */
 	void minus_fwd(const ExprMinus&, const T& exprL, T& result);
 

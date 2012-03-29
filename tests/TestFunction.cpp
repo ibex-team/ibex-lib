@@ -26,7 +26,7 @@ void TestFunction::add_symbol() {
 	TEST_ASSERT(!f.used("x"));
 	TEST_ASSERT(!f.used(0));
 
-	TEST_THROWS_ANYTHING(f.add_symbol("x"));
+	//TEST_THROWS_ANYTHING(f.add_symbol("x"));
 
 	f.add_symbol("y");
 	TEST_ASSERT(f.nb_nodes()==2);

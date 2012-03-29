@@ -35,6 +35,8 @@ public:
 		TEST_ADD(TestExpr::mulxy04);
 		TEST_ADD(TestExpr::mulxy05);
 		TEST_ADD(TestExpr::mulxy06);
+		TEST_ADD(TestExpr::mulxy07);
+		TEST_ADD(TestExpr::mulxy08);
 
 		TEST_ADD(TestExpr::dag01);
 
@@ -47,7 +49,14 @@ public:
 		TEST_ADD(TestExpr::cst04);
 		TEST_ADD(TestExpr::cst05);
 
-		TEST_ADD(TestExpr::vector);
+		TEST_ADD(TestExpr::vector01);
+		TEST_ADD(TestExpr::vector02);
+
+		TEST_ADD(TestExpr::index01);
+		TEST_ADD(TestExpr::index02);
+		TEST_ADD(TestExpr::index03);
+
+		TEST_ADD(TestExpr::apply01);
 	}
 
 	void symbol();
@@ -64,6 +73,8 @@ public:
 	void mulxy04();
 	void mulxy05();
 	void mulxy06();
+	void mulxy07();
+	void mulxy08();
 
 	void dag01();
 
@@ -76,7 +87,14 @@ public:
 	void cst04();
 	void cst05();
 
-	void vector();
+	void vector01();
+	void vector02();
+
+	void index01();
+	void index02();
+	void index03();
+
+	void apply01();
 };
 
 } // end namespace

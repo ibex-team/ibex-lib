@@ -213,11 +213,11 @@ public:
 	 */
 	static const ExprVector& new_(const ExprNode& e1, const ExprNode& e2, bool in_rows);
 
-	/** \brief In rows or columns?
+	/** \brief In a row or a column?
 	 *
-	 * \note A matrix is "in rows" if it is a vector of column vectors.
+	 * \note A matrix is a "row vector" if it is a vector of column vectors.
 	 */
-	bool in_rows() const;
+	bool row_vector() const;
 
 	/** Get the ith component.
 	 *
@@ -1123,7 +1123,7 @@ inline const ExprIndex& ExprIndex::new_(const ExprNode& subexpr, int index) {
 inline ExprIndex::ExprIndex(const ExprNode& subexpr, int index)
   : ExprNode(subexpr.context, subexpr.height+1, subexpr.size+1, subexpr.dim.index_dim()), expr(subexpr), index(index) { }
 
-inline bool ExprVector::in_rows() const {
+inline bool ExprVector::row_vector() const {
 	return (dim.type()==Dim::ROW_VECTOR || get(0).type()==Dim::COL_VECTOR); /* last case occurs if *this is a matrix */ }
 
 inline ExprSymbol::~ExprSymbol() {

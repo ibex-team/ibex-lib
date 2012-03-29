@@ -17,10 +17,10 @@ void HC4ReviseAlgo::vector_bwd(const ExprVector& v, EvalLabel** compL, const Eva
 		for (int i=0; i<v.length(); i++) compL[i]->i() &= y.v()[i];
 	}
 	else {
-		if (v.in_rows())
-			for (int i=0; i<v.length(); i++) compL[i]->v()=y.m().row(i);
-		else
+		if (v.row_vector())
 			for (int i=0; i<v.length(); i++) compL[i]->v()=y.m().col(i);
+		else
+			for (int i=0; i<v.length(); i++) compL[i]->v()=y.m().row(i);
 	}
 }
 
@@ -47,8 +47,8 @@ void HC4ReviseAlgo::contract(Domain& box) {
 
 	switch(root.type()) {
 	case Dim::SCALAR:       root_label.set_domain(right_cst); break;
-	case Dim::ROW_VECTOR:   root_label.set_domain(IntervalVector(root.dim.dim2,right_cst)); break;
-	case Dim::COL_VECTOR:   root_label.set_domain(IntervalVector(root.dim.dim3,right_cst)); break;
+	case Dim::ROW_VECTOR:   root_label.set_domain(IntervalVector(root.dim.dim3,right_cst)); break;
+	case Dim::COL_VECTOR:   root_label.set_domain(IntervalVector(root.dim.dim2,right_cst)); break;
 	case Dim::MATRIX:       root_label.set_domain(IntervalMatrix(root.dim.dim2,root.dim.dim3,right_cst)); break;
 	case Dim::MATRIX_ARRAY: assert(false); /* impossible */ break;
 	}

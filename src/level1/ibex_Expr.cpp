@@ -42,7 +42,7 @@ Dim mul_dim(const ExprNode& left, const ExprNode& right) {
 	if (l.type()==Dim::SCALAR) // scalar multiplication.
 		return r;
 	else {
-		if (r.dim3==0)
+		if (r.type()==Dim::SCALAR)
 			throw NonRecoverableException("Cannot right-multiply by a scalar");
 		else if (l.dim3!=r.dim2)
 			throw NonRecoverableException("Mismatched dimensions in matrix multiplication");
@@ -98,7 +98,7 @@ Dim vec_dim(const ExprNode** comp, int n, bool in_a_row) {
 		}
 	}
 	error:
-	throw NonRecoverableException("Components of a vector must have the same dimension");
+	throw NonRecoverableException("Impossible to form a vector with these components");
 }
 
 class SizeofDAG : public FunctionVisitor {
