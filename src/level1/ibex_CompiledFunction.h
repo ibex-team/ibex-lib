@@ -82,21 +82,6 @@ private:
 		visit(i.expr);
 	}
 
-	void visit(const ExprVector& v) {
-		code[ptr]=VEC;
-		nodes[ptr]=&v;
-		nb_args[ptr]=v.length();
-		args[ptr]=new ExprLabel*[v.length()+1];
-		args[ptr][0]=v.deco;
-		for (int i=1; i<v.length(); i++)
-			args[ptr][i]=v.get(i).deco;
-
-		ptr++;
-		for (int i=0; i<v.length(); i++) {
-			visit(v.get(i));
-		}
-	}
-
 	void visit(const ExprSymbol& v) {
 		code[ptr]=SYM;
 		nodes[ptr]=&v;
@@ -118,16 +103,19 @@ private:
 		ptr++;
 	}
 
-	void visit(const ExprUnaryOp& u) {
-		u.acceptVisitor(*this);
-		nodes[ptr]=&u;
-		nb_args[ptr]=1;
-		args[ptr]=new ExprLabel*[2];
-		args[ptr][0]=u.deco;
-		args[ptr][1]=u.expr.deco;
+	void visit(const ExprNAryOp& e) {
+		e.acceptVisitor(*this);
+		nodes[ptr]=&e;
+		nb_args[ptr]=e.nb_args;
+		args[ptr]=new ExprLabel*[e.nb_args+1];
+		args[ptr][0]=e.deco;
+		for (int i=1; i<e.nb_args; i++)
+			args[ptr][i]=e.arg(i).deco;
 
 		ptr++;
-		visit(u.expr);
+		for (int i=0; i<e.nb_args; i++) {
+			visit(e.arg(i));
+		}
 	}
 
 	void visit(const ExprBinaryOp& b) {
@@ -144,21 +132,21 @@ private:
 		visit(b.right);
 	}
 
-	void visit(const ExprApply& a) {
-		code[ptr]=APPLY;
-		nodes[ptr]=&a;
-		nb_args[ptr]=a.nb_args;
-		args[ptr]=new ExprLabel*[a.nb_args];
-		args[ptr][0]=a.deco;
-		for (int i=0; i<a.nb_args; i++) {
-			args[ptr][i]=a.args[i]->deco;
-		}
+	void visit(const ExprUnaryOp& u) {
+		u.acceptVisitor(*this);
+		nodes[ptr]=&u;
+		nb_args[ptr]=1;
+		args[ptr]=new ExprLabel*[2];
+		args[ptr][0]=u.deco;
+		args[ptr][1]=u.expr.deco;
 
 		ptr++;
-		for (int i=0; i<a.nb_args; i++) {
-			visit(*a.args[i]);
-		}
+		visit(u.expr);
 	}
+
+	void visit(const ExprVector&){ code[ptr]=VEC; }
+
+	void visit(const ExprApply&) { code[ptr]=APPLY; }
 
 	void visit(const ExprAdd&)   { code[ptr]=ADD; }
 

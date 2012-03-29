@@ -49,6 +49,13 @@ public:
 	Function();
 
 	/**
+	 * \brief Delete the function.
+	 *
+	 * This will delete all the associated expression nodes (including symbols).
+	 */
+	~Function();
+
+	/**
 	 * \brief Creates a function named \a name.
 	 */
 	Function(const char* name);

@@ -28,6 +28,9 @@ template<typename T>
 class Decorator : public FunctionVisitor {
 
 public:
+
+	virtual ~Decorator() { }
+
 	/**
 	 * \brief Decorate the function f with object of type "T".
 	 */

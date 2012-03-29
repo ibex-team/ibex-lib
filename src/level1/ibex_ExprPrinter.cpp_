@@ -32,14 +32,6 @@ public:
 		os << e.expr << "[" << e.index << "]";
 	}
 
-	virtual void visit(const ExprVector& e) {
-		for (int i=0; i<e.length(); i++) {
-			visit(e.get(i));
-			if (i<e.length()-1) os << ",";
-		}
-		os << ")";
-	}
-
 	virtual void visit(const ExprSymbol& e) {
 		os << e.name;
 	}
@@ -47,11 +39,15 @@ public:
 	virtual void visit(const ExprConstant& e) {
 		switch (e.type()) {
 		case Dim::SCALAR:     os << e.get_value(); break;
-		case Dim::COL_VECTOR: 
-		case Dim::ROW_VECTOR: os << e.get_vector_value(); break;
+		case Dim::COL_VECTOR: os << e.get_vector_value(); break;
+		case Dim::ROW_VECTOR: os << e.get_vector_value() << "'"; break;
 		case Dim::MATRIX:     os << e.get_matrix_value(); break;
 		default: assert(false); break;
 		}
+	}
+
+	virtual void visit(const ExprNAryOp& e) {
+		assert(false);
 	}
 
 	virtual void visit(const ExprUnaryOp& e) {
@@ -60,6 +56,14 @@ public:
 
 	virtual void visit(const ExprBinaryOp& e) {
 		assert(false);
+	}
+
+	virtual void visit(const ExprVector& e) {
+		for (int i=0; i<e.length(); i++) {
+			visit(e.get(i));
+			if (i<e.length()-1) os << ",";
+		}
+		os << ")";
 	}
 
 	virtual void visit(const ExprApply& a) {

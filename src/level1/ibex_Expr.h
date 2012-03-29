@@ -1124,7 +1124,7 @@ inline ExprIndex::ExprIndex(const ExprNode& subexpr, int index)
   : ExprNode(subexpr.context, subexpr.height+1, subexpr.size+1, subexpr.dim.index_dim()), expr(subexpr), index(index) { }
 
 inline bool ExprVector::in_rows() const {
-	return (dim.type()==Dim::ROW_VECTOR || get(0).type()==Dim::COL_VECTOR); /* case *this is a matrix */ }
+	return (dim.type()==Dim::ROW_VECTOR || get(0).type()==Dim::COL_VECTOR); /* last case occurs if *this is a matrix */ }
 
 inline ExprSymbol::~ExprSymbol() {
 	free((char*) name); }

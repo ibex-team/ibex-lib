@@ -43,10 +43,20 @@ public:
 	EvalLabel(const Dim& dim) {
 		switch (dim.type()) {
 		case Dim::SCALAR:       domain = new Interval(); break;
-		case Dim::ROW_VECTOR:   domain = new IntervalVector(dim.size2()); break;
-		case Dim::COL_VECTOR:   domain = new IntervalVector(dim.size3()); break;
-		case Dim::MATRIX:       domain = new IntervalMatrix(dim.size2(),dim.size1()); break;
+		case Dim::ROW_VECTOR:   domain = new IntervalVector(dim.size3()); break;
+		case Dim::COL_VECTOR:   domain = new IntervalVector(dim.size2()); break;
+		case Dim::MATRIX:       domain = new IntervalMatrix(dim.size2(),dim.size3()); break;
 		case Dim::MATRIX_ARRAY: throw NonRecoverableException("Matrix arrays not allowed in expressions"); break;
+		}
+	}
+
+	void cleanup(const Dim& dim) {
+		switch (dim.type()) {
+		case Dim::SCALAR:       delete (Interval*) domain; break;
+		case Dim::ROW_VECTOR:
+		case Dim::COL_VECTOR:   delete (IntervalVector*) domain; break;
+		case Dim::MATRIX:       delete (IntervalMatrix*) domain; break;
+		case Dim::MATRIX_ARRAY : assert(false); break;
 		}
 	}
 
@@ -72,62 +82,6 @@ private:
 
 /**
  * \ingroup level1
- * \brief Decorates a function for basic evaluation.
- */
-class EvalDecorator : public Decorator<EvalLabel> {
-public:
-	void decorate(const Function& f) const {
-		if (f.expr().deco!=NULL) {
-			throw NonRecoverableException("Cannot re-decorate a function");
-		}
-		((EvalDecorator&) *this).visit(f.expr()); // // cast -> we know *this will not be modified
-	}
-
-protected:
-	 /** Visit an expression. */
-	  virtual void visit(const ExprNode& n) {
-		  n.acceptVisitor(*this);
-	  }
-
-	  /** Visit an indexed expression. */
-	  virtual void visit(const ExprIndex& idx) {
-		  idx.deco = new EvalLabel(); // domain of this node is a reference
-	  }
-
-	  /** Visit a vector of expressions. */
-	  virtual void visit(const ExprVector& v) {
-		  v.deco = new EvalLabel(v.dim);
-	  }
-
-	  /** Visit a symbol. */
-	  virtual void visit(const ExprSymbol& s) {
-		  s.deco = new EvalLabel();
-	  }
-
-	  /** Visit a constant. */
-	  virtual void visit(const ExprConstant& c) {
-		  c.deco = new EvalLabel(c.dim);
-	  }
-
-	  /** Visit an unary operator. */
-	  virtual void visit(const ExprUnaryOp& u) {
-		  u.deco = new EvalLabel(u.dim);
-	  }
-
-	  /** Visit a binary operator. */
-	  virtual void visit(const ExprBinaryOp& b) {
-		  b.deco = new EvalLabel(b.dim);
-	  }
-
-	  /** Visit a function application. */
-	  virtual void visit(const ExprApply& a) {
-		  a.deco = new EvalLabel(a.dim);
-	  }
-
-};
-
-/**
- * \ingroup level1
  * \brief Evaluation label for function application nodes.
  *
  * An function application node has a specific label that, in addition
@@ -138,8 +92,41 @@ class EvalApplyLabel : public EvalLabel {
 public:
 	EvalApplyLabel(const Dim& dim, Eval& fevl, Domain& fbox) : EvalLabel(dim), fbox(fbox), fevl(fevl) { }
 
-	Domain& fbox;    // for each function that is called (possibly several times) in an expression, a box is created
-	Eval& fevl; //  for each function, there is an associated evaluator
+	Domain& fbox;  // for each function that is called (possibly several times) in an expression, a box is created
+	Eval& fevl;    //  for each function, there is an associated evaluator
+};
+
+/**
+ * \ingroup level1
+ * \brief Decorates/undecorates a function for basic evaluation.
+ */
+class EvalDecorator : public Decorator<EvalLabel> {
+public:
+	void decorate(const Function& f) const;
+
+	void undecorate(const Function& f) const;
+
+protected:
+	/* Visit an expression. */
+	virtual void visit(const ExprNode& n);
+	/* Visit an indexed expression. */
+	virtual void visit(const ExprIndex& idx);
+	/* Visit a symbol. */
+	virtual void visit(const ExprSymbol& s);
+	/* Visit a constant. */
+	virtual void visit(const ExprConstant& c);
+	/* Visit an n-ary operator. */
+	virtual void visit(const ExprNAryOp&);
+	/* Visit an unary operator. */
+	virtual void visit(const ExprUnaryOp&);
+	/* Visit a binary operator. */
+	virtual void visit(const ExprBinaryOp&);
+	/* Visit a vector of expressions. */
+	virtual void visit(const ExprVector& v);
+	/* Visit a function application. */
+	virtual void visit(const ExprApply&);
+
+	mutable bool undecorating; // tells whether "decorate" or "undecorate" has been called
 };
 
 /**

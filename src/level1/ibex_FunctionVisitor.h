@@ -20,11 +20,15 @@ namespace ibex {
 class ExprNode;
 
 class ExprIndex;
-class ExprVector;
 class ExprSymbol;
 class ExprConstant;
-
+class ExprNAryOp;
 class ExprBinaryOp;
+class ExprUnaryOp;
+
+class ExprVector;
+class ExprApply;
+
 class ExprAdd;
 class ExprMul;
 class ExprSub;
@@ -33,7 +37,6 @@ class ExprMax;
 class ExprMin;
 class ExprAtan2;
 
-class ExprUnaryOp;
 class ExprMinus;
 class ExprSign;
 class ExprAbs;
@@ -54,8 +57,6 @@ class ExprAtan;
 class ExprAcosh;
 class ExprAsinh;
 class ExprAtanh;
-
-class ExprApply;
 
 /*
  * \ingroup level1
@@ -81,28 +82,37 @@ class FunctionVisitor {
   /** Visit an indexed expression. */
   virtual void visit(const ExprIndex&)=0;
 
-  /** Visit a vector of expressions. */
-  virtual void visit(const ExprVector&)=0;
-
   /** Visit a symbol. */
   virtual void visit(const ExprSymbol&)=0;
 
   /** Visit a constant. */
   virtual void visit(const ExprConstant&)=0;
 
-  /** Visit an unary operator. */
-  virtual void visit(const ExprUnaryOp&)=0;
+  /** Visit a n-ary operator. */
+  virtual void visit(const ExprNAryOp&)=0;
 
   /** Visit a binary operator. */
   virtual void visit(const ExprBinaryOp&)=0;
 
-  /** Visit a function application. */
-  virtual void visit(const ExprApply&)=0;
-
+  /** Visit an unary operator. */
+  virtual void visit(const ExprUnaryOp&)=0;
 
   /*===============================================================*/
   /*                optional functions                             */
   /*===============================================================*/
+
+  /*==================== n-ary operators =========================*/
+  /** Visit a vector of expressions.
+   * By default: call visit(const ExprNAryOp& e). */
+   virtual void visit(const ExprVector& e) {
+	   visit((const ExprNAryOp&) e);
+   }
+
+   /** Visit a function application.
+   * By default: call visit(const ExprNAryOp& e). */
+   virtual void visit(const ExprApply& e) {
+	   visit((const ExprNAryOp&) e);
+   }
 
   /*==================== binary operators =========================*/
   /** Visit an addition (Implementation is not mandatory).

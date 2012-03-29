@@ -32,11 +32,6 @@ public:
 		visit(e.expr);
 	}
 
-	virtual void visit(const ExprVector& e) {
-		for (int i=0; i<e.length(); i++)
-			visit(e.get(i));
-	}
-
 	virtual void visit(const ExprSymbol& e) {
 		keys.push_back(e.key);
 	}
@@ -45,8 +40,11 @@ public:
 		// do nothing
 	}
 
-	virtual void visit(const ExprUnaryOp& e) {
-		visit(e.expr);
+
+	virtual void visit(const ExprNAryOp& e) {
+		for (int i=0; i<e.nb_args; i++) {
+			visit(*e.args[i]);
+		}
 	}
 
 	virtual void visit(const ExprBinaryOp& e) {
@@ -54,10 +52,8 @@ public:
 		visit(e.right);
 	}
 
-	virtual void visit(const ExprApply& a) {
-		for (int i=0; i<a.nb_args; i++) {
-			visit(*a.args[i]);
-		}
+	virtual void visit(const ExprUnaryOp& e) {
+		visit(e.expr);
 	}
 };
 
@@ -70,6 +66,10 @@ Function::Function() : name(NULL), root(NULL), key_count(0) {
 
 Function::Function(const char* name) : name(strdup(name)), root(NULL), key_count(0) {
 
+}
+
+Function::~Function() {
+	cerr << "warning: ~Function() not implemented.";
 }
 
 Function* Function::separate() const {
