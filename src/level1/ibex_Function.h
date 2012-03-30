@@ -128,6 +128,11 @@ public:
 	int nb_nodes() const;
 
 	/**
+	 * \brief Return the ith node.
+	 */
+	const ExprNode& node(int i) const;
+
+	/**
 	 * \brief Return the name of the ith symbol.
 	 *
 	 * Corresponds to the ith parameter of the function.
@@ -182,5 +187,10 @@ inline bool Function::used(int i) const {
 inline const ExprSymbol& Function::symbol(int i) const {
 	return *order2info[i];
 }
+
+inline const ExprNode& Function::node(int i) const {
+	return *exprnodes[i];
+}
+
 } // namespace ibex
 #endif // _IBEX_FUNCTION_H_

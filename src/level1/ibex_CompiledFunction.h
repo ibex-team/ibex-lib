@@ -34,7 +34,7 @@ public:
 	 * Create a compiled version of the function \a f, where
 	 * each node is decorated with an object of type "T" via the decorator \a d.
 	 */
-	CompiledFunction(const Function& f, const Decorator<T>& d) : expr(f.expr()) {
+	CompiledFunction(const Function& f, const Decorator<T>& d) : expr(f.expr()), f(f) {
 		d.decorate(f);
 		code=new operation[expr.size];
 		args=new ExprLabel**[expr.size];
@@ -60,10 +60,14 @@ public:
 	void backward(const V& algo) const;
 
 	/**
-	 * \brief The root node of the expression
+	 * \brief The root node of the function expression
 	 */
 	const ExprNode& expr;
 
+	/**
+	 * The function
+	 */
+	const Function& f;
 private:
 
 	void visit(const ExprNode& e) {

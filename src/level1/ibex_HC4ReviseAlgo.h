@@ -70,6 +70,10 @@ protected:
 	inline void acosh_bwd (const ExprAcosh& e, EvalLabel& exprL, const EvalLabel& result)                    { proj_acosh(result.i(),exprL.i()); }
 	inline void asinh_bwd (const ExprAsinh& e, EvalLabel& exprL, const EvalLabel& result)                    { proj_asinh(result.i(),exprL.i()); }
 	inline void atanh_bwd (const ExprAtanh& e, EvalLabel& exprL, const EvalLabel& result)                    { proj_atanh(result.i(),exprL.i()); }
+
+private:
+	void write(IntervalVector&);
+
 };
 
 

@@ -29,41 +29,9 @@ class EvalLabel : public ExprLabel {
 public:
 
 	/**
-	 * Creates a label with no domain.
-	 * This type of label corresponds to symbols and indexes.
-	 * These nodes do not have their own domains, their
-	 * domains are references that are set dynamically (depends
-	 * on the input box).
+	 * Creates a label with a domain.
 	 */
-	EvalLabel() : domain(NULL) { }
-
-	/**
-	 * Creates a label with a domain of the specified dimension.
-	 */
-	EvalLabel(const Dim& dim) {
-		switch (dim.type()) {
-		case Dim::SCALAR:       domain = new Interval(); break;
-		case Dim::ROW_VECTOR:   domain = new IntervalVector(dim.size3()); break;
-		case Dim::COL_VECTOR:   domain = new IntervalVector(dim.size2()); break;
-		case Dim::MATRIX:       domain = new IntervalMatrix(dim.size2(),dim.size3()); break;
-		case Dim::MATRIX_ARRAY: throw NonRecoverableException("Matrix arrays not allowed in expressions"); break;
-		}
-	}
-
-	void cleanup(const Dim& dim) {
-		switch (dim.type()) {
-		case Dim::SCALAR:       delete (Interval*) domain; break;
-		case Dim::ROW_VECTOR:
-		case Dim::COL_VECTOR:   delete (IntervalVector*) domain; break;
-		case Dim::MATRIX:       delete (IntervalMatrix*) domain; break;
-		case Dim::MATRIX_ARRAY : assert(false); break;
-		}
-	}
-
-	inline void set_domain(const Interval& x)            { domain = (void*) &x; }
-	inline void set_domain(const IntervalVector& x)      { domain = (void*) &x; }
-	inline void set_domain(const IntervalMatrix& x)      { domain = (void*) &x; }
-	inline void set_domain(const IntervalMatrixArray& x) { domain = (void*) &x; }
+	EvalLabel(void* domain) : domain(domain) {	}
 
 	inline Interval& i()        { return *(Interval*) domain; }
 	inline IntervalVector& v()  { return *(IntervalVector*) domain; }
@@ -90,7 +58,7 @@ private:
  */
 class EvalApplyLabel : public EvalLabel {
 public:
-	EvalApplyLabel(const Dim& dim, Eval& fevl, Domain& fbox) : EvalLabel(dim), fbox(fbox), fevl(fevl) { }
+	EvalApplyLabel(void* domain, Eval& fevl, Domain& fbox) : EvalLabel(domain), fbox(fbox), fevl(fevl) { }
 
 	Domain& fbox;  // for each function that is called (possibly several times) in an expression, a box is created
 	Eval& fevl;    //  for each function, there is an associated evaluator
@@ -102,11 +70,15 @@ public:
  */
 class EvalDecorator : public Decorator<EvalLabel> {
 public:
-	void decorate(const Function& f) const;
 
-	void undecorate(const Function& f) const;
+	void decorate(const Function& f);
+
+	void undecorate(const Function& f);
 
 protected:
+	mutable bool undecorating; // tells whether "decorate" or "undecorate" has been called
+	bool is_index;
+
 	/* Visit an expression. */
 	virtual void visit(const ExprNode& n);
 	/* Visit an indexed expression. */
@@ -126,7 +98,6 @@ protected:
 	/* Visit a function application. */
 	virtual void visit(const ExprApply&);
 
-	mutable bool undecorating; // tells whether "decorate" or "undecorate" has been called
 };
 
 /**
@@ -154,30 +125,33 @@ public:
 	 */
 	Eval(const CompiledFunction<EvalLabel>& f);
 
+	/**
+	 * \brief Delete the evaluator.
+	 */
 	~Eval();
 
 	/**
-	 * Run the forward algorithm (ignore the result).
+	 * Run the forward algorithm.
 	 */
-	void forward(const Domain& box) const;
+	EvalLabel& forward(const IntervalVector& box) const;
 
 	/**
 	 * Run the forward algorithm and return the
 	 * domain of the root node, that must be scalar.
 	 */
-	Interval eval(const Domain& box) const;
+	Interval eval(const IntervalVector& box) const;
 
 	/**
 	 * Run the forward algorithm and return the
 	 * domain of the root node, that must be a vector.
 	 */
-	IntervalVector eval_vector(const Domain& box) const;
+	IntervalVector eval_vector(const IntervalVector& box) const;
 
 	/**
 	 * Run the forward algorithm and return the
 	 * domain of the root node, that must be a matrix.
 	 */
-	IntervalMatrix eval_matrix(const Domain& box) const;
+	IntervalMatrix eval_matrix(const IntervalVector& box) const;
 
 	/**
 	 * The compiled function.
@@ -187,6 +161,7 @@ public:
 protected:
 
 	friend class CompiledFunction<EvalLabel>;
+	friend class EvalDecorator;
 
 	inline void index_fwd(const ExprIndex& e, const EvalLabel& x, EvalLabel& y);
 	       void vector_fwd(const ExprVector& v, const EvalLabel** compL, EvalLabel& y);
@@ -221,7 +196,10 @@ protected:
 	inline void asinh_fwd(const ExprAsinh&, const EvalLabel& x, EvalLabel& y);
 	inline void atanh_fwd(const ExprAtanh&, const EvalLabel& x, EvalLabel& y);
 
-	mutable const Domain* box; // current box
+	mutable EvalLabel** symbolLabels; // domains of the symbols
+
+private:
+	void read(const IntervalVector&) const;
 
 	bool proper_compiled_func;
 };
@@ -230,52 +208,34 @@ protected:
  	 	 	 	 	 	 	 implementation
   ============================================================================*/
 
-inline void Eval::forward(const Domain& box) const {
-	f.forward(*this);
+inline EvalLabel& Eval::forward(const IntervalVector& box) const {
+	read(box); // load the domains of all the symbols
+	return f.forward(*this);
 }
 
-inline Interval Eval::eval(const Domain& box) const {
-	this->box = &box;
-	return f.forward(*this).i();
+inline Interval Eval::eval(const IntervalVector& box) const {
+	return forward(box).i();
 }
 
-inline IntervalVector Eval::eval_vector(const Domain& box) const {
-	this->box = &box;
-	return f.forward(*this).v();
+inline IntervalVector Eval::eval_vector(const IntervalVector& box) const {
+	return forward(box).v();
 }
 
-inline IntervalMatrix Eval::eval_matrix(const Domain& box) const {
-	this->box = &box;
-	return f.forward(*this).m();
+inline IntervalMatrix Eval::eval_matrix(const IntervalVector& box) const {
+	return forward(box).m();
 }
 
-inline void Eval::Eval::index_fwd(const ExprIndex& e, const EvalLabel& x, EvalLabel& y) {
-	switch (e.type()) {
-	case Dim::SCALAR:       y.set_domain(x.v()[e.index]);     break;
-	case Dim::ROW_VECTOR:   y.set_domain(x.m().row(e.index)); break;
-	case Dim::COL_VECTOR:   assert(false); /* see comment in ExprVector */; break;
-	case Dim::MATRIX:       y.set_domain(x.ma()[e.index]);    break;
-	case Dim::MATRIX_ARRAY: assert(false); /* impossible */   break;
-	}
-}
+inline void Eval::Eval::index_fwd(const ExprIndex& e, const EvalLabel& x, EvalLabel& y) { }
 
-inline void Eval::symbol_fwd(const ExprSymbol& s, EvalLabel& y) {
-	switch (s.type()) {
-	case Dim::SCALAR:       y.set_domain(box->get(s.key));          break;
-	case Dim::ROW_VECTOR:   // is it possible in the language?
-	case Dim::COL_VECTOR:   y.set_domain(box->vector(s.key));       break;
-	case Dim::MATRIX:       y.set_domain(box->matrix(s.key));       break;
-	case Dim::MATRIX_ARRAY: y.set_domain(box->matrix_array(s.key)); break;
-	}
-}
+inline void Eval::symbol_fwd(const ExprSymbol& s, EvalLabel& y) { }
 
 inline void Eval::cst_fwd(const ExprConstant& c, EvalLabel& y) {
 	switch (c.type()) {
-	case Dim::SCALAR:       y.set_domain(c.get_value());         break;
+	case Dim::SCALAR:       y.i() = c.get_value();         break;
 	case Dim::ROW_VECTOR:
-	case Dim::COL_VECTOR:   y.set_domain(c.get_vector_value());  break;
-	case Dim::MATRIX:       y.set_domain(c.get_matrix_value());  break;
-	case Dim::MATRIX_ARRAY: assert(false); /* impossible */      break;
+	case Dim::COL_VECTOR:   y.v() = c.get_vector_value();  break;
+	case Dim::MATRIX:       y.m() = c.get_matrix_value();  break;
+	case Dim::MATRIX_ARRAY: assert(false); /* impossible */ break;
 	}
 }
 inline void Eval::add_fwd(const ExprAdd&, const EvalLabel& x1, const EvalLabel& x2, EvalLabel& y)     { y.i()=x1.i()+x2.i(); }

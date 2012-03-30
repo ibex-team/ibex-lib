@@ -11,6 +11,7 @@
 
 #include "TestFunction.h"
 #include "ibex_Function.h"
+#include "ibex_Expr.h"
 
 namespace ibex {
 
@@ -19,7 +20,7 @@ void TestFunction::add_symbol() {
 	TEST_ASSERT(f.nb_nodes()==0);
 	TEST_ASSERT(f.nb_symbols()==0);
 
-	f.add_symbol("x");
+	const SymbolExpr& x=f.add_symbol("x");
 	TEST_ASSERT(f.nb_nodes()==1);
 	TEST_ASSERT(f.nb_symbols()==1);
 	TEST_ASSERT(strcmp(f.symbol_name(0),"x")==0);
@@ -28,8 +29,10 @@ void TestFunction::add_symbol() {
 
 	//TEST_THROWS_ANYTHING(f.add_symbol("x"));
 
-	f.add_symbol("y");
+	const SymbolExpr& y=f.add_symbol("y");
 	TEST_ASSERT(f.nb_nodes()==2);
+	TEST_ASSERT(&f.node(0)==&x);
+	TEST_ASSERT(&f.node(1)==&y);
 	TEST_ASSERT(f.nb_symbols()==2);
 	TEST_ASSERT(strcmp(f.symbol_name(0),"x")==0);
 	TEST_ASSERT(strcmp(f.symbol_name(1),"y")==0);
