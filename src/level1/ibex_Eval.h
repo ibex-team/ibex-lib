@@ -13,8 +13,8 @@
 #define _IBEX_EVAL_H_
 
 #include "ibex_CompiledFunction.h"
-#include "ibex_IntervalMatrix.h"
-#include "ibex_Domain.h"
+#include "ibex_IntervalMatrixArray.h"
+#include "ibex_Dim.h"
 #include "ibex_Decorator.h"
 
 namespace ibex {
@@ -29,39 +29,108 @@ class EvalLabel : public ExprLabel {
 public:
 
 	/**
-	 * Creates a label with a domain.
+	 * The dimension of the domain
 	 */
-	EvalLabel(void* domain) : domain(domain) {	}
+	const Dim dim;
 
-	inline Interval& i()        { return *(Interval*) domain; }
-	inline IntervalVector& v()  { return *(IntervalVector*) domain; }
-	inline IntervalMatrix& m()  { return *(IntervalMatrix*) domain; }
-	inline IntervalMatrixArray& ma() { return *(IntervalMatrixArray*) domain; }
+	/**
+	 * \brief Creates a new domain of dimension \a dim.
+	 */
+	EvalLabel(const Dim& dim) : dim(dim), is_reference(false) {
+		switch(dim.type()) {
+		case Dim::SCALAR:       domain = new Interval(); break;
+		case Dim::ROW_VECTOR:   domain = new IntervalVector(dim.dim3); break;
+		case Dim::COL_VECTOR:   domain = new IntervalVector(dim.dim2); break;
+		case Dim::MATRIX:       domain = new IntervalMatrix(dim.dim2,dim.dim3); break;
+		case Dim::MATRIX_ARRAY: domain = new IntervalMatrixArray(dim.dim1,dim.dim2,dim.dim3); break;
+		}
+	}
 
-	inline const Interval& i() const  { return *(Interval*) domain; }
-	inline const IntervalVector& v() const  { return *(IntervalVector*) domain; }
-	inline const IntervalMatrix& m() const  { return *(IntervalMatrix*) domain; }
-	inline const IntervalMatrixArray& ma() const { return *(IntervalMatrixArray*) domain; }
+	/**
+	 * \brief Creates a reference to an interval.
+	 */
+	EvalLabel(Interval& itv) : dim(0,0,0), is_reference(true) {
+		domain = &itv;
+	}
+
+	/**
+	 * \brief Creates a reference to an interval vector.
+	 */
+	EvalLabel(IntervalVector& v, bool in_row) : dim(0,in_row?0:v.size(),in_row?v.size():0), is_reference(true) {
+		domain = &v;
+	}
+
+	/**
+	 * \brief Creates a reference to an interval matrix.
+	 */
+	EvalLabel(IntervalMatrix& m) : dim(0,m.nb_rows(),m.nb_cols()), is_reference(true) {
+		domain = &m;
+	}
+
+	/**
+	 * \brief Creates a reference to an array of interval matrices.
+	 */
+	EvalLabel(IntervalMatrixArray& ma) : dim(ma.size(),ma.nb_rows(),ma.nb_cols()), is_reference(true) {
+		domain = &ma;
+	}
+
+	virtual ~EvalLabel() {
+		if (!is_reference)
+			switch(dim.type()) {
+			case Dim::SCALAR:       delete &i();  break;
+			case Dim::ROW_VECTOR:
+			case Dim::COL_VECTOR:   delete &v();  break;
+			case Dim::MATRIX:       delete &m();  break;
+			case Dim::MATRIX_ARRAY: delete &ma(); break;
+			}
+	}
+
+	/**
+	 * Return the domain as an interval.
+	 */
+	inline Interval& i()        {
+		assert(dim.is_scalar());
+		return *(Interval*) domain;
+	}
+
+	inline IntervalVector& v()  {
+		assert(dim.is_vector());
+		return *(IntervalVector*) domain;
+	}
+
+	inline IntervalMatrix& m()  {
+		assert(dim.type()==Dim::MATRIX);
+		return *(IntervalMatrix*) domain;
+	}
+
+	inline IntervalMatrixArray& ma() {
+		assert(dim.type()==Dim::MATRIX_ARRAY);
+		return *(IntervalMatrixArray*) domain;
+	}
+
+	inline const Interval& i() const  {
+		assert(dim.is_scalar());
+		return *(Interval*) domain;
+	}
+
+	inline const IntervalVector& v() const  {
+		assert(dim.is_vector());
+		return *(IntervalVector*) domain;
+	}
+
+	inline const IntervalMatrix& m() const  {
+		assert(dim.type()==Dim::MATRIX);
+		return *(IntervalMatrix*) domain;
+	}
+
+	inline const IntervalMatrixArray& ma() const {
+		assert(dim.type()==Dim::MATRIX_ARRAY);
+		return *(IntervalMatrixArray*) domain;
+	}
 
 private:
 	void* domain;
-
-};
-
-/**
- * \ingroup level1
- * \brief Evaluation label for function application nodes.
- *
- * An function application node has a specific label that, in addition
- * to the EvalLabel, contains a reference to the evaluator of the function called,
- * as well as the domain that is used to load the arguments domains.
- */
-class EvalApplyLabel : public EvalLabel {
-public:
-	EvalApplyLabel(void* domain, Eval& fevl, Domain& fbox) : EvalLabel(domain), fbox(fbox), fevl(fevl) { }
-
-	Domain& fbox;  // for each function that is called (possibly several times) in an expression, a box is created
-	Eval& fevl;    //  for each function, there is an associated evaluator
+	bool is_reference;
 };
 
 /**
@@ -73,12 +142,7 @@ public:
 
 	void decorate(const Function& f);
 
-	void undecorate(const Function& f);
-
 protected:
-	mutable bool undecorating; // tells whether "decorate" or "undecorate" has been called
-	bool is_index;
-
 	/* Visit an expression. */
 	virtual void visit(const ExprNode& n);
 	/* Visit an indexed expression. */
@@ -196,12 +260,27 @@ protected:
 	inline void asinh_fwd(const ExprAsinh&, const EvalLabel& x, EvalLabel& y);
 	inline void atanh_fwd(const ExprAtanh&, const EvalLabel& x, EvalLabel& y);
 
-	mutable EvalLabel** symbolLabels; // domains of the symbols
+	mutable EvalLabel** symbolLabels; // domains of the symbols (created by the decorator)
 
 private:
-	void read(const IntervalVector&) const;
+	void read(const IntervalVector&) const; // load a box into symbolLabels
 
 	bool proper_compiled_func;
+};
+
+/**
+ * \ingroup level1
+ * \brief Evaluation label for function application nodes.
+ *
+ * An function application node has a specific label that, in addition
+ * to the EvalLabel, contains a reference to the evaluator of the function called,
+ * as well as the domain that is used to load the arguments domains.
+ */
+class EvalApplyLabel : public EvalLabel {
+public:
+	EvalApplyLabel(const Dim& dim, const Function& f) : EvalLabel(dim), fevl(f) { }
+
+	Eval fevl;    //  for each function, there is an associated evaluator
 };
 
 /* ============================================================================

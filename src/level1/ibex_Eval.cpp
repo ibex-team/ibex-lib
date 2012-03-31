@@ -15,7 +15,6 @@
 namespace ibex {
 
 void EvalDecorator::decorate(const Function& f) {
-	undecorating = false;
 	if (f.expr().deco!=NULL) {
 		throw NonRecoverableException("Cannot re-decorate a function");
 	} else {
@@ -23,109 +22,77 @@ void EvalDecorator::decorate(const Function& f) {
 	}
 }
 
-void EvalDecorator::undecorate(const Function& f) {
-	undecorating = true;
-	if (f.expr().deco==NULL) {
-		throw NonRecoverableException("Cannot un-decorate a function without decoration");
-	}
-	visit(f.expr());
-}
-
 void EvalDecorator::visit(const ExprNode& e) {
-
-		is_index=false;         // by default "e" is not an IndexExpr
-
-		e.acceptVisitor(*this); // may set is_index to true
-
-		if (!is_index) {        // an IndexExpr has a special treatment
-			if (undecorating) {
-				switch(e.type()) {
-				case Dim::SCALAR:       delete &((EvalLabel*) e.deco)->i();  break;
-				case Dim::ROW_VECTOR:
-				case Dim::COL_VECTOR:   delete &((EvalLabel*) e.deco)->v();  break;
-				case Dim::MATRIX:       delete &((EvalLabel*) e.deco)->m();  break;
-				case Dim::MATRIX_ARRAY: delete &((EvalLabel*) e.deco)->ma(); break;
-				}
-				delete e.deco;
-			}
-			else {
-				switch(e.type()) {
-				case Dim::SCALAR:       e.deco = new EvalLabel(new Interval()); break;
-				case Dim::ROW_VECTOR:   e.deco = new EvalLabel(new IntervalVector(e.dim.dim3)); break;
-				case Dim::COL_VECTOR:   e.deco = new EvalLabel(new IntervalVector(e.dim.dim2)); break;
-				case Dim::MATRIX:       e.deco = new EvalLabel(new IntervalMatrix(e.dim.dim2,e.dim.dim3)); break;
-				case Dim::MATRIX_ARRAY: e.deco = new EvalLabel(new IntervalMatrixArray(e.dim.dim1,e.dim.dim2,e.dim.dim3)); break;
-				}
-			}
-		}
+	e.acceptVisitor(*this);
 }
 
 void EvalDecorator::visit(const ExprIndex& idx) {
 
 	visit(idx.expr);
 
-	if (undecorating)
-		delete idx.deco;
-	else {
-		void* domain;
-		switch (idx.expr.type()) {
-		case Dim::SCALAR:       domain = &((EvalLabel*) idx.expr.deco)->v()[idx.index]; break;
-		case Dim::ROW_VECTOR:   domain = &((EvalLabel*) idx.expr.deco)->m()[idx.index]; break;
-		case Dim::COL_VECTOR:   assert(false); /* see comment in ExprVector */ break;
-		case Dim::MATRIX:       domain = &((EvalLabel*) idx.expr.deco)->ma()[idx.index]; break;
-		case Dim::MATRIX_ARRAY: assert(false); /* impossible */ break;
-		}
-		idx.deco = new EvalLabel(domain);
+	EvalLabel& l=(EvalLabel&) *idx.expr.deco;
+
+	switch (idx.expr.type()) {
+	case Dim::SCALAR:       idx.deco = new EvalLabel(l.v()[idx.index]); break;
+	case Dim::ROW_VECTOR:   idx.deco = new EvalLabel(l.m()[idx.index],idx.type()==Dim::ROW_VECTOR); break;
+	case Dim::COL_VECTOR:   assert(false); /* see comment in ExprVector */ break;
+	case Dim::MATRIX:       idx.deco = new EvalLabel(l.ma()[idx.index]); break;
+	case Dim::MATRIX_ARRAY: assert(false); /* impossible */ break;
 	}
-
-	is_index=true;
 }
 
-void EvalDecorator::visit(const ExprSymbol& s) {
-
+void EvalDecorator::visit(const ExprSymbol& e) {
+	e.deco = new EvalLabel(e.dim);
 }
 
-void EvalDecorator::visit(const ExprConstant& c) {
-
+void EvalDecorator::visit(const ExprConstant& e) {
+	e.deco = new EvalLabel(e.dim);
 }
 
 void EvalDecorator::visit(const ExprNAryOp& e) {
+	for (int i=0; i<e.nb_args; i++)
+		visit(e.arg(i));
+
 	e.acceptVisitor(*this);
 }
 
 void EvalDecorator::visit(const ExprBinaryOp& b) {
 	visit(b.left);
 	visit(b.right);
+	b.deco = new EvalLabel(b.dim);
 }
 
 void EvalDecorator::visit(const ExprUnaryOp& u) {
 	visit(u.expr);
+	u.deco = new EvalLabel(u.dim);
 }
 
 void EvalDecorator::visit(const ExprVector& v) {
-	for (int i=0; i<v.nb_args; v++)
-		visit(v.arg(i));
+	v.deco = new EvalLabel(v.dim);
 }
 
 void EvalDecorator::visit(const ExprApply& a) {
-	if (undecorating) {
-		EvalApplyLabel* l =(EvalApplyLabel*) a.deco;
-		l->cleanup(a.dim);
-		delete &l->fbox;
-		delete &l->fevl;
-		delete l;
-	}
-	else {
-		Domain* d = new Domain();
-		for (int i=0; i<a.nb_args; i++)
-			d->add(a.arg(i).dim);
-		a.deco = new EvalApplyLabel(a.dim, *new Eval(a.func),*d);
-	}
-
+	a.deco = new EvalApplyLabel(a.dim, a.func);
 }
 
 /*==========================================================================================*/
 
+Eval::Eval(const Function& f) : f(*new CompiledFunction<EvalLabel>(f,EvalDecorator())),
+		proper_compiled_func(true) {
+
+	symbolLabels = new EvalLabel*[f.nb_symbols()];
+
+	for (int i=0; i<f.nb_symbols(); i++) {
+		symbolLabels[i] = (EvalLabel*) f.symbol(i).deco;
+	}
+}
+
+Eval::Eval(const CompiledFunction<EvalLabel>& f) : f(f), proper_compiled_func(false) { }
+
+Eval::~Eval() {
+	if (proper_compiled_func) delete (CompiledFunction<EvalLabel>*) &f;
+	delete[] symbolLabels;
+}
 void Eval::read(const IntervalVector& x) const {
 	int i=0;
 
@@ -171,23 +138,6 @@ void Eval::read(const IntervalVector& x) const {
 	}
 }
 
-Eval::Eval(const Function& f) : f(*new CompiledFunction<EvalLabel>(f,EvalDecorator())),
-		proper_compiled_func(true) {
-
-	symbolLabels = new EvalLabel*[f.nb_symbols()];
-
-	for (int i=0; i<f.nb_symbols(); i++) {
-		symbolLabels[i] = f.symbol(i).deco;
-	}
-}
-
-Eval::Eval(const CompiledFunction<EvalLabel>& f) : f(f), proper_compiled_func(false) { }
-
-Eval::~Eval() {
-	if (proper_compiled_func) delete (CompiledFunction<EvalLabel>*) &f;
-	delete[] symbolLabels;
-}
-
 void Eval::Eval::vector_fwd(const ExprVector& v, const EvalLabel** compL, EvalLabel& y) {
 
 	assert(v.type()!=Dim::SCALAR);
@@ -206,17 +156,17 @@ void Eval::Eval::vector_fwd(const ExprVector& v, const EvalLabel** compL, EvalLa
 
 void Eval::apply_fwd(const ExprApply& a, const EvalLabel** argL, EvalLabel& y) {
 	// upload data (in the function arguments' box).
-	Domain& b=((EvalApplyLabel&) y).fbox;
+	Eval& fevl=((EvalApplyLabel&) y).fevl;
 	for (int i=0; i<a.nb_args; i++) {
 		switch(a.args[i]->type()) {
-		case Dim::SCALAR:       b.get(i)=argL[i]->i(); break;
+		case Dim::SCALAR:       fevl.symbolLabels[i]->i()=argL[i]->i(); break;
 		case Dim::ROW_VECTOR:
-		case Dim::COL_VECTOR:   b.vector(i)=argL[i]->v(); break;
-		case Dim::MATRIX:       b.matrix(i)=argL[i]->m(); break;
+		case Dim::COL_VECTOR:   fevl.symbolLabels[i]->v()=argL[i]->v(); break;
+		case Dim::MATRIX:       fevl.symbolLabels[i]->m()=argL[i]->m(); break;
 		case Dim::MATRIX_ARRAY: assert(false); /* impossible */ break;
 		}
 	}
-	((EvalApplyLabel&) y).fevl.eval(b);
+	fevl.f.forward(fevl);
 }
 
 } // namespace ibex

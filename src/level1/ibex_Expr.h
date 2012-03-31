@@ -25,20 +25,16 @@
 
 namespace ibex {
 
+class ExprLabel {
+public:
+	virtual ~ExprLabel() { }
+};
+
 class Function;
 class Constraint;
 class Equality;
 class Inequality;
 class ExprIndex;
-
-/**
- * \ingroup level1
- * \brief Label of an expression node
- *
- */
-class ExprLabel {
-
-};
 
 /**
  * \ingroup level1
@@ -1100,6 +1096,7 @@ class ExprAtanh : public ExprUnaryOp {
   ============================================================================*/
 
 inline ExprNode::~ExprNode() {
+	if (deco) delete deco;
 }
 
 inline bool ExprNode::is_zero() const {
