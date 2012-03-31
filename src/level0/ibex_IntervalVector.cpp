@@ -10,59 +10,11 @@
  * ---------------------------------------------------------------------------- */
 
 #include "ibex_IntervalVector.h"
-#include "ibex_Domain.h"
 #include <vector>
 #include <stdlib.h>
 #include <math.h>
 
 namespace ibex {
-
-IntervalVector& IntervalVector::operator=(const Domain& d) {
-	int i=0;
-	assert (size()==d._size);
-	std::vector<Dim>::const_iterator it;
-	std::vector<void*>::const_iterator it2;
-	for (it=d.symbol_dims.begin(), it2=d.doms.begin(); it!=d.symbol_dims.end(); it++,it2++) {
-		Dim dim=*it;
-		switch (dim.type()) {
-		case Dim::SCALAR:
-			(*this)[i++]=*((Interval*) *it2);
-			break;
-		case Dim::ROW_VECTOR:
-		{
-			const IntervalVector& v=(*((IntervalVector*) *it2));
-			for (int j=0; j<dim.dim3; j++)
-				(*this)[i++]=v[j];
-		}
-		break;
-		case Dim::COL_VECTOR:
-		{
-			const IntervalVector& v=(*((IntervalVector*) *it2));
-			for (int j=0; j<dim.dim2; j++)
-				(*this)[i++]=v[j];
-		}
-		break;
-		case Dim::MATRIX:
-		{
-			const IntervalMatrix& M=(*((IntervalMatrix*) *it2));
-			for (int k=0; k<dim.dim2; k++)
-				for (int j=0; j<dim.dim3; j++)
-					(*this)[i++]=M[k][j];
-		}
-		break;
-		case Dim::MATRIX_ARRAY:
-		{
-			const IntervalMatrixArray& A=(*((IntervalMatrixArray*) *it2));
-			for (int l=0; l<dim.dim1; l++)
-				for (int k=0; k<dim.dim2; k++)
-					for (int j=0; j<dim.dim3; j++)
-						(*this)[i++]=A[l][k][j];
-		}
-		break;
-		}
-	}
-	return *this;
-}
 
 double IntervalVector::volume() const {
 	if ((*this)[0].is_unbounded()) return POS_INFINITY;

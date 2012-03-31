@@ -36,6 +36,16 @@ public:
 	int size() const;
 
 	/**
+	 * \brief Number of rows of each matrix
+	 */
+	int nb_rows() const;
+
+	/**
+	 * \brief Number of columns of each matrix
+	 */
+	int nb_cols() const;
+
+	/**
 	 * \brief Return the ith matrix.
 	 *
 	 */
@@ -58,6 +68,16 @@ std::ostream& operator<<(std::ostream& os, const IntervalMatrixArray&);
 
 inline int IntervalMatrixArray::size() const {
 	return n;
+}
+
+int IntervalMatrixArray::nb_rows() const {
+	assert(n>0);
+	return array[0].nb_rows();
+}
+
+int IntervalMatrixArray::nb_cols() const {
+	assert(n>0);
+	return array[0].nb_cols();
 }
 
 inline IntervalMatrix& IntervalMatrixArray::operator[](int i) {

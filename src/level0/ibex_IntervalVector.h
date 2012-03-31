@@ -19,7 +19,6 @@
 
 namespace ibex {
 
-class Domain;
 class IntervalMatrix; // declared only for friendship
 
 /**
@@ -127,11 +126,6 @@ public:
 	 * \note Emptiness is overridden.
 	 */
 	IntervalVector& operator=(const IntervalVector& x);
-
-	/**
-	 * \brief "Load" the domain into this
-	 */
-	IntervalVector& operator=(const Domain& d);
 
 	/**
 	 * \brief Set *this to its intersection with x

@@ -1,7 +1,7 @@
 
 include ../common.mak
 
-OBJS=ibex_Interval.o ibex_IntervalVector.o ibex_IntervalMatrix.o ibex_IntervalMatrixArray.o ibex_Domain.o ibex_Dim.o
+OBJS=ibex_Interval.o ibex_IntervalVector.o ibex_IntervalMatrix.o ibex_IntervalMatrixArray.o ibex_Dim.o
 TARGET=all
 
 SUBLIB_H:=ibex_$(SUBLIB)_Interval.h
@@ -26,10 +26,7 @@ ibex_Interval.o : ibex_Interval.cpp ibex_Interval.h $(SUBLIB_CPP) $(SUBLIB_H)
 
 ibex_Dim.o : ibex_Dim.cpp ibex_Dim.h $(SUBLIB_CPP) $(SUBLIB_H) 
 	$(CXX) $(CXXFLAGS) $(INC_DIR_OPT) -c -o  $@ $<
-	
-ibex_Domain.o : ibex_Domain.cpp ibex_Domain.h ibex_IntervalMatrixArray.h ibex_Dim.h $(SUBLIB_CPP) $(SUBLIB_H) 
-	$(CXX) $(CXXFLAGS) $(INC_DIR_OPT) -c -o  $@ $<
-	
+		
 ibex_Interval.h : update_sub_lib
 
 .PHONY update_sub_lib :
