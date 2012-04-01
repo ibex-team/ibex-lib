@@ -152,11 +152,27 @@ private:
 
 	void visit(const ExprApply&) { code[ptr]=APPLY; }
 
-	void visit(const ExprAdd&)   { code[ptr]=ADD; }
+	void visit(const ExprAdd& e)   {
+		if (e.dim.is_scalar())      code[ptr]=ADD;
+		else if (e.dim.is_vector()) code[ptr]=ADD_V;
+		else                        code[ptr]=ADD_M;
+	}
 
-	void visit(const ExprMul&)   { code[ptr]=MUL; }
+	void visit(const ExprMul& m)   {
+		if (m.left.dim.is_scalar())
+			if (m.right.dim.is_scalar())      code[ptr]=MUL;
+			else if (m.right.dim.is_vector()) code[ptr]=MUL_SV;
+			else                              code[ptr]=MUL_SM;
+		else if (m.left.dim.is_vector())      code[ptr]=MUL_VV;
+		else if (m.right.dim.is_vector())     code[ptr]=MUL_MV;
+			else                              code[ptr]=MUL_MM;
+	}
 
-	void visit(const ExprSub&)   { code[ptr]=SUB; }
+	void visit(const ExprSub& e)   {
+		if (e.dim.is_scalar())      code[ptr]=SUB;
+		else if (e.dim.is_vector()) code[ptr]=SUB_V;
+		else                        code[ptr]=SUB_M;
+	}
 
 	void visit(const ExprDiv&)   { code[ptr]=DIV; }
 
@@ -214,7 +230,10 @@ protected:
 		MINUS, SIGN, ABS, POWER,
 		SQR, SQRT, EXP, LOG,
 		COS,  SIN,  TAN,  ACOS,  ASIN,  ATAN,
-		COSH, SINH, TANH, ACOSH, ASINH, ATANH
+		COSH, SINH, TANH, ACOSH, ASINH, ATANH,
+
+		ADD_V, ADD_M, SUB_V, SUB_M,
+		MUL_SV, MUL_SM, MUL_VV, MUL_MV, MUL_MM
 	} operation;
 
 	const ExprNode** nodes;
@@ -237,8 +256,17 @@ T& CompiledFunction<T>::forward(const V& algo) const {
 		case CST:    ((V&) algo).cst_fwd  ((ExprConstant&) *(nodes[i]),                                     (T&) *args[i][0]); break;
 		case APPLY:  ((V&) algo).apply_fwd((ExprApply&)    *(nodes[i]), (const T**) &(args[i][1]),          (T&) *args[i][0]); break;
 		case ADD:    ((V&) algo).add_fwd  ((ExprAdd&)      *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
+		case ADD_V:  ((V&) algo).add_V_fwd  ((ExprAdd&)    *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
+		case ADD_M:  ((V&) algo).add_M_fwd  ((ExprAdd&)    *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
 		case MUL:    ((V&) algo).mul_fwd  ((ExprMul&)      *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
+		case MUL_SV: ((V&) algo).mul_SV_fwd ((ExprMul&)    *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
+		case MUL_SM: ((V&) algo).mul_SM_fwd ((ExprMul&)    *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
+		case MUL_VV: ((V&) algo).mul_VV_fwd ((ExprMul&)    *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
+		case MUL_MV: ((V&) algo).mul_MV_fwd ((ExprMul&)    *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
+		case MUL_MM: ((V&) algo).mul_MM_fwd ((ExprMul&)    *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
 		case SUB:    ((V&) algo).sub_fwd  ((ExprSub&)      *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
+		case SUB_V:  ((V&) algo).sub_V_fwd  ((ExprSub&)    *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
+		case SUB_M:  ((V&) algo).sub_M_fwd  ((ExprSub&)    *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
 		case DIV:    ((V&) algo).div_fwd  ((ExprDiv&)      *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
 		case MAX:    ((V&) algo).max_fwd  ((ExprMax&)      *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
 		case MIN:    ((V&) algo).min_fwd  ((ExprMin&)      *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
@@ -279,10 +307,19 @@ void CompiledFunction<T>::backward(const V& algo) const {
 		case VEC:    ((V&) algo).vector_bwd((ExprVector&)  *(nodes[i]), (T**) &(*args[i][1]),                  (T&) *args[i][0]); break;
 		case SYM:    ((V&) algo).symbol_bwd((ExprSymbol&)  *(nodes[i]),                                        (T&) *args[i][0]); break;
 		case CST:    ((V&) algo).cst_bwd  ((ExprConstant&) *(nodes[i]),                                        (T&) *args[i][0]); break;
-		case APPLY:  ((V&) algo).apply_bwd((ExprApply&)    *(nodes[i]), (T**) &(*args[i][1]),                  (T&) *args[i][0]); break;
-		case ADD:    ((V&) algo).add_bwd  ((ExprAdd&)      *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
-		case MUL:    ((V&) algo).mul_bwd  ((ExprMul&)      *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
-		case SUB:    ((V&) algo).sub_bwd  ((ExprSub&)      *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
+		case APPLY:  ((V&) algo).apply_bwd  ((ExprApply&)  *(nodes[i]), (T**) &(*args[i][1]),                  (T&) *args[i][0]); break;
+		case ADD:    ((V&) algo).add_bwd    ((ExprAdd&)    *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
+		case ADD_V:  ((V&) algo).add_V_bwd  ((ExprAdd&)    *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
+		case ADD_M:  ((V&) algo).add_M_bwd  ((ExprAdd&)    *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
+		case MUL:    ((V&) algo).mul_bwd    ((ExprMul&)    *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
+		case MUL_SV: ((V&) algo).mul_SV_bwd ((ExprMul&)    *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
+		case MUL_SM: ((V&) algo).mul_SM_bwd ((ExprMul&)    *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
+		case MUL_VV: ((V&) algo).mul_VV_bwd ((ExprMul&)    *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
+		case MUL_MV: ((V&) algo).mul_MV_bwd ((ExprMul&)    *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
+		case MUL_MM: ((V&) algo).mul_MM_bwd ((ExprMul&)    *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
+		case SUB:    ((V&) algo).sub_bwd    ((ExprSub&)    *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
+		case SUB_V:  ((V&) algo).sub_V_bwd  ((ExprSub&)    *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
+		case SUB_M:  ((V&) algo).sub_M_bwd  ((ExprSub&)    *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
 		case DIV:    ((V&) algo).div_bwd  ((ExprDiv&)      *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
 		case MAX:    ((V&) algo).max_bwd  ((ExprMax&)      *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
 		case MIN:    ((V&) algo).min_bwd  ((ExprMin&)      *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;

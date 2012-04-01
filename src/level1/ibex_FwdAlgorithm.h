@@ -44,10 +44,37 @@ class FwdAlgorithm {
 	void add_fwd(const ExprAdd&, const T& leftL, const T& rightL, T& result);
 
 	/** TO BE DEFINED (by the subclass) */
+	void add_V_fwd(const ExprAdd&, const T& leftL, const T& rightL, T& result);
+
+	/** TO BE DEFINED (by the subclass) */
+	void add_M_fwd(const ExprAdd&, const T& leftL, const T& rightL, T& result);
+
+	/** TO BE DEFINED (by the subclass) */
 	void mul_fwd(const ExprMul&, const T& leftL, const T& rightL, T& result);
 
 	/** TO BE DEFINED (by the subclass) */
+	void mul_SV_fwd(const ExprMul&, const T& leftL, const T& rightL, T& result);
+
+	/** TO BE DEFINED (by the subclass) */
+	void mul_SM_fwd(const ExprMul&, const T& leftL, const T& rightL, T& result);
+
+	/** TO BE DEFINED (by the subclass) */
+	void mul_VV_fwd(const ExprMul&, const T& leftL, const T& rightL, T& result);
+
+	/** TO BE DEFINED (by the subclass) */
+	void mul_MV_fwd(const ExprMul&, const T& leftL, const T& rightL, T& result);
+
+	/** TO BE DEFINED (by the subclass) */
+	void mul_MM_fwd(const ExprMul&, const T& leftL, const T& rightL, T& result);
+
+	/** TO BE DEFINED (by the subclass) */
 	void sub_fwd(const ExprSub&, const T& leftL, const T& rightL, T& result);
+
+	/** TO BE DEFINED (by the subclass) */
+	void sub_V_fwd(const ExprSub&, const T& leftL, const T& rightL, T& result);
+
+	/** TO BE DEFINED (by the subclass) */
+	void sub_M_fwd(const ExprSub&, const T& leftL, const T& rightL, T& result);
 
 	/** TO BE DEFINED (by the subclass) */
 	void div_fwd(const ExprDiv&, const T& leftL, const T& rightL, T& result);

@@ -44,8 +44,17 @@ protected:
 	inline void cst_bwd   (const ExprConstant&, const EvalLabel& result)                                     { /* nothing to do */ }
 	inline void apply_bwd (const ExprApply&,   EvalLabel** argL, const EvalLabel& result);
 	inline void add_bwd   (const ExprAdd&,     EvalLabel& leftL, EvalLabel& rightL, const EvalLabel& result) { proj_add(result.i(),leftL.i(),rightL.i()); }
-	inline void mul_bwd   (const ExprMul&,     EvalLabel& leftL, EvalLabel& rightL, const EvalLabel& result) { proj_mul(result.i(),leftL.i(),rightL.i()); }
+	inline void add_V_bwd  (const ExprAdd&,    EvalLabel& leftL, EvalLabel& rightL, const EvalLabel& result) { /* to do */}
+	inline void add_M_bwd  (const ExprAdd&,    EvalLabel& leftL, EvalLabel& rightL, const EvalLabel& result) { /* to do */ }
+	inline void mul_bwd    (const ExprMul&,    EvalLabel& leftL, EvalLabel& rightL, const EvalLabel& result) { proj_mul(result.i(),leftL.i(),rightL.i()); }
+	inline void mul_SV_bwd (const ExprMul&,    EvalLabel& leftL, EvalLabel& rightL, const EvalLabel& result) {  }
+	inline void mul_SM_bwd (const ExprMul&,    EvalLabel& leftL, EvalLabel& rightL, const EvalLabel& result) {  }
+	inline void mul_VV_bwd (const ExprMul&,    EvalLabel& leftL, EvalLabel& rightL, const EvalLabel& result) {  }
+	inline void mul_MV_bwd (const ExprMul&,    EvalLabel& leftL, EvalLabel& rightL, const EvalLabel& result) {  }
+	inline void mul_MM_bwd (const ExprMul&,    EvalLabel& leftL, EvalLabel& rightL, const EvalLabel& result) {  }
 	inline void sub_bwd   (const ExprSub&,     EvalLabel& leftL, EvalLabel& rightL, const EvalLabel& result) { proj_sub(result.i(),leftL.i(),rightL.i()); }
+	inline void sub_V_bwd (const ExprSub&,     EvalLabel& leftL, EvalLabel& rightL, const EvalLabel& result) {  }
+	inline void sub_M_bwd (const ExprSub&,     EvalLabel& leftL, EvalLabel& rightL, const EvalLabel& result) {  }
 	inline void div_bwd   (const ExprDiv&,     EvalLabel& leftL, EvalLabel& rightL, const EvalLabel& result) { proj_div(result.i(),leftL.i(),rightL.i()); }
 	inline void max_bwd   (const ExprMax&,     EvalLabel& leftL, EvalLabel& rightL, const EvalLabel& result) { proj_max(result.i(),leftL.i(),rightL.i()); }
 	inline void min_bwd   (const ExprMin&,     EvalLabel& leftL, EvalLabel& rightL, const EvalLabel& result) { proj_min(result.i(),leftL.i(),rightL.i()); }

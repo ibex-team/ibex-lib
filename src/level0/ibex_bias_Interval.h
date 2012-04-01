@@ -732,6 +732,11 @@ inline Interval min(const Interval& x, const Interval& y) {
 	return Interval(x.lb()<y.lb()? x.lb() : y.lb(), x.ub()<y.ub()? x.ub() : y.ub());
 }
 
+inline bool proj_add(const Interval& y, Interval& x1, Interval& x2) {
+	if ((x1 &= y-x2).is_empty()) return false;
+	return (x2 &= y-x1).is_empty();
+}
+
 inline bool proj_mul(const Interval& y, Interval& x1, Interval& x2) {
 	if (y.contains(0)) {
 		if (!x2.contains(0))                           // if y and x2 contains 0, x1 can be any real number.
@@ -743,6 +748,15 @@ inline bool proj_mul(const Interval& y, Interval& x1, Interval& x2) {
 	}
 }
 
+inline bool proj_sub(const Interval& y, Interval& x1, Interval& x2) {
+	if ((x1 &= y+x2).is_empty()) return false;
+	return (x2 &= x1-y).is_empty();
+}
+
+inline bool proj_div(const Interval& y, Interval& x1, Interval& x2) {
+	if ((x1 &= y*x2).is_empty()) return false;
+	return (x2.div2_inter(x1,y)).is_empty(); // INCORRECT
+}
 inline bool proj_sqr(const Interval& y, Interval& x) {
 
 	Interval proj=sqrt(y);

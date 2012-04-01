@@ -260,6 +260,16 @@ protected:
 	inline void asinh_fwd(const ExprAsinh&, const EvalLabel& x, EvalLabel& y);
 	inline void atanh_fwd(const ExprAtanh&, const EvalLabel& x, EvalLabel& y);
 
+	inline void add_V_fwd(const ExprAdd&, const EvalLabel& x1, const EvalLabel& x2, EvalLabel& y);
+	inline void add_M_fwd(const ExprAdd&, const EvalLabel& x1, const EvalLabel& x2, EvalLabel& y);
+	inline void mul_SV_fwd(const ExprMul&, const EvalLabel& x1, const EvalLabel& x2, EvalLabel& y);
+	inline void mul_SM_fwd(const ExprMul&, const EvalLabel& x1, const EvalLabel& x2, EvalLabel& y);
+	inline void mul_VV_fwd(const ExprMul&, const EvalLabel& x1, const EvalLabel& x2, EvalLabel& y);
+	inline void mul_MV_fwd(const ExprMul&, const EvalLabel& x1, const EvalLabel& x2, EvalLabel& y);
+	inline void mul_MM_fwd(const ExprMul&, const EvalLabel& x1, const EvalLabel& x2, EvalLabel& y);
+	inline void sub_V_fwd(const ExprSub&, const EvalLabel& x1, const EvalLabel& x2, EvalLabel& y);
+	inline void sub_M_fwd(const ExprSub&, const EvalLabel& x1, const EvalLabel& x2, EvalLabel& y);
+
 	mutable EvalLabel** symbolLabels; // domains of the symbols (created by the decorator)
 
 private:
@@ -346,6 +356,15 @@ inline void Eval::acosh_fwd(const ExprAcosh&, const EvalLabel& x, EvalLabel& y) 
 inline void Eval::asinh_fwd(const ExprAsinh&, const EvalLabel& x, EvalLabel& y)                       { y.i()=asinh(x.i()); }
 inline void Eval::atanh_fwd(const ExprAtanh&, const EvalLabel& x, EvalLabel& y)                       { y.i()=atanh(x.i()); }
 
+inline void add_V_fwd(const ExprAdd&, const EvalLabel& x1, const EvalLabel& x2, EvalLabel& y)         { y.v()=x1.v()+x2.v(); }
+inline void add_M_fwd(const ExprAdd&, const EvalLabel& x1, const EvalLabel& x2, EvalLabel& y)         { y.m()=x1.m()+x2.m(); }
+inline void mul_SV_fwd(const ExprMul&, const EvalLabel& x1, const EvalLabel& x2, EvalLabel& y)        { y.v()=x1.i()*x2.v(); }
+inline void mul_SM_fwd(const ExprMul&, const EvalLabel& x1, const EvalLabel& x2, EvalLabel& y)        { y.m()=x1.i()*x2.m(); }
+inline void mul_VV_fwd(const ExprMul&, const EvalLabel& x1, const EvalLabel& x2, EvalLabel& y)        { y.i()=x1.v()*x2.v(); }
+inline void mul_MV_fwd(const ExprMul&, const EvalLabel& x1, const EvalLabel& x2, EvalLabel& y)        { y.v()=x1.m()*x2.v(); }
+inline void mul_MM_fwd(const ExprMul&, const EvalLabel& x1, const EvalLabel& x2, EvalLabel& y)        { y.m()=x1.m()*x2.m(); }
+inline void sub_V_fwd(const ExprSub&, const EvalLabel& x1, const EvalLabel& x2, EvalLabel& y)         { y.v()=x1.v()-x2.v(); }
+inline void sub_M_fwd(const ExprSub&, const EvalLabel& x1, const EvalLabel& x2, EvalLabel& y)         { y.m()=x1.m()-x2.m(); }
 
 } // namespace ibex
 #endif // IBEX_EVAL_H_

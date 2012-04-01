@@ -43,10 +43,37 @@ class BwdAlgorithm {
 	void add_bwd(const ExprAdd&, T& leftL, T& rightL, const T& result);
 
 	/** TO BE DEFINED (by the subclass) */
+	void add_V_bwd(const ExprAdd&, T& leftL, T& rightL, const T& result);
+
+	/** TO BE DEFINED (by the subclass) */
+	void add_M_bwd(const ExprAdd&, T& leftL, T& rightL, const T& result);
+
+	/** TO BE DEFINED (by the subclass) */
 	void mul_bwd(const ExprMul&, T& leftL, T& rightL, const T& result);
 
 	/** TO BE DEFINED (by the subclass) */
+	void mul_SV_bwd(const ExprMul&, T& leftL, T& rightL, const T& result);
+
+	/** TO BE DEFINED (by the subclass) */
+	void mul_SM_bwd(const ExprMul&, T& leftL, T& rightL, const T& result);
+
+	/** TO BE DEFINED (by the subclass) */
+	void mul_VV_bwd(const ExprMul&, T& leftL, T& rightL, const T& result);
+
+	/** TO BE DEFINED (by the subclass) */
+	void mul_MV_bwd(const ExprMul&, T& leftL, T& rightL, const T& result);
+
+	/** TO BE DEFINED (by the subclass) */
+	void mul_MM_bwd(const ExprMul&, T& leftL, T& rightL, const T& result);
+
+	/** TO BE DEFINED (by the subclass) */
 	void sub_bwd(const ExprSub&, T& leftL, T& rightL, const T& result);
+
+	/** TO BE DEFINED (by the subclass) */
+	void sub_V_bwd(const ExprSub&, T& leftL, T& rightL, const T& result);
+
+	/** TO BE DEFINED (by the subclass) */
+	void sub_M_bwd(const ExprSub&, T& leftL, T& rightL, const T& result);
 
 	/** TO BE DEFINED (by the subclass) */
 	void div_bwd(const ExprDiv&, T& leftL, T& rightL, const T& result);
