@@ -12,7 +12,7 @@
 
 namespace ibex {
 
-void HC4ReviseAlgo::vector_bwd(const ExprVector& v, EvalLabel** compL, const EvalLabel& y) {
+void HC4ReviseAlgo::vector_bwd(const ExprVector& v, Domain** compL, const Domain& y) {
 	if (v.dim.is_vector()) {
 		for (int i=0; i<v.length(); i++) compL[i]->i() &= y.v()[i];
 	}
@@ -24,32 +24,32 @@ void HC4ReviseAlgo::vector_bwd(const ExprVector& v, EvalLabel** compL, const Eva
 	}
 }
 
-void HC4ReviseAlgo::apply_bwd(const ExprApply& a, EvalLabel** argL, const EvalLabel& y) {
+void HC4ReviseAlgo::apply_bwd(const ExprApply& a, Domain** argL, const Domain& y) {
 	// download data
-	const Domain& b=((const EvalApplyLabel&) y).fbox;
+	Eval& fevl=((EvalApplyLabel&) y).fevl;
 	for (int i=0; i<a.nb_args; i++) {
 		switch(a.args[i]->type()) {
-		case Dim::SCALAR:       argL[i]->i() &=b.get(i);    break;
+		case Dim::SCALAR:       argL[i]->i() &=fevl.domain(i).i();    break;
 		case Dim::ROW_VECTOR:
-		case Dim::COL_VECTOR:   argL[i]->v() &=b.vector(i); break;
-		case Dim::MATRIX:       argL[i]->m() &=b.matrix(i);  break;
+		case Dim::COL_VECTOR:   argL[i]->v() &=fevl.domain(i).v(); break;
+		case Dim::MATRIX:       argL[i]->m() &=fevl.domain(i).m();  break;
 		case Dim::MATRIX_ARRAY: assert(false); /* impossible */ break;
 		}
 	}
 }
 
-void HC4ReviseAlgo::contract(Domain& box) {
+void HC4ReviseAlgo::contract(IntervalVector& box) {
 	eval.forward(box);
 
 	const ExprNode& root=eval.f.expr;
-	EvalLabel& root_label=(EvalLabel&) *(root.deco);
+	Domain& root_label=(Domain&) *(root.deco);
 	Interval right_cst(equality? 0: NEG_INFINITY, 0);
 
 	switch(root.type()) {
-	case Dim::SCALAR:       root_label.set_domain(right_cst); break;
-	case Dim::ROW_VECTOR:   root_label.set_domain(IntervalVector(root.dim.dim3,right_cst)); break;
-	case Dim::COL_VECTOR:   root_label.set_domain(IntervalVector(root.dim.dim2,right_cst)); break;
-	case Dim::MATRIX:       root_label.set_domain(IntervalMatrix(root.dim.dim2,root.dim.dim3,right_cst)); break;
+	case Dim::SCALAR:       root_label.i()=right_cst; break;
+	case Dim::ROW_VECTOR:   root_label.v()=IntervalVector(root.dim.dim3,right_cst); break;
+	case Dim::COL_VECTOR:   root_label.v()=IntervalVector(root.dim.dim2,right_cst); break;
+	case Dim::MATRIX:       root_label.m()=IntervalMatrix(root.dim.dim2,root.dim.dim3,right_cst); break;
 	case Dim::MATRIX_ARRAY: assert(false); /* impossible */ break;
 	}
 

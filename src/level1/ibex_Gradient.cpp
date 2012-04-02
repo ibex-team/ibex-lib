@@ -15,11 +15,11 @@ namespace ibex {
 
 
 
-Gradient::Gradient(const Function& f) : f(f,GradDecorator()), eval((const CompiledFunction<EvalLabel>&) f) {
+Gradient::Gradient(const Function& f) : f(f,GradDecorator()), eval((const CompiledFunction<Domain>&) f) {
 
 }
 
-void Gradient::calculate(const Domain& box, IntervalVector& g) const {
+void Gradient::calculate(const IntervalVector& box, IntervalVector& g) const {
 	eval.forward(box);
 	f.backward(*this);
 	//for (int i=0; i<)

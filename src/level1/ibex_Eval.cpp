@@ -14,11 +14,23 @@
 
 namespace ibex {
 
-void EvalDecorator::decorate(const Function& f) {
+std::ostream& operator<<(std::ostream& os,const Domain& d) {
+	switch (d.dim.type()) {
+		case Dim::SCALAR:       os << d.i(); break;
+		case Dim::ROW_VECTOR:
+		case Dim::COL_VECTOR:   os << d.v(); break;
+		case Dim::MATRIX:       os << d.m(); break;
+		case Dim::MATRIX_ARRAY: os << d.ma(); break;
+		}
+	return os;
+}
+
+
+void EvalDecorator::decorate(const Function& f) const {
 	if (f.expr().deco!=NULL) {
-		throw NonRecoverableException("Cannot re-decorate a function");
+		return; //throw NonRecoverableException("Cannot re-decorate a function");
 	} else {
-		visit(f.expr());
+		((EvalDecorator*) this)->visit(f.expr());
 	}
 }
 
@@ -30,23 +42,23 @@ void EvalDecorator::visit(const ExprIndex& idx) {
 
 	visit(idx.expr);
 
-	EvalLabel& l=(EvalLabel&) *idx.expr.deco;
+	Domain& l=(Domain&) *idx.expr.deco;
 
 	switch (idx.expr.type()) {
-	case Dim::SCALAR:       idx.deco = new EvalLabel(l.v()[idx.index]); break;
-	case Dim::ROW_VECTOR:   idx.deco = new EvalLabel(l.m()[idx.index],idx.type()==Dim::ROW_VECTOR); break;
+	case Dim::SCALAR:       idx.deco = new Domain(l.v()[idx.index]); break;
+	case Dim::ROW_VECTOR:   idx.deco = new Domain(l.m()[idx.index],idx.type()==Dim::ROW_VECTOR); break;
 	case Dim::COL_VECTOR:   assert(false); /* see comment in ExprVector */ break;
-	case Dim::MATRIX:       idx.deco = new EvalLabel(l.ma()[idx.index]); break;
+	case Dim::MATRIX:       idx.deco = new Domain(l.ma()[idx.index]); break;
 	case Dim::MATRIX_ARRAY: assert(false); /* impossible */ break;
 	}
 }
 
 void EvalDecorator::visit(const ExprSymbol& e) {
-	e.deco = new EvalLabel(e.dim);
+	e.deco = new Domain(e.dim);
 }
 
 void EvalDecorator::visit(const ExprConstant& e) {
-	e.deco = new EvalLabel(e.dim);
+	e.deco = new Domain(e.dim);
 }
 
 void EvalDecorator::visit(const ExprNAryOp& e) {
@@ -59,16 +71,16 @@ void EvalDecorator::visit(const ExprNAryOp& e) {
 void EvalDecorator::visit(const ExprBinaryOp& b) {
 	visit(b.left);
 	visit(b.right);
-	b.deco = new EvalLabel(b.dim);
+	b.deco = new Domain(b.dim);
 }
 
 void EvalDecorator::visit(const ExprUnaryOp& u) {
 	visit(u.expr);
-	u.deco = new EvalLabel(u.dim);
+	u.deco = new Domain(u.dim);
 }
 
 void EvalDecorator::visit(const ExprVector& v) {
-	v.deco = new EvalLabel(v.dim);
+	v.deco = new Domain(v.dim);
 }
 
 void EvalDecorator::visit(const ExprApply& a) {
@@ -77,20 +89,20 @@ void EvalDecorator::visit(const ExprApply& a) {
 
 /*==========================================================================================*/
 
-Eval::Eval(const Function& f) : f(*new CompiledFunction<EvalLabel>(f,EvalDecorator())),
+Eval::Eval(const Function& f) : f(*new CompiledFunction<Domain>(f,EvalDecorator())),
 		proper_compiled_func(true) {
 
-	symbolLabels = new EvalLabel*[f.nb_symbols()];
+	symbolLabels = new Domain*[f.nb_symbols()];
 
 	for (int i=0; i<f.nb_symbols(); i++) {
-		symbolLabels[i] = (EvalLabel*) f.symbol(i).deco;
+		symbolLabels[i] = (Domain*) f.symbol(i).deco;
 	}
 }
 
-Eval::Eval(const CompiledFunction<EvalLabel>& f) : f(f), proper_compiled_func(false) { }
+Eval::Eval(const CompiledFunction<Domain>& f) : f(f), proper_compiled_func(false) { }
 
 Eval::~Eval() {
-	if (proper_compiled_func) delete (CompiledFunction<EvalLabel>*) &f;
+	if (proper_compiled_func) delete (CompiledFunction<Domain>*) &f;
 	delete[] symbolLabels;
 }
 void Eval::read(const IntervalVector& x) const {
@@ -138,7 +150,7 @@ void Eval::read(const IntervalVector& x) const {
 	}
 }
 
-void Eval::Eval::vector_fwd(const ExprVector& v, const EvalLabel** compL, EvalLabel& y) {
+void Eval::Eval::vector_fwd(const ExprVector& v, const Domain** compL, Domain& y) {
 
 	assert(v.type()!=Dim::SCALAR);
 	assert(v.type()!=Dim::MATRIX_ARRAY);
@@ -154,15 +166,15 @@ void Eval::Eval::vector_fwd(const ExprVector& v, const EvalLabel** compL, EvalLa
 	}
 }
 
-void Eval::apply_fwd(const ExprApply& a, const EvalLabel** argL, EvalLabel& y) {
+void Eval::apply_fwd(const ExprApply& a, const Domain** argL, Domain& y) {
 	// upload data (in the function arguments' box).
 	Eval& fevl=((EvalApplyLabel&) y).fevl;
 	for (int i=0; i<a.nb_args; i++) {
 		switch(a.args[i]->type()) {
-		case Dim::SCALAR:       fevl.symbolLabels[i]->i()=argL[i]->i(); break;
+		case Dim::SCALAR:       fevl.domain(i).i()=argL[i]->i(); break;
 		case Dim::ROW_VECTOR:
-		case Dim::COL_VECTOR:   fevl.symbolLabels[i]->v()=argL[i]->v(); break;
-		case Dim::MATRIX:       fevl.symbolLabels[i]->m()=argL[i]->m(); break;
+		case Dim::COL_VECTOR:   fevl.domain(i).v()=argL[i]->v(); break;
+		case Dim::MATRIX:       fevl.domain(i).m()=argL[i]->m(); break;
 		case Dim::MATRIX_ARRAY: assert(false); /* impossible */ break;
 		}
 	}

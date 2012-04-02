@@ -109,7 +109,6 @@ public:
 	 */
 	bool used(int i) const;
 
-
 	/**
 	 * \brief Set the expression f(x).
 	 *
@@ -146,6 +145,8 @@ public:
 
 	/**
 	 * \brief Return the expression f(x) of the function.
+	 *
+	 * Corresponds to the root node.
 	 */
 	const ExprNode& expr() const;
 

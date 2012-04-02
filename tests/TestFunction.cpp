@@ -20,7 +20,7 @@ void TestFunction::add_symbol() {
 	TEST_ASSERT(f.nb_nodes()==0);
 	TEST_ASSERT(f.nb_symbols()==0);
 
-	const SymbolExpr& x=f.add_symbol("x");
+	const ExprSymbol& x=f.add_symbol("x");
 	TEST_ASSERT(f.nb_nodes()==1);
 	TEST_ASSERT(f.nb_symbols()==1);
 	TEST_ASSERT(strcmp(f.symbol_name(0),"x")==0);
@@ -29,7 +29,7 @@ void TestFunction::add_symbol() {
 
 	//TEST_THROWS_ANYTHING(f.add_symbol("x"));
 
-	const SymbolExpr& y=f.add_symbol("y");
+	const ExprSymbol& y=f.add_symbol("y");
 	TEST_ASSERT(f.nb_nodes()==2);
 	TEST_ASSERT(&f.node(0)==&x);
 	TEST_ASSERT(&f.node(1)==&y);

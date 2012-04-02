@@ -1,45 +1,32 @@
 /* ============================================================================
- * I B E X - Domain Tests
+ * I B E X - Eval Tests
  * ============================================================================
  * Copyright   : Ecole des Mines de Nantes (FRANCE)
  * License     : This program can be distributed under the terms of the GNU LGPL.
  *               See the file COPYING.LESSER.
  *
  * Author(s)   : Gilles Chabert
- * Created     : Mar 2, 2012
+ * Created     : Apr 02, 2012
  * ---------------------------------------------------------------------------- */
 
-#ifndef __TEST_DOMAIN_H__
-#define __TEST_DOMAIN_H__
+#ifndef __TEST_EVAL_H__
+#define __TEST_EVAL_H__
 
 #include "cpptest.h"
-#include "ibex_Eval.h"
 #include "utils.h"
 
 namespace ibex {
 
-class TestDomain : public TestIbex {
+class TestEval : public TestIbex {
 
 public:
-	TestDomain() {
-/*
-		TEST_ADD(TestDomain::cons01);
-		TEST_ADD(TestDomain::scal01);
-		TEST_ADD(TestDomain::vector01);
-		TEST_ADD(TestDomain::matrix01);
-		TEST_ADD(TestDomain::mix01);
-		*/
+	TestEval() {
+		TEST_ADD(TestEval::add01);
 	}
 
-	// test: Domain()
-/*	void cons01();
-
-	void scal01();
-	void vector01();
-	void matrix01();
-	void mix01(); */
-
+	void add01();
 };
 
-} // namespace ibex
-#endif // __TEST_DOMAIN_H__
+} // end namespace
+
+#endif /* __TEST_EVAL_H__ */

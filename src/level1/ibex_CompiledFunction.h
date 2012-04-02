@@ -224,6 +224,9 @@ private:
 
 protected:
 
+	template<typename _T>
+	friend std::ostream& operator<<(std::ostream&,const CompiledFunction<_T>&);
+
 	typedef enum {
 		IDX, VEC, SYM, CST, APPLY,
 		ADD, MUL, SUB, DIV, MAX, MIN, ATAN2,
@@ -348,6 +351,97 @@ void CompiledFunction<T>::backward(const V& algo) const {
 	}
 }
 
+// for debug only
+template<typename T>
+std::ostream& operator<<(std::ostream& os,const CompiledFunction<T>& f) {
+	for (int i=0; i<f.expr.size; i++) {
+		switch(f.code[i]) {
+		case CompiledFunction<T>::IDX:
+		{
+			ExprIndex& e=(ExprIndex&) *(f.nodes[i]);
+			os << e.id << ": [-]" << " " << (T&) *f.args[i][0] << " " << e.expr.id << " " << (T&) *f.args[i][1];
+		}
+		break;
+		case CompiledFunction<T>::VEC:
+		{
+			ExprVector& e=(ExprVector&) *(f.nodes[i]);
+			const T** _args=(const T**) &f.args[i][1];
+			os << e.id << ": vec " << " ";
+			for (int i=0; i<e.nb_args; i++)
+				os << (e.arg(i).id) << " " << *(_args[i]) << " ";
+		}
+		break;
+		case CompiledFunction<T>::SYM:
+		{
+			ExprSymbol& e=(ExprSymbol&) *(f.nodes[i]);
+			os << e.id << ": " << e.name << " " << (T&) *f.args[i][0];
+		}
+		break;
+		case CompiledFunction<T>::CST:
+		{
+			ExprConstant& e=(ExprConstant&) *(f.nodes[i]);
+			os << e.id << ": cst=" << e.get_matrix_value() << " " <<  (T&) *f.args[i][0];
+		}
+		break;
+		case CompiledFunction<T>::APPLY:
+		{
+			ExprApply& e=(ExprApply&) *(f.nodes[i]);
+			const T** args=(const T**) f.args[i][1];
+			os << e.id << ": " << e.func.name << "()" << " ";
+			for (int i=0; i<e.nb_args; i++)
+				os << e.arg(i).id << " " << *args[i] << " ";
+		}
+		break;
+		case CompiledFunction<T>::ADD:
+		{
+			ExprAdd& e=(ExprAdd&) *(f.nodes[i]);
+			os << e.id << ": +" << " " << (T&) *f.args[i][0] << " ";
+			os << e.left.id << " " << (T&) *f.args[i][1];
+			os << e.right.id << " " << (T&) *f.args[i][2];
+		}
+		break;
+
+		case CompiledFunction<T>::ADD_V:
+		case CompiledFunction<T>::ADD_M:
+		case CompiledFunction<T>::MUL:
+		case CompiledFunction<T>::MUL_SV:
+		case CompiledFunction<T>::MUL_SM:
+		case CompiledFunction<T>::MUL_VV:
+		case CompiledFunction<T>::MUL_MV:
+		case CompiledFunction<T>::MUL_MM:
+		case CompiledFunction<T>::SUB:
+		case CompiledFunction<T>::SUB_V:
+		case CompiledFunction<T>::SUB_M:
+		case CompiledFunction<T>::DIV:
+		case CompiledFunction<T>::MAX:
+		case CompiledFunction<T>::MIN:
+		case CompiledFunction<T>::ATAN2:
+		case CompiledFunction<T>::MINUS:
+		case CompiledFunction<T>::SIGN:
+		case CompiledFunction<T>::ABS:
+		case CompiledFunction<T>::POWER:
+		case CompiledFunction<T>::SQR:
+		case CompiledFunction<T>::SQRT:
+		case CompiledFunction<T>::EXP:
+		case CompiledFunction<T>::LOG:
+		case CompiledFunction<T>::COS:
+		case CompiledFunction<T>::SIN:
+		case CompiledFunction<T>::TAN:
+		case CompiledFunction<T>::COSH:
+		case CompiledFunction<T>::SINH:
+		case CompiledFunction<T>::TANH:
+		case CompiledFunction<T>::ACOS:
+		case CompiledFunction<T>::ASIN:
+		case CompiledFunction<T>::ATAN:
+		case CompiledFunction<T>::ACOSH:
+		case CompiledFunction<T>::ASINH:
+		case CompiledFunction<T>::ATANH:
+			os << "not implemented yet";
+			break;
+		}
+	}
+	return os;
+}
 
 } // namespace ibex
 #endif // _IBEX_COMPILED_FUNCTION_H_

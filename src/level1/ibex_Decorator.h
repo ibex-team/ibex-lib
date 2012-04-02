@@ -34,7 +34,7 @@ public:
 	/**
 	 * \brief Decorate the function f with object of type "T".
 	 */
-	virtual void decorate(const Function& f) const;
+	virtual void decorate(const Function& f) const=0;
 };
 
 } // namespace ibex

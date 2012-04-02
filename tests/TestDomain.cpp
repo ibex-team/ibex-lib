@@ -18,11 +18,6 @@ namespace ibex {
 
 #define ERROR 1e-10
 
-void TestDomain::cons01() {
-	Domain d;
-	TEST_ASSERT(d.size()==0);
-}
-
 static IntervalVector v0() {
 	double vec0[][2] = { {0,3}, {0,4}, {0,5} };
 	return IntervalVector(3,vec0);
@@ -55,6 +50,12 @@ static IntervalMatrix M3() {
 	double m[][2]={{1,2},{1,2},{2,4},
 	               {-2,-1},{-2,-1},{-4,-2}};
 	return IntervalMatrix(2,3,m);
+}
+/*
+
+void TestDomain::cons01() {
+	Domain d;
+	TEST_ASSERT(d.size()==0);
 }
 
 void TestDomain::scal01() {
@@ -216,5 +217,5 @@ void TestDomain::mix01() {
 	for (int i=0; i<10; i++)
 		TEST_ASSERT(v2[i]==Interval(1,i+2));
 }
-
+*/
 } // namespace ibex

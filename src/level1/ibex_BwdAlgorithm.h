@@ -23,6 +23,7 @@ namespace ibex {
 template<typename T>
 class BwdAlgorithm {
 
+protected:
 	/** TO BE DEFINED (by the subclass) */
 	void index_bwd(const ExprIndex&, T& exprL, const T& result);
 

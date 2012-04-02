@@ -70,12 +70,12 @@ inline int IntervalMatrixArray::size() const {
 	return n;
 }
 
-int IntervalMatrixArray::nb_rows() const {
+inline int IntervalMatrixArray::nb_rows() const {
 	assert(n>0);
 	return array[0].nb_rows();
 }
 
-int IntervalMatrixArray::nb_cols() const {
+inline int IntervalMatrixArray::nb_cols() const {
 	assert(n>0);
 	return array[0].nb_cols();
 }

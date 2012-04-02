@@ -23,10 +23,9 @@ namespace ibex {
  * \ingroup level1
  * \brief Label for the gradient computation.
  */
-class GradLabel : public EvalLabel {
+class GradLabel : public Domain {
 public:
-	GradLabel() : EvalLabel() { }
-	GradLabel(const Dim& dim) : EvalLabel(dim) { }
+	GradLabel(const Dim& dim) : Domain(dim) { }
 
 	Interval g; // we don't manage yet vector/matrix operations
 };
@@ -58,7 +57,7 @@ protected:
 
 	  /** Visit an indexed expression. */
 	  virtual void visit(const ExprIndex& idx) {
-		  idx.deco = new GradLabel();
+		  idx.deco = new GradLabel(idx.dim);
 	  }
 
 	  /** Visit a vector of expressions. */
@@ -68,7 +67,7 @@ protected:
 
 	  /** Visit a symbol. */
 	  virtual void visit(const ExprSymbol& s) {
-		  s.deco = new GradLabel();
+		  s.deco = new GradLabel(s.dim);
 	  }
 
 	  /** Visit a constant. */
@@ -108,7 +107,7 @@ public:
 	/**
 	 * \brief Calculate the gradient on the box \a box and store the result in \a g.
 	 */
-	void calculate(const Domain& box, IntervalVector& g) const;
+	void calculate(const IntervalVector& box, IntervalVector& g) const;
 
 private:
 	friend class CompiledFunction<GradLabel>;
@@ -116,8 +115,6 @@ private:
 	const CompiledFunction<GradLabel> f;
 
 	Eval eval;
-
-	mutable const Domain* box; // current box
 
 	inline void index_bwd (const ExprIndex&,   GradLabel& exprL,                    const GradLabel& result) { /* nothing to do */ }
 	inline void vector_bwd(const ExprVector&,  GradLabel** compL,                   const GradLabel& result) {  }
