@@ -27,15 +27,8 @@ void HC4ReviseAlgo::vector_bwd(const ExprVector& v, Domain** compL, const Domain
 void HC4ReviseAlgo::apply_bwd(const ExprApply& a, Domain** argL, const Domain& y) {
 	// download data
 	Eval& fevl=((EvalApplyLabel&) y).fevl;
-	for (int i=0; i<a.nb_args; i++) {
-		switch(a.args[i]->type()) {
-		case Dim::SCALAR:       argL[i]->i() &=fevl.domain(i).i();    break;
-		case Dim::ROW_VECTOR:
-		case Dim::COL_VECTOR:   argL[i]->v() &=fevl.domain(i).v(); break;
-		case Dim::MATRIX:       argL[i]->m() &=fevl.domain(i).m();  break;
-		case Dim::MATRIX_ARRAY: assert(false); /* impossible */ break;
-		}
-	}
+	//fevl.apply_fwd(p)
+	fevl.symbolLabels = ((EvalApplyLabel&) y).args_doms;  // upload data (in the function arguments' box).
 }
 
 void HC4ReviseAlgo::contract(IntervalVector& box) {
@@ -54,6 +47,8 @@ void HC4ReviseAlgo::contract(IntervalVector& box) {
 	}
 
 	eval.f.backward(*this);
+
+	box = eval.symbolLabels;
 }
 
 } /* namespace ibex */

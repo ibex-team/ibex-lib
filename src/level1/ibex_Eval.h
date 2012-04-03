@@ -16,6 +16,7 @@
 #include "ibex_IntervalMatrixArray.h"
 #include "ibex_Dim.h"
 #include "ibex_Decorator.h"
+#include "ibex_Domain.h"
 
 #include <iostream>
 
@@ -23,119 +24,6 @@ namespace ibex {
 
 class Eval;
 
-/**
- * \ingroup level1
- * \brief Label for the basic evaluation of a function.
- */
-class Domain : public ExprLabel {
-public:
-
-	/**
-	 * The dimension of the domain
-	 */
-	const Dim dim;
-
-	/**
-	 * \brief Creates a new domain of dimension \a dim.
-	 */
-	Domain(const Dim& dim) : dim(dim), is_reference(false) {
-		switch(dim.type()) {
-		case Dim::SCALAR:       domain = new Interval(); break;
-		case Dim::ROW_VECTOR:   domain = new IntervalVector(dim.dim3); break;
-		case Dim::COL_VECTOR:   domain = new IntervalVector(dim.dim2); break;
-		case Dim::MATRIX:       domain = new IntervalMatrix(dim.dim2,dim.dim3); break;
-		case Dim::MATRIX_ARRAY: domain = new IntervalMatrixArray(dim.dim1,dim.dim2,dim.dim3); break;
-		}
-	}
-
-	/**
-	 * \brief Creates a reference to an interval.
-	 */
-	Domain(Interval& itv) : dim(0,0,0), is_reference(true) {
-		domain = &itv;
-	}
-
-	/**
-	 * \brief Creates a reference to an interval vector.
-	 */
-	Domain(IntervalVector& v, bool in_row) : dim(0,in_row?0:v.size(),in_row?v.size():0), is_reference(true) {
-		domain = &v;
-	}
-
-	/**
-	 * \brief Creates a reference to an interval matrix.
-	 */
-	Domain(IntervalMatrix& m) : dim(0,m.nb_rows(),m.nb_cols()), is_reference(true) {
-		domain = &m;
-	}
-
-	/**
-	 * \brief Creates a reference to an array of interval matrices.
-	 */
-	Domain(IntervalMatrixArray& ma) : dim(ma.size(),ma.nb_rows(),ma.nb_cols()), is_reference(true) {
-		domain = &ma;
-	}
-
-	virtual ~Domain() {
-		if (!is_reference)
-			switch(dim.type()) {
-			case Dim::SCALAR:       delete &i();  break;
-			case Dim::ROW_VECTOR:
-			case Dim::COL_VECTOR:   delete &v();  break;
-			case Dim::MATRIX:       delete &m();  break;
-			case Dim::MATRIX_ARRAY: delete &ma(); break;
-			}
-	}
-
-	/**
-	 * Return the domain as an interval.
-	 */
-	inline Interval& i()        {
-		assert(dim.is_scalar());
-		return *(Interval*) domain;
-	}
-
-	inline IntervalVector& v()  {
-		assert(dim.is_vector());
-		return *(IntervalVector*) domain;
-	}
-
-	inline IntervalMatrix& m()  {
-		assert(dim.type()==Dim::MATRIX);
-		return *(IntervalMatrix*) domain;
-	}
-
-	inline IntervalMatrixArray& ma() {
-		assert(dim.type()==Dim::MATRIX_ARRAY);
-		return *(IntervalMatrixArray*) domain;
-	}
-
-	inline const Interval& i() const  {
-		assert(dim.is_scalar());
-		return *(Interval*) domain;
-	}
-
-	inline const IntervalVector& v() const  {
-		assert(dim.is_vector());
-		return *(IntervalVector*) domain;
-	}
-
-	inline const IntervalMatrix& m() const  {
-		assert(dim.type()==Dim::MATRIX);
-		return *(IntervalMatrix*) domain;
-	}
-
-	inline const IntervalMatrixArray& ma() const {
-		assert(dim.type()==Dim::MATRIX_ARRAY);
-		return *(IntervalMatrixArray*) domain;
-	}
-
-private:
-	void* domain;
-	bool is_reference;
-};
-
-std::ostream& operator<<(std::ostream& os,const Domain&);
 
 /**
  * \ingroup level1
@@ -226,14 +114,11 @@ public:
 	const CompiledFunction<Domain>& f;
 
 	/**
-	 * \brief Domain of the ith input symbol.
+	 * \brief Domains of the input symbols
+	 *
+	 * The structure is initialized by the decorator.
 	 */
-	Domain& domain(int i);
-
-	/**
-	 * \brief Domain of the ith input symbol.
-	 */
-	const Domain& domain(int i) const;
+	mutable Domains symbolLabels;
 
 protected:
 
@@ -283,11 +168,7 @@ protected:
 	inline void sub_V_fwd(const ExprSub&, const Domain& x1, const Domain& x2, Domain& y);
 	inline void sub_M_fwd(const ExprSub&, const Domain& x1, const Domain& x2, Domain& y);
 
-	mutable Domain** symbolLabels; // domains of the symbols (created by the decorator)
-
 private:
-	void read(const IntervalVector&) const; // load a box into symbolLabels
-
 	bool proper_compiled_func;
 };
 
@@ -300,7 +181,9 @@ private:
  */
 class EvalApplyLabel : public Domain {
 public:
-	EvalApplyLabel(const Dim& dim, const Function& f) : Domain(dim), fevl(f) { }
+	EvalApplyLabel(const Dim& dim, const Function& f);
+
+	Domains args_doms; // domains of the arguments (references)
 
 	Eval fevl;    //  for each function, there is an associated evaluator
 };
@@ -309,18 +192,8 @@ public:
  	 	 	 	 	 	 	 implementation
   ============================================================================*/
 
-inline Domain& Eval::domain(int i) {
-	assert(i>=0 && i<f.f.nb_symbols());
-	return *symbolLabels[i];
-}
-
-inline const Domain& Eval::domain(int i) const {
-	assert(i>=0 && i<f.f.nb_symbols());
-	return *symbolLabels[i];
-}
-
 inline Domain& Eval::forward(const IntervalVector& box) const {
-	read(box); // load the domains of all the symbols
+	symbolLabels = box; // load the domains of all the symbols
 	return f.forward(*this);
 }
 
@@ -349,13 +222,13 @@ inline void Eval::cst_fwd(const ExprConstant& c, Domain& y) {
 	case Dim::MATRIX_ARRAY: assert(false); /* impossible */ break;
 	}
 }
-inline void Eval::add_fwd(const ExprAdd&, const Domain& x1, const Domain& x2, Domain& y)     { y.i()=x1.i()+x2.i(); }
-inline void Eval::mul_fwd(const ExprMul&, const Domain& x1, const Domain& x2, Domain& y)     { y.i()=x1.i()*x2.i(); }
-inline void Eval::sub_fwd(const ExprSub&, const Domain& x1, const Domain& x2, Domain& y)     { y.i()=x1.i()-x2.i(); }
-inline void Eval::div_fwd(const ExprDiv&, const Domain& x1, const Domain& x2, Domain& y)     { y.i()=x1.i()/x2.i(); }
-inline void Eval::max_fwd(const ExprMax&, const Domain& x1, const Domain& x2, Domain& y)     { y.i()=max(x1.i(),x2.i()); }
-inline void Eval::min_fwd(const ExprMin&, const Domain& x1, const Domain& x2, Domain& y)     { y.i()=min(x1.i(),x2.i()); }
-inline void Eval::atan2_fwd(const ExprAtan2&, const Domain& x1, const Domain& x2, Domain& y) { y.i()=atan2(x1.i(),x2.i()); }
+inline void Eval::add_fwd(const ExprAdd&, const Domain& x1, const Domain& x2, Domain& y)        { y.i()=x1.i()+x2.i(); }
+inline void Eval::mul_fwd(const ExprMul&, const Domain& x1, const Domain& x2, Domain& y)        { y.i()=x1.i()*x2.i(); }
+inline void Eval::sub_fwd(const ExprSub&, const Domain& x1, const Domain& x2, Domain& y)        { y.i()=x1.i()-x2.i(); }
+inline void Eval::div_fwd(const ExprDiv&, const Domain& x1, const Domain& x2, Domain& y)        { y.i()=x1.i()/x2.i(); }
+inline void Eval::max_fwd(const ExprMax&, const Domain& x1, const Domain& x2, Domain& y)        { y.i()=max(x1.i(),x2.i()); }
+inline void Eval::min_fwd(const ExprMin&, const Domain& x1, const Domain& x2, Domain& y)        { y.i()=min(x1.i(),x2.i()); }
+inline void Eval::atan2_fwd(const ExprAtan2&, const Domain& x1, const Domain& x2, Domain& y)    { y.i()=atan2(x1.i(),x2.i()); }
 
 inline void Eval::minus_fwd(const ExprMinus&, const Domain& x, Domain& y)                       { y.i()=-x.i(); }
 inline void Eval::sign_fwd(const ExprSign&, const Domain& x, Domain& y)                         { y.i()=sign(x.i()); }
@@ -378,15 +251,15 @@ inline void Eval::acosh_fwd(const ExprAcosh&, const Domain& x, Domain& y)       
 inline void Eval::asinh_fwd(const ExprAsinh&, const Domain& x, Domain& y)                       { y.i()=asinh(x.i()); }
 inline void Eval::atanh_fwd(const ExprAtanh&, const Domain& x, Domain& y)                       { y.i()=atanh(x.i()); }
 
-inline void Eval::add_V_fwd(const ExprAdd&, const Domain& x1, const Domain& x2, Domain& y)         { y.v()=x1.v()+x2.v(); }
-inline void Eval::add_M_fwd(const ExprAdd&, const Domain& x1, const Domain& x2, Domain& y)         { y.m()=x1.m()+x2.m(); }
-inline void Eval::mul_SV_fwd(const ExprMul&, const Domain& x1, const Domain& x2, Domain& y)        { y.v()=x1.i()*x2.v(); }
-inline void Eval::mul_SM_fwd(const ExprMul&, const Domain& x1, const Domain& x2, Domain& y)        { y.m()=x1.i()*x2.m(); }
-inline void Eval::mul_VV_fwd(const ExprMul&, const Domain& x1, const Domain& x2, Domain& y)        { y.i()=x1.v()*x2.v(); }
-inline void Eval::mul_MV_fwd(const ExprMul&, const Domain& x1, const Domain& x2, Domain& y)        { y.v()=x1.m()*x2.v(); }
-inline void Eval::mul_MM_fwd(const ExprMul&, const Domain& x1, const Domain& x2, Domain& y)        { y.m()=x1.m()*x2.m(); }
-inline void Eval::sub_V_fwd(const ExprSub&, const Domain& x1, const Domain& x2, Domain& y)         { y.v()=x1.v()-x2.v(); }
-inline void Eval::sub_M_fwd(const ExprSub&, const Domain& x1, const Domain& x2, Domain& y)         { y.m()=x1.m()-x2.m(); }
+inline void Eval::add_V_fwd(const ExprAdd&, const Domain& x1, const Domain& x2, Domain& y)      { y.v()=x1.v()+x2.v(); }
+inline void Eval::add_M_fwd(const ExprAdd&, const Domain& x1, const Domain& x2, Domain& y)      { y.m()=x1.m()+x2.m(); }
+inline void Eval::mul_SV_fwd(const ExprMul&, const Domain& x1, const Domain& x2, Domain& y)     { y.v()=x1.i()*x2.v(); }
+inline void Eval::mul_SM_fwd(const ExprMul&, const Domain& x1, const Domain& x2, Domain& y)     { y.m()=x1.i()*x2.m(); }
+inline void Eval::mul_VV_fwd(const ExprMul&, const Domain& x1, const Domain& x2, Domain& y)     { y.i()=x1.v()*x2.v(); }
+inline void Eval::mul_MV_fwd(const ExprMul&, const Domain& x1, const Domain& x2, Domain& y)     { y.v()=x1.m()*x2.v(); }
+inline void Eval::mul_MM_fwd(const ExprMul&, const Domain& x1, const Domain& x2, Domain& y)     { y.m()=x1.m()*x2.m(); }
+inline void Eval::sub_V_fwd(const ExprSub&, const Domain& x1, const Domain& x2, Domain& y)      { y.v()=x1.v()-x2.v(); }
+inline void Eval::sub_M_fwd(const ExprSub&, const Domain& x1, const Domain& x2, Domain& y)      { y.m()=x1.m()-x2.m(); }
 
 } // namespace ibex
 #endif // IBEX_EVAL_H_

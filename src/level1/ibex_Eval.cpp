@@ -85,70 +85,33 @@ void EvalDecorator::visit(const ExprVector& v) {
 
 void EvalDecorator::visit(const ExprApply& a) {
 	a.deco = new EvalApplyLabel(a.dim, a.func);
+	for (int i=0; i<a.nb_args; i++) {
+		((EvalApplyLabel*) a.deco)->args_doms.set(i,(Domain&) (*a.arg(i).deco));
+	}
+}
+
+EvalApplyLabel::EvalApplyLabel(const Dim& dim, const Function& f) : Domain(dim), args_doms(f.nb_symbols()), fevl(f) {
+
 }
 
 /*==========================================================================================*/
 
 Eval::Eval(const Function& f) : f(*new CompiledFunction<Domain>(f,EvalDecorator())),
-		proper_compiled_func(true) {
-
-	symbolLabels = new Domain*[f.nb_symbols()];
+		symbolLabels(f.nb_symbols()), proper_compiled_func(true) {
 
 	for (int i=0; i<f.nb_symbols(); i++) {
-		symbolLabels[i] = (Domain*) f.symbol(i).deco;
+		symbolLabels.set(i,((Domain&) *f.symbol(i).deco));
 	}
 }
 
-Eval::Eval(const CompiledFunction<Domain>& f) : f(f), proper_compiled_func(false) { }
+Eval::Eval(const CompiledFunction<Domain>& f) : f(f), symbolLabels(f.f.nb_symbols()), proper_compiled_func(false) {
+	for (int i=0; i<f.f.nb_symbols(); i++) {
+		symbolLabels.set(i,((Domain&) *f.f.symbol(i).deco));
+	}
+}
 
 Eval::~Eval() {
 	if (proper_compiled_func) delete (CompiledFunction<Domain>*) &f;
-	delete[] symbolLabels;
-}
-
-void Eval::read(const IntervalVector& x) const {
-	int i=0;
-
-	for (int s=0; s<f.f.nb_symbols(); s++) {
-		const Dim& dim=f.f.symbol(s).dim;
-		switch (dim.type()) {
-		case Dim::SCALAR:
-			symbolLabels[s]->i()=x[i++];
-			break;
-		case Dim::ROW_VECTOR:
-		{
-			IntervalVector& v=symbolLabels[s]->v();
-			for (int j=0; j<dim.dim3; j++)
-				v[j]=x[i++];
-		}
-		break;
-		case Dim::COL_VECTOR:
-		{
-			IntervalVector& v=symbolLabels[s]->v();
-			for (int j=0; j<dim.dim2; j++)
-				v[j]=x[i++];
-		}
-		break;
-
-		case Dim::MATRIX:
-		{
-			IntervalMatrix& M=symbolLabels[s]->m();
-			for (int k=0; k<dim.dim2; k++)
-				for (int j=0; j<dim.dim3; j++)
-					M[k][j]=x[i++];
-		}
-		break;
-		case Dim::MATRIX_ARRAY:
-		{
-			IntervalMatrixArray& A=symbolLabels[s]->ma();
-			for (int l=0; l<dim.dim1; l++)
-				for (int k=0; k<dim.dim2; k++)
-					for (int j=0; j<dim.dim3; j++)
-						A[l][k][j]=x[i++];
-		}
-		break;
-		}
-	}
 }
 
 void Eval::Eval::vector_fwd(const ExprVector& v, const Domain** compL, Domain& y) {
@@ -168,17 +131,8 @@ void Eval::Eval::vector_fwd(const ExprVector& v, const Domain** compL, Domain& y
 }
 
 void Eval::apply_fwd(const ExprApply& a, const Domain** argL, Domain& y) {
-	// upload data (in the function arguments' box).
 	Eval& fevl=((EvalApplyLabel&) y).fevl;
-	for (int i=0; i<a.nb_args; i++) {
-		switch(a.args[i]->type()) {
-		case Dim::SCALAR:       fevl.domain(i).i()=argL[i]->i(); break;
-		case Dim::ROW_VECTOR:
-		case Dim::COL_VECTOR:   fevl.domain(i).v()=argL[i]->v(); break;
-		case Dim::MATRIX:       fevl.domain(i).m()=argL[i]->m(); break;
-		case Dim::MATRIX_ARRAY: assert(false); /* impossible */ break;
-		}
-	}
+	fevl.symbolLabels = ((EvalApplyLabel&) y).args_doms;  // upload data (in the function arguments' box).
 	fevl.f.forward(fevl);
 }
 

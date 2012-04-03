@@ -29,34 +29,34 @@ public:
 
 	void contract(IntervalVector& box);
 
+	Eval eval;
+
 protected:
 	friend class CompiledFunction<Domain>;
-
-	Eval eval;
 
 	bool equality;
 
 	inline void index_bwd (const ExprIndex&,   Domain& exprL, const Domain& result)                    { /* nothing to do */ }
 	inline void vector_bwd(const ExprVector&,  Domain** compL, const Domain& result);
-	inline void symbol_bwd(const ExprSymbol&, const Domain& result)                                       { /* nothing to do */ }
-	inline void cst_bwd   (const ExprConstant&, const Domain& result)                                     { /* nothing to do */ }
+	inline void symbol_bwd(const ExprSymbol&, const Domain& result)                                    { /* nothing to do */ }
+	inline void cst_bwd   (const ExprConstant&, const Domain& result)                                  { /* nothing to do */ }
 	inline void apply_bwd (const ExprApply&,   Domain** argL, const Domain& result);
-	inline void add_bwd   (const ExprAdd&,     Domain& leftL, Domain& rightL, const Domain& result) { proj_add(result.i(),leftL.i(),rightL.i()); }
-	inline void add_V_bwd  (const ExprAdd&,    Domain& leftL, Domain& rightL, const Domain& result) { /* to do */}
-	inline void add_M_bwd  (const ExprAdd&,    Domain& leftL, Domain& rightL, const Domain& result) { /* to do */ }
-	inline void mul_bwd    (const ExprMul&,    Domain& leftL, Domain& rightL, const Domain& result) { proj_mul(result.i(),leftL.i(),rightL.i()); }
-	inline void mul_SV_bwd (const ExprMul&,    Domain& leftL, Domain& rightL, const Domain& result) {  }
-	inline void mul_SM_bwd (const ExprMul&,    Domain& leftL, Domain& rightL, const Domain& result) {  }
-	inline void mul_VV_bwd (const ExprMul&,    Domain& leftL, Domain& rightL, const Domain& result) {  }
-	inline void mul_MV_bwd (const ExprMul&,    Domain& leftL, Domain& rightL, const Domain& result) {  }
-	inline void mul_MM_bwd (const ExprMul&,    Domain& leftL, Domain& rightL, const Domain& result) {  }
-	inline void sub_bwd   (const ExprSub&,     Domain& leftL, Domain& rightL, const Domain& result) { proj_sub(result.i(),leftL.i(),rightL.i()); }
-	inline void sub_V_bwd (const ExprSub&,     Domain& leftL, Domain& rightL, const Domain& result) {  }
-	inline void sub_M_bwd (const ExprSub&,     Domain& leftL, Domain& rightL, const Domain& result) {  }
-	inline void div_bwd   (const ExprDiv&,     Domain& leftL, Domain& rightL, const Domain& result) { proj_div(result.i(),leftL.i(),rightL.i()); }
-	inline void max_bwd   (const ExprMax&,     Domain& leftL, Domain& rightL, const Domain& result) { proj_max(result.i(),leftL.i(),rightL.i()); }
-	inline void min_bwd   (const ExprMin&,     Domain& leftL, Domain& rightL, const Domain& result) { proj_min(result.i(),leftL.i(),rightL.i()); }
-	inline void atan2_bwd (const ExprAtan2& e, Domain& leftL, Domain& rightL, const Domain& result) { proj_atan2(result.i(),leftL.i(),rightL.i()); }
+	inline void add_bwd   (const ExprAdd&,     Domain& leftL, Domain& rightL, const Domain& result)    { proj_add(result.i(),leftL.i(),rightL.i()); }
+	inline void add_V_bwd  (const ExprAdd&,    Domain& leftL, Domain& rightL, const Domain& result)    { /* to do */}
+	inline void add_M_bwd  (const ExprAdd&,    Domain& leftL, Domain& rightL, const Domain& result)    { /* to do */ }
+	inline void mul_bwd    (const ExprMul&,    Domain& leftL, Domain& rightL, const Domain& result)    { proj_mul(result.i(),leftL.i(),rightL.i()); }
+	inline void mul_SV_bwd (const ExprMul&,    Domain& leftL, Domain& rightL, const Domain& result)    {  }
+	inline void mul_SM_bwd (const ExprMul&,    Domain& leftL, Domain& rightL, const Domain& result)    {  }
+	inline void mul_VV_bwd (const ExprMul&,    Domain& leftL, Domain& rightL, const Domain& result)    {  }
+	inline void mul_MV_bwd (const ExprMul&,    Domain& leftL, Domain& rightL, const Domain& result)    {  }
+	inline void mul_MM_bwd (const ExprMul&,    Domain& leftL, Domain& rightL, const Domain& result)    {  }
+	inline void sub_bwd   (const ExprSub&,     Domain& leftL, Domain& rightL, const Domain& result)    { proj_sub(result.i(),leftL.i(),rightL.i()); }
+	inline void sub_V_bwd (const ExprSub&,     Domain& leftL, Domain& rightL, const Domain& result)    {  }
+	inline void sub_M_bwd (const ExprSub&,     Domain& leftL, Domain& rightL, const Domain& result)    {  }
+	inline void div_bwd   (const ExprDiv&,     Domain& leftL, Domain& rightL, const Domain& result)    { proj_div(result.i(),leftL.i(),rightL.i()); }
+	inline void max_bwd   (const ExprMax&,     Domain& leftL, Domain& rightL, const Domain& result)    { proj_max(result.i(),leftL.i(),rightL.i()); }
+	inline void min_bwd   (const ExprMin&,     Domain& leftL, Domain& rightL, const Domain& result)    { proj_min(result.i(),leftL.i(),rightL.i()); }
+	inline void atan2_bwd (const ExprAtan2& e, Domain& leftL, Domain& rightL, const Domain& result)    { proj_atan2(result.i(),leftL.i(),rightL.i()); }
 	inline void minus_bwd (const ExprMinus& e, Domain& exprL, const Domain& result)                    { exprL.i() &=-result.i(); }
 	inline void sign_bwd  (const ExprSign& e,  Domain& exprL, const Domain& result)                    { proj_sign(result.i(),exprL.i()); }
 	inline void abs_bwd   (const ExprAbs& e,   Domain& exprL, const Domain& result)                    { proj_abs(result.i(),exprL.i()); }
@@ -79,7 +79,7 @@ protected:
 	inline void atanh_bwd (const ExprAtanh& e, Domain& exprL, const Domain& result)                    { proj_atanh(result.i(),exprL.i()); }
 
 private:
-	void write(IntervalVector&);
+	void write(IntervalVector&) const;
 
 };
 

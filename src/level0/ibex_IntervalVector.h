@@ -20,6 +20,7 @@
 namespace ibex {
 
 class IntervalMatrix; // declared only for friendship
+class Domains;        // declared for operator=(const Domains&)
 
 /**
  * \ingroup arith
@@ -62,6 +63,12 @@ public:
 	 * \pre n>0
 	 */
 	IntervalVector(int n, double  bounds[][2]);
+
+
+	/**
+	 * \brief Load domains into this interval vector.
+	 */
+	IntervalVector& operator=(const Domains&); // REM: Implemented in ibex_Domains.cpp
 
 	/**
 	 * \brief Create [empty; ...; empty]
