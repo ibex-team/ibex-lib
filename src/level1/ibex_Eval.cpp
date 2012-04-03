@@ -105,6 +105,7 @@ Eval::~Eval() {
 	if (proper_compiled_func) delete (CompiledFunction<Domain>*) &f;
 	delete[] symbolLabels;
 }
+
 void Eval::read(const IntervalVector& x) const {
 	int i=0;
 

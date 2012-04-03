@@ -39,6 +39,7 @@ public:
 		code=new operation[expr.size];
 		args=new ExprLabel**[expr.size];
 		nodes=new const ExprNode*[expr.size];
+		nb_args=new int[expr.size];
 		ptr=0;
 		visit(expr);
 	}
@@ -68,6 +69,20 @@ public:
 	 * The function
 	 */
 	const Function& f;
+
+protected:
+	typedef enum {
+		IDX, VEC, SYM, CST, APPLY,
+		ADD, MUL, SUB, DIV, MAX, MIN, ATAN2,
+		MINUS, SIGN, ABS, POWER,
+		SQR, SQRT, EXP, LOG,
+		COS,  SIN,  TAN,  ACOS,  ASIN,  ATAN,
+		COSH, SINH, TANH, ACOSH, ASINH, ATANH,
+
+		ADD_V, ADD_M, SUB_V, SUB_M,
+		MUL_SV, MUL_SM, MUL_VV, MUL_MV, MUL_MM
+	} operation;
+
 private:
 
 	void visit(const ExprNode& e) {
@@ -109,6 +124,18 @@ private:
 
 	void visit(const ExprNAryOp& e) {
 		e.acceptVisitor(*this);
+	}
+
+	void visit(const ExprBinaryOp& b) {
+		b.acceptVisitor(*this);
+	}
+
+	void visit(const ExprUnaryOp& u) {
+		u.acceptVisitor(*this);
+	}
+
+	void visit(const ExprNAryOp& e, operation op) {
+		code[ptr]=op;
 		nodes[ptr]=&e;
 		nb_args[ptr]=e.nb_args;
 		args[ptr]=new ExprLabel*[e.nb_args+1];
@@ -122,8 +149,8 @@ private:
 		}
 	}
 
-	void visit(const ExprBinaryOp& b) {
-		b.acceptVisitor(*this);
+	void visit(const ExprBinaryOp& b, operation op) {
+		code[ptr]=op;
 		nodes[ptr]=&b;
 		nb_args[ptr]=2;
 		args[ptr]=new ExprLabel*[3];
@@ -136,9 +163,8 @@ private:
 		visit(b.right);
 	}
 
-	void visit(const ExprUnaryOp& u) {
-		u.acceptVisitor(*this);
-		nodes[ptr]=&u;
+	void visit(const ExprUnaryOp& u, operation op) {
+		code[ptr]=op;		nodes[ptr]=&u;
 		nb_args[ptr]=1;
 		args[ptr]=new ExprLabel*[2];
 		args[ptr][0]=u.deco;
@@ -148,96 +174,86 @@ private:
 		visit(u.expr);
 	}
 
-	void visit(const ExprVector&){ code[ptr]=VEC; }
+	void visit(const ExprVector& e) { visit(e,VEC); }
 
-	void visit(const ExprApply&) { code[ptr]=APPLY; }
+	void visit(const ExprApply& e) { visit(e,APPLY); }
 
 	void visit(const ExprAdd& e)   {
-		if (e.dim.is_scalar())      code[ptr]=ADD;
-		else if (e.dim.is_vector()) code[ptr]=ADD_V;
-		else                        code[ptr]=ADD_M;
+		if (e.dim.is_scalar())      visit(e,ADD);
+		else if (e.dim.is_vector()) visit(e,ADD_V);
+		else                        visit(e,ADD_M);
 	}
 
-	void visit(const ExprMul& m)   {
-		if (m.left.dim.is_scalar())
-			if (m.right.dim.is_scalar())      code[ptr]=MUL;
-			else if (m.right.dim.is_vector()) code[ptr]=MUL_SV;
-			else                              code[ptr]=MUL_SM;
-		else if (m.left.dim.is_vector())      code[ptr]=MUL_VV;
-		else if (m.right.dim.is_vector())     code[ptr]=MUL_MV;
-			else                              code[ptr]=MUL_MM;
+	void visit(const ExprMul& e)   {
+		if (e.left.dim.is_scalar())
+			if (e.right.dim.is_scalar())      visit(e,MUL);
+			else if (e.right.dim.is_vector()) visit(e,MUL_SV);
+			else                              visit(e,MUL_SM);
+		else if (e.left.dim.is_vector())      visit(e,MUL_VV);
+		else if (e.right.dim.is_vector())     visit(e,MUL_MV);
+			else                              visit(e,MUL_MM);
 	}
 
 	void visit(const ExprSub& e)   {
-		if (e.dim.is_scalar())      code[ptr]=SUB;
-		else if (e.dim.is_vector()) code[ptr]=SUB_V;
-		else                        code[ptr]=SUB_M;
+		if (e.dim.is_scalar())      visit(e,SUB);
+		else if (e.dim.is_vector()) visit(e,SUB_V);
+		else                        visit(e,SUB_M);
 	}
 
-	void visit(const ExprDiv&)   { code[ptr]=DIV; }
+	void visit(const ExprDiv& e)   { visit(e,DIV); }
 
-	void visit(const ExprMax&)   { code[ptr]=MAX; }
+	void visit(const ExprMax& e)   { visit(e,MAX); }
 
-	void visit(const ExprMin&)   { code[ptr]=MIN; }
+	void visit(const ExprMin& e)   { visit(e,MIN); }
 
-	void visit(const ExprAtan2&) { code[ptr]=ATAN2;}
+	void visit(const ExprAtan2& e) { visit(e,ATAN2); }
 
-	void visit(const ExprMinus&) { code[ptr]=MINUS; }
+	void visit(const ExprMinus& e) { visit(e,MINUS); }
 
-	void visit(const ExprSign&)  { code[ptr]=SIGN; }
+	void visit(const ExprSign& e)  { visit(e,SIGN); }
 
-	void visit(const ExprAbs&)   { code[ptr]=ABS; }
+	void visit(const ExprAbs& e)   { visit(e,ABS); }
 
-	void visit(const ExprPower&) { code[ptr]=POWER; }
+	void visit(const ExprPower& e) { visit(e,POWER); }
 
-	void visit(const ExprSqr&)   { code[ptr]=SQR; }
+	void visit(const ExprSqr& e)   { visit(e,SQR); }
 
-	void visit(const ExprSqrt&)  { code[ptr]=SQRT; }
+	void visit(const ExprSqrt& e)  { visit(e,SQRT); }
 
-	void visit(const ExprExp&)   { code[ptr]=EXP; }
+	void visit(const ExprExp& e)   { visit(e,EXP); }
 
-	void visit(const ExprLog&)   { code[ptr]=LOG; }
+	void visit(const ExprLog& e)   { visit(e,LOG); }
 
-	void visit(const ExprCos&)   { code[ptr]=COS; }
+	void visit(const ExprCos& e)   { visit(e,COS); }
 
-	void visit(const ExprSin&)   { code[ptr]=SIN; }
+	void visit(const ExprSin& e)   { visit(e,SIN); }
 
-	void visit(const ExprTan&)   { code[ptr]=TAN; }
+	void visit(const ExprTan& e)   { visit(e,TAN); }
 
-	void visit(const ExprCosh&)  { code[ptr]=COSH; }
+	void visit(const ExprCosh& e)  { visit(e,COSH); }
 
-	void visit(const ExprSinh&)  { code[ptr]=SINH; }
+	void visit(const ExprSinh& e)  { visit(e,SINH); }
 
-	void visit(const ExprTanh&)  { code[ptr]=TANH; }
+	void visit(const ExprTanh& e)  { visit(e,TANH); }
 
-	void visit(const ExprAcos&)  { code[ptr]=ACOS; }
+	void visit(const ExprAcos& e)  { visit(e,ACOS); }
 
-	void visit(const ExprAsin&)  { code[ptr]=ASIN; }
+	void visit(const ExprAsin& e)  { visit(e,ASIN); }
 
-	void visit(const ExprAtan&)  { code[ptr]=ATAN; }
+	void visit(const ExprAtan& e)  { visit(e,ATAN); }
 
-	void visit(const ExprAcosh&) { code[ptr]=ACOSH; }
+	void visit(const ExprAcosh& e) { visit(e,ACOSH); }
 
-	void visit(const ExprAsinh&) { code[ptr]=ASINH; }
+	void visit(const ExprAsinh& e) { visit(e,ASINH); }
 
-	void visit(const ExprAtanh&) { code[ptr]=ATANH; }
+	void visit(const ExprAtanh& e) { visit(e,ATANH); }
 
 protected:
 
+	const char* op(operation o) const;
+
 	template<typename _T>
 	friend std::ostream& operator<<(std::ostream&,const CompiledFunction<_T>&);
-
-	typedef enum {
-		IDX, VEC, SYM, CST, APPLY,
-		ADD, MUL, SUB, DIV, MAX, MIN, ATAN2,
-		MINUS, SIGN, ABS, POWER,
-		SQR, SQRT, EXP, LOG,
-		COS,  SIN,  TAN,  ACOS,  ASIN,  ATAN,
-		COSH, SINH, TANH, ACOSH, ASINH, ATANH,
-
-		ADD_V, ADD_M, SUB_V, SUB_M,
-		MUL_SV, MUL_SM, MUL_VV, MUL_MV, MUL_MM
-	} operation;
 
 	const ExprNode** nodes;
 	operation *code;
@@ -353,6 +369,47 @@ void CompiledFunction<T>::backward(const V& algo) const {
 
 // for debug only
 template<typename T>
+const char* CompiledFunction<T>::op(operation o) const {
+	switch (o) {
+	case IDX:   return "[]";
+	case VEC:   return "V";
+	case CST:   return "const";
+	case SYM:   return "symbl";
+	case APPLY: return "apply";
+	case ADD: case ADD_V: case ADD_M:
+		        return "+";
+	case MUL: case MUL_SV: case MUL_SM: case MUL_VV: case MUL_MV: case MUL_MM:
+		        return "*";
+	case MINUS: case SUB: case SUB_V: case SUB_M:
+		        return "-";
+	case DIV:   return "/";
+	case MAX:   return "max";
+	case MIN:   return "min";
+	case ATAN2: return "atan2";
+	case SIGN:  return "sign";
+	case ABS:   return "abs";
+	case POWER: return "pow";
+	case SQR:   return "sqr";
+	case SQRT:  return "sqrt";
+	case EXP:   return "exp";
+	case LOG:   return "log";
+	case COS:   return "cos";
+	case  SIN:  return "sin";
+	case  TAN:  return "tan";
+	case  ACOS: return "acos";
+	case  ASIN: return "asin";
+	case  ATAN: return "atan";
+	case COSH:  return "cosh";
+	case SINH:  return "sinh";
+	case TANH:  return "tanh";
+	case ACOSH: return "acosh";
+	case ASINH: return "asinh";
+	case ATANH: return "atanh";
+	}
+}
+
+// for debug only
+template<typename T>
 std::ostream& operator<<(std::ostream& os,const CompiledFunction<T>& f) {
 	for (int i=0; i<f.expr.size; i++) {
 		switch(f.code[i]) {
@@ -393,14 +450,6 @@ std::ostream& operator<<(std::ostream& os,const CompiledFunction<T>& f) {
 		}
 		break;
 		case CompiledFunction<T>::ADD:
-		{
-			ExprAdd& e=(ExprAdd&) *(f.nodes[i]);
-			os << e.id << ": +" << " " << (T&) *f.args[i][0] << " ";
-			os << e.left.id << " " << (T&) *f.args[i][1];
-			os << e.right.id << " " << (T&) *f.args[i][2];
-		}
-		break;
-
 		case CompiledFunction<T>::ADD_V:
 		case CompiledFunction<T>::ADD_M:
 		case CompiledFunction<T>::MUL:
@@ -416,6 +465,14 @@ std::ostream& operator<<(std::ostream& os,const CompiledFunction<T>& f) {
 		case CompiledFunction<T>::MAX:
 		case CompiledFunction<T>::MIN:
 		case CompiledFunction<T>::ATAN2:
+		{
+			ExprBinaryOp& e=(ExprBinaryOp&) *(f.nodes[i]);
+			os << e.id << ": " << f.op(f.code[i]) << " " << (T&) *f.args[i][0] << " ";
+			os << e.left.id << " " << (T&) *f.args[i][1] << " ";
+			os << e.right.id << " " << (T&) *f.args[i][2];
+		}
+		break;
+
 		case CompiledFunction<T>::MINUS:
 		case CompiledFunction<T>::SIGN:
 		case CompiledFunction<T>::ABS:
@@ -436,9 +493,14 @@ std::ostream& operator<<(std::ostream& os,const CompiledFunction<T>& f) {
 		case CompiledFunction<T>::ACOSH:
 		case CompiledFunction<T>::ASINH:
 		case CompiledFunction<T>::ATANH:
-			os << "not implemented yet";
-			break;
+		{
+			ExprUnaryOp& e=(ExprUnaryOp&) *(f.nodes[i]);
+			os << e.id << ": " << f.op(f.code[i]) << " " << (T&) *f.args[i][0] << " ";
+			os << e.expr.id << " " << (T&) *f.args[i][1];
 		}
+		break;
+		}
+		os << endl;
 	}
 	return os;
 }

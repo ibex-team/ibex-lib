@@ -15,6 +15,8 @@
 
 using namespace std;
 
+namespace {
+
 IntervalMatrix M1() {
 	IntervalMatrix m(2,3);
 	double _r1[][2]={{0,1},{0,2},{0,3}};
@@ -50,6 +52,8 @@ IntervalMatrix M3() { // non-null intersection with M1
 	m[0]=r1;
 	m[1]=r2;
 	return m;
+}
+
 }
 
 void TestIntervalMatrix::eq01() {
