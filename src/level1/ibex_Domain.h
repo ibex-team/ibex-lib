@@ -25,7 +25,7 @@ class Domains; // for friendship grant
  *
  * A generic domains is also the label type for the basic evaluation of a function.
  */
-class Domain : public ExprLabel {
+class Domain : public Object {
 public:
 
 	/**

@@ -13,6 +13,16 @@
 
 namespace ibex {
 
+std::ostream& operator<<(std::ostream& os,const Domain& d) {
+	switch (d.dim.type()) {
+		case Dim::SCALAR:       os << d.i(); break;
+		case Dim::ROW_VECTOR:
+		case Dim::COL_VECTOR:   os << d.v(); break;
+		case Dim::MATRIX:       os << d.m(); break;
+		case Dim::MATRIX_ARRAY: os << d.ma(); break;
+		}
+	return os;
+}
 
 Domains::Domains(int n) : n(n) {
 	d=new Domain[n];
