@@ -13,15 +13,14 @@
 
 namespace ibex {
 
+Gradient::Gradient(Function& f) : eval(f) {
 
-
-Gradient::Gradient(const Function& f) : f(f,GradDecorator()), eval((const CompiledFunction<Domain>&) f) {
-
+	f.decorate(GradDecorator());
 }
 
 void Gradient::calculate(const IntervalVector& box, IntervalVector& g) const {
 	eval.eval(box);
-	f.backward(*this);
+	eval.f.backward<Gradient,GradLabel>(*this);
 	//for (int i=0; i<)
 	// TO COMPLETE
 }

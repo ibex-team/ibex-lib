@@ -26,7 +26,7 @@ class NumConstraint {
 
 public:
 
-	NumConstraint(const Function& f, bool equality);
+	NumConstraint(Function& f, bool equality);
 
 	/**
 	 * \brief Transform f(x)<=0 into {f_1(x)<=0 ,..., f_n(x)<=0)
@@ -35,7 +35,7 @@ public:
 	 */
 	NumConstraint* separate() const;
 
-	const Function& f;
+	Function& f;
 	const bool equality;
 };
 

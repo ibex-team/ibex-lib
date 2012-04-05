@@ -28,7 +28,7 @@ public:
 	/**
 	 * \brief Create the HC4-revise algorithm for a constraint \a ctr.
 	 */
-	HC4ReviseAlgo(const NumConstraint& ctr);
+	HC4ReviseAlgo(NumConstraint& ctr);
 
 	/**
 	 * \brief Run the backward algorithm.
@@ -58,7 +58,7 @@ public:
 	const bool equality;
 
 protected:
-	friend class CompiledFunction<Domain>;
+	friend class CompiledFunction;
 
 	inline void index_bwd (const ExprIndex&,   Domain& exprL, const Domain& result)                    { /* nothing to do */ }
 	inline void vector_bwd(const ExprVector&,  Domain** compL, const Domain& result);
@@ -113,8 +113,8 @@ private:
   ============================================================================*/
 
 inline void HC4ReviseAlgo::backward(const Domain& root) {
-	(Domain&) *eval.f.expr.deco = root;
-	return eval.f.backward(*this);
+	(Domain&) *eval.f.expr().deco = root;
+	return eval.f.backward<HC4ReviseAlgo,Domain>(*this);
 }
 
 } /* namespace ibex */

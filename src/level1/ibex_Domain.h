@@ -14,6 +14,7 @@
 
 #include "ibex_Decorator.h"
 #include "ibex_IntervalMatrixArray.h"
+#include "ibex_Expr.h"
 
 namespace ibex {
 
@@ -275,9 +276,6 @@ protected:
 	Domain* d;
 };
 
-/*void read(Domain** d, int n, const IntervalVector& x);
-
-void write(const Domain** d, int n, IntervalVector& x);*/
-
 } // end namespace
-#endif /* __IBEX_DOMAIN_H__ */
+
+#endif // __IBEX_DOMAIN_H__

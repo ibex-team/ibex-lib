@@ -16,6 +16,7 @@
 #include "ibex_BwdAlgorithm.h"
 #include "ibex_Decorator.h"
 #include "ibex_CompiledFunction.h"
+#include "ibex_BasicDecorator.h"
 
 namespace ibex {
 
@@ -30,7 +31,7 @@ public:
 	Interval g; // we don't manage yet vector/matrix operations
 };
 
-class ApplyGradLabel : public GradLabel {
+class ApplyGradLabel : public BasicApplyLabel {
 /* to do */
 };
 
@@ -39,12 +40,12 @@ class ApplyGradLabel : public GradLabel {
  * \brief Decorates a function with the label for gradient computation.
  */
 
-class GradDecorator : public Decorator<GradLabel> {
+class GradDecorator : public Decorator {
 public:
 
-	void decorate(const Function& f) const {
+	void decorate(Function& f) const {
 		if (f.expr().deco!=NULL) {
-			throw NonRecoverableException("Cannot re-decorate a function");
+			return; //throw NonRecoverableException("Cannot re-decorate a function");
 		}
 		((GradDecorator&) *this).visit(f.expr()); // // cast -> we know *this will not be modified
 	}
@@ -102,7 +103,7 @@ public:
 	/**
 	 * \brief The function f (not decorated).
 	 */
-	Gradient(const Function& f);
+	Gradient(Function& f);
 
 	/**
 	 * \brief Calculate the gradient on the box \a box and store the result in \a g.
@@ -110,9 +111,7 @@ public:
 	void calculate(const IntervalVector& box, IntervalVector& g) const;
 
 private:
-	friend class CompiledFunction<GradLabel>;
-
-	const CompiledFunction<GradLabel> f;
+	friend class CompiledFunction;
 
 	Eval eval;
 

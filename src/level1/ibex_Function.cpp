@@ -109,11 +109,33 @@ void Function::add_node(const ExprNode& expr)  {
 
 
 void Function::set_expr(const ExprNode& expr) {
+	assert(root==NULL); // cannot change the function (and recompile it)
+
 	root = &expr;
 	FindSymbolsUsed fsu(expr);
 	for (vector<int>::iterator it=fsu.keys.begin(); it!=fsu.keys.end(); it++) {
 		is_used[*it]=true;
 	}
+
+}
+
+void Function::decorate(const Decorator& d) {
+	assert(root!=NULL); // cannot decorate if there is no expression yet!
+
+	// cannot decorate twice. But this is not necessarily an error.
+	// an algorithm that requires this function to be decorated with T
+	// calls decorate to be sure the function is decorated.
+	//
+	// !! FIX NEEDED !!
+	// However, if the function is already decorated but with another type T'
+	// there is a problem the algorithm is not warned about.
+	// Maybe this function should return the type_id
+	// corresponding to T in case of failure?
+	if (root->deco!=NULL) return;
+
+	d.decorate(*this);
+
+	cf.compile(*this); // now that it is decorated, it can be "compiled"
 }
 
 const ExprApply& Function::operator()(const ExprNode** args) {

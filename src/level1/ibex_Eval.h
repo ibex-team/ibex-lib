@@ -17,12 +17,11 @@
 #include "ibex_Dim.h"
 #include "ibex_Decorator.h"
 #include "ibex_Domain.h"
+#include "ibex_Function.h"
 
 #include <iostream>
 
 namespace ibex {
-
-class Eval;
 
 /**
  * \brief Function evaluator.
@@ -33,20 +32,10 @@ public:
 	/**
 	 * \brief Build an evaluator for a function f.
 	 *
-	 * The function f in argument is not "compiled".
-	 * The evaluator is in charge of decorating/compiling the function.
-	 * A reference to the compiled function is stored in the
-	 * field \a f and can therefore be used from outside (like
-	 * in HC4Revise).
-	 */
-	Eval(const Function& f);
-
-	/**
-	 * \brief Build an evaluator for a function f.
+	 * The evaluator will decorate the function with "Domain" (if not done already).
 	 *
-	 * The function is already compiled with a label typed Domain.
 	 */
-	Eval(const CompiledFunction<Domain>& f);
+	Eval(Function& f);
 
 	/**
 	 * \brief Delete the evaluator.
@@ -90,7 +79,7 @@ public:
 	/**
 	 * \brief The compiled function.
 	 */
-	const CompiledFunction<Domain>& f;
+	const Function& f;
 
 	/**
 	 * \brief Domains of the input symbols
@@ -101,7 +90,7 @@ public:
 
 protected:
 
-	friend class CompiledFunction<Domain>;
+	friend class CompiledFunction;
 	friend class EvalDecorator;
 
 	inline void index_fwd(const ExprIndex& e, const Domain& x, Domain& y);
@@ -147,8 +136,6 @@ protected:
 	inline void sub_V_fwd(const ExprSub&, const Domain& x1, const Domain& x2, Domain& y);
 	inline void sub_M_fwd(const ExprSub&, const Domain& x1, const Domain& x2, Domain& y);
 
-private:
-	bool proper_compiled_func;
 };
 
 /**
@@ -173,12 +160,12 @@ public:
 
 inline Domain& Eval::eval(const Domains& d) const {
 	symbolLabels = d;
-	return f.forward(*this);
+	return f.forward<Eval,Domain>(*this);
 }
 
 inline Domain& Eval::eval(const IntervalVector& box) const {
 	symbolLabels = box; // load the domains of all the symbols
-	return f.forward(*this);
+	return f.forward<Eval,Domain>(*this);
 }
 
 inline Interval Eval::eval_scalar(const IntervalVector& box) const {

@@ -13,6 +13,7 @@
 #define _IBEX_FUNCTION_H_
 
 #include "ibex_Expr.h"
+#include "ibex_CompiledFunction.h"
 
 namespace ibex {
 
@@ -117,6 +118,11 @@ public:
 	void set_expr(const ExprNode&);
 
 	/**
+	 * \brief Decorate (and compile) the function.
+	 */
+	void decorate(const Decorator&);
+
+	/**
 	 * \brief Apply this function to the arguments
 	 */
 	const ExprApply& operator()(const ExprNode** arg);
@@ -157,6 +163,32 @@ public:
 	 */
 	const char* name;
 
+
+	/**
+	 * \brief Run a forward algorithm.
+	 *
+	 * Run a forward algorithm and
+	 * return a reference to the label of the root node.
+	 *
+	 * V must be a subclass of FwdAlgorithm<T> and the
+	 * nodes of this function must have been decorated with T.
+	 *
+	 * Note that the type V is just passed in order to have static linkage.
+	 */
+	template<class V,typename T>
+	T& forward(const V& algo) const;
+
+	/**
+	 * \brief Run a backward algorithm.
+	 *
+	 * V must be a subclass of FwdAlgorithm<T> and the
+	 * nodes of this function must have been decorated with T.
+	 *
+	 * Note that the type V is just passed in order to have static linkage.
+	 */
+	template<class V,typename T>
+	void backward(const V& algo) const;
+
 private:
 	friend class ExprNode;
 	void add_node(const ExprNode&);
@@ -167,6 +199,8 @@ private:
 	std::vector<const ExprNode*> exprnodes;     // all the nodes
 	SymbolMap<const ExprSymbol*> id2info;       // to retrieve a symbol node from its name.
 	int key_count;                              // count the number of symbols
+
+	CompiledFunction cf;
 };
 
 std::ostream& operator<<(std::ostream&, const Function&);
@@ -191,6 +225,16 @@ inline const ExprSymbol& Function::symbol(int i) const {
 
 inline const ExprNode& Function::node(int i) const {
 	return *exprnodes[i];
+}
+
+template<class V,typename T>
+inline T& Function::forward(const V& algo) const {
+	return cf.forward<V,T>(algo);
+}
+
+template<class V,typename T>
+inline void Function::backward(const V& algo) const {
+	cf.backward<V,T>(algo);
 }
 
 } // namespace ibex

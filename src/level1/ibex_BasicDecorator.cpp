@@ -12,7 +12,7 @@
 
 namespace ibex {
 
-void BasicDecorator::decorate(const Function& f) const {
+void BasicDecorator::decorate(Function& f) const {
 	if (f.expr().deco!=NULL) {
 		return; //throw NonRecoverableException("Cannot re-decorate a function");
 	} else {
@@ -70,7 +70,7 @@ void BasicDecorator::visit(const ExprVector& v) {
 }
 
 void BasicDecorator::visit(const ExprApply& a) {
-	a.deco = new BasicApplyLabel(a.dim, a.func);
+	a.deco = new BasicApplyLabel(a.dim, (Function&) a.func);
 
 	/* we could also be more efficient by making symbolLabels of a.deco->fevl
 	 * direct references to the arguments' domain.
@@ -89,8 +89,8 @@ void BasicDecorator::visit(const ExprApply& a) {
 	}
 }
 
-BasicApplyLabel::BasicApplyLabel(const Dim& dim, const Function& f) :
-		Domain(dim), args_doms(f.nb_symbols()), fevl(NumConstraint(f,true)) {
+BasicApplyLabel::BasicApplyLabel(const Dim& dim, Function& f) :
+		Domain(dim), args_doms(f.nb_symbols()), feq(f,true), fevl(feq) {
 
 }
 

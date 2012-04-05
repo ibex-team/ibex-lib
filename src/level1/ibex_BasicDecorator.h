@@ -22,10 +22,10 @@ namespace ibex {
  * \ingroup level1
  * \brief Decorates a function for evaluation/HC4Revise.
  */
-class BasicDecorator : public Decorator<Domain> {
+class BasicDecorator : public Decorator {
 public:
 
-	virtual void decorate(const Function& f) const;
+	virtual void decorate(Function& f) const;
 
 protected:
 	/* Visit an expression. */
@@ -58,11 +58,13 @@ protected:
  */
 class BasicApplyLabel : public Domain {
 public:
-	BasicApplyLabel(const Dim& dim, const Function& f);
+	BasicApplyLabel(const Dim& dim, Function& f);
 
-	Domains args_doms; // domains of the arguments (references)
+	Domains args_doms;  // domains of the arguments (references)
 
-	HC4ReviseAlgo fevl;    //  for each function, there is an associated evaluator
+	NumConstraint feq;  // the constraint f(x)=...
+
+	HC4ReviseAlgo fevl; //  for each function, there is an associated evaluator
 };
 
 } // end namespace ibex

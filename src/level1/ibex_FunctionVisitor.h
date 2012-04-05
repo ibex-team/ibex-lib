@@ -9,8 +9,8 @@
  * Created     : Jan 06, 2012
  * ---------------------------------------------------------------------------- */
 
-#ifndef _IBEX_FUNC_VISITOR_H_
-#define _IBEX_FUNC_VISITOR_H_
+#ifndef __IBEX_FUNC_VISITOR_H__
+#define __IBEX_FUNC_VISITOR_H__
 
 #include "Interval.h"
 #include "IntervalMatrix.h"
@@ -289,4 +289,4 @@ class FunctionVisitor {
 
 } // end namespace ibex
 
-#endif // _IBEX_FUNC_VISITOR_H_
+#endif // __IBEX_FUNC_VISITOR_H__

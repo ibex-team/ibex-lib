@@ -13,7 +13,7 @@
 
 namespace ibex {
 
-HC4ReviseAlgo::HC4ReviseAlgo(const NumConstraint& ctr) :
+HC4ReviseAlgo::HC4ReviseAlgo(NumConstraint& ctr) :
 		eval(ctr.f), equality(ctr.equality) { }
 
 void HC4ReviseAlgo::vector_bwd(const ExprVector& v, Domain** compL, const Domain& y) {
@@ -36,7 +36,7 @@ void HC4ReviseAlgo::apply_bwd(const ExprApply& a, Domain** argL, const Domain& y
 void HC4ReviseAlgo::contract(IntervalVector& box) {
 	eval.eval(box);
 
-	const ExprNode& root=eval.f.expr;
+	const ExprNode& root=eval.f.expr();
 	Domain& root_label=(Domain&) *(root.deco);
 	Interval right_cst(equality? 0: NEG_INFINITY, 0);
 
@@ -48,7 +48,7 @@ void HC4ReviseAlgo::contract(IntervalVector& box) {
 	case Dim::MATRIX_ARRAY: assert(false); /* impossible */ break;
 	}
 
-	eval.f.backward(*this);
+	eval.f.backward<HC4ReviseAlgo,Domain>(*this);
 
 	box = eval.symbolLabels;
 }

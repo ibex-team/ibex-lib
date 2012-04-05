@@ -9,11 +9,12 @@
  * Created     : Jan 27, 2012
  * ---------------------------------------------------------------------------- */
 
-#ifndef IBEX_DECORATOR_H_
-#define IBEX_DECORATOR_H_
+#ifndef __IBEX_DECORATOR_H__
+#define __IBEX_DECORATOR_H__
 
 #include "ibex_FunctionVisitor.h"
-#include "ibex_Function.h"
+
+class Function;
 
 namespace ibex {
 
@@ -21,10 +22,9 @@ namespace ibex {
  * \ingroup level1
  * \brief Function decorator.
  *
- * A class that extends Decorator<T> decorates all the nodes of a function
- * with an object of type "T".
+ * A class that extends Decorator decorates all the nodes of a function
+ * with an homogenous type "T".
  */
-template<typename T>
 class Decorator : public FunctionVisitor {
 
 public:
@@ -34,8 +34,9 @@ public:
 	/**
 	 * \brief Decorate the function f with object of type "T".
 	 */
-	virtual void decorate(const Function& f) const=0;
+	virtual void decorate(Function& f) const=0;
 };
 
-} // namespace ibex
-#endif // IBEX_DECORATOR_H_
+} // end namespace ibex
+
+#endif // __IBEX_DECORATOR_H__

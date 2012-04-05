@@ -15,22 +15,20 @@
 
 namespace ibex {
 
-Eval::Eval(const Function& f) : f(*new CompiledFunction<Domain>(f,BasicDecorator())),
-		symbolLabels(f.nb_symbols()), proper_compiled_func(true) {
+Eval::Eval(Function& f) : f(f),
+		symbolLabels(f.nb_symbols()) {
+
+	BasicDecorator d;
+
+	f.decorate(d); //BasicDecorator());
 
 	for (int i=0; i<f.nb_symbols(); i++) {
 		symbolLabels.set(i,((Domain&) *f.symbol(i).deco));
 	}
 }
 
-Eval::Eval(const CompiledFunction<Domain>& f) : f(f), symbolLabels(f.f.nb_symbols()), proper_compiled_func(false) {
-	for (int i=0; i<f.f.nb_symbols(); i++) {
-		symbolLabels.set(i,((Domain&) *f.f.symbol(i).deco));
-	}
-}
-
 Eval::~Eval() {
-	if (proper_compiled_func) delete (CompiledFunction<Domain>*) &f;
+
 }
 
 void Eval::Eval::vector_fwd(const ExprVector& v, const Domain** compL, Domain& y) {
