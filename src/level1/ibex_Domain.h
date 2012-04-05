@@ -10,7 +10,7 @@
  * ---------------------------------------------------------------------------- */
 
 #ifndef __IBEX_DOMAIN_H__
-#define __IBEX_DOMAIN_H_
+#define __IBEX_DOMAIN_H__
 
 #include "ibex_Decorator.h"
 #include "ibex_IntervalMatrixArray.h"
@@ -25,7 +25,7 @@ class Domains; // for friendship grant
  *
  * A generic domains is also the label type for the basic evaluation of a function.
  */
-class Domain : public Object {
+class Domain : public ExprLabel {
 public:
 
 	/**
@@ -86,6 +86,21 @@ public:
 			case Dim::MATRIX:       delete &m();  break;
 			case Dim::MATRIX_ARRAY: delete &ma(); break;
 			}
+	}
+
+	/**
+	 * \brief Load domains from another array of domains.
+	 */
+	Domain& operator=(const Domain& d) {
+		assert((*this).dim==d.dim);
+		switch((*this).dim.type()) {
+		case Dim::SCALAR:       i()=d.i(); break;
+		case Dim::ROW_VECTOR:
+		case Dim::COL_VECTOR:   v()=d.v(); break;
+		case Dim::MATRIX:       m()=d.m(); break;
+		case Dim::MATRIX_ARRAY: assert(false); /* forbidden  */ break;
+		}
+		return *this;
 	}
 
 	/**

@@ -20,7 +20,7 @@ Gradient::Gradient(const Function& f) : f(f,GradDecorator()), eval((const Compil
 }
 
 void Gradient::calculate(const IntervalVector& box, IntervalVector& g) const {
-	eval.forward(box);
+	eval.eval(box);
 	f.backward(*this);
 	//for (int i=0; i<)
 	// TO COMPLETE

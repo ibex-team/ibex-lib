@@ -87,14 +87,7 @@ const Domain& Domains::operator[](int i) const {
 Domains& Domains::operator=(const Domains& d) {
 	assert(size()==d.size());
 	for (int i=0; i<size(); i++) {
-		assert((*this)[i].dim==d[i].dim);
-		switch((*this)[i].dim.type()) {
-		case Dim::SCALAR:       (*this)[i].i()=d[i].i(); break;
-		case Dim::ROW_VECTOR:
-		case Dim::COL_VECTOR:   (*this)[i].v()=d[i].v(); break;
-		case Dim::MATRIX:       (*this)[i].m()=d[i].m(); break;
-		case Dim::MATRIX_ARRAY: assert(false); /* impossible */ break;
-		}
+		(*this)[i]=d[i];
 	}
 	return *this;
 }

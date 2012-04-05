@@ -24,38 +24,6 @@ namespace ibex {
 
 class Eval;
 
-
-/**
- * \ingroup level1
- * \brief Decorates/undecorates a function for basic evaluation.
- */
-class EvalDecorator : public Decorator<Domain> {
-public:
-
-	virtual void decorate(const Function& f) const;
-
-protected:
-	/* Visit an expression. */
-	virtual void visit(const ExprNode& n);
-	/* Visit an indexed expression. */
-	virtual void visit(const ExprIndex& idx);
-	/* Visit a symbol. */
-	virtual void visit(const ExprSymbol& s);
-	/* Visit a constant. */
-	virtual void visit(const ExprConstant& c);
-	/* Visit an n-ary operator. */
-	virtual void visit(const ExprNAryOp&);
-	/* Visit an unary operator. */
-	virtual void visit(const ExprUnaryOp&);
-	/* Visit a binary operator. */
-	virtual void visit(const ExprBinaryOp&);
-	/* Visit a vector of expressions. */
-	virtual void visit(const ExprVector& v);
-	/* Visit a function application. */
-	virtual void visit(const ExprApply&);
-
-};
-
 /**
  * \brief Function evaluator.
  */
@@ -86,23 +54,34 @@ public:
 	~Eval();
 
 	/**
-	 * Run the forward algorithm.
+	 * \brief Run the forward algorithm with input domains.
 	 */
-	Domain& forward(const IntervalVector& box) const;
+	Domain& eval(const Domains& d) const;
 
 	/**
+	 * \brief Run the forward algorithm with an input box.
+	 */
+	Domain& eval(const IntervalVector& box) const;
+
+	/**
+	 * \brief Calculate f(box).
+	 *
 	 * Run the forward algorithm and return the
 	 * domain of the root node, that must be scalar.
 	 */
-	Interval eval(const IntervalVector& box) const;
+	Interval eval_scalar(const IntervalVector& box) const;
 
 	/**
+	 * \brief Calculate f(box).
+	 *
 	 * Run the forward algorithm and return the
 	 * domain of the root node, that must be a vector.
 	 */
 	IntervalVector eval_vector(const IntervalVector& box) const;
 
 	/**
+	 * \brief Calculate f(box).
+	 *
 	 * Run the forward algorithm and return the
 	 * domain of the root node, that must be a matrix.
 	 */
@@ -192,21 +171,26 @@ public:
  	 	 	 	 	 	 	 implementation
   ============================================================================*/
 
-inline Domain& Eval::forward(const IntervalVector& box) const {
+inline Domain& Eval::eval(const Domains& d) const {
+	symbolLabels = d;
+	return f.forward(*this);
+}
+
+inline Domain& Eval::eval(const IntervalVector& box) const {
 	symbolLabels = box; // load the domains of all the symbols
 	return f.forward(*this);
 }
 
-inline Interval Eval::eval(const IntervalVector& box) const {
-	return forward(box).i();
+inline Interval Eval::eval_scalar(const IntervalVector& box) const {
+	return eval(box).i();
 }
 
 inline IntervalVector Eval::eval_vector(const IntervalVector& box) const {
-	return forward(box).v();
+	return eval(box).v();
 }
 
 inline IntervalMatrix Eval::eval_matrix(const IntervalVector& box) const {
-	return forward(box).m();
+	return eval(box).m();
 }
 
 inline void Eval::Eval::index_fwd(const ExprIndex& e, const Domain& x, Domain& y) { }

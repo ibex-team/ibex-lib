@@ -9,7 +9,7 @@
 //============================================================================
 
 #ifndef __IBEX_HC4_REVISE_ALGO_H__
-#define __IBEX_HC4R_EVISE_ALGO_H__
+#define __IBEX_HC4_REVISE_ALGO_H__
 
 #include "ibex_Eval.h"
 #include "ibex_CompiledFunction.h"
@@ -25,16 +25,40 @@ namespace ibex {
 class HC4ReviseAlgo : public BwdAlgorithm<Domain> {
 public:
 
-	HC4ReviseAlgo(const NumConstraint& ctr) : eval(ctr.f), equality(ctr.equality) { }
+	/**
+	 * \brief Create the HC4-revise algorithm for a constraint \a ctr.
+	 */
+	HC4ReviseAlgo(const NumConstraint& ctr);
 
+	/**
+	 * \brief Run the backward algorithm.
+	 *
+	 * Set the domain of the root node to \a root
+	 * and run the backward algorithm. The new domains
+	 * of the variables can be read from eval.symbolLabels.
+	 */
+	void backward(const Domain& root);
+
+	/**
+	 * \brief Contract the input box with the backward algorithm.
+	 */
 	void contract(IntervalVector& box);
 
+	/**
+	 * \brief The evaluator.
+	 *
+	 * This field contains in particular a reference to the function "f"
+	 * of the constraint.
+	 */
 	Eval eval;
+
+	/**
+	 * \brief True if the constraint is an equality.
+	 */
+	const bool equality;
 
 protected:
 	friend class CompiledFunction<Domain>;
-
-	bool equality;
 
 	inline void index_bwd (const ExprIndex&,   Domain& exprL, const Domain& result)                    { /* nothing to do */ }
 	inline void vector_bwd(const ExprVector&,  Domain** compL, const Domain& result);
@@ -83,6 +107,15 @@ private:
 
 };
 
+
+/* ============================================================================
+ 	 	 	 	 	 	 	 implementation
+  ============================================================================*/
+
+inline void HC4ReviseAlgo::backward(const Domain& root) {
+	(Domain&) *eval.f.expr.deco = root;
+	return eval.f.backward(*this);
+}
 
 } /* namespace ibex */
 #endif /* __IBEX_HC4_REVISE_ALGO_H__ */

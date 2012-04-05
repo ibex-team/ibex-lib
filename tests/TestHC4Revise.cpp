@@ -33,7 +33,7 @@ void TestHC4Revise::add01() {
 	IntervalVector box(2,init_xy);
 
 	hc4r.contract(box);
-	cout << box << endl;
+	//cout << box << endl;
 
 	double res_xy[][2]= { {2,3}, {-3,-2} };
 	IntervalVector box1(2,res_xy);
@@ -59,7 +59,29 @@ void TestHC4Revise::mul01() {
 }
 
 void TestHC4Revise::dist01() {
+	Function f;
+	const ExprSymbol& xa = f.add_symbol("xa");
+	const ExprSymbol& ya = f.add_symbol("ya");
+	const ExprSymbol& xb = f.add_symbol("xb");
+	const ExprSymbol& yb = f.add_symbol("yb");
 
+	f.set_expr(sqrt(sqr(xa-xb)+sqr(ya-yb))-5.0);
+
+
+	NumConstraint c(f,true);
+
+	HC4ReviseAlgo hc4r(c);
+
+	double init_xy[][2] = { {0,10}, {-10,10},
+						{1,1}, {2,2} };
+	IntervalVector box(4,init_xy);
+
+	hc4r.contract(box);
+
+	double res_xy[][2] = { {0,6}, {-3,7},
+						{1,1}, {2,2} };
+	IntervalVector boxR(4,res_xy);
+	check(box, boxR);
 }
 } // end namespace
 

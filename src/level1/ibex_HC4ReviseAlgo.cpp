@@ -9,8 +9,12 @@
 //============================================================================
 
 #include "ibex_HC4ReviseAlgo.h"
+#include "ibex_BasicDecorator.h"
 
 namespace ibex {
+
+HC4ReviseAlgo::HC4ReviseAlgo(const NumConstraint& ctr) :
+		eval(ctr.f), equality(ctr.equality) { }
 
 void HC4ReviseAlgo::vector_bwd(const ExprVector& v, Domain** compL, const Domain& y) {
 	if (v.dim.is_vector()) {
@@ -25,14 +29,12 @@ void HC4ReviseAlgo::vector_bwd(const ExprVector& v, Domain** compL, const Domain
 }
 
 void HC4ReviseAlgo::apply_bwd(const ExprApply& a, Domain** argL, const Domain& y) {
-	// download data
-	Eval& fevl=((EvalApplyLabel&) y).fevl;
-	//fevl.apply_fwd(p)
-	fevl.symbolLabels = ((EvalApplyLabel&) y).args_doms;  // upload data (in the function arguments' box).
+	HC4ReviseAlgo& fevl=((BasicApplyLabel&) y).fevl;
+	fevl.backward(y);
 }
 
 void HC4ReviseAlgo::contract(IntervalVector& box) {
-	eval.forward(box);
+	eval.eval(box);
 
 	const ExprNode& root=eval.f.expr;
 	Domain& root_label=(Domain&) *(root.deco);
