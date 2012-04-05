@@ -13,6 +13,7 @@
 #include "ibex_Function.h"
 #include "ibex_Expr.h"
 #include "ibex_Eval.h"
+#include "ibex_BasicDecorator.h"
 
 using namespace std;
 
@@ -106,7 +107,7 @@ void TestEval::deco01() {
 	const ExprNode&   e = x+y;
 	f.set_expr(e);
 
-	EvalDecorator d;
+	BasicDecorator d;
 	d.decorate(f);
 	check_deco(x);
 	check_deco(y);
@@ -120,7 +121,7 @@ void TestEval::deco02() {
 	const ExprNode&   e = x+y;
 	f.set_expr(e);
 
-	EvalDecorator d;
+	BasicDecorator d;
 	d.decorate(f);
 	check_deco(x);
 	check_deco(y);
@@ -140,7 +141,7 @@ void TestEval::add01() {
 	box[0]=Interval(1,2);
 	box[1]=Interval(3,4);
 
-	Interval res=e.eval(box);
+	Interval res=e.eval_scalar(box);
 	//cout << e.f << endl;
 	TEST_ASSERT(res==Interval(4,6));
 }
@@ -251,7 +252,7 @@ void TestEval::dist01() {
 						{4,4}, {5,5} };
 	IntervalVector box(4,_xy);
 
-	Interval res=e.eval(box);
+	Interval res=e.eval_scalar(box);
 	//cout << e.f << endl;
 	check(res,Interval(::sqrt(2),::sqrt(2)));
 }
