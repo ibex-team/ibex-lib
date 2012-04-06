@@ -40,7 +40,7 @@ class ApplyGradLabel : public BasicApplyLabel {
  * \brief Decorates a function with the label for gradient computation.
  */
 
-class GradDecorator : public Decorator {
+class GradDecorator : public Decorator, public FunctionVisitor {
 public:
 
 	void decorate(Function& f) const {

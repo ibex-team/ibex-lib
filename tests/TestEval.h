@@ -33,6 +33,9 @@ public:
 		TEST_ADD(TestEval::mul01);
 
 		TEST_ADD(TestEval::dist01);
+
+		TEST_ADD(TestEval::apply01);
+		TEST_ADD(TestEval::apply02);
 	}
 
 	void deco01();
@@ -46,6 +49,9 @@ public:
 	void mul01();
 
 	void dist01();
+
+	void apply01();
+	void apply02();
 
 private:
 	void check_deco(const ExprNode& e);

@@ -17,11 +17,10 @@
 #include "ibex_FunctionVisitor.h"
 #include "ibex_FwdAlgorithm.h"
 #include "ibex_BwdAlgorithm.h"
-#include "ibex_Decorator.h"
-
-class Function;
 
 namespace ibex {
+
+class Function;
 
 /**
  * \ingroup level1

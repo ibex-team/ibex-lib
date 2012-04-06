@@ -12,9 +12,10 @@
 #define __IBEX_BASIC_DECORATOR_H__
 
 #include "ibex_Domain.h"
-#include "ibex_Function.h"
+//#include "ibex_Function.h"
 #include "ibex_Expr.h"
 #include "ibex_HC4ReviseAlgo.h"
+#include "ibex_Decorator.h"
 
 namespace ibex {
 
@@ -22,8 +23,10 @@ namespace ibex {
  * \ingroup level1
  * \brief Decorates a function for evaluation/HC4Revise.
  */
-class BasicDecorator : public Decorator {
+class BasicDecorator : public Decorator, public FunctionVisitor {
 public:
+
+	virtual ~BasicDecorator() { }
 
 	virtual void decorate(Function& f) const;
 

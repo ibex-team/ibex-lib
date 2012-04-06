@@ -43,6 +43,11 @@ public:
 	~Eval();
 
 	/**
+	 * \brief Run the forward algorithm.
+	 */
+	Domain& eval() const;
+
+	/**
 	 * \brief Run the forward algorithm with input domains.
 	 */
 	Domain& eval(const Domains& d) const;
@@ -138,34 +143,22 @@ protected:
 
 };
 
-/**
- * \ingroup level1
- * \brief Evaluation label for function application nodes.
- *
- * A function application node has a specific label that, in addition
- * to the domain, contains an evaluator of the function called.
- */
-class EvalApplyLabel : public Domain {
-public:
-	EvalApplyLabel(const Dim& dim, const Function& f);
-
-	Domains args_doms; // domains of the arguments (references)
-
-	Eval fevl;    //  for each function, there is an associated evaluator
-};
-
 /* ============================================================================
  	 	 	 	 	 	 	 implementation
   ============================================================================*/
 
+inline Domain& Eval::eval() const {
+	return f.forward<Eval,Domain>(*this);
+}
+
 inline Domain& Eval::eval(const Domains& d) const {
 	symbolLabels = d;
-	return f.forward<Eval,Domain>(*this);
+	return eval();
 }
 
 inline Domain& Eval::eval(const IntervalVector& box) const {
 	symbolLabels = box; // load the domains of all the symbols
-	return f.forward<Eval,Domain>(*this);
+	return eval();
 }
 
 inline Interval Eval::eval_scalar(const IntervalVector& box) const {

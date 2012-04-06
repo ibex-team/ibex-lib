@@ -14,13 +14,10 @@
 #include "ibex_BasicDecorator.h"
 
 namespace ibex {
+#include <typeinfo>
+Eval::Eval(Function& f) : f(f), symbolLabels(f.nb_symbols()) {
 
-Eval::Eval(Function& f) : f(f),
-		symbolLabels(f.nb_symbols()) {
-
-	BasicDecorator d;
-
-	f.decorate(d); //BasicDecorator());
+	f.decorate(BasicDecorator());
 
 	for (int i=0; i<f.nb_symbols(); i++) {
 		symbolLabels.set(i,((Domain&) *f.symbol(i).deco));
@@ -48,8 +45,8 @@ void Eval::Eval::vector_fwd(const ExprVector& v, const Domain** compL, Domain& y
 }
 
 void Eval::apply_fwd(const ExprApply& a, const Domain**, Domain& y) {
-	EvalApplyLabel& l=(EvalApplyLabel&) y;
-	l.fevl.eval(l.args_doms);
+	BasicApplyLabel& l=(BasicApplyLabel&) y;
+	((Domain&) l) = l.fevl.eval.eval(l.args_doms);
 }
 
 } // namespace ibex

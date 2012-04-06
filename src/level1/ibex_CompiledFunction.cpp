@@ -93,8 +93,8 @@ void CompiledFunction::visit(const ExprNAryOp& e, operation op) {
 	nb_args[ptr]=e.nb_args;
 	args[ptr]=new ExprLabel*[e.nb_args+1];
 	args[ptr][0]=e.deco;
-	for (int i=1; i<e.nb_args; i++)
-		args[ptr][i]=e.arg(i).deco;
+	for (int i=1; i<=e.nb_args; i++)
+		args[ptr][i]=e.arg(i-1).deco;
 
 	ptr++;
 	for (int i=0; i<e.nb_args; i++) {
@@ -239,6 +239,7 @@ const char* CompiledFunction::op(operation o) const {
 	case ACOSH: return "acosh";
 	case ASINH: return "asinh";
 	case ATANH: return "atanh";
+	default: assert(false); return "???";
 	}
 }
 } // end namespace

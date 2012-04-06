@@ -418,7 +418,8 @@ public:
 	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
 
 	/** Accept an #ibex::ExprVisitor visitor. */
-	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+	virtual void acceptVisitor(FunctionVisitor& v) const {
+		v.visit(*this); };
 
 	static const ExprAdd& new_(const ExprNode& left, const ExprNode& right) {
 		return *new ExprAdd(left,right);

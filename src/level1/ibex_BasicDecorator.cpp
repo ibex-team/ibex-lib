@@ -24,6 +24,10 @@ void BasicDecorator::visit(const ExprNode& e) {
 	e.acceptVisitor(*this);
 }
 
+void BasicDecorator::visit(const ExprNAryOp& e) {
+	e.acceptVisitor(*this);
+}
+
 void BasicDecorator::visit(const ExprIndex& idx) {
 
 	visit(idx.expr);
@@ -47,13 +51,6 @@ void BasicDecorator::visit(const ExprConstant& e) {
 	e.deco = new Domain(e.dim);
 }
 
-void BasicDecorator::visit(const ExprNAryOp& e) {
-	for (int i=0; i<e.nb_args; i++)
-		visit(e.arg(i));
-
-	e.acceptVisitor(*this);
-}
-
 void BasicDecorator::visit(const ExprBinaryOp& b) {
 	visit(b.left);
 	visit(b.right);
@@ -66,10 +63,16 @@ void BasicDecorator::visit(const ExprUnaryOp& u) {
 }
 
 void BasicDecorator::visit(const ExprVector& v) {
+	for (int i=0; i<v.nb_args; i++)
+			visit(v.arg(i));
+
 	v.deco = new Domain(v.dim);
 }
 
 void BasicDecorator::visit(const ExprApply& a) {
+	for (int i=0; i<a.nb_args; i++)
+			visit(a.arg(i));
+
 	a.deco = new BasicApplyLabel(a.dim, (Function&) a.func);
 
 	/* we could also be more efficient by making symbolLabels of a.deco->fevl
@@ -90,6 +93,10 @@ void BasicDecorator::visit(const ExprApply& a) {
 }
 
 BasicApplyLabel::BasicApplyLabel(const Dim& dim, Function& f) :
+		/* same comment as above. We could make the root of the sub-function f
+		 * being a reference (set dynamically) to the corresponding node in the
+		 * DAG of the function.
+		 */
 		Domain(dim), args_doms(f.nb_symbols()), feq(f,true), fevl(feq) {
 
 }

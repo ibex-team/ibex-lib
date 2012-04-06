@@ -11,6 +11,7 @@
 
 #include "ibex_Function.h"
 #include "ibex_Expr.h"
+#include "ibex_BasicDecorator.h"
 
 namespace ibex {
 
@@ -60,7 +61,7 @@ public:
 }
 
 
-Function::Function() : name(NULL), root(NULL), key_count(0) {
+Function::Function() : name("anonymous"), root(NULL), key_count(0) {
 
 }
 

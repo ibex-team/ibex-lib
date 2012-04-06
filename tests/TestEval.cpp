@@ -108,6 +108,7 @@ void TestEval::deco01() {
 	f.set_expr(e);
 
 	BasicDecorator d;
+
 	d.decorate(f);
 	check_deco(x);
 	check_deco(y);
@@ -257,5 +258,51 @@ void TestEval::dist01() {
 	check(res,Interval(::sqrt(2),::sqrt(2)));
 }
 
-} // end namespace
+void TestEval::apply01() {
 
+	Function f1("f1");
+	const ExprSymbol& x1 = f1.add_symbol("x1");
+
+	Function f2;
+	const ExprSymbol& x2 = f2.add_symbol("x2");
+
+	f1.set_expr(x1);
+
+	const ExprNode* args[1];
+	args[0]=&x2;
+	f2.set_expr(f1(args));
+
+	Eval e(f2);
+	e.symbolLabels[0].i()=Interval(2,2);
+
+	check(e.eval().i(), INTERVAL(2,2));
+}
+
+void TestEval::apply02() {
+
+	Function f1("f1");
+	const ExprSymbol& x1 = f1.add_symbol("x1");
+	const ExprSymbol& y1 = f1.add_symbol("y1");
+
+	Function f2("f2");
+	const ExprSymbol& x2 = f2.add_symbol("x2");
+	const ExprSymbol& y2 = f2.add_symbol("y2");
+
+	f1.set_expr(x1+y1);
+
+	const ExprNode* args[2];
+	args[0]=&x2;
+	args[1]=&(x2+y2);
+	f2.set_expr(f1(args)+y2);
+
+	cout << f1 << endl;
+	cout << f2 << endl;
+
+	Eval e(f2);
+	e.symbolLabels[0].i()=Interval(2,2);
+	e.symbolLabels[1].i()=Interval(3,3);
+
+	check(e.eval().i(), INTERVAL(10,10));
+}
+
+}

@@ -14,9 +14,9 @@
 
 #include "ibex_FunctionVisitor.h"
 
-class Function;
-
 namespace ibex {
+
+class Function;
 
 /**
  * \ingroup level1
@@ -25,7 +25,7 @@ namespace ibex {
  * A class that extends Decorator decorates all the nodes of a function
  * with an homogenous type "T".
  */
-class Decorator : public FunctionVisitor {
+class Decorator { //: public FunctionVisitor {
 
 public:
 

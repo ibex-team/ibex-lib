@@ -61,10 +61,10 @@ protected:
 	friend class CompiledFunction;
 
 	inline void index_bwd (const ExprIndex&,   Domain& exprL, const Domain& result)                    { /* nothing to do */ }
-	inline void vector_bwd(const ExprVector&,  Domain** compL, const Domain& result);
+	       void vector_bwd(const ExprVector&,  Domain** compL, const Domain& result);
 	inline void symbol_bwd(const ExprSymbol&, const Domain& result)                                    { /* nothing to do */ }
 	inline void cst_bwd   (const ExprConstant&, const Domain& result)                                  { /* nothing to do */ }
-	inline void apply_bwd (const ExprApply&,   Domain** argL, const Domain& result);
+	       void apply_bwd (const ExprApply&,   Domain** argL, const Domain& result);
 	inline void add_bwd   (const ExprAdd&,     Domain& leftL, Domain& rightL, const Domain& result)    { proj_add(result.i(),leftL.i(),rightL.i()); }
 	inline void add_V_bwd  (const ExprAdd&,    Domain& leftL, Domain& rightL, const Domain& result)    { /* to do */}
 	inline void add_M_bwd  (const ExprAdd&,    Domain& leftL, Domain& rightL, const Domain& result)    { /* to do */ }

@@ -14,6 +14,7 @@
 
 #include "ibex_Expr.h"
 #include "ibex_CompiledFunction.h"
+#include "ibex_Decorator.h"
 
 namespace ibex {
 
