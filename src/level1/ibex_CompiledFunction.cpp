@@ -11,7 +11,6 @@
 
 #include "ibex_CompiledFunction.h"
 #include "ibex_Function.h"
-//#include "ibex_ExprTopoSort.cpp_"
 #include <algorithm>
 
 namespace ibex {
@@ -35,8 +34,6 @@ void CompiledFunction::compile(const Function& f) {
 	nb_args=new int[n];
 
 	// Sort the nodes of the DAG by decreasing height
-	//std::vector<std::set<idtype> > levels(n);
-	//ExprTopoSort sort(levels);
 	const ExprNode* nodes[n];
 	for (int i=0; i<n; i++) nodes[i]=&f.node(i);
 

@@ -15,6 +15,7 @@
 #include "ibex_Expr.h"
 #include "ibex_CompiledFunction.h"
 #include "ibex_Decorator.h"
+#include <stdarg.h>
 
 namespace ibex {
 
@@ -122,6 +123,27 @@ public:
 	 * \brief Decorate (and compile) the function.
 	 */
 	void decorate(const Decorator&);
+
+	/**
+	 * \brief Apply this function to the argument
+	 *
+	 * Works only if it is a unary function.
+	 */
+	const ExprApply& operator()(const ExprNode& arg1);
+
+	/**
+	 * \brief Apply this function to the arguments
+	 *
+	 * Works only if it is a binary function.
+	 */
+	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2);
+
+	/**
+	 * \brief Apply this function to the arguments
+	 *
+	 * Works only if it is a ternary function.
+	 */
+	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3);
 
 	/**
 	 * \brief Apply this function to the arguments

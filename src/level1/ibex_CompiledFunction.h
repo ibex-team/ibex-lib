@@ -277,10 +277,10 @@ void CompiledFunction::print() const {
 		case CompiledFunction::APPLY:
 		{
 			ExprApply& e=(ExprApply&) *(f.nodes[i]);
-			const T** args=(const T**) f.args[i][1];
+			const T** args=(const T**) &f.args[i][1];
 			cout << e.id << ": " << "func()" << " ";
-			for (int i=0; i<e.nb_args; i++)
-				cout << e.arg(i).id << " " << *args[i] << " ";
+			for (int j=0; j<e.nb_args; j++)
+				cout << e.arg(j).id << " " << *args[j] << " ";
 		}
 		break;
 		case CompiledFunction::ADD:

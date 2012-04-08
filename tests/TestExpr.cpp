@@ -465,4 +465,29 @@ void TestExpr::apply01() {
 	TEST_ASSERT(checkExpr(e,"func(x2,(A2*y2),A2)"));
 }
 
+void TestExpr::apply03() {
+
+	Function f1("f1");
+	const ExprSymbol& x1 = f1.add_symbol("x1");
+	const ExprSymbol& y1 = f1.add_symbol("y1");
+
+	Function f2("f2");
+	const ExprSymbol& x2 = f2.add_symbol("x2");
+	const ExprSymbol& y2 = f2.add_symbol("y2");
+
+	Function f3("f3");
+	const ExprSymbol& x3 = f3.add_symbol("x3");
+
+	f1.set_expr(x1+y1);
+	f2.set_expr(x2*y2);
+	f3.set_expr(f1(x3,x3)-f2(x3,x3));
+	const ExprNode& e = f3.expr();
+
+	TEST_ASSERT(e.height==2);
+	TEST_ASSERT(e.id==3);
+	TEST_ASSERT(e.size==4);
+	cout << e << endl;
+	TEST_ASSERT(checkExpr(e,"(f1(x3,x3)-f2(x3,x3))"));
+}
+
 } // end namespace

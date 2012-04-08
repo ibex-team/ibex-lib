@@ -139,6 +139,21 @@ void Function::decorate(const Decorator& d) {
 	cf.compile(*this); // now that it is decorated, it can be "compiled"
 }
 
+const ExprApply& Function::operator()(const ExprNode& arg1) {
+	const ExprNode* args[1] = { &arg1 };
+	return (*this)(args);
+}
+
+const ExprApply& Function::operator()(const ExprNode& arg1, const ExprNode& arg2) {
+	const ExprNode* args[2] = { &arg1, &arg2 };
+	return (*this)(args);
+}
+
+const ExprApply& Function::operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3) {
+	const ExprNode* args[3] = { &arg1, &arg2, &arg3 };
+	return (*this)(args);
+}
+
 const ExprApply& Function::operator()(const ExprNode** args) {
 	return ExprApply::new_(*this, args);
 }

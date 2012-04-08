@@ -57,6 +57,7 @@ public:
 		TEST_ADD(TestExpr::index03);
 
 		TEST_ADD(TestExpr::apply01);
+		TEST_ADD(TestExpr::apply03);
 	}
 
 	void symbol();
@@ -95,6 +96,7 @@ public:
 	void index03();
 
 	void apply01();
+	void apply03();
 };
 
 } // end namespace

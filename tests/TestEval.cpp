@@ -306,4 +306,36 @@ void TestEval::apply02() {
 	check(e.eval().i(), INTERVAL(10,10));
 }
 
+void TestEval::apply03() {
+
+	Function f1("f1");
+	const ExprSymbol& x1 = f1.add_symbol("x1");
+	const ExprSymbol& y1 = f1.add_symbol("y1");
+
+	Function f2("f2");
+	const ExprSymbol& x2 = f2.add_symbol("x2");
+	const ExprSymbol& y2 = f2.add_symbol("y2");
+
+	Function f3("f3");
+	const ExprSymbol& x3 = f3.add_symbol("x3");
+
+	f1.set_expr(x1+y1);
+	f2.set_expr(x2*y2);
+	f3.set_expr(f1(x3,x3)-f2(x3,x3));
+
+	cout << f3 << endl;
+
+	Eval e(f3);
+
+	e.symbolLabels[0].i()=Interval(3,3);
+	e.eval().i();
+	cout << "f1:---------\n";
+	f1.cf.print<Domain>();
+	cout << "f2:---------\n";
+	f2.cf.print<Domain>();
+	cout << "f3:---------\n";
+	f3.cf.print<Domain>();
+	check(e.eval().i(), INTERVAL(-3,-3));
+}
+
 }

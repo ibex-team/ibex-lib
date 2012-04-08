@@ -46,7 +46,12 @@ void Eval::Eval::vector_fwd(const ExprVector& v, const Domain** compL, Domain& y
 
 void Eval::apply_fwd(const ExprApply& a, const Domain**, Domain& y) {
 	BasicApplyLabel& l=(BasicApplyLabel&) y;
+	cout << "args Doms=";
+	for (int i=0; i<l.args_doms.size(); i++)
+		cout << l.args_doms[i] << " ";
+		cout << endl;
 	((Domain&) l) = l.fevl.eval.eval(l.args_doms);
+	cout << "new Domain=" << ((Domain&) l) << endl;
 }
 
 } // namespace ibex
