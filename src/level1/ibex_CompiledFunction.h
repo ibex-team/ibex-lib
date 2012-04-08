@@ -59,6 +59,12 @@ public:
 	template<class V,typename T>
 	void backward(const V& algo) const;
 
+	/**
+	 * Print the structure to the standard output.
+	 */
+	template<typename T>
+	void print() const;
+
 protected:
 	typedef enum {
 		IDX, VEC, SYM, CST, APPLY,
@@ -237,43 +243,44 @@ void CompiledFunction::backward(const V& algo) const {
 
 // for debug only
 template<typename T>
-std::ostream& operator<<(std::ostream& os,const CompiledFunction& f) {
+void CompiledFunction::print() const {
+	const CompiledFunction& f=*this;
 	for (int i=0; i<f.n; i++) {
 		switch(f.code[i]) {
 		case CompiledFunction::IDX:
 		{
 			ExprIndex& e=(ExprIndex&) *(f.nodes[i]);
-			os << e.id << ": [-]" << " " << (T&) *f.args[i][0] << " " << e.expr.id << " " << (T&) *f.args[i][1];
+			cout << e.id << ": [-]" << " " << (T&) *f.args[i][0] << " " << e.expr.id << " " << (T&) *f.args[i][1];
 		}
 		break;
 		case CompiledFunction::VEC:
 		{
 			ExprVector& e=(ExprVector&) *(f.nodes[i]);
 			const T** _args=(const T**) &f.args[i][1];
-			os << e.id << ": vec " << " ";
+			cout << e.id << ": vec " << " ";
 			for (int i=0; i<e.nb_args; i++)
-				os << (e.arg(i).id) << " " << *(_args[i]) << " ";
+				cout << (e.arg(i).id) << " " << *(_args[i]) << " ";
 		}
 		break;
 		case CompiledFunction::SYM:
 		{
 			ExprSymbol& e=(ExprSymbol&) *(f.nodes[i]);
-			os << e.id << ": " << e.name << " " << (T&) *f.args[i][0];
+			cout << e.id << ": " << e.name << " " << (T&) *f.args[i][0];
 		}
 		break;
 		case CompiledFunction::CST:
 		{
 			ExprConstant& e=(ExprConstant&) *(f.nodes[i]);
-			os << e.id << ": cst=" << e.get_matrix_value() << " " <<  (T&) *f.args[i][0];
+			cout << e.id << ": cst=" << e.get_matrix_value() << " " <<  (T&) *f.args[i][0];
 		}
 		break;
 		case CompiledFunction::APPLY:
 		{
 			ExprApply& e=(ExprApply&) *(f.nodes[i]);
 			const T** args=(const T**) f.args[i][1];
-			os << e.id << ": " << "func()" << " ";
+			cout << e.id << ": " << "func()" << " ";
 			for (int i=0; i<e.nb_args; i++)
-				os << e.arg(i).id << " " << *args[i] << " ";
+				cout << e.arg(i).id << " " << *args[i] << " ";
 		}
 		break;
 		case CompiledFunction::ADD:
@@ -294,9 +301,9 @@ std::ostream& operator<<(std::ostream& os,const CompiledFunction& f) {
 		case CompiledFunction::ATAN2:
 		{
 			ExprBinaryOp& e=(ExprBinaryOp&) *(f.nodes[i]);
-			os << e.id << ": " << f.op(f.code[i]) << " " << (T&) *f.args[i][0] << " ";
-			os << e.left.id << " " << (T&) *f.args[i][1] << " ";
-			os << e.right.id << " " << (T&) *f.args[i][2];
+			cout << e.id << ": " << f.op(f.code[i]) << " " << (T&) *f.args[i][0] << " ";
+			cout << e.left.id << " " << (T&) *f.args[i][1] << " ";
+			cout << e.right.id << " " << (T&) *f.args[i][2];
 		}
 		break;
 
@@ -322,14 +329,13 @@ std::ostream& operator<<(std::ostream& os,const CompiledFunction& f) {
 		case CompiledFunction::ATANH:
 		{
 			ExprUnaryOp& e=(ExprUnaryOp&) *(f.nodes[i]);
-			os << e.id << ": " << f.op(f.code[i]) << " " << (T&) *f.args[i][0] << " ";
-			os << e.expr.id << " " << (T&) *f.args[i][1];
+			cout << e.id << ": " << f.op(f.code[i]) << " " << (T&) *f.args[i][0] << " ";
+			cout << e.expr.id << " " << (T&) *f.args[i][1];
 		}
 		break;
 		}
-		os << endl;
+		cout << endl;
 	}
-	return os;
 }
 
 } // namespace ibex

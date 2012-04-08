@@ -143,7 +143,8 @@ void TestEval::add01() {
 	box[1]=Interval(3,4);
 
 	Interval res=e.eval_scalar(box);
-	//cout << e.f << endl;
+	//e.f.cf.print<Domain>();
+	//cout << "res=" << res << endl;
 	TEST_ASSERT(res==Interval(4,6));
 }
 
@@ -295,8 +296,8 @@ void TestEval::apply02() {
 	args[1]=&(x2+y2);
 	f2.set_expr(f1(args)+y2);
 
-	cout << f1 << endl;
-	cout << f2 << endl;
+	//cout << f1 << endl;
+	//cout << f2 << endl;
 
 	Eval e(f2);
 	e.symbolLabels[0].i()=Interval(2,2);

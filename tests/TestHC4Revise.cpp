@@ -38,7 +38,7 @@ void TestHC4Revise::add01() {
 	double res_xy[][2]= { {2,3}, {-3,-2} };
 	IntervalVector box1(2,res_xy);
 
-	cout << hc4r.eval.f << endl;
+	//cout << hc4r.eval.f << endl;
 	TEST_ASSERT(box==box1);
 }
 

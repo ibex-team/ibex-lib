@@ -11,21 +11,42 @@
 
 #include "ibex_CompiledFunction.h"
 #include "ibex_Function.h"
+//#include "ibex_ExprTopoSort.cpp_"
+#include <algorithm>
 
 namespace ibex {
+
+namespace {
+
+bool compare(const ExprNode* x, const ExprNode* y) { return (x->height>y->height); }
+
+}
 
 CompiledFunction::CompiledFunction() : 	n(0), nodes(NULL), code(NULL), nb_args(NULL), args(NULL) {
 
 }
 
 void CompiledFunction::compile(const Function& f) {
+
 	n=f.expr().size;
 	code=new operation[n];
 	args=new ExprLabel**[n];
 	nodes=new const ExprNode*[n];
 	nb_args=new int[n];
-	ptr=0;
-	visit(f.expr());
+
+	// Sort the nodes of the DAG by decreasing height
+	//std::vector<std::set<idtype> > levels(n);
+	//ExprTopoSort sort(levels);
+	const ExprNode* nodes[n];
+	for (int i=0; i<n; i++) nodes[i]=&f.node(i);
+
+	sort(nodes,nodes+n,compare);
+
+	// Process each node of the DAG
+	for (ptr=0; ptr<n; ptr++) {
+		visit(*nodes[ptr]);
+	}
+	//cout << f.name << " : n=" << n << " nb_args[" << 0 << "]=" << nb_args[0] << endl;
 }
 
 CompiledFunction::~CompiledFunction() {
@@ -49,9 +70,6 @@ void CompiledFunction::visit(const ExprIndex& i) {
 	args[ptr]=new ExprLabel*[2];
 	args[ptr][0]=i.deco;
 	args[ptr][1]=i.expr.deco;
-
-	ptr++;
-	visit(i.expr);
 }
 
 void CompiledFunction::visit(const ExprSymbol& v) {
@@ -60,8 +78,6 @@ void CompiledFunction::visit(const ExprSymbol& v) {
 	nb_args[ptr]=0;
 	args[ptr]=new ExprLabel*[1]; // the unique argument of a Variable is the corresponding index in "csts"
 	args[ptr][0]=v.deco;
-
-	ptr++;
 }
 
 void CompiledFunction::visit(const ExprConstant& c) {
@@ -71,8 +87,6 @@ void CompiledFunction::visit(const ExprConstant& c) {
 	nb_args[ptr]=0;
 	args[ptr]=new ExprLabel*[1];
 	args[ptr][0]=c.deco;
-
-	ptr++;
 }
 
 void CompiledFunction::visit(const ExprNAryOp& e) {
@@ -91,15 +105,10 @@ void CompiledFunction::visit(const ExprNAryOp& e, operation op) {
 	code[ptr]=op;
 	nodes[ptr]=&e;
 	nb_args[ptr]=e.nb_args;
-	args[ptr]=new ExprLabel*[e.nb_args+1];
+	args[ptr]=new ExprLabel*[e.nb_args +1];
 	args[ptr][0]=e.deco;
 	for (int i=1; i<=e.nb_args; i++)
 		args[ptr][i]=e.arg(i-1).deco;
-
-	ptr++;
-	for (int i=0; i<e.nb_args; i++) {
-		visit(e.arg(i));
-	}
 }
 
 void CompiledFunction::visit(const ExprBinaryOp& b, operation op) {
@@ -110,10 +119,6 @@ void CompiledFunction::visit(const ExprBinaryOp& b, operation op) {
 	args[ptr][0]=b.deco;
 	args[ptr][1]=b.left.deco;
 	args[ptr][2]=b.right.deco;
-
-	ptr++;
-	visit(b.left);
-	visit(b.right);
 }
 
 void CompiledFunction::visit(const ExprUnaryOp& u, operation op) {
@@ -123,9 +128,6 @@ void CompiledFunction::visit(const ExprUnaryOp& u, operation op) {
 	args[ptr]=new ExprLabel*[2];
 	args[ptr][0]=u.deco;
 	args[ptr][1]=u.expr.deco;
-
-	ptr++;
-	visit(u.expr);
 }
 
 void CompiledFunction::visit(const ExprVector& e) { visit(e,VEC); }

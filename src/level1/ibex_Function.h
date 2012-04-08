@@ -190,6 +190,8 @@ public:
 	template<class V,typename T>
 	void backward(const V& algo) const;
 
+	CompiledFunction cf;
+
 private:
 	friend class ExprNode;
 	void add_node(const ExprNode&);
@@ -201,7 +203,6 @@ private:
 	SymbolMap<const ExprSymbol*> id2info;       // to retrieve a symbol node from its name.
 	int key_count;                              // count the number of symbols
 
-	CompiledFunction cf;
 };
 
 std::ostream& operator<<(std::ostream&, const Function&);
