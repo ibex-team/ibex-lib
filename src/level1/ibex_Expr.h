@@ -340,9 +340,6 @@ class ExprConstant : public ExprNode {
   /** Create a matrix constant. */
   static const ExprConstant& new_matrix(Function& expr, const IntervalMatrix& value);
 
-  /** Return a copy of a constant. */
-  const ExprConstant& copy() const;
-
   /** Return true if this constant is either 0, the null vector or the null matrix. */
   virtual bool is_zero() const;
 
@@ -371,7 +368,7 @@ class ExprConstant : public ExprNode {
   ExprConstant(Function& expr, const IntervalMatrix& value);
 
   /** Duplicate this constant: forbidden. */
-  ExprConstant(Function& expr, const ExprConstant& c);
+  ExprConstant(const ExprConstant& c);
 
   const IntervalMatrix value;
 };
@@ -1144,9 +1141,6 @@ inline const ExprConstant& ExprConstant::new_vector(Function& expr, const Interv
 
 inline const ExprConstant& ExprConstant::new_matrix(Function& expr, const IntervalMatrix& value) {
 	return *new ExprConstant(expr,value); }
-
-inline  const ExprConstant& ExprConstant::copy() const {
-	return *new ExprConstant(*this); }
 
 inline const Interval& ExprConstant::get_value() const {
 	return value[0][0]; }

@@ -341,4 +341,25 @@ void TestEval::apply03() {
 	check(e.eval().i(), INTERVAL(-3,-3));
 }
 
+void TestEval::apply04() {
+
+	Function f1("f1");
+	const ExprSymbol& x1 = f1.add_symbol("x1");
+
+	Function f2("f2");
+	const ExprSymbol& x2 = f2.add_symbol("x2");
+
+	Function f3("f3");
+	const ExprSymbol& x3 = f3.add_symbol("x3");
+
+	f1.set_expr(sqr(x1));
+	f2.set_expr(x2+1);
+	f3.set_expr(f2(f1(x3)));
+	Eval e(f3);
+
+	e.symbolLabels[0].i()=Interval(3,3);
+
+	check(e.eval().i(), INTERVAL(10,10));
+}
+
 }

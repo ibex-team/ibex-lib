@@ -12,6 +12,7 @@
 #include "ibex_Function.h"
 #include "ibex_Expr.h"
 #include "ibex_BasicDecorator.h"
+#include "ibex_ExprCopy.cpp_"
 
 namespace ibex {
 
@@ -74,8 +75,24 @@ Function::~Function() {
 		delete &node(i);
 }
 
+Function::Function(const Function& f) {
+	ExprCopy(f.expr(),*this);
+}
+
 Function* Function::separate() const {
-	return 0;
+	if (expr().type()==Dim::SCALAR) return new Function(*this);
+
+	const ExprVector* fvec=dynamic_cast<const ExprVector*>(&expr());
+	if (!fvec) {
+		throw NonRecoverableException("Decomposition of vector/matrix function: not implemented.");
+	}
+
+	Function *compf = new Function[fvec->size];
+
+	for (int i=0; i<fvec->size; i++) {
+		ExprCopy((*fvec)[i], compf[i]);
+	}
+	return compf;
 }
 
 const ExprSymbol& Function::add_symbol(const char* id) {

@@ -1,0 +1,129 @@
+//============================================================================
+//                                  I B E X                                   
+// File        : ibex_ExprCopy.cpp_
+// Author      : Gilles Chabert
+// Copyright   : Ecole des Mines de Nantes (France)
+// License     : See the LICENSE file
+// Created     : Apr 9, 2012
+// Last Update : Apr 9, 2012
+//============================================================================
+
+#include <stdlib.h>
+#include "ibex_FunctionVisitor.h"
+#include "ibex_Expr.h"
+
+namespace ibex {
+
+/**
+ * \ingroup level1
+ *
+ * \brief Copy of a (sub)expression.
+ *
+ */
+class ExprCopy : public FunctionVisitor {
+	const ExprNode** peers;
+
+public:
+	Function& f2;
+
+	ExprCopy(const ExprNode& src, Function& dest) : f2(dest) {
+		int n=src.context.nb_nodes();
+		peers = new const ExprNode*[n]; // n is the max number of sub_nodes of "src"
+		for (int i=0; i<n; i++) peers[i]=NULL;
+		// some of the peers[i] may stay NULL
+
+		visit(src);
+
+		f2.set_expr(*peers[src.id]);
+	}
+
+protected:
+	void visit(const ExprNode& e) {
+		if (peers[e.id]!=NULL) {
+			e.acceptVisitor(*this);
+		}
+	}
+
+	void visit(const ExprIndex& i) {
+		visit(i.expr);
+		peers[i.id]=& (*peers[i.expr.id])[i.index];
+	}
+
+	void visit(const ExprSymbol& v) {
+		peers[v.id]=&f2.add_symbol(v.name,v.dim);
+	}
+
+	void visit(const ExprConstant& c) {
+		switch(c.type()) {
+		case Dim::SCALAR:     peers[c.id]=&ExprConstant::new_scalar(f2, c.get_value()); break;
+		case Dim::ROW_VECTOR: peers[c.id]=&ExprConstant::new_vector(f2, c.get_vector_value(),true); break;
+		case Dim::COL_VECTOR: peers[c.id]=&ExprConstant::new_vector(f2, c.get_vector_value(),false); break;
+		case Dim::MATRIX:     peers[c.id]=&ExprConstant::new_matrix(f2, c.get_matrix_value()); break;
+		case Dim::MATRIX_ARRAY: assert(false); break;
+		}
+	}
+
+	void visit(const ExprNAryOp& e) {
+		for (int i=0; i<e.size; i++)
+				visit(e.arg(i));
+		e.acceptVisitor(*this);
+	}
+
+	void visit(const ExprBinaryOp& b) {
+		visit(b.left);
+		visit(b.right);
+		b.acceptVisitor(*this);
+	}
+
+	void visit(const ExprUnaryOp& u) {
+		visit(u.expr);
+		u.acceptVisitor(*this);
+	}
+
+	void visit(const ExprVector& e) {
+		const ExprNode* args2[e.size];
+		for (int i=0; i<e.size; i++)
+			args2[i]=peers[e.arg(i).id];
+
+		peers[e.id]=&ExprVector::new_(args2, e.size, e.row_vector());
+	}
+
+	void visit(const ExprApply& e) {
+		const ExprNode* args2[e.size];
+		for (int i=0; i<e.size; i++)
+			args2[i]=peers[e.arg(i).id];
+
+		peers[e.id]=&ExprApply::new_(e.func, args2);
+	}
+
+	void visit(const ExprAdd& e)   { peers[e.id] = &      (*peers[e.left.id] + *peers[e.right.id]); }
+	void visit(const ExprMul& e)   { peers[e.id] = &      (*peers[e.left.id] * *peers[e.right.id]); }
+	void visit(const ExprSub& e)   { peers[e.id] = &      (*peers[e.left.id] - *peers[e.right.id]); }
+	void visit(const ExprDiv& e)   { peers[e.id] = &      (*peers[e.left.id] / *peers[e.right.id]); }
+	void visit(const ExprMax& e)   { peers[e.id] = & max  (*peers[e.left.id], *peers[e.right.id]); }
+	void visit(const ExprMin& e)   { peers[e.id] = & min  (*peers[e.left.id], *peers[e.right.id]); }
+	void visit(const ExprAtan2& e) { peers[e.id] = & atan2(*peers[e.left.id], *peers[e.right.id]); }
+
+	void visit(const ExprMinus& e) { peers[e.id] = & -    (*peers[e.expr.id]); }
+	void visit(const ExprSign& e)  { peers[e.id] = & sign (*peers[e.expr.id]); }
+	void visit(const ExprAbs& e)   { peers[e.id] = & abs  (*peers[e.expr.id]); }
+	void visit(const ExprPower& e) { peers[e.id] = & pow  (*peers[e.expr.id],e.expon); }
+	void visit(const ExprSqr& e)   { peers[e.id] = & sqr  (*peers[e.expr.id]); }
+	void visit(const ExprSqrt& e)  { peers[e.id] = & sqrt (*peers[e.expr.id]); }
+	void visit(const ExprExp& e)   { peers[e.id] = & exp  (*peers[e.expr.id]); }
+	void visit(const ExprLog& e)   { peers[e.id] = & log  (*peers[e.expr.id]); }
+	void visit(const ExprCos& e)   { peers[e.id] = & cos  (*peers[e.expr.id]); }
+	void visit(const ExprSin& e)   { peers[e.id] = & sin  (*peers[e.expr.id]); }
+	void visit(const ExprTan& e)   { peers[e.id] = & tan  (*peers[e.expr.id]); }
+	void visit(const ExprCosh& e)  { peers[e.id] = & cosh (*peers[e.expr.id]); }
+	void visit(const ExprSinh& e)  { peers[e.id] = & sinh (*peers[e.expr.id]); }
+	void visit(const ExprTanh& e)  { peers[e.id] = & tanh (*peers[e.expr.id]); }
+	void visit(const ExprAcos& e)  { peers[e.id] = & acos (*peers[e.expr.id]); }
+	void visit(const ExprAsin& e)  { peers[e.id] = & asin (*peers[e.expr.id]); }
+	void visit(const ExprAtan& e)  { peers[e.id] = & atan (*peers[e.expr.id]); }
+	void visit(const ExprAcosh& e) { peers[e.id] = & acosh(*peers[e.expr.id]); }
+	void visit(const ExprAsinh& e) { peers[e.id] = & asinh(*peers[e.expr.id]); }
+	void visit(const ExprAtanh& e) { peers[e.id] = & atanh(*peers[e.expr.id]); }
+};
+
+} // end namespace

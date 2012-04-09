@@ -64,6 +64,17 @@ public:
 	~Function();
 
 	/**
+	 * \brief Duplicate this function.
+	 *
+	 * The resulting function is independent from *this
+	 * (no reference shared). The DAG is entirely duplicated.
+	 *
+	 * Decoration is not copied.
+	 * The resulting function is not decorated.
+	 */
+	Function(const Function&);
+
+	/**
 	 * \brief Transform f into (f_1,...f_n)
 	 *
 	 * The vector-valued function f is transformed
