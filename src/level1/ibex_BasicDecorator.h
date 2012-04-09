@@ -50,6 +50,7 @@ protected:
 	/* Visit a function application. */
 	virtual void visit(const ExprApply&);
 
+	mutable bool* visited;
 };
 
 /**

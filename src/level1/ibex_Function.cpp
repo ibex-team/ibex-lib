@@ -70,7 +70,8 @@ Function::Function(const char* name) : name(strdup(name)), root(NULL), key_count
 }
 
 Function::~Function() {
-	cerr << "warning: ~Function() not implemented.";
+	for (int i=0; i<key_count; i++)
+		delete &node(i);
 }
 
 Function* Function::separate() const {

@@ -16,12 +16,19 @@ void BasicDecorator::decorate(Function& f) const {
 	if (f.expr().deco!=NULL) {
 		return; //throw NonRecoverableException("Cannot re-decorate a function");
 	} else {
+		int n=f.nb_nodes();
+		visited = new bool[n];
+		for (int i=0; i<n; i++) visited[i]=false;
 		((BasicDecorator*) this)->visit(f.expr());
+		delete[] visited;
 	}
 }
 
 void BasicDecorator::visit(const ExprNode& e) {
-	e.acceptVisitor(*this);
+	if (!visited[e.id]) {
+		visited[e.id]=true;
+		e.acceptVisitor(*this);
+	}
 }
 
 void BasicDecorator::visit(const ExprNAryOp& e) {

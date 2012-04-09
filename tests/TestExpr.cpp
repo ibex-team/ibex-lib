@@ -486,7 +486,6 @@ void TestExpr::apply03() {
 	TEST_ASSERT(e.height==2);
 	TEST_ASSERT(e.id==3);
 	TEST_ASSERT(e.size==4);
-	cout << e << endl;
 	TEST_ASSERT(checkExpr(e,"(f1(x3,x3)-f2(x3,x3))"));
 }
 

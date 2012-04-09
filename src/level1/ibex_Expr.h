@@ -60,7 +60,10 @@ class ExprNode {
 
   friend class Visitor;
 
-  /** Deletes this instance. */
+  /**
+   * \brief Deletes this instance.
+   *
+   * Need to be virtual (see Function::~Function()) */
   virtual ~ExprNode();
 
   /** Streams out this expression. */
