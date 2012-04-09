@@ -27,11 +27,11 @@ public:
 	Function& f2;
 
 	ExprCopy(const ExprNode& src, Function& dest) : f2(dest) {
+
 		int n=src.context.nb_nodes();
 		peers = new const ExprNode*[n]; // n is the max number of sub_nodes of "src"
 		for (int i=0; i<n; i++) peers[i]=NULL;
 		// some of the peers[i] may stay NULL
-
 		visit(src);
 
 		f2.set_expr(*peers[src.id]);
@@ -39,7 +39,7 @@ public:
 
 protected:
 	void visit(const ExprNode& e) {
-		if (peers[e.id]!=NULL) {
+		if (peers[e.id]==NULL) {
 			e.acceptVisitor(*this);
 		}
 	}
@@ -64,23 +64,21 @@ protected:
 	}
 
 	void visit(const ExprNAryOp& e) {
-		for (int i=0; i<e.size; i++)
-				visit(e.arg(i));
 		e.acceptVisitor(*this);
 	}
 
 	void visit(const ExprBinaryOp& b) {
-		visit(b.left);
-		visit(b.right);
 		b.acceptVisitor(*this);
 	}
 
 	void visit(const ExprUnaryOp& u) {
-		visit(u.expr);
 		u.acceptVisitor(*this);
 	}
 
 	void visit(const ExprVector& e) {
+		for (int i=0; i<e.size; i++)
+			visit(e.arg(i));
+
 		const ExprNode* args2[e.size];
 		for (int i=0; i<e.size; i++)
 			args2[i]=peers[e.arg(i).id];
@@ -89,6 +87,9 @@ protected:
 	}
 
 	void visit(const ExprApply& e) {
+		for (int i=0; i<e.size; i++)
+			visit(e.arg(i));
+
 		const ExprNode* args2[e.size];
 		for (int i=0; i<e.size; i++)
 			args2[i]=peers[e.arg(i).id];
@@ -96,34 +97,34 @@ protected:
 		peers[e.id]=&ExprApply::new_(e.func, args2);
 	}
 
-	void visit(const ExprAdd& e)   { peers[e.id] = &      (*peers[e.left.id] + *peers[e.right.id]); }
-	void visit(const ExprMul& e)   { peers[e.id] = &      (*peers[e.left.id] * *peers[e.right.id]); }
-	void visit(const ExprSub& e)   { peers[e.id] = &      (*peers[e.left.id] - *peers[e.right.id]); }
-	void visit(const ExprDiv& e)   { peers[e.id] = &      (*peers[e.left.id] / *peers[e.right.id]); }
-	void visit(const ExprMax& e)   { peers[e.id] = & max  (*peers[e.left.id], *peers[e.right.id]); }
-	void visit(const ExprMin& e)   { peers[e.id] = & min  (*peers[e.left.id], *peers[e.right.id]); }
-	void visit(const ExprAtan2& e) { peers[e.id] = & atan2(*peers[e.left.id], *peers[e.right.id]); }
+	void visit(const ExprAdd& e)   { visit(e.left); visit(e.right); peers[e.id] = &      (*peers[e.left.id] + *peers[e.right.id]); }
+	void visit(const ExprMul& e)   { visit(e.left); visit(e.right); peers[e.id] = &      (*peers[e.left.id] * *peers[e.right.id]); }
+	void visit(const ExprSub& e)   { visit(e.left); visit(e.right); peers[e.id] = &      (*peers[e.left.id] - *peers[e.right.id]); }
+	void visit(const ExprDiv& e)   { visit(e.left); visit(e.right); peers[e.id] = &      (*peers[e.left.id] / *peers[e.right.id]); }
+	void visit(const ExprMax& e)   { visit(e.left); visit(e.right); peers[e.id] = & max  (*peers[e.left.id], *peers[e.right.id]); }
+	void visit(const ExprMin& e)   { visit(e.left); visit(e.right); peers[e.id] = & min  (*peers[e.left.id], *peers[e.right.id]); }
+	void visit(const ExprAtan2& e) { visit(e.left); visit(e.right); peers[e.id] = & atan2(*peers[e.left.id], *peers[e.right.id]); }
 
-	void visit(const ExprMinus& e) { peers[e.id] = & -    (*peers[e.expr.id]); }
-	void visit(const ExprSign& e)  { peers[e.id] = & sign (*peers[e.expr.id]); }
-	void visit(const ExprAbs& e)   { peers[e.id] = & abs  (*peers[e.expr.id]); }
-	void visit(const ExprPower& e) { peers[e.id] = & pow  (*peers[e.expr.id],e.expon); }
-	void visit(const ExprSqr& e)   { peers[e.id] = & sqr  (*peers[e.expr.id]); }
-	void visit(const ExprSqrt& e)  { peers[e.id] = & sqrt (*peers[e.expr.id]); }
-	void visit(const ExprExp& e)   { peers[e.id] = & exp  (*peers[e.expr.id]); }
-	void visit(const ExprLog& e)   { peers[e.id] = & log  (*peers[e.expr.id]); }
-	void visit(const ExprCos& e)   { peers[e.id] = & cos  (*peers[e.expr.id]); }
-	void visit(const ExprSin& e)   { peers[e.id] = & sin  (*peers[e.expr.id]); }
-	void visit(const ExprTan& e)   { peers[e.id] = & tan  (*peers[e.expr.id]); }
-	void visit(const ExprCosh& e)  { peers[e.id] = & cosh (*peers[e.expr.id]); }
-	void visit(const ExprSinh& e)  { peers[e.id] = & sinh (*peers[e.expr.id]); }
-	void visit(const ExprTanh& e)  { peers[e.id] = & tanh (*peers[e.expr.id]); }
-	void visit(const ExprAcos& e)  { peers[e.id] = & acos (*peers[e.expr.id]); }
-	void visit(const ExprAsin& e)  { peers[e.id] = & asin (*peers[e.expr.id]); }
-	void visit(const ExprAtan& e)  { peers[e.id] = & atan (*peers[e.expr.id]); }
-	void visit(const ExprAcosh& e) { peers[e.id] = & acosh(*peers[e.expr.id]); }
-	void visit(const ExprAsinh& e) { peers[e.id] = & asinh(*peers[e.expr.id]); }
-	void visit(const ExprAtanh& e) { peers[e.id] = & atanh(*peers[e.expr.id]); }
+	void visit(const ExprMinus& e) { visit(e.expr); peers[e.id] = & -    (*peers[e.expr.id]); }
+	void visit(const ExprSign& e)  { visit(e.expr); peers[e.id] = & sign (*peers[e.expr.id]); }
+	void visit(const ExprAbs& e)   { visit(e.expr); peers[e.id] = & abs  (*peers[e.expr.id]); }
+	void visit(const ExprPower& e) { visit(e.expr); peers[e.id] = & pow  (*peers[e.expr.id],e.expon); }
+	void visit(const ExprSqr& e)   { visit(e.expr); peers[e.id] = & sqr  (*peers[e.expr.id]); }
+	void visit(const ExprSqrt& e)  { visit(e.expr); peers[e.id] = & sqrt (*peers[e.expr.id]); }
+	void visit(const ExprExp& e)   { visit(e.expr); peers[e.id] = & exp  (*peers[e.expr.id]); }
+	void visit(const ExprLog& e)   { visit(e.expr); peers[e.id] = & log  (*peers[e.expr.id]); }
+	void visit(const ExprCos& e)   { visit(e.expr); peers[e.id] = & cos  (*peers[e.expr.id]); }
+	void visit(const ExprSin& e)   { visit(e.expr); peers[e.id] = & sin  (*peers[e.expr.id]); }
+	void visit(const ExprTan& e)   { visit(e.expr); peers[e.id] = & tan  (*peers[e.expr.id]); }
+	void visit(const ExprCosh& e)  { visit(e.expr); peers[e.id] = & cosh (*peers[e.expr.id]); }
+	void visit(const ExprSinh& e)  { visit(e.expr); peers[e.id] = & sinh (*peers[e.expr.id]); }
+	void visit(const ExprTanh& e)  { visit(e.expr); peers[e.id] = & tanh (*peers[e.expr.id]); }
+	void visit(const ExprAcos& e)  { visit(e.expr); peers[e.id] = & acos (*peers[e.expr.id]); }
+	void visit(const ExprAsin& e)  { visit(e.expr); peers[e.id] = & asin (*peers[e.expr.id]); }
+	void visit(const ExprAtan& e)  { visit(e.expr); peers[e.id] = & atan (*peers[e.expr.id]); }
+	void visit(const ExprAcosh& e) { visit(e.expr); peers[e.id] = & acosh(*peers[e.expr.id]); }
+	void visit(const ExprAsinh& e) { visit(e.expr); peers[e.id] = & asinh(*peers[e.expr.id]); }
+	void visit(const ExprAtanh& e) { visit(e.expr); peers[e.id] = & atanh(*peers[e.expr.id]); }
 };
 
 } // end namespace

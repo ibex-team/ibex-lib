@@ -22,9 +22,11 @@ class TestFunction : public TestIbex {
 public:
 	TestFunction() {
 		TEST_ADD(TestFunction::add_symbol);
+		TEST_ADD(TestFunction::copy);
 	}
 
 	void add_symbol();
+	void copy();
 };
 
 } // end namespace

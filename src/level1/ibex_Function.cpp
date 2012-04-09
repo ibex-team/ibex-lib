@@ -75,7 +75,8 @@ Function::~Function() {
 		delete &node(i);
 }
 
-Function::Function(const Function& f) {
+Function::Function(const Function& f) : name(strdup(f.name)), root(NULL), key_count(0) {
+	assert(f.root!=NULL);
 	ExprCopy(f.expr(),*this);
 }
 
