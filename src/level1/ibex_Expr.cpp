@@ -67,7 +67,7 @@ Dim vec_dim(const ExprNode** comp, int n, bool in_a_row) {
 				// row vectors of different size
 				// in a single row vector;
 				// (but not implemented yet)
-				if (!comp[i]->type()==Dim::SCALAR) goto error;
+				if (!comp[i]->type()!=Dim::SCALAR) goto error;
 			return Dim(0,0,n);
 		}
 		else {
@@ -76,7 +76,7 @@ Dim vec_dim(const ExprNode** comp, int n, bool in_a_row) {
 				// column vectors of different size
 				// in a single column vector;
 				// (but not implemented yet)
-				if (comp[i]->type()==Dim::SCALAR) goto error;
+				if (comp[i]->type()!=Dim::SCALAR) goto error;
 			return Dim(0,n,0);
 		}
 	} else {

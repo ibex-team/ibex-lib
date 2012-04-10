@@ -16,6 +16,12 @@
 
 namespace ibex {
 
+static bool sameExpr(const ExprNode& node, const char* expr) {
+	std::stringstream s;
+	s << node;
+	return strcmp(s.str().c_str(),expr)==0;
+}
+
 void TestFunction::add_symbol() {
 	Function f;
 	TEST_ASSERT(f.nb_nodes()==0);
@@ -67,10 +73,38 @@ void TestFunction::copy() {
 	const ExprMul* e2=dynamic_cast<const ExprMul*>(&f2.node(2));
 	TEST_ASSERT(e2!=NULL);
 
-	std::stringstream s;
-	s << f2.expr();
-	TEST_ASSERT(strcmp(s.str().c_str(),"A*x")==0);
+	TEST_ASSERT(sameExpr(f2.expr(),"(A*x)"));
 }
 
+void TestFunction::separate() {
+
+	Function f;
+
+	const ExprSymbol& x=f.add_symbol("x");
+	const ExprSymbol& y=f.add_symbol("y");
+	const ExprSymbol& z=f.add_symbol("z");
+
+	const ExprNode& e1=x+y-z;
+	const ExprNode& e2=x*z;
+	const ExprNode& e3=y-z;
+	const ExprNode* v[3] = { &e1, &e2, &e3 };
+
+	const ExprVector& e=ExprVector::new_(v, 3, false);
+
+	f.set_expr(e);
+
+	Function* fcomp=f.separate();
+
+	TEST_ASSERT(fcomp[0].nb_symbols()==3);
+	TEST_ASSERT(sameExpr(fcomp[0].expr(),"((x+y)-z)"));
+
+	TEST_ASSERT(fcomp[1].nb_symbols()==3);
+	TEST_ASSERT(sameExpr(fcomp[1].expr(),"(x*z)"));
+
+	TEST_ASSERT(fcomp[2].nb_symbols()==3);
+	TEST_ASSERT(sameExpr(fcomp[2].expr(),"(y-z)"));
+
+	delete[] fcomp;
+}
 
 } // end namespace

@@ -90,8 +90,8 @@ Function* Function::separate() const {
 
 	Function *compf = new Function[fvec->size];
 
-	for (int i=0; i<fvec->size; i++) {
-		ExprCopy((*fvec)[i], compf[i]);
+	for (int i=0; i<fvec->nb_args; i++) {
+		ExprCopy(fvec->arg(i), compf[i]);
 	}
 	return compf;
 }

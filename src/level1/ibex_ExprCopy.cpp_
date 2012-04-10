@@ -26,15 +26,25 @@ class ExprCopy : public FunctionVisitor {
 public:
 	Function& f2;
 
-	ExprCopy(const ExprNode& src, Function& dest) : f2(dest) {
+	ExprCopy(const ExprNode& e, Function& dest) : f2(dest) {
 
-		int n=src.context.nb_nodes();
+		const Function& src=e.context;
+		int n=src.nb_nodes();
 		peers = new const ExprNode*[n]; // n is the max number of sub_nodes of "src"
-		for (int i=0; i<n; i++) peers[i]=NULL;
-		// some of the peers[i] may stay NULL
-		visit(src);
 
-		f2.set_expr(*peers[src.id]);
+		// peers[i] will stay NULL if src.context.node(i) is not a subnode of "src"
+		for (int i=0; i<n; i++) peers[i]=NULL;
+
+		// we have to proceed first the symbols in order to guarantee that
+		// they appear in the same order in "dest". Indeed, if we add the symbols
+		// as they appear in the expression the copy of a a function (x,y)->y+x
+		// would yield (y,x)->y+x.
+		for (int i=0; i<src.nb_symbols(); i++)
+			visit(src.symbol(i));
+
+		visit(e);
+
+		f2.set_expr(*peers[e.id]);
 	}
 
 protected:
@@ -76,22 +86,22 @@ protected:
 	}
 
 	void visit(const ExprVector& e) {
-		for (int i=0; i<e.size; i++)
+		for (int i=0; i<e.nb_args; i++)
 			visit(e.arg(i));
 
-		const ExprNode* args2[e.size];
-		for (int i=0; i<e.size; i++)
+		const ExprNode* args2[e.nb_args];
+		for (int i=0; i<e.nb_args; i++)
 			args2[i]=peers[e.arg(i).id];
 
-		peers[e.id]=&ExprVector::new_(args2, e.size, e.row_vector());
+		peers[e.id]=&ExprVector::new_(args2, e.nb_args, e.row_vector());
 	}
 
 	void visit(const ExprApply& e) {
-		for (int i=0; i<e.size; i++)
+		for (int i=0; i<e.nb_args; i++)
 			visit(e.arg(i));
 
-		const ExprNode* args2[e.size];
-		for (int i=0; i<e.size; i++)
+		const ExprNode* args2[e.nb_args];
+		for (int i=0; i<e.nb_args; i++)
 			args2[i]=peers[e.arg(i).id];
 
 		peers[e.id]=&ExprApply::new_(e.func, args2);
