@@ -107,4 +107,46 @@ void TestFunction::separate() {
 	delete[] fcomp;
 }
 
+void TestFunction::used() {
+	Function f;
+
+	const ExprSymbol& x=f.add_symbol("x");
+	const ExprSymbol& y=f.add_symbol("y");
+	const ExprSymbol& z=f.add_symbol("z");
+
+	const ExprNode& e1=x+y-z;
+	const ExprNode& e2=x*z;
+	const ExprNode& e3=y-z;
+	const ExprNode* v[3] = { &e1, &e2, &e3 };
+
+	const ExprVector& e=ExprVector::new_(v, 3, false);
+
+	f.set_expr(e);
+
+	Function* fcomp=f.separate();
+
+	TEST_ASSERT(fcomp[0].used("x"));
+	TEST_ASSERT(fcomp[0].used("y"));
+	TEST_ASSERT(fcomp[0].used("z"));
+	TEST_ASSERT(fcomp[0].used(0));
+	TEST_ASSERT(fcomp[0].used(1));
+	TEST_ASSERT(fcomp[0].used(2));
+
+	TEST_ASSERT(fcomp[1].used("x"));
+	TEST_ASSERT(!fcomp[1].used("y"));
+	TEST_ASSERT(fcomp[1].used("z"));
+	TEST_ASSERT(fcomp[1].used(0));
+	TEST_ASSERT(!fcomp[1].used(1));
+	TEST_ASSERT(fcomp[1].used(2));
+
+	TEST_ASSERT(!fcomp[2].used("x"));
+	TEST_ASSERT(fcomp[2].used("y"));
+	TEST_ASSERT(fcomp[2].used("z"));
+	TEST_ASSERT(!fcomp[2].used(0));
+	TEST_ASSERT(fcomp[2].used(1));
+	TEST_ASSERT(fcomp[2].used(2));
+}
+
+
+
 } // end namespace

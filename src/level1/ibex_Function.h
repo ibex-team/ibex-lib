@@ -132,8 +132,11 @@ public:
 
 	/**
 	 * \brief Decorate (and compile) the function.
+	 *
+	 * Declared "const" because the decoration is
+	 * not considered as part of the definition of the function.
 	 */
-	void decorate(const Decorator&);
+	void decorate(const Decorator&) const;
 
 	/**
 	 * \brief Apply this function to the argument
@@ -223,9 +226,10 @@ public:
 	template<class V,typename T>
 	void backward(const V& algo) const;
 
-	CompiledFunction cf;
+	CompiledFunction cf; // "public" just for debug
 
 private:
+
 	friend class ExprNode;
 	void add_node(const ExprNode&);
 

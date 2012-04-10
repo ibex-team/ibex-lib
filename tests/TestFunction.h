@@ -24,11 +24,13 @@ public:
 		TEST_ADD(TestFunction::add_symbol);
 		TEST_ADD(TestFunction::copy);
 		TEST_ADD(TestFunction::separate);
+		TEST_ADD(TestFunction::used);
 	}
 
 	void add_symbol();
 	void copy();
 	void separate();
+	void used();
 };
 
 } // end namespace

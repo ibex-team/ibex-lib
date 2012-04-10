@@ -13,7 +13,7 @@
 
 namespace ibex {
 
-HC4ReviseAlgo::HC4ReviseAlgo(NumConstraint& ctr) :
+HC4ReviseAlgo::HC4ReviseAlgo(const NumConstraint& ctr) :
 		eval(ctr.f), equality(ctr.equality) { }
 
 void HC4ReviseAlgo::vector_bwd(const ExprVector& v, Domain** compL, const Domain& y) {

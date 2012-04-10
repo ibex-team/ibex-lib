@@ -28,19 +28,19 @@ public:
 	 * Creates a new indicators structure with
 	 * nothing activated (all the indicators are "off")
 	 */
-	Indicators();
+	Indicators(int n);
 
 	/**
 	 * Set whether a variable has been impacted
 	 * since the last call to the contractor.
 	 */
-	BoolMask& impact;
+	BoolMask impact;
 
 	/**
 	 * Set whether a variable has to be
 	 * considered by the next call to the contractor.
 	 */
-	BoolMask& scope;
+	BoolMask scope;
 
 	/**
 	 * Add the impact to the indicators

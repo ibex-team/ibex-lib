@@ -25,6 +25,9 @@
 #include "TestEval.h"
 #include "TestHC4Revise.h"
 
+// ================ level 2 ===============
+#include "TestHC4.h"
+
 int main() {
     Test::TextOutput output(Test::TextOutput::Verbose);
 
@@ -34,10 +37,13 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestIntervalMatrix()));
     ts.add(auto_ptr<Test::Suite>(new TestDim()));
     //ts.add(auto_ptr<Test::Suite>(new TestDomain()));
+
     ts.add(auto_ptr<Test::Suite>(new TestExpr()));
     ts.add(auto_ptr<Test::Suite>(new TestFunction()));
     ts.add(auto_ptr<Test::Suite>(new TestEval()));
     ts.add(auto_ptr<Test::Suite>(new TestHC4Revise()));
+
+    ts.add(auto_ptr<Test::Suite>(new TestHC4()));
 
     return ts.run(output,false) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

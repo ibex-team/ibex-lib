@@ -13,7 +13,7 @@
 
 namespace ibex {
 
-Gradient::Gradient(Function& f) : eval(f) {
+Gradient::Gradient(const Function& f) : eval(f) {
 
 	f.decorate(GradDecorator());
 }

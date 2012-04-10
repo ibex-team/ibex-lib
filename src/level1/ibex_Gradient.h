@@ -43,7 +43,7 @@ class ApplyGradLabel : public BasicApplyLabel {
 class GradDecorator : public Decorator, public FunctionVisitor {
 public:
 
-	void decorate(Function& f) const {
+	void decorate(const Function& f) const {
 		if (f.expr().deco!=NULL) {
 			return; //throw NonRecoverableException("Cannot re-decorate a function");
 		}
@@ -103,7 +103,7 @@ public:
 	/**
 	 * \brief The function f (not decorated).
 	 */
-	Gradient(Function& f);
+	Gradient(const Function& f);
 
 	/**
 	 * \brief Calculate the gradient on the box \a box and store the result in \a g.

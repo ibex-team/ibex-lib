@@ -15,7 +15,7 @@
 
 namespace ibex {
 #include <typeinfo>
-Eval::Eval(Function& f) : f(f), symbolLabels(f.nb_symbols()) {
+Eval::Eval(const Function& f) : f(f), symbolLabels(f.nb_symbols()) {
 
 	f.decorate(BasicDecorator());
 

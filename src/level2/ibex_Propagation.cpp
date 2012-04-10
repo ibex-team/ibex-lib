@@ -28,7 +28,7 @@ Propagation::Propagation(ContractorList& cl, double ratio, bool incremental) :
 }
 
 void Propagation::contract(IntervalVector& box) {
-	contract(box, Indicators());
+	contract(box, Indicators(box.size()));
 }
 
 void  Propagation::contract(IntervalVector& _box, const Indicators& indic) {
@@ -55,7 +55,7 @@ void  Propagation::contract(IntervalVector& _box, const Indicators& indic) {
 	//     thres(i) = ratio*Diam(box(i));
 	//     if (thres(i)<w) thres(i)=w;
 	//   }
-	Indicators p;
+	Indicators p(_box.size());
 	p.set_scope_on();
 	p.set_impact_on();
 

@@ -35,7 +35,7 @@ public:
 	 * The evaluator will decorate the function with "Domain" (if not done already).
 	 *
 	 */
-	Eval(Function& f);
+	Eval(const Function& f);
 
 	/**
 	 * \brief Delete the evaluator.

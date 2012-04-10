@@ -28,7 +28,7 @@ public:
 	/**
 	 * \brief Create the HC4-revise algorithm for a constraint \a ctr.
 	 */
-	HC4ReviseAlgo(NumConstraint& ctr);
+	HC4ReviseAlgo(const NumConstraint& ctr);
 
 	/**
 	 * \brief Run the backward algorithm.

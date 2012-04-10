@@ -13,7 +13,7 @@
 
 namespace ibex {
 
-Indicators::Indicators() {
+Indicators::Indicators(int n) : impact(n), scope(n) {
 }
 
 /*Indicators::~Indicators() {

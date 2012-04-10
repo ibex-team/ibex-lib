@@ -12,13 +12,21 @@
 
 namespace ibex {
 
-void BasicDecorator::decorate(Function& f) const {
+void BasicDecorator::decorate(const Function& f) const {
 	if (f.expr().deco!=NULL) {
 		return; //throw NonRecoverableException("Cannot re-decorate a function");
 	} else {
 		int n=f.nb_nodes();
 		visited = new bool[n];
 		for (int i=0; i<n; i++) visited[i]=false;
+
+		// we cannot just call visit(f.expr()) because
+		// some symbols may not appear in the expression
+		// and they have to be decorated. So we first
+		// decorate all the symbols.
+		for (int i=0; i<f.nb_symbols(); i++)
+			((BasicDecorator*) this)->visit(f.symbol(i));
+
 		((BasicDecorator*) this)->visit(f.expr());
 		delete[] visited;
 	}

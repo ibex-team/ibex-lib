@@ -36,7 +36,6 @@ public:
 
 private:
 	HC4ReviseAlgo hc4r;
-	Domain d;
 };
 
 } // namespace ibex

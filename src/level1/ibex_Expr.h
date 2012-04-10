@@ -1155,136 +1155,136 @@ inline ExprUnaryOp::ExprUnaryOp(const ExprNode& subexpr, const Dim& dim) :
 		ExprNode(subexpr.context, subexpr.height+1, subexpr.size+1, dim), expr(subexpr) { }
 
 /** Addition */
-inline const ExprBinaryOp& operator+(const ExprNode& left, const ExprNode& right) {
+inline const ExprAdd& operator+(const ExprNode& left, const ExprNode& right) {
   return ExprAdd::new_(left, right); }
 
 /** Subtraction */
-inline const ExprBinaryOp& operator-(const ExprNode& left, const ExprNode& right) {
+inline const ExprSub& operator-(const ExprNode& left, const ExprNode& right) {
   return ExprSub::new_(left, right); }
 
 /** Multiplication */
-inline const ExprBinaryOp& operator*(const ExprNode& left, const ExprNode& right) {
+inline const ExprMul& operator*(const ExprNode& left, const ExprNode& right) {
   return ExprMul::new_(left, right); }
 
 /** Division */
-inline const ExprBinaryOp& operator/(const ExprNode& left, const ExprNode& right) {
+inline const ExprDiv& operator/(const ExprNode& left, const ExprNode& right) {
   return ExprDiv::new_(left, right); }
 
 /** Maximum */
- inline const ExprBinaryOp& max(const ExprNode& left, const ExprNode& right) {
+ inline const ExprMax& max(const ExprNode& left, const ExprNode& right) {
   return ExprMax::new_(left, right); }
 
 /** Minimum */
-inline const ExprBinaryOp& min(const ExprNode& left, const ExprNode& right) {
+inline const ExprMin& min(const ExprNode& left, const ExprNode& right) {
   return ExprMin::new_(left, right); }
 
 /** Arctangent2 of two expressions */
-inline const ExprBinaryOp& atan2(const ExprNode& exp1, const ExprNode& exp2) {
+inline const ExprAtan2& atan2(const ExprNode& exp1, const ExprNode& exp2) {
 	return ExprAtan2::new_(exp1, exp2); }
 
 /** Addition of an expression to a constant */
-inline const ExprBinaryOp& operator+(const ExprNode& left, const Interval& value) {
+inline const ExprAdd& operator+(const ExprNode& left, const Interval& value) {
   return left+ExprConstant::new_scalar(left.context, value); }
 
 /** Subtraction of an expression from a constant */
-inline const ExprBinaryOp& operator-(const ExprNode& left, const Interval& value) {
+inline const ExprSub& operator-(const ExprNode& left, const Interval& value) {
   return left-ExprConstant::new_scalar(left.context, value); }
 
 /** Multiplication of an expression by a constant */
-inline const ExprBinaryOp& operator*(const ExprNode& left, const Interval& value) {
+inline const ExprMul& operator*(const ExprNode& left, const Interval& value) {
   return left*ExprConstant::new_scalar(left.context, value); }
 
 /** Division of an expression by a constant */
-inline const ExprBinaryOp& operator/(const ExprNode& left, const Interval& value) {
+inline const ExprDiv& operator/(const ExprNode& left, const Interval& value) {
   return left/ExprConstant::new_scalar(left.context, value); }
 
 /** Maximum of an expression and a constant */
- inline const ExprBinaryOp& max(const ExprNode& left, const Interval& value) {
+ inline const ExprMax& max(const ExprNode& left, const Interval& value) {
    return max(left, ExprConstant::new_scalar(left.context, value)); }
 
 /** Minimum of an expression and a constant */
- inline const ExprBinaryOp& min(const ExprNode& left, const Interval& value) {
+ inline const ExprMin& min(const ExprNode& left, const Interval& value) {
    return min(left, ExprConstant::new_scalar(left.context, value)); }
 
 /** Arctangent2 of an expression and a constant */
- inline const ExprBinaryOp& atan2(const ExprNode& exp1, const Interval& value) {
+ inline const ExprAtan2& atan2(const ExprNode& exp1, const Interval& value) {
  	return ExprAtan2::new_(exp1, ExprConstant::new_scalar(exp1.context, value)); }
 
 /** Addition of a constant to an expression */
-inline const ExprBinaryOp& operator+(const Interval& value, const ExprNode& right) {
+inline const ExprAdd& operator+(const Interval& value, const ExprNode& right) {
   return ExprConstant::new_scalar(right.context, value)+right; }
 
 /** Subtraction of a constant from an expression */
-inline const ExprBinaryOp& operator-(const Interval& value, const ExprNode& right) {
+inline const ExprSub& operator-(const Interval& value, const ExprNode& right) {
   return ExprConstant::new_scalar(right.context, value)-right; }
 
 /** Multiplication of a constant by an expression*/
-inline const ExprBinaryOp& operator*(const Interval& value, const ExprNode& right) {
+inline const ExprMul& operator*(const Interval& value, const ExprNode& right) {
   return ExprConstant::new_scalar(right.context, value)*right; }
 
 /** Division of a constant by an expression */
-inline const ExprBinaryOp& operator/(const Interval& value, const ExprNode& right) {
+inline const ExprDiv& operator/(const Interval& value, const ExprNode& right) {
   return ExprConstant::new_scalar(right.context, value)/right; }
 
 /** Maximum of a constant and an expression */
-inline const ExprBinaryOp& max (const Interval& value, const ExprNode& right) {
+inline const ExprMax& max (const Interval& value, const ExprNode& right) {
   return max(ExprConstant::new_scalar(right.context, value), right); }
 
 /** Minimum of a constant and an expression */
-inline const ExprBinaryOp& min (const Interval& value, const ExprNode& right) {
+inline const ExprMin& min (const Interval& value, const ExprNode& right) {
   return min(ExprConstant::new_scalar(right.context, value), right); }
 
 /** Arctangent2 of a constant and an expression */
-inline const ExprBinaryOp& atan2(const Interval& value, const ExprNode& exp2) {
+inline const ExprAtan2& atan2(const Interval& value, const ExprNode& exp2) {
 	return ExprAtan2::new_(ExprConstant::new_scalar(exp2.context, value), exp2); }
 
-/** Square of an expresion */
-inline const ExprUnaryOp& sqr  (const ExprNode& exp) { return ExprSqr::new_(exp); }
+/** Square of an expression */
+inline const ExprSqr& sqr  (const ExprNode& exp) { return ExprSqr::new_(exp); }
 
-/** Square root of an expresion */
-inline const ExprUnaryOp& sqrt (const ExprNode& exp) { return ExprSqrt::new_(exp); }
+/** Square root of an expression */
+inline const ExprSqrt& sqrt (const ExprNode& exp) { return ExprSqrt::new_(exp); }
 
 /** Exponential of an expression */
-inline const ExprUnaryOp& exp  (const ExprNode& exp) { return ExprExp::new_(exp); }
+inline const ExprExp& exp  (const ExprNode& exp) { return ExprExp::new_(exp); }
 
 /** Neperian logarithm of an expression */
-inline const ExprUnaryOp& log  (const ExprNode& exp) { return ExprLog::new_(exp); }
+inline const ExprLog& log  (const ExprNode& exp) { return ExprLog::new_(exp); }
 
 /** Cosine of an expression */
-inline const ExprUnaryOp& cos  (const ExprNode& exp) { return ExprCos::new_(exp); }
+inline const ExprCos& cos  (const ExprNode& exp) { return ExprCos::new_(exp); }
 
 /** Sine of an expression */
-inline const ExprUnaryOp& sin  (const ExprNode& exp) { return ExprSin::new_(exp); }
+inline const ExprSin& sin  (const ExprNode& exp) { return ExprSin::new_(exp); }
 
 /** Tangent of an expression */
-inline const ExprUnaryOp& tan  (const ExprNode& exp) { return ExprTan::new_(exp); }
+inline const ExprTan& tan  (const ExprNode& exp) { return ExprTan::new_(exp); }
 
 /** Arccosine of an expression */
-inline const ExprUnaryOp& acos (const ExprNode& exp) { return ExprAcos::new_(exp); }
+inline const ExprAcos& acos (const ExprNode& exp) { return ExprAcos::new_(exp); }
 
 /** Arcsine of an expression */
-inline const ExprUnaryOp& asin (const ExprNode& exp) { return ExprAsin::new_(exp); }
+inline const ExprAsin& asin (const ExprNode& exp) { return ExprAsin::new_(exp); }
 
 /** Arctangent of an expression */
-inline const ExprUnaryOp& atan (const ExprNode& exp) { return ExprAtan::new_(exp); }
+inline const ExprAtan& atan (const ExprNode& exp) { return ExprAtan::new_(exp); }
 
 /** Hyperbolic cosine of an expression */
-inline const ExprUnaryOp& cosh (const ExprNode& exp) { return ExprCosh::new_(exp); }
+inline const ExprCosh& cosh (const ExprNode& exp) { return ExprCosh::new_(exp); }
 
 /** Hyperbolic sine of an expression */
-inline const ExprUnaryOp& sinh (const ExprNode& exp) { return ExprSinh::new_(exp); }
+inline const ExprSinh& sinh (const ExprNode& exp) { return ExprSinh::new_(exp); }
 
 /** Hyperbolic tangent of an expression */
-inline const ExprUnaryOp& tanh (const ExprNode& exp) { return ExprTanh::new_(exp); }
+inline const ExprTanh& tanh (const ExprNode& exp) { return ExprTanh::new_(exp); }
 
 /** Inverse hyperbolic cosine of an expression */
-inline const ExprUnaryOp& acosh(const ExprNode& exp) { return ExprAcosh::new_(exp); }
+inline const ExprAcosh& acosh(const ExprNode& exp) { return ExprAcosh::new_(exp); }
 
 /** Inverse hyperbolic sine of an expression */
-inline const ExprUnaryOp& asinh(const ExprNode& exp) { return ExprAsinh::new_(exp); }
+inline const ExprAsinh& asinh(const ExprNode& exp) { return ExprAsinh::new_(exp); }
 
 /** Inverse hyperbolic tangent of an expression */
-inline const ExprUnaryOp& atanh(const ExprNode& exp) { return ExprAtanh::new_(exp); }
+inline const ExprAtanh& atanh(const ExprNode& exp) { return ExprAtanh::new_(exp); }
 
 /** Raises \a left to the power \a expnon.
     \note operator ^ is not used because its associativity and priority defined in C++ does
@@ -1296,31 +1296,31 @@ inline const ExprNode& pow(const ExprNode& left, int expon) {
 }
 
 /** Minus sign */
-inline const ExprUnaryOp& operator-(const ExprNode& expr) {
+inline const ExprMinus& operator-(const ExprNode& expr) {
   return ExprMinus::new_(expr);
 }
 
 /** Sign */
-inline const ExprUnaryOp& sign(const ExprNode& expr) {
+inline const ExprSign& sign(const ExprNode& expr) {
   return ExprSign::new_(expr);
 }
 
 /** Absolute value */
-inline const ExprUnaryOp& abs(const ExprNode& expr) {
+inline const ExprAbs& abs(const ExprNode& expr) {
   return ExprAbs::new_(expr);
 }
 
 /** Expression raised to the power of another expression */
-inline const ExprUnaryOp& pow(const ExprNode& left, const ExprNode& right) {
+inline const ExprExp& pow(const ExprNode& left, const ExprNode& right) {
   return exp(right*log(left));
 }
 
 /** Expression raised to the power of a constant */
-inline const ExprUnaryOp& pow(const ExprNode& left, const Interval& value) {
+inline const ExprExp& pow(const ExprNode& left, const Interval& value) {
   return exp(ExprConstant::new_scalar(left.context, value)*log(left));
 }
 /** Constant raised to the power of an expression */
-inline const ExprUnaryOp& pow(const Interval& value, const ExprNode& right) {
+inline const ExprExp& pow(const Interval& value, const ExprNode& right) {
   return exp(right*log(ExprConstant::new_scalar(right.context, value)));
 }
 

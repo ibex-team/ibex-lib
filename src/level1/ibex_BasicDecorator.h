@@ -28,7 +28,7 @@ public:
 
 	virtual ~BasicDecorator() { }
 
-	virtual void decorate(Function& f) const;
+	virtual void decorate(const Function& f) const;
 
 protected:
 	/* Visit an expression. */

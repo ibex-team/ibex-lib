@@ -139,7 +139,7 @@ void Function::set_expr(const ExprNode& expr) {
 
 }
 
-void Function::decorate(const Decorator& d) {
+void Function::decorate(const Decorator& d) const {
 	assert(root!=NULL); // cannot decorate if there is no expression yet!
 
 	// cannot decorate twice. But this is not necessarily an error.
@@ -155,7 +155,7 @@ void Function::decorate(const Decorator& d) {
 
 	d.decorate(*this);
 
-	cf.compile(*this); // now that it is decorated, it can be "compiled"
+	((CompiledFunction&) cf).compile(*this); // now that it is decorated, it can be "compiled"
 }
 
 const ExprApply& Function::operator()(const ExprNode& arg1) {
