@@ -32,7 +32,7 @@ public:
 
 	virtual bool can_contract(int v);
 
-	const NumConstraint ctr;
+	const NumConstraint& ctr;
 
 private:
 	HC4ReviseAlgo hc4r;

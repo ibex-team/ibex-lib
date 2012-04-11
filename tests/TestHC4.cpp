@@ -17,15 +17,29 @@ namespace ibex {
 
 void TestHC4::ponts30() {
 	Ponts30 p30;
-	Function* ctr=p30.f.separate();
-	cout << "firt function:" << ctr[29] << endl;
+	Function* fs=p30.f.separate();
 	IntervalVector box = p30.init_box;
 
-	HC4Revise c0(NumConstraint(ctr[29],true));
-	cout << "before="<< box << endl;
-	c0.contract(box);
+	NumConstraint* ctr[30];
+	HC4Revise* c[30];
+	for (int k=0; k<10; k++)
 
-	cout << "after="<< box << endl;
+	for (int i=0; i<30; i++) {
+		ctr[i]=new NumConstraint(fs[i],true);
+		c[i]=new HC4Revise(*ctr[i]);
+	}
+//	cout << "before="<< box << endl;
+
+	for (int i=0; i<30; i++)
+		c[i]->contract(box);
+
+//	cout << "after="<< box << endl;
+
+	for (int i=0; i<30; i++) {
+		delete c[i];
+		delete ctr[i];
+	}
+
 }
 
 } // end namespace ibex

@@ -13,6 +13,7 @@
 #include "ibex_Function.h"
 #include "ibex_NonRecoverableException.h"
 #include "ibex_ExprPrinter.cpp_"
+#include "ibex_ExprSubNodes.cpp_"
 #include <limits.h>
 #include <set>
 
@@ -147,6 +148,11 @@ int nary_size(const ExprNode** args, int n) {
 }
 
 } // end anonymous namespace
+
+
+const ExprNode** ExprNode::subnodes() const {
+	return ExprSubNodes(*this).nodes();
+}
 
 ExprNode::ExprNode(Function& env, int height, int size, const Dim& dim) :
   context(env), height(height), size(size), id(context.nb_nodes()), dim(dim), deco(NULL) {

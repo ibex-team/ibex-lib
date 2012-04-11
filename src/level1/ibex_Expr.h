@@ -127,6 +127,9 @@ class ExprNode {
 
   /** Create an inequality constraint expr>value. */
   const Inequality& operator>(const Interval& value) const;
+
+  /** Return all the subnodes */
+  const ExprNode** subnodes() const;
 };
 
 std::ostream& operator<<(std::ostream&, const ExprNode&);

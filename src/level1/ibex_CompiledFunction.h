@@ -250,16 +250,16 @@ void CompiledFunction::print() const {
 		case CompiledFunction::IDX:
 		{
 			ExprIndex& e=(ExprIndex&) *(f.nodes[i]);
-			cout << e.id << ": [-]" << " " << (T&) *f.args[i][0] << " " << e.expr.id << " " << (T&) *f.args[i][1];
+			cout << e.id << ": [-]" << " " << (T&) *f.args[i][0] << " " << e.expr.id ;
 		}
 		break;
 		case CompiledFunction::VEC:
 		{
 			ExprVector& e=(ExprVector&) *(f.nodes[i]);
 			const T** _args=(const T**) &f.args[i][1];
-			cout << e.id << ": vec " << " ";
+			cout << e.id << ": vec " << " " << (T&) *f.args[i][0] << " ";
 			for (int i=0; i<e.nb_args; i++)
-				cout << (e.arg(i).id) << " " << *(_args[i]) << " ";
+				cout << (e.arg(i).id) << " ";
 		}
 		break;
 		case CompiledFunction::SYM:
@@ -278,9 +278,9 @@ void CompiledFunction::print() const {
 		{
 			ExprApply& e=(ExprApply&) *(f.nodes[i]);
 			const T** args=(const T**) &f.args[i][1];
-			cout << e.id << ": " << "func()" << " ";
+			cout << e.id << ": " << "func()" << " " << (T&) *f.args[i][0];
 			for (int j=0; j<e.nb_args; j++)
-				cout << e.arg(j).id << " " << *args[j] << " ";
+				cout << e.arg(j).id << " ";
 		}
 		break;
 		case CompiledFunction::ADD:
@@ -302,8 +302,7 @@ void CompiledFunction::print() const {
 		{
 			ExprBinaryOp& e=(ExprBinaryOp&) *(f.nodes[i]);
 			cout << e.id << ": " << f.op(f.code[i]) << " " << (T&) *f.args[i][0] << " ";
-			cout << e.left.id << " " << (T&) *f.args[i][1] << " ";
-			cout << e.right.id << " " << (T&) *f.args[i][2];
+			cout << e.left.id << " " << e.right.id;
 		}
 		break;
 
@@ -330,7 +329,7 @@ void CompiledFunction::print() const {
 		{
 			ExprUnaryOp& e=(ExprUnaryOp&) *(f.nodes[i]);
 			cout << e.id << ": " << f.op(f.code[i]) << " " << (T&) *f.args[i][0] << " ";
-			cout << e.expr.id << " " << (T&) *f.args[i][1];
+			cout << e.expr.id;
 		}
 		break;
 		}

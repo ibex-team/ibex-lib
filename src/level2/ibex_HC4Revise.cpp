@@ -20,7 +20,7 @@ HC4Revise::HC4Revise(const NumConstraint& ctr) : Contractor(ctr.f.nb_symbols()),
 void HC4Revise::contract(IntervalVector& box) {
 	hc4r.contract(box);
 
-	hc4r.eval.f.cf.print<Domain>();
+	//hc4r.eval.f.cf.print<Domain>();
 }
 
 bool HC4Revise::can_contract(int v) {

@@ -58,6 +58,8 @@ public:
 
 		TEST_ADD(TestExpr::apply01);
 		TEST_ADD(TestExpr::apply03);
+
+		TEST_ADD(TestExpr::subnodes01);
 	}
 
 	void symbol();
@@ -97,6 +99,8 @@ public:
 
 	void apply01();
 	void apply03();
+
+	void subnodes01();
 };
 
 } // end namespace

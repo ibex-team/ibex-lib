@@ -489,4 +489,30 @@ void TestExpr::apply03() {
 	TEST_ASSERT(checkExpr(e,"(f1(x3,x3)-f2(x3,x3))"));
 }
 
+// same expr as in dag01
+void TestExpr::subnodes01() {
+	Function f;
+	const ExprSymbol& x=f.add_symbol("x",Dim(0,0,0));
+	const ExprSymbol& __z__=f.add_symbol("z",Dim(0,0,0));
+	const ExprSymbol& y=f.add_symbol("y",Dim(0,0,0));
+
+	const ExprNode& e1=pow(x+y,2);
+	const ExprNode& __e1__=e1*__z__;
+	const ExprNode& e2=x-e1;
+	const ExprNode& e3=e2*e1;
+	const ExprNode& __e2__=e3-__e1__;
+	const ExprNode& e4=e3+e2;
+	const ExprNode& e5=e4+__e2__;
+	f.set_expr(e5);
+
+	const ExprNode** nodes=e4.subnodes();
+
+	TEST_ASSERT(nodes[0]==&e4);
+	TEST_ASSERT(nodes[1]==&e3);
+	TEST_ASSERT(nodes[2]==&e2);
+	TEST_ASSERT(nodes[3]==&x);
+	TEST_ASSERT(nodes[4]==&e1);
+}
+
+
 } // end namespace

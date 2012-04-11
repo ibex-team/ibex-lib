@@ -1,0 +1,65 @@
+//============================================================================
+//                                  I B E X                                   
+// File        : ibex_ExprCopy.cpp_
+// Author      : Gilles Chabert
+// Copyright   : Ecole des Mines de Nantes (France)
+// License     : See the LICENSE file
+// Created     : Apr 9, 2012
+// Last Update : Apr 9, 2012
+//============================================================================
+
+#include <stdlib.h>
+#include "ibex_FunctionVisitor.h"
+#include "ibex_Expr.h"
+
+namespace ibex {
+
+/**
+ * \ingroup level1
+ *
+ * \brief Return all the subnodes of an expression.
+ *
+ */
+class ExprSubNodes : public FunctionVisitor {
+	const ExprNode** subnodes;
+	bool *visited;
+	int j;
+
+public:
+
+	ExprSubNodes(const ExprNode& e) {
+		subnodes = new const ExprNode*[e.size];
+		visited = new bool[e.context.nb_nodes()];
+		for (int i=0; i<e.context.nb_nodes(); i++)
+			visited[i]=false;
+		j=0;
+		visit(e);
+	}
+
+	const ExprNode** nodes() {
+		return subnodes;
+	}
+
+	~ExprSubNodes() {
+		// subnodes must be freed by the caller
+		delete[] visited;
+	}
+
+protected:
+	void visit(const ExprNode& e) {
+		if (!visited[e.id]) {
+			visited[e.id]=true;
+			subnodes[j++]=&e;
+			e.acceptVisitor(*this);
+		}
+	}
+
+	void visit(const ExprIndex& i) { visit(i.expr); }
+	void visit(const ExprSymbol& v) { }
+	void visit(const ExprConstant& c) { }
+	void visit(const ExprNAryOp& e) { for (int i=0; i<e.nb_args; i++) visit(e.arg(i)); }
+	void visit(const ExprBinaryOp& b) { visit(b.left); visit(b.right); }
+	void visit(const ExprUnaryOp& u) {	visit(u.expr); }
+};
+
+} // end namespace

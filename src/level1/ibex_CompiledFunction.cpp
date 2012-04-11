@@ -30,13 +30,13 @@ void CompiledFunction::compile(const Function& f) {
 	n=f.expr().size;
 	code=new operation[n];
 	args=new ExprLabel**[n];
-	nodes=new const ExprNode*[n];
 	nb_args=new int[n];
 
-	// Sort the nodes of the DAG by decreasing height
-	const ExprNode* nodes[n];
-	for (int i=0; i<n; i++) nodes[i]=&f.node(i);
+	// Get the nodes of the DAG
+	// (the DAG may not necessarily contains all the nodes of f)
+	nodes = f.expr().subnodes();
 
+	// Sort the nodes by decreasing height
 	sort(nodes,nodes+n,compare);
 
 	// Process each node of the DAG
@@ -62,7 +62,6 @@ void CompiledFunction::visit(const ExprNode& e) {
 
 void CompiledFunction::visit(const ExprIndex& i) {
 	code[ptr]=IDX;
-	nodes[ptr]=&i;
 	nb_args[ptr]=1;
 	args[ptr]=new ExprLabel*[2];
 	args[ptr][0]=i.deco;
@@ -71,7 +70,6 @@ void CompiledFunction::visit(const ExprIndex& i) {
 
 void CompiledFunction::visit(const ExprSymbol& v) {
 	code[ptr]=SYM;
-	nodes[ptr]=&v;
 	nb_args[ptr]=0;
 	args[ptr]=new ExprLabel*[1]; // the unique argument of a Variable is the corresponding index in "csts"
 	args[ptr][0]=v.deco;
@@ -80,7 +78,6 @@ void CompiledFunction::visit(const ExprSymbol& v) {
 void CompiledFunction::visit(const ExprConstant& c) {
 	code[ptr]=CST;
 
-	nodes[ptr]=&c;
 	nb_args[ptr]=0;
 	args[ptr]=new ExprLabel*[1];
 	args[ptr][0]=c.deco;
@@ -100,7 +97,6 @@ void CompiledFunction::visit(const ExprUnaryOp& u) {
 
 void CompiledFunction::visit(const ExprNAryOp& e, operation op) {
 	code[ptr]=op;
-	nodes[ptr]=&e;
 	nb_args[ptr]=e.nb_args;
 	args[ptr]=new ExprLabel*[e.nb_args +1];
 	args[ptr][0]=e.deco;
@@ -110,7 +106,6 @@ void CompiledFunction::visit(const ExprNAryOp& e, operation op) {
 
 void CompiledFunction::visit(const ExprBinaryOp& b, operation op) {
 	code[ptr]=op;
-	nodes[ptr]=&b;
 	nb_args[ptr]=2;
 	args[ptr]=new ExprLabel*[3];
 	args[ptr][0]=b.deco;
@@ -120,7 +115,6 @@ void CompiledFunction::visit(const ExprBinaryOp& b, operation op) {
 
 void CompiledFunction::visit(const ExprUnaryOp& u, operation op) {
 	code[ptr]=op;
-	nodes[ptr]=&u;
 	nb_args[ptr]=1;
 	args[ptr]=new ExprLabel*[2];
 	args[ptr][0]=u.deco;
