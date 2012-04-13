@@ -67,6 +67,14 @@ string op_str(int i){
   REAL LO_root(const REAL& _real_, int expon) {
   return Inf(Root(INTERVAL(_real_,_real_), expon));
  }
+ 
+ REAL UP_inv(const REAL& _real_){
+ return Sup(INTERVAL(1.0)/INTERVAL(_real_,_real_));
+ }
+ 
+ REAL LO_inv(const REAL& _real_){
+ return Inf(INTERVAL(1.0)/INTERVAL(_real_,_real_));
+ }
 
 INTERVAL eval(const INTERVAL& x, const INTERVAL& y, int op){
   switch(op){
@@ -329,16 +337,22 @@ bool innerproj_power(const INTERVAL& p_evl, INTERVAL& p_exp_evl, int expon) {
   
   } else {
 
-    return p_exp_evl &= proj;
-    
+    return p_exp_evl &= proj;   
   }
 }
 
+//in a monotonic segment
+bool innerproj_inv(const INTERVAL& evl, INTERVAL& exp_evl) {
+  if(Inf(evl)>=0)
+     return exp_evl &= INTERVAL(UP_inv(Sup(evl)), (Inf(evl)==0)? BiasPosInf : LO_inv(Inf(evl)) );
+  else
+     return exp_evl &= INTERVAL((Sup(evl)==0)? BiasNegInf : UP_inv(Sup(evl)), LO_inv(Inf(evl)) );
+  
+}
 
 bool innerproj_sqr(const INTERVAL& evl, INTERVAL& exp_evl) { //, bool& continuity, bool& monotonicity) {
   INTERVAL projpos=INTERVAL(UP(Sqrt,Inf(evl)),LO(Sqrt,Sup(evl)));
-  INTERVAL projneg=INTERVAL(-LO(Sqrt,Inf(evl)),-UP(Sqrt,Sup(evl)));
-
+  INTERVAL projneg=INTERVAL(-LO(Sqrt,Sup(evl)),-UP(Sqrt,Inf(evl)));
   if (projpos.empty()) return false;
   
   INTERVAL tmp1, tmp2;      
@@ -359,19 +373,91 @@ bool innerproj_sqr(const INTERVAL& evl, INTERVAL& exp_evl) { //, bool& continuit
 
 
 bool innerproj_sqrt(const INTERVAL& evl, INTERVAL& exp_evl) {
-  INTERVAL proj=(Inf(evl)>0? UP(Sqr,Inf(evl)) : 0, LO(Sqr,Sup(evl)));
+  INTERVAL proj=( Inf(evl)>0? UP(Sqr,Inf(evl)) : 0, LO(Sqr,Sup(evl)));
   exp_evl &= proj;
 }
 
 
+bool leq_inner_projection_mult(INTERVAL& x, INTERVAL& y, INTERVAL z){
+        INTERVAL xx,yy;
+        INTERVAL x1(Sup(x));
+        INTERVAL y1(Sup(y));
+        if(Sup(x)>0 && Sup(y)>0){
+          xx=INTERVAL(max(0.0,Inf(x)),Sup(x));
+          yy=INTERVAL(max(0.0,Inf(y)),Sup(y));          
+          if(!leq_inner_projection(xx,yy,Sup(z),MUL,true,true)) return false;
+          x1=Sup(xx);
+          y1=Sup(yy);
+        }
+
+        INTERVAL x2(Inf(x));
+        INTERVAL y2(Inf(y));
+        if(Inf(x)<0 && Inf(y)<0){
+          xx=INTERVAL(Inf(x),min(0.0,Sup(x)));
+          yy=INTERVAL(Inf(y),min(0.0,Sup(y))); 
+          if(!leq_inner_projection(xx,yy,Sup(z),MUL,false,false)) return false;
+          x2=Inf(xx);
+          y2=Inf(yy);
+        }
+        
+        x=INTERVAL(Inf(x2),Sup(x1));
+        y=INTERVAL(Inf(y2),Sup(y1));
+        return true;
+}
+
+bool geq_inner_projection_mult(INTERVAL& x, INTERVAL& y, INTERVAL z){
+        INTERVAL xx,yy;
+        INTERVAL x1(Inf(x));
+        INTERVAL y1(Sup(y));
+        if(Inf(x)<0 && Sup(y)>0){
+          xx=INTERVAL(Inf(x),min(0.0,Sup(x)));
+          yy=INTERVAL(max(0.0,Inf(y)),Sup(y));          
+          if(!geq_inner_projection(xx,yy,Inf(z),MUL,true,false)) return false;
+          x1=Inf(xx);
+          y1=Sup(yy);
+        }
+        INTERVAL x2(Sup(x));
+        INTERVAL y2(Inf(y));
+        if(Sup(x)>0 && Inf(y)<0){
+
+          xx=INTERVAL(max(0.0,Inf(x)),Sup(x));
+          yy=INTERVAL(Inf(y),min(0.0,Sup(y))); 
+          if(!geq_inner_projection(xx,yy,Inf(z),MUL,false,true)) return false;
+          x2=Sup(xx);
+          y2=Inf(yy);
+        }
+            
+        x=INTERVAL(Inf(x2),Sup(x1));
+        y=INTERVAL(Inf(y2),Sup(y1));
+        return true;
+}
+
+
+//only when 0 in [z]??
+bool inner_projection_mult(INTERVAL& x, INTERVAL& y, INTERVAL z){
+    INTERVAL xx,yy;
+    if(-Inf(z)>Sup(z)){
+      
+      if(Inf(z) != BiasNegInf && Inf(z)<0 && !geq_inner_projection_mult(x,y,z)) return false;
+      if(Sup(z) != BiasPosInf && Sup(z)>0 && !leq_inner_projection_mult(x,y,z)) return false;
+    }else{
+      if(Sup(z) != BiasPosInf && Sup(z)>0 && !leq_inner_projection_mult(x,y,z)) return false;
+      if(Inf(z) != BiasNegInf && Inf(z)<0 && !geq_inner_projection_mult(x,y,z)) return false;
+    }
+    
+    return true;
+}
 
 
 bool inner_projection(INTERVAL& x, INTERVAL& y, INTERVAL z, int op){
   INTERVAL ev=eval(x,y,op);
   if(!(z&=ev)) return false;
+  if(ev<=z) return true;
   bool inc_var1,inc_var2;
-  if(op==MUL || op==DIV){ //One box of the four possible boxes is chosen randomly
-  if(Inf(z)>=0 || Sup(z)<=0){
+
+  
+  if(op==DIV || op==MUL){
+  if(Inf(z)>=0 || Sup(z)<=0){ //One of the feasible boxes is chosen randomly
     if(Inf(y)>=0)
       x=(Inf(z)>=0)? INTERVAL(max(0.0,Inf(x)),Sup(x)):INTERVAL(Inf(x),min(0.0,Sup(x))); //the only choice
     else if(Sup(y)<=0)
@@ -384,11 +470,24 @@ bool inner_projection(INTERVAL& x, INTERVAL& y, INTERVAL z, int op){
          y=(Sup(z)<=0)? INTERVAL(max(0.0,Inf(y)),Sup(y)):INTERVAL(Inf(y),min(0.0,Sup(y))); //the only choice
     }
   }else if(Inf(z)<0 && Sup(z)>0){
-    if(Sup(x)>0 && Inf(x)<0)
-      x=(rand()%2)? INTERVAL(0,Sup(x)):INTERVAL(Inf(x),0) ;
-    if(Sup(y)>0 && Inf(y)<0)      
-      y=(rand()%2)? INTERVAL(0,Sup(y)):INTERVAL(Inf(y),0) ;
-      z=((Sup(x)<=0 && Sup(y)<=0) || (Inf(x)>=0 && Inf(y)>=0))? INTERVAL(max(0.0,Inf(z)),Sup(z)):INTERVAL(Inf(z),min(0.0,Sup(z))); //the only choice
+    if(op==MUL) return inner_projection_mult(x, y, z);
+    if(op==DIV){
+      
+      INTERVAL y_inv; // y_inv=1/y
+      if(Inf(y)<=0 && Sup(y)>=0){
+         int r=rand()%2;
+         if(r==1)
+           y_inv=INTERVAL(LO_inv(Sup(y)), BiasPosInf);
+         else
+           y_inv=INTERVAL(BiasNegInf, UP_inv(Inf(y)));
+      }else
+           y_inv=1.0/y;
+
+      if(inner_projection_mult(x, y_inv, z))
+         return innerproj_inv(y_inv, y);
+      else
+         return false;
+    }
   }
 }
 

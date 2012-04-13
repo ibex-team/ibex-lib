@@ -59,6 +59,9 @@ namespace ibex {
   /** Finds a box [x]x[y], such that [op]([x],[y]) in [y]. op in {+,-,*,/} **/
   bool inner_projection(INTERVAL& x, INTERVAL& y, INTERVAL z, int op);
 
+  bool inner_projection_mult(INTERVAL& x, INTERVAL& y, INTERVAL z);
+  
+  
   // This method returns a box [x]x[y] such that every point in it satisfies the
   // constraint op(x, y) >= z_inf
   // the operator MUST BE monotonic wrt x and y.
