@@ -1,7 +1,7 @@
 
 include ../common.mak
 
-OBJS=ibex_Interval.o ibex_IntervalVector.o ibex_IntervalMatrix.o ibex_IntervalMatrixArray.o ibex_Dim.o
+OBJS=ibex_Interval.o ibex_IntervalVector.o ibex_IntervalMatrix.o ibex_IntervalMatrixArray.o ibex_Vector.o
 TARGET=all
 
 SUBLIB_H:=ibex_$(SUBLIB)_Interval.h

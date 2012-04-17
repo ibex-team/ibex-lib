@@ -42,7 +42,7 @@ namespace ibex {
 //class IntervalVector; // just to be declared as "friend"
 
 /**
- *  \defgroup arith Interval Arithmetic
+ * \defgroup arith Interval Arithmetic
  *
  * \brief Interval
  *

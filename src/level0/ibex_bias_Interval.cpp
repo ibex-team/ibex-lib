@@ -33,7 +33,10 @@ const Interval Interval::TWO_PI = PI*2.0;
 const Interval Interval::HALF_PI = PI/2.0;
 
 std::ostream& operator<<(std::ostream& os, const Interval& x) {
-	return os << x.itv;
+	if (x.is_empty())
+			return os << "empty";
+	else
+		return os << x.itv;
 }
 
 } // end namespace
