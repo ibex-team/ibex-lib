@@ -337,6 +337,20 @@ IntervalMatrix operator*(const IntervalMatrix& m1, const IntervalMatrix& m2);
 IntervalMatrix abs(const IntervalMatrix& m);
 
 /**
+ * \brief Projection of $y=x_1+x_2$.
+ *
+ * Set $([x]_1,[x]_2)$ to $([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=x_1+x_2\}$.
+ */
+bool proj_add(const IntervalMatrix& y, IntervalMatrix& x1, IntervalMatrix& x2);
+
+/**
+ * \brief Projection of $y=x_1-x_2$.
+ *
+ * Set $([x]_1,[x]_2)$ to $([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=x_1-x_2\}$.
+ */
+bool proj_sub(const IntervalMatrix& y, IntervalMatrix& x1, IntervalMatrix& x2);
+
+/**
  * \brief Projection of y1=x1*x2 (scalar product of a matrix).
  *
  * Set $([x]_1,[x]_2)$ to $([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=x_1*x_2\}$.

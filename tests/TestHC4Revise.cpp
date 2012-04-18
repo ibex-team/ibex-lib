@@ -83,5 +83,29 @@ void TestHC4Revise::dist01() {
 	IntervalVector boxR(4,res_xy);
 	check(box, boxR);
 }
+
+void TestHC4Revise::dist02() {
+	Function f;
+	const ExprSymbol& x = f.add_symbol("x",Dim(0,2,0));
+	const ExprSymbol& y = f.add_symbol("y",Dim(0,2,0));
+
+	f.set_expr(sqrt(sqr(x[0]-y[0])+sqr(x[1]-y[1]))-5.0);
+
+	NumConstraint c(f,true);
+
+	HC4ReviseAlgo hc4r(c);
+
+	double init_xy[][2] = { {0,10}, {-10,10},
+						{1,1}, {2,2} };
+	IntervalVector box(4,init_xy);
+
+	hc4r.contract(box);
+
+	double res_xy[][2] = { {0,6}, {-3,7},
+						{1,1}, {2,2} };
+	IntervalVector boxR(4,res_xy);
+	check(box, boxR);
+}
+
 } // end namespace
 

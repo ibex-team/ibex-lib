@@ -33,44 +33,6 @@ void HC4ReviseAlgo::apply_bwd(const ExprApply& a, Domain** argL, const Domain& y
 	fevl.backward(y);
 }
 
-void HC4ReviseAlgo::add_M_bwd  (const ExprAdd&, Domain& leftL, Domain& rightL, const Domain& result) {
-	leftL.m()&=result.m()-rightL.m();
-	rightL.m()&=result.m()-leftL.m();
-}
-
-void HC4ReviseAlgo::mul_SV_bwd (const ExprMul&, Domain& leftL, Domain& rightL, const Domain& result) {
-	const IntervalVector& y=result.v();
-	IntervalVector& x=rightL.v();
-	Interval& a=leftL.i();
-
-	for (int i=0; i<x.size(); i++)
-		proj_mul(y[i], a, x[i]);
-}
-
-void HC4ReviseAlgo::mul_SM_bwd (const ExprMul&, Domain& leftL, Domain& rightL, const Domain& result) {
-	const IntervalMatrix& y=result.m();
-	IntervalMatrix& x=rightL.m();
-	Interval& a=leftL.i();
-
-	for (int i=0; i<x.nb_rows(); i++)
-		for (int j=0; j<x.nb_cols(); j++)
-			proj_mul(y[i][j], a, x[i][j]);
-}
-
-void HC4ReviseAlgo::mul_VV_bwd (const ExprMul&, Domain& leftL, Domain& rightL, const Domain& result) {
-
-
-}
-
-void HC4ReviseAlgo::mul_MV_bwd (const ExprMul&, Domain& leftL, Domain& rightL, const Domain& result) {
-
-}
-
-void HC4ReviseAlgo::mul_MM_bwd (const ExprMul&, Domain& leftL, Domain& rightL, const Domain& result) {
-
-}
-
-
 void HC4ReviseAlgo::contract(IntervalVector& box) {
 	eval.eval(box);
 

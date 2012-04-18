@@ -28,6 +28,7 @@ public:
 		TEST_ADD(TestHC4Revise::mul01);
 
 		TEST_ADD(TestHC4Revise::dist01);
+		TEST_ADD(TestHC4Revise::dist02);
 	}
 
 	void add01();
@@ -38,6 +39,7 @@ public:
 	void mul01();
 
 	void dist01();
+	void dist02();
 };
 
 } // end namespace

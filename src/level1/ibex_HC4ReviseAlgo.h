@@ -61,7 +61,7 @@ public:
 	 * \brief Ratio for the contraction of a
 	 * matrix-vector / matrix-matrix multiplication.
 	 */
-	const double RATIO = 0.1;
+	static const double RATIO = 0.1;
 
 protected:
 	friend class CompiledFunction;

@@ -16,6 +16,8 @@
 
 namespace ibex {
 
+class Matrix; // declared only for friendship
+
 /**
  * \ingroup arith
  *
@@ -76,6 +78,14 @@ public:
 	double& operator[](int i);
 
 	/**
+	 * \brief Resize this Vector.
+	 *
+	 * If the size is increased, the existing components are not
+	 * modified and the new ones are set to 0.
+	 */
+	void resize(int n2);
+
+	/**
 	 * \brief Assign this Vector to x.
 	 *
 	 * \pre Dimensions of this and x must match.
@@ -113,6 +123,10 @@ public:
 	Vector& operator*=(double d);
 
 private:
+	friend class Matrix;
+
+	Vector() : n(0), vec(NULL) { } // for Matrix
+
 	int n;             // dimension (size of vec)
 	double *vec;	   // vector of elements
 };
@@ -121,14 +135,25 @@ private:
  * \brief -x.
  */
 Vector operator-(const Vector& x);
-/** \brief x1+x2. */
-Vector         operator+(const Vector& x1,         const Vector& x2);
-/** \brief x1-x2. */
-Vector         operator-(const Vector& x1,         const Vector& x2);
-/** \brief x1*x2. */
-double   operator*(const Vector& x1,         const Vector& x2);
 
-/** \brief d*x */
+/**
+ * \brief x1+x2.
+ */
+Vector operator+(const Vector& x1, const Vector& x2);
+
+/**
+ * \brief x1-x2.
+ */
+Vector operator-(const Vector& x1, const Vector& x2);
+
+/**
+ * \brief x1*x2.
+ */
+double operator*(const Vector& x1, const Vector& x2);
+
+/**
+ * \brief d*x
+ */
 Vector operator*(double d, const Vector& x);
 
 /**
@@ -143,29 +168,6 @@ std::ostream& operator<<(std::ostream& os, const Vector& x);
 
 /*================================== inline implementations ========================================*/
 
-inline Vector::Vector(int n) : n(n), vec(new double[n]) {
-	assert(n>=1);
-	for (int i=0; i<n; i++) vec[i]=0;
-}
-
-inline Vector::Vector(int n, double x) : n(n), vec(new double[n]) {
-	assert(n>=1);
-	for (int i=0; i<n; i++) vec[i]=x;
-}
-
-inline Vector::Vector(const Vector& x) : n(x.n), vec(new double[x.n]) {
-	for (int i=0; i<n; i++) vec[i]=x[i];
-}
-
-inline Vector::Vector(int n, double x[]) : n(n), vec(new double[n]) {
-	assert(n>=1);
-	for (int i=0; i<n; i++) vec[i]=x[i];
-}
-
-inline Vector::~Vector() {
-	delete[] vec;
-}
-
 inline const double& Vector::operator[](int i) const {
 	assert(i>=0 && i<n);
 	return vec[i];
@@ -176,21 +178,6 @@ inline double& Vector::operator[](int i) {
 	return vec[i];
 }
 
-inline Vector& Vector::operator=(const Vector& x) {
-	assert(size()==x.size()); // throw InvalidVectorOp("Cannot set a Vector to a Vector with different dimension");
-
-	for (int i=0; i<size(); i++)
-		(*this)[i]=x[i];
-
-	return *this;
-}
-
-inline bool Vector::operator==(const Vector& x) const {
-	if (n!=x.size()) return false;
-	for (int i=0; i<n; i++)
-		if ((*this)[i]!=(x[i])) return false;
-	return true;
-}
 
 inline bool Vector::operator!=(const Vector& x) const {
 	return !(*this==x);
@@ -198,14 +185,6 @@ inline bool Vector::operator!=(const Vector& x) const {
 
 inline int Vector::size() const {
 	return n;
-}
-
-inline std::ostream& operator<<(std::ostream& os, const Vector& x) {
-	os << "(";
-	for (int i=0; i<x.size(); i++)
-		os << x[i] << (i<x.size()-1? " ; " : "");
-	os << ")";
-	return os;
 }
 
 } // end namespace ibex

@@ -54,6 +54,11 @@ public:
 	Matrix(int m, int n, double x[]);
 
 	/**
+	 * \brief Set *this to m.
+	 */
+	Matrix& operator=(const Matrix& x);
+
+	/**
 	 * \brief True if the entries of (*this) coincide with m.
 	 *
 	 */

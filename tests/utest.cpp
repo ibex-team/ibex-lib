@@ -24,11 +24,18 @@
 #include "TestFunction.h"
 #include "TestEval.h"
 #include "TestHC4Revise.h"
+#include "TestHC4.h"
 
 // ================ level 2 ===============
 #include "TestHC4.h"
+#include "ibex_Function.h"
+#include "ibex_Eval.h"
+#include "ibex_HC4ReviseAlgo.h"
+#include "ibex_NumConstraint.h"
+
 
 int main() {
+
     Test::TextOutput output(Test::TextOutput::Verbose);
 
     Test::Suite ts;
@@ -46,4 +53,5 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestHC4()));
 
     return ts.run(output,false) ? EXIT_SUCCESS : EXIT_FAILURE;
+
 }

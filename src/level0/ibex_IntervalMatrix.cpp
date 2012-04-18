@@ -200,6 +200,17 @@ void IntervalMatrix::set_col(int col, const IntervalVector& v) {
 		M[i][col]=v[i];
 }
 
+bool proj_add(const IntervalMatrix& y, IntervalMatrix& x1, IntervalMatrix& x2) {
+	x1 &= y-x2;
+	x2 &= y-x1;
+	return x1.is_empty() || x2.is_empty();
+}
+
+bool proj_sub(const IntervalMatrix& y, IntervalMatrix& x1, IntervalMatrix& x2) {
+	x1 &= y+x2;
+	x2 &= x1-y;
+	return x1.is_empty() || x2.is_empty();
+}
 
 bool proj_mul(const IntervalMatrix& y, Interval& x1, IntervalMatrix& x2) {
 	int n=(y.nb_rows());

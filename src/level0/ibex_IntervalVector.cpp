@@ -67,6 +67,8 @@ void IntervalVector::set_empty() {
 
 void IntervalVector::resize(int n2) {
 	assert(n2>=1);
+	assert((vec==NULL && n==0) || (n!=0 && vec!=NULL));
+
 	if (n2==size()) return;
 
 	Interval* newVec=new Interval[n2];

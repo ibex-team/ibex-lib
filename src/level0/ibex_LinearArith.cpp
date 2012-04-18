@@ -88,7 +88,7 @@ inline M1& set_addM(M1& m1, const M2& m2) {
 	assert(m1.nb_rows()==m2.nb_rows());
 	assert(m1.nb_cols()==m2.nb_cols());
 
-	if (is_empty(m1) || is_empty(m2)) { m1.set_empty(); return m1; }
+	if (is_empty(m1) || is_empty(m2)) { set_empty(m1); return m1; }
 
 	for (int i=0; i<m1.nb_rows(); i++)
 		m1[i]+=m2[i];
@@ -101,7 +101,7 @@ inline M1& set_subM(M1& m1, const M2& m2) {
 	assert(m1.nb_rows()==m2.nb_rows());
 	assert(m1.nb_cols()==m2.nb_cols());
 
-	if (is_empty(m1) || is_empty(m2)) { m1.set_empty(); return m1; }
+	if (is_empty(m1) || is_empty(m2)) { set_empty(m1); return m1; }
 
 	for (int i=0; i<m1.nb_rows(); i++)
 		m1[i]-=m2[i];
@@ -236,6 +236,10 @@ IntervalVector& IntervalVector::operator+=(const IntervalVector& x) {
 	return set_addV<IntervalVector,IntervalVector>(*this,x);
 }
 
+Matrix& Matrix::operator+=(const Matrix& m) {
+	return set_addM<Matrix,Matrix>(*this,m);
+}
+
 IntervalMatrix& IntervalMatrix::operator+=(const Matrix& m) {
 	return set_addM<IntervalMatrix,Matrix>(*this,m);
 }
@@ -254,6 +258,10 @@ IntervalVector& IntervalVector::operator-=(const Vector& x) {
 
 IntervalVector& IntervalVector::operator-=(const IntervalVector& x) {
 	return set_subV<IntervalVector,IntervalVector>(*this,x);
+}
+
+Matrix& Matrix::operator-=(const Matrix& m) {
+	return set_subM<Matrix,Matrix>(*this,m);
 }
 
 IntervalMatrix& IntervalMatrix::operator-=(const Matrix& m) {
