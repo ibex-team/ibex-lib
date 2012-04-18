@@ -57,6 +57,12 @@ public:
 	 */
 	const bool equality;
 
+	/**
+	 * \brief Ratio for the contraction of a
+	 * matrix-vector / matrix-matrix multiplication.
+	 */
+	const double RATIO = 0.1;
+
 protected:
 	friend class CompiledFunction;
 
@@ -66,17 +72,17 @@ protected:
 	inline void cst_bwd   (const ExprConstant&, const Domain& result)                                  { /* nothing to do */ }
 	       void apply_bwd (const ExprApply&,   Domain** argL, const Domain& result);
 	inline void add_bwd   (const ExprAdd&,     Domain& leftL, Domain& rightL, const Domain& result)    { proj_add(result.i(),leftL.i(),rightL.i()); }
-	inline void add_V_bwd  (const ExprAdd&,    Domain& leftL, Domain& rightL, const Domain& result)    { /* to do */}
-	inline void add_M_bwd  (const ExprAdd&,    Domain& leftL, Domain& rightL, const Domain& result)    { /* to do */ }
+	inline void add_V_bwd  (const ExprAdd&,    Domain& leftL, Domain& rightL, const Domain& result)    { proj_add(result.v(),leftL.v(),rightL.v()); }
+	inline void add_M_bwd  (const ExprAdd&,    Domain& leftL, Domain& rightL, const Domain& result)    { proj_add(result.m(),leftL.m(),rightL.m()); }
 	inline void mul_bwd    (const ExprMul&,    Domain& leftL, Domain& rightL, const Domain& result)    { proj_mul(result.i(),leftL.i(),rightL.i()); }
-	inline void mul_SV_bwd (const ExprMul&,    Domain& leftL, Domain& rightL, const Domain& result)    {  }
-	inline void mul_SM_bwd (const ExprMul&,    Domain& leftL, Domain& rightL, const Domain& result)    {  }
-	inline void mul_VV_bwd (const ExprMul&,    Domain& leftL, Domain& rightL, const Domain& result)    {  }
-	inline void mul_MV_bwd (const ExprMul&,    Domain& leftL, Domain& rightL, const Domain& result)    {  }
-	inline void mul_MM_bwd (const ExprMul&,    Domain& leftL, Domain& rightL, const Domain& result)    {  }
+	inline void mul_SV_bwd (const ExprMul&,    Domain& leftL, Domain& rightL, const Domain& result)    { proj_mul(result.v(),leftL.i(),rightL.v()); }
+	inline void mul_SM_bwd (const ExprMul&,    Domain& leftL, Domain& rightL, const Domain& result)    { proj_mul(result.m(),leftL.i(),rightL.m()); }
+	inline void mul_VV_bwd (const ExprMul&,    Domain& leftL, Domain& rightL, const Domain& result)    { proj_mul(result.i(),leftL.v(),rightL.v()); }
+	inline void mul_MV_bwd (const ExprMul&,    Domain& leftL, Domain& rightL, const Domain& result)    { proj_mul(result.v(),leftL.m(),rightL.v(), RATIO); }
+	inline void mul_MM_bwd (const ExprMul&,    Domain& leftL, Domain& rightL, const Domain& result)    { proj_mul(result.m(),leftL.m(),rightL.m(), RATIO); }
 	inline void sub_bwd   (const ExprSub&,     Domain& leftL, Domain& rightL, const Domain& result)    { proj_sub(result.i(),leftL.i(),rightL.i()); }
-	inline void sub_V_bwd (const ExprSub&,     Domain& leftL, Domain& rightL, const Domain& result)    {  }
-	inline void sub_M_bwd (const ExprSub&,     Domain& leftL, Domain& rightL, const Domain& result)    {  }
+	inline void sub_V_bwd (const ExprSub&,     Domain& leftL, Domain& rightL, const Domain& result)    { proj_sub(result.v(),leftL.v(),rightL.v()); }
+	inline void sub_M_bwd (const ExprSub&,     Domain& leftL, Domain& rightL, const Domain& result)    { proj_sub(result.m(),leftL.m(),rightL.m()); }
 	inline void div_bwd   (const ExprDiv&,     Domain& leftL, Domain& rightL, const Domain& result)    { proj_div(result.i(),leftL.i(),rightL.i()); }
 	inline void max_bwd   (const ExprMax&,     Domain& leftL, Domain& rightL, const Domain& result)    { proj_max(result.i(),leftL.i(),rightL.i()); }
 	inline void min_bwd   (const ExprMin&,     Domain& leftL, Domain& rightL, const Domain& result)    { proj_min(result.i(),leftL.i(),rightL.i()); }

@@ -196,11 +196,11 @@ void CompiledFunction::backward(const V& algo) const {
 
 	for (int i=0; i<n; i++) {
 		switch(code[i]) {
-		case IDX:    ((V&) algo).index_bwd((ExprIndex&)    *(nodes[i]), (T&) *args[i][1],                      (T&) *args[i][0]); break;
-		case VEC:    ((V&) algo).vector_bwd((ExprVector&)  *(nodes[i]), (T**) &(*args[i][1]),                  (T&) *args[i][0]); break;
-		case SYM:    ((V&) algo).symbol_bwd((ExprSymbol&)  *(nodes[i]),                                        (T&) *args[i][0]); break;
-		case CST:    ((V&) algo).cst_bwd  ((ExprConstant&) *(nodes[i]),                                        (T&) *args[i][0]); break;
-		case APPLY:  ((V&) algo).apply_bwd  ((ExprApply&)  *(nodes[i]), (T**) &(*args[i][1]),                  (T&) *args[i][0]); break;
+		case IDX:    ((V&) algo).index_bwd((ExprIndex&)    *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
+		case VEC:    ((V&) algo).vector_bwd((ExprVector&)  *(nodes[i]), (T**) &(*args[i][1]),               (T&) *args[i][0]); break;
+		case SYM:    ((V&) algo).symbol_bwd((ExprSymbol&)  *(nodes[i]),                                     (T&) *args[i][0]); break;
+		case CST:    ((V&) algo).cst_bwd  ((ExprConstant&) *(nodes[i]),                                     (T&) *args[i][0]); break;
+		case APPLY:  ((V&) algo).apply_bwd  ((ExprApply&)  *(nodes[i]), (T**) &(*args[i][1]),               (T&) *args[i][0]); break;
 		case ADD:    ((V&) algo).add_bwd    ((ExprAdd&)    *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
 		case ADD_V:  ((V&) algo).add_V_bwd  ((ExprAdd&)    *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
 		case ADD_M:  ((V&) algo).add_M_bwd  ((ExprAdd&)    *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
@@ -217,26 +217,26 @@ void CompiledFunction::backward(const V& algo) const {
 		case MAX:    ((V&) algo).max_bwd  ((ExprMax&)      *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
 		case MIN:    ((V&) algo).min_bwd  ((ExprMin&)      *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
 		case ATAN2:  ((V&) algo).atan2_bwd((ExprAtan2&)    *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
-		case MINUS:  ((V&) algo).minus_bwd((ExprMinus&)    *(nodes[i]), (T&) *args[i][1],                      (T&) *args[i][0]); break;
-		case SIGN:   ((V&) algo).sign_bwd ((ExprSign&)     *(nodes[i]), (T&) *args[i][1],                      (T&) *args[i][0]); break;
-		case ABS:    ((V&) algo).abs_bwd  ((ExprAbs&)      *(nodes[i]), (T&) *args[i][1],                      (T&) *args[i][0]); break;
-		case POWER:  ((V&) algo).power_bwd((ExprPower&)    *(nodes[i]), (T&) *args[i][1],                      (T&) *args[i][0]); break;
-		case SQR:    ((V&) algo).sqr_bwd  ((ExprSqr&)      *(nodes[i]), (T&) *args[i][1],                      (T&) *args[i][0]); break;
-		case SQRT:   ((V&) algo).sqrt_bwd ((ExprSqrt&)     *(nodes[i]), (T&) *args[i][1],                      (T&) *args[i][0]); break;
-		case EXP:    ((V&) algo).exp_bwd  ((ExprExp&)      *(nodes[i]), (T&) *args[i][1],                      (T&) *args[i][0]); break;
-		case LOG:    ((V&) algo).log_bwd  ((ExprLog&)      *(nodes[i]), (T&) *args[i][1],                      (T&) *args[i][0]); break;
-		case COS:    ((V&) algo).cos_bwd  ((ExprCos&)      *(nodes[i]), (T&) *args[i][1],                      (T&) *args[i][0]); break;
-		case SIN:    ((V&) algo).sin_bwd  ((ExprSin&)      *(nodes[i]), (T&) *args[i][1],                      (T&) *args[i][0]); break;
-		case TAN:    ((V&) algo).tan_bwd  ((ExprTan&)      *(nodes[i]), (T&) *args[i][1],                      (T&) *args[i][0]); break;
-		case COSH:   ((V&) algo).cosh_bwd ((ExprCosh&)     *(nodes[i]), (T&) *args[i][1],                      (T&) *args[i][0]); break;
-		case SINH:   ((V&) algo).sinh_bwd ((ExprSinh&)     *(nodes[i]), (T&) *args[i][1],                      (T&) *args[i][0]); break;
-		case TANH:   ((V&) algo).tanh_bwd ((ExprTanh&)     *(nodes[i]), (T&) *args[i][1],                      (T&) *args[i][0]); break;
-		case ACOS:   ((V&) algo).acos_bwd ((ExprAcos&)     *(nodes[i]), (T&) *args[i][1],                      (T&) *args[i][0]); break;
-		case ASIN:   ((V&) algo).asin_bwd ((ExprAsin&)     *(nodes[i]), (T&) *args[i][1],                      (T&) *args[i][0]); break;
-		case ATAN:   ((V&) algo).atan_bwd ((ExprAtan&)     *(nodes[i]), (T&) *args[i][1],                      (T&) *args[i][0]); break;
-		case ACOSH:  ((V&) algo).acosh_bwd((ExprAcosh&)    *(nodes[i]), (T&) *args[i][1],                      (T&) *args[i][0]); break;
-		case ASINH:  ((V&) algo).asinh_bwd((ExprAsinh&)    *(nodes[i]), (T&) *args[i][1],                      (T&) *args[i][0]); break;
-		case ATANH:  ((V&) algo).atanh_bwd((ExprAtanh&)    *(nodes[i]), (T&) *args[i][1],                      (T&) *args[i][0]); break;
+		case MINUS:  ((V&) algo).minus_bwd((ExprMinus&)    *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
+		case SIGN:   ((V&) algo).sign_bwd ((ExprSign&)     *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
+		case ABS:    ((V&) algo).abs_bwd  ((ExprAbs&)      *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
+		case POWER:  ((V&) algo).power_bwd((ExprPower&)    *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
+		case SQR:    ((V&) algo).sqr_bwd  ((ExprSqr&)      *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
+		case SQRT:   ((V&) algo).sqrt_bwd ((ExprSqrt&)     *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
+		case EXP:    ((V&) algo).exp_bwd  ((ExprExp&)      *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
+		case LOG:    ((V&) algo).log_bwd  ((ExprLog&)      *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
+		case COS:    ((V&) algo).cos_bwd  ((ExprCos&)      *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
+		case SIN:    ((V&) algo).sin_bwd  ((ExprSin&)      *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
+		case TAN:    ((V&) algo).tan_bwd  ((ExprTan&)      *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
+		case COSH:   ((V&) algo).cosh_bwd ((ExprCosh&)     *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
+		case SINH:   ((V&) algo).sinh_bwd ((ExprSinh&)     *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
+		case TANH:   ((V&) algo).tanh_bwd ((ExprTanh&)     *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
+		case ACOS:   ((V&) algo).acos_bwd ((ExprAcos&)     *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
+		case ASIN:   ((V&) algo).asin_bwd ((ExprAsin&)     *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
+		case ATAN:   ((V&) algo).atan_bwd ((ExprAtan&)     *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
+		case ACOSH:  ((V&) algo).acosh_bwd((ExprAcosh&)    *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
+		case ASINH:  ((V&) algo).asinh_bwd((ExprAsinh&)    *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
+		case ATANH:  ((V&) algo).atanh_bwd((ExprAtanh&)    *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
 		}
 	}
 }
