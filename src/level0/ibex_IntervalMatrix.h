@@ -13,6 +13,8 @@
 #define __IBEX_INTERVAL_MATRIX_H__
 
 #include "ibex_IntervalVector.h"
+#include "ibex_Matrix.h"
+
 #include <iostream>
 
 namespace ibex {
@@ -42,6 +44,11 @@ public:
 	IntervalMatrix(const IntervalMatrix& m);
 
 	/**
+	 * \brief Create a degenerated interval matrix.
+	 */
+	IntervalMatrix(const Matrix& m);
+
+	/**
 	 * \brief Create an interval matrix from an array of doubles.
 	 *
 	 * Create the IntervalMatrix: <br>
@@ -64,6 +71,11 @@ public:
 	 * \pre m>0, n>0
 	 */
 	static IntervalMatrix empty(int m, int n);
+
+	/**
+	 * \brief Set *this to m.
+	 */
+	IntervalMatrix& operator=(const IntervalMatrix& x);
 
 	/**
 	 * \brief Set *this to its intersection with x
@@ -172,24 +184,44 @@ public:
 	void set_col(int col, const IntervalVector& v);
 
     /**
-     * \brief Return -*this.
+     * \brief (*this)+=m.
      */
-    IntervalMatrix operator-() const;
+    IntervalMatrix& operator+=(const Matrix& m);
 
     /**
-     * \brief Set *this to (*this)+m.
+     * \brief (*this)+=m.
      */
-    IntervalMatrix operator+=(const IntervalMatrix& m);
+    IntervalMatrix& operator+=(const IntervalMatrix& m);
 
     /**
-     * \brief Set *this to (*this)-m.
+     * \brief (*this)-=m.
      */
-    IntervalMatrix operator-=(const IntervalMatrix& m);
+    IntervalMatrix& operator-=(const Matrix& m);
 
     /**
-     * \brief Set *this to (*this)*m.
+     * \brief (*this)-=m.
      */
-    IntervalMatrix operator*=(const IntervalMatrix& m);
+    IntervalMatrix& operator-=(const IntervalMatrix& m);
+
+    /**
+     * \brief (*this)=x * *(this).
+     */
+    IntervalMatrix& operator*=(double x);
+
+    /**
+     * \brief (*this)=x * *(this).
+     */
+    IntervalMatrix& operator*=(const Interval& x);
+
+    /**
+     * \brief (*this)*=m.
+     */
+    IntervalMatrix& operator*=(const Matrix& m);
+
+    /**
+     * \brief (*this)*=m.
+     */
+    IntervalMatrix& operator*=(const IntervalMatrix& m);
 
 private:
 	friend class IntervalMatrixArray;
@@ -202,9 +234,34 @@ private:
 };
 
 /**
+ * \brief Return -m.
+ */
+IntervalMatrix operator-(const IntervalMatrix& m);
+
+/**
+ * \brief $[m]_1+[m]_2$.
+ */
+IntervalMatrix operator+(const IntervalMatrix& m1, const Matrix& m2);
+
+/**
+ * \brief $[m]_1+[m]_2$.
+ */
+IntervalMatrix operator+(const Matrix& m1, const IntervalMatrix& m2);
+
+/**
  * \brief $[m]_1+[m]_2$.
  */
 IntervalMatrix operator+(const IntervalMatrix& m1, const IntervalMatrix& m2);
+
+/**
+ * \brief $[m]_1-[m]_2$.
+ */
+IntervalMatrix operator-(const IntervalMatrix& m1, const Matrix& m2);
+
+/**
+ * \brief $[m]_1-[m]_2$.
+ */
+IntervalMatrix operator-(const Matrix& m1, const IntervalMatrix& m2);
 
 /**
  * \brief $[m]_1-[m]_2$.
@@ -219,17 +276,42 @@ IntervalMatrix operator*(double d, const IntervalMatrix& m);
 /**
  * \brief Scalar multiplication of a matrix.
  */
-IntervalMatrix operator*(const Interval& x, const IntervalMatrix& m);
+IntervalMatrix operator*(const Interval& x, const Matrix& m);
 
 /**
- * \brief $[m]_1*[m]_2$.
+ * \brief Scalar multiplication of a matrix.
  */
-IntervalMatrix operator*(const IntervalMatrix& m1, const IntervalMatrix& m2);
+IntervalMatrix operator*(const Interval& x, const IntervalMatrix& m);
+
+/*
+ * \brief $[m]*[x]$.
+ */
+IntervalVector operator*(const IntervalMatrix& m, const Vector& x);
+
+/**
+ * \brief $[m]*[x]$.
+ */
+IntervalVector operator*(const Matrix& m, const IntervalVector& x);
 
 /**
  * \brief $[m]*[x]$.
  */
 IntervalVector operator*(const IntervalMatrix& m, const IntervalVector& x);
+
+/**
+ * \brief $[m]_1*[m]_2$.
+ */
+IntervalMatrix operator*(const IntervalMatrix& m1, const Matrix& m2);
+
+/**
+ * \brief $[m]_1*[m]_2$.
+ */
+IntervalMatrix operator*(const Matrix& m1, const IntervalMatrix& m2);
+
+/**
+ * \brief $[m]_1*[m]_2$.
+ */
+IntervalMatrix operator*(const IntervalMatrix& m1, const IntervalMatrix& m2);
 
 /**
  * \brief Stream out a matrix.

@@ -97,10 +97,30 @@ public:
 	 */
 	int size() const;
 
+	/**
+	 * \brief (*this)+=x2.
+	 */
+	Vector& operator+=(const Vector& x2);
+
+	/**
+	 * \brief (*this)-=x2.
+	 */
+	Vector& operator-=(const Vector& x2);
+
+	/**
+	 * \brief (*this)=d*(*this) (left scalar multiplication)
+	 */
+	Vector& operator*=(double d);
+
 private:
 	int n;             // dimension (size of vec)
 	double *vec;	   // vector of elements
 };
+
+/**
+ * \brief -x.
+ */
+Vector operator-(const Vector& x);
 
 /**
  * \brief Display the Vector \a x
@@ -124,8 +144,8 @@ inline Vector::Vector(const Vector& x) : n(x.n), vec(new double[x.n]) {
 }
 
 inline Vector::Vector(int n, double x[]) : n(n), vec(new double[n]) {
-	for (int i=0; i<n; i++)
-		vec[i]=x[i];
+	assert(n>=1);
+	for (int i=0; i<n; i++) vec[i]=x[i];
 }
 
 inline Vector::~Vector() {
@@ -173,7 +193,6 @@ inline std::ostream& operator<<(std::ostream& os, const Vector& x) {
 	os << ")";
 	return os;
 }
-
 
 } // end namespace ibex
 #endif // __IBEX_VECTOR_H__

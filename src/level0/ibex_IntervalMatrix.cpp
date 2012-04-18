@@ -53,6 +53,30 @@ IntervalMatrix::IntervalMatrix(int m, int n, double bounds[][2]) : _nb_rows(m), 
 	}
 }
 
+IntervalMatrix::IntervalMatrix(const IntervalMatrix& m) : _nb_rows(m.nb_rows()), _nb_cols(m.nb_cols()){
+	M = new IntervalVector[_nb_rows];
+	for (int i=0; i<_nb_rows; i++) {
+		M[i].resize(_nb_cols);
+		for (int j=0; j<_nb_cols; j++) M[i].vec[j]=m[i][j];
+	}
+}
+
+
+IntervalMatrix::IntervalMatrix(const Matrix& m) : _nb_rows(m.nb_rows()), _nb_cols(m.nb_cols()){
+	M = new IntervalVector[_nb_rows];
+	for (int i=0; i<_nb_rows; i++) {
+		M[i].resize(_nb_cols);
+		for (int j=0; j<_nb_cols; j++) M[i].vec[j]=m[i][j];
+	}
+}
+
+IntervalMatrix& IntervalMatrix::operator=(const IntervalMatrix& x) {
+	resize(x.nb_rows(), x.nb_cols());
+	for (int i=0; i<nb_rows(); i++)
+		(*this)[i]=x[i];
+	return *this;
+}
+
 IntervalMatrix& IntervalMatrix::operator&=(const IntervalMatrix& m) {
 	assert(nb_rows()==m.nb_rows());
 	assert(nb_cols()==m.nb_cols());
@@ -82,8 +106,17 @@ bool IntervalMatrix::operator==(const IntervalMatrix& m) const {
 void IntervalMatrix::resize(int nb_rows, int nb_cols) {
 	assert(nb_rows>0);
 	assert(nb_cols>0);
+	assert((M==NULL && nb_rows==0) || (nb_rows!=0 && M!=NULL));
 
-	IntervalVector* M2 = new IntervalVector[nb_rows];
+	if (nb_rows==_nb_rows && nb_cols==_nb_cols) return;
+
+	IntervalVector* M2;
+
+	if (nb_rows!=_nb_rows)
+		M2 = new IntervalVector[nb_rows];
+	else
+		M2 = M;
+
 	for (int i=0; i<nb_rows; i++) {
 		M2[i].resize(nb_cols);  // ALL_REALS by default
 		if (i<_nb_rows) {
@@ -92,18 +125,11 @@ void IntervalMatrix::resize(int nb_rows, int nb_cols) {
 				M2[i][j]=M[i][j];
 		}
 	}
-	if (M!=NULL) delete[] M; // M=NULL only in IntervalMatrixArray
+
+	if (M!=NULL && nb_rows!=_nb_rows) delete[] M; // M=NULL only in IntervalMatrixArray
 	M=M2;
 	_nb_rows = nb_rows;
 	_nb_cols = nb_cols;
-}
-
-IntervalMatrix::IntervalMatrix(const IntervalMatrix& m) : _nb_rows(m.nb_rows()), _nb_cols(m.nb_cols()){
-	M = new IntervalVector[_nb_rows];
-	for (int i=0; i<_nb_rows; i++) {
-		M[i].resize(_nb_cols);
-		for (int j=0; j<_nb_cols; j++) M[i].vec[j]=m[i][j];
-	}
 }
 
 IntervalMatrix IntervalMatrix::submatrix(int row_start_index, int row_end_index, int col_start_index, int col_end_index) {
@@ -142,126 +168,6 @@ void IntervalMatrix::set_col(int col, const IntervalVector& v) {
 	for (int i=0; i<nb_rows(); i++)
 		M[i][col]=v[i];
 }
-
-IntervalMatrix IntervalMatrix::operator-() const {
-	IntervalMatrix res(nb_rows(),nb_cols());
-	for (int i=0; i<nb_rows(); i++)
-		res[i]=-(*this)[i];
-	return res;
-}
-
-IntervalMatrix IntervalMatrix::operator+=(const IntervalMatrix& m) {
-	assert(nb_rows()==m.nb_rows());
-	assert(nb_cols()==m.nb_cols());
-
-	for (int i=0; i<nb_rows(); i++)
-		(*this)[i]+=m[i];
-
-	return *this;
-}
-
-IntervalMatrix operator+(const IntervalMatrix& m1, const IntervalMatrix& m2) {
-	return IntervalMatrix(m1)+=m2;
-}
-
-IntervalMatrix IntervalMatrix::operator-=(const IntervalMatrix& m) {
-	assert(nb_rows()==m.nb_rows());
-	assert(nb_cols()==m.nb_cols());
-
-	for (int i=0; i<nb_rows(); i++)
-		(*this)[i]-=m[i];
-
-	return *this;
-}
-
-IntervalMatrix operator-(const IntervalMatrix& m1, const IntervalMatrix& m2) {
-	assert(m1.nb_rows()==m2.nb_rows());
-	assert(m1.nb_cols()==m2.nb_cols());
-
-	return IntervalMatrix(m1)-=m2;
-}
-
-IntervalMatrix operator*(double d, const IntervalMatrix& m) {
-	IntervalMatrix res(m);
-	for (int i=0; i<m.nb_rows(); i++)
-		for (int j=0; j<m.nb_cols(); j++)
-			res[i][j]*=d;
-	return res;
-}
-
-IntervalMatrix operator*(const Interval& x, const IntervalMatrix& m) {
-	IntervalMatrix res(m);
-	for (int i=0; i<m.nb_rows(); i++)
-		for (int j=0; j<m.nb_cols(); j++)
-			res[i][j]*=x;
-	return res;
-}
-
-IntervalMatrix IntervalMatrix::operator*=(const IntervalMatrix& m) {
-	IntervalMatrix copy(*this);
-
-	resize(nb_rows(),m.nb_cols());
-
-	*this=copy*m;
-
-	return *this;
-}
-
-IntervalMatrix operator*(const IntervalMatrix& m1, const IntervalMatrix& m2) {
-	assert(m1.nb_cols()==m2.nb_rows());
-
-	IntervalMatrix m3(m1.nb_rows(),m2.nb_cols());
-
-	for (int i=0; i<m1.nb_rows(); i++) {
-		for (int j=0; j<m2.nb_cols(); j++) {
-			m3[i][j]=0;
-			for (int k=0; k<m1.nb_cols(); k++)
-				m3[i][j]+=m1[i][k]*m2[k][j];
-		}
-	}
-
-	return m3;
-}
-
-IntervalVector operator*(const IntervalMatrix& m, const IntervalVector& x) {
-	assert(m.nb_cols()==x.size());
-
-	IntervalVector y(m.nb_rows());
-
-	for (int i=0; i<m.nb_rows(); i++) {
-		y[i]=0;
-		for (int k=0; k<x.size(); k++) {
-			y[i]+=m[i][k]*x[k];
-		}
-	}
-
-	return y;
-}
-
-std::ostream& operator<<(std::ostream& os, const IntervalMatrix& m) {
-	os << "(";
-	for (int i=0; i<m.nb_rows(); i++) {
-		os << "(";
-		for (int j=0; j<m.nb_rows(); j++) {
-			os << m[i][j];
-			if (j<m.nb_rows()-1) os << " ; ";
-		}
-		os << ")";
-	}
-	os << ")";
-	return os;
-}
-
-/*
-IntervalMatrix& IntervalMatrix::operator&=(const IntervalMatrix& x) {
-	assert(x.nb_rows()==nb_rows());
-	assert(x.nb_cols()==nb_cols());
-
-	for (int i=0; i<nb_rows(); i++)
-		(*this)[i] &= x[i];
-	return *this;
-}*/
-
 
 
 } // namespace ibex

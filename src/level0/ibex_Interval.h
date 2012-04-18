@@ -92,61 +92,6 @@ class Interval {
      * \param x - the interval to compute the hull with.*/
     Interval& operator|=(const Interval& x);
 
-    /** \brief Return -*this. */
-    Interval operator-() const;
-
-    /** \brief Add \a d to *this and return the result.  */
-    Interval& operator+=(double d);
-
-    /** \brief Subtract \a d to *this and return the result. */
-    Interval& operator-=(double d);
-
-    /** \brief Multiply *this by \a d and return the result. */
-    Interval& operator*=(double d);
-
-    /** \brief Divide *this by \a d and return the result. */
-    Interval& operator/=(double d);
-
-    /** \brief Add \a x to *this and return the result. */
-    Interval& operator+=(const Interval& x);
-
-    /** \brief Subtract \a x to *this and return the result. */
-    Interval& operator-=(const Interval& x);
-
-    /** \brief Multiply *this by \a x and return the result. */
-    Interval& operator*=(const Interval& x);
-
-    /** \brief Divide *this by \a x and return the result.
-     *
-     * Does better than *this=*this/x: because calculates
-     * the union of *this/x as intermediate result. */
-    Interval& operator/=(const Interval& x);
-
-    /**
-     * Set this interval to the intersection of itself with the division of two others.
-     *
-     * \param x - the numerator
-     * \param y - the divisor
-     * \param out2 - In return, *this and out2 contains the lower and upper part respectively
-     * of the division. If the result of the generalized division and intersection
-     * is a single interval, out2 is set to the empty interval.
-     * \code
-     * Interval intv(-10,10);
-     * Interval out2;
-     * intv.div2_inter(Interval(2,3), Interval(-1,2), out2);
-     * cout << intv << " " << out2 << endl;  // will display: [-10,-2] [1,10]
-     * \endcode
-	 *
-     * \return \c true if the intersection is non empty.
-     * \note Contrary to the "cset" theory, the result is empty if \a y=[0,0] (whatever \a x is).
-     */
-    bool div2_inter(const Interval& x, const Interval& y, Interval& out2);
-
-    /**
-     * Set this interval to the intersection of itself with the division of two others.
-     */
-    Interval& div2_inter(const Interval& x, const Interval& y);
-
     /** \brief Return the lower bound of *this. */
     double lb() const;
 
@@ -245,6 +190,61 @@ class Interval {
      * The relative distance is basically distance(x)/diam(*this).
      */
     double rel_distance(const Interval& x) const;
+
+    /** \brief Return -*this. */
+    Interval operator-() const;
+
+    /** \brief Add \a d to *this and return the result.  */
+    Interval& operator+=(double d);
+
+    /** \brief Subtract \a d to *this and return the result. */
+    Interval& operator-=(double d);
+
+    /** \brief Multiply *this by \a d and return the result. */
+    Interval& operator*=(double d);
+
+    /** \brief Divide *this by \a d and return the result. */
+    Interval& operator/=(double d);
+
+    /** \brief Add \a x to *this and return the result. */
+    Interval& operator+=(const Interval& x);
+
+    /** \brief Subtract \a x to *this and return the result. */
+    Interval& operator-=(const Interval& x);
+
+    /** \brief Multiply *this by \a x and return the result. */
+    Interval& operator*=(const Interval& x);
+
+    /** \brief Divide *this by \a x and return the result.
+     *
+     * Does better than *this=*this/x: because calculates
+     * the union of *this/x as intermediate result. */
+    Interval& operator/=(const Interval& x);
+
+    /**
+     * Set this interval to the intersection of itself with the division of two others.
+     *
+     * \param x - the numerator
+     * \param y - the divisor
+     * \param out2 - In return, *this and out2 contains the lower and upper part respectively
+     * of the division. If the result of the generalized division and intersection
+     * is a single interval, out2 is set to the empty interval.
+     * \code
+     * Interval intv(-10,10);
+     * Interval out2;
+     * intv.div2_inter(Interval(2,3), Interval(-1,2), out2);
+     * cout << intv << " " << out2 << endl;  // will display: [-10,-2] [1,10]
+     * \endcode
+	 *
+     * \return \c true if the intersection is non empty.
+     * \note Contrary to the "cset" theory, the result is empty if \a y=[0,0] (whatever \a x is).
+     */
+    bool div2_inter(const Interval& x, const Interval& y, Interval& out2);
+
+    /**
+     * Set this interval to the intersection of itself with the division of two others.
+     */
+    Interval& div2_inter(const Interval& x, const Interval& y);
 
     /** \brief pi. */
     static const Interval PI;

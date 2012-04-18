@@ -345,6 +345,37 @@ public:
 	 */
 	IntervalVector random() const;
 
+	/**
+	 * \brief (*this)+=x2.
+	 */
+	IntervalVector& operator+=(const Vector& x2);
+
+	/**
+	 * \brief (*this)+=x2.
+	 */
+	IntervalVector& operator+=(const IntervalVector& x2);
+
+	/**
+	 * \brief (*this)-=x2.
+	 */
+	IntervalVector& operator-=(const Vector& x2);
+
+	/**
+	 * \brief (*this)-=x2.
+	 */
+	IntervalVector& operator-=(const IntervalVector& x2);
+
+	/**
+	 * \brief x=d*x
+	 */
+	IntervalVector& operator*=(double d);
+
+	/**
+	 * \brief (*this)=x1*(*this).
+	 */
+	IntervalVector& operator*=(const Interval& x1);
+
+
 private:
 	friend class IntervalMatrix;
 
@@ -365,8 +396,7 @@ private:
  */
 double distance(const IntervalVector& x1, const IntervalVector& x2);
 
-/** \brief -x. */
-Vector operator-(const Vector& x);
+
 /** \brief -x. */
 IntervalVector operator-(const IntervalVector& x);
 
@@ -397,20 +427,6 @@ Interval operator*(const IntervalVector& x1, const Vector& x2);
 /** \brief x1*x2. */
 Interval operator*(const IntervalVector& x1, const IntervalVector& x2);
 
-/** \brief x1+=x2. */
-Vector&         operator+=(Vector& x1,         const Vector& x2);
-/** \brief x1+=x2. */
-IntervalVector& operator+=(IntervalVector& x1, const Vector& x2);
-/** \brief x1+=x2. */
-IntervalVector& operator+=(IntervalVector& x1, const IntervalVector& x2);
-
-/** \brief x1-=x2. */
-Vector&         operator-=(Vector& x1,         const Vector& x2);
-/** \brief x1-=x2. */
-IntervalVector& operator-=(IntervalVector& x1, const Vector& x2);
-/** \brief x1-=x2. */
-IntervalVector& operator-=(IntervalVector& x1, const IntervalVector& x2);
-
 /** \brief d*x */
 Vector operator*(double d, const Vector& x);
 /** \brief d*x */
@@ -420,23 +436,74 @@ IntervalVector operator*(const Interval& x1, const Vector& x2);
 /** \brief x1*x2. */
 IntervalVector operator*(const Interval& x1, const IntervalVector& x2);
 
-/** \brief x=d*x */
-Vector& operator*=(Vector& x, double d);
-/** \brief x=d*x */
-IntervalVector& operator*=(IntervalVector& x, double d);
-/** \brief x2=x1*x2. */
-IntervalVector& operator*=(IntervalVector& x2, const Interval& x1);
+/** \brief Projection of $y=x_1+x_2$.
+ *
+ * Set $([x]_1,[x]_2)$ to $([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=x_1+x_2\}$. */
+bool proj_add(const IntervalVector& y, IntervalVector& x1, IntervalVector& x2);
+
+/** \brief Projection of $y=x_1-x_2$.
+ *
+ * Set $([x]_1,[x]_2)$ to $([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=x_1-x_2\}$. */
+bool proj_sub(const IntervalVector& y, IntervalVector& x1, IntervalVector& x2);
+
+/** \brief Projection of $y=x_1*x_2$ (scalar product).
+ *
+ * Set $([x]_1,[x]_2)$ to $([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=x_1*x_2\}$. */
+bool proj_mul(const IntervalVector& y, Interval& x1, IntervalVector& x2);
+
+/** \brief Projection of $y=x_1*x_2$ (dot product).
+ *
+ * Set $([x]_1,[x]_2)$ to $([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=x_1*x_2\}$. */
+bool proj_mul(const Interval& y, IntervalVector& x1, IntervalVector& x2);
 
 /**
  * \brief Display the IntervalVector \a x
  */
 std::ostream& operator<<(std::ostream& os, const IntervalVector& x);
 
+
+/*============================================ inline implementation ============================================ */
+
+inline IntervalVector IntervalVector::empty(int n) {
+	return IntervalVector(n, Interval::EMPTY_SET);
+}
+
+inline IntervalVector IntervalVector::operator&(const IntervalVector& x) const {
+	return IntervalVector(*this) &= x;
+}
+
+inline IntervalVector IntervalVector::operator|(const IntervalVector& x) const {
+	return IntervalVector(*this) |= x;
+}
+
+inline bool IntervalVector::operator!=(const IntervalVector& x) const {
+	return !(*this==x);
+}
+
+inline int IntervalVector::size() const {
+	return n;
+}
+
+inline bool IntervalVector::is_empty() const {
+	return (*this)[0].is_empty();
+}
+
+inline bool IntervalVector::is_superset(const IntervalVector& x) const {
+	return x.is_subset(*this);
+}
+
+inline bool IntervalVector::is_strict_superset(const IntervalVector& x) const {
+	return x.is_strict_subset(*this);
+}
+
+inline double IntervalVector::max_diam() const {
+	return (*this)[extr_diam_index(false)].diam();
+}
+
+inline double IntervalVector::min_diam() const {
+	return (*this)[extr_diam_index(true)].diam();
+}
+
 } // end namespace
-
-// --------- inline implementation --------------------
-
-#include "ibex_IntervalVector.h_"
-
 
 #endif /* _IBEX_INTERVAL_VECTOR_H_ */
