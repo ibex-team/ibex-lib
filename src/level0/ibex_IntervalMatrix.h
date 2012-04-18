@@ -114,6 +114,24 @@ public:
 	int nb_rows() const;
 
 	/**
+	 * \brief Return the lower bound matrix
+	 * \pre (*this) must be nonempty
+	 */
+	Matrix lb() const;
+
+	/**
+	 * \brief Return the upper bound matrix
+	 * \pre (*this) must be nonempty
+	 */
+	Matrix ub() const;
+
+	/**
+	 * \brief Return the midmatrix
+	 * \pre (*this) must be nonempty
+	 */
+	Matrix mid() const;
+
+	/**
 	 * \brief Return true iff this IntervalMatrix is empty
 	 */
 	bool is_empty() const;
@@ -312,6 +330,36 @@ IntervalMatrix operator*(const Matrix& m1, const IntervalMatrix& m2);
  * \brief $[m]_1*[m]_2$.
  */
 IntervalMatrix operator*(const IntervalMatrix& m1, const IntervalMatrix& m2);
+
+/**
+ * \brief |x|.
+ */
+IntervalMatrix abs(const IntervalMatrix& m);
+
+/**
+ * \brief Projection of y1=x1*x2 (scalar product of a matrix).
+ *
+ * Set $([x]_1,[x]_2)$ to $([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=x_1*x_2\}$.
+ */
+bool proj_mul(const IntervalMatrix& y, Interval& x1, IntervalMatrix& x2);
+
+/**
+ * \brief Projection of y1=x1*x2 (product of a matrix by a vector).
+ *
+ * Uses a fixpoint algorithm with the provided ratio.
+ *
+ * Set $([x]_1,[x]_2)$ to $([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=x_1*x_2\}$.
+ */
+bool proj_mul(const IntervalVector& y, IntervalMatrix& x1, IntervalVector& x2, double ratio);
+
+/**
+ * \brief Projection of y1=x1*x2 (scalar product of a matrix).
+ *
+ * Uses a fixpoint algorithm with the provided ratio.
+ *
+ * Set $([x]_1,[x]_2)$ to $([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=x_1*x_2\}$.
+ */
+bool proj_mul(const IntervalMatrix& y, IntervalMatrix& x1, IntervalMatrix& x2, double ratio);
 
 /**
  * \brief Stream out a matrix.

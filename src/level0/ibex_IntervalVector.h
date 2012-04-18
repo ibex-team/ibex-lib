@@ -182,6 +182,18 @@ public:
 	int size() const;
 
 	/**
+	 * \brief Return the lower bound vector
+	 * \pre (*this) must be nonempty
+	 */
+	Vector lb() const;
+
+	/**
+	 * \brief Return the upper bound vector
+	 * \pre (*this) must be nonempty
+	 */
+	Vector ub() const;
+
+	/**
 	 * \brief Return the midpoint
 	 * \pre (*this) must be nonempty
 	 */
@@ -396,64 +408,104 @@ private:
  */
 double distance(const IntervalVector& x1, const IntervalVector& x2);
 
-
-/** \brief -x. */
+/**
+ * \brief -x.
+ */
 IntervalVector operator-(const IntervalVector& x);
 
-/** \brief x1+x2. */
-Vector         operator+(const Vector& x1,         const Vector& x2);
-/** \brief x1+x2. */
-IntervalVector operator+(const Vector& x1,         const IntervalVector& x2);
-/** \brief x1+x2. */
+/**
+ * \brief x1+x2.
+ */
+
+IntervalVector operator+(const Vector& x1, const IntervalVector& x2);
+
+/**
+ * \brief x1+x2.
+ */
 IntervalVector operator+(const IntervalVector& x1, const Vector& x2);
-/** \brief x1+x2. */
+
+/**
+ * \brief x1+x2.
+ */
 IntervalVector operator+(const IntervalVector& x1, const IntervalVector& x2);
 
-/** \brief x1-x2. */
-Vector         operator-(const Vector& x1,         const Vector& x2);
-/** \brief x1-x2. */
-IntervalVector operator-(const Vector& x1,         const IntervalVector& x2);
-/** \brief x1-x2. */
+/**
+ * \brief x1-x2.
+ */
+IntervalVector operator-(const Vector& x1, const IntervalVector& x2);
+
+/**
+ * \brief x1-x2.
+ */
+
 IntervalVector operator-(const IntervalVector& x1, const Vector& x2);
-/** \brief x1-x2. */
+
+/**
+ * \brief x1-x2.
+ */
 IntervalVector operator-(const IntervalVector& x1, const IntervalVector& x2);
 
-/** \brief x1*x2. */
-double   operator*(const Vector& x1,         const Vector& x2);
-/** \brief x1*x2. */
-Interval operator*(const Vector& x1,         const IntervalVector& x2);
-/** \brief x1*x2. */
+/**
+ * \brief x1*x2.
+ */
+Interval operator*(const Vector& x1, const IntervalVector& x2);
+
+/**
+ * \brief x1*x2.
+ */
 Interval operator*(const IntervalVector& x1, const Vector& x2);
-/** \brief x1*x2. */
+
+/**
+ * \brief x1*x2.
+ */
 Interval operator*(const IntervalVector& x1, const IntervalVector& x2);
 
-/** \brief d*x */
-Vector operator*(double d, const Vector& x);
-/** \brief d*x */
+/**
+ * \brief d*x
+ */
 IntervalVector operator*(double d, const IntervalVector& x);
-/** \brief x1*x2. */
+
+/**
+ * \brief x1*x2.
+ */
 IntervalVector operator*(const Interval& x1, const Vector& x2);
-/** \brief x1*x2. */
+
+/**
+ *  \brief x1*x2.
+ */
 IntervalVector operator*(const Interval& x1, const IntervalVector& x2);
 
-/** \brief Projection of $y=x_1+x_2$.
+/**
+ * \brief |x|.
+ */
+IntervalVector abs(const IntervalVector& x);
+
+/**
+ * \brief Projection of $y=x_1+x_2$.
  *
- * Set $([x]_1,[x]_2)$ to $([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=x_1+x_2\}$. */
+ * Set $([x]_1,[x]_2)$ to $([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=x_1+x_2\}$.
+ */
 bool proj_add(const IntervalVector& y, IntervalVector& x1, IntervalVector& x2);
 
-/** \brief Projection of $y=x_1-x_2$.
+/**
+ * \brief Projection of $y=x_1-x_2$.
  *
- * Set $([x]_1,[x]_2)$ to $([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=x_1-x_2\}$. */
+ * Set $([x]_1,[x]_2)$ to $([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=x_1-x_2\}$.
+ */
 bool proj_sub(const IntervalVector& y, IntervalVector& x1, IntervalVector& x2);
 
-/** \brief Projection of $y=x_1*x_2$ (scalar product).
+/**
+ * \brief Projection of $y=x_1*x_2$ (scalar product).
  *
- * Set $([x]_1,[x]_2)$ to $([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=x_1*x_2\}$. */
+ * Set $([x]_1,[x]_2)$ to $([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=x_1*x_2\}$.
+ */
 bool proj_mul(const IntervalVector& y, Interval& x1, IntervalVector& x2);
 
-/** \brief Projection of $y=x_1*x_2$ (dot product).
+/**
+ * \brief Projection of $y=x_1*x_2$ (dot product).
  *
- * Set $([x]_1,[x]_2)$ to $([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=x_1*x_2\}$. */
+ * Set $([x]_1,[x]_2)$ to $([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=x_1*x_2\}$.
+ */
 bool proj_mul(const Interval& y, IntervalVector& x1, IntervalVector& x2);
 
 /**

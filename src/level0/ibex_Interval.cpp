@@ -12,10 +12,10 @@
 #include "ibex_Interval.h"
 
 #ifdef _IBEX_WITH_GAOL_
-#include "ibex_gaol_Interval.cpp"
+#include "ibex_gaol_Interval.cpp_"
 #else
 #ifdef _IBEX_WITH_BIAS_
-#include "ibex_bias_Interval.cpp"
+#include "ibex_bias_Interval.cpp_"
 #endif
 #endif
 

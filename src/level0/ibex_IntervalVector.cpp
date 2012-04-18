@@ -86,8 +86,8 @@ IntervalVector IntervalVector::subvector(int start_index, int end_index) {
 	assert(!is_empty());
 	assert(end_index>=0 && start_index>=0);
 
-	if (end_index>=size() || start_index>end_index)
-		throw NonRecoverableException("Invalid indices for IntervalVector::subvector");
+	assert(end_index<size() && start_index<=end_index);
+	//throw NonRecoverableException("Invalid indices for IntervalVector::subvector");
 
 	IntervalVector v(end_index-start_index+1);
 	int j=0;
@@ -150,13 +150,32 @@ bool IntervalVector::operator==(const IntervalVector& x) const {
 	return true;
 }
 
+Vector IntervalVector::lb() const {
+	assert(!is_empty());
+
+	Vector l(size());
+	for (int i=0; i<size(); i++) {
+		l[i]=(*this)[i].lb();
+	}
+	return l;
+}
+
+Vector IntervalVector::ub() const {
+	assert(!is_empty());
+
+	Vector u(size());
+	for (int i=0; i<size(); i++) {
+		u[i]=(*this)[i].ub();
+	}
+	return u;
+}
+
 Vector IntervalVector::mid() const {
 	assert(!is_empty());
 
 	Vector mV(size());
 	for (int i=0; i<size(); i++) {
-		double m =  (*this)[i].mid();
-		mV[i]=m;
+		mV[i]=(*this)[i].mid();
 	}
 	return mV;
 }
@@ -396,7 +415,10 @@ bool proj_mul(const IntervalVector& y, Interval& x1, IntervalVector& x2) {
 	assert(y.size()==x2.size());
 
 	for (int i=0; i<x2.size(); i++)
-		if (!proj_mul(y[i], x1, x2[i])) return false;
+		if (!proj_mul(y[i], x1, x2[i])) {
+			x2.set_empty();
+			return false;
+		}
 	return true;
 }
 
@@ -405,7 +427,8 @@ bool proj_mul(const Interval& z, IntervalVector& x, IntervalVector& y) {
 	int n=x.size();
 
 	if (n==1) {
-		return proj_mul(z,x[0],y[0]);
+		if (proj_mul(z,x[0],y[0])) return true;
+		else { x.set_empty(); y.set_empty(); return false; }
 	}
 
 	Interval xy[n];  // xy[i] := x[i]y[i]
@@ -418,13 +441,13 @@ bool proj_mul(const Interval& z, IntervalVector& x, IntervalVector& y) {
 
 	// ------------- backward -------------------
 	// (rem: we have n>=2)
-	if (!proj_add(z, sum[n-2], xy[n-1])) return false;
+	if (!proj_add(z, sum[n-2], xy[n-1])) { x.set_empty(); y.set_empty(); return false; }
 
 	for (int i=n-3; i>=0; i--)
-		if (!proj_add(sum[i+1],sum[i],xy[i+1])) return false;
+		if (!proj_add(sum[i+1],sum[i],xy[i+1])) { x.set_empty(); y.set_empty(); return false; }
 
 	for (int i=0; i<n; i++)
-		if (!proj_mul(xy[i],x[i],y[i])) return false;
+		if (!proj_mul(xy[i],x[i],y[i])) { x.set_empty(); y.set_empty(); return false; }
 
 	return true;
 }

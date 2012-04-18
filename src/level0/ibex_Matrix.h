@@ -176,6 +176,11 @@ Matrix operator*(const Matrix& m1, const Matrix& m2);
 Vector operator*(const Matrix& m, const Vector& x);
 
 /**
+ * \brief |x|.
+ */
+Matrix abs(const Matrix& x);
+
+/**
  * \brief Stream out a matrix.
  */
 std::ostream& operator<<(std::ostream& os, const Matrix&);

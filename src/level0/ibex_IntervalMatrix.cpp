@@ -10,6 +10,7 @@
  * ---------------------------------------------------------------------------- */
 
 #include "ibex_IntervalMatrix.h"
+#include "ibex_Agenda.h"
 
 namespace ibex {
 
@@ -103,6 +104,36 @@ bool IntervalMatrix::operator==(const IntervalMatrix& m) const {
 	return true;
 }
 
+Matrix IntervalMatrix::lb() const {
+	assert(!is_empty());
+
+	Matrix l(nb_rows(), nb_cols());
+	for (int i=0; i<nb_rows(); i++) {
+		l[i]=(*this)[i].lb();
+	}
+	return l;
+}
+
+Matrix IntervalMatrix::ub() const {
+	assert(!is_empty());
+
+	Matrix u(nb_rows(), nb_cols());
+	for (int i=0; i<nb_rows(); i++) {
+		u[i]=(*this)[i].ub();
+	}
+	return u;
+}
+
+Matrix IntervalMatrix::mid() const {
+	assert(!is_empty());
+
+	Matrix mV(nb_rows(), nb_cols());
+	for (int i=0; i<nb_rows(); i++) {
+		mV[i]=(*this)[i].mid();
+	}
+	return mV;
+}
+
 void IntervalMatrix::resize(int nb_rows, int nb_cols) {
 	assert(nb_rows>0);
 	assert(nb_cols>0);
@@ -167,6 +198,88 @@ void IntervalMatrix::set_col(int col, const IntervalVector& v) {
 
 	for (int i=0; i<nb_rows(); i++)
 		M[i][col]=v[i];
+}
+
+
+bool proj_mul(const IntervalMatrix& y, Interval& x1, IntervalMatrix& x2) {
+	int n=(y.nb_rows());
+	int m=(y.nb_cols());
+	assert((x2.nb_rows())==n && (x2.nb_cols())==m);
+
+	for (int i=0; i<n; i++) {
+		if (!proj_mul(y[i],x1,x2[i])) {
+			x2.set_empty();
+			return false;
+		}
+	}
+	return true;
+}
+
+bool proj_mul(const IntervalVector& y, IntervalMatrix& x1, IntervalVector& x2, double ratio) {
+	assert(x1.nb_rows()==y.size());
+	assert(x1.nb_cols()==x2.size());
+
+	int last_row=0;
+	int i=0;
+	int n=y.size();
+
+	do {
+		IntervalVector x2old=x2;
+		if (!proj_mul(y[i],x1[i],x2)) {
+			x1.set_empty();
+			return false;
+		}
+		if (x2old.rel_distance(x2)>ratio) last_row=i;
+		i=(i+1)%n;
+	} while(i!=last_row);
+
+	return true;
+}
+
+bool proj_mul(const IntervalMatrix& y, IntervalMatrix& x1, IntervalMatrix& x2, double ratio) {
+	int m=y.nb_rows();
+	int n=y.nb_cols();
+	assert(x1.nb_cols()==x2.nb_rows());
+	assert(x1.nb_rows()==m);
+	assert(x2.nb_cols()==n);
+
+	// each coefficient (i,j) of y is considered as a binary "dot product" constraint
+	// between the ith row of x1 and the jth column of x2
+	// (advantage: we have exact projection for the dot product)
+	//
+	// we propagate these constraints using a simple agenda.
+	Agenda a(m*n);
+
+	//init
+	for (int i=0; i<m; i++)
+		for (int j=0; j<n; j++)
+			a.push(i*n+j);
+
+	int k;
+	while (!a.empty()) {
+		a.pop(k);
+		int i=k/n;
+		int j=k%n;
+		IntervalVector x1old=x1[i];
+		IntervalVector x2j=x2.col(j);
+		IntervalVector x2old=x2j;
+		if (!proj_mul(y[i][j],x1[i],x2j)) {
+			x1.set_empty();
+			x2.set_empty();
+			return false;
+		} else {
+			if (x1old.rel_distance(x1[i])>=ratio) {
+				for (int j2=0; j2<n; j2++)
+					if (j2!=j) a.push(i*n+j2);
+			}
+			if (x2old.rel_distance(x2j)>=ratio) {
+				for (int i2=0; i2<m; i2++)
+					if (i2!=i) a.push(i2*n+j);
+			}
+			x2.set_col(j,x2j);
+		}
+	}
+	return true;
 }
 
 

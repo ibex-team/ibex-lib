@@ -15,6 +15,8 @@ namespace ibex {
 
 namespace {
 
+// the following functions are
+// introduced to allow genericity
 inline bool is_empty(double x)                { return false; }
 inline bool is_empty(const Interval& x)       { return x.is_empty(); }
 inline bool is_empty(const Vector& v)         { return false; }
@@ -28,6 +30,8 @@ inline void set_empty(Vector& v)         { }
 inline void set_empty(IntervalVector& v) { v.set_empty(); }
 inline void set_empty(Matrix& m)         { }
 inline void set_empty(IntervalMatrix& m) { m.set_empty(); }
+
+inline double abs(const double& x) { return fabs(x); }
 
 template<typename V>
 inline V minusV(const V& v) {
@@ -177,6 +181,30 @@ inline Mout mulMM(const Min1& m1, const Min2& m2) {
 		}
 	}
 	return m3;
+}
+
+template<typename V>
+inline V absV(const V& v) {
+	V res(v.size());
+
+	if (is_empty(v)) { set_empty(res); return res; }
+
+	for (int i=0; i<v.size(); i++)
+		res[i]=abs(v[i]);
+
+	return res;
+}
+
+template<typename M>
+inline M absM(const M& m) {
+	M res(m.nb_rows(),m.nb_cols());
+
+	if (is_empty(m)) { set_empty(res); return res; }
+
+	for (int i=0; i<m.nb_rows(); i++)
+		res[i]=abs(m[i]);
+
+	return res;
 }
 
 template<class M>
@@ -426,6 +454,22 @@ IntervalMatrix operator*(const IntervalMatrix& m1, const Matrix& m2) {
 
 IntervalMatrix operator*(const IntervalMatrix& m1, const IntervalMatrix& m2) {
 	return mulMM<IntervalMatrix,IntervalMatrix,IntervalMatrix>(m1,m2);
+}
+
+Vector abs(const Vector& v) {
+	return absV(v);
+}
+
+IntervalVector abs(const IntervalVector& v) {
+	return absV(v);
+}
+
+Matrix abs(const Matrix& m) {
+	return absM(m);
+}
+
+IntervalMatrix abs(const IntervalMatrix& m) {
+	return absM(m);
 }
 
 std::ostream& operator<<(std::ostream& os, const Matrix& m) {

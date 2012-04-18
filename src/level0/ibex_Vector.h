@@ -121,6 +121,20 @@ private:
  * \brief -x.
  */
 Vector operator-(const Vector& x);
+/** \brief x1+x2. */
+Vector         operator+(const Vector& x1,         const Vector& x2);
+/** \brief x1-x2. */
+Vector         operator-(const Vector& x1,         const Vector& x2);
+/** \brief x1*x2. */
+double   operator*(const Vector& x1,         const Vector& x2);
+
+/** \brief d*x */
+Vector operator*(double d, const Vector& x);
+
+/**
+ * \brief |x|.
+ */
+Vector abs(const Vector& x);
 
 /**
  * \brief Display the Vector \a x
