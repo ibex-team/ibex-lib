@@ -335,7 +335,7 @@ void TestIntervalMatrix::minus02() {
 void TestIntervalMatrix::add01() {
 	IntervalMatrix m(M1());
 	IntervalMatrix m2(m+m);
-	cout << "m2=" << m2 << endl;
+
 	for (int i=0; i<2; i++) {
 		for (int j=0; j<3; j++) {
 			TEST_ASSERT(m2[i][j]==m[i][j]+m[i][j]);

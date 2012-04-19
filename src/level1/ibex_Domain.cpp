@@ -141,7 +141,7 @@ Domains& Domains::operator=(const IntervalVector& x) {
 IntervalVector& IntervalVector::operator=(const Domains& d) {
 	int i=0;
 
-	for (int s=0; s<n; s++) {
+	for (int s=0; s<d.size(); s++) {
 		const Dim& dim=d[s].dim;
 		switch (dim.type()) {
 		case Dim::SCALAR:

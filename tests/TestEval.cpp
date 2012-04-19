@@ -353,7 +353,7 @@ void TestEval::apply04() {
 	const ExprSymbol& x3 = f3.add_symbol("x3");
 
 	f1.set_expr(sqr(x1));
-	f2.set_expr(x2+1);
+	f2.set_expr(x2+Interval(1,1));
 	f3.set_expr(f2(f1(x3)));
 	Eval e(f3);
 

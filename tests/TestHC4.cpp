@@ -33,7 +33,7 @@ void TestHC4::ponts30() {
 	for (int i=0; i<30; i++)
 		c[i]->contract(box);
 
-//	cout << "after="<< box << endl;
+	cout << "after="<< box << endl;
 
 	for (int i=0; i<30; i++) {
 		delete c[i];

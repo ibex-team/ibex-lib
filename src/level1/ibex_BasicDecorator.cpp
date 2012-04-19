@@ -49,7 +49,7 @@ void BasicDecorator::visit(const ExprIndex& idx) {
 
 	Domain& l=(Domain&) *idx.expr.deco;
 
-	switch (idx.expr.type()) {
+	switch (idx.type()) {
 	case Dim::SCALAR:       idx.deco = new Domain(l.v()[idx.index]); break;
 	case Dim::ROW_VECTOR:   idx.deco = new Domain(l.m()[idx.index],idx.type()==Dim::ROW_VECTOR); break;
 	case Dim::COL_VECTOR:   assert(false); /* see comment in ExprVector */ break;

@@ -1189,13 +1189,37 @@ inline const ExprAtan2& atan2(const ExprNode& exp1, const ExprNode& exp2) {
 inline const ExprAdd& operator+(const ExprNode& left, const Interval& value) {
   return left+ExprConstant::new_scalar(left.context, value); }
 
+/** Addition of an expression to a constant vector */
+inline const ExprAdd& operator+(const ExprNode& left, const IntervalVector& vec) {
+  return left+ExprConstant::new_vector(left.context, vec, left.type()==Dim::ROW_VECTOR); }
+
+/** Addition of an expression to a constant matrix */
+inline const ExprAdd& operator+(const ExprNode& left, const IntervalMatrix& m) {
+  return left+ExprConstant::new_matrix(left.context, m); }
+
 /** Subtraction of an expression from a constant */
 inline const ExprSub& operator-(const ExprNode& left, const Interval& value) {
   return left-ExprConstant::new_scalar(left.context, value); }
 
+/** Subtraction of an expression to a constant vector */
+inline const ExprSub& operator-(const ExprNode& left, const IntervalVector& vec) {
+  return left-ExprConstant::new_vector(left.context, vec, left.type()==Dim::ROW_VECTOR); }
+
+/** Subtraction of an expression to a constant matrix */
+inline const ExprSub& operator-(const ExprNode& left, const IntervalMatrix& m) {
+  return left-ExprConstant::new_matrix(left.context, m); }
+
 /** Multiplication of an expression by a constant */
 inline const ExprMul& operator*(const ExprNode& left, const Interval& value) {
   return left*ExprConstant::new_scalar(left.context, value); }
+
+/** Multiplication of an expression by a constant vector */
+inline const ExprMul& operator*(const ExprNode& left, const IntervalVector& vec) {
+  return left*ExprConstant::new_vector(left.context, vec, false); }
+
+/** Multiplication of an expression by a constant */
+inline const ExprMul& operator*(const ExprNode& left, const IntervalMatrix& m) {
+  return left*ExprConstant::new_matrix(left.context, m); }
 
 /** Division of an expression by a constant */
 inline const ExprDiv& operator/(const ExprNode& left, const Interval& value) {
@@ -1217,13 +1241,37 @@ inline const ExprDiv& operator/(const ExprNode& left, const Interval& value) {
 inline const ExprAdd& operator+(const Interval& value, const ExprNode& right) {
   return ExprConstant::new_scalar(right.context, value)+right; }
 
+/** Addition of a vector constant to an expression */
+inline const ExprAdd& operator+(const IntervalVector& vec, const ExprNode& right) {
+  return ExprConstant::new_vector(right.context, vec, right.type()==Dim::ROW_VECTOR)+right; }
+
+/** Addition of a matrix constant to an expression */
+inline const ExprAdd& operator+(const IntervalMatrix& m, const ExprNode& right) {
+  return ExprConstant::new_matrix(right.context, m)+right; }
+
 /** Subtraction of a constant from an expression */
 inline const ExprSub& operator-(const Interval& value, const ExprNode& right) {
   return ExprConstant::new_scalar(right.context, value)-right; }
 
+/** Subtraction of a vector constant to an expression */
+inline const ExprSub& operator-(const IntervalVector& vec, const ExprNode& right) {
+  return ExprConstant::new_vector(right.context, vec, right.type()==Dim::ROW_VECTOR)-right; }
+
+/** Subtraction of a matrix constant to an expression */
+inline const ExprSub& operator-(const IntervalMatrix& m, const ExprNode& right) {
+  return ExprConstant::new_matrix(right.context, m)-right; }
+
 /** Multiplication of a constant by an expression*/
 inline const ExprMul& operator*(const Interval& value, const ExprNode& right) {
   return ExprConstant::new_scalar(right.context, value)*right; }
+
+/** Multiplication of a vector constant by an expression*/
+inline const ExprMul& operator*(const IntervalVector& vec, const ExprNode& right) {
+  return ExprConstant::new_vector(right.context, vec, true)*right; }
+
+/** Multiplication of a matrix constant by an expression*/
+inline const ExprMul& operator*(const IntervalMatrix& m, const ExprNode& right) {
+  return ExprConstant::new_matrix(right.context, m)*right; }
 
 /** Division of a constant by an expression */
 inline const ExprDiv& operator/(const Interval& value, const ExprNode& right) {
