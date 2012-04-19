@@ -23,6 +23,7 @@ void TestIbex::check(const Interval& y_actual, const Interval& y_expected) {
 
 void TestIbex::check(const IntervalVector& y_actual, const IntervalVector& y_expected) {
 	TEST_ASSERT(y_actual.size()==y_actual.size());
+	if (y_actual.is_empty() && y_expected.is_empty()) { TEST_ASSERT(true); return; }
 	for (int i=0; i<y_actual.size(); i++)
 		TestIbex::check(y_actual[i],y_expected[i]);
 }

@@ -211,9 +211,45 @@ void TestInterval::sqrt03() { check(sqrt(Interval(-9,4)),      Interval(0,2)); }
 void TestInterval::sqrt04() { check(sqrt(Interval(4,9)),       Interval(2,3)); }
 void TestInterval::sqrt05() { check(sqrt(Interval(-9,-4)),     Interval::EMPTY_SET); }
 
-#define checkproj(func,y,xbefore,xafter) Interval x=xbefore; NAME2(proj_,func)(y,x); check(x,xafter);
+static double piL=Interval::PI.lb();
+static double piU=Interval::PI.ub();
+
+void TestInterval::check_trigo(const Interval& x, const Interval& sin_x_expected) {
+	check(sin(x), sin_x_expected);
+	check(sin(Interval::PI-x), sin_x_expected);
+	check(sin(x+Interval::TWO_PI), sin_x_expected);
+	check(sin(-x), -sin_x_expected);
+	check(cos(x-Interval::HALF_PI), sin_x_expected);
+	check(cos(Interval::HALF_PI-x), sin_x_expected);
+	check(cos(x+Interval::HALF_PI), -sin_x_expected);
+	check(cos(x+Interval::TWO_PI-Interval::HALF_PI), sin_x_expected);
+}
+
+void TestInterval::sin01() { check_trigo(Interval::ALL_REALS, Interval(-1,1)); }
+void TestInterval::sin02() { check_trigo(Interval::EMPTY_SET, Interval::EMPTY_SET); }
+void TestInterval::sin03() { check_trigo(Interval(0,piU/2.0), Interval(0,1)); }
+void TestInterval::sin04() { check_trigo(Interval(0,piU), Interval(0,1)); }
+void TestInterval::sin05() { check_trigo(Interval(0,3*piU/2.0), Interval(-1,1)); }
+void TestInterval::sin06() { check_trigo(Interval(piL,3*piU/2.0), Interval(-1,0)); }
+void TestInterval::sin07() { check_trigo(Interval(0.5,1.5), Interval(sin(0.5),sin(1.5))); }
+void TestInterval::sin08() { check_trigo(Interval(1.5,3), Interval(sin(3.0),1)); }
+void TestInterval::sin09() { check_trigo(Interval(3,4), Interval(sin(4.0),sin(3.0))); }
+void TestInterval::sin10() { check_trigo(Interval(3,5), Interval(-1,sin(3.0))); }
+void TestInterval::sin11() { check_trigo(Interval(3,2*piU+1.5), Interval(-1,sin(1.5))); }
+void TestInterval::sin12() { check_trigo(Interval(5,2*piU+1.5), Interval(sin(5),sin(1.5))); }
+void TestInterval::sin13() { check_trigo(Interval(5,2*piU+3), Interval(sin(5),1)); }
+
+
+#define checkproj(func,y,xbefore,xafter) { Interval x=xbefore; NAME2(proj_,func)(y,x); check(x,xafter); }
 #define NAME2(a,b)         NAME2_HIDDEN(a,b)
 #define NAME2_HIDDEN(a,b)  a ## b
+
+void TestInterval::checkproj_trigo(const Interval& y, const Interval& xbefore, const Interval& xafter) {
+    checkproj(sin,  y, xbefore, xafter);
+	checkproj(sin, -y,-xbefore,-xafter);
+	checkproj(cos,  y, xbefore-Interval::HALF_PI, xafter-Interval::HALF_PI);
+	checkproj(cos, -y, xbefore+Interval::HALF_PI, xafter+Interval::HALF_PI);
+}
 
 void TestInterval::sqrProj01() { checkproj(sqr, Interval(1,9),            Interval(0,4),       Interval(1,3)); }
 void TestInterval::sqrProj02() { checkproj(sqr, Interval(1,9),            Interval(0,2),       Interval(1,2)); }
@@ -223,7 +259,30 @@ void TestInterval::sqrProj05() { checkproj(sqr, Interval(NEG_INFINITY,9), Interv
 void TestInterval::sqrProj06() { checkproj(sqr, Interval(4,9),            Interval(-1,5),      Interval(2,3)); }
 void TestInterval::sqrProj07() { checkproj(sqr, Interval(-4,-2),          Interval::ALL_REALS, Interval::EMPTY_SET); }
 
-void TestInterval::sinProj01() { /*check(asin_Proj(Interval(0,1),   Interval(-0.5*pi,3.5*pi)),  Interval(0,3*pi));*/ }
+void TestInterval::sinProj01() { checkproj_trigo(sin(Interval(0.5,1.5)), Interval(0,piU/2.0),        Interval(0.5,1.5)); }
+void TestInterval::sinProj02() { checkproj_trigo(sin(Interval(0.5,1.5)), Interval(0,5*piU/2.0),      Interval(0.5,2*piU+1.5)); }
+void TestInterval::sinProj03() { checkproj_trigo(sin(Interval(0.5,1.5)), Interval(-2*piU,piU/2.0),   Interval(-2*piU+0.5,1.5)); }
+void TestInterval::sinProj04() { checkproj_trigo(sin(Interval(0.5,1.5)), Interval(-2*piU,5*piU/2.0), Interval(-2*piU+0.5,2*piU+1.5)); }
+void TestInterval::sinProj05() { checkproj_trigo(sin(Interval(0.5,1.5)), Interval(-piL-0.4,piU/2.0), Interval(0.5,1.5)); }
+void TestInterval::sinProj06() { checkproj_trigo(sin(Interval(0.5,1.5)), Interval(-piU-0.5,piU/2.0), Interval(-piU-0.5,1.5)); }
+void TestInterval::sinProj07() { checkproj_trigo(sin(Interval(0.5,1.5)), Interval(-3*piU/2,piU/2.0), Interval(-piU-1.5,1.5)); }
+void TestInterval::sinProj08() { checkproj_trigo(sin(Interval(0.5,1.5)), Interval(0.5,piL-1.6),      Interval(0.5,1.5)); }
+void TestInterval::sinProj09() { checkproj_trigo(sin(Interval(0.5,1.5)), Interval(0.5,piU-1.5),      Interval(0.5,piU-1.5)); }
+void TestInterval::sinProj10() { checkproj_trigo(sin(Interval(0.5,1.5)), Interval(0.5,piU),          Interval(0.5,piU-0.5)); }
+void TestInterval::sinProj11() { checkproj_trigo(sin(Interval(0.5,1.5)), Interval(-piU-0.5,piU-1.5), Interval(-piU-0.5,piU-1.5)); }
+void TestInterval::sinProj12() { checkproj_trigo(sin(Interval(0.5,1.5)), Interval(-3*piU/2,piU),     Interval(-piU-1.5,piU-0.5)); }
+void TestInterval::sinProj13() { checkproj_trigo(sin(Interval(0.5,1.5)), Interval(-piU/2,piU/2.0),   Interval(0.5,1.5)); }
+void TestInterval::sinProj14() { checkproj_trigo(Interval(2,3),          Interval::ALL_REALS,        Interval::EMPTY_SET); }
+
+void TestInterval::sinProj15() { checkproj_trigo(Interval(sin(0.5),1.0), Interval(0,piU/2.0),        Interval(0.5,piU/2.0)); }
+void TestInterval::sinProj16() { checkproj_trigo(Interval(sin(0.5),1.0), Interval(0,5*piU/2.0),      Interval(0.5,5*piU/2.0)); }
+void TestInterval::sinProj17() { checkproj_trigo(Interval(sin(0.5),1.0), Interval(-2*piU,piU/2.0),   Interval(-2*piU+0.5,piU/2.0)); }
+void TestInterval::sinProj18() { checkproj_trigo(Interval(sin(0.5),1.0), Interval(-2*piU,5*piU/2.0), Interval(-2*piU+0.5,5*piU/2.0)); }
+void TestInterval::sinProj19() { checkproj_trigo(Interval(sin(0.5),1.0), Interval(-piL-0.4,piU/2.0), Interval(0.5,piU/2.0)); }
+void TestInterval::sinProj20() { checkproj_trigo(Interval(sin(0.5),1.0), Interval(-piU-0.5,piU/2.0), Interval(-piU-0.5,piU/2.0)); }
+void TestInterval::sinProj21() { checkproj_trigo(Interval(sin(0.5),1.0), Interval(-3*piU/2,piU/2.0), Interval(-3*piU/2,piU/2.0)); }
+void TestInterval::sinProj22() { checkproj_trigo(Interval(sin(0.5),1.0), Interval(0.5,piU),          Interval(0.5,piU-0.5)); }
+void TestInterval::sinProj23() { checkproj_trigo(Interval(sin(0.5),1.0), Interval(-3*piU/2,piU),     Interval(-3*piU/2,piU-0.5)); }
 
 void TestInterval::distance01() { check(ibex::distance(Interval(0,10), Interval(-5,5)), 5); }
 void TestInterval::distance02() { check(ibex::distance(Interval(0,10), Interval(5,10)), 5); }

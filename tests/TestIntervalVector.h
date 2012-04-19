@@ -58,6 +58,7 @@ public:
 		TEST_ADD(TestIntervalVector::eq01);
 		TEST_ADD(TestIntervalVector::eq02);
 		TEST_ADD(TestIntervalVector::eq03);
+		TEST_ADD(TestIntervalVector::eq04);
 
 		TEST_ADD(TestIntervalVector::mid01);
 
@@ -173,6 +174,7 @@ public:
 	void eq01();
 	void eq02();
 	void eq03();
+	void eq04();
 
 	// test: mid() const
 	void mid01();

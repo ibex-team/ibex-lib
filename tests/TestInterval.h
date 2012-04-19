@@ -114,6 +114,20 @@ public:
 		TEST_ADD(TestInterval::div2_12);
 		TEST_ADD(TestInterval::div2_13);
 
+		TEST_ADD(TestInterval::sin01);
+		TEST_ADD(TestInterval::sin02);
+		TEST_ADD(TestInterval::sin03);
+		TEST_ADD(TestInterval::sin04);
+		TEST_ADD(TestInterval::sin05);
+		TEST_ADD(TestInterval::sin06);
+		TEST_ADD(TestInterval::sin07);
+		TEST_ADD(TestInterval::sin08);
+		TEST_ADD(TestInterval::sin09);
+		TEST_ADD(TestInterval::sin10);
+		TEST_ADD(TestInterval::sin11);
+		TEST_ADD(TestInterval::sin12);
+		TEST_ADD(TestInterval::sin13);
+
 		TEST_ADD(TestInterval::getters01);
 		TEST_ADD(TestInterval::getters02);
 		TEST_ADD(TestInterval::getters03);
@@ -159,8 +173,30 @@ public:
 		TEST_ADD(TestInterval::sqrProj05);
 		TEST_ADD(TestInterval::sqrProj06);
 		TEST_ADD(TestInterval::sqrProj07);
-		TEST_ADD(TestInterval::sinProj01);
 
+		TEST_ADD(TestInterval::sinProj01);
+		TEST_ADD(TestInterval::sinProj02);
+		TEST_ADD(TestInterval::sinProj03);
+		TEST_ADD(TestInterval::sinProj04);
+		TEST_ADD(TestInterval::sinProj05);
+		TEST_ADD(TestInterval::sinProj06);
+		TEST_ADD(TestInterval::sinProj07);
+		TEST_ADD(TestInterval::sinProj08);
+		TEST_ADD(TestInterval::sinProj09);
+		TEST_ADD(TestInterval::sinProj10);
+		TEST_ADD(TestInterval::sinProj11);
+		TEST_ADD(TestInterval::sinProj12);
+		TEST_ADD(TestInterval::sinProj13);
+		TEST_ADD(TestInterval::sinProj14);
+		TEST_ADD(TestInterval::sinProj15);
+		TEST_ADD(TestInterval::sinProj16);
+		TEST_ADD(TestInterval::sinProj17);
+		TEST_ADD(TestInterval::sinProj18);
+		TEST_ADD(TestInterval::sinProj19);
+		TEST_ADD(TestInterval::sinProj20);
+		TEST_ADD(TestInterval::sinProj21);
+		TEST_ADD(TestInterval::sinProj22);
+		TEST_ADD(TestInterval::sinProj23);
 
 		TEST_ADD(TestInterval::rel_distance01);
 		TEST_ADD(TestInterval::rel_distance02);
@@ -369,7 +405,23 @@ private:
 	void div2_12();
 	void div2_13();
 
-
+	/* test:
+	 * sin
+	 * cos
+	 */
+	void sin01();
+	void sin02();
+	void sin03();
+	void sin04();
+	void sin05();
+	void sin06();
+	void sin07();
+	void sin08();
+	void sin09();
+	void sin10();
+	void sin11();
+	void sin12();
+	void sin13();
 	/* test
 	 * =============
 	 *  lb() const
@@ -494,8 +546,30 @@ private:
 	void sqrProj06();
 	void sqrProj07();
 
-	/* test: proj_sin(const Interval& y,  Interval& x) */
+	/* test: proj_sin & proj_cos */
 	void sinProj01();
+	void sinProj02();
+	void sinProj03();
+	void sinProj04();
+	void sinProj05();
+	void sinProj06();
+	void sinProj07();
+	void sinProj08();
+	void sinProj09();
+	void sinProj10();
+	void sinProj11();
+	void sinProj12();
+	void sinProj13();
+	void sinProj14();
+	void sinProj15();
+	void sinProj16();
+	void sinProj17();
+	void sinProj18();
+	void sinProj19();
+	void sinProj20();
+	void sinProj21();
+	void sinProj22();
+	void sinProj23();
 
 	void check_eq(const Interval& x, const Interval& y, bool);
 	void check_add_scal(const Interval& x, double z, const Interval& y_expected);
@@ -507,6 +581,8 @@ private:
 	void check_hull(const Interval& x, const Interval& z, const Interval& y_expected);
 	void check_inter(const Interval& x, const Interval& z, const Interval& y_expected);
 	void check_div2(const Interval& x, const Interval& y, const Interval& out1, const Interval& out2);
+	void check_trigo(const Interval& x, const Interval& y);
+	void checkproj_trigo(const Interval& y, const Interval& xbefore, const Interval& xafter);
 };
 
 #endif // __TEST_INTERVAL__

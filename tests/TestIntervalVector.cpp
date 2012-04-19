@@ -221,6 +221,14 @@ void TestIntervalVector::eq03() {
 	TEST_ASSERT(!(x1!=x2));
 }
 
+void TestIntervalVector::eq04() {
+	TEST_ASSERT(IntervalVector::empty(2)==IntervalVector::empty(2));
+	TEST_ASSERT(IntervalVector::empty(2)!=IntervalVector::empty(3));
+	IntervalVector x(2);
+	x.set_empty();
+	TEST_ASSERT(IntervalVector::empty(2)==x);
+}
+
 void TestIntervalVector::mid01() {
 	IntervalVector x(3,_x);
 	IntervalVector m=x.mid();

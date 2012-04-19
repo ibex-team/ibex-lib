@@ -15,6 +15,7 @@
 
 #include "Functions.h"
 #include <float.h>
+#include <cassert>
 #include <BIAS/BiasF.h>
 
 namespace ibex {
@@ -734,11 +735,14 @@ inline Interval min(const Interval& x, const Interval& y) {
 inline bool proj_mul(const Interval& y, Interval& x1, Interval& x2) {
 	if (y.contains(0)) {
 		if (!x2.contains(0))                           // if y and x2 contains 0, x1 can be any real number.
-			if (x1.div2_inter(y,x2).is_empty()) return false;   // otherwise y=x1*x2 => x1=y/x2
-		return x1.contains(0) || (!x2.div2_inter(y,x1).is_empty());
+			if (x1.div2_inter(y,x2).is_empty()) { x2.set_empty(); return false; }  // otherwise y=x1*x2 => x1=y/x2
+		if (x1.contains(0)) return true;
+		if (x2.div2_inter(y,x1).is_empty()) { x1.set_empty(); return false; }
+		else return true;
 	} else {
-		if (x1.div2_inter(y,x2).is_empty()) return false;
-		return !x2.div2_inter(y,x1).is_empty();
+		if (x1.div2_inter(y,x2).is_empty()) { x2.set_empty(); return false; }
+		if (x2.div2_inter(y,x1).is_empty()) { x1.set_empty(); return false; }
+		else return true;
 	}
 }
 
@@ -789,27 +793,34 @@ inline bool proj_trigo(const Interval& y, Interval& x, int ftype) {
 	const int SIN=1;
 	const int TAN=2;
 
-	if (x.lb()==NEG_INFINITY || x.ub()==POS_INFINITY) return true; // infinity of periods
-
 	Interval period_0, nb_period;
 
 	switch (ftype) {
 	case COS :
-		period_0 = acos(y);
-		nb_period = x / Interval::PI;
-		break;
+		period_0 = acos(y); break;
 	case SIN :
-		period_0 = asin(y);
-		nb_period = (x+Interval::HALF_PI) / Interval::PI;
-		break;
+		period_0 = asin(y); break;
 	case TAN :
-	default :
-		period_0 = atan(y);
-		nb_period = (x+Interval::HALF_PI) / Interval::PI;
-		break;
-	}
-	if (period_0.is_empty()) return false;
+		period_0 = atan(y); break;
+	default : 
+		assert(false); break;
+	} 
 
+	if (period_0.is_empty()) { x.set_empty(); return false; }
+
+	if (x.lb()==NEG_INFINITY || x.ub()==POS_INFINITY) return true; // infinity of periods
+
+	switch (ftype) {
+	case COS :
+		nb_period = x / Interval::PI; break;
+	case SIN :
+		nb_period = (x+Interval::HALF_PI) / Interval::PI; break;
+	case TAN :
+		nb_period = (x+Interval::HALF_PI) / Interval::PI; break;
+	default :
+		assert(false); break;
+	}
+	
 	int p1 = ((int) nb_period.lb())-1;
 	int p2 = ((int) nb_period.ub());
 	Interval tmp1, tmp2;

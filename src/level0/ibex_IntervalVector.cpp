@@ -233,6 +233,8 @@ int IntervalVector::extr_diam_index(bool min) const {
 }
 
 std::ostream& operator<<(std::ostream& os, const IntervalVector& x) {
+	if (x.is_empty()) return os << "empty vector";
+
 	os << "(";
 	for (int i=0; i<x.size(); i++)
 		os << x[i] << (i<x.size()-1? " ; " : "");

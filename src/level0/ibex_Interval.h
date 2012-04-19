@@ -588,21 +588,23 @@ inline Interval sign(const Interval& x) {
 }
 
 inline bool proj_add(const Interval& y, Interval& x1, Interval& x2) {
-	x1 &= y-x2;
-	x2 &= y-x1;
-	return x1.is_empty() || x2.is_empty();
+	if ((x1 &= y-x2).is_empty()) { x2.set_empty(); return false; }
+	if ((x2 &= y-x1).is_empty()) { x1.set_empty(); return false; }
+	return true;
 }
 
 inline bool proj_sub(const Interval& y, Interval& x1, Interval& x2) {
-	x1 &= y+x2;
-	x2 &= x1-y;
-	return x1.is_empty() || x2.is_empty();
+	if ((x1 &= y+x2).is_empty()) { x2.set_empty(); return false; }
+	if ((x2 &= x1-y).is_empty()) { x1.set_empty(); return false; }
+	return true;
 }
 
 inline bool proj_div(const Interval& y, Interval& x1, Interval& x2) {
-	x1 &= y*x2;
-	x2.div2_inter(x1,y);
-	return (!x1.is_empty()) && (!x2.is_empty());
+	if ((x1 &= y*x2).is_empty()) { x2.set_empty(); return false; }
+	Interval tmp=y;
+	proj_mul(x1, tmp, x2);
+	if (x2.is_empty()) { x1.set_empty(); return false; }
+	return true;
 }
 
 inline bool proj_sqrt(const Interval& y, Interval& x) {

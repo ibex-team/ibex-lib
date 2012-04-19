@@ -212,9 +212,9 @@ inline std::ostream& print(std::ostream& os, const M& m) {
 	os << "(";
 	for (int i=0; i<m.nb_rows(); i++) {
 		os << "(";
-		for (int j=0; j<m.nb_rows(); j++) {
+		for (int j=0; j<m.nb_cols(); j++) {
 			os << m[i][j];
-			if (j<m.nb_rows()-1) os << " ; ";
+			if (j<m.nb_cols()-1) os << " ; ";
 		}
 		os << ")";
 	}
@@ -245,7 +245,7 @@ IntervalMatrix& IntervalMatrix::operator+=(const Matrix& m) {
 }
 
 IntervalMatrix& IntervalMatrix::operator+=(const IntervalMatrix& m) {
-	return set_subM<IntervalMatrix,IntervalMatrix>(*this,m);
+	return set_addM<IntervalMatrix,IntervalMatrix>(*this,m);
 }
 
 Vector& Vector::operator-=(const Vector& x) {
