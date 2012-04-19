@@ -32,13 +32,9 @@ namespace ibex {
 
   /*********** amohc ******/
   //parameters
-  const double Mohc::RHO_INTERESTING=0.65;
-  const double Mohc::TAU_FREQ=0.10;
+  const double Mohc::RHO_INTERESTING=0.65; //0.65
+  const double Mohc::TAU_FREQ=0.10; //0.10
   
-  //auxiliary variables
-  int Mohc::nb_calls=0;
-  int Mohc::nb_interesting=0;
-  /*************************/
   
   
   //for analysis purposes only
@@ -51,7 +47,7 @@ namespace ibex {
   
 MohcRevise::MohcRevise(ConstraintOG& ctr_mohc, Space& space, REAL epsilon, REAL univ_newton_min_width, REAL tau_mohc, bool amohc) :
       Operator(space), ctr_mohc(ctr_mohc), tau_mohc(tau_mohc), epsilon(epsilon), univ_newton_min_width(univ_newton_min_width),
-      active_mono_proc(1), amohc(amohc), LB(NULL), RB(NULL) { 
+      active_mono_proc(1), amohc(amohc), LB(NULL), RB(NULL), nb_calls(0), nb_interesting(0) { 
    ApplyFmin=new int[ctr_mohc.nb_vars()];
    ApplyFmax=new int[ctr_mohc.nb_vars()];
    LB=new INTERVAL[ctr_mohc.nb_vars()];
@@ -60,7 +56,7 @@ MohcRevise::MohcRevise(ConstraintOG& ctr_mohc, Space& space, REAL epsilon, REAL 
 
   MohcRevise::MohcRevise (const MohcRevise& mhrv) : Operator(mhrv.space), Contractor(mhrv),  
   ctr_mohc(mhrv.ctr_mohc), tau_mohc(mhrv.tau_mohc), epsilon(mhrv.epsilon), 
-  univ_newton_min_width(mhrv.univ_newton_min_width), active_mono_proc(1), amohc(mhrv.amohc), LB(NULL), RB(NULL)
+  univ_newton_min_width(mhrv.univ_newton_min_width), active_mono_proc(1), amohc(mhrv.amohc), LB(NULL), RB(NULL), nb_calls(0), nb_interesting(0)
    { ApplyFmin=new int[ctr_mohc.nb_vars()];
    ApplyFmax=new int[ctr_mohc.nb_vars()];
    LB=new INTERVAL[ctr_mohc.nb_vars()];
@@ -130,14 +126,21 @@ void MohcRevise::contract() {
 	     rho=1.01;
 	   
 	   if(amohc){
-	     Mohc::nb_calls++;
-	     if(rho < Mohc::RHO_INTERESTING)
-	       Mohc::nb_interesting++;
-	     if(Mohc::nb_calls > 50 && (REAL)Mohc::nb_interesting/(REAL)Mohc::nb_calls < Mohc::TAU_FREQ)
+	     nb_calls++;
+	     if(nb_calls%500==100){
+                 cout << "FREQ:" << ((REAL)nb_interesting/(REAL)nb_calls) << endl;
+             } 
+//cout << rho << endl;
+	     if(rho < Mohc::RHO_INTERESTING){
+             //  cout << rho << endl;
+	       nb_interesting++;
+             }
+	     if(nb_calls > 50 && (REAL)nb_interesting/(REAL)nb_calls < Mohc::TAU_FREQ)
 	       tau_mohc=0.5;
 	     else 
 	       tau_mohc=0.9999;
 	   }
+           //cout << tau_mohc << endl;
 	   
 
 	   if(rho<tau_mohc) active_mono_proc=1;
