@@ -30,16 +30,22 @@ void TestHC4::ponts30() {
 	}
 //	cout << "before="<< box << endl;
 
-	for (int i=0; i<30; i++)
+	for (int i=0; i<30; i++) {
 		c[i]->contract(box);
+		//cout << box << endl;
+		//cout << p30.hc4r_box[i] << endl;
+		//c[i]->hc4r.eval.f.cf.print<Domain>();
+		TEST_ASSERT(almost_eq(box, p30.hc4r_box[i],1e-02));
+	}
+	//cout << "after="<< box << endl;
 
-	cout << "after="<< box << endl;
+
 
 	for (int i=0; i<30; i++) {
 		delete c[i];
 		delete ctr[i];
 	}
-
+	//cout << "goal=" << p30.hc4r_box << endl;
 }
 
 } // end namespace ibex

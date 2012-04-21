@@ -25,6 +25,7 @@ public:
 	void check(double y_actual, double y_expected);
 	void check(const Interval& y_actual, const Interval& y_expected);
 	void check(const IntervalVector& y_actual, const IntervalVector& y_expected);
+	bool almost_eq(const IntervalVector& y_actual, const IntervalVector& y_expected, double err);
 };
 
 #endif // __UTILS_H__

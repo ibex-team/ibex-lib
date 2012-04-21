@@ -41,7 +41,7 @@ public:
 	 * Create a n-sized vector. All the components are (-oo,+oo)
 	 * \pre n>0
 	 */
-	IntervalVector(int n);
+	explicit IntervalVector(int n);
 
 	/**
 	 * \brief Create [x; ....; x]

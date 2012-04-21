@@ -34,8 +34,9 @@ public:
 
 	const NumConstraint& ctr;
 
-private:
 	HC4ReviseAlgo hc4r;
+private:
+
 };
 
 } // namespace ibex

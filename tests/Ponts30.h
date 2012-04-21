@@ -22,7 +22,7 @@ public:
 
 	Function f;
 	IntervalVector init_box;
-
+	IntervalMatrix hc4r_box; // after applying HC4Revise once on each ctr
 private:
 	void build_box();
 	void build_equ();
