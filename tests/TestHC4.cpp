@@ -11,7 +11,7 @@
 #include "TestHC4.h"
 #include "Ponts30.h"
 #include "ibex_HC4Revise.h"
-#include "ibex_Propagation.h"
+#include "ibex_HC4.h"
 
 namespace ibex {
 
@@ -38,9 +38,13 @@ void TestHC4::ponts30() {
 		TEST_ASSERT(almost_eq(box, p30.hc4r_box[i],1e-02));
 	}
 	//cout << "after="<< box << endl;
+	box = p30.init_box;
 
-
-
+	Array<NumConstraint> a(ctr,30);
+	HC4 hc4(a);
+	box=p30.init_box;
+	hc4.contract(box);
+	cout << "after="<< box << endl;
 	for (int i=0; i<30; i++) {
 		delete c[i];
 		delete ctr[i];

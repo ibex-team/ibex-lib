@@ -15,7 +15,7 @@
 #include "ibex_Agenda.h"
 #include "ibex_Contractor.h"
 #include "ibex_HyperGraph.h"
-#include "ibex_ContractorList.h"
+#include "ibex_Array.h"
 
 namespace ibex {
 
@@ -33,7 +33,7 @@ public:
   * \see #ibex::Contractor::contract(Cell& cell, const Contractor::Indicators& p) {
   * #ibex::Contractor::contract(Space& space, const Contractor::Indicators& p),
   * #ibex::Contractor::contract(const Contractor::Indicators& p) */
- Propagation(ContractorList& cl, REAL ratio=default_ratio, bool incremental=false);
+ Propagation(Array<Contractor>& cl, double ratio=default_ratio, bool incremental=false);
 
  /* warning: do not replace adj(p.adj) by adj(p). The adjacency information (i.e., whether a variable is involved in a constraint
   * or not) is supplied by the original Composite, NOT the propagation Composite (which can be looser). Therefore, this information must be
@@ -64,7 +64,7 @@ public:
  virtual void contract(IntervalVector& box, const Indicators& idc);
 
  /** The list of contractors to propagate */
- ContractorList list;
+ Array<Contractor> list;
 
  /** Ratio (see \link Propagation(const ContractorList&, Space&, REAL, bool) constructor \endlink for details). */
  const REAL ratio;

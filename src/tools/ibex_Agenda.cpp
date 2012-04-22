@@ -10,16 +10,24 @@
  * ---------------------------------------------------------------------------- */
 
 #include "ibex_Agenda.h"
+#include <cassert>
 
 namespace ibex {
 
 void ArcAgenda::init(const HyperGraph& g) {
-  for (int c=0; c<g.nb_ctr(); c++)
-    for (int i=0; i<g.ctr_nb_vars(c); i++)
-      push(c,g.ctr_ith_var(c,i));
+	assert(nb_var==g.nb_var());
+	assert(nb_ctr==g.nb_ctr());
+
+	for (int c=0; c<g.nb_ctr(); c++)
+		for (int i=0; i<g.ctr_nb_vars(c); i++)
+			push(c,g.ctr_ith_var(c,i));
 }
 
 void ArcAgenda::propagate(const HyperGraph& g, int c, int v) {
+	assert(nb_var==g.nb_var());
+	assert(nb_ctr==g.nb_ctr());
+	assert(c>=0 && c<nb_ctr);
+	assert(v>=0 && v<nb_var);
 
 	for (int i=0; i<g.var_nb_ctrs(v); i++) {
 		int c2 = g.var_ith_ctr(v,i);
@@ -32,23 +40,27 @@ void ArcAgenda::propagate(const HyperGraph& g, int c, int v) {
 	}
 }
 
+void ArcAgenda::propagate(const HyperGraph& g, const BoolMask& m) {
+	for (int i=0; i<nb_var; i++)
+		if (m[i]) propagate(g,-1,i);
+}
 
 std::ostream& operator<<(std::ostream& os, const ArcAgenda& a) {
-  if (a.empty()) return os << "(empty)";
+	if (a.empty()) return os << "(empty)";
 
-  int M = a.nb_var;
-  int i = a.first/M;
-  int j = a.first%M;
-  int tmp;
+	int M = a.nb_var;
+	int i = a.first/M;
+	int j = a.first%M;
+	int tmp;
 
-  do {
-    os << "(" << i << ", " << j << ") ";
-    tmp = a.table[i*M+j];
-    i = tmp/M;
-    j = tmp%M;
-  } while (tmp!=a.first);
+	do {
+		os << "(" << i << ", " << j << ") ";
+		tmp = a.table[i*M+j];
+		i = tmp/M;
+		j = tmp%M;
+	} while (tmp!=a.first);
 
-  return os << std::endl;
+	return os << std::endl;
 }
 
 } // namespace ibex

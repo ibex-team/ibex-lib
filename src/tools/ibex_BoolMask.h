@@ -22,19 +22,107 @@ namespace ibex {
 class BoolMask {
 
 public:
+	/**
+	 * \brief Create a bool mask of size.
+	 */
 	BoolMask(int n);
+
+	/**
+	 * \brief set all bits to true.
+	 */
 	void set_all();
+
+	/**
+	 * \brief set all bits to false.
+	 */
 	void unset_all();
+
+	/**
+	 * \brief true iff all bits are true.
+	 */
 	bool all_set() const;
+
+	/**
+	 * \brief true iff all bits are false.
+	 */
 	bool all_unset() const;
+
+	/**
+	 * \brief The ith bit.
+	 */
 	bool operator[](int i);
+
+	/**
+	 * \brief The ith bit.
+	 */
 	const bool operator[](int i) const;
+
+	/**
+	 * \brief set the ith bit to true.
+	 */
 	void set(int i);
+
+	/**
+	 * \brief Set the ith bit to false.
+	 */
 	void unset(int i);
+
+	/**
+	 * \brief Delete *this.
+	 */
 	~BoolMask();
 private:
+	int n;
 	bool* mask;
 };
+
+
+/*================================== inline implementations ========================================*/
+BoolMask::BoolMask(int n) : n(n), mask(new bool[n]) {
+	unset_all();
+}
+
+void BoolMask::set_all() {
+	for (int i=0; i<n; i++)
+		set(i);
+}
+
+void BoolMask::unset_all() {
+	for (int i=0; i<n; i++)
+		unset(i);
+}
+
+bool BoolMask::all_set() const {
+	for (int i=0; i<n; i++)
+		if (!(*this)[i]) return false;
+	return true;
+}
+
+bool BoolMask::all_unset() const {
+	for (int i=0; i<n; i++)
+		if ((*this)[i]) return false;
+	return true;
+}
+
+bool BoolMask::operator[](int i) {
+	return mask[i];
+}
+
+const bool BoolMask::operator[](int i) const {
+	return mask[i];
+}
+
+void BoolMask::set(int i) {
+	mask[i]=true;
+}
+
+void BoolMask::unset(int i) {
+	mask[i]=false;
+}
+
+BoolMask::~BoolMask() {
+	delete[] mask;
+}
 
 } // namespace ibex
 #endif // __IBEX_BOOL_MASK_H__

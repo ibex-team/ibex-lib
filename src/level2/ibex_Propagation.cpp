@@ -17,13 +17,16 @@ namespace ibex {
 /*! Default propagation ratio. */
 #define __IBEX_DEFAULT_RATIO_PROPAG           0.1
 
-Propagation::Propagation(ContractorList& cl, double ratio, bool incremental) :
-		  Contractor(cl.nb_var), list(cl), ratio(ratio), incremental(incremental),
-		  g(list.size(), cl.nb_var), agenda(cl.size(), cl.nb_var) {
+Propagation::Propagation(Array<Contractor>& cl, double ratio, bool incremental) :
+		  Contractor(cl[0].nb_var), list(cl), ratio(ratio), incremental(incremental),
+		  g(list.size(), cl[0].nb_var), agenda(cl.size(), cl[0].nb_var) {
+
+	for (int i=1; i<cl.size(); i++)
+		assert(cl[i].nb_var==nb_var);
 
 	for (int i=0; i<list.size(); i++)
-		for (int j=0; j<list.nb_var; j++)
-			if (cl(i).can_contract(j)) g.add_arc(i,j,1);
+		for (int j=0; j<nb_var; j++)
+			if (cl[i].can_contract(j)) g.add_arc(i,j,1);
 
 }
 
@@ -86,7 +89,7 @@ void  Propagation::contract(IntervalVector& _box, const Indicators& indic) {
 		/* "fine" propagation option  */
 		/********************************/
 		try {
-			list(c).contract(box, p);
+			list[c].contract(box, p);
 		}
 		catch (EmptyBoxException& e) {
 			agenda.flush();

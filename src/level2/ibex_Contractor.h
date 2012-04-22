@@ -48,7 +48,7 @@ public:
 	 *
 	 * By default, return true.
 	 */
-	virtual bool can_contract(int v) {
+	virtual bool can_contract(int v) const {
 		return true;
 	}
 
