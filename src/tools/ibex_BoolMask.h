@@ -33,6 +33,11 @@ public:
 	BoolMask& operator=(const BoolMask& m);
 
 	/**
+	 * \brief Logical OR.
+	 */
+	BoolMask& operator|=(const BoolMask& m);
+
+	/**
 	 * \brief set all bits to true.
 	 */
 	void set_all();
@@ -55,12 +60,12 @@ public:
 	/**
 	 * \brief The ith bit.
 	 */
-	bool operator[](int i);
+	bool& operator[](int i);
 
 	/**
 	 * \brief The ith bit.
 	 */
-	const bool operator[](int i) const;
+	const bool& operator[](int i) const;
 
 	/**
 	 * \brief set the ith bit to true.
@@ -89,7 +94,13 @@ inline BoolMask::BoolMask(int n) : n(n), mask(new bool[n]) {
 
 inline BoolMask& BoolMask::operator=(const BoolMask& m) {
 	for (int i=0; i<n; i++)
-		(*this)[i]=m[i];
+		(*this)[i] = m[i];
+	return *this;
+}
+
+inline BoolMask& BoolMask::operator|=(const BoolMask& m) {
+	for (int i=0; i<n; i++)
+		(*this)[i] |= m[i];
 	return *this;
 }
 
@@ -115,11 +126,11 @@ inline bool BoolMask::all_unset() const {
 	return true;
 }
 
-inline bool BoolMask::operator[](int i) {
+inline bool& BoolMask::operator[](int i) {
 	return mask[i];
 }
 
-inline const bool BoolMask::operator[](int i) const {
+inline const bool& BoolMask::operator[](int i) const {
 	return mask[i];
 }
 

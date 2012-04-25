@@ -19,7 +19,7 @@ namespace ibex {
 
 /** \ingroup tools
  *
- * \brief Array of const references.
+ * \brief Array of references.
  *
  */
 template<class T>
@@ -126,23 +126,16 @@ bool Array<T>::empty() const {
 	return _nb==0;
 }
 
-/**
- * \brief Return the number of objects.
- */
 template<class T>
 int Array<T>::size() const {
 	return _nb;
 }
 
-/**
- * \brief Return the ith reference (as const). */
 template<class T>
 T& Array<T>::operator[](int i) {
 	return *array[i];
 }
 
-/**
- * \brief Return the ith reference (as const). */
 template<class T>
 T& Array<T>::operator[](int i) const {
 	return *array[i];
