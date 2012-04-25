@@ -22,13 +22,13 @@ namespace ibex {
  *
  * \brief Contractor interface.
  */
-class Contractor {
+class Ctc {
 
 public:
 	/**
 	 * Build a contractor for n-dimensional boxes
 	 */
-	Contractor(int n);
+	Ctc(int n);
 
 	/**
 	 * \brief Contraction.
@@ -57,7 +57,7 @@ public:
 	/**
 	 * \brief Delete *this.
 	 */
-	virtual ~Contractor();
+	virtual ~Ctc();
 
 	/**
 	 * \brief The number of variables this contractor works with.

@@ -1,5 +1,5 @@
 /* ============================================================================
- * I B E X - HC4 Revise (forward-backward algorithm)
+ * I B E X - HC4Revise contractor
  * ============================================================================
  * Copyright   : Ecole des Mines de Nantes (FRANCE)
  * License     : This program can be distributed under the terms of the GNU LGPL.
@@ -9,35 +9,22 @@
  * Created     : Feb 27, 2012
  * ---------------------------------------------------------------------------- */
 
-#ifndef __IBEX_HC4REVISE_H__
-#define __IBEX_HC4REVISE_H__
-
-#include "ibex_Contractor.h"
-#include "ibex_HC4ReviseAlgo.h"
+#include "ibex_CtcHC4Revise.h"
 
 namespace ibex {
 
-/**
- * \ingroup level2
- * \brief HC4Revise contractor.
- *
- */
-class HC4Revise: public ibex::Contractor {
+CtcHC4Revise::CtcHC4Revise(const NumConstraint& ctr) : Ctc(ctr.f.nb_symbols()), ctr(ctr), hc4r(ctr) {
 
-public:
+}
 
-	HC4Revise(const NumConstraint& ctr);
+void CtcHC4Revise::contract(IntervalVector& box) {
+	hc4r.contract(box);
 
-	virtual void contract(IntervalVector& box);
+	//hc4r.eval.f.cf.print<Domain>();
+}
 
-	virtual bool can_contract(int v) const;
-
-	const NumConstraint& ctr;
-
-	HC4ReviseAlgo hc4r;
-private:
-
-};
+bool CtcHC4Revise::can_contract(int v) const {
+	return ctr.f.used(v);
+}
 
 } // namespace ibex
-#endif // IBEX_HC4REVISE_H_

@@ -8,7 +8,7 @@
 // Last Update : 
 //============================================================================
 
-#include "ibex_HC4ReviseAlgo.h"
+#include "ibex_HC4Revise.h"
 #include "ibex_BasicDecorator.h"
 
 namespace ibex {

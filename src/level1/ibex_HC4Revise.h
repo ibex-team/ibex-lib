@@ -8,8 +8,8 @@
 // Last Update : 
 //============================================================================
 
-#ifndef __IBEX_HC4_REVISE_ALGO_H__
-#define __IBEX_HC4_REVISE_ALGO_H__
+#ifndef __IBEX_HC4_REVISE_H__
+#define __IBEX_HC4_REVISE_H__
 
 #include "ibex_Eval.h"
 #include "ibex_CompiledFunction.h"
@@ -124,4 +124,4 @@ inline void HC4ReviseAlgo::backward(const Domain& root) {
 }
 
 } /* namespace ibex */
-#endif /* __IBEX_HC4_REVISE_ALGO_H__ */
+#endif /* __IBEX_HC4_REVISE_H__ */

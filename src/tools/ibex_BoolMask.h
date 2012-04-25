@@ -28,6 +28,11 @@ public:
 	BoolMask(int n);
 
 	/**
+	 * \brief Set a bool mask to another
+	 */
+	BoolMask& operator=(const BoolMask& m);
+
+	/**
 	 * \brief set all bits to true.
 	 */
 	void set_all();
@@ -80,6 +85,12 @@ private:
 
 inline BoolMask::BoolMask(int n) : n(n), mask(new bool[n]) {
 	unset_all();
+}
+
+inline BoolMask& BoolMask::operator=(const BoolMask& m) {
+	for (int i=0; i<n; i++)
+		(*this)[i]=m[i];
+	return *this;
 }
 
 inline void BoolMask::set_all() {

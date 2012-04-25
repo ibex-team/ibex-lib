@@ -8,10 +8,10 @@
 // Last Update : Apr 22, 2012
 //============================================================================
 
-#ifndef __IBEX_HC4_H__
-#define __IBEX_HC4_H__
+#ifndef __IBEX_CTC_HC4_H__
+#define __IBEX_CTC_HC4_H__
 
-#include "ibex_Propagation.h"
+#include "ibex_CtcPropag.h"
 #include "ibex_NumConstraint.h"
 #include "ibex_Array.h"
 
@@ -22,7 +22,7 @@ namespace ibex {
  * \brief HC4 propagation.
  *
  */
-class HC4 : public Propagation {
+class CtcHC4 : public CtcPropag {
   public:
   /**
    * \brief Create a HC4 propagation with a CSP (array of constraints).
@@ -30,14 +30,14 @@ class HC4 : public Propagation {
    * \param ratio (optional) - \see #ibex::Propagation
    * \param incremental (optional) - \see #ibex::Propagation
    */
-  HC4(const Array<NumConstraint>& csp, double ratio=default_ratio, bool incremental=false);
+  CtcHC4(const Array<NumConstraint>& csp, double ratio=default_ratio, bool incremental=false);
 
   /**
    * \brief Delete *this.
    */
-  ~HC4();
+  ~CtcHC4();
 };
 
 
 } // end namespace ibex
-#endif // __IBEX_HC4_H__
+#endif // __IBEX_CTC_HC4_H__

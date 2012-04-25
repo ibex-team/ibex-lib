@@ -14,7 +14,7 @@
 #include "ibex_Domain.h"
 //#include "ibex_Function.h"
 #include "ibex_Expr.h"
-#include "ibex_HC4ReviseAlgo.h"
+#include "ibex_HC4Revise.h"
 #include "ibex_Decorator.h"
 
 namespace ibex {

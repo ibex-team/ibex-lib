@@ -1,6 +1,6 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_HC4.cpp
+// File        : HC4 Contractor
 // Author      : Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
@@ -8,26 +8,26 @@
 // Last Update : Apr 22, 2012
 //============================================================================
 
-#include "ibex_HC4.h"
-#include "ibex_HC4Revise.h"
+#include "ibex_CtcHC4.h"
+#include "ibex_CtcHC4Revise.h"
 
 namespace ibex {
 
 namespace {
-Array<Contractor> convert(const Array<NumConstraint>& csp) {
-	std::vector<Contractor*> vec;
+Array<Ctc> convert(const Array<NumConstraint>& csp) {
+	std::vector<Ctc*> vec;
 	for (int i=0; i<csp.size(); i++) {
-		vec.push_back(new HC4Revise(csp[i]));
+		vec.push_back(new CtcHC4Revise(csp[i]));
 	}
 	return vec;
 }
 }
 
-HC4::HC4(const Array<NumConstraint>& csp, double ratio, bool incremental) :
-		Propagation(convert(csp), default_ratio, incremental) {
+CtcHC4::CtcHC4(const Array<NumConstraint>& csp, double ratio, bool incremental) :
+		CtcPropag(convert(csp), default_ratio, incremental) {
 }
 
-HC4::~HC4() {
+CtcHC4::~CtcHC4() {
 	for (int i=0; i<list.size(); i++)
 		delete &list[i];
 }
