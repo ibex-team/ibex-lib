@@ -20,12 +20,12 @@ HyperGraph::HyperGraph(int nb_ctr, int nb_var) : m(nb_ctr), n(nb_var) {
 
 	for (int i=0; i<m; i++) {
 		matrix[i]=new int[n];
-		ctr_adj[i]=new int[n+1];
+		ctr_adj[i]=new int[n+1]; // the first place is kept for storing the size (arity) of ctr i
 		for (int j=0; j<n; j++) matrix[i][j]=0;
 		for (int j=0; j<n+1; j++) ctr_adj[i][j]=0;
 	}
 	for (int j=0; j<n; j++) {
-		var_adj[j]=new int[m+1];
+		var_adj[j]=new int[m+1]; // the first place is kept for storing the size (arity) of var j
 		for (int i=0; i<m+1; i++) var_adj[j][i]=0;
 	}
 }
@@ -35,11 +35,9 @@ void HyperGraph::add_arc(int ctr, int var, int value) {
 
 	matrix[ctr][var]=value;
 
-	ctr_adj[ctr][ctr_adj[ctr][0]]=var;
-	ctr_adj[ctr][0]++;
+	ctr_adj[ctr][++ctr_adj[ctr][0]]=var;
 
-	var_adj[var][var_adj[var][0]]=ctr;
-	var_adj[var][0]++;
+	var_adj[var][++var_adj[var][0]]=ctr;
 }
 
 

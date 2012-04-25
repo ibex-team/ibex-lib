@@ -141,4 +141,26 @@ bool Interval::div2_inter(const Interval& num, const Interval& div, Interval& ou
 	}
 }
 
+double Interval::delta(const Interval& x) const {
+	if (is_empty()) return 0;
+	if (x.is_empty()) return diam();
+
+	if (x.lb()==NEG_INFINITY) {
+		if (x.ub()==POS_INFINITY) return 0;
+		else return ub()==POS_INFINITY ? POS_INFINITY : ub()-x.ub();
+	}
+	else if (x.ub()==POS_INFINITY) {
+		if (x.lb()==NEG_INFINITY) return 0;
+		else return lb()==NEG_INFINITY ? POS_INFINITY : x.lb()-lb();
+	}
+	else return diam() - x.diam();
+}
+
+double Interval::ratiodelta(const Interval& x) const {
+	double d=delta(x);
+	if (d==POS_INFINITY) return 1;
+	double D=diam();
+	return (D==0 || D==POS_INFINITY) ? 0.0 : (d/D); // if this.diam()=infinity here, necessarily d=0
+}
+
 } // end namespace

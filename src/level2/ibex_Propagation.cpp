@@ -17,16 +17,18 @@ namespace ibex {
 /*! Default propagation ratio. */
 #define __IBEX_DEFAULT_RATIO_PROPAG           0.1
 
-Propagation::Propagation(Array<Contractor>& cl, double ratio, bool incremental) :
+Propagation::Propagation(const Array<Contractor>& cl, double ratio, bool incremental) :
 		  Contractor(cl[0].nb_var), list(cl), ratio(ratio), incremental(incremental),
-		  g(list.size(), cl[0].nb_var), agenda(cl.size(), cl[0].nb_var) {
+		  g(cl.size(), cl[0].nb_var), agenda(cl.size(), cl[0].nb_var) {
 
-	for (int i=1; i<cl.size(); i++)
-		assert(cl[i].nb_var==nb_var);
+	for (int i=1; i<list.size(); i++)
+		assert(list[i].nb_var==nb_var);
 
 	for (int i=0; i<list.size(); i++)
 		for (int j=0; j<nb_var; j++)
-			if (cl[i].can_contract(j)) g.add_arc(i,j,1);
+			if (list[i].can_contract(j)) {
+				g.add_arc(i,j,1);
+			}
 
 }
 
@@ -36,7 +38,7 @@ void Propagation::contract(IntervalVector& box) {
 
 void  Propagation::contract(IntervalVector& _box, const Indicators& indic) {
 
-	if (incremental && indic.impact_on())
+	if (incremental && indic.impact_on)
 		if (indic.impact.all_unset()) return;  // nothing to do
 		else agenda.propagate(g,indic.impact);
 	else
@@ -59,17 +61,14 @@ void  Propagation::contract(IntervalVector& _box, const Indicators& indic) {
 	//     if (thres(i)<w) thres(i)=w;
 	//   }
 	Indicators p(_box.size());
-	p.set_scope_on();
-	p.set_impact_on();
+	p.scope_on=true;
+	p.impact_on=true;
 
 	while (!agenda.empty()) {
 
 		agenda.pop(c,v);
 
 		//cout << "Narrowing for (c" << c << ", v" << v << ")" << endl;
-		//     cout << "Narrowing for " << list(c) << " on " << space.env.symbol_name(space.key(IBEX_VAR, v)) << " -> " << space.box(v+1) << endl;
-		//     space.set_output_flags(31);
-		//     cout << space << endl;
 		//projbox(v+1) = box(v+1);
 
 		if (c!=old_c)
@@ -96,13 +95,16 @@ void  Propagation::contract(IntervalVector& _box, const Indicators& indic) {
 			throw e;
 		}
 
-		//cout << "  =>" << space.box(v+1) << endl;
+		//cout << "  =>" << box[v] << endl;
+		//cout << agenda << endl;
 
-		if (propbox[v].rel_distance(box[v])>=ratio) {
+		//if (propbox[v].rel_distance(box[v])>=ratio) {
+		if (propbox[v].ratiodelta(box[v])>=ratio) {
 			//cout << "before prop q=" << agenda << endl;
 			/********************************/
 			/* "fine" propagation option  */
-			if (projbox[v].rel_distance(box[v])>=ratio) {
+			//if (projbox[v].rel_distance(box[v])>=ratio) {
+			if (projbox[v].ratiodelta(box[v])>=ratio) {
 				agenda.propagate(g,c,v);
 			} else {
 				/********************************/

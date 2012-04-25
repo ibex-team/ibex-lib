@@ -162,7 +162,7 @@ class ArcAgenda : Agenda {
    *
    *  \see #ibex::Propagation.
    */
-  inline void propagate(const HyperGraph& g, const BoolMask& m);
+  void propagate(const HyperGraph& g, const BoolMask& m);
 
 
   /**

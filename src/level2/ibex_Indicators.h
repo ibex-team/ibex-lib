@@ -25,55 +25,41 @@ class Indicators {
 public:
 
 	/**
-	 * Creates a new indicators structure with
-	 * nothing activated (all the indicators are "off")
+	 * \brief Creates a new indicators structure.
+	 *
+	 * The indicators are all "off" (not activated) and
+	 * the bits of each indicators are all "false" (unset).
 	 */
 	Indicators(int n);
 
 	/**
-	 * Set whether a variable has been impacted
+	 * \brief Set whether a variable has been impacted
 	 * since the last call to the contractor.
 	 */
 	BoolMask impact;
 
 	/**
-	 * Set whether a variable has to be
+	 * \brief Set whether a variable has to be
 	 * considered by the next call to the contractor.
 	 */
 	BoolMask scope;
 
 	/**
-	 * Add the impact to the indicators
+	 * \brief Whether the impact is activated (on).
 	 */
-	void set_impact_on();
+	bool impact_on;
 
 	/**
-	 * Remove the impact from the indicators
+	 * \brief Whether the scope is activated (on).
 	 */
-	void set_impact_off();
-
-	/**
-	 * Add the scope to the indicators
-	 */
-	void set_scope_on();
-
-	/**
-	 * Remove the scope from the indicators
-	 */
-	void set_scope_off();
-
-	/**
-	 * True if the impact is activated
-	 */
-	bool impact_on() const;
-
-	/**
-	 * True if the scope is activated
-	 */
-	bool scope_on() const;
-
-
+	bool scope_on;
 };
+
+/*================================== inline implementations ========================================*/
+
+inline Indicators::Indicators(int n) : impact(n), scope(n), impact_on(false), scope_on(false) {
+
+}
 
 } // namespace ibex
 #endif // __IBEX_INDICATORS_H__

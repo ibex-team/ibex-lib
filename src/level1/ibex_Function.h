@@ -99,6 +99,8 @@ public:
 
 	/**
 	 * \brief Create a multi-dimensional symbol (new argument of the function).
+	 *
+	 * The string \a name is duplicated.
 	 */
 	const ExprSymbol& add_symbol(const char* name, const Dim& dim);
 

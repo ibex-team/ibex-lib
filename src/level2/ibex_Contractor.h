@@ -18,6 +18,8 @@
 namespace ibex {
 
 /**
+ * \defgroup level2
+ *
  * \brief Contractor interface.
  */
 class Contractor {
@@ -52,6 +54,9 @@ public:
 		return true;
 	}
 
+	/**
+	 * \brief Delete *this.
+	 */
 	virtual ~Contractor();
 
 	/**

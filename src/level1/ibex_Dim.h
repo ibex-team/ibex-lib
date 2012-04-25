@@ -14,6 +14,7 @@
 
 #include <iostream> // for ostream
 #include <utility>  // for pair
+#include <cassert>
 #include "ibex_NonRecoverableException.h"
 
 namespace ibex {
@@ -69,6 +70,13 @@ public:
 
 	/** \brief True if this is either a row or column vector. */
 	bool is_vector() const;
+
+	/** \brief If *this is a vector, return the dimension.
+	 *
+	 * This dimension corresponds to dim2 (in case of column vector)
+	 * or dim3 (in case of row vector)
+	 */
+	int vec_size() const;
 
 	/** \brief True if the three dimensions match */
 	bool operator==(const Dim& d) const;
@@ -139,6 +147,11 @@ inline bool Dim::is_scalar() const {
 inline bool Dim::is_vector() const {
 	Type t=type();
 	return t==COL_VECTOR || t==ROW_VECTOR;
+}
+
+inline int Dim::vec_size() const {
+	assert(is_vector());
+	return dim2==0? dim3 : dim2;
 }
 
 inline bool Dim::operator==(const Dim& d) const {

@@ -23,7 +23,7 @@ class BoolMask {
 
 public:
 	/**
-	 * \brief Create a bool mask of size.
+	 * \brief Create a boolean mask of size \a n with all bits unset.
 	 */
 	BoolMask(int n);
 
@@ -76,51 +76,51 @@ private:
 	bool* mask;
 };
 
-
 /*================================== inline implementations ========================================*/
-BoolMask::BoolMask(int n) : n(n), mask(new bool[n]) {
+
+inline BoolMask::BoolMask(int n) : n(n), mask(new bool[n]) {
 	unset_all();
 }
 
-void BoolMask::set_all() {
+inline void BoolMask::set_all() {
 	for (int i=0; i<n; i++)
 		set(i);
 }
 
-void BoolMask::unset_all() {
+inline void BoolMask::unset_all() {
 	for (int i=0; i<n; i++)
 		unset(i);
 }
 
-bool BoolMask::all_set() const {
+inline bool BoolMask::all_set() const {
 	for (int i=0; i<n; i++)
 		if (!(*this)[i]) return false;
 	return true;
 }
 
-bool BoolMask::all_unset() const {
+inline bool BoolMask::all_unset() const {
 	for (int i=0; i<n; i++)
 		if ((*this)[i]) return false;
 	return true;
 }
 
-bool BoolMask::operator[](int i) {
+inline bool BoolMask::operator[](int i) {
 	return mask[i];
 }
 
-const bool BoolMask::operator[](int i) const {
+inline const bool BoolMask::operator[](int i) const {
 	return mask[i];
 }
 
-void BoolMask::set(int i) {
+inline void BoolMask::set(int i) {
 	mask[i]=true;
 }
 
-void BoolMask::unset(int i) {
+inline void BoolMask::unset(int i) {
 	mask[i]=false;
 }
 
-BoolMask::~BoolMask() {
+inline BoolMask::~BoolMask() {
 	delete[] mask;
 }
 

@@ -50,86 +50,86 @@ class ExprIndex;
  */
 class ExprNode {
 
- public:
-  /** Builds a node of a given height, size and dimension.
-   * \see #height, #size, #dim. */
-  ExprNode(Function& expr, int height, int size, const Dim& dim);
+public:
+	/** Builds a node of a given height, size and dimension.
+	 * \see #height, #size, #dim. */
+	ExprNode(Function& expr, int height, int size, const Dim& dim);
 
-  /** Accept an #ibex::ExprVisitor visitor. */
-  virtual void acceptVisitor(FunctionVisitor& v) const = 0;
+	/** Accept an #ibex::ExprVisitor visitor. */
+	virtual void acceptVisitor(FunctionVisitor& v) const = 0;
 
-  friend class Visitor;
+	friend class Visitor;
 
-  /**
-   * \brief Deletes this instance.
-   *
-   * Need to be virtual (see Function::~Function()) */
-  virtual ~ExprNode();
+	/**
+	 * \brief Deletes this instance.
+	 *
+	 * Need to be virtual (see Function::~Function()) */
+	virtual ~ExprNode();
 
-  /** Streams out this expression. */
-  friend std::ostream& operator<<(std::ostream&, const ExprNode&);
+	/** Streams out this expression. */
+	friend std::ostream& operator<<(std::ostream&, const ExprNode&);
 
-  /** The function where this expression is defined */
-  Function& context;
+	/** The function where this expression is defined */
+	Function& context;
 
-  /** height (following topological order) of this node in the DAG.
-   *  A leaf is at height 0. */
-  const int height;
+	/** height (following topological order) of this node in the DAG.
+	 *  A leaf is at height 0. */
+	const int height;
 
-  /** Number of subnodes (including itself) in the DAG (not in the TREE:
-   * two subnodes referencing the same object count for 1).*/
-  const int size;
+	/** Number of subnodes (including itself) in the DAG (not in the TREE:
+	 * two subnodes referencing the same object count for 1).*/
+	const int size;
 
-  /** Unique number identifying this node in the global function. */
-  const int id;
+	/** Unique number identifying this node in the global function. */
+	const int id;
 
-  /** Dimensions */
-  const Dim dim;
+	/** Dimensions */
+	const Dim dim;
 
-  /** The label of this node. */
-  mutable ExprLabel *deco;
+	/** The label of this node. */
+	mutable ExprLabel *deco;
 
-  /** Return true if this subexpression is the constant 0. */
-  virtual bool is_zero() const;
+	/** Return true if this subexpression is the constant 0. */
+	virtual bool is_zero() const;
 
-  /** Return the type of this subexpression. */
-  Dim::Type type() const;
+	/** Return the type of this subexpression. */
+	Dim::Type type() const;
 
-  /** Indexing */
-  const ExprIndex& operator[](int index) const;
+	/** Indexing */
+	const ExprIndex& operator[](int index) const;
 
-  /** Create an equality constraint expr=expr. */
-  const Equality& operator=(const ExprNode& right) const;
+	/** Create an equality constraint expr=expr. */
+	const Equality& operator=(const ExprNode& right) const;
 
-  /** Create an equality constraint expr=value. */
-  const Equality& operator=(const Interval& value) const;
+	/** Create an equality constraint expr=value. */
+	const Equality& operator=(const Interval& value) const;
 
-  /** Create an inequality constraint expr<=expr. */
-  const Inequality& operator<=(const ExprNode& right) const;
+	/** Create an inequality constraint expr<=expr. */
+	const Inequality& operator<=(const ExprNode& right) const;
 
-  /** Create an inequality constraint expr<=value. */
-  const Inequality& operator<=(const Interval& value) const;
+	/** Create an inequality constraint expr<=value. */
+	const Inequality& operator<=(const Interval& value) const;
 
-  /** Create an inequality constraint expr>=expr. */
-  const Inequality& operator>=(const ExprNode& right) const;
+	/** Create an inequality constraint expr>=expr. */
+	const Inequality& operator>=(const ExprNode& right) const;
 
-  /** Create an inequality constraint expr>=value. */
-  const Inequality& operator>=(const Interval& value) const;
+	/** Create an inequality constraint expr>=value. */
+	const Inequality& operator>=(const Interval& value) const;
 
-  /** Create an inequality constraint expr<value. */
-  const Inequality& operator<(const ExprNode& right) const;
+	/** Create an inequality constraint expr<value. */
+	const Inequality& operator<(const ExprNode& right) const;
 
-  /** Create an inequality constraint expr<value. */
-  const Inequality& operator<(const Interval& value) const;
+	/** Create an inequality constraint expr<value. */
+	const Inequality& operator<(const Interval& value) const;
 
-  /** Create an inequality constraint expr>expr. */
-  const Inequality& operator>(const ExprNode& right) const;
+	/** Create an inequality constraint expr>expr. */
+	const Inequality& operator>(const ExprNode& right) const;
 
-  /** Create an inequality constraint expr>value. */
-  const Inequality& operator>(const Interval& value) const;
+	/** Create an inequality constraint expr>value. */
+	const Inequality& operator>(const Interval& value) const;
 
-  /** Return all the subnodes */
-  const ExprNode** subnodes() const;
+	/** Return all the subnodes */
+	const ExprNode** subnodes() const;
 };
 
 std::ostream& operator<<(std::ostream&, const ExprNode&);
@@ -140,27 +140,34 @@ std::ostream& operator<<(std::ostream&, const ExprNode&);
  */
 class ExprIndex : public ExprNode {
 
- public:
-  /** Accept an #ibex::ExprVisitor visitor. */
-   void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); }
+public:
+	/** Accept an #ibex::ExprVisitor visitor. */
+	void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); }
 
-  /** Create an equality constraint expr[i]=expr. */
-  const Equality& operator=(const ExprNode& expr) const;
+	/** Create an equality constraint expr[i]=expr. */
+	const Equality& operator=(const ExprNode& expr) const;
 
-  /** Create an equality constraint expr[i]=value. */
-  const Equality& operator=(const Interval& value) const;
+	/** Create an equality constraint expr[i]=value. */
+	const Equality& operator=(const Interval& value) const;
 
-   /** The sub-expression */
-   const ExprNode& expr;
+	/** The sub-expression */
+	const ExprNode& expr;
 
-   /** The index. */
-    const int index;
+	/** The index. */
+	const int index;
 
-   static const ExprIndex& new_(const ExprNode& subexpr, int index);
+	/**
+	 * \brief Return true iff this node is an indexed symbol.
+	 *
+	 * E.g. x[0], x[0][1], x[0][1][0] are indexed symbols, (x+y)[0] is not.
+	 */
+	bool indexed_symbol() const;
 
- private:
-   /** Create an indexed expression. */
-   ExprIndex(const ExprNode& subexpr, int index);
+	static const ExprIndex& new_(const ExprNode& subexpr, int index);
+
+private:
+	/** Create an indexed expression. */
+	ExprIndex(const ExprNode& subexpr, int index);
 
 };
 
@@ -195,14 +202,17 @@ protected:
  * the type of v is a mxn matrix. In particular, by indexing v we get a row
  * of the matrix and not one of the e_i's. E.g., v[1] is the first row, not e_1 (the first column).
  * This ensures the consistency of indexing system: if one expression e is a matrix,
- * e[i] gives a row and e[i][j] the element (i,j) of the matrix.
- *
+ * e[i] gives a row and e[i][j] the element (i,j) of the matrix. See also the comment of
+ * #row_vector() const.
+ * <p>
  * So v[i] can either be a scalar if v is a (row or column) vector, a row vector (if v is a matrix) or
  * a matrix (if v is an array of matrices). A column vector is not possible here.
  */
 class ExprVector : public ExprNAryOp {
 public:
-	/** Accept an #ibex::ExprVisitor visitor. */
+	/**
+	 * \brief Accept an #ibex::ExprVisitor visitor.
+	 */
 	void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); }
 
 	/**
@@ -215,15 +225,23 @@ public:
 	 */
 	static const ExprVector& new_(const ExprNode& e1, const ExprNode& e2, bool in_rows);
 
-	/** \brief In a row or a column?
+	/** \brief It the vector structured as a row or a column?
 	 *
 	 * \note A matrix is a "row vector" if it is a vector of column vectors.
+	 * It is not a "column vector" if it is a vector of row vectors.
+	 * Important: this concerns the structure only, that is, the object viewed
+	 * as an array of nodes. E.g., if *this is a row vector, then get(i) return column.
+	 * But, as said above, in any case (*this)[i], as an expression, denotes the ith row.
 	 */
 	bool row_vector() const;
 
-	/** Get the ith component.
+	/**
+	 * \brief Get the ith component of the vector.
 	 *
-	 * \warning Can't define it using operator[]... already overwritten in ExprNode */
+	 * \warning Not to be confused with operator[] (that build a new expression
+	 * corresponding to the ith row of this expression). This function does not
+	 * create any expression.
+	 */
 	const ExprNode& get(int i) const { return arg(i); }
 
 	/**
@@ -231,7 +249,8 @@ public:
 	 *
 	 * The length is the number of elements (not to be
 	 * confused with the dimension #dim of the vector
-	 * nor the #size() (that is, of the DAG)). */
+	 * nor the #size() (that is, of the DAG)).
+	 */
 	int length() const { return nb_args; }
 
 private:
@@ -264,27 +283,27 @@ private:
  */
 class ExprApply : public ExprNAryOp {
 
- public:
+public:
 
-  /** Create an equality constraint apply=expr. */
-  const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+	/** Create an equality constraint apply=expr. */
+	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
-  /** Create an equality constraint apply=value. */
-  const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+	/** Create an equality constraint apply=value. */
+	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
 
-  /** Accept an #ibex::ExprVisitor visitor. */
-  virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+	/** Accept an #ibex::ExprVisitor visitor. */
+	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
 
-  /** The applied function. */
-  const Function& func;
+	/** The applied function. */
+	const Function& func;
 
-  static const ExprApply& new_(const Function& func, const ExprNode** args) {
-    return *new ExprApply(func,args);
-  }
+	static const ExprApply& new_(const Function& func, const ExprNode** args) {
+		return *new ExprApply(func,args);
+	}
 
- private:
+private:
 
-  ExprApply(const Function& expr, const ExprNode** args);
+	ExprApply(const Function& expr, const ExprNode** args);
 };
 
 /**
@@ -296,35 +315,36 @@ class ExprApply : public ExprNAryOp {
  */
 class ExprSymbol : public ExprNode {
 
- public:
-  /** Create an equality constraint symbol=expr. */
-  const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+public:
+	/** Create an equality constraint symbol=expr. */
+	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
-  /** Create an equality constraint symbol=value. */
-  const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+	/** Create an equality constraint symbol=value. */
+	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
 
-  /** Accept an #ibex::ExprVisitor visitor. */
-  virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+	/** Accept an #ibex::ExprVisitor visitor. */
+	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
 
-  /** Deletes this instance. */
-  ~ExprSymbol();
+	/** Deletes this instance. */
+	~ExprSymbol();
 
-  /** The symbol identifier. */
-  const char* name;
+	/** The symbol identifier. */
+	const char* name;
 
-  /** Key of this symbol. Every symbol in an expression is also
-   * an argument of the corresponding function; this key simply corresponds to the
-   * order of this symbol in the list of arguments. */
-  int key;
+	/** Key of this symbol. Every symbol in an expression is also
+	 * an argument of the corresponding function; this key simply corresponds to the
+	 * order of this symbol in the list of arguments. */
+	int key;
 
-  static const ExprSymbol& new_(Function& expr, const char* name, const Dim& dim, int key);
+	/* Create a new symbol. The string \a name is duplicated. */
+	static const ExprSymbol& new_(Function& expr, const char* name, const Dim& dim, int key);
 
- private:
-  /** Create a symbol. */
-  ExprSymbol(Function& expr, const char* name, const Dim& dim, int key);
+private:
+	/** Create a symbol. */
+	ExprSymbol(Function& expr, const char* name, const Dim& dim, int key);
 
-  /** Duplicate this symbol: forbidden. */
-  ExprSymbol(const ExprSymbol&);
+	/** Duplicate this symbol: forbidden. */
+	ExprSymbol(const ExprSymbol&);
 };
 
 /**
@@ -333,47 +353,47 @@ class ExprSymbol : public ExprNode {
  */
 class ExprConstant : public ExprNode {
 
- public:
-  /** Create a scalar constant. */
-  static const ExprConstant& new_scalar(Function& expr, const Interval& value);
+public:
+	/** Create a scalar constant. */
+	static const ExprConstant& new_scalar(Function& expr, const Interval& value);
 
-  /** Create a vector constant. */
-  static const ExprConstant& new_vector(Function& expr, const IntervalVector& value, bool in_row);
+	/** Create a vector constant. */
+	static const ExprConstant& new_vector(Function& expr, const IntervalVector& value, bool in_row);
 
-  /** Create a matrix constant. */
-  static const ExprConstant& new_matrix(Function& expr, const IntervalMatrix& value);
+	/** Create a matrix constant. */
+	static const ExprConstant& new_matrix(Function& expr, const IntervalMatrix& value);
 
-  /** Return true if this constant is either 0, the null vector or the null matrix. */
-  virtual bool is_zero() const;
+	/** Return true if this constant is either 0, the null vector or the null matrix. */
+	virtual bool is_zero() const;
 
-  /** Accept an #ibex::ExprVisitor visitor. */
-  virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+	/** Accept an #ibex::ExprVisitor visitor. */
+	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
 
-  /** Return the value of the constant under the form of an #Interval.
-   *  If the constant is a matrix, the first entry is returned (no error). */
-  const Interval& get_value() const;
+	/** Return the value of the constant under the form of an #Interval.
+	 *  If the constant is a matrix, the first entry is returned (no error). */
+	const Interval& get_value() const;
 
-  /** Return the value of the constant under the form of an #IntervalVector.
-   *  If the constant is a matrix, the first row is returned (no error). */
-  const IntervalVector& get_vector_value() const;
+	/** Return the value of the constant under the form of an #IntervalVector.
+	 *  If the constant is a matrix, the first row is returned (no error). */
+	const IntervalVector& get_vector_value() const;
 
-  /** Return the value of the constant under the form of an IntervalMatrix.
-   *  If the constant is not a matrix, the returned matrix is 1-row x 1-col. */
-  const IntervalMatrix& get_matrix_value() const;
+	/** Return the value of the constant under the form of an IntervalMatrix.
+	 *  If the constant is not a matrix, the returned matrix is 1-row x 1-col. */
+	const IntervalMatrix& get_matrix_value() const;
 
- private:
-  friend class Visitor;
+private:
+	friend class Visitor;
 
-  ExprConstant(Function& expr, const Interval& value);
+	ExprConstant(Function& expr, const Interval& value);
 
-  ExprConstant(Function& expr, const IntervalVector& value, bool in_row);
+	ExprConstant(Function& expr, const IntervalVector& value, bool in_row);
 
-  ExprConstant(Function& expr, const IntervalMatrix& value);
+	ExprConstant(Function& expr, const IntervalMatrix& value);
 
-  /** Duplicate this constant: forbidden. */
-  ExprConstant(const ExprConstant& c);
+	/** Duplicate this constant: forbidden. */
+	ExprConstant(const ExprConstant& c);
 
-  const IntervalMatrix value;
+	const IntervalMatrix value;
 };
 
 
@@ -386,26 +406,26 @@ class ExprConstant : public ExprNode {
  * \brief Binary expression
  */
 class ExprBinaryOp : public ExprNode {
- public:
-  /* Create an equality constraint expr o expr=expr. */
-  //const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+public:
+	/* Create an equality constraint expr o expr=expr. */
+	//const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
-  /* Create an equality constraint expr o expr=value. */
-  //const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+	/* Create an equality constraint expr o expr=value. */
+	//const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
 
-  /** Left subexpression. */
-  const ExprNode& left;
+	/** Left subexpression. */
+	const ExprNode& left;
 
-  /** Right subexpression. */
-  const ExprNode& right;
+	/** Right subexpression. */
+	const ExprNode& right;
 
- protected:
-  friend class Visitor;
+protected:
+	friend class Visitor;
 
-  ExprBinaryOp(const ExprNode& left, const ExprNode& right, const Dim& dim);
+	ExprBinaryOp(const ExprNode& left, const ExprNode& right, const Dim& dim);
 
- private:
-  ExprBinaryOp(const ExprBinaryOp&); // copy constructor forbidden
+private:
+	ExprBinaryOp(const ExprBinaryOp&); // copy constructor forbidden
 };
 
 /**
@@ -429,8 +449,8 @@ public:
 	}
 
 private:
-	 ExprAdd(const ExprNode& left, const ExprNode& right);
-	 ExprAdd(const ExprAdd&); // copy constructor forbidden
+	ExprAdd(const ExprNode& left, const ExprNode& right);
+	ExprAdd(const ExprAdd&); // copy constructor forbidden
 };
 
 /**
@@ -445,16 +465,16 @@ public:
 	/** Create an equality constraint expr1*expr2=value. */
 	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
 
-	 /** Accept an #ibex::ExprVisitor visitor. */
-	 virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+	/** Accept an #ibex::ExprVisitor visitor. */
+	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
 
-	 static const ExprMul& new_(const ExprNode& left, const ExprNode& right) {
-		  return *new ExprMul(left,right);
-	 }
+	static const ExprMul& new_(const ExprNode& left, const ExprNode& right) {
+		return *new ExprMul(left,right);
+	}
 
 private:
-	 ExprMul(const ExprNode& left, const ExprNode& right);
-	 ExprMul(const ExprMul&); // copy constructor forbidden
+	ExprMul(const ExprNode& left, const ExprNode& right);
+	ExprMul(const ExprMul&); // copy constructor forbidden
 };
 
 
@@ -470,16 +490,16 @@ public:
 	/** Create an equality constraint expr1+expr2=value. */
 	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
 
-	 /** Accept an #ibex::ExprVisitor visitor. */
-	 virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+	/** Accept an #ibex::ExprVisitor visitor. */
+	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
 
-	 static const ExprSub& new_(const ExprNode& left, const ExprNode& right) {
-		  return *new ExprSub(left,right);
-	 }
+	static const ExprSub& new_(const ExprNode& left, const ExprNode& right) {
+		return *new ExprSub(left,right);
+	}
 
 private:
-	 ExprSub(const ExprNode& left, const ExprNode& right);
-	 ExprSub(const ExprSub&); // copy constructor forbidden
+	ExprSub(const ExprNode& left, const ExprNode& right);
+	ExprSub(const ExprSub&); // copy constructor forbidden
 };
 
 /**
@@ -494,16 +514,16 @@ public:
 	/** Create an equality constraint expr1+expr2=value. */
 	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
 
-	 /** Accept an #ibex::ExprVisitor visitor. */
-	 virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+	/** Accept an #ibex::ExprVisitor visitor. */
+	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
 
-	 static const ExprDiv& new_(const ExprNode& left, const ExprNode& right) {
-		  return *new ExprDiv(left,right);
-	 }
+	static const ExprDiv& new_(const ExprNode& left, const ExprNode& right) {
+		return *new ExprDiv(left,right);
+	}
 
 private:
-	 ExprDiv(const ExprNode& left, const ExprNode& right);
-	 ExprDiv(const ExprDiv&); // copy constructor forbidden
+	ExprDiv(const ExprNode& left, const ExprNode& right);
+	ExprDiv(const ExprDiv&); // copy constructor forbidden
 };
 
 /**
@@ -518,16 +538,16 @@ public:
 	/** Create an equality constraint expr1+expr2=value. */
 	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
 
-	 /** Accept an #ibex::ExprVisitor visitor. */
-	 virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+	/** Accept an #ibex::ExprVisitor visitor. */
+	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
 
-	 static const ExprMax& new_(const ExprNode& left, const ExprNode& right) {
-		  return *new ExprMax(left,right);
-	 }
+	static const ExprMax& new_(const ExprNode& left, const ExprNode& right) {
+		return *new ExprMax(left,right);
+	}
 
 private:
-	 ExprMax(const ExprNode& left, const ExprNode& right);
-	 ExprMax(const ExprMax&); // copy constructor forbidden
+	ExprMax(const ExprNode& left, const ExprNode& right);
+	ExprMax(const ExprMax&); // copy constructor forbidden
 };
 
 /**
@@ -542,16 +562,16 @@ public:
 	/** Create an equality constraint expr1+expr2=value. */
 	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
 
-	 /** Accept an #ibex::ExprVisitor visitor. */
-	 virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+	/** Accept an #ibex::ExprVisitor visitor. */
+	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
 
-	 static const ExprMin& new_(const ExprNode& left, const ExprNode& right) {
-		  return *new ExprMin(left,right);
-	 }
+	static const ExprMin& new_(const ExprNode& left, const ExprNode& right) {
+		return *new ExprMin(left,right);
+	}
 
 private:
-	 ExprMin(const ExprNode& left, const ExprNode& right);
-	 ExprMin(const ExprMin&); // copy constructor forbidden
+	ExprMin(const ExprNode& left, const ExprNode& right);
+	ExprMin(const ExprMin&); // copy constructor forbidden
 };
 
 /**
@@ -566,16 +586,16 @@ public:
 	/** Create an equality constraint expr1+expr2=value. */
 	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
 
-	 /** Accept an #ibex::ExprVisitor visitor. */
-	 virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+	/** Accept an #ibex::ExprVisitor visitor. */
+	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
 
-	 static const ExprAtan2& new_(const ExprNode& left, const ExprNode& right) {
-		  return *new ExprAtan2(left,right);
-	 }
+	static const ExprAtan2& new_(const ExprNode& left, const ExprNode& right) {
+		return *new ExprAtan2(left,right);
+	}
 
 private:
-	 ExprAtan2(const ExprNode& left, const ExprNode& right);
-	 ExprAtan2(const ExprAtan2&); // copy constructor forbidden
+	ExprAtan2(const ExprNode& left, const ExprNode& right);
+	ExprAtan2(const ExprAtan2&); // copy constructor forbidden
 };
 /*==========================================================================================================*/
 /*                                         unary expressions                                                */
@@ -597,8 +617,8 @@ public:
 	/** The subexpression */
 	const ExprNode& expr;
 
- protected:
-  ExprUnaryOp(const ExprNode& subexpr, const Dim& dim);
+protected:
+	ExprUnaryOp(const ExprNode& subexpr, const Dim& dim);
 
 };
 
@@ -675,7 +695,7 @@ private:
  */
 class ExprPower : public ExprUnaryOp {
 
- public:
+public:
 	/** Create an equality constraint expr^n=expr. */
 	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
@@ -689,11 +709,11 @@ class ExprPower : public ExprUnaryOp {
 		return *new ExprPower(expr,expon);
 	}
 
-  const int expon;
+	const int expon;
 
- private:
-  ExprPower(const ExprNode& expr, int expon) : ExprUnaryOp(expr,expr.dim), expon(expon) { }
-  ExprPower(const ExprPower&); // copy constructor forbidden
+private:
+	ExprPower(const ExprNode& expr, int expon) : ExprUnaryOp(expr,expr.dim), expon(expon) { }
+	ExprPower(const ExprPower&); // copy constructor forbidden
 };
 
 /**
@@ -702,7 +722,7 @@ class ExprPower : public ExprUnaryOp {
  */
 class ExprSqr : public ExprUnaryOp {
 
- public:
+public:
 	/** Create an equality constraint expr^2=expr. */
 	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
@@ -716,9 +736,9 @@ class ExprSqr : public ExprUnaryOp {
 		return *new ExprSqr(expr);
 	}
 
- private:
-  ExprSqr(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
-  ExprSqr(const ExprSqr&); // copy constructor forbidden
+private:
+	ExprSqr(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+	ExprSqr(const ExprSqr&); // copy constructor forbidden
 };
 
 /**
@@ -727,7 +747,7 @@ class ExprSqr : public ExprUnaryOp {
  */
 class ExprSqrt : public ExprUnaryOp {
 
- public:
+public:
 	/** Create an equality constraint sqrt(expr)=expr. */
 	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
@@ -739,9 +759,9 @@ class ExprSqrt : public ExprUnaryOp {
 
 	static const ExprSqrt& new_(const ExprNode& expr) { return *new ExprSqrt(expr); }
 
- private:
-  ExprSqrt(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
-  ExprSqrt(const ExprSqrt&); // copy constructor forbidden
+private:
+	ExprSqrt(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+	ExprSqrt(const ExprSqrt&); // copy constructor forbidden
 };
 
 /**
@@ -750,7 +770,7 @@ class ExprSqrt : public ExprUnaryOp {
  */
 class ExprExp : public ExprUnaryOp {
 
- public:
+public:
 	/** Create an equality constraint e^expr=expr. */
 	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
@@ -764,9 +784,9 @@ class ExprExp : public ExprUnaryOp {
 		return *new ExprExp(expr);
 	}
 
- private:
-  ExprExp(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
-  ExprExp(const ExprExp&); // copy constructor forbidden
+private:
+	ExprExp(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+	ExprExp(const ExprExp&); // copy constructor forbidden
 };
 
 /**
@@ -775,7 +795,7 @@ class ExprExp : public ExprUnaryOp {
  */
 class ExprLog : public ExprUnaryOp {
 
- public:
+public:
 	/** Create an equality constraint log(expr)=expr. */
 	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
@@ -789,9 +809,9 @@ class ExprLog : public ExprUnaryOp {
 		return *new ExprLog(expr);
 	}
 
- private:
-  ExprLog(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
-  ExprLog(const ExprLog&); // copy constructor forbidden
+private:
+	ExprLog(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+	ExprLog(const ExprLog&); // copy constructor forbidden
 };
 
 /**
@@ -800,7 +820,7 @@ class ExprLog : public ExprUnaryOp {
  */
 class ExprCos : public ExprUnaryOp {
 
- public:
+public:
 	/** Create an equality constraint cos(expr)=expr. */
 	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
@@ -814,9 +834,9 @@ class ExprCos : public ExprUnaryOp {
 		return *new ExprCos(expr);
 	}
 
- private:
-  ExprCos(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
-  ExprCos(const ExprCos&); // copy constructor forbidden
+private:
+	ExprCos(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+	ExprCos(const ExprCos&); // copy constructor forbidden
 };
 
 /**
@@ -825,7 +845,7 @@ class ExprCos : public ExprUnaryOp {
  */
 class ExprSin : public ExprUnaryOp {
 
- public:
+public:
 	/** Create an equality constraint sin(expr)=expr. */
 	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
@@ -839,9 +859,9 @@ class ExprSin : public ExprUnaryOp {
 		return *new ExprSin(expr);
 	}
 
- private:
-  ExprSin(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
-  ExprSin(const ExprSin&); // copy constructor forbidden
+private:
+	ExprSin(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+	ExprSin(const ExprSin&); // copy constructor forbidden
 };
 
 /**
@@ -850,7 +870,7 @@ class ExprSin : public ExprUnaryOp {
  */
 class ExprTan : public ExprUnaryOp {
 
- public:
+public:
 	/** Create an equality constraint tan(expr)=expr. */
 	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
@@ -864,9 +884,9 @@ class ExprTan : public ExprUnaryOp {
 		return *new ExprTan(expr);
 	}
 
- private:
-  ExprTan(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
-  ExprTan(const ExprTan&); // copy constructor forbidden
+private:
+	ExprTan(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+	ExprTan(const ExprTan&); // copy constructor forbidden
 };
 
 /**
@@ -875,7 +895,7 @@ class ExprTan : public ExprUnaryOp {
  */
 class ExprCosh : public ExprUnaryOp {
 
- public:
+public:
 	/** Create an equality constraint cosh(expr)=expr. */
 	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
@@ -889,9 +909,9 @@ class ExprCosh : public ExprUnaryOp {
 		return *new ExprCosh(expr);
 	}
 
- private:
-  ExprCosh(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
-  ExprCosh(const ExprCosh&); // copy constructor forbidden
+private:
+	ExprCosh(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+	ExprCosh(const ExprCosh&); // copy constructor forbidden
 };
 
 /**
@@ -900,7 +920,7 @@ class ExprCosh : public ExprUnaryOp {
  */
 class ExprSinh : public ExprUnaryOp {
 
- public:
+public:
 	/** Create an equality constraint sinh(expr)=expr. */
 	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
@@ -914,9 +934,9 @@ class ExprSinh : public ExprUnaryOp {
 		return *new ExprSinh(expr);
 	}
 
- private:
-  ExprSinh(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
-  ExprSinh(const ExprSinh&); // copy constructor forbidden
+private:
+	ExprSinh(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+	ExprSinh(const ExprSinh&); // copy constructor forbidden
 };
 
 /**
@@ -925,7 +945,7 @@ class ExprSinh : public ExprUnaryOp {
  */
 class ExprTanh : public ExprUnaryOp {
 
- public:
+public:
 	/** Create an equality constraint tanh(expr)=expr. */
 	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
@@ -939,9 +959,9 @@ class ExprTanh : public ExprUnaryOp {
 		return *new ExprTanh(expr);
 	}
 
- private:
-  ExprTanh(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
-  ExprTanh(const ExprTanh&); // copy constructor forbidden
+private:
+	ExprTanh(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+	ExprTanh(const ExprTanh&); // copy constructor forbidden
 };
 
 /**
@@ -950,7 +970,7 @@ class ExprTanh : public ExprUnaryOp {
  */
 class ExprAcos : public ExprUnaryOp {
 
- public:
+public:
 	/** Create an equality constraint acos(expr)=expr. */
 	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
@@ -964,9 +984,9 @@ class ExprAcos : public ExprUnaryOp {
 		return *new ExprAcos(expr);
 	}
 
- private:
-  ExprAcos(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
-  ExprAcos(const ExprAcos&); // copy constructor forbidden
+private:
+	ExprAcos(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+	ExprAcos(const ExprAcos&); // copy constructor forbidden
 };
 
 /**
@@ -975,7 +995,7 @@ class ExprAcos : public ExprUnaryOp {
  */
 class ExprAsin : public ExprUnaryOp {
 
- public:
+public:
 	/** Create an equality constraint asin(expr)=expr. */
 	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
@@ -989,9 +1009,9 @@ class ExprAsin : public ExprUnaryOp {
 		return *new ExprAsin(expr);
 	}
 
- private:
-  ExprAsin(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
-  ExprAsin(const ExprAsin&); // copy constructor forbidden
+private:
+	ExprAsin(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+	ExprAsin(const ExprAsin&); // copy constructor forbidden
 };
 
 /**
@@ -1000,7 +1020,7 @@ class ExprAsin : public ExprUnaryOp {
  */
 class ExprAtan : public ExprUnaryOp {
 
- public:
+public:
 	/** Create an equality constraint atan(expr)=expr. */
 	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
@@ -1014,9 +1034,9 @@ class ExprAtan : public ExprUnaryOp {
 		return *new ExprAtan(expr);
 	}
 
- private:
-  ExprAtan(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
-  ExprAtan(const ExprAtan&); // copy constructor forbidden
+private:
+	ExprAtan(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+	ExprAtan(const ExprAtan&); // copy constructor forbidden
 };
 
 /**
@@ -1025,7 +1045,7 @@ class ExprAtan : public ExprUnaryOp {
  */
 class ExprAcosh : public ExprUnaryOp {
 
- public:
+public:
 	/** Create an equality constraint acosh(expr)=expr. */
 	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
@@ -1039,9 +1059,9 @@ class ExprAcosh : public ExprUnaryOp {
 		return *new ExprAcosh(expr);
 	}
 
- private:
-  ExprAcosh(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
-  ExprAcosh(const ExprAcosh&); // copy constructor forbidden
+private:
+	ExprAcosh(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+	ExprAcosh(const ExprAcosh&); // copy constructor forbidden
 };
 
 /**
@@ -1050,7 +1070,7 @@ class ExprAcosh : public ExprUnaryOp {
  */
 class ExprAsinh : public ExprUnaryOp {
 
- public:
+public:
 	/** Create an equality constraint asinh(expr)=expr. */
 	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
@@ -1064,9 +1084,9 @@ class ExprAsinh : public ExprUnaryOp {
 		return *new ExprAsinh(expr);
 	}
 
- private:
-  ExprAsinh(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
-  ExprAsinh(const ExprAsinh&); // copy constructor forbidden
+private:
+	ExprAsinh(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+	ExprAsinh(const ExprAsinh&); // copy constructor forbidden
 };
 
 /**
@@ -1075,7 +1095,7 @@ class ExprAsinh : public ExprUnaryOp {
  */
 class ExprAtanh : public ExprUnaryOp {
 
- public:
+public:
 	/** Create an equality constraint atanh(expr)=expr. */
 	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
@@ -1089,9 +1109,9 @@ class ExprAtanh : public ExprUnaryOp {
 		return *new ExprAtanh(expr);
 	}
 
- private:
-  ExprAtanh(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
-  ExprAtanh(const ExprAtanh&); // copy constructor forbidden
+private:
+	ExprAtanh(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+	ExprAtanh(const ExprAtanh&); // copy constructor forbidden
 };
 
 
@@ -1119,10 +1139,10 @@ inline const Equality& ExprIndex::operator=(const Interval& value) const  {
 	return ((ExprNode&) *this)=value; }
 
 inline const ExprIndex& ExprIndex::new_(const ExprNode& subexpr, int index) {
-	 return *new ExprIndex(subexpr,index); }
+	return *new ExprIndex(subexpr,index); }
 
 inline ExprIndex::ExprIndex(const ExprNode& subexpr, int index)
-  : ExprNode(subexpr.context, subexpr.height+1, subexpr.size+1, subexpr.dim.index_dim()), expr(subexpr), index(index) { }
+: ExprNode(subexpr.context, subexpr.height+1, subexpr.size+1, subexpr.dim.index_dim()), expr(subexpr), index(index) { }
 
 inline bool ExprVector::row_vector() const {
 	return (dim.type()==Dim::ROW_VECTOR || get(0).type()==Dim::COL_VECTOR); /* last case occurs if *this is a matrix */ }
@@ -1134,7 +1154,7 @@ inline const ExprSymbol& ExprSymbol::new_(Function& expr, const char* name, cons
 	return *new ExprSymbol(expr,name,dim,key); }
 
 inline ExprSymbol::ExprSymbol(Function& expr, const char* name, const Dim& dim, int key)
-  : ExprNode(expr,0,1,dim), name(strdup(name)), key(key) { }
+: ExprNode(expr,0,1,dim), name(strdup(name)), key(key) { }
 
 inline const ExprConstant& ExprConstant::new_scalar(Function& expr, const Interval& value) {
 	return *new ExprConstant(expr,value); }
@@ -1155,31 +1175,31 @@ inline const IntervalMatrix& ExprConstant::get_matrix_value() const {
 	return value; }
 
 inline ExprUnaryOp::ExprUnaryOp(const ExprNode& subexpr, const Dim& dim) :
-		ExprNode(subexpr.context, subexpr.height+1, subexpr.size+1, dim), expr(subexpr) { }
+				ExprNode(subexpr.context, subexpr.height+1, subexpr.size+1, dim), expr(subexpr) { }
 
 /** Addition */
 inline const ExprAdd& operator+(const ExprNode& left, const ExprNode& right) {
-  return ExprAdd::new_(left, right); }
+	return ExprAdd::new_(left, right); }
 
 /** Subtraction */
 inline const ExprSub& operator-(const ExprNode& left, const ExprNode& right) {
-  return ExprSub::new_(left, right); }
+	return ExprSub::new_(left, right); }
 
 /** Multiplication */
 inline const ExprMul& operator*(const ExprNode& left, const ExprNode& right) {
-  return ExprMul::new_(left, right); }
+	return ExprMul::new_(left, right); }
 
 /** Division */
 inline const ExprDiv& operator/(const ExprNode& left, const ExprNode& right) {
-  return ExprDiv::new_(left, right); }
+	return ExprDiv::new_(left, right); }
 
 /** Maximum */
- inline const ExprMax& max(const ExprNode& left, const ExprNode& right) {
-  return ExprMax::new_(left, right); }
+inline const ExprMax& max(const ExprNode& left, const ExprNode& right) {
+	return ExprMax::new_(left, right); }
 
 /** Minimum */
 inline const ExprMin& min(const ExprNode& left, const ExprNode& right) {
-  return ExprMin::new_(left, right); }
+	return ExprMin::new_(left, right); }
 
 /** Arctangent2 of two expressions */
 inline const ExprAtan2& atan2(const ExprNode& exp1, const ExprNode& exp2) {
@@ -1187,103 +1207,103 @@ inline const ExprAtan2& atan2(const ExprNode& exp1, const ExprNode& exp2) {
 
 /** Addition of an expression to a constant */
 inline const ExprAdd& operator+(const ExprNode& left, const Interval& value) {
-  return left+ExprConstant::new_scalar(left.context, value); }
+	return left+ExprConstant::new_scalar(left.context, value); }
 
 /** Addition of an expression to a constant vector */
 inline const ExprAdd& operator+(const ExprNode& left, const IntervalVector& vec) {
-  return left+ExprConstant::new_vector(left.context, vec, left.type()==Dim::ROW_VECTOR); }
+	return left+ExprConstant::new_vector(left.context, vec, left.type()==Dim::ROW_VECTOR); }
 
 /** Addition of an expression to a constant matrix */
 inline const ExprAdd& operator+(const ExprNode& left, const IntervalMatrix& m) {
-  return left+ExprConstant::new_matrix(left.context, m); }
+	return left+ExprConstant::new_matrix(left.context, m); }
 
 /** Subtraction of an expression from a constant */
 inline const ExprSub& operator-(const ExprNode& left, const Interval& value) {
-  return left-ExprConstant::new_scalar(left.context, value); }
+	return left-ExprConstant::new_scalar(left.context, value); }
 
 /** Subtraction of an expression to a constant vector */
 inline const ExprSub& operator-(const ExprNode& left, const IntervalVector& vec) {
-  return left-ExprConstant::new_vector(left.context, vec, left.type()==Dim::ROW_VECTOR); }
+	return left-ExprConstant::new_vector(left.context, vec, left.type()==Dim::ROW_VECTOR); }
 
 /** Subtraction of an expression to a constant matrix */
 inline const ExprSub& operator-(const ExprNode& left, const IntervalMatrix& m) {
-  return left-ExprConstant::new_matrix(left.context, m); }
+	return left-ExprConstant::new_matrix(left.context, m); }
 
 /** Multiplication of an expression by a constant */
 inline const ExprMul& operator*(const ExprNode& left, const Interval& value) {
-  return left*ExprConstant::new_scalar(left.context, value); }
+	return left*ExprConstant::new_scalar(left.context, value); }
 
 /** Multiplication of an expression by a constant vector */
 inline const ExprMul& operator*(const ExprNode& left, const IntervalVector& vec) {
-  return left*ExprConstant::new_vector(left.context, vec, false); }
+	return left*ExprConstant::new_vector(left.context, vec, false); }
 
 /** Multiplication of an expression by a constant */
 inline const ExprMul& operator*(const ExprNode& left, const IntervalMatrix& m) {
-  return left*ExprConstant::new_matrix(left.context, m); }
+	return left*ExprConstant::new_matrix(left.context, m); }
 
 /** Division of an expression by a constant */
 inline const ExprDiv& operator/(const ExprNode& left, const Interval& value) {
-  return left/ExprConstant::new_scalar(left.context, value); }
+	return left/ExprConstant::new_scalar(left.context, value); }
 
 /** Maximum of an expression and a constant */
- inline const ExprMax& max(const ExprNode& left, const Interval& value) {
-   return max(left, ExprConstant::new_scalar(left.context, value)); }
+inline const ExprMax& max(const ExprNode& left, const Interval& value) {
+	return max(left, ExprConstant::new_scalar(left.context, value)); }
 
 /** Minimum of an expression and a constant */
- inline const ExprMin& min(const ExprNode& left, const Interval& value) {
-   return min(left, ExprConstant::new_scalar(left.context, value)); }
+inline const ExprMin& min(const ExprNode& left, const Interval& value) {
+	return min(left, ExprConstant::new_scalar(left.context, value)); }
 
 /** Arctangent2 of an expression and a constant */
- inline const ExprAtan2& atan2(const ExprNode& exp1, const Interval& value) {
- 	return ExprAtan2::new_(exp1, ExprConstant::new_scalar(exp1.context, value)); }
+inline const ExprAtan2& atan2(const ExprNode& exp1, const Interval& value) {
+	return ExprAtan2::new_(exp1, ExprConstant::new_scalar(exp1.context, value)); }
 
 /** Addition of a constant to an expression */
 inline const ExprAdd& operator+(const Interval& value, const ExprNode& right) {
-  return ExprConstant::new_scalar(right.context, value)+right; }
+	return ExprConstant::new_scalar(right.context, value)+right; }
 
 /** Addition of a vector constant to an expression */
 inline const ExprAdd& operator+(const IntervalVector& vec, const ExprNode& right) {
-  return ExprConstant::new_vector(right.context, vec, right.type()==Dim::ROW_VECTOR)+right; }
+	return ExprConstant::new_vector(right.context, vec, right.type()==Dim::ROW_VECTOR)+right; }
 
 /** Addition of a matrix constant to an expression */
 inline const ExprAdd& operator+(const IntervalMatrix& m, const ExprNode& right) {
-  return ExprConstant::new_matrix(right.context, m)+right; }
+	return ExprConstant::new_matrix(right.context, m)+right; }
 
 /** Subtraction of a constant from an expression */
 inline const ExprSub& operator-(const Interval& value, const ExprNode& right) {
-  return ExprConstant::new_scalar(right.context, value)-right; }
+	return ExprConstant::new_scalar(right.context, value)-right; }
 
 /** Subtraction of a vector constant to an expression */
 inline const ExprSub& operator-(const IntervalVector& vec, const ExprNode& right) {
-  return ExprConstant::new_vector(right.context, vec, right.type()==Dim::ROW_VECTOR)-right; }
+	return ExprConstant::new_vector(right.context, vec, right.type()==Dim::ROW_VECTOR)-right; }
 
 /** Subtraction of a matrix constant to an expression */
 inline const ExprSub& operator-(const IntervalMatrix& m, const ExprNode& right) {
-  return ExprConstant::new_matrix(right.context, m)-right; }
+	return ExprConstant::new_matrix(right.context, m)-right; }
 
 /** Multiplication of a constant by an expression*/
 inline const ExprMul& operator*(const Interval& value, const ExprNode& right) {
-  return ExprConstant::new_scalar(right.context, value)*right; }
+	return ExprConstant::new_scalar(right.context, value)*right; }
 
 /** Multiplication of a vector constant by an expression*/
 inline const ExprMul& operator*(const IntervalVector& vec, const ExprNode& right) {
-  return ExprConstant::new_vector(right.context, vec, true)*right; }
+	return ExprConstant::new_vector(right.context, vec, true)*right; }
 
 /** Multiplication of a matrix constant by an expression*/
 inline const ExprMul& operator*(const IntervalMatrix& m, const ExprNode& right) {
-  return ExprConstant::new_matrix(right.context, m)*right; }
+	return ExprConstant::new_matrix(right.context, m)*right; }
 
 /** Division of a constant by an expression */
 inline const ExprDiv& operator/(const Interval& value, const ExprNode& right) {
-  return ExprConstant::new_scalar(right.context, value)/right; }
+	return ExprConstant::new_scalar(right.context, value)/right; }
 
 /** Maximum of a constant and an expression */
 inline const ExprMax& max (const Interval& value, const ExprNode& right) {
-  return max(ExprConstant::new_scalar(right.context, value), right); }
+	return max(ExprConstant::new_scalar(right.context, value), right); }
 
 /** Minimum of a constant and an expression */
 inline const ExprMin& min (const Interval& value, const ExprNode& right) {
-  return min(ExprConstant::new_scalar(right.context, value), right); }
+	return min(ExprConstant::new_scalar(right.context, value), right); }
 
 /** Arctangent2 of a constant and an expression */
 inline const ExprAtan2& atan2(const Interval& value, const ExprNode& exp2) {
@@ -1341,38 +1361,38 @@ inline const ExprAtanh& atanh(const ExprNode& exp) { return ExprAtanh::new_(exp)
     \note operator ^ is not used because its associativity and priority defined in C++ does
     not match mathematical usage. */
 inline const ExprNode& pow(const ExprNode& left, int expon) {
-  if (expon==1) return left;
-  if (expon==2) return sqr(left);
-  return ExprPower::new_(left, expon);
+	if (expon==1) return left;
+	if (expon==2) return sqr(left);
+	return ExprPower::new_(left, expon);
 }
 
 /** Minus sign */
 inline const ExprMinus& operator-(const ExprNode& expr) {
-  return ExprMinus::new_(expr);
+	return ExprMinus::new_(expr);
 }
 
 /** Sign */
 inline const ExprSign& sign(const ExprNode& expr) {
-  return ExprSign::new_(expr);
+	return ExprSign::new_(expr);
 }
 
 /** Absolute value */
 inline const ExprAbs& abs(const ExprNode& expr) {
-  return ExprAbs::new_(expr);
+	return ExprAbs::new_(expr);
 }
 
 /** Expression raised to the power of another expression */
 inline const ExprExp& pow(const ExprNode& left, const ExprNode& right) {
-  return exp(right*log(left));
+	return exp(right*log(left));
 }
 
 /** Expression raised to the power of a constant */
 inline const ExprExp& pow(const ExprNode& left, const Interval& value) {
-  return exp(ExprConstant::new_scalar(left.context, value)*log(left));
+	return exp(ExprConstant::new_scalar(left.context, value)*log(left));
 }
 /** Constant raised to the power of an expression */
 inline const ExprExp& pow(const Interval& value, const ExprNode& right) {
-  return exp(right*log(ExprConstant::new_scalar(right.context, value)));
+	return exp(right*log(ExprConstant::new_scalar(right.context, value)));
 }
 
 } // end namespace ibex

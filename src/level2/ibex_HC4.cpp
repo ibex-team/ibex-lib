@@ -15,7 +15,7 @@ namespace ibex {
 
 namespace {
 Array<Contractor> convert(const Array<NumConstraint>& csp) {
-	std::vector<const Contractor*> vec(csp.size());
+	std::vector<Contractor*> vec;
 	for (int i=0; i<csp.size(); i++) {
 		vec.push_back(new HC4Revise(csp[i]));
 	}

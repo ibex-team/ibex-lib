@@ -30,7 +30,7 @@ public:
 
 	virtual void contract(IntervalVector& box);
 
-	virtual bool can_contract(int v);
+	virtual bool can_contract(int v) const;
 
 	const NumConstraint& ctr;
 

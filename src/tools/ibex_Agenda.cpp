@@ -26,7 +26,7 @@ void ArcAgenda::init(const HyperGraph& g) {
 void ArcAgenda::propagate(const HyperGraph& g, int c, int v) {
 	assert(nb_var==g.nb_var());
 	assert(nb_ctr==g.nb_ctr());
-	assert(c>=0 && c<nb_ctr);
+	assert(c>=-1 && c<nb_ctr);
 	assert(v>=0 && v<nb_var);
 
 	for (int i=0; i<g.var_nb_ctrs(v); i++) {

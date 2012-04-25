@@ -396,7 +396,7 @@ void TestExpr::vector02() {
 void TestExpr::index01() {
 	Function f;
 	const ExprSymbol& x=f.add_symbol("x",Dim(2,3,4));
-	const ExprNode& e=x[1];
+	const ExprIndex& e=x[1];
 	TEST_ASSERT(&e.context==&f);
 	TEST_ASSERT(e.deco==NULL);
 	TEST_ASSERT(e.dim==Dim(0,3,4));
@@ -405,12 +405,13 @@ void TestExpr::index01() {
 	TEST_ASSERT(e.size==2);
 	TEST_ASSERT(e.type()==Dim::MATRIX);
 	TEST_ASSERT(checkExpr(e,"x[1]"));
+	TEST_ASSERT(e.indexed_symbol());
 }
 
 void TestExpr::index02() {
 	Function f;
 	const ExprSymbol& x=f.add_symbol("x",Dim(2,3,4));
-	const ExprNode& e=x[1][1];
+	const ExprIndex& e=x[1][1];
 	TEST_ASSERT(&e.context==&f);
 	TEST_ASSERT(e.deco==NULL);
 	TEST_ASSERT(e.dim==Dim(0,0,4));
@@ -419,12 +420,13 @@ void TestExpr::index02() {
 	TEST_ASSERT(e.size==3);
 	TEST_ASSERT(e.type()==Dim::ROW_VECTOR);
 	TEST_ASSERT(checkExpr(e,"x[1][1]"));
+	TEST_ASSERT(e.indexed_symbol());
 }
 
 void TestExpr::index03() {
 	Function f;
 	const ExprSymbol& x=f.add_symbol("x",Dim(2,3,4));
-	const ExprNode& e=x[1][1][1];
+	const ExprIndex& e=x[1][1][1];
 	TEST_ASSERT(&e.context==&f);
 	TEST_ASSERT(e.deco==NULL);
 	TEST_ASSERT(e.height==3);
@@ -432,6 +434,7 @@ void TestExpr::index03() {
 	TEST_ASSERT(e.size==4);
 	TEST_ASSERT(e.type()==Dim::SCALAR);
 	TEST_ASSERT(checkExpr(e,"x[1][1][1]"));
+	TEST_ASSERT(e.indexed_symbol());
 }
 
 void TestExpr::apply01() {

@@ -22,7 +22,12 @@ public:
 
 	Function f;
 	IntervalVector init_box;
-	IntervalMatrix hc4r_box; // after applying HC4Revise once on each ctr
+	// hc4r_box[i] is the box obtained after applying
+	// HC4Revise once on each ctr (in increasing order)
+	IntervalMatrix hc4r_box;
+
+	// box obtained after HC4 propagation
+	IntervalVector hc4_box;
 private:
 	void build_box();
 	void build_equ();

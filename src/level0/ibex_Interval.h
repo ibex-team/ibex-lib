@@ -246,6 +246,34 @@ class Interval {
      */
     Interval& div2_inter(const Interval& x, const Interval& y);
 
+    /**
+     * \brief Return diam(*this)-diam(x), for x\subseteq *this [deprecated]
+     *
+     * Deprecated. Kept for compatibility with ibex 1.xx.
+     *
+     * \pre \a x must be included in this interval.
+     * \note The result may be +oo (if the set difference is infinite).
+     * \note An empty interval is considered here to have a null diamater (as a degenerated interval). <br>
+     * If either \a x or this interval is empty, then the method returns the diameter of this interval
+     * (which is 0 if the latter is empty).
+     */
+    double delta(const Interval& x) const;
+
+    /**
+     * \brief Compute the ratio of the diameter to #delta(x) [deprecated].
+     *
+     * Deprecated. Kept for compatibility with ibex 1.xx.
+     *
+     * \pre \a x must be included in this interval.
+     * \note An empty interval is considered to have a null diamater (as a degenerated interval). <br>
+     * <ul><li>If either \a x or this interval is empty, then
+     * <ul><li>the method returns 1 (100% of reduction) if this diameter is not null,
+     *     <li>0 otherwise (as if 0/0=0).</ul>
+     * <li>As a pure convention, the method returns \c 1 if one bound of this interval is infinite and the corresponding bound of \a x
+     * is not (in particular if this interval is unbounded and \a x not). </ul>
+     */
+    double ratiodelta(const Interval& x) const;
+
     /** \brief pi. */
     static const Interval PI;
     /** \brief 2*pi. */

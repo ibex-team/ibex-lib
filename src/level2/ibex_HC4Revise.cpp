@@ -23,7 +23,7 @@ void HC4Revise::contract(IntervalVector& box) {
 	//hc4r.eval.f.cf.print<Domain>();
 }
 
-bool HC4Revise::can_contract(int v) {
+bool HC4Revise::can_contract(int v) const {
 	return ctr.f.used(v);
 }
 

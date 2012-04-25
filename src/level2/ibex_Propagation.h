@@ -33,7 +33,7 @@ public:
   * \see #ibex::Contractor::contract(Cell& cell, const Contractor::Indicators& p) {
   * #ibex::Contractor::contract(Space& space, const Contractor::Indicators& p),
   * #ibex::Contractor::contract(const Contractor::Indicators& p) */
- Propagation(Array<Contractor>& cl, double ratio=default_ratio, bool incremental=false);
+ Propagation(const Array<Contractor>& cl, double ratio=default_ratio, bool incremental=false);
 
  /* warning: do not replace adj(p.adj) by adj(p). The adjacency information (i.e., whether a variable is involved in a constraint
   * or not) is supplied by the original Composite, NOT the propagation Composite (which can be looser). Therefore, this information must be
@@ -67,13 +67,13 @@ public:
  Array<Contractor> list;
 
  /** Ratio (see \link Propagation(const ContractorList&, Space&, REAL, bool) constructor \endlink for details). */
- const REAL ratio;
+ const double ratio;
 
  /** Queue initialization mode (see \link Propagation(const ContractorList&, Space&, REAL, bool) constructor \endlink for details).*/
  const bool incremental;
 
  /** Default ratio used by propagation, set to 0.1. */
- static const REAL default_ratio;
+ static const double default_ratio;
 
 protected:
  HyperGraph g;

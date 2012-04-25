@@ -77,7 +77,7 @@ Function::~Function() {
 
 Function::Function(const Function& f) : name(strdup(f.name)), root(NULL), key_count(0) {
 	assert(f.root!=NULL);
-	ExprCopy(f.expr(),*this);
+	ExprCopy(f.expr(),*this, false);
 }
 
 Function* Function::separate() const {
@@ -91,7 +91,7 @@ Function* Function::separate() const {
 	Function *compf = new Function[fvec->size];
 
 	for (int i=0; i<fvec->nb_args; i++) {
-		ExprCopy(fvec->arg(i), compf[i]);
+		ExprCopy(fvec->arg(i), compf[i], true);
 	}
 	return compf;
 }
@@ -133,10 +133,13 @@ void Function::set_expr(const ExprNode& expr) {
 
 	root = &expr;
 	FindSymbolsUsed fsu(expr);
+
+	for (int i=0; i<nb_symbols(); i++)
+		is_used[i]=false; // by default
+
 	for (vector<int>::iterator it=fsu.keys.begin(); it!=fsu.keys.end(); it++) {
 		is_used[*it]=true;
 	}
-
 }
 
 void Function::decorate(const Decorator& d) const {

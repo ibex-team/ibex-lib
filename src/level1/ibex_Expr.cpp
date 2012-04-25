@@ -61,7 +61,7 @@ Dim vec_dim(const ExprNode** comp, int n, bool in_a_row) {
 	assert (n>0);
 	const Dim& d=comp[0]->dim;
 
-	if (d.type()==Dim::SCALAR) {
+	if (d.is_scalar()) {
 		if (in_a_row) {
 			for (int i=0; i<n; i++)
 				// we could allow concatenation of
@@ -80,7 +80,7 @@ Dim vec_dim(const ExprNode** comp, int n, bool in_a_row) {
 				if (comp[i]->type()!=Dim::SCALAR) goto error;
 			return Dim(0,n,0);
 		}
-	} else {
+	} else if (d.is_vector()) {
 		if (in_a_row) {
 			for (int i=0; i<n; i++)
 				// same comment as above: we could also
@@ -98,6 +98,15 @@ Dim vec_dim(const ExprNode** comp, int n, bool in_a_row) {
 			return Dim(0,n,d.dim3);
 		}
 	}
+
+	// notice: array of matrix expressions are only used
+	// so far in unvectorizing (for symbols corresponding to matrix arrays)
+	else if (d.type()==Dim::MATRIX) {
+		for (int i=0; i<n; i++)
+			if (comp[i]->type()!=Dim::MATRIX || comp[i]->dim.dim2!=d.dim2 || comp[i]->dim.dim3!=d.dim3) goto error;
+		return Dim(n,d.dim2,d.dim3);
+	}
+
 	error:
 	throw NonRecoverableException("Impossible to form a vector with these components");
 }
@@ -157,6 +166,17 @@ const ExprNode** ExprNode::subnodes() const {
 ExprNode::ExprNode(Function& env, int height, int size, const Dim& dim) :
   context(env), height(height), size(size), id(context.nb_nodes()), dim(dim), deco(NULL) {
   env.add_node(*this);
+}
+
+bool ExprIndex::indexed_symbol() const {
+	// we prefer to use directly a dynamic cast here
+	// instead of creating a visitor class (or adding a new field in ExprNode)
+	if (dynamic_cast<const ExprSymbol*>(&expr)) return true;
+
+	const ExprIndex* expr_index=dynamic_cast<const ExprIndex*>(&expr);
+	if (!expr_index) return false;
+
+	return expr_index->indexed_symbol();
 }
 
 ExprNAryOp::ExprNAryOp(const ExprNode** _args, int n, const Dim& dim) :

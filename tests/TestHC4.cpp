@@ -22,7 +22,8 @@ void TestHC4::ponts30() {
 
 	NumConstraint* ctr[30];
 	HC4Revise* c[30];
-	for (int k=0; k<10; k++)
+
+	cout << fs[0] << endl;
 
 	for (int i=0; i<30; i++) {
 		ctr[i]=new NumConstraint(fs[i],true);
@@ -44,12 +45,13 @@ void TestHC4::ponts30() {
 	HC4 hc4(a);
 	box=p30.init_box;
 	hc4.contract(box);
-	cout << "after="<< box << endl;
+
+	TEST_ASSERT(almost_eq(box, p30.hc4_box,1e-05));
+
 	for (int i=0; i<30; i++) {
 		delete c[i];
 		delete ctr[i];
 	}
-	//cout << "goal=" << p30.hc4r_box << endl;
 }
 
 } // end namespace ibex

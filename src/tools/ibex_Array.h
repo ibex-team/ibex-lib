@@ -46,7 +46,7 @@ public:
 	 * \brief Duplicate this instance.
 	 *
 	 */
-	Array(Array&);
+	Array(const Array&);
 
 	/**
 	 * \brief Delete this instance.
@@ -72,7 +72,7 @@ public:
 	/**
 	 * \brief Return the ith reference (as const).
 	 */
-	inline const T& operator[](int i) const;
+	inline T& operator[](int i) const;
 
 protected:
 	int _nb;
@@ -98,7 +98,7 @@ Array<T>::Array(const std::vector<T*>& vec) : _nb(vec.size()), array(new T*[vec.
 
 	assert(vec.size()>0);
 	int i=0;
-	for (typename std::vector<const T*>::const_iterator it=vec.begin(); it!=vec.end(); it++) {
+	for (typename std::vector<T*>::const_iterator it=vec.begin(); it!=vec.end(); it++) {
 		array[i++] = *it;
 	}
 }
@@ -110,7 +110,7 @@ Array<T>::Array(T& c1, T& c2) : _nb(2), array(new T*[2]) {
 }
 
 template<class T>
-Array<T>::Array(Array<T>& a) : _nb(a.size()), array(new T*[a.size()]) {
+Array<T>::Array(const Array<T>& a) : _nb(a.size()), array(new T*[a.size()]) {
 	for (int i=0; i<_nb; i++) {
 		array[i] = &a[i];
 	}
@@ -144,7 +144,7 @@ T& Array<T>::operator[](int i) {
 /**
  * \brief Return the ith reference (as const). */
 template<class T>
-const T& Array<T>::operator[](int i) const {
+T& Array<T>::operator[](int i) const {
 	return *array[i];
 }
 
