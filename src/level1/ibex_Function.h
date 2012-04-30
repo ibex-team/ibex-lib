@@ -141,32 +141,6 @@ public:
 	void decorate(const Decorator&) const;
 
 	/**
-	 * \brief Apply this function to the argument
-	 *
-	 * Works only if it is a unary function.
-	 */
-	const ExprApply& operator()(const ExprNode& arg1);
-
-	/**
-	 * \brief Apply this function to the arguments
-	 *
-	 * Works only if it is a binary function.
-	 */
-	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2);
-
-	/**
-	 * \brief Apply this function to the arguments
-	 *
-	 * Works only if it is a ternary function.
-	 */
-	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3);
-
-	/**
-	 * \brief Apply this function to the arguments
-	 */
-	const ExprApply& operator()(const ExprNode** arg);
-
-	/**
 	 * \brief Return the current number of nodes in the DAG.
 	 */
 	int nb_nodes() const;
@@ -242,6 +216,77 @@ private:
 	SymbolMap<const ExprSymbol*> id2info;       // to retrieve a symbol node from its name.
 	int key_count;                              // count the number of symbols
 
+public:
+
+	/**
+	 * \brief Apply this function to the argument
+	 *
+	 * Works only if it is a unary function.
+	 */
+	const ExprApply& operator()(const ExprNode& arg1);
+
+	/**
+	 * \brief Apply this function to the arguments
+	 *
+	 * Works only if it is a binary function.
+	 */
+	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2);
+
+	/**
+	 * \brief Apply this function to the arguments
+	 *
+	 * Works only if it is a ternary function.
+	 */
+	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3);
+
+	/**
+	 * \brief Apply this function to the arguments
+	 */
+	const ExprApply& operator()(const ExprNode** arg);
+
+	const ExprApply& operator()(const ExprNode& arg1, const Interval& arg2);
+	const ExprApply& operator()(const ExprNode& arg1, const IntervalVector& arg2);
+	const ExprApply& operator()(const ExprNode& arg1, const IntervalMatrix& arg2);
+	const ExprApply& operator()(const Interval& arg1, const ExprNode& arg2);
+	const ExprApply& operator()(const IntervalVector& arg1, const ExprNode& arg2);
+	const ExprApply& operator()(const IntervalMatrix& arg1, const ExprNode& arg2);
+
+	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const Interval& arg3);
+	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const IntervalVector& arg3);
+	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const IntervalMatrix& arg3);
+	const ExprApply& operator()(const ExprNode& arg1, const Interval& arg2, const ExprNode& arg3);
+	const ExprApply& operator()(const ExprNode& arg1, const Interval& arg2, const Interval& arg3);
+	const ExprApply& operator()(const ExprNode& arg1, const Interval& arg2, const IntervalVector& arg3);
+	const ExprApply& operator()(const ExprNode& arg1, const Interval& arg2, const IntervalMatrix& arg3);
+	const ExprApply& operator()(const ExprNode& arg1, const IntervalVector& arg2, const ExprNode& arg3);
+	const ExprApply& operator()(const ExprNode& arg1, const IntervalVector& arg2, const Interval& arg3);
+	const ExprApply& operator()(const ExprNode& arg1, const IntervalVector& arg2, const IntervalVector& arg3);
+	const ExprApply& operator()(const ExprNode& arg1, const IntervalVector& arg2, const IntervalMatrix& arg3);
+	const ExprApply& operator()(const ExprNode& arg1, const IntervalMatrix& arg2, const ExprNode& arg3);
+	const ExprApply& operator()(const ExprNode& arg1, const IntervalMatrix& arg2, const Interval& arg3);
+	const ExprApply& operator()(const ExprNode& arg1, const IntervalMatrix& arg2, const IntervalVector& arg3);
+	const ExprApply& operator()(const ExprNode& arg1, const IntervalMatrix& arg2, const IntervalMatrix& arg3);
+	const ExprApply& operator()(const Interval& arg1, const ExprNode& arg2, const ExprNode& arg3);
+	const ExprApply& operator()(const Interval& arg1, const ExprNode& arg2, const Interval& arg3);
+	const ExprApply& operator()(const Interval& arg1, const ExprNode& arg2, const IntervalVector& arg3);
+	const ExprApply& operator()(const Interval& arg1, const ExprNode& arg2, const IntervalMatrix& arg3);
+	const ExprApply& operator()(const IntervalVector& arg1, const ExprNode& arg2, const ExprNode& arg3);
+	const ExprApply& operator()(const IntervalVector& arg1, const ExprNode& arg2, const Interval& arg3);
+	const ExprApply& operator()(const IntervalVector& arg1, const ExprNode& arg2, const IntervalVector& arg3);
+	const ExprApply& operator()(const IntervalVector& arg1, const ExprNode& arg2, const IntervalMatrix& arg3);
+	const ExprApply& operator()(const IntervalMatrix& arg1, const ExprNode& arg2, const ExprNode& arg3);
+	const ExprApply& operator()(const IntervalMatrix& arg1, const ExprNode& arg2, const Interval& arg3);
+	const ExprApply& operator()(const IntervalMatrix& arg1, const ExprNode& arg2, const IntervalVector& arg3);
+	const ExprApply& operator()(const IntervalMatrix& arg1, const ExprNode& arg2, const IntervalMatrix& arg3);
+	const ExprApply& operator()(const Interval& arg1, const Interval& arg3, const ExprNode& arg2);
+	const ExprApply& operator()(const Interval& arg1, const IntervalVector& arg3, const ExprNode& arg2);
+	const ExprApply& operator()(const Interval& arg1, const IntervalMatrix& arg3, const ExprNode& arg2);
+	const ExprApply& operator()(const IntervalVector& arg1, const Interval& arg3, const ExprNode& arg2);
+	const ExprApply& operator()(const IntervalVector& arg1, const IntervalVector& arg3, const ExprNode& arg2);
+	const ExprApply& operator()(const IntervalVector& arg1, const IntervalMatrix& arg3, const ExprNode& arg2);
+	const ExprApply& operator()(const IntervalMatrix& arg1, const Interval& arg3, const ExprNode& arg2);
+	const ExprApply& operator()(const IntervalMatrix& arg1, const IntervalVector& arg3, const ExprNode& arg2);
+	const ExprApply& operator()(const IntervalMatrix& arg1, const IntervalMatrix& arg3, const ExprNode& arg2);
 };
 
 std::ostream& operator<<(std::ostream&, const Function&);
@@ -277,6 +322,8 @@ template<class V,typename T>
 inline void Function::backward(const V& algo) const {
 	cf.backward<V,T>(algo);
 }
+
+
 
 } // namespace ibex
 #endif // _IBEX_FUNCTION_H_

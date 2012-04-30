@@ -199,5 +199,54 @@ std::ostream& operator<<(std::ostream& os, const Function& f) {
 	return os;
 }
 
+#define CONCAT(a,b)         CONCAT_HIDDEN(a,b)
+#define CONCAT_HIDDEN(a,b)  a ## b
+#define _I(ref,i) ExprConstant::new_scalar(CONCAT(arg,ref).context, CONCAT(arg,i))
+#define _V(ref,i) ExprConstant::new_vector(CONCAT(arg,ref).context, CONCAT(arg,i), symbol(i).type()==Dim::ROW_VECTOR)
+#define _M(ref,i) ExprConstant::new_matrix(CONCAT(arg,ref).context, CONCAT(arg,i))
 
+const ExprApply& Function::operator()(const ExprNode& arg0, const Interval& arg1)       { return (*this)(arg0,_I(0,1)); }
+const ExprApply& Function::operator()(const ExprNode& arg0, const IntervalVector& arg1) { return (*this)(arg0,_V(0,1)); }
+const ExprApply& Function::operator()(const ExprNode& arg0, const IntervalMatrix& arg1) { return (*this)(arg0,_M(0,1)); }
+const ExprApply& Function::operator()(const Interval& arg0, const ExprNode& arg1)       { return (*this)(_I(1,0),arg1); }
+const ExprApply& Function::operator()(const IntervalVector& arg0, const ExprNode& arg1) { return (*this)(_V(1,0),arg1); }
+const ExprApply& Function::operator()(const IntervalMatrix& arg0, const ExprNode& arg1) { return (*this)(_M(1,0),arg1); }
+
+const ExprApply& Function::operator()(const ExprNode& arg0, const ExprNode& arg1, const Interval& arg2)       { return (*this)(arg0, arg1, _I(0,2)); }
+const ExprApply& Function::operator()(const ExprNode& arg0, const ExprNode& arg1, const IntervalVector& arg2) { return (*this)(arg0, arg1, _V(0,2)); }
+const ExprApply& Function::operator()(const ExprNode& arg0, const ExprNode& arg1, const IntervalMatrix& arg2) { return (*this)(arg0, arg1, _M(0,2)); }
+
+const ExprApply& Function::operator()(const ExprNode& arg0, const Interval& arg1, const ExprNode& arg2)             { return (*this)(arg0, _I(0,1), arg2); }
+const ExprApply& Function::operator()(const ExprNode& arg0, const Interval& arg1, const Interval& arg2)             { return (*this)(arg0, _I(0,1), _I(0,2)); }
+const ExprApply& Function::operator()(const ExprNode& arg0, const Interval& arg1, const IntervalVector& arg2)       { return (*this)(arg0, _I(0,1), _V(0,2)); }
+const ExprApply& Function::operator()(const ExprNode& arg0, const Interval& arg1, const IntervalMatrix& arg2)       { return (*this)(arg0, _I(0,1), _M(0,2)); }
+const ExprApply& Function::operator()(const ExprNode& arg0, const IntervalVector& arg1, const ExprNode& arg2)       { return (*this)(arg0, _V(0,1), arg2); }
+const ExprApply& Function::operator()(const ExprNode& arg0, const IntervalVector& arg1, const Interval& arg2)       { return (*this)(arg0, _V(0,1), _I(0,2)); }
+const ExprApply& Function::operator()(const ExprNode& arg0, const IntervalVector& arg1, const IntervalVector& arg2) { return (*this)(arg0, _V(0,1), _V(0,2)); }
+const ExprApply& Function::operator()(const ExprNode& arg0, const IntervalVector& arg1, const IntervalMatrix& arg2) { return (*this)(arg0, _V(0,1), _M(0,2)); }
+const ExprApply& Function::operator()(const ExprNode& arg0, const IntervalMatrix& arg1, const ExprNode& arg2)       { return (*this)(arg0, _M(0,1), arg2); }
+const ExprApply& Function::operator()(const ExprNode& arg0, const IntervalMatrix& arg1, const Interval& arg2)       { return (*this)(arg0, _M(0,1), _I(0,2)); }
+const ExprApply& Function::operator()(const ExprNode& arg0, const IntervalMatrix& arg1, const IntervalVector& arg2) { return (*this)(arg0, _M(0,1), _V(0,2)); }
+const ExprApply& Function::operator()(const ExprNode& arg0, const IntervalMatrix& arg1, const IntervalMatrix& arg2) { return (*this)(arg0, _M(0,1), _M(0,2)); }
+const ExprApply& Function::operator()(const Interval& arg0, const ExprNode& arg1, const ExprNode& arg2)             { return (*this)(_I(1,0), arg1, arg2); }
+const ExprApply& Function::operator()(const Interval& arg0, const ExprNode& arg1, const Interval& arg2)             { return (*this)(_I(1,0), arg1, _I(1,2)); }
+const ExprApply& Function::operator()(const Interval& arg0, const ExprNode& arg1, const IntervalVector& arg2)       { return (*this)(_I(1,0), arg1, _V(1,2)); }
+const ExprApply& Function::operator()(const Interval& arg0, const ExprNode& arg1, const IntervalMatrix& arg2)       { return (*this)(_I(1,0), arg1, _M(1,2)); }
+const ExprApply& Function::operator()(const IntervalVector& arg0, const ExprNode& arg1, const ExprNode& arg2)       { return (*this)(_V(1,0), arg1, arg2); }
+const ExprApply& Function::operator()(const IntervalVector& arg0, const ExprNode& arg1, const Interval& arg2)       { return (*this)(_V(1,0), arg1, _I(1,2)); }
+const ExprApply& Function::operator()(const IntervalVector& arg0, const ExprNode& arg1, const IntervalVector& arg2) { return (*this)(_V(1,0), arg1, _V(1,2)); }
+const ExprApply& Function::operator()(const IntervalVector& arg0, const ExprNode& arg1, const IntervalMatrix& arg2) { return (*this)(_V(1,0), arg1, _M(1,2)); }
+const ExprApply& Function::operator()(const IntervalMatrix& arg0, const ExprNode& arg1, const ExprNode& arg2)       { return (*this)(_M(1,0), arg1, arg2); }
+const ExprApply& Function::operator()(const IntervalMatrix& arg0, const ExprNode& arg1, const Interval& arg2)       { return (*this)(_M(1,0), arg1, _I(1,2)); }
+const ExprApply& Function::operator()(const IntervalMatrix& arg0, const ExprNode& arg1, const IntervalVector& arg2) { return (*this)(_M(1,0), arg1, _V(1,2)); }
+const ExprApply& Function::operator()(const IntervalMatrix& arg0, const ExprNode& arg1, const IntervalMatrix& arg2) { return (*this)(_M(1,0), arg1, _M(1,2)); }
+const ExprApply& Function::operator()(const Interval& arg0, const Interval& arg1, const ExprNode& arg2)             { return (*this)(_I(2,0), _I(2,1), arg2); }
+const ExprApply& Function::operator()(const Interval& arg0, const IntervalVector& arg1, const ExprNode& arg2)       { return (*this)(_I(2,0), _V(2,1), arg2); }
+const ExprApply& Function::operator()(const Interval& arg0, const IntervalMatrix& arg1, const ExprNode& arg2)       { return (*this)(_I(2,0), _M(2,1), arg2); }
+const ExprApply& Function::operator()(const IntervalVector& arg0, const Interval& arg1, const ExprNode& arg2)       { return (*this)(_V(2,0), _I(2,1), arg2); }
+const ExprApply& Function::operator()(const IntervalVector& arg0, const IntervalVector& arg1, const ExprNode& arg2) { return (*this)(_V(2,0), _V(2,1), arg2); }
+const ExprApply& Function::operator()(const IntervalVector& arg0, const IntervalMatrix& arg1, const ExprNode& arg2) { return (*this)(_V(2,0), _M(2,1), arg2); }
+const ExprApply& Function::operator()(const IntervalMatrix& arg0, const Interval& arg1, const ExprNode& arg2)       { return (*this)(_M(2,0), _I(2,1), arg2); }
+const ExprApply& Function::operator()(const IntervalMatrix& arg0, const IntervalVector& arg1, const ExprNode& arg2) { return (*this)(_M(2,0), _V(2,1), arg2); }
+const ExprApply& Function::operator()(const IntervalMatrix& arg0, const IntervalMatrix& arg1, const ExprNode& arg2) { return (*this)(_M(2,0), _M(2,1), arg2); }
 } // namespace ibex

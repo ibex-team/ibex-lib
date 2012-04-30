@@ -73,7 +73,7 @@ public:
 	 * one \a e belongs to) is replaced by scalar symbols "x[0]",...,"x[n]"
 	 * in the destination function \a dest. Same for matrices & matrix arrays
 	 */
-	ExprCopy(const ExprNode& e, Function& dest, bool unvectorize) : f2(dest), unvectorize(unvectorize) {
+	ExprCopy(const ExprNode& e, Function& dest, bool unvectorize) : unvectorize(unvectorize), f2(dest) {
 
 		const Function& src=e.context;
 		int n=src.nb_nodes();
