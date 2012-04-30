@@ -22,13 +22,13 @@ namespace ibex {
  * \brief The famous forward-backward contraction algorithm.
  *
  */
-class HC4ReviseAlgo : public BwdAlgorithm<Domain> {
+class HC4Revise : public BwdAlgorithm<Domain> {
 public:
 
 	/**
 	 * \brief Create the HC4-revise algorithm for a constraint \a ctr.
 	 */
-	HC4ReviseAlgo(const NumConstraint& ctr);
+	HC4Revise(const Function& f);
 
 	/**
 	 * \brief Run the backward algorithm.
@@ -40,9 +40,18 @@ public:
 	void backward(const Domain& root);
 
 	/**
-	 * \brief Contract the input box with the backward algorithm.
+	 * \brief Contract the input domains with the backward algorithm.
+	 *
+	 * The domain of the root is set to \a root.
 	 */
-	void contract(IntervalVector& box);
+	void contract(Domains& d, const Domain& root);
+
+	/**
+	 * \brief Contract the input box with the backward algorithm.
+	 *
+	 * The domain of the root is set to \a root.
+	 */
+	void contract(IntervalVector& box, const Domain& root);
 
 	/**
 	 * \brief The evaluator.
@@ -51,11 +60,6 @@ public:
 	 * of the constraint.
 	 */
 	Eval eval;
-
-	/**
-	 * \brief True if the constraint is an equality.
-	 */
-	const bool equality;
 
 	/**
 	 * \brief Ratio for the contraction of a
@@ -118,9 +122,21 @@ private:
  	 	 	 	 	 	 	 implementation
   ============================================================================*/
 
-inline void HC4ReviseAlgo::backward(const Domain& root) {
+inline void HC4Revise::backward(const Domain& root) {
 	(Domain&) *eval.f.expr().deco = root;
-	return eval.f.backward<HC4ReviseAlgo,Domain>(*this);
+	return eval.f.backward<HC4Revise,Domain>(*this);
+}
+
+inline void HC4Revise::contract(Domains& d, const Domain& root) {
+	eval.eval(d);
+	backward(root);
+	d = eval.symbolLabels;
+}
+
+inline void HC4Revise::contract(IntervalVector& box, const Domain& root) {
+	eval.eval(box);
+	backward(root);
+	box = eval.symbolLabels;
 }
 
 } /* namespace ibex */

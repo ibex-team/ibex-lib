@@ -110,6 +110,14 @@ public:
 	int nb_symbols() const;
 
 	/**
+	 * \brief Return the total input size.
+	 *
+	 * This size is the sum of the numbers of components, for
+	 * all symbols.
+	 */
+	int input_size() const;
+
+	/**
 	 * \brief Return true if the symbol (or argument) \a name is
 	 * actually used in the function.
 	 *

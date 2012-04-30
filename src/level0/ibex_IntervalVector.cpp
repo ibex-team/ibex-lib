@@ -191,7 +191,7 @@ bool IntervalVector::is_flat() const {
 }
 
 bool IntervalVector::contains(const Vector& x) const {
-  for (int i=1; i<=size(); i++)
+  for (int i=0; i<size(); i++)
     if (!(*this)[i].contains(x[i])) return false;
   return true;
 }

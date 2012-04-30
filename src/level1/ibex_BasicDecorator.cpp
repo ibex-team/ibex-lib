@@ -112,7 +112,7 @@ BasicApplyLabel::BasicApplyLabel(const Dim& dim, Function& f) :
 		 * being a reference (set dynamically) to the corresponding node in the
 		 * DAG of the function.
 		 */
-		Domain(dim), args_doms(f.nb_symbols()), feq(f,true), fevl(feq) {
+		Domain(dim), args_doms(f.nb_symbols()), f(f), fevl(f) {
 
 }
 

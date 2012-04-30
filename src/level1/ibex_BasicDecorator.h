@@ -64,11 +64,11 @@ class BasicApplyLabel : public Domain {
 public:
 	BasicApplyLabel(const Dim& dim, Function& f);
 
-	Domains args_doms;  // domains of the arguments (references)
+	Domains args_doms; // domains of the arguments x (references)
 
-	NumConstraint feq;  // the constraint f(x)=...
+	Function& f;       // the function f(x)
 
-	HC4ReviseAlgo fevl; //  for each function, there is an associated evaluator
+	HC4Revise fevl;    //  the associated evaluator
 };
 
 } // end namespace ibex

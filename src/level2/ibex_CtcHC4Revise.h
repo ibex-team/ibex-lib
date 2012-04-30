@@ -25,16 +25,31 @@ namespace ibex {
 class CtcHC4Revise: public Ctc {
 
 public:
+	/**
+	 * \brief HC4Revise on f(x)=0 or f(x)<=0.
+	 *
+	 * \param equality If true: f(x)=0, otherwise: f(x)<=0.
+	 */
+	CtcHC4Revise(Function& f, bool equality);
 
 	CtcHC4Revise(const NumConstraint& ctr);
 
+	/**
+	 * \brief Contract the box.
+	 */
 	virtual void contract(IntervalVector& box);
 
 	virtual bool can_contract(int v) const;
 
-	const NumConstraint& ctr;
+	/**
+	 * The constraint.
+	 */
+	const NumConstraint ctr;
 
-	HC4ReviseAlgo hc4r;
+	/**
+	 * HC4Revise algorithm.
+	 */
+	HC4Revise hc4r;
 private:
 
 };

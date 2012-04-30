@@ -118,6 +118,12 @@ const ExprSymbol& Function::add_symbol(const char* id, const Dim& dim) {
   return *sbl;
 }
 
+int Function::input_size() const {
+	int sum=0;
+	for (int i=0; i<nb_symbols(); i++)
+		sum+=symbol(i).dim.size();
+	return sum;
+}
 
 int Function::nb_nodes() const {
 	return exprnodes.size();

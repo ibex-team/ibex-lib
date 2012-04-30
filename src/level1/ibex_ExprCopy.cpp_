@@ -165,7 +165,6 @@ protected:
 
 		default:
 			assert(false);
-			break;
 		}
 	}
 

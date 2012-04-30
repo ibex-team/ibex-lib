@@ -271,7 +271,11 @@ void CompiledFunction::print() const {
 		case CompiledFunction::CST:
 		{
 			ExprConstant& e=(ExprConstant&) *(f.nodes[i]);
-			cout << e.id << ": cst=" << e.get_matrix_value() << " " <<  (T&) *f.args[i][0];
+			cout << e.id << ": cst=";
+			if (e.dim.is_scalar()) cout << e.get_value();
+			else if (e.dim.is_vector()) cout << e.get_vector_value();
+			else e.get_matrix_value();
+			cout << " " <<  (T&) *f.args[i][0];
 		}
 		break;
 		case CompiledFunction::APPLY:
@@ -280,7 +284,7 @@ void CompiledFunction::print() const {
 			const T** args=(const T**) &f.args[i][1];
 			cout << e.id << ": " << "func()" << " " << (T&) *f.args[i][0];
 			for (int j=0; j<e.nb_args; j++)
-				cout << e.arg(j).id << " ";
+				cout << " " << e.arg(j).id;
 		}
 		break;
 		case CompiledFunction::ADD:

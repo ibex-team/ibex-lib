@@ -14,6 +14,7 @@
 
 #include <vector>
 #include <cassert>
+#include <stdlib.h>
 
 namespace ibex {
 
@@ -25,6 +26,18 @@ namespace ibex {
 template<class T>
 class Array {
 public:
+	/**
+	 * \brief Create an array of uninitialized references.
+	 *
+	 * \warning You must initialize the references with set().
+	 */
+	Array(int n);
+
+	/**
+	 * \brief Set the ith reference to the object \a obj.
+	 */
+	void set_ref(int i, T& obj);
+
 	/**
 	 * \brief Create an array of references from an array of pointers.
 	 */
@@ -86,6 +99,22 @@ protected:
 
 
 template<class T>
+Array<T>::Array(int n) : _nb(n), array(new T*[n]) {
+
+	for (int i=0; i<_nb; i++) {
+		array[i] = NULL;
+	}
+}
+
+template<class T>
+void Array<T>::set_ref(int i, T& obj) {
+	assert(i>=0 && i<_nb);
+	assert(!array[i]);
+
+	array[i]=&obj;
+}
+
+template<class T>
 Array<T>::Array(T** a, int n) : _nb(n), array(new T*[n]) {
 
 	for (int i=0; i<_nb; i++) {
@@ -133,11 +162,17 @@ int Array<T>::size() const {
 
 template<class T>
 T& Array<T>::operator[](int i) {
+	assert(i>=0 && i<_nb);
+	assert(array[i]);
+
 	return *array[i];
 }
 
 template<class T>
 T& Array<T>::operator[](int i) const {
+	assert(i>=0 && i<_nb);
+	assert(array[i]);
+
 	return *array[i];
 }
 

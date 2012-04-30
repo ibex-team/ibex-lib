@@ -27,7 +27,7 @@ void TestHC4Revise::add01() {
 
 	NumConstraint c(f,true);
 
-	HC4ReviseAlgo hc4r(c);
+	HC4Revise hc4r(c);
 
 	double init_xy[][2]= { {1,3}, {-4,-2} };
 	IntervalVector box(2,init_xy);
@@ -70,7 +70,7 @@ void TestHC4Revise::dist01() {
 
 	NumConstraint c(f,true);
 
-	HC4ReviseAlgo hc4r(c);
+	HC4Revise hc4r(c);
 
 	double init_xy[][2] = { {0,10}, {-10,10},
 						{1,1}, {2,2} };
@@ -93,7 +93,7 @@ void TestHC4Revise::dist02() {
 
 	NumConstraint c(f,true);
 
-	HC4ReviseAlgo hc4r(c);
+	HC4Revise hc4r(c);
 
 	double init_xy[][2] = { {0,10}, {-10,10},
 						{1,1}, {2,2} };

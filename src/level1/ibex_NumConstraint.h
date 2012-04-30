@@ -33,7 +33,7 @@ public:
 	 *
 	 * \see #ibex::Function::separate().
 	 */
-	NumConstraint* separate() const;
+	//NumConstraint* separate() const;
 
 	Function& f;
 	const bool equality;
