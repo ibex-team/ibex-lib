@@ -13,7 +13,7 @@
 #include "ibex_Function.h"
 #include "ibex_Expr.h"
 #include "ibex_NumConstraint.h"
-#include "ibex_HC4ReviseAlgo.h"
+#include "ibex_HC4Revise.h"
 
 using namespace std;
 
@@ -25,14 +25,14 @@ void TestHC4Revise::add01() {
 	const ExprSymbol& y = f.add_symbol("y");
 	f.set_expr(x+y);
 
-	NumConstraint c(f,true);
-
-	HC4Revise hc4r(c);
+	HC4Revise hc4r(f);
 
 	double init_xy[][2]= { {1,3}, {-4,-2} };
 	IntervalVector box(2,init_xy);
 
-	hc4r.contract(box);
+	Domain zero(Dim(0,0,0));
+	zero.i()=Interval(0,0);
+	hc4r.contract(box,zero);
 	//cout << box << endl;
 
 	double res_xy[][2]= { {2,3}, {-3,-2} };
@@ -67,16 +67,15 @@ void TestHC4Revise::dist01() {
 
 	f.set_expr(sqrt(sqr(xa-xb)+sqr(ya-yb))-5.0);
 
-
-	NumConstraint c(f,true);
-
-	HC4Revise hc4r(c);
+	HC4Revise hc4r(f);
 
 	double init_xy[][2] = { {0,10}, {-10,10},
 						{1,1}, {2,2} };
 	IntervalVector box(4,init_xy);
 
-	hc4r.contract(box);
+	Domain zero(Dim(0,0,0));
+	zero.i()=Interval(0,0);
+	hc4r.contract(box,zero);
 
 	double res_xy[][2] = { {0,6}, {-3,7},
 						{1,1}, {2,2} };
@@ -91,15 +90,15 @@ void TestHC4Revise::dist02() {
 
 	f.set_expr(sqrt(sqr(x[0]-y[0])+sqr(x[1]-y[1]))-5.0);
 
-	NumConstraint c(f,true);
-
-	HC4Revise hc4r(c);
+	HC4Revise hc4r(f);
 
 	double init_xy[][2] = { {0,10}, {-10,10},
 						{1,1}, {2,2} };
 	IntervalVector box(4,init_xy);
 
-	hc4r.contract(box);
+	Domain zero(Dim(0,0,0));
+	zero.i()=Interval(0,0);
+	hc4r.contract(box,zero);
 
 	double res_xy[][2] = { {0,6}, {-3,7},
 						{1,1}, {2,2} };

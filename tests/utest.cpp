@@ -28,10 +28,7 @@
 
 // ================ level 2 ===============
 #include "TestHC4.h"
-#include "ibex_Function.h"
-#include "ibex_Eval.h"
-#include "ibex_HC4ReviseAlgo.h"
-#include "ibex_NumConstraint.h"
+
 
 
 int main() {

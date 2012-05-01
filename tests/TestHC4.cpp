@@ -10,8 +10,8 @@
 
 #include "TestHC4.h"
 #include "Ponts30.h"
-#include "ibex_HC4Revise.h"
-#include "ibex_HC4.h"
+#include "ibex_CtcHC4Revise.h"
+#include "ibex_CtcHC4.h"
 
 namespace ibex {
 
@@ -23,7 +23,7 @@ void TestHC4::ponts30() {
 	NumConstraint* ctr[30];
 	CtcHC4Revise* c[30];
 
-	cout << fs[0] << endl;
+	//cout << fs[0] << endl;
 
 	for (int i=0; i<30; i++) {
 		ctr[i]=new NumConstraint(fs[i],true);
