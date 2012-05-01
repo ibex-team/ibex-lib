@@ -58,4 +58,4 @@ protected:
 };
 
 } // end namespace ibex
-#endif // IBEX_CTCCOMPO_H_
+#endif // __IBEX_CTC_COMPO_H__
