@@ -5,7 +5,7 @@ TARGET=robust_estim
 
 include ../src/common.mak
 
-% :	%.o $(IBEX_LIB_DIR)/libibex.a
+$(TARGET) :	$(TARGET).o $(IBEX_LIB_DIR)/libibex.a
 	$(CXX) -o $(TARGET) $(LIB_DIR_OPT) $< $(LIB_NAME_OPT)  
 
 %.o : %.cpp 
