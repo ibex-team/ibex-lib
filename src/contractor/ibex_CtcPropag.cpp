@@ -124,6 +124,6 @@ void  CtcPropag::contract(IntervalVector& _box, const Indicators& indic) {
 
 }
 
-const REAL CtcPropag::default_ratio = __IBEX_DEFAULT_RATIO_PROPAG;
+const double CtcPropag::default_ratio = __IBEX_DEFAULT_RATIO_PROPAG;
 
 } // namespace ibex

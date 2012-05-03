@@ -78,9 +78,9 @@ inline Interval& Interval::operator/=(const Interval& x) {
 	return *this;
 }
 
-inline Interval Interval::operator+() const {
+/*inline Interval Interval::operator+() const {
 	return *this;
-}
+}*/
 
 inline Interval Interval:: operator-() const {
 	return -itv;

@@ -2,8 +2,8 @@
 # chose the interval library
 #===================================================
 #!warning: do not insert white space after the name! 
-#SUBLIB=gaol
-SUBLIB=bias
+SUBLIB=gaol
+#SUBLIB=bias
 #===================================================
 
 # where are Ibex, Bias/Profil and Gaol installed?
@@ -36,7 +36,12 @@ GAOL_INC_DIR_OPT := -I$(GAOL_INC_DIR)
 GAOL_LIB_DIR_OPT := -L$(GAOL_LIB_DIR) -L$(GDTOA_LIB_DIR)
 GAOL_LIB_NAME_OPT := -lgaol -lgdtoa -lm -lultim 
 
-INC_DIR_OPT := $(IBEX_INC_DIR_OPT) $(GAOL_INC_DIR_OPT) $(BIAS_INC_DIR_OPT)
-LIB_DIR_OPT := $(IBEX_LIB_DIR_OPT) $(GAOL_LIB_DIR_OPT) $(BIAS_LIB_DIR_OPT)
-LIB_NAME_OPT := $(IBEX_LIB_NAME_OPT) $(GAOL_LIB_NAME_OPT) $(BIAS_LIB_NAME_OPT) 
-
+ifeq ($(SUBLIB), gaol)
+INC_DIR_OPT := $(IBEX_INC_DIR_OPT) $(GAOL_INC_DIR_OPT)
+LIB_DIR_OPT := $(IBEX_LIB_DIR_OPT) $(GAOL_LIB_DIR_OPT)
+LIB_NAME_OPT := $(IBEX_LIB_NAME_OPT) $(GAOL_LIB_NAME_OPT) 
+else
+INC_DIR_OPT := $(IBEX_INC_DIR_OPT) $(BIAS_INC_DIR_OPT)
+LIB_DIR_OPT := $(IBEX_LIB_DIR_OPT) $(BIAS_LIB_DIR_OPT)
+LIB_NAME_OPT := $(IBEX_LIB_NAME_OPT) $(BIAS_LIB_NAME_OPT)
+endif

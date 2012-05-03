@@ -13,8 +13,20 @@
 
 namespace ibex {
 
-IntervalVector qinter(const Array<IntervalVector>& boxes, int q) {
-	int p=boxes.size();
+IntervalVector qinter(const Array<IntervalVector>& _boxes, int q) {
+
+	// ====== remove the empty boxes from the list ====
+	int p=0; // count the number of non-empty boxes
+	for (int i=0; i<_boxes.size(); i++) {
+		if (!_boxes[i].is_empty()) p++;
+	}
+	Array<IntervalVector> boxes(p);
+	int j=0;
+	for (int i=0; i<_boxes.size(); i++) {
+		if (!_boxes[i].is_empty()) boxes.set_ref(j++,_boxes[i]);
+	}
+	// ================================================
+
 	int n=boxes[0].size();
 
 	double x[n][2*p];
@@ -27,7 +39,7 @@ IntervalVector qinter(const Array<IntervalVector>& boxes, int q) {
 			x[i][2*j+1] = boxes[j][i].ub();
 		}
 
-		sort(x[i],x[i]+2*p);
+		std::sort(x[i],x[i]+2*p);
 	}
 
 	/* An inner box of the hull of the q-intersection.

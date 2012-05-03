@@ -11,6 +11,7 @@
 
 #include "TestInterval.h"
 #include "utils.h"
+#include <float.h>
 
 using namespace std;
 
@@ -249,6 +250,56 @@ void TestInterval::checkproj_trigo(const Interval& y, const Interval& xbefore, c
 	checkproj(sin, -y,-xbefore,-xafter);
 	checkproj(cos,  y, xbefore-Interval::HALF_PI, xafter-Interval::HALF_PI);
 	checkproj(cos, -y, xbefore+Interval::HALF_PI, xafter+Interval::HALF_PI);
+}
+
+bool TestInterval::checkproj_mul(const Interval& y, const Interval& x1_bef, const Interval& x2_bef,
+								const Interval& x1_aft, const Interval& x2_aft) {
+	bool res=true;
+	Interval x1;
+	Interval x2;
+
+	x1=x1_bef;
+	x2=x2_bef;
+	proj_mul(y,x1,x2);
+	//cout << "x1=" << x1 << " x2=" << x2 << endl;
+	res &= almost_eq(x1,x1_aft,ERROR) && almost_eq(x2,x2_aft,ERROR);
+
+	x1=x1_bef;
+	x2=x2_bef;
+	proj_mul(y,x2,x1);
+	res &= almost_eq(x1,x1_aft,ERROR) && almost_eq(x2,x2_aft,ERROR);
+
+	x1=-x1_bef;
+	x2=x2_bef;
+	proj_mul(-y,x2,x1);
+	res &= almost_eq(x1,-x1_aft,ERROR) && almost_eq(x2,x2_aft,ERROR);
+
+	x1=x1_bef;
+	x2=-x2_bef;
+	proj_mul(-y,x2,x1);
+	res &= almost_eq(x1,x1_aft,ERROR) && almost_eq(x2,-x2_aft,ERROR);
+
+	return res;
+}
+
+void TestInterval::proj_mul01() {
+	TEST_ASSERT(checkproj_mul(Interval(1,2),Interval(0.1,2.0),Interval(-10,2),Interval(0.5,2.0),Interval(0.5,2)));
+}
+
+void TestInterval::proj_mul02() {
+	TEST_ASSERT(checkproj_mul(Interval::EMPTY_SET,Interval(0.1,2.0),Interval(-10,2),Interval::EMPTY_SET,Interval::EMPTY_SET));
+}
+
+void TestInterval::proj_mul03() {
+	TEST_ASSERT(checkproj_mul(Interval(0,0),Interval(0.1,2.0),Interval(-10,2),Interval(0.1,2.0),Interval(0,0)));
+}
+
+void TestInterval::proj_mul04() {
+	TEST_ASSERT(checkproj_mul(Interval(0,0),Interval(-1,1),Interval(-1,1),Interval(-1,1),Interval(-1,1)));
+}
+
+void TestInterval::proj_mul05() {
+	TEST_ASSERT(checkproj_mul(Interval(1,1),Interval(0,10),Interval(0,10),Interval(0.1,10.0),Interval(0.1,10.0)));
 }
 
 void TestInterval::sqrProj01() { checkproj(sqr, Interval(1,9),            Interval(0,4),       Interval(1,3)); }

@@ -3,7 +3,7 @@
 #include "ibex_CtcCompo.h"
 #include "ibex_CtcQInter.h"
 #include "ibex_CtcFixPoint.h"
-
+#include "ibex_EmptyBoxException.h"
 #include "ibex_Array.h"
 
 #include <iostream>
@@ -64,7 +64,10 @@ int main() {
 		a[1]=beacons[i][1]+beacon_error*Interval(-1,1);
 
 		Interval d; // the distance + uncertainty
-		d=dist[i]+dist_error*Interval(-1,1);
+		if (i==0) {
+		  d=dist[i]+Interval(1,2); // Interval(10,12);  ///////////////////////////////// ICI
+		} else
+			d=dist[i]+dist_error*Interval(-1,1);
 
 		m_func[i].set_expr(distance(x,a)-d);
 
@@ -76,14 +79,16 @@ int main() {
 	IntervalVector box(2,_box);
 
 	// The q-intersection of the N contractors
-	CtcQInter q(m_ctc,8);
+	CtcQInter q(m_ctc,9);
 
 	// Fixpoint
 	CtcFixPoint fix(q);
 
 	cout << "before =" << box << endl;
-	fix.contract(box);
-	cout << "end =" << box << endl;
+	try {
+		fix.contract(box);
+	} catch (EmptyBoxException&) { }
+	cout << "after =" << box << endl;
 
 	// cleanup
 	for (int i=0; i<N; i++) {

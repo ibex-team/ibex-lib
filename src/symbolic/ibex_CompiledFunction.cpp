@@ -37,7 +37,7 @@ void CompiledFunction::compile(const Function& f) {
 	nodes = f.expr().subnodes();
 
 	// Sort the nodes by decreasing height
-	sort(nodes,nodes+n,compare);
+	std::sort(nodes,nodes+n,compare);
 
 	// Process each node of the DAG
 	for (ptr=0; ptr<n; ptr++) {

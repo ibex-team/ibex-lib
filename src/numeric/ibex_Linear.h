@@ -102,7 +102,7 @@ bool proj_mul(IntervalMatrix& A, IntervalMatrix& B, const IntervalMatrix& C, dou
 /**
  * Contract an interval [a] and an interval matrix [B] constrained by [a]*[B]=[C]
  */
-bool proj_mul(INTERVAL& a, IntervalMatrix& B, const IntervalMatrix& C, double ratio);
+bool proj_mul(Interval& a, IntervalMatrix& B, const IntervalMatrix& C, double ratio);
 
 /*
  * Applies Gauss-Seidel algorithm with preconditioning.<br>

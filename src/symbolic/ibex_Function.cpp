@@ -14,6 +14,8 @@
 #include "ibex_BasicDecorator.h"
 #include "ibex_ExprCopy.cpp_"
 
+using namespace std;
+
 namespace ibex {
 
 namespace {

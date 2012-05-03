@@ -276,7 +276,7 @@ void TestEval::apply01() {
 	Eval e(f2);
 	e.symbolLabels[0].i()=Interval(2,2);
 
-	check(e.eval().i(), INTERVAL(2,2));
+	check(e.eval().i(), Interval(2,2));
 }
 
 void TestEval::apply02() {
@@ -303,7 +303,7 @@ void TestEval::apply02() {
 	e.symbolLabels[0].i()=Interval(2,2);
 	e.symbolLabels[1].i()=Interval(3,3);
 
-	check(e.eval().i(), INTERVAL(10,10));
+	check(e.eval().i(), Interval(10,10));
 }
 
 void TestEval::apply03() {
@@ -338,7 +338,7 @@ void TestEval::apply03() {
 	f3.cf.print<Domain>();
 	*/
 
-	check(e.eval().i(), INTERVAL(-3,-3));
+	check(e.eval().i(), Interval(-3,-3));
 }
 
 void TestEval::apply04() {
@@ -359,7 +359,7 @@ void TestEval::apply04() {
 
 	e.symbolLabels[0].i()=Interval(3,3);
 
-	check(e.eval().i(), INTERVAL(10,10));
+	check(e.eval().i(), Interval(10,10));
 }
 
 }

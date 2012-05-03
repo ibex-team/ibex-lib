@@ -166,6 +166,12 @@ public:
 		TEST_ADD(TestInterval::sqrt04);
 		TEST_ADD(TestInterval::sqrt05);
 
+		TEST_ADD(TestInterval::proj_mul01);
+		TEST_ADD(TestInterval::proj_mul02);
+		TEST_ADD(TestInterval::proj_mul03);
+		TEST_ADD(TestInterval::proj_mul04);
+		TEST_ADD(TestInterval::proj_mul05);
+
 		TEST_ADD(TestInterval::sqrProj01);
 		TEST_ADD(TestInterval::sqrProj02);
 		TEST_ADD(TestInterval::sqrProj03);
@@ -537,6 +543,13 @@ private:
 	void sqrt04();
 	void sqrt05();
 
+	/* test: proj_mul */
+	void proj_mul01();
+	void proj_mul02();
+	void proj_mul03();
+	void proj_mul04();
+	void proj_mul05();
+
 	/* test: proj_sqrt(const Interval& y, Interval& x) */
 	void sqrProj01();
 	void sqrProj02();
@@ -582,6 +595,7 @@ private:
 	void check_inter(const Interval& x, const Interval& z, const Interval& y_expected);
 	void check_div2(const Interval& x, const Interval& y, const Interval& out1, const Interval& out2);
 	void check_trigo(const Interval& x, const Interval& y);
+	bool checkproj_mul(const Interval& y, const Interval& x1_before, const Interval& x2_before, const Interval& x1_after, const Interval& x2_after);
 	void checkproj_trigo(const Interval& y, const Interval& xbefore, const Interval& xafter);
 };
 

@@ -3,7 +3,9 @@ include common.mak
 TARGET  :=$(IBEX_LIB_DIR)/libibex.a
 SUBDIRS :=tools arithmetic numeric symbolic combinatorial contractor
 
-OBJS :=$(wildcard $(IBEX_DIR)/src/tools/*.o) \
+# warning: don't define OBJS with ":=" because the
+# object files may not exist yet
+OBJS  =$(wildcard $(IBEX_DIR)/src/tools/*.o) \
        $(wildcard $(IBEX_DIR)/src/arithmetic/*.o) \
        $(wildcard $(IBEX_DIR)/src/numeric/*.o) \
        $(wildcard $(IBEX_DIR)/src/symbolic/*.o) \

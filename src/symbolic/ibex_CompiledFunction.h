@@ -241,6 +241,9 @@ void CompiledFunction::backward(const V& algo) const {
 	}
 }
 
+using std::cout;
+using std::endl;
+
 // for debug only
 template<typename T>
 void CompiledFunction::print() const {

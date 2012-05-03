@@ -12,8 +12,8 @@
 #ifndef __IBEX_FUNC_VISITOR_H__
 #define __IBEX_FUNC_VISITOR_H__
 
-#include "Interval.h"
-#include "IntervalMatrix.h"
+#include "ibex_Interval.h"
+#include "ibex_IntervalMatrix.h"
 
 namespace ibex {
 

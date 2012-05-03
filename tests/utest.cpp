@@ -11,6 +11,7 @@
 
 #include <stdlib.h>
 #include <cpptest.h>
+#include <memory>
 
 // ================ level 0 ===============
 #include "TestInterval.h"
@@ -30,6 +31,7 @@
 #include "TestHC4.h"
 
 
+using std::auto_ptr;
 
 int main() {
 
