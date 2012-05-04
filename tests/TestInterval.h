@@ -230,10 +230,12 @@ public:
 	    TEST_ADD(TestInterval::is_subset02);
 	    TEST_ADD(TestInterval::is_strict_subset01);
 	    TEST_ADD(TestInterval::is_strict_subset02);
+	    TEST_ADD(TestInterval::is_strict_subset03);
 	    TEST_ADD(TestInterval::is_superset01);
 	    TEST_ADD(TestInterval::is_superset02);
 	    TEST_ADD(TestInterval::is_strict_superset01);
 	    TEST_ADD(TestInterval::is_strict_superset02);
+	    TEST_ADD(TestInterval::is_strict_superset03);
 	    TEST_ADD(TestInterval::contains01);
 	    TEST_ADD(TestInterval::contains02);
 	    TEST_ADD(TestInterval::strictly_contains01);
@@ -452,6 +454,7 @@ private:
 	/* test: is_strict_subset */
     void is_strict_subset01();
     void is_strict_subset02();
+    void is_strict_subset03();
 
 	/* test: is_superset */
     void is_superset01();
@@ -460,6 +463,7 @@ private:
 	/* test: is_strict_superset */
     void is_strict_superset01();
     void is_strict_superset02();
+    void is_strict_superset03();
 
 	/* test: contains */
     void contains01();

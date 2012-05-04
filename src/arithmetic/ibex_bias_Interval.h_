@@ -29,26 +29,6 @@ inline Interval& Interval::operator=(const INTERVAL& x) {
 	return *this;
 }
 
-inline Interval::Interval() : itv(NEG_INFINITY, POS_INFINITY) {
-
-}
-
-inline Interval::Interval(double a, double b) : itv(a,b) {
-	if (a==POS_INFINITY || b==NEG_INFINITY || a>b) *this=EMPTY_SET;
-}
-
-inline Interval::Interval(double a) : itv(a,a) {
-	if (a==NEG_INFINITY || a==POS_INFINITY) *this=EMPTY_SET;
-}
-
-inline bool Interval::operator==(const Interval& x) const {
-	return lb()==x.lb() && ub()==x.ub();
-}
-
-inline bool Interval::operator!=(const Interval& x) const {
-	return !(*this==x);
-}
-
 inline Interval& Interval::operator+=(double d) {
 	if (!is_empty()) {
 		if (d==NEG_INFINITY || d==POS_INFINITY) *this=EMPTY_SET;
@@ -242,19 +222,6 @@ inline void Interval::set_empty() {
 	*this=EMPTY_SET;
 }
 
-inline Interval& Interval::operator=(const Interval& x) {
-	itv = x.itv;
-	return *this;
-}
-
-inline Interval& Interval::operator=(double x) {
-	if (x==NEG_INFINITY || x==POS_INFINITY)
-		*this=EMPTY_SET;
-	else
-		itv = x;
-	return *this;
-}
-
 inline Interval& Interval::operator&=(const Interval& x) {
 	if (is_empty()) return *this;
 	if (x.is_empty()) { set_empty(); return *this; }
@@ -298,18 +265,8 @@ inline bool Interval::is_subset(const Interval& x) const {
 	return is_empty() || (!x.is_empty() && x.lb()<=lb() && x.ub()>=ub());
 }
 
-inline bool Interval::is_strict_subset(const Interval& x) const {
-	return (is_empty() && !x.is_empty()) ||
-			(!x.is_empty() && (x.lb()==NEG_INFINITY || x.lb()<lb()) &&
-							  (x.ub()==POS_INFINITY || x.ub()>ub()));
-}
-
 inline bool Interval::is_superset(const Interval& x) const {
 	return x.is_subset(*this);
-}
-
-inline bool Interval::is_strict_superset(const Interval& x) const {
-	return x.is_strict_subset(*this);
 }
 
 inline bool Interval::contains(double d) const {
@@ -338,10 +295,6 @@ inline bool Interval::is_degenerated() const {
 inline bool Interval::is_unbounded() const {
 	if (is_empty()) return false;
 	return lb()==NEG_INFINITY || ub()==POS_INFINITY;
-}
-
-inline double Interval::rad() const {
-	return 0.5*Diam(itv);
 }
 
 inline double Interval::diam() const {
@@ -447,42 +400,6 @@ inline Interval operator*(const Interval& x, const Interval& y) {
 
 inline Interval operator/(const Interval& x, const Interval& y) {
 	return (Interval(x)/=y);
-}
-
-inline double distance(const Interval &x1, const Interval &x2) {
-
-    if (x1.is_empty()) return x2.rad();
-
-    if (x2.is_empty()) return x1.rad();
-
-    if (x1.lb()==NEG_INFINITY) {
-    	if (x2.lb()!=NEG_INFINITY)
-    		return POS_INFINITY;
-    	else if (x1.ub()==POS_INFINITY) {
-    		if (x2.ub()==POS_INFINITY) return 0.0;
-    		else return POS_INFINITY;
-    	}
-    	else if (x2.ub()==POS_INFINITY) return POS_INFINITY;
-    	else return fabs(x1.ub()-x2.ub());
-    }
-    else if (x1.ub()==POS_INFINITY) {
-    	if (x2.ub()!=POS_INFINITY)
-    		return POS_INFINITY;
-    	else if (x2.lb()==NEG_INFINITY)
-    		return POS_INFINITY;
-    	else return fabs(x1.lb()-x2.lb());
-    }
-    else if (x2.is_unbounded())
-    	return POS_INFINITY;
-    else
-    	return Distance(x1.itv,x2.itv);
-}
-
-inline double Interval::rel_distance(const Interval& x) const {
-	  double d=distance(*this,x);
-	  if (d==POS_INFINITY) return 1;
-	  double D=diam();
-	  return (D==0 || D==POS_INFINITY) ? 0.0 : (d/D); // if diam(this)=infinity here, necessarily d=0
 }
 
 inline Interval sqr(const Interval& x) {

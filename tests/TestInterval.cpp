@@ -570,10 +570,12 @@ void TestInterval::is_subset01()          { TEST_ASSERT(Interval(0,1).is_subset(
 void TestInterval::is_subset02()          { TEST_ASSERT(!Interval(0,1).is_subset(Interval(1,2))); }
 void TestInterval::is_strict_subset01()   { TEST_ASSERT(!Interval(0,1).is_strict_subset(Interval(0,2))); }
 void TestInterval::is_strict_subset02()   { TEST_ASSERT(Interval::NEG_REALS.is_strict_subset(Interval::ALL_REALS)); }
+void TestInterval::is_strict_subset03()   { TEST_ASSERT(Interval::EMPTY_SET.is_strict_subset(Interval::EMPTY_SET)); }
 void TestInterval::is_superset01()        { TEST_ASSERT(Interval(0,2).is_superset(Interval(0,1))); }
 void TestInterval::is_superset02()        { TEST_ASSERT(!Interval(1,2).is_superset(Interval(0,1))); }
 void TestInterval::is_strict_superset01() { TEST_ASSERT(!Interval(0,2).is_strict_superset(Interval(0,1))); }
 void TestInterval::is_strict_superset02() { TEST_ASSERT(Interval::ALL_REALS.is_strict_superset(Interval::NEG_REALS)); }
+void TestInterval::is_strict_superset03() { TEST_ASSERT(Interval::EMPTY_SET.is_strict_superset(Interval::EMPTY_SET)); }
 void TestInterval::contains01()           { TEST_ASSERT(Interval(0,2).contains(0)); }
 void TestInterval::contains02()           { TEST_ASSERT(Interval::ALL_REALS.contains(POS_INFINITY)); }
 void TestInterval::strictly_contains01()  { TEST_ASSERT(!Interval(0,2).strictly_contains(0)); }

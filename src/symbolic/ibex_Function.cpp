@@ -14,11 +14,16 @@
 #include "ibex_BasicDecorator.h"
 #include "ibex_ExprCopy.cpp_"
 
+#define MAX_NAME_SIZE 20
+#define BASE_SYMB_NAME "_symb_"
+
 using namespace std;
 
 namespace ibex {
 
 namespace {
+
+char generated_name_buff[MAX_NAME_SIZE];
 
 class FindSymbolsUsed: public FunctionVisitor {
 public:
@@ -98,8 +103,10 @@ Function* Function::separate() const {
 	return compf;
 }
 
-const ExprSymbol& Function::add_symbol(const char* id) {
-	return add_symbol(id, Dim(0,0,0));
+const ExprSymbol& Function::add_symbol(const Dim& dim) {
+	sprintf(generated_name_buff, BASE_SYMB_NAME);
+	snprintf(&generated_name_buff[strlen(BASE_SYMB_NAME)], MAX_NAME_SIZE-strlen(BASE_SYMB_NAME), "%d", key_count);
+	return add_symbol(generated_name_buff, dim);
 }
 
 const ExprSymbol& Function::add_symbol(const char* id, const Dim& dim) {

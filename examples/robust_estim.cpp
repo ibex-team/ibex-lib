@@ -48,8 +48,8 @@ int main() {
 
 	Function distance("dist");
 	{
-		const ExprSymbol& x=distance.add_symbol("x",Dim(0,0,2));
-		const ExprSymbol& y=distance.add_symbol("y",Dim(0,0,2));
+		const ExprSymbol& x=distance.add_symbol(Dim(0,0,2));
+		const ExprSymbol& y=distance.add_symbol(Dim(0,0,2));
 		distance.set_expr(sqrt(sqr(x[0]-y[0])+sqr(x[1]-y[1])));
 	}
 
@@ -57,7 +57,7 @@ int main() {
 	Array<Ctc> m_ctc(N);     // and a contractor w.r.t the constraint dist-d=0
 
 	for (int i=0; i<N; i++) {
-		const ExprSymbol& x=m_func[i].add_symbol("x",Dim(0,0,2));
+		const ExprSymbol& x=m_func[i].add_symbol(Dim(0,0,2));
 
 		IntervalVector a(2); // the beacon position + uncertainty
 		a[0]=beacons[i][0]+beacon_error*Interval(-1,1);

@@ -141,6 +141,7 @@ class Interval {
     /** Return true iff this interval is in the
      * interior of \a x.
      * \note In particular, (-oo,oo) is a strict subset of (-oo,oo)
+     * and the empty set is a strict subset of the empty set.
      * \note Always return true if *this is empty. */
     bool is_strict_subset(const Interval& x) const;
 
@@ -610,6 +611,96 @@ bool proj_sign(const Interval& y, Interval& x);
 /*============================================ features with common implementation ============================================ */
 
 namespace ibex {
+
+inline Interval::Interval() : itv(NEG_INFINITY, POS_INFINITY) {
+
+}
+
+inline Interval::Interval(double a, double b) : itv(a,b) {
+	if (a==POS_INFINITY || b==NEG_INFINITY || a>b) *this=EMPTY_SET;
+}
+
+inline Interval::Interval(double a) : itv(a,a) {
+	if (a==NEG_INFINITY || a==POS_INFINITY) *this=EMPTY_SET;
+}
+
+inline bool Interval::operator==(const Interval& x) const {
+	return (is_empty() && x.is_empty()) || (lb()==x.lb() && ub()==x.ub());
+}
+
+inline Interval& Interval::operator=(double x) {
+	if (x==NEG_INFINITY || x==POS_INFINITY)
+		*this=EMPTY_SET;
+	else
+		itv = x;
+	return *this;
+}
+
+inline Interval& Interval::operator=(const Interval& x) {
+	itv = x.itv;
+	return *this;
+}
+
+inline bool Interval::operator!=(const Interval& x) const {
+	return !(*this==x);
+}
+
+inline double Interval::rad() const {
+	return 0.5*diam();
+}
+
+inline bool Interval::is_strict_subset(const Interval& x) const {
+	return is_empty() ||
+			(!x.is_empty() && (x.lb()==NEG_INFINITY || x.lb()<lb()) &&
+					(x.ub()==POS_INFINITY || x.ub()>ub()));
+}
+
+inline bool Interval::is_strict_superset(const Interval& x) const {
+	return x.is_strict_subset(*this);
+}
+
+inline double Interval::rel_distance(const Interval& x) const {
+	  double d=distance(*this,x);
+	  if (d==POS_INFINITY) return 1;
+	  double D=diam();
+	  return (D==0 || D==POS_INFINITY) ? 0.0 : (d/D); // if diam(this)=infinity here, necessarily d=0
+}
+
+inline double distance(const Interval &x1, const Interval &x2) {
+
+    if (x1.is_empty()) return x2.rad();
+
+    if (x2.is_empty()) return x1.rad();
+
+    if (x1.lb()==NEG_INFINITY) {
+    	if (x2.lb()!=NEG_INFINITY)
+    		return POS_INFINITY;
+    	else if (x1.ub()==POS_INFINITY) {
+    		if (x2.ub()==POS_INFINITY) return 0.0;
+    		else return POS_INFINITY;
+    	}
+    	else if (x2.ub()==POS_INFINITY) return POS_INFINITY;
+    	else return fabs(x1.ub()-x2.ub());
+    }
+    else if (x1.ub()==POS_INFINITY) {
+    	if (x2.ub()!=POS_INFINITY)
+    		return POS_INFINITY;
+    	else if (x2.lb()==NEG_INFINITY)
+    		return POS_INFINITY;
+    	else return fabs(x1.lb()-x2.lb());
+    }
+    else if (x2.is_unbounded())
+    	return POS_INFINITY;
+    else
+#ifdef _IBEX_WITH_GAOL_
+    	return hausdorff(x1,x2);
+#else
+#ifdef _IBEX_WITH_BIAS_
+    	return Distance(x1.itv,x2.itv);
+#endif
+#endif
+
+}
 
 inline Interval sign(const Interval& x) {
 	return x.ub()<0 ? Interval(-1,-1) : x.lb()>0 ? Interval(1,1) : Interval(-1,1);

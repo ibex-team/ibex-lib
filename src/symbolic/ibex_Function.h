@@ -93,16 +93,23 @@ public:
 	Function* separate() const;
 
 	/**
-	 * \brief Create a new symbol (argument of the function).
+	 * \brief Create a new symbol (new argument of the function).
+	 *
+	 * The name of the symbol is generated automatically.
+	 *
+	 * By default, the symbol is zero-dimensional (scalar symbol).
+	 *
 	 */
-	const ExprSymbol& add_symbol(const char* name);
+	const ExprSymbol& add_symbol(const Dim& dim=Dim(0,0,0));
 
 	/**
-	 * \brief Create a multi-dimensional symbol (new argument of the function).
+	 * \brief Create a new symbol (new argument of the function) with a specific name.
+	 *
+	 * By default, the symbol is zero-dimensional (scalar symbol).
 	 *
 	 * The string \a name is duplicated.
 	 */
-	const ExprSymbol& add_symbol(const char* name, const Dim& dim);
+	const ExprSymbol& add_symbol(const char* name, const Dim& dim=Dim(0,0,0));
 
 	/**
 	 * \brief Return the number of symbols (or arguments).

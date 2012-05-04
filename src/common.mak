@@ -2,8 +2,8 @@
 # chose the interval library
 #===================================================
 #!warning: do not insert white space after the name! 
-SUBLIB=gaol
-#SUBLIB=bias
+#SUBLIB=gaol
+SUBLIB=bias
 #===================================================
 
 # where are Ibex, Bias/Profil and Gaol installed?

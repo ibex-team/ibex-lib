@@ -25,18 +25,6 @@ inline Interval& Interval::operator=(const gaol::interval& x) {
 	return *this;
 }
 
-inline Interval::Interval() : itv(NEG_INFINITY, POS_INFINITY) {
-
-}
-
-inline Interval::Interval(double a, double b) : itv(a,b) {
-
-}
-
-inline Interval::Interval(double a) : itv(a,a) {
-
-}
-
 inline Interval& Interval::operator+=(double d) {
 	itv+=d;
 	return *this;
@@ -122,17 +110,19 @@ inline bool Interval::is_subset(const Interval& x) const {
 	return x.itv.set_contains(itv);
 }
 
+/* the semantic of goal does not match 
 inline bool Interval::is_strict_subset(const Interval& x) const {
 	return x.itv.set_strictly_contains(itv);
-}
+} */
 
 inline bool Interval::is_superset(const Interval& x) const {
 	return itv.set_contains(x.itv);
 }
 
+/* the semantic of goal does not match
 inline bool Interval::is_strict_superset(const Interval& x) const {
 	return itv.set_strictly_contains(x.itv);
-}
+} */
 
 inline bool Interval::contains(double d) const {
 	return itv.set_contains(d);
@@ -151,8 +141,13 @@ inline bool Interval::is_empty() const {
 }
 
 inline bool Interval::is_degenerated() const {
-	return itv.is_a_double();
+	return is_empty() || itv.is_a_double();
 }
+
+inline bool Interval::is_unbounded() const {
+	return !itv.is_finite();
+}
+
 
 inline double Interval::diam() const {
 	return itv.width();
@@ -323,8 +318,8 @@ inline Interval min(const Interval& x, const Interval& y) {
 }
 
 inline bool proj_mul(const Interval& y, Interval& x1, Interval& x2) {
-	x1 = gaol::div_rel(x1.itv, y.itv, x2.itv);
-	x2 = gaol::div_rel(x2.itv, y.itv, x1.itv);
+	x1 = gaol::div_rel(y.itv, x2.itv, x1.itv);
+	x2 = gaol::div_rel(y.itv, x1.itv, x2.itv);
 	return (!x1.is_empty()) && (!x2.is_empty());
 }
 
