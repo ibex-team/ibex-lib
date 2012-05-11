@@ -601,10 +601,10 @@ bool proj_sign(const Interval& y, Interval& x);
 } // end namespace ibex
 
 #ifdef _IBEX_WITH_GAOL_
-#include "ibex_gaol_Interval.h_"
+#include "ibex_gaol_Interval.h"
 #else
 #ifdef _IBEX_WITH_BIAS_
-#include "ibex_bias_Interval.h_"
+#include "ibex_bias_Interval.h"
 #endif
 #endif
 

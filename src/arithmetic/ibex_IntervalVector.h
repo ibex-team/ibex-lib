@@ -14,6 +14,7 @@
 
 #include <cassert>
 #include <iostream>
+#include <utility>
 #include "ibex_Interval.h"
 #include "ibex_InvalidIntervalVectorOp.h"
 #include "ibex_Vector.h"
@@ -349,6 +350,20 @@ public:
 	 * It is <b>not</b> a zero-sized array containing no element.
 	 */
 	int complementary(IntervalVector*& result) const;
+
+	/**
+	 * \brief Bisect the box
+	 *
+	 * The box is bisected along the dimension \a i
+	 * and with a ratio \a ratio. If (*this)[i] is the interval [a,a+d]:
+	 * <ul>
+	 * <li> The first box of the result is (*this)[0]x...x(*this)[i-1]x[a+ratio*d]x...
+	 * <li> The second box is (*this)[0]x...x(*this)[i-1]x[a+ratio*d,a+d]x...
+	 * </ul>
+	 * Default value for the ratio is 0.5.
+	 * \pre 0<ratio<1
+	 */
+	std::pair<IntervalVector,IntervalVector> bisect(int i, double ratio=0.5) const;
 
 	/**
 	 * \brief Return a random vector (degenerated box) inside *this.

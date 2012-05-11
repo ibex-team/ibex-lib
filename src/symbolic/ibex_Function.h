@@ -313,7 +313,7 @@ inline int Function::nb_symbols() const {
 }
 
 inline bool Function::used(const char* name) const {
-	return used(id2info.data(name)->key);
+	return used(id2info[name]->key);
 }
 
 inline bool Function::used(int i) const {

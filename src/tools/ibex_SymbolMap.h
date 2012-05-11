@@ -68,7 +68,7 @@ public:
 	SymbolMap(const SymbolMap<T>& tab) {
 		typename IBEXMAP(T)::const_iterator it=tab.map.begin();
 		for(; it!=tab.map.end(); it++) {
-			map.insert_new(it->first, it->second);
+			insert_new(it->first, it->second);
 		}
 	}
 
@@ -142,7 +142,7 @@ public:
 	 * \brief Return the data associated to the symbol \a id.
 	 *
 	 * \throw NonRecoverableException - if no element could be found with key \a id. */
-	const T& data(const char* id) const {
+	const T& operator[](const char* id) const {
 		typename IBEXMAP(T)::const_iterator it = map.find (id);
 		if (it == map.end()) throw NonRecoverableException(std::string("Unknown symbol \"")+id+"\"");
 		return it->second;
@@ -152,8 +152,8 @@ public:
 	 * \brief Return the data associated to the symbol \a id.
 	 *
 	 * \throw NonRecoverableException - if no element could be found with key \a id. */
-	T& data(const char* id) {
-		return (T&) ((const SymbolMap<T>*) this)->data(id);
+	T& operator[](const char* id) {
+		return (T&) ((const SymbolMap<T>*) this)->operator[](id);
 	}
 
 	/**
@@ -161,13 +161,21 @@ public:
 	 */
 	friend std::ostream& operator<<(std::ostream& os, const SymbolMap<T>& idtab) {
 		int i=0;
-		for (typename IBEXMAP(T)::const_iterator it=idtab.begin(); it!=idtab.end(); it++) {
+		for (typename IBEXMAP(T)::const_iterator it=idtab.map.begin(); it!=idtab.map.end(); it++) {
 			os << it->first << " " << it->second << "    ";
 			if (++i%8==0) os << std::endl;
 		}
 		return os;
 	}
 
+	/**
+	 * \brief Exec something for all entries in the map
+	 */
+	void forall(void (*func)(const char*, T&)) {
+		for (typename IBEXMAP(T)::iterator it=map.begin(); it!=map.end(); it++) {
+			(*func)(it->first, it->second);
+		}
+	}
 private:
 	IBEXMAP(T) map;
 

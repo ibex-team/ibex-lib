@@ -17,6 +17,7 @@ GAOL_DIR:=/home/gchabert08/Applications/Gaol-3.1.1
 CXXFLAGS :=	-g -Wall -fmessage-length=0
 
 IBEX_INC_DIR:=$(IBEX_DIR)/include
+IBEX_SRC_DIR:=$(IBEX_DIR)/src
 IBEX_INC_DIR_OPT:=-I$(IBEX_INC_DIR)
 IBEX_LIB_DIR=$(IBEX_DIR)/lib
 IBEX_LIB_DIR_OPT=-L$(IBEX_LIB_DIR)
