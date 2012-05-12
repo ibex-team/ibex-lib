@@ -40,12 +40,14 @@ pair<IntervalVector,IntervalVector> RoundRobin::bisect(const IntervalVector& box
 	return bisect(box,i);
 }
 
-pair<Cell*,Cell*> RoundRobin::bisect(const Cell& cell) {
-	int i=cell.last_split_var;
+pair<Cell*,Cell*> RoundRobin::bisect(Cell& cell) {
+	BisectedVar& v=cell.get<BisectedVar>();
 
-	pair<IntervalVector,IntervalVector> boxes=bisect(cell.box,i);
+	// the following instruction will update v.var
+	pair<IntervalVector,IntervalVector> boxes=bisect(cell.box,v.var);
 
-	return pair<Cell*,Cell*>(new Cell(boxes.first,i), new Cell(boxes.second,i));
+	// and the new value of v.var will be copied to child nodes
+	return cell.bisect(boxes.first, boxes.second);
 }
 
 } // end namespace ibex

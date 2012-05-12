@@ -37,10 +37,10 @@ public:
 	 *
 	 * The information in a cell is e.g., used to get the last bisected variable in case
 	 * the bisector is called by a solver/paver (e.g., RoundRobin).
-	 * Implementation is optional. By default, this function call bisect(cell.box).
-	 * See #bisect(const IntervalVector& box).
+	 * Implementation is <b>optional</b>. By default, this function call bisect(cell.box).
+	 * See #bisect(const IntervalVector&).
 	 */
-	virtual std::pair<Cell*,Cell*> bisect(const Cell& cell);
+	virtual std::pair<Cell*,Cell*> bisect(Cell& cell);
 
 	/**
 	 * \brief Delete *this.

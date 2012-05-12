@@ -15,9 +15,9 @@ using std::pair;
 
 namespace ibex {
 
-pair<Cell,Cell> Bsc::bisect(const Cell& cell) {
+pair<Cell*,Cell*> Bsc::bisect(Cell& cell) {
 	pair<IntervalVector,IntervalVector> boxes=bisect(cell.box);
-	return pair<Cell,Cell>(Cell(boxes.first),Cell(boxes.second));
+	return cell.bisect(boxes.first,boxes.second);
 }
 
 } // end namespace ibex

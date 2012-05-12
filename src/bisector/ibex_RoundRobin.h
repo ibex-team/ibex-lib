@@ -15,6 +15,22 @@
 
 namespace ibex {
 
+
+class BisectedVar : public Backtrackable {
+public:
+	BisectedVar() : var(-1) { }
+
+	BisectedVar(int x) : var(x) { }
+
+	std::pair<Backtrackable*,Backtrackable*> down() {
+		return std::pair<Backtrackable*,Backtrackable*>(new BisectedVar(var),new BisectedVar(var));
+	}
+
+	void up(Backtrackable& child, bool side) { }
+
+	int var;
+};
+
 /** \ingroup bisector
  * \brief Round-robin bisector
  *
@@ -51,8 +67,12 @@ class RoundRobin : public Bsc {
 
   /**
    * \brief Bisect a cell.
+   *
+   * The #ibex::BisectedVar information of \a cell is set to the
+   * bisected variable and this information is copied to
+   * the subcells data.
    */
-  virtual std::pair<Cell*,Cell*> bisect(const Cell& cell);
+  virtual std::pair<Cell*,Cell*> bisect(Cell& cell);
 
   /**
    * \brief Precision.

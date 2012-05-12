@@ -36,26 +36,38 @@ namespace ibex {
 class Cell {
 public:
 
-	Cell(IntervalVector& box, int split_var=-1) : box(box), last_split_var(last_split_var) { }
+	/**
+	 * \brief Bisect this cell.
+	 *
+	 * The box of the first (resp. second) cell is \a left (resp. \a right).
+	 * Each subcell inherits from the data of this cell via the
+	 * \link #ibex::Backtrackable::down() down \endlink
+	 *
+	 * <p>
+	 * This function is called by the bisector. Note that the actual
+	 * bisector class can simply bisect a box into two subboxes, the
+	 * cell bisection has a default implementation in #ibex::Bsc.
+	 */
+	std::pair<Cell*,Cell*> bisect(const IntervalVector& left, const IntervalVector& right);
 
-	/** Delete this instance. */
-	~Cell() {
-		data.forall(_delete);
-	}
+	/**
+	 * \brief Delete *this.
+	 */
+	~Cell();
 
 	/**
 	 * \brief Return true if this cell is the root cell.
 	 */
-	bool is_root() const;
+	//bool is_root() const;
 
 	/**
-	 * \brief Retreive backtrackable data from this cell.
+	 * \brief Retrieve backtrackable data from this cell.
 	 *
 	 * The data is identified by its classname.
 	 * \pre Class \a T is a subclass of #ibex::Backtrackable. */
 	template<typename T>
 	T& get() {
-		return data[typeid(T).name()];
+		return (T&) *data[typeid(T).name()];
 	}
 
 	/**
@@ -64,29 +76,16 @@ public:
 	IntervalVector box;
 
 	/**
-	 * \brief The last split variable
-	 *
-	 * Undefined if this cell is the root.
-	 * \sa #root().
-	 */
-	const int last_split_var;
-
-	/**
 	 * \brief Other data.
 	 */
 	SymbolMap<Backtrackable*> data;
 
 private:
-	static void _delete(const char* id, Backtrackable*& b) { delete b; }
+	Cell(const IntervalVector& box);
 
 	/* A constant to be used when no variable has been split yet (root cell). */
-	static const int ROOT_CELL;
+	//static const int ROOT_CELL;
 };
-
-/*
-bool Cell:is_root() const {
-	return last_split_var==ROOT_CELL;
-}*/
 
 
 } // end namespace ibex

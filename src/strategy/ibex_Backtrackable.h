@@ -11,6 +11,8 @@
 #ifndef __IBEX_BACKTRACKABLE_H__
 #define __IBEX_BACKTRACKABLE_H__
 
+#include <utility>
+
 namespace ibex {
 
 /** \ingroup strategy
@@ -31,27 +33,14 @@ namespace ibex {
  */
 class Backtrackable {
 public:
-  /**
-   * \brief Create default data (for the root cell)
-   *
-   * This constructor does nothing (empty data).
-   */
-  Backtrackable() { }
+	/**
+	 * \brief Create data associated to child nodes.
+	 */
+	virtual std::pair<Backtrackable*,Backtrackable*> down()=0;
 
-  /**
-   * \brief Create data associated to a child node.
-   *
-   * \param father - The data associated to the father node.
-   * \param side - \a false if the cell to be built is the left child, true if it is the right child.
-   *
-   * This constructor does nothing (empty data).
-   */
-  Backtrackable(Backtrackable& father, bool side) { }
+	virtual void up(Backtrackable& child, bool side)=0;
 
-  /**
-   * \brief Delete *this.
-   */
-  virtual ~Backtrackable() { }
+	virtual ~Backtrackable() { }
 };
 
 

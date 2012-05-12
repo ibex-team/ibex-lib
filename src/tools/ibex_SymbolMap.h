@@ -168,14 +168,22 @@ public:
 		return os;
 	}
 
-	/**
-	 * \brief Exec something for all entries in the map
-	 */
-	void forall(void (*func)(const char*, T&)) {
-		for (typename IBEXMAP(T)::iterator it=map.begin(); it!=map.end(); it++) {
-			(*func)(it->first, it->second);
-		}
+	typename IBEXMAP(T)::iterator begin() {
+		return map.begin();
 	}
+
+	typename IBEXMAP(T)::iterator end() {
+		return map.end();
+	}
+
+	typename IBEXMAP(T)::const_iterator begin() const {
+		return map.begin();
+	}
+
+	typename IBEXMAP(T)::const_iterator end() const {
+		return map.end();
+	}
+
 private:
 	IBEXMAP(T) map;
 
