@@ -17,6 +17,8 @@
 
 namespace ibex {
 
+class Cell;
+
 /**
  * \defgroup level2
  *
@@ -34,6 +36,14 @@ public:
 	 * \brief Contraction.
 	 */
 	virtual void contract(IntervalVector& box)=0;
+
+	/**
+	 * \brief Contraction of a cell.
+	 *
+	 * Implementation is optional. By default, call
+	 * contract(cell.box).
+	 */
+	virtual void contract(Cell& cell);
 
 	/**
 	 * \brief Contraction with indicators.
@@ -58,6 +68,14 @@ public:
 	 * \brief Delete *this.
 	 */
 	virtual ~Ctc();
+
+	/**
+	 * Allows to add the backtrackable data required
+	 * by this contractor to the root cell before a
+	 * strategy is executed.<br>
+	 * By default: does nothing.
+	 */
+	virtual void init_root(Cell& root) { }
 
 	/**
 	 * \brief The number of variables this contractor works with.

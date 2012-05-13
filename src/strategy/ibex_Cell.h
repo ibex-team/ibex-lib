@@ -18,6 +18,8 @@
 
 namespace ibex {
 
+class Strategy; // for friendship
+
 /** \ingroup strategy
  *
  * \brief Representation of the search space.
@@ -64,10 +66,23 @@ public:
 	 * \brief Retrieve backtrackable data from this cell.
 	 *
 	 * The data is identified by its classname.
-	 * \pre Class \a T is a subclass of #ibex::Backtrackable. */
+	 * \pre Class \a T is a subclass of #ibex::Backtrackable.
+	 */
 	template<typename T>
 	T& get() {
 		return (T&) *data[typeid(T).name()];
+	}
+
+	/**
+	 * \brief Add backtrackable data into this cell.
+	 *
+	 * The data is identified by its classname.
+	 * \pre Class \a T is a subclass of #ibex::Backtrackable.
+	 */
+	template<typename T>
+	void add() {
+		const char* id=typeid(T).name();
+		if (!data.used(id)) data.insert_new(id,new T());
 	}
 
 	/**
@@ -81,12 +96,16 @@ public:
 	SymbolMap<Backtrackable*> data;
 
 private:
+	friend class Strategy;
+	int status; // managed by Strategy
+
 	Cell(const IntervalVector& box);
 
 	/* A constant to be used when no variable has been split yet (root cell). */
 	//static const int ROOT_CELL;
 };
 
+ostream& operator<<(ostream& os, const Cell& c);
 
 } // end namespace ibex
 

@@ -10,6 +10,7 @@
  * ---------------------------------------------------------------------------- */
 
 #include "ibex_Ctc.h"
+#include "ibex_Cell.h"
 
 namespace ibex {
 
@@ -17,6 +18,10 @@ Ctc::Ctc(int n) : nb_var(n) {
 }
 
 Ctc::~Ctc() {
+}
+
+void Ctc::contract(Cell& cell) {
+	contract(cell.box);
 }
 
 } // namespace ibex

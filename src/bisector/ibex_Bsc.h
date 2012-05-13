@@ -12,6 +12,7 @@
 #define __IBEX_BISECTOR_H__
 
 #include "ibex_Cell.h"
+#include <utility>
 
 namespace ibex {
 
@@ -47,6 +48,13 @@ public:
 	 */
 	virtual ~Bsc() { }
 
+	/**
+	 * Allows to add the backtrackable data required
+	 * by this bisector to the root cell before a
+	 * strategy is executed.<br>
+	 * By default: does nothing.
+	 */
+	virtual void init_root(Cell& root) { }
 };
 
 } // end namespace ibex

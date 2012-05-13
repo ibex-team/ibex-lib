@@ -33,13 +33,28 @@ namespace ibex {
  */
 class Backtrackable {
 public:
+
 	/**
-	 * \brief Create data associated to child nodes.
+	 * \brief Create data of the root cell.
+	 *
+	 * The data of the root cell is the one obtained
+	 * by calling the default constructor.
+	 */
+	Backtrackable() { }
+
+	/**
+	 * \brief Create data associated to child cells.
 	 */
 	virtual std::pair<Backtrackable*,Backtrackable*> down()=0;
 
+	/**
+	 * \brief Update data from child cells.
+	 */
 	virtual void up(Backtrackable& child, bool side)=0;
 
+	/**
+	 * \brief Delete *this.
+	 */
 	virtual ~Backtrackable() { }
 };
 

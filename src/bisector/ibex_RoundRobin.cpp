@@ -50,4 +50,8 @@ pair<Cell*,Cell*> RoundRobin::bisect(Cell& cell) {
 	return cell.bisect(boxes.first, boxes.second);
 }
 
+void RoundRobin::init_root(Cell& root) {
+	root.add<BisectedVar>();
+}
+
 } // end namespace ibex

@@ -24,7 +24,7 @@ namespace ibex {
  *
  * Thrown when an element is retreived from an empty agenda.
  */
-class EmptyQueueException : public Exception { };
+class EmptyAgendaException : public Exception { };
 
 
 /*
@@ -56,8 +56,8 @@ class Agenda {
     table[last] = first; // just to remember that (i,j) is set
   }
 
-  inline void pop(int& p) throw(EmptyQueueException) {
-    if (first == -1) throw EmptyQueueException();
+  inline void pop(int& p) throw(EmptyAgendaException) {
+    if (first == -1) throw EmptyAgendaException();
 
     p = first;
 

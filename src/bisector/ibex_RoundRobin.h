@@ -12,6 +12,7 @@
 #define __IBEX_ROUND_ROBIN_H__
 
 #include "ibex_Bsc.h"
+#include "ibex_Backtrackable.h"
 
 namespace ibex {
 
@@ -73,6 +74,8 @@ class RoundRobin : public Bsc {
    * the subcells data.
    */
   virtual std::pair<Cell*,Cell*> bisect(Cell& cell);
+
+  void init_root(Cell& root);
 
   /**
    * \brief Precision.
