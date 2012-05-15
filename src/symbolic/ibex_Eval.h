@@ -95,6 +95,8 @@ public:
 
 protected:
 
+	mutable const IntervalVector* current_box; // **HACK**
+
 	friend class CompiledFunction;
 	friend class EvalDecorator;
 
@@ -157,8 +159,11 @@ inline Domain& Eval::eval(const Domains& d) const {
 }
 
 inline Domain& Eval::eval(const IntervalVector& box) const {
-	symbolLabels = box; // load the domains of all the symbols
-	return eval();
+	if (f.all_symbols_scalar()) current_box=&box; // **HACK**
+	else symbolLabels = box; // load the domains of all the symbols
+	Domain& res=eval();
+	current_box=NULL; // **HACK**
+	return res;
 }
 
 inline Interval Eval::eval_scalar(const IntervalVector& box) const {
@@ -175,7 +180,10 @@ inline IntervalMatrix Eval::eval_matrix(const IntervalVector& box) const {
 
 inline void Eval::Eval::index_fwd(const ExprIndex& e, const Domain& x, Domain& y) { }
 
-inline void Eval::symbol_fwd(const ExprSymbol& s, Domain& y) { }
+inline void Eval::symbol_fwd(const ExprSymbol& s, Domain& y) {
+	// ** HACK **
+	if (current_box!=NULL && f.all_symbols_scalar()) y.i()=(*current_box)[s.key];
+}
 
 inline void Eval::cst_fwd(const ExprConstant& c, Domain& y) {
 	switch (c.type()) {

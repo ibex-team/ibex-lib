@@ -219,6 +219,13 @@ public:
 
 	CompiledFunction cf; // "public" just for debug
 
+	/**
+	 * \brief True if all the symbols are scalar
+	 *
+	 * Useful for various code optimization.
+	 */
+	bool all_symbols_scalar() const;
+
 private:
 
 	friend class ExprNode;
@@ -230,6 +237,7 @@ private:
 	std::vector<const ExprNode*> exprnodes;     // all the nodes
 	SymbolMap<const ExprSymbol*> id2info;       // to retrieve a symbol node from its name.
 	int key_count;                              // count the number of symbols
+	bool __all_symbols_scalar;                  // true if all symbols are scalar
 
 public:
 
@@ -338,7 +346,9 @@ inline void Function::backward(const V& algo) const {
 	cf.backward<V,T>(algo);
 }
 
-
+inline bool Function::all_symbols_scalar() const {
+	return __all_symbols_scalar;
+}
 
 } // namespace ibex
 #endif // _IBEX_FUNCTION_H_

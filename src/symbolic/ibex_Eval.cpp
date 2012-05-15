@@ -22,6 +22,8 @@ Eval::Eval(const Function& f) : f(f), symbolLabels(f.nb_symbols()) {
 	for (int i=0; i<f.nb_symbols(); i++) {
 		symbolLabels.set(i,((Domain&) *f.symbol(i).deco));
 	}
+
+	current_box = NULL; // **HACK**
 }
 
 Eval::~Eval() {

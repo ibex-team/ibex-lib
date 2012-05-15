@@ -69,11 +69,11 @@ public:
 }
 
 
-Function::Function() : name("anonymous"), root(NULL), key_count(0) {
+Function::Function() : name("anonymous"), root(NULL), key_count(0), __all_symbols_scalar(true) {
 
 }
 
-Function::Function(const char* name) : name(strdup(name)), root(NULL), key_count(0) {
+Function::Function(const char* name) : name(strdup(name)), root(NULL), key_count(0), __all_symbols_scalar(true) {
 
 }
 
@@ -82,7 +82,7 @@ Function::~Function() {
 		delete &node(i);
 }
 
-Function::Function(const Function& f) : name(strdup(f.name)), root(NULL), key_count(0) {
+Function::Function(const Function& f) : name(strdup(f.name)), root(NULL), key_count(0), __all_symbols_scalar(f.all_symbols_scalar()) {
 	assert(f.root!=NULL);
 	ExprCopy(f.expr(),*this, false);
 }
@@ -106,6 +106,7 @@ Function* Function::separate() const {
 const ExprSymbol& Function::add_symbol(const Dim& dim) {
 	sprintf(generated_name_buff, BASE_SYMB_NAME);
 	snprintf(&generated_name_buff[strlen(BASE_SYMB_NAME)], MAX_NAME_SIZE-strlen(BASE_SYMB_NAME), "%d", key_count);
+
 	return add_symbol(generated_name_buff, dim);
 }
 
@@ -123,6 +124,8 @@ const ExprSymbol& Function::add_symbol(const char* id, const Dim& dim) {
 
   order2info.push_back(sbl);
   is_used.push_back(false); // unused by default
+
+  __all_symbols_scalar &= dim.is_scalar();
 
   return *sbl;
 }

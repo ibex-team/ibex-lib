@@ -67,11 +67,16 @@ public:
 	static const double RATIO = 0.1;
 
 protected:
+	IntervalVector* current_box; // **HACK**
+
 	friend class CompiledFunction;
 
 	inline void index_bwd (const ExprIndex&,   Domain& exprL, const Domain& result)                    { /* nothing to do */ }
 	       void vector_bwd(const ExprVector&,  Domain** compL, const Domain& result);
-	inline void symbol_bwd(const ExprSymbol&, const Domain& result)                                    { /* nothing to do */ }
+	inline void symbol_bwd(const ExprSymbol& s, const Domain& result)                                    {
+		// **HACK **
+		if (current_box) (*current_box)[s.key]=result.i();
+		/* else: nothing to do */ }
 	inline void cst_bwd   (const ExprConstant&, const Domain& result)                                  { /* nothing to do */ }
 	       void apply_bwd (const ExprApply&,   Domain** argL, const Domain& result);
 	inline void add_bwd   (const ExprAdd&,     Domain& leftL, Domain& rightL, const Domain& result)    { proj_add(result.i(),leftL.i(),rightL.i()); }
@@ -134,8 +139,16 @@ inline void HC4Revise::contract(Domains& d, const Domain& root) {
 
 inline void HC4Revise::contract(IntervalVector& box, const Domain& root) {
 	eval.eval(box);
+
+	if (eval.f.all_symbols_scalar()) // **HACK**
+		current_box = &box;
+
 	backward(root);
-	box = eval.symbolLabels;
+
+	if (current_box) // **HACK**
+		current_box = NULL;
+	else
+		box = eval.symbolLabels;
 }
 
 } /* namespace ibex */

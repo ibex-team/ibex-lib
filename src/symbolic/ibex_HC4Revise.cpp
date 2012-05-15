@@ -13,7 +13,9 @@
 
 namespace ibex {
 
-HC4Revise::HC4Revise(const Function& f) : eval(f) { }
+HC4Revise::HC4Revise(const Function& f) : eval(f) {
+	current_box = NULL;
+}
 
 void HC4Revise::vector_bwd(const ExprVector& v, Domain** compL, const Domain& y) {
 	if (v.dim.is_vector()) {
