@@ -11,6 +11,8 @@
 #include "ibex_CellHeap.h"
 #include <algorithm>
 
+using namespace std;
+
 namespace ibex {
 
 namespace {

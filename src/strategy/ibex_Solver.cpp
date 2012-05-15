@@ -12,7 +12,7 @@
 #include "ibex_EmptyBoxException.h"
 #include <cassert>
 
-using std::vector;
+using namespace std;
 
 namespace ibex {
 

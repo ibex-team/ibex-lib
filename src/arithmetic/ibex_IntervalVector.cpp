@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <sstream>
 #include <math.h>
+#include <float.h>
 
 namespace ibex {
 
@@ -449,7 +450,7 @@ std::pair<IntervalVector,IntervalVector> IntervalVector::bisect(int i, double ra
 		right[i] = Interval(point, right[i].ub());
 	}
 
-	return pair<IntervalVector,IntervalVector>(left,right);
+	return std::pair<IntervalVector,IntervalVector>(left,right);
 }
 
 Vector IntervalVector::random() const {

@@ -12,6 +12,8 @@
 #include "ibex_EmptyBoxException.h"
 #include "ibex_Timer.h"
 
+using namespace std;
+
 namespace ibex {
 
 const double Optimizer::default_prec = 1e-07;

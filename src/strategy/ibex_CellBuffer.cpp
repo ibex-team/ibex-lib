@@ -10,9 +10,11 @@
 
 #include "ibex_CellBuffer.h"
 
+using namespace std;
+
 namespace ibex {
 
-CellBuffer::CellBuffer() : capacity(-1), screen(0) { }
+CellBuffer::CellBuffer() : capacity(-1), screen(1) { }
 
 CellBuffer::~CellBuffer() { }
 
@@ -22,7 +24,7 @@ std::ostream& operator<<(std::ostream& os, const CellBuffer& buffer) {
 
 	os << buffer.top()->box;
 
-	return os << endl << endl;
+	return os << endl;
 }
 
 }  // end namespace ibex

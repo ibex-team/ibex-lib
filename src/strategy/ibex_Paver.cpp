@@ -12,6 +12,8 @@
 #include "ibex_EmptyBoxException.h"
 #include "ibex_Timer.h"
 
+using namespace std;
+
 namespace ibex {
 
 Paver::Paver(const Array<Ctc>& c, Bsc& b, CellBuffer& buffer) :

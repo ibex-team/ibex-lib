@@ -30,7 +30,7 @@
 // ================ level 2 ===============
 #include "TestHC4.h"
 
-
+using namespace std;
 using std::auto_ptr;
 
 int main() {

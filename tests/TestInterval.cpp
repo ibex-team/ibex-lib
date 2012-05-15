@@ -212,8 +212,8 @@ void TestInterval::sqrt03() { check(sqrt(Interval(-9,4)),      Interval(0,2)); }
 void TestInterval::sqrt04() { check(sqrt(Interval(4,9)),       Interval(2,3)); }
 void TestInterval::sqrt05() { check(sqrt(Interval(-9,-4)),     Interval::EMPTY_SET); }
 
-static double piL=Interval::PI.lb();
-static double piU=Interval::PI.ub();
+#define piL Interval::PI.lb()
+#define piU Interval::PI.ub()
 
 void TestInterval::check_trigo(const Interval& x, const Interval& sin_x_expected) {
 	check(sin(x), sin_x_expected);

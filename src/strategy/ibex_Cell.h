@@ -114,7 +114,7 @@ private:
 	//static const int ROOT_CELL;
 };
 
-ostream& operator<<(ostream& os, const Cell& c);
+std::ostream& operator<<(std::ostream& os, const Cell& c);
 
 } // end namespace ibex
 

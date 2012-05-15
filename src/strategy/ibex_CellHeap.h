@@ -12,6 +12,8 @@
 #define __IBEX_CELL_HEAP_H__
 
 #include "ibex_CellBuffer.h"
+#include <utility>
+#include <vector>
 
 namespace ibex {
 
@@ -73,18 +75,18 @@ class CellHeap : public CellBuffer {
   virtual double cost(const Cell&) const=0;
 
   /** The way to compare two pairs (cells,crit). */
-  bool operator()(const pair<Cell*,double>& c1, const pair<Cell*,double>& c2) const;
+  bool operator()(const std::pair<Cell*,double>& c1, const std::pair<Cell*,double>& c2) const;
 
   // cells and associated "costs"
-  vector<pair<Cell*,double> > l;
+  std::vector<std::pair<Cell*,double> > l;
 
-  friend ostream& operator<<(ostream&, const CellHeap&);
+  friend std::ostream& operator<<(std::ostream&, const CellHeap&);
 
 
 };
 
 /** Display the buffer */
-ostream& operator<<(ostream&, const CellHeap&);
+std::ostream& operator<<(std::ostream&, const CellHeap&);
 
 } // end namespace ibex
 #endif // __IBEX_CELL_HEAP_H__

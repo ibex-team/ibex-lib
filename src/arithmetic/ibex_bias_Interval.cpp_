@@ -8,6 +8,7 @@
  * Author(s)   : Gilles Chabert
  * Created     : Dec 23, 2011
  * ---------------------------------------------------------------------------- */
+#include <iomanip>
 
 extern void BiasInit ();
 extern void BiasFuncInit ();
@@ -37,7 +38,8 @@ std::ostream& operator<<(std::ostream& os, const Interval& x) {
 	if (x.is_empty())
 			return os << "empty";
 	else
-		return os << x.itv;
+		return os << setprecision(6) << "[" << x.lb() << "," << x.ub() << "]";
+	//return os << x.itv;
 }
 
 } // end namespace
