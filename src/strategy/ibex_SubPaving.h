@@ -47,15 +47,15 @@ public:
 
 /*============================================ inline implementation ============================================ */
 
-void SubPaving::add(const IntervalVector& before, const IntervalVector& after) {
+inline void SubPaving::add(const IntervalVector& before, const IntervalVector& after) {
 	traces.push_back(std::pair<IntervalVector,IntervalVector>(before,after));
 }
 
-void SubPaving::add(const IntervalVector& box) {
+inline void SubPaving::add(const IntervalVector& box) {
 	traces.push_back(std::pair<IntervalVector,IntervalVector>(box,IntervalVector::empty(box.size())));
 }
 
-int SubPaving::size() const {
+inline int SubPaving::size() const {
 	return traces.size();
 }
 

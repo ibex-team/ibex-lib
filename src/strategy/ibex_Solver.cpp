@@ -16,6 +16,10 @@ using std::vector;
 
 namespace ibex {
 
+Solver::Solver(Ctc& ctc, Bsc& bsc, CellBuffer& buffer, double prec) : ctc(ctc), bsc(bsc), buffer(buffer), prec(ctc.nb_var,prec) {
+
+}
+
 vector<IntervalVector> Solver::solve(const IntervalVector& init_box) {
 	buffer.flush();
 

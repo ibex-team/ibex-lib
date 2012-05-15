@@ -24,11 +24,16 @@ $(TARGET) : headers $(SUBDIRS)
 headers :
 	echo \/\* this file is generated \*\/ > $(ARITH)/ibex_bias_or_gaol.h ; \
 	echo \#define $(SUBLIB_DEF) >> $(ARITH)/ibex_bias_or_gaol.h; \
-	find $(IBEX_SRC_DIR) -name "*.h" | while read LINE; do install -m 640 $${LINE} $(IBEX_INC_DIR)/`basename $${LINE}`; done
+	install -m 640 $(ARITH)/ibex_$(SUBLIB)_Interval.h_ $(IBEX_INC_DIR)/ibex_$(SUBLIB)_Interval.h_; \
+	echo \/\* this file is generated \*\/ > $(IBEX_INC_DIR)/ibex.h ; \
+	find $(IBEX_SRC_DIR) -name "*.h" | while read LINE; do \
+	f=`basename $${LINE}`; echo "#include \""$$f"\"" >> $(IBEX_INC_DIR)/ibex.h; \
+	install -m 640 $${LINE} $(IBEX_INC_DIR)/$$f; done
 
 clean: $(SUBDIRS)
 	rm -f $(TARGET); \
 	find $(IBEX_INC_DIR)/*.h -exec rm -f {} \; ; \
+	rm -f $(IBEX_INC_DIR)/ibex.h
 	
 .PHONY: $(SUBDIRS)
  

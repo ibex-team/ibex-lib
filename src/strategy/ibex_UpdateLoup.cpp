@@ -97,7 +97,6 @@ bool Optimizer::random_probing (const IntervalVector& box, bool is_inner) {
 }
 
 bool Optimizer::line_probing(const IntervalVector& box, const Vector& start, bool is_inner, int sample_size, bool recursive) {
-	int n=n;
 	Vector diam = box.diam();
 	Vector pt(n);
 	bool loup_changed=false;

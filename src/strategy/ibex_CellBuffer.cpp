@@ -20,7 +20,7 @@ std::ostream& operator<<(std::ostream& os, const CellBuffer& buffer) {
 	os << "==============================================================================\n";
 	os << "[" << buffer.screen++ << "] buffer size=" << buffer.size() << " . Cell on the top :\n\n ";
 
-	os << *buffer.top();
+	os << buffer.top()->box;
 
 	return os << endl << endl;
 }
