@@ -1,22 +1,21 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_Bisector.cpp
+// File        : ibex_CtcUnion.cpp
 // Author      : Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
-// Created     : May 8, 2012
-// Last Update : May 8, 2012
+// Created     : May 14, 2012
+// Last Update : May 14, 2012
 //============================================================================
 
-#include "ibex_Bsc.h"
-#include "ibex_Cell.h"
-
-using std::pair;
+#include "ibex_CtcUnion.h"
 
 namespace ibex {
 
-pair<IntervalVector,IntervalVector> Bsc::bisect(Cell& cell) {
-	return bisect(cell.box);
+CtcUnion::CtcUnion(const Array<Ctc>& list) : Ctc(list[0].nb_var), list(list) {
+	for (int i=0; i<list.size(); i++) {
+		assert(list[i].nb_var==nb_var);
+	}
 }
 
 } // end namespace ibex

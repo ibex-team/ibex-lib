@@ -35,6 +35,11 @@ public:
 	void add(const IntervalVector& box);
 
 	/**
+	 * \brief Return the size (number of elements, either boxes or traces)
+	 */
+	int size() const;
+
+	/**
 	 * \brief All the traces
 	 */
 	std::vector<std::pair<IntervalVector,IntervalVector> > traces;
@@ -50,6 +55,9 @@ void SubPaving::add(const IntervalVector& box) {
 	traces.push_back(std::pair<IntervalVector,IntervalVector>(box,IntervalVector::empty(box.size())));
 }
 
+int SubPaving::size() const {
+	return traces.size();
+}
 
 } // end namespace ibex
 #endif // __IBEX_SUBPAVING_H__

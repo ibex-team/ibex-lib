@@ -13,7 +13,6 @@
 
 #include "ibex_Eval.h"
 #include "ibex_CompiledFunction.h"
-#include "ibex_NumConstraint.h"
 
 namespace ibex {
 
@@ -26,7 +25,7 @@ class HC4Revise : public BwdAlgorithm<Domain> {
 public:
 
 	/**
-	 * \brief Create the HC4-revise algorithm for a constraint \a ctr.
+	 * \brief Create the HC4-revise algorithm for a function \a f.
 	 */
 	HC4Revise(const Function& f);
 

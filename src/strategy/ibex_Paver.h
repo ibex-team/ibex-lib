@@ -13,10 +13,13 @@
 
 #include "ibex_Array.h"
 #include "ibex_Ctc.h"
+#include "ibex_Bsc.h"
+#include "ibex_CellBuffer.h"
 #include "ibex_SubPaving.h"
-#include "ibex_Strategy.h"
 
 namespace ibex {
+
+class CapacityException : public Exception { };
 
 /**
  * \brief Paver.
@@ -27,81 +30,103 @@ namespace ibex {
  * See the description of this algorithm in <a href="www.references.html#cha09">[cha09]</a>
  *
  */
-class Paver : public Strategy {
+class Paver {
 public:
-	/**
-	 * \brief Create a paver.
+	/*
+	 * \brief Create a paver with default buffer.
+	 *
+	 * The cell buffer is a stack (depth-first search)
 	 */
-	Paver(const Array<Ctc>& c, Bsc& b);
+	//Paver(const Array<Ctc>& c, Bsc& b);
 
 	/**
 	 * \brief Create a paver.
-	 *
-	 * The cell buffer is a stack (depth-first search).
 	 */
 	Paver(const Array<Ctc>& c, Bsc& b, CellBuffer& cells);
 
 	/**
 	 * \brief Run the paver.
+	 *
+	 * The paving returned is an array that must be disallocated by the caller.
 	 */
-	void pave(const IntervalVector& init_box);
+	SubPaving* pave(const IntervalVector& init_box);
 
-  /*----------------------------------------------------------------------------------*/
-  /*                                        PARAMETERS                                */
-  /*----------------------------------------------------------------------------------*/
+	/*----------------------------------------------------------------------------------*/
+	/*                                        PARAMETERS                                */
+	/*----------------------------------------------------------------------------------*/
 
-  /**
-   * \brief Capacity of the solver.
-   *
-   * The total number of boxes that can be stored.
-   * This parameter allows to bound space complexity.
-   * The value can be fixed by the user. By default, it is -1 (no limit).
-   *
-   */
-  long capacity;
+	/**
+	 * \brief Capacity of the solver.
+	 *
+	 * The total number of boxes that can be stored.
+	 * This parameter allows to bound space complexity.
+	 * The value can be fixed by the user. By default, it is -1 (no limit).
+	 *
+	 */
+	long capacity;
 
+	/**
+	 * \brief Time limit.
+	 *
+	 * Maximum cpu time used by the strategy.
+	 * This parameter allows to bound time complexity.
+	 * The value can be fixed by the user.
+	 */
+	double timeout;
 
+	/**
+	 * \brief Contraction fix-point flag.
+	 *
+	 * If true, the paver will loop on contractors until the fixpoint
+	 * is reached, for each cell. Otherwise, contractors are only called once.
+	 * Default value is  \c true.
+	 */
+	bool ctc_loop;
 
-  /**
-   * \brief Contraction fix-point flag.
-   *
-   * If true, the paver will loop on contractors until the fixpoint
-   * is reached, for each cell. Otherwise, contractors are only called once.
-   * Default value is  \c true.
-   */
-  bool ctc_loop;
+	/**
+	 * \brief Trace activation flag.
+	 *
+	 * A flag for printing the trace. If set, the top of the buffer is printed
+	 * on the standard output each time a new cell is created. Default value is \c false.
+	 */
+	bool trace;
+
+	/** Contractors. */
+	Array<Ctc> ctc;
+
+	/** Bisector. */
+	Bsc& bsc;
+
+	/** Cell buffer. */
+	CellBuffer& buffer;
 
 protected:
-  /**
-   * \brief Check the number of boxes stored in the paving.
-   */
-  void check_capacity() throw(CapacityException);
 
-  /**
-   * \brief Calls all the contractors until the fix-point is reached.
-   *
-   * \return the contractor number that entirely emptied the box, if any.
-   * Otherwise, return -1 (the box is non empty and the fixpoint is reached).
-   */
-  void contract(Cell& c);
+	/**
+	 * \brief Calls all the contractors until the fix-point is reached.
+	 *
+	 * Contracted parts are put into the paving in argument.
+	 *
+	 * \return the contractor number that entirely emptied the box, if any.
+	 * Otherwise, return -1 (the box is non empty and the fixpoint is reached).
+	 */
+	void contract(Cell& c, SubPaving*);
 
-  /* Contractors. */
-  Array<Ctc> ctc;
+	/**
+	 * \brief Check the number of boxes stored in the paving.
+	 */
+	void check_capacity(SubPaving*);
 
-  /** Result Paving. */
-  SubPaving *paving;
-
-  /** Total size of \a result */
-  int paving_size;
+	/**
+	 * \brief Bisect the cell and push the two subcells into the buffer.
+	 */
+	void bisect(Cell& c);
 
 };
 
 
 /*============================================ inline implementation ============================================ */
 
-inline void Paver::check_capacity() throw(CapacityException) {
-  if (capacity!=-1 && paving_size>capacity) throw CapacityException();
-}
 
 } // end namespace ibex
 #endif // __IBEX_PAVER_H__

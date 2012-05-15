@@ -1,7 +1,7 @@
 //============================================================================
 //                                  I B E X                                   
 // File        : ibex_Timer.h
-// Author      : Gilles Chabert
+// Author      : ????
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : May 13, 2012
@@ -10,6 +10,8 @@
 
 #ifndef __IBEX_TIMER_H__
 #define __IBEX_TIMER_H__
+
+#include "ibex_Exception.h"
 
 #include <sys/time.h>
 
@@ -23,6 +25,17 @@
 
 namespace ibex {
 
+/** \ingroup tools
+ *
+ * \brief Timeout exception.
+ *
+ */
+class TimeOutException : public Exception { };
+
+/** \ingroup tools
+ *
+ * \brief Timer.
+ */
 class Timer {
  public:
 
@@ -33,6 +46,14 @@ class Timer {
   static void start();
 
   static void stop(TimerType type=VIRTUAL);
+
+  /**
+   * \brief Check the timer and throw a #ibex::TimeOutException
+   * if the time elapsed exceeds #timeout.
+   *
+   * (add by gch).
+   */
+  static void check(double timeout);
 
   inline static Time REAL_TIMELAPSE() { return real_lapse; }
   inline static double RESIDENT_MEMORY() { return resident_memory; }

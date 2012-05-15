@@ -108,6 +108,16 @@ public:
 	int size() const;
 
 	/**
+	 * \brief The maximum of all elements
+	 */
+	double max() const;
+
+	/**
+	 * \brief The minimum of all elements
+	 */
+	double min() const;
+
+	/**
 	 * \brief (*this)+=x2.
 	 */
 	Vector& operator+=(const Vector& x2);

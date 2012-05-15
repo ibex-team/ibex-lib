@@ -18,8 +18,6 @@
 
 namespace ibex {
 
-class Strategy; // for friendship
-
 /** \ingroup strategy
  *
  * \brief Representation of the search space.
@@ -37,6 +35,11 @@ class Strategy; // for friendship
  */
 class Cell {
 public:
+
+	/**
+	 * \brief Create the root cell.
+	 */
+	Cell(const IntervalVector& box);
 
 	/**
 	 * \brief Bisect this cell.
@@ -74,6 +77,17 @@ public:
 	}
 
 	/**
+	 * \brief Retrieve backtrackable data from this cell.
+	 *
+	 * The data is identified by its classname.
+	 * \pre Class \a T is a subclass of #ibex::Backtrackable.
+	 */
+	template<typename T>
+	const T& get() const {
+		return (T&) *data[typeid(T).name()];
+	}
+
+	/**
 	 * \brief Add backtrackable data into this cell.
 	 *
 	 * The data is identified by its classname.
@@ -96,11 +110,6 @@ public:
 	SymbolMap<Backtrackable*> data;
 
 private:
-	friend class Strategy;
-	int status; // managed by Strategy
-
-	Cell(const IntervalVector& box);
-
 	/* A constant to be used when no variable has been split yet (root cell). */
 	//static const int ROOT_CELL;
 };

@@ -13,21 +13,29 @@
 
 #include "ibex_Ctc.h"
 #include "ibex_CtcPrecision.h"
-#include "ibex_Strategy.h"
+#include "ibex_Bsc.h"
+#include "ibex_CellBuffer.h"
+#include "ibex_SubPaving.h"
 
 #include <vector>
 
 namespace ibex {
 
-class Solver : public Strategy {
+class Solver {
 public:
-	Solver(Ctc& ctc, double prec);
+	Solver(Ctc& ctc, Bsc& bsc, CellBuffer& buffer, double prec);
 
 	// This field allows to bound the number of solutions.
 	std::vector<IntervalVector> solve(const IntervalVector& init_box);
 
 	/** Contractor. */
 	Ctc& ctc;
+
+	/** Bisector. */
+	Bsc& bsc;
+
+	/** Cell buffer. */
+	CellBuffer& buffer;
 
 	/** Precision */
 	CtcPrecision prec;

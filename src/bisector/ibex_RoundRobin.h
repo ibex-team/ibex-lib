@@ -27,8 +27,6 @@ public:
 		return std::pair<Backtrackable*,Backtrackable*>(new BisectedVar(var),new BisectedVar(var));
 	}
 
-	void up(Backtrackable& child, bool side) { }
-
 	int var;
 };
 
@@ -73,7 +71,7 @@ class RoundRobin : public Bsc {
    * bisected variable and this information is copied to
    * the subcells data.
    */
-  virtual std::pair<Cell*,Cell*> bisect(Cell& cell);
+  virtual std::pair<IntervalVector,IntervalVector> bisect(Cell& cell);
 
   void init_root(Cell& root);
 

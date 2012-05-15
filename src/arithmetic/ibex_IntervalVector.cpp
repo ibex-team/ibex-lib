@@ -220,6 +220,13 @@ bool IntervalVector::is_strict_subset(const IntervalVector& x) const {
   return true;
 }
 
+Vector IntervalVector::diam() const {
+	Vector d(size());
+	for (int i=0; i<size(); i++)
+		d[i]=(*this)[i].diam();
+	return d;
+}
+
 int IntervalVector::extr_diam_index(bool min) const {
 	double d=(*this)[0].diam();
 	int selectedIndex=0;
@@ -445,10 +452,10 @@ std::pair<IntervalVector,IntervalVector> IntervalVector::bisect(int i, double ra
 	return pair<IntervalVector,IntervalVector>(left,right);
 }
 
-IntervalVector IntervalVector::random() const {
+Vector IntervalVector::random() const {
 	assert(!is_empty());
 
-	IntervalVector b(size());
+	Vector b(size());
 	for (int i=0; i<size(); i++) {
 		const Interval& xi=(*this)[i];
 		// get a random number in [-0.5,0.5]

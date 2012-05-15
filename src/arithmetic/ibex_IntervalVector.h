@@ -273,6 +273,11 @@ public:
 	bool is_strict_superset(const IntervalVector& x) const;
 
 	/**
+	 * \brief Return the vector of diameters.
+	 */
+	Vector diam() const;
+
+	/**
 	 * \brief Return the index of a component with minimal/maximal diameter.
 	 *
 	 *  \param min true => minimal diameter
@@ -366,11 +371,11 @@ public:
 	std::pair<IntervalVector,IntervalVector> bisect(int i, double ratio=0.5) const;
 
 	/**
-	 * \brief Return a random vector (degenerated box) inside *this.
+	 * \brief Return a random vector inside *this.
 	 *
 	 * \pre (*this) must be nonempty.
 	 */
-	IntervalVector random() const;
+	Vector random() const;
 
 	/**
 	 * \brief (*this)+=x2.

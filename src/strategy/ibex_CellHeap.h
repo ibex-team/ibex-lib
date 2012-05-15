@@ -25,6 +25,13 @@ namespace ibex {
  *
  * The criterion used to order the cells is the one defined by #cost(const Cell*).
  *
+ * The heap is built so that:
+ *  <ul>
+ *  <li> #pop() returns in logarithmic time
+ *    the cell with the minimal criterion.
+ *  <li> #push() is also in logarithmic time.</li>
+ *  </ul>
+ *
  * \see #CellBuffer, #CellHeapBySize
  */
 class CellHeap : public CellBuffer {
@@ -49,6 +56,10 @@ class CellHeap : public CellBuffer {
   /** Return the next box (but does not pop it).*/
   Cell* top() const;
 
+  /**
+   * Removes (and deletes) from the heap all the cells
+   * with a cost greater than \a loup.
+   */
   void contract_heap(double loup);
 
   /** Return the minimum (the criterion for

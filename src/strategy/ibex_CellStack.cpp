@@ -13,32 +13,33 @@
 namespace ibex {
 
 void CellStack::flush() {
-  while (!cstack.empty()) {
-    delete cstack.top();
-    cstack.pop();
-  }
+	while (!cstack.empty()) {
+		delete cstack.top();
+		cstack.pop();
+	}
 }
 
 int CellStack::size() const {
-  return cstack.size();
+	return cstack.size();
 }
 
 bool CellStack::empty() const {
-  return cstack.empty();
+	return cstack.empty();
 }
 
 void CellStack::push(Cell* cell) {
-  cstack.push(cell);
+	if (capacity>0 && size()==capacity) throw CellBufferOverflow();
+	cstack.push(cell);
 }
 
 Cell* CellStack::pop() {
-  Cell* c = cstack.top();
-  cstack.pop();
-  return c;
+	Cell* c = cstack.top();
+	cstack.pop();
+	return c;
 }
 
 Cell* CellStack::top() const {
-  return cstack.top();
+	return cstack.top();
 }
 
 } // end namespace ibex

@@ -1,7 +1,7 @@
 //============================================================================
 //                                  I B E X                                   
 // File        : ibex_Timer.cpp
-// Author      : Gilles Chabert
+// Author      : ???? and Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : May 13, 2012
@@ -79,6 +79,20 @@ void Timer::stop( TimerType type )
 		resident_memory = res.ru_ixrss;
 #endif
 	}
+}
+
+void Timer::check(double timeout) {
+	if (VIRTUAL_TIMELAPSE()>timeout) throw TimeOutException();
+	//Timer::stop();
+	//time += Timer::VIRTUAL_TIMELAPSE();
+	//if (time >=time_limit) throw TimeOutException();
+	/*
+if (Timer::RESIDENT_MEMORY() > 100000)
+  {cout << "memory limit " << Timer::RESIDENT_MEMORY() << endl;
+    throw MemoryException();
+  }
+	 */
+	//Timer::start();
 }
 
 } // end namespace ibex

@@ -9,6 +9,7 @@
 //============================================================================
 
 #include "ibex_Vector.h"
+#include <float.h>
 
 namespace ibex {
 
@@ -68,6 +69,20 @@ bool Vector::operator==(const Vector& x) const {
 	for (int i=0; i<n; i++)
 		if ((*this)[i]!=(x[i])) return false;
 	return true;
+}
+
+double Vector::min() const {
+	double res=DBL_MAX;
+	for (int i=0; i<n; i++)
+		if ((*this)[i]<res) res=(*this)[i];
+	return res;
+}
+
+double Vector::max() const {
+	double res=-DBL_MAX;
+	for (int i=0; i<n; i++)
+		if ((*this)[i]>res) res=(*this)[i];
+	return res;
 }
 
 std::ostream& operator<<(std::ostream& os, const Vector& x) {

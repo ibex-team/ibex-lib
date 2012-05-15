@@ -14,6 +14,7 @@
 
 #include "ibex_Ctc.h"
 #include "ibex_HC4Revise.h"
+#include "ibex_NumConstraint.h"
 
 namespace ibex {
 

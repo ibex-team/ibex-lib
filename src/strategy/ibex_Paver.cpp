@@ -10,21 +10,17 @@
 
 #include "ibex_Paver.h"
 #include "ibex_EmptyBoxException.h"
+#include "ibex_Timer.h"
 
 namespace ibex {
 
-Paver::Paver(const Array<Ctc>& c, Bsc& b) :
-		Strategy(b), ctc(c), capacity(-1), ctc_loop(true),
-		paving(new SubPaving[c.size()]) {
-
-}
-
 Paver::Paver(const Array<Ctc>& c, Bsc& b, CellBuffer& buffer) :
-		Strategy(b,buffer), ctc(c),
-		capacity(-1), ctc_loop(true), paving(new SubPaving[c.size()]) {
+		capacity(-1), ctc_loop(true), ctc(c), bsc(bsc), buffer(buffer) {
+
+	assert(ctc.size()>0);
 }
 
-void Paver::contract(Cell& cell) {
+void Paver::contract(Cell& cell, SubPaving* paving) {
 	int i=0; // contractor number
 
 	int n=ctc.size(); // number of contractors
@@ -55,9 +51,7 @@ void Paver::contract(Cell& cell) {
 			if (tmpbox.rel_distance(cell.box)>0) {
 				fix_count=0;
 
-				check_capacity();
 				paving[i].add(tmpbox,cell.box);
-				paving_size++;
 
 				if (trace) cout << " -> contracts" << endl;
 
@@ -73,28 +67,63 @@ void Paver::contract(Cell& cell) {
 		assert(cell.box.is_empty());
 		if (trace) cout << " -> empty set" << endl;
 
-		check_capacity();
 		paving[i].add(tmpbox);
-		paving_size++;
 	}
 
 }
 
-void Paver::pave(const IntervalVector& init_box) {
+void Paver::bisect(Cell& c) {
 
-	assert(ctc.size()>0);
+	pair<IntervalVector,IntervalVector> boxes=bsc.bisect(c);
+	pair<Cell*,Cell*> new_cells=c.bisect(boxes.first,boxes.second);
 
-	start(init_box);
+	delete buffer.pop();
+	buffer.push(new_cells.first);
+	buffer.push(new_cells.second);
+}
 
+SubPaving* Paver::pave(const IntervalVector& init_box) {
+
+	SubPaving* paving=new SubPaving[ctc.size()];
+
+	buffer.flush();
+
+	Cell* root=new Cell(init_box);
+
+	// add data required by the contractors
 	for (int i=0; i<ctc.size(); i++) {
-		ctc[i].init_root(*buffer.top());
+		ctc[i].init_root(*root);
+	}
+	// add data required by the bisector
+	bsc.init_root(*root);
+
+	buffer.push(root);
+
+	while (!buffer.empty()) {
+		Cell* c=buffer.top();
+
+		if (trace) cout << buffer << endl;
+
+		contract(*c, paving);
+
+		Timer::check(timeout);
+		check_capacity(paving);
+
+		if (c->box.is_empty()) delete buffer.pop();
+		else bisect(*c);
 	}
 
-	Cell* c;
+	return paving;
+}
 
-	while ((c=next_cell())) {
-		contract(*c);
-	}
+
+void Paver::check_capacity(SubPaving* paving) {
+	if (capacity==-1) return;
+
+	int size=0;
+	for (int i=0; i<ctc.size(); i++) size+=paving[i].size();
+
+	if (size>capacity) throw CapacityException();
 }
 
 } // end namespace ibex

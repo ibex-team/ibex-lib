@@ -73,6 +73,8 @@ bool CellHeap::empty() const {
 }
 
 void CellHeap::push(Cell* cell) {
+	if (capacity>0 && size()==capacity) throw CellBufferOverflow();
+
 	l.push_back(pair<Cell*,double>(cell,cost(*cell)));
 	push_heap(l.begin(), l.end(), CellComparator());
 }

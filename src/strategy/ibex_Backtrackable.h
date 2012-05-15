@@ -48,11 +48,6 @@ public:
 	virtual std::pair<Backtrackable*,Backtrackable*> down()=0;
 
 	/**
-	 * \brief Update data from child cells.
-	 */
-	virtual void up(Backtrackable& child, bool side)=0;
-
-	/**
 	 * \brief Delete *this.
 	 */
 	virtual ~Backtrackable() { }

@@ -17,6 +17,14 @@ namespace ibex {
 
 /** \ingroup strategy
  *
+ * \brief Cell Buffer Overflow Exception.
+ */
+class CellBufferOverflow : Exception {
+
+};
+
+/** \ingroup strategy
+ *
  * \brief Cell Buffer
  *
  * This class allows to control the order in which cells are treated by
@@ -29,29 +37,49 @@ namespace ibex {
 class CellBuffer {
 
  public:
-  /** Flush the buffer.
-   * All the remaining cells will be *deleted* */
-  virtual void flush()=0;
+	/**
+	 * \brief Limit the buffer size.
+	 *
+	 * When the number of cells exceeds this number,
+	 * a #ibex::CellBufferOverflow exception must be raised.
+	 * Special value "-1" means no limit. By default, it is -1.
+	 */
+	int capacity;
 
-  /** Return the size of the buffer. */
-  virtual int size() const=0;
+	/**
+	 * \brief Create a buffer
+	 */
+	CellBuffer();
 
-  /** Return true if the buffer is empty. */
-  virtual bool empty() const=0;
+	/** Delete *this. */
+	virtual ~CellBuffer();
 
-  /** Push a new cell on the stack. */
-  virtual void push(Cell* cell)=0;
+	/** Flush the buffer.
+	 * All the remaining cells will be *deleted* */
+	virtual void flush()=0;
 
-  /** Pop a cell from the stack and return it.*/
-  virtual Cell* pop()=0;
+	/** Return the size of the buffer. */
+	virtual int size() const=0;
 
-  /** Return the next box (but does not pop it).*/
-  virtual Cell* top() const=0;
+	/** Return true if the buffer is empty. */
+	virtual bool empty() const=0;
 
-  /** Delete *this. */
-  virtual ~CellBuffer() { }
+	/** Push a new cell on the stack. */
+	virtual void push(Cell* cell)=0;
 
+	/** Pop a cell from the stack and return it.*/
+	virtual Cell* pop()=0;
+
+	/** Return the next box (but does not pop it).*/
+	virtual Cell* top() const=0;
+
+ private:
+	friend std::ostream& operator<<(std::ostream& os, const CellBuffer&);
+
+	mutable int screen; // only for display (debug)
 };
+
+std::ostream& operator<<(std::ostream& os, const CellBuffer&);
 
 } // end namespace ibex
 #endif // __IBEX_CELL_BUFFER_H__

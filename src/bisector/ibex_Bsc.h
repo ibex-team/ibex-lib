@@ -41,7 +41,7 @@ public:
 	 * Implementation is <b>optional</b>. By default, this function call bisect(cell.box).
 	 * See #bisect(const IntervalVector&).
 	 */
-	virtual std::pair<Cell*,Cell*> bisect(Cell& cell);
+	virtual std::pair<IntervalVector,IntervalVector> bisect(Cell& cell);
 
 	/**
 	 * \brief Delete *this.
