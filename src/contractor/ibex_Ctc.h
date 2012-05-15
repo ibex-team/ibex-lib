@@ -14,6 +14,7 @@
 
 #include "ibex_IntervalVector.h"
 #include "ibex_Indicators.h"
+#include "ibex_EmptyBoxException.h"
 
 namespace ibex {
 

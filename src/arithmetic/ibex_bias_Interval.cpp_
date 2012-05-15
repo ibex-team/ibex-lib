@@ -21,8 +21,9 @@ namespace ibex {
 
 // The following code is only used to force Constants.C to be
 // always included in the executable code.
+static int ___IGNORE__ = (init(), 0);
 
-const Interval Interval::EMPTY_SET((init(), NEG_INFINITY), (init(), NEG_INFINITY));
+const Interval Interval::EMPTY_SET(NEG_INFINITY, NEG_INFINITY);
 const Interval Interval::ALL_REALS(NEG_INFINITY, POS_INFINITY);
 const Interval Interval::NEG_REALS(NEG_INFINITY, 0.0);
 const Interval Interval::POS_REALS(0.0, POS_INFINITY);

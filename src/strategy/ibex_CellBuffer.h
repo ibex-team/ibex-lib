@@ -73,6 +73,10 @@ class CellBuffer {
 	/** Return the next box (but does not pop it).*/
 	virtual Cell* top() const=0;
 
+	/** Count the number of cells pushed since
+	 * the object is created. */
+	int nb_cells;
+
  private:
 	friend std::ostream& operator<<(std::ostream& os, const CellBuffer&);
 

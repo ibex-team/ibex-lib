@@ -34,7 +34,13 @@ void CtcHC4Revise::contract(IntervalVector& box) {
 	case Dim::MATRIX_ARRAY: assert(false); /* impossible */ break;
 	}
 	hc4r.contract(box,root_label);
+	if (box.is_empty()) throw EmptyBoxException();
 	//hc4r.eval.f.cf.print<Domain>();
+}
+
+void CtcHC4Revise::contract(IntervalVector& box, const Indicators& idc) {
+	if (idc.impact_on && idc.impact.all_unset()) return;
+	contract(box);
 }
 
 bool CtcHC4Revise::can_contract(int v) const {

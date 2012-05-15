@@ -408,7 +408,6 @@ inline Interval sqr(const Interval& x) {
 
 inline Interval sqrt(const Interval& x) {
 	INTERVAL r;
-	BiasInit();
 
 	if (x.ub()<0) return Interval::EMPTY_SET;
 	else {

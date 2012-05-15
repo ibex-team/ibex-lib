@@ -39,6 +39,16 @@ public:
 
 	/** Precision */
 	CtcPrecision prec;
+
+	/**
+	 * \brief Trace activation flag.
+	 *
+	 * A flag for printing the trace. If set, the top of the buffer is printed
+	 * on the standard output each time a new cell is created. Default value is \c false.
+	 */
+	bool trace;
+
+	int nb_cells;
 };
 
 } // end namespace ibex
