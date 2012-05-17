@@ -19,13 +19,16 @@ HC4Revise::HC4Revise(const Function& f) : eval(f) {
 
 void HC4Revise::vector_bwd(const ExprVector& v, Domain** compL, const Domain& y) {
 	if (v.dim.is_vector()) {
-		for (int i=0; i<v.length(); i++) compL[i]->i() &= y.v()[i];
+		for (int i=0; i<v.length(); i++)
+			if ((compL[i]->i() &= y.v()[i]).is_empty()) throw EmptyBoxException();
 	}
 	else {
 		if (v.row_vector())
-			for (int i=0; i<v.length(); i++) compL[i]->v()=y.m().col(i);
+			for (int i=0; i<v.length(); i++)
+				if ((compL[i]->v()&=y.m().col(i)).is_empty()) throw EmptyBoxException();
 		else
-			for (int i=0; i<v.length(); i++) compL[i]->v()=y.m().row(i);
+			for (int i=0; i<v.length(); i++)
+				if ((compL[i]->v()=y.m().row(i)).is_empty()) throw EmptyBoxException();
 	}
 }
 

@@ -68,8 +68,7 @@ void  CtcPropag::contract(IntervalVector& _box, const Indicators& indic) {
 
 		agenda.pop(c,v);
 
-		//cout << "Narrowing for (c" << c << ", v" << v << ")" << endl;
-		//projbox(v+1) = box(v+1);
+		//cout << "Narrowing for (c" << c << ", v" << v << ")"; // << endl;
 
 		if (c!=old_c)
 			for (int i=0; i<g.ctr_nb_vars(c); i++) {
@@ -92,6 +91,7 @@ void  CtcPropag::contract(IntervalVector& _box, const Indicators& indic) {
 		}
 		catch (EmptyBoxException& e) {
 			agenda.flush();
+			//cout << "   empty!" << endl;
 			throw e;
 		}
 
@@ -99,6 +99,7 @@ void  CtcPropag::contract(IntervalVector& _box, const Indicators& indic) {
 		//cout << agenda << endl;
 
 		//if (propbox[v].rel_distance(box[v])>=ratio) {
+		//cout << "   " << propbox[v] << " % " << box[v] << "   " << propbox[v].ratiodelta(box[v]) << endl;
 		if (propbox[v].ratiodelta(box[v])>=ratio) {
 			//cout << "before prop q=" << agenda << endl;
 			/********************************/

@@ -112,10 +112,14 @@ class Interval {
      * - [a, b]     -> midP ~ a + .5*(b-a) */
     double mid() const;
 
-    /** Return the radius of the interval. */
+    /** Return the radius of the interval.
+     *
+     * By convention, 0 if *this is empty.*/
     double rad() const;
 
-    /** Return the diameter of the interval. */
+    /** Return the diameter of the interval.
+     *
+     * By convention, 0 if *this is empty.*/
     double diam() const;
 
     /** \brief Mignitude.

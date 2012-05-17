@@ -1,16 +1,11 @@
 SRCS=$(wildcard *.cpp)
-HEADERS=$(SRCS:.cpp=.h)
-OBJS=$(SRCS:.cpp=.o)
-TARGET=robust_estim
+BINS=$(SRCS:.cpp=)
 
 include ../src/common.mak
 
-$(TARGET) :	$(TARGET).o $(IBEX_LIB_DIR)/libibex.a
-	$(CXX) -o $(TARGET) $(LIB_DIR_OPT) $< $(LIB_NAME_OPT)  
-
-%.o : %.cpp 
-	$(CXX) $(CXXFLAGS) $(INC_DIR_OPT) -c -o  $@ $<
+% :	%.cpp $(IBEX_LIB_DIR)/libibex.a
+	$(CXX) $(INC_DIR_OPT) -o $@ $< $(LIB_DIR_OPT) $(LIB_NAME_OPT)  
 
 clean:
-	rm -f $(OBJS) $(TARGET)
+	rm -f $(OBJS) $(BINS)
 	

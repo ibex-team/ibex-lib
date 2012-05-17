@@ -40,6 +40,12 @@ public:
 	/** Precision */
 	CtcPrecision prec;
 
+
+	/** Maximal number of cells created by the solver.
+	 * This parameter allows to bound time complexity.
+	 * The value can be fixed by the user. By default, it is -1 (no limit). */
+	long cell_limit;
+
 	/**
 	 * \brief Trace activation flag.
 	 *

@@ -298,7 +298,7 @@ inline bool Interval::is_unbounded() const {
 }
 
 inline double Interval::diam() const {
-	return Diam(itv);
+	return is_empty()? 0: Diam(itv);
 }
 
 inline double Interval::mig() const {

@@ -17,7 +17,8 @@ using namespace std;
 namespace ibex {
 
 Solver::Solver(Ctc& ctc, Bsc& bsc, CellBuffer& buffer, double prec) :
-		ctc(ctc), bsc(bsc), buffer(buffer), prec(ctc.nb_var,prec), trace(false) {
+		ctc(ctc), bsc(bsc), buffer(buffer), prec(ctc.nb_var,prec), trace(false),
+		cell_limit(-1) {
 
 	nb_cells=0;
 
@@ -60,6 +61,7 @@ vector<IntervalVector> Solver::solve(const IntervalVector& init_box) {
 				buffer.push(new_cells.first);
 				buffer.push(new_cells.second);
 				nb_cells+=2;
+				if (nb_cells==cell_limit) throw Exception();
 
 			} catch(EmptyBoxException&) {
 				assert(c->box.is_empty());

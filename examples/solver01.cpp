@@ -1,7 +1,6 @@
 #include "ibex.h"
-
-#include "../tests/Ponts30.h"
-//#include "../tests/Ponts30.cpp"
+#include <iomanip>
+#include "../tests/Ponts30.cpp"
 
 using namespace std;
 
@@ -28,6 +27,7 @@ int main() {
 
 	Solver s(hc4,rr,buff,1e-03);
 	//s.trace=true;
+	//s.cell_limit = 1000;
 
 	vector<IntervalVector> sols=s.solve(p30.init_box);
 
