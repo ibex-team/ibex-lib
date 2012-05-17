@@ -18,7 +18,9 @@
 
 namespace ibex {
 
-/**
+/** \degroup numeric Numeric Algorithms
+ * \ingroup numeric
+ *
  * \brief Computes an (approximative) LU decomposition of a real matrix.
  *
  * \param A - The matrix to inverse.

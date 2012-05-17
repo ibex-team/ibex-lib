@@ -20,7 +20,7 @@
 namespace ibex {
 
 /**
- * \ingroup level1
+ * \ingroup symbolic
  * \brief Decorates a function for evaluation/HC4Revise.
  */
 class BasicDecorator : public Decorator, public FunctionVisitor {

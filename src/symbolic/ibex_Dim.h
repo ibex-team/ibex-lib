@@ -20,7 +20,7 @@
 namespace ibex {
 
 /**
- * \ingroup level1
+ * \ingroup symbolic
  * \brief Dimensions (of an mathematical expression)
  *
  * All expressions are considered here as 3-dimensional vectors, except that the "value" of a dimension can be 0.

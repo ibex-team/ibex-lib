@@ -17,7 +17,7 @@
 namespace ibex {
 
 /**
- * \ingroup level1
+ * \ingroup symbolic
  * \brief Interface for forward algorithms.
  */
 template<typename T>

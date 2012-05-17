@@ -21,7 +21,7 @@ namespace ibex {
 
 class CapacityException : public Exception { };
 
-/**
+/** \ingroup strategy
  * \brief Paver.
  *
  * This class implements a branch & contract algorithm.

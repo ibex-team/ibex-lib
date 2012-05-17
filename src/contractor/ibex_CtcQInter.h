@@ -18,7 +18,7 @@
 namespace ibex {
 
 /**
- * \ingroup level2
+ * \ingroup contractor
  * \brief Q-intersection contractor.
  *
  */

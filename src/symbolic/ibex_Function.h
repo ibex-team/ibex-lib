@@ -20,7 +20,7 @@
 namespace ibex {
 
 /**
- * \ingroup level1
+ * \ingroup symbolic
  * \brief Function (x->f(x) where f(x) is the DAG of an arithmetical expression).
  *
  * Every expression in ibex (like x^2+y^2) is considered as a function,

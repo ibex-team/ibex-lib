@@ -21,7 +21,7 @@
 namespace ibex {
 
 /**
- * \ingroup level1
+ * \ingroup symbolic
  * \brief Label for the gradient computation.
  */
 class GradLabel : public Domain {

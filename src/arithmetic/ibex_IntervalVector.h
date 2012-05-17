@@ -25,7 +25,7 @@ class IntervalMatrix; // declared only for friendship
 class Domains;        // declared for operator=(const Domains&)
 
 /**
- * \ingroup arith
+ * \ingroup arithmetic
  *
  * \brief Vector of Intervals
  *

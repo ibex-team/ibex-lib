@@ -19,7 +19,7 @@ namespace ibex {
 class Function;
 
 /**
- * \ingroup level1
+ * \ingroup symbolic
  * \brief Function decorator.
  *
  * A class that extends Decorator decorates all the nodes of a function

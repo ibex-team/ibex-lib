@@ -15,7 +15,7 @@ namespace ibex {
 /**
  * IMPORTANT:
  *
- * It is very usafe to define the interval constants as follows
+ * It is very unsafe to define the interval constants as follows
  * because of the "static initialization order fiasco".
  *
 //const Interval Interval::EMPTY_SET(gaol::interval::emptyset);

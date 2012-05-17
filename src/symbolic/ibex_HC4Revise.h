@@ -18,7 +18,7 @@
 namespace ibex {
 
 /**
- * \ingroup level1
+ * \ingroup symbolic
  * \brief The famous forward-backward contraction algorithm.
  *
  */

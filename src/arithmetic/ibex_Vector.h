@@ -19,7 +19,7 @@ namespace ibex {
 class Matrix; // declared only for friendship
 
 /**
- * \ingroup arith
+ * \ingroup arithmetic
  *
  * \brief Vector of reals
  *

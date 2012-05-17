@@ -23,6 +23,10 @@
 namespace ibex {
 
 
+/**
+ * \ingroup strategy
+ * \brief Optimization criterion (backtrackable structure)
+ */
 class OptimCrit : public Backtrackable {
 public:
 	OptimCrit() { }

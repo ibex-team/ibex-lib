@@ -50,7 +50,7 @@ struct equal_string {
 	}
 };
 
-/** \ingroup toolsgroup
+/** \ingroup tools
  * \brief Structure to map symbol to any data.
  */
 template <typename T>

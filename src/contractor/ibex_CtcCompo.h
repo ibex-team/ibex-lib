@@ -16,7 +16,7 @@
 
 namespace ibex {
 
-/**
+/** \ingroup contractor
  * \brief Composition of contractors
  *
  * For a box [x] the composition of {c_0,...c_n} performs

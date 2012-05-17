@@ -16,7 +16,7 @@
 
 namespace ibex {
 
-/**
+/** \ingroup contractor
  * \brief Union of contractors
  *
  * For a box [x] the union of {c_0,...c_n} performs

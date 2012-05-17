@@ -15,6 +15,9 @@
 
 namespace ibex {
 
+/** \ingroup symbolic
+ *
+ */
 class InnerInflator {
 public:
 

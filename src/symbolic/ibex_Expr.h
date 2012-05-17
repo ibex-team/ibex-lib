@@ -25,6 +25,9 @@
 
 namespace ibex {
 
+/** \ingroup symbolic
+ * \brief Expression label (decoration)
+ */
 class ExprLabel {
 public:
 	virtual ~ExprLabel() { }
@@ -37,7 +40,7 @@ class Inequality;
 class ExprIndex;
 
 /**
- * \ingroup level1
+ * \ingroup symbolic
  * \brief Node in an expression.
  *
  * An object of this class is a node in a DAG, reprented by a #Function object.
@@ -135,7 +138,7 @@ public:
 std::ostream& operator<<(std::ostream&, const ExprNode&);
 
 /**
- * \ingroup level1
+ * \ingroup symbolic
  * \brief Indexed expression
  */
 class ExprIndex : public ExprNode {
@@ -172,7 +175,7 @@ private:
 };
 
 /**
- * \ingroup level1
+ * \ingroup symbolic
  * \brief N-ary expressions
  */
 class ExprNAryOp : public ExprNode {
@@ -195,7 +198,7 @@ protected:
 };
 
 /**
- * \ingroup level1
+ * \ingroup symbolic
  * \brief Vector of expressions
  *
  * If e_1 and e_n are n column vectors of m elements,and v=[e_1 ... e_n] then
@@ -259,7 +262,7 @@ private:
 };
 
 /**
- * \ingroup level1
+ * \ingroup symbolic
  * \brief Function application expression
  *
  * In the following Quimper example:
@@ -307,7 +310,7 @@ private:
 };
 
 /**
- * \ingroup level1
+ * \ingroup symbolic
  * \brief Symbol
  *
  * An instance of this class represents a leaf in the syntax tree. This leaf
@@ -348,7 +351,7 @@ private:
 };
 
 /**
- * \ingroup level1
+ * \ingroup symbolic
  * \brief Constant expression
  */
 class ExprConstant : public ExprNode {
@@ -402,7 +405,7 @@ private:
 /*==========================================================================================================*/
 
 /**
- * \ingroup level1
+ * \ingroup symbolic
  * \brief Binary expression
  */
 class ExprBinaryOp : public ExprNode {
@@ -429,7 +432,7 @@ private:
 };
 
 /**
- * \ingroup level1
+ * \ingroup symbolic
  * \brief Addition of 2 expressions
  */
 class ExprAdd : public ExprBinaryOp {
@@ -454,7 +457,7 @@ private:
 };
 
 /**
- * \ingroup level1
+ * \ingroup symbolic
  * \brief Multiplication of 2 expressions
  */
 class ExprMul : public ExprBinaryOp {
@@ -479,7 +482,7 @@ private:
 
 
 /**
- * \ingroup level1
+ * \ingroup symbolic
  * \brief Subtraction of 2 expressions
  */
 class ExprSub : public ExprBinaryOp {
@@ -503,7 +506,7 @@ private:
 };
 
 /**
- * \ingroup level1
+ * \ingroup symbolic
  * \brief Division of 2 expressions
  */
 class ExprDiv : public ExprBinaryOp {
@@ -527,7 +530,7 @@ private:
 };
 
 /**
- * \ingroup level1
+ * \ingroup symbolic
  * \brief Maximum of 2 expressions
  */
 class ExprMax : public ExprBinaryOp {
@@ -551,7 +554,7 @@ private:
 };
 
 /**
- * \ingroup level1
+ * \ingroup symbolic
  * \brief Minimum of 2 expressions
  */
 class ExprMin : public ExprBinaryOp {
@@ -575,7 +578,7 @@ private:
 };
 
 /**
- * \ingroup level1
+ * \ingroup symbolic
  * \brief Atan2 of 2 expressions
  */
 class ExprAtan2 : public ExprBinaryOp {
@@ -602,7 +605,7 @@ private:
 /*==========================================================================================================*/
 
 /**
- * \ingroup level1
+ * \ingroup symbolic
  * \brief Unary expression
  */
 class ExprUnaryOp : public ExprNode {
@@ -623,7 +626,7 @@ protected:
 };
 
 /**
- * \ingroup level1
+ * \ingroup symbolic
  * \brief Minus an expression
  */
 class ExprMinus : public ExprUnaryOp {
@@ -645,7 +648,7 @@ private:
 };
 
 /**
- * \ingroup level1
+ * \ingroup symbolic
  * \brief Sign of an expression
  */
 class ExprSign : public ExprUnaryOp {
@@ -667,7 +670,7 @@ private:
 };
 
 /**
- * \ingroup level1
+ * \ingroup symbolic
  * \brief Absolute value of an expression
  */
 class ExprAbs : public ExprUnaryOp {
@@ -690,7 +693,7 @@ private:
 
 
 /**
- * \ingroup level1
+ * \ingroup symbolic
  * \brief Power expression.
  */
 class ExprPower : public ExprUnaryOp {
@@ -717,7 +720,7 @@ private:
 };
 
 /**
- * \ingroup level1
+ * \ingroup symbolic
  * \brief Square of an expression.
  */
 class ExprSqr : public ExprUnaryOp {
@@ -742,7 +745,7 @@ private:
 };
 
 /**
- * \ingroup level1
+ * \ingroup symbolic
  * \brief Square root of an expression.
  */
 class ExprSqrt : public ExprUnaryOp {
@@ -765,7 +768,7 @@ private:
 };
 
 /**
- * \ingroup level1
+ * \ingroup symbolic
  * \brief Exponential of an expression.
  */
 class ExprExp : public ExprUnaryOp {
@@ -790,7 +793,7 @@ private:
 };
 
 /**
- * \ingroup level1
+ * \ingroup symbolic
  * \brief Neperian logarithm of an expression.
  */
 class ExprLog : public ExprUnaryOp {
@@ -815,7 +818,7 @@ private:
 };
 
 /**
- * \ingroup level1
+ * \ingroup symbolic
  * \brief Cosine of an expression.
  */
 class ExprCos : public ExprUnaryOp {
@@ -840,7 +843,7 @@ private:
 };
 
 /**
- * \ingroup level1
+ * \ingroup symbolic
  * \brief Sine of an expression.
  */
 class ExprSin : public ExprUnaryOp {
@@ -865,7 +868,7 @@ private:
 };
 
 /**
- * \ingroup level1
+ * \ingroup symbolic
  * \brief Tangent of an expression.
  */
 class ExprTan : public ExprUnaryOp {
@@ -890,7 +893,7 @@ private:
 };
 
 /**
- * \ingroup level1
+ * \ingroup symbolic
  * \brief Hyperbolic cosine of an expression.
  */
 class ExprCosh : public ExprUnaryOp {
@@ -915,7 +918,7 @@ private:
 };
 
 /**
- * \ingroup level1
+ * \ingroup symbolic
  * \brief Hyperbolic sine of an expression.
  */
 class ExprSinh : public ExprUnaryOp {
@@ -940,7 +943,7 @@ private:
 };
 
 /**
- * \ingroup level1
+ * \ingroup symbolic
  * \brief Hyperbolic tangent of an expression.
  */
 class ExprTanh : public ExprUnaryOp {
@@ -965,7 +968,7 @@ private:
 };
 
 /**
- * \ingroup level1
+ * \ingroup symbolic
  * \brief Inverse cosine of an expression.
  */
 class ExprAcos : public ExprUnaryOp {
@@ -990,7 +993,7 @@ private:
 };
 
 /**
- * \ingroup level1
+ * \ingroup symbolic
  * \brief Inverse sine of an expression.
  */
 class ExprAsin : public ExprUnaryOp {
@@ -1015,7 +1018,7 @@ private:
 };
 
 /**
- * \ingroup level1
+ * \ingroup symbolic
  * \brief Inverse tangent of an expression.
  */
 class ExprAtan : public ExprUnaryOp {
@@ -1040,7 +1043,7 @@ private:
 };
 
 /**
- * \ingroup level1
+ * \ingroup symbolic
  * \brief Inverse hyperbolic cosine of an expression.
  */
 class ExprAcosh : public ExprUnaryOp {
@@ -1065,7 +1068,7 @@ private:
 };
 
 /**
- * \ingroup level1
+ * \ingroup symbolic
  * \brief Inverse hyperbolic sine of an expression.
  */
 class ExprAsinh : public ExprUnaryOp {
@@ -1090,7 +1093,7 @@ private:
 };
 
 /**
- * \ingroup level1
+ * \ingroup symbolic
  * \brief Inverse hyperbolic tangent of an expression.
  */
 class ExprAtanh : public ExprUnaryOp {

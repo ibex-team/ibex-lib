@@ -23,7 +23,7 @@
 
 namespace ibex {
 
-/**
+/** \ingroup symbolic
  * \brief Function evaluator.
  */
 class Eval : public FwdAlgorithm<Domain> {

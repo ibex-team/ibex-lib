@@ -23,7 +23,7 @@ namespace ibex {
 class Function;
 
 /**
- * \ingroup level1
+ * \ingroup symbolic
  * \brief A low-level representation of a function for speeding up forward/backward algorithms.
  *
  */

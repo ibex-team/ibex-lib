@@ -21,11 +21,19 @@
 
 namespace ibex {
 
+/** \ingroup strategy
+ * \brief Solver
+ */
 class Solver {
 public:
+	/**
+	 * \brief Build a solver.
+	 */
 	Solver(Ctc& ctc, Bsc& bsc, CellBuffer& buffer, double prec);
 
-	// This field allows to bound the number of solutions.
+	/**
+	 * \brief Solve the system.
+	 */
 	std::vector<IntervalVector> solve(const IntervalVector& init_box);
 
 	/** Contractor. */

@@ -19,6 +19,13 @@
 
 namespace ibex {
 
+/** \ingroup contractor
+ *
+ * \brief Propagation contractor.
+ *
+ * This class is an implementation of the classical interval variant of the AC3 constraint propagation algorithm.
+ *
+ */
 class CtcPropag : public Ctc {
 
 public:

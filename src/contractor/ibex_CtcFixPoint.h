@@ -16,7 +16,7 @@
 namespace ibex {
 
 /**
- * \ingroup level2
+ * \ingroup contractor
  * \brief CtcFixPoint of a contractor
  *
  */

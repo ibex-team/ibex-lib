@@ -17,7 +17,7 @@
 
 namespace ibex {
 
-/** \ingroup level2
+/** \ingroup contractor
  *
  * \brief HC4 propagation.
  *

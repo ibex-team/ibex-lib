@@ -15,7 +15,7 @@
 
 namespace ibex {
 
-/** \ingroup ctc
+/** \ingroup contractor
  *
  * \brief Precision contractor.
  *

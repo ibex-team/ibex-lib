@@ -16,8 +16,8 @@
 
 namespace ibex {
 
-/**
- * Boolean mask.
+/** \ingroup tools
+ * \brief Boolean mask.
  */
 class BoolMask {
 

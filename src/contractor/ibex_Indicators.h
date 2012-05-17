@@ -17,7 +17,7 @@
 namespace ibex {
 
 /**
- * \ingroup level2
+ * \ingroup contractor
  * \brief Indicators (Parameters of contractors based on a dictionary structure).
  */
 class Indicators {

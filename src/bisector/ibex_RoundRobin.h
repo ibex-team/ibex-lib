@@ -1,6 +1,6 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : Round robin bisector
+// File        : Round-robin bisector
 // Author      : Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
@@ -17,6 +17,10 @@
 namespace ibex {
 
 
+/** \ingroup bisector
+ *
+ * \brief Last bisected variable (used by RoundRobin)
+ */
 class BisectedVar : public Backtrackable {
 public:
 	BisectedVar() : var(-1) { }

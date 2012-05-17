@@ -21,7 +21,8 @@ namespace ibex {
 class Cell;
 
 /**
- * \defgroup level2
+ * \defgroup contractor Contractors
+ * \ingroup contractor
  *
  * \brief Contractor interface.
  */

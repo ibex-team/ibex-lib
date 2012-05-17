@@ -16,7 +16,7 @@
 
 namespace ibex {
 
-/** \ingroup arith
+/** \ingroup arithmetic
  *
  * \brief Base class for all exceptions raised by an operation on an interval vector
  *

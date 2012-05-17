@@ -19,7 +19,7 @@
 namespace ibex {
 
 /**
- * \ingroup toolsgroup
+ * \ingroup tools
  * \brief Empty agenda exception.
  *
  * Thrown when an element is retreived from an empty agenda.
@@ -28,7 +28,7 @@ class EmptyAgendaException : public Exception { };
 
 
 /*
- * \ingroup toolsgroup
+ * \ingroup tools
  * \brief Propagation agenda.
  */
 class Agenda {
@@ -93,7 +93,7 @@ class Agenda {
 };
 
 /**
- * \ingroup toolsgroup
+ * \ingroup tools
  * \brief Propagation agenda (agenda)
  *
  * This class has to be used instead of the STL agenda class to avoid

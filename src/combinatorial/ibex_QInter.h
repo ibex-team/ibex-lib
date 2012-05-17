@@ -17,6 +17,9 @@
 namespace ibex {
 
 /**
+ * \defgroup combinatorial Combinatorial Algorithms
+ * \ingroup combinatorial
+ *
  * \brief Q-intersection.
  */
 IntervalVector qinter(const Array<IntervalVector>& boxes, int q);

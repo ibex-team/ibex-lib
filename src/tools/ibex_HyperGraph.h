@@ -17,7 +17,7 @@
 namespace ibex {
 
 /**
- * \ingroup toolsgroup
+ * \ingroup tools
  * \brief Hypergraph.
  *
  */

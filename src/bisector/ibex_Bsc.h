@@ -18,7 +18,9 @@ namespace ibex {
 
 class Cell;
 
-/** \ingroup bisector
+/** \defgroup bisector Bisectors
+ *
+ * \ingroup bisector
  * \brief Generic bisector
  *
  * Base class of all bisectors. A bisector is an operator used by a strategy

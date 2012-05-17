@@ -188,7 +188,7 @@ private:
 std::ostream& operator<<(std::ostream& os,const Domain&);
 
 /**
- * \ingroup level1
+ * \ingroup symbolic
  * \brief Domains (ordered list of generic interval-based #ibex::Domain).
  *
  * This class is a structure that represent domains of variables.
