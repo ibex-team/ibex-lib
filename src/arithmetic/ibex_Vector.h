@@ -162,6 +162,11 @@ Vector operator-(const Vector& x1, const Vector& x2);
 double operator*(const Vector& x1, const Vector& x2);
 
 /**
+ * \brief Outer product of x1 and x2.
+ */
+Matrix outer_product(const Vector& x1, const Vector& x2);
+
+/**
  * \brief d*x
  */
 Vector operator*(double d, const Vector& x);

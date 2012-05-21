@@ -181,6 +181,11 @@ Matrix operator*(const Matrix& m1, const Matrix& m2);
 Vector operator*(const Matrix& m, const Vector& x);
 
 /**
+ * \brief $[x]*[m]$.
+ */
+Vector operator*(const Vector& x, const Matrix& m);
+
+/**
  * \brief |x|.
  */
 Matrix abs(const Matrix& x);

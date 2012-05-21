@@ -147,6 +147,24 @@ inline S mulVV(const Vin1& v1, const Vin2& v2) {
 	return y;
 }
 
+template<class Vin1, class Vin2, class M>
+inline M outer_prod(const Vin1& v1, const Vin2& v2) {
+
+	M y(v1.size(),v2.size());
+
+	if (is_empty(v1) || is_empty(v2)) {
+		set_empty(y);
+		return y;
+	}
+
+	for (int i=0; i<v1.size(); i++) {
+		for (int j=0; j<v2.size(); j++) {
+			y[i][j]=v1[i]*v2[j];
+		}
+	}
+	return y;
+}
+
 template<class M, class Vin, class Vout>
 inline Vout mulMV(const M& m, const Vin& v) {
 	assert(m.nb_cols()==v.size());
@@ -161,6 +179,28 @@ inline Vout mulMV(const M& m, const Vin& v) {
 
 	for (int i=0; i<m.nb_rows(); i++)
 		y[i]=m[i]*v;
+
+	return y;
+}
+
+template<class Vin, class M, class Vout>
+inline Vout mulVM(const Vin& v, const M& m) {
+	assert(m.nb_cols()==v.size());
+
+	if (is_empty(m) || is_empty(v)) {
+		Vout res(m.nb_cols());
+		set_empty(res);
+		return res;
+	}
+
+	Vout y(m.nb_cols());
+
+	for (int j=0; j<m.nb_cols(); j++) {
+		y[j]=0;
+		for (int i=0; i<m.nb_rows(); i++) {
+			y[j]+=m[i][j]*v[i];
+		}
+	}
 
 	return y;
 }
@@ -432,6 +472,22 @@ Interval operator*(const IntervalVector& v1, const IntervalVector& v2) {
 	return mulVV<IntervalVector,IntervalVector,Interval>(v1,v2);
 }
 
+Matrix outer_prod(const Vector& v1, const Vector& v2) {
+	return outer_prod<Vector,Vector,Matrix>(v1,v2);
+}
+
+IntervalMatrix outer_prod(const Vector& v1, const IntervalVector& v2) {
+	return outer_prod<Vector,IntervalVector,IntervalMatrix>(v1,v2);
+}
+
+IntervalMatrix outer_prod(const IntervalVector& v1, const Vector& v2) {
+	return outer_prod<IntervalVector,Vector,IntervalMatrix>(v1,v2);
+}
+
+IntervalMatrix outer_prod(const IntervalVector& v1, const IntervalVector& v2) {
+	return outer_prod<IntervalVector,IntervalVector,IntervalMatrix>(v1,v2);
+}
+
 Vector operator*(const Matrix& m, const Vector& v) {
 	return mulMV<Matrix,Vector,Vector>(m,v);
 }
@@ -446,6 +502,22 @@ IntervalVector operator*(const IntervalMatrix& m, const Vector& v) {
 
 IntervalVector operator*(const IntervalMatrix& m, const IntervalVector& v) {
 	return mulMV<IntervalMatrix,IntervalVector,IntervalVector>(m,v);
+}
+
+Vector operator*(const Vector& v, const Matrix& m) {
+	return mulVM<Vector,Matrix,Vector>(v,m);
+}
+
+IntervalVector operator*(const IntervalVector& v, const Matrix& m) {
+	return mulVM<IntervalVector,Matrix,IntervalVector>(v,m);
+}
+
+IntervalVector operator*(const Vector& v, const IntervalMatrix& m) {
+	return mulVM<Vector,IntervalMatrix,IntervalVector>(v,m);
+}
+
+IntervalVector operator*(const IntervalVector& v, const IntervalMatrix& m) {
+	return mulVM<IntervalVector,IntervalMatrix,IntervalVector>(v,m);
 }
 
 Matrix operator*(const Matrix& m1, const Matrix& m2) {

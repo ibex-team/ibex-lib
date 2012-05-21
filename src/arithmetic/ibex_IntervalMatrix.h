@@ -163,6 +163,11 @@ public:
 	IntervalMatrix submatrix(int row_start_index, int row_end_index, int col_start_index, int col_end_index);
 
 	/**
+	 * \brief Transpose of *this.
+	 */
+	IntervalMatrix transpose() const;
+
+	/**
 	 * \brief Return the ith row.
 
 	 * Equivalent to (*this)[i.
@@ -316,6 +321,21 @@ IntervalVector operator*(const Matrix& m, const IntervalVector& x);
  */
 IntervalVector operator*(const IntervalMatrix& m, const IntervalVector& x);
 
+/*
+ * \brief $[x]*[m]$.
+ */
+IntervalVector operator*(const Vector& x, const IntervalMatrix& m);
+
+/**
+ * \brief $[x]*[m]$.
+ */
+IntervalVector operator*(const IntervalVector& x, const Matrix& m);
+
+/**
+ * \brief $[x]*[m]$.
+ */
+IntervalVector operator*(const IntervalVector& x, const IntervalMatrix& m);
+
 /**
  * \brief $[m]_1*[m]_2$.
  */
@@ -365,6 +385,15 @@ bool proj_mul(const IntervalMatrix& y, Interval& x1, IntervalMatrix& x2);
  * Set $([x]_1,[x]_2)$ to $([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=x_1*x_2\}$.
  */
 bool proj_mul(const IntervalVector& y, IntervalMatrix& x1, IntervalVector& x2, double ratio);
+
+/**
+ * \brief Projection of y1=x1*x2 (product of a row vector by a matrix).
+ *
+ * Uses a fixpoint algorithm with the provided ratio.
+ *
+ * Set $([x]_1,[x]_2)$ to $([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=x_1*x_2\}$.
+ */
+bool proj_mul(const IntervalVector& y, IntervalVector& x1, IntervalMatrix& x2, double ratio);
 
 /**
  * \brief Projection of y1=x1*x2 (scalar product of a matrix).

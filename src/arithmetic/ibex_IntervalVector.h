@@ -481,6 +481,21 @@ Interval operator*(const IntervalVector& x1, const Vector& x2);
 Interval operator*(const IntervalVector& x1, const IntervalVector& x2);
 
 /**
+ * \brief Outer product (multiplication of a column vector by a row vector).
+ */
+IntervalMatrix outer_product(const IntervalVector& x1, const Vector& x2);
+
+/**
+ * \brief Outer product (multiplication of a column vector by a row vector).
+ */
+IntervalMatrix outer_product(const Vector& x1, const IntervalVector& x2);
+
+/**
+ * \brief Outer product (multiplication of a column vector by a row vector).
+ */
+IntervalMatrix outer_product(const IntervalVector& x1, const IntervalVector& x2);
+
+/**
  * \brief d*x
  */
 IntervalVector operator*(double d, const IntervalVector& x);

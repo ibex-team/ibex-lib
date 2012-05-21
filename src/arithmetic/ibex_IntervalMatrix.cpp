@@ -183,6 +183,17 @@ IntervalMatrix IntervalMatrix::submatrix(int row_start_index, int row_end_index,
 	return sub;
 }
 
+IntervalMatrix IntervalMatrix::transpose() const {
+	IntervalMatrix m(nb_cols(), nb_rows());
+
+	for (int i=0; i<nb_rows(); i++) {
+		for (int j=0; j<nb_cols(); j++) {
+			m[j][i]=(*this)[i][j];
+		}
+	}
+	return m;
+}
+
 IntervalVector IntervalMatrix::col(int j) const {
 	assert(j>=0 && j<nb_cols());
 
@@ -245,6 +256,15 @@ bool proj_mul(const IntervalVector& y, IntervalMatrix& x1, IntervalVector& x2, d
 	} while(i!=last_row);
 
 	return true;
+}
+
+bool proj_mul(const IntervalVector& y, IntervalVector& x1, IntervalMatrix& x2, double ratio) {
+	IntervalMatrix x2t=x2.transpose();
+
+	bool res=proj_mul(y,x2t,x1,ratio);
+
+	x2=x2t.transpose();
+	return res;
 }
 
 bool proj_mul(const IntervalMatrix& y, IntervalMatrix& x1, IntervalMatrix& x2, double ratio) {
