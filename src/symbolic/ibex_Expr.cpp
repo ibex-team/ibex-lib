@@ -45,10 +45,11 @@ Dim mul_dim(const ExprNode& left, const ExprNode& right) {
 	else {
 		if (r.type()==Dim::SCALAR)
 			throw NonRecoverableException("Cannot right-multiply by a scalar");
-		else if (l.dim3!=r.dim2)
-			throw NonRecoverableException("Mismatched dimensions in matrix multiplication");
-		else return Dim(0,l.dim2,r.dim3);
-		/* will work in all cases:
+		else if (l.dim3!=r.dim2) {
+			if ((l.dim3==0 && r.dim3==0) || (l.dim2==0 && r.dim2==0)) return Dim(0,0,0); // dot product
+			else throw NonRecoverableException("Mismatched dimensions in matrix multiplication");
+		} else return Dim(0,l.dim2,r.dim3);
+		/* should work in all remaining cases:
 		 * - if l is a matrix and r is a vector, the result is a col-vector (we have r.dim3 =0)
 		 * - if l is a row vector and r a matrix with 1 row, the result is a 1-length row vector (we have l.dim2=0 and r.dim3=1)
 		 * - if l is a matrix with 1 row and l a column vector, the result is a 1-length column vector (we have l.dim2=1 and r.dim3=0)

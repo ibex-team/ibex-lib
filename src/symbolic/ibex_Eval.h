@@ -139,6 +139,7 @@ protected:
 	inline void mul_SM_fwd(const ExprMul&, const Domain& x1, const Domain& x2, Domain& y);
 	inline void mul_VV_fwd(const ExprMul&, const Domain& x1, const Domain& x2, Domain& y);
 	inline void mul_MV_fwd(const ExprMul&, const Domain& x1, const Domain& x2, Domain& y);
+	inline void mul_VM_fwd(const ExprMul&, const Domain& x1, const Domain& x2, Domain& y);
 	inline void mul_MM_fwd(const ExprMul&, const Domain& x1, const Domain& x2, Domain& y);
 	inline void sub_V_fwd(const ExprSub&, const Domain& x1, const Domain& x2, Domain& y);
 	inline void sub_M_fwd(const ExprSub&, const Domain& x1, const Domain& x2, Domain& y);
@@ -229,6 +230,7 @@ inline void Eval::mul_SV_fwd(const ExprMul&, const Domain& x1, const Domain& x2,
 inline void Eval::mul_SM_fwd(const ExprMul&, const Domain& x1, const Domain& x2, Domain& y)     { y.m()=x1.i()*x2.m(); }
 inline void Eval::mul_VV_fwd(const ExprMul&, const Domain& x1, const Domain& x2, Domain& y)     { y.i()=x1.v()*x2.v(); }
 inline void Eval::mul_MV_fwd(const ExprMul&, const Domain& x1, const Domain& x2, Domain& y)     { y.v()=x1.m()*x2.v(); }
+inline void Eval::mul_VM_fwd(const ExprMul&, const Domain& x1, const Domain& x2, Domain& y)     { y.v()=x1.v()*x2.m(); }
 inline void Eval::mul_MM_fwd(const ExprMul&, const Domain& x1, const Domain& x2, Domain& y)     { y.m()=x1.m()*x2.m(); }
 inline void Eval::sub_V_fwd(const ExprSub&, const Domain& x1, const Domain& x2, Domain& y)      { y.v()=x1.v()-x2.v(); }
 inline void Eval::sub_M_fwd(const ExprSub&, const Domain& x1, const Domain& x2, Domain& y)      { y.m()=x1.m()-x2.m(); }

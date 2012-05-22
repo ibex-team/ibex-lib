@@ -65,6 +65,9 @@ protected:
 	void mul_MV_bwd(const ExprMul&, T& leftL, T& rightL, const T& result);
 
 	/** TO BE DEFINED (by the subclass) */
+	void mul_VM_bwd(const ExprMul&, T& leftL, T& rightL, const T& result);
+
+	/** TO BE DEFINED (by the subclass) */
 	void mul_MM_bwd(const ExprMul&, T& leftL, T& rightL, const T& result);
 
 	/** TO BE DEFINED (by the subclass) */

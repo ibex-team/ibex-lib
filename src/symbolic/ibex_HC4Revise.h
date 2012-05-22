@@ -88,6 +88,7 @@ protected:
 	inline void mul_SM_bwd (const ExprMul&,    Domain& leftL, Domain& rightL, const Domain& result)    { if (!(proj_mul(result.m(),leftL.i(),rightL.m()))) throw EmptyBoxException();  }
 	inline void mul_VV_bwd (const ExprMul&,    Domain& leftL, Domain& rightL, const Domain& result)    { if (!(proj_mul(result.i(),leftL.v(),rightL.v()))) throw EmptyBoxException();  }
 	inline void mul_MV_bwd (const ExprMul&,    Domain& leftL, Domain& rightL, const Domain& result)    { if (!(proj_mul(result.v(),leftL.m(),rightL.v(), RATIO))) throw EmptyBoxException();  }
+	inline void mul_VM_bwd (const ExprMul&,    Domain& leftL, Domain& rightL, const Domain& result)    { if (!(proj_mul(result.v(),leftL.v(),rightL.m(), RATIO))) throw EmptyBoxException();  }
 	inline void mul_MM_bwd (const ExprMul&,    Domain& leftL, Domain& rightL, const Domain& result)    { if (!(proj_mul(result.m(),leftL.m(),rightL.m(), RATIO))) throw EmptyBoxException();  }
 	inline void sub_bwd   (const ExprSub&,     Domain& leftL, Domain& rightL, const Domain& result)    { if (!(proj_sub(result.i(),leftL.i(),rightL.i()))) throw EmptyBoxException();  }
 	inline void sub_V_bwd (const ExprSub&,     Domain& leftL, Domain& rightL, const Domain& result)    { if (!(proj_sub(result.v(),leftL.v(),rightL.v()))) throw EmptyBoxException();  }

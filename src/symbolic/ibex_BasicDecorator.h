@@ -12,7 +12,6 @@
 #define __IBEX_BASIC_DECORATOR_H__
 
 #include "ibex_Domain.h"
-//#include "ibex_Function.h"
 #include "ibex_Expr.h"
 #include "ibex_HC4Revise.h"
 #include "ibex_Decorator.h"
@@ -60,7 +59,7 @@ protected:
  * A function application node has a specific label that, in addition
  * to the domain, contains an evaluator of the function called.
  */
-class BasicApplyLabel : public Domain {
+class BasicApplyLabel : public virtual Domain {
 public:
 	BasicApplyLabel(const Dim& dim, Function& f);
 

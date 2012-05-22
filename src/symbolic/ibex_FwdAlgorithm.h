@@ -65,6 +65,9 @@ class FwdAlgorithm {
 	void mul_MV_fwd(const ExprMul&, const T& leftL, const T& rightL, T& result);
 
 	/** TO BE DEFINED (by the subclass) */
+	void mul_VM_fwd(const ExprMul&, const T& leftL, const T& rightL, T& result);
+
+	/** TO BE DEFINED (by the subclass) */
 	void mul_MM_fwd(const ExprMul&, const T& leftL, const T& rightL, T& result);
 
 	/** TO BE DEFINED (by the subclass) */

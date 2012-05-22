@@ -26,7 +26,7 @@ class Domains; // for friendship grant
  *
  * A generic domains is also the label type for the basic evaluation of a function.
  */
-class Domain : public ExprLabel {
+class Domain : public virtual ExprLabel {
 public:
 
 	/**
@@ -43,35 +43,35 @@ public:
 	/**
 	 * \brief Creates a new domain of dimension \a dim.
 	 */
-	Domain(const Dim& dim) : dim(dim), is_reference(false) {
+	explicit Domain(const Dim& dim) : dim(dim), is_reference(false) {
 		build();
 	}
 
 	/**
 	 * \brief Creates a reference to an interval.
 	 */
-	Domain(Interval& itv) : dim(0,0,0), is_reference(true) {
+	explicit Domain(Interval& itv) : dim(0,0,0), is_reference(true) {
 		domain = &itv;
 	}
 
 	/**
 	 * \brief Creates a reference to an interval vector.
 	 */
-	Domain(IntervalVector& v, bool in_row) : dim(0,in_row?0:v.size(),in_row?v.size():0), is_reference(true) {
+	explicit Domain(IntervalVector& v, bool in_row) : dim(0,in_row?0:v.size(),in_row?v.size():0), is_reference(true) {
 		domain = &v;
 	}
 
 	/**
 	 * \brief Creates a reference to an interval matrix.
 	 */
-	Domain(IntervalMatrix& m) : dim(0,m.nb_rows(),m.nb_cols()), is_reference(true) {
+	explicit Domain(IntervalMatrix& m) : dim(0,m.nb_rows(),m.nb_cols()), is_reference(true) {
 		domain = &m;
 	}
 
 	/**
 	 * \brief Creates a reference to an array of interval matrices.
 	 */
-	Domain(IntervalMatrixArray& ma) : dim(ma.size(),ma.nb_rows(),ma.nb_cols()), is_reference(true) {
+	explicit Domain(IntervalMatrixArray& ma) : dim(ma.size(),ma.nb_rows(),ma.nb_cols()), is_reference(true) {
 		domain = &ma;
 	}
 
@@ -209,7 +209,7 @@ public:
 	 *
 	 * Use set(...) to initialize each domain.
 	 */
-	Domains(int n);
+	explicit Domains(int n);
 
 	/**
 	 * \brief Delete *this.
