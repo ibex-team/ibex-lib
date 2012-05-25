@@ -7,6 +7,7 @@ using namespace std;
 using namespace ibex;
 
 int main() {
+
 	Ponts30 p30;
 	Function* fs=p30.f.separate();
 

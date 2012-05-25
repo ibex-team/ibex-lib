@@ -46,23 +46,22 @@ public:
 	/**
 	 * Run the forward phase of a forward algorithm and
 	 * return a reference to the label
-	 * of the root node. V must be a subclass of FwdAlgorithm<T>.
+	 * of the root node. V must be a subclass of FwdAlgorithm.
 	 * Note that the type V is just passed in order to have static linkage.
 	 */
-	template<class V,typename T>
-	T& forward(const V& algo) const;
+	template<class V>
+	ExprLabel& forward(const V& algo) const;
 
 	/**
-	 * Run the backward phase.  V must be a subclass of BwdAlgorithm<T>.
+	 * Run the backward phase.  V must be a subclass of BwdAlgorithm.
 	 * Note that the type V is just passed in order to have static linkage.
 	 */
-	template<class V,typename T>
+	template<class V>
 	void backward(const V& algo) const;
 
 	/**
 	 * Print the structure to the standard output.
 	 */
-	template<typename T>
 	void print() const;
 
 protected:
@@ -125,7 +124,6 @@ protected:
 
 	const char* op(operation o) const;
 
-	template<typename T>
 	friend std::ostream& operator<<(std::ostream&,const CompiledFunction&);
 
 	int n; // == the size of the root expression of the expression
@@ -137,212 +135,110 @@ protected:
 	mutable int ptr;
 };
 
-template<class V,typename T>
-T& CompiledFunction::forward(const V& algo) const {
-	assert(dynamic_cast<const FwdAlgorithm<T>* >(&algo)!=NULL);
+template<class V>
+ExprLabel& CompiledFunction::forward(const V& algo) const {
+	assert(dynamic_cast<const FwdAlgorithm* >(&algo)!=NULL);
 
 	for (int i=n-1; i>=0; i--) {
 		switch(code[i]) {
-		case IDX:    ((V&) algo).index_fwd((ExprIndex&)    *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
-		case VEC:    ((V&) algo).vector_fwd((ExprVector&)  *(nodes[i]), (const T**) &(args[i][1]),          (T&) *args[i][0]); break;
-		case SYM:    ((V&) algo).symbol_fwd((ExprSymbol&)  *(nodes[i]),                                     (T&) *args[i][0]); break;
-		case CST:    ((V&) algo).cst_fwd  ((ExprConstant&) *(nodes[i]),                                     (T&) *args[i][0]); break;
-		case APPLY:  ((V&) algo).apply_fwd((ExprApply&)    *(nodes[i]), (const T**) &(args[i][1]),          (T&) *args[i][0]); break;
-		case ADD:    ((V&) algo).add_fwd  ((ExprAdd&)      *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
-		case ADD_V:  ((V&) algo).add_V_fwd  ((ExprAdd&)    *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
-		case ADD_M:  ((V&) algo).add_M_fwd  ((ExprAdd&)    *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
-		case MUL:    ((V&) algo).mul_fwd  ((ExprMul&)      *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
-		case MUL_SV: ((V&) algo).mul_SV_fwd ((ExprMul&)    *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
-		case MUL_SM: ((V&) algo).mul_SM_fwd ((ExprMul&)    *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
-		case MUL_VV: ((V&) algo).mul_VV_fwd ((ExprMul&)    *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
-		case MUL_MV: ((V&) algo).mul_MV_fwd ((ExprMul&)    *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
-		case MUL_MM: ((V&) algo).mul_MM_fwd ((ExprMul&)    *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
-		case SUB:    ((V&) algo).sub_fwd  ((ExprSub&)      *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
-		case SUB_V:  ((V&) algo).sub_V_fwd  ((ExprSub&)    *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
-		case SUB_M:  ((V&) algo).sub_M_fwd  ((ExprSub&)    *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
-		case DIV:    ((V&) algo).div_fwd  ((ExprDiv&)      *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
-		case MAX:    ((V&) algo).max_fwd  ((ExprMax&)      *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
-		case MIN:    ((V&) algo).min_fwd  ((ExprMin&)      *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
-		case ATAN2:  ((V&) algo).atan2_fwd((ExprAtan2&)    *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
-		case MINUS:  ((V&) algo).minus_fwd((ExprMinus&)    *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
-		case SIGN:   ((V&) algo).sign_fwd ((ExprSign&)     *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
-		case ABS:    ((V&) algo).abs_fwd  ((ExprAbs&)      *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
-		case POWER:  ((V&) algo).power_fwd((ExprPower&)    *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
-		case SQR:    ((V&) algo).sqr_fwd  ((ExprSqr&)      *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
-		case SQRT:   ((V&) algo).sqrt_fwd ((ExprSqrt&)     *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
-		case EXP:    ((V&) algo).exp_fwd  ((ExprExp&)      *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
-		case LOG:    ((V&) algo).log_fwd  ((ExprLog&)      *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
-		case COS:    ((V&) algo).cos_fwd  ((ExprCos&)      *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
-		case SIN:    ((V&) algo).sin_fwd  ((ExprSin&)      *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
-		case TAN:    ((V&) algo).tan_fwd  ((ExprTan&)      *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
-		case COSH:   ((V&) algo).cosh_fwd ((ExprCosh&)     *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
-		case SINH:   ((V&) algo).sinh_fwd ((ExprSinh&)     *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
-		case TANH:   ((V&) algo).tanh_fwd ((ExprTanh&)     *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
-		case ACOS:   ((V&) algo).acos_fwd ((ExprAcos&)     *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
-		case ASIN:   ((V&) algo).asin_fwd ((ExprAsin&)     *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
-		case ATAN:   ((V&) algo).atan_fwd ((ExprAtan&)     *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
-		case ACOSH:  ((V&) algo).acosh_fwd((ExprAcosh&)    *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
-		case ASINH:  ((V&) algo).asinh_fwd((ExprAsinh&)    *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
-		case ATANH:  ((V&) algo).atanh_fwd((ExprAtanh&)    *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
+		case IDX:    ((V&) algo).index_fwd((ExprIndex&)    *(nodes[i]), *args[i][1],  *args[i][0]); break;
+		case VEC:    ((V&) algo).vector_fwd((ExprVector&)  *(nodes[i]), (const ExprLabel**) &(args[i][1]),*args[i][0]); break;
+		case SYM:    ((V&) algo).symbol_fwd((ExprSymbol&)  *(nodes[i]),               *args[i][0]); break;
+		case CST:    ((V&) algo).cst_fwd  ((ExprConstant&) *(nodes[i]),               *args[i][0]); break;
+		case APPLY:  ((V&) algo).apply_fwd((ExprApply&)    *(nodes[i]), &(args[i][1]),*args[i][0]); break;
+		case ADD:    ((V&) algo).add_fwd  ((ExprAdd&)      *(nodes[i]), *args[i][1], *args[i][2], *args[i][0]); break;
+		case ADD_V:  ((V&) algo).add_V_fwd  ((ExprAdd&)    *(nodes[i]), *args[i][1], *args[i][2], *args[i][0]); break;
+		case ADD_M:  ((V&) algo).add_M_fwd  ((ExprAdd&)    *(nodes[i]), *args[i][1], *args[i][2], *args[i][0]); break;
+		case MUL:    ((V&) algo).mul_fwd  ((ExprMul&)      *(nodes[i]), *args[i][1], *args[i][2], *args[i][0]); break;
+		case MUL_SV: ((V&) algo).mul_SV_fwd ((ExprMul&)    *(nodes[i]), *args[i][1], *args[i][2], *args[i][0]); break;
+		case MUL_SM: ((V&) algo).mul_SM_fwd ((ExprMul&)    *(nodes[i]), *args[i][1], *args[i][2], *args[i][0]); break;
+		case MUL_VV: ((V&) algo).mul_VV_fwd ((ExprMul&)    *(nodes[i]), *args[i][1], *args[i][2], *args[i][0]); break;
+		case MUL_MV: ((V&) algo).mul_MV_fwd ((ExprMul&)    *(nodes[i]), *args[i][1], *args[i][2], *args[i][0]); break;
+		case MUL_MM: ((V&) algo).mul_MM_fwd ((ExprMul&)    *(nodes[i]), *args[i][1], *args[i][2], *args[i][0]); break;
+		case SUB:    ((V&) algo).sub_fwd  ((ExprSub&)      *(nodes[i]), *args[i][1], *args[i][2], *args[i][0]); break;
+		case SUB_V:  ((V&) algo).sub_V_fwd  ((ExprSub&)    *(nodes[i]), *args[i][1], *args[i][2], *args[i][0]); break;
+		case SUB_M:  ((V&) algo).sub_M_fwd  ((ExprSub&)    *(nodes[i]), *args[i][1], *args[i][2], *args[i][0]); break;
+		case DIV:    ((V&) algo).div_fwd  ((ExprDiv&)      *(nodes[i]), *args[i][1], *args[i][2], *args[i][0]); break;
+		case MAX:    ((V&) algo).max_fwd  ((ExprMax&)      *(nodes[i]), *args[i][1], *args[i][2], *args[i][0]); break;
+		case MIN:    ((V&) algo).min_fwd  ((ExprMin&)      *(nodes[i]), *args[i][1], *args[i][2], *args[i][0]); break;
+		case ATAN2:  ((V&) algo).atan2_fwd((ExprAtan2&)    *(nodes[i]), *args[i][1], *args[i][2], *args[i][0]); break;
+		case MINUS:  ((V&) algo).minus_fwd((ExprMinus&)    *(nodes[i]), *args[i][1],                   *args[i][0]); break;
+		case SIGN:   ((V&) algo).sign_fwd ((ExprSign&)     *(nodes[i]), *args[i][1],                   *args[i][0]); break;
+		case ABS:    ((V&) algo).abs_fwd  ((ExprAbs&)      *(nodes[i]), *args[i][1],                   *args[i][0]); break;
+		case POWER:  ((V&) algo).power_fwd((ExprPower&)    *(nodes[i]), *args[i][1],                   *args[i][0]); break;
+		case SQR:    ((V&) algo).sqr_fwd  ((ExprSqr&)      *(nodes[i]), *args[i][1],                   *args[i][0]); break;
+		case SQRT:   ((V&) algo).sqrt_fwd ((ExprSqrt&)     *(nodes[i]), *args[i][1],                   *args[i][0]); break;
+		case EXP:    ((V&) algo).exp_fwd  ((ExprExp&)      *(nodes[i]), *args[i][1],                   *args[i][0]); break;
+		case LOG:    ((V&) algo).log_fwd  ((ExprLog&)      *(nodes[i]), *args[i][1],                   *args[i][0]); break;
+		case COS:    ((V&) algo).cos_fwd  ((ExprCos&)      *(nodes[i]), *args[i][1],                   *args[i][0]); break;
+		case SIN:    ((V&) algo).sin_fwd  ((ExprSin&)      *(nodes[i]), *args[i][1],                   *args[i][0]); break;
+		case TAN:    ((V&) algo).tan_fwd  ((ExprTan&)      *(nodes[i]), *args[i][1],                   *args[i][0]); break;
+		case COSH:   ((V&) algo).cosh_fwd ((ExprCosh&)     *(nodes[i]), *args[i][1],                   *args[i][0]); break;
+		case SINH:   ((V&) algo).sinh_fwd ((ExprSinh&)     *(nodes[i]), *args[i][1],                   *args[i][0]); break;
+		case TANH:   ((V&) algo).tanh_fwd ((ExprTanh&)     *(nodes[i]), *args[i][1],                   *args[i][0]); break;
+		case ACOS:   ((V&) algo).acos_fwd ((ExprAcos&)     *(nodes[i]), *args[i][1],                   *args[i][0]); break;
+		case ASIN:   ((V&) algo).asin_fwd ((ExprAsin&)     *(nodes[i]), *args[i][1],                   *args[i][0]); break;
+		case ATAN:   ((V&) algo).atan_fwd ((ExprAtan&)     *(nodes[i]), *args[i][1],                   *args[i][0]); break;
+		case ACOSH:  ((V&) algo).acosh_fwd((ExprAcosh&)    *(nodes[i]), *args[i][1],                   *args[i][0]); break;
+		case ASINH:  ((V&) algo).asinh_fwd((ExprAsinh&)    *(nodes[i]), *args[i][1],                   *args[i][0]); break;
+		case ATANH:  ((V&) algo).atanh_fwd((ExprAtanh&)    *(nodes[i]), *args[i][1],                   *args[i][0]); break;
 		}
 	}
-	return (T&) *args[0][0];
+	return *args[0][0];
 }
 
-template<class V,typename T>
+template<class V>
 void CompiledFunction::backward(const V& algo) const {
 
-	assert(dynamic_cast<const BwdAlgorithm<T>* >(&algo)!=NULL);
+	assert(dynamic_cast<const BwdAlgorithm* >(&algo)!=NULL);
 
 	for (int i=0; i<n; i++) {
 		switch(code[i]) {
-		case IDX:    ((V&) algo).index_bwd((ExprIndex&)    *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
-		case VEC:    ((V&) algo).vector_bwd((ExprVector&)  *(nodes[i]), (T**) &(*args[i][1]),               (T&) *args[i][0]); break;
-		case SYM:    ((V&) algo).symbol_bwd((ExprSymbol&)  *(nodes[i]),                                     (T&) *args[i][0]); break;
-		case CST:    ((V&) algo).cst_bwd  ((ExprConstant&) *(nodes[i]),                                     (T&) *args[i][0]); break;
-		case APPLY:  ((V&) algo).apply_bwd  ((ExprApply&)  *(nodes[i]), (T**) &(*args[i][1]),               (T&) *args[i][0]); break;
-		case ADD:    ((V&) algo).add_bwd    ((ExprAdd&)    *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
-		case ADD_V:  ((V&) algo).add_V_bwd  ((ExprAdd&)    *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
-		case ADD_M:  ((V&) algo).add_M_bwd  ((ExprAdd&)    *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
-		case MUL:    ((V&) algo).mul_bwd    ((ExprMul&)    *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
-		case MUL_SV: ((V&) algo).mul_SV_bwd ((ExprMul&)    *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
-		case MUL_SM: ((V&) algo).mul_SM_bwd ((ExprMul&)    *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
-		case MUL_VV: ((V&) algo).mul_VV_bwd ((ExprMul&)    *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
-		case MUL_MV: ((V&) algo).mul_MV_bwd ((ExprMul&)    *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
-		case MUL_MM: ((V&) algo).mul_MM_bwd ((ExprMul&)    *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
-		case SUB:    ((V&) algo).sub_bwd    ((ExprSub&)    *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
-		case SUB_V:  ((V&) algo).sub_V_bwd  ((ExprSub&)    *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
-		case SUB_M:  ((V&) algo).sub_M_bwd  ((ExprSub&)    *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
-		case DIV:    ((V&) algo).div_bwd  ((ExprDiv&)      *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
-		case MAX:    ((V&) algo).max_bwd  ((ExprMax&)      *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
-		case MIN:    ((V&) algo).min_bwd  ((ExprMin&)      *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
-		case ATAN2:  ((V&) algo).atan2_bwd((ExprAtan2&)    *(nodes[i]), (T&) *args[i][1], (T&) *args[i][2], (T&) *args[i][0]); break;
-		case MINUS:  ((V&) algo).minus_bwd((ExprMinus&)    *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
-		case SIGN:   ((V&) algo).sign_bwd ((ExprSign&)     *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
-		case ABS:    ((V&) algo).abs_bwd  ((ExprAbs&)      *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
-		case POWER:  ((V&) algo).power_bwd((ExprPower&)    *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
-		case SQR:    ((V&) algo).sqr_bwd  ((ExprSqr&)      *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
-		case SQRT:   ((V&) algo).sqrt_bwd ((ExprSqrt&)     *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
-		case EXP:    ((V&) algo).exp_bwd  ((ExprExp&)      *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
-		case LOG:    ((V&) algo).log_bwd  ((ExprLog&)      *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
-		case COS:    ((V&) algo).cos_bwd  ((ExprCos&)      *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
-		case SIN:    ((V&) algo).sin_bwd  ((ExprSin&)      *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
-		case TAN:    ((V&) algo).tan_bwd  ((ExprTan&)      *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
-		case COSH:   ((V&) algo).cosh_bwd ((ExprCosh&)     *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
-		case SINH:   ((V&) algo).sinh_bwd ((ExprSinh&)     *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
-		case TANH:   ((V&) algo).tanh_bwd ((ExprTanh&)     *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
-		case ACOS:   ((V&) algo).acos_bwd ((ExprAcos&)     *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
-		case ASIN:   ((V&) algo).asin_bwd ((ExprAsin&)     *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
-		case ATAN:   ((V&) algo).atan_bwd ((ExprAtan&)     *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
-		case ACOSH:  ((V&) algo).acosh_bwd((ExprAcosh&)    *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
-		case ASINH:  ((V&) algo).asinh_bwd((ExprAsinh&)    *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
-		case ATANH:  ((V&) algo).atanh_bwd((ExprAtanh&)    *(nodes[i]), (T&) *args[i][1],                   (T&) *args[i][0]); break;
+		case IDX:    ((V&) algo).index_bwd((ExprIndex&)    *(nodes[i]), *args[i][1],                   *args[i][0]); break;
+		case VEC:    ((V&) algo).vector_bwd((ExprVector&)  *(nodes[i]), (ExprLabel**) &(*args[i][1]),               *args[i][0]); break;
+		case SYM:    ((V&) algo).symbol_bwd((ExprSymbol&)  *(nodes[i]),                                     *args[i][0]); break;
+		case CST:    ((V&) algo).cst_bwd  ((ExprConstant&) *(nodes[i]),                                     *args[i][0]); break;
+		case APPLY:  ((V&) algo).apply_bwd  ((ExprApply&)  *(nodes[i]), (ExprLabel**) &(*args[i][1]),               *args[i][0]); break;
+		case ADD:    ((V&) algo).add_bwd    ((ExprAdd&)    *(nodes[i]), *args[i][1], *args[i][2], *args[i][0]); break;
+		case ADD_V:  ((V&) algo).add_V_bwd  ((ExprAdd&)    *(nodes[i]), *args[i][1], *args[i][2], *args[i][0]); break;
+		case ADD_M:  ((V&) algo).add_M_bwd  ((ExprAdd&)    *(nodes[i]), *args[i][1], *args[i][2], *args[i][0]); break;
+		case MUL:    ((V&) algo).mul_bwd    ((ExprMul&)    *(nodes[i]), *args[i][1], *args[i][2], *args[i][0]); break;
+		case MUL_SV: ((V&) algo).mul_SV_bwd ((ExprMul&)    *(nodes[i]), *args[i][1], *args[i][2], *args[i][0]); break;
+		case MUL_SM: ((V&) algo).mul_SM_bwd ((ExprMul&)    *(nodes[i]), *args[i][1], *args[i][2], *args[i][0]); break;
+		case MUL_VV: ((V&) algo).mul_VV_bwd ((ExprMul&)    *(nodes[i]), *args[i][1], *args[i][2], *args[i][0]); break;
+		case MUL_MV: ((V&) algo).mul_MV_bwd ((ExprMul&)    *(nodes[i]), *args[i][1], *args[i][2], *args[i][0]); break;
+		case MUL_MM: ((V&) algo).mul_MM_bwd ((ExprMul&)    *(nodes[i]), *args[i][1], *args[i][2], *args[i][0]); break;
+		case SUB:    ((V&) algo).sub_bwd    ((ExprSub&)    *(nodes[i]), *args[i][1], *args[i][2], *args[i][0]); break;
+		case SUB_V:  ((V&) algo).sub_V_bwd  ((ExprSub&)    *(nodes[i]), *args[i][1], *args[i][2], *args[i][0]); break;
+		case SUB_M:  ((V&) algo).sub_M_bwd  ((ExprSub&)    *(nodes[i]), *args[i][1], *args[i][2], *args[i][0]); break;
+		case DIV:    ((V&) algo).div_bwd  ((ExprDiv&)      *(nodes[i]), *args[i][1], *args[i][2], *args[i][0]); break;
+		case MAX:    ((V&) algo).max_bwd  ((ExprMax&)      *(nodes[i]), *args[i][1], *args[i][2], *args[i][0]); break;
+		case MIN:    ((V&) algo).min_bwd  ((ExprMin&)      *(nodes[i]), *args[i][1], *args[i][2], *args[i][0]); break;
+		case ATAN2:  ((V&) algo).atan2_bwd((ExprAtan2&)    *(nodes[i]), *args[i][1], *args[i][2], *args[i][0]); break;
+		case MINUS:  ((V&) algo).minus_bwd((ExprMinus&)    *(nodes[i]), *args[i][1],                   *args[i][0]); break;
+		case SIGN:   ((V&) algo).sign_bwd ((ExprSign&)     *(nodes[i]), *args[i][1],                   *args[i][0]); break;
+		case ABS:    ((V&) algo).abs_bwd  ((ExprAbs&)      *(nodes[i]), *args[i][1],                   *args[i][0]); break;
+		case POWER:  ((V&) algo).power_bwd((ExprPower&)    *(nodes[i]), *args[i][1],                   *args[i][0]); break;
+		case SQR:    ((V&) algo).sqr_bwd  ((ExprSqr&)      *(nodes[i]), *args[i][1],                   *args[i][0]); break;
+		case SQRT:   ((V&) algo).sqrt_bwd ((ExprSqrt&)     *(nodes[i]), *args[i][1],                   *args[i][0]); break;
+		case EXP:    ((V&) algo).exp_bwd  ((ExprExp&)      *(nodes[i]), *args[i][1],                   *args[i][0]); break;
+		case LOG:    ((V&) algo).log_bwd  ((ExprLog&)      *(nodes[i]), *args[i][1],                   *args[i][0]); break;
+		case COS:    ((V&) algo).cos_bwd  ((ExprCos&)      *(nodes[i]), *args[i][1],                   *args[i][0]); break;
+		case SIN:    ((V&) algo).sin_bwd  ((ExprSin&)      *(nodes[i]), *args[i][1],                   *args[i][0]); break;
+		case TAN:    ((V&) algo).tan_bwd  ((ExprTan&)      *(nodes[i]), *args[i][1],                   *args[i][0]); break;
+		case COSH:   ((V&) algo).cosh_bwd ((ExprCosh&)     *(nodes[i]), *args[i][1],                   *args[i][0]); break;
+		case SINH:   ((V&) algo).sinh_bwd ((ExprSinh&)     *(nodes[i]), *args[i][1],                   *args[i][0]); break;
+		case TANH:   ((V&) algo).tanh_bwd ((ExprTanh&)     *(nodes[i]), *args[i][1],                   *args[i][0]); break;
+		case ACOS:   ((V&) algo).acos_bwd ((ExprAcos&)     *(nodes[i]), *args[i][1],                   *args[i][0]); break;
+		case ASIN:   ((V&) algo).asin_bwd ((ExprAsin&)     *(nodes[i]), *args[i][1],                   *args[i][0]); break;
+		case ATAN:   ((V&) algo).atan_bwd ((ExprAtan&)     *(nodes[i]), *args[i][1],                   *args[i][0]); break;
+		case ACOSH:  ((V&) algo).acosh_bwd((ExprAcosh&)    *(nodes[i]), *args[i][1],                   *args[i][0]); break;
+		case ASINH:  ((V&) algo).asinh_bwd((ExprAsinh&)    *(nodes[i]), *args[i][1],                   *args[i][0]); break;
+		case ATANH:  ((V&) algo).atanh_bwd((ExprAtanh&)    *(nodes[i]), *args[i][1],                   *args[i][0]); break;
 		}
 	}
 }
 
-using std::cout;
-using std::endl;
-
-// for debug only
-template<typename T>
-void CompiledFunction::print() const {
-	const CompiledFunction& f=*this;
-	for (int i=0; i<f.n; i++) {
-		switch(f.code[i]) {
-		case CompiledFunction::IDX:
-		{
-			ExprIndex& e=(ExprIndex&) *(f.nodes[i]);
-			cout << e.id << ": [-]" << " " << (T&) *f.args[i][0] << " " << e.expr.id ;
-		}
-		break;
-		case CompiledFunction::VEC:
-		{
-			ExprVector& e=(ExprVector&) *(f.nodes[i]);
-			const T** _args=(const T**) &f.args[i][1];
-			cout << e.id << ": vec " << " " << (T&) *f.args[i][0] << " ";
-			for (int i=0; i<e.nb_args; i++)
-				cout << (e.arg(i).id) << " ";
-		}
-		break;
-		case CompiledFunction::SYM:
-		{
-			ExprSymbol& e=(ExprSymbol&) *(f.nodes[i]);
-			cout << e.id << ": " << e.name << " " << (T&) *f.args[i][0];
-		}
-		break;
-		case CompiledFunction::CST:
-		{
-			ExprConstant& e=(ExprConstant&) *(f.nodes[i]);
-			cout << e.id << ": cst=";
-			if (e.dim.is_scalar()) cout << e.get_value();
-			else if (e.dim.is_vector()) cout << e.get_vector_value();
-			else e.get_matrix_value();
-			cout << " " <<  (T&) *f.args[i][0];
-		}
-		break;
-		case CompiledFunction::APPLY:
-		{
-			ExprApply& e=(ExprApply&) *(f.nodes[i]);
-			const T** args=(const T**) &f.args[i][1];
-			cout << e.id << ": " << "func()" << " " << (T&) *f.args[i][0];
-			for (int j=0; j<e.nb_args; j++)
-				cout << " " << e.arg(j).id;
-		}
-		break;
-		case CompiledFunction::ADD:
-		case CompiledFunction::ADD_V:
-		case CompiledFunction::ADD_M:
-		case CompiledFunction::MUL:
-		case CompiledFunction::MUL_SV:
-		case CompiledFunction::MUL_SM:
-		case CompiledFunction::MUL_VV:
-		case CompiledFunction::MUL_MV:
-		case CompiledFunction::MUL_MM:
-		case CompiledFunction::SUB:
-		case CompiledFunction::SUB_V:
-		case CompiledFunction::SUB_M:
-		case CompiledFunction::DIV:
-		case CompiledFunction::MAX:
-		case CompiledFunction::MIN:
-		case CompiledFunction::ATAN2:
-		{
-			ExprBinaryOp& e=(ExprBinaryOp&) *(f.nodes[i]);
-			cout << e.id << ": " << f.op(f.code[i]) << " " << (T&) *f.args[i][0] << " ";
-			cout << e.left.id << " " << e.right.id;
-		}
-		break;
-
-		case CompiledFunction::MINUS:
-		case CompiledFunction::SIGN:
-		case CompiledFunction::ABS:
-		case CompiledFunction::POWER:
-		case CompiledFunction::SQR:
-		case CompiledFunction::SQRT:
-		case CompiledFunction::EXP:
-		case CompiledFunction::LOG:
-		case CompiledFunction::COS:
-		case CompiledFunction::SIN:
-		case CompiledFunction::TAN:
-		case CompiledFunction::COSH:
-		case CompiledFunction::SINH:
-		case CompiledFunction::TANH:
-		case CompiledFunction::ACOS:
-		case CompiledFunction::ASIN:
-		case CompiledFunction::ATAN:
-		case CompiledFunction::ACOSH:
-		case CompiledFunction::ASINH:
-		case CompiledFunction::ATANH:
-		{
-			ExprUnaryOp& e=(ExprUnaryOp&) *(f.nodes[i]);
-			cout << e.id << ": " << f.op(f.code[i]) << " " << (T&) *f.args[i][0] << " ";
-			cout << e.expr.id;
-		}
-		break;
-		}
-		cout << endl;
-	}
-}
 
 } // namespace ibex
 #endif // _IBEX_COMPILED_FUNCTION_H_

@@ -18,11 +18,11 @@
 #include "ibex_Interval.h"
 #include "ibex_InvalidIntervalVectorOp.h"
 #include "ibex_Vector.h"
+#include "ibex_Array.h"
 
 namespace ibex {
 
 class IntervalMatrix; // declared only for friendship
-class Domains;        // declared for operator=(const Domains&)
 
 /**
  * \ingroup arithmetic
@@ -73,11 +73,6 @@ public:
 	IntervalVector(const Vector& x);
 
 	/**
-	 * \brief Load domains into this interval vector.
-	 */
-	IntervalVector& operator=(const Domains&); // REM: Implemented in ibex_Domains.cpp
-
-	/**
 	 * \brief Create [empty; ...; empty]
 	 *
 	 * Create an empty IntervalVector of dimension \a n
@@ -114,6 +109,11 @@ public:
 	 * The dimension remains the same.
 	 */
 	void set_empty();
+
+	/**
+	 * \brief Set all the elements to 0 (even if empty).
+	 */
+	void clear();
 
 	/**
 	 * \brief Resize this IntervalVector.
@@ -317,6 +317,13 @@ public:
 	 */
 	double perimeter() const;
 
+	 /**
+	  * \brief Return max of the delta, for x\subseteq *this [deprecated]
+	  *
+	  * Deprecated. Kept for compatibility with ibex 1.xx.
+	  */
+	double maxdelta(const IntervalVector&);
+
 	/**
 	 * \brief Return the relative distance with x.
 	 *
@@ -479,21 +486,6 @@ Interval operator*(const IntervalVector& x1, const Vector& x2);
  * \brief x1*x2.
  */
 Interval operator*(const IntervalVector& x1, const IntervalVector& x2);
-
-/**
- * \brief Outer product (multiplication of a column vector by a row vector).
- */
-IntervalMatrix outer_product(const IntervalVector& x1, const Vector& x2);
-
-/**
- * \brief Outer product (multiplication of a column vector by a row vector).
- */
-IntervalMatrix outer_product(const Vector& x1, const IntervalVector& x2);
-
-/**
- * \brief Outer product (multiplication of a column vector by a row vector).
- */
-IntervalMatrix outer_product(const IntervalVector& x1, const IntervalVector& x2);
 
 /**
  * \brief d*x

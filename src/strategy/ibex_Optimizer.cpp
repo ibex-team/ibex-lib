@@ -26,7 +26,7 @@ Optimizer::Optimizer(Function& f, const Array<Function>& g, Ctc& ctc, Bsc& bsc, 
 		n(f.nb_symbols()), f(f), g(g), ctc(ctc), bsc(bsc), buffer(),
 		prec(n,prec), goal_rel_prec(goal_rel_prec), goal_abs_prec(goal_abs_prec),
 		sample_size(sample_size), mono_analysis_flag(true), in_HC4_flag(true), trace(false),
-		f_eval(f), f_grad(f), loup(POS_INFINITY), loup_point(n), uplo_of_epsboxes(POS_INFINITY) {
+		loup(POS_INFINITY), loup_point(n), uplo_of_epsboxes(POS_INFINITY) {
 
 	//g_eval...
 	// is_inside...
@@ -68,7 +68,7 @@ bool Optimizer::contract_and_bound(Cell& c) {
 	try {
 		prec.contract(c.box);
 	} catch (EmptyBoxException&) { // the box is a "solution"
-		y=f_eval.eval_scalar(c.box);
+		y=f.eval_scalar(c.box);
 		if (uplo_of_epsboxes > y.lb()) uplo_of_epsboxes = y.lb();
 		throw EmptyBoxException();
 	}

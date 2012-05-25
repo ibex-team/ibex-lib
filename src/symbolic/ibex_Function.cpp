@@ -13,6 +13,9 @@
 #include "ibex_Expr.h"
 #include "ibex_BasicDecorator.h"
 #include "ibex_ExprCopy.cpp_"
+#include "ibex_Eval.h"
+#include "ibex_HC4Revise.h"
+#include "ibex_Gradient.h"
 
 #define MAX_NAME_SIZE 20
 #define BASE_SYMB_NAME "_symb_"
@@ -77,14 +80,14 @@ Function::Function(const char* name) : name(strdup(name)), root(NULL), key_count
 
 }
 
-Function::~Function() {
-	for (int i=0; i<key_count; i++)
-		delete &node(i);
-}
-
 Function::Function(const Function& f) : name(strdup(f.name)), root(NULL), key_count(0), __all_symbols_scalar(f.all_symbols_scalar()) {
 	assert(f.root!=NULL);
 	ExprCopy(f.expr(),*this, false);
+}
+
+Function::~Function() {
+	for (int i=0; i<key_count; i++)
+		delete &node(i);
 }
 
 Function* Function::separate() const {
@@ -158,25 +161,33 @@ void Function::set_expr(const ExprNode& expr) {
 	for (vector<int>::iterator it=fsu.keys.begin(); it!=fsu.keys.end(); it++) {
 		is_used[*it]=true;
 	}
+
+	decorate();
 }
 
-void Function::decorate(const Decorator& d) const {
+void Function::decorate() const {
 	assert(root!=NULL); // cannot decorate if there is no expression yet!
 
-	// cannot decorate twice. But this is not necessarily an error.
-	// an algorithm that requires this function to be decorated with T
-	// calls decorate to be sure the function is decorated.
-	//
-	// !! FIX NEEDED !!
-	// However, if the function is already decorated but with another type T'
-	// there is a problem the algorithm is not warned about.
-	// Maybe this function should return the type_id
-	// corresponding to T in case of failure?
-	if (root->deco!=NULL) return;
+	BasicDecorator().decorate(*this);
+	GradDecorator().decorate(*this);
 
-	d.decorate(*this);
+	symbol_domains.resize(nb_symbols());
+	symbol_deriv.resize(nb_symbols());
+
+	for (int i=0; i<nb_symbols(); i++) {
+		symbol_domains.set_ref(i,*symbol(i).deco.d);
+		symbol_deriv.set_ref(i,*symbol(i).deco.g);
+	}
 
 	((CompiledFunction&) cf).compile(*this); // now that it is decorated, it can be "compiled"
+}
+
+Domain& Function::eval(const IntervalVector& box) const {
+	return Eval().eval(*this,box);
+}
+
+void Function::proj(const Domain& y, IntervalVector& x) const {
+	HC4Revise().proj(*this,y,x);
 }
 
 const ExprApply& Function::operator()(const ExprNode& arg1) {
@@ -204,6 +215,41 @@ const char* Function::symbol_name(int i) const {
 
 const ExprNode& Function::expr() const {
 	return *root;
+}
+
+void Function::gradient(const IntervalVector& x, IntervalVector& g) const {
+	assert(g.size()==input_size());
+	assert(x.size()==input_size());
+
+	Gradient().gradient(*this,x,g);
+}
+
+void Function::jacobian(const IntervalVector& x, IntervalMatrix& J) const {
+	assert(J.nb_cols()==input_size());
+	assert(x.size()==input_size());
+	assert(expr().dim.is_vector());
+	assert(J.nb_rows()==expr().dim.vec_size());
+
+	Gradient().jacobian(*this,x,J);
+}
+
+void Function::hansen_matrix(const IntervalVector& box, IntervalMatrix& H) const {
+	int n=input_size();
+	int m=expr().dim.vec_size();
+
+	assert(H.nb_cols()==n);
+	assert(box.size()==n);
+	assert(expr().dim.is_vector());
+	assert(H.nb_rows()==m);
+
+	IntervalVector x=box.mid();
+	IntervalMatrix J(m,n);
+
+	for (int var=0; var<n; var++) {
+		x[var]=box[var];
+		jacobian(x,J);
+		H.set_col(var,J.col(var));
+	}
 }
 
 std::ostream& operator<<(std::ostream& os, const Function& f) {

@@ -15,44 +15,51 @@
 
 namespace ibex {
 #include <typeinfo>
-Eval::Eval(const Function& f) : f(f), symbolLabels(f.nb_symbols()) {
 
-	f.decorate(BasicDecorator());
 
-	for (int i=0; i<f.nb_symbols(); i++) {
-		symbolLabels.set(i,((Domain&) *f.symbol(i).deco));
-	}
+Domain& Eval::eval(const Function& f, ExprLabel** args) const {
+	assert(f.expr().deco.d);
 
-	current_box = NULL; // **HACK**
+	for (int i=0; i<f.symbol_domains.size(); i++)
+		f.symbol_domains[i]=*(*args[i]).d;
+
+	return *f.forward<Eval>(*this).d;
 }
 
-Eval::~Eval() {
+Domain& Eval::eval(const Function& f, const Array<Domain>& d) const {
+	assert(f.expr().deco.d);
 
+	load(f.symbol_domains,d);
+
+	return *f.forward<Eval>(*this).d;
 }
 
-void Eval::Eval::vector_fwd(const ExprVector& v, const Domain** compL, Domain& y) {
+Domain& Eval::eval(const Function &f, const IntervalVector& box) const {
+	assert(f.expr().deco.d);
+
+	if (f.all_symbols_scalar())
+		for (int i=0; i<f.symbol_domains.size(); i++)
+			f.symbol_domains[i].i()=box[i];
+	else
+		load(f.symbol_domains,box); // load the domains of all the symbols
+
+	return *f.forward<Eval>(*this).d;
+}
+
+void Eval::Eval::vector_fwd(const ExprVector& v, const ExprLabel** compL, ExprLabel& y) {
 
 	assert(v.type()!=Dim::SCALAR);
 	assert(v.type()!=Dim::MATRIX_ARRAY);
 
 	if (v.dim.is_vector()) {
-		for (int i=0; i<v.length(); i++) y.v()[i]=compL[i]->i();
+		for (int i=0; i<v.length(); i++) y.d->v()[i]=compL[i]->d->i();
 	}
 	else {
 		if (v.row_vector())
-			for (int i=0; i<v.length(); i++) y.m().set_col(i,compL[i]->v());
+			for (int i=0; i<v.length(); i++) y.d->m().set_col(i,compL[i]->d->v());
 		else
-			for (int i=0; i<v.length(); i++) y.m().set_row(i,compL[i]->v());
+			for (int i=0; i<v.length(); i++) y.d->m().set_row(i,compL[i]->d->v());
 	}
-}
-
-void Eval::apply_fwd(const ExprApply& a, const Domain**, Domain& y) {
-	BasicApplyLabel& l=(BasicApplyLabel&) y;
-	//cout << "args Doms=";
-	//for (int i=0; i<l.args_doms.size(); i++)
-	//	cout << l.args_doms[i] << " ";
-	//	cout << endl;
-	((Domain&) l) = l.fevl.eval.eval(l.args_doms);
 }
 
 } // namespace ibex

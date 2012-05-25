@@ -12,228 +12,138 @@
 #ifndef _IBEX_EVAL_H_
 #define _IBEX_EVAL_H_
 
-#include "ibex_CompiledFunction.h"
-#include "ibex_IntervalMatrixArray.h"
-#include "ibex_Dim.h"
-#include "ibex_Decorator.h"
-#include "ibex_Domain.h"
 #include "ibex_Function.h"
-
 #include <iostream>
 
 namespace ibex {
 
+
 /** \ingroup symbolic
  * \brief Function evaluator.
+ *
+ * \pre Requires the function to be decorated with BasicDecorator.
  */
-class Eval : public FwdAlgorithm<Domain> {
+class Eval : public FwdAlgorithm {
 
 public:
 	/**
-	 * \brief Build an evaluator for a function f.
-	 *
-	 * The evaluator will decorate the function with "Domain" (if not done already).
-	 *
-	 */
-	Eval(const Function& f);
-
-	/**
-	 * \brief Delete the evaluator.
-	 */
-	~Eval();
-
-	/**
-	 * \brief Run the forward algorithm.
-	 */
-	Domain& eval() const;
-
-	/**
 	 * \brief Run the forward algorithm with input domains.
 	 */
-	Domain& eval(const Domains& d) const;
+	Domain& eval(const Function&, const Array<Domain>& d) const;
 
 	/**
 	 * \brief Run the forward algorithm with an input box.
 	 */
-	Domain& eval(const IntervalVector& box) const;
+	Domain& eval(const Function&, const IntervalVector& box) const;
 
+	inline void index_fwd(const ExprIndex&, const ExprLabel& x, ExprLabel& y);
+	       void vector_fwd(const ExprVector&, const ExprLabel** compL, ExprLabel& y);
+	inline void cst_fwd(const ExprConstant&, ExprLabel& y);
+	inline void symbol_fwd(const ExprSymbol&, ExprLabel& y);
+	inline void apply_fwd(const ExprApply&, ExprLabel** x, ExprLabel& y);
+	inline void add_fwd(const ExprAdd&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y);
+	inline void mul_fwd(const ExprMul&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y);
+	inline void sub_fwd(const ExprSub&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y);
+	inline void div_fwd(const ExprDiv&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y);
+	inline void max_fwd(const ExprMax&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y);
+	inline void min_fwd(const ExprMin&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y);
+	inline void atan2_fwd(const ExprAtan2&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y);
+	inline void minus_fwd(const ExprMinus&, const ExprLabel& x, ExprLabel& y);
+	inline void sign_fwd(const ExprSign&, const ExprLabel& x, ExprLabel& y);
+	inline void abs_fwd(const ExprAbs&, const ExprLabel& x, ExprLabel& y);
+	inline void power_fwd(const ExprPower& p, const ExprLabel& x, ExprLabel& y);
+	inline void sqr_fwd(const ExprSqr&, const ExprLabel& x, ExprLabel& y);
+	inline void sqrt_fwd(const ExprSqrt&, const ExprLabel& x, ExprLabel& y);
+	inline void exp_fwd(const ExprExp&, const ExprLabel& x, ExprLabel& y);
+	inline void log_fwd(const ExprLog&, const ExprLabel& x, ExprLabel& y);
+	inline void cos_fwd(const ExprCos&, const ExprLabel& x, ExprLabel& y);
+	inline void sin_fwd(const ExprSin&, const ExprLabel& x, ExprLabel& y);
+	inline void tan_fwd(const ExprTan&, const ExprLabel& x, ExprLabel& y);
+	inline void cosh_fwd(const ExprCosh&, const ExprLabel& x, ExprLabel& y);
+	inline void sinh_fwd(const ExprSinh&, const ExprLabel& x, ExprLabel& y);
+	inline void tanh_fwd(const ExprTanh&, const ExprLabel& x, ExprLabel& y);
+	inline void acos_fwd(const ExprAcos&, const ExprLabel& x, ExprLabel& y);
+	inline void asin_fwd(const ExprAsin&, const ExprLabel& x, ExprLabel& y);
+	inline void atan_fwd(const ExprAtan&, const ExprLabel& x, ExprLabel& y);
+	inline void acosh_fwd(const ExprAcosh&, const ExprLabel& x, ExprLabel& y);
+	inline void asinh_fwd(const ExprAsinh&, const ExprLabel& x, ExprLabel& y);
+	inline void atanh_fwd(const ExprAtanh&, const ExprLabel& x, ExprLabel& y);
+
+	inline void add_V_fwd(const ExprAdd&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y);
+	inline void add_M_fwd(const ExprAdd&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y);
+	inline void mul_SV_fwd(const ExprMul&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y);
+	inline void mul_SM_fwd(const ExprMul&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y);
+	inline void mul_VV_fwd(const ExprMul&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y);
+	inline void mul_MV_fwd(const ExprMul&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y);
+	inline void mul_VM_fwd(const ExprMul&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y);
+	inline void mul_MM_fwd(const ExprMul&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y);
+	inline void sub_V_fwd(const ExprSub&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y);
+	inline void sub_M_fwd(const ExprSub&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y);
+
+//protected:
 	/**
-	 * \brief Calculate f(box).
-	 *
-	 * Run the forward algorithm and return the
-	 * domain of the root node, that must be scalar.
+	 * \brief Run the forward algorithm with input domains.
 	 */
-	Interval eval_scalar(const IntervalVector& box) const;
-
-	/**
-	 * \brief Calculate f(box).
-	 *
-	 * Run the forward algorithm and return the
-	 * domain of the root node, that must be a vector.
-	 */
-	IntervalVector eval_vector(const IntervalVector& box) const;
-
-	/**
-	 * \brief Calculate f(box).
-	 *
-	 * Run the forward algorithm and return the
-	 * domain of the root node, that must be a matrix.
-	 */
-	IntervalMatrix eval_matrix(const IntervalVector& box) const;
-
-	/**
-	 * \brief The compiled function.
-	 */
-	const Function& f;
-
-	/**
-	 * \brief Domains of the input symbols
-	 *
-	 * The structure is initialized by the decorator.
-	 */
-	mutable Domains symbolLabels;
-
-protected:
-
-	mutable const IntervalVector* current_box; // **HACK**
-
-	friend class CompiledFunction;
-	friend class EvalDecorator;
-
-	inline void index_fwd(const ExprIndex& e, const Domain& x, Domain& y);
-	       void vector_fwd(const ExprVector& v, const Domain** compL, Domain& y);
-	inline void cst_fwd(const ExprConstant& c, Domain& y);
-	inline void symbol_fwd(const ExprSymbol& s, Domain& y);
-	       void apply_fwd(const ExprApply& a, const Domain** argL, Domain& y);
-	inline void add_fwd(const ExprAdd&, const Domain& x1, const Domain& x2, Domain& y);
-	inline void mul_fwd(const ExprMul&, const Domain& x1, const Domain& x2, Domain& y);
-	inline void sub_fwd(const ExprSub&, const Domain& x1, const Domain& x2, Domain& y);
-	inline void div_fwd(const ExprDiv&, const Domain& x1, const Domain& x2, Domain& y);
-	inline void max_fwd(const ExprMax&, const Domain& x1, const Domain& x2, Domain& y);
-	inline void min_fwd(const ExprMin&, const Domain& x1, const Domain& x2, Domain& y);
-	inline void atan2_fwd(const ExprAtan2&, const Domain& x1, const Domain& x2, Domain& y);
-	inline void minus_fwd(const ExprMinus&, const Domain& x, Domain& y);
-	inline void sign_fwd(const ExprSign&, const Domain& x, Domain& y);
-	inline void abs_fwd(const ExprAbs&, const Domain& x, Domain& y);
-	inline void power_fwd(const ExprPower& p, const Domain& x, Domain& y);
-	inline void sqr_fwd(const ExprSqr&, const Domain& x, Domain& y);
-	inline void sqrt_fwd(const ExprSqrt&, const Domain& x, Domain& y);
-	inline void exp_fwd(const ExprExp&, const Domain& x, Domain& y);
-	inline void log_fwd(const ExprLog&, const Domain& x, Domain& y);
-	inline void cos_fwd(const ExprCos&, const Domain& x, Domain& y);
-	inline void sin_fwd(const ExprSin&, const Domain& x, Domain& y);
-	inline void tan_fwd(const ExprTan&, const Domain& x, Domain& y);
-	inline void cosh_fwd(const ExprCosh&, const Domain& x, Domain& y);
-	inline void sinh_fwd(const ExprSinh&, const Domain& x, Domain& y);
-	inline void tanh_fwd(const ExprTanh&, const Domain& x, Domain& y);
-	inline void acos_fwd(const ExprAcos&, const Domain& x, Domain& y);
-	inline void asin_fwd(const ExprAsin&, const Domain& x, Domain& y);
-	inline void atan_fwd(const ExprAtan&, const Domain& x, Domain& y);
-	inline void acosh_fwd(const ExprAcosh&, const Domain& x, Domain& y);
-	inline void asinh_fwd(const ExprAsinh&, const Domain& x, Domain& y);
-	inline void atanh_fwd(const ExprAtanh&, const Domain& x, Domain& y);
-
-	inline void add_V_fwd(const ExprAdd&, const Domain& x1, const Domain& x2, Domain& y);
-	inline void add_M_fwd(const ExprAdd&, const Domain& x1, const Domain& x2, Domain& y);
-	inline void mul_SV_fwd(const ExprMul&, const Domain& x1, const Domain& x2, Domain& y);
-	inline void mul_SM_fwd(const ExprMul&, const Domain& x1, const Domain& x2, Domain& y);
-	inline void mul_VV_fwd(const ExprMul&, const Domain& x1, const Domain& x2, Domain& y);
-	inline void mul_MV_fwd(const ExprMul&, const Domain& x1, const Domain& x2, Domain& y);
-	inline void mul_VM_fwd(const ExprMul&, const Domain& x1, const Domain& x2, Domain& y);
-	inline void mul_MM_fwd(const ExprMul&, const Domain& x1, const Domain& x2, Domain& y);
-	inline void sub_V_fwd(const ExprSub&, const Domain& x1, const Domain& x2, Domain& y);
-	inline void sub_M_fwd(const ExprSub&, const Domain& x1, const Domain& x2, Domain& y);
-
+	Domain& eval(const Function&, ExprLabel** d) const;
 };
 
 /* ============================================================================
  	 	 	 	 	 	 	 implementation
   ============================================================================*/
 
-inline Domain& Eval::eval() const {
-	return f.forward<Eval,Domain>(*this);
-}
+inline void Eval::index_fwd(const ExprIndex& e, const ExprLabel& x, ExprLabel& y) { /* nothing to do */ }
 
-inline Domain& Eval::eval(const Domains& d) const {
-	symbolLabels = d;
-	return eval();
-}
+inline void Eval::symbol_fwd(const ExprSymbol& s, ExprLabel& y) { /* nothing to do */ }
 
-inline Domain& Eval::eval(const IntervalVector& box) const {
-	if (f.all_symbols_scalar()) current_box=&box; // **HACK**
-	else symbolLabels = box; // load the domains of all the symbols
-	Domain& res=eval();
-	current_box=NULL; // **HACK**
-	return res;
-}
-
-inline Interval Eval::eval_scalar(const IntervalVector& box) const {
-	return eval(box).i();
-}
-
-inline IntervalVector Eval::eval_vector(const IntervalVector& box) const {
-	return eval(box).v();
-}
-
-inline IntervalMatrix Eval::eval_matrix(const IntervalVector& box) const {
-	return eval(box).m();
-}
-
-inline void Eval::Eval::index_fwd(const ExprIndex& e, const Domain& x, Domain& y) { }
-
-inline void Eval::symbol_fwd(const ExprSymbol& s, Domain& y) {
-	// ** HACK **
-	if (current_box!=NULL && f.all_symbols_scalar()) y.i()=(*current_box)[s.key];
-}
-
-inline void Eval::cst_fwd(const ExprConstant& c, Domain& y) {
+inline void Eval::cst_fwd(const ExprConstant& c, ExprLabel& y) {
 	switch (c.type()) {
-	case Dim::SCALAR:       y.i() = c.get_value();         break;
+	case Dim::SCALAR:       y.d->i() = c.get_value();         break;
 	case Dim::ROW_VECTOR:
-	case Dim::COL_VECTOR:   y.v() = c.get_vector_value();  break;
-	case Dim::MATRIX:       y.m() = c.get_matrix_value();  break;
+	case Dim::COL_VECTOR:   y.d->v() = c.get_vector_value();  break;
+	case Dim::MATRIX:       y.d->m() = c.get_matrix_value();  break;
 	case Dim::MATRIX_ARRAY: assert(false); /* impossible */ break;
 	}
 }
-inline void Eval::add_fwd(const ExprAdd&, const Domain& x1, const Domain& x2, Domain& y)        { y.i()=x1.i()+x2.i(); }
-inline void Eval::mul_fwd(const ExprMul&, const Domain& x1, const Domain& x2, Domain& y)        { y.i()=x1.i()*x2.i(); }
-inline void Eval::sub_fwd(const ExprSub&, const Domain& x1, const Domain& x2, Domain& y)        { y.i()=x1.i()-x2.i(); }
-inline void Eval::div_fwd(const ExprDiv&, const Domain& x1, const Domain& x2, Domain& y)        { y.i()=x1.i()/x2.i(); }
-inline void Eval::max_fwd(const ExprMax&, const Domain& x1, const Domain& x2, Domain& y)        { y.i()=max(x1.i(),x2.i()); }
-inline void Eval::min_fwd(const ExprMin&, const Domain& x1, const Domain& x2, Domain& y)        { y.i()=min(x1.i(),x2.i()); }
-inline void Eval::atan2_fwd(const ExprAtan2&, const Domain& x1, const Domain& x2, Domain& y)    { y.i()=atan2(x1.i(),x2.i()); }
+inline void Eval::apply_fwd(const ExprApply& a, ExprLabel** x, ExprLabel& y)                          { *y.d = eval(a.func,x); }
+inline void Eval::add_fwd(const ExprAdd&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)     { y.d->i()=x1.d->i()+x2.d->i(); }
+inline void Eval::mul_fwd(const ExprMul&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)     { y.d->i()=x1.d->i()*x2.d->i(); }
+inline void Eval::sub_fwd(const ExprSub&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)     { y.d->i()=x1.d->i()-x2.d->i(); }
+inline void Eval::div_fwd(const ExprDiv&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)     { y.d->i()=x1.d->i()/x2.d->i(); }
+inline void Eval::max_fwd(const ExprMax&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)     { y.d->i()=max(x1.d->i(),x2.d->i()); }
+inline void Eval::min_fwd(const ExprMin&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)     { y.d->i()=min(x1.d->i(),x2.d->i()); }
+inline void Eval::atan2_fwd(const ExprAtan2&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y) { y.d->i()=atan2(x1.d->i(),x2.d->i()); }
 
-inline void Eval::minus_fwd(const ExprMinus&, const Domain& x, Domain& y)                       { y.i()=-x.i(); }
-inline void Eval::sign_fwd(const ExprSign&, const Domain& x, Domain& y)                         { y.i()=sign(x.i()); }
-inline void Eval::abs_fwd(const ExprAbs&, const Domain& x, Domain& y)                           { y.i()=abs(x.i()); }
-inline void Eval::power_fwd(const ExprPower& p, const Domain& x, Domain& y)                     { y.i()=pow(x.i(),p.expon); }
-inline void Eval::sqr_fwd(const ExprSqr&, const Domain& x, Domain& y)                           { y.i()=sqr(x.i()); }
-inline void Eval::sqrt_fwd(const ExprSqrt&, const Domain& x, Domain& y)                         { y.i()=sqrt(x.i()); }
-inline void Eval::exp_fwd(const ExprExp&, const Domain& x, Domain& y)                           { y.i()=exp(x.i()); }
-inline void Eval::log_fwd(const ExprLog&, const Domain& x, Domain& y)                           { y.i()=log(x.i()); }
-inline void Eval::cos_fwd(const ExprCos&, const Domain& x, Domain& y)                           { y.i()=cos(x.i()); }
-inline void Eval::sin_fwd(const ExprSin&, const Domain& x, Domain& y)                           { y.i()=sin(x.i()); }
-inline void Eval::tan_fwd(const ExprTan&, const Domain& x, Domain& y)                           { y.i()=tan(x.i()); }
-inline void Eval::cosh_fwd(const ExprCosh&, const Domain& x, Domain& y)                         { y.i()=cosh(x.i()); }
-inline void Eval::sinh_fwd(const ExprSinh&, const Domain& x, Domain& y)                         { y.i()=sinh(x.i()); }
-inline void Eval::tanh_fwd(const ExprTanh&, const Domain& x, Domain& y)                         { y.i()=tanh(x.i()); }
-inline void Eval::acos_fwd(const ExprAcos&, const Domain& x, Domain& y)                         { y.i()=acos(x.i()); }
-inline void Eval::asin_fwd(const ExprAsin&, const Domain& x, Domain& y)                         { y.i()=asin(x.i()); }
-inline void Eval::atan_fwd(const ExprAtan&, const Domain& x, Domain& y)                         { y.i()=atan(x.i()); }
-inline void Eval::acosh_fwd(const ExprAcosh&, const Domain& x, Domain& y)                       { y.i()=acosh(x.i()); }
-inline void Eval::asinh_fwd(const ExprAsinh&, const Domain& x, Domain& y)                       { y.i()=asinh(x.i()); }
-inline void Eval::atanh_fwd(const ExprAtanh&, const Domain& x, Domain& y)                       { y.i()=atanh(x.i()); }
+inline void Eval::minus_fwd(const ExprMinus&, const ExprLabel& x, ExprLabel& y)                       { y.d->i()=-x.d->i(); }
+inline void Eval::sign_fwd(const ExprSign&, const ExprLabel& x, ExprLabel& y)                         { y.d->i()=sign(x.d->i()); }
+inline void Eval::abs_fwd(const ExprAbs&, const ExprLabel& x, ExprLabel& y)                           { y.d->i()=abs(x.d->i()); }
+inline void Eval::power_fwd(const ExprPower& p, const ExprLabel& x, ExprLabel& y)                     { y.d->i()=pow(x.d->i(),p.expon); }
+inline void Eval::sqr_fwd(const ExprSqr&, const ExprLabel& x, ExprLabel& y)                           { y.d->i()=sqr(x.d->i()); }
+inline void Eval::sqrt_fwd(const ExprSqrt&, const ExprLabel& x, ExprLabel& y)                         { y.d->i()=sqrt(x.d->i()); }
+inline void Eval::exp_fwd(const ExprExp&, const ExprLabel& x, ExprLabel& y)                           { y.d->i()=exp(x.d->i()); }
+inline void Eval::log_fwd(const ExprLog&, const ExprLabel& x, ExprLabel& y)                           { y.d->i()=log(x.d->i()); }
+inline void Eval::cos_fwd(const ExprCos&, const ExprLabel& x, ExprLabel& y)                           { y.d->i()=cos(x.d->i()); }
+inline void Eval::sin_fwd(const ExprSin&, const ExprLabel& x, ExprLabel& y)                           { y.d->i()=sin(x.d->i()); }
+inline void Eval::tan_fwd(const ExprTan&, const ExprLabel& x, ExprLabel& y)                           { y.d->i()=tan(x.d->i()); }
+inline void Eval::cosh_fwd(const ExprCosh&, const ExprLabel& x, ExprLabel& y)                         { y.d->i()=cosh(x.d->i()); }
+inline void Eval::sinh_fwd(const ExprSinh&, const ExprLabel& x, ExprLabel& y)                         { y.d->i()=sinh(x.d->i()); }
+inline void Eval::tanh_fwd(const ExprTanh&, const ExprLabel& x, ExprLabel& y)                         { y.d->i()=tanh(x.d->i()); }
+inline void Eval::acos_fwd(const ExprAcos&, const ExprLabel& x, ExprLabel& y)                         { y.d->i()=acos(x.d->i()); }
+inline void Eval::asin_fwd(const ExprAsin&, const ExprLabel& x, ExprLabel& y)                         { y.d->i()=asin(x.d->i()); }
+inline void Eval::atan_fwd(const ExprAtan&, const ExprLabel& x, ExprLabel& y)                         { y.d->i()=atan(x.d->i()); }
+inline void Eval::acosh_fwd(const ExprAcosh&, const ExprLabel& x, ExprLabel& y)                       { y.d->i()=acosh(x.d->i()); }
+inline void Eval::asinh_fwd(const ExprAsinh&, const ExprLabel& x, ExprLabel& y)                       { y.d->i()=asinh(x.d->i()); }
+inline void Eval::atanh_fwd(const ExprAtanh&, const ExprLabel& x, ExprLabel& y)                       { y.d->i()=atanh(x.d->i()); }
 
-inline void Eval::add_V_fwd(const ExprAdd&, const Domain& x1, const Domain& x2, Domain& y)      { y.v()=x1.v()+x2.v(); }
-inline void Eval::add_M_fwd(const ExprAdd&, const Domain& x1, const Domain& x2, Domain& y)      { y.m()=x1.m()+x2.m(); }
-inline void Eval::mul_SV_fwd(const ExprMul&, const Domain& x1, const Domain& x2, Domain& y)     { y.v()=x1.i()*x2.v(); }
-inline void Eval::mul_SM_fwd(const ExprMul&, const Domain& x1, const Domain& x2, Domain& y)     { y.m()=x1.i()*x2.m(); }
-inline void Eval::mul_VV_fwd(const ExprMul&, const Domain& x1, const Domain& x2, Domain& y)     { y.i()=x1.v()*x2.v(); }
-inline void Eval::mul_MV_fwd(const ExprMul&, const Domain& x1, const Domain& x2, Domain& y)     { y.v()=x1.m()*x2.v(); }
-inline void Eval::mul_VM_fwd(const ExprMul&, const Domain& x1, const Domain& x2, Domain& y)     { y.v()=x1.v()*x2.m(); }
-inline void Eval::mul_MM_fwd(const ExprMul&, const Domain& x1, const Domain& x2, Domain& y)     { y.m()=x1.m()*x2.m(); }
-inline void Eval::sub_V_fwd(const ExprSub&, const Domain& x1, const Domain& x2, Domain& y)      { y.v()=x1.v()-x2.v(); }
-inline void Eval::sub_M_fwd(const ExprSub&, const Domain& x1, const Domain& x2, Domain& y)      { y.m()=x1.m()-x2.m(); }
+inline void Eval::add_V_fwd(const ExprAdd&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)   { y.d->v()=x1.d->v()+x2.d->v(); }
+inline void Eval::add_M_fwd(const ExprAdd&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)   { y.d->m()=x1.d->m()+x2.d->m(); }
+inline void Eval::mul_SV_fwd(const ExprMul&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)  { y.d->v()=x1.d->i()*x2.d->v(); }
+inline void Eval::mul_SM_fwd(const ExprMul&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)  { y.d->m()=x1.d->i()*x2.d->m(); }
+inline void Eval::mul_VV_fwd(const ExprMul&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)  { y.d->i()=x1.d->v()*x2.d->v(); }
+inline void Eval::mul_MV_fwd(const ExprMul&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)  { y.d->v()=x1.d->m()*x2.d->v(); }
+inline void Eval::mul_VM_fwd(const ExprMul&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)  { y.d->v()=x1.d->v()*x2.d->m(); }
+inline void Eval::mul_MM_fwd(const ExprMul&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)  { y.d->m()=x1.d->m()*x2.d->m(); }
+inline void Eval::sub_V_fwd(const ExprSub&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)   { y.d->v()=x1.d->v()-x2.d->v(); }
+inline void Eval::sub_M_fwd(const ExprSub&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)   { y.d->m()=x1.d->m()-x2.d->m(); }
 
 } // namespace ibex
 #endif // IBEX_EVAL_H_

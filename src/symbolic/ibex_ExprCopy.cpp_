@@ -162,9 +162,6 @@ protected:
 			}
 			peers[x.id]= & ExprVector::new_(ma,x.dim.dim1,true); // notice: true or false does not matter here
 			break;
-
-		default:
-			assert(false);
 		}
 	}
 

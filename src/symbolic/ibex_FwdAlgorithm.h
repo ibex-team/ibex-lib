@@ -20,137 +20,136 @@ namespace ibex {
  * \ingroup symbolic
  * \brief Interface for forward algorithms.
  */
-template<typename T>
 class FwdAlgorithm {
 
 	/** TO BE DEFINED (by the subclass) */
-	void index_fwd(const ExprIndex&, const T& exprL, T& result);
+	void index_fwd(const ExprIndex&, const ExprLabel& exprL, ExprLabel& result);
 
 	/** TO BE DEFINED (by the subclass) */
-	void symbol_fwd(const ExprSymbol&, T& result);
+	void symbol_fwd(const ExprSymbol&, ExprLabel& result);
 
 	/** TO BE DEFINED (by the subclass) */
-	void cst_fwd(const ExprConstant&, T& result);
+	void cst_fwd(const ExprConstant&, ExprLabel& result);
 
 	/*==================== n-ary operators =========================*/
 	/** TO BE DEFINED (by the subclass) */
-	void vector_fwd(const ExprVector&, const T** compL, T& result);
+	void vector_fwd(const ExprVector&, const ExprLabel** compL, ExprLabel& result);
 
 	/** TO BE DEFINED (by the subclass) */
-	void apply_fwd(const ExprApply&, const T** argL, T& result);
+	void apply_fwd(const ExprApply&, ExprLabel** argL, ExprLabel& result);
 
 	/*==================== binary operators =========================*/
 	/** TO BE DEFINED (by the subclass) */
-	void add_fwd(const ExprAdd&, const T& leftL, const T& rightL, T& result);
+	void add_fwd(const ExprAdd&, const ExprLabel& leftL, const ExprLabel& rightL, ExprLabel& result);
 
 	/** TO BE DEFINED (by the subclass) */
-	void add_V_fwd(const ExprAdd&, const T& leftL, const T& rightL, T& result);
+	void add_V_fwd(const ExprAdd&, const ExprLabel& leftL, const ExprLabel& rightL, ExprLabel& result);
 
 	/** TO BE DEFINED (by the subclass) */
-	void add_M_fwd(const ExprAdd&, const T& leftL, const T& rightL, T& result);
+	void add_M_fwd(const ExprAdd&, const ExprLabel& leftL, const ExprLabel& rightL, ExprLabel& result);
 
 	/** TO BE DEFINED (by the subclass) */
-	void mul_fwd(const ExprMul&, const T& leftL, const T& rightL, T& result);
+	void mul_fwd(const ExprMul&, const ExprLabel& leftL, const ExprLabel& rightL, ExprLabel& result);
 
 	/** TO BE DEFINED (by the subclass) */
-	void mul_SV_fwd(const ExprMul&, const T& leftL, const T& rightL, T& result);
+	void mul_SV_fwd(const ExprMul&, const ExprLabel& leftL, const ExprLabel& rightL, ExprLabel& result);
 
 	/** TO BE DEFINED (by the subclass) */
-	void mul_SM_fwd(const ExprMul&, const T& leftL, const T& rightL, T& result);
+	void mul_SM_fwd(const ExprMul&, const ExprLabel& leftL, const ExprLabel& rightL, ExprLabel& result);
 
 	/** TO BE DEFINED (by the subclass) */
-	void mul_VV_fwd(const ExprMul&, const T& leftL, const T& rightL, T& result);
+	void mul_VV_fwd(const ExprMul&, const ExprLabel& leftL, const ExprLabel& rightL, ExprLabel& result);
 
 	/** TO BE DEFINED (by the subclass) */
-	void mul_MV_fwd(const ExprMul&, const T& leftL, const T& rightL, T& result);
+	void mul_MV_fwd(const ExprMul&, const ExprLabel& leftL, const ExprLabel& rightL, ExprLabel& result);
 
 	/** TO BE DEFINED (by the subclass) */
-	void mul_VM_fwd(const ExprMul&, const T& leftL, const T& rightL, T& result);
+	void mul_VM_fwd(const ExprMul&, const ExprLabel& leftL, const ExprLabel& rightL, ExprLabel& result);
 
 	/** TO BE DEFINED (by the subclass) */
-	void mul_MM_fwd(const ExprMul&, const T& leftL, const T& rightL, T& result);
+	void mul_MM_fwd(const ExprMul&, const ExprLabel& leftL, const ExprLabel& rightL, ExprLabel& result);
 
 	/** TO BE DEFINED (by the subclass) */
-	void sub_fwd(const ExprSub&, const T& leftL, const T& rightL, T& result);
+	void sub_fwd(const ExprSub&, const ExprLabel& leftL, const ExprLabel& rightL, ExprLabel& result);
 
 	/** TO BE DEFINED (by the subclass) */
-	void sub_V_fwd(const ExprSub&, const T& leftL, const T& rightL, T& result);
+	void sub_V_fwd(const ExprSub&, const ExprLabel& leftL, const ExprLabel& rightL, ExprLabel& result);
 
 	/** TO BE DEFINED (by the subclass) */
-	void sub_M_fwd(const ExprSub&, const T& leftL, const T& rightL, T& result);
+	void sub_M_fwd(const ExprSub&, const ExprLabel& leftL, const ExprLabel& rightL, ExprLabel& result);
 
 	/** TO BE DEFINED (by the subclass) */
-	void div_fwd(const ExprDiv&, const T& leftL, const T& rightL, T& result);
+	void div_fwd(const ExprDiv&, const ExprLabel& leftL, const ExprLabel& rightL, ExprLabel& result);
 
 	/** TO BE DEFINED (by the subclass) */
-	void max_fwd(const ExprMax&, const T& leftL, const T& rightL, T& result);
+	void max_fwd(const ExprMax&, const ExprLabel& leftL, const ExprLabel& rightL, ExprLabel& result);
 
 	/** TO BE DEFINED (by the subclass) */
-	void min_fwd(const ExprMin&, const T& leftL, const T& rightL, T& result);
+	void min_fwd(const ExprMin&, const ExprLabel& leftL, const ExprLabel& rightL, ExprLabel& result);
 
 	/** TO BE DEFINED (by the subclass) */
-	void atan2_fwd(const ExprAtan2&, const T& leftL, const T& rightL, T& result);
+	void atan2_fwd(const ExprAtan2&, const ExprLabel& leftL, const ExprLabel& rightL, ExprLabel& result);
 
 	/*==================== unary operators =========================*/
 	/** TO BE DEFINED (by the subclass) */
-	void minus_fwd(const ExprMinus&, const T& exprL, T& result);
+	void minus_fwd(const ExprMinus&, const ExprLabel& exprL, ExprLabel& result);
 
 	/** TO BE DEFINED (by the subclass) */
-	void sign_fwd(const ExprSign&, const T& exprL, T& result);
+	void sign_fwd(const ExprSign&, const ExprLabel& exprL, ExprLabel& result);
 
 	/** TO BE DEFINED (by the subclass) */
-	void abs_fwd(const ExprAbs&, const T& exprL, T& result);
+	void abs_fwd(const ExprAbs&, const ExprLabel& exprL, ExprLabel& result);
 
 	/** TO BE DEFINED (by the subclass) */
-	void power_fwd(const ExprPower&, const T& exprL, T& result);
+	void power_fwd(const ExprPower&, const ExprLabel& exprL, ExprLabel& result);
 
 	/** TO BE DEFINED (by the subclass) */
-	void sqr_fwd(const ExprSqr&, const T& exprL, T& result);
+	void sqr_fwd(const ExprSqr&, const ExprLabel& exprL, ExprLabel& result);
 
 	/** TO BE DEFINED (by the subclass) */
-	void sqrt_fwd(const ExprSqrt&, const T& exprL, T& result);
+	void sqrt_fwd(const ExprSqrt&, const ExprLabel& exprL, ExprLabel& result);
 
 	/** TO BE DEFINED (by the subclass) */
-	void exp_fwd(const ExprExp&, const T& exprL, T& result);
+	void exp_fwd(const ExprExp&, const ExprLabel& exprL, ExprLabel& result);
 
 	/** TO BE DEFINED (by the subclass) */
-	void log_fwd(const ExprLog&, const T& exprL, T& result);
+	void log_fwd(const ExprLog&, const ExprLabel& exprL, ExprLabel& result);
 
 	/** TO BE DEFINED (by the subclass) */
-	void cos_fwd(const ExprCos&, const T& exprL, T& result);
+	void cos_fwd(const ExprCos&, const ExprLabel& exprL, ExprLabel& result);
 
 	/** TO BE DEFINED (by the subclass) */
-	void sin_fwd(const ExprSin&, const T& exprL, T& result);
+	void sin_fwd(const ExprSin&, const ExprLabel& exprL, ExprLabel& result);
 
 	/** TO BE DEFINED (by the subclass) */
-	void tan_fwd(const ExprTan&, const T& exprL, T& result);
+	void tan_fwd(const ExprTan&, const ExprLabel& exprL, ExprLabel& result);
 
 	/** TO BE DEFINED (by the subclass) */
-	void cosh_fwd(const ExprCosh&, const T& exprL, T& result);
+	void cosh_fwd(const ExprCosh&, const ExprLabel& exprL, ExprLabel& result);
 
 	/** TO BE DEFINED (by the subclass) */
-	void sinh_fwd(const ExprSinh&, const T& exprL, T& result);
+	void sinh_fwd(const ExprSinh&, const ExprLabel& exprL, ExprLabel& result);
 
 	/** TO BE DEFINED (by the subclass) */
-	void tanh_fwd(const ExprTanh&, const T& exprL, T& result);
+	void tanh_fwd(const ExprTanh&, const ExprLabel& exprL, ExprLabel& result);
 
 	/** TO BE DEFINED (by the subclass) */
-	void acos_fwd(const ExprAcos&, const T& exprL, T& result);
+	void acos_fwd(const ExprAcos&, const ExprLabel& exprL, ExprLabel& result);
 
 	/** TO BE DEFINED (by the subclass) */
-	void asin_fwd(const ExprAsin&, const T& exprL, T& result);
+	void asin_fwd(const ExprAsin&, const ExprLabel& exprL, ExprLabel& result);
 
 	/** TO BE DEFINED (by the subclass) */
-	void atan_fwd(const ExprAtan&, const T& exprL, T& result);
+	void atan_fwd(const ExprAtan&, const ExprLabel& exprL, ExprLabel& result);
 
 	/** TO BE DEFINED (by the subclass) */
-	void acosh_fwd(const ExprAcosh&, const T& exprL, T& result);
+	void acosh_fwd(const ExprAcosh&, const ExprLabel& exprL, ExprLabel& result);
 
 	/** TO BE DEFINED (by the subclass) */
-	void asinh_fwd(const ExprAsinh&, const T& exprL, T& result);
+	void asinh_fwd(const ExprAsinh&, const ExprLabel& exprL, ExprLabel& result);
 
 	/** TO BE DEFINED (by the subclass) */
-	void atanh_fwd(const ExprAtanh&, const T& exprL, T& result);
+	void atanh_fwd(const ExprAtanh&, const ExprLabel& exprL, ExprLabel& result);
 };
 
 

@@ -91,6 +91,11 @@ IntervalMatrix& IntervalMatrix::operator&=(const IntervalMatrix& m) {
 	return *this;
 }
 
+void IntervalMatrix::clear() {
+	for (int i=0; i<nb_rows(); i++)
+		(*this)[i].clear();
+}
+
 bool IntervalMatrix::operator==(const IntervalMatrix& m) const {
 	if (m.nb_rows()!=nb_rows()) return false;
 	if (m.nb_cols()!=nb_cols()) return false;

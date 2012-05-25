@@ -24,78 +24,10 @@ std::ostream& operator<<(std::ostream& os,const Domain& d) {
 	return os;
 }
 
-Domains::Domains(int n) : n(n) {
-	d=new Domain[n];
-}
+void load(Array<Domain>& d, const IntervalVector& x) {
+int i=0;
 
-Domains::~Domains() {
-	delete[] d;
-}
-
-int Domains::size() const {
-	return n;
-}
-
-void Domains::set(int i, const Dim& dim) {
-	(Dim&) d[i].dim=dim;
-	(bool&) d[i].is_reference=false;
-	d[i].build();
-}
-
-void Domains::set(int i, Interval& itv) {
-	(Dim&) d[i].dim=Dim(0,0,0);
-	(bool&) d[i].is_reference=true;
-	d[i].domain = &itv;
-}
-
-void Domains::set(int i, IntervalVector& vec, bool in_row) {
-	(Dim&) d[i].dim=Dim(0, in_row?0:vec.size(), in_row?vec.size():0);
-	(bool&) d[i].is_reference=true;
-	d[i].domain = &vec;
-}
-
-void Domains::set(int i, IntervalMatrix& mat) {
-	(Dim&) d[i].dim=Dim(0,mat.nb_rows(),mat.nb_cols());
-	(bool&) d[i].is_reference=true;
-	d[i].domain = &mat;
-}
-
-void Domains::set(int i, IntervalMatrixArray& mat_array) {
-	(Dim&) d[i].dim=Dim(mat_array.size(),mat_array.nb_rows(),mat_array.nb_cols());
-	(bool&) d[i].is_reference=true;
-	d[i].domain = &mat_array;
-}
-
-void Domains::set(int i, Domain& d) {
-	switch (d.dim.type()) {
-	case Dim::SCALAR:       set(i,d.i());       break;
-	case Dim::ROW_VECTOR:   set(i,d.v(),true);  break;
-	case Dim::COL_VECTOR:   set(i,d.v(),false); break;
-	case Dim::MATRIX:       set(i,d.m());       break;
-	case Dim::MATRIX_ARRAY: set(i,d.ma());      break;
-	}
-}
-
-Domain& Domains::operator[](int i) {
-	return d[i];
-}
-
-const Domain& Domains::operator[](int i) const {
-	return d[i];
-}
-
-Domains& Domains::operator=(const Domains& d) {
-	assert(size()==d.size());
-	for (int i=0; i<size(); i++) {
-		(*this)[i]=d[i];
-	}
-	return *this;
-}
-
-Domains& Domains::operator=(const IntervalVector& x) {
-	int i=0;
-
-	for (int s=0; s<n; s++) {
+	for (int s=0; s<d.size(); s++) {
 		const Dim& dim=d[s].dim;
 		switch (dim.type()) {
 		case Dim::SCALAR:
@@ -135,30 +67,29 @@ Domains& Domains::operator=(const IntervalVector& x) {
 		break;
 		}
 	}
-	return *this;
 }
 
-IntervalVector& IntervalVector::operator=(const Domains& d) {
+void load(IntervalVector& x, const Array<Domain>& d) {
 	int i=0;
 
 	for (int s=0; s<d.size(); s++) {
 		const Dim& dim=d[s].dim;
 		switch (dim.type()) {
 		case Dim::SCALAR:
-			(*this)[i++]=d[s].i();
+			x[i++]=d[s].i();
 			break;
 		case Dim::ROW_VECTOR:
 		{
 			const IntervalVector& v=d[s].v();
 			for (int j=0; j<dim.dim3; j++)
-				(*this)[i++]=v[j];
+				x[i++]=v[j];
 		}
 		break;
 		case Dim::COL_VECTOR:
 		{
 			const IntervalVector& v=d[s].v();
 			for (int j=0; j<dim.dim2; j++)
-				(*this)[i++]=v[j];
+				x[i++]=v[j];
 		}
 		break;
 
@@ -167,7 +98,7 @@ IntervalVector& IntervalVector::operator=(const Domains& d) {
 			const IntervalMatrix& M=d[s].m();
 			for (int k=0; k<dim.dim2; k++)
 				for (int j=0; j<dim.dim3; j++)
-					(*this)[i++]=M[k][j];
+					x[i++]=M[k][j];
 		}
 		break;
 		case Dim::MATRIX_ARRAY:
@@ -176,12 +107,18 @@ IntervalVector& IntervalVector::operator=(const Domains& d) {
 			for (int l=0; l<dim.dim1; l++)
 				for (int k=0; k<dim.dim2; k++)
 					for (int j=0; j<dim.dim3; j++)
-						(*this)[i++]=A[l][k][j];
+						x[i++]=A[l][k][j];
 		}
 		break;
 		}
 	}
-	return *this;
+}
+
+void load(Array<Domain>& x, const Array<Domain>& y) {
+	assert(x.size()==y.size());
+	for (int s=0; s<x.size(); s++) {
+		x[s]=y[s];
+	}
 }
 
 } // end namespace

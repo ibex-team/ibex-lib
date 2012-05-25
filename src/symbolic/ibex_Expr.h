@@ -21,17 +21,10 @@
 #include "ibex_IntervalVector.h"
 #include "ibex_IntervalMatrix.h"
 #include "ibex_Dim.h"
-
+#include "ibex_ExprLabel.h"
 
 namespace ibex {
 
-/** \ingroup symbolic
- * \brief Expression label (decoration)
- */
-class ExprLabel {
-public:
-	virtual ~ExprLabel() { }
-};
 
 class Function;
 class Constraint;
@@ -90,7 +83,7 @@ public:
 	const Dim dim;
 
 	/** The label of this node. */
-	mutable ExprLabel *deco;
+	mutable ExprLabel deco;
 
 	/** Return true if this subexpression is the constant 0. */
 	virtual bool is_zero() const;
@@ -1123,7 +1116,6 @@ private:
   ============================================================================*/
 
 inline ExprNode::~ExprNode() {
-	if (deco) delete deco;
 }
 
 inline bool ExprNode::is_zero() const {

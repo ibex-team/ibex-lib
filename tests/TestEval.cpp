@@ -50,9 +50,8 @@ IntervalMatrix M2() { // the transpose of M1
 namespace ibex {
 
 void TestEval::check_deco(const ExprNode& e) {
-	TEST_ASSERT(e.deco!=NULL);
-	TEST_ASSERT((dynamic_cast<Domain*>(e.deco))!=NULL);
-	Domain* dx = (Domain*) e.deco;
+	TEST_ASSERT(e.deco.d!=NULL);
+	Domain* dx = (Domain*) e.deco.d;
 	TEST_ASSERT(dx->dim==e.dim);
 	switch (e.dim.type()) {
 	case Dim::SCALAR:
@@ -106,10 +105,6 @@ void TestEval::deco01() {
 	const ExprSymbol& y = f.add_symbol("y");
 	const ExprNode&   e = x+y;
 	f.set_expr(e);
-
-	BasicDecorator d;
-
-	d.decorate(f);
 	check_deco(x);
 	check_deco(y);
 	check_deco(e);
@@ -122,8 +117,6 @@ void TestEval::deco02() {
 	const ExprNode&   e = x+y;
 	f.set_expr(e);
 
-	BasicDecorator d;
-	d.decorate(f);
 	check_deco(x);
 	check_deco(y);
 	check_deco(e);
@@ -136,13 +129,11 @@ void TestEval::add01() {
 	const ExprSymbol& y = f.add_symbol("y");
 	f.set_expr(x+y);
 
-	Eval e(f);
-
 	IntervalVector box(2);
 	box[0]=Interval(1,2);
 	box[1]=Interval(3,4);
 
-	Interval res=e.eval_scalar(box);
+	Interval res=f.eval_scalar(box);
 	//e.f.cf.print<Domain>();
 	//cout << "res=" << res << endl;
 	TEST_ASSERT(res==Interval(4,6));
@@ -155,8 +146,6 @@ void TestEval::add02() {
 	const ExprSymbol& y = f.add_symbol("y",Dim(0,3,0));
 	f.set_expr(x+y);
 
-	Eval e(f);
-
 	double _xy[][2] = { {1,2}, {3,4}, {5,6} ,
 						 {1,1}, {2,2}, {3,3} };
 	IntervalVector xy(6,_xy);
@@ -164,7 +153,7 @@ void TestEval::add02() {
 	double _z[][2] = { {2,3}, {5,6}, {8,9} };
 	IntervalVector z(3,_z);
 
-	IntervalVector res=e.eval_vector(xy);
+	IntervalVector res=f.eval_vector(xy);
 	//cout << e.f << endl;
 	TEST_ASSERT(res==z);
 }
@@ -176,8 +165,6 @@ void TestEval::add03() {
 	const ExprSymbol& y = f.add_symbol("y",Dim(0,0,3));
 	f.set_expr(x+y);
 
-	Eval e(f);
-
 	double _xy[][2] = { {1,2}, {3,4}, {5,6} ,
 						 {1,1}, {2,2}, {3,3} };
 	IntervalVector xy(6,_xy);
@@ -185,7 +172,7 @@ void TestEval::add03() {
 	double _z[][2] = { {2,3}, {5,6}, {8,9} };
 	IntervalVector z(3,_z);
 
-	IntervalVector res=e.eval_vector(xy);
+	IntervalVector res=f.eval_vector(xy);
 	//cout << e.f << endl;
 	TEST_ASSERT(res==z);
 }
@@ -197,8 +184,6 @@ void TestEval::add04() {
 	const ExprSymbol& y = f.add_symbol("y",Dim(0,2,3));
 	f.set_expr(x+y);
 
-	Eval e(f);
-
 	double _xy[][2] = { {1,2}, {3,4}, {5,6},
 						{1,1}, {2,2}, {3,3},
 						{1,1}, {2,2}, {3,3},
@@ -209,7 +194,7 @@ void TestEval::add04() {
 			           {2,3}, {5,6}, {8,9} };
 	IntervalMatrix z(2, 3,_z);
 
-	IntervalMatrix res=e.eval_matrix(xy);
+	IntervalMatrix res=f.eval_matrix(xy);
 	//cout << e.f << endl;
 	TEST_ASSERT(res==z);
 }
@@ -221,9 +206,6 @@ void TestEval::mul01() {
 	const ExprSymbol& y = f.add_symbol("y",Dim(0,3,2));
 	f.set_expr(x*y);
 
-	Eval e(f);
-
-
 	IntervalVector xy(12);
 	IntervalMatrix mx=M1();
 	IntervalMatrix my=M2();
@@ -232,7 +214,7 @@ void TestEval::mul01() {
 
 	IntervalMatrix mz=mx*my;
 
-	IntervalMatrix res=e.eval_matrix(xy);
+	IntervalMatrix res=f.eval_matrix(xy);
 	//cout << e.f << endl;
 	TEST_ASSERT(res==mz);
 }
@@ -248,13 +230,11 @@ void TestEval::dist01() {
 
 	f.set_expr(sqrt(sqr(xa-ya)+sqr(xb-yb)));
 
-	Eval e(f);
-
 	double _xy[][2] = { {3,3}, {4,4},
 						{4,4}, {5,5} };
 	IntervalVector box(4,_xy);
 
-	Interval res=e.eval_scalar(box);
+	Interval res=f.eval_scalar(box);
 	//cout << e.f << endl;
 	check(res,Interval(::sqrt(2),::sqrt(2)));
 }
@@ -269,14 +249,10 @@ void TestEval::apply01() {
 
 	f1.set_expr(x1);
 
-	const ExprNode* args[1];
-	args[0]=&x2;
-	f2.set_expr(f1(args));
+	f2.set_expr(f1(x2));
 
-	Eval e(f2);
-	e.symbolLabels[0].i()=Interval(2,2);
-
-	check(e.eval().i(), Interval(2,2));
+	IntervalVector _x2(1,Interval(2,2));
+	check(f2.eval_scalar(_x2), Interval(2,2));
 }
 
 void TestEval::apply02() {
@@ -299,11 +275,11 @@ void TestEval::apply02() {
 	//cout << f1 << endl;
 	//cout << f2 << endl;
 
-	Eval e(f2);
-	e.symbolLabels[0].i()=Interval(2,2);
-	e.symbolLabels[1].i()=Interval(3,3);
+	IntervalVector x(2);
+	x[0]=Interval(2,2);
+	x[1]=Interval(3,3);
 
-	check(e.eval().i(), Interval(10,10));
+	check(f2.eval(x).i(), Interval(10,10));
 }
 
 void TestEval::apply03() {
@@ -324,10 +300,8 @@ void TestEval::apply03() {
 	f3.set_expr(f1(x3,x3)-f2(x3,x3));
 
 	//cout << f3 << endl;
+	IntervalVector _x3(1,Interval(3,3));
 
-	Eval e(f3);
-
-	e.symbolLabels[0].i()=Interval(3,3);
 	/*
 	e.eval().i();
 	cout << "f1:---------\n";
@@ -338,7 +312,7 @@ void TestEval::apply03() {
 	f3.cf.print<Domain>();
 	*/
 
-	check(e.eval().i(), Interval(-3,-3));
+	check(f3.eval(_x3).i(), Interval(-3,-3));
 }
 
 void TestEval::apply04() {
@@ -355,11 +329,10 @@ void TestEval::apply04() {
 	f1.set_expr(sqr(x1));
 	f2.set_expr(x2+Interval(1,1));
 	f3.set_expr(f2(f1(x3)));
-	Eval e(f3);
 
-	e.symbolLabels[0].i()=Interval(3,3);
+	IntervalVector _x3(1,Interval(3,3));
 
-	check(e.eval().i(), Interval(10,10));
+	check(f3.eval(_x3).i(), Interval(10,10));
 }
 
 }

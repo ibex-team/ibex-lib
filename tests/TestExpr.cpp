@@ -43,7 +43,7 @@ void TestExpr::symbol() {
 	TEST_ASSERT(x.key==0);
 	TEST_ASSERT(strcmp(x.name,"x")==0);
 	TEST_ASSERT(x.size==1);
-	TEST_ASSERT(x.deco==NULL);
+	TEST_ASSERT(x.deco.d==NULL);
 	TEST_ASSERT(!x.is_zero());
 	TEST_ASSERT(x.type()==Dim::SCALAR);
 	TEST_ASSERT(checkExpr(x,"x"));
@@ -65,7 +65,7 @@ void TestExpr::addxy01() {
 	TEST_ASSERT(e.height==1);
 	TEST_ASSERT(e.id==2);
 	TEST_ASSERT(e.size==3);
-	TEST_ASSERT(e.deco==NULL);
+	TEST_ASSERT(e.deco.d==NULL);
 	TEST_ASSERT(!e.is_zero());
 	TEST_ASSERT(e.type()==Dim::SCALAR);
 
@@ -111,7 +111,7 @@ void TestExpr::addxx01() {
 	TEST_ASSERT(e.height==1);
 	TEST_ASSERT(e.id==1);
 	TEST_ASSERT(e.size==2);
-	TEST_ASSERT(e.deco==NULL);
+	TEST_ASSERT(e.deco.d==NULL);
 	TEST_ASSERT(!e.is_zero());
 	TEST_ASSERT(e.type()==Dim::SCALAR);
 
@@ -287,7 +287,7 @@ void TestExpr::cst01() {
 	TEST_ASSERT(c.height==0);
 	TEST_ASSERT(c.id==0);
 	TEST_ASSERT(c.size==1);
-	TEST_ASSERT(c.deco==NULL);
+	TEST_ASSERT(c.deco.d==NULL);
 	TEST_ASSERT(!c.is_zero());
 	TEST_ASSERT(c.type()==Dim::SCALAR);
 	TEST_ASSERT(c.get_value()==5.0);
@@ -361,7 +361,7 @@ void TestExpr::vector01() {
 
 	const ExprVector& v=ExprVector::new_(c,4,false);
 	TEST_ASSERT(&v.context==&f);
-	TEST_ASSERT(v.deco==NULL);
+	TEST_ASSERT(v.deco.d==NULL);
 	TEST_ASSERT(v.dim==Dim(0,4,3));
 	TEST_ASSERT(v.height==3);
 	TEST_ASSERT(v.id==4);
@@ -398,7 +398,7 @@ void TestExpr::index01() {
 	const ExprSymbol& x=f.add_symbol("x",Dim(2,3,4));
 	const ExprIndex& e=x[1];
 	TEST_ASSERT(&e.context==&f);
-	TEST_ASSERT(e.deco==NULL);
+	TEST_ASSERT(e.deco.d==NULL);
 	TEST_ASSERT(e.dim==Dim(0,3,4));
 	TEST_ASSERT(e.height==1);
 	TEST_ASSERT(e.id==1);
@@ -413,7 +413,7 @@ void TestExpr::index02() {
 	const ExprSymbol& x=f.add_symbol("x",Dim(2,3,4));
 	const ExprIndex& e=x[1][1];
 	TEST_ASSERT(&e.context==&f);
-	TEST_ASSERT(e.deco==NULL);
+	TEST_ASSERT(e.deco.d==NULL);
 	TEST_ASSERT(e.dim==Dim(0,0,4));
 	TEST_ASSERT(e.height==2);
 	TEST_ASSERT(e.id==2);
@@ -428,7 +428,7 @@ void TestExpr::index03() {
 	const ExprSymbol& x=f.add_symbol("x",Dim(2,3,4));
 	const ExprIndex& e=x[1][1][1];
 	TEST_ASSERT(&e.context==&f);
-	TEST_ASSERT(e.deco==NULL);
+	TEST_ASSERT(e.deco.d==NULL);
 	TEST_ASSERT(e.height==3);
 	TEST_ASSERT(e.id==3);
 	TEST_ASSERT(e.size==4);
@@ -460,7 +460,7 @@ void TestExpr::apply01() {
 	TEST_ASSERT(&e.arg(0)==&x2);
 	TEST_ASSERT(&e.arg(2)==&A2);
 	TEST_ASSERT(&e.context==&f2);
-	TEST_ASSERT(e.deco==NULL);
+	TEST_ASSERT(e.deco.d==NULL);
 	TEST_ASSERT(e.height==2);
 	TEST_ASSERT(e.id==4);
 	TEST_ASSERT(e.size==5);

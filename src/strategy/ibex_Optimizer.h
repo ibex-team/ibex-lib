@@ -249,14 +249,6 @@ class Optimizer {
     static const int default_sample_size;
 
  private:
-    /** Evaluator for f */
-    Eval f_eval;
-
-    /** Gradient for f */
-    Gradient f_grad;
-
-    /** Evaluators for g */
-    Eval* g_eval;
 
     /** Inner inflators for g */
     InnerInflator* g_infl;

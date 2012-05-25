@@ -12,9 +12,8 @@
 #ifndef __IBEX_DOMAIN_H__
 #define __IBEX_DOMAIN_H__
 
-#include "ibex_Decorator.h"
 #include "ibex_IntervalMatrixArray.h"
-#include "ibex_Expr.h"
+#include "ibex_Dim.h"
 
 namespace ibex {
 
@@ -24,9 +23,8 @@ class Domains; // for friendship grant
  * \ingroup level1
  * \brief Generic Domain (either interval, vector of intervals, etc.)
  *
- * A generic domains is also the label type for the basic evaluation of a function.
  */
-class Domain : public virtual ExprLabel {
+class Domain  {
 public:
 
 	/**
@@ -188,93 +186,19 @@ private:
 std::ostream& operator<<(std::ostream& os,const Domain&);
 
 /**
- * \ingroup symbolic
- * \brief Domains (ordered list of generic interval-based #ibex::Domain).
- *
- * This class is a structure that represent domains of variables.
- * It is an ordered list of generic structures called "domain".
- * An interval structure is either:
- * <ul>
- * <li> a single interval (domain of a scalar variable)
- * <li> a vector (domain of a vector variable)
- * <li> a matrix (etc.)
- * <li> an array of matrices
- * <li> a reference to an object of any of the previous types
- * </ul>
+ * \brief Load domains from a flat vector
  */
-class Domains {
-public:
-	/**
-	 * \brief Build an array of n uninitialized domains.
-	 *
-	 * Use set(...) to initialize each domain.
-	 */
-	explicit Domains(int n);
+void load(Array<Domain>& domains, const IntervalVector& box);
 
-	/**
-	 * \brief Delete *this.
-	 */
-	~Domains();
+/**
+ * \brief Load domains into an interval vector.
+ */
+void load(IntervalVector& box, const Array<Domain>& domains);
 
-	/**
-	 * \brief Size (number of domains).
-	 */
-	int size() const;
-
-	/**
-	 * \brief Set the ith domain to an object of dimension d.
-	 */
-	void set(int i, const Dim& d);
-
-	/**
-	 * \brief Set the ith domain to a reference to \a itv.
-	 */
-	void set(int i, Interval& itv);
-
-	/**
-	 * \brief Set the ith domain to a reference to \a vec.
-	 */
-	void set(int i, IntervalVector& vec, bool is_row);
-
-	/**
-	 * \brief Set the ith domain to a reference to \a mat.
-	 */
-	void set(int i, IntervalMatrix& mat);
-
-	/**
-	 * \brief Set the ith domain to a reference to \a mat_array.
-	 */
-	void set(int i, IntervalMatrixArray& mat_array);
-
-	/**
-	 * \brief Set the ith domain to a reference to another domain.
-	 */
-	void set(int i, Domain& d);
-
-	/**
-	 * \brief The ith domain.
-	 */
-	Domain& operator[](int i);
-
-	/**
-	 * \brief The ith domain.
-	 */
-	const Domain& operator[](int i) const;
-
-	/**
-	 * \brief Load domains from another array of domains.
-	 */
-	Domains& operator=(const Domains&);
-
-	/**
-	 * \brief Load these domains from a flat vector
-	 */
-	Domains& operator=(const IntervalVector&);
-
-protected:
-	int n;
-	Domain* d;
-};
+/**
+ * \brief x:=y
+ */
+void load(Array<Domain>& x, const Array<Domain>& y);
 
 } // end namespace
 

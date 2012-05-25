@@ -18,7 +18,7 @@ namespace ibex {
 
 void Optimizer::monotonicity_analysis(IntervalVector& box) {
   IntervalVector g(n);
-  f_grad.calculate(box,g);
+  f.gradient(box,g);
 
   for (int j=0; j<n; j++) {
 	  if (g[j].lb()>=0) box[j]=box[j].lb();
@@ -28,13 +28,13 @@ void Optimizer::monotonicity_analysis(IntervalVector& box) {
 
 bool Optimizer::is_feasible(const IntervalVector& box) {
 	for (int j=0; j<g.size(); j++)
-		if (g_eval[j].eval_scalar(box).lb()>0) return false;
+		if (g[j].eval_scalar(box).lb()>0) return false;
 	return true;
 }
 
 bool Optimizer::is_inner(const IntervalVector& box) {
 	for (int j=0; j<g.size(); j++)
-		if (g_eval[j].eval_scalar(box).ub()>0) return false;
+		if (g[j].eval_scalar(box).ub()>0) return false;
 	return true;
 }
 
@@ -55,7 +55,7 @@ bool Optimizer::in_HC4(IntervalVector& box){
 /* last update: GCH  */
 bool Optimizer::check_candidate(const Vector& pt, bool _is_inner) {
 
-	Interval fx=f_eval.eval_scalar(pt);
+	Interval fx=f.eval_scalar(pt);
 
 	if (fx.is_empty()) { // means: outside of the definition domain of the function
 		return false;
@@ -110,7 +110,7 @@ bool Optimizer::line_probing(const IntervalVector& box, const Vector& start, boo
 
 	(IntervalVector&) box = start;     // take the startpoint of the box
 
-	f_grad.calculate(box,ig);
+	f.gradient(box,ig);
 
 	(IntervalVector&) box = savebox;   // restore domains
 

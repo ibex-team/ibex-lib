@@ -13,11 +13,11 @@
 
 namespace ibex {
 
-CtcHC4Revise::CtcHC4Revise(Function& f, bool equality) : Ctc(f.input_size()), ctr(f,equality), hc4r(f) {
+CtcHC4Revise::CtcHC4Revise(Function& f, bool equality) : Ctc(f.input_size()), ctr(f,equality) {
 
 }
 
-CtcHC4Revise::CtcHC4Revise(const NumConstraint& ctr) : Ctc(ctr.f.nb_symbols()), ctr(ctr), hc4r(ctr.f) {
+CtcHC4Revise::CtcHC4Revise(const NumConstraint& ctr) : Ctc(ctr.f.nb_symbols()), ctr(ctr) {
 
 }
 
@@ -33,9 +33,13 @@ void CtcHC4Revise::contract(IntervalVector& box) {
 	case Dim::MATRIX:       root_label.m()=IntervalMatrix(d.dim2,d.dim3,right_cst); break;
 	case Dim::MATRIX_ARRAY: assert(false); /* impossible */ break;
 	}
-	hc4r.contract(box,root_label);
-	if (box.is_empty()) throw EmptyBoxException();
-	//hc4r.eval.f.cf.print<Domain>();
+
+	try {
+		HC4Revise().proj(ctr.f,root_label,box);
+	} catch (EmptyBoxException&) {
+		box.set_empty();
+		throw EmptyBoxException();
+	}
 }
 
 void CtcHC4Revise::contract(IntervalVector& box, const Indicators& idc) {

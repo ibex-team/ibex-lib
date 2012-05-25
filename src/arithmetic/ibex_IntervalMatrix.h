@@ -86,6 +86,11 @@ public:
 	IntervalMatrix& operator&=(const IntervalMatrix& x);
 
 	/**
+	 * \brief Set all the elements to 0 (even if empty).
+	 */
+	void clear();
+
+	/**
 	 * \brief True if the bounds of (*this) coincide with m.
 	 *
 	 * If the two matrices are empty and with the same dimensions
@@ -350,6 +355,21 @@ IntervalMatrix operator*(const Matrix& m1, const IntervalMatrix& m2);
  * \brief $[m]_1*[m]_2$.
  */
 IntervalMatrix operator*(const IntervalMatrix& m1, const IntervalMatrix& m2);
+
+/**
+ * \brief Outer product (multiplication of a column vector by a row vector).
+ */
+IntervalMatrix outer_product(const IntervalVector& x1, const Vector& x2);
+
+/**
+ * \brief Outer product (multiplication of a column vector by a row vector).
+ */
+IntervalMatrix outer_product(const Vector& x1, const IntervalVector& x2);
+
+/**
+ * \brief Outer product (multiplication of a column vector by a row vector).
+ */
+IntervalMatrix outer_product(const IntervalVector& x1, const IntervalVector& x2);
 
 /**
  * \brief |x|.

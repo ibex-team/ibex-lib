@@ -13,7 +13,7 @@
 
 #include "ibex_Domain.h"
 #include "ibex_Expr.h"
-#include "ibex_HC4Revise.h"
+//#include "ibex_HC4Revise.h"
 #include "ibex_Decorator.h"
 
 namespace ibex {
@@ -59,6 +59,7 @@ protected:
  * A function application node has a specific label that, in addition
  * to the domain, contains an evaluator of the function called.
  */
+/*
 class BasicApplyLabel : public virtual Domain {
 public:
 	BasicApplyLabel(const Dim& dim, Function& f);
@@ -69,6 +70,7 @@ public:
 
 	HC4Revise fevl;    //  the associated evaluator
 };
+*/
 
 } // end namespace ibex
 

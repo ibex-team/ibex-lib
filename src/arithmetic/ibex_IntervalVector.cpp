@@ -68,6 +68,11 @@ void IntervalVector::set_empty() {
 	(*this)[0]=Interval::EMPTY_SET;
 }
 
+void IntervalVector::clear() {
+	for (int i=0; i<size(); i++)
+		(*this)[i]=0;
+}
+
 void IntervalVector::resize(int n2) {
 	assert(n2>=1);
 	assert((vec==NULL && n==0) || (n!=0 && vec!=NULL));
@@ -280,6 +285,15 @@ double distance(const IntervalVector& x1, const IntervalVector& x2) {
 	double max = ibex::distance(x1[0],x2[0]);
 	for (int i=1; i<x1.size(); i++) {
 		double cand = ibex::distance(x1[i],x2[i]);
+		if (max<cand) max = cand;
+	}
+	return max;
+}
+
+double IntervalVector::maxdelta(const IntervalVector& x) {
+	double max = (*this)[0].delta(x[0]);
+	for (int i=1; i<size(); i++) {
+		double cand = (*this)[i].delta(x[i]);
 		if (max<cand) max = cand;
 	}
 	return max;

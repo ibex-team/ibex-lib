@@ -29,11 +29,23 @@ template<class T>
 class Array {
 public:
 	/**
+	 * \brief Create an initialized array
+	 *
+	 * \warning You must use #resize() and then initialize the references with set().
+	 */
+	Array();
+
+	/**
 	 * \brief Create an array of uninitialized references.
 	 *
 	 * \warning You must initialize the references with set().
 	 */
 	Array(int n);
+
+	/**
+	 * \brief Resize the array.
+	 */
+	void resize(int n);
 
 	/**
 	 * \brief Set the ith reference to the object \a obj.
@@ -99,13 +111,34 @@ protected:
 
 /*================================== inline implementations ========================================*/
 
+template<class T>
+Array<T>::Array() : _nb(0), array(NULL) {
+
+}
 
 template<class T>
 Array<T>::Array(int n) : _nb(n), array(new T*[n]) {
-
+	assert(n>0);
 	for (int i=0; i<_nb; i++) {
 		array[i] = NULL;
 	}
+}
+
+template<class T>
+void Array<T>::resize(int n) {
+	assert(n>0);
+	T** new_array=new T*[n];
+	int i=0;
+	for (; i<_nb; i++) {
+		if (i<n) new_array[i] = array[i];
+		else if (array[i]) delete array[i];
+	}
+	for (; i<n; i++) {
+		new_array[i]=NULL;
+	}
+	if (array) delete[] array;
+	array=new_array;
+	_nb=n;
 }
 
 template<class T>

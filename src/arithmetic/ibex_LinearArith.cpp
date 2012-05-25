@@ -472,19 +472,19 @@ Interval operator*(const IntervalVector& v1, const IntervalVector& v2) {
 	return mulVV<IntervalVector,IntervalVector,Interval>(v1,v2);
 }
 
-Matrix outer_prod(const Vector& v1, const Vector& v2) {
+Matrix outer_product(const Vector& v1, const Vector& v2) {
 	return outer_prod<Vector,Vector,Matrix>(v1,v2);
 }
 
-IntervalMatrix outer_prod(const Vector& v1, const IntervalVector& v2) {
+IntervalMatrix outer_product(const Vector& v1, const IntervalVector& v2) {
 	return outer_prod<Vector,IntervalVector,IntervalMatrix>(v1,v2);
 }
 
-IntervalMatrix outer_prod(const IntervalVector& v1, const Vector& v2) {
+IntervalMatrix outer_product(const IntervalVector& v1, const Vector& v2) {
 	return outer_prod<IntervalVector,Vector,IntervalMatrix>(v1,v2);
 }
 
-IntervalMatrix outer_prod(const IntervalVector& v1, const IntervalVector& v2) {
+IntervalMatrix outer_product(const IntervalVector& v1, const IntervalVector& v2) {
 	return outer_prod<IntervalVector,IntervalVector,IntervalMatrix>(v1,v2);
 }
 

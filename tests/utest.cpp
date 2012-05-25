@@ -13,21 +13,22 @@
 #include <cpptest.h>
 #include <memory>
 
-// ================ level 0 ===============
+// ================ arithmetic ===============
 #include "TestInterval.h"
 #include "TestIntervalVector.h"
 #include "TestIntervalMatrix.h"
 #include "TestDim.h"
 //#include "TestDomain.h"
 
-// ================ level 1 ===============
+// ================ symbolic ===============
 #include "TestExpr.h"
 #include "TestFunction.h"
 #include "TestEval.h"
+#include "TestGradient.h"
 #include "TestHC4Revise.h"
 #include "TestHC4.h"
 
-// ================ level 2 ===============
+// ================ contractor ===============
 #include "TestHC4.h"
 
 using namespace std;
@@ -48,6 +49,7 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestFunction()));
     ts.add(auto_ptr<Test::Suite>(new TestEval()));
     ts.add(auto_ptr<Test::Suite>(new TestHC4Revise()));
+    ts.add(auto_ptr<Test::Suite>(new TestGradient()));
 
     ts.add(auto_ptr<Test::Suite>(new TestHC4()));
 

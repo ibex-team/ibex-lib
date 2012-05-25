@@ -15,6 +15,8 @@
 #include "ibex_Expr.h"
 #include "ibex_CompiledFunction.h"
 #include "ibex_Decorator.h"
+#include "ibex_Array.h"
+
 #include <stdarg.h>
 
 namespace ibex {
@@ -81,7 +83,7 @@ public:
 	 * into n real-valued functions f_1, ... f_n
 	 * that can be used independently.
 	 *
-	 * Of course the dimension of the argument x is
+	 * Of course the list of arguments "x" is
 	 * the same for each component. For instance
 	 *
 	 * (x,y,z)->(x+y,z-x) is transformed into:  <br>
@@ -91,6 +93,8 @@ public:
 	 *    { (x,y)->x+y ; (z,y)->z-y }
 	 */
 	Function* separate() const;
+
+
 
 	/**
 	 * \brief Create a new symbol (new argument of the function).
@@ -148,14 +152,6 @@ public:
 	void set_expr(const ExprNode&);
 
 	/**
-	 * \brief Decorate (and compile) the function.
-	 *
-	 * Declared "const" because the decoration is
-	 * not considered as part of the definition of the function.
-	 */
-	void decorate(const Decorator&) const;
-
-	/**
 	 * \brief Return the current number of nodes in the DAG.
 	 */
 	int nb_nodes() const;
@@ -203,8 +199,8 @@ public:
 	 *
 	 * Note that the type V is just passed in order to have static linkage.
 	 */
-	template<class V,typename T>
-	T& forward(const V& algo) const;
+	template<class V>
+	ExprLabel& forward(const V& algo) const;
 
 	/**
 	 * \brief Run a backward algorithm.
@@ -214,10 +210,8 @@ public:
 	 *
 	 * Note that the type V is just passed in order to have static linkage.
 	 */
-	template<class V,typename T>
+	template<class V>
 	void backward(const V& algo) const;
-
-	CompiledFunction cf; // "public" just for debug
 
 	/**
 	 * \brief True if all the symbols are scalar
@@ -226,10 +220,83 @@ public:
 	 */
 	bool all_symbols_scalar() const;
 
+	/**
+	 * \brief Calculate f(box)
+	 */
+	Domain& eval(const IntervalVector& box) const;
+
+	/**
+	 * \brief Calculate f(box).
+	 *
+	 * \pre f must be real-valued
+	 */
+	Interval eval_scalar(const IntervalVector& box) const;
+
+	/**
+	 * \brief Calculate f(box).
+	 *
+	 * \pre f must be vector-valued
+	 */
+	IntervalVector eval_vector(const IntervalVector& box) const;
+
+	/**
+	 * \brief Calculate f(x).
+	 *
+	 * \pre f must be matrix-valued
+	 */
+	IntervalMatrix eval_matrix(const IntervalVector& x) const;
+
+	/**
+	 * \brief Calculate the gradient of f
+	 * \pre f must be real-valued
+	 */
+	void gradient(const IntervalVector& x, IntervalVector& g) const;
+
+	/**
+	 * \brief Calculate the Jacobian matrix of f
+	 * \pre f must be vector-valued
+	 */
+	void jacobian(const IntervalVector& x, IntervalMatrix& g) const;
+
+	/**
+	 * \brief Calculate the Hansen matrix of f
+	 * \pre f must be vector-valued
+	 */
+	void hansen_matrix(const IntervalVector& x, IntervalMatrix& h) const;
+
+	/**
+	 * \brief Project f(x)=y onto x.
+	 */
+	void proj(const Domain& y, IntervalVector& x) const;
+
+	CompiledFunction cf; // "public" just for debug
+
+	/*
+	 * \brief The domains of the symbols.
+	 *
+	 * \note The structure is initialized by #ibex::BasicDecorator.
+	 */
+	mutable Array<Domain> symbol_domains;
+
+	/*
+	 * \brief The derivative label of the symbols.
+	 *
+	 * \note The structure is initialized by #ibex::GradDecorator.
+	 */
+	mutable Array<Domain> symbol_deriv;
+
 private:
 
 	friend class ExprNode;
 	void add_node(const ExprNode&);
+
+	/*
+	 * \brief Apply default Decoration (and compile) the function.
+	 *
+	 * Declared "const" because the decoration is
+	 * not considered as part of the definition of the function.
+	 */
+	void decorate() const;
 
 	const ExprNode* root;                       // the root node
 	std::vector<const ExprSymbol*> order2info;  // to retrieve symbol (node)s by appearing order.
@@ -237,6 +304,8 @@ private:
 	std::vector<const ExprNode*> exprnodes;     // all the nodes
 	SymbolMap<const ExprSymbol*> id2info;       // to retrieve a symbol node from its name.
 	int key_count;                              // count the number of symbols
+
+
 	bool __all_symbols_scalar;                  // true if all symbols are scalar
 
 public:
@@ -336,18 +405,30 @@ inline const ExprNode& Function::node(int i) const {
 	return *exprnodes[i];
 }
 
-template<class V,typename T>
-inline T& Function::forward(const V& algo) const {
-	return cf.forward<V,T>(algo);
+template<class V>
+inline ExprLabel& Function::forward(const V& algo) const {
+	return cf.forward<V>(algo);
 }
 
-template<class V,typename T>
+template<class V>
 inline void Function::backward(const V& algo) const {
-	cf.backward<V,T>(algo);
+	cf.backward<V>(algo);
 }
 
 inline bool Function::all_symbols_scalar() const {
 	return __all_symbols_scalar;
+}
+
+inline Interval Function::eval_scalar(const IntervalVector& box) const {
+	return eval(box).i();
+}
+
+inline IntervalVector Function::eval_vector(const IntervalVector& box) const {
+	return eval(box).v();
+}
+
+inline IntervalMatrix Function::eval_matrix(const IntervalVector& box) const {
+	return eval(box).m();
 }
 
 } // namespace ibex

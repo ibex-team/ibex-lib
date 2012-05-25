@@ -165,7 +165,7 @@ const ExprNode** ExprNode::subnodes() const {
 }
 
 ExprNode::ExprNode(Function& env, int height, int size, const Dim& dim) :
-  context(env), height(height), size(size), id(context.nb_nodes()), dim(dim), deco(NULL) {
+  context(env), height(height), size(size), id(context.nb_nodes()), dim(dim) {
   env.add_node(*this);
 }
 
