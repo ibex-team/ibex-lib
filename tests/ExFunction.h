@@ -18,7 +18,7 @@ namespace ibex {
 
 class ExFunction {
 public:
-	ExFunction(const IntervalVector& x, const Dim& dimY, const IntervalVector& xBwd) : x(x), yFwd(dimY), xBwd(xBwd) { }
+	ExFunction(const ExprSymbol& in, const ExprNode& out, const IntervalVector& x, const Dim& dimY, const IntervalVector& xBwd) : f(in,out), x(x), yFwd(dimY), xBwd(xBwd) { }
 
 	Function f;
 

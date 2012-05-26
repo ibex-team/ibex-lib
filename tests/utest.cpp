@@ -49,7 +49,7 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestFunction()));
     ts.add(auto_ptr<Test::Suite>(new TestEval()));
     ts.add(auto_ptr<Test::Suite>(new TestHC4Revise()));
-    ts.add(auto_ptr<Test::Suite>(new TestGradient()));
+   // ts.add(auto_ptr<Test::Suite>(new TestGradient()));
 
     ts.add(auto_ptr<Test::Suite>(new TestHC4()));
 

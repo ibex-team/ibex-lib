@@ -65,9 +65,19 @@ public:
 	Array(const std::vector<T*>&);
 
 	/**
+	 * \brief Create an array with a single reference.
+	 */
+	Array(T& x);
+
+	/**
 	 * \brief Create an array with 2 references.
 	 */
 	Array(T& x1, T& x2);
+
+	/**
+	 * \brief Create an array with 3 references.
+	 */
+	Array(T& x1, T& x2, T& x3);
 
 	/**
 	 * \brief Duplicate this instance.
@@ -168,9 +178,21 @@ Array<T>::Array(const std::vector<T*>& vec) : _nb(vec.size()), array(new T*[vec.
 }
 
 template<class T>
-Array<T>::Array(T& c1, T& c2) : _nb(2), array(new T*[2]) {
-	array[0] = &c1;
-	array[1] = &c2;
+Array<T>::Array(T& x) : _nb(1), array(new T*[1]) {
+	array[0] = &x;
+}
+
+template<class T>
+Array<T>::Array(T& x1, T& x2) : _nb(2), array(new T*[2]) {
+	array[0] = &x1;
+	array[1] = &x2;
+}
+
+template<class T>
+Array<T>::Array(T& x1, T& x2, T& x3) : _nb(3), array(new T*[3]) {
+	array[0] = &x1;
+	array[1] = &x2;
+	array[2] = &x3;
 }
 
 template<class T>

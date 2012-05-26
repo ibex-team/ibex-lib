@@ -142,7 +142,7 @@ Matrix IntervalMatrix::mid() const {
 void IntervalMatrix::resize(int nb_rows, int nb_cols) {
 	assert(nb_rows>0);
 	assert(nb_cols>0);
-	assert((M==NULL && nb_rows==0) || (nb_rows!=0 && M!=NULL));
+	assert((M==NULL && _nb_rows==0) || (_nb_rows!=0 && M!=NULL));
 
 	if (nb_rows==_nb_rows && nb_cols==_nb_cols) return;
 

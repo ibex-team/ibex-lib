@@ -48,8 +48,6 @@ protected:
 	virtual void visit(const ExprVector& v);
 	/* Visit a function application. */
 	virtual void visit(const ExprApply&);
-
-	mutable bool* visited;
 };
 
 /**

@@ -18,7 +18,7 @@ namespace ibex {
 
 void TestHC4::ponts30() {
 	Ponts30 p30;
-	Function* fs=p30.f.separate();
+	Function* fs=p30.f->separate();
 	IntervalVector box = p30.init_box;
 
 	NumConstraint* ctr[30];

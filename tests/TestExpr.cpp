@@ -34,38 +34,39 @@ static bool checkExpr(const ExprNode& node, const char* expr) {
 }
 
 void TestExpr::symbol() {
-	Function f;
-	const ExprSymbol& x=f.add_symbol("x");
-	TEST_ASSERT(&x.context==&f);
+	const ExprSymbol& x=ExprSymbol::new_("x");
+	Function f(x,x);
+	TEST_ASSERT(x.deco.f==&f);
 	TEST_ASSERT(x.dim==Dim(0,0,0));
 	TEST_ASSERT(x.height==0);
 	TEST_ASSERT(x.id==0);
 	TEST_ASSERT(x.key==0);
 	TEST_ASSERT(strcmp(x.name,"x")==0);
 	TEST_ASSERT(x.size==1);
-	TEST_ASSERT(x.deco.d==NULL);
+	TEST_ASSERT(x.deco.d->dim==x.dim);
 	TEST_ASSERT(!x.is_zero());
 	TEST_ASSERT(x.type()==Dim::SCALAR);
 	TEST_ASSERT(checkExpr(x,"x"));
 }
 
 void TestExpr::addxy01() {
-	Function f;
-	const ExprSymbol& x=f.add_symbol("x");
-	const ExprSymbol& y=f.add_symbol("y");
+	const ExprSymbol& x=ExprSymbol::new_("x");
+	const ExprSymbol& y=ExprSymbol::new_("y");
+	const ExprNode& e=x+y;
+	Function f(x,y,e);
+
 	TEST_ASSERT(x.id==0);
 	TEST_ASSERT(y.id==1);
 	TEST_ASSERT(x.key==0);
 	TEST_ASSERT(y.key==1);
 	TEST_ASSERT(strcmp(y.name,"y")==0);
 
-	const ExprNode& e=x+y;
-	TEST_ASSERT(&e.context==&f);
+	TEST_ASSERT(e.deco.f==&f);
 	TEST_ASSERT(e.dim==Dim(0,0,0));
 	TEST_ASSERT(e.height==1);
 	TEST_ASSERT(e.id==2);
 	TEST_ASSERT(e.size==3);
-	TEST_ASSERT(e.deco.d==NULL);
+	TEST_ASSERT(e.deco.d->dim==e.dim);
 	TEST_ASSERT(!e.is_zero());
 	TEST_ASSERT(e.type()==Dim::SCALAR);
 
@@ -73,29 +74,28 @@ void TestExpr::addxy01() {
 }
 
 void TestExpr::addxy02() {
-	Function f;
-	const ExprSymbol& x=f.add_symbol("x",Dim(0,0,3));
-	const ExprSymbol& y=f.add_symbol("y",Dim(0,0,3));
+	const ExprSymbol& x=ExprSymbol::new_("x",Dim(0,0,3));
+	const ExprSymbol& y=ExprSymbol::new_("y",Dim(0,0,3));
 	const ExprNode& e=x+y;
+
 	TEST_ASSERT(e.dim==Dim(0,0,3));
 	TEST_ASSERT(!e.is_zero());
 	TEST_ASSERT(e.type()==Dim::ROW_VECTOR);
 }
 
 void TestExpr::addxy03() {
-	Function f;
-	const ExprSymbol& x=f.add_symbol("x",Dim(0,3,0));
-	const ExprSymbol& y=f.add_symbol("y",Dim(0,3,0));
+	const ExprSymbol& x=ExprSymbol::new_("x",Dim(0,3,0));
+	const ExprSymbol& y=ExprSymbol::new_("y",Dim(0,3,0));
 	const ExprNode& e=x+y;
+
 	TEST_ASSERT(e.dim==Dim(0,3,0));
 	TEST_ASSERT(!e.is_zero());
 	TEST_ASSERT(e.type()==Dim::COL_VECTOR);
 }
 
 void TestExpr::addxy04() {
-	Function f;
-	const ExprSymbol& x=f.add_symbol("x",Dim(0,2,3));
-	const ExprSymbol& y=f.add_symbol("y",Dim(0,2,3));
+	const ExprSymbol& x=ExprSymbol::new_("x",Dim(0,2,3));
+	const ExprSymbol& y=ExprSymbol::new_("y",Dim(0,2,3));
 	const ExprNode& e=x+y;
 	TEST_ASSERT(e.dim==Dim(0,2,3));
 	TEST_ASSERT(!e.is_zero());
@@ -103,15 +103,15 @@ void TestExpr::addxy04() {
 }
 
 void TestExpr::addxx01() {
-	Function f;
-	const ExprSymbol& x=f.add_symbol("x");
+	const ExprSymbol& x=ExprSymbol::new_("x");
 	const ExprNode& e=x+x;
-	TEST_ASSERT(&e.context==&f);
+	Function f(x,e);
+	TEST_ASSERT(e.deco.f==&f);
 	TEST_ASSERT(e.dim==Dim(0,0,0));
 	TEST_ASSERT(e.height==1);
 	TEST_ASSERT(e.id==1);
 	TEST_ASSERT(e.size==2);
-	TEST_ASSERT(e.deco.d==NULL);
+	TEST_ASSERT(e.deco.d->dim==e.dim);
 	TEST_ASSERT(!e.is_zero());
 	TEST_ASSERT(e.type()==Dim::SCALAR);
 
@@ -120,9 +120,8 @@ void TestExpr::addxx01() {
 
 // scalar * scalar
 void TestExpr::mulxy01() {
-	Function f;
-	const ExprSymbol& x=f.add_symbol("x",Dim(0,0,0));
-	const ExprSymbol& y=f.add_symbol("y",Dim(0,0,0));
+	const ExprSymbol& x=ExprSymbol::new_("x",Dim(0,0,0));
+	const ExprSymbol& y=ExprSymbol::new_("y",Dim(0,0,0));
 	const ExprNode& e=x*y;
 	TEST_ASSERT(e.dim==Dim(0,0,0));
 	TEST_ASSERT(!e.is_zero());
@@ -132,9 +131,8 @@ void TestExpr::mulxy01() {
 
 // vector * vector
 void TestExpr::mulxy02() {
-	Function f;
-	const ExprSymbol& x=f.add_symbol("x",Dim(0,0,3));
-	const ExprSymbol& y=f.add_symbol("y",Dim(0,3,0));
+	const ExprSymbol& x=ExprSymbol::new_("x",Dim(0,0,3));
+	const ExprSymbol& y=ExprSymbol::new_("y",Dim(0,3,0));
 	const ExprNode& e=x*y;
 	TEST_ASSERT(e.dim==Dim(0,0,0));
 	TEST_ASSERT(!e.is_zero());
@@ -143,9 +141,8 @@ void TestExpr::mulxy02() {
 
 // matrix * matrix
 void TestExpr::mulxy03() {
-	Function f;
-	const ExprSymbol& x=f.add_symbol("x",Dim(0,2,3));
-	const ExprSymbol& y=f.add_symbol("y",Dim(0,3,4));
+	const ExprSymbol& x=ExprSymbol::new_("x",Dim(0,2,3));
+	const ExprSymbol& y=ExprSymbol::new_("y",Dim(0,3,4));
 	const ExprNode& e=x*y;
 	TEST_ASSERT(e.dim==Dim(0,2,4));
 	TEST_ASSERT(!e.is_zero());
@@ -154,9 +151,8 @@ void TestExpr::mulxy03() {
 
 // matrix * vector
 void TestExpr::mulxy04() {
-	Function f;
-	const ExprSymbol& x=f.add_symbol("x",Dim(0,2,3));
-	const ExprSymbol& y=f.add_symbol("y",Dim(0,3,0));
+	const ExprSymbol& x=ExprSymbol::new_("x",Dim(0,2,3));
+	const ExprSymbol& y=ExprSymbol::new_("y",Dim(0,3,0));
 	const ExprNode& e=x*y;
 	TEST_ASSERT(e.dim==Dim(0,2,0));
 	TEST_ASSERT(!e.is_zero());
@@ -165,9 +161,8 @@ void TestExpr::mulxy04() {
 
 // scalar * matrix
 void TestExpr::mulxy05() {
-	Function f;
-	const ExprSymbol& x=f.add_symbol("x",Dim(0,0,0));
-	const ExprSymbol& y=f.add_symbol("y",Dim(0,2,3));
+	const ExprSymbol& x=ExprSymbol::new_("x",Dim(0,0,0));
+	const ExprSymbol& y=ExprSymbol::new_("y",Dim(0,2,3));
 	const ExprNode& e=x*y;
 	TEST_ASSERT(e.dim==Dim(0,2,3));
 	TEST_ASSERT(!e.is_zero());
@@ -176,9 +171,8 @@ void TestExpr::mulxy05() {
 
 // scalar * vector
 void TestExpr::mulxy06() {
-	Function f;
-	const ExprSymbol& x=f.add_symbol("x",Dim(0,0,0));
-	const ExprSymbol& y=f.add_symbol("y",Dim(0,0,3));
+	const ExprSymbol& x=ExprSymbol::new_("x",Dim(0,0,0));
+	const ExprSymbol& y=ExprSymbol::new_("y",Dim(0,0,3));
 	const ExprNode& e=x*y;
 	TEST_ASSERT(e.dim==Dim(0,0,3));
 	TEST_ASSERT(!e.is_zero());
@@ -189,9 +183,8 @@ void TestExpr::mulxy06() {
 
 // 1-rowed matrix * column vector
 void TestExpr::mulxy07() {
-	Function f;
-	const ExprSymbol& x=f.add_symbol("x",Dim(0,1,3));
-	const ExprSymbol& y=f.add_symbol("y",Dim(0,3,0));
+	const ExprSymbol& x=ExprSymbol::new_("x",Dim(0,1,3));
+	const ExprSymbol& y=ExprSymbol::new_("y",Dim(0,3,0));
 	const ExprNode& e=x*y;
 	TEST_ASSERT(e.dim==Dim(0,1,0));
 	TEST_ASSERT(!e.is_zero());
@@ -200,9 +193,8 @@ void TestExpr::mulxy07() {
 
 // row vector * 1-columned matrix
 void TestExpr::mulxy08() {
-	Function f;
-	const ExprSymbol& x=f.add_symbol("x",Dim(0,0,3));
-	const ExprSymbol& y=f.add_symbol("y",Dim(0,3,1));
+	const ExprSymbol& x=ExprSymbol::new_("x",Dim(0,0,3));
+	const ExprSymbol& y=ExprSymbol::new_("y",Dim(0,3,1));
 	const ExprNode& e=x*y;
 	TEST_ASSERT(e.dim==Dim(0,0,1));
 	TEST_ASSERT(!e.is_zero());
@@ -212,13 +204,14 @@ void TestExpr::mulxy08() {
 
 // (x-sqr(x+y))*sqr(x+y) + (x-sqr(x+y))
 void TestExpr::dag01() {
-	Function f;
-	const ExprSymbol& x=f.add_symbol("x",Dim(0,0,0));
-	const ExprSymbol& y=f.add_symbol("y",Dim(0,0,0));
+
+	const ExprSymbol& x=ExprSymbol::new_("x",Dim(0,0,0));
+	const ExprSymbol& y=ExprSymbol::new_("y",Dim(0,0,0));
 	const ExprNode& e1=pow(x+y,2);
 	const ExprNode& e2=x-e1;
 	const ExprNode& e3=e2*e1;
 	const ExprNode& e4=e3+e2;
+	Function f(x,y,e4);
 
 	TEST_ASSERT(e1.height==2);
 	TEST_ASSERT(e2.height==3);
@@ -242,8 +235,7 @@ void TestExpr::dag01() {
 }
 
 void TestExpr::unaryOp() {
-	Function f;
-	const ExprSymbol& x=f.add_symbol("x",Dim(0,0,0));
+	const ExprSymbol& x=ExprSymbol::new_("x",Dim(0,0,0));
 	TEST_ASSERT(checkExpr(-x,"(-x)"));
 	TEST_ASSERT(checkExpr(sign(x),"sign(x)"));
 	TEST_ASSERT(checkExpr(abs(x),"abs(x)"));
@@ -267,9 +259,8 @@ void TestExpr::unaryOp() {
 }
 
 void TestExpr::binaryOp() {
-	Function f;
-	const ExprSymbol& x=f.add_symbol("x",Dim(0,0,0));
-	const ExprSymbol& y=f.add_symbol("y",Dim(0,0,0));
+	const ExprSymbol& x=ExprSymbol::new_("x",Dim(0,0,0));
+	const ExprSymbol& y=ExprSymbol::new_("y",Dim(0,0,0));
 	TEST_ASSERT(checkExpr(x+y,"(x+y)"));
 	TEST_ASSERT(checkExpr(x-y,"(x-y)"));
 	TEST_ASSERT(checkExpr(x*y,"(x*y)"));
@@ -280,26 +271,25 @@ void TestExpr::binaryOp() {
 }
 
 void TestExpr::cst01() {
-	Function f;
-	const ExprConstant& c=ExprConstant::new_scalar(f,5.0);
-	TEST_ASSERT(&c.context==&f);
+
+	const ExprConstant& c=ExprConstant::new_scalar(5.0);
+	TEST_ASSERT(c.deco.f==NULL);
 	TEST_ASSERT(c.dim==Dim(0,0,0));
 	TEST_ASSERT(c.height==0);
-	TEST_ASSERT(c.id==0);
+	TEST_ASSERT(c.id==-1);
 	TEST_ASSERT(c.size==1);
 	TEST_ASSERT(c.deco.d==NULL);
 	TEST_ASSERT(!c.is_zero());
 	TEST_ASSERT(c.type()==Dim::SCALAR);
 	TEST_ASSERT(c.get_value()==5.0);
 
-	const ExprConstant& z=ExprConstant::new_scalar(f,0);
+	const ExprConstant& z=ExprConstant::new_scalar(0);
 	TEST_ASSERT(z.is_zero());
 }
 
 void TestExpr::cst02() {
-	Function f;
 	IntervalVector v(v1());
-	const ExprConstant& c1=ExprConstant::new_vector(f,v,false);
+	const ExprConstant& c1=ExprConstant::new_vector(v,false);
 
 	TEST_ASSERT(c1.dim==Dim(0,3,0));
 	TEST_ASSERT(!c1.is_zero());
@@ -308,9 +298,8 @@ void TestExpr::cst02() {
 }
 
 void TestExpr::cst03() {
-	Function f;
 	IntervalMatrix M(M1());
-	const ExprConstant& c2=ExprConstant::new_matrix(f,M);
+	const ExprConstant& c2=ExprConstant::new_matrix(M);
 
 	TEST_ASSERT(c2.dim==Dim(0,2,3));
 	TEST_ASSERT(!c2.is_zero());
@@ -320,9 +309,8 @@ void TestExpr::cst03() {
 }
 
 void TestExpr::cst04() {
-	Function f;
 	IntervalVector v(v1());
-	const ExprConstant& c1=ExprConstant::new_vector(f,v,true);
+	const ExprConstant& c1=ExprConstant::new_vector(v,true);
 
 	TEST_ASSERT(c1.dim==Dim(0,0,3));
 	TEST_ASSERT(!c1.is_zero());
@@ -331,7 +319,6 @@ void TestExpr::cst04() {
 }
 
 void TestExpr::cst05() {
-	Function f;
 	IntervalVector v(3);
 	IntervalMatrix M(2,3);
 
@@ -340,18 +327,19 @@ void TestExpr::cst05() {
 		for (int i=0; i<2; i++) M[i][j]=0;
 	}
 
-	const ExprConstant& z1=ExprConstant::new_vector(f,v,false);
-	const ExprConstant& z2=ExprConstant::new_matrix(f,M);
+	const ExprConstant& z1=ExprConstant::new_vector(v,false);
+	const ExprConstant& z2=ExprConstant::new_matrix(M);
 	TEST_ASSERT(z1.is_zero());
 	TEST_ASSERT(z2.is_zero());
 }
 
 void TestExpr::vector01() {
-	Function f;
-	const ExprSymbol& x=f.add_symbol("x",Dim(0,0,3));
-	const ExprSymbol& y=f.add_symbol("y",Dim(0,0,3));
+
+	const ExprSymbol& x=ExprSymbol::new_("x",Dim(0,0,3));
+	const ExprSymbol& y=ExprSymbol::new_("y",Dim(0,0,3));
 	const ExprNode& e1=x+y;
 	const ExprNode& e2=x+e1;
+	Function f(x,y,e2);
 
 	const ExprNode** c=new const ExprNode*[4];
 	c[0]=&x;
@@ -360,11 +348,11 @@ void TestExpr::vector01() {
 	c[3]=&e2;
 
 	const ExprVector& v=ExprVector::new_(c,4,false);
-	TEST_ASSERT(&v.context==&f);
+	TEST_ASSERT(v.deco.f==NULL);
 	TEST_ASSERT(v.deco.d==NULL);
 	TEST_ASSERT(v.dim==Dim(0,4,3));
 	TEST_ASSERT(v.height==3);
-	TEST_ASSERT(v.id==4);
+	TEST_ASSERT(v.id==-1);
 	TEST_ASSERT(!v.row_vector());
 	TEST_ASSERT(v.nb_args==4);
 	TEST_ASSERT(v.length()==4);
@@ -374,9 +362,8 @@ void TestExpr::vector01() {
 }
 
 void TestExpr::vector02() {
-	Function f;
-	const ExprSymbol& x=f.add_symbol("x",Dim(0,3,0));
-	const ExprSymbol& y=f.add_symbol("y",Dim(0,3,0));
+	const ExprSymbol& x=ExprSymbol::new_("x",Dim(0,3,0));
+	const ExprSymbol& y=ExprSymbol::new_("y",Dim(0,3,0));
 	const ExprNode& e1=x+y;
 	const ExprNode& e2=x+e1;
 
@@ -394,11 +381,12 @@ void TestExpr::vector02() {
 }
 
 void TestExpr::index01() {
-	Function f;
-	const ExprSymbol& x=f.add_symbol("x",Dim(2,3,4));
+
+	const ExprSymbol& x=ExprSymbol::new_("x",Dim(2,3,4));
 	const ExprIndex& e=x[1];
-	TEST_ASSERT(&e.context==&f);
-	TEST_ASSERT(e.deco.d==NULL);
+	Function f(x,e);
+	TEST_ASSERT(e.deco.f==&f);
+	TEST_ASSERT(e.deco.d->dim==e.dim);
 	TEST_ASSERT(e.dim==Dim(0,3,4));
 	TEST_ASSERT(e.height==1);
 	TEST_ASSERT(e.id==1);
@@ -409,11 +397,13 @@ void TestExpr::index01() {
 }
 
 void TestExpr::index02() {
-	Function f;
-	const ExprSymbol& x=f.add_symbol("x",Dim(2,3,4));
+
+	const ExprSymbol& x=ExprSymbol::new_("x",Dim(2,3,4));
 	const ExprIndex& e=x[1][1];
-	TEST_ASSERT(&e.context==&f);
-	TEST_ASSERT(e.deco.d==NULL);
+	Function f(x,e);
+
+	TEST_ASSERT(e.deco.f==&f);
+	TEST_ASSERT(e.deco.d->dim==e.dim);
 	TEST_ASSERT(e.dim==Dim(0,0,4));
 	TEST_ASSERT(e.height==2);
 	TEST_ASSERT(e.id==2);
@@ -424,11 +414,12 @@ void TestExpr::index02() {
 }
 
 void TestExpr::index03() {
-	Function f;
-	const ExprSymbol& x=f.add_symbol("x",Dim(2,3,4));
+	const ExprSymbol& x=ExprSymbol::new_("x",Dim(2,3,4));
 	const ExprIndex& e=x[1][1][1];
-	TEST_ASSERT(&e.context==&f);
-	TEST_ASSERT(e.deco.d==NULL);
+	Function f(x,e);
+
+	TEST_ASSERT(e.deco.f==&f);
+	TEST_ASSERT(e.deco.d->dim==e.dim);
 	TEST_ASSERT(e.height==3);
 	TEST_ASSERT(e.id==3);
 	TEST_ASSERT(e.size==4);
@@ -438,29 +429,28 @@ void TestExpr::index03() {
 }
 
 void TestExpr::apply01() {
-	Function f("func");
-	//const ExprSymbol& x=
-	f.add_symbol("x");
-	const ExprSymbol& y=f.add_symbol("y",Dim(0,3,0));
-	//const ExprSymbol& z=
-	f.add_symbol("z",Dim(0,3,4));
+	const ExprSymbol& x=ExprSymbol::new_("x");
+	const ExprSymbol& y=ExprSymbol::new_("y",Dim(0,3,0));
+	const ExprSymbol& z=ExprSymbol::new_("z",Dim(0,3,4));
+	Function f(x,y,z,y,"func");
 
-	f.set_expr(y);
 	TEST_ASSERT(f.nb_symbols()==3);
 
-	Function f2;
-	const ExprSymbol& x2=f2.add_symbol("x2");
-	const ExprSymbol& y2=f2.add_symbol("y2",Dim(0,4,0));
-	const ExprSymbol& A2=f2.add_symbol("A2",Dim(0,3,4));
+	const ExprSymbol& x2=ExprSymbol::new_("x2");
+	const ExprSymbol& y2=ExprSymbol::new_("y2",Dim(0,4,0));
+	const ExprSymbol& A2=ExprSymbol::new_("A2",Dim(0,3,4));
 
 	const ExprNode* args[3] = {&x2, &(A2*y2), &A2};
 
 	const ExprApply& e=ExprApply::new_(f,args);
+	Function f2(x2,y2,A2,e);
+
+	TEST_ASSERT(f2.nb_symbols()==3);
 	TEST_ASSERT(e.nb_args==3);
 	TEST_ASSERT(&e.arg(0)==&x2);
 	TEST_ASSERT(&e.arg(2)==&A2);
-	TEST_ASSERT(&e.context==&f2);
-	TEST_ASSERT(e.deco.d==NULL);
+	TEST_ASSERT(e.deco.f==&f2);
+	TEST_ASSERT(e.deco.d->dim==e.dim);
 	TEST_ASSERT(e.height==2);
 	TEST_ASSERT(e.id==4);
 	TEST_ASSERT(e.size==5);
@@ -470,20 +460,19 @@ void TestExpr::apply01() {
 
 void TestExpr::apply03() {
 
-	Function f1("f1");
-	const ExprSymbol& x1 = f1.add_symbol("x1");
-	const ExprSymbol& y1 = f1.add_symbol("y1");
 
-	Function f2("f2");
-	const ExprSymbol& x2 = f2.add_symbol("x2");
-	const ExprSymbol& y2 = f2.add_symbol("y2");
+	const ExprSymbol& x1 = ExprSymbol::new_("x1");
+	const ExprSymbol& y1 = ExprSymbol::new_("y1");
+	Function f1(x1,y1,x1+y1,"f1");
 
-	Function f3("f3");
-	const ExprSymbol& x3 = f3.add_symbol("x3");
+	const ExprSymbol& x2 = ExprSymbol::new_("x2");
+	const ExprSymbol& y2 = ExprSymbol::new_("y2");
+	Function f2(x2,y2,x2*y2,"f2");
 
-	f1.set_expr(x1+y1);
-	f2.set_expr(x2*y2);
-	f3.set_expr(f1(x3,x3)-f2(x3,x3));
+
+	const ExprSymbol& x3 = ExprSymbol::new_("x3");
+	Function f3(x3,f1(x3,x3)-f2(x3,x3),"f3");
+
 	const ExprNode& e = f3.expr();
 
 	TEST_ASSERT(e.height==2);
@@ -494,10 +483,9 @@ void TestExpr::apply03() {
 
 // same expr as in dag01
 void TestExpr::subnodes01() {
-	Function f;
-	const ExprSymbol& x=f.add_symbol("x",Dim(0,0,0));
-	const ExprSymbol& __z__=f.add_symbol("z",Dim(0,0,0));
-	const ExprSymbol& y=f.add_symbol("y",Dim(0,0,0));
+	const ExprSymbol& x=ExprSymbol::new_("x",Dim(0,0,0));
+	const ExprSymbol& __z__=ExprSymbol::new_("z",Dim(0,0,0));
+	const ExprSymbol& y=ExprSymbol::new_("y",Dim(0,0,0));
 
 	const ExprNode& e1=pow(x+y,2);
 	const ExprNode& __e1__=e1*__z__;
@@ -506,7 +494,8 @@ void TestExpr::subnodes01() {
 	const ExprNode& __e2__=e3-__e1__;
 	const ExprNode& e4=e3+e2;
 	const ExprNode& e5=e4+__e2__;
-	f.set_expr(e5);
+
+	Function f(x,__z__,y,e5);
 
 	const ExprNode** nodes=e4.subnodes();
 

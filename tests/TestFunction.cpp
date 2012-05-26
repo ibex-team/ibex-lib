@@ -23,38 +23,28 @@ static bool sameExpr(const ExprNode& node, const char* expr) {
 }
 
 void TestFunction::add_symbol() {
-	Function f;
-	TEST_ASSERT(f.nb_nodes()==0);
-	TEST_ASSERT(f.nb_symbols()==0);
+	const ExprSymbol& x=ExprSymbol::new_("x");
+	const ExprSymbol& y=ExprSymbol::new_("y");
 
-	const ExprSymbol& x=f.add_symbol("x");
-	TEST_ASSERT(f.nb_nodes()==1);
-	TEST_ASSERT(f.nb_symbols()==1);
-	TEST_ASSERT(strcmp(f.symbol_name(0),"x")==0);
-	TEST_ASSERT(!f.used("x"));
-	TEST_ASSERT(!f.used(0));
+	Function f(x,y,x);
 
-	//TEST_THROWS_ANYTHING(f.add_symbol("x"));
-
-	const ExprSymbol& y=f.add_symbol("y");
 	TEST_ASSERT(f.nb_nodes()==2);
-	TEST_ASSERT(&f.node(0)==&x);
-	TEST_ASSERT(&f.node(1)==&y);
 	TEST_ASSERT(f.nb_symbols()==2);
 	TEST_ASSERT(strcmp(f.symbol_name(0),"x")==0);
 	TEST_ASSERT(strcmp(f.symbol_name(1),"y")==0);
-	TEST_ASSERT(!f.used("x"));
-	TEST_ASSERT(!f.used(0));
+	TEST_ASSERT(f.used("x"));
+	TEST_ASSERT(f.used(0));
 	TEST_ASSERT(!f.used("y"));
 	TEST_ASSERT(!f.used(1));
+	TEST_ASSERT(&f.node(0)==&x);
+	TEST_ASSERT(&f.node(1)==&y);
 }
 
 void TestFunction::copy() {
-	Function f;
-	const ExprSymbol& x=f.add_symbol("x",Dim(0,3,0));
-	const ExprSymbol& A=f.add_symbol("A",Dim(0,2,3));
+	const ExprSymbol& x=ExprSymbol::new_("x",Dim(0,3,0));
+	const ExprSymbol& A=ExprSymbol::new_("A",Dim(0,2,3));
 
-	f.set_expr(A*x);
+	Function f(x,A,A*x);
 
 	Function f2(f);
 	TEST_ASSERT(f2.nb_nodes()==3);
@@ -77,12 +67,9 @@ void TestFunction::copy() {
 }
 
 void TestFunction::separate() {
-
-	Function f;
-
-	const ExprSymbol& x=f.add_symbol("x");
-	const ExprSymbol& y=f.add_symbol("y");
-	const ExprSymbol& z=f.add_symbol("z");
+	const ExprSymbol& x=ExprSymbol::new_("x");
+	const ExprSymbol& y=ExprSymbol::new_("y");
+	const ExprSymbol& z=ExprSymbol::new_("z");
 
 	const ExprNode& e1=x+y-z;
 	const ExprNode& e2=x*z;
@@ -91,7 +78,7 @@ void TestFunction::separate() {
 
 	const ExprVector& e=ExprVector::new_(v, 3, false);
 
-	f.set_expr(e);
+	Function f(x,y,z,e);
 
 	Function* fcomp=f.separate();
 
@@ -108,11 +95,9 @@ void TestFunction::separate() {
 }
 
 void TestFunction::used() {
-	Function f;
-
-	const ExprSymbol& x=f.add_symbol("x");
-	const ExprSymbol& y=f.add_symbol("y");
-	const ExprSymbol& z=f.add_symbol("z");
+	const ExprSymbol& x=ExprSymbol::new_("x");
+	const ExprSymbol& y=ExprSymbol::new_("y");
+	const ExprSymbol& z=ExprSymbol::new_("z");
 
 	const ExprNode& e1=x+y-z;
 	const ExprNode& e2=x*z;
@@ -121,7 +106,7 @@ void TestFunction::used() {
 
 	const ExprVector& e=ExprVector::new_(v, 3, false);
 
-	f.set_expr(e);
+	Function f(x,y,z,e);
 
 	Function* fcomp=f.separate();
 

@@ -17,9 +17,7 @@ void BasicDecorator::decorate(const Function& f) const {
 
 	if (f.expr().deco.d) return; // already decorated
 
-	int n=f.nb_nodes();
-	visited = new bool[n];
-	for (int i=0; i<n; i++) visited[i]=false;
+	f.expr().reset_visited();
 
 	// we cannot just call visit(f.expr()) because
 	// some symbols may not appear in the expression
@@ -29,12 +27,11 @@ void BasicDecorator::decorate(const Function& f) const {
 		((BasicDecorator*) this)->visit(f.symbol(i));
 
 	((BasicDecorator*) this)->visit(f.expr());
-	delete[] visited;
 }
 
 void BasicDecorator::visit(const ExprNode& e) {
-	if (!visited[e.id]) {
-		visited[e.id]=true;
+	if (!e.deco.visited) {
+		e.deco.visited=true;
 		e.acceptVisitor(*this);
 	}
 }

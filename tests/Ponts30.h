@@ -20,7 +20,7 @@ class Ponts30 {
 public:
 	Ponts30();
 
-	Function f;
+	Function* f;
 	IntervalVector init_box;
 	// hc4r_box[i] is the box obtained after applying
 	// HC4Revise once on each ctr (in increasing order)

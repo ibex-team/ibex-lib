@@ -49,22 +49,89 @@ const char* index_symbol_2_string(const char* symbol_name, int index1, int index
 	return buff;
 }
 
-}
+/*
+class Unvectorize {
 
-/**
- * \ingroup level1
+	vector<const ExprSymbol*> dest_symbols;
+	Array<const ExprNode> peers;
+
+	Unvectorize(Array<const ExprSymbol>& x) : peers(x.size()) {
+		for (int i=0; i<x.size(); i++)
+			visit(x[i]);
+	}
+protected:
+	void visit(const ExprSymbol& x) {
+
+		switch (x.type()) {
+		case Dim::SCALAR:
+			dest_symbols.push_back(&ExprSymbol::new_(x.name,x.dim));
+			peers.set_ref(x.id,*dest_symbols.back());
+			break;
+		case Dim::ROW_VECTOR:
+		case Dim::COL_VECTOR:
+			// Example. Let x be a vector of 2 components.
+			// The following node "v" is [x[0], x[1]]. It the src expression is:
+			//           x->x[0]+x[1].
+			// We will get in this case
+			//          (x[0],x[1])->x[0]+x[1]
+			// So v does not appear in the dest expression. But if the original expression is:
+			//           x -> 0.1*x (scalar product)
+			// we will get
+			//          (x[0],x[1])->0.1*[x[0],x[1]]
+			// and the right side of the multiplication points to v.
+			const ExprNode* v[x.dim.vec_size()];
+			for (int i=0; i<x.dim.vec_size(); i++) {
+				dest_symbols.push_back(& ExprSymbol::new_(index_symbol_2_string(x.name,-1,-1,i)));
+				v[i]=dest_symbols.back();
+			}
+			peers.set_ref(x.id,ExprVector::new_(v,x.dim.vec_size(),x.dim.type()==Dim::ROW_VECTOR));
+			break;
+		case Dim::MATRIX:
+			const ExprNode* m[x.dim.dim2];
+			for (int i=0; i<x.dim.dim2; i++) {
+				const ExprNode* v[x.dim.dim3];
+				for (int j=0; j<x.dim.dim3; j++) {
+					dest_symbols.push_back(& ExprSymbol::new_(index_symbol_2_string(x.name,-1,i,j)));
+					v[j]=dest_symbols.back();
+				}
+				m[i]= & ExprVector::new_(v,x.dim.dim3,true);
+			}
+			peers.set_ref(x.id,ExprVector::new_(m,x.dim.dim2,false));
+			break;
+		case Dim::MATRIX_ARRAY:
+			const ExprNode* ma[x.dim.dim1];
+			for (int i=0; i<x.dim.dim1; i++) {
+				const ExprNode* m[x.dim.dim2];
+				for (int j=0; j<x.dim.dim2; j++) {
+					const ExprNode* v[x.dim.dim3];
+					for (int k=0; k<x.dim.dim3; k++) {
+						dest_symbols.push_back(& ExprSymbol::new_(index_symbol_2_string(x.name,i,j,k)));
+						v[k]=dest_symbols.back();
+					}
+					m[j]= & ExprVector::new_(v,x.dim.dim3,true);
+				}
+				ma[i]= & ExprVector::new_(m,x.dim.dim2,false);
+			}
+			peers.set_ref(x.id, ExprVector::new_(ma,x.dim.dim1,true)); // notice: true or false does not matter here
+			break;
+		}
+	}
+};
+*/
+
+/*
  *
  * \brief Copy of a (sub)expression.
  *
  */
 class ExprCopy : public FunctionVisitor {
+protected:
 	const ExprNode** peers;
-
-
+	vector<const ExprSymbol*> dest_symbols;
+	int root_id;
 	bool unvectorize;
 
 public:
-	Function& f2;
 
 	/*
 	 * \brief Set the expression of \a dest to x->f(x) where f(x) is the expression \a e.
@@ -73,9 +140,9 @@ public:
 	 * one \a e belongs to) is replaced by scalar symbols "x[0]",...,"x[n]"
 	 * in the destination function \a dest. Same for matrices & matrix arrays
 	 */
-	ExprCopy(const ExprNode& e, Function& dest, bool unvectorize) : unvectorize(unvectorize), f2(dest) {
+	ExprCopy(const ExprNode& e, Function& dest, bool unvectorize) : unvectorize(unvectorize) {
 
-		const Function& src=e.context;
+		const Function& src=*(e.deco.f);
 		int n=src.nb_nodes();
 		peers = new const ExprNode*[n]; // n is the max number of sub_nodes of "src"
 
@@ -91,8 +158,18 @@ public:
 
 		visit(e);
 
-		f2.set_expr(*peers[e.id]);
+		root_id=e.id;
+	}
 
+	Array<const ExprSymbol> get_x() {
+		return dest_symbols;
+	}
+
+	const ExprNode& get_y() {
+		return *peers[root_id];
+	}
+
+	~ExprCopy() {
 		delete[] peers;
 	}
 
@@ -116,11 +193,13 @@ protected:
 	void visit(const ExprSymbol& x) {
 
 		if (!unvectorize || x.dim.is_scalar()) { // just duplicate the symbol
-			peers[x.id]=&f2.add_symbol(x.name,x.dim);
+			dest_symbols.push_back(&ExprSymbol::new_(x.name,x.dim));
+			peers[x.id]=dest_symbols.back();
 			return;
 		}
 
 		switch (x.type()) {
+		case Dim::SCALAR: // cannot happen
 		case Dim::ROW_VECTOR:
 		case Dim::COL_VECTOR:
 			// Example. Let x be a vector of 2 components.
@@ -134,16 +213,20 @@ protected:
 			//          (x[0],x[1])->0.1*[x[0],x[1]]
 			// and the right side of the multiplication points to v.
 			const ExprNode* v[x.dim.vec_size()];
-			for (int i=0; i<x.dim.vec_size(); i++)
-				v[i]= & f2.add_symbol(index_symbol_2_string(x.name,-1,-1,i));
+			for (int i=0; i<x.dim.vec_size(); i++) {
+				dest_symbols.push_back(& ExprSymbol::new_(index_symbol_2_string(x.name,-1,-1,i)));
+				v[i]=dest_symbols.back();
+			}
 			peers[x.id]=&ExprVector::new_(v,x.dim.vec_size(),x.dim.type()==Dim::ROW_VECTOR);
 			break;
 		case Dim::MATRIX:
 			const ExprNode* m[x.dim.dim2];
 			for (int i=0; i<x.dim.dim2; i++) {
 				const ExprNode* v[x.dim.dim3];
-				for (int j=0; j<x.dim.dim3; j++)
-					v[j]= & f2.add_symbol(index_symbol_2_string(x.name,-1,i,j));
+				for (int j=0; j<x.dim.dim3; j++) {
+					dest_symbols.push_back(& ExprSymbol::new_(index_symbol_2_string(x.name,-1,i,j)));
+					v[j]=dest_symbols.back();
+				}
 				m[i]= & ExprVector::new_(v,x.dim.dim3,true);
 			}
 			peers[x.id]=& ExprVector::new_(m,x.dim.dim2,false);
@@ -154,23 +237,25 @@ protected:
 				const ExprNode* m[x.dim.dim2];
 				for (int j=0; j<x.dim.dim2; j++) {
 					const ExprNode* v[x.dim.dim3];
-					for (int k=0; k<x.dim.dim3; k++)
-						v[k] = & f2.add_symbol(index_symbol_2_string(x.name,i,j,k));
+					for (int k=0; k<x.dim.dim3; k++) {
+						dest_symbols.push_back(& ExprSymbol::new_(index_symbol_2_string(x.name,i,j,k)));
+						v[k]=dest_symbols.back();
+					}
 					m[j]= & ExprVector::new_(v,x.dim.dim3,true);
 				}
 				ma[i]= & ExprVector::new_(m,x.dim.dim2,false);
 			}
 			peers[x.id]= & ExprVector::new_(ma,x.dim.dim1,true); // notice: true or false does not matter here
-			break;
+			//break;
 		}
 	}
 
 	void visit(const ExprConstant& c) {
 		switch(c.type()) {
-		case Dim::SCALAR:     peers[c.id]=&ExprConstant::new_scalar(f2, c.get_value()); break;
-		case Dim::ROW_VECTOR: peers[c.id]=&ExprConstant::new_vector(f2, c.get_vector_value(),true); break;
-		case Dim::COL_VECTOR: peers[c.id]=&ExprConstant::new_vector(f2, c.get_vector_value(),false); break;
-		case Dim::MATRIX:     peers[c.id]=&ExprConstant::new_matrix(f2, c.get_matrix_value()); break;
+		case Dim::SCALAR:     peers[c.id]=&ExprConstant::new_scalar(c.get_value()); break;
+		case Dim::ROW_VECTOR: peers[c.id]=&ExprConstant::new_vector(c.get_vector_value(),true); break;
+		case Dim::COL_VECTOR: peers[c.id]=&ExprConstant::new_vector(c.get_vector_value(),false); break;
+		case Dim::MATRIX:     peers[c.id]=&ExprConstant::new_matrix(c.get_matrix_value()); break;
 		case Dim::MATRIX_ARRAY: assert(false); break;
 		}
 	}
@@ -239,4 +324,5 @@ protected:
 	void visit(const ExprAtanh& e) { visit(e.expr); peers[e.id] = & atanh(*peers[e.expr.id]); }
 };
 
-} // end namespace
+} // end anonymous namespace
+} // end ibex namespace

@@ -35,72 +35,67 @@ void init_FUNC() {
 
 	// x -> x
 	{
-		FUNC[i] = new ExFunction(v1,Dim(0,0,0),IntervalVector(1,0));
-		const ExprSymbol& x=FUNC[i]->f.add_symbol("x");
-		FUNC[i]->f.set_expr(x);
+
+		const ExprSymbol& x=ExprSymbol::new_();
+		FUNC[i] = new ExFunction(x,x,v1,Dim(0,0,0),IntervalVector(1,0));
+
 		FUNC[i]->yFwd.i()=x1;
 		i++;
 	}
 
 	// v -> v
 	{
-		FUNC[i] = new ExFunction(v3,Dim(0,3,0),zero3);
-		const ExprSymbol& v=FUNC[i]->f.add_symbol("v",Dim(0,3,0));
-		FUNC[i]->f.set_expr(v);
+		const ExprSymbol& v=ExprSymbol::new_(Dim(0,3,0));
+		FUNC[i] = new ExFunction(v,v,v3,Dim(0,3,0),zero3);
 		FUNC[i]->yFwd.v()=v3;
 		i++;
 	}
 
 	// vt -> vt
 	{
-		FUNC[i] = new ExFunction(v3,Dim(0,0,3),zero3);
-		const ExprSymbol& vt=FUNC[i]->f.add_symbol("vt",Dim(0,0,3));
-		FUNC[i]->f.set_expr(vt);
+		const ExprSymbol& vt=ExprSymbol::new_(Dim(0,0,3));
+		FUNC[i] = new ExFunction(vt,vt,v3,Dim(0,0,3),zero3);
 		FUNC[i]->yFwd.v()=v3;
 		i++;
 	}
 
 	// M -> M
+
 	{
-		FUNC[i] = new ExFunction(v23,Dim(0,2,3),zero6);
-		const ExprSymbol& M=FUNC[i]->f.add_symbol("M",Dim(0,2,3));
-		FUNC[i]->f.set_expr(M);
+		const ExprSymbol& M=ExprSymbol::new_(Dim(0,2,3));
+		FUNC[i] = new ExFunction(M,M,v23,Dim(0,2,3),zero6);
 		FUNC[i]->yFwd.m()=m23;
 		i++;
 	}
 
 	// x -> x+1
 	{
-		FUNC[i] = new ExFunction(v1,Dim(0,0,0),IntervalVector(1,-1));
-		const ExprSymbol& x=FUNC[i]->f.add_symbol("x");
-		FUNC[i]->f.set_expr(x+Interval(1,1));
+		const ExprSymbol& x=ExprSymbol::new_();
+		FUNC[i] = new ExFunction(x,x+Interval(1,1),v1,Dim(0,0,0),IntervalVector(1,-1));
 		FUNC[i]->yFwd.i()=x1+1.0;
 		i++;
 	}
 
 	// v -> v+1
 	{
-		FUNC[i] = new ExFunction(v3,Dim(0,3,0),-one3);
-		const ExprSymbol& v=FUNC[i]->f.add_symbol("v",Dim(0,3,0));
-		FUNC[i]->f.set_expr(v+one3);
+		const ExprSymbol& v=ExprSymbol::new_(Dim(0,3,0));
+		FUNC[i] = new ExFunction(v,v+one3,v3,Dim(0,3,0),-one3);
 		FUNC[i]->yFwd.v()=v3+one3;
 		i++;
 	}
 
 	// vt -> vt+1
 	{
-		FUNC[i] = new ExFunction(v3,Dim(0,0,3),-one3);
-		const ExprSymbol& vt=FUNC[i]->f.add_symbol("vt",Dim(0,0,3));
-		FUNC[i]->f.set_expr(vt+one3);
+		const ExprSymbol& vt=ExprSymbol::new_(Dim(0,0,3));
+		FUNC[i] = new ExFunction(vt,vt+one3,v3,Dim(0,0,3),-one3);
 		FUNC[i]->yFwd.v()=v3+one3;
 		i++;
 	}
 
 	// M -> M+1
 	{
-		FUNC[i] = new ExFunction(v23,Dim(0,2,3),-one6);
-		const ExprSymbol& M=FUNC[i]->f.add_symbol("M",Dim(0,3,0));
-		FUNC[i]->f.set_expr(M+one23);
+		const ExprSymbol& M=ExprSymbol::new_(Dim(0,3,0));
+		FUNC[i] = new ExFunction(M,M+one23,v23,Dim(0,2,3),-one6);
 		FUNC[i]->yFwd.m()=m23+one23;
 		i++;
 	}

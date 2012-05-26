@@ -49,14 +49,29 @@ namespace ibex {
 class Function {
 public:
 	/**
+	 * \brief Creates a function y=f(x).
+	 */
+	Function(const ExprSymbol& x, const ExprNode& y, const char* name="anonymous");
+
+	/**
+	 * \brief Creates a function y=f(x1,x2).
+	 */
+	Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprNode& y, const char* name="anonymous");
+
+	/**
+	 * \brief Creates a function y=f(x1,x2,x3).
+	 */
+	Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprNode& y, const char* name="anonymous");
+
+	/**
 	 * \brief Creates a new (anonymous) function.
 	 */
-	Function();
+	Function(const Array<const ExprSymbol>& x, const ExprNode& y);
 
 	/**
 	 * \brief Creates a function named \a name.
 	 */
-	Function(const char* name);
+	Function(const char* name, const Array<const ExprSymbol>& x, const ExprNode& y);
 
 	/**
 	 * \brief Delete the function.
@@ -94,9 +109,7 @@ public:
 	 */
 	Function* separate() const;
 
-
-
-	/**
+	/*
 	 * \brief Create a new symbol (new argument of the function).
 	 *
 	 * The name of the symbol is generated automatically.
@@ -104,16 +117,16 @@ public:
 	 * By default, the symbol is zero-dimensional (scalar symbol).
 	 *
 	 */
-	const ExprSymbol& add_symbol(const Dim& dim=Dim(0,0,0));
+	//const ExprSymbol& add_symbol(const Dim& dim=Dim(0,0,0));
 
-	/**
+	/*
 	 * \brief Create a new symbol (new argument of the function) with a specific name.
 	 *
 	 * By default, the symbol is zero-dimensional (scalar symbol).
 	 *
 	 * The string \a name is duplicated.
 	 */
-	const ExprSymbol& add_symbol(const char* name, const Dim& dim=Dim(0,0,0));
+	//const ExprSymbol& add_symbol(const char* name, const Dim& dim=Dim(0,0,0));
 
 	/**
 	 * \brief Return the number of symbols (or arguments).
@@ -144,12 +157,12 @@ public:
 	 */
 	bool used(int i) const;
 
-	/**
+	/*
 	 * \brief Set the expression f(x).
 	 *
 	 * Also calculates which symbols are actually used.
 	 */
-	void set_expr(const ExprNode&);
+	//void set_expr(const ExprNode&);
 
 	/**
 	 * \brief Return the current number of nodes in the DAG.
@@ -286,9 +299,9 @@ public:
 	mutable Array<Domain> symbol_deriv;
 
 private:
-
-	friend class ExprNode;
-	void add_node(const ExprNode&);
+	Function();
+	void init(const Array<const ExprSymbol>& x, const ExprNode& y);
+	void add_symbol(const ExprSymbol* x);
 
 	/*
 	 * \brief Apply default Decoration (and compile) the function.
@@ -401,8 +414,20 @@ inline const ExprSymbol& Function::symbol(int i) const {
 	return *order2info[i];
 }
 
+inline const char* Function::symbol_name(int i) const {
+	return order2info[i]->name;
+}
+
+inline int Function::nb_nodes() const {
+	return exprnodes.size();
+}
+
 inline const ExprNode& Function::node(int i) const {
 	return *exprnodes[i];
+}
+
+inline const ExprNode& Function::expr() const {
+	return *root;
 }
 
 template<class V>

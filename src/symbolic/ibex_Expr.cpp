@@ -13,8 +13,9 @@
 #include "ibex_Function.h"
 #include "ibex_NonRecoverableException.h"
 #include "ibex_ExprPrinter.cpp_"
-#include "ibex_ExprSubNodes.cpp_"
+#include "ibex_ExprTools.cpp_"
 #include <limits.h>
+#include <stdio.h>
 #include <set>
 
 namespace ibex {
@@ -112,41 +113,6 @@ Dim vec_dim(const ExprNode** comp, int n, bool in_a_row) {
 	throw NonRecoverableException("Impossible to form a vector with these components");
 }
 
-class SizeofDAG : public FunctionVisitor {
-public:
-	/* for binary expressions (BinOpExpr). */
-	SizeofDAG(const ExprNode& l, const ExprNode& r) : size(0) {
-		visit(l);
-		visit(r);
-	}
-
-	/* for n-ary expressions (Apply). */
-	SizeofDAG(const ExprNode** args, int n) : size(0) {
-		for (int i=0; i<n; i++)
-			visit(*args[i]);
-	}
-
-	int size;
-
-private:
-	virtual void visit(const ExprNode& e) {
-		if (visited.find(e.id)==visited.end()) {
-			visited.insert(e.id);
-			size++;
-			e.acceptVisitor(*this);
-		}
-	}
-
-	virtual void visit(const ExprIndex& e)    { visit(e.expr); }
-	virtual void visit(const ExprSymbol& e)   { }
-	virtual void visit(const ExprConstant& e) { }
-	virtual void visit(const ExprNAryOp& e)   { for (int i=0; i<e.nb_args; i++) visit(e.arg(i)); }
-	virtual void visit(const ExprBinaryOp& e) { visit(e.left); visit(e.right); }
-	virtual void visit(const ExprUnaryOp& e)  { visit(e.expr); }
-
-	std::set<int> visited;
-};
-
 int bin_size(const ExprNode& left, const ExprNode& right) {
 	SizeofDAG s(left,right);
 	return s.size+1;
@@ -159,14 +125,17 @@ int nary_size(const ExprNode** args, int n) {
 
 } // end anonymous namespace
 
+void ExprNode::reset_visited() const {
+	ResetVisited(*this);
+}
 
 const ExprNode** ExprNode::subnodes() const {
 	return ExprSubNodes(*this).nodes();
 }
 
-ExprNode::ExprNode(Function& env, int height, int size, const Dim& dim) :
-  context(env), height(height), size(size), id(context.nb_nodes()), dim(dim) {
-  env.add_node(*this);
+ExprNode::ExprNode(int height, int size, const Dim& dim) :
+  height(height), size(size), id(-1), dim(dim) {
+
 }
 
 bool ExprIndex::indexed_symbol() const {
@@ -181,7 +150,7 @@ bool ExprIndex::indexed_symbol() const {
 }
 
 ExprNAryOp::ExprNAryOp(const ExprNode** _args, int n, const Dim& dim) :
-		ExprNode(_args[0]->context, max_height(_args,n)+1, nary_size(_args,n), dim), nb_args(n) {
+		ExprNode(max_height(_args,n)+1, nary_size(_args,n), dim), nb_args(n) {
 
 	args = new const ExprNode*[n];
 	for (int i=0; i<n; i++)
@@ -203,19 +172,32 @@ ExprVector::ExprVector(const ExprNode** comp, int n, bool in_row) :
 		ExprNAryOp(comp, n, vec_dim(comp,n,in_row)) {
 }
 
-ExprConstant::ExprConstant(Function& expr, const Interval& value) : ExprNode(expr,0,1,Dim(0,0,0)), value(1,1) {
+#define MAX_NAME_SIZE 20
+#define BASE_SYMB_NAME "_symb_"
+
+static char generated_name_buff[MAX_NAME_SIZE];
+static int generated_count=0;
+
+const ExprSymbol& ExprSymbol::new_(const Dim& dim) {
+	sprintf(generated_name_buff, BASE_SYMB_NAME);
+	snprintf(&generated_name_buff[strlen(BASE_SYMB_NAME)], MAX_NAME_SIZE-strlen(BASE_SYMB_NAME), "%d", generated_count++);
+
+	return new_(generated_name_buff, dim);
+}
+
+ExprConstant::ExprConstant(const Interval& value) : ExprNode(0,1,Dim(0,0,0)), value(1,1) {
 	((Interval&) this->value[0][0])=value;
 }
 
-ExprConstant::ExprConstant(Function& expr, const IntervalVector& v, bool in_row)
-  : ExprNode(expr,0,1, in_row? Dim(0,0,v.size()) : Dim(0,v.size(),0)),
+ExprConstant::ExprConstant(const IntervalVector& v, bool in_row)
+  : ExprNode(0,1, in_row? Dim(0,0,v.size()) : Dim(0,v.size(),0)),
   value(1,v.size()) {
 	/* warning: we represent a vector by a row, even if it is a column vector */
 	((IntervalVector&) value[0])=v;
 }
 
-ExprConstant::ExprConstant(Function& expr, const IntervalMatrix& m)
-  : ExprNode(expr,0,1,Dim(0,m.nb_rows(),m.nb_cols())), value(m) {
+ExprConstant::ExprConstant(const IntervalMatrix& m)
+  : ExprNode(0,1,Dim(0,m.nb_rows(),m.nb_cols())), value(m) {
 
 }
 
@@ -228,13 +210,10 @@ bool ExprConstant::ExprConstant::is_zero() const {
 }
 
 ExprBinaryOp::ExprBinaryOp(const ExprNode& left, const ExprNode& right, const Dim& dim) :
-		ExprNode(	left.context,
-					max_height(left,right)+1,
+		ExprNode(	max_height(left,right)+1,
 					bin_size(left,right),
 					dim ),
 		left(left), right(right) {
-
-	assert(&left.context == &right.context);
 }
 
 ExprAdd::ExprAdd(const ExprNode& left, const ExprNode& right) :

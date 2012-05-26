@@ -100,22 +100,21 @@ void TestEval::check_deco(const ExprNode& e) {
 }
 
 void TestEval::deco01() {
-	Function f;
-	const ExprSymbol& x = f.add_symbol("x");
-	const ExprSymbol& y = f.add_symbol("y");
+
+	const ExprSymbol& x = ExprSymbol::new_("x");
+	const ExprSymbol& y = ExprSymbol::new_("y");
 	const ExprNode&   e = x+y;
-	f.set_expr(e);
+	Function f(x,y,e);
 	check_deco(x);
 	check_deco(y);
 	check_deco(e);
 }
 
 void TestEval::deco02() {
-	Function f;
-	const ExprSymbol& x = f.add_symbol("x",Dim(0,3,0));
-	const ExprSymbol& y = f.add_symbol("y",Dim(0,3,0));
+	const ExprSymbol& x = ExprSymbol::new_("x",Dim(0,3,0));
+	const ExprSymbol& y = ExprSymbol::new_("y",Dim(0,3,0));
 	const ExprNode&   e = x+y;
-	f.set_expr(e);
+	Function f(x,y,e);
 
 	check_deco(x);
 	check_deco(y);
@@ -124,10 +123,9 @@ void TestEval::deco02() {
 
 void TestEval::add01() {
 
-	Function f;
-	const ExprSymbol& x = f.add_symbol("x");
-	const ExprSymbol& y = f.add_symbol("y");
-	f.set_expr(x+y);
+	const ExprSymbol& x = ExprSymbol::new_("x");
+	const ExprSymbol& y = ExprSymbol::new_("y");
+	Function f(x,y,x+y);
 
 	IntervalVector box(2);
 	box[0]=Interval(1,2);
@@ -141,10 +139,9 @@ void TestEval::add01() {
 
 void TestEval::add02() {
 
-	Function f;
-	const ExprSymbol& x = f.add_symbol("x",Dim(0,3,0));
-	const ExprSymbol& y = f.add_symbol("y",Dim(0,3,0));
-	f.set_expr(x+y);
+	const ExprSymbol& x = ExprSymbol::new_("x",Dim(0,3,0));
+	const ExprSymbol& y = ExprSymbol::new_("y",Dim(0,3,0));
+	Function f(x,y,x+y);
 
 	double _xy[][2] = { {1,2}, {3,4}, {5,6} ,
 						 {1,1}, {2,2}, {3,3} };
@@ -160,10 +157,9 @@ void TestEval::add02() {
 
 void TestEval::add03() {
 
-	Function f;
-	const ExprSymbol& x = f.add_symbol("x",Dim(0,0,3));
-	const ExprSymbol& y = f.add_symbol("y",Dim(0,0,3));
-	f.set_expr(x+y);
+	const ExprSymbol& x = ExprSymbol::new_("x",Dim(0,0,3));
+	const ExprSymbol& y = ExprSymbol::new_("y",Dim(0,0,3));
+	Function f(x,y,x+y);
 
 	double _xy[][2] = { {1,2}, {3,4}, {5,6} ,
 						 {1,1}, {2,2}, {3,3} };
@@ -179,10 +175,9 @@ void TestEval::add03() {
 
 void TestEval::add04() {
 
-	Function f;
-	const ExprSymbol& x = f.add_symbol("x",Dim(0,2,3));
-	const ExprSymbol& y = f.add_symbol("y",Dim(0,2,3));
-	f.set_expr(x+y);
+	const ExprSymbol& x = ExprSymbol::new_("x",Dim(0,2,3));
+	const ExprSymbol& y = ExprSymbol::new_("y",Dim(0,2,3));
+	Function f(x,y,x+y);
 
 	double _xy[][2] = { {1,2}, {3,4}, {5,6},
 						{1,1}, {2,2}, {3,3},
@@ -201,10 +196,9 @@ void TestEval::add04() {
 
 void TestEval::mul01() {
 
-	Function f;
-	const ExprSymbol& x = f.add_symbol("x",Dim(0,2,3));
-	const ExprSymbol& y = f.add_symbol("y",Dim(0,3,2));
-	f.set_expr(x*y);
+	const ExprSymbol& x = ExprSymbol::new_("x",Dim(0,2,3));
+	const ExprSymbol& y = ExprSymbol::new_("y",Dim(0,3,2));
+	Function f(x,y,x*y);
 
 	IntervalVector xy(12);
 	IntervalMatrix mx=M1();
@@ -222,13 +216,13 @@ void TestEval::mul01() {
 
 void TestEval::dist01() {
 
-	Function f;
-	const ExprSymbol& xa = f.add_symbol("xa");
-	const ExprSymbol& ya = f.add_symbol("ya");
-	const ExprSymbol& xb = f.add_symbol("xb");
-	const ExprSymbol& yb = f.add_symbol("yb");
+	const ExprSymbol& xa = ExprSymbol::new_("xa");
+	const ExprSymbol& ya = ExprSymbol::new_("ya");
+	const ExprSymbol& xb = ExprSymbol::new_("xb");
+	const ExprSymbol& yb = ExprSymbol::new_("yb");
 
-	f.set_expr(sqrt(sqr(xa-ya)+sqr(xb-yb)));
+	const ExprSymbol* args[4]={&xa, &ya, &xb, &yb};
+	Function f(Array<const ExprSymbol>(args,4),sqrt(sqr(xa-ya)+sqr(xb-yb)));
 
 	double _xy[][2] = { {3,3}, {4,4},
 						{4,4}, {5,5} };
@@ -241,15 +235,12 @@ void TestEval::dist01() {
 
 void TestEval::apply01() {
 
-	Function f1("f1");
-	const ExprSymbol& x1 = f1.add_symbol("x1");
+	const ExprSymbol& x1 = ExprSymbol::new_("x1");
+	const ExprSymbol& x2 = ExprSymbol::new_("x2");
 
-	Function f2;
-	const ExprSymbol& x2 = f2.add_symbol("x2");
+	Function f1(x1,x1,"f1");
 
-	f1.set_expr(x1);
-
-	f2.set_expr(f1(x2));
+	Function f2(x2,f1(x2));
 
 	IntervalVector _x2(1,Interval(2,2));
 	check(f2.eval_scalar(_x2), Interval(2,2));
@@ -257,20 +248,14 @@ void TestEval::apply01() {
 
 void TestEval::apply02() {
 
-	Function f1("f1");
-	const ExprSymbol& x1 = f1.add_symbol("x1");
-	const ExprSymbol& y1 = f1.add_symbol("y1");
+	const ExprSymbol& x1 = ExprSymbol::new_("x1");
+	const ExprSymbol& y1 = ExprSymbol::new_("y1");
 
-	Function f2("f2");
-	const ExprSymbol& x2 = f2.add_symbol("x2");
-	const ExprSymbol& y2 = f2.add_symbol("y2");
+	const ExprSymbol& x2 = ExprSymbol::new_("x2");
+	const ExprSymbol& y2 = ExprSymbol::new_("y2");
 
-	f1.set_expr(x1+y1);
-
-	const ExprNode* args[2];
-	args[0]=&x2;
-	args[1]=&(x2+y2);
-	f2.set_expr(f1(args)+y2);
+	Function f1(x1,y1,x1+y1,"f1");
+	Function f2(x2,y2,f1(x2,x2+y2)+y2,"f2");
 
 	//cout << f1 << endl;
 	//cout << f2 << endl;
@@ -284,20 +269,17 @@ void TestEval::apply02() {
 
 void TestEval::apply03() {
 
-	Function f1("f1");
-	const ExprSymbol& x1 = f1.add_symbol("x1");
-	const ExprSymbol& y1 = f1.add_symbol("y1");
+	const ExprSymbol& x1 = ExprSymbol::new_("x1");
+	const ExprSymbol& y1 = ExprSymbol::new_("y1");
 
-	Function f2("f2");
-	const ExprSymbol& x2 = f2.add_symbol("x2");
-	const ExprSymbol& y2 = f2.add_symbol("y2");
+	const ExprSymbol& x2 = ExprSymbol::new_("x2");
+	const ExprSymbol& y2 = ExprSymbol::new_("y2");
 
-	Function f3("f3");
-	const ExprSymbol& x3 = f3.add_symbol("x3");
+	const ExprSymbol& x3 = ExprSymbol::new_("x3");
 
-	f1.set_expr(x1+y1);
-	f2.set_expr(x2*y2);
-	f3.set_expr(f1(x3,x3)-f2(x3,x3));
+	Function f1(x1,y1,x1+y1);
+	Function f2(x2,y2,x2*y2);
+	Function f3(x3,f1(x3,x3)-f2(x3,x3));
 
 	//cout << f3 << endl;
 	IntervalVector _x3(1,Interval(3,3));
@@ -317,18 +299,13 @@ void TestEval::apply03() {
 
 void TestEval::apply04() {
 
-	Function f1("f1");
-	const ExprSymbol& x1 = f1.add_symbol("x1");
+	const ExprSymbol& x1 = ExprSymbol::new_("x1");
+	const ExprSymbol& x2 = ExprSymbol::new_("x2");
+	const ExprSymbol& x3 = ExprSymbol::new_("x3");
 
-	Function f2("f2");
-	const ExprSymbol& x2 = f2.add_symbol("x2");
-
-	Function f3("f3");
-	const ExprSymbol& x3 = f3.add_symbol("x3");
-
-	f1.set_expr(sqr(x1));
-	f2.set_expr(x2+Interval(1,1));
-	f3.set_expr(f2(f1(x3)));
+	Function f1(x1,sqr(x1));
+	Function f2(x2,x2+Interval(1,1));
+	Function f3(x3,f2(f1(x3)));
 
 	IntervalVector _x3(1,Interval(3,3));
 

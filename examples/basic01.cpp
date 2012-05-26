@@ -1,27 +1,27 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_ExprLabel.cpp
+// File        : basic01.cpp
 // Author      : Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
-// Created     : May 22, 2012
-// Last Update : May 22, 2012
+// Created     : May 26, 2012
+// Last Update : May 26, 2012
 //============================================================================
+#include "ibex.h"
 
+using namespace ibex;
 
-#include "ibex_ExprLabel.h"
+int main() {
+	Variable x,y;
+	Function f(x,y,x+y);
 
-namespace ibex {
+	double _box[][2]= {{1,2},{3,4}};
+	IntervalVector box(2,_box);
 
-ExprLabel::ExprLabel() : f(NULL), d(NULL), g(NULL) { }
+	cout << f.eval_scalar(box) << endl;
 
-ostream& operator<<(ostream& os, const ExprLabel& l) {
-	if (l.d) os << "d=" << *l.d << " ";
-	if (l.g) os << "g=" << *l.g << " ";
-	return os;
+	return 0;
 }
-
-} // end namespace ibex
 
 
 

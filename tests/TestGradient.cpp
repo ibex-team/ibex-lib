@@ -36,10 +36,9 @@ void TestGradient::deco02() { }
 
 void TestGradient::add01() {
 
-	Function f;
-	const ExprSymbol& x = f.add_symbol("x");
-	const ExprSymbol& y = f.add_symbol("y");
-	f.set_expr(x+y);
+	const ExprSymbol& x = ExprSymbol::new_("x");
+	const ExprSymbol& y = ExprSymbol::new_("y");
+	Function f(x,y,x+y);
 
 	IntervalVector box(2);
 	box[0]=Interval(1,2);

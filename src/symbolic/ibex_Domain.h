@@ -76,15 +76,16 @@ public:
 	/**
 	 * \brief Delete *this.
 	 */
-	virtual ~Domain() {
-		if (!is_reference)
+	~Domain() {
+		if (!is_reference) {
 			switch(dim.type()) {
-			case Dim::SCALAR:       delete &i();  break;
+			case Dim::SCALAR:   delete (Interval*) domain;  break;
 			case Dim::ROW_VECTOR:
 			case Dim::COL_VECTOR:   delete &v();  break;
 			case Dim::MATRIX:       delete &m();  break;
 			case Dim::MATRIX_ARRAY: delete &ma(); break;
 			}
+		}
 	}
 
 	/**

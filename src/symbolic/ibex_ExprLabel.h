@@ -16,17 +16,35 @@
 
 namespace ibex {
 
+class Function;
+
 /** \ingroup symbolic
  *
  * \brief Expression label (decoration)
  */
-
 class ExprLabel {
 public:
-	ExprLabel() : d(NULL), g(NULL) { }
+	ExprLabel();
+
+	/**
+	 * The function this node belongs to.
+	 */
+	Function* f;
+
+	/**
+	 * The domain (evaluation)
+	 */
 	Domain *d;
+
+	/**
+	 * The gradient (differentiation)
+	 */
 	Domain *g;
 
+	/**
+	 * Visited tag.
+	 */
+	bool visited;
 };
 
 ostream& operator<<(ostream& os, const ExprLabel&);
