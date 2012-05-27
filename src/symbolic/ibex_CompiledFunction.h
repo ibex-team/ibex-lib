@@ -194,11 +194,11 @@ void CompiledFunction::backward(const V& algo) const {
 
 	for (int i=0; i<n; i++) {
 		switch(code[i]) {
-		case IDX:    ((V&) algo).index_bwd((ExprIndex&)    *(nodes[i]), *args[i][1],                   *args[i][0]); break;
-		case VEC:    ((V&) algo).vector_bwd((ExprVector&)  *(nodes[i]), (ExprLabel**) &(*args[i][1]),               *args[i][0]); break;
-		case SYM:    ((V&) algo).symbol_bwd((ExprSymbol&)  *(nodes[i]),                                     *args[i][0]); break;
-		case CST:    ((V&) algo).cst_bwd  ((ExprConstant&) *(nodes[i]),                                     *args[i][0]); break;
-		case APPLY:  ((V&) algo).apply_bwd  ((ExprApply&)  *(nodes[i]), (ExprLabel**) &(*args[i][1]),               *args[i][0]); break;
+		case IDX:    ((V&) algo).index_bwd((ExprIndex&)    *(nodes[i]), *args[i][1],   *args[i][0]); break;
+		case VEC:    ((V&) algo).vector_bwd((ExprVector&)  *(nodes[i]), &(args[i][1]), *args[i][0]); break;
+		case SYM:    ((V&) algo).symbol_bwd((ExprSymbol&)  *(nodes[i]),                *args[i][0]); break;
+		case CST:    ((V&) algo).cst_bwd  ((ExprConstant&) *(nodes[i]),                *args[i][0]); break;
+		case APPLY:  ((V&) algo).apply_bwd  ((ExprApply&)  *(nodes[i]), &(args[i][1]), *args[i][0]); break;
 		case ADD:    ((V&) algo).add_bwd    ((ExprAdd&)    *(nodes[i]), *args[i][1], *args[i][2], *args[i][0]); break;
 		case ADD_V:  ((V&) algo).add_V_bwd  ((ExprAdd&)    *(nodes[i]), *args[i][1], *args[i][2], *args[i][0]); break;
 		case ADD_M:  ((V&) algo).add_M_bwd  ((ExprAdd&)    *(nodes[i]), *args[i][1], *args[i][2], *args[i][0]); break;

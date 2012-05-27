@@ -361,6 +361,8 @@ public:
 
 	operator const ExprNode&() const { return symbol; }
 
+	const ExprIndex& operator[](int index) { return symbol[index]; }
+
 	const ExprSymbol& symbol;
 };
 

@@ -14,8 +14,8 @@ BIAS_DIR:=/home/gchabert08/Applications/Profil-2.0.8
 GAOL_DIR:=/home/gchabert08/Applications/Gaol-3.1.1
 #===================================================
 
-CXXFLAGS := -g -pg -Wall -Wno-deprecated -fmessage-length=0
-#CXXFLAGS :=	-O3 -DNDEBUG #-g -pg 
+#CXXFLAGS := -g -pg -Wall -Wno-deprecated -fmessage-length=0
+CXXFLAGS :=	-O3 -DNDEBUG #-g -pg 
 
 IBEX_INC_DIR:=$(IBEX_DIR)/include
 IBEX_SRC_DIR:=$(IBEX_DIR)/src

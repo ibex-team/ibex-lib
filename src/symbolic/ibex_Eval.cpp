@@ -20,8 +20,9 @@ namespace ibex {
 Domain& Eval::eval(const Function& f, ExprLabel** args) const {
 	assert(f.expr().deco.d);
 
-	for (int i=0; i<f.symbol_domains.size(); i++)
-		f.symbol_domains[i]=*(*args[i]).d;
+	for (int i=0; i<f.symbol_domains.size(); i++) {
+		f.symbol_domains[i]=*(args[i]->d);
+	}
 
 	return *f.forward<Eval>(*this).d;
 }

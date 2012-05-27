@@ -287,7 +287,6 @@ public:
 	/*
 	 * \brief The domains of the symbols.
 	 *
-	 * \note The structure is initialized by #ibex::BasicDecorator.
 	 */
 	mutable Array<Domain> symbol_domains;
 
