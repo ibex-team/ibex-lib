@@ -79,6 +79,24 @@ public:
 	 */
 	Array(T& x1, T& x2, T& x3);
 
+
+	/**
+	 * \brief Create an array with 4 references.
+	 */
+	Array(T& x1, T& x2, T& x3, T& x4);
+
+
+	/**
+	 * \brief Create an array with 5 references.
+	 */
+	Array(T& x1, T& x2, T& x3, T& x4, T& x5);
+
+
+	/**
+	 * \brief Create an array with 6 references.
+	 */
+	Array(T& x1, T& x2, T& x3, T& x4, T& x5, T& x6);
+
 	/**
 	 * \brief Duplicate this instance.
 	 *
@@ -193,6 +211,33 @@ Array<T>::Array(T& x1, T& x2, T& x3) : _nb(3), array(new T*[3]) {
 	array[0] = &x1;
 	array[1] = &x2;
 	array[2] = &x3;
+}
+
+template<class T>
+Array<T>::Array(T& x1, T& x2, T& x3, T& x4) : _nb(4), array(new T*[4]) {
+	array[0] = &x1;
+	array[1] = &x2;
+	array[2] = &x3;
+	array[3] = &x4;
+}
+
+template<class T>
+Array<T>::Array(T& x1, T& x2, T& x3, T& x4, T& x5) : _nb(5), array(new T*[5]) {
+	array[0] = &x1;
+	array[1] = &x2;
+	array[2] = &x3;
+	array[3] = &x4;
+	array[4] = &x5;
+}
+
+template<class T>
+Array<T>::Array(T& x1, T& x2, T& x3, T& x4, T& x5, T& x6) : _nb(6), array(new T*[6]) {
+	array[0] = &x1;
+	array[1] = &x2;
+	array[2] = &x3;
+	array[3] = &x4;
+	array[4] = &x5;
+	array[5] = &x6;
 }
 
 template<class T>

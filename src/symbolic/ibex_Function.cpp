@@ -21,6 +21,8 @@ using namespace std;
 
 namespace ibex {
 
+const char* Function::DEFAULT_NAME="f";
+
 Function::~Function() {
 	for (int i=0; i<exprnodes.size(); i++) {
 		delete node(i).deco.d;

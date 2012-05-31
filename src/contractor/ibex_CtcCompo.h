@@ -32,6 +32,12 @@ public:
 	CtcCompo(const Array<Ctc>& list, bool incremental=false, double ratio=default_ratio);
 
 	/**
+	 * \brief build a composition of two contractors
+	 *
+	 */
+	//CtcCompo(const Array<Ctc>& list;
+
+	/**
 	 * \brief Contract a box.
 	 */
 	virtual void contract(IntervalVector& box);

@@ -116,7 +116,7 @@ public:
 	inline void symbol_bwd(const ExprSymbol&,                                const ExprLabel& y) { /* nothing to do */ }
 	inline void cst_bwd   (const ExprConstant&,                              const ExprLabel& y) { /* nothing to do */ }
 	inline void apply_bwd (const ExprApply&,   ExprLabel** x,                const ExprLabel& y);
-	inline void add_bwd   (const ExprAdd&,     ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) { x1.g->i() += y.g->i();          x2.g->i() += y.g->i(); }
+	inline void add_bwd   (const ExprAdd&,     ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) { x1.g->i() += y.g->i();  x2.g->i() += y.g->i(); }
 	inline void mul_bwd   (const ExprMul&,     ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) { x1.g->i() += y.g->i() * x2.d->i(); x2.g->i() += y.g->i() * x1.d->i(); }
 	inline void sub_bwd   (const ExprSub&,     ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) { x1.g->i() += y.g->i();          x2.g->i() += -y.g->i();}
 	inline void div_bwd   (const ExprDiv&,     ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) { x1.g->i() += y.g->i() / x2.d->i(); x2.g->i() += y.g->i()*(-x1.d->i())/sqr(x2.d->i()); }

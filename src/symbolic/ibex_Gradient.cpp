@@ -40,14 +40,19 @@ void GradDecorator::visit(const ExprNAryOp& a) {
 
 void GradDecorator::visit(const ExprBinaryOp& b) {
 	b.deco.g = new Domain(b.dim);
+	visit(b.left);
+	visit(b.right);
 }
 
 void GradDecorator::visit(const ExprUnaryOp& u) {
 	u.deco.g = new Domain(u.dim);
+	visit(u.expr);
 }
 
 void GradDecorator::visit(const ExprVector& v) {
 	v.deco.g = new Domain(v.dim);
+	for (int i=0; i<v.nb_args; i++)
+		visit(v.arg(i));
 }
 
 void GradDecorator::visit(const ExprApply&) {
@@ -66,8 +71,11 @@ void Gradient::gradient(const Function& f, const IntervalVector& box, IntervalVe
 
 	f.expr().deco.g->i()=1.0;
 	f.backward<Gradient>(*this);
-	for (int i=0; i<f.nb_symbols(); i++) {
-		//g[i]=f.symbol_deriv
+
+	if (f.all_symbols_scalar()) {
+		for (int i=0; i<f.nb_symbols(); i++) {
+			g[i]=f.symbol_deriv[i].i();
+		}
 	}
 }
 

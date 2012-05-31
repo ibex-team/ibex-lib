@@ -107,6 +107,7 @@ public:
 	 * \brief Return the domain as an interval.
 	 */
 	inline Interval& i()        {
+		assert(domain);
 		assert(dim.is_scalar());
 		return *(Interval*) domain;
 	}
@@ -115,6 +116,7 @@ public:
 	 * \brief Return the domain as an vector.
 	 */
 	inline IntervalVector& v()  {
+		assert(domain);
 		assert(dim.is_vector());
 		return *(IntervalVector*) domain;
 	}
@@ -123,6 +125,7 @@ public:
 	 * \brief Return the domain as a matrix.
 	 */
 	inline IntervalMatrix& m()  {
+		assert(domain);
 		assert(dim.type()==Dim::MATRIX);
 		return *(IntervalMatrix*) domain;
 	}
@@ -131,14 +134,16 @@ public:
 	 * \brief Return the domain as an array of matrices.
 	 */
 	inline IntervalMatrixArray& ma() {
+		assert(domain);
 		assert(dim.type()==Dim::MATRIX_ARRAY);
 		return *(IntervalMatrixArray*) domain;
 	}
 
 	/**
-		 * \brief Return the domain as a const interval.
-		 */
+	 * \brief Return the domain as a const interval.
+	 */
 	inline const Interval& i() const  {
+		assert(domain);
 		assert(dim.is_scalar());
 		return *(Interval*) domain;
 	}
@@ -147,6 +152,7 @@ public:
 	 * \brief Return the domain as a const vector.
 	 */
 	inline const IntervalVector& v() const  {
+		assert(domain);
 		assert(dim.is_vector());
 		return *(IntervalVector*) domain;
 	}
@@ -154,6 +160,7 @@ public:
 	 * \brief Return the domain as a matrix.
 	 */
 	inline const IntervalMatrix& m() const  {
+		assert(domain);
 		assert(dim.type()==Dim::MATRIX);
 		return *(IntervalMatrix*) domain;
 	}
@@ -162,6 +169,7 @@ public:
 	 * \brief Return the domain as an array of matrices.
 	 */
 	inline const IntervalMatrixArray& ma() const {
+		assert(domain);
 		assert(dim.type()==Dim::MATRIX_ARRAY);
 		return *(IntervalMatrixArray*) domain;
 	}

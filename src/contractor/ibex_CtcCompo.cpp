@@ -15,6 +15,12 @@ namespace ibex {
 /*! Default composition ratio. */
 const double CtcCompo::default_ratio = 0.1;
 
+/*
+CtcCompo::CtcCompo(Ctc& c1, Ctc& c2) : Ctc(c1.nb_var), list(c1,c2) incremental(false),
+		ratio(default_ratio), idc(new Indicators*[2]) {
+
+}*/
+
 CtcCompo::CtcCompo(const Array<Ctc>& list, bool incremental, double ratio) :
 		Ctc(list[0].nb_var), list(list), incremental(incremental),
 		ratio(ratio), idc(new Indicators*[list.size()]) {

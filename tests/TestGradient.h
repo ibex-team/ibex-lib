@@ -29,6 +29,8 @@ public:
 		TEST_ADD(TestGradient::add02);
 		TEST_ADD(TestGradient::add03);
 		TEST_ADD(TestGradient::add04);
+		//TEST_ADD(TestGradient::add05);
+		TEST_ADD(TestGradient::dist);
 	}
 
 	void deco01();
@@ -38,6 +40,7 @@ public:
 	void add02();
 	void add03();
 	void add04();
+	void dist();
 
 private:
 	void check_deco(const ExprNode& e);

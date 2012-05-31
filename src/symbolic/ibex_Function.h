@@ -48,30 +48,45 @@ namespace ibex {
  */
 class Function {
 public:
+	static const char* DEFAULT_NAME;
+
 	/**
 	 * \brief Creates a function y=f(x).
 	 */
-	Function(const ExprSymbol& x, const ExprNode& y, const char* name="anonymous");
+	Function(const ExprSymbol& x, const ExprNode& y, const char* name=DEFAULT_NAME);
 
 	/**
 	 * \brief Creates a function y=f(x1,x2).
 	 */
-	Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprNode& y, const char* name="anonymous");
+	Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprNode& y, const char* name=DEFAULT_NAME);
 
 	/**
 	 * \brief Creates a function y=f(x1,x2,x3).
 	 */
-	Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprNode& y, const char* name="anonymous");
+	Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprNode& y, const char* name=DEFAULT_NAME);
+
 
 	/**
-	 * \brief Creates a new (anonymous) function.
+	 * \brief Creates a function y=f(x1,x2,x3,x4).
 	 */
-	Function(const Array<const ExprSymbol>& x, const ExprNode& y);
+	Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprNode& y, const char* name=DEFAULT_NAME);
+
 
 	/**
-	 * \brief Creates a function named \a name.
+	 * \brief Creates a function y=f(x1,x2,x3,x4,x5).
 	 */
-	Function(const char* name, const Array<const ExprSymbol>& x, const ExprNode& y);
+	Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprNode& y, const char* name=DEFAULT_NAME);
+
+
+	/**
+	 * \brief Creates a function y=f(x1,x2,x3,x4,x5,x6).
+	 */
+	Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprNode& y, const char* name=DEFAULT_NAME);
+
+	/**
+	 * \brief Creates a new (anonymous) function y=f(x1,...,xn).
+	 */
+	Function(const Array<const ExprSymbol>& x, const ExprNode& y, const char* name=DEFAULT_NAME);
 
 	/**
 	 * \brief Delete the function.
