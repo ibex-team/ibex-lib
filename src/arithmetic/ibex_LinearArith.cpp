@@ -249,6 +249,7 @@ inline M absM(const M& m) {
 
 template<class M>
 inline std::ostream& print(std::ostream& os, const M& m) {
+	if (is_empty(m)) { return os << "empty matrix"; }
 	os << "(";
 	for (int i=0; i<m.nb_rows(); i++) {
 		os << "(";
@@ -257,6 +258,7 @@ inline std::ostream& print(std::ostream& os, const M& m) {
 			if (j<m.nb_cols()-1) os << " ; ";
 		}
 		os << ")";
+		if (i<m.nb_rows()-1) os << endl;
 	}
 	os << ")";
 	return os;

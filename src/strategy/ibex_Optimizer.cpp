@@ -68,7 +68,7 @@ bool Optimizer::contract_and_bound(Cell& c) {
 	try {
 		prec.contract(c.box);
 	} catch (EmptyBoxException&) { // the box is a "solution"
-		y=f.eval_scalar(c.box);
+		y=f.eval(c.box);
 		if (uplo_of_epsboxes > y.lb()) uplo_of_epsboxes = y.lb();
 		throw EmptyBoxException();
 	}

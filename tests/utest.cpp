@@ -39,6 +39,7 @@ int main() {
     Test::TextOutput output(Test::TextOutput::Verbose);
 
     Test::Suite ts;
+
     ts.add(auto_ptr<Test::Suite>(new TestInterval()));
     ts.add(auto_ptr<Test::Suite>(new TestIntervalVector()));
     ts.add(auto_ptr<Test::Suite>(new TestIntervalMatrix()));
@@ -49,7 +50,7 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestFunction()));
     ts.add(auto_ptr<Test::Suite>(new TestEval()));
     ts.add(auto_ptr<Test::Suite>(new TestHC4Revise()));
-   // ts.add(auto_ptr<Test::Suite>(new TestGradient()));
+    ts.add(auto_ptr<Test::Suite>(new TestGradient()));
 
     ts.add(auto_ptr<Test::Suite>(new TestHC4()));
 

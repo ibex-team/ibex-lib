@@ -131,7 +131,7 @@ void TestEval::add01() {
 	box[0]=Interval(1,2);
 	box[1]=Interval(3,4);
 
-	Interval res=f.eval_scalar(box);
+	Interval res=f.eval(box);
 	//e.f.cf.print<Domain>();
 	//cout << "res=" << res << endl;
 	TEST_ASSERT(res==Interval(4,6));
@@ -228,7 +228,7 @@ void TestEval::dist01() {
 						{4,4}, {5,5} };
 	IntervalVector box(4,_xy);
 
-	Interval res=f.eval_scalar(box);
+	Interval res=f.eval(box);
 	//cout << e.f << endl;
 	check(res,Interval(::sqrt(2),::sqrt(2)));
 }
@@ -243,7 +243,7 @@ void TestEval::apply01() {
 	Function f2(x2,f1(x2));
 
 	IntervalVector _x2(1,Interval(2,2));
-	check(f2.eval_scalar(_x2), Interval(2,2));
+	check(f2.eval(_x2), Interval(2,2));
 }
 
 void TestEval::apply02() {
@@ -264,7 +264,7 @@ void TestEval::apply02() {
 	x[0]=Interval(2,2);
 	x[1]=Interval(3,3);
 
-	check(f2.eval(x).i(), Interval(10,10));
+	check(f2.eval_domain(x).i(), Interval(10,10));
 }
 
 void TestEval::apply03() {
@@ -294,7 +294,7 @@ void TestEval::apply03() {
 	f3.cf.print<Domain>();
 	*/
 
-	check(f3.eval(_x3).i(), Interval(-3,-3));
+	check(f3.eval_domain(_x3).i(), Interval(-3,-3));
 }
 
 void TestEval::apply04() {
@@ -309,7 +309,7 @@ void TestEval::apply04() {
 
 	IntervalVector _x3(1,Interval(3,3));
 
-	check(f3.eval(_x3).i(), Interval(10,10));
+	check(f3.eval_domain(_x3).i(), Interval(10,10));
 }
 
 }

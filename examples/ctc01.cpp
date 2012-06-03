@@ -1,27 +1,34 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : basic01.cpp
+// File        : ctc01.cpp
 // Author      : Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
-// Created     : May 26, 2012
-// Last Update : May 26, 2012
+// Created     : Jun 3, 2012
+// Last Update : Jun 3, 2012
 //============================================================================
+
+
 #include "ibex.h"
 
 using namespace ibex;
 
 int main() {
-	Variable x,y;
-	Function f(x,y,x+y);
+	Variable x("x"),y("y");
+	double d=0.5*sqrt(2);
+	Function f(x,y,VectorImage(sqrt(sqr(x)+sqr(y))-d, sqrt(sqr(x-1.0)+sqr(y-1.0))-d));
+	cout << f << endl;
 
-	double _box[][2]= {{1,2},{3,4}};
-	IntervalVector box(2,_box);
+	double init_box[][2] = { {0,1},{0,1} };
+		IntervalVector box(2,init_box);
 
-	cout << f.eval_scalar(box) << endl;
+	IntervalMatrix M(2,2);
+	f.proj(Vector::zeros(2),box);
+	f.jacobian(box,M);
 
-	return 0;
+	Newton
+
+	cout << M << endl;
 }
-
 
 

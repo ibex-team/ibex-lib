@@ -251,14 +251,14 @@ public:
 	/**
 	 * \brief Calculate f(box)
 	 */
-	Domain& eval(const IntervalVector& box) const;
+	Domain& eval_domain(const IntervalVector& box) const;
 
 	/**
 	 * \brief Calculate f(box).
 	 *
 	 * \pre f must be real-valued
 	 */
-	Interval eval_scalar(const IntervalVector& box) const;
+	Interval eval(const IntervalVector& box) const;
 
 	/**
 	 * \brief Calculate f(box).
@@ -296,6 +296,21 @@ public:
 	 * \brief Project f(x)=y onto x.
 	 */
 	void proj(const Domain& y, IntervalVector& x) const;
+
+	/**
+	 * \brief Project f(x)=y onto x.
+	 */
+	void proj(const Interval& y, IntervalVector& x) const;
+
+	/**
+	 * \brief Project f(x)=y onto x.
+	 */
+	void proj(const IntervalVector& y, IntervalVector& x) const;
+
+	/**
+	 * \brief Project f(x)=y onto x.
+	 */
+	void proj(const IntervalMatrix& y, IntervalVector& x) const;
 
 	CompiledFunction cf; // "public" just for debug
 
@@ -458,16 +473,29 @@ inline bool Function::all_symbols_scalar() const {
 	return __all_symbols_scalar;
 }
 
-inline Interval Function::eval_scalar(const IntervalVector& box) const {
-	return eval(box).i();
+inline Interval Function::eval(const IntervalVector& box) const {
+	return eval_domain(box).i();
 }
 
 inline IntervalVector Function::eval_vector(const IntervalVector& box) const {
-	return eval(box).v();
+	return eval_domain(box).v();
 }
 
 inline IntervalMatrix Function::eval_matrix(const IntervalVector& box) const {
-	return eval(box).m();
+	return eval_domain(box).m();
+}
+
+inline void Function::proj(const Interval& y, IntervalVector& x) const {
+	proj(Domain((Interval&) y),x); // y will not be modified
+}
+
+inline void Function::proj(const IntervalVector& y, IntervalVector& x) const {
+	assert(expr().dim.is_vector());
+	proj(Domain((IntervalVector&) y, expr().dim.type()==Dim::ROW_VECTOR),x); // y will not be modified
+}
+
+inline void Function::proj(const IntervalMatrix& y, IntervalVector& x) const {
+	proj(Domain((IntervalMatrix&) y),x); // y will not be modified
 }
 
 } // namespace ibex

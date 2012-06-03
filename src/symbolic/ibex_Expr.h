@@ -189,6 +189,7 @@ public:
 	const int nb_args;
 
 protected:
+	// TO DO: replace args by Array<...>
 	ExprNAryOp(const ExprNode** args, int n, const Dim& dim);
 };
 
@@ -217,6 +218,11 @@ public:
 	 * \brief Create a vector of expressions.
 	 */
 	static const ExprVector& new_(const ExprNode** components, int n, bool in_rows);
+
+	/**
+	 * \brief Create a vector of expressions.
+	 */
+	static const ExprVector& new_(const Array<const ExprNode>& components, bool in_rows);
 
 	/**
 	 * \brief Create a vector of two expressions.
@@ -254,6 +260,31 @@ public:
 private:
 	ExprVector(const ExprNode**, int n, bool in_row);
 
+};
+
+/**
+ * (syntax sugar for users)
+ */
+class VectorImage {
+public:
+	VectorImage(const ExprNode& f1, const ExprNode& f2, bool in_rows=false) :
+		vec(ExprVector::new_(f1,f2,in_rows)) { }
+	VectorImage(const ExprNode& f1, const ExprNode& f2, const ExprNode& f3, bool in_rows=false) :
+		vec(ExprVector::new_(Array<const ExprNode>(f1,f2,f3),in_rows)) { }
+	VectorImage(const ExprNode& f1, const ExprNode& f2, const ExprNode& f3, const ExprNode& f4, bool in_rows=false) :
+		vec(ExprVector::new_(Array<const ExprNode>(f1,f2,f3,f4),in_rows)) { }
+	VectorImage(const ExprNode& f1, const ExprNode& f2, const ExprNode& f3, const ExprNode& f4, const ExprNode& f5, bool in_rows=false) :
+		vec(ExprVector::new_(Array<const ExprNode>(f1,f2,f3,f4,f5),in_rows)) { }
+	VectorImage(const ExprNode& f1, const ExprNode& f2, const ExprNode& f3, const ExprNode& f4, const ExprNode& f5, const ExprNode& f6, bool in_rows=false) :
+		vec(ExprVector::new_(Array<const ExprNode>(f1,f2,f3,f4,f5,f6),in_rows)) { }
+
+	operator const ExprVector&() const { return vec; }
+
+	operator const ExprNode&() const { return vec; }
+
+	const ExprIndex& operator[](int index) { return vec[index]; }
+
+	const ExprVector& vec;
 };
 
 /**

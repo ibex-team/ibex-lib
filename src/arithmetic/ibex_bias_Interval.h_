@@ -757,7 +757,7 @@ inline bool proj_trigo(const Interval& y, Interval& x, int ftype) {
 		break;
 	}
 
-	if (!found) return false;
+	if (!found) { x.set_empty(); return false; }
 	found = false;
 	i=p2+1;
 
@@ -773,7 +773,7 @@ inline bool proj_trigo(const Interval& y, Interval& x, int ftype) {
 		break;
 	}
 
-	if (!found) return false;
+	if (!found) {  x.set_empty(); return false; }
 
 	x = tmp1 | tmp2;
 

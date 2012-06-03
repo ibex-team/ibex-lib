@@ -34,8 +34,20 @@ bool newton(const Function& f, IntervalVector& box, double prec, double ratio_ga
 	y1= box.mid();
 
 	do {
-
+//		cout.precision(20);
+//		cout << box << endl;
 		f.hansen_matrix(box,J); //may throw EmptyBoxException
+//		f.jacobian(box,J); //may throw EmptyBoxException
+//		for (int i=0; i<m; i++)
+//			for (int j=0; j<n; j++)
+//				if (J[i][j].mag()>1e-10) cout << "(" << i << "," << j << ")=" << J[i][j] << "  ";
+
+		/* remove this block
+		 *
+		 for (int i=0; i<m; i++)
+			for (int j=0; j<n; j++)
+				if (J[i][j].is_unbounded()) return false;
+		 */
 
 		mid = box.mid();
 

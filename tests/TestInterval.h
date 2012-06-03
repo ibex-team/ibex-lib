@@ -203,6 +203,7 @@ public:
 		TEST_ADD(TestInterval::sinProj21);
 		TEST_ADD(TestInterval::sinProj22);
 		TEST_ADD(TestInterval::sinProj23);
+		TEST_ADD(TestInterval::sinProj24);
 
 		TEST_ADD(TestInterval::rel_distance01);
 		TEST_ADD(TestInterval::rel_distance02);
@@ -587,6 +588,7 @@ private:
 	void sinProj21();
 	void sinProj22();
 	void sinProj23();
+	void sinProj24();
 
 	void check_eq(const Interval& x, const Interval& y, bool);
 	void check_add_scal(const Interval& x, double z, const Interval& y_expected);

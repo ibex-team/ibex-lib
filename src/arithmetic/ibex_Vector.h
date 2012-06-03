@@ -132,6 +132,16 @@ public:
 	 */
 	Vector& operator*=(double d);
 
+	/**
+	 * \brief Create the zero-vector of size n.
+	 */
+	static Vector zeros(int n);
+
+	/**
+	 * \brief Create a vector of ones of size n.
+	 */
+	static Vector ones(int n);
+
 private:
 	friend class Matrix;
 
@@ -200,6 +210,14 @@ inline bool Vector::operator!=(const Vector& x) const {
 
 inline int Vector::size() const {
 	return n;
+}
+
+inline Vector Vector::zeros(int n) {
+	return Vector(n,0.0);
+}
+
+inline Vector Vector::ones(int n) {
+	return Vector(n,1.0);
 }
 
 } // end namespace ibex

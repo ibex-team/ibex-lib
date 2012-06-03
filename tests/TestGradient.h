@@ -31,6 +31,9 @@ public:
 		TEST_ADD(TestGradient::add04);
 		//TEST_ADD(TestGradient::add05);
 		TEST_ADD(TestGradient::dist);
+		TEST_ADD(TestGradient::jac01);
+		TEST_ADD(TestGradient::jac02);
+		TEST_ADD(TestGradient::hansen01);
 	}
 
 	void deco01();
@@ -41,6 +44,9 @@ public:
 	void add03();
 	void add04();
 	void dist();
+	void jac01();
+	void jac02();
+	void hansen01();
 
 private:
 	void check_deco(const ExprNode& e);

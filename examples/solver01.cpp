@@ -19,14 +19,15 @@ int main() {
 
 	Array<NumConstraint> a(ctr,30);
 	CtcHC4 hc4(a);
-
+	CtcNewton newton(*p30.f);
+	CtcCompo c(Array<Ctc>(hc4,newton));
 	IntervalVector box = p30.init_box;
 
 	RoundRobin rr;
 
 	CellStack buff;
 
-	Solver s(hc4,rr,buff,1e-03);
+	Solver s(c,rr,buff,1e-03);
 	//s.trace=true;
 	//s.cell_limit = 1000;
 
@@ -34,7 +35,7 @@ int main() {
 
 	cout << "number of solutions=" << sols.size() << endl;
 
-	cout << s.nb_cells << endl;
+	cout << "number of cells=" << s.nb_cells << endl;
 
 
 }

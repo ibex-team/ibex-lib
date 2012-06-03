@@ -66,7 +66,7 @@ void Gradient::gradient(const Function& f, const IntervalVector& box, IntervalVe
 	assert(f.expr().deco.g);
 
 
-	f.eval(box);
+	f.eval_domain(box);
 	f.forward<Gradient>(*this);
 
 	f.expr().deco.g->i()=1.0;
@@ -87,7 +87,7 @@ void Gradient::jacobian(const Function& f, const IntervalVector& box, IntervalMa
 
 	int m=f.expr().dim.vec_size();
 
-	f.eval(box);
+	f.eval_domain(box);
 
 	// calculate the gradient of each component of f
 	for (int i=0; i<m; i++) {

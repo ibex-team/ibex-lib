@@ -38,7 +38,7 @@ int Function::input_size() const {
 	return sum;
 }
 
-Domain& Function::eval(const IntervalVector& box) const {
+Domain& Function::eval_domain(const IntervalVector& box) const {
 	return Eval().eval(*this,box);
 }
 

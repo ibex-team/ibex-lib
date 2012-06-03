@@ -142,7 +142,30 @@ public:
      */
     Matrix& operator*=(const Matrix& m);
 
+    /**
+     * Return the identity matrix n*n
+     */
+    static Matrix eye(int n);
 
+    /**
+     * Return a n*n matrix of zeros
+     */
+    static Matrix zeros(int n);
+
+    /**
+     * Return a m*n matrix of zeros
+     */
+    static Matrix zeros(int m, int n);
+
+    /**
+     * Return a n*n matrix of ones
+     */
+    static Matrix ones(int n);
+
+    /**
+     * Return a m*n matrix of ones
+     */
+    static Matrix ones(int m, int n);
 
 private:
 	int _nb_rows;
@@ -236,6 +259,29 @@ inline void Matrix::set_row(int row, const Vector& v) {
 	M[row]=v;
 }
 
+inline Matrix Matrix::eye(int n) {
+	Matrix M(n,n);
+	for (int i=0; i<n; i++)
+		for (int j=0; j<n; j++)
+			M[i][j]=i==j ? 1.0 : 0.0;
+	return M;
+}
+
+inline Matrix Matrix::zeros(int n) {
+	return Matrix(n,n,0.0);
+}
+
+inline Matrix Matrix::zeros(int m, int n) {
+	return Matrix(m,n,0.0);
+}
+
+inline Matrix Matrix::ones(int n){
+	return Matrix(n,n,1.0);
+}
+
+inline Matrix Matrix::ones(int m, int n) {
+	return Matrix(m,n,1.0);
+}
 
 } // namespace ibex
 #endif // __IBEX_MATRIX_H__

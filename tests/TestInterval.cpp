@@ -335,6 +335,12 @@ void TestInterval::sinProj21() { checkproj_trigo(Interval(sin(0.5),1.0), Interva
 void TestInterval::sinProj22() { checkproj_trigo(Interval(sin(0.5),1.0), Interval(0.5,piU),          Interval(0.5,piU-0.5)); }
 void TestInterval::sinProj23() { checkproj_trigo(Interval(sin(0.5),1.0), Interval(-3*piU/2,piU),     Interval(-3*piU/2,piU-0.5)); }
 
+// not the same case as before because
+// when the image is > 1 or < -1 the box x is
+// emptied by the call to asin (not by the
+//  intersection scheme)
+void TestInterval::sinProj24() { checkproj_trigo(Interval(1.0),          Interval(4.0,6.0),          Interval::EMPTY_SET); }
+
 void TestInterval::distance01() { check(ibex::distance(Interval(0,10), Interval(-5,5)), 5); }
 void TestInterval::distance02() { check(ibex::distance(Interval(0,10), Interval(5,10)), 5); }
 void TestInterval::distance03() { check(ibex::distance(Interval(0,10), Interval(5,15)), 5); }

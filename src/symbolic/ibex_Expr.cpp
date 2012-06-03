@@ -165,7 +165,19 @@ const ExprVector& ExprVector::new_(const ExprNode& e1, const ExprNode& e2, bool 
 	const ExprNode** comp=new const ExprNode*[2];
 	comp[0]=&e1;
 	comp[1]=&e2;
-	return *new ExprVector(comp, 2, in_row);
+	ExprVector* res=new ExprVector(comp, 2, in_row);
+	delete[] comp;
+	return *res;
+}
+
+const ExprVector& ExprVector::new_(const Array<const ExprNode>& components, bool in_rows) {
+	int n=components.size();
+	const ExprNode** nodes=new const ExprNode*[n];
+	for (int i=0; i<n; i++)
+		nodes[i]=&components[i];
+	ExprVector* res=new ExprVector(nodes,n,in_rows);
+	delete[] nodes;
+	return *res;
 }
 
 ExprVector::ExprVector(const ExprNode** comp, int n, bool in_row) :

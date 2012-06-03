@@ -190,6 +190,26 @@ Vector IntervalVector::mid() const {
 	return mV;
 }
 
+Vector IntervalVector::mig() const {
+	assert(!is_empty());
+
+	Vector res(size());
+	for (int i=0; i<size(); i++) {
+		res[i]=(*this)[i].mig();
+	}
+	return res;
+}
+
+Vector IntervalVector::mag() const {
+	assert(!is_empty());
+
+	Vector res(size());
+	for (int i=0; i<size(); i++) {
+		res[i]=(*this)[i].mag();
+	}
+	return res;
+}
+
 bool IntervalVector::is_flat() const {
 	if (is_empty()) return true;
 	for (int i=0; i<size(); i++)

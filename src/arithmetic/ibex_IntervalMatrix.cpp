@@ -139,6 +139,26 @@ Matrix IntervalMatrix::mid() const {
 	return mV;
 }
 
+Matrix IntervalMatrix::mig() const {
+	assert(!is_empty());
+
+	Matrix res(nb_rows(), nb_cols());
+	for (int i=0; i<nb_rows(); i++) {
+		res[i]=(*this)[i].mig();
+	}
+	return res;
+}
+
+Matrix IntervalMatrix::mag() const {
+	assert(!is_empty());
+
+	Matrix res(nb_rows(), nb_cols());
+	for (int i=0; i<nb_rows(); i++) {
+		res[i]=(*this)[i].mag();
+	}
+	return res;
+}
+
 void IntervalMatrix::resize(int nb_rows, int nb_cols) {
 	assert(nb_rows>0);
 	assert(nb_cols>0);

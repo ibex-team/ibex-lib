@@ -28,13 +28,13 @@ void Optimizer::monotonicity_analysis(IntervalVector& box) {
 
 bool Optimizer::is_feasible(const IntervalVector& box) {
 	for (int j=0; j<g.size(); j++)
-		if (g[j].eval_scalar(box).lb()>0) return false;
+		if (g[j].eval(box).lb()>0) return false;
 	return true;
 }
 
 bool Optimizer::is_inner(const IntervalVector& box) {
 	for (int j=0; j<g.size(); j++)
-		if (g[j].eval_scalar(box).ub()>0) return false;
+		if (g[j].eval(box).ub()>0) return false;
 	return true;
 }
 
@@ -55,7 +55,7 @@ bool Optimizer::in_HC4(IntervalVector& box){
 /* last update: GCH  */
 bool Optimizer::check_candidate(const Vector& pt, bool _is_inner) {
 
-	Interval fx=f.eval_scalar(pt);
+	Interval fx=f.eval(pt);
 
 	if (fx.is_empty()) { // means: outside of the definition domain of the function
 		return false;

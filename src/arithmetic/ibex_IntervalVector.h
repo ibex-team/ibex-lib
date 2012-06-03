@@ -201,6 +201,18 @@ public:
 	Vector mid() const;
 
 	/**
+	 * \brief Return the mignitude vector.
+	 * \pre (*this) must be nonempty
+	 */
+	Vector mig() const;
+
+	/**
+	 * \brief Return the magnitude vector.
+	 * \pre (*this) must be nonempty
+	 */
+	Vector mag() const;
+
+	/**
 	 * \brief Return true iff this IntervalVector is empty
 	 */
 	bool is_empty() const;

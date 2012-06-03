@@ -137,6 +137,18 @@ public:
 	Matrix mid() const;
 
 	/**
+	 * \brief Return the mignitude matrix.
+	 * \pre (*this) must be nonempty
+	 */
+	Matrix mig() const;
+
+	/**
+	 * \brief Return the magnitude matrix.
+	 * \pre (*this) must be nonempty
+	 */
+	Matrix mag() const;
+
+	/**
 	 * \brief Return true iff this IntervalMatrix is empty
 	 */
 	bool is_empty() const;

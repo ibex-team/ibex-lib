@@ -18,7 +18,7 @@ CtcNewton::CtcNewton(const Function& f, double ceil, double prec, double ratio) 
 		Ctc(f.nb_symbols()), f(f), ceil(ceil), prec(prec), gauss_seidel_ratio(ratio) { }
 
 void CtcNewton::contract(IntervalVector& box) {
-	if (box.max_diam()>ceil) return;
+	if (!(box.max_diam()<=ceil)) return;
 	else newton(f,box,prec,gauss_seidel_ratio);
 
 }
