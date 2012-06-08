@@ -14,20 +14,23 @@
 namespace ibex {
 
 IntervalVector qinter(const Array<IntervalVector>& _boxes, int q) {
+	assert(_boxes.size()>0);
+	int n=_boxes[0].size();
 
 	// ====== remove the empty boxes from the list ====
 	int p=0; // count the number of non-empty boxes
 	for (int i=0; i<_boxes.size(); i++) {
 		if (!_boxes[i].is_empty()) p++;
 	}
+
+	if (p==0) return IntervalVector::empty(n);
+
 	Array<IntervalVector> boxes(p);
 	int j=0;
 	for (int i=0; i<_boxes.size(); i++) {
 		if (!_boxes[i].is_empty()) boxes.set_ref(j++,_boxes[i]);
 	}
 	// ================================================
-
-	int n=boxes[0].size();
 
 	double x[n][2*p];
 	int ind[n];     // ind[i] is the current index in x[(d+i)%n]

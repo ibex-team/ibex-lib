@@ -55,16 +55,36 @@ void GradDecorator::visit(const ExprVector& v) {
 		visit(v.arg(i));
 }
 
-void GradDecorator::visit(const ExprApply&) {
-
+void GradDecorator::visit(const ExprApply& v) {
+	v.deco.g = new Domain(v.dim);
+	for (int i=0; i<v.nb_args; i++)
+		visit(v.arg(i));
 }
 
+void Gradient::gradient(const Function& f, const Array<Domain>& d, IntervalVector& g) const {
+	assert(f.expr().dim.is_scalar());
+	assert(f.expr().deco.d);
+	assert(f.expr().deco.g);
+
+	Eval().eval(f,d);
+	f.forward<Gradient>(*this);
+
+	f.expr().deco.g->i()=1.0;
+	f.backward<Gradient>(*this);
+
+	if (f.all_symbols_scalar()) {
+		for (int i=0; i<f.nb_symbols(); i++) {
+			g[i]=f.symbol_deriv[i].i();
+		}
+	} else {
+		load(g,f.symbol_deriv);
+	}
+}
 
 void Gradient::gradient(const Function& f, const IntervalVector& box, IntervalVector& g) const {
 	assert(f.expr().dim.is_scalar());
 	assert(f.expr().deco.d);
 	assert(f.expr().deco.g);
-
 
 	f.eval_domain(box);
 	f.forward<Gradient>(*this);
@@ -76,9 +96,40 @@ void Gradient::gradient(const Function& f, const IntervalVector& box, IntervalVe
 		for (int i=0; i<f.nb_symbols(); i++) {
 			g[i]=f.symbol_deriv[i].i();
 		}
+	} else {
+		load(g,f.symbol_deriv);
 	}
 }
 
+
+void Gradient::jacobian(const Function& f, const Array<Domain>& d, IntervalMatrix& J) const {
+	assert(f.expr().dim.is_vector());
+	assert(f.expr().deco.d);
+	assert(f.expr().deco.g);
+
+	int m=f.expr().dim.vec_size();
+
+	Eval().eval(f,d);
+
+	// calculate the gradient of each component of f
+	for (int i=0; i<m; i++) {
+
+		f.forward<Gradient>(*this);
+
+		for (int i2=0; i2<m; i2++) {
+			f.expr().deco.g->v()[i2]=(i2==i?1.0:0.0);
+		}
+
+		f.backward<Gradient>(*this);
+
+		if (f.all_symbols_scalar())
+			for (int j=0; j<f.nb_symbols(); j++) {
+				J[i][j]=f.symbol_deriv[j].i();
+			}
+		else
+			load(J[i],f.symbol_deriv);
+	}
+}
 
 void Gradient::jacobian(const Function& f, const IntervalVector& box, IntervalMatrix& J) const {
 	assert(f.expr().dim.is_vector());
@@ -108,7 +159,6 @@ void Gradient::jacobian(const Function& f, const IntervalVector& box, IntervalMa
 			load(J[i],f.symbol_deriv);
 	}
 }
-
 
 void Gradient::symbol_fwd(const ExprSymbol& s, ExprLabel& y) {
 	switch (s.type()) {
@@ -161,8 +211,34 @@ void Gradient::vector_bwd(const ExprVector& v, ExprLabel** compL, const ExprLabe
 	}
 }
 
-void Gradient::apply_bwd (const ExprApply&, ExprLabel** x, const ExprLabel& y) {
-// TO DO
+void Gradient::apply_bwd (const ExprApply& a, ExprLabel** x, const ExprLabel& y) {
+
+	Array<Domain> d(a.nb_args);
+	Array<Domain> g(a.nb_args);
+	int n=0;
+
+	for (int i=0; i<a.nb_args; i++) {
+		d.set_ref(i,*x[i]->d);
+		g.set_ref(i,*x[i]->g);
+		n+=x[i]->d->dim.size();
+	}
+
+	// we unvectorize the components of the gradient.
+	IntervalVector tmp_g(n);
+
+	if (a.func.expr().dim.is_scalar()) {
+		gradient(a.func,d,tmp_g);
+		tmp_g*=y.g->i();   // pre-multiplication by y.g
+		load(g,tmp_g);
+
+	} else {
+		assert(a.func.expr().dim.is_vector()); // matrix-valued function not implemented...
+		int m=a.func.expr().dim.vec_size();
+		IntervalMatrix J(m,n);
+		jacobian(a.func,d,J);
+		tmp_g = y.g->v()*J; // pre-multiplication by y.g
+		load(g,tmp_g);
+	}
 }
 
 void Gradient::sign_bwd  (const ExprSign& e,  ExprLabel& exprL, const ExprLabel& result) {

@@ -45,7 +45,7 @@ const char* index_symbol_2_string(const char* symbol_name, int index1, int index
 	if (index2!=-1) k+=index_2_string(&buff[k], index2);
 	if (index3!=-1) k+=index_2_string(&buff[k], index3);
 	buff[k++]='\0';
-	cout << "debug name=" << buff << endl;
+	//cout << "debug name=" << buff << endl;
 	return buff;
 }
 
@@ -127,7 +127,7 @@ protected:
 class ExprCopy : public FunctionVisitor {
 protected:
 	const ExprNode** peers;
-	vector<const ExprSymbol*> dest_symbols;
+	std::vector<const ExprSymbol*> dest_symbols;
 	int root_id;
 	bool unvectorize;
 

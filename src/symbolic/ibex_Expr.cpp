@@ -190,11 +190,19 @@ ExprVector::ExprVector(const ExprNode** comp, int n, bool in_row) :
 static char generated_name_buff[MAX_NAME_SIZE];
 static int generated_count=0;
 
-const ExprSymbol& ExprSymbol::new_(const Dim& dim) {
+static char* next_generated_name() {
 	sprintf(generated_name_buff, BASE_SYMB_NAME);
 	snprintf(&generated_name_buff[strlen(BASE_SYMB_NAME)], MAX_NAME_SIZE-strlen(BASE_SYMB_NAME), "%d", generated_count++);
+	return generated_name_buff;
+}
 
-	return new_(generated_name_buff, dim);
+ExprSymbol::ExprSymbol(const Dim& dim) : ExprNode(0,1,dim),
+		name(strdup(next_generated_name())), key(-1) {
+}
+
+const ExprSymbol& ExprSymbol::new_(const Dim& dim) {
+	return new_(next_generated_name(), dim);
+	//return new_(generated_name_buff, dim);
 }
 
 ExprConstant::ExprConstant(const Interval& value) : ExprNode(0,1,Dim(0,0,0)), value(1,1) {

@@ -15,7 +15,7 @@ namespace ibex {
 
 ExprLabel::ExprLabel() : f(NULL), d(NULL), g(NULL) { }
 
-ostream& operator<<(ostream& os, const ExprLabel& l) {
+std::ostream& operator<<(std::ostream& os, const ExprLabel& l) {
 	if (l.d) os << "d=" << *l.d << " ";
 	if (l.g) os << "g=" << *l.g << " ";
 	return os;

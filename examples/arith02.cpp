@@ -43,20 +43,20 @@ int main() {
 	}
 
 	{
-//	double _x[][2]={{1,1},{1,1},{1,1}};
-//	IntervalVector x(3,_x);
-//	IntervalMatrix M=Matrix::eye(3) + Interval(-0.1,0.1)*Matrix::ones(3);
-//	cout << "x before=" << x << endl;
-//	cout << "M before=" << M << endl << endl;
-//	cout << "M*x=" << M*x << endl << endl;
-//
-//	M[2][2]=Interval(0.5,1.1);
-//	IntervalVector y=Vector::ones(3);
-//	cout << "M modified=" << M << endl << endl;
-//
-//	proj_mul(y,M,x,1e-04);
-//	cout << "x after=" << x << endl;
-//	cout << "M after=" << M << endl << endl;
+	double _x[][2]={{1,1},{1,1},{1,1}};
+	IntervalVector x(3,_x);
+	IntervalMatrix M=Matrix::eye(3) + Interval(-0.1,0.1)*Matrix::ones(3);
+	cout << "x before=" << x << endl;
+	cout << "M before=" << M << endl << endl;
+	cout << "M*x=" << M*x << endl << endl;
+
+	M[2][2]=Interval(0.5,1.1);
+	IntervalVector y=Vector::ones(3);
+	cout << "M modified=" << M << endl << endl;
+
+	proj_mul(y,M,x,1e-04);
+	cout << "x after=" << x << endl;
+	cout << "M after=" << M << endl << endl;
 
 	}
 

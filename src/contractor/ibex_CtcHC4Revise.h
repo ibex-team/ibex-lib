@@ -23,7 +23,7 @@ namespace ibex {
  * \brief HC4Revise contractor.
  *
  */
-class CtcHC4Revise: public Ctc {
+class CtcProj: public Ctc {
 
 public:
 	/**
@@ -31,9 +31,9 @@ public:
 	 *
 	 * \param equality If true: f(x)=0, otherwise: f(x)<=0.
 	 */
-	CtcHC4Revise(Function& f, bool equality);
+	CtcProj(Function& f, bool equality=true);
 
-	CtcHC4Revise(const NumConstraint& ctr);
+	CtcProj(const NumConstraint& ctr);
 
 	/**
 	 * \brief Contract the box.

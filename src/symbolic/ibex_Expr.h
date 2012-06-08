@@ -265,17 +265,17 @@ private:
 /**
  * (syntax sugar for users)
  */
-class VectorImage {
+class Return {
 public:
-	VectorImage(const ExprNode& f1, const ExprNode& f2, bool in_rows=false) :
+	Return(const ExprNode& f1, const ExprNode& f2, bool in_rows=false) :
 		vec(ExprVector::new_(f1,f2,in_rows)) { }
-	VectorImage(const ExprNode& f1, const ExprNode& f2, const ExprNode& f3, bool in_rows=false) :
+	Return(const ExprNode& f1, const ExprNode& f2, const ExprNode& f3, bool in_rows=false) :
 		vec(ExprVector::new_(Array<const ExprNode>(f1,f2,f3),in_rows)) { }
-	VectorImage(const ExprNode& f1, const ExprNode& f2, const ExprNode& f3, const ExprNode& f4, bool in_rows=false) :
+	Return(const ExprNode& f1, const ExprNode& f2, const ExprNode& f3, const ExprNode& f4, bool in_rows=false) :
 		vec(ExprVector::new_(Array<const ExprNode>(f1,f2,f3,f4),in_rows)) { }
-	VectorImage(const ExprNode& f1, const ExprNode& f2, const ExprNode& f3, const ExprNode& f4, const ExprNode& f5, bool in_rows=false) :
+	Return(const ExprNode& f1, const ExprNode& f2, const ExprNode& f3, const ExprNode& f4, const ExprNode& f5, bool in_rows=false) :
 		vec(ExprVector::new_(Array<const ExprNode>(f1,f2,f3,f4,f5),in_rows)) { }
-	VectorImage(const ExprNode& f1, const ExprNode& f2, const ExprNode& f3, const ExprNode& f4, const ExprNode& f5, const ExprNode& f6, bool in_rows=false) :
+	Return(const ExprNode& f1, const ExprNode& f2, const ExprNode& f3, const ExprNode& f4, const ExprNode& f5, const ExprNode& f6, bool in_rows=false) :
 		vec(ExprVector::new_(Array<const ExprNode>(f1,f2,f3,f4,f5,f6),in_rows)) { }
 
 	operator const ExprVector&() const { return vec; }
@@ -372,6 +372,11 @@ public:
 	static const ExprSymbol& new_(const char* name, const Dim& dim=Dim(0,0,0));
 
 private:
+	friend class Variable;
+
+	/** Create a symbol. */
+	ExprSymbol(const Dim& dim);
+
 	/** Create a symbol. */
 	ExprSymbol(const char* name, const Dim& dim);
 
@@ -384,17 +389,29 @@ private:
  */
 class Variable {
 public:
-	Variable(const Dim& dim=Dim(0,0,0)) : symbol(ExprSymbol::new_(dim)) { }
+	Variable(int n) : symbol(new ExprSymbol(Dim(0,0,n))) { }
 
-	Variable(const char* name, const Dim& dim=Dim(0,0,0)) : symbol(ExprSymbol::new_(name,dim)) { }
+	Variable(int n, const char* name) : symbol(new ExprSymbol(name, Dim(0,0,n))) { }
 
-	operator const ExprSymbol&() const { return symbol; }
+	Variable(const Dim& dim=Dim(0,0,0)) : symbol(new ExprSymbol(dim)) { }
 
-	operator const ExprNode&() const { return symbol; }
+	Variable(const char* name, const Dim& dim=Dim(0,0,0)) : symbol(new ExprSymbol(name,dim)) { }
 
-	const ExprIndex& operator[](int index) { return symbol[index]; }
+	operator const ExprSymbol&() const {
+		if (symbol->deco.f) // already used build new one.
+			symbol=new ExprSymbol(symbol->name, symbol->dim);
+		return *symbol;
+	}
 
-	const ExprSymbol& symbol;
+	operator const ExprNode&() const {
+		if (symbol->deco.f) // already used build new one.
+			symbol=new ExprSymbol(symbol->name, symbol->dim);
+		return *symbol;
+	}
+
+	const ExprIndex& operator[](int index) { return (*symbol)[index]; }
+
+	mutable ExprSymbol* symbol;
 };
 
 /**

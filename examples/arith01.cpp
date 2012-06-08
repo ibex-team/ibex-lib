@@ -11,35 +11,38 @@
 
 #include "ibex.h"
 
+using namespace std;
 using namespace ibex;
 
 int main() {
 	{
 //	Interval x(1,2);
 //	Interval y(3,4);
-//	cout << x+y << endl;
-//	cout << sin(x+1) << endl;
+//	cout << "x+y=" << x+y << endl;
+//	cout << "sin(x+1)=" << sin(x+1) << endl;
 	}
 
 	{
 //	double _x[][2]={{0,1},{0,1},{0,1}};
 //	IntervalVector x(3,_x);
+//
 //	double _M[][2]={{0,1},{0,1},{0,1},
 //					{0,2},{0,2},{0,2}};
 //	IntervalMatrix M(3,3,_M);
-//	cout << M*x << endl;
-//	cout << M.transpose()*x << endl;
+//
+//	cout << "M*x=" << M*x << endl;
+//	cout << "M'*x=" << M.transpose()*x << endl;
 	}
 
 	{
-//	double _x[][2]={{0,1},{0,1},{0,1}};
-//	IntervalVector x(3,_x);
-//	double _M[][2]={{0,1},{0,1},{0,1},
-//						{0,2},{0,2},{0,2}};
-//	IntervalMatrix M(3,3,_M);
-//	Matrix m2=M.mag();
-//	Vector x2=x.mid();
-//	cout << m2*x2 << endl;
+	double _x[][2]={{0,1},{0,1},{0,1}};
+	IntervalVector x(3,_x);
+	double _M[][2]={{0,1},{0,1},{0,1},
+						{0,2},{0,2},{0,2}};
+	IntervalMatrix M(3,3,_M);
+	Matrix m2=M.mag();
+	Vector x2=x.mid();
+	cout << m2*x2 << endl;
 	}
 
 	return 0;

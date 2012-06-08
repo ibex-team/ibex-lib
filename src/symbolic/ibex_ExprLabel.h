@@ -47,7 +47,7 @@ public:
 	bool visited;
 };
 
-ostream& operator<<(ostream& os, const ExprLabel&);
+std::ostream& operator<<(std::ostream& os, const ExprLabel&);
 
 } // end namespace ibex
 

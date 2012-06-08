@@ -17,7 +17,7 @@ namespace {
 Array<Ctc> convert(const Array<NumConstraint>& csp) {
 	std::vector<Ctc*> vec;
 	for (int i=0; i<csp.size(); i++) {
-		vec.push_back(new CtcHC4Revise(csp[i]));
+		vec.push_back(new CtcProj(csp[i]));
 	}
 	return vec;
 }

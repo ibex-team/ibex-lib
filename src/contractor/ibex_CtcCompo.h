@@ -31,6 +31,8 @@ public:
 	 */
 	CtcCompo(const Array<Ctc>& list, bool incremental=false, double ratio=default_ratio);
 
+	CtcCompo(Ctc& c1, Ctc& c2, bool incremental=false, double ratio=default_ratio);
+
 	/**
 	 * \brief build a composition of two contractors
 	 *

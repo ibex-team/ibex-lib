@@ -258,7 +258,7 @@ inline std::ostream& print(std::ostream& os, const M& m) {
 			if (j<m.nb_cols()-1) os << " ; ";
 		}
 		os << ")";
-		if (i<m.nb_rows()-1) os << endl;
+		if (i<m.nb_rows()-1) os << std::endl;
 	}
 	os << ")";
 	return os;

@@ -209,6 +209,59 @@ void load(IntervalVector& box, const Array<Domain>& domains);
  */
 void load(Array<Domain>& x, const Array<Domain>& y);
 
+/*
+ * \brief x*=a.
+ *
+void mul(Array<Domain>& x, const Interval& a) {
+	for (int i=0; i<x.size(); i++) {
+		switch(x[i].dim.type()) {
+		case Dim::SCALAR:    x[i].i()*=a; break;
+		case Dim::ROW_VECTOR:
+		case Dim::COL_VECTOR: x[i].v()*=a; break;
+		case Dim::MATRIX:     x[i].m()*=a; break;
+		case Dim::MATRIX_ARRAY: assert(false); break;
+		}
+	}
+}
+*/
+
+/*
+ * \brief Set z to x*M (x is a row vector)
+ *
+void mul(const Array<Domain>* M, const IntervalVector&x, Array<Domain>&y) {
+	int m=x.size();
+	int n=M[0].size();
+	for (int i=0; i<n; i++) {
+		for (int j=0; j<m; j++)
+			assert(y[j].dim.type()==M[i][j].dim.type);
+	}
+
+	for (int j=0; j<n; j++) {
+		switch(y[j].dim.type()) {
+		case Dim::SCALAR     :
+		{
+			y[j].i()=0;
+			for (int i=0; i<m; i++) y[j].i()+=x[i]*M[i][j].i();
+		}
+		break;
+		case Dim::ROW_VECTOR :
+		case Dim::COL_VECTOR :
+		{
+			y[j].v().clear();
+			for (int i=0; i<m; i++) y[j].v()+=x[i]*M[i][j].v();
+		}
+		break;
+		case Dim::MATRIX     :
+		{
+			y[j].m().clear();
+			for (int i=0; i<m; i++) y[j].m()+=x[i]*M[i][j].m();
+		}
+		break;
+		case Dim::MATRIX_ARRAY : assert(false); break;
+		}
+	}
+}*/
+
 } // end namespace
 
 #endif // __IBEX_DOMAIN_H__

@@ -13,15 +13,15 @@
 
 namespace ibex {
 
-CtcHC4Revise::CtcHC4Revise(Function& f, bool equality) : Ctc(f.input_size()), ctr(f,equality) {
+CtcProj::CtcProj(Function& f, bool equality) : Ctc(f.input_size()), ctr(f,equality) {
 
 }
 
-CtcHC4Revise::CtcHC4Revise(const NumConstraint& ctr) : Ctc(ctr.f.nb_symbols()), ctr(ctr) {
+CtcProj::CtcProj(const NumConstraint& ctr) : Ctc(ctr.f.nb_symbols()), ctr(ctr) {
 
 }
 
-void CtcHC4Revise::contract(IntervalVector& box) {
+void CtcProj::contract(IntervalVector& box) {
 	const Dim& d=ctr.f.expr().dim;
 	Domain root_label(d);
 	Interval right_cst(ctr.equality? 0: NEG_INFINITY, 0);
@@ -42,12 +42,12 @@ void CtcHC4Revise::contract(IntervalVector& box) {
 	}
 }
 
-void CtcHC4Revise::contract(IntervalVector& box, const Indicators& idc) {
+void CtcProj::contract(IntervalVector& box, const Indicators& idc) {
 	if (idc.impact_on && idc.impact.all_unset()) return;
 	contract(box);
 }
 
-bool CtcHC4Revise::can_contract(int v) const {
+bool CtcProj::can_contract(int v) const {
 	return ctr.f.used(v);
 }
 

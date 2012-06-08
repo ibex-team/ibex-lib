@@ -57,9 +57,19 @@ class Gradient : public FwdAlgorithm, public BwdAlgorithm {
 
 public:
 	/**
+	 * \brief Calculate the gradient of f on the domains \a d and store the result in \a g.
+	 */
+	void gradient(const Function&, const Array<Domain>& d, IntervalVector& g) const;
+
+	/**
 	 * \brief Calculate the gradient of f on the box \a box and store the result in \a g.
 	 */
 	void gradient(const Function& f, const IntervalVector& box, IntervalVector& g) const;
+
+	/**
+	 * \brief Calculate the Jacobian on the domains \a d and store the result in \a J.
+	 */
+	void jacobian(const Function& f, const Array<Domain>& d, IntervalMatrix& J) const;
 
 	/**
 	 * \brief Calculate the Jacobian on the box \a box and store the result in \a J.

@@ -32,6 +32,16 @@ CtcCompo::CtcCompo(const Array<Ctc>& list, bool incremental, double ratio) :
 	}
 }
 
+CtcCompo::CtcCompo(Ctc& c1, Ctc& c2, bool incremental, double ratio) :
+		Ctc(c1.nb_var), list(Array<Ctc>(c1,c2)), incremental(incremental),
+		ratio(ratio), idc(new Indicators*[list.size()]) {
+
+	for (int i=0; i<list.size(); i++) {
+		assert(list[i].nb_var==nb_var);
+		idc[i]=new Indicators(nb_var);
+		idc[i]->impact.set_all();
+	}
+}
 void CtcCompo::contract(IntervalVector& box) {
 	for (int i=0; i<list.size(); i++) {
 		list[i].contract(box);

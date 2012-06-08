@@ -14,6 +14,8 @@
 #include <stdlib.h>
 #include <math.h> // for fabs
 
+using namespace std;
+
 namespace ibex {
 
 void Optimizer::monotonicity_analysis(IntervalVector& box) {
