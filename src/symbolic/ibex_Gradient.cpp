@@ -15,15 +15,28 @@
 namespace ibex {
 
 void GradDecorator::decorate(const Function& f) const {
+	f.expr().reset_visited();
 	((GradDecorator&) *this).visit(f.expr()); // // cast -> we know *this will not be modified
 }
 
-void GradDecorator::visit(const ExprNode& n) {
-	n.acceptVisitor(*this);
+void GradDecorator::visit(const ExprNode& e) {
+	if (!e.deco.visited) {
+		e.deco.visited=true;
+		e.acceptVisitor(*this);
+	}
 }
 
 void GradDecorator::visit(const ExprIndex& idx) {
-	idx.deco.g = new Domain(idx.dim);
+
+	visit(idx.expr);
+	Domain& l=(Domain&) *idx.expr.deco.g;
+	switch (idx.type()) {
+	case Dim::SCALAR:       idx.deco.g = new Domain(l.v()[idx.index]); break;
+	case Dim::ROW_VECTOR:   idx.deco.g = new Domain(l.m()[idx.index],idx.type()==Dim::ROW_VECTOR); break;
+	case Dim::COL_VECTOR:   assert(false); /* see comment in ExprVector */ break;
+	case Dim::MATRIX:       idx.deco.g = new Domain(l.ma()[idx.index]); break;
+	case Dim::MATRIX_ARRAY: assert(false); /* impossible */ break;
+	}
 }
 
 void GradDecorator::visit(const ExprSymbol& s) {
@@ -36,6 +49,8 @@ void GradDecorator::visit(const ExprConstant& c) {
 
 void GradDecorator::visit(const ExprNAryOp& a) {
 	a.deco.g = new Domain(a.dim);
+	for (int i=0; i<a.nb_args; i++)
+		visit(a.arg(i));
 }
 
 void GradDecorator::visit(const ExprBinaryOp& b) {
@@ -47,18 +62,6 @@ void GradDecorator::visit(const ExprBinaryOp& b) {
 void GradDecorator::visit(const ExprUnaryOp& u) {
 	u.deco.g = new Domain(u.dim);
 	visit(u.expr);
-}
-
-void GradDecorator::visit(const ExprVector& v) {
-	v.deco.g = new Domain(v.dim);
-	for (int i=0; i<v.nb_args; i++)
-		visit(v.arg(i));
-}
-
-void GradDecorator::visit(const ExprApply& v) {
-	v.deco.g = new Domain(v.dim);
-	for (int i=0; i<v.nb_args; i++)
-		visit(v.arg(i));
 }
 
 void Gradient::gradient(const Function& f, const Array<Domain>& d, IntervalVector& g) const {
@@ -113,7 +116,6 @@ void Gradient::jacobian(const Function& f, const Array<Domain>& d, IntervalMatri
 
 	// calculate the gradient of each component of f
 	for (int i=0; i<m; i++) {
-
 		f.forward<Gradient>(*this);
 
 		for (int i2=0; i2<m; i2++) {
@@ -160,6 +162,16 @@ void Gradient::jacobian(const Function& f, const IntervalVector& box, IntervalMa
 	}
 }
 
+void Gradient::cst_fwd(const ExprConstant& c, ExprLabel& y) {
+	switch (c.type()) {
+	case Dim::SCALAR:       y.g->i()=0; break;
+	case Dim::ROW_VECTOR:
+	case Dim::COL_VECTOR:   y.g->v().clear(); break;
+	case Dim::MATRIX:       y.g->m().clear(); break;
+	case Dim::MATRIX_ARRAY: assert(false); break;
+	}
+}
+
 void Gradient::symbol_fwd(const ExprSymbol& s, ExprLabel& y) {
 	switch (s.type()) {
 		case Dim::SCALAR:       y.g->i()=0; break;
@@ -187,18 +199,6 @@ void Gradient::apply_fwd(const ExprApply& a, ExprLabel**, ExprLabel& y) {
 		}
 }
 
-void Gradient::index_bwd (const ExprIndex& idx, ExprLabel& exprL, const ExprLabel& result) {
-	exprL.d->v()[idx.index] += result.d->i();
-
-	switch (idx.type()) {
-	case Dim::SCALAR:       exprL.g->v()[idx.index]+=result.g->i(); break;
-	case Dim::ROW_VECTOR:   exprL.g->m()[idx.index]+=result.g->v(); break;
-	case Dim::COL_VECTOR:   assert(false); break;
-	case Dim::MATRIX:       exprL.g->ma()[idx.index]+=result.g->m(); break;
-	case Dim::MATRIX_ARRAY: assert(false); /* impossible */ break;
-	}
-}
-
 void Gradient::vector_bwd(const ExprVector& v, ExprLabel** compL, const ExprLabel& y) {
 	if (v.dim.is_vector()) {
 		for (int i=0; i<v.length(); i++) compL[i]->g->i()+=y.g->v()[i];
@@ -224,19 +224,23 @@ void Gradient::apply_bwd (const ExprApply& a, ExprLabel** x, const ExprLabel& y)
 	}
 
 	// we unvectorize the components of the gradient.
+	IntervalVector old_g(n);
+	load(old_g, g);
 	IntervalVector tmp_g(n);
 
 	if (a.func.expr().dim.is_scalar()) {
 		gradient(a.func,d,tmp_g);
-		tmp_g*=y.g->i();   // pre-multiplication by y.g
+		//cout << "tmp-g=" << tmp_g << endl;
+		tmp_g *= y.g->i();   // pre-multiplication by y.g
+		tmp_g += old_g;      // addition to the old value of g
 		load(g,tmp_g);
-
 	} else {
 		assert(a.func.expr().dim.is_vector()); // matrix-valued function not implemented...
 		int m=a.func.expr().dim.vec_size();
 		IntervalMatrix J(m,n);
 		jacobian(a.func,d,J);
 		tmp_g = y.g->v()*J; // pre-multiplication by y.g
+		tmp_g += old_g;
 		load(g,tmp_g);
 	}
 }

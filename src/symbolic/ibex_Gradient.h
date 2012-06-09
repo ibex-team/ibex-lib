@@ -43,10 +43,6 @@ protected:
 	virtual void visit(const ExprBinaryOp& b);
 	/** Visit an unary operator. */
 	virtual void visit(const ExprUnaryOp& u);
-	/** Visit a vector of expressions. */
-	virtual void visit(const ExprVector& v);
-	/** Visit a function application. */
-	virtual void visit(const ExprApply&);
 };
 
 /**
@@ -76,9 +72,9 @@ public:
 	 */
 	void jacobian(const Function& f, const IntervalVector& box, IntervalMatrix& J) const;
 
-	inline void index_fwd(const ExprIndex& e, const ExprLabel& x, ExprLabel& y) { }
+	inline void index_fwd(const ExprIndex& e, const ExprLabel& x, ExprLabel& y) { /* nothing to do */ }
 	       void vector_fwd(const ExprVector& v, const ExprLabel** s, ExprLabel& y);
-	inline void cst_fwd(const ExprConstant& c, ExprLabel& y) { }
+	       void cst_fwd(const ExprConstant& c, ExprLabel& y);
 	       void symbol_fwd(const ExprSymbol& s, ExprLabel& y);
 	       void apply_fwd(const ExprApply& a, ExprLabel** argL, ExprLabel& y);
 	inline void add_fwd(const ExprAdd&, const ExprLabel, const ExprLabel, ExprLabel& y)     { y.g->i()=0; }
@@ -121,14 +117,14 @@ public:
 	inline void sub_M_fwd(const ExprSub&, const ExprLabel&, const ExprLabel&, ExprLabel& y)  { y.g->m().clear(); }
 
 
-	inline void index_bwd (const ExprIndex&,   ExprLabel& x,                 const ExprLabel& y);
+	       void index_bwd (const ExprIndex&,   ExprLabel& x,                 const ExprLabel& y) { }
 	       void vector_bwd(const ExprVector&,  ExprLabel** x,                const ExprLabel& y);
-	inline void symbol_bwd(const ExprSymbol&,                                const ExprLabel& y) { /* nothing to do */ }
+	inline void symbol_bwd(const ExprSymbol&,                                const ExprLabel& y) { /*cout << "symbol bwd=" << y.g->v() << endl;*/ /* nothing to do */ }
 	inline void cst_bwd   (const ExprConstant&,                              const ExprLabel& y) { /* nothing to do */ }
 	inline void apply_bwd (const ExprApply&,   ExprLabel** x,                const ExprLabel& y);
 	inline void add_bwd   (const ExprAdd&,     ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) { x1.g->i() += y.g->i();  x2.g->i() += y.g->i(); }
 	inline void mul_bwd   (const ExprMul&,     ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) { x1.g->i() += y.g->i() * x2.d->i(); x2.g->i() += y.g->i() * x1.d->i(); }
-	inline void sub_bwd   (const ExprSub&,     ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) { x1.g->i() += y.g->i();          x2.g->i() += -y.g->i();}
+	inline void sub_bwd   (const ExprSub&,     ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) { x1.g->i() += y.g->i();          x2.g->i() += -y.g->i(); }
 	inline void div_bwd   (const ExprDiv&,     ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) { x1.g->i() += y.g->i() / x2.d->i(); x2.g->i() += y.g->i()*(-x1.d->i())/sqr(x2.d->i()); }
 	inline void max_bwd   (const ExprMax&,     ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) { /* not implemented yet */ assert(false); }
 	inline void min_bwd   (const ExprMin&,     ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) { /* not implemented yet */ assert(false); }

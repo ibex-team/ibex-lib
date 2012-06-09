@@ -80,18 +80,14 @@ void TestFunction::separate() {
 
 	Function f(x,y,z,e);
 
-	Function* fcomp=f.separate();
+	TEST_ASSERT(f[0].nb_symbols()==3);
+	TEST_ASSERT(sameExpr(f[0].expr(),"((x+y)-z)"));
 
-	TEST_ASSERT(fcomp[0].nb_symbols()==3);
-	TEST_ASSERT(sameExpr(fcomp[0].expr(),"((x+y)-z)"));
+	TEST_ASSERT(f[1].nb_symbols()==3);
+	TEST_ASSERT(sameExpr(f[1].expr(),"(x*z)"));
 
-	TEST_ASSERT(fcomp[1].nb_symbols()==3);
-	TEST_ASSERT(sameExpr(fcomp[1].expr(),"(x*z)"));
-
-	TEST_ASSERT(fcomp[2].nb_symbols()==3);
-	TEST_ASSERT(sameExpr(fcomp[2].expr(),"(y-z)"));
-
-	delete[] fcomp;
+	TEST_ASSERT(f[2].nb_symbols()==3);
+	TEST_ASSERT(sameExpr(f[2].expr(),"(y-z)"));
 }
 
 void TestFunction::used() {
@@ -108,28 +104,26 @@ void TestFunction::used() {
 
 	Function f(x,y,z,e);
 
-	Function* fcomp=f.separate();
+	TEST_ASSERT(f[0].used("x"));
+	TEST_ASSERT(f[0].used("y"));
+	TEST_ASSERT(f[0].used("z"));
+	TEST_ASSERT(f[0].used(0));
+	TEST_ASSERT(f[0].used(1));
+	TEST_ASSERT(f[0].used(2));
 
-	TEST_ASSERT(fcomp[0].used("x"));
-	TEST_ASSERT(fcomp[0].used("y"));
-	TEST_ASSERT(fcomp[0].used("z"));
-	TEST_ASSERT(fcomp[0].used(0));
-	TEST_ASSERT(fcomp[0].used(1));
-	TEST_ASSERT(fcomp[0].used(2));
+	TEST_ASSERT(f[1].used("x"));
+	TEST_ASSERT(!f[1].used("y"));
+	TEST_ASSERT(f[1].used("z"));
+	TEST_ASSERT(f[1].used(0));
+	TEST_ASSERT(!f[1].used(1));
+	TEST_ASSERT(f[1].used(2));
 
-	TEST_ASSERT(fcomp[1].used("x"));
-	TEST_ASSERT(!fcomp[1].used("y"));
-	TEST_ASSERT(fcomp[1].used("z"));
-	TEST_ASSERT(fcomp[1].used(0));
-	TEST_ASSERT(!fcomp[1].used(1));
-	TEST_ASSERT(fcomp[1].used(2));
-
-	TEST_ASSERT(!fcomp[2].used("x"));
-	TEST_ASSERT(fcomp[2].used("y"));
-	TEST_ASSERT(fcomp[2].used("z"));
-	TEST_ASSERT(!fcomp[2].used(0));
-	TEST_ASSERT(fcomp[2].used(1));
-	TEST_ASSERT(fcomp[2].used(2));
+	TEST_ASSERT(!f[2].used("x"));
+	TEST_ASSERT(f[2].used("y"));
+	TEST_ASSERT(f[2].used("z"));
+	TEST_ASSERT(!f[2].used(0));
+	TEST_ASSERT(f[2].used(1));
+	TEST_ASSERT(f[2].used(2));
 }
 
 

@@ -45,6 +45,11 @@ public:
 	 * Visited tag.
 	 */
 	bool visited;
+
+	/**
+	 * Any other temporary data
+	 */
+	const void* tmp;
 };
 
 std::ostream& operator<<(std::ostream& os, const ExprLabel&);

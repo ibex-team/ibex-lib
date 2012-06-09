@@ -107,10 +107,18 @@ public:
 	Function(const Function&);
 
 	/**
-	 * \brief Transform f into (f_1,...f_n)
+	 * \brief Number of components of f
 	 *
-	 * The vector-valued function f is transformed
-	 * into n real-valued functions f_1, ... f_n
+	 * If f is a real-valued function, the result is 1.
+	 * If f is a m*n matrix function, the result is m*n.
+	 */
+	int dimension() const;
+
+	/**
+	 * \brief Return the ith component of f.
+	 *
+	 * The vector-valued function f is also
+	 * n real-valued functions f_1, ... f_n
 	 * that can be used independently.
 	 *
 	 * Of course the list of arguments "x" is
@@ -122,7 +130,21 @@ public:
 	 * *not* in:   <br>
 	 *    { (x,y)->x+y ; (z,y)->z-y }
 	 */
-	Function* separate() const;
+	Function& operator[](int i);
+
+	/**
+	 * \brief Unvectorize f.
+	 *
+	 * If some arguments of f are vectors or matrices,
+	 * they are transformed into scalar arguments. <br>
+	 * For instance, if f is <br>
+	 * (x,y)->x[0]*y[0]+x[1]*y[1]. <br>
+	 * the f.unvectorize() is <br>
+	 * (x[0],x[1],y[0],y[1])->x[0]*y[0]+x[1]*y[1] <br>
+	 * that is, <br>
+	 * (a,b,c,d)->a*c+b*d
+	 */
+	Function unvectorize() const;
 
 	/*
 	 * \brief Create a new symbol (new argument of the function).
@@ -340,13 +362,16 @@ private:
 	 */
 	void decorate() const;
 
+	void separate();
+
 	const ExprNode* root;                       // the root node
-	std::vector<const ExprSymbol*> order2info;  // to retrieve symbol (node)s by appearing order.
+	Array<const ExprSymbol> symbols;            // to retrieve symbol (node)s by appearing order.
 	std::vector<bool> is_used;                  // tells whether the i^th symbol is used.
 	std::vector<const ExprNode*> exprnodes;     // all the nodes
 	SymbolMap<const ExprSymbol*> id2info;       // to retrieve a symbol node from its name.
 	int key_count;                              // count the number of symbols
 
+	Function* comp;                             // the components. ==this if dimension()==1.
 
 	bool __all_symbols_scalar;                  // true if all symbols are scalar
 
@@ -427,6 +452,21 @@ std::ostream& operator<<(std::ostream&, const Function&);
 
 /*================================== inline implementations ========================================*/
 
+inline int Function::dimension() const {
+	switch (expr().dim.type()) {
+	case Dim::SCALAR: return 1;
+	case Dim::ROW_VECTOR:
+	case Dim::COL_VECTOR: return expr().dim.vec_size();
+	case Dim::MATRIX: return expr().dim.dim2*expr().dim.dim3;
+	case Dim::MATRIX_ARRAY: assert(false); return 0;
+	}
+}
+
+inline Function& Function::operator[](int i) {
+	return comp[i];
+}
+
+
 inline int Function::nb_symbols() const {
 	return key_count;
 }
@@ -440,11 +480,11 @@ inline bool Function::used(int i) const {
 }
 
 inline const ExprSymbol& Function::symbol(int i) const {
-	return *order2info[i];
+	return symbols[i];
 }
 
 inline const char* Function::symbol_name(int i) const {
-	return order2info[i]->name;
+	return symbols[i].name;
 }
 
 inline int Function::nb_nodes() const {

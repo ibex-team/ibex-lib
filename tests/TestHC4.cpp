@@ -18,7 +18,6 @@ namespace ibex {
 
 void TestHC4::ponts30() {
 	Ponts30 p30;
-	Function* fs=p30.f->separate();
 	IntervalVector box = p30.init_box;
 
 	NumConstraint* ctr[30];
@@ -27,7 +26,7 @@ void TestHC4::ponts30() {
 	//cout << fs[0] << endl;
 
 	for (int i=0; i<30; i++) {
-		ctr[i]=new NumConstraint(fs[i],true);
+		ctr[i]=new NumConstraint(p30.f[i],true);
 		c[i]=new CtcProj(*ctr[i]);
 	}
 //	cout << "before="<< box << endl;

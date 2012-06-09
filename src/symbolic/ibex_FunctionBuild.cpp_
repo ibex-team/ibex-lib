@@ -121,25 +121,51 @@ Function::Function(const Array<const ExprSymbol>& x, const ExprNode& y, const ch
 
 Function::Function(const Function& f) : name(strdup(f.name)) {
 	//assert(f.root!=NULL);
-	ExprCopy cp(f.expr(),*this, false);
+	ExprCopy cp(f.symbols, f.expr());
 	init(cp.get_x(), cp.get_y());
 }
 
-Function* Function::separate() const {
-	if (expr().type()==Dim::SCALAR) return new Function(*this);
-
-	const ExprVector* fvec=dynamic_cast<const ExprVector*>(&expr());
-	if (!fvec) {
-		throw NonRecoverableException("Decomposition of vector/matrix function: not implemented.");
+void Function::separate() {
+	if (expr().type()==Dim::SCALAR) {
+		comp=this;
+		return;
 	}
 
-	Function *compf = new Function[fvec->nb_args];
-
-	for (int i=0; i<fvec->nb_args; i++) {
-		ExprCopy cp(fvec->arg(i), compf[i], true);
-		compf[i].init(cp.get_x(), cp.get_y());
+	if (expr().dim.is_vector()) {
+		const ExprVector* fvec=dynamic_cast<const ExprVector*>(&expr());
+		comp = new Function[fvec->nb_args];
+		const ExprNode* tmp=NULL;
+		for (int i=0; i<expr().dim.vec_size(); i++) {
+			ExprCopy cp(symbols, fvec? fvec->arg(i) : *(tmp=&expr()[i]));
+			if (tmp) delete (ExprNode*) tmp; // do not delete the subexpression
+			comp[i].init(cp.get_x(), cp.get_y());
+		}
 	}
-	return compf;
+
+	else {
+		const ExprVector* fvec=dynamic_cast<const ExprVector*>(&expr());
+		Function *compf = new Function[fvec->nb_args];
+
+		int n=expr().dim.dim3;
+		const ExprNode* tmp=NULL;
+		for (int i=0; i<expr().dim.dim2; i++) {
+			const ExprVector* fvec2=NULL;
+			if (fvec) {
+				fvec2=dynamic_cast<const ExprVector*>(&fvec->arg(i));
+			}
+			for (int j=0; j<n; j++) {
+				ExprCopy cp(symbols,
+						fvec2 ? fvec2->arg(j) : (fvec? *(tmp=&(fvec->arg(i)[j])) : *(tmp=&(expr()[i][j]))));
+				if (tmp) delete (ExprNode*) tmp; // do not delete the subexpression
+				compf[i*n+j].init(cp.get_x(), cp.get_y());
+			}
+		}
+	}
+}
+
+Function Function::unvectorize() const {
+	// TO DO
+	return *this;
 }
 
 //void Function::set_expr(const ExprNode& expr) {
@@ -148,7 +174,10 @@ void Function::init(const Array<const ExprSymbol>& x, const ExprNode& y) {
 	key_count=0;
 	__all_symbols_scalar=true; // by default
 
+	symbols.resize(x.size());
+
 	for (int i=0; i<x.size(); i++) {
+		symbols.set_ref(i,x[i]);
 		add_symbol(&x[i]);
 	}
 
@@ -173,8 +202,6 @@ void Function::add_symbol(const ExprSymbol* symbol) {
   ((ExprSymbol&) *symbol).key = key_count;
 
   key_count ++;
-
-  order2info.push_back(symbol);
 
   is_used.push_back(false); // unused by default
 

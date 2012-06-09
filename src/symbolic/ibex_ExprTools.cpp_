@@ -18,7 +18,7 @@ class ResetVisited : public FunctionVisitor {
 public:
 	ResetVisited(const ExprNode& e)   { visit(e); }
 protected:
-	void visit(const ExprNode& e)     { e.deco.visited=false; e.acceptVisitor(*this); }
+	void visit(const ExprNode& e)     { e.deco.visited=false; e.deco.tmp=NULL; e.acceptVisitor(*this); }
 	void visit(const ExprIndex& i)    { visit(i.expr); }
 	void visit(const ExprSymbol& v)   { }
 	void visit(const ExprConstant& c) { }
