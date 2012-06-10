@@ -38,7 +38,7 @@ std::ostream& operator<<(std::ostream& os, const Interval& x) {
 	if (x.is_empty())
 			return os << "empty";
 	else
-		return os << setprecision(5) << "[" << x.lb() << "," << x.ub() << "]";
+		return os << setprecision(20) << "[" << x.lb() << "," << x.ub() << "]";
 	//return os << x.itv;
 }
 

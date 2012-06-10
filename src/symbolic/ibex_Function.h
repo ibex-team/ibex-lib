@@ -133,6 +133,12 @@ public:
 	Function& operator[](int i);
 
 	/**
+	 * \brief Return the ith component of f.
+	 * \see operator[](int).
+	 */
+	Function& operator[](int i) const;
+
+	/**
 	 * \brief Unvectorize f.
 	 *
 	 * If some arguments of f are vectors or matrices,
@@ -466,6 +472,9 @@ inline Function& Function::operator[](int i) {
 	return comp[i];
 }
 
+inline Function& Function::operator[](int i) const {
+	return comp[i];
+}
 
 inline int Function::nb_symbols() const {
 	return key_count;

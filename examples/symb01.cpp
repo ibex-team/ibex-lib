@@ -103,9 +103,11 @@ int main() {
 
 	cout << "box after proj=" << box << endl;
 
-//	IntervalMatrix J(2,2);
-//	dist.jacobian(box,J);
-//	cout << "J=" << J << endl;
+	box[0]=3;
+	box[1]=2;
+	IntervalMatrix J(2,2);
+	f.jacobian(box,J);
+	cout << "J=" << J << endl;
 	}
 	return 0;
 }

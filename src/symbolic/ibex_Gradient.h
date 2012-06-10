@@ -67,11 +67,6 @@ public:
 	 */
 	void jacobian(const Function& f, const Array<Domain>& d, IntervalMatrix& J) const;
 
-	/**
-	 * \brief Calculate the Jacobian on the box \a box and store the result in \a J.
-	 */
-	void jacobian(const Function& f, const IntervalVector& box, IntervalMatrix& J) const;
-
 	inline void index_fwd(const ExprIndex& e, const ExprLabel& x, ExprLabel& y) { /* nothing to do */ }
 	       void vector_fwd(const ExprVector& v, const ExprLabel** s, ExprLabel& y);
 	       void cst_fwd(const ExprConstant& c, ExprLabel& y);

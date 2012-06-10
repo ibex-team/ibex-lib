@@ -9,12 +9,11 @@ using namespace ibex;
 int main() {
 
 	Ponts30 p30;
-	Function* fs=p30.f->separate();
 
 	NumConstraint* ctr[30];
 
 	for (int i=0; i<30; i++) {
-		ctr[i]=new NumConstraint(fs[i],true);
+		ctr[i]=new NumConstraint((*p30.f)[i],true);
 	}
 
 	Array<NumConstraint> a(ctr,30);

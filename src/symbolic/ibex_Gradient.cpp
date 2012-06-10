@@ -16,6 +16,12 @@ namespace ibex {
 
 void GradDecorator::decorate(const Function& f) const {
 	f.expr().reset_visited();
+
+	// we must decorate all the symbols first
+	// because some may not appear in the expression.
+	for (int i=0; i<f.nb_symbols(); i++)
+		((GradDecorator&) *this).visit(f.symbol(i));
+
 	((GradDecorator&) *this).visit(f.expr()); // // cast -> we know *this will not be modified
 }
 
@@ -70,6 +76,9 @@ void Gradient::gradient(const Function& f, const Array<Domain>& d, IntervalVecto
 	assert(f.expr().deco.g);
 
 	Eval().eval(f,d);
+	for (int i=0; i<f.nb_symbols(); i++)
+		((Gradient&) *this).symbol_fwd(f.symbol(i), f.symbol(i).deco);
+
 	f.forward<Gradient>(*this);
 
 	f.expr().deco.g->i()=1.0;
@@ -90,6 +99,9 @@ void Gradient::gradient(const Function& f, const IntervalVector& box, IntervalVe
 	assert(f.expr().deco.g);
 
 	f.eval_domain(box);
+	for (int i=0; i<f.nb_symbols(); i++)
+		((Gradient&) *this).symbol_fwd(f.symbol(i), f.symbol(i).deco);
+
 	f.forward<Gradient>(*this);
 
 	f.expr().deco.g->i()=1.0;
@@ -112,53 +124,9 @@ void Gradient::jacobian(const Function& f, const Array<Domain>& d, IntervalMatri
 
 	int m=f.expr().dim.vec_size();
 
-	Eval().eval(f,d);
-
 	// calculate the gradient of each component of f
 	for (int i=0; i<m; i++) {
-		f.forward<Gradient>(*this);
-
-		for (int i2=0; i2<m; i2++) {
-			f.expr().deco.g->v()[i2]=(i2==i?1.0:0.0);
-		}
-
-		f.backward<Gradient>(*this);
-
-		if (f.all_symbols_scalar())
-			for (int j=0; j<f.nb_symbols(); j++) {
-				J[i][j]=f.symbol_deriv[j].i();
-			}
-		else
-			load(J[i],f.symbol_deriv);
-	}
-}
-
-void Gradient::jacobian(const Function& f, const IntervalVector& box, IntervalMatrix& J) const {
-	assert(f.expr().dim.is_vector());
-	assert(f.expr().deco.d);
-	assert(f.expr().deco.g);
-
-	int m=f.expr().dim.vec_size();
-
-	f.eval_domain(box);
-
-	// calculate the gradient of each component of f
-	for (int i=0; i<m; i++) {
-
-		f.forward<Gradient>(*this);
-
-		for (int i2=0; i2<m; i2++) {
-			f.expr().deco.g->v()[i2]=(i2==i?1.0:0.0);
-		}
-
-		f.backward<Gradient>(*this);
-
-		if (f.all_symbols_scalar())
-			for (int j=0; j<f.nb_symbols(); j++) {
-				J[i][j]=f.symbol_deriv[j].i();
-			}
-		else
-			load(J[i],f.symbol_deriv);
+		gradient(f[i],d,J[i]);
 	}
 }
 

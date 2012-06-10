@@ -35,9 +35,10 @@ bool newton(const Function& f, IntervalVector& box, double prec, double ratio_ga
 
 	do {
 //		cout.precision(20);
-//		cout << box << endl;
-		f.hansen_matrix(box,J); //may throw EmptyBoxException
+//		cout << box << endl << endl << endl;
+		f.hansen_matrix(box,J); //may throw EmptyBoxException?
 //		f.jacobian(box,J); //may throw EmptyBoxException
+		if (J.is_empty()) { cout << "J empty\n"; return false; }
 //		for (int i=0; i<m; i++)
 //			for (int j=0; j<n; j++)
 //				if (J[i][j].mag()>1e-10) cout << "(" << i << "," << j << ")=" << J[i][j] << "  ";
@@ -59,7 +60,9 @@ bool newton(const Function& f, IntervalVector& box, double prec, double ratio_ga
 
 		try {
 			precond(J, Fmid);
+
 			gauss_seidel(J, Fmid, y, ratio_gauss_seidel);
+
 			if (y.is_empty()) throw EmptyBoxException();
 		} catch (LinearException& e) {
 			return reducted; // should be false
