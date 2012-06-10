@@ -23,10 +23,8 @@ void TestHC4::ponts30() {
 	NumConstraint* ctr[30];
 	CtcProj* c[30];
 
-	//cout << fs[0] << endl;
-
 	for (int i=0; i<30; i++) {
-		ctr[i]=new NumConstraint(p30.f[i],true);
+		ctr[i]=new NumConstraint((*p30.f)[i],true);
 		c[i]=new CtcProj(*ctr[i]);
 	}
 //	cout << "before="<< box << endl;

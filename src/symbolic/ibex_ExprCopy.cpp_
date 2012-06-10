@@ -139,10 +139,14 @@ public:
 		y.reset_visited();
 		for (int j=0; j<x.size(); j++) {
 			new_x.set_ref(j,ExprSymbol::new_(x[j].name,x[j].dim));
-			x[j].deco.tmp=(void*) &new_x[j];
+			x[j].deco.tmp=&new_x[j];
 		}
 		visit(y);
+		//cout << "new x=";
+		//for (int j=0; j<new_x.size(); j++) cout << new_x[j].name << " ";
+		//cout << endl;
 		new_y=(const ExprNode*) y.deco.tmp;
+		//cout << "new y=" << *new_y << endl;
 	}
 
 	Array<const ExprSymbol>& get_x() {
