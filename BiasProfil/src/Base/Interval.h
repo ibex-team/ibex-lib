@@ -551,7 +551,7 @@ inline INTERVAL operator / (CONST INTERVAL & x, CONST INTERVAL & y) {
     return r;
   }
   if (c==0 && d==0) 
-    return INTERVAL(BiasNegInf, BiasPosInf);
+    return INTERVAL(BiasNegInf, BiasPosInf); // ?????????
   if (_LE(b,0) && d==0) {
     BiasDivII (Bias(r), Bias(INTERVAL(b)), Bias(INTERVAL(c)));
     return INTERVAL(Inf(r), BiasPosInf);
@@ -639,21 +639,31 @@ inline INTERVAL Hull (REAL a, REAL b) {
 }
 
 inline INTERVAL Hull (REAL a, CONST INTERVAL & b) {
-  INTERVAL result;
-  BiasHullRI (Bias(result), & a, Bias(b));
-  return result;
+  if (b.empty()) return a;
+  else {
+    INTERVAL result;
+    BiasHullRI (Bias(result), & a, Bias(b));
+    return result;
+  }
 }
 
 inline INTERVAL Hull (CONST INTERVAL & a, REAL b) {
-  INTERVAL result;
-  BiasHullIR (Bias(result), Bias(a), & b);
-  return result;
+  if (a.empty()) return b; 
+  else {
+    INTERVAL result;
+    BiasHullIR (Bias(result), Bias(a), & b);
+    return result;
+  }
 }
 
 inline INTERVAL Hull (CONST INTERVAL & a, CONST INTERVAL & b) {
-  INTERVAL result;
-  BiasHullII (Bias(result), Bias(a), Bias(b));
-  return result;
+  if (a.empty()) return b;
+  else if (b.empty()) return a;
+  else {
+    INTERVAL result;
+    BiasHullII (Bias(result), Bias(a), Bias(b));
+    return result;
+  }
 }
 
 inline INTERVAL SymHull (REAL a) {

@@ -98,7 +98,7 @@ class OperatorPrinter {
   void print(const AtMostNVector&) const;
   void print(const NotIn&) const;
 
-  mutable std::ostream& os;
+  std::ostream& os;
 
  private:
   mutable int shift;
