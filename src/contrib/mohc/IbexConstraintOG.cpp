@@ -1,4 +1,3 @@
-
 #include <vector>
 #include "mohc/IbexConstraintOG.h"
 #include "IbexExprAdjFactory.h"
@@ -15,7 +14,8 @@ hash_map<int, REAL> ConstraintOG::h;
 
 
 ConstraintOG::ConstraintOG(const ArithConstraint& ctr, Space &space) : 
-      expr(ctr.expr), rho_mohc(1.1){
+      expr(ctr.expr), rho_mohc(1.1),
+ op((dynamic_cast<const Inequality*>(&ctr))? (dynamic_cast<const Inequality*>(&ctr))->op:EQU){
  adj = ctr.adj;
  evlog=new EvaluatorOG();
 
@@ -26,7 +26,11 @@ ConstraintOG::ConstraintOG(const ArithConstraint& ctr, Space &space) :
 
 //partial derivatives of each variable
   deriv=new INTERVAL[space.nb_var()];
+  deriv_a=new INTERVAL[space.nb_var()];
+  deriv_b=new INTERVAL[space.nb_var()];
 
+  
+  
 //partial derivatives of each occurrence of variable
   derivs=new INTERVAL*[space.nb_var()];
 
@@ -62,8 +66,8 @@ int*  entity2var= new int[space.nb_var()];
  
   
   //the ic2var and ic2occ arrays are initialized (only once). Also for r_a,r_b,r_c.
-  int nb_occ_ctr=evlog->initForwardOG(space,nb_var,entity2var);
-  delete entity2var;
+  nb_occ_ctr=evlog->initForwardOG(space,nb_var,entity2var);
+  delete[] entity2var;
   if(nb_occ_ctr!=-1){
      r_a=new INTERVAL[nb_occ_ctr];
      r_b=new INTERVAL[nb_occ_ctr];
@@ -72,23 +76,27 @@ int*  entity2var= new int[space.nb_var()];
 
 }
 
-
-
 //obtains the arrays r_a, r_b, r_c that minimize G
-void ConstraintOG::Occurrence_Grouping(int var){
+void ConstraintOG::Occurrence_Grouping(int var, bool y_set, bool og){
    for(int occ=0;occ<nb_occ[var];occ++){
       r_a[vocc2cocc[var][occ]]=0;
       r_b[vocc2cocc[var][occ]]=0;
       r_c[vocc2cocc[var][occ]]=1;
    }
-
+   deriv_a[var]=0;
+   deriv_b[var]=0;
+   
    //only variables with multiple occurrences are treated
-   if(nb_occ[var]<=1) return;
+   if(y_set && nb_occ[var]<=1) return;
 
    if(Inf(deriv[var]) >= 0 || Sup(deriv[var]) <= 0){ //G_0 does not contain 0
       OG_case1(var);
       return;
    }
+   
+   if(!og) return;
+   
+
 
    INTERVAL* g=derivs[var];
    INTERVAL G_plus=0, G_minus=0;
@@ -111,11 +119,18 @@ void ConstraintOG::Occurrence_Grouping(int var){
 
    INTERVAL G_m=G_plus + G_minus;
 
+
+   
    if(Inf(G_m)<0 && Sup(G_m)>0){ //G_m contains 0
       OG_case2(var, g, Inf(G_plus), Inf(G_minus), Sup(G_plus), Sup(G_minus));
+      deriv_a[var]=INTERVAL(0,Sup(G_m));
+      deriv_b[var]=INTERVAL(Inf(G_m),0);
    }else{
       OG_case3(var, g, X_m, X_nm, G_m);
+      if(Sup(G_m)>0) deriv_a[var]=G_m;
+      else deriv_b[var]=G_m;
    }
+   
 }
 
 void ConstraintOG::OG_case1(int var){
@@ -213,8 +228,18 @@ void ConstraintOG::OG_case3(int var, INTERVAL* g, list<int>& X_m, list<int>& X_n
         forwardOG(space, true);
         forwardOG(space, false);
         INTERVAL ev_mon=INTERVAL(Inf(zmin),Sup(zmax));
-        if(existence_test && !ev_mon.contains(0)) 
-           throw EmptyBoxException();
+        if(existence_test)
+	  switch (op) { 
+	    case EQU      : if(!ev_mon.contains(0)) throw EmptyBoxException();
+	           break;
+	    case LT       : 
+	    case LEQ      : if (Inf(zmin) >= 0) throw EmptyBoxException();
+                  break;
+	    case GEQ      : 
+	    case GT       : if (Sup(zmax) <= 0) throw EmptyBoxException();
+	}
+//        if(existence_test && !ev_mon.contains(0)) 
+//           throw EmptyBoxException();
 
         diam_mon=Diam(ev_mon);
         diam_nat=Diam(eval(space));

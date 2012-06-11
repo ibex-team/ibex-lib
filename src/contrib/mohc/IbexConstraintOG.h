@@ -65,19 +65,45 @@ class ConstraintOG : public Constraint {
   void forward(const Space& space) const{ evlog->forward(space); };
 
   /** Backward evaluation (\a HC4-Revise)*/  
-  void backward(Space& space) const{ 
-    bool sat = evlog->output() &= INTERVAL(0,0);       
+  void backward(Space& space) const{    
+//    bool sat = evlog->output() &= INTERVAL(0,0);       
 
+//    if (!sat) throw EmptyBoxException();
+//    evlog->backward(space);
+
+      switch (op) {      
+	case LT       : 
+	case LEQ      : if (evlog->output().included(INTERVAL(BiasNegInf,0))) return;
+                  break;
+	case GEQ      : 
+	case GT       : if (evlog->output().included(INTERVAL(0,BiasPosInf))) return;
+     }
+
+     bool sat;
+     switch (op) {     
+        case EQU      : sat = evlog->output() &= INTERVAL(0,0);    break;
+	case LT       : 
+	case LEQ      : sat = evlog->output() &= INTERVAL(BiasNegInf,0); break;
+	case GEQ      : 
+	case GT       : sat = evlog->output() &= INTERVAL(0,BiasPosInf); break;    
+    }
+    
+    
     if (!sat) throw EmptyBoxException();
     evlog->backward(space);
-  }
 
-  /** Perform automatic differentiation and occurrence grouping 
+  };
+
+  /** Perform automatic differentiation and occurrence grouping (OG). For each occurence o related to a variable x three
+   * atomic interval are computed: r_a[o], r_b[o] and r_c[c]. These intervals represents the replacement made by OG 
+   * to the variable x: x is replaced by r_a[o].x_a + r_b[o].x_b + r_c[o].x_c
   * \param space - the space representing current domains of entities.
+  * \param y_set - if is true, then the grouping is not performed to variables appearing once (by default)
+  * \param og - if it is true, then og is performed (by default), otherwise, all the occurences of a variable are grouped together (in x_a, x_b or x_c)
   */
-  bool gradientOG(Space& space) {
+  bool gradientOG(Space& space, bool y_set=true, bool og=true) {
      try{  
-        gradient(space);
+      gradient(space);
      }catch(UnboundedResultException e){
         return false;
      }catch(NotDifferentiableException e){
@@ -85,7 +111,7 @@ class ConstraintOG : public Constraint {
      }
      
      for (int var=0; var<nb_var; var++)
-        Occurrence_Grouping(var); //the tables A, B and C are filled
+        Occurrence_Grouping(var, y_set, og); //the tables A, B and C are filled
      return true;
   }
 
@@ -94,11 +120,19 @@ class ConstraintOG : public Constraint {
 
   /* Perform a Newton iteration */
   INTERVAL Newton_it(INTERVAL b, REAL x_m, REAL f_m, int var){
-
     INTERVAL nwt_proj=INTERVAL(x_m)-INTERVAL(f_m)/deriv[var];
     b &= nwt_proj;
     return b;
   }
+
+    /* Perform a Newton iteration for variables x_a(increasing=true) and x_b(increasing=false))*/
+  INTERVAL Newton_it(INTERVAL b, REAL x_m, REAL f_m, int var, bool increasing){
+    if(deriv_a[var]==0 && deriv_b[var]==0) return b;
+    INTERVAL deriv=(increasing)? deriv_a[var]:deriv_b[var];
+    INTERVAL nwt_proj=INTERVAL(x_m)-INTERVAL(f_m)/deriv ;
+    b &= nwt_proj;
+    return b;
+  }  
 
   /* Perform a Newton iteration */
   INTERVAL Newton_it_cert(INTERVAL b, REAL x_m, REAL f_m, int var){
@@ -141,13 +175,13 @@ class ConstraintOG : public Constraint {
   /** return true if the i-th variable of the 
   * constraint is monotonic increasing and appears several times */
   inline bool in_Xplus(int i){ 
-     return ((nb_occ[i]>1) && (Inf(deriv[i])>0));
+     return ((Inf(deriv[i])>0));
   }
 
   /** return true if the i-th variable of the 
   * constraint is monotonic decreasing and appears several times */
   inline bool in_Xminus(int i){ 
-     return ((nb_occ[i]>1) && (Sup(deriv[i])<0));
+     return ((Sup(deriv[i])<0));
   }
 
   /** The last computed value of rho_mohc */
@@ -160,31 +194,45 @@ class ConstraintOG : public Constraint {
   
   int* nb_occ;
   
+  /** The comparison operator. */
+  CmpOpType op;
   
   bool is_monotonic;
- private:
-
-  /** Evaluator. */
+    /** Evaluator. */
    EvaluatorOG* evlog;
 
-//   const CmpOpType op;
+  //derivative of variables xi
   INTERVAL* deriv;
+  //derivative of variables xi_a
+  INTERVAL* deriv_a;
+  //derivative of variables xi_b
+  INTERVAL* deriv_b;
+  //derivative of occurrences of each variable
   INTERVAL** derivs;
+  
   int nb_var;
   int** vocc2cocc;
-
+  int nb_occ_ctr;
+  
+  //values computed by OG
   INTERVAL* r_a;
   INTERVAL* r_b;
   INTERVAL* r_c;
   //true if the constraint has at least one variable with multiple occurrences.
   bool has_occ_mult;
-
+  
+  
+ private:
   friend class Visitor;
 
   void gradient(Space& space);
   INTERVAL last_nateval;
   
-  void Occurrence_Grouping(int var);
+  //yset indicates if variables with one occrrence are considered in the set Y (yset=true) or are not considered (yset=false)
+  //if og=false, then the variables are grouped without using OG, only the monotonicity-based evaluation
+  void Occurrence_Grouping(int var, bool yset=true, bool og=true);
+
+  
 
   void OG_case1(int var);
   void OG_case2(int var, INTERVAL* g, INTERVAL inf_G_Xa, INTERVAL inf_G_Xb, INTERVAL sup_G_Xa, INTERVAL sup_G_Xb);

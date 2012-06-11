@@ -1,0 +1,8 @@
+#--- $Id: make.linux.x86.intel.std,v 1.8 2007/08/17 14:14:08 bzfpfend Exp $
+CXX	=	icc
+CPPFLAGS=	-Isrc -DNDEBUG
+CXXFLAGS=	-O -wd1572
+LDFLAGS	=	-lm -lstdc++
+ARFLAGS	=	crs
+ZLIB_FLAGS	=
+ZLIB_LDFLAGS 	=	-lz

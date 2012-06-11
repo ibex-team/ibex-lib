@@ -1,0 +1,8 @@
+#--- $Id: make.linux.x86.intel.opt-p4,v 1.7 2007/08/17 14:14:08 bzfpfend Exp $
+CXX	=	icc
+CPPFLAGS=	-Isrc -DNDEBUG -DNO_ADDITIONAL_CHECKS
+CXXFLAGS=	-O3 -tpp7 -xW -Xc -w1 -ip 
+LDFLAGS	=	-lm -static -lstdc++
+ARFLAGS	=	crs
+ZLIB_FLAGS	=
+ZLIB_LDFLAGS 	=	-lz

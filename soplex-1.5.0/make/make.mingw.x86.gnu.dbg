@@ -1,0 +1,8 @@
+#--- $Id: make.mingw.x86.gnu.dbg,v 1.1 2010/09/29 16:43:34 bzfviger Exp $
+CXX	=	g++
+CPPFLAGS=	-Isrc
+CXXFLAGS=	-O0 -g
+LDFLAGS	=	-lm # -static
+ARFLAGS	=	crs
+ZLIB_FLAGS	=
+ZLIB_LDFLAGS 	=	-lz

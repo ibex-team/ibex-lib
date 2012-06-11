@@ -302,6 +302,9 @@ class SmearSumRelative : public SmearFunction
 };
 
 
+
+
+
 /** Create a bisector with a variant of the Smear function heuristic, where we use a normalized maximimum impact instead of the max used by SmearMax or the sum used by SmearSum
    *  \param sys - The system of equations. 
    *  \param w (optional) - - the minimum width (diameter) an interval must have to be bisected (see #w).

@@ -1,0 +1,8 @@
+#--- $Id: make.linux.x86.gnu.opt,v 1.21 2010/09/21 13:27:49 bzfwinkm Exp $
+CXX	=	g++
+CPPFLAGS=	-Isrc -DNDEBUG -DNO_ADDITIONAL_CHECKS
+CXXFLAGS=	-O3 -fomit-frame-pointer # -malign-double -ffast-math
+LDFLAGS	=	-lm -static
+ARFLAGS	=	crs
+ZLIB_FLAGS	=
+ZLIB_LDFLAGS 	=	-lz

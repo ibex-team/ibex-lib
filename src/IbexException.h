@@ -194,7 +194,11 @@ class OverflowException : public PaverException { };
  * \date March 2007
  */
 class TimeOutException : public PaverException { };
+class CellLimitException : public PaverException { };
 
+ class MemoryException : public PaverException {};
+
+ class GoalPrecisionException : public PaverException {};
 
 /*================================================================================*/
 /*                                    PARSER                                      */

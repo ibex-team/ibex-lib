@@ -34,13 +34,20 @@ namespace {
    * "*this" since the class is abstract) */
   struct CellComparator {
     bool operator()(const pair<Cell*,REAL>& c1, const pair<Cell*,REAL>& c2) {
-      return c1.second > c2.second;
+      /* if (c1.second == c2.second)
+	if (random()%2)
+	  return true;
+	else
+	  return false;
+      else
+      */
+	return c1.second >= c2.second;
     }
   };
 }
 
 bool CellHeap::operator()(const pair<Cell*,REAL>& c1, const pair<Cell*,REAL>& c2) const {
-  return c1.second > c2.second;
+  return c1.second >= c2.second;
 }
 
 void CellHeap::flush() { 

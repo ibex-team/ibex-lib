@@ -64,6 +64,14 @@ class Evaluator {
    *        #UnboundedResultException, #EmptyBoxException. */
   void gradient(const Space& space) const;
 
+  /** Contract the box space.box to a "forbidden" region around a given initial 
+   * (thin) box pt.
+   * The size of dom must be intvl */
+  void expand(Space& space, const INTERVAL* pt) const;
+
+  void inner_backward(Space& space) const;
+
+
   /** Streams out internal tables (for debug purpose). */
   friend std::ostream& operator<<(std::ostream&, const Evaluator&);
 
@@ -76,6 +84,11 @@ class Evaluator {
   /* Create an evaluator. */
   Evaluator() { } // restricted to Function & Constraint
 
+  int itvl;
+
+  /* Interval associated to each zero-dimensional node. */
+  mutable INTERVAL* I;
+
  private:
   friend class EvaluatorFactory;
 
@@ -85,7 +98,7 @@ class Evaluator {
   void write_matrix(Space& space, int i) const;
   void write_matrix(Space& space, int mc, int i) const;
   void read_matrix(Space& space, int i) const;
-
+  
  protected :
   /* Code (nodes of the DAG). */
   int *code;
@@ -95,8 +108,6 @@ class Evaluator {
    * I or M, exponent of a power expression, symbol environment number, etc.) */
   int *info;
 
-  /* Interval associated to each zero-dimensional node. */
-  mutable INTERVAL* I;
 
 
   /* Interval matrix associated to each n-dimensional node (n>0). */
@@ -118,7 +129,7 @@ class Evaluator {
   mutable Space** args;
 
   /* Table lengths. */
-  int codel,infol,itvl,matl,icstl,mcstl,funcl; 
+  int codel,infol,matl,icstl,mcstl,funcl; 
 };
 
 } // end namespace

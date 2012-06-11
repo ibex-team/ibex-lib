@@ -187,11 +187,18 @@ class ArithConstraint : public Constraint {
    *    <br> true - otherwise. */
   virtual bool feasible(const Space& space) const=0;
 
+  /** Expands space.box to a "forbidden" region inside [dom]. 
+   * \throw #UnfeasibilityException if the entire box [dom] is unfeasible. */
+  virtual void expand(Space& space, const INTERVAL_VECTOR& dom) const=0;
+
   /** Forward evaluation. */
   virtual void forward(const Space& space) const { evl.forward(space); }
 
   /** Backward evaluation. */
   virtual void backward(Space& space) const=0;
+
+
+virtual void inner_backward(Space& space) const=0;
 
   /** Return true. */
   virtual bool is_equality() const=0;
@@ -264,6 +271,12 @@ class Equality : public ArithConstraint {
   /** Backward evaluation. */
   void backward(Space& space) const;
 
+  /** Expands space.box to a "forbidden" region inside [dom]. 
+   * \throw #UnfeasibilityException if the entire box [dom] is unfeasible. */
+  virtual void expand(Space& space, const INTERVAL_VECTOR& dom) const;
+
+  void inner_backward(Space& space) const;
+
   /** Return true. */
   virtual bool is_equality() const { return true; }
 
@@ -307,6 +320,13 @@ class Inequality : public ArithConstraint {
 
   /** Backward evaluation. */
   void backward(Space& space) const;
+
+  /** Expands space.box to a "forbidden" region inside [dom]. 
+   * \throw #UnfeasibilityException if the entire box [dom] is unfeasible. */
+  virtual void expand(Space& space, const INTERVAL_VECTOR& dom) const;
+
+
+  void inner_backward(Space& space) const;
 
   /** Return false. */
   virtual bool is_equality() const { return false; }

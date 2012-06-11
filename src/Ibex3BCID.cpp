@@ -50,6 +50,7 @@ bool  _3BCID::equalBoxes (int var, INTERVAL_VECTOR &box1, INTERVAL_VECTOR &box2)
 void _3BCID::contract() {
   //const Indicators* indic=current_indic();
   int nb_var=Dimension(cid_space.box);
+  start_var=nb_var-1;        //  patch pour l'optim  A RETIRER ??
 
   for (int var=start_var; var<start_var+vhandled; var++) {
     int var_env=cid_space.key(IBEX_VAR, var%nb_var);
@@ -61,8 +62,9 @@ void _3BCID::contract() {
 
   }
 
-  start_var=(start_var+vhandled)%nb_var;
+  start_var=(start_var+vhandled)%nb_var;   //  en contradiction avec le patch pour l'optim
 }
+
 
 
 
@@ -100,6 +102,7 @@ bool  _3BCID::var3BCID(int var) {
 
 /* Call the right, left (3B) and central (CID) contractions, the right and left shavings
    being done in a dichotomic way : returns true if a contraction is done*/
+
 bool _3BCID::var3BCID_dicho(int var, REAL w3b){
   INTERVAL_VECTOR initbox = space.box;
 
@@ -134,8 +137,22 @@ bool _3BCID::var3BCID_dicho(int var, REAL w3b){
       return false;
   }
 }
-      
 
+
+  // left shaving only (for optimization)
+/*
+bool _3BCID::var3BCID_dicho(int var, REAL w3b){
+  INTERVAL_VECTOR initbox = space.box;
+
+  int r0= shave_bound_dicho(var, w3b, true);  // left shaving , after space.box contains the left slide
+  if (Sup(space.box(var+1)) == Sup(initbox(var+1))) 
+    return true; // the left slide reaches the right bound : nothing more to do
+  INTERVAL_VECTOR leftbox=space.box;
+  space.box=initbox;
+  space.box(var+1)= INTERVAL(Inf(leftbox(var+1)),Sup(initbox(var+1)));
+  return r0;
+}
+*/
 /*3B dicho   applies 3B left or right contraction
   returns in space.box  the left or right non empty slide ; may throw Unfeasiblity */
 bool _3BCID::shave_bound_dicho(int var,  REAL wv, bool left) {
@@ -252,6 +269,7 @@ bool _3BCID::shave_bound_dicho(int var,  REAL wv, bool left) {
 
 */
 
+
 bool _3BCID::var3BCID_slices(int var, int locs3b, REAL w_DC, INTERVAL& dom) {
    
   INTERVAL_VECTOR savebox(space.box);
@@ -365,6 +383,63 @@ bool _3BCID::var3BCID_slices(int var, int locs3b, REAL w_DC, INTERVAL& dom) {
   }
   return true;
 }
+
+
+
+// left only (for optimization)
+/*
+bool _3BCID::var3BCID_slices(int var, int locs3b, REAL w_DC, INTERVAL& dom) {
+   
+  INTERVAL_VECTOR savebox(space.box);
+   
+  // Reduce left bound by shaving:
+
+  bool stopLeft = false;
+  REAL leftBound = Inf(dom);
+  REAL rightBound = Sup(dom);
+  REAL leftCID;
+   
+  int k=0;
+
+  while (k < locs3b && ! stopLeft) {
+
+    // Compute a slice 'dom'
+    if (k > 0) space.box = savebox;
+    REAL inf_k = Inf(dom)+k*w_DC;
+    REAL sup_k = Inf(dom)+(k+1)*w_DC;
+    if (sup_k > Sup(dom) || (k == locs3b - 1 && sup_k<Sup(dom))) sup_k = Sup(dom);
+    dom = INTERVAL(inf_k, sup_k);
+
+    // Try to refute this slice
+    try{
+      ctc.contract(space, Indicators(var,ALL_VARS));
+    }catch(EmptyBoxException e) {
+      leftBound = sup_k;
+      k++;
+      continue;
+    }  
+    //non empty box
+    stopLeft = true;
+    leftCID = sup_k;
+    leftBound = Inf(dom);
+    k++;
+  }
+
+  if (!stopLeft) { // all slices give an empty box
+    space.box.set_empty();	
+    throw EmptyBoxException();
+  } else if (k == locs3b) {
+    // Only the last slice gives a non-empty box : space.box is reduced to this last slice
+    return true;
+  }else {
+
+    INTERVAL_VECTOR newbox (space.box); // newbox is initialized with the last slice handled in the previous loop
+    space.box=savebox;
+    space.box(var+1)= INTERVAL(Inf(newbox(var+1)),Sup(savebox(var+1)));
+    return true;  
+  }
+}
+*/
 
 
 /* central CID contraction : applies a constructive disjunction, i.e., divides the varcid_box into scid slices,

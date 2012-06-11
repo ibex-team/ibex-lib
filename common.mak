@@ -42,4 +42,5 @@ INC_IBEX=$(IBEX)/include
 LIB_IBEX=$(IBEX)/lib
 LD_IBEX=-L$(LIB_IBEX) -libex
 #--------------------------------------------------
-
+# Soplex
+INC_SOPLEX=$(IBEX)/soplex-1.5.0/src
