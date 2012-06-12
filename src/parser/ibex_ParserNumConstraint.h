@@ -39,7 +39,7 @@ public:
 
 class P_ConstraintLoop : public P_NumConstraint {
 public:
-	P_ConstraintLoop(const char* iter, int first_value, int last_value, const P_NumConstraint& ctr);
+	P_ConstraintLoop(const char* iter, int first_value, int last_value, vector<P_NumConstraint*>& ctrs);
 
 	void acceptVisitor(P_Generator& g) const {
 		g.visit(*this);
@@ -48,7 +48,7 @@ public:
 	const char* iter;
 	int first_value;
 	int last_value;
-	const P_NumConstraint& ctr;
+	vector<P_NumConstraint*>& ctrs;
 
 };
 

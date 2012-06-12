@@ -1,6 +1,6 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_ParserNumConstraint.cpp
+// File        : ibex_ParserSource.cpp
 // Author      : Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
@@ -8,19 +8,13 @@
 // Last Update : Jun 12, 2012
 //============================================================================
 
-#include "ibex_ParserNumConstraint.h"
+#include "ibex_ParserSource.h"
 
 namespace ibex {
-
 namespace parser {
 
-P_OneConstraint::P_OneConstraint(const ExprNode& expr, NumConstraint::CompOp op) : expr(expr), op(op) {
-
-}
-
-P_ConstraintLoop::P_ConstraintLoop(const char* iter, int first_value, int last_value, vector<P_NumConstraint*>& ctrs) :
-		 iter(strdup(iter)), first_value(first_value), last_value(last_value), ctrs(ctrs) {
-
+P_Source::~P_Source() {
+	// TO DO: cleanup
 }
 
 } // end namespace parser

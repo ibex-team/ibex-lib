@@ -1,6 +1,6 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_ParserNumConstraint.cpp
+// File        : ibex_ParserResult.h
 // Author      : Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
@@ -8,20 +8,35 @@
 // Last Update : Jun 12, 2012
 //============================================================================
 
+#ifndef __IBEX_PARSER_RESULT_H__
+#define __IBEX_PARSER_RESULT_H__
+
+#include <vector>
+#include "ibex_ParserExpr.h"
 #include "ibex_ParserNumConstraint.h"
+#include "ibex_Function.h"
 
 namespace ibex {
 
 namespace parser {
+class P_Result {
+public:
+	P_Result();
 
-P_OneConstraint::P_OneConstraint(const ExprNode& expr, NumConstraint::CompOp op) : expr(expr), op(op) {
+	/** Auxiliary functions */
+	std::vector<Function*> func;
 
-}
+	/** Main function */
+	Function* f;
 
-P_ConstraintLoop::P_ConstraintLoop(const char* iter, int first_value, int last_value, vector<P_NumConstraint*>& ctrs) :
-		 iter(strdup(iter)), first_value(first_value), last_value(last_value), ctrs(ctrs) {
+	/** Domains */
+	std::vector<Interval> domains;
 
-}
+	/** Constraints */
+	std::vector<NumConstraint*> ctrs;
+};
+
 
 } // end namespace parser
 } // end namespace ibex
+#endif // IBEX_PARSERRESULT_H_

@@ -35,7 +35,7 @@ public:
 	P_ExprConstant(const IntervalMatrix&);
 	P_ExprConstant(const std::vector<P_ExprConstant>&);
 
-	P_ExprConstant& operator=(const P_ExprConstant& c);
+	//P_ExprConstant& operator=(const P_ExprConstant& c);
 
 	~P_ExprConstant();
 
@@ -92,6 +92,25 @@ public:
 	virtual void acceptVisitor(P_ExprVisitor& v) const {
 		v.visit(*this);
 	}
+};
+
+/**
+ * A symbol + a domain.
+ */
+class P_ExprSymbol: public ExprSymbol {
+public:
+	P_ExprSymbol(const char* name, const Dim& dim, const Interval& domain) : ExprSymbol(name,dim), domain(domain) { }
+
+	virtual void acceptVisitor(ExprVisitor& v) const {
+		// never called
+	}
+
+	/** Accept an #ibex::parser::P_ExprVisitor visitor. */
+	virtual void acceptVisitor(P_ExprVisitor& v) const {
+		v.visit(*this);
+	}
+
+	Interval domain;
 };
 
 } // end namespace parser

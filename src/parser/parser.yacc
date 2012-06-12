@@ -14,6 +14,7 @@
 
 #include "ibex_ParserExpr.h"
 #include "ibex_ParserNumConstraint.h"
+#include "ibex_ParserGenerator.h"
 #include "ibex_Array.h"
 
 using namespace std;
@@ -29,10 +30,12 @@ void ibexerror (const std::string& msg) {
 namespace ibex { 
 namespace parser {
 
+P_Source source;
+P_result result;
 
-stack<Scope>   scopes;
+stack<Scope> scopes;
 
-void init() {
+void begin() {
   ibex_lineno=-1;
   if (!setlocale(LC_NUMERIC, "C")) // to accept the dot (instead of the french coma) with numeric numbers
     ibexerror("platform does not support \"C\" locale");
@@ -40,9 +43,14 @@ void init() {
   ibex_lineno=1;
 
   /* there may be some pending scopes (if the previous call to the parser failed).
-   * (in this case, main_ctr_list and main_ctc_list could not have been created). */
+   */
   while (!scopes.empty()) scopes.pop(); 
-  scopes.push(Scope());
+  
+  scopes.push(Scope()); // a fresh new scope!
+}
+
+void end() {
+	Generator(source,result);
 }
 
 } // end namespace
@@ -61,8 +69,8 @@ using namespace parser;
   Interval* itv;
   vector<const char*>*                   strvec;
 
-  struct ibex::Dim*                      dim;
-  const ibex::parser::P_ExtendedSymbol*  extsbl;
+  ibex::Dim*                             dim;
+  const ibex::parser::P_ExprSymbol*      sbl;
 
   vector<const ibex::parser::P_Assign*>* assvec;
   const ibex::parser::P_Assign*          ass;
@@ -128,7 +136,11 @@ using namespace parser;
 %type<ass>        fnc_assign
 %type<extsbl>     fnc_ass_left
 
+/* symbols */
+%type<sbl>        decl_sbl
+
 /* constraints */
+%type<_ctrblklst> decl_ctr_list
 %type<_ctrblklst> ctr_blk_list
 %type<_ctrblklst> ctr_blk_list_ // ctr_blk_list without ending semicolon
 %type<_ctrblk>    ctr_blk
@@ -149,16 +161,74 @@ using namespace parser;
 %%
 
 
+program       :                                      { begin(); }
+              decl_opt_cst 
+              TK_VARS                   
+	          decl_var_list ';'   
+              decl_opt_par
+              decl_fnc_list
+	          decl_ctr_list                          { end(); }
+              ;
+
+/**********************************************************************************************************************/
+/*                                                SYMBOLS                                                         */
 /**********************************************************************************************************************/
 
+decl_opt_cst  : 
+              | TK_CONST decl_cst_list ';'
+	          ;
+
+decl_cst_list : decl_cst                                    
+              | decl_cst_list ';' decl_cst
+              ;
+
+decl_cst      : TK_NEW_SYMBOL TK_EQU const_expr      { scopes.top().add_cst($1, *$3); free($1); delete $3; }
+              | TK_NEW_SYMBOL TK_IN const_expr       { scopes.top().add_cst($1, *$3); free($1); delete $3; }
+              ;
+
+decl_opt_par  : 
+              | TK_PARAM decl_par_list ';'
+              ; 
+ 
+decl_par_list : decl_par                                    
+              | decl_par_list ';' decl_par
+              | decl_par_list ',' decl_par
+              ;
+
+decl_par      : '!' decl_sbl                         { source.eprs.push_back($1); }
+	          |     decl_sbl                         { source.sybs.push_back($1); }
+              ;
+
+decl_var_list : decl_var                             
+              | decl_var_list ';' decl_sbl           
+              | decl_var_list ',' decl_sbl           
+              ;
+
+decl_var      : decl_sbl                             { source.vars.push_back($1); }
+              ;
+              
+decl_sbl      : TK_NEW_SYMBOL dimension              { $$ = new P_ExprSymbol($1,*$2,Interval::ALL_REALS);
+		                                               scopes.top().add_symbol($1,*$$);  
+		                                               free($1); delete $2; }
+              | TK_NEW_SYMBOL dimension 
+	            TK_IN const_expr                     { $$ = new P_ExprSymbol($1,*$2,*$4);
+		                                               scopes.top().add_symbol($1,*$$); 
+						                               free($1); delete $2; delete $4; }
+              ; 
+
+dimension     :                                      { $$=new Dim(0,0,0); }
+              | '[' const_expr ']'                   { $$=new Dim(0,0,$2->_2int()); delete $2; }
+              | '[' const_expr ']' '[' const_expr ']'{ $$=new Dim(0,$2->_2int(),$5->_2int()); delete $2; delete $5; }
+              | '[' const_expr ']' '[' const_expr ']'
+ 	            '[' const_expr ']'                   { $$=new Dim($2->_2int(),$5->_2int(),$8->_2int()); 
+		                                               delete $2; delete $5; delete $8; }
+	          ;
+
+/**********************************************************************************************************************/
 /*                                                CONSTRAINTS                                                         */
 /**********************************************************************************************************************/
 decl_ctr_list : TK_CTRS
-                ctr_blk_list TK_END            { vector<const NumConstraint*>* vec = new vector<const NumConstraint*>();
-		                                         Generator g(*vec);
-						                         g.visit(*$2);
-						                         delete $2;
-						                       }
+                ctr_blk_list TK_END            { $$ = $2; }
               ;
               
 ctr_blk_list  : ctr_blk_list_ semi_col_opt     { $$ = $1; }

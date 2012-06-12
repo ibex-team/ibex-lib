@@ -14,7 +14,6 @@
 #include <vector>
 #include <stack>
 #include <utility>
-#include "ibex_ParserExpr.h"
 #include "ibex_ParserScope.h"
 #include "ibex_NumConstraint.h"
 #include "ibex_Expr.h"
@@ -27,21 +26,21 @@ namespace parser {
 class P_NumConstraint;
 class P_OneConstraint;
 class P_ConstraintLoop;
+class P_Source;
+class P_Result;
 
 class P_Generator : public P_ExprVisitor {
 public:
-	P_Generator();
-
-	pair<Function*,vector<NumConstraint*> > generate(Array<const ExprSymbol> vars, Array<Function> func, const vector<P_NumConstraint*>& ctrs);
+	P_Generator(const P_Source& source, P_Result& result);
 
 	void visit(const P_NumConstraint& c);
 	void visit(const P_OneConstraint& c);
 	void visit(const P_ConstraintLoop& l);
 
 protected:
+	P_Result& result;
 
 	const ExprNode& generate(const ExprNode& expr);
-
 
 	void visit(const ExprNode& e);
 	void visit(const ExprIndex& i);
@@ -113,6 +112,7 @@ protected:
 
 	void visit(const P_ExprConstant& c);
 	void visit(const P_ExprIndex& e);
+	void visit(const P_ExprSymbol& e);
 
 	virtual ~P_Generator();
 

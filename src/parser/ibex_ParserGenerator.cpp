@@ -11,21 +11,20 @@
 #include "ibex_ParserGenerator.h"
 #include "ibex_SyntaxError.h"
 #include "ibex_ParserNumConstraint.h"
+#include "ibex_ParserSource.h"
+#include "ibex_ParserResult.h"
+#include "ibex_Function.h"
 
 using namespace std;
 
 namespace ibex {
 namespace parser {
 
-P_Generator::P_Generator()  {
-
-}
-
-pair<Function*,vector<NumConstraint*> > P_Generator::generate(Array<const ExprSymbol> vars, Array<Function> func, const vector<P_NumConstraint*>& _ctrs) {
+P_Generator::P_Generator(const P_Source& source, P_Result& result) : result(result) {
 
 	assert(ctrs.empty()); //clear(); // cleanup
 
-	for (vector<P_NumConstraint*>::const_iterator it=_ctrs.begin(); it!=_ctrs.end(); it++) {
+	for (vector<P_NumConstraint*>::const_iterator it=source.ctrs.begin(); it!=source.ctrs.end(); it++) {
 		visit(**it);
 	}
 
@@ -38,7 +37,14 @@ pair<Function*,vector<NumConstraint*> > P_Generator::generate(Array<const ExprSy
 		image.set_ref(i++,*(it->first));
 	}
 
-	Function* f=new Function(vars,ExprVector::new_(image,false));
+	Array<const ExprSymbol> all_vars(source.vars.size()+source.eprs.size()+source.sybs.size());
+
+	i=0;
+	for (int j=0; j<source.vars.size(); j++) all_vars.set_ref(i++,*source.vars[j]);
+	for (int j=0; j<source.eprs.size(); j++) all_vars.set_ref(i++,*source.eprs[j]);
+	for (int j=0; j<source.sybs.size(); j++) all_vars.set_ref(i++,*source.sybs[j]);
+
+	Function* f=new Function(all_vars,ExprVector::new_(image,false));
 
 	vector<NumConstraint*> res;
 
@@ -46,8 +52,6 @@ pair<Function*,vector<NumConstraint*> > P_Generator::generate(Array<const ExprSy
 	for (vector<pair<const ExprNode*, NumConstraint::CompOp> >::const_iterator it=ctrs.begin(); it!=ctrs.end(); it++) {
 		res.push_back(new NumConstraint(f[i++], it->second));
 	}
-	// TODO: we must cleanup _ctrs at some point...
-	return pair<Function*,vector<NumConstraint*> >(f,res);
 }
 
 void P_Generator::visit(const P_NumConstraint& c) {
@@ -69,7 +73,9 @@ void P_Generator::visit(const P_ConstraintLoop& loop) {
 
 	for (int i=begin; i<=end; i++) {
 		scopes.top().set_iter_value(name,i);
-		visit(loop.ctr);
+		for (int j=0; j<=loop.ctrs.size(); j++) {
+			visit(*loop.ctrs[j]);
+		}
 	}
 	scopes.pop();
 }
@@ -100,15 +106,7 @@ void P_Generator::visit(const ExprIndex& i) {
 }
 
 void P_Generator::visit(const ExprSymbol& x) {
-	if (scopes.top().is_iter_symbol(x.name)) {
-		if (index_expr)
-			x.deco.tmp = new int[scopes.top().get_iter_value(x.name)];
-		else
-			x.deco.tmp = & ExprConstant::new_scalar(scopes.top().get_iter_value(x.name));
-	} else if (scopes.top().is_cst_symbol(x.name)) {
-		x.deco.tmp = & scopes.top().get_cst(x.name).to_cst();
-	} else
-		x.deco.tmp = & ExprSymbol::new_(x.name,x.dim);
+	assert(false); // only P_ExprSymbol appears at parse time.
 }
 
 void P_Generator::visit(const ExprConstant& c) {
@@ -265,6 +263,20 @@ void P_Generator::visit(const ExprAtanh& e) { check_not_index_expr("atanh"); vis
 
 void P_Generator::visit(const P_ExprConstant& c) {
 	c.deco.tmp = & c.to_cst();
+}
+
+void P_Generator::visit(const P_ExprSymbol& x) {
+	if (scopes.top().is_iter_symbol(x.name)) {
+		if (index_expr)
+			x.deco.tmp = new int[scopes.top().get_iter_value(x.name)];
+		else
+			x.deco.tmp = & ExprConstant::new_scalar(scopes.top().get_iter_value(x.name));
+	} else if (scopes.top().is_cst_symbol(x.name)) {
+		x.deco.tmp = & scopes.top().get_cst(x.name).to_cst();
+	} else {
+		x.deco.tmp = & ExprSymbol::new_(x.name,x.dim);
+		result.domains.push_back(x.domain);
+	}
 }
 
 void P_Generator::visit(const P_ExprIndex& e) {

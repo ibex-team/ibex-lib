@@ -26,7 +26,7 @@ int main() {
 
 	CellStack buff;
 
-	Solver s(c,rr,buff,1e-03);
+	Solver s(c,rr,buff,1e-07);
 	//s.trace=true;
 	//s.cell_limit = 1000;
 

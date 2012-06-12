@@ -332,6 +332,10 @@ private:
 	ExprApply(const Function& expr, const ExprNode** args);
 };
 
+namespace parser {
+class P_ExprSymbol;
+}
+
 /**
  * \ingroup symbolic
  * \brief Symbol
@@ -370,6 +374,7 @@ public:
 
 private:
 	friend class Variable;
+	friend class parser::P_ExprSymbol;
 
 	/** Create a symbol. */
 	ExprSymbol(const Dim& dim);

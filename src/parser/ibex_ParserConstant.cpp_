@@ -169,6 +169,7 @@ bool P_ExprConstant::is_scalar() const {
 	return (type==_int_ || type==_double_ || type==_itv_);
 }
 
+/*
 P_ExprConstant& P_ExprConstant::operator=(const P_ExprConstant& c) {
 	type=c.type;
 	n=c.n;
@@ -179,7 +180,7 @@ P_ExprConstant& P_ExprConstant::operator=(const P_ExprConstant& c) {
 	M.resize(c.M.nb_rows(),c.M.nb_cols());
 	M=c.M;
 	return *this;
-}
+}*/
 
 P_ExprConstant P_ExprConstant::operator[](int i) const {
 
