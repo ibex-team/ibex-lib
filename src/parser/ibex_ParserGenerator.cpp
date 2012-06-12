@@ -21,6 +21,35 @@ P_Generator::P_Generator()  {
 
 }
 
+pair<Function*,vector<NumConstraint*> > P_Generator::generate(Array<const ExprSymbol> vars, Array<Function> func, const vector<P_NumConstraint*>& _ctrs) {
+
+	assert(ctrs.empty()); //clear(); // cleanup
+
+	for (vector<P_NumConstraint*>::const_iterator it=_ctrs.begin(); it!=_ctrs.end(); it++) {
+		visit(**it);
+	}
+
+	int m=ctrs.size();
+
+	Array<const ExprNode> image(m);
+	int i=0;
+
+	for (vector<pair<const ExprNode*, NumConstraint::CompOp> >::const_iterator it=ctrs.begin(); it!=ctrs.end(); it++) {
+		image.set_ref(i++,*(it->first));
+	}
+
+	Function* f=new Function(vars,ExprVector::new_(image,false));
+
+	vector<NumConstraint*> res;
+
+	i=0;
+	for (vector<pair<const ExprNode*, NumConstraint::CompOp> >::const_iterator it=ctrs.begin(); it!=ctrs.end(); it++) {
+		res.push_back(new NumConstraint(f[i++], it->second));
+	}
+	// TODO: we must cleanup _ctrs at some point...
+	return pair<Function*,vector<NumConstraint*> >(f,res);
+}
+
 void P_Generator::visit(const P_NumConstraint& c) {
 	c.acceptVisitor(*this);
 }
