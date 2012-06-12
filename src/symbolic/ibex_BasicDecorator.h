@@ -22,7 +22,7 @@ namespace ibex {
  * \ingroup symbolic
  * \brief Decorates a function for evaluation/HC4Revise.
  */
-class BasicDecorator : public Decorator, public FunctionVisitor {
+class BasicDecorator : public Decorator, public ExprVisitor {
 public:
 
 	virtual ~BasicDecorator() { }

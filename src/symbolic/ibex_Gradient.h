@@ -23,7 +23,7 @@ namespace ibex {
  * \brief Decorates a function with the label for gradient computation.
  */
 
-class GradDecorator : public Decorator, public FunctionVisitor {
+class GradDecorator : public Decorator, public ExprVisitor {
 public:
 
 	void decorate(const Function& f) const;

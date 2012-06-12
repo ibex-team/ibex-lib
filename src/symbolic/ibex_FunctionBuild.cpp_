@@ -28,7 +28,7 @@ namespace {
  * Find the symbols used in the function
  * \pre the symbol keys must have been set
  */
-class FindSymbolsUsed: public FunctionVisitor {
+class FindSymbolsUsed: public ExprVisitor {
 public:
 	vector<int> keys;
 
@@ -57,7 +57,7 @@ public:
  * Set the id number of each node and
  * push all the nodes into a vector (ordered by id).
  */
-class BuildVectorOfNodes: public FunctionVisitor {
+class BuildVectorOfNodes: public ExprVisitor {
 public:
 	vector<const ExprNode*>& nodes;
 	int id;

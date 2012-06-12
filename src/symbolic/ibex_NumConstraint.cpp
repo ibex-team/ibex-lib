@@ -13,7 +13,7 @@
 
 namespace ibex {
 
-NumConstraint::NumConstraint(Function& f, bool equality) : f(f), equality(equality) {
+NumConstraint::NumConstraint(Function& f, CompOp op) : f(f), op(op) {
 
 }
 

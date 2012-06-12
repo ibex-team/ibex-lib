@@ -26,18 +26,14 @@ class NumConstraint {
 
 public:
 
-	NumConstraint(Function& f, bool equality);
+	typedef enum { LT, LEQ, EQ, GEQ, GT } CompOp;
 
-	/**
-	 * \brief Transform f(x)<=0 into {f_1(x)<=0 ,..., f_n(x)<=0)
-	 *
-	 * \see #ibex::Function::separate().
-	 */
-	//NumConstraint* separate() const;
+	NumConstraint(Function& f, CompOp op=EQ);
 
 	Function& f;
-	const bool equality;
+	const CompOp op;
 };
+
 
 } // namespace ibex
 #endif // __IBEX_NUM_CONSTRAINT_H__

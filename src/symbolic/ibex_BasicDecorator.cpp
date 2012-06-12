@@ -10,6 +10,8 @@
 
 #include "ibex_BasicDecorator.h"
 #include "ibex_Function.h"
+#include "ibex_ExprVisitor.h"
+
 
 namespace ibex {
 

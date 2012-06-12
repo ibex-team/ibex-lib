@@ -229,6 +229,16 @@ bool ExprConstant::ExprConstant::is_zero() const {
 	return true;
 }
 
+const ExprConstant& ExprConstant::copy() const {
+	switch(type()) {
+	case Dim::SCALAR:     return new_scalar(get_value()); break;
+	case Dim::ROW_VECTOR: return new_vector(get_vector_value(),true); break;
+	case Dim::COL_VECTOR: return new_vector(get_vector_value(),false); break;
+	case Dim::MATRIX:     return new_matrix(get_matrix_value()); break;
+	default: assert(false); return *this; break;
+	}
+}
+
 ExprBinaryOp::ExprBinaryOp(const ExprNode& left, const ExprNode& right, const Dim& dim) :
 		ExprNode(	max_height(left,right)+1,
 					bin_size(left,right),

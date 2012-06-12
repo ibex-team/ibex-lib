@@ -9,14 +9,14 @@
  * Created     : Mar 24, 2012
  * ---------------------------------------------------------------------------- */
 
-#include "ibex_FunctionVisitor.h"
+#include "ibex_ExprVisitor.h"
 #include <cassert>
 
 namespace ibex {
 
 namespace {
 
-class ExprPrinter : public virtual FunctionVisitor {
+class ExprPrinter : public virtual ExprVisitor {
 
 public:
 	std::ostream& os;

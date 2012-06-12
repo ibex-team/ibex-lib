@@ -14,7 +14,7 @@
 #include <stack>
 
 #include "ibex_Expr.h"
-#include "ibex_FunctionVisitor.h"
+#include "ibex_ExprVisitor.h"
 #include "ibex_FwdAlgorithm.h"
 #include "ibex_BwdAlgorithm.h"
 
@@ -27,7 +27,7 @@ class Function;
  * \brief A low-level representation of a function for speeding up forward/backward algorithms.
  *
  */
-class CompiledFunction : public FunctionVisitor {
+class CompiledFunction : public ExprVisitor {
 public:
 
 	CompiledFunction();

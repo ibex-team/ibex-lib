@@ -9,12 +9,12 @@
 //============================================================================
 
 #include <stdlib.h>
-#include "ibex_FunctionVisitor.h"
+#include "ibex_ExprVisitor.h"
 #include "ibex_Expr.h"
 
 namespace ibex {
 
-class ResetVisited : public FunctionVisitor {
+class ResetVisited : public ExprVisitor {
 public:
 	ResetVisited(const ExprNode& e)   { visit(e); }
 protected:
@@ -27,7 +27,7 @@ protected:
 	void visit(const ExprUnaryOp& u)  {	visit(u.expr); }
 };
 
-class SizeofDAG : public FunctionVisitor {
+class SizeofDAG : public ExprVisitor {
 public:
 	/* for binary expressions (BinOpExpr). */
 	SizeofDAG(const ExprNode& l, const ExprNode& r) : size(0) {
@@ -62,7 +62,7 @@ private:
 	 void visit(const ExprUnaryOp& e)  { visit(e.expr); }
 };
 
-class ExprSubNodes : public FunctionVisitor {
+class ExprSubNodes : public ExprVisitor {
 	const ExprNode** subnodes;
 	int j;
 

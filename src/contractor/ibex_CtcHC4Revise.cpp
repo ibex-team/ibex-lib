@@ -13,7 +13,7 @@
 
 namespace ibex {
 
-CtcProj::CtcProj(Function& f, bool equality) : Ctc(f.input_size()), ctr(f,equality) {
+CtcProj::CtcProj(Function& f, bool equality) : Ctc(f.input_size()), ctr(f,equality?NumConstraint::EQ:NumConstraint::LEQ) {
 
 }
 
@@ -24,7 +24,15 @@ CtcProj::CtcProj(const NumConstraint& ctr) : Ctc(ctr.f.nb_symbols()), ctr(ctr) {
 void CtcProj::contract(IntervalVector& box) {
 	const Dim& d=ctr.f.expr().dim;
 	Domain root_label(d);
-	Interval right_cst(ctr.equality? 0: NEG_INFINITY, 0);
+	Interval right_cst;
+
+	switch (ctr.op) {
+	case NumConstraint::LT :
+	case NumConstraint::LEQ : right_cst=Interval(NEG_INFINITY, 0); break;
+	case NumConstraint::EQ  : right_cst=Interval(0,0); break;
+	case NumConstraint::GEQ :
+	case NumConstraint::GT : right_cst=Interval(0,POS_INFINITY); break;
+	}
 
 	switch(d.type()) {
 	case Dim::SCALAR:       root_label.i()=right_cst; break;

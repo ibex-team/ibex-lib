@@ -1,5 +1,5 @@
 /* ============================================================================
- * I B E X - Interface for function visitors
+ * I B E X - Interface for expression visitors
  * ============================================================================
  * Copyright   : Ecole des Mines de Nantes (FRANCE)
  * License     : This program can be distributed under the terms of the GNU LGPL.
@@ -9,8 +9,8 @@
  * Created     : Jan 06, 2012
  * ---------------------------------------------------------------------------- */
 
-#ifndef __IBEX_FUNC_VISITOR_H__
-#define __IBEX_FUNC_VISITOR_H__
+#ifndef __IBEX_EXPR_VISITOR_H__
+#define __IBEX_EXPR_VISITOR_H__
 
 #include "ibex_Interval.h"
 #include "ibex_IntervalMatrix.h"
@@ -67,10 +67,10 @@ class ExprAtanh;
  * \author Gilles Chabert
  * \date March 2007
  */
-class FunctionVisitor {
+class ExprVisitor {
 
  public:
-  virtual ~FunctionVisitor() { }
+  virtual ~ExprVisitor() { }
 
   /*===============================================================*/
   /*                mandatory functions                            */
@@ -289,4 +289,4 @@ class FunctionVisitor {
 
 } // end namespace ibex
 
-#endif // __IBEX_FUNC_VISITOR_H__
+#endif // __IBEX_EXPR_VISITOR_H__

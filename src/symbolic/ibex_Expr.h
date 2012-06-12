@@ -16,7 +16,7 @@
 #include <iostream>
 
 #include "ibex_SymbolMap.h"
-#include "ibex_FunctionVisitor.h"
+#include "ibex_ExprVisitor.h"
 #include "ibex_Interval.h"
 #include "ibex_IntervalVector.h"
 #include "ibex_IntervalMatrix.h"
@@ -25,11 +25,8 @@
 
 namespace ibex {
 
-class Constraint;
-class Equality;
-class Inequality;
+class NumConstraint;
 class ExprIndex;
-
 class Function;
 
 /**
@@ -52,7 +49,7 @@ public:
 	ExprNode(int height, int size, const Dim& dim);
 
 	/** Accept an #ibex::ExprVisitor visitor. */
-	virtual void acceptVisitor(FunctionVisitor& v) const = 0;
+	virtual void acceptVisitor(ExprVisitor& v) const = 0;
 
 	friend class Visitor;
 
@@ -92,34 +89,34 @@ public:
 	const ExprIndex& operator[](int index) const;
 
 	/** Create an equality constraint expr=expr. */
-	const Equality& operator=(const ExprNode& right) const;
+	const NumConstraint& operator=(const ExprNode& right) const;
 
 	/** Create an equality constraint expr=value. */
-	const Equality& operator=(const Interval& value) const;
+	const NumConstraint& operator=(const Interval& value) const;
 
 	/** Create an inequality constraint expr<=expr. */
-	const Inequality& operator<=(const ExprNode& right) const;
+	const NumConstraint& operator<=(const ExprNode& right) const;
 
 	/** Create an inequality constraint expr<=value. */
-	const Inequality& operator<=(const Interval& value) const;
+	const NumConstraint& operator<=(const Interval& value) const;
 
 	/** Create an inequality constraint expr>=expr. */
-	const Inequality& operator>=(const ExprNode& right) const;
+	const NumConstraint& operator>=(const ExprNode& right) const;
 
 	/** Create an inequality constraint expr>=value. */
-	const Inequality& operator>=(const Interval& value) const;
+	const NumConstraint& operator>=(const Interval& value) const;
 
 	/** Create an inequality constraint expr<value. */
-	const Inequality& operator<(const ExprNode& right) const;
+	const NumConstraint& operator<(const ExprNode& right) const;
 
 	/** Create an inequality constraint expr<value. */
-	const Inequality& operator<(const Interval& value) const;
+	const NumConstraint& operator<(const Interval& value) const;
 
 	/** Create an inequality constraint expr>expr. */
-	const Inequality& operator>(const ExprNode& right) const;
+	const NumConstraint& operator>(const ExprNode& right) const;
 
 	/** Create an inequality constraint expr>value. */
-	const Inequality& operator>(const Interval& value) const;
+	const NumConstraint& operator>(const Interval& value) const;
 
 	/**
 	 * \brief Return all the subnodes. */
@@ -140,13 +137,13 @@ class ExprIndex : public ExprNode {
 
 public:
 	/** Accept an #ibex::ExprVisitor visitor. */
-	void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); }
+	void acceptVisitor(ExprVisitor& v) const { v.visit(*this); }
 
 	/** Create an equality constraint expr[i]=expr. */
-	const Equality& operator=(const ExprNode& expr) const;
+	const NumConstraint& operator=(const ExprNode& expr) const;
 
 	/** Create an equality constraint expr[i]=value. */
-	const Equality& operator=(const Interval& value) const;
+	const NumConstraint& operator=(const Interval& value) const;
 
 	/** The sub-expression */
 	const ExprNode& expr;
@@ -177,7 +174,7 @@ class ExprNAryOp : public ExprNode {
 public:
 
 	/** Accept an #ibex::ExprVisitor visitor. */
-	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
 
 	/** Return a reference to the ith argument expression. */
 	const ExprNode& arg(int i) const { return *args[i]; }
@@ -212,7 +209,7 @@ public:
 	/**
 	 * \brief Accept an #ibex::ExprVisitor visitor.
 	 */
-	void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); }
+	void acceptVisitor(ExprVisitor& v) const { v.visit(*this); }
 
 	/**
 	 * \brief Create a vector of expressions.
@@ -315,13 +312,13 @@ class ExprApply : public ExprNAryOp {
 public:
 
 	/** Create an equality constraint apply=expr. */
-	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+	const NumConstraint& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
 	/** Create an equality constraint apply=value. */
-	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+	const NumConstraint& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
 
 	/** Accept an #ibex::ExprVisitor visitor. */
-	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
 
 	/** The applied function. */
 	const Function& func;
@@ -346,13 +343,13 @@ class ExprSymbol : public ExprNode {
 
 public:
 	/** Create an equality constraint symbol=expr. */
-	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+	const NumConstraint& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
 	/** Create an equality constraint symbol=value. */
-	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+	const NumConstraint& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
 
 	/** Accept an #ibex::ExprVisitor visitor. */
-	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
 
 	/** Deletes this instance. */
 	~ExprSymbol();
@@ -434,7 +431,7 @@ public:
 	virtual bool is_zero() const;
 
 	/** Accept an #ibex::ExprVisitor visitor. */
-	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
 
 	/** Return the value of the constant under the form of an #Interval.
 	 *  If the constant is a matrix, the first entry is returned (no error). */
@@ -447,6 +444,10 @@ public:
 	/** Return the value of the constant under the form of an IntervalMatrix.
 	 *  If the constant is not a matrix, the returned matrix is 1-row x 1-col. */
 	const IntervalMatrix& get_matrix_value() const;
+
+	/** Return a copy of *this.
+	 */
+	const ExprConstant& copy() const;
 
 private:
 	friend class Visitor;
@@ -475,10 +476,10 @@ private:
 class ExprBinaryOp : public ExprNode {
 public:
 	/* Create an equality constraint expr o expr=expr. */
-	//const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+	//const NumConstraint& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
 	/* Create an equality constraint expr o expr=value. */
-	//const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+	//const NumConstraint& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
 
 	/** Left subexpression. */
 	const ExprNode& left;
@@ -502,13 +503,13 @@ private:
 class ExprAdd : public ExprBinaryOp {
 public:
 	/** Create an equality constraint expr1+expr2=expr. */
-	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+	const NumConstraint& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
 	/** Create an equality constraint expr1+expr2=value. */
-	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+	const NumConstraint& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
 
 	/** Accept an #ibex::ExprVisitor visitor. */
-	virtual void acceptVisitor(FunctionVisitor& v) const {
+	virtual void acceptVisitor(ExprVisitor& v) const {
 		v.visit(*this); };
 
 	static const ExprAdd& new_(const ExprNode& left, const ExprNode& right) {
@@ -527,13 +528,13 @@ private:
 class ExprMul : public ExprBinaryOp {
 public:
 	/** Create an equality constraint expr1*expr2=expr. */
-	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+	const NumConstraint& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
 	/** Create an equality constraint expr1*expr2=value. */
-	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+	const NumConstraint& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
 
 	/** Accept an #ibex::ExprVisitor visitor. */
-	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
 
 	static const ExprMul& new_(const ExprNode& left, const ExprNode& right) {
 		return *new ExprMul(left,right);
@@ -552,13 +553,13 @@ private:
 class ExprSub : public ExprBinaryOp {
 public:
 	/** Create an equality constraint expr1+expr2=expr. */
-	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+	const NumConstraint& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
 	/** Create an equality constraint expr1+expr2=value. */
-	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+	const NumConstraint& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
 
 	/** Accept an #ibex::ExprVisitor visitor. */
-	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
 
 	static const ExprSub& new_(const ExprNode& left, const ExprNode& right) {
 		return *new ExprSub(left,right);
@@ -576,13 +577,13 @@ private:
 class ExprDiv : public ExprBinaryOp {
 public:
 	/** Create an equality constraint expr1+expr2=expr. */
-	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+	const NumConstraint& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
 	/** Create an equality constraint expr1+expr2=value. */
-	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+	const NumConstraint& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
 
 	/** Accept an #ibex::ExprVisitor visitor. */
-	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
 
 	static const ExprDiv& new_(const ExprNode& left, const ExprNode& right) {
 		return *new ExprDiv(left,right);
@@ -600,13 +601,13 @@ private:
 class ExprMax : public ExprBinaryOp {
 public:
 	/** Create an equality constraint expr1+expr2=expr. */
-	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+	const NumConstraint& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
 	/** Create an equality constraint expr1+expr2=value. */
-	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+	const NumConstraint& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
 
 	/** Accept an #ibex::ExprVisitor visitor. */
-	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
 
 	static const ExprMax& new_(const ExprNode& left, const ExprNode& right) {
 		return *new ExprMax(left,right);
@@ -624,13 +625,13 @@ private:
 class ExprMin : public ExprBinaryOp {
 public:
 	/** Create an equality constraint expr1+expr2=expr. */
-	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+	const NumConstraint& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
 	/** Create an equality constraint expr1+expr2=value. */
-	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+	const NumConstraint& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
 
 	/** Accept an #ibex::ExprVisitor visitor. */
-	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
 
 	static const ExprMin& new_(const ExprNode& left, const ExprNode& right) {
 		return *new ExprMin(left,right);
@@ -648,13 +649,13 @@ private:
 class ExprAtan2 : public ExprBinaryOp {
 public:
 	/** Create an equality constraint expr1+expr2=expr. */
-	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+	const NumConstraint& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
 	/** Create an equality constraint expr1+expr2=value. */
-	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+	const NumConstraint& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
 
 	/** Accept an #ibex::ExprVisitor visitor. */
-	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
 
 	static const ExprAtan2& new_(const ExprNode& left, const ExprNode& right) {
 		return *new ExprAtan2(left,right);
@@ -676,10 +677,10 @@ class ExprUnaryOp : public ExprNode {
 
 public:
 	/* Create an equality constraint f(expr)=expr. */
-	//const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+	//const NumConstraint& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
 	/* Create an equality constraint f(expr)=value. */
-	//const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+	//const NumConstraint& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
 
 	/** The subexpression */
 	const ExprNode& expr;
@@ -696,13 +697,13 @@ protected:
 class ExprMinus : public ExprUnaryOp {
 public:
 	/** Create an equality constraint (-expr)=expr. */
-	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+	const NumConstraint& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
 	/** Create an equality constraint (-expr)=value. */
-	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+	const NumConstraint& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
 
 	/** Accept an #ibex::ExprVisitor visitor. */
-	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
 
 	static const ExprMinus& new_(const ExprNode& expr) { return *new ExprMinus(expr); }
 
@@ -718,13 +719,13 @@ private:
 class ExprSign : public ExprUnaryOp {
 public:
 	/** Create an equality constraint (-expr)=expr. */
-	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+	const NumConstraint& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
 	/** Create an equality constraint (-expr)=value. */
-	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+	const NumConstraint& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
 
 	/** Accept an #ibex::ExprVisitor visitor. */
-	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
 
 	static const ExprSign& new_(const ExprNode& expr) { return *new ExprSign(expr); }
 
@@ -740,13 +741,13 @@ private:
 class ExprAbs : public ExprUnaryOp {
 public:
 	/** Create an equality constraint (-expr)=expr. */
-	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+	const NumConstraint& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
 	/** Create an equality constraint (-expr)=value. */
-	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+	const NumConstraint& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
 
 	/** Accept an #ibex::ExprVisitor visitor. */
-	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
 
 	static const ExprAbs& new_(const ExprNode& expr) { return *new ExprAbs(expr); }
 
@@ -764,13 +765,13 @@ class ExprPower : public ExprUnaryOp {
 
 public:
 	/** Create an equality constraint expr^n=expr. */
-	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+	const NumConstraint& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
 	/** Create an equality constraint expr^n=value. */
-	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+	const NumConstraint& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
 
 	/** Accept an #ibex::ExprVisitor visitor. */
-	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
 
 	static const ExprPower& new_(const ExprNode& expr, int expon) {
 		return *new ExprPower(expr,expon);
@@ -791,13 +792,13 @@ class ExprSqr : public ExprUnaryOp {
 
 public:
 	/** Create an equality constraint expr^2=expr. */
-	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+	const NumConstraint& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
 	/** Create an equality constraint expr^2=value. */
-	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+	const NumConstraint& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
 
 	/** Accept an #ibex::ExprVisitor visitor. */
-	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
 
 	static const ExprSqr& new_(const ExprNode& expr) {
 		return *new ExprSqr(expr);
@@ -816,13 +817,13 @@ class ExprSqrt : public ExprUnaryOp {
 
 public:
 	/** Create an equality constraint sqrt(expr)=expr. */
-	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+	const NumConstraint& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
 	/** Create an equality constraint sqrt(expr)=value. */
-	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+	const NumConstraint& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
 
 	/** Accept an #ibex::ExprVisitor visitor. */
-	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
 
 	static const ExprSqrt& new_(const ExprNode& expr) { return *new ExprSqrt(expr); }
 
@@ -839,13 +840,13 @@ class ExprExp : public ExprUnaryOp {
 
 public:
 	/** Create an equality constraint e^expr=expr. */
-	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+	const NumConstraint& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
 	/** Create an equality constraint e^expr=value. */
-	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+	const NumConstraint& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
 
 	/** Accept an #ibex::ExprVisitor visitor. */
-	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
 
 	static const ExprExp& new_(const ExprNode& expr) {
 		return *new ExprExp(expr);
@@ -864,13 +865,13 @@ class ExprLog : public ExprUnaryOp {
 
 public:
 	/** Create an equality constraint log(expr)=expr. */
-	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+	const NumConstraint& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
 	/** Create an equality constraint log(expr)=value. */
-	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+	const NumConstraint& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
 
 	/** Accept an #ibex::ExprVisitor visitor. */
-	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
 
 	static const ExprLog& new_(const ExprNode& expr) {
 		return *new ExprLog(expr);
@@ -889,13 +890,13 @@ class ExprCos : public ExprUnaryOp {
 
 public:
 	/** Create an equality constraint cos(expr)=expr. */
-	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+	const NumConstraint& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
 	/** Create an equality constraint cos(expr)=value. */
-	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+	const NumConstraint& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
 
 	/** Accept an #ibex::ExprVisitor visitor. */
-	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
 
 	static const ExprCos& new_(const ExprNode& expr) {
 		return *new ExprCos(expr);
@@ -914,13 +915,13 @@ class ExprSin : public ExprUnaryOp {
 
 public:
 	/** Create an equality constraint sin(expr)=expr. */
-	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+	const NumConstraint& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
 	/** Create an equality constraint sin(expr)=value. */
-	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+	const NumConstraint& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
 
 	/** Accept an #ibex::ExprVisitor visitor. */
-	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
 
 	static const ExprSin& new_(const ExprNode& expr) {
 		return *new ExprSin(expr);
@@ -939,13 +940,13 @@ class ExprTan : public ExprUnaryOp {
 
 public:
 	/** Create an equality constraint tan(expr)=expr. */
-	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+	const NumConstraint& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
 	/** Create an equality constraint tan(expr)=value. */
-	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+	const NumConstraint& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
 
 	/** Accept an #ibex::ExprVisitor visitor. */
-	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
 
 	static const ExprTan& new_(const ExprNode& expr) {
 		return *new ExprTan(expr);
@@ -964,13 +965,13 @@ class ExprCosh : public ExprUnaryOp {
 
 public:
 	/** Create an equality constraint cosh(expr)=expr. */
-	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+	const NumConstraint& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
 	/** Create an equality constraint cosh(expr)=value. */
-	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+	const NumConstraint& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
 
 	/** Accept an #ibex::ExprVisitor visitor. */
-	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
 
 	static const ExprCosh& new_(const ExprNode& expr) {
 		return *new ExprCosh(expr);
@@ -989,13 +990,13 @@ class ExprSinh : public ExprUnaryOp {
 
 public:
 	/** Create an equality constraint sinh(expr)=expr. */
-	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+	const NumConstraint& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
 	/** Create an equality constraint sinh(expr)=value. */
-	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+	const NumConstraint& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
 
 	/** Accept an #ibex::ExprVisitor visitor. */
-	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
 
 	static const ExprSinh& new_(const ExprNode& expr) {
 		return *new ExprSinh(expr);
@@ -1014,13 +1015,13 @@ class ExprTanh : public ExprUnaryOp {
 
 public:
 	/** Create an equality constraint tanh(expr)=expr. */
-	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+	const NumConstraint& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
 	/** Create an equality constraint tanh(expr)=value. */
-	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+	const NumConstraint& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
 
 	/** Accept an #ibex::ExprVisitor visitor. */
-	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
 
 	static const ExprTanh& new_(const ExprNode& expr) {
 		return *new ExprTanh(expr);
@@ -1039,13 +1040,13 @@ class ExprAcos : public ExprUnaryOp {
 
 public:
 	/** Create an equality constraint acos(expr)=expr. */
-	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+	const NumConstraint& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
 	/** Create an equality constraint acos(expr)=value. */
-	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+	const NumConstraint& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
 
 	/** Accept an #ibex::ExprVisitor visitor. */
-	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
 
 	static const ExprAcos& new_(const ExprNode& expr) {
 		return *new ExprAcos(expr);
@@ -1064,13 +1065,13 @@ class ExprAsin : public ExprUnaryOp {
 
 public:
 	/** Create an equality constraint asin(expr)=expr. */
-	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+	const NumConstraint& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
 	/** Create an equality constraint asin(expr)=value. */
-	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+	const NumConstraint& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
 
 	/** Accept an #ibex::ExprVisitor visitor. */
-	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
 
 	static const ExprAsin& new_(const ExprNode& expr) {
 		return *new ExprAsin(expr);
@@ -1089,13 +1090,13 @@ class ExprAtan : public ExprUnaryOp {
 
 public:
 	/** Create an equality constraint atan(expr)=expr. */
-	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+	const NumConstraint& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
 	/** Create an equality constraint atan(expr)=value. */
-	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+	const NumConstraint& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
 
 	/** Accept an #ibex::ExprVisitor visitor. */
-	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
 
 	static const ExprAtan& new_(const ExprNode& expr) {
 		return *new ExprAtan(expr);
@@ -1114,13 +1115,13 @@ class ExprAcosh : public ExprUnaryOp {
 
 public:
 	/** Create an equality constraint acosh(expr)=expr. */
-	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+	const NumConstraint& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
 	/** Create an equality constraint acosh(expr)=value. */
-	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+	const NumConstraint& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
 
 	/** Accept an #ibex::ExprVisitor visitor. */
-	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
 
 	static const ExprAcosh& new_(const ExprNode& expr) {
 		return *new ExprAcosh(expr);
@@ -1139,13 +1140,13 @@ class ExprAsinh : public ExprUnaryOp {
 
 public:
 	/** Create an equality constraint asinh(expr)=expr. */
-	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+	const NumConstraint& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
 	/** Create an equality constraint asinh(expr)=value. */
-	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+	const NumConstraint& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
 
 	/** Accept an #ibex::ExprVisitor visitor. */
-	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
 
 	static const ExprAsinh& new_(const ExprNode& expr) {
 		return *new ExprAsinh(expr);
@@ -1164,13 +1165,13 @@ class ExprAtanh : public ExprUnaryOp {
 
 public:
 	/** Create an equality constraint atanh(expr)=expr. */
-	const Equality& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+	const NumConstraint& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
 
 	/** Create an equality constraint atanh(expr)=value. */
-	const Equality& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+	const NumConstraint& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
 
 	/** Accept an #ibex::ExprVisitor visitor. */
-	virtual void acceptVisitor(FunctionVisitor& v) const { v.visit(*this); };
+	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
 
 	static const ExprAtanh& new_(const ExprNode& expr) {
 		return *new ExprAtanh(expr);
@@ -1198,10 +1199,10 @@ inline Dim::Type ExprNode::type() const {
 inline const ExprIndex& ExprNode::operator[](int index) const {
 	return ExprIndex::new_(*this, index); }
 
-inline const Equality& ExprIndex::operator=(const ExprNode& expr) const {
+inline const NumConstraint& ExprIndex::operator=(const ExprNode& expr) const {
 	return ((ExprNode&) *this)=expr; }
 
-inline const Equality& ExprIndex::operator=(const Interval& value) const  {
+inline const NumConstraint& ExprIndex::operator=(const Interval& value) const  {
 	return ((ExprNode&) *this)=value; }
 
 inline const ExprIndex& ExprIndex::new_(const ExprNode& subexpr, int index) {
