@@ -33,42 +33,42 @@ int to_double(const Domain& d) {
 	return d.i().mid();
 }
 
-ConstantEvaluator::ConstantEvaluator(const Scope& scope) : scope(scope ){
+ConstantGenerator::ConstantGenerator(const Scope& scope) : scope(scope ){
 
 }
 
-ConstantEvaluator::~ConstantEvaluator() {
+ConstantGenerator::~ConstantGenerator() {
 
 }
 
-Domain ConstantEvaluator::eval(const ExprNode& expr) {
+Domain ConstantGenerator::eval(const ExprNode& expr) {
 	visit(expr);
 	Domain r=*((const Domain*) expr.deco.tmp);
 	delete (Domain*) expr.deco.tmp;
 	return r;
 }
 
-int ConstantEvaluator::eval_integer(const ExprNode& expr) {
+int ConstantGenerator::eval_integer(const ExprNode& expr) {
 	return to_integer(eval(expr));
 }
 
-double ConstantEvaluator::eval_double(const ExprNode& expr) {
+double ConstantGenerator::eval_double(const ExprNode& expr) {
 	return to_double(eval(expr));
 }
 
-void ConstantEvaluator::visit(const ExprNode& e) {
+void ConstantGenerator::visit(const ExprNode& e) {
 	e.acceptVisitor(*this);
 }
 
-void ConstantEvaluator::visit(const ExprIndex& i) {
+void ConstantGenerator::visit(const ExprIndex& i) {
 	assert(false); // only P_ExprIndex appears at parse time.
 }
 
-void ConstantEvaluator::visit(const ExprSymbol& x) {
+void ConstantGenerator::visit(const ExprSymbol& x) {
 	assert(false); // only P_ExprSymbol appears at parse time.
 }
 
-void ConstantEvaluator::visit(const ExprConstant& c) {
+void ConstantGenerator::visit(const ExprConstant& c) {
 	Domain* d=new Domain(c.dim);
 	switch(c.dim.type()) {
 	case Dim::SCALAR:     d->i()=c.get_value(); break;
@@ -80,19 +80,19 @@ void ConstantEvaluator::visit(const ExprConstant& c) {
 	c.deco.tmp = d;
 }
 
-void ConstantEvaluator::visit(const ExprNAryOp& e) {
+void ConstantGenerator::visit(const ExprNAryOp& e) {
 	e.acceptVisitor(*this);
 }
 
-void ConstantEvaluator::visit(const ExprBinaryOp& b) {
+void ConstantGenerator::visit(const ExprBinaryOp& b) {
 	b.acceptVisitor(*this);
 }
 
-void ConstantEvaluator::visit(const ExprUnaryOp& u) {
+void ConstantGenerator::visit(const ExprUnaryOp& u) {
 	u.acceptVisitor(*this);
 }
 
-void ConstantEvaluator::visit(const ExprVector& e) {
+void ConstantGenerator::visit(const ExprVector& e) {
 	Domain* d= new Domain(e.dim);
 	assert(d->dim.is_vector() || d->dim.type()==Dim::MATRIX);
 	// we forbid a "vector operation" between constants
@@ -106,7 +106,7 @@ void ConstantEvaluator::visit(const ExprVector& e) {
 	e.deco.tmp = d;
 }
 
-void ConstantEvaluator::visit(const ExprApply& e) {
+void ConstantGenerator::visit(const ExprApply& e) {
 	assert(false); // TO DO
 }
 
@@ -148,40 +148,40 @@ Domain _power(const Domain& d, const Domain& expon) {
 
 }
 
-void ConstantEvaluator::visit(const ExprAdd& e)     { visit(e.left); visit(e.right); binary_eval(e,operator+); }
-void ConstantEvaluator::visit(const ExprMul& e)     { visit(e.left); visit(e.right); binary_eval(e,operator*); }
-void ConstantEvaluator::visit(const ExprSub& e)     { visit(e.left); visit(e.right); binary_eval(e,operator-); }
-void ConstantEvaluator::visit(const ExprDiv& e)     { visit(e.left); visit(e.right); binary_eval(e,operator/); }
-void ConstantEvaluator::visit(const ExprMax& e)     { visit(e.left); visit(e.right); binary_eval(e,max); }
-void ConstantEvaluator::visit(const ExprMin& e)     { visit(e.left); visit(e.right); binary_eval(e,min); }
-void ConstantEvaluator::visit(const ExprAtan2& e)   { visit(e.left); visit(e.right); binary_eval(e,atan2); }
-void ConstantEvaluator::visit(const P_ExprIndex& e) { visit(e.left); visit(e.right); binary_eval(e,_index); }
-void ConstantEvaluator::visit(const P_ExprPower& e) { visit(e.left); visit(e.right); binary_eval(e,_power); }
+void ConstantGenerator::visit(const ExprAdd& e)     { visit(e.left); visit(e.right); binary_eval(e,operator+); }
+void ConstantGenerator::visit(const ExprMul& e)     { visit(e.left); visit(e.right); binary_eval(e,operator*); }
+void ConstantGenerator::visit(const ExprSub& e)     { visit(e.left); visit(e.right); binary_eval(e,operator-); }
+void ConstantGenerator::visit(const ExprDiv& e)     { visit(e.left); visit(e.right); binary_eval(e,operator/); }
+void ConstantGenerator::visit(const ExprMax& e)     { visit(e.left); visit(e.right); binary_eval(e,max); }
+void ConstantGenerator::visit(const ExprMin& e)     { visit(e.left); visit(e.right); binary_eval(e,min); }
+void ConstantGenerator::visit(const ExprAtan2& e)   { visit(e.left); visit(e.right); binary_eval(e,atan2); }
+void ConstantGenerator::visit(const P_ExprIndex& e) { visit(e.left); visit(e.right); binary_eval(e,_index); }
+void ConstantGenerator::visit(const P_ExprPower& e) { visit(e.left); visit(e.right); binary_eval(e,_power); }
 
-void ConstantEvaluator::visit(const ExprMinus& e) { visit(e.expr); unary_eval(e,operator-); }
-void ConstantEvaluator::visit(const ExprSign& e)  { visit(e.expr); unary_eval(e,sign); }
-void ConstantEvaluator::visit(const ExprAbs& e)   { visit(e.expr); unary_eval(e,abs); }
-void ConstantEvaluator::visit(const ExprPower& e) { assert(false); /* only P_ExprPower possible */ }
-void ConstantEvaluator::visit(const ExprSqr& e)   { visit(e.expr); unary_eval(e,sqr); }
-void ConstantEvaluator::visit(const ExprSqrt& e)  { visit(e.expr); unary_eval(e,sqrt); }
-void ConstantEvaluator::visit(const ExprExp& e)   { visit(e.expr); unary_eval(e,exp); }
-void ConstantEvaluator::visit(const ExprLog& e)   { visit(e.expr); unary_eval(e,log); }
-void ConstantEvaluator::visit(const ExprCos& e)   { visit(e.expr); unary_eval(e,cos); }
-void ConstantEvaluator::visit(const ExprSin& e)   { visit(e.expr); unary_eval(e,sin); }
-void ConstantEvaluator::visit(const ExprTan& e)   { visit(e.expr); unary_eval(e,tan); }
-void ConstantEvaluator::visit(const ExprCosh& e)  { visit(e.expr); unary_eval(e,cosh); }
-void ConstantEvaluator::visit(const ExprSinh& e)  { visit(e.expr); unary_eval(e,sinh); }
-void ConstantEvaluator::visit(const ExprTanh& e)  { visit(e.expr); unary_eval(e,tanh); }
-void ConstantEvaluator::visit(const ExprAcos& e)  { visit(e.expr); unary_eval(e,acos); }
-void ConstantEvaluator::visit(const ExprAsin& e)  { visit(e.expr); unary_eval(e,asin); }
-void ConstantEvaluator::visit(const ExprAtan& e)  { visit(e.expr); unary_eval(e,atan); }
-void ConstantEvaluator::visit(const ExprAcosh& e) { visit(e.expr); unary_eval(e,acosh); }
-void ConstantEvaluator::visit(const ExprAsinh& e) { visit(e.expr); unary_eval(e,asinh); }
-void ConstantEvaluator::visit(const ExprAtanh& e) { visit(e.expr); unary_eval(e,atanh); }
+void ConstantGenerator::visit(const ExprMinus& e) { visit(e.expr); unary_eval(e,operator-); }
+void ConstantGenerator::visit(const ExprSign& e)  { visit(e.expr); unary_eval(e,sign); }
+void ConstantGenerator::visit(const ExprAbs& e)   { visit(e.expr); unary_eval(e,abs); }
+void ConstantGenerator::visit(const ExprPower& e) { assert(false); /* only P_ExprPower possible */ }
+void ConstantGenerator::visit(const ExprSqr& e)   { visit(e.expr); unary_eval(e,sqr); }
+void ConstantGenerator::visit(const ExprSqrt& e)  { visit(e.expr); unary_eval(e,sqrt); }
+void ConstantGenerator::visit(const ExprExp& e)   { visit(e.expr); unary_eval(e,exp); }
+void ConstantGenerator::visit(const ExprLog& e)   { visit(e.expr); unary_eval(e,log); }
+void ConstantGenerator::visit(const ExprCos& e)   { visit(e.expr); unary_eval(e,cos); }
+void ConstantGenerator::visit(const ExprSin& e)   { visit(e.expr); unary_eval(e,sin); }
+void ConstantGenerator::visit(const ExprTan& e)   { visit(e.expr); unary_eval(e,tan); }
+void ConstantGenerator::visit(const ExprCosh& e)  { visit(e.expr); unary_eval(e,cosh); }
+void ConstantGenerator::visit(const ExprSinh& e)  { visit(e.expr); unary_eval(e,sinh); }
+void ConstantGenerator::visit(const ExprTanh& e)  { visit(e.expr); unary_eval(e,tanh); }
+void ConstantGenerator::visit(const ExprAcos& e)  { visit(e.expr); unary_eval(e,acos); }
+void ConstantGenerator::visit(const ExprAsin& e)  { visit(e.expr); unary_eval(e,asin); }
+void ConstantGenerator::visit(const ExprAtan& e)  { visit(e.expr); unary_eval(e,atan); }
+void ConstantGenerator::visit(const ExprAcosh& e) { visit(e.expr); unary_eval(e,acosh); }
+void ConstantGenerator::visit(const ExprAsinh& e) { visit(e.expr); unary_eval(e,asinh); }
+void ConstantGenerator::visit(const ExprAtanh& e) { visit(e.expr); unary_eval(e,atanh); }
 
 
 
-void ConstantEvaluator::visit(const P_ExprSymbol& x) {
+void ConstantGenerator::visit(const P_ExprSymbol& x) {
 
 	if (scope.is_iter_symbol(x.name)) {
 		Domain* d= new Domain(x.dim);

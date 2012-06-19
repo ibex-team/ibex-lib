@@ -19,6 +19,7 @@
 namespace ibex {
 
 namespace parser {
+
 class P_Result {
 public:
 	P_Result();
@@ -29,6 +30,9 @@ public:
 	/** Main function */
 	Function* f;
 
+	/** All the variables */
+	Array<const ExprSymbol>* vars;
+
 	/** Indices of sybs */
 	std::vector<int> sybs;
 
@@ -36,7 +40,7 @@ public:
 	std::vector<int> eprs;
 
 	/** Domains */
-	std::vector<Interval> domains;
+	IntervalVector box;
 
 	/** Constraints */
 	std::vector<NumConstraint*> ctrs;

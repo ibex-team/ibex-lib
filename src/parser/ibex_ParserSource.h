@@ -30,16 +30,16 @@ public:
 	~P_Source();
 
 	/** The variables */
-	vector<const ExprSymbol*> vars;
+	std::vector<const P_ExprSymbol*> vars;
 
 	/** The sybs */
-	vector<const ExprSymbol*> sybs;
+	std::vector<const P_ExprSymbol*> sybs;
 
 	/** The exist-parameters */
-	vector<const ExprSymbol*> eprs;
+	std::vector<const P_ExprSymbol*> eprs;
 
 	/** The functions */
-	vector<Function*> func;
+	std::vector<Function*> func;
 
 	/** The constraints */
 	const std::vector<P_NumConstraint*> ctrs;

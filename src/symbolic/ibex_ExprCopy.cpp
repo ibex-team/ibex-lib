@@ -123,32 +123,17 @@ protected:
 
 } // end namespace
 
-ExprCopy::ExprCopy(const Array<const ExprSymbol>& x, const ExprNode& y) : new_x(x.size()) {
-	// we have to proceed first the symbols in order to guarantee that
-	// they appear in the same order in "dest". Indeed, if we add the symbols
-	// as they appear in the expression the copy of a a function (x,y)->y+x
-	// would yield (y,x)->y+x.
+const ExprNode& ExprCopy::copy(const Array<const ExprSymbol>& x, const ExprNode& y) {
 	y.reset_visited();
-	for (int j=0; j<x.size(); j++) {
-		new_x.set_ref(j,ExprSymbol::new_(x[j].name,x[j].dim));
-		x[j].deco.tmp=&new_x[j];
-	}
+	new_x = &x;
 	visit(y);
 	//cout << "new x=";
 	//for (int j=0; j<new_x.size(); j++) cout << new_x[j].name << " ";
 	//cout << endl;
-	new_y=(const ExprNode*) y.deco.tmp;
+	new_x = NULL;
+	return *(const ExprNode*) y.deco.tmp;
 	//cout << "new y=" << *new_y << endl;
 }
-
-Array<const ExprSymbol>& ExprCopy::get_x() {
-	return new_x;
-}
-
-const ExprNode& ExprCopy::get_y() {
-	return *new_y;
-}
-
 
 void ExprCopy::visit(const ExprNode& e) {
 	if (e.deco.tmp==NULL) {
@@ -162,7 +147,7 @@ void ExprCopy::visit(const ExprIndex& i) {
 }
 
 void ExprCopy::visit(const ExprSymbol& x) {
-	// already done by the caller
+	x.deco.tmp=&(*new_x)[x.key];
 }
 
 void ExprCopy::visit(const ExprConstant& c) {

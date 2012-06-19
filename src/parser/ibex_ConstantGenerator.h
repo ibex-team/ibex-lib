@@ -21,11 +21,11 @@ namespace parser {
 
 //int to_integer(const Domain& d);
 
-class ConstantEvaluator : public P_ExprVisitor {
+class ConstantGenerator : public P_ExprVisitor {
 public:
-	ConstantEvaluator(const Scope& scope);
+	ConstantGenerator(const Scope& scope);
 
-	virtual ~ConstantEvaluator();
+	virtual ~ConstantGenerator();
 
 	Domain eval(const ExprNode& expr);
 

@@ -121,8 +121,26 @@ Function::Function(const Array<const ExprSymbol>& x, const ExprNode& y, const ch
 
 Function::Function(const Function& f) : name(strdup(f.name)) {
 	//assert(f.root!=NULL);
-	ExprCopy cp(f.symbols, f.expr());
-	init(cp.get_x(), cp.get_y());
+
+	// Create the new symbols
+	// we have to proceed first the symbols in order to guarantee that
+	// they appear in the same order in "dest". Indeed, if we add the symbols
+	// as they appear in the expression the copy of a a function (x,y)->y+x
+	// would yield (y,x)->y+x.
+	Array<const ExprSymbol> x(f.nb_symbols());
+	for (int j=0; j<f.nb_symbols(); j++) {
+		x.set_ref(j,ExprSymbol::new_(f.symbol(j).name,f.symbol(j).dim));
+		// note the "key" of f.symbol(j) is properly set, as required
+		// by ExprCopy.
+	}
+	//cout << "new x=";
+	//for (int j=0; j<new_x.size(); j++) cout << new_x[j].name << " ";
+	//cout << endl;
+
+	// Duplicate the expression
+	const ExprNode& y=ExprCopy().copy(x,f.expr());
+
+	init(x,y);
 }
 
 void Function::separate() {
@@ -140,9 +158,13 @@ void Function::separate() {
 
 	if (expr().dim.is_vector()) {
 		for (int i=0; i<expr().dim.vec_size(); i++) {
-			ExprCopy cp(symbols, fvec? fvec->arg(i) : *(tmp=&expr()[i]));
+			Array<const ExprSymbol> x(symbols);
+			for (int j=0; j<nb_symbols(); j++) {
+				x.set_ref(j,ExprSymbol::new_(symbol(j).name,symbol(j).dim));
+			}
+			const ExprNode& y=ExprCopy().copy(x, fvec? fvec->arg(i) : *(tmp=&expr()[i]));
 			if (tmp) delete (ExprNode*) tmp; // will not delete the subexpression
-			comp[i].init(cp.get_x(), cp.get_y());
+			comp[i].init(x,y);
 		}
 	}
 
@@ -154,10 +176,14 @@ void Function::separate() {
 				fvec2=dynamic_cast<const ExprVector*>(&fvec->arg(i));
 			}
 			for (int j=0; j<n; j++) {
-				ExprCopy cp(symbols,
+				Array<const ExprSymbol> x(symbols);
+				for (int k=0; k<nb_symbols(); k++) {
+					x.set_ref(k,ExprSymbol::new_(symbol(k).name,symbol(k).dim));
+				}
+				const ExprNode& y=ExprCopy().copy(x,
 						fvec2 ? fvec2->arg(j) : (fvec? *(tmp=&(fvec->arg(i)[j])) : *(tmp=&(expr()[i][j]))));
 				if (tmp) delete (ExprNode*) tmp; // do not delete the subexpression
-				comp[i*n+j].init(cp.get_x(), cp.get_y());
+				comp[i*n+j].init(x,y);
 			}
 		}
 	}

@@ -21,16 +21,12 @@ namespace ibex {
 class ExprCopy : public virtual ExprVisitor {
 
 public:
-
 	/*
-	 * \brief Set the expression of \a dest to x->f(x) where f(x) is the expression \a e.
-	 *
+	 * \pre The "key" field of each symbol in y must
+	 * be the number of the corresponding symbol
+	 * in the array "new_x".
 	 */
-	ExprCopy(const Array<const ExprSymbol>& x, const ExprNode& y);
-
-	Array<const ExprSymbol>& get_x();
-
-	const ExprNode& get_y();
+	const ExprNode& copy(const Array<const ExprSymbol>& new_x, const ExprNode& y);
 
 protected:
 	void visit(const ExprNode& e);
@@ -71,8 +67,7 @@ protected:
 	void visit(const ExprAtanh& e);
 
 protected:
-	Array<const ExprSymbol> new_x;
-	const ExprNode* new_y;
+	Array<const ExprSymbol> const* new_x;
 };
 
 } // end namespace ibex
