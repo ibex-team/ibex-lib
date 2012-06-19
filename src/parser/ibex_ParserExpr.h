@@ -21,23 +21,10 @@ namespace ibex {
 namespace parser {
 
 /*
- * Integer, double and Interval constants at parse time.
- *
- * remark: private inheritance to avoid conflits between the
- * operator= between 2 constants and 2 expressions.
+ * Power at parse time.
  */
-class P_ExprConstant : public ExprNode {
-public:
-	P_ExprConstant(int);
-	P_ExprConstant(double);
-	P_ExprConstant(const Interval&);
-	P_ExprConstant(const IntervalVector&);
-	P_ExprConstant(const IntervalMatrix&);
-	P_ExprConstant(const std::vector<P_ExprConstant>&);
-
-	//P_ExprConstant& operator=(const P_ExprConstant& c);
-
-	~P_ExprConstant();
+class P_ExprPower : public ExprBinaryOp {
+	P_ExprPower(const ExprNode& expr, const ExprNode& expon) : ExprBinaryOp(expr,expon,Dim(1,1,1)) { }
 
 	virtual void acceptVisitor(ExprVisitor& v) const {
 		// never called
@@ -48,33 +35,6 @@ public:
 		v.visit(*this);
 	}
 
-	P_ExprConstant operator[](int i) const;
-
-	const ExprConstant& to_cst() const;
-
-	const ExprNode& _2expr() const { return *this; }
-
-	virtual bool is_zero() const;
-
-	bool is_scalar() const;
-
-	/* Conversions */
-	int _2int() const;
-	double _2double() const;
-	Interval _2itv() const;
-	IntervalVector _2itvv() const;
-	IntervalMatrix _2itvM() const;
-
-	int type;
-	int n;
-	double r;
-	Interval x;
-	IntervalVector v;
-	IntervalMatrix M;
-
-	/*  int* intv;
-  double* doublev;
-  int size; */
 };
 
 /**

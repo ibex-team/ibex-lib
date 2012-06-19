@@ -73,6 +73,24 @@ public:
 		domain = &ma;
 	}
 
+	Domain(const Domain& d, bool is_reference) : dim(d.dim), is_reference(is_reference) {
+		if (is_reference) {
+			domain = d.domain;
+		} else {
+			switch (dim.type()) {
+			case Dim::SCALAR:       domain = new Interval(d.i()); break;
+			case Dim::ROW_VECTOR:
+			case Dim::COL_VECTOR:   domain = new IntervalVector(d.v()); break;
+			case Dim::MATRIX:       domain = new IntervalMatrix(d.m()); break;
+			case Dim::MATRIX_ARRAY: domain = new IntervalMatrixArray(d.ma()); break;
+			}
+		}
+	}
+
+	Domain operator[](int index);
+
+	const Domain operator[](int index) const;
+
 	/**
 	 * \brief Delete *this.
 	 */
@@ -177,7 +195,7 @@ public:
 private:
 	friend class Domains;
 
-	Domain() : dim(0,0,0), is_reference(false), domain(NULL) { }
+	Domain() : dim(1,1,1), is_reference(false), domain(NULL) { }
 
 	void build() {
 		switch(dim.type()) {
@@ -208,6 +226,35 @@ void load(IntervalVector& box, const Array<Domain>& domains);
  * \brief x:=y
  */
 void load(Array<Domain>& x, const Array<Domain>& y);
+
+Domain operator+(const Domain& d1, const Domain& d2);
+Domain operator*(const Domain& d1, const Domain& d2);
+Domain operator-(const Domain& d1, const Domain& d2);
+Domain operator/(const Domain& d1, const Domain& d2);
+Domain max(const Domain& d1, const Domain& d2);
+Domain min(const Domain& d1, const Domain& d2);
+Domain atan2(const Domain& d1, const Domain& d2);
+Domain operator-(const Domain& d1);
+Domain sign(const Domain& d1);
+Domain abs(const Domain& d);
+Domain pow(const Domain& d, int p);
+Domain pow(const Domain& d, const Domain& p);
+Domain sqr(const Domain& d);
+Domain sqrt(const Domain& d);
+Domain exp(const Domain& d);
+Domain log(const Domain& d);
+Domain cos(const Domain& d);
+Domain sin(const Domain& d);
+Domain tan(const Domain& d);
+Domain acos(const Domain& d);
+Domain asin(const Domain& d);
+Domain atan(const Domain& d);
+Domain cosh(const Domain& d);
+Domain sinh(const Domain& d);
+Domain tanh(const Domain& d);
+Domain acosh(const Domain& d);
+Domain asinh(const Domain& d);
+Domain atanh(const Domain& d);
 
 /*
  * \brief x*=a.

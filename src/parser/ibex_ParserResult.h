@@ -29,6 +29,12 @@ public:
 	/** Main function */
 	Function* f;
 
+	/** Indices of sybs */
+	std::vector<int> sybs;
+
+	/** Indices of eprs */
+	std::vector<int> eprs;
+
 	/** Domains */
 	std::vector<Interval> domains;
 

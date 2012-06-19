@@ -40,13 +40,13 @@ class Scope {
 //
 //  void add_entity(const char* id, Dim dim, P_Constant domain);
 //
-//  void add_func_output(const char* tmp_symbol, Dim dim);
+//  void add_func_return(const char* tmp_symbol, Dim dim);
 //
 //  void add_func_input(const char* tmp_symbol, Dim dim);
 //
 //  void add_func_tmp_symbol(const char* tmp_symbol);
 //
-//  void add_cst(const char* id, P_Constant domain);
+  void add_cst(const char* id, const Domain& domain);
 //
 //  void add_ctc(const char* id, const Contractor* ctc);
 //
@@ -92,7 +92,7 @@ class Scope {
   int get_iter_value(const char* id) const;
 
   /* Return the constant */
-  const P_ExprConstant& get_cst(const char* id) const;
+  const Domain& get_cst(const char* id) const;
 
   /* Return the function */
   Function& get_func(const char* id);
@@ -105,7 +105,7 @@ class Scope {
 //
 
   /* return the token associated to a symbol (used by lexer)
-   * either TK_SYMBOL, TK_CONSTANT or TK_FUNC. */
+   * either TK_SYMBOL, TK_CONSTANT, TK_TMP_SYMBOL, TK_FUNC_RETURN or TK_FUNC. */
   int token(const char* id) const;
 
   //

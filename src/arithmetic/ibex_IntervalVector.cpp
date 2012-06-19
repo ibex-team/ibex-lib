@@ -246,6 +246,12 @@ bool IntervalVector::is_strict_subset(const IntervalVector& x) const {
   return true;
 }
 
+bool IntervalVector::is_zero() const {
+	for (int i=0; i<size(); i++)
+		if ((*this)[i]!=Interval::ZERO) return false;
+	return true;
+}
+
 Vector IntervalVector::diam() const {
 	Vector d(size());
 	for (int i=0; i<size(); i++)

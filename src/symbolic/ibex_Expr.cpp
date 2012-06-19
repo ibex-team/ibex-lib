@@ -34,84 +34,6 @@ int max_height(const ExprNode** args, int n) {
 	return max;
 }
 
-// return the dimension of a product (left*right)
-Dim mul_dim(const ExprNode& left, const ExprNode& right) {
-	const Dim& l=left.dim;
-	const Dim& r=right.dim;
-
-	assert(l.dim1==0 && r.dim1==0);
-
-	if (l.type()==Dim::SCALAR) // scalar multiplication.
-		return r;
-	else {
-		if (r.type()==Dim::SCALAR)
-			throw NonRecoverableException("Cannot right-multiply by a scalar");
-		else if (l.dim3!=r.dim2) {
-			if ((l.dim3==0 && r.dim3==0) || (l.dim2==0 && r.dim2==0)) return Dim(0,0,0); // dot product
-			else throw NonRecoverableException("Mismatched dimensions in matrix multiplication");
-		} else return Dim(0,l.dim2,r.dim3);
-		/* should work in all remaining cases:
-		 * - if l is a matrix and r is a vector, the result is a col-vector (we have r.dim3 =0)
-		 * - if l is a row vector and r a matrix with 1 row, the result is a 1-length row vector (we have l.dim2=0 and r.dim3=1)
-		 * - if l is a matrix with 1 row and l a column vector, the result is a 1-length column vector (we have l.dim2=1 and r.dim3=0)
-		 * - ...
-		 */
-	}
-}
-
-Dim vec_dim(const ExprNode** comp, int n, bool in_a_row) {
-	assert (n>0);
-	const Dim& d=comp[0]->dim;
-
-	if (d.is_scalar()) {
-		if (in_a_row) {
-			for (int i=0; i<n; i++)
-				// we could allow concatenation of
-				// row vectors of different size
-				// in a single row vector;
-				// (but not implemented yet)
-				if (!comp[i]->type()!=Dim::SCALAR) goto error;
-			return Dim(0,0,n);
-		}
-		else {
-			for (int i=0; i<n; i++)
-				// we could allow concatenation of
-				// column vectors of different size
-				// in a single column vector;
-				// (but not implemented yet)
-				if (comp[i]->type()!=Dim::SCALAR) goto error;
-			return Dim(0,n,0);
-		}
-	} else if (d.is_vector()) {
-		if (in_a_row) {
-			for (int i=0; i<n; i++)
-				// same comment as above: we could also
-				// put matrices with different number of columns
-				// in a row. Not implemented. Only column vectors are accepted
-				if (comp[i]->type()!=Dim::COL_VECTOR || comp[i]->dim.dim2!=d.dim2) goto error;
-			return Dim(0,d.dim2,n);
-		} else {
-			for (int i=0; i<n; i++) {
-				// same comment as above: we could also
-				// put matrices with different number of rows
-				// in column. Not implemented. Only row vectors are accepted
-				if (comp[i]->type()!=Dim::ROW_VECTOR || comp[i]->dim.dim3!=d.dim3) goto error;
-			}
-			return Dim(0,n,d.dim3);
-		}
-	}
-
-	// notice: array of matrix expressions are only used
-	// so far in unvectorizing (for symbols corresponding to matrix arrays)
-	else if (d.type()==Dim::MATRIX) {
-		for (int i=0; i<n; i++)
-			if (comp[i]->type()!=Dim::MATRIX || comp[i]->dim.dim2!=d.dim2 || comp[i]->dim.dim3!=d.dim3) goto error;
-		return Dim(n,d.dim2,d.dim3);
-	}
-
-	error:
-	throw NonRecoverableException("Impossible to form a vector with these components");
-}
 
 int bin_size(const ExprNode& left, const ExprNode& right) {
 	SizeofDAG s(left,right);
@@ -157,6 +79,12 @@ ExprNAryOp::ExprNAryOp(const ExprNode** _args, int n, const Dim& dim) :
 		args[i]=_args[i];
 }
 
+static Array<const Dim> dims(const ExprNode** comp, int n) {
+	Array<const Dim> a(n);
+	for (int i=0; i<n; i++) a.set_ref(i,comp[i]->dim);
+	return a;
+}
+
 const ExprVector& ExprVector::new_(const ExprNode** comp, int n, bool in_row) {
 	return *new ExprVector(comp,n,in_row);
 }
@@ -181,7 +109,7 @@ const ExprVector& ExprVector::new_(const Array<const ExprNode>& components, bool
 }
 
 ExprVector::ExprVector(const ExprNode** comp, int n, bool in_row) :
-		ExprNAryOp(comp, n, vec_dim(comp,n,in_row)) {
+		ExprNAryOp(comp, n, vec_dim(dims(comp,n),in_row)) {
 }
 
 #define MAX_NAME_SIZE 20
@@ -205,38 +133,43 @@ const ExprSymbol& ExprSymbol::new_(const Dim& dim) {
 	//return new_(generated_name_buff, dim);
 }
 
-ExprConstant::ExprConstant(const Interval& value) : ExprNode(0,1,Dim(0,0,0)), value(1,1) {
-	((Interval&) this->value[0][0])=value;
+ExprConstant::ExprConstant(const Interval& x)
+  : ExprNode(0,1,Dim(1,1,1)),
+    value(Dim(1,1,1)) {
+
+	value.i() = x;
 }
 
 ExprConstant::ExprConstant(const IntervalVector& v, bool in_row)
-  : ExprNode(0,1, in_row? Dim(0,0,v.size()) : Dim(0,v.size(),0)),
-  value(1,v.size()) {
-	/* warning: we represent a vector by a row, even if it is a column vector */
-	((IntervalVector&) value[0])=v;
+  : ExprNode(0,1, in_row? Dim(1,1,v.size()) : Dim(1,v.size(),1)),
+    value(in_row? Dim(1,1,v.size()) : Dim(1,v.size(),1)) {
+
+	value.v() = v;
 }
 
 ExprConstant::ExprConstant(const IntervalMatrix& m)
-  : ExprNode(0,1,Dim(0,m.nb_rows(),m.nb_cols())), value(m) {
+  : ExprNode(0,1,Dim(1,m.nb_rows(),m.nb_cols())),
+    value(Dim(1,m.nb_rows(),m.nb_cols())) {
 
+	value.m() = m;
+}
+
+ExprConstant::ExprConstant(const Domain& d) : ExprNode(0,1,d.dim), value(d.dim) {
+	value = d;
 }
 
 bool ExprConstant::ExprConstant::is_zero() const {
-	for (int i=0; i<value.nb_rows(); i++)
-		for (int j=0; j<value.nb_cols(); j++)
-			if (value[i][j]!=Interval::ZERO) return false;
-
-	return true;
+	switch(dim.type()) {
+	case Dim::SCALAR:     return value.i()==Interval::ZERO; break;
+	case Dim::ROW_VECTOR:
+	case Dim::COL_VECTOR: return value.v().is_zero(); break;
+	case Dim::MATRIX:     return value.m().is_zero(); break;
+	default:              return false;
+	}
 }
 
 const ExprConstant& ExprConstant::copy() const {
-	switch(type()) {
-	case Dim::SCALAR:     return new_scalar(get_value()); break;
-	case Dim::ROW_VECTOR: return new_vector(get_vector_value(),true); break;
-	case Dim::COL_VECTOR: return new_vector(get_vector_value(),false); break;
-	case Dim::MATRIX:     return new_matrix(get_matrix_value()); break;
-	default: assert(false); return *this; break;
-	}
+	return new_(value);
 }
 
 ExprBinaryOp::ExprBinaryOp(const ExprNode& left, const ExprNode& right, const Dim& dim) :
@@ -252,7 +185,7 @@ ExprAdd::ExprAdd(const ExprNode& left, const ExprNode& right) :
 }
 
 ExprMul::ExprMul(const ExprNode& left, const ExprNode& right) :
-				ExprBinaryOp(left,right,mul_dim(left,right)) {
+				ExprBinaryOp(left,right,mul_dim(left.dim,right.dim)) {
 }
 
 ExprSub::ExprSub(const ExprNode& left, const ExprNode& right) :

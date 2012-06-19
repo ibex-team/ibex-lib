@@ -21,23 +21,98 @@ namespace ibex {
 /** Build the three-dimensional structure. */
 Dim::Dim(int dim1, int dim2, int dim3) : dim1(dim1), dim2(dim2), dim3(dim3) {
 
-	assert(!(dim1>0 && (dim2==0 || dim3==0)));
+	assert(dim1>0 && dim2>0 && dim3>0);
+}
+
+Dim mul_dim(const Dim& l, const Dim& r) {
+	assert(l.dim1==1 && r.dim1==1);
+
+	if (l.type()==Dim::SCALAR) // scalar multiplication.
+		return r;
+	else {
+		if (r.type()==Dim::SCALAR)
+			throw NonRecoverableException("Cannot right-multiply by a scalar");
+		else if (l.dim3!=r.dim2) {
+			throw NonRecoverableException("Mismatched dimensions in matrix multiplication");
+		} else return Dim(1,l.dim2,r.dim3);
+		/* should work in all remaining cases:
+		 * - if l is a matrix and r is a vector, the result is a col-vector (we have r.dim3 =0)
+		 * - if l is a row vector and r a matrix with 1 row, the result is a 1-length row vector (we have l.dim2=0 and r.dim3=1)
+		 * - if l is a matrix with 1 row and l a column vector, the result is a 1-length column vector (we have l.dim2=1 and r.dim3=0)
+		 * - ...
+		 */
+	}
+}
+
+Dim vec_dim(const Array<const Dim>& comp, bool in_a_row) {
+	int n=comp.size();
+	assert (n>0);
+	const Dim& d=comp[0];
+
+	if (d.is_scalar()) {
+		if (in_a_row) {
+			for (int i=0; i<n; i++)
+				// we could allow concatenation of
+				// row vectors of different size
+				// in a single row vector;
+				// (but not implemented yet)
+				if (!comp[i].type()!=Dim::SCALAR) goto error;
+			return Dim(1,1,n);
+		}
+		else {
+			for (int i=0; i<n; i++)
+				// we could allow concatenation of
+				// column vectors of different size
+				// in a single column vector;
+				// (but not implemented yet)
+				if (comp[i].type()!=Dim::SCALAR) goto error;
+			return Dim(1,n,1);
+		}
+	} else if (d.is_vector()) {
+		if (in_a_row) {
+			for (int i=0; i<n; i++)
+				// same comment as above: we could also
+				// put matrices with different number of columns
+				// in a row. Not implemented. Only column vectors are accepted
+				if (comp[i].type()!=Dim::COL_VECTOR || comp[i].dim2!=d.dim2) goto error;
+			return Dim(1,d.dim2,n);
+		} else {
+			for (int i=0; i<n; i++) {
+				// same comment as above: we could also
+				// put matrices with different number of rows
+				// in column. Not implemented. Only row vectors are accepted
+				if (comp[i].type()!=Dim::ROW_VECTOR || comp[i].dim3!=d.dim3) goto error;
+			}
+			return Dim(1,n,d.dim3);
+		}
+	}
+
+	// notice: array of matrix expressions are only used
+	// so far in unvectorizing (for symbols corresponding to matrix arrays)
+	else if (d.type()==Dim::MATRIX) {
+		for (int i=0; i<n; i++)
+			if (comp[i].type()!=Dim::MATRIX || comp[i].dim2!=d.dim2 || comp[i].dim3!=d.dim3) goto error;
+		return Dim(n,d.dim2,d.dim3);
+	}
+
+	error:
+	throw NonRecoverableException("Impossible to form a vector with these components");
 }
 
 Dim Dim::index_dim() const {
 
   const Dim& dim=*this;
 
-  if (dim.dim2==0 && dim.dim3==0) {
+  if (dim.dim2==1 && dim.dim3==1) {
     throw NonRecoverableException("Too many subscripts (e.g., a vector symbol cannot be indexed twice)");
   }
-  if (dim.dim1>0) // array of matrices
-	  return Dim(0,dim.dim2,dim.dim3);
+  if (dim.dim1>1) // array of matrices
+	  return Dim(1,dim.dim2,dim.dim3);
   else
-	  if (dim.dim2==0 || dim.dim3==0) // vector
-		  return Dim(0,0,0);
+	  if (dim.dim2==1 || dim.dim3==1) // vector
+		  return Dim(1,1,1);
 	  else // matrix
-		  return Dim(0,0,dim.dim3); // return a row vector
+		  return Dim(1,1,dim.dim3); // return a row vector
 }
 
 /*

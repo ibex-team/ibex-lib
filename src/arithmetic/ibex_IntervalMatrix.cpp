@@ -188,6 +188,12 @@ void IntervalMatrix::resize(int nb_rows, int nb_cols) {
 	_nb_cols = nb_cols;
 }
 
+bool IntervalMatrix::is_zero() const {
+	for (int i=0; i<nb_rows(); i++)
+		if (!(*this)[i].is_zero()) return false;
+	return true;
+}
+
 IntervalMatrix IntervalMatrix::submatrix(int row_start_index, int row_end_index, int col_start_index, int col_end_index) {
 	assert(row_start_index>=0 && row_start_index<nb_rows());
 	assert(row_end_index>=0 && row_end_index<nb_rows());

@@ -21,6 +21,7 @@
 #include "ibex_IntervalVector.h"
 #include "ibex_IntervalMatrix.h"
 #include "ibex_Dim.h"
+#include "ibex_Domain.h"
 #include "ibex_ExprLabel.h"
 
 namespace ibex {
@@ -432,23 +433,26 @@ public:
 	/** Create a matrix constant. */
 	static const ExprConstant& new_matrix(const IntervalMatrix& value);
 
+	/** Create a constant from a domain. */
+	static const ExprConstant& new_(const Domain& d);
+
 	/** Return true if this constant is either 0, the null vector or the null matrix. */
 	virtual bool is_zero() const;
 
 	/** Accept an #ibex::ExprVisitor visitor. */
 	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
 
-	/** Return the value of the constant under the form of an #Interval.
-	 *  If the constant is a matrix, the first entry is returned (no error). */
+	/** Return the value of the constant iff it is an Interval. */
 	const Interval& get_value() const;
 
-	/** Return the value of the constant under the form of an #IntervalVector.
-	 *  If the constant is a matrix, the first row is returned (no error). */
+	/** Return the value of the constant iff it is an IntervalVector.*/
 	const IntervalVector& get_vector_value() const;
 
-	/** Return the value of the constant under the form of an IntervalMatrix.
-	 *  If the constant is not a matrix, the returned matrix is 1-row x 1-col. */
+	/** Return the value of the constant iff it is an IntervalMatrix. */
 	const IntervalMatrix& get_matrix_value() const;
+
+	/** Return the value of the constant under the form of a domain. */
+	const Domain& get() const;
 
 	/** Return a copy of *this.
 	 */
@@ -463,10 +467,12 @@ private:
 
 	ExprConstant(const IntervalMatrix& value);
 
+	ExprConstant(const Domain& value);
+
 	/** Duplicate this constant: forbidden. */
 	ExprConstant(const ExprConstant& c);
 
-	const IntervalMatrix value;
+	Domain value;
 };
 
 
@@ -1237,13 +1243,19 @@ inline const ExprConstant& ExprConstant::new_vector(const IntervalVector& value,
 inline const ExprConstant& ExprConstant::new_matrix(const IntervalMatrix& value) {
 	return *new ExprConstant(value); }
 
+inline const ExprConstant& ExprConstant::new_(const Domain& value) {
+	return *new ExprConstant(value); }
+
 inline const Interval& ExprConstant::get_value() const {
-	return value[0][0]; }
+	return value.i(); }
 
 inline const IntervalVector& ExprConstant::get_vector_value() const {
-	return value[0]; }
+	return value.v(); }
 
 inline const IntervalMatrix& ExprConstant::get_matrix_value() const {
+	return value.m(); }
+
+inline const Domain& ExprConstant::get() const {
 	return value; }
 
 inline ExprUnaryOp::ExprUnaryOp(const ExprNode& subexpr, const Dim& dim) :

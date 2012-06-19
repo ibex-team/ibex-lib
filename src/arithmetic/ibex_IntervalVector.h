@@ -284,6 +284,12 @@ public:
 	 */
 	bool is_strict_superset(const IntervalVector& x) const;
 
+
+	/**
+	 * \brief True iff *this is a vector of zeros.
+	 */
+	bool is_zero() const;
+
 	/**
 	 * \brief Return the vector of diameters.
 	 */

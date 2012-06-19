@@ -175,6 +175,11 @@ public:
 	void set_empty();
 
 	/**
+	 * \brief True iff *this is a matrix of zeros.
+	 */
+	bool is_zero() const;
+
+	/**
 	 * \brief Return a submatrix.
 	 */
 	IntervalMatrix submatrix(int row_start_index, int row_end_index, int col_start_index, int col_end_index);

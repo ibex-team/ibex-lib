@@ -21,7 +21,7 @@ namespace parser {
 class P_NumConstraint {
 public:
 	P_NumConstraint();
-	virtual void acceptVisitor(P_Generator& g) const;
+	virtual void acceptVisitor(Generator& g) const;
 	virtual ~P_NumConstraint();
 };
 
@@ -29,7 +29,7 @@ class P_OneConstraint : public P_NumConstraint {
 public:
 	P_OneConstraint(const ExprNode& expr, NumConstraint::CompOp op);
 
-	void acceptVisitor(P_Generator& g) const {
+	void acceptVisitor(Generator& g) const {
 		g.visit(*this);
 	}
 
@@ -41,7 +41,7 @@ class P_ConstraintLoop : public P_NumConstraint {
 public:
 	P_ConstraintLoop(const char* iter, int first_value, int last_value, vector<P_NumConstraint*>& ctrs);
 
-	void acceptVisitor(P_Generator& g) const {
+	void acceptVisitor(Generator& g) const {
 		g.visit(*this);
 	}
 

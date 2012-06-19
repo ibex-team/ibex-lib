@@ -49,6 +49,14 @@ void begin() {
   scopes.push(Scope()); // a fresh new scope!
 }
 
+int _2int(const ExprNode& expr) {
+	return ConstantEvaluator(scopes.top()).eval_integer(expr);
+}
+
+double _2dbl(const ExprNode& expr) {
+	return ConstantEvaluator(scopes.top()).eval_double(expr);
+}
+
 void end() {
 	Generator(source,result);
 }
@@ -72,10 +80,6 @@ using namespace parser;
   ibex::Dim*                             dim;
   const ibex::parser::P_ExprSymbol*      sbl;
 
-  vector<const ibex::parser::P_Assign*>* assvec;
-  const ibex::parser::P_Assign*          ass;
-
-
   vector<ibex::parser::P_NumConstraint*> _ctrblklst;
   ibex::parser::P_NumConstraint*         _ctrblk;
   const ibex::NumConstraint*             _ctr;
@@ -87,15 +91,12 @@ using namespace parser;
 
 }
 
-%token <str> TK_ENTITY
 %token <str> TK_NEW_SYMBOL
 %token <str> TK_TMP_SYMBOL
-%token <str> TK_INPUT
-%token <str> TK_OUTPUT
+%token <str> TK_INPUT_SYMBOL
+%token <str> TK_RETURN_SYMBOL
 %token <str> TK_ITERATOR
-%token <str> TK_CTC_LIST
 %token <str> TK_CTR_LIST
-%token <str> TK_CTC
 %token <str> TK_CTR
 %token <str> TK_FUNC
 
@@ -126,15 +127,13 @@ using namespace parser;
 
 /* --------------------------- Nonterminals types -------------------------- */
 
-%type<extsbl>     identifier
+%type<sbl>        identifier
 %type<dim>        dimension
 
 /* functions */
-%type<assvec>     fnc_code
 %type<strvec>     fnc_inpt_list
 %type<str>        fnc_input
 %type<ass>        fnc_assign
-%type<extsbl>     fnc_ass_left
 
 /* symbols */
 %type<sbl>        decl_sbl
@@ -147,14 +146,9 @@ using namespace parser;
 %type<_ctrblk>    ctr_loop
 %type<_ctr>       ctr 
  
-/* const expressions */
-%type<cst>        const_expr
-%type<cst>        const_vector
-%type<cstvec>     const_list
 %type<itv>        interval
 
 /* expressions */
-%type<iter>       iter_expr
 %type<_expr>      expr
 %type<exprvec>    expr_list
 
@@ -217,12 +211,54 @@ decl_sbl      : TK_NEW_SYMBOL dimension              { $$ = new P_ExprSymbol($1,
               ; 
 
 dimension     :                                      { $$=new Dim(0,0,0); }
-              | '[' const_expr ']'                   { $$=new Dim(0,0,$2->_2int()); delete $2; }
-              | '[' const_expr ']' '[' const_expr ']'{ $$=new Dim(0,$2->_2int(),$5->_2int()); delete $2; delete $5; }
-              | '[' const_expr ']' '[' const_expr ']'
- 	            '[' const_expr ']'                   { $$=new Dim($2->_2int(),$5->_2int(),$8->_2int()); 
+              | '[' expr ']'                         { $$=new Dim(0,0,_2int(*$2); delete $2; }
+              | '[' expr ']' '[' expr ']'            { $$=new Dim(0,_2int(*$2),_2int(*$5)); delete $2; delete $5; }
+              | '[' expr ']' '[' expr ']'
+ 	            '[' expr ']'                         { $$=new Dim(_2int(*2),_2int(*$5),$8->_2int()); 
 		                                               delete $2; delete $5; delete $8; }
 	          ;
+
+interval      : '[' expr ',' expr ']'                { $$=new Interval(_2dbl(*$2), _2dbl(*$4)); 
+		                                               delete $2; delete $4; }
+              ;
+
+/**********************************************************************************************************************/
+/*                                                FUNCTIONS                                                           */
+/**********************************************************************************************************************/
+
+decl_fnc_list : decl_fnc_list decl_fnc 
+              | 
+              ;
+
+decl_fnc      : TK_FUNCTION                          { scopes.push(Scope(scopes.top(),TK_CONSTANT)); }
+                TK_NEW_SYMBOL dimension              { scopes.top().add_func_return($3,*$4); delete $4; }
+				TK_EQU TK_NEW_SYMBOL
+                '(' fnc_inpt_list ')'
+				fnc_code
+				TK_RETURN_SYMBOL TK_EQU expr semicolon_opt
+				TK_END                               { Function* f=new Function($9,$14,$3);
+													   source.func.push_back(f);
+													   scopes.pop();
+													   scopes.top().add_func($3,f); 
+                                        	       	   free($3); delete $4; free($7); }
+              ;
+
+semicolon_opt : ';' | ;
+
+fnc_inpt_list : fnc_inpt_list ',' fnc_input          { $1->push_back(strdup($3)); free($3); $$=$1; }
+              | fnc_input                            { $$=new vector<const char*>(); $$->push_back(strdup($1)); free($1);}
+              ;
+
+fnc_input     : TK_NEW_SYMBOL dimension              { scopes.top().add_func_input($1,*$2); $$=$1; delete $2; }
+              ;
+
+fnc_code      : fnc_code fnc_assign ';'              
+              | fnc_assign ';'                       
+              ;
+
+fnc_assign    : TK_NEW_SYMBOL TK_EQU expr            { /* note: if this tmp symbol is not used, the expr will never be deleted */
+														scopes.top().add_func_tmp_symbol($1,$3); free($1); }
+              ;
 
 /**********************************************************************************************************************/
 /*                                                CONSTRAINTS                                                         */
@@ -256,66 +292,9 @@ ctr           : expr TK_EQU expr               { $$ = &(*$1 =*$3); }
               | expr TK_GEQ expr               { $$ = &(*$1>=*$3); }
               | expr   '<'  expr               { $$ = &(*$1< *$3); }
               | expr   '>'  expr               { $$ = &(*$1> *$3); }
-              | '(' num_ctr ')'                { $$ = $2; }
+              | '(' ctr ')'                    { $$ = $2; }
               ; 
-
-/**********************************************************************************************************************/
-/*                                      CONSTANT EXPRESSIONS (evaluated on-the-fly)                                   */
-/**********************************************************************************************************************/
-
-const_expr    : const_expr  '+' const_expr	   { *$1 = *$1 + *$3;      $$=$1; delete $3; }
-	          | const_expr  '*' const_expr	   { *$1 = *$1 * *$3;      $$=$1; delete $3; }
-	          | const_expr  '-' const_expr	   { *$1 = *$1 - *$3;      $$=$1; delete $3; }
-              | const_expr  '/' const_expr	   { *$1 = *$1 / *$3;      $$=$1; delete $3; }
-              | const_expr  '^' const_expr	   { *$1 = pow (*$1,*$3);  $$=$1; delete $3; }
-              | TK_ATAN2   '(' const_expr ',' 
-	                           const_expr ')'  { *$3 = atan2(*$3,*$5); $$=$3; delete $5; }
-	          | TK_ABS   '(' const_expr ')'    { *$3 = abs (*$3);      $$=$3; }
-              | TK_SQRT  '(' const_expr ')'    { *$3 = sqrt (*$3);     $$=$3; }
-              | TK_EXPO  '(' const_expr ')'    { *$3 = exp  (*$3);     $$=$3; }
-              | TK_LOG   '(' const_expr ')'    { *$3 = log  (*$3);     $$=$3; }
-              | TK_COS   '(' const_expr ')'    { *$3 = cos  (*$3);     $$=$3; }
-              | TK_SIN   '(' const_expr ')'    { *$3 = sin  (*$3);     $$=$3; }
-              | TK_TAN   '(' const_expr ')'    { *$3 = tan  (*$3);     $$=$3; }
-              | TK_ACOS  '(' const_expr ')'    { *$3 = acos (*$3);     $$=$3; }
-              | TK_ASIN  '(' const_expr ')'    { *$3 = asin (*$3);     $$=$3; }
-              | TK_ATAN  '(' const_expr ')'    { *$3 = atan (*$3);     $$=$3; }
-              | TK_COSH  '(' const_expr ')'    { *$3 = cosh (*$3);     $$=$3; }
-              | TK_SINH  '(' const_expr ')'    { *$3 = sinh (*$3);     $$=$3; }
-              | TK_TANH  '(' const_expr ')'    { *$3 = tanh (*$3);     $$=$3; }
-              | TK_ACOSH '(' const_expr ')'    { *$3 = acosh(*$3);     $$=$3; }
-              | TK_ASINH '(' const_expr ')'    { *$3 = asinh(*$3);     $$=$3; }
-              | TK_ATANH '(' const_expr ')'    { *$3 = atanh(*$3);     $$=$3; }
-              | '+' const_expr                 {                       $$=$2; }
-              | '-' const_expr                 { *$2 = -*$2;           $$=$2; }
-	          | '(' const_expr ')'		       {                       $$=$2; }
-              | TK_CONSTANT                    { $$ = new P_ExprConstant(scopes.top().get_cst($1)); free($1); }
-              | TK_CONSTANT '[' const_expr ']' { $$ = new P_ExprConstant((scopes.top().get_cst($1))[$3->_2int()]); 
-                                                free($1); delete $3; }
-              | TK_CONSTANT '[' const_expr ']' 
-                            '[' const_expr ']' { $$ = new P_Constant((scopes.top().get_cst($1))[$3->_2int()][$6->_2int()]); 
-                                                free($1); delete $3; delete $6; }
-              | TK_FLOAT                       { $$ = new P_ExprConstant($1);       }
-              | TK_INTEGER                     { $$ = new P_ExprConstant($1);       }
-              | interval                       { $$ = new P_ExprConstant(*$1); delete $1;  }
-              | const_vector                   { $$ = $1; }
-              ;
-
-const_vector  : '[' const_list ']'             { $$ = new P_ExprConstant(*$2); delete $2; }
-              ;
-
-const_list    : const_expr                     { $$ = new vector<P_ExprConstant>(); 
-	 											 $$->push_back(*$1); delete $1; }
-              | const_list ';' const_expr      { $1->push_back(*$3); delete $3; $$=$1; }
-              ;
               
-interval      : '[' const_expr ',' const_expr ']'    { $$=new INTERVAL($2->_2real(), $4->_2real()); 
-		                                               delete $2; delete $4; }
-              | '<' const_expr ',' const_expr '>'    { $$=new INTERVAL($2->_2real()-($4->_2real()/2), 
-								                       $2->_2real()+($4->_2real()/2)); 
-		                                               delete $2; delete $4; }
-              ;
-
 /**********************************************************************************************************************/
 /*                                                EXPRESSIONS                                                         */
 /**********************************************************************************************************************/
@@ -328,9 +307,9 @@ expr          : expr '+' expr	                     { $$ = &(*$1 + *$3); }
               | TK_MIN '(' expr_list ')'             { $$ = &min(*$3); delete $3; }
               | TK_ATAN2 '(' expr ',' expr ')'       { $$ = &atan2(*$3,*$5); }
               | '-' expr                             { $$ = &(-*$2); }
-              | TK_ABS  '(' expr ')'                 { $$ = &abs    (*$3); }
-              | TK_SIGN '(' expr ')'                 { $$ = &sign(*$3); }
-              | expr '^' TK_INTEGER	                 { $$ = &pow(*$1, $3); }
+              | TK_ABS  '(' expr ')'                 { $$ = &abs  (*$3); }
+              | TK_SIGN '(' expr ')'                 { $$ = &sign (*$3); }
+              | expr '^' expr	                     { $$ = new P_ExprPower(*$1, *$3); }
               | TK_SQRT '(' expr ')'                 { $$ = &sqrt (*$3); }
               | TK_EXPO '(' expr ')'                 { $$ = &exp  (*$3); }
               | TK_LOG '(' expr ')'                  { $$ = &ln   (*$3); }
@@ -349,12 +328,14 @@ expr          : expr '+' expr	                     { $$ = &(*$1 + *$3); }
               | '+' expr                             { $$ = $2; }
               | '(' expr ')'		                 { $$ = $2; }
               | TK_SYMBOL                            { $$ = scope.get_symbol($1); free($1); }
-              | TK_FUNC '(' expr_list ')'            { $$ = scope.get_func($1)(*$3); free($1); }
-              | TK_FLOAT                             { $$ = new P_ExprConstant($1); }
-              | TK_INTEGER                           { $$ = new P_ExprConstant($1); }
-              | interval                             { $$ = new P_ExprConstant($1); delete $1; }
-              | const_vector                         { $$ = $1; }
-              | expr '[' expr ']'                    { $$ = new P_ExprIndexExpr(*$3); }
+              | TK_TMP_SYMBOL                        { $$ = scope.get_expr($1); free($1); }
+              | TK_CONSTANT                          { $$ = new ExprConstant(scope.get_cst($1)); free($1); }
+              | TK_FUNC '(' expr_list ')'            { $$ = scope.get_func($1)(*$3); free($1); delete $3; }
+              | '[' expr_list ']'                    { $$ = new ExprVector(*$2); delete $2;
+              | expr '[' expr ']'                    { $$ = new P_ExprIndex(*$1,*$3); }
+              | TK_FLOAT                             { $$ = new ExprConstant($1); }
+              | TK_INTEGER                           { $$ = new ExprConstant($1); }
+              | interval                             { $$ = new ExprConstant($1); delete $1; }
 	      	  ;
 	      
 expr_list     : expr_list ',' expr                   { $1->push_back($3); $$=$1; }

@@ -121,4 +121,162 @@ void load(Array<Domain>& x, const Array<Domain>& y) {
 	}
 }
 
+Domain Domain::operator[](int i) {
+	switch(dim.type()) {
+	case Dim::SCALAR:       assert(false); break;
+	case Dim::ROW_VECTOR:
+	case Dim::COL_VECTOR:   return Domain(v()[i]); break;
+	case Dim::MATRIX:       return Domain(m()[i],true); break;
+	case Dim::MATRIX_ARRAY: return Domain(ma()[i]); break;
+	}
+}
+
+const Domain Domain::operator[](int i) const {
+	return ((Domain&) *this)[i];
+}
+
+Domain operator+(const Domain& d1, const Domain& d2) {
+	const Dim& dim=d1.dim;
+	assert(d2.dim==dim);
+	Domain d(dim);
+
+	switch(dim.type()) {
+	case Dim::SCALAR:       d.i()=d1.i()+d2.i(); break;
+	case Dim::ROW_VECTOR:
+	case Dim::COL_VECTOR:   d.v()=d1.v()+d2.v(); break;
+	case Dim::MATRIX:       d.m()=d1.m()+d2.m(); break;
+	case Dim::MATRIX_ARRAY: assert(false); break;
+	}
+	return d;
+}
+
+Domain operator*(const Domain& d1, const Domain& d2) {
+
+	Domain d(mul_dim(d1.dim,d2.dim));
+
+	if (d1.dim.is_scalar()) {
+		switch(d2.dim.type()) {
+		case Dim::SCALAR:       d.i()=d1.i()*d2.i(); break;
+		case Dim::ROW_VECTOR:
+		case Dim::COL_VECTOR:   d.v()=d1.i()*d2.v(); break;
+		case Dim::MATRIX:       d.m()=d1.i()*d2.m(); break;
+		default:                assert(false); break;
+		}
+	} else if (d1.dim.type()==Dim::ROW_VECTOR) {
+		switch(d2.dim.type()) {
+		case Dim::COL_VECTOR:   d.i()=d1.v()*d2.v(); break;
+		case Dim::MATRIX:       d.v()=d1.v()*d2.m(); break;
+		default: assert(false); break;
+		}
+	} else if (d1.dim.type()==Dim::COL_VECTOR) {
+		switch(d2.dim.type()) {
+		case Dim::SCALAR:       d.v()=d2.i()*d1.v(); break;
+		case Dim::ROW_VECTOR:   d.m()=outer_product(d1.v(),d2.v()); break;
+		default: assert(false); break;
+		}
+	} else { // MATRIX
+		switch(d2.dim.type()) {
+		case Dim::COL_VECTOR:   d.v()=d1.m()*d2.v(); break;
+		case Dim::MATRIX:       d.m()=d1.m()*d2.m(); break;
+		default:                assert(false); break;
+		}
+	}
+
+	return d;
+}
+
+Domain operator-(const Domain& d1, const Domain& d2) {
+	const Dim& dim=d1.dim;
+	assert(d2.dim==dim);
+	Domain d(dim);
+
+	switch(dim.type()) {
+	case Dim::SCALAR:       d.i()=d1.i()-d2.i(); break;
+	case Dim::ROW_VECTOR:
+	case Dim::COL_VECTOR:   d.v()=d1.v()-d2.v(); break;
+	case Dim::MATRIX:       d.m()=d1.m()-d2.m(); break;
+	case Dim::MATRIX_ARRAY: assert(false); break;
+	}
+	return d;
+}
+
+
+Domain operator-(const Domain& d1) {
+	Domain d(d1.dim);
+
+	switch(d.dim.type()) {
+	case Dim::SCALAR:       d.i()=-d1.i(); break;
+	case Dim::ROW_VECTOR:
+	case Dim::COL_VECTOR:   d.v()=-d1.v(); break;
+	case Dim::MATRIX:       d.m()=-d1.m(); break;
+	case Dim::MATRIX_ARRAY: assert(false); break;
+	}
+	return d;
+}
+
+Domain pow(const Domain& d1, const Domain& p) {
+	assert(d1.dim.is_scalar() && p.dim.is_scalar());
+
+	Domain d(Dim(1,1,1));
+
+	Interval expon=p.i();
+
+	// we try to use power with integer exponant if possible
+	if (expon.is_degenerated()) {
+		double x=expon.mid();
+		if (floor(x)==x) {
+			d.i()=pow(d1.i(),(int) x);
+			return d;
+		}
+	}
+	// otherwise
+	d.i()=pow(d1.i(),expon);
+	return d;
+}
+
+/* ======================== pure scalar functions ===================== */
+
+// unary interval function
+typedef Interval (*itv_func)(const Interval&);
+// binary interval function
+typedef Interval (*itv_func2)(const Interval&, const Interval&);
+
+static Domain unary_func(itv_func f, const Domain& d1) {
+	assert(d1.dim.is_scalar());
+	Domain d(Dim(1,1,1));
+	d.i()=f(d1.i());
+	return d;
+}
+
+static Domain binary_func(itv_func2 f, const Domain& d1, const Domain& d2) {
+	assert(d1.dim.is_scalar() && d2.dim.is_scalar());
+	Domain d(Dim(1,1,1));
+	d.i()=f(d1.i(),d2.i());
+	return d;
+}
+
+Domain operator/(const Domain& d1, const Domain& d2) { return binary_func(operator/,d1,d2); }
+Domain max(const Domain& d1, const Domain& d2)       { return binary_func(max,d1,d2); }
+Domain min(const Domain& d1, const Domain& d2)       { return binary_func(min,d1,d2); }
+Domain atan2(const Domain& d1, const Domain& d2)     { return binary_func(atan2,d1,d2); }
+
+Domain sign(const Domain& d)  { return unary_func(sign,d); }
+Domain abs(const Domain& d)   { return unary_func(abs,d); }
+Domain sqr(const Domain& d)   { return unary_func(sqr,d); }
+Domain sqrt(const Domain& d)  { return unary_func(sqrt,d); }
+Domain exp(const Domain& d)   { return unary_func(exp,d); }
+Domain log(const Domain& d)   { return unary_func(log,d); }
+Domain cos(const Domain& d)   { return unary_func(cos,d); }
+Domain sin(const Domain& d)   { return unary_func(sin,d); }
+Domain tan(const Domain& d)   { return unary_func(tan,d); }
+Domain acos(const Domain& d)  { return unary_func(acos,d); }
+Domain asin(const Domain& d)  { return unary_func(asin,d); }
+Domain atan(const Domain& d)  { return unary_func(atan,d); }
+Domain cosh(const Domain& d)  { return unary_func(cosh,d); }
+Domain sinh(const Domain& d)  { return unary_func(sinh,d); }
+Domain tanh(const Domain& d)  { return unary_func(tanh,d); }
+Domain acosh(const Domain& d) { return unary_func(acosh,d); }
+Domain asinh(const Domain& d) { return unary_func(asinh,d); }
+Domain atanh(const Domain& d) { return unary_func(atanh,d); }
+
 } // end namespace

@@ -17,16 +17,16 @@ namespace ibex {
 
 namespace parser {
 
-class P_ExprConstant;
+class P_ExprPower;
 class P_ExprIndex;
 class P_ExprSymbol;
 
-class P_ExprVisitor : public ExprVisitor {
+class P_ExprVisitor : public virtual ExprVisitor {
 public:
 	virtual ~P_ExprVisitor() { }
 
-	/** Visit a parser constant. */
-	virtual void visit(const P_ExprConstant&)=0;
+	/** Visit a parser power expression. */
+	virtual void visit(const P_ExprPower&)=0;
 
 	/** Visit a parser indexed expression. */
 	virtual void visit(const P_ExprIndex&)=0;

@@ -16,6 +16,7 @@
 #include <utility>  // for pair
 #include <cassert>
 #include "ibex_NonRecoverableException.h"
+#include "ibex_Array.h"
 
 namespace ibex {
 
@@ -52,15 +53,6 @@ public:
 
 	/** \brief Return the type of this object */
 	Type type() const;
-
-	/** \brief Return the size of the first dimension. */
-	inline int size1() const;
-
-	/** \brief Return the size of the second dimension. */
-	inline int size2() const;
-
-	/** \brief Return the size of the third dimension. */
-	inline int size3() const;
 
 	/** \brief Return the total number of components */
 	inline int size()  const;
@@ -110,34 +102,32 @@ public:
 	int dim3;
 };
 
+/**
+ * Return the dimension of a product (left*right)
+ */
+Dim mul_dim(const Dim& l, const Dim& r);
+
+/**
+ * Return the dimension of a vector
+ */
+Dim vec_dim(const Array<const Dim>& comp, bool in_a_row);
+
 /*================================== inline implementations ========================================*/
 
 inline Dim::Type Dim::type() const {
-	if (dim1==0)
-		if (dim2==0)
-			if (dim3==0) return SCALAR;
+	if (dim1==1)
+		if (dim2==1)
+			if (dim3==1) return SCALAR;
 			else return ROW_VECTOR;
 		else
-			if (dim3==0) return COL_VECTOR;
+			if (dim3==1) return COL_VECTOR;
 			else return MATRIX;
 	else
 		return MATRIX_ARRAY;
 }
 
-inline int Dim::size1() const {
-	return dim1==0?1:dim1;
-}
-
-inline int Dim::size2() const {
-	return dim2==0?1:dim2;
-}
-
-inline int Dim::size3() const {
-	return dim3==0?1:dim3;
-}
-
 inline int Dim::size()  const {
-	return size1()*size2()*size3();
+	return dim1*dim2*dim3;
 }
 
 inline bool Dim::is_scalar() const {
@@ -151,7 +141,7 @@ inline bool Dim::is_vector() const {
 
 inline int Dim::vec_size() const {
 	assert(is_vector());
-	return dim2==0? dim3 : dim2;
+	return dim2==1? dim3 : dim2;
 }
 
 inline bool Dim::operator==(const Dim& d) const {
