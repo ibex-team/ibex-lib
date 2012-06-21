@@ -333,10 +333,6 @@ private:
 	ExprApply(const Function& expr, const ExprNode** args);
 };
 
-namespace parser {
-class P_ExprSymbol;
-}
-
 /**
  * \ingroup symbolic
  * \brief Symbol
@@ -368,14 +364,13 @@ public:
 	int key;
 
 	/* Create a new anonymous symbol. The string \a name is generated. */
-	static const ExprSymbol& new_(const Dim& dim=Dim(0,0,0));
+	static const ExprSymbol& new_(const Dim& dim=Dim::scalar());
 
 	/* Create a new symbol. The string \a name is duplicated. */
-	static const ExprSymbol& new_(const char* name, const Dim& dim=Dim(0,0,0));
+	static const ExprSymbol& new_(const char* name, const Dim& dim=Dim::scalar());
 
 private:
 	friend class Variable;
-	friend class parser::P_ExprSymbol;
 
 	/** Create a symbol. */
 	ExprSymbol(const Dim& dim);
@@ -392,13 +387,13 @@ private:
  */
 class Variable {
 public:
-	Variable(int n) : symbol(new ExprSymbol(Dim(0,0,n))) { }
+	Variable(int n) : symbol(new ExprSymbol(Dim::col_vec(n))) { }
 
-	Variable(int n, const char* name) : symbol(new ExprSymbol(name, Dim(0,0,n))) { }
+	Variable(int n, const char* name) : symbol(new ExprSymbol(name, Dim::col_vec(n))) { }
 
-	Variable(const Dim& dim=Dim(0,0,0)) : symbol(new ExprSymbol(dim)) { }
+	Variable(const Dim& dim=Dim::scalar()) : symbol(new ExprSymbol(dim)) { }
 
-	Variable(const char* name, const Dim& dim=Dim(0,0,0)) : symbol(new ExprSymbol(name,dim)) { }
+	Variable(const char* name, const Dim& dim=Dim::scalar()) : symbol(new ExprSymbol(name,dim)) { }
 
 	operator const ExprSymbol&() const {
 		if (symbol->deco.f) // already used build new one.

@@ -17,74 +17,60 @@ using namespace std;
 namespace ibex {
 
 void TestDim::test01() {
-	Dim d(0,0,0);
-	TEST_ASSERT(d.dim1==0);
-	TEST_ASSERT(d.dim2==0);
-	TEST_ASSERT(d.dim3==0);
-	TEST_ASSERT(d.size1()==1);
-	TEST_ASSERT(d.size2()==1);
-	TEST_ASSERT(d.size3()==1);
-	TEST_ASSERT(d==Dim(0,0,0));
-	TEST_ASSERT(!(d==Dim(1,1,1)));
-	TEST_ASSERT(!(d==Dim(2,1,1)));
+	Dim d;
+	TEST_ASSERT(d.dim1==1);
+	TEST_ASSERT(d.dim2==1);
+	TEST_ASSERT(d.dim3==1);
+	TEST_ASSERT(d==Dim::scalar());
 	TEST_ASSERT(d.is_scalar());
 	TEST_ASSERT(d.type()==Dim::SCALAR);
 	TEST_ASSERT(Dim(d)==d);
-	TEST_ASSERT((Dim(1,1,1)=d)==d);
+	TEST_ASSERT((Dim::scalar()=d)==d);
 
 }
 
 void TestDim::test02() {
-	Dim d(0,0,3);
-	TEST_ASSERT(d.dim1==0);
-	TEST_ASSERT(d.dim2==0);
+	Dim d(Dim::row_vec(3));
+	TEST_ASSERT(d.dim1==1);
+	TEST_ASSERT(d.dim2==1);
 	TEST_ASSERT(d.dim3==3);
-	TEST_ASSERT(d.size1()==1);
-	TEST_ASSERT(d.size2()==1);
-	TEST_ASSERT(d.size3()==3);
-	TEST_ASSERT(d==Dim(0,0,3));
-	TEST_ASSERT(!(d==Dim(0,1,3)));
-	TEST_ASSERT(!(d==Dim(1,1,3)));
+	TEST_ASSERT(d==Dim::row_vec(3));
+	TEST_ASSERT(!(d==Dim::col_vec(3)));
 	TEST_ASSERT(!d.is_scalar());
 	TEST_ASSERT(d.type()==Dim::ROW_VECTOR);
-	TEST_ASSERT(d.index_dim()==Dim(0,0,0));
+	TEST_ASSERT(d.index_dim()==Dim::scalar());
 	TEST_ASSERT(Dim(d)==d);
-	TEST_ASSERT((Dim(1,1,1)=d)==d);
+	TEST_ASSERT((Dim::scalar()=d)==d);
 }
 
 void TestDim::test03() {
-	Dim d(0,2,3);
-	TEST_ASSERT(d.dim1==0);
-	TEST_ASSERT(d.dim2==2);
-	TEST_ASSERT(d.dim3==3);
-	TEST_ASSERT(d.size1()==1);
-	TEST_ASSERT(d.size2()==2);
-	TEST_ASSERT(d.size3()==3);
-	TEST_ASSERT(d==Dim(0,2,3));
-	TEST_ASSERT(!(d==Dim(1,2,3)));
-	TEST_ASSERT(!d.is_scalar());
-	TEST_ASSERT(d.type()==Dim::MATRIX);
-
-	TEST_ASSERT(d.index_dim()==Dim(0,0,3));
-	TEST_ASSERT(d.index_dim().type()==Dim::ROW_VECTOR);
-	TEST_ASSERT(Dim(d)==d);
-	TEST_ASSERT((Dim(1,1,1)=d)==d);
-}
-
-void TestDim::test04() {
-	Dim d(1,2,3);
+	Dim d(Dim::matrix(2,3));
 	TEST_ASSERT(d.dim1==1);
 	TEST_ASSERT(d.dim2==2);
 	TEST_ASSERT(d.dim3==3);
-	TEST_ASSERT(d.size1()==1);
-	TEST_ASSERT(d.size2()==2);
-	TEST_ASSERT(d.size3()==3);
-	TEST_ASSERT(d==Dim(1,2,3));
+	TEST_ASSERT(d==Dim::matrix(2,3));
 	TEST_ASSERT(!d.is_scalar());
-	TEST_ASSERT(d.type()==Dim::MATRIX_ARRAY);
-	TEST_ASSERT(d.index_dim()==Dim(0,2,3));
+	TEST_ASSERT(!d.is_vector());
+	TEST_ASSERT(d.type()==Dim::MATRIX);
+
+	TEST_ASSERT(d.index_dim()==Dim::row_vec(3));
+	TEST_ASSERT(d.index_dim().type()==Dim::ROW_VECTOR);
 	TEST_ASSERT(Dim(d)==d);
-	TEST_ASSERT((Dim(1,1,1)=d)==d);
+	TEST_ASSERT((Dim::scalar()=d)==d);
+}
+
+void TestDim::test04() {
+	Dim d(Dim::matrix(2,3));
+	TEST_ASSERT(d.dim1==1);
+	TEST_ASSERT(d.dim2==2);
+	TEST_ASSERT(d.dim3==3);
+	TEST_ASSERT(d==Dim::matrix(2,3));
+	TEST_ASSERT(!d.is_scalar());
+	TEST_ASSERT(!d.is_vector());
+	TEST_ASSERT(d.type()==Dim::MATRIX);
+	TEST_ASSERT(d.index_dim()==Dim::row_vec(3));
+	TEST_ASSERT(Dim(d)==d);
+	TEST_ASSERT((Dim::scalar()=d)==d);
 }
 
 } // end namespace

@@ -48,28 +48,28 @@ public:
 	/**
 	 * \brief Creates a reference to an interval.
 	 */
-	explicit Domain(Interval& itv) : dim(0,0,0), is_reference(true) {
+	explicit Domain(Interval& itv) : dim(), is_reference(true) {
 		domain = &itv;
 	}
 
 	/**
 	 * \brief Creates a reference to an interval vector.
 	 */
-	explicit Domain(IntervalVector& v, bool in_row) : dim(0,in_row?0:v.size(),in_row?v.size():0), is_reference(true) {
+	explicit Domain(IntervalVector& v, bool in_row) : dim(in_row? Dim::row_vec(v.size()) : Dim::col_vec(v.size())), is_reference(true) {
 		domain = &v;
 	}
 
 	/**
 	 * \brief Creates a reference to an interval matrix.
 	 */
-	explicit Domain(IntervalMatrix& m) : dim(0,m.nb_rows(),m.nb_cols()), is_reference(true) {
+	explicit Domain(IntervalMatrix& m) : dim(Dim::matrix(m.nb_rows(),m.nb_cols())), is_reference(true) {
 		domain = &m;
 	}
 
 	/**
 	 * \brief Creates a reference to an array of interval matrices.
 	 */
-	explicit Domain(IntervalMatrixArray& ma) : dim(ma.size(),ma.nb_rows(),ma.nb_cols()), is_reference(true) {
+	explicit Domain(IntervalMatrixArray& ma) : dim(Dim::matrix_array(ma.size(),ma.nb_rows(),ma.nb_cols())), is_reference(true) {
 		domain = &ma;
 	}
 
@@ -195,7 +195,7 @@ public:
 private:
 	friend class Domains;
 
-	Domain() : dim(1,1,1), is_reference(false), domain(NULL) { }
+	Domain() : dim(), is_reference(false), domain(NULL) { }
 
 	void build() {
 		switch(dim.type()) {

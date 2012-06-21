@@ -134,22 +134,22 @@ const ExprSymbol& ExprSymbol::new_(const Dim& dim) {
 }
 
 ExprConstant::ExprConstant(const Interval& x)
-  : ExprNode(0,1,Dim(1,1,1)),
-    value(Dim(1,1,1)) {
+  : ExprNode(0,1,Dim()),
+    value(Dim()) {
 
 	value.i() = x;
 }
 
 ExprConstant::ExprConstant(const IntervalVector& v, bool in_row)
-  : ExprNode(0,1, in_row? Dim(1,1,v.size()) : Dim(1,v.size(),1)),
-    value(in_row? Dim(1,1,v.size()) : Dim(1,v.size(),1)) {
+  : ExprNode(0,1, in_row? Dim::row_vec(v.size()) : Dim::col_vec(v.size())),
+    value(in_row? Dim::row_vec(v.size()) : Dim::col_vec(v.size())) {
 
 	value.v() = v;
 }
 
 ExprConstant::ExprConstant(const IntervalMatrix& m)
-  : ExprNode(0,1,Dim(1,m.nb_rows(),m.nb_cols())),
-    value(Dim(1,m.nb_rows(),m.nb_cols())) {
+  : ExprNode(0,1,Dim::matrix(m.nb_rows(),m.nb_cols())),
+    value(Dim::matrix(m.nb_rows(),m.nb_cols())) {
 
 	value.m() = m;
 }
@@ -194,25 +194,25 @@ ExprSub::ExprSub(const ExprNode& left, const ExprNode& right) :
 }
 
 ExprDiv::ExprDiv(const ExprNode& left, const ExprNode& right) :
-						ExprBinaryOp(left,right,Dim(0,0,0)) {
+						ExprBinaryOp(left,right,Dim()) {
 	assert(left.type() == Dim::SCALAR);
 	assert(right.type() == Dim::SCALAR);
 }
 
 ExprMax::ExprMax(const ExprNode& left, const ExprNode& right) :
-		ExprBinaryOp(left,right,Dim(0,0,0)) {
+		ExprBinaryOp(left,right,Dim()) {
 	assert(left.type() == Dim::SCALAR);
 	assert(right.type() == Dim::SCALAR);
 }
 
 ExprMin::ExprMin(const ExprNode& left, const ExprNode& right) :
-		ExprBinaryOp(left,right,Dim(0,0,0)) {
+		ExprBinaryOp(left,right,Dim()) {
 	assert(left.type() == Dim::SCALAR);
 	assert(right.type() == Dim::SCALAR);
 }
 
 ExprAtan2::ExprAtan2(const ExprNode& left, const ExprNode& right) :
-			ExprBinaryOp(left,right,Dim(0,0,0)) {
+			ExprBinaryOp(left,right,Dim()) {
 	assert(left.type() == Dim::SCALAR);
 	assert(right.type() == Dim::SCALAR);
 }

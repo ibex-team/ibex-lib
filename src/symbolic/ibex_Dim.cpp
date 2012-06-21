@@ -30,17 +30,16 @@ Dim mul_dim(const Dim& l, const Dim& r) {
 	if (l.type()==Dim::SCALAR) // scalar multiplication.
 		return r;
 	else {
-		if (r.type()==Dim::SCALAR)
-			throw NonRecoverableException("Cannot right-multiply by a scalar");
-		else if (l.dim3!=r.dim2) {
+		if (l.dim3!=r.dim2) {
 			throw NonRecoverableException("Mismatched dimensions in matrix multiplication");
-		} else return Dim(1,l.dim2,r.dim3);
-		/* should work in all remaining cases:
-		 * - if l is a matrix and r is a vector, the result is a col-vector (we have r.dim3 =0)
-		 * - if l is a row vector and r a matrix with 1 row, the result is a 1-length row vector (we have l.dim2=0 and r.dim3=1)
-		 * - if l is a matrix with 1 row and l a column vector, the result is a 1-length column vector (we have l.dim2=1 and r.dim3=0)
-		 * - ...
-		 */
+		} else {
+			if (l.dim2==1)
+				if (r.dim3==1) return Dim::scalar();
+				else return Dim::row_vec(r.dim3);
+			else
+				if (r.dim3==1) return Dim::col_vec(l.dim2);
+				else return Dim::matrix(l.dim2,r.dim3);
+		}
 	}
 }
 
@@ -57,7 +56,7 @@ Dim vec_dim(const Array<const Dim>& comp, bool in_a_row) {
 				// in a single row vector;
 				// (but not implemented yet)
 				if (!comp[i].type()!=Dim::SCALAR) goto error;
-			return Dim(1,1,n);
+			return Dim::row_vec(n);
 		}
 		else {
 			for (int i=0; i<n; i++)
@@ -66,7 +65,7 @@ Dim vec_dim(const Array<const Dim>& comp, bool in_a_row) {
 				// in a single column vector;
 				// (but not implemented yet)
 				if (comp[i].type()!=Dim::SCALAR) goto error;
-			return Dim(1,n,1);
+			return Dim::col_vec(n);
 		}
 	} else if (d.is_vector()) {
 		if (in_a_row) {
@@ -75,7 +74,7 @@ Dim vec_dim(const Array<const Dim>& comp, bool in_a_row) {
 				// put matrices with different number of columns
 				// in a row. Not implemented. Only column vectors are accepted
 				if (comp[i].type()!=Dim::COL_VECTOR || comp[i].dim2!=d.dim2) goto error;
-			return Dim(1,d.dim2,n);
+			return Dim::matrix(d.dim2,n);
 		} else {
 			for (int i=0; i<n; i++) {
 				// same comment as above: we could also
@@ -83,7 +82,7 @@ Dim vec_dim(const Array<const Dim>& comp, bool in_a_row) {
 				// in column. Not implemented. Only row vectors are accepted
 				if (comp[i].type()!=Dim::ROW_VECTOR || comp[i].dim3!=d.dim3) goto error;
 			}
-			return Dim(1,n,d.dim3);
+			return Dim::matrix(n,d.dim3);
 		}
 	}
 
@@ -92,7 +91,7 @@ Dim vec_dim(const Array<const Dim>& comp, bool in_a_row) {
 	else if (d.type()==Dim::MATRIX) {
 		for (int i=0; i<n; i++)
 			if (comp[i].type()!=Dim::MATRIX || comp[i].dim2!=d.dim2 || comp[i].dim3!=d.dim3) goto error;
-		return Dim(n,d.dim2,d.dim3);
+		return Dim::matrix_array(n,d.dim2,d.dim3);
 	}
 
 	error:

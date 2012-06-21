@@ -41,8 +41,8 @@ void TestFunction::add_symbol() {
 }
 
 void TestFunction::copy() {
-	const ExprSymbol& x=ExprSymbol::new_("x",Dim(0,3,0));
-	const ExprSymbol& A=ExprSymbol::new_("A",Dim(0,2,3));
+	const ExprSymbol& x=ExprSymbol::new_("x",Dim::col_vec(3));
+	const ExprSymbol& A=ExprSymbol::new_("A",Dim::matrix(2,3));
 
 	Function f(x,A,A*x);
 

@@ -111,8 +111,8 @@ void TestEval::deco01() {
 }
 
 void TestEval::deco02() {
-	const ExprSymbol& x = ExprSymbol::new_("x",Dim(0,3,0));
-	const ExprSymbol& y = ExprSymbol::new_("y",Dim(0,3,0));
+	const ExprSymbol& x = ExprSymbol::new_("x",Dim::col_vec(3));
+	const ExprSymbol& y = ExprSymbol::new_("y",Dim::col_vec(3));
 	const ExprNode&   e = x+y;
 	Function f(x,y,e);
 
@@ -139,8 +139,8 @@ void TestEval::add01() {
 
 void TestEval::add02() {
 
-	const ExprSymbol& x = ExprSymbol::new_("x",Dim(0,3,0));
-	const ExprSymbol& y = ExprSymbol::new_("y",Dim(0,3,0));
+	const ExprSymbol& x = ExprSymbol::new_("x",Dim::col_vec(3));
+	const ExprSymbol& y = ExprSymbol::new_("y",Dim::col_vec(3));
 	Function f(x,y,x+y);
 
 	double _xy[][2] = { {1,2}, {3,4}, {5,6} ,
@@ -157,8 +157,8 @@ void TestEval::add02() {
 
 void TestEval::add03() {
 
-	const ExprSymbol& x = ExprSymbol::new_("x",Dim(0,0,3));
-	const ExprSymbol& y = ExprSymbol::new_("y",Dim(0,0,3));
+	const ExprSymbol& x = ExprSymbol::new_("x",Dim::row_vec(3));
+	const ExprSymbol& y = ExprSymbol::new_("y",Dim::row_vec(3));
 	Function f(x,y,x+y);
 
 	double _xy[][2] = { {1,2}, {3,4}, {5,6} ,
@@ -175,8 +175,8 @@ void TestEval::add03() {
 
 void TestEval::add04() {
 
-	const ExprSymbol& x = ExprSymbol::new_("x",Dim(0,2,3));
-	const ExprSymbol& y = ExprSymbol::new_("y",Dim(0,2,3));
+	const ExprSymbol& x = ExprSymbol::new_("x",Dim::matrix(2,3));
+	const ExprSymbol& y = ExprSymbol::new_("y",Dim::matrix(2,3));
 	Function f(x,y,x+y);
 
 	double _xy[][2] = { {1,2}, {3,4}, {5,6},
@@ -196,8 +196,8 @@ void TestEval::add04() {
 
 void TestEval::mul01() {
 
-	const ExprSymbol& x = ExprSymbol::new_("x",Dim(0,2,3));
-	const ExprSymbol& y = ExprSymbol::new_("y",Dim(0,3,2));
+	const ExprSymbol& x = ExprSymbol::new_("x",Dim::matrix(2,3));
+	const ExprSymbol& y = ExprSymbol::new_("y",Dim::matrix(3,2));
 	Function f(x,y,x*y);
 
 	IntervalVector xy(12);

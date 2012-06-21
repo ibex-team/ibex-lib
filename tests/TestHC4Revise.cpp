@@ -28,7 +28,7 @@ void TestHC4Revise::add01() {
 	double init_xy[][2]= { {1,3}, {-4,-2} };
 	IntervalVector box(2,init_xy);
 
-	Domain zero(Dim(0,0,0));
+	Domain zero(Dim::scalar());
 	zero.i()=Interval(0,0);
 	f.proj(zero,box);
 	//cout << box << endl;
@@ -70,7 +70,7 @@ void TestHC4Revise::dist01() {
 						{1,1}, {2,2} };
 	IntervalVector box(4,init_xy);
 
-	Domain zero(Dim(0,0,0));
+	Domain zero(Dim::scalar());
 	zero.i()=Interval(0,0);
 	f.proj(zero,box);
 
@@ -82,8 +82,8 @@ void TestHC4Revise::dist01() {
 
 void TestHC4Revise::dist02() {
 
-	const ExprSymbol& x = ExprSymbol::new_("x",Dim(0,2,0));
-	const ExprSymbol& y = ExprSymbol::new_("y",Dim(0,2,0));
+	const ExprSymbol& x = ExprSymbol::new_("x",Dim::col_vec(2));
+	const ExprSymbol& y = ExprSymbol::new_("y",Dim::col_vec(2));
 
 	Function f(x,y,sqrt(sqr(x[0]-y[0])+sqr(x[1]-y[1]))-5.0);
 
@@ -91,7 +91,7 @@ void TestHC4Revise::dist02() {
 						{1,1}, {2,2} };
 	IntervalVector box(4,init_xy);
 
-	Domain zero(Dim(0,0,0));
+	Domain zero(Dim::scalar());
 	zero.i()=Interval(0,0);
 	f.proj(zero,box);
 

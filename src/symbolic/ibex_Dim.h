@@ -45,11 +45,26 @@ namespace ibex {
 class Dim {
 public:
 
+	/** \brief Build the dimension of a scalar (1,1,1) */
+	Dim();
+
+	/** \brief Build the dimension of a scalar (1,1,1) */
+	static Dim scalar();
+
+	/** \brief Build the dimension of a row vector (1,1,n) */
+	static Dim row_vec(int n);
+
+	/** \brief Build the dimension of a col vector (1,n,1) */
+	static Dim col_vec(int n);
+
+	/** \brief Build the dimension of a matrix (1,m,n) */
+	static Dim matrix(int m, int n);
+
+	/** \brief Build the dimension of a matrix array (k,m,n) */
+	static Dim matrix_array(int k, int m, int n);
+
 	/** The 4 different types of "Dim" objects */
 	typedef enum { SCALAR, ROW_VECTOR, COL_VECTOR, MATRIX, MATRIX_ARRAY } Type;
-
-	/** \brief Build the three-dimensional structure. */
-	Dim(int dim1, int dim2, int dim3);
 
 	/** \brief Return the type of this object */
 	Type type() const;
@@ -100,6 +115,11 @@ public:
 	 * valid (scalar) expression, where x is resp. an array-of-matrix,
 	 * a matrix or a row vector expression. */
 	int dim3;
+
+protected:
+	/** \brief Build the three-dimensional structure. */
+	Dim(int dim1, int dim2, int dim3);
+
 };
 
 /**
@@ -113,6 +133,18 @@ Dim mul_dim(const Dim& l, const Dim& r);
 Dim vec_dim(const Array<const Dim>& comp, bool in_a_row);
 
 /*================================== inline implementations ========================================*/
+
+inline Dim::Dim() : dim1(1), dim2(1), dim3(1)     { }
+
+inline Dim Dim::scalar()                          { return Dim(1,1,1); }
+
+inline Dim Dim::row_vec(int n)                    { assert(n>1); return Dim(1,1,n); }
+
+inline Dim Dim::col_vec(int n)                    { assert(n>1); return Dim(1,n,1); }
+
+inline Dim Dim::matrix(int m, int n)              { assert(m>1 && n>1); return Dim(1,m,n); }
+
+inline Dim Dim::matrix_array(int k, int m, int n) { assert(k>1 && m>1 && n>1); return Dim(k,m,n); }
 
 inline Dim::Type Dim::type() const {
 	if (dim1==1)

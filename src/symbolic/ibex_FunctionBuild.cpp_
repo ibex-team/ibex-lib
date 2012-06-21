@@ -158,7 +158,7 @@ void Function::separate() {
 
 	if (expr().dim.is_vector()) {
 		for (int i=0; i<expr().dim.vec_size(); i++) {
-			Array<const ExprSymbol> x(symbols);
+			Array<const ExprSymbol> x(nb_symbols());
 			for (int j=0; j<nb_symbols(); j++) {
 				x.set_ref(j,ExprSymbol::new_(symbol(j).name,symbol(j).dim));
 			}
@@ -176,7 +176,7 @@ void Function::separate() {
 				fvec2=dynamic_cast<const ExprVector*>(&fvec->arg(i));
 			}
 			for (int j=0; j<n; j++) {
-				Array<const ExprSymbol> x(symbols);
+				Array<const ExprSymbol> x(nb_symbols());
 				for (int k=0; k<nb_symbols(); k++) {
 					x.set_ref(k,ExprSymbol::new_(symbol(k).name,symbol(k).dim));
 				}

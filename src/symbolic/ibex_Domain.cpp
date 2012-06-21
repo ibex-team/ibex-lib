@@ -217,7 +217,7 @@ Domain operator-(const Domain& d1) {
 Domain pow(const Domain& d1, const Domain& p) {
 	assert(d1.dim.is_scalar() && p.dim.is_scalar());
 
-	Domain d(Dim(1,1,1));
+	Domain d(Dim::scalar());
 
 	Interval expon=p.i();
 
@@ -243,14 +243,14 @@ typedef Interval (*itv_func2)(const Interval&, const Interval&);
 
 static Domain unary_func(itv_func f, const Domain& d1) {
 	assert(d1.dim.is_scalar());
-	Domain d(Dim(1,1,1));
+	Domain d(Dim::scalar());
 	d.i()=f(d1.i());
 	return d;
 }
 
 static Domain binary_func(itv_func2 f, const Domain& d1, const Domain& d2) {
 	assert(d1.dim.is_scalar() && d2.dim.is_scalar());
-	Domain d(Dim(1,1,1));
+	Domain d(Dim::scalar());
 	d.i()=f(d1.i(),d2.i());
 	return d;
 }
