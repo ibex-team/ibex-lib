@@ -14,13 +14,29 @@ namespace ibex {
 
 namespace parser {
 
-P_OneConstraint::P_OneConstraint(const ExprNode& expr, NumConstraint::CompOp op) : expr(expr), op(op) {
+P_OneConstraint::P_OneConstraint(const ExprNode& left, NumConstraint::CompOp op, const ExprNode& right) :
+		expr(right.is_zero()? left : left-right), op(op) {
 
+}
+
+P_OneConstraint::~P_OneConstraint() {
+	const ExprNode** nodes=expr.subnodes();
+	for (int i=0; i<expr.size; i++) {
+		if (!dynamic_cast<const P_ExprSymbol*>(nodes[i])) {
+			delete (ExprNode*) nodes[i];
+		}
+	}
 }
 
 P_ConstraintLoop::P_ConstraintLoop(const char* iter, int first_value, int last_value, vector<P_NumConstraint*>& ctrs) :
 		 iter(strdup(iter)), first_value(first_value), last_value(last_value), ctrs(ctrs) {
 
+}
+
+P_ConstraintLoop::~P_ConstraintLoop() {
+	for (vector<P_NumConstraint*>::const_iterator it=ctrs.begin(); it!=ctrs.end(); it++) {
+		delete *it;
+	}
 }
 
 } // end namespace parser

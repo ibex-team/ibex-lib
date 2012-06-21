@@ -409,6 +409,11 @@ public:
 	 */
 	const ExprApply& operator()(const ExprNode** arg);
 
+	/**
+	 * \brief Apply this function to the arguments
+	 */
+	const ExprApply& operator()(const vector<const ExprNode*>& arg);
+
 	const ExprApply& operator()(const ExprNode& arg1, const Interval& arg2);
 	const ExprApply& operator()(const ExprNode& arg1, const IntervalVector& arg2);
 	const ExprApply& operator()(const ExprNode& arg1, const IntervalMatrix& arg2);

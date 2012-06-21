@@ -24,7 +24,8 @@ namespace parser {
  * Power at parse time.
  */
 class P_ExprPower : public ExprBinaryOp {
-	P_ExprPower(const ExprNode& expr, const ExprNode& expon) : ExprBinaryOp(expr,expon,Dim(1,1,1)) { }
+public:
+	P_ExprPower(const ExprNode& expr, const ExprNode& expon) : ExprBinaryOp(expr,expon,Dim()) { }
 
 	virtual void acceptVisitor(ExprVisitor& v) const {
 		// never called
@@ -59,7 +60,13 @@ public:
  */
 class P_ExprSymbol: public ExprSymbol {
 public:
-	P_ExprSymbol(const char* name, const Dim& dim, const Interval& domain) : ExprSymbol(name,dim), domain(domain) { }
+	P_ExprSymbol(const char* name, const Dim& dim, const Interval& itv) : ExprSymbol(name,dim), domain(new Domain(Dim())) {
+		((Domain*) domain)->i()=itv;
+	}
+
+	P_ExprSymbol(const char* name, const Dim& dim, const Domain* domain) : ExprSymbol(name,dim), domain(domain) {
+
+	}
 
 	virtual void acceptVisitor(ExprVisitor& v) const {
 		// never called
@@ -70,7 +77,11 @@ public:
 		v.visit(*this);
 	}
 
-	Interval domain;
+	~P_ExprSymbol() {
+		delete (Domain*) domain;
+	}
+
+	const Domain* domain;
 };
 
 } // end namespace parser

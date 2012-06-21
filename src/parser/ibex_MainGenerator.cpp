@@ -31,30 +31,39 @@ void MainGenerator::generate(const P_Source& source, P_Result& result) {
 	int n=source.vars.size()+source.eprs.size()+source.sybs.size();
 
 	result.vars = new Array<const ExprSymbol>(n);
-	result.box.resize(n);
+
+	Array<const Domain> domains(n);
 
 	int i=0;
-	for (int j=0; j<source.vars.size(); j++) {
-		result.vars->set_ref(i,*source.vars[j]);
-		result.box[i]=source.vars[j]->domain;
+	for (vector<const P_ExprSymbol*>::const_iterator it=source.vars.begin(); it<source.vars.end(); it++) {
+		const P_ExprSymbol& x=**it;
+		result.vars->set_ref(i,ExprSymbol::new_(x.name,x.dim));
+		domains.set_ref(i,*x.domain);
 		i++;
 	}
 
-	for (int j=0; j<source.eprs.size(); j++) {
+	for (vector<const P_ExprSymbol*>::const_iterator it=source.eprs.begin(); it!=source.eprs.end(); it++) {
+		const P_ExprSymbol& x=**it;
 		result.eprs.push_back(i);
-		result.vars->set_ref(i,*source.eprs[j]);
-		result.box[i]=source.eprs[j]->domain;
+		result.vars->set_ref(i,ExprSymbol::new_(x.name,x.dim));
+		domains.set_ref(i,*x.domain);
 		i++;
 	}
-	for (int j=0; j<source.sybs.size(); j++) {
+	for (vector<const P_ExprSymbol*>::const_iterator it=source.sybs.begin(); it!=source.sybs.end(); it++) {
+		const P_ExprSymbol& x=**it;
 		result.sybs.push_back(i);
-		result.vars->set_ref(i,*source.sybs[j]);
-		result.box[i]=source.sybs[j]->domain;
+		result.vars->set_ref(i,ExprSymbol::new_(x.name,x.dim));
+		domains.set_ref(i,*x.domain);
 		i++;
 	}
 	assert(i==n);
 
-	//================= generate the constraints =====================
+	//================= generate the domain =====================
+	result.box.resize(n);
+	load(result.box, domains);
+
+	//================= generate the global function =====================
+
 	vector<pair<const ExprNode*, NumConstraint::CompOp> > ctrs;
 
 	CtrGenerator().generate(*result.vars, source.ctrs, ctrs);
@@ -68,15 +77,13 @@ void MainGenerator::generate(const P_Source& source, P_Result& result) {
 		image.set_ref(i++,*(it->first));
 	}
 
-	//================= generate the global function =====================
+	result.f = new Function(*result.vars,ExprVector::new_(image,false));
 
-	Function* f=new Function(*result.vars,ExprVector::new_(image,false));
-
-	vector<NumConstraint*> res;
+	//================= generate the constraints =====================
 
 	i=0;
 	for (vector<pair<const ExprNode*, NumConstraint::CompOp> >::const_iterator it=ctrs.begin(); it!=ctrs.end(); it++) {
-		res.push_back(new NumConstraint(f[i++], it->second));
+		result.ctrs.push_back(new NumConstraint((*result.f)[i++], it->second));
 	}
 }
 

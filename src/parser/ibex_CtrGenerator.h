@@ -14,7 +14,7 @@
 #include <vector>
 #include <stack>
 #include <utility>
-#include "ibex_ParserScope.h"
+#include "ibex_Scope.h"
 #include "ibex_NumConstraint.h"
 #include "ibex_Expr.h"
 #include "ibex_Function.h"

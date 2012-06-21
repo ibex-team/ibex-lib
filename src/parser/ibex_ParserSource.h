@@ -27,7 +27,12 @@ class P_Source {
 public:
 	P_Source();
 
-	~P_Source();
+	/**
+	 * Delete the vars, sybs, eprs, ctrs.
+	 *
+	 * Not the functions (transmitted by reference to P_Result).
+	 */
+	void cleanup();
 
 	/** The variables */
 	std::vector<const P_ExprSymbol*> vars;

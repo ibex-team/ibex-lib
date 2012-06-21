@@ -13,7 +13,7 @@
 
 #include "ibex_ParserExprVisitor.h"
 #include "ibex_Expr.h"
-#include "ibex_ParserScope.h"
+#include "ibex_Scope.h"
 
 namespace ibex {
 

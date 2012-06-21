@@ -24,7 +24,7 @@ namespace ibex {
 const char* Function::DEFAULT_NAME="f";
 
 Function::~Function() {
-	for (int i=0; i<exprnodes.size(); i++) {
+	for (unsigned int i=0; i<exprnodes.size(); i++) {
 		delete node(i).deco.d;
 		delete node(i).deco.g;
 		delete &node(i);
@@ -113,6 +113,16 @@ const ExprApply& Function::operator()(const ExprNode& arg1, const ExprNode& arg2
 
 const ExprApply& Function::operator()(const ExprNode** args) {
 	return ExprApply::new_(*this, args);
+}
+
+const ExprApply& Function::operator()(const vector<const ExprNode*>& arg) {
+	int n=arg.size();
+	assert(nb_symbols()==n);
+	const ExprNode** tmp=new const ExprNode*[n];
+	for (int i=0; i<n; i++) tmp[i]=arg[i];
+	const ExprApply* a=&ExprApply::new_(*this, tmp);
+	delete[] tmp;
+	return *a;
 }
 
 #define CONCAT(a,b)         CONCAT_HIDDEN(a,b)

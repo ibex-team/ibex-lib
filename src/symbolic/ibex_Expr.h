@@ -120,7 +120,11 @@ public:
 	const NumConstraint& operator>(const Interval& value) const;
 
 	/**
-	 * \brief Return all the subnodes. */
+	 * \brief Return all the subnodes.
+	 *
+	 * Subnodes appear only once in the array.
+	 * The size of the array is this->size().
+	 */
 	const ExprNode** subnodes() const;
 
 	/** Set all the "visited" tags of the DAG to "false.
@@ -333,6 +337,10 @@ private:
 	ExprApply(const Function& expr, const ExprNode** args);
 };
 
+namespace parser {
+class P_ExprSymbol;
+}
+
 /**
  * \ingroup symbolic
  * \brief Symbol
@@ -371,6 +379,7 @@ public:
 
 private:
 	friend class Variable;
+	friend class parser::P_ExprSymbol;
 
 	/** Create a symbol. */
 	ExprSymbol(const Dim& dim);

@@ -26,7 +26,7 @@ headers :
 	echo \#define $(SUBLIB_DEF) >> $(ARITH)/ibex_bias_or_gaol.h; \
 	install -m 640 $(ARITH)/ibex_$(SUBLIB)_Interval.h_ $(IBEX_INC_DIR)/ibex_$(SUBLIB)_Interval.h_; \
 	echo \/\* this file is generated \*\/ > $(IBEX_INC_DIR)/ibex.h ; \
-	find $(IBEX_SRC_DIR) -name "*.h" | while read LINE; do \
+	find $(IBEX_SRC_DIR) -path "$(IBEX_SRC_DIR)/parser*" -prune -o -name "*.h" | grep "\\.h" | while read LINE; do \
 	f=`basename $${LINE}`; echo "#include \""$$f"\"" >> $(IBEX_INC_DIR)/ibex.h; \
 	install -m 640 $${LINE} $(IBEX_INC_DIR)/$$f; done
 

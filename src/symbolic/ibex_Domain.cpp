@@ -69,7 +69,7 @@ int i=0;
 	}
 }
 
-void load(IntervalVector& x, const Array<Domain>& d) {
+void load(IntervalVector& x, const Array<const Domain>& d) {
 	int i=0;
 
 	for (int s=0; s<d.size(); s++) {

@@ -12,7 +12,7 @@
 #define __IBEX_EXPR_GENERATOR_H__
 
 #include "ibex_ParserExprVisitor.h"
-#include "ibex_ParserScope.h"
+#include "ibex_Scope.h"
 #include "ibex_ExprCopy.h"
 
 namespace ibex {

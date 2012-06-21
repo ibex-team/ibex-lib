@@ -220,7 +220,14 @@ void load(Array<Domain>& domains, const IntervalVector& box);
 /**
  * \brief Load domains into an interval vector.
  */
-void load(IntervalVector& box, const Array<Domain>& domains);
+void load(IntervalVector& box, const Array<const Domain>& domains);
+
+/**
+ * \brief Load domains into an interval vector.
+ */
+void load(IntervalVector& box, const Array<Domain>& domains) {
+	load(box,(const Array<const Domain>&) domains);
+}
 
 /**
  * \brief x:=y

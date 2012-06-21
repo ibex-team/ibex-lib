@@ -20,18 +20,26 @@ namespace parser {
 
 class P_NumConstraint {
 public:
-	P_NumConstraint();
-	virtual void acceptVisitor(CtrGenerator& g) const;
-	virtual ~P_NumConstraint();
+	virtual void acceptVisitor(CtrGenerator& g) const=0;
+
+	/**
+	 * delete all the nodes of the expression *excepted symbols*
+	 */
+	virtual ~P_NumConstraint()=0;
 };
 
 class P_OneConstraint : public P_NumConstraint {
 public:
-	P_OneConstraint(const ExprNode& expr, NumConstraint::CompOp op);
+	P_OneConstraint(const ExprNode& left, NumConstraint::CompOp op, const ExprNode& right);
 
 	void acceptVisitor(CtrGenerator& g) const {
 		g.visit(*this);
 	}
+
+	/**
+	 * delete all the nodes of the expression *excepted symbols*
+	 */
+	~P_OneConstraint();
 
 	const ExprNode& expr;
 	NumConstraint::CompOp op;
@@ -44,6 +52,11 @@ public:
 	void acceptVisitor(CtrGenerator& g) const {
 		g.visit(*this);
 	}
+
+	/**
+	 * delete all the nodes of the expression *excepted symbols*
+	 */
+	~P_ConstraintLoop();
 
 	const char* iter;
 	int first_value;

@@ -51,8 +51,8 @@ void CtrGenerator::visit(const P_ConstraintLoop& loop) {
 
 	for (int i=begin; i<=end; i++) {
 		scopes.top().set_iter_value(name,i);
-		for (int j=0; j<=loop.ctrs.size(); j++) {
-			visit(*loop.ctrs[j]);
+		for (vector<P_NumConstraint*>::const_iterator it=loop.ctrs.begin(); it!=loop.ctrs.end(); it++) {
+			visit(**it);
 		}
 	}
 	scopes.pop();
