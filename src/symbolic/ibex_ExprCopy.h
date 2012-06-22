@@ -22,11 +22,11 @@ class ExprCopy : public virtual ExprVisitor {
 
 public:
 	/*
-	 * \pre The "key" field of each symbol in y must
-	 * be the number of the corresponding symbol
-	 * in the array "new_x".
+	 * \pre Each symbol in y must belong to "old_x".
+	 *
+	 * Symbols in "old_x" are matched to symbols in "new_x" with respect to their order.
 	 */
-	const ExprNode& copy(const Array<const ExprSymbol>& new_x, const ExprNode& y);
+	const ExprNode& copy(const Array<const ExprSymbol>& old_x, const Array<const ExprSymbol>& new_x, const ExprNode& y);
 
 protected:
 	void visit(const ExprNode& e);
@@ -66,8 +66,6 @@ protected:
 	void visit(const ExprAsinh& e);
 	void visit(const ExprAtanh& e);
 
-protected:
-	Array<const ExprSymbol> const* new_x;
 };
 
 } // end namespace ibex

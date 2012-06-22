@@ -19,10 +19,11 @@ using namespace std;
 namespace ibex {
 namespace parser {
 
-void CtrGenerator::generate(const Array<const ExprSymbol> _vars,
+void CtrGenerator::generate(const Array<const ExprSymbol>& _src_vars, const Array<const ExprSymbol>& _res_vars,
 		std::vector<P_NumConstraint*> src,
 		std::vector<std::pair<const ExprNode*, NumConstraint::CompOp> > dest) {
-	vars = &_vars;
+	src_vars = &_src_vars;
+	res_vars = &_res_vars;
 	ctrs = &dest;
 
 	assert(dest.empty());
@@ -37,7 +38,7 @@ void CtrGenerator::visit(const P_NumConstraint& c) {
 }
 
 void CtrGenerator::visit(const P_OneConstraint& c) {
-	const ExprNode& e=ExprGenerator(scopes.top()).generate(*vars,c.expr);
+	const ExprNode& e=ExprGenerator(scopes.top()).generate(*src_vars,*res_vars,c.expr);
 	ctrs->push_back(pair<const ExprNode*, NumConstraint::CompOp>(&e,c.op));
 }
 

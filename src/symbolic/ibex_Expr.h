@@ -338,7 +338,7 @@ private:
 };
 
 namespace parser {
-class P_ExprSymbol;
+class ExprEntity;
 }
 
 /**
@@ -379,7 +379,7 @@ public:
 
 private:
 	friend class Variable;
-	friend class parser::P_ExprSymbol;
+	friend class parser::ExprEntity;
 
 	/** Create a symbol. */
 	ExprSymbol(const Dim& dim);

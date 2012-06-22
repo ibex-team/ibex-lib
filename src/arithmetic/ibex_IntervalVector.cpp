@@ -43,34 +43,9 @@ IntervalVector::IntervalVector(const Vector& x) : n(x.size()), vec(new Interval[
 	for (int i=0; i<n; i++) vec[i]=x[i];
 }
 
-IntervalVector::~IntervalVector() {
-	delete[] vec;
-}
-
-const Interval& IntervalVector::operator[](int i) const {
-	assert(i>=0 && i<n);
-	return vec[i];
-}
-
-Interval& IntervalVector::operator[](int i) {
-	assert(i>=0 && i<n);
-	return vec[i];
-}
-
-void IntervalVector::set_empty() {
-	// warning: do not insert this test:
-	//	 if (isEmpty()) return;
-	// because we call set_empty() from set(...) and the first component
-	// may be empty in an intermediate state
-
-	//for (int i=0; i<size(); i++)
-	//	(*this)[i]=Interval::EMPTY_SET;
-	(*this)[0]=Interval::EMPTY_SET;
-}
-
-void IntervalVector::clear() {
+void IntervalVector::init(const Interval& x) {
 	for (int i=0; i<size(); i++)
-		(*this)[i]=0;
+		(*this)[i]=x;
 }
 
 void IntervalVector::resize(int n2) {

@@ -20,12 +20,32 @@ namespace ibex {
 
 namespace parser {
 
+/**
+ * Entity (var, epr or syb)
+ */
+class Entity {
+public:
+	typedef enum { VAR, EPR, SYB } Type;
+
+	Entity(const char* name, const Dim& dim, const Domain& domain);
+
+	Entity(const char* name, const Dim& dim, const Interval& x);
+
+	~Entity();
+
+	const ExprSymbol& symbol;
+	Domain domain;
+
+	Type type; // not specified at construction (see parser.yacc)
+	//int key;   // not specified at construction (see parser.yacc)
+};
+
 /*
  * Power at parse time.
  */
 class P_ExprPower : public ExprBinaryOp {
 public:
-	P_ExprPower(const ExprNode& expr, const ExprNode& expon) : ExprBinaryOp(expr,expon,Dim()) { }
+	P_ExprPower(const ExprNode& expr, const ExprNode& expon);
 
 	virtual void acceptVisitor(ExprVisitor& v) const {
 		// never called
@@ -43,7 +63,7 @@ public:
  */
 class P_ExprIndex : public ExprBinaryOp {
 public:
-	P_ExprIndex(const ExprNode& expr, const ExprNode& index) : ExprBinaryOp(expr,index,expr.dim.index_dim()) { }
+	P_ExprIndex(const ExprNode& expr, const ExprNode& index);
 
 	virtual void acceptVisitor(ExprVisitor& v) const {
 		// never called
@@ -56,17 +76,13 @@ public:
 };
 
 /**
- * A symbol + a domain.
+ * An iterator symbol in an expression
  */
-class P_ExprSymbol: public ExprSymbol {
+class ExprIter : public ExprNode {
 public:
-	P_ExprSymbol(const char* name, const Dim& dim, const Interval& itv) : ExprSymbol(name,dim), domain(new Domain(Dim())) {
-		((Domain*) domain)->i()=itv;
-	}
+	ExprIter(const char* name);
 
-	P_ExprSymbol(const char* name, const Dim& dim, const Domain* domain) : ExprSymbol(name,dim), domain(domain) {
-
-	}
+	~ExprIter();
 
 	virtual void acceptVisitor(ExprVisitor& v) const {
 		// never called
@@ -77,12 +93,29 @@ public:
 		v.visit(*this);
 	}
 
-	~P_ExprSymbol() {
-		delete (Domain*) domain;
-	}
-
-	const Domain* domain;
+	const char* name;
 };
+
+/**
+ * An entity symbol in an expression
+ */
+//class ExprEntity: public ExprNode {
+//public:
+//	ExprEntity(const Entity& e, int lineno);
+//
+//	virtual void acceptVisitor(ExprVisitor& v) const {
+//		// never called
+//	}
+//
+//	/** Accept an #ibex::parser::P_ExprVisitor visitor. */
+//	virtual void acceptVisitor(P_ExprVisitor& v) const {
+//		v.visit(*this);
+//	}
+//
+//	const Entity& entity;
+//	int line;  // line in the program
+//};
+
 
 } // end namespace parser
 

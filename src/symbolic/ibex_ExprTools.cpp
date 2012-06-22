@@ -99,4 +99,30 @@ protected:
 	void visit(const ExprUnaryOp& u)  {	visit(u.expr); }
 };
 
+void ExprNode::reset_visited() const {
+	ResetVisited(*this);
+}
+
+const ExprNode** ExprNode::subnodes() const {
+	return ExprSubNodes(*this).nodes();
+}
+
+int bin_size(const ExprNode& left, const ExprNode& right) {
+	SizeofDAG s(left,right);
+	return s.size+1;
+}
+
+int nary_size(const ExprNode** args, int n) {
+	SizeofDAG s(args,n);
+	return s.size+1;
+}
+
+void cleanup(const ExprNode& expr, bool delete_symbols) {
+	const ExprNode** nodes=expr.subnodes();
+	for (int i=0; i<expr.size; i++)
+		if (delete_symbols || (!dynamic_cast<const ExprSymbol*>(nodes[i])))
+			delete (ExprNode*) nodes[i];
+}
+
+
 } // end namespace

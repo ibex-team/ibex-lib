@@ -13,14 +13,17 @@
 #include <vector>
 
 #include "ibex_Interval.h"
+#include "ibex_Array.h"
+#include "ibex_System.h"
+#include "ibex_ExprTools.h"
+
+#include "ibex_SyntaxError.h"
+#include "ibex_ParserSource.h"
 #include "ibex_ParserExpr.h"
 #include "ibex_ParserNumConstraint.h"
 #include "ibex_MainGenerator.h"
 #include "ibex_ConstantGenerator.h"
-#include "ibex_Array.h"
-#include "ibex_SyntaxError.h"
-#include "ibex_ParserSource.h"
-#include "ibex_ParserResult.h"
+#include "ibex_ExprGenerator.h"
 
 using namespace std;
 
@@ -33,11 +36,14 @@ void ibexerror (const std::string& msg) {
 }
    
 namespace ibex { 
+
+System* parser_result;
+
 namespace parser {
 
 P_Source source;
-P_Result result;
 
+Entity::Type ent_type; // current type, either var/epr/syb
 stack<Scope> scopes;
 
 void begin() {
@@ -54,36 +60,31 @@ void begin() {
   scopes.push(Scope()); // a fresh new scope!
 }
 
-/* cleanup a temporary expression */
-void cleanup(const ExprNode& expr) {
-	const ExprNode** nodes=expr.subnodes();
-	for (int i=0; i<expr.size; i++) delete (ExprNode*) nodes[i];
-}
-
 int _2int(const ExprNode& expr) {
 	int n=ConstantGenerator(scopes.top()).eval_integer(expr);
-	cleanup(expr);
+	cleanup(expr,true); // false or true (there is no symbols)
 	return n;
 }
 
 double _2dbl(const ExprNode& expr) {
 	double d=ConstantGenerator(scopes.top()).eval_double(expr);
-	cleanup(expr);
+	cleanup(expr,true); // false or true (there is no symbols)
 	return d;
 }
 
 Domain _2domain(const ExprNode& expr) {
 	Domain d=ConstantGenerator(scopes.top()).eval(expr);
-	cleanup(expr);
+	cleanup(expr,true); // false or true (there is no symbols)
 	return d;
 }
 
 void end() {
-	MainGenerator().generate(source,result);
+	MainGenerator().generate(source,*parser_result);
 	source.cleanup();
-    // we have to cleanup the constants
+    
+    // we have to cleanup the data in case of Syntax Error 
     // TO DO...
-    // and all the data in case of Syntax Error
+    
 }
 
 } // end namespace
@@ -104,12 +105,12 @@ using namespace parser;
   
   ibex::Dim*      dim;
   
-  const ibex::ExprSymbol*                func_input_symbol;
-  vector<const ibex::ExprSymbol*>*  func_input_symbols;
+  const ibex::ExprSymbol*                 func_input_symbol;
+  vector<const ibex::ExprSymbol*>*        func_input_symbols;
 
-  const ibex::parser::P_ExprSymbol*      entity_symbol;
+  ibex::parser::Entity*                   entity_symbol;
 
-  ibex::parser::P_NumConstraint*               constraint;
+  ibex::parser::P_NumConstraint*          constraint;
   vector<ibex::parser::P_NumConstraint*>* constraints;
 
   const ibex::ExprNode*                expression;
@@ -200,8 +201,8 @@ decl_cst_list : decl_cst
               | decl_cst_list ';' decl_cst
               ;
 
-decl_cst      : TK_NEW_SYMBOL TK_EQU expr      { scopes.top().add_cst($1, new Domain(_2domain(*$3))); free($1); }
-              | TK_NEW_SYMBOL TK_IN expr       { scopes.top().add_cst($1, new Domain(_2domain(*$3))); free($1); }
+decl_cst      : TK_NEW_SYMBOL TK_EQU expr       { scopes.top().add_cst($1, _2domain(*$3)); free($1); }
+              | TK_NEW_SYMBOL TK_IN expr        { scopes.top().add_cst($1, _2domain(*$3)); free($1); }
               ;
 
 decl_opt_par  : 
@@ -213,8 +214,8 @@ decl_par_list : decl_par
               | decl_par_list ',' decl_par
               ;
 
-decl_par      : '!' decl_entity                 { source.eprs.push_back($2); }
-	          |     decl_entity                 { source.sybs.push_back($1); }
+decl_par      : '!' decl_entity                 { $2->type=Entity::EPR; source.vars.push_back($2); }
+	          |     decl_entity                 { $1->type=Entity::SYB; source.vars.push_back($1); }
               ;
 
 decl_var_list : decl_var                             
@@ -222,14 +223,14 @@ decl_var_list : decl_var
               | decl_var_list ',' decl_entity           
               ;
 
-decl_var      : decl_entity                     { source.vars.push_back($1); }
+decl_var      : decl_entity                     { $1->type=Entity::VAR; source.vars.push_back($1); }
               ;
               
-decl_entity   : TK_NEW_SYMBOL dimension         { $$ = new P_ExprSymbol($1,*$2,Interval::ALL_REALS);
+decl_entity   : TK_NEW_SYMBOL dimension         { $$ = new Entity($1,*$2,Interval::ALL_REALS);
 		                                          scopes.top().add_entity($1,$$);  
 		                                          free($1); delete $2; }
               | TK_NEW_SYMBOL dimension 
-	            TK_IN expr                      { $$ = new P_ExprSymbol($1,*$2,new Domain(_2domain(*$4),false));
+	            TK_IN expr                      { $$ = new Entity($1,*$2,_2domain(*$4));
 		                                          scopes.top().add_entity($1,$$); 
 						                          free($1); delete $2; }
               ; 
@@ -252,123 +253,132 @@ decl_fnc_list : decl_fnc_list decl_fnc
               | 
               ;
 
-decl_fnc      : TK_FUNCTION                          { scopes.push(Scope(scopes.top())); }
-                TK_NEW_SYMBOL                        { scopes.top().add_func_return($3); }
+decl_fnc      : TK_FUNCTION                     { scopes.push(Scope(scopes.top(),true)); }
+                TK_NEW_SYMBOL                   { scopes.top().add_func_return($3); }
                 TK_EQU TK_NEW_SYMBOL
                 '(' fnc_inpt_list ')'
                 fnc_code
                 TK_FUNC_RET_SYMBOL TK_EQU expr semicolon_opt
-                TK_END                               { Function* f=new Function(Array<const ExprSymbol>(*$8),*$13,$6);
-                                                       source.func.push_back(f);
-                                                       scopes.pop();
-                                                       scopes.top().add_func($3,f); 
-                                                       source.func.push_back(f);
-                                                       free($3); free($6); delete $8; }
+                TK_END                          { 
+                								  Array<const ExprSymbol> x($8->size());
+                								  int i=0;
+                								  for(vector<const ExprSymbol*>::const_iterator it=$8->begin(); it!=$8->end(); it++)
+                								      x.set_ref(i++,ExprSymbol::new_((*it)->name,(*it)->dim));
+                								  const ExprNode& y= ExprGenerator(scopes.top()).generate(Array<const ExprSymbol>(*$8),x,*$13);
+                								  Function* f=new Function(x,y,$6);
+                                                  source.func.push_back(f);
+                                                  scopes.pop();
+                                                  scopes.top().add_func($3,f); 
+                                                  source.func.push_back(f);
+                                                  free($3); free($6); 
+                                                  cleanup(*$13,true); // will also delete symbols in $8
+                                                  delete $8; }
               ;
 
 semicolon_opt : ';' | ;
 
-fnc_inpt_list : fnc_inpt_list ',' fnc_input          { $1->push_back($3); $$=$1; }
-              | fnc_input                            { $$=new vector<const ExprSymbol*>(); $$->push_back($1); }
+fnc_inpt_list : fnc_inpt_list ',' fnc_input     { $1->push_back($3); $$=$1; }
+              | fnc_input                       { $$=new vector<const ExprSymbol*>(); $$->push_back($1); }
               ;
 
-fnc_input     : TK_NEW_SYMBOL dimension              { $$=&ExprSymbol::new_($1,*$2);
-                                                       scopes.top().add_func_input($1,$$);  
-                                                       free($1); delete $2; }
+fnc_input     : TK_NEW_SYMBOL dimension         { $$=&ExprSymbol::new_($1,*$2);
+                                                  scopes.top().add_func_input($1,$$);  
+                                                  free($1); delete $2; }
               ;
 
 fnc_code      : fnc_code fnc_assign ';'              
               | fnc_assign ';'                       
               ;
 
-fnc_assign    : TK_NEW_SYMBOL TK_EQU expr            { /* note: if this tmp symbol is not used, the expr $3 will never be deleted */
-														scopes.top().add_func_tmp_symbol($1,$3); free($1); }
+fnc_assign    : TK_NEW_SYMBOL TK_EQU expr       { /* note: if this tmp symbol is not used, the expr $3 will never be deleted */
+                                                  scopes.top().add_func_tmp_symbol($1,$3); free($1); }
               ;
 
 /**********************************************************************************************************************/
 /*                                                CONSTRAINTS                                                         */
 /**********************************************************************************************************************/
 decl_ctr_list : TK_CTRS
-                ctr_blk_list TK_END            { $$ = $2; }
+                ctr_blk_list TK_END             { $$ = $2; }
               ;
               
 ctr_blk_list  : ctr_blk_list_ semicolon_opt     { $$ = $1; }
               ;
 
-ctr_blk_list_ : ctr_blk_list_ ';' ctr_blk      { $1->push_back($3); $$ = $1; }
-              | ctr_blk                        { $$ = new vector<P_NumConstraint*>();
-              								     $$->push_back($1); }
+ctr_blk_list_ : ctr_blk_list_ ';' ctr_blk       { $1->push_back($3); $$ = $1; }
+              | ctr_blk                         { $$ = new vector<P_NumConstraint*>();
+              								      $$->push_back($1); }
               ;
 
-ctr_blk       : ctr_loop                       { $$ = $1; }
-              | ctr                            { $$ = $1; }
+ctr_blk       : ctr_loop                        { $$ = $1; }
+              | ctr                             { $$ = $1; }
               ;
 
 
 ctr_loop      : TK_FOR TK_NEW_SYMBOL TK_EQU
-				expr ':' expr ';'              { scopes.push(scopes.top());
+				expr ':' expr ';'               { scopes.push(scopes.top());
 						       					 scopes.top().add_iterator($2); }
-                ctr_blk_list TK_END            { $$ = new P_ConstraintLoop($2, _2int(*$4), _2int(*$6), *$9); 
-						                         scopes.pop();
-		                                         free($2); }
+                ctr_blk_list TK_END             { $$ = new P_ConstraintLoop($2, _2int(*$4), _2int(*$6), *$9); 
+						                          scopes.pop();
+		                                          free($2); }
               ;
 
-ctr           : expr TK_EQU expr               { $$ = new P_OneConstraint(*$1,NumConstraint::EQ,*$3); }
-              | expr TK_LEQ expr               { $$ = new P_OneConstraint(*$1,NumConstraint::LEQ,*$3); }
-              | expr TK_GEQ expr               { $$ = new P_OneConstraint(*$1,NumConstraint::GEQ,*$3); }
-              | expr   '<'  expr               { $$ = new P_OneConstraint(*$1,NumConstraint::LT,*$3); }
-              | expr   '>'  expr               { $$ = new P_OneConstraint(*$1,NumConstraint::GT,*$3); }
-              | '(' ctr ')'                    { $$ = $2; }
+ctr           : expr TK_EQU expr                { $$ = new P_OneConstraint(*$1,NumConstraint::EQ,*$3); }
+              | expr TK_LEQ expr                { $$ = new P_OneConstraint(*$1,NumConstraint::LEQ,*$3); }
+              | expr TK_GEQ expr                { $$ = new P_OneConstraint(*$1,NumConstraint::GEQ,*$3); }
+              | expr   '<'  expr                { $$ = new P_OneConstraint(*$1,NumConstraint::LT,*$3); }
+              | expr   '>'  expr                { $$ = new P_OneConstraint(*$1,NumConstraint::GT,*$3); }
+              | '(' ctr ')'                     { $$ = $2; }
               ; 
               
 /**********************************************************************************************************************/
 /*                                                EXPRESSIONS                                                         */
 /**********************************************************************************************************************/
 
-expr          : expr '+' expr	                     { $$ = &(*$1 + *$3); }
-              | expr '*' expr	                     { $$ = &(*$1 * *$3); }
-              | expr '-' expr	                     { $$ = &(*$1 - *$3); }
-              | expr '/' expr	                     { $$ = &(*$1 / *$3); }
-              | TK_MAX '(' expr ',' expr ')'         { $$ = &max(*$3,*$5); }
-              | TK_MIN '(' expr ',' expr ')'         { $$ = &min(*$3,*$5); }
-              | TK_ATAN2 '(' expr ',' expr ')'       { $$ = &atan2(*$3,*$5); }
-              | '-' expr                             { $$ = &(-*$2); }
-              | TK_ABS  '(' expr ')'                 { $$ = &abs  (*$3); }
-              | TK_SIGN '(' expr ')'                 { $$ = &sign (*$3); }
-              | expr '^' expr	                     { $$ = new P_ExprPower(*$1, *$3); }
-              | TK_SQRT '(' expr ')'                 { $$ = &sqrt (*$3); }
-              | TK_EXPO '(' expr ')'                 { $$ = &exp  (*$3); }
-              | TK_LOG '(' expr ')'                  { $$ = &log  (*$3); }
-              | TK_COS '(' expr ')'                  { $$ = &cos  (*$3); }
-              | TK_SIN '(' expr ')'                  { $$ = &sin  (*$3); }
-              | TK_TAN '(' expr ')'                  { $$ = &tan  (*$3); }
-              | TK_ACOS '(' expr ')'                 { $$ = &acos (*$3); }
-              | TK_ASIN '(' expr ')'                 { $$ = &asin (*$3); }
-              | TK_ATAN '(' expr ')'                 { $$ = &atan (*$3); }
-              | TK_COSH '(' expr ')'                 { $$ = &cosh (*$3); }
-              | TK_SINH '(' expr ')'                 { $$ = &sinh (*$3); }
-              | TK_TANH '(' expr ')'                 { $$ = &tanh (*$3); }
-              | TK_ACOSH '(' expr ')'                { $$ = &acosh(*$3); }
-              | TK_ASINH '(' expr ')'                { $$ = &asinh(*$3); }
-              | TK_ATANH '(' expr ')'                { $$ = &atanh(*$3); }
-              | '+' expr                             { $$ = $2; }
-              | '(' expr ')'		                 { $$ = $2; }
-              | TK_ENTITY                            { $$ = &scopes.top().get_entity($1); free($1); }
-              | TK_FUNC_INP_SYMBOL                   { $$ = &scopes.top().get_func_input_symbol($1); free($1); }
-              | TK_FUNC_TMP_SYMBOL                   { $$ = &scopes.top().get_func_tmp_expr($1); free($1); }
-              | TK_CONSTANT                          { $$ = &ExprConstant::new_(scopes.top().get_cst($1)); free($1); }
-              | TK_FUNC_SYMBOL '(' expr_list ')'     { $$ = &scopes.top().get_func($1)(*$3); free($1); delete $3; }
-              | '[' expr_list ']'                    { $$ = &ExprVector::new_(Array<const ExprNode>(*$2),false); delete $2; }
-              | expr '[' expr ']'                    { $$ = new P_ExprIndex(*$1,*$3); }
-              | TK_FLOAT                             { $$ = &ExprConstant::new_scalar($1); }
-              | TK_INTEGER                           { $$ = &ExprConstant::new_scalar((double) $1); }
-              | interval                             { $$ = &ExprConstant::new_scalar(*$1); delete $1; }
-              | TK_INF expr                          { $$ = &ExprConstant::new_scalar(_2domain(*$2).i().lb()); }
-              | TK_MID expr                          { $$ = &ExprConstant::new_scalar(_2domain(*$2).i().ub()); }
-              | TK_SUP expr                          { $$ = &ExprConstant::new_scalar(_2domain(*$2).i().mid()); }
+expr          : expr '+' expr	                { $$ = &(*$1 + *$3); }
+              | expr '*' expr	                { $$ = &(*$1 * *$3); }
+              | expr '-' expr	                { $$ = &(*$1 - *$3); }
+              | expr '/' expr	                { $$ = &(*$1 / *$3); }
+              | TK_MAX '(' expr ',' expr ')'    { $$ = &max(*$3,*$5); }
+              | TK_MIN '(' expr ',' expr ')'    { $$ = &min(*$3,*$5); }
+              | TK_ATAN2 '(' expr ',' expr ')'  { $$ = &atan2(*$3,*$5); }
+              | '-' expr                        { $$ = &(-*$2); }
+              | TK_ABS  '(' expr ')'            { $$ = &abs  (*$3); }
+              | TK_SIGN '(' expr ')'            { $$ = &sign (*$3); }
+              | expr '^' expr	                { $$ = new P_ExprPower(*$1, *$3); }
+              | TK_SQRT '(' expr ')'            { $$ = &sqrt (*$3); }
+              | TK_EXPO '(' expr ')'            { $$ = &exp  (*$3); }
+              | TK_LOG '(' expr ')'             { $$ = &log  (*$3); }
+              | TK_COS '(' expr ')'             { $$ = &cos  (*$3); }
+              | TK_SIN '(' expr ')'             { $$ = &sin  (*$3); }
+              | TK_TAN '(' expr ')'             { $$ = &tan  (*$3); }
+              | TK_ACOS '(' expr ')'            { $$ = &acos (*$3); }
+              | TK_ASIN '(' expr ')'            { $$ = &asin (*$3); }
+              | TK_ATAN '(' expr ')'            { $$ = &atan (*$3); }
+              | TK_COSH '(' expr ')'            { $$ = &cosh (*$3); }
+              | TK_SINH '(' expr ')'            { $$ = &sinh (*$3); }
+              | TK_TANH '(' expr ')'            { $$ = &tanh (*$3); }
+              | TK_ACOSH '(' expr ')'           { $$ = &acosh(*$3); }
+              | TK_ASINH '(' expr ')'           { $$ = &asinh(*$3); }
+              | TK_ATANH '(' expr ')'           { $$ = &atanh(*$3); }
+              | '+' expr                        { $$ = $2; }
+              | '(' expr ')'		            { $$ = $2; }
+              | TK_ENTITY                       { $$ = &scopes.top().get_entity($1).symbol; free($1); /* cannot happen inside a function expr */}
+              | TK_ITERATOR                     { $$ = new ExprIter($1); free($1); }
+              | TK_FUNC_INP_SYMBOL              { $$ = &scopes.top().get_func_input_symbol($1); free($1); }
+              | TK_FUNC_TMP_SYMBOL              { $$ = &scopes.top().get_func_tmp_expr($1); free($1); }
+              | TK_CONSTANT                     { $$ = &ExprConstant::new_(scopes.top().get_cst($1)); free($1); }
+              | TK_FUNC_SYMBOL '(' expr_list ')'{ $$ = &scopes.top().get_func($1)(*$3); free($1); delete $3; }
+              | '[' expr_list ']'               { $$ = &ExprVector::new_(Array<const ExprNode>(*$2),false); delete $2; }
+              | expr '[' expr ']'               { $$ = new P_ExprIndex(*$1,*$3); }
+              | TK_FLOAT                        { $$ = &ExprConstant::new_scalar($1); }
+              | TK_INTEGER                      { $$ = &ExprConstant::new_scalar((double) $1); }
+              | interval                        { $$ = &ExprConstant::new_scalar(*$1); delete $1; }
+              | TK_INF expr                     { $$ = &ExprConstant::new_scalar(_2domain(*$2).i().lb()); }
+              | TK_MID expr                     { $$ = &ExprConstant::new_scalar(_2domain(*$2).i().ub()); }
+              | TK_SUP expr                     { $$ = &ExprConstant::new_scalar(_2domain(*$2).i().mid()); }
               ;
 	      
-expr_list     : expr_list ',' expr                   { $1->push_back($3); $$=$1; }
-              | expr                                 { $$ = new vector<const ExprNode*>; 
-              										   $$->push_back($1); }
+expr_list     : expr_list ',' expr              { $1->push_back($3); $$=$1; }
+              | expr                            { $$ = new vector<const ExprNode*>; 
+                                                  $$->push_back($1); }
               ;

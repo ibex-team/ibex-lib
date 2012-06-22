@@ -41,13 +41,13 @@ public:
 class S_Cst : public Scope::S_Object {
 public:
 
-	S_Cst(const Domain* domain) : domain(domain) { }
+	S_Cst(const Domain& domain) : domain(domain) { }
 
 	S_Object* copy() const { return new S_Cst(domain); }
 
 	int token() const { return TK_CONSTANT; }
 
-	const Domain* domain;
+	Domain domain;
 };
 
 class S_Func : public Scope::S_Object {
@@ -97,13 +97,13 @@ public:
 class S_Entity : public Scope::S_Object {
 public:
 
-	S_Entity(const P_ExprSymbol* symbol) : symbol(symbol) { }
+	S_Entity(const Entity* symbol) : symbol(symbol) { }
 
 	S_Object* copy() const { return new S_Entity(symbol); }
 
 	int token() const { return TK_ENTITY; }
 
-	const P_ExprSymbol* symbol;
+	const Entity* symbol;
 };
 
 class S_Iterator : public Scope::S_Object {
@@ -119,7 +119,31 @@ public:
 };
 /*====================================================================================================*/
 
-void Scope::add_cst(const char* id, const Domain* domain) {
+
+Scope::Scope() { }
+
+Scope::Scope(const Scope& scope) {
+  for (IBEXMAP(S_Object*)::const_iterator it=scope.tab.begin(); it!=scope.tab.end(); it++) {
+      tab.insert_new(it->first, it->second->copy());
+  }
+}
+
+Scope::Scope(const Scope& scope, bool global) {
+  for (IBEXMAP(S_Object*)::const_iterator it=scope.tab.begin(); it!=scope.tab.end(); it++) {
+    if (global && it->second->token()!=TK_ENTITY)
+      tab.insert_new(it->first, it->second->copy());
+  }
+}
+
+Scope::~Scope() {
+  for (IBEXMAP(S_Object*)::const_iterator it=tab.begin(); it!=tab.end(); it++)
+    delete it->second;
+}
+
+/*====================================================================================================*/
+
+
+void Scope::add_cst(const char* id, const Domain& domain) {
 	tab.insert_new(id, new S_Cst(domain));
 }
 
@@ -139,7 +163,7 @@ void Scope::add_func_tmp_symbol(const char* id, const ExprNode* expr) {
 	tab.insert_new(id, new S_FuncTmp(expr));
 }
 
-void Scope::add_entity(const char* id, const P_ExprSymbol* symbol) {
+void Scope::add_entity(const char* id, const Entity* symbol) {
 	tab.insert_new(id, new S_Entity(symbol));
 }
 
@@ -150,7 +174,7 @@ void Scope::add_iterator(const char* id) {
 const Domain& Scope::get_cst(const char* id) const {
 	const S_Object& s=*tab[id];
 	assert(s.token()==TK_CONSTANT);
-	return *((const S_Cst&) s).domain;
+	return ((const S_Cst&) s).domain;
 }
 
 Function& Scope::get_func(const char* id) {
@@ -171,7 +195,7 @@ const ExprNode& Scope::get_func_tmp_expr(const char* id) const {
 	return *((const S_FuncTmp&) s).expr;
 }
 
-const P_ExprSymbol& Scope::get_entity(const char* id) const {
+const Entity& Scope::get_entity(const char* id) const {
 	const S_Object& s=*tab[id];
 	assert(s.token()==TK_ENTITY);
 	return *((const S_Entity&) s).symbol;

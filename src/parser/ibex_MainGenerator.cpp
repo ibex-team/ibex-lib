@@ -10,17 +10,17 @@
 
 #include "ibex_MainGenerator.h"
 #include "ibex_CtrGenerator.h"
-#include "ibex_ParserSource.h"
-#include "ibex_ParserResult.h"
+
 #include <utility>
 
 using namespace std;
+extern void ibexerror (const std::string& msg);
 
 namespace ibex {
 
 namespace parser {
 
-void MainGenerator::generate(const P_Source& source, P_Result& result) {
+void MainGenerator::generate(const P_Source& source, System& result) {
 
 	//================= generate the functions =====================
 	for (vector<Function*>::const_iterator it=source.func.begin(); it!=source.func.end(); it++) {
@@ -28,32 +28,21 @@ void MainGenerator::generate(const P_Source& source, P_Result& result) {
 	}
 
 	//================= generate the variables & domains =====================
-	int n=source.vars.size()+source.eprs.size()+source.sybs.size();
+	int n=source.vars.size();
 
-	result.vars = new Array<const ExprSymbol>(n);
+	result.vars.resize(n);
+	Array<const ExprSymbol> srcvars(n);
 
 	Array<const Domain> domains(n);
 
 	int i=0;
-	for (vector<const P_ExprSymbol*>::const_iterator it=source.vars.begin(); it<source.vars.end(); it++) {
-		const P_ExprSymbol& x=**it;
-		result.vars->set_ref(i,ExprSymbol::new_(x.name,x.dim));
-		domains.set_ref(i,*x.domain);
-		i++;
-	}
-
-	for (vector<const P_ExprSymbol*>::const_iterator it=source.eprs.begin(); it!=source.eprs.end(); it++) {
-		const P_ExprSymbol& x=**it;
-		result.eprs.push_back(i);
-		result.vars->set_ref(i,ExprSymbol::new_(x.name,x.dim));
-		domains.set_ref(i,*x.domain);
-		i++;
-	}
-	for (vector<const P_ExprSymbol*>::const_iterator it=source.sybs.begin(); it!=source.sybs.end(); it++) {
-		const P_ExprSymbol& x=**it;
-		result.sybs.push_back(i);
-		result.vars->set_ref(i,ExprSymbol::new_(x.name,x.dim));
-		domains.set_ref(i,*x.domain);
+	for (vector<Entity*>::const_iterator it=source.vars.begin(); it<source.vars.end(); it++) {
+		const Entity& x=**it;
+		if (x.type==Entity::EPR) result.eprs.push_back(i);
+		else if (x.type==Entity::SYB) result.sybs.push_back(i);
+		srcvars.set_ref(i,x.symbol);
+		result.vars.set_ref(i,ExprSymbol::new_(x.symbol.name, x.symbol.dim));
+		domains.set_ref(i,x.domain);
 		i++;
 	}
 	assert(i==n);
@@ -66,7 +55,7 @@ void MainGenerator::generate(const P_Source& source, P_Result& result) {
 
 	vector<pair<const ExprNode*, NumConstraint::CompOp> > ctrs;
 
-	CtrGenerator().generate(*result.vars, source.ctrs, ctrs);
+	CtrGenerator().generate(srcvars, result.vars, source.ctrs, ctrs);
 
 	int m=ctrs.size();
 
@@ -77,7 +66,7 @@ void MainGenerator::generate(const P_Source& source, P_Result& result) {
 		image.set_ref(i++,*(it->first));
 	}
 
-	result.f = new Function(*result.vars,ExprVector::new_(image,false));
+	result.f = new Function(result.vars,ExprVector::new_(image,false));
 
 	//================= generate the constraints =====================
 

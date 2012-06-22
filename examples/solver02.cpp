@@ -13,7 +13,7 @@ int main() {
 	NumConstraint* ctr[30];
 
 	for (int i=0; i<30; i++) {
-		ctr[i]=new NumConstraint((*p30.f)[i],true);
+		ctr[i]=new NumConstraint((*p30.f)[i]);
 	}
 
 	Array<NumConstraint> a(ctr,30);

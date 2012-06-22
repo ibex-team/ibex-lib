@@ -91,9 +91,9 @@ IntervalMatrix& IntervalMatrix::operator&=(const IntervalMatrix& m) {
 	return *this;
 }
 
-void IntervalMatrix::clear() {
+void IntervalMatrix::init(const Interval& x) {
 	for (int i=0; i<nb_rows(); i++)
-		(*this)[i].clear();
+		(*this)[i].init(x);
 }
 
 bool IntervalMatrix::operator==(const IntervalMatrix& m) const {

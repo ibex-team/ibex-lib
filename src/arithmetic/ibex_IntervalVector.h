@@ -112,8 +112,17 @@ public:
 
 	/**
 	 * \brief Set all the elements to 0 (even if empty).
+	 *
+	 * \note Emptiness is "overridden".
 	 */
 	void clear();
+
+	/**
+	 * \brief Set all the elements to x (even if empty).
+	 *
+	 * \note Emptiness is "overridden".
+	 */
+	void init(const Interval& x);
 
 	/**
 	 * \brief Resize this IntervalVector.
@@ -563,6 +572,28 @@ std::ostream& operator<<(std::ostream& os, const IntervalVector& x);
 
 inline IntervalVector IntervalVector::empty(int n) {
 	return IntervalVector(n, Interval::EMPTY_SET);
+}
+
+inline IntervalVector::~IntervalVector() {
+	delete[] vec;
+}
+
+inline void IntervalVector::set_empty() {
+	(*this)[0]=Interval::EMPTY_SET;
+}
+
+inline const Interval& IntervalVector::operator[](int i) const {
+	assert(i>=0 && i<n);
+	return vec[i];
+}
+
+inline Interval& IntervalVector::operator[](int i) {
+	assert(i>=0 && i<n);
+	return vec[i];
+}
+
+inline void IntervalVector::clear() {
+	init(0);
 }
 
 inline IntervalVector IntervalVector::operator&(const IntervalVector& x) const {

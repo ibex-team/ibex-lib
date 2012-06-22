@@ -75,7 +75,7 @@ protected:
 
 	void visit(const P_ExprPower& e);
 	void visit(const P_ExprIndex& e);
-	void visit(const P_ExprSymbol& e);
+	void visit(const ExprIter& i);
 
 	const Scope& scope;
 };

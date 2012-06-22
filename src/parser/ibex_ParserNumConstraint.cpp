@@ -9,6 +9,7 @@
 //============================================================================
 
 #include "ibex_ParserNumConstraint.h"
+#include "ibex_ExprTools.h"
 
 namespace ibex {
 
@@ -20,12 +21,7 @@ P_OneConstraint::P_OneConstraint(const ExprNode& left, NumConstraint::CompOp op,
 }
 
 P_OneConstraint::~P_OneConstraint() {
-	const ExprNode** nodes=expr.subnodes();
-	for (int i=0; i<expr.size; i++) {
-		if (!dynamic_cast<const P_ExprSymbol*>(nodes[i])) {
-			delete (ExprNode*) nodes[i];
-		}
-	}
+	cleanup(expr,false); // do not delete symbols
 }
 
 P_ConstraintLoop::P_ConstraintLoop(const char* iter, int first_value, int last_value, vector<P_NumConstraint*>& ctrs) :

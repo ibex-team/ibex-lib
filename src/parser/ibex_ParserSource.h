@@ -34,14 +34,8 @@ public:
 	 */
 	void cleanup();
 
-	/** The variables */
-	std::vector<const P_ExprSymbol*> vars;
-
-	/** The sybs */
-	std::vector<const P_ExprSymbol*> sybs;
-
-	/** The exist-parameters */
-	std::vector<const P_ExprSymbol*> eprs;
+	/** The "entities" */
+	std::vector<Entity*> vars;
 
 	/** The functions */
 	std::vector<Function*> func;

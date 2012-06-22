@@ -11,16 +11,16 @@
 #ifndef __IBEX_MAIN_GENERATOR_H__
 #define __IBEX_MAIN_GENERATOR_H__
 
+#include "ibex_System.h"
+#include "ibex_ParserSource.h"
+
 namespace ibex {
 
 namespace parser {
 
-class P_Source;
-class P_Result;
-
 class MainGenerator {
 public:
-	void generate(const P_Source& source, P_Result& result);
+	void generate(const P_Source& source, System& result);
 };
 
 } // end namespace parser

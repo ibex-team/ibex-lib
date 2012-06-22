@@ -87,6 +87,16 @@ public:
 		}
 	}
 
+	Domain(const Domain& d) : dim(d.dim), is_reference(false) {
+		switch (dim.type()) {
+		case Dim::SCALAR:       domain = new Interval(d.i()); break;
+		case Dim::ROW_VECTOR:
+		case Dim::COL_VECTOR:   domain = new IntervalVector(d.v()); break;
+		case Dim::MATRIX:       domain = new IntervalMatrix(d.m()); break;
+		case Dim::MATRIX_ARRAY: domain = new IntervalMatrixArray(d.ma()); break;
+		}
+	}
+
 	Domain operator[](int index);
 
 	const Domain operator[](int index) const;
@@ -225,7 +235,7 @@ void load(IntervalVector& box, const Array<const Domain>& domains);
 /**
  * \brief Load domains into an interval vector.
  */
-void load(IntervalVector& box, const Array<Domain>& domains) {
+inline void load(IntervalVector& box, const Array<Domain>& domains) {
 	load(box,(const Array<const Domain>&) domains);
 }
 

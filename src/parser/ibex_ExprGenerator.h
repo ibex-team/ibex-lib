@@ -22,7 +22,7 @@ class ExprGenerator : private ExprCopy, public virtual P_ExprVisitor {
 public:
 	ExprGenerator(const Scope& scope);
 
-	const ExprNode& generate(const Array<const ExprSymbol>& x, const ExprNode& y);
+	const ExprNode& generate(const Array<const ExprSymbol>& old_x, const Array<const ExprSymbol>& new_x, const ExprNode& y);
 
 protected:
 
@@ -33,11 +33,10 @@ protected:
 
 	void visit(const ExprPower& e) ;
 	void visit(const ExprIndex& i);
-	void visit(const ExprSymbol& x);
 
 	void visit(const P_ExprPower& c);
 	void visit(const P_ExprIndex& e);
-	void visit(const P_ExprSymbol& e);
+	void visit(const ExprIter& i);
 
 	const Scope& scope;
 };

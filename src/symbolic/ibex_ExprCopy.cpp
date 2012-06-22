@@ -123,16 +123,16 @@ protected:
 
 } // end namespace
 
-const ExprNode& ExprCopy::copy(const Array<const ExprSymbol>& x, const ExprNode& y) {
+const ExprNode& ExprCopy::copy(const Array<const ExprSymbol>& old_x, const Array<const ExprSymbol>& new_x, const ExprNode& y) {
+
 	y.reset_visited();
-	new_x = &x;
+
+	for (int i=0; i<old_x.size(); i++)
+		old_x[i].deco.tmp=&new_x[i]; // must be done *after* y.reset_visited()
+
 	visit(y);
-	//cout << "new x=";
-	//for (int j=0; j<new_x.size(); j++) cout << new_x[j].name << " ";
-	//cout << endl;
-	new_x = NULL;
+
 	return *(const ExprNode*) y.deco.tmp;
-	//cout << "new y=" << *new_y << endl;
 }
 
 void ExprCopy::visit(const ExprNode& e) {
@@ -147,7 +147,7 @@ void ExprCopy::visit(const ExprIndex& i) {
 }
 
 void ExprCopy::visit(const ExprSymbol& x) {
-	x.deco.tmp=&(*new_x)[x.key];
+
 }
 
 void ExprCopy::visit(const ExprConstant& c) {

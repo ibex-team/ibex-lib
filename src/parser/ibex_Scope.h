@@ -28,12 +28,15 @@ public:
 	/** Duplicacte the scope */
 	Scope(const Scope& scope);
 
+	/** Only copy global data (constants and functions) */
+	Scope(const Scope& scope, bool global);
+
 	/** Delete this scope. */
 	~Scope();
 
 	/*------------- addition of new symbols in the current scope -----------*/
 	/** Add a constant */
-	void add_cst(const char* id, const Domain* domain);
+	void add_cst(const char* id, const Domain& domain);
 
 	/** Add a function. */
 	void add_func(const char* id, Function* f);
@@ -48,7 +51,7 @@ public:
 	void add_func_tmp_symbol(const char* tmp_symbol, const ExprNode* expr);
 
 	/** Add a var, a syb or an epr */
-	void add_entity(const char* id, const P_ExprSymbol* symbol);
+	void add_entity(const char* id, const Entity* e);
 
 	/** Add an (uninitialized) iterator. */
 	void add_iterator(const char* id);
@@ -66,8 +69,8 @@ public:
 	/* Return the expression bound to a tmp symbol in a function */
 	const ExprNode& get_func_tmp_expr(const char* id) const;
 
-	/* Return the entity symbol */
-	const P_ExprSymbol& get_entity(const char* id) const;
+	/* Return the entity attached to a symbol */
+	const Entity& get_entity(const char* id) const;
 
 	/* Return the value of the iterator */
 	int get_iter_value(const char* id) const;

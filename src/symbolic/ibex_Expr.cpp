@@ -13,7 +13,7 @@
 #include "ibex_Function.h"
 #include "ibex_NonRecoverableException.h"
 #include "ibex_ExprPrinter.cpp_"
-#include "ibex_ExprTools.cpp_"
+#include "ibex_ExprTools.h"
 #include <limits.h>
 #include <stdio.h>
 #include <set>
@@ -34,26 +34,7 @@ int max_height(const ExprNode** args, int n) {
 	return max;
 }
 
-
-int bin_size(const ExprNode& left, const ExprNode& right) {
-	SizeofDAG s(left,right);
-	return s.size+1;
-}
-
-int nary_size(const ExprNode** args, int n) {
-	SizeofDAG s(args,n);
-	return s.size+1;
-}
-
 } // end anonymous namespace
-
-void ExprNode::reset_visited() const {
-	ResetVisited(*this);
-}
-
-const ExprNode** ExprNode::subnodes() const {
-	return ExprSubNodes(*this).nodes();
-}
 
 ExprNode::ExprNode(int height, int size, const Dim& dim) :
   height(height), size(size), id(-1), dim(dim) {

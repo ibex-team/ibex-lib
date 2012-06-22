@@ -1,6 +1,6 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_ParserResult.h
+// File        : ibex_System.h
 // Author      : Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
@@ -8,21 +8,17 @@
 // Last Update : Jun 12, 2012
 //============================================================================
 
-#ifndef __IBEX_PARSER_RESULT_H__
-#define __IBEX_PARSER_RESULT_H__
+#ifndef __IBEX_SYSTEM_H__
+#define __IBEX_SYSTEM_H__
 
 #include <vector>
-#include "ibex_ParserExpr.h"
-#include "ibex_ParserNumConstraint.h"
-#include "ibex_Function.h"
+#include "ibex_NumConstraint.h"
 
 namespace ibex {
 
-namespace parser {
-
-class P_Result {
+class System {
 public:
-	P_Result();
+	System(const char* filename);
 
 	/** Auxiliary functions */
 	std::vector<Function*> func;
@@ -31,7 +27,7 @@ public:
 	Function* f;
 
 	/** All the variables */
-	Array<const ExprSymbol>* vars;
+	Array<const ExprSymbol> vars;
 
 	/** Indices of sybs */
 	std::vector<int> sybs;
@@ -46,7 +42,5 @@ public:
 	std::vector<NumConstraint*> ctrs;
 };
 
-
-} // end namespace parser
 } // end namespace ibex
-#endif // IBEX_PARSERRESULT_H_
+#endif // __IBEX_SYSTEM_H__

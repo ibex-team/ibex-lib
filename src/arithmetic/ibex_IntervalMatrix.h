@@ -91,6 +91,13 @@ public:
 	void clear();
 
 	/**
+	 * \brief Set all the elements to x (even if empty).
+	 *
+	 * \note Emptiness is "overridden".
+	 */
+	void init(const Interval& x);
+
+	/**
 	 * \brief True if the bounds of (*this) coincide with m.
 	 *
 	 * If the two matrices are empty and with the same dimensions
@@ -472,6 +479,10 @@ inline IntervalVector& IntervalMatrix::operator[](int i) {
 inline const IntervalVector& IntervalMatrix::operator[](int i) const {
 	assert(i>=0 && i<nb_rows());
 	return M[i];
+}
+
+inline void IntervalMatrix::clear() {
+	init(0);
 }
 
 inline void IntervalMatrix::set_empty() {

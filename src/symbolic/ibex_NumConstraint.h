@@ -16,7 +16,9 @@
 
 namespace ibex {
 
-/** \ingroup symbolic
+/**
+ * \ingroup symbolic
+ *
  * \brief Numerical constraint.
  *
  * A numerical constraint is a constraint under the form

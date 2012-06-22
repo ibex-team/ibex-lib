@@ -469,7 +469,7 @@ inline int Function::dimension() const {
 	case Dim::ROW_VECTOR:
 	case Dim::COL_VECTOR: return expr().dim.vec_size();
 	case Dim::MATRIX: return expr().dim.dim2*expr().dim.dim3;
-	case Dim::MATRIX_ARRAY: assert(false); return 0;
+	default: assert(false); return 0;
 	}
 }
 

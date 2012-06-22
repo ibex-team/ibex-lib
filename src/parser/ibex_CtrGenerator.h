@@ -32,7 +32,7 @@ class CtrGenerator {
 public:
 	CtrGenerator();
 
-	void generate(const Array<const ExprSymbol> vars,
+	void generate(const Array<const ExprSymbol>& src_vars, const Array<const ExprSymbol>& res_vars,
 			std::vector<P_NumConstraint*> src,
 			std::vector<std::pair<const ExprNode*, NumConstraint::CompOp> > dest);
 
@@ -42,7 +42,8 @@ public:
 
 
 protected:
-	const Array<const ExprSymbol>* vars;
+	const Array<const ExprSymbol>* src_vars;
+	const Array<const ExprSymbol>* res_vars;
 	std::vector<std::pair<const ExprNode*, NumConstraint::CompOp> >* ctrs;
 
 	std::stack<Scope> scopes;

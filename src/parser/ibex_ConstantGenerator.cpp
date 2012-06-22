@@ -8,7 +8,12 @@
 // Last Update : Jun 19, 2012
 //============================================================================
 
+#include <sstream>
+
 #include "ibex_ConstantGenerator.h"
+#include "ibex_SyntaxError.h"
+
+extern void ibexerror (const std::string& msg);
 
 namespace ibex {
 
@@ -65,7 +70,9 @@ void ConstantGenerator::visit(const ExprIndex& i) {
 }
 
 void ConstantGenerator::visit(const ExprSymbol& x) {
-	assert(false); // only P_ExprSymbol appears at parse time.
+	stringstream s;
+	s << "Cannot use symbol\"" << x.name << "\" inside a constant expression";
+	ibexerror(s.str());
 }
 
 void ConstantGenerator::visit(const ExprConstant& c) {
@@ -180,20 +187,17 @@ void ConstantGenerator::visit(const ExprAsinh& e) { visit(e.expr); unary_eval(e,
 void ConstantGenerator::visit(const ExprAtanh& e) { visit(e.expr); unary_eval(e,atanh); }
 
 
-
-void ConstantGenerator::visit(const P_ExprSymbol& x) {
-
-	if (scope.is_iter_symbol(x.name)) {
-		Domain* d= new Domain(x.dim);
-		d->i()=Interval(scope.get_iter_value(x.name));
-		x.deco.tmp=d;
-	} else if (scope.is_cst_symbol(x.name)) {
-		x.deco.tmp = new Domain(scope.get_cst(x.name),true); // reference
-	} else {
-		assert(false); // cannot use a variable in a constant expression.
-	}
-
+void ConstantGenerator::visit(const ExprIter& x) {
+	Domain* d= new Domain(x.dim);
+	d->i()=Interval(scope.get_iter_value(x.name));
+	x.deco.tmp=d;
 }
+
+//void ConstantGenerator::visit(const ExprEntity& x) {
+//	stringstream s;
+//	s << "Cannot use symbol\"" << x.entity.name << "\" inside a constant expression";
+//	throw new SyntaxError(s.str(),"",x.line);
+//}
 
 } // end namespace parser
 } // end namespace ibex

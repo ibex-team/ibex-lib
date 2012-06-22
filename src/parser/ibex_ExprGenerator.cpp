@@ -18,8 +18,8 @@ ExprGenerator::ExprGenerator(const Scope& scope) : scope(scope) {
 
 }
 
-const ExprNode& ExprGenerator::generate(const Array<const ExprSymbol>& x, const ExprNode& y) {
-	return ExprGenerator::copy(x,y);
+const ExprNode& ExprGenerator::generate(const Array<const ExprSymbol>& old_x, const Array<const ExprSymbol>& new_x, const ExprNode& y) {
+	return ExprGenerator::copy(old_x,new_x,y);
 }
 
 void ExprGenerator::visit(const ExprNode& e) {
@@ -51,10 +51,6 @@ void ExprGenerator::visit(const ExprIndex& i) {
 	assert(false); // only P_ExprIndex appears at parse time.
 }
 
-void ExprGenerator::visit(const ExprSymbol& x) {
-	assert(false); // only P_ExprSymbol appears at parse time.
-}
-
 void ExprGenerator::visit(const P_ExprPower& e) {
 	int expon=ConstantGenerator(scope).eval_integer(e.right);
 	e.deco.tmp = &(pow(e.left,expon));
@@ -65,14 +61,8 @@ void ExprGenerator::visit(const P_ExprIndex& e) {
 	e.deco.tmp = &(e.left[index]);
 }
 
-void ExprGenerator::visit(const P_ExprSymbol& x) {
-	if (scope.is_iter_symbol(x.name)) {
-		x.deco.tmp = & ExprConstant::new_scalar(scope.get_iter_value(x.name));
-	} else if (scope.is_cst_symbol(x.name)) {
-		x.deco.tmp = & ExprConstant::new_(scope.get_cst(x.name));
-	} else {
-		x.deco.tmp = &new_x[x.key]; // & ExprSymbol::new_(x.name,x.dim);
-	}
+void ExprGenerator::visit(const ExprIter& x) {
+	x.deco.tmp = & ExprConstant::new_scalar(scope.get_iter_value(x.name));
 }
 
 
