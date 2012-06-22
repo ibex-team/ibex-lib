@@ -28,6 +28,9 @@
 #include "TestHC4Revise.h"
 #include "TestHC4.h"
 
+// ================ parser ===============
+#include "TestParser.h"
+
 // ================ numeric ===============
 #include "TestNewton.h"
 
@@ -53,6 +56,9 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestExpr()));
     ts.add(auto_ptr<Test::Suite>(new TestFunction()));
     ts.add(auto_ptr<Test::Suite>(new TestEval()));
+
+    ts.add(auto_ptr<Test::Suite>(new TestParser()));
+
     ts.add(auto_ptr<Test::Suite>(new TestHC4Revise()));
     ts.add(auto_ptr<Test::Suite>(new TestGradient()));
 

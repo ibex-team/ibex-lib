@@ -2,7 +2,7 @@ include common.mak
 
 TARGET:=$(IBEX_LIB_DIR)/libibex.a
 ARITH:=arithmetic
-SUBDIRS:=tools $(ARITH) numeric symbolic combinatorial contractor bisector strategy
+SUBDIRS:=tools $(ARITH) numeric symbolic combinatorial contractor bisector strategy parser
 SUBLIB_DEF:=_IBEX_WITH_`echo $(SUBLIB) | tr '[:lower:]' '[:upper:]'`_
 
 # warning: don't define OBJS with ":=" because the
@@ -14,8 +14,9 @@ OBJS  =$(wildcard $(IBEX_SRC_DIR)/tools/*.o) \
        $(wildcard $(IBEX_SRC_DIR)/combinatorial/*.o) \
        $(wildcard $(IBEX_SRC_DIR)/contractor/*.o) \
        $(wildcard $(IBEX_SRC_DIR)/bisector/*.o) \
-       $(wildcard $(IBEX_SRC_DIR)/strategy/*.o)       
-
+       $(wildcard $(IBEX_SRC_DIR)/strategy/*.o) \
+       $(wildcard $(IBEX_SRC_DIR)/parser/*.o)
+       
 all : $(TARGET)
 
 $(TARGET) : headers $(SUBDIRS)
