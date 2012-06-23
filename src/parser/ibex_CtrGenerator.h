@@ -26,18 +26,18 @@ namespace parser {
 
 class P_NumConstraint;
 class P_OneConstraint;
+class P_ConstraintList;
 class P_ConstraintLoop;
 
 class CtrGenerator {
 public:
-	CtrGenerator();
-
 	void generate(const Array<const ExprSymbol>& src_vars, const Array<const ExprSymbol>& res_vars,
-			std::vector<P_NumConstraint*> src,
-			std::vector<std::pair<const ExprNode*, NumConstraint::CompOp> > dest);
+			const P_ConstraintList& src,
+			std::vector<std::pair<const ExprNode*, NumConstraint::CompOp> >& dest);
 
 	void visit(const P_NumConstraint& c);
 	void visit(const P_OneConstraint& c);
+	void visit(const P_ConstraintList& l);
 	void visit(const P_ConstraintLoop& l);
 
 

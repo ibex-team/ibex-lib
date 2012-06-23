@@ -25,7 +25,7 @@ public:
 	/**
 	 * delete all the nodes of the expression *excepted symbols*
 	 */
-	virtual ~P_NumConstraint()=0;
+	virtual ~P_NumConstraint() { }
 };
 
 class P_OneConstraint : public P_NumConstraint {
@@ -45,6 +45,23 @@ public:
 	NumConstraint::CompOp op;
 };
 
+class P_ConstraintList : public P_NumConstraint {
+public:
+	P_ConstraintList(vector<P_NumConstraint*>& ctrs);
+
+	void acceptVisitor(CtrGenerator& g) const {
+		g.visit(*this);
+	}
+
+	/**
+	 * delete all the nodes of the expression *excepted symbols*
+	 */
+	~P_ConstraintList();
+
+	vector<P_NumConstraint*>& ctrs;
+
+};
+
 class P_ConstraintLoop : public P_NumConstraint {
 public:
 	P_ConstraintLoop(const char* iter, int first_value, int last_value, vector<P_NumConstraint*>& ctrs);
@@ -61,8 +78,8 @@ public:
 	const char* iter;
 	int first_value;
 	int last_value;
-	vector<P_NumConstraint*>& ctrs;
 
+	P_ConstraintList ctrs;
 };
 
 } // end namespace parser

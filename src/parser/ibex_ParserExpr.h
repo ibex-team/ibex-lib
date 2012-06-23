@@ -31,8 +31,6 @@ public:
 
 	Entity(const char* name, const Dim& dim, const Interval& x);
 
-	~Entity();
-
 	const ExprSymbol& symbol;
 	Domain domain;
 

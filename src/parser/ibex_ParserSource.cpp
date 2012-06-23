@@ -15,10 +15,7 @@ namespace ibex {
 namespace parser {
 
 void P_Source::cleanup() {
-
-	for (vector<P_NumConstraint*>::const_iterator it=ctrs.begin(); it!=ctrs.end(); it++) {
-		delete *it;
-	}
+	delete ctrs;
 
 	for (vector<Entity*>::iterator it=vars.begin(); it!=vars.end(); it++) {
 		delete (ExprSymbol*) &((*it)->symbol);

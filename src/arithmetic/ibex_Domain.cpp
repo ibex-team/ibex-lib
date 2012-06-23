@@ -214,6 +214,15 @@ Domain operator-(const Domain& d1) {
 	return d;
 }
 
+Domain pow(const Domain& d1, int i) {
+	assert(d1.dim.is_scalar());
+
+	Domain d(Dim::scalar());
+	d.i()=pow(d1.i(),i);
+
+	return d;
+}
+
 Domain pow(const Domain& d1, const Domain& p) {
 	assert(d1.dim.is_scalar() && p.dim.is_scalar());
 

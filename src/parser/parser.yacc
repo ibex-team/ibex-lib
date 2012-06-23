@@ -163,7 +163,6 @@ using namespace parser;
 %type<func_input_symbol>   fnc_input
 
 /* constraints */
-%type<constraints>  decl_ctr_list
 %type<constraints>  ctr_blk_list
 %type<constraints>  ctr_blk_list_ // ctr_blk_list without ending semicolon
 %type<constraint>   ctr_blk
@@ -297,7 +296,7 @@ fnc_assign    : TK_NEW_SYMBOL TK_EQU expr       { /* note: if this tmp symbol is
 /*                                                CONSTRAINTS                                                         */
 /**********************************************************************************************************************/
 decl_ctr_list : TK_CTRS
-                ctr_blk_list TK_END             { $$ = $2; }
+                ctr_blk_list TK_END             { source.ctrs=new P_ConstraintList(*$2); }
               ;
               
 ctr_blk_list  : ctr_blk_list_ semicolon_opt     { $$ = $1; }

@@ -20,17 +20,15 @@ namespace ibex {
 namespace parser {
 
 void CtrGenerator::generate(const Array<const ExprSymbol>& _src_vars, const Array<const ExprSymbol>& _res_vars,
-		std::vector<P_NumConstraint*> src,
-		std::vector<std::pair<const ExprNode*, NumConstraint::CompOp> > dest) {
+		const P_ConstraintList& src,
+		std::vector<std::pair<const ExprNode*, NumConstraint::CompOp> >& dest) {
 	src_vars = &_src_vars;
 	res_vars = &_res_vars;
 	ctrs = &dest;
 
 	assert(dest.empty());
 
-	for (vector<P_NumConstraint*>::const_iterator it=src.begin(); it!=src.end(); it++) {
-		visit(**it);
-	}
+	visit(src);
 }
 
 void CtrGenerator::visit(const P_NumConstraint& c) {
@@ -39,7 +37,15 @@ void CtrGenerator::visit(const P_NumConstraint& c) {
 
 void CtrGenerator::visit(const P_OneConstraint& c) {
 	const ExprNode& e=ExprGenerator(scopes.top()).generate(*src_vars,*res_vars,c.expr);
+
 	ctrs->push_back(pair<const ExprNode*, NumConstraint::CompOp>(&e,c.op));
+	cout << "size=" << ctrs->size() << endl;
+}
+
+void CtrGenerator::visit(const P_ConstraintList& list) {
+	for (vector<P_NumConstraint*>::const_iterator it=list.ctrs.begin(); it!=list.ctrs.end(); it++) {
+		visit(**it);
+	}
 }
 
 void CtrGenerator::visit(const P_ConstraintLoop& loop) {
@@ -52,9 +58,7 @@ void CtrGenerator::visit(const P_ConstraintLoop& loop) {
 
 	for (int i=begin; i<=end; i++) {
 		scopes.top().set_iter_value(name,i);
-		for (vector<P_NumConstraint*>::const_iterator it=loop.ctrs.begin(); it!=loop.ctrs.end(); it++) {
-			visit(**it);
-		}
+		visit(loop.ctrs);
 	}
 	scopes.pop();
 }

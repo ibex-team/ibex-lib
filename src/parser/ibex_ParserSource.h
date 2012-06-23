@@ -25,8 +25,6 @@ namespace parser {
  */
 class P_Source {
 public:
-	P_Source();
-
 	/**
 	 * Delete the vars, sybs, eprs, ctrs.
 	 *
@@ -41,7 +39,7 @@ public:
 	std::vector<Function*> func;
 
 	/** The constraints */
-	const std::vector<P_NumConstraint*> ctrs;
+	P_ConstraintList* ctrs;
 };
 
 } // end namespace parser

@@ -24,15 +24,24 @@ P_OneConstraint::~P_OneConstraint() {
 	cleanup(expr,false); // do not delete symbols
 }
 
+P_ConstraintList::P_ConstraintList(vector<P_NumConstraint*>& ctrs) : ctrs(ctrs) {
+
+}
+
+P_ConstraintList::~P_ConstraintList() {
+	for (vector<P_NumConstraint*>::const_iterator it=ctrs.begin(); it!=ctrs.end(); it++) {
+		delete *it;
+	}
+	delete &ctrs;
+}
+
 P_ConstraintLoop::P_ConstraintLoop(const char* iter, int first_value, int last_value, vector<P_NumConstraint*>& ctrs) :
 		 iter(strdup(iter)), first_value(first_value), last_value(last_value), ctrs(ctrs) {
 
 }
 
 P_ConstraintLoop::~P_ConstraintLoop() {
-	for (vector<P_NumConstraint*>::const_iterator it=ctrs.begin(); it!=ctrs.end(); it++) {
-		delete *it;
-	}
+
 }
 
 } // end namespace parser

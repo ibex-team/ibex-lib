@@ -55,7 +55,7 @@ void MainGenerator::generate(const P_Source& source, System& result) {
 
 	vector<pair<const ExprNode*, NumConstraint::CompOp> > ctrs;
 
-	CtrGenerator().generate(srcvars, result.vars, source.ctrs, ctrs);
+	CtrGenerator().generate(srcvars, result.vars, *source.ctrs, ctrs);
 
 	int m=ctrs.size();
 
@@ -66,7 +66,8 @@ void MainGenerator::generate(const P_Source& source, System& result) {
 		image.set_ref(i++,*(it->first));
 	}
 
-	result.f = new Function(result.vars,ExprVector::new_(image,false));
+	result.f = new Function(result.vars,
+			m>1? ExprVector::new_(image,false) : image[0]);
 
 	//================= generate the constraints =====================
 

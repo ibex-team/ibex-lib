@@ -20,12 +20,17 @@
 
 #include "parser.h"
 
-using namespace ibex;
-using namespace ibex::parser;
-
+namespace ibex {
+namespace parser {
 extern std::stack<Scope> scopes;
 
+} // end namespace
+} // end namespace
+
 int ibex_lineno = 1;
+
+using namespace ibex;
+using namespace ibex::parser;
 
 %}
 
@@ -72,12 +77,12 @@ int ibex_lineno = 1;
 "\""[^\n]*"\""                   { ibexlval.str = (char*) malloc(strlen(ibextext)-1);
                                    /* copy while removing quotes */
                                    strncpy(ibexlval.str,&ibextext[1],strlen(ibextext)-2);   
-				   ibexlval.str[strlen(ibextext)-2]='\0';
+                                   ibexlval.str[strlen(ibextext)-2]='\0';
                                    return TK_STRING; 
                                  }
 [_a-zA-Z][_a-zA-Z0-9]*	         { ibexlval.str = (char*) malloc(strlen(ibextext)+1);
-				   strcpy(ibexlval.str,ibextext);
-	                           return scopes.top().token(ibextext);				       
+                                   strcpy(ibexlval.str,ibextext);
+                                   return scopes.top().token(ibextext);				       
                                  }
 ([0-9]{6,10}[0-9]*|([0-9][0-9]*\.[0-9]*)|(\.[0-9]+))(e(\-|\+)?[0-9]+)?|([0-9]{1,5}e(\-|\+)?[0-9]+)  { 
                                    ibexlval.real = atof(ibextext); return TK_FLOAT; 
@@ -92,8 +97,8 @@ int ibex_lineno = 1;
                                    while ((s=strpbrk(s,"\n"))) { s+=sizeof(char); ++ibex_lineno; }
                                  }
 
-[ \t]+ 			         { /* skipping spaces */ }
-"\n"			         { ++ibex_lineno; /* counting CR */ }
+[ \t]+                           { /* skipping spaces */ }
+"\n"                             { ++ibex_lineno; /* counting CR */ }
 
 "<="                             { return TK_LEQ; }
 ">="                             { return TK_GEQ; }

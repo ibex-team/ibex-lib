@@ -21,7 +21,7 @@ namespace ibex {
 
 extern System* parser_result;
 
-System::System(const char* filename) : vars(0), box(0) {
+System::System(const char* filename) : box(1) /* tmp */ {
 
 	FILE *fd;
 	if ((fd = fopen(filename, "r")) == NULL) throw UnknownFileException(filename);

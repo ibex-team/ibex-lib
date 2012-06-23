@@ -230,6 +230,14 @@ bool Scope::is_iter_symbol(const char* id) const {
 	return tab[id]->token()==TK_ITERATOR;
 }
 
+int Scope::token(const char* id) const {
+  if (tab.used(id))
+    return tab[id]->token();
+  else
+    return TK_NEW_SYMBOL;
+}
+
+
 ostream& operator<<(ostream& os, const Scope& scope) {
 	os << "current scope :\n";
 	os << "--------------------\n";

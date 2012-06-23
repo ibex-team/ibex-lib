@@ -21,7 +21,7 @@ Entity::Entity(const char* name, const Dim& dim, const Domain& domain) :
 
 // VAR is a temporary value
 Entity::Entity(const char* name, const Dim& dim, const Interval& x) :
-				symbol(ExprSymbol::new_(name,dim)), domain(domain,false), type(VAR) {
+				symbol(ExprSymbol::new_(name,dim)), domain(dim), type(VAR) {
 
 	switch(dim.type()) {
 	case Dim::SCALAR :      domain.i()=x; break;
@@ -32,6 +32,11 @@ Entity::Entity(const char* name, const Dim& dim, const Interval& x) :
 	}
 
 }
+
+P_ExprPower::P_ExprPower(const ExprNode& expr, const ExprNode& expon) : ExprBinaryOp(expr,expon,expr.dim) {
+
+}
+
 
 P_ExprIndex::P_ExprIndex(const ExprNode& expr, const ExprNode& index) : ExprBinaryOp(expr,index,expr.dim.index_dim()) {
 
