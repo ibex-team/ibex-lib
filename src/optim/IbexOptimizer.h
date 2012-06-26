@@ -82,7 +82,9 @@ Optimizer(const System& sys,  int y_num, Contractor& contractor, Precision & pre
   int nb_rand;
   REAL diam_simplex;
   REAL diam_rand;
-
+  REAL distloup;
+  REAL optval;
+  int nbnodes;
 
   protected:
   virtual bool loup_change(Cell& cell);

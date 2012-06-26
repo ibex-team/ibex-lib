@@ -31,9 +31,11 @@ REAL abs(REAL a){
 //     sys.space.box=savebox;  
 //     return false;
 //   }
-
-  sys.space.box=Inf(sys.space.box);
-  sys.eval(eval_inf);
+  try
+    {  sys.space.box=Inf(sys.space.box);
+      sys.eval(eval_inf);}
+  catch(EmptyBoxException)
+    {sys.space.box=savebox; return false;}
   goal.forward(sys.space);
 
 
@@ -113,14 +115,11 @@ REAL abs(REAL a){
   }
 
   if( stat == SPxSolver::OPTIMAL ){
-      INTERVAL f= inf_f+ mysoplex.objValue();
-
         //the linear solution is mapped to intervals and evaluated
         DVector prim(n);
         mysoplex.getPrimal(prim);
         for (int j=0; j<n-1; j++)
             sys.space.box(j+1)= Inf(sys.space.box(j+1))+prim[j+1];
-        
         bool ret= check_candidate(sys, sys.space, Mid(sys.space.box));
 	sys.space.box=savebox;
         if (ret)

@@ -128,7 +128,7 @@ Optimizer::Optimizer(const System& sys,  int y_num, Contractor& contractor,
   y_num(y_num),
   goal_ctr(goal_ctr1),
   prec_num(1), goal_ceil(goal_ceil),
-  loup(BiasPosInf), sample_size(sample_size), loup_changed(false),
+  loup(BiasPosInf), distloup(BiasPosInf), optval(BiasPosInf),nbnodes(0), sample_size(sample_size), loup_changed(false),
   uplo(BiasPosInf), uplo_of_solutions(BiasPosInf)
 { 
 
@@ -136,7 +136,7 @@ Optimizer::Optimizer(const System& sys,  int y_num, Contractor& contractor,
   const Expr& goal_function=(((const BinOpExpr&)sys.ctr(goal_ctr).expr).right);
   EvaluatorFactory fac(goal_function);
   fac.build(&goal);
-   cout << " nb constraints " << sys.nb_ctr() << endl;
+  cout << " nb constraints " << sys.nb_ctr() << endl;
 
    nb_simplex=0;
    diam_simplex=0;
@@ -153,7 +153,7 @@ Optimizer::Optimizer(const System& sys,  int y_num, Contractor& contractor,
   y_num(y_num),
   goal_ctr(goal_ctr1),
   prec_num(1), goal_ceil(goal_ceil),
-  loup(BiasPosInf), sample_size(sample_size), loup_changed(false),
+  loup(BiasPosInf), distloup(BiasPosInf), optval(BiasPosInf),nbnodes(0), sample_size(sample_size), loup_changed(false),
   uplo(BiasPosInf), uplo_of_solutions(BiasPosInf)
 { 
 
@@ -202,7 +202,8 @@ void Optimizer::contract_and_bound(Cell* c) {
   if ((fabs (loup) < 1) || (goal_ceil > 1))  // goal_ceil is a relative precision  and should be less than 1
     ymax=loup-goal_ceil;
   else 
-    ymax=loup*(1-goal_ceil);
+    if (loup != BiasPosInf)
+      ymax = loup - fabs(loup)* goal_ceil;
   
   if (Inf (y) > ymax) { 
     delete c; 
@@ -263,9 +264,6 @@ void Optimizer::contract_and_bound(Cell* c) {
 
  bool ConstrainedOptimizer::loup_change(Cell& c)
       {
-	//	innerbox= c.get<InnerBox>().inner_box; // get the current inner box (to be inflated by update_loup)  not used BNE
-
-	//	space.box(1)=INTERVAL(1.e-8,1.e-8);   // essai pour algo mixte propagation avec ctes plus fortes que recherche loup
 	int box_loup_changed = update_loup(sys, space);
 	innerfound=false;
 	box_loup_changed |= simplex_update_loup(sys);
@@ -273,7 +271,6 @@ void Optimizer::contract_and_bound(Cell* c) {
 	  if(Dimension(innerbox)==1) Resize(innerbox, space.nb_var()); 
 	  innerbox = loup_point;
 	}
-	//space.box(1)=INTERVAL(1.e-15,1.e-15); // essai pour algo mixte propagation avec ctes plus fortes que recherche loup
 	return box_loup_changed;
       }
 
@@ -321,13 +318,14 @@ int Optimizer::next_box() {
       {if ((fabs (loup) < 1) || (goal_ceil > 1))  // goal_ceil is a relative precision  and should be less than 1
 	  new_uplo=loup-goal_ceil;
 	else 
-	  new_uplo=loup*(1-goal_ceil);
+	  new_uplo=loup - fabs(loup)* goal_ceil;
       }
     if (new_uplo < uplo_of_solutions)
       uplo=new_uplo;
     else
       uplo=uplo_of_solutions;
-  
+    
+
     if (loup_changed)   trace_uplo();
     manage_cell_buffer();      
 
@@ -335,13 +333,29 @@ int Optimizer::next_box() {
 
     if (!cells.empty())delete &c; //  bug ???
 
+    /*
+// stat distloup : (loup-optval)/(loup-uplo)
+    if (nbnodes==0 && loup < BiasPosInf )
+      {cout << " 1er loup " << loup << " uplo " << uplo << " distloup " << distloup << endl ;
+	distloup= (loup-optval)/(loup-uplo);
+	cout << distloup << endl; 
+      }
+
+    if (loup < BiasPosInf && optval < BiasPosInf)
+      nbnodes++;
+    if (nbnodes > 1)
+      {
+      distloup=(distloup*(nbnodes-1) + (loup-optval) /(loup-uplo))/nbnodes;
+      }
+    */
+
     // stopping criterion   the required precision is reached.
     if (loup != BiasPosInf) {
       if (((fabs(loup)> 1) && (loup-uplo)/(fabs (loup)) < goal_ceil)
 	  || (loup-uplo) <  goal_ceil)
 	{throw GoalPrecisionException();}
     }
-    
+
 
   }
   return -1; // means empty stack : end of the algorithm
@@ -359,7 +373,7 @@ void Optimizer::manage_cell_buffer() {
     if ((fabs (loup) < 1) || (goal_ceil > 1))  // goal_ceil is a relative precision  and should be less than 1
       ymax=loup-goal_ceil;
     else 
-      ymax=loup*(1-goal_ceil);
+      ymax= loup - fabs(loup)*goal_ceil;
 
     ((CellHeap&) cells).contract_heap(ymax);
   }

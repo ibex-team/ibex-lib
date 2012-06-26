@@ -51,6 +51,9 @@ namespace ibex {
   }
   catch (UnboundedResultException e)
     {;}
+  catch (EmptyBoxException e)
+    {;}
+
 }
 
   bool ConstrainedOptimizer::isInner(const System& sys, const Space& space, int j){
