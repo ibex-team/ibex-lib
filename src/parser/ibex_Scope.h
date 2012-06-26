@@ -12,7 +12,7 @@
 #define __IBEX_SCOPE_H__
 
 #include <iostream>
-#include "ibex_ParserExpr.h"
+#include "ibex_P_Expr.h"
 
 namespace ibex {
 

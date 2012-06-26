@@ -8,7 +8,7 @@
 // Last Update : Jun 19, 2012
 //============================================================================
 
-#include "ibex_ExprGenerator.h"
+#include "ibex_P_ExprGenerator.h"
 #include "ibex_ConstantGenerator.h"
 
 namespace ibex {
@@ -28,37 +28,18 @@ void ExprGenerator::visit(const ExprNode& e) {
 	}
 }
 
-// (useless so far)
-void ExprGenerator::visit(const ExprNAryOp& e) {
-	e.acceptVisitor(*this);
-}
-
-// (useless so far)
-void ExprGenerator::visit(const ExprBinaryOp& b) {
-	b.acceptVisitor(*this);
-}
-
-// (useless so far)
-void ExprGenerator::visit(const ExprUnaryOp& u) {
-	u.acceptVisitor(*this);
-}
-
-void ExprGenerator::visit(const ExprPower& x) {
-	assert(false); // only P_ExprPower appears at parse time.
-}
-
-void ExprGenerator::visit(const ExprIndex& i) {
-	assert(false); // only P_ExprIndex appears at parse time.
-}
+#define LEFT  (*((const ExprNode*) e.left.deco.tmp))
 
 void ExprGenerator::visit(const P_ExprPower& e) {
 	int expon=ConstantGenerator(scope).eval_integer(e.right);
-	e.deco.tmp = &(pow(e.left,expon));
+	visit(e.left);
+	e.deco.tmp = &(pow(LEFT,expon));
 }
 
 void ExprGenerator::visit(const P_ExprIndex& e) {
 	int index=ConstantGenerator(scope).eval_integer(e.right);
-	e.deco.tmp = &(e.left[index]);
+	visit(e.left);
+	e.deco.tmp = &(LEFT[index]);
 }
 
 void ExprGenerator::visit(const ExprIter& x) {

@@ -12,8 +12,10 @@
 #include "ibex_Expr.h"
 #include "ibex_Function.h"
 #include "ibex_NonRecoverableException.h"
-#include "ibex_ExprPrinter.cpp_"
-#include "ibex_ExprTools.h"
+#include "ibex_ExprPrinter.h"
+#include "ibex_ExprNodes.h"
+#include "ibex_ExprSize.h"
+#include "ibex_ExprReset.h"
 #include <limits.h>
 #include <stdio.h>
 #include <set>
@@ -40,6 +42,22 @@ ExprNode::ExprNode(int height, int size, const Dim& dim) :
   height(height), size(size), id(-1), dim(dim) {
 
 }
+
+const ExprNode** ExprNode::subnodes() const {
+	return ExprNodes().nodes(*this);
+}
+
+void ExprNode::reset_visited() const {
+	ExprReset().reset(*this);
+}
+
+void cleanup(const ExprNode& expr, bool delete_symbols) {
+	const ExprNode** nodes=expr.subnodes();
+	for (int i=0; i<expr.size; i++)
+		if (delete_symbols || (!dynamic_cast<const ExprSymbol*>(nodes[i])))
+			delete (ExprNode*) nodes[i];
+}
+
 
 bool ExprIndex::indexed_symbol() const {
 	// we prefer to use directly a dynamic cast here
@@ -105,7 +123,7 @@ static char* next_generated_name() {
 	return generated_name_buff;
 }
 
-ExprSymbol::ExprSymbol(const Dim& dim) : ExprNode(0,1,dim),
+ExprSymbol::ExprSymbol(const Dim& dim) : ExprLeaf(dim),
 		name(strdup(next_generated_name())), key(-1) {
 }
 
@@ -115,27 +133,27 @@ const ExprSymbol& ExprSymbol::new_(const Dim& dim) {
 }
 
 ExprConstant::ExprConstant(const Interval& x)
-  : ExprNode(0,1,Dim()),
+  : ExprLeaf(Dim()),
     value(Dim()) {
 
 	value.i() = x;
 }
 
 ExprConstant::ExprConstant(const IntervalVector& v, bool in_row)
-  : ExprNode(0,1, in_row? Dim::row_vec(v.size()) : Dim::col_vec(v.size())),
+  : ExprLeaf(in_row? Dim::row_vec(v.size()) : Dim::col_vec(v.size())),
     value(in_row? Dim::row_vec(v.size()) : Dim::col_vec(v.size())) {
 
 	value.v() = v;
 }
 
 ExprConstant::ExprConstant(const IntervalMatrix& m)
-  : ExprNode(0,1,Dim::matrix(m.nb_rows(),m.nb_cols())),
+  : ExprLeaf(Dim::matrix(m.nb_rows(),m.nb_cols())),
     value(Dim::matrix(m.nb_rows(),m.nb_cols())) {
 
 	value.m() = m;
 }
 
-ExprConstant::ExprConstant(const Domain& d) : ExprNode(0,1,d.dim), value(d.dim) {
+ExprConstant::ExprConstant(const Domain& d) : ExprLeaf(d.dim), value(d.dim) {
 	value = d;
 }
 
@@ -206,7 +224,7 @@ ExprApply::ExprApply(const Function& f, const ExprNode** args) :
 }
 
 std::ostream& operator<<(std::ostream& os, const ExprNode& expr) {
-  ExprPrinter(os).visit(expr);
+  ExprPrinter().print(os,expr);
   return os;
 }
 

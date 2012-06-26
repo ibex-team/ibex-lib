@@ -47,24 +47,24 @@ int main() {
 
     Test::Suite ts;
 
-    ts.add(auto_ptr<Test::Suite>(new TestInterval()));
-    ts.add(auto_ptr<Test::Suite>(new TestIntervalVector()));
-    ts.add(auto_ptr<Test::Suite>(new TestIntervalMatrix()));
-    ts.add(auto_ptr<Test::Suite>(new TestDim()));
-    //ts.add(auto_ptr<Test::Suite>(new TestDomain()));
-
-    ts.add(auto_ptr<Test::Suite>(new TestExpr()));
-    ts.add(auto_ptr<Test::Suite>(new TestFunction()));
-    ts.add(auto_ptr<Test::Suite>(new TestEval()));
+//    ts.add(auto_ptr<Test::Suite>(new TestInterval()));
+//    ts.add(auto_ptr<Test::Suite>(new TestIntervalVector()));
+//    ts.add(auto_ptr<Test::Suite>(new TestIntervalMatrix()));
+//    ts.add(auto_ptr<Test::Suite>(new TestDim()));
+//    //ts.add(auto_ptr<Test::Suite>(new TestDomain()));
+//
+//    ts.add(auto_ptr<Test::Suite>(new TestExpr()));
+//    ts.add(auto_ptr<Test::Suite>(new TestFunction()));
+//    ts.add(auto_ptr<Test::Suite>(new TestEval()));
 
     ts.add(auto_ptr<Test::Suite>(new TestParser()));
 
-    ts.add(auto_ptr<Test::Suite>(new TestHC4Revise()));
-    ts.add(auto_ptr<Test::Suite>(new TestGradient()));
-
-    ts.add(auto_ptr<Test::Suite>(new TestNewton()));
-
-    ts.add(auto_ptr<Test::Suite>(new TestHC4()));
+//    ts.add(auto_ptr<Test::Suite>(new TestHC4Revise()));
+//    ts.add(auto_ptr<Test::Suite>(new TestGradient()));
+//
+//    ts.add(auto_ptr<Test::Suite>(new TestNewton()));
+//
+//    ts.add(auto_ptr<Test::Suite>(new TestHC4()));
 
     return ts.run(output,false) ? EXIT_SUCCESS : EXIT_FAILURE;
 

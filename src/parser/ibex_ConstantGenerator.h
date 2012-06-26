@@ -11,7 +11,7 @@
 #ifndef __IBEX_CONSTANT_EVALUATOR_H__
 #define __IBEX_CONSTANT_EVALUATOR_H__
 
-#include "ibex_ParserExprVisitor.h"
+#include "ibex_P_ExprVisitor.h"
 #include "ibex_Expr.h"
 #include "ibex_Scope.h"
 
@@ -36,11 +36,12 @@ public:
 protected:
 	void visit(const ExprNode& e);
 	void visit(const ExprIndex& i);
-	void visit(const ExprSymbol& x);
-	void visit(const ExprConstant& c);
+	void visit(const ExprLeaf& e);
 	void visit(const ExprNAryOp& e);
 	void visit(const ExprBinaryOp& b);
 	void visit(const ExprUnaryOp& u);
+	void visit(const ExprSymbol& x);
+	void visit(const ExprConstant& c);
 	void visit(const ExprVector& e);
 	void visit(const ExprApply& e);
 

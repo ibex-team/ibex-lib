@@ -17,111 +17,6 @@
 
 namespace ibex {
 
-namespace {
-
-/* Write an index into a string, surrounded with brackets.
- * Up to 6 digits are allowed.
- * Return the length of the string. */
-int index_2_string(char* buff, int index) {
-	assert(index<1000000);
-	int k=0;
-	char number[6];
-	buff[k++]='[';
-	snprintf(number, 6, "%d", index);
-	strcpy(&buff[k], number);
-	k+=strlen(number);
-	buff[k++]=']';
-	return k;
-}
-
-char buff[1000];
-
-/* Return the string corresponding to the subexpression
- * x[i] where x is a symbol name and i and index. */
-const char* index_symbol_2_string(const char* symbol_name, int index1, int index2, int index3) {
-	int k=0;
-	strcpy(&buff[k], symbol_name);
-	k+=strlen(symbol_name);
-
-	if (index1!=-1) k+=index_2_string(&buff[k], index1);
-	if (index2!=-1) k+=index_2_string(&buff[k], index2);
-	if (index3!=-1) k+=index_2_string(&buff[k], index3);
-	buff[k++]='\0';
-	//cout << "debug name=" << buff << endl;
-	return buff;
-}
-
-/*
-class Unvectorize {
-
-	vector<const ExprSymbol*> dest_symbols;
-	Array<const ExprNode> peers;
-
-	Unvectorize(Array<const ExprSymbol>& x) : peers(x.size()) {
-		for (int i=0; i<x.size(); i++)
-			visit(x[i]);
-	}
-protected:
-	void visit(const ExprSymbol& x) {
-
-		switch (x.type()) {
-		case Dim::SCALAR:
-			dest_symbols.push_back(&ExprSymbol::new_(x.name,x.dim));
-			peers.set_ref(x.id,*dest_symbols.back());
-			break;
-		case Dim::ROW_VECTOR:
-		case Dim::COL_VECTOR:
-			// Example. Let x be a vector of 2 components.
-			// The following node "v" is [x[0], x[1]]. It the src expression is:
-			//           x->x[0]+x[1].
-			// We will get in this case
-			//          (x[0],x[1])->x[0]+x[1]
-			// So v does not appear in the dest expression. But if the original expression is:
-			//           x -> 0.1*x (scalar product)
-			// we will get
-			//          (x[0],x[1])->0.1*[x[0],x[1]]
-			// and the right side of the multiplication points to v.
-			const ExprNode* v[x.dim.vec_size()];
-			for (int i=0; i<x.dim.vec_size(); i++) {
-				dest_symbols.push_back(& ExprSymbol::new_(index_symbol_2_string(x.name,-1,-1,i)));
-				v[i]=dest_symbols.back();
-			}
-			peers.set_ref(x.id,ExprVector::new_(v,x.dim.vec_size(),x.dim.type()==Dim::ROW_VECTOR));
-			break;
-		case Dim::MATRIX:
-			const ExprNode* m[x.dim.dim2];
-			for (int i=0; i<x.dim.dim2; i++) {
-				const ExprNode* v[x.dim.dim3];
-				for (int j=0; j<x.dim.dim3; j++) {
-					dest_symbols.push_back(& ExprSymbol::new_(index_symbol_2_string(x.name,-1,i,j)));
-					v[j]=dest_symbols.back();
-				}
-				m[i]= & ExprVector::new_(v,x.dim.dim3,true);
-			}
-			peers.set_ref(x.id,ExprVector::new_(m,x.dim.dim2,false));
-			break;
-		case Dim::MATRIX_ARRAY:
-			const ExprNode* ma[x.dim.dim1];
-			for (int i=0; i<x.dim.dim1; i++) {
-				const ExprNode* m[x.dim.dim2];
-				for (int j=0; j<x.dim.dim2; j++) {
-					const ExprNode* v[x.dim.dim3];
-					for (int k=0; k<x.dim.dim3; k++) {
-						dest_symbols.push_back(& ExprSymbol::new_(index_symbol_2_string(x.name,i,j,k)));
-						v[k]=dest_symbols.back();
-					}
-					m[j]= & ExprVector::new_(v,x.dim.dim3,true);
-				}
-				ma[i]= & ExprVector::new_(m,x.dim.dim2,false);
-			}
-			peers.set_ref(x.id, ExprVector::new_(ma,x.dim.dim1,true)); // notice: true or false does not matter here
-			break;
-		}
-	}
-};
-*/
-
-} // end namespace
 
 const ExprNode& ExprCopy::copy(const Array<const ExprSymbol>& old_x, const Array<const ExprSymbol>& new_x, const ExprNode& y) {
 
@@ -156,6 +51,10 @@ void ExprCopy::visit(const ExprConstant& c) {
 
 // (useless so far)
 void ExprCopy::visit(const ExprNAryOp& e) {
+	e.acceptVisitor(*this);
+}
+
+void ExprCopy::visit(const ExprLeaf& e) {
 	e.acceptVisitor(*this);
 }
 

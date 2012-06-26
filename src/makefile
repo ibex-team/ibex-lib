@@ -2,7 +2,7 @@ include common.mak
 
 TARGET:=$(IBEX_LIB_DIR)/libibex.a
 ARITH:=arithmetic
-SUBDIRS:=tools $(ARITH) numeric symbolic combinatorial contractor bisector strategy parser
+SUBDIRS:=tools $(ARITH) numeric symbolic function combinatorial contractor bisector strategy parser
 SUBLIB_DEF:=_IBEX_WITH_`echo $(SUBLIB) | tr '[:lower:]' '[:upper:]'`_
 
 # warning: don't define OBJS with ":=" because the
@@ -11,6 +11,7 @@ OBJS  =$(wildcard $(IBEX_SRC_DIR)/tools/*.o) \
        $(wildcard $(IBEX_SRC_DIR)/arithmetic/*.o) \
        $(wildcard $(IBEX_SRC_DIR)/numeric/*.o) \
        $(wildcard $(IBEX_SRC_DIR)/symbolic/*.o) \
+       $(wildcard $(IBEX_SRC_DIR)/function/*.o) \
        $(wildcard $(IBEX_SRC_DIR)/combinatorial/*.o) \
        $(wildcard $(IBEX_SRC_DIR)/contractor/*.o) \
        $(wildcard $(IBEX_SRC_DIR)/bisector/*.o) \
@@ -27,9 +28,12 @@ headers :
 	echo \#define $(SUBLIB_DEF) >> $(ARITH)/ibex_bias_or_gaol.h; \
 	install -m 640 $(ARITH)/ibex_$(SUBLIB)_Interval.h_ $(IBEX_INC_DIR)/ibex_$(SUBLIB)_Interval.h_; \
 	echo \/\* this file is generated \*\/ > $(IBEX_INC_DIR)/ibex.h ; \
-	find $(IBEX_SRC_DIR) -path "$(IBEX_SRC_DIR)/parser*" -prune -o -name "*.h" | grep "\\.h" | while read LINE; do \
+	find $(IBEX_SRC_DIR) -name "*.h" | while read LINE; do \
 	f=`basename $${LINE}`; echo "#include \""$$f"\"" >> $(IBEX_INC_DIR)/ibex.h; \
 	install -m 640 $${LINE} $(IBEX_INC_DIR)/$$f; done
+
+## to remove parser:
+##	find $(IBEX_SRC_DIR) -path "$(IBEX_SRC_DIR)/parser*" -prune -o -name "*.h" | grep "\\.h" | while read LINE; do \
 
 clean: $(SUBDIRS)
 	rm -f $(TARGET); \

@@ -11,7 +11,7 @@
 #ifndef __IBEX_EXPR_GENERATOR_H__
 #define __IBEX_EXPR_GENERATOR_H__
 
-#include "ibex_ParserExprVisitor.h"
+#include "ibex_P_ExprVisitor.h"
 #include "ibex_Scope.h"
 #include "ibex_ExprCopy.h"
 
@@ -27,13 +27,6 @@ public:
 protected:
 
 	void visit(const ExprNode& e);
-	void visit(const ExprNAryOp& e);
-	void visit(const ExprBinaryOp& b);
-	void visit(const ExprUnaryOp& u);
-
-	void visit(const ExprPower& e) ;
-	void visit(const ExprIndex& i);
-
 	void visit(const P_ExprPower& c);
 	void visit(const P_ExprIndex& e);
 	void visit(const ExprIter& i);

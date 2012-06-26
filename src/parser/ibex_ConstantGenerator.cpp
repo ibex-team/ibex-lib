@@ -27,9 +27,8 @@ int to_integer(const Domain& d) {
 	return x;
 }
 
-int to_double(const Domain& d) {
+double to_double(const Domain& d) {
 	assert(d.dim.is_scalar());
-
 	// WARNING: this is quite unsafe. But
 	// requiring d.i().is_degenerated() is wrong,
 	// the result of a calculus with degenerated intervals
@@ -67,6 +66,10 @@ void ConstantGenerator::visit(const ExprNode& e) {
 
 void ConstantGenerator::visit(const ExprIndex& i) {
 	assert(false); // only P_ExprIndex appears at parse time.
+}
+
+void ConstantGenerator::visit(const ExprLeaf& x) {
+	x.acceptVisitor(*this);
 }
 
 void ConstantGenerator::visit(const ExprSymbol& x) {

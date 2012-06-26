@@ -12,6 +12,7 @@
 
 #include "TestParser.h"
 #include "ibex_System.h"
+#include "Ponts30.h"
 
 namespace ibex {
 
@@ -19,6 +20,13 @@ static bool sameExpr(const ExprNode& node, const char* expr) {
 	std::stringstream s;
 	s << node;
 	return strcmp(s.str().c_str(),expr)==0;
+}
+
+static bool sameExpr(const ExprNode& node, const ExprNode& node2) {
+	std::stringstream s,s2;
+	s << node;
+	s2 << node2;
+	return strcmp(s.str().c_str(),s2.str().c_str())==0;
 }
 
 void TestParser::file01() {
@@ -37,6 +45,31 @@ void TestParser::file01() {
 	TEST_ASSERT(sys.ctrs.size()==1);
 	TEST_ASSERT(&sys.ctrs[0]->f==sys.f);
 	TEST_ASSERT(sys.ctrs[0]->op==NumConstraint::GEQ);
+}
+
+void TestParser::ponts() {
+	System sys("ponts.txt");
+	Ponts30 sys2;
+	TEST_ASSERT(sys.func.empty());
+	TEST_ASSERT(sys.vars.size()==30);
+	for (int i=0; i<30; i++) {
+		TEST_ASSERT(strcmp(sys.vars[i].name,sys2.f->symbol_name(i))==0);
+		TEST_ASSERT(sys.vars[0].dim.is_scalar());
+		TEST_ASSERT(&sys.f->symbol(i) == &sys.vars[i]);
+	}
+	TEST_ASSERT(sys.eprs.empty());
+	TEST_ASSERT(sys.sybs.empty());
+	TEST_ASSERT(sys.box.size()==30);
+	TEST_ASSERT(sys.box==sys2.init_box);
+	TEST_ASSERT(sys.f->nb_symbols()==30);
+	TEST_ASSERT(sameExpr(sys.f->expr(),sys2.f->expr()));
+	TEST_ASSERT(sys.ctrs.size()==30);
+	for (int i=0; i<30; i++) {
+		cout << sys.ctrs[i]->f << endl;
+		cout << sys.f[i] << endl;
+		TEST_ASSERT(&sys.ctrs[i]->f==&sys.f[i]);
+		TEST_ASSERT(sys.ctrs[i]->op==NumConstraint::GEQ);
+	}
 }
 
 } // end namespace

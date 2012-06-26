@@ -8,8 +8,7 @@
 // Last Update : Jun 12, 2012
 //============================================================================
 
-#include "ibex_ParserNumConstraint.h"
-#include "ibex_ExprTools.h"
+#include "ibex_P_NumConstraint.h"
 
 namespace ibex {
 
@@ -17,11 +16,10 @@ namespace parser {
 
 P_OneConstraint::P_OneConstraint(const ExprNode& left, NumConstraint::CompOp op, const ExprNode& right) :
 		expr(right.is_zero()? left : left-right), op(op) {
-
 }
 
 P_OneConstraint::~P_OneConstraint() {
-	cleanup(expr,false); // do not delete symbols
+	cleanup(expr,false); // will not delete symbols
 }
 
 P_ConstraintList::P_ConstraintList(vector<P_NumConstraint*>& ctrs) : ctrs(ctrs) {

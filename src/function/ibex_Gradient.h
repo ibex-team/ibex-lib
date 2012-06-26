@@ -33,10 +33,8 @@ protected:
 	virtual void visit(const ExprNode& n);
 	/** Visit an indexed expression. */
 	virtual void visit(const ExprIndex& idx);
-	/** Visit a symbol. */
-	virtual void visit(const ExprSymbol& s);
-	/** Visit a constant. */
-	virtual void visit(const ExprConstant& c);
+	/** Visit a leaf. */
+	virtual void visit(const ExprLeaf& e);
 	/** Visit a n-ary operator. */
 	virtual void visit(const ExprNAryOp& a);
 	/** Visit a binary operator. */

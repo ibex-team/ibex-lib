@@ -85,11 +85,12 @@ private:
 
 	void visit(const ExprNode& e);
 	void visit(const ExprIndex& i);
-	void visit(const ExprSymbol& v);
-	void visit(const ExprConstant& c);
+	void visit(const ExprLeaf& e);
 	void visit(const ExprNAryOp& e);
 	void visit(const ExprBinaryOp& b);
 	void visit(const ExprUnaryOp& u);
+	void visit(const ExprSymbol& v);
+	void visit(const ExprConstant& c);
 	void visit(const ExprVector& e);
 	void visit(const ExprApply& e);
 	void visit(const ExprAdd& e);

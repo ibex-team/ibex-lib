@@ -38,6 +38,7 @@ void MainGenerator::generate(const P_Source& source, System& result) {
 	int i=0;
 	for (vector<Entity*>::const_iterator it=source.vars.begin(); it<source.vars.end(); it++) {
 		const Entity& x=**it;
+		// cout << "new symbol=" << x.symbol.name << endl;
 		if (x.type==Entity::EPR) result.eprs.push_back(i);
 		else if (x.type==Entity::SYB) result.sybs.push_back(i);
 		srcvars.set_ref(i,x.symbol);

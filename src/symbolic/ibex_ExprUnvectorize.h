@@ -1,44 +1,55 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_ExprCopy.h
+// File        : ibex_ExprPrinter.h
 // Author      : Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
-// Created     : Jun 19, 2012
-// Last Update : Jun 19, 2012
+// Created     : Jun 26, 2012
+// Last Update : Jun 26, 2012
 //============================================================================
 
-
-#ifndef __IBEX_EXPR_COPY_H__
-#define __IBEX_EXPR_COPY_H__
+#ifndef __IBEX_EXPR_UNVECTORIZE_H__
+#define __IBEX_EXPR_UNVECTORIZE_H__
 
 #include "ibex_ExprVisitor.h"
-#include "ibex_Array.h"
+#include "ibex_Function.h"
 
 namespace ibex {
 
 /**
- * \brief Duplicate an expression
+ * \brief Unvectorize an expression
  */
-class ExprCopy : public virtual ExprVisitor {
-
+class ExprUnvectorize : public ExprVisitor {
 public:
+
 	/*
-	 * \pre Each symbol in y must belong to "old_x".
+	 * \brief Set the expression of \a dest to x->f(x) where f(x) is the expression \a e.
 	 *
-	 * Symbols in "old_x" are matched to symbols in "new_x" with respect to their order.
+	 * \param unvectorize: if true, a vector symbol x in the original function (the
+	 * one \a e belongs to) is replaced by scalar symbols "x[0]",...,"x[n]"
+	 * in the destination function \a dest. Same for matrices & matrix arrays
 	 */
-	const ExprNode& copy(const Array<const ExprSymbol>& old_x, const Array<const ExprSymbol>& new_x, const ExprNode& y);
+	ExprUnvectorize(const ExprNode& e, Function& dest, bool unvectorize);
+
+	Array<const ExprSymbol> get_x();
+
+	const ExprNode& get_y();
+
+	~ExprUnvectorize();
 
 protected:
+	const ExprNode** peers;
+	std::vector<const ExprSymbol*> dest_symbols;
+	int root_id;
+	bool unvectorize;
+
 	void visit(const ExprNode& e);
 	void visit(const ExprIndex& i);
-	void visit(const ExprNAryOp& e);
-	void visit(const ExprLeaf& e);
-	void visit(const ExprBinaryOp& b);
-	void visit(const ExprUnaryOp& u);
 	void visit(const ExprSymbol& x);
 	void visit(const ExprConstant& c);
+	void visit(const ExprNAryOp& e);
+	void visit(const ExprBinaryOp& b);
+	void visit(const ExprUnaryOp& u);
 	void visit(const ExprVector& e);
 	void visit(const ExprApply& e);
 	void visit(const ExprAdd& e);
@@ -68,9 +79,8 @@ protected:
 	void visit(const ExprAcosh& e);
 	void visit(const ExprAsinh& e);
 	void visit(const ExprAtanh& e);
-
 };
 
 } // end namespace ibex
 
-#endif // __IBEX_EXPR_COPY_H__
+#endif // __IBEX_EXPR_UNVECTORIZE_H__

@@ -248,9 +248,9 @@ void Ponts30::build_equ() {
 	equ[i++]=&(	sqr(C_x - H_x) + sqr(C_y - H_y) - 18.003049000000004 );
 	equ[i++]=&(	sqr(B_x - C_x) + sqr(B_y - C_y) - 9 );
 	equ[i++]=&(	sqr(A_x - B_x) + sqr(A_y - B_y) - 25 );
-	equ[i++]=&(	B_x - 0 );
-	equ[i++]=&(	A_y - 0 );
-	equ[i++]=&(	A_x - 0 );
+	equ[i++]=&(	B_x );
+	equ[i++]=&(	A_y );
+	equ[i++]=&(	A_x );
 
 	f =  new Function(symbols,ExprVector::new_(equ,30,false),"ponts30");
 }

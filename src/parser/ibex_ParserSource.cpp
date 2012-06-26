@@ -9,18 +9,20 @@
 //============================================================================
 
 #include "ibex_ParserSource.h"
-#include "ibex_ExprTools.h"
 
 namespace ibex {
 namespace parser {
 
 void P_Source::cleanup() {
-	delete ctrs;
+	func.clear();
 
 	for (vector<Entity*>::iterator it=vars.begin(); it!=vars.end(); it++) {
 		delete (ExprSymbol*) &((*it)->symbol);
 		delete *it;
 	}
+	vars.clear();
+
+	//delete ctrs; // will recursively delete all the constraints
 }
 
 } // end namespace parser

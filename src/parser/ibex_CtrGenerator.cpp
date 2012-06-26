@@ -10,9 +10,9 @@
 
 #include "ibex_CtrGenerator.h"
 #include "ibex_SyntaxError.h"
-#include "ibex_ParserNumConstraint.h"
+#include "ibex_P_NumConstraint.h"
 #include "ibex_Function.h"
-#include "ibex_ExprGenerator.h"
+#include "ibex_P_ExprGenerator.h"
 
 using namespace std;
 
@@ -39,7 +39,6 @@ void CtrGenerator::visit(const P_OneConstraint& c) {
 	const ExprNode& e=ExprGenerator(scopes.top()).generate(*src_vars,*res_vars,c.expr);
 
 	ctrs->push_back(pair<const ExprNode*, NumConstraint::CompOp>(&e,c.op));
-	cout << "size=" << ctrs->size() << endl;
 }
 
 void CtrGenerator::visit(const P_ConstraintList& list) {

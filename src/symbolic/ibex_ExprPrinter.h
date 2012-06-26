@@ -1,46 +1,43 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_ExprCopy.h
+// File        : ibex_ExprPrinter.h
 // Author      : Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
-// Created     : Jun 19, 2012
-// Last Update : Jun 19, 2012
+// Created     : Jun 26, 2012
+// Last Update : Jun 26, 2012
 //============================================================================
 
 
-#ifndef __IBEX_EXPR_COPY_H__
-#define __IBEX_EXPR_COPY_H__
+#ifndef __IBEX_EXPR_PRINTER_H__
+#define __IBEX_EXPR_PRINTER_H__
 
+#include <iostream>
 #include "ibex_ExprVisitor.h"
-#include "ibex_Array.h"
 
 namespace ibex {
 
 /**
- * \brief Duplicate an expression
+ * \brief Print an expression into an ostream.
  */
-class ExprCopy : public virtual ExprVisitor {
-
+class ExprPrinter : public virtual ExprVisitor {
 public:
-	/*
-	 * \pre Each symbol in y must belong to "old_x".
-	 *
-	 * Symbols in "old_x" are matched to symbols in "new_x" with respect to their order.
-	 */
-	const ExprNode& copy(const Array<const ExprSymbol>& old_x, const Array<const ExprSymbol>& new_x, const ExprNode& y);
+	/** Print an expression on a given output stream. */
+	void print(std::ostream& os, const ExprNode&);
 
 protected:
+	std::ostream* os;
 	void visit(const ExprNode& e);
-	void visit(const ExprIndex& i);
-	void visit(const ExprNAryOp& e);
+
+	void visit(const ExprIndex& e);
 	void visit(const ExprLeaf& e);
-	void visit(const ExprBinaryOp& b);
-	void visit(const ExprUnaryOp& u);
-	void visit(const ExprSymbol& x);
-	void visit(const ExprConstant& c);
+	void visit(const ExprNAryOp& e);
+	void visit(const ExprUnaryOp& e);
+	void visit(const ExprBinaryOp& e);
+	void visit(const ExprSymbol& e);
+	void visit(const ExprConstant& e);
 	void visit(const ExprVector& e);
-	void visit(const ExprApply& e);
+	void visit(const ExprApply& a);
 	void visit(const ExprAdd& e);
 	void visit(const ExprMul& e);
 	void visit(const ExprSub& e);
@@ -68,9 +65,8 @@ protected:
 	void visit(const ExprAcosh& e);
 	void visit(const ExprAsinh& e);
 	void visit(const ExprAtanh& e);
-
 };
 
 } // end namespace ibex
 
-#endif // __IBEX_EXPR_COPY_H__
+#endif // __IBEX_EXPR_PRINTER_H__

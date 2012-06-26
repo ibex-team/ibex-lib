@@ -7,7 +7,7 @@
 // License     : See the LICENSE file
 // Created     : Jun 12, 2012
 // Last Update : Jun 12, 2012
-//==========================
+//===========================================================================
 
 #include <math.h>
 #include <vector>
@@ -15,15 +15,14 @@
 #include "ibex_Interval.h"
 #include "ibex_Array.h"
 #include "ibex_System.h"
-#include "ibex_ExprTools.h"
 
 #include "ibex_SyntaxError.h"
 #include "ibex_ParserSource.h"
-#include "ibex_ParserExpr.h"
-#include "ibex_ParserNumConstraint.h"
+#include "ibex_P_Expr.h"
+#include "ibex_P_NumConstraint.h"
 #include "ibex_MainGenerator.h"
 #include "ibex_ConstantGenerator.h"
-#include "ibex_ExprGenerator.h"
+#include "ibex_P_ExprGenerator.h"
 
 using namespace std;
 
@@ -79,7 +78,7 @@ Domain _2domain(const ExprNode& expr) {
 }
 
 void end() {
-	MainGenerator().generate(source,*parser_result);
+   MainGenerator().generate(source,*parser_result);
 	source.cleanup();
     
     // we have to cleanup the data in case of Syntax Error 
@@ -217,11 +216,12 @@ decl_par      : '!' decl_entity                 { $2->type=Entity::EPR; source.v
               ;
 
 decl_var_list : decl_var                             
-              | decl_var_list ';' decl_entity           
-              | decl_var_list ',' decl_entity           
+              | decl_var_list ';' decl_var           
+              | decl_var_list ',' decl_var           
               ;
 
-decl_var      : decl_entity                     { $1->type=Entity::VAR; source.vars.push_back($1); }
+decl_var      : decl_entity                     { $1->type=Entity::VAR; 
+	                                              source.vars.push_back($1); }
               ;
               
 decl_entity   : TK_NEW_SYMBOL dimension         { $$ = new Entity($1,*$2,Interval::ALL_REALS);

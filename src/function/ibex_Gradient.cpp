@@ -45,12 +45,8 @@ void GradDecorator::visit(const ExprIndex& idx) {
 	}
 }
 
-void GradDecorator::visit(const ExprSymbol& s) {
-	s.deco.g = new Domain(s.dim);
-}
-
-void GradDecorator::visit(const ExprConstant& c) {
-	c.deco.g = new Domain(c.dim);
+void GradDecorator::visit(const ExprLeaf& e) {
+	e.deco.g = new Domain(e.dim);
 }
 
 void GradDecorator::visit(const ExprNAryOp& a) {

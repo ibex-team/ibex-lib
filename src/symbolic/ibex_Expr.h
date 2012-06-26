@@ -132,7 +132,17 @@ public:
 	void reset_visited() const;
 };
 
+/**
+ * \brief Streams out an expression.
+ */
 std::ostream& operator<<(std::ostream&, const ExprNode&);
+
+/**
+ * \brief Delete all the nodes of an expression, including itself.
+ *
+ * \param delete_symbols if false, symbols are not deleted.
+ */
+void cleanup(const ExprNode& expr, bool delete_symbols);
 
 /**
  * \ingroup symbolic
@@ -341,6 +351,16 @@ namespace parser {
 class ExprEntity;
 }
 
+
+/**
+ * \ingroup symbolic
+ * \brief Leaf in the DAG
+ */
+class ExprLeaf : public ExprNode {
+protected:
+	ExprLeaf(const Dim& dim);
+};
+
 /**
  * \ingroup symbolic
  * \brief Symbol
@@ -348,7 +368,7 @@ class ExprEntity;
  * An instance of this class represents a leaf in the syntax tree. This leaf
  * merely contains the name of the symbol, a string (char*).
  */
-class ExprSymbol : public ExprNode {
+class ExprSymbol : public ExprLeaf {
 
 public:
 	/** Create an equality constraint symbol=expr. */
@@ -425,7 +445,7 @@ public:
  * \ingroup symbolic
  * \brief Constant expression
  */
-class ExprConstant : public ExprNode {
+class ExprConstant : public ExprLeaf {
 
 public:
 	/** Create a scalar constant. */
@@ -1229,6 +1249,8 @@ inline ExprIndex::ExprIndex(const ExprNode& subexpr, int index)
 inline bool ExprVector::row_vector() const {
 	return (dim.type()==Dim::ROW_VECTOR || get(0).type()==Dim::COL_VECTOR); /* last case occurs if *this is a matrix */ }
 
+inline ExprLeaf::ExprLeaf(const Dim& dim) : ExprNode(0,1,dim) { }
+
 inline ExprSymbol::~ExprSymbol() {
 	free((char*) name); }
 
@@ -1236,7 +1258,7 @@ inline const ExprSymbol& ExprSymbol::new_(const char* name, const Dim& dim) {
 	return *new ExprSymbol(name,dim); }
 
 inline ExprSymbol::ExprSymbol(const char* name, const Dim& dim)
-: ExprNode(0,1,dim), name(strdup(name)), key(-1) { }
+: ExprLeaf(dim), name(strdup(name)), key(-1) { }
 
 inline const ExprConstant& ExprConstant::new_scalar(const Interval& value) {
 	return *new ExprConstant(value); }

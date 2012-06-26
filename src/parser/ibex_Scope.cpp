@@ -9,7 +9,7 @@
 //============================================================================
 
 #include "ibex_Scope.h"
-#include "ibex_ParserNumConstraint.h"
+#include "ibex_P_NumConstraint.h"
 #include "parser.h"
 
 /*

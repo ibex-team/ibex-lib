@@ -20,11 +20,13 @@ namespace ibex {
 class ExprNode;
 
 class ExprIndex;
-class ExprSymbol;
-class ExprConstant;
+class ExprLeaf;
 class ExprNAryOp;
 class ExprBinaryOp;
 class ExprUnaryOp;
+
+class ExprSymbol;
+class ExprConstant;
 
 class ExprVector;
 class ExprApply;
@@ -82,11 +84,8 @@ class ExprVisitor {
   /** Visit an indexed expression. */
   virtual void visit(const ExprIndex&)=0;
 
-  /** Visit a symbol. */
-  virtual void visit(const ExprSymbol&)=0;
-
-  /** Visit a constant. */
-  virtual void visit(const ExprConstant&)=0;
+  /** Visit a leaf. */
+  virtual void visit(const ExprLeaf&)=0;
 
   /** Visit a n-ary operator. */
   virtual void visit(const ExprNAryOp&)=0;
@@ -100,6 +99,17 @@ class ExprVisitor {
   /*===============================================================*/
   /*                optional functions                             */
   /*===============================================================*/
+
+  /*==================== 0-ary operators =========================*/
+  /** Visit a symbol. */
+  virtual void visit(const ExprSymbol& e) {
+	   visit((const ExprLeaf&) e);
+  }
+
+  /** Visit a constant. */
+  virtual void visit(const ExprConstant& e) {
+	   visit((const ExprLeaf&) e);
+  }
 
   /*==================== n-ary operators =========================*/
   /** Visit a vector of expressions.

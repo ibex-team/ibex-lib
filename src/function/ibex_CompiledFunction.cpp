@@ -71,6 +71,22 @@ void CompiledFunction::visit(const ExprIndex& i) {
 	args[ptr][1]=&i.expr.deco;
 }
 
+void CompiledFunction::visit(const ExprLeaf& e) {
+	e.acceptVisitor(*this);
+}
+
+void CompiledFunction::visit(const ExprNAryOp& e) {
+	e.acceptVisitor(*this);
+}
+
+void CompiledFunction::visit(const ExprBinaryOp& b) {
+	b.acceptVisitor(*this);
+}
+
+void CompiledFunction::visit(const ExprUnaryOp& u) {
+	u.acceptVisitor(*this);
+}
+
 void CompiledFunction::visit(const ExprSymbol& v) {
 	code[ptr]=SYM;
 	nb_args[ptr]=0;
@@ -84,18 +100,6 @@ void CompiledFunction::visit(const ExprConstant& c) {
 	nb_args[ptr]=0;
 	args[ptr]=new ExprLabel*[1];
 	args[ptr][0]=&c.deco;
-}
-
-void CompiledFunction::visit(const ExprNAryOp& e) {
-	e.acceptVisitor(*this);
-}
-
-void CompiledFunction::visit(const ExprBinaryOp& b) {
-	b.acceptVisitor(*this);
-}
-
-void CompiledFunction::visit(const ExprUnaryOp& u) {
-	u.acceptVisitor(*this);
 }
 
 void CompiledFunction::visit(const ExprNAryOp& e, operation op) {

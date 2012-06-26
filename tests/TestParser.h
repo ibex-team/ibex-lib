@@ -22,10 +22,12 @@ class TestParser : public TestIbex {
 public:
 	TestParser() {
 		TEST_ADD(TestParser::file01);
+		TEST_ADD(TestParser::ponts);
 
 	}
 
 	void file01();
+	void ponts();
 
 };
 

@@ -96,7 +96,7 @@ void TestNewton::newton01() {
 	}
 
 	IntervalVector expected(30,BOX2);
-	cout << box << endl;
+	//cout << box << endl;
 	TEST_ASSERT(almost_eq(box,expected,error));
 }
 

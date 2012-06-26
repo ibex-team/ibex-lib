@@ -12,8 +12,8 @@
 #define __IBEX_PARSER_SOURCE_H__
 
 #include <vector>
-#include "ibex_ParserExpr.h"
-#include "ibex_ParserNumConstraint.h"
+#include "ibex_P_Expr.h"
+#include "ibex_P_NumConstraint.h"
 #include "ibex_Function.h"
 
 namespace ibex {

@@ -14,29 +14,12 @@
 #include <vector>
 #include "ibex_Expr.h"
 #include "ibex_IntervalMatrix.h"
-#include "ibex_ParserExprVisitor.h"
+#include "ibex_P_ExprVisitor.h"
+#include "ibex_Entity.h"
 
 namespace ibex {
 
 namespace parser {
-
-/**
- * Entity (var, epr or syb)
- */
-class Entity {
-public:
-	typedef enum { VAR, EPR, SYB } Type;
-
-	Entity(const char* name, const Dim& dim, const Domain& domain);
-
-	Entity(const char* name, const Dim& dim, const Interval& x);
-
-	const ExprSymbol& symbol;
-	Domain domain;
-
-	Type type; // not specified at construction (see parser.yacc)
-	//int key;   // not specified at construction (see parser.yacc)
-};
 
 /*
  * Power at parse time.
@@ -46,14 +29,10 @@ public:
 	P_ExprPower(const ExprNode& expr, const ExprNode& expon);
 
 	virtual void acceptVisitor(ExprVisitor& v) const {
-		// never called
+		P_ExprVisitor* v2=dynamic_cast<P_ExprVisitor*>(&v);
+		if (v2) v2->visit(*this);
+		else v.visit(*this);
 	}
-
-	/** Accept an #ibex::parser::P_ExprVisitor visitor. */
-	virtual void acceptVisitor(P_ExprVisitor& v) const {
-		v.visit(*this);
-	}
-
 };
 
 /**
@@ -64,12 +43,9 @@ public:
 	P_ExprIndex(const ExprNode& expr, const ExprNode& index);
 
 	virtual void acceptVisitor(ExprVisitor& v) const {
-		// never called
-	}
-
-	/** Accept an #ibex::parser::P_ExprVisitor visitor. */
-	virtual void acceptVisitor(P_ExprVisitor& v) const {
-		v.visit(*this);
+		P_ExprVisitor* v2=dynamic_cast<P_ExprVisitor*>(&v);
+		if (v2) v2->visit(*this);
+		else v.visit(*this);
 	}
 };
 
@@ -83,16 +59,15 @@ public:
 	~ExprIter();
 
 	virtual void acceptVisitor(ExprVisitor& v) const {
-		// never called
-	}
-
-	/** Accept an #ibex::parser::P_ExprVisitor visitor. */
-	virtual void acceptVisitor(P_ExprVisitor& v) const {
-		v.visit(*this);
+		P_ExprVisitor* v2=dynamic_cast<P_ExprVisitor*>(&v);
+		assert(v2);
+		v2->visit(*this);
 	}
 
 	const char* name;
 };
+
+void p_print(const ExprNode& e);
 
 /**
  * An entity symbol in an expression

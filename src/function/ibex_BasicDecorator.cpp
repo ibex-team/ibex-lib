@@ -57,11 +57,7 @@ void BasicDecorator::visit(const ExprIndex& idx) {
 	}
 }
 
-void BasicDecorator::visit(const ExprSymbol& e) {
-	e.deco.d = new Domain(e.dim);
-}
-
-void BasicDecorator::visit(const ExprConstant& e) {
+void BasicDecorator::visit(const ExprLeaf& e) {
 	e.deco.d = new Domain(e.dim);
 }
 

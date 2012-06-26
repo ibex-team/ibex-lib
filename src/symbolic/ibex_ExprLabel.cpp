@@ -8,7 +8,7 @@
 // Last Update : May 22, 2012
 //============================================================================
 
-
+#include <iostream>
 #include "ibex_ExprLabel.h"
 
 namespace ibex {
