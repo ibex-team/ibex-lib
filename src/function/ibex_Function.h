@@ -21,6 +21,8 @@
 
 namespace ibex {
 
+class System;
+
 /**
  * \ingroup symbolic
  * \brief Function (x->f(x) where f(x) is the DAG of an arithmetical expression).
@@ -87,6 +89,20 @@ public:
 	 * \brief Creates a new (anonymous) function y=f(x1,...,xn).
 	 */
 	Function(const Array<const ExprSymbol>& x, const ExprNode& y, const char* name=DEFAULT_NAME);
+
+	/**
+	 * \brief Build an uninitialized function.
+	 *
+	 * A call to #init(const Array<const ExprSymbol>&, const ExprNode&) must follow
+	 * to complete the intialization. This constructo+init can be
+	 * used when a function has to be built and initialized in two distinct steps.
+	 */
+	Function();
+
+	/**
+	 * \brief Initialize this function (set the "x" and the "y").
+	 */
+	void init(const Array<const ExprSymbol>& x, const ExprNode& y);
 
 	/**
 	 * \brief Delete the function.
@@ -356,8 +372,7 @@ public:
 	mutable Array<Domain> symbol_deriv;
 
 private:
-	Function();
-	void init(const Array<const ExprSymbol>& x, const ExprNode& y);
+
 	void add_symbol(const ExprSymbol* x);
 
 	/*

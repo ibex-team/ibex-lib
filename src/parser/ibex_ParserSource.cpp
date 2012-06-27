@@ -16,13 +16,15 @@ namespace parser {
 void P_Source::cleanup() {
 	func.clear();
 
+	delete ctrs; // will recursively delete all the constraints
+			     // but not the symbols
+
 	for (vector<Entity*>::iterator it=vars.begin(); it!=vars.end(); it++) {
 		delete (ExprSymbol*) &((*it)->symbol);
 		delete *it;
 	}
 	vars.clear();
 
-	//delete ctrs; // will recursively delete all the constraints
 }
 
 } // end namespace parser

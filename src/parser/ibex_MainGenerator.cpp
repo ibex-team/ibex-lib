@@ -23,8 +23,10 @@ namespace parser {
 void MainGenerator::generate(const P_Source& source, System& result) {
 
 	//================= generate the functions =====================
+	result.func.resize(source.func.size());
+	int i=0;
 	for (vector<Function*>::const_iterator it=source.func.begin(); it!=source.func.end(); it++) {
-		result.func.push_back(*it);
+		result.func.set_ref(i++,**it);
 	}
 
 	//================= generate the variables & domains =====================
@@ -35,7 +37,7 @@ void MainGenerator::generate(const P_Source& source, System& result) {
 
 	Array<const Domain> domains(n);
 
-	int i=0;
+	i=0;
 	for (vector<Entity*>::const_iterator it=source.vars.begin(); it<source.vars.end(); it++) {
 		const Entity& x=**it;
 		// cout << "new symbol=" << x.symbol.name << endl;
@@ -67,14 +69,15 @@ void MainGenerator::generate(const P_Source& source, System& result) {
 		image.set_ref(i++,*(it->first));
 	}
 
-	result.f = new Function(result.vars,
+	result.f.init(result.vars,
 			m>1? ExprVector::new_(image,false) : image[0]);
 
 	//================= generate the constraints =====================
-
+	result.ctrs.resize(m);
 	i=0;
 	for (vector<pair<const ExprNode*, NumConstraint::CompOp> >::const_iterator it=ctrs.begin(); it!=ctrs.end(); it++) {
-		result.ctrs.push_back(new NumConstraint((*result.f)[i++], it->second));
+		result.ctrs.set_ref(i,*new NumConstraint(result.f[i], it->second));
+		i++;
 	}
 }
 

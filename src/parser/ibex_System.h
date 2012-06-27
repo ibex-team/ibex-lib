@@ -21,10 +21,10 @@ public:
 	System(const char* filename);
 
 	/** Auxiliary functions */
-	std::vector<Function*> func;
+	Array<Function> func;
 
 	/** Main function */
-	Function* f;
+	Function f;
 
 	/** All the variables */
 	Array<const ExprSymbol> vars;
@@ -39,7 +39,7 @@ public:
 	IntervalVector box;
 
 	/** Constraints */
-	std::vector<NumConstraint*> ctrs;
+	Array<NumConstraint> ctrs;
 };
 
 } // end namespace ibex

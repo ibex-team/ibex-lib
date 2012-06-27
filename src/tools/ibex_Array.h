@@ -111,23 +111,23 @@ public:
 	/**
 	 * \brief Return true if empty.
 	 */
-	inline bool empty() const;
+	bool is_empty() const;
 
 	/**
 	 * \brief Return the number of objects.
 	 */
-	inline int size() const;
+	int size() const;
 
 	/**
 	 * \brief Return the ith reference (as const).
 	 */
-	inline T& operator[](int i);
+	T& operator[](int i);
 
 
 	/**
 	 * \brief Return the ith reference (as const).
 	 */
-	inline T& operator[](int i) const;
+	T& operator[](int i) const;
 
 protected:
 	int _nb;
@@ -146,7 +146,7 @@ Array<T>::Array() : _nb(0), array(NULL) {
 
 template<class T>
 Array<T>::Array(int n) : _nb(n), array(new T*[n]) {
-	assert(n>0);
+	assert(n>=0);
 	for (int i=0; i<_nb; i++) {
 		array[i] = NULL;
 	}
@@ -154,7 +154,7 @@ Array<T>::Array(int n) : _nb(n), array(new T*[n]) {
 
 template<class T>
 void Array<T>::resize(int n) {
-	assert(n>0);
+	assert(n>=0);
 	T** new_array=new T*[n];
 	int i=0;
 	for (; i<_nb; i++) {
@@ -179,7 +179,7 @@ void Array<T>::set_ref(int i, T& obj) {
 
 template<class T>
 Array<T>::Array(T** a, int n) : _nb(n), array(new T*[n]) {
-
+	assert(n>=0);
 	for (int i=0; i<_nb; i++) {
 		array[i] = a[i];
 	}
@@ -253,7 +253,7 @@ Array<T>::~Array() {
 }
 
 template<class T>
-bool Array<T>::empty() const {
+bool Array<T>::is_empty() const {
 	return _nb==0;
 }
 
