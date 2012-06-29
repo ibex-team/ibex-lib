@@ -87,6 +87,9 @@ public:
 		TEST_ADD(TestIntervalVector::extr_diam_index04);
 		TEST_ADD(TestIntervalVector::extr_diam_index05);
 
+		TEST_ADD(TestIntervalVector::sort_indices01);
+		TEST_ADD(TestIntervalVector::sort_indices02);
+
 		TEST_ADD(TestIntervalVector::perimeter01);
 		TEST_ADD(TestIntervalVector::perimeter02);
 
@@ -214,6 +217,10 @@ public:
 	void extr_diam_index03();
 	void extr_diam_index04();
 	void extr_diam_index05();
+
+
+	void sort_indices01();
+	void sort_indices02();
 
 	// test: perimeter() const
 	void perimeter01();

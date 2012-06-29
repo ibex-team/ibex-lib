@@ -312,6 +312,12 @@ public:
 	 */
 	int extr_diam_index(bool min) const;
 
+
+	/**
+	 * \brief Return the indices of all the components, sorted by increasing/decreasing diameter.
+	 */
+	void sort_indices(bool min, int tab[]) const;
+
 	/**
 	 * \brief Return the maximal diameter among all the components.
 	 *

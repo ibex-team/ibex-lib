@@ -40,11 +40,12 @@ void TestHC4::ponts30() {
 	box = p30.init_box;
 
 	Array<NumConstraint> a(ctr,30);
-	CtcHC4 hc4(a);
+	CtcHC4 hc4(a,0.001);
 	box=p30.init_box;
 	hc4.contract(box);
-
-	TEST_ASSERT(almost_eq(box, p30.hc4_box,1e-05));
+	cout << p30.hc4_box << endl << endl << endl;
+	cout << box << endl << endl << endl;
+	TEST_ASSERT(almost_eq(box, p30.hc4_box,1e-02));
 
 	for (int i=0; i<30; i++) {
 		delete c[i];

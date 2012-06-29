@@ -11,6 +11,8 @@
 
 #include "ibex_CtcPropag.h"
 #include "ibex_EmptyBoxException.h"
+#include "ibex_Cell.h"
+#include "ibex_Bsc.h"
 
 namespace ibex {
 
@@ -19,75 +21,80 @@ namespace ibex {
 
 CtcPropag::CtcPropag(const Array<Ctc>& cl, double ratio, bool incremental) :
 		  Ctc(cl[0].nb_var), list(cl), ratio(ratio), incremental(incremental),
-		  g(cl.size(), cl[0].nb_var), agenda(cl.size(), cl[0].nb_var) {
+		  g(cl.size(), cl[0].nb_var), agenda(cl.size()), accumulate(false) {
 
 	for (int i=1; i<list.size(); i++)
 		assert(list[i].nb_var==nb_var);
 
 	for (int i=0; i<list.size(); i++)
-		for (int j=0; j<nb_var; j++)
-			if (list[i].can_contract(j)) {
-				g.add_arc(i,j,1);
-			}
+		for (int j=0; j<nb_var; j++) {
+			if (list[i].input[j]) g.add_arc(i,j,true);
+			if (list[i].output[j]) g.add_arc(i,j,false);
+		}
+}
 
+void CtcPropag::init_root(Cell& root) {
+	if (incremental)
+		root.add<BisectedVar>();
+}
+
+
+void CtcPropag::contract(Cell& cell) {
+	if (incremental)
+		contract(cell.box, cell.get<BisectedVar>().var);
+	else
+		contract(cell.box, -1);
 }
 
 void CtcPropag::contract(IntervalVector& box) {
-	contract(box, Indicators(box.size()));
+	contract(box,-1);
 }
 
-void  CtcPropag::contract(IntervalVector& _box, const Indicators& indic) {
+void  CtcPropag::contract(IntervalVector& box, int start) {
 
-	if (incremental && indic.impact_on)
-		if (indic.impact.all_unset()) return;  // nothing to do
-		else agenda.propagate(g,indic.impact);
-	else
-		agenda.init(g);
+	if (incremental && start!=-1) {
+		set<int> ctrs=g.output_ctrs(start);
+		for (set<int>::iterator c=ctrs.begin(); c!=ctrs.end(); c++)
+			agenda.push(*c);
+	} else { // push all the contractors
+		for (int i=0; i<list.size(); i++)
+			agenda.push(i);
+	}
 
-	int  c,v;                          // current constraint & variable
-	int  old_c = -1;
+	int c;                          // current constraint
 
-	IntervalVector& box(_box);
-	IntervalVector propbox(box);  // variables domains before last propagation
-
-	/********************************/
-	/* option "fine" propagation  */
-	IntervalVector projbox(box); // variables domains before last projection
-	/********************************/
+	/*
+	 * old_box is either:
+	 * - variables domains before last propagation ("fine" propagation, accumulate=true)
+	 * - variables domains before last projection ("coarse" propagation, accumulate=false)
+	 */
+	IntervalVector old_box(box);
 
 	//   VECTOR thres(_nb_var);        // threshold for propagation
 	//   for (int i=1; i<=_nb_var; i++) {
 	//     thres(i) = ratio*Diam(box(i));
 	//     if (thres(i)<w) thres(i)=w;
 	//   }
-	Indicators p(_box.size());
-	p.scope_on=true;
-	p.impact_on=true;
 
 	while (!agenda.empty()) {
 
-		agenda.pop(c,v);
+		agenda.pop(c);
 
-		//cout << "Narrowing for (c" << c << ", v" << v << ")"; // << endl;
+		set<int> vars=g.output_vars(c);
 
-		if (c!=old_c)
-			for (int i=0; i<g.ctr_nb_vars(c); i++) {
-				int j=g.ctr_ith_var(c,i);
-				projbox[j] = box[j];
+		// ===================== fine propagation =========================
+		// reset the old box to the current domains just before contraction
+		if (!accumulate) {
+			for (set<int>::iterator v=vars.begin(); v!=vars.end(); v++) {
+				old_box[*v] = box[*v];
 			}
-
-		p.scope.set(v);
-		if (c==old_c) p.impact.unset_all();
-		else {
-			p.impact.set_all();
-			old_c = c;
 		}
+		// ================================================================
 
-		/********************************/
-		/* "fine" propagation option  */
-		/********************************/
+		//cout << "Contraction with " << c << endl;
+
 		try {
-			list[c].contract(box, p);
+			list[c].contract(box);
 		}
 		catch (EmptyBoxException& e) {
 			agenda.flush();
@@ -98,21 +105,22 @@ void  CtcPropag::contract(IntervalVector& _box, const Indicators& indic) {
 		//cout << "  =>" << box[v] << endl;
 		//cout << agenda << endl;
 
-		//if (propbox[v].rel_distance(box[v])>=ratio) {
-		//cout << "   " << propbox[v] << " % " << box[v] << "   " << propbox[v].ratiodelta(box[v]) << endl;
-		if (propbox[v].ratiodelta(box[v])>=ratio) {
-			//cout << "before prop q=" << agenda << endl;
-			/********************************/
-			/* "fine" propagation option  */
-			//if (projbox[v].rel_distance(box[v])>=ratio) {
-			if (projbox[v].ratiodelta(box[v])>=ratio) {
-				agenda.propagate(g,c,v);
-			} else {
-				/********************************/
-				agenda.propagate(g,v); //(c,v);
-				//       cout << "q=" << agenda << endl;
+		for (set<int>::iterator it=vars.begin(); it!=vars.end(); it++) {
+			int v=*it;
+			//cout << "   " << old_box[v] << " % " << box[v] << "   " << old_box[v].ratiodelta(box[v]) << endl;
+			//if (old_box[v].rel_distance(box[v])>=ratio) {
+			if (old_box[v].ratiodelta(box[v])>=ratio) {
+				set<int> ctrs=g.output_ctrs(v);
+				for (set<int>::iterator c2=ctrs.begin(); c2!=ctrs.end(); c2++) {
+					if (c!=*c2 || !list[c].indempotent())
+						agenda.push(*c2);
+				}
+				// ===================== coarse propagation =========================
+				// reset the old box to the current domains just after propagation
+				if (accumulate)
+					old_box[v] = box[v];
+				// ================================================================
 			}
-			propbox[v] = box[v];
 		}
 	}
 

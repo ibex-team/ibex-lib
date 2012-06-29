@@ -34,6 +34,8 @@ public:
 	 */
 	CtcPrecision(int nb_var, double ceil);
 
+	~CtcPrecision();
+
 	/**
 	 * \brief Contract a box.
 	 */

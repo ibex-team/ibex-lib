@@ -17,6 +17,10 @@ CtcPrecision::CtcPrecision(int nb_var, double ceil) : Ctc(nb_var), ceil(ceil) {
 
 }
 
+CtcPrecision::~CtcPrecision() {
+
+}
+
 void CtcPrecision::contract(IntervalVector& box) {
 	if (box.max_diam()<=ceil) {
 		box.set_empty();

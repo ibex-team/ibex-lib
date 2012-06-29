@@ -59,5 +59,24 @@ public:
 	virtual void init_root(Cell& root) { }
 };
 
+
+
+/** \ingroup bisector
+ *
+ * \brief Last bisected variable (used by RoundRobin, CtcPropag, etc.)
+ */
+class BisectedVar : public Backtrackable {
+public:
+	BisectedVar() : var(-1) { }
+
+	BisectedVar(int x) : var(x) { }
+
+	std::pair<Backtrackable*,Backtrackable*> down() {
+		return std::pair<Backtrackable*,Backtrackable*>(new BisectedVar(var),new BisectedVar(var));
+	}
+
+	int var;
+};
+
 } // end namespace ibex
 #endif // __IBEX_BISECTOR_H__

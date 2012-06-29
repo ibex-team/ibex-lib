@@ -14,7 +14,7 @@
 
 #include "ibex_Agenda.h"
 #include "ibex_Ctc.h"
-#include "ibex_HyperGraph.h"
+#include "ibex_DirectedHyperGraph.h"
 #include "ibex_Array.h"
 
 namespace ibex {
@@ -53,6 +53,8 @@ public:
  }
 */
 
+	void init_root(Cell& root);
+
  /** Enforces propagation (e.g.: HC4 or BOX) fitering.
   *
   * \param start - The variable to start propagation with. Set this parameter to \link ibex::Contractor::ALL_VARS ALL_VARS \endlink
@@ -60,15 +62,26 @@ public:
   * \throw #ibex::EmptyBoxException - if inconsistency is detected. */
  void contract(IntervalVector& box, int start, const Indicators& idc);
 
- /** Applies contraction (taking into account indicators, if any).
-  * If #incremental is true and the
-  * \link ibex::Contractor::Indicators::impact impact \endlink field of \a p is a
-  * specific variable, then propagation will start from this variable only (instead of from
-  * all the variables).
-  * \see #contract(int). */
+ /**
+  * \brief Contract the cell's box.
+  *
+  * If #incremental is true, the propagation will start from the
+  * last bisected variable only (instead of from all the variables).
+  */
+ virtual void contract(Cell& cell);
+
+ /**
+  * \brief Contract a box.
+  */
  virtual void contract(IntervalVector& box);
 
- virtual void contract(IntervalVector& box, const Indicators& idc);
+ /**
+  * \brief Contract a box.
+  *
+  * If #incremental is true, the propagation will start from the
+  * \a start only (instead of from all the variables).
+  */
+ void contract(IntervalVector& box, int start);
 
  /** The list of contractors to propagate */
  Array<Ctc> list;
@@ -79,13 +92,16 @@ public:
  /** Queue initialization mode (see \link Propagation(const ContractorList&, Space&, REAL, bool) constructor \endlink for details).*/
  const bool incremental;
 
+ /** Accumulate residual contractions. */
+ bool accumulate;
+
  /** Default ratio used by propagation, set to 0.1. */
  static const double default_ratio;
 
 protected:
- HyperGraph g;
+ DirectedHyperGraph g;
 
- ArcAgenda agenda;
+ Agenda agenda;
 };
 
 } // namespace ibex

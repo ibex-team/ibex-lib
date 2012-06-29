@@ -78,11 +78,18 @@ void Function::hansen_matrix(const IntervalVector& box, IntervalMatrix& H) const
 	IntervalVector x=box.mid();
 	IntervalMatrix J(m,n);
 
+	// test!
+//	int tab[box.size()];
+//	box.sort_indices(false,tab);
+//	int var;
+
 	for (int var=0; var<n; var++) {
+		//var=tab[i];
 		x[var]=box[var];
 		jacobian(x,J);
 		H.set_col(var,J.col(var));
 	}
+
 }
 
 std::ostream& operator<<(std::ostream& os, const Function& f) {

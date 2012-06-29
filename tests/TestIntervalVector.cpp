@@ -408,6 +408,31 @@ void TestIntervalVector::extr_diam_index05() {
 	TEST_ASSERT(x1.max_diam()==POS_INFINITY);
 }
 
+void TestIntervalVector::sort_indices01() {
+	double _x[][2]={{0,2},{NEG_INFINITY,0},{0,1},{3,3},{-10,10}};
+	IntervalVector x(5,_x);
+	int tab[5];
+	x.sort_indices(true,tab);
+	TEST_ASSERT(tab[0]==3);
+	TEST_ASSERT(tab[1]==2);
+	TEST_ASSERT(tab[2]==0);
+	TEST_ASSERT(tab[3]==4);
+	TEST_ASSERT(tab[4]==1);
+}
+
+void TestIntervalVector::sort_indices02() {
+	double _x[][2]={{0,2},{NEG_INFINITY,0},{0,1},{3,3},{-10,10}};
+	IntervalVector x(5,_x);
+	int tab[5];
+	x.sort_indices(false,tab);
+	TEST_ASSERT(tab[0]==1);
+	TEST_ASSERT(tab[1]==4);
+	TEST_ASSERT(tab[2]==0);
+	TEST_ASSERT(tab[3]==2);
+	TEST_ASSERT(tab[4]==3);
+}
+
+
 void TestIntervalVector::rel_distance01() {
   IntervalVector box1(3);
   IntervalVector box2(3);

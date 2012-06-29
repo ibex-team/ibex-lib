@@ -14,7 +14,8 @@ int main() {
 	// A "constraint propagation" loop.
 	// Each constraint in sys.ctrs is an
 	// equation.
-	CtcHC4 hc4(sys.ctrs);
+	CtcHC4 hc4(sys.ctrs,0.001);
+	hc4.accumulate=true;
 
 	// Build contractor #2:
 	// --------------------------

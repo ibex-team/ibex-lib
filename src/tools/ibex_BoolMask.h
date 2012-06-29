@@ -13,6 +13,8 @@
 #define __IBEX_BOOL_MASK_H__
 
 #include <vector>
+#include <cassert>
+#include <iostream>
 
 namespace ibex {
 
@@ -28,9 +30,29 @@ public:
 	BoolMask(int n);
 
 	/**
+	 * \brief Create a 0-sized mask (to be used with #resize()).
+	 */
+	BoolMask();
+
+	/**
+	 * \brief Resize the mask.
+	 */
+	void resize(int n);
+
+	/**
+	 * \brief Size of the mask.
+	 */
+	int size() const;
+
+	/**
 	 * \brief Set a bool mask to another
 	 */
 	BoolMask& operator=(const BoolMask& m);
+
+	/**
+	 * \brief Logical AND.
+	 */
+	BoolMask& operator&=(const BoolMask& m);
 
 	/**
 	 * \brief Logical OR.
@@ -86,15 +108,46 @@ private:
 	bool* mask;
 };
 
+std::ostream& operator<<(std::ostream& os, const BoolMask& m);
+
 /*================================== inline implementations ========================================*/
+
+inline BoolMask::BoolMask() : n(0), mask(NULL) {
+
+}
 
 inline BoolMask::BoolMask(int n) : n(n), mask(new bool[n]) {
 	unset_all();
 }
 
+inline void BoolMask::resize(int n2) {
+	assert(n>=0);
+	bool* new_mask=new bool[n2];
+	int i=0;
+	for (; i<n; i++) {
+		if (i<n2) new_mask[i] = mask[i];
+	}
+	for (; i<n2; i++) {
+		new_mask[i]=false;
+	}
+	if (mask) delete[] mask;
+	mask=new_mask;
+	n=n2;
+}
+
+inline int BoolMask::size() const {
+	return n;
+}
+
 inline BoolMask& BoolMask::operator=(const BoolMask& m) {
 	for (int i=0; i<n; i++)
 		(*this)[i] = m[i];
+	return *this;
+}
+
+inline BoolMask& BoolMask::operator&=(const BoolMask& m) {
+	for (int i=0; i<n; i++)
+		(*this)[i] &= m[i];
 	return *this;
 }
 
@@ -144,6 +197,14 @@ inline void BoolMask::unset(int i) {
 
 inline BoolMask::~BoolMask() {
 	delete[] mask;
+}
+
+inline std::ostream& operator<<(std::ostream& os, const BoolMask& m) {
+	os << "(";
+	for (int i=0; i<m.size(); i++) {
+		os << (m[i]?"1":"0") << (i<m.size()-1?" ":"");
+	}
+	return os << ")";
 }
 
 } // namespace ibex

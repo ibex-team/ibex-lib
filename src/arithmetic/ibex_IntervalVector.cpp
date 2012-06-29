@@ -16,6 +16,7 @@
 #include <sstream>
 #include <math.h>
 #include <float.h>
+#include <algorithm>
 
 namespace ibex {
 
@@ -246,6 +247,24 @@ int IntervalVector::extr_diam_index(bool min) const {
 		}
 	}
 	return selectedIndex;
+}
+
+namespace {
+
+const IntervalVector* tmp;
+bool diam_lt(const int& i, const int& j) {
+	return (*tmp)[i].diam()<(*tmp)[j].diam();
+}
+bool diam_gt(const int& i, const int& j) {
+	return (*tmp)[i].diam()>(*tmp)[j].diam();
+}
+
+} // end namespace
+
+void IntervalVector::sort_indices(bool min, int tab[]) const {
+	for (int i=0; i<n; i++) tab[i]=i;
+	tmp=this;
+	sort(tab,tab+n,min? diam_lt:diam_gt);
 }
 
 std::ostream& operator<<(std::ostream& os, const IntervalVector& x) {

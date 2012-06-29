@@ -40,10 +40,6 @@ public:
 	 */
 	virtual void contract(IntervalVector& box);
 
-	virtual void contract(IntervalVector& box, const Indicators& idc);
-
-	virtual bool can_contract(int v) const;
-
 	/**
 	 * The constraint.
 	 */

@@ -14,11 +14,14 @@
 namespace ibex {
 
 CtcProj::CtcProj(Function& f, bool equality) : Ctc(f.input_size()), ctr(f,equality?NumConstraint::EQ:NumConstraint::LEQ) {
+	for (int v=0; v<ctr.f.nb_symbols(); v++)
+		output[v]=input[v]=ctr.f.used(v);
 
 }
 
 CtcProj::CtcProj(const NumConstraint& ctr) : Ctc(ctr.f.nb_symbols()), ctr(ctr) {
-
+	for (int v=0; v<ctr.f.nb_symbols(); v++)
+		output[v]=input[v]=ctr.f.used(v);
 }
 
 void CtcProj::contract(IntervalVector& box) {
@@ -44,19 +47,10 @@ void CtcProj::contract(IntervalVector& box) {
 
 	try {
 		HC4Revise().proj(ctr.f,root_label,box);
-	} catch (EmptyBoxException&) {
+	} catch (EmptyBoxException& e) {
 		box.set_empty();
-		throw EmptyBoxException();
+		throw e;
 	}
-}
-
-void CtcProj::contract(IntervalVector& box, const Indicators& idc) {
-	if (idc.impact_on && idc.impact.all_unset()) return;
-	contract(box);
-}
-
-bool CtcProj::can_contract(int v) const {
-	return ctr.f.used(v);
 }
 
 } // namespace ibex
