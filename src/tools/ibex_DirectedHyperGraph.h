@@ -126,10 +126,10 @@ inline int DirectedHyperGraph::nb_var() const {
 inline void DirectedHyperGraph::add_arc(int ctr, int var, bool incoming) {
 	if (incoming) {
 		ctr_input_adj[ctr].insert(var);
-		var_output_adj[ctr].insert(var);
+		var_output_adj[var].insert(ctr);
 	} else {
 		ctr_output_adj[ctr].insert(var);
-		var_input_adj[ctr].insert(var);
+		var_input_adj[var].insert(ctr);
 	}
 }
 

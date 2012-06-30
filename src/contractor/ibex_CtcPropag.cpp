@@ -31,6 +31,7 @@ CtcPropag::CtcPropag(const Array<Ctc>& cl, double ratio, bool incremental) :
 			if (list[i].input[j]) g.add_arc(i,j,true);
 			if (list[i].output[j]) g.add_arc(i,j,false);
 		}
+//	cout << g << endl;
 }
 
 void CtcPropag::init_root(Cell& root) {

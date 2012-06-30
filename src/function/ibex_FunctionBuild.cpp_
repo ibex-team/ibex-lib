@@ -250,12 +250,13 @@ void Function::decorate() const {
 	symbol_domains.resize(nb_symbols());
 	symbol_deriv.resize(nb_symbols());
 
+	((CompiledFunction&) cf).compile(*this); // now that it is decorated, it can be "compiled"
+
+	// warning: to place after "compile" if compile modifies deco.d...
 	for (int i=0; i<nb_symbols(); i++) {
 		symbol_domains.set_ref(i,*symbol(i).deco.d);
 		symbol_deriv.set_ref(i,*symbol(i).deco.g);
 	}
-
-	((CompiledFunction&) cf).compile(*this); // now that it is decorated, it can be "compiled"
 }
 
 
