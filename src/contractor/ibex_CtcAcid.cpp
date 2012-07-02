@@ -34,7 +34,7 @@ void CtcAcid::contract(IntervalVector& box) {
 	// 1er reglage sur nbvar (on divise par 2 pour réobtenir nbvar 2 lignes plus loin dans la 1re phase de réglage
 	if (nbcalls==0) nbcidvar= (nb_CID_var+1)/2;
 
-	// if (nbcalls==0) nbcidvar=nb_var;                //  variante 1er reglage sur 2*nbvar
+	// if (nbcalls==0) nbcidvar=nb_CID_var;                //  variante 1er reglage sur 2*nbvar
 
 	IntervalVector initbox (box);
 
@@ -54,7 +54,7 @@ void CtcAcid::contract(IntervalVector& box) {
 	if (vhandled > 0) compute_smearorder(box);         // l'ordre sur les variables est calculé avec la smearsumrel
 
    for (int v=0; v<vhandled; v++) {
-    	int v1=v%nb_var;                               // [gch] how can v be < nb_var??
+    	int v1=v%nb_CID_var;                               // [gch] how can v be < nb_var?? [bne]  vhandled can be between 0 and nbvarmax
     	int v2=smearorder[v1];
 
     	var3BCID(box, v2);                             // appel 3BCID sur la variable v2
