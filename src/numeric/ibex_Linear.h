@@ -99,12 +99,12 @@ void gauss_seidel(const IntervalMatrix& A, const IntervalVector& b, IntervalVect
  * \param ratio - Stopping criterion: the iteration is stopped when each entry of A and B has not been reduced by more
  * than \a ratio \%. Default value is 0.1 (10\%).
  */
-bool proj_mul(IntervalMatrix& A, IntervalMatrix& B, const IntervalMatrix& C, double ratio);
+//bool proj_mul(IntervalMatrix& A, IntervalMatrix& B, const IntervalMatrix& C, double ratio);
 
 /**
  * Contract an interval [a] and an interval matrix [B] constrained by [a]*[B]=[C]
  */
-bool proj_mul(Interval& a, IntervalMatrix& B, const IntervalMatrix& C, double ratio);
+//bool proj_mul(Interval& a, IntervalMatrix& B, const IntervalMatrix& C, double ratio);
 
 /*
  * Applies Gauss-Seidel algorithm with preconditioning.<br>

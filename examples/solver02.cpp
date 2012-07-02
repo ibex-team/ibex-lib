@@ -14,7 +14,7 @@ int main() {
 	// A "constraint propagation" loop.
 	// Each constraint in sys.ctrs is an
 	// equation.
-	CtcHC4 hc4(sys.ctrs,0.001);
+	CtcHC4 hc4(sys.ctrs,0.1);
 	hc4.accumulate=true;
 
 	// Build contractor #2:
@@ -46,7 +46,9 @@ int main() {
 	// -------------
 	// The last parameter (1e-07) is the precision
 	// required for the solutions
-	Solver s(c,rr,buff,1e-07);
+	Solver s(c,rr,buff,1e-03);
+
+	//s.trace=true;
 
 	// Get the solutions
 	vector<IntervalVector> sols=s.solve(sys.box);
