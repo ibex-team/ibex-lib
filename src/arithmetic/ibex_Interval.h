@@ -39,6 +39,26 @@
 
 namespace ibex {
 
+/**
+ * Sets the rounding direction mode of the FPU towards -oo.
+ */
+void fpu_round_down();
+
+/**
+ * Sets the rounding direction mode of the FPU towards +oo.
+ */
+void fpu_round_up();
+
+/**
+ * Sets the rounding direction mode of the nearest
+ */
+void fpu_round_near();
+
+/*
+ * Sets the rounding direction mode of the FPU towards zero.
+ */
+//void fpu_round_zero();
+
 //class IntervalVector; // just to be declared as "friend"
 
 /**

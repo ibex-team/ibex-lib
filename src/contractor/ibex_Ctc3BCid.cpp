@@ -1,7 +1,8 @@
 //============================================================================
 //                                  I B E X                                   
 // File        : ibex_3BCID.cpp
-// Author      : Gilles Chabert
+// Author      : Ignacio Araya, Gilles Chabert,
+//               Bertrand Neveu, Gilles Trombettoni
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Jul 1, 2012

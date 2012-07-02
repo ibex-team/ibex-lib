@@ -16,6 +16,22 @@
 
 namespace ibex {
 
+inline void fpu_round_down() {
+	round_downward();
+}
+
+inline void fpu_round_up() {
+	round_upward();
+}
+
+inline void fpu_round_near() {
+	round_nearest();
+}
+
+//inline void fpu_round_zero() {
+//	round_zero();
+//}
+
 inline Interval::Interval(const gaol::interval& x) : itv(x) {
 
 }

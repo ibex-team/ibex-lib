@@ -20,6 +20,18 @@
 
 namespace ibex {
 
+inline void fpu_round_down() {
+	BiasRoundDown();
+}
+
+inline void fpu_round_up() {
+	BiasRoundUp();
+}
+
+inline void fpu_round_near() {
+	BiasRoundNear();
+}
+
 inline Interval::Interval(const INTERVAL& x) : itv(x) {
 
 }
