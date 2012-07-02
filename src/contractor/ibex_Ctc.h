@@ -13,7 +13,7 @@
 #define __IBEX_CONTRACTOR_H__
 
 #include "ibex_IntervalVector.h"
-#include "ibex_Indicators.h"
+//#include "ibex_Indicators.h"
 #include "ibex_EmptyBoxException.h"
 #include "ibex_BoolMask.h"
 
@@ -41,12 +41,23 @@ public:
 	virtual void contract(IntervalVector& box)=0;
 
 	/**
+	 * \brief Incremental contraction.
+	 *
+	 * The \a impact specifies the variables that have been
+	 * modified since the last call to this contractor.
+	 * By default, this function calls contract(box).
+	 *
+	 * \see #contract(IntervalVector&).
+	 */
+	virtual void contract(IntervalVector& box, const BoolMask& impact);
+
+	/*
 	 * \brief Contraction of a cell (optional)
 	 *
 	 * Implementation is optional. By default, call
 	 * contract(cell.box).
 	 */
-	virtual void contract(Cell& cell);
+	//virtual void contract(Cell& cell);
 
 	/**
 	 * \brief Delete *this.
@@ -62,7 +73,7 @@ public:
 	 *
 	 * By default: does nothing.
 	 */
-	virtual void init_root(Cell& root) { }
+	//virtual void init_root(Cell& root) { }
 
 
 	/**

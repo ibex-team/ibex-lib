@@ -15,15 +15,19 @@
 namespace ibex {
 
 Ctc::Ctc(int n) : nb_var(n), input(n), output(n) {
-	input.set_all(); // by default
+	input.set_all();   // by default
 	output.set_all();  // by default
 }
 
 Ctc::~Ctc() {
 }
 
-void Ctc::contract(Cell& cell) {
-	contract(cell.box);
+//void Ctc::contract(Cell& cell) {
+//	contract(cell.box);
+//}
+
+void Ctc::contract(IntervalVector& box, const BoolMask& impact) {
+	contract(box);
 }
 
 } // namespace ibex

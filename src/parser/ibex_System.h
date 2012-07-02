@@ -23,16 +23,18 @@ public:
 	/** Auxiliary functions */
 	Array<Function> func;
 
-	/** Main function */
+	/** The main (vector-valued) function */
 	Function f;
 
 	/** All the variables */
 	Array<const ExprSymbol> vars;
 
-	/** Indices of sybs */
+	/** Indices of variables to be considered as constants
+	 * (not contracted nor bisected) */
 	std::vector<int> sybs;
 
-	/** Indices of eprs */
+	/** Indices of variables to be considered as parameters
+	 * (contracted but not bisected) */
 	std::vector<int> eprs;
 
 	/** Domains */

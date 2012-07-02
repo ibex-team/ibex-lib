@@ -30,7 +30,10 @@ vector<IntervalVector> Solver::solve(const IntervalVector& init_box) {
 	Cell* root=new Cell(init_box);
 
 	// add data required by the contractor
-	ctc.init_root(*root);
+	//ctc.init_root(*root);
+
+	// add data required by this solver
+	root->add<BisectedVar>();
 
 	// add data required by the bisector
 	bsc.init_root(*root);
@@ -39,6 +42,10 @@ vector<IntervalVector> Solver::solve(const IntervalVector& init_box) {
 
 	vector<IntervalVector> sols;
 	IntervalVector tmpbox(init_box.size());
+
+	BoolMask impact(init_box.size());
+	impact.set_all();
+	int v;                              // last bisected var.
 
 	while (!buffer.empty()) {
 
@@ -49,10 +56,15 @@ vector<IntervalVector> Solver::solve(const IntervalVector& init_box) {
 		tmpbox = c->box;
 
 		try {
-			ctc.contract(*c);
+			v=c->get<BisectedVar>().var;
+			impact.set(v);
+
+			ctc.contract(c->box,impact);
+
+			impact.unset(v);
 
 			try {
-				((Ctc&) prec).contract(*c);
+				((Ctc&) prec).contract(c->box);
 
 				pair<IntervalVector,IntervalVector> boxes=bsc.bisect(*c);
 				pair<Cell*,Cell*> new_cells=c->bisect(boxes.first,boxes.second);
@@ -67,11 +79,13 @@ vector<IntervalVector> Solver::solve(const IntervalVector& init_box) {
 				assert(c->box.is_empty());
 				sols.push_back(tmpbox);
 				delete buffer.pop();
+				impact.set_all();
 			}
 
 		} catch(EmptyBoxException&) {
 			assert(c->box.is_empty());
 			delete buffer.pop();
+			impact.set_all();
 		}
 
 	}

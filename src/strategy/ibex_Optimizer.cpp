@@ -56,7 +56,8 @@ bool Optimizer::contract_and_bound(Cell& c) {
 
 
 	/*======================== contract with g(x)<=0 =====================*/
-	ctc.contract(c); // may throw EmptyBoxException
+	ctc.contract(c.box); // may throw EmptyBoxException
+	// TODO: no more cell in argument here. Does it matter?
 	/*====================================================================*/
 
 	// there is still something left to be contracted in the box
@@ -86,7 +87,7 @@ void Optimizer::optimize(const IntervalVector& init_box) {
 	root->add<OptimCrit>();
 
 	// add data required by the contractor
-	ctc.init_root(*root);
+	//ctc.init_root(*root);
 
 	// add data required by the bisector
 	bsc.init_root(*root);

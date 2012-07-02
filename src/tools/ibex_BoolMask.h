@@ -30,6 +30,11 @@ public:
 	BoolMask(int n);
 
 	/**
+	 * \brief Create a boolean mask of size \a n with all bits set to value.
+	 */
+	BoolMask(int n, bool value);
+
+	/**
 	 * \brief Create a 0-sized mask (to be used with #resize()).
 	 */
 	BoolMask();
@@ -80,6 +85,20 @@ public:
 	bool all_unset() const;
 
 	/**
+	 * \brief Number of bits set
+	 *
+	 * Complexity: O(n)
+	 */
+	int nb_set() const;
+
+	/**
+	 * \brief Number of bits unset
+	 *
+	 * Complexity: O(n)
+	 */
+	int nb_unset() const;
+
+	/**
 	 * \brief The ith bit.
 	 */
 	bool& operator[](int i);
@@ -120,6 +139,11 @@ inline BoolMask::BoolMask(int n) : n(n), mask(new bool[n]) {
 	unset_all();
 }
 
+inline BoolMask::BoolMask(int n, bool value) : n(n), mask(new bool[n]) {
+	if (value) set_all();
+	else unset_all();
+}
+
 inline void BoolMask::resize(int n2) {
 	assert(n>=0);
 	bool* new_mask=new bool[n2];
@@ -137,6 +161,18 @@ inline void BoolMask::resize(int n2) {
 
 inline int BoolMask::size() const {
 	return n;
+}
+
+inline int BoolMask::nb_set() const {
+	int k=0;
+	for (int i=0; i<n; i++) if ((*this)[i]) k++;
+	return k;
+}
+
+inline int BoolMask::nb_unset() const {
+	int k=0;
+	for (int i=0; i<n; i++) if (!(*this)[i]) k++;
+	return k;
 }
 
 inline BoolMask& BoolMask::operator=(const BoolMask& m) {

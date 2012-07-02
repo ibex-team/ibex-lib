@@ -19,89 +19,76 @@
 
 namespace ibex {
 
-/** \ingroup contractor
+/**
+ * \ingroup contractor
  *
  * \brief Propagation contractor.
  *
- * This class is an implementation of the classical interval variant of the AC3 constraint propagation algorithm.
+ * This class is an implementation of the classical interval variant of the AC3 constraint propagation
+ * algorithm.
  *
  */
 class CtcPropag : public Ctc {
-
 public:
- /** Create a AC3-like propagation with a list of contractors.
-  * \param cl - The list of contractors.
-  * \param ratio (optional) - Criterion for stopping propagation. If a projection does not remove more that \a ratio times
-  * the diameter of a variable domain, then this reduction is not propagated. The default value is #default_ratio.
-  * \param incremental (optional) - This parameter is only used when contraction is called with a \link Contractor::Indicators
-  * Indicators \endlink structure.
-  * If set to \a true, only the pairs <i>(var,ctr)</i> where var is the impacted variable are pushed in the queue.
-  * If set to \a false, all the pairs are pushed in the queue. Default value is \a false.
-  * \see #ibex::Contractor::contract(Cell& cell, const Contractor::Indicators& p) {
-  * #ibex::Contractor::contract(Space& space, const Contractor::Indicators& p),
-  * #ibex::Contractor::contract(const Contractor::Indicators& p) */
- CtcPropag(const Array<Ctc>& cl, double ratio=default_ratio, bool incremental=false);
 
- /* warning: do not replace adj(p.adj) by adj(p). The adjacency information (i.e., whether a variable is involved in a constraint
-  * or not) is supplied by the original Composite, NOT the propagation Composite (which can be looser). Therefore, this information must be
-  * forwarded to the new Propagation Composite thanks to the copy constructor of Adjacency. */
+	/**
+	 * \brief Create a AC3-like propagation with a list of contractors.
+	 *
+	 * \param cl               - The list of contractors.
+	 * \param ratio (optional) - Criterion for stopping propagation. If a projection does not remove
+	 *                           more that \a ratio times the diameter of a variable domain, then this
+	 *                           reduction is not propagated. The default value is #default_ratio.
+	 * \param incr (optional)  - Whether the propagation works incrementally. This parameter is
+	 *                           only used when contraction is called with an "impact" bool mask.
+	 *
+	 * \see #contract(IntervalVector&, const BoolMask&).
+	 */
+	CtcPropag(const Array<Ctc>& cl, double ratio=default_ratio, bool incr=false);
 
- /* Accept the pretty printer. */
-/*
- virtual void accept_printer(const OperatorPrinter& p) const {
-   return p.print(*this);
- }
-*/
+	/**
+	 * \brief Enforces propagation (e.g.: HC4 or BOX) fitering.
+	 *
+	 * Call #contract(IntervalVector&, const BoolMask&) with the mask
+	 * set to all the variables.
+	 *
+	 * \see #contract(IntervalVector&, const BoolMask&).
+	 * \throw #ibex::EmptyBoxException - if inconsistency is detected.
+	 */
+	virtual void contract(IntervalVector& box);
 
-	void init_root(Cell& root);
+	/**
+	 * \brief Incremental contraction.
+	 *
+	 * If #incremental is true, the propagation will start from the
+	 * impacted variables only (instead of from all the variables).
+	 *
+	 * \throw #ibex::EmptyBoxException - if inconsistency is detected.
+	 */
+	virtual void contract(IntervalVector& box, const BoolMask& impact);
 
- /** Enforces propagation (e.g.: HC4 or BOX) fitering.
-  *
-  * \param start - The variable to start propagation with. Set this parameter to \link ibex::Contractor::ALL_VARS ALL_VARS \endlink
-  * if <i>all the variables</i> must be considered.
-  * \throw #ibex::EmptyBoxException - if inconsistency is detected. */
- void contract(IntervalVector& box, int start, const Indicators& idc);
+	/** The list of contractors to propagate */
+	Array<Ctc> list;
 
- /**
-  * \brief Contract the cell's box.
-  *
-  * If #incremental is true, the propagation will start from the
-  * last bisected variable only (instead of from all the variables).
-  */
- virtual void contract(Cell& cell);
+	/** Ratio (see \link CtcPropag(const Array<Ctc>&, double, bool) constructor \endlink for details). */
+	const double ratio;
 
- /**
-  * \brief Contract a box.
-  */
- virtual void contract(IntervalVector& box);
+	/** Agenda initialization mode (see \link CtcPropag(const Array<Ctc>&, double, bool) constructor \endlink for details).*/
+	const bool incremental;
 
- /**
-  * \brief Contract a box.
-  *
-  * If #incremental is true, the propagation will start from the
-  * \a start only (instead of from all the variables).
-  */
- void contract(IntervalVector& box, int start);
+	/** Accumulate residual contractions? */
+	bool accumulate;
 
- /** The list of contractors to propagate */
- Array<Ctc> list;
-
- /** Ratio (see \link Propagation(const ContractorList&, Space&, REAL, bool) constructor \endlink for details). */
- const double ratio;
-
- /** Queue initialization mode (see \link Propagation(const ContractorList&, Space&, REAL, bool) constructor \endlink for details).*/
- const bool incremental;
-
- /** Accumulate residual contractions. */
- bool accumulate;
-
- /** Default ratio used by propagation, set to 0.1. */
- static const double default_ratio;
+	/** Default ratio used by propagation, set to 0.1. */
+	static const double default_ratio;
 
 protected:
- DirectedHyperGraph g;
 
- Agenda agenda;
+	DirectedHyperGraph g;
+
+	Agenda agenda;
+
+	BoolMask all_vars; // used when incremental=false
+
 };
 
 } // namespace ibex

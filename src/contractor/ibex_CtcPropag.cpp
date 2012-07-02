@@ -21,7 +21,8 @@ namespace ibex {
 
 CtcPropag::CtcPropag(const Array<Ctc>& cl, double ratio, bool incremental) :
 		  Ctc(cl[0].nb_var), list(cl), ratio(ratio), incremental(incremental),
-		  g(cl.size(), cl[0].nb_var), agenda(cl.size()), accumulate(false) {
+		  g(cl.size(), cl[0].nb_var), agenda(cl.size()), accumulate(false),
+		  all_vars(cl[0].nb_var) {
 
 	for (int i=1; i<list.size(); i++)
 		assert(list[i].nb_var==nb_var);
@@ -31,38 +32,33 @@ CtcPropag::CtcPropag(const Array<Ctc>& cl, double ratio, bool incremental) :
 			if (list[i].input[j]) g.add_arc(i,j,true);
 			if (list[i].output[j]) g.add_arc(i,j,false);
 		}
+
+	all_vars.set_all();
 //	cout << g << endl;
 }
 
-void CtcPropag::init_root(Cell& root) {
-	if (incremental)
-		root.add<BisectedVar>();
-}
-
-
-void CtcPropag::contract(Cell& cell) {
-	if (incremental)
-		contract(cell.box, cell.get<BisectedVar>().var);
-	else
-		contract(cell.box, -1);
-}
-
 void CtcPropag::contract(IntervalVector& box) {
-	contract(box,-1);
+	contract(box,all_vars);
 }
 
-void  CtcPropag::contract(IntervalVector& box, int start) {
+void  CtcPropag::contract(IntervalVector& box, const BoolMask& start) {
 
-	if (incremental && start!=-1) {
-		set<int> ctrs=g.output_ctrs(start);
-		for (set<int>::iterator c=ctrs.begin(); c!=ctrs.end(); c++)
-			agenda.push(*c);
+	assert(start.size()==nb_var);
+
+	if (incremental) {
+		for (int i=0; i<nb_var; i++) {
+			if (start[i]) {
+				set<int> ctrs=g.output_ctrs(i);
+				for (set<int>::iterator c=ctrs.begin(); c!=ctrs.end(); c++)
+					agenda.push(*c);
+			}
+		}
 	} else { // push all the contractors
 		for (int i=0; i<list.size(); i++)
 			agenda.push(i);
 	}
 
-	int c;                          // current constraint
+	int c; // current contractor
 
 	/*
 	 * old_box is either:

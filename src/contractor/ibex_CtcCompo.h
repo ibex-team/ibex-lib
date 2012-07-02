@@ -31,13 +31,17 @@ public:
 	 */
 	CtcCompo(const Array<Ctc>& list, bool incremental=false, double ratio=default_ratio);
 
+	/**
+	 * \brief build the composition of c1 and c2.
+	 *
+	 * If incremental is true, manages the impact.
+	 */
 	CtcCompo(Ctc& c1, Ctc& c2, bool incremental=false, double ratio=default_ratio);
 
 	/**
-	 * \brief build a composition of two contractors
-	 *
+	 * \brief Delete *this.
 	 */
-	//CtcCompo(const Array<Ctc>& list;
+	~CtcCompo();
 
 	/**
 	 * \brief Contract a box.
@@ -45,9 +49,9 @@ public:
 	virtual void contract(IntervalVector& box);
 
 	/**
-	 * \brief Contract a box with indicators.
+	 * \brief Contract a box with an impact.
 	 */
-	virtual void contract(IntervalVector& box, const Indicators& idc);
+	virtual void contract(IntervalVector& box, const BoolMask& impact);
 
 	/** The list of sub-contractors */
 	Array<Ctc> list;
@@ -62,7 +66,7 @@ public:
 	static const double default_ratio;
 
 protected:
-	Indicators **idc;
+	BoolMask *impacts;
 };
 
 } // end namespace ibex

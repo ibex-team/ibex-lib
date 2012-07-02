@@ -93,9 +93,9 @@ SubPaving* Paver::pave(const IntervalVector& init_box) {
 	Cell* root=new Cell(init_box);
 
 	// add data required by the contractors
-	for (int i=0; i<ctc.size(); i++) {
-		ctc[i].init_root(*root);
-	}
+//	for (int i=0; i<ctc.size(); i++) {
+//		ctc[i].init_root(*root);
+//	}
 	// add data required by the bisector
 	bsc.init_root(*root);
 
