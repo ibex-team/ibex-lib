@@ -40,19 +40,30 @@
 namespace ibex {
 
 /**
- * Sets the rounding direction mode of the FPU towards -oo.
+ * \brief Sets the rounding direction mode of the FPU towards -oo.
  */
 void fpu_round_down();
 
 /**
- * Sets the rounding direction mode of the FPU towards +oo.
+ * \brief Sets the rounding direction mode of the FPU towards +oo.
  */
 void fpu_round_up();
 
 /**
- * Sets the rounding direction mode of the nearest
+ * \brief Sets the rounding direction mode of the nearest
  */
 void fpu_round_near();
+
+/**
+ * \brief Return the previous float
+ */
+double previous_float(double x);
+
+/**
+ * \brief Return the next float
+ */
+double next_float(double x);
+
 
 /*
  * Sets the rounding direction mode of the FPU towards zero.

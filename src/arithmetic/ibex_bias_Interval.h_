@@ -32,6 +32,14 @@ inline void fpu_round_near() {
 	BiasRoundNear();
 }
 
+inline double previous_float(double x) {
+	return Pred(x);
+}
+
+inline double next_float(double x) {
+	return Succ(x);
+}
+
 inline Interval::Interval(const INTERVAL& x) : itv(x) {
 
 }

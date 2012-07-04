@@ -28,6 +28,14 @@ inline void fpu_round_near() {
 	round_nearest();
 }
 
+inline double previous_float(double x) {
+	return gaol::previous_float(x);
+}
+
+inline double next_float(double x) {
+	return gaol::next_float(x);
+}
+
 //inline void fpu_round_zero() {
 //	round_zero();
 //}
