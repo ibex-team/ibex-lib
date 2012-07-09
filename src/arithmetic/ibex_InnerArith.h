@@ -21,7 +21,7 @@ namespace ibex {
  * .... Useful?
  * Return z such that $z\subseteq x+y$.
  */
-Interval iadd(const Interval& x, const Interval& y) {
+inline Interval iadd(const Interval& x, const Interval& y) {
 	assert(false); // TODO
 	return 0;
 }

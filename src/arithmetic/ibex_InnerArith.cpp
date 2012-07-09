@@ -24,7 +24,7 @@ string op_str(int i) {
     case ADD: return " + ";
     case SUB: return " - ";
     case MUL: return " * ";
-    case DIV: return " / ";
+    default : return " / ";
   }
 }
 
@@ -57,7 +57,7 @@ Interval eval(const Interval& x, const Interval& y, int op) {
     case ADD: return x+y;
     case SUB: return x-y;
     case MUL: return x*y;
-    case DIV: return x/y;
+    default: return x/y;
   }
 }
 
@@ -67,7 +67,7 @@ double projx(double z, double y, int op, bool round_up) {
     case ADD: return z-y;
     case SUB: return z+y;
     case MUL: return (y==0)? POS_INFINITY:z/y;
-    case DIV: return z*y;
+    default: return z*y;
   }
   fpu_round_near();
 }
@@ -78,7 +78,7 @@ double projy(double z, double x, int op, bool round_up) {
     case ADD: return z-x;
     case SUB: return x-z;
     case MUL: return (x==0)? POS_INFINITY:z/x;
-    case DIV: return (z==0)? POS_INFINITY:x/z;
+    default: return (z==0)? POS_INFINITY:x/z;
   }
   fpu_round_near();
 }
@@ -110,7 +110,8 @@ bool iproj_geq_mono_op(double z_inf, Interval& x, Interval& y, const Interval& x
 
 	assert(xin.is_subset(x));
 	assert(yin.is_subset(y));
-	assert(!inflate || eval(xin,yin,op).lb()>=z_inf); // does this condition should really hold?
+	//assert(!inflate || eval(xin,yin,op).lb()>=z_inf); // does this condition should really hold?
+	//pb: this function is used for <= with add/sub
 
 	if (x.is_empty() || y.is_empty()) return false;
 
@@ -133,8 +134,12 @@ bool iproj_geq_mono_op(double z_inf, Interval& x, Interval& y, const Interval& x
 		}
 	}
 
+	cout << "--- y1=" << y1 << " y2=" << y2 << " ---" << endl;
+
 	xmin=projx(z_inf, y1, op, inc_var1);
 	xmax=projx(z_inf, y2, op, inc_var1); //true->ROUND_UP, false->ROUND_DOWN
+
+	cout << "--- xmin=" << xmin << " xmax=" << xmax << " ---" << endl;
 
 	// [gch]: when op==MUL and z_inf=0 we have xmin=+oo whereas we should have xmin=-oo
 	// but fortunately we catch the case xmin==+oo here:
@@ -152,8 +157,13 @@ bool iproj_geq_mono_op(double z_inf, Interval& x, Interval& y, const Interval& x
 		x0=(inc_var1)? x.lb():x.ub();
 	} else {
 		//           if(xmin>xmax) xmin=xmax;
+		if (inflate)
+			if (inc_var1) { if (xmax>xin.lb()) xmax=xin.lb(); }
+			else          { if (xmin<xin.ub()) xmin=xin.ub(); }
+
 		Interval xx= x & Interval(xmin,xmax);
 		x0= xx.lb() + (double)rand()/(double)RAND_MAX*(xx.diam());
+		cout << "--- x0=" << x0 << " ---" << endl;
 		if (!xx.contains(x0)) x0= (x0 < xx.lb())? xx.lb():xx.ub();
 	}
 	y0=projy(z_inf,x0,op,inc_var2);

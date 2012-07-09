@@ -18,6 +18,7 @@
 #include "TestIntervalVector.h"
 #include "TestIntervalMatrix.h"
 #include "TestDim.h"
+#include "TestInnerArith.h"
 //#include "TestDomain.h"
 
 // ================ symbolic ===============
@@ -51,6 +52,7 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestIntervalVector()));
     ts.add(auto_ptr<Test::Suite>(new TestIntervalMatrix()));
     ts.add(auto_ptr<Test::Suite>(new TestDim()));
+    ts.add(auto_ptr<Test::Suite>(new TestInnerArith()));
     //ts.add(auto_ptr<Test::Suite>(new TestDomain()));
 
     ts.add(auto_ptr<Test::Suite>(new TestExpr()));
