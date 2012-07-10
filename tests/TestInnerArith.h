@@ -15,6 +15,8 @@
 #include "cpptest.h"
 #include "utils.h"
 
+#include "ibex_Interval.h"
+
 namespace ibex {
 
 class TestInnerArith : public TestIbex {
@@ -22,93 +24,96 @@ class TestInnerArith : public TestIbex {
 public:
 	TestInnerArith() {
 
-		TEST_ADD(TestInnerArith::add01);
-		TEST_ADD(TestInnerArith::add01_2);
-		TEST_ADD(TestInnerArith::add01_3);
-		TEST_ADD(TestInnerArith::add02);
-		TEST_ADD(TestInnerArith::add02_2);
-		TEST_ADD(TestInnerArith::add02_3);
-		TEST_ADD(TestInnerArith::add03);
-		TEST_ADD(TestInnerArith::add03_2);
-		TEST_ADD(TestInnerArith::add04);
-		TEST_ADD(TestInnerArith::add04_2);
-		TEST_ADD(TestInnerArith::add04_3);
+		TEST_ADD(TestInnerArith::add_sub01);
+		TEST_ADD(TestInnerArith::add_sub01_2);
+		TEST_ADD(TestInnerArith::add_sub01_3);
+		TEST_ADD(TestInnerArith::add_sub02);
+		TEST_ADD(TestInnerArith::add_sub02_2);
+		TEST_ADD(TestInnerArith::add_sub02_3);
+		TEST_ADD(TestInnerArith::add_sub03);
+		TEST_ADD(TestInnerArith::add_sub03_2);
+		TEST_ADD(TestInnerArith::add_sub04);
+		TEST_ADD(TestInnerArith::add_sub04_2);
+		TEST_ADD(TestInnerArith::add_sub04_3);
 
-		TEST_ADD(TestInnerArith::add05_1);
-		TEST_ADD(TestInnerArith::add05_2);
-		TEST_ADD(TestInnerArith::add05_3);
-		TEST_ADD(TestInnerArith::add05_4);
-		TEST_ADD(TestInnerArith::add05_5);
-		TEST_ADD(TestInnerArith::add05_6);
-		TEST_ADD(TestInnerArith::add05_7);
-		TEST_ADD(TestInnerArith::add05_8);
-		TEST_ADD(TestInnerArith::add05_9);
-		TEST_ADD(TestInnerArith::add05_10);
-		TEST_ADD(TestInnerArith::add05_11);
+		TEST_ADD(TestInnerArith::add_sub05_1);
+		TEST_ADD(TestInnerArith::add_sub05_2);
+		TEST_ADD(TestInnerArith::add_sub05_3);
+		TEST_ADD(TestInnerArith::add_sub05_4);
+		TEST_ADD(TestInnerArith::add_sub05_5);
+		TEST_ADD(TestInnerArith::add_sub05_6);
+		TEST_ADD(TestInnerArith::add_sub05_7);
+		TEST_ADD(TestInnerArith::add_sub05_8);
+		TEST_ADD(TestInnerArith::add_sub05_9);
+		TEST_ADD(TestInnerArith::add_sub05_10);
+		TEST_ADD(TestInnerArith::add_sub05_11);
 
 
-		TEST_ADD(TestInnerArith::add06_1);
-		TEST_ADD(TestInnerArith::add06_2);
+		TEST_ADD(TestInnerArith::add_sub06_1);
+		TEST_ADD(TestInnerArith::add_sub06_2);
 
-		TEST_ADD(TestInnerArith::add07);
+		TEST_ADD(TestInnerArith::add_sub07);
 	}
 
 	// x+y<=z with contraction (no inflation)
-	void add01();
+	void add_sub01();
 	// x+y>=z with contraction (no inflation)
-	void add01_2();
+	void add_sub01_2();
 	// x+y in [z] with contraction on both sides (no inflation)
-	void add01_3();
+	void add_sub01_3();
 
 	// x+y<=z with all (x,y) solution (no inflation)
-	void add02();
+	void add_sub02();
 	// x+y>=z with all (x,y) solution (no inflation)
-	void add02_2();
+	void add_sub02_2();
 	// x+y in [z] with all (x,y) solution (no inflation)
-	void add02_3();
+	void add_sub02_3();
 
 	// x+y<=z with no solution (no inflation)
-	void add03();
+	void add_sub03();
 	// x+y>=z with no solution (no inflation)
-	void add03_2();
+	void add_sub03_2();
 
 	// x+y<=z with only 1 pt solution (no inflation)
-	void add04();
+	void add_sub04();
 	// x+y>=z with only 1 pt solution (no inflation)
-	void add04_2();
+	void add_sub04_2();
 	// x+y in [z] with only 1 pt solution (no inflation)
-	void add04_3();
+	void add_sub04_3();
 
 	// x+y<=z with contraction (+inflation)
-	void add05_1();
+	void add_sub05_1();
 	// x+y>=z with contraction (+inflation)
-	void add05_2();
+	void add_sub05_2();
 	// x+y in [z] with contraction +inflation xin>0,yin<0
-	void add05_3();
+	void add_sub05_3();
 	// x+y in [z] with contraction +inflation xin<0,yin>0
-	void add05_4();
+	void add_sub05_4();
 	// x+y in [z] with contraction +inflation xin>0,yin>0
-	void add05_5();
+	void add_sub05_5();
 	// x+y in [z] with contraction +inflation xin<0,yin<0
-	void add05_6();
+	void add_sub05_6();
 	// x+y in [z] with contraction +inflation xin=yin=0
-	void add05_7();
+	void add_sub05_7();
 	// x+y in [z] with (xin,yin) at a corner xin>0, yin=0
-	void add05_8();
+	void add_sub05_8();
 	// x+y in [z] with (xin,yin) at a corner xin<0, yin=0
-	void add05_9();
+	void add_sub05_9();
 	// x+y in [z] with (xin,yin) at a corner xin=0, yin>0
-	void add05_10();
+	void add_sub05_10();
 	// x+y in [z] with (xin,yin) at a corner xin=0, yin<0
-	void add05_11();
+	void add_sub05_11();
 
 	// x+y<=z with (xin,yin) at a corner
-	void add06_1();
+	void add_sub06_1();
 	// x+y>=z with (xin,yin) at a corner
-	void add06_2();
+	void add_sub06_2();
 
 	// x+y=z
-	void add07();
+	void add_sub07();
+
+private:
+	void check_add_sub(const Interval& z, const Interval& xin, const Interval& yin, bool lb, bool ub);
 };
 
 } // namespace ibex

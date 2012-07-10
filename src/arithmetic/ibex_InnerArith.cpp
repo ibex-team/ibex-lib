@@ -117,7 +117,7 @@ bool iproj_geq_mono_op(double z_inf, Interval& x, Interval& y, const Interval& x
 	assert(yin.is_subset(y));
 	//assert(!inflate || eval(xin,yin,op).lb()>=z_inf); // does this condition should really hold?
 	//pb: this function is used for <= with add/sub
-	cout << "--- x geq_mono_op=" << x << " y=" << y << " with z_inf=" << z_inf << endl;
+	//cout << "--- x geq_mono_op=" << x << " y=" << y << " with z_inf=" << z_inf << endl;
 	if (x.is_empty() || y.is_empty()) return false;
 
 	if (inc_var1) {
@@ -139,12 +139,12 @@ bool iproj_geq_mono_op(double z_inf, Interval& x, Interval& y, const Interval& x
 		}
 	}
 
-	cout << "--- y1=" << y1 << " y2=" << y2 << " ---" << endl;
+	//cout << "--- y1=" << y1 << " y2=" << y2 << " ---" << endl;
 
 	xmin=projx(z_inf, y1, op, inc_var1);
 	xmax=projx(z_inf, y2, op, inc_var1); //true->ROUND_UP, false->ROUND_DOWN
 
-	cout << "--- xmin=" << xmin << " xmax=" << xmax << " ---" << endl;
+	//cout << "--- xmin=" << xmin << " xmax=" << xmax << " ---" << endl;
 
 	if (xmax==POS_INFINITY) xmax=x.ub();
 	if (xmin==NEG_INFINITY) xmin=x.lb();
@@ -162,15 +162,15 @@ bool iproj_geq_mono_op(double z_inf, Interval& x, Interval& y, const Interval& x
 		if (inflate)
 			if (inc_var1) { if (xmax>xin.lb()) xmax=xin.lb(); }
 			else          { if (xmin<xin.ub()) xmin=xin.ub(); }
-		cout << "--- xmin2=" << xmin << " xmax2=" << xmax << " ---" << endl;
+		//cout << "--- xmin2=" << xmin << " xmax2=" << xmax << " ---" << endl;
 		Interval xx= x & Interval(xmin,xmax);
-		cout << "--- xx.diam=" << xx.diam() << "---" << endl;
+		//cout << "--- xx.diam=" << xx.diam() << "---" << endl;
 		x0= xx.lb() + (double)rand()/(double)RAND_MAX*xx.diam();
-		cout << "--- x0=" << x0 << " ---" << endl;
+		//cout << "--- x0=" << x0 << " ---" << endl;
 		if (!xx.contains(x0)) x0= (x0 < xx.lb())? xx.lb():xx.ub();
 	}
 	y0=projy(z_inf,x0,op,inc_var2);
-	cout << "--- y0=" << y0 << " ---" << endl;
+	//cout << "--- y0=" << y0 << " ---" << endl;
 	if (y0!=POS_INFINITY) {
 		if(y0>y.ub()) y0=y.ub();
 		else if(y0<y.lb()) y0=y.lb();
@@ -179,7 +179,7 @@ bool iproj_geq_mono_op(double z_inf, Interval& x, Interval& y, const Interval& x
 	}
 
 	x = (inc_var1)? Interval(x0,x.ub()):Interval(x.lb(),x0);
-	cout << "--- result: x=" << x << " y=" << y << endl;
+	//cout << "--- result: x=" << x << " y=" << y << endl;
 	// [gch] if op==MUL and z_sup=0 we have y=[0,0]
 	// and x=[x^-,x0] (or x=[x0,x^+]) which is correct in both
 	// case although we could take x entirely in this case.

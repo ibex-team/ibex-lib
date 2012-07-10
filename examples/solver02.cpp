@@ -5,6 +5,15 @@ using namespace ibex;
 
 int main() {
 
+	// Example #17
+	// ------------------------------------------------
+	// Solver (with a function loaded from a file)
+	//
+	// Solve a system using interval Newton and constraint
+	// propagation.
+	// ------------------------------------------------
+
+
 	// Load a system of equations
 	// --------------------------
 	System sys("ponts.txt");
@@ -60,6 +69,7 @@ int main() {
 	// generated during the search
 	cout << "number of cells=" << s.nb_cells << endl;
 
+	// ------------------------------------------------
 }
 
 
