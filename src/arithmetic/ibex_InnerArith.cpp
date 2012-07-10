@@ -66,10 +66,12 @@ double projx(double z, double y, int op, bool round_up) {
   switch(op) {
     case ADD: return z-y;
     case SUB: return z+y;
-    case MUL: return (y==0)? POS_INFINITY:z/y;
+    case MUL:
+    	assert(z!=0); // z==0 should not appear
+    	return (y==0)? (round_up? POS_INFINITY: NEG_INFINITY) : z/y;
     default: return z*y;
   }
-  fpu_round_near();
+  //fpu_round_near(); // unreachable
 }
 
 double projy(double z, double x, int op, bool round_up) {
@@ -77,10 +79,13 @@ double projy(double z, double x, int op, bool round_up) {
   switch(op) {
     case ADD: return z-x;
     case SUB: return x-z;
-    case MUL: return (x==0)? POS_INFINITY:z/x;
+    case MUL:
+    	assert(z!=0); // z==0 should not appear
+    	assert(x!=0); // x==0 should not appear
+    	return z/x;
     default: return (z==0)? POS_INFINITY:x/z;
   }
-  fpu_round_near();
+  //fpu_round_near(); // unreachable
 }
 
 
@@ -112,7 +117,7 @@ bool iproj_geq_mono_op(double z_inf, Interval& x, Interval& y, const Interval& x
 	assert(yin.is_subset(y));
 	//assert(!inflate || eval(xin,yin,op).lb()>=z_inf); // does this condition should really hold?
 	//pb: this function is used for <= with add/sub
-
+	cout << "--- x geq_mono_op=" << x << " y=" << y << " with z_inf=" << z_inf << endl;
 	if (x.is_empty() || y.is_empty()) return false;
 
 	if (inc_var1) {
@@ -141,11 +146,8 @@ bool iproj_geq_mono_op(double z_inf, Interval& x, Interval& y, const Interval& x
 
 	cout << "--- xmin=" << xmin << " xmax=" << xmax << " ---" << endl;
 
-	// [gch]: when op==MUL and z_inf=0 we have xmin=+oo whereas we should have xmin=-oo
-	// but fortunately we catch the case xmin==+oo here:
-
 	if (xmax==POS_INFINITY) xmax=x.ub();
-	if (xmin==POS_INFINITY) xmin=x.lb();
+	if (xmin==NEG_INFINITY) xmin=x.lb();
 
 	//    cout << xmin << "," << xmax << endl;
 	if ((inc_var1 && xmin > x.ub()) || (!inc_var1 && xmax < x.lb())) {
@@ -154,20 +156,21 @@ bool iproj_geq_mono_op(double z_inf, Interval& x, Interval& y, const Interval& x
 		y.set_empty();
 		return false;
 	} else if((inc_var1 && xmax < x.lb()) || (!inc_var1 && xmin > x.ub())) {
+		// all the box is inner
 		x0=(inc_var1)? x.lb():x.ub();
 	} else {
-		//           if(xmin>xmax) xmin=xmax;
 		if (inflate)
 			if (inc_var1) { if (xmax>xin.lb()) xmax=xin.lb(); }
 			else          { if (xmin<xin.ub()) xmin=xin.ub(); }
-
+		cout << "--- xmin2=" << xmin << " xmax2=" << xmax << " ---" << endl;
 		Interval xx= x & Interval(xmin,xmax);
-		x0= xx.lb() + (double)rand()/(double)RAND_MAX*(xx.diam());
+		cout << "--- xx.diam=" << xx.diam() << "---" << endl;
+		x0= xx.lb() + (double)rand()/(double)RAND_MAX*xx.diam();
 		cout << "--- x0=" << x0 << " ---" << endl;
 		if (!xx.contains(x0)) x0= (x0 < xx.lb())? xx.lb():xx.ub();
 	}
 	y0=projy(z_inf,x0,op,inc_var2);
-
+	cout << "--- y0=" << y0 << " ---" << endl;
 	if (y0!=POS_INFINITY) {
 		if(y0>y.ub()) y0=y.ub();
 		else if(y0<y.lb()) y0=y.lb();
@@ -176,7 +179,7 @@ bool iproj_geq_mono_op(double z_inf, Interval& x, Interval& y, const Interval& x
 	}
 
 	x = (inc_var1)? Interval(x0,x.ub()):Interval(x.lb(),x0);
-
+	cout << "--- result: x=" << x << " y=" << y << endl;
 	// [gch] if op==MUL and z_sup=0 we have y=[0,0]
 	// and x=[x^-,x0] (or x=[x0,x^+]) which is correct in both
 	// case although we could take x entirely in this case.
