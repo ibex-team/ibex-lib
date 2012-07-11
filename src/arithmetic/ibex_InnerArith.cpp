@@ -68,7 +68,7 @@ double projx(double z, double y, int op, bool round_up) {
     case SUB: return z+y;
     case MUL:
     	assert(z!=0); // z==0 should not appear
-    	return (y==0)? (round_up? POS_INFINITY: NEG_INFINITY) : z/y;
+    	return (y==0)? POS_INFINITY:z/y;
     default: return z*y;
   }
   //fpu_round_near(); // unreachable
@@ -124,6 +124,7 @@ bool iproj_geq_mono_op(double z_inf, Interval& x, Interval& y, const Interval& x
 	if (inflate) //cout << "  inflating xin=" << xin << " yin=" << yin << endl;
 	if (x.is_empty() || y.is_empty()) {
 		//cout << "  result: x=" << x << " y=" << y << endl;
+		//cout << "----------------------------------------------------------" << endl;
 		return false;
 	}
 
@@ -149,6 +150,11 @@ bool iproj_geq_mono_op(double z_inf, Interval& x, Interval& y, const Interval& x
 	//cout << "  y1=" << y1 << " y2=" << y2 << endl;
 
 	xmin=projx(z_inf, y1, op, inc_var1);
+	// remark: to avoid the following test, we cannot
+	// return -oo in projx if round_up==false
+	// because we want sometimes to get +oo "rounded by below"
+	// (ex: op==ADD, x,y>0, z_sup=+oo inc_var and inc_var are both false (leq_add))
+	if (op==MUL && xmin==POS_INFINITY) xmin=NEG_INFINITY;
 	xmax=projx(z_inf, y2, op, inc_var1); //true->ROUND_UP, false->ROUND_DOWN
 
 	//cout << "  xmin=" << xmin << " xmax=" << xmax << endl;
@@ -169,6 +175,7 @@ bool iproj_geq_mono_op(double z_inf, Interval& x, Interval& y, const Interval& x
 		x.set_empty();
 		y.set_empty();
 		//cout << "  result: x=" << x << " y=" << y << endl;
+		//cout << "----------------------------------------------------------" << endl;
 		return false;
 	} else if((inc_var1 && xmax < x.lb()) || (!inc_var1 && xmin > x.ub())) {
 		// all the box is inner
@@ -197,11 +204,11 @@ bool iproj_geq_mono_op(double z_inf, Interval& x, Interval& y, const Interval& x
 	}
 
 	x = (inc_var1)? Interval(x0,x.ub()):Interval(x.lb(),x0);
-	//cout << "--- result: x=" << x << " y=" << y << endl;
 	// [gch] if op==MUL and z_sup=0 we have y=[0,0]
 	// and x=[x^-,x0] (or x=[x0,x^+]) which is correct in both
 	// case although we could take x entirely in this case.
 	//cout << "  result: x=" << x << " y=" << y << endl;
+	//cout << "----------------------------------------------------------" << endl;
 	assert(xin.is_subset(x));
 	assert(yin.is_subset(y));
 
@@ -224,6 +231,10 @@ bool iproj_leq_sub(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 bool iproj_leq_mul(double z_sup, Interval& x, Interval& y, const Interval &xin, const Interval& yin) {
 
 	bool inflate=!xin.is_empty();
+
+	//cout << "[mul] x=" << x << " y=" << y << " z_sup=" << z_sup << endl;
+	//if (inflate)
+	//cout << "  inflating xin=" << xin << " yin=" << yin << endl;
 
 	if (z_sup==POS_INFINITY) return true;
 
@@ -257,13 +268,15 @@ bool iproj_leq_mul(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 		if(!xP.is_empty() && !yP.is_empty()) { //y.ub()>=0 && (!inflate || yin.lb()>0)) {
 			xxin=inflate? Interval(max(0.0,xin.lb()), max(0.0,xin.ub())) : Interval::EMPTY_SET;
 			yyin=inflate? Interval(max(0.0,yin.lb()), max(0.0,yin.ub())) : Interval::EMPTY_SET;
-			if(!iproj_leq_mono_op(z_sup, xP, yP, xxin, yin, MUL, true, true)) {
+			if(!iproj_leq_mono_op(z_sup, xP, yP, xxin, yyin, MUL, true, true)) {
+				//cout << "[mul] nothing in the positive quadrant --> x and y empty" << endl;
 				x.set_empty();
 				y.set_empty();
 				return false;
 			}
 			xU = xP.ub();
 			yU = yP.ub();
+			//cout << "[mul] bounds in the positive quadrant xU=" << xU << " yU=" << yU << endl;
 		}
 
 		Interval xN = x & Interval::NEG_REALS;
@@ -276,12 +289,14 @@ bool iproj_leq_mul(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 			xxin=inflate? Interval(min(0.0,xin.lb()),min(0.0,xin.ub())) : Interval::EMPTY_SET;
 			yyin=inflate? Interval(min(0.0,yin.lb()),min(0.0,yin.lb())) : Interval::EMPTY_SET;
 			if(!iproj_leq_mono_op(z_sup, xN, yN, xxin, yyin, MUL, false, false)) {
+				//cout << "[mul] nothing in the negative quadrant --> x and y empty" << endl;
 				x.set_empty();
 				y.set_empty();
 				return false;
 			}
 			xL = xN.lb();
 			yL = yN.lb();
+			//cout << "[mul] bounds in the negative quadrant xL=" << xL << " yL=" << yL << endl;
 		}
 
 		assert(xL<=xU && yL<=yU);
@@ -331,6 +346,8 @@ bool iproj_leq_div(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 
 	bool inflate=!xin.is_empty();
 
+	//cout << "[div] x=" << x << " y=" << y << " z_sup=" << z_sup << endl;
+
 	if (z_sup==POS_INFINITY) {
 		// We cannot simply return true (i.e., (x,y) is inner)
 		// because all the points (x,y) with y=0 does not satisfy x/y<+oo
@@ -340,9 +357,9 @@ bool iproj_leq_div(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 		// We chose one half-plane. TODO: if we are not inflating, we may chose it randomly.
 		if (x==Interval::ZERO)                          { }
 		else if (inflate && yin.contains(0))            { x&=Interval::ZERO; }
-		else if (y.ub()>=0 && (!inflate || yin.lb()>0)) { y&=Interval(next_float(0),POS_INFINITY); }
+		else if (y.ub()>0 && (!inflate || yin.lb()>0))  { y&=Interval(next_float(0),POS_INFINITY); }
 		else                                            { y&=Interval(NEG_INFINITY,previous_float(0)); }
-		//cout << "leq_div1: x=" << x << " y=" << y << endl;
+		//cout << "[div] z_sup=+oo --> x=" << x << " y=" << y << endl;
 		return true;
 	}
 
@@ -361,7 +378,7 @@ bool iproj_leq_div(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 		// are in inflating mode and the box to be inflated is precisely the origin.
 		if (inflate && yin.contains(0)) {
 			x&=Interval::ZERO;
-			//cout << "leq_div2: x=" << x << " y=" << y << endl;
+			//cout << "[div] 0 in yin --> x=" << x << " y=" << y << endl;
 			return true;
 		}
 
@@ -385,7 +402,7 @@ bool iproj_leq_div(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 						// we reintegrate the part of the quadrant (x<0,y>0)
 						x = Interval(x.lb(), xP.ub());
 						y = Interval(yP.lb(), y.ub());
-						//cout << "leq_div3: x=" << x << " y=" << y << endl;
+						//cout << "[div] quadrant (pos,pos): x=" << x << " y=" << y << endl;
 						return true;
 					} else assert(!inflate);
 				}
@@ -397,11 +414,11 @@ bool iproj_leq_div(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 				// ------------------------ quadrant x<0 y<0 ----------------------------------
 				if(!xN.is_empty() && !yN.is_empty() && (!inflate || yin.ub()<0)) {
 					Interval xxin=inflate? Interval(min(0.0,xin.lb()),min(0,xin.ub())) : Interval::EMPTY_SET;
-					if(iproj_leq_mono_op(z_sup,xN,yN,xxin,yin,DIV,true,false)) {
+					if(iproj_leq_mono_op(z_sup,xN,yN,xxin,yin,DIV,false,true)) {
 						// we reintegrate the part of the quadrant (x>0,y<0)
 						x = Interval(xN.lb(), x.ub());
 						y = Interval(y.lb(), yN.ub());
-						//cout << "leq_div4: x=" << x << " y=" << y << endl;
+						//cout << "[div] quadrant (neg,neg): x=" << x << " y=" << y << endl;
 						return true;
 					} else assert(!inflate);
 				}
@@ -440,7 +457,7 @@ bool iproj_leq_div(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 					if(z_sup==0 || iproj_leq_mono_op(z_sup,xN,yP,xin,yin,DIV,true,true)) {
 						x = xN;
 						y = yP;
-						//cout << "leq_div5: x=" << x << " y=" << y << endl;
+						//cout << "[div] quadrant (neg,pos): x=" << x << " y=" << y << endl;
 						return true;
 					} else assert(!inflate);
 				}
@@ -453,7 +470,7 @@ bool iproj_leq_div(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 					if(z_sup==0 || iproj_leq_mono_op(z_sup,xP,yN,xin,yin,DIV,false,false)) {
 						x = xP;
 						y = yN;
-						//cout << "leq_div6: x=" << x << " y=" << y << endl;
+						//cout << "[div] quadrant (pos,neg): x=" << x << " y=" << y << endl;
 						return true;
 					} else assert(!inflate);
 				}
@@ -499,8 +516,6 @@ bool iproj_sub(const Interval& z, Interval& x, Interval& y, const Interval& xin,
 }
 
 bool iproj_mul(const Interval& z, Interval& x, Interval& y, const Interval &xin, const Interval& yin) {
-	iproj_leq_mul(z.ub(),x,y,xin,yin);
-	iproj_geq_mul(z.lb(),x,y,xin,yin);
 	return iproj_leq_mul(z.ub(),x,y,xin,yin) && iproj_geq_mul(z.lb(),x,y,xin,yin);
 }
 

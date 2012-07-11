@@ -82,6 +82,24 @@ public:
 		TEST_ADD(TestInnerArith::mul_div_mono06_2);
 
 		TEST_ADD(TestInnerArith::mul_div_mono07);
+
+		TEST_ADD(TestInnerArith::mul08);
+		TEST_ADD(TestInnerArith::mul09);
+		TEST_ADD(TestInnerArith::mul10);
+		TEST_ADD(TestInnerArith::mul11);
+		TEST_ADD(TestInnerArith::mul12_1);
+		TEST_ADD(TestInnerArith::mul12_2);
+		TEST_ADD(TestInnerArith::mul12_3);
+		TEST_ADD(TestInnerArith::mul12_4);
+		TEST_ADD(TestInnerArith::mul13_1);
+		TEST_ADD(TestInnerArith::mul13_2);
+		TEST_ADD(TestInnerArith::mul13_3);
+		TEST_ADD(TestInnerArith::mul13_4);
+
+		TEST_ADD(TestInnerArith::div08_1);
+		TEST_ADD(TestInnerArith::div08_2);
+		TEST_ADD(TestInnerArith::div09_1);
+		TEST_ADD(TestInnerArith::div09_2);
 	}
 
 	// x+y<=z with contraction (no inflation)
@@ -198,11 +216,50 @@ public:
 	// x*y=z
 	void mul_div_mono07();
 
+	/*================================= non monotonous =========================================== */
+	// x*y<=z with z>0 non inflating
+	void mul08();
+	// x*y>=z with z>0, with only 1 possible quadrant (x>0, y>0), non inflating
+	void mul09();
+	// x*y>=z with z>0, with only 1 possible quadrant (x<0, y<0), non inflating
+	void mul10();
+	// x*y>=z with z>0, with 2 possible quadrants, non inflating
+	void mul11();
+
+	// x*y in [z], non inflating with all corners impacted
+	void mul12_1();
+	// x*y in [z], non inflating with lower-left/upper right corners impacted
+	void mul12_2();
+	// x*y in [z], non inflating with lower-right/upper-left corners impacted
+	void mul12_3();
+	// x*y in [z], non inflating with all the box inner
+	void mul12_4();
+
+	// x*y in [z], inflating a box xin>0 yin>0
+	void mul13_1();
+	// x*y in [z], inflating a box xin>0 yin<0
+	void mul13_2();
+	// x*y in [z], inflating a box xin<0 yin>0
+	void mul13_3();
+	// x*y in [z], inflating a box xin<0 yin<0
+	void mul13_4();
+
+	// x/y<=z with z>0 non inflating,with only possible positive half-plane
+	void div08_1();
+	// x/y<=z with z>0 non inflating,with only possible negative half-plane
+	void div08_2();
+	// x/y<=z with z<0 non inflating,with only possible positive half-plane
+	void div09_1();
+	// x/y<=z with z<0 non inflating,with only possible negative half-plane
+	void div09_2();
+
+
+
 
 private:
 	void check_add_sub(const Interval& z, const Interval& xin, const Interval& yin, bool lb, bool ub);
 	void check_mul_div_mono(const Interval& z, const Interval& xin, const Interval& yin, bool lb, bool ub);
-
+	void check_mul_div(const Interval& z, const Interval& xin, const Interval& yin, bool ll, bool lr, bool ul, bool ur);
 };
 
 } // namespace ibex

@@ -81,7 +81,8 @@ void TestInnerArith::check_add_sub(const Interval& z, const Interval& xin, const
 	TEST_ASSERT(yin.is_subset(y));
 }
 
-// All the multiplication/division are tested on the box [0.5,2]x[0.5,2]
+// All the monotonous multiplication/division are tested on the box [0.5,2]x[0.5,2]
+// All the non-mono multiplication/division are tested on the box [-2,2]x[-2,2]
 //
 // check that the lower bound of (xin,yin) is inside (x,y)
 // if lb=true then x.lb*y.lb == z.lb else x.lb and y.lb must be unchanged
@@ -158,6 +159,51 @@ void TestInnerArith::check_mul_div_mono(const Interval& z, const Interval& xin, 
 	TEST_ASSERT(xin.is_subset(x));
 	TEST_ASSERT(yin.is_subset(y));
 }
+
+// All the monotonous multiplication/division are tested on the box [0.5,2]x[0.5,2]
+// All the non-mono multiplication/division are tested on the box [-2,2]x[-2,2]
+//
+// check that the lower bound of (xin,yin) is inside (x,y)
+// if lb=true then x.lb*y.lb == z.lb else x.lb and y.lb must be unchanged
+// if ub=true then x.ub*y.ub == z.ub else x.ub and y.ub must be unchanged
+void TestInnerArith::check_mul_div(const Interval& z, const Interval& xin, const Interval& yin, bool ll, bool lr, bool ul, bool ur) {
+	const double L=-2.0;
+	const double U=2.0;
+	Interval x(L,U);
+	Interval y(L,U);
+
+	iproj_mul(z,x,y,xin,yin);
+  	if (ll)	{
+  		//
+  		// !!!!!!!!!!!!!! the current code is not optimal.... !!!!!!!!!!!!!
+  		//
+		//TEST_ASSERT_DELTA(y.lb()*x.lb(),z.ub(),error);
+
+
+  		TEST_ASSERT(y.lb()*x.lb()<=z.ub());
+	}
+	if (lr) {
+		//TEST_ASSERT_DELTA(y.lb()*x.ub(),z.lb(),error);
+		TEST_ASSERT(y.lb()*x.ub()>=z.lb());
+	}
+	if (ul)	{
+		//TEST_ASSERT_DELTA(y.ub()*x.lb(),z.lb(),error);
+		TEST_ASSERT(y.ub()*x.lb()>=z.lb());
+	}
+	if (ur) {
+		//TEST_ASSERT_DELTA(y.ub()*x.ub(),z.ub(),error);
+		TEST_ASSERT(y.ub()*x.ub()<=z.ub());
+	}
+
+	if (!ll && !ul) TEST_ASSERT(x.lb()==L);
+	if (!ll && !lr) TEST_ASSERT(y.lb()==L);
+	if (!lr && !ur) TEST_ASSERT(x.ub()==U);
+	if (!ul && !ur) TEST_ASSERT(y.ub()==U);
+
+	TEST_ASSERT(xin.is_subset(x));
+	TEST_ASSERT(yin.is_subset(y));
+}
+
 
 void TestInnerArith::add_sub01() {
 	check_add_sub(Interval(NEG_INFINITY,1.0),Interval::EMPTY_SET,Interval::EMPTY_SET,false,true);
@@ -384,4 +430,105 @@ void TestInnerArith::mul_div_mono07() {
 	iproj_mul(1,x,y);
 	TEST_ASSERT(x.is_empty() || (x*y==1));
 }
+
+void TestInnerArith::mul08() {
+	check_mul_div(Interval(NEG_INFINITY,1),Interval::EMPTY_SET,Interval::EMPTY_SET,true,false,false,true);
+}
+
+void TestInnerArith::mul09() {
+	Interval x(-0.5,2);
+	Interval y(-0.5,2);
+	iproj_mul(Interval(1,2),x,y);
+	TEST_ASSERT_DELTA(x.lb()*y.lb(),1.0,error);
+	TEST_ASSERT_DELTA(x.ub()*y.ub(),2.0,error);
+	TEST_ASSERT((x*y).is_subset(Interval(1,2)));
+}
+
+void TestInnerArith::mul10() {
+	Interval x(-2,0.5);
+	Interval y(-2,0.5);
+	iproj_mul(Interval(1,2),x,y);
+	TEST_ASSERT_DELTA(x.lb()*y.lb(),2.0,error);
+	TEST_ASSERT_DELTA(x.ub()*y.ub(),1.0,error);
+	TEST_ASSERT((x*y).is_subset(Interval(1,2)));
+}
+
+void TestInnerArith::mul11() {
+	Interval x(-2,2);
+	Interval y(-2,2);
+	iproj_mul(Interval(1,2),x,y);
+	TEST_ASSERT(fabs(x.lb()*y.lb()-1.0)<error || fabs(x.ub()*y.ub()-1.0)<error);
+	TEST_ASSERT((x*y).is_subset(Interval(1,2)));
+}
+
+void TestInnerArith::mul12_1() {
+	check_mul_div(Interval(-1,1), Interval::EMPTY_SET, Interval::EMPTY_SET, true,true,true,true);
+}
+
+void TestInnerArith::mul12_2() {
+	check_mul_div(Interval(-4,1), Interval::EMPTY_SET, Interval::EMPTY_SET, true,true,true,true);
+}
+
+void TestInnerArith::mul12_3() {
+	check_mul_div(Interval(-1,4), Interval::EMPTY_SET, Interval::EMPTY_SET, true,true,true,true);
+}
+
+void TestInnerArith::mul12_4() {
+	check_mul_div(Interval(-4,4), Interval::EMPTY_SET, Interval::EMPTY_SET, true,true,true,true);
+}
+
+void TestInnerArith::mul13_1() {
+	check_mul_div(Interval(-1,1), 2, 0.1, true,false,false,true);
+}
+
+void TestInnerArith::mul13_2() {
+	check_mul_div(Interval(-1,1), -1, -1, true,false,false,true);
+}
+
+void TestInnerArith::mul13_3() {
+	check_mul_div(Interval(-1,1), 0.1, -2, true,false,false,true);
+}
+
+void TestInnerArith::mul13_4() {
+	check_mul_div(Interval(-1,1), -2, 0.1, true,false,false,true);
+}
+
+void TestInnerArith::div08_1() {
+	Interval x(-2,2);
+	Interval y(0.5,1.0);
+	iproj_div(Interval(NEG_INFINITY,1),x,y);
+	TEST_ASSERT_DELTA(x.ub()/y.lb(),1.0,error);
+	TEST_ASSERT(x.lb()==-2);
+	TEST_ASSERT(y.ub()==1.0);
+}
+
+void TestInnerArith::div08_2() {
+	Interval x(-2,2);
+	Interval y(-1,-0.5);
+	iproj_div(Interval(NEG_INFINITY,1),x,y);
+	TEST_ASSERT_DELTA(x.lb()/y.ub(),1.0,error);
+	TEST_ASSERT(x.ub()==2);
+	TEST_ASSERT(y.lb()==-1.0);
+}
+
+void TestInnerArith::div09_1() {
+	Interval x(-2,-1);
+	Interval y(-2,2.0);
+	iproj_div(Interval(NEG_INFINITY,-1),x,y);
+
+	TEST_ASSERT_DELTA(x.ub()/y.ub(),-1.0,error);
+	TEST_ASSERT(x.lb()==-2);
+	TEST_ASSERT(y.lb()==next_float(0));
+}
+
+void TestInnerArith::div09_2() {
+	Interval x(1,2);
+	Interval y(-2,2.0);
+	iproj_div(Interval(NEG_INFINITY,-1),x,y);
+
+	TEST_ASSERT_DELTA(x.lb()/y.lb(),-1.0,error);
+	TEST_ASSERT(x.ub()==2);
+	TEST_ASSERT(y.ub()==previous_float(0));
+}
+
 } // end namespace
