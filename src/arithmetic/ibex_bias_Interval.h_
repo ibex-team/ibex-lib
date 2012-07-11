@@ -382,9 +382,10 @@ inline Interval operator*(double d, const Interval& x) {
 }
 
 inline Interval operator/(double d, const Interval& x) {
-	if (x.is_empty()) return x;
+	/*if (x.is_empty()) return x;
 	else if (d==0 || d==NEG_INFINITY || d==POS_INFINITY) return Interval::EMPTY_SET;
-	else return INTERVAL(d)/x.itv;
+	else*/
+	return Interval(d)/x.itv;
 }
 
 inline Interval operator+(const Interval& x1, const Interval& x2) {

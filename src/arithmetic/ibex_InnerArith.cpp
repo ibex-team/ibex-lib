@@ -117,8 +117,15 @@ bool iproj_geq_mono_op(double z_inf, Interval& x, Interval& y, const Interval& x
 	assert(yin.is_subset(y));
 	//assert(!inflate || eval(xin,yin,op).lb()>=z_inf); // does this condition should really hold?
 	//pb: this function is used for <= with add/sub
-	//cout << "--- x geq_mono_op=" << x << " y=" << y << " with z_inf=" << z_inf << endl;
-	if (x.is_empty() || y.is_empty()) return false;
+	//cout << "----------------------------------------------------------" << endl;
+	//cout << "  geq_mono_op " << op_str(op) << endl;
+	//cout << "  x=" << x << " y=" << y << " z_inf=" << z_inf << endl;
+	//cout << "  inc_var1=" << inc_var1 << " inc_var2=" << inc_var2 << endl;
+	if (inflate) //cout << "  inflating xin=" << xin << " yin=" << yin << endl;
+	if (x.is_empty() || y.is_empty()) {
+		//cout << "  result: x=" << x << " y=" << y << endl;
+		return false;
+	}
 
 	if (inc_var1) {
 		if (inc_var2) {
@@ -139,38 +146,49 @@ bool iproj_geq_mono_op(double z_inf, Interval& x, Interval& y, const Interval& x
 		}
 	}
 
-	//cout << "--- y1=" << y1 << " y2=" << y2 << " ---" << endl;
+	//cout << "  y1=" << y1 << " y2=" << y2 << endl;
 
 	xmin=projx(z_inf, y1, op, inc_var1);
 	xmax=projx(z_inf, y2, op, inc_var1); //true->ROUND_UP, false->ROUND_DOWN
 
-	//cout << "--- xmin=" << xmin << " xmax=" << xmax << " ---" << endl;
+	//cout << "  xmin=" << xmin << " xmax=" << xmax << endl;
 
-	if (xmax==POS_INFINITY) xmax=x.ub();
-	if (xmin==NEG_INFINITY) xmin=x.lb();
+	if (xmax==POS_INFINITY) {
+		xmax=x.ub();
+		//cout << "    xmax=" << xmax << endl;
+	}
 
-	//    cout << xmin << "," << xmax << endl;
+	if (xmin==NEG_INFINITY) {
+		xmin=x.lb();
+		//cout << "    xmin=" << xmin << endl;
+	}
+
+
 	if ((inc_var1 && xmin > x.ub()) || (!inc_var1 && xmax < x.lb())) {
 		assert(!inflate);
 		x.set_empty();
 		y.set_empty();
+		//cout << "  result: x=" << x << " y=" << y << endl;
 		return false;
 	} else if((inc_var1 && xmax < x.lb()) || (!inc_var1 && xmin > x.ub())) {
 		// all the box is inner
 		x0=(inc_var1)? x.lb():x.ub();
+		//cout << "  x0 =" << x0 << endl;
 	} else {
-		if (inflate)
+		if (inflate) {
 			if (inc_var1) { if (xmax>xin.lb()) xmax=xin.lb(); }
 			else          { if (xmin<xin.ub()) xmin=xin.ub(); }
-		//cout << "--- xmin2=" << xmin << " xmax2=" << xmax << " ---" << endl;
+		}
+		//cout << "  xmin=" << xmin << " xmax=" << xmax << endl;
 		Interval xx= x & Interval(xmin,xmax);
-		//cout << "--- xx.diam=" << xx.diam() << "---" << endl;
 		x0= xx.lb() + (double)rand()/(double)RAND_MAX*xx.diam();
-		//cout << "--- x0=" << x0 << " ---" << endl;
+		//cout << "  x0 (random) =" << x0 << endl;
 		if (!xx.contains(x0)) x0= (x0 < xx.lb())? xx.lb():xx.ub();
 	}
+
 	y0=projy(z_inf,x0,op,inc_var2);
-	//cout << "--- y0=" << y0 << " ---" << endl;
+	//cout << "  y0=" << y0 << endl;
+
 	if (y0!=POS_INFINITY) {
 		if(y0>y.ub()) y0=y.ub();
 		else if(y0<y.lb()) y0=y.lb();
@@ -183,7 +201,7 @@ bool iproj_geq_mono_op(double z_inf, Interval& x, Interval& y, const Interval& x
 	// [gch] if op==MUL and z_sup=0 we have y=[0,0]
 	// and x=[x^-,x0] (or x=[x0,x^+]) which is correct in both
 	// case although we could take x entirely in this case.
-
+	//cout << "  result: x=" << x << " y=" << y << endl;
 	assert(xin.is_subset(x));
 	assert(yin.is_subset(y));
 
@@ -224,6 +242,10 @@ bool iproj_leq_mul(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 		}
 	}
 	else if (z_sup>0) {
+		// xxin and yyin are introduced because the box (xin,yin)
+		// may not be included in the current quadrant (here x>0, y>0).
+		// Still, we have to take it into account. (xxin,yyin) is the
+		// projection of (xin,yin) onto the current quadrant
 		Interval xxin,yyin;
 
 		Interval xP = x & Interval::POS_REALS;
@@ -233,10 +255,13 @@ bool iproj_leq_mul(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 
 		// ------------------------ quadrant x>0 y>0 ----------------------------------
 		if(!xP.is_empty() && !yP.is_empty()) { //y.ub()>=0 && (!inflate || yin.lb()>0)) {
-			xxin=inflate? Interval(0, max(0.0,xin.ub())) : Interval::EMPTY_SET;
-			yyin=inflate? Interval(0, max(0.0,xin.ub())) : Interval::EMPTY_SET;
-			if(!iproj_leq_mono_op(z_sup, xP, yP, xxin, yin, MUL, true, true))
+			xxin=inflate? Interval(max(0.0,xin.lb()), max(0.0,xin.ub())) : Interval::EMPTY_SET;
+			yyin=inflate? Interval(max(0.0,yin.lb()), max(0.0,yin.ub())) : Interval::EMPTY_SET;
+			if(!iproj_leq_mono_op(z_sup, xP, yP, xxin, yin, MUL, true, true)) {
+				x.set_empty();
+				y.set_empty();
 				return false;
+			}
 			xU = xP.ub();
 			yU = yP.ub();
 		}
@@ -248,10 +273,13 @@ bool iproj_leq_mul(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 
 		// ------------------------ quadrant x<0 y<0 ----------------------------------
 		if(!xN.is_empty() && !yN.is_empty()) { //y.ub()>=0 && (!inflate || yin.lb()>0)) {
-			xxin=inflate? Interval(min(0.0,xin.lb()),0) : Interval::EMPTY_SET;
-			yyin=inflate? Interval(min(0.0,yin.lb()),0) : Interval::EMPTY_SET;
-			if(!iproj_leq_mono_op(z_sup, xN, yN, xxin, yyin, MUL, false, false))
+			xxin=inflate? Interval(min(0.0,xin.lb()),min(0.0,xin.ub())) : Interval::EMPTY_SET;
+			yyin=inflate? Interval(min(0.0,yin.lb()),min(0.0,yin.lb())) : Interval::EMPTY_SET;
+			if(!iproj_leq_mono_op(z_sup, xN, yN, xxin, yyin, MUL, false, false)) {
+				x.set_empty();
+				y.set_empty();
 				return false;
+			}
 			xL = xN.lb();
 			yL = yN.lb();
 		}
@@ -310,9 +338,11 @@ bool iproj_leq_div(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 		// be a real value (0 or 1).
 
 		// We chose one half-plane. TODO: if we are not inflating, we may chose it randomly.
-		if (inflate && yin.contains(0))                 { x&=Interval::ZERO; }
+		if (x==Interval::ZERO)                          { }
+		else if (inflate && yin.contains(0))            { x&=Interval::ZERO; }
 		else if (y.ub()>=0 && (!inflate || yin.lb()>0)) { y&=Interval(next_float(0),POS_INFINITY); }
 		else                                            { y&=Interval(NEG_INFINITY,previous_float(0)); }
+		//cout << "leq_div1: x=" << x << " y=" << y << endl;
 		return true;
 	}
 
@@ -320,12 +350,6 @@ bool iproj_leq_div(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 		x.set_empty();
 		y.set_empty();
 		return false;
-	}
-
-	else if (z_sup==0) {
-		assert(!inflate || (xin==Interval::ZERO));
-		x&=Interval::ZERO;
-		return !x.is_empty();
 	}
 
 	else if (z_sup>0) {
@@ -337,6 +361,7 @@ bool iproj_leq_div(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 		// are in inflating mode and the box to be inflated is precisely the origin.
 		if (inflate && yin.contains(0)) {
 			x&=Interval::ZERO;
+			//cout << "leq_div2: x=" << x << " y=" << y << endl;
 			return true;
 		}
 
@@ -355,11 +380,12 @@ bool iproj_leq_div(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 
 				// ------------------------ quadrant x>0 y>0 ----------------------------------
 				if(!xP.is_empty() && !yP.is_empty() && (!inflate || yin.lb()>0)) {
-					Interval xxin=inflate? Interval(0, max(0.0,xin.ub())) : Interval::EMPTY_SET;
+					Interval xxin=inflate? Interval(max(0.0,xin.lb()), max(0.0,xin.ub())) : Interval::EMPTY_SET;
 					if(iproj_leq_mono_op(z_sup,xP,yP,xxin,yin,DIV,true,false)) {
 						// we reintegrate the part of the quadrant (x<0,y>0)
 						x = Interval(x.lb(), xP.ub());
 						y = Interval(yP.lb(), y.ub());
+						//cout << "leq_div3: x=" << x << " y=" << y << endl;
 						return true;
 					} else assert(!inflate);
 				}
@@ -370,11 +396,12 @@ bool iproj_leq_div(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 
 				// ------------------------ quadrant x<0 y<0 ----------------------------------
 				if(!xN.is_empty() && !yN.is_empty() && (!inflate || yin.ub()<0)) {
-					Interval xxin=inflate? Interval(min(0.0,xin.lb()),0) : Interval::EMPTY_SET;
+					Interval xxin=inflate? Interval(min(0.0,xin.lb()),min(0,xin.ub())) : Interval::EMPTY_SET;
 					if(iproj_leq_mono_op(z_sup,xN,yN,xxin,yin,DIV,true,false)) {
 						// we reintegrate the part of the quadrant (x>0,y<0)
 						x = Interval(xN.lb(), x.ub());
 						y = Interval(y.lb(), yN.ub());
+						//cout << "leq_div4: x=" << x << " y=" << y << endl;
 						return true;
 					} else assert(!inflate);
 				}
@@ -385,11 +412,19 @@ bool iproj_leq_div(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 		y.set_empty();
 		return false;
 	}
-	else { // z_sup<0
+	else { // z_sup<=0
+
 		if (inflate && yin.contains(0)) {
-			assert(xin==Interval::ZERO && yin==Interval::ZERO);
-			x=xin;
-			y=yin;
+			// this is the only case were we can inflate inside
+			// both quadrants (x<0,y>0) and (x>0,y<0), along the line x=0.
+			assert(xin==Interval::ZERO);
+			if (z_sup==0) {
+				x=xin; // 0
+			} else {
+				assert(yin==Interval::ZERO);
+				x=xin; // 0
+				y=yin; // 0
+			}
 			return true;
 		}
 
@@ -402,9 +437,10 @@ bool iproj_leq_div(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 
 				// ------------------------ quadrant x<0 y>0 ----------------------------------
 				if(!xN.is_empty() && !yP.is_empty() && (!inflate || yin.lb()>0)) {
-					if(iproj_leq_mono_op(z_sup,xN,yP,xin,yin,DIV,false,true)) {
+					if(z_sup==0 || iproj_leq_mono_op(z_sup,xN,yP,xin,yin,DIV,true,true)) {
 						x = xN;
 						y = yP;
+						//cout << "leq_div5: x=" << x << " y=" << y << endl;
 						return true;
 					} else assert(!inflate);
 				}
@@ -414,9 +450,10 @@ bool iproj_leq_div(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 
 				// ------------------------ quadrant x>0 y<0 ----------------------------------
 				if(!xP.is_empty() && !yN.is_empty() && (!inflate || yin.ub()<0)) {
-					if(iproj_leq_mono_op(z_sup,xP,yN,xin,yin,DIV,false,true)) {
+					if(z_sup==0 || iproj_leq_mono_op(z_sup,xP,yN,xin,yin,DIV,false,false)) {
 						x = xP;
 						y = yN;
+						//cout << "leq_div6: x=" << x << " y=" << y << endl;
 						return true;
 					} else assert(!inflate);
 				}
@@ -446,7 +483,7 @@ bool iproj_geq_mul(double z_inf, Interval& x, Interval& y, const Interval &xin, 
 
 bool iproj_geq_div(double z_inf, Interval& x, Interval& y, const Interval &xin, const Interval& yin) {
 	Interval x2(-x);
-	bool res=iproj_leq_div(-z_inf,x2,y,-xin,yin);
+ 	bool res=iproj_leq_div(-z_inf,x2,y,-xin,yin);
 	x=-x2;
 	return res;
 }
@@ -462,6 +499,8 @@ bool iproj_sub(const Interval& z, Interval& x, Interval& y, const Interval& xin,
 }
 
 bool iproj_mul(const Interval& z, Interval& x, Interval& y, const Interval &xin, const Interval& yin) {
+	iproj_leq_mul(z.ub(),x,y,xin,yin);
+	iproj_geq_mul(z.lb(),x,y,xin,yin);
 	return iproj_leq_mul(z.ub(),x,y,xin,yin) && iproj_geq_mul(z.lb(),x,y,xin,yin);
 }
 
