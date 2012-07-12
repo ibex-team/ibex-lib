@@ -18,4 +18,16 @@ CtcUnion::CtcUnion(const Array<Ctc>& list) : Ctc(list[0].nb_var), list(list) {
 	}
 }
 
+void CtcUnion::contract(IntervalVector& box) {
+	IntervalVector savebox(box);
+	IntervalVector result(IntervalVector::empty(box.size()));
+
+	for (int i=0; i<list.size(); i++) {
+		if (i>0) box=savebox;
+		list[i].contract(box);
+		result |= box;
+	}
+	box = result;
 } // end namespace ibex
+
+}

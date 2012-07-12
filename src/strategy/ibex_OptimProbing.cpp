@@ -29,13 +29,13 @@ void Optimizer::monotonicity_analysis(IntervalVector& box) {
 }
 
 bool Optimizer::is_feasible(const IntervalVector& box) {
-	for (int j=0; j<g.size(); j++)
+	for (int j=0; j<m; j++)
 		if (g[j].eval(box).lb()>0) return false;
 	return true;
 }
 
 bool Optimizer::is_inner(const IntervalVector& box) {
-	for (int j=0; j<g.size(); j++)
+	for (int j=0; j<m; j++)
 		if (g[j].eval(box).ub()>0) return false;
 	return true;
 }
@@ -44,7 +44,7 @@ bool Optimizer::is_inner(const IntervalVector& box) {
 bool Optimizer::in_HC4(IntervalVector& box) {
 	if (!is_feasible(box)) { box.set_empty(); return false; }
 
-	for (int j=0; j<g.size(); j++) {
+	for (int j=0; j<m; j++) {
 		g[j].iproj(Interval(NEG_INFINITY,0),box);
 		if (box.is_empty()) return false;
 	}
@@ -105,7 +105,7 @@ bool Optimizer::line_probing(const IntervalVector& box, const Vector& start, boo
 	// ------------------------------------------------------------------------
 	// Calculates the gradient of f at the startpoint of the box (once for all)
 	// ------------------------------------------------------------------------
-	IntervalVector ig(n);            // interval gradient
+	IntervalVector ig(n);              // interval gradient
 
 	(IntervalVector&) box = start;     // take the startpoint of the box
 
@@ -122,7 +122,7 @@ bool Optimizer::line_probing(const IntervalVector& box, const Vector& start, boo
 	// (the opposite of the gradient, that is, the facet
 	// successive candidate points will move to)
 	// --------------------------------------------------
-	Vector dist(n); // the distance to reach the facet along the j axis
+	Vector dist(n);                    // the distance to reach the facet along the j axis
 
 	for (int j=0; j<n; j++) {
 		// if start is midpoint, dist is equal to +/- rad(j+1) !
@@ -140,8 +140,8 @@ bool Optimizer::line_probing(const IntervalVector& box, const Vector& start, boo
 	// which the descent direction is maximal with respect
 	// to the corresponding distance.
 	// --------------------------------------------------
-	double max_ratio=0; // the maximal ratio
-	int mj=-1;         // the index of the "main direction"
+	double max_ratio=0;                // the maximal ratio
+	int mj=-1;                         // the index of the "main direction"
 	for (int j=0; j<n; j++) {
 
 		if (dist[j]==0) continue;

@@ -65,7 +65,7 @@ public:
 	 *  \brief Create an optimizer.
 	 *
 	 *   \param f     - The objective function f(x)
-	 *   \param g     - the constraints function g(x) (each constraint being g_i(x)<=0)
+	 *   \param g     - the vector-valued function representing the constraints (each constraint must be g_i(x)<=0)
 	 *   \param ctc   - the contractor w.r.t. to g(x)<=0
 	 *   \param bsc   - the bisector
 	 *
@@ -75,9 +75,14 @@ public:
 	 *   \pram  goal_abs_prec - absolute precision of the objective (the optimizer stops once reached).
 	 *   \param sample_size   - number of samples taken when looking for a "loup"
 	 */
-	Optimizer(Function& f, const Array<Function>& g, Ctc& ctc, Bsc& bsc, double prec=default_prec,
+	Optimizer(Function& f, Function& g, Ctc& ctc, Bsc& bsc, double prec=default_prec,
 			double goal_rel_prec=default_goal_rel_prec, double goal_abs_prec=default_goal_abs_prec,
 			int sample_size=default_sample_size);
+
+	/**
+	 * \brief Delete *this.
+	 */
+	~Optimizer();
 
 	/**
 	 * \brief Run the optimization.
@@ -98,11 +103,14 @@ public:
 	/** Number of variables. */
 	const int n;
 
+	/** Number of constraints. */
+	const int m;
+
 	/** Objective function */
 	Function& f;
 
 	/** Constraints (we have g(x)<=0) */
-	Array<Function> g;
+	Function& g;
 
 	/** Contractor w.r.t. g(x)<=0. */
 	Ctc& ctc;
@@ -270,7 +278,7 @@ private:
 	/** Inner contractor (for the negation of g) */
 	CtcUnion* is_inside;
 
-	/**  */
+	/** The "loup" (lowest upper bound of the criterion) */
 	double loup;
 
 	/** The point satisfying the constraints corresponding to the loup */
@@ -279,6 +287,8 @@ private:
 	/** Lower bound of the small boxes taken by the precision contractor */
 	double uplo_of_epsboxes;
 
+	/** Miscellaneous */
+	int nb_simplex;
 	int nb_rand;
 	double diam_simplex;
 	double diam_rand;

@@ -9,7 +9,7 @@
 //============================================================================
 
 #include "ibex_CtcHC4.h"
-#include "ibex_CtcHC4Revise.h"
+#include "ibex_CtcProj.h"
 
 namespace ibex {
 

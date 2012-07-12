@@ -25,6 +25,9 @@ namespace ibex {
 class CtcUnion : public Ctc {
 public:
 
+	/**
+	 * \brief Create the union of all the contractors in the list.
+	 */
 	CtcUnion(const Array<Ctc>& list);
 
 	/**
@@ -33,14 +36,10 @@ public:
 	virtual void contract(IntervalVector& box);
 
 	/**
-	 * \brief Delete *this.
+	 * \brief The list of sub-contractors.
 	 */
-	virtual ~CtcUnion();
-
-protected:
-	/** The list of sub-contractors */
 	Array<Ctc> list;
 };
 
 } // end namespace ibex
-#endif // IBEX_CTCUNION_H_
+#endif // __IBEX_CTC_UNION_H__

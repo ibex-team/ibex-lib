@@ -23,6 +23,9 @@ public:
 	/** Auxiliary functions */
 	Array<Function> func;
 
+	/** The goal (if any) */
+	//Function goal;
+
 	/** The main (vector-valued) function */
 	Function f;
 

@@ -551,11 +551,26 @@ inline Interval Function::eval(const IntervalVector& box) const {
 }
 
 inline IntervalVector Function::eval_vector(const IntervalVector& box) const {
-	return eval_domain(box).v();
+	return expr().dim.is_scalar() ? IntervalVector(1,eval_domain(box).i()) : eval_domain(box).v();
 }
 
 inline IntervalMatrix Function::eval_matrix(const IntervalVector& box) const {
-	return eval_domain(box).m();
+	switch (expr().dim.type()) {
+	case Dim::SCALAR     :
+		return IntervalMatrix(1,1,eval_domain(box).i());
+	case Dim::ROW_VECTOR : {
+		IntervalMatrix M(dimension(),1);
+		M.set_row(0,eval_domain(box).v());
+		return M;
+	}
+	case Dim::COL_VECTOR : {
+		IntervalMatrix M(1,dimension());
+		M.set_col(0,eval_domain(box).v());
+		return M;
+	}
+	case Dim::MATRIX: return eval_domain(box).m();
+	default : assert(false);
+	}
 }
 
 inline void Function::proj(const Interval& y, IntervalVector& x) const {

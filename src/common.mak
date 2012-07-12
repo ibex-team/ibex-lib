@@ -12,9 +12,10 @@ SUBLIB=bias
 IBEX_DIR:=/home/gchabert08/Workspace-C++/Ibex
 BIAS_DIR:=/home/gchabert08/Applications/Profil-2.0.8
 GAOL_DIR:=/home/gchabert08/Applications/Gaol-3.1.1
+SOPLEX_DIR:=/home/gchabert08/Applications/soplex-1.5.0
 #===================================================
 
-#CXXFLAGS := -O0 -g -pg -Wall -Wno-deprecated -fmessage-length=0
+#CXXFLAGS := -O0 -g -pg -Wall -Wno-unknown-pragmas -Wno-deprecated -fmessage-length=0
 CXXFLAGS :=	-O3 -DNDEBUG #-g -pg 
 
 IBEX_INC_DIR:=$(IBEX_DIR)/include
@@ -38,12 +39,18 @@ GAOL_INC_DIR_OPT := -I$(GAOL_INC_DIR)
 GAOL_LIB_DIR_OPT := -L$(GAOL_LIB_DIR) -L$(GDTOA_LIB_DIR)
 GAOL_LIB_NAME_OPT := -lgaol -lgdtoa -lm -lultim 
 
+SOPLEX_INC_DIR:=$(SOPLEX_DIR)/src
+SOPLEX_INC_DIR_OPT:=-I$(SOPLEX_INC_DIR)
+SOPLEX_LIB_DIR=$(SOPLEX_DIR)/lib
+SOPLEX_LIB_DIR_OPT=-L$(SOPLEX_LIB_DIR)
+SOPLEX_LIB_NAME_OPT=-lsoplex-1.5.0.linux.x86.gnu.opt
+
 ifeq ($(SUBLIB), gaol)
-INC_DIR_OPT := $(IBEX_INC_DIR_OPT) $(GAOL_INC_DIR_OPT)
-LIB_DIR_OPT := $(IBEX_LIB_DIR_OPT) $(GAOL_LIB_DIR_OPT)
-LIB_NAME_OPT := $(IBEX_LIB_NAME_OPT) $(GAOL_LIB_NAME_OPT)
+INC_DIR_OPT := $(IBEX_INC_DIR_OPT) $(GAOL_INC_DIR_OPT) $(SOPLEX_INC_DIR_OPT) 
+LIB_DIR_OPT := $(IBEX_LIB_DIR_OPT) $(GAOL_LIB_DIR_OPT) $(SOPLEX_LIB_DIR_OPT) 
+LIB_NAME_OPT := $(IBEX_LIB_NAME_OPT) $(GAOL_LIB_NAME_OPT) $(SOPLEX_LIB_NAME_OPT) 
 else
-INC_DIR_OPT := $(IBEX_INC_DIR_OPT) $(BIAS_INC_DIR_OPT)
-LIB_DIR_OPT := $(IBEX_LIB_DIR_OPT) $(BIAS_LIB_DIR_OPT)
-LIB_NAME_OPT := $(IBEX_LIB_NAME_OPT) $(BIAS_LIB_NAME_OPT)
+INC_DIR_OPT := $(IBEX_INC_DIR_OPT) $(BIAS_INC_DIR_OPT) $(SOPLEX_INC_DIR_OPT)
+LIB_DIR_OPT := $(IBEX_LIB_DIR_OPT) $(BIAS_LIB_DIR_OPT) $(SOPLEX_LIB_DIR_OPT)
+LIB_NAME_OPT := $(IBEX_LIB_NAME_OPT) $(BIAS_LIB_NAME_OPT) $(SOPLEX_LIB_NAME_OPT)
 endif
