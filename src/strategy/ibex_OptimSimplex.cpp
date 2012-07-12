@@ -1,7 +1,7 @@
 //============================================================================
 //                                  I B E X                                   
 // File        : ibex_OptimSimplex.cpp
-// Author      : Gilles Chabert
+// Author      : Ignacio Araya
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Jul 12, 2012
