@@ -12,7 +12,6 @@
 #include "ibex_Function.h"
 #include "ibex_Expr.h"
 #include "ibex_Eval.h"
-#include "ibex_BasicDecorator.h"
 #include "Ponts30.h"
 
 using namespace std;

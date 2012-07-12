@@ -13,7 +13,6 @@
 #include "ibex_Function.h"
 #include "ibex_Expr.h"
 #include "ibex_Eval.h"
-#include "ibex_BasicDecorator.h"
 
 using namespace std;
 

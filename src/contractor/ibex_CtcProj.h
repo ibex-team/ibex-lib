@@ -9,8 +9,8 @@
  * Created     : Feb 27, 2012
  * ---------------------------------------------------------------------------- */
 
-#ifndef __IBEX_CTC_HC4_REVISE_H__
-#define __IBEX_CTC_HC4_REVISE_H__
+#ifndef __IBEX_CTC_PROJ_H__
+#define __IBEX_CTC_PROJ_H__
 
 #include "ibex_Ctc.h"
 #include "ibex_HC4Revise.h"
@@ -29,10 +29,13 @@ public:
 	/**
 	 * \brief HC4Revise on f(x)=0 or f(x)<=0.
 	 *
-	 * \param equality If true: f(x)=0, otherwise: f(x)<=0.
+	 * \param op: by default: true.
 	 */
-	CtcProj(Function& f, bool equality=true);
+	CtcProj(Function& f, NumConstraint::CompOp op=NumConstraint::EQ);
 
+	/**
+	 * \remark ctr is not kept by reference.
+	 */
 	CtcProj(const NumConstraint& ctr);
 
 	/**
@@ -54,4 +57,4 @@ private:
 };
 
 } // namespace ibex
-#endif // __IBEX_CTC_HC4_REVISE_H__
+#endif // __IBEX_CTC_PROJ_H__

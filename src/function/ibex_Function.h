@@ -30,23 +30,6 @@ class System;
  * Every expression in ibex (like x^2+y^2) is considered as a function,
  * (here: (x,y)->x^2+y^2) where the order of the arguments ("x" and "y")
  * is simply the order of symbol declaration.
- *
- * <p>
- * A function is build in three steps:<br>
- * 1. Create the function object:
- * \code
- * Function f;
- * \endcode
- * 2. Add the symbols (arguments of the function), and
- * get a reference to them for future usage.
- * \code
- *  const Symbol& x=f.add_symbol("x");
- *  const Symbol& y=f.add_symbol("y");
- *  \endcode
- *  3. Build the expression and set it as the "return" value of the function:
- *  \code
- *   f.set_expr(pow(x,2)+pow(y,2));
- *  \endcode
  */
 class Function {
 public:
@@ -356,6 +339,27 @@ public:
 	 */
 	void proj(const IntervalMatrix& y, IntervalVector& x) const;
 
+	/**
+	 * \brief Inner projection f(x)=y onto x.
+	 */
+	void iproj(const Domain& y, IntervalVector& x) const;
+
+	/**
+	 * \brief Inner projection f(x)=y onto x, inflating xin.
+	 */
+	void iproj(const Domain& y, IntervalVector& x, const IntervalVector& xin) const;
+
+	/**
+	 * \brief Inner projection f(x)=y onto x.
+	 */
+	void iproj(const Interval& y, IntervalVector& x) const;
+
+	/**
+	 * \brief Inner projection f(x)=y onto x, inflating xin.
+	 */
+	void iproj(const Interval& y, IntervalVector& x, const IntervalVector& xin) const;
+
+
 	CompiledFunction cf; // "public" just for debug
 
 	/*
@@ -565,6 +569,14 @@ inline void Function::proj(const IntervalVector& y, IntervalVector& x) const {
 
 inline void Function::proj(const IntervalMatrix& y, IntervalVector& x) const {
 	proj(Domain((IntervalMatrix&) y),x); // y will not be modified
+}
+
+inline void Function::iproj(const Interval& y, IntervalVector& x) const {
+	iproj(Domain((Interval&) y),x);
+}
+
+inline void Function::iproj(const Interval& y, IntervalVector& x, const IntervalVector& xin) const {
+	iproj(Domain((Interval&) y),x,xin);
 }
 
 } // namespace ibex

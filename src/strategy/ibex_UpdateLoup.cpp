@@ -41,17 +41,14 @@ bool Optimizer::is_inner(const IntervalVector& box) {
 }
 
 /* last update: IAR  */
-bool Optimizer::in_HC4(IntervalVector& box){
+bool Optimizer::in_HC4(IntervalVector& box) {
 	if (!is_feasible(box)) { box.set_empty(); return false; }
 
-	bool inner_found=true;
-
 	for (int j=0; j<g.size(); j++) {
-		IntervalVector in=g_infl->inner_box(box,Interval(NEG_INFINITY,0));
-		if (in.is_empty()) inner_found=false;
-		else box=in;
+		g[j].iproj(Interval(NEG_INFINITY,0),box);
+		if (box.is_empty()) return false;
 	}
-	return inner_found;
+	return true;
 }
 
 /* last update: GCH  */

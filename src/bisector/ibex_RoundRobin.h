@@ -16,17 +16,21 @@
 
 namespace ibex {
 
-/** \ingroup bisector
- * \brief Round-robin bisector
+/**
+ * \ingroup bisector
+ *
+ * \brief Round-robin bisector.
  *
  */
 class RoundRobin : public Bsc {
  public:
-  /** Create a bisector with round-robin heuristic.
+  /**
+   * \brief Create a bisector with round-robin heuristic.
+   *
    * \param w - the minimum width (diameter) an interval must have to be bisected (see #w).
    *            Default value is 1e-07.
    * \param ratio (optional) - the ratio between the diameters of the left and the right parts of the
-   *            bisected interval. Default value is 0.45
+   *            bisected interval. Default value is 0.45.
    */
   RoundRobin(double w=1e-07, double ratio=0.45);
 
@@ -59,6 +63,9 @@ class RoundRobin : public Bsc {
    */
   virtual std::pair<IntervalVector,IntervalVector> bisect(Cell& cell);
 
+  /**
+   * \brief Add an instance of #ibex::BisectedVar to the backtrackle data of the root cell.
+   */
   void init_root(Cell& root);
 
   /**
@@ -66,14 +73,16 @@ class RoundRobin : public Bsc {
    *
    * Allow to skip variables whose domain is too small in the round-robin heuristic. This parameter usually
    * matches the \link CtcPrec::ceil ceil \endlink parameter of the precision contractor
-   * since boxes that are too small are usually both not bisected and considered as precise enough. */
+   * since boxes that are too small are usually both not bisected and considered as precise enough.
+   */
   const double w;
 
   /**
    * \brief Ratio to chose the split point.
    *
    * Ratio between the diameters of the left and right parts of a bisected
-   * interval. */
+   * interval.
+   */
   const double ratio;
 };
 

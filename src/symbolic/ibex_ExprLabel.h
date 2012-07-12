@@ -42,6 +42,11 @@ public:
 	Domain *g;
 
 	/**
+	 * The inflated "point" (or degenerated domain). See InHC4Revise.
+	 */
+	Domain *p;
+
+	/**
 	 * Visited tag.
 	 */
 	bool visited;

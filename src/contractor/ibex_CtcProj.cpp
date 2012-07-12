@@ -9,17 +9,17 @@
  * Created     : Feb 27, 2012
  * ---------------------------------------------------------------------------- */
 
-#include "ibex_CtcHC4Revise.h"
+#include "ibex_CtcProj.h"
 
 namespace ibex {
 
-CtcProj::CtcProj(Function& f, bool equality) : Ctc(f.input_size()), ctr(f,equality?NumConstraint::EQ:NumConstraint::LEQ) {
+CtcProj::CtcProj(Function& f, NumConstraint::CompOp op) : Ctc(f.input_size()), ctr(f,op) {
 	for (int v=0; v<ctr.f.nb_symbols(); v++)
 		output[v]=input[v]=ctr.f.used(v);
 
 }
 
-CtcProj::CtcProj(const NumConstraint& ctr) : Ctc(ctr.f.nb_symbols()), ctr(ctr) {
+CtcProj::CtcProj(const NumConstraint& ctr) : Ctc(ctr.f.nb_symbols()), ctr(ctr.f,ctr.op) {
 	for (int v=0; v<ctr.f.nb_symbols(); v++)
 		output[v]=input[v]=ctr.f.used(v);
 }

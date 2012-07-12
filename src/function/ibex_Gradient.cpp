@@ -14,58 +14,6 @@
 
 namespace ibex {
 
-void GradDecorator::decorate(const Function& f) const {
-	f.expr().reset_visited();
-
-	// we must decorate all the symbols first
-	// because some may not appear in the expression.
-	for (int i=0; i<f.nb_symbols(); i++)
-		((GradDecorator&) *this).visit(f.symbol(i));
-
-	((GradDecorator&) *this).visit(f.expr()); // // cast -> we know *this will not be modified
-}
-
-void GradDecorator::visit(const ExprNode& e) {
-	if (!e.deco.visited) {
-		e.deco.visited=true;
-		e.acceptVisitor(*this);
-	}
-}
-
-void GradDecorator::visit(const ExprIndex& idx) {
-
-	visit(idx.expr);
-	Domain& l=(Domain&) *idx.expr.deco.g;
-	switch (idx.type()) {
-	case Dim::SCALAR:       idx.deco.g = new Domain(l.v()[idx.index]); break;
-	case Dim::ROW_VECTOR:   idx.deco.g = new Domain(l.m()[idx.index],idx.type()==Dim::ROW_VECTOR); break;
-	case Dim::COL_VECTOR:   assert(false); /* see comment in ExprVector */ break;
-	case Dim::MATRIX:       idx.deco.g = new Domain(l.ma()[idx.index]); break;
-	case Dim::MATRIX_ARRAY: assert(false); /* impossible */ break;
-	}
-}
-
-void GradDecorator::visit(const ExprLeaf& e) {
-	e.deco.g = new Domain(e.dim);
-}
-
-void GradDecorator::visit(const ExprNAryOp& a) {
-	a.deco.g = new Domain(a.dim);
-	for (int i=0; i<a.nb_args; i++)
-		visit(a.arg(i));
-}
-
-void GradDecorator::visit(const ExprBinaryOp& b) {
-	b.deco.g = new Domain(b.dim);
-	visit(b.left);
-	visit(b.right);
-}
-
-void GradDecorator::visit(const ExprUnaryOp& u) {
-	u.deco.g = new Domain(u.dim);
-	visit(u.expr);
-}
-
 void Gradient::gradient(const Function& f, const Array<Domain>& d, IntervalVector& g) const {
 	assert(f.expr().dim.is_scalar());
 	assert(f.expr().deco.d);

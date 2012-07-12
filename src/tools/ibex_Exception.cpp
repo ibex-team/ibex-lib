@@ -10,7 +10,18 @@
  * ---------------------------------------------------------------------------- */
 
 #include "ibex_Exception.h"
+#include <stdlib.h>
+
+using namespace std;
 
 namespace ibex {
 
+void not_implemented(const char* feature) {
+	cerr << "***********************************************************************" << endl;
+	cerr << "IBEX has crashed because the following feature is not implemented yet:" << endl;
+	cerr << feature << endl;
+	cerr << "Please, submit a new feature request.";
+	cerr << "***********************************************************************" << endl;
+	exit(-1);
+}
 } /* namespace ibex */

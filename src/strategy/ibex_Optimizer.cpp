@@ -28,8 +28,13 @@ Optimizer::Optimizer(Function& f, const Array<Function>& g, Ctc& ctc, Bsc& bsc, 
 		sample_size(sample_size), mono_analysis_flag(true), in_HC4_flag(true), trace(false),
 		loup(POS_INFINITY), loup_point(n), uplo_of_epsboxes(POS_INFINITY) {
 
-	//g_eval...
-	// is_inside...
+	// ====== build the reversed inequalities g(x)>0 ===============
+	Array<Ctc> ng(g.size());
+	for (int i=0; i<g.size(); i++)
+		ng.set_ref(i, *new CtcProj(g[i],NumConstraint::GT));
+	is_inside=new CtcUnion(ng);
+	// =============================================================
+
 	if (trace) cout.precision(12);
 }
 

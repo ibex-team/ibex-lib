@@ -529,7 +529,7 @@ bool iproj_sqr(const Interval& y, Interval& x, const Interval& xin) {
 }
 
 bool iproj_pow(const Interval& y, Interval& x, int p, const Interval &xin) {
-	//   cout << "sqr x=" << xin << " x=" << x << " y=" << y << endl;
+	//   cout << "[sqr] xin=" << xin << " x=" << x << " y=" << y << endl;
 	// Interval xini(X);
 	bool inflate=!xin.is_empty();
 	assert(xin.is_subset(x));
@@ -583,10 +583,8 @@ bool iproj_pow(const Interval& y, Interval& x, int p, const Interval &xin) {
 	//assert(sqr(x).is_subset(y));        // note that sqr(x) might not be included anymore in y
 	                                      // if sqr was more pessimistic than sqrt
 	//  assert(xini.is_subset(x));
-	//cout << "new x=" << x << endl;
+	//cout << "[sqr] result: x=" << x << endl;
 }
-
-
 
 /*---------------------------------------------------------------------------*/
 

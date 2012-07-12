@@ -14,34 +14,8 @@
 
 #include "ibex_Function.h"
 #include "ibex_BwdAlgorithm.h"
-#include "ibex_BasicDecorator.h"
 
 namespace ibex {
-
-/**
- * \ingroup symbolic
- * \brief Decorates a function with the label for gradient computation.
- */
-
-class GradDecorator : public Decorator, public ExprVisitor {
-public:
-
-	void decorate(const Function& f) const;
-
-protected:
-	/** Visit an expression. */
-	virtual void visit(const ExprNode& n);
-	/** Visit an indexed expression. */
-	virtual void visit(const ExprIndex& idx);
-	/** Visit a leaf. */
-	virtual void visit(const ExprLeaf& e);
-	/** Visit a n-ary operator. */
-	virtual void visit(const ExprNAryOp& a);
-	/** Visit a binary operator. */
-	virtual void visit(const ExprBinaryOp& b);
-	/** Visit an unary operator. */
-	virtual void visit(const ExprUnaryOp& u);
-};
 
 /**
  * \ingroup symbolic

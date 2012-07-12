@@ -16,25 +16,31 @@
 
 namespace ibex {
 
+
 /**
  * \brief Inner image of the addition
  * .... Useful?
  * Return z such that $z\subseteq x+y$.
  */
-inline Interval iadd(const Interval& x, const Interval& y) {
-	assert(false); // TODO
-	return 0;
-}
+//inline Interval iadd(const Interval& x, const Interval& y) {
+//}
 
 // other operators are missing.
 // TODO
 // ............................
+
 
 /**
  * \brief Inner image of sqr.
  * Return y such that $y\subseteq x^2$.
  */
 Interval isqr(const Interval& x);
+
+/**
+ * \brief Inner image of minus.
+ * Return y such that $y\subseteq -x$.
+ */
+Interval iminus(const Interval& x);
 
 /**
  * \brief Inner image of log.
@@ -119,7 +125,7 @@ bool iproj_mul(const Interval& z, Interval& x, Interval& y, const Interval &xin=
 bool iproj_div(const Interval& z, Interval& x, Interval& y, const Interval &xin=Interval::EMPTY_SET, const Interval& yin=Interval::EMPTY_SET);
 
 /**
- * \brief Inner projection of the addition (inflating version)
+ * \brief Inner projection of the square function (inflating version)
  *
  * Inner projections for unary operators "f" act the following way.<br>
  *
@@ -140,6 +146,14 @@ bool iproj_div(const Interval& z, Interval& x, Interval& y, const Interval &xin=
 bool iproj_sqr(const Interval& y, Interval& x, const Interval& xin=Interval::EMPTY_SET);
 
 /**
+ * \brief Inner projection of the minus operator.
+ *
+ * \see comments in #ibex::iproj_sqr(const Interval&, Interval&, const Interval&).
+ *
+ */
+bool iproj_minus(const Interval& y, Interval& x);
+
+/**
  * \brief Inner projection of power
  *
  * \see comments in #ibex::iproj_sqr(const Interval&, Interval&, const Interval&).
@@ -151,14 +165,14 @@ bool iproj_pow(const Interval& y, Interval& x, int p, const Interval &xin=Interv
  *
  * \see comments in #ibex::iproj_sqr(const Interval&, Interval&, const Interval&).
  */
-bool iproj_exp(const Interval& y, Interval& x, int p, const Interval &xin=Interval::EMPTY_SET);
+bool iproj_exp(const Interval& y, Interval& x);
 
 /**
  * \brief Inner projection of log
  *
  * \see comments in #ibex::iproj_sqr(const Interval&, Interval&, const Interval&).
  */
-bool iproj_log(const Interval& y, Interval& x, int p, const Interval &xin=Interval::EMPTY_SET);
+bool iproj_log(const Interval& y, Interval& x);
 
 /*
  * TODO: to be continued....
@@ -166,11 +180,19 @@ bool iproj_log(const Interval& y, Interval& x, int p, const Interval &xin=Interv
 
 /*================================== inline implementations ========================================*/
 
-inline bool iproj_exp(const Interval& y, Interval& x, int p, const Interval &xin) {
+inline Interval iminus(const Interval& x) {
+	return -x;
+}
+
+inline bool iproj_minus(const Interval& y, Interval& x) {
+	return !(x&=iminus(y)).is_empty();
+}
+
+inline bool iproj_exp(const Interval& y, Interval& x) {
 	return !(x&=ilog(y)).is_empty();
 }
 
-inline bool iproj_log(const Interval& y, Interval& x, int p, const Interval &xin) {
+inline bool iproj_log(const Interval& y, Interval& x) {
 	return !(x&=iexp(y)).is_empty();
 }
 

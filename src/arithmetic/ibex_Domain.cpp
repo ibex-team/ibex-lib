@@ -13,6 +13,16 @@
 
 namespace ibex {
 
+void Domain::set_empty() {
+	switch (dim.type()) {
+		case Dim::SCALAR:       i().set_empty(); break;
+		case Dim::ROW_VECTOR:
+		case Dim::COL_VECTOR:   v().set_empty(); break;
+		case Dim::MATRIX:       m().set_empty(); break;
+		case Dim::MATRIX_ARRAY: assert(false); break;
+		}
+}
+
 std::ostream& operator<<(std::ostream& os,const Domain& d) {
 	switch (d.dim.type()) {
 		case Dim::SCALAR:       os << d.i(); break;

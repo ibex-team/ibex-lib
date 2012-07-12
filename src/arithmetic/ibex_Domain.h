@@ -202,6 +202,11 @@ public:
 		return *(IntervalMatrixArray*) domain;
 	}
 
+	/**
+	 * \brief Set the domain to the empty set.
+	 */
+	void set_empty();
+
 private:
 	friend class Domains;
 

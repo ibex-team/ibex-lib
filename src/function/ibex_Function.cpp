@@ -11,9 +11,9 @@
 
 #include "ibex_Function.h"
 #include "ibex_Expr.h"
-#include "ibex_BasicDecorator.h"
 #include "ibex_Eval.h"
 #include "ibex_HC4Revise.h"
+#include "ibex_InHC4Revise.h"
 #include "ibex_Gradient.h"
 #include "ibex_FunctionBuild.cpp_"
 
@@ -44,6 +44,14 @@ Domain& Function::eval_domain(const IntervalVector& box) const {
 
 void Function::proj(const Domain& y, IntervalVector& x) const {
 	HC4Revise().proj(*this,y,x);
+}
+
+void Function::iproj(const Domain& y, IntervalVector& x) const {
+	InHC4Revise().iproj(*this,y,x);
+}
+
+void Function::iproj(const Domain& y, IntervalVector& x, const IntervalVector& xin) const {
+	InHC4Revise().iproj(*this,y,x,xin);
 }
 
 void Function::gradient(const IntervalVector& x, IntervalVector& g) const {

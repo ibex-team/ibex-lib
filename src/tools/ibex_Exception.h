@@ -17,6 +17,8 @@
 
 namespace ibex {
 
+void not_implemented(const char*);
+
 /**
  * \brief Root class of all exceptions raised by IBEX
  */

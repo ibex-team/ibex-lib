@@ -9,7 +9,6 @@
 //============================================================================
 
 #include "ibex_HC4Revise.h"
-#include "ibex_BasicDecorator.h"
 
 namespace ibex {
 

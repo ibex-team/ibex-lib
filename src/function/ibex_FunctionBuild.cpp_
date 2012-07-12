@@ -11,7 +11,7 @@
 
 #include "ibex_Function.h"
 #include "ibex_Expr.h"
-#include "ibex_BasicDecorator.h"
+#include "ibex_Decorator.h"
 #include "ibex_ExprCopy.h"
 #include "ibex_Eval.h"
 #include "ibex_HC4Revise.h"
@@ -244,8 +244,8 @@ void Function::add_symbol(const ExprSymbol* symbol) {
 void Function::decorate() const {
 	assert(root!=NULL); // cannot decorate if there is no expression yet!
 
-	BasicDecorator().decorate(*this);
-	GradDecorator().decorate(*this);
+	Decorator d;
+	d.decorate(*this);
 
 	symbol_domains.resize(nb_symbols());
 	symbol_deriv.resize(nb_symbols());

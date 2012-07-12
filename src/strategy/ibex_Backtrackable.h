@@ -15,21 +15,19 @@
 
 namespace ibex {
 
-/** \ingroup strategy
+/**
+ * \ingroup strategy
  *
  * \brief Operator-specific backtrackable data.
  *
  * A <i>backtrackable</i> is a structure propagated through the search tree. It is therefore
- * only used by \link ibex::Paver pavers \endlink. Each node in the search tree has its own structure, this
- * structure being inherited from the father node. The mechanism of inheritance can be controled
- * thanks to the \link #Backtrackable(Backtrackable&, bool) copy constructor \endlink.
- * For the moment, control can only be made downward: there is no way of updating a node structure by aggregating
- * children node structures when backtracking (this shall be fixed in a future version).
+ * only used by strategies. Each node in the search tree has its own structure, this
+ * structure being inherited from the father node. The mechanism of inheritance can be controlled
+ * thanks to the \link #Backtrackable::down() down \endlink function.
+ * For the moment, control can only be made downward: there is no way of updating a node structure
+ * by aggregating children node structures when backtracking (this might be done in a future release).
  *
  * This class is an interface to be implemented by any operator data class associated to a cell.
- * Backtrackable must be viewed as a metaclass, each object being a subclass whose copy is controlled by the copy
- * constructor.
- *
  */
 class Backtrackable {
 public:
@@ -53,6 +51,6 @@ public:
 	virtual ~Backtrackable() { }
 };
 
-
 } // end namespace ibex
+
 #endif // __IBEX_BACKTRACKABLE_H__
