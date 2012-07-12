@@ -38,6 +38,9 @@ public:
 	/** The functions */
 	std::vector<Function*> func;
 
+	/** The goal (NULL if none (pure satisfaction problem)) */
+	const ExprNode* goal;
+
 	/** The constraints */
 	P_ConstraintList* ctrs;
 };

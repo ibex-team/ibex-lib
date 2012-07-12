@@ -67,7 +67,7 @@ double projx(double z, double y, int op, bool round_up) {
     case ADD: return z-y;
     case SUB: return z+y;
     case MUL:
-    	assert(z!=0); // z==0 should not appear
+
     	return (y==0)? POS_INFINITY:z/y;
     default: return z*y;
   }
@@ -80,7 +80,7 @@ double projy(double z, double x, int op, bool round_up) {
     case ADD: return z-x;
     case SUB: return x-z;
     case MUL:
-    	assert(z!=0); // z==0 should not appear
+    	//assert(z!=0); // z==0 should not appear
     	assert(x!=0); // x==0 should not appear
     	return z/x;
     default: return (z==0)? POS_INFINITY:x/z;
@@ -243,15 +243,6 @@ bool iproj_leq_mul(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 		y.set_empty();
 		return false;
 	}
-
-	else if (z_sup==0) {
-		if (xin==Interval::ZERO)
-			return !(y&=Interval::ZERO).is_empty();
-		else {
-			assert(yin==Interval::ZERO);
-			return !(x&=Interval::ZERO).is_empty();
-		}
-	}
 	else if (z_sup>0) {
 		// xxin and yyin are introduced because the box (xin,yin)
 		// may not be included in the current quadrant (here x>0, y>0).
@@ -306,15 +297,21 @@ bool iproj_leq_mul(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 		return true;
 	}
 
-	else { // z_sup<0
+	else { // z_sup<=0
 
 		if (inflate) {
 			// in this case, we directly know in which quadrant
 			// an inner box has to be found
-			if (xin.lb()>0)
+			if (xin.lb()>0) {
+				assert(yin.ub()<=0);
 				return iproj_leq_mono_op(z_sup,x, y, xin, yin, MUL, false, true);
-			else
+			} else if (xin.ub()>0) {
+				assert(z_sup==0);
+				return !(y&=Interval::ZERO).is_empty();
+			} else {
+				assert(yin.lb()>=0);
 				return iproj_leq_mono_op(z_sup, x, y, xin, yin, MUL, true, false);
+			}
 		}
 
 		// Disconnected set.

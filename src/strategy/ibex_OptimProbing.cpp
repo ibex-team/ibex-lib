@@ -13,6 +13,7 @@
 
 #include <stdlib.h>
 #include <math.h> // for fabs
+#include <iomanip>
 
 using namespace std;
 
@@ -306,10 +307,9 @@ bool Optimizer::update_loup(const System& sys, const Space& space) {
 
 void Optimizer::trace_loup ()
 {
-	int prec=cout.precision();
-	cout.precision(12);
-	cout << " loup update " << loup  << " loup point  " << loup_point << endl;
-	cout.precision(prec);
+	//int prec=cout.precision();
+	cout << setprecision (12) << " loup update " << loup  << " loup point  " << loup_point << endl;
+	//cout.precision(prec);
 }
 
 } // end namespace

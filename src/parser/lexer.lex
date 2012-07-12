@@ -40,7 +40,7 @@ using namespace ibex::parser;
 "variables"|"Variables"|"VARIABLES"      { return TK_VARS; }
 "parameters"|"Parameters"|"PARAMETERS"	 { return TK_PARAM; }
 "function"|"Function"|"FUNCTION"         { return TK_FUNCTION; }
-
+"minimize"|"Minimize"|"MINIMIZE"         { return TK_MINIMIZE; }
 "max"                            { return TK_MAX; }
 "min"                            { return TK_MIN; }
 "atan2"                          { return TK_ATAN2; }

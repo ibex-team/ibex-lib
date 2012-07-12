@@ -16,25 +16,22 @@ using namespace ibex;
 
 int main() {
 
-	// Example #18
+	// Example #19
 	// ------------------------------------------------
-	// Optimizer (with an hard-coded function)
+	// Optimizer (with a system loaded from a file)
 	//
 
-	Variable x,y;
-	Function f(x,y,x+y);
-	Function g(x,y,sqr(x)+sqr(y)-1.0);
-	NumConstraint c(g,NumConstraint::LEQ);
+	System sys("ex2_1_3.bch");
 
-	CtcProj proj(c);
+	CtcHC4 hc4(sys.ctrs);
 	RoundRobin rr;
 
-	Optimizer o(f,g,proj,rr);
+	Optimizer o(*sys.goal,sys.f,hc4,rr);
 
-	IntervalVector box(2);
-	o.trace=true;
-	o.optimize(box);
+	//o.trace=true;
 
+	o.optimize(sys.box);
 	o.report();
+
 	return 0;
 }

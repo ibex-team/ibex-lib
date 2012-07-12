@@ -20,7 +20,7 @@ using namespace std;
 namespace ibex {
 
 const double Optimizer::default_prec = 1e-07;
-const double Optimizer::default_goal_rel_prec = 1e-02;
+const double Optimizer::default_goal_rel_prec = 1e-07;
 const double Optimizer::default_goal_abs_prec = 1e-07;
 const int Optimizer::default_sample_size = 10;
 
@@ -29,7 +29,7 @@ Optimizer::Optimizer(Function& f, Function& g, Ctc& ctc, Bsc& bsc, double prec,
 		n(f.nb_symbols()), m(g.dimension()), f(f), g(g), ctc(ctc), bsc(bsc), buffer(),
 		prec(n,prec), goal_rel_prec(goal_rel_prec), goal_abs_prec(goal_abs_prec),
 		sample_size(sample_size), mono_analysis_flag(true), in_HC4_flag(true), trace(false),
-		loup(POS_INFINITY), loup_point(n), uplo_of_epsboxes(POS_INFINITY) {
+		timeout(1e08), loup(POS_INFINITY), loup_point(n), uplo_of_epsboxes(POS_INFINITY) {
 
 	// ====== build the reversed inequalities g_i(x)>0 ===============
 	Array<Ctc> ng(m);
@@ -103,10 +103,13 @@ bool Optimizer::contract_and_bound(Cell& c) {
 	/*====================================================================*/
 
 	try {
+		y=f.eval(c.box);             // don't place this line after prec.contract (the box may be empty)
 		prec.contract(c.box);
 	} catch (EmptyBoxException&) { // the box is a "solution"
-		y=f.eval(c.box);
-		if (uplo_of_epsboxes > y.lb()) uplo_of_epsboxes = y.lb();
+		if (uplo_of_epsboxes > y.lb()) {
+			if (trace) { cout.precision(12); cout << "uplo of eps-boxes:" << y.lb() << endl; }
+			uplo_of_epsboxes = y.lb();
+		}
 		throw EmptyBoxException();
 	}
 
@@ -132,7 +135,7 @@ void Optimizer::optimize(const IntervalVector& init_box) {
 
 	while (!buffer.empty()) {
 
-		if (trace) cout << ((CellBuffer&) buffer) << endl;
+		//if (trace) cout << ((CellBuffer&) buffer) << endl;
 
 		Cell* c=buffer.top();
 

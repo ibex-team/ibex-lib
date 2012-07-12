@@ -10,7 +10,7 @@
 
 #include "TestHC4.h"
 #include "Ponts30.h"
-#include "ibex_CtcHC4Revise.h"
+#include "ibex_CtcProj.h"
 #include "ibex_CtcHC4.h"
 #include "ibex_Array.h"
 

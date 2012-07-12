@@ -140,7 +140,7 @@ using namespace parser;
 
 %token TK_BEGIN TK_END TK_FOR TK_FROM TK_TO
 
-%token TK_CTRS TK_CONSTRAINT TK_CONSTRAINT_LIST
+%token TK_CTRS TK_MINIMIZE
 
 %token TK_IN
 
@@ -183,6 +183,7 @@ program       :                                      { begin(); }
 	          decl_var_list ';'   
               decl_opt_par
               decl_fnc_list
+              decl_opt_goal
 	          decl_ctr_list                          { end(); }
               ;
 
@@ -290,6 +291,13 @@ fnc_code      : fnc_code fnc_assign ';'
 
 fnc_assign    : TK_NEW_SYMBOL TK_EQU expr       { /* note: if this tmp symbol is not used, the expr $3 will never be deleted */
                                                   scopes.top().add_func_tmp_symbol($1,$3); free($1); }
+              ;
+
+/**********************************************************************************************************************/
+/*                                                  GOAL                                                              */
+/**********************************************************************************************************************/
+decl_opt_goal :                                 { source.goal = NULL; }
+              | TK_MINIMIZE expr semicolon_opt  { source.goal = $2; }
               ;
 
 /**********************************************************************************************************************/

@@ -10,6 +10,7 @@
 
 #include "ibex_MainGenerator.h"
 #include "ibex_CtrGenerator.h"
+#include "ibex_P_ExprGenerator.h"
 
 #include <utility>
 
@@ -53,6 +54,23 @@ void MainGenerator::generate(const P_Source& source, System& result) {
 	//================= generate the domain =====================
 	result.box.resize(n);
 	load(result.box, domains);
+
+	Scope scope;
+
+	//============== generate the goal function (if any) =================
+	if (source.goal==NULL) result.goal=NULL;
+	else {
+		// we must create a copy of the array of variables srcvars
+		// for the objective function (nodes cannot be shared by
+		// two different functions)
+		Array<const ExprSymbol> objvars(n);
+		for (int i=0; i<n; i++)
+			// TODO: should we remove eprs and sybs from the objective variables?
+			objvars.set_ref(i,ExprSymbol::new_(result.vars[i].name, result.vars[i].dim));
+
+		const ExprNode& goal=ExprGenerator(Scope()).generate(srcvars, objvars, *source.goal);
+		result.goal = new Function(objvars,goal,"goal");
+	}
 
 	//================= generate the global function =====================
 
