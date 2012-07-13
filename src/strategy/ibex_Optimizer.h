@@ -13,7 +13,7 @@
 
 #include "ibex_Bsc.h"
 #include "ibex_CtcPrecision.h"
-#include "ibex_CtcProj.h"
+#include "ibex_CtcPropag.h"
 #include "ibex_CtcUnion.h"
 #include "ibex_Eval.h"
 #include "ibex_Gradient.h"
@@ -21,7 +21,6 @@
 #include "ibex_CellHeapOptim.h"
 
 namespace ibex {
-
 
 /**
  * \ingroup strategy
@@ -48,7 +47,25 @@ public:
 	Interval y;
 };
 
-/** \ingroup strategy
+/**
+ * \ingroup strategy
+ *
+ * Contractor (x,y) w.r.t y=f(x) where x is the box in argument
+ * and y any interval (can be set dynamically).
+ */
+class GoalProj : public Ctc {
+public:
+	GoalProj(Function& goal);
+
+	Function& goal;
+
+	Interval* y;
+
+	virtual void contract(IntervalVector& box);
+};
+
+/**
+ * \ingroup strategy
  *
  * \brief Global Optimizer.
  *
@@ -66,7 +83,6 @@ public:
 	 *
 	 *   \param f     - The objective function f(x)
 	 *   \param g     - the vector-valued function representing the constraints (each constraint must be g_i(x)<=0)
-	 *   \param ctc   - the contractor w.r.t. to g(x)<=0
 	 *   \param bsc   - the bisector
 	 *
 	 * And optionally:
@@ -75,7 +91,7 @@ public:
 	 *   \pram  goal_abs_prec - absolute precision of the objective (the optimizer stops once reached).
 	 *   \param sample_size   - number of samples taken when looking for a "loup"
 	 */
-	Optimizer(Function& f, Function& g, Ctc& ctc, Bsc& bsc, double prec=default_prec,
+	Optimizer(Function& f, Function& g, Bsc& bsc, double prec=default_prec,
 			double goal_rel_prec=default_goal_rel_prec, double goal_abs_prec=default_goal_abs_prec,
 			int sample_size=default_sample_size);
 
@@ -106,14 +122,14 @@ public:
 	/** Number of constraints. */
 	const int m;
 
-	/** Objective function */
+	/** Objective function. */
 	Function& f;
 
-	/** Constraints (we have g(x)<=0) */
+	/** Constraints under the form of a vector-valued function (we have g(x)<=0). */
 	Function& g;
 
-	/** Contractor w.r.t. g(x)<=0. */
-	Ctc& ctc;
+	/** Contractor w.r.t. y=f(x). */
+	GoalProj goal_ctc;
 
 	/** Bisector. */
 	Bsc& bsc;
@@ -253,12 +269,12 @@ protected:
 	bool line_probing(const IntervalVector& box, const Vector& start, bool is_inner, int sample_size, bool recursive);
 
 	/*
-	 *
+	 * \brief Update loup either using line_probing or random_probing.
 	 */
 	bool update_loup_probing(const IntervalVector& box);
 
 	/**
-	 *
+	 * \brief Update loup using inner linearizations.
 	 */
 	bool update_loup_simplex(const IntervalVector& box);
 
@@ -274,6 +290,9 @@ protected:
 
 
 private:
+
+	/** Propagation of y=f(x), g_1(x)<=0,...,g_m(x)<=0. */
+	CtcPropag* ctc;
 
 	/** Inner contractor (for the negation of g) */
 	CtcUnion* is_inside;

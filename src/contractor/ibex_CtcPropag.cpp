@@ -17,11 +17,11 @@
 namespace ibex {
 
 /*! Default propagation ratio. */
-#define __IBEX_DEFAULT_RATIO_PROPAG           0.1
+#define __IBEX_DEFAULT_RATIO_PROPAG           0.01
 
 CtcPropag::CtcPropag(const Array<Ctc>& cl, double ratio, bool incremental) :
 		  Ctc(cl[0].nb_var), list(cl), ratio(ratio), incremental(incremental),
-		  g(cl.size(), cl[0].nb_var), agenda(cl.size()), accumulate(false),
+		  accumulate(false), g(cl.size(), cl[0].nb_var), agenda(cl.size()),
 		  all_vars(cl[0].nb_var) {
 
 	for (int i=1; i<list.size(); i++)

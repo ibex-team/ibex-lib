@@ -147,7 +147,7 @@ void Function::separate() {
 		return;
 	}
 
-	comp = new Function[dimension()];
+	comp = new Function[output_size()];
 	// rem: dimension()==expr().dim.vec_size() if expr() is a vector
 	//      and also fvec->nb_args if, in addition, fvec!=NULL
 

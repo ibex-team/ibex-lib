@@ -23,10 +23,9 @@ int main() {
 
 	System sys("ex2_1_3.bch");
 
-	CtcHC4 hc4(sys.ctrs);
 	RoundRobin rr;
 
-	Optimizer o(*sys.goal,sys.f,hc4,rr);
+	Optimizer o(*sys.goal,sys.f,rr);
 
 	//o.trace=true;
 

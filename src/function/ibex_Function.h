@@ -110,8 +110,12 @@ public:
 	 *
 	 * If f is a real-valued function, the result is 1.
 	 * If f is a m*n matrix function, the result is m*n.
+	 *
+	 * Note that contrary to the input of a function, there
+	 * is a unique output and if this output is a vector, all
+	 * the components have the same dimension.
 	 */
-	int dimension() const;
+	int output_size() const;
 
 	/**
 	 * \brief Return the ith component of f.
@@ -396,7 +400,7 @@ private:
 	SymbolMap<const ExprSymbol*> id2info;       // to retrieve a symbol node from its name.
 	int key_count;                              // count the number of symbols
 
-	Function* comp;                             // the components. ==this if dimension()==1.
+	Function* comp;                             // the components. ==this if output_size()==1.
 
 	bool __all_symbols_scalar;                  // true if all symbols are scalar
 
@@ -482,7 +486,7 @@ std::ostream& operator<<(std::ostream&, const Function&);
 
 /*================================== inline implementations ========================================*/
 
-inline int Function::dimension() const {
+inline int Function::output_size() const {
 	switch (expr().dim.type()) {
 	case Dim::SCALAR: return 1;
 	case Dim::ROW_VECTOR:
@@ -559,12 +563,12 @@ inline IntervalMatrix Function::eval_matrix(const IntervalVector& box) const {
 	case Dim::SCALAR     :
 		return IntervalMatrix(1,1,eval_domain(box).i());
 	case Dim::ROW_VECTOR : {
-		IntervalMatrix M(dimension(),1);
+		IntervalMatrix M(output_size(),1);
 		M.set_row(0,eval_domain(box).v());
 		return M;
 	}
 	case Dim::COL_VECTOR : {
-		IntervalMatrix M(1,dimension());
+		IntervalMatrix M(1,output_size());
 		M.set_col(0,eval_domain(box).v());
 		return M;
 	}

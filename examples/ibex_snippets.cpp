@@ -53,7 +53,7 @@ int main() {
 	IntervalVector x(3,_x);
 	double _M[][2]={{0,1},{0,1},{0,1},
 			        {0,2},{0,2},{0,2}};
-	IntervalMatrix M(3,3,_M);
+	IntervalMatrix M(2,3,_M);
 	Matrix m2=M.mag();
 	Vector x2=x.mid();
 	cout << m2*x2 << endl;

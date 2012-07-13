@@ -1,10 +1,5 @@
 
-#include "ibex_CtcHC4Revise.h"
-#include "ibex_CtcCompo.h"
-#include "ibex_CtcQInter.h"
-#include "ibex_CtcFixPoint.h"
-#include "ibex_EmptyBoxException.h"
-#include "ibex_Array.h"
+#include "ibex.h"
 
 #include <iostream>
 #include <stdlib.h>
@@ -46,15 +41,15 @@ int main() {
 
 	init_data();
 
-	Variable x(Dim(0,0,2));
-	Variable y(Dim(0,0,2));
+	Variable x(2);
+	Variable y(2);
 	Function distance(x,y,sqrt(sqr(x[0]-y[0])+sqr(x[1]-y[1])));
 
 	Function *m_func[N];      // for each measurement, we have a dist function
 	Array<Ctc> m_ctc(N);     // and a contractor w.r.t the constraint dist-d=0
 
 	for (int i=0; i<N; i++) {
-		Variable x(Dim(0,0,2));
+		Variable x(2);
 
 		IntervalVector a(2); // the beacon position + uncertainty
 		a[0]=beacons[i][0]+beacon_error*Interval(-1,1);
@@ -68,7 +63,7 @@ int main() {
 
 		m_func[i] = new Function(x,distance(x,a)-d);
 
-		m_ctc.set_ref(i,*new CtcHC4Revise(*m_func[i],true));
+		m_ctc.set_ref(i,*new CtcProj(*m_func[i]));
 	}
 
 	// the initial box [0,L]x[0,L]

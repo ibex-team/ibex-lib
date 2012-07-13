@@ -64,12 +64,12 @@ void Function::gradient(const IntervalVector& x, IntervalVector& g) const {
 void Function::jacobian(const IntervalVector& x, IntervalMatrix& J) const {
 	assert(J.nb_cols()==input_size());
 	assert(x.size()==input_size());
-	assert(J.nb_rows()==dimension());
+	assert(J.nb_rows()==output_size());
 	assert(expr().deco.d);
 	assert(expr().deco.g);
 
 	// calculate the gradient of each component of f
-	for (int i=0; i<dimension(); i++) {
+	for (int i=0; i<output_size(); i++) {
 		(*this)[i].gradient(x,J[i]);
 	}
 }

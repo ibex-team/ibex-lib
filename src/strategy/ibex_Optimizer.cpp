@@ -24,12 +24,36 @@ const double Optimizer::default_goal_rel_prec = 1e-07;
 const double Optimizer::default_goal_abs_prec = 1e-07;
 const int Optimizer::default_sample_size = 10;
 
-Optimizer::Optimizer(Function& f, Function& g, Ctc& ctc, Bsc& bsc, double prec,
+GoalProj::GoalProj(Function& goal) : Ctc(goal.input_size()), goal(goal) {
+	for (int v=0; v<goal.input_size(); v++)
+		output[v]=input[v]=goal.used(v);
+}
+
+void GoalProj::contract(IntervalVector& box) {
+	*y&=goal.eval(box);
+	goal.proj(*y,box);
+}
+
+
+Optimizer::Optimizer(Function& f, Function& g, Bsc& bsc, double prec,
 		double goal_rel_prec, double goal_abs_prec, int sample_size) :
-		n(f.nb_symbols()), m(g.dimension()), f(f), g(g), ctc(ctc), bsc(bsc), buffer(),
-		prec(n,prec), goal_rel_prec(goal_rel_prec), goal_abs_prec(goal_abs_prec),
-		sample_size(sample_size), mono_analysis_flag(true), in_HC4_flag(true), trace(false),
-		timeout(1e08), loup(POS_INFINITY), loup_point(n), uplo_of_epsboxes(POS_INFINITY) {
+		n(f.input_size()), m(g.output_size()), f(f), g(g), goal_ctc(f),
+		bsc(bsc), buffer(), prec(n,prec), goal_rel_prec(goal_rel_prec),
+		goal_abs_prec(goal_abs_prec), sample_size(sample_size),
+		mono_analysis_flag(true), in_HC4_flag(true), trace(false),
+		timeout(1e08), loup(POS_INFINITY), loup_point(n),
+		uplo_of_epsboxes(POS_INFINITY) {
+
+
+	// ====== build the propagation of f(x)=0 and all g_i(x)<=0 =====
+	Array<Ctc> array(m+1);
+	array.set_ref(0,goal_ctc);
+	for (int i=0; i<m; i++) {
+		array.set_ref(i+1,*new CtcProj(g[i],NumConstraint::LEQ));
+	}
+	ctc = new CtcPropag(array);
+	// =============================================================
+
 
 	// ====== build the reversed inequalities g_i(x)>0 ===============
 	Array<Ctc> ng(m);
@@ -83,16 +107,16 @@ bool Optimizer::contract_and_bound(Cell& c) {
 	}
 	if (y.ub() > ymax) y = Interval(y.lb(),ymax);
 
-	//cout << "y=" << y << endl;
-	/*====================================================================*/
+	/*================ contract x with f(x)=y and g(x)<=0 ================*/
+//	cout << "y=f(x) and g(x)<=0 " << endl;
+//	cout << "   x before=" << c.box << endl;
+//	cout << "   y before=" << y << endl;
 
-	/* ================ contract x with f(x)=y =========================*/
-	f.proj(y,c.box);
-	/*====================================================================*/
+	goal_ctc.y=&y;
+	ctc->contract(c.box); // may throw EmptyBoxException
 
-
-	/*==================== contract x with g(x)<=0 =====================*/
-	ctc.contract(c.box); // may throw EmptyBoxException
+//	cout << "   x after=" << c.box << endl;
+//	cout << "   y after=" << y << endl;
 	// TODO: no more cell in argument here (just a box). Does it matter?
 	/*====================================================================*/
 
@@ -105,9 +129,12 @@ bool Optimizer::contract_and_bound(Cell& c) {
 	try {
 		y=f.eval(c.box);             // don't place this line after prec.contract (the box may be empty)
 		prec.contract(c.box);
-	} catch (EmptyBoxException&) { // the box is a "solution"
+	} catch (EmptyBoxException&) {   // the box is a "solution"
 		if (uplo_of_epsboxes > y.lb()) {
-			if (trace) { cout.precision(12); cout << "uplo of eps-boxes:" << y.lb() << endl; }
+			if (trace) {
+				cout.precision(12);
+				cout << "uplo of eps-boxes:" << y.lb() << endl;
+			}
 			uplo_of_epsboxes = y.lb();
 		}
 		throw EmptyBoxException();
