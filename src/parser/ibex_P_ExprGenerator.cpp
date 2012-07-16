@@ -39,7 +39,7 @@ void ExprGenerator::visit(const P_ExprPower& e) {
 void ExprGenerator::visit(const P_ExprIndex& e) {
 	int index=ConstantGenerator(scope).eval_integer(e.right);
 	visit(e.left);
-	e.deco.tmp = &(LEFT[index]);
+	e.deco.tmp = &(LEFT[index-1]);
 }
 
 void ExprGenerator::visit(const ExprIter& x) {

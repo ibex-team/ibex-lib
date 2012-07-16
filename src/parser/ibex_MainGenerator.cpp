@@ -32,6 +32,7 @@ void MainGenerator::generate(const P_Source& source, System& result) {
 
 	//================= generate the variables & domains =====================
 	int n=source.vars.size();
+	int input_size=0;
 
 	result.vars.resize(n);
 	Array<const ExprSymbol> srcvars(n);
@@ -48,11 +49,12 @@ void MainGenerator::generate(const P_Source& source, System& result) {
 		result.vars.set_ref(i,ExprSymbol::new_(x.symbol.name, x.symbol.dim));
 		domains.set_ref(i,x.domain);
 		i++;
+		input_size+=x.symbol.dim.size();
 	}
 	assert(i==n);
 
 	//================= generate the domain =====================
-	result.box.resize(n);
+	result.box.resize(input_size);
 	load(result.box, domains);
 
 	Scope scope;

@@ -193,11 +193,6 @@ void Function::separate() {
 //	cout << "------------------------------" << endl;
 }
 
-Function Function::unvectorize() const {
-	// TO DO
-	return *this;
-}
-
 //void Function::set_expr(const ExprNode& expr) {
 void Function::init(const Array<const ExprSymbol>& x, const ExprNode& y) {
 
@@ -235,7 +230,8 @@ void Function::add_symbol(const ExprSymbol* symbol) {
 
   key_count ++;
 
-  is_used.push_back(false); // unused by default
+  for (int i=0; i<symbol->dim.size(); i++)
+	  is_used.push_back(false);               // all the components are unused by default
 
   __all_symbols_scalar &= symbol->dim.is_scalar();
 

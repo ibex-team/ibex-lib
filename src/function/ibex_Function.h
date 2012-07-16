@@ -141,20 +141,6 @@ public:
 	 */
 	Function& operator[](int i) const;
 
-	/**
-	 * \brief Unvectorize f.
-	 *
-	 * If some arguments of f are vectors or matrices,
-	 * they are transformed into scalar arguments. <br>
-	 * For instance, if f is <br>
-	 * (x,y)->x[0]*y[0]+x[1]*y[1]. <br>
-	 * the f.unvectorize() is <br>
-	 * (x[0],x[1],y[0],y[1])->x[0]*y[0]+x[1]*y[1] <br>
-	 * that is, <br>
-	 * (a,b,c,d)->a*c+b*d
-	 */
-	Function unvectorize() const;
-
 	/*
 	 * \brief Create a new symbol (new argument of the function).
 	 *
@@ -188,18 +174,11 @@ public:
 	int input_size() const;
 
 	/**
-	 * \brief Return true if the symbol (or argument) \a name is
-	 * actually used in the function.
-	 *
-	 * In other words, return true if the output of the function
-	 * may depend on the argument named \a name.
-	 */
-	bool used(const char* name) const;
-
-	/**
 	 * \brief Return true if the ith argument is used in the function.
 	 *
-	 * #see used(const char*) const;
+	 * \warning The function is seen as a function from R^n to R^m. So, the
+	 * ith "argument" is not the ith symbol.
+	 *
 	 */
 	bool used(int i) const;
 
@@ -506,10 +485,6 @@ inline Function& Function::operator[](int i) const {
 
 inline int Function::nb_symbols() const {
 	return key_count;
-}
-
-inline bool Function::used(const char* name) const {
-	return used(id2info[name]->key);
 }
 
 inline bool Function::used(int i) const {

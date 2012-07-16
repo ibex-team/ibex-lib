@@ -39,5 +39,7 @@ class SyntaxError : public Exception {
 };
 
 
+std::ostream& operator<< (std::ostream& os, const SyntaxError& e);
+
 } // end namespace ibex
 #endif // __IBEX_SYNTAX_ERROR_H__
