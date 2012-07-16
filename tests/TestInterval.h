@@ -128,6 +128,19 @@ public:
 		TEST_ADD(TestInterval::sin12);
 		TEST_ADD(TestInterval::sin13);
 
+		TEST_ADD(TestInterval::pow01);
+		TEST_ADD(TestInterval::pow02);
+		TEST_ADD(TestInterval::pow03);
+		TEST_ADD(TestInterval::pow04);
+		TEST_ADD(TestInterval::pow05);
+		TEST_ADD(TestInterval::pow06);
+		TEST_ADD(TestInterval::pow07);
+		TEST_ADD(TestInterval::pow08);
+		TEST_ADD(TestInterval::pow09);
+		TEST_ADD(TestInterval::pow10);
+		TEST_ADD(TestInterval::pow11);
+		TEST_ADD(TestInterval::pow12);
+
 		TEST_ADD(TestInterval::getters01);
 		TEST_ADD(TestInterval::getters02);
 		TEST_ADD(TestInterval::getters03);
@@ -172,13 +185,13 @@ public:
 		TEST_ADD(TestInterval::proj_mul04);
 		TEST_ADD(TestInterval::proj_mul05);
 
-		TEST_ADD(TestInterval::sqrProj01);
-		TEST_ADD(TestInterval::sqrProj02);
-		TEST_ADD(TestInterval::sqrProj03);
-		TEST_ADD(TestInterval::sqrProj04);
-		TEST_ADD(TestInterval::sqrProj05);
-		TEST_ADD(TestInterval::sqrProj06);
-		TEST_ADD(TestInterval::sqrProj07);
+		TEST_ADD(TestInterval::proj_sqr01);
+		TEST_ADD(TestInterval::proj_sqr02);
+		TEST_ADD(TestInterval::proj_sqr03);
+		TEST_ADD(TestInterval::proj_sqr04);
+		TEST_ADD(TestInterval::proj_sqr05);
+		TEST_ADD(TestInterval::proj_sqr06);
+		TEST_ADD(TestInterval::proj_sqr07);
 
 		TEST_ADD(TestInterval::proj_sin01);
 		TEST_ADD(TestInterval::proj_sin02);
@@ -446,6 +459,20 @@ private:
 	void sin11();
 	void sin12();
 	void sin13();
+
+	void pow01();
+	void pow02();
+	void pow03();
+	void pow04();
+	void pow05();
+	void pow06();
+	void pow07();
+	void pow08();
+	void pow09();
+	void pow10();
+	void pow11();
+	void pow12();
+
 	/* test
 	 * =============
 	 *  lb() const
@@ -571,13 +598,13 @@ private:
 	void proj_mul05();
 
 	/* test: proj_sqrt(const Interval& y, Interval& x) */
-	void sqrProj01();
-	void sqrProj02();
-	void sqrProj03();
-	void sqrProj04();
-	void sqrProj05();
-	void sqrProj06();
-	void sqrProj07();
+	void proj_sqr01();
+	void proj_sqr02();
+	void proj_sqr03();
+	void proj_sqr04();
+	void proj_sqr05();
+	void proj_sqr06();
+	void proj_sqr07();
 
 	/* test: proj_sin & proj_cos */
 	void proj_sin01();
@@ -631,6 +658,7 @@ private:
 	void check_inter(const Interval& x, const Interval& z, const Interval& y_expected);
 	void check_div2(const Interval& x, const Interval& y, const Interval& out1, const Interval& out2);
 	void check_trigo(const Interval& x, const Interval& y);
+	void check_pow(const Interval& x, int p, const Interval& y_expected);
 	bool checkproj_mul(const Interval& y, const Interval& x1_before, const Interval& x2_before, const Interval& x1_after, const Interval& x2_after);
 	void checkproj_trigo(const Interval& y, const Interval& xbefore, const Interval& xafter);
 	void checkproj_pow(const Interval& y, const Interval& xbefore, const Interval& xafter, int p);

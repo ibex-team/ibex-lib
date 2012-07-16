@@ -424,10 +424,13 @@ inline Interval operator/(const Interval& x, const Interval& y) {
 }
 
 inline Interval sqr(const Interval& x) {
-	return Sqr(x.itv);
+	if (x.is_empty()) return Interval::EMPTY_SET;
+	else return Sqr(x.itv);
 }
 
 inline Interval sqrt(const Interval& x) {
+	if (x.is_empty()) return Interval::EMPTY_SET;
+
 	INTERVAL r;
 
 	if (x.ub()<0) return Interval::EMPTY_SET;
@@ -444,18 +447,30 @@ inline Interval sqrt(const Interval& x) {
 }
 
 inline Interval pow(const Interval& x, int n) {
+	if (x.is_empty()) return Interval::EMPTY_SET;
+
+	// there are bugs with negative x
+	// such as Power([-2,3],3)->[-18,27])
+	if (n%2!=0)
+		if (x.ub()<0) return -Power(-x.itv,n);
+		else if (x.lb()<0) return Interval(Inf(-Power(INTERVAL(-x.lb(),-x.lb()),n)),
+										   Sup( Power(INTERVAL(x.ub(), x.ub()),n)));
 	return Power(x.itv,n);
 }
 
 inline Interval pow(const Interval& x, double d) {
-	return Power(x.itv,d);
+	if (x.is_empty()) return Interval::EMPTY_SET;
+	else return Power(x.itv,d);
 }
 
 inline Interval pow(const Interval &x, const Interval &y) {
-	return Power(x.itv,y.itv);
+	if (x.is_empty()) return Interval::EMPTY_SET;
+	else return Power(x.itv,y.itv);
 }
 
 inline Interval root(const Interval& x, int n) {
+	if (x.is_empty()) return Interval::EMPTY_SET;
+
 	INTERVAL r;
 
 	if (x.lb()==0 && x.ub()==0) return Interval::ZERO;
@@ -491,10 +506,13 @@ inline Interval root(const Interval& x, int n) {
 }
 
 inline Interval exp(const Interval& x) {
-	return Exp(x.itv);
+	if (x.is_empty()) return Interval::EMPTY_SET;
+	else return Exp(x.itv);
 }
 
 inline Interval log(const Interval& x) {
+	if (x.is_empty()) return Interval::EMPTY_SET;
+
 	INTERVAL r;
 
 	if (x.ub()<=0)
@@ -512,14 +530,18 @@ inline Interval log(const Interval& x) {
 }
 
 inline Interval cos(const Interval& x) {
-	return Cos(x.itv);
+	if (x.is_empty()) return Interval::EMPTY_SET;
+	else return Cos(x.itv);
 }
 
 inline Interval sin(const Interval& x) {
-	return Sin(x.itv);
+	if (x.is_empty()) return Interval::EMPTY_SET;
+	else return Sin(x.itv);
 }
 
 inline Interval tan(const Interval& x) {
+	if (x.is_empty()) return Interval::EMPTY_SET;
+
 	INTERVAL r;
 
 	Interval nb_period = (x+INTERVAL((x.lb()<0?-1:1)*Interval::PI.lb()/2.0,(x.ub()<0?-1:1)*Interval::PI.ub()/2.0))/Interval::PI;
@@ -530,6 +552,8 @@ inline Interval tan(const Interval& x) {
 }
 
 inline Interval acos(const Interval& x) {
+	if (x.is_empty()) return Interval::EMPTY_SET;
+
 	INTERVAL r;
 
 	if (x.ub()<-1.0 || x.lb()>1.0)
@@ -544,6 +568,8 @@ inline Interval acos(const Interval& x) {
 }
 
 inline Interval asin(const Interval& x) {
+	if (x.is_empty()) return Interval::EMPTY_SET;
+
 	INTERVAL r;
 
 	if (x.ub()<-1.0 || x.lb()>1.0)
@@ -557,11 +583,13 @@ inline Interval asin(const Interval& x) {
 }
 
 inline Interval atan(const Interval& x) {
-	return ArcTan(x.itv);
+	if (x.is_empty()) return Interval::EMPTY_SET;
+	else return ArcTan(x.itv);
 }
 
 // ArcTan2 by Firas Khemane (feb 2010)
 inline Interval atan2(const Interval& a, const Interval& b) {
+	if (a.is_empty() || b.is_empty()) return Interval::EMPTY_SET;
 
 	if (( a.lb() > 0 && b.lb() > 0) || (  a.lb() > 0 &&   b.ub() < 0 )  || ( b.lb() < 0 && b.ub()> 0  && a.lb() > 0 ) )
 
@@ -591,14 +619,17 @@ inline Interval atan2(const Interval& a, const Interval& b) {
 }
 
 inline Interval cosh(const Interval& x) {
-	return Cosh(x.itv);
+	if (x.is_empty()) return Interval::EMPTY_SET;
+	else return Cosh(x.itv);
 }
 
 inline Interval sinh(const Interval& x) {
-	return Sinh(x.itv);
+	if (x.is_empty()) return Interval::EMPTY_SET;
+	else return Sinh(x.itv);
 }
 
 inline Interval tanh(const Interval& x) {
+	if (x.is_empty()) return Interval::EMPTY_SET;
 
 	INTERVAL r;
 
@@ -621,6 +652,7 @@ inline Interval tanh(const Interval& x) {
 }
 
 inline Interval acosh(const Interval& x) {
+	if (x.is_empty()) return Interval::EMPTY_SET;
 	if (x.ub()<1.0) return Interval::EMPTY_SET;
 
 	INTERVAL r;
@@ -631,10 +663,13 @@ inline Interval acosh(const Interval& x) {
 }
 
 inline Interval asinh(const Interval& x) {
-	return ArSinh(x.itv);
+	if (x.is_empty()) return Interval::EMPTY_SET;
+	else return ArSinh(x.itv);
 }
 
 inline Interval atanh(const Interval& x) {
+	if (x.is_empty()) return Interval::EMPTY_SET;
+
 	INTERVAL r;
 
 	if (x.ub()<-1.0 || x.lb()>1.0)
@@ -658,15 +693,18 @@ inline Interval atanh(const Interval& x) {
 }
 
 inline Interval abs(const Interval &x) {
-	return IAbs(x.itv);
+	if (x.is_empty()) return Interval::EMPTY_SET;
+	else return IAbs(x.itv);
 }
 
 inline Interval max(const Interval& x, const Interval& y) {
-	return Interval(x.lb()>y.lb()? x.lb() : y.lb(), x.ub()>y.ub()? x.ub() : y.ub());
+	if (x.is_empty() || y.is_empty()) return Interval::EMPTY_SET;
+	else return Interval(x.lb()>y.lb()? x.lb() : y.lb(), x.ub()>y.ub()? x.ub() : y.ub());
 }
 
 inline Interval min(const Interval& x, const Interval& y) {
-	return Interval(x.lb()<y.lb()? x.lb() : y.lb(), x.ub()<y.ub()? x.ub() : y.ub());
+	if (x.is_empty() || y.is_empty()) return Interval::EMPTY_SET;
+	else return Interval(x.lb()<y.lb()? x.lb() : y.lb(), x.ub()<y.ub()? x.ub() : y.ub());
 }
 
 inline bool proj_mul(const Interval& y, Interval& x1, Interval& x2) {

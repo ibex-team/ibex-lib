@@ -10,13 +10,19 @@
  * ---------------------------------------------------------------------------- */
 
 #include "utils.h"
+#include <math.h>
 
 void TestIbex::check(double y_actual, double y_expected) {
+	TEST_ASSERT(!isnan(y_expected));
 	TEST_ASSERT_DELTA(y_actual,y_expected,ERROR);
 }
 
 void TestIbex::check(const Interval& y_actual, const Interval& y_expected) {
 	//cout << "TestIbex::check:    " << y_expected << " (expected)        " << y_actual << " (actual)"<< endl;
+	if (y_actual.is_empty()) { TEST_ASSERT(y_expected.is_empty()); return; }
+	else { TEST_ASSERT(!y_expected.is_empty()); return; }
+	TEST_ASSERT(!isnan(y_actual.lb()));
+	TEST_ASSERT(!isnan(y_actual.ub()));
 	TEST_ASSERT_DELTA(y_actual.lb(),y_expected.lb(),ERROR);
 	TEST_ASSERT_DELTA(y_actual.ub(),y_expected.ub(),ERROR);
 }

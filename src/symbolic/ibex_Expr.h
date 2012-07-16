@@ -420,6 +420,8 @@ public:
 
 	Variable(int n, const char* name) : symbol(new ExprSymbol(name, Dim::col_vec(n))) { }
 
+	Variable(int m, int n, const char* name) : symbol(new ExprSymbol(name, Dim::matrix(m,n))) { }
+
 	Variable(const Dim& dim=Dim::scalar()) : symbol(new ExprSymbol(dim)) { }
 
 	Variable(const char* name, const Dim& dim=Dim::scalar()) : symbol(new ExprSymbol(name,dim)) { }
