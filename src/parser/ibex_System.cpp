@@ -44,4 +44,14 @@ System::System(const char* filename) : box(1) /* tmp */ {
 	fclose(fd);
 }
 
+System::~System() {
+	for (int i=0; i<func.size(); i++)
+		delete &func[i];
+
+	if (goal) delete &goal;
+
+	for (int i=0; i<ctrs.size(); i++)
+		delete &ctrs[i].f;
+}
+
 } // end namespace ibex

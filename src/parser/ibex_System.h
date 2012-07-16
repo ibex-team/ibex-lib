@@ -5,7 +5,7 @@
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Jun 12, 2012
-// Last Update : Jun 12, 2012
+// Last Update : Jul 16, 2012
 //============================================================================
 
 #ifndef __IBEX_SYSTEM_H__
@@ -16,9 +16,21 @@
 
 namespace ibex {
 
+/**
+ * \ingroup parser
+ *
+ * \brief System.
+ *
+ * A system includes variables, domains, auxiliary functions,
+ * (in)equations and (optionally) an objective function.
+ */
 class System {
 public:
+	/** \brief Load a system from a file. */
 	System(const char* filename);
+
+	/** \brief Delete *this. */
+	~System();
 
 	/** Auxiliary functions */
 	Array<Function> func;

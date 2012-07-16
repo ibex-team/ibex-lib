@@ -27,8 +27,11 @@ Function::~Function() {
 	for (unsigned int i=0; i<exprnodes.size(); i++) {
 		delete node(i).deco.d;
 		delete node(i).deco.g;
-		delete &node(i);
 	}
+	cleanup(expr(),false);
+
+	for (int i=0; i<nb_symbols(); i++)
+		delete &symbol(i);
 }
 
 int Function::input_size() const {

@@ -53,7 +53,8 @@ void ExprNode::reset_visited() const {
 
 void cleanup(const ExprNode& expr, bool delete_symbols) {
 	const ExprNode** nodes=expr.subnodes();
-	for (int i=0; i<expr.size; i++)
+	int size=expr.size; // (warning: expr will be deleted in the loop)
+	for (int i=0; i<size; i++)
 		if (delete_symbols || (!dynamic_cast<const ExprSymbol*>(nodes[i])))
 			delete (ExprNode*) nodes[i];
 }
