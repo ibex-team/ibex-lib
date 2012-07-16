@@ -46,7 +46,7 @@ public:
 			}
 		}
 
-		visit(e);
+		visit(y);
 
 		if (current_index!=-1) is_used[current_index]=true;
 	}
@@ -254,7 +254,7 @@ void Function::init(const Array<const ExprSymbol>& x, const ExprNode& y) {
 
 	BuildVectorOfNodes(exprnodes, x, y);
 
-	FindSymbolsUsed fsu(is_used, nb_symbols(), y);
+	FindSymbolsUsed fsu(x, y, is_used);
 
 	for (int i=0; i<nb_nodes(); i++) {
 		assert(node(i).deco.f==NULL); // this node must not belong to another function!
