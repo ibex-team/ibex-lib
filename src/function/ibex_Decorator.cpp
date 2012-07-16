@@ -5,7 +5,7 @@
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Apr 4, 2012
-// Last Update : Jul 12, 2012
+// Last Update : Jul 16, 2012
 //============================================================================
 
 #include "ibex_Decorator.h"
@@ -20,11 +20,13 @@ void Decorator::decorate(const Function& f) {
 
 	f.expr().reset_visited();
 
+
 	// we cannot just call visit(f.expr()) because
 	// some symbols may not appear in the expression
 	// and they have to be decorated. So we first
 	// decorate all the symbols.
 	for (int i=0; i<f.nb_symbols(); i++) {
+		f.symbol(i).deco.visited=false;
 		visit((const ExprNode&) f.symbol(i)); // cast to ExprNode, in order to set "visited" to true.
 	}
 
