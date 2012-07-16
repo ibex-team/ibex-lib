@@ -57,11 +57,11 @@ vector<IntervalVector> Solver::solve(const IntervalVector& init_box) {
 
 		try {
 			v=c->get<BisectedVar>().var;
-			impact.set(v);
+			if (v!=-1) impact.set(v);
 
 			ctc.contract(c->box,impact);
 
-			impact.unset(v);
+			if (v!=-1) impact.unset(v);
 
 			try {
 				((Ctc&) prec).contract(c->box);
