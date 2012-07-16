@@ -32,9 +32,9 @@ void TestFunction::add_symbol() {
 	TEST_ASSERT(f.nb_symbols()==2);
 	TEST_ASSERT(strcmp(f.symbol_name(0),"x")==0);
 	TEST_ASSERT(strcmp(f.symbol_name(1),"y")==0);
-	TEST_ASSERT(f.used("x"));
 	TEST_ASSERT(f.used(0));
-	TEST_ASSERT(!f.used("y"));
+	TEST_ASSERT(f.used(0));
+	TEST_ASSERT(!f.used(1));
 	TEST_ASSERT(!f.used(1));
 	TEST_ASSERT(&f.node(0)==&x);
 	TEST_ASSERT(&f.node(1)==&y);
@@ -104,28 +104,50 @@ void TestFunction::used() {
 
 	Function f(x,y,z,e);
 
-	TEST_ASSERT(f[0].used("x"));
-	TEST_ASSERT(f[0].used("y"));
-	TEST_ASSERT(f[0].used("z"));
+	TEST_ASSERT(f[0].used(0));
+	TEST_ASSERT(f[0].used(1));
+	TEST_ASSERT(f[0].used(2));
 	TEST_ASSERT(f[0].used(0));
 	TEST_ASSERT(f[0].used(1));
 	TEST_ASSERT(f[0].used(2));
 
-	TEST_ASSERT(f[1].used("x"));
-	TEST_ASSERT(!f[1].used("y"));
-	TEST_ASSERT(f[1].used("z"));
+	TEST_ASSERT(f[1].used(0));
+	TEST_ASSERT(!f[1].used(1));
+	TEST_ASSERT(f[1].used(2));
 	TEST_ASSERT(f[1].used(0));
 	TEST_ASSERT(!f[1].used(1));
 	TEST_ASSERT(f[1].used(2));
 
-	TEST_ASSERT(!f[2].used("x"));
-	TEST_ASSERT(f[2].used("y"));
-	TEST_ASSERT(f[2].used("z"));
+	TEST_ASSERT(!f[2].used(0));
+	TEST_ASSERT(f[2].used(1));
+	TEST_ASSERT(f[2].used(2));
 	TEST_ASSERT(!f[2].used(0));
 	TEST_ASSERT(f[2].used(1));
 	TEST_ASSERT(f[2].used(2));
 }
 
+void TestFunction::used02() {
+	Variable x(3,"x");
+	Variable y(2,3,"y");
+
+	Function f(x,y,x[0]+x[2]-(y[1][1]*y[1][2]));
+
+	TEST_ASSERT(f.used(0));
+	TEST_ASSERT(!f.used(1));
+	TEST_ASSERT(f.used(2));
+
+	TEST_ASSERT(!f.used(3));
+	TEST_ASSERT(!f.used(4));
+	TEST_ASSERT(!f.used(5));
+
+	TEST_ASSERT(!f.used(6));
+	TEST_ASSERT(f.used(7));
+	TEST_ASSERT(f.used(8));
+
+	TEST_ASSERT(!f.used(9));
+	TEST_ASSERT(!f.used(10));
+	TEST_ASSERT(!f.used(11));
+}
 
 
 } // end namespace
