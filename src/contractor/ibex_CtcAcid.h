@@ -88,7 +88,7 @@ protected :
 	 */
 	void compute_smearorder(IntervalVector& box);
 
-	vector<int> smearorder;
+	std::vector<int> smearorder;
 	int nbcalls;
 	double nbctvar;
 	double ctratio;

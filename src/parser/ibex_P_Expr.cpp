@@ -11,6 +11,8 @@
 #include "ibex_P_Expr.h"
 #include "ibex_P_ExprPrinter.h"
 
+using namespace std;
+
 namespace ibex {
 namespace parser {
 

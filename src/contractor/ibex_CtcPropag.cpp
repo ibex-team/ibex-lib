@@ -14,6 +14,8 @@
 #include "ibex_Cell.h"
 #include "ibex_Bsc.h"
 
+using namespace std;
+
 namespace ibex {
 
 /*! Default propagation ratio. */

@@ -10,6 +10,8 @@
 
 #include "ibex_CtcAcid.h"
 
+using namespace std;
+
 namespace ibex {
 
 double  CtcAcid::nbvarstat=0;
@@ -110,7 +112,7 @@ void CtcAcid::compute_smearorder(IntervalVector& box) {
 
 	if (smearorder.size()!=0) smearorder.clear();
 
-	vector<int> varorder2;
+	std::vector<int> varorder2;
 
 	for (int i=0;i<nb_var;i++)
 		if (cid_vars[i]) varorder2.push_back(i);       // [gch] (the condition)

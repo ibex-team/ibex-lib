@@ -94,7 +94,7 @@ public:
 
 private:
 
-	friend ostream& operator<<(ostream& os, const Scope& scope);
+	friend std::ostream& operator<<(std::ostream& os, const Scope& scope);
 
 	SymbolMap<S_Object*> tab;
 };

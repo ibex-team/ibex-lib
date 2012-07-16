@@ -264,7 +264,7 @@ bool diam_gt(const int& i, const int& j) {
 void IntervalVector::sort_indices(bool min, int tab[]) const {
 	for (int i=0; i<n; i++) tab[i]=i;
 	tmp=this;
-	sort(tab,tab+n,min? diam_lt:diam_gt);
+	std::sort(tab,tab+n,min? diam_lt:diam_gt);
 }
 
 std::ostream& operator<<(std::ostream& os, const IntervalVector& x) {

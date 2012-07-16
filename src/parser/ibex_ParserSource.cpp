@@ -10,6 +10,8 @@
 
 #include "ibex_ParserSource.h"
 
+using namespace std;
+
 namespace ibex {
 namespace parser {
 

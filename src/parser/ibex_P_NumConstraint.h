@@ -47,7 +47,7 @@ public:
 
 class P_ConstraintList : public P_NumConstraint {
 public:
-	P_ConstraintList(vector<P_NumConstraint*>& ctrs);
+	P_ConstraintList(std::vector<P_NumConstraint*>& ctrs);
 
 	void acceptVisitor(CtrGenerator& g) const {
 		g.visit(*this);
@@ -58,13 +58,13 @@ public:
 	 */
 	~P_ConstraintList();
 
-	vector<P_NumConstraint*>& ctrs;
+	std::vector<P_NumConstraint*>& ctrs;
 
 };
 
 class P_ConstraintLoop : public P_NumConstraint {
 public:
-	P_ConstraintLoop(const char* iter, int first_value, int last_value, vector<P_NumConstraint*>& ctrs);
+	P_ConstraintLoop(const char* iter, int first_value, int last_value, std::vector<P_NumConstraint*>& ctrs);
 
 	void acceptVisitor(CtrGenerator& g) const {
 		g.visit(*this);

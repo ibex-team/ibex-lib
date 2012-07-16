@@ -15,6 +15,7 @@
 #include "soplex.h"
 
 using namespace soplex;
+using namespace std;
 
 namespace ibex {
 

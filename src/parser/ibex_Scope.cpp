@@ -24,6 +24,8 @@ extern const int TK_ENTITY;
 extern const int TK_ITERATOR;
  */
 
+using namespace std;
+
 namespace ibex {
 namespace parser {
 

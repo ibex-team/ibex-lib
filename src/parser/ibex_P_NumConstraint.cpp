@@ -10,6 +10,8 @@
 
 #include "ibex_P_NumConstraint.h"
 
+using namespace std;
+
 namespace ibex {
 
 namespace parser {

@@ -92,6 +92,7 @@ void end() {
 
 using namespace ibex;
 using namespace parser;
+using namespace std;
 
 %}	
 
@@ -105,15 +106,15 @@ using namespace parser;
   ibex::Dim*      dim;
   
   const ibex::ExprSymbol*                 func_input_symbol;
-  vector<const ibex::ExprSymbol*>*        func_input_symbols;
+  std::vector<const ibex::ExprSymbol*>*   func_input_symbols;
 
   ibex::parser::Entity*                   entity_symbol;
 
-  ibex::parser::P_NumConstraint*          constraint;
-  vector<ibex::parser::P_NumConstraint*>* constraints;
+  ibex::parser::P_NumConstraint*               constraint;
+  std::vector<ibex::parser::P_NumConstraint*>* constraints;
 
   const ibex::ExprNode*                expression;
-  vector<const ibex::ExprNode*>*  expressions;
+  std::vector<const ibex::ExprNode*>*  expressions;
 
 }
 

@@ -15,6 +15,8 @@
 
 extern void ibexerror (const std::string& msg);
 
+using namespace std;
+
 namespace ibex {
 
 namespace parser {

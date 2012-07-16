@@ -14,6 +14,8 @@
 #include "ibex_EmptyBoxException.h"
 #include <cassert>
 
+using namespace std;
+
 namespace ibex {
 
 double default_newton_prec=1e-07;
