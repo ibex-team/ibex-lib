@@ -22,4 +22,4 @@ lexer.c : lexer.lex ibex_Scope.h
 	flex -Pibex -olexer.c lexer.lex
 
 clean:
-	rm -f $(OBJS) *~ *.o *~ *.output parser.h parser.c lexer.h lexer.c; \
+	rm -f *~ *.o *~ *.output parser.h parser.c lexer.h lexer.c; \
