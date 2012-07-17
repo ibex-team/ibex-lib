@@ -14,23 +14,32 @@ namespace ibex {
 namespace parser {
 
 // VAR is a temporary value
-Entity::Entity(const char* name, const Dim& dim, const Domain& domain) :
-				symbol(ExprSymbol::new_(name,dim)), domain(domain,false), type(VAR) {
-
-}
-
-// VAR is a temporary value
-Entity::Entity(const char* name, const Dim& dim, const Interval& x) :
+Entity::Entity(const char* name, const Dim& dim, const Domain& d) :
 				symbol(ExprSymbol::new_(name,dim)), domain(dim), type(VAR) {
 
-	switch(dim.type()) {
+
+	if (d.dim==dim) {
+		domain=d;
+	} else {
+		// when a vector/matrix is initialized with a single interval
+		assert(d.dim.is_scalar());
+		load_domain(d.i());
+	}
+}
+
+Entity::Entity(const char* name, const Dim& dim, const Interval& x) :
+				symbol(ExprSymbol::new_(name,dim)), domain(dim), type(VAR) {
+	load_domain(x);
+}
+
+void Entity::load_domain(const Interval& x) {
+	switch(domain.dim.type()) {
 	case Dim::SCALAR :      domain.i()=x; break;
 	case Dim::ROW_VECTOR:
 	case Dim::COL_VECTOR:   domain.v().init(x); break;
 	case Dim::MATRIX:       domain.m().init(x); break;
 	case Dim::MATRIX_ARRAY: for (int i=0; i<domain.ma().size(); i++) domain.ma()[i].init(x); break;
 	}
-
 }
 
 } // end namespace parser

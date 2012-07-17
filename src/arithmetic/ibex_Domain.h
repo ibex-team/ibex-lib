@@ -117,7 +117,7 @@ public:
 	}
 
 	/**
-	 * \brief Load domains from another array of domains.
+	 * \brief Load domains from another domain.
 	 */
 	Domain& operator=(const Domain& d) {
 		assert((*this).dim==d.dim);

@@ -33,6 +33,8 @@ public:
 	Domain domain;
 
 	Type type; // not specified at construction (see parser.yacc)
+private:
+	void load_domain(const Interval& x);
 };
 
 } // end namespace parser
