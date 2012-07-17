@@ -72,7 +72,7 @@ IntervalMatrix::IntervalMatrix(const Matrix& m) : _nb_rows(m.nb_rows()), _nb_col
 }
 
 IntervalMatrix::~IntervalMatrix() {
-	delete[] M;
+	if (M!=NULL) delete[] M;
 }
 
 IntervalMatrix& IntervalMatrix::operator=(const IntervalMatrix& x) {
