@@ -71,7 +71,7 @@ public :
 	double nbvar_stat();
 
 	/** the handled constraint system */
-	System system;
+	const System& system;
 
 	/** the average (on all tunings) of the  number of variables to be shaved  : result given at the end of the search*/
 	static double nbvarstat;

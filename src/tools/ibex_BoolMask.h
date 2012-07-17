@@ -40,6 +40,11 @@ public:
 	BoolMask();
 
 	/**
+	 * \brief Copy constructor.
+	 */
+	BoolMask(const BoolMask& m);
+
+	/**
 	 * \brief Resize the mask.
 	 */
 	void resize(int n);
@@ -144,6 +149,11 @@ inline BoolMask::BoolMask(int n, bool value) : n(n), mask(new bool[n]) {
 	else unset_all();
 }
 
+inline BoolMask::BoolMask(const BoolMask& m) : n(m.n), mask(new bool[n]) {
+	for (int i=0; i<n; i++)
+		mask[i]=m.mask[i];
+}
+
 inline void BoolMask::resize(int n2) {
 	assert(n>=0);
 	bool* new_mask=new bool[n2];
@@ -232,6 +242,7 @@ inline void BoolMask::unset(int i) {
 }
 
 inline BoolMask::~BoolMask() {
+	assert(mask);
 	delete[] mask;
 }
 

@@ -57,6 +57,9 @@ public:
 
 	/** Constraints */
 	Array<NumConstraint> ctrs;
+
+private:
+	explicit System(const System& sys); // forbidden
 };
 
 } // end namespace ibex
