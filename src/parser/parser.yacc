@@ -67,7 +67,6 @@ int _2int(const ExprNode& expr) {
 
 double _2dbl(const ExprNode& expr) {
 	double d=ConstantGenerator(scopes.top()).eval_double(expr);
-	cout << expr.size << endl;
 	cleanup(expr,true); // false or true (there is no symbols)
 	return d;
 }
