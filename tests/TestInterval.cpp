@@ -233,6 +233,6 @@ void TestInterval::is_unbounded04()       { TEST_ASSERT(Interval::POS_REALS.is_u
 
 void TestInterval::delta01() {
 	Interval x(-1.7976931348623157081e+308,6.1000000000000005329);
-	cout << "diam(x)=" << x.diam() << endl;
+	//cout << "delta=" << x.delta(x) << " x.diam()=" << (x.diam()==POS_INFINITY) << endl;
 	TEST_ASSERT(x.delta(x)==0.0);
 }

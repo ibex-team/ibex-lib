@@ -153,12 +153,15 @@ double Interval::delta(const Interval& x) const {
 
 	double d=diam();
 	double dx=x.diam();
-
+	//
 	if (d==POS_INFINITY) {
+		//cout << "d=" << d << " dx=" << dx << endl;
 		if (dx==POS_INFINITY) {
-			int left=x.lb()==NEG_INFINITY? 0 : x.lb()-lb();
-			int right=x.ub()==POS_INFINITY? 0 : ub()-x.ub();
+			int left=(x.lb()==NEG_INFINITY? 0 : x.lb()-lb());
+			int right=(x.ub()==POS_INFINITY? 0 : ub()-x.ub());
 			return left+right;
+
+			cout << "left=" << left << " right=" << right << endl;
 		} else
 			return POS_INFINITY;
 	}

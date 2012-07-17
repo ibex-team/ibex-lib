@@ -56,7 +56,6 @@ void MainGenerator::generate(const P_Source& source, System& result) {
 	//================= generate the domain =====================
 	result.box.resize(input_size);
 	load(result.box, domains);
-	cout << "domain=" << result.box << endl;
 	Scope scope;
 
 	//============== generate the goal function (if any) =================

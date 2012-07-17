@@ -92,6 +92,13 @@ public:
 		TEST_ADD(TestArith::div2_12);
 		TEST_ADD(TestArith::div2_13);
 
+		TEST_ADD(TestArith::log01);
+		TEST_ADD(TestArith::log02);
+		TEST_ADD(TestArith::log03);
+		TEST_ADD(TestArith::log04);
+		TEST_ADD(TestArith::log05);
+		TEST_ADD(TestArith::log06);
+
 		TEST_ADD(TestArith::sin01);
 		TEST_ADD(TestArith::sin02);
 		TEST_ADD(TestArith::sin03);
@@ -131,6 +138,16 @@ public:
 		TEST_ADD(TestArith::proj_mul04);
 		TEST_ADD(TestArith::proj_mul05);
 
+		TEST_ADD(TestArith::proj_div01);
+		TEST_ADD(TestArith::proj_div02);
+		TEST_ADD(TestArith::proj_div03);
+		TEST_ADD(TestArith::proj_div04);
+		TEST_ADD(TestArith::proj_div05);
+		TEST_ADD(TestArith::proj_div06);
+		TEST_ADD(TestArith::proj_div07);
+		TEST_ADD(TestArith::proj_div08);
+		TEST_ADD(TestArith::proj_div09);
+
 		TEST_ADD(TestArith::proj_sqr01);
 		TEST_ADD(TestArith::proj_sqr02);
 		TEST_ADD(TestArith::proj_sqr03);
@@ -138,6 +155,15 @@ public:
 		TEST_ADD(TestArith::proj_sqr05);
 		TEST_ADD(TestArith::proj_sqr06);
 		TEST_ADD(TestArith::proj_sqr07);
+
+		TEST_ADD(TestArith::proj_log01);
+		TEST_ADD(TestArith::proj_log02);
+		TEST_ADD(TestArith::proj_log03);
+		TEST_ADD(TestArith::proj_log04);
+		TEST_ADD(TestArith::proj_log05);
+		TEST_ADD(TestArith::proj_log06);
+		TEST_ADD(TestArith::proj_log07);
+		TEST_ADD(TestArith::proj_log08);
 
 		TEST_ADD(TestArith::proj_sin01);
 		TEST_ADD(TestArith::proj_sin02);
@@ -290,6 +316,13 @@ private:
 	void div2_12();
 	void div2_13();
 
+	void log01();
+	void log02();
+	void log03();
+	void log04();
+	void log05();
+	void log06();
+
 	/* test:
 	 * sin
 	 * cos
@@ -335,6 +368,17 @@ private:
 	void proj_mul04();
 	void proj_mul05();
 
+	/* test: proj_div */
+	void proj_div01();
+	void proj_div02();
+	void proj_div03();
+	void proj_div04();
+	void proj_div05();
+	void proj_div06();
+	void proj_div07();
+	void proj_div08();
+	void proj_div09();
+
 	/* test: proj_sqrt(const Interval& y, Interval& x) */
 	void proj_sqr01();
 	void proj_sqr02();
@@ -343,6 +387,15 @@ private:
 	void proj_sqr05();
 	void proj_sqr06();
 	void proj_sqr07();
+
+	void proj_log01();
+	void proj_log02();
+	void proj_log03();
+	void proj_log04();
+	void proj_log05();
+	void proj_log06();
+	void proj_log07();
+	void proj_log08();
 
 	/* test: proj_sin & proj_cos */
 	void proj_sin01();
@@ -397,6 +450,7 @@ private:
 	void check_trigo(const Interval& x, const Interval& y);
 	void check_pow(const Interval& x, int p, const Interval& y_expected);
 	bool checkproj_mul(const Interval& y, const Interval& x1_before, const Interval& x2_before, const Interval& x1_after, const Interval& x2_after);
+	void checkproj_div(const Interval& y, const Interval& x1_before, const Interval& x2_before, const Interval& x1_after, const Interval& x2_after);
 	void checkproj_trigo(const Interval& y, const Interval& xbefore, const Interval& xafter);
 	void checkproj_pow(const Interval& y, const Interval& xbefore, const Interval& xafter, int p);
 };

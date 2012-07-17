@@ -20,7 +20,7 @@ void not_implemented(const char* feature) {
 	cerr << "***********************************************************************" << endl;
 	cerr << "IBEX has crashed because the following feature is not implemented yet:" << endl;
 	cerr << feature << endl;
-	cerr << "Please, submit a new feature request.";
+	cerr << "Please, submit a new feature request." << endl;
 	cerr << "***********************************************************************" << endl;
 	exit(-1);
 }

@@ -187,6 +187,13 @@ void TestArith::check_trigo(const Interval& x, const Interval& sin_x_expected) {
 	check(cos(x+Interval::TWO_PI-Interval::HALF_PI), sin_x_expected);
 }
 
+void TestArith::log01() { check(log(Interval::EMPTY_SET), Interval::EMPTY_SET); }
+void TestArith::log02() { check(log(Interval::ALL_REALS), Interval::ALL_REALS); }
+void TestArith::log03() { check(log(Interval::POS_REALS), Interval::ALL_REALS); }
+void TestArith::log04() { check(log(Interval::NEG_REALS), Interval::EMPTY_SET); }
+void TestArith::log05() { check(log(Interval(1,2)),       Interval(0,::log(2))); }
+void TestArith::log06() { check(log(Interval(-1,1)),      Interval(NEG_INFINITY,0)); }
+
 void TestArith::sin01() { check_trigo(Interval::ALL_REALS, Interval(-1,1)); }
 void TestArith::sin02() { check_trigo(Interval::EMPTY_SET, Interval::EMPTY_SET); }
 void TestArith::sin03() { check_trigo(Interval(0,piU/2.0), Interval(0,1)); }
@@ -288,6 +295,47 @@ void TestArith::proj_mul05() {
 	TEST_ASSERT(checkproj_mul(Interval(1,1),Interval(0,10),Interval(0,10),Interval(0.1,10.0),Interval(0.1,10.0)));
 }
 
+void TestArith::checkproj_div(const Interval& y, const Interval& x1_bef, const Interval& x2_bef,
+		const Interval& x1_aft, const Interval& x2_aft) {
+	Interval x1;
+	Interval x2;
+
+	x1=x1_bef;
+	x2=x2_bef;
+	proj_div(y,x1,x2);
+	check(x1,x1_aft);
+	check(x2,x2_aft);
+
+	x1=-x1_bef;
+	x2=-x2_bef;
+	proj_div(y,x1,x2);
+	check(x1,-x1_aft);
+	check(x2,-x2_aft);
+
+	x1=-x1_bef;
+	x2=x2_bef;
+	proj_div(-y,x1,x2);
+	check(x1,-x1_aft);
+	check(x2,x2_aft);
+
+	x1=x1_bef;
+	x2=-x2_bef;
+	proj_div(-y,x1,x2);
+	check(x1,x1_aft);
+	check(x2,-x2_aft);
+}
+
+void TestArith::proj_div01() { checkproj_div(Interval(1,2),  Interval(0,1),   Interval(2,3),  Interval::EMPTY_SET, Interval::EMPTY_SET); }
+void TestArith::proj_div02() { checkproj_div(Interval(1,2),  Interval(0,1),   Interval(1,3),  1,                   1); }
+void TestArith::proj_div03() { checkproj_div(Interval(1,2),  Interval(1,3),   Interval(0,1),  Interval(1,2),       Interval(0.5,1)); }
+void TestArith::proj_div04() { checkproj_div(Interval(-1,1), Interval(-2,2),  Interval(0,1),  Interval(-1,1),      Interval(0,1)); }
+void TestArith::proj_div05() { checkproj_div(Interval(-1,1), Interval(-2,2),  Interval::ZERO, Interval::ZERO,      Interval::ZERO); }
+void TestArith::proj_div06() { checkproj_div(Interval::ZERO, Interval(-2,2),  Interval(-2,2), Interval::ZERO,      Interval(-2,2)); }
+void TestArith::proj_div07() { checkproj_div(Interval::POS_REALS, Interval(0,1),  Interval(-1,0), Interval::ZERO,   Interval(-1,0)); }
+// note: 0/0 can be any number.
+void TestArith::proj_div08() { checkproj_div(Interval(next_float(0),POS_INFINITY), Interval(0,1), Interval(-1,0), Interval::ZERO, Interval::ZERO); }
+void TestArith::proj_div09() { checkproj_div(Interval::POS_REALS, Interval(next_float(0),1),  Interval(-1,0),  Interval::EMPTY_SET, Interval::EMPTY_SET); }
+
 void TestArith::proj_sqr01() { checkproj(sqr, Interval(1,9),            Interval(0,4),       Interval(1,3)); }
 void TestArith::proj_sqr02() { checkproj(sqr, Interval(1,9),            Interval(0,2),       Interval(1,2)); }
 void TestArith::proj_sqr03() { checkproj(sqr, Interval(1,9),            Interval(-4,2),      Interval(-3,2)); }
@@ -295,6 +343,16 @@ void TestArith::proj_sqr04() { checkproj(sqr, Interval(1,9),            Interval
 void TestArith::proj_sqr05() { checkproj(sqr, Interval(NEG_INFINITY,9), Interval(-4,1),      Interval(-3,1)); }
 void TestArith::proj_sqr06() { checkproj(sqr, Interval(4,9),            Interval(-1,5),      Interval(2,3)); }
 void TestArith::proj_sqr07() { checkproj(sqr, Interval(-4,-2),          Interval::ALL_REALS, Interval::EMPTY_SET); }
+
+void TestArith::proj_log01() { checkproj(log, Interval::ALL_REALS,      Interval::ALL_REALS, Interval::POS_REALS); }
+void TestArith::proj_log02() { checkproj(log, Interval::NEG_REALS,      Interval::ALL_REALS, Interval(0,1)); }
+void TestArith::proj_log03() { checkproj(log, Interval::POS_REALS,      Interval(0,1),       1); }
+void TestArith::proj_log04() { checkproj(log, Interval(0,1),      		Interval(-1,3),      Interval(1,::exp(1))); }
+void TestArith::proj_log05() { checkproj(log, Interval(NEG_INFINITY,1), Interval(-1,3),      Interval(0,::exp(1))); }
+void TestArith::proj_log06() { checkproj(log, Interval(NEG_INFINITY,1), Interval(-1,2),      Interval(0,2)); }
+void TestArith::proj_log07() { checkproj(log, Interval(NEG_INFINITY,1), Interval(3,4),       Interval::EMPTY_SET); }
+void TestArith::proj_log08() { checkproj(log, Interval(-1,1),           Interval(-0.01,0.01),Interval::EMPTY_SET); }
+
 
 void TestArith::proj_sin01() { checkproj_trigo(sin(Interval(0.5,1.5)), Interval(0,piU/2.0),        Interval(0.5,1.5)); }
 void TestArith::proj_sin02() { checkproj_trigo(sin(Interval(0.5,1.5)), Interval(0,5*piU/2.0),      Interval(0.5,2*piU+1.5)); }

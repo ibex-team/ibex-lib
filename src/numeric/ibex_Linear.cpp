@@ -191,7 +191,7 @@ void gauss_seidel(const IntervalMatrix& A, const IntervalVector& b, IntervalVect
 //   GaussSeidel(A, b, x);
 // }
 
-void HansenBliek(const IntervalMatrix& A, const IntervalVector& B, IntervalVector& x) {
+void hansen_bliek(const IntervalMatrix& A, const IntervalVector& B, IntervalVector& x) {
 	int n=A.nb_rows();
 	assert(n == A.nb_cols()); // throw NotSquareMatrixException();
 	assert(n == x.size() && n == B.size());
