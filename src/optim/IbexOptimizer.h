@@ -77,7 +77,7 @@ Optimizer(const System& sys,  int y_num, Contractor& contractor, Precision & pre
   void report();  
   void check_limits();
   REAL loup;                // "loup"= lowest upper bound of the minimum
-
+  REAL uplo;                // "uplo"= uppest lower bound of the minimum
   int nb_simplex;
   int nb_rand;
   REAL diam_simplex;
@@ -105,7 +105,7 @@ Optimizer(const System& sys,  int y_num, Contractor& contractor, Precision & pre
   VECTOR loup_point;        // the point satisfying the constraints corresponding to the loup
 
   REAL uplo_of_solutions;   //  lower bound of the small boxes taken by the precision contractor
-  REAL uplo;                // "uplo"= uppest lower bound of the minimum
+
 
 
 
