@@ -145,15 +145,24 @@ double Interval::delta(const Interval& x) const {
 	if (is_empty()) return 0;
 	if (x.is_empty()) return diam();
 
-	if (x.lb()==NEG_INFINITY) {
-		if (x.ub()==POS_INFINITY) return 0;
-		else return ub()==POS_INFINITY ? POS_INFINITY : ub()-x.ub();
+	// ** warning **
+	// checking if *this or x is infinite by
+	// testing if the lower/upper bounds are -oo/+oo
+	// is not enough because diam() may return +oo even
+	// with finite bounds (very large intervals).
+
+	double d=diam();
+	double dx=x.diam();
+
+	if (d==POS_INFINITY) {
+		if (dx==POS_INFINITY) {
+			int left=x.lb()==NEG_INFINITY? 0 : x.lb()-lb();
+			int right=x.ub()==POS_INFINITY? 0 : ub()-x.ub();
+			return left+right;
+		} else
+			return POS_INFINITY;
 	}
-	else if (x.ub()==POS_INFINITY) {
-		if (x.lb()==NEG_INFINITY) return 0;
-		else return lb()==NEG_INFINITY ? POS_INFINITY : x.lb()-lb();
-	}
-	else return diam() - x.diam();
+	else return d-dx;
 }
 
 double Interval::ratiodelta(const Interval& x) const {

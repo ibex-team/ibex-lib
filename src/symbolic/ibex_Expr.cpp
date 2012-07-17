@@ -57,6 +57,7 @@ void cleanup(const ExprNode& expr, bool delete_symbols) {
 	for (int i=0; i<size; i++)
 		if (delete_symbols || (!dynamic_cast<const ExprSymbol*>(nodes[i])))
 			delete (ExprNode*) nodes[i];
+	delete[] nodes;
 }
 
 
@@ -77,6 +78,10 @@ ExprNAryOp::ExprNAryOp(const ExprNode** _args, int n, const Dim& dim) :
 	args = new const ExprNode*[n];
 	for (int i=0; i<n; i++)
 		args[i]=_args[i];
+}
+
+ExprNAryOp::~ExprNAryOp() {
+	delete[] args;
 }
 
 static Array<const Dim> dims(const ExprNode** comp, int n) {

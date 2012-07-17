@@ -71,6 +71,10 @@ IntervalMatrix::IntervalMatrix(const Matrix& m) : _nb_rows(m.nb_rows()), _nb_col
 	}
 }
 
+IntervalMatrix::~IntervalMatrix() {
+	delete[] M;
+}
+
 IntervalMatrix& IntervalMatrix::operator=(const IntervalMatrix& x) {
 	resize(x.nb_rows(), x.nb_cols());
 	for (int i=0; i<nb_rows(); i++)

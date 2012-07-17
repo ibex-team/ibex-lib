@@ -200,6 +200,9 @@ public:
 	/** The number of arguments */
 	const int nb_args;
 
+	/** Delete the array (but not the subexpressions). */
+	~ExprNAryOp();
+
 protected:
 	// TO DO: replace args by Array<...>
 	ExprNAryOp(const ExprNode** args, int n, const Dim& dim);

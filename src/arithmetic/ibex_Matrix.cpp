@@ -59,6 +59,10 @@ Matrix::Matrix(const Matrix& m) : _nb_rows(m.nb_rows()), _nb_cols(m.nb_cols()){
 	}
 }
 
+Matrix::~Matrix() {
+	delete[] M;
+}
+
 Matrix& Matrix::operator=(const Matrix& x) {
 	assert(nb_rows()==x.nb_rows() && nb_cols()==x.nb_cols()); // or implement "resize"
 	//resize(x.nb_rows(), x.nb_cols());

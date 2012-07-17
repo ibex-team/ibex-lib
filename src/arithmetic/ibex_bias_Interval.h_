@@ -451,10 +451,11 @@ inline Interval pow(const Interval& x, int n) {
 
 	// there are bugs with negative x
 	// such as Power([-2,3],3)->[-18,27])
-	if (n%2!=0)
+	if (n%2!=0) {
 		if (x.ub()<0) return -Power(-x.itv,n);
 		else if (x.lb()<0) return Interval(Inf(-Power(INTERVAL(-x.lb(),-x.lb()),n)),
 										   Sup( Power(INTERVAL(x.ub(), x.ub()),n)));
+	}
 	return Power(x.itv,n);
 }
 

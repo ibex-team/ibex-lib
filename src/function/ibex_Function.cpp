@@ -27,11 +27,20 @@ Function::~Function() {
 	for (unsigned int i=0; i<exprnodes.size(); i++) {
 		delete node(i).deco.d;
 		delete node(i).deco.g;
+		delete node(i).deco.p;
 	}
 	cleanup(expr(),false);
 
 	for (int i=0; i<nb_symbols(); i++)
 		delete &symbol(i);
+
+
+	/* warning... if there is only one constraint
+	 * then comp is the same object as f itself!
+	 *
+	 * This is not a very consistent choice...
+	 */
+	if (output_size()>1) delete[] comp;
 }
 
 int Function::input_size() const {

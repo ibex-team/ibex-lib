@@ -63,6 +63,11 @@ public:
 	IntervalMatrix(int m, int n, double x[][2]);
 
 	/**
+	 * \brief Delete *this.
+	 */
+	~IntervalMatrix();
+
+	/**
 	 * \brief Create a mxn empty matrix
 	 *
 	 * Create an empty IntervalMatrix of dimension \a n x \a m

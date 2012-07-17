@@ -374,7 +374,7 @@ private:
 
 	const ExprNode* root;                       // the root node
 	Array<const ExprSymbol> symbols;            // to retrieve symbol (node)s by appearing order.
-	std::vector<bool> is_used;                  // tells whether the i^th symbol is used.
+	std::vector<bool> is_used;                  // tells whether the i^th component is used.
 	std::vector<const ExprNode*> exprnodes;     // all the nodes
 	SymbolMap<const ExprSymbol*> id2info;       // to retrieve a symbol node from its name.
 	int key_count;                              // count the number of symbols

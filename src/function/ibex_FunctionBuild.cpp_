@@ -25,16 +25,16 @@ namespace ibex {
 namespace {
 
 /*
- * Find the symbols used in the function
+ * Find the components used in the function
  * \pre the symbol keys must have been set
  */
-class FindSymbolsUsed: public ExprVisitor {
+class FindInputsUsed: public ExprVisitor {
 public:
 	std::vector<bool>& is_used;
 	int* symbol_index;
 	int current_index;
 
-	FindSymbolsUsed(const Array<const ExprSymbol>& x, const ExprNode& y, std::vector<bool>& is_used) : is_used(is_used) {
+	FindInputsUsed(const Array<const ExprSymbol>& x, const ExprNode& y, std::vector<bool>& is_used) : is_used(is_used) {
 		symbol_index = new int[x.size()];
 		int index=0;
 
@@ -49,6 +49,7 @@ public:
 		visit(y);
 
 		if (current_index!=-1) is_used[current_index]=true;
+		delete[] symbol_index;
 	}
 
 	virtual void visit(const ExprNode& e)     {
@@ -254,7 +255,7 @@ void Function::init(const Array<const ExprSymbol>& x, const ExprNode& y) {
 
 	BuildVectorOfNodes(exprnodes, x, y);
 
-	FindSymbolsUsed fsu(x, y, is_used);
+	FindInputsUsed fsu(x, y, is_used);
 
 	for (int i=0; i<nb_nodes(); i++) {
 		assert(node(i).deco.f==NULL); // this node must not belong to another function!

@@ -51,7 +51,7 @@ System::~System() {
 	if (goal) delete &goal;
 
 	for (int i=0; i<ctrs.size(); i++)
-		delete &ctrs[i].f;
+		delete &ctrs[i];
 }
 
 } // end namespace ibex

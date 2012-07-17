@@ -18,6 +18,7 @@
 #include "TestIntervalVector.h"
 #include "TestIntervalMatrix.h"
 #include "TestDim.h"
+#include "TestArith.h"
 #include "TestInnerArith.h"
 //#include "TestDomain.h"
 
@@ -44,6 +45,8 @@ using std::auto_ptr;
 
 int main() {
 
+	Interval x(Interval::EMPTY_SET);
+
     Test::TextOutput output(Test::TextOutput::Verbose);
 
     Test::Suite ts;
@@ -52,6 +55,7 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestIntervalVector()));
     ts.add(auto_ptr<Test::Suite>(new TestIntervalMatrix()));
     ts.add(auto_ptr<Test::Suite>(new TestDim()));
+    ts.add(auto_ptr<Test::Suite>(new TestArith()));
     ts.add(auto_ptr<Test::Suite>(new TestInnerArith()));
     //ts.add(auto_ptr<Test::Suite>(new TestDomain()));
 

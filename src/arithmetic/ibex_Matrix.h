@@ -54,6 +54,11 @@ public:
 	Matrix(int m, int n, double x[]);
 
 	/**
+	 * \brief Delete *this.
+	 */
+	~Matrix();
+
+	/**
 	 * \brief Set *this to m.
 	 */
 	Matrix& operator=(const Matrix& x);
