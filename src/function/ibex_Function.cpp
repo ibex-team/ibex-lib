@@ -24,6 +24,14 @@ namespace ibex {
 const char* Function::DEFAULT_NAME="f";
 
 Function::~Function() {
+
+	/* warning... if there is only one constraint
+	 * then comp is the same object as f itself!
+	 *
+	 * This is not a very consistent choice...
+	 */
+	if (!expr().dim.is_scalar()) delete[] comp;
+
 	for (unsigned int i=0; i<exprnodes.size(); i++) {
 		delete node(i).deco.d;
 		delete node(i).deco.g;
@@ -33,14 +41,6 @@ Function::~Function() {
 
 	for (int i=0; i<nb_symbols(); i++)
 		delete &symbol(i);
-
-
-	/* warning... if there is only one constraint
-	 * then comp is the same object as f itself!
-	 *
-	 * This is not a very consistent choice...
-	 */
-	if (output_size()>1) delete[] comp;
 }
 
 int Function::input_size() const {
