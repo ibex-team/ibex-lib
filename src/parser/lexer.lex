@@ -16,6 +16,7 @@
 #include "ibex_Scope.h"
 #include "ibex_Interval.h"
 #include "ibex_Expr.h"
+#include "ibex_SyntaxError.h"
 #include "ibex_P_NumConstraint.h"
 
 #include "parser.h"
@@ -110,5 +111,26 @@ using namespace ibex::parser;
 %%
 
 int ibexwrap () { return 1; }
+
+extern int ibexparse();
+
+void ibexparse_string(const char* syntax) {
+
+	// copy string into new buffer and Switch buffers
+	ibex_scan_string (syntax);
+
+	// analyze the string
+	try {
+	  ibexparse();
+	} catch(SyntaxError& e) {
+	  // delete the new buffer
+	  ibex_delete_buffer(YY_CURRENT_BUFFER);
+      throw(e);
+	}
+
+	// delete the new buffer
+	ibex_delete_buffer(YY_CURRENT_BUFFER);
+	
+}
 
 //"/""*"*([^*]|("*")+[^/])"*"*"/"    { /* C-like comments */ }

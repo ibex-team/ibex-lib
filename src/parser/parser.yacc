@@ -73,7 +73,7 @@ void begin_system() {
 
 void begin_choco() {
     begin();
-    
+ 
     // ----- generate all the variables {i} -----
     char buf[10];
     for (int i=0; i<system->nb_var; i++) {
@@ -107,7 +107,7 @@ void end() {
     // we have to cleanup the data in case of Syntax Error 
     // TODO...
 }
-
+	
 } // end namespace
 } // end namespace
 
@@ -400,6 +400,7 @@ expr          : expr '+' expr	                { $$ = &(*$1 + *$3); }
               | expr '[' expr ']'               { $$ = new P_ExprIndex(*$1,*$3); }
               | '(' expr_list ')'               { $$ = &ExprVector::new_(Array<const ExprNode>(*$2),false); delete $2; }
               | TK_ENTITY                       { $$ = &scopes.top().get_entity($1).symbol; free($1); /* cannot happen inside a function expr */}
+              | '{' TK_INTEGER '}'              { $$ = &source.vars[$2]->symbol;                      /* CHOCO variable symbols */ }
               | TK_ITERATOR                     { $$ = new ExprIter($1); free($1); }
               | TK_FUNC_INP_SYMBOL              { $$ = &scopes.top().get_func_input_symbol($1); free($1); }
               | TK_FUNC_TMP_SYMBOL              { $$ = &scopes.top().get_func_tmp_expr($1); free($1); }

@@ -12,10 +12,13 @@
 #include "ibex_SyntaxError.h"
 #include "ibex_UnknownFileException.h"
 #include <stdio.h>
+#include <sstream>
 
 extern int ibexparse();
-extern FILE* ibexin;
+extern void ibexparse_string(const char* syntax);
+//extern int ibex_lineno;
 extern void ibexrestart(FILE *);
+extern FILE* ibexin;
 
 namespace ibex {
 
@@ -23,20 +26,20 @@ namespace parser {
 extern System* system;
 }
 
-System::System(const char* filename) : box(1), nb_var(0), nb_ctr(0) /* tmp */ {
+System::System(const char* filename) : nb_var(0), nb_ctr(0), box(1) /* tmp */ {
 	FILE *fd;
 	if ((fd = fopen(filename, "r")) == NULL) throw UnknownFileException(filename);
 	load(fd);
 }
 
-System::System(int n, const char* syntax) : box(1),    /* tmp */
-		                                    nb_var(n), /* NOT TMP (required by parser) */
-		                                    nb_ctr(0)  /* tmp */ {
-	FILE* fd=tmpfile ();
-
-	for (int i=0; i<strlen(syntax); i++)
-		putc(syntax[i],fd);
-	load(fd);
+System::System(int n, const char* syntax) : nb_var(n), /* NOT TMP (required by parser) */
+		                                    nb_ctr(0), box(1) /* tmp */ {
+	try {
+		parser::system=this;
+		ibexparse_string(syntax);
+	} catch(SyntaxError& e) {
+		throw e;
+	}
 }
 
 void System::load(FILE* fd) {
@@ -49,7 +52,6 @@ void System::load(FILE* fd) {
 
 	catch(SyntaxError& e) {
 		fclose(fd);
-		//clean();
 		ibexrestart(ibexin);
 		throw e;
 	}

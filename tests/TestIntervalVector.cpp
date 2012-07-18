@@ -271,7 +271,7 @@ void TestIntervalVector::is_unbounded02() {
 
 void TestIntervalVector::is_unbounded03() {
 	double _x1[][2]={{0,1},{0,2}};
-	TEST_ASSERT(!IntervalVector(3,_x1).is_unbounded());
+	TEST_ASSERT(!IntervalVector(2,_x1).is_unbounded());
 }
 
 void TestIntervalVector::is_unbounded04() {
