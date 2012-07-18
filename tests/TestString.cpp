@@ -1,37 +1,33 @@
 /* ============================================================================
- * I B E X - Parser Tests
+ * I B E X - String Tests
  * ============================================================================
  * Copyright   : Ecole des Mines de Nantes (FRANCE)
  * License     : This program can be distributed under the terms of the GNU LGPL.
  *               See the file COPYING.LESSER.
  *
  * Author(s)   : Gilles Chabert
- * Created     : Apr 02, 2012
+ * Created     : Mar 2, 2012
  * ---------------------------------------------------------------------------- */
 
-#ifndef __TEST_PARSER_H__
-#define __TEST_PARSER_H__
+#include "TestString.h"
+#include "ibex_String.h"
 
-#include "cpptest.h"
-#include "utils.h"
+using namespace std;
 
 namespace ibex {
 
-class TestParser : public TestIbex {
+void TestString::test01() {
+	char buf[10];
+	int n=index_2_string(buf,'[',']',12478);
+	TEST_ASSERT(strcmp(buf,"[12478]")==0);
+	TEST_ASSERT(n==7);
+}
 
-public:
-	TestParser() {
-		TEST_ADD(TestParser::file01);
-		TEST_ADD(TestParser::ponts);
-		TEST_ADD(TestParser::choco01);
-	}
-
-	void file01();
-	void ponts();
-	void choco01();
-
-};
+void TestString::test02() {
+	char buf[10];
+	int n=index_2_string(buf,'{','}',0);
+	TEST_ASSERT(strcmp(buf,"{0}")==0);
+	TEST_ASSERT(n==3);
+}
 
 } // end namespace
-
-#endif // __TEST_PARSER_H__

@@ -13,6 +13,9 @@
 #include <cpptest.h>
 #include <memory>
 
+// ================ tools ===============
+#include "TestString.h"
+
 // ================ arithmetic ===============
 #include "TestInterval.h"
 #include "TestIntervalVector.h"
@@ -50,6 +53,7 @@ int main() {
     Test::TextOutput output(Test::TextOutput::Verbose);
 
     Test::Suite ts;
+    ts.add(auto_ptr<Test::Suite>(new TestString()));
 
     ts.add(auto_ptr<Test::Suite>(new TestInterval()));
     ts.add(auto_ptr<Test::Suite>(new TestIntervalVector()));

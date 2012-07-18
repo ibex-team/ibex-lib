@@ -29,6 +29,14 @@ public:
 	/** \brief Load a system from a file. */
 	System(const char* filename);
 
+	/**
+	 * \brief Load a stand-alone system from a string.
+	 *
+	 * \remark Used by Choco.
+	 * \param n    Number of variables.
+	 */
+	System(int n, const char* syntax);
+
 	/** \brief Delete *this. */
 	~System();
 
@@ -64,7 +72,8 @@ public:
 	 * (contracted but not bisected) */
 	std::vector<int> eprs;
 
-	/** Domains */
+	/** Initial Domains
+	 * (not only "initial": may be used as input by CHOCO) */
 	IntervalVector box;
 
 	/** Constraints */
@@ -72,6 +81,8 @@ public:
 
 private:
 	explicit System(const System& sys); // forbidden
+
+	void load(FILE* file);
 };
 
 } // end namespace ibex

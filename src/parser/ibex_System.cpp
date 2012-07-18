@@ -19,18 +19,31 @@ extern void ibexrestart(FILE *);
 
 namespace ibex {
 
-extern System* parser_result;
+namespace parser {
+extern System* system;
+}
 
 System::System(const char* filename) : box(1), nb_var(0), nb_ctr(0) /* tmp */ {
-
 	FILE *fd;
 	if ((fd = fopen(filename, "r")) == NULL) throw UnknownFileException(filename);
+	load(fd);
+}
 
+System::System(int n, const char* syntax) : box(1),    /* tmp */
+		                                    nb_var(n), /* NOT TMP (required by parser) */
+		                                    nb_ctr(0)  /* tmp */ {
+	FILE* fd=tmpfile ();
+
+	for (int i=0; i<strlen(syntax); i++)
+		putc(syntax[i],fd);
+	load(fd);
+}
+
+void System::load(FILE* fd) {
 	ibexin = fd;
 
 	try {
-		parser_result=this;
-		/* This will build parser_env and parser_space */
+		parser::system=this;
 		ibexparse();
 	}
 

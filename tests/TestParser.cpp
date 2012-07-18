@@ -71,6 +71,21 @@ void TestParser::ponts() {
 	}
 }
 
+void TestParser::choco01() {
+	System sys(2,"{1}+{0}=0");
+	TEST_ASSERT(sys.func.is_empty());
+	TEST_ASSERT(sys.vars.size()==2);
+	TEST_ASSERT(strcmp(sys.vars[0].name,"{0}")==0);
+	TEST_ASSERT(strcmp(sys.vars[1].name,"{1}")==0);
+	TEST_ASSERT(sys.eprs.empty());
+	TEST_ASSERT(sys.sybs.empty());
+	TEST_ASSERT(sys.box.size()==2);
+	TEST_ASSERT(sys.f.nb_symbols()==2);
+	TEST_ASSERT(sameExpr(sys.f.expr(),"{1}+{0}"));
+	TEST_ASSERT(sys.ctrs.size()==1);
+	TEST_ASSERT(&(sys.ctrs[0].f)==&(sys.f));
+}
+
 } // end namespace
 
 

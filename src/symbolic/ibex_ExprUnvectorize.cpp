@@ -9,26 +9,11 @@
 //============================================================================
 
 #include <stdlib.h>
-#include <stdio.h>
 #include "ibex_ExprUnvectorize.h"
 #include "ibex_Expr.h"
+#include "ibex_String.h"
 
 namespace {
-
-/* Write an index into a string, surrounded with brackets.
- * Up to 6 digits are allowed.
- * Return the length of the string. */
-int index_2_string(char* buff, int index) {
-	assert(index<1000000);
-	int k=0;
-	char number[6];
-	buff[k++]='[';
-	snprintf(number, 6, "%d", index);
-	strcpy(&buff[k], number);
-	k+=strlen(number);
-	buff[k++]=']';
-	return k;
-}
 
 char buff[1000];
 
@@ -39,9 +24,9 @@ const char* index_symbol_2_string(const char* symbol_name, int index1, int index
 	strcpy(&buff[k], symbol_name);
 	k+=strlen(symbol_name);
 
-	if (index1!=-1) k+=index_2_string(&buff[k], index1);
-	if (index2!=-1) k+=index_2_string(&buff[k], index2);
-	if (index3!=-1) k+=index_2_string(&buff[k], index3);
+	if (index1!=-1) k+=ibex::index_2_string(&buff[k], '[', ']', index1);
+	if (index2!=-1) k+=ibex::index_2_string(&buff[k], '[', ']', index2);
+	if (index3!=-1) k+=ibex::index_2_string(&buff[k], '[', ']', index3);
 	buff[k++]='\0';
 	//cout << "debug name=" << buff << endl;
 	return buff;

@@ -15,6 +15,7 @@
 #include "ibex_Interval.h"
 #include "ibex_Array.h"
 #include "ibex_System.h"
+#include "ibex_String.h"
 
 #include "ibex_SyntaxError.h"
 #include "ibex_ParserSource.h"
@@ -36,27 +37,50 @@ void ibexerror (const std::string& msg) {
    
 namespace ibex { 
 
-System* parser_result;
-
 namespace parser {
 
-P_Source source;
+/* ==================================== The result of the parser =================================*/
 
-Entity::Type ent_type; // current type, either var/epr/syb
-stack<Scope> scopes;
+System* system;            // standard AMPL-like system
+
+// ******************
+// Note: when a stand-alone constraint is read by CHOCO
+// the field system->nb_var must be set *before* calling the parser
+// ******************
+
+/* ===============================================================================================*/
+
+static P_Source source;  // static because not to be visible:
+stack<Scope> scopes;     // not static because lexer needs to see it
 
 void begin() {
-  ibex_lineno=-1;
-  if (!setlocale(LC_NUMERIC, "C")) // to accept the dot (instead of the french coma) with numeric numbers
-    ibexerror("platform does not support \"C\" locale");
+    ibex_lineno=-1;
+    if (!setlocale(LC_NUMERIC, "C")) // to accept the dot (instead of the french coma) with numeric numbers
+      ibexerror("platform does not support \"C\" locale");
   
-  ibex_lineno=1;
+    ibex_lineno=1;
 
-  /* there may be some pending scopes (if the previous call to the parser failed).
-   */
-  while (!scopes.empty()) scopes.pop(); 
+    /* there may be some pending scopes (if the previous call to the parser failed).
+     */
+    while (!scopes.empty()) scopes.pop(); 
   
-  scopes.push(Scope()); // a fresh new scope!
+    scopes.push(Scope()); // a fresh new scope!
+}
+
+void begin_system() {
+    begin();
+}
+
+void begin_choco() {
+    begin();
+    
+    // ----- generate all the variables {i} -----
+    char buf[10];
+    for (int i=0; i<system->nb_var; i++) {
+        ibex::index_2_string(buf,'{','}',i);
+        source.vars.push_back(new Entity(buf,Dim::scalar(),Interval::ALL_REALS));
+    }
+    // ------------------------------------------
 }
 
 int _2int(const ExprNode& expr) {
@@ -78,12 +102,10 @@ Domain _2domain(const ExprNode& expr) {
 }
 
 void end() {
-   MainGenerator().generate(source,*parser_result);
-	source.cleanup();
-    
+    MainGenerator().generate(source,*system);
+    source.cleanup();
     // we have to cleanup the data in case of Syntax Error 
-    // TO DO...
-    
+    // TODO...
 }
 
 } // end namespace
@@ -163,7 +185,6 @@ using namespace std;
 %type<func_input_symbol>   fnc_input
 
 /* constraints */
-%type<constraints>  ctr_blk_list
 %type<constraints>  ctr_blk_list_ // ctr_blk_list without ending semicolon
 %type<constraint>   ctr_blk
 %type<constraint>   ctr_loop
@@ -178,14 +199,23 @@ using namespace std;
 %%
 
 
-program       :                                      { begin(); }
+program       :                                 { begin_system(); }         
+                system                          { end(); } 
+              |                                 { begin_choco(); } 
+                choco_ctr                       { end(); }
+              ;
+              
+
+system        :                                      
               decl_opt_cst 
-              TK_VARS                   
-	          decl_var_list ';'   
+              TK_VARS decl_var_list ';'   
               decl_opt_par
               decl_fnc_list
               decl_opt_goal
-	          decl_ctr_list                          { end(); }
+	          TK_CTRS ctr_blk_list TK_END                          
+              ;
+              
+choco_ctr     : ctr_blk_list                    { }
               ;
 
 /**********************************************************************************************************************/
@@ -304,11 +334,8 @@ decl_opt_goal :                                 { source.goal = NULL; }
 /**********************************************************************************************************************/
 /*                                                CONSTRAINTS                                                         */
 /**********************************************************************************************************************/
-decl_ctr_list : TK_CTRS
-                ctr_blk_list TK_END             { source.ctrs=new P_ConstraintList(*$2); }
-              ;
               
-ctr_blk_list  : ctr_blk_list_ semicolon_opt     { $$ = $1; }
+ctr_blk_list  : ctr_blk_list_ semicolon_opt     { source.ctrs=new P_ConstraintList(*$1); }
               ;
 
 ctr_blk_list_ : ctr_blk_list_ ';' ctr_blk       { $1->push_back($3); $$ = $1; }
@@ -324,7 +351,8 @@ ctr_blk       : ctr_loop                        { $$ = $1; }
 ctr_loop      : TK_FOR TK_NEW_SYMBOL TK_EQU
 				expr ':' expr ';'               { scopes.push(scopes.top());
 						       					 scopes.top().add_iterator($2); }
-                ctr_blk_list TK_END             { $$ = new P_ConstraintLoop($2, _2int(*$4), _2int(*$6), *$9); 
+                ctr_blk_list_ semicolon_opt 
+                TK_END                          { $$ = new P_ConstraintLoop($2, _2int(*$4), _2int(*$6), *$9); 
 						                          scopes.pop();
 		                                          free($2); }
               ;
