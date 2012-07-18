@@ -42,20 +42,17 @@ void Ctc3BCid::contract(IntervalVector& box) {
 	int i=0;
 	start_var=nb_var-1;                                //  patch pour l'optim  A RETIRER ??
 	impact.unset_all();                                // [gch]
-
 	for (int k=0; k<vhandled; k++) {                   // [gch] k counts the number of varCIDed variables [gch]
 
-	   	while (i<nb_var && !cid_vars[(start_var+i)%nb_var]) i++;  // [gch]
+	  i++;
 
-    	assert(i<nb_var);                              // [gch] fails iff vhandled > number of variables set in cid_vars
+	  var=(start_var+i)%nb_var;
 
-		var=(start_var+i)%nb_var;
+	  impact.set(var);                              // [gch]
+	  var3BCID(box,var);
+	  impact.unset(var);                            // [gch]
 
-		impact.set(var);                              // [gch]
-		var3BCID(box,var);
-		impact.unset(var);                            // [gch]
-
-		if(box.is_empty()) throw EmptyBoxException();
+	  if(box.is_empty()) throw EmptyBoxException();
 	}
 
 	start_var=(start_var+vhandled)%nb_var;             //  en contradiction avec le patch pour l'optim

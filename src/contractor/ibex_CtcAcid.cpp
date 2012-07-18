@@ -26,7 +26,7 @@ CtcAcid::CtcAcid(const System& sys, const BoolMask& cid_vars, Ctc& ctc, int s3b,
 void CtcAcid::contract(IntervalVector& box) {
 
 	int nb_CID_var=cid_vars.nb_set();                  // [gch]
-
+	impact.unset_all();                                // [gch]
 	int nbvarmax=5*nb_CID_var;                         //  au plus 5*nbvar
 	double ctstat[nbvarmax];
 
@@ -58,9 +58,9 @@ void CtcAcid::contract(IntervalVector& box) {
    for (int v=0; v<vhandled; v++) {
     	int v1=v%nb_CID_var;                               // [gch] how can v be < nb_var?? [bne]  vhandled can be between 0 and nbvarmax
     	int v2=smearorder[v1];
-
+	impact.set(v2);
     	var3BCID(box, v2);                             // appel 3BCID sur la variable v2
-
+	impact.unset(v2); 
 		if(box.is_empty())
 			throw EmptyBoxException();
 		if (nbcall1 < nbinitcalls) {                   // on fait des stats pour le réglage courant
