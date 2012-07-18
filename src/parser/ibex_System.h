@@ -32,6 +32,18 @@ public:
 	/** \brief Delete *this. */
 	~System();
 
+	/** Number of variables.
+	 *
+	 * \note This number is also sys.f.input_size() and box.size().
+	 * However, in general, it does not match vars.size(), which is
+	 * the number of symbols. For instance, in case of a single array
+	 * x of 10 components, there is 10 variables but only one symbol.
+	 */
+	const int nb_var;
+
+	/** Number of constraints. */
+	const int nb_ctr;
+
 	/** Auxiliary functions */
 	Array<Function> func;
 

@@ -53,6 +53,8 @@ void MainGenerator::generate(const P_Source& source, System& result) {
 	}
 	assert(i==n);
 
+	(int&) result.nb_var = input_size;
+
 	//================= generate the domain =====================
 	result.box.resize(input_size);
 	load(result.box, domains);
@@ -98,6 +100,8 @@ void MainGenerator::generate(const P_Source& source, System& result) {
 		result.ctrs.set_ref(i,*new NumConstraint(result.f[i], it->second));
 		i++;
 	}
+
+	(int&) result.nb_ctr = m;
 }
 
 } // end namespace parser
