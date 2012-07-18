@@ -17,7 +17,7 @@ using namespace std;
 namespace ibex {
 
 Solver::Solver(Ctc& ctc, Bsc& bsc, CellBuffer& buffer, double prec) :
-		ctc(ctc), bsc(bsc), buffer(buffer), prec(ctc.nb_var,prec), cell_limit(-1),
+		ctc(ctc), bsc(bsc), buffer(buffer), prec(prec), cell_limit(-1),
 		trace(false) {
 
 	nb_cells=0;
@@ -53,8 +53,6 @@ vector<IntervalVector> Solver::solve(const IntervalVector& init_box) {
 
 		Cell* c=buffer.top();
 
-		tmpbox = c->box;
-
 		try {
 			v=c->get<BisectedVar>().var;
 			if (v!=-1) impact.set(v);
@@ -63,9 +61,11 @@ vector<IntervalVector> Solver::solve(const IntervalVector& init_box) {
 
 			if (v!=-1) impact.unset(v);
 
-			try {
-				((Ctc&) prec).contract(c->box);
-
+			if (c->box.max_diam()<=prec) {
+				sols.push_back(c->box);
+				delete buffer.pop();
+				impact.set_all();
+			} else {
 				pair<IntervalVector,IntervalVector> boxes=bsc.bisect(*c);
 				pair<Cell*,Cell*> new_cells=c->bisect(boxes.first,boxes.second);
 
@@ -75,13 +75,7 @@ vector<IntervalVector> Solver::solve(const IntervalVector& init_box) {
 				nb_cells+=2;
 				if (nb_cells==cell_limit) throw Exception();
 
-			} catch(EmptyBoxException&) {
-				assert(c->box.is_empty());
-				sols.push_back(tmpbox);
-				delete buffer.pop();
-				impact.set_all();
 			}
-
 		} catch(EmptyBoxException&) {
 			assert(c->box.is_empty());
 			delete buffer.pop();

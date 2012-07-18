@@ -45,9 +45,8 @@ public:
 	/** Cell buffer. */
 	CellBuffer& buffer;
 
-	/** Precision */
-	CtcPrecision prec;
-
+	/** Precision of solutions. */
+	double prec;
 
 	/** Maximal number of cells created by the solver.
 	 * This parameter allows to bound time complexity.
