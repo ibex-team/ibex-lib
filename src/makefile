@@ -1,11 +1,18 @@
 include common.mak
 
+KERNEL=$(shell uname -s)
 STATIC_TARGET:=$(IBEX_LIB_DIR)/libibex.a
+
+ifeq ($(KERNEL), Linux)
 DYNAMIC_TARGET:=$(IBEX_LIB_DIR)/libibex.so
+else
+DYNAMIC_TARGET:=$(IBEX_LIB_DIR)/libibex.dylib
+endif
+
 ARITH:=arithmetic
 SUBDIRS:=tools $(ARITH) numeric symbolic function combinatorial contractor bisector strategy parser java
 SUBLIB_DEF:=_IBEX_WITH_`echo $(SUBLIB) | tr '[:lower:]' '[:upper:]'`_
-
+ 
 # warning: don't define OBJS with ":=" because the
 # object files may not exist yet
 OBJS  =$(wildcard $(IBEX_SRC_DIR)/tools/*.o) \
@@ -20,17 +27,20 @@ OBJS  =$(wildcard $(IBEX_SRC_DIR)/tools/*.o) \
        $(wildcard $(IBEX_SRC_DIR)/parser/*.o) \
        $(wildcard $(IBEX_SRC_DIR)/java/*.o)
 
+# The dynamic library encompasses all the dependencies (in a single library 
+# that can be directly uploaded, in particular from Choco).
+# So we determine here which are the actual dependencies.
 ifeq ($(SUBLIB), gaol)
-DYNLIBS=
+DYN_LIB_DEP=
 else
-DYNLIBS=dyn_ibex_bias  
+DYN_LIB_DEP=dyn_ibex_bias  
 endif
 
 all : static
 
 static : $(STATIC_TARGET)
 
-dynamic : $(DYNLIBS)
+dynamic : $(DYNAMIC_TARGET)
 
 $(STATIC_TARGET) : headers $(SUBDIRS)
 	ar rcs $@ $(OBJS);
@@ -52,13 +62,25 @@ headers :
 $(SUBDIRS):
 	$(MAKE) all -C $@ 
 
-dyn_ibex_bias : $(STATIC_TARGET)
+# Create temporarily all the .o objects (including Profil/Bias) on the "lib" subdirectory
+# in order to create the dynamic library.
+# Note: Vector.o (of Bias) is in conflict with soplex, and useless, so it is removed as 
+# its dependencies (Matrix, etc.) before uncompressing libsoplex.a.
+dyn_ibex_bias: $(STATIC_TARGET)
 	cd $(IBEX_LIB_DIR);  ar -x libibex.a; \
 	ar -x $(BIAS_LIB_DIR)/libBias.a; ar -x $(BIAS_LIB_DIR)/liblr.a; ar -x $(BIAS_LIB_DIR)/libProfil.a; \
-	ar -x $(SIMPLEX_LIB_DIR)/libsoplex.a; \
-	g++ -shared *.o -o libibex.so; rm *.o; cd $(IBEX_DIR)/$(CHOCO)
+	rm Vector.o Matrix.o IntervalVector.o IntervalMatrix.o Utilities.o LSS.o; \
+	ar -x $(SIMPLEX_LIB_DIR)/libsoplex.a; cd $(IBEX_DIR)
 
-.PHONY: $(SUBDIRS) dyn_ibex_bias
+# For Linux
+$(IBEX_LIB_DIR)/libibex.so: $(DYN_LIB_DEP)
+	cd $(IBEX_LIB_DIR); g++ -shared *.o -o libibex.so; rm *.o; cd $(IBEX_DIR)
+
+# For MacOS
+$(IBEX_LIB_DIR)/libibex.dylib: $(DYN_LIB_DEP)
+	cd $(IBEX_LIB_DIR); g++ -dynamiclib -o libibex.dylib *.o -lz; rm *.o; cd $(IBEX_DIR)
+
+.PHONY: $(SUBDIRS) $(DYN_LIB_DEP)
 
 clean: $(SUBDIRS)
 	rm -f $(STATIC_TARGET) $(DYNAMIC_TARGET); \
