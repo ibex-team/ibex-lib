@@ -85,5 +85,6 @@ $(IBEX_LIB_DIR)/libibex.dylib: $(DYN_LIB_DEP)
 clean: $(SUBDIRS)
 	rm -f $(STATIC_TARGET) $(DYNAMIC_TARGET); \
 	find $(IBEX_INC_DIR)/*.h -exec rm -f {} \; ; \
+	rm $(IBEX_INC_DIR)/ibex_$(SUBLIB)_Interval.h_ ; \
 	rm -f $(IBEX_INC_DIR)/ibex.h
 	
