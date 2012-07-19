@@ -8,11 +8,13 @@ SUBLIB=bias
 
 # where are Ibex, Bias/Profil and Gaol installed?
 #!warning: gdtoa must also be installed in the root directory of Gaol
+# JAVA_INC must contain jni.h
 #===================================================
 IBEX_DIR:=/home/gchabert08/Workspace-C++/Ibex
 BIAS_DIR:=/home/gchabert08/Applications/Profil-2.0.8
 GAOL_DIR:=/home/gchabert08/Applications/Gaol-3.1.1
 SIMPLEX_DIR:=/home/gchabert08/Applications/soplex-1.5.0
+JAVA_INC=/usr/lib/jvm/java-7-openjdk-i386/include     
 #===================================================
 
 #CXXFLAGS := -O0 -g -pg -Wall -Wno-unknown-pragmas -fmessage-length=0
