@@ -36,11 +36,7 @@ else
 DYN_LIB_DEP=dyn_ibex_bias  
 endif
 
-all : static
-
-static : $(STATIC_TARGET)
-
-dynamic : $(DYNAMIC_TARGET)
+all : $(STATIC_TARGET) $(DYNAMIC_TARGET)
 
 $(STATIC_TARGET) : headers $(SUBDIRS)
 	ar rcs $@ $(OBJS);
@@ -57,10 +53,9 @@ headers :
 ## to remove parser:
 ##	find $(IBEX_SRC_DIR) -path "$(IBEX_SRC_DIR)/parser*" -prune -o -name "*.h" | grep "\\.h" | while read LINE; do \
 
-#$(MAKS) $(MAKECMDGOALS) ?
 
 $(SUBDIRS):
-	$(MAKE) all -C $@ 
+	$(MAKE) $(MAKECMDGOALS) -C $@ 
 
 # Create temporarily all the .o objects (including Profil/Bias) on the "lib" subdirectory
 # in order to create the dynamic library.
@@ -84,7 +79,6 @@ $(IBEX_LIB_DIR)/libibex.dylib: $(DYN_LIB_DEP)
 
 clean: $(SUBDIRS)
 	rm -f $(STATIC_TARGET) $(DYNAMIC_TARGET); \
-	find $(IBEX_INC_DIR)/*.h -exec rm -f {} \; ; \
-	rm $(IBEX_INC_DIR)/ibex_$(SUBLIB)_Interval.h_ ; \
-	rm -f $(IBEX_INC_DIR)/ibex.h
+	rm -f $(IBEX_INC_DIR)/*.h \
+	rm -f $(IBEX_INC_DIR)/ibex_$(SUBLIB)_Interval.h_
 	

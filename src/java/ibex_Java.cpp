@@ -8,7 +8,7 @@
 // Last Update : Jul 18, 2012
 //============================================================================
 
-#include "ibex_Java.h"
+#include "ibex_Java.h_"
 #include "ibex_CtcCompo.h"
 #include "ibex_CtcProj.h"
 #include "ibex_System.h"
