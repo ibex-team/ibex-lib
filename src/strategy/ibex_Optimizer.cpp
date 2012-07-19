@@ -11,8 +11,8 @@
 #include "ibex_Optimizer.h"
 #include "ibex_EmptyBoxException.h"
 #include "ibex_Timer.h"
-#include "ibex_OptimProbing.cpp"
-#include "ibex_OptimSimplex.cpp"
+#include "ibex_OptimProbing.cpp_"
+#include "ibex_OptimSimplex.cpp_"
 #include "ibex_CtcProj.h"
 
 using namespace std;

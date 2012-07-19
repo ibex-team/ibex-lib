@@ -81,7 +81,7 @@ void TestParser::choco01() {
 	TEST_ASSERT(sys.sybs.empty());
 	TEST_ASSERT(sys.box.size()==2);
 	TEST_ASSERT(sys.f.nb_symbols()==2);
-	TEST_ASSERT(sameExpr(sys.f.expr(),"{1}+{0}"));
+	TEST_ASSERT(sameExpr(sys.f.expr(),"({1}+{0})"));
 	TEST_ASSERT(sys.ctrs.size()==1);
 	TEST_ASSERT(&(sys.ctrs[0].f)==&(sys.f));
 }
