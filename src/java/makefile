@@ -19,7 +19,7 @@ JAVA_SIGNATURE=$(shell echo $(JAVA_PACKAGE) | sed "s/\./_/g")
 
 Test.class : Test.java_
 	echo "// This file is generated from Test.java_." > Test.java ; \
-	echo "import "$(JAVA_PACKAGE)".Ibex;\n" >> Test.java ; \
+	echo "import "$(JAVA_PACKAGE)".Ibex;" >> Test.java ; \
 	cat Test.java_ >> Test.java ; \
 	javac Test.java
    
