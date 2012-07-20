@@ -492,6 +492,11 @@ Interval min(const Interval& x, const Interval& y);
  * \remark By convention, \f$ 0\in[x] \Longrightarrow sign[x]=[-1,1]\f$. */
 Interval sign(const Interval& x);
 
+/**
+ * \brief Return the largest integer interval included in x.
+ */
+Interval integer(const Interval& x);
+
 /** \brief Projection of $y=x_1+x_2$.
  *
  * Set $([x]_1,[x]_2)$ to $([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=x_1+x_2\}$. */
@@ -632,6 +637,10 @@ bool proj_min(const Interval& y, Interval& x1, Interval& x2);
  * Set $[x]$ to $[x]\cap { x\in [x] \exists y\in [y], \quad y=sign(x) \}$. */
 bool proj_sign(const Interval& y, Interval& x);
 
+/** \brief Contract x w.r.t. the fact that it must be integral.
+ *
+ */
+bool proj_integer(Interval& x);
 
 } // end namespace ibex
 
@@ -863,6 +872,10 @@ inline bool proj_sign(const Interval& y,  Interval& x) {
 	/* At this point, y.ub()>0. */
 	x &= Interval::POS_REALS;
 	return !x.is_empty();
+}
+
+inline bool proj_integer(Interval& x) {
+	return !(x = integer(x)).is_empty();
 }
 
 } // end namespace ibex

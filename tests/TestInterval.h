@@ -129,6 +129,15 @@ public:
 	    TEST_ADD(TestInterval::is_unbounded03);
 	    TEST_ADD(TestInterval::is_unbounded04);
 
+		TEST_ADD(TestInterval::integer01);
+		TEST_ADD(TestInterval::integer02);
+		TEST_ADD(TestInterval::integer03);
+		TEST_ADD(TestInterval::integer04);
+		TEST_ADD(TestInterval::integer05);
+		TEST_ADD(TestInterval::integer06);
+		TEST_ADD(TestInterval::integer07);
+		TEST_ADD(TestInterval::integer08);
+
 	    TEST_ADD(TestInterval::delta01);
 	}
 private:
@@ -296,6 +305,15 @@ private:
 	void distance21();
 	void distance22();
 	void distance23();
+
+	void integer01();
+	void integer02();
+	void integer03();
+	void integer04();
+	void integer05();
+	void integer06();
+	void integer07();
+	void integer08();
 
 	void delta01();
 

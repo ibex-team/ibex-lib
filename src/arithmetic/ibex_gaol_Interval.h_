@@ -341,6 +341,10 @@ inline Interval min(const Interval& x, const Interval& y) {
 	return gaol::min(x.itv,y.itv);
 }
 
+inline Interval integer(const Interval& x) {
+	return gaol::integer(x.itv);
+}
+
 inline bool proj_mul(const Interval& y, Interval& x1, Interval& x2) {
 	x1 = gaol::div_rel(y.itv, x2.itv, x1.itv);
 	x2 = gaol::div_rel(y.itv, x1.itv, x2.itv);

@@ -231,6 +231,35 @@ void TestInterval::is_unbounded02()       { TEST_ASSERT(!Interval(0,1).is_unboun
 void TestInterval::is_unbounded03()       { TEST_ASSERT(Interval::NEG_REALS.is_unbounded()); }
 void TestInterval::is_unbounded04()       { TEST_ASSERT(Interval::POS_REALS.is_unbounded()); }
 
+void TestInterval::integer01() {
+	Interval x=Interval::EMPTY_SET; proj_integer(x); check(x,Interval::EMPTY_SET);
+}
+void TestInterval::integer02() {
+	Interval x(NEG_INFINITY,-0.000001); proj_integer(x); check(x,Interval(NEG_INFINITY,-1));
+}
+void TestInterval::integer03() {
+	Interval x(0.00000001,POS_INFINITY); proj_integer(x); check(x,Interval(1.0,POS_INFINITY));
+}
+void TestInterval::integer04() {
+	Interval x=Interval::ALL_REALS; proj_integer(x); check(x,Interval::ALL_REALS);
+}
+
+void TestInterval::integer05() {
+	Interval x(0.01,2.99); proj_integer(x); check(x,Interval(1,2));
+}
+
+void TestInterval::integer06() {
+	Interval x(-0.01,2.99); proj_integer(x); check(x,Interval(0,2));
+}
+
+void TestInterval::integer07() {
+	Interval x(1.000000001,1.9999999999); proj_integer(x); check(x,Interval::EMPTY_SET);
+}
+
+void TestInterval::integer08() {
+	Interval x(1e8, DBL_MAX); proj_integer(x); check(x, Interval(1e8,DBL_MAX));
+}
+
 void TestInterval::delta01() {
 	Interval x(-1.7976931348623157081e+308,6.1000000000000005329);
 	//cout << "delta=" << x.delta(x) << " x.diam()=" << (x.diam()==POS_INFINITY) << endl;
