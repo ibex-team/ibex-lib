@@ -42,6 +42,16 @@ public class Ibex {
     public native void add_ctr(int nb_var, String syntax, int option);
     
     /**
+     * Constraint nb_var variables to be integer variables.
+     * 
+     * @param nb_var - Number of variables
+     * /////@param mask   - Set whether a variable is integral or not. 
+     * /////                mask[i]==true <=> the ith variable is integral.
+     */
+    public native void add_int_ctr(int nb_var);
+    
+    
+    /**
      * Call the contractor associated to a constraint.
      * 
      * @param i      - Number of the constraint (in the order of creation)

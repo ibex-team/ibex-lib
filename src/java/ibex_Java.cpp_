@@ -12,6 +12,7 @@
 #include "ibex_CtcHC4.h"
 #include "ibex_CtcNewton.h"
 #include "ibex_CtcProj.h"
+#include "ibex_CtcInteger.h"
 #include "ibex_System.h"
 #include <stdio.h>
 #include <vector>
@@ -23,7 +24,7 @@ static vector<System*> sys;
 static vector<Ctc*> ctc;
 static vector<int> options; // which contractor is used for the ith constraint?
 
-enum { COMPO=0, HC4=1, HC4_NEWTON=2 };
+enum { COMPO=0, HC4=1, HC4_NEWTON=2, INTEGER=3 };
 
 enum { FAIL=0, ENTAILED=1, CONTRACT=2, NOTHING=3 };
 
@@ -67,6 +68,12 @@ JNIEXPORT void JNICALL Java_Ibex_add_1ctr__ILjava_lang_String_2I(JNIEnv *env, jo
 	}
 }
 
+JNIEXPORT void JNICALL Java_Ibex_add_1int_1ctr(JNIEnv *env, jobject o, jint nb_var) {
+	sys.push_back(NULL);
+	options.push_back(INTEGER);
+	ctc.push_back(new CtcInteger(nb_var,BoolMask(nb_var,true)));
+}
+
 JNIEXPORT jint JNICALL Java_Ibex_contract__I_3D(JNIEnv *env, jobject o, jint n, jdoubleArray domains) {
 	return Java_Ibex_contract__I_3DI(env,o,n,domains,1);
 }
@@ -84,7 +91,7 @@ JNIEXPORT jint JNICALL Java_Ibex_contract__I_3DI(JNIEnv *env, jobject, jint n, j
 
 	assert(nb_var==ctc[n]->nb_var);
 
-	IntervalVector& box=sys[n]->box;
+	IntervalVector box(ctc[n]->nb_var); // warning: sys[n]==NULL for INTEGER
 
 	for (int i=0; i<nb_var; i++) {
 		box[i]=Interval(d[2*i],d[2*i+1]);
@@ -94,6 +101,7 @@ JNIEXPORT jint JNICALL Java_Ibex_contract__I_3DI(JNIEnv *env, jobject, jint n, j
 
 	if (reif==TRUE_ || reif==FALSE_OR_TRUE) {
 		try {
+
 			ctc[n]->contract(box);
 
 			if (reif==TRUE_ && savebox.rel_distance(box) >= EPS_CONTRACT) {
@@ -116,7 +124,6 @@ JNIEXPORT jint JNICALL Java_Ibex_contract__I_3DI(JNIEnv *env, jobject, jint n, j
 			d[2*i+1]=box[i].ub();
 		}
 	}
-
 	env->ReleaseDoubleArrayElements(domains, d, 0);
 
 	return result;
@@ -124,25 +131,28 @@ JNIEXPORT jint JNICALL Java_Ibex_contract__I_3DI(JNIEnv *env, jobject, jint n, j
 
 JNIEXPORT void JNICALL Java_Ibex_release(JNIEnv *, jobject) {
 	for (unsigned int i=0; i<sys.size(); i++) {
-		// free the contractors
-		if (sys[i]->nb_ctr>1) {
-			switch(options[i]) {
-			case COMPO:
-			case HC4_NEWTON:
-			{
-				CtcCompo& compo=*((CtcCompo*) ctc[i]);
-				for (int j=0; j<compo.list.size(); j++)
-					delete &compo.list[j];
-				break;
+		if (options[i]!=INTEGER) {
+			// free the contractors
+			if (sys[i]->nb_ctr>1) {
+				switch(options[i]) {
+				case COMPO:
+				case HC4_NEWTON:
+				{
+					CtcCompo& compo=*((CtcCompo*) ctc[i]);
+					for (int j=0; j<compo.list.size(); j++)
+						delete &compo.list[j];
+					break;
+				}
+				default:
+					break;
+				}
 			}
-			default:
-				break;
-			}
+			// free the system (except if INTEGER)
+			delete sys[i];
 		}
-
 		delete ctc[i];
-
-		// free the system
-		delete sys[i];
 	}
+	sys.clear();
+	options.clear();
+	ctc.clear();
 }
