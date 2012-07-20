@@ -41,7 +41,7 @@
 
 // ================ contractor ===============
 #include "TestHC4.h"
-
+#include "TestCtcInteger.h"
 
 using namespace std;
 using std::auto_ptr;
@@ -75,6 +75,7 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestNewton()));
 
     ts.add(auto_ptr<Test::Suite>(new TestHC4()));
+    ts.add(auto_ptr<Test::Suite>(new TestCtcInteger()));
 
     return ts.run(output,false) ? EXIT_SUCCESS : EXIT_FAILURE;
 
