@@ -16,6 +16,8 @@
 #include "ibex_Bsc.h"
 #include "ibex_CellBuffer.h"
 #include "ibex_SubPaving.h"
+#include "ibex_Timer.h"
+#include "ibex_Exception.h"
 
 #include <vector>
 
@@ -24,6 +26,9 @@ namespace ibex {
 /** \ingroup strategy
  * \brief Solver
  */
+
+  class CellLimitException : public Exception {} ;
+  
 class Solver {
 public:
 	/**
@@ -59,9 +64,20 @@ public:
 	 * A flag for printing the trace. If set, the top of the buffer is printed
 	 * on the standard output each time a new cell is created. Default value is \c false.
 	 */
-	bool trace;
+	int trace;
 
 	int nb_cells;
+
+	void time_limit_check();
+
+/** Maximum cpu time used by the solver.
+   * This parameter allows to bound time complexity.
+   * The value can be fixed by the user. By default, it is -1 (no limit). */
+
+  double time_limit;
+  /* Remember running time of the last exploration */
+  double time;
+
 };
 
 } // end namespace ibex

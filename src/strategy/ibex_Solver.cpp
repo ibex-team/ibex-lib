@@ -17,8 +17,8 @@ using namespace std;
 namespace ibex {
 
 Solver::Solver(Ctc& ctc, Bsc& bsc, CellBuffer& buffer, double prec) :
-		ctc(ctc), bsc(bsc), buffer(buffer), prec(prec), cell_limit(-1),
-		trace(false) {
+  ctc(ctc), bsc(bsc), buffer(buffer), prec(prec), cell_limit(-1),time_limit(-1), time(0),
+  trace(0) {
 
 	nb_cells=0;
 
@@ -47,9 +47,11 @@ vector<IntervalVector> Solver::solve(const IntervalVector& init_box) {
 	impact.set_all();
 	int v;                              // last bisected var.
 
-	while (!buffer.empty()) {
+	Timer::start();
+        try  {
+	  while (!buffer.empty()) {
 
-		if (trace) cout << buffer << endl;
+		if (trace==2) cout << buffer << endl;
 
 		Cell* c=buffer.top();
 
@@ -63,6 +65,9 @@ vector<IntervalVector> Solver::solve(const IntervalVector& init_box) {
 
 			if (c->box.max_diam()<=prec) {
 				sols.push_back(c->box);
+				cout.precision(12);
+				if (trace >=1) 
+				  cout << " sol " << sols.size() << sols[sols.size()-1] << endl;
 				delete buffer.pop();
 				impact.set_all();
 			} else {
@@ -73,18 +78,37 @@ vector<IntervalVector> Solver::solve(const IntervalVector& init_box) {
 				buffer.push(new_cells.first);
 				buffer.push(new_cells.second);
 				nb_cells+=2;
-				if (nb_cells==cell_limit) throw Exception();
-
+				if (nb_cells==cell_limit) throw CellLimitException();
+				time_limit_check();
 			}
+				
 		} catch(EmptyBoxException&) {
 			assert(c->box.is_empty());
 			delete buffer.pop();
 			impact.set_all();
 		}
-
+		
+	  }
 	}
-
+	catch (TimeOutException exc) 
+	  {cout << "time limit " << time_limit << "s. reached " << endl;}	
+	catch (CellLimitException exc) 
+	  {cout << "cell limit " << cell_limit << " reached " << endl;}	
+	
+	Timer::stop();
+        time+= Timer::VIRTUAL_TIMELAPSE();
 	return sols;
+
 }
+  
+  void Solver::time_limit_check ()
+  {
+    Timer::stop();
+    time += Timer::VIRTUAL_TIMELAPSE();    
+    if (time_limit >0 &&  time >=time_limit) throw TimeOutException();
+    Timer::start();
+  }
+  
+  
 
 } // end namespace ibex
