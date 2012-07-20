@@ -1,14 +1,19 @@
 public class Ibex {
 
+	/* Possible contraction strategies. */
+	public static final int COMPO      = 0;
+	public static final int HC4        = 1;
+	public static final int HC4_NEWTON = 2;
+	
 	/* Constants for the status of a contraction. */
-	public static final int FAIL = 0;
+	public static final int FAIL     = 0;
 	public static final int ENTAILED = 1;
 	public static final int CONTRACT = 2;
-	public static final int NOTHING = 3;
+	public static final int NOTHING  = 3;
 	
 	/* Constants for describing a boolean domain (by an integer). */
-	public static final int FALSE = 0;
-	public static final int TRUE = 1;
+	public static final int FALSE         = 0;
+	public static final int TRUE          = 1;
 	public static final int FALSE_OR_TRUE = 2;
 	
     static {
@@ -16,13 +21,25 @@ public class Ibex {
     }
 
     /**
-     * Create a new IBEX constraint (and an associated contractor). 
+     * Create a new IBEX constraint with a default contractor.
+     * 
+     * The default contractor is COMPO.
      * 
      * Example: add_ctr(2,{0}={1}) will add the constraint x=y.
      * 
-     * @param nb_var - Number of variables
+     * @param nb_var - Number of variables.
+     * @param syntax - The constraint
      */
     public native void add_ctr(int nb_var, String syntax);
+    
+    /**
+     * Same as add_ctr except that a specific contractor is used.
+     * 
+     * @param nb_var - Number of variables
+     * @param syntax - The constraint
+     * @param option - A value between COMPO, HC4 or HC4_NEWTON.
+     */
+    public native void add_ctr(int nb_var, String syntax, int option);
     
     /**
      * Call the contractor associated to a constraint.

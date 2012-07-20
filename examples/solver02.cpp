@@ -3,7 +3,7 @@
 using namespace std;
 using namespace ibex;
 
-int main() {
+int main(int argc, char** argv) {
 
 	// Example #17
 	// ------------------------------------------------
@@ -16,7 +16,14 @@ int main() {
 
 	// Load a system of equations
 	// --------------------------
-	System sys("ponts.txt");
+	try {
+
+	if (argc<2) {
+		cerr << "usage: solver2 [filename]" << endl;
+		exit(1);
+	}
+
+	System sys(argv[1]);
 
 	// Build contractor #1:
 	// --------------------------
@@ -55,7 +62,7 @@ int main() {
 	// -------------
 	// The last parameter (1e-07) is the precision
 	// required for the solutions
-	Solver s(c,rr,buff,1e-03);
+	Solver s(c,rr,buff,1e-07);
 
 	//s.trace=true;
 
@@ -68,6 +75,15 @@ int main() {
 	// Display the number of boxes (called "cells")
 	// generated during the search
 	cout << "number of cells=" << s.nb_cells << endl;
+
+	// Display the solutions
+	//
+	for (int i=0; i< sols.size() ; i++)
+		cout << " sol  "<< i+1 << " : " << sols[i] << endl;
+
+	} catch(ibex::SyntaxError& e) {
+		cout << e << endl;
+	}
 
 	// ------------------------------------------------
 }

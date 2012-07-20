@@ -10,6 +10,8 @@
 
 #include "ibex_Java.h_"
 #include "ibex_CtcCompo.h"
+#include "ibex_CtcHC4.h"
+#include "ibex_CtcNewton.h"
 #include "ibex_CtcProj.h"
 #include "ibex_System.h"
 #include <stdio.h>
@@ -20,6 +22,9 @@ using namespace ibex;
 
 static vector<System*> sys;
 static vector<Ctc*> ctc;
+static vector<int> options; // which contractor is used for the ith constraint?
+
+enum { COMPO=0, HC4=1, HC4_NEWTON=2 };
 
 enum { FAIL=0, ENTAILED=1, CONTRACT=2, NOTHING=3 };
 
@@ -27,17 +32,39 @@ enum { FALSE_=0, TRUE_=1, FALSE_OR_TRUE=2 };
 
 static const double EPS_CONTRACT=0.01;
 
-JNIEXPORT void JNICALL Java_Ibex_add_1ctr(JNIEnv *env, jobject, jint nb_var, jstring syntax) {
+JNIEXPORT void JNICALL Java_Ibex_add_1ctr__ILjava_lang_String_2(JNIEnv *env, jobject o, jint nb_var, jstring syntax) {
+	Java_Ibex_add_1ctr__ILjava_lang_String_2I(env,o,nb_var,syntax,COMPO);
+}
+
+JNIEXPORT void JNICALL Java_Ibex_add_1ctr__ILjava_lang_String_2I(JNIEnv *env, jobject, jint nb_var, jstring syntax, jint option) {
 	const char* _syntax = env->GetStringUTFChars(syntax,0);
+
 	System* s=new System(nb_var,_syntax);
 	sys.push_back(s);
-	if (s->nb_ctr==1)
+	options.push_back(option);
+
+	if (s->nb_ctr==1) {
 		ctc.push_back(new CtcProj(s->ctrs[0]));
-	else {
-		Array<Ctc> array(s->nb_ctr);
-		for (int i=0; i<s->nb_ctr; i++)
-			array.set_ref(i,*new CtcProj(s->ctrs[i]));
-		ctc.push_back(new CtcCompo(array));
+	} else {
+		Ctc* c;
+		switch (option) {
+		case COMPO:      {
+			Array<Ctc> array(s->nb_ctr);
+			for (int i=0; i<s->nb_ctr; i++)
+				array.set_ref(i,*new CtcProj(s->ctrs[i]));
+			c=new CtcCompo(array);
+			break;
+		}
+		case HC4:
+			c=new CtcHC4(s->ctrs);
+			break;
+		case HC4_NEWTON:
+			c=new CtcCompo(*new CtcHC4(s->ctrs), *new CtcNewton(s->f));
+			break;
+		default:
+			not_implemented("unimplemented option");
+		}
+		ctc.push_back(c);
 	}
 }
 
@@ -100,12 +127,21 @@ JNIEXPORT void JNICALL Java_Ibex_release(JNIEnv *, jobject) {
 	for (unsigned int i=0; i<sys.size(); i++) {
 		// free the contractors
 		if (sys[i]->nb_ctr>1) {
-			CtcCompo& compo=*((CtcCompo*) ctc[i]);
-			for (int j=0; j<compo.list.size(); j++)
-				delete &compo.list[j];
-		} else {
-			delete ctc[i];
+			switch(options[i]) {
+			case COMPO:
+			case HC4_NEWTON:
+			{
+				CtcCompo& compo=*((CtcCompo*) ctc[i]);
+				for (int j=0; j<compo.list.size(); j++)
+					delete &compo.list[j];
+				break;
+			}
+			default:
+				break;
+			}
 		}
+
+		delete ctc[i];
 
 		// free the system
 		delete sys[i];
