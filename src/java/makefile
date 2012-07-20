@@ -43,4 +43,4 @@ ibex_Java.o : ibex_Java.cpp_ $(JAVA_SIGNATURE)_Ibex.h
 # not only $(OBJS), there may be old .o files
 clean:
 	rm -f Ibex.java Test.java ibex_Java.cpp $(JAVA_SIGNATURE)_Ibex.h *.o Test.class ; \
-	if [ -d "$(JAVA_PATH)" ]; then rm -f $(JAVA_PATH)/* ; rmdir -p $(JAVA_PATH); fi
+	if [ -d "$(JAVA_PATH)" ]; then rm -Rf `echo $(JAVA_PACKAGE) | cut -d"." -f1`; fi
