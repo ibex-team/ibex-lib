@@ -56,9 +56,12 @@ public:
 	 * strategy is executed.<br>
 	 * By default: does nothing.
 	 */
-	virtual void init_root(Cell& root) { }
-};
+	virtual void init_root(Cell& root);
+	static const double default_prec;
+	static const double default_ratio;
 
+ 
+};
 
 
 /** \ingroup bisector

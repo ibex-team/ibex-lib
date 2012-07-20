@@ -32,7 +32,7 @@ class RoundRobin : public Bsc {
    * \param ratio (optional) - the ratio between the diameters of the left and the right parts of the
    *            bisected interval. Default value is 0.45.
    */
-  RoundRobin(double w=1e-07, double ratio=0.45);
+    RoundRobin(double w=Bsc::default_prec, double ratio=Bsc::default_ratio);
 
   /**
    * \brief Bisect a box.
@@ -44,7 +44,7 @@ class RoundRobin : public Bsc {
    * <p>
    * In return, last_var is set to the variable just bisected.
    */
-  std::pair<IntervalVector,IntervalVector> bisect(const IntervalVector& box, int& last_var);
+  virtual  std::pair<IntervalVector,IntervalVector> bisect(const IntervalVector& box, int& last_var);
 
   /**
    * \brief Bisect a box.
@@ -77,7 +77,7 @@ class RoundRobin : public Bsc {
    */
   const double w;
 
-  /**
+  ;/**
    * \brief Ratio to chose the split point.
    *
    * Ratio between the diameters of the left and right parts of a bisected

@@ -19,4 +19,11 @@ pair<IntervalVector,IntervalVector> Bsc::bisect(Cell& cell) {
 	return bisect(cell.box);
 }
 
+  const double Bsc::default_prec = 1.e-7;
+  const double Bsc::default_ratio = 0.45;
+
+  void Bsc::init_root(Cell& root) {
+	root.add<BisectedVar>();
+  }
+
 } // end namespace ibex
