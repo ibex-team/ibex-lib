@@ -27,7 +27,7 @@ Ibex.class : Ibex.java_
 	echo "java path="$(JAVA_PATH) ; \
 	mkdir -p $(JAVA_PATH) ; \
 	echo "// This file is generated from Ibex.java_." > $(JAVA_PATH)/Ibex.java ; \
-	echo "package "$(JAVA_PACKAGE)";\n" >> $(JAVA_PATH)/Ibex.java ; \
+	echo "package "$(JAVA_PACKAGE)";" >> $(JAVA_PATH)/Ibex.java ; \
 	cat Ibex.java_ >> $(JAVA_PATH)/Ibex.java; javac $(JAVA_PATH)/Ibex.java
 	
 	
@@ -40,7 +40,6 @@ ibex_Java.o : ibex_Java.cpp_ $(JAVA_SIGNATURE)_Ibex.h
 	cat ibex_Java.cpp_ | sed "s/Java_/Java_$(JAVA_SIGNATURE)_/g" >> ibex_Java.cpp ; \
 	$(CXX) $(CXXFLAGS) -I$(JAVA_INC) $(INC_DIR_OPT) -c -o $@ ibex_Java.cpp 
 
-# not only $(OBJS), there may be old .o files
 clean:
 	rm -f Ibex.java Test.java ibex_Java.cpp $(JAVA_SIGNATURE)_Ibex.h *.o Test.class ; \
 	if [ -d "$(JAVA_PATH)" ]; then rm -Rf `echo $(JAVA_PACKAGE) | cut -d"." -f1`; fi
