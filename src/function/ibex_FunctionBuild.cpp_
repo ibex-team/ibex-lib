@@ -16,7 +16,7 @@
 #include "ibex_Eval.h"
 #include "ibex_HC4Revise.h"
 #include "ibex_Gradient.h"
-
+#include "ibex_String.h"
 
 using namespace std;
 
@@ -130,37 +130,43 @@ public:
 	virtual void visit(const ExprBinaryOp& e) { visit(e.left); visit(e.right); }
 	virtual void visit(const ExprUnaryOp& e)  { visit(e.expr); }
 };
+
+const char* duplicate_or_generate(const char* name) {
+	if (name) return strdup(name);
+	else return ibex::next_generated_func_name();
 }
 
-Function::Function() : name(DEFAULT_NAME) {
+}
+
+Function::Function() : name(next_generated_func_name()) {
 
 }
 
-Function::Function(const ExprSymbol& x, const ExprNode& y, const char* name) : name(strdup(name)) {
+Function::Function(const ExprSymbol& x, const ExprNode& y, const char* name) : name(duplicate_or_generate(name)) {
 	init(Array<const ExprSymbol>(x),y);
 }
 
-Function::Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprNode& y, const char* name) : name(strdup(name)) {
+Function::Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprNode& y, const char* name) : name(duplicate_or_generate(name)) {
 	init(Array<const ExprSymbol>(x1,x2),y);
 }
 
-Function::Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprNode& y, const char* name) : name(strdup(name)) {
+Function::Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprNode& y, const char* name) : name(duplicate_or_generate(name)) {
 	init(Array<const ExprSymbol>(x1,x2,x3),y);
 }
 
-Function::Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprNode& y, const char* name) : name(strdup(name)) {
+Function::Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprNode& y, const char* name) : name(duplicate_or_generate(name)) {
 	init(Array<const ExprSymbol>(x1,x2,x3,x4),y);
 }
 
-Function::Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprNode& y, const char* name) : name(strdup(name)) {
+Function::Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprNode& y, const char* name) : name(duplicate_or_generate(name)) {
 	init(Array<const ExprSymbol>(x1,x2,x3,x4,x5),y);
 }
 
-Function::Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprNode& y, const char* name) : name(strdup(name)) {
+Function::Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprNode& y, const char* name) : name(duplicate_or_generate(name)) {
 	init(Array<const ExprSymbol>(x1,x2,x3,x4,x5,x6),y);
 }
 
-Function::Function(const Array<const ExprSymbol>& x, const ExprNode& y, const char* name) : name(strdup(name)) {
+Function::Function(const Array<const ExprSymbol>& x, const ExprNode& y, const char* name) : name(duplicate_or_generate(name)) {
 	init(x,y);
 }
 

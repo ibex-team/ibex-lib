@@ -21,8 +21,6 @@ using namespace std;
 
 namespace ibex {
 
-const char* Function::DEFAULT_NAME="f";
-
 Function::~Function() {
 
 	/* warning... if there is only one constraint

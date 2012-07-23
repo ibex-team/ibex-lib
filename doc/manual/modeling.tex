@@ -1,0 +1,150 @@
+\chapter{Modeling your Problem}\label{chap:mod}
+
+\section{What we mean by ``variable'' and ``function''}
+
+Before starting, let us rule out a potential ambiguity.
+
+The purpose of this chapter is basically to show how to declare {\it variables} and {\it functions}.
+But, since we are in the C++ programming language, the term {\it variable} and
+{\it function} already refers to something precise. For instance, the following
+piece of code introduces a {\it function} \cf{sum} and a {\it variable} \cf{x}:
+\begin{lstlisting}
+int sum(int x, int y) { 
+  return x+y;
+}
+
+int x=2;
+\end{lstlisting}
+The variable $x$ may represent, say, the balance of a bank account.
+The account number is what we call the {\it semantic} of $x$, that is, what $x$ is supposed
+to represent in the user's mind. So, on one side,
+we have {\it what we write}, that is, a program with variables and functions,
+ and on the other side, {\it what we represent}, that is, concepts 
+like a bank account.
+
+With \ibex, we write programs to represent mathematical concepts
+that are also called {\it variables} and {\it functions}.
+The mapping $(x,y)\mapsto \sin(x+y)$ is an example of function that
+we want to represent. It shall not be confused with the function \cf{sum}
+above.
+
+To avoid ambiguity, we shall talk about {\it mathematical}
+variables (resp. functions) versus {\it program} variables (resp. functions).
+We will also use italic symbol like $x$ to denote a mathematical variable
+and postscript symbols like \cf{x} for program variables.
+In most of our discussions, variables and functions will refer
+to the mathematical objects so that the mathematical meaning will be often the implicit one. 
+
+\section{Creating variables}
+
+Mathematical variables are represented by objects of the class \hcf{Variable}.
+
+\subsection{Default construction}
+
+The following piece of code creates a variable \cf{x} and prints it.
+
+\begin{lstlisting}
+  Variable x;
+  cout << x << endl;
+\end{lstlisting}
+
+The first instruction creates a (program) variable \cf{x}. It is initialized by default, since
+no argument are given here to the constructor.
+By default, the variable is real (or {\it scalar}), meaning it is not a vector nor a matrix. 
+Furthermore, the (mathematical) variable has a name that is automatically
+generated. Of course, the name of the mathematical variable does not necessarily correspond to the name of the 
+program variable.
+For instance, \cf{x} is the name of a C++ variable but the corresponding 
+mathematical variable is named {\it \_x\_0}.
+The second instruction prints the name of the mathematical variable on the standard output:
+
+\begin{lstlisting}
+_x_0
+\end{lstlisting}
+
+It is possible to rename variables, see \S\ref{sec:mod-var-name}.
+
+\subsection{Vector and matrix variables}\label{sec:mod-var-vec}
+
+Like in Matlab, Variables can be vectors or matrices. To create a $n$-dimensional vector variable, just
+give the number $n$ as an arguement to the constructor:
+
+\begin{lstlisting}
+  Variable y(3);   // creates a 3-dimensional vector
+\end{lstlisting}
+
+To create a $m\times n$ matrix, give $m$ (number of rows) and $n$ (number of columns) as arguments:
+
+\begin{lstlisting}
+  Variable z(2,3);   // creates a 2*3-dimensional matrix
+\end{lstlisting}
+
+We can go like this up to 3 dimensional arrays:
+
+\begin{lstlisting}
+  Variable t(2,3,4);   // creates a 2*3*4-dimensional array
+\end{lstlisting}
+
+
+\subsection{Renaming variables}\label{sec:mod-var-name}
+Usually, you don't really care about the names of mathematical variables since you handle
+program variables in your code.
+However, if you want a more user-friendly display, you can specify
+the name of the variable as a last argument to the constructor.
+
+In the following example, we create a scalar, a vector and a matrix variable each
+time with a chosen name.
+
+\begin{lstlisting}
+  Variable x("x");   // creates a real variable named "x"
+  Variable y(3,"y");   // creates a vector variable named "y"
+  Variable z(2,3,"z");   // creates a matrix variable named "z"
+  cout << x << " " << y << " " << z << endl;
+\end{lstlisting}
+
+Now, the display is:
+\begin{lstlisting}
+x y z
+\end{lstlisting}
+
+
+\section{Creating functions}
+
+Mathematical functions are represented by objects of the class \hcf{Function}.
+The following piece of code creates the function
+$(x,y)\mapsto x+y$:
+
+\begin{lstlisting}	
+  Variable x("x");
+  Variable y("y");
+  Function f(x,y,sin(x+y));
+  cout << f << endl;
+\end{lstlisting}
+
+The display is:
+\begin{lstlisting}
+_f_0:(x,y)->sin((x+y))
+\end{lstlisting}
+%_f_0:(_x_0,_x_1)->sin((_x_0+_x_1))
+\section{Evaluation}
+
+We show now how to calculate the image of a box by a function $f$ or, in short, how
+to perform an {\it interval evaluation}.
+
+We assume that the function \cf{f} has been created to represent $(x,y)\mapsto \sin(x+y)$ (see the previous paragraph).
+
+We start by building a box (as explained in Chapter \ref{chap:arith}).
+The box must have as many components as the function has arguments, here, 2.
+
+Then we simply call \hcf{f.eval(...)} to get the image of the box by \cf{f}:
+
+\begin{lstlisting}
+  double _box[][2]= {{1,2},{3,4}};
+  IntervalVector box(2,_box);         // create the box ([1,2];[3,4])
+
+  cout << "initial box=" << box << endl;
+  cout << "f(box)=" << f.eval(box) << endl; 
+\end{lstlisting}
+
+
+

@@ -31,5 +31,15 @@ namespace ibex {
  */
 int index_2_string(char* buff, char lbracket, char rbracket, int index);
 
+/**
+ * \brief Generate a variable name (_x_i).
+ */
+char* next_generated_var_name();
+
+/**
+ * \brief Generate a function name (_f_i).
+ */
+char* next_generated_func_name();
+
 } // end namespace ibex
 #endif // __IBEX_STRING_H__

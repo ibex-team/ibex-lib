@@ -419,15 +419,23 @@ private:
  */
 class Variable {
 public:
+	Variable(const Dim& dim=Dim::scalar()) : symbol(new ExprSymbol(dim)) { }
+
+	Variable(const char* name) : symbol(new ExprSymbol(name,Dim::scalar())) { }
+
+	Variable(const Dim& dim, const char* name) : symbol(new ExprSymbol(name, dim)) { }
+
 	Variable(int n) : symbol(new ExprSymbol(Dim::col_vec(n))) { }
 
 	Variable(int n, const char* name) : symbol(new ExprSymbol(name, Dim::col_vec(n))) { }
 
+	Variable(int m, int n) : symbol(new ExprSymbol(Dim::matrix(m,n))) { }
+
 	Variable(int m, int n, const char* name) : symbol(new ExprSymbol(name, Dim::matrix(m,n))) { }
 
-	Variable(const Dim& dim=Dim::scalar()) : symbol(new ExprSymbol(dim)) { }
+	Variable(int k, int m, int n) : symbol(new ExprSymbol(Dim::matrix_array(k,m,n))) { }
 
-	Variable(const char* name, const Dim& dim=Dim::scalar()) : symbol(new ExprSymbol(name,dim)) { }
+	Variable(int k, int m, int n, const char* name) : symbol(new ExprSymbol(name, Dim::matrix_array(k,m,n))) { }
 
 	operator const ExprSymbol&() const {
 		if (symbol->deco.f) // already used build new one.

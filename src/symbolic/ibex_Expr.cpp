@@ -16,6 +16,7 @@
 #include "ibex_ExprNodes.h"
 #include "ibex_ExprSize.h"
 #include "ibex_ExprReset.h"
+#include "ibex_String.h"
 #include <limits.h>
 #include <stdio.h>
 #include <set>
@@ -117,24 +118,12 @@ ExprVector::ExprVector(const ExprNode** comp, int n, bool in_row) :
 		ExprNAryOp(comp, n, vec_dim(dims(comp,n),in_row)) {
 }
 
-#define MAX_NAME_SIZE 20
-#define BASE_SYMB_NAME "_symb_"
-
-static char generated_name_buff[MAX_NAME_SIZE];
-static int generated_count=0;
-
-static char* next_generated_name() {
-	sprintf(generated_name_buff, BASE_SYMB_NAME);
-	snprintf(&generated_name_buff[strlen(BASE_SYMB_NAME)], MAX_NAME_SIZE-strlen(BASE_SYMB_NAME), "%d", generated_count++);
-	return generated_name_buff;
-}
-
 ExprSymbol::ExprSymbol(const Dim& dim) : ExprLeaf(dim),
-		name(strdup(next_generated_name())), key(-1) {
+		name(strdup(next_generated_var_name())), key(-1) {
 }
 
 const ExprSymbol& ExprSymbol::new_(const Dim& dim) {
-	return new_(next_generated_name(), dim);
+	return new_(next_generated_var_name(), dim);
 	//return new_(generated_name_buff, dim);
 }
 

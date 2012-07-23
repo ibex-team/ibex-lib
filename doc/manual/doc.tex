@@ -1,0 +1,75 @@
+\documentclass[11pt,twoside]{book}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{epsfig}
+\usepackage{listings}
+%\usepackage{verbatim}
+%\newcommand{\guill}[1]{\og #1 \fg\,\!\!} 
+
+\parindent=0pt
+\parskip=6pt
+
+\newcommand{\IRset}{\mathbb{IR}}
+\newcommand{\vx}{{\bf x}}
+\newcommand{\Rset}{\mathbb{R}}
+\newcommand{\ibex}{{\textsc{Ibex}~}}
+\newcommand{\bias}{{\tt Profil/Bias}}
+\newcommand{\gaol}{{\tt Gaol}}
+\newcommand{\var}{{\tt var}}
+\newcommand{\syb}{{\tt syb}}
+\newcommand{\epr}{{\tt epr}}
+\newcommand{\upr}{{\tt upr}}
+\newcommand{\rad}{{\tt rad}}
+\newtheorem{remark}{Remark}[chapter]
+
+\title{IBEX 2.0\\
+%(An {\bf I}nterval-{\bf B}ased {\bf EX}plorer)\\
+~\\
+Documentation\\
+~\\
+July 2012}
+%\author{
+%\begin{tabular}{lll}
+%Gilles Chabert & Ecole des Mines de Nantes\\
+%Bertrand Neveu & Ecole nationale des Ponts \& Chaussées\\
+%Gilles Trombettoni & Université de Nice-Sophia Antipolis\\
+%Ignacio Araya & Université de Nice-Sophia Antipolis\\
+%\end{tabular}
+%}
+\date{}
+
+\usepackage{verbatim}
+\usepackage{color}
+
+\definecolor{qcolor}{rgb}{0.9,0.9,0.9}
+\definecolor{white}{rgb}{1.0,1.0,1.0}
+
+\newcommand{\cf}[1]{\lstinline[basicstyle=\ttfamily,backgroundcolor=]{#1}}
+\newcommand{\hcf}[1]{\lstinline[basicstyle=\ttfamily\color{blue},backgroundcolor=]{#1}}
+
+\lstset{
+language=C++,
+backgroundcolor=\color{qcolor},
+frame=single,
+breaklines=true,
+columns=flexible,
+basicstyle=\small\ttfamily,          % print whole listing small
+keywordstyle=\color{black}\bfseries,
+                            % underlined bold black keywords
+identifierstyle=,           % nothing happens
+commentstyle=\itshape\color{blue}, % white comments
+stringstyle=\ttfamily,      % typewriter type for strings
+showstringspaces=false}     % no special string spaces
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+\include{intro}
+\include{arithmetic}
+\include{modeling}
+\include{solving}
+
+\end{document}
+
