@@ -31,15 +31,16 @@ Ibex.class : Ibex.java_
 	cat Ibex.java_ >> $(JAVA_PATH)/Ibex.java; javac $(JAVA_PATH)/Ibex.java
 	
 	
-$(JAVA_SIGNATURE)_Ibex.h : Ibex.class
-	javah -jni $(JAVA_PACKAGE).Ibex;
+# renamed ".h_" to exclude this file from the IBEX includes.
+$(JAVA_SIGNATURE)_Ibex.h_ : Ibex.class
+	javah -jni $(JAVA_PACKAGE).Ibex; mv $(JAVA_SIGNATURE)_Ibex.h $(JAVA_SIGNATURE)_Ibex.h_
 	
-ibex_Java.o : ibex_Java.cpp_ $(JAVA_SIGNATURE)_Ibex.h
+ibex_Java.o : ibex_Java.cpp_ $(JAVA_SIGNATURE)_Ibex.h_
 	echo "// This file is generated from Ibex_Java.cpp_." > ibex_Java.cpp ; \
-	echo "#include \""$(JAVA_SIGNATURE)_Ibex.h"\"" >> ibex_Java.cpp ; \
+	echo "#include \""$(JAVA_SIGNATURE)_Ibex.h_"\"" >> ibex_Java.cpp ; \
 	cat ibex_Java.cpp_ | sed "s/Java_/Java_$(JAVA_SIGNATURE)_/g" >> ibex_Java.cpp ; \
 	$(CXX) $(CXXFLAGS) -I$(JAVA_INC) $(INC_DIR_OPT) -c -o $@ ibex_Java.cpp 
 
 clean:
-	rm -f Ibex.java Test.java ibex_Java.cpp $(JAVA_SIGNATURE)_Ibex.h *.o Test.class ; \
+	rm -f Ibex.java Test.java ibex_Java.cpp $(JAVA_SIGNATURE)_Ibex.h_ *.o Test.class ; \
 	if [ -d "$(JAVA_PATH)" ]; then rm -Rf `echo $(JAVA_PACKAGE) | cut -d"." -f1`; fi
