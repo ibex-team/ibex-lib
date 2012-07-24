@@ -136,8 +136,13 @@ void CtcAcid::compute_smearorder(IntervalVector& box) {
 	for (int i=0; i<nb_ctr; i++) {
 		ctrjsum[i]=0;
 		for (int j=0; j<nb_var ; j++) {
-			if (cid_vars[j])                           // [gch] (only varCIDed variables considered?)
-				ctrjsum[i]+= J[i][j].mag() * box[j].diam();
+		  // in case of infinite derivatives , natural ordering
+		  if (J[i][j].mag()==POS_INFINITY)
+		    {for (int i1=0;i1 < nb_var; i1++)
+		      smearorder.push_back(varorder2[i1]);
+		      return;}
+		  if (cid_vars[j])                           // [gch] (only varCIDed variables considered?)
+		      ctrjsum[i]+= J[i][j].mag() * box[j].diam();
 		}
 	}
 
@@ -147,8 +152,11 @@ void CtcAcid::compute_smearorder(IntervalVector& box) {
 		sum_smear[i]=0;
 		for (int j=0; j<nb_ctr; j++) {
 			if (ctrjsum[j]>1.e-5)
+			  {
 				sum_smear[i]+= J[j][i].mag() * box[i].diam()/ctrjsum[j] ; // formule smearsumrel
+                           
 			    // sum_smear[i]+= abs(J[j][i]) * box[i].diam();          // variante smearsum
+			  }
 		}
 	}
 	// tri des variables selon sum_smear :  resultat dans tableau smearorder

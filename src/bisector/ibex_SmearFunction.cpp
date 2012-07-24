@@ -18,9 +18,13 @@ namespace ibex {
 
   pair<IntervalVector,IntervalVector> SmearFunction::bisect(const IntervalVector& box, int& last_var) {
     IntervalMatrix J(sys.nb_ctr, sys.nb_var);
-    int n = box.size();
-    sys.f.jacobian(box,J);
 
+    sys.f.jacobian(box,J);
+    // in case of infinite derivatives  changing to roundrobin bisection
+    for (int i=0;i < sys.nb_ctr;i++)
+      for (int j=0;j < sys.nb_var;j++)
+	if (J[i][j].mag() == POS_INFINITY)
+	  return RoundRobin::bisect(box,last_var);
     int var = var_to_bisect (J,box);
     if (var == -1)
       return RoundRobin::bisect(box,last_var);
