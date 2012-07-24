@@ -25,7 +25,7 @@ void real_LU(const Matrix& A, Matrix& LU, int* p) {
 	// check the matrix has no "infinite" values
 	for (int i=0; i<n; i++) {
 		for (int j=0; j<n; j++) {
-			if (A[i][j]>=TOO_LARGE) throw SingularMatrixException();
+			if (fabs(A[i][j])>=TOO_LARGE) throw SingularMatrixException();
 		}
 	}
 
@@ -54,6 +54,7 @@ void real_LU(const Matrix& A, Matrix& LU, int* p) {
 
 		for (int j=i+1; j<n; j++) {
 			for (int k=i+1; k<n; k++) {
+				//cout << LU[p[j]][k] << " " << LU[p[j]][i] << " " << pivot << endl;
 				LU[p[j]][k]-=(LU[p[j]][i]/pivot)*LU[p[i]][k];
 			}
 			LU[p[j]][i] = LU[p[j]][i]/pivot;
