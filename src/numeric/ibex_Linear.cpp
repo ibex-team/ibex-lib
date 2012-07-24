@@ -22,6 +22,13 @@ void real_LU(const Matrix& A, Matrix& LU, int* p) {
 	assert(n == (A.nb_cols())); // throw NotSquareMatrixException();
 	assert(n == (LU.nb_rows()) && n == (LU.nb_cols()));
 
+	// check the matrix has no "infinite" values
+	for (int i=0; i<n; i++) {
+		for (int j=0; j<n; j++) {
+			if (A[i][j]>=TOO_LARGE) throw SingularMatrixException();
+		}
+	}
+
 	LU = A;
 	for (int i=0; i<n; i++) p[i]=i;
 
@@ -34,7 +41,6 @@ void real_LU(const Matrix& A, Matrix& LU, int* p) {
 		pivot = LU[p[i]][i];
 		for (int j=i+1; j<n; j++) {
 			volatile double tmp=LU[p[j]][i];
-			if (fabs(tmp)>=TOO_LARGE) throw SingularMatrixException();
 			if (fabs(tmp)>fabs(LU[p[swap]][i])) swap=j;
 		}
 		int tmp = p[i];
