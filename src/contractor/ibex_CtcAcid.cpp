@@ -121,14 +121,6 @@ void CtcAcid::compute_smearorder(IntervalVector& box) {
 
 	system.f.jacobian(box,J);
 
-	// [gch]: BNE, I've commented out the next
-	// block because the Jacobian does not
-	// throw exception anymore.
-//	catch(EvalException) {
-//		for (int i=0;i < space.nb_var(); i++)
-//			smearorder.push_back(varorder2[i]);
-//		return;
-//	}
 
 	double sum_smear[nb_var];
 	double ctrjsum[nb_ctr];
@@ -136,7 +128,7 @@ void CtcAcid::compute_smearorder(IntervalVector& box) {
 	for (int i=0; i<nb_ctr; i++) {
 		ctrjsum[i]=0;
 		for (int j=0; j<nb_var ; j++) {
-		  // in case of infinite derivatives , natural ordering
+		  // [bne]  in case of infinite derivatives , natural ordering
 		  if (J[i][j].mag()==POS_INFINITY)
 		    {for (int i1=0;i1 < nb_var; i1++)
 		      smearorder.push_back(varorder2[i1]);
