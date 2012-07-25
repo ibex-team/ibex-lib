@@ -44,14 +44,15 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 	f.gradient(box,G);
 
 	//     if(G.max_diameter()>1e8) return false; //to avoid problems with SoPleX
-	DSVector row1(n);
+        int nsimplex=n+1;  // the n variables + the objective
+	DSVector row1(nsimplex);
 
 	//Linear variable yl is created
 	//0 <= yl <= loup
 	mysoplex.addCol(LPCol(1.0, dummycol, infinity, -infinity ));
 	row1.add(0, -1.0);
 
-	for (int j=0; j<n-1; j++){
+	for (int j=0; j<nsimplex-1; j++){
 		//The linear variables are generated
 		//0 <= xl_j <= diam([x_j])
 		mysoplex.addCol(LPCol(0.0, dummycol, box[j].diam(), 0.0));
@@ -74,11 +75,11 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 
 		// ============================================================
 		//     if(G.max_diameter()>1e8) return false; //to avoid problems with SoPleX
-		DSVector row1(n);
+		DSVector row1(nsimplex);
 
 		//The contraints i is generated:
 		// c_i:  inf([g_i]([x]) + sup(dg_i/dx_1) * xl_1 + ... + sup(dg_i/dx_n) + xl_n  <= -eps_error
-		for (int j=0; j<n-1; j++) {
+		for (int j=0; j<nsimplex-1; j++) {
 //			if(op == LEQ || op== LT) {
 				row1.add(j+1, G[j].ub());
 //			} else {
@@ -106,12 +107,12 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 
 	if (stat == SPxSolver::OPTIMAL) {
 		//the linear solution is mapped to intervals and evaluated
-		DVector prim(n);
+		DVector prim(nsimplex);
 		mysoplex.getPrimal(prim);
 
-		IntervalVector tmpbox(n);
+		IntervalVector tmpbox(nsimplex);
 
-		for (int j=0; j<n-1; j++)
+		for (int j=0; j<nsimplex-1; j++)
 			tmpbox[j]=box[j].lb()+prim[j+1];
 
 		bool ret= check_candidate(box.mid(),false); // [gch] do we know here that the point is inner??
