@@ -26,10 +26,9 @@ int main() {
 	Function g(x,y,sqr(x)+sqr(y)-1.0);
 	NumConstraint c(g,NumConstraint::LEQ);
 
-	CtcProj proj(c);
 	RoundRobin rr;
 
-	Optimizer o(f,g,proj,rr);
+	Optimizer o(f,g,rr);
 
 	IntervalVector box(2);
 	o.trace=true;

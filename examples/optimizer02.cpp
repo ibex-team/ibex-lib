@@ -21,7 +21,7 @@ int main() {
 	// Optimizer (with a system loaded from a file)
 	//
 
-	System sys("ex2_1_3.bch");
+	System sys("../benchs/ex2_1_3.bch");
 
 	RoundRobin rr;
 

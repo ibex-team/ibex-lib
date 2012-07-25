@@ -63,7 +63,7 @@ System::~System() {
 	for (int i=0; i<func.size(); i++)
 		delete &func[i];
 
-	if (goal) delete &goal;
+	if (goal) delete goal;
 
 	for (int i=0; i<ctrs.size(); i++)
 		delete &ctrs[i];
