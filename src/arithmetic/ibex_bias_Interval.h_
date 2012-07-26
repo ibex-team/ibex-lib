@@ -16,7 +16,7 @@
 #include "Functions.h"
 #include <float.h>
 #include <cassert>
-#include <BIAS/BiasF.h>
+#include "BIAS/BiasF.h"
 
 namespace ibex {
 
