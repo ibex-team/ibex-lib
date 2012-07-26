@@ -8,7 +8,7 @@ JAVA_PACKAGE=ibex
 
 include ../common.mak
 
-all: ibex_Java.o Test.class
+all : ibex_Java.o Test.class
 
 JAVA_PATH=$(shell echo $(JAVA_PACKAGE) | sed "s/\./\//g")
 
@@ -23,7 +23,7 @@ Test.class : Test.java_
 	cat Test.java_ >> Test.java ; \
 	javac Test.java
    
-Ibex.class : Ibex.java_
+$(JAVA_PATH)/Ibex.class : Ibex.java_
 	echo "java path="$(JAVA_PATH) ; \
 	mkdir -p $(JAVA_PATH) ; \
 	echo "// This file is generated from Ibex.java_." > $(JAVA_PATH)/Ibex.java ; \
@@ -32,7 +32,7 @@ Ibex.class : Ibex.java_
 	
 	
 # renamed ".h_" to exclude this file from the IBEX includes.
-$(JAVA_SIGNATURE)_Ibex.h_ : Ibex.class
+$(JAVA_SIGNATURE)_Ibex.h_ : $(JAVA_PATH)/Ibex.class
 	javah -jni $(JAVA_PACKAGE).Ibex; mv $(JAVA_SIGNATURE)_Ibex.h $(JAVA_SIGNATURE)_Ibex.h_
 	
 ibex_Java.o : ibex_Java.cpp_ $(JAVA_SIGNATURE)_Ibex.h_
