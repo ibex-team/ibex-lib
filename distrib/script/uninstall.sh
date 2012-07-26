@@ -43,6 +43,6 @@ if [ "$KERNEL" == "Linux" ]; then
   echo -n \\t Running ldconfig ..........
   ldconfig
   echo done.
-endif
+fi
 
 echo done.
