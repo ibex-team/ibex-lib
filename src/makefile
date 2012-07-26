@@ -12,6 +12,7 @@ endif
 ARITH:=arithmetic
 SUBDIRS:=tools $(ARITH) numeric symbolic function combinatorial contractor bisector strategy parser java
 SUBLIB_DEF:=_IBEX_WITH_`echo $(SUBLIB) | tr '[:lower:]' '[:upper:]'`_
+DISTRIB=ibex-$(RELEASE)-$(KERNEL)
  
 # warning: don't define OBJS with ":=" because the
 # object files may not exist yet
@@ -75,10 +76,22 @@ $(IBEX_LIB_DIR)/libibex.so: $(DYN_LIB_DEP)
 $(IBEX_LIB_DIR)/libibex.dylib: $(DYN_LIB_DEP)
 	cd $(IBEX_LIB_DIR); g++ -dynamiclib -o libibex.dylib *.o -lz; rm *.o; cd $(IBEX_DIR)
 
-.PHONY: $(SUBDIRS) $(DYN_LIB_DEP)
+distrib:
+	svn export https://ibex-lib.svn.sourceforge.net/svnroot/ibex-lib/branches/version2.0/distrib $(IBEX_DIR)/$(DISTRIB)
+	install -m 640 $(IBEX_INC_DIR)/*.h* $(IBEX_DIR)/$(DISTRIB)/include ; \
+	install -m 640 $(DYNAMIC_TARGET) $(IBEX_DIR)/$(DISTRIB)/lib ; \
+	cd $(IBEX_DIR) ; \
+	tar cvfz $(DISTRIB).tar.gz $(DISTRIB) ; \
+	rm -Rf $(IBEX_DIR)/$(DISTRIB) ; \
+	cd $(IBEX_SRC_DIR) 
 
+.PHONY: distrib $(SUBDIRS) $(DYN_LIB_DEP)
+	
+	
 clean: $(SUBDIRS)
 	rm -f $(STATIC_TARGET) $(DYNAMIC_TARGET); \
-	rm -f $(IBEX_INC_DIR)/*.h \
-	rm -f $(IBEX_INC_DIR)/ibex_$(SUBLIB)_Interval.h_
+	rm -f $(IBEX_INC_DIR)/*.h; \
+	rm -f $(IBEX_INC_DIR)/ibex_$(SUBLIB)_Interval.h_; \
+	rm -f $(DISTRIB).tar.gz
+	
 	
