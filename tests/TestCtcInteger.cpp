@@ -24,10 +24,10 @@ void TestCtcInteger::test01() {
 	mask[3]=true;
 
 	CtcInteger c(4,mask);
-	double _box[][2] = {0.5,1.5,  1.5,2.5,  2.5,3.5,  3.5,4.5};
+	double _box[][2] = {{0.5,1.5},  {1.5,2.5},  {2.5,3.5},  {3.5,4.5}};
 	IntervalVector box(4,_box);
 
-	double _resbox[][2] = {0.5,1.5,  2,2,  2.5,3.5,  4,4};
+	double _resbox[][2] = {{0.5,1.5},  {2,2},  {2.5,3.5},  {4,4}};
 	IntervalVector resbox(4,_resbox);
 
 	c.contract(box);
@@ -41,8 +41,8 @@ void TestCtcInteger::test02() {
 	mask[1]=true;
 
 	CtcInteger c(2,mask);
-	double _box[][2] = {0.01,0.99,  0.01,0.99};
-	IntervalVector box(4,_box);
+	double _box[][2] = {{0.01,0.99},  {0.01,0.99}};
+	IntervalVector box(2,_box);
 
 	TEST_THROWS(c.contract(box), EmptyBoxException);
 }
