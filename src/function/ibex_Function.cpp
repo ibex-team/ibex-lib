@@ -39,6 +39,8 @@ Function::~Function() {
 
 	for (int i=0; i<nb_symbols(); i++)
 		delete &symbol(i);
+
+	free((char*) name);
 }
 
 int Function::input_size() const {

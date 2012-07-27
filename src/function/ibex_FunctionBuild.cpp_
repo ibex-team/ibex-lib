@@ -133,12 +133,12 @@ public:
 
 const char* duplicate_or_generate(const char* name) {
 	if (name) return strdup(name);
-	else return ibex::next_generated_func_name();
+	else return strdup(ibex::next_generated_func_name());
 }
 
 }
 
-Function::Function() : name(next_generated_func_name()) {
+Function::Function() : name(strdup(next_generated_func_name())) {
 
 }
 
