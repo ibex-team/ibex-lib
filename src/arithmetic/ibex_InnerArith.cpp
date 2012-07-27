@@ -121,8 +121,8 @@ bool iproj_geq_mono_op(double z_inf, Interval& x, Interval& y, const Interval& x
 	//cout << "  geq_mono_op " << op_str(op) << endl;
 	//cout << "  x=" << x << " y=" << y << " z_inf=" << z_inf << endl;
 	//cout << "  inc_var1=" << inc_var1 << " inc_var2=" << inc_var2 << endl;
-	if (inflate) //cout << "  inflating xin=" << xin << " yin=" << yin << endl;
-	if (x.is_empty() || y.is_empty()) {
+	if (inflate) { } //cout << "  inflating xin=" << xin << " yin=" << yin << endl;
+	if (z_inf==NEG_INFINITY || x.is_empty() || y.is_empty()) {
 		//cout << "  result: x=" << x << " y=" << y << endl;
 		//cout << "----------------------------------------------------------" << endl;
 		return false;
