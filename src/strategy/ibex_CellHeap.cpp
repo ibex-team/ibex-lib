@@ -47,25 +47,23 @@ int CellHeap::size() const {
 // the heap all the cells with a cost greater than loup.
 void CellHeap::contract_heap(double loup)
 {
-	//    cout << " before contract heap  " << l.size() << endl;
+	//cout << " before contract heap  " << l.size() << endl;
 
 	sort_heap(l.begin(),l.end(),CellComparator());
 	vector<pair<Cell*,double> >::iterator it0=l.begin();
-	int k=0;
-	for (vector<pair<Cell*,double> >::iterator it=l.begin(); it!=l.end(); it++)
-	{
-		it0=it;
-		if (it->second < loup) break;
-		k++;
-	}
 
-	for (int i=0;i<k;i++)
-	{delete l[i].first;}
+	int k=0;
+	while (it0!=l.end() && it0->second > loup) { it0++; k++; }
+
+	for (int i=0;i<k;i++) {
+		delete l[i].first;
+	}
 
 	if (k>0) l.erase(l.begin(),it0);
 
 	make_heap(l.begin(), l.end() ,CellComparator());
-	//    cout << " after contract heap " << l.size() << endl;
+
+	//cout << " after contract heap " << l.size() << endl;
 
 }
 
