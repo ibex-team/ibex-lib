@@ -12,8 +12,7 @@
 #define __IBEX_OPTIMIZER_H__
 
 #include "ibex_Bsc.h"
-#include "ibex_CtcPrecision.h"
-#include "ibex_CtcPropag.h"
+#include "ibex_CtcHC4.h"
 #include "ibex_CtcUnion.h"
 #include "ibex_Eval.h"
 #include "ibex_Gradient.h"
@@ -21,48 +20,6 @@
 #include "ibex_CellHeapOptim.h"
 
 namespace ibex {
-
-/**
- * \ingroup strategy
- *
- * \brief Optimization criterion (used by Optimizer).
- *
- * This class stores the interval [uplo,loup] where "uplo" is
- * the uppermost lower bound on f(x) and "loup" the lowest upper
- * bound.
- */
-class OptimCrit : public Backtrackable {
-public:
-	OptimCrit() { }
-
-	OptimCrit(const Interval& y) : y(y) { }
-
-	/**
-	 * \brief Create data associated to child cells.
-	 */
-	virtual std::pair<Backtrackable*,Backtrackable*> down() {
-		return std::pair<Backtrackable*,Backtrackable*>(new OptimCrit(y), new OptimCrit(y));
-	}
-
-	Interval y;
-};
-
-/**
- * \ingroup strategy
- *
- * Contractor (x,y) w.r.t y=f(x) where x is the box in argument
- * and y any interval (can be set dynamically).
- */
-class GoalProj : public Ctc {
-public:
-	GoalProj(Function& goal);
-
-	Function& goal;
-
-	Interval* y;
-
-	virtual void contract(IntervalVector& box);
-};
 
 /**
  * \ingroup strategy
@@ -90,6 +47,8 @@ public:
 	 *   \param goal_rel_prec - relative precision of the objective (the optimizer stops once reached).
 	 *   \pram  goal_abs_prec - absolute precision of the objective (the optimizer stops once reached).
 	 *   \param sample_size   - number of samples taken when looking for a "loup"
+	 *
+	 *   \pre - The variables of f and g must correspond: same number of variables and same dimensions.
 	 */
 	Optimizer(Function& f, Function& g, Bsc& bsc, double prec=default_prec,
 			double goal_rel_prec=default_goal_rel_prec, double goal_abs_prec=default_goal_abs_prec,
@@ -128,8 +87,39 @@ public:
 	/** Constraints under the form of a vector-valued function (we have g(x)<=0). */
 	Function& g;
 
-	/** Contractor w.r.t. y=f(x). */
-	GoalProj goal_ctc;
+	/*=======================================================================================================*/
+	/*                                             Extended CSP                                              */
+	/*=======================================================================================================*/
+
+	/** Extended function (x,y)->(y-f(x),g(x)) */
+	Function ext_f_g;
+
+	/**
+	 * \brief Extended constraint system.
+	 *
+	 * <ul> The system contains:
+	 * <li> (n+1) variables, x_1,...x_n,y. The index of y is #goal_var (==n if it is the last).
+	 * <li> (m+1) constraints: y-f(x)=0, g_1(x)<=0, ..., g_m(x)<=0.
+	 *      The index of y-f(x)=0 in the system is #goal_ctr (==0 if it is the first).
+	 * </ul>
+	 */
+	Array<NumConstraint> ext_csp;
+
+	/**
+	 * \brief Number of the goal constraint y-f(x)=0 in the extended CSP.
+	 */
+	int goal_ctr;
+
+	/**
+	 * \brief Index of the goal variable y in the extended box.
+	 *
+	 * This variables stores the interval [uplo,loup] where "uplo" is
+	 * the uppermost lower bound on f(x) and "loup" the lowest upper
+	 * bound.
+	 */
+	int goal_var;
+	/*=======================================================================================================*/
+
 
 	/** Bisector. */
 	Bsc& bsc;
@@ -137,8 +127,8 @@ public:
 	/** Cell buffer. */
 	CellHeapOptim buffer;
 
-	/** Precision */
-	CtcPrecision prec;
+	/** Precision (bisection control) */
+	const double prec;
 
 	/** Relative precision on the objective */
 	const double goal_rel_prec;
@@ -183,6 +173,9 @@ public:
 	/** Default sample size */
 	static const int default_sample_size;
 
+	/** Name of the goal variable ("y"). */
+	static const char* goal_name;
+
 protected:
 	/**
 	 * \brief Main procedure for processing a box.
@@ -197,6 +190,9 @@ protected:
 	 */
 	bool contract_and_bound(Cell& c);
 
+	/*=======================================================================================================*/
+	/*             Functions to update the loup (see ibex_OptimProbing and ibex_OptimSimplex)                */
+	/*=======================================================================================================*/
 	/**
 	 * \brief Monotonicity analysis.
 	 *
@@ -287,12 +283,40 @@ protected:
 	 * \brief Display the loup (for debug)
 	 */
 	void trace_loup();
+	/*=======================================================================================================*/
+	/*                                Functions to manage the extended CSP                                   */
+	/*=======================================================================================================*/
 
+	/**
+	 * \brief Transform x->g_i(x) to (x,y)->g_i(x).
+	 *
+	 * This function is introduced because the vector of variables must be uniform in the extended CSP.
+	 */
+	void build_ext_g(int i);
+
+	/**
+	 * \brief Build the extended CSP.
+	 */
+	void build_ext_csp();
+
+	/**
+	 * \brief Load a (n-dimensional) box into an (n+1-dimensional) extended box
+	 *
+	 *  The goal variable is skipped.
+	 */
+	void write_ext_box(const IntervalVector& box, IntervalVector& ext_box);
+
+	/**
+	 * \brief Load an extended (n+1-dimensional) box into a (n-dimensional) box
+	 *
+	 *  The goal variable is skipped.
+	 */
+	void read_ext_box(const IntervalVector& ext_box, IntervalVector& box);
 
 private:
 
 	/** Propagation of y=f(x), g_1(x)<=0,...,g_m(x)<=0. */
-	CtcPropag* ctc;
+	CtcHC4* ctc;
 
 	/** Inner contractor (for the negation of g) */
 	CtcUnion* is_inside;

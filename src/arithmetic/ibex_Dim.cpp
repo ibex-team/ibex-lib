@@ -55,7 +55,7 @@ Dim vec_dim(const Array<const Dim>& comp, bool in_a_row) {
 				// row vectors of different size
 				// in a single row vector;
 				// (but not implemented yet)
-				if (!comp[i].type()!=Dim::SCALAR) goto error;
+				if (comp[i].type()!=Dim::SCALAR) goto error;
 			return Dim::row_vec(n);
 		}
 		else {

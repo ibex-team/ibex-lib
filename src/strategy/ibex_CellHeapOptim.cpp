@@ -13,10 +13,14 @@
 
 namespace ibex {
 
+CellHeapOptim::CellHeapOptim(const int y) : y(y) {
+
+}
+
 /** The cost is already computed, it is the min of the
  * last variable corresponding to the objective */
 double CellHeapOptim::cost(const Cell& c) const {
-  return c.get<OptimCrit>().y.lb();
+  return c.box[y].lb();
 }
 
 

@@ -198,6 +198,11 @@ public:
 	const ExprNode& node(int i) const;
 
 	/**
+	 * \brief Return the symbols.
+	 */
+	const Array<const ExprSymbol>& symbols() const;
+
+	/**
 	 * \brief Return the name of the ith symbol.
 	 *
 	 * Corresponds to the ith parameter of the function.
@@ -371,7 +376,7 @@ private:
 	void separate();
 
 	const ExprNode* root;                       // the root node
-	Array<const ExprSymbol> symbols;            // to retrieve symbol (node)s by appearing order.
+	Array<const ExprSymbol> symbs;              // to retrieve symbol (node)s by appearing order.
 	std::vector<bool> is_used;                  // tells whether the i^th component is used.
 	std::vector<const ExprNode*> exprnodes;     // all the nodes
 	SymbolMap<const ExprSymbol*> id2info;       // to retrieve a symbol node from its name.
@@ -489,12 +494,16 @@ inline bool Function::used(int i) const {
 	return (root!=NULL && is_used[i]);
 }
 
+inline const Array<const ExprSymbol>& Function::symbols() const {
+	return symbs;
+}
+
 inline const ExprSymbol& Function::symbol(int i) const {
-	return symbols[i];
+	return symbs[i];
 }
 
 inline const char* Function::symbol_name(int i) const {
-	return symbols[i].name;
+	return symbs[i].name;
 }
 
 inline int Function::nb_nodes() const {

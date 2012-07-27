@@ -14,6 +14,7 @@
 #include "ibex_OptimProbing.cpp_"
 #include "ibex_OptimSimplex.cpp_"
 #include "ibex_CtcProj.h"
+#include "ibex_ExprCopy.h"
 
 using namespace std;
 
@@ -23,37 +24,70 @@ const double Optimizer::default_prec = 1e-07;
 const double Optimizer::default_goal_rel_prec = 1e-07;
 const double Optimizer::default_goal_abs_prec = 1e-07;
 const int Optimizer::default_sample_size = 10;
+const char* Optimizer::goal_name = "y";
 
-GoalProj::GoalProj(Function& goal) : Ctc(goal.input_size()), goal(goal) {
-	for (int v=0; v<goal.input_size(); v++)
-		output[v]=input[v]=goal.used(v);
+void Optimizer::build_ext_csp() {
+
+	const Array<const ExprSymbol>& x(g.symbols()); // could also be f.symbols().
+	const ExprSymbol& y=ExprSymbol::new_(goal_name,Dim()); // y is a scalar
+
+	// ---------- build the new vector of variables ----------------
+	// We set goal_var to n (<=>y variable is the nth variable)
+	// to simplify the copy of expressions (see ibex_ExprCopy).
+	Array<const ExprSymbol> ext_vars(n+1);
+	for (int j=0; j<n; j++)
+		ext_vars.set_ref(j,ExprSymbol::new_(x[j].name, x[j].dim));
+	// warning: y must be added at the end (goal_var is set to n in constructor)
+	ext_vars.set_ref(n,y);
+
+	vector<const ExprNode*> vec;
+	const ExprNode& f_copy=ExprCopy().copy(f.symbols(),ext_vars,f.expr());
+	vec.push_back(&(y-f_copy));
+
+	for (int i=0; i<m; i++)
+		vec.push_back(&ExprCopy().copy(g[i].symbols(),ext_vars,g[i].expr()));
+
+	ext_f_g.init(ext_vars,ExprVector::new_(vec,true));
+
+	// ------------- add y=f(x) in the extended CSP -----------------
+	// warning: must be added first (goal_ctr is set to 0 in constructor)
+	ext_csp.set_ref(0,*new NumConstraint(ext_f_g[0])); // equality (by default)
+	// ------------- add g(x)<=0 in the extended CSP ----------------
+	for (int i=0; i<m; i++)
+		ext_csp.set_ref(i+1,*new NumConstraint(ext_f_g[i+1], NumConstraint::LEQ));
+
 }
 
-void GoalProj::contract(IntervalVector& box) {
-	*y&=goal.eval(box);
-	goal.proj(*y,box);
+void Optimizer::write_ext_box(const IntervalVector& box, IntervalVector& ext_box) {
+	int i2=0;
+	for (int i=0; i<n; i++,i2++) {
+		if (i2==goal_var) i2++; // skip goal variable
+		ext_box[i2]=box[i];
+	}
 }
 
+void Optimizer::read_ext_box(const IntervalVector& ext_box, IntervalVector& box) {
+	int i2=0;
+	for (int i=0; i<n; i++,i2++) {
+		if (i2==goal_var) i2++; // skip goal variable
+		box[i]=ext_box[i2];
+	}
+}
 
 Optimizer::Optimizer(Function& f, Function& g, Bsc& bsc, double prec,
 		double goal_rel_prec, double goal_abs_prec, int sample_size) :
-		n(f.input_size()), m(g.output_size()), f(f), g(g), goal_ctc(f),
-		bsc(bsc), buffer(), prec(n,prec), goal_rel_prec(goal_rel_prec),
-		goal_abs_prec(goal_abs_prec), sample_size(sample_size),
-		mono_analysis_flag(true), in_HC4_flag(true), trace(false),
+		n(f.input_size()), m(g.output_size()), f(f), g(g),
+		ext_csp(m+1), goal_ctr(0), goal_var(n), bsc(bsc), buffer(n),
+		prec(prec), goal_rel_prec(goal_rel_prec), goal_abs_prec(goal_abs_prec),
+		sample_size(sample_size), mono_analysis_flag(true), in_HC4_flag(true), trace(false),
 		timeout(1e08), loup(POS_INFINITY), loup_point(n),
 		uplo_of_epsboxes(POS_INFINITY) {
 
+	build_ext_csp();
 
 	// ====== build the propagation of f(x)=0 and all g_i(x)<=0 =====
-	Array<Ctc> array(m+1);
-	array.set_ref(0,goal_ctc);
-	for (int i=0; i<m; i++) {
-		array.set_ref(i+1,*new CtcProj(g[i],NumConstraint::LEQ));
-	}
-	ctc = new CtcPropag(array);
+	ctc = new CtcHC4(ext_csp);
 	// =============================================================
-
 
 	// ====== build the reversed inequalities g_i(x)>0 ===============
 	Array<Ctc> ng(m);
@@ -74,9 +108,16 @@ Optimizer::Optimizer(Function& f, Function& g, Bsc& bsc, double prec,
 }
 
 Optimizer::~Optimizer() {
+
+	delete &ext_csp[0];
+
 	for (int i=0; i<m; i++) {
 		delete &(is_inside->list[i]);
+		delete &ext_csp[i+1];
 	}
+
+	delete ctc;
+	delete is_inside;
 }
 
 bool Optimizer::update_loup(const IntervalVector& box) {
@@ -88,7 +129,7 @@ bool Optimizer::update_loup(const IntervalVector& box) {
 bool Optimizer::contract_and_bound(Cell& c) {
 
 	/*======================== contract y with y<=loup ========================*/
-	Interval& y=c.get<OptimCrit>().y;
+	Interval& y=c.box[goal_var];
 
 	//cout << "loup=" << loup << endl;
 
@@ -112,7 +153,6 @@ bool Optimizer::contract_and_bound(Cell& c) {
 //	cout << "   x before=" << c.box << endl;
 //	cout << "   y before=" << y << endl;
 
-	goal_ctc.y=&y;
 	ctc->contract(c.box); // may throw EmptyBoxException
 
 //	cout << "   x after=" << c.box << endl;
@@ -122,14 +162,17 @@ bool Optimizer::contract_and_bound(Cell& c) {
 
 	// there is still something left to be contracted in the box
 	/*========================= update loup ==============================*/
-
-	bool loup_changed = update_loup(c.box);
+	IntervalVector tmp_box(n);
+	read_ext_box(c.box,tmp_box);
+	bool loup_changed = update_loup(tmp_box);
+	write_ext_box(tmp_box,c.box);
 	/*====================================================================*/
 
-	try {
-		y=f.eval(c.box);             // don't place this line after prec.contract (the box may be empty)
-		prec.contract(c.box);
-	} catch (EmptyBoxException&) {   // the box is a "solution"
+	if (tmp_box.max_diam()<=prec) {
+		// rem1: tmp_box and not c.box because y is [-inf;loup]
+		// rem2: do not use a precision contractor here since it would make the box empty (and y==(-inf,-inf)!!)
+
+		// the box is a "solution"
 		if (uplo_of_epsboxes > y.lb()) {
 			if (trace) {
 				cout.precision(12);
@@ -147,13 +190,12 @@ void Optimizer::optimize(const IntervalVector& init_box) {
 
 	buffer.flush();
 
-	Cell* root=new Cell(init_box);
+	Cell* root=new Cell(IntervalVector(n+1));
 
-	// add data required by the buffer
-	root->add<OptimCrit>();
+	write_ext_box(init_box,root->box);
 
 	// add data required by the contractor
-	//ctc.init_root(*root);
+	//ctc.init_root(*root); // we know there is none (not incremental HC4).
 
 	// add data required by the bisector
 	bsc.init_root(*root);

@@ -187,7 +187,7 @@ Function::Function(const Function& f) : name(strdup(f.name)) {
 	//cout << endl;
 
 	// Duplicate the expression
-	const ExprNode& y=ExprCopy().copy(f.symbols,x,f.expr());
+	const ExprNode& y=ExprCopy().copy(f.symbs,x,f.expr());
 
 	init(x,y);
 }
@@ -211,7 +211,7 @@ void Function::separate() {
 			for (int j=0; j<nb_symbols(); j++) {
 				x.set_ref(j,ExprSymbol::new_(symbol(j).name,symbol(j).dim));
 			}
-			const ExprNode& y=ExprCopy().copy(symbols, x, fvec? fvec->arg(i) : *(tmp=&expr()[i]));
+			const ExprNode& y=ExprCopy().copy(symbs, x, fvec? fvec->arg(i) : *(tmp=&expr()[i]));
 			if (tmp) delete (ExprNode*) tmp; // will not delete the subexpression
 			comp[i].init(x,y);
 		}
@@ -229,7 +229,7 @@ void Function::separate() {
 				for (int k=0; k<nb_symbols(); k++) {
 					x.set_ref(k,ExprSymbol::new_(symbol(k).name,symbol(k).dim));
 				}
-				const ExprNode& y=ExprCopy().copy(symbols, x,
+				const ExprNode& y=ExprCopy().copy(symbs, x,
 						fvec2 ? fvec2->arg(j) : (fvec? *(tmp=&(fvec->arg(i)[j])) : *(tmp=&(expr()[i][j]))));
 				if (tmp) delete (ExprNode*) tmp; // do not delete the subexpression
 				comp[i*n+j].init(x,y);
@@ -250,10 +250,10 @@ void Function::init(const Array<const ExprSymbol>& x, const ExprNode& y) {
 	key_count=0;
 	__all_symbols_scalar=true; // by default
 
-	symbols.resize(x.size());
+	symbs.resize(x.size());
 
 	for (int i=0; i<x.size(); i++) {
-		symbols.set_ref(i,x[i]);
+		symbs.set_ref(i,x[i]);
 		add_symbol(&x[i]);
 	}
 

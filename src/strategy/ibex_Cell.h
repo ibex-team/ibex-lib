@@ -38,6 +38,8 @@ public:
 
 	/**
 	 * \brief Create the root cell.
+	 *
+	 * \param box - Box (passed by copy).
 	 */
 	Cell(const IntervalVector& box);
 

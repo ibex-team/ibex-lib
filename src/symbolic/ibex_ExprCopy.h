@@ -26,7 +26,11 @@ public:
 	/*
 	 * \pre Each symbol in y must belong to "old_x".
 	 *
-	 * Symbols in "old_x" are matched to symbols in "new_x" with respect to their order.
+	 * Symbols in \a old_x are matched to symbols in \a new_x with respect to their order.
+	 *
+	 * \pre The size of \a new_x must be greater or equal to the size of \a old_x. It is not
+	 *      required to be the same size to allow the use of extra variables (that do not occurr in the expression).
+	 *      This is used, e.g., in ibex_Optimizer to transform a function x->g(x) into (x,y)->g(x).
 	 */
 	const ExprNode& copy(const Array<const ExprSymbol>& old_x, const Array<const ExprSymbol>& new_x, const ExprNode& y);
 

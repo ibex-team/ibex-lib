@@ -22,6 +22,8 @@ const ExprNode& ExprCopy::copy(const Array<const ExprSymbol>& old_x, const Array
 
 	y.reset_visited();
 
+	assert(new_x.size()>=old_x.size());
+
 	for (int i=0; i<old_x.size(); i++)
 		old_x[i].deco.tmp=&new_x[i]; // must be done *after* y.reset_visited()
 
