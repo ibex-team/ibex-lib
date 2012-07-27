@@ -39,7 +39,7 @@ public:
 	 *  \brief Create an optimizer.
 	 *
 	 *   \param f     - The objective function f(x)
-	 *   \param g     - the vector-valued function representing the constraints (each constraint must be g_i(x)<=0)
+	 *   \param g     - the constraints (each constraint must be g_i(x)<=0)
 	 *   \param bsc   - the bisector
 	 *
 	 * And optionally:
@@ -48,9 +48,9 @@ public:
 	 *   \pram  goal_abs_prec - absolute precision of the objective (the optimizer stops once reached).
 	 *   \param sample_size   - number of samples taken when looking for a "loup"
 	 *
-	 *   \pre - The variables of f and g must correspond: same number of variables and same dimensions.
+	 *   \pre - The variables of f and g_1,...g_m must correspond: same number of symbols and same dimensions.
 	 */
-	Optimizer(Function& f, Function& g, Bsc& bsc, double prec=default_prec,
+	Optimizer(Function& f, Array<NumConstraint>& g, Bsc& bsc, double prec=default_prec,
 			double goal_rel_prec=default_goal_rel_prec, double goal_abs_prec=default_goal_abs_prec,
 			int sample_size=default_sample_size);
 
@@ -81,11 +81,11 @@ public:
 	/** Number of constraints. */
 	const int m;
 
-	/** Objective function. */
+	/** Objective function. Must be real-valued. */
 	Function& f;
 
-	/** Constraints under the form of a vector-valued function (we have g(x)<=0). */
-	Function& g;
+	/** Constraints under the form of a vector-valued function (each constraint is g_i(x)<=0). */
+	Function g;
 
 	/*=======================================================================================================*/
 	/*                                             Extended CSP                                              */
@@ -288,16 +288,13 @@ protected:
 	/*=======================================================================================================*/
 
 	/**
+	 * \brief Build the extended CSP.
 	 * \brief Transform x->g_i(x) to (x,y)->g_i(x).
 	 *
 	 * This function is introduced because the vector of variables must be uniform in the extended CSP.
+	 *
 	 */
-	void build_ext_g(int i);
-
-	/**
-	 * \brief Build the extended CSP.
-	 */
-	void build_ext_csp();
+	void build_ext_csp(const Array<NumConstraint>& ctrs);
 
 	/**
 	 * \brief Load a (n-dimensional) box into an (n+1-dimensional) extended box

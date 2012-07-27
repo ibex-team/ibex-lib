@@ -26,33 +26,82 @@ const double Optimizer::default_goal_abs_prec = 1e-07;
 const int Optimizer::default_sample_size = 10;
 const char* Optimizer::goal_name = "y";
 
-void Optimizer::build_ext_csp() {
 
-	const Array<const ExprSymbol>& x(g.symbols()); // could also be f.symbols().
+// \pre ctrs must be non empty.
+void Optimizer::build_ext_csp(const Array<NumConstraint>& ctrs) {
+
+	assert(!ctrs.is_empty()); // <=> m>0
+
+	const Array<const ExprSymbol>& x=ctrs[0].f.symbols();
+
+	// ---------- check all constraints have same variables ---------
+	for (int i=0; i<m; i++) {
+		assert(ctrs[i].f.nb_symbols()==n);
+		for (int j=0; j<n; j++)
+			assert(ctrs[i].f.symbol(j).dim==x[j].dim);
+	}
+	// -------------------------------------------------------------
+
+	// ---------- build a copy of variables ----------------
+	Array<const ExprSymbol> x_copy(n);
+	for (int j=0; j<n; j++) {
+		x_copy.set_ref(j,ExprSymbol::new_(x[j].name, x[j].dim));
+	}
+	// -------------------------------------------------------------
+
+
+	// ---------- create the vector-valued function g ----------------
+	vector<const ExprNode*> vec_g;
+	for (int i=0; i<m; i++) {
+		const ExprNode& g_i=ExprCopy().copy(ctrs[i].f.symbols(),x_copy,ctrs[i].f.expr());
+		switch (ctrs[i].op) {
+		case NumConstraint::LT:  warning("warning: strict inequality (<) replaced by inequality (<=).");
+		case NumConstraint::LEQ: vec_g.push_back(&g_i);
+		                         break;
+		case NumConstraint::EQ:  not_implemented("Optimization with equality constraints");
+		                         break;
+		case NumConstraint::GT:  warning("warning: strict inequality (>) replaced by inequality (>=).");
+		case NumConstraint::GEQ: vec_g.push_back(&(-g_i)); // reverse the inequality
+		                         break;
+		}
+	}
+	g.init(x_copy, vec_g.size()>1 ? ExprVector::new_(vec_g,false) : *vec_g[0]);
+	// -------------------------------------------------------------
+
+
+	// ---------- build the extended set of variables ----------------
 	const ExprSymbol& y=ExprSymbol::new_(goal_name,Dim()); // y is a scalar
 
-	// ---------- build the new vector of variables ----------------
+	Array<const ExprSymbol> ext_vars(n+1);
+	for (int j=0; j<n; j++) {
+		ext_vars.set_ref(j,ExprSymbol::new_(x[j].name, x[j].dim));
+	}
+	// warning: y must be added at the end (goal_var is set to n in constructor)
 	// We set goal_var to n (<=>y variable is the nth variable)
 	// to simplify the copy of expressions (see ibex_ExprCopy).
-	Array<const ExprSymbol> ext_vars(n+1);
-	for (int j=0; j<n; j++)
-		ext_vars.set_ref(j,ExprSymbol::new_(x[j].name, x[j].dim));
-	// warning: y must be added at the end (goal_var is set to n in constructor)
 	ext_vars.set_ref(n,y);
+	// -------------------------------------------------------------
 
-	vector<const ExprNode*> vec;
+
+	// ---------- create the extended function ext_f_g ----------------
 	const ExprNode& f_copy=ExprCopy().copy(f.symbols(),ext_vars,f.expr());
-	vec.push_back(&(y-f_copy));
+	vector<const ExprNode*> vec;
 
-	for (int i=0; i<m; i++)
-		vec.push_back(&ExprCopy().copy(g[i].symbols(),ext_vars,g[i].expr()));
+	vec.push_back(&(y-f_copy)); // warning: must be added first (goal_ctr is set to 0 in constructor)
 
-	ext_f_g.init(ext_vars,ExprVector::new_(vec,true));
+	for (int i=0; i<m; i++) {
+		const ExprNode& g_copy=ExprCopy().copy(g[i].symbols(),ext_vars,g[i].expr());
+		vec.push_back(&g_copy);
+	}
 
-	// ------------- add y=f(x) in the extended CSP -----------------
+	ext_f_g.init(ext_vars,ExprVector::new_(vec,false));
+	// -------------------------------------------------------------
+
+
+	// ---------- create the extended CSP ----------------
 	// warning: must be added first (goal_ctr is set to 0 in constructor)
 	ext_csp.set_ref(0,*new NumConstraint(ext_f_g[0])); // equality (by default)
-	// ------------- add g(x)<=0 in the extended CSP ----------------
+
 	for (int i=0; i<m; i++)
 		ext_csp.set_ref(i+1,*new NumConstraint(ext_f_g[i+1], NumConstraint::LEQ));
 
@@ -74,16 +123,16 @@ void Optimizer::read_ext_box(const IntervalVector& ext_box, IntervalVector& box)
 	}
 }
 
-Optimizer::Optimizer(Function& f, Function& g, Bsc& bsc, double prec,
+Optimizer::Optimizer(Function& f, Array<NumConstraint>& ctrs, Bsc& bsc, double prec,
 		double goal_rel_prec, double goal_abs_prec, int sample_size) :
-		n(f.input_size()), m(g.output_size()), f(f), g(g),
+		n(f.input_size()), m(ctrs.size()), f(f),
 		ext_csp(m+1), goal_ctr(0), goal_var(n), bsc(bsc), buffer(n),
 		prec(prec), goal_rel_prec(goal_rel_prec), goal_abs_prec(goal_abs_prec),
 		sample_size(sample_size), mono_analysis_flag(true), in_HC4_flag(true), trace(false),
 		timeout(1e08), loup(POS_INFINITY), loup_point(n),
 		uplo_of_epsboxes(POS_INFINITY) {
 
-	build_ext_csp();
+	build_ext_csp(ctrs);
 
 	// ====== build the propagation of f(x)=0 and all g_i(x)<=0 =====
 	ctc = new CtcHC4(ext_csp);

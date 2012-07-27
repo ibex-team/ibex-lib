@@ -15,7 +15,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <iostream>
-#include "ibex_NonRecoverableException.h"
+#include <cassert>
+
+//#include "ibex_NonRecoverableException.h"
 
 #ifdef __GNUC__
 // === deprecated headers ===
@@ -116,10 +118,10 @@ public:
 	 * \brief Insert a new identifier \a id with associated data \a data.
 	 *
 	 * The key is a copy of the string pointed to by \a id, not \a id itself.
-	 * \throw  NonRecoverableException- if \a id already exists.
+	 * \pre \a id must not already exist.
 	 * \return - a pointer to the copy of the string used as key. */
 	const char* insert_new(const char* id, T data) {
-		if (used(id)) throw NonRecoverableException(std::string("Redeclared symbol \"")+id+"\"");
+		assert(!used(id)); //throw NonRecoverableException(std::string("Redeclared symbol \"")+id+"\"");
 
 		char* copy = strdup(id);
 		map.insert(std::pair<const char*,T>(copy, data));
@@ -141,17 +143,17 @@ public:
 	/**
 	 * \brief Return the data associated to the symbol \a id.
 	 *
-	 * \throw NonRecoverableException - if no element could be found with key \a id. */
+	 * \pre - an element with key \a id must exist. */
 	const T& operator[](const char* id) const {
 		typename IBEXMAP(T)::const_iterator it = map.find (id);
-		if (it == map.end()) throw NonRecoverableException(std::string("Unknown symbol \"")+id+"\"");
+		assert(it != map.end()); //throw NonRecoverableException(std::string("Unknown symbol \"")+id+"\"");
 		return it->second;
 	}
 
 	/**
 	 * \brief Return the data associated to the symbol \a id.
 	 *
-	 * \throw NonRecoverableException - if no element could be found with key \a id. */
+	 * \pre - an element with key \a id must exist. */
 	T& operator[](const char* id) {
 		return (T&) ((const SymbolMap<T>*) this)->operator[](id);
 	}

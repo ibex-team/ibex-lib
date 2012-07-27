@@ -16,6 +16,11 @@ using namespace std;
 
 namespace ibex {
 
+
+void warning(const char* message) {
+	cerr << "warning: " << message << endl;
+}
+
 void not_implemented(const char* feature) {
 	cerr << "***********************************************************************" << endl;
 	cerr << "IBEX has crashed because the following feature is not implemented yet:" << endl;

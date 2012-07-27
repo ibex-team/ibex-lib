@@ -17,6 +17,8 @@
 
 namespace ibex {
 
+void warning(const char*);
+
 void not_implemented(const char*);
 
 /**
