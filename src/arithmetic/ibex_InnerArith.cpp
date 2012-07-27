@@ -109,8 +109,9 @@ double projy(double z, double x, int op, bool round_up) {
  * \pre xin.is_empty()<=>yin.is_empty()
  */
 bool iproj_geq_mono_op(double z_inf, Interval& x, Interval& y, const Interval& xin, const Interval& yin, int op, bool inc_var1, bool inc_var2) {
-	double xmin, xmax, x0,y0;
-	double y1,y2;
+	volatile double xmin, xmax;
+	volatile double x0,y0;
+	volatile double y1,y2;
 	bool inflate=!xin.is_empty();
 
 	assert(xin.is_subset(x));
@@ -252,8 +253,8 @@ bool iproj_leq_mul(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 
 		Interval xP = x & Interval::POS_REALS;
 		Interval yP = y & Interval::POS_REALS;
-		double xU=x.ub();
-		double yU=x.ub();
+		/* volatile? */double xU=x.ub();
+		/* volatile? */double yU=x.ub();
 
 		// ------------------------ quadrant x>0 y>0 ----------------------------------
 		if(!xP.is_empty() && !yP.is_empty()) { //y.ub()>=0 && (!inflate || yin.lb()>0)) {
@@ -272,8 +273,8 @@ bool iproj_leq_mul(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 
 		Interval xN = x & Interval::NEG_REALS;
 		Interval yN = y & Interval::NEG_REALS;
-		double xL=x.lb();
-		double yL=y.lb();
+		/* volatile? */double xL=x.lb();
+		/* volatile? */double yL=y.lb();
 
 		// ------------------------ quadrant x<0 y<0 ----------------------------------
 		if(!xN.is_empty() && !yN.is_empty()) { //y.ub()>=0 && (!inflate || yin.lb()>0)) {
@@ -532,8 +533,8 @@ bool iproj_pow(const Interval& y, Interval& x, int p, const Interval &xin) {
 	assert(xin.is_subset(x));
 	assert(!inflate || (p==2 && sqr(xin).is_subset(y)) || (p!=2 && pow(xin,p).is_subset(y)));
 
-	double lo=p==2? UP(sqrt,y.lb()) : UP_root(y.lb(), p);
-	double up=p==2? LO(sqrt,y.ub()) : LO_root(y.ub(), p);
+	/* volatile */double lo=p==2? UP(sqrt,y.lb()) : UP_root(y.lb(), p);
+	/* volatile */double up=p==2? LO(sqrt,y.ub()) : LO_root(y.ub(), p);
 
 	if (p % 2 ==0) { // even exponant
 		if (up<0) up=0;                       // may happen because of rounding
