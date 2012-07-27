@@ -13,24 +13,37 @@
 
 using namespace std;
 using namespace ibex;
-
-int main() {
+int main(int argc, char** argv){
 
 	// Example #19
 	// ------------------------------------------------
 	// Optimizer (with a system loaded from a file)
 	//
 
-	System sys("../benchs/ex2_1_3.bch");
+         // Load a problem to optimize
+	// --------------------------
+	try {
+
+	if (argc<2) {
+		cerr << "usage: optimizer02 [filename]" << endl;
+		exit(1);
+	}
+
+	System sys(argv[1]);
 
 	RoundRobin rr;
 
 	Optimizer o(*sys.goal,sys.f,rr);
 
-	//o.trace=true;
-
+        //o.trace=true;
 	o.optimize(sys.box);
 	o.report();
 
 	return 0;
+	}
+
+
+	catch(ibex::SyntaxError& e) {
+	  cout << e << endl;
+	}
 }
