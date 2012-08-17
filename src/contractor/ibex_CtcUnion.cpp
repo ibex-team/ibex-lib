@@ -24,10 +24,15 @@ void CtcUnion::contract(IntervalVector& box) {
 
 	for (int i=0; i<list.size(); i++) {
 		if (i>0) box=savebox;
-		list[i].contract(box);
-		result |= box;
+		try {
+			list[i].contract(box);
+			result |= box;
+		}
+		catch(EmptyBoxException&) {
+		}
 	}
 	box = result;
+	if (box.is_empty()) throw EmptyBoxException();
 } // end namespace ibex
 
 }
