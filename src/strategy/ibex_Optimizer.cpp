@@ -33,18 +33,19 @@ void Optimizer::build_ext_csp(const Array<NumConstraint>& ctrs) {
 	assert(!ctrs.is_empty()); // <=> m>0
 
 	const Array<const ExprSymbol>& x=ctrs[0].f.symbols();
+	int nb=x.size();  // warning: x.size()<>n in general
 
 	// ---------- check all constraints have same variables ---------
 	for (int i=0; i<m; i++) {
-		assert(ctrs[i].f.nb_symbols()==n);
-		for (int j=0; j<n; j++)
+		assert(ctrs[i].f.nb_symbols()==nb);
+		for (int j=0; j<nb; j++)
 			assert(ctrs[i].f.symbol(j).dim==x[j].dim);
 	}
 	// -------------------------------------------------------------
 
 	// ---------- build a copy of variables ----------------
-	Array<const ExprSymbol> x_copy(n);
-	for (int j=0; j<n; j++) {
+	Array<const ExprSymbol> x_copy(nb);
+	for (int j=0; j<nb; j++) {
 		x_copy.set_ref(j,ExprSymbol::new_(x[j].name, x[j].dim));
 	}
 	// -------------------------------------------------------------
@@ -72,14 +73,14 @@ void Optimizer::build_ext_csp(const Array<NumConstraint>& ctrs) {
 	// ---------- build the extended set of variables ----------------
 	const ExprSymbol& y=ExprSymbol::new_(goal_name,Dim()); // y is a scalar
 
-	Array<const ExprSymbol> ext_vars(n+1);
-	for (int j=0; j<n; j++) {
+	Array<const ExprSymbol> ext_vars(nb+1);
+	for (int j=0; j<nb; j++) {
 		ext_vars.set_ref(j,ExprSymbol::new_(x[j].name, x[j].dim));
 	}
 	// warning: y must be added at the end (goal_var is set to n in constructor)
 	// We set goal_var to n (<=>y variable is the nth variable)
 	// to simplify the copy of expressions (see ibex_ExprCopy).
-	ext_vars.set_ref(n,y);
+	ext_vars.set_ref(nb,y);
 	// -------------------------------------------------------------
 
 
@@ -141,8 +142,6 @@ Optimizer::Optimizer(Function& f, Array<NumConstraint>& ctrs, Bsc& bsc, double p
 	// ====== build the reversed inequalities g_i(x)>0 ===============
 	Array<Ctc> ng(m);
 	for (int i=0; i<m; i++) {
-		//if (g[i].op!=NumConstraint::LEQ)
-		//	not_implemented("Optimizer with constraints that are not under the form g(x)<=0.");
 		ng.set_ref(i, *new CtcProj(g[i],NumConstraint::GT));
 	}
 	is_inside=new CtcUnion(ng);
