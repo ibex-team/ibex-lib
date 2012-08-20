@@ -307,21 +307,25 @@ public:
 
 	/**
 	 * \brief Project f(x)=y onto x.
+	 * \throw EmptyBoxException if x is empty.
 	 */
 	void proj(const Domain& y, IntervalVector& x) const;
 
 	/**
 	 * \brief Project f(x)=y onto x.
+	 * \throw EmptyBoxException if x is empty.
 	 */
 	void proj(const Interval& y, IntervalVector& x) const;
 
 	/**
 	 * \brief Project f(x)=y onto x.
+	 * \throw EmptyBoxException if x is empty.
 	 */
 	void proj(const IntervalVector& y, IntervalVector& x) const;
 
 	/**
 	 * \brief Project f(x)=y onto x.
+	 * \throw EmptyBoxException if x is empty.
 	 */
 	void proj(const IntervalMatrix& y, IntervalVector& x) const;
 

@@ -42,6 +42,10 @@ System::System(int n, const char* syntax) : nb_var(n), /* NOT TMP (required by p
 	}
 }
 
+System::System(int nb_ctr, int nb_var) : nb_var(nb_var), nb_ctr(nb_ctr), func(0), goal(NULL),
+		vars(nb_var), box(nb_var), ctrs(nb_ctr) {
+}
+
 void System::load(FILE* fd) {
 	ibexin = fd;
 

@@ -22,14 +22,19 @@ void InHC4Revise::iproj(const Function& f, const Domain& y, IntervalVector& x) {
 
 	*f.expr().deco.d = y;
 
-	f.backward<InHC4Revise>(*this);
+	try {
+		f.backward<InHC4Revise>(*this);
 
-	if (f.all_symbols_scalar())
-		for (int i=0; i<f.nb_symbols(); i++) {
-			x[i]=f.symbol_domains[i].i();
-		}
-	else
-		load(x,f.symbol_domains);
+		if (f.all_symbols_scalar())
+			for (int i=0; i<f.nb_symbols(); i++) {
+				x[i]=f.symbol_domains[i].i();
+			}
+		else
+			load(x,f.symbol_domains);
+
+	} catch(EmptyBoxException&) {
+		x.set_empty();
+	}
 }
 
 void InHC4Revise::iproj(const Function& f, const Domain& y, IntervalVector& x, const IntervalVector& xin) {
@@ -50,14 +55,20 @@ void InHC4Revise::iproj(const Function& f, const Domain& y, IntervalVector& x, c
 
 	*f.expr().deco.d = y;
 
-	f.backward<InHC4Revise>(*this);
+	try {
 
-	if (f.all_symbols_scalar())
-		for (int i=0; i<f.nb_symbols(); i++) {
-			x[i]=f.symbol_domains[i].i();
-		}
-	else
-		load(x,f.symbol_domains);
+		f.backward<InHC4Revise>(*this);
+
+		if (f.all_symbols_scalar())
+			for (int i=0; i<f.nb_symbols(); i++) {
+				x[i]=f.symbol_domains[i].i();
+			}
+		else
+			load(x,f.symbol_domains);
+
+	} catch(EmptyBoxException&) {
+		x.set_empty();
+	}
 }
 
 } // end namespace ibex

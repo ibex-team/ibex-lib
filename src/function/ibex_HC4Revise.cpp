@@ -16,6 +16,9 @@ void HC4Revise::proj(const Function& f, const Domain& y, Array<Domain>& x) {
 	Eval().eval(f,x);
 	*f.expr().deco.d = y;
 	f.backward<HC4Revise>(*this);
+	// note: not very clean.
+	// the box x is not emptied if an EmptyBoxException is thrown
+	// before (this is done by the contractor).
 	x = f.symbol_domains;
 }
 

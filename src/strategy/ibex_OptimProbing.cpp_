@@ -235,6 +235,7 @@ bool Optimizer::update_loup_probing(const IntervalVector& box) {
 
 	if (in_HC4_flag) {
 		inner_found=in_HC4(inbox); // inbox will be contracted to an inner box (possibly empty)
+		//cout << "inner_found ? " << inner_found << " inbox=" << inbox << endl;
 	}
 	else {
 		try {

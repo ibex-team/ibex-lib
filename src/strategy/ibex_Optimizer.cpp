@@ -266,7 +266,7 @@ void Optimizer::optimize(const IntervalVector& init_box) {
 					ymax = loup - goal_abs_prec;
 				((CellHeap&) buffer ).contract_heap(ymax);
 
-				if (trace) cout << "uplo " << ymax << endl;
+				if (trace) cout << "ymax=" << ymax << " uplo=" << ((CellHeap&) buffer ).minimum() << endl;
 			}
 			// Note: in principle, even if the loup has changed, the current
 			// cell "c" should not been removed by the previous call to contract_heap.
@@ -298,7 +298,7 @@ void Optimizer::report() {
 
 	if (uplo > uplo_of_epsboxes) uplo=uplo_of_epsboxes;
 
-	cout << " best bound in: [" << loup << "," << uplo << "]" << endl;
+	cout << " best bound in: [" << uplo << "," << loup << "]" << endl;
 
 	double rel_prec;
 	if (loup==POS_INFINITY) rel_prec=0;

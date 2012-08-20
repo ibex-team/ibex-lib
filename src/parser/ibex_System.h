@@ -30,7 +30,11 @@ public:
 	System(const char* filename);
 
 	/**
-	 * \brief Load a stand-alone system from a string.
+	 * \brief Load a stand-alone conjunction of constraints
+	 * from a string.
+	 *
+	 * Example: System(2,"{0}+{1}=0;{0}-{1}=0") will create
+	 * the system x+y=0 ^ x-y=0.
 	 *
 	 * \remark Used by Choco.
 	 * \param n    Number of variables.
@@ -39,6 +43,19 @@ public:
 
 	/** \brief Delete *this. */
 	~System();
+
+	/*
+	 * Create an uninitialized system (for internal usage).
+	 *
+	 * \remark: used by #ibex::Optimizer to build the
+	 * extended system including y=f(x) where f is the objective
+	 * function.
+	 *
+	 * \note Size of #func is 0. Size of #vars and #box is \a nb_var and
+	 * size of #ctrs is \a nb_ctr. These arrays have to be initialized.
+	 * #goal is set to NULL.
+	 */
+	System(int nb_ctr, int nb_var);
 
 	/** Number of variables.
 	 *
