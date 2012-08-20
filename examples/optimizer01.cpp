@@ -25,10 +25,11 @@ int main() {
 	Function f(x,y,x+y);
 	Function g(x,y,sqr(x)+sqr(y)-1.0);
 	NumConstraint c(g,NumConstraint::LEQ);
+	Array<NumConstraint> ctrs(c);
 
 	RoundRobin rr;
 
-	Optimizer o(f,g,rr);
+	Optimizer o(f,ctrs,rr);
 
 	IntervalVector box(2);
 	o.trace=true;

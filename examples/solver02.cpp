@@ -19,7 +19,7 @@ int main(int argc, char** argv) {
 	try {
 
 	if (argc<2) {
-		cerr << "usage: solver2 [filename]" << endl;
+		cerr << "usage: solver02 [filename]" << endl;
 		exit(1);
 	}
 
