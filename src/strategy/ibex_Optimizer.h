@@ -14,10 +14,9 @@
 #include "ibex_Bsc.h"
 #include "ibex_CtcHC4.h"
 #include "ibex_CtcUnion.h"
-#include "ibex_Eval.h"
-#include "ibex_Gradient.h"
 #include "ibex_Backtrackable.h"
 #include "ibex_CellHeapOptim.h"
+#include "ibex_System.h"
 
 namespace ibex {
 
@@ -50,7 +49,7 @@ public:
 	 *
 	 *   \pre - The variables of f and g_1,...g_m must correspond: same number of symbols and same dimensions.
 	 */
-	Optimizer(Function& f, Array<NumConstraint>& g, Bsc& bsc, double prec=default_prec,
+	Optimizer(System& sys, Bsc& bsc, double prec=default_prec,
 			double goal_rel_prec=default_goal_rel_prec, double goal_abs_prec=default_goal_abs_prec,
 			int sample_size=default_sample_size);
 
@@ -81,29 +80,25 @@ public:
 	/** Number of constraints. */
 	const int m;
 
-	/** Objective function. Must be real-valued. */
-	Function& f;
-
-	/** Constraints under the form of a vector-valued function (each constraint is g_i(x)<=0). */
-	Function g;
-
-	/*=======================================================================================================*/
-	/*                                             Extended CSP                                              */
-	/*=======================================================================================================*/
-
-	/** Extended function (x,y)->(y-f(x),g(x)) */
-	Function ext_f_g;
+	/**
+	 * \brief Normalized system
+	 *
+	 * Corresponds to the input system (see constructor) but with all inequalities
+	 * under the form g_i(x)<=0.
+	 */
+	System sys;
 
 	/**
-	 * \brief Extended constraint system.
+	 * \brief Extended system.
 	 *
-	 * <ul> The system contains:
+	 * <ul> This system contains:
 	 * <li> (n+1) variables, x_1,...x_n,y. The index of y is #goal_var (==n if it is the last).
+	 * <li> A (m+1)-valued function f:(x,y)->(y-f(x),g_0(x),...,g_m(x))
 	 * <li> (m+1) constraints: y-f(x)=0, g_1(x)<=0, ..., g_m(x)<=0.
 	 *      The index of y-f(x)=0 in the system is #goal_ctr (==0 if it is the first).
 	 * </ul>
-	 */
-	Array<NumConstraint> ext_csp;
+	 * */
+	System ext_sys;
 
 	/**
 	 * \brief Number of the goal constraint y-f(x)=0 in the extended CSP.
@@ -288,13 +283,19 @@ protected:
 	/*=======================================================================================================*/
 
 	/**
+	 * \brief Build the normalized system.
+	 *
+	 */
+	void build_system(const System& sys_ori);
+
+	/**
 	 * \brief Build the extended CSP.
 	 * \brief Transform x->g_i(x) to (x,y)->g_i(x).
 	 *
 	 * This function is introduced because the vector of variables must be uniform in the extended CSP.
 	 *
 	 */
-	void build_ext_csp(const Array<NumConstraint>& ctrs);
+	void build_ext_system();
 
 	/**
 	 * \brief Load a (n-dimensional) box into an (n+1-dimensional) extended box

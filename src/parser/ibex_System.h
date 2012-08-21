@@ -45,7 +45,9 @@ public:
 	~System();
 
 	/*
-	 * Create an uninitialized system (for internal usage).
+	 * \brief Create an uninitialized system (for internal usage).
+	 *
+	 * \warning: do not confuser nb_var with input_size.
 	 *
 	 * \remark: used by #ibex::Optimizer to build the
 	 * extended system including y=f(x) where f is the objective

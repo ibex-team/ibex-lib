@@ -29,7 +29,7 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 
 	IntervalVector x_inf(box.lb());
 
-	IntervalVector g_inf(g.eval_vector(x_inf)); // may throw EmptyBoxException?
+	IntervalVector g_inf(sys.f.eval_vector(x_inf)); // may throw EmptyBoxException?
 
 	// Interval f_inf=f.eval(x_inf);        // [gch] never used...
 
@@ -41,10 +41,10 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 	// ============================================================
 	//                  linearize the objective
 	// ============================================================
-	f.gradient(box,G);
+	sys.goal->gradient(box,G);
 
 	//     if(G.max_diameter()>1e8) return false; //to avoid problems with SoPleX
-        int nsimplex=n+1;  // the n variables + the objective
+	int nsimplex=n+1;  // the n variables + the objective
 	DSVector row1(nsimplex);
 
 	//Linear variable yl is created
@@ -69,9 +69,9 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 	//The linear system is generated
 	for (int i=0; i<m; i++) {
 
-		if(g[i].eval(box).ub()<=0) continue;      // the constraint is satified :)
+		if(sys.f[i].eval(box).ub()<=0) continue;      // the constraint is satified :)
 
-		g[i].gradient(box,G);                     // gradient calculation
+		sys.f[i].gradient(box,G);                     // gradient calculation
 
 		// ============================================================
 		//     if(G.max_diameter()>1e8) return false; //to avoid problems with SoPleX
@@ -80,18 +80,18 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 		//The contraints i is generated:
 		// c_i:  inf([g_i]([x]) + sup(dg_i/dx_1) * xl_1 + ... + sup(dg_i/dx_n) + xl_n  <= -eps_error
 		for (int j=0; j<nsimplex-1; j++) {
-//			if(op == LEQ || op== LT) {
-				row1.add(j+1, G[j].ub());
-//			} else {
-//				row1.add(j+1, Inf(G(j+1)));
-//			}
+			//			if(op == LEQ || op== LT) {
+			row1.add(j+1, G[j].ub());
+			//			} else {
+			//				row1.add(j+1, Inf(G(j+1)));
+			//			}
 		}
 
-//		if(op == LEQ || op== LT) {
-			mysoplex.addRow(LPRow(-infinity, row1, (-g_inf)[i].lb()-1e-10));    //  1e-10 ???  BNE
-//		} else {
-//			mysoplex.addRow(LPRow(Sup(-eval_inf(i+1))+1e-10, row1, infinity));
-//		}
+		//		if(op == LEQ || op== LT) {
+		mysoplex.addRow(LPRow(-infinity, row1, (-g_inf)[i].lb()-1e-10));    //  1e-10 ???  BNE
+		//		} else {
+		//			mysoplex.addRow(LPRow(Sup(-eval_inf(i+1))+1e-10, row1, infinity));
+		//		}
 	}
 
 	SPxSolver::Status stat;

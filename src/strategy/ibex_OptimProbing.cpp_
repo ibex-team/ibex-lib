@@ -21,7 +21,7 @@ namespace ibex {
 
 void Optimizer::monotonicity_analysis(IntervalVector& box) {
   IntervalVector g(n);
-  f.gradient(box,g);
+  sys.goal->gradient(box,g);
 
   for (int j=0; j<n; j++) {
 	  if (g[j].lb()>=0) box[j]=box[j].lb();
@@ -31,13 +31,13 @@ void Optimizer::monotonicity_analysis(IntervalVector& box) {
 
 bool Optimizer::is_feasible(const IntervalVector& box) {
 	for (int j=0; j<m; j++)
-		if (g[j].eval(box).lb()>0) return false;
+		if (sys.f[j].eval(box).lb()>0) return false;
 	return true;
 }
 
 bool Optimizer::is_inner(const IntervalVector& box) {
 	for (int j=0; j<m; j++)
-		if (g[j].eval(box).ub()>0) return false;
+		if (sys.f[j].eval(box).ub()>0) return false;
 	return true;
 }
 
@@ -46,7 +46,7 @@ bool Optimizer::in_HC4(IntervalVector& box) {
 	if (!is_feasible(box)) { box.set_empty(); return false; }
 
 	for (int j=0; j<m; j++) {
-		g[j].iproj(Interval(NEG_INFINITY,0),box);
+		sys.f[j].iproj(Interval(NEG_INFINITY,0),box);
 		if (box.is_empty()) return false;
 	}
 	return true;
@@ -55,7 +55,7 @@ bool Optimizer::in_HC4(IntervalVector& box) {
 /* last update: GCH  */
 bool Optimizer::check_candidate(const Vector& pt, bool _is_inner) {
 
-	Interval fx=f.eval(pt);
+	Interval fx=sys.goal->eval(pt);
 
 	if (fx.is_empty()) { // means: outside of the definition domain of the function
 		return false;
@@ -110,7 +110,7 @@ bool Optimizer::line_probing(const IntervalVector& box, const Vector& start, boo
 
 	(IntervalVector&) box = start;     // take the startpoint of the box
 
-	f.gradient(box,ig);
+	sys.goal->gradient(box,ig);
 
 	(IntervalVector&) box = savebox;   // restore domains
 
