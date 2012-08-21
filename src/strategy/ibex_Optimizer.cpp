@@ -268,6 +268,13 @@ void Optimizer::optimize(const IntervalVector& init_box) {
 	// add data required by the bisector
 	bsc.init_root(*root);
 
+	try {
+		contract_and_bound(*root);
+	} catch(EmptyBoxException&) {
+		delete root;
+		return;
+	}
+
 	buffer.push(root);
 
 	while (!buffer.empty()) {
@@ -276,36 +283,40 @@ void Optimizer::optimize(const IntervalVector& init_box) {
 
 		Cell* c=buffer.top();
 
+		pair<IntervalVector,IntervalVector> boxes=bsc.bisect(*c);
+		pair<Cell*,Cell*> new_cells=c->bisect(boxes.first,boxes.second);
+
+		delete buffer.pop();
+
+		bool loup_changed;
+
 		try {
-			bool loup_changed=contract_and_bound(*c);
-			if (loup_changed) {
-				// In case of a new upper bound (loup_changed == true), all the boxes
-				// with a lower bound greater than (loup - goal_prec) are removed and deleted.
-				double ymax=loup - goal_rel_prec*fabs(loup);
-				if (loup - goal_abs_prec < ymax)
-					ymax = loup - goal_abs_prec;
-				((CellHeap&) buffer ).contract_heap(ymax);
-
-				if (trace) cout << "ymax=" << ymax << " uplo=" << ((CellHeap&) buffer ).minimum() << endl;
-			}
-			// Note: in principle, even if the loup has changed, the current
-			// cell "c" should not been removed by the previous call to contract_heap.
-			// because this cell is precisely the one where a new loup has been found.
-			// However, because of goal_xxx_ceil, it can actually be removed. But, in the
-			// latter case, the buffer is necessarily empty: this cell is the one with
-			// the lowest lower bound on the criterion. If it has been removed, all
-			// the subsequent cells in the heap are removed.
-			if (!buffer.empty()) {
-				pair<IntervalVector,IntervalVector> boxes=bsc.bisect(*c);
-				pair<Cell*,Cell*> new_cells=c->bisect(boxes.first,boxes.second);
-
-				delete buffer.pop();
-				buffer.push(new_cells.first);
-				buffer.push(new_cells.second);
-			}
+			loup_changed = contract_and_bound(*new_cells.first);
+			buffer.push(new_cells.first);
 		} catch(EmptyBoxException&) {
-			delete buffer.pop();
+			delete new_cells.first;
 		}
+
+		try {
+			loup_changed |= contract_and_bound(*new_cells.second);
+			buffer.push(new_cells.second);
+		} catch(EmptyBoxException&) {
+			delete new_cells.second;
+		}
+
+		if (loup_changed) {
+			// In case of a new upper bound (loup_changed == true), all the boxes
+			// with a lower bound greater than (loup - goal_prec) are removed and deleted.
+			double ymax=loup - goal_rel_prec*fabs(loup);
+			if (loup - goal_abs_prec < ymax)
+				ymax = loup - goal_abs_prec;
+			((CellHeap&) buffer ).contract_heap(ymax);
+
+			if (trace) cout << "ymax=" << ymax << " uplo=" << ((CellHeap&) buffer ).minimum() << endl;
+		}
+		// Note: if contraction was before bisection, we could have the problem
+		// that the current cell is removed by contract_heap. See comments in
+		// older version of the code (before revision 284).
 
 		Timer::check(timeout);
 	}

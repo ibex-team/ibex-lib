@@ -101,12 +101,12 @@ public:
 	System ext_sys;
 
 	/**
-	 * \brief Number of the goal constraint y-f(x)=0 in the extended CSP.
+	 * \brief Number of the goal constraint y-f(x)=0 in the extended system.
 	 */
 	int goal_ctr;
 
 	/**
-	 * \brief Index of the goal variable y in the extended box.
+	 * \brief Index of the goal variable y in the extended system.
 	 *
 	 * This variables stores the interval [uplo,loup] where "uplo" is
 	 * the uppermost lower bound on f(x) and "loup" the lowest upper
@@ -289,10 +289,9 @@ protected:
 	void build_system(const System& sys_ori);
 
 	/**
-	 * \brief Build the extended CSP.
-	 * \brief Transform x->g_i(x) to (x,y)->g_i(x).
+	 * \brief Build the extended system.
 	 *
-	 * This function is introduced because the vector of variables must be uniform in the extended CSP.
+	 * Transform x->g_i(x) to (x,y)->g_i(x).
 	 *
 	 */
 	void build_ext_system();
