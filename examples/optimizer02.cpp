@@ -33,7 +33,7 @@ int main(int argc, char** argv){
 
 	RoundRobin rr;
 
-	Optimizer o(*sys.goal,sys.ctrs,rr);
+	Optimizer o(sys,rr);
 	//o.in_HC4_flag=false;
     o.trace=true;
 	o.optimize(sys.box);
