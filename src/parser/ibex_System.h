@@ -23,6 +23,9 @@ namespace ibex {
  *
  * A system includes variables, domains, auxiliary functions,
  * (in)equations and (optionally) an objective function.
+ *
+ * All theses functions are defined on the same set of variables
+ * (the number and the dimension of each component coincide).
  */
 class System {
 public:
@@ -41,23 +44,32 @@ public:
 	 */
 	System(int n, const char* syntax);
 
-	/** \brief Delete *this. */
-	~System();
+	/**
+	 * \brief Create a system with a goal function and
+	 * a set of constraints (all by copy).
+	 *
+	 * Basically, checks that the variables coincide between
+	 * the objective function and all the constraints.
+	 */
+	//System(const Function& goal, const Array<NumConstraint>& ctrs);
 
-	/*
+	/**
 	 * \brief Create an uninitialized system (for internal usage).
 	 *
-	 * \warning: do not confuser nb_var with input_size.
+	 * \warning: do not confuse nb_var (or input_size) with nb_symbols.
 	 *
 	 * \remark: used by #ibex::Optimizer to build the
-	 * extended system including y=f(x) where f is the objective
-	 * function.
+	 * normalized and extended system (including y=f(x))
+	 * where f is the objective function.
 	 *
-	 * \note Size of #func is 0. Size of #vars and #box is \a nb_var and
-	 * size of #ctrs is \a nb_ctr. These arrays have to be initialized.
-	 * #goal is set to NULL.
+	 * \note Size of #func is 0. Size of #vars is 0 (must be resized).
+	 * Size of #box is \a nb_var and size of #ctrs is \a nb_ctr. These arrays
+	 * have to be initialized. #goal is set to NULL.
 	 */
 	System(int nb_ctr, int nb_var);
+
+	/** \brief Delete *this. */
+	~System();
 
 	/** Number of variables.
 	 *

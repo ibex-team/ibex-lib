@@ -30,14 +30,14 @@ const char* Optimizer::goal_name = "y";
 
 void Optimizer::build_system(const System& user_sys) {
 
-	assert(!ctrs.is_empty()); // <=> m>0
+	assert(!user_sys.ctrs.is_empty()); // <=> m>0
 
 	const Array<const ExprSymbol>& x=user_sys.f.symbols();
 	int nb=x.size();  // warning: x.size()<>n in general
 
 	// ---------- check all constraints have same variables ---------
 	for (int i=0; i<m; i++) {
-		assert(&user_sys.ctrs[i].f==&f[i]);
+		assert(&user_sys.ctrs[i].f==&user_sys.f[i]);
 		assert(user_sys.f[i].nb_symbols()==nb);
 		for (int j=0; j<nb; j++)
 			assert(user_sys.f[i].symbol(j).dim==x[j].dim);
@@ -45,7 +45,7 @@ void Optimizer::build_system(const System& user_sys) {
 	// -------------------------------------------------------------
 
 	// ---------- build the variables sys.vars ----------------
-	assert(sys.vars.size()==nb);
+	sys.vars.resize(nb);
 	for (int j=0; j<nb; j++) {
 		sys.vars.set_ref(j,ExprSymbol::new_(x[j].name, x[j].dim));
 	}
@@ -85,18 +85,13 @@ void Optimizer::build_ext_system() {
 	const Array<const ExprSymbol>& x=sys.f.symbols();
 	int nb=x.size();  // warning: x.size()<>n in general
 
-	// ---------- build a copy of variables ----------------
-	for (int j=0; j<nb; j++) {
-		ext_sys.vars.set_ref(j,ExprSymbol::new_(x[j].name, x[j].dim));
-	}
-	// -------------------------------------------------------------
-
 	// ---------- build the extended set of variables ----------------
-	const ExprSymbol& y=ExprSymbol::new_(goal_name,Dim()); // y is a scalar
+	ext_sys.vars.resize(nb+1);
 
 	for (int j=0; j<nb; j++) {
 		ext_sys.vars.set_ref(j,ExprSymbol::new_(x[j].name, x[j].dim));
 	}
+	const ExprSymbol& y=ExprSymbol::new_(goal_name,Dim()); // y is a scalar
 	// warning: y must be added at the end (goal_var is set to n in constructor)
 	// We set goal_var to n (<=>y variable is the nth variable)
 	// to simplify the copy of expressions (see ibex_ExprCopy).

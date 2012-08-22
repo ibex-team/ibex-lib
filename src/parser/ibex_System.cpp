@@ -43,8 +43,23 @@ System::System(int n, const char* syntax) : nb_var(n), /* NOT TMP (required by p
 }
 
 System::System(int nb_ctr, int nb_var) : nb_var(nb_var), nb_ctr(nb_ctr), func(0), goal(NULL),
-		vars(nb_var), box(nb_var), ctrs(nb_ctr) {
+		box(nb_var), ctrs(nb_ctr) {
 }
+
+/*System::System(const Function& goal, const Array<NumConstraint>& ctrs): nb_var(goal.nb_symbols()), nb_ctr(ctrs.size()),
+		func(0), goal(goal), vars(nb_var), box(nb_var), ctrs(nb_ctr) {
+
+	// ---------- check all constraints have same variables ---------
+	//
+	for (int i=0; i<m; i++) {
+		assert(&user_sys.ctrs[i].f==&f[i]);
+		assert(user_sys.f[i].nb_symbols()==nb);
+		for (int j=0; j<nb; j++)
+			assert(user_sys.f[i].symbol(j).dim==x[j].dim);
+	}
+	// -------------------------------------------------------------
+
+}*/
 
 void System::load(FILE* fd) {
 	ibexin = fd;
