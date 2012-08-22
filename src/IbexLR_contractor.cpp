@@ -269,7 +269,10 @@ void LR_contractor::iter(){
   mysoplex.changeSense(SPxLP::MINIMIZE); 
   mysoplex.setTerminationIter(max_iter_soplex);
   mysoplex.setDelta(1e-10);
-//    mysoplex.writeFile("dump.lp", NULL, NULL, NULL); 
+  
+  
+  //mysoplex.writeFile("dump.lp", NULL, NULL, NULL); 
+  //system("cat dump.lp");
 
   try{
     stat = mysoplex.solve();

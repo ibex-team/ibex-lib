@@ -83,7 +83,9 @@ Optimizer(const System& sys,  int y_num, Contractor& contractor, Precision & pre
   REAL diam_simplex;
   REAL diam_rand;
 
-
+   enum upper_bounding_mode{DEFAULT, RANDOM_PROBING, MID_PROBING};
+   static upper_bounding_mode ub_mode;
+   
   protected:
   virtual bool loup_change(Cell& cell);
 
@@ -150,6 +152,8 @@ bool check_candidate(const System& sys, const Space& space,  const VECTOR& pt);
 virtual bool check_constraints(const System& sys, const Space& space);
  bool line_probing(const System& sys, const Space& space, const VECTOR& start, int sample_size, bool recursive);
  bool random_probing (const System& sys, const Space& space);
+ VECTOR random_point(const INTERVAL_VECTOR& box) ;
+ bool mid_probing (const System& sys, const Space& space);
 void monotonicity_analysis(const Space& space, const Evaluator& goal);
  virtual bool isInner(const System& sys, const Space& space) {return true;}; // used in simplex_update_loup
  virtual bool isInner(const System& sys, const Space& space, int j) {return true;};

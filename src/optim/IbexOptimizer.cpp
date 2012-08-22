@@ -253,10 +253,18 @@ void Optimizer::contract_and_bound(Cell* c) {
   // Search for a new loup 
 
 
+ Optimizer::upper_bounding_mode Optimizer::ub_mode=Optimizer::DEFAULT;
  bool Optimizer::loup_change(Cell& c)
       {
- 	int box_loup_changed = update_loup (sys, space);
-	box_loup_changed |= simplex_update_loup(sys);
+      int box_loup_changed;
+      if(ub_mode==DEFAULT){
+       	box_loup_changed = update_loup (sys, space);
+      	box_loup_changed |= simplex_update_loup(sys);
+      }else if(ub_mode==RANDOM_PROBING){
+        box_loup_changed = random_probing (sys, space);
+      }else if(ub_mode==MID_PROBING){ 
+        box_loup_changed = mid_probing (sys, space);
+      }
 	return box_loup_changed;
       }
 
