@@ -283,20 +283,6 @@ protected:
 	/*=======================================================================================================*/
 
 	/**
-	 * \brief Build the normalized system.
-	 *
-	 */
-	void build_system(const System& sys_ori);
-
-	/**
-	 * \brief Build the extended system.
-	 *
-	 * Transform x->g_i(x) to (x,y)->g_i(x).
-	 *
-	 */
-	void build_ext_system();
-
-	/**
 	 * \brief Load a (n-dimensional) box into an (n+1-dimensional) extended box
 	 *
 	 *  The goal variable is skipped.
