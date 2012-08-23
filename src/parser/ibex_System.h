@@ -77,8 +77,10 @@ public:
 	 * <ul>
 	 * <li> COPY:      copy
 	 * <li> NORMALIZE: copy and make all inequalities under the form f(x)<=0.
-	 * <li> EXTEND:    copy and add an additional variable y (added after the others),
-	 *                 transform the goal into a constraint y-f(x)=0 (added before the others)
+	 * <li> EXTEND:    <ul> <li> normalize
+	 *                      <li> add an additional variable y (added after the others),
+	 *                      <li> transform the goal into a constraint y-f(x)=0 (added before the others)
+	 *                 </ul>
 	 * </ul>
 	 */
 	System(const System& sys, copy_mode mode);

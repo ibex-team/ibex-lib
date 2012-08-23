@@ -39,7 +39,8 @@ public:
 	 *
 	 *   \param f     - The objective function f(x)
 	 *   \param g     - the constraints (each constraint must be g_i(x)<=0)
-	 *   \param bsc   - the bisector
+	 *   \param bsc   - bisector for extended boxes
+	 *   \param ctc   - contractor for the extended system
 	 *
 	 * And optionally:
 	 *   \param prec          - absolute precision for the boxes (bisection control)
@@ -47,9 +48,15 @@ public:
 	 *   \pram  goal_abs_prec - absolute precision of the objective (the optimizer stops once reached).
 	 *   \param sample_size   - number of samples taken when looking for a "loup"
 	 *
-	 *   \pre - The variables of f and g_1,...g_m must correspond: same number of symbols and same dimensions.
+	 * <ul> The extended system (see copy constructor of #ibex::System) contains:
+	 * <li> (n+1) variables, x_1,...x_n,y. The index of y is #goal_var (==n if it is the last).
+	 * <li> A (m+1)-valued function f:(x,y)->(y-f(x),g_0(x),...,g_m(x))
+	 * <li> (m+1) constraints: y-f(x)=0, g_1(x)<=0, ..., g_m(x)<=0.
+	 *      The index of y-f(x)=0 in the system is #goal_ctr (==0 if it is the first).
+	 * </ul>
+	 *
 	 */
-	Optimizer(System& sys, Bsc& bsc, double prec=default_prec,
+	Optimizer(System& sys, Bsc& bsc, Ctc& ctc, double prec=default_prec,
 			double goal_rel_prec=default_goal_rel_prec, double goal_abs_prec=default_goal_abs_prec,
 			int sample_size=default_sample_size);
 
@@ -89,16 +96,8 @@ public:
 	System sys;
 
 	/**
-	 * \brief Extended system.
-	 *
-	 * <ul> This system contains:
-	 * <li> (n+1) variables, x_1,...x_n,y. The index of y is #goal_var (==n if it is the last).
-	 * <li> A (m+1)-valued function f:(x,y)->(y-f(x),g_0(x),...,g_m(x))
-	 * <li> (m+1) constraints: y-f(x)=0, g_1(x)<=0, ..., g_m(x)<=0.
-	 *      The index of y-f(x)=0 in the system is #goal_ctr (==0 if it is the first).
-	 * </ul>
 	 * */
-	System ext_sys;
+	//System ext_sys;
 
 	/**
 	 * \brief Number of the goal constraint y-f(x)=0 in the extended system.
@@ -118,6 +117,10 @@ public:
 
 	/** Bisector. */
 	Bsc& bsc;
+
+	/** Contractor for the extended system
+	 * (y=f(x), g_1(x)<=0,...,g_m(x)<=0). */
+	Ctc& ctc;
 
 	/** Cell buffer. */
 	CellHeapOptim buffer;
@@ -297,9 +300,6 @@ protected:
 	void read_ext_box(const IntervalVector& ext_box, IntervalVector& box);
 
 private:
-
-	/** Propagation of y=f(x), g_1(x)<=0,...,g_m(x)<=0. */
-	CtcHC4* ctc;
 
 	/** Inner contractor (for the negation of g) */
 	CtcUnion* is_inside;
