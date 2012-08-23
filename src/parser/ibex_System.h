@@ -68,6 +68,21 @@ public:
 	 */
 	System(int nb_ctr, int nb_var);
 
+	typedef enum { COPY, NORMALIZE, EXTEND } copy_mode;
+
+	/**
+	 * \brief Duplicate/Transform the system.
+	 *
+	 * The \a mode field controls the copy:
+	 * <ul>
+	 * <li> COPY:      copy
+	 * <li> NORMALIZE: copy and make all inequalities under the form f(x)<=0.
+	 * <li> EXTEND:    copy and add an additional variable y (added after the others),
+	 *                 transform the goal into a constraint y-f(x)=0 (added before the others)
+	 * </ul>
+	 */
+	System(const System& sys, copy_mode mode);
+
 	/** \brief Delete *this. */
 	~System();
 
@@ -110,11 +125,15 @@ public:
 	/** Constraints */
 	Array<NumConstraint> ctrs;
 
+	/** Name of the goal variable ("y"). */
+	static const char* goal_name;
+
 private:
-	explicit System(const System& sys); // forbidden
 
 	void load(FILE* file);
 };
+
+std::ostream& operator<<(std::ostream&, const System&);
 
 } // end namespace ibex
 #endif // __IBEX_SYSTEM_H__

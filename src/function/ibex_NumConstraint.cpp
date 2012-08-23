@@ -17,4 +17,17 @@ NumConstraint::NumConstraint(Function& f, CompOp op) : f(f), op(op) {
 
 }
 
+std::ostream& operator<<(std::ostream& os, const NumConstraint& c) {
+	os << c.f.expr();
+	switch (c.op) {
+	case NumConstraint::LT : os << "<"; break;
+	case NumConstraint::LEQ : os << "<="; break;
+	case NumConstraint::EQ : os << "="; break;
+	case NumConstraint::GEQ : os << ">="; break;
+	case NumConstraint::GT : os << ">"; break;
+	}
+	os << "0";
+	return os;
+}
+
 } // namespace ibex

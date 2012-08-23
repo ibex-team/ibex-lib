@@ -36,6 +36,7 @@ public:
 	const CompOp op;
 };
 
+std::ostream& operator<<(std::ostream&, const NumConstraint&);
 
 } // namespace ibex
 #endif // __IBEX_NUM_CONSTRAINT_H__
