@@ -49,10 +49,9 @@ public:
 	 *   \param sample_size   - number of samples taken when looking for a "loup"
 	 *
 	 * <ul> The extended system (see copy constructor of #ibex::System) contains:
-	 * <li> (n+1) variables, x_1,...x_n,y. The index of y is #goal_var (==n if it is the last).
+	 * <li> (n+1) variables, x_1,...x_n,y. The index of y is #goal_var (==n).
 	 * <li> A (m+1)-valued function f:(x,y)->(y-f(x),g_0(x),...,g_m(x))
 	 * <li> (m+1) constraints: y-f(x)=0, g_1(x)<=0, ..., g_m(x)<=0.
-	 *      The index of y-f(x)=0 in the system is #goal_ctr (==0 if it is the first).
 	 * </ul>
 	 *
 	 */
@@ -95,26 +94,6 @@ public:
 	 */
 	System sys;
 
-	/**
-	 * */
-	//System ext_sys;
-
-	/**
-	 * \brief Number of the goal constraint y-f(x)=0 in the extended system.
-	 */
-	int goal_ctr;
-
-	/**
-	 * \brief Index of the goal variable y in the extended system.
-	 *
-	 * This variables stores the interval [uplo,loup] where "uplo" is
-	 * the uppermost lower bound on f(x) and "loup" the lowest upper
-	 * bound.
-	 */
-	int goal_var;
-	/*=======================================================================================================*/
-
-
 	/** Bisector. */
 	Bsc& bsc;
 
@@ -124,6 +103,18 @@ public:
 
 	/** Cell buffer. */
 	CellHeapOptim buffer;
+
+	/**
+	 * \brief Index of the goal variable y in the extended box.
+	 *
+	 * This variables stores the interval [uplo,loup] where "uplo" is
+	 * the uppermost lower bound on f(x) and "loup" the lowest upper
+	 * bound.
+	 *
+	 * The value of goal_var is nb_var (last variable). see
+	 * #ibex::System::System(const ibex::System& sys, System::copy_mode mode).
+	 */
+	const int goal_var;
 
 	/** Precision (bisection control) */
 	const double prec;

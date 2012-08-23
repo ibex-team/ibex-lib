@@ -47,7 +47,7 @@ Optimizer::Optimizer(System& user_sys, Bsc& bsc, Ctc& ctc, double prec,
 		double goal_rel_prec, double goal_abs_prec, int sample_size) :
 		n(user_sys.f.input_size()), m(user_sys.ctrs.size()),
 		sys(user_sys,System::NORMALIZE),
-		goal_ctr(0), goal_var(n), bsc(bsc), ctc(ctc), buffer(n),
+		bsc(bsc), ctc(ctc), buffer(n), goal_var(n),
 		prec(prec), goal_rel_prec(goal_rel_prec), goal_abs_prec(goal_abs_prec),
 		sample_size(sample_size), mono_analysis_flag(true), in_HC4_flag(true), trace(false),
 		timeout(1e08), loup(POS_INFINITY), loup_point(n),
