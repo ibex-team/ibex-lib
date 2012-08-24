@@ -91,8 +91,8 @@ double projy(double z, double x, int op, bool round_up) {
 
 /**
  * Contract x and y so that the resulting box is inner w.r.t.
- *                      (x op y)>=z_inf
- * where op is a monotonous function wrt x and y.
+ *                      (x op y)>=z_inf or (x op y)<=z
+ * where op is a monotonous function wrt x and y. The first case corresponds to geq==true.
  *
  * If xin and yin are non-empty, the returned box (x,y) is guaranteed to be
  * a superset of (xin,yin). Otherwise, xin and yin are ignored.
@@ -108,7 +108,7 @@ double projy(double z, double x, int op, bool round_up) {
 
  * \pre xin.is_empty()<=>yin.is_empty()
  */
-bool iproj_geq_mono_op(double z_inf, Interval& x, Interval& y, const Interval& xin, const Interval& yin, int op, bool inc_var1, bool inc_var2) {
+bool iproj_cmp_mono_op(bool geq, double z, Interval& x, Interval& y, const Interval& xin, const Interval& yin, int op, bool inc_var1, bool inc_var2) {
 	volatile double xmin, xmax;
 	volatile double x0,y0;
 	volatile double y1,y2;
@@ -119,21 +119,29 @@ bool iproj_geq_mono_op(double z_inf, Interval& x, Interval& y, const Interval& x
 	//assert(!inflate || eval(xin,yin,op).lb()>=z_inf); // does this condition should really hold?
 	//pb: this function is used for <= with add/sub
 	//cout << "----------------------------------------------------------" << endl;
-	//cout << "  geq_mono_op " << op_str(op) << endl;
+	//cout << "  cmp_mono_op " << op_str(op) << endl;
 	//cout << "  x=" << x << " y=" << y << " z_inf=" << z_inf << endl;
 	//cout << "  inc_var1=" << inc_var1 << " inc_var2=" << inc_var2 << endl;
 	if (inflate) { 
 		//cout << "  inflating xin=" << xin << " yin=" << yin << endl; 
 	}
-	if (z_inf==POS_INFINITY || x.is_empty() || y.is_empty()) {
+	if (x.is_empty() || y.is_empty() || (geq && z==POS_INFINITY) || (!geq && z==NEG_INFINITY)) {
 		//cout << "  result: x=" << x << " y=" << y << endl;
 		//cout << "----------------------------------------------------------" << endl;
 		return false;
 	}
-	else if (z_inf==NEG_INFINITY) {
+	else if ((geq && z==NEG_INFINITY) || (!geq && z==POS_INFINITY)) {
 		//cout << "  result: x=" << x << " y=" << y << endl; 
 		//cout << "----------------------------------------------------------" << endl;
 		return true; // note: we also know that (x,y) is not empty.
+	}
+
+	// we bring back to the GEQ case
+	// by simply reverting the directions
+	// (but this is not very clean, see remark below)
+	if (!geq) {
+		inc_var1 = !inc_var1;
+		inc_var2 = !inc_var2;
 	}
 
 	if (inc_var1) {
@@ -157,13 +165,13 @@ bool iproj_geq_mono_op(double z_inf, Interval& x, Interval& y, const Interval& x
 
 	//cout << "  y1=" << y1 << " y2=" << y2 << endl;
 
-	xmin=projx(z_inf, y1, op, inc_var1);
+	xmin=projx(z, y1, op, inc_var1);
 	// remark: to avoid the following test, we cannot
 	// return -oo in projx if round_up==false
 	// because we want sometimes to get +oo "rounded by below"
-	// (ex: op==ADD, x,y>0, z_sup=+oo inc_var and inc_var are both false (leq_add))
+	// (ex: op==ADD, x,y>0, z_sup=+oo inc_var and inc_var are both false (geq==false))
 	if (op==MUL && xmin==POS_INFINITY) xmin=NEG_INFINITY;
-	xmax=projx(z_inf, y2, op, inc_var1); //true->ROUND_UP, false->ROUND_DOWN
+	xmax=projx(z, y2, op, inc_var1); //true->ROUND_UP, false->ROUND_DOWN
 
 	//cout << "  xmin=" << xmin << " xmax=" << xmax << endl;
 
@@ -201,7 +209,7 @@ bool iproj_geq_mono_op(double z_inf, Interval& x, Interval& y, const Interval& x
 		if (!xx.contains(x0)) x0= (x0 < xx.lb())? xx.lb():xx.ub();
 	}
 
-	y0=projy(z_inf,x0,op,inc_var2);
+	y0=projy(z,x0,op,inc_var2);
 	//cout << "  y0=" << y0 << endl;
 
 	if (y0!=POS_INFINITY) {
@@ -212,7 +220,7 @@ bool iproj_geq_mono_op(double z_inf, Interval& x, Interval& y, const Interval& x
 	}
 
 	x = (inc_var1)? Interval(x0,x.ub()):Interval(x.lb(),x0);
-	// [gch] if op==MUL and z_sup=0 we have y=[0,0]
+	// [gch] if op==MUL and z=0 we have y=[0,0]
 	// and x=[x^-,x0] (or x=[x0,x^+]) which is correct in both
 	// case although we could take x entirely in this case.
 	//cout << "  result: x=" << x << " y=" << y << endl;
@@ -223,19 +231,15 @@ bool iproj_geq_mono_op(double z_inf, Interval& x, Interval& y, const Interval& x
 	return true;
 }
 
-bool iproj_leq_mono_op(double z_sup, Interval& x, Interval& y, const Interval& xin, const Interval& yin, int op, bool inc_var1, bool inc_var2) {
-	return iproj_geq_mono_op(z_sup,x,y,xin,yin,op,!inc_var1,!inc_var2);
+inline bool iproj_leq_add(double z_sup, Interval& x, Interval& y, const Interval &xin, const Interval& yin) {
+	return iproj_cmp_mono_op(false,z_sup,x,y,xin,yin,ADD,true,true);
 }
 
-bool iproj_leq_add(double z_sup, Interval& x, Interval& y, const Interval &xin, const Interval& yin) {
-	return iproj_leq_mono_op(z_sup,x,y,xin,yin,ADD,true,true);
+inline bool iproj_leq_sub(double z_sup, Interval& x, Interval& y, const Interval &xin, const Interval& yin) {
+	return iproj_cmp_mono_op(false, z_sup,x,y,xin,yin,SUB,true,false);
 }
 
-bool iproj_leq_sub(double z_sup, Interval& x, Interval& y, const Interval &xin, const Interval& yin) {
-	return iproj_leq_mono_op(z_sup,x,y,xin,yin,SUB,true,false);
-}
-
-// Difference with iproj_leq_mono_op: we do not require monotonicity
+// Difference with iproj_cmp_mono_op: we do not require monotonicity
 bool iproj_leq_mul(double z_sup, Interval& x, Interval& y, const Interval &xin, const Interval& yin) {
 
 	bool inflate=!xin.is_empty();
@@ -267,7 +271,7 @@ bool iproj_leq_mul(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 		if(!xP.is_empty() && !yP.is_empty()) { //y.ub()>=0 && (!inflate || yin.lb()>0)) {
 			xxin=inflate? Interval(max(0.0,xin.lb()), max(0.0,xin.ub())) : Interval::EMPTY_SET;
 			yyin=inflate? Interval(max(0.0,yin.lb()), max(0.0,yin.ub())) : Interval::EMPTY_SET;
-			if(!iproj_leq_mono_op(z_sup, xP, yP, xxin, yyin, MUL, true, true)) {
+			if(!iproj_cmp_mono_op(false, z_sup, xP, yP, xxin, yyin, MUL, true, true)) {
 				//cout << "[mul] nothing in the positive quadrant --> x and y empty" << endl;
 				x.set_empty();
 				y.set_empty();
@@ -287,7 +291,7 @@ bool iproj_leq_mul(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 		if(!xN.is_empty() && !yN.is_empty()) { //y.ub()>=0 && (!inflate || yin.lb()>0)) {
 			xxin=inflate? Interval(min(0.0,xin.lb()),min(0.0,xin.ub())) : Interval::EMPTY_SET;
 			yyin=inflate? Interval(min(0.0,yin.lb()),min(0.0,yin.lb())) : Interval::EMPTY_SET;
-			if(!iproj_leq_mono_op(z_sup, xN, yN, xxin, yyin, MUL, false, false)) {
+			if(!iproj_cmp_mono_op(false, z_sup, xN, yN, xxin, yyin, MUL, false, false)) {
 				//cout << "[mul] nothing in the negative quadrant --> x and y empty" << endl;
 				x.set_empty();
 				y.set_empty();
@@ -312,13 +316,13 @@ bool iproj_leq_mul(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 			// an inner box has to be found
 			if (xin.lb()>0) {
 				assert(yin.ub()<=0);
-				return iproj_leq_mono_op(z_sup,x, y, xin, yin, MUL, false, true);
+				return iproj_cmp_mono_op(false, z_sup,x, y, xin, yin, MUL, false, true);
 			} else if (xin.ub()>0) {
 				assert(z_sup==0);
 				return !(y&=Interval::ZERO).is_empty();
 			} else {
 				assert(yin.lb()>=0);
-				return iproj_leq_mono_op(z_sup, x, y, xin, yin, MUL, true, false);
+				return iproj_cmp_mono_op(false, z_sup, x, y, xin, yin, MUL, true, false);
 			}
 		}
 
@@ -334,19 +338,19 @@ bool iproj_leq_mul(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 		x &= q? Interval::POS_REALS : Interval::NEG_REALS;
 		y &= q? Interval::NEG_REALS : Interval::POS_REALS;
 
-		if (iproj_leq_mono_op(z_sup, x, y, xin, yin, MUL, !q, q)) {
+		if (iproj_cmp_mono_op(false, z_sup, x, y, xin, yin, MUL, !q, q)) {
 			return true;
 		} else {
 			// intersection with the first quadrant did not succeed.
 			// we try with the other one.
 			x = xsave & (q? Interval::NEG_REALS : Interval::POS_REALS);
 			y = ysave & (q? Interval::POS_REALS : Interval::NEG_REALS);
-			return iproj_leq_mono_op(z_sup, x, y, xin, yin, MUL, q, !q);
+			return iproj_cmp_mono_op(false, z_sup, x, y, xin, yin, MUL, q, !q);
 		}
 	}
 }
 
-// Difference with iproj_leq_mono_op: we do not require monotonicity
+// Difference with iproj_cmp_mono_op: we do not require monotonicity
 bool iproj_leq_div(double z_sup, Interval& x, Interval& y, const Interval &xin, const Interval& yin) {
 
 	bool inflate=!xin.is_empty();
@@ -403,7 +407,7 @@ bool iproj_leq_div(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 				// ------------------------ quadrant x>0 y>0 ----------------------------------
 				if(!xP.is_empty() && !yP.is_empty() && (!inflate || yin.lb()>0)) {
 					Interval xxin=inflate? Interval(max(0.0,xin.lb()), max(0.0,xin.ub())) : Interval::EMPTY_SET;
-					if(iproj_leq_mono_op(z_sup,xP,yP,xxin,yin,DIV,true,false)) {
+					if(iproj_cmp_mono_op(false, z_sup,xP,yP,xxin,yin,DIV,true,false)) {
 						// we reintegrate the part of the quadrant (x<0,y>0)
 						x = Interval(x.lb(), xP.ub());
 						y = Interval(yP.lb(), y.ub());
@@ -419,7 +423,7 @@ bool iproj_leq_div(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 				// ------------------------ quadrant x<0 y<0 ----------------------------------
 				if(!xN.is_empty() && !yN.is_empty() && (!inflate || yin.ub()<0)) {
 					Interval xxin=inflate? Interval(min(0.0,xin.lb()),min(0,xin.ub())) : Interval::EMPTY_SET;
-					if(iproj_leq_mono_op(z_sup,xN,yN,xxin,yin,DIV,false,true)) {
+					if(iproj_cmp_mono_op(false, z_sup,xN,yN,xxin,yin,DIV,false,true)) {
 						// we reintegrate the part of the quadrant (x>0,y<0)
 						x = Interval(xN.lb(), x.ub());
 						y = Interval(y.lb(), yN.ub());
@@ -459,7 +463,7 @@ bool iproj_leq_div(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 
 				// ------------------------ quadrant x<0 y>0 ----------------------------------
 				if(!xN.is_empty() && !yP.is_empty() && (!inflate || yin.lb()>0)) {
-					if(z_sup==0 || iproj_leq_mono_op(z_sup,xN,yP,xin,yin,DIV,true,true)) {
+					if(z_sup==0 || iproj_cmp_mono_op(false, z_sup,xN,yP,xin,yin,DIV,true,true)) {
 						x = xN;
 						y = yP;
 						//cout << "[div] quadrant (neg,pos): x=" << x << " y=" << y << endl;
@@ -472,7 +476,7 @@ bool iproj_leq_div(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 
 				// ------------------------ quadrant x>0 y<0 ----------------------------------
 				if(!xP.is_empty() && !yN.is_empty() && (!inflate || yin.ub()<0)) {
-					if(z_sup==0 || iproj_leq_mono_op(z_sup,xP,yN,xin,yin,DIV,false,false)) {
+					if(z_sup==0 || iproj_cmp_mono_op(false, z_sup,xP,yN,xin,yin,DIV,false,false)) {
 						x = xP;
 						y = yN;
 						//cout << "[div] quadrant (pos,neg): x=" << x << " y=" << y << endl;
@@ -488,12 +492,12 @@ bool iproj_leq_div(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 	}
 }
 
-bool iproj_geq_add(double z_inf, Interval& x, Interval& y, const Interval &xin, const Interval& yin ) {
-	return iproj_geq_mono_op(z_inf,x,y,xin,yin,ADD,true,true);
+inline bool iproj_geq_add(double z_inf, Interval& x, Interval& y, const Interval &xin, const Interval& yin ) {
+	return iproj_cmp_mono_op(true,z_inf,x,y,xin,yin,ADD,true,true);
 }
 
-bool iproj_geq_sub(double z_inf, Interval& x, Interval& y, const Interval &xin, const Interval& yin ) {
-	return iproj_geq_mono_op(z_inf,x,y,xin,yin,SUB,true,false);
+inline bool iproj_geq_sub(double z_inf, Interval& x, Interval& y, const Interval &xin, const Interval& yin ) {
+	return iproj_cmp_mono_op(true, z_inf,x,y,xin,yin,SUB,true,false);
 }
 
 bool iproj_geq_mul(double z_inf, Interval& x, Interval& y, const Interval &xin, const Interval& yin) {
