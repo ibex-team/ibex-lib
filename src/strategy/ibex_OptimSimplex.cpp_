@@ -31,8 +31,6 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 
 	IntervalVector g_inf(sys.f.eval_vector(x_inf)); // may throw EmptyBoxException?
 
-	// Interval f_inf=f.eval(x_inf);        // [gch] never used...
-
 	SoPlex mysoplex;
 	mysoplex.changeSense(SPxLP::MINIMIZE);	// set the objective sense
 
@@ -44,6 +42,7 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 	sys.goal->gradient(box,G);
 
 	//     if(G.max_diameter()>1e8) return false; //to avoid problems with SoPleX
+
 	int nsimplex=n+1;  // the n variables + the objective
 	DSVector row1(nsimplex);
 
@@ -61,7 +60,7 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 	//the first constraint:
 	//sup(df/dx_1) xl_1 + ... + sup(df/dx_n) xl_n <= yl
 	mysoplex.addRow(LPRow(-infinity, row1, 0.0));
-
+	
 	// ============================================================
 	//                  linearize the constraints
 	// ============================================================
@@ -110,12 +109,12 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 		DVector prim(nsimplex);
 		mysoplex.getPrimal(prim);
 
-		IntervalVector tmpbox(nsimplex);
+		IntervalVector tmpbox(n);
 
-		for (int j=0; j<nsimplex-1; j++)
+		for (int j=0; j<n; j++)
 			tmpbox[j]=box[j].lb()+prim[j+1];
 
-		bool ret= check_candidate(box.mid(),false); // [gch] do we know here that the point is inner??
+		bool ret= check_candidate(tmpbox.mid(),false); //  [gch] do we know here that the point is inner??
 
 		if (ret) {
 			int prec=cout.precision();
