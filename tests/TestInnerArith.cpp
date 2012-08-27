@@ -28,8 +28,9 @@ void TestInnerArith::check_add_sub(const Interval& z, const Interval& xin, const
 	Interval x(L,U);
 	Interval y(L,U);
 
-	iproj_add(z,x,y,xin,yin);
+	if (!iproj_add(z,x,y,xin,yin)) TEST_ASSERT(false);
 
+	//cout << "x=" << x << " y=" << y << " z=" << z << endl;
 	if (ub)	{
 		TEST_ASSERT_DELTA(y.ub()+x.ub(),z.ub(),error);
 		TEST_ASSERT(y.ub()+x.ub()<=z.ub());

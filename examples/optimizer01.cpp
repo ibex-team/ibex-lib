@@ -22,17 +22,19 @@ int main() {
 	//
 
 	Variable x,y;
-	Function f(x,y,x+y);
-	Function g(x,y,sqr(x)+sqr(y)-1.0);
-	NumConstraint c(g,NumConstraint::LEQ);
-	Array<NumConstraint> ctrs(c);
 
-	RoundRobin rr;
+	SystemFactory fac;
+	fac.add_var(x);
+	fac.add_var(y);
+	fac.add_goal(x+y);
+	fac.add_ctr(sqr(x)+sqr(y)<=1);
 
-	Optimizer o(f,ctrs,rr);
+	System sys(fac);
+
+	DefaultOptimizer o(sys);
 
 	IntervalVector box(2);
-	o.trace=true;
+
 	o.optimize(box);
 
 	o.report();

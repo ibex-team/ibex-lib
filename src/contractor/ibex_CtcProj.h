@@ -31,7 +31,7 @@ public:
 	 *
 	 * \param op: by default: true.
 	 */
-	CtcProj(Function& f, NumConstraint::CompOp op=NumConstraint::EQ);
+	CtcProj(Function& f, CmpOp op=EQ);
 
 	/**
 	 * \remark ctr is not kept by reference.

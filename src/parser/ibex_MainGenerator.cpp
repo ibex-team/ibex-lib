@@ -76,7 +76,7 @@ void MainGenerator::generate(const P_Source& source, System& result) {
 
 	//================= generate the global function =====================
 
-	vector<pair<const ExprNode*, NumConstraint::CompOp> > ctrs;
+	vector<pair<const ExprNode*, CmpOp> > ctrs;
 
 	CtrGenerator().generate(srcvars, result.vars, *source.ctrs, ctrs);
 
@@ -85,7 +85,7 @@ void MainGenerator::generate(const P_Source& source, System& result) {
 	Array<const ExprNode> image(m);
 	i=0;
 
-	for (vector<pair<const ExprNode*, NumConstraint::CompOp> >::const_iterator it=ctrs.begin(); it!=ctrs.end(); it++) {
+	for (vector<pair<const ExprNode*, CmpOp> >::const_iterator it=ctrs.begin(); it!=ctrs.end(); it++) {
 		image.set_ref(i++,*(it->first));
 	}
 
@@ -95,7 +95,7 @@ void MainGenerator::generate(const P_Source& source, System& result) {
 	//================= generate the constraints =====================
 	result.ctrs.resize(m);
 	i=0;
-	for (vector<pair<const ExprNode*, NumConstraint::CompOp> >::const_iterator it=ctrs.begin(); it!=ctrs.end(); it++) {
+	for (vector<pair<const ExprNode*, CmpOp> >::const_iterator it=ctrs.begin(); it!=ctrs.end(); it++) {
 		result.ctrs.set_ref(i,*new NumConstraint(result.f[i], it->second));
 		i++;
 	}

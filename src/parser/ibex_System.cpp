@@ -30,7 +30,7 @@ namespace parser {
 extern System* system;
 }
 
-const char* System::goal_name = "y";
+const char* System::goal_name = "__goal__";
 
 System::System(const char* filename) : nb_var(0), nb_ctr(0), box(1) /* tmp */ {
 	FILE *fd;
@@ -46,10 +46,6 @@ System::System(int n, const char* syntax) : nb_var(n), /* NOT TMP (required by p
 	} catch(SyntaxError& e) {
 		throw e;
 	}
-}
-
-System::System(int nb_ctr, int nb_var) : nb_var(nb_var), nb_ctr(nb_ctr), func(0), goal(NULL),
-		box(nb_var), ctrs(nb_ctr) {
 }
 
 System::System(const System& sys, copy_mode mode) : nb_var(0), nb_ctr(0), func(0), box(1) {
@@ -116,13 +112,13 @@ System::System(const System& sys, copy_mode mode) : nb_var(0), nb_ctr(0), func(0
 		for (int i=0; i<sys.nb_ctr; i++) {
 			const ExprNode& f_i=ExprCopy().copy(sys.f[i].symbols(),this->vars,sys.f[i].expr());
 			switch (sys.ctrs[i].op) {
-			case NumConstraint::LT:  warning("warning: strict inequality (<) replaced by inequality (<=).");
-			case NumConstraint::LEQ: vec_f.push_back(&f_i);
+			case LT:  warning("warning: strict inequality (<) replaced by inequality (<=).");
+			case LEQ: vec_f.push_back(&f_i);
 			break;
-			case NumConstraint::EQ:  not_implemented("Normalization with equality constraints");
+			case EQ:  not_implemented("Normalization with equality constraints");
 			break;
-			case NumConstraint::GT:  warning("warning: strict inequality (>) replaced by inequality (>=).");
-			case NumConstraint::GEQ: vec_f.push_back(&(-f_i)); // reverse the inequality
+			case GT:  warning("warning: strict inequality (>) replaced by inequality (>=).");
+			case GEQ: vec_f.push_back(&(-f_i)); // reverse the inequality
 			break;
 			}
 		}
@@ -140,12 +136,12 @@ System::System(const System& sys, copy_mode mode) : nb_var(0), nb_ctr(0), func(0
 		// warning: must be added first (goal_ctr is set to 0 in constructor)
 		ctrs.set_ref(0,*new NumConstraint(f[0])); // equality (by default)
 		for (int i=0; i<sys.nb_ctr; i++)
-			ctrs.set_ref(i+1,*new NumConstraint(f[i+1], NumConstraint::LEQ));
+			ctrs.set_ref(i+1,*new NumConstraint(f[i+1], LEQ));
 
 	}
 	else { // mode==NORMALIZE
 		for (int i=0; i<nb_ctr; i++)
-			ctrs.set_ref(i,*new NumConstraint(f[i], NumConstraint::LEQ));
+			ctrs.set_ref(i,*new NumConstraint(f[i], LEQ));
 	}
 
 }

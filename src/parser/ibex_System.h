@@ -16,6 +16,8 @@
 
 namespace ibex {
 
+class SystemFactory;
+
 /**
  * \ingroup parser
  *
@@ -29,7 +31,14 @@ namespace ibex {
  */
 class System {
 public:
-	/** \brief Load a system from a file. */
+	/**
+	 * \brief Build a system with a factory.
+	*/
+	System(const SystemFactory& factory);
+
+	/**
+	 * \brief Load a system from a file.
+	 */
 	System(const char* filename);
 
 	/**
@@ -66,7 +75,6 @@ public:
 	 * Size of #box is \a nb_var and size of #ctrs is \a nb_ctr. These arrays
 	 * have to be initialized. #goal is set to NULL.
 	 */
-	System(int nb_ctr, int nb_var);
 
 	typedef enum { COPY, NORMALIZE, EXTEND } copy_mode;
 
@@ -76,11 +84,13 @@ public:
 	 * The \a mode field controls the copy:
 	 * <ul>
 	 * <li> COPY:      copy
-	 * <li> NORMALIZE: copy and make all inequalities under the form f(x)<=0.
-	 * <li> EXTEND:    <ul> <li> normalize
-	 *                      <li> add an additional variable y (added after the others),
-	 *                      <li> transform the goal into a constraint y-f(x)=0 (added before the others)
-	 *                 </ul>
+	 * <li> NORMALIZE: copy and make all inequalities under the form f_i(x)<=0.
+	 * <li> EXTEND:    normalize and encode the goal function as a constraint.
+	 * The resulting system includes (n+1) variables, the n original variables x_1,...,x_n and
+	 * an an additional "goal" variable y. The goal variable is added at the end (after the others).
+	 * It also includes (m+1) constraints. The first constraint is y-goal(x)=0 where goal(x) is the
+	 * goal function. The others constraints are normalized copy of the original ones.
+	 * The name of the goal variable is #goal_name.
 	 * </ul>
 	 */
 	System(const System& sys, copy_mode mode);

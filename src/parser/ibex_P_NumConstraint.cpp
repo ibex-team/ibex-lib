@@ -16,7 +16,7 @@ namespace ibex {
 
 namespace parser {
 
-P_OneConstraint::P_OneConstraint(const ExprNode& left, NumConstraint::CompOp op, const ExprNode& right) :
+P_OneConstraint::P_OneConstraint(const ExprNode& left, CmpOp op, const ExprNode& right) :
 		expr(right.is_zero()? left : left-right), op(op) {
 }
 

@@ -13,6 +13,7 @@
 #define __IBEX_NUM_CONSTRAINT_H__
 
 #include "ibex_Function.h"
+#include "ibex_CmpOp.h"
 
 namespace ibex {
 
@@ -28,15 +29,26 @@ class NumConstraint {
 
 public:
 
-	typedef enum { LT, LEQ, EQ, GEQ, GT } CompOp;
-
-	NumConstraint(Function& f, CompOp op=EQ);
+	NumConstraint(Function& f, CmpOp op=EQ);
 
 	Function& f;
-	const CompOp op;
+	const CmpOp op;
 };
 
 std::ostream& operator<<(std::ostream&, const NumConstraint&);
+
+
+/* ============================================================================
+ 	 	 	 	 	 	 	 inline implementation
+  ============================================================================*/
+
+inline NumConstraint::NumConstraint(Function& f, CmpOp op) : f(f), op(op) {
+
+}
+
+inline std::ostream& operator<<(std::ostream& os, const NumConstraint& c) {
+	return os << c.f.expr() << c.op << "0";
+}
 
 } // namespace ibex
 #endif // __IBEX_NUM_CONSTRAINT_H__

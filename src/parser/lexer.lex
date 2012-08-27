@@ -124,12 +124,13 @@ void ibexparse_string(const char* syntax) {
 	  ibexparse();
 	} catch(SyntaxError& e) {
 	  // delete the new buffer
-	  ibex_delete_buffer(YY_CURRENT_BUFFER);
+	  //ibex_delete_buffer(YY_CURRENT_BUFFER);
       throw(e);
 	}
 
 	// delete the new buffer
-	ibex_delete_buffer(YY_CURRENT_BUFFER);
+	//   --> provokes bug when another file is read after...
+	//ibex_delete_buffer(YY_CURRENT_BUFFER);
 	
 }
 

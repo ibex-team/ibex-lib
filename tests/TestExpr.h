@@ -105,5 +105,5 @@ public:
 
 } // end namespace
 
-#endif /* __TEST_FUNCTION_H__ */
+#endif /* __TEST_EXPR_H__ */
 

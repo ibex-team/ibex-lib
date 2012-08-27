@@ -40,7 +40,7 @@ public:
 	 *   \param f     - The objective function f(x)
 	 *   \param g     - the constraints (each constraint must be g_i(x)<=0)
 	 *   \param bsc   - bisector for extended boxes
-	 *   \param ctc   - contractor for the extended system
+	 *   \param ctc   - contractor for the <b>extended system</b>
 	 *
 	 * And optionally:
 	 *   \param prec          - absolute precision for the boxes (bisection control)
@@ -53,6 +53,9 @@ public:
 	 * <li> A (m+1)-valued function f:(x,y)->(y-f(x),g_0(x),...,g_m(x))
 	 * <li> (m+1) constraints: y-f(x)=0, g_1(x)<=0, ..., g_m(x)<=0.
 	 * </ul>
+	 *
+	 * \warning The optimizer relies on the contractor \a ctc to contract the domain of the goal variable.
+	 * If this contractor never contracts this goal variable, the optimizer will never stop.
 	 *
 	 */
 	Optimizer(System& sys, Bsc& bsc, Ctc& ctc, double prec=default_prec,

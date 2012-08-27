@@ -13,7 +13,7 @@
 
 namespace ibex {
 
-CtcProj::CtcProj(Function& f, NumConstraint::CompOp op) : Ctc(f.input_size()), ctr(f,op) {
+CtcProj::CtcProj(Function& f, CmpOp op) : Ctc(f.input_size()), ctr(f,op) {
 	for (int v=0; v<ctr.f.input_size(); v++)
 		output[v]=input[v]=ctr.f.used(v);
 
@@ -30,11 +30,11 @@ void CtcProj::contract(IntervalVector& box) {
 	Interval right_cst;
 
 	switch (ctr.op) {
-	case NumConstraint::LT :
-	case NumConstraint::LEQ : right_cst=Interval(NEG_INFINITY, 0); break;
-	case NumConstraint::EQ  : right_cst=Interval(0,0); break;
-	case NumConstraint::GEQ :
-	case NumConstraint::GT : right_cst=Interval(0,POS_INFINITY); break;
+	case LT :
+	case LEQ : right_cst=Interval(NEG_INFINITY, 0); break;
+	case EQ  : right_cst=Interval(0,0); break;
+	case GEQ :
+	case GT : right_cst=Interval(0,POS_INFINITY); break;
 	}
 
 	switch(d.type()) {

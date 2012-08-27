@@ -44,7 +44,7 @@ void TestParser::file01() {
 	TEST_ASSERT(sameExpr(sys.f.expr(),"x"));
 	TEST_ASSERT(sys.ctrs.size()==1);
 	TEST_ASSERT(&sys.ctrs[0].f==&sys.f);
-	TEST_ASSERT(sys.ctrs[0].op==NumConstraint::GEQ);
+	TEST_ASSERT(sys.ctrs[0].op==GEQ);
 }
 
 void TestParser::ponts() {
@@ -67,7 +67,7 @@ void TestParser::ponts() {
 
 	for (int i=0; i<30; i++) {
 		TEST_ASSERT(&(sys.ctrs[i].f)==&(sys.f[i]));
-		TEST_ASSERT(sys.ctrs[i].op==NumConstraint::EQ);
+		TEST_ASSERT(sys.ctrs[i].op==EQ);
 	}
 }
 

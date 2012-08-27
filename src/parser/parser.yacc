@@ -357,11 +357,11 @@ ctr_loop      : TK_FOR TK_NEW_SYMBOL TK_EQU
 		                                          free($2); }
               ;
 
-ctr           : expr TK_EQU expr                { $$ = new P_OneConstraint(*$1,NumConstraint::EQ,*$3); }
-              | expr TK_LEQ expr                { $$ = new P_OneConstraint(*$1,NumConstraint::LEQ,*$3); }
-              | expr TK_GEQ expr                { $$ = new P_OneConstraint(*$1,NumConstraint::GEQ,*$3); }
-              | expr   '<'  expr                { $$ = new P_OneConstraint(*$1,NumConstraint::LT,*$3); }
-              | expr   '>'  expr                { $$ = new P_OneConstraint(*$1,NumConstraint::GT,*$3); }
+ctr           : expr TK_EQU expr                { $$ = new P_OneConstraint(*$1,EQ,*$3); }
+              | expr TK_LEQ expr                { $$ = new P_OneConstraint(*$1,LEQ,*$3); }
+              | expr TK_GEQ expr                { $$ = new P_OneConstraint(*$1,GEQ,*$3); }
+              | expr   '<'  expr                { $$ = new P_OneConstraint(*$1,LT,*$3); }
+              | expr   '>'  expr                { $$ = new P_OneConstraint(*$1,GT,*$3); }
               | '(' ctr ')'                     { $$ = $2; }
               ; 
               

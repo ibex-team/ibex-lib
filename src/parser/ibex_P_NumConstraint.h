@@ -30,7 +30,7 @@ public:
 
 class P_OneConstraint : public P_NumConstraint {
 public:
-	P_OneConstraint(const ExprNode& left, NumConstraint::CompOp op, const ExprNode& right);
+	P_OneConstraint(const ExprNode& left, CmpOp op, const ExprNode& right);
 
 	void acceptVisitor(CtrGenerator& g) const {
 		g.visit(*this);
@@ -42,7 +42,7 @@ public:
 	~P_OneConstraint();
 
 	const ExprNode& expr;
-	NumConstraint::CompOp op;
+	CmpOp op;
 };
 
 class P_ConstraintList : public P_NumConstraint {
