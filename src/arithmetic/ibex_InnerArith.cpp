@@ -71,7 +71,7 @@ double projx(double z, double y, int op, bool round_up) {
     	return (y==0)? POS_INFINITY:z/y;
     default: return z*y;
   }
-  //fpu_round_near(); // unreachable
+  //fpu_round_near(); // unreachable!
 }
 
 double projy(double z, double x, int op, bool round_up) {
@@ -85,7 +85,7 @@ double projy(double z, double x, int op, bool round_up) {
     	return z/x;
     default: return (z==0)? POS_INFINITY:x/z;
   }
-  //fpu_round_near(); // unreachable
+  //fpu_round_near(); // unreachable!
 }
 
 
@@ -102,6 +102,7 @@ double projy(double z, double x, int op, bool round_up) {
  *    In particular, if op==MUL, [x]x[y] must be included in a single quadrant.
  * 2- [xin]x[yin] is contained in [x]x[y]
  * 3- and [op]([xin],[yin]) is contained in [z]
+ * 4- if op==MUL the following cases are not handled here: z=0 or x=[0,0] or y=[0,0].
  *
  * \param inc_var1 : true<=>op is increasing wrt x (false<=>decreasing)
  * \param inc_var2 : true<=>op is increasing wrt y (false<=>decreasing)
@@ -119,11 +120,11 @@ bool iproj_cmp_mono_op(bool geq, double z, Interval& x, Interval& y, const Inter
 	//assert(!inflate || eval(xin,yin,op).lb()>=z_inf); // does this condition should really hold?
 	//pb: this function is used for <= with add/sub
 	//cout << "----------------------------------------------------------" << endl;
-	//cout << "  cmp_mono_op " << op_str(op) << endl;
-	//cout << "  x=" << x << " y=" << y << " z_inf=" << z_inf << endl;
+	//cout << "  cmp_mono_op " << op_str(op) << " " << (geq? "GEQ" : "LEQ") << endl;
+	//cout << "  x=" << x << " y=" << y << " z=" << z << endl;
 	//cout << "  inc_var1=" << inc_var1 << " inc_var2=" << inc_var2 << endl;
 	if (inflate) { 
-		//cout << "  inflating xin=" << xin << " yin=" << yin << endl; 
+		//cout << "  inflating xin=" << xin << " yin=" << yin << endl;
 	}
 	if (x.is_empty() || y.is_empty() || (geq && z==POS_INFINITY) || (!geq && z==NEG_INFINITY)) {
 		//cout << "  result: x=" << x << " y=" << y << endl;
@@ -131,7 +132,7 @@ bool iproj_cmp_mono_op(bool geq, double z, Interval& x, Interval& y, const Inter
 		return false;
 	}
 	else if ((geq && z==NEG_INFINITY) || (!geq && z==POS_INFINITY)) {
-		//cout << "  result: x=" << x << " y=" << y << endl; 
+		//cout << "  result: x=" << x << " y=" << y << endl;
 		//cout << "----------------------------------------------------------" << endl;
 		return true; // note: we also know that (x,y) is not empty.
 	}
@@ -177,12 +178,12 @@ bool iproj_cmp_mono_op(bool geq, double z, Interval& x, Interval& y, const Inter
 
 	if (xmax==POS_INFINITY) {
 		xmax=x.ub();
-		//cout << "    xmax=" << xmax << endl;
+		//cout << "  xmax=" << xmax << endl;
 	}
 
 	if (xmin==NEG_INFINITY) {
 		xmin=x.lb();
-		//cout << "    xmin=" << xmin << endl;
+		//cout << "  xmin=" << xmin << endl;
 	}
 
 
@@ -265,10 +266,12 @@ bool iproj_leq_mul(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 		Interval xP = x & Interval::POS_REALS;
 		Interval yP = y & Interval::POS_REALS;
 		/* volatile? */double xU=x.ub();
-		/* volatile? */double yU=x.ub();
+		/* volatile? */double yU=y.ub();
 
 		// ------------------------ quadrant x>0 y>0 ----------------------------------
-		if(!xP.is_empty() && !yP.is_empty()) { //y.ub()>=0 && (!inflate || yin.lb()>0)) {
+		if(!xP.is_empty() && !yP.is_empty() && xP.ub()>0 && yP.ub()>0) { //(!inflate || yin.lb()>0)) {
+			// if xP.ub()==0 or yP.ub()==0, the upper right corner is safe
+			// and these cases cannot be handled properly by iproj_cmp_mono_op
 			xxin=inflate? Interval(max(0.0,xin.lb()), max(0.0,xin.ub())) : Interval::EMPTY_SET;
 			yyin=inflate? Interval(max(0.0,yin.lb()), max(0.0,yin.ub())) : Interval::EMPTY_SET;
 			if(!iproj_cmp_mono_op(false, z_sup, xP, yP, xxin, yyin, MUL, true, true)) {
@@ -288,7 +291,8 @@ bool iproj_leq_mul(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 		/* volatile? */double yL=y.lb();
 
 		// ------------------------ quadrant x<0 y<0 ----------------------------------
-		if(!xN.is_empty() && !yN.is_empty()) { //y.ub()>=0 && (!inflate || yin.lb()>0)) {
+		if(!xN.is_empty() && !yN.is_empty() && xN.lb()<0 && yN.lb()<0) { //(!inflate || yin.lb()<0)) {
+			// same remark as above for xN.lb()<0 && yN.lb()<0.
 			xxin=inflate? Interval(min(0.0,xin.lb()),min(0.0,xin.ub())) : Interval::EMPTY_SET;
 			yyin=inflate? Interval(min(0.0,yin.lb()),min(0.0,yin.lb())) : Interval::EMPTY_SET;
 			if(!iproj_cmp_mono_op(false, z_sup, xN, yN, xxin, yyin, MUL, false, false)) {
@@ -316,12 +320,23 @@ bool iproj_leq_mul(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 			// an inner box has to be found
 			if (xin.lb()>0) {
 				assert(yin.ub()<=0);
-				return iproj_cmp_mono_op(false, z_sup,x, y, xin, yin, MUL, false, true);
+				x &= Interval::POS_REALS;
+				y &= Interval::NEG_REALS;
+				if (z_sup==0) return true;
+				// note: we know x.ub()>0 && y.lb()<0
+				assert(yin.lb()<0);
+				return iproj_cmp_mono_op(false, z_sup, x, y, xin, yin, MUL, false, true);
 			} else if (xin.ub()>0) {
+				assert(yin==Interval::ZERO);
 				assert(z_sup==0);
 				return !(y&=Interval::ZERO).is_empty();
 			} else {
 				assert(yin.lb()>=0);
+				x &= Interval::NEG_REALS;
+				y &= Interval::POS_REALS;
+				if (z_sup==0) return true;
+				// note: we know x.ub()>0 && y.lb()<0
+				assert(yin.ub()>0);
 				return iproj_cmp_mono_op(false, z_sup, x, y, xin, yin, MUL, true, false);
 			}
 		}
@@ -338,14 +353,24 @@ bool iproj_leq_mul(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 		x &= q? Interval::POS_REALS : Interval::NEG_REALS;
 		y &= q? Interval::NEG_REALS : Interval::POS_REALS;
 
-		if (iproj_cmp_mono_op(false, z_sup, x, y, xin, yin, MUL, !q, q)) {
+		if (z_sup==0 || ((q? x.ub()>0 : x.lb()<0) &&
+						 (q? y.lb()<0 : y.ub()>0) &&
+						 iproj_cmp_mono_op(false, z_sup, x, y, xin, yin, MUL, !q, q))) {
 			return true;
 		} else {
 			// intersection with the first quadrant did not succeed.
 			// we try with the other one.
 			x = xsave & (q? Interval::NEG_REALS : Interval::POS_REALS);
 			y = ysave & (q? Interval::POS_REALS : Interval::NEG_REALS);
-			return iproj_cmp_mono_op(false, z_sup, x, y, xin, yin, MUL, q, !q);
+			if (z_sup==0)
+				return true;
+			else if ((q? x.lb()==0 : x.ub()==0) || (q? y.ub()==0 : y.lb()==0)) {
+				x.set_empty();
+				y.set_empty();
+				return false;
+			}
+			else
+				return iproj_cmp_mono_op(false, z_sup, x, y, xin, yin, MUL, q, !q);
 		}
 	}
 }

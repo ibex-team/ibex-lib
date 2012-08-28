@@ -112,12 +112,12 @@ System::System(const System& sys, copy_mode mode) : nb_var(0), nb_ctr(0), func(0
 		for (int i=0; i<sys.nb_ctr; i++) {
 			const ExprNode& f_i=ExprCopy().copy(sys.f[i].symbols(),this->vars,sys.f[i].expr());
 			switch (sys.ctrs[i].op) {
-			case LT:  warning("warning: strict inequality (<) replaced by inequality (<=).");
+			case LT:  ibex_warning("warning: strict inequality (<) replaced by inequality (<=).");
 			case LEQ: vec_f.push_back(&f_i);
 			break;
 			case EQ:  not_implemented("Normalization with equality constraints");
 			break;
-			case GT:  warning("warning: strict inequality (>) replaced by inequality (>=).");
+			case GT:  ibex_warning("warning: strict inequality (>) replaced by inequality (>=).");
 			case GEQ: vec_f.push_back(&(-f_i)); // reverse the inequality
 			break;
 			}

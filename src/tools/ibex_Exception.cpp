@@ -16,12 +16,12 @@ using namespace std;
 
 namespace ibex {
 
-void error(const char* message) {
+void ibex_error(const char* message) {
 	cerr << "error: " << message << endl;
 	exit(-1);
 }
 
-void warning(const char* message) {
+void ibex_warning(const char* message) {
 	cerr << "warning: " << message << endl;
 }
 

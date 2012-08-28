@@ -18,7 +18,7 @@ namespace ibex {
 SystemFactory::SystemFactory() : goal(NULL) { }
 
 void SystemFactory::add_var(Variable& v) {
-	if (goal || !exprs.empty()) error("cannot add a variable to a system after a constraint (or the goal function)");
+	if (goal || !exprs.empty()) ibex_error("cannot add a variable to a system after a constraint (or the goal function)");
 	vars.push_back(&((const ExprSymbol&) v));
 
 }
