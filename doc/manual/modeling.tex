@@ -66,7 +66,7 @@ It is possible to rename variables, see \S\ref{sec:mod-var-name}.
 
 \subsection{Vector and matrix variables}\label{sec:mod-var-vec}
 
-Like in Matlab, Variables can be vectors or matrices. To create a $n$-dimensional vector variable, just
+Like in Matlab, variables can be vectors or matrices. To create a $n$-dimensional vector variable, just
 give the number $n$ as an arguement to the constructor:
 
 \begin{lstlisting}
@@ -112,7 +112,7 @@ x y z
 
 Mathematical functions are represented by objects of the class \hcf{Function}.
 The following piece of code creates the function
-$(x,y)\mapsto x+y$:
+$(x,y)\mapsto \sin(x+y)$:
 
 \begin{lstlisting}	
   Variable x("x");
@@ -126,7 +126,99 @@ The display is:
 _f_0:(x,y)->sin((x+y))
 \end{lstlisting}
 %_f_0:(_x_0,_x_1)->sin((_x_0+_x_1))
-\section{Evaluation}
+
+
+\subsection{Renaming functions}
+
+By default, function names are also generated. But you can also set your own function name, as the last argument of the constructor:
+\begin{lstlisting}
+Function f(x,y,sin(x+y),"f");
+\end{lstlisting}
+
+\subsection{Allowed symbols}
+
+The following symbols are allowed in expressions:
+\begin{verbatim}
+sign, min, max,
+sqr, sqrt, exp, log, pow, 
+cos, sin, tan, acos, asin, atan,
+cosh, sinh, tanh, acosh, asinh, atanh
+atan2
+\end{verbatim}
+
+Power symbols \cf{^} are not allowed. You must
+either use \cf{pow(x,y)}, or simply \cf{sqr(x)} for the square function.
+
+Here is an example of the distance function between (\cf{xa},\cf{ya}) and
+(\cf{xb},\cf{yb}):
+
+\begin{lstlisting}
+  Variable xa,xb,ya,yb;
+  Function dist(xa,xb,ya,yb, sqrt(sqr(xa-xb)+sqr(ya-yb)));
+\end{lstlisting}
+
+\subsection{Functions with vector variables}
+
+If variables are vectors, you can refer to the component
+of a variable using square brackets. Indices start by 0,
+following the convention of the C language.
+
+We rewrite here the previous distance function using 2-dimensional
+variables \cf{a} and \cf{b} instead:
+\begin{lstlisting}
+  Variable a(2);
+  Variable b(2);
+  Function dist(a,b,sqrt(sqr(a[0]-b[0])+sqr(a[1]-b[1])),"dist");
+\end{lstlisting}
+
+\subsection{Composition}
+
+You can compose functions. Each argument of the called function can be substitued
+by a variable, a subexpression or a constant value.
+
+For instance, we can define a function "foo" that associates to
+a point \cf{x} the distance between \cf{x} and a fixed point $(1,2)$,
+using the generic distance function defined in the previous paragraph:
+
+\begin{lstlisting}
+  Vector pt(2);
+  pt[0]=1;
+  pt[1]=2;
+
+  Variable x(2);
+  Function f(x,dist(x,pt),"foo");
+\end{lstlisting}
+
+\subsection{Vector-valued functions}
+
+To define a vector-valued function, the \hcf{Return} keword allows
+you to list the function's components.
+
+For instance, we can define the function that associates to $x$ the 
+respective distances between two fixed points \cf{pt1} and \cf{pt2}:
+
+\begin{lstlisting}	
+	Variable x(2,"x");
+	Variable pt(2,"p");
+	Function dist(x,pt,sqrt(sqr(x[0]-pt[0])+sqr(x[1]-pt[1])),"dist");
+
+	Vector pt1=Vector::zeros(2);
+	Vector pt2=Vector::ones(2);
+
+	Function f(x,Return(dist(x,pt1),dist(x,pt2)),"f");
+
+	cout << f << endl;
+\end{lstlisting}
+
+The display is as folllows. Note that constant values like 0 are automatically replaced
+by degenerated intervals (like [0,0]):
+\begin{verbatim}
+f:(x)->(dist(x,([0,0] ; [0,0])),dist(x,([1,1] ; [1,1])))
+\end{verbatim}
+
+\section{Computing with Functions}
+
+\subsection{Evaluation (forward computation)}
 
 We show now how to calculate the image of a box by a function $f$ or, in short, how
 to perform an {\it interval evaluation}.
@@ -146,5 +238,171 @@ Then we simply call \hcf{f.eval(...)} to get the image of the box by \cf{f}:
   cout << "f(box)=" << f.eval(box) << endl; 
 \end{lstlisting}
 
+\subsection{Projection (backward computation)}
 
+	
+\subsection{Gradient}
 
+\subsection{Jacobian and Hansen's matrix}
+
+\section{Constraints}
+
+\section{Systems}
+
+A {\it system} in \ibex is a set of constraints with, optionnaly, a goal function to minimize.
+One is usually interested in solving the system while minimizing the criterion, if any.
+
+For this reason, a system is not as simple as a collection of {\it any} constraints.
+Each constraint must exactly relates the same set of variables. And this set must
+also coincide with that of the goal function.
+
+A system is an object of the \hcf{System} class. This object is made of several fields
+that are detailed below. %We take as example the following system:
+
+\begin{itemize}
+\item \cf{const int} \hcf{nb_var}: the total number of variables or, in other words, the
+{\it size} of the problem. This number is basically the sum of all variables components. For instance,
+if one declares a variable $x$ with 10 components and a variable $y$ with 5, the value of this field
+will be $15$.
+\item \cf{const int} \hcf{nb_ctr}: the number of constraints
+\item \cf{Function*} \hcf{goal}: a pointer to the goal function. If there is no goal function, this
+pointer is \cf{NULL}.
+\item \cf{Function} \hcf{f}: the (usually vector-valued) function representing the constraints. 
+For instance, if one defines three constraints: $x+y\leq0$ and $x-y=1$ and $x-y\geq0$, the function f will be 
+$(x,y)\mapsto (x+y,x-y-1,x-y)$. Note that the constraints are automatically transformed so that the right side 
+is 0 but, however, without changing the comparison sign. It is however possible to {\it normalize} a system so that
+all inequalities are defined with the $\le$ sign (see \S\ref{sec:mod-sys-transfo}).
+\item \cf{IntervalVector} \hcf{box}: when a system is loaded from a file (see \S\ref{sec:mod-sys-load}),
+a initial box can be specified. It is contained in this field.
+\item \cf{Array<NumConstraint>} \hcf{ctrs}: the array of constraints. The \cf{Array} class of \ibex can
+be used as a regular C array.
+\end{itemize}
+
+\section{Creating Systems in C++}
+
+Creating a system in C++ is done in three steps and must be done using a temporary object called a {\it system factory}:
+\begin{enumerate}
+\item Add variables using \hcf{add_var}.
+\item (optional) add the expression of the goal function using \hcf{add_goal}
+\item add the constraints using \hcf{add_ctr}
+\end{enumerate}
+
+Here is an example:
+
+\begin{lstlisting}
+  Variable x,y;
+
+  SystemFactory fac;
+  fac.add_var(x);
+  fac.add_var(y);
+  fac.add_goal(x+y);
+  fac.add_ctr(sqr(x)+sqr(y)<=1);
+
+  System sys(fac);
+\end{lstlisting}
+
+\section{Loading Systems from a File}\label{sec:mod-sys-load}
+
+You can directly load a system from a (plain text) input file.
+
+Here is a simple example that talks for itself:
+
+\begin{verbatim}
+Variables
+  x,y;
+
+Minimize
+  x+y;
+
+Constraints
+  x^2+y^2<=1;
+end
+\end{verbatim}
+
+\subsection{Overall structure}
+The input file is a sequence of declaration blocks that must respect the following order:
+\begin{enumerate}
+\item (optional) constants
+\item variables
+\item (optional) auxiliary functions
+\item (optional) goal function
+\item constraints
+\end{enumerate}
+
+The following paragraphs detail each declaration blocks.
+
+\subsection{Constants}
+Constants are all defined in the same declaration block, 
+started with the \cf{Constants} keyword.
+A constant value can depends on other constants' value. Example:
+
+\begin{verbatim}
+Constants
+  pi=3.14159;
+  y=-1.0;
+  z=sin(pi*y);
+\end{verbatim} 
+
+You can give a constant an interval enclosure rather than a single fixed value.
+In the previous example, we can give \cf{pi} a valid enclosure as below:
+
+\begin{verbatim}
+Constants
+  pi in [3.14159,3.14160];
+  y=-1.0;
+  z=sin(pi*y);
+\end{verbatim}
+
+Constants can also be vector, matrices or array of matrices.
+The following table give examples of constant definitions. 
+
+\begin{tabular}{l|l}
+\hline
+{\tt x in [-oo,0]} & declares a constant $x$ with domain $(-\infty,0]$ \\
+{\tt x in [0,1]} & declares an constant $x$ with domain $[0,1]$ \\
+{\tt x in 0} & declares a (interval) constant $x$ with domain $[0,0]$ \\
+{\tt x = 0} & declares a (real) constant $x$ equal to $0$ \\
+{\tt x = 100*sin(0.1)} & declares a constant $x$ equal to $100\sin(0.1)$ \\
+{\tt x[10] in [-oo,0]} & declares $10$ constants $x[1],\ldots,x[10]$, each with domain $(-\infty,0]$ \\
+{\tt x[2] in [[-oo,0];[0,+oo]]} & declares $2$ constants $x[1]\in(-\infty,0]$ and $x[2]\in[0,+\infty)$ \\
+{\tt x[10] in [0,1]} & declares $10$ constants $x[1],\ldots,x[10]$, each with domain $[0,1]$ \\
+{\tt x[3][3] in} &  \multirow{4}{*}{declares a constrant matrix 
+$x=\begin{pmatrix}
+\!\,[0,1] & 0 & 0 \\
+0 & [0,1]& 0 \\
+0 & 0 & [0,1] 
+\end{pmatrix}$.} \\
+\!\,{\tt [[[0,1];0;0];} & \\
+\!\,{\tt [0;[0,1];0];} & \\
+\!\,{\tt [0;0;[0,1]]]} &\\
+\multirow{2}{*}{\tt x[10][5] in [0,1]} & declares $50$ constants $x[1][1],\ldots,x[1][5],\ldots,x[10][1],\ldots,x[10][5]$, \\
+& each with domain $[0,1]$.\\
+\end{tabular}
+
+It is possible to define up to three dimensional vectors. 
+
+\subsection{Functions}
+
+\subsection{Loops}
+
+You can resort to loops in a Matlab-like syntax to define constraints. Example:
+
+\begin{verbatim}
+Variables
+  x[10];
+
+Constraints
+  for i=1:10;
+    x[i] <= i;
+  end
+end
+\end{verbatim}
+
+\subsection{Difference with C++}
+
+\begin{itemize}
+\item Indices start by $1$ instead of $0$
+\item You can use the \^{} symbol
+\end{itemize}
+
+\section{System copy and transformation}\label{sec:mod-sys-transfo}
