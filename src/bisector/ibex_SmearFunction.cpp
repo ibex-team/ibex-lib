@@ -23,7 +23,7 @@ namespace ibex {
     // in case of infinite derivatives  changing to roundrobin bisection
     for (int i=0;i < sys.nb_ctr;i++)
       for (int j=0;j < sys.nb_var;j++)
-	if (J[i][j].mag() == POS_INFINITY)
+	if (J[i][j].mag() == POS_INFINITY ||((J[i][j].mag() ==0) && box[j].diam()== POS_INFINITY ))
 	  return RoundRobin::bisect(box,last_var);
     int var = var_to_bisect (J,box);
     if (var == -1)
@@ -48,6 +48,7 @@ namespace ibex {
 	      }
 	}
     }
+
     return var;
   }
 
@@ -102,6 +103,7 @@ namespace ibex {
 	  }
       }
   }
+  //  cout << "variable bissectee " << var << endl;
   return var;
 }
 

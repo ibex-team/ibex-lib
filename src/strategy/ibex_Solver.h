@@ -65,7 +65,7 @@ public:
 	 * on the standard output each time a new cell is created. Default value is \c false.
 	 */
 	int trace;
-
+	/** Number of nodes  in the search tree */
 	int nb_cells;
 
 	void time_limit_check();

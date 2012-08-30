@@ -235,7 +235,7 @@ bool Optimizer::update_loup_probing(const IntervalVector& box) {
 
 	if (in_HC4_flag) {
 		inner_found=in_HC4(inbox); // inbox will be contracted to an inner box (possibly empty)
-		//cout << "inner_found ? " << inner_found << " inbox=" << inbox << endl;
+		//		cout << "inner_found ? " << inner_found << " inbox=" << inbox << endl;
 	}
 	else {
 		try {
@@ -251,8 +251,8 @@ bool Optimizer::update_loup_probing(const IntervalVector& box) {
 	if (inner_found && mono_analysis_flag)
 		monotonicity_analysis(inbox);
 
-
 	//  if (innerfound)
+
 	// first option: startpoint = midpoint
 	//
 	//  loup_changed = line_probing(sys, space,   Mid(space.box), 3*sample_size, true);
@@ -267,7 +267,7 @@ bool Optimizer::update_loup_probing(const IntervalVector& box) {
 
 	if (loup_changed) {
 
-		trace_loup();
+		trace_loup(inner_found);
 
 		if (inner_found) {
 			nb_inhc4++;
@@ -282,35 +282,12 @@ bool Optimizer::update_loup_probing(const IntervalVector& box) {
 }
 
 
-/*
-bool Optimizer::update_loup(const System& sys, const Space& space) {
-
-	bool loup_changed=false; // the return value
-	IntervalVector savebox = space.box;
-
-	if(mono_analysis)
-		monotonicity_analysis(space, goal);
-
-	// first option: startpoint = midpoint
-	//
-	//     loup_changed = line_probing(sys, space,  Mid(space.box), 5* sample_size, true);
-	// other option: chose startpoint randomly
-	//  loup_changed = line_probing(sys, space,  random_point(space.box), 5* sample_size,  true);
-
-	//  else
-	loup_changed = random_probing (sys, space);
-
-	if (loup_changed) trace_loup();
-
-	(IntervalVector&) space.box = savebox;
-	return loup_changed;
-}*/
-
-void Optimizer::trace_loup ()
+void Optimizer::trace_loup (bool inner_found)
 {
-	//int prec=cout.precision();
-	cout << setprecision (12) << " loup update " << loup  << " loup point  " << loup_point << endl;
-	//cout.precision(prec);
+
+  if (inner_found) cout << "[in!]";
+  cout << setprecision (12) << " loup update " << loup  << " loup point  " << loup_point << endl;
+
 }
 
 } // end namespace

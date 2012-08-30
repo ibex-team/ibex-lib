@@ -67,7 +67,7 @@ vector<IntervalVector> Solver::solve(const IntervalVector& init_box) {
 				sols.push_back(c->box);
 				cout.precision(12);
 				if (trace >=1) 
-				  cout << " sol " << sols.size() << sols[sols.size()-1] << endl;
+				  cout << " sol " << sols.size() << " nb_cells " <<  nb_cells << " "  << sols[sols.size()-1] <<   endl;
 				delete buffer.pop();
 				impact.set_all();
 			} else {

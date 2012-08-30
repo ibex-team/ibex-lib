@@ -58,6 +58,7 @@ public:
 	 * If this contractor never contracts this goal variable, the optimizer will never stop.
 	 *
 	 */
+
 	Optimizer(System& sys, Bsc& bsc, Ctc& ctc, double prec=default_prec,
 			double goal_rel_prec=default_goal_rel_prec, double goal_abs_prec=default_goal_abs_prec,
 			int sample_size=default_sample_size);
@@ -100,9 +101,11 @@ public:
 	/** Bisector. */
 	Bsc& bsc;
 
+
 	/** Contractor for the extended system
 	 * (y=f(x), g_1(x)<=0,...,g_m(x)<=0). */
 	Ctc& ctc;
+
 
 	/** Cell buffer. */
 	CellHeapOptim buffer;
@@ -153,6 +156,11 @@ public:
 	 */
 	double timeout;
 
+	/* Remember running time of the last exploration */
+	double time;
+
+	void time_limit_check();
+
 	/** Default bisection precision: 1e-07 */
 	static const double default_prec;
 
@@ -173,7 +181,8 @@ protected:
 	 * \brief Main procedure for processing a box.
 	 *
 	 * <ul>
-	 * <li> contract the cell's box w.r.t the "loup", with the contractor ctc,
+	 * <li> contract the cell's box w.r.t the "loup",
+	 * <li> contract with the contractor ctc,
 	 * <li> search for a new loup,
 	 * <li> push the box onto the heap.
 	 * </ul>
@@ -274,7 +283,7 @@ protected:
 	/**
 	 * \brief Display the loup (for debug)
 	 */
-	void trace_loup();
+	void trace_loup(bool inner_found);
 	/*=======================================================================================================*/
 	/*                                Functions to manage the extended CSP                                   */
 	/*=======================================================================================================*/
@@ -295,11 +304,16 @@ protected:
 
 private:
 
+
 	/** Inner contractor (for the negation of g) */
 	CtcUnion* is_inside;
 
 	/** The "loup" (lowest upper bound of the criterion) */
 	double loup;
+
+	/** The "uplo" (upper lower bound of the criterion) */
+	double uplo;
+
 
 	/** The point satisfying the constraints corresponding to the loup */
 	Vector loup_point;
@@ -307,7 +321,10 @@ private:
 	/** Lower bound of the small boxes taken by the precision contractor */
 	double uplo_of_epsboxes;
 
-	/** Miscellaneous */
+        /** Number of cells put into the heap (which passed through the contractors)  */
+	int nb_cells;
+
+	/** Miscellaneous   for statistics */
 	int nb_simplex;
 	int nb_rand;
 	double diam_simplex;
