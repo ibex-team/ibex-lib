@@ -215,12 +215,14 @@ Mathematical functions are represented by objects of the class \hcf{Function}.
 These objects are very easy to build. Either refer to \S\ref{sec:mod-func-cpp}
 or \S\ref{sec:mod-func-quimper}.
 
+Various operations can be performed with a function. We detail below the main ones.
+
 \subsection{Evaluation (forward computation)}
 
-We show now how to calculate the image of a box by a function $f$ or, in short, how
+We show here how to calculate the image of a box by a function $f$ or, in short, how
 to perform an {\it interval evaluation}.
 
-We assume that the function \cf{f} has been created to represent $(x,y)\mapsto \sin(x+y)$ (see the previous paragraph).
+We assume that the function \cf{f} has been created to represent $(x,y)\mapsto \sin(x+y)$.
 
 We start by building a box (as explained in Chapter \ref{chap:arith}).
 The box must have as many components as the function has arguments, here, 2.
@@ -237,7 +239,33 @@ Then we simply call \hcf{f.eval(...)} to get the image of the box by \cf{f}:
 
 \subsection{Projection (backward computation)}
 	
+Projection means that we contract the input box $[x]$
+with respect to $f(x)=y$, where $y$ is any real value or interval.
+The underlying algorithm is the famous {\it forward-backward} (alias \textsc{HC4Revise})
+algorithm. It is quick (runs in linear time w.r.t. the size
+of the constraint syntax) and optimal when variables have all one occurrence.
+
+Consider again that \cf{f} represents $(x,y)\mapsto\sin(x+y)$.
+We can contract $[x]=[1,2]\times[3,4]$ w.r.t.
+to $f(x)=-1$:
+
+\begin{lstlisting}
+  double _box[][2]= {{1,2},{3,4}};
+  IntervalVector box(2,_box);
+  cout << "initial box=" << box << endl;
+  f.proj(-1.0,box);
+  cout << "box after proj=" << box << endl;
+\end{lstlisting}
+The display is:
+\begin{verbatim}
+initial box=([1,2] ; [3,4])
+box after proj=([1,1.7123889803846914504] ; [3,3.7123889803846914504])
+\end{verbatim}
+and one can indeed check that the resulting box is a consistent narrowing
+of the initial one.
+
 \subsection{Gradient}
+
 
 \subsection{Jacobian and Hansen's matrix}
 
@@ -661,6 +689,16 @@ a tree for the function expression. It is also possible (and easy) to build a DA
 a \cf{Function} object in C++ (to be documented).
 
 \subsection{Variables}
+
+Variables are defined exactly in the same fashion as constants (see \S\ref{ref:cst}).
+It is possible to define up to three dimensional vectors, with an optional domain to initialize each
+component with. The following examples are valid:
+
+{\tt x[10][5][4]}
+
+{\tt x[10][5][4] in [0,1]}
+
+Whenever domains are not specified, they are set by default to $(-\infty,+\infty)$.
 
 \subsection{Constraints}
 \subsubsection{Loops}
