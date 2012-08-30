@@ -1,11 +1,44 @@
 \chapter{Modeling your Problem}\label{chap:mod}
 
-\section{What we mean by ``variable'' and ``function''}
+%In this chapter, you will learn how to create a problem
 
-Before starting, let us rule out a potential ambiguity.
+\section{Introduction}
 
-The purpose of this chapter is basically to show how to declare {\it variables} and {\it functions}.
-But, since we are in the C++ programming language, the term {\it variable} and
+The purpose of this chapter is to show how to create and manipulate
+objects corresponding to the mathematical concepts of
+{\it variable}, {\it function}, {\it constraint} and {\it system}.
+
+We talk about {\it modeling} as these objects mathematically model the concrete problem you are faced to.
+
+\subsection{C++ versus \quimper}
+
+There are two possible alternatives for modeling.
+You can either:
+\begin{enumerate}
+\item write C++ code. Variables, functions, constraints
+and systems are C++ object that you declare yourself
+and build by calling the constructors of the corresponding classes
+\item write all these basic mathematic data in a text file, following
+the (very intuitive) \quimper syntax. All these data are loaded
+simultaneously and stored in a single \hcf{System} object.
+\end{enumerate}
+
+In both cases, you will access and use the data in the same way.
+For instance, you will calculate the interval derivative of a function
+by the same code, would it be created in your C++ program or loaded
+from a \quimper file.
+
+The chapter is organized as follows: we present
+each concept (variable, function, etc.) in turn and
+each time explain how objects are created in C++.
+
+All the \quimper syntax is given afterwards, in a separate section.
+ 
+\subsection{What we mean by ``variable'' and ``function''}
+
+Let us rule out a potential ambiguity.
+
+Since we are in the C++ programming language, the term {\it variable} and
 {\it function} already refers to something precise. For instance, the following
 piece of code introduces a {\it function} \cf{sum} and a {\it variable} \cf{x}:
 \begin{lstlisting}
@@ -33,13 +66,81 @@ variables (resp. functions) versus {\it program} variables (resp. functions).
 We will also use italic symbol like $x$ to denote a mathematical variable
 and postscript symbols like \cf{x} for program variables.
 In most of our discussions, variables and functions will refer
-to the mathematical objects so that the mathematical meaning will be often the implicit one. 
+to the mathematical objects so that the mathematical meaning will be the implicit one. 
 
-\section{Creating variables}
+\section{Variables}
 
-Mathematical variables are represented by objects of the class \hcf{Variable}.
+Before telling you which class represents mathematical variables, let us say first that
+this class does not play a big role.
+%The reason is that variables are only used to build functions.
+Indeed, the only purpose of declaring a variable $x$ in \ibex is
+for building a function right after, like $f:x\mapsto x+1$.
+Functions play, in contrast, a big role.
 
-\subsection{Default construction}
+In other words, $x$ is nothing but a syntaxic leaf in the expression 
+of the function. In particular, a variable is not a slot for
+representing domain. % (as it could be the case). %This is an important difference with other 
+E.g, if you want to calculate the range of $f$ for $x\in [0,1]$,
+you just call a (program) function \cf{eval} with a plain box in argument.
+It's just as if $f$ was the function that takes one argument and
+increment it, whatever the name of this argument is.
+
+Once $f$ has been built, we can almost say that $x$ is no longer useful.
+Variables must be seen only as temporary objects, in the process of function construction.
+
+Before going on, let us slightly moderate this point.
+We have assumed here that, as a user of \ibex the operations you are interested in are: {\it evaluate $f$ on a box, 
+calculate $f'$ on a box, solve $f(x)=0$} and so on. All these operations can be qualified as numerical: they take
+intervals and return intervals. You don't need to deal again with the expression of the function, once built.
+But if you need to handle, for any reason, the symbolic form of the function then you have to inspect the syntax
+and variables appear again.
+
+\subsection{Dimensions and ordering}
+
+A variable does not necessarily represent a single real value.
+It can also be a vector, a matrix or an array-of-matrices. So each variable has some associated information about
+its dimension(s). 
+
+One can, e.g., build the following function 
+$$\begin{array}{cccc}
+f: & \Rset^2\times\Rset^3 & \to & \Rset\\
+   &  (x,y) & \mapsto & x_1\times y_1+x_2\times y_2 - x_3
+\end{array}.$$
+
+In this case, $x$ and $y$ are vector variables with 2 and 3 components respectively.
+
+From the user standpoint, the function $f$ (once built) is ``flattened'' to a mapping from $\Rset^5$ to $\Rset$.
+Each numerical function (eval, etc.) expects a 5-dimensional box as argument.
+
+The way intervals are mapped to the variables components follows a straightforward ordering:
+everytime we call a (program) function of $f$ with the box $[b]=([b]_1,\ldots,[b]_5)$ in argument, we simply enforce
+$$x\in[b]_1\times[b]_2 \quad \mbox{and} \quad y\in[b]_3\times[b]_4\times[b]_5.$$
+
+If you don't want to create functions in C++, you can skip now to Section \ref{sec:mod-func}.
+
+\subsection{Class name and fields}
+
+As we have just said, variables are just symbols in expression. For this reason,
+they are represented by a classe named \hcf{ExprSymbol}.
+In fact, there is also another class we introduced for convenience, called \hcf{Variable}.
+Without going further into details, the latter must be seen as a kind of ``macro'': a \hcf{Variable} object
+generates \hcf{ExprSymbol} objects. This macro is only useful if you build variables in C++ (see \S\ref{sec:mod-var-cpp}).
+
+Once built, a variable is always typed \hcf{ExprSymbol}.
+
+If \cf{x} is an \hcf{ExprSymbol} object, you can obtain the information about its dimensions via \cf{x.dim}.
+The \hcf{dim} field is of type \hcf{Dim}, a class that simply contains 3 integers (one for each dimension, see
+the API for further details).
+
+Finally, a variable also have a name, that is only useful for displaying. It is a 
+regular C string (\cf{char*}) stored in the field \hcf{name}.
+
+
+%\subsection{Vector and matrix variables}
+
+
+
+\subsection{Creating variables (in C++)}\label{sec:mod-var-cpp}
 
 The following piece of code creates a variable \cf{x} and prints it.
 
@@ -62,11 +163,10 @@ The second instruction prints the name of the mathematical variable on the stand
 _x_0
 \end{lstlisting}
 
-It is possible to rename variables, see \S\ref{sec:mod-var-name}.
+It is possible to rename variables, see below. %\S\ref{sec:mod-var-name}.
 
-\subsection{Vector and matrix variables}\label{sec:mod-var-vec}
-
-Like in Matlab, variables can be vectors or matrices. To create a $n$-dimensional vector variable, just
+\subsubsection{Vector and matrix variables}\label{sec:mod-var-vec}
+To create a $n$-dimensional vector variable, just
 give the number $n$ as an arguement to the constructor:
 
 \begin{lstlisting}
@@ -86,7 +186,7 @@ We can go like this up to 3 dimensional arrays:
 \end{lstlisting}
 
 
-\subsection{Renaming variables}\label{sec:mod-var-name}
+\subsubsection{Renaming variables}\label{sec:mod-var-name}
 Usually, you don't really care about the names of mathematical variables since you handle
 program variables in your code.
 However, if you want a more user-friendly display, you can specify
@@ -108,9 +208,41 @@ x y z
 \end{lstlisting}
 
 
-\section{Creating functions}
+\section{Functions}\label{sec:mod-func}
 
 Mathematical functions are represented by objects of the class \hcf{Function}.
+
+These objects are very easy to build. Either refer to \S\ref{sec:mod-func-cpp}
+or \S\ref{sec:mod-func-quimper}.
+
+\subsection{Evaluation (forward computation)}
+
+We show now how to calculate the image of a box by a function $f$ or, in short, how
+to perform an {\it interval evaluation}.
+
+We assume that the function \cf{f} has been created to represent $(x,y)\mapsto \sin(x+y)$ (see the previous paragraph).
+
+We start by building a box (as explained in Chapter \ref{chap:arith}).
+The box must have as many components as the function has arguments, here, 2.
+
+Then we simply call \hcf{f.eval(...)} to get the image of the box by \cf{f}:
+
+\begin{lstlisting}
+  double _box[][2]= {{1,2},{3,4}};
+  IntervalVector box(2,_box);         // create the box ([1,2];[3,4])
+
+  cout << "initial box=" << box << endl;
+  cout << "f(box)=" << f.eval(box) << endl; 
+\end{lstlisting}
+
+\subsection{Projection (backward computation)}
+	
+\subsection{Gradient}
+
+\subsection{Jacobian and Hansen's matrix}
+
+\subsection{Creating functions (in C++)}\label{sec:mod-func-cpp}
+
 The following piece of code creates the function
 $(x,y)\mapsto \sin(x+y)$:
 
@@ -127,15 +259,14 @@ _f_0:(x,y)->sin((x+y))
 \end{lstlisting}
 %_f_0:(_x_0,_x_1)->sin((_x_0+_x_1))
 
-
-\subsection{Renaming functions}
+\subsubsection{Renaming functions}
 
 By default, function names are also generated. But you can also set your own function name, as the last argument of the constructor:
 \begin{lstlisting}
 Function f(x,y,sin(x+y),"f");
 \end{lstlisting}
 
-\subsection{Allowed symbols}
+\subsubsection{Allowed symbols}
 
 The following symbols are allowed in expressions:
 \begin{verbatim}
@@ -157,7 +288,7 @@ Here is an example of the distance function between (\cf{xa},\cf{ya}) and
   Function dist(xa,xb,ya,yb, sqrt(sqr(xa-xb)+sqr(ya-yb)));
 \end{lstlisting}
 
-\subsection{Functions with vector variables}
+\subsubsection{Functions with vector variables}
 
 If variables are vectors, you can refer to the component
 of a variable using square brackets. Indices start by 0,
@@ -171,7 +302,7 @@ variables \cf{a} and \cf{b} instead:
   Function dist(a,b,sqrt(sqr(a[0]-b[0])+sqr(a[1]-b[1])),"dist");
 \end{lstlisting}
 
-\subsection{Composition}
+\subsubsection{Composition}
 
 You can compose functions. Each argument of the called function can be substitued
 by a variable, a subexpression or a constant value.
@@ -189,7 +320,7 @@ using the generic distance function defined in the previous paragraph:
   Function f(x,dist(x,pt),"foo");
 \end{lstlisting}
 
-\subsection{Vector-valued functions}
+\subsubsection{Vector-valued functions}
 
 To define a vector-valued function, the \hcf{Return} keword allows
 you to list the function's components.
@@ -216,45 +347,21 @@ by degenerated intervals (like [0,0]):
 f:(x)->(dist(x,([0,0] ; [0,0])),dist(x,([1,1] ; [1,1])))
 \end{verbatim}
 
-\section{Computing with Functions}
-
-\subsection{Evaluation (forward computation)}
-
-We show now how to calculate the image of a box by a function $f$ or, in short, how
-to perform an {\it interval evaluation}.
-
-We assume that the function \cf{f} has been created to represent $(x,y)\mapsto \sin(x+y)$ (see the previous paragraph).
-
-We start by building a box (as explained in Chapter \ref{chap:arith}).
-The box must have as many components as the function has arguments, here, 2.
-
-Then we simply call \hcf{f.eval(...)} to get the image of the box by \cf{f}:
-
-\begin{lstlisting}
-  double _box[][2]= {{1,2},{3,4}};
-  IntervalVector box(2,_box);         // create the box ([1,2];[3,4])
-
-  cout << "initial box=" << box << endl;
-  cout << "f(box)=" << f.eval(box) << endl; 
-\end{lstlisting}
-
-\subsection{Projection (backward computation)}
-
-	
-\subsection{Gradient}
-
-\subsection{Jacobian and Hansen's matrix}
-
 \section{Constraints}
+
+\subsection{Creating constraints (in C++)}
 
 \section{Systems}
 
 A {\it system} in \ibex is a set of constraints with, optionnaly, a goal function to minimize.
 One is usually interested in solving the system while minimizing the criterion, if any.
 
-For this reason, a system is not as simple as a collection of {\it any} constraints.
-Each constraint must exactly relates the same set of variables. And this set must
+For this reason, a system is not as simple as a collection of {\it any} constraints:
+each constraint must exactly relates the same set of variables. And this set must
 also coincide with that of the goal function.
+Many algorithms of \ibex are based on this assumption.
+This is why they requires a system as argument (and not just an array of constraints).
+This makes systems a central concept in \ibex.
 
 A system is an object of the \hcf{System} class. This object is made of several fields
 that are detailed below. %We take as example the following system:
@@ -278,13 +385,20 @@ a initial box can be specified. It is contained in this field.
 be used as a regular C array.
 \end{itemize}
 
-\section{Creating Systems in C++}
+\subsection{Copy and transformation}\label{sec:mod-sys-transfo}
 
-Creating a system in C++ is done in three steps and must be done using a temporary object called a {\it system factory}:
+\subsection{Auxiliary functions}\label{sec:mod-sys-auxfunc}
+
+\subsection{Creating systems (in C++)}
+
+The first alternative for creating a system is to do it programmatically, that is, directly in your C++ program.
+Creating a system in C++ resorts to a temporary object called a {\it system factory}. The task is done in a few simple steps:
 \begin{enumerate}
-\item Add variables using \hcf{add_var}.
+\item declare a new system factory (an object of \hcf{SystemFactory})
+\item add variables in the factory using \hcf{add_var}.
 \item (optional) add the expression of the goal function using \hcf{add_goal}
 \item add the constraints using \hcf{add_ctr}
+\item create the system simply by passing the factory to the constructor of \cf{System}
 \end{enumerate}
 
 Here is an example:
@@ -301,11 +415,17 @@ Here is an example:
   System sys(fac);
 \end{lstlisting}
 
-\section{Loading Systems from a File}\label{sec:mod-sys-load}
+\section{The \quimper syntax}\label{sec:mod-sys-load}
 
-You can directly load a system from a (plain text) input file.
+Entering a system programmatically is usually not very convenient.
+You may prefer to separate the model of the problem from the algorithms
+you use to solve it. In this way, you can run the same program with different
+variants of your model without recompiling it each time.
 
-Here is a simple example that talks for itself:
+\ibex provides such possibility. You can directly load a system from a (plain text) input file.
+
+Here is a simple example. Copy-paste the text above in a file named, say, {\tt problem.txt}. 
+The syntax talks for itself:
 
 \begin{verbatim}
 Variables
@@ -319,8 +439,18 @@ Constraints
 end
 \end{verbatim}
 
+Then, in your C++ program, just write:
+
+\begin{lstlisting}
+System sys("problem.txt");
+\end{lstlisting}
+
+and the system you get is exactly the same as in the previous example.
+
+Next sections details the mini-language of these input files. 
+
 \subsection{Overall structure}
-The input file is a sequence of declaration blocks that must respect the following order:
+First of all, the input file is a sequence of declaration blocks that must respect the following order:
 \begin{enumerate}
 \item (optional) constants
 \item variables
@@ -329,12 +459,41 @@ The input file is a sequence of declaration blocks that must respect the followi
 \item constraints
 \end{enumerate}
 
-The following paragraphs detail each declaration blocks.
+Next paragraph gives the basic format of number and intervals.
+The subsequent paragraphs detail each declaration blocks.
+
+\subsection{Real and Intervals}
+A real is represented with the usual English format, that is
+with a dot separating the integral from the decimal part,
+and, possibly, using scientific notation.
+
+Here are some valid examples of reals in the syntax:
+\begin{verbatim}
+0
+3.14159
+-0.0001
+1.001e-10
++70.0000
+\end{verbatim}
+ 
+An interval are two reals separated by a comma
+and surrounded by square brackets. The special symbol
+{\tt oo} represents the infinity $\infty$.
+Note that, even with infinity bounds, the brackets
+must be squared (and not parenthesis as it should be since the
+bound is open). Here a some examples:
+
+\begin{verbatim}
+[0,1]
+[0,+oo]
+[-oo,oo]
+[1.01e-02,1.02e-02]
+\end{verbatim}
 
 \subsection{Constants}
 Constants are all defined in the same declaration block, 
 started with the \cf{Constants} keyword.
-A constant value can depends on other constants' value. Example:
+A constant value can depends on other (previously defined) constants value. Example:
 
 \begin{verbatim}
 Constants
@@ -344,6 +503,7 @@ Constants
 \end{verbatim} 
 
 You can give a constant an interval enclosure rather than a single fixed value.
+This interval will be embedded in all subsequent computations.
 In the previous example, we can give \cf{pi} a valid enclosure as below:
 
 \begin{verbatim}
@@ -354,7 +514,39 @@ Constants
 \end{verbatim}
 
 Constants can also be vector, matrices or array of matrices.
-The following table give examples of constant definitions. 
+In this case, the dimension is specified in brackets
+right after the name. For instance \cf{x[2]} means that 
+$x$ is a vector with 2 components. If the first component is equal
+to $0$ and the second to $1$, we write: 
+\begin{verbatim}
+Constants
+x[2] = [0; 1]
+\end{verbatim}
+
+{\bf important remark}. Do note confuse
+\cf{[0;1]} with \cf{[0,1]}
+\begin{itemize}
+\item \cf{[0;1]} is a 2-dimensional vector of two reals, namely 0 and 1
+\item \cf{[0,1]} is the 1-dimensional interval $[0,1]$
+\end{itemize}
+The difference is ``\cf{;}'' versus ``\cf{,}''.
+
+Of course, you mix vector with intervals. For instance:
+{\tt [[-oo,0];[0,+oo]]} is a vector of $2$ intervals, $(-\infty,0)$ and $(0,+\infty)$.
+
+To declare matrix constant, add an extra dimension in brackets:
+\begin{verbatim}
+Constants
+M[3][2] = [[0; 0] ; [0; 1]; [1; 0]]
+\end{verbatim}
+This will create the constant matrix \cf{M} with 3 rows and 2 columns equal to
+$$\begin{pmatrix}
+0 & 0 \\ 0 & 1 \\ 1 & 0
+\end{pmatrix}$$
+
+
+The following table summarizes the possibility for declaring constants
+through different examples.
 
 \begin{tabular}{l|l}
 \hline
@@ -381,9 +573,97 @@ $x=\begin{pmatrix}
 
 It is possible to define up to three dimensional vectors. 
 
-\subsection{Functions}
+\subsection{Functions}\label{sec:mod-func-quimper}
 
-\subsection{Loops}
+When the constraints involve the same expression repeatidly, it may be
+convenient for you to put this expression once for all in a separate auxiliary
+function and to call this function.
+
+Assume for instance that your constraints intensively use the following expression
+$$\sqrt{(x_a-x_b)^2+(y_a-y_b)^2)}$$
+where $x_a,\ldots y_b$ are various sub-expressions, like:
+\begin{verbatim}
+sqrt((xA-1.0)^2+(yA-1.0)^2<=0;
+sqrt((xA-(xB+xC))^2+(yA-(yB+yC))^2=0;
+...
+\end{verbatim}
+
+You can declare the distance function as follows.
+\begin{verbatim}
+function d=distance(xa,ya,xb,yb)
+ d=sqrt((xa-xb)^2+(ya-yb)^2
+end
+\end{verbatim}
+Note that \cf{d} corresponds to the returned value of the function,
+as in the Matlab syntax. We will call it the {\it return variable}.
+You will then be able to simplify the writing of constraints:
+\begin{verbatim}
+distance(xA,1.0,yA,1.0)<=0;
+distance(xA,xB+xC,yA,yB+yC)=0;
+...
+\end{verbatim}
+
+As you may expect, this will result in the creation of
+a \cf{Function} object (see \S\ref{sec:mod-func}) that
+you can access from your C++ program. This will be explained
+in \ref{sec:mod-sys-auxfunc}.
+
+A function can return a single value, a vector
+or a matrix. Similarly, it can take real, vectors or matrix arguments.
+You can also write some minimal ``code'' inside the function before
+assigning the final expression to the return variable. This
+code is however limited to be a sequence of assignments.
+
+Let us now illustrate all this with a more sophisticated example.
+We write below the function that calculates the rotation matrix
+from the three Euler angles, $\phi$, $\theta$ and $\psi$ :
+
+$R : (\phi,\psi,\theta) \mapsto$
+{\scriptsize
+$$\begin{pmatrix}
+\cos(\theta)\cos(\psi) & -\cos(\phi)\sin(\psi)+\sin(\theta)\cos(\psi)\sin(\phi) & \sin(\psi)\sin(\phi)+\sin(\theta)\cos(\psi)\cos(\phi)\\
+\cos(\theta)\sin(\psi) & \cos(\psi)\cos(\phi)+\sin(\theta)\sin(\psi)\sin(\phi) & -\cos(\psi)\sin(\phi)+\sin(\theta)\cos(\phi)\sin(\psi)\\
+-\sin(\theta) & \cos(\theta)\sin(\phi) & \cos(\theta)\cos(\phi);
+\end{pmatrix}
+$$}
+
+As you can see, there are many occurrences of the same subexpression
+like $\cos(\theta)$ so a good idea for both readibility and (actually) efficiency
+is to precalculate such pattern and put the result into an intermediate variable.
+
+Here is the way we propose to define this function:
+
+\begin{verbatim}
+/* Computes the rotation matrix from the Euler angles: 
+   roll(phi), the pitch (theta) and the yaw (psi)  */
+function R[3][3]=euler(phi,theta,psi)
+  cphi   = cos(phi);
+  sphi   = sin(phi);
+  ctheta = cos(theta);
+  stheta = sin(theta);
+  cpsi   = cos(psi);
+  spsi   = sin(psi);
+  
+  R[1][1]=ctheta*cpsi;
+  R[1][2]=-cphi*spsi+stheta*cpsi*sphi;  
+  R[1][3]=spsi*sphi+stheta*cpsi*cphi;
+  R[2][1]=ctheta*spsi;    
+  R[2][2]=cpsi*cphi+stheta*spsi*sphi;   
+  R[2][3]=-cpsi*sphi+stheta*cphi*spsi;
+  R[3][1]=-stheta;        
+  R[3][2]=ctheta*sphi;                  
+  R[3][3]=ctheta*cphi;
+end
+\end{verbatim}
+
+{\bf Remark}. Introducing temporary variables like \cf{cphi} amouts to build a DAG instead of
+a tree for the function expression. It is also possible (and easy) to build a DAG when you directly create
+a \cf{Function} object in C++ (to be documented).
+
+\subsection{Variables}
+
+\subsection{Constraints}
+\subsubsection{Loops}
 
 You can resort to loops in a Matlab-like syntax to define constraints. Example:
 
@@ -405,4 +685,3 @@ end
 \item You can use the \^{} symbol
 \end{itemize}
 
-\section{System copy and transformation}\label{sec:mod-sys-transfo}
