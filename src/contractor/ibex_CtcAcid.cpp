@@ -65,7 +65,7 @@ void CtcAcid::contract(IntervalVector& box) {
 			throw EmptyBoxException();
 		if (nbcall1 < nbinitcalls) {                   // on fait des stats pour le réglage courant
 			for (int i=0; i<initbox.size(); i++)
-				if  (initbox[i].diam() !=0)
+			  if  (initbox[i].diam() !=0 && box[i].diam()!= POS_INFINITY)
 					// gain sur la ième dimension de la boîte courante après var3BCID sur la v-ième variable
 					ctstat[v] += 1  - box[i].diam() / initbox[i].diam();
 			ctstat[v]=ctstat[v]/ initbox.size();   // gain moyen

@@ -64,7 +64,7 @@ bool Ctc3BCid::var3BCID(IntervalVector& box, int var) {
 	Interval& dom(box[var]);
 
 	if (dom.diam() < var_min_width) return false;      // domain already small enough : nothing to do
-
+        if (dom.diam() == POS_INFINITY) return false;     //  no hanndling infinite domains
 	double w_DC = dom.diam() / s3b;
 	int locs3b=s3b;
 
