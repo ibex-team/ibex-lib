@@ -25,6 +25,7 @@ namespace ibex {
 
 bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 
+  //  cout << " box update loup " << box << endl;
 	IntervalVector G(n); // vector to be used by the partial derivatives
 
 	IntervalVector x_inf(box.lb());
@@ -41,7 +42,8 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 	// ============================================================
 	sys.goal->gradient(box,G);
 
-	//     if(G.max_diameter()>1e8) return false; //to avoid problems with SoPleX
+	for (int i =0; i< n ; i++)
+	  if (G[i].diam() > 1e8) return false;   //to avoid problems with SoPleX
 
 	int nsimplex=n+1;  // the n variables + the objective
 	DSVector row1(nsimplex);
@@ -72,8 +74,9 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 
 		sys.f[i].gradient(box,G);                     // gradient calculation
 
-		// ============================================================
-		//     if(G.max_diameter()>1e8) return false; //to avoid problems with SoPleX
+		for (int ii =0; ii< n ; ii++)
+		  if (G[ii].diam() > 1e8) {return false;}   //to avoid problems with SoPleX
+
 		DSVector row1(nsimplex);
 
 		//The contraints i is generated:
@@ -98,6 +101,8 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 	mysoplex.setTerminationIter(30);
 	mysoplex.setDelta(1e-10);
 
+
+	//	mysoplex.writeFile("dump.lp", NULL, NULL, NULL);
 	try{
 		stat = mysoplex.solve();
 	} catch(SPxException&) {

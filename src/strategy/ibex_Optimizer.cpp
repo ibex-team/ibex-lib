@@ -86,7 +86,7 @@ bool Optimizer::update_loup(const IntervalVector& box) {
 }
 
 bool Optimizer::contract_and_bound(Cell& c) {
-        //cout << c.box << endl;
+  //  cout << "box " <<c.box << endl;
 	/*======================== contract y with y<=loup ========================*/
 	Interval& y=c.box[goal_var];
 
@@ -156,17 +156,20 @@ void Optimizer::optimize(const IntervalVector& init_box) {
 
 	// add data required by the bisector
 	bsc.init_root(*root);
-	int loup_changed=0;
+
+	bool loup_changed=0;
+	Timer::start();
 	try {
 		loup_changed=contract_and_bound(*root);
-	} catch(EmptyBoxException&) {
+	}
+	catch(EmptyBoxException&) {
 		delete root;
 		return;
 	}
 
 	buffer.push(root);
 	if (loup_changed && trace) cout  << " uplo=" << ((CellHeap&) buffer ).minimum() << endl;
-	Timer::start();
+
 
 	try {
 	  while (!buffer.empty()) {
@@ -175,16 +178,12 @@ void Optimizer::optimize(const IntervalVector& init_box) {
 
 		Cell* c=buffer.top();
 
-
-
-    
 		pair<IntervalVector,IntervalVector> boxes=bsc.bisect(*c);
 		pair<Cell*,Cell*> new_cells=c->bisect(boxes.first,boxes.second);
 
 		delete buffer.pop();
 
-
-		bool loup_changed=0;
+		loup_changed=0;
 
 		try {
 			loup_changed = contract_and_bound(*new_cells.first);
