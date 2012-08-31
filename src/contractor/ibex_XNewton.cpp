@@ -33,7 +33,7 @@ const double X_Newton::default_max_diam_deriv =1e5;
 const double X_Newton::default_max_diam_box =1e4;
 
 
-
+using namespace soplex;
 
 // the constructor
 X_Newton::X_Newton(const System& sys, Ctc* ctc, vector<corner_point>& cpoints, int goal_ctr, Function* fgoal, 

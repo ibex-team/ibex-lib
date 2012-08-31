@@ -104,6 +104,16 @@ public:
 	Function(const Function&);
 
 	/**
+	 * \brief Return the total input size.
+	 *
+	 * This size is the sum of the numbers of components, for
+	 * all symbols.
+	 * \warning very slow!
+	 * \see #nb_symbols() const.
+	 */
+	int input_size() const;
+
+	/**
 	 * \brief Number of components of f
 	 *
 	 * If f is a real-valued function, the result is 1.
@@ -162,14 +172,6 @@ public:
 	 * \brief Return the number of symbols (or arguments).
 	 */
 	int nb_symbols() const;
-
-	/**
-	 * \brief Return the total input size.
-	 *
-	 * This size is the sum of the numbers of components, for
-	 * all symbols.
-	 */
-	int input_size() const;
 
 	/**
 	 * \brief Return true if the ith argument is used in the function.
@@ -288,7 +290,17 @@ public:
 	IntervalMatrix eval_matrix(const IntervalVector& x) const;
 
 	/**
-	 * \brief Calculate the gradient of f
+	 * \brief Calculate the gradient of f.
+	 * \pre f must be real-valued
+	 */
+	IntervalVector gradient(const IntervalVector& x) const;
+
+	/**
+	 * \brief Calculate the gradient of f.
+	 *
+	 * \param x - the input box
+	 * \param g - where the gradient has to be stored (output parameter).
+	 *
 	 * \pre f must be real-valued
 	 */
 	void gradient(const IntervalVector& x, IntervalVector& g) const;
@@ -297,7 +309,17 @@ public:
 	 * \brief Calculate the Jacobian matrix of f
 	 * \pre f must be vector-valued
 	 */
-	void jacobian(const IntervalVector& x, IntervalMatrix& g) const;
+	IntervalMatrix jacobian(const IntervalVector& x) const;
+
+	/**
+	 * \brief Calculate the Jacobian matrix of f
+	 *
+	 * \param x - the input box
+	 * \param J - where the Jacobian matrix has to be stored (output parameter).
+	 *
+	 * \pre f must be vector-valued
+	 */
+	void jacobian(const IntervalVector& x, IntervalMatrix& J) const;
 
 	/**
 	 * \brief Calculate the Hansen matrix of f
@@ -582,6 +604,18 @@ inline void Function::iproj(const Interval& y, IntervalVector& x) const {
 
 inline void Function::iproj(const Interval& y, IntervalVector& x, const IntervalVector& xin) const {
 	iproj(Domain((Interval&) y),x,xin);
+}
+
+inline IntervalVector Function::gradient(const IntervalVector& x) const {
+	IntervalVector g(x.size());
+	gradient(x,g);
+	return g;
+}
+
+inline IntervalMatrix Function::jacobian(const IntervalVector& x) const {
+	IntervalMatrix J(output_size(),x.size());
+	jacobian(x,J);
+	return J;
 }
 
 } // namespace ibex

@@ -18,8 +18,6 @@
 #include "ibex_NumConstraint.h"
 #include "soplex.h"
 
-using namespace soplex;
-
 namespace ibex {
 
 /** \ingroup ctcgroup
@@ -146,17 +144,17 @@ class X_Newton : public Ctc {
   
   ctc_mode cmode;
  
-  SPxSolver::Status run_simplex(IntervalVector & box,SoPlex& mysoplex, SPxLP::SPxSense sense, int var, int n, Interval& obj, double bound, vector<Interval>& taylor_ev );
+  soplex::SPxSolver::Status run_simplex(IntervalVector & box,soplex::SoPlex& mysoplex, soplex::SPxLP::SPxSense sense, int var, int n, Interval& obj, double bound, vector<Interval>& taylor_ev );
 
   /** Tries to add a linearization in the model mysoplex. Returns true if it is succesful **/
-  int X_Linearization(IntervalVector & box,SoPlex& mysoplex, int ctr, corner_point cpoint, vector<Interval>& taylor_ev, IntervalVector &G, 
+  int X_Linearization(IntervalVector & box,soplex::SoPlex& mysoplex, int ctr, corner_point cpoint, vector<Interval>& taylor_ev, IntervalVector &G,
 		      int id_point, int& non_linear_vars);
 
-  int X_Linearization(IntervalVector& box, SoPlex& mysoplex, int ctr, corner_point cpoint, CmpOp op, vector<Interval>& taylor_ev, 
+  int X_Linearization(IntervalVector& box, soplex::SoPlex& mysoplex, int ctr, corner_point cpoint, CmpOp op, vector<Interval>& taylor_ev,
   IntervalVector &G, int id_point, int& non_linear_vars);
 
   bool isInner(IntervalVector & box,const System& sys, int j);
-  void choose_next_variable ( IntervalVector& box,SoPlex& mysoplex , int & nexti, int & infnexti, int* inf_bound, int* sup_bound);
+  void choose_next_variable ( IntervalVector& box,soplex::SoPlex& mysoplex , int & nexti, int & infnexti, int* inf_bound, int* sup_bound);
 
 
 /*

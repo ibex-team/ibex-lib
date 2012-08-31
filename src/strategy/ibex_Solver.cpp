@@ -17,8 +17,7 @@ using namespace std;
 namespace ibex {
 
 Solver::Solver(Ctc& ctc, Bsc& bsc, CellBuffer& buffer, double prec) :
-  ctc(ctc), bsc(bsc), buffer(buffer), prec(prec), cell_limit(-1),time_limit(-1), time(0),
-  trace(0) {
+  ctc(ctc), bsc(bsc), buffer(buffer), prec(prec), cell_limit(-1),time_limit(-1), trace(0), time(0) {
 
 	nb_cells=0;
 
