@@ -157,8 +157,8 @@ double Interval::delta(const Interval& x) const {
 	if (d==POS_INFINITY) {
 		//cout << "d=" << d << " dx=" << dx << endl;
 		if (dx==POS_INFINITY) {
-			int left=(x.lb()==NEG_INFINITY? 0 : x.lb()-lb());
-			int right=(x.ub()==POS_INFINITY? 0 : ub()-x.ub());
+			double left=(x.lb()==NEG_INFINITY? 0 : x.lb()-lb());
+			double right=(x.ub()==POS_INFINITY? 0 : ub()-x.ub());
 			return left+right;
 
 			cout << "left=" << left << " right=" << right << endl;
