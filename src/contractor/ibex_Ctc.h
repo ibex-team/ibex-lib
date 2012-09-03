@@ -77,11 +77,11 @@ public:
 
 
 	/**
-	 * \brief Whether this contractor is independent (optional)
+	 * \brief Whether this contractor is idempotent (optional)
 	 *
 	 * By default: return false.
 	 */
-	virtual bool indempotent() {
+	virtual bool idempotent() {
 		return false;
 	}
 

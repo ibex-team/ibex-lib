@@ -43,6 +43,13 @@ public:
 	 */
 	virtual void contract(IntervalVector& box);
 
+	/*
+	 * \brief Whether this contractor is idempotent (optional)
+	 */
+	// TODO
+	// bool idempotent();
+	//
+
 	/**
 	 * The constraint.
 	 */

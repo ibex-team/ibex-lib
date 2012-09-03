@@ -42,6 +42,11 @@ public:
 	virtual void contract(IntervalVector& box);
 
 	/**
+	 * \brief Return true.
+	 */
+	virtual bool idempotent();
+
+	/**
 	 * \brief The precision.
 	 */
 	const double ceil;

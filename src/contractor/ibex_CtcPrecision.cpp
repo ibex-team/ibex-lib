@@ -28,4 +28,8 @@ void CtcPrecision::contract(IntervalVector& box) {
 	}
 }
 
+bool CtcPrecision::idempotent() {
+	return true;
+}
+
 } // end namespace ibex

@@ -111,7 +111,7 @@ void  CtcPropag::contract(IntervalVector& box, const BoolMask& start) {
 			if (old_box[v].ratiodelta(box[v])>=ratio) {
 				set<int> ctrs=g.output_ctrs(v);
 				for (set<int>::iterator c2=ctrs.begin(); c2!=ctrs.end(); c2++) {
-					if (c!=*c2 || !list[c].indempotent())
+					if (c!=*c2 || !list[c].idempotent())
 						agenda.push(*c2);
 				}
 				// ===================== coarse propagation =========================

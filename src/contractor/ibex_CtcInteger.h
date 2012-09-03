@@ -34,7 +34,7 @@ public:
 
 	virtual void contract(IntervalVector& box, const BoolMask& impact);
 
-	virtual bool indempotent();
+	virtual bool idempotent();
 
 	/**
 	 * The mask.
