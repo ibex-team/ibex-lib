@@ -40,7 +40,7 @@ void CtcInteger::contract(IntervalVector& box, const BoolMask& impact) {
 	}
 }
 
-bool CtcInteger::indempotent() {
+bool CtcInteger::idempotent() {
 	return true;
 }
 
