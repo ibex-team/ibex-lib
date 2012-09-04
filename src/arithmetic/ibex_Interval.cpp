@@ -149,19 +149,23 @@ double Interval::delta(const Interval& x) const {
 	// checking if *this or x is infinite by
 	// testing if the lower/upper bounds are -oo/+oo
 	// is not enough because diam() may return +oo even
-	// with finite bounds (very large intervals).
+	// with finite bounds (e.g, very large intervals like [-DBL_MAX,DBL_MAX]).
+    // ("almost-unboundedness")
 
-	double d=diam();
-	double dx=x.diam();
-	//
+	volatile double d=diam();
+	volatile double dx=x.diam();
+	// furthermore, if these variables are not declared volatile
+	// conditions like d==POS_INFINITY are evaluated
+	// to FALSE for intervals like [-DBL_MAX,DBL_MAX] (with -O3 option)
+	// while the returned expression (d-dx) evaluates to +oo (instead of 0).
+
 	if (d==POS_INFINITY) {
 		//cout << "d=" << d << " dx=" << dx << endl;
 		if (dx==POS_INFINITY) {
 			double left=(x.lb()==NEG_INFINITY? 0 : x.lb()-lb());
 			double right=(x.ub()==POS_INFINITY? 0 : ub()-x.ub());
+			//cout << "left=" << left << " right=" << right << endl;
 			return left+right;
-
-			cout << "left=" << left << " right=" << right << endl;
 		} else
 			return POS_INFINITY;
 	}

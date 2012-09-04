@@ -74,7 +74,7 @@ void  CtcPropag::contract(IntervalVector& box, const BoolMask& start) {
 	//     thres(i) = ratio*Diam(box(i));
 	//     if (thres(i)<w) thres(i)=w;
 	//   }
-
+	//cout << "=========== Start propagation ==========" << endl;
 	while (!agenda.empty()) {
 
 		agenda.pop(c);
@@ -97,6 +97,7 @@ void  CtcPropag::contract(IntervalVector& box, const BoolMask& start) {
 		}
 		catch (EmptyBoxException& e) {
 			agenda.flush();
+			//cout << "=========== End propagation ==========" << endl;
 			//cout << "   empty!" << endl;
 			throw e;
 		}
@@ -122,7 +123,7 @@ void  CtcPropag::contract(IntervalVector& box, const BoolMask& start) {
 			}
 		}
 	}
-
+	//cout << "=========== End propagation ==========" << endl;
 	/* we cancel the "residual" contractions
 	 * in order to trigger more propagation next
 	 * time this function is called. This action
