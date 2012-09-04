@@ -37,7 +37,7 @@ void TestCtcSubBox::test01() {
 	IntervalVector resbox(4,_resbox);
 
 	c2.contract(box);
-	cout << "box= " << box << endl;
+
 	check(box,resbox);
 }
 
@@ -53,11 +53,12 @@ void TestCtcSubBox::test02() {
 	CtcProj c(f);
 
 	CtcSubBox c2(c,mask);
+
 	double _box[][2] = {{0,1},{1,3},{0,1},{4,5}};
 
 	IntervalVector box(4,_box);
 
-	TEST_THROWS(c2.contract(box), EmptyBoxException);
+	TEST_THROWS(c2.contract(box), EmptyBoxException&);
 }
 
 } // end namespace
