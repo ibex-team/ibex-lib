@@ -167,11 +167,12 @@ using namespace std;
 
 %token TK_IN
 
-%nonassoc TK_EQU '<' TK_LEQ '>' TK_GEQ    /* on interdit donc a < b < c */
+%nonassoc TK_EQU '<' TK_LEQ '>' TK_GEQ    /* we forbid a < b < c */
 %left '+' '-' TK_UNION
 %left '*' '/' TK_INTERSEC
 %left '^'
-%left '['
+%left '[' '('
+
 
 /* --------------------------- Nonterminals types -------------------------- */
 
@@ -194,8 +195,8 @@ using namespace std;
 
 /* expressions */
 %type<expression>  expr
-%type<expressions> expr_list
-
+%type<expressions> expr_row
+%type<expressions> expr_col
 %%
 
 
@@ -397,7 +398,8 @@ expr          : expr '+' expr	                { $$ = &(*$1 + *$3); }
               | '+' expr                        { $$ = $2; }
               | '(' expr ')'		            { $$ = $2; }
               | expr '[' expr ']'               { $$ = new P_ExprIndex(*$1,*$3); }
-              | '(' expr_list ')'               { $$ = &ExprVector::new_(Array<const ExprNode>(*$2),false); delete $2; }
+              | '(' expr_row ')'                { $$ = &ExprVector::new_(Array<const ExprNode>(*$2),true); delete $2; }
+              | '(' expr_col ')'                { $$ = &ExprVector::new_(Array<const ExprNode>(*$2),false); delete $2; }
               | TK_ENTITY                       { $$ = &scopes.top().get_entity($1).symbol; free($1); /* cannot happen inside a function expr */}
               | '{' TK_INTEGER '}'              { $$ = &source.vars[$2]->symbol;                      /* CHOCO variable symbols */ }
               | TK_ITERATOR                     { $$ = new ExprIter($1); free($1); }
@@ -405,7 +407,7 @@ expr          : expr '+' expr	                { $$ = &(*$1 + *$3); }
               | TK_FUNC_TMP_SYMBOL              { $$ = &scopes.top().get_func_tmp_expr($1); free($1); }
               | TK_CONSTANT                     { $$ = &ExprConstant::new_(scopes.top().get_cst($1)); free($1); }
               | TK_FUNC_SYMBOL '(' expr ')'     { $$ = &scopes.top().get_func($1)(*$3); free($1); }
-              | TK_FUNC_SYMBOL '(' expr_list ')'{ $$ = &scopes.top().get_func($1)(*$3); free($1); delete $3; }
+              | TK_FUNC_SYMBOL '(' expr_row ')' { $$ = &scopes.top().get_func($1)(*$3); free($1); delete $3; }
               | TK_FLOAT                        { $$ = &ExprConstant::new_scalar($1); }
               | TK_INTEGER                      { $$ = &ExprConstant::new_scalar((double) $1); }
               | interval                        { $$ = &ExprConstant::new_scalar(*$1); delete $1; }
@@ -414,7 +416,12 @@ expr          : expr '+' expr	                { $$ = &(*$1 + *$3); }
               | TK_SUP '(' expr ')'             { $$ = &ExprConstant::new_scalar(_2domain(*$3).i().mid()); }
               ;
 	      
-expr_list     : expr_list ',' expr              { $1->push_back($3); $$=$1; }
-              | expr ',' expr                   { $$ = new vector<const ExprNode*>; 
+expr_row      : expr_row  ',' expr              { $1->push_back($3); $$=$1; }
+              | expr ',' expr                   { $$ = new vector<const ExprNode*>(); 
                                                   $$->push_back($1); $$->push_back($3); }
               ;
+
+expr_col      : expr_col  ';' expr              { $1->push_back($3); $$=$1; }
+              | expr ';' expr                   { $$ = new vector<const ExprNode*>(); 
+                                                  $$->push_back($1); $$->push_back($3); }
+              ;              

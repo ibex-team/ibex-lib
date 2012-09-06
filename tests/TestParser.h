@@ -22,6 +22,11 @@ class TestParser : public TestIbex {
 public:
 	TestParser() {
 		TEST_ADD(TestParser::var01);
+
+		TEST_ADD(TestParser::const01);
+		TEST_ADD(TestParser::const02);
+		TEST_ADD(TestParser::const03);
+
 		TEST_ADD(TestParser::ponts);
 		TEST_ADD(TestParser::choco01);
 		TEST_ADD(TestParser::func01);
@@ -29,6 +34,11 @@ public:
 	}
 
 	void var01();
+
+	void const01();
+	void const02();
+	void const03();
+
 	void func01();
 	void ponts();
 	void choco01();

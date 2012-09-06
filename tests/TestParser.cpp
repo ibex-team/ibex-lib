@@ -48,6 +48,39 @@ void TestParser::var01() {
 	TEST_ASSERT(sys.ctrs[0].op==GEQ);
 }
 
+void TestParser::const01() {
+	try {System sys("quimper/const01.qpr");
+	check(sys.box[0],Interval(3.14159));
+	} catch(SyntaxError& e) {
+		cout << e << endl;
+		TEST_ASSERT(false);
+	}
+}
+
+void TestParser::const02() {
+	try {
+		System sys("quimper/const02.qpr");
+		double _box[3][2]={{0,0},{1,1},{2,2}};
+		IntervalVector box(3,_box);
+		check(sys.box,box);
+	} catch(SyntaxError& e) {
+		cout << e << endl;
+		TEST_ASSERT(false);
+	}
+}
+
+void TestParser::const03() {
+	try {
+		System sys("quimper/const03.qpr");
+		double _m[6][2]={{0,0},{1,1},{2,2},
+				{3,3},{4,4},{5,5}};
+		IntervalVector box(6,_m);
+		check(sys.box,box);
+	} catch(SyntaxError& e) {
+		cout << e << endl;
+		TEST_ASSERT(false);
+	}
+}
 
 void TestParser::func01() {
 	System sys("quimper/func01.qpr");

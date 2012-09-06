@@ -11,14 +11,20 @@
 
 #include "TestSystem.h"
 #include "ibex_System.h"
+#include "ibex_SyntaxError.h"
 #include <sstream>
 
 namespace ibex {
 
 void TestSystem::copy01() {
-	System sys("../benchs/michalewicz-11.bch");
+	try {
+		System sys("../benchs/michalewicz-11.bch");
+		System sys2(sys,System::EXTEND);
+	} catch(SyntaxError& e) {
+		cerr << e << endl;
+		exit(1);
+	}
 
-	System sys2(sys,System::EXTEND);
 
 }
 
