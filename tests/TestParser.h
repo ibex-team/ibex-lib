@@ -21,15 +21,15 @@ class TestParser : public TestIbex {
 
 public:
 	TestParser() {
-		TEST_ADD(TestParser::file01);
+		TEST_ADD(TestParser::var01);
 		TEST_ADD(TestParser::ponts);
 		TEST_ADD(TestParser::choco01);
-		TEST_ADD(TestParser::file_func01);
+		TEST_ADD(TestParser::func01);
 //		TEST_ADD(TestParser::error01);
 	}
 
-	void file01();
-	void file_func01();
+	void var01();
+	void func01();
 	void ponts();
 	void choco01();
 	void error01();

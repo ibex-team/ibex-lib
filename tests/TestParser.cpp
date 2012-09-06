@@ -30,8 +30,8 @@ static bool sameExpr(const ExprNode& node, const ExprNode& node2) {
 	return strcmp(s.str().c_str(),s2.str().c_str())==0;
 }
 
-void TestParser::file01() {
-	System sys("file01.txt");
+void TestParser::var01() {
+	System sys("quimper/var01.qpr");
 	TEST_ASSERT(sys.func.is_empty());
 	TEST_ASSERT(sys.vars.size()==1);
 	TEST_ASSERT(strcmp(sys.vars[0].name,"x")==0);
@@ -49,8 +49,8 @@ void TestParser::file01() {
 }
 
 
-void TestParser::file_func01() {
-	System sys("file_func01.txt");
+void TestParser::func01() {
+	System sys("quimper/func01.qpr");
 
 	TEST_ASSERT(sys.vars.size()==1);
 	TEST_ASSERT(strcmp(sys.vars[0].name,"x")==0);
@@ -72,7 +72,7 @@ void TestParser::file_func01() {
 }
 
 void TestParser::ponts() {
-	System sys("ponts.txt");
+	System sys("quimper/ponts.qpr");
 	Ponts30 sys2;
 	TEST_ASSERT(sys.func.is_empty());
 	TEST_ASSERT(sys.vars.size()==30);
@@ -111,7 +111,7 @@ void TestParser::choco01() {
 }
 
 void TestParser::error01() {
-	TEST_THROWS(System("error01.txt"),SyntaxError&);
+	TEST_THROWS(System("quimper/error01.qpr"),SyntaxError&);
 }
 
 } // end namespace

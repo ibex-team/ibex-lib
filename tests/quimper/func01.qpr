@@ -1,0 +1,11 @@
+
+variables
+ x;
+
+function y=foo(x2) 
+ y=x2;
+end
+
+constraints
+ x=foo(x);
+end
