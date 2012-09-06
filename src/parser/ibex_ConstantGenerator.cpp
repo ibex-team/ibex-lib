@@ -111,6 +111,7 @@ void ConstantGenerator::visit(const ExprVector& e) {
 	// to yield an array of matrices
 
 	for (int i=0; i<e.nb_args; i++) {
+		visit(e.arg(i));
 		const Domain& di=(*((const Domain*) e.arg(i).deco.tmp));
 		if (d->dim.is_vector()) d->v()[i]=di.i();
 		else d->m()[i]=di.v();
