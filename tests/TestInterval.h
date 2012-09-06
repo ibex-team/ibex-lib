@@ -139,6 +139,8 @@ public:
 		TEST_ADD(TestInterval::integer08);
 
 	    TEST_ADD(TestInterval::delta01);
+	    TEST_ADD(TestInterval::delta02);
+	    TEST_ADD(TestInterval::delta03);
 	}
 private:
 
@@ -316,6 +318,8 @@ private:
 	void integer08();
 
 	void delta01();
+	void delta02();
+	void delta03();
 
 	void check_eq(const Interval& x, const Interval& y, bool);
 	void check_hull(const Interval& x, const Interval& z, const Interval& y_expected);

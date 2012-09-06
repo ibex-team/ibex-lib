@@ -25,7 +25,7 @@ public:
 		TEST_ADD(TestParser::ponts);
 		TEST_ADD(TestParser::choco01);
 		TEST_ADD(TestParser::file_func01);
-		TEST_ADD(TestParser::error01);
+//		TEST_ADD(TestParser::error01);
 	}
 
 	void file01();

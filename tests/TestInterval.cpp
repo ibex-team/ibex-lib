@@ -265,3 +265,20 @@ void TestInterval::delta01() {
 	//cout << "delta=" << x.delta(x) << " x.diam()=" << (x.diam()==POS_INFINITY) << endl;
 	TEST_ASSERT(x.delta(x)==0.0);
 }
+
+void TestInterval::delta02() {
+	double a=-3.6841361702068902e+17; // == DBL_MAX
+	Interval x(a,POS_INFINITY);
+	//cout << "delta=" << x.delta(x) << " x.diam()=" << (x.diam()==POS_INFINITY) << endl;
+	Interval y(Interval::ALL_REALS);
+	Interval z(NEG_INFINITY,a);
+	//cout << y.delta(x) << " " << z.diam() << endl;
+	TEST_ASSERT(y.delta(x)==z.diam());
+}
+
+void TestInterval::delta03() {
+	Interval x(-DBL_MAX,DBL_MAX); // so that diam()>DBL_MAX
+	//cout << x.diam() << " " << x.diam() << endl;
+	//cout << "delta=" << x.delta(x) << endl;
+	TEST_ASSERT(x.delta(x)==0);
+}

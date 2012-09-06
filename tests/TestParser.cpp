@@ -65,7 +65,6 @@ void TestParser::file_func01() {
 	TEST_ASSERT(sys.func[0].symbol(0).dim.is_scalar());
 	TEST_ASSERT(strcmp(sys.func[0].symbol(0).name,"x2")==0);
 	TEST_ASSERT(sameExpr(sys.func[0].expr(),"x2"));
-	cout << sys.f.expr() << endl;
 	TEST_ASSERT(sameExpr(sys.f.expr(),"(x-foo(x))"));
 	TEST_ASSERT(sys.ctrs.size()==1);
 	TEST_ASSERT(&sys.ctrs[0].f==&sys.f);
