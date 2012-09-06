@@ -23,22 +23,25 @@ namespace ibex {
 
 Function::~Function() {
 
-	/* warning... if there is only one constraint
-	 * then comp is the same object as f itself!
-	 *
-	 * This is not a very consistent choice...
-	 */
-	if (!expr().dim.is_scalar()) delete[] comp;
+	if (root!=NULL) {
 
-	for (unsigned int i=0; i<exprnodes.size(); i++) {
-		delete node(i).deco.d;
-		delete node(i).deco.g;
-		delete node(i).deco.p;
+		/* warning... if there is only one constraint
+		 * then comp is the same object as f itself!
+		 *
+		 * This is not a very consistent choice...
+		 */
+		if (!expr().dim.is_scalar()) delete[] comp;
+
+		for (unsigned int i=0; i<exprnodes.size(); i++) {
+			delete node(i).deco.d;
+			delete node(i).deco.g;
+			delete node(i).deco.p;
+		}
+		cleanup(expr(),false);
+
+		for (int i=0; i<nb_symbols(); i++)
+			delete &symbol(i);
 	}
-	cleanup(expr(),false);
-
-	for (int i=0; i<nb_symbols(); i++)
-		delete &symbol(i);
 
 	free((char*) name);
 }

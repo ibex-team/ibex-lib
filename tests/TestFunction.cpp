@@ -22,6 +22,11 @@ static bool sameExpr(const ExprNode& node, const char* expr) {
 	return strcmp(s.str().c_str(),expr)==0;
 }
 
+void TestFunction::build01() {
+	delete new Function();
+	TEST_ASSERT(true);
+}
+
 void TestFunction::add_symbol() {
 	const ExprSymbol& x=ExprSymbol::new_("x");
 	const ExprSymbol& y=ExprSymbol::new_("y");

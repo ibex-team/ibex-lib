@@ -10,6 +10,7 @@
 
 #include "ibex_P_ExprGenerator.h"
 #include "ibex_ConstantGenerator.h"
+#include "ibex_SyntaxError.h"
 
 namespace ibex {
 namespace parser {
@@ -38,6 +39,7 @@ void ExprGenerator::visit(const P_ExprPower& e) {
 
 void ExprGenerator::visit(const P_ExprIndex& e) {
 	int index=ConstantGenerator(scope).eval_integer(e.right);
+	if (index<=0) throw SyntaxError("Indices start from 1 (not 0)","",-1);
 	visit(e.left);
 	e.deco.tmp = &(LEFT[index-1]);
 }

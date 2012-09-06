@@ -295,10 +295,9 @@ decl_fnc      : TK_FUNCTION                     { scopes.push(Scope(scopes.top()
                 								  for(vector<const ExprSymbol*>::const_iterator it=$8->begin(); it!=$8->end(); it++)
                 								      x.set_ref(i++,ExprSymbol::new_((*it)->name,(*it)->dim));
                 								  const ExprNode& y= ExprGenerator(scopes.top()).generate(Array<const ExprSymbol>(*$8),x,*$13);
-                								  Function* f=new Function(x,y,$6);
-                                                  source.func.push_back(f);
+                								  Function* f=new Function(x,y,$6);                                                  
                                                   scopes.pop();
-                                                  scopes.top().add_func($3,f); 
+                                                  scopes.top().add_func($6,f); 
                                                   source.func.push_back(f);
                                                   free($3); free($6); 
                                                   cleanup(*$13,true); // will also delete symbols in $8
@@ -317,7 +316,7 @@ fnc_input     : TK_NEW_SYMBOL dimension         { $$=&ExprSymbol::new_($1,*$2);
               ;
 
 fnc_code      : fnc_code fnc_assign ';'              
-              | fnc_assign ';'                       
+              |                       
               ;
 
 fnc_assign    : TK_NEW_SYMBOL TK_EQU expr       { /* note: if this tmp symbol is not used, the expr $3 will never be deleted */

@@ -138,8 +138,8 @@ const char* duplicate_or_generate(const char* name) {
 
 }
 
-Function::Function() : name(strdup(next_generated_func_name())) {
-
+Function::Function() : name(strdup(next_generated_func_name())), root(NULL) {
+	// root==NULL <=> the function is not initialized yet
 }
 
 Function::Function(const ExprSymbol& x, const ExprNode& y, const char* name) : name(duplicate_or_generate(name)) {
