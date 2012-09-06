@@ -164,6 +164,12 @@ void CompiledFunction::visit(const ExprAtan2& e) { visit(e,ATAN2); }
 
 void CompiledFunction::visit(const ExprMinus& e) { visit(e,MINUS); }
 
+void CompiledFunction::visit(const ExprTrans& e)   {
+	if (e.dim.is_vector())              visit(e,TRANS_V);
+	else if (e.dim.type()==Dim::MATRIX) visit(e,TRANS_M);
+	else assert(false);
+}
+
 void CompiledFunction::visit(const ExprSign& e)  { visit(e,SIGN); }
 
 void CompiledFunction::visit(const ExprAbs& e)   { visit(e,ABS); }
@@ -220,6 +226,9 @@ const char* CompiledFunction::op(operation o) const {
 	case MAX:   return "max";
 	case MIN:   return "min";
 	case ATAN2: return "atan2";
+	case TRANS_V:
+	case TRANS_M:
+		        return "'";
 	case SIGN:  return "sign";
 	case ABS:   return "abs";
 	case POWER: return "pow";
@@ -228,11 +237,11 @@ const char* CompiledFunction::op(operation o) const {
 	case EXP:   return "exp";
 	case LOG:   return "log";
 	case COS:   return "cos";
-	case  SIN:  return "sin";
-	case  TAN:  return "tan";
-	case  ACOS: return "acos";
-	case  ASIN: return "asin";
-	case  ATAN: return "atan";
+	case SIN:   return "sin";
+	case TAN:   return "tan";
+	case ACOS:  return "acos";
+	case ASIN:  return "asin";
+	case ATAN:  return "atan";
 	case COSH:  return "cosh";
 	case SINH:  return "sinh";
 	case TANH:  return "tanh";
@@ -310,6 +319,8 @@ void CompiledFunction::print() const {
 		break;
 
 		case CompiledFunction::MINUS:
+		case CompiledFunction::TRANS_V:
+		case CompiledFunction::TRANS_M:
 		case CompiledFunction::SIGN:
 		case CompiledFunction::ABS:
 		case CompiledFunction::POWER:

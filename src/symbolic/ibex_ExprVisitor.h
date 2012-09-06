@@ -40,6 +40,7 @@ class ExprMin;
 class ExprAtan2;
 
 class ExprMinus;
+class ExprTrans;
 class ExprSign;
 class ExprAbs;
 class ExprPower;
@@ -169,9 +170,15 @@ class ExprVisitor {
 
 
   /*==================== unary operators =========================*/
-  /** Visit a sqr (Implementation is not mandatory).
+  /** Visit a minus sign (Implementation is not mandatory).
    * By default call visit(const ExprUnaryOp&). */
   virtual void visit(const ExprMinus& e) {
+	  visit((const ExprUnaryOp&) e);
+  }
+
+  /** Visit a transpose (Implementation is not mandatory).
+   * By default call visit(const ExprUnaryOp&). */
+  virtual void visit(const ExprTrans& e) {
 	  visit((const ExprUnaryOp&) e);
   }
 

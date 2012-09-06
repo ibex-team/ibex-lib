@@ -47,6 +47,8 @@ public:
 	inline void min_bwd   (const ExprMin&,     ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) { not_implemented("Inner projection of \"min\""); }
 	inline void atan2_bwd (const ExprAtan2& e, ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) { not_implemented("Inner projection of \"atan2\""); }
 	inline void minus_bwd (const ExprMinus& e, ExprLabel& x, const ExprLabel& y)                 { if (!iproj_minus(y.d->i(),x.d->i())) throw EmptyBoxException(); }
+    inline void trans_V_bwd(const ExprTrans& e,ExprLabel& x, const ExprLabel& y)                 { not_implemented("Inner projection of \"transpose\""); }
+    inline void trans_M_bwd(const ExprTrans& e,ExprLabel& x, const ExprLabel& y)                 { not_implemented("Inner projection of \"transpose\""); }
 	inline void sign_bwd  (const ExprSign& e,  ExprLabel& x, const ExprLabel& y)                 { not_implemented("Inner projection of \"sign\""); }
 	inline void abs_bwd   (const ExprAbs& e,   ExprLabel& x, const ExprLabel& y)                 { not_implemented("Inner projection of \"abs\""); }
 	inline void power_bwd (const ExprPower& e, ExprLabel& x, const ExprLabel& y)                 { if (!iproj_pow(y.d->i(),x.d->i(),e.expon, x.p->i())) throw EmptyBoxException(); }

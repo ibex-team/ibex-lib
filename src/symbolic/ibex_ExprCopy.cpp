@@ -105,6 +105,7 @@ void ExprCopy::visit(const ExprMin& e)   { visit(e.left); visit(e.right); e.deco
 void ExprCopy::visit(const ExprAtan2& e) { visit(e.left); visit(e.right); e.deco.tmp = & atan2(LEFT, RIGHT); }
 
 void ExprCopy::visit(const ExprMinus& e) { visit(e.expr); e.deco.tmp = & -    (EXPR); }
+void ExprCopy::visit(const ExprTrans& e) { visit(e.expr); e.deco.tmp = & transpose(EXPR); }
 void ExprCopy::visit(const ExprSign& e)  { visit(e.expr); e.deco.tmp = & sign (EXPR); }
 void ExprCopy::visit(const ExprAbs& e)   { visit(e.expr); e.deco.tmp = & abs  (EXPR); }
 void ExprCopy::visit(const ExprPower& e) { visit(e.expr); e.deco.tmp = & pow  (EXPR,e.expon); }

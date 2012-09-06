@@ -88,8 +88,20 @@ public:
 	/** \brief True if the three dimensions match */
 	bool operator==(const Dim& d) const;
 
-	/** \brief Compute the dimension of an expression obtained
-	 * by indexing an expression whose dimension is *this. */
+	/**
+	 * \brief Add an index to *this
+	 *
+	 * Compute the dimension of an expression obtained
+	 * by indexing an expression whose dimension is *this.
+	 */
+	Dim transpose_dim() const;
+
+	/**
+	 * \brief Transpose *this.
+	 *
+	 * Compute the dimension of the transpose expression obtained
+	 * by indexing an expression whose dimension is *this.
+	 */
 	Dim index_dim() const;
 
 	/** Compute the starting position of x[i] in a flat array

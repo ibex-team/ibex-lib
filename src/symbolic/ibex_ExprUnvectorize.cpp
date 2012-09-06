@@ -268,6 +268,7 @@ void ExprUnvectorize::visit(const ExprMin& e)   { visit(e.left); visit(e.right);
 void ExprUnvectorize::visit(const ExprAtan2& e) { visit(e.left); visit(e.right); peers[e.id] = & atan2(*peers[e.left.id], *peers[e.right.id]); }
 
 void ExprUnvectorize::visit(const ExprMinus& e) { visit(e.expr); peers[e.id] = & -    (*peers[e.expr.id]); }
+void ExprUnvectorize::visit(const ExprTrans& e) { visit(e.expr); peers[e.id] = & transpose(*peers[e.expr.id]); }
 void ExprUnvectorize::visit(const ExprSign& e)  { visit(e.expr); peers[e.id] = & sign (*peers[e.expr.id]); }
 void ExprUnvectorize::visit(const ExprAbs& e)   { visit(e.expr); peers[e.id] = & abs  (*peers[e.expr.id]); }
 void ExprUnvectorize::visit(const ExprPower& e) { visit(e.expr); peers[e.id] = & pow  (*peers[e.expr.id],e.expon); }

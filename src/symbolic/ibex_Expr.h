@@ -750,6 +750,28 @@ private:
 
 /**
  * \ingroup symbolic
+ * \brief Transpose
+ */
+class ExprTrans : public ExprUnaryOp {
+public:
+	/** Create an equality constraint expr'=expr. */
+	const ExprCtr& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+
+	/** Create an equality constraint expr'=value. */
+	const ExprCtr& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+
+	/** Accept an #ibex::ExprVisitor visitor. */
+	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
+
+	static const ExprTrans& new_(const ExprNode& expr) { return *new ExprTrans(expr); }
+
+private:
+	ExprTrans(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim.transpose_dim()) { }
+	ExprTrans(const ExprTrans&); // copy constructor forbidden
+};
+
+/**
+ * \ingroup symbolic
  * \brief Sign of an expression
  */
 class ExprSign : public ExprUnaryOp {
@@ -1474,6 +1496,11 @@ inline const ExprNode& pow(const ExprNode& left, int expon) {
 /** Minus sign */
 inline const ExprMinus& operator-(const ExprNode& expr) {
 	return ExprMinus::new_(expr);
+}
+
+/** Transpose */
+inline const ExprTrans& transpose(const ExprNode& expr) {
+	return ExprTrans::new_(expr);
 }
 
 /** Sign */

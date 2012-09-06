@@ -90,8 +90,16 @@ protected:
 	/** TO BE DEFINED (by the subclass) */
 	void atan2_bwd(const ExprAtan2&, ExprLabel& leftL, ExprLabel& rightL, const ExprLabel& result);
 
+	/*==================== unary operators =========================*/
+
 	/** TO BE DEFINED (by the subclass) */
 	void minus_bwd(const ExprMinus&, ExprLabel& exprL, const ExprLabel& result);
+
+	/** TO BE DEFINED (by the subclass) */
+	void trans_V_bwd(const ExprTrans&, ExprLabel& exprL, const ExprLabel& result);
+
+	/** TO BE DEFINED (by the subclass) */
+	void trans_M_bwd(const ExprTrans&, ExprLabel& exprL, const ExprLabel& result);
 
 	/** TO BE DEFINED (by the subclass) */
 	void sign_bwd(const ExprSign&, ExprLabel& exprL, const ExprLabel& result);

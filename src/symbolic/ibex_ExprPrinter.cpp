@@ -87,6 +87,7 @@ void ExprPrinter::visit(const ExprMin& e)   { (*os) << "min("  ; visit(e.left); 
 void ExprPrinter::visit(const ExprAtan2& e) { (*os) << "atan2("; visit(e.left); (*os) << ","; visit(e.right); (*os) << ")"; }
 
 void ExprPrinter::visit(const ExprMinus& e) { (*os) << "(-"   ; visit(e.expr); (*os) << ")"; }
+void ExprPrinter::visit(const ExprTrans& e) { (*os) << "("   ; visit(e.expr); (*os) << ")'"; }
 void ExprPrinter::visit(const ExprSign& e)  { (*os) << "sign("; visit(e.expr); (*os) << ")"; }
 void ExprPrinter::visit(const ExprAbs& e)   { (*os) << "abs(" ; visit(e.expr); (*os) << ")"; }
 void ExprPrinter::visit(const ExprPower& e) { visit(e.expr); (*os) << "^" << e.expon ; }

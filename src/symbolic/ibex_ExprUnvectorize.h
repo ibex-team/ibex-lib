@@ -60,6 +60,7 @@ protected:
 	void visit(const ExprMin& e);
 	void visit(const ExprAtan2& e);
 	void visit(const ExprMinus& e);
+	void visit(const ExprTrans& e);
 	void visit(const ExprSign& e);
 	void visit(const ExprAbs& e);
 	void visit(const ExprPower& e);

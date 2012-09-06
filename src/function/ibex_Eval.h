@@ -49,6 +49,8 @@ public:
 	inline void min_fwd(const ExprMin&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y);
 	inline void atan2_fwd(const ExprAtan2&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y);
 	inline void minus_fwd(const ExprMinus&, const ExprLabel& x, ExprLabel& y);
+	inline void trans_V_fwd(const ExprTrans&, const ExprLabel& x, ExprLabel& y);
+	inline void trans_M_fwd(const ExprTrans&, const ExprLabel& x, ExprLabel& y);
 	inline void sign_fwd(const ExprSign&, const ExprLabel& x, ExprLabel& y);
 	inline void abs_fwd(const ExprAbs&, const ExprLabel& x, ExprLabel& y);
 	inline void power_fwd(const ExprPower& p, const ExprLabel& x, ExprLabel& y);
@@ -134,6 +136,8 @@ inline void Eval::acosh_fwd(const ExprAcosh&, const ExprLabel& x, ExprLabel& y) 
 inline void Eval::asinh_fwd(const ExprAsinh&, const ExprLabel& x, ExprLabel& y)                       { y.d->i()=asinh(x.d->i()); }
 inline void Eval::atanh_fwd(const ExprAtanh&, const ExprLabel& x, ExprLabel& y)                       { y.d->i()=atanh(x.d->i()); }
 
+inline void Eval::trans_V_fwd(const ExprTrans&, const ExprLabel& x, ExprLabel& y)                     { y.d->v()=x.d->v(); }
+inline void Eval::trans_M_fwd(const ExprTrans&, const ExprLabel& x, ExprLabel& y)                     { y.d->m()=x.d->m().transpose(); }
 inline void Eval::add_V_fwd(const ExprAdd&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)   { y.d->v()=x1.d->v()+x2.d->v(); }
 inline void Eval::add_M_fwd(const ExprAdd&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)   { y.d->m()=x1.d->m()+x2.d->m(); }
 inline void Eval::mul_SV_fwd(const ExprMul&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)  { y.d->v()=x1.d->i()*x2.d->v(); }

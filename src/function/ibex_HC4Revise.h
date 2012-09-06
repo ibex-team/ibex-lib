@@ -63,6 +63,8 @@ public:
 	inline void min_bwd   (const ExprMin&,     ExprLabel& x1, ExprLabel& x2, const ExprLabel& y)    { if (!(proj_min(y.d->i(),x1.d->i(),x2.d->i()))) throw EmptyBoxException();  }
 	inline void atan2_bwd (const ExprAtan2& e, ExprLabel& x1, ExprLabel& x2, const ExprLabel& y)    { if (!(proj_atan2(y.d->i(),x1.d->i(),x2.d->i()))) throw EmptyBoxException();  }
 	inline void minus_bwd (const ExprMinus& e, ExprLabel& x, const ExprLabel& y)                    { if ((x.d->i() &=-y.d->i()).is_empty()) throw EmptyBoxException();  }
+    inline void trans_V_bwd(const ExprTrans& e,ExprLabel& x, const ExprLabel& y)                    { if ((x.d->v() &= y.d->v()).is_empty()) throw EmptyBoxException();  }
+    inline void trans_M_bwd(const ExprTrans& e,ExprLabel& x, const ExprLabel& y)                    { if ((x.d->m() &= y.d->m().transpose()).is_empty()) throw EmptyBoxException();  }
 	inline void sign_bwd  (const ExprSign& e,  ExprLabel& x, const ExprLabel& y)                    { if (!(proj_sign(y.d->i(),x.d->i()))) throw EmptyBoxException();  }
 	inline void abs_bwd   (const ExprAbs& e,   ExprLabel& x, const ExprLabel& y)                    { if (!(proj_abs(y.d->i(),x.d->i()))) throw EmptyBoxException();  }
 	inline void power_bwd (const ExprPower& e, ExprLabel& x, const ExprLabel& y)                    { if (!(proj_pow(y.d->i(),e.expon, x.d->i()))) throw EmptyBoxException();  }

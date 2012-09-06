@@ -52,6 +52,8 @@ public:
 	inline void min_fwd(const ExprMin&, const ExprLabel, const ExprLabel, ExprLabel& y)     { y.g->i()=0; }
 	inline void atan2_fwd(const ExprAtan2&, const ExprLabel, const ExprLabel, ExprLabel& y) { y.g->i()=0; }
 	inline void minus_fwd(const ExprMinus&, const ExprLabel&, ExprLabel& y)   { y.g->i()=0; }
+	inline void trans_V_fwd(const ExprTrans&, const ExprLabel&, ExprLabel& y) { y.g->v().clear(); }
+	inline void trans_M_fwd(const ExprTrans&, const ExprLabel&, ExprLabel& y) { y.g->m().clear(); }
 	inline void sign_fwd(const ExprSign&, const ExprLabel&, ExprLabel& y)     { y.g->i()=0; }
 	inline void abs_fwd(const ExprAbs&, const ExprLabel&, ExprLabel& y)       { y.g->i()=0; }
 	inline void power_fwd(const ExprPower& p, const ExprLabel&, ExprLabel& y) { y.g->i()=0; }
@@ -97,7 +99,9 @@ public:
 	inline void min_bwd   (const ExprMin&,     ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) { /* not implemented yet */ assert(false); }
 	inline void atan2_bwd (const ExprAtan2& e, ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) { /* not implemented yet */ assert(false); }
 	inline void minus_bwd (const ExprMinus& e, ExprLabel& x,                 const ExprLabel& y) { x.g->i() += -1.0*y.g->i(); }
-           void sign_bwd  (const ExprSign& e,  ExprLabel& x,                 const ExprLabel& y);
+    inline void trans_V_bwd (const ExprTrans& e, ExprLabel& x,               const ExprLabel& y) { x.g->v() += y.g->v(); }
+    inline void trans_M_bwd (const ExprTrans& e, ExprLabel& x,               const ExprLabel& y) { x.g->m() += y.g->m().transpose(); }
+	       void sign_bwd  (const ExprSign& e,  ExprLabel& x,                 const ExprLabel& y);
 	       void abs_bwd   (const ExprAbs& e,   ExprLabel& x,                 const ExprLabel& y);
 	inline void power_bwd (const ExprPower& e, ExprLabel& x,                 const ExprLabel& y) { x.g->i() += y.g->i() * e.expon * pow(x.d->i(), e.expon-1); }
 	inline void sqr_bwd   (const ExprSqr& e,   ExprLabel& x,                 const ExprLabel& y) { x.g->i() += y.g->i() * 2.0 * x.d->i(); }

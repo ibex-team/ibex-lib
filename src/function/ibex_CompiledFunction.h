@@ -68,7 +68,7 @@ protected:
 	typedef enum {
 		IDX, VEC, SYM, CST, APPLY,
 		ADD, MUL, SUB, DIV, MAX, MIN, ATAN2,
-		MINUS, SIGN, ABS, POWER,
+		MINUS, TRANS_V, TRANS_M, SIGN, ABS, POWER,
 		SQR, SQRT, EXP, LOG,
 		COS,  SIN,  TAN,  ACOS,  ASIN,  ATAN,
 		COSH, SINH, TANH, ACOSH, ASINH, ATANH,
@@ -101,6 +101,7 @@ private:
 	void visit(const ExprMin& e);
 	void visit(const ExprAtan2& e);
 	void visit(const ExprMinus& e);
+	void visit(const ExprTrans& e);
 	void visit(const ExprSign& e);
 	void visit(const ExprAbs& e);
 	void visit(const ExprPower& e);
@@ -164,6 +165,8 @@ ExprLabel& CompiledFunction::forward(const V& algo) const {
 		case MIN:    ((V&) algo).min_fwd  ((ExprMin&)      *(nodes[i]), *args[i][1], *args[i][2], *args[i][0]); break;
 		case ATAN2:  ((V&) algo).atan2_fwd((ExprAtan2&)    *(nodes[i]), *args[i][1], *args[i][2], *args[i][0]); break;
 		case MINUS:  ((V&) algo).minus_fwd((ExprMinus&)    *(nodes[i]), *args[i][1],                   *args[i][0]); break;
+		case TRANS_V:((V&) algo).trans_V_fwd((ExprTrans&)  *(nodes[i]), *args[i][1],                   *args[i][0]); break;
+		case TRANS_M:((V&) algo).trans_M_fwd((ExprTrans&)  *(nodes[i]), *args[i][1],                   *args[i][0]); break;
 		case SIGN:   ((V&) algo).sign_fwd ((ExprSign&)     *(nodes[i]), *args[i][1],                   *args[i][0]); break;
 		case ABS:    ((V&) algo).abs_fwd  ((ExprAbs&)      *(nodes[i]), *args[i][1],                   *args[i][0]); break;
 		case POWER:  ((V&) algo).power_fwd((ExprPower&)    *(nodes[i]), *args[i][1],                   *args[i][0]); break;
@@ -217,6 +220,8 @@ void CompiledFunction::backward(const V& algo) const {
 		case MIN:    ((V&) algo).min_bwd  ((ExprMin&)      *(nodes[i]), *args[i][1], *args[i][2], *args[i][0]); break;
 		case ATAN2:  ((V&) algo).atan2_bwd((ExprAtan2&)    *(nodes[i]), *args[i][1], *args[i][2], *args[i][0]); break;
 		case MINUS:  ((V&) algo).minus_bwd((ExprMinus&)    *(nodes[i]), *args[i][1],                   *args[i][0]); break;
+		case TRANS_V:((V&) algo).trans_V_bwd((ExprTrans&)  *(nodes[i]), *args[i][1],                   *args[i][0]); break;
+		case TRANS_M:((V&) algo).trans_M_bwd((ExprTrans&)  *(nodes[i]), *args[i][1],                   *args[i][0]); break;
 		case SIGN:   ((V&) algo).sign_bwd ((ExprSign&)     *(nodes[i]), *args[i][1],                   *args[i][0]); break;
 		case ABS:    ((V&) algo).abs_bwd  ((ExprAbs&)      *(nodes[i]), *args[i][1],                   *args[i][0]); break;
 		case POWER:  ((V&) algo).power_bwd((ExprPower&)    *(nodes[i]), *args[i][1],                   *args[i][0]); break;

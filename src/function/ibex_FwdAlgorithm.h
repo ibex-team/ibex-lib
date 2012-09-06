@@ -95,6 +95,12 @@ class FwdAlgorithm {
 	void minus_fwd(const ExprMinus&, const ExprLabel& exprL, ExprLabel& result);
 
 	/** TO BE DEFINED (by the subclass) */
+	void trans_V_fwd(const ExprTrans&, const ExprLabel& exprL, ExprLabel& result);
+
+	/** TO BE DEFINED (by the subclass) */
+	void trans_M_fwd(const ExprTrans&, const ExprLabel& exprL, ExprLabel& result);
+
+	/** TO BE DEFINED (by the subclass) */
 	void sign_fwd(const ExprSign&, const ExprLabel& exprL, ExprLabel& result);
 
 	/** TO BE DEFINED (by the subclass) */

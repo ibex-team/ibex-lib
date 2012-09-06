@@ -114,6 +114,18 @@ Dim Dim::index_dim() const {
 		  return Dim(1,1,dim.dim3); // return a row vector
 }
 
+
+Dim Dim::transpose_dim() const {
+	switch (type()) {
+	case SCALAR:       return *this;
+	case ROW_VECTOR:   return col_vec(vec_size());
+	case COL_VECTOR:   return row_vec(vec_size());
+	case MATRIX:       return matrix(dim3,dim2);
+	case MATRIX_ARRAY: ibex_error("Cannot transpose an array of matrices.");
+	                   return *this;
+	}
+}
+
 /*
 int Dim::index_num(int this_num, int index) const {
 
