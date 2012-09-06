@@ -52,7 +52,7 @@ public:
 /**
  * An iterator symbol in an expression
  */
-class ExprIter : public ExprNode {
+class ExprIter : public ExprLeaf {
 public:
 	ExprIter(const char* name);
 
@@ -60,8 +60,9 @@ public:
 
 	virtual void acceptVisitor(ExprVisitor& v) const {
 		P_ExprVisitor* v2=dynamic_cast<P_ExprVisitor*>(&v);
-		assert(v2);
-		v2->visit(*this);
+		if (v2) v2->visit(*this);
+		else v.visit(*this); // as a leaf. May happen, e.g., with ExprReset called by bin_size
+		                       // (for calculating the size of the DAG x[y])
 	}
 
 	const char* name;

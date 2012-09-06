@@ -9,6 +9,9 @@
 //============================================================================
 
 #include "ibex_Entity.h"
+#include <sstream>
+
+extern void ibexerror (const std::string& msg);
 
 namespace ibex {
 namespace parser {
@@ -22,8 +25,23 @@ Entity::Entity(const char* name, const Dim& dim, const Domain& d) :
 		domain=d;
 	} else {
 		// when a vector/matrix is initialized with a single interval
-		assert(d.dim.is_scalar());
-		load_domain(d.i());
+		if (d.dim.is_scalar()) {
+			load_domain(d.i());
+		}
+		else {
+			stringstream s;
+			s << "Variable \"" << name << "\"";
+
+			if (dim.is_vector() && d.dim.is_vector()) {
+				s << " is a column vector and is initialized with a row vector";
+				s << " (you have probably used \",\" instead of \";\" in the constant vector)";
+				ibexerror(s.str());
+			}
+			else {
+				s << " is not initialized correctly (dimensions do not match)";
+				ibexerror(s.str());
+			}
+		}
 	}
 }
 

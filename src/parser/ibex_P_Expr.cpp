@@ -29,7 +29,7 @@ P_ExprIndex::P_ExprIndex(const ExprNode& expr, const ExprNode& index) : ExprBina
 
 }
 
-ExprIter::ExprIter(const char* name) : ExprNode(0,1,Dim()), name(strdup(name)) {
+ExprIter::ExprIter(const char* name) : ExprLeaf(Dim()), name(strdup(name)) {
 
 }
 
