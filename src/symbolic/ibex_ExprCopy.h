@@ -14,6 +14,7 @@
 
 #include "ibex_ExprVisitor.h"
 #include "ibex_Array.h"
+#include "ibex_Domain.h"
 
 namespace ibex {
 
@@ -28,11 +29,13 @@ public:
 	 *
 	 * Symbols in \a old_x are matched to symbols in \a new_x with respect to their order.
 	 *
+	 * \param fold_cst - if true, all constant subexpressions are "folded" into a single node.
+	 *
 	 * \pre The size of \a new_x must be greater or equal to the size of \a old_x. It is not
 	 *      required to be the same size to allow the use of extra variables (that do not occurr in the expression).
 	 *      This is used, e.g., in ibex_Optimizer to transform a function x->g(x) into (x,y)->g(x).
 	 */
-	const ExprNode& copy(const Array<const ExprSymbol>& old_x, const Array<const ExprSymbol>& new_x, const ExprNode& y);
+	const ExprNode& copy(const Array<const ExprSymbol>& old_x, const Array<const ExprSymbol>& new_x, const ExprNode& y, bool fold_cst=false);
 
 protected:
 	void visit(const ExprNode& e);
@@ -73,6 +76,8 @@ protected:
 	void visit(const ExprAcosh& e);
 	void visit(const ExprAsinh& e);
 	void visit(const ExprAtanh& e);
+
+	bool fold;
 
 };
 

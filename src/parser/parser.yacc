@@ -170,7 +170,7 @@ using namespace std;
 %nonassoc TK_EQU '<' TK_LEQ '>' TK_GEQ    /* we forbid a < b < c */
 %left '+' '-' TK_UNION
 %left '*' '/' TK_INTERSEC
-%left '^'
+%left '^' '\''
 %left '[' '('
 
 
@@ -380,6 +380,7 @@ expr          : expr '+' expr	                { $$ = &(*$1 + *$3); }
               | TK_ABS  '(' expr ')'            { $$ = &abs  (*$3); }
               | TK_SIGN '(' expr ')'            { $$ = &sign (*$3); }
               | expr '^' expr	                { $$ = new P_ExprPower(*$1, *$3); }
+              | expr '\''	                    { $$ = &transpose(*$1); }
               | TK_SQRT '(' expr ')'            { $$ = &sqrt (*$3); }
               | TK_EXPO '(' expr ')'            { $$ = &exp  (*$3); }
               | TK_LOG '(' expr ')'             { $$ = &log  (*$3); }

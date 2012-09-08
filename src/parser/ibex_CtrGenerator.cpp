@@ -37,7 +37,6 @@ void CtrGenerator::visit(const P_NumConstraint& c) {
 
 void CtrGenerator::visit(const P_OneConstraint& c) {
 	const ExprNode& e=ExprGenerator(scopes.top()).generate(*src_vars,*res_vars,c.expr);
-
 	ctrs->push_back(pair<const ExprNode*, CmpOp>(&e,c.op));
 }
 
@@ -52,7 +51,11 @@ void CtrGenerator::visit(const P_ConstraintLoop& loop) {
 	int         begin    = loop.first_value; //scope.it_first_value(name);
 	int         end      = loop.last_value; //scope.it_last_value(name);
 
-	scopes.push(scopes.top());
+	if (!scopes.empty())
+		scopes.push(scopes.top());
+	else
+		scopes.push(Scope());
+
 	scopes.top().add_iterator(name);
 
 	for (int i=begin; i<=end; i++) {

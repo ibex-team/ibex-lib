@@ -26,6 +26,14 @@ Domain& Eval::eval(const Function& f, ExprLabel** args) const {
 	return *f.forward<Eval>(*this).d;
 }
 
+Domain& Eval::eval(const Function& f, const Array<const Domain>& d) const {
+	assert(f.expr().deco.d);
+
+	load(f.symbol_domains,d);
+
+	return *f.forward<Eval>(*this).d;
+}
+
 Domain& Eval::eval(const Function& f, const Array<Domain>& d) const {
 	assert(f.expr().deco.d);
 

@@ -29,6 +29,11 @@ public:
 	/**
 	 * \brief Run the forward algorithm with input domains.
 	 */
+	Domain& eval(const Function&, const Array<const Domain>& d) const;
+
+	/**
+	 * \brief Run the forward algorithm with input domains.
+	 */
 	Domain& eval(const Function&, const Array<Domain>& d) const;
 
 	/**

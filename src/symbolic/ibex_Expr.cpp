@@ -148,8 +148,14 @@ ExprConstant::ExprConstant(const IntervalMatrix& m)
 	value.m() = m;
 }
 
-ExprConstant::ExprConstant(const Domain& d) : ExprLeaf(d.dim), value(d.dim) {
-	value = d;
+ExprConstant::ExprConstant(const IntervalMatrixArray& ma)
+  : ExprLeaf(Dim::matrix_array(ma.size(),ma.nb_rows(),ma.nb_cols())),
+    value(Dim::matrix_array(ma.size(),ma.nb_rows(),ma.nb_cols())) {
+
+	value.ma() = ma;
+}
+
+ExprConstant::ExprConstant(const Domain& d, bool reference) : ExprLeaf(d.dim), value(d,reference) {
 }
 
 bool ExprConstant::ExprConstant::is_zero() const {

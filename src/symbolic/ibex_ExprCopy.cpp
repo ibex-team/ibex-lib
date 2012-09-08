@@ -14,11 +14,14 @@
 #include <cassert>
 #include "ibex_ExprCopy.h"
 #include "ibex_Expr.h"
+#include "ibex_Eval.h"
 
 namespace ibex {
 
 
-const ExprNode& ExprCopy::copy(const Array<const ExprSymbol>& old_x, const Array<const ExprSymbol>& new_x, const ExprNode& y) {
+const ExprNode& ExprCopy::copy(const Array<const ExprSymbol>& old_x, const Array<const ExprSymbol>& new_x, const ExprNode& y, bool fold_cst) {
+
+	fold = fold_cst;
 
 	y.reset_visited();
 
@@ -39,8 +42,19 @@ void ExprCopy::visit(const ExprNode& e) {
 }
 
 void ExprCopy::visit(const ExprIndex& i) {
+
 	visit(i.expr);
-	i.deco.tmp =& (*((const ExprNode*) i.expr.deco.tmp))[i.index];
+	const ExprNode* node=(const ExprNode*) i.expr.deco.tmp;
+	if (fold) {
+		const ExprConstant* c=dynamic_cast<const ExprConstant*>(node);
+		if (c) {
+			i.deco.tmp = &ExprConstant::new_(c->get()[i.index]);
+			delete c;
+			return;
+		}
+	}
+
+	i.deco.tmp =& (*node)[i.index];
 }
 
 void ExprCopy::visit(const ExprSymbol& x) {
@@ -70,13 +84,49 @@ void ExprCopy::visit(const ExprUnaryOp& u) {
 	u.acceptVisitor(*this);
 }
 
+
+#define ARG(i) (*((const ExprNode*) e.arg(i).deco.tmp))
+#define LEFT   (*((const ExprNode*) e.left.deco.tmp))
+#define RIGHT  (*((const ExprNode*) e.right.deco.tmp))
+#define EXPR   (*((const ExprNode*) e.expr.deco.tmp))
+
 void ExprCopy::visit(const ExprVector& e) {
 	for (int i=0; i<e.nb_args; i++)
 		visit(e.arg(i));
 
+	if (fold) {
+		int i=0;
+		for (; i<e.nb_args; i++) {
+			if (!dynamic_cast<const ExprConstant*>(&ARG(i))) break;
+		}
+		if (i==e.nb_args) {
+			if (e.dim.is_vector()) {
+				IntervalVector v(e.dim.vec_size());
+				for (i=0; i<e.nb_args; i++) {
+					v[i]=((const ExprConstant&) ARG(i)).get_value();
+				}
+				e.deco.tmp=&ExprConstant::new_vector(v,e.row_vector());
+			} else if (e.dim.type()==Dim::MATRIX) {
+				IntervalMatrix m(e.dim.dim2,e.dim.dim3);
+				for (i=0; i<e.nb_args; i++) {
+					m.set_row(i,((const ExprConstant&) ARG(i)).get_vector_value());
+				}
+				e.deco.tmp=&ExprConstant::new_matrix(m);
+			} else {
+				assert(e.dim.type()==Dim::MATRIX_ARRAY);
+				IntervalMatrixArray ma(e.dim.dim1,e.dim.dim2,e.dim.dim3);
+				for (i=0; i<e.nb_args; i++) {
+					ma[i]=((const ExprConstant&) ARG(i)).get_matrix_value();
+				}
+				e.deco.tmp=&ExprConstant::new_matrix_array(ma);
+			}
+			return;
+		}
+	}
+
 	const ExprNode* args2[e.nb_args];
 	for (int i=0; i<e.nb_args; i++)
-		args2[i]=(const ExprNode*) e.arg(i).deco.tmp;
+		args2[i]=&ARG(i);
 
 	e.deco.tmp=&ExprVector::new_(args2, e.nb_args, e.row_vector());
 }
@@ -85,46 +135,101 @@ void ExprCopy::visit(const ExprApply& e) {
 	for (int i=0; i<e.nb_args; i++)
 		visit(e.arg(i));
 
+	if (fold) {
+		int i=0;
+		for (; i<e.nb_args; i++) {
+			if (!dynamic_cast<const ExprConstant*>(&ARG(i))) break;
+		}
+		if (i==e.nb_args) {
+			Array<const Domain> d(e.nb_args);
+			for (i=0; i<e.nb_args; i++) {
+				d.set_ref(i,((const ExprConstant&) ARG(i)).get());
+			}
+			e.deco.tmp=&ExprConstant::new_(Eval().eval(e.func,d));
+			return;
+		}
+	}
+
 	const ExprNode* args2[e.nb_args];
 	for (int i=0; i<e.nb_args; i++)
-		args2[i]=(const ExprNode*) e.arg(i).deco.tmp;
+		args2[i]=&ARG(i);
 
 	e.deco.tmp=&ExprApply::new_(e.func, args2);
 }
 
-#define LEFT  (*((const ExprNode*) e.left.deco.tmp))
-#define RIGHT (*((const ExprNode*) e.right.deco.tmp))
-#define EXPR  (*((const ExprNode*) e.expr.deco.tmp))
+#define visit_binary(f) \
+		visit(e.left); \
+		visit(e.right); \
+		if (fold) { \
+			const ExprConstant* cl=dynamic_cast<const ExprConstant*>(&LEFT); \
+			if (cl) { \
+				const ExprConstant* cr=dynamic_cast<const ExprConstant*>(&RIGHT); \
+				if (cr) { \
+					/* evaluate the constant expression on-the-fly */ \
+					e.deco.tmp = &ExprConstant::new_(f(cl->get(),cr->get())); \
+					delete cl; \
+					delete cr; \
+					return; \
+				} \
+			} \
+		} \
+		e.deco.tmp = &f(LEFT,RIGHT); \
 
-void ExprCopy::visit(const ExprAdd& e)   { visit(e.left); visit(e.right); e.deco.tmp = &      (LEFT + RIGHT); }
-void ExprCopy::visit(const ExprMul& e)   { visit(e.left); visit(e.right); e.deco.tmp = &      (LEFT * RIGHT); }
-void ExprCopy::visit(const ExprSub& e)   { visit(e.left); visit(e.right); e.deco.tmp = &      (LEFT - RIGHT); }
-void ExprCopy::visit(const ExprDiv& e)   { visit(e.left); visit(e.right); e.deco.tmp = &      (LEFT / RIGHT); }
-void ExprCopy::visit(const ExprMax& e)   { visit(e.left); visit(e.right); e.deco.tmp = & max  (LEFT, RIGHT); }
-void ExprCopy::visit(const ExprMin& e)   { visit(e.left); visit(e.right); e.deco.tmp = & min  (LEFT, RIGHT); }
-void ExprCopy::visit(const ExprAtan2& e) { visit(e.left); visit(e.right); e.deco.tmp = & atan2(LEFT, RIGHT); }
+void ExprCopy::visit(const ExprAdd& e)   { visit_binary(operator+); }
+void ExprCopy::visit(const ExprMul& e)   { visit_binary(operator*); }
+void ExprCopy::visit(const ExprSub& e)   { visit_binary(operator-); }
+void ExprCopy::visit(const ExprDiv& e)   { visit_binary(operator/); }
+void ExprCopy::visit(const ExprMax& e)   { visit_binary( max  ); }
+void ExprCopy::visit(const ExprMin& e)   { visit_binary( min  ); }
+void ExprCopy::visit(const ExprAtan2& e) { visit_binary( atan2); }
 
-void ExprCopy::visit(const ExprMinus& e) { visit(e.expr); e.deco.tmp = & -    (EXPR); }
-void ExprCopy::visit(const ExprTrans& e) { visit(e.expr); e.deco.tmp = & transpose(EXPR); }
-void ExprCopy::visit(const ExprSign& e)  { visit(e.expr); e.deco.tmp = & sign (EXPR); }
-void ExprCopy::visit(const ExprAbs& e)   { visit(e.expr); e.deco.tmp = & abs  (EXPR); }
-void ExprCopy::visit(const ExprPower& e) { visit(e.expr); e.deco.tmp = & pow  (EXPR,e.expon); }
-void ExprCopy::visit(const ExprSqr& e)   { visit(e.expr); e.deco.tmp = & sqr  (EXPR); }
-void ExprCopy::visit(const ExprSqrt& e)  { visit(e.expr); e.deco.tmp = & sqrt (EXPR); }
-void ExprCopy::visit(const ExprExp& e)   { visit(e.expr); e.deco.tmp = & exp  (EXPR); }
-void ExprCopy::visit(const ExprLog& e)   { visit(e.expr); e.deco.tmp = & log  (EXPR); }
-void ExprCopy::visit(const ExprCos& e)   { visit(e.expr); e.deco.tmp = & cos  (EXPR); }
-void ExprCopy::visit(const ExprSin& e)   { visit(e.expr); e.deco.tmp = & sin  (EXPR); }
-void ExprCopy::visit(const ExprTan& e)   { visit(e.expr); e.deco.tmp = & tan  (EXPR); }
-void ExprCopy::visit(const ExprCosh& e)  { visit(e.expr); e.deco.tmp = & cosh (EXPR); }
-void ExprCopy::visit(const ExprSinh& e)  { visit(e.expr); e.deco.tmp = & sinh (EXPR); }
-void ExprCopy::visit(const ExprTanh& e)  { visit(e.expr); e.deco.tmp = & tanh (EXPR); }
-void ExprCopy::visit(const ExprAcos& e)  { visit(e.expr); e.deco.tmp = & acos (EXPR); }
-void ExprCopy::visit(const ExprAsin& e)  { visit(e.expr); e.deco.tmp = & asin (EXPR); }
-void ExprCopy::visit(const ExprAtan& e)  { visit(e.expr); e.deco.tmp = & atan (EXPR); }
-void ExprCopy::visit(const ExprAcosh& e) { visit(e.expr); e.deco.tmp = & acosh(EXPR); }
-void ExprCopy::visit(const ExprAsinh& e) { visit(e.expr); e.deco.tmp = & asinh(EXPR); }
-void ExprCopy::visit(const ExprAtanh& e) { visit(e.expr); e.deco.tmp = & atanh(EXPR); }
+void ExprCopy::visit(const ExprPower& e) {
+	visit(e.expr);
+	if (fold) {
+		const ExprConstant* c=dynamic_cast<const ExprConstant*>(&EXPR);
+		if (c) {
+			/* evaluate the constant expression on-the-fly */
+			e.deco.tmp = &ExprConstant::new_(pow(c->get(),e.expon));
+			delete c;
+			return;
+		}
+	}
+	e.deco.tmp = &pow(EXPR,e.expon);
+}
+
+#define visit_unary(f) \
+		visit(e.expr); \
+		if (fold) { \
+			const ExprConstant* c=dynamic_cast<const ExprConstant*>(&EXPR); \
+			if (c) { \
+				/* evaluate the constant expression on-the-fly */ \
+				e.deco.tmp = &ExprConstant::new_(f(c->get())); \
+				delete c; \
+				return; \
+			} \
+		} \
+		e.deco.tmp = &f(EXPR); \
+
+void ExprCopy::visit(const ExprMinus& e) { visit_unary( - ); }
+void ExprCopy::visit(const ExprTrans& e) { visit_unary( transpose ); }
+void ExprCopy::visit(const ExprSign& e)  { visit_unary( sign ); }
+void ExprCopy::visit(const ExprAbs& e)   { visit_unary( abs ); }
+void ExprCopy::visit(const ExprSqr& e)   { visit_unary( sqr ); }
+void ExprCopy::visit(const ExprSqrt& e)  { visit_unary( sqrt ); }
+void ExprCopy::visit(const ExprExp& e)   { visit_unary( exp  ); }
+void ExprCopy::visit(const ExprLog& e)   { visit_unary( log  ); }
+void ExprCopy::visit(const ExprCos& e)   { visit_unary( cos  ); }
+void ExprCopy::visit(const ExprSin& e)   { visit_unary( sin  ); }
+void ExprCopy::visit(const ExprTan& e)   { visit_unary( tan  ); }
+void ExprCopy::visit(const ExprCosh& e)  { visit_unary( cosh ); }
+void ExprCopy::visit(const ExprSinh& e)  { visit_unary( sinh ); }
+void ExprCopy::visit(const ExprTanh& e)  { visit_unary( tanh ); }
+void ExprCopy::visit(const ExprAcos& e)  { visit_unary( acos ); }
+void ExprCopy::visit(const ExprAsin& e)  { visit_unary( asin ); }
+void ExprCopy::visit(const ExprAtan& e)  { visit_unary( atan ); }
+void ExprCopy::visit(const ExprAcosh& e) { visit_unary( acosh); }
+void ExprCopy::visit(const ExprAsinh& e) { visit_unary( asinh); }
+void ExprCopy::visit(const ExprAtanh& e) { visit_unary( atanh); }
 
 } // end ibex namespace
 

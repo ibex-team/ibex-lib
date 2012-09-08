@@ -172,6 +172,7 @@ void ConstantGenerator::visit(const P_ExprIndex& e) { visit(e.left); visit(e.rig
 void ConstantGenerator::visit(const P_ExprPower& e) { visit(e.left); visit(e.right); binary_eval(e,_power); }
 
 void ConstantGenerator::visit(const ExprMinus& e) { visit(e.expr); unary_eval(e,operator-); }
+void ConstantGenerator::visit(const ExprTrans& e) { visit(e.expr); unary_eval(e,transpose); }
 void ConstantGenerator::visit(const ExprSign& e)  { visit(e.expr); unary_eval(e,sign); }
 void ConstantGenerator::visit(const ExprAbs& e)   { visit(e.expr); unary_eval(e,abs); }
 void ConstantGenerator::visit(const ExprPower& e) { assert(false); /* only P_ExprPower possible */ }
