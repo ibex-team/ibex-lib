@@ -247,6 +247,11 @@ inline void load(IntervalVector& box, const Array<Domain>& domains) {
 /**
  * \brief x:=y
  */
+void load(Array<Domain>& x, const Array<const Domain>& y);
+
+/**
+ * \brief x:=y
+ */
 void load(Array<Domain>& x, const Array<Domain>& y);
 
 Domain operator+(const Domain& d1, const Domain& d2);
@@ -257,6 +262,7 @@ Domain max(const Domain& d1, const Domain& d2);
 Domain min(const Domain& d1, const Domain& d2);
 Domain atan2(const Domain& d1, const Domain& d2);
 Domain operator-(const Domain& d1);
+Domain transpose(const Domain& d1);
 Domain sign(const Domain& d1);
 Domain abs(const Domain& d);
 Domain pow(const Domain& d, int p);

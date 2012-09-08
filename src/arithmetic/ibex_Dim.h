@@ -128,7 +128,6 @@ public:
 	 * a matrix or a row vector expression. */
 	int dim3;
 
-protected:
 	/** \brief Build the three-dimensional structure. */
 	Dim(int dim1, int dim2, int dim3);
 

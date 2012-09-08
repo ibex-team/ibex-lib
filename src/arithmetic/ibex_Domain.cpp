@@ -124,13 +124,19 @@ void load(IntervalVector& x, const Array<const Domain>& d) {
 	}
 }
 
-void load(Array<Domain>& x, const Array<Domain>& y) {
+void load(Array<Domain>& x, const Array<const Domain>& y) {
 	assert(x.size()==y.size());
 	for (int s=0; s<x.size(); s++) {
 		x[s]=y[s];
 	}
 }
 
+void load(Array<Domain>& x, const Array<Domain>& y) {
+	assert(x.size()==y.size());
+	for (int s=0; s<x.size(); s++) {
+		x[s]=y[s];
+	}
+}
 Domain Domain::operator[](int i) {
 	switch(dim.type()) {
 	case Dim::SCALAR:       assert(false); break;
@@ -223,6 +229,20 @@ Domain operator-(const Domain& d1) {
 	}
 	return d;
 }
+
+Domain transpose(const Domain& d1) {
+	Domain d(Dim(d1.dim.dim1,d1.dim.dim3,d1.dim.dim2));
+
+	switch(d.dim.type()) {
+	case Dim::SCALAR:       d.i()=d1.i(); break;
+	case Dim::ROW_VECTOR:
+	case Dim::COL_VECTOR:   d.v()=d1.v(); break;
+	case Dim::MATRIX:       d.m()=d1.m().transpose(); break;
+	case Dim::MATRIX_ARRAY: assert(false); break;
+	}
+	return d;
+}
+
 
 Domain pow(const Domain& d1, int i) {
 	assert(d1.dim.is_scalar());
