@@ -49,6 +49,17 @@ void IntervalVector::init(const Interval& x) {
 		(*this)[i]=x;
 }
 
+IntervalVector& IntervalVector::inflate(double rad) {
+	if (is_empty()) return *this;
+	Interval r(-rad,rad);
+	// little optim: we do not call (*this)[i].inflate(rad)
+	// because this would create n times
+	// the interval [-rad,rad]
+	for (int i=0; i<size(); i++)
+		(*this)[i]+=r;
+	return *this;
+}
+
 void IntervalVector::resize(int n2) {
 	assert(n2>=1);
 	assert((vec==NULL && n==0) || (n!=0 && vec!=NULL));

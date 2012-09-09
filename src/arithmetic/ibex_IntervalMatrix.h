@@ -260,6 +260,13 @@ public:
      */
     IntervalMatrix& operator-=(const IntervalMatrix& m);
 
+	/**
+	 * \brief Add [-rad,+rad] to all the components of *this.
+	 *
+	 * \return *this.
+	 */
+	IntervalMatrix& inflate(double rad);
+
     /**
      * \brief (*this)=x * *(this).
      */

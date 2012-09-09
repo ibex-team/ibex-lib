@@ -95,6 +95,19 @@ void TestParser::const04() {
 	}
 }
 
+void TestParser::const05() {
+	try {
+		System sys("quimper/const05.qpr");
+		double _m[6][2]={{0,0},{3,3},{1,1},
+				         {4,4},{2,2},{5,5}};
+		IntervalVector box(6,_m);
+		check(sys.box,box.inflate(0.1));
+	} catch(SyntaxError& e) {
+		cout << e << endl;
+		TEST_ASSERT(false);
+	}
+}
+
 void TestParser::func01() {
 	System sys("quimper/func01.qpr");
 

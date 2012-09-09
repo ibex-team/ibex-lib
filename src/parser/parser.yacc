@@ -9,112 +9,7 @@
 // Last Update : Jun 12, 2012
 //===========================================================================
 
-#include <math.h>
-#include <vector>
-
-#include "ibex_Interval.h"
-#include "ibex_Array.h"
-#include "ibex_System.h"
-#include "ibex_String.h"
-
-#include "ibex_SyntaxError.h"
-#include "ibex_ParserSource.h"
-#include "ibex_P_Expr.h"
-#include "ibex_P_NumConstraint.h"
-#include "ibex_MainGenerator.h"
-#include "ibex_ConstantGenerator.h"
-#include "ibex_P_ExprGenerator.h"
-
-using namespace std;
-
-extern int ibexlex(void);
-extern char* ibextext;
-extern int ibex_lineno;
-
-void ibexerror (const std::string& msg) {
-  throw ibex::SyntaxError(msg, ibextext, ibex_lineno);
-}
-   
-namespace ibex { 
-
-namespace parser {
-
-/* ==================================== The result of the parser =================================*/
-
-System* system;            // standard AMPL-like system
-
-// ******************
-// Note: when a stand-alone constraint is read by CHOCO
-// the field system->nb_var must be set *before* calling the parser
-// ******************
-
-/* ===============================================================================================*/
-
-static P_Source source;  // static because not to be visible:
-stack<Scope> scopes;     // not static because lexer needs to see it
-
-void begin() {
-    ibex_lineno=-1;
-    if (!setlocale(LC_NUMERIC, "C")) // to accept the dot (instead of the french coma) with numeric numbers
-      ibexerror("platform does not support \"C\" locale");
-  
-    ibex_lineno=1;
-
-    /* there may be some pending scopes (if the previous call to the parser failed).
-     */
-    while (!scopes.empty()) scopes.pop(); 
-  
-    scopes.push(Scope()); // a fresh new scope!
-}
-
-void begin_system() {
-    begin();
-}
-
-void begin_choco() {
-    begin();
- 
-    // ----- generate all the variables {i} -----
-    char buf[10];
-    for (int i=0; i<system->nb_var; i++) {
-        ibex::index_2_string(buf,'{','}',i);
-        source.vars.push_back(new Entity(buf,Dim::scalar(),Interval::ALL_REALS));
-    }
-    // ------------------------------------------
-}
-
-int _2int(const ExprNode& expr) {
-	int n=ConstantGenerator(scopes.top()).eval_integer(expr);
-	cleanup(expr,true); // false or true (there is no symbols)
-	return n;
-}
-
-double _2dbl(const ExprNode& expr) {
-	double d=ConstantGenerator(scopes.top()).eval_double(expr);
-	cleanup(expr,true); // false or true (there is no symbols)
-	return d;
-}
-
-Domain _2domain(const ExprNode& expr) {
-	Domain d=ConstantGenerator(scopes.top()).eval(expr);
-	cleanup(expr,true); // false or true (there is no symbols)
-	return d;
-}
-
-void end() {
-    MainGenerator().generate(source,*system);
-    source.cleanup();
-    // we have to cleanup the data in case of Syntax Error 
-    // TODO...
-}
-	
-} // end namespace
-} // end namespace
-
-
-using namespace ibex;
-using namespace parser;
-using namespace std;
+#include "parser.cpp_"
 
 %}	
 
@@ -373,6 +268,7 @@ expr          : expr '+' expr	                { $$ = &(*$1 + *$3); }
               | expr '*' expr	                { $$ = &(*$1 * *$3); }
               | expr '-' expr	                { $$ = &(*$1 - *$3); }
               | expr '/' expr	                { $$ = &(*$1 / *$3); }
+              | '<' expr ',' expr '>'           { $$ = &ExprConstant::new_(ball(_2domain(*$2),_2dbl(*$4))); }
               | TK_MAX '(' expr ',' expr ')'    { $$ = &max(*$3,*$5); }
               | TK_MIN '(' expr ',' expr ')'    { $$ = &min(*$3,*$5); }
               | TK_ATAN2 '(' expr ',' expr ')'  { $$ = &atan2(*$3,*$5); }

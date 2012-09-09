@@ -123,6 +123,13 @@ class Interval {
      * \param x - the interval to compute the hull with.*/
     Interval& operator|=(const Interval& x);
 
+    /**
+     * \brief Add [-rad,+rad] to *this.
+     *
+     * Return a reference to *this.
+     */
+    Interval& inflate(double rad);
+
     /** \brief Return the lower bound of *this. */
     double lb() const;
 
@@ -682,6 +689,11 @@ inline Interval& Interval::operator=(double x) {
 
 inline Interval& Interval::operator=(const Interval& x) {
 	itv = x.itv;
+	return *this;
+}
+
+inline Interval& Interval::inflate(double rad) {
+	(*this) += Interval(-rad,rad);
 	return *this;
 }
 

@@ -125,6 +125,13 @@ public:
 	void init(const Interval& x);
 
 	/**
+	 * \brief Add [-rad,+rad] to all the components of *this.
+	 *
+	 * \return *this.
+	 */
+	IntervalVector& inflate(double rad);
+
+	/**
 	 * \brief Resize this IntervalVector.
 	 *
 	 * If the size is increased, the existing components are not

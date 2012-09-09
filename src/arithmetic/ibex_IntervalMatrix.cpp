@@ -246,6 +246,18 @@ void IntervalMatrix::set_col(int col, const IntervalVector& v) {
 		M[i][col]=v[i];
 }
 
+IntervalMatrix& IntervalMatrix::inflate(double rad) {
+	// see comment in IntervalVector::inflate
+	if (is_empty()) return *this;
+
+	Interval r(-rad,rad);
+
+	for (int i=0; i<nb_rows(); i++)
+		for (int j=0; j<nb_cols(); j++)
+			(*this)[i][j]+=r;
+	return *this;
+}
+
 bool proj_add(const IntervalMatrix& y, IntervalMatrix& x1, IntervalMatrix& x2) {
 	x1 &= y-x2;
 	x2 &= y-x1;
