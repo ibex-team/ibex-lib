@@ -180,24 +180,24 @@ decl_fnc_list : decl_fnc_list decl_fnc
               ;
 
 decl_fnc      : TK_FUNCTION                     { scopes.push(Scope(scopes.top(),true)); }
-                TK_NEW_SYMBOL                   { scopes.top().add_func_return($3); }
+                TK_NEW_SYMBOL dimension         { scopes.top().add_func_return($3,*$4); delete $4; }
                 TK_EQU TK_NEW_SYMBOL
                 '(' fnc_inpt_list ')'
                 fnc_code
                 TK_FUNC_RET_SYMBOL TK_EQU expr semicolon_opt
                 TK_END                          { 
-                								  Array<const ExprSymbol> x($8->size());
+                								  Array<const ExprSymbol> x($9->size());
                 								  int i=0;
-                								  for(vector<const ExprSymbol*>::const_iterator it=$8->begin(); it!=$8->end(); it++)
+                								  for(vector<const ExprSymbol*>::const_iterator it=$9->begin(); it!=$9->end(); it++)
                 								      x.set_ref(i++,ExprSymbol::new_((*it)->name,(*it)->dim));
-                								  const ExprNode& y= ExprGenerator(scopes.top()).generate(Array<const ExprSymbol>(*$8),x,*$13);
-                								  Function* f=new Function(x,y,$6);                                                  
+                								  const ExprNode& y= ExprGenerator(scopes.top()).generate(Array<const ExprSymbol>(*$9),x,*$14);
+                								  Function* f=new Function(x,y,$7);                                                  
                                                   scopes.pop();
-                                                  scopes.top().add_func($6,f); 
+                                                  scopes.top().add_func($7,f); 
                                                   source.func.push_back(f);
-                                                  free($3); free($6); 
-                                                  cleanup(*$13,true); // will also delete symbols in $8
-                                                  delete $8; }
+                                                  free($3); free($7); 
+                                                  cleanup(*$14,true); // will also delete symbols in $9
+                                                  delete $9; }
               ;
 
 semicolon_opt : ';' | ;
@@ -215,9 +215,12 @@ fnc_code      : fnc_code fnc_assign ';'
               |                       
               ;
 
-fnc_assign    : TK_NEW_SYMBOL TK_EQU expr       { /* note: if this tmp symbol is not used, the expr $3 will never be deleted */
+fnc_assign    : TK_NEW_SYMBOL TK_EQU expr       { /* TODO: if this tmp symbol is not used, the expr $3 will never be deleted */
                                                   scopes.top().add_func_tmp_symbol($1,$3); free($1); }
-              ;
+              | TK_CONSTANT TK_EQU expr         { cerr << "Warning: line " << ibex_lineno << ", local variable " << $1 << " shadows the constant of the same name\n"; 
+                                                  scopes.top().rem_cst($1);
+                                                  scopes.top().add_func_tmp_symbol($1,$3); free($1); } 
+              ;           
 
 /**********************************************************************************************************************/
 /*                                                  GOAL                                                              */

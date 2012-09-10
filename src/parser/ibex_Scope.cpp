@@ -78,9 +78,11 @@ public:
 class S_FuncOutput : public Scope::S_Object {
 public:
 
-	S_FuncOutput() { }
+	S_FuncOutput(const Dim& dim) : dim(dim) { }
 
-	S_Object* copy() const { return new S_FuncOutput(); }
+	S_Object* copy() const { return new S_FuncOutput(dim); }
+
+	Dim dim;
 
 	int token() const { return TK_FUNC_RET_SYMBOL; }
 };
@@ -149,12 +151,18 @@ void Scope::add_cst(const char* id, const Domain& domain) {
 	tab.insert_new(id, new S_Cst(domain));
 }
 
+void Scope::rem_cst(const char* id) {
+	assert(tab[id]->token()==TK_CONSTANT);
+	delete tab[id];
+	tab.erase(id);
+}
+
 void Scope::add_func(const char* id, Function* f) {
 	tab.insert_new(id, new S_Func(f));
 }
 
-void Scope::add_func_return(const char* id) {
-	tab.insert_new(id, new S_FuncOutput());
+void Scope::add_func_return(const char* id, const Dim& d) {
+	tab.insert_new(id, new S_FuncOutput(d));
 }
 
 void Scope::add_func_input(const char* id, const ExprSymbol* symbol) {
@@ -189,6 +197,12 @@ const ExprSymbol& Scope::get_func_input_symbol(const char* id) const {
 	const S_Object& s=*tab[id];
 	assert(s.token()==TK_FUNC_INP_SYMBOL);
 	return *((const S_FuncInput&) s).symbol;
+}
+
+const ExprSymbol& Scope::get_func_return(const char* id) const {
+	const S_Object& s=*tab[id];
+	assert(s.token()==TK_FUNC_RET_SYMBOL);
+	return *((const S_FuncOutput&) s).symbol;
 }
 
 const ExprNode& Scope::get_func_tmp_expr(const char* id) const {
