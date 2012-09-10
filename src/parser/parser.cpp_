@@ -10,6 +10,7 @@
 
 #include <math.h>
 #include <vector>
+#include <sstream>
 
 #include "ibex_Interval.h"
 #include "ibex_Array.h"
@@ -98,6 +99,28 @@ Domain _2domain(const ExprNode& expr) {
 	Domain d=ConstantGenerator(scopes.top()).eval(expr);
 	cleanup(expr,true); // false or true (there is no symbols)
 	return d;
+}
+
+const ExprNode& apply(Function& f, const ExprNode& expr) {
+	int n=f.nb_symbols();
+	if (n!=1) {
+		stringstream s;
+		s << "function " << f.name << " expects 1 argument";
+		ibexerror(s.str());
+	} else {
+		return f(expr);
+	}
+}
+
+const ExprNode& apply(Function& f, const vector<const ExprNode*>& args) {
+	int n=f.nb_symbols();
+	if (n!=args.size()) {
+		stringstream s;
+		s << "function " << f.name << " expects " << n << " argument" << (n>1? "s":"");
+		ibexerror(s.str());
+	} else {
+		return f(args);
+	}
 }
 
 Domain ball(const Domain& mid, double rad) {

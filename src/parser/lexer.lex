@@ -68,6 +68,7 @@ using namespace ibex::parser;
 "mid"                            { return TK_MID; }
 "sup"                            { return TK_SUP; }
 
+"return"|"Return"|"RETURN"       { return TK_RETURN; }
 "begin"|"Begin"|"BEGIN"          { return TK_BEGIN; }
 "end"|"End"|"END"                { return TK_END;  }
 "for"|"For"|"FOR"                { return TK_FOR;  }

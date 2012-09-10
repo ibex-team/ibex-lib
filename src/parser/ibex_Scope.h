@@ -45,9 +45,6 @@ public:
 	/** Add a function. */
 	void add_func(const char* id, Function* f);
 
-	/** Add the symbol of the returned value of a function */
-	void add_func_return(const char* ret_symbol, const Dim&);
-
 	/** Add an argument of a function. */
 	void add_func_input(const char* input_symbol, const ExprSymbol* symbol);
 
@@ -69,9 +66,6 @@ public:
 
 	/* Return the input symbol of a function */
 	const ExprSymbol& get_func_input_symbol(const char* id) const;
-
-	/* Return the output symbol of a function */
-	const ExprSymbol& get_func_return(const char* id) const;
 
 	/* Return the expression bound to a tmp symbol in a function */
 	const ExprNode& get_func_tmp_expr(const char* id) const;

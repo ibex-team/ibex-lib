@@ -56,7 +56,7 @@
 %token TK_COSH TK_SINH  TK_TANH TK_ACOSH TK_ASINH TK_ATANH
 %token TK_LEQ  TK_GEQ   TK_EQU  TK_ASSIGN
 
-%token TK_BEGIN TK_END TK_FOR TK_FROM TK_TO
+%token TK_BEGIN TK_END TK_FOR TK_FROM TK_TO TK_RETURN
 
 %token TK_CTRS TK_MINIMIZE
 
@@ -180,24 +180,22 @@ decl_fnc_list : decl_fnc_list decl_fnc
               ;
 
 decl_fnc      : TK_FUNCTION                     { scopes.push(Scope(scopes.top(),true)); }
-                TK_NEW_SYMBOL dimension         { scopes.top().add_func_return($3,*$4); delete $4; }
-                TK_EQU TK_NEW_SYMBOL
+                TK_NEW_SYMBOL
                 '(' fnc_inpt_list ')'
                 fnc_code
-                TK_FUNC_RET_SYMBOL TK_EQU expr semicolon_opt
-                TK_END                          { 
-                								  Array<const ExprSymbol> x($9->size());
+                TK_RETURN expr semicolon_opt
+                TK_END                          { Array<const ExprSymbol> x($5->size());
                 								  int i=0;
-                								  for(vector<const ExprSymbol*>::const_iterator it=$9->begin(); it!=$9->end(); it++)
+                								  for(vector<const ExprSymbol*>::const_iterator it=$5->begin(); it!=$5->end(); it++)
                 								      x.set_ref(i++,ExprSymbol::new_((*it)->name,(*it)->dim));
-                								  const ExprNode& y= ExprGenerator(scopes.top()).generate(Array<const ExprSymbol>(*$9),x,*$14);
-                								  Function* f=new Function(x,y,$7);                                                  
+                								  const ExprNode& y= ExprGenerator(scopes.top()).generate(Array<const ExprSymbol>(*$5),x,*$9);
+                								  Function* f=new Function(x,y,$3);                                                  
                                                   scopes.pop();
-                                                  scopes.top().add_func($7,f); 
+                                                  scopes.top().add_func($3,f); 
                                                   source.func.push_back(f);
-                                                  free($3); free($7); 
-                                                  cleanup(*$14,true); // will also delete symbols in $9
-                                                  delete $9; }
+                                                  free($3); 
+                                                  cleanup(*$9,true); // will also delete symbols in $5
+                                                  delete $5; }
               ;
 
 semicolon_opt : ';' | ;
@@ -306,8 +304,9 @@ expr          : expr '+' expr	                { $$ = &(*$1 + *$3); }
               | TK_FUNC_INP_SYMBOL              { $$ = &scopes.top().get_func_input_symbol($1); free($1); }
               | TK_FUNC_TMP_SYMBOL              { $$ = &scopes.top().get_func_tmp_expr($1); free($1); }
               | TK_CONSTANT                     { $$ = &ExprConstant::new_(scopes.top().get_cst($1)); free($1); }
-              | TK_FUNC_SYMBOL '(' expr ')'     { $$ = &scopes.top().get_func($1)(*$3); free($1); }
-              | TK_FUNC_SYMBOL '(' expr_row ')' { $$ = &scopes.top().get_func($1)(*$3); free($1); delete $3; }
+              | TK_FUNC_SYMBOL '(' expr ')'     { $$ = &apply(scopes.top().get_func($1), *$3); free($1); }
+              | TK_FUNC_SYMBOL '(' expr_row ')' { $$ = &apply(scopes.top().get_func($1), *$3); free($1); delete $3; }
+              | TK_NEW_SYMBOL                   { ibexerror("unknown symbol"); }
               | TK_FLOAT                        { $$ = &ExprConstant::new_scalar($1); }
               | TK_INTEGER                      { $$ = &ExprConstant::new_scalar((double) $1); }
               | interval                        { $$ = &ExprConstant::new_scalar(*$1); delete $1; }

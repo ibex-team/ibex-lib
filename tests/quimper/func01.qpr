@@ -2,8 +2,8 @@
 variables
  x;
 
-function y=foo(x2) 
- y=x2;
+function foo(x2) 
+ return x2;
 end
 
 constraints

@@ -109,25 +109,30 @@ void TestParser::const05() {
 }
 
 void TestParser::func01() {
-	System sys("quimper/func01.qpr");
+	try {
+		System sys("quimper/func01.qpr");
 
-	TEST_ASSERT(sys.vars.size()==1);
-	TEST_ASSERT(strcmp(sys.vars[0].name,"x")==0);
-	TEST_ASSERT(sys.vars[0].dim.is_scalar());
-	TEST_ASSERT(sys.eprs.empty());
-	TEST_ASSERT(sys.sybs.empty());
-	TEST_ASSERT(sys.box.size()==1);
+		TEST_ASSERT(sys.vars.size()==1);
+		TEST_ASSERT(strcmp(sys.vars[0].name,"x")==0);
+		TEST_ASSERT(sys.vars[0].dim.is_scalar());
+		TEST_ASSERT(sys.eprs.empty());
+		TEST_ASSERT(sys.sybs.empty());
+		TEST_ASSERT(sys.box.size()==1);
 
-	TEST_ASSERT(sys.func.size()==1);
-	TEST_ASSERT(strcmp(sys.func[0].name,"foo")==0);
-	TEST_ASSERT(sys.func[0].nb_symbols()==1);
-	TEST_ASSERT(sys.func[0].symbol(0).dim.is_scalar());
-	TEST_ASSERT(strcmp(sys.func[0].symbol(0).name,"x2")==0);
-	TEST_ASSERT(sameExpr(sys.func[0].expr(),"x2"));
-	TEST_ASSERT(sameExpr(sys.f.expr(),"(x-foo(x))"));
-	TEST_ASSERT(sys.ctrs.size()==1);
-	TEST_ASSERT(&sys.ctrs[0].f==&sys.f);
-	TEST_ASSERT(sys.ctrs[0].op==EQ);
+		TEST_ASSERT(sys.func.size()==1);
+		TEST_ASSERT(strcmp(sys.func[0].name,"foo")==0);
+		TEST_ASSERT(sys.func[0].nb_symbols()==1);
+		TEST_ASSERT(sys.func[0].symbol(0).dim.is_scalar());
+		TEST_ASSERT(strcmp(sys.func[0].symbol(0).name,"x2")==0);
+		TEST_ASSERT(sameExpr(sys.func[0].expr(),"x2"));
+		TEST_ASSERT(sameExpr(sys.f.expr(),"(x-foo(x))"));
+		TEST_ASSERT(sys.ctrs.size()==1);
+		TEST_ASSERT(&sys.ctrs[0].f==&sys.f);
+		TEST_ASSERT(sys.ctrs[0].op==EQ);
+	} catch(SyntaxError& e) {
+		cout << e << endl;
+		TEST_ASSERT(false);
+	}
 }
 
 void TestParser::ponts() {

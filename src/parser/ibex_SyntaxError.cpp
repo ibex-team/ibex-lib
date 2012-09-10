@@ -13,9 +13,10 @@
 namespace ibex {
 
 std::ostream& operator<< (std::ostream& os, const SyntaxError& e) {
-  os << "Syntax error:" << e.msg << " ";
+  os << "Syntax error";
   if (e.token) os << " near \"" << e.token << "\"";
   if (e.line!=-1) os << " line " << e.line;
+  os << ": " << e.msg;
   return os;
 }
 
