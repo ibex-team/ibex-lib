@@ -32,7 +32,7 @@ OBJS  =$(wildcard $(IBEX_SRC_DIR)/tools/*.o) \
 # that can be directly uploaded, in particular from Choco).
 # So we determine here which are the actual dependencies.
 ifeq ($(SUBLIB), gaol)
-DYN_LIB_DEP=
+DYN_LIB_DEP=dyn_ibex_gaol
 else
 DYN_LIB_DEP=dyn_ibex_bias  
 endif
@@ -66,6 +66,11 @@ dyn_ibex_bias: $(STATIC_TARGET)
 	cd $(IBEX_LIB_DIR);  ar -x libibex.a; \
 	ar -x $(BIAS_LIB_DIR)/libBias.a; ar -x $(BIAS_LIB_DIR)/liblr.a; ar -x $(BIAS_LIB_DIR)/libProfil.a; \
 	rm Vector.o Matrix.o IntervalVector.o IntervalMatrix.o Utilities.o LSS.o; \
+	ar -x $(SIMPLEX_LIB_DIR)/libsoplex.a; cd $(IBEX_DIR)
+
+dyn_ibex_gaol: $(STATIC_TARGET)
+	cd $(IBEX_LIB_DIR);  ar -x libibex.a; \
+	ar -x $(GAOL_LIB_DIR)/libgaol.a; \
 	ar -x $(SIMPLEX_LIB_DIR)/libsoplex.a; cd $(IBEX_DIR)
 
 # For Linux
