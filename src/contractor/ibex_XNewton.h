@@ -18,6 +18,8 @@
 #include "ibex_NumConstraint.h"
 #include "soplex.h"
 
+#include <vector>
+
 namespace ibex {
 
 /** \ingroup ctcgroup
@@ -55,7 +57,7 @@ class X_Newton : public Ctc {
  */
 
 
-  X_Newton(const System& sys, Ctc* ctc, vector<corner_point>& cpoints, int goal_ctr=-1, Function* goal=0,
+  X_Newton(const System& sys, Ctc* ctc, std::vector<corner_point>& cpoints, int goal_ctr=-1, Function* goal=0,
      double ratio_fp=default_ratio_fp, double ratio_fp2=default_ratio_fp2, 
 	     ctc_mode cmode=X_NEWTON, linear_mode lmode=HANSEN, int max_iter_soplex=100, double max_diam_deriv=default_max_diam_deriv, double max_diam_box=default_max_diam_box);
 
@@ -132,7 +134,7 @@ class X_Newton : public Ctc {
   bool** coin_ctrvar;
 
 
-  vector<corner_point> cpoints;
+  std::vector<corner_point> cpoints;
 
   /** The fixpoint ratio **/
   double ratio_fp;
@@ -144,13 +146,13 @@ class X_Newton : public Ctc {
   
   ctc_mode cmode;
  
-  soplex::SPxSolver::Status run_simplex(IntervalVector & box,soplex::SoPlex& mysoplex, soplex::SPxLP::SPxSense sense, int var, int n, Interval& obj, double bound, vector<Interval>& taylor_ev );
+  soplex::SPxSolver::Status run_simplex(IntervalVector & box,soplex::SoPlex& mysoplex, soplex::SPxLP::SPxSense sense, int var, int n, Interval& obj, double bound, std::vector<Interval>& taylor_ev );
 
   /** Tries to add a linearization in the model mysoplex. Returns true if it is succesful **/
-  int X_Linearization(IntervalVector & box,soplex::SoPlex& mysoplex, int ctr, corner_point cpoint, vector<Interval>& taylor_ev, IntervalVector &G,
+  int X_Linearization(IntervalVector & box,soplex::SoPlex& mysoplex, int ctr, corner_point cpoint, std::vector<Interval>& taylor_ev, IntervalVector &G,
 		      int id_point, int& non_linear_vars);
 
-  int X_Linearization(IntervalVector& box, soplex::SoPlex& mysoplex, int ctr, corner_point cpoint, CmpOp op, vector<Interval>& taylor_ev,
+  int X_Linearization(IntervalVector& box, soplex::SoPlex& mysoplex, int ctr, corner_point cpoint, CmpOp op, std::vector<Interval>& taylor_ev,
   IntervalVector &G, int id_point, int& non_linear_vars);
 
   bool isInner(IntervalVector & box,const System& sys, int j);

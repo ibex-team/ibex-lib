@@ -40,7 +40,7 @@ int main(int argc, char** argv){
 
 	Optimizer o(sys,rr,ctc);
 	//o.in_HC4_flag=false;
-    o.trace=true;
+    //o.trace=true;
 	o.optimize(sys.box);
 	o.report();
 

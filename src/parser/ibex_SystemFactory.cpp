@@ -13,6 +13,8 @@
 #include "ibex_ExprCtr.h"
 #include "ibex_ExprCopy.h"
 
+using std::vector;
+
 namespace ibex {
 
 SystemFactory::SystemFactory() : goal(NULL) { }

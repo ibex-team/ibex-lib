@@ -24,6 +24,7 @@
 
 #include "ibex_XNewton.h"
 
+using std::vector;
 
 namespace ibex {
 

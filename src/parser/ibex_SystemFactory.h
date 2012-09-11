@@ -54,10 +54,10 @@ public:
 
 protected:
 	friend class System;
-	vector<const ExprSymbol*> vars;
+	std::vector<const ExprSymbol*> vars;
 	const ExprNode* goal;
-	vector<const ExprNode*> exprs;
-	vector<CmpOp> ops;
+	std::vector<const ExprNode*> exprs;
+	std::vector<CmpOp> ops;
 };
 
 } // end namespace ibex
