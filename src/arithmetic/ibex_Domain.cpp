@@ -143,7 +143,8 @@ Domain Domain::operator[](int i) {
 	case Dim::ROW_VECTOR:
 	case Dim::COL_VECTOR:   return Domain(v()[i]); break;
 	case Dim::MATRIX:       return Domain(m()[i],true); break;
-	case Dim::MATRIX_ARRAY: return Domain(ma()[i]); break;
+	case Dim::MATRIX_ARRAY:
+	default:                return Domain(ma()[i]); break;
 	}
 }
 

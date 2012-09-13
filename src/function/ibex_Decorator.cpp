@@ -84,9 +84,17 @@ void Decorator::visit(const ExprBinaryOp& b) {
 
 void Decorator::visit(const ExprUnaryOp& u) {
 	visit(u.expr);
-	u.deco.d = new Domain(u.dim);
-	u.deco.g = new Domain(u.dim);
-	u.deco.p = new Domain(u.dim);
+	const ExprTrans* t=dynamic_cast<const ExprTrans*>(&u);
+
+	if (t && u.dim.is_vector()) {
+		u.deco.d = new Domain(*u.expr.deco.d,true);
+		u.deco.g = new Domain(*u.expr.deco.g,true);
+		u.deco.p = new Domain(*u.expr.deco.p,true);
+	} else {
+		u.deco.d = new Domain(u.dim);
+		u.deco.g = new Domain(u.dim);
+		u.deco.p = new Domain(u.dim);
+	}
 }
 
 void Decorator::visit(const ExprNAryOp& a) {

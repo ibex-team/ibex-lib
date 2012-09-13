@@ -50,22 +50,35 @@ inline Interval& Interval::operator=(const gaol::interval& x) {
 }
 
 inline Interval& Interval::operator+=(double d) {
-	itv+=d;
+	if (d==POS_INFINITY || d==NEG_INFINITY)
+		set_empty();
+	else
+		itv+=d;
 	return *this;
 }
 
 inline Interval& Interval::operator-=(double d) {
-	itv-=d;
+	if (d==POS_INFINITY || d==NEG_INFINITY)
+		set_empty();
+	else
+		itv-=d;
 	return *this;
+
 }
 
 inline Interval& Interval::operator*=(double d) {
-	itv*=d;
+	if (d==POS_INFINITY || d==NEG_INFINITY)
+		set_empty();
+	else
+		itv*=d;
 	return *this;
 }
 
 inline Interval& Interval::operator/=(double d) {
-	itv/=d;
+	if (d==POS_INFINITY || d==NEG_INFINITY)
+		set_empty();
+	else
+		itv/=d;
 	return *this;
 }
 
@@ -198,35 +211,59 @@ inline double hausdorff(const Interval &x1, const Interval &x2) {
 }
 
 inline Interval operator+(const Interval& x, double d) {
-	return x.itv+d;
+	if(d==NEG_INFINITY || d==POS_INFINITY)
+		return Interval::EMPTY_SET;
+	else
+		return x.itv+d;
 }
 
 inline Interval operator-(const Interval& x, double d) {
-	return x.itv-d;
+	if(d==NEG_INFINITY || d==POS_INFINITY)
+		return Interval::EMPTY_SET;
+	else
+		return x.itv-d;
 }
 
 inline Interval operator*(const Interval& x, double d) {
-	return x.itv*d;
+	if(d==NEG_INFINITY || d==POS_INFINITY)
+		return Interval::EMPTY_SET;
+	else
+		return x.itv*d;
 }
 
 inline Interval operator/(const Interval& x, double d) {
-	return x.itv/d;
+	if(d==NEG_INFINITY || d==POS_INFINITY)
+		return Interval::EMPTY_SET;
+	else
+		return x.itv/d;
 }
 
 inline Interval operator+(double d,const Interval& x) {
-	return d+x.itv;
+	if(d==NEG_INFINITY || d==POS_INFINITY)
+		return Interval::EMPTY_SET;
+	else
+		return d+x.itv;
 }
 
 inline Interval operator-(double d, const Interval& x) {
-	return d-x.itv;
+	if(d==NEG_INFINITY || d==POS_INFINITY)
+		return Interval::EMPTY_SET;
+	else
+		return d-x.itv;
 }
 
 inline Interval operator*(double d, const Interval& x) {
-	return d*x.itv;
+	if(d==NEG_INFINITY || d==POS_INFINITY)
+		return Interval::EMPTY_SET;
+	else
+		return d*x.itv;
 }
 
 inline Interval operator/(double d, const Interval& x) {
-	return d/x.itv;
+	if(d==NEG_INFINITY || d==POS_INFINITY)
+		return Interval::EMPTY_SET;
+	else
+		return d/x.itv;
 }
 
 inline Interval operator+(const Interval& x1, const Interval& x2) {
@@ -258,7 +295,10 @@ inline Interval pow(const Interval& x, int n) {
 }
 
 inline Interval pow(const Interval &x, double d) {
-	return gaol::pow(x.itv, d);
+	if(d==NEG_INFINITY || d==POS_INFINITY)
+		return Interval::EMPTY_SET;
+	else
+		return gaol::pow(x.itv, d);
 }
 
 inline Interval pow(const Interval &x, const Interval &y) {
@@ -274,7 +314,10 @@ inline Interval exp(const Interval& x) {
 }
 
 inline Interval log(const Interval& x) {
-	return gaol::log(x.itv);
+	if (x.ub()<=0) // gaol returns (-oo,-DBL_MAX) if x.ub()==0, instead of EMPTY_SET
+		return Interval::EMPTY_SET;
+	else
+		return gaol::log(x.itv);
 }
 
 inline Interval cos(const Interval& x) {
