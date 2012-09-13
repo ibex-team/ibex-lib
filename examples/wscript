@@ -1,0 +1,13 @@
+#! /usr/bin/env python
+# encoding: utf-8
+
+def build (bld):
+
+	bld.program (
+		target = "optimizer02",
+		includes = "../src ../src/arithmetic ../src/bisector ../src/combinatorial ../src/contractor ../src/function ../src/numeric ../src/parser ../src/strategy ../src/symbolic ../src/tools",
+		use = "ibex soplex interval jni",
+		cxxflags = "-O3 -DNDEBUG -Wno-deprecated",
+		source = "optimizer02.cpp"
+	)
+
