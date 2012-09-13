@@ -52,7 +52,7 @@ def configure (conf):
 
 		path = getattr (conf.options, opt_name)
 
-		return os.path.abspath (path) if path else find_lib (prefix)
+		return os.path.abspath (os.path.expanduser (path)) if path else find_lib (prefix)
 
 	# check which interval lib is requested
 	use_gaol = conf.options.GAOL_PATH != None
