@@ -9,17 +9,16 @@ $(TARGET):	$(OBJS)
 %.o : %.cpp lexer.o parser.o
 	$(CXX) $(CXXFLAGS) $(INC_DIR_OPT) -I. -c  -o  $@ $<
 
-lexer.o : lexer.c parser.h
+lexer.o : lexer.c parser.tab.hh
 	$(CXX) $(CXXFLAGS) $(INC_DIR_OPT) -I. lexer.c -c -o $@
 
-parser.o parser.h: parser.yacc 
-	bison --name-prefix=ibex --defines parser.yacc --report=all --file-prefix=parser; \
-	mv parser.tab.hacc parser.h; \
-	mv parser.tab.cacc parser.c; \
-	$(CXX) $(CXXFLAGS) $(INC_DIR_OPT) -I. parser.c -c -o parser.o
+parser.o parser.tab.hh: parser.yc 
+	bison --name-prefix=ibex --defines parser.yc --report=all --file-prefix=parser; \
+	mv parser.tab.hc parser.tab.hh; \
+	$(CXX) $(CXXFLAGS) $(INC_DIR_OPT) -I. parser.tab.cc -c -o parser.o
  
-lexer.c : lexer.lex ibex_Scope.h
-	flex -Pibex -olexer.c lexer.lex
+lexer.c : lexer.l ibex_Scope.h
+	flex -Pibex -olexer.c lexer.l
 
 clean:
-	rm -f *~ *.o *~ *.output parser.h parser.c lexer.h lexer.c; \
+	rm -f *~ *.o *~ *.output parser.tab.hh parser.tab.cc lexer.h lexer.c; \

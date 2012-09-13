@@ -19,7 +19,7 @@
 #include "ibex_SyntaxError.h"
 #include "ibex_P_NumConstraint.h"
 
-#include "parser.h"
+#include "parser.tab.hh"
 
 namespace ibex {
 namespace parser {

@@ -177,22 +177,6 @@ def build (bld):
 	)
 
 	# c++ compilation
-	
-	#TODO: remove
-	bld (
-		target = "parser/parser.h",
-		rule   = "rm -f ${TGT} && ln -s parser.tab.hh ${TGT} && touch ${TGT}",
-	)
-	bld (
-		source = "parser/lexer.lex",
-		target = "parser/lexer.l",
-		rule   = "rm -f ${TGT} && ln -s ${SRC[0].abspath()} ${TGT}",
-	)
-	bld (
-		source = "parser/parser.yacc",
-		target = "parser/parser.yc",
-		rule   = "rm -f ${TGT} && ln -s ${SRC[0].abspath()} ${TGT}",
-	)
 
 	bld.stlib (
 		target = "ibex",
