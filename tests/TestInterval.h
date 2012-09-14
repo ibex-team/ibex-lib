@@ -138,6 +138,15 @@ public:
 		TEST_ADD(TestInterval::integer07);
 		TEST_ADD(TestInterval::integer08);
 
+		TEST_ADD(TestInterval::mid01);
+		TEST_ADD(TestInterval::mid02);
+		TEST_ADD(TestInterval::mid03);
+		TEST_ADD(TestInterval::mid04);
+		TEST_ADD(TestInterval::mid05);
+		TEST_ADD(TestInterval::mid06);
+		TEST_ADD(TestInterval::mid07);
+		TEST_ADD(TestInterval::mid08);
+
 	    TEST_ADD(TestInterval::delta01);
 	    TEST_ADD(TestInterval::delta02);
 	    TEST_ADD(TestInterval::delta03);
@@ -316,6 +325,15 @@ private:
 	void integer06();
 	void integer07();
 	void integer08();
+
+	void mid01();
+	void mid02();
+	void mid03();
+	void mid04();
+	void mid05();
+	void mid06();
+	void mid07();
+	void mid08();
 
 	void delta01();
 	void delta02();
