@@ -143,10 +143,13 @@ public:
 	 * The value can be fixed by the user. By default: true. */
 	bool in_HC4_flag;
 
+
 	/** Trace activation flag.
 	 * The value can be fixed by the user. By default: false. */
 	bool trace;
 
+
+	
 	/**
 	 * \brief Time limit.
 	 *
@@ -175,6 +178,14 @@ public:
 
 	/** Name of the goal variable ("y"). */
 	static const char* goal_name;
+
+
+	/** The "loup" (lowest upper bound of the criterion) */
+	double loup;
+
+	/** The "uplo" (upper lower bound of the criterion) */
+	double uplo;
+
 
 protected:
 	/**
@@ -308,11 +319,6 @@ private:
 	/** Inner contractor (for the negation of g) */
 	CtcUnion* is_inside;
 
-	/** The "loup" (lowest upper bound of the criterion) */
-	double loup;
-
-	/** The "uplo" (upper lower bound of the criterion) */
-	double uplo;
 
 
 	/** The point satisfying the constraints corresponding to the loup */
