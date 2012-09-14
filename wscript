@@ -14,7 +14,7 @@ out = '__build__'
 
 
 def options (opt):
-	opt.load ("compiler_cxx compiler_cc")
+	opt.load ("compiler_cxx compiler_cc javaw")
 
 	opt.add_option ("--with-gaol",   action="store", type="string", dest="GAOL_PATH",
 			help = "location of the Gaol lib")
@@ -22,14 +22,11 @@ def options (opt):
 			help = "location of the Profil/Bias lib")
 	opt.add_option ("--with-soplex", action="store", type="string", dest="SOPLEX_PATH",
 			help = "location of the Soplex lib")
-	opt.add_option ("--with-java", action="store", type="string", dest="JVM_PATH",
-			help = "location of the Java Virtual Machine")
-
-
 		
 
 def configure (conf):
-	conf.load ('compiler_cxx compiler_cc flex bison')
+	env = conf.env
+	conf.load ('compiler_cxx compiler_cc flex bison javaw')
 
 	def find_lib (prefix):
 
@@ -68,14 +65,14 @@ def configure (conf):
 		path = candidate_lib_path ("GAOL_PATH", "gaol-")
 		if path:
 			use_gaol = True
-			conf.env["INTERVAL_LIB"] = "gaol"
+			env["INTERVAL_LIB"] = "gaol"
 	
 	# then try with the Profil/Bias lib
 	if not use_gaol:
 		path = candidate_lib_path ("BIAS_PATH", "Profil-")
 		if path:
 			use_bias = True
-			conf.env["INTERVAL_LIB"] = "bias"
+			env["INTERVAL_LIB"] = "bias"
 	
 	if not (use_gaol or use_bias):
 		conf.fatal ("cannot find any interval library, please use --with-bias=BIAS_PATH or --with-gaol=GAOL_PATH")
@@ -105,20 +102,22 @@ def configure (conf):
 	else:
 		conf.fatal ("cannot find the Soplex library, please use --with-soplex=SOPLEX_PATH")
 
-	# JNI
-	jvm_path = conf.options.JVM_PATH
-	if not jvm_path:
-		jvm_path = "/usr/lib/jvm/java-6-sun"
-	conf.check_cxx (header_name	= "jni.h",
-			includes	= [	os.path.join (jvm_path, "include"),
-						os.path.join (jvm_path, "include", "linux")], # FIXME
-			uselib_store	= "jni")
-	
-	conf.find_program (os.path.join (jvm_path, "bin", "javac"), var = "JAVAC")
-	conf.find_program (os.path.join (jvm_path, "bin", "javah"), var = "JAVAH")
 
-	conf.env.append_unique ("BISONFLAGS", ["--name-prefix=ibex", "--report=all", "--file-prefix=parser"])
-	conf.env.append_unique ("FLEXFLAGS", "-Pibex")
+	# JNI
+	
+	conf.check_jni_headers (mandatory = False)
+	if env["INCLUDES_JAVA"]:
+		home = env["JAVA_HOME"][0]
+		conf.msg ("Checking for java sdk", home)
+		del env["JAVAC"]
+		conf.find_program (os.path.join (home, "bin", "javac"), var = "JAVAC")
+		conf.find_program (os.path.join (home, "bin", "javah"), var = "JAVAH")
+	else:
+		conf.msg ("Checking for java sdk", "no (you may need to set JAVA_HOME to detect it properly)", "YELLOW")
+
+	# Bison / Flex
+	env.append_unique ("BISONFLAGS", ["--name-prefix=ibex", "--report=all", "--file-prefix=parser"])
+	env.append_unique ("FLEXFLAGS", "-Pibex")
 
 def build (bld):
 	bld.recurse ("src examples")

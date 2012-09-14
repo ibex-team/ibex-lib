@@ -129,59 +129,62 @@ def build (bld):
 	)
 
 	# JNI
+	jni_source = ""
+	if bld.env["INCLUDES_JAVA"]:
+		jni_source = "java/ibex_Java.cpp"
 
-	java_signature = JAVA_PACKAGE.replace (".", "_")
-	java_path      = JAVA_PACKAGE.replace (".", "/")
+		java_signature = JAVA_PACKAGE.replace (".", "_")
+		java_path      = JAVA_PACKAGE.replace (".", "/")
 
-	def gen_ibex_java_cpp (tsk):
-		source = tsk.inputs[0].abspath()
-		target = tsk.outputs[0].abspath()
-		
-		with open (target, "w") as out:
-			out.write ("// This file is generated from %s.\n" % tsk.inputs[0].name)
-			out.write ('#include "%s_Ibex.h_"\n' % java_signature)
-			for line in open (source):
-				out.write (line.replace ("Java_", "Java_%s_" % java_signature))
+		def gen_ibex_java_cpp (tsk):
+			source = tsk.inputs[0].abspath()
+			target = tsk.outputs[0].abspath()
+			
+			with open (target, "w") as out:
+				out.write ("// This file is generated from %s.\n" % tsk.inputs[0].name)
+				out.write ('#include "%s_Ibex.h_"\n' % java_signature)
+				for line in open (source):
+					out.write (line.replace ("Java_", "Java_%s_" % java_signature))
 
-	bld (
-		target = "java/ibex_Java.cpp",
-		source = "java/ibex_Java.cpp_",
-		rule   = gen_ibex_java_cpp
-	)
+		bld (
+			target = jni_source,
+			source = "java/ibex_Java.cpp_",
+			rule   = gen_ibex_java_cpp
+		)
 
-	def gen_ibex_java (tsk):
-		source = tsk.inputs[0].abspath()
-		target = tsk.outputs[0].abspath()
-		
-		with open (target, "w") as out:
-			out.write ("// This file is generated from %s.\n" % tsk.inputs[0].name)
-			out.write ("package %s;" % JAVA_PACKAGE)
-			map (out.write, open (source))
+		def gen_ibex_java (tsk):
+			source = tsk.inputs[0].abspath()
+			target = tsk.outputs[0].abspath()
+			
+			with open (target, "w") as out:
+				out.write ("// This file is generated from %s.\n" % tsk.inputs[0].name)
+				out.write ("package %s;" % JAVA_PACKAGE)
+				map (out.write, open (source))
 
-	bld (
-		target = "java/Ibex.java",
-		source = "java/Ibex.java_",
-		rule   = gen_ibex_java
-	)
+		bld (
+			target = "java/Ibex.java",
+			source = "java/Ibex.java_",
+			rule   = gen_ibex_java
+		)
 
-	bld (
-		target = "java/%s/Ibex.class" % java_path,
-		source = "java/Ibex.java",
-		rule   = "${JAVAC} -d src/java ${SRC}"
-	)
+		bld (
+			target = "java/%s/Ibex.class" % java_path,
+			source = "java/Ibex.java",
+			rule   = "${JAVAC} -d src/java ${SRC}"
+		)
 
-	bld (
-		target = "java/%s_Ibex.h_" % java_signature,
-		source = "java/%s/Ibex.class" % java_path,
-		rule   = "${JAVAH} -jni -classpath src/java -o ${TGT} %s.Ibex" % JAVA_PACKAGE
-	)
+		bld (
+			target = "java/%s_Ibex.h_" % java_signature,
+			source = "java/%s/Ibex.class" % java_path,
+			rule   = "${JAVAH} -jni -classpath src/java -o ${TGT} %s.Ibex" % JAVA_PACKAGE
+		)
 
 	# c++ compilation
 
 	bld.stlib (
 		target = "ibex",
 		name = "ibex",
-		use  = "soplex interval jni",
+		use  = "soplex interval JAVA",
 		includes = "arithmetic bisector combinatorial contractor function numeric parser strategy symbolic tools",
 		cxxflags = "-O3 -DNDEBUG -Wno-deprecated",
 		source = """
@@ -222,7 +225,6 @@ def build (bld):
 			function/ibex_Gradient.cpp
 			function/ibex_HC4Revise.cpp
 			function/ibex_InHC4Revise.cpp
-			java/ibex_Java.cpp
 			numeric/ibex_Linear.cpp
 			numeric/ibex_Newton.cpp
 			parser/ibex_ConstantGenerator.cpp
@@ -267,6 +269,8 @@ def build (bld):
 			tools/ibex_NonRecoverableException.cpp
 			tools/ibex_String.cpp
 			tools/ibex_Timer.cpp
-		""")
+
+			%s
+		""" % jni_source)
 
 
