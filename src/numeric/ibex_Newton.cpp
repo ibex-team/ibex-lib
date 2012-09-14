@@ -40,7 +40,7 @@ bool newton(const Function& f, IntervalVector& box, double prec, double ratio_ga
 //		cout << box << endl << endl << endl;
 		f.hansen_matrix(box,J); //may throw EmptyBoxException?
 //		f.jacobian(box,J); //may throw EmptyBoxException
-		if (J.is_empty()) { cout << "J empty\n"; return false; }
+		if (J.is_empty()) { return false; }
 //		for (int i=0; i<m; i++)
 //			for (int j=0; j<n; j++)
 //				if (J[i][j].mag()>1e-10) cout << "(" << i << "," << j << ")=" << J[i][j] << "  ";
