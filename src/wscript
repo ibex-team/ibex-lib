@@ -1,6 +1,8 @@
 #! /usr/bin/env python
 # encoding: utf-8
 
+import shutil
+
 JAVA_PACKAGE = "ibex"
 
 
@@ -32,8 +34,9 @@ def build (bld):
 			for hdr in tsk.inputs:
 				out.write ('#include "%s"\n' % hdr.name)
 
-	bld (
+	tg_ibex_h = bld (
 		target = "ibex.h",
+		name   = "ibex_headers",
 		source = ibex_hdr,
 		rule   = gen_ibex_h
 	)
@@ -90,13 +93,31 @@ def build (bld):
 
 	# c++ compilation
 
-	bld.stlib (
+	tg_ibex = bld.stlib (
 		target = "ibex",
-		name = "ibex",
 		use  = "soplex interval JAVA",
 		includes = "arithmetic bisector combinatorial contractor function numeric parser strategy symbolic tools",
 		cxxflags = "-O3 -DNDEBUG -Wno-deprecated",
 		source = ibex_src
 	)
 
+
+	def update_dirs (task):
+		bld = task.generator.bld
+
+		lib_nodes = tg_ibex.tasks[-1].outputs
+
+		t = tg_ibex_h.tasks[0]
+		include_nodes = list (t.inputs) + t.outputs
+
+		for nodes, path in ((include_nodes, "include"),(lib_nodes, "lib")):
+			for n in nodes:
+				shutil.copy (n.abspath(), path)
+
+	bld (
+		name = "update lib/ and include/ directories",
+		after = "cxxstlib ibex_headers",
+		always = True,
+		rule = update_dirs,
+	)
 
