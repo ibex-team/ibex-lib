@@ -26,7 +26,7 @@ def options (opt):
 
 def configure (conf):
 	env = conf.env
-	conf.load ('compiler_cxx compiler_cc flex bison javaw')
+	conf.load ('compiler_cxx compiler_cc flex bison')
 
 	def find_lib (prefix):
 
@@ -104,14 +104,18 @@ def configure (conf):
 
 
 	# JNI
+	java_home = os.environ.get("JAVA_HOME")
+	if java_home:
+		env["JAVA_HOME"] = [java_home]
 	
+	conf.load ('javaw', funs = [])
+
 	conf.check_jni_headers (mandatory = False)
 	if env["INCLUDES_JAVA"]:
-		home = env["JAVA_HOME"][0]
-		conf.msg ("Checking for java sdk", home)
+		conf.msg ("Checking for java sdk", java_home)
 		del env["JAVAC"]
-		conf.find_program (os.path.join (home, "bin", "javac"), var = "JAVAC")
-		conf.find_program (os.path.join (home, "bin", "javah"), var = "JAVAH")
+		conf.find_program (os.path.join (java_home, "bin", "javac"), var = "JAVAC")
+		conf.find_program (os.path.join (java_home, "bin", "javah"), var = "JAVAH")
 	else:
 		conf.msg ("Checking for java sdk", "no (you may need to set JAVA_HOME to detect it properly)", "YELLOW")
 
