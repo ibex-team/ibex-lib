@@ -47,6 +47,7 @@
 %token <str> TK_STRING
 %token <itg> TK_INTEGER
 %token <real> TK_FLOAT
+%token TK_INFINITY
 %token <_bool> TK_BOOL
 
 %token TK_PARAM TK_CONST TK_VARS TK_FUNCTION 
@@ -308,6 +309,7 @@ expr          : expr '+' expr	                { $$ = &(*$1 + *$3); }
               | TK_FUNC_SYMBOL '(' expr_row ')' { $$ = &apply(scopes.top().get_func($1), *$3); free($1); delete $3; }
               | TK_NEW_SYMBOL                   { ibexerror("unknown symbol"); }
               | TK_FLOAT                        { $$ = &ExprConstant::new_scalar($1); }
+              | TK_INFINITY                     { $$ = new ExprInfinity(); }              
               | TK_INTEGER                      { $$ = &ExprConstant::new_scalar((double) $1); }
               | interval                        { $$ = &ExprConstant::new_scalar(*$1); delete $1; }
               | TK_INF '(' expr ')'             { $$ = &ExprConstant::new_scalar(_2domain(*$3).i().lb()); }

@@ -11,6 +11,7 @@
 #include "ibex_P_ExprGenerator.h"
 #include "ibex_ConstantGenerator.h"
 #include "ibex_SyntaxError.h"
+#include "ibex_Exception.h"
 
 namespace ibex {
 namespace parser {
@@ -67,6 +68,10 @@ void ExprGenerator::visit(const ExprIter& x) {
 	x.deco.tmp = & ExprConstant::new_scalar(scope.get_iter_value(x.name));
 }
 
+void ExprGenerator::visit(const ExprInfinity& x) {
+	ibex_warning("infinity value \"oo\" inside an expression means the empty interval");
+	x.deco.tmp = & ExprConstant::new_scalar(Interval::EMPTY_SET);
+}
 
 } // end namespace parser
 } // end namespace ibex

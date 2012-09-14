@@ -28,11 +28,7 @@ class P_ExprPower : public ExprBinaryOp {
 public:
 	P_ExprPower(const ExprNode& expr, const ExprNode& expon);
 
-	virtual void acceptVisitor(ExprVisitor& v) const {
-		P_ExprVisitor* v2=dynamic_cast<P_ExprVisitor*>(&v);
-		if (v2) v2->visit(*this);
-		else v.visit(*this);
-	}
+	virtual void acceptVisitor(ExprVisitor& v) const;
 };
 
 /**
@@ -42,11 +38,7 @@ class P_ExprIndex : public ExprBinaryOp {
 public:
 	P_ExprIndex(const ExprNode& expr, const ExprNode& index);
 
-	virtual void acceptVisitor(ExprVisitor& v) const {
-		P_ExprVisitor* v2=dynamic_cast<P_ExprVisitor*>(&v);
-		if (v2) v2->visit(*this);
-		else v.visit(*this);
-	}
+	virtual void acceptVisitor(ExprVisitor& v) const;
 };
 
 /**
@@ -58,14 +50,24 @@ public:
 
 	~ExprIter();
 
-	virtual void acceptVisitor(ExprVisitor& v) const {
-		P_ExprVisitor* v2=dynamic_cast<P_ExprVisitor*>(&v);
-		if (v2) v2->visit(*this);
-		else v.visit(*this); // as a leaf. May happen, e.g., with ExprReset called by bin_size
-		                       // (for calculating the size of the DAG x[y])
-	}
+	virtual void acceptVisitor(ExprVisitor& v) const;
 
 	const char* name;
+};
+
+
+/**
+ * The constant infinity.
+ *
+ * This constant cannot be represented by an ExprConstant
+ * object because (+oo,+oo) is automatically
+ * replaced by the empty set.
+ */
+class ExprInfinity : public ExprLeaf {
+public:
+	ExprInfinity();
+
+	virtual void acceptVisitor(ExprVisitor& v) const;
 };
 
 void p_print(const ExprNode& e);

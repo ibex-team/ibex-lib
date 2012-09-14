@@ -30,6 +30,7 @@ protected:
 	void visit(const P_ExprPower& c);
 	void visit(const P_ExprIndex& e);
 	void visit(const ExprIter& i);
+	void visit(const ExprInfinity&);
 
 	const Scope& scope;
 };

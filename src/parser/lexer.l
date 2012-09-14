@@ -75,7 +75,7 @@ using namespace ibex::parser;
 
 "constraints"|"Constraints"|"CONSTRAINTS" { return TK_CTRS; }
 
-"oo"                             { ibexlval.real = POS_INFINITY; return TK_FLOAT; } 
+"oo"                             { return TK_INFINITY; } 
 "\""[^\n]*"\""                   { ibexlval.str = (char*) malloc(strlen(ibextext)-1);
                                    /* copy while removing quotes */
                                    strncpy(ibexlval.str,&ibextext[1],strlen(ibextext)-2);   

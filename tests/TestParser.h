@@ -28,6 +28,7 @@ public:
 		TEST_ADD(TestParser::const03);
 		TEST_ADD(TestParser::const04);
 		TEST_ADD(TestParser::const05);
+		TEST_ADD(TestParser::const06);
 
 		TEST_ADD(TestParser::ponts);
 		TEST_ADD(TestParser::choco01);
@@ -42,6 +43,7 @@ public:
 	void const03();
 	void const04();
 	void const05();
+	void const06();
 
 	void func01();
 	void ponts();

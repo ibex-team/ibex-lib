@@ -78,8 +78,11 @@ protected:
 	void visit(const P_ExprPower& e);
 	void visit(const P_ExprIndex& e);
 	void visit(const ExprIter& i);
+	void visit(const ExprInfinity&);
 
 	const Scope& scope;
+
+	int number_type;
 };
 
 } // end namespace parser

@@ -19,14 +19,15 @@ void P_ExprPrinter::print(std::ostream& os, const ExprNode& e) {
 	ExprPrinter::print(os,e);
 }
 
-void P_ExprPrinter::visit(const ExprNode& e)    { e.acceptVisitor(*this); }
+void P_ExprPrinter::visit(const ExprNode& e)     { e.acceptVisitor(*this); }
 
-void P_ExprPrinter::visit(const P_ExprPower& e) { (*os) << "("; visit(e.left); (*os) << "^"; visit(e.right); (*os ) << ")"; }
+void P_ExprPrinter::visit(const P_ExprPower& e)  { (*os) << "("; visit(e.left); (*os) << "^"; visit(e.right); (*os ) << ")"; }
 
-void P_ExprPrinter::visit(const P_ExprIndex& e) { (*os) << "("; visit(e.left); (*os) << "["; visit(e.right); (*os ) << "]"; }
+void P_ExprPrinter::visit(const P_ExprIndex& e)  { (*os) << "("; visit(e.left); (*os) << "["; visit(e.right); (*os ) << "]"; }
 
-void P_ExprPrinter::visit(const ExprIter& e)    { (*os) << e.name; }
+void P_ExprPrinter::visit(const ExprIter& e)     { (*os) << e.name; }
 
+void P_ExprPrinter::visit(const ExprInfinity& e) { (*os) << "oo"; }
 
 } // end namespace parser
 

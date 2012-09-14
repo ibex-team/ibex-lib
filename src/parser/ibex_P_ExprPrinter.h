@@ -28,6 +28,7 @@ protected:
 	void visit(const P_ExprPower&);
 	void visit(const P_ExprIndex&);
 	void visit(const ExprIter&);
+	void visit(const ExprInfinity&);
 };
 
 } // end namespace parser

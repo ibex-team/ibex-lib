@@ -15,6 +15,8 @@
 #include "ibex_SyntaxError.h"
 #include "Ponts30.h"
 
+using namespace std;
+
 namespace ibex {
 
 static bool sameExpr(const ExprNode& node, const char* expr) {
@@ -102,6 +104,18 @@ void TestParser::const05() {
 				         {4,4},{2,2},{5,5}};
 		IntervalVector box(6,_m);
 		check(sys.box,box.inflate(0.1));
+	} catch(SyntaxError& e) {
+		cout << e << endl;
+		TEST_ASSERT(false);
+	}
+}
+
+void TestParser::const06() {
+	try {
+		System sys("quimper/const06.qpr");
+		check(sys.box[0],Interval(1.0,POS_INFINITY));
+		check(sys.box[1],Interval(NEG_INFINITY,0));
+		check(sys.box[2],Interval::ALL_REALS);
 	} catch(SyntaxError& e) {
 		cout << e << endl;
 		TEST_ASSERT(false);

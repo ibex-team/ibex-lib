@@ -24,6 +24,7 @@
 #include "ibex_MainGenerator.h"
 #include "ibex_ConstantGenerator.h"
 #include "ibex_P_ExprGenerator.h"
+#include "ibex_Exception.h"
 
 using namespace std;
 

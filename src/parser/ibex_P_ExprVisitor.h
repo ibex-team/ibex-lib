@@ -20,6 +20,7 @@ namespace parser {
 class P_ExprPower;
 class P_ExprIndex;
 class ExprIter;
+class ExprInfinity;
 
 class P_ExprVisitor : public virtual ExprVisitor {
 public:
@@ -33,6 +34,9 @@ public:
 
 	/** Visit an iterator symbol. */
 	virtual void visit(const ExprIter&)=0;
+
+	/** Visit +/-oo. */
+	virtual void visit(const ExprInfinity&)=0;
 };
 
 } // end namespace parser
