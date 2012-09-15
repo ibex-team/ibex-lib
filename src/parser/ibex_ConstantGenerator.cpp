@@ -96,15 +96,7 @@ void ConstantGenerator::visit(const ExprSymbol& x) {
 }
 
 void ConstantGenerator::visit(const ExprConstant& c) {
-	Domain* d=new Domain(c.dim);
-	switch(c.dim.type()) {
-	case Dim::SCALAR:     d->i()=c.get_value(); break;
-	case Dim::ROW_VECTOR:
-	case Dim::COL_VECTOR: d->v()=c.get_vector_value(); break;
-	case Dim::MATRIX:     d->m()=c.get_matrix_value(); break;
-	default: assert(false); break;
-	}
-	c.deco.tmp = d;
+	c.deco.tmp = new Domain(c.get(),false);
 	number_type = OTHER; // neither -oo nor +oo
 }
 
@@ -130,10 +122,12 @@ void ConstantGenerator::visit(const ExprVector& e) {
 	for (int i=0; i<e.nb_args; i++) {
 		visit(e.arg(i));
 		NOT_INF;
-		const Domain& di=(*((const Domain*) e.arg(i).deco.tmp));
-		if (d->dim.is_vector()) d->v()[i]=di.i();
-		else d->m()[i]=di.v();
+		const Domain* di=(const Domain*) e.arg(i).deco.tmp;
+		if (d->dim.is_vector()) d->v()[i]=di->i();
+		else d->m()[i]=di->v();
+		delete di;
 	}
+
 	e.deco.tmp = d;
 }
 
@@ -145,11 +139,13 @@ void ConstantGenerator::visit(const ExprApply& e) {
 	for (int i=0; i<e.nb_args; i++) {
 		visit(e.arg(i));
 		NOT_INF;
-		const Domain& di=(*((const Domain*) e.arg(i).deco.tmp));
-		args.set_ref(i,di);
+		const Domain* di=(const Domain*) e.arg(i).deco.tmp;
+		args.set_ref(i,*di);
 	}
 	*d=Eval().eval(e.func,args);
-
+	for (int i=0; i<e.nb_args; i++) {
+		delete &args[i];
+	}
 	e.deco.tmp=d;
 }
 
@@ -161,20 +157,21 @@ typedef Domain (*dom_func)(const Domain&);
 typedef Domain (*dom_func2)(const Domain&, const Domain&);
 
 void unary_eval(const ExprUnaryOp& e, dom_func f) {
-	Domain  dx = *((const Domain*) e.expr.deco.tmp);
-	delete (Domain*) e.expr.deco.tmp;
+	const Domain* dx = (const Domain*) e.expr.deco.tmp;
 	Domain* dy = new Domain(e.dim);
-	*dy = f(dx);
+	*dy = f(*dx);
+	delete dx;
 	e.deco.tmp = dy;
 }
 
 void binary_eval(const ExprBinaryOp& e, dom_func2 f) {
-	Domain  dx1 = *((const Domain*) e.left.deco.tmp);
-	Domain  dx2 = *((const Domain*) e.right.deco.tmp);
-	delete (Domain*) e.left.deco.tmp;
-	delete (Domain*) e.right.deco.tmp;
+	const Domain* dx1 = (const Domain*) e.left.deco.tmp;
+	const Domain* dx2 = (const Domain*) e.right.deco.tmp;
 	Domain* dy = new Domain(e.dim);
-	*dy = f(dx1,dx2);
+	*dy = f(*dx1,*dx2);
+	delete dx1;
+	delete dx2;
+
 	e.deco.tmp = dy;
 }
 
@@ -207,15 +204,15 @@ void ConstantGenerator::visit(const ExprMinus& e) {
 	switch(number_type) {
 	case NEG_INF:
 		number_type=POS_INF;
-		e.deco.tmp = new Domain(Dim::scalar());
-		((Domain*) e.deco.tmp)->i()=Interval::EMPTY_SET;
+		e.deco.tmp = e.expr.deco.tmp; // the empty set
 		break;
 	case POS_INF:
 		number_type=NEG_INF;
-		e.deco.tmp = new Domain(Dim::scalar());
-		((Domain*) e.deco.tmp)->i()=Interval::EMPTY_SET;
+		e.deco.tmp = e.expr.deco.tmp; // the empty set
 		break;
-	default: unary_eval(e,operator-); break;
+	default:
+		unary_eval(e,operator-);
+		break;
 	}
 }
 
@@ -241,6 +238,7 @@ void ConstantGenerator::visit(const ExprAsinh& e) { visit(e.expr); NOT_INF; unar
 void ConstantGenerator::visit(const ExprAtanh& e) { visit(e.expr); NOT_INF; unary_eval(e,atanh); }
 
 void ConstantGenerator::visit(const ExprIter& x) {
+	number_type=OTHER;
 	Domain* d= new Domain(x.dim);
 	d->i()=Interval(scope.get_iter_value(x.name));
 	x.deco.tmp=d;
