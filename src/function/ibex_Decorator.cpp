@@ -91,6 +91,8 @@ void Decorator::visit(const ExprUnaryOp& u) {
 		u.deco.g = new Domain(*u.expr.deco.g,true);
 		u.deco.p = new Domain(*u.expr.deco.p,true);
 	} else {
+		/* TODO: seems impossible to have references
+		 in case of matrices... */
 		u.deco.d = new Domain(u.dim);
 		u.deco.g = new Domain(u.dim);
 		u.deco.p = new Domain(u.dim);

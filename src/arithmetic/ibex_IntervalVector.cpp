@@ -82,7 +82,6 @@ void IntervalVector::resize(int n2) {
 IntervalVector IntervalVector::subvector(int start_index, int end_index) {
 	assert(!is_empty());
 	assert(end_index>=0 && start_index>=0);
-
 	assert(end_index<size() && start_index<=end_index);
 	//throw NonRecoverableException("Invalid indices for IntervalVector::subvector");
 
@@ -92,6 +91,17 @@ IntervalVector IntervalVector::subvector(int start_index, int end_index) {
 		v[j++]=(*this)[i];
 	}
 	return v;
+}
+
+void IntervalVector::put(int start_index, const IntervalVector& subvec) {
+	assert(!is_empty());
+	int end_index=start_index+subvec.size()-1;
+	assert(start_index>=0 && end_index<size());
+
+	int j=0;
+	for (int i=start_index; i<=end_index; i++) {
+		(*this)[i]=subvec[j++];
+	}
 }
 
 IntervalVector& IntervalVector::operator=(const IntervalVector& x) {

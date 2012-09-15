@@ -150,6 +150,16 @@ public:
 	IntervalVector subvector(int start_index, int end_index);
 
 	/**
+	 * \brief Put a subvector into *this at a given position.
+	 *
+	 * \param start_index - the position where the subvector
+	 * \param subvec - the subvector
+	 *
+	 * \pre (*this) must not be empty
+	 */
+	void put(int start_index, const IntervalVector& subvec);
+
+	/**
 	 * \brief Assign this IntervalVector to x.
 	 *
 	 * \pre Dimensions of this and x must match. 
@@ -453,7 +463,6 @@ public:
 	 * \brief (*this)=x1*(*this).
 	 */
 	IntervalVector& operator*=(const Interval& x1);
-
 
 private:
 	friend class IntervalMatrix;
