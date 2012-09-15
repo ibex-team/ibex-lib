@@ -1,7 +1,0 @@
-
-variables
- x;
-
-constraints
- x>=0;
-end

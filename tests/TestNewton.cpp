@@ -90,14 +90,16 @@ void TestNewton::newton01() {
 	try {
 		newton(*p30.f,box);
 	} catch (EmptyBoxException& e) {
+		cout << "empty box" << endl;
 		TEST_ASSERT(false);
 	} catch (LinearException& e) {
+		cout << "linear exception" << endl;
 		TEST_ASSERT(false);
 	}
 
 	IntervalVector expected(30,BOX2);
-//	cout << expected << endl << endl << endl;
-//	cout << box << endl;
+	//cout << expected << endl << endl << endl;
+	//cout << box << endl;
 	TEST_ASSERT(almost_eq(box,expected,error));
 }
 

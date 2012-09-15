@@ -333,8 +333,8 @@ void TestArith::proj_div05() { checkproj_div(Interval(-1,1), Interval(-2,2),  In
 void TestArith::proj_div06() { checkproj_div(Interval::ZERO, Interval(-2,2),  Interval(-2,2), Interval::ZERO,      Interval(-2,2)); }
 void TestArith::proj_div07() { checkproj_div(Interval::POS_REALS, Interval(0,1),  Interval(-1,0), Interval::ZERO,   Interval(-1,0)); }
 // note: 0/0 can be any number.
-void TestArith::proj_div08() { checkproj_div(Interval(next_float(0),POS_INFINITY), Interval(0,1), Interval(-1,0), Interval::ZERO, Interval::ZERO); }
-void TestArith::proj_div09() { checkproj_div(Interval::POS_REALS, Interval(next_float(0),1),  Interval(-1,0),  Interval::EMPTY_SET, Interval::EMPTY_SET); }
+void TestArith::proj_div08() { checkproj_div(Interval(ibex::next_float(0),POS_INFINITY), Interval(0,1), Interval(-1,0), Interval::ZERO, Interval::ZERO); }
+void TestArith::proj_div09() { checkproj_div(Interval::POS_REALS, Interval(ibex::next_float(0),1),  Interval(-1,0),  Interval::EMPTY_SET, Interval::EMPTY_SET); }
 
 void TestArith::proj_sqr01() { checkproj(sqr, Interval(1,9),            Interval(0,4),       Interval(1,3)); }
 void TestArith::proj_sqr02() { checkproj(sqr, Interval(1,9),            Interval(0,2),       Interval(1,2)); }

@@ -13,6 +13,7 @@
 #include "ibex_System.h"
 #include "ibex_SyntaxError.h"
 #include <sstream>
+using namespace std;
 
 namespace ibex {
 
