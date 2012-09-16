@@ -19,7 +19,7 @@ void HC4Revise::proj(const Function& f, const Domain& y, Array<Domain>& x) {
 	// note: not very clean.
 	// the box x is not emptied if an EmptyBoxException is thrown
 	// before (this is done by the contractor).
-	x = f.symbol_domains;
+	load(x,f.symbol_domains,f.nb_used_inputs,f.used_input);
 }
 
 void HC4Revise::proj(const Function& f, const Domain& y, IntervalVector& x) {
@@ -27,20 +27,26 @@ void HC4Revise::proj(const Function& f, const Domain& y, IntervalVector& x) {
 	*f.expr().deco.d = y;
 	f.backward<HC4Revise>(*this);
 
-	if (f.all_symbols_scalar())
-		for (int i=0; i<f.nb_symbols(); i++) {
-			x[i]=f.symbol_domains[i].i();
+	if (f.all_symbols_scalar()) {
+		int j;
+		for (int i=0; i<f.nb_used_inputs; i++) {
+			j=f.used_input[i];
+			x[j]=f.symbol_domains[j].i();
 		}
+	}
 	else
-		load(x,f.symbol_domains);
+		load(x,f.symbol_domains,f.nb_used_inputs,f.used_input);
 }
 
 void HC4Revise::proj(const Function& f, const Domain& y, ExprLabel** x) {
 	Eval().eval(f,x);
 	*f.expr().deco.d = y;
 	f.backward<HC4Revise>(*this);
-	for (int i=0; i<f.nb_symbols(); i++) {
-		*(x[i]->d) = f.symbol_domains[i];
+
+	int j;
+	for (int i=0; i<f.nb_used_inputs; i++) {
+		j=f.used_input[i];
+		*(x[j]->d) = f.symbol_domains[j];
 	}
 }
 

@@ -134,6 +134,8 @@ protected:
 
 	/** Array of sub-Ts */
 	T** array;
+private:
+	T& operator=(const Array<T>&); //forbidden
 };
 
 

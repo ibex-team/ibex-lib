@@ -47,10 +47,13 @@ Function::~Function() {
 }
 
 int Function::input_size() const {
+	return is_used.size();
+	/*
 	int sum=0;
 	for (int i=0; i<nb_symbols(); i++)
 		sum+=symbol(i).dim.size();
 	return sum;
+	*/
 }
 
 Domain& Function::eval_domain(const IntervalVector& box) const {

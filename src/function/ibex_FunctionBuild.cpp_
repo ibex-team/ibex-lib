@@ -78,22 +78,26 @@ public:
 	virtual void visit(const ExprNAryOp& e)   {
 		for (int i=0; i<e.nb_args; i++) {
 			visit(*e.args[i]);
-			if (current_index!=-1) is_used[current_index]=true;
+			if (current_index!=-1)
+				for (int j=0; j<e.arg(i).dim.size(); j++) is_used[current_index+j]=true;
 		}
 		current_index=-1;
 	}
 
 	virtual void visit(const ExprBinaryOp& e) {
 		visit(e.left);
-		if (current_index!=-1) is_used[current_index]=true;
+		if (current_index!=-1)
+			for (int i=0; i<e.left.dim.size(); i++) is_used[current_index+i]=true;
 		visit(e.right);
-		if (current_index!=-1) is_used[current_index]=true;
+		if (current_index!=-1)
+			for (int i=0; i<e.right.dim.size(); i++) is_used[current_index+i]=true;
 		current_index=-1;
 	}
 
 	virtual void visit(const ExprUnaryOp& e)  {
 		visit(e.expr);
-		if (current_index!=-1) is_used[current_index]=true;
+		if (current_index!=-1)
+			for (int i=0; i<e.expr.dim.size(); i++) is_used[current_index+i]=true;
 		current_index=-1;
 	}
 
@@ -263,6 +267,18 @@ void Function::init(const Array<const ExprSymbol>& x, const ExprNode& y) {
 
 	FindInputsUsed fsu(x, y, is_used);
 
+	nb_used_inputs=0;
+	for (int i=0; i<is_used.size(); i++) {
+		if (is_used[i]) nb_used_inputs++;
+	}
+
+	used_input=new int[nb_used_inputs];
+	int j=0;
+	for (int i=0; i<is_used.size(); i++) {
+		if (is_used[i]) { used_input[j++]=i; }
+	}
+	assert(j==nb_used_inputs);
+
 	for (int i=0; i<nb_nodes(); i++) {
 		assert(node(i).deco.f==NULL); // this node must not belong to another function!
 		node(i).deco.f=this;
@@ -280,9 +296,6 @@ void Function::add_symbol(const ExprSymbol* symbol) {
   ((ExprSymbol&) *symbol).key = key_count;
 
   key_count ++;
-
-  for (int i=0; i<symbol->dim.size(); i++)
-	  is_used.push_back(false);               // all the components are unused by default
 
   __all_symbols_scalar &= symbol->dim.is_scalar();
 

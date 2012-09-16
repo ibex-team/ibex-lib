@@ -108,7 +108,7 @@ public:
 	 *
 	 * This size is the sum of the numbers of components, for
 	 * all symbols.
-	 * \warning very slow!
+	 *
 	 * \see #nb_symbols() const.
 	 */
 	int input_size() const;
@@ -386,6 +386,17 @@ public:
 	 * \note The structure is initialized by #ibex::GradDecorator.
 	 */
 	mutable Array<Domain> symbol_deriv;
+
+	/**
+	 * Number of used inputs
+	 */
+	int nb_used_inputs;
+
+	/**
+	 * Array of used inputs (indices in declaration order)
+	 */
+	int* used_input;
+
 
 private:
 

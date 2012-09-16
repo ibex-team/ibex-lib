@@ -19,8 +19,10 @@ namespace ibex {
 Domain& Eval::eval(const Function& f, ExprLabel** args) const {
 	assert(f.expr().deco.d);
 
-	for (int i=0; i<f.symbol_domains.size(); i++) {
-		f.symbol_domains[i]=*(args[i]->d);
+	int j;
+	for (int i=0; i<f.nb_used_inputs; i++) {
+		j=f.used_input[i];
+		f.symbol_domains[j]=*(args[j]->d);
 	}
 
 	return *f.forward<Eval>(*this).d;
@@ -29,7 +31,7 @@ Domain& Eval::eval(const Function& f, ExprLabel** args) const {
 Domain& Eval::eval(const Function& f, const Array<const Domain>& d) const {
 	assert(f.expr().deco.d);
 
-	load(f.symbol_domains,d);
+	load(f.symbol_domains,d,f.nb_used_inputs,f.used_input);
 
 	return *f.forward<Eval>(*this).d;
 }
@@ -37,7 +39,7 @@ Domain& Eval::eval(const Function& f, const Array<const Domain>& d) const {
 Domain& Eval::eval(const Function& f, const Array<Domain>& d) const {
 	assert(f.expr().deco.d);
 
-	load(f.symbol_domains,d);
+	load(f.symbol_domains,d,f.nb_used_inputs,f.used_input);
 
 	return *f.forward<Eval>(*this).d;
 }
@@ -45,11 +47,15 @@ Domain& Eval::eval(const Function& f, const Array<Domain>& d) const {
 Domain& Eval::eval(const Function &f, const IntervalVector& box) const {
 	assert(f.expr().deco.d);
 
-	if (f.all_symbols_scalar())
-		for (int i=0; i<f.symbol_domains.size(); i++)
-			f.symbol_domains[i].i()=box[i];
+	if (f.all_symbols_scalar()) {
+		int j;
+		for (int i=0; i<f.nb_used_inputs; i++) {
+			j=f.used_input[i];
+			f.symbol_domains[j].i()=box[j];
+		}
+	}
 	else
-		load(f.symbol_domains,box); // load the domains of all the symbols
+		load(f.symbol_domains,box,f.nb_used_inputs,f.used_input); // load the domains of all the symbols
 
 	return *f.forward<Eval>(*this).d;
 }

@@ -230,29 +230,29 @@ std::ostream& operator<<(std::ostream& os,const Domain&);
 /**
  * \brief Load domains from a flat vector
  */
-void load(Array<Domain>& domains, const IntervalVector& box);
+void load(Array<Domain>& domains, const IntervalVector& box, int nb_used=-1, int* used=NULL);
 
 /**
  * \brief Load domains into an interval vector.
  */
-void load(IntervalVector& box, const Array<const Domain>& domains);
+void load(IntervalVector& box, const Array<const Domain>& domains, int nb_used=-1, int* used=NULL);
 
 /**
  * \brief Load domains into an interval vector.
  */
-inline void load(IntervalVector& box, const Array<Domain>& domains) {
-	load(box,(const Array<const Domain>&) domains);
+inline void load(IntervalVector& box, const Array<Domain>& domains, int nb_used=-1, int* used=NULL) {
+	load(box, (const Array<const Domain>&) domains, nb_used, used);
 }
 
 /**
  * \brief x:=y
  */
-void load(Array<Domain>& x, const Array<const Domain>& y);
+void load(Array<Domain>& x, const Array<const Domain>& y, int nb_used=-1, int* used=NULL);
 
 /**
  * \brief x:=y
  */
-void load(Array<Domain>& x, const Array<Domain>& y);
+void load(Array<Domain>& x, const Array<Domain>& y, int nb_used=-1, int* used=NULL);
 
 Domain operator+(const Domain& d1, const Domain& d2);
 Domain operator*(const Domain& d1, const Domain& d2);

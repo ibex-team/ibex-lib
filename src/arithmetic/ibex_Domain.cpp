@@ -34,11 +34,25 @@ std::ostream& operator<<(std::ostream& os,const Domain& d) {
 	return os;
 }
 
-void load(Array<Domain>& d, const IntervalVector& x) {
-int i=0;
 
-	for (int s=0; s<d.size(); s++) {
+
+/**
+ * \brief Load domains into an interval vector.
+ */
+void load(Array<Domain>& d, const IntervalVector& x, int nb_used, int* used) {
+	int i=0; // iterates over the components of box
+	int u=0; // iterates over the array "used"
+
+	for (int s=0; (nb_used==-1 || u<nb_used) && s<d.size(); s++) {
+
+		if (nb_used!=-1 && s!=used[u]) {
+			i+=d[s].dim.size();
+			continue;
+		}
+		u++;
+
 		const Dim& dim=d[s].dim;
+
 		switch (dim.type()) {
 		case Dim::SCALAR:
 			d[s].i()=x[i++];
@@ -79,27 +93,43 @@ int i=0;
 	}
 }
 
-void load(IntervalVector& x, const Array<const Domain>& d) {
-	int i=0;
 
-	for (int s=0; s<d.size(); s++) {
+void load(IntervalVector& x, const Array<const Domain>& d, int nb_used, int* used) {
+	int i=0; // iterates over the components of box
+	int u=0; // iterates over the array "used"
+
+	for (int s=0; (nb_used==-1 || u<nb_used) && s<d.size(); s++) {
+
 		const Dim& dim=d[s].dim;
+
+		if (nb_used!=-1 && used[u]>=i+dim.size()) {  // next used component is after this symbol
+			i+=dim.size();
+			continue; // skip this symbol
+		}
+
+		// else: some components of the current symbol d[s] are used.
+		// (i.e. they have to be copied in x).
 		switch (dim.type()) {
 		case Dim::SCALAR:
-			x[i++]=d[s].i();
+			if (nb_used==-1 || i==used[u]) { x[i]=d[s].i(); u++; } // if nb_used==-1, u is incremented for nothing
+			i++;
 			break;
 		case Dim::ROW_VECTOR:
 		{
 			const IntervalVector& v=d[s].v();
-			for (int j=0; j<dim.dim3; j++)
-				x[i++]=v[j];
+			for (int j=0; j<dim.dim3; j++) {
+				if (nb_used==-1 || i==used[u]) { x[i]=v[j]; u++; }
+				i++;
+			}
 		}
 		break;
 		case Dim::COL_VECTOR:
 		{
 			const IntervalVector& v=d[s].v();
-			for (int j=0; j<dim.dim2; j++)
-				x[i++]=v[j];
+			for (int j=0; j<dim.dim2; j++) {
+				if (nb_used==-1 || i==used[u]) { x[i]=v[j]; u++; }
+				i++;
+			}
 		}
 		break;
 
@@ -107,8 +137,10 @@ void load(IntervalVector& x, const Array<const Domain>& d) {
 		{
 			const IntervalMatrix& M=d[s].m();
 			for (int k=0; k<dim.dim2; k++)
-				for (int j=0; j<dim.dim3; j++)
-					x[i++]=M[k][j];
+				for (int j=0; j<dim.dim3; j++) {
+					if (nb_used==-1 || i==used[u]) { x[i]=M[k][j]; u++; }
+					i++;
+				}
 		}
 		break;
 		case Dim::MATRIX_ARRAY:
@@ -116,27 +148,96 @@ void load(IntervalVector& x, const Array<const Domain>& d) {
 			const IntervalMatrixArray& A=d[s].ma();
 			for (int l=0; l<dim.dim1; l++)
 				for (int k=0; k<dim.dim2; k++)
-					for (int j=0; j<dim.dim3; j++)
-						x[i++]=A[l][k][j];
+					for (int j=0; j<dim.dim3; j++) {
+						if (nb_used==-1 || i==used[u]) { x[i]=A[l][k][j]; u++; }
+						i++;
+					}
 		}
 		break;
 		}
 	}
+	assert(nb_used==-1 || u==nb_used);
 }
 
-void load(Array<Domain>& x, const Array<const Domain>& y) {
+void load(Array<Domain>& x, const Array<const Domain>& y, int nb_used, int* used) {
 	assert(x.size()==y.size());
-	for (int s=0; s<x.size(); s++) {
-		x[s]=y[s];
+	if (nb_used==-1)
+		for (int s=0; s<x.size(); s++)
+			x[s]=y[s];
+	else {
+
+		int i=0; // iterates over the components of box
+		int u=0; // iterates over the array "used"
+
+		for (int s=0; u<nb_used && s<y.size(); s++) {
+
+			const Dim& dim=y[s].dim;
+
+			if (used[u]>=i+dim.size()) {  // next used component is after this symbol
+				i+=dim.size();
+				continue; // skip this symbol
+			}
+
+			// else: some components of the current symbol d[s] are used.
+			// (i.e. they have to be copied in x).
+			switch (dim.type()) {
+			case Dim::SCALAR:
+				if (i==used[u]) { x[s]=y[s]; u++; } // if nb_used==-1, u is incremented for nothing
+				i++;
+				break;
+			case Dim::ROW_VECTOR:
+			{
+				for (int j=0; j<dim.dim3; j++) {
+					if (i==used[u]) { x[s][j]=y[s][j]; u++; }
+					i++;
+				}
+			}
+			break;
+			case Dim::COL_VECTOR:
+			{
+				for (int j=0; j<dim.dim2; j++) {
+					if (i==used[u]) { x[s][j]=y[s][j]; u++; }
+					i++;
+				}
+			}
+			break;
+
+			case Dim::MATRIX:
+			{
+				for (int k=0; k<dim.dim2; k++)
+					for (int j=0; j<dim.dim3; j++) {
+						if (i==used[u]) { x[s][k][j]=y[s][k][j]; u++; }
+						i++;
+					}
+			}
+			break;
+			case Dim::MATRIX_ARRAY:
+			{
+				for (int l=0; l<dim.dim1; l++)
+					for (int k=0; k<dim.dim2; k++)
+						for (int j=0; j<dim.dim3; j++) {
+							// TODO: are all these temporary Domain objects
+							// created by [] really safe?
+							if (i==used[u]) { x[s][l][k][j]=y[s][l][k][j]; u++; }
+							i++;
+						}
+			}
+			break;
+			}
+		}
+		assert(nb_used==-1 || u==nb_used);
 	}
+
+	// if "used" was referring symbols directly,
+	// a much simpler code would be...
+	//for (int u=0; u<nb_used; u++)
+	//	x[used[u]]=y[used[u]];
 }
 
-void load(Array<Domain>& x, const Array<Domain>& y) {
-	assert(x.size()==y.size());
-	for (int s=0; s<x.size(); s++) {
-		x[s]=y[s];
-	}
+void load(Array<Domain>& x, const Array<Domain>& y, int nb_used, int* used) {
+	load(x,(const Array<const Domain>&) y, nb_used,used);
 }
+
 Domain Domain::operator[](int i) {
 	switch(dim.type()) {
 	case Dim::SCALAR:       assert(false); break;
