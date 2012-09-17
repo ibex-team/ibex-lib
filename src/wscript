@@ -96,7 +96,7 @@ def build (bld):
 	tg_ibex = bld.stlib (
 		target = "ibex",
 		use  = "soplex interval JAVA",
-		includes = "arithmetic bisector combinatorial contractor function numeric parser strategy symbolic tools",
+		includes = ". arithmetic bisector combinatorial contractor function numeric parser strategy symbolic tools",
 		cxxflags = "-O3 -DNDEBUG -Wno-deprecated",
 		source = ibex_src
 	)
