@@ -65,14 +65,14 @@ def configure (conf):
 		path = candidate_lib_path ("GAOL_PATH", "gaol-")
 		if path:
 			use_gaol = True
-			env["INTERVAL_LIB"] = "gaol"
+			env["INTERVAL_LIB"] = "GAOL"
 	
 	# then try with the Profil/Bias lib
 	if not use_gaol:
 		path = candidate_lib_path ("BIAS_PATH", "Profil-")
 		if path:
 			use_bias = True
-			env["INTERVAL_LIB"] = "bias"
+			env["INTERVAL_LIB"] = "BIAS"
 	
 	if not (use_gaol or use_bias):
 		conf.fatal ("cannot find any interval library, please use --with-bias=BIAS_PATH or --with-gaol=GAOL_PATH")
