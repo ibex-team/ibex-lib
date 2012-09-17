@@ -86,7 +86,7 @@ bool Optimizer::update_loup(const IntervalVector& box) {
 }
 
 bool Optimizer::contract_and_bound(Cell& c) {
-        //  cout << "box " <<c.box << endl;
+  //         cout << "box " <<c.box << endl;
 	/*======================== contract y with y<=loup ========================*/
 	Interval& y=c.box[goal_var];
 
@@ -125,14 +125,14 @@ bool Optimizer::contract_and_bound(Cell& c) {
 	read_ext_box(c.box,tmp_box);
 	bool loup_changed = update_loup(tmp_box);
 	/*====================================================================*/
-
-	if (tmp_box.max_diam()<=prec) {
+	if (tmp_box.max_diam()<=prec || box_infinity(c.box)) {
           // rem1: tmp_box and not c.box because y is handled with goal_prec_rec and goal_abs_prec
 	  // rem2: do not use a precision contractor here since it would make the box empty (and y==(-inf,-inf)!!)
-
+	  // rem 3 : the extended  boxes with infinite domains [-inf,-DBL_MAX] or {DBL_MAX,inf] should be catched for avoiding infinite bisections
 	  // the box is a "solution"
 	  // uplo of epsboxes can only go down, but not under uplo : it is an upperbound for uplo, that indicates a lowerbound for the objective in all the small boxes 
 	  // found by the precision criterion
+	  //	  cout << " small box " << tmp_box << endl;
 	  if (uplo_of_epsboxes > y.lb()) {
 	    if (y.lb() > uplo)
 	      uplo_of_epsboxes = y.lb();
@@ -148,6 +148,20 @@ bool Optimizer::contract_and_bound(Cell& c) {
 
 	return loup_changed;
 }
+
+
+  // detecting boxes with infinite domains [-inf,-DBL_MAX] or [DBL_MAX,inf]  for avoiding infinite bisections
+
+  bool Optimizer::box_infinity( const IntervalVector& box)
+  { 
+    for (int j=0; j<box.size() ; j++)
+      {
+      if ((box[j].lb()==NEG_INFINITY && box[j].ub()==-DBL_MAX) ||(box[j].lb()==DBL_MAX && box[j].ub()== POS_INFINITY))
+	return true;
+      }
+    return false;
+   
+  }
 
 void Optimizer::optimize(const IntervalVector& init_box) {
   
@@ -183,52 +197,44 @@ void Optimizer::optimize(const IntervalVector& init_box) {
 	  while (!buffer.empty()) {
 
 	    // if (trace) cout << ((CellBuffer&) buffer) << endl;
+	    bool first=true; bool second=true;
 
 		Cell* c=buffer.top();
-		
-		
+		//		cout << " box before bisection " <<  c->box << endl;
 		pair<IntervalVector,IntervalVector> boxes=bsc.bisect(*c);
+
+
 		pair<Cell*,Cell*> new_cells=c->bisect(boxes.first,boxes.second);
+		//		cout << " boxes after bisection " <<  boxes.first << " " << boxes.second << endl;
+		if (boxes.first==c->box) {cout << "first = box " << endl;  first=false; }
+		if (boxes.second==c->box) {cout << "second = box " << endl;  second=false; }
+
 
 		delete buffer.pop();
-
 		loup_changed=0;
 
-		try {
-			loup_changed = contract_and_bound(*new_cells.first);
-			buffer.push(new_cells.first);
-			nb_cells++;
-		} catch(EmptyBoxException&) {
-			delete new_cells.first;
-		}
-
-		try {
+		if (first==false) delete new_cells.first;
+		else
+		  try {  
+		    loup_changed = contract_and_bound(*new_cells.first);
+		    buffer.push(new_cells.first);
+		    nb_cells++;
+		  }
+		  catch(EmptyBoxException&) {
+		    delete new_cells.first;
+		  }
+		if (second==false) 
+		  delete new_cells.second;
+		else
+		  try {
 			loup_changed |= contract_and_bound(*new_cells.second);
 			buffer.push(new_cells.second);
 			nb_cells++;
-		} catch(EmptyBoxException&) {
+		  } 
+		  catch(EmptyBoxException&) {
 			delete new_cells.second;
-		}
+		  }
 
-		double new_uplo=POS_INFINITY;
-		if (! buffer.empty()) 
-		   new_uplo= ((CellHeap&) buffer).minimum();
-			
-		else if (buffer.empty() && loup != POS_INFINITY)
-		   // empty heap : uplo is set to loup - precision if a loup has been found
-		  {if (fabs (loup) < 1)  
-		      new_uplo=loup-goal_abs_prec;
-		    else 
-		      new_uplo=loup - fabs(loup)* goal_rel_prec;
-		  }
-		if (new_uplo < uplo_of_epsboxes && new_uplo > uplo)
-		  {uplo=new_uplo;
-                    // cout << " uplo " << uplo << endl;
-		  }
-		else if (new_uplo >=   uplo_of_epsboxes && uplo_of_epsboxes != POS_INFINITY)
-		  { uplo=uplo_of_epsboxes;
-		      //cout << " uplo " << uplo << endl;
-		  }
 		
 
 		if (loup_changed) {
@@ -238,13 +244,37 @@ void Optimizer::optimize(const IntervalVector& init_box) {
 			if (loup - goal_abs_prec < ymax)
 				ymax = loup - goal_abs_prec;
 			((CellHeap&) buffer ).contract_heap(ymax);
-
+			if (ymax <=-DBL_MAX)
+			  {cout << " infinite value for the minimum " << endl;  break;}
 			if (trace) cout << "ymax=" << ymax << " uplo= " <<  uplo << endl;
 		}
+
+
+		double new_uplo=POS_INFINITY;
+		if (! buffer.empty()) 
+		   new_uplo= ((CellHeap&) buffer).minimum();
+			
+		else if (buffer.empty() && loup != POS_INFINITY)
+		   // empty heap : uplo is set to loup - precision if a loup has been found
+		  {if (fabs (loup) < 1) 
+		      new_uplo=loup-goal_abs_prec;
+		    else 
+		      new_uplo=loup - fabs(loup)* goal_rel_prec;
+		    //		    cout << " new uplo buffer empty " << new_uplo << " uplo " << uplo << endl;
+		  }
+		if (new_uplo < uplo_of_epsboxes && new_uplo > uplo)
+		  { // cout << " new uplo " << new_uplo << " uplo " << uplo << endl;
+		    uplo=new_uplo;
+                   
+		  }
+		else if (new_uplo >=   uplo_of_epsboxes && uplo_of_epsboxes != POS_INFINITY)
+		  { uplo=uplo_of_epsboxes;
+		      //cout << " uplo " << uplo << endl;
+		  }
+
 		// Note: if contraction was before bisection, we could have the problem
 		// that the current cell is removed by contract_heap. See comments in
 		// older version of the code (before revision 284).
-
 		time_limit_check();
 
 		}
@@ -280,8 +310,8 @@ void Optimizer::report() {
 	
 	cout << " absolute precision obtained on objective function: " << abs_prec << " " <<
 	  (abs_prec < goal_abs_prec? " [passed]" : " [failed]") << "  " << goal_abs_prec << endl;
-	if (uplo_of_epsboxes != POS_INFINITY)
-	  cout << " precision on variable domains obtained " << prec << endl;
+	if (uplo_of_epsboxes != NEG_INFINITY && uplo_of_epsboxes != POS_INFINITY)
+	  cout << " precision on variable domains obtained " << prec << " "   << " uplo_of_epsboxes " << uplo_of_epsboxes << endl;
     }
   
   cout << " cpu time used " << time << "s." << endl;
