@@ -65,9 +65,10 @@ void CtcAcid::contract(IntervalVector& box) {
 			throw EmptyBoxException();
 		if (nbcall1 < nbinitcalls) {                   // on fait des stats pour le réglage courant
 			for (int i=0; i<initbox.size(); i++)
+			  {//cout << i << " initbox " << initbox[i].diam() << " box " << box[i].diam() << endl;
 			  if  (initbox[i].diam() !=0 && box[i].diam()!= POS_INFINITY)
-					// gain sur la ième dimension de la boîte courante après var3BCID sur la v-ième variable
-					ctstat[v] += 1  - box[i].diam() / initbox[i].diam();
+			    // gain sur la ième dimension de la boîte courante après var3BCID sur la v-ième variable
+			    ctstat[v] += 1  - box[i].diam() / initbox[i].diam();}
 			ctstat[v]=ctstat[v]/ initbox.size();   // gain moyen
 		}
 
@@ -129,7 +130,7 @@ void CtcAcid::compute_smearorder(IntervalVector& box) {
 		ctrjsum[i]=0;
 		for (int j=0; j<nb_var ; j++) {
 		  // [bne]  in case of infinite derivatives , natural ordering
-		  if (J[i][j].mag()==POS_INFINITY)
+		  if (J[i][j].mag()==POS_INFINITY || box[j].diam()==POS_INFINITY)
 		    {for (int i1=0;i1 < nb_var; i1++)
 		      smearorder.push_back(varorder2[i1]);
 		      return;}
