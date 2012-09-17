@@ -22,7 +22,7 @@ def build (bld):
 	bld (
 		target = "ibex_bias_or_gaol.h",
 		rule   = gen_ibex_bias_or_gaol_h,
-		vars   = "INTERVAL_LIB",
+		vars   = ["INTERVAL_LIB"],
 	)
 
 	def gen_ibex_h (tsk):
