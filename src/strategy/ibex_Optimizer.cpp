@@ -133,7 +133,7 @@ bool Optimizer::contract_and_bound(Cell& c) {
 	  // uplo of epsboxes can only go down, but not under uplo : it is an upperbound for uplo, that indicates a lowerbound for the objective in all the small boxes 
 	  // found by the precision criterion
 	  //	  cout << " small box " << tmp_box << endl;
-	  if (uplo_of_epsboxes > y.lb()) {
+	  if (uplo_of_epsboxes > y.lb() && uplo_of_epsboxes > uplo) {
 	    if (y.lb() > uplo)
 	      uplo_of_epsboxes = y.lb();
 	    else
@@ -189,8 +189,9 @@ void Optimizer::optimize(const IntervalVector& init_box) {
 	}
 
 	buffer.push(root);
-	uplo= ((CellHeap&) buffer ).minimum() ;
-	if (loup_changed && trace) cout  << " uplo= " << uplo << endl;
+        if (((CellHeap&) buffer).minimum() > uplo)
+	  uplo= ((CellHeap&) buffer ).minimum() ;
+	if (trace) cout  << " uplo= " << uplo << endl;
 
 
 	try {
@@ -246,7 +247,7 @@ void Optimizer::optimize(const IntervalVector& init_box) {
 			((CellHeap&) buffer ).contract_heap(ymax);
 			if (ymax <=-DBL_MAX)
 			  {cout << " infinite value for the minimum " << endl;  break;}
-			if (trace) cout << "ymax=" << ymax << " uplo= " <<  uplo << endl;
+			if (trace) cout << setprecision(12) << "ymax=" << ymax << " uplo= " <<  uplo << endl;
 		}
 
 
