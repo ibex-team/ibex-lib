@@ -1,0 +1,21 @@
+This directory contains the benchmark for global optimization
+
+
+The mainpart comes from coconut benchmark Library1 
+http://www.mat.univie.ac.at/~neum/glopt/coconut/Benchmark/Library1_new_v1.html
+
+All the characteristics of these problems can be found on this webpage
+
+
+All the optimization problems from Library1 with less than 50 variables  and without integer variables are in this directory, coded in Quimper.
+A few other problems are also coded (unconstrained problems with additional always satisfied constraints).
+
+
+The unbounded variables are declared with domains [-1.e8,1.e8]
+
+The equality constraints are relaxed by two inequalities  with eps=1.e-8
+
+
+The files suffixed by  -1  are variants with different domains for some variables
+                   by bis are variants with another formulation of the same problem
+
