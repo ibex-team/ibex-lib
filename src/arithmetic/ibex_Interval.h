@@ -21,6 +21,9 @@
 /* ======================================================= */
 
 #ifdef _IBEX_WITH_GAOL_
+extern "C" {
+#include "gdtoaimp.h"
+}
 #include "gaol/gaol.h"
 #include "gaol/gaol_interval.h"
 /** \brief NEG_INFINITY: double representation of -oo */
