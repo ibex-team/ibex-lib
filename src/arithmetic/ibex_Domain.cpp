@@ -45,30 +45,36 @@ void load(Array<Domain>& d, const IntervalVector& x, int nb_used, int* used) {
 
 	for (int s=0; (nb_used==-1 || u<nb_used) && s<d.size(); s++) {
 
-		if (nb_used!=-1 && s!=used[u]) {
-			i+=d[s].dim.size();
-			continue;
-		}
-		u++;
-
 		const Dim& dim=d[s].dim;
 
+		if (nb_used!=-1 && used[u]>=i+dim.size()) {  // next used component is after this symbol
+			i+=dim.size();
+			continue; // skip this symbol
+		}
+
+		// else: some components of the current symbol d[s] are used.
+		// (i.e. they have to be copied in x).
 		switch (dim.type()) {
 		case Dim::SCALAR:
-			d[s].i()=x[i++];
+			if (nb_used==-1 || i==used[u]) { d[s].i()=x[i]; u++; } // if nb_used==-1, u is incremented for nothing
+			i++;
 			break;
 		case Dim::ROW_VECTOR:
 		{
 			IntervalVector& v=d[s].v();
-			for (int j=0; j<dim.dim3; j++)
-				v[j]=x[i++];
+			for (int j=0; j<dim.vec_size(); j++) {
+				if (nb_used==-1 || i==used[u]) { v[j]=x[i]; u++; }
+				i++;
+			}
 		}
 		break;
 		case Dim::COL_VECTOR:
 		{
 			IntervalVector& v=d[s].v();
-			for (int j=0; j<dim.dim2; j++)
-				v[j]=x[i++];
+			for (int j=0; j<dim.vec_size(); j++) {
+				if (nb_used==-1 || i==used[u]) { v[j]=x[i]; u++; }
+				i++;
+			}
 		}
 		break;
 
@@ -76,8 +82,10 @@ void load(Array<Domain>& d, const IntervalVector& x, int nb_used, int* used) {
 		{
 			IntervalMatrix& M=d[s].m();
 			for (int k=0; k<dim.dim2; k++)
-				for (int j=0; j<dim.dim3; j++)
-					M[k][j]=x[i++];
+				for (int j=0; j<dim.dim3; j++) {
+					if (nb_used==-1 || i==used[u]) { M[k][j]=x[i]; u++; }
+					i++;
+				}
 		}
 		break;
 		case Dim::MATRIX_ARRAY:
@@ -85,13 +93,17 @@ void load(Array<Domain>& d, const IntervalVector& x, int nb_used, int* used) {
 			IntervalMatrixArray& A=d[s].ma();
 			for (int l=0; l<dim.dim1; l++)
 				for (int k=0; k<dim.dim2; k++)
-					for (int j=0; j<dim.dim3; j++)
-						A[l][k][j]=x[i++];
+					for (int j=0; j<dim.dim3; j++) {
+						if (nb_used==-1 || i==used[u]) { A[l][k][j]=x[i]; u++; }
+						i++;
+					}
 		}
 		break;
 		}
 	}
+	assert(nb_used==-1 || u==nb_used);
 }
+
 
 
 void load(IntervalVector& x, const Array<const Domain>& d, int nb_used, int* used) {
@@ -117,7 +129,7 @@ void load(IntervalVector& x, const Array<const Domain>& d, int nb_used, int* use
 		case Dim::ROW_VECTOR:
 		{
 			const IntervalVector& v=d[s].v();
-			for (int j=0; j<dim.dim3; j++) {
+			for (int j=0; j<dim.vec_size(); j++) {
 				if (nb_used==-1 || i==used[u]) { x[i]=v[j]; u++; }
 				i++;
 			}
@@ -126,7 +138,7 @@ void load(IntervalVector& x, const Array<const Domain>& d, int nb_used, int* use
 		case Dim::COL_VECTOR:
 		{
 			const IntervalVector& v=d[s].v();
-			for (int j=0; j<dim.dim2; j++) {
+			for (int j=0; j<dim.vec_size(); j++) {
 				if (nb_used==-1 || i==used[u]) { x[i]=v[j]; u++; }
 				i++;
 			}

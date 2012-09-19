@@ -268,13 +268,13 @@ void Function::init(const Array<const ExprSymbol>& x, const ExprNode& y) {
 	FindInputsUsed fsu(x, y, is_used);
 
 	nb_used_inputs=0;
-	for (int i=0; i<is_used.size(); i++) {
+	for (unsigned int i=0; i<is_used.size(); i++) {
 		if (is_used[i]) nb_used_inputs++;
 	}
 
 	used_input=new int[nb_used_inputs];
 	int j=0;
-	for (int i=0; i<is_used.size(); i++) {
+	for (unsigned int i=0; i<is_used.size(); i++) {
 		if (is_used[i]) { used_input[j++]=i; }
 	}
 	assert(j==nb_used_inputs);
@@ -287,6 +287,12 @@ void Function::init(const Array<const ExprSymbol>& x, const ExprNode& y) {
 	decorate();
 
 	separate();
+
+	// ===== display adjacency (debug) =========
+//	cout << "adjacency of function" << *this << ":" << endl;
+//	for (int i=0; i<nb_used_inputs; i++)
+//		cout << used_input[i] << " ";
+//	cout << endl;
 }
 
 void Function::add_symbol(const ExprSymbol* symbol) {
