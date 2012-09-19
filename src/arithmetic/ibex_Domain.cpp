@@ -252,7 +252,7 @@ void load(Array<Domain>& x, const Array<Domain>& y, int nb_used, int* used) {
 
 Domain Domain::operator[](int i) {
 	switch(dim.type()) {
-	case Dim::SCALAR:       assert(false); break;
+	case Dim::SCALAR:       assert(i==0); return Domain(this->i()); break;
 	case Dim::ROW_VECTOR:
 	case Dim::COL_VECTOR:   return Domain(v()[i]); break;
 	case Dim::MATRIX:       return Domain(m()[i],true); break;

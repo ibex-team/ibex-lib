@@ -48,23 +48,26 @@ void Decorator::visit(const ExprIndex& idx) {
 	Domain& g=(Domain&) *idx.expr.deco.g;
 	Domain& di=(Domain&) *idx.expr.deco.p;
 
-	switch (idx.type()) {
-	case Dim::SCALAR:       idx.deco.d = new Domain(d.v()[idx.index]);
-                            idx.deco.g = new Domain(g.v()[idx.index]);
-                            idx.deco.p = new Domain(g.v()[idx.index]);
-                            break;
-	case Dim::ROW_VECTOR:   idx.deco.d = new Domain(d.m()[idx.index],idx.type()==Dim::ROW_VECTOR);
-	                        idx.deco.g = new Domain(g.m()[idx.index],idx.type()==Dim::ROW_VECTOR);
-	                        idx.deco.p = new Domain(di.m()[idx.index],idx.type()==Dim::ROW_VECTOR);
-	                        break;
-	case Dim::COL_VECTOR:   assert(false); /* see comment in ExprVector */
-	                        break;
-	case Dim::MATRIX:       idx.deco.d = new Domain(d.ma()[idx.index]);
-	                        idx.deco.g = new Domain(g.ma()[idx.index]);
-	                        idx.deco.p = new Domain(di.ma()[idx.index]);
-	                        break;
-	case Dim::MATRIX_ARRAY: assert(false); /* impossible */
-	                        break;
+	switch (idx.expr.type()) {
+	case Dim::SCALAR:
+		idx.deco.d = new Domain(d.i());
+		break;
+	case Dim::ROW_VECTOR:
+	case Dim::COL_VECTOR:
+		idx.deco.d = new Domain(d.v()[idx.index]);
+		idx.deco.g = new Domain(g.v()[idx.index]);
+		idx.deco.p = new Domain(g.v()[idx.index]);
+		break;
+	case Dim::MATRIX:
+		idx.deco.d = new Domain(d.m()[idx.index],true);
+		idx.deco.g = new Domain(g.m()[idx.index],true);
+		idx.deco.p = new Domain(di.m()[idx.index],true);
+		break;
+	case Dim::MATRIX_ARRAY:
+		idx.deco.d = new Domain(d.ma()[idx.index]);
+		idx.deco.g = new Domain(g.ma()[idx.index]);
+		idx.deco.p = new Domain(di.ma()[idx.index]);
+		break;
 	}
 }
 

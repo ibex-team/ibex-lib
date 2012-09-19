@@ -103,7 +103,9 @@ Dim Dim::index_dim() const {
   const Dim& dim=*this;
 
   if (dim.dim2==1 && dim.dim3==1) {
-    throw NonRecoverableException("Too many subscripts (e.g., a vector symbol cannot be indexed twice)");
+	  return Dim::scalar();
+	  // we allow x[1] for x scalar
+	  // old error message -> "Too many subscripts (e.g., a vector symbol cannot be indexed twice)";
   }
   if (dim.dim1>1) // array of matrices
 	  return Dim(1,dim.dim2,dim.dim3);

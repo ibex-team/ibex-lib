@@ -22,25 +22,21 @@ namespace ibex {
 
 /**
  * \ingroup symbolic
- * \brief Dimensions (of an mathematical expression)
+ * \brief Dimensions (of a mathematical value)
  *
- * All expressions are considered here as 3-dimensional vectors, except that the "value" of a dimension can be 0.
+ * All mathematical expressions are considered as 3-dimensional vectors.
  * The "value" of the ith dimension means the number of valid expressions obtained by indexing in this dimension.
  * The values of the three dimensions are represented by the fields dim1, dim2 and dim3. Let x be an expression.
- * If x is scalar, dim1=0, dim2=0, dim3=0. Indeed, x[1] is not a valid symbol. If x is a row vector of 2 components,
- * dim1=0, dim2=0, dim3=2 (because x[1] and x[2] are valid symbols but not x[1][1]). If x is a 2x3 matrix, dim1=0,
- * dim2=2, dim3=3. If x is a column vector of 2 elements, then dim1=0, dim2=2 and dim3=0.
- * Last case: if x is an array of 4 matrices which are 2x3matrices then dim1=4, dim2=2 and dim3=3.
+ * If x is scalar, dim1=1, dim2=1, dim3=1.
+ * If x is a row vector of 2 components, dim1=1, dim2=1, dim3=2.
+ * If x is a 2x3 matrix, dim1=1, dim2=2, dim3=3.
+ * If x is a column vector of 2 elements, then dim1=1, dim2=2 and dim3=1.
+ *  If x is an array of 4 matrices which are 2x3matrices then dim1=4, dim2=2 and dim3=3.
  *
  * <p>
- * A combination like dim1=1 dim2=0 and dim3=2 is invalid (we cannot represent array of vectors. we use matrices
+ * A combination like dim1=1 dim2=1 and dim3=2 is invalid (we cannot represent array of vectors. we use matrices
  * instead).
  *
- * The "size" of a dimension represents the number of elements in the dimension (this time seen as an array).
- * The size is simply equal to the "value" if it is greater than 0, and 1 otherwise.
- *
- * Hence, a vector with a single component is distinguished from a scalar: the field dim3 is 1 and 0 respectively.
- * But, in both cases, size3() returns 1.
  */
 class Dim {
 public:
@@ -145,17 +141,34 @@ Dim vec_dim(const Array<const Dim>& comp, bool in_a_row);
 
 /*================================== inline implementations ========================================*/
 
-inline Dim::Dim() : dim1(1), dim2(1), dim3(1)     { }
+inline Dim::Dim() : dim1(1), dim2(1), dim3(1) {
 
-inline Dim Dim::scalar()                          { return Dim(1,1,1); }
+}
 
-inline Dim Dim::row_vec(int n)                    { assert(n>1); return Dim(1,1,n); }
+inline Dim Dim::scalar() {
+	return Dim(1,1,1);
+}
 
-inline Dim Dim::col_vec(int n)                    { assert(n>1); return Dim(1,n,1); }
+inline Dim Dim::row_vec(int n) {
+	if (n==1) return Dim::scalar();
+	else      return Dim(1,1,n);
+}
 
-inline Dim Dim::matrix(int m, int n)              { assert(m>1 && n>1); return Dim(1,m,n); }
+inline Dim Dim::col_vec(int n) {
+	if (n==1) return Dim::scalar();
+	else      return Dim(1,n,1);
+}
 
-inline Dim Dim::matrix_array(int k, int m, int n) { assert(k>1 && m>1 && n>1); return Dim(k,m,n); }
+inline Dim Dim::matrix(int m, int n) {
+	if (m==1)      return Dim::row_vec(n);
+	else if (n==1) return Dim::col_vec(m);
+	else           return Dim(1,m,n);
+}
+
+inline Dim Dim::matrix_array(int k, int m, int n) {
+	if (k==1) return Dim::matrix(m,n);
+	else      return Dim(k,m,n);
+}
 
 inline Dim::Type Dim::type() const {
 	if (dim1==1)
@@ -190,39 +203,6 @@ inline int Dim::vec_size() const {
 inline bool Dim::operator==(const Dim& d) const {
 	return dim1==d.dim1 && dim2==d.dim2 && dim3==d.dim3;
 }
-
-/*
- * \ingroup level1
- * \brief Indices for an expression.
- *
- * In the expression x[1][0][2], the triple of indices (1,0,2)
- * is represented by an object of this class.
- */
-/*
-class Indices {
-public:
-	Indices() : index1(-1), start_index2(-1), end_index2(-1), start_index3(-1), end_index3(-1) { }
-
-	void add_index(int index) {
-		if (start_index3==-1) start_index3=end_index3=index;
-		else if (start_index2==-1) start_index2=end_index2=index;
-		else if (index1==-1) index1=index;
-		else throw NonRecoverableException("Cannot use 4 levels of indices.");
-	}
-
-	void add_index_range(int start_index, int end_index) {
-		if (start_index3==-1) {start_index3=start_index; end_index3=end_index; }
-		else if (start_index2==-1) {start_index2=start_index; end_index2=end_index; }
-		else if (index1==-1) throw NonRecoverableException("Cannot use range of 3rd-level indices.");
-		else throw NonRecoverableException("Cannot use 4 levels of indices.");
-	}
-
-	int index1;
-	int start_index2;
-	int end_index2;
-	int start_index3;
-	int end_index3;
-};*/
 
 /** Streams out a dimension  */
 std::ostream& operator<<(std::ostream&, const Dim&);
