@@ -212,7 +212,8 @@ def configure (conf):
 		conf.define ("SET_INEXACT", 1)
 		conf.define ("Honor_FLT_ROUNDS", 1)
 	
-		conf.env.append_unique ("INCLUDES", [gdtoa_includes])
+		conf.env.append_unique ("INCLUDES", gdtoa_includes)
+		ibex_append_path ("INCLUDES", gdtoa_includes)
 
 		conf.setenv ("")
 
