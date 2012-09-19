@@ -9,7 +9,7 @@
  * Created     : Dec 24, 2011
  * ---------------------------------------------------------------------------- */
 
-#include "gaol.h"
+#include "gaol/gaol.h"
 
 namespace ibex {
 /**

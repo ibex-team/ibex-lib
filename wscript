@@ -52,6 +52,7 @@ def configure (conf):
 		return os.path.abspath (os.path.expanduser (path)) if path else find_lib (prefix)
 
 	# check which interval lib is requested
+	"""
 	use_gaol = conf.options.GAOL_PATH != None
 	use_bias = conf.options.BIAS_PATH != None
 	path     = None
@@ -67,6 +68,7 @@ def configure (conf):
 			use_gaol = True
 			env["INTERVAL_LIB"] = "GAOL"
 
+			
 			conf.check_cxx (header_name	= ["gaol.h", "gaol_interval.h"],
 					includes	= os.path.join (path, "include", "gaol"),
 					uselib_store	= "interval")
@@ -93,7 +95,7 @@ def configure (conf):
 	
 	if not (use_gaol or use_bias):
 		conf.fatal ("cannot find any interval library, please use --with-bias=BIAS_PATH or --with-gaol=GAOL_PATH")
-
+	"""
 	# Soplex lib
 	path = candidate_lib_path ("SOPLEX_PATH", "soplex-")
 	if path:
@@ -130,5 +132,7 @@ def configure (conf):
 	env.append_unique ("BISONFLAGS", ["--name-prefix=ibex", "--report=all", "--file-prefix=parser"])
 	env.append_unique ("FLEXFLAGS", "-Pibex")
 
+	conf.recurse ("3rd")
+
 def build (bld):
-	bld.recurse ("src examples")
+	bld.recurse ("src examples 3rd")

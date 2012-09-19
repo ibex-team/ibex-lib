@@ -21,8 +21,8 @@
 /* ======================================================= */
 
 #ifdef _IBEX_WITH_GAOL_
-#include "gaol.h"
-#include "gaol_interval.h"
+#include "gaol/gaol.h"
+#include "gaol/gaol_interval.h"
 /** \brief NEG_INFINITY: double representation of -oo */
 #define NEG_INFINITY (-GAOL_INFINITY)
 /** \brief POS_INFINITY: double representation of +oo */
