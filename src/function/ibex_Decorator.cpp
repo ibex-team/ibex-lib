@@ -51,12 +51,14 @@ void Decorator::visit(const ExprIndex& idx) {
 	switch (idx.expr.type()) {
 	case Dim::SCALAR:
 		idx.deco.d = new Domain(d.i());
+		idx.deco.g = new Domain(g.i());
+		idx.deco.p = new Domain(di.i());
 		break;
 	case Dim::ROW_VECTOR:
 	case Dim::COL_VECTOR:
 		idx.deco.d = new Domain(d.v()[idx.index]);
 		idx.deco.g = new Domain(g.v()[idx.index]);
-		idx.deco.p = new Domain(g.v()[idx.index]);
+		idx.deco.p = new Domain(di.v()[idx.index]);
 		break;
 	case Dim::MATRIX:
 		idx.deco.d = new Domain(d.m()[idx.index],true);
