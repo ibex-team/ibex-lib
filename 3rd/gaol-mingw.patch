@@ -1,0 +1,62 @@
+--- gaol-3.1.1/gaol/gaol_common.cpp.orig	2012-09-21 18:42:52.687500000 +0200
++++ gaol-3.1.1/gaol/gaol_common.cpp	2012-09-21 18:44:21.218750000 +0200
+@@ -113,7 +113,7 @@
+ 
+   double maximum(double a, double b)
+   {
+-    if (isnan(a) || isnan(b)) {
++    if (std::isnan(a) || std::isnan(b)) {
+       return GAOL_NAN;
+     }
+     if (is_signed(a)) { // To handle +0 and -0 such that +0 is returned
+@@ -125,7 +125,7 @@
+ 
+   double minimum(double a, double b)
+   {
+-    if (isnan(a) || isnan(b)) {
++    if (std::isnan(a) || std::isnan(b)) {
+       return GAOL_NAN;
+   }
+     if (is_signed(a)) { // To handle +0 and -0 such that -0 is returned
+--- gaol-3.1.1/gaol/gaol_config_mingw.h.orig	2012-09-21 18:17:57.953125000 +0200
++++ gaol-3.1.1/gaol/gaol_config_mingw.h	2012-09-21 18:18:04.640625000 +0200
+@@ -52,7 +52,7 @@
+ #define HAVE_CLOCK 1
+ 
+ /* Define if you have the getrusage function.  */
+-#define HAVE_GETRUSAGE 1
++//#define HAVE_GETRUSAGE 1
+ 
+ /* Define if you have the rint function.  */
+ /* #undef HAVE_RINT */
+--- gaol-3.1.1/gaol/gaol_interval.cpp.orig	2012-09-21 18:42:39.515625000 +0200
++++ gaol-3.1.1/gaol/gaol_interval.cpp	2012-09-21 18:44:57.921875000 +0200
+@@ -1108,7 +1108,7 @@
+   
+   bool interval::is_finite(void) const
+   {
+-      return !isinf(left()) && !isinf(right());
++      return !std::isinf(left()) && !std::isinf(right());
+   }
+ 
+   interval  max(const interval &I, const interval &J)
+@@ -1164,7 +1164,7 @@
+       if (I1.is_empty() || I2.is_empty()) {
+ 	  return GAOL_NAN;
+       } else {
+-	  if (isinf(I1.left()) || isinf(I1.right()) || isinf(I2.left()) || isinf(I2.right())) { 
++	  if (std::isinf(I1.left()) || std::isinf(I1.right()) || std::isinf(I2.left()) || std::isinf(I2.right())) { 
+ 	      if (I1.set_eq(interval::universe) && I2.set_eq(interval::universe)) {
+ 		  // hausdorff([-oo, +oo],[-oo,+oo]) = 0	
+ 		  return 0.0;
+--- gaol-3.1.1/gaol/gaol_version.h.orig	2012-09-21 18:58:33.015625000 +0200
++++ gaol-3.1.1/gaol/gaol_version.h	2012-09-21 18:58:47.093750000 +0200
+@@ -35,7 +35,7 @@
+ # include "gaol/gaol_version_msvc.h"
+ 
+ #elif defined (__MINGW32__)
+-// Nothing for now. FIXME!
++# include "gaol/gaol_version_autoconf.h"
+ 
+ #elif defined (__GNUC__)
+ # include "gaol/gaol_version_autoconf.h"

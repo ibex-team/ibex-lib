@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # encoding: utf-8
 
-import tarfile, os.path, os, re, patch
+import tarfile, os.path, os, re, patch, sys
 from waflib import Utils, Errors, Logs
 
 
@@ -106,10 +106,15 @@ def configure (conf):
 		conf.define ("GAOL_EXCEPTIONS_ENABLED", 1)
 		conf.define ("GAOL_USING_ASM", 1)
 
-		host = "%s-%s" % (
-			os.uname()[4],
-			Utils.unversioned_sys_platform(),
-		)
+		if sys.platform in ("cygwin", "win32"):
+			# TODO: some better detection
+			host = "i386-cygwin"
+		else:
+			host = "%s-%s" % (
+				os.uname()[4],
+				Utils.unversioned_sys_platform(),
+			)
+
 		for known, macro in (
 			("i.86-linux$", 	"IX86_LINUX"),
 			("i.86-cygwin$",	"IX86_CYGWIN"),
@@ -250,6 +255,7 @@ def configure (conf):
 			conf.define ({
 				"aix":		"MATHLIB_AIX",
 				"cygwin":	"MATHLIB_CYGWIN",
+				"win32":	"MATHLIB_CYGWIN",
 				"linux":	"MATHLIB_LINUX",
 				"sunos":	"MATHLIB_SUN",
 
@@ -282,18 +288,8 @@ def build (bld):
 		assert node
 		return node
 
-	if bld.env["BUILD_GDTOA"]:
-		# build gdtoa
-
-		bld.variant = "gdtoa"
-
-		def prfx (file_name):
-			return os.path.join (bld.env.GDTOA, file_name)
-
-		node = extract (bld.env.GDTOA)
-
-		# apply a patch to have strtod() and strtol() match with stdlib.h
-		patch_file = os.path.join (src_dir, "gdtoa-nothrow.patch")
+	def apply_patch (name):
+		patch_file = os.path.join (src_dir, name)
 		p = patch.fromfile (patch_file)
 		try:
 			prev_dir = os.getcwd()
@@ -305,6 +301,19 @@ def build (bld):
 				raise Errors.WafError ("Cannot apply patch %s" % patch_file)
 		finally:
 			os.chdir (prev_dir)
+
+	if bld.env["BUILD_GDTOA"]:
+		# build gdtoa
+
+		bld.variant = "gdtoa"
+
+		def prfx (file_name):
+			return os.path.join (bld.env.GDTOA, file_name)
+
+		node = extract (bld.env.GDTOA)
+
+		# apply a patch to have strtod() and strtol() match with stdlib.h
+		apply_patch ("gdtoa-nothrow.patch")
 
 		cpat = bld.env.cprogram_PATTERN
 
@@ -374,6 +383,7 @@ def build (bld):
 		node = extract (bld.env.GAOL)
 		remove (os.path.join (node.abspath(), "gaol", "gaol_double_op.h"))
 		remove (os.path.join (node.abspath(), "gaol", "gaol_configuration.h"))
+		apply_patch ("gaol-mingw.patch")
 
 		@bld.rule (
 			target = prfx ("gaol_double_op.h"),
