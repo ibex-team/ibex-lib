@@ -26,7 +26,8 @@ def options (opt):
 
 def configure (conf):
 	env = conf.env
-	conf.load ('compiler_cxx compiler_cc flex bison')
+	conf.load ('compiler_cxx compiler_cc bison')
+	conf.load ('flex', '.')
 
 	def find_lib (prefix):
 
