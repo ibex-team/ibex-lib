@@ -100,6 +100,19 @@ public:
 		TEST_ADD(TestInnerArith::div08_2);
 		TEST_ADD(TestInnerArith::div09_1);
 		TEST_ADD(TestInnerArith::div09_2);
+
+		TEST_ADD(TestInnerArith::abs01);
+		TEST_ADD(TestInnerArith::abs02);
+		TEST_ADD(TestInnerArith::abs03);
+		TEST_ADD(TestInnerArith::abs04);
+		TEST_ADD(TestInnerArith::abs05);
+
+		TEST_ADD(TestInnerArith::sqrt01);
+		TEST_ADD(TestInnerArith::sqrt02);
+		TEST_ADD(TestInnerArith::sqrt03);
+		TEST_ADD(TestInnerArith::sqrt04);
+		TEST_ADD(TestInnerArith::sqrt05);
+
 	}
 
 	// x+y<=z with contraction (no inflation)
@@ -253,8 +266,17 @@ public:
 	// x/y<=z with z<0 non inflating,with only possible negative half-plane
 	void div09_2();
 
+	void abs01();
+	void abs02();
+	void abs03();
+	void abs04();
+	void abs05();
 
-
+	void sqrt01();
+	void sqrt02();
+	void sqrt03();
+	void sqrt04();
+	void sqrt05();
 
 private:
 	void check_add_sub(const Interval& z, const Interval& xin, const Interval& yin, bool lb, bool ub);

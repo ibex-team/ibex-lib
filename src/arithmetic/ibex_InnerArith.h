@@ -154,6 +154,14 @@ bool iproj_sqr(const Interval& y, Interval& x, const Interval& xin=Interval::EMP
 bool iproj_minus(const Interval& y, Interval& x);
 
 /**
+ * \brief Inner projection of the absolute value.
+ *
+ * \see comments in #ibex::iproj_sqr(const Interval&, Interval&, const Interval&).
+ *
+ */
+bool iproj_abs(const Interval& y, Interval& x, const Interval& xin=Interval::EMPTY_SET);
+
+/**
  * \brief Inner projection of power
  *
  * \see comments in #ibex::iproj_sqr(const Interval&, Interval&, const Interval&).
@@ -173,6 +181,13 @@ bool iproj_exp(const Interval& y, Interval& x);
  * \see comments in #ibex::iproj_sqr(const Interval&, Interval&, const Interval&).
  */
 bool iproj_log(const Interval& y, Interval& x);
+
+/**
+ * \brief Inner projection of square root
+ *
+ * \see comments in #ibex::iproj_sqr(const Interval&, Interval&, const Interval&).
+ */
+bool iproj_sqrt(const Interval& y, Interval& x);
 
 /*
  * TODO: to be continued....
@@ -196,6 +211,9 @@ inline bool iproj_log(const Interval& y, Interval& x) {
 	return !(x&=iexp(y)).is_empty();
 }
 
+inline bool iproj_sqrt(const Interval& y, Interval& x) {
+	return !(x&=isqr(y & Interval::POS_REALS)).is_empty();
+}
 
 } // end namespace ibex
 

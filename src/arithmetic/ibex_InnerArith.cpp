@@ -553,6 +553,45 @@ bool iproj_mul(const Interval& z, Interval& x, Interval& y, const Interval &xin,
 	return iproj_leq_mul(z.ub(),x,y,xin,yin) && iproj_geq_mul(z.lb(),x,y,xin,yin);
 }
 
+bool iproj_abs(const Interval& y, Interval& x, const Interval& xin) {
+	bool inflate=!xin.is_empty();
+	assert(xin.is_subset(x));
+	assert(!inflate || abs(xin).is_subset(y));
+
+	double up=y.ub();
+	double lo=y.lb();
+
+	if (y.is_empty() || up<0) {
+		x.set_empty();
+		return false;
+	}
+
+	if (lo>0) {
+		if (inflate) {
+			assert(!xin.contains(0));
+			if (xin.lb()>0)
+				x &= Interval(lo,up);
+			else                      // we cannot have 0 in x since sqr(x) must be included in y
+				x &= Interval(-up,-lo);
+			return true;
+		}
+		else {
+			Interval xtmp=x;
+			bool q=(rand()%2==1); // q==1 : we first consider x>0.
+
+			x &= (q? Interval(lo,up) : Interval(-up,-lo));
+			if (!x.is_empty()) return true;
+
+			x = xtmp & (q? Interval(-up,-lo) : Interval(lo,up));
+			return !x.is_empty();
+		}
+	}
+	else {
+		x &= Interval(-up,up);
+		return !x.is_empty();
+	}
+}
+
 bool iproj_div(const Interval& z, Interval& x, Interval& y, const Interval &xin, const Interval& yin) {
 	return iproj_leq_div(z.ub(),x,y,xin,yin) && iproj_geq_div(z.lb(),x,y,xin,yin);
 }
@@ -623,10 +662,15 @@ bool iproj_pow(const Interval& y, Interval& x, int p, const Interval &xin) {
 /*---------------------------------------------------------------------------*/
 
 Interval isqr(const Interval& x) {
+	if (x.is_empty()) return Interval::EMPTY_SET;
 	double l,u;
 	if (x.lb()==NEG_INFINITY) {
 		l = x.ub()>=0 ? 0 : UP(sqr,x.ub());
-		u = NEG_INFINITY;
+		u = POS_INFINITY;
+	}
+	else if (x.ub()==POS_INFINITY) {
+		l = x.lb()<=0 ? 0 : UP(sqr,x.lb());
+		u = POS_INFINITY;
 	}
 	else if (x.ub()<-x.lb()) {
 		l = x.ub()>=0 ? 0 : UP(sqr,x.ub());

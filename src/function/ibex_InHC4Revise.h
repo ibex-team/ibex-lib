@@ -50,10 +50,10 @@ public:
     inline void trans_V_bwd(const ExprTrans& e,ExprLabel& x, const ExprLabel& y)                 { not_implemented("Inner projection of \"transpose\""); }
     inline void trans_M_bwd(const ExprTrans& e,ExprLabel& x, const ExprLabel& y)                 { not_implemented("Inner projection of \"transpose\""); }
 	inline void sign_bwd  (const ExprSign& e,  ExprLabel& x, const ExprLabel& y)                 { not_implemented("Inner projection of \"sign\""); }
-	inline void abs_bwd   (const ExprAbs& e,   ExprLabel& x, const ExprLabel& y)                 { not_implemented("Inner projection of \"abs\""); }
+	inline void abs_bwd   (const ExprAbs& e,   ExprLabel& x, const ExprLabel& y)                 { if (!iproj_abs(y.d->i(),x.d->i())) throw EmptyBoxException(); }
 	inline void power_bwd (const ExprPower& e, ExprLabel& x, const ExprLabel& y)                 { if (!iproj_pow(y.d->i(),x.d->i(),e.expon, x.p->i())) throw EmptyBoxException(); }
 	inline void sqr_bwd   (const ExprSqr& e,   ExprLabel& x, const ExprLabel& y)                 { if (!iproj_sqr(y.d->i(),x.d->i(),x.p->i())) throw EmptyBoxException(); }
-	inline void sqrt_bwd  (const ExprSqrt& e,  ExprLabel& x, const ExprLabel& y)                 { not_implemented("Inner projection of \"sqrt\""); }
+	inline void sqrt_bwd  (const ExprSqrt& e,  ExprLabel& x, const ExprLabel& y)                 { if (!iproj_sqrt(y.d->i(),x.d->i())) throw EmptyBoxException(); }
 	inline void exp_bwd   (const ExprExp& e,   ExprLabel& x, const ExprLabel& y)                 { if (!iproj_exp(y.d->i(),x.d->i())) throw EmptyBoxException(); }
 	inline void log_bwd   (const ExprLog& e,   ExprLabel& x, const ExprLabel& y)                 { if (!iproj_log(y.d->i(),x.d->i())) throw EmptyBoxException(); }
 	inline void cos_bwd   (const ExprCos& e,   ExprLabel& x, const ExprLabel& y)                 { not_implemented("Inner projection of \"cos\""); }

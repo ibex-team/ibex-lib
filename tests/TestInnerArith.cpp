@@ -532,4 +532,76 @@ void TestInnerArith::div09_2() {
 	TEST_ASSERT(y.ub()==previous_float(0));
 }
 
+
+void TestInnerArith::abs01() {
+	Interval x;
+	bool f=iproj_abs(Interval::EMPTY_SET,x);
+	TEST_ASSERT(!f && x.is_empty());
+}
+
+void TestInnerArith::abs02() {
+	Interval x(0,2);
+	bool f=iproj_abs(Interval(1,3),x);
+	TEST_ASSERT(f);
+	check(x,Interval(1,2));
+}
+
+void TestInnerArith::abs03() {
+	Interval x(-3,-1);
+	bool f=iproj_abs(Interval(2,4),x);
+	TEST_ASSERT(f);
+	check(x,Interval(-3,-2));
+}
+
+void TestInnerArith::abs04() {
+	Interval x(-2,2);
+	bool f=iproj_abs(Interval(1,3),x,-2);
+	TEST_ASSERT(f);
+	check(x,Interval(-2,-1));
+}
+
+void TestInnerArith::abs05() {
+	Interval x(-2,2);
+	bool f=iproj_abs(Interval(1,3),x,2);
+	TEST_ASSERT(f);
+	check(x,Interval(1,2));
+}
+
+void TestInnerArith::sqrt01() {
+	Interval x;
+	bool f=iproj_sqrt(Interval::EMPTY_SET,x);
+	TEST_ASSERT(!f && x.is_empty());
+}
+
+void TestInnerArith::sqrt02() {
+	Interval x;
+	bool f=iproj_sqrt(Interval(-1),x);
+	TEST_ASSERT(!f && x.is_empty());
+}
+
+void TestInnerArith::sqrt03() {
+	Interval x(0,6);
+	Interval y(2,3);
+	TEST_ASSERT(iproj_sqrt(y,x));
+	check(x,Interval(4,6));
+	//TEST_ASSERT(y.is_superset(sqrt(Interval(x.ub()))));
+	//TEST_ASSERT(y.is_superset(sqrt(Interval(x.lb()))));
+	TEST_ASSERT(x.lb()>=sqr(Interval(y.lb())).ub());
+	TEST_ASSERT(x.ub()<=sqr(Interval(y.ub())).lb());
+}
+
+void TestInnerArith::sqrt04() {
+	Interval x(0,1);
+	Interval y(2,3);
+	bool f=iproj_sqrt(y,x);
+	TEST_ASSERT(!f && x.is_empty());
+}
+
+void TestInnerArith::sqrt05() {
+	Interval x;
+	Interval y(1,POS_INFINITY);
+	bool f=iproj_sqrt(y,x);
+	TEST_ASSERT(f);
+	check(x,y);
+}
 } // end namespace

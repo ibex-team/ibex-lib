@@ -29,6 +29,8 @@ class NumConstraint {
 
 public:
 
+	NumConstraint(Variable& x, const ExprCtr& e);
+
 	NumConstraint(Function& f, CmpOp op=EQ);
 
 	Function& f;
