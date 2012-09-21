@@ -306,6 +306,7 @@ def build (bld):
 		finally:
 			os.chdir (prev_dir)
 
+		cpat = bld.env.cprogram_PATTERN
 
 		bld.program (
 			target	= prfx ("arithchk"),
@@ -314,7 +315,7 @@ def build (bld):
 
 		bld (
 			target	= prfx ("arith.h"),
-			source	= prfx ("arithchk"),
+			source	= prfx (cpat % "arithchk"),
 			rule	= "${SRC} > ${TGT}",
 		)
 
@@ -325,7 +326,7 @@ def build (bld):
 
 		bld (
 			target	= prfx ("gd_qnan.h"),
-			source	= prfx ("qnan"),
+			source	= prfx (cpat % "qnan"),
 			rule	= "${SRC} > ${TGT}",
 		)
 
