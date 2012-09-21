@@ -72,6 +72,12 @@ def configure (conf):
 		Logs.pprint ("BLUE", "Starting configuration for %s" % name)
 	
 	if conf.env.BUILD_GAOL:
+		# This will compile the bundled version of gaol
+		#
+		# default config is:    --disable-preserve-rounding
+		#
+
+
 		log_start ("gaol")
 		conf.setenv ("gaol")
 		#TODO: support config options
@@ -101,7 +107,7 @@ def configure (conf):
 
 		conf.env.FAST_MATH = "fast"
 
-		conf.define ("GAOL_PRESERVE_ROUNDING", 1)
+		conf.define ("GAOL_PRESERVE_ROUNDING", 0)   # --disable-preserve-rounding
 		conf.define ("GAOL_CERTAINLY_RELATIONS", 1)
 		conf.define ("GAOL_EXCEPTIONS_ENABLED", 1)
 		conf.define ("GAOL_USING_ASM", 1)
