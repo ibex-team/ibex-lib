@@ -113,8 +113,8 @@ From the user standpoint, the function $f$ (once built) is ``flattened'' to a ma
 Each numerical function (eval, etc.) expects a 5-dimensional box as argument.
 
 The way intervals are mapped to the variables components follows a straightforward ordering:
-everytime we call a (program) function of $f$ with the box $[b]=([b]_1,\ldots,[b]_5)$ in argument, we simply enforce
-$$x\in[b]_1\times[b]_2 \quad \mbox{and} \quad y\in[b]_3\times[b]_4\times[b]_5.$$
+everytime we call a (program) function of $f$ with the box $\ib=(\ib_1,\ldots,\ib_5)$ in argument, we simply enforce
+$$x\in\ib_1\times\ib_2 \quad \mbox{and} \quad y\in\ib_3\times\ib_4\times\ib_5.$$
 
 If you don't want to create functions in C++, you can skip now to Section \ref{sec:mod-func}.
 
@@ -233,20 +233,27 @@ Then we simply call \hcf{f.eval(...)} to get the image of the box by \cf{f}:
   double _box[][2]= {{1,2},{3,4}};
   IntervalVector box(2,_box);         // create the box ([1,2];[3,4])
 
-  cout << "initial box=" << box << endl;
-  cout << "f(box)=" << f.eval(box) << endl; 
+  cout << "f(" << box << ")=" << f.eval(box) << endl; 
 \end{lstlisting}
+
+The display is:
+\begin{verbatim}
+f(([1,2] ; [3,4]))=[-1,-0.27941549819892486095]
+\end{verbatim}
 
 \subsection{Projection (backward computation)}
 	
-Projection means that we contract the input box $[x]$
-with respect to $f(x)=y$, where $y$ is any real value or interval.
-The underlying algorithm is the famous {\it forward-backward} (alias \textsc{HC4Revise})
-algorithm. It is quick (runs in linear time w.r.t. the size
-of the constraint syntax) and optimal when variables have all one occurrence.
+Projection means that we contract the input box $\ix$
+with respect to $f(x)=y$, where $y$ is any constant (real value, interval,
+inteval vector, etc.).
 
-Consider again that \cf{f} represents $(x,y)\mapsto\sin(x+y)$.
-We can contract $[x]=[1,2]\times[3,4]$ w.r.t.
+The underlying algorithm is the famous {\it forward-backward} (alias \textsc{HC4Revise})
+algorithm. It is quick since it runs in linear time w.r.t. the size
+of the constraint syntax and optimal when variables have all one occurrence
+in this syntax.
+
+Consider again \cf{f} representing $(x,y)\mapsto\sin(x+y)$.
+We can contract $\ix=[1,2]\times[3,4]$ w.r.t.
 to $f(x)=-1$:
 
 \begin{lstlisting}
@@ -266,8 +273,58 @@ of the initial one.
 
 \subsection{Gradient}
 
+Consider $f:(x,y)\mapsto x\times y$.
+The first and most simple way of calculating the gradient is:
+\begin{lstlisting}
+  double init_xy[][2] = { {1,2}, {3,4} };
+  IntervalVector box(2,init_xy);
+  cout << "gradient=" << f.gradient(box) << endl;
+\end{lstlisting}
+
+Since $\fP{f}{x}=y$ and $\fP{f}{y}=x$ we get:
+\begin{verbatim}
+gradient=([3,4] ; [1,2])
+\end{verbatim}
+
+In this first variant, the returned vector is a new object created each time the function is called.
+When we have to compute many times different values of the gradient for the same function, we can
+also build a vector once for all and ask the \cf{gradient} to store the result in this slot:
+
+\begin{lstlisting}
+  IntervalVector g(4);
+  f.gradient(box,g);
+  cout << "gradient=" << g << endl;
+\end{lstlisting}
 
 \subsection{Jacobian and Hansen's matrix}
+
+The interval Jacobian matrix of a function $f$ on a box $\ix$ is
+$$J=\begin{pmatrix}
+\fP{f_1}{x_1}(\ix) & \ldots & \fP{f_1}{x_n}(\ix)\\
+\vdots \\
+\fP{f_m}{x_1}(\ix) & \ldots & \fP{f_m}{x_n}(\ix)\\
+\end{pmatrix}$$
+
+The interval Jacobian matrix is obtained exactly as for the gradient.
+Just write \\
+\centerline{\cf{f.jacobian(box)}}\\ to get an \cf{IntervalMatrix}
+containing an enclosure of the Jacobian matrix of $f$ on the box in argument.
+
+There is also a variant where the matrix is passed as argument
+(as for the gradient) in order to avoid allocating memory for the calculated matrix:\\
+\centerline{\cf{f.jacobian(box,J)}.}
+
+You can also compute with \ibex the ``Hansen matrix''. This matrix
+is another {\it slope} matrix, thiner than the interval Jacobian (but slower to be calculated).
+It is, for example, used inside the interval Newton operator.
+The Hansen matrix corresponds to the following matrix, where $(x_1,\ldots,x_n)$ denotes
+the midvector of $\ix$.
+
+$$\begin{pmatrix}
+\fP{f_1}{x_1}(\ix_1,x_2,\ldots,x_n) & \fP{f_1}{x_2}(\ix_1,\ix_2,\ldots,x_n) & \ldots & \fP{f_1}{x_n}(\ix_1,\ix_2,\ldots,\ix_n) \\
+\vdots & \\
+\fP{f_m}{x_1}(\ix_1,x_2,\ldots,x_n) & \fP{f_n}{x_2}(\ix_1,\ix_2,\ldots,x_n) & \ldots & \fP{f_m}{x_n}(\ix_1,\ix_2,\ldots,\ix_n) \\
+\end{pmatrix}$$
 
 \subsection{Creating functions (in C++)}\label{sec:mod-func-cpp}
 
@@ -354,7 +411,7 @@ To define a vector-valued function, the \hcf{Return} keword allows
 you to list the function's components.
 
 For instance, we can define the function that associates to $x$ the 
-respective distances between two fixed points \cf{pt1} and \cf{pt2}:
+respective distances between two fixed points \cf{pt1}=$(0,0)$ and \cf{pt2}=$(1,1)$.
 
 \begin{lstlisting}	
 	Variable x(2,"x");
@@ -377,7 +434,62 @@ f:(x)->(dist(x,([0,0] ; [0,0])),dist(x,([1,1] ; [1,1])))
 
 \section{Constraints}
 
+In this section, we do not present {\it constraints} in their full generality
+but {\it numerical constraints} (the ones you are the most likely interested in).
+
+A numerical constraint in \ibex is either a relation like 
+$f(x)<0$, $f(x)\le0$, $f(x)=0$, $f(x)\ge0$ or $f(x)>0$,
+where $f$ is a function as introduced in the previous section. If $f$ is vector-valued, then
+$0$ must be a vector.
+
+Surprisingly, constraints do not play an important role in \ibex.
+It sounds a little bit contraditory for a {\it constraint} programming library.
+The point is that \ibex is rather a {\it contractor} programming library meaning that 
+we build, apply and compose contractors rather than constraints directly.
+
+As a programer, you may actually face two different situations.
+
+Either you indeed want to use a constraint as a contractor in which case you
+build a \cf{Contractor} object with this constraint (the actual class depending
+on the algorithm you chose, as detailed in Chapter \ref{chap:ctc} --by default, it is \cf{HC4Revise}--).
+Either you need to do something else, say, like calculating the Jacobian matrix of the
+function $f$. In this case, you just need to get a reference to this function 
+and call \cf{jacobian}. In fact, all the information inherent to a constraint
+(except the comparison operator of course) is contained in the underlying function so that there
+is little specific code related to the constraint itself.
+
+For these reasons, the only operations you actually do with a constraint is either
+to read its field or wrap it into a contractor.
+
+\subsection{Class and Fields}
+
+The class for representing a numerical constraint is \hcf{NumConstraint}.
+The first field in this class is a reference to the function:\\
+\centerline{\cf{Function&} \hcf{f}}
+
+The second field is the comparison operator:\\
+\centerline{\cf{CmpOp} \hcf{op}}
+
+\cf{CmpOp} is just an \cf{enum} (integer) with the following values
+
+\begin{center}
+\begin{tabular}{cccc}
+\hcf{LT} & $<$ & \hcf{LEQ} & $\le$ \\
+\hcf{EQ} & =& \\
+\hcf{GEQ} & $\ge$ & \hcf{GT} & $>$ \\
+\end{tabular}
+\end{center}
+
 \subsection{Creating constraints (in C++)}
+
+To create a numerical constraint, you need to build the function $f$ first.
+Then simply call the constructor as in the following example.
+
+\begin{lstlisting}
+Variable x;
+Function f(x,x+1);
+NumConstraint c(f,LEQ); // the constraint x+1<=0
+\end{lstlisting}	
 
 \section{Systems}
 
