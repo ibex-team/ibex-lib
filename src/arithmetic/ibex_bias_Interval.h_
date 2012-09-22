@@ -179,6 +179,7 @@ inline Interval& Interval::operator/=(const Interval& y) {
 	}
 
 	if (a==0 && b==0) {
+		// TODO: 0/0 can also be 1...
 		return *this;
 	}
 

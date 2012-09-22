@@ -36,12 +36,26 @@ double min(const double& x, const double& y) {
 	return x<y? x : y;
 }
 
+/* [gch] NOTE: Perhaps all the functions UPxx and LOxx below
+ * could be implemented more efficiently by using fpu_round_down()
+ * and fpu_round_up(). But it not sure (time to change processor
+ * rounding mode has to be considered).
+ */
+
 double UP(Interval (*F)(const Interval&), const double& _real_) {
 	return F(Interval(_real_,_real_)).ub();
 }
 
 double LO(Interval (*F)(const Interval&), const double& _real_) {
 	return F(Interval(_real_,_real_)).lb();
+}
+
+double UP2(Interval (*F)(const Interval&, const Interval&), const double& _real1_, const double& _real2_) {
+	return F(Interval(_real1_,_real1_),Interval(_real2_,_real2_)).ub();
+}
+
+double LO2(Interval (*F)(const Interval&, const Interval&), const double& _real1_, const double& _real2_) {
+	return F(Interval(_real1_,_real1_),Interval(_real2_,_real2_)).lb();
 }
 
 double UP_root(const double& _real_, int expon) {
@@ -659,7 +673,272 @@ bool iproj_pow(const Interval& y, Interval& x, int p, const Interval &xin) {
 	//cout << "[sqr] result: x=" << x << endl;
 }
 
+#define PERIOD_COS(i) (i1%2==0? iadd(period_0,imul((double) i1,Interval::PI)) : isub(imul((double) i1+1,Interval::PI),period_0))
+#define PERIOD_SIN(i) (i1%2==0? iadd(period_0,imul((double) i1,Interval::PI)) : isub(imul((double) i1,Interval::PI),period_0))
+#define PERIOD_TAN(i) (iadd(period_0, imul((double) i1,Interval::PI)))
+
+#define COS 0
+#define SIN 1
+#define TAN 2
+
+static bool iproj_trigo(const Interval& y, Interval& x, const Interval& xin, int ftype) {
+
+	bool inflate=!xin.is_empty();
+	assert(xin.is_subset(x));
+
+	Interval period_0, nb_period;
+
+	switch (ftype) {
+	case COS :
+		if (y==Interval(-1,1)) return true;
+		period_0 = iacos(y); break;
+	case SIN :
+		if (y==Interval(-1,1)) return true;
+		period_0 = iasin(y); break;
+	case TAN :
+		period_0 = iatan(y); break;
+	default :
+		assert(false); break;
+	}
+
+	if (period_0.is_empty()) {
+		// can happen even if inflate==true
+		// because of inner rounding (to be checked?)
+		if (inflate) x=xin;
+		else x.set_empty();
+		return inflate;
+	}
+
+	switch (ftype) {
+	case COS :
+		nb_period = (inflate? xin : x) / Interval::PI; break;
+	case SIN :
+		nb_period = ((inflate? xin : x) + Interval::HALF_PI) / Interval::PI; break;
+	case TAN :
+		nb_period = ((inflate? xin : x) + Interval::HALF_PI) / Interval::PI; break;
+	}
+
+	int p1 = ((int) nb_period.lb())-1;
+	int p2 = ((int) nb_period.ub());
+
+	int i1 = p1;
+
+	switch(ftype) {
+	case COS :
+		// should find in at most 2 turns.. but consider rounding !
+		while (i1<=p2 && ((inflate? xin : x) & PERIOD_COS(i)).is_empty()) i1++;
+		break;
+	case SIN :
+		while (i1<=p2 && ((inflate? xin : x) & PERIOD_SIN(i)).is_empty()) i1++;
+		break;
+	case TAN :
+		while (i1<=p2 && ((inflate? xin : x) & PERIOD_TAN(i)).is_empty()) i1++;
+		break;
+	}
+
+	if (i1==p2+1) {
+		// can happen even if inflate==true
+		// since PERIOD_XXX can be the empty set
+		// because of inner rounding
+		if (inflate) x=xin;
+		else x.set_empty();
+		return inflate;
+	}
+
+	int i2 = p2;
+
+	if (i1<p2) {
+		switch(ftype) {
+		case COS :
+			// should find in at most 2 turns.. but consider rounding !
+			while (i2>=p1 && ((inflate? xin : x) & PERIOD_COS(i)).is_empty()) i2--;
+			break;
+		case SIN :
+			while (i2>=p1 && ((inflate? xin : x) & PERIOD_SIN(i)).is_empty()) i2--;
+			break;
+		case TAN :
+			while (i2>=p1 && ((inflate? xin : x) & PERIOD_TAN(i)).is_empty()) i2--;
+			break;
+		}
+	}
+	assert(i2>=p1 && i2>=i1);
+
+	if (inflate) {
+		switch(ftype) {
+		case COS :
+			x &= (PERIOD_COS(i1) | PERIOD_COS(i2));
+			break;
+		case SIN :
+			x &= (PERIOD_SIN(i1) | PERIOD_SIN(i2));
+			break;
+		case TAN :
+			// impossible to span more than one period
+			// even if y=(-oo,+oo)
+			assert(i1==i2);
+			x &= PERIOD_TAN(i1);
+			break;
+		}
+	}
+	else {
+		// choose randomly the period on which we project
+		int i;
+		if (i1==i2) i = i1; // no choice
+		else i = i1+ (rand() % (i2-i1+1));
+
+		switch(ftype) {
+		case COS :
+			if (y.ub()>=1.0) // the projection spans two periods
+				x &= (PERIOD_COS(i) | (i%2==0? PERIOD_COS(i-1) : PERIOD_COS(i+1)));
+			else if (y.lb()<=-1.0)
+				x &= (PERIOD_COS(i) | (i%2==0? PERIOD_COS(i+1) : PERIOD_COS(i-1)));
+			else // the case y==[-1,1] is already considered at the beginning
+				x &= PERIOD_COS(i);
+			break;
+		case SIN :
+			if (y.ub()>=1.0) // the projection spans two periods
+				x &= (PERIOD_SIN(i) | (i%2==0? PERIOD_SIN(i+1) : PERIOD_SIN(i-1)));
+			else if (y.lb()<=-1.0)
+				x &= (PERIOD_SIN(i) | (i%2==0? PERIOD_SIN(i-1) : PERIOD_SIN(i+1)));
+			else // the case y==[-1,1] is already considered at the beginning
+				x &= PERIOD_SIN(i);
+			break;
+		case TAN :
+			// impossible to span more than one period
+			x &= PERIOD_TAN(i);
+			break;
+		}
+	}
+
+	return true;
+}
+
+bool iproj_cos(const Interval& y, Interval& x, const Interval& xin) {
+	return iproj_trigo(y,x,xin,COS);
+}
+
+bool iproj_sin(const Interval& y, Interval& x, const Interval& xin) {
+	return iproj_trigo(y,x,xin,SIN);
+}
+
+bool iproj_tan(const Interval& y, Interval& x, const Interval& xin) {
+	return iproj_trigo(y,x,xin,TAN);
+}
+
 /*---------------------------------------------------------------------------*/
+
+Interval iadd(const Interval& x, const Interval& y) {
+	// note if the upper bound < lower bound,  the interval
+	// will be automatically set to the empty interval
+	return Interval(UP2(operator+,x.lb(),y.lb()),LO2(operator+,x.ub(),y.ub()));
+}
+
+Interval isub(const Interval& x, const Interval& y) {
+	return Interval(UP2(operator-,x.lb(),y.ub()),LO2(operator-,x.ub(),y.lb()));
+}
+
+Interval imul(const Interval& x, const Interval& y) {
+	if (x.is_empty() || y.is_empty())
+			return Interval::EMPTY_SET;
+
+	double lx=x.lb();
+	double ux=x.ub();
+	double ly=y.lb();
+	double uy=y.ub();
+
+	if (lx==0 && ux==0)
+		return Interval(0,0); // so, for us, 0/0==1
+	else if	(ly==0 && uy==0)
+		return Interval::EMPTY_SET; // so, for us, 0/0==1
+	else if ((lx<0 && ux>0) && (ly==NEG_INFINITY || uy==POS_INFINITY))
+		return Interval::ALL_REALS;
+	else if ((ly<0 && uy>0) && (lx==NEG_INFINITY || ux==POS_INFINITY))
+		return Interval::ALL_REALS;
+	else if ((lx==NEG_INFINITY && uy==0) || (uy==POS_INFINITY && lx==0))
+		if (ux<=0 || ly>=0)
+			return Interval::POS_REALS;
+		else
+			return Interval(UP2(operator*,ux,ly), POS_INFINITY);
+	else if ((lx==NEG_INFINITY && ly==0) || (ly==NEG_INFINITY && lx==0))
+		if (ux<=0 || uy<=0)
+			return Interval::NEG_REALS;
+		else
+			return Interval(NEG_INFINITY, LO2(operator*,ux,uy));
+	else if ((ly==NEG_INFINITY && ux==0) || (ux==POS_INFINITY && ly==0))
+		if (uy<=0 || lx>=0)
+			return Interval::ALL_REALS;
+		else
+			return Interval(UP2(operator*,uy,lx), POS_INFINITY);
+	else if ((ux==POS_INFINITY && uy==0) || (uy==POS_INFINITY && ux==0))
+		if (lx>=0 || ly>=0)
+			return Interval::NEG_REALS;
+		else
+			return Interval(NEG_INFINITY, LO2(operator*,lx,ly));
+	else
+		if (uy<0)
+			if (ux<0)
+				return Interval(UP2(operator*,ux,uy),LO2(operator*,lx,ly));
+			else if (lx<0)
+				return Interval(UP2(operator*,ux,ly),LO2(operator*,lx,ly));
+			else return Interval(UP2(operator*,ux,ly),LO2(operator*,lx,uy));
+		else
+			if (ux<0)
+				return Interval(UP2(operator*,lx,uy),LO2(operator*,lx,ly));
+			else if (lx<0) {
+				double l1=UP2(operator*,lx,uy);
+				double l2=UP2(operator*,ux,ly);
+				double u1=LO2(operator*,lx,ly);
+				double u2=LO2(operator*,ux,uy);
+				return Interval(l1<l2?l1:l2,u1>u2?u1:u2);
+			}
+			else return Interval(UP2(operator*,ux,ly),LO2(operator*,ux,uy));
+}
+
+Interval idiv(const Interval& x, const Interval& y) {
+	if (x.is_empty() || y.is_empty())
+		return Interval::EMPTY_SET;
+
+	double lx=x.lb();
+	double ux=x.ub();
+	double ly=y.lb();
+	double uy=y.ub();
+
+	if (ly==0 && uy==0)
+		return Interval::EMPTY_SET;
+	else if (lx==0 && ux==0)
+		return  Interval::ZERO;
+	else if (ly>0 || uy<0) {
+		if (uy<0)
+			if (ux<0)
+				return Interval(UP2(operator/,ux,uy),LO2(operator/,lx,ly));
+			else if (lx<0)
+				return Interval(UP2(operator/,ux,uy),LO2(operator/,lx,uy));
+			else
+				return Interval(UP2(operator/,ux,ly),LO2(operator/,lx,uy));
+		else // ly>0
+			if (ux<0)
+				return Interval(UP2(operator/,lx,uy),LO2(operator/,ux,ly));
+			else if (lx<0)
+				return Interval(UP2(operator/,lx,ly),LO2(operator/,ux,ly));
+			else
+				return Interval(UP2(operator/,lx,ly),LO2(operator/,ux,uy));
+	}
+	else if (ux<=0 && uy==0)
+		return Interval(UP2(operator/,ux,ly), POS_INFINITY);
+	else if (ux<=0 && ly<0 && uy>0)
+		return Interval(NEG_INFINITY,LO2(operator/,ux,uy)); // we could also return Interval(UP2(operator/,ux,ly),POS_INFINITY);
+	else if (ux<=0 && ly==0)
+		return Interval(NEG_INFINITY, LO2(operator/,ux,uy));
+	else if (lx>=0 && uy==0)
+		return Interval(NEG_INFINITY, LO2(operator/,lx,ly));
+				else if (lx>=0 && ly<0 && uy>0)
+					return Interval(NEG_INFINITY,LO2(operator/,lx,ly)); // idem with Interval(UP2(operator/,lx,uy),POS_INFINITY);
+				else if (lx>=0 && ly==0)
+					return Interval(UP2(operator/,lx,uy), POS_INFINITY);
+				else
+					return Interval::ALL_REALS; // lx<0<ux && ly<=0<=uy
+
+
+}
 
 Interval isqr(const Interval& x) {
 	if (x.is_empty()) return Interval::EMPTY_SET;
@@ -717,4 +996,6 @@ Interval iatan(const Interval& x) {
 	double sup = x.ub()==POS_INFINITY ?  Interval::HALF_PI.lb() : LO(atan,x.ub());
 	return inf>sup ? Interval::EMPTY_SET : Interval(inf,sup);
 }
+
+
 } // end namespace ibex

@@ -56,9 +56,9 @@ public:
 	inline void sqrt_bwd  (const ExprSqrt& e,  ExprLabel& x, const ExprLabel& y)                 { if (!iproj_sqrt(y.d->i(),x.d->i())) throw EmptyBoxException(); }
 	inline void exp_bwd   (const ExprExp& e,   ExprLabel& x, const ExprLabel& y)                 { if (!iproj_exp(y.d->i(),x.d->i())) throw EmptyBoxException(); }
 	inline void log_bwd   (const ExprLog& e,   ExprLabel& x, const ExprLabel& y)                 { if (!iproj_log(y.d->i(),x.d->i())) throw EmptyBoxException(); }
-	inline void cos_bwd   (const ExprCos& e,   ExprLabel& x, const ExprLabel& y)                 { not_implemented("Inner projection of \"cos\""); }
-	inline void sin_bwd   (const ExprSin& e,   ExprLabel& x, const ExprLabel& y)                 { not_implemented("Inner projection of \"sin\""); }
-	inline void tan_bwd   (const ExprTan& e,   ExprLabel& x, const ExprLabel& y)                 { not_implemented("Inner projection of \"tan\""); }
+	inline void cos_bwd   (const ExprCos& e,   ExprLabel& x, const ExprLabel& y)                 { if (!iproj_cos(y.d->i(),x.d->i(),x.p->i())) throw EmptyBoxException(); }
+	inline void sin_bwd   (const ExprSin& e,   ExprLabel& x, const ExprLabel& y)                 { if (!iproj_sin(y.d->i(),x.d->i(),x.p->i())) throw EmptyBoxException();}
+	inline void tan_bwd   (const ExprTan& e,   ExprLabel& x, const ExprLabel& y)                 { if (!iproj_tan(y.d->i(),x.d->i(),x.p->i())) throw EmptyBoxException(); }
 	inline void cosh_bwd  (const ExprCosh& e,  ExprLabel& x, const ExprLabel& y)                 { not_implemented("Inner projection of \"cosh\""); }
 	inline void sinh_bwd  (const ExprSinh& e,  ExprLabel& x, const ExprLabel& y)                 { not_implemented("Inner projection of \"sinh\""); }
 	inline void tanh_bwd  (const ExprTanh& e,  ExprLabel& x, const ExprLabel& y)                 { not_implemented("Inner projection of \"tanh\""); }

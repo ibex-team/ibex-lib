@@ -19,16 +19,27 @@ namespace ibex {
 
 /**
  * \brief Inner image of the addition
- * .... Useful?
  * Return z such that $z\subseteq x+y$.
  */
-//inline Interval iadd(const Interval& x, const Interval& y) {
-//}
+Interval iadd(const Interval& x, const Interval& y);
 
-// other operators are missing.
-// TODO
-// ............................
+/**
+ * \brief Inner image of the subtraction
+ * Return z such that $z\subseteq x-y$.
+ */
+Interval isub(const Interval& x, const Interval& y);
 
+/**
+ * \brief Inner image of the multiplication
+ * Return z such that $z\subseteq x-y$.
+ */
+Interval imul(const Interval& x, const Interval& y);
+
+/**
+ * \brief Inner image of the division
+ * Return z such that $z\subseteq x-y$.
+ */
+Interval idiv(const Interval& x, const Interval& y);
 
 /**
  * \brief Inner image of sqr.
@@ -181,6 +192,30 @@ bool iproj_exp(const Interval& y, Interval& x);
  * \see comments in #ibex::iproj_sqr(const Interval&, Interval&, const Interval&).
  */
 bool iproj_log(const Interval& y, Interval& x);
+
+
+/**
+ * \brief Inner projection of cosine
+ *
+ * \see comments in #ibex::iproj_sqr(const Interval&, Interval&, const Interval&).
+ */
+bool iproj_cos(const Interval& y, Interval& x, const Interval &xin=Interval::EMPTY_SET);
+
+
+/**
+ * \brief Inner projection of sine
+ *
+ * \see comments in #ibex::iproj_sqr(const Interval&, Interval&, const Interval&).
+ */
+bool iproj_sin(const Interval& y, Interval& x, const Interval &xin=Interval::EMPTY_SET);
+
+
+/**
+ * \brief Inner projection of tan
+ *
+ * \see comments in #ibex::iproj_sqr(const Interval&, Interval&, const Interval&).
+ */
+bool iproj_tan(const Interval& y, Interval& x, const Interval &xin=Interval::EMPTY_SET);
 
 /**
  * \brief Inner projection of square root
