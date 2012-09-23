@@ -43,11 +43,13 @@ void HC4Revise::proj(const Function& f, const Domain& y, ExprLabel** x) {
 	*f.expr().deco.d = y;
 	f.backward<HC4Revise>(*this);
 
-	int j;
-	for (int i=0; i<f.nb_used_inputs; i++) {
-		j=f.used_input[i];
-		*(x[j]->d) = f.symbol_domains[j];
+	Array<Domain> argD(f.nb_symbols());
+
+	for (int i=0; i<f.nb_symbols(); i++) {
+		argD.set_ref(i,*(x[i]->d));
 	}
+
+	load(argD,f.symbol_domains,f.nb_used_inputs,f.used_input);
 }
 
 void HC4Revise::vector_bwd(const ExprVector& v, ExprLabel** compL, const ExprLabel& y) {

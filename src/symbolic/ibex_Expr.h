@@ -439,26 +439,37 @@ private:
 };
 
 /**
- * Syntax sugar for users
+ * \brief Variable.
+ *
+ * \note This is syntax sugar for users. The "real" class is ExprSymbol.
  */
 class Variable {
 public:
+	/** Create a variable of dimension \a dim (by default: scalar). */
 	explicit Variable(const Dim& dim=Dim::scalar()) : symbol(new ExprSymbol(dim)) { }
 
+	/** Create a scalar variable named \a name. */
 	explicit Variable(const char* name) : symbol(new ExprSymbol(name,Dim::scalar())) { }
 
+	/** Create a variable of dimension \a dim named \a name. */
 	Variable(const Dim& dim, const char* name) : symbol(new ExprSymbol(name, dim)) { }
 
+	/** Create a vector variable of \a n components. */
 	explicit Variable(int n) : symbol(new ExprSymbol(Dim::col_vec(n))) { }
 
+	/** Create a vector variable of \a n components named \a name. */
 	Variable(int n, const char* name) : symbol(new ExprSymbol(name, Dim::col_vec(n))) { }
 
+	/** Create a \a m x \a n matrix variable. */
 	Variable(int m, int n) : symbol(new ExprSymbol(Dim::matrix(m,n))) { }
 
+	/** Create a \a m x \a n matrix variable named \a name. */
 	Variable(int m, int n, const char* name) : symbol(new ExprSymbol(name, Dim::matrix(m,n))) { }
 
+	/** Create a (\a k-sized array of \a m x \a n matrices) variable. */
 	Variable(int k, int m, int n) : symbol(new ExprSymbol(Dim::matrix_array(k,m,n))) { }
 
+	/** Create a (\a k-sized array of \a m x \a n matrices) variable named \a name. */
 	Variable(int k, int m, int n, const char* name) : symbol(new ExprSymbol(name, Dim::matrix_array(k,m,n))) { }
 
 	operator const ExprSymbol&() const {
@@ -473,15 +484,29 @@ public:
 		return *symbol;
 	}
 
+	/** Create the expression x[index]. */
 	const ExprIndex& operator[](int index) { return ((const ExprNode&) *this)[index]; }
 
-	const ExprCtr& operator=(const ExprNode& expr) const { return ((const ExprNode&) *this)=expr; }
-
+	/** Create an equality constraint x=value. */
 	const ExprCtr& operator=(const Interval& value) const { return ((const ExprNode&) *this)=value; }
 
+	/** Create an equality constraint x=value. */
 	const ExprCtr& operator=(const IntervalVector& value) const  { return ((const ExprNode&) *this)=value; }
 
+	/** Create an equality constraint x=value. */
 	const ExprCtr& operator=(const IntervalMatrix& value) const  { return ((const ExprNode&) *this)=value; }
+
+	/** Create an inequality constraint x<=value. */
+	const ExprCtr& operator<=(const Interval& value) const { return ((const ExprNode&) *this)<=value; }
+
+	/** Create an inequality constraint x>=value. */
+	const ExprCtr& operator>=(const Interval& value) const { return ((const ExprNode&) *this)>=value; }
+
+	/** Create an inequality constraint x<value. */
+	const ExprCtr& operator<(const Interval& value) const { return ((const ExprNode&) *this)<value; }
+
+	/** Create an inequality constraint x>value. */
+	const ExprCtr& operator>(const Interval& value) const { return ((const ExprNode&) *this)>value; }
 
 	mutable ExprSymbol* symbol;
 };
