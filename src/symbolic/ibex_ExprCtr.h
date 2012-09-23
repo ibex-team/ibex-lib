@@ -58,6 +58,14 @@ inline const ExprCtr& ExprNode::operator=(const Interval& value) const {
   return *new ExprCtr(value.lb()==0 && value.ub()==0? *this : *this-value, EQ);
 }
 
+inline const ExprCtr& ExprNode::operator=(const IntervalVector& value) const {
+  return *new ExprCtr(value.is_zero()? *this : *this-value, EQ);
+}
+
+inline const ExprCtr& ExprNode::operator=(const IntervalMatrix& value) const {
+  return *new ExprCtr(value.is_zero()? *this : *this-value, EQ);
+}
+
 inline const ExprCtr& ExprNode::operator<=(const ExprNode& right) const {
   return *new ExprCtr(right.is_zero()? *this : *this-right, LEQ);
 }

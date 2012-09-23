@@ -95,6 +95,12 @@ public:
 	/** Create an equality constraint expr=value. */
 	const ExprCtr& operator=(const Interval& value) const;
 
+	/** Create an equality constraint expr=value. */
+	const ExprCtr& operator=(const IntervalVector& value) const;
+
+	/** Create an equality constraint expr=value. */
+	const ExprCtr& operator=(const IntervalMatrix& value) const;
+
 	/** Create an inequality constraint expr<=expr. */
 	const ExprCtr& operator<=(const ExprNode& right) const;
 
@@ -159,6 +165,12 @@ public:
 
 	/** Create an equality constraint expr[i]=value. */
 	const ExprCtr& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+
+	/** Create an equality constraint expr[i]=value. */
+	const ExprCtr& operator=(const IntervalVector& value) const  { return ((ExprNode&) *this)=value; }
+
+	/** Create an equality constraint expr[i]=value. */
+	const ExprCtr& operator=(const IntervalMatrix& value) const  { return ((ExprNode&) *this)=value; }
 
 	/** The sub-expression */
 	const ExprNode& expr;
@@ -335,6 +347,12 @@ public:
 	/** Create an equality constraint apply=value. */
 	const ExprCtr& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
 
+	/** Create an equality constraint apply=value. */
+	const ExprCtr& operator=(const IntervalVector& value) const  { return ((ExprNode&) *this)=value; }
+
+	/** Create an equality constraint apply=value. */
+	const ExprCtr& operator=(const IntervalMatrix& value) const  { return ((ExprNode&) *this)=value; }
+
 	/** Accept an #ibex::ExprVisitor visitor. */
 	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
 
@@ -380,6 +398,12 @@ public:
 	/** Create an equality constraint symbol=value. */
 	const ExprCtr& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
 
+	/** Create an equality constraint symbol=value. */
+	const ExprCtr& operator=(const IntervalVector& value) const  { return ((ExprNode&) *this)=value; }
+
+	/** Create an equality constraint symbol=value. */
+	const ExprCtr& operator=(const IntervalMatrix& value) const  { return ((ExprNode&) *this)=value; }
+
 	/** Accept an #ibex::ExprVisitor visitor. */
 	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
 
@@ -419,13 +443,13 @@ private:
  */
 class Variable {
 public:
-	Variable(const Dim& dim=Dim::scalar()) : symbol(new ExprSymbol(dim)) { }
+	explicit Variable(const Dim& dim=Dim::scalar()) : symbol(new ExprSymbol(dim)) { }
 
-	Variable(const char* name) : symbol(new ExprSymbol(name,Dim::scalar())) { }
+	explicit Variable(const char* name) : symbol(new ExprSymbol(name,Dim::scalar())) { }
 
 	Variable(const Dim& dim, const char* name) : symbol(new ExprSymbol(name, dim)) { }
 
-	Variable(int n) : symbol(new ExprSymbol(Dim::col_vec(n))) { }
+	explicit Variable(int n) : symbol(new ExprSymbol(Dim::col_vec(n))) { }
 
 	Variable(int n, const char* name) : symbol(new ExprSymbol(name, Dim::col_vec(n))) { }
 
@@ -449,7 +473,15 @@ public:
 		return *symbol;
 	}
 
-	const ExprIndex& operator[](int index) { return (*symbol)[index]; }
+	const ExprIndex& operator[](int index) { return ((const ExprNode&) *this)[index]; }
+
+	const ExprCtr& operator=(const ExprNode& expr) const { return ((const ExprNode&) *this)=expr; }
+
+	const ExprCtr& operator=(const Interval& value) const { return ((const ExprNode&) *this)=value; }
+
+	const ExprCtr& operator=(const IntervalVector& value) const  { return ((const ExprNode&) *this)=value; }
+
+	const ExprCtr& operator=(const IntervalMatrix& value) const  { return ((const ExprNode&) *this)=value; }
 
 	mutable ExprSymbol* symbol;
 };
@@ -558,6 +590,12 @@ public:
 	/** Create an equality constraint expr1+expr2=value. */
 	const ExprCtr& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
 
+	/** Create an equality constraint expr1+expr2=value. */
+	const ExprCtr& operator=(const IntervalVector& value) const  { return ((ExprNode&) *this)=value; }
+
+	/** Create an equality constraint expr1+expr2=value. */
+	const ExprCtr& operator=(const IntervalMatrix& value) const  { return ((ExprNode&) *this)=value; }
+
 	/** Accept an #ibex::ExprVisitor visitor. */
 	virtual void acceptVisitor(ExprVisitor& v) const {
 		v.visit(*this); };
@@ -583,6 +621,12 @@ public:
 	/** Create an equality constraint expr1*expr2=value. */
 	const ExprCtr& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
 
+	/** Create an equality constraint expr1*expr2=value. */
+	const ExprCtr& operator=(const IntervalVector& value) const  { return ((ExprNode&) *this)=value; }
+
+	/** Create an equality constraint expr1*expr2=value. */
+	const ExprCtr& operator=(const IntervalMatrix& value) const  { return ((ExprNode&) *this)=value; }
+
 	/** Accept an #ibex::ExprVisitor visitor. */
 	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
 
@@ -607,6 +651,12 @@ public:
 
 	/** Create an equality constraint expr1+expr2=value. */
 	const ExprCtr& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+
+	/** Create an equality constraint expr1+expr2=value. */
+	const ExprCtr& operator=(const IntervalVector& value) const  { return ((ExprNode&) *this)=value; }
+
+	/** Create an equality constraint expr1+expr2=value. */
+	const ExprCtr& operator=(const IntervalMatrix& value) const  { return ((ExprNode&) *this)=value; }
 
 	/** Accept an #ibex::ExprVisitor visitor. */
 	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
@@ -746,6 +796,12 @@ public:
 	/** Create an equality constraint (-expr)=value. */
 	const ExprCtr& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
 
+	/** Create an equality constraint (-expr)=value. */
+	const ExprCtr& operator=(const IntervalVector& value) const  { return ((ExprNode&) *this)=value; }
+
+	/** Create an equality constraint (-expr)=value. */
+	const ExprCtr& operator=(const IntervalMatrix& value) const  { return ((ExprNode&) *this)=value; }
+
 	/** Accept an #ibex::ExprVisitor visitor. */
 	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
 
@@ -767,6 +823,12 @@ public:
 
 	/** Create an equality constraint expr'=value. */
 	const ExprCtr& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+
+	/** Create an equality constraint expr'=value. */
+	const ExprCtr& operator=(const IntervalVector& value) const  { return ((ExprNode&) *this)=value; }
+
+	/** Create an equality constraint expr'=value. */
+	const ExprCtr& operator=(const IntervalMatrix& value) const  { return ((ExprNode&) *this)=value; }
 
 	/** Accept an #ibex::ExprVisitor visitor. */
 	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
