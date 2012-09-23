@@ -26,6 +26,16 @@ public:
 	IntervalMatrixArray(int n, int nb_rows, int nb_cols);
 
 	/**
+	 * \brief Copy a.
+	 */
+	IntervalMatrixArray(const IntervalMatrixArray& a);
+
+	/**
+	 * \brief Assign a to *this.
+	 */
+	IntervalMatrixArray& operator=(const IntervalMatrixArray& a);
+
+	/**
 	 * \brief Delete this.
 	 */
 	~IntervalMatrixArray();

@@ -126,7 +126,7 @@ public:
 		case Dim::ROW_VECTOR:
 		case Dim::COL_VECTOR:   v()=d.v(); break;
 		case Dim::MATRIX:       m()=d.m(); break;
-		case Dim::MATRIX_ARRAY: assert(false); /* forbidden  */ break;
+		case Dim::MATRIX_ARRAY: ma()=d.ma(); break;
 		}
 		return *this;
 	}

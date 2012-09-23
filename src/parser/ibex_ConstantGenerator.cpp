@@ -115,7 +115,7 @@ void ConstantGenerator::visit(const ExprUnaryOp& u) {
 void ConstantGenerator::visit(const ExprVector& e) {
 	// TODO: test
 	Domain* d= new Domain(e.dim);
-	assert(d->dim.is_vector() || d->dim.type()==Dim::MATRIX);
+//	assert(d->dim.is_vector() || d->dim.type()==Dim::MATRIX);
 	// we forbid a "vector operation" between constants
 	// to yield an array of matrices
 
@@ -124,7 +124,8 @@ void ConstantGenerator::visit(const ExprVector& e) {
 		NOT_INF;
 		const Domain* di=(const Domain*) e.arg(i).deco.tmp;
 		if (d->dim.is_vector()) d->v()[i]=di->i();
-		else d->m()[i]=di->v();
+		else if (d->dim.type()==Dim::MATRIX) d->m()[i]=di->v();
+		else d->ma()[i]=di->m();
 		delete di;
 	}
 

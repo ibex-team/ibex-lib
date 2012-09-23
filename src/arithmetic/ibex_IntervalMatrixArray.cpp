@@ -22,6 +22,26 @@ IntervalMatrixArray::IntervalMatrixArray(int n, int nb_rows, int nb_cols) : n(n)
 		array[i].resize(nb_rows,nb_cols);
 }
 
+IntervalMatrixArray::IntervalMatrixArray(const IntervalMatrixArray& a) : n(a.n) {
+	array = new IntervalMatrix[n];
+	for (int i=0; i<n; i++) {
+		array[i]=a[i]; // array[i] will be resized
+	}
+}
+
+IntervalMatrixArray& IntervalMatrixArray::operator=(const IntervalMatrixArray& a) {
+	if (size()!=a.size()) {
+		delete[] array;
+		array = new IntervalMatrix[a.size()];
+		n = a.size();
+	}
+
+	for (int i=0; i<a.size(); i++) {
+		array[i]=a[i]; // array[i] will be resized
+	}
+	return *this;
+}
+
 IntervalMatrixArray::~IntervalMatrixArray() {
 	delete[] array;
 }
