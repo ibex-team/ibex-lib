@@ -85,6 +85,7 @@ def configure (conf):
 		conf.env.GAOL = "gaol-3.1.1"
 
 		conf.load ("compiler_cxx compiler_cc")
+		conf.switch_to_32bits()
 
 		if not (conf.check_cxx (header_name="gdtoa.h", mandatory=False) and
 			conf.check_cxx (lib="gdtoa", mandatory=False)):
@@ -122,8 +123,8 @@ def configure (conf):
 			)
 
 		for known, macro in (
-			("i.86-linux$", 	"IX86_LINUX"),
-			("i.86-cygwin$",	"IX86_CYGWIN"),
+			(".*-linux$", 	"IX86_LINUX"),
+			(".*-cygwin$",	"IX86_CYGWIN"),
 			("sparc.*-sunos$",	"SPARC_SOLARIS"),
 			("powerpc-",		"POWERPC_UNIX"),
 		):
@@ -217,7 +218,8 @@ def configure (conf):
 		conf.env.GDTOA = gdtoa_name
 		gdtoa_includes = conf.env.GDTOA
 
-		conf.load ("compiler_cc")
+		conf.load ("compiler_cxx compiler_cc")
+		conf.switch_to_32bits()
 
 		conf.define ("INFNAN_CHECK", 1)
 		conf.define ("SET_INEXACT", 1)
@@ -233,7 +235,8 @@ def configure (conf):
 		conf.setenv ("mathlib")
 		conf.env.MATHLIB = "mathlib-2.0.0"
 		
-		conf.load ("compiler_cc")
+		conf.load ("compiler_cxx compiler_cc")
+		conf.switch_to_32bits()
 
 		conf.env.append_unique ("INCLUDES", os.path.join (conf.env.MATHLIB, "src"))
 

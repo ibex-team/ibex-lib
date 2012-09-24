@@ -4,6 +4,7 @@
 import datetime, os
 
 from distutils.version import LooseVersion
+from waflib import Logs
 
 # the following two variables are used by the target "waf dist"
 VERSION=datetime.date.today().strftime ("%Y%m%d")
@@ -22,12 +23,32 @@ def options (opt):
 			help = "location of the Profil/Bias lib")
 	opt.add_option ("--with-soplex", action="store", type="string", dest="SOPLEX_PATH",
 			help = "location of the Soplex lib")
-		
+
 
 def configure (conf):
+
+	def switch_to_32bits():
+		env = conf.env
+		if env.DEST_CPU == "x86_64":
+			if env.COMPILER_CC == "gcc" and env.COMPILER_CXX == "g++":
+				# fall-back to 32bits
+				Logs.pprint ("YELLOW", "Warning: x86_64 is not supported, will build for i386 instead")
+				
+				for var in ("CFLAGS", "LINKFLAGS", "CXXFLAGS"):
+					env.append_unique (var, "-m32")
+
+				conf.check_cc (cflags = "-m32")
+				conf.check_cxx (cxxflags = "-m32")
+			else:
+				conf.fatal ("64bit platform are not supported")
+
+	conf.switch_to_32bits = switch_to_32bits
+
+
 	env = conf.env
 	conf.load ('compiler_cxx compiler_cc bison')
 	conf.load ('flex', '.')
+	conf.switch_to_32bits()
 
 	def find_lib (prefix):
 
