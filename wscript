@@ -73,51 +73,6 @@ def configure (conf):
 
 		return os.path.abspath (os.path.expanduser (path)) if path else find_lib (prefix)
 
-	# check which interval lib is requested
-	"""
-	use_gaol = conf.options.GAOL_PATH != None
-	use_bias = conf.options.BIAS_PATH != None
-	path     = None
-
-	if use_gaol and use_bias:
-		conf.fatal ("cannot use --with-gaol and --with-bias together")
-
-	# try with the Gaol lib first
-	if not use_bias:
-		#TODO: test it
-		path = candidate_lib_path ("GAOL_PATH", "gaol-")
-		if path:
-			use_gaol = True
-			env["INTERVAL_LIB"] = "GAOL"
-
-			
-			conf.check_cxx (header_name	= ["gaol.h", "gaol_interval.h"],
-					includes	= os.path.join (path, "include", "gaol"),
-					uselib_store	= "interval")
-
-			conf.check_cxx (lib		= ["gaol", "ultim", "gdtoa"],
-					libpath		= os.path.join (path, "lib"),
-					uselib_store	= "interval")
-
-	
-	# then try with the Profil/Bias lib
-	if not use_gaol:
-		path = candidate_lib_path ("BIAS_PATH", "Profil-")
-		if path:
-			use_bias = True
-			env["INTERVAL_LIB"] = "BIAS"
-
-			conf.check_cxx (header_name	= "BIAS/BiasF.h",
-					includes	= os.path.join (path, "include"),
-					uselib_store	= "interval")
-
-			conf.check_cxx (lib		= ["Profil", "Bias", "lr"],
-					libpath		= os.path.join (path, "lib"),
-					uselib_store	= "interval")
-	
-	if not (use_gaol or use_bias):
-		conf.fatal ("cannot find any interval library, please use --with-bias=BIAS_PATH or --with-gaol=GAOL_PATH")
-	"""
 	# Soplex lib
 	path = candidate_lib_path ("SOPLEX_PATH", "soplex-")
 	if path:
