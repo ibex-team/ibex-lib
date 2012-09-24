@@ -2,10 +2,24 @@
 # encoding: utf-8
 
 def build (bld):
+	
+#	bld.program (
+#		target = "optimizer02",
+#		source = "optimizer02.cpp",
+#		use = "ibex",
+#	)
 
-	bld.program (
-		target = "optimizer02",
-		source = "optimizer02.cpp",
-		use = "ibex",
-	)
+	
+	targets = [n.name[:-4] for n in bld.path.ant_glob("*.cpp")]
 
+	# broken targets
+	for n in "arith02 ctc02 optimizer04 symb01".split():
+		targets.remove (n)
+
+	for t in targets:
+
+		bld.program (
+			target = t,
+			source = "%s.cpp" % t,
+			use = "ibex",
+		)
