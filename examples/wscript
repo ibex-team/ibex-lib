@@ -5,8 +5,7 @@ def build (bld):
 
 	bld.program (
 		target = "optimizer02",
+		source = "optimizer02.cpp",
 		use = "ibex",
-		cxxflags = "-O3 -DNDEBUG -Wno-deprecated",
-		source = "optimizer02.cpp"
 	)
 

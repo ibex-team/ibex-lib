@@ -50,6 +50,13 @@ def configure (conf):
 	conf.load ('flex', '.')
 	conf.switch_to_32bits()
 
+	# optimised compilation flags
+	conf.define ("NDEBUG", 1)
+	for flag in ("-O3", "-Wno-deprecated"):
+		if conf.check_cxx (cxxflags = flag, mandatory = False):
+			env.append_unique ("CXXFLAGS", flag)
+
+
 	def find_lib (prefix):
 
 		parent_dir = os.path.abspath ("..")
