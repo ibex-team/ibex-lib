@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # encoding: utf-8
 
-import shutil
+import shutil, os
 
 JAVA_PACKAGE = "ibex"
 
@@ -104,6 +104,8 @@ def build (bld):
 		include_nodes = list (t.inputs) + t.outputs
 
 		for nodes, path in ((include_nodes, "include"),(lib_nodes, "lib")):
+			if not os.path.isdir (path):
+				os.mkdir (path)
 			for n in nodes:
-				shutil.copy (n.abspath(), path)
+				shutil.copy (n.abspath(), os.path.join (path, n.name))
 
