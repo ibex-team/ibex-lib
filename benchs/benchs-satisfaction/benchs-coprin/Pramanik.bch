@@ -1,0 +1,24 @@
+//Time of Generation:0.156
+Constants
+
+f0 in 1.7461756494150842271;
+f1 in 2.0364691127919609051;
+f2 in 2.2390977868265978920;
+f3 in 2.4600678409809344550;
+y0 in 1.3954170041747090114;
+y1 in 1.7444828545735749268;
+y2 in 2.0656234369405315689;
+y3 in 2.4600678478912500533;
+
+Variables
+
+x1 in [0.06,1];
+x2 in [0.06,1];
+x3 in [0.06,1];
+
+Constraints
+//Original System
+-(-(x1*(-x3 + x2*cos(y1))*(-x3 + x2*sin(f1))) + x1*(1 + x2*cos(f1))*(-x3 + x2*sin(y1)))^2 + ((x2*(-cos(f0) + cos(f1)) - x2*x3*(-sin(f0) + sin(f1)) - x1*(-x3 + x2*sin(f1)))*(-x3 + x2*sin(y1)) - (sin(f1)*x2 - x3)*(x1*x3 + x2*cos(y0) - x2*cos(y1) + x2*(-x1 + x3)*sin(y0) - x2*x3*sin(y1)))^2 + (-((-1 + x2*cos(y1))*(x2*(-cos(f0) + cos(f1)) - x2*x3*(-sin(f0) + sin(f1)) - x1*(-x3 + x2*sin(f1)))) + (1 + x2*cos(f1))*(x1*x3 + x2*cos(y0) - x2*cos(y1) + x2*(-x1 + x3)*sin(y0) - x2*x3*sin(y1)))^2 = 0;
+-(-(x1*(-x3 + x2*cos(y2))*(-x3 + x2*sin(f2))) + x1*(1 + x2*cos(f2))*(-x3 + x2*sin(y2)))^2 + ((x2*(-cos(f0) + cos(f2)) - x2*x3*(-sin(f0) + sin(f2)) - x1*(-x3 + x2*sin(f2)))*(-x3 + x2*sin(y2)) - (sin(f2)*x2 - x3)*(x1*x3 + x2*cos(y0) - x2*cos(y2) + x2*(-x1 + x3)*sin(y0) - x2*x3*sin(y2)))^2 + (-((-1 + x2*cos(y2))*(x2*(-cos(f0) + cos(f2)) - x2*x3*(-sin(f0) + sin(f2)) - x1*(-x3 + x2*sin(f2)))) + (1 + x2*cos(f2))*(x1*x3 + x2*cos(y0) - x2*cos(y2) + x2*(-x1 + x3)*sin(y0) - x2*x3*sin(y2)))^2 = 0;
+-(-(x1*(-x3 + x2*cos(y3))*(-x3 + x2*sin(f3))) + x1*(1 + x2*cos(f3))*(-x3 + x2*sin(y3)))^2 + ((x2*(-cos(f0) + cos(f3)) - x2*x3*(-sin(f0) + sin(f3)) - x1*(-x3 + x2*sin(f3)))*(-x3 + x2*sin(y3)) - (sin(f3)*x2 - x3)*(x1*x3 + x2*cos(y0) - x2*cos(y3) + x2*(-x1 + x3)*sin(y0) - x2*x3*sin(y3)))^2 + (-((-1 + x2*cos(y3))*(x2*(-cos(f0) + cos(f3)) - x2*x3*(-sin(f0) + sin(f3)) - x1*(-x3 + x2*sin(f3)))) + (1 + x2*cos(f3))*(x1*x3 + x2*cos(y0) - x2*cos(y3) + x2*(-x1 + x3)*sin(y0) - x2*x3*sin(y3)))^2 = 0;
+end

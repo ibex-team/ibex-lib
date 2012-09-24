@@ -1,0 +1,15 @@
+//Time of Generation:0.187
+Variables
+
+x in [-10,10];
+y in [-10,10];
+z in [-10,10];
+t in [-10,10];
+
+Constraints
+//Original System
+-2*x + 2*t*x*y - z + y^2*z = 0;
+2 + 4*x^2 - 10*t*y + 4*t*x^2*y - 10*y^2 + 2*t*y^3 + 4*x*z - x^3*z + 4*x*y^2*z = 0;
+-x + t^2*x - 2*z + 2*t*y*z = 0;
+2 - 10*t^2 - 10*t*y + 2*t^3*y + 4*x*z + 4*t^2*x*z + 4*z^2 + 4*t*y*z^2 - x*z^3 = 0;
+end
