@@ -109,7 +109,7 @@ def configure (conf):
 	env.append_unique ("BISONFLAGS", ["--name-prefix=ibex", "--report=all", "--file-prefix=parser"])
 	env.append_unique ("FLEXFLAGS", "-Pibex")
 
-	conf.recurse ("3rd")
+	conf.recurse ("3rd src")
 
 def build (bld):
 	bld.recurse ("src examples 3rd")

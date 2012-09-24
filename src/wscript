@@ -5,6 +5,9 @@ import shutil
 
 JAVA_PACKAGE = "ibex"
 
+def configure (conf):
+	conf.env.append_unique ("INCLUDES", ["../src/%s" % p for p in 
+		". arithmetic bisector combinatorial contractor function numeric parser strategy symbolic tools".split()])
 
 def build (bld):
 
@@ -82,7 +85,6 @@ def build (bld):
 	tg_ibex = bld.stlib (
 		target = "ibex",
 		use  = "soplex interval JAVA",
-		includes = ". arithmetic bisector combinatorial contractor function numeric parser strategy symbolic tools",
 		cxxflags = "-O3 -DNDEBUG -Wno-deprecated",
 		source = ibex_src
 	)
