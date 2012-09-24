@@ -101,7 +101,7 @@ def build (bld):
 		lib_nodes = tg_ibex.tasks[-1].outputs
 
 		t = tg_ibex_h.tasks[0]
-		include_nodes = list (t.inputs) + t.outputs
+		include_nodes = list (t.inputs) + t.outputs + [bld.path.find_resource ("src/arithmetic/ibex_gaol_Interval.h_")]
 
 		for nodes, path in ((include_nodes, "include"),(lib_nodes, "lib")):
 			if not os.path.isdir (path):
