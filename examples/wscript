@@ -5,7 +5,7 @@ def build (bld):
 
 	bld.program (
 		target = "optimizer02",
-		use = "ibex soplex interval jni gaol mathlib gdtoa ultim",
+		use = "ibex",
 		cxxflags = "-O3 -DNDEBUG -Wno-deprecated",
 		source = "optimizer02.cpp"
 	)

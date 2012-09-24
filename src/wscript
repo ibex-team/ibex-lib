@@ -84,7 +84,7 @@ def build (bld):
 
 	tg_ibex = bld.stlib (
 		target = "ibex",
-		use  = "soplex interval JAVA",
+		use  = "JAVA",
 		cxxflags = "-O3 -DNDEBUG -Wno-deprecated",
 		source = ibex_src
 	)

@@ -78,13 +78,14 @@ def configure (conf):
 	if path:
 		conf.msg ("Candidate directory for lib Soplex", path)
 
-		conf.check_cxx (header_name	= "soplex.h",
-				includes	= os.path.join (path, "src"),
-				uselib_store	= "soplex")
+		env.append_unique ("INCLUDES",  os.path.join (path, "src"))
+		env.append_unique ("LIBPATH", 	os.path.join (path, "lib"))
 
-		conf.check_cxx (lib		= ["soplex", "z"],
-				libpath		= os.path.join (path, "lib"),
-				uselib_store	= "soplex")
+		conf.check_cxx (header_name	= "soplex.h")
+		conf.check_cxx (lib		= "z")
+		conf.check_cxx (lib		= "soplex")
+
+		env.append_unique ("LIB", ["soplex", "z"])
 	else:
 		conf.fatal ("cannot find the Soplex library, please use --with-soplex=SOPLEX_PATH")
 
@@ -109,6 +110,7 @@ def configure (conf):
 	env.append_unique ("BISONFLAGS", ["--name-prefix=ibex", "--report=all", "--file-prefix=parser"])
 	env.append_unique ("FLEXFLAGS", "-Pibex")
 
+	conf.env.append_unique ("LIBPATH", ["3rd", "src"])
 	conf.recurse ("3rd src")
 
 def build (bld):

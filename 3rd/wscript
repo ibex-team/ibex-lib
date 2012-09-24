@@ -20,8 +20,6 @@ def configure (conf):
 			for d in p
 		])
 
-	ibex_append_path ("LIBPATH", ".")
-
 	with_bias = conf.options.BIAS_PATH
 	with_gaol = conf.options.GAOL_PATH
 	def join (path, *k):
