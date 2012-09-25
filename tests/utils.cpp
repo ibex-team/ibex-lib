@@ -11,6 +11,20 @@
 
 #include "utils.h"
 #include <math.h>
+#include <sstream>
+
+bool TestIbex::sameExpr(const ExprNode& node, const char* expr) {
+	std::stringstream s;
+	s << node;
+	return strcmp(s.str().c_str(),expr)==0;
+}
+
+bool TestIbex::sameExpr(const ExprNode& node, const ExprNode& node2) {
+	std::stringstream s,s2;
+	s << node;
+	s2 << node2;
+	return strcmp(s.str().c_str(),s2.str().c_str())==0;
+}
 
 void TestIbex::check(double y_actual, double y_expected) {
 	TEST_ASSERT(!isnan(y_expected));

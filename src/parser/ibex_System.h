@@ -16,6 +16,10 @@
 
 namespace ibex {
 
+namespace parser {
+class MainGenerator;
+}
+
 class SystemFactory;
 
 /**
@@ -93,7 +97,7 @@ public:
 	 * The name of the goal variable is #goal_name.
 	 * </ul>
 	 */
-	System(const System& sys, copy_mode mode);
+	System(const System& sys, copy_mode mode=COPY);
 
 	/** \brief Delete *this. */
 	~System();
@@ -141,8 +145,14 @@ public:
 	static const char* goal_name;
 
 private:
+	friend class parser::MainGenerator;
+	//friend class SystemFactory;
 
 	void load(FILE* file);
+
+	// initialize f from the constraints in ctrs,
+	// once *all* the other fields are set (including vars and nb_ctr).
+	void init_f_from_ctrs();
 };
 
 std::ostream& operator<<(std::ostream&, const System&);

@@ -27,6 +27,7 @@ public:
 		TEST_ADD(TestFunction::separate);
 		TEST_ADD(TestFunction::used);
 		TEST_ADD(TestFunction::used02);
+		TEST_ADD(TestFunction::numctr01);
 	}
 
 	// an uninitialized function must be deletable
@@ -35,10 +36,15 @@ public:
 	void build01();
 
 	void add_symbol();
+
 	void copy();
+
 	void separate();
+
 	void used();
 	void used02();
+
+	void numctr01();
 };
 
 } // end namespace

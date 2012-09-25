@@ -15,6 +15,7 @@
 #include "cpptest.h"
 #include "ibex_Interval.h"
 #include "ibex_IntervalVector.h"
+#include "ibex_Expr.h"
 
 using namespace ibex;
 
@@ -22,6 +23,8 @@ using namespace ibex;
 
 class TestIbex : public Test::Suite {
 public:
+	bool sameExpr(const ExprNode& node, const char* expr);
+	bool sameExpr(const ExprNode& node, const ExprNode& node2);
 	void check(double y_actual, double y_expected);
 	void check(const Interval& y_actual, const Interval& y_expected);
 	void check(const IntervalVector& y_actual, const IntervalVector& y_expected);

@@ -19,19 +19,6 @@ using namespace std;
 
 namespace ibex {
 
-static bool sameExpr(const ExprNode& node, const char* expr) {
-	std::stringstream s;
-	s << node;
-	return strcmp(s.str().c_str(),expr)==0;
-}
-
-static bool sameExpr(const ExprNode& node, const ExprNode& node2) {
-	std::stringstream s,s2;
-	s << node;
-	s2 << node2;
-	return strcmp(s.str().c_str(),s2.str().c_str())==0;
-}
-
 void TestParser::var01() {
 	System sys("quimper/var01.qpr");
 	TEST_ASSERT(sys.func.is_empty());
@@ -46,7 +33,8 @@ void TestParser::var01() {
 	TEST_ASSERT(&sys.f.symbol(0) == &sys.vars[0]);
 	TEST_ASSERT(sameExpr(sys.f.expr(),"x"));
 	TEST_ASSERT(sys.ctrs.size()==1);
-	TEST_ASSERT(&sys.ctrs[0].f==&sys.f);
+	TEST_ASSERT(sys.ctrs[0].f.nb_symbols()==1);
+	TEST_ASSERT(sameExpr(sys.ctrs[0].f.expr(),"x"));
 	TEST_ASSERT(sys.ctrs[0].op==GEQ);
 }
 
@@ -122,6 +110,24 @@ void TestParser::const06() {
 	}
 }
 
+void TestParser::const07() {
+	try {
+		System sys("quimper/const07.qpr");
+		double _m1[6][2]={{0,0},{1,1},{2,2},
+				{3,3},{4,4},{5,5}};
+		IntervalVector box1(6,_m1);
+		double _m2[6][2]={{6,6},{7,7},{8,8},
+				{9,9},{10,10},{11,11}};
+		IntervalVector box2(6,_m2);
+		check(sys.box.subvector(0,5), box1);
+		check(sys.box.subvector(6,11), box2);
+
+	} catch(SyntaxError& e) {
+		cout << e << endl;
+		TEST_ASSERT(false);
+	}
+}
+
 void TestParser::func01() {
 	try {
 		System sys("quimper/func01.qpr");
@@ -141,7 +147,7 @@ void TestParser::func01() {
 		TEST_ASSERT(sameExpr(sys.func[0].expr(),"x2"));
 		TEST_ASSERT(sameExpr(sys.f.expr(),"(x-foo(x))"));
 		TEST_ASSERT(sys.ctrs.size()==1);
-		TEST_ASSERT(&sys.ctrs[0].f==&sys.f);
+		TEST_ASSERT(sameExpr(sys.ctrs[0].f.expr(),sys.f.expr()));
 		TEST_ASSERT(sys.ctrs[0].op==EQ);
 	} catch(SyntaxError& e) {
 		cout << e << endl;
@@ -168,7 +174,7 @@ void TestParser::ponts() {
 	TEST_ASSERT(sys.ctrs.size()==30);
 
 	for (int i=0; i<30; i++) {
-		TEST_ASSERT(&(sys.ctrs[i].f)==&(sys.f[i]));
+		TEST_ASSERT(sameExpr(sys.ctrs[i].f.expr(),sys.f[i].expr()));
 		TEST_ASSERT(sys.ctrs[i].op==EQ);
 	}
 }
@@ -185,7 +191,7 @@ void TestParser::choco01() {
 	TEST_ASSERT(sys.f.nb_symbols()==2);
 	TEST_ASSERT(sameExpr(sys.f.expr(),"({1}+{0})"));
 	TEST_ASSERT(sys.ctrs.size()==1);
-	TEST_ASSERT(&(sys.ctrs[0].f)==&(sys.f));
+	TEST_ASSERT(sameExpr(sys.ctrs[0].f.expr(),sys.f.expr()));
 }
 
 void TestParser::error01() {

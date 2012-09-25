@@ -508,6 +508,21 @@ public:
 	/** Create an inequality constraint x>value. */
 	const ExprCtr& operator>(const Interval& value) const { return ((const ExprNode&) *this)>value; }
 
+	/** Create an equality constraint x=value. */
+	const ExprCtr& operator=(const ExprNode& value) const { return ((const ExprNode&) *this)=value; }
+
+	/** Create an inequality constraint x<=value. */
+	const ExprCtr& operator<=(const ExprNode& value) const { return ((const ExprNode&) *this)<=value; }
+
+	/** Create an inequality constraint x>=value. */
+	const ExprCtr& operator>=(const ExprNode& value) const { return ((const ExprNode&) *this)>=value; }
+
+	/** Create an inequality constraint x<value. */
+	const ExprCtr& operator<(const ExprNode& value) const { return ((const ExprNode&) *this)<value; }
+
+	/** Create an inequality constraint x>value. */
+	const ExprCtr& operator>(const ExprNode& value) const { return ((const ExprNode&) *this)>value; }
+
 	mutable ExprSymbol* symbol;
 };
 

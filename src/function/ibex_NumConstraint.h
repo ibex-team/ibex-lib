@@ -34,7 +34,7 @@ public:
 	/**
 	 * \brief Build a constraint.
 	 */
-	NumConstraint(Function& f, CmpOp op=EQ);
+	NumConstraint(Function& f, CmpOp op=EQ, bool own_f=false);
 
 	/**
 	 * \brief Build a constraint (f(x) op 0).
@@ -102,7 +102,7 @@ std::ostream& operator<<(std::ostream&, const NumConstraint&);
  	 	 	 	 	 	 	 inline implementation
   ============================================================================*/
 
-inline NumConstraint::NumConstraint(Function& f, CmpOp op) : f(f), op(op), own_f(false) { }
+inline NumConstraint::NumConstraint(Function& f, CmpOp op, bool own_f) : f(f), op(op), own_f(own_f) { }
 
 inline NumConstraint::NumConstraint(const ExprSymbol& x, const ExprCtr& c) : f(*new Function(x,c.e)), op(c.op), own_f(true) { }
 

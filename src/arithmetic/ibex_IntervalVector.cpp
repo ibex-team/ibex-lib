@@ -36,8 +36,12 @@ IntervalVector::IntervalVector(const IntervalVector& x) : n(x.n), vec(new Interv
 }
 
 IntervalVector::IntervalVector(int n, double bounds[][2]) : n(n), vec(new Interval[n]) {
-	for (int i=0; i<n; i++)
-		vec[i]=Interval(bounds[i][0],bounds[i][1]);
+	if (bounds==0) // probably, the user called IntervalVector(n,0) and 0 is interpreted as NULL!
+		for (int i=0; i<n; i++)
+			vec[i]=Interval::ZERO;
+	else
+		for (int i=0; i<n; i++)
+			vec[i]=Interval(bounds[i][0],bounds[i][1]);
 }
 
 IntervalVector::IntervalVector(const Vector& x) : n(x.size()), vec(new Interval[n]) {

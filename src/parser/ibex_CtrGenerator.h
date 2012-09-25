@@ -31,9 +31,7 @@ class P_ConstraintLoop;
 
 class CtrGenerator {
 public:
-	void generate(const Array<const ExprSymbol>& src_vars, const Array<const ExprSymbol>& res_vars,
-			const P_ConstraintList& src,
-			std::vector<std::pair<const ExprNode*, CmpOp> >& dest);
+	void generate(const Array<const ExprSymbol>& src_vars, const P_ConstraintList& src, std::vector<NumConstraint*>& dest);
 
 	void visit(const P_NumConstraint& c);
 	void visit(const P_OneConstraint& c);
@@ -44,7 +42,7 @@ public:
 protected:
 	const Array<const ExprSymbol>* src_vars;
 	const Array<const ExprSymbol>* res_vars;
-	std::vector<std::pair<const ExprNode*, CmpOp> >* ctrs;
+	std::vector<NumConstraint*>* ctrs;
 
 	std::stack<Scope> scopes;
 

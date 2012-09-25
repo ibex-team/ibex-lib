@@ -66,41 +66,36 @@ void MainGenerator::generate(const P_Source& source, System& result) {
 		// for the objective function (nodes cannot be shared by
 		// two different functions)
 		Array<const ExprSymbol> objvars(n);
-		for (int i=0; i<n; i++)
-			// TODO: should we remove eprs and sybs from the objective variables?
-			objvars.set_ref(i,ExprSymbol::new_(result.vars[i].name, result.vars[i].dim));
 
+		varcopy(result.vars, objvars); // TODO: should we remove eprs and sybs from the objective variables?
 		const ExprNode& goal=ExprGenerator(Scope()).generate(srcvars, objvars, *source.goal);
-		result.goal = new Function(objvars,goal,"goal");
+		result.goal = new Function(objvars, goal, "goal");
 	}
+
+	//================= generate the constraints =====================
+	// we cannot generate first the global function f and
+	// then each constraint with (f[i] op 0) because
+	// a constraint can be vector or matrix valued.
+	// so we do the contrary: we generate first the constraints,
+	// and build f with the components of all constraints' functions.
+
+	vector<NumConstraint*> ctrs; // tmp
+	CtrGenerator().generate(srcvars, *source.ctrs, ctrs);
+
+	int m=ctrs.size();
+	result.ctrs.resize(m);
+	i=0;
+	(int&) result.nb_ctr = 0;
+	for (vector<NumConstraint*>::const_iterator it=ctrs.begin(); it!=ctrs.end(); it++) {
+		result.ctrs.set_ref(i,**it);
+		i++;
+		((int&) result.nb_ctr) += (*it)->f.output_size();
+	}
+
 
 	//================= generate the global function =====================
 
-	vector<pair<const ExprNode*, CmpOp> > ctrs;
-
-	CtrGenerator().generate(srcvars, result.vars, *source.ctrs, ctrs);
-
-	int m=ctrs.size();
-
-	Array<const ExprNode> image(m);
-	i=0;
-
-	for (vector<pair<const ExprNode*, CmpOp> >::const_iterator it=ctrs.begin(); it!=ctrs.end(); it++) {
-		image.set_ref(i++,*(it->first));
-	}
-
-	result.f.init(result.vars,
-			m>1? ExprVector::new_(image,false) : image[0]);
-
-	//================= generate the constraints =====================
-	result.ctrs.resize(m);
-	i=0;
-	for (vector<pair<const ExprNode*, CmpOp> >::const_iterator it=ctrs.begin(); it!=ctrs.end(); it++) {
-		result.ctrs.set_ref(i,*new NumConstraint(result.f[i], it->second));
-		i++;
-	}
-
-	(int&) result.nb_ctr = m;
+	result.init_f_from_ctrs();
 }
 
 } // end namespace parser

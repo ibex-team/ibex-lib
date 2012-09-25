@@ -11,16 +11,11 @@
 
 #include "TestFunction.h"
 #include "ibex_Function.h"
+#include "ibex_NumConstraint.h"
 #include "ibex_Expr.h"
 #include <sstream>
 
 namespace ibex {
-
-static bool sameExpr(const ExprNode& node, const char* expr) {
-	std::stringstream s;
-	s << node;
-	return strcmp(s.str().c_str(),expr)==0;
-}
 
 void TestFunction::build01() {
 	delete new Function();
@@ -154,5 +149,11 @@ void TestFunction::used02() {
 	TEST_ASSERT(!f.used(11));
 }
 
+void TestFunction::numctr01() {
+	Variable x("x");
+	Variable y("y");
+	Function f(x,y,x+y);
+	NumConstraint c(f,EQ);
+}
 
 } // end namespace

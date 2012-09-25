@@ -18,6 +18,16 @@
 
 namespace ibex {
 
+
+/**
+ * \brief Deep copy of an array of variables.
+ *
+ * As for ExprCopy, the size of \a dest may be greater than \a src (but not smaller).
+ *
+ * Useful to duplicate functions, via #Copy.
+ */
+void varcopy(const Array<const ExprSymbol>& src, Array<const ExprSymbol>& dest);
+
 /**
  * \brief Duplicate an expression
  */

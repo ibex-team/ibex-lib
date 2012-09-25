@@ -51,22 +51,24 @@ System::System(const SystemFactory& fac) : nb_var(0) /* tmp */,
 		for (int j=0; j<nb; j++)
 			goal_vars.set_ref(j,ExprSymbol::new_(fac.vars[j]->name, fac.vars[j]->dim));
 
-		goal = new Function(goal_vars, ExprCopy().copy(fac.vars,goal_vars,*fac.goal));
+		goal = new Function(goal_vars, ExprCopy().copy(fac.vars, goal_vars, *fac.goal));
 	}
 
 	// =========== init f
 	Array<const ExprNode> y(nb_ctr);
+
 	for (int i=0; i<nb_ctr; i++) {
-		y.set_ref(i,ExprCopy().copy(fac.vars,vars,*fac.exprs[i]));
+		Array<const ExprSymbol> ctrvars(vars.size());
+		varcopy(vars,ctrvars);
+		const ExprNode& f_i=ExprCopy().copy(fac.vars, ctrvars, *fac.exprs[i]);
+		ctrs.set_ref(i,*new NumConstraint(* new Function(ctrvars,f_i), fac.ops[i], true));
 	}
-	f.init(vars, nb_ctr>1 ? ExprVector::new_(y,false) : y[0]);
 
 	// =========== resize the box
 	box.resize(nb_var);
 
-	// =========== init ctrs
-	for (int i=0; i<nb_ctr; i++)
-		ctrs.set_ref(i,*new NumConstraint(f[i], LEQ));
+	// =========== init main function
+	init_f_from_ctrs();
 }
 
 } // end namespace

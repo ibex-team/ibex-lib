@@ -423,6 +423,8 @@ private:
 
 	bool __all_symbols_scalar;                  // true if all symbols are scalar
 
+	Function& operator=(const Function&);       // forbidden
+
 public:
 
 	/**

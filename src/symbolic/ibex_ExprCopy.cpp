@@ -18,6 +18,12 @@
 
 namespace ibex {
 
+void varcopy(const Array<const ExprSymbol>& src, Array<const ExprSymbol>& dest) {
+	assert(src.size()<=dest.size());
+	for (int i=0; i<src.size(); i++) {
+		dest.set_ref(i,ExprSymbol::new_(src[i].name, src[i].dim));
+	}
+}
 
 const ExprNode& ExprCopy::copy(const Array<const ExprSymbol>& old_x, const Array<const ExprSymbol>& new_x, const ExprNode& y, bool fold_cst) {
 
