@@ -17,6 +17,9 @@ out = '__build__'
 def options (opt):
 	opt.load ("compiler_cxx compiler_cc javaw")
 
+	opt.add_option ("--with-debug",  action="store_true", dest="DEBUG",
+			help = "enable debugging")
+
 	opt.add_option ("--with-gaol",   action="store", type="string", dest="GAOL_PATH",
 			help = "location of the Gaol lib")
 	opt.add_option ("--with-bias",   action="store", type="string", dest="BIAS_PATH",
@@ -51,10 +54,14 @@ def configure (conf):
 	conf.switch_to_32bits()
 
 	# optimised compilation flags
-	conf.define ("NDEBUG", 1)
-	for flag in ("-O3", "-Wno-deprecated"):
-		if conf.check_cxx (cxxflags = flag, mandatory = False):
-			env.append_unique ("CXXFLAGS", flag)
+	if conf.options.DEBUG:
+		flags = "-O0 -g -pg -Wall -Wno-unknown-pragmas -fmessage-length=0"
+	else:
+		flags = "-O3 -Wno-deprecated"
+		conf.define ("NDEBUG", 1)
+	for f in flags.split():
+		if conf.check_cxx (cxxflags = f, mandatory = False):
+			env.append_unique ("CXXFLAGS", f)
 
 
 	def find_lib (prefix):
