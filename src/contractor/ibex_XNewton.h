@@ -43,7 +43,7 @@ class X_Newton : public Ctc {
   /** Creates the X_Newton
    *
    * \param sys The system (the extended system in case of optimization)
-   * \param ctc (Pre)contractor. (e.g., CtcHC4, NULL)
+   * \param ctc Internal contractor in the X-Newton loop (e.g., CtcHC4, NULL)
    * \param cpoints The way in that the corner is selected in linearization (X_INF, X_SUP, RANDOM, RANDOM_INV)
    * \param goal_ctr  (goal index for optimization, -1 for constraint solving)
    * \param goal   (goal function pointer for optimization, NULL for constraint solving)
@@ -53,7 +53,7 @@ class X_Newton : public Ctc {
    * \param lmode TAYLOR | HANSEN : linear relaxation method. 
    * \param max_iter_soplex : the maximum number of iterations for Soplex (default value 100)
    * \param max_diam_deriv : the maximum diameter of the derivatives for calling Soplex (default value 1.e5)
-   * \param max_diam_deriv : the maximum diameter of the variables for calling Soplex (default value 1.e4) Soplex may lose solutions when it is called with "big" domains.
+   * \param max_diam_box : the maximum diameter of the variables for calling Soplex (default value 1.e4) Soplex may lose solutions when it is called with "big" domains.
  */
 
 
@@ -82,7 +82,7 @@ class X_Newton : public Ctc {
   /** Apply contraction. **/
   virtual void contract(IntervalVector & box);
 
-  /** The pre-contractor */
+  /** The contractor calles in the XNewton loop*/
   Ctc* ctc;
 
   /** The system  (in optimization : the extended system) */
@@ -109,7 +109,7 @@ class X_Newton : public Ctc {
   //  Function* goal;          //  the goal function (in optimization only) 
   Function* goal;
 
-
+  std::vector<corner_point>& cpoints;
 
   protected:
 
@@ -131,10 +131,7 @@ class X_Newton : public Ctc {
 
   int max_iter_soplex;
 
-  bool** coin_ctrvar;
 
-
-  std::vector<corner_point> cpoints;
 
   /** The fixpoint ratio **/
   double ratio_fp;
