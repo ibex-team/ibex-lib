@@ -16,6 +16,8 @@
 
 namespace ibex {
 
+/**\ingroup arithmetic */
+/*@{*/
 
 /**
  * \brief Inner image of the addition
@@ -227,6 +229,8 @@ bool iproj_sqrt(const Interval& y, Interval& x);
 /*
  * TODO: to be continued....
  */
+
+/*@}*/
 
 /*================================== inline implementations ========================================*/
 

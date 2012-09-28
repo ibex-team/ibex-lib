@@ -1,6 +1,6 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_InnerProj.cpp
+// File        : Inner arithmetic functions
 // Author      : Gilles Chabert, Ignacio Araya
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file

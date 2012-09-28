@@ -17,6 +17,11 @@
 
 namespace ibex {
 
+/**
+ * \ingroup arithmetic
+ *
+ * \brief Array of interval matrices.
+ */
 class IntervalMatrixArray {
 
 public:
@@ -71,8 +76,16 @@ private:
 	int n;
 };
 
+/** \ingroup arithmetic */
+/*@{*/
+
+
+/**
+ * \brief Output an array of interval matrices.
+ */
 std::ostream& operator<<(std::ostream& os, const IntervalMatrixArray&);
 
+/*@}*/
 
 /*================================== inline implementations ========================================*/
 

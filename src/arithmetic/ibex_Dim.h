@@ -1,5 +1,5 @@
 /* ============================================================================
- * I B E X - Dimension of expressions (including symbols)
+ * I B E X - Dimension of expressions (symbols, etc.)
  * ============================================================================
  * Copyright   : Ecole des Mines de Nantes (FRANCE)
  * License     : This program can be distributed under the terms of the GNU LGPL.
@@ -21,7 +21,8 @@
 namespace ibex {
 
 /**
- * \ingroup symbolic
+ * \ingroup arithmetic
+ *
  * \brief Dimensions (of a mathematical value)
  *
  * All mathematical expressions are considered as 3-dimensional vectors.
@@ -100,7 +101,7 @@ public:
 	 */
 	Dim index_dim() const;
 
-	/** Compute the starting position of x[i] in a flat array
+	/* Compute the starting position of x[i] in a flat array
 	 * that starts from \a this_num, and representing all elements
 	 * x[i][j][k] (resp. x[i][j], x[i]) if *this is an array-of-matrix
 	 * (resp. matrix, vector), in lexicographic order.
@@ -129,6 +130,10 @@ public:
 
 };
 
+
+/** \ingroup arithmetic */
+/*@{*/
+
 /**
  * Return the dimension of a product (left*right)
  */
@@ -138,6 +143,8 @@ Dim mul_dim(const Dim& l, const Dim& r);
  * Return the dimension of a vector
  */
 Dim vec_dim(const Array<const Dim>& comp, bool in_a_row);
+
+/*@}*/
 
 /*================================== inline implementations ========================================*/
 
@@ -204,7 +211,8 @@ inline bool Dim::operator==(const Dim& d) const {
 	return dim1==d.dim1 && dim2==d.dim2 && dim3==d.dim3;
 }
 
-/** Streams out a dimension  */
+/** \ingroup arithmetic
+ * \brief Streams out a dimension */
 std::ostream& operator<<(std::ostream&, const Dim&);
 
 } // namespace ibex

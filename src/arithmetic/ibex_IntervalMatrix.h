@@ -22,6 +22,8 @@ namespace ibex {
 class IntervalMatrixArray; // declared only for friendship
 
 /**
+ * \ingroup arithmetic
+ *
  * \brief Interval matrix.
  */
 class IntervalMatrix {
@@ -297,6 +299,9 @@ private:
 	IntervalVector* M;
 };
 
+/** \ingroup arithmetic */
+/*@{*/
+
 /**
  * \brief Return -m.
  */
@@ -464,6 +469,8 @@ bool proj_mul(const IntervalMatrix& y, IntervalMatrix& x1, IntervalMatrix& x2, d
  * \brief Stream out a matrix.
  */
 std::ostream& operator<<(std::ostream& os, const IntervalMatrix&);
+
+/*@}*/
 
 /*================================== inline implementations ========================================*/
 

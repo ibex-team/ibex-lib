@@ -473,6 +473,9 @@ private:
 	Interval *vec;	   // vector of elements
 };
 
+/** \ingroup arithmetic */
+/*@{*/
+
 /**
  * \brief Return the infinite Hausdorff distance (i.e. the maximum of the distance componentwise).
  *
@@ -589,6 +592,7 @@ bool proj_mul(const Interval& y, IntervalVector& x1, IntervalVector& x2);
  */
 std::ostream& operator<<(std::ostream& os, const IntervalVector& x);
 
+/*@}*/
 
 /*============================================ inline implementation ============================================ */
 

@@ -151,6 +151,9 @@ private:
 	double *vec;	   // vector of elements
 };
 
+/** \ingroup arithmetic */
+/*@{*/
+
 /**
  * \brief -x.
  */
@@ -190,6 +193,8 @@ Vector abs(const Vector& x);
  * \brief Display the Vector \a x
  */
 std::ostream& operator<<(std::ostream& os, const Vector& x);
+
+/*@}*/
 
 /*================================== inline implementations ========================================*/
 

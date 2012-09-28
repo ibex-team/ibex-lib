@@ -17,23 +17,29 @@
 
 namespace ibex {
 
-class Domains; // for friendship grant
-
 /**
- * \ingroup level1
- * \brief Generic Domain (either interval, vector of intervals, etc.)
+ * \ingroup arithmetic
+ *
+ * \brief Generic Domain.
+ *
+ * A generic domain is either:
+ * <ul><li> an interval (#ibex:Interval)
+ *     <li> a vector of intervals (#ibex::IntervalVector)
+ *     <li> a matrix of intervals (#ibex::IntervalMatrix)
+ *     <li> or an array of interval matrices (#ibex::IntervalMatrixArray)
+ * </ul>
  *
  */
 class Domain  {
 public:
 
 	/**
-	 * \brief The dimension of the domain.
+	 * \brief The dimension of the internal domain.
 	 */
 	const Dim dim;
 
 	/**
-	 * \brief True if this domain is a reference.
+	 * \brief True if the internal domain is a reference.
 	 */
 	const bool is_reference;
 
@@ -47,6 +53,8 @@ public:
 
 	/**
 	 * \brief Creates a reference to an interval.
+	 *
+	 * The internal domain will point to \a itv.
 	 */
 	explicit Domain(Interval& itv) : dim(), is_reference(true) {
 		domain = &itv;
@@ -54,6 +62,8 @@ public:
 
 	/**
 	 * \brief Creates a reference to an interval vector.
+	 *
+	 *  The internal domain will point to \a v.
 	 */
 	explicit Domain(IntervalVector& v, bool in_row) : dim(in_row? Dim::row_vec(v.size()) : Dim::col_vec(v.size())), is_reference(true) {
 		domain = &v;
@@ -61,6 +71,8 @@ public:
 
 	/**
 	 * \brief Creates a reference to an interval matrix.
+	 *
+	 *  The internal domain will point to \a m.
 	 */
 	explicit Domain(IntervalMatrix& m) : dim(Dim::matrix(m.nb_rows(),m.nb_cols())), is_reference(true) {
 		domain = &m;
@@ -68,12 +80,20 @@ public:
 
 	/**
 	 * \brief Creates a reference to an array of interval matrices.
+	 *
+	 *  The internal domain will point to \a ma.
 	 */
 	explicit Domain(IntervalMatrixArray& ma) : dim(Dim::matrix_array(ma.size(),ma.nb_rows(),ma.nb_cols())), is_reference(true) {
 		domain = &ma;
 	}
 
-	Domain(const Domain& d, bool is_reference) : dim(d.dim), is_reference(is_reference) {
+	/**
+	 * \brief Creates a domain by copy.
+	 *
+	 * If \a is_reference is true, the intenal domain is a reference to the
+	 * internal domain of \a d.
+	 */
+	Domain(const Domain& d, bool is_reference=false) : dim(d.dim), is_reference(is_reference) {
 		if (is_reference) {
 			domain = d.domain;
 		} else {
@@ -87,18 +107,19 @@ public:
 		}
 	}
 
-	Domain(const Domain& d) : dim(d.dim), is_reference(false) {
-		switch (dim.type()) {
-		case Dim::SCALAR:       domain = new Interval(d.i()); break;
-		case Dim::ROW_VECTOR:
-		case Dim::COL_VECTOR:   domain = new IntervalVector(d.v()); break;
-		case Dim::MATRIX:       domain = new IntervalMatrix(d.m()); break;
-		case Dim::MATRIX_ARRAY: domain = new IntervalMatrixArray(d.ma()); break;
-		}
-	}
 
+	/**
+	 * \brief Return the ith component of *this.
+	 *
+	 * Creates a domain that points to the ith component of the internal domain.
+	 */
 	Domain operator[](int index);
 
+	/**
+	 * \brief Return the ith component of *this.
+	 *
+	 * Creates a domain that points to the ith component of the internal domain.
+	 */
 	const Domain operator[](int index) const;
 
 	/**
@@ -117,7 +138,7 @@ public:
 	}
 
 	/**
-	 * \brief Load domains from another domain.
+	 * \brief Load the domain from another domain.
 	 */
 	Domain& operator=(const Domain& d) {
 		assert((*this).dim==d.dim);
@@ -225,6 +246,12 @@ private:
 	void* domain;
 };
 
+/** \ingroup arithmetic */
+/*@{*/
+
+/**
+ * \brief Output a domain.
+ */
 std::ostream& operator<<(std::ostream& os,const Domain&);
 
 /**
@@ -254,88 +281,66 @@ void load(Array<Domain>& x, const Array<const Domain>& y, int nb_used=-1, int* u
  */
 void load(Array<Domain>& x, const Array<Domain>& y, int nb_used=-1, int* used=NULL);
 
+/** Add two domains. */
 Domain operator+(const Domain& d1, const Domain& d2);
+/** Multiply two domains. */
 Domain operator*(const Domain& d1, const Domain& d2);
+/** Subtract two domains. */
 Domain operator-(const Domain& d1, const Domain& d2);
+/** Divide two domains. */
 Domain operator/(const Domain& d1, const Domain& d2);
+/** Max of two domains. */
 Domain max(const Domain& d1, const Domain& d2);
+/** Min of two domains. */
 Domain min(const Domain& d1, const Domain& d2);
+/** Atan2 of two domains. */
 Domain atan2(const Domain& d1, const Domain& d2);
+/** Opposite of a domain. */
 Domain operator-(const Domain& d1);
+/** Transpose. */
 Domain transpose(const Domain& d1);
+/** Sign. */
 Domain sign(const Domain& d1);
+/** Absolute value. */
 Domain abs(const Domain& d);
+/** Raise a domain to the power \a p. */
 Domain pow(const Domain& d, int p);
+/** Raise a domain to the power \a p. */
 Domain pow(const Domain& d, const Domain& p);
+/** Square of a domain. */
 Domain sqr(const Domain& d);
+/** Square root of a domain. */
 Domain sqrt(const Domain& d);
+/** Exponential. */
 Domain exp(const Domain& d);
+/** Logarithm. */
 Domain log(const Domain& d);
+/** Cosine. */
 Domain cos(const Domain& d);
+/** Sine. */
 Domain sin(const Domain& d);
+/** Tangent. */
 Domain tan(const Domain& d);
+/** Arccosine. */
 Domain acos(const Domain& d);
+/** Arcsine. */
 Domain asin(const Domain& d);
+/** Arctangent. */
 Domain atan(const Domain& d);
+/** Hyperbolic cosine. */
 Domain cosh(const Domain& d);
+/** Hyperbolic sine. */
 Domain sinh(const Domain& d);
+/** Hyperbolic tangent. */
 Domain tanh(const Domain& d);
+/** Hyperbolic arccosine. */
 Domain acosh(const Domain& d);
+/** Hyperbolic arcsine. */
 Domain asinh(const Domain& d);
+/** Hyperbolic arctangent. */
 Domain atanh(const Domain& d);
 
-/*
- * \brief x*=a.
- *
-void mul(Array<Domain>& x, const Interval& a) {
-	for (int i=0; i<x.size(); i++) {
-		switch(x[i].dim.type()) {
-		case Dim::SCALAR:    x[i].i()*=a; break;
-		case Dim::ROW_VECTOR:
-		case Dim::COL_VECTOR: x[i].v()*=a; break;
-		case Dim::MATRIX:     x[i].m()*=a; break;
-		case Dim::MATRIX_ARRAY: assert(false); break;
-		}
-	}
-}
-*/
-
-/*
- * \brief Set z to x*M (x is a row vector)
- *
-void mul(const Array<Domain>* M, const IntervalVector&x, Array<Domain>&y) {
-	int m=x.size();
-	int n=M[0].size();
-	for (int i=0; i<n; i++) {
-		for (int j=0; j<m; j++)
-			assert(y[j].dim.type()==M[i][j].dim.type);
-	}
-
-	for (int j=0; j<n; j++) {
-		switch(y[j].dim.type()) {
-		case Dim::SCALAR     :
-		{
-			y[j].i()=0;
-			for (int i=0; i<m; i++) y[j].i()+=x[i]*M[i][j].i();
-		}
-		break;
-		case Dim::ROW_VECTOR :
-		case Dim::COL_VECTOR :
-		{
-			y[j].v().clear();
-			for (int i=0; i<m; i++) y[j].v()+=x[i]*M[i][j].v();
-		}
-		break;
-		case Dim::MATRIX     :
-		{
-			y[j].m().clear();
-			for (int i=0; i<m; i++) y[j].m()+=x[i]*M[i][j].m();
-		}
-		break;
-		case Dim::MATRIX_ARRAY : assert(false); break;
-		}
-	}
-}*/
+/*@}*/
 
 } // end namespace
 

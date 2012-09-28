@@ -1,5 +1,5 @@
 /* ============================================================================
- * I B E X - Dimension of expressions (including symbols)
+ * I B E X - Dimension of expressions (symbols, etc.)
  * ============================================================================
  * Copyright   : Ecole des Mines de Nantes (FRANCE)
  * License     : This program can be distributed under the terms of the GNU LGPL.

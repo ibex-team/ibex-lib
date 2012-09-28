@@ -18,6 +18,8 @@
 namespace ibex {
 
 /**
+ * \ingroup arithmetic
+ *
  * \brief Real matrix.
  */
 class Matrix {
@@ -178,6 +180,9 @@ private:
 	Vector* M;
 };
 
+/** \ingroup arithmetic */
+/*@{*/
+
 /**
  * \brief -M
  */
@@ -222,6 +227,8 @@ Matrix abs(const Matrix& x);
  * \brief Stream out a matrix.
  */
 std::ostream& operator<<(std::ostream& os, const Matrix&);
+
+/*@}*/
 
 /*================================== inline implementations ========================================*/
 
