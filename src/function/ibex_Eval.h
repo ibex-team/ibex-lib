@@ -18,7 +18,9 @@
 namespace ibex {
 
 
-/** \ingroup symbolic
+/**
+ * \ingroup symbolic
+ *
  * \brief Function evaluator.
  *
  * \pre Requires the function to be decorated with BasicDecorator.

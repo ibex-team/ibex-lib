@@ -23,7 +23,7 @@ double default_gauss_seidel_ratio=1e-04;
 
 bool newton(const Function& f, IntervalVector& box, double prec, double ratio_gauss_seidel) {
 	assert(f.expr().dim.is_vector());
-	int n=f.input_size();
+	int n=f.nb_var();
 	int m=f.expr().dim.vec_size();
 
 	IntervalMatrix J(m, n);

@@ -103,7 +103,7 @@ Domain _2domain(const ExprNode& expr) {
 }
 
 const ExprNode& apply(Function& f, const ExprNode& expr) {
-	int n=f.nb_symbols();
+	int n=f.nb_arg();
 	if (n!=1) {
 		stringstream s;
 		s << "function " << f.name << " expects 1 argument";
@@ -114,7 +114,7 @@ const ExprNode& apply(Function& f, const ExprNode& expr) {
 }
 
 const ExprNode& apply(Function& f, const vector<const ExprNode*>& args) {
-	int n=f.nb_symbols();
+	int n=f.nb_arg();
 	if (n!=args.size()) {
 		stringstream s;
 		s << "function " << f.name << " expects " << n << " argument" << (n>1? "s":"");

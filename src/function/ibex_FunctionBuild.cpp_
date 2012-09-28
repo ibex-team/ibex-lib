@@ -182,9 +182,9 @@ Function::Function(const Function& f) : name(strdup(f.name)) {
 	// they appear in the same order in "dest". Indeed, if we add the symbols
 	// as they appear in the expression the copy of a a function (x,y)->y+x
 	// would yield (y,x)->y+x.
-	Array<const ExprSymbol> x(f.nb_symbols());
-	for (int j=0; j<f.nb_symbols(); j++) {
-		x.set_ref(j,ExprSymbol::new_(f.symbol(j).name,f.symbol(j).dim));
+	Array<const ExprSymbol> x(f.nb_arg());
+	for (int j=0; j<f.nb_arg(); j++) {
+		x.set_ref(j,ExprSymbol::new_(f.arg(j).name,f.arg(j).dim));
 	}
 	//cout << "new x=";
 	//for (int j=0; j<new_x.size(); j++) cout << new_x[j].name << " ";
@@ -202,7 +202,7 @@ void Function::separate() {
 		return;
 	}
 
-	comp = new Function[output_size()];
+	comp = new Function[image_dim()];
 	// rem: dimension()==expr().dim.vec_size() if expr() is a vector
 	//      and also fvec->nb_args if, in addition, fvec!=NULL
 
@@ -211,9 +211,9 @@ void Function::separate() {
 
 	if (expr().dim.is_vector()) {
 		for (int i=0; i<expr().dim.vec_size(); i++) {
-			Array<const ExprSymbol> x(nb_symbols());
-			for (int j=0; j<nb_symbols(); j++) {
-				x.set_ref(j,ExprSymbol::new_(symbol(j).name,symbol(j).dim));
+			Array<const ExprSymbol> x(nb_arg());
+			for (int j=0; j<nb_arg(); j++) {
+				x.set_ref(j,ExprSymbol::new_(arg(j).name,arg(j).dim));
 			}
 			const ExprNode& y=ExprCopy().copy(symbs, x, fvec? fvec->arg(i) : *(tmp=&expr()[i]));
 			if (tmp) delete (ExprNode*) tmp; // will not delete the subexpression
@@ -229,9 +229,9 @@ void Function::separate() {
 				fvec2=dynamic_cast<const ExprVector*>(&fvec->arg(i));
 			}
 			for (int j=0; j<n; j++) {
-				Array<const ExprSymbol> x(nb_symbols());
-				for (int k=0; k<nb_symbols(); k++) {
-					x.set_ref(k,ExprSymbol::new_(symbol(k).name,symbol(k).dim));
+				Array<const ExprSymbol> x(nb_arg());
+				for (int k=0; k<nb_arg(); k++) {
+					x.set_ref(k,ExprSymbol::new_(arg(k).name,arg(k).dim));
 				}
 				const ExprNode& y=ExprCopy().copy(symbs, x,
 						fvec2 ? fvec2->arg(j) : (fvec? *(tmp=&(fvec->arg(i)[j])) : *(tmp=&(expr()[i][j]))));
@@ -267,17 +267,17 @@ void Function::init(const Array<const ExprSymbol>& x, const ExprNode& y) {
 
 	FindInputsUsed fsu(x, y, is_used);
 
-	nb_used_inputs=0;
+	nb_used_vars=0;
 	for (unsigned int i=0; i<is_used.size(); i++) {
-		if (is_used[i]) nb_used_inputs++;
+		if (is_used[i]) nb_used_vars++;
 	}
 
-	used_input=new int[nb_used_inputs];
+	used_var=new int[nb_used_vars];
 	int j=0;
 	for (unsigned int i=0; i<is_used.size(); i++) {
-		if (is_used[i]) { used_input[j++]=i; }
+		if (is_used[i]) { used_var[j++]=i; }
 	}
-	assert(j==nb_used_inputs);
+	assert(j==nb_used_vars);
 
 	for (int i=0; i<nb_nodes(); i++) {
 		assert(node(i).deco.f==NULL); // this node must not belong to another function!
@@ -313,15 +313,15 @@ void Function::decorate() const {
 	Decorator d;
 	d.decorate(*this);
 
-	symbol_domains.resize(nb_symbols());
-	symbol_deriv.resize(nb_symbols());
+	arg_domains.resize(nb_arg());
+	arg_deriv.resize(nb_arg());
 
 	((CompiledFunction&) cf).compile(*this); // now that it is decorated, it can be "compiled"
 
 	// warning: to place after "compile" if compile modifies deco.d...
-	for (int i=0; i<nb_symbols(); i++) {
-		symbol_domains.set_ref(i,*symbol(i).deco.d);
-		symbol_deriv.set_ref(i,*symbol(i).deco.g);
+	for (int i=0; i<nb_arg(); i++) {
+		arg_domains.set_ref(i,*arg(i).deco.d);
+		arg_deriv.set_ref(i,*arg(i).deco.g);
 	}
 }
 

@@ -16,9 +16,9 @@ namespace ibex {
 const double CtcNewton::default_ceil = 0.01;
 
 CtcNewton::CtcNewton(const Function& f, double ceil, double prec, double ratio) :
-		Ctc(f.input_size()), f(f), ceil(ceil), prec(prec), gauss_seidel_ratio(ratio) {
+		Ctc(f.nb_var()), f(f), ceil(ceil), prec(prec), gauss_seidel_ratio(ratio) {
 
-	if (f.input_size()!=f.output_size()) {
+	if (f.nb_var()!=f.image_dim()) {
 		not_implemented("Newton operator with rectangular systems.");
 	}
 }

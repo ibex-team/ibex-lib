@@ -34,7 +34,7 @@ void MainGenerator::generate(const P_Source& source, System& result) {
 	int n=source.vars.size();
 	int input_size=0;
 
-	result.vars.resize(n);
+	result.args.resize(n);
 	Array<const ExprSymbol> srcvars(n);
 
 	Array<const Domain> domains(n);
@@ -45,7 +45,7 @@ void MainGenerator::generate(const P_Source& source, System& result) {
 		if (x.type==Entity::EPR) result.eprs.push_back(i);
 		else if (x.type==Entity::SYB) result.sybs.push_back(i);
 		srcvars.set_ref(i,x.symbol);
-		result.vars.set_ref(i,ExprSymbol::new_(x.symbol.name, x.symbol.dim));
+		result.args.set_ref(i,ExprSymbol::new_(x.symbol.name, x.symbol.dim));
 		domains.set_ref(i,x.domain);
 		i++;
 		input_size+=x.symbol.dim.size();
@@ -67,7 +67,7 @@ void MainGenerator::generate(const P_Source& source, System& result) {
 		// two different functions)
 		Array<const ExprSymbol> objvars(n);
 
-		varcopy(result.vars, objvars); // TODO: should we remove eprs and sybs from the objective variables?
+		varcopy(result.args, objvars); // TODO: should we remove eprs and sybs from the objective variables?
 		const ExprNode& goal=ExprGenerator(Scope()).generate(srcvars, objvars, *source.goal);
 		result.goal = new Function(objvars, goal, "goal");
 	}
@@ -89,7 +89,7 @@ void MainGenerator::generate(const P_Source& source, System& result) {
 	for (vector<NumConstraint*>::const_iterator it=ctrs.begin(); it!=ctrs.end(); it++) {
 		result.ctrs.set_ref(i,**it);
 		i++;
-		((int&) result.nb_ctr) += (*it)->f.output_size();
+		((int&) result.nb_ctr) += (*it)->f.image_dim();
 	}
 
 

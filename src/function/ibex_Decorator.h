@@ -60,26 +60,6 @@ protected:
 	virtual void visit(const ExprBinaryOp&);
 };
 
-/**
- * \ingroup level1
- * \brief Label of function application nodes for eval/HC4Revise.
- *
- * A function application node has a specific label that, in addition
- * to the domain, contains an evaluator of the function called.
- */
-/*
-class BasicApplyLabel : public virtual Domain {
-public:
-	BasicApplyLabel(const Dim& dim, Function& f);
-
-	Domains args_doms; // domains of the arguments x (references)
-
-	Function& f;       // the function f(x)
-
-	HC4Revise fevl;    //  the associated evaluator
-};
-*/
-
 } // end namespace ibex
 
 #endif // __IBEX_DECORATOR_H__

@@ -35,13 +35,13 @@ void SystemFactory::add_ctr(const ExprCtr& ctr) {
 
 
 System::System(const SystemFactory& fac) : nb_var(0) /* tmp */,
-		nb_ctr(fac.exprs.size()), func(0), vars(fac.vars.size()), box(1) /* tmp */, ctrs(nb_ctr)  {
+		nb_ctr(fac.exprs.size()), func(0), args(fac.vars.size()), box(1) /* tmp */, ctrs(nb_ctr)  {
 
 	int nb=fac.vars.size();
 
 	// =========== init vars
 	for (int j=0; j<nb; j++) {
-		vars.set_ref(j,ExprSymbol::new_(fac.vars[j]->name, fac.vars[j]->dim));
+		args.set_ref(j,ExprSymbol::new_(fac.vars[j]->name, fac.vars[j]->dim));
 		(int&) nb_var += fac.vars[j]->dim.size();
 	}
 
@@ -58,8 +58,8 @@ System::System(const SystemFactory& fac) : nb_var(0) /* tmp */,
 	Array<const ExprNode> y(nb_ctr);
 
 	for (int i=0; i<nb_ctr; i++) {
-		Array<const ExprSymbol> ctrvars(vars.size());
-		varcopy(vars,ctrvars);
+		Array<const ExprSymbol> ctrvars(args.size());
+		varcopy(args,ctrvars);
 		const ExprNode& f_i=ExprCopy().copy(fac.vars, ctrvars, *fac.exprs[i]);
 		ctrs.set_ref(i,*new NumConstraint(* new Function(ctrvars,f_i), fac.ops[i], true));
 	}

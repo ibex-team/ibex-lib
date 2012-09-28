@@ -119,8 +119,8 @@ ExprUnvectorize::ExprUnvectorize(const ExprNode& e, Function& dest, bool unvecto
 	// they appear in the same order in "dest". Indeed, if we add the symbols
 	// as they appear in the expression the copy of a a function (x,y)->y+x
 	// would yield (y,x)->y+x.
-	for (int i=0; i<src.nb_symbols(); i++)
-		visit(src.symbol(i));
+	for (int i=0; i<src.nb_arg(); i++)
+		visit(src.arg(i));
 
 	visit(e);
 

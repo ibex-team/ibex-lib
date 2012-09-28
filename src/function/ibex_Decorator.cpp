@@ -25,9 +25,9 @@ void Decorator::decorate(const Function& f) {
 	// some symbols may not appear in the expression
 	// and they have to be decorated. So we first
 	// decorate all the symbols.
-	for (int i=0; i<f.nb_symbols(); i++) {
-		f.symbol(i).deco.visited=false;
-		visit((const ExprNode&) f.symbol(i)); // cast to ExprNode, in order to set "visited" to true.
+	for (int i=0; i<f.nb_arg(); i++) {
+		f.arg(i).deco.visited=false;
+		visit((const ExprNode&) f.arg(i)); // cast to ExprNode, in order to set "visited" to true.
 	}
 
 	visit(f.expr()); // cast -> we know *this will not be modified

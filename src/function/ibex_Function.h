@@ -30,6 +30,11 @@ class System;
  * Every expression in ibex (like x^2+y^2) is considered as a function,
  * (here: (x,y)->x^2+y^2) where the order of the arguments ("x" and "y")
  * is simply the order of symbol declaration.
+ *
+ * <br>
+ * We distinguish <i>arguments</i> from <i>variables</i>. For instance, if
+ * f:(x,y)->x[0]+y where x is a vector of 9 components, the functions has
+ * 2 arguments and 10 variables.
  */
 class Function {
 public:
@@ -104,14 +109,14 @@ public:
 	Function(const Function&);
 
 	/**
-	 * \brief Return the total input size.
+	 * \brief Return the total number of variables.
 	 *
-	 * This size is the sum of the numbers of components, for
-	 * all symbols.
+	 * The number of variables is the sum
+	 * of the number of components of each argument.
 	 *
-	 * \see #nb_symbols() const.
+	 * \see #nb_arg() const.
 	 */
-	int input_size() const;
+	int nb_var() const;
 
 	/**
 	 * \brief Number of components of f
@@ -123,7 +128,7 @@ public:
 	 * is a unique output and if this output is a vector, all
 	 * the components have the same dimension.
 	 */
-	int output_size() const;
+	int image_dim() const;
 
 	/**
 	 * \brief Return the ith component of f.
@@ -149,45 +154,19 @@ public:
 	 */
 	Function& operator[](int i) const;
 
-	/*
-	 * \brief Create a new symbol (new argument of the function).
-	 *
-	 * The name of the symbol is generated automatically.
-	 *
-	 * By default, the symbol is zero-dimensional (scalar symbol).
-	 *
+	/**
+	 * \brief Return the number of arguments.
 	 */
-	//const ExprSymbol& add_symbol(const Dim& dim=Dim(0,0,0));
-
-	/*
-	 * \brief Create a new symbol (new argument of the function) with a specific name.
-	 *
-	 * By default, the symbol is zero-dimensional (scalar symbol).
-	 *
-	 * The string \a name is duplicated.
-	 */
-	//const ExprSymbol& add_symbol(const char* name, const Dim& dim=Dim(0,0,0));
+	int nb_arg() const;
 
 	/**
-	 * \brief Return the number of symbols (or arguments).
-	 */
-	int nb_symbols() const;
-
-	/**
-	 * \brief Return true if the ith argument is used in the function.
+	 * \brief Return true if the ith variable is used in the function.
 	 *
 	 * \warning The function is seen as a function from R^n to R^m. So, the
-	 * ith "argument" is not the ith symbol.
+	 * ith variable is <b>not</b> the ith symbol.
 	 *
 	 */
 	bool used(int i) const;
-
-	/*
-	 * \brief Set the expression f(x).
-	 *
-	 * Also calculates which symbols are actually used.
-	 */
-	//void set_expr(const ExprNode&);
 
 	/**
 	 * \brief Return the current number of nodes in the DAG.
@@ -200,21 +179,21 @@ public:
 	const ExprNode& node(int i) const;
 
 	/**
-	 * \brief Return the symbols.
+	 * \brief Return the arguments.
 	 */
-	const Array<const ExprSymbol>& symbols() const;
+	const Array<const ExprSymbol>& args() const;
 
 	/**
-	 * \brief Return the name of the ith symbol.
+	 * \brief Return the name of the ith argument.
 	 *
 	 * Corresponds to the ith parameter of the function.
 	 */
-	const char* symbol_name(int i) const;
+	const char* arg_name(int i) const;
 
 	/**
-	 * Return the ith symbol.
+	 * Return the ith argument.
 	 */
-	const ExprSymbol& symbol(int i) const;
+	const ExprSymbol& arg(int i) const;
 
 	/**
 	 * \brief Return the expression f(x) of the function.
@@ -257,11 +236,11 @@ public:
 	void backward(const V& algo) const;
 
 	/**
-	 * \brief True if all the symbols are scalar
+	 * \brief True if all the arguments are scalar
 	 *
 	 * Useful for various code optimization.
 	 */
-	bool all_symbols_scalar() const;
+	bool all_args_scalar() const;
 
 	/**
 	 * \brief Calculate f(box)
@@ -375,27 +354,27 @@ public:
 	CompiledFunction cf; // "public" just for debug
 
 	/*
-	 * \brief The domains of the symbols.
+	 * \brief The domains of the arguments.
 	 *
 	 */
-	mutable Array<Domain> symbol_domains;
+	mutable Array<Domain> arg_domains;
 
 	/*
-	 * \brief The derivative label of the symbols.
+	 * \brief The derivative label of the arguments.
 	 *
 	 * \note The structure is initialized by #ibex::GradDecorator.
 	 */
-	mutable Array<Domain> symbol_deriv;
+	mutable Array<Domain> arg_deriv;
 
 	/**
-	 * Number of used inputs
+	 * Number of used variables
 	 */
-	int nb_used_inputs;
+	int nb_used_vars;
 
 	/**
-	 * Array of used inputs (indices in declaration order)
+	 * Array of used variables (indices in declaration order)
 	 */
-	int* used_input;
+	int* used_var;
 
 
 private:
@@ -417,7 +396,7 @@ private:
 	std::vector<bool> is_used;                  // tells whether the i^th component is used.
 	std::vector<const ExprNode*> exprnodes;     // all the nodes
 	SymbolMap<const ExprSymbol*> id2info;       // to retrieve a symbol node from its name.
-	int key_count;                              // count the number of symbols
+	int key_count;                              // count the number of arguments
 
 	Function* comp;                             // the components. ==this if output_size()==1.
 
@@ -458,48 +437,90 @@ public:
 	 */
 	const ExprApply& operator()(const std::vector<const ExprNode*>& arg);
 
+	/** \brief Apply the function to the arguments */
 	const ExprApply& operator()(const ExprNode& arg1, const Interval& arg2);
+	/** \brief Apply the function to the arguments */
 	const ExprApply& operator()(const ExprNode& arg1, const IntervalVector& arg2);
+	/** \brief Apply the function to the arguments */
 	const ExprApply& operator()(const ExprNode& arg1, const IntervalMatrix& arg2);
+	/** \brief Apply the function to the arguments */
 	const ExprApply& operator()(const Interval& arg1, const ExprNode& arg2);
+	/** \brief Apply the function to the arguments */
 	const ExprApply& operator()(const IntervalVector& arg1, const ExprNode& arg2);
+	/** \brief Apply the function to the arguments */
 	const ExprApply& operator()(const IntervalMatrix& arg1, const ExprNode& arg2);
 
+	/** \brief Apply the function to the arguments */
 	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const Interval& arg3);
+	/** \brief Apply the function to the arguments */
 	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const IntervalVector& arg3);
+	/** \brief Apply the function to the arguments */
 	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const IntervalMatrix& arg3);
+	/** \brief Apply the function to the arguments */
 	const ExprApply& operator()(const ExprNode& arg1, const Interval& arg2, const ExprNode& arg3);
+	/** \brief Apply the function to the arguments */
 	const ExprApply& operator()(const ExprNode& arg1, const Interval& arg2, const Interval& arg3);
+	/** \brief Apply the function to the arguments */
 	const ExprApply& operator()(const ExprNode& arg1, const Interval& arg2, const IntervalVector& arg3);
+	/** \brief Apply the function to the arguments */
 	const ExprApply& operator()(const ExprNode& arg1, const Interval& arg2, const IntervalMatrix& arg3);
+	/** \brief Apply the function to the arguments */
 	const ExprApply& operator()(const ExprNode& arg1, const IntervalVector& arg2, const ExprNode& arg3);
+	/** \brief Apply the function to the arguments */
 	const ExprApply& operator()(const ExprNode& arg1, const IntervalVector& arg2, const Interval& arg3);
+	/** \brief Apply the function to the arguments */
 	const ExprApply& operator()(const ExprNode& arg1, const IntervalVector& arg2, const IntervalVector& arg3);
+	/** \brief Apply the function to the arguments */
 	const ExprApply& operator()(const ExprNode& arg1, const IntervalVector& arg2, const IntervalMatrix& arg3);
+	/** \brief Apply the function to the arguments */
 	const ExprApply& operator()(const ExprNode& arg1, const IntervalMatrix& arg2, const ExprNode& arg3);
+	/** \brief Apply the function to the arguments */
 	const ExprApply& operator()(const ExprNode& arg1, const IntervalMatrix& arg2, const Interval& arg3);
+	/** \brief Apply the function to the arguments */
 	const ExprApply& operator()(const ExprNode& arg1, const IntervalMatrix& arg2, const IntervalVector& arg3);
+	/** \brief Apply the function to the arguments */
 	const ExprApply& operator()(const ExprNode& arg1, const IntervalMatrix& arg2, const IntervalMatrix& arg3);
+	/** \brief Apply the function to the arguments */
 	const ExprApply& operator()(const Interval& arg1, const ExprNode& arg2, const ExprNode& arg3);
+	/** \brief Apply the function to the arguments */
 	const ExprApply& operator()(const Interval& arg1, const ExprNode& arg2, const Interval& arg3);
+	/** \brief Apply the function to the arguments */
 	const ExprApply& operator()(const Interval& arg1, const ExprNode& arg2, const IntervalVector& arg3);
+	/** \brief Apply the function to the arguments */
 	const ExprApply& operator()(const Interval& arg1, const ExprNode& arg2, const IntervalMatrix& arg3);
+	/** \brief Apply the function to the arguments */
 	const ExprApply& operator()(const IntervalVector& arg1, const ExprNode& arg2, const ExprNode& arg3);
+	/** \brief Apply the function to the arguments */
 	const ExprApply& operator()(const IntervalVector& arg1, const ExprNode& arg2, const Interval& arg3);
+	/** \brief Apply the function to the arguments */
 	const ExprApply& operator()(const IntervalVector& arg1, const ExprNode& arg2, const IntervalVector& arg3);
+	/** \brief Apply the function to the arguments */
 	const ExprApply& operator()(const IntervalVector& arg1, const ExprNode& arg2, const IntervalMatrix& arg3);
+	/** \brief Apply the function to the arguments */
 	const ExprApply& operator()(const IntervalMatrix& arg1, const ExprNode& arg2, const ExprNode& arg3);
+	/** \brief Apply the function to the arguments */
 	const ExprApply& operator()(const IntervalMatrix& arg1, const ExprNode& arg2, const Interval& arg3);
+	/** \brief Apply the function to the arguments */
 	const ExprApply& operator()(const IntervalMatrix& arg1, const ExprNode& arg2, const IntervalVector& arg3);
+	/** \brief Apply the function to the arguments */
 	const ExprApply& operator()(const IntervalMatrix& arg1, const ExprNode& arg2, const IntervalMatrix& arg3);
+	/** \brief Apply the function to the arguments */
 	const ExprApply& operator()(const Interval& arg1, const Interval& arg3, const ExprNode& arg2);
+	/** \brief Apply the function to the arguments */
 	const ExprApply& operator()(const Interval& arg1, const IntervalVector& arg3, const ExprNode& arg2);
+	/** \brief Apply the function to the arguments */
 	const ExprApply& operator()(const Interval& arg1, const IntervalMatrix& arg3, const ExprNode& arg2);
+	/** \brief Apply the function to the arguments */
 	const ExprApply& operator()(const IntervalVector& arg1, const Interval& arg3, const ExprNode& arg2);
+	/** \brief Apply the function to the arguments */
 	const ExprApply& operator()(const IntervalVector& arg1, const IntervalVector& arg3, const ExprNode& arg2);
+	/** \brief Apply the function to the arguments */
 	const ExprApply& operator()(const IntervalVector& arg1, const IntervalMatrix& arg3, const ExprNode& arg2);
+	/** \brief Apply the function to the arguments */
 	const ExprApply& operator()(const IntervalMatrix& arg1, const Interval& arg3, const ExprNode& arg2);
+	/** \brief Apply the function to the arguments */
 	const ExprApply& operator()(const IntervalMatrix& arg1, const IntervalVector& arg3, const ExprNode& arg2);
+	/** \brief Apply the function to the arguments */
 	const ExprApply& operator()(const IntervalMatrix& arg1, const IntervalMatrix& arg3, const ExprNode& arg2);
 };
 
@@ -507,7 +528,7 @@ std::ostream& operator<<(std::ostream&, const Function&);
 
 /*================================== inline implementations ========================================*/
 
-inline int Function::output_size() const {
+inline int Function::image_dim() const {
 	switch (expr().dim.type()) {
 	case Dim::SCALAR: return 1;
 	case Dim::ROW_VECTOR:
@@ -525,7 +546,7 @@ inline Function& Function::operator[](int i) const {
 	return comp[i];
 }
 
-inline int Function::nb_symbols() const {
+inline int Function::nb_arg() const {
 	return key_count;
 }
 
@@ -533,15 +554,15 @@ inline bool Function::used(int i) const {
 	return (root!=NULL && is_used[i]);
 }
 
-inline const Array<const ExprSymbol>& Function::symbols() const {
+inline const Array<const ExprSymbol>& Function::args() const {
 	return symbs;
 }
 
-inline const ExprSymbol& Function::symbol(int i) const {
+inline const ExprSymbol& Function::arg(int i) const {
 	return symbs[i];
 }
 
-inline const char* Function::symbol_name(int i) const {
+inline const char* Function::arg_name(int i) const {
 	return symbs[i].name;
 }
 
@@ -567,7 +588,7 @@ inline void Function::backward(const V& algo) const {
 	cf.backward<V>(algo);
 }
 
-inline bool Function::all_symbols_scalar() const {
+inline bool Function::all_args_scalar() const {
 	return __all_symbols_scalar;
 }
 
@@ -584,12 +605,12 @@ inline IntervalMatrix Function::eval_matrix(const IntervalVector& box) const {
 	case Dim::SCALAR     :
 		return IntervalMatrix(1,1,eval_domain(box).i());
 	case Dim::ROW_VECTOR : {
-		IntervalMatrix M(output_size(),1);
+		IntervalMatrix M(image_dim(),1);
 		M.set_row(0,eval_domain(box).v());
 		return M;
 	}
 	case Dim::COL_VECTOR : {
-		IntervalMatrix M(1,output_size());
+		IntervalMatrix M(1,image_dim());
 		M.set_col(0,eval_domain(box).v());
 		return M;
 	}
@@ -626,7 +647,7 @@ inline IntervalVector Function::gradient(const IntervalVector& x) const {
 }
 
 inline IntervalMatrix Function::jacobian(const IntervalVector& x) const {
-	IntervalMatrix J(output_size(),x.size());
+	IntervalMatrix J(image_dim(),x.size());
 	jacobian(x,J);
 	return J;
 }

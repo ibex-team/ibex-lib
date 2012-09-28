@@ -13,14 +13,14 @@
 
 namespace ibex {
 
-CtcProj::CtcProj(Function& f, CmpOp op) : Ctc(f.input_size()), ctr(f,op) {
-	for (int v=0; v<ctr.f.input_size(); v++)
+CtcProj::CtcProj(Function& f, CmpOp op) : Ctc(f.nb_var()), ctr(f,op) {
+	for (int v=0; v<ctr.f.nb_var(); v++)
 		output[v]=input[v]=ctr.f.used(v);
 
 }
 
-CtcProj::CtcProj(const NumConstraint& ctr) : Ctc(ctr.f.input_size()), ctr(ctr.f,ctr.op) {
-	for (int v=0; v<ctr.f.input_size(); v++)
+CtcProj::CtcProj(const NumConstraint& ctr) : Ctc(ctr.f.nb_var()), ctr(ctr.f,ctr.op) {
+	for (int v=0; v<ctr.f.nb_var(); v++)
 		output[v]=input[v]=ctr.f.used(v);
 }
 

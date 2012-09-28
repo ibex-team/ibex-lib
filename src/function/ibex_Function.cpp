@@ -39,14 +39,14 @@ Function::~Function() {
 		}
 		cleanup(expr(),false);
 
-		for (int i=0; i<nb_symbols(); i++)
-			delete &symbol(i);
+		for (int i=0; i<nb_arg(); i++)
+			delete &arg(i);
 	}
 
 	free((char*) name);
 }
 
-int Function::input_size() const {
+int Function::nb_var() const {
 	return is_used.size();
 	/*
 	int sum=0;
@@ -73,27 +73,27 @@ void Function::iproj(const Domain& y, IntervalVector& x, const IntervalVector& x
 }
 
 void Function::gradient(const IntervalVector& x, IntervalVector& g) const {
-	assert(g.size()==input_size());
-	assert(x.size()==input_size());
+	assert(g.size()==nb_var());
+	assert(x.size()==nb_var());
 
 	Gradient().gradient(*this,x,g);
 }
 
 void Function::jacobian(const IntervalVector& x, IntervalMatrix& J) const {
-	assert(J.nb_cols()==input_size());
-	assert(x.size()==input_size());
-	assert(J.nb_rows()==output_size());
+	assert(J.nb_cols()==nb_var());
+	assert(x.size()==nb_var());
+	assert(J.nb_rows()==image_dim());
 	assert(expr().deco.d);
 	assert(expr().deco.g);
 
 	// calculate the gradient of each component of f
-	for (int i=0; i<output_size(); i++) {
+	for (int i=0; i<image_dim(); i++) {
 		(*this)[i].gradient(x,J[i]);
 	}
 }
 
 void Function::hansen_matrix(const IntervalVector& box, IntervalMatrix& H) const {
-	int n=input_size();
+	int n=nb_var();
 	int m=expr().dim.vec_size();
 
 	assert(H.nb_cols()==n);
@@ -121,9 +121,9 @@ void Function::hansen_matrix(const IntervalVector& box, IntervalMatrix& H) const
 std::ostream& operator<<(std::ostream& os, const Function& f) {
 	if (f.name!=NULL) os << f.name << ":";
 	os << "(";
-	for (int i=0; i<f.nb_symbols(); i++) {
-		os << f.symbol_name(i);
-		if (i<f.nb_symbols()-1) os << ",";
+	for (int i=0; i<f.nb_arg(); i++) {
+		os << f.arg_name(i);
+		if (i<f.nb_arg()-1) os << ",";
 	}
 	os << ")->" << f.expr();
 	return os;
@@ -150,7 +150,7 @@ const ExprApply& Function::operator()(const ExprNode** args) {
 
 const ExprApply& Function::operator()(const vector<const ExprNode*>& arg) {
 	int n=arg.size();
-	assert(nb_symbols()==n);
+	assert(nb_arg()==n);
 	const ExprNode** tmp=new const ExprNode*[n];
 	for (int i=0; i<n; i++) tmp[i]=arg[i];
 	const ExprApply* a=&ExprApply::new_(*this, tmp);
@@ -161,7 +161,7 @@ const ExprApply& Function::operator()(const vector<const ExprNode*>& arg) {
 #define CONCAT(a,b)         CONCAT_HIDDEN(a,b)
 #define CONCAT_HIDDEN(a,b)  a ## b
 #define _I(ref,i) ExprConstant::new_scalar(CONCAT(arg,i))
-#define _V(ref,i) ExprConstant::new_vector(CONCAT(arg,i), symbol(i).type()==Dim::ROW_VECTOR)
+#define _V(ref,i) ExprConstant::new_vector(CONCAT(arg,i), arg(i).type()==Dim::ROW_VECTOR)
 #define _M(ref,i) ExprConstant::new_matrix(CONCAT(arg,i))
 
 const ExprApply& Function::operator()(const ExprNode& arg0, const Interval& arg1)       { return (*this)(arg0,_I(0,1)); }

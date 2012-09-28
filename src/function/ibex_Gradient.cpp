@@ -20,20 +20,20 @@ void Gradient::gradient(const Function& f, const Array<Domain>& d, IntervalVecto
 	assert(f.expr().deco.g);
 
 	Eval().eval(f,d);
-	for (int i=0; i<f.nb_symbols(); i++)
-		((Gradient&) *this).symbol_fwd(f.symbol(i), f.symbol(i).deco);
+	for (int i=0; i<f.nb_arg(); i++)
+		((Gradient&) *this).symbol_fwd(f.arg(i), f.arg(i).deco);
 
 	f.forward<Gradient>(*this);
 
 	f.expr().deco.g->i()=1.0;
 	f.backward<Gradient>(*this);
 
-	if (f.all_symbols_scalar()) {
-		for (int i=0; i<f.nb_symbols(); i++) {
-			g[i]=f.symbol_deriv[i].i();
+	if (f.all_args_scalar()) {
+		for (int i=0; i<f.nb_arg(); i++) {
+			g[i]=f.arg_deriv[i].i();
 		}
 	} else {
-		load(g,f.symbol_deriv);
+		load(g,f.arg_deriv);
 	}
 }
 
@@ -43,20 +43,20 @@ void Gradient::gradient(const Function& f, const IntervalVector& box, IntervalVe
 	assert(f.expr().deco.g);
 
 	f.eval_domain(box);
-	for (int i=0; i<f.nb_symbols(); i++)
-		((Gradient&) *this).symbol_fwd(f.symbol(i), f.symbol(i).deco);
+	for (int i=0; i<f.nb_arg(); i++)
+		((Gradient&) *this).symbol_fwd(f.arg(i), f.arg(i).deco);
 
 	f.forward<Gradient>(*this);
 
 	f.expr().deco.g->i()=1.0;
 	f.backward<Gradient>(*this);
 
-	if (f.all_symbols_scalar()) {
-		for (int i=0; i<f.nb_symbols(); i++) {
-			g[i]=f.symbol_deriv[i].i();
+	if (f.all_args_scalar()) {
+		for (int i=0; i<f.nb_arg(); i++) {
+			g[i]=f.arg_deriv[i].i();
 		}
 	} else {
-		load(g,f.symbol_deriv);
+		load(g,f.arg_deriv);
 	}
 }
 

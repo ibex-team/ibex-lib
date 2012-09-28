@@ -92,8 +92,6 @@ double next_float(double x);
  * because there are not used by ibex; while other have been introduced (like "ratio_delta"). Some
  * functions are also renamed to match more conventional use.
  *
- * \author Gilles Chabert
- * \date Created Dec 05, 2011 - Last Update Dec 24, 2011
  */
 class Interval {
   public:
@@ -138,14 +136,19 @@ class Interval {
      */
     Interval& inflate(double rad);
 
-    /** \brief Return the lower bound of *this. */
+    /** \brief Lower bound.
+     *
+     * Return the lower bound of *this. */
     double lb() const;
 
-    /** \brief Return the upper bound of *this. */
+    /** \brief Upper bound.
+     *
+     * Return the upper bound of *this. */
     double ub() const;
 
-    /** \brief Returns the midpoint of *this.
+    /** \brief Midpoint.
      *
+     * Returns the midpoint of *this.
      * The return point is guaranteed to be included in *this
      * but not necessarily to be the closest floating point
      * from the real midpoint.
@@ -158,17 +161,22 @@ class Interval {
      * - [a, b]     -> midP ~ a + .5*(b-a) */
     double mid() const;
 
-    /** Return the radius of the interval.
+    /**
+     * \brief Radius.
      *
+     * Return the diameter of *this.
      * By convention, 0 if *this is empty.*/
     double rad() const;
 
-    /** Return the diameter of the interval.
+    /**
+     * \brief Diameter.
      *
+     * Return the diameter of *this.
      * By convention, 0 if *this is empty.*/
     double diam() const;
 
-    /** \brief Mignitude.
+    /**
+     * \brief Mignitude.
 	 *
      * Returns the mignitude of *this:
      * <lu>
@@ -178,65 +186,84 @@ class Interval {
      * </lu> */
     double mig() const;
 
-    /** \brief Magnitude
+    /**
+     * \brief Magnitude.
 	 *
      * Returns the magnitude of *this:
      * mag(*this)=max(|lower bound|, |upper bound|). */
     double mag() const;
 
-    /** Return true iff this interval is a subset of \a x.
+    /**
+     * \brief True iff this interval is a subset of \a x.
+     *
      * \note Always return true if *this is empty. */
     bool is_subset(const Interval& x) const;
 
-    /** Return true iff this interval is in the
-     * interior of \a x.
+    /**
+     * \brief True iff this interval is in the interior of \a x.
+     *
      * \note In particular, (-oo,oo) is a strict subset of (-oo,oo)
      * and the empty set is a strict subset of the empty set.
      * \note Always return true if *this is empty. */
     bool is_strict_subset(const Interval& x) const;
 
-    /** Return true iff this interval is a superset of \a x.
+    /**
+     * \brief True iff this interval is a superset of \a x.
      *
      * \note Always return true if x is empty. */
     bool is_superset(const Interval& x) const;
 
-    /** Return true iff the interior of *this is a superset of \a x.
+    /**
+     * \brief True iff the interior of *this is a superset of \a x.
      *
      * \note In particular, (-oo,oo) is a strict superset of (-oo,oo)
      */
     bool is_strict_superset(const Interval& x) const;
 
-    /** Return true iff *this contains \a d.
+    /**
+     * \brief True iff *this contains \a d.
+     *
      * \note d can also be an "open bound", i.e., infinity.
      * So this function is not restricted to a set-membership
      * interpretation. */
     bool contains(double d) const;
 
-    /** Return true iff the interior of *this contains \a d.
+    /**
+     * \brief True iff the interior of *this contains \a d.
+     *
      * \note d can also be an "open bound", i.e., infinity.
      * So this function is not restricted to a set-membership
      * interpretation. */
     bool strictly_contains(double d) const;
 
-    /** Return true iff *this and \a x do not intersect. */
+    /**
+     * \brief True iff *this and \a x do not intersect.
+     *
+     */
     bool is_disjoint(const Interval &x) const;
 
-    /** Return true iff *this is empty */
+    /**
+     * \brief True iff *this is empty.
+     */
     bool is_empty() const;
 
-    /** An interval is degenerated if it is of the form [a, a]
+    /**
+     * \brief True iff *this is degenerated.
+     *
+     * An interval is degenerated if it is of the form [a, a]
      *
      * \note An empty interval is considered here as degenerated. */
     bool is_degenerated() const;
 
     /**
      * \brief True if one bound of *this is infinite.
+     *
      * \note An empty interval is always bounded.
      */
     bool is_unbounded() const;
 
     /**
-     * \brief Relative Hausdorff distance between *this and x,
+     * \brief Relative Hausdorff distance between *this and x.
      *
      * The relative distance is basically distance(x)/diam(*this).
      */
@@ -266,14 +293,15 @@ class Interval {
     /** \brief Multiply *this by \a x and return the result. */
     Interval& operator*=(const Interval& x);
 
-    /** \brief Divide *this by \a x and return the result.
+    /**
+     * \brief Divide *this by \a x and return the result.
      *
      * Does better than *this=*this/x: because calculates
      * the union of *this/x as intermediate result. */
     Interval& operator/=(const Interval& x);
 
     /**
-     * Set this interval to the intersection of itself with the division of two others.
+     * \brief Set this interval to the intersection of itself with the division of two others.
      *
      * \param x - the numerator
      * \param y - the divisor
@@ -293,7 +321,7 @@ class Interval {
     bool div2_inter(const Interval& x, const Interval& y, Interval& out2);
 
     /**
-     * Set this interval to the intersection of itself with the division of two others.
+     * \brief Set this interval to the intersection of itself with the division of two others.
      */
     Interval& div2_inter(const Interval& x, const Interval& y);
 

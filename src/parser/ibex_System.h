@@ -104,10 +104,10 @@ public:
 
 	/** Number of variables.
 	 *
-	 * \note This number is also sys.f.input_size() and box.size().
-	 * However, in general, it does not match vars.size(), which is
-	 * the number of symbols. For instance, in case of a single array
-	 * x of 10 components, there is 10 variables but only one symbol.
+	 * \note This number is also sys.f.nb_var() and box.size().
+	 * However, in general, it does not match args.size(), which is
+	 * the number of arguments (or symbols). For instance, in case of
+	 * a single array x of 10 components, there is 10 variables but only one symbol.
 	 */
 	const int nb_var;
 
@@ -123,14 +123,14 @@ public:
 	/** The main (vector-valued) function */
 	Function f;
 
-	/** All the variables */
-	Array<const ExprSymbol> vars;
+	/** All the arguments */
+	Array<const ExprSymbol> args;
 
-	/** Indices of variables to be considered as constants
+	/** Indices of arguments to be considered as constants
 	 * (not contracted nor bisected) */
 	std::vector<int> sybs;
 
-	/** Indices of variables to be considered as parameters
+	/** Indices of arguments to be considered as parameters
 	 * (contracted but not bisected) */
 	std::vector<int> eprs;
 
@@ -151,7 +151,7 @@ private:
 	void load(FILE* file);
 
 	// initialize f from the constraints in ctrs,
-	// once *all* the other fields are set (including vars and nb_ctr).
+	// once *all* the other fields are set (including args and nb_ctr).
 	void init_f_from_ctrs();
 };
 

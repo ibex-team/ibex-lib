@@ -218,10 +218,10 @@ ExprAtan2::ExprAtan2(const ExprNode& left, const ExprNode& right) :
 }
 
 ExprApply::ExprApply(const Function& f, const ExprNode** args) :
-		ExprNAryOp(args,f.nb_symbols(),f.expr().dim),
+		ExprNAryOp(args,f.nb_arg(),f.expr().dim),
 		func(f) {
-	for (int i=0; i<f.nb_symbols(); i++)
-		assert(args[i]->dim == f.symbol(i).dim);
+	for (int i=0; i<f.nb_arg(); i++)
+		assert(args[i]->dim == f.arg(i).dim);
 }
 
 std::ostream& operator<<(std::ostream& os, const ExprNode& expr) {

@@ -52,14 +52,14 @@ System::System(const System& sys, copy_mode mode) : nb_var(0), nb_ctr(0), func(0
 
 	assert(!sys.ctrs.is_empty()); // <=> m>0
 
-	const Array<const ExprSymbol>& x=sys.f.symbols();
+	const Array<const ExprSymbol>& x=sys.f.args();
 	int nb_arg=x.size();  // warning: x.size()<>n in general
 
 	// ---------- check all constraints have same variables ---------
 	for (int i=0; i<sys.nb_ctr; i++) {
-		assert(sys.f[i].nb_symbols()==nb_arg);
+		assert(sys.f[i].nb_arg()==nb_arg);
 		for (int j=0; j<nb_arg; j++)
-			assert(sys.f[i].symbol(j).dim==x[j].dim);
+			assert(sys.f[i].arg(j).dim==x[j].dim);
 	}
 	// -------------------------------------------------------------
 
@@ -67,24 +67,24 @@ System::System(const System& sys, copy_mode mode) : nb_var(0), nb_ctr(0), func(0
 	if (mode==EXTEND) {
 		(int&) nb_var = sys.nb_var+1;
 		(int&) nb_ctr = sys.nb_ctr+1;
-		vars.resize(nb_arg+1);
+		args.resize(nb_arg+1);
 	} else {
 		(int&) nb_var = sys.nb_var;
 		(int&) nb_ctr = sys.nb_ctr;
-		vars.resize(nb_arg);
+		args.resize(nb_arg);
 	}
 
 	ctrs.resize(nb_ctr);
 	box.resize(nb_var);
 
-	varcopy(x,vars);
+	varcopy(x,args);
 
 	if (mode==EXTEND) {
 		const ExprSymbol& y=ExprSymbol::new_(goal_name,Dim::scalar()); // y is a scalar
 		// warning: y must be added at the end (goal_var is set to n in constructor)
 		// We set goal_var to n (<=>y variable is the nth variable)
 		// to simplify the copy of expressions (see ibex_ExprCopy).
-		vars.set_ref(nb_arg,y);
+		args.set_ref(nb_arg,y);
 	}
 	// -------------------------------------------------------------
 
@@ -104,18 +104,18 @@ System::System(const System& sys, copy_mode mode) : nb_var(0), nb_ctr(0), func(0
 		int j=0;
 
 		if (mode==EXTEND) { // first, add y=goal(x).
-			Array<const ExprSymbol> goalvars(vars.size());
-			varcopy(vars,goalvars);
-			const ExprNode& goal_copy=ExprCopy().copy(sys.goal->symbols(), goalvars, sys.goal->expr());
+			Array<const ExprSymbol> goalvars(args.size());
+			varcopy(args,goalvars);
+			const ExprNode& goal_copy=ExprCopy().copy(sys.goal->args(), goalvars, sys.goal->expr());
 			ctrs.set_ref(j++,*new NumConstraint(goalvars, (goalvars[nb_arg]-goal_copy)=0) );
 		}
 
 		// note: sys.ctrs.size()<>sys.nb_ctr in general but
 		// with EXTEND/NORMALIZE, they actually match (only scalar constraints).
 		for (int i=0; i<sys.ctrs.size(); i++) {
-			Array<const ExprSymbol> ctrvars(vars.size());
-			varcopy(vars,ctrvars);
-			const ExprNode& f_i=ExprCopy().copy(sys.ctrs[i].f.symbols(), ctrvars, sys.ctrs[i].f.expr());
+			Array<const ExprSymbol> ctrvars(args.size());
+			varcopy(args,ctrvars);
+			const ExprNode& f_i=ExprCopy().copy(sys.ctrs[i].f.args(), ctrvars, sys.ctrs[i].f.expr());
 			switch (sys.ctrs[i].op) {
 			case LT:  ibex_warning("warning: strict inequality (<) replaced by inequality (<=).");
 			case LEQ: ctrs.set_ref(j++,*new NumConstraint(ctrvars, f_i<=0));
@@ -153,7 +153,7 @@ System::System(const System& sys, copy_mode mode) : nb_var(0), nb_ctr(0), func(0
 void System::init_f_from_ctrs() {
 	int total_output_size=0;
 	for (int j=0; j<ctrs.size(); j++)
-		total_output_size += ctrs[j].f.output_size();
+		total_output_size += ctrs[j].f.image_dim();
 
 	Array<const ExprNode> image(total_output_size);
 	int i=0;
@@ -161,21 +161,21 @@ void System::init_f_from_ctrs() {
 	// concatene all the components of all the constraints function
 	for (int j=0; j<ctrs.size(); j++) {
 		Function& fj=ctrs[j].f;
-		for (int k=0; k<fj.output_size(); k++) {
-			const ExprNode& e=ExprCopy().copy(fj[k].symbols(), vars, fj[k].expr());
+		for (int k=0; k<fj.image_dim(); k++) {
+			const ExprNode& e=ExprCopy().copy(fj[k].args(), args, fj[k].expr());
 			image.set_ref(i++,e);
 		}
 	}
 	assert(i==total_output_size);
 
-	f.init(vars, total_output_size>1? ExprVector::new_(image,false) : image[0]);
+	f.init(args, total_output_size>1? ExprVector::new_(image,false) : image[0]);
 }
 
 std::ostream& operator<<(std::ostream& os, const System& sys) {
 
 	os << "variables: " << endl << "  ";
-	for (int i=0; i<sys.vars.size(); i++)
-		os << sys.vars[i] << " ";
+	for (int i=0; i<sys.args.size(); i++)
+		os << sys.args[i] << " ";
 	os << endl;
 
 	os << "goal: " << endl;
