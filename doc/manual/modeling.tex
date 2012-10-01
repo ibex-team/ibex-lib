@@ -68,39 +68,10 @@ and postscript symbols like \cf{x} for program variables.
 In most of our discussions, variables and functions will refer
 to the mathematical objects so that the mathematical meaning will be the implicit one. 
 
-\section{Variables}
+\subsection{Arguments versus variables}
 
-Before telling you which class represents mathematical variables, let us say first that
-this class does not play a big role.
-%The reason is that variables are only used to build functions.
-Indeed, the only purpose of declaring a variable $x$ in \ibex is
-for building a function right after, like $f:x\mapsto x+1$.
-Functions play, in contrast, a big role.
-
-In other words, $x$ is nothing but a syntaxic leaf in the expression 
-of the function. In particular, a variable is not a slot for
-representing domain. % (as it could be the case). %This is an important difference with other 
-E.g, if you want to calculate the range of $f$ for $x\in [0,1]$,
-you just call a (program) function \cf{eval} with a plain box in argument.
-It's just as if $f$ was the function that takes one argument and
-increment it, whatever the name of this argument is.
-
-Once $f$ has been built, we can almost say that $x$ is no longer useful.
-Variables must be seen only as temporary objects, in the process of function construction.
-
-Before going on, let us slightly moderate this point.
-We have assumed here that, as a user of \ibex the operations you are interested in are: {\it evaluate $f$ on a box, 
-calculate $f'$ on a box, solve $f(x)=0$} and so on. All these operations can be qualified as numerical: they take
-intervals and return intervals. You don't need to deal again with the expression of the function, once built.
-But if you need to handle, for any reason, the symbolic form of the function then you have to inspect the syntax
-and variables appear again.
-
-\subsection{Dimensions and ordering}
-
-A variable does not necessarily represent a single real value.
-It can also be a vector, a matrix or an array-of-matrices. So each variable has some associated information about
-its dimension(s). 
-
+A (mathematical) variable does not necessarily represent a single real value.
+It can also be a vector, a matrix or an array-of-matrices.
 One can, e.g., build the following function 
 $$\begin{array}{cccc}
 f: & \Rset^2\times\Rset^3 & \to & \Rset\\
@@ -109,8 +80,61 @@ f: & \Rset^2\times\Rset^3 & \to & \Rset\\
 
 In this case, $x$ and $y$ are vector variables with 2 and 3 components respectively.
 
+We see, at this point, that the term {\it variable} becomes ambiguous.
+For instance, if I say that the function $f$ takes $2$ variables, we don't really know if
+it means that the function takes two arguments (that might be vectors or matrices) or if
+the total input size is a vector of $\Rset^2$.
+
+For this reason, from now on, we will call {\bf argument} the formal parameters
+or input symbols the function has been defined with and {\bf variable} a component of the
+latters. 
+
+Hence, the function $f$ in the previous paragraphs has two arguments, $x$ and $y$
+and 5 variables $x_1$, $x_2$, $y_1$, $y_2$ and $y_3$.
+
+Note that, as a consequence, variables are always real-valued.
+
+\section{Arguments}
+
+Before telling you which class represents the arguments of a function, let us say first that
+this class does not play a big role.
+%The reason is that variables are only used to build functions.
+Indeed, the only purpose of declaring an argument $x$ in \ibex is
+for building a function right after, like $f:x\mapsto x+1$.
+Functions play, in contrast, a big role.
+
+In other words, $x$ is nothing but a syntaxic leaf in the expression 
+of the function. In particular, an argument is not a slot for
+representing domain. % (as it could be the case). %This is an important difference with other 
+E.g, if you want to calculate the range of $f$ for $x\in [0,1]$,
+you just call a (program) function \cf{eval} with a plain box in argument.
+It's just as if $f$ was the function that takes one argument and
+increment it, whatever the name of this argument is.
+
+Once $f$ has been built, we can almost say that $x$ is no longer useful.
+Arguments must be seen only as temporary objects, in the process of function construction.
+
+Before going on, let us slightly moderate this point.
+We have assumed here that, as a user of \ibex the operations you are interested in are: {\it evaluate $f$ on a box, 
+calculate $f'$ on a box, solve $f(x)=0$} and so on. All these operations can be qualified as numerical: they take
+intervals and return intervals. You don't need to deal again with the expression of the function, once built.
+But if you need to handle, for any reason, the symbolic form of the function then you have to inspect the syntax
+and arguments appear again.
+
+\subsection{Dimensions and ordering}
+
+We have said in the previous paragraph that an argument $x$ can actually represent
+$n$ variables $x_1,\ldots,x_n$. So each argument has some associated information about
+its dimension(s). 
+
+Let us consider again this function: 
+$$\begin{array}{cccc}
+f: & \Rset^2\times\Rset^3 & \to & \Rset\\
+   &  (x,y) & \mapsto & x_1\times y_1+x_2\times y_2 - x_3
+\end{array}.$$
+
 From the user standpoint, the function $f$ (once built) is ``flattened'' to a mapping from $\Rset^5$ to $\Rset$.
-Each numerical function (eval, etc.) expects a 5-dimensional box as argument.
+Each C++ function (eval, etc.) expects a 5-dimensional box as parameter.
 
 The way intervals are mapped to the variables components follows a straightforward ordering:
 everytime we call a (program) function of $f$ with the box $\ib=(\ib_1,\ldots,\ib_5)$ in argument, we simply enforce
@@ -120,19 +144,23 @@ If you don't want to create functions in C++, you can skip now to Section \ref{s
 
 \subsection{Class name and fields}
 
-As we have just said, variables are just symbols in expression. For this reason,
+As we have just said, arguments are just symbols in expression. For this reason,
 they are represented by a classe named \hcf{ExprSymbol}.
 In fact, there is also another class we introduced for convenience, called \hcf{Variable}.
-Without going further into details, the latter must be seen as a kind of ``macro'': a \hcf{Variable} object
-generates \hcf{ExprSymbol} objects. This macro is only useful if you build variables in C++ (see \S\ref{sec:mod-var-cpp}).
+It is, of course, a very confusing name from the programer's viewpoint since a \cf{Variable}
+does actually not represent a {\it variable} but an {\it argument}. However, from the user's viewpoint,
+this distinction is not visible and ``variable'' is more meaningful than ``arguments''.
+Anyway, the programer never has to deal with a \cf{Variable} object. Without going further into details, the \cf{Variable}
+class must be seen as a kind of ``macro'' that generates \hcf{ExprSymbol} objects. 
+This macro is only useful if you build arguments in C++ (see \S\ref{sec:mod-var-cpp}).
 
-Once built, a variable is always typed \hcf{ExprSymbol}.
+Once built, an argument is always typed \hcf{ExprSymbol}.
 
 If \cf{x} is an \hcf{ExprSymbol} object, you can obtain the information about its dimensions via \cf{x.dim}.
 The \hcf{dim} field is of type \hcf{Dim}, a class that simply contains 3 integers (one for each dimension, see
 the API for further details).
 
-Finally, a variable also have a name, that is only useful for displaying. It is a 
+Finally, an argument also has a name, that is only useful for displaying. It is a 
 regular C string (\cf{char*}) stored in the field \hcf{name}.
 
 
@@ -140,9 +168,9 @@ regular C string (\cf{char*}) stored in the field \hcf{name}.
 
 
 
-\subsection{Creating variables (in C++)}\label{sec:mod-var-cpp}
+\subsection{Creating arguments (in C++)}\label{sec:mod-var-cpp}
 
-The following piece of code creates a variable \cf{x} and prints it.
+The following piece of code creates an argument \cf{x} and prints it.
 
 \begin{lstlisting}
   Variable x;
@@ -150,30 +178,29 @@ The following piece of code creates a variable \cf{x} and prints it.
 \end{lstlisting}
 
 The first instruction creates a (program) variable \cf{x}. It is initialized by default, since
-no argument are given here to the constructor.
-By default, the variable is real (or {\it scalar}), meaning it is not a vector nor a matrix. 
-Furthermore, the (mathematical) variable has a name that is automatically
-generated. Of course, the name of the mathematical variable does not necessarily correspond to the name of the 
+nothing is given here to the constructor.
+By default, the argument is real (or {\it scalar}), meaning it is not a vector nor a matrix. 
+Furthermore, the argument has a name that is automatically
+generated. Of course, the name of the argument does not necessarily correspond to the name of the 
 program variable.
-For instance, \cf{x} is the name of a C++ variable but the corresponding 
-mathematical variable is named {\it \_x\_0}.
-The second instruction prints the name of the mathematical variable on the standard output:
+For instance, \cf{x} is the name of a C++ variable but the corresponding argument is named {\it \_x\_0}.
+The second instruction prints the name of the argument on the standard output:
 
 \begin{lstlisting}
 _x_0
 \end{lstlisting}
 
-It is possible to rename variables, see below. %\S\ref{sec:mod-var-name}.
+It is possible to rename arguments, see below. %\S\ref{sec:mod-var-name}.
 
-\subsubsection{Vector and matrix variables}\label{sec:mod-var-vec}
-To create a $n$-dimensional vector variable, just
-give the number $n$ as an arguement to the constructor:
+\subsubsection{Vector and matrix arguments}\label{sec:mod-var-vec}
+To create a $n$-dimensional vector argument, just
+give the number $n$ as a parameter to the constructor:
 
 \begin{lstlisting}
   Variable y(3);   // creates a 3-dimensional vector
 \end{lstlisting}
 
-To create a $m\times n$ matrix, give $m$ (number of rows) and $n$ (number of columns) as arguments:
+To create a $m\times n$ matrix, give $m$ (number of rows) and $n$ (number of columns) as parameters:
 
 \begin{lstlisting}
   Variable z(2,3);   // creates a 2*3-dimensional matrix
@@ -186,19 +213,19 @@ We can go like this up to 3 dimensional arrays:
 \end{lstlisting}
 
 
-\subsubsection{Renaming variables}\label{sec:mod-var-name}
-Usually, you don't really care about the names of mathematical variables since you handle
+\subsubsection{Renaming arguments}\label{sec:mod-var-name}
+Usually, you don't really care about the names of arguments since you handle
 program variables in your code.
 However, if you want a more user-friendly display, you can specify
-the name of the variable as a last argument to the constructor.
+the name of the argument as a last parameter to the constructor.
 
-In the following example, we create a scalar, a vector and a matrix variable each
+In the following example, we create a scalar, a vector and a matrix argument each
 time with a chosen name.
 
 \begin{lstlisting}
-  Variable x("x");   // creates a real variable named "x"
-  Variable y(3,"y");   // creates a vector variable named "y"
-  Variable z(2,3,"z");   // creates a matrix variable named "z"
+  Variable x("x");     // creates a real argument named "x"
+  Variable y(3,"y");   // creates a vector argument named "y"
+  Variable z(2,3,"z"); // creates a matrix argument named "z"
   cout << x << " " << y << " " << z << endl;
 \end{lstlisting}
 
@@ -225,7 +252,7 @@ to perform an {\it interval evaluation}.
 We assume that the function \cf{f} has been created to represent $(x,y)\mapsto \sin(x+y)$.
 
 We start by building a box (as explained in Chapter \ref{chap:arith}).
-The box must have as many components as the function has arguments, here, 2.
+The box must have as many components as the function has variables, here, 2.
 
 Then we simply call \hcf{f.eval(...)} to get the image of the box by \cf{f}:
 
@@ -249,7 +276,7 @@ inteval vector, etc.).
 
 The underlying algorithm is the famous {\it forward-backward} (alias \textsc{HC4Revise})
 algorithm. It is quick since it runs in linear time w.r.t. the size
-of the constraint syntax and optimal when variables have all one occurrence
+of the constraint syntax and optimal when arguments have all one occurrence
 in this syntax.
 
 Consider again \cf{f} representing $(x,y)\mapsto\sin(x+y)$.
@@ -310,7 +337,7 @@ Just write \\
 \centerline{\cf{f.jacobian(box)}}\\ to get an \cf{IntervalMatrix}
 containing an enclosure of the Jacobian matrix of $f$ on the box in argument.
 
-There is also a variant where the matrix is passed as argument
+There is also a variant where the matrix is passed as parameter
 (as for the gradient) in order to avoid allocating memory for the calculated matrix:\\
 \centerline{\cf{f.jacobian(box,J)}.}
 
@@ -350,11 +377,11 @@ Variable a,b,c,d,e,f,g;
 Function f(a,b,c,d,e,f,g,a+b+c+d+e+f+g);
 \end{lstlisting}	
 
-If more than 6 variables are needed, you need to build an intermediate array for collecting the variables.
+If more than 6 variables are needed, you need to build an intermediate array for collecting the arguments.
 More precisely, this intermediate object is an \cf{Array<const ExprSymbol>}. The usage is summarized below. In this
 example, we have 7 variables. But instead of creating the function
 $$x\mapsto x_1+\ldots+x_7$$
-with one argument (a vector variable with 7 components), we decide to create the function
+with one argument (a vector with 7 components), we decide to create the function
 $$(x_1,\ldots,x_7)\mapsto x_1+\ldots+x_7.$$
 with 7 arguments (7 scalar variables).
 \begin{lstlisting}
@@ -374,7 +401,7 @@ _f_1:(_x_0,_x_1,_x_2,_x_3,_x_4,_x_5,_x_6)->
 
 \subsubsection{Renaming functions}
 
-By default, function names are also generated. But you can also set your own function name, as the last argument of the constructor:
+By default, function names are also generated. But you can also set your own function name, as the last parameter of the constructor:
 \begin{lstlisting}
 Function f(x,y,sin(x+y),"f");
 \end{lstlisting}
@@ -401,14 +428,14 @@ Here is an example of the distance function between (\cf{xa},\cf{ya}) and
   Function dist(xa,xb,ya,yb, sqrt(sqr(xa-xb)+sqr(ya-yb)));
 \end{lstlisting}
 
-\subsubsection{Functions with vector variables}
+\subsubsection{Functions with vector arguments}
 
-If variables are vectors, you can refer to the component
-of a variable using square brackets. Indices start by 0,
+If arguments are vectors, you can refer to the component
+of an argument using square brackets. Indices start by 0,
 following the convention of the C language.
 
 We rewrite here the previous distance function using 2-dimensional
-variables \cf{a} and \cf{b} instead:
+arguments \cf{a} and \cf{b} instead:
 \begin{lstlisting}
   Variable a(2);
   Variable b(2);
@@ -418,7 +445,7 @@ variables \cf{a} and \cf{b} instead:
 \subsubsection{Composition}
 
 You can compose functions. Each argument of the called function can be substitued
-by a variable, a subexpression or a constant value.
+by an argument of the calling function, a subexpression or a constant value.
 
 For instance, we can define a function "foo" that associates to
 a point \cf{x} the distance between \cf{x} and a fixed point $(1,2)$,
@@ -559,7 +586,7 @@ A {\it system} in \ibex is a set of constraints with, optionnaly, a goal functio
 One is usually interested in solving the system while minimizing the criterion, if any.
 
 For this reason, a system is not as simple as a collection of {\it any} constraints:
-each constraint must exactly relates the same set of variables. And this set must
+each constraint must exactly relates the same set of arguments. And this set must
 also coincide with that of the goal function.
 Many algorithms of \ibex are based on this assumption.
 This is why they requires a system as argument (and not just an array of constraints).
@@ -570,14 +597,14 @@ that are detailed below. %We take as example the following system:
 
 \begin{itemize}
 \item \cf{const int} \hcf{nb_var}: the total number of variables or, in other words, the
-{\it size} of the problem. This number is basically the sum of all variables components. For instance,
-if one declares a variable $x$ with 10 components and a variable $y$ with 5, the value of this field
+{\it size} of the problem. This number is basically the sum of all arguments' components. For instance,
+if one declares an argument $x$ with 10 components and an argument $y$ with 5, the value of this field
 will be $15$.
 \item \cf{const int} \hcf{nb_ctr}: the number of constraints
 \item \cf{Function*} \hcf{goal}: a pointer to the goal function. If there is no goal function, this
 pointer is \cf{NULL}.
 \item \cf{Function} \hcf{f}: the (usually vector-valued) function representing the constraints. 
-For instance, if one defines three constraints: $x+y\leq0$ and $x-y=1$ and $x-y\geq0$, the function f will be 
+For instance, if one defines three constraints: $x+y\leq0$, $x-y=1$ and $x-y\geq0$, the function f will be 
 $(x,y)\mapsto (x+y,x-y-1,x-y)$. Note that the constraints are automatically transformed so that the right side 
 is 0 but, however, without changing the comparison sign. It is however possible to {\it normalize} a system so that
 all inequalities are defined with the $\le$ sign (see \S\ref{sec:mod-sys-transfo}).
@@ -597,7 +624,7 @@ The first alternative for creating a system is to do it programmatically, that i
 Creating a system in C++ resorts to a temporary object called a {\it system factory}. The task is done in a few simple steps:
 \begin{enumerate}
 \item declare a new system factory (an object of \hcf{SystemFactory})
-\item add variables in the factory using \hcf{add_var}.
+\item add arguments in the factory using \hcf{add_var}.
 \item (optional) add the expression of the goal function using \hcf{add_goal}
 \item add the constraints using \hcf{add_ctr}
 \item create the system simply by passing the factory to the constructor of \cf{System}
@@ -618,9 +645,9 @@ Here is an example:
 \end{lstlisting}
 
 If you compare the declaration of the constraint here with the examples given in \S\ref{sec:mod-ctr-cpp},
-you notice that we do not list here the variables before writing {\tt sqr(x)+sqr(y)<=1}.
+you notice that we do not list here the arguments before writing {\tt sqr(x)+sqr(y)<=1}.
 The reason is simply that, as said above, the goal function and the constraints in a system
-share all the same ordered set of variables. This set is defined via \cf{add_var} once for all.
+share all the same list of arguments. This list is defined via \cf{add_var} once for all.
 
 \section{The \quimper syntax}\label{sec:mod-sys-load}
 
@@ -688,7 +715,7 @@ and surrounded by square brackets. The special symbol
 {\tt oo} (two consecutive ``o'') represents the infinity $\infty$.
 Note that, even with infinity bounds, the brackets
 must be squared (and not parenthesis as it should be since the
-bound is open). Here a some examples:
+bound is open). Here are some examples:
 
 \begin{verbatim}
 [0,1]
@@ -725,16 +752,18 @@ For instance \cf{x} below is a column vector with 2 components, the first compon
 to $0$ and the second to $1$:
 \begin{verbatim}
 Constants
-x = (0; 1)
+x = (0; 1);
 \end{verbatim}
 For row vectors, use commas instead of periods:
 \begin{verbatim}
 Constants
-x = (0, 1)
+x = (0, 1);
 \end{verbatim}
 
-{\bf important remark}. Do note confuse
-\cf{[0,1]} with \cf{(0,1)}
+{\bf important remark}. 
+The reason why the syntax differs here from Matlab is that a 2-sized row vector surrounded
+by brackets would conflict with an interval. So, do note confuse
+\cf{[0,1]} with \cf{(0,1)}:
 \begin{itemize}
 \item \cf{(0,1)} is a 2-dimensional row vector of two reals, namely 0 and 1.
 This is {\bf not} an open interval.
@@ -743,7 +772,7 @@ This is {\bf not} an open interval.
 %The difference is ``\cf{;}'' versus ``\cf{,}''.
 
 Of course, you mix vector with intervals. For instance:
-{\tt ([-oo,0];[0,+oo])} is a column vector of $2$ intervals, $(-\infty,0)$ and $(0,+\infty)$.
+{\tt ([-oo,0];[0,+oo])} is a column vector of $2$ intervals, $(-\infty,0]$ and $[0,+\infty)$.
 
 To declare matrix constant, add an extra dimension in brackets:
 \begin{verbatim}
@@ -802,11 +831,11 @@ sqrt((xA-(xB+xC))^2+(yA-(yB+yC))^2=0;
 You can declare the distance function as follows.
 \begin{verbatim}
 function d=distance(xa,ya,xb,yb)
- d=sqrt((xa-xb)^2+(ya-yb)^2
+ return sqrt((xa-xb)^2+(ya-yb)^2;
 end
 \end{verbatim}
-Note that \cf{d} corresponds to the returned value of the function,
-as in the Matlab syntax. We will call it the {\it return variable}.
+%Note that \cf{d} corresponds to the returned value of the function,
+%as in the Matlab syntax. We will call it the {\it return variable}.
 You will then be able to simplify the writing of constraints:
 \begin{verbatim}
 distance(xA,1.0,yA,1.0)<=0;
@@ -822,8 +851,9 @@ in \ref{sec:mod-sys-auxfunc}.
 A function can return a single value, a vector
 or a matrix. Similarly, it can take real, vectors or matrix arguments.
 You can also write some minimal ``code'' inside the function before
-assigning the final expression to the return variable. This
-code is however limited to be a sequence of assignments.
+returning the final expression.
+%assigning the final expression to the return variable. 
+This code is however limited to be a sequence of assignments.
 
 Let us now illustrate all this with a more sophisticated example.
 We write below the function that calculates the rotation matrix
@@ -855,15 +885,12 @@ function R[3][3]=euler(phi,theta,psi)
   cpsi   = cos(psi);
   spsi   = sin(psi);
   
-  R[1][1]=ctheta*cpsi;
-  R[1][2]=-cphi*spsi+stheta*cpsi*sphi;  
-  R[1][3]=spsi*sphi+stheta*cpsi*cphi;
-  R[2][1]=ctheta*spsi;    
-  R[2][2]=cpsi*cphi+stheta*spsi*sphi;   
-  R[2][3]=-cpsi*sphi+stheta*cphi*spsi;
-  R[3][1]=-stheta;        
-  R[3][2]=ctheta*sphi;                  
-  R[3][3]=ctheta*cphi;
+  return 
+  ( (ctheta*cpsi, -cphi*spsi+stheta*cpsi*sphi, 
+                   spsi*sphi+stheta*cpsi*cphi) ; 
+    (ctheta*spsi, cpsi*cphi+stheta*spsi*sphi, 
+                 -cpsi*sphi+stheta*cphi*spsi) ;
+    (-stheta, ctheta*sphi, ctheta*cphi) );
 end
 \end{verbatim}
 
@@ -902,6 +929,7 @@ end
 \subsection{Difference with C++}
 
 \begin{itemize}
+\item Vectors are surrounded by parenthesis (not brackets)
 \item Indices start by $1$ instead of $0$
 \item You can use the \^{} symbol
 \end{itemize}
