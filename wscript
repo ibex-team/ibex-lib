@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # encoding: utf-8
 
-import datetime, os, shutil
+import datetime, os, shutil, re
 
 from distutils.version import LooseVersion
 from waflib import Logs
@@ -135,3 +135,20 @@ def build (bld):
 			d = os.path.join (bld.path.abspath(), name)
 			if os.path.isdir (d):
 				shutil.rmtree (d)
+
+def dist (ctx):
+	# do not include 3rd/* subdirectories when building the archive
+	get_files_orig = ctx.get_files
+	def get_files():
+		def is_not_3rd_subdir (node):
+			rel_path = node.path_from (ctx.path.find_dir ("3rd"))
+			if rel_path.startswith (".."):
+				return True
+			else:
+				# exclude subdirectories in 3rd
+				return not os.sep in rel_path
+
+		return list(filter (is_not_3rd_subdir, get_files_orig()))
+	ctx.get_files = get_files
+		
+
