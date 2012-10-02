@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # encoding: utf-8
 
-import datetime, os
+import datetime, os, shutil
 
 from distutils.version import LooseVersion
 from waflib import Logs
@@ -129,3 +129,9 @@ def configure (conf):
 
 def build (bld):
 	bld.recurse ("src examples 3rd")
+	
+	if bld.cmd == "clean":
+		for name in ("include", "lib"):
+			d = os.path.join (bld.path.abspath(), name)
+			if os.path.isdir (d):
+				shutil.rmtree (d)
