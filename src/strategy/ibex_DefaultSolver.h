@@ -41,7 +41,7 @@ private:
 	Bsc* __bsc;
 	CellBuffer* __buffer;
 	Array<Ctc>*  contractor_list (System& sys, double prec);
-	vector<X_Newton::corner_point>* default_corners ();
+	std::vector<X_Newton::corner_point>* default_corners ();
 };
 
 } // end namespace ibex

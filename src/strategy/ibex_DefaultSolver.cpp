@@ -25,9 +25,9 @@ namespace ibex {
 static System* tmp;
 
   // the corners for  Xnewton
- vector<X_Newton::corner_point>*  DefaultSolver::default_corners ()
- { vector<X_Newton::corner_point>* x;
-   x= new vector<X_Newton::corner_point>;
+ std::vector<X_Newton::corner_point>*  DefaultSolver::default_corners ()
+ { std::vector<X_Newton::corner_point>* x;
+   x= new std::vector<X_Newton::corner_point>;
    x->push_back(X_Newton::RANDOM);
    x->push_back(X_Newton::RANDOM_INV);
    return x;}
