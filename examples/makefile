@@ -6,7 +6,7 @@ LIBS	 := $(shell pkg-config --libs   ibex)
 
 all: $(BINS)
 
-% :	%.cpp ../lib/libibex.a
+% :	%.cpp
 	echo $(BINS) $(OBJS)
 	$(CXX) $(CPPFLAGS) $(LDFLAGS) $(CXXFLAGS) -o $@ $< $(LIBS)
 

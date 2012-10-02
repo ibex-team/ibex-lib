@@ -131,12 +131,6 @@ def configure (conf):
 
 def build (bld):
 	bld.recurse ("src examples 3rd")
-	
-	if bld.cmd == "clean":
-		for name in ("include", "lib"):
-			d = os.path.join (bld.path.abspath(), name)
-			if os.path.isdir (d):
-				shutil.rmtree (d)
 
 def dist (ctx):
 	# do not include 3rd/* subdirectories when building the archive
