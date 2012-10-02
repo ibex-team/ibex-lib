@@ -231,7 +231,10 @@ def configure (conf):
 	if conf.env.BUILD_MATHLIB:
 		log_start ("mathlib")
 		conf.setenv ("mathlib")
-		conf.env.MATHLIB = "mathlib-2.0.0"
+
+		platform = Utils.unversioned_sys_platform()
+
+		conf.env.MATHLIB = "mathlib-2.0.0" if platform != "darwin" else "mathlib-lion"
 		
 		conf.load ("compiler_cxx compiler_cc")
 		conf.switch_to_32bits()
@@ -251,6 +254,7 @@ def configure (conf):
 				"sys/stat.h",
 				"sys/types.h",
 				"unistd.h",
+				"fenv.h",
 		):
 			conf.check_cc (header_name = h, mandatory = False)
 
@@ -258,15 +262,20 @@ def configure (conf):
 		conf.define ("VERSION", conf.env.MATHLIB.split("-")[1])
 
 		try:
-			platform = Utils.unversioned_sys_platform()
 			conf.define ({
 				"aix":		"MATHLIB_AIX",
 				"cygwin":	"MATHLIB_CYGWIN",
 				"win32":	"MATHLIB_CYGWIN",
 				"linux":	"MATHLIB_LINUX",
+				"darwin":	"MATHLIB_I86_MACOSX",
 				"sunos":	"MATHLIB_SUN",
 
 			}[platform], 1)
+
+			if platform == "darwin":
+				# this is defined in mathlib-lion
+				# (don't know if it is really useful)
+				conf.define ("IX86_CPU", 1)
 		except KeyError:
 			conf.fatal ("unknown platform: %s" % platform)
 
