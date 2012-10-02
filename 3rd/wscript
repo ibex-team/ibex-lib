@@ -121,8 +121,9 @@ def configure (conf):
 			)
 
 		for known, macro in (
-			(".*-linux$", 	"IX86_LINUX"),
-			(".*-cygwin$",	"IX86_CYGWIN"),
+			(".*-linux$", 		"IX86_LINUX"),
+			(".*-cygwin$",		"IX86_CYGWIN"),
+			(".*-darwin$", 		"IX86_LINUX"),
 			("sparc.*-sunos$",	"SPARC_SOLARIS"),
 			("powerpc-",		"POWERPC_UNIX"),
 		):
@@ -202,6 +203,21 @@ def configure (conf):
 					function_name = func, header_name = header)
 			if macro:
 				conf.define (macro, 1 if v else 0)
+
+		# fix to build for macosx
+		if "HAVE_FENV_H=1" in conf.env.DEFINES:
+			check_fenv_t_attrib = lambda attr, mandatory: conf.check (
+				mandatory = mandatory, features = "c",
+				msg = "Checking if fenv_t has .%s" % attr,
+				fragment = """#include <fenv.h>\nvoid a(fenv_t* e) {
+						unsigned short int c;
+						c = e->%s;
+					}\n""" % attr)
+
+			if not check_fenv_t_attrib ("__control_word", False):
+				check_fenv_t_attrib ("__control", True)
+				# FIXME: may produce some side effects
+				conf.define ("__control_word", "__control", False)
 
 		conf.write_config_header ("%s/gaol/gaol_configuration.h" % conf.env.GAOL)
 
@@ -330,6 +346,10 @@ def build (bld):
 
 		# apply a patch to have strtod() and strtol() match with stdlib.h
 		apply_patch ("gdtoa-nothrow.patch")
+
+		# apply a patch initialise Flt_Rounds with a default value
+		# (becaues BSD's linker do not include uninitialised symbols by default)
+		apply_patch ("gdtoa-initialise-flt-rounds.patch")
 
 		cpat = bld.env.cprogram_PATTERN
 
