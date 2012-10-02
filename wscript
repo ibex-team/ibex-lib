@@ -1,13 +1,13 @@
 #! /usr/bin/env python
 # encoding: utf-8
 
-import datetime, os, shutil, re
+import os, shutil, re
 
 from distutils.version import LooseVersion
 from waflib import Logs
 
 # the following two variables are used by the target "waf dist"
-VERSION=datetime.date.today().strftime ("%Y%m%d")
+VERSION="2.0.0alpha"
 APPNAME='ibex-lib'
 
 top = '.'
@@ -52,6 +52,8 @@ def configure (conf):
 	conf.load ('compiler_cxx compiler_cc bison')
 	conf.load ('flex', '.')
 	conf.switch_to_32bits()
+
+	env.VERSION = VERSION
 
 	# optimised compilation flags
 	if conf.options.DEBUG:

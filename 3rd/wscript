@@ -301,6 +301,9 @@ def configure (conf):
 
 def build (bld):
 
+	INCDIR = "${PREFIX}/include/ibex"
+	LIBDIR = "${PREFIX}/lib/ibex"
+
 	def remove (filename):
 		if os.path.isfile (filename):
 			os.remove (filename)
@@ -356,29 +359,36 @@ def build (bld):
 		bld.program (
 			target	= prfx ("arithchk"),
 			source	= prfx ("arithchk.c"),
+			install_path = False,
 		)
 
 		bld (
 			target	= prfx ("arith.h"),
 			source	= prfx (cpat % "arithchk"),
 			rule	= "${SRC} > ${TGT}",
+			install_path = INCDIR,
 		)
 
 		bld.program (
 			target	= prfx ("qnan"),
 			source	= prfx ("qnan.c"),
+			install_path = False,
 		)
 
 		bld (
 			target	= prfx ("gd_qnan.h"),
 			source	= prfx (cpat % "qnan"),
 			rule	= "${SRC} > ${TGT}",
+			install_path = INCDIR,
 		)
 
 		bld.stlib (
 			source	= node.ant_glob("*.c"),
 			target	= "gdtoa",
+			install_path = LIBDIR,
 		)
+
+		bld.install_files (INCDIR, node.ant_glob("*.h"))
 		
 		bld.variant = ""
 	
@@ -402,7 +412,8 @@ def build (bld):
 				doasin.c    mpatan.c   sincos32.c  slowpow.c   ulog2.c  usncs.c
 				dosincos.c  mpexp.c    slowcot.c   uasncs.c    ulog.c   utan.c 
 				DPChange.c
-				 """.split()]
+				 """.split()],
+			install_path = LIBDIR,
 		)
 				
 
@@ -421,12 +432,19 @@ def build (bld):
 		remove (os.path.join (node.abspath(), "gaol", "gaol_configuration.h"))
 		apply_patch ("gaol-mingw.patch")
 
+		GAOL_INCDIR = "%s/gaol" % INCDIR
+
 		@bld.rule (
 			target = prfx ("gaol_double_op.h"),
 			source = prfx ("gaol_double_op_%s.h" % bld.env.FAST_MATH),
+			install_path = GAOL_INCDIR,
 		)
 		def _(tsk):
 			tsk.outputs[0].write (tsk.inputs[0].read())
+
+		bld.install_files (GAOL_INCDIR, node.ant_glob (["gaol/*.h", "gaol/gaol"]))
+		bld.install_files (os.path.join (GAOL_INCDIR, "sysdeps"), node.ant_glob ("gaol/sysdeps/*.h"))
+		bld.install_files (GAOL_INCDIR, node.get_bld().find_or_declare ("gaol/gaol_configuration.h"))
 
 
 		bld.stlib (
@@ -436,7 +454,8 @@ def build (bld):
 				gaol_expression.cpp gaol_interval_parser.cpp gaol_interval_lexer.cpp
 				gaol_port.cpp gaol_flt_output.cpp gaol_exceptions.cpp
 				gaol_init_cleanup.cpp s_nextafter.c gaol_exact.c
-				 """.split()]
+				 """.split()],
+			install_path = LIBDIR,
 		)
 
 

@@ -22,4 +22,5 @@ def build (bld):
 			target = t,
 			source = "%s.cpp" % t,
 			use = "ibex",
+			install_path = False,
 		)
