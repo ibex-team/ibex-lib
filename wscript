@@ -72,7 +72,7 @@ def configure (conf):
 
 		v = LooseVersion ("0")
 		for path in os.listdir (parent_dir):
-			if (path.startswith (prefix)):
+			if path.startswith (prefix) and os.path.isdir (os.path.join (parent_dir, path)):
 				new_v = LooseVersion (path)
 				if new_v > v:
 					v = new_v
