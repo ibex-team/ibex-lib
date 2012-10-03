@@ -27,6 +27,9 @@ def options (opt):
 	opt.add_option ("--with-soplex", action="store", type="string", dest="SOPLEX_PATH",
 			help = "location of the Soplex lib")
 
+	opt.add_option ("--with-jni", action="store_true", dest="WITH_JNI",
+			help = "enable the compilation of the JNI adapter (note: your JAVA_HOME environment variable must be properly set if you want to use this option)")
+
 
 def configure (conf):
 
@@ -107,20 +110,22 @@ def configure (conf):
 
 
 	# JNI
-	java_home = os.environ.get("JAVA_HOME")
-	if java_home:
-		env["JAVA_HOME"] = [java_home]
-	
-	conf.load ('javaw', funs = [])
+	if conf.options.WITH_JNI:
+		java_home = os.environ.get("JAVA_HOME")
+		if java_home:
+			env["JAVA_HOME"] = [java_home]
+		
+		conf.load ('javaw', funs = [])
 
-	conf.check_jni_headers (mandatory = False)
-	if env["INCLUDES_JAVA"]:
-		conf.msg ("Checking for java sdk", java_home)
-		del env["JAVAC"]
-		conf.find_program (os.path.join (java_home, "bin", "javac"), var = "JAVAC")
-		conf.find_program (os.path.join (java_home, "bin", "javah"), var = "JAVAH")
-	else:
-		conf.msg ("Checking for java sdk", "no (you may need to set JAVA_HOME to detect it properly)", "YELLOW")
+		conf.check_jni_headers (mandatory = False)
+		if env["INCLUDES_JAVA"]:
+			conf.msg ("Checking for java sdk", java_home)
+			del env["JAVAC"]
+			conf.find_program (os.path.join (java_home, "bin", "javac"), var = "JAVAC")
+			conf.find_program (os.path.join (java_home, "bin", "javah"), var = "JAVAH")
+		else:
+			conf.msg ("Checking for java sdk", "no (you may need to set JAVA_HOME to detect it properly)", "YELLOW")
+			conf.fatal ("Cannot find java sdk")
 
 	# Bison / Flex
 	env.append_unique ("BISONFLAGS", ["--name-prefix=ibex", "--report=all", "--file-prefix=parser"])
