@@ -46,7 +46,7 @@ def build (bld):
 	bld.install_files (INCDIR, bld.path.ant_glob ("**/ibex_*.h_"))
 
 	# JNI
-	if bld.env["INCLUDES_JAVA"]:
+	if bld.env.WITH_JNI:
 		ibex_src.append ("java/ibex_Java.cpp")
 
 		java_signature = JAVA_PACKAGE.replace (".", "_")

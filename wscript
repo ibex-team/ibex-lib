@@ -110,7 +110,8 @@ def configure (conf):
 
 
 	# JNI
-	if conf.options.WITH_JNI:
+	env.WITH_JNI = conf.options.WITH_JNI
+	if env.WITH_JNI:
 		java_home = os.environ.get("JAVA_HOME")
 		if java_home:
 			env["JAVA_HOME"] = [java_home]
