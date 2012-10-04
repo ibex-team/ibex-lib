@@ -19,7 +19,6 @@ def build (bld):
 	# headers
 
 	INCDIR = "${PREFIX}/include/ibex"
-	LIBDIR = "${PREFIX}/lib/ibex"
 
 	@bld.rule (
 		target = "ibex_bias_or_gaol.h",
@@ -88,12 +87,21 @@ def build (bld):
 		)
 
 	# c++ compilation
-	tg_ibex = bld.stlib (
-		target = "ibex",
-		use  = "JAVA",
-		source = ibex_src,
-		install_path = LIBDIR,
-	)
+	if bld.env.ENABLE_SHLIB:
+		# shared lib
+		tg_ibex = bld.shlib (
+			target	= "ibex",
+			use	= "JAVA gaol_objs gdtoa_objs ultim_objs",
+			source = ibex_src,
+		)
+	else:
+		# static lib
+		tg_ibex = bld.stlib (
+			target = "ibex",
+			use  = "JAVA",
+			source = ibex_src,
+			install_path = bld.env.LIBDIR,
+		)
 
 	# pkg-config file
 	@bld.rule (
@@ -116,8 +124,8 @@ Libs: -L${libdir}/ibex %s -libex %s
 		# extra CFLAGS
 		" ".join(("-I%s" % p) for p in filter (os.path.isabs, tsk.env.INCLUDES)),
 		# extra LIBPATH
-		" ".join(("-L%s" % p) for p in filter (os.path.isabs, tsk.env.LIBPATH)),
+		" ".join(("-L%s" % p) for p in filter (os.path.isabs, tsk.env.LIBPATH_IBEX_DEPS)),
 		# extra LIB
-		" ".join(("-l%s" % l) for l in tsk.env.LIB),
+		" ".join(("-l%s" % l) for l in tsk.env.LIB_IBEX_DEPS),
 	))
 

@@ -17,6 +17,10 @@ out = '__build__'
 def options (opt):
 	opt.load ("compiler_cxx compiler_cc javaw")
 
+
+	opt.add_option ("--enable-shlib", action="store_true", dest="ENABLE_SHLIB",
+			help = "build ibex as a shared lib")
+
 	opt.add_option ("--with-debug",  action="store_true", dest="DEBUG",
 			help = "enable debugging")
 
@@ -58,8 +62,6 @@ def configure (conf):
 
 	env.VERSION = VERSION
 
-	env.LIB_IBEX = "ibex"
-
 	# optimised compilation flags
 	if conf.options.DEBUG:
 		flags = "-O0 -g -pg -Wall -Wno-unknown-pragmas -fmessage-length=0"
@@ -69,6 +71,13 @@ def configure (conf):
 	for f in flags.split():
 		if conf.check_cxx (cxxflags = f, mandatory = False):
 			env.append_unique ("CXXFLAGS", f)
+
+	# build as shared lib
+	if conf.options.ENABLE_SHLIB or conf.options.WITH_JNI:
+		if conf.options.BIAS_PATH != None or conf.options.GAOL_PATH != None:
+			conf.fatal ("--enable-shlib cannot be used together with --with-bias/--with-gaol (the official libs are not compiled with -fPIC)")
+
+		env.ENABLE_SHLIB = True
 
 
 	def find_lib (prefix):
@@ -100,10 +109,10 @@ def configure (conf):
 		conf.msg ("Candidate directory for lib Soplex", path)
 
 		env.append_unique ("INCLUDES",  os.path.join (path, "src"))
-		env.append_unique ("LIBPATH", 	os.path.join (path, "lib"))
 
 		conf.check_cxx (header_name	= "soplex.h")
-		conf.check_cxx (lib		= ["soplex", "z"], uselib_store = "IBEX")
+		conf.check_cxx (lib		= ["soplex", "z"], uselib_store = "IBEX_DEPS",
+				libpath		= os.path.join (path, "lib"))
 	else:
 		conf.fatal ("cannot find the Soplex library, please use --with-soplex=SOPLEX_PATH")
 

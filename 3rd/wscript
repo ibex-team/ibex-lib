@@ -19,14 +19,28 @@ def configure (conf):
 			d if os.path.isabs (d) else os.path.join ("..", "3rd", d)
 			for d in p
 		])
-
+	
+	enable_shlib = conf.env.ENABLE_SHLIB
 	with_bias = conf.options.BIAS_PATH
 	with_gaol = conf.options.GAOL_PATH
 	def join (path, *k):
 		return os.path.abspath (os.path.join (os.path.expanduser (path), *k)) if path else None
+	def use_shlib():
+		if enable_shlib:
+			# configure the environment to produce PIC objects
+			conf.env.append_unique ("CFLAGS",   conf.env.CFLAGS_cshlib)
+			conf.env.append_unique ("CXXFLAGS", conf.env.CXXFLAGS_cxxshlib)
 
+		# return true if we build as a shared library
+		return enable_shlib
 
-	if with_bias is not None:
+	if enable_shlib:
+		# when building a shared, we force using the bundled version of gaol
+		# (in order to ensure that it is compiled as position independent code)
+		conf.env.INTERVAL_LIB = "GAOL"
+		conf.env.BUILD_GAOL = True
+
+	elif with_bias is not None:
 		# build with bias
 		if with_gaol is not None:
 			conf.fatal ("cannot use --with-gaol and --with-bias together")
@@ -35,12 +49,12 @@ def configure (conf):
 
 		if with_bias:
 			conf.env.append_unique ("INCLUDES", join (with_bias, "include"))
-			conf.env.append_unique ("LIBPATH", join (with_bias, "lib"))
 
 		conf.check_cxx (header_name	= "BIAS/BiasF.h")
 
+		kw = {"libpath": join (with_bias, "lib")} if with_bias else {}
 		conf.check_cxx (lib = ["Profil", "Bias", "lr"],
-				uselib_store = "IBEX")
+				uselib_store = "IBEX_DEPS", **kw)
 
 	else:
 		# build with gaol
@@ -48,16 +62,15 @@ def configure (conf):
 
 		if with_gaol:
 			conf.env.append_unique ("INCLUDES", join (with_gaol, "include"))
-			conf.env.append_unique ("LIBPATH", join (with_gaol, "lib"))
 		mandatory = bool (with_gaol)
 
 		has_h = conf.check_cxx (
 				header_name = ["gaol/gaol.h", "gaol/gaol_interval.h"],
 				mandatory = mandatory)
 
-		l = ["gaol", "ultim", "gdtoa"]
-		conf.env.LIB_IBEX.extend (l)
-		has_l = conf.check_cxx (lib=l, uselib_store="", mandatory = mandatory)
+		kw = {"libpath": join (with_gaol, "lib")} if with_gaol else {}
+		has_l = conf.check_cxx (lib=["gaol", "ultim", "gdtoa"], uselib_store="IBEX_DEPS",
+					mandatory = mandatory, **kw)
 
 		if not (has_h and has_l):
 			conf.env.BUILD_GAOL = True
@@ -84,12 +97,19 @@ def configure (conf):
 		conf.load ("compiler_cxx compiler_cc")
 		conf.switch_to_32bits()
 
-		if not (conf.check_cxx (header_name="gdtoa.h", mandatory=False) and
-			conf.check_cxx (lib="gdtoa", mandatory=False)):
+		# check if we need to build gdtoa and/or mathlib
+		if use_shlib():
 			ibex_env.BUILD_GDTOA = True
-
-		if not (conf.check_cxx (lib="ultim", mandatory=False)):
 			ibex_env.BUILD_MATHLIB = True
+		else:
+			if not (conf.check_cxx (header_name="gdtoa.h", mandatory=False) and
+				conf.check_cxx (lib="gdtoa", mandatory=False,
+						uselib_store="IBEX_DEPS")):
+				ibex_env.BUILD_GDTOA = True
+
+			if not conf.check_cxx (lib="ultim", mandatory=False,
+						uselib_store="IBEX_DEPS"):
+				ibex_env.BUILD_MATHLIB = True
 
 		conf.env.append_unique ("INCLUDES", [conf.env.GAOL, gdtoa_name])
 		ibex_append_path ("INCLUDES", conf.env.GAOL)
@@ -235,6 +255,8 @@ def configure (conf):
 		conf.load ("compiler_cxx compiler_cc")
 		conf.switch_to_32bits()
 
+		use_shlib()
+
 		conf.define ("INFNAN_CHECK", 1)
 		conf.define ("SET_INEXACT", 1)
 		conf.define ("Honor_FLT_ROUNDS", 1)
@@ -254,6 +276,8 @@ def configure (conf):
 		
 		conf.load ("compiler_cxx compiler_cc")
 		conf.switch_to_32bits()
+
+		use_shlib()
 
 		conf.env.append_unique ("INCLUDES", os.path.join (conf.env.MATHLIB, "src"))
 
@@ -301,8 +325,11 @@ def configure (conf):
 
 def build (bld):
 
+	# installation paths
 	INCDIR = "${PREFIX}/include/ibex"
-	LIBDIR = "${PREFIX}/lib/ibex"
+	# NOTE: we do not install the 3rd static libs when ibex is built as a shared library
+	#	(they will be linked within the lib instead)
+	LIBDIR = "${PREFIX}/lib/ibex" if not bld.env.ENABLE_SHLIB else None
 
 	def remove (filename):
 		if os.path.isfile (filename):
@@ -382,9 +409,16 @@ def build (bld):
 			install_path = INCDIR,
 		)
 
-		bld.stlib (
-			source	= node.ant_glob("*.c"),
-			target	= "gdtoa",
+		bld.objects (
+			source	= [prfx(n) for n in """
+				dmisc.c dtoa.c g_Qfmt.c g__fmt.c g_ddfmt.c g_dfmt.c g_ffmt.c
+				g_xLfmt.c g_xfmt.c gdtoa.c gethex.c gmisc.c hd_init.c hexnan.c
+				misc.c smisc.c strtoIQ.c strtoId.c strtoIdd.c strtoIf.c strtoIg.c
+				strtoIx.c strtoIxL.c strtod.c strtodI.c strtodg.c strtof.c strtopQ.c
+				strtopd.c strtopdd.c strtopf.c strtopx.c strtopxL.c strtorQ.c
+				strtord.c strtordd.c strtorf.c strtorx.c strtorxL.c sum.c ulp.c
+ 				""".split()],
+			target	= "gdtoa_objs",
 			install_path = LIBDIR,
 		)
 
@@ -403,8 +437,8 @@ def build (bld):
 		node = extract (bld.env.MATHLIB)
 		remove (os.path.join (node.abspath(), "src", "mathlib_configuration.h"))
 
-		bld.stlib (
-			target = "ultim",
+		bld.objects (
+			target = "ultim_objs",
 			source = [prfx(n) for n in """
 				atnat2.c    halfulp.c  mplog.c     slowexp2.c  ucot.c   upow.c 
 				atnat.c     mpa.c      mpsqrt.c    slowexp.c   uexp2.c  urem.c 
@@ -447,8 +481,8 @@ def build (bld):
 		bld.install_files (GAOL_INCDIR, node.get_bld().find_or_declare ("gaol/gaol_configuration.h"))
 
 
-		bld.stlib (
-			target = "gaol",
+		bld.objects (
+			target = "gaol_objs",
 			source = [prfx(n) for n in """
 				gaol_interval.cpp gaol_profile.cpp gaol_common.cpp gaol_parser.cpp
 				gaol_expression.cpp gaol_interval_parser.cpp gaol_interval_lexer.cpp

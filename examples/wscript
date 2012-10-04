@@ -21,6 +21,6 @@ def build (bld):
 		bld.program (
 			target = t,
 			source = "%s.cpp" % t,
-			use = "IBEX",
+			use = "ibex IBEX_DEPS",
 			install_path = False,
 		)
