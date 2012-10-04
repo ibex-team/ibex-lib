@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # encoding: utf-8
 
-import waflib.TaskGen
+import waflib.TaskGen, re
 def decide_ext(self,node):
 	if'cxx'in self.features:
 		return['.lex.cc']
@@ -19,7 +19,7 @@ def flexfun(tsk):
 	lst.extend([a.path_from(bld.bldnode)for a in tsk.inputs])
 	lst=[x for x in lst if x]
 	txt=bld.cmd_and_log(lst,cwd=wd,env=env.env or None,quiet=0)
-	tsk.outputs[0].write(txt.replace('\r\n','\n'))
+	tsk.outputs[0].write(re.sub('\r\n?|\n\r', '\n', txt))
 waflib.TaskGen.declare_chain(name='flex',rule=flexfun,ext_in='.l',decider=decide_ext,)
 def configure(conf):
 	conf.find_program('flex',var='FLEX')
