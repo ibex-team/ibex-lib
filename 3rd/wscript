@@ -20,7 +20,7 @@ def configure (conf):
 			for d in p
 		])
 	
-	enable_shlib = conf.env.ENABLE_SHLIB
+	enable_shlib = conf.env.ENABLE_SHARED
 	with_bias = conf.options.BIAS_PATH
 	with_gaol = conf.options.GAOL_PATH
 	def join (path, *k):
@@ -329,7 +329,7 @@ def build (bld):
 	INCDIR = "${PREFIX}/include/ibex"
 	# NOTE: we do not install the 3rd static libs when ibex is built as a shared library
 	#	(they will be linked within the lib instead)
-	LIBDIR = "${PREFIX}/lib/ibex" if not bld.env.ENABLE_SHLIB else None
+	LIBDIR = "${PREFIX}/lib/ibex" if not bld.env.ENABLE_SHARED else None
 
 	def remove (filename):
 		if os.path.isfile (filename):

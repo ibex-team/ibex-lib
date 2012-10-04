@@ -18,7 +18,7 @@ def options (opt):
 	opt.load ("compiler_cxx compiler_cc javaw")
 
 
-	opt.add_option ("--enable-shlib", action="store_true", dest="ENABLE_SHLIB",
+	opt.add_option ("--enable-shared", action="store_true", dest="ENABLE_SHARED",
 			help = "build ibex as a shared lib")
 
 	opt.add_option ("--with-debug",  action="store_true", dest="DEBUG",
@@ -73,11 +73,11 @@ def configure (conf):
 			env.append_unique ("CXXFLAGS", f)
 
 	# build as shared lib
-	if conf.options.ENABLE_SHLIB or conf.options.WITH_JNI:
+	if conf.options.ENABLE_SHARED or conf.options.WITH_JNI:
 		if conf.options.BIAS_PATH != None or conf.options.GAOL_PATH != None:
 			conf.fatal ("--enable-shlib cannot be used together with --with-bias/--with-gaol (the official libs are not compiled with -fPIC)")
 
-		env.ENABLE_SHLIB = True
+		env.ENABLE_SHARED = True
 
 
 	def find_lib (prefix):

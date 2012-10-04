@@ -87,21 +87,12 @@ def build (bld):
 		)
 
 	# c++ compilation
-	if bld.env.ENABLE_SHLIB:
-		# shared lib
-		tg_ibex = bld.shlib (
-			target	= "ibex",
-			use	= "JAVA gaol_objs gdtoa_objs ultim_objs",
-			source = ibex_src,
-		)
-	else:
-		# static lib
-		tg_ibex = bld.stlib (
-			target = "ibex",
-			use  = "JAVA",
-			source = ibex_src,
-			install_path = bld.env.LIBDIR,
-		)
+	tg_ibex = (bld.shlib if bld.env.ENABLE_SHARED else bld.stlib) (
+		target = "ibex",
+		use  = "JAVA gaol_objs gdtoa_objs ultim_objs",
+		source = ibex_src,
+		install_path = bld.env.LIBDIR,
+	)
 
 	# pkg-config file
 	@bld.rule (
