@@ -102,6 +102,7 @@ def configure (conf):
 			vis_flags = "-fvisibility-inlines-hidden -fvisibility=hidden".split()
 			if conf.check_cxx (cxxflags=vis_flags, mandatory=False):
 				conf.env.append_unique ("CXXFLAGS", vis_flags)
+				conf.define ("HAVE_VISIBILITY_OPTIONS", 1)
 
 		conf.env.FAST_MATH = "fast"
 
