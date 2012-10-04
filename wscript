@@ -58,6 +58,8 @@ def configure (conf):
 
 	env.VERSION = VERSION
 
+	env.LIB_IBEX = "ibex"
+
 	# optimised compilation flags
 	if conf.options.DEBUG:
 		flags = "-O0 -g -pg -Wall -Wno-unknown-pragmas -fmessage-length=0"
@@ -101,10 +103,7 @@ def configure (conf):
 		env.append_unique ("LIBPATH", 	os.path.join (path, "lib"))
 
 		conf.check_cxx (header_name	= "soplex.h")
-		conf.check_cxx (lib		= "z")
-		conf.check_cxx (lib		= "soplex")
-
-		env.append_unique ("LIB", ["soplex", "z"])
+		conf.check_cxx (lib		= ["soplex", "z"], uselib_store = "IBEX")
 	else:
 		conf.fatal ("cannot find the Soplex library, please use --with-soplex=SOPLEX_PATH")
 

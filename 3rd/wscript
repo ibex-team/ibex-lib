@@ -39,9 +39,8 @@ def configure (conf):
 
 		conf.check_cxx (header_name	= "BIAS/BiasF.h")
 
-		l = ["Profil", "Bias", "lr"]
-		conf.check_cxx (lib = l , uselib_store = "")
-		conf.env.append_unique ("LIB", l) # TODO: submit patch to do this with uselib_store=""
+		conf.check_cxx (lib = ["Profil", "Bias", "lr"],
+				uselib_store = "IBEX")
 
 	else:
 		# build with gaol
@@ -53,12 +52,12 @@ def configure (conf):
 		mandatory = bool (with_gaol)
 
 		has_h = conf.check_cxx (
-				header_name	= ["gaol/gaol.h", "gaol/gaol_interval.h"],
+				header_name = ["gaol/gaol.h", "gaol/gaol_interval.h"],
 				mandatory = mandatory)
 
 		l = ["gaol", "ultim", "gdtoa"]
+		conf.env.LIB_IBEX.extend (l)
 		has_l = conf.check_cxx (lib=l, uselib_store="", mandatory = mandatory)
-		conf.env.append_unique ("LIB", l)
 
 		if not (has_h and has_l):
 			conf.env.BUILD_GAOL = True
