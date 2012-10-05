@@ -93,7 +93,7 @@ def build (bld):
 	# c++ compilation
 	tg_ibex = (bld.shlib if bld.env.ENABLE_SHARED else bld.stlib) (
 		target = "ibex",
-		use  = "gaol_objs gdtoa_objs ultim_objs",
+		use  = "gaol_objs gdtoa_objs ultim_objs IBEX_BUILD_DEPS",
 		source = ibex_src,
 		install_path = bld.env.LIBDIR,
 	)
