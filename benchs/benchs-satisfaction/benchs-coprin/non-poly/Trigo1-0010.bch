@@ -5,14 +5,14 @@ Variables
 x[10] in [1.e-8,2*pi-1.e-8];
 
 Constraints
-11 - 2*cos(x[1]) - cos(x[2]) - cos(x[3]) - cos(x[4]) - cos(x[5]) - cos(x[6]) - cos(x[7]) - cos(x[8]) - cos(x[9]) - cos(x[10]) - sin(x[1]) = 0;
-10 - cos(x[1]) + 2*(1 - cos(x[2])) - cos(x[2]) - cos(x[3]) - cos(x[4]) - cos(x[5]) - cos(x[6]) - cos(x[7]) - cos(x[8]) - cos(x[9]) - cos(x[10]) - sin(x[2]) = 0;
-10 - cos(x[1]) - cos(x[2]) + 3*(1 - cos(x[3])) - cos(x[3]) - cos(x[4]) - cos(x[5]) - cos(x[6]) - cos(x[7]) - cos(x[8]) - cos(x[9]) - cos(x[10]) - sin(x[3]) = 0;
-10 - cos(x[1]) - cos(x[2]) - cos(x[3]) + 4*(1 - cos(x[4])) - cos(x[4]) - cos(x[5]) - cos(x[6]) - cos(x[7]) - cos(x[8]) - cos(x[9]) - cos(x[10]) - sin(x[4]) = 0;
-10 - cos(x[1]) - cos(x[2]) - cos(x[3]) - cos(x[4]) + 5*(1 - cos(x[5])) - cos(x[5]) - cos(x[6]) - cos(x[7]) - cos(x[8]) - cos(x[9]) - cos(x[10]) - sin(x[5]) = 0;
-10 - cos(x[1]) - cos(x[2]) - cos(x[3]) - cos(x[4]) - cos(x[5]) + 6*(1 - cos(x[6])) - cos(x[6]) - cos(x[7]) - cos(x[8]) - cos(x[9]) - cos(x[10]) - sin(x[6]) = 0;
-10 - cos(x[1]) - cos(x[2]) - cos(x[3]) - cos(x[4]) - cos(x[5]) - cos(x[6]) + 7*(1 - cos(x[7])) - cos(x[7]) - cos(x[8]) - cos(x[9]) - cos(x[10]) - sin(x[7]) = 0;
-10 - cos(x[1]) - cos(x[2]) - cos(x[3]) - cos(x[4]) - cos(x[5]) - cos(x[6]) - cos(x[7]) + 8*(1 - cos(x[8])) - cos(x[8]) - cos(x[9]) - cos(x[10]) - sin(x[8]) = 0;
-10 - cos(x[1]) - cos(x[2]) - cos(x[3]) - cos(x[4]) - cos(x[5]) - cos(x[6]) - cos(x[7]) - cos(x[8]) + 9*(1 - cos(x[9])) - cos(x[9]) - cos(x[10]) - sin(x[9]) = 0;
-10 - cos(x[1]) - cos(x[2]) - cos(x[3]) - cos(x[4]) - cos(x[5]) - cos(x[6]) - cos(x[7]) - cos(x[8]) - cos(x[9]) + 10*(1 - cos(x[10])) - cos(x[10]) - sin(x[10]) = 0;
+11 - 2*cos(x(1)) - cos(x(2)) - cos(x(3)) - cos(x(4)) - cos(x(5)) - cos(x(6)) - cos(x(7)) - cos(x(8)) - cos(x(9)) - cos(x(10)) - sin(x(1)) = 0;
+10 - cos(x(1)) + 2*(1 - cos(x(2))) - cos(x(2)) - cos(x(3)) - cos(x(4)) - cos(x(5)) - cos(x(6)) - cos(x(7)) - cos(x(8)) - cos(x(9)) - cos(x(10)) - sin(x(2)) = 0;
+10 - cos(x(1)) - cos(x(2)) + 3*(1 - cos(x(3))) - cos(x(3)) - cos(x(4)) - cos(x(5)) - cos(x(6)) - cos(x(7)) - cos(x(8)) - cos(x(9)) - cos(x(10)) - sin(x(3)) = 0;
+10 - cos(x(1)) - cos(x(2)) - cos(x(3)) + 4*(1 - cos(x(4))) - cos(x(4)) - cos(x(5)) - cos(x(6)) - cos(x(7)) - cos(x(8)) - cos(x(9)) - cos(x(10)) - sin(x(4)) = 0;
+10 - cos(x(1)) - cos(x(2)) - cos(x(3)) - cos(x(4)) + 5*(1 - cos(x(5))) - cos(x(5)) - cos(x(6)) - cos(x(7)) - cos(x(8)) - cos(x(9)) - cos(x(10)) - sin(x(5)) = 0;
+10 - cos(x(1)) - cos(x(2)) - cos(x(3)) - cos(x(4)) - cos(x(5)) + 6*(1 - cos(x(6))) - cos(x(6)) - cos(x(7)) - cos(x(8)) - cos(x(9)) - cos(x(10)) - sin(x(6)) = 0;
+10 - cos(x(1)) - cos(x(2)) - cos(x(3)) - cos(x(4)) - cos(x(5)) - cos(x(6)) + 7*(1 - cos(x(7))) - cos(x(7)) - cos(x(8)) - cos(x(9)) - cos(x(10)) - sin(x(7)) = 0;
+10 - cos(x(1)) - cos(x(2)) - cos(x(3)) - cos(x(4)) - cos(x(5)) - cos(x(6)) - cos(x(7)) + 8*(1 - cos(x(8))) - cos(x(8)) - cos(x(9)) - cos(x(10)) - sin(x(8)) = 0;
+10 - cos(x(1)) - cos(x(2)) - cos(x(3)) - cos(x(4)) - cos(x(5)) - cos(x(6)) - cos(x(7)) - cos(x(8)) + 9*(1 - cos(x(9))) - cos(x(9)) - cos(x(10)) - sin(x(9)) = 0;
+10 - cos(x(1)) - cos(x(2)) - cos(x(3)) - cos(x(4)) - cos(x(5)) - cos(x(6)) - cos(x(7)) - cos(x(8)) - cos(x(9)) + 10*(1 - cos(x(10))) - cos(x(10)) - sin(x(10)) = 0;
 end

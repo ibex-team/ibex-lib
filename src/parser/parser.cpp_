@@ -115,6 +115,7 @@ const ExprNode& apply(Function& f, const ExprNode& expr) {
 			return f(expr);
 		} catch(DimException& e) {
 			ibexerror(e.message());
+			return expr; // just to avoid a "warning control reaches end of non-void function"
 		}
 	}
 }
@@ -131,6 +132,7 @@ const ExprNode& apply(Function& f, const vector<const ExprNode*>& args) {
 			return f(args);
 		} catch(DimException& e) {
 			ibexerror(e.message());
+			return *args[0]; // just to avoid a "warning control reaches end of non-void function"
 		}
 	}
 }

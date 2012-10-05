@@ -33,12 +33,17 @@ public:
 
 /**
  * An indexed expression, like x[i+1], at parse time
+ *
+ * If matlab_style is true, the index starts from 1;
+ * otherwise it starts from 0.
  */
 class P_ExprIndex : public ExprBinaryOp {
 public:
-	P_ExprIndex(const ExprNode& expr, const ExprNode& index);
+	P_ExprIndex(const ExprNode& expr, const ExprNode& index, bool matlab_style);
 
 	virtual void acceptVisitor(ExprVisitor& v) const;
+
+	bool matlab_style;
 };
 
 /**

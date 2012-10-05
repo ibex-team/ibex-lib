@@ -49,19 +49,26 @@ void ExprGenerator::visit(const P_ExprPower& e) {
 
 void ExprGenerator::visit(const P_ExprIndex& e) {
 	int index=ConstantGenerator(scope).eval_integer(e.right);
-	if (index<=0) throw SyntaxError("Indices start from 1 (not 0)","",-1);
+
 	visit(e.left);
+
+	int real_index=e.matlab_style? index-1 : index;
+
+	if (real_index<0)
+		throw SyntaxError("negative index. Note: indices in Matlab-style (using parenthesis like in \"x(i)\") start from 1 (not 0).");
+	if (real_index>LEFT.dim.max_index())
+		throw SyntaxError("index out of bounds. Note: indices in C-style (using square brackets like in \"x[i]\") start from 0 (not 1).");
 
 	if (fold) {
 		const ExprConstant* c=dynamic_cast<const ExprConstant*>(&LEFT);
 		if (c) {
-			e.deco.tmp = &ExprConstant::new_(c->get()[index-1]);
+			e.deco.tmp = &ExprConstant::new_(c->get()[real_index]);
 			delete c;
 			return;
 		}
 	}
 
-	e.deco.tmp = &(LEFT[index-1]);
+	e.deco.tmp = &(LEFT[real_index]);
 }
 
 void ExprGenerator::visit(const ExprIter& x) {

@@ -34,7 +34,8 @@ void P_ExprPower::acceptVisitor(ExprVisitor& v) const {
 	else v.visit(*this);
 }
 
-P_ExprIndex::P_ExprIndex(const ExprNode& expr, const ExprNode& index) : ExprBinaryOp(expr,index,expr.dim.index_dim()) {
+P_ExprIndex::P_ExprIndex(const ExprNode& expr, const ExprNode& index, bool style) : ExprBinaryOp(expr,index,expr.dim.index_dim()),
+		matlab_style(style) {
 
 }
 

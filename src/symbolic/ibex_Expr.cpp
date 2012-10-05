@@ -62,6 +62,12 @@ void cleanup(const ExprNode& expr, bool delete_symbols) {
 	delete[] nodes;
 }
 
+ExprIndex::ExprIndex(const ExprNode& subexpr, int index)
+: ExprNode(subexpr.height+1, subexpr.size+1, subexpr.dim.index_dim()), expr(subexpr), index(index) {
+	if (index<0 || index>subexpr.dim.max_index())
+		throw DimException("index out of bounds");
+}
+
 
 bool ExprIndex::indexed_symbol() const {
 	// we prefer to use directly a dynamic cast here

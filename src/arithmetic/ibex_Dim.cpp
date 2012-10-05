@@ -119,6 +119,12 @@ Dim Dim::index_dim() const {
 		  return Dim(1,1,dim.dim3); // return a row vector
 }
 
+int Dim::max_index() const {
+	if (is_scalar()) return 0;
+	else if (is_vector()) return vec_size()-1;
+	else if (type()==MATRIX) return dim2-1;
+	else return dim1-1;
+}
 
 Dim Dim::transpose_dim() const {
 	switch (type()) {
