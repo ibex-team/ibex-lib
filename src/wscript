@@ -53,6 +53,7 @@ def build (bld):
 		@bld.rule (
 			target = "java/ibex_Java.cpp",
 			source = "java/ibex_Java.cpp_",
+			vars = ["JAVA_PACKAGE"],
 		)
 		def _(tsk):
 			tsk.outputs[0].write (
