@@ -10,7 +10,6 @@
  * ---------------------------------------------------------------------------- */
 
 #include "ibex_IntervalVector.h"
-#include "ibex_NonRecoverableException.h"
 #include <vector>
 #include <stdlib.h>
 #include <sstream>
@@ -87,7 +86,7 @@ IntervalVector IntervalVector::subvector(int start_index, int end_index) {
 	assert(!is_empty());
 	assert(end_index>=0 && start_index>=0);
 	assert(end_index<size() && start_index<=end_index);
-	//throw NonRecoverableException("Invalid indices for IntervalVector::subvector");
+	//throw InvalidIntervalVectorOp("Invalid indices for IntervalVector::subvector");
 
 	IntervalVector v(end_index-start_index+1);
 	int j=0;
@@ -467,7 +466,7 @@ std::pair<IntervalVector,IntervalVector> IntervalVector::bisect(int i, double ra
 		if ((*this)[i].ub()<-DBL_MAX) {
 			std::ostringstream oss;
 			oss << "Unable to bisect " << *this;
-			throw NonRecoverableException(oss.str());
+			throw InvalidIntervalVectorOp(oss.str());
 		}
 
 		else if ((*this)[i].ub()==POS_INFINITY) {
@@ -487,7 +486,7 @@ std::pair<IntervalVector,IntervalVector> IntervalVector::bisect(int i, double ra
 		if ((*this)[i].lb()>DBL_MAX) {
 			std::ostringstream oss;
 			oss << "Unable to bisect " << *this;
-			throw NonRecoverableException(oss.str());
+			throw InvalidIntervalVectorOp(oss.str());
 		}
 
 		else {

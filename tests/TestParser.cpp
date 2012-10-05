@@ -166,7 +166,7 @@ void TestParser::func02() {
 		for (int i=0; i<sys.ctrs.size(); i++)
 			c[i]=new CtcProj(sys.ctrs[i]);
 
-		for (int i=6; i<sys.ctrs.size(); i++) {
+		for (int i=0; i<sys.ctrs.size(); i++) {
 			IntervalVector subbox(2);
 			subbox[0]=11;
 			subbox[1]=12;

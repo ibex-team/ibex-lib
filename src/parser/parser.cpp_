@@ -16,7 +16,7 @@
 #include "ibex_Array.h"
 #include "ibex_System.h"
 #include "ibex_String.h"
-
+#include "ibex_DimException.h"
 #include "ibex_SyntaxError.h"
 #include "ibex_ParserSource.h"
 #include "ibex_P_Expr.h"
@@ -32,6 +32,7 @@ extern int ibexlex(void);
 extern char* ibextext;
 extern int ibex_lineno;
 
+// note: do not confuse with ibex_error in tools/ibex_Exception.h
 void ibexerror (const std::string& msg) {
 	throw ibex::SyntaxError(msg, ibextext, ibex_lineno);
 }
@@ -110,7 +111,11 @@ const ExprNode& apply(Function& f, const ExprNode& expr) {
 		ibexerror(s.str());
 		return expr; // just to avoid a "warning control reaches end of non-void function"
 	} else {
-		return f(expr);
+		try {
+			return f(expr);
+		} catch(DimException& e) {
+			ibexerror(e.message());
+		}
 	}
 }
 
@@ -122,7 +127,11 @@ const ExprNode& apply(Function& f, const vector<const ExprNode*>& args) {
 		ibexerror(s.str());
 		return *args[0]; // just to avoid a "warning control reaches end of non-void function"
 	} else {
-		return f(args);
+		try {
+			return f(args);
+		} catch(DimException& e) {
+			ibexerror(e.message());
+		}
 	}
 }
 

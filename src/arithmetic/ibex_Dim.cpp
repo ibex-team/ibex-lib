@@ -11,7 +11,7 @@
 
 #include <sstream>
 #include "ibex_Dim.h"
-#include "ibex_NonRecoverableException.h"
+#include "ibex_DimException.h"
 #include <cassert>
 
 using std::stringstream;
@@ -25,13 +25,14 @@ Dim::Dim(int dim1, int dim2, int dim3) : dim1(dim1), dim2(dim2), dim3(dim3) {
 }
 
 Dim mul_dim(const Dim& l, const Dim& r) {
-	assert(l.dim1==1 && r.dim1==1);
+	if (l.dim1!=1 || r.dim1!=1)
+		throw DimException("cannot multiply a matrix array");
 
 	if (l.type()==Dim::SCALAR) // scalar multiplication.
 		return r;
 	else {
 		if (l.dim3!=r.dim2) {
-			throw NonRecoverableException("Mismatched dimensions in matrix multiplication");
+			throw DimException("mismatched dimensions in matrix multiplication");
 		} else {
 			if (l.dim2==1)
 				if (r.dim3==1) return Dim::scalar();
@@ -45,7 +46,9 @@ Dim mul_dim(const Dim& l, const Dim& r) {
 
 Dim vec_dim(const Array<const Dim>& comp, bool in_a_row) {
 	int n=comp.size();
-	assert (n>0);
+
+	if (n==0) throw DimException("a 0-sized vector has no dimension");
+
 	const Dim& d=comp[0];
 
 	if (d.is_scalar()) {
@@ -95,7 +98,7 @@ Dim vec_dim(const Array<const Dim>& comp, bool in_a_row) {
 	}
 
 	error:
-	throw NonRecoverableException("Impossible to form a vector with these components");
+	throw DimException("impossible to form a vector with heterogeneous components");
 }
 
 Dim Dim::index_dim() const {
@@ -124,7 +127,7 @@ Dim Dim::transpose_dim() const {
 	case COL_VECTOR:   return row_vec(vec_size());
 	case MATRIX:       return matrix(dim3,dim2);
 	case MATRIX_ARRAY:
-	default:           ibex_error("Cannot transpose an array of matrices.");
+	default:           throw DimException("cannot transpose an array of matrices");
 	                   return *this;
 	}
 }
@@ -134,15 +137,15 @@ int Dim::index_num(int this_num, int index) const {
 
   int num=this_num;
 
-  if (index<=0) throw NonRecoverableException("Null index (note: indexes start from 1)");
+  if (index<=0) throw DimException("Null index (note: indexes start from 1)");
 
-  if (this->dim3==0) throw NonRecoverableException("Too many subscripts (e.g., a vector symbol cannot be indexed twice)");
+  if (this->dim3==0) throw DimException("Too many subscripts (e.g., a vector symbol cannot be indexed twice)");
 
   if (this->dim2==0) {
     if (index>this->dim3)  {
       stringstream s;
       s << "Index (" << index << ") exceeds bounds";
-      throw NonRecoverableException(s.str());
+      throw DimException(s.str());
     }
     num+=(index-1);
   }
@@ -150,14 +153,14 @@ int Dim::index_num(int this_num, int index) const {
     if (index>this->dim2)  {
       stringstream s;
       s << "Index (" << index << ") exceeds bounds";
-      throw NonRecoverableException(s.str());
+      throw DimException(s.str());
     }
     num+=(index-1) * this->dim3;
   } else {
     if (index>this->dim1)  {
       stringstream s;
       s << "Index (" << index << ") exceeds bounds";
-      throw NonRecoverableException(s.str());
+      throw DimException(s.str());
     }
     num+=(index-1) * this->dim2 * this->dim3;
   }

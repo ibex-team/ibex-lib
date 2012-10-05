@@ -10,13 +10,14 @@
  * ---------------------------------------------------------------------------- */
 
 #include "ibex_Expr.h"
+#include "ibex_DimException.h"
 #include "ibex_Function.h"
-#include "ibex_NonRecoverableException.h"
 #include "ibex_ExprPrinter.h"
 #include "ibex_ExprNodes.h"
 #include "ibex_ExprSize.h"
 #include "ibex_ExprReset.h"
 #include "ibex_String.h"
+#include <sstream>
 #include <limits.h>
 #include <stdio.h>
 #include <set>
@@ -181,7 +182,7 @@ ExprBinaryOp::ExprBinaryOp(const ExprNode& left, const ExprNode& right, const Di
 
 ExprAdd::ExprAdd(const ExprNode& left, const ExprNode& right) :
 				ExprBinaryOp(left,right,left.dim) {
-	assert(left.dim == right.dim);
+	if (!(left.dim == right.dim)) throw DimException("mismatched dimensions in addition");
 }
 
 ExprMul::ExprMul(const ExprNode& left, const ExprNode& right) :
@@ -190,40 +191,50 @@ ExprMul::ExprMul(const ExprNode& left, const ExprNode& right) :
 
 ExprSub::ExprSub(const ExprNode& left, const ExprNode& right) :
 				ExprBinaryOp(left,right,left.dim) {
-	assert(left.dim == right.dim);
+	if (!(left.dim == right.dim)) throw DimException("mismatched dimensions in subtraction");
 }
 
 ExprDiv::ExprDiv(const ExprNode& left, const ExprNode& right) :
 						ExprBinaryOp(left,right,Dim()) {
-	assert(left.type() == Dim::SCALAR);
-	assert(right.type() == Dim::SCALAR);
+	if (!(left.type() == Dim::SCALAR)) throw DimException("cannot divide a non-scalar expression");
+	if (!(right.type() == Dim::SCALAR)) throw DimException("cannot divide by a non-scalar expression");
 }
 
 ExprMax::ExprMax(const ExprNode& left, const ExprNode& right) :
 		ExprBinaryOp(left,right,Dim()) {
-	assert(left.type() == Dim::SCALAR);
-	assert(right.type() == Dim::SCALAR);
+	if (!(left.type() == Dim::SCALAR)) throw DimException("\"max\" expects scalar arguments");
+	if (!(right.type() == Dim::SCALAR)) throw DimException("\"max\" expects scalar arguments");
 }
 
 ExprMin::ExprMin(const ExprNode& left, const ExprNode& right) :
 		ExprBinaryOp(left,right,Dim()) {
-	assert(left.type() == Dim::SCALAR);
-	assert(right.type() == Dim::SCALAR);
+	if (!(left.type() == Dim::SCALAR)) throw DimException("\"min\" expects scalar arguments");
+	if (!(right.type() == Dim::SCALAR)) throw DimException("\"min\" expects scalar arguments");
 }
 
 ExprAtan2::ExprAtan2(const ExprNode& left, const ExprNode& right) :
 			ExprBinaryOp(left,right,Dim()) {
-	assert(left.type() == Dim::SCALAR);
-	assert(right.type() == Dim::SCALAR);
+	if (!(left.type() == Dim::SCALAR)) throw DimException("\"atan2\" expects scalar arguments");
+	if (!(right.type() == Dim::SCALAR)) throw DimException("\"atan2\" expects scalar arguments");
 }
 
 ExprApply::ExprApply(const Function& f, const ExprNode** args) :
 		ExprNAryOp(args,f.nb_arg(),f.expr().dim),
 		func(f) {
 	for (int i=0; i<f.nb_arg(); i++) {
-		// we allow automatic transposition of vector arguments
-		assert((args[i]->dim.is_vector() && f.arg(i).dim.is_vector())
-				|| (args[i]->dim == f.arg(i).dim));
+
+		if (args[i]->dim.is_vector()) {
+			// we allow automatic transposition of vector arguments
+			if (f.arg(i).dim.is_vector() && (args[i]->dim.vec_size()==f.arg(i).dim.vec_size())) continue;
+		} else {
+			// otherwise, dimensions must match exactly.
+			if (args[i]->dim == f.arg(i).dim) continue;
+		}
+
+		stringstream s;
+		s << "dimension of the " << (i+1) << "th argument passed to \"" << f.name << "\" ";
+		s << "do not match that of the formal argument \"" << f.arg_name(i) << "\"";
+		throw DimException(s.str());
 	}
 }
 

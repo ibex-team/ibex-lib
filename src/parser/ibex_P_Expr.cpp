@@ -11,6 +11,8 @@
 #include "ibex_P_Expr.h"
 #include "ibex_P_ExprPrinter.h"
 
+extern void ibexerror (const std::string& msg);
+
 using namespace std;
 
 namespace ibex {
@@ -21,6 +23,8 @@ void p_print(const ExprNode& e) {
 }
 
 P_ExprPower::P_ExprPower(const ExprNode& expr, const ExprNode& expon) : ExprBinaryOp(expr,expon,expr.dim) {
+	if (!expr.dim.is_scalar()) ibexerror("cannot raise a non-scalar value to some power");
+	if (!expon.dim.is_scalar()) ibexerror("cannot raise a value to a non-scalar power");
 
 }
 

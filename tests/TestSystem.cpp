@@ -85,7 +85,6 @@ void TestSystem::copy01() {
 	//delete &_sys;
 
 	// all the lines below are copy-pasted from factory01...
-	cout << sys.nb_ctr << endl;
 	TEST_ASSERT(sys.nb_ctr==2);
 	TEST_ASSERT(sys.nb_var==13);
 	TEST_ASSERT(sys.args.size()==3);

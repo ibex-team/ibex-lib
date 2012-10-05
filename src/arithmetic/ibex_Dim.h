@@ -15,7 +15,6 @@
 #include <iostream> // for ostream
 #include <utility>  // for pair
 #include <cassert>
-#include "ibex_NonRecoverableException.h"
 #include "ibex_Array.h"
 
 namespace ibex {
