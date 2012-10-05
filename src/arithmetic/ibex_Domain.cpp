@@ -199,6 +199,8 @@ void load(Array<Domain>& x, const Array<const Domain>& y, int nb_used, int* used
 				break;
 			case Dim::ROW_VECTOR:
 			{
+				// note that it is then possible to load a row vector
+				// into a column vector (and this flexibility is desired)
 				for (int j=0; j<dim.dim3; j++) {
 					if (i==used[u]) { x[s][j]=y[s][j]; u++; }
 					i++;
@@ -207,6 +209,8 @@ void load(Array<Domain>& x, const Array<const Domain>& y, int nb_used, int* used
 			break;
 			case Dim::COL_VECTOR:
 			{
+				// note that it is then possible to load a column vector
+				// into a row vector (and this flexibility is desired)
 				for (int j=0; j<dim.dim2; j++) {
 					if (i==used[u]) { x[s][j]=y[s][j]; u++; }
 					i++;

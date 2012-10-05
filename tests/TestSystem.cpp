@@ -57,19 +57,19 @@ void TestSystem::factory01() {
 
 	TEST_ASSERT(sys.nb_ctr==2);
 	TEST_ASSERT(sys.nb_var==13);
-	TEST_ASSERT(sys.vars.size()==3);
-	TEST_ASSERT(sys.vars[0].dim==Dim::col_vec(3));
-	TEST_ASSERT(sys.vars[1].dim==Dim::matrix(3,3));
-	TEST_ASSERT(sys.vars[2].dim==Dim::scalar());
+	TEST_ASSERT(sys.args.size()==3);
+	TEST_ASSERT(sys.args[0].dim==Dim::col_vec(3));
+	TEST_ASSERT(sys.args[1].dim==Dim::matrix(3,3));
+	TEST_ASSERT(sys.args[2].dim==Dim::scalar());
 	TEST_ASSERT(sameExpr(sys.goal->expr(),"(y-cos(x[1]))"));
 	TEST_ASSERT(strcmp(sys.goal_name,System::goal_name)==0);
 
 	TEST_ASSERT(sys.box.size()==13);
 
 	TEST_ASSERT(sys.ctrs.size()==2);
-	TEST_ASSERT(sys.f.nb_symbols()==3);
-	TEST_ASSERT(sys.f.input_size()==13);
-	TEST_ASSERT(sys.f.output_size()==4);
+	TEST_ASSERT(sys.f.nb_arg()==3);
+	TEST_ASSERT(sys.f.nb_var()==13);
+	TEST_ASSERT(sys.f.image_dim()==4);
 	TEST_ASSERT(sameExpr(sys.ctrs[0].f.expr(),"(A*x)"));
 	TEST_ASSERT(sys.ctrs[0].op==EQ);
 	TEST_ASSERT(sameExpr(sys.ctrs[1].f.expr(),"(y-x[0])"));
@@ -88,19 +88,19 @@ void TestSystem::copy01() {
 	cout << sys.nb_ctr << endl;
 	TEST_ASSERT(sys.nb_ctr==2);
 	TEST_ASSERT(sys.nb_var==13);
-	TEST_ASSERT(sys.vars.size()==3);
-	TEST_ASSERT(sys.vars[0].dim==Dim::col_vec(3));
-	TEST_ASSERT(sys.vars[1].dim==Dim::matrix(3,3));
-	TEST_ASSERT(sys.vars[2].dim==Dim::scalar());
+	TEST_ASSERT(sys.args.size()==3);
+	TEST_ASSERT(sys.args[0].dim==Dim::col_vec(3));
+	TEST_ASSERT(sys.args[1].dim==Dim::matrix(3,3));
+	TEST_ASSERT(sys.args[2].dim==Dim::scalar());
 	TEST_ASSERT(sameExpr(sys.goal->expr(),"(y-cos(x[1]))"));
 	TEST_ASSERT(strcmp(sys.goal_name,System::goal_name)==0);
 
 	TEST_ASSERT(sys.box.size()==13);
 
 	TEST_ASSERT(sys.ctrs.size()==2);
-	TEST_ASSERT(sys.f.nb_symbols()==3);
-	TEST_ASSERT(sys.f.input_size()==13);
-	TEST_ASSERT(sys.f.output_size()==4);
+	TEST_ASSERT(sys.f.nb_arg()==3);
+	TEST_ASSERT(sys.f.nb_var()==13);
+	TEST_ASSERT(sys.f.image_dim()==4);
 	TEST_ASSERT(sameExpr(sys.ctrs[0].f.expr(),"(A*x)"));
 	TEST_ASSERT(sys.ctrs[0].op==EQ);
 	TEST_ASSERT(sameExpr(sys.ctrs[1].f.expr(),"(y-x[0])"));
@@ -115,18 +115,18 @@ void TestSystem::extend01() {
 
 	TEST_ASSERT(sys.nb_ctr==4);
 	TEST_ASSERT(sys.nb_var==5);
-	TEST_ASSERT(sys.vars.size()==3);
-	TEST_ASSERT(sys.vars[0].dim==Dim::col_vec(3));
-	TEST_ASSERT(sys.vars[1].dim==Dim::scalar());
-	TEST_ASSERT(sys.vars[2].dim==Dim::scalar());
+	TEST_ASSERT(sys.args.size()==3);
+	TEST_ASSERT(sys.args[0].dim==Dim::col_vec(3));
+	TEST_ASSERT(sys.args[1].dim==Dim::scalar());
+	TEST_ASSERT(sys.args[2].dim==Dim::scalar());
 	TEST_ASSERT(sys.goal==NULL);
 
 	TEST_ASSERT(sys.box.size()==5);
 
 	TEST_ASSERT(sys.ctrs.size()==4);
-	TEST_ASSERT(sys.f.nb_symbols()==3);
-	TEST_ASSERT(sys.f.input_size()==5);
-	TEST_ASSERT(sys.f.output_size()==4);
+	TEST_ASSERT(sys.f.nb_arg()==3);
+	TEST_ASSERT(sys.f.nb_var()==5);
+	TEST_ASSERT(sys.f.image_dim()==4);
 	TEST_ASSERT(sameExpr(sys.ctrs[0].f.expr(),"(__goal__-(y-cos(x[1])))"));
 	TEST_ASSERT(sys.ctrs[0].op==EQ);
 	TEST_ASSERT(sameExpr(sys.ctrs[1].f.expr(),"(-(x[0]+x[1]))"));

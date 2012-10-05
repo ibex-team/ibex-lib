@@ -533,13 +533,13 @@ Vector IntervalVector::random() const {
 bool proj_add(const IntervalVector& y, IntervalVector& x1, IntervalVector& x2) {
 	x1 &= y-x2;
 	x2 &= y-x1;
-	return x1.is_empty() || x2.is_empty();
+	return !x1.is_empty() && !x2.is_empty();
 }
 
 bool proj_sub(const IntervalVector& y, IntervalVector& x1, IntervalVector& x2) {
 	x1 &= y+x2;
 	x2 &= x1-y;
-	return x1.is_empty() || x2.is_empty();
+	return !x1.is_empty() && !x2.is_empty();
 }
 
 bool proj_mul(const IntervalVector& y, Interval& x1, IntervalVector& x2) {

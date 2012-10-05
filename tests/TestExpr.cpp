@@ -434,7 +434,7 @@ void TestExpr::apply01() {
 	const ExprSymbol& z=ExprSymbol::new_("z",Dim::matrix(3,4));
 	Function f(x,y,z,y,"func");
 
-	TEST_ASSERT(f.nb_symbols()==3);
+	TEST_ASSERT(f.nb_arg()==3);
 
 	const ExprSymbol& x2=ExprSymbol::new_("x2");
 	const ExprSymbol& y2=ExprSymbol::new_("y2",Dim::col_vec(4));
@@ -445,7 +445,7 @@ void TestExpr::apply01() {
 	const ExprApply& e=ExprApply::new_(f,args);
 	Function f2(x2,y2,A2,e);
 
-	TEST_ASSERT(f2.nb_symbols()==3);
+	TEST_ASSERT(f2.nb_arg()==3);
 	TEST_ASSERT(e.nb_args==3);
 	TEST_ASSERT(&e.arg(0)==&x2);
 	TEST_ASSERT(&e.arg(2)==&A2);

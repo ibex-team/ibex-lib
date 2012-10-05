@@ -29,9 +29,9 @@ void TestFunction::add_symbol() {
 	Function f(x,y,x);
 
 	TEST_ASSERT(f.nb_nodes()==2);
-	TEST_ASSERT(f.nb_symbols()==2);
-	TEST_ASSERT(strcmp(f.symbol_name(0),"x")==0);
-	TEST_ASSERT(strcmp(f.symbol_name(1),"y")==0);
+	TEST_ASSERT(f.nb_arg()==2);
+	TEST_ASSERT(strcmp(f.arg_name(0),"x")==0);
+	TEST_ASSERT(strcmp(f.arg_name(1),"y")==0);
 	TEST_ASSERT(f.used(0));
 	TEST_ASSERT(f.used(0));
 	TEST_ASSERT(!f.used(1));
@@ -48,7 +48,7 @@ void TestFunction::copy() {
 
 	Function f2(f);
 	TEST_ASSERT(f2.nb_nodes()==3);
-	TEST_ASSERT(f2.nb_symbols()==2);
+	TEST_ASSERT(f2.nb_arg()==2);
 
 	const ExprSymbol* x2=dynamic_cast<const ExprSymbol*>(&f2.node(0));
 	TEST_ASSERT(x2!=NULL);
@@ -80,13 +80,13 @@ void TestFunction::separate() {
 
 	Function f(x,y,z,e);
 
-	TEST_ASSERT(f[0].nb_symbols()==3);
+	TEST_ASSERT(f[0].nb_arg()==3);
 	TEST_ASSERT(sameExpr(f[0].expr(),"((x+y)-z)"));
 
-	TEST_ASSERT(f[1].nb_symbols()==3);
+	TEST_ASSERT(f[1].nb_arg()==3);
 	TEST_ASSERT(sameExpr(f[1].expr(),"(x*z)"));
 
-	TEST_ASSERT(f[2].nb_symbols()==3);
+	TEST_ASSERT(f[2].nb_arg()==3);
 	TEST_ASSERT(sameExpr(f[2].expr(),"(y-z)"));
 }
 

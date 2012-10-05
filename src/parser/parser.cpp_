@@ -108,17 +108,19 @@ const ExprNode& apply(Function& f, const ExprNode& expr) {
 		stringstream s;
 		s << "function " << f.name << " expects 1 argument";
 		ibexerror(s.str());
+		return expr; // just to avoid a "warning control reaches end of non-void function"
 	} else {
 		return f(expr);
 	}
 }
 
 const ExprNode& apply(Function& f, const vector<const ExprNode*>& args) {
-	int n=f.nb_arg();
+	unsigned int n=f.nb_arg();
 	if (n!=args.size()) {
 		stringstream s;
 		s << "function " << f.name << " expects " << n << " argument" << (n>1? "s":"");
 		ibexerror(s.str());
+		return *args[0]; // just to avoid a "warning control reaches end of non-void function"
 	} else {
 		return f(args);
 	}

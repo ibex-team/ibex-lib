@@ -220,8 +220,11 @@ ExprAtan2::ExprAtan2(const ExprNode& left, const ExprNode& right) :
 ExprApply::ExprApply(const Function& f, const ExprNode** args) :
 		ExprNAryOp(args,f.nb_arg(),f.expr().dim),
 		func(f) {
-	for (int i=0; i<f.nb_arg(); i++)
-		assert(args[i]->dim == f.arg(i).dim);
+	for (int i=0; i<f.nb_arg(); i++) {
+		// we allow automatic transposition of vector arguments
+		assert((args[i]->dim.is_vector() && f.arg(i).dim.is_vector())
+				|| (args[i]->dim == f.arg(i).dim));
+	}
 }
 
 std::ostream& operator<<(std::ostream& os, const ExprNode& expr) {

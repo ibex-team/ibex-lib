@@ -27,6 +27,12 @@ Domain& Eval::eval(const Function& f, ExprLabel** args) const {
 
 	load(f.arg_domains,argD,f.nb_used_vars,f.used_var);
 
+	//------------- for debug
+	//	cout << "Function " << f.name << ", domains before eval:" << endl;
+	//	for (int i=0; i<f.nb_arg(); i++) {
+	//		cout << "arg[" << i << "]=" << f.arg_domains[i] << endl;
+	//	}
+
 	return *f.forward<Eval>(*this).d;
 }
 

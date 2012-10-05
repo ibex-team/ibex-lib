@@ -13,6 +13,7 @@
 #include "TestParser.h"
 #include "ibex_System.h"
 #include "ibex_SyntaxError.h"
+#include "ibex_CtcProj.h"
 #include "Ponts30.h"
 
 using namespace std;
@@ -22,18 +23,18 @@ namespace ibex {
 void TestParser::var01() {
 	System sys("quimper/var01.qpr");
 	TEST_ASSERT(sys.func.is_empty());
-	TEST_ASSERT(sys.vars.size()==1);
-	TEST_ASSERT(strcmp(sys.vars[0].name,"x")==0);
-	TEST_ASSERT(sys.vars[0].dim.is_scalar());
+	TEST_ASSERT(sys.args.size()==1);
+	TEST_ASSERT(strcmp(sys.args[0].name,"x")==0);
+	TEST_ASSERT(sys.args[0].dim.is_scalar());
 	TEST_ASSERT(sys.eprs.empty());
 	TEST_ASSERT(sys.sybs.empty());
 	TEST_ASSERT(sys.box.size()==1);
 	TEST_ASSERT(sys.box[0]==Interval::ALL_REALS);
-	TEST_ASSERT(sys.f.nb_symbols()==1);
-	TEST_ASSERT(&sys.f.symbol(0) == &sys.vars[0]);
+	TEST_ASSERT(sys.f.nb_arg()==1);
+	TEST_ASSERT(&sys.f.arg(0) == &sys.args[0]);
 	TEST_ASSERT(sameExpr(sys.f.expr(),"x"));
 	TEST_ASSERT(sys.ctrs.size()==1);
-	TEST_ASSERT(sys.ctrs[0].f.nb_symbols()==1);
+	TEST_ASSERT(sys.ctrs[0].f.nb_arg()==1);
 	TEST_ASSERT(sameExpr(sys.ctrs[0].f.expr(),"x"));
 	TEST_ASSERT(sys.ctrs[0].op==GEQ);
 }
@@ -132,18 +133,18 @@ void TestParser::func01() {
 	try {
 		System sys("quimper/func01.qpr");
 
-		TEST_ASSERT(sys.vars.size()==1);
-		TEST_ASSERT(strcmp(sys.vars[0].name,"x")==0);
-		TEST_ASSERT(sys.vars[0].dim.is_scalar());
+		TEST_ASSERT(sys.args.size()==1);
+		TEST_ASSERT(strcmp(sys.args[0].name,"x")==0);
+		TEST_ASSERT(sys.args[0].dim.is_scalar());
 		TEST_ASSERT(sys.eprs.empty());
 		TEST_ASSERT(sys.sybs.empty());
 		TEST_ASSERT(sys.box.size()==1);
 
 		TEST_ASSERT(sys.func.size()==1);
 		TEST_ASSERT(strcmp(sys.func[0].name,"foo")==0);
-		TEST_ASSERT(sys.func[0].nb_symbols()==1);
-		TEST_ASSERT(sys.func[0].symbol(0).dim.is_scalar());
-		TEST_ASSERT(strcmp(sys.func[0].symbol(0).name,"x2")==0);
+		TEST_ASSERT(sys.func[0].nb_arg()==1);
+		TEST_ASSERT(sys.func[0].arg(0).dim.is_scalar());
+		TEST_ASSERT(strcmp(sys.func[0].arg(0).name,"x2")==0);
 		TEST_ASSERT(sameExpr(sys.func[0].expr(),"x2"));
 		TEST_ASSERT(sameExpr(sys.f.expr(),"(x-foo(x))"));
 		TEST_ASSERT(sys.ctrs.size()==1);
@@ -155,21 +156,52 @@ void TestParser::func01() {
 	}
 }
 
+void TestParser::func02() {
+	try {
+		System sys("quimper/func02.qpr");
+
+		//cout << "sys nb ctr=" << sys.nb_ctr << endl;
+		//TEST_ASSERT(sys.nb_ctr==12);
+		CtcProj* c[24];
+		for (int i=0; i<sys.ctrs.size(); i++)
+			c[i]=new CtcProj(sys.ctrs[i]);
+
+		for (int i=6; i<sys.ctrs.size(); i++) {
+			IntervalVector subbox(2);
+			subbox[0]=11;
+			subbox[1]=12;
+			IntervalVector box(8);
+			box.put(1,subbox); // load x1[1] and x1[2]
+			box.put(4,subbox); // load z1[1] and z1[2]
+			try {
+				c[i]->contract(box);
+			} catch(EmptyBoxException&) {
+				TEST_ASSERT(false);
+			}
+			check(box.subvector(6,7),subbox); // check x2
+		}
+
+	} catch(SyntaxError& e) {
+		cout << e << endl;
+		TEST_ASSERT(false);
+	}
+}
+
 void TestParser::ponts() {
 	System sys("quimper/ponts.qpr");
 	Ponts30 sys2;
 	TEST_ASSERT(sys.func.is_empty());
-	TEST_ASSERT(sys.vars.size()==30);
+	TEST_ASSERT(sys.args.size()==30);
 	for (int i=0; i<30; i++) {
-		TEST_ASSERT(strcmp(sys.vars[i].name,sys2.f->symbol_name(i))==0);
-		TEST_ASSERT(sys.vars[0].dim.is_scalar());
-		TEST_ASSERT(&sys.f.symbol(i) == &sys.vars[i]);
+		TEST_ASSERT(strcmp(sys.args[i].name,sys2.f->arg_name(i))==0);
+		TEST_ASSERT(sys.args[0].dim.is_scalar());
+		TEST_ASSERT(&sys.f.arg(i) == &sys.args[i]);
 	}
 	TEST_ASSERT(sys.eprs.empty());
 	TEST_ASSERT(sys.sybs.empty());
 	TEST_ASSERT(sys.box.size()==30);
 	TEST_ASSERT(sys.box==sys2.init_box);
-	TEST_ASSERT(sys.f.nb_symbols()==30);
+	TEST_ASSERT(sys.f.nb_arg()==30);
 	TEST_ASSERT(sameExpr(sys.f.expr(),sys2.f->expr()));
 	TEST_ASSERT(sys.ctrs.size()==30);
 
@@ -182,13 +214,13 @@ void TestParser::ponts() {
 void TestParser::choco01() {
 	System sys(2,"{1}+{0}=0");
 	TEST_ASSERT(sys.func.is_empty());
-	TEST_ASSERT(sys.vars.size()==2);
-	TEST_ASSERT(strcmp(sys.vars[0].name,"{0}")==0);
-	TEST_ASSERT(strcmp(sys.vars[1].name,"{1}")==0);
+	TEST_ASSERT(sys.args.size()==2);
+	TEST_ASSERT(strcmp(sys.args[0].name,"{0}")==0);
+	TEST_ASSERT(strcmp(sys.args[1].name,"{1}")==0);
 	TEST_ASSERT(sys.eprs.empty());
 	TEST_ASSERT(sys.sybs.empty());
 	TEST_ASSERT(sys.box.size()==2);
-	TEST_ASSERT(sys.f.nb_symbols()==2);
+	TEST_ASSERT(sys.f.nb_arg()==2);
 	TEST_ASSERT(sameExpr(sys.f.expr(),"({1}+{0})"));
 	TEST_ASSERT(sys.ctrs.size()==1);
 	TEST_ASSERT(sameExpr(sys.ctrs[0].f.expr(),sys.f.expr()));

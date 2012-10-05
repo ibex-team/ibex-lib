@@ -107,7 +107,8 @@ public:
 	 * \note This number is also sys.f.nb_var() and box.size().
 	 * However, in general, it does not match args.size(), which is
 	 * the number of arguments (or symbols). For instance, in case of
-	 * a single array x of 10 components, there is 10 variables but only one symbol.
+	 * a single array x of 10 components, there is 10 variables but only one
+	 * argument.
 	 */
 	const int nb_var;
 
