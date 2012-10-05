@@ -12,7 +12,7 @@
 #ifndef _IBEX_GAOL_INTERVAL_H_
 #define _IBEX_GAOL_INTERVAL_H_
 
-#include "ibex_NonRecoverableException.h"
+#include "ibex_Exception.h"
 
 namespace ibex {
 
@@ -405,7 +405,7 @@ inline bool proj_pow(const Interval& y, int n, Interval& x) {
 }
 
 inline bool proj_pow(const Interval& y, Interval& x1, Interval& x2) {
-	throw NonRecoverableException("proj_power(y,x1,x2) (with x1 and x2 intervals) not implemented yet with Gaol");
+	ibex_error("proj_power(y,x1,x2) (with x1 and x2 intervals) not implemented yet with Gaol");
 }
 
 inline bool proj_cos(const Interval& y,  Interval& x) {
@@ -424,7 +424,7 @@ inline bool proj_tan(const Interval& y,  Interval& x) {
 }
 
 inline bool proj_atan2(const Interval& y, Interval& x1, Interval& x2) {
-	throw NonRecoverableException("proj_atan2 non implemented yet with Gaol");
+	ibex_error("proj_atan2 non implemented yet with Gaol");
 }
 
 inline bool proj_cosh(const Interval& y,  Interval& x) {
