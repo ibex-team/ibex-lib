@@ -136,7 +136,7 @@ Name: ibex
 Description: A C++ library for interval-based algorithm design
 Version: %s
 Cflags: -I${includedir}/ibex %s
-Libs: -L${libdir}/ibex %s -libex %s
+Libs: -L${libdir} %s -libex %s
 """ % (		tsk.env.PREFIX, tsk.env.VERSION,
 		# extra CFLAGS
 		" ".join(("-I%s" % p) for p in filter (os.path.isabs, tsk.env.INCLUDES)),
