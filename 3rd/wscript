@@ -28,8 +28,8 @@ def configure (conf):
 	def use_shlib():
 		if enable_shlib:
 			# configure the environment to produce PIC objects
-			conf.env.append_unique ("CFLAGS",   conf.env.CFLAGS_cshlib)
-			conf.env.append_unique ("CXXFLAGS", conf.env.CXXFLAGS_cxxshlib)
+			conf.env.CFLAGS.extend   (conf.env.CFLAGS_cshlib)
+			conf.env.CXXFLAGS.extend (conf.env.CXXFLAGS_cxxshlib)
 
 		# return true if we build as a shared library
 		return enable_shlib
