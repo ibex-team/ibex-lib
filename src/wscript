@@ -3,8 +3,6 @@
 
 import shutil, os
 
-JAVA_PACKAGE = "ibex"
-
 def configure (conf):
 	conf.env.append_unique ("INCLUDES", ["../src/%s" % p for p in 
 		". arithmetic bisector combinatorial contractor function numeric parser strategy symbolic tools".split()])
@@ -48,8 +46,9 @@ def build (bld):
 	if bld.env.WITH_JNI:
 		ibex_src.append ("java/ibex_Java.cpp")
 
-		java_signature = JAVA_PACKAGE.replace (".", "_")
-		java_path      = JAVA_PACKAGE.replace (".", "/")
+		JAVA_PACKAGE   = bld.env.JAVA_PACKAGE
+		JAVA_SIGNATURE = JAVA_PACKAGE.replace (".", "_")
+		JAVA_PATH      = JAVA_PACKAGE.replace (".", "/")
 
 
 		@bld.rule (
@@ -60,8 +59,8 @@ def build (bld):
 			tsk.outputs[0].write (
 				"// This file is generated from %s.\n"
 				'#include "%s_Ibex.h_"\n%s'
-				% (tsk.inputs[0].name, java_signature, 
-				   tsk.inputs[0].read().replace ("Java_", "Java_%s_" % java_signature)
+				% (tsk.inputs[0].name, JAVA_SIGNATURE, 
+				   tsk.inputs[0].read().replace ("Java_", "Java_%s_" % JAVA_SIGNATURE)
 				))
 
 		@bld.rule (
@@ -75,14 +74,14 @@ def build (bld):
 				% (tsk.inputs[0].name, JAVA_PACKAGE, tsk.inputs[0].read()))
 
 		bld (
-			target = "java/%s/Ibex.class" % java_path,
+			target = "java/%s/Ibex.class" % JAVA_PATH,
 			source = "java/Ibex.java",
 			rule   = "${JAVAC} -d src/java ${SRC}"
 		)
 
 		bld (
-			target = "java/%s_Ibex.h_" % java_signature,
-			source = "java/%s/Ibex.class" % java_path,
+			target = "java/%s_Ibex.h_" % JAVA_SIGNATURE,
+			source = "java/%s/Ibex.class" % JAVA_PATH,
 			rule   = "${JAVAH} -jni -classpath src/java -o ${TGT} %s.Ibex" % JAVA_PACKAGE
 		)
 
