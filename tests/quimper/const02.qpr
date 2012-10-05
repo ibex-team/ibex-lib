@@ -1,5 +1,5 @@
 constants 
- c=(0; 1; 2);
+ c[3]=(0; 1; 2);
  
 variables
  x[3] in c;

@@ -38,6 +38,9 @@ public:
 	/** Add a constant */
 	void add_cst(const char* id, const Domain& domain);
 
+	/** Add a constant */
+	void add_cst(const char* id, const Dim& d, const Domain& dom);
+
 	/** Remove a constant (constants can be overridden
 	 * by local variables in functions)*/
 	void rem_cst(const char* id);

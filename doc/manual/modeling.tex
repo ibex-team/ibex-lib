@@ -738,7 +738,9 @@ Constants
 
 You can give a constant an interval enclosure rather than a single fixed value.
 This interval will be embedded in all subsequent computations.
-In the previous example, we can give \cf{pi} a valid enclosure as below:
+Following the previous example, we can give \cf{pi} a valid enclosure as below.
+We just have to replace ``{\tt =}'' by ``{\tt in}''.
+
 
 \begin{verbatim}
 Constants
@@ -747,59 +749,78 @@ Constants
   z=sin(pi*y);
 \end{verbatim}
 
-Constants can also be vector, matrices or array of matrices.
+Constants can also be vectors, matrices or array of matrices.
+You need to specify the dimensions of the constant in square brackets.
 For instance \cf{x} below is a column vector with 2 components, the first component is equal
 to $0$ and the second to $1$:
 \begin{verbatim}
 Constants
-x = (0; 1);
+x[2] = (0; 1);
 \end{verbatim}
-For row vectors, use commas instead of periods:
+Writing {\tt x[2]} is equivalent to {\tt x[2][1]} because a column vector is also
+a $2\times 1$ matrix.
+A row vector is a $1\times 2$ matrix so a row vector has to be declared as follows. 
+On the right side, note that we use commas instead of periods:
 \begin{verbatim}
 Constants
-x = (0, 1);
+x[1][2] = (0, 1);
 \end{verbatim}
 
 {\bf important remark}. 
-The reason why the syntax differs here from Matlab is that a 2-sized row vector surrounded
+The reason why the syntax for declaring row vectors differs here from Matlab is that a 2-sized row vector surrounded
 by brackets would conflict with an interval. So, do note confuse
 \cf{[0,1]} with \cf{(0,1)}:
 \begin{itemize}
 \item \cf{(0,1)} is a 2-dimensional row vector of two reals, namely 0 and 1.
 This is {\bf not} an open interval.
-\item \cf{[0,1]} is the 1-dimensional interval $[0,1]$
+\item \cf{[0,1]} is the 1-dimensional interval $[0,1]$. This is {\bf not} a 2-dimensional row vector.
 \end{itemize}
 %The difference is ``\cf{;}'' versus ``\cf{,}''.
 
 Of course, you mix vector with intervals. For instance:
 {\tt ([-oo,0];[0,+oo])} is a column vector of $2$ intervals, $(-\infty,0]$ and $[0,+\infty)$.
 
-To declare matrix constant, add an extra dimension in brackets:
+Here is an example of matrix constant declaration: %, add an extra dimension in brackets:
 \begin{verbatim}
 Constants
-M = ((0 , 0) ; (0 , 1) ; (1 , 0))
+M[3][2] = ((0 , 0) ; (0 , 1) ; (1 , 0));
 \end{verbatim}
 This will create the constant matrix \cf{M} with 3 rows and 2 columns equal to
 $$\begin{pmatrix}
 0 & 0 \\ 0 & 1 \\ 1 & 0
 \end{pmatrix}$$
 
+You can also declare array of matrices:
+\begin{verbatim}
+Constants
+ c[2][2][3]=(((0,1,2); (3,4,5)) ; ((6,7,8); (9,10,11)));
+\end{verbatim}
+It is possible to define up to three dimensional vectors, but not more.
 
-The following table summarizes the possibility for declaring constants
+When all the components of a multi-dimensional constant share the same interval, you
+don't need to duplicate it on the right side. Here is an example of a $10\times10$ matrix where all
+components are $[0,0]$:
+\begin{verbatim}
+Constants
+ c[10][10] in [0,0];
+\end{verbatim}
+Ibex intializes the 100 entries of the matrix {\tt c} to $[0,0]$.
+
+Finally, the following table summarizes the possibility for declaring constants
 through different examples.
 
 \begin{tabular}{p{.3\textwidth}|p{.7\textwidth}}
 \hline
-{\tt x in [-oo,0]} & declares a constant $x$ with domain $(-\infty,0]$ \\
-{\tt x in [0,1]} & declares an constant $x$ with domain $[0,1]$ \\
-{\tt x in 0} & declares a (interval) constant $x$ with domain $[0,0]$ \\
-{\tt x = 0} & declares a (real) constant $x$ equal to $0$ \\
-{\tt x = 100*sin(0.1)} & declares a constant $x$ equal to $100\sin(0.1)$ \\
-%{\tt x in [-oo,0]} & declares a $10$-sized vector constant $x=(x[1],\ldots,x[10])$, each with domain $(-\infty,0]$ \\
-{\tt x in ([-oo,0];[0,+oo])} & declares a $2$-sized vector constant $x$ with $x[1]\in(-\infty,0]$ and $x[2]\in[0,+\infty)$ \\
-%{\tt x in [0,1]} & declares $10$ constants $x[1],\ldots,x[10]$, each with domain $[0,1]$ \\
-{\tt x in} &  \multirow{4}{*}{declares a constrant matrix 
-$x=\begin{pmatrix}
+{\tt x in [-oo,0]} & declares a constant {\tt x} $\in(-\infty,0]$ \\
+{\tt x in [0,1]} & declares an constant {\tt x} $\in[0,1]$ \\
+{\tt x in [0,0]} & declares a constant {\tt x} $\in[0,0]$ \\
+{\tt x = 0} & declares a real constant {\tt x} equal to $0$ \\
+{\tt x = 100*sin(0.1)} & declares a constant {\tt x} equal to $100\sin(0.1)$ \\
+{\tt x[10] in [-oo,0]} & declares a $10$-sized constant vector {\tt x}, with each component {\tt x(i)} $\in(-\infty,0]$ \\
+{\tt x[2] in ([-oo,0];[0,+oo])} & declares a $2$-sized constant vector {\tt x} with {\tt x(1)}$\in(-\infty,0]$ and {\tt x(2)}$\in[0,+\infty)$ \\
+%{\tt x[10] in [0,1]} & declares $10$ constants $x[1],\ldots,x[10]$, each with domain $[0,1]$ \\
+{\tt x[3][3] in} &  \multirow{4}{*}{declares a constrant matrix 
+{\tt x} $\in\begin{pmatrix}
 \!\,[0,1] & 0 & 0 \\
 0 & [0,1]& 0 \\
 0 & 0 & [0,1] 
@@ -807,11 +828,9 @@ $x=\begin{pmatrix}
 \!\,{\tt (([0,1],0,0);} & \\
 \!\,{\tt (0,[0,1],0);} & \\
 \!\,{\tt (0,0,[0,1]))} &\\
-\multirow{2}{*}{\tt x[10][5] in [0,1]} & declares $50$ constants $x[1][1],\ldots,x[1][5],\ldots,x[10][1],\ldots,x[10][5]$, \\
-& each with domain $[0,1]$.\\
+{\tt x[10][5] in [0,1]} & declares a matrix {\tt x} with each entry {\tt x(i,j)} $\in[0,1]$.\\
+{\tt x[2][10][5] in [0,1]} & declares an array of 2 $10\times 5$ matrices with each entry {\tt x(i,j,k)} $\in[0,1]$.\\
 \end{tabular}
-
-It is possible to define up to three dimensional vectors. 
 
 \subsection{Functions}\label{sec:mod-func-quimper}
 
@@ -904,9 +923,9 @@ Variables are defined exactly in the same fashion as constants (see \S\ref{ref:c
 It is possible to define up to three dimensional vectors, with an optional domain to initialize each
 component with. The following examples are valid:
 
-{\tt x[10][5][4]}
+{\tt x[10][5][4];}
 
-{\tt x[10][5][4] in [0,1]}
+{\tt x[10][5][4] in [0,1];}
 
 Whenever domains are not specified, they are set by default to $(-\infty,+\infty)$.
 

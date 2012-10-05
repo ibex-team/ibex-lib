@@ -42,6 +42,11 @@ IntervalMatrixArray& IntervalMatrixArray::operator=(const IntervalMatrixArray& a
 	return *this;
 }
 
+void IntervalMatrixArray::init(const Interval& x) {
+	for (int i=0; i<size(); i++)
+		(*this)[i].init(x);
+}
+
 IntervalMatrixArray::~IntervalMatrixArray() {
 	delete[] array;
 }

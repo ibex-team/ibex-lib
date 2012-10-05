@@ -18,48 +18,22 @@ using std::stringstream;
 namespace ibex {
 namespace parser {
 
+void init_symbol_domain(const char* destname, Domain& dest, const Domain& src);
+
+
 // VAR is a temporary value
 Entity::Entity(const char* name, const Dim& dim, const Domain& d) :
 				symbol(ExprSymbol::new_(name,dim)), domain(dim), type(VAR) {
 
-
-	if (d.dim==dim) {
-		domain=d;
-	} else {
-		// when a vector/matrix is initialized with a single interval
-		if (d.dim.is_scalar()) {
-			load_domain(d.i());
-		}
-		else {
-			stringstream s;
-			s << "Variable \"" << name << "\"";
-
-			if (dim.is_vector() && d.dim.is_vector()) {
-				s << " is a column vector and is initialized with a row vector";
-				s << " (you have probably used \",\" instead of \";\" in the constant vector)";
-				ibexerror(s.str());
-			}
-			else {
-				s << " is not initialized correctly (dimensions do not match)";
-				ibexerror(s.str());
-			}
-		}
-	}
+	init_symbol_domain(name, domain, d);
 }
 
 Entity::Entity(const char* name, const Dim& dim, const Interval& x) :
 				symbol(ExprSymbol::new_(name,dim)), domain(dim), type(VAR) {
-	load_domain(x);
-}
 
-void Entity::load_domain(const Interval& x) {
-	switch(domain.dim.type()) {
-	case Dim::SCALAR :      domain.i()=x; break;
-	case Dim::ROW_VECTOR:
-	case Dim::COL_VECTOR:   domain.v().init(x); break;
-	case Dim::MATRIX:       domain.m().init(x); break;
-	case Dim::MATRIX_ARRAY: for (int i=0; i<domain.ma().size(); i++) domain.ma()[i].init(x); break;
-	}
+	Domain tmp(Dim::scalar());
+	tmp.i()=x;
+	init_symbol_domain(name, domain, tmp);
 }
 
 } // end namespace parser

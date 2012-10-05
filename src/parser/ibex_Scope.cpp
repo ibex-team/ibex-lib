@@ -29,6 +29,8 @@ using namespace std;
 namespace ibex {
 namespace parser {
 
+extern void init_symbol_domain(const char* destname, Domain& dest, const Domain& src);
+
 /* root class of all objects linked to symbols */
 class Scope::S_Object {
 public:
@@ -44,6 +46,8 @@ class S_Cst : public Scope::S_Object {
 public:
 
 	S_Cst(const Domain& domain) : domain(domain) { }
+
+	S_Cst(const Dim& d) : domain(d) { }
 
 	S_Object* copy() const { return new S_Cst(domain); }
 
@@ -137,6 +141,12 @@ Scope::~Scope() {
 
 void Scope::add_cst(const char* id, const Domain& domain) {
 	tab.insert_new(id, new S_Cst(domain));
+}
+
+void Scope::add_cst(const char* id, const Dim& d, const Domain& dom) {
+	S_Cst* c=new S_Cst(d);
+	tab.insert_new(id, c);
+	init_symbol_domain(id, c->domain, dom);
 }
 
 void Scope::rem_cst(const char* id) {

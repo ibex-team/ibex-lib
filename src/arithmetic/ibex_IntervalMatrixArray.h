@@ -41,6 +41,12 @@ public:
 	IntervalMatrixArray& operator=(const IntervalMatrixArray& a);
 
 	/**
+	 * \brief Set all the elements to x.
+	 *
+	 */
+	void init(const Interval& x);
+
+	/**
 	 * \brief Delete this.
 	 */
 	~IntervalMatrixArray();

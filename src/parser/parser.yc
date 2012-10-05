@@ -127,8 +127,8 @@ decl_cst_list : decl_cst
               | decl_cst_list ';' decl_cst
               ;
 
-decl_cst      : TK_NEW_SYMBOL TK_EQU expr       { scopes.top().add_cst($1, _2domain(*$3)); free($1); }
-              | TK_NEW_SYMBOL TK_IN expr        { scopes.top().add_cst($1, _2domain(*$3)); free($1); }
+decl_cst      : TK_NEW_SYMBOL dimension TK_EQU expr { scopes.top().add_cst($1, *$2, _2domain(*$4)); free($1); delete $2; }
+              | TK_NEW_SYMBOL dimension TK_IN expr  { scopes.top().add_cst($1, *$2, _2domain(*$4)); free($1); delete $2; }
               ;
 
 decl_opt_par  : 
