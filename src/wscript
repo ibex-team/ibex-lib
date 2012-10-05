@@ -44,8 +44,6 @@ def build (bld):
 
 	# JNI
 	if bld.env.WITH_JNI:
-		ibex_src.append ("java/ibex_Java.cpp")
-
 		JAVA_PACKAGE   = bld.env.JAVA_PACKAGE
 		JAVA_SIGNATURE = JAVA_PACKAGE.replace (".", "_")
 		JAVA_PATH      = JAVA_PACKAGE.replace (".", "/")
@@ -85,10 +83,17 @@ def build (bld):
 			rule   = "${JAVAH} -jni -classpath src/java -o ${TGT} %s.Ibex" % JAVA_PACKAGE
 		)
 
+		bld.shlib (
+			target = "ibex-java",
+			source = "java/ibex_Java.cpp",
+			use = "JAVA ibex",
+			install_path = bld.env.LIBDIR,
+		)
+
 	# c++ compilation
 	tg_ibex = (bld.shlib if bld.env.ENABLE_SHARED else bld.stlib) (
 		target = "ibex",
-		use  = "JAVA gaol_objs gdtoa_objs ultim_objs",
+		use  = "gaol_objs gdtoa_objs ultim_objs",
 		source = ibex_src,
 		install_path = bld.env.LIBDIR,
 	)
