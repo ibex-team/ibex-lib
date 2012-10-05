@@ -23,6 +23,6 @@ sin(x[11])*(sin(11*x[11]^2/pi))^20) ;
 
 
 constraints
-x[1] >=0;
+x(1) >=0;
 
 end
