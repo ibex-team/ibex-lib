@@ -113,8 +113,7 @@ def configure (conf):
 		env.append_unique ("INCLUDES",  os.path.join (path, "src"))
 
 		conf.check_cxx (header_name	= "soplex.h")
-		conf.check_cxx (lib		= ["soplex", "z"], uselib_store = (
-					"IBEX_BUILD_DEPS" if env.ENABLE_SHARED else "IBEX_DEPS"),
+		conf.check_cxx (lib		= ["soplex", "z"], uselib_store = "IBEX_DEPS",
 				libpath		= os.path.join (path, "lib"))
 	else:
 		conf.fatal ("cannot find the Soplex library, please use --with-soplex=SOPLEX_PATH")
