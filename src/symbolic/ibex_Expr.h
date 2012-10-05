@@ -898,7 +898,7 @@ public:
 	static const ExprSign& new_(const ExprNode& expr) { return *new ExprSign(expr); }
 
 private:
-	ExprSign(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+	ExprSign(const ExprNode& expr);
 	ExprSign(const ExprSign&); // copy constructor forbidden
 };
 
@@ -920,7 +920,7 @@ public:
 	static const ExprAbs& new_(const ExprNode& expr) { return *new ExprAbs(expr); }
 
 private:
-	ExprAbs(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+	ExprAbs(const ExprNode& expr);
 	ExprAbs(const ExprAbs&); // copy constructor forbidden
 };
 
@@ -973,7 +973,7 @@ public:
 	}
 
 private:
-	ExprSqr(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+	ExprSqr(const ExprNode& expr);
 	ExprSqr(const ExprSqr&); // copy constructor forbidden
 };
 
@@ -996,7 +996,7 @@ public:
 	static const ExprSqrt& new_(const ExprNode& expr) { return *new ExprSqrt(expr); }
 
 private:
-	ExprSqrt(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+	ExprSqrt(const ExprNode& expr);
 	ExprSqrt(const ExprSqrt&); // copy constructor forbidden
 };
 
@@ -1021,7 +1021,7 @@ public:
 	}
 
 private:
-	ExprExp(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+	ExprExp(const ExprNode& expr);
 	ExprExp(const ExprExp&); // copy constructor forbidden
 };
 
@@ -1046,7 +1046,7 @@ public:
 	}
 
 private:
-	ExprLog(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+	ExprLog(const ExprNode& expr);
 	ExprLog(const ExprLog&); // copy constructor forbidden
 };
 
@@ -1071,7 +1071,7 @@ public:
 	}
 
 private:
-	ExprCos(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+	ExprCos(const ExprNode& expr);
 	ExprCos(const ExprCos&); // copy constructor forbidden
 };
 
@@ -1096,7 +1096,7 @@ public:
 	}
 
 private:
-	ExprSin(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+	ExprSin(const ExprNode& expr);
 	ExprSin(const ExprSin&); // copy constructor forbidden
 };
 
@@ -1121,7 +1121,7 @@ public:
 	}
 
 private:
-	ExprTan(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+	ExprTan(const ExprNode& expr);
 	ExprTan(const ExprTan&); // copy constructor forbidden
 };
 
@@ -1146,7 +1146,7 @@ public:
 	}
 
 private:
-	ExprCosh(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+	ExprCosh(const ExprNode& expr);
 	ExprCosh(const ExprCosh&); // copy constructor forbidden
 };
 
@@ -1171,7 +1171,7 @@ public:
 	}
 
 private:
-	ExprSinh(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+	ExprSinh(const ExprNode& expr);
 	ExprSinh(const ExprSinh&); // copy constructor forbidden
 };
 
@@ -1196,7 +1196,7 @@ public:
 	}
 
 private:
-	ExprTanh(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+	ExprTanh(const ExprNode& expr);
 	ExprTanh(const ExprTanh&); // copy constructor forbidden
 };
 
@@ -1221,7 +1221,7 @@ public:
 	}
 
 private:
-	ExprAcos(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+	ExprAcos(const ExprNode& expr);
 	ExprAcos(const ExprAcos&); // copy constructor forbidden
 };
 
@@ -1246,7 +1246,7 @@ public:
 	}
 
 private:
-	ExprAsin(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+	ExprAsin(const ExprNode& expr);
 	ExprAsin(const ExprAsin&); // copy constructor forbidden
 };
 
@@ -1271,7 +1271,7 @@ public:
 	}
 
 private:
-	ExprAtan(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+	ExprAtan(const ExprNode& expr);
 	ExprAtan(const ExprAtan&); // copy constructor forbidden
 };
 
@@ -1296,7 +1296,7 @@ public:
 	}
 
 private:
-	ExprAcosh(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+	ExprAcosh(const ExprNode& expr);
 	ExprAcosh(const ExprAcosh&); // copy constructor forbidden
 };
 
@@ -1321,7 +1321,7 @@ public:
 	}
 
 private:
-	ExprAsinh(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+	ExprAsinh(const ExprNode& expr);
 	ExprAsinh(const ExprAsinh&); // copy constructor forbidden
 };
 
@@ -1346,7 +1346,7 @@ public:
 	}
 
 private:
-	ExprAtanh(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) { }
+	ExprAtanh(const ExprNode& expr);
 	ExprAtanh(const ExprAtanh&); // copy constructor forbidden
 };
 

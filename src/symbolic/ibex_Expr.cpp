@@ -238,6 +238,78 @@ ExprApply::ExprApply(const Function& f, const ExprNode** args) :
 	}
 }
 
+ExprSign::ExprSign(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) {
+	if (!expr.dim.is_scalar()) throw DimException("\"sign\" expects a scalar argument");
+}
+
+ExprAbs::ExprAbs(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) {
+	if (!expr.dim.is_scalar()) throw DimException("\"abs\" expects a scalar argument");
+}
+
+ExprSqr::ExprSqr(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) {
+	if (!expr.dim.is_scalar()) throw DimException("\"sqr\" expects a scalar argument");
+}
+
+ExprSqrt::ExprSqrt(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) {
+	if (!expr.dim.is_scalar()) throw DimException("\"sqrt\" expects a scalar argument");
+}
+
+ExprExp::ExprExp(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) {
+	if (!expr.dim.is_scalar()) throw DimException("\"exp\" expects a scalar argument");
+}
+
+ExprLog::ExprLog(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) {
+	if (!expr.dim.is_scalar()) throw DimException("\"log\" expects a scalar argument");
+}
+
+ExprCos::ExprCos(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) {
+	if (!expr.dim.is_scalar()) throw DimException("\"cos\" expects a scalar argument");
+}
+
+ExprSin::ExprSin(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) {
+	if (!expr.dim.is_scalar()) throw DimException("\"sin\" expects a scalar argument");
+}
+
+ExprTan::ExprTan(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) {
+	if (!expr.dim.is_scalar()) throw DimException("\"tan\" expects a scalar argument");
+}
+
+ExprCosh::ExprCosh(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) {
+	if (!expr.dim.is_scalar()) throw DimException("\"cosh\" expects a scalar argument");
+}
+
+ExprSinh::ExprSinh(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) {
+	if (!expr.dim.is_scalar()) throw DimException("\"sinh\" expects a scalar argument");
+}
+
+ExprTanh::ExprTanh(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) {
+	if (!expr.dim.is_scalar()) throw DimException("\"tanh\" expects a scalar argument");
+}
+
+ExprAcos::ExprAcos(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) {
+	if (!expr.dim.is_scalar()) throw DimException("\"acos\" expects a scalar argument");
+}
+
+ExprAsin::ExprAsin(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) {
+	if (!expr.dim.is_scalar()) throw DimException("\"asin\" expects a scalar argument");
+}
+
+ExprAtan::ExprAtan(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) {
+	if (!expr.dim.is_scalar()) throw DimException("\"atan\" expects a scalar argument");
+}
+
+ExprAcosh::ExprAcosh(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) {
+	if (!expr.dim.is_scalar()) throw DimException("\"acosh\" expects a scalar argument");
+}
+
+ExprAsinh::ExprAsinh(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) {
+	if (!expr.dim.is_scalar()) throw DimException("\"asinh\" expects a scalar argument");
+}
+
+ExprAtanh::ExprAtanh(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) {
+	if (!expr.dim.is_scalar()) throw DimException("\"atanh\" expects a scalar argument");
+}
+
 std::ostream& operator<<(std::ostream& os, const ExprNode& expr) {
   ExprPrinter().print(os,expr);
   return os;
