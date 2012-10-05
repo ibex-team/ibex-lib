@@ -101,7 +101,7 @@ def build (bld):
 	# pkg-config file
 	@bld.rule (
 		target = "ibex.pc",
-		vars = "PREFIX LIB VERSION INCLUDES LIBPATH".split(),
+		vars = "PREFIX VERSION INCLUDES LIBPATH_IBEX_DEPS LIB_IBEX_DEPS".split(),
 		install_path = "${PREFIX}/share/pkgconfig",
 	)
 	def _ (tsk):
