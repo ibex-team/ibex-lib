@@ -61,20 +61,32 @@ def build (bld):
 				   tsk.inputs[0].read().replace ("Java_", "Java_%s_" % JAVA_SIGNATURE)
 				))
 
-		@bld.rule (
-			target = "java/Ibex.java",
-			source = "java/Ibex.java_",
-		)
-		def _(tsk):
-			tsk.outputs[0].write (
-				"// This file is generated from %s.\n"
-				"package %s;\n%s"
-				% (tsk.inputs[0].name, JAVA_PACKAGE, tsk.inputs[0].read()))
+		for (name, snippet) in (
+			("Ibex", "package %s;\n" % JAVA_PACKAGE),
+			("Test", "import %s.Ibex;\n" % JAVA_PACKAGE),
+		):
+			@bld.rule (
+				target = "java/%s.java" % name,
+				source = "java/%s.java_" % name,
+				vars = ["JAVA_PACKAGE"],
+				snippet = snippet,
+			)
+			def _(tsk):
+				tsk.outputs[0].write (
+					"// This file is generated from %s.\n"
+					"%s\n%s"
+					% (tsk.inputs[0].name, tsk.generator.snippet, tsk.inputs[0].read()))
 
 		bld (
 			target = "java/%s/Ibex.class" % JAVA_PATH,
 			source = "java/Ibex.java",
 			rule   = "${JAVAC} -d src/java ${SRC}"
+		)
+
+		bld (
+			target = "java/Test.class",
+			source = "java/Test.java",
+			rule   = "${JAVAC} -d src/java -cp src/java ${SRC}"
 		)
 
 		bld (
