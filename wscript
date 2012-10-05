@@ -135,6 +135,7 @@ def configure (conf):
 		del env["JAVAC"]
 		conf.find_program (os.path.join (java_home, "bin", "javac"), var = "JAVAC")
 		conf.find_program (os.path.join (java_home, "bin", "javah"), var = "JAVAH")
+		conf.find_program (os.path.join (java_home, "bin", "jar"),   var = "JAR")
 
 		conf.env.JAVA_PACKAGE = conf.options.JAVA_PACKAGE
 

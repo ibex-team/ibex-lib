@@ -9,14 +9,15 @@ def configure (conf):
 
 def build (bld):
 
+	INCDIR  = "${PREFIX}/include/ibex"
+	JAVADIR = "${PREFIX}/share/java"
+
 	ibex_src = bld.path.ant_glob ("**/*.(cpp|yc|l)")
 
 	ibex_hdr = bld.path.ant_glob ("**/ibex_*.h")
 	ibex_hdr.append ("ibex_bias_or_gaol.h")
 
 	# headers
-
-	INCDIR = "${PREFIX}/include/ibex"
 
 	@bld.rule (
 		target = "ibex_bias_or_gaol.h",
@@ -101,6 +102,13 @@ def build (bld):
 			use = "JAVA ibex",
 			install_path = bld.env.LIBDIR,
 		)
+		bld (
+			target = "%s.jar" % JAVA_PACKAGE,
+			source = "java/%s/Ibex.class" % JAVA_PATH,
+			rule = "${JAR} cf ${TGT} -C src/java %s/Ibex.class" % JAVA_PATH,
+			install_path = JAVADIR,
+		)
+
 
 	# c++ compilation
 	tg_ibex = (bld.shlib if bld.env.ENABLE_SHARED else bld.stlib) (
