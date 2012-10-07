@@ -40,8 +40,13 @@ void TestParser::var01() {
 }
 
 void TestParser::const01() {
-	try {System sys("quimper/const01.qpr");
-	check(sys.box[0],Interval(3.14159));
+	try {
+		System sys("quimper/const01.qpr");
+		check(sys.box[0],Interval(3.14159));
+		sys.box.init(Interval::ALL_REALS);
+		CtcProj c0(sys.ctrs[0]);
+		c0.contract(sys.box);
+		TEST_ASSERT(sys.box[0]==Interval::ZERO);
 	} catch(SyntaxError& e) {
 		cout << e << endl;
 		TEST_ASSERT(false);
@@ -54,6 +59,10 @@ void TestParser::const02() {
 		double _box[3][2]={{0,0},{1,1},{2,2}};
 		IntervalVector box(3,_box);
 		check(sys.box,box);
+		sys.box.init(Interval::ALL_REALS);
+		CtcProj c0(sys.ctrs[0]);
+		c0.contract(sys.box);
+		TEST_ASSERT(sys.box[0]==Interval::ZERO);
 	} catch(SyntaxError& e) {
 		cout << e << endl;
 		TEST_ASSERT(false);
@@ -67,6 +76,18 @@ void TestParser::const03() {
 				{3,3},{4,4},{5,5}};
 		IntervalVector box(6,_m);
 		check(sys.box,box);
+
+		sys.box.init(Interval::ALL_REALS);
+		CtcProj(sys.ctrs[0]).contract(sys.box);
+		check(sys.box[0],Interval::ZERO);
+		check(sys.box[1],Interval::ALL_REALS);
+
+		sys.box.init(Interval::ALL_REALS);
+		CtcProj(sys.ctrs[1]).contract(sys.box);
+		IntervalVector zero(3);
+		zero.init(0);
+		check(sys.box.subvector(0,2),zero);
+
 	} catch(SyntaxError& e) {
 		cout << e << endl;
 		TEST_ASSERT(false);
@@ -122,7 +143,21 @@ void TestParser::const07() {
 		IntervalVector box2(6,_m2);
 		check(sys.box.subvector(0,5), box1);
 		check(sys.box.subvector(6,11), box2);
+		sys.box.init(Interval::ALL_REALS);
 
+		CtcProj c0(sys.ctrs[0]);
+		c0.contract(sys.box);
+		IntervalVector zero(6);
+		zero.init(0);
+		check(sys.box.subvector(0,5),zero);
+
+		CtcProj c1(sys.ctrs[1]);
+		sys.box[5]=Interval::ALL_REALS;
+		c1.contract(sys.box);
+		check(sys.box[5],Interval(1,1));
+
+	} catch(EmptyBoxException& e) {
+		TEST_ASSERT(false);
 	} catch(SyntaxError& e) {
 		cout << e << endl;
 		TEST_ASSERT(false);

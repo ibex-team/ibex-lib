@@ -5,5 +5,5 @@ variables
  x[3] in c;
  
 constraints
- x=0;
+ x(1)=0;
 end

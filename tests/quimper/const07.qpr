@@ -6,4 +6,5 @@ variables
  
 constraints
  x(1)=0;
+ x(1,2,3)+0=1;
 end

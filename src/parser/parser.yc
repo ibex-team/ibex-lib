@@ -298,6 +298,9 @@ expr          : expr '+' expr	                { try { $$ = &(*$1 + *$3);    } ca
               | expr '^' expr	                { $$ = new P_ExprPower(*$1, *$3); }
               | expr '[' expr ']'               { $$ = new P_ExprIndex(*$1,*$3, false); }
               | expr '(' expr ')'               { $$ = new P_ExprIndex(*$1,*$3, true); }
+              | expr '(' expr ',' expr ')'      { $$ = new P_ExprIndex(*new P_ExprIndex(*$1,*$3, true),*$5, true); }
+              | expr '(' expr ',' expr ',' 
+                                  expr ')'      { $$ = new P_ExprIndex(*new P_ExprIndex(*new P_ExprIndex(*$1,*$3, true),*$5, true), *$7, true); }
               | '(' expr_row ')'                { $$ = &ExprVector::new_(Array<const ExprNode>(*$2),true); delete $2; }
               | '(' expr_col ')'                { $$ = &ExprVector::new_(Array<const ExprNode>(*$2),false); delete $2; }
               | TK_ENTITY                       { $$ = &scopes.top().get_entity($1).symbol; free($1); /* cannot happen inside a function expr */}

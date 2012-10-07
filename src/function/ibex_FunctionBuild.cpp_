@@ -31,8 +31,8 @@ namespace {
 class FindInputsUsed: public ExprVisitor {
 public:
 	std::vector<bool>& is_used;
-	int* symbol_index;
-	int current_index;
+	int* symbol_index; // first variable index of a symbol
+	int current_index; // idem for the subexpression. -1 when subexpression is not an index
 
 	FindInputsUsed(const Array<const ExprSymbol>& x, const ExprNode& y, std::vector<bool>& is_used) : is_used(is_used) {
 		symbol_index = new int[x.size()];
@@ -48,7 +48,10 @@ public:
 
 		visit(y);
 
-		if (current_index!=-1) is_used[current_index]=true;
+		if (current_index!=-1) {
+			for (int i=0; i<y.dim.size(); i++)
+				is_used[current_index+i]=true;
+		}
 		delete[] symbol_index;
 	}
 
