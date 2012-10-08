@@ -16,6 +16,7 @@
 #include "ibex_CtcProj.h"
 #include "ibex_ExprCopy.h"
 #include "ibex_Function.h"
+#include <float.h>
 
 using namespace std;
 
