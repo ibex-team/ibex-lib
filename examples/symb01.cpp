@@ -28,6 +28,23 @@ int main() {
 	}
 
 	{
+		Variable x(2);
+		NumConstraint c(x,x=IntervalVector(2,1)); // the constraint x=(1,1)
+		cout << "c=" << c << endl;
+	}
+
+	{
+		Variable x[7]; // not to be confused with x(7)
+		Array<const ExprSymbol> vars(7);
+		for (int i=0; i<7; i++)
+			vars.set_ref(i,x[i]);
+		Function f(vars, x[0]+x[1]+x[2]+x[3]+x[4]+x[5]+x[6]);
+		cout << f << endl;
+		// ------------------------------------------------
+	}
+
+
+	{
 		// Example #8
 		// ------------------------------------------------
 		// Function evaluation/projection

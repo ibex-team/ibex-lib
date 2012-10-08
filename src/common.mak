@@ -17,8 +17,15 @@ SIMPLEX_DIR:=/home/gchabert08/Applications/soplex-1.5.0
 JAVA_INC=/usr/lib/jvm/java-7-openjdk-i386/include     
 #===================================================
 
-#CXXFLAGS := -O0 -g -pg -Wall -Wno-unknown-pragmas -fmessage-length=0
-CXXFLAGS :=	-O3 -DNDEBUG -Wno-deprecated #-g #-pg 
+# To compile in debug mode: "make DEBUG=yes"
+
+ifeq ($(DEBUG), yes)
+CXXFLAGS:=-O0 -g -pg -Wall -Wno-deprecated -Wno-unknown-pragmas -fmessage-length=0
+else
+CXXFLAGS:=-O3 -DNDEBUG -Wno-deprecated #-g #-pg 
+endif
+
+RELEASE=2.0
 
 IBEX_INC_DIR:=$(IBEX_DIR)/include
 IBEX_SRC_DIR:=$(IBEX_DIR)/src
