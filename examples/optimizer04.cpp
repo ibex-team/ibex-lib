@@ -1,7 +1,7 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : optimizer01.cpp
-// Author      : Gilles Chabert
+// File        : optimizer04.cpp
+// Author      : Gilles Chabert  Bertrand Neveu
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Jul 12, 2012
@@ -15,12 +15,11 @@ using namespace std;
 using namespace ibex;
 int main(int argc, char** argv){
 
-	// Example #19
+
 	// ------------------------------------------------
 	// Parameterized Optimizer (with a system loaded from a file, and choice of contractor and bisectors)
 	// with X_Newton
-
-         // Load a problem to optimize
+        // Load a problem to optimize
 	// --------------------------
 	try {
 
@@ -36,7 +35,7 @@ int main(int argc, char** argv){
 	double goalprec= atof (argv[5]);
 	double timelimit = atof(argv[6]);
 
-
+	srandom(1);
 	System ext_sys(sys,System::EXTEND);
 	int goal_var= ext_sys.nb_var-1;  // the last variable in ext_sys
 
@@ -69,7 +68,6 @@ int main(int argc, char** argv){
 	// hc4 inside xnewton loop
 	CtcHC4 hc44xn (ext_sys.ctrs,0.01,false);
 
-
 	CtcAcid acidhc4(ext_sys,BoolMask(ext_sys.nb_var,1),hc44cid,10,1,1.e-8,0.005);
 	Ctc3BCid c3bcidhc4(BoolMask(ext_sys.nb_var,1),hc44cid,10,1,ext_sys.nb_var);
 	CtcCompo hc4acidhc4 (hc4, acidhc4);
@@ -97,11 +95,10 @@ int main(int argc, char** argv){
 	//		cpoints.push_back(X_Newton::INF_X);
 	cpoints.push_back(X_Newton::RANDOM);
 	cpoints.push_back(X_Newton::RANDOM_INV);
+	//              cpoints.push_back(X_Newton::K4);
 
-	//	X_Newton ctcxnewton (ext_sys, ctc, cpoints, 0,sys.goal,0.2,0.2, X_Newton::X_NEWTON,X_Newton::HANSEN,100,1.e5,1.e5);
-	X_Newton ctcxnewton (ext_sys, &hc44xn, cpoints, 0,sys.goal,0.2,0.2, X_Newton::X_NEWTON,X_Newton::HANSEN,100,1.e5,1.e5);
 
-	//      X_Newton ctcxnewton (ext_sys, ctc , cpoints, 0,sys.goal,0.3,1,X_Newton::X_NEWTON,X_Newton::HANSEN,100,1.e5,1.e5);
+	X_Newton ctcxnewton (ext_sys, &hc44xn, cpoints, 0,sys.goal,0.3,0.3, X_Newton::X_NEWTON,X_Newton::HANSEN,100,1.e5,1.e5);
 
 	//  the actual contractor  ctc + xnewton	
 	CtcCompo  cxn (*ctc, ctcxnewton);

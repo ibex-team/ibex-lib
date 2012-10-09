@@ -1,30 +1,71 @@
 //============================================================================
 //                                  I B E X                                   
 // File        : ibex_DefaultOptimizer.cpp
-// Author      : Gilles Chabert
+// Author      : Gilles Chabert , Bertrand Neveu
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Aug 27, 2012
-// Last Update : Aug 27, 2012
+// Last Update : Oct 9, 2012
 //============================================================================
 
 #include "ibex_DefaultOptimizer.h"
-#include "ibex_RoundRobin.h"
+#include "ibex_SmearFunction.h"
 #include "ibex_CtcHC4.h"
-
+#include "ibex_CtcAcid.h"
+#include "ibex_CtcCompo.h"
+#include "ibex_BoolMask.h"
+#include "ibex_CellStack.h"
+#include "ibex_Array.h"
+#include <vector>
 namespace ibex {
 
-static System* tmp;
 
-DefaultOptimizer::DefaultOptimizer(System& sys) : Optimizer(sys,*new RoundRobin(),*new CtcHC4((tmp=new System(sys,System::EXTEND))->ctrs)),
-		__ctc(&ctc), __bsc(&bsc), __sys(tmp) {
+  // the defaultoptimizer constructor  1 point for sample_size
+  DefaultOptimizer::DefaultOptimizer(System& sys, System& ext_sys, double prec, double goal_prec) : Optimizer(sys,*new SmearSumRelative(ext_sys,prec),
+											    *new CtcCompo (* (contractor_list(sys,ext_sys,prec))),
+											    prec,goal_prec,goal_prec,1),
+										  __ctc(dynamic_cast<CtcCompo*>(&ctc)), __bsc(&bsc)  {
 
 }
 
+  // the corners for X_Newton : one random orner and its opposite
+ vector<X_Newton::corner_point>*  DefaultOptimizer::default_corners ()
+ { vector<X_Newton::corner_point>* x;
+   x= new vector<X_Newton::corner_point>;
+   x->push_back(X_Newton::RANDOM);
+   x->push_back(X_Newton::RANDOM_INV);
+   return x;}
+
+  // the contractor list  hc4, acid(hc4), xnewton 
+    Array<Ctc>*  DefaultOptimizer::contractor_list (System& sys, System& ext_sys,double prec)
+  {Array<Ctc>* ctc_list;
+    ctc_list= new Array<Ctc>(3);
+    // first contractor on ext_sys : incremental hc4  ratio propag 0.01
+    ctc_list->set_ref(0, *new CtcHC4 (ext_sys.ctrs,0.01,true));
+    // second contractor on ext_sys : acid (hc4)   with incremental hc4  ratio propag 0.1 
+    ctc_list->set_ref(1, *new CtcAcid (ext_sys,BoolMask(ext_sys.nb_var,1),
+				       *new CtcHC4 (ext_sys.ctrs,0.1,true)));
+    // the last contractor is X_Newton  with rfp=0.3 and rfp2=0.3
+    // the limits for calling soplex are 1e5 for the derivatives and 1e10 for the domains : no error found with these bounds
+      ctc_list->set_ref(2,*new X_Newton(ext_sys, 
+					new CtcHC4 (ext_sys.ctrs,0.01),  // called in the X_Newton external loop 
+					 *(default_corners()),
+					//					0,sys.goal,0.3,0.3,X_Newton::X_NEWTON,X_Newton::HANSEN,100,1.e5,1.e10));
+					0,sys.goal,0.3,0.3,X_Newton::X_NEWTON,X_Newton::HANSEN,100,1.e5,1.e5));
+
+    return ctc_list;}
+
+
+
+  // deletion of all dynamically created objects
 DefaultOptimizer::~DefaultOptimizer() {
-	delete __ctc;
-	delete __bsc;
-	delete __sys;
+     delete &((dynamic_cast<CtcAcid*> (&__ctc->list[1]))->ctc);
+      delete (dynamic_cast<X_Newton*> (&__ctc->list[2]))->ctc;
+      delete &((dynamic_cast<X_Newton*> (&__ctc->list[2]))->cpoints);
+    for (int i=0 ; i<__ctc->list.size(); i++)
+      delete &__ctc->list[i];
+    delete __ctc;
+    delete __bsc;
 }
 
 } // end namespace ibex
