@@ -220,13 +220,26 @@ bool ConstrainedOptimizer::check_constraints (const System& sys, const Space& sp
   }
 
 
+  bool Optimizer::mid_probing (const System& sys, const Space& space) {
+  //cout << space.box << endl;
+  VECTOR pt(Mid(space.box));
+  bool loup_changed = check_candidate (sys, space, pt);
+
+  for(int i=1; i<sample_size ; i++){
+    pt =  random_point(space.box);
+    loup_changed |= check_candidate (sys, space, pt);
+  }
+
+  if (loup_changed) cout << "[mid_probing] " << loup << endl;
+  return loup_changed;
+  }
 
 /** Return a random point inside a box.
  *
  * last update: GCH
  */
 
-VECTOR random_point(const INTERVAL_VECTOR& box) {
+VECTOR  Optimizer::random_point(const INTERVAL_VECTOR& box) {
   int n=Dimension(box);
   VECTOR mid = Mid(box);
   VECTOR diam = Diam(box);
