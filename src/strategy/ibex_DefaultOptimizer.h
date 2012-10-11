@@ -41,7 +41,7 @@ private:
 	CtcCompo* __ctc;
 	Bsc* __bsc;
 	Array<Ctc>*  contractor_list (System& sys, System& ext_sys,double prec);
-	vector<X_Newton::corner_point>* default_corners ();
+	std::vector<X_Newton::corner_point>* default_corners ();
 };
 
 

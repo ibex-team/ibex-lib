@@ -19,6 +19,7 @@
 #include <vector>
 namespace ibex {
 
+  using namespace std;
 
   // the defaultoptimizer constructor  1 point for sample_size
   DefaultOptimizer::DefaultOptimizer(System& sys, System& ext_sys, double prec, double goal_prec) : Optimizer(sys,*new SmearSumRelative(ext_sys,prec),
