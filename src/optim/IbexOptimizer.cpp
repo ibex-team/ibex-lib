@@ -32,7 +32,7 @@
 #include "IbexOptimizer.h"
 
 
-#include <math.h>
+#include <math.h> 
 
 namespace ibex {
  
@@ -128,7 +128,9 @@ Optimizer::Optimizer(const System& sys,  int y_num, Contractor& contractor,
   y_num(y_num),
   goal_ctr(goal_ctr1),
   prec_num(1), goal_ceil(goal_ceil),
-  loup(BiasPosInf), distloup(BiasPosInf), optval(BiasPosInf),nbnodes(0), sample_size(sample_size), loup_changed(false),
+  loup(BiasPosInf), 
+  // distloup(BiasPosInf), optval(BiasPosInf),nbnodes(0),
+  sample_size(sample_size), loup_changed(false),
   uplo(BiasPosInf), uplo_of_solutions(BiasPosInf)
 { 
 
@@ -153,7 +155,9 @@ Optimizer::Optimizer(const System& sys,  int y_num, Contractor& contractor,
   y_num(y_num),
   goal_ctr(goal_ctr1),
   prec_num(1), goal_ceil(goal_ceil),
-  loup(BiasPosInf), distloup(BiasPosInf), optval(BiasPosInf),nbnodes(0), sample_size(sample_size), loup_changed(false),
+  loup(BiasPosInf), 
+  // distloup(BiasPosInf), optval(BiasPosInf),nbnodes(0), 
+  sample_size(sample_size), loup_changed(false),
   uplo(BiasPosInf), uplo_of_solutions(BiasPosInf)
 { 
 

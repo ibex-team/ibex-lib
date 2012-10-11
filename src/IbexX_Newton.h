@@ -37,12 +37,12 @@ class X_Newton : public LR_contractor {
    * \param cmode X_NEWTON (contracts all the box) | LOWER_BOUNDING (only improves the left bound of the variable y) 
    * \param lmode TAYLOR | HANSEN : linear relaxation method. 
  */
-    X_Newton(const System& sys, Contractor* ctc, vector<corner_point>& cpoints, int goal_ctr=-1,
+  X_Newton(const System& sys, Contractor* ctc, vector<corner_point>& cpoints, int goal_ctr=-1,
      REAL ratio_fp=default_ratio_fp, REAL ratio_fp2=default_ratio_fp2, REAL var_min_width=default_var_min_width, 
 	     ctc_mode cmode=ALL_BOX, linear_mode lmode=HANSEN, int max_iter_soplex=100, REAL max_diam_deriv=default_max_diam_deriv, 
              REAL max_diam_box=default_max_diam_box) : 
-     LR_contractor(sys, ctc, goal_ctr,  ratio_fp, ratio_fp2, var_min_width, cmode, max_iter_soplex), Operator(sys.space),
-        cpoints(cpoints), lmode(lmode), max_diam_deriv(max_diam_deriv), max_diam_box(max_diam_box) {
+  LR_contractor(sys, ctc, goal_ctr,  ratio_fp, ratio_fp2, var_min_width, cmode, max_iter_soplex, max_diam_box), Operator(sys.space),
+        cpoints(cpoints), lmode(lmode), max_diam_deriv(max_diam_deriv) {
 
         last_rnd = new int[space.nb_var()];
         base_coin = new int[space.nb_var()];
@@ -53,7 +53,7 @@ class X_Newton : public LR_contractor {
   /** Duplicates this instance (space is passed by reference). */
     X_Newton(const X_Newton& xnwt) : 
   LR_contractor(xnwt), cpoints(xnwt.cpoints), lmode(xnwt.lmode),
-      max_diam_deriv(xnwt.max_diam_deriv), max_diam_box(xnwt.max_diam_box),  Operator(xnwt.sys.space), revise(xnwt.revise){
+      max_diam_deriv(xnwt.max_diam_deriv),  Operator(xnwt.sys.space), revise(xnwt.revise){
 
       last_rnd = new int[space.nb_var()];
       base_coin = new int[space.nb_var()];
@@ -73,7 +73,7 @@ class X_Newton : public LR_contractor {
   }
 
    /** Implements the contractor abstract copy. */
-  virtual LR_contractor* copy() const {
+  virtual X_Newton* copy() const {
       return new X_Newton(*this);
     }
     
@@ -94,7 +94,6 @@ class X_Newton : public LR_contractor {
 
   REAL max_diam_deriv;
 
-  REAL max_diam_box;
 
   protected:
 

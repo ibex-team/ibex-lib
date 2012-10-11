@@ -32,6 +32,7 @@ namespace ibex {
 const REAL X_Newton::default_max_diam_deriv =1e5;
 const REAL X_Newton::default_max_diam_box =1e4;
 
+
 void X_Newton::best_corner(int ctr, int op, INTERVAL_VECTOR& G, bool* corner){
    int n=space.nb_var();
     //0000000000
@@ -119,7 +120,7 @@ INTERVAL_VECTOR& G, int id_point, int& nb_nonlinear_vars){
     return cont;
 }
 
-//return 0 only when the linearization is not performed
+//return 0 only St,when the linearization is not performed
 int X_Newton::X_Linearization(SoPlex& mysoplex, int ctr, corner_point cpoint, int op, vector<INTERVAL>& taylor_ev,
 INTERVAL_VECTOR& G, int id_point, int& nb_nonlinear_vars){
 
@@ -149,6 +150,7 @@ INTERVAL_VECTOR& G, int id_point, int& nb_nonlinear_vars){
     }
     try{
     for (int j=0; j<n; j++){
+
           if(j==n-1 && goal_ctr!=-1) continue; //the variable y! 
              
           if(isvar[ctr][j]){
@@ -162,7 +164,7 @@ INTERVAL_VECTOR& G, int id_point, int& nb_nonlinear_vars){
             else
               sys.ctr(ctr).gradient(space);
 	    }
-         }
+	  }
 	  else continue;
 
 	  if(Diam(G(j+1))> max_diam_deriv ){
@@ -315,7 +317,8 @@ INTERVAL_VECTOR& G, int id_point, int& nb_nonlinear_vars){
    {  if(corner) delete[] corner; 
       space.box=savebox; return 0;}
       
-      if(corner) delete[] corner;
+
+    if(corner) delete[] corner;
       
     if(ctr==goal_ctr){
           goal->forward(space);
@@ -358,6 +361,8 @@ INTERVAL_VECTOR& G, int id_point, int& nb_nonlinear_vars){
 
 
   }
+
+
 
 
 int X_Newton::Linearization(SoPlex& mysoplex) {
@@ -418,7 +423,6 @@ int X_Newton::Linearization(SoPlex& mysoplex) {
   return nb_ctrs;
 
 }
-
 
 
 

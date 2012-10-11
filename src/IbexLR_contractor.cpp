@@ -28,6 +28,7 @@ namespace ibex {
 const REAL LR_contractor::default_ratio_fp = 0.1;
 const REAL LR_contractor::default_ratio_fp2 = 0.01;
 const REAL LR_contractor::default_var_min_width = 1.e-11;
+const REAL LR_contractor::default_max_diam_box =1e4;
 
   /** Creates the LR_contractor
    *
@@ -39,9 +40,9 @@ const REAL LR_contractor::default_var_min_width = 1.e-11;
    * \param cmode ALL_BOX (contracts all the box) | ONLY_Y (only improves the left bound of the variable y) 
  */
    LR_contractor::LR_contractor(const System& sys, Contractor* ctc, int goal_ctr,
-     REAL ratio_fp, REAL ratio_fp2, REAL var_min_width, ctc_mode cmode, int max_iter_soplex) : 
+				REAL ratio_fp, REAL ratio_fp2, REAL var_min_width, ctc_mode cmode, int max_iter_soplex, REAL max_diam_box) : 
     Operator(sys.space), sys(sys), ctc(ctc? ctc->copy():NULL), goal_ctr(goal_ctr), 
-    ratio_fp(ratio_fp), ratio_fp2(ratio_fp2), var_min_width(var_min_width), cmode(cmode), max_iter_soplex(max_iter_soplex) {
+    ratio_fp(ratio_fp), ratio_fp2(ratio_fp2), var_min_width(var_min_width), cmode(cmode), max_iter_soplex(max_iter_soplex), max_diam_box(max_diam_box) {
 
     /* get the goal function from the constraint y=f(x) */
       if(goal_ctr!=-1){
@@ -105,7 +106,7 @@ const REAL LR_contractor::default_var_min_width = 1.e-11;
   /** Duplicates this instance (space is passed by reference). */
      LR_contractor::LR_contractor(const LR_contractor& lrc) : Operator(lrc.space), sys(lrc.sys), 
          ctc((lrc.ctc)? lrc.ctc->copy():NULL), ratio_fp(lrc.ratio_fp), ratio_fp2(lrc.ratio_fp2),
-         var_min_width(lrc.var_min_width), goal_ctr(lrc.goal_ctr), cmode(lrc.cmode), max_iter_soplex(lrc.max_iter_soplex) {
+							      var_min_width(lrc.var_min_width), goal_ctr(lrc.goal_ctr), cmode(lrc.cmode), max_iter_soplex(lrc.max_iter_soplex), max_diam_box(lrc.max_diam_box) {
        isvar=new bool*[sys.nb_ctr()];
        for(int i=0;i<sys.nb_ctr();i++)
            isvar[i]=new bool[space.nb_var()];
@@ -131,7 +132,7 @@ const REAL LR_contractor::default_var_min_width = 1.e-11;
   
 void  LR_contractor::contract() {
    REAL gain;
-  // if (space.box.max_diameter() > max_diam_box) return; // is it necessary?
+   if (space.box.max_diameter() > max_diam_box) return; // is it necessary?  YES (BNE) Soplex can give false infeasible results with large numbers
    
    do{
      INTERVAL_VECTOR savebox=space.box;

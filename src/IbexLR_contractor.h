@@ -25,7 +25,7 @@ namespace ibex {
  
   LR_contractor(const System& sys, Contractor* ctc, int goal_ctr=-1,
      REAL ratio_fp=default_ratio_fp, REAL ratio_fp2=default_ratio_fp2, REAL var_min_width=default_var_min_width, 
-	     ctc_mode cmode=ALL_BOX, int max_iter_soplex=100);
+		ctc_mode cmode=ALL_BOX, int max_iter_soplex=100, REAL max_diam_box=default_max_diam_box);
 	     
   LR_contractor(const LR_contractor& lrc);
   
@@ -55,6 +55,9 @@ namespace ibex {
   
   /** Default var_min_width value, set to 1e-11  **/
   static const REAL default_var_min_width;
+
+ /** Default max_diam_box value, set to 1e4  **/
+  static const REAL default_max_diam_box;
  
   /** The contraint related to the objective function **/
   int goal_ctr;
@@ -72,6 +75,8 @@ namespace ibex {
   /** Min size of a variable to be contracted **/
   REAL var_min_width;
   
+  REAL max_diam_box;
+
   /** Indicates if only y is contracted (cmode=ONLY_Y) or all the box (ALL_BOX) **/
   ctc_mode cmode;
   
