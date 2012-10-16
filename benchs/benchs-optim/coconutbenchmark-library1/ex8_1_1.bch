@@ -10,6 +10,7 @@ minimize cos(x1)*sin(x2) - x1/(1 + x2^2);
 
 constraints
 x1 <= 2;
+x2 <= 1;
 
 end
 
