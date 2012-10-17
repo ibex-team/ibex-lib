@@ -36,7 +36,7 @@ class AA_Simplex : public LR_contractor {
      ops = new int[sys.nb_ctr()];
      
      for(int i=0; i<sys.nb_ctr(); i++){
-       const Expr& function=(i==goal_ctr)? sys.ctr(i).expr : (((const BinOpExpr&)sys.ctr(goal_ctr).expr).right);;
+       const Expr& function=(i==goal_ctr)? sys.ctr(i).expr : (((const BinOpExpr&)sys.ctr(goal_ctr).expr).right);
        EvaluatorFactory fac(function);
        evls[i]=new EvaluatorAffine();
        fac.build(evls[i]);
@@ -110,7 +110,6 @@ class AA_Simplex : public LR_contractor {
   protected:
 
   virtual int Linearization(SoPlex& mysoplex);
-  virtual void Map(INTERVAL_VECTOR& box, INTERVAL_VECTOR& tbox);
 
 };
 
