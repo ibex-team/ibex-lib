@@ -68,7 +68,30 @@ void ExprGenerator::visit(const P_ExprIndex& e) {
 		}
 	}
 
+	const ExprConstantRef* s=dynamic_cast<const ExprConstantRef*>(&LEFT);
+	if (s) {
+		if (dynamic_cast<const P_ExprIndex*>(e.father)) {
+			e.deco.tmp = new ExprConstantRef(s->value[real_index]);
+		} else {
+			// "last time": we cannot keep reference anymore.
+			e.deco.tmp = &ExprConstant::new_(s->value[real_index]);
+		}
+		delete s;
+		return;
+	}
+
 	e.deco.tmp = &(LEFT[real_index]);
+}
+
+void ExprGenerator::visit(const ExprConstantRef& c) {
+	if (dynamic_cast<const P_ExprIndex*>(c.father)) {
+		// temporary copy (with domain passed by reference).
+		// will be replaced by a ExprConstant at the
+		// last time (in P_ExprIndex)
+		c.deco.tmp = new ExprConstantRef(c.value);
+	} else {
+		c.deco.tmp = & ExprConstant::new_(c.value); //ExprConstSymbol(c.value);
+	}
 }
 
 void ExprGenerator::visit(const ExprIter& x) {

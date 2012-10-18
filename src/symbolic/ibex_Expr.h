@@ -71,14 +71,21 @@ public:
 	 * two subnodes referencing the same object count for 1).*/
 	const int size;
 
-	/** Unique number identifying this node in the global function. */
+	/** Unique number identifying this node in the global function.
+	 *
+	 * Undefined while this node is not part of a function expression. */
 	const int id;
 
 	/** Dimensions */
 	const Dim dim;
 
-	/** The label of this node. */
+	/** The label of this node.
+	 *
+	 * Uninitialized while this node is not part of a function expression. */
 	mutable ExprLabel deco;
+
+	/** The father node. NULL if none. */
+	const ExprNode* father;
 
 	/** Return true if this subexpression is the constant 0. */
 	virtual bool is_zero() const;
@@ -1413,9 +1420,6 @@ inline const IntervalMatrixArray& ExprConstant::get_matrix_array_value() const {
 
 inline const Domain& ExprConstant::get() const {
 	return value; }
-
-inline ExprUnaryOp::ExprUnaryOp(const ExprNode& subexpr, const Dim& dim) :
-				ExprNode(subexpr.height+1, subexpr.size+1, dim), expr(subexpr) { }
 
 /** Addition */
 inline const ExprAdd& operator+(const ExprNode& left, const ExprNode& right) {

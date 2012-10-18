@@ -209,17 +209,11 @@ void Function::separate() {
 	// rem: dimension()==expr().dim.vec_size() if expr() is a vector
 	//      and also fvec->nb_args if, in addition, fvec!=NULL
 
-	const ExprVector* fvec=dynamic_cast<const ExprVector*>(&expr());
-	const ExprNode* tmp=NULL;
-
 	if (expr().dim.is_vector()) {
 		for (int i=0; i<expr().dim.vec_size(); i++) {
 			Array<const ExprSymbol> x(nb_arg());
-			for (int j=0; j<nb_arg(); j++) {
-				x.set_ref(j,ExprSymbol::new_(arg(j).name,arg(j).dim));
-			}
-			const ExprNode& y=ExprCopy().copy(symbs, x, fvec? fvec->arg(i) : *(tmp=&expr()[i]));
-			if (tmp) delete (ExprNode*) tmp; // will not delete the subexpression
+			varcopy(symbs,x);
+			const ExprNode& y=ExprCopy().index_copy(symbs, x, expr(), i);
 			comp[i].init(x,y);
 		}
 	}
@@ -227,18 +221,11 @@ void Function::separate() {
 	else {
 		int n=expr().dim.dim3;
 		for (int i=0; i<expr().dim.dim2; i++) {
-			const ExprVector* fvec2=NULL;
-			if (fvec) {
-				fvec2=dynamic_cast<const ExprVector*>(&fvec->arg(i));
-			}
+
 			for (int j=0; j<n; j++) {
 				Array<const ExprSymbol> x(nb_arg());
-				for (int k=0; k<nb_arg(); k++) {
-					x.set_ref(k,ExprSymbol::new_(arg(k).name,arg(k).dim));
-				}
-				const ExprNode& y=ExprCopy().copy(symbs, x,
-						fvec2 ? fvec2->arg(j) : (fvec? *(tmp=&(fvec->arg(i)[j])) : *(tmp=&(expr()[i][j]))));
-				if (tmp) delete (ExprNode*) tmp; // do not delete the subexpression
+				varcopy(symbs,x);
+				const ExprNode& y=ExprCopy().index_copy(symbs, x, expr(), i, j);
 				comp[i*n+j].init(x,y);
 			}
 		}

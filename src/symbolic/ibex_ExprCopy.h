@@ -28,6 +28,8 @@ namespace ibex {
  */
 void varcopy(const Array<const ExprSymbol>& src, Array<const ExprSymbol>& dest);
 
+
+
 /**
  * \brief Duplicate an expression
  */
@@ -35,6 +37,8 @@ class ExprCopy : public virtual ExprVisitor {
 
 public:
 	/*
+	 * \brief Duplicate an expression (with new symbols).
+	 *
 	 * \pre Each symbol in y must belong to "old_x".
 	 *
 	 * Symbols in \a old_x are matched to symbols in \a new_x with respect to their order.
@@ -46,6 +50,23 @@ public:
 	 *      This is used, e.g., in ibex_Optimizer to transform a function x->g(x) into (x,y)->g(x).
 	 */
 	const ExprNode& copy(const Array<const ExprSymbol>& old_x, const Array<const ExprSymbol>& new_x, const ExprNode& y, bool fold_cst=false);
+
+	/**
+	 * \brief Duplicate y[i], where y is an expression.
+	 *
+	 * If \a y is a vector, the ith argument of y is copied, i.e., copy-of(y[i])
+	 * instead of returning (copy-of(y))[i].
+	 */
+	const ExprNode& index_copy(const Array<const ExprSymbol>& old_x, const Array<const ExprSymbol>& new_x, const ExprNode& y, int i, bool fold_cst=false);
+
+	/**
+	 * \brief Duplicate y[i][j], where y is an expression.
+	 *
+	 * If \a y is a matrix, a copy of the (i,j) entry of y is returned, i.e., copy-of(y[i][j]).
+	 * Else if \a y is a vector, a copy-of(y[i])[j] is returned.
+	 * Otherwise, the returned expression is (copy-of(y))[i][j].
+	 */
+	const ExprNode& index_copy(const Array<const ExprSymbol>& old_x, const Array<const ExprSymbol>& new_x, const ExprNode& y, int i, int j, bool fold_cst=false);
 
 protected:
 	void visit(const ExprNode& e);

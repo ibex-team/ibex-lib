@@ -25,6 +25,43 @@ void varcopy(const Array<const ExprSymbol>& src, Array<const ExprSymbol>& dest) 
 	}
 }
 
+const ExprNode& ExprCopy::index_copy(const Array<const ExprSymbol>& old_x, const Array<const ExprSymbol>& new_x, const ExprNode& y, int i, bool fold_cst) {
+
+	const ExprVector* vec=dynamic_cast<const ExprVector*>(&y);
+
+	if (vec) {
+		return copy(old_x, new_x,  vec->arg(i));
+	} else {
+		const ExprNode* tmp=&y[i];
+		const ExprNode& y2=copy(old_x, new_x, *tmp);
+		delete (ExprNode*) tmp; // will delete the "[i]" created on-the-fly (but not y, the subexpression)
+		return y2;
+	}
+}
+
+const ExprNode& ExprCopy::index_copy(const Array<const ExprSymbol>& old_x, const Array<const ExprSymbol>& new_x, const ExprNode& y, int i, int j, bool fold_cst) {
+
+	const ExprVector* vec=dynamic_cast<const ExprVector*>(&y);
+
+	if (vec) {
+		const ExprVector* vec2=dynamic_cast<const ExprVector*>(&vec->arg(i));
+		if (vec2) {
+			return copy(old_x, new_x,  vec2->arg(j));
+		} else {
+			const ExprNode* tmp=&(vec->arg(i)[j]);
+			const ExprNode& y2=copy(old_x, new_x, *tmp);
+			delete (ExprNode*) tmp; // will delete the "[j]" created on-the-fly (but not y[i], the subexpression)
+			return y2;
+		}
+	} else {
+		const ExprIndex* tmp=&(y[i][j]);
+		const ExprNode& y2=copy(old_x, new_x, *tmp);
+		delete &((ExprIndex*) tmp)->expr; // delete y[i][j]
+		delete (ExprNode*) tmp;           // delete y[i]
+		return y2;
+	}
+}
+
 const ExprNode& ExprCopy::copy(const Array<const ExprSymbol>& old_x, const Array<const ExprSymbol>& new_x, const ExprNode& y, bool fold_cst) {
 
 	fold = fold_cst;

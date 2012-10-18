@@ -27,6 +27,7 @@ protected:
 	void visit(const ExprNode& e);
 	void visit(const P_ExprPower&);
 	void visit(const P_ExprIndex&);
+	void visit(const ExprConstantRef&);
 	void visit(const ExprIter&);
 	void visit(const ExprInfinity&);
 };

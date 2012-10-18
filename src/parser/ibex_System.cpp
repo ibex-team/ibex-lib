@@ -158,13 +158,55 @@ void System::init_f_from_ctrs() {
 	Array<const ExprNode> image(total_output_size);
 	int i=0;
 
-	// concatene all the components of all the constraints function
+	// concatenate all the components of all the constraints function
 	for (int j=0; j<ctrs.size(); j++) {
 		Function& fj=ctrs[j].f;
-		for (int k=0; k<fj.image_dim(); k++) {
-			const ExprNode& e=ExprCopy().copy(fj[k].args(), args, fj[k].expr());
+
+		/*========= 1st variant ===============
+		 * will have the disadvantage that the DAG structure
+		 * of a vector constraint may be lost, e.g., a 2D constraint x+y=0
+		 * will result in two components (x+y)[0] and (x+y)[1] where (x+y)
+		 * is for each a separate subnode.
+		 */
+//		for (int k=0; k<fj.image_dim(); k++) {
+//			const ExprNode& e=ExprCopy().copy(fj[k].args(), args, fj[k].expr());
+//			image.set_ref(i++,e);
+//		}
+		/*======================================================================*/
+
+
+		/*========= 2nd variant ===============*/
+		/* copy the DAG directly of the jth constraint and create
+		 * indexed expression after.
+		 *
+		 * TODO: Disadvantage : a vector constraint like
+		 *   (x[0],x[1])=(0,1)
+		 * will be transformed into
+		 *   (x[0],x[1])[0]=(0,1)[0] and (x[0],x[1])[1]=(0,1)[1]
+		 * instead of
+		 *    x[0]=0 and x[1]=1.
+		 */
+		const ExprNode& e=ExprCopy().copy(fj.args(), args, fj.expr());
+
+		const Dim& fjd=fj.expr().dim;
+		switch (fjd.type()) {
+		case Dim::SCALAR :
 			image.set_ref(i++,e);
+			break;
+		case Dim::ROW_VECTOR:
+		case Dim::COL_VECTOR:
+			for (int k=0; k<fjd.vec_size(); k++)
+				image.set_ref(i++,e[k]);
+			break;
+		case Dim::MATRIX:
+			for (int k=0; k<fjd.dim2; k++)
+				for (int l=0; l<fjd.dim3; l++)
+					image.set_ref(i++,e[k][l]);
+			break;
+		default: assert(false);
 		}
+		/*======================================================================*/
+
 	}
 	assert(i==total_output_size);
 

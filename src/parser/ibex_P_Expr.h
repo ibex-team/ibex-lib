@@ -21,8 +21,8 @@ namespace ibex {
 
 namespace parser {
 
-/*
- * Power at parse time.
+/**
+ * \brief Power expression (for parser only).
  */
 class P_ExprPower : public ExprBinaryOp {
 public:
@@ -32,7 +32,10 @@ public:
 };
 
 /**
- * An indexed expression, like x[i+1], at parse time
+ * \brief Indexed expression (for parser only).
+ *
+ * An indexed expression "at parse time" can be
+ * something like x[i+1].
  *
  * If matlab_style is true, the index starts from 1;
  * otherwise it starts from 0.
@@ -47,7 +50,36 @@ public:
 };
 
 /**
- * An iterator symbol in an expression
+ * \brief Constant symbol expressions (for parser only)
+ *
+ * At parse time, the domains of constants
+ * (those built from symbols) are references to
+ * avoid duplication (consider, e.g., an interval
+ * matrix array M appearing in many expressions).
+ *
+ * We could have also decided to adapt #ibex::ExprConstant
+ * so that the Domain field "value" is a reference (Domain
+ * can be references). However, it is more safe
+ * to create a separate class for a separate usage.
+ */
+class ExprConstantRef : public ExprLeaf {
+public:
+	// should we add the name (for display?)
+	// but then we have to build names like "x[i]"
+	// when we build an ExprConstantRef from "x"
+	// in ExprGenerator::visit(const P_ExprIndex&).
+	ExprConstantRef(const Domain& d);
+
+	virtual void acceptVisitor(ExprVisitor& v) const;
+
+	// Points to the constant name (no copy)
+	//const char* name;
+	// A *reference* to the internal domain of d.
+	Domain value;
+};
+
+/**
+ * An iterator symbol (for parser only).
  */
 class ExprIter : public ExprLeaf {
 public:
@@ -62,9 +94,9 @@ public:
 
 
 /**
- * The constant infinity.
+ * \brief The infinity constant (for parser only).
  *
- * This constant cannot be represented by an ExprConstant
+ * This constant cannot be represented by an #ibex::ExprConstant
  * object because (+oo,+oo) is automatically
  * replaced by the empty set.
  */
@@ -76,27 +108,6 @@ public:
 };
 
 void p_print(const ExprNode& e);
-
-/**
- * An entity symbol in an expression
- */
-//class ExprEntity: public ExprNode {
-//public:
-//	ExprEntity(const Entity& e, int lineno);
-//
-//	virtual void acceptVisitor(ExprVisitor& v) const {
-//		// never called
-//	}
-//
-//	/** Accept an #ibex::parser::P_ExprVisitor visitor. */
-//	virtual void acceptVisitor(P_ExprVisitor& v) const {
-//		v.visit(*this);
-//	}
-//
-//	const Entity& entity;
-//	int line;  // line in the program
-//};
-
 
 } // end namespace parser
 

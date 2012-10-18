@@ -36,6 +36,7 @@ public:
 protected:
 	void visit(const ExprNode& e);
 	void visit(const ExprIndex& i);
+	void visit(const ExprConstantRef&);
 	void visit(const ExprLeaf& e);
 	void visit(const ExprNAryOp& e);
 	void visit(const ExprBinaryOp& b);

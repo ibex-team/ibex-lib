@@ -56,23 +56,23 @@ void load(Array<Domain>& d, const IntervalVector& x, int nb_used, int* used) {
 		// (i.e. they have to be copied in x).
 		switch (dim.type()) {
 		case Dim::SCALAR:
-			if (nb_used==-1 || i==used[u]) { d[s].i()=x[i]; u++; } // if nb_used==-1, u is incremented for nothing
+			if (nb_used==-1 || i==used[u]) {
+				d[s].i()=x[i];
+				u++; // note: if nb_used==-1, u is incremented for nothing
+				if (u==nb_used) return; // otherwise next test "i==used[u]" is a memory fault
+			}
 			i++;
 			break;
 		case Dim::ROW_VECTOR:
-		{
-			IntervalVector& v=d[s].v();
-			for (int j=0; j<dim.vec_size(); j++) {
-				if (nb_used==-1 || i==used[u]) { v[j]=x[i]; u++; }
-				i++;
-			}
-		}
-		break;
 		case Dim::COL_VECTOR:
 		{
 			IntervalVector& v=d[s].v();
 			for (int j=0; j<dim.vec_size(); j++) {
-				if (nb_used==-1 || i==used[u]) { v[j]=x[i]; u++; }
+				if (nb_used==-1 || i==used[u]) {
+					v[j]=x[i];
+					u++;
+					if (u==nb_used) return;
+				}
 				i++;
 			}
 		}
@@ -83,7 +83,11 @@ void load(Array<Domain>& d, const IntervalVector& x, int nb_used, int* used) {
 			IntervalMatrix& M=d[s].m();
 			for (int k=0; k<dim.dim2; k++)
 				for (int j=0; j<dim.dim3; j++) {
-					if (nb_used==-1 || i==used[u]) { M[k][j]=x[i]; u++; }
+					if (nb_used==-1 || i==used[u]) {
+						M[k][j]=x[i];
+						u++;
+						if (u==nb_used) return;
+					}
 					i++;
 				}
 		}
@@ -94,7 +98,11 @@ void load(Array<Domain>& d, const IntervalVector& x, int nb_used, int* used) {
 			for (int l=0; l<dim.dim1; l++)
 				for (int k=0; k<dim.dim2; k++)
 					for (int j=0; j<dim.dim3; j++) {
-						if (nb_used==-1 || i==used[u]) { A[l][k][j]=x[i]; u++; }
+						if (nb_used==-1 || i==used[u]) {
+							A[l][k][j]=x[i];
+							u++;
+							if (u==nb_used) return;
+						}
 						i++;
 					}
 		}
@@ -123,23 +131,23 @@ void load(IntervalVector& x, const Array<const Domain>& d, int nb_used, int* use
 		// (i.e. they have to be copied in x).
 		switch (dim.type()) {
 		case Dim::SCALAR:
-			if (nb_used==-1 || i==used[u]) { x[i]=d[s].i(); u++; } // if nb_used==-1, u is incremented for nothing
+			if (nb_used==-1 || i==used[u]) {
+				x[i]=d[s].i();
+				u++; // if nb_used==-1, u is incremented for nothing
+				if (u==nb_used) return; // otherwise next test "i==used[u]" is a memory fault
+			}
 			i++;
 			break;
 		case Dim::ROW_VECTOR:
-		{
-			const IntervalVector& v=d[s].v();
-			for (int j=0; j<dim.vec_size(); j++) {
-				if (nb_used==-1 || i==used[u]) { x[i]=v[j]; u++; }
-				i++;
-			}
-		}
-		break;
 		case Dim::COL_VECTOR:
 		{
 			const IntervalVector& v=d[s].v();
 			for (int j=0; j<dim.vec_size(); j++) {
-				if (nb_used==-1 || i==used[u]) { x[i]=v[j]; u++; }
+				if (nb_used==-1 || i==used[u]) {
+					x[i]=v[j];
+					u++;
+					if (u==nb_used) return;
+				}
 				i++;
 			}
 		}
@@ -150,7 +158,11 @@ void load(IntervalVector& x, const Array<const Domain>& d, int nb_used, int* use
 			const IntervalMatrix& M=d[s].m();
 			for (int k=0; k<dim.dim2; k++)
 				for (int j=0; j<dim.dim3; j++) {
-					if (nb_used==-1 || i==used[u]) { x[i]=M[k][j]; u++; }
+					if (nb_used==-1 || i==used[u]) {
+						x[i]=M[k][j];
+						u++;
+						if (u==nb_used) return;
+					}
 					i++;
 				}
 		}
@@ -161,7 +173,11 @@ void load(IntervalVector& x, const Array<const Domain>& d, int nb_used, int* use
 			for (int l=0; l<dim.dim1; l++)
 				for (int k=0; k<dim.dim2; k++)
 					for (int j=0; j<dim.dim3; j++) {
-						if (nb_used==-1 || i==used[u]) { x[i]=A[l][k][j]; u++; }
+						if (nb_used==-1 || i==used[u]) {
+							x[i]=A[l][k][j];
+							u++;
+							if (u==nb_used) return;
+						}
 						i++;
 					}
 		}
@@ -194,7 +210,11 @@ void load(Array<Domain>& x, const Array<const Domain>& y, int nb_used, int* used
 			// (i.e. they have to be copied in x).
 			switch (dim.type()) {
 			case Dim::SCALAR:
-				if (i==used[u]) { x[s]=y[s]; u++; } // if nb_used==-1, u is incremented for nothing
+				if (i==used[u]) {
+					x[s]=y[s];
+					u++; // if nb_used==-1, u is incremented for nothing
+					if (u==nb_used) return;
+				}
 				i++;
 				break;
 			case Dim::ROW_VECTOR:
@@ -202,7 +222,11 @@ void load(Array<Domain>& x, const Array<const Domain>& y, int nb_used, int* used
 				// note that it is then possible to load a row vector
 				// into a column vector (and this flexibility is desired)
 				for (int j=0; j<dim.dim3; j++) {
-					if (i==used[u]) { x[s][j]=y[s][j]; u++; }
+					if (i==used[u]) {
+						x[s][j]=y[s][j];
+						u++;
+						if (u==nb_used) return;
+					}
 					i++;
 				}
 			}
@@ -212,7 +236,11 @@ void load(Array<Domain>& x, const Array<const Domain>& y, int nb_used, int* used
 				// note that it is then possible to load a column vector
 				// into a row vector (and this flexibility is desired)
 				for (int j=0; j<dim.dim2; j++) {
-					if (i==used[u]) { x[s][j]=y[s][j]; u++; }
+					if (i==used[u]) {
+						x[s][j]=y[s][j];
+						u++;
+						if (u==nb_used) return;
+					}
 					i++;
 				}
 			}
@@ -222,7 +250,11 @@ void load(Array<Domain>& x, const Array<const Domain>& y, int nb_used, int* used
 			{
 				for (int k=0; k<dim.dim2; k++)
 					for (int j=0; j<dim.dim3; j++) {
-						if (i==used[u]) { x[s][k][j]=y[s][k][j]; u++; }
+						if (i==used[u]) {
+							x[s][k][j]=y[s][k][j];
+							u++;
+							if (u==nb_used) return;
+						}
 						i++;
 					}
 			}
@@ -234,7 +266,11 @@ void load(Array<Domain>& x, const Array<const Domain>& y, int nb_used, int* used
 						for (int j=0; j<dim.dim3; j++) {
 							// TODO: are all these temporary Domain objects
 							// created by [] really safe?
-							if (i==used[u]) { x[s][l][k][j]=y[s][l][k][j]; u++; }
+							if (i==used[u]) {
+								x[s][l][k][j]=y[s][l][k][j];
+								u++;
+								if (u==nb_used) return;
+							}
 							i++;
 						}
 			}

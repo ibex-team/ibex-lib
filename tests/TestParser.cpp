@@ -149,12 +149,23 @@ void TestParser::const07() {
 		c0.contract(sys.box);
 		IntervalVector zero(6);
 		zero.init(0);
-		check(sys.box.subvector(0,5),zero);
 
 		CtcProj c1(sys.ctrs[1]);
 		sys.box[5]=Interval::ALL_REALS;
 		c1.contract(sys.box);
 		check(sys.box[5],Interval(1,1));
+
+		CtcProj c2(sys.ctrs[2]);
+		sys.box.init(Interval::ALL_REALS);
+		c2.contract(sys.box);
+		check(sys.box[5],Interval(1,1));
+
+		CtcProj c3(sys.ctrs[3]);
+		sys.box.init(Interval::ALL_REALS);
+		c3.contract(sys.box);
+		double _c21[][2]={{6,6},{7,7},{8,8}};
+		IntervalVector c21(3,_c21);
+		check(sys.box.subvector(3,5),c21);
 
 	} catch(EmptyBoxException& e) {
 		TEST_ASSERT(false);

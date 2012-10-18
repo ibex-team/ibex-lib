@@ -95,6 +95,11 @@ void ConstantGenerator::visit(const ExprSymbol& x) {
 	ibexerror(s.str());
 }
 
+void ConstantGenerator::visit(const ExprConstantRef& s) {
+	s.deco.tmp = new Domain(s.value,true);
+	number_type = OTHER; // neither -oo nor +oo
+}
+
 void ConstantGenerator::visit(const ExprConstant& c) {
 	c.deco.tmp = new Domain(c.get(),false);
 	number_type = OTHER; // neither -oo nor +oo
@@ -176,17 +181,26 @@ void binary_eval(const ExprBinaryOp& e, dom_func2 f) {
 	e.deco.tmp = dy;
 }
 
-// the index under the form of dom_func2
-Domain _index(const Domain& d, const Domain& idx) {
-	return d[to_integer(idx)];
-}
-
 // the power under the form of dom_func
 Domain _power(const Domain& d, const Domain& expon) {
 	return pow(d,to_integer(expon));
 }
 // =====================================
 
+}
+
+void ConstantGenerator::visit(const P_ExprIndex& e) {
+	const Domain* dx1 = (const Domain*) e.left.deco.tmp;
+	const Domain* dx2 = (const Domain*) e.right.deco.tmp;
+	if (dx1->is_reference) {
+		e.deco.tmp = new Domain((*dx1)[to_integer(*dx2)]);
+		delete dx1; // if dx1 is a reference (ConstExprSymbol, the referenced domain will not be deleted.)
+	} else {
+		Domain* dy = new Domain(e.dim);
+		*dy = (*dx1)[to_integer(*dx2)]; // by copy
+		delete dx1;
+	}
+	delete dx2;
 }
 
 void ConstantGenerator::visit(const ExprAdd& e)     { visit(e.left); NOT_INF; visit(e.right); NOT_INF; binary_eval(e,operator+); }
@@ -196,7 +210,6 @@ void ConstantGenerator::visit(const ExprDiv& e)     { visit(e.left); NOT_INF; vi
 void ConstantGenerator::visit(const ExprMax& e)     { visit(e.left); NOT_INF; visit(e.right); NOT_INF; binary_eval(e,max); }
 void ConstantGenerator::visit(const ExprMin& e)     { visit(e.left); NOT_INF; visit(e.right); NOT_INF; binary_eval(e,min); }
 void ConstantGenerator::visit(const ExprAtan2& e)   { visit(e.left); NOT_INF; visit(e.right); NOT_INF; binary_eval(e,atan2); }
-void ConstantGenerator::visit(const P_ExprIndex& e) { visit(e.left); NOT_INF; visit(e.right); NOT_INF; binary_eval(e,_index); }
 void ConstantGenerator::visit(const P_ExprPower& e) { visit(e.left); NOT_INF; visit(e.right); NOT_INF; binary_eval(e,_power); }
 
 void ConstantGenerator::visit(const ExprMinus& e) {

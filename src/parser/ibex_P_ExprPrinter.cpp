@@ -19,15 +19,36 @@ void P_ExprPrinter::print(std::ostream& os, const ExprNode& e) {
 	ExprPrinter::print(os,e);
 }
 
-void P_ExprPrinter::visit(const ExprNode& e)     { e.acceptVisitor(*this); }
+void P_ExprPrinter::visit(const ExprNode& e) {
+	e.acceptVisitor(*this);
+}
 
-void P_ExprPrinter::visit(const P_ExprPower& e)  { (*os) << "("; visit(e.left); (*os) << "^"; visit(e.right); (*os ) << ")"; }
+void P_ExprPrinter::visit(const P_ExprPower& e) {
+	(*os) << "(";
+	visit(e.left);
+	(*os) << "^";
+	visit(e.right);
+	(*os ) << ")";
+}
 
-void P_ExprPrinter::visit(const P_ExprIndex& e)  { (*os) << "("; visit(e.left); (*os) << "["; visit(e.right); (*os ) << "]"; }
+void P_ExprPrinter::visit(const P_ExprIndex& e) {
+	visit(e.left);
+	(*os) << (e.matlab_style? '(' : '[');
+	visit(e.right);
+	(*os ) << (e.matlab_style? ')' : ']');
+}
 
-void P_ExprPrinter::visit(const ExprIter& e)     { (*os) << e.name; }
+void P_ExprPrinter::visit(const ExprConstantRef& e) {
+	(*os) << "<cst>"; //e.name;
+}
 
-void P_ExprPrinter::visit(const ExprInfinity& e) { (*os) << "oo"; }
+void P_ExprPrinter::visit(const ExprIter& e) {
+	(*os) << e.name;
+}
+
+void P_ExprPrinter::visit(const ExprInfinity& e) {
+	(*os) << "oo";
+}
 
 } // end namespace parser
 

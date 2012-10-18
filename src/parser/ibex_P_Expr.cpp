@@ -70,6 +70,16 @@ void ExprInfinity::acceptVisitor(ExprVisitor& v) const {
 	else v.visit(*this); // as a leaf.
 }
 
+ExprConstantRef::ExprConstantRef(const Domain& d) : ExprLeaf(d.dim), value(d,true) {
+
+}
+
+void ExprConstantRef::acceptVisitor(ExprVisitor& v) const {
+	P_ExprVisitor* v2=dynamic_cast<P_ExprVisitor*>(&v);
+	if (v2) v2->visit(*this);
+	else v.visit(*this); // as a leaf.
+}
+
 //ExprEntity::ExprEntity(const Entity& e, int line) : ExprNode(0,1,e.dim), entity(e), line(line) {
 //
 //}

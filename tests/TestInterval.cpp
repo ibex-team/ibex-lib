@@ -287,7 +287,15 @@ void TestInterval::mid06() {
 
 void TestInterval::mid07() {
 	Interval x(2.7629416257693772963,2.7629416257693835135);
-	TEST_ASSERT((x+x.mid()-x.mid()).is_superset(x));
+	Interval y=x;
+	//cout << "x=" << y << endl;
+	static double m=x.mid();
+	//cout << "milieu = " << m << endl;
+	Interval x2=x+m;
+	//cout << "x+m=" << x2 << endl;
+	Interval x3=x2-m;
+	//cout << "(x+m)-m" <<x3 << endl;
+	TEST_ASSERT(x3.is_superset(y));
 }
 
 void TestInterval::mid08() {

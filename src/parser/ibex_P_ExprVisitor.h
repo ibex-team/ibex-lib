@@ -19,6 +19,7 @@ namespace parser {
 
 class P_ExprPower;
 class P_ExprIndex;
+class ExprConstantRef;
 class ExprIter;
 class ExprInfinity;
 
@@ -31,6 +32,9 @@ public:
 
 	/** Visit a parser indexed expression. */
 	virtual void visit(const P_ExprIndex&)=0;
+
+	/** Visit a constant symbol expression. */
+	virtual void visit(const ExprConstantRef&)=0;
 
 	/** Visit an iterator symbol. */
 	virtual void visit(const ExprIter&)=0;

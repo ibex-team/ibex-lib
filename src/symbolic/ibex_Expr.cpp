@@ -43,7 +43,7 @@ int max_height(const ExprNode** args, int n) {
 } // end anonymous namespace
 
 ExprNode::ExprNode(int height, int size, const Dim& dim) :
-  height(height), size(size), id(-1), dim(dim) {
+  height(height), size(size), id(-1), dim(dim), father(NULL) {
 
 }
 
@@ -68,6 +68,7 @@ ExprIndex::ExprIndex(const ExprNode& subexpr, int index)
 : ExprNode(subexpr.height+1, subexpr.size+1, subexpr.dim.index_dim()), expr(subexpr), index(index) {
 	if (index<0 || index>subexpr.dim.max_index())
 		throw DimException("index out of bounds");
+	((ExprNode*&) (subexpr.father))=this;
 }
 
 
@@ -86,8 +87,10 @@ ExprNAryOp::ExprNAryOp(const ExprNode** _args, int n, const Dim& dim) :
 		ExprNode(max_height(_args,n)+1, nary_size(_args,n), dim), nb_args(n) {
 
 	args = new const ExprNode*[n];
-	for (int i=0; i<n; i++)
+	for (int i=0; i<n; i++) {
 		args[i]=_args[i];
+		((ExprNode*&) args[i]->father)=this;
+	}
 }
 
 ExprNAryOp::~ExprNAryOp() {
@@ -125,6 +128,26 @@ const ExprVector& ExprVector::new_(const Array<const ExprNode>& components, bool
 
 ExprVector::ExprVector(const ExprNode** comp, int n, bool in_row) :
 		ExprNAryOp(comp, n, vec_dim(dims(comp,n),in_row)) {
+}
+
+ExprApply::ExprApply(const Function& f, const ExprNode** args) :
+		ExprNAryOp(args,f.nb_arg(),f.expr().dim),
+		func(f) {
+	for (int i=0; i<f.nb_arg(); i++) {
+
+		if (args[i]->dim.is_vector()) {
+			// we allow automatic transposition of vector arguments
+			if (f.arg(i).dim.is_vector() && (args[i]->dim.vec_size()==f.arg(i).dim.vec_size())) continue;
+		} else {
+			// otherwise, dimensions must match exactly.
+			if (args[i]->dim == f.arg(i).dim) continue;
+		}
+
+		stringstream s;
+		s << "dimension of the " << (i+1) << "th argument passed to \"" << f.name << "\" ";
+		s << "do not match that of the formal argument \"" << f.arg_name(i) << "\"";
+		throw DimException(s.str());
+	}
 }
 
 ExprSymbol::ExprSymbol(const Dim& dim) : ExprLeaf(dim),
@@ -186,6 +209,9 @@ ExprBinaryOp::ExprBinaryOp(const ExprNode& left, const ExprNode& right, const Di
 					bin_size(left,right),
 					dim ),
 		left(left), right(right) {
+
+	((ExprNode*&) left.father)=this;
+	((ExprNode*&) right.father)=this;
 }
 
 ExprAdd::ExprAdd(const ExprNode& left, const ExprNode& right) :
@@ -226,24 +252,9 @@ ExprAtan2::ExprAtan2(const ExprNode& left, const ExprNode& right) :
 	if (!(right.type() == Dim::SCALAR)) throw DimException("\"atan2\" expects scalar arguments");
 }
 
-ExprApply::ExprApply(const Function& f, const ExprNode** args) :
-		ExprNAryOp(args,f.nb_arg(),f.expr().dim),
-		func(f) {
-	for (int i=0; i<f.nb_arg(); i++) {
-
-		if (args[i]->dim.is_vector()) {
-			// we allow automatic transposition of vector arguments
-			if (f.arg(i).dim.is_vector() && (args[i]->dim.vec_size()==f.arg(i).dim.vec_size())) continue;
-		} else {
-			// otherwise, dimensions must match exactly.
-			if (args[i]->dim == f.arg(i).dim) continue;
-		}
-
-		stringstream s;
-		s << "dimension of the " << (i+1) << "th argument passed to \"" << f.name << "\" ";
-		s << "do not match that of the formal argument \"" << f.arg_name(i) << "\"";
-		throw DimException(s.str());
-	}
+ExprUnaryOp::ExprUnaryOp(const ExprNode& subexpr, const Dim& dim) :
+				ExprNode(subexpr.height+1, subexpr.size+1, dim), expr(subexpr) {
+	((ExprNode*&) expr.father)=this;
 }
 
 ExprSign::ExprSign(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) {
