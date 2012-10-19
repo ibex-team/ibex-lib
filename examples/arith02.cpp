@@ -12,6 +12,7 @@
 #include "ibex.h"
 
 using namespace ibex;
+using namespace std;
 
 int main() {
 	{
