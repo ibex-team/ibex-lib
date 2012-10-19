@@ -31,7 +31,7 @@ int main() {
 
 	System sys(fac);
 
-	DefaultOptimizer o(sys);
+	DefaultOptimizer o(sys,0.001,0.001);
 
 	IntervalVector box(2);
 

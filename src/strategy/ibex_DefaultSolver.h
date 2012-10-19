@@ -20,12 +20,16 @@
 namespace ibex {
 
 /**
+ * \ingroup strategy
  * \brief Default solver.
  */
 class DefaultSolver : public Solver {
 public:
 	/**
 	 * \brief Create a default solver.
+	 *
+	 * \param sys  - The system to solve
+	 * \param prec - Stopping criterion for box splitting (absolute precision)
 	 */
     DefaultSolver(System& sys, double prec);
 

@@ -18,33 +18,40 @@
 namespace ibex {
 
 /**
+ * \ingroup strategy
  * \brief Default optimizer.
  */
 class DefaultOptimizer : public Optimizer {
 public:
 	/**
 	 * \brief Create a default optimizer.
+	 *
+	 * \param sys       - The system to optimize
+	 * \param prec      - Stopping criterion for box splitting (absolute precision)
+	 * \param goal_prec - Stopping criterion for the objective (relative precision)
 	 */
-    DefaultOptimizer(System& sys, System & ext_sys, double prec, double goal_prec);
+    DefaultOptimizer(System& sys, double prec, double goal_prec);
 
 	/**
 	 * \brief Delete *this.
-	 * \param sys The system to optimize
-	 * \param ext_sys The extended_system  (the objective is added in the system as the last variable and the first constraint 
-            and is used for contraction and bisection)
-	 * \param  the precision : stopping criterion for box splitting and for the objective (used as absolute and relative precisions)
 	 */
     ~DefaultOptimizer();
 
 private:
-	// -------- information stored for cleanup ----------
-	CtcCompo* __ctc;
-	Bsc* __bsc;
 	Array<Ctc>*  contractor_list (System& sys, System& ext_sys,double prec);
 	std::vector<X_Newton::corner_point>* default_corners ();
+
+
+	// -------- information stored for cleanup ----------
+	// Extended system
+	// (the objective is added in the system as the last variable and the first constraint
+    // is used for contraction and bisection)
+    System* __ext_sys;
+
+	CtcCompo* __ctc;
+	Bsc* __bsc;
 };
 
-
-
 } // end namespace ibex
+
 #endif // __IBEX_DEFAULT_OPTIMIZER_H__

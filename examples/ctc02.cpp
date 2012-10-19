@@ -1,5 +1,5 @@
 
-#include "ibex_CtcHC4Revise.h"
+#include "ibex_CtcProj.h"
 #include "ibex_CtcCompo.h"
 #include "ibex_CtcQInter.h"
 #include "ibex_CtcFixPoint.h"
@@ -96,7 +96,5 @@ int main() {
 	fix.contract(box);
 
 	cout << "after fix+q-inter =" << box << endl;
-	}
-
-	return 0;
 }
+
