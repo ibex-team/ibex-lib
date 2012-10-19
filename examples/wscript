@@ -12,9 +12,9 @@ def build (bld):
 	
 	targets = [n.name[:-4] for n in bld.path.ant_glob("*.cpp")]
 
-	# broken targets
-	for n in "arith02 ctc02 defaultsolver optimizer04 robust_estim solver04 symb01".split():
-		targets.remove (n)
+	# filtering broken targets
+#	for n in "arith02 ctc02 defaultsolver optimizer04 robust_estim solver04 symb01".split():
+#		targets.remove (n)
 
 	for t in targets:
 
