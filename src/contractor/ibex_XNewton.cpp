@@ -38,7 +38,7 @@ using namespace soplex;
 
 // the constructor
 X_Newton::X_Newton(const System& sys, Ctc* ctc, vector<corner_point>& cpoints, int goal_ctr, Function* fgoal, 
-		   double ratio_fp, double ratio_fp2,
+     		   double ratio_fp, double ratio_fp2,
 		   ctc_mode cmode, linear_mode lmode, int max_iter_soplex, double max_diam_deriv, double max_diam_box) : 
   Ctc(sys.nb_var), sys(sys), ctc(ctc? ctc:NULL), goal_ctr(goal_ctr), 
   ratio_fp(ratio_fp), ratio_fp2(ratio_fp2),  cmode(cmode), cpoints(cpoints), lmode(lmode), max_iter_soplex(max_iter_soplex),
@@ -55,9 +55,15 @@ X_Newton::X_Newton(const System& sys, Ctc* ctc, vector<corner_point>& cpoints, i
   for(int ctr=0; ctr<sys.nb_ctr;ctr++){
     
      IntervalVector G(sys.nb_var);
-     
+
+
      if(ctr==goal_ctr)
-       goal->gradient(sys.box,G);
+       {IntervalVector G1(sys.nb_var-1);
+       goal->gradient(sys.box,G1);
+       for (int i=0; i<sys.nb_var-1; i++)
+	 G[i]=G1[i];
+       G[sys.nb_var-1]=0;
+       }
      else
        sys.ctrs[ctr].f.gradient(sys.box,G);
     
@@ -104,7 +110,7 @@ double ratio_maxreduction(IntervalVector& box1, IntervalVector& box2){
 
 void X_Newton::contract(IntervalVector & box) {
  double gain;
- //cout << " box avant " << box << endl;
+ // cout << " box avant " << box << endl;
  if (box.max_diam() > max_diam_box) 
    return;
  do{
@@ -121,7 +127,7 @@ void X_Newton::contract(IntervalVector & box) {
     gain = ratio_maxreduction(savebox,box);
 
  }while(gain >= ratio_fp);
- //  cout << " box apres " << box << endl;
+ //   cout << " box apres " << box << endl;
 }
 
   /*  pas implanté en version 2 
@@ -204,6 +210,7 @@ REAL X_Newton::eval_corner(int ctr, int op, INTERVAL_VECTOR& G, bool* corner){
 }
   */
 
+ 
 
 int X_Newton::X_Linearization(IntervalVector& box, SoPlex& mysoplex, int ctr, corner_point cpoint, vector<Interval>& taylor_ev,
 			      IntervalVector& G, int id_point, int& nb_nonlinear_vars){
@@ -260,8 +267,14 @@ int X_Newton::X_Linearization(IntervalVector& box, SoPlex& mysoplex, int ctr, co
              
       if(sys.ctrs[ctr].f.used(j)){
 	  if(lmode==HANSEN && !linear[ctr]){
-	    if(ctr==goal_ctr) // objective function in optimization
-	      goal->gradient(box,G);
+	    if(ctr==goal_ctr) // objective function in optimization	    
+	      {IntervalVector G1(sys.nb_var-1);
+		goal->gradient(box,G1);
+		for (int i=0; i<sys.nb_var-1; i++)
+		  G[i]=G1[i];
+		G[sys.nb_var-1]=0;
+	      }
+
 	    else
 	      sys.ctrs[ctr].f.gradient(box,G);
 	  }
@@ -529,7 +542,13 @@ void X_Newton::X_NewtonIter( IntervalVector & box){
       
      try{
        if(goal_ctr==ctr)  // objective function  in optimization
-	 goal->gradient(box,G);
+	 {IntervalVector G1(sys.nb_var-1);
+	   goal->gradient(sys.box,G1);
+	   for (int i=0; i<sys.nb_var-1; i++)
+	     G[i]=G1[i];
+	   G[sys.nb_var-1]=0;
+	 }
+
        else
 	 sys.ctrs[ctr].f.gradient(box,G);
      }
@@ -722,6 +741,8 @@ void X_Newton::X_NewtonIter( IntervalVector & box){
   return stat;
  }
 
+  // for the defaultsolver
 
 
+ 
 }

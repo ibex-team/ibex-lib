@@ -50,7 +50,7 @@ DefaultOptimizer::DefaultOptimizer(System& _sys, double prec, double goal_prec) 
 				  1),
 		__ext_sys(tmp_ext_sys),
 		__ctc(dynamic_cast<CtcCompo*>(&ctc)), __bsc(&bsc)  {
-
+  
 	tmp_ext_sys=NULL; // important! re-init for next call to constructor.
 
 	srandom(1);
@@ -74,13 +74,12 @@ Array<Ctc>*  DefaultOptimizer::contractor_list (System& sys, System& ext_sys,dou
 	// second contractor on ext_sys : acid (hc4)   with incremental hc4  ratio propag 0.1
 	ctc_list->set_ref(1, *new CtcAcid (ext_sys,BoolMask(ext_sys.nb_var,1),
 			             *new CtcHC4 (ext_sys.ctrs,0.1,true)));
-	// the last contractor is X_Newton  with rfp=0.3 and rfp2=0.3
-	// the limits for calling soplex are 1e5 for the derivatives and 1e10 for the domains : no error found with these bounds
+	// the last contractor is X_Newton  with rfp=0.2 and rfp2=0.2
+	// the limits for calling soplex are 1e5 for the derivatives and 1e5 for the domains : no error found with these bounds
 	ctc_list->set_ref(2,*new X_Newton(ext_sys,
 			new CtcHC4 (ext_sys.ctrs,0.01),  // called in the X_Newton external loop
 			*(default_corners()),
-			//					0,sys.goal,0.3,0.3,X_Newton::X_NEWTON,X_Newton::HANSEN,100,1.e5,1.e10));
-			0,sys.goal,0.3,0.3,X_Newton::X_NEWTON,X_Newton::HANSEN,100,1.e5,1.e5));
+					  0,sys.goal,0.2,0.2,X_Newton::X_NEWTON,X_Newton::HANSEN,100,1.e5,1.e5));
 
 	return ctc_list;
 }
