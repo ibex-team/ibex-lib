@@ -31,20 +31,78 @@ void ExprGenerator::visit(const ExprNode& e) {
 }
 
 #define LEFT  (*((const ExprNode*) e.left.deco.tmp))
+#define RIGHT (*((const ExprNode*) e.right.deco.tmp))
 
 void ExprGenerator::visit(const P_ExprPower& e) {
-	int expon=ConstantGenerator(scope).eval_integer(e.right);
-	visit(e.left);
 
-	if (fold) {
-		const ExprConstant* c=dynamic_cast<const ExprConstant*>(&LEFT);
-		if (c) {
-			e.deco.tmp = &ExprConstant::new_(pow(c->get(),expon));
-			delete c;
-			return;
+	visit(e.left);
+	visit(e.right);
+
+	if (!fold) {
+		// if fold is false, even x^(1) will be transformed into exp(1*ln(x)) :-(
+		e.deco.tmp = &exp(RIGHT * log(LEFT));
+		return;
+	}
+
+	typedef enum { INTEGER, INTERVAL, EXPRNODE } _type;
+	_type right_type;
+	_type left_type;
+
+	int int_right;
+	Interval itv_right;
+	Interval itv_left;
+
+	const ExprConstant* cr=dynamic_cast<const ExprConstant*>(&RIGHT);
+	if (cr) {
+		if (!cr->dim.is_scalar()) throw SyntaxError("exponent must be scalar");
+
+		right_type=INTERVAL;
+		itv_right=cr->get_value();
+		delete cr;
+		// NOTE: we can delete cr right now because
+		// even in the case where right_type==INTERVAL and left_type==EXPRNODE
+		// we will recreate a ExprConstant node by multiplying itv_right (instead of RIGHT)
+		// with LEFT.
+
+		// try to see if the exponent is an integer
+		if (itv_right.is_degenerated()) {
+			double x=itv_right.mid();
+			if (floor(x)==x) {
+				right_type=INTEGER;
+				int_right=floor(x);
+			}
+		}
+	} else
+		right_type=EXPRNODE;
+
+
+	const ExprConstant* cl=dynamic_cast<const ExprConstant*>(&LEFT);
+	if (cl) {
+		left_type=INTERVAL;
+		itv_left=cl->get_value();
+		delete cl; // LEFT will no longer be used
+	} else
+		left_type=EXPRNODE;
+
+
+	if (left_type==INTERVAL) {
+		if (right_type==INTEGER) {
+			e.deco.tmp = &ExprConstant::new_scalar(pow(itv_left,int_right));
+		} else if (right_type==INTERVAL) {
+			e.deco.tmp = &ExprConstant::new_scalar(pow(itv_left,itv_right));
+		} else {
+			e.deco.tmp = &exp(RIGHT * log(itv_left)); // *log(...) will create a new ExprConstant.
+		}
+	}  else {
+		if (right_type==INTEGER) {
+			e.deco.tmp = &(pow(LEFT,int_right));
+		} else if (right_type==INTERVAL) { // do not forget this case (RIGHT does not exist anymore)
+			e.deco.tmp = &exp(itv_right * log(LEFT));
+		} else {
+			e.deco.tmp = &exp(RIGHT * log(LEFT));
 		}
 	}
-	e.deco.tmp = &(pow(LEFT,expon));
+
 }
 
 void ExprGenerator::visit(const P_ExprIndex& e) {
