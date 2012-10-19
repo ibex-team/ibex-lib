@@ -77,6 +77,11 @@ public:
 	Function(const Array<const ExprSymbol>& x, const ExprNode& y, const char* name=NULL);
 
 	/**
+	 * \brief Load a function from a file.
+	 */
+	Function(const char* filename);
+
+	/**
 	 * \brief Build an uninitialized function.
 	 *
 	 * A call to #init(const Array<const ExprSymbol>&, const ExprNode&) must follow

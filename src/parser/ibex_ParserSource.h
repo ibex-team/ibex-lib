@@ -32,6 +32,8 @@ public:
 	 */
 	void cleanup();
 
+	P_Source();
+
 	/** The "entities" */
 	std::vector<Entity*> vars;
 

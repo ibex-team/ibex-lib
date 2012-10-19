@@ -97,9 +97,11 @@
 
 
 program       :                                 { begin_system(); }         
-                system                          { end(); } 
+                system                          { end_system(); } 
               |                                 { begin_choco(); } 
-                choco_ctr                       { end(); }
+                choco_ctr                       { end_choco(); }
+              |                                 { begin_function(); }
+                decl_fnc                        { end_function(); }
               ;
               
 

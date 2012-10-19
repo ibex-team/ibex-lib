@@ -43,7 +43,9 @@ System::System(int n, const char* syntax) : nb_var(n), /* NOT TMP (required by p
 	try {
 		parser::system=this;
 		ibexparse_string(syntax);
+		parser::system=NULL;
 	} catch(SyntaxError& e) {
+		parser::system=NULL;
 		throw e;
 	}
 }
@@ -240,9 +242,11 @@ void System::load(FILE* fd) {
 	try {
 		parser::system=this;
 		ibexparse();
+		parser::system=NULL;
 	}
 
 	catch(SyntaxError& e) {
+		parser::system=NULL;
 		fclose(fd);
 		ibexrestart(ibexin);
 		throw e;

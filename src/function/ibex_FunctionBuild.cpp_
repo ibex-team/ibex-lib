@@ -17,6 +17,8 @@
 #include "ibex_HC4Revise.h"
 #include "ibex_Gradient.h"
 #include "ibex_String.h"
+#include "ibex_UnknownFileException.h"
+#include "ibex_SyntaxError.h"
 
 using namespace std;
 
@@ -175,6 +177,38 @@ Function::Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol&
 
 Function::Function(const Array<const ExprSymbol>& x, const ExprNode& y, const char* name) : name(duplicate_or_generate(name)) {
 	init(x,y);
+}
+
+}
+
+extern int ibexparse();
+extern void ibexrestart(FILE *);
+extern FILE* ibexin;
+
+namespace ibex {
+
+namespace parser {
+extern Function* function;
+}
+
+Function::Function(const char* filename) {
+	FILE *fd;
+	if ((fd = fopen(filename, "r")) == NULL) throw UnknownFileException(filename);
+	ibexin = fd;
+
+	try {
+		parser::function=this;
+		ibexparse();
+		parser::function=NULL;
+	}
+	catch(SyntaxError& e) {
+		parser::function=NULL;
+		fclose(fd);
+		ibexrestart(ibexin);
+		throw e;
+	}
+
+	fclose(fd);
 }
 
 Function::Function(const Function& f) : name(strdup(f.name)) {

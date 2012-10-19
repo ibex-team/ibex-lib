@@ -15,11 +15,16 @@ using namespace std;
 namespace ibex {
 namespace parser {
 
+P_Source::P_Source() : goal(NULL), ctrs(NULL) {
+
+}
+
 void P_Source::cleanup() {
 	func.clear();
 
-	delete ctrs; // will recursively delete all the constraints
-			     // but not the symbols
+	if (ctrs) // may be NULL if only a single function is loaded
+		delete ctrs; // will recursively delete all the constraints
+	                 // but not the symbols
 
 	for (vector<Entity*>::iterator it=vars.begin(); it!=vars.end(); it++) {
 		delete (ExprSymbol*) &((*it)->symbol);
@@ -27,6 +32,9 @@ void P_Source::cleanup() {
 	}
 	vars.clear();
 
+	// important! re-init to NULL for the next file to be parsed:
+	goal=NULL;
+	ctrs=NULL;
 }
 
 } // end namespace parser

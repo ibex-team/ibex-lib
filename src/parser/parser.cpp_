@@ -43,12 +43,14 @@ namespace parser {
 
 /* ==================================== The result of the parser =================================*/
 
-System* system;            // standard AMPL-like system
+System* system=NULL;            // standard AMPL-like system
 
 // ******************
 // Note: when a stand-alone constraint is read by CHOCO
 // the field system->nb_var must be set *before* calling the parser
 // ******************
+
+Function* function=NULL;       // when a single function is loaded
 
 /* ===============================================================================================*/
 
@@ -70,10 +72,16 @@ void begin() {
 }
 
 void begin_system() {
+	if (system==NULL) { // someone tries to load a Function from a file containing a system
+		throw SyntaxError("unexpected (global) variable declaration for a function.");
+	}
 	begin();
 }
 
 void begin_choco() {
+	if (system==NULL) { // someone tries to load a Function from a file with CHOCO constraint syntax
+		throw SyntaxError("unexpected constraints declaration for a function.");
+	}
 	begin();
 
 	// ----- generate all the variables {i} -----
@@ -84,6 +92,43 @@ void begin_choco() {
 		source.vars.push_back(new Entity(buf,Dim::scalar(),Domain(x)));
 	}
 	// ------------------------------------------
+}
+
+void begin_function() {
+	if (function==NULL) { // someone tries to load a system from a file containing a function only
+		throw SyntaxError("a system requires declaration of variables.");
+	}
+
+	begin();
+}
+
+void end_system() {
+	MainGenerator().generate(source,*system);
+	source.cleanup();
+	// TODO: we have to cleanup the data in case of Syntax Error
+	// this probably requires a kind of garbage collector during
+	// parsing
+}
+
+void end_choco() {
+	MainGenerator().generate(source,*system);
+	source.cleanup();
+	// TODO: see end_system()
+}
+
+void end_function() {
+	if (source.func.empty()) {
+		throw SyntaxError("no function declared in file");
+	}
+	const Function& f=(*source.func[0]);
+	Array<const ExprSymbol> x(f.nb_arg());
+	varcopy(f.args(),x);
+	const ExprNode& y=ExprCopy().copy(f.args(),x,f.expr());
+
+	function->init(x,y);
+	((char*&) function->name)=strdup(f.name);
+	source.cleanup();
+	// TODO: see end_system()
 }
 
 int _2int(const ExprNode& expr) {
@@ -192,13 +237,6 @@ Domain ball(const Domain& mid, double rad) {
 	break;
 	}
 	return d;
-}
-
-void end() {
-	MainGenerator().generate(source,*system);
-	source.cleanup();
-	// we have to cleanup the data in case of Syntax Error
-	// TODO...
 }
 
 } // end namespace

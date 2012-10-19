@@ -177,25 +177,13 @@ void TestParser::const07() {
 
 void TestParser::func01() {
 	try {
-		System sys("quimper/func01.qpr");
+		Function f("quimper/func01.qpr");
 
-		TEST_ASSERT(sys.args.size()==1);
-		TEST_ASSERT(strcmp(sys.args[0].name,"x")==0);
-		TEST_ASSERT(sys.args[0].dim.is_scalar());
-		TEST_ASSERT(sys.eprs.empty());
-		TEST_ASSERT(sys.sybs.empty());
-		TEST_ASSERT(sys.box.size()==1);
-
-		TEST_ASSERT(sys.func.size()==1);
-		TEST_ASSERT(strcmp(sys.func[0].name,"foo")==0);
-		TEST_ASSERT(sys.func[0].nb_arg()==1);
-		TEST_ASSERT(sys.func[0].arg(0).dim.is_scalar());
-		TEST_ASSERT(strcmp(sys.func[0].arg(0).name,"x2")==0);
-		TEST_ASSERT(sameExpr(sys.func[0].expr(),"x2"));
-		TEST_ASSERT(sameExpr(sys.f.expr(),"(x-foo(x))"));
-		TEST_ASSERT(sys.ctrs.size()==1);
-		TEST_ASSERT(sameExpr(sys.ctrs[0].f.expr(),sys.f.expr()));
-		TEST_ASSERT(sys.ctrs[0].op==EQ);
+		TEST_ASSERT(strcmp(f.name,"foo")==0);
+		TEST_ASSERT(f.nb_arg()==1);
+		TEST_ASSERT(f.arg(0).dim.is_scalar());
+		TEST_ASSERT(strcmp(f.arg(0).name,"x2")==0);
+		TEST_ASSERT(sameExpr(f.expr(),"x2"));
 	} catch(SyntaxError& e) {
 		cout << e << endl;
 		TEST_ASSERT(false);

@@ -144,9 +144,6 @@ void TestFunction::used02() {
 	TEST_ASSERT(f.used(7));
 	TEST_ASSERT(f.used(8));
 
-	TEST_ASSERT(!f.used(9));
-	TEST_ASSERT(!f.used(10));
-	TEST_ASSERT(!f.used(11));
 }
 
 void TestFunction::numctr01() {

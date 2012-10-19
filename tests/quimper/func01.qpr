@@ -1,11 +1,4 @@
 
-variables
- x;
-
 function foo(x2) 
  return x2;
-end
-
-constraints
- x=foo(x);
 end
