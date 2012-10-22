@@ -102,13 +102,17 @@ def configure (conf):
 			ibex_env.BUILD_GDTOA = True
 			ibex_env.BUILD_MATHLIB = True
 		else:
-			if not (conf.check_cxx (header_name="gdtoa.h", mandatory=False) and
-				conf.check_cxx (lib="gdtoa", mandatory=False,
-						uselib_store="IBEX_DEPS")):
+			if (	conf.check_cxx (header_name="gdtoa.h", mandatory=False) and
+				conf.check_cxx (lib="gdtoa", mandatory=False)):
+
+				ibex_env.append_unique ("LIB_IBEX_DEPS", "gdtoa")
+			else:
 				ibex_env.BUILD_GDTOA = True
 
-			if not conf.check_cxx (lib="ultim", mandatory=False,
-						uselib_store="IBEX_DEPS"):
+			if conf.check_cxx (lib="ultim", mandatory=False):
+
+				ibex_env.append_unique ("LIB_IBEX_DEPS", "ultim")
+			else:
 				ibex_env.BUILD_MATHLIB = True
 
 		conf.env.append_unique ("INCLUDES", [conf.env.GAOL, gdtoa_name])
