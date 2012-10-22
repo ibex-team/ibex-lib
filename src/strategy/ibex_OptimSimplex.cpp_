@@ -25,7 +25,7 @@ namespace ibex {
 
 bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 
-  //  cout << " box update loup " << box << endl;
+  //cout << " box simplex " << box << endl;
 	IntervalVector G(n); // vector to be used by the partial derivatives
 
 	IntervalVector x_inf(box.lb());
@@ -44,7 +44,6 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 
 	for (int i =0; i< n ; i++)
 	  if (G[i].diam() > 1e8) return false;   //to avoid problems with SoPleX
-
 	int nsimplex=n+1;  // the n variables + the objective
 	DSVector row1(nsimplex);
 
@@ -76,6 +75,7 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 
 		for (int ii =0; ii< n ; ii++)
 		  if (G[ii].diam() > 1e8) {return false;}   //to avoid problems with SoPleX
+		
 
 		DSVector row1(nsimplex);
 
@@ -122,10 +122,12 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 		bool ret= check_candidate(tmpbox.mid(),false); //  [gch] do we know here that the point is inner??
 
 		if (ret) {
-			int prec=cout.precision();
+		  if (trace)
+		    {   int prec=cout.precision();
 			cout.precision(12);
 			cout << "[simplex1]"  << " loup update " << loup  << " loup point  " << loup_point << endl;
 			cout.precision(prec);
+		    }
 			nb_simplex++;
 			diam_simplex= ((nb_simplex-1) * diam_simplex + box.max_diam()) / nb_simplex;
 		}

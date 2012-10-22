@@ -56,7 +56,7 @@ bool Optimizer::in_HC4(IntervalVector& box) {
 bool Optimizer::check_candidate(const Vector& pt, bool _is_inner) {
 
 	Interval fx=sys.goal->eval(pt);
-
+//	cout << " check candidate " << pt << " eval " << fx << endl;
 	if (fx.is_empty()) { // means: outside of the definition domain of the function
 		return false;
 	}
@@ -262,20 +262,20 @@ bool Optimizer::update_loup_probing(const IntervalVector& box) {
 	//  else
 	//    if (!loup_changed)
 	bool loup_changed; // return value
-
+//	cout <<  " inner ? " << inner_found? << " box " << box << " inbox " << inbox << endl;
 	loup_changed = random_probing(inner_found? inbox : box, inner_found);
 
 	if (loup_changed) {
 
-		trace_loup(inner_found);
+	  if (trace) trace_loup(inner_found);
 
-		if (inner_found) {
-			nb_inhc4++;
-			diam_inhc4 = ((nb_inhc4-1) *diam_inhc4 + inbox.max_diam()) / nb_inhc4;
-		} else {
-			nb_rand++;
-			diam_rand = ((nb_rand-1) *diam_rand + box.max_diam()) / nb_rand;
-		}
+	  if (inner_found) {
+	    nb_inhc4++;
+	    diam_inhc4 = ((nb_inhc4-1) *diam_inhc4 + inbox.max_diam()) / nb_inhc4;
+	  } else {
+	    nb_rand++;
+	    diam_rand = ((nb_rand-1) *diam_rand + box.max_diam()) / nb_rand;
+	  }
 	}
 
 	return loup_changed;
