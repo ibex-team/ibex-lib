@@ -22,7 +22,7 @@
 
 #ifdef _IBEX_WITH_GAOL_
 extern "C" {
-#include "gdtoaimp.h"
+  //#include "gdtoaimp.h"
 }
 #include "gaol/gaol.h"
 #include "gaol/gaol_interval.h"
