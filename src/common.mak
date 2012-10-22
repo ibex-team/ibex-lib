@@ -2,8 +2,8 @@
 # chose the interval library
 #===================================================
 #!warning: do not insert white space after the name! 
-#SUBLIB=gaol
-SUBLIB=bias
+SUBLIB=gaol
+#SUBLIB=bias
 #===================================================
 
 # where are Ibex, Bias/Profil and Gaol installed?
@@ -12,6 +12,7 @@ SUBLIB=bias
 #===================================================
 IBEX_DIR:=/home/gchabert08/Workspace-C++/Ibex
 BIAS_DIR:=/home/gchabert08/Applications/Profil-2.0.8
+ULTIM_DIR:=/home/gchabert08/Applications/mathlib-2.0.0
 GAOL_DIR:=/home/gchabert08/Applications/Gaol-3.1.1
 SIMPLEX_DIR:=/home/gchabert08/Applications/soplex-1.5.0
 JAVA_INC=/usr/lib/jvm/java-7-openjdk-i386/include     
@@ -40,12 +41,13 @@ BIAS_LIB_DIR:=$(BIAS_DIR)/lib
 BIAS_LIB_DIR_OPT:=-L$(BIAS_LIB_DIR) 
 BIAS_LIB_NAME_OPT:=-lProfil -lBias -llr
 
-GAOL_INC_DIR  := $(GAOL_DIR)/gaol
-GAOL_LIB_DIR  := $(GAOL_DIR)
-GDTOA_DIR  := $(GAOL_DIR)/gdtoa
+GAOL_INC_DIR  := /usr/local/include/gaol
+GAOL_LIB_DIR  := /usr/local/lib
+GDTOA_DIR  := $(GAOL_DIR)
 GDTOA_LIB_DIR := $(GDTOA_DIR)
+ULTIM_LIB_DIR := $(ULTIM_DIR)/lib
 GAOL_INC_DIR_OPT := -I$(GAOL_INC_DIR)
-GAOL_LIB_DIR_OPT := -L$(GAOL_LIB_DIR) -L$(GDTOA_LIB_DIR)
+GAOL_LIB_DIR_OPT := -L$(GAOL_LIB_DIR) -L$(GDTOA_LIB_DIR) -L$(ULTIM_LIB_DIR)
 GAOL_LIB_NAME_OPT := -lgaol -lgdtoa -lm -lultim 
 
 SIMPLEX_INC_DIR:=$(SIMPLEX_DIR)/src
