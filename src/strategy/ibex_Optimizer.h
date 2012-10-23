@@ -176,9 +176,6 @@ public:
 	/** Default sample size */
 	static const int default_sample_size;
 
-	/** Name of the goal variable ("y"). */
-	static const char* goal_name;
-
 
 	/** The "loup" (lowest upper bound of the criterion) */
 	double loup;

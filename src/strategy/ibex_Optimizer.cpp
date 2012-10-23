@@ -26,7 +26,7 @@ const double Optimizer::default_prec = 1e-07;
 const double Optimizer::default_goal_rel_prec = 1e-07;
 const double Optimizer::default_goal_abs_prec = 1e-07;
 const int Optimizer::default_sample_size = 10;
-const char* Optimizer::goal_name = "y";
+
 
 void Optimizer::write_ext_box(const IntervalVector& box, IntervalVector& ext_box) {
 	int i2=0;
@@ -179,6 +179,7 @@ void Optimizer::optimize(const IntervalVector& init_box) {
 	bsc.init_root(*root);
 
 	bool loup_changed=0;
+	time=0;
 	Timer::start();
 	try {
 		loup_changed=contract_and_bound(*root);
@@ -307,13 +308,17 @@ void Optimizer::report() {
 
 	double abs_prec=loup-uplo;
 
-	cout << " relative precision obtained on objective function: " << rel_prec << " " <<
-	  (rel_prec < goal_rel_prec? " [passed]" : " [failed]") << "  " << goal_rel_prec <<  endl;
+	cout << " Relative precision obtained on objective function: " << rel_prec << " " <<
+	  (rel_prec <= goal_rel_prec? " [passed]" : " [failed]") << "  " << goal_rel_prec <<  endl;
 	
-	cout << " absolute precision obtained on objective function: " << abs_prec << " " <<
-	  (abs_prec < goal_abs_prec? " [passed]" : " [failed]") << "  " << goal_abs_prec << endl;
+	cout << " Absolute precision obtained on objective function: " << abs_prec << " " <<
+	  (abs_prec <= goal_abs_prec? " [passed]" : " [failed]") << "  " << goal_abs_prec << endl;
 	if (uplo_of_epsboxes != NEG_INFINITY && uplo_of_epsboxes != POS_INFINITY)
 	  cout << " precision on variable domains obtained " << prec << " "   << " uplo_of_epsboxes " << uplo_of_epsboxes << endl;
+	if (loup==POS_INFINITY)
+	  cout << " no feasible point found " << endl;
+	else
+	  cout << " best feasible point " << loup_point << endl;
     }
   
   cout << " cpu time used " << time << "s." << endl;

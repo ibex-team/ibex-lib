@@ -22,7 +22,6 @@
 
 namespace ibex {
 
-static System* tmp;
 
   // the corners for  Xnewton
  std::vector<X_Newton::corner_point>*  DefaultSolver::default_corners ()
