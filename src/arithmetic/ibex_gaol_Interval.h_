@@ -53,7 +53,7 @@ inline Interval& Interval::operator+=(double d) {
 	if (d==POS_INFINITY || d==NEG_INFINITY)
 		set_empty();
 	else
-		itv+=d;
+		itv+=interval(d);
 	return *this;
 }
 
@@ -61,7 +61,7 @@ inline Interval& Interval::operator-=(double d) {
 	if (d==POS_INFINITY || d==NEG_INFINITY)
 		set_empty();
 	else
-		itv-=d;
+		itv-=interval(d);
 	return *this;
 
 }
@@ -70,7 +70,7 @@ inline Interval& Interval::operator*=(double d) {
 	if (d==POS_INFINITY || d==NEG_INFINITY)
 		set_empty();
 	else
-		itv*=d;
+		itv*=interval(d);
 	return *this;
 }
 
@@ -78,7 +78,7 @@ inline Interval& Interval::operator/=(double d) {
 	if (d==POS_INFINITY || d==NEG_INFINITY)
 		set_empty();
 	else
-		itv/=d;
+		itv/=interval(d);
 	return *this;
 }
 
@@ -140,7 +140,9 @@ inline double Interval::ub() const {
 }
 
 inline double Interval::mid() const {
-	return itv.midpoint();
+	double m=itv.midpoint();
+	fpu_round_up();
+	return m;
 }
 
 inline bool Interval::is_subset(const Interval& x) const {
@@ -187,7 +189,9 @@ inline bool Interval::is_unbounded() const {
 
 
 inline double Interval::diam() const {
-	return itv.width();
+	double d=itv.width();
+	fpu_round_up();
+	return d;
 }
 
 inline double Interval::mig() const {
@@ -214,56 +218,56 @@ inline Interval operator+(const Interval& x, double d) {
 	if(d==NEG_INFINITY || d==POS_INFINITY)
 		return Interval::EMPTY_SET;
 	else
-		return x.itv+d;
+		return x.itv+interval(d);
 }
 
 inline Interval operator-(const Interval& x, double d) {
 	if(d==NEG_INFINITY || d==POS_INFINITY)
 		return Interval::EMPTY_SET;
 	else
-		return x.itv-d;
+		return x.itv-interval(d);
 }
 
 inline Interval operator*(const Interval& x, double d) {
 	if(d==NEG_INFINITY || d==POS_INFINITY)
 		return Interval::EMPTY_SET;
 	else
-		return x.itv*d;
+		return x.itv*interval(d);
 }
 
 inline Interval operator/(const Interval& x, double d) {
 	if(d==NEG_INFINITY || d==POS_INFINITY)
 		return Interval::EMPTY_SET;
 	else
-		return x.itv/d;
+		return x.itv/interval(d);
 }
 
 inline Interval operator+(double d,const Interval& x) {
 	if(d==NEG_INFINITY || d==POS_INFINITY)
 		return Interval::EMPTY_SET;
 	else
-		return d+x.itv;
+		return interval(d)+x.itv;
 }
 
 inline Interval operator-(double d, const Interval& x) {
 	if(d==NEG_INFINITY || d==POS_INFINITY)
 		return Interval::EMPTY_SET;
 	else
-		return d-x.itv;
+		return interval(d)-x.itv;
 }
 
 inline Interval operator*(double d, const Interval& x) {
 	if(d==NEG_INFINITY || d==POS_INFINITY)
 		return Interval::EMPTY_SET;
 	else
-		return d*x.itv;
+		return interval(d)*x.itv;
 }
 
 inline Interval operator/(double d, const Interval& x) {
 	if(d==NEG_INFINITY || d==POS_INFINITY)
 		return Interval::EMPTY_SET;
 	else
-		return d/x.itv;
+		return interval(d)/x.itv;
 }
 
 inline Interval operator+(const Interval& x1, const Interval& x2) {
@@ -406,6 +410,7 @@ inline bool proj_pow(const Interval& y, int n, Interval& x) {
 
 inline bool proj_pow(const Interval& y, Interval& x1, Interval& x2) {
 	ibex_error("proj_power(y,x1,x2) (with x1 and x2 intervals) not implemented yet with Gaol");
+	return false;
 }
 
 inline bool proj_cos(const Interval& y,  Interval& x) {
@@ -425,6 +430,7 @@ inline bool proj_tan(const Interval& y,  Interval& x) {
 
 inline bool proj_atan2(const Interval& y, Interval& x1, Interval& x2) {
 	ibex_error("proj_atan2 non implemented yet with Gaol");
+	return false;
 }
 
 inline bool proj_cosh(const Interval& y,  Interval& x) {
