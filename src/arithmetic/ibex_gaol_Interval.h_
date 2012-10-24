@@ -53,7 +53,7 @@ inline Interval& Interval::operator+=(double d) {
 	if (d==POS_INFINITY || d==NEG_INFINITY)
 		set_empty();
 	else
-		itv+=interval(d);
+		itv+=d;
 	return *this;
 }
 
@@ -61,7 +61,7 @@ inline Interval& Interval::operator-=(double d) {
 	if (d==POS_INFINITY || d==NEG_INFINITY)
 		set_empty();
 	else
-		itv-=interval(d);
+		itv-=d;
 	return *this;
 
 }
@@ -70,7 +70,7 @@ inline Interval& Interval::operator*=(double d) {
 	if (d==POS_INFINITY || d==NEG_INFINITY)
 		set_empty();
 	else
-		itv*=interval(d);
+		itv*=d;
 	return *this;
 }
 
@@ -78,7 +78,7 @@ inline Interval& Interval::operator/=(double d) {
 	if (d==POS_INFINITY || d==NEG_INFINITY)
 		set_empty();
 	else
-		itv/=interval(d);
+		itv/=d;
 	return *this;
 }
 
@@ -218,56 +218,56 @@ inline Interval operator+(const Interval& x, double d) {
 	if(d==NEG_INFINITY || d==POS_INFINITY)
 		return Interval::EMPTY_SET;
 	else
-		return x.itv+interval(d);
+		return x.itv+d;
 }
 
 inline Interval operator-(const Interval& x, double d) {
 	if(d==NEG_INFINITY || d==POS_INFINITY)
 		return Interval::EMPTY_SET;
 	else
-		return x.itv-interval(d);
+		return x.itv-d;
 }
 
 inline Interval operator*(const Interval& x, double d) {
 	if(d==NEG_INFINITY || d==POS_INFINITY)
 		return Interval::EMPTY_SET;
 	else
-		return x.itv*interval(d);
+		return x.itv*d;
 }
 
 inline Interval operator/(const Interval& x, double d) {
 	if(d==NEG_INFINITY || d==POS_INFINITY)
 		return Interval::EMPTY_SET;
 	else
-		return x.itv/interval(d);
+		return x.itv/d;
 }
 
 inline Interval operator+(double d,const Interval& x) {
 	if(d==NEG_INFINITY || d==POS_INFINITY)
 		return Interval::EMPTY_SET;
 	else
-		return interval(d)+x.itv;
+		return d+x.itv;
 }
 
 inline Interval operator-(double d, const Interval& x) {
 	if(d==NEG_INFINITY || d==POS_INFINITY)
 		return Interval::EMPTY_SET;
 	else
-		return interval(d)-x.itv;
+		return d-x.itv;
 }
 
 inline Interval operator*(double d, const Interval& x) {
 	if(d==NEG_INFINITY || d==POS_INFINITY)
 		return Interval::EMPTY_SET;
 	else
-		return interval(d)*x.itv;
+		return d*x.itv;
 }
 
 inline Interval operator/(double d, const Interval& x) {
 	if(d==NEG_INFINITY || d==POS_INFINITY)
 		return Interval::EMPTY_SET;
 	else
-		return interval(d)/x.itv;
+		return d/x.itv;
 }
 
 inline Interval operator+(const Interval& x1, const Interval& x2) {
