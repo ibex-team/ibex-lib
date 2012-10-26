@@ -211,6 +211,9 @@ inline Interval operator|(const Interval& x1, const Interval& x2) {
 }
 
 inline double hausdorff(const Interval &x1, const Interval &x2) {
+//	double h=hausdorff(x1.itv,x2.itv);
+//	fpu_round_up();
+//	return h;
 	return hausdorff(x1.itv,x2.itv);
 }
 
@@ -414,12 +417,18 @@ inline bool proj_pow(const Interval& y, Interval& x1, Interval& x2) {
 }
 
 inline bool proj_cos(const Interval& y,  Interval& x) {
-	x = gaol::acos_rel(y.itv,x.itv);
+	x &= gaol::acos_rel(y.itv,x.itv);
 	return !x.is_empty();
 }
 
 inline bool proj_sin(const Interval& y,  Interval& x) {
-	x = gaol::asin_rel(y.itv,x.itv);
+	/*fpu_round_up();
+	interval tmp=gaol::asin_rel(y.itv,x.itv);
+	if (!x.itv.set_contains(tmp)) {
+		std::cout << "bug x=" << x.itv << " y=" << y.itv << " tmp=" << tmp << std::endl;
+	}*/
+	x &= gaol::asin_rel(y.itv,x.itv);
+
 	return !x.is_empty();
 }
 
