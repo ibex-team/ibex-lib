@@ -98,7 +98,7 @@ int main(int argc, char** argv){
 	//              cpoints.push_back(X_Newton::K4);
 
 
-	X_Newton ctcxnewton (ext_sys, &hc44xn, cpoints, 0,sys.goal,0.3,0.3, X_Newton::X_NEWTON,X_Newton::HANSEN,100,1.e5,1.e5);
+	X_Newton ctcxnewton (ext_sys, &hc44xn, cpoints, 0,sys.goal,0.2,0.2, X_Newton::X_NEWTON,X_Newton::HANSEN,100,1.e5,1.e5);
 
 	//  the actual contractor  ctc + xnewton	
 	CtcCompo  cxn (*ctc, ctcxnewton);
@@ -112,7 +112,7 @@ int main(int argc, char** argv){
 	// if (val.lb() < -1.e8) val = Interval(-1.e8,val.ub());
 
 	ext_sys.box[goal_var]= val;
-	cout << " y init " << ext_sys.box[goal_var] << endl;
+	//	cout << " y init " << ext_sys.box[goal_var] << endl;
 
 	//o.in_HC4_flag=false;
 	//o.mono_analysis_flag=false;

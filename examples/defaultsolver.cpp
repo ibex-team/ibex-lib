@@ -4,10 +4,11 @@ using namespace std;
 using namespace ibex;
 
 int main(int argc, char** argv){
-
+try{
 // Load a system of equations
 	// --------------------------
 	System sys(argv[1]);
+	cout << "load file " << argv[1] << "." << endl;
 	srandom(1);
 	double prec= atof(argv[2]);  // the required precision
         double time_limit=atof(argv[3]); 
@@ -17,9 +18,14 @@ int main(int argc, char** argv){
 	s.trace=1;  // the solutions are printed when they are found
 	cout.precision(12);
 	// Get the solutions
+
 	vector<IntervalVector> sols=s.solve(sys.box);
 	cout << "number of solutions=" << sols.size() << endl;
 
 	cout << "cpu time used=" << s.time << "s."<< endl;
 	cout << "number of cells=" << s.nb_cells << endl;
+ }
+ catch(ibex::SyntaxError& e) {
+   cout << e << endl;
+  }
 }

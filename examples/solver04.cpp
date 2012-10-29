@@ -5,6 +5,14 @@ using namespace ibex;
 
 int main(int argc, char** argv) {
 
+ try {
+	// Load a system of equations
+	// --------------------------
+         if (argc<7) {
+	   cerr << "usage: solver04 filename ratiopropag filtering xnewton bisection prec  timelimit "  << endl;
+	   exit(1);
+	 }
+
 	// Load a system of equations
 	// --------------------------
 	System sys(argv[1]);
@@ -34,7 +42,7 @@ int main(int argc, char** argv) {
 	// the system.
 	CtcNewton* ctcnewton;
 	if (filtering == "acidhc4n" || filtering=="hc4n" || filtering=="3bcidhc4n")
-	  ctcnewton= new CtcNewton(sys.f,2e8,prec,1.e-4);
+	  ctcnewton= new CtcNewton(sys.f,5e8,prec,1.e-4);
 
 	// Build the main contractor:
 	// ---------------------------
@@ -70,7 +78,7 @@ int main(int argc, char** argv) {
 
 	cpoints.push_back(X_Newton::RANDOM);
 	cpoints.push_back(X_Newton::RANDOM_INV);
-	CtcHC4 propag1(sys.ctrs,ratio_propag);  // the contractor called in the XNewton loop if the gain is > fp2
+	CtcHC4 propag1(sys.ctrs,ratio_propag);  // the contractor called in the XNewton loop if the gain is > rfp2
 
 
 
@@ -138,7 +146,12 @@ int main(int argc, char** argv) {
 	  cout << "nbvarcid=" <<  CtcAcid::nbvarstat << endl;
 	cout << "cpu time used=" << s.time << "s."<< endl;
 
-}
+ }
 
+ catch(ibex::SyntaxError& e) {
+   cout << e << endl;
+ }
+
+}
 
 
