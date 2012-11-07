@@ -67,17 +67,18 @@ namespace ibex {
             if(j==n-1 && goal_ctr!=-1) continue; //the variable y!    
             if(!isvar[ctr][j]) continue;
 
-  	  //if(Abs(x[j+1])> max_diam_deriv )   return 0; //to avoid problems with SoPleX
-                 
-           AF2_expr afexp = AF2_expr(space.box(j+1),j,n);
+	    if(Diam(space.box(j+1))==0) continue;
+     	  //if(Abs(x[j+1])> max_diam_deriv )   return 0; //to avoid problems with SoPleX
+	    AF2_expr afexp = AF2_expr(space.box(j+1),j,n);
          
-           INTERVAL a = (op == LEQ || op == LT)? Inf(x[j+1]/afexp[j+1]) : Sup(x[j+1]/afexp[j+1]);
+	    INTERVAL a = (op == LEQ || op == LT)? Inf(x[j+1]/afexp[j+1]) : Sup(x[j+1]/afexp[j+1]);
          
-           res+=x[j+1]*afexp[0]/afexp[j+1]; //map AF -> I
-         
-           row1.add(j, Mid(a)); //Inf(a)=Mid(a)=Sup(a)
+	    res+=x[j+1]*afexp[0]/afexp[j+1]; //map AF -> I
+
+	    row1.add(j, Mid(a)); //Inf(a)=Mid(a)=Sup(a)
          
       }
+
       
     bool added=false;
 
@@ -106,7 +107,6 @@ namespace ibex {
             added=true;
          }
       }
-
     
       return (added)? 1:0;
     
