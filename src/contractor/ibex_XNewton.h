@@ -16,6 +16,7 @@
 #include "ibex_Ctc.h"
 #include "ibex_System.h"
 #include "ibex_NumConstraint.h"
+#include "ibex_LRContractor.h"
 #include "soplex.h"
 
 #include <vector>
@@ -23,13 +24,14 @@
 namespace ibex {
 
 /** \ingroup ctcgroup
- * \brief 3BCID contractor (extension of 3B with CID)
+ * \brief X_Newton contractor 
  *
  * This class is an implementation of the X-Newton algorithm
- * \author Ignacio Araya, Gilles Trombettoni
+ * \author Ignacio Araya, Gilles Trombettoni     
  * \date February 2011
  */
-class X_Newton : public Ctc {
+
+class X_Newton : public LR_contractor {
 
  public:
 
@@ -38,13 +40,12 @@ class X_Newton : public Ctc {
 
   enum linear_mode  {  TAYLOR, HANSEN  };
 
-  enum ctc_mode {  LOWER_BOUNDING, X_NEWTON  };
 
   /** Creates the X_Newton
    *
    * \param sys The system (the extended system in case of optimization)
    * \param ctc Internal contractor in the X-Newton loop (e.g., CtcHC4, NULL)
-   * \param cpoints The way in that the corner is selected in linearization (X_INF, X_SUP, RANDOM, RANDOM_INV)
+   * \param cpoints The vector of corner selection in linearization (X_INF, X_SUP, RANDOM, RANDOM_INV)
    * \param goal_ctr  (goal index for optimization, -1 for constraint solving)
    * \param goal   (goal function pointer for optimization, NULL for constraint solving)
    * \param ratio_fp fixpoint precision for X-Newton
@@ -59,7 +60,7 @@ class X_Newton : public Ctc {
 
   X_Newton(const System& sys, Ctc* ctc, std::vector<corner_point>& cpoints, int goal_ctr=-1, Function* goal=0,
      double ratio_fp=default_ratio_fp, double ratio_fp2=default_ratio_fp2, 
-	     ctc_mode cmode=X_NEWTON, linear_mode lmode=HANSEN, int max_iter_soplex=100, double max_diam_deriv=default_max_diam_deriv, double max_diam_box=default_max_diam_box);
+	   LR_contractor::ctc_mode cmode=ALL_BOX, linear_mode lmode=HANSEN, int max_iter_soplex=100, double max_diam_deriv=default_max_diam_deriv, double max_diam_box=default_max_diam_box);
 
 
  
@@ -75,85 +76,37 @@ class X_Newton : public Ctc {
 
   /** X_Newton iteration. 
   Linearize the system and performs 2n calls to Simplex in order to reduce 
-  the 2 bounds of each variable **/
-  void X_NewtonIter(IntervalVector & box );
-
-
-  /** Apply contraction. **/
-  virtual void contract(IntervalVector & box);
-
-  /** The contractor calles in the XNewton loop*/
-  Ctc* ctc;
-
-  /** The system  (in optimization : the extended system) */
-  const System& sys;
-
-  /** Default ratio_fp value, set to 0.1  **/
-  static const double default_ratio_fp;
-
-  /** Default ratio_fp value, set to 0.01  **/
-  static const double default_ratio_fp2;
-
-  /** Default var_min_width value, set to 1e-11  **/
-  static const double default_var_min_width;
+  the 2 bounds of each variable */
+  int Linearization( IntervalVector & box, soplex::SoPlex& mysoplex);
 
   /** Default max_diam_deriv value, set to 1e5  **/
   static const double default_max_diam_deriv;
 
-  /** Default max_diam_box value, set to 1e4  **/
-  static const double default_max_diam_box;
 
-  /** goal index for optimization, -1 for constraint solving **/
-  int  goal_ctr;
-
-  //  Function* goal;          //  the goal function (in optimization only) 
-  Function* goal;
-
+  /** The vector of corner selection in linearization (X_INF, X_SUP, RANDOM, RANDOM_INV) */
   std::vector<corner_point>& cpoints;
 
   protected:
 
 
-  /** indicates if the constraint is linear **/
-  bool* linear;
-
-  /** stores the coefficients of linear constraints **/
-  IntervalMatrix LinearCoef;
 
 
   int* last_rnd;
   int* base_coin;
 
-
+  /** max_diam_deriv : the maximum diameter of the derivatives for calling Soplex (default value 1.e5) */
   double max_diam_deriv;
 
-  double max_diam_box;
-
-  int max_iter_soplex;
-
-
-
-  /** The fixpoint ratio **/
-  double ratio_fp;
-
-  /* The fixpoint2 ratio (see implementation of void X_Newton::contract(IntervalVector &box) to understand) */
-  double ratio_fp2;
-
+  /** TAYLOR | HANSEN : the linear relaxation method */
   linear_mode lmode;
-  
-  ctc_mode cmode;
- 
-  soplex::SPxSolver::Status run_simplex(IntervalVector & box,soplex::SoPlex& mysoplex, soplex::SPxLP::SPxSense sense, int var, int n, Interval& obj, double bound, std::vector<Interval>& taylor_ev );
 
-  /** Tries to add a linearization in the model mysoplex. Returns true if it is succesful **/
+  /** Tries to add a linearization in the model mysoplex. Returns true if it is succesful */
   int X_Linearization(IntervalVector & box,soplex::SoPlex& mysoplex, int ctr, corner_point cpoint, std::vector<Interval>& taylor_ev, IntervalVector &G,
 		      int id_point, int& non_linear_vars);
 
   int X_Linearization(IntervalVector& box, soplex::SoPlex& mysoplex, int ctr, corner_point cpoint, CmpOp op, std::vector<Interval>& taylor_ev,
   IntervalVector &G, int id_point, int& non_linear_vars);
 
-  bool isInner(IntervalVector & box,const System& sys, int j);
-  void choose_next_variable ( IntervalVector& box,soplex::SoPlex& mysoplex , int & nexti, int & infnexti, int* inf_bound, int* sup_bound);
 
 
 /*

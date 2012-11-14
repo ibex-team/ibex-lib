@@ -199,7 +199,7 @@ void Optimizer::optimize(const IntervalVector& init_box) {
 	try {
 	  while (!buffer.empty()) {
 
-	    // if (trace) cout << ((CellBuffer&) buffer) << endl;
+	    if (trace >= 2) cout << ((CellBuffer&) buffer) << endl;
 	    bool first=true; bool second=true;
 
 		Cell* c=buffer.top();

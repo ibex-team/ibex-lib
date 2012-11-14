@@ -145,8 +145,10 @@ public:
 
 
 	/** Trace activation flag.
-	 * The value can be fixed by the user. By default: false. */
-	bool trace;
+	 * The value can be fixed by the user. By default: 0  nothing is printed
+	 1 for printing each better found feasible points 
+	  2 for printing each handled node */
+	int trace;
 
 
 	

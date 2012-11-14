@@ -49,7 +49,7 @@ namespace ibex {
     ctc_list->set_ref(index,*new X_Newton(sys, 
 					 new CtcHC4 (sys.ctrs,0.01),
 					 *(default_corners()),
-					 -1,0,0.2,0.2, X_Newton::X_NEWTON,X_Newton::HANSEN,100,1.e5,1.e4));
+					 -1,0,0.2,0.2, LR_contractor::ALL_BOX,X_Newton::HANSEN,100,1.e5,1.e4));
     ctc_list->resize(index+1);
     return ctc_list;}
 		    

@@ -28,107 +28,29 @@ using std::vector;
 
 namespace ibex {
 
-const double X_Newton::default_ratio_fp = 0.1;
-const double X_Newton::default_ratio_fp2 = 0.1;
 const double X_Newton::default_max_diam_deriv =1e5;
-const double X_Newton::default_max_diam_box =1e4;
 
+  using namespace std;
 
 using namespace soplex;
 
 // the constructor
 X_Newton::X_Newton(const System& sys, Ctc* ctc, vector<corner_point>& cpoints, int goal_ctr, Function* fgoal, 
      		   double ratio_fp, double ratio_fp2,
-		   ctc_mode cmode, linear_mode lmode, int max_iter_soplex, double max_diam_deriv, double max_diam_box) : 
-  Ctc(sys.nb_var), sys(sys), ctc(ctc? ctc:NULL), goal_ctr(goal_ctr), 
-  ratio_fp(ratio_fp), ratio_fp2(ratio_fp2),  cmode(cmode), cpoints(cpoints), lmode(lmode), max_iter_soplex(max_iter_soplex),
-  max_diam_deriv(max_diam_deriv), max_diam_box(max_diam_box),
-  LinearCoef(sys.nb_ctr, sys.nb_var){
-   if(goal_ctr!=-1)
-     {goal= fgoal;}
+		   ctc_mode cmode, linear_mode lmode, int max_iter_soplex, double max_diam_deriv, double max_diam_box):
+  LR_contractor(sys,ctc,goal_ctr,fgoal,ratio_fp,ratio_fp2,cmode,max_iter_soplex,max_diam_box), cpoints(cpoints),
+  max_diam_deriv(max_diam_deriv), lmode(lmode){
 
     // ============================================================
-  linear = new bool[sys.nb_ctr];
   last_rnd = new int[sys.nb_var];
   base_coin = new int[sys.nb_var]; 
-
-  for(int ctr=0; ctr<sys.nb_ctr;ctr++){
-    
-     IntervalVector G(sys.nb_var);
-
-
-     if(ctr==goal_ctr)
-       {IntervalVector G1(sys.nb_var-1);
-       goal->gradient(sys.box,G1);
-       for (int i=0; i<sys.nb_var-1; i++)
-	 G[i]=G1[i];
-       G[sys.nb_var-1]=0;
-       }
-     else
-       sys.ctrs[ctr].f.gradient(sys.box,G);
-    
-     linear[ctr]=true;
-     // for testing if a function is linear (with scalar coefficients) w.r.t all its variables, we test the diameter of the gradient components.
-     for(int i=0;i<sys.nb_var;i++){
-       if (G[i].diam() >1e-10) {
-	 linear[ctr]=false;
-	 break;
-       }
-       
-     }
-     LinearCoef[ctr]=G;  // in case of a linear function, the coefficients are stored.
-  }
+ 
+		}
 
 
 
-  }
 
 
-double ratio_maxreduction(IntervalVector& box1, IntervalVector& box2){
-   double maxratio=0.0;
-   for(int i=0;i<box1.size();i++){
-      double ratio=0.0;
-
-      if(box1[i].diam()>1e-20)
-     ratio=1.0-box2[i].diam()/box1[i].diam();
-
-      if(ratio>maxratio)
-        maxratio=ratio;
-  }
-  return maxratio;
-}
-
-  bool X_Newton::isInner(IntervalVector & box,const System& sys, int j){
-        Interval eval=sys.ctrs[j].f.eval(box);
-
-        if((sys.ctrs[j].op==LEQ && eval.ub() > 0) || (sys.ctrs[j].op==LT && eval.ub() >= 0) ||
-	   (sys.ctrs[j].op==GEQ && eval.lb() < 0) || (sys.ctrs[j].op==GT && eval.lb() <= 0))
-	  return false;
-	return true;
-  }
-
-
-void X_Newton::contract(IntervalVector & box) {
- double gain;
- // cout << " box avant " << box << endl;
- if (box.max_diam() > max_diam_box) 
-   return;
- do{
-
-    IntervalVector savebox=box;
-
-    X_NewtonIter(box);
-
-    if(ctc) {
-       gain = ratio_maxreduction(savebox,box);
-       if (gain >= ratio_fp2) ctc->contract(box);
-     }
-		       
-    gain = ratio_maxreduction(savebox,box);
-
- }while(gain >= ratio_fp);
- //   cout << " box apres " << box << endl;
-}
 
   /*  pas implanté en version 2 
 
@@ -212,7 +134,7 @@ REAL X_Newton::eval_corner(int ctr, int op, INTERVAL_VECTOR& G, bool* corner){
 
  
 
-int X_Newton::X_Linearization(IntervalVector& box, SoPlex& mysoplex, int ctr, corner_point cpoint, vector<Interval>& taylor_ev,
+  int X_Newton::X_Linearization(IntervalVector& box, soplex::SoPlex& mysoplex, int ctr, corner_point cpoint, vector<Interval>& taylor_ev,
 			      IntervalVector& G, int id_point, int& nb_nonlinear_vars){
 
     CmpOp op= sys.ctrs[ctr].op;
@@ -231,7 +153,7 @@ int X_Newton::X_Linearization(IntervalVector& box, SoPlex& mysoplex, int ctr, co
 }
 
 //return 0 only when the linearization is not performed
-  int X_Newton::X_Linearization(IntervalVector& box ,SoPlex& mysoplex, int ctr, corner_point cpoint, CmpOp op, 
+  int X_Newton::X_Linearization(IntervalVector& box ,soplex::SoPlex& mysoplex, int ctr, corner_point cpoint, CmpOp op, 
 				vector<Interval>& taylor_ev,
 				IntervalVector& G, int id_point, int& nb_nonlinear_vars){
     int n=sys.nb_var;
@@ -428,7 +350,7 @@ int X_Newton::X_Linearization(IntervalVector& box, SoPlex& mysoplex, int ctr, co
 
       }
 
-      //  cout << " j " << j <<  " " << savebox[j] << G[j] << endl;
+      //      cout << " j " << j <<  " " << savebox[j] << G[j] << endl;
 	  box[j]=inf_x? savebox[j].lb():savebox[j].ub();
 	  Interval a = ((inf_x && (op == LEQ || op== LT)) ||
 			(!inf_x && (op == GEQ || op== GT)))? G[j].lb():G[j].ub();
@@ -480,49 +402,12 @@ int X_Newton::X_Linearization(IntervalVector& box, SoPlex& mysoplex, int ctr, co
   }
 
 
-  // The Achterberg heuristic for choosing the next variable (nexti) and its bound (infnexti) to be contracted (cf Baharev paper)
-  // and updating the indicators if a bound has been found feasible (with the precision prec_bound)
-
-  void X_Newton::choose_next_variable ( IntervalVector & box, SoPlex& mysoplex , int & nexti, int & infnexti, int* inf_bound, int* sup_bound)
-  {
-    double prec_bound = 1.e-8; // relative precision for the indicators
-    int n=sys.nb_var;
-    DVector primal(n);
-    mysoplex.getPrimal(primal);
-    double delta=1.e100;
-    double deltaj=delta;
-    for (int j=0;j<n;j++)
-      
-      {
-	if (inf_bound[j]==0)
-	  {deltaj= fabs (primal[j]- box[j].lb());
-	    if ((fabs (box[j].lb()) < 1 && deltaj < prec_bound)
-		||
-		(fabs (box[j].lb()) >= 1 && fabs (deltaj /(box[j].lb())) < prec_bound))
-	      inf_bound[j]=1;
-	    if (inf_bound[j]==0 && deltaj < delta)
-	      {nexti=j; infnexti=0;delta=deltaj;}
-	  }
-	if (sup_bound[j]==0)
-	  {	deltaj = fabs (primal[j]- box[j].ub());
-	    if ((fabs (box[j].ub()) < 1 && deltaj < prec_bound)
-	    ||
-		(fabs (box[j].ub()) >= 1 && fabs (deltaj/(box[j].ub())) < prec_bound))
-	  sup_bound[j]=1;
-	if (sup_bound[j]==0 && deltaj < delta)
-	  {nexti=j; infnexti=1;delta=deltaj;}
-      }
-
-      }
-  }
-
 
 //the X_NewtonIteration
-void X_Newton::X_NewtonIter( IntervalVector & box){
+  int X_Newton::Linearization( IntervalVector & box, soplex::SoPlex& mysoplex){
   int n = sys.nb_var;
   int nvarsimplex=n;
 
-  SoPlex mysoplex;
   DSVector dummycol(0);
   vector<Interval> taylor_ev;
 
@@ -552,7 +437,7 @@ void X_Newton::X_NewtonIter( IntervalVector & box){
        else
 	 sys.ctrs[ctr].f.gradient(box,G);
      }
-     catch (EmptyBoxException e) {return;}
+     catch (EmptyBoxException e) {return 0;}   // useful ??
    }
 
     int nb_nonlinear_vars;
@@ -576,172 +461,10 @@ void X_Newton::X_NewtonIter( IntervalVector & box){
 
   }
 
-  if(nb_ctrs<1)return;
-
-  /***************************************************/
-
-  Interval opt(0);
-
-  int inf_bound[nvarsimplex]; // indicator inf_bound = 1 means the inf bound is feasible or already contracted , call to simplex useless (cf Baharev)
-  int sup_bound[nvarsimplex];// indicator sup_bound = 1 means the sup bound is feasible or already contracted, call to simplex useless
-
-  for (int i=0; i<nvarsimplex ;i++) {inf_bound[i]=0;sup_bound[i]=0;}
-
-   if (goal_ctr!=-1)  sup_bound[n]=1;  // in case of optimization, for y the left bound only is contracted
-  // in the case of lower_bounding, only the left bound of y is contracted
-  int firsti=(cmode==LOWER_BOUNDING)? 2*n-1:0;
-
-  int nexti=-1;  // the next variable to be contracted
-  int infnexti=0; // the bound to be contracted contract  infnexti=0 for the lower bound, infnexti=1 for the upper bound
-  for(int ii=firsti;ii<2*n;ii++){  // at most 2*n calls
-    int i= ii/2;
-    if (nexti != -1) i=nexti;
-    if (infnexti==0 && inf_bound[i]==0)
-      {  
-	  inf_bound[i]=1;
-	  SPxSolver::Status stat = run_simplex(box,mysoplex, SPxLP::MINIMIZE, i, n, opt,box[i].lb(), taylor_ev);
-	if( stat == SPxSolver::OPTIMAL ){
-
-	  if(opt.lb()>box[i].ub())   throw EmptyBoxException();
-	  choose_next_variable(box,mysoplex ,nexti,infnexti, inf_bound, sup_bound);
-	  if(opt.lb() > box[i].lb() ){
-	    box[i]=Interval(opt.lb(),box[i].ub());
-	    mysoplex.changeLhs(nb_ctrs+i,opt.lb());
-	  }
-	}
-	else if(stat == SPxSolver::INFEASIBLE) throw EmptyBoxException();
-	else if (stat == SPxSolver::UNKNOWN)
-	  {int next=-1;
-	    for (int j=0;j<n;j++)
-	      {if (inf_bound[j]==0) {nexti=j; next=0;infnexti=0;break;}
-	      else if  (sup_bound[j]==0) {nexti=j;next=0; infnexti=1;break;}
-	      }
-	    if (next==-1) break;
-	  }
-
-		    
-      }
-    else
-      if(infnexti==1 && sup_bound[i]==0 ){ 
-        //max x
-	  sup_bound[i]=1;
-	  SPxSolver::Status stat= run_simplex(box,mysoplex, SPxLP::MAXIMIZE, i, n, opt, box[i].ub(), taylor_ev);
-        if( stat == SPxSolver::OPTIMAL ){
-
-	  if(opt.ub() <box[i].lb()) throw EmptyBoxException();
-	  choose_next_variable(box,mysoplex ,nexti,infnexti, inf_bound, sup_bound);
-	 if (opt.ub() < box[i].ub()) {
-	   box[i] =Interval( box[i].lb(), opt.ub());
-	   mysoplex.changeRhs(nb_ctrs+i,opt.ub());
-           }
-        } else if(stat == SPxSolver::INFEASIBLE)  throw EmptyBoxException();
-	else if (stat == SPxSolver::UNKNOWN)
-	  {int next=-1;
-	    for (int j=0;j<n;j++)
-	      {if (inf_bound[j]==0) {nexti=j; next=0;infnexti=0;break;}
-	      else if  (sup_bound[j]==0) {nexti=j; next=0;infnexti=1;break;}
-	      }
-	    if (next==-1) break;
-	  }
-
-
-      }
-      else break;  // no more call to soplex
-  }
-
-}
-
-  SPxSolver::Status X_Newton::run_simplex(IntervalVector& box,SoPlex& mysoplex, SPxLP::SPxSense sense, int var, int n, Interval& obj, double bound, vector<Interval>& taylor_ev){
-//  mysoplex.writeFile("dump.lp", NULL, NULL, NULL);
-
-   int nb_rows=mysoplex.nRows()-n;
-
-   if(sense==SPxLP::MINIMIZE)
-      mysoplex.changeObj(var, 1.0); 
-   else
-      mysoplex.changeObj(var, -1.0); 
-
-
-
-  SPxSolver::Status stat;
-  mysoplex.changeSense(SPxLP::MINIMIZE); 
-  mysoplex.setTerminationIter(max_iter_soplex);
-  mysoplex.setDelta(1e-10);
-//   mysoplex.writeFile("dump.lp", NULL, NULL, NULL);
-
-  try{
-    stat = mysoplex.solve();
-  }catch(SPxException){
-    stat = SPxSolver::UNKNOWN;
-  }
-
-  if(stat == SPxSolver::OPTIMAL){
-     if( (sense==SPxLP::MINIMIZE && mysoplex.objValue()<=bound) || 
-    (sense==SPxLP::MAXIMIZE && -mysoplex.objValue()>=bound) )
-      stat = SPxSolver::UNKNOWN;
-  }//else if(SPxSolver::ABORT_ITER) stat = SPxSolver::OPTIMAL;
-     
-
-  if(stat == SPxSolver::OPTIMAL){
-     
-     IntervalMatrix As (mysoplex.nRows(),n);
-     IntervalVector C(n);
-     for(int i=0;i<n;i++){
-         C[i]=0;
-         if(i==var){
-           if(sense==SPxLP::MINIMIZE)
-              C[var]=1.0;
-           else 
-              C[var]=-1.0;
-         }
-     }
-
-     for (int i=0;i<mysoplex.nRows(); i++){
-       for(int j=0; j<n; j++)
-         As[i][j]=mysoplex.rowVector(i)[j];
-     }
-     // cout << As << endl;
-
-     IntervalVector B(mysoplex.nRows());
-     for (int i=0;i<mysoplex.nRows(); i++){
-//          cout << taylor_ev[i] << endl;
-       B[i]=Interval((mysoplex.lhs()[i]!=-infinity)? mysoplex.lhs()[i]:taylor_ev[i].lb(),(mysoplex.rhs()[i]!=infinity)? mysoplex.rhs()[i]:taylor_ev[i].ub()); //Idea: replace 1e8 (resp. -1e8) by Sup([g_i]_t) (resp. Inf([g_i]_t) ) 
-//           cout << B(i+1) << endl;
-    }
-
-    DVector dual(mysoplex.nRows());
-    mysoplex.getDual(dual);
-
-
-    // Shchberbina - Neumaier postprocessing 
-    IntervalVector Lambda(mysoplex.nRows());
-    for (int i =0; i< mysoplex.nRows() ; i++)
-      Lambda[i]=dual[i];
-
-    IntervalVector Rest(n);
-    IntervalMatrix AsTranspose (n, mysoplex.nRows());
-    for (int i =0; i< mysoplex.nRows() ; i++)
-      for (int j= 0; j<n ;j++)
-	AsTranspose[j][i]= As[i][j];
-    Rest = AsTranspose *Lambda - C;
-
-
-   if(sense==SPxLP::MINIMIZE)
-     obj = Lambda * B - Rest * box;
-   else 
-     obj = -(Lambda * B - Rest * box);
-
-//     cout << sense << endl;
-//     cout << obj << endl;
-//     cout << mysoplex.objValue()<< endl;
-//     exit(0);
-  }
-
-  mysoplex.changeObj(var, 0.0);
-  return stat;
+ return nb_ctrs;
  }
 
-  // for the defaultsolver
+
 
 
  

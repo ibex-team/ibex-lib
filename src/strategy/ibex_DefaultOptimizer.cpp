@@ -79,7 +79,7 @@ Array<Ctc>*  DefaultOptimizer::contractor_list (System& sys, System& ext_sys,dou
 	ctc_list->set_ref(2,*new X_Newton(ext_sys,
 			new CtcHC4 (ext_sys.ctrs,0.01),  // called in the X_Newton external loop
 			*(default_corners()),
-					  0,sys.goal,0.2,0.2,X_Newton::X_NEWTON,X_Newton::HANSEN,100,1.e5,1.e5));
+					  0,sys.goal,0.2,0.2,LR_contractor::ALL_BOX,X_Newton::HANSEN,100,1.e5,1.e5));
 
 	return ctc_list;
 }
