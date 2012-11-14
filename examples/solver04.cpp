@@ -73,21 +73,15 @@ int main(int argc, char** argv) {
 
 	// corner selection 
 	vector<X_Newton::corner_point> cpoints;
-	//		cpoints.push_back(X_Newton::SUP_X);
-	//		cpoints.push_back(X_Newton::INF_X);
+	//	cpoints.push_back(X_Newton::SUP_X);
+	//	cpoints.push_back(X_Newton::INF_X);
 
 	cpoints.push_back(X_Newton::RANDOM);
 	cpoints.push_back(X_Newton::RANDOM_INV);
 	CtcHC4 propag1(sys.ctrs,ratio_propag);  // the contractor called in the XNewton loop if the gain is > rfp2
 
-
-
-
-	X_Newton ctcxnewton (sys, &propag1 , cpoints, -1,0,0.2,0.2, X_Newton::X_NEWTON,X_Newton::HANSEN,100,1.e5,1.e4);
-	//	X_Newton ctcxnewton (sys, ctc , cpoints, -1,0,0.2,0.2, X_Newton::X_NEWTON,X_Newton::TAYLOR,100,1.e5,1.e4);
-	//X_Newton ctcxnewton (sys, ctc , cpoints, -1,0,0.2,0.2, X_Newton::X_NEWTON,X_Newton::HANSEN,100,1.e5,1.e4);
-	//	X_Newton ctcxnewton (sys, ctc , cpoints, -1,0,0.2,0.2, X_Newton::X_NEWTON,X_Newton::HANSEN,100,1.e8,1.e8);
-	//X_Newton ctcxnewton (sys, ctc , cpoints, -1,0,0.3,1, X_Newton::X_NEWTON,X_Newton::HANSEN,100,1.e5,1.e4);
+	//	X_Newton ctcxnewton (sys, &propag1 , cpoints, -1,0,0.2,0.2, LR_contractor::ALL_BOX,X_Newton::HANSEN,100,1.e5,1.e4);
+	X_Newton ctcxnewton (sys, &propag1 , cpoints, -1,0,1,1, LR_contractor::ALL_BOX,X_Newton::HANSEN,100,1.e5,1.e4);
 
 	// the actual contractor ; composition of ctc ,e.g. acidhc4n,  and Xnewton
 

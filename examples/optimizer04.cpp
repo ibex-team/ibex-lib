@@ -98,7 +98,8 @@ int main(int argc, char** argv){
 	//              cpoints.push_back(X_Newton::K4);
 
 
-	X_Newton ctcxnewton (ext_sys, &hc44xn, cpoints, 0,sys.goal,0.2,0.2, X_Newton::X_NEWTON,X_Newton::HANSEN,100,1.e5,1.e5);
+	//	X_Newton ctcxnewton (ext_sys, &hc44xn, cpoints, 0,sys.goal,0.2,0.2, LR_contractor::ALL_BOX,X_Newton::HANSEN,100,1.e5,1.e5);
+	X_Newton ctcxnewton (ext_sys, &hc44xn, cpoints, 0,sys.goal,1,1, LR_contractor::ALL_BOX,X_Newton::HANSEN,100,1.e5,1.e5);
 
 	//  the actual contractor  ctc + xnewton	
 	CtcCompo  cxn (*ctc, ctcxnewton);
@@ -116,7 +117,7 @@ int main(int argc, char** argv){
 
 	//o.in_HC4_flag=false;
 	//o.mono_analysis_flag=false;
-	o.trace=true;
+	o.trace=1;
 	o.timeout=timelimit;
 	o.optimize(sys.box);
      
