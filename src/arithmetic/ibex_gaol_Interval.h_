@@ -328,7 +328,9 @@ inline Interval log(const Interval& x) {
 }
 
 inline Interval cos(const Interval& x) {
-	return gaol::cos(x.itv);
+	Interval res = gaol::cos(x.itv);
+	fpu_round_up();
+	return res;
 }
 
 inline Interval sin(const Interval& x) {
@@ -418,6 +420,7 @@ inline bool proj_pow(const Interval& y, Interval& x1, Interval& x2) {
 
 inline bool proj_cos(const Interval& y,  Interval& x) {
 	x &= gaol::acos_rel(y.itv,x.itv);
+	fpu_round_up();
 	return !x.is_empty();
 }
 
