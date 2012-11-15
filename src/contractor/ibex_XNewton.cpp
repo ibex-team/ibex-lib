@@ -1,26 +1,12 @@
-/*---------------------------------------------------------------------------------
- * XNewton Contractor
- * ----------------------------------------------------------------------------
- *
- * Authors  Ignacio Araya, Gilles Trombettoni, Bertrand Neveu
- * Copyright (C) 2007 Gilles Chabert
- * 
- * This file is part of IBEX.
- *
- * IBEX is free software; you can redistribute it and/or modify it under the terms of 
- * the GNU General Public License as published by the Free Software Foundation; either 
- * version 2 of the License, or (at your option) any later version.
- *
- * IBEX is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
- * PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with IBEX; 
- * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, 
- * Boston, MA 02110-1301, USA 
- *
- --------------------------------------------------------------------------------*/
-
+//============================================================================
+//                                  I B E X                                   
+// File        : ibex_XNewton.cpp
+// Author      : Ignacio Araya, Bertrand Neveu , Gilles Trombettoni
+// Copyright   : Ecole des Mines de Nantes (France)
+// License     : See the LICENSE file
+// Created     : Jul 1, 2012
+// Last Update : Nov 15, 2012
+//============================================================================
 
 #include "ibex_XNewton.h"
 
@@ -41,7 +27,6 @@ X_Newton::X_Newton(const System& sys, Ctc* ctc, vector<corner_point>& cpoints, i
   LR_contractor(sys,ctc,goal_ctr,fgoal,ratio_fp,ratio_fp2,cmode,max_iter_soplex,max_diam_box), cpoints(cpoints),
   max_diam_deriv(max_diam_deriv), lmode(lmode){
 
-    // ============================================================
   last_rnd = new int[sys.nb_var];
   base_coin = new int[sys.nb_var]; 
  
@@ -56,7 +41,7 @@ X_Newton::X_Newton(const System& sys, Ctc* ctc, vector<corner_point>& cpoints, i
 
 void X_Newton::best_corner(int ctr, int op, INTERVAL_VECTOR& G, bool* corner){
    int n=sys.nb_var;
-    //0000000000
+
    int total_backtracks=1; int nb_var=0;
    for(int i=0;i<n;i++){
       corner[i]=false;
@@ -425,7 +410,7 @@ REAL X_Newton::eval_corner(int ctr, int op, INTERVAL_VECTOR& G, bool* corner){
     if (linear[ctr]) G= LinearCoef[ctr]; // constant derivatives are already computed
     else    if(lmode==TAYLOR){ //derivatives are computed once (Taylor)
       
-     try{
+
        if(goal_ctr==ctr)  // objective function  in optimization
 	 {IntervalVector G1(sys.nb_var-1);
 	   goal->gradient(sys.box,G1);
@@ -436,9 +421,7 @@ REAL X_Newton::eval_corner(int ctr, int op, INTERVAL_VECTOR& G, bool* corner){
 
        else
 	 sys.ctrs[ctr].f.gradient(box,G);
-     }
-     catch (EmptyBoxException e) {return 0;}   // useful ??
-   }
+    }
 
     int nb_nonlinear_vars;
 

@@ -1,3 +1,13 @@
+//============================================================================                                                 
+//                                  I B E X                                                                                  
+// 
+// File        : ibex_LRContractor.h                                                                 
+// Author      : Ignacio Araya Bertrand Neveu, Gilles Trombettoni      
+// Copyright   : Ecole des Mines de Nantes (France)                                    
+// License     : See the LICENSE file                                                                            
+// Created     : Jul 20, 2012 
+// Last Update : Nov 15, 2012                                                                                         
+//============================================================================  
 #ifndef IBEX_LR_CONTRACTOR_H
 #define IBEX_LR_CONTRACTOR_H
 
@@ -34,9 +44,9 @@ namespace ibex {
      * \param goal   goal function pointer for optimization, NULL for constraint solving
      * \param ratio_fp fixpoint precision for X-Newton                                                                 
      * \param ratio_fp2  fixpoint precision for calling the subcontractor ctc
-     * \param cmode ALL_BOX (contracts all the box) | ONLY_Y (only improves the left bound of the variable y)          
+     * \param cmode ALL_BOX (contracts all variables in the box) | ONLY_Y (only improves the left bound of the variable y) 
      * \param max_iter_soplex : the maximum number of iterations for Soplex (default value 100)                 
-     * \param max_diam_deriv : the maximum diameter of the derivatives for calling Soplex (default value 1.e5)  
+     * \param max_diam_box : the maximum diameter of the box for calling Soplex (default value 1.e5)  
      */
     LR_contractor(const System& sys, Ctc* ctc, int goal_ctr=-1, Function* goal=0,
 		  double ratio_fp=default_ratio_fp, double ratio_fp2=default_ratio_fp2,
@@ -50,7 +60,7 @@ namespace ibex {
     /** Apply contraction. **/
     virtual void contract( IntervalVector& box);
 
-    /** The pre-contractor */
+    /** The contractor in the fixpoint loop */
     Ctc* ctc;
 
     /** The system */
@@ -77,11 +87,13 @@ namespace ibex {
     /** The fixpoint ratio */
     double ratio_fp;
 
-    /* The fixpoint2 ratio (see implementation of void contract() to understand) */
+    /** The internal fixpoint ratio (see implementation of void contract() to understand) */
     double ratio_fp2;
 
+    /** The maximum number of iterations for Soplex (default value 100) */
     int max_iter_soplex;
     
+    /** The maximum diameter of the box for calling Soplex (default value 1.e5)  */
     double max_diam_box;
 
     /** Indicates if only y is contracted (cmode=ONLY_Y) or all the box (ALL_BOX) */
@@ -101,7 +113,10 @@ namespace ibex {
 
     //Soplex related functions and variables    
 
+    /* call to Soplex */
     soplex::SPxSolver::Status run_simplex(IntervalVector &box, soplex::SoPlex& mysoplex, soplex::SPxLP::SPxSense sense, int var, int n, Interval & obj, double bound);
+
+    /* Achterberg heuristic for choosing the next variable  and which bound to optimize */
     void choose_next_variable ( IntervalVector &box, soplex::SoPlex& mysoplex , int & nexti, int & infnexti, int* inf_bound, int* sup_bound);
     void optimizer(IntervalVector &box, soplex::SoPlex& mysoplex, int n, int nb_ctrs);
 

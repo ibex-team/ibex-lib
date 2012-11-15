@@ -1,28 +1,19 @@
-/*---------------------------------------------------------------------------------
- * XNewton Contractor
- * ----------------------------------------------------------------------------
- *
- * Copyright (C) 2007 Gilles Chabert
- * 
- * This file is part of IBEX.
- *
- * IBEX is free software; you can redistribute it and/or modify it under the terms of 
- * the GNU General Public License as published by the Free Software Foundation; either 
- * version 2 of the License, or (at your option) any later version.
- *
- * IBEX is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
- * PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with IBEX; 
- * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, 
- * Boston, MA 02110-1301, USA 
- *
- --------------------------------------------------------------------------------*/
- 
+//============================================================================
+//                                  I B E X
+// Linear Relaxation Contractor                                   
+// File        : ibex_LRContractor.cpp     
+// Author      : Bertrand Neveu , Gilles Trombettoni
+// Copyright   : Ecole des Mines de Nantes (France)
+// License     : See the LICENSE file
+// Created     : Nov 14, 2012
+// Last Update : Nov 15, 2012
+//============================================================================ 
+
  #include "ibex_LRContractor.h"
 
 using namespace std;
+
+using namespace soplex;
 namespace ibex {
 
 const double LR_contractor::default_ratio_fp = 0.1;
@@ -38,7 +29,7 @@ const double LR_contractor::default_max_diam_box =1e4;
      LinearCoef(sys.nb_ctr, sys.nb_var)
 
  {
-    /* get the goal function from the constraint y=f(x) */
+    /* in case of optimization the objective function */
    if(goal_ctr!=-1){goal=fgoal;} 
     // ============================================================
     
@@ -116,7 +107,7 @@ void LR_contractor::iter(IntervalVector & box){
 
   int n=sys.nb_var;
   
-  soplex::SoPlex mysoplex;
+  SoPlex mysoplex;
   
   IntervalVector initbox=box;
   //returns the number of constraints in the linearized system
@@ -133,7 +124,7 @@ void LR_contractor::iter(IntervalVector & box){
 
 }
 
-  void LR_contractor::optimizer(IntervalVector & box, soplex::SoPlex& mysoplex, int n, int nb_ctrs){
+  void LR_contractor::optimizer(IntervalVector & box, SoPlex& mysoplex, int n, int nb_ctrs){
 
   Interval opt(0);
   int inf_bound[n]; // indicator inf_bound = 1 means the inf bound is feasible or already contracted , call to simplex useless (cf Baharev)
@@ -154,9 +145,9 @@ void LR_contractor::iter(IntervalVector & box){
     if (infnexti==0 && inf_bound[i]==0)
       {
 	inf_bound[i]=1;
-	soplex::SPxSolver::Status stat = run_simplex(box,mysoplex, soplex::SPxLP::MINIMIZE, i, n, opt,box[i].lb()/*, taylor_ev*/);
+	SPxSolver::Status stat = run_simplex(box,mysoplex, SPxLP::MINIMIZE, i, n, opt,box[i].lb()/*, taylor_ev*/);
 	//	cout << " stat " <<  stat << endl;
-        if( stat == soplex::SPxSolver::OPTIMAL ){
+        if( stat == SPxSolver::OPTIMAL ){
 
           if(opt.lb()>box[i].ub())   throw EmptyBoxException();
           choose_next_variable(box,mysoplex ,nexti,infnexti, inf_bound, sup_bound);
@@ -165,8 +156,8 @@ void LR_contractor::iter(IntervalVector & box){
             mysoplex.changeLhs(nb_ctrs+i,opt.lb());
           }
         }
-        else if(stat == soplex::SPxSolver::INFEASIBLE) throw EmptyBoxException();
-        else if (stat == soplex::SPxSolver::UNKNOWN)
+        else if(stat == SPxSolver::INFEASIBLE) throw EmptyBoxException();
+        else if (stat == SPxSolver::UNKNOWN)
           {int next=-1;
             for (int j=0;j<n;j++)
               {if (inf_bound[j]==0) {nexti=j; next=0;infnexti=0;break;}
@@ -181,8 +172,8 @@ void LR_contractor::iter(IntervalVector & box){
       if(infnexti==1 && sup_bound[i]==0 ){
         //max x                                                                                                         
 	sup_bound[i]=1;
-	soplex::SPxSolver::Status stat= run_simplex(box,mysoplex, soplex::SPxLP::MAXIMIZE, i, n, opt, box[i].ub()/*, taylor_ev*/);
-        if( stat == soplex::SPxSolver::OPTIMAL ){
+	SPxSolver::Status stat= run_simplex(box,mysoplex, SPxLP::MAXIMIZE, i, n, opt, box[i].ub()/*, taylor_ev*/);
+        if( stat == SPxSolver::OPTIMAL ){
 
           if(opt.ub() <box[i].lb()) throw EmptyBoxException();
           choose_next_variable(box,mysoplex ,nexti,infnexti, inf_bound, sup_bound);
@@ -190,8 +181,8 @@ void LR_contractor::iter(IntervalVector & box){
 	    box[i] =Interval( box[i].lb(), opt.ub());
 	    mysoplex.changeRhs(nb_ctrs+i,opt.ub());
 	  }
-        } else if(stat == soplex::SPxSolver::INFEASIBLE)  throw EmptyBoxException();
-        else if (stat == soplex::SPxSolver::UNKNOWN)
+        } else if(stat == SPxSolver::INFEASIBLE)  throw EmptyBoxException();
+        else if (stat == SPxSolver::UNKNOWN)
           {int next=-1;
             for (int j=0;j<n;j++)
               {if (inf_bound[j]==0) {nexti=j; next=0;infnexti=0;break;}
@@ -213,45 +204,45 @@ void LR_contractor::iter(IntervalVector & box){
 
 
 
-  soplex::SPxSolver::Status LR_contractor::run_simplex(IntervalVector& box,soplex::SoPlex& mysoplex, soplex::SPxLP::SPxSense sense, int var, int n, \
+  SPxSolver::Status LR_contractor::run_simplex(IntervalVector& box,SoPlex& mysoplex, SPxLP::SPxSense sense, int var, int n, \
 					  Interval& obj, double bound){
     //  mysoplex.writeFile("dump.lp", NULL, NULL, NULL);                                                                    
 
     int nb_rows=mysoplex.nRows()-n;
 
-    if(sense==soplex::SPxLP::MINIMIZE)
+    if(sense==SPxLP::MINIMIZE)
       mysoplex.changeObj(var, 1.0);
     else
       mysoplex.changeObj(var, -1.0);
 
 
 
-    soplex::SPxSolver::Status stat;
-    mysoplex.changeSense(soplex::SPxLP::MINIMIZE);
+    SPxSolver::Status stat;
+    mysoplex.changeSense(SPxLP::MINIMIZE);
     mysoplex.setTerminationIter(max_iter_soplex);
     mysoplex.setDelta(1e-10);
     //    mysoplex.writeFile("dump.lp", NULL, NULL, NULL);              
     //    system("cat dump.lp");
     try{
       stat = mysoplex.solve();
-    }catch(soplex::SPxException){
-      stat = soplex::SPxSolver::UNKNOWN;
+    }catch(SPxException){
+      stat = SPxSolver::UNKNOWN;
     }
 
-    if(stat == soplex::SPxSolver::OPTIMAL){
-      if( (sense==soplex::SPxLP::MINIMIZE && mysoplex.objValue()<=bound) ||
-	  (sense==soplex::SPxLP::MAXIMIZE && -mysoplex.objValue()>=bound) )
-	stat = soplex::SPxSolver::UNKNOWN;
-    }//else if(soplex::SPxSolver::ABORT_ITER) stat = soplex::SPxSolver::OPTIMAL;                                                          
+    if(stat == SPxSolver::OPTIMAL){
+      if( (sense==SPxLP::MINIMIZE && mysoplex.objValue()<=bound) ||
+	  (sense==SPxLP::MAXIMIZE && -mysoplex.objValue()>=bound) )
+	stat = SPxSolver::UNKNOWN;
+    }//else if(SPxSolver::ABORT_ITER) stat = SPxSolver::OPTIMAL;                                                          
 
-    if(stat == soplex::SPxSolver::OPTIMAL){
+    if(stat == SPxSolver::OPTIMAL){
 
       IntervalMatrix As (mysoplex.nRows(),n);
       IntervalVector C(n);
       for(int i=0;i<n;i++){
 	C[i]=0;
 	if(i==var){
-	  if(sense==soplex::SPxLP::MINIMIZE)
+	  if(sense==SPxLP::MINIMIZE)
 	    C[var]=1.0;
 	  else
 	    C[var]=-1.0;
@@ -266,14 +257,14 @@ void LR_contractor::iter(IntervalVector & box){
 
       IntervalVector B(mysoplex.nRows());
       for (int i=0;i<mysoplex.nRows(); i++){	
-	B[i]=Interval((mysoplex.lhs()[i]!=-soplex::infinity)? mysoplex.lhs()[i]:-1.e20,(mysoplex.rhs()[i]!=soplex::infinity)?  
+	B[i]=Interval((mysoplex.lhs()[i]!=-infinity)? mysoplex.lhs()[i]:-1.e20,(mysoplex.rhs()[i]!=infinity)?  
 		      mysoplex.rhs()[i]:1.e20); 
 	//Idea: replace 1e20 (resp. -1e20) by Sup([g_i]) (resp. Inf([g_i])), where [g_i] is an evaluation of the nonlinear function <-- IA 
 
 	//           cout << B(i+1) << endl;                                                                                    
       }
 
-      soplex::DVector dual(mysoplex.nRows());
+      DVector dual(mysoplex.nRows());
       mysoplex.getDual(dual);
       // Shchberbina - Neumaier postprocessing                                                                            
       IntervalVector Lambda(mysoplex.nRows());
@@ -293,7 +284,7 @@ void LR_contractor::iter(IntervalVector & box){
       Rest = AsTranspose *Lambda - C;
 
 
-      if(sense==soplex::SPxLP::MINIMIZE)
+      if(sense==SPxLP::MINIMIZE)
 	obj = Lambda * B - Rest * box;
       else
 	obj = -(Lambda * B - Rest * box);
@@ -326,11 +317,11 @@ void LR_contractor::iter(IntervalVector & box){
   // The Achterberg heuristic for choosing the next variable (nexti) and its bound (infnexti) to be contracted (cf Baharev paper)
   // and updating the indicators if a bound has been found feasible (with the precision prec_bound)
 
-  void LR_contractor::choose_next_variable ( IntervalVector & box, soplex::SoPlex& mysoplex , int & nexti, int & infnexti, int* inf_bound, int* sup_bound)
+  void LR_contractor::choose_next_variable ( IntervalVector & box, SoPlex& mysoplex , int & nexti, int & infnexti, int* inf_bound, int* sup_bound)
   {
     double prec_bound = 1.e-8; // relative precision for the indicators                                                 
     int n=sys.nb_var;
-    soplex::DVector primal(n);
+    DVector primal(n);
     mysoplex.getPrimal(primal);
     double delta=1.e100;
     double deltaj=delta;

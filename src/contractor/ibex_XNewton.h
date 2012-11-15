@@ -6,7 +6,7 @@
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Jul 20, 2012
-// Last Update : Jul 20, 2012
+// Last Update : Nov 15, 2012
 //============================================================================
 
 
@@ -63,9 +63,6 @@ class X_Newton : public LR_contractor {
 	   LR_contractor::ctc_mode cmode=ALL_BOX, linear_mode lmode=HANSEN, int max_iter_soplex=100, double max_diam_deriv=default_max_diam_deriv, double max_diam_box=default_max_diam_box);
 
 
- 
-
-
   /** Deletes this instance. */  
   ~X_Newton() {
     if(linear) delete[] linear;
@@ -90,8 +87,9 @@ class X_Newton : public LR_contractor {
 
 
 
-
+  /* for implementing RANDOM_INV one needs to store the last random corners */
   int* last_rnd;
+
   int* base_coin;
 
   /** max_diam_deriv : the maximum diameter of the derivatives for calling Soplex (default value 1.e5) */

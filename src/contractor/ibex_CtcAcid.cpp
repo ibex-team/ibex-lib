@@ -1,6 +1,6 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_ACID.cpp
+// File        : Adaptive CID (ACID) contractor
 // Author      : Bertrand Neveu , Gilles Trombettoni
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
