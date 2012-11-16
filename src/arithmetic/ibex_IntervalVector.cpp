@@ -391,7 +391,7 @@ void diffI(const Interval& x, const Interval& y, Interval& c1, Interval& c2) {
 	if (c2.is_degenerated()) c2=Interval::EMPTY_SET;
 
 	if (c1.is_empty()) {
-		c2=c1;
+		c1=c2;
 		c2=Interval::EMPTY_SET;
 	}
 }

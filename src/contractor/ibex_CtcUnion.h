@@ -31,6 +31,16 @@ public:
 	CtcUnion(const Array<Ctc>& list);
 
 	/**
+	 * \brief Create the union of two contractors.
+	 */
+	CtcUnion(Ctc& c1, Ctc& c2);
+
+	/**
+	 * \brief Create the union of three contractors
+	 */
+	CtcUnion(Ctc& c1, Ctc& c2, Ctc& c3);
+
+	/**
 	 * \brief Contract a box.
 	 */
 	virtual void contract(IntervalVector& box);
