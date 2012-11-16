@@ -657,6 +657,30 @@ void TestIntervalVector::diff03() {
 	delete[] c;
 }
 
+/**
+ * [-7,7]x[-7,7]  \ [-7,7]x[-7,5] =
+ *  {  [-7,7]x]5,7] }
+ */
+void TestIntervalVector::diff04() {
+	double _b1[][2]={{-7,7},{-7,7}};
+	double _b2[][2]={{-7,7},{-7,5}};
+	IntervalVector b1(2,_b1);
+	IntervalVector b2(2,_b2);
+	IntervalVector* c;
+
+	int n=b1.diff(b2,c);
+
+	TEST_ASSERT (n==1);
+
+	double _b3[][2]={{-7,7}, {5, 7}};
+	IntervalVector b3(2,_b3);
+
+	TEST_ASSERT(c[0]==b3);
+
+	delete[] c;
+
+}
+
 void TestIntervalVector::random01() {
 	double _b[][2]={{0,1},{0,1}};
 	IntervalVector b(2,_b);
