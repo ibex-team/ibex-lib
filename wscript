@@ -15,8 +15,14 @@ out = '__build__'
 
 
 def options (opt):
-	opt.load ("compiler_cxx compiler_cc javaw")
+	# when running on windows: do not attempt to detect msvc automatically
+	# -> will use gcc by default
+	import waflib.Tools.compiler_c
+	import waflib.Tools.compiler_cxx
+	waflib.Tools.compiler_c.c_compiler["win32"].remove ("msvc")
+	waflib.Tools.compiler_cxx.cxx_compiler["win32"].remove ("msvc")
 
+	opt.load ("compiler_cxx compiler_cc javaw")
 
 	opt.add_option ("--enable-shared", action="store_true", dest="ENABLE_SHARED",
 			help = "build ibex as a shared lib")
