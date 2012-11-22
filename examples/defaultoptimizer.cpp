@@ -32,6 +32,8 @@ int main(int argc, char** argv) {
 		double goal_prec  = convert("goal_prec",argv[3]);  // the required precision for the objective
 		double time_limit = convert("timelimit",argv[4]);
 
+		cout << sys.goal->gradient(sys.box);
+
 		// Build the default optimizer
 		DefaultOptimizer o(sys,prec,goal_prec);
 

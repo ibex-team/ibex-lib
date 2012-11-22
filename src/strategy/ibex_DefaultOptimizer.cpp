@@ -53,7 +53,7 @@ DefaultOptimizer::DefaultOptimizer(System& _sys, double prec, double goal_prec) 
   
 	tmp_ext_sys=NULL; // important! re-init for next call to constructor.
 
-	srandom(1);
+	srand(1);
 }
 
 // the corners for X_Newton : one random orner and its opposite

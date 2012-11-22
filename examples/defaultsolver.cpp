@@ -9,7 +9,7 @@ try{
 	// --------------------------
 	System sys(argv[1]);
 	cout << "load file " << argv[1] << "." << endl;
-	srandom(1);
+
 	double prec= atof(argv[2]);  // the required precision
         double time_limit=atof(argv[3]); 
 

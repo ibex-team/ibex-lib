@@ -35,7 +35,7 @@ int main(int argc, char** argv){
 	double goalprec= atof (argv[5]);
 	double timelimit = atof(argv[6]);
 
-	srandom(1);
+	srand(1);
 	System ext_sys(sys,System::EXTEND);
 	int goal_var= ext_sys.nb_var-1;  // the last variable in ext_sys
 

@@ -17,18 +17,18 @@ double dist_error=0.1;   // the uncertainty on the distance
 
 // init data (simulate measurements)
 void init_data() {
-	srand48(1111);
+	srand(1111);
 
-	double x=drand48()*L;
-	double y=drand48()*L;
+	double x=((double) rand()/RAND_MAX)*L;
+	double y=((double) rand()/RAND_MAX)*L;
 	cout << endl;
 	cout << "******* Target *******" << endl;
 	cout << "   x=" << x << " y=" << y << endl << endl;
 
 	cout << "******* beacons *******" << endl;
 	for (int i=0; i<N; i++) {
-		beacons[i][0]=drand48()*L;
-		beacons[i][1]=drand48()*L;
+		beacons[i][0]=((double) rand()/RAND_MAX)*L;
+		beacons[i][1]=((double) rand()/RAND_MAX)*L;
 		dist[i]=sqrt(pow(beacons[i][0]-x,2)+pow(beacons[i][1]-y,2));
 		cout << "   x=" << beacons[i][0] << " y=" << beacons[i][1] << " dist=" << dist[i] << endl;
 	}

@@ -24,7 +24,7 @@ int main(int argc, char** argv) {
         double time_limit=atof(argv[7]); 
 
 
-	srandom(1); // random used in corner choice in X_Newton
+	srand(1); // random used in corner choice in X_Newton
 	// Build contractor #1:   hc4 acidhc4 or 3bcidhc4
 	// --------------------------
 	// A "constraint propagation" loop.
