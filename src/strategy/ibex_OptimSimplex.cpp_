@@ -48,7 +48,7 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 	DSVector row1(nsimplex);
 
 	//Linear variable yl is created
-	//0 <= yl <= loup
+	//0 <= yl <= loup   : CONSTRAINT NOT IMPLEMENTED
 	mysoplex.addCol(LPCol(1.0, dummycol, infinity, -infinity ));
 	row1.add(0, -1.0);
 
@@ -98,11 +98,12 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 
 	SPxSolver::Status stat;
 
-	mysoplex.setTerminationIter(30);
+	mysoplex.setTerminationIter(100);
 	mysoplex.setDelta(1e-10);
 
 
 	//	mysoplex.writeFile("dump.lp", NULL, NULL, NULL);
+	//	system ("cat dump.lp");
 	try{
 		stat = mysoplex.solve();
 	} catch(SPxException&) {
