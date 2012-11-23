@@ -77,6 +77,8 @@ Optimizer::~Optimizer() {
 	}
 
 	delete is_inside;
+	buffer.flush();
+	
 }
 
 bool Optimizer::update_loup(const IntervalVector& box) {
