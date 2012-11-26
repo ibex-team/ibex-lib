@@ -202,7 +202,6 @@ void Optimizer::optimize(const IntervalVector& init_box) {
 	  while (!buffer.empty()) {
 
 	    if (trace >= 2) cout << ((CellBuffer&) buffer) << endl;
-	    bool first=true; bool second=true;
 
 		Cell* c=buffer.top();
 		//		cout << " box before bisection " <<  c->box << endl;
@@ -210,35 +209,27 @@ void Optimizer::optimize(const IntervalVector& init_box) {
 
 
 		pair<Cell*,Cell*> new_cells=c->bisect(boxes.first,boxes.second);
-		//		cout << " boxes after bisection " <<  boxes.first << " " << boxes.second << endl;
-		if (boxes.first==c->box) {cout << "first = box " << endl;  first=false; }
-		if (boxes.second==c->box) {cout << "second = box " << endl;  second=false; }
 
 
 		delete buffer.pop();
 		loup_changed=0;
 
-		if (first==false) delete new_cells.first;
-		else
-		  try {  
-		    loup_changed = contract_and_bound(*new_cells.first);
+		try{
+		  loup_changed = contract_and_bound(*new_cells.first);
 		    buffer.push(new_cells.first);
 		    nb_cells++;
 		  }
 		  catch(EmptyBoxException&) {
 		    delete new_cells.first;
 		  }
-		if (second==false) 
+		try {
+		  loup_changed |= contract_and_bound(*new_cells.second);
+		  buffer.push(new_cells.second);
+		  nb_cells++;
+		} 
+		catch(EmptyBoxException&) {
 		  delete new_cells.second;
-		else
-		  try {
-			loup_changed |= contract_and_bound(*new_cells.second);
-			buffer.push(new_cells.second);
-			nb_cells++;
-		  } 
-		  catch(EmptyBoxException&) {
-			delete new_cells.second;
-		  }
+		}
 
 		
 

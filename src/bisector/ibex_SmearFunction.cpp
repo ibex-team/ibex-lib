@@ -11,7 +11,7 @@
 #include "ibex_SmearFunction.h"
 
 using std::pair;
-
+using namespace std;
 namespace ibex {
 
 
@@ -37,7 +37,7 @@ namespace ibex {
     double max_magn = NEG_INFINITY;
     int var=-1;
     for (int j=0; j<nbvars; j++) {
-      if (box[j].diam()>= w)
+      if ((box[j].diam()>= w) && (box[j].mag() <1 ||  box[j].diam()/ box[j].mag() >= w))
 	{
 	  for (int i=0; i<sys.nb_ctr; i++)
 	    
@@ -59,7 +59,7 @@ namespace ibex {
     int var = -1;
 
     for (int j=0; j<nbvars; j++) {
-      if (box[j].diam()>= w)
+      if ((box[j].diam()>= w) && (box[j].mag() <1 ||  box[j].diam()/ box[j].mag() >= w))
 	{
 	  double sum_smear=0;
 	  for (int i=0; i<sys.nb_ctr; i++) 
@@ -90,7 +90,7 @@ namespace ibex {
     }
       // computes the variable with the maximal sum of normalized impacts
   for (int j=0; j<nbvars; j++) {
-    if (box[j].diam()>= w)
+    if ((box[j].diam()>= w) && (box[j].mag() <1 ||  box[j].diam()/ box[j].mag() >= w))
       {
 	double sum_smear=0;
 	for (int i=0; i<sys.nb_ctr; i++) 
@@ -103,7 +103,6 @@ namespace ibex {
 	  }
       }
   }
-  //  cout << "variable bissectee " << var << endl;
   return var;
 }
 
@@ -128,7 +127,7 @@ namespace ibex {
   // computes the variable with the greatest normalized impact
   double maxsmear=0;
   for (int j=0; j<nbvars; j++) {
-    if (box[j].diam()>= w)
+    if ((box[j].diam()>= w) && (box[j].mag() <1 ||  box[j].diam()/ box[j].mag() >= w))
 
 	for (int i=0; i<sys.nb_ctr; i++) 
 	  {
