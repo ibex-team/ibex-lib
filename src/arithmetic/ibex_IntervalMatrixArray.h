@@ -41,6 +41,11 @@ public:
 	IntervalMatrixArray& operator=(const IntervalMatrixArray& a);
 
 	/**
+	 * \brief Check equality
+	 */
+	bool operator==(const IntervalMatrixArray& m) const;
+
+	/**
 	 * \brief Set all the elements to x.
 	 *
 	 */

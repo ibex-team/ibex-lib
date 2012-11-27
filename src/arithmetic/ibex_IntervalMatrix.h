@@ -115,7 +115,7 @@ public:
 	/**
 	 * \brief True if one bound of (*this) differs from m.
 	 */
-	bool operator!=(const IntervalMatrix& m);
+	bool operator!=(const IntervalMatrix& m) const;
 
 	/**
 	 * \brief Resize the matrix
@@ -478,7 +478,7 @@ inline IntervalMatrix IntervalMatrix::empty(int m, int n) {
 	return IntervalMatrix(m, n, Interval::EMPTY_SET);
 }
 
-inline bool IntervalMatrix::operator!=(const IntervalMatrix& m) {
+inline bool IntervalMatrix::operator!=(const IntervalMatrix& m) const {
 	return !(*this==m);
 }
 

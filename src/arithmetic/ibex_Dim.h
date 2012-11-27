@@ -84,6 +84,9 @@ public:
 	/** \brief True if the three dimensions match */
 	bool operator==(const Dim& d) const;
 
+	/** \brief True if one the dimensions does not match */
+	bool operator!=(const Dim& d) const;
+
 	/**
 	 * \brief Add an index to *this
 	 *
@@ -215,6 +218,10 @@ inline int Dim::vec_size() const {
 
 inline bool Dim::operator==(const Dim& d) const {
 	return dim1==d.dim1 && dim2==d.dim2 && dim3==d.dim3;
+}
+
+inline bool Dim::operator!=(const Dim& d) const {
+	return !(*this==d);
 }
 
 /** \ingroup arithmetic

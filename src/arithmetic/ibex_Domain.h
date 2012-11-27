@@ -153,6 +153,28 @@ public:
 	}
 
 	/**
+	 * \brief Equality operator
+	 */
+	bool operator==(const Domain& d) const {
+		if (dim!=d.dim) return false;
+		switch(dim.type()) {
+		case Dim::SCALAR:       return i()==d.i();
+		case Dim::ROW_VECTOR:
+		case Dim::COL_VECTOR:   return v()==d.v();
+		case Dim::MATRIX:       return m()==d.m();
+		case Dim::MATRIX_ARRAY: return ma()==d.ma();
+		}
+	}
+
+
+	/**
+	 * \brief Difference operator
+	 */
+	bool operator!=(const Domain& d) const {
+		return !(*this==d);
+	}
+
+	/**
 	 * \brief Return the domain as an interval.
 	 */
 	inline Interval& i()        {

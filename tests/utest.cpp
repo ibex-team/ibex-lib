@@ -31,6 +31,7 @@
 #include "TestEval.h"
 #include "TestGradient.h"
 #include "TestHC4Revise.h"
+#include "TestInHC4Revise.h"
 #include "TestHC4.h"
 
 // ================ parser ===============
@@ -73,6 +74,7 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestSystem()));
 
     ts.add(auto_ptr<Test::Suite>(new TestHC4Revise()));
+    ts.add(auto_ptr<Test::Suite>(new TestInHC4Revise()));
     ts.add(auto_ptr<Test::Suite>(new TestGradient()));
 
     ts.add(auto_ptr<Test::Suite>(new TestNewton()));

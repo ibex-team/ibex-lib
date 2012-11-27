@@ -42,6 +42,13 @@ IntervalMatrixArray& IntervalMatrixArray::operator=(const IntervalMatrixArray& a
 	return *this;
 }
 
+bool IntervalMatrixArray::operator==(const IntervalMatrixArray& x) const {
+	if (n!=x.size()) return false;
+	for (int i=0; i<n; i++)
+		if ((*this)[i]!=(x[i])) return false;
+	return true;
+}
+
 void IntervalMatrixArray::init(const Interval& x) {
 	for (int i=0; i<size(); i++)
 		(*this)[i].init(x);

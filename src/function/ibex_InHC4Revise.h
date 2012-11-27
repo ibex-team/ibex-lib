@@ -27,7 +27,7 @@ public:
 	inline void index_bwd (const ExprIndex&,   ExprLabel& exprL, const ExprLabel& result)        { /* nothing to do */ }
 	       void vector_bwd(const ExprVector&,  ExprLabel** compL, const ExprLabel& result)       { not_implemented("Inner projection of \"vector\""); }
 	inline void symbol_bwd(const ExprSymbol& s, const ExprLabel& result)                         { /* nothing to do */ }
-	inline void cst_bwd   (const ExprConstant&, const ExprLabel& y)                              { /* nothing to do */ }
+	inline void cst_bwd   (const ExprConstant& c, const ExprLabel& y)                              { /* TODO: improve this. */ if (*(y.d)!=c.get()) throw EmptyBoxException(); }
 	inline void apply_bwd (const ExprApply& a, ExprLabel** x, const ExprLabel& y)                { not_implemented("Inner projection of \"apply\""); }
 	inline void add_bwd   (const ExprAdd&,     ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) { if (!iproj_add(y.d->i(),x1.d->i(),x2.d->i(),x1.p->i(),x2.p->i())) throw EmptyBoxException(); }
 	inline void add_V_bwd (const ExprAdd&,     ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) { not_implemented("Inner projection of \"add_V\""); }
