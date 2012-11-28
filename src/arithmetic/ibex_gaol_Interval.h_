@@ -313,7 +313,10 @@ inline Interval pow(const Interval &x, const Interval &y) {
 }
 
 inline Interval root(const Interval& x, int n) {
-	return gaol::nth_root(x.itv,n);
+	if (n>=0)
+		return gaol::nth_root(x.itv,n);
+	else
+		return 1.0/gaol::nth_root(x.itv,-n);
 }
 
 inline Interval exp(const Interval& x) {
@@ -408,8 +411,28 @@ inline bool proj_sqr(const Interval& y, Interval& x) {
 	return !x.is_empty();
 }
 
-inline bool proj_pow(const Interval& y, int n, Interval& x) {
-	x = gaol::nth_root_rel(y.itv, n, x.itv);
+inline bool proj_pow(const Interval& y, int expon, Interval& x) {
+
+	// there is a bug in nth_root_rel
+	//x = gaol::nth_root_rel(y.itv, expon, x.itv);
+
+	// ---> follows a temporary copy of the code
+	//      in ibex_bias_interval
+
+	// Note: this implem assumes that we can compute root
+	// with negative exponents (that is why the root function
+	// has also been wrapped)
+
+	if (expon % 2 ==0) {
+		Interval proj=root(y,expon);
+		Interval pos_proj= proj & x;
+		Interval neg_proj = (-proj) & x;
+		//std::cout << "expon=" << expon << " proj=" << proj << " x=" << x << std::endl;
+		x = pos_proj | neg_proj;
+	} else {
+		x &= root(y, expon);
+	}
+
 	return !x.is_empty();
 }
 
