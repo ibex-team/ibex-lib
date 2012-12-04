@@ -34,7 +34,7 @@ x30 in [0,1000];
 
 
 
-minimize - x25*exp(ln(x26)*0.944)*exp(ln(x27)*0.891136);
+minimize  - x25*x26^0.944*x27^0.891136;
 
 constraints
 

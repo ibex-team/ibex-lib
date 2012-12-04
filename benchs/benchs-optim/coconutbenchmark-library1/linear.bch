@@ -28,10 +28,10 @@ x25 in [ -1.e8, 1.e8];
 
 
 
-minimize sqrt(x2^2) + sqrt(x3^2) + sqrt(x4^2) + sqrt(x5^2) + sqrt(x6^2) + sqrt(x7^2) + sqrt(
-x8^2) + sqrt(x9^2) + sqrt(x10^2) + sqrt(x11^2) + sqrt(x12^2) + sqrt(x13^2) + sqrt(
-x14^2) + sqrt(x15^2) + sqrt(x16^2) + sqrt(x17^2) + sqrt(x18^2) + sqrt(x19^2) +
-sqrt(x20^2) + sqrt(x21^2);
+minimize abs(x2) + abs(x3) + abs(x4) + abs(x5) + abs(x6) + abs(x7) + abs(
+x8) + abs(x9) + abs(x10) + abs(x11) + abs(x12) + abs(x13) + abs(
+x14) + abs(x15) + abs(x16) + abs(x17) + abs(x18) + abs(x19) +
+abs(x20) + abs(x21);
 
 constraints
 

@@ -62,7 +62,7 @@ constraints
 0.812088652256959*sqrt(sqrt(x4)) - x15 - x26 <= eps;
 
 0.830292969275008*sqrt(sqrt(x5)) - x16 - x27 >= -eps;
-0.830292969275008*sqrt(sqrt(x6)) - x16 - x27 <= eps;
+0.830292969275008*sqrt(sqrt(x5)) - x16 - x27 <= eps;
 
 0.848905366318769*sqrt(sqrt(x6)) - x17 - x28 >= -eps;
 0.848905366318769*sqrt(sqrt(x6)) - x17 - x28 <= eps;

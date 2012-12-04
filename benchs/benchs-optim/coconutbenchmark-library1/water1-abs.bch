@@ -59,7 +59,7 @@ constraints
 
 
 - x4 - x5 - x6 - x7 + x38 >= -eps;
-- x4 - x5 - x6 - x7 + x38 <= -eps;
+- x4 - x5 - x6 - x7 + x38 <= eps;
 
 x1 + x4 - x8 - x9 - x10 - x11 - 1.212 >= -eps;
 x1 + x4 - x8 - x9 - x10 - x11 - 1.212 <= eps;
