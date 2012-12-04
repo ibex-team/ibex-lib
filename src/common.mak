@@ -41,8 +41,8 @@ BIAS_LIB_DIR:=$(BIAS_DIR)/lib
 BIAS_LIB_DIR_OPT:=-L$(BIAS_LIB_DIR) 
 BIAS_LIB_NAME_OPT:=-lProfil -lBias -llr
 
-GAOL_INC_DIR  := /usr/local/include/gaol
-GAOL_LIB_DIR  := /usr/local/lib
+GAOL_INC_DIR  := $(GAOL_DIR)/include
+GAOL_LIB_DIR  := $(GAOL_DIR)/lib
 GDTOA_DIR  := $(GAOL_DIR)
 GDTOA_LIB_DIR := $(GDTOA_DIR)
 ULTIM_LIB_DIR := $(ULTIM_DIR)/lib
