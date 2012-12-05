@@ -294,7 +294,9 @@ inline Interval sqr(const Interval& x) {
 }
 
 inline Interval sqrt(const Interval& x) {
-	return gaol::sqrt(x.itv);
+	Interval res=gaol::sqrt(x.itv);
+	fpu_round_up();
+	return res;
 }
 
 inline Interval pow(const Interval& x, int n) {
