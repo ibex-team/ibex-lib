@@ -26,7 +26,11 @@ pair<IntervalVector,IntervalVector> RoundRobin::bisect(const IntervalVector& box
 
   int var = (last_var+1)%n;
 
-  while (var != last_var && box[var].diam()< w) var = (var + 1)%n;
+
+  while (var != last_var && (box[var].diam()< w 
+			     || box[var].mag()==POS_INFINITY)) // test for avoiding to bisect infinite intervals BNE
+    var = (var + 1)%n;  
+
 
   // the next line ensures that in the case where all the domains
   // have width less than w, we keep on round robin.

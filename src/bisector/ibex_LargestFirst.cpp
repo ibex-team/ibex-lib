@@ -22,7 +22,7 @@ pair<IntervalVector,IntervalVector> LargestFirst::bisect(const IntervalVector& b
 
   int var =0;
   for (int i=1; i< box.size(); i++)
-    if (box[i].diam()>box[var].diam())
+    if (box[i].diam()>box[var].diam() && box[i].mag () < POS_INFINITY  )
       var = i;    
 
   return box.bisect(var,ratio);
