@@ -9,7 +9,7 @@
 //============================================================================
 
 #include "ibex_CtcHC4.h"
-#include "ibex_CtcProj.h"
+#include "ibex_CtcFwdBwd.h"
 
 namespace ibex {
 
@@ -17,7 +17,7 @@ namespace {
 Array<Ctc> convert(const Array<NumConstraint>& csp) {
 	std::vector<Ctc*> vec;
 	for (int i=0; i<csp.size(); i++) {
-		vec.push_back(new CtcProj(csp[i]));
+		vec.push_back(new CtcFwdBwd(csp[i]));
 	}
 	return vec;
 }

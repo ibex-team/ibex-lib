@@ -39,6 +39,26 @@ public:
 	CtcCompo(Ctc& c1, Ctc& c2, bool incremental=false, double ratio=default_ratio);
 
 	/**
+	 * \brief Create the composition of 3 contractors
+	 */
+	CtcCompo(Ctc& c1, Ctc& c2, Ctc& c3, bool incremental=false, double ratio=default_ratio);
+
+	/**
+	 * \brief Create the composition of 4 contractors
+	 */
+	CtcCompo(Ctc& c1, Ctc& c2, Ctc& c3, Ctc& c4, bool incremental=false, double ratio=default_ratio);
+
+	/**
+	 * \brief Create the composition of 5 contractors
+	 */
+	CtcCompo(Ctc& c1, Ctc& c2, Ctc& c3, Ctc& c4, Ctc& c5, bool incremental=false, double ratio=default_ratio);
+
+	/**
+	 * \brief Create the composition of 6 contractors
+	 */
+	CtcCompo(Ctc& c1, Ctc& c2, Ctc& c3, Ctc& c4, Ctc& c5, Ctc& c6, bool incremental=false, double ratio=default_ratio);
+
+	/**
 	 * \brief Delete *this.
 	 */
 	~CtcCompo();
@@ -66,6 +86,8 @@ public:
 	static const double default_ratio;
 
 protected:
+	void init_impacts();
+
 	BoolMask *impacts;
 };
 

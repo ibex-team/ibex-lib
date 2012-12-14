@@ -312,28 +312,28 @@ public:
 	void hansen_matrix(const IntervalVector& x, IntervalMatrix& h) const;
 
 	/**
-	 * \brief Project f(x)=y onto x.
+	 * \brief Contract x w.r.t. f(x)=y.
 	 * \throw EmptyBoxException if x is empty.
 	 */
-	void proj(const Domain& y, IntervalVector& x) const;
+	void backward(const Domain& y, IntervalVector& x) const;
 
 	/**
-	 * \brief Project f(x)=y onto x.
+	 * \brief Contract x w.r.t. f(x)=y.
 	 * \throw EmptyBoxException if x is empty.
 	 */
-	void proj(const Interval& y, IntervalVector& x) const;
+	void backward(const Interval& y, IntervalVector& x) const;
 
 	/**
-	 * \brief Project f(x)=y onto x.
+	 * \brief Contract x w.r.t. f(x)=y.
 	 * \throw EmptyBoxException if x is empty.
 	 */
-	void proj(const IntervalVector& y, IntervalVector& x) const;
+	void backward(const IntervalVector& y, IntervalVector& x) const;
 
 	/**
-	 * \brief Project f(x)=y onto x.
+	 * \brief Contract x w.r.t. f(x)=y.
 	 * \throw EmptyBoxException if x is empty.
 	 */
-	void proj(const IntervalMatrix& y, IntervalVector& x) const;
+	void backward(const IntervalMatrix& y, IntervalVector& x) const;
 
 	/**
 	 * \brief Inner projection f(x)=y onto x.
@@ -624,17 +624,17 @@ inline IntervalMatrix Function::eval_matrix(const IntervalVector& box) const {
 	}
 }
 
-inline void Function::proj(const Interval& y, IntervalVector& x) const {
-	proj(Domain((Interval&) y),x); // y will not be modified
+inline void Function::backward(const Interval& y, IntervalVector& x) const {
+	backward(Domain((Interval&) y),x); // y will not be modified
 }
 
-inline void Function::proj(const IntervalVector& y, IntervalVector& x) const {
+inline void Function::backward(const IntervalVector& y, IntervalVector& x) const {
 	assert(expr().dim.is_vector());
-	proj(Domain((IntervalVector&) y, expr().dim.type()==Dim::ROW_VECTOR),x); // y will not be modified
+	backward(Domain((IntervalVector&) y, expr().dim.type()==Dim::ROW_VECTOR),x); // y will not be modified
 }
 
-inline void Function::proj(const IntervalMatrix& y, IntervalVector& x) const {
-	proj(Domain((IntervalMatrix&) y),x); // y will not be modified
+inline void Function::backward(const IntervalMatrix& y, IntervalVector& x) const {
+	backward(Domain((IntervalMatrix&) y),x); // y will not be modified
 }
 
 inline void Function::iproj(const Interval& y, IntervalVector& x) const {

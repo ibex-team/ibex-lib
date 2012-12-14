@@ -592,6 +592,13 @@ bool proj_mul(const Interval& y, IntervalVector& x1, IntervalVector& x2);
  */
 std::ostream& operator<<(std::ostream& os, const IntervalVector& x);
 
+
+/**
+ * \brief Cartesian product of x and y.
+ *
+ */
+IntervalVector cart_prod(const IntervalVector& x, const IntervalVector& y);
+
 /*@}*/
 
 /*============================================ inline implementation ============================================ */
@@ -656,6 +663,13 @@ inline double IntervalVector::max_diam() const {
 
 inline double IntervalVector::min_diam() const {
 	return (*this)[extr_diam_index(true)].diam();
+}
+
+inline IntervalVector cart_prod(const IntervalVector& x, const IntervalVector& y) {
+	IntervalVector z(x.size()+y.size());
+	z.put(0,x);
+	z.put(x.size(),y);
+	return z;
 }
 
 } // end namespace

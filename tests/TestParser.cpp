@@ -13,7 +13,7 @@
 #include "TestParser.h"
 #include "ibex_System.h"
 #include "ibex_SyntaxError.h"
-#include "ibex_CtcProj.h"
+#include "ibex_CtcFwdBwd.h"
 #include "Ponts30.h"
 
 using namespace std;
@@ -44,7 +44,7 @@ void TestParser::const01() {
 		System sys("quimper/const01.qpr");
 		check(sys.box[0],Interval(3.14159));
 		sys.box.init(Interval::ALL_REALS);
-		CtcProj c0(sys.ctrs[0]);
+		CtcFwdBwd c0(sys.ctrs[0]);
 		c0.contract(sys.box);
 		TEST_ASSERT(sys.box[0]==Interval::ZERO);
 	} catch(SyntaxError& e) {
@@ -60,7 +60,7 @@ void TestParser::const02() {
 		IntervalVector box(3,_box);
 		check(sys.box,box);
 		sys.box.init(Interval::ALL_REALS);
-		CtcProj c0(sys.ctrs[0]);
+		CtcFwdBwd c0(sys.ctrs[0]);
 		c0.contract(sys.box);
 		TEST_ASSERT(sys.box[0]==Interval::ZERO);
 	} catch(SyntaxError& e) {
@@ -78,12 +78,12 @@ void TestParser::const03() {
 		check(sys.box,box);
 
 		sys.box.init(Interval::ALL_REALS);
-		CtcProj(sys.ctrs[0]).contract(sys.box);
+		CtcFwdBwd(sys.ctrs[0]).contract(sys.box);
 		check(sys.box[0],Interval::ZERO);
 		check(sys.box[1],Interval::ALL_REALS);
 
 		sys.box.init(Interval::ALL_REALS);
-		CtcProj(sys.ctrs[1]).contract(sys.box);
+		CtcFwdBwd(sys.ctrs[1]).contract(sys.box);
 		IntervalVector zero(3);
 		zero.init(0);
 		check(sys.box.subvector(0,2),zero);
@@ -145,22 +145,22 @@ void TestParser::const07() {
 		check(sys.box.subvector(6,11), box2);
 		sys.box.init(Interval::ALL_REALS);
 
-		CtcProj c0(sys.ctrs[0]);
+		CtcFwdBwd c0(sys.ctrs[0]);
 		c0.contract(sys.box);
 		IntervalVector zero(6);
 		zero.init(0);
 
-		CtcProj c1(sys.ctrs[1]);
+		CtcFwdBwd c1(sys.ctrs[1]);
 		sys.box[5]=Interval::ALL_REALS;
 		c1.contract(sys.box);
 		check(sys.box[5],Interval(1,1));
 
-		CtcProj c2(sys.ctrs[2]);
+		CtcFwdBwd c2(sys.ctrs[2]);
 		sys.box.init(Interval::ALL_REALS);
 		c2.contract(sys.box);
 		check(sys.box[5],Interval(1,1));
 
-		CtcProj c3(sys.ctrs[3]);
+		CtcFwdBwd c3(sys.ctrs[3]);
 		sys.box.init(Interval::ALL_REALS);
 		c3.contract(sys.box);
 		double _c21[][2]={{6,6},{7,7},{8,8}};
@@ -196,9 +196,9 @@ void TestParser::func02() {
 
 		//cout << "sys nb ctr=" << sys.nb_ctr << endl;
 		//TEST_ASSERT(sys.nb_ctr==12);
-		CtcProj* c[24];
+		CtcFwdBwd* c[24];
 		for (int i=0; i<sys.ctrs.size(); i++)
-			c[i]=new CtcProj(sys.ctrs[i]);
+			c[i]=new CtcFwdBwd(sys.ctrs[i]);
 
 		for (int i=0; i<sys.ctrs.size(); i++) {
 			IntervalVector subbox(2);

@@ -1,5 +1,5 @@
 
-#include "ibex_CtcProj.h"
+#include "ibex_CtcFwdBwd.h"
 #include "ibex_CtcCompo.h"
 #include "ibex_CtcQInter.h"
 #include "ibex_CtcFixPoint.h"
@@ -63,12 +63,12 @@ int main() {
 
 	// Declare a projection contractor for each
 	// function
-	CtcProj c0(f0);
-	CtcProj c1(f1);
-	CtcProj c2(f2);
-	CtcProj c3(f3);
-	CtcProj c4(f4);
-	CtcProj c5(f5);
+	CtcFwdBwd c0(f0);
+	CtcFwdBwd c1(f1);
+	CtcFwdBwd c2(f2);
+	CtcFwdBwd c3(f3);
+	CtcFwdBwd c4(f4);
+	CtcFwdBwd c5(f5);
 
 	// The initial box
 	double _box[][2]={{0,10},{0,10}};

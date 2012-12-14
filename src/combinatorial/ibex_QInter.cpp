@@ -11,6 +11,8 @@
 #include "ibex_QInter.h"
 #include <algorithm>
 
+using namespace std;
+
 namespace ibex {
 
 IntervalVector qinter(const Array<IntervalVector>& _boxes, int q) {
@@ -30,6 +32,8 @@ IntervalVector qinter(const Array<IntervalVector>& _boxes, int q) {
 	for (int i=0; i<_boxes.size(); i++) {
 		if (!_boxes[i].is_empty()) boxes.set_ref(j++,_boxes[i]);
 	}
+
+
 	// ================================================
 
 	double x[n][2*p];
@@ -42,7 +46,7 @@ IntervalVector qinter(const Array<IntervalVector>& _boxes, int q) {
 			x[i][2*j+1] = boxes[j][i].ub();
 		}
 
-		std::sort(x[i],x[i]+2*p);
+		sort(x[i],x[i]+2*p);
 	}
 
 	/* An inner box of the hull of the q-intersection.
@@ -107,7 +111,7 @@ IntervalVector qinter(const Array<IntervalVector>& _boxes, int q) {
 
 		/*===================== calculate upper bound =========================== */
 
-		double ub0 = d==0? NEG_INFINITY : inner_box[d].ub(); // start with a lower bound
+		double ub0 = /*d==0? NEG_INFINITY :*/ inner_box[d].ub(); // start with a lower bound
 
 		for (int i=0; i<n; i++) {
 			ind[i]=k-1;
@@ -123,7 +127,7 @@ IntervalVector qinter(const Array<IntervalVector>& _boxes, int q) {
 			}
 			if (count==q) {
 				inner_box |= cell;	// update inner box
-				ub0=x[0][ind[0]+1];
+				ub0=x[d][ind[0]+1];
 				break;
 			}
 

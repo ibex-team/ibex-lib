@@ -11,7 +11,7 @@
 
 #include "TestCtcSubBox.h"
 #include "ibex_CtcSubBox.h"
-#include "ibex_CtcProj.h"
+#include "ibex_CtcFwdBwd.h"
 
 using namespace std;
 
@@ -26,7 +26,7 @@ void TestCtcSubBox::test01() {
 
 	Variable x,y;
 	Function f(x,y,x-y);
-	CtcProj c(f);
+	CtcFwdBwd c(f);
 
 	CtcSubBox c2(c,mask);
 	double _box[][2] = {{0,1},{1,3},{0,1},{2,4}};
@@ -50,7 +50,7 @@ void TestCtcSubBox::test02() {
 
 	Variable x,y;
 	Function f(x,y,x-y);
-	CtcProj c(f);
+	CtcFwdBwd c(f);
 
 	CtcSubBox c2(c,mask);
 

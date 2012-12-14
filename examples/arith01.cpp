@@ -43,7 +43,7 @@ int main() {
 		// > calculate M*x
 		// > calculate M'*x, where M' is the transpose of M
 		// ------------------------------------------------
-		double _x[3][2]={{0,1},{0,1},{0,1}};
+		double _x[3][2]={{0,1},{2,3},{4,5}};
 		IntervalVector x(3,_x);
 
 		double _M[9][2]={{0,1},{0,1},{0,1}, // 3*3 matrix of intervals 
@@ -84,6 +84,12 @@ int main() {
 		cout << "M2*x2 = " << m2*x2 << endl;
 		cout << "-------------------------" << endl;
 		// ------------------------------------------------
+	}
+
+	{
+
+	IntervalVector x(3,Interval(1,2));
+	IntervalVector y=IntervalVector::empty(3);
 	}
 
 	return 0;

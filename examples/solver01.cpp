@@ -38,7 +38,7 @@ int main() {
 	double init_box[][2] = { {-10,10},{-10,10} };
 	IntervalVector box(2,init_box);
 
-	CtcProj c(f);
+	CtcFwdBwd c(f);
 	CtcNewton newton(f);
 	RoundRobin rr;
 	CellStack buff;

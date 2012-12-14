@@ -13,6 +13,7 @@
 #define __IBEX_LINEAR_H__
 
 #include "ibex_IntervalMatrix.h"
+#include "ibex_LinearException.h"
 
 /** \file */
 

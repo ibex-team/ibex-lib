@@ -25,6 +25,13 @@ namespace ibex {
 typedef enum { LT, LEQ, EQ, GEQ, GT } CmpOp;
 
 /**
+ * \ingroup symbolic
+ * \brief Return the negation of op.
+ * \pre op must be different from EQ.
+ */
+CmpOp operator!(CmpOp op);
+
+/**
  * \brief Display the operator.
  */
 std::ostream& operator<<(std::ostream&, const CmpOp&);

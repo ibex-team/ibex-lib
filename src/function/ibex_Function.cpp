@@ -62,7 +62,7 @@ Domain& Function::eval_domain(const IntervalVector& box) const {
 	return Eval().eval(*this,box);
 }
 
-void Function::proj(const Domain& y, IntervalVector& x) const {
+void Function::backward(const Domain& y, IntervalVector& x) const {
 	HC4Revise().proj(*this,y,x);
 }
 

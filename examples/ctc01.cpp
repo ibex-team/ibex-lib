@@ -35,7 +35,7 @@ int main() {
 		double init_box[][2] = { {-10,10},{-10,10} };
 		IntervalVector box(2,init_box);
 
-		CtcProj c(f);
+		CtcFwdBwd c(f);
 		c.contract(box);
 		cout << "box after proj=" << box << endl;
 
@@ -48,7 +48,7 @@ int main() {
 	{
 		// Example #14
 		// ------------------------------------------------
-		// Combining Projection and Newton Contractor
+		// Combining FwdBwdection and Newton Contractor
 		//
 		// > Create the projection contractor on the same function
 		//   as in the last example
@@ -64,7 +64,7 @@ int main() {
 		double init_box[][2] = { {0.9,1.1},{-0.1,0.1} };
 		IntervalVector box(2,init_box);
 
-		CtcProj c(f);
+		CtcFwdBwd c(f);
 		c.contract(box);
 		cout << "box after proj=" << box << endl;
 

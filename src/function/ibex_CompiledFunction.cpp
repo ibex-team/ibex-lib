@@ -260,7 +260,7 @@ void CompiledFunction::print() const {
 		case CompiledFunction::IDX:
 		{
 			ExprIndex& e=(ExprIndex&) *(f.nodes[i]);
-			cout << e.id << ": [-]" << " " << *f.args[i][0] << " " << e.expr.id ;
+			cout << e.id << ": [" << e.index << "]" << " " << *f.args[i][0] << " " << e.expr.id ;
 		}
 		break;
 		case CompiledFunction::VEC:

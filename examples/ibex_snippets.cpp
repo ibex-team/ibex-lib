@@ -169,7 +169,7 @@ int main() {
 
 	cout << "f(box)=" << f.eval(box) << endl;
 
-	f.proj(-1.0,box);
+	f.backward(-1.0,box);
 	cout << "box after proj=" << box << endl;
 	// ------------------------------------------------
 }
@@ -194,7 +194,7 @@ int main() {
 	IntervalVector box(4,init_xy);
 	cout << "initial box=" << box << endl;
 
-	dist.proj(5.0,box);
+	dist.backward(5.0,box);
 
 	cout << "box after proj=" << box << endl;
 
@@ -219,7 +219,7 @@ int main() {
 
 	double init_xy[][2] = { {-10,10}, {-10,10}, {1,1}, {2,2} };
 	IntervalVector box(4,init_xy);
-	dist.proj(5.0,box);
+	dist.backward(5.0,box);
 	cout << "box after proj=" << box << endl;
 	// ------------------------------------------------
 }
@@ -247,7 +247,7 @@ int main() {
 
 	double init_xy[][2] = { {-10,10}, {-10,10} };
 	IntervalVector box(2,init_xy);
-	f.proj(5.0,box);
+	f.backward(5.0,box);
 	cout << "box after proj=" << box << endl;
 	// ------------------------------------------------
 }
@@ -278,7 +278,7 @@ int main() {
 
 	IntervalVector d=0.5*sqrt(2)*Vector::ones(2);
 
-	f.proj(d,box);
+	f.backward(d,box);
 
 	cout << "box after proj=" << box << endl;
 
@@ -311,7 +311,7 @@ int main() {
 	double init_box[][2] = { {-10,10},{-10,10} };
 	IntervalVector box(2,init_box);
 
-	CtcProj c(f);
+	CtcFwdBwd c(f);
 	c.contract(box);
 	cout << "box after proj=" << box << endl;
 
@@ -325,7 +325,7 @@ int main() {
 {
 	// Example #14
 	// ------------------------------------------------
-	// Combining Projection and Newton Contractor
+	// Combining FwdBwdection and Newton Contractor
 	//
 	// > Create the projection contractor on the same function
 	//   as in the last example
@@ -342,7 +342,7 @@ int main() {
 	double init_box[][2] = { {0.9,1.1},{-0.1,0.1} };
 	IntervalVector box(2,init_box);
 
-	CtcProj c(f);
+	CtcFwdBwd c(f);
 	c.contract(box);
 	cout << "box after proj=" << box << endl;
 
@@ -401,12 +401,12 @@ int main() {
 
 	// Declare a projection contractor for each
 	// function
-	CtcProj c0(f0);
-	CtcProj c1(f1);
-	CtcProj c2(f2);
-	CtcProj c3(f3);
-	CtcProj c4(f4);
-	CtcProj c5(f5);
+	CtcFwdBwd c0(f0);
+	CtcFwdBwd c1(f1);
+	CtcFwdBwd c2(f2);
+	CtcFwdBwd c3(f3);
+	CtcFwdBwd c4(f4);
+	CtcFwdBwd c5(f5);
 
 	// The initial box
 	double _box[][2]={{0,10},{0,10}};
@@ -444,7 +444,7 @@ int main() {
 	//
 	// > Create the function (x,y)->( ||(x,y)||-d,  ||(x,y)-(1,1)||-d )
 	// > Create two contractors w.r.t f(x,y)=0, one using backward
-	//   arithmetic (CtcProj), the other using interval Newton iteration
+	//   arithmetic (CtcFwdBwd), the other using interval Newton iteration
 	//   (CtcNewton)
 	// > Create a round-robin bisection heuristic
 	// > Create a "stack of boxes" (CellStack), which has the effect of
@@ -461,7 +461,7 @@ int main() {
 	double init_box[][2] = { {-10,10},{-10,10} };
 	IntervalVector box(2,init_box);
 
-	CtcProj c(f);
+	CtcFwdBwd c(f);
 	CtcNewton newton(f);
 	RoundRobin rr;
 	CellStack buff;

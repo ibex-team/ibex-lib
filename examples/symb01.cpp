@@ -64,7 +64,7 @@ int main() {
 
 		cout << "f(box)=" << f.eval(box) << endl;
 
-		f.proj(-1.0,box);
+		f.backward(-1.0,box);
 		cout << "box after proj=" << box << endl;
 		// ------------------------------------------------
 	}
@@ -81,21 +81,21 @@ int main() {
 		//   centered on xb=1,yb=2).
 		// > Calculate the gradient of the function
 		// ------------------------------------------------
-		Variable xa,xb,ya,yb;
-		Function dist(xa,xb,ya,yb, sqrt(sqr(xa-xb)+sqr(ya-yb)));
+			Variable xa,xb,ya,yb;
+			Function dist(xa,xb,ya,yb, sqrt(sqr(xa-xb)+sqr(ya-yb)));
 
-		double init_xy[][2] = { {-10,10}, {1,1},
-				{-10,10}, {2,2} };
-		IntervalVector box(4,init_xy);
-		cout << "initial box=" << box << endl;
+			double init_xy[][2] = { {-10,10}, {1,1},
+					{-10,10}, {2,2} };
+			IntervalVector box(4,init_xy);
+			cout << "initial box=" << box << endl;
 
-		dist.proj(5.0,box);
+			dist.backward(5.0,box);
 
-		cout << "box after proj=" << box << endl;
+			cout << "box after proj=" << box << endl;
 
-		IntervalVector g(4);
-		dist.gradient(box,g);
-		cout << "gradient=" << g << endl;
+			IntervalVector g(4);
+			dist.gradient(box,g);
+			cout << "gradient=" << g << endl;
 		// ------------------------------------------------
 	}
 
@@ -114,7 +114,7 @@ int main() {
 
 		double init_xy[][2] = { {-10,10}, {-10,10}, {1,1}, {2,2} };
 		IntervalVector box(4,init_xy);
-		dist.proj(5.0,box);
+		dist.backward(5.0,box);
 		cout << "box after proj=" << box << endl;
 	}
 
@@ -141,7 +141,7 @@ int main() {
 
 		double init_xy[][2] = { {-10,10}, {-10,10} };
 		IntervalVector box(2,init_xy);
-		f.proj(5.0,box);
+		f.backward(5.0,box);
 		cout << "box after proj=" << box << endl;
 	}
 
@@ -164,14 +164,18 @@ int main() {
 
 		Function f(x,Return(dist(x,pt1),dist(x,pt2)));
 
+		cout << "Example 12" << endl;
+
 		cout << f << endl;
 
 		double init_box[][2] = { {-10,10},{-10,10} };
 		IntervalVector box(2,init_box);
 
+		cout << "f(box)=" << f.eval_vector(box) << endl;
+
 		IntervalVector d=0.5*sqrt(2)*Vector::ones(2);
 
-		f.proj(d,box);
+		f.backward(d,box);
 
 		cout << "box after proj=" << box << endl;
 
@@ -181,6 +185,59 @@ int main() {
 		f.jacobian(box,J);
 		cout << "J=" << J << endl;
 		// ------------------------------------------------
+
+		{
+			// Example of the tutorial
+			// ------------------------------------------------
+			// Vector-valued functions
+			// ------------------------------------------------
+			cout << "Example tuto 1" << endl;
+			Variable a;
+			Function f(a,Return(sqr(a),-a));
+			IntervalVector x(1,Interval(1,2));
+			cout << f.eval_vector(x) << endl;
+		}
+
+		{
+			// Example of the tutorial
+			// ------------------------------------------------
+			// Matrix-valued functions
+			// ------------------------------------------------
+			cout << "Example tuto 2" << endl;
+			Variable x("x");
+			Function f(x,Return(Return(2*x,-x),Return(-x,3*x),true));
+			cout << f << endl;
+			IntervalVector box(1,Interval(0,1));
+			IntervalMatrix M=f.eval_matrix(box);
+			cout << M << endl;
+		}
+
+
+		{
+			// Example of the tutorial
+			// ------------------------------------------------
+			// Matrix-valued functions
+			// ------------------------------------------------
+			cout << "Example tuto 3" << endl;
+			Function f("symb01.txt");
+			cout << f << endl;
+			IntervalVector x(1,Interval(0,1));
+			IntervalMatrix M=f.eval_matrix(x);
+			cout << M << endl;
+		}
+
+		{
+			// Example of the tutorial
+			// ------------------------------------------------
+			Variable x,y,z;
+			Function f(x,y,z,x*y+z*y);
+
+			double init_xyz[][2] = { {0,1},{0,2},{0,3} };
+			IntervalVector xyz(3,init_xyz);
+			IntervalVector g=f.gradient(xyz);
+			cout << "gradient=" << g << endl;
+			// ------------------------------------------------
+		}
 	}
 	return 0;
 }

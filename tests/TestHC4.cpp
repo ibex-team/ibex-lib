@@ -10,7 +10,7 @@
 
 #include "TestHC4.h"
 #include "Ponts30.h"
-#include "ibex_CtcProj.h"
+#include "ibex_CtcFwdBwd.h"
 #include "ibex_CtcHC4.h"
 #include "ibex_Array.h"
 
@@ -21,11 +21,11 @@ void TestHC4::ponts30() {
 	IntervalVector box = p30.init_box;
 
 	NumConstraint* ctr[30];
-	CtcProj* c[30];
+	CtcFwdBwd* c[30];
 
 	for (int i=0; i<30; i++) {
 		ctr[i]=new NumConstraint((*p30.f)[i],EQ);
-		c[i]=new CtcProj(*ctr[i]);
+		c[i]=new CtcFwdBwd(*ctr[i]);
 	}
 //	cout << "before="<< box << endl;
 

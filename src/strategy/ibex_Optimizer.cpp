@@ -13,7 +13,7 @@
 #include "ibex_Timer.h"
 #include "ibex_OptimProbing.cpp_"
 #include "ibex_OptimSimplex.cpp_"
-#include "ibex_CtcProj.h"
+#include "ibex_CtcFwdBwd.h"
 #include "ibex_ExprCopy.h"
 #include "ibex_Function.h"
 #include <float.h>
@@ -57,7 +57,7 @@ Optimizer::Optimizer(System& user_sys, Bsc& bsc, Ctc& ctc, double prec,
 	// ====== build the reversed inequalities g_i(x)>0 ===============
 	Array<Ctc> ng(m);
 	for (int i=0; i<m; i++) {
-		ng.set_ref(i, *new CtcProj(sys.f[i],GT));
+		ng.set_ref(i, *new CtcFwdBwd(sys.f[i],GT));
 	}
 	is_inside=new CtcUnion(ng);
 	// =============================================================

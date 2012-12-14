@@ -26,6 +26,8 @@ class CtcQInter : public Ctc {
 public:
 	/**
 	 * \brief q-intersection on a list of contractors.
+	 *
+	 * The list itself is not kept by reference.
 	 */
 	CtcQInter(const Array<Ctc>& list, int q);
 

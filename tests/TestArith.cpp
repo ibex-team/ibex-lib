@@ -225,6 +225,9 @@ void TestArith::pow09() { check_pow(Interval(2,3), 3, Interval(8,27)); }
 void TestArith::pow10() { check_pow(Interval(-2,3), 3, Interval(-8,27)); }
 void TestArith::pow11() { check_pow(Interval(-3,2), 3, Interval(-27,8)); }
 void TestArith::pow12() { check_pow(Interval(2,POS_INFINITY), 3, Interval(8,POS_INFINITY)); }
+void TestArith::pow13() { check_pow(Interval(-10,10), -2, Interval(1.0/100,POS_INFINITY)); }
+
+void TestArith::root01() { check(root(Interval(0,1),-1), Interval(1.0,POS_INFINITY)); }
 
 #define checkproj(func,y,xbefore,xafter) { Interval x=xbefore; NAME2(proj_,func)(y,x); check(x,xafter); }
 #define NAME2(a,b)         NAME2_HIDDEN(a,b)
@@ -401,7 +404,7 @@ void TestArith::proj_pow13() { checkproj_pow(Interval(8,27), Interval(1,1), Inte
 void TestArith::proj_pow14() { checkproj_pow(Interval(8,27), Interval(4,4), Interval::EMPTY_SET, 3); }
 void TestArith::proj_pow15() { checkproj_pow(Interval(-27,-8), Interval(-1,-1), Interval::EMPTY_SET, 3); }
 void TestArith::proj_pow16() { checkproj_pow(Interval(-27,-8), Interval(-4,-4), Interval::EMPTY_SET, 3); }
-
+void TestArith::proj_pow17() { checkproj_pow(Interval(0,1), Interval(-10,10), Interval(-10,10), -2); }
 
 void TestArith::check_div2(const Interval& x, const Interval& y, const Interval& out1, const Interval& out2) {
 	Interval _out1,_out2;

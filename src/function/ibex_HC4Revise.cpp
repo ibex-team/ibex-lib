@@ -59,11 +59,13 @@ void HC4Revise::vector_bwd(const ExprVector& v, ExprLabel** compL, const ExprLab
 	}
 	else {
 		if (v.row_vector())
-			for (int i=0; i<v.length(); i++)
+			for (int i=0; i<v.length(); i++) {
 				if ((compL[i]->d->v()&=y.d->m().col(i)).is_empty()) throw EmptyBoxException();
+			}
 		else
-			for (int i=0; i<v.length(); i++)
-				if ((compL[i]->d->v()=y.d->m().row(i)).is_empty()) throw EmptyBoxException();
+			for (int i=0; i<v.length(); i++) {
+				if ((compL[i]->d->v()&=y.d->m().row(i)).is_empty()) throw EmptyBoxException();
+			}
 	}
 }
 

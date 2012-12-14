@@ -11,8 +11,8 @@ const int N=10;          // number of measurements
 const double L=10;       // the target & the beacons are in the area [0,L]x[0,L]
 double beacons[N][2];    // positions (x,y) of the N beacons
 double dist[N];          // distance between the target and each beacon
-double beacon_error=0.1; // the uncertainty on the beacon position
-double dist_error=0.1;   // the uncertainty on the distance
+double BEACON_ERROR=0.1; // the uncertainty on the beacon position
+double DIST_ERROR=0.1;   // the uncertainty on the distance
 /*=========================================*/
 
 // init data (simulate measurements)
@@ -24,6 +24,8 @@ void init_data() {
 	cout << endl;
 	cout << "******* Target *******" << endl;
 	cout << "   x=" << x << " y=" << y << endl << endl;
+
+	rand(); // just to synchronize with the number of "rand" in robust_estim2
 
 	cout << "******* beacons *******" << endl;
 	for (int i=0; i<N; i++) {
@@ -52,18 +54,18 @@ int main() {
 		Variable x(2);
 
 		IntervalVector a(2); // the beacon position + uncertainty
-		a[0]=beacons[i][0]+beacon_error*Interval(-1,1);
-		a[1]=beacons[i][1]+beacon_error*Interval(-1,1);
+		a[0]=beacons[i][0]+BEACON_ERROR*Interval(-1,1);
+		a[1]=beacons[i][1]+BEACON_ERROR*Interval(-1,1);
 
 		Interval d; // the distance + uncertainty
-		if (i==0) {
+		/*if (i==0) {
 		  d=dist[i]+Interval(1,2);
-		} else
-			d=dist[i]+dist_error*Interval(-1,1);
+		} else*/
+			d=dist[i]+DIST_ERROR*Interval(-1,1);
 
 		m_func[i] = new Function(x,distance(x,a)-d);
 
-		m_ctc.set_ref(i,*new CtcProj(*m_func[i]));
+		m_ctc.set_ref(i,*new CtcFwdBwd(*m_func[i]));
 	}
 
 	// the initial box [0,L]x[0,L]

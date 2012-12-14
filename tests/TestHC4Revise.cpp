@@ -30,7 +30,7 @@ void TestHC4Revise::add01() {
 
 	Domain zero(Dim::scalar());
 	zero.i()=Interval(0,0);
-	f.proj(zero,box);
+	f.backward(zero,box);
 	//cout << box << endl;
 
 	double res_xy[][2]= { {2,3}, {-3,-2} };
@@ -72,7 +72,7 @@ void TestHC4Revise::dist01() {
 
 	Domain zero(Dim::scalar());
 	zero.i()=Interval(0,0);
-	f.proj(zero,box);
+	f.backward(zero,box);
 
 	double res_xy[][2] = { {0,6}, {-3,7},
 						{1,1}, {2,2} };
@@ -93,7 +93,7 @@ void TestHC4Revise::dist02() {
 
 	Domain zero(Dim::scalar());
 	zero.i()=Interval(0,0);
-	f.proj(zero,box);
+	f.backward(zero,box);
 
 	double res_xy[][2] = { {0,6}, {-3,7},
 						{1,1}, {2,2} };

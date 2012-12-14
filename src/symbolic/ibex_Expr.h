@@ -266,9 +266,9 @@ public:
 	/** \brief It the vector structured as a row or a column?
 	 *
 	 * \note A matrix is a "row vector" if it is a vector of column vectors.
-	 * It is not a "column vector" if it is a vector of row vectors.
+	 * It is a "column vector" if it is a vector of row vectors.
 	 * Important: this concerns the structure only, that is, the object viewed
-	 * as an array of nodes. E.g., if *this is a row vector, then get(i) return column.
+	 * as an array of nodes. E.g., if *this is a row vector, then get(i) returns a column.
 	 * But, as said above, in any case (*this)[i], as an expression, denotes the ith row.
 	 */
 	bool row_vector() const;

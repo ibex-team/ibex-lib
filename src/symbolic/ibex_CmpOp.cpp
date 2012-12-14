@@ -9,6 +9,7 @@
 //============================================================================
 
 #include "ibex_CmpOp.h"
+#include <cassert>
 
 namespace ibex {
 
@@ -21,6 +22,16 @@ std::ostream& operator<<(std::ostream& os, const CmpOp& op) {
 	case GT  : os << ">";  break;
 	}
 	return os;
+}
+
+CmpOp operator!(CmpOp op) {
+	assert(op!=EQ);
+	switch(op) {
+	case LT :  return GEQ;
+	case LEQ : return GT;
+	case GEQ : return LT;
+	case GT :  return LEQ;
+	}
 }
 
 } // end namespace ibex

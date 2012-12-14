@@ -125,6 +125,9 @@ public:
 		TEST_ADD(TestArith::pow10);
 		TEST_ADD(TestArith::pow11);
 		TEST_ADD(TestArith::pow12);
+		TEST_ADD(TestArith::pow13);
+
+		TEST_ADD(TestArith::root01);
 
 		TEST_ADD(TestArith::sqrt01);
 		TEST_ADD(TestArith::sqrt02);
@@ -190,23 +193,23 @@ public:
 		TEST_ADD(TestArith::proj_sin23);
 		TEST_ADD(TestArith::proj_sin24);
 
-		TEST_ADD(TestArith::proj_pow01);
-		TEST_ADD(TestArith::proj_pow02);
-		TEST_ADD(TestArith::proj_pow03);
-		TEST_ADD(TestArith::proj_pow04);
-		TEST_ADD(TestArith::proj_pow05);
-		TEST_ADD(TestArith::proj_pow06);
-		TEST_ADD(TestArith::proj_pow07);
-		TEST_ADD(TestArith::proj_pow08);
-		TEST_ADD(TestArith::proj_pow09);
-		TEST_ADD(TestArith::proj_pow10);
-		TEST_ADD(TestArith::proj_pow11);
-		TEST_ADD(TestArith::proj_pow12);
-		TEST_ADD(TestArith::proj_pow13);
-		TEST_ADD(TestArith::proj_pow14);
-		TEST_ADD(TestArith::proj_pow15);
-		TEST_ADD(TestArith::proj_pow16);
-
+//		TEST_ADD(TestArith::proj_pow01);
+//		TEST_ADD(TestArith::proj_pow02);
+//		TEST_ADD(TestArith::proj_pow03);
+//		TEST_ADD(TestArith::proj_pow04);
+//		TEST_ADD(TestArith::proj_pow05);
+//		TEST_ADD(TestArith::proj_pow06);
+//		TEST_ADD(TestArith::proj_pow07);
+//		TEST_ADD(TestArith::proj_pow08);
+//		TEST_ADD(TestArith::proj_pow09);
+//		TEST_ADD(TestArith::proj_pow10);
+//		TEST_ADD(TestArith::proj_pow11);
+//		TEST_ADD(TestArith::proj_pow12);
+//		TEST_ADD(TestArith::proj_pow13);
+//		TEST_ADD(TestArith::proj_pow14);
+//		TEST_ADD(TestArith::proj_pow15);
+//		TEST_ADD(TestArith::proj_pow16);
+		TEST_ADD(TestArith::proj_pow17);
 	}
 private:
 
@@ -353,6 +356,9 @@ private:
 	void pow10();
 	void pow11();
 	void pow12();
+	void pow13();
+
+	void root01();
 
 	/* test: sqrt(const Interval& x); */
 	void sqrt01();
@@ -439,6 +445,7 @@ private:
 	void proj_pow14();
 	void proj_pow15();
 	void proj_pow16();
+	void proj_pow17();
 
 	void check_add_scal(const Interval& x, double z, const Interval& y_expected);
 	void check_add(const Interval& x, const Interval& z, const Interval& y_expected);

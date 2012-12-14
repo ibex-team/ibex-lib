@@ -41,6 +41,21 @@ public:
 	CtcUnion(Ctc& c1, Ctc& c2, Ctc& c3);
 
 	/**
+	 * \brief Create the union of 4 contractors
+	 */
+	CtcUnion(Ctc& c1, Ctc& c2, Ctc& c3, Ctc& c4);
+
+	/**
+	 * \brief Create the union of 5 contractors
+	 */
+	CtcUnion(Ctc& c1, Ctc& c2, Ctc& c3, Ctc& c4, Ctc& c5);
+
+	/**
+	 * \brief Create the union of 6 contractors
+	 */
+	CtcUnion(Ctc& c1, Ctc& c2, Ctc& c3, Ctc& c4, Ctc& c5, Ctc& c6);
+
+	/**
 	 * \brief Contract a box.
 	 */
 	virtual void contract(IntervalVector& box);
