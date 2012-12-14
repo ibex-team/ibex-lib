@@ -11,7 +11,7 @@
 #include "ibex_CtcCompo.h"
 #include "ibex_CtcHC4.h"
 #include "ibex_CtcNewton.h"
-#include "ibex_CtcProj.h"
+#include "ibex_CtcFwdBwd.h"
 #include "ibex_CtcInteger.h"
 #include "ibex_SyntaxError.h"
 #include "ibex_System.h"
@@ -52,14 +52,14 @@ JNIEXPORT void JNICALL Java_Ibex_add_1ctr__ILjava_lang_String_2I(JNIEnv *env, jo
 	options.push_back(option);
 
 	if (s->nb_ctr==1) {
-		ctc.push_back(new CtcProj(s->ctrs[0]));
+		ctc.push_back(new CtcFwdBwd(s->ctrs[0]));
 	} else {
 		Ctc* c;
 		switch (option) {
 		case COMPO:      {
 			Array<Ctc> array(s->nb_ctr);
 			for (int i=0; i<s->nb_ctr; i++)
-				array.set_ref(i,*new CtcProj(s->ctrs[i]));
+				array.set_ref(i,*new CtcFwdBwd(s->ctrs[i]));
 			c=new CtcCompo(array);
 			break;
 		}
