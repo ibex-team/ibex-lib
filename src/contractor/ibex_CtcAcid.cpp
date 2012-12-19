@@ -33,51 +33,49 @@ void CtcAcid::contract(IntervalVector& box) {
 	int nbinitcalls=50;                                // longueur du réglage
 	int factor = 20;                                   // détermine la période entre les débuts de 2 régalages  successifs : factor*nbinitcalls
 	int nbcall1= nbcalls% (factor*nbinitcalls);        // pour savoir si on est dans une phase de réglage (nbcall1 < nbinitcalls )
-	// 1er reglage sur nbvar (on divise par 2 pour réobtenir nbvar 2 lignes plus loin dans la 1re phase de réglage
-	if (nbcalls==0) nbcidvar= (nb_CID_var+1)/2;
-
-	// if (nbcalls==0) nbcidvar=nb_CID_var;                //  variante 1er reglage sur 2*nbvar
 
 	IntervalVector initbox (box);
 
 	if (nbcall1 < nbinitcalls) {                       // réglage
-		vhandled = 2* nbcidvar;
 
-		if (vhandled< 2) vhandled= 2;                  // réglage minimum  à 2
+	  if (nbcalls==0) vhandled =nb_CID_var;               // premier réglage 3BCID une fois sur toutes les variables
+	  else	vhandled = 2* nbcidvar;                       //  réglages suivants : sur 2 fois le réglage précédent
+	  
+	  if (vhandled< 2) vhandled= 2;                  // réglage minimum  à 2
 
-		for (int i =0; i< nbvarmax; i++)               // initialisation du tableau des gains:
-			ctstat[i]=0;                               // ctstat[i] gain moyen dû à l'appel de varcid sur la variable i
+	  for (int i =0; i< nbvarmax; i++)               // initialisation du tableau des gains:
+	    ctstat[i]=0;                               // ctstat[i] gain moyen dû à l'appel de varcid sur la variable i
 	}
 	else
-		vhandled = nbcidvar;                           // en dehors du réglage , on prend nbcidvar   ( la valeur réglée)
+	  vhandled = nbcidvar;                           // en dehors du réglage , on prend nbcidvar   ( la valeur réglée)
 
 	if (vhandled > nbvarmax) vhandled=nbvarmax;        // pour rester raisonnable et dans les limites du tableau ctstat
 
 	if (vhandled > 0) compute_smearorder(box);         // l'ordre sur les variables est calculé avec la smearsumrel
 
-   for (int v=0; v<vhandled; v++) {
-    	int v1=v%nb_CID_var;                               // [gch] how can v be < nb_var?? [bne]  vhandled can be between 0 and nbvarmax
-    	int v2=smearorder[v1];
-	impact.set(v2);
-    	var3BCID(box, v2);                             // appel 3BCID sur la variable v2
-	impact.unset(v2); 
-		if(box.is_empty())
-			throw EmptyBoxException();
-		if (nbcall1 < nbinitcalls) {                   // on fait des stats pour le réglage courant
-			for (int i=0; i<initbox.size(); i++)
-			  {//cout << i << " initbox " << initbox[i].diam() << " box " << box[i].diam() << endl;
-			  if  (initbox[i].diam() !=0 && box[i].diam()!= POS_INFINITY)
-			    // gain sur la ième dimension de la boîte courante après var3BCID sur la v-ième variable
-			    ctstat[v] += 1  - box[i].diam() / initbox[i].diam();}
-			ctstat[v]=ctstat[v]/ initbox.size();   // gain moyen
-		}
-
-		initbox=box;
+	for (int v=0; v<vhandled; v++) {
+	  int v1=v%nb_CID_var;                               // [gch] how can v be < nb_var?? [bne]  vhandled can be between 0 and nbvarmax
+	  int v2=smearorder[v1];
+	  impact.set(v2);
+	  var3BCID(box, v2);                             // appel 3BCID sur la variable v2
+	  impact.unset(v2); 
+	  if(box.is_empty())
+	    throw EmptyBoxException();
+	  if (nbcall1 < nbinitcalls) {                   // on fait des stats pour le réglage courant
+	    for (int i=0; i<initbox.size(); i++)
+	      {//cout << i << " initbox " << initbox[i].diam() << " box " << box[i].diam() << endl;
+		if  (initbox[i].diam() !=0 && box[i].diam()!= POS_INFINITY)
+		  // gain sur la ième dimension de la boîte courante après var3BCID sur la v-ième variable
+		  ctstat[v] += 1  - box[i].diam() / initbox[i].diam();}
+	    ctstat[v]=ctstat[v]/ initbox.size();   // gain moyen
+	  }
+	  
+	  initbox=box;
 	}
 
-	int nvar=0;
+        int nvar=0;
 
-	nbcalls++;
+        nbcalls++;
 	nbcall1++;
 	// pendant la phase de réglage
 	if (nbcall1 <= nbinitcalls) {
@@ -170,8 +168,9 @@ void CtcAcid::compute_smearorder(IntervalVector& box) {
 		varorder2.erase(result);
 	}
 	varorder2.clear();
-
-	assert(smearorder.size()==vhandled);               // [gch]
+	
+	
+	//	assert(smearorder.size()==vhandled);       // [gch]   [bne] assert suppression : vhandled can be > nb_variables
 }
 
 double CtcAcid::nbvar_stat() {

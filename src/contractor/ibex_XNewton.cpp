@@ -175,8 +175,11 @@ REAL X_Newton::eval_corner(int ctr, int op, INTERVAL_VECTOR& G, bool* corner){
       if(sys.ctrs[ctr].f.used(j)){
 	  if(lmode==HANSEN && !linear[ctr]){
 	    if(ctr==goal_ctr) // objective function in optimization	    
-	      {IntervalVector G1(sys.nb_var-1);
-		goal->gradient(box,G1);
+	      {IntervalVector box1(sys.nb_var-1);
+	  for (int i=0; i<sys.nb_var-1; i++)
+	    box1[i]=box[i];
+		IntervalVector G1(sys.nb_var-1);
+		goal->gradient(box1,G1);
 		for (int i=0; i<sys.nb_var-1; i++)
 		  G[i]=G1[i];
 		G[sys.nb_var-1]=0;
@@ -412,8 +415,11 @@ REAL X_Newton::eval_corner(int ctr, int op, INTERVAL_VECTOR& G, bool* corner){
       
 
        if(goal_ctr==ctr)  // objective function  in optimization
-	 {IntervalVector G1(sys.nb_var-1);
-	   goal->gradient(sys.box,G1);
+	 {IntervalVector box1(sys.nb_var-1);
+	  for (int i=0; i<sys.nb_var-1; i++)
+	    box1[i]=box[i];
+	  IntervalVector G1(sys.nb_var-1);
+	   goal->gradient(box1,G1);
 	   for (int i=0; i<sys.nb_var-1; i++)
 	     G[i]=G1[i];
 	   G[sys.nb_var-1]=0;

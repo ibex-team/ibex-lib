@@ -34,16 +34,20 @@ const double LR_contractor::default_max_diam_box =1e4;
     // ============================================================
     
    linear = new bool[sys.nb_ctr];
-
+   
 
     for(int ctr=0; ctr<sys.nb_ctr;ctr++){
 
       IntervalVector G(sys.nb_var);
-
-
+      
       if(ctr==goal_ctr)
-	{IntervalVector G1(sys.nb_var-1);
-	  goal->gradient(sys.box,G1);
+	{IntervalVector box1(sys.nb_var-1);
+	  for (int i=0; i<sys.nb_var-1; i++)
+	    box1[i]=sys.box[i];
+
+	  
+	  IntervalVector G1(sys.nb_var-1);
+	  goal->gradient(box1,G1);
 	  for (int i=0; i<sys.nb_var-1; i++)
 	    G[i]=G1[i];
 	  G[sys.nb_var-1]=0;
@@ -118,7 +122,7 @@ void LR_contractor::iter(IntervalVector & box){
   try{
     optimizer(box, mysoplex, n, nb_ctrs);
   }catch(EmptyBoxException e){
-     throw EmptyBoxException();
+    throw EmptyBoxException();
   }  
   
 
@@ -149,14 +153,14 @@ void LR_contractor::iter(IntervalVector & box){
 	//	cout << " stat " <<  stat << endl;
         if( stat == SPxSolver::OPTIMAL ){
 
-          if(opt.lb()>box[i].ub())   throw EmptyBoxException();
+          if(opt.lb()>box[i].ub())  throw EmptyBoxException();
           choose_next_variable(box,mysoplex ,nexti,infnexti, inf_bound, sup_bound);
           if(opt.lb() > box[i].lb() ){
             box[i]=Interval(opt.lb(),box[i].ub());
             mysoplex.changeLhs(nb_ctrs+i,opt.lb());
           }
         }
-        else if(stat == SPxSolver::INFEASIBLE) throw EmptyBoxException();
+	else if(stat == SPxSolver::INFEASIBLE) throw EmptyBoxException();
         else if (stat == SPxSolver::UNKNOWN)
           {int next=-1;
             for (int j=0;j<n;j++)
@@ -175,13 +179,14 @@ void LR_contractor::iter(IntervalVector & box){
 	SPxSolver::Status stat= run_simplex(box,mysoplex, SPxLP::MAXIMIZE, i, n, opt, box[i].ub()/*, taylor_ev*/);
         if( stat == SPxSolver::OPTIMAL ){
 
-          if(opt.ub() <box[i].lb()) throw EmptyBoxException();
-          choose_next_variable(box,mysoplex ,nexti,infnexti, inf_bound, sup_bound);
+          if(opt.ub() <box[i].lb())   throw EmptyBoxException();
+          choose_next_variable(box, mysoplex ,nexti,infnexti, inf_bound, sup_bound);
 	  if (opt.ub() < box[i].ub()) {
 	    box[i] =Interval( box[i].lb(), opt.ub());
 	    mysoplex.changeRhs(nb_ctrs+i,opt.ub());
 	  }
-        } else if(stat == SPxSolver::INFEASIBLE)  throw EmptyBoxException();
+        } 
+        else if(stat == SPxSolver::INFEASIBLE)  throw EmptyBoxException();
         else if (stat == SPxSolver::UNKNOWN)
           {int next=-1;
             for (int j=0;j<n;j++)
@@ -221,8 +226,8 @@ void LR_contractor::iter(IntervalVector & box){
     mysoplex.changeSense(SPxLP::MINIMIZE);
     mysoplex.setTerminationIter(max_iter_soplex);
     mysoplex.setDelta(1e-10);
-    //    mysoplex.writeFile("dump.lp", NULL, NULL, NULL);              
-    //    system("cat dump.lp");
+    //   mysoplex.writeFile("dump.lp", NULL, NULL, NULL);              
+    //  system("cat dump.lp");
     try{
       stat = mysoplex.solve();
     }catch(SPxException){
@@ -295,6 +300,7 @@ void LR_contractor::iter(IntervalVector & box){
 
     }
     mysoplex.changeObj(var, 0.0);
+    //    cout << "stat " << stat << endl;
     return stat;
   }
 
