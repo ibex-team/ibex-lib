@@ -17,7 +17,12 @@
 #include "ibex_System.h"
 
 namespace ibex {
-
+/**
+ * \ingroup bisector
+ *
+ * \brief bisector with Smear function heuristic  abstract class
+ *
+ */
 
 class SmearFunction : public RoundRobin {
 
@@ -26,7 +31,7 @@ protected :
 
  public:
   /** Create a bisector with Smear function heuristic,i.e using the impacts based on the Jacobian matrix.
-      Virtual class with 4 implementations SmearMax, SmearSum, SmearMaxRelative, SmearSumRelative corresponding to
+      Abstract  class with 4 implementations SmearMax, SmearSum, SmearMaxRelative, SmearSumRelative corresponding to
       different variants for computing the variable to be bisected, all variants using the Jacobian matrix.
    *  \param sys - The system of equations. 
    *  \param w (optional) - - the minimum width (diameter) an interval must have to be bisected (see #w).
@@ -52,6 +57,12 @@ protected :
   System& sys;
 };
 
+/**
+ * \ingroup bisector
+ *
+ * \brief bisector with Smear function heuristic (maximum impact)
+ *
+ */
 class SmearMax : public SmearFunction
  {
 
@@ -77,6 +88,14 @@ class SmearMax : public SmearFunction
   int var_to_bisect(IntervalMatrix& J,const IntervalVector& box  ) const;
 };
 
+/**
+ * \ingroup bisector
+ *
+ * \brief bisector with Smear function heuristic (maximum sum of impacts)
+ *
+ */
+
+
 class SmearSum : public SmearFunction
  {
 
@@ -101,6 +120,13 @@ class SmearSum : public SmearFunction
 };
 
 
+/**
+ * \ingroup bisector
+ *
+ * \brief bisector with Smear function heuristic (maximum sum of normalized impacts)
+ *
+ */
+
 class SmearSumRelative : public SmearFunction
  {
   public :
@@ -123,19 +149,25 @@ class SmearSumRelative : public SmearFunction
 };
 
 
+/**
+ * \ingroup bisector
+ *
+ * \brief bisector with Smear function heuristic (maximum  normalized impact)
+ *
+ */
 
 
 
-/** Create a bisector with a variant of the Smear function heuristic, where we use a normalized maximimum impact instead of the max used by SmearMax or the sum used by SmearSum
+class SmearMaxRelative : public SmearFunction
+ {
+  public :
+   /** Create a bisector with a variant of the Smear function heuristic, where we use a normalized maximimum impact instead of the max used by SmearMax or the sum used by SmearSum
    *  \param sys - The system of equations. 
    *  \param w (optional) - - the minimum width (diameter) an interval must have to be bisected (see #w).
    *  \param ratio (optional) - the ratio between the diameters of the left and the right parts of the 
    *  bisected interval. Default value is 0.45 */
 
 
-class SmearMaxRelative : public SmearFunction
- {
-  public :
     SmearMaxRelative (System& sys, double w=Bsc::default_prec, double ratio=Bsc::default_ratio)
       : SmearFunction (sys,w,ratio) {;};
   ~SmearMaxRelative() {;};
