@@ -10,6 +10,7 @@
  * ---------------------------------------------------------------------------- */
 
 #include "TestArith.h"
+#include "ibex_Linear.h"
 #include "utils.h"
 #include <float.h>
 
@@ -296,6 +297,52 @@ void TestArith::proj_mul04() {
 
 void TestArith::proj_mul05() {
 	TEST_ASSERT(checkproj_mul(Interval(1,1),Interval(0,10),Interval(0,10),Interval(0.1,10.0),Interval(0.1,10.0)));
+}
+
+void TestArith::proj_mulVV01() {
+	IntervalVector a(2);
+	a[0]=Interval(2,4);
+	a[1]=Interval(-0.1,0.1);
+
+	Interval b(2,3);
+
+	IntervalVector x(2,Interval(-10,10));
+
+	proj_mul(b,a,x);
+	check(x[0],Interval(1.0/4,2));
+	check(x[1],Interval(-10,10));
+}
+
+void TestArith::proj_mulMV01() {
+	double delta=0.1;
+	IntervalMatrix A(2,2);
+	Interval deltaM(-delta,delta);
+	A[0][0]=1+deltaM;
+	A[0][1]=deltaM;
+	A[1][0]=deltaM;
+	A[1][1]=1+deltaM;
+
+	Vector b(2,1.0);
+
+	IntervalVector x(2,Interval(-10,10));
+
+	double _M[16]={1+delta,   0,       0,     delta,
+				     0,    1-delta,    0,    -delta,
+				     0,     -delta,    0,   1-delta,
+				     0,      delta, 1+delta,    0};
+	Matrix M(4,4,_M);
+	Matrix invM(4,4);
+	real_inverse(M,invM);
+
+	Vector b2(4,1.0);
+	Vector bounds=invM*b2;
+	double _x2[2][2]={ {bounds[0],bounds[1]}, {bounds[2],bounds[3]} };
+	IntervalVector x2(2,_x2);
+
+	double epsilon=1e-07;
+	proj_mul(b,A,x,epsilon);
+
+	TEST_ASSERT(almost_eq(x,x2,epsilon));
 }
 
 void TestArith::checkproj_div(const Interval& y, const Interval& x1_bef, const Interval& x2_bef,

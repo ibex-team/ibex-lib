@@ -50,7 +50,7 @@ public:
 	 *  ... <br>
 	 *  x[(m-1)n] ; ... ; x[2n-1]  <br>
 	 *
-	 * \param bounds an (mxn) array of doubles
+	 * \param x an (mxn) array of doubles
 	 * \pre m>0, n>0
 	 */
 	Matrix(int m, int n, double x[]);

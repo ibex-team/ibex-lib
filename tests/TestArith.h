@@ -141,6 +141,10 @@ public:
 		TEST_ADD(TestArith::proj_mul04);
 		TEST_ADD(TestArith::proj_mul05);
 
+		TEST_ADD(TestArith::proj_mulVV01);
+		TEST_ADD(TestArith::proj_mulMV01);
+
+
 		TEST_ADD(TestArith::proj_div01);
 		TEST_ADD(TestArith::proj_div02);
 		TEST_ADD(TestArith::proj_div03);
@@ -373,6 +377,9 @@ private:
 	void proj_mul03();
 	void proj_mul04();
 	void proj_mul05();
+
+	void proj_mulVV01();
+	void proj_mulMV01();
 
 	/* test: proj_div */
 	void proj_div01();

@@ -576,6 +576,8 @@ bool proj_mul(const Interval& z, IntervalVector& x, IntervalVector& y) {
 	for (int i=n-3; i>=0; i--)
 		if (!proj_add(sum[i+1],sum[i],xy[i+1])) { x.set_empty(); y.set_empty(); return false; }
 
+	if ((xy[0] &= sum[0]).is_empty()) { x.set_empty(); y.set_empty(); return false; }
+
 	for (int i=0; i<n; i++)
 		if (!proj_mul(xy[i],x[i],y[i])) { x.set_empty(); y.set_empty(); return false; }
 
