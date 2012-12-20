@@ -26,7 +26,8 @@ namespace ibex {
 	if (J[i][j].mag() == POS_INFINITY ||((J[i][j].mag() ==0) && box[j].diam()== POS_INFINITY ))
 	  return RoundRobin::bisect(box,last_var);
     int var = var_to_bisect (J,box);
-    if (var == -1)
+   // in case of selected var with infinite domain, change to round-robin bisection
+    if (var == -1 || box[var].diam()== POS_INFINITY)
       return RoundRobin::bisect(box,last_var);
     else
       return box.bisect(var,ratio);
