@@ -82,7 +82,7 @@ void IntervalVector::resize(int n2) {
 	vec = newVec;
 }
 
-IntervalVector IntervalVector::subvector(int start_index, int end_index) {
+IntervalVector IntervalVector::subvector(int start_index, int end_index) const {
 	assert(!is_empty());
 	assert(end_index>=0 && start_index>=0);
 	assert(end_index<size() && start_index<=end_index);

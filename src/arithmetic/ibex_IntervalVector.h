@@ -147,7 +147,7 @@ public:
 	 * \pre (*this) must not be empty
 	 * \return [ (*this)[start_index]; ...; (*this)[end_index] ].
 	 */
-	IntervalVector subvector(int start_index, int end_index);
+	IntervalVector subvector(int start_index, int end_index) const;
 
 	/**
 	 * \brief Put a subvector into *this at a given position.
