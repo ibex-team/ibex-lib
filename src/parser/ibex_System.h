@@ -121,7 +121,10 @@ public:
 	/** The goal (if any, otherwise NULL) */
 	Function* goal;
 
-	/** The main (vector-valued) function */
+	/** The main (vector-valued) function.
+	 *
+	 * \warning - if this system represents an unconstrained optimization problem,
+	 * this field is not initialized and must be ignored. */
 	Function f;
 
 	/** All the arguments */
@@ -139,7 +142,10 @@ public:
 	 * (not only "initial": may be used as input by CHOCO) */
 	IntervalVector box;
 
-	/** Constraints */
+	/** Constraints.
+	 *
+	 * If this system represents an unconstrained optimization problem,
+	 * this array is zero-sized. */
 	Array<NumConstraint> ctrs;
 
 	/** Name of the goal variable ("y"). */

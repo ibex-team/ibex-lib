@@ -72,6 +72,12 @@ void MainGenerator::generate(const P_Source& source, System& result) {
 		result.goal = new Function(objvars, goal, "goal");
 	}
 
+	// ============== case of unconstrained optimization ===========
+	if (source.ctrs==NULL) {
+		(int&) result.nb_ctr = 0;
+		return;
+	}
+
 	//================= generate the constraints =====================
 	// we cannot generate first the global function f and
 	// then each constraint with (f[i] op 0) because

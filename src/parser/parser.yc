@@ -111,7 +111,7 @@ system        :
               decl_opt_par
               decl_fnc_list
               decl_opt_goal
-	          TK_CTRS ctr_blk_list TK_END                          
+	          decl_opt_ctrs                          
               ;
               
 choco_ctr     : ctr_blk_list                    { }
@@ -233,7 +233,11 @@ decl_opt_goal :                                 { source.goal = NULL; }
 /**********************************************************************************************************************/
 /*                                                CONSTRAINTS                                                         */
 /**********************************************************************************************************************/
-              
+
+decl_opt_ctrs : 
+              | TK_CTRS ctr_blk_list TK_END
+	          ;
+	          
 ctr_blk_list  : ctr_blk_list_ semicolon_opt     { source.ctrs=new P_ConstraintList(*$1); }
               ;
 

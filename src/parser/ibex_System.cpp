@@ -52,9 +52,9 @@ System::System(int n, const char* syntax) : nb_var(n), /* NOT TMP (required by p
 
 System::System(const System& sys, copy_mode mode) : nb_var(0), nb_ctr(0), func(0), box(1) {
 
-	assert(!sys.ctrs.is_empty()); // <=> m>0
-
-	const Array<const ExprSymbol>& x=sys.f.args();
+	// do not initalize x with with sys.f.args
+	// since f may be uninitialized (unconstrained problem)
+	const Array<const ExprSymbol>& x=sys.args;
 	int nb_arg=x.size();  // warning: x.size()<>n in general
 
 	// ---------- check all constraints have same variables ---------
@@ -133,7 +133,8 @@ System::System(const System& sys, copy_mode mode) : nb_var(0), nb_ctr(0), func(0
 
 
 	// ---------- initialize the vector-valued function "f" ----------------
-	init_f_from_ctrs();
+	if (nb_ctr>0)
+		init_f_from_ctrs();
 }
 
 /*System::System(const Function& goal, const Array<NumConstraint>& ctrs): nb_var(goal.nb_symbols()), nb_ctr(ctrs.size()),
@@ -151,8 +152,11 @@ System::System(const System& sys, copy_mode mode) : nb_var(0), nb_ctr(0), func(0
 
 }*/
 
-
+// precondition: nb_ctr > 0
 void System::init_f_from_ctrs() {
+
+	assert(!ctrs.is_empty()); // <=> m>0
+
 	int total_output_size=0;
 	for (int j=0; j<ctrs.size(); j++)
 		total_output_size += ctrs[j].f.image_dim();

@@ -79,6 +79,17 @@ void TestSystem::factory01() {
 }
 
 
+void TestSystem::factory02() {
+	System sys("quimper/unconstrained.qpr");
+
+	TEST_ASSERT(sys.nb_ctr==0);
+	TEST_ASSERT(sys.nb_var==2);
+	TEST_ASSERT(sys.args.size()==2);
+	TEST_ASSERT(sameExpr(sys.goal->expr(),"(x+y)"));
+	TEST_ASSERT(strcmp(sys.goal_name,System::goal_name)==0);
+	TEST_ASSERT(sys.ctrs.size()==0);
+}
+
 void TestSystem::copy01() {
 	System& _sys(*sysex1());
 	System sys(_sys,System::COPY);
@@ -106,6 +117,14 @@ void TestSystem::copy01() {
 	TEST_ASSERT(sys.ctrs[1].op==GEQ);
 }
 
+void TestSystem::copy02() {
+	System _sys("quimper/unconstrained.qpr");
+	System sys(_sys, System::COPY);
+	TEST_ASSERT(sys.nb_ctr==0);
+	TEST_ASSERT(sys.nb_var==2);
+	TEST_ASSERT(sameExpr(sys.goal->expr(),"(x+y)"));
+	TEST_ASSERT(sys.ctrs.size()==0);
+}
 
 void TestSystem::extend01() {
 	System& _sys(*sysex2());
@@ -134,6 +153,20 @@ void TestSystem::extend01() {
 	TEST_ASSERT(sys.ctrs[2].op==LEQ);
 	TEST_ASSERT(sameExpr(sys.ctrs[3].f.expr(),"(-(y-x[0]))"));
 	TEST_ASSERT(sys.ctrs[3].op==LEQ);
+}
+
+void TestSystem::extend02() {
+	System _sys("quimper/unconstrained.qpr");
+	System sys(_sys, System::EXTEND);
+	TEST_ASSERT(sys.nb_ctr==1);
+	TEST_ASSERT(sys.nb_var==3);
+	TEST_ASSERT(sys.goal==NULL);
+	TEST_ASSERT(sys.ctrs.size()==1);
+	TEST_ASSERT(sys.f.nb_arg()==3);
+	TEST_ASSERT(sys.f.nb_var()==3);
+	TEST_ASSERT(sys.f.image_dim()==1);
+	TEST_ASSERT(sameExpr(sys.ctrs[0].f.expr(),"(__goal__-(x+y))"));
+	TEST_ASSERT(sys.ctrs[0].op==EQ);
 }
 
 } // end namespace

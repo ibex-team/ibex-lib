@@ -23,6 +23,7 @@ void P_Source::cleanup() {
 	func.clear();
 
 	if (ctrs) // may be NULL if only a single function is loaded
+		      // or if the system is unconstrained.
 		delete ctrs; // will recursively delete all the constraints
 	                 // but not the symbols
 
