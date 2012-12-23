@@ -230,6 +230,12 @@ void TestInterval::is_unbounded01()       { TEST_ASSERT(!Interval::EMPTY_SET.is_
 void TestInterval::is_unbounded02()       { TEST_ASSERT(!Interval(0,1).is_unbounded()); }
 void TestInterval::is_unbounded03()       { TEST_ASSERT(Interval::NEG_REALS.is_unbounded()); }
 void TestInterval::is_unbounded04()       { TEST_ASSERT(Interval::POS_REALS.is_unbounded()); }
+void TestInterval::is_bisectable01()      { TEST_ASSERT(!Interval::EMPTY_SET.is_bisectable()); }
+void TestInterval::is_bisectable02()      { TEST_ASSERT(!Interval(DBL_MAX,POS_INFINITY).is_bisectable()); }
+void TestInterval::is_bisectable03()      { TEST_ASSERT(!Interval(NEG_INFINITY,-DBL_MAX).is_bisectable()); }
+void TestInterval::is_bisectable04()      { TEST_ASSERT(!Interval(0,ibex::next_float(0)).is_bisectable()); }
+void TestInterval::is_bisectable05()      { TEST_ASSERT(Interval(0,ibex::next_float(ibex::next_float(0))).is_bisectable()); }
+
 
 void TestInterval::integer01() {
 	Interval x=Interval::EMPTY_SET; proj_integer(x); check(x,Interval::EMPTY_SET);

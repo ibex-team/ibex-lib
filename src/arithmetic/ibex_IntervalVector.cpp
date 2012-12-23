@@ -456,57 +456,19 @@ int IntervalVector::complementary(IntervalVector*& result) const {
 std::pair<IntervalVector,IntervalVector> IntervalVector::bisect(int i, double ratio) const {
 	assert(0<ratio && ratio<1.0);
 	assert(0<=i && i<size());
+
+	if (!(*this)[i].is_bisectable()) {
+		std::ostringstream oss;
+		oss << "Unable to bisect " << *this;
+		throw InvalidIntervalVectorOp(oss.str());
+	}
 	IntervalVector left(*this);
 	IntervalVector right(*this);
 
-	double point;
+	std::pair<Interval,Interval> p=(*this)[i].bisect(ratio);
 
-	if ((*this)[i].lb()==NEG_INFINITY) {
-
-		if ((*this)[i].ub()<-DBL_MAX) {
-			std::ostringstream oss;
-			oss << "Unable to bisect " << *this;
-			throw InvalidIntervalVectorOp(oss.str());
-		}
-
-		else if ((*this)[i].ub()==POS_INFINITY) {
-			left[i] = Interval(NEG_INFINITY,0);
-			right[i] = Interval(0,POS_INFINITY);
-		}
-
-		else {
-			left[i] = Interval(NEG_INFINITY,-DBL_MAX);
-			right[i] = Interval(-DBL_MAX,(*this)[i].ub());
-		}
-
-	}
-
-	else if ((*this)[i].ub()==POS_INFINITY) {
-
-		if ((*this)[i].lb()>DBL_MAX) {
-			std::ostringstream oss;
-			oss << "Unable to bisect " << *this;
-			throw InvalidIntervalVectorOp(oss.str());
-		}
-
-		else {
-			left[i] = Interval((*this)[i].lb(),DBL_MAX);
-			right[i] = Interval(DBL_MAX,POS_INFINITY);
-		}
-
-	}
-
-	else {
-
-		if (ratio==0.5)
-			point = left[i].mid();
-		else {
-			point = left[i].lb()+ratio*left[i].diam();
-			if (point > left[i].ub()) point=left[i].lb(); // watch dog
-		}
-		left[i] = Interval(left[i].lb(), point);
-		right[i] = Interval(point, right[i].ub());
-	}
+	left[i] = p.first;
+	right[i] = p.second;
 
 	return std::pair<IntervalVector,IntervalVector>(left,right);
 }

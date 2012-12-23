@@ -129,6 +129,12 @@ public:
 	    TEST_ADD(TestInterval::is_unbounded03);
 	    TEST_ADD(TestInterval::is_unbounded04);
 
+		TEST_ADD(TestInterval::is_bisectable01);
+		TEST_ADD(TestInterval::is_bisectable02);
+		TEST_ADD(TestInterval::is_bisectable03);
+		TEST_ADD(TestInterval::is_bisectable04);
+		TEST_ADD(TestInterval::is_bisectable05);
+
 		TEST_ADD(TestInterval::integer01);
 		TEST_ADD(TestInterval::integer02);
 		TEST_ADD(TestInterval::integer03);
@@ -267,6 +273,12 @@ private:
     void is_unbounded02();
     void is_unbounded03();
     void is_unbounded04();
+
+    void is_bisectable01();
+    void is_bisectable02();
+    void is_bisectable03();
+    void is_bisectable04();
+    void is_bisectable05();
 
 	/* test: rel_distance(const Interval& x) const */
 	void rel_distance01();

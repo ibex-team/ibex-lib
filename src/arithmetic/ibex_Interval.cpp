@@ -10,6 +10,8 @@
  * ---------------------------------------------------------------------------- */
 
 #include "ibex_Interval.h"
+#include <float.h>
+#include <cassert>
 
 #ifdef _IBEX_WITH_GAOL_
 #include "ibex_gaol_Interval.cpp_"
@@ -177,6 +179,48 @@ double Interval::ratiodelta(const Interval& x) const {
 	if (d==POS_INFINITY) return 1;
 	double D=diam();
 	return (D==0 || D==POS_INFINITY) ? 0.0 : (d/D); // if this.diam()=infinity here, necessarily d=0
+}
+
+std::pair<Interval,Interval> Interval::bisect(double ratio) const {
+
+	assert(is_bisectable());
+	assert(ratio>0 && ratio<1);
+
+	Interval left,right;
+
+	if (lb()==NEG_INFINITY) {
+		if (ub()==POS_INFINITY) {
+			left = Interval(NEG_INFINITY,0);
+			right = Interval(0,POS_INFINITY);
+		}
+		else {
+			left = Interval(NEG_INFINITY,-DBL_MAX);
+			right = Interval(-DBL_MAX,ub());
+		}
+	}
+
+	else if (ub()==POS_INFINITY) {
+		left = Interval(lb(),DBL_MAX);
+		right = Interval(DBL_MAX,POS_INFINITY);
+	}
+
+	else {
+		double point;
+		if (ratio==0.5)
+			point = mid();
+		else {
+			point = lb()+ratio*diam();
+
+			// watch dog. note that since *this is
+			// bisectable, we have next_float(left.lb()) < ub()
+			if (point >= ub()) point=next_float(lb());
+			assert(point<ub());
+		}
+		left = Interval(lb(), point);
+		right = Interval(point, ub());
+	}
+
+	return std::pair<Interval,Interval>(left,right);
 }
 
 } // end namespace

@@ -263,6 +263,11 @@ class Interval {
     bool is_unbounded() const;
 
     /**
+     * \brief True iff *this can be bisected into two non-degenerated intervals.
+     */
+    bool is_bisectable() const;
+
+    /**
      * \brief Relative Hausdorff distance between *this and x.
      *
      * The relative distance is basically distance(x)/diam(*this).
@@ -352,6 +357,15 @@ class Interval {
      * is not (in particular if this interval is unbounded and \a x not). </ul>
      */
     double ratiodelta(const Interval& x) const;
+
+    /**
+     * \brief Bisect *this into two subintervals.
+     *
+     * \param ratio - says where to split (0.5=middle)
+     * \pre is_bisectable() must be true.
+     * \pre 0<ratio<1.
+     */
+    std::pair<Interval,Interval> bisect(double ratio=0.5) const;
 
     /** \brief pi. */
     static const Interval PI;
@@ -755,6 +769,13 @@ inline bool Interval::is_strict_subset(const Interval& x) const {
 inline bool Interval::is_strict_superset(const Interval& x) const {
 	return x.is_strict_subset(*this);
 }
+
+inline bool Interval::is_bisectable() const {
+	if (is_empty()) return false;
+	double m=mid();
+	return (lb()<m && m<ub());
+}
+
 
 inline double Interval::rel_distance(const Interval& x) const {
 	  double d=distance(*this,x);
