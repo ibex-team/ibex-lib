@@ -1,11 +1,11 @@
 //============================================================================
 //                                  I B E X                                   
 // File        : ibex_Optimizer.cpp
-// Author      : Gilles Chabert
+// Author      : Gilles Chabert, Bertrand Neveu
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : May 14, 2012
-// Last Update : May 14, 2012
+// Last Update : December 24, 2012
 //============================================================================
 
 #include "ibex_Optimizer.h"
@@ -16,6 +16,7 @@
 #include "ibex_CtcFwdBwd.h"
 #include "ibex_ExprCopy.h"
 #include "ibex_Function.h"
+#include "ibex_NoBisectableVariableException.h"
 #include <float.h>
 
 using namespace std;
@@ -45,22 +46,24 @@ void Optimizer::read_ext_box(const IntervalVector& ext_box, IntervalVector& box)
 }
 
 Optimizer::Optimizer(System& user_sys, Bsc& bsc, Ctc& ctc, double prec,
-		double goal_rel_prec, double goal_abs_prec, int sample_size) :
-		n(user_sys.f.nb_var()), m(user_sys.ctrs.size()),
-		sys(user_sys,System::NORMALIZE),
-		bsc(bsc), ctc(ctc), buffer(n), goal_var(n),
-		prec(prec), goal_rel_prec(goal_rel_prec), goal_abs_prec(goal_abs_prec),
-		sample_size(sample_size), mono_analysis_flag(true), in_HC4_flag(true), trace(false),
-		timeout(1e08), loup(POS_INFINITY), loup_point(n), nb_cells(0), uplo(NEG_INFINITY),
-		uplo_of_epsboxes(POS_INFINITY) {
-
-	// ====== build the reversed inequalities g_i(x)>0 ===============
-	Array<Ctc> ng(m);
+       	double goal_rel_prec, double goal_abs_prec, int sample_size) :
+	n(user_sys.nb_var), m(user_sys.nb_ctr),
+	sys(user_sys,System::NORMALIZE),
+	bsc(bsc), ctc(ctc), buffer(n), goal_var(n),
+	prec(prec), goal_rel_prec(goal_rel_prec), goal_abs_prec(goal_abs_prec),
+	sample_size(sample_size), mono_analysis_flag(true), in_HC4_flag(true), trace(false),
+	timeout(1e08), loup(POS_INFINITY), loup_point(n), nb_cells(0), uplo(NEG_INFINITY),
+	uplo_of_epsboxes(POS_INFINITY) {
+  // ====== build the reversed inequalities g_i(x)>0 ===============
+  if(m>0)
+    {Array<Ctc> ng(m);
 	for (int i=0; i<m; i++) {
 		ng.set_ref(i, *new CtcFwdBwd(sys.f[i],GT));
 	}
 	is_inside=new CtcUnion(ng);
-	// =============================================================
+    }
+  else is_inside=NULL;
+  // =============================================================
 
 	if (trace) cout.precision(12);
 
@@ -71,14 +74,15 @@ Optimizer::Optimizer(System& user_sys, Bsc& bsc, Ctc& ctc, double prec,
 }
 
 Optimizer::~Optimizer() {
-
+  if (is_inside)
+    {
 	for (int i=0; i<m; i++) {
 		delete &(is_inside->list[i]);
 	}
 
 	delete is_inside;
+    }
 	buffer.flush();
-	
 }
 
 bool Optimizer::update_loup(const IntervalVector& box) {
@@ -128,14 +132,14 @@ bool Optimizer::contract_and_bound(Cell& c) {
 	read_ext_box(c.box,tmp_box);
 	bool loup_changed = update_loup(tmp_box);
 	/*====================================================================*/
-	if (tmp_box.max_diam()<=prec || box_infinity(c.box)) {
+	if (tmp_box.max_diam()<=prec || !(can_bisect(c.box))){
           // rem1: tmp_box and not c.box because y is handled with goal_prec_rec and goal_abs_prec
 	  // rem2: do not use a precision contractor here since it would make the box empty (and y==(-inf,-inf)!!)
-	  // rem 3 : the extended  boxes with infinite domains [-inf,-DBL_MAX] or {DBL_MAX,inf] should be catched for avoiding infinite bisections
+	  // rem 3 : the extended  boxes with no bisectable  domains  should be catched for avoiding infinite bisections
 	  // the box is a "solution"
 	  // uplo of epsboxes can only go down, but not under uplo : it is an upperbound for uplo, that indicates a lowerbound for the objective in all the small boxes 
 	  // found by the precision criterion
-	  //	  cout << " small box " << tmp_box << endl;
+	  //	  cout << " small box " << tmp_box <<  "  " << c.box <<  endl;
 	  if (uplo_of_epsboxes > y.lb() && uplo_of_epsboxes > uplo) {
 	    if (y.lb() > uplo)
 	      uplo_of_epsboxes = y.lb();
@@ -153,17 +157,18 @@ bool Optimizer::contract_and_bound(Cell& c) {
 }
 
 
-  // detecting boxes with infinite domains [-inf,-DBL_MAX] or [DBL_MAX,inf]  for avoiding infinite bisections
+  // detecting boxes with infinite domains (all domains are infinite or < w)  for avoiding infinite bisections
 
-  bool Optimizer::box_infinity( const IntervalVector& box)
+  bool Optimizer::can_bisect( const IntervalVector& box)
   { 
     for (int j=0; j<box.size() ; j++)
       {
-      if ((box[j].lb()==NEG_INFINITY && box[j].ub()==-DBL_MAX) ||(box[j].lb()==DBL_MAX && box[j].ub()== POS_INFINITY))
-	return true;
+	if 
+	  (box[j].is_bisectable())
+	{
+	  return true;}
       }
     return false;
-   
   }
 
 void Optimizer::optimize(const IntervalVector& init_box) {
@@ -200,40 +205,40 @@ void Optimizer::optimize(const IntervalVector& init_box) {
 
 	try {
 	  while (!buffer.empty()) {
-
+	       
 	    if (trace >= 2) cout << ((CellBuffer&) buffer) << endl;
 
-		Cell* c=buffer.top();
-		//		cout << " box before bisection " <<  c->box << endl;
-		pair<IntervalVector,IntervalVector> boxes=bsc.bisect(*c);
+	    Cell* c=buffer.top();
+	    //	    cout << " box before bisection " <<  c->box << endl;
 
-
-		pair<Cell*,Cell*> new_cells=c->bisect(boxes.first,boxes.second);
-
-
-		delete buffer.pop();
-		loup_changed=0;
-
-		try{
-		  loup_changed = contract_and_bound(*new_cells.first);
-		    buffer.push(new_cells.first);
-		    nb_cells++;
-		  }
-		  catch(EmptyBoxException&) {
-		    delete new_cells.first;
-		  }
-		try {
-		  loup_changed |= contract_and_bound(*new_cells.second);
-		  buffer.push(new_cells.second);
-		  nb_cells++;
-		} 
-		catch(EmptyBoxException&) {
-		  delete new_cells.second;
-		}
-
+	    try {
+	    pair<IntervalVector,IntervalVector> boxes=bsc.bisect(*c);
 		
 
-		if (loup_changed) {
+	    pair<Cell*,Cell*> new_cells=c->bisect(boxes.first,boxes.second);
+
+
+	    delete buffer.pop();
+	    loup_changed=0;
+
+	    try{
+	      loup_changed = contract_and_bound(*new_cells.first);
+	      buffer.push(new_cells.first);
+	      nb_cells++;
+	    }
+	    catch(EmptyBoxException&) {
+	      delete new_cells.first;
+	    }
+	    try {
+	      loup_changed |= contract_and_bound(*new_cells.second);
+	      buffer.push(new_cells.second);
+	      nb_cells++;
+	    } 
+	    catch(EmptyBoxException&) {
+	      delete new_cells.second;
+	    }
+	    
+	    if (loup_changed) {
 			// In case of a new upper bound (loup_changed == true), all the boxes
 			// with a lower bound greater than (loup - goal_prec) are removed and deleted.
 			double ymax=loup - goal_rel_prec*fabs(loup);
@@ -243,7 +248,7 @@ void Optimizer::optimize(const IntervalVector& init_box) {
 			if (ymax <=-DBL_MAX)
 			  {cout << " infinite value for the minimum " << endl;  break;}
 			if (trace) cout << setprecision(12) << "ymax=" << ymax << " uplo= " <<  uplo << endl;
-		}
+	    }
 
 
 		double new_uplo=POS_INFINITY;
@@ -273,7 +278,10 @@ void Optimizer::optimize(const IntervalVector& init_box) {
 		// older version of the code (before revision 284).
 		time_limit_check();
 
-		}
+	    }
+	    catch (NoBisectableVariableException exc)
+	      {delete buffer.pop();}
+	  }
 	}
 	catch (TimeOutException exc) 
 	  {cout << "time limit " << timeout << "s. reached " << endl;}
@@ -308,6 +316,8 @@ void Optimizer::report() {
 	  (abs_prec <= goal_abs_prec? " [passed]" : " [failed]") << "  " << goal_abs_prec << endl;
 	if (uplo_of_epsboxes != NEG_INFINITY && uplo_of_epsboxes != POS_INFINITY)
 	  cout << " precision on variable domains obtained " << prec << " "   << " uplo_of_epsboxes " << uplo_of_epsboxes << endl;
+	else if (uplo_of_epsboxes == NEG_INFINITY)
+	  cout << " small boxes with negative infinity objective :  objective not bound " << endl;
 	if (loup==POS_INFINITY)
 	  cout << " no feasible point found " << endl;
 	else

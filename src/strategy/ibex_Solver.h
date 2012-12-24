@@ -77,6 +77,7 @@ public:
   double time_limit;
   /* Remember running time of the last exploration */
   double time;
+  
 
 };
 

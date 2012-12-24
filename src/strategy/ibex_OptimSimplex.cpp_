@@ -30,7 +30,7 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 
 	IntervalVector x_inf(box.lb());
 
-	IntervalVector g_inf(sys.f.eval_vector(x_inf)); // may throw EmptyBoxException?
+	
 
 	SoPlex mysoplex;
 	mysoplex.changeSense(SPxLP::MINIMIZE);	// set the objective sense
@@ -67,7 +67,9 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 	// ============================================================
 
 	//The linear system is generated
-	for (int i=0; i<m; i++) {
+	if (m>0)
+	  {IntervalVector g_inf(sys.f.eval_vector(x_inf)); // may throw EmptyBoxException?
+	    for (int i=0; i<m; i++) {
 
 		if(sys.f[i].eval(box).ub()<=0) continue;      // the constraint is satified :)
 
@@ -94,7 +96,8 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 		//		} else {
 		//			mysoplex.addRow(LPRow(Sup(-eval_inf(i+1))+1e-10, row1, infinity));
 		//		}
-	}
+	    }
+	  }
 
 	SPxSolver::Status stat;
 
@@ -102,14 +105,14 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 	mysoplex.setDelta(1e-10);
 
 
-	//	mysoplex.writeFile("dump.lp", NULL, NULL, NULL);
-	//	system ("cat dump.lp");
+	//		mysoplex.writeFile("dump.lp", NULL, NULL, NULL);
+	//		system ("cat dump.lp");
 	try{
 		stat = mysoplex.solve();
-	} catch(SPxException&) {
+	} catch(SPxException e ) {  //cout << " Simplex error " << endl;
 		return false;
 	}
-
+//	cout << " stat " << stat << endl;
 	if (stat == SPxSolver::OPTIMAL) {
 		//the linear solution is mapped to intervals and evaluated
 		DVector prim(nsimplex);
@@ -119,7 +122,7 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 
 		for (int j=0; j<n; j++)
 			tmpbox[j]=box[j].lb()+prim[j+1];
-
+//		cout << " simplex result " << tmpbox << endl;
 		bool ret= check_candidate(tmpbox.mid(),false); //  [gch] do we know here that the point is inner??
 
 		if (ret) {

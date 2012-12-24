@@ -22,7 +22,6 @@ namespace ibex {
 void Optimizer::monotonicity_analysis(IntervalVector& box) {
   IntervalVector g(n);
   sys.goal->gradient(box,g);
-
   for (int j=0; j<n; j++) {
 	  if (g[j].lb()>=0) box[j]=box[j].lb();
 	  if (g[j].ub()<=0) box[j]=box[j].ub();
@@ -73,7 +72,6 @@ bool Optimizer::check_candidate(const Vector& pt, bool _is_inner) {
 
 	//  cout << " res " <<  res << " loup " << loup << endl;
 	if (res<loup) {
-
 		if (_is_inner || is_inner(pt)) {
 			loup = res;
 			loup_point = pt;
@@ -90,6 +88,7 @@ bool Optimizer::random_probing (const IntervalVector& box, bool is_inner) {
 
 	for(int i=0; i<sample_size; i++) {
 		pt = box.random();
+	//	cout << " box " << box << " pt " << pt << endl;
 		loup_changed |= check_candidate (pt, is_inner);
 	}
 
@@ -232,22 +231,26 @@ bool Optimizer::update_loup_probing(const IntervalVector& box) {
 
 	IntervalVector inbox=box;
 	bool inner_found=false;
-
-	if (in_HC4_flag) {
+	if (m==0)  // unconstrained problem
+	  inner_found=true;
+	//	cout << "inbox " << inbox << endl;
+        else
+	  {	if (in_HC4_flag) {
 		inner_found=in_HC4(inbox); // inbox will be contracted to an inner box (possibly empty)
 		//		cout << "inner_found ? " << inner_found << " inbox=" << inbox << endl;
-	}
-	else {
-		try {
-			is_inside->contract(inbox); // compared to in_HC4, works the other way around: if inbox is inner, it is emptied.
-			inner_found=false;
-			inbox.set_empty();
+	    }
+	    else {
+	      try {
+		is_inside->contract(inbox); // compared to in_HC4, works the other way around: if inbox is inner, it is emptied.
+		inner_found=false;
+		inbox.set_empty();
 		} catch(EmptyBoxException&) {
 			inbox = box;
 			inner_found=true;
 		}
-	}
-
+	    }
+	  }
+	
 	if (inner_found && mono_analysis_flag)
 		monotonicity_analysis(inbox);
 

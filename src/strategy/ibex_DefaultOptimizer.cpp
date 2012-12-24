@@ -53,8 +53,7 @@ DefaultOptimizer::DefaultOptimizer(System& _sys, double prec, double goal_prec) 
   
 	tmp_ext_sys=NULL; // important! re-init for next call to constructor.
 
-	srand(1);
-}
+	srand(1);}
 
 // the corners for X_Newton : one random orner and its opposite
 vector<X_Newton::corner_point>*  DefaultOptimizer::default_corners () {
@@ -79,7 +78,7 @@ Array<Ctc>*  DefaultOptimizer::contractor_list (System& sys, System& ext_sys,dou
 	ctc_list->set_ref(2,*new X_Newton(ext_sys,
 			new CtcHC4 (ext_sys.ctrs,0.01),  // called in the X_Newton external loop
 			*(default_corners()),
-					  0,sys.goal,0.2,0.2,LR_contractor::ALL_BOX,X_Newton::HANSEN,100,1.e5,1.e5));
+					  0,sys.goal,0.2,0.2,LR_contractor::ALL_BOX,X_Newton::HANSEN,100,1.e6,1.e6));
 
 	return ctc_list;
 }

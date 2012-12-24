@@ -10,6 +10,7 @@
 
 #include "ibex_Solver.h"
 #include "ibex_EmptyBoxException.h"
+#include "ibex_NoBisectableVariableException.h"
 #include <cassert>
 
 using namespace std;
@@ -22,6 +23,10 @@ Solver::Solver(Ctc& ctc, Bsc& bsc, CellBuffer& buffer, double prec) :
 	nb_cells=0;
 
 }
+
+
+
+
 
 vector<IntervalVector> Solver::solve(const IntervalVector& init_box) {
 	buffer.flush();
@@ -69,18 +74,25 @@ vector<IntervalVector> Solver::solve(const IntervalVector& init_box) {
 				  cout << " sol " << sols.size() << " nb_cells " <<  nb_cells << " "  << sols[sols.size()-1] <<   endl;
 				delete buffer.pop();
 				impact.set_all();
-			} else {
-				pair<IntervalVector,IntervalVector> boxes=bsc.bisect(*c);
+			}
+	       
+			else {
+			  try {pair<IntervalVector,IntervalVector> boxes=bsc.bisect(*c);
 				pair<Cell*,Cell*> new_cells=c->bisect(boxes.first,boxes.second);
 
 				delete buffer.pop();
 				buffer.push(new_cells.first);
 				buffer.push(new_cells.second);
 				nb_cells+=2;
-				if (nb_cells==cell_limit) throw CellLimitException();
-				time_limit_check();
+				if (nb_cells==cell_limit) throw CellLimitException();}
+			  catch (NoBisectableVariableException){
+			    delete buffer.pop(); 
+			    impact.set_all();
+			  }
 			}
-				
+			time_limit_check();
+			  
+						
 		} catch(EmptyBoxException&) {
 			assert(c->box.is_empty());
 			delete buffer.pop();

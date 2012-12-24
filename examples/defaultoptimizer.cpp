@@ -33,10 +33,6 @@ int main(int argc, char** argv) {
 		double time_limit = convert("timelimit",argv[4]);
 
 
-		CtcHC4 hc4(sys.ctrs);
-hc4.contract(sys.box);
-cout << "after=" << sys.box << endl;
-
 		// Build the default optimizer
 		DefaultOptimizer o(sys,prec,goal_prec);
 

@@ -9,7 +9,7 @@
 //============================================================================
 
 #include "ibex_RoundRobin.h"
-
+#include "ibex_NoBisectableVariableException.h"
 using std::pair;
 
 namespace ibex {
@@ -28,13 +28,15 @@ pair<IntervalVector,IntervalVector> RoundRobin::bisect(const IntervalVector& box
 
 
   while (var != last_var && (box[var].diam()< w 
-			     || box[var].mag()==POS_INFINITY)) // test for avoiding to bisect infinite intervals BNE
+			     || !(box[var].is_bisectable())) // test for avoiding to bisect infinite intervals BNE
+	 )
     var = (var + 1)%n;  
 
-
+// if no variable can be bisected an exception is thrown
+  if (var==last_var) throw NoBisectableVariableException();
   // the next line ensures that in the case where all the domains
   // have width less than w, we keep on round robin.
-  if (var==last_var && box[var].diam()<w) var = (last_var+1)%n;
+  //  if (var==last_var && box[var].diam()<w) var = (last_var+1)%n;    suppressed  BNE  (incompatible with NoBisectableVariableException)
 
   last_var = var; // output
 

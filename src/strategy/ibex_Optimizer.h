@@ -312,10 +312,10 @@ protected:
 	 */
 	void read_ext_box(const IntervalVector& ext_box, IntervalVector& box);
 
-        /** Detection of boxes with infinite domains [-inf,-DBL_MAX] or {DBL_MAX,inf] that should be catched for avoiding infinite bisections */
-	bool box_infinity( const IntervalVector& box);
 
 private:
+        /** Detection if there exist a bisectable interval  for avoiding infinite bisections */
+	bool can_bisect( const IntervalVector& box);
 
 
 	/** Inner contractor (for the negation of g) */
