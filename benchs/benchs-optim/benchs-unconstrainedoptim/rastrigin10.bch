@@ -1,0 +1,19 @@
+constants
+pi = 3.14159265;
+
+variables
+
+x1 in [-10,10];
+x2 in [-10,10];
+x3 in [-10,10];
+x4 in [-10,10];
+x5 in [-10,10];
+x6 in [-10,10];
+x7 in [-10,10];
+x8 in [-10,10];
+x9 in [-10,10];
+x10 in [-10,10];
+
+minimize
+300  + x1^2 + x2 ^2 + x3 ^2 + x4^2 + x5^2 +x6^2 + x7 ^2 + x8 ^2 + x9^2 + x10^2 - 10 *cos (2*pi*x1) - 10 *cos (2*pi*x2) -  10 *cos (2*pi*x3) -  10 *cos (2*pi*x4) - 10 *cos (2*pi*x5) - 10 *cos (2*pi*x6) - 10 *cos (2*pi*x7) -  10 *cos (2*pi*x8) -  10 *cos (2*pi*x9) - 10 *cos (2*pi*x10);
+
