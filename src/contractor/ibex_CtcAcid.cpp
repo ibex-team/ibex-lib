@@ -38,7 +38,8 @@ void CtcAcid::contract(IntervalVector& box) {
 
 	if (nbcall1 < nbinitcalls) {                       // réglage
 
-	  if (nbcalls==0) vhandled =nb_CID_var;               // premier réglage 3BCID une fois sur toutes les variables
+
+	  if (nbcalls < nbinitcalls) vhandled =nb_CID_var;     // premier réglage 3BCID une fois sur toutes les variables
 	  else	vhandled = 2* nbcidvar;                       //  réglages suivants : sur 2 fois le réglage précédent
 	  
 	  if (vhandled< 2) vhandled= 2;                  // réglage minimum  à 2
