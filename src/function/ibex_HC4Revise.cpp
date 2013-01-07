@@ -12,6 +12,8 @@
 
 namespace ibex {
 
+const double HC4Revise::RATIO = 0.1;
+
 void HC4Revise::proj(const Function& f, const Domain& y, Array<Domain>& x) {
 	Eval().eval(f,x);
 	*f.expr().deco.d = y;

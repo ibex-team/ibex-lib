@@ -190,7 +190,7 @@ ExprConstant::ExprConstant(const IntervalMatrixArray& ma)
 ExprConstant::ExprConstant(const Domain& d, bool reference) : ExprLeaf(d.dim), value(d,reference) {
 }
 
-bool ExprConstant::ExprConstant::is_zero() const {
+bool ExprConstant::is_zero() const {
 	switch(dim.type()) {
 	case Dim::SCALAR:     return value.i()==Interval::ZERO; break;
 	case Dim::ROW_VECTOR:

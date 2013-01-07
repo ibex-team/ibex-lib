@@ -31,6 +31,7 @@ CmpOp operator!(CmpOp op) {
 	case LEQ : return GT;
 	case GEQ : return LT;
 	case GT :  return LEQ;
+	default :  assert(false); return EQ;
 	}
 }
 

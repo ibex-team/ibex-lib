@@ -9,6 +9,7 @@
 //============================================================================
 
 #include "ibex_CtcAcid.h"
+#include <algorithm>
 
 using namespace std;
 

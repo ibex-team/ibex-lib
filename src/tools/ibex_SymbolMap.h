@@ -29,7 +29,7 @@ using __gnu_cxx::hash_map;
 /* using std::unordered_map; */
 
 #else
-#ifdef __WIN32__
+#ifdef _WIN32
 #include <hash_map>
 using stdext::hash_compare;
 using stdext::hash_map;

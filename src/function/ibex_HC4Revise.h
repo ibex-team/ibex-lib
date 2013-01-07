@@ -37,8 +37,9 @@ public:
 	/**
 	 * \brief Ratio for the contraction of a
 	 * matrix-vector / matrix-matrix multiplication.
+	 * Set to 0.1.
 	 */
-	static const double RATIO = 0.1;
+	static const double RATIO;
 
 	inline void index_bwd (const ExprIndex&,   ExprLabel& exprL, const ExprLabel& result)            { /* nothing to do */ }
 	       void vector_bwd(const ExprVector&,  ExprLabel** compL, const ExprLabel& result);

@@ -12,12 +12,18 @@
 
 namespace ibex {
 
+#ifdef _MSC_VER
+#define SNPRINTF _snprintf
+#else
+#define SNPRINTF snprintf
+#endif // _MSC_VER
+
 int index_2_string(char* buff, char lbracket, char rbracket, int index) {
 	assert(index<1000000);
 	int k=0;
 	char number[6];
 	buff[k++]=lbracket;
-	snprintf(number, 6, "%d", index);
+	SNPRINTF(number, 6, "%d", index);
 	strcpy(&buff[k], number);
 	k+=strlen(number);
 	buff[k++]=rbracket;
@@ -37,7 +43,7 @@ static int generated_func_count=0;
 
 static char* next_generated_name(const char* base, int num) {
 	sprintf(generated_name_buff, base);
-	snprintf(&generated_name_buff[strlen(base)], MAX_NAME_SIZE-strlen(base), "%d", num);
+	SNPRINTF(&generated_name_buff[strlen(base)], MAX_NAME_SIZE-strlen(base), "%d", num);
 	return generated_name_buff;
 }
 

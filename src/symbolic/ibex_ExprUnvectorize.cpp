@@ -102,7 +102,7 @@ protected:
 		}
 	}
 };
-*/
+ */
 
 namespace ibex {
 
@@ -167,6 +167,7 @@ void ExprUnvectorize::visit(const ExprSymbol& x) {
 	case Dim::SCALAR: // cannot happen
 	case Dim::ROW_VECTOR:
 	case Dim::COL_VECTOR:
+	{
 		// Example. Let x be a vector of 2 components.
 		// The following node "v" is [x[0], x[1]]. It the src expression is:
 		//           x->x[0]+x[1].
@@ -183,8 +184,10 @@ void ExprUnvectorize::visit(const ExprSymbol& x) {
 			v[i]=dest_symbols.back();
 		}
 		peers[x.id]=&ExprVector::new_(v,x.dim.vec_size(),x.dim.type()==Dim::ROW_VECTOR);
-		break;
+	}
+	break;
 	case Dim::MATRIX:
+	{
 		const ExprNode* m[x.dim.dim2];
 		for (int i=0; i<x.dim.dim2; i++) {
 			const ExprNode* v[x.dim.dim3];
@@ -195,8 +198,10 @@ void ExprUnvectorize::visit(const ExprSymbol& x) {
 			m[i]= & ExprVector::new_(v,x.dim.dim3,true);
 		}
 		peers[x.id]=& ExprVector::new_(m,x.dim.dim2,false);
-		break;
+	}
+	break;
 	case Dim::MATRIX_ARRAY:
+	{
 		const ExprNode* ma[x.dim.dim1];
 		for (int i=0; i<x.dim.dim1; i++) {
 			const ExprNode* m[x.dim.dim2];
@@ -211,7 +216,9 @@ void ExprUnvectorize::visit(const ExprSymbol& x) {
 			ma[i]= & ExprVector::new_(m,x.dim.dim2,false);
 		}
 		peers[x.id]= & ExprVector::new_(ma,x.dim.dim1,true); // notice: true or false does not matter here
-		//break;
+
+	}
+	break;
 	}
 }
 

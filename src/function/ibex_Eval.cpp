@@ -68,7 +68,7 @@ Domain& Eval::eval(const Function &f, const IntervalVector& box) const {
 	return *f.forward<Eval>(*this).d;
 }
 
-void Eval::Eval::vector_fwd(const ExprVector& v, const ExprLabel** compL, ExprLabel& y) {
+void Eval::vector_fwd(const ExprVector& v, const ExprLabel** compL, ExprLabel& y) {
 
 	assert(v.type()!=Dim::SCALAR);
 	assert(v.type()!=Dim::MATRIX_ARRAY);

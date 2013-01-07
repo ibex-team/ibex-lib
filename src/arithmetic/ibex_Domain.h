@@ -163,6 +163,7 @@ public:
 		case Dim::COL_VECTOR:   return v()==d.v();
 		case Dim::MATRIX:       return m()==d.m();
 		case Dim::MATRIX_ARRAY: return ma()==d.ma();
+		default:                assert(false); return false;
 		}
 	}
 
