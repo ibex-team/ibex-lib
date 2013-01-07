@@ -12,13 +12,13 @@
 #define __IBEX_BOOL_INTERVAL_H__
 
 /**
- * \defgroup predicate
+ * \defgroup predicate Predicates
  */
 
 namespace ibex {
 
 /**
- * \ingroup predicate.
+ * \ingroup predicate
  *
  * \brief Boolean interval.
  */

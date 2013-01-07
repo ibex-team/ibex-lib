@@ -20,69 +20,79 @@ namespace ibex {
 /*@{*/
 
 /**
- * \brief Inner image of the addition
- * Return z such that $z\subseteq x+y$.
+ * \brief Inner image of the addition.
+ *
+ * Return z such that z ⊆ (x+y).
  */
 Interval iadd(const Interval& x, const Interval& y);
 
 /**
- * \brief Inner image of the subtraction
- * Return z such that $z\subseteq x-y$.
+ * \brief Inner image of the subtraction.
+ *
+ * Return z such that z ⊆ (x-y).
  */
 Interval isub(const Interval& x, const Interval& y);
 
 /**
- * \brief Inner image of the multiplication
- * Return z such that $z\subseteq x-y$.
+ * \brief Inner image of the multiplication.
+ *
+ * Return z such that z ⊆ (x-y).
  */
 Interval imul(const Interval& x, const Interval& y);
 
 /**
- * \brief Inner image of the division
- * Return z such that $z\subseteq x-y$.
+ * \brief Inner image of the division.
+ *
+ * Return z such that z ⊆ (x-y).
  */
 Interval idiv(const Interval& x, const Interval& y);
 
 /**
  * \brief Inner image of sqr.
- * Return y such that $y\subseteq x^2$.
+ *
+ * Return y such that y ⊆ x^2.
  */
 Interval isqr(const Interval& x);
 
 /**
  * \brief Inner image of minus.
- * Return y such that $y\subseteq -x$.
+ *
+ * Return y such that y ⊆ -x.
  */
 Interval iminus(const Interval& x);
 
 /**
  * \brief Inner image of log.
- * Return y such that $y\subseteq log(x)$.
+ *
+ * Return y such that y ⊆ log(x).
  */
 Interval ilog(const Interval& x);
 
 /**
  * \brief Inner image of exp.
- * Return y such that $y\subseteq exp(x)$.
+ *
+ * Return y such that y ⊆ exp(x).
  */
 Interval iexp(const Interval& x);
 
 /**
  * \brief Inner image of acos.
- * Return y such that $y\subseteq acos(x)$.
+ *
+ * Return y such that y ⊆ acos(x).
  */
 Interval iacos(const Interval& x);
 
 /**
  * \brief Inner image of asin.
- * Return y such that $y\subseteq asin(x)$.
+ *
+ * Return y such that y ⊆ asin(x).
  */
 Interval iasin(const Interval& x);
 
 /**
  * \brief Inner image of atan.
  *
- * Return y such that $y\subseteq atan(x)$.
+ * Return y such that  y ⊆ atan(x).
  */
 Interval iatan(const Interval& x);
 
@@ -101,8 +111,8 @@ Interval iatan(const Interval& x);
  *
  * They contract x (resp. y) to x' (resp. y') such that:
  * <ul>
- * <li> $(xin,yin)\subseteq (x',y')$ (only relevant in inflating mode)
- * <li> $x' op y'\subseteq z$
+ * <li> (xin,yin) ⊆ (x',y') (only relevant in inflating mode)
+ * <li> x' op y'⊆ z
  * </ul>
  * where op is the operator (either,+,-,* or /)
  *
@@ -110,23 +120,23 @@ Interval iatan(const Interval& x);
  *
  * \return true iff the result is non empty (always return true in inflating mode)
  *
- * \pre $xin=\emptyset$ iff $yin=\emptyset$
- * \pre $(xin,yin)\subseteq (x,y)$
- * \pre $xin op yin\subseteq z$
+ * \pre xin=\emptyset iff yin=\emptyset
+ * \pre (xin,yin) ⊆ (x,y)
+ * \pre xin op yin ⊆ z
  */
 bool iproj_add(const Interval& z, Interval& x, Interval& y, const Interval &xin=Interval::EMPTY_SET, const Interval& yin=Interval::EMPTY_SET);
 
 /**
  * \brief Inner projection of the subtraction (inflating version)
  *
- * \see comments in #ibex::iproj_add(const Interval&, Interval&, Interval&, const Interval, const Interval&).
+ * \see comments in \link ibex::iproj_add(const Interval& z, Interval& x, Interval& y, const Interval& xin, const Interval& yin) iproj_add \endlink
  */
 bool iproj_sub(const Interval& z, Interval& x, Interval& y, const Interval &xin=Interval::EMPTY_SET, const Interval& yin=Interval::EMPTY_SET);
 
 /**
  * \brief Inner projection of the multiplication.
  *
- * \see comments in #ibex::iproj_add(const Interval&, Interval&, Interval&, const Interval, const Interval&).
+ * \see comments in #ibex::iproj_add(const Interval&, Interval&, Interval&, const Interval&, const Interval&).
  */
 bool iproj_mul(const Interval& z, Interval& x, Interval& y, const Interval &xin=Interval::EMPTY_SET, const Interval& yin=Interval::EMPTY_SET);
 
@@ -144,8 +154,8 @@ bool iproj_div(const Interval& z, Interval& x, Interval& y, const Interval &xin=
  *
  * They contract x to x' such that
  * <ul>
- * <li> $xin\subseteq x'$ (only relevant in inflating mode)
- * <li> $f(x')\subseteq y$
+ * <li> xin ⊆ x' (only relevant in inflating mode)
+ * <li> f(x') ⊆ y
  * </ul>
  * where op is the operator (either,+,-,* or /)
  *
@@ -153,8 +163,8 @@ bool iproj_div(const Interval& z, Interval& x, Interval& y, const Interval &xin=
  *
  * \return true iff the result is non empty (always return true in inflating mode)
  *
- * \pre $xin\subseteq x$
- * \pre $f(xin)\subseteq y$
+ * \pre xin ⊆ x
+ * \pre f(xin) ⊆ y
  */
 bool iproj_sqr(const Interval& y, Interval& x, const Interval& xin=Interval::EMPTY_SET);
 

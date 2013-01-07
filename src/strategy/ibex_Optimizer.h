@@ -314,14 +314,9 @@ protected:
 
 
 private:
-        /** Detection if there exist a bisectable interval  for avoiding infinite bisections */
-	bool can_bisect( const IntervalVector& box);
-
 
 	/** Inner contractor (for the negation of g) */
 	CtcUnion* is_inside;
-
-
 
 	/** The point satisfying the constraints corresponding to the loup */
 	Vector loup_point;

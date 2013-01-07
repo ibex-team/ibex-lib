@@ -264,6 +264,8 @@ class Interval {
 
     /**
      * \brief True iff *this can be bisected into two non-degenerated intervals.
+     *
+     * Examples of non bisectable intervals are [0,next_float(0)] or [DBL_MAX,+oo).
      */
     bool is_bisectable() const;
 
@@ -271,6 +273,7 @@ class Interval {
      * \brief Relative Hausdorff distance between *this and x.
      *
      * The relative distance is basically distance(x)/diam(*this).
+     * \see #ibex::distance (const ibex::Interval &x1, const ibex::Interval &x2).
      */
     double rel_distance(const Interval& x) const;
 

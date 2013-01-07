@@ -23,8 +23,10 @@ class Cell;
 
 /**
  * \defgroup contractor Contractors
+ */
+
+/**
  * \ingroup contractor
- *
  * \brief Contractor interface.
  */
 class Ctc {

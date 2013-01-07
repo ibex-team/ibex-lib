@@ -18,14 +18,17 @@ namespace ibex {
 
 class Cell;
 
-/** \defgroup bisector Bisectors
- *
+/**
+ * \defgroup bisector Bisectors
+ */
+
+/**
  * \ingroup bisector
  * \brief Generic bisector
  *
  * Base class of all bisectors. A bisector is an operator used by a strategy
- * (like \link ibex::Paver paver \endlink) to make a choice point.
- * An implementation of this class must provide a #bisect() function.
+ * (like the \link ibex::Solver solver \endlink) to make a choice point.
+ * An implementation of this class must provide a #bisect(const IntervalVector& box) function.
  *
  */
 class Bsc {

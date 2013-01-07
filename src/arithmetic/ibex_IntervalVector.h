@@ -316,7 +316,14 @@ public:
 	 */
 	bool is_zero() const;
 
-	/**
+    /**
+     * \brief True iff *this can be bisected along one dimension.
+     *
+     * \sa #ibex::Interval::is_bisectable().
+     */
+    bool is_bisectable() const;
+
+    /**
 	 * \brief Return the vector of diameters.
 	 */
 	Vector diam() const;
@@ -377,10 +384,10 @@ public:
 	/**
 	 * \brief Return the relative distance with x.
 	 *
-	 * \return \f$\displaystyle \max_{i=1..n} rel_distance([this]_i, x_i)/diam([this]_i)\f$.
+	 * \return \f$\displaystyle \max_{i=1..n} rel\_distance([this]_i, x_i)/diam([this]_i)\f$.
 	 *
 	 * \sa #ibex::distance(const IntervalVector& x1, const IntervalVector& x2).
-	 * \sa #Interval::rel_distance(const Interval& x) const.
+	 * \sa #ibex::Interval::rel_distance(const Interval& x) const.
 	 */
 	double rel_distance(const IntervalVector& x) const;
 
@@ -483,7 +490,7 @@ private:
  *
  * \pre Dimension of \a x1 and \a x2 must be equal.
  *
- * \sa #ibex::distance(const Interval&, const Interval&) const.
+ * \sa #ibex::distance(const Interval&, const Interval&).
  */
 double distance(const IntervalVector& x1, const IntervalVector& x2);
 

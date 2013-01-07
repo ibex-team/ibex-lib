@@ -23,8 +23,11 @@ namespace ibex {
 class CtcFixPoint : public Ctc {
 public:
 	/**
-	 * \brief build a CtcFixPoint
+	 * \brief build a CtcFixPoint.
 	 *
+	 * When the Hausdorff distance between
+	 * two iterations is less than ratio*diameter
+	 * the fixpoint is considered to be reached.
 	 */
 	CtcFixPoint(Ctc& ctc, double ratio=default_ratio);
 

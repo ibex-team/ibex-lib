@@ -20,8 +20,10 @@ namespace ibex {
 
 /**
  * \defgroup tools Tools
+ */
+
+/**
  * \ingroup tools
- *
  * \brief Array of references.
  *
  */

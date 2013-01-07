@@ -252,6 +252,12 @@ bool IntervalVector::is_zero() const {
 	return true;
 }
 
+bool IntervalVector::is_bisectable() const {
+	for (int i=0; i<size(); i++)
+		if ((*this)[i].is_bisectable()) return true;
+	return false;
+}
+
 Vector IntervalVector::diam() const {
 	Vector d(size());
 	for (int i=0; i<size(); i++)

@@ -18,9 +18,10 @@ namespace ibex {
 
 /**
  * \defgroup predicate Predicates
- *
+ */
+
+/**
  * \ingroup predicate
- *
  * \brief Predicate (function that maps a box to a boolean interval)
  *
  * Root class of all predicates.
