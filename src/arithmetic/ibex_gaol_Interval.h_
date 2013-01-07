@@ -322,7 +322,9 @@ inline Interval root(const Interval& x, int n) {
 }
 
 inline Interval exp(const Interval& x) {
-	return gaol::exp(x.itv);
+	Interval res = gaol::exp(x.itv);
+	fpu_round_up();
+	return res;
 }
 
 inline Interval log(const Interval& x) {
