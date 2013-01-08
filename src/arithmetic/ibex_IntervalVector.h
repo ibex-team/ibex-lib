@@ -324,6 +324,11 @@ public:
     bool is_bisectable() const;
 
     /**
+      * \brief Vector of radii.
+      */
+    Vector rad() const;
+
+    /**
 	 * \brief Return the vector of diameters.
 	 */
 	Vector diam() const;

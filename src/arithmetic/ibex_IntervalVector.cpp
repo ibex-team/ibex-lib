@@ -258,6 +258,13 @@ bool IntervalVector::is_bisectable() const {
 	return false;
 }
 
+Vector IntervalVector::rad() const {
+	Vector r(size());
+	for (int i=0; i<size(); i++)
+		r[i]=(*this)[i].rad();
+	return r;
+}
+
 Vector IntervalVector::diam() const {
 	Vector d(size());
 	for (int i=0; i<size(); i++)
