@@ -68,12 +68,9 @@ vector<IntervalVector> Solver::solve(const IntervalVector& init_box) {
 			if (v!=-1) impact.unset(v);
 
 			if (c->box.max_diam()<=prec) {
-				sols.push_back(c->box);
-				cout.precision(12);
-				if (trace >=1) 
-				  cout << " sol " << sols.size() << " nb_cells " <<  nb_cells << " "  << sols[sols.size()-1] <<   endl;
-				delete buffer.pop();
-				impact.set_all();
+			  new_sol(sols,c->box);
+			  delete buffer.pop();
+			  impact.set_all();
 			}
 	       
 			else {
@@ -84,8 +81,9 @@ vector<IntervalVector> Solver::solve(const IntervalVector& init_box) {
 				buffer.push(new_cells.first);
 				buffer.push(new_cells.second);
 				nb_cells+=2;
-				if (nb_cells==cell_limit) throw CellLimitException();}
+				if (cell_limit >=0 && nb_cells>=cell_limit) throw CellLimitException();}
 			  catch (NoBisectableVariableException){
+			    new_sol(sols, c->box);
 			    delete buffer.pop(); 
 			    impact.set_all();
 			  }
@@ -120,6 +118,14 @@ vector<IntervalVector> Solver::solve(const IntervalVector& init_box) {
     Timer::start();
   }
   
+
+  void Solver::new_sol (vector<IntervalVector> & sols, IntervalVector & box)
+  {sols.push_back(box);
+    cout.precision(12);
+    if (trace >=1) 
+      cout << " sol " << sols.size() << " nb_cells " <<  nb_cells << " "  << sols[sols.size()-1] <<   endl;
+  }
+	
   
 
 } // end namespace ibex

@@ -68,8 +68,6 @@ public:
 	/** Number of nodes  in the search tree */
 	int nb_cells;
 
-	void time_limit_check();
-
 /** Maximum cpu time used by the solver.
    * This parameter allows to bound time complexity.
    * The value can be fixed by the user. By default, it is -1 (no limit). */
@@ -77,6 +75,9 @@ public:
   double time_limit;
   /* Remember running time of the last exploration */
   double time;
+ protected :
+	void time_limit_check();
+	void new_sol(std::vector<IntervalVector> & sols, IntervalVector & box);
   
 
 };
