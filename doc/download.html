@@ -1,0 +1,338 @@
+	<p>
+	Archive file: &nbsp; <a href="uploads/ibex-2.0.3alpha.tar.gz">ibex-2.0.3alpha.tar.gz</a>. 
+	<p>
+        The release 2.0 will be ready soon. The current version is still under test:
+	<p>
+	<h2 id="stand-install">Standard installation (recommended)</h2>
+	Ibex can either be compiled with <a href="http://sourceforge.net/projects/gaol/">Gaol</a> or <a href="http://www.ti3.tu-harburg.de/keil/profil/index_e.html">Profil/Bias</a>.
+	The standard installation will automatically extract and build the Gaol library (and its dependencies) from the bundle.
+	It will also make you install Soplex in a specific folder.
+	Finally, it will install Ibex on your system, as a static 32-bits library (even if your platform is 64 bits).<br>
+
+	<p><p>
+	<div>
+	But you can also {anchor anchor='options' text='customize'} the installation.
+	</div>
+	<p>
+
+	<h3>Linux and MacOS</h3>
+	The installation assumes your system meets the {anchor anchor='requirements' text='requirements'}.
+	<ul>
+	<li>Create a new directory <span class="txtcode">Ibex</span><br>
+	<div class="code"><span class="path">~$</span> mkdir Ibex</div>
+	<li>Download <a href="http://soplex.zib.de/">Soplex 1.7.0</a> and save the archive in <span class="txtcode">Ibex</span></li>
+	<li>Compile Soplex<br>
+	<div class="code">
+	<span class="path">~$</span> cd Ibex<br> 
+	<span class="path">~/Ibex$</span> tar xvfz soplex-1.7.0.tgz <br> 
+	<span class="path">~/Ibex$</span> cd soplex-1.7.0 <br> 
+	<span class="path">~/Ibex/soplex-1.7.0$</span> make ZLIB=false<br/> 
+	<span class="path">~/Ibex/soplex-1.7.0$</span> cd ..
+	</div>
+	<b>[for MacOS or Linux 64 bits]</b> Compile Soplex with the following option instead:
+	<div class="code"><span class="path">~/Ibex/soplex-1.7.0$</span> make ARCH=x86 ZLIB=false</div>
+	</li>
+	<li>Save the archive <span class="txtcode">ibex-lib-2.0.tar.gz</span> in <span class="txtcode">Ibex</span></li>
+	<li>Compile Ibex<br>
+	<div class="code">
+	<span class="path">~/Ibex/$</span> tar xvfz ibex-lib-2.0.tar.gz<br /> 
+	<span class="path">~/Ibex/$</span> cd ibex-2.0<br /> 
+	<span class="path">~/Ibex/ibex-2.0/$</span> ./waf configure <br /> 
+	<span class="path">~/Ibex/ibex-2.0/$</span> sudo ./waf install
+	</div>
+	</li>
+	</ul>
+
+	<span id="requirements"><b>Requirements</b><br/>
+	The following applications must be installed.
+	<ul>
+	<li>g++
+	<li>gcc
+	<li>flex
+	<li>bison
+	<li>python2.x
+	<li>make
+	<li>g++-multilib (<i>only for 64 bits platform</i>)
+	<li>pkg-config (<i>optionnal</i>)
+	<li>jdk (<i>optionnal</i>)
+	</ul>
+	<p>
+
+	<h3>Windows</h3>
+
+	<ul>
+
+	<li>Install <a href="https://sourceforge.net/projects/mingw/files/Installer/mingw-get-inst/">Mingw+Msys</a><br>
+	Select the following components to be installed:
+	<ul>
+	<li>C Compiler</li>
+	<li>C++ Compiler</li>
+	<li>MSYS Basic System</li>
+	<li>MinGW Developer ToolKit</li>
+	</ul>
+	</li>
+
+	<li>Install <a href="http://www.python.org/getit/">Python2</a></li>
+
+	<li>Create a new directory <span class="txtcode">Ibex</span> (in the shell of Mingw)<br>
+	<div class="code"><span class="path">~$</span> mkdir Ibex</div></li>
+
+	<li>Download <a href="http://soplex.zib.de/">Soplex 1.7.0</a> and save the archive in <span class="txtcode">Ibex</span></li>
+
+	<li>Compile Soplex in <span class="txtcode">Ibex</span> (still in the shell of Mingw):
+	<div class="code">
+	<span class="path">~$</span> cd Ibex<br> 
+	<span class="path">~/Ibex$</span> tar xvfz soplex-1.7.0.tgz <br> 
+	<span class="path">~/Ibex$</span> cd soplex-1.7.0 <br> 
+	<span class="path">~/Ibex/soplex-1.7.0$</span> make ZLIB=false<br/> 
+	<span class="path">~/Ibex/soplex-1.7.0$</span> cd ..
+	</div></li>
+	<li>Save the archive <span class="txtcode">ibex-lib-2.0.tar.gz</span> in <span class="txtcode">Ibex</span></li>
+	<li>Compile ibex (still in the shell of Mingw)<br>
+	<div class="code">
+	<span class="path">~/Ibex/$</span> export PATH="$PATH:/c/Python27" <br />
+	<span class="path">~/Ibex/$</span> tar xvfz ibex-lib-2.0.tar.gz<br /> 
+	<span class="path">~/Ibex/$</span> cd ibex-2.0<br /> 
+	<span class="path">~/Ibex/ibex-2.0/$</span> ./waf configure --prefix=<i>[path]</i><br />
+	</div>
+	where <i>[path]</i> is the place where you want Ibex to be installed.
+	This path must be entered in Windows-style and with double backslash (&laquo;\\&raquo;) as separator, e.g.,
+	<span class="txtcode">C:\\MyLibraires\\Ibex</span>.<br>
+	Finally:
+	<div class="code">
+	<span class="path">~/Ibex/ibex-2.0/$</span> ./waf install<br />
+	</div>
+	
+	</li>
+	</ul>
+
+	<p>
+
+
+	<h2 id="options">Customized Installation</h2>
+
+	<h3>Configuration options</h3>
+
+	<span class="txtcode">waf</span> <span class="txtcode">configure</span> supports the following options:
+	<ul>
+	<li><span class="keyword">--with-gaol=</span><i>[path]</i><br>
+	Use the (already installed) version of Gaol at the given path.<br><br>
+	<b>Warning</b>: to get good performances it is highly recommended to have configured Gaol with the options
+        <span class="txtcode">--disable-preserve-rounding --enable-optimize</span>.<br><br>
+	<b>Note</b>: The configuration will also automatically look for two other librairies required by Gaol: <b>gdtoa</b> and <b>ultim</b> (mathlib).
+	It is assumed that these librairies are installed under standard system folders (like <span class="txtcode">/usr/lib</span>) or under <span class="txtcode"><i>[gaol-path]</i>/lib</span>. Otherwise, you have to set compiler
+        flags (e.g., <span class="txtcode">CPPFLAGS=-I/<i>[ultim-path]</i>/include</span> and <span class="txtcode">LDFLAGS=-L/<i>[ultim-path]</i>/lib</span>).
+	<br><br>
+	<li><span class="keyword">--with-bias=</span><i>[path]</i><br>
+	Compile Ibex with Profil/Bias (instead of Gaol).
+	Note that the bundle only contains Gaol, not Profil/Bias. This library must already be installed on your machine
+	at the given path.<br><br>
+        <b>Note:</b> To compile Profil/Bias on a MacOS 64 bits platform, unzip <a href="uploads/x86_64-MaxOSX-compat-gcc.tgz">this file</a>
+	under <i>[profil path]</i><span class="txtcode">/config</span>.
+	<br><br>
+	<li><span class="keyword">--with-soplex=</span><i>[path]</i><br>
+	Look for Soplex at the given path instead of the parent directory.
+	<br><br>
+	<li><span class="keyword">--enable-shared</span><br>
+	Compile Ibex as a dynamic library. See {anchor anchor='dynamic-install' text='the guidelines'}.
+	<br><br>
+	<li><span class="keyword">--with-jni</span><br>
+	Compile Ibex with the Java interface used by <a href="http://www.emn.fr/z-info/choco-solver/">Choco</a>.<br>
+	Ibex itself will be compiled as a dynamic library (as if configured with <span class="txtcode">--enable-sharerd</span>).
+	See {anchor anchor='dynamic-install' text='the guidelines'}. 
+	<br><br>
+	<li><span class="keyword">---with-java-package=</span><i>[package name]</i><br>
+	To be used with <span class="txtcode">--with-jni</span> only. Set the Java package name of the <span class="txtcode">Ibex</span> class. By default, the
+	package is <span class="txtcode">ibex</span>.
+	<br><br>
+	<li><span class="keyword">--prefix=</span><i>[path]</i><br>
+	Set the folder where Ibex must be installed (by default, <span class="txtcode">/usr/local</span>).
+	You can use this option to install Ibex in a local folder.
+	</ul>
+
+	<p>
+	<h3 id="dynamic-install">Installation as a dynamic library (<span class="txtcode">--enable-shared</span> or <span class="txtcode">--with-jni</span>)</h3>
+	You can install Ibex as a dynamic library, but with Gaol only. 
+	Of course, it is technically possible to compile Ibex+Profil as a dynamic (and 64-bits) library, but you have to do it by yourself (no script supplied).
+
+	<p>
+	There are only a few differences with the standard installation:
+	<ul>
+	<li><b>Linux and MacOS</b><li>
+	Compile Soplex as follows:
+	<div class="code">
+	<span class="path">~/Ibex/ibex-2.0/soplex-1.7.0$</span> make ARCH=x86 SHARED=true ZLIB=false
+	</div>
+	</li>
+
+	<li><b>Windows</b><br>
+	Compile Soplex as follows:
+	<div class="code">
+	<span class="path">~/Ibex/ibex-2.0/soplex-1.7.0$</span>  make ZLIB=false SHARED=true SHAREDLIBEXT=dll
+	</div>
+	</li>
+	</ul>
+	<p>
+
+	Then, you can run <span class="txtcode">waf</span> <span class="txtcode">configure</span>
+	with either <span class="txtcode">--enable-shared</span> or <span class="txtcode">--with-jni</span>.
+
+	<p>
+
+	<h4 id="java">Installation of the Java interface (<span class="txtcode">--with-jni</span>)</h4>
+
+	<p>
+
+	Important notice:
+	<ul>
+	<li>This interface is <b>under development</b>
+	<li>This option is currently <b>not supported</b> under 64 bits platform unless
+	you have installed a 32 bits JVM. This is because Gaol currently supports only 32 bits platform. </li>
+	<li>The Ibex-Choco interface is <b>not supported</b> yet by the current release of Choco.</li>
+	</ul>
+
+	<P>
+	The only additional requirement is that the environment variable <span class="txtcode">JAVA_HOME</span> must be set. 
+	Typical paths are <span class="txtcode">/Library/Java/Home</span> (MacOS) or
+	<span class="txtcode">/usr/lib/jvm/java-7-openjdk-i38</span> (Linux). Example:
+	<div class="code">
+	<span class="path">~/Ibex/$</span> export JAVA_HOME=/Library/Java/Home
+	</div>
+
+	<p><p>
+	This installation will generate, in addition to the Ibex library:
+	<ul>
+	<li> the <span class="txtcode">libibex-java</span> library that contains the glue code between C++ and Java
+	<li> the <i>[java package]</i><span class="txtcode">.jar</span> file where <i>[java package]</i> is the name given with
+	the <span class="txtcode">--with-package</span> option. 
+	This file is put into the <i>[prefix]</i><span class="txtcode">/share/java</span> where <i>[prefix]</i> is 
+	<span class="txtcode">/usr/local</span> by default or whatever path specified via <span class="txtcode">--prefix</span>.
+	</li>
+	</ul>
+
+	<p>
+
+	<h2 id="examples">Compiling and running examples</h2>
+
+	<h3>Using the Makefile (recommended)</h3>
+
+	If you have installed Ibex following the {anchor anchor='stand-install' text='standard installation'}, there is a simple <span class="txtcode">makefile</span>
+	you can use to compile examples as well as your own programs.
+	This makefile however assumes <span class="txtcode">pkg-config</span> is installed on your system (which is done by default on many Linux distribution).<br>
+	<p><p>
+	If you have installed Ibex in the local folder, or if you don't want <span class="txtcode">pkg-config</span> to be installed,
+	you may consider the {anchor anchor='basic-make' text='basic command line'} instead.<br>
+	<p>
+	<!--If you have installed Ibex as a dynamic library,-->
+	<b>Note:</b> it may be necessary to set the <span class="txtcode">PKG_CONFIG_PATH</span> to <i>[prefix]</i><span class="txtcode">/share/pkgconfig</span> where <i>[prefix]</i> is 
+	<span class="txtcode">/usr/local</span> by default or whatever path specified via <span class="txtcode">--prefix</span>:
+
+	<div class="code">
+	<span class="path">~/Ibex/ibex-2.0/$</span> export PKG_CONFIG_PATH=/usr/local/share/pkgconfig/ 
+	</div>
+
+	<p>
+	<b>Note:</b> if some libraries are linked dynamically (like libultim), it may be necessary to set the <span class="txtcode">LD_LIBRARY_PATH</span> accordingly.
+
+	<p>
+	Here is an example:
+	<div class="code">
+	<span class="path">~/Ibex/ibex-2.0/$</span> cd examples<br /> 
+	<span class="path">~/Ibex/ibex-2.0/$</span> make defaultsolver<br /> 
+	<span class="path">~/Ibex/ibex-2.0/$</span> ./defaultsolver ../benchs/cyclohexan3D.bch 1e-05 10<br /> 
+	</div>
+	<p>
+	The default solver solves the systems of equations in argument (cyclohexan3D) with a precision less than 1e-05 and
+	within a time limit of 10 seconds.
+	<p>
+	To compile your own program, just copy-paste the makefile of <span class="txtcode">Ibex/examples</span>.
+
+	<p>
+	<b>Note:</b> this makefile uses the extended syntax of GNU make.
+
+	<h3 id="basic-make">Basic command line</h3>
+
+	You can alternatively try the following command line directly, but the success is less guaranteed.
+
+	The basic line is:<br>
+	<p>
+	<div class="code">
+	g++ -m32 -I<i>[prefix]</i>/include/ibex -I<i>[soplex path]</i>/src -L<i>[soplex path]</i>/lib -libex -lsoplex -lz <br/>
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-o <i>[filename]</i> <i>[filename]</i>.cpp 
+	</div>
+	where <i>[prefix]</i> is <span class="txtcode">/usr/local</span> by default or whatever path specified via <span class="txtcode">--prefix</span>.
+	<p>
+	<ul>
+
+	<li><b>If your platform is 64 bits</b><br>
+	Add the <span class="txtcode">-m32</span> option 
+	</li>
+
+	<li><b>If Ibex is installed in a local folder</b><br>
+	<ul>
+	<li>Add -L<i>[ibex path]</i><span class="txtcode">/__build__/src</span></li>
+	</ul>
+	</li>
+
+	<li><b>If you have compiled Ibex with Profil/Bias</b><br>
+	<ul>
+	<li>Add -I<i>[profil path]</i><span class="txtcode">/include
+	<li>Add -L<i>[profil path]</i><span class="txtcode">/lib
+	<li>At the end of the line, add <span class="txtcode"><br>-lProfil -lBias -llr -lsoplex -lz</span>
+	</ul>
+	</li>
+
+	</ul>
+
+	<p>
+
+	<h3>Java examples</h3>
+	<b>under development</b><br><br>
+	If you have installed Ibex with the <span class="txtcode">--with-jni</span> option, you can run a java test example.
+	<p>
+
+	<ul>
+	<li><b>Linux</b><br>
+	<div class="code">
+	<span class="path">~$</span> export LD_LIBRARY_PATH=<i>[prefix]</i>/lib<br/>
+	</div>
+	where <i>[prefix]</i> is 
+	<span class="txtcode">/usr/local</span> by default or whatever path specified via <span class="txtcode">--prefix</span>.<br>
+	Then:
+	<div class="code">
+	<span class="path">~$</span> cd Ibex/ibex-2.0/__build__/src/java <br />
+	<span class="path">~/Ibex/ibex-2.0/__build__/src/java$</span> $JAVA_HOME/bin/java -Djava.library.path=$LD_LIBRARY_PATH Test <br/>
+	</div>
+	</li>
+
+	<li><b>MacOS</b><br>
+	<div class="code">
+	<span class="path">~$</span> export DYLD_LIBRARY_PATH=<i>[prefix]</i>/lib<br/>
+	</div>
+	where <i>[prefix]</i> is 
+	<span class="txtcode">/usr/local</span> by default or whatever path specified via <span class="txtcode">--prefix</span>.<br>
+	Then:
+	<div class="code">
+	<span class="path">~$</span> cd Ibex/ibex-2.0/__build__/src/java <br />
+	<span class="path">~/Ibex/ibex-2.0/__build__/src/java$</span> $JAVA_HOME/bin/java -Djava.library.path=$DYLD_LIBRARY_PATH Test <br/>
+	</div>
+	</li>
+
+	<li><b>Windows</b><br>
+	(To complete).
+	</ul>
+
+	Notice: <span class="txtcode">$JAVA_HOME</span> ensures the JVM is compatible with the version of Java you have compiled Ibex with.
+	<p>
+
+
+	<h2>Uninstall</h2>
+
+	Simply type in the path of IBEX (under the shell of Msys for Windows)
+
+	<p>
+
+	<div class="code">
+	<span class="path">~/Ibex/ibex-2.0$</span> ./waf uninstall
+	</div>
+

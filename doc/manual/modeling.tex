@@ -849,7 +849,7 @@ sqrt((xA-(xB+xC))^2+(yA-(yB+yC))^2=0;
 
 You can declare the distance function as follows.
 \begin{verbatim}
-function d=distance(xa,ya,xb,yb)
+function distance(xa,ya,xb,yb)
  return sqrt((xa-xb)^2+(ya-yb)^2;
 end
 \end{verbatim}
@@ -896,7 +896,7 @@ Here is the way we propose to define this function:
 \begin{verbatim}
 /* Computes the rotation matrix from the Euler angles: 
    roll(phi), the pitch (theta) and the yaw (psi)  */
-function R[3][3]=euler(phi,theta,psi)
+function euler(phi,theta,psi)
   cphi   = cos(phi);
   sphi   = sin(phi);
   ctheta = cos(theta);

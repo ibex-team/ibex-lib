@@ -1,0 +1,927 @@
+
+<!--<span class="txtcode">Ibex</span> is as a library for performing
+interval computations on functions defined as any mathematical expression.-->
+
+<ul>
+<li>{anchor anchor='start' text='Getting started'}
+<ul>
+<li>{anchor anchor='start01' text='Run the default solver'}
+<li>{anchor anchor='start02' text='Run the default optimizer'}
+<li>{anchor anchor='start03' text='Start a C++ program with Ibex'}
+<li>{anchor anchor='start04' text='Call the default solver from C++'}
+<li>{anchor anchor='start05' text='Call the default optimizer from C++'}
+</ul>
+<li>{anchor anchor='arith' text='Basic interval computations'}
+<ul>
+<li>{anchor anchor='arith01' text='Creating intervals'}
+<li>{anchor anchor='arith02' text='Operation between intervals'}
+<li>{anchor anchor='arith03' text='Applying a function to an interval'}
+<li>{anchor anchor='arith04' text='Interval vectors'}
+<li>{anchor anchor='arith05' text='Interval matrices'}
+<li>{anchor anchor='arith06' text='Operations between matrices and vectors'}
+<li>{anchor anchor='arith07' text='Midpoint, radius, magnitude, etc.'}
+</ul>
+<li>{anchor anchor='func' text='Functions'}
+<ul>
+<li>{anchor anchor='func01' text='Creating functions'}
+<li>{anchor anchor='func02' text='Constants inside functions'}
+<li>{anchor anchor='func03' text='Functions with vector arguments'}
+<li>{anchor anchor='func04' text='Composing functions'}
+<li>{anchor anchor='func05' text='Vector-valued functions'}
+<li>{anchor anchor='func06' text='Matrix-valued functions'}
+<li>{anchor anchor='func061' text='Using the Minibex syntax'}
+<li>{anchor anchor='func062' text='Minibex syntax with intermediate variables'}
+<li>{anchor anchor='func07' text='Evaluation over floating-point numbers'}
+<li>{anchor anchor='func07bis' text='Interval evaluation'}
+<li>{anchor anchor='func08' text='Interval gradient'}
+<li>{anchor anchor='func09' text='Interval Jacobian matrix'}
+<li>{anchor anchor='func10' text='Backward (or contraction)'}
+</ul>
+<li>{anchor anchor='ctc' text='Contractors'}
+<ul>
+<li>{anchor anchor='ctc01' text='What is a contractor programming?'}
+<li>{anchor anchor='ctc02' text='Forward-Backward'}
+<li>{anchor anchor='ctc03' text='Fixpoint'}
+<li>{anchor anchor='ctc04' text='Intersection, union & composition'}
+<li>{anchor anchor='ctc05' text='Interval Newton'}
+<li>{anchor anchor='ctc06' text='Propagation'}
+<li>{anchor anchor='ctc07' text='Acid & 3BCid'}
+<li>{anchor anchor='ctc08' text='Linear Relaxation'}
+<li>{anchor anchor='ctc09' text='Q-Intersection (robustness w.r.t. outliers)'}
+<li>{anchor anchor='ctc10' text='Build your own contractor'}
+<li><b>under construction!!</b>
+</ul>
+<li>{anchor anchor='stra' text='Strategies'}
+<ul>
+<li>The default solver <b>(under construction)</b>
+<li>The generic solver <b>(under construction)</b>
+<li>The default optimizer <b>(under construction)</b>
+<li>The generic optimizer <b>(under construction)</b>
+<li>The default SIVIA <b>(under construction)</b>
+</ul>
+<li>{anchor anchor='stra' text='Complete examples'}
+<ul>
+<li>Your own SIVIA <b>(under construction)</b>
+<li>Your own solver <b>(under construction)</b>
+<li>Parameter estimation<b>(under construction)</b>
+<li>Robot localization<b>(under construction)</b>
+</ul>
+</ul>
+
+<h2 id="start">Getting started</h2>
+<p>
+
+<h3 id="start01">Run the default solver</h3>
+A couple of example programs are compiled with Ibex and installed under the
+<span class="txtcode">/__build__/examples/</span> subfolder.
+<br>
+
+<p>
+One of them is the <i>default solver</i> that solves a system of nonlinear equations rigorously
+(that is, it does not lose any solution and return each solution under the form of a 
+small box enclosing the true value). It is called the "default" solver because is resorts to
+a unique black-box strategy (whatever the input problem is) and with a very limited 
+number of parameters. Needless to say, this strategy is a kind of compromise and not the 
+best one for a given problem. <br>
+<p>
+Note that Ibex also supplies a "generic" solver that is much more customizable.
+
+<p>
+You can directly apply this default solver on one of the benchmark problems 
+distributed with Ibex. 
+The benchmarks are all written in the {anchor anchor='func061' text='Minibex syntax'} and stored 
+in an arborescence under <span class="txtcode">benchs/</span>.
+
+<p>
+Open a terminal and move to the examples subfolder:
+<div class="code">
+<span class="path">~/Ibex/ibex-2.0/</span> cd __build__/examples<br>
+<span class="path">~/Ibex/ibex-2.0/__build__/examples/$</span><br>
+</div>
+
+Now, run the default solver with, for example, the problem named kolev36 located at the specified path:
+<div class="code">
+<span class="path">~/Ibex/ibex-2.0/__build__/examples/$</span>./defaultsolver <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;../../benchs/benchs-satisfaction/benchlib2/kolev36.bch 1e-07 10
+</div>
+The second argument is the precision required on solution (1e-07). The third and last argument
+is the time limit in seconds (10 seconds).
+
+The following result should be displayed:<br><br>
+<div style="font-family:'Courier New'">
+load file ../../benchs/benchs-satisfaction/benchlib2/kolev36.bch.<br>
+ sol 1 nb_cells 6 ([0.1173165676349034, 0.1173165676349242] ; <br>
+&nbsp;&nbsp;&nbsp;&nbsp; [0.4999999999996189, 0.5000000000003763] ;<br>
+&nbsp;&nbsp;&nbsp;&nbsp; [0.8826834323643938, 0.8826834323657756] ;<br>
+&nbsp;&nbsp;&nbsp;&nbsp; [-0.2071067811866001, -0.2071067811865033] ;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp; [1.207106781186472, 1.207106781186622] ;<br> 
+&nbsp;&nbsp;&nbsp;&nbsp; [-2.000000000000119, -1.999999999999871])<br>
+number of solutions=1<br>
+cpu time used=0.08000500000000002s.<br>
+number of cells=26<br>
+</div>
+
+<br><br>
+The first simply says that the file has been successfuly loaded.<br>
+The second line (broken here into 6 lines for clarity) details the first solution found. There are 6 variables so 6 intervals are displayed.<br>
+The third line is the total number of solutions found (there is just one here).<br>
+The two last lines report the CPU time and the number of hypothesis (bisections) that was required to solve the problem.
+<p>
+
+<h3 id="start02">Run the default optimizer</h3>
+Similarly to the default solver, a default optimizer is installed with Ibex.
+This program minimizes a (nonlinear) objective function under (nonlinear) inequality constraints.
+Let us execute this optimizer with the problem ex3_1_3 got from the Coconut library. If you compare
+the Minibex syntax of this benchmark with that of the previous example, you will see that a "minimize"
+keyword has appeared.
+<p>
+<div class="code">
+<span class="path">~/Ibex/ibex-2.0/__build__/examples/$</span>./defaultoptimizer <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;../../benchs/benchs-optim/coconutbenchmark-library1/ex3_1_3.bch 1e-07 1e-07 10
+</div>
+As you see, the optimizer requires 3 arguments, besides the name of the benchmark.
+The extra argument corresponds to the precision on the objective (both relative and absolute). Here, this precision is also set to 1e-07.
+<p>
+The following result should be displayed:<br><br>
+<div style="font-family:'Courier New'">
+ best bound in: [-310,-309.999999984]<br>
+ Relative precision obtained on objective function: 5.23566394568e-11  [passed]  1e-07<br>
+ Absolute precision obtained on objective function: 1.62305582307e-08  [passed]  1e-07<br>
+ best feasible point (4.9999999999 ; 1 ; 5 ; 1.53748558193e-10 ; 5 ; 10)<br>
+ cpu time used 0.048003s.<br>
+ number of cells 78<br>
+</div>
+
+<br><br>
+The program has proved that the minimum of the objective lies in [-310,-309.999999984]. It also gives
+a point (4.9999999999 ; 1 ; 5 ; 1.53748558193e-10 ; 5 ; 10) which satisfies the constraints and for which
+the value taken by the objective function is inside this interval.
+
+<p>
+
+<h3 id="start03">Start a program</h3>
+
+To write a program with Ibex, use the following canvas:
+
+<div class="code">
+#include "ibex.h"<br>
+<br>
+using namespace std;<br>
+using namespace ibex;<br>
+<br>
+int main(int argc, char** argv)&#123;<br>
+<br>
+        <span class="comment">// write your own code here</span><br>
+<br>
+&#125;<br>
+</div>
+You can execute by yourself all the code snippets of this tutorial, using this canvas.
+
+<p>
+To compile a program, the easiest way is to copy-paste the <span class="txtcode">makefile</span>
+of the <span class="txtcode">examples</span> subfolder of Ibex.
+See also the <a href="index.php?page=download#examples">guidelines</a>.
+<p>
+
+<h3 id="start04">Call the default solver from C++</h3>
+	<p>
+	You can call the default solver and get the solutions from C++.
+	Two objects must be built: the first represents the problem (or "system"), the second
+	the solver itself. Then, we just run the solver. Here is a simple example:
+	<div class="code">
+	<span class="linecomment">/* Build a system of equations from the file */</span><br>
+	System system("../benchs/benchs-satisfaction/benchlib2/kolev36.bch");<br>
+	<br>
+	<span class="linecomment">/* Build a default solver for the system and with a precision set to 1e-07 */</span><br>
+	DefaultSolver solver(system,1e-07);<br>
+	<br>
+	vector<IntervalVector> solutions = solver.solve(system.box); <span class="comment">// Run the solver</span><br>
+	<br>
+	<span class="linecomment">/* Display the solutions. */</span><br>
+	for (int i=0; i<&zwj;solutions.size(); i++) &#123;<br>
+	&nbsp;&nbsp;&nbsp;&nbsp;cout << "solution n°" <<&zwj;i <<&zwj;" : " <<&zwj; solutions[i] <<&zwj; endl;<br>
+	&#125;<br>
+	</div>
+	<p>
+
+<h3 id="start05">Call the default optimizer from C++</h3>
+	<p>
+	Calling the default optimizer is as simple as for the default solver.
+	The loaded system must simply correspond to an optimization problem. The default optimizer
+	is an object of the class <span class="txtcode">DefaultOptimizer</span>.
+	Once the optimizer has been executed(), the main information is stored in three fields, 
+	where f is the objective:
+	<ul>
+	<li><span class="txtcode">loup</span> ("lo-up") is the lowest upper bound known for min(f).
+	<li><span class="txtcode">uplo</span> ("up-lo") is the uppest lower bound known for min(f).
+	<li><span class="txtcode">loup_point</span> is the vector for which the value taken by f is less or
+	equal to the loup.
+	</ul>
+	Example:
+	<div class="code">
+	<span class="linecomment">/* Build a constrained optimization problem from the file */</span><br>
+	System sys("../benchs/benchs-optim/coconutbenchmark-library1/ex3_1_3.bch");<br>
+	<br>
+	<span class="linecomment">/* Build a default optimizer with a precision set to 1e-07 for both x and f(x) */</span><br>
+	DefaultOptimizer o(sys,1e-07,1e-07);<br>
+	<br>
+	o.optimize(sys.box);<span class="comment">// Run the optimizer</span><br>
+	<br>
+	<span class="linecomment">/* Display the result. */</span><br>
+	cout << "interval for the minimum: " << Interval(o.uplo,o.loup) << endl;<br>
+	cout << "minimizer: " << o.loup_point << endl;
+	</div>
+	<p>
+
+<br><p>
+
+<h2 id="arith">Basic interval computations</h2>
+
+	
+<p>
+	<h3 id="arith01">Creating intervals</h3>
+	Here are examples of intervals
+	<div class="code">
+	  Interval x(1,2);	 		<span class="comment">// create the interval [1,2]</span><br> 
+	  Interval x;	 			<span class="comment">// create the interval (-oo,oo)</span><br> 
+	  Interval x=Interval::ALL_REALS;	<span class="comment">// create the interval (-oo,oo)</span><br> 
+	  Interval x=Interval::EMPTY_SET;	<span class="comment">// create the empty interval</span><br> 
+	</div>
+
+	
+<p>
+	<h3 id="arith02">Operation between intervals</h3>
+	C++ operator overloading allows you to calculate the sum of two
+	intervals by using directly the "+" symbol:
+	<div class="code">
+	  Interval x(1,2);<br> 
+	  Interval y(3,4);<br> 
+	  cout << "x+y=" << x+y << endl; <span class="comment">// display [4,6]</span>
+	</div>
+	You can use the other operators similarly ("<span class="txtcode">-</span>","<span class="txtcode">*</span>","<span class="txtcode">/</span>").
+
+	
+<p>	
+<h3 id="arith03">Applying a function to an interval</h3>
+	All the elementary functions can be applied to intervals, and composed in an arbitrarly way:
+	<div class="code">
+	  Interval x(0,1);<br> 
+	  Interval y=exp(x+1); <span class="comment">//y is [1,7.389...]
+	</div>
+
+	
+<p>	
+<h3 id="arith04">Interval vectors</h3>
+	You can create an interval vector by using an intermediate array of n*2<span class="txtcode">double</span>, representing the lower and
+	uppoer bounds of each components.<br>
+	The first argument of the constructor of <span class="txtcode">IntervalVector</span> in this case is the dimension (here, 3),
+	the second the array of <span class="txtcode">double</span>.
+	<div class="code">	
+	double _x[3][2]=&#123;&#123;0,1&#125;,&#123;2,3&#125;,&#123;4,5&#125;&#125;; <br>
+	IntervalVector x(3,_x); <span class="comment">//create ([0,1],[2,3],[4,5])</span>
+	</div>
+	You can also create an interval vector by duplicating a given interval or simply create the empty interval vector.
+	<div class="code">
+	IntervalVector x(3,Interval(1,2)); <span class="comment"> //create ([1,2],[1,2],[1,2])</span><br>
+	IntervalVector y=IntervalVector::empty(3); <span class="comment"> //create a vector of 3 empty intervals</span>
+	</div>
+	
+<p>	
+<h3 id="arith05">Interval matrices</h3>
+	Interval matrices can be created in a similar way. However, since we cannot build 3-dimensional arrays in C++,
+  	all the bounds must be set in a single n*2 array representing the matrix row by row (and n is the total number of entries
+ 	of the matrix). The two first arguments of the constructor are the number of rows and columns respectively. The last one
+	is the array of <span class="txtcode">double</span>.
+	Here is an example of a 3x3 matrix:
+	<div class="code">	
+	double _M[9][2]=&#123;&#123;0,1&#125;,&#123;0,1&#125;,&#123;0,1&#125;,  <br>
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;		 &#123;0,2&#125;,&#123;0,2&#125;,&#123;0,2&#125;, <br>
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;		 &#123;0,3&#125;,&#123;0,3&#125;,&#123;0,3&#125;&#125;; <br>
+	IntervalMatrix M(3,3,_M);<br>
+	 <span class="linecomment">//create (([0,1] [0,1] [0,1]) ; ([0,2] [0,2] [0,2]) ; ([0,3] [0,3] [0,3])) 
+	</div>
+
+	<h3 id="arith06">Operations between matrices and vectors</h3>
+	You can use the usual operations of linear algebra between matrices and vectors (<it>sum of vectors,
+	transpose of vectors, sum of matrices, left multiplication of a matrix by a scalar, etc.</it>).
+
+	<div class="code">
+	IntervalMatrix M(...); <span class="comment">// see above to create a matrix</span><br>
+	IntervalVector x(...); <span class="comment">// see above to create a vector</span><br>
+	IntervalVector y=M*x; <span class="comment">// matrix-vector multiplication</span><br>
+	IntervalMatrix N=transpose(M);<span class="comment">// N is M^T</span><br> 
+	</div>
+
+	
+<p>
+	<h3 id="arith07">Midpoint, radius, magnitude, etc.</h3>
+	These usual properties can be obtained for intervals. They are also all extended to interval vectors or matrices
+	componentwise. For instance, the radius of an interval matrix is the (real) matrix of the radii.
+	<p>
+	As a consequence, Ibex also has classes to handle real (versus interval) vectors and matrices.
+	Mathematical Operations (like the sum) can also be applied to these objects but, of course, using this times
+	floating-point arithmetic (not interval).
+	
+	<div class="code">
+	Interval i(...); <span class="comment">// see above to create an interval</span><br>
+	IntervalMatrix M(...); <span class="comment">// see above to create a matrix</span><br>
+	IntervalVector x(...); <span class="comment">// see above to create a vector</span><br>
+	double r=i.diam(); <span class="comment">// the diameter of the interval i</span><br>
+	Matrix M2=M.mag(); <span class="comment">// the matrix of magnitudes</span><br>
+	Vector x2=x.mid(); <span class="comment">// the vector of midpoints</span><br>
+	Vector y=M2*x2; <span class="comment">// a matrix-vector product (subject to roundoff errors)</span>
+	</div>
+
+	<p>
+	<p>
+
+<h2 id="func">Functions</h2>
+	
+<p>
+	<h3 id="func01">Creating functions</h3>
+	To create your own function, you must first build <i>variables</i>. As before, the expression of the function
+	is then obtained using C++ operator overloading:
+	<div class="code">
+	Variable x,y;<br>
+	Function f(x,y,sin(x+y)); <span class="comment">// create the function (x,y)->sin(x+y)</span>
+	</div>
+	
+<p>
+	<h3 id="func02">Constants inside functions</h3>
+	You can insert interval constants in the expresion of a function.
+	For instance, if you want to create the function sin(2*x), just write:
+	<div class="code">
+	Variable x;<br>
+	Function f(x,sin(2*x)); <span class="comment">// create the function (x,y)->sin(2*x)</span>
+	</div>
+	Assume now that the function to be created is sin(&pi;*x). It is still possible to
+	use a <span class="txtcode">double</span> representing approximately &pi; but to keep
+	numerical reliability, it is required in this case to use an interval constant enclosing
+	&pi;. Next function must be seen as a ``thick'' function rigorously encloses sin(&pi;*x):
+	<div class="code">
+	Interval pi(3.1415,3.1416);<br>
+	Variable x;<br>
+	Function f(x,sin(pi*x)); <span class="comment">// create the function (x,y)->sin(&pi;*x)</span>
+	</div>
+	<h3 id="func03">Functions with vector arguments</h3>
+	Arguments of a function are not necessarily scalar variables. They can also be vectors
+	or matrices. In the following example, we build the distance function<br><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; dist:(a,b)->||a-b||<br><br>
+	where a and b are 2-dimensional vectors.
+	<div class="code">
+	Variable a(2);<br>
+	Variable b(2);<br>
+	Function dist(a,b,sqrt(sqr(a[0]-b[0])+sqr(a[1]-b[1])));	
+	</div>
+	<b>Note:</b>{anchor anchor='func07' text='Evaluation'} of a thick function will necessarily result
+	in an interval with non-null diameter, even if the argument is reduced to a point.
+		
+<p>
+<h3 id="func04">Composing functions</h3>
+	You can compose functions to build new functions. We build here the function that maps a vector x
+	to its distance with a constant point (1,2). To this end, we first define a generic distance function 
+	dist(a,b) as above.
+	<div class="code">
+	<span class="linecomment">/* create the distance function with 2 arguments */</span><br>
+	Variable a(2);<br>
+	Variable b(2);<br>
+	Function dist(a,b,sqrt(sqr(a[0]-b[0])+sqr(a[1]-b[1])));<br>
+	<br>
+	<span class="linecomment">/* create the constant vector pt=(1,2) */</span><br>
+	Vector pt(2);<br>
+	pt[0]=1;<br>
+	pt[1]=2;<br>
+	<br>
+	<span class="linecomment">/* create the function x->dist(x,pt). */</span><br>
+	Variable x(2);<br>
+	Function f(x,dist(x,pt));
+	</div>
+	
+<p>
+<h3 id="func05">Vector-valued functions</h3>
+	In line with the previous example, we define now the function that
+	associates to a vector x its distance with two different points:
+	<br><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; f:x->( ||x-(1,1)|| , ||x-(0,0)|| )<br><br>
+	<div class="code">
+	<span class="linecomment">/* create the distance function with 2 arguments */</span><br>
+	Variable x(2,"x");<br>
+	Variable pt(2,"p");<br>
+	Function dist(x,pt,sqrt(sqr(x[0]-pt[0])+sqr(x[1]-pt[1])),"dist");<br>
+	<br>
+	<span class="linecomment">/* create the two constant vectors */</span><br>
+	Vector pt1=Vector::zeros(2);<br>
+	Vector pt2=Vector::ones(2);<br>
+	<br>
+	<span class="linecomment">/* create the function x->(dist(x,pt1),dist(x,pt2)). */</span><br>
+	Function f(x,Return(dist(x,pt1),dist(x,pt2)));
+	</span>
+	</div>
+	<b>Note:</b>The <span class="txtcode">Return</span> keyword is only necessary when the
+	output of a function is a vector (or a matrix).
+<p>
+<h3 id="func06">Matrix-valued functions</h3>
+	You can also create functions that return matrices.
+	Here is an example of a function from R to R^(2x2) where:<br>
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; f: x -> ( (2*x, -x) ; (-x,3*x) )<br><br>
+	
+	<div class="code">
+	Variable x("x");<br>
+	Function f(x,Return(Return(2*x,x,true),Return(-x,3*x,true)));<br>
+	</div>			
+	The boolean value <span txt="txtcode">true</span> given here to the two embedded <span txt="txtcode">Return</span>
+	means that, each time, the two components must be put in rows, and not in column as it is by default.
+	In contrast, the enclosing <span txt="txtcode">Return</span> keeps the default behaviour since the two rows are
+	put in column in order to form a 2x2 matrix.
+<p>
+<h3 id="func061">Using the Minibex syntax</h3>
+	To create sophisticated functions we advice you to use an intermediate "minibex" input file as follows instead of
+	embedding the function directly in your C++ program.
+	The previous example can be written in a plain text file:
+	<div class="minibex">
+	function f(x)<br>
+	&nbsp;&nbsp;return ((2*x,-x);(-x,3*x));<br>
+	end
+	</div>	
+	Save this file under the name "myfunction.txt". Now, you can load this function in your 
+	C++ program:
+	<div class="code">
+	Function f("myfunction.txt");
+	</div>	
+<p>
+<h3 id="func062">Minibex syntax with intermediate variables</h3>
+	When several occurrences of the same subexpression occur in a function, it
+	is a good idea for readibility (and, actually, efficiency) to put
+	this subexpression into intermediate variables. <br>
+
+	The following example is the function thar returns the rotation matrix
+	from the three Euler angles. In this function an experssion like cos(phi)
+	occurs several times.
+
+	<div class="minibex">
+	/* Computes the rotation matrix from the Euler angles:  <br>
+	   roll(phi), the pitch (theta) and the yaw (psi)  */ <br>
+	<br>
+	function euler(phi,theta,psi) <br>
+  	&nbsp;&nbsp;cphi   = cos(phi); <br>
+	&nbsp;&nbsp;sphi   = sin(phi); <br>
+	&nbsp;&nbsp;ctheta = cos(theta); <br>
+	&nbsp;&nbsp;stheta = sin(theta); <br>
+	&nbsp;&nbsp;cpsi   = cos(psi); <br>
+	&nbsp;&nbsp;spsi   = sin(psi); <br>
+   	<br>
+	&nbsp;&nbsp;return  <br>
+        &nbsp;&nbsp;&nbsp;&nbsp;( (ctheta*cpsi, -cphi*spsi+stheta*cpsi*sphi,  <br>
+        &nbsp;&nbsp;&nbsp;&nbsp;  spsi*sphi+stheta*cpsi*cphi) ;  <br>
+        &nbsp;&nbsp;&nbsp;&nbsp; (ctheta*spsi, cpsi*cphi+stheta*spsi*sphi,  <br>
+        &nbsp;&nbsp;&nbsp;&nbsp; -cpsi*sphi+stheta*cphi*spsi) ; <br>
+        &nbsp;&nbsp;&nbsp;&nbsp; (-stheta, ctheta*sphi, ctheta*cphi) ); <br>
+         end <br>
+	</div>	
+<p>
+
+<h3 id="func07">Evaluation over floating-point numbers</h3>
+Given input <span class="txtcode">double</span> values x, you can obtain a rigorous inclusion of f(x) either using
+<span class="txtcode">eval</span>, <span class="txtcode">eval_vector</span> or <span class="txtcode">eval_matrix</span>.
+These functions return interval enclosures of the true result.
+<p>
+These functions are presented below in a more general setting where the inputs are intervals as well.
+<p>
+So, to get the image by f of fixed floating-point values, simply create degenerated intervals in the
+next examples.
+<p>
+<h3 id="func07bis">Interval evaluation</h3>
+The interval evaluation of f is the image of the given input interval vector [x] by f, this range being noted by f([x]):	
+
+<div class="formula">
+       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; f([x]) := &#123; f(x), x &isin; [x] &#125;
+</div>
+
+Let us start with a real-valued function f with scalar arguments:
+	<div class="code">
+	Variable x;<br>
+	Variable y;<br>
+	Function f(x,y,sin(x+y));<br>
+	<br>
+	double _x[2][2]=&#123;&#123;1,2&#125;,&#123;3,4&#125;&#125;; <br>
+	IntervalVector xy(2,_x);   <span class="comment">// build xy=([1,2],[3,4])</span><br>
+	Interval z=f.eval(xy);       <span class="comment">// z=f(xy)=sin([4,6])=[-1, -0.27941]<br>
+	</div>
+	The sine function is not monotonic on [4,6] and actually reaches its
+	minimum at 3&pi;/2.
+	<p>
+	Note that the <span class="txtcode">eval</span> takes an <span class="txtcode">IntervalVector</span>
+	as argument, even if there is only one variable. So, in the latter case, you have to build a vector
+	reduced to a single component.
+	<p>
+	We consider now a vector-valued function.
+	Since the return type of an evaluation is not anymore an <span class="txtcode">Interval</span> but
+	an <span class="txtcode">IntervalVector</span>, we have to use a method with a different 
+	signature, namely, <span class="txtcode">eval_vector</span>:
+	<div class="code">
+	Variable a;<br>
+	Function f(a,Return(sqr(a),-a));<br><br>
+	IntervalVector x(1,Interval(1,2)); <span class="comment">// build x=([1,2])</span><br><br> 
+	<span class="linecomment">/* calculate y=f(x)=([1, 4] ; [-2, -1]) */</span><br>
+	IntervalVector y=f.eval_vector(x); 
+	</div>
+	<p>
+	Finally, for a matrix-valued function, the evaluation is obtained via <span class="txtcode">eval_matrix</span>.
+	We assume again that the following matrix-valued function<br><br>
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; f: x &rarr; ( (2*x, -x) ; (-x,3*x) )<br><br>
+	has been written in a "minibex" input file (see above).
+	<div class="code">
+	Function f("myfunction.txt")<br><br>
+	IntervalVector x(1,Interval(0,1));<br><br>
+	<span class="linecomment">// calculate M=f(x)=(([0, 2] , [-1, -0]) ; ([-1, -0] , [0, 3]))</span><br>
+	IntervalMatrix M=f.eval_matrix(x); 
+<br>
+	</div>
+<p>
+<h3 id="func08">Interval gradient</h3>
+	For a scalar-valued function, you can get an interval enclosure of the gradient:
+	<div class="code">
+	Variable x,y,z;<br>
+	Function f(x,y,z,x*y+z*y);<br>
+	<br>
+	double _xyz[3][2]=&#123;&#123;0,1&#125;,&#123;0,2&#125;,&#123;0,3&#125;&#125;; <br>
+	IntervalVector xyz(3,_xyz);<br>
+	<br>
+	<span class="linecomment">/* calculate g=grad_f(x)=(y,x+z,y)=[0, 2] ; [0, 4] ; [0, 2]) */</span><br>
+	IntervalVector g=f.gradient(xyz);<br>
+	</div>
+<p>
+<h3 id="func09">Interval Jacobian matrix</h3>
+	For a vector-valued function, you can get an interval enclosure of the Jacobian matrix:
+	<div class="code">
+	int n=...; <span class="comment"> // number of variables (dimension)</span> <br>
+	int m=...; <span class="comment"> // number of components (codimension)</span><br>
+	Function f(...); <span class="comment">// a function from R^n to R^m</span><br>
+	IntervalBox x(...); <span class="comment">// a n-dimension box</span><br>
+	<br>
+	<span class="linecomment">/* calculate J as a m*n interval enclosure of the Jacobian matrix */</span><br>
+	IntervalMatrix J=f.jacobian(x);
+	</div>
+
+<p>
+<h3 id="func10">Backward (or contraction)</h3>
+	One of the main feature of Ibex is the ability to <i>contract</i> a box representing the domain of a variable
+	x with respect to the constraint that f(x) belongs to a restricted input range [y]. 
+	Rigorously, given two intervals [x] and [y], the contraction gives a new interval [z] such that
+	<div class="formula">
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &forall; x &isin; [x], f(x)&isin; [y] &rArr; x &isin; [z] &sube; [x].
+	</div>
+	One way to do this is by using the famous <i>backward</i> algorithm. 
+	This algorithm does not return a new interval [z] but contract the input interval [x] which is therefore 
+	an input-output argument.	
+	<p>
+	In the following snippet we require the function sin(x+y) to take the value -1 (a degenerated interval).
+	With an initial box (x,y)=[1,2],[3,4], we obtain the result that (x,y) must lie in the subdomain 
+	([1, 1.7123] ; [3, 3.7124]).
+	<div class="code">
+	Variable x;<br>
+	Variable y;<br>
+	Function f(x,y,sin(x+y));<br>
+	<br>
+	double _box[2][2]=&#123;&#123;1,2&#125;,&#123;3,4&#125;&#125;; <br>
+	IntervalVector box(2,_box);<br>
+	<br>
+	<span class="linecomment">/* the backward sets box to ([1, 1.7123] ; [3, 3.7124]) */</span><br>
+	f.backward(-1.0,box);
+	</div>
+
+	<p>
+	<p>
+
+<h2 id="ctc">Contractors</h2>
+<p>
+<h3 id="ctc01">What is a contractor programming?</h3>
+The key idea behind <i>contractor programming</i> is to abstract the algorithm
+from the underlying constraint and to view it a function "C":
+
+<div class="formula">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; C: IR^n &rarr; IR^n &nbsp;&nbsp;  such that &nbsp; &nbsp; C([x])&sube; [x],
+</div>
+where IR denotes the set of real intervals.
+
+<p>
+In other word, we take as primary concept the <i>operational</i> definition of a constraint.<br>
+
+<p>
+In this way, operators (like the intersection and the others below) can be extended to contractors. 
+
+<p>
+Since contractors implicitly represent sets, the fundamental advantage of extending operations
+to contractors is that we actually extend these operations to sets. 
+
+<p>
+All contractors in Ibex are algorithms represented by different classes. 
+See the <a href="http://en.wikipedia.org/wiki/Strategy_pattern">strategy pattern</a> for more information on this design choice.
+Classes representing contractors are prefixed by <span class="txtcode">Ctc</span>.
+
+<p>
+<h3 id="ctc02">Forward-Backward</h3>
+	The standard way to contract with respect to a constraint is by using the <i>forward-bacwkard</i> algorithm.
+	The corresponding class is <span class="txtcode">CtcFwdBwd</span>.
+	<br>	
+	A constraint has to be built first using the <span class="txtcode">NumConstraint</span> class.
+	In the following piece of code, we build a forward-backward contractor with respect to x+y=z.
+	
+	<div class="code">
+	Variable x,y,z;<br>
+	NumConstraint c(x,y,x+y=z);<br>
+	CtcFwdBwd ctc(c);<br>
+	</div>
+
+	Of course, the expression of a constraint can involve a previously defined function.
+	Furthermore, if the constraint is simply "f=0", where f is a <span class="txtcode">Function</span> object, it is not 
+	necessary in this case to build an intermediate <span class="txtcode">NumConstraint</span> object. 
+	One can directly give the function f that has to be nullify to <span class="txtcode">CtcFwdBwd</span>. 
+	In the next example, we consider the problem of finding the point which distance from
+	both (0,0) and (1,1) is sqrt(2)/2. The solution is (0.5,0.5).
+	
+	<div class="code">
+	Variable x,y;<br>
+	double d=0.5*sqrt(2);<br>
+	Function f(x,y,Return(sqrt(sqr(x)+sqr(y))-d, sqrt(sqr(x-1.0)+sqr(y-1.0))-d));<br>
+	<br>
+	IntervalVector box(2,Interval(-10,10));<br>
+	<br>
+	<span class="linecomment">/* we give f directly (means that the constraint is f=0) */</span><br>
+	CtcFwdBwd c(f);<br>
+	c.contract(box);<br>
+	<br>
+	<span class="linecomment">/* display ([0.2929, 0.7072] ; [0.2929, 0.7072]) */</span><br>
+	cout << box << endl;<br>
+	</div>
+	Of course, the result is rather crude. Remember that the purpose of <span class="txtcode">CtcFwdBwd</span> 
+	is to contract <i>quickly</i> with respect to <i>any</i> numerical constraint: it is widely applicable and takes
+	a time that is only proportional to the expression size. In the other hand, it is not accurate in general.
+<p>
+<h3 id="ctc03">Fixpoint</h3>
+	The fixpoint operator applies a contractor C iteratively:<br>
+	<div class="formula">
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fixpoint(C): [x] &rarr; C(... C([x])...),
+	</div>
+        while the "gain" is more than the given <span class="txtcode">ratio</span>. More precisely, the "gain"
+	is the relative Hausdorff distance between the input box [x] and the output box C([x]) but, often, you can ignore 
+	the precise meaning of this gain and just consider that the procedure will loop until the contracted box
+	will roughly differ "by <span class="txtcode">ratio</span>" from the input one.
+	<br>
+	Let us now follow the previous example. As said, the solution is (0.5,0.5). We can see that simply embedding
+	the <span class="txtcode">CtcFwdBwd</span> contractor in a fixpoint loop (with a <span class="txtcode">ratio</span>
+	set to 0.1) gives a box with sharp bounds.
+
+	<div class="code">
+	Variable x,y;<br>
+	double d=0.5*sqrt(2);<br>
+	Function f(x,y,Return(sqrt(sqr(x)+sqr(y))-d, sqrt(sqr(x-1.0)+sqr(y-1.0))-d));<br>
+	<br>
+	IntervalVector box(2,Interval(-10,10));<br>
+	<br>
+	CtcFwdBwd c(f);<br>
+	CtcFixPoint fp(c,1e-03);<br>
+	<br>
+	fp.contract(box);<br>
+	<span class="linecomment">/* display ([0.4990, 0.5001] ; [0.4990, 0.5001]) */</span><br>
+	cout << "box after fixpoint=" << box << endl;
+	</div>
+<p>
+<h3 id="ctc04">Intersection, union & composition</h3><p>
+	Given two of more contractors, we can apply the two logical operators <i>union</i> and <i>intersection</i>:
+	<div class="formula">
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;union(C1,...,Cn): [x] &rarr; C1([x]) &cup; ... &cup; Cn([x]).
+	</div>
+	<div class="formula">
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inter(C1,...,Cn): [x] &rarr; C1([x]) &cap; ... &cap; Cn([x]).
+	</div>
+	However, the latter operation is barely used and usually replaced by the <i>composition</i>:
+	<div class="formula">
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;compo(C1,...,Cn): [x] &rarr; Cn(...(C1([x])...).
+	</div>
+	Indeed, one can see that the composition amounts to the same logical operation (the intersection of each contractor's set), 
+	but in a more efficient way since we take advantage of the contraction performed by C1,...,C(i-1) when contracting with Ci.
+	In contrast, the intersection operator calls each contractor independently on the same initial box.
+	<p>
+	The corresponding classes are <span class="txtcode">CtcUnion</span> and <span class="txtcode">CtcCompo</span>.
+	<p>
+	As a rule of thumb, use <span class="txtcode">CtcUnion</span> for the union of two contractors and
+	<span class="txtcode">CtcCompo</span> for the intersection.
+	Here is an example with the union:
+	<div class="code">
+	Variable x;<br>
+	NumConstraint c1(x,x<=-1);<br>
+	NumConstraint c2(x,x>=1);<br>
+	CtcFwdBwd ctc1(c1);<br>
+	CtcFwdBwd ctc2(c2);<br>
+	IntervalVector box(1,Interval::POS_REALS); <span class="comment">// the box [0,oo)</span><br>
+	<br>
+	CtcUnion ctc3(ctc1,ctc2); <span class="comment">// a contractor w.r.t. (x<=-1 or x>=1)</span><br> 
+	ctc3.contract(box);  <span class="comment">// box will be contracted to [1,oo)</span><br>
+	cout << box << endl; 
+	</div>
+	Here is an example with the intersection (composition):
+	<div class="code">
+	Variable x;<br>
+	NumConstraint c1(x,x>=-1);<br>
+	NumConstraint c2(x,x<=1);<br>
+	CtcFwdBwd ctc1(c1);<br>
+	CtcFwdBwd ctc2(c2);<br>
+	IntervalVector box(1,Interval::ALL_REALS);<span class="comment">// the box (-oo,oo)</span><br>
+
+	CtcCompo ctc3(ctc1,ctc2);<span class="comment">// a contractor w.r.t. (x>=-1 and x<=1)</span><br> 
+	ctc3.contract(box); <span class="comment">// box will be contracted to [-1,1]</span><br>
+	cout << box << endl;
+	</div>
+	
+<h3 id="ctc05">Interval Newton</h3>
+	When a function is "square" (the dimension is the same as the codimension, i.e., f:R^n &rarr; R^n), you can contract a 
+	box with respect to the constraint f(x)=0 using the interval Newton iteration. You just have to build a
+	<span class="txtcode">CtcNewton</span> object with the function and call <span class="txtcode">contract</span>.
+	This operator can give extremly accurate bounds proving that the input box is already "sufficiently" small (that is, 
+	"inside the convergence basin" of Newton's iteration). In the following example, we give a box that encloses the
+	solution (1,0) with a radius of 10^-3. Newton's iteration contracts this box downto the maximal precision:
+
+	<div class="code">
+	Variable x,y;<br>
+	Function f(x,y,Return(sqrt(sqr(x)+sqr(y))-1, sqrt(sqr(x-1.0)+sqr(y-1.0))-1));<br>
+	double init_box[][2]=&#123;&#123;0.999,1.001&#125;,&#123;-0.001,0.001&#125;&#125;; <br>
+	IntervalVector box(2,init_box);<br>
+	CtcNewton newton(f);<br>
+	newton.contract(box);<br>
+	<span class="linecomment">/* display a very small box enclosing (1,0) */</span><br>
+	cout << box << endl;<br>
+	</div>
+
+<h3 id="ctc06">Propagation</h3>
+	The <i>propagation</i> operator calculates the fixpoint of (the composition of) n contractors by using a more 
+	sophisticated ("incremental") strategy than a simple loop.
+	So, semantically, the propagation operator can be defined as follows:
+	<div class="formula">
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;propagation(C1,...,Cn):=fixpoint(compo(C1,...,Cn)).
+	</div>
+	(see above for the definition of the fixpoint and composition operators).
+	<p>
+	The key idea behind this operator is to avoid calling contractors that will certainly leave the box intact.
+	Contractors that can potentially enforce a contraction are determined typically from the syntax of their 
+	underlying constraint. Consider for instance two contractors, C1 w.r.t. f(x,z)=0 and C2 w.r.t. g(x,y)=0.
+	Assume that the fixpoint for C1 is reached with the current box ([x],[y],[z]). If a call to C2 only
+	contracts the second interval (the one corresponding to y), it is then useless to call C1 again.
+	<p>
+	So, by using such principle, the propagation calculates the fixpoint by "awaking" contractors only when
+	necessary. Of course, the more sparse the constraint system, the more valuable the propagation, when
+	compared to a simple fixpoint.
+	<p>
+	The following example compares the number of contractors
+	<b>(to be completed)</b>
+	<p>
+<h3 id="ctc07">Acid & 3BCid</h3>
+	<b>(to be completed)</b>
+	<p>
+<h3 id="ctc08">Linear Relaxation</h3>
+	<b>(to be completed)</b>
+	<p>
+<h3 id="ctc09">Q-Intersection (robustness w.r.t. outliers)</h3>
+	The Q-intersection is typically used in a context where we have a set of contractors that result
+	from measurements (each measurement enforces a constraint), some of which can be incorrect.
+	If we are sure that at least q measurements are correct (which amounts to say that the number of
+	outliers is bounded by N-q) then we can contract the box in a robust way, by calculating the union
+	of the boxes resulting from the contraction with all combinaisons of q contractors among N.
+	Mathematicaly, with (i1 , . . . , iq) ranging over the set of all q distinct indices between 0 and N-1:
+	<div class="formula">
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;q-inter(C1,...,Cn,q):=union(...,inter(Ci1,...,Ciq),...)
+	</div>
+	<p>
+	Here is a simple example inspired from parameter estimation.<br><br>
+	We assume a point (x,y) has to be localized. We measure 4 distances "bD" from 6 (approximately known) points (bX,bY).
+ 	Each position bX, bY and each distance bD has an uncertainty [-0.1,0.1]. We also know there may be at most one outlier.
+	<br>
+	The solution point is: x=6.32193 y=5.49908
+	<br>
+	First of all, let us enter the coordinates of the points (bX,bY) and the distances. This data will simulate our measurements.
+	<div class="code">	
+	int N=6;<br>
+	<span class="linecomment">/* The measurements (coordinates of the points and distances) */</span><br>
+	double bx[N]=&#123;5.09392,4.51835,0.76443,7.6879,0.823486,1.70958&#125;;<br>
+	double by[N]=&#123;0.640775,7.25862,0.417032,8.74453,3.48106,4.42533&#125;;<br>
+	double bd[N]=&#123;5.0111,2.5197,7.5308,3.52119,5.85707,4.73568&#125;;<br>
+	</div>
+	Next, we define the measurement intervals (with uncertainty taken into account)
+	<div class="code">	
+	Interval bX[N];<br>
+	Interval bY[N];<br>
+	Interval bD[N];<br>
+	<br>
+	<span class="linecomment">/* add uncertainty on measurements */</span><br>
+	for (int i=0; i<&zwj;N; i++) &#123;<br>
+	&nbsp;&nbsp;&nbsp;&nbsp;  bX[i]=bx[i]+Interval(-0.1,0.1);<br>
+	&nbsp;&nbsp;&nbsp;&nbsp;  bY[i]=by[i]+Interval(-0.1,0.1);<br>
+	&nbsp;&nbsp;&nbsp;&nbsp;  bD[i]=bd[i]+Interval(-0.1,0.1);<br>
+	&#125;<br>
+	</div>
+	Now, we artificially introduce an outlier by shifting the interval for one measurement (here, x position n°5) by a
+	large value:
+	<div class="code">	
+	bX[5]+=10;
+	</div>
+
+	Now, all our simulated data is set up. We just have to define the contractors.
+	We first declare the distance function and then 6 contractors corresponding to
+	the distance with each (bX,bY):
+	<div class="code">	
+	Variable x(2);<br>
+	Variable px,py;<br>
+	Function dist(x,px,py,sqrt(sqr(x[0]-px)+sqr(x[1]-py)));<br>
+	<br>
+	Function f0(x,dist(x,bX[0],bY[0])-bD[0]);<br>
+	Function f1(x,dist(x,bX[1],bY[1])-bD[1]);<br>
+	Function f2(x,dist(x,bX[2],bY[2])-bD[2]);<br>
+	Function f3(x,dist(x,bX[3],bY[3])-bD[3]);<br>
+	Function f4(x,dist(x,bX[4],bY[4])-bD[4]);<br>
+	Function f5(x,dist(x,bX[5],bY[5])-bD[5]);<br>
+	<br>
+		
+	CtcFwdBwd c0(f0);<br>
+	CtcFwdBwd c1(f1);<br>
+	CtcFwdBwd c2(f2);<br>
+	CtcFwdBwd c3(f3);<br>
+	CtcFwdBwd c4(f4);<br>
+	CtcFwdBwd c5(f5);<br>
+	</div>
+	We can contract now a box with the q-intersection of these contractors:
+
+	<div class="code">
+	<span class="linecomment">/* The initial box: [0,10]x[0,10] */</span><br>
+	IntervalVector initbox(2,Interval(0,10));<br>
+	<br>
+	<span class="linecomment">/* Create the array of all the contractors */</span><br>
+	Array<&zwj;Ctc> array(c0,c1,c2,c3,c4,c5);<br>
+	<span class="linecomment">/* Create the q-intersection of the N contractors */</span><br>
+	CtcQInter q(array,5);<span class="comment">// 5 is the number of correct measurement</span><br> 
+	<span class="linecomment">/* Perform a first contraction */</span><br>
+	box=initbox;<br>
+	q.contract(box);<br>
+	cout << "after q-inter =" << box << endl;<br>
+	</div>
+	The displayed result is ([3.9667, 7.2381] ; [4.5389, 8.1479]). Of course, we can do better by calculating a fixpoint of the q-intersection:
+	<div class="code">
+	<span class="linecomment">/* Build a Fix-point of the q-intersection */</span><br>
+	CtcFixPoint fix(q);<br>
+	<br>
+	<span class="linecomment">/* Perform a stronger contraction with the fixpoint */</span><br>
+	fix.contract(box);<br>
+	cout << "after fix+q-inter =" << box << endl;
+	</div>
+	The displayed result is ([5.9277, 6.8836] ; [5.0914, 5.7996]) which, indeed, better encloses the solution point x=6.32193 y=5.49908.
+
+<br>
+<p>
+
+<h3 id="ctc10">Build your own contractor</h3>
+	To create a contractor, you just have to declare a class that extends <span class="txtcode">Ctc</span> and create:
+	<ul>
+	<li>a constructor that calls the constructor of <span class="txtcode">Ctc</span>. The latter
+	requires an integer argument: the dimension of the box to be contracted (this dimension must indeed be fixed at construction
+	time, this is a restriction imposed by Ibex).
+	<li>a function <span class="txtcode">contract</span> that takes a reference to a box (<span class="txtcode">IntervalVector&</span>)
+	and contracts it. The function returns <span class="txtcode">void</span>.
+	</ul>
+	In the following example, we create a contractor that simply divides by two the radius of each component.
+	<div class="code">
+	class MyContractor : public Ctc &#123;<br> 
+		&nbsp;public:<br> 
+		&nbsp;<span class="linecomment">/* n is the dimension of boxes. It is mandatory to fix it<br>
+		&nbsp;&nbsp;at construction. */</span><br>
+		&nbsp;MyContractor(int n) : Ctc(n) &#123; &#125;<br> 
+		<br> 
+		&nbsp;void contract(IntervalVector& box) &#123;<br> 
+		&nbsp;&nbsp;box=box.mid()+0.5*Interval(-1,1)*box.rad();<br> 
+		&nbsp;&#125;<br> 
+		&#125;;<br> 
+	</div>
+	Then, if we create this contractor and applies it several time to the same box,
+	we can observe the expected result:
+	<div class="code">
+	<span class="linecomment">/* build the contractor for 3-dimensional boxes. */</span><br>
+	MyContractor c(3);<br>
+	<br>
+	<span class="linecomment">/* create the box [0,1]x[0,1]x[0,1] */</span><br>
+	IntervalVector x(3,Interval(0,1));<br>
+	<br>
+	c.contract(x);<br>
+	cout << x << endl;<span class="comment">// ([0.25, 0.75] ; [0.25, 0.75] ; [0.25, 0.75])</span><br>
+	<br>
+	c.contract(x);<br>
+	cout << x << endl;<span class="comment">// ([0.375, 0.625] ; [0.375, 0.625] ; [0.375, 0.625])</span><br>
+	<br>
+	c.contract(x);<br>
+	cout << x << endl;<span class="comment">// ([0.4375, 0.5625] ; [0.4375, 0.5625] ; [0.4375, 0.5625])</span><br>
+	</div>
+	This contractor can now be combined with the ones built-in. For instance, we can decide to calculate the fixpoint.
+	Then, the result is a small box enclosing (0.5,0.5,0.5):
+	<div class="code">
+	CtcFixPoint fp(c,0.001);<br>
+	fp.contract(x);<br>
+	cout << x << endl;<span class="comment">// ([0.4999999999999999, 0.5000000000000001], ...</span><br>
+	</div>
+
