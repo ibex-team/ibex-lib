@@ -37,8 +37,7 @@ public:
 	/**
 	 *  \brief Create an optimizer.
 	 *
-	 *   \param f     - The objective function f(x)
-	 *   \param g     - the constraints (each constraint must be g_i(x)<=0)
+	 *   \param sys   - the <b>extended system</b> (see below)
 	 *   \param bsc   - bisector for extended boxes
 	 *   \param ctc   - contractor for the <b>extended system</b>
 	 *
@@ -77,9 +76,10 @@ public:
 	 * \brief Displays on standard output a report of the last call to #optimize(const IntervalVector&).
 	 *
 	 * Information provided:
-	 * <ul><li>last value of the "loup"
-	 *     <li>total number of cells created during the exploration
+	 * <ul><li> interval of the cost  [uplo,loup]
+	 *     <li> the best feasible point found
 	 *     <li>total running time
+	 *     <li>total number of cells created during the exploration
 	 * </ul>
 	 */
 	void report();
@@ -91,9 +91,9 @@ public:
 	const int m;
 
 	/**
-	 * \brief Normalized system
+	 * \brief The extended system 
 	 *
-	 * Corresponds to the input system (see constructor) but with all inequalities
+	 * Corresponds to the extended  system (see constructor) with all inequalities
 	 * under the form g_i(x)<=0.
 	 */
 	System sys;
@@ -146,7 +146,7 @@ public:
 
 	/** Trace activation flag.
 	 * The value can be fixed by the user. By default: 0  nothing is printed
-	 1 for printing each better found feasible points 
+	 1 for printing each better found feasible point
 	  2 for printing each handled node */
 	int trace;
 
@@ -182,7 +182,7 @@ public:
 	/** The "loup" (lowest upper bound of the criterion) */
 	double loup;
 
-	/** The "uplo" (upper lower bound of the criterion) */
+	/** The "uplo" (uppermost lower bound of the criterion) */
 	double uplo;
 
 
@@ -244,7 +244,7 @@ protected:
 	 */
 	bool check_candidate(const Vector& pt, bool is_inner);
 
-	/*
+	/**
 	 * \brief First method for probing
 	 *
 	 * Take random points in any directions.
@@ -256,7 +256,7 @@ protected:
 	 */
 	bool random_probing (const IntervalVector& box, bool is_innner);
 
-	/*
+	/**
 	 * \brief Second method for probing
 	 *
 	 * Pick equidistant points in the opposite direction of the
@@ -275,8 +275,13 @@ protected:
 	 */
 	bool line_probing(const IntervalVector& box, const Vector& start, bool is_inner, int sample_size, bool recursive);
 
-	/*
+	/**
 	 * \brief Update loup either using line_probing or random_probing.
+	 *
+	 * Main function for probing ;
+	 * search for an inner box ;
+	 * call line_probing or random_probing. (in the current version, random probing is called)
+	 * return true if the loup has been modified.
 	 */
 	bool update_loup_probing(const IntervalVector& box);
 
