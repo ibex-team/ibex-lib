@@ -44,7 +44,7 @@ void ExprGenerator::visit(const P_ExprPower& e) {
 		return;
 	}
 
-	typedef enum { INTEGER, INTERVAL, EXPRNODE } _type;
+	typedef enum { IBEX_INTEGER, IBEX_INTERVAL, IBEX_EXPRNODE } _type;
 	_type right_type;
 	_type left_type;
 
@@ -56,11 +56,11 @@ void ExprGenerator::visit(const P_ExprPower& e) {
 	if (cr) {
 		if (!cr->dim.is_scalar()) throw SyntaxError("exponent must be scalar");
 
-		right_type=INTERVAL;
+		right_type=IBEX_INTERVAL;
 		itv_right=cr->get_value();
 		delete cr;
 		// NOTE: we can delete cr right now because
-		// even in the case where right_type==INTERVAL and left_type==EXPRNODE
+		// even in the case where right_type==IBEX_INTERVAL and left_type==IBEX_EXPRNODE
 		// we will recreate a ExprConstant node by multiplying itv_right (instead of RIGHT)
 		// with LEFT.
 
@@ -68,35 +68,35 @@ void ExprGenerator::visit(const P_ExprPower& e) {
 		if (itv_right.is_degenerated()) {
 			double x=itv_right.mid();
 			if (floor(x)==x) {
-				right_type=INTEGER;
+				right_type=IBEX_INTEGER;
 				int_right=floor(x);
 			}
 		}
 	} else
-		right_type=EXPRNODE;
+		right_type=IBEX_EXPRNODE;
 
 
 	const ExprConstant* cl=dynamic_cast<const ExprConstant*>(&LEFT);
 	if (cl) {
-		left_type=INTERVAL;
+		left_type=IBEX_INTERVAL;
 		itv_left=cl->get_value();
 		delete cl; // LEFT will no longer be used
 	} else
-		left_type=EXPRNODE;
+		left_type=IBEX_EXPRNODE;
 
 
-	if (left_type==INTERVAL) {
-		if (right_type==INTEGER) {
+	if (left_type==IBEX_INTERVAL) {
+		if (right_type==IBEX_INTEGER) {
 			e.deco.tmp = &ExprConstant::new_scalar(pow(itv_left,int_right));
-		} else if (right_type==INTERVAL) {
+		} else if (right_type==IBEX_INTERVAL) {
 			e.deco.tmp = &ExprConstant::new_scalar(pow(itv_left,itv_right));
 		} else {
 			e.deco.tmp = &exp(RIGHT * log(itv_left)); // *log(...) will create a new ExprConstant.
 		}
 	}  else {
-		if (right_type==INTEGER) {
+		if (right_type==IBEX_INTEGER) {
 			e.deco.tmp = &(pow(LEFT,int_right));
-		} else if (right_type==INTERVAL) { // do not forget this case (RIGHT does not exist anymore)
+		} else if (right_type==IBEX_INTERVAL) { // do not forget this case (RIGHT does not exist anymore)
 			e.deco.tmp = &exp(itv_right * log(LEFT));
 		} else {
 			e.deco.tmp = &exp(RIGHT * log(LEFT));

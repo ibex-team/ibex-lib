@@ -21,22 +21,40 @@
 /* ======================================================= */
 
 #ifdef _IBEX_WITH_GAOL_
-extern "C" {
-  //#include "gdtoaimp.h"
-}
-#include "gaol/gaol.h"
-#include "gaol/gaol_interval.h"
-/** \brief NEG_INFINITY: double representation of -oo */
-#define NEG_INFINITY (-GAOL_INFINITY)
-/** \brief POS_INFINITY: double representation of +oo */
-#define POS_INFINITY GAOL_INFINITY
+	extern "C" {
+	  //#include "gdtoaimp.h"
+	}
+	#include "gaol/gaol.h"
+	#include "gaol/gaol_interval.h"
+	/** \brief NEG_INFINITY: double representation of -oo */
+	#define NEG_INFINITY (-GAOL_INFINITY)
+	/** \brief POS_INFINITY: double representation of +oo */
+	#define POS_INFINITY GAOL_INFINITY
 #else
 #ifdef _IBEX_WITH_BIAS_
-#include "Interval.h"
-/** \brief NEG_INFINITY: double representation of -oo */
-#define NEG_INFINITY BiasNegInf
-/** \brief POS_INFINITY: double representation of +oo */
-#define POS_INFINITY BiasPosInf
+	#include "Interval.h"
+	/** \brief NEG_INFINITY: double representation of -oo */
+	#define NEG_INFINITY BiasNegInf
+	/** \brief POS_INFINITY: double representation of +oo */
+	#define POS_INFINITY BiasPosInf
+#else
+#ifdef _IBEX_WITH_FILIB_
+	#include "interval/interval.hpp"
+	#include <fp_traits/fp_traits.hpp>
+	/* simplify instantiation */
+	#define FI_BASE	double
+	//#define FI_ROUNDING filib::no_rounding
+	#define FI_ROUNDING filib::native_switched
+	//#define FI_MODE filib::i_mode_extended
+	#define FI_MODE filib::i_mode_extended_flag
+	//#define FI_MODE filib::i_mode_normal
+	/** \brief NEG_INFINITY: <double> representation of -oo */
+	#define NEG_INFINITY filib::primitive::compose(1,0x7FF,0,0)
+	/** \brief POS_INFINITY: <double> representation of +oo */
+	#define POS_INFINITY filib::primitive::compose(0,0x7FF,0,0)
+	/** \brief IBEX_NAN: <double> representation of NaN */
+	#define IBEX_NAN filib::primitive::compose(0,0x7FF,1 << 19,0)
+#endif
 #endif
 #endif
 
@@ -86,11 +104,16 @@ double next_float(double x);
  * \brief Interval
  *
  * This class defines the interval interface of IBEX and encapsulates an interval "itv" whose
- * type depends on the chosen implementation (currently: Gaol or Bias).
+ * type depends on the chosen implementation (currently: Gaol, Bias of filib).
  *
  * Note that some functions of the Gaol interval interface do not appear here (like "possibly relations")
  * because there are not used by ibex; while other have been introduced (like "ratio_delta"). Some
  * functions are also renamed to match more conventional use.
+ *
+ * Note that with filib several precision and mode are available. We choose :
+ * base type = double
+ * rounding_strategy = native_switched
+ * interval_mode = i_mode_extended_flag
  *
  */
 class Interval {
@@ -406,6 +429,18 @@ class Interval {
     Interval& operator=(const INTERVAL& x);
 
     INTERVAL itv;
+#else
+#ifdef _IBEX_WITH_FILIB_
+    //typedef filib::interval<double, filib::native_switched,filib::i_mode_extended_flag> INTERVAL;
+    typedef filib::interval<FI_BASE,FI_ROUNDING,FI_MODE> FI_INTERVAL;
+	/* \brief Wrap the filib-interval [x]. */
+    Interval(const FI_INTERVAL& x);
+    /* \brief Assign this to the filib-interval [x]. */
+    Interval& operator=(const FI_INTERVAL& x);
+
+    FI_INTERVAL itv;
+
+#endif
 #endif
 #endif
 };
@@ -712,6 +747,10 @@ bool proj_integer(Interval& x);
 #else
 #ifdef _IBEX_WITH_BIAS_
 #include "ibex_bias_Interval.h_"
+#else
+#ifdef _IBEX_WITH_FILIB_
+#include "ibex_filib_Interval.h_"
+#endif
 #endif
 #endif
 
@@ -760,7 +799,10 @@ inline bool Interval::operator!=(const Interval& x) const {
 }
 
 inline double Interval::rad() const {
-	return 0.5*diam();
+	double t = mid();
+	double t1 =(t-*this).ub();
+	double t2= (*this-t).ub();
+	return (t1>t2) ? t1 : t2;
 }
 
 inline bool Interval::is_strict_subset(const Interval& x) const {
@@ -818,6 +860,10 @@ inline double distance(const Interval &x1, const Interval &x2) {
 #else
 #ifdef _IBEX_WITH_BIAS_
     	return Distance(x1.itv,x2.itv);
+#else
+#ifdef _IBEX_WITH_FILIB_
+    	return x1.itv.dist(x2.itv);
+#endif
 #endif
 #endif
 

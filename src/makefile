@@ -34,9 +34,12 @@ OBJS  =$(wildcard $(IBEX_SRC_DIR)/tools/*.o) \
 ifeq ($(SUBLIB), gaol)
 DYN_LIB_DEP=dyn_ibex_gaol
 else
+ifeq ($(SUBLIB), bias)
 DYN_LIB_DEP=dyn_ibex_bias  
+else
+DYN_LIB_DEP=dyn_ibex_filib  
 endif
-
+endif
 all : $(STATIC_TARGET) $(DYNAMIC_TARGET)
 
 $(STATIC_TARGET) : headers $(SUBDIRS)
@@ -72,10 +75,16 @@ dyn_ibex_gaol: $(STATIC_TARGET)
 	cd $(IBEX_LIB_DIR);  ar -x libibex.a; \
 	ar -x $(GAOL_LIB_DIR)/libgaol.a; \
 	ar -x $(SIMPLEX_LIB_DIR)/libsoplex.a; cd $(IBEX_DIR)
+	
+dyn_ibex_filib: $(STATIC_TARGET)
+	cd $(IBEX_LIB_DIR);  ar -x libibex.a; \
+	ar -x $(FILIB_LIB_DIR)/libprim.a; \
+	ar -x $(SIMPLEX_LIB_DIR)/libsoplex.a; cd $(IBEX_DIR)
+
 
 # For Linux
 $(IBEX_LIB_DIR)/libibex.so: $(DYN_LIB_DEP)
-	cd $(IBEX_LIB_DIR); g++ -shared *.o -o libibex.so; rm *.o; cd $(IBEX_DIR)
+	cd $(IBEX_LIB_DIR); g++  *.o -o libibex.so; rm *.o; cd $(IBEX_DIR)
 
 # For MacOS
 $(IBEX_LIB_DIR)/libibex.dylib: $(DYN_LIB_DEP)

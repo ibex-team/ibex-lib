@@ -18,10 +18,15 @@
 #else
 #ifdef _IBEX_WITH_BIAS_
 #include "ibex_bias_Interval.cpp_"
+#else
+#ifdef _IBEX_WITH_FILIB_
+#include "ibex_filib_Interval.cpp_"
+#endif
 #endif
 #endif
 
 namespace ibex {
+
 
 
 #define INF_DIV(n,d) ((Interval(n)/Interval(d)).lb())

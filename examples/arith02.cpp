@@ -16,6 +16,22 @@ using namespace std;
 
 int main() {
 	{
+
+		cout << " EMPTY_SET = " << Interval::EMPTY_SET <<  "  is empty? "<< Interval::EMPTY_SET.is_empty() << std::endl;
+		cout << " PI = "<<  Interval::PI <<  std::endl;
+		cout << " 2 PI = "<<  Interval::TWO_PI << std::endl;
+		cout << " 1/2 PI = "<<  Interval::HALF_PI << std::endl;
+		cout << " ONE = "<<  Interval::ONE << std::endl;
+		cout << " ZERO = " << Interval::ZERO << std::endl;
+		cout << " -INFTY = "<<  NEG_INFINITY << std::endl;
+		cout << " INFTY = "<<  POS_INFINITY << std::endl;
+		cout << " ALL_REALS = " << Interval::ALL_REALS << std::endl;
+		cout << " POS_REALS = " << Interval::POS_REALS << std::endl;
+		cout << " NEG_REALS = " << Interval::NEG_REALS << std::endl;
+
+
+	}
+	{
 		// Example #4
 		// ------------------------------------------------
 		// Basic "projection"/"backward arithmetic"
@@ -26,9 +42,12 @@ int main() {
 	    // > project sin(z)=-1 onto z (contracts z)
 		// > project x+y onto x and y (contracts x and y)
 		// ------------------------------------------------
+
+		Interval c=Interval(1.0);
 		Interval x(1,2);
 		Interval y(3,4);
 		Interval z=x+y;
+
 		cout << "x before =" << x << endl;
 		cout << "y before =" << y << endl;
 		cout << "z before =" << z << endl << endl;

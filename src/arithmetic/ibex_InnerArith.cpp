@@ -19,7 +19,7 @@ namespace {
 
 enum { ADD, SUB, MUL, DIV};
 
-string op_str(int i) {
+std::string op_str(int i) {
   switch(i) {
     case ADD: return " + ";
     case SUB: return " - ";

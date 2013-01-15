@@ -34,6 +34,8 @@ def options (opt):
 			help = "location of the Gaol lib")
 	opt.add_option ("--with-bias",   action="store", type="string", dest="BIAS_PATH",
 			help = "location of the Profil/Bias lib")
+	opt.add_option ("--with-filib",   action="store", type="string", dest="FILIB_PATH",
+			help = "location of the filib lib")
 	opt.add_option ("--with-soplex", action="store", type="string", dest="SOPLEX_PATH",
 			help = "location of the Soplex lib")
 
@@ -66,7 +68,7 @@ def configure (conf):
 	env = conf.env
 	conf.load ('compiler_cxx compiler_cc bison')
 	conf.load ('flex', '.')
-	conf.switch_to_32bits()
+
 
 	env.VERSION = VERSION
 
@@ -82,8 +84,8 @@ def configure (conf):
 
 	# build as shared lib
 	if conf.options.ENABLE_SHARED or conf.options.WITH_JNI:
-		if conf.options.BIAS_PATH != None or conf.options.GAOL_PATH != None:
-			conf.fatal ("--enable-shlib cannot be used together with --with-bias/--with-gaol (the official libs are not compiled with -fPIC)")
+		if conf.options.BIAS_PATH != None or conf.options.GAOL_PATH != None or conf.options.FILIB_PATH != None:
+			conf.fatal ("--enable-shlib cannot be used together with --with-bias/--with-gaol/--with-filib (the official libs are not compiled with -fPIC)")
 
 		env.ENABLE_SHARED = True
 

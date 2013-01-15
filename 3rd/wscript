@@ -23,6 +23,7 @@ def configure (conf):
 	enable_shlib = conf.env.ENABLE_SHARED
 	with_bias = conf.options.BIAS_PATH
 	with_gaol = conf.options.GAOL_PATH
+	with_filib = conf.options.FILIB_PATH
 	def join (path, *k):
 		return os.path.abspath (os.path.join (os.path.expanduser (path), *k)) if path else None
 	def use_shlib():
@@ -56,10 +57,31 @@ def configure (conf):
 		conf.check_cxx (lib = ["Profil", "Bias", "lr"],
 				uselib_store = "IBEX_DEPS", **kw)
 
+	elif with_filib is not None:
+		# build with filib
+		if with_gaol is not None:
+			conf.fatal ("cannot use --with-gaol and --with-filib together")
+		if with_bias is not None:
+			conf.fatal ("cannot use --with-bias and --with-filib together")
+
+		conf.env.INTERVAL_LIB = "FILIB"
+
+		if with_filib:
+			conf.env.append_unique ("INCLUDES", join (with_filib, "include"))
+
+		conf.check_cxx (header_name	= "interval/interval.hpp")
+
+		kw = {"libpath": join (with_filib, "lib")} if with_filib else {}
+		conf.check_cxx (lib = ["prim"],
+				uselib_store = "IBEX_DEPS", **kw)
+		conf.env.append_unique ("CXXFLAGS", "-frounding-math")
+
+
 	else:
 		# build with gaol
 		conf.env.INTERVAL_LIB = "GAOL"
-
+		
+		conf.switch_to_32bits()
 		if with_gaol:
 			conf.env.append_unique ("INCLUDES", join (with_gaol, "include"))
 		mandatory = bool (with_gaol)

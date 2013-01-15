@@ -12,9 +12,8 @@
 #include "ibex_Eval.h"
 #include "ibex_Expr.h"
 
-namespace ibex {
 #include <typeinfo>
-
+namespace ibex {
 
 Domain& Eval::eval(const Function& f, ExprLabel** args) const {
 	assert(f.expr().deco.d);
