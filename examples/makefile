@@ -1,8 +1,8 @@
 SRCS=$(wildcard *.cpp)
 BINS=$(SRCS:.cpp=)
 
-CXXFLAGS := $(shell pkg-config --cflags /home/nininjo/Documents/WORK/PROJET/IBEX/share/pkgconfig/ibex.pc)  -O3 -DNDEBUG -Wno-deprecated -frounding-math -g # -pg 
-LIBS	 := $(shell pkg-config --libs   /home/nininjo/Documents/WORK/PROJET/IBEX/share/pkgconfig/ibex.pc) 
+CXXFLAGS := $(shell pkg-config --cflags ibex) -m32 -O3 -DNDEBUG -Wno-deprecated #-g #-pg 
+LIBS	 := $(shell pkg-config --libs   ibex) -m32
 
 all: $(BINS)
 
