@@ -3,28 +3,20 @@ HEADERS=$(SRCS:.cpp=.h)
 OBJS=$(SRCS:.cpp=.o)
 TARGET=utest
 
-include ../src/common.mak
- 
-#CPPTEST_DIR:=/home/gchabert08/Applications/cpptest
-#CPPTEST_INC_DIR:=$(CPPTEST_DIR)/src
-#CPPTEST_LIB_DIR:=$(CPPTEST_DIR)
-#CPPTEST_INC_DIR_OPT:=-I$(CPPTEST_INC_DIR)
-#CPPTEST_LIB_DIR_OPT:=-static -L$(CPPTEST_LIB_DIR)
-#CPPTEST_LIB_DIR_OPT:=-static 
-CPPTEST_LIB_NAME_OPT:=-lcpptest
- 		
-INC_DIR_OPT:=$(INC_DIR_OPT) $(CPPTEST_INC_DIR_OPT)
-LIB_DIR_OPT:=$(LIB_DIR_OPT) $(CPPTEST_LIB_DIR_OPT)
-LIB_NAME_OPT:=$(LIB_NAME_OPT) $(CPPTEST_LIB_NAME_OPT)
+CXXFLAGS := $(shell pkg-config --cflags ibex)  -O3 -DNDEBUG -Wno-deprecated   #-g # -pg 
+LIBS	 :=  -static $(shell pkg-config --libs  ibex) -lcpptest
+LIBDIR	 := $(shell pkg-config --libdir  ibex) 
 
-$(TARGET):	$(OBJS) $(IBEX_LIB_DIR)/libibex.a
-	$(CXX) -o $(TARGET) $(LIB_DIR_OPT) $(OBJS) -static $(LIB_NAME_OPT) 
+$(TARGET):	$(OBJS) 
+	$(CXX) -o $(TARGET) $(CXXFLAGS) $(OBJS) $(LIBS)
+
 
 utest.o : $(SRCS) $(HEADERS) 
 
-%.o : %.cpp %.h 
-	$(CXX) $(CXXFLAGS) $(INC_DIR_OPT) -c  -o  $@ $<
+%.o :	%.cpp
+	$(CXX) $(CPPFLAGS) $(LDFLAGS) $(CXXFLAGS) -c -o $@ $< $(LIBS)
 
 clean:
 	rm -f $(OBJS) $(TARGET)
 	
+
