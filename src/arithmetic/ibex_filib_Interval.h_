@@ -14,6 +14,7 @@
 
 #include "ibex_Exception.h"
 #include <cassert>
+#include <float.h>
 
 
 
@@ -73,16 +74,16 @@ inline Interval& Interval::operator*=(double d) {
 	if (d==POS_INFINITY || d==NEG_INFINITY)
 		set_empty();
 	else
-		itv*=d;
+		*this*=Interval(d);
 	return *this;
 }
 
 inline Interval& Interval::operator/=(double d) {
 	if (d==POS_INFINITY || d==NEG_INFINITY)
 		set_empty();
-	else
-		itv/=d;
-	return *this;
+	else{
+		return *this/=Interval(d);
+	}
 }
 
 inline Interval& Interval::operator+=(const Interval& x) {
@@ -95,14 +96,132 @@ inline Interval& Interval::operator-=(const Interval& x) {
 	return *this;
 }
 
-inline Interval& Interval::operator*=(const Interval& x) {
-	itv*=x.itv;
+inline Interval& Interval::operator*=(const Interval& y) {
+
+	FI_INTERVAL r;
+
+	if (is_empty()) return *this;
+	if (y.is_empty()) { *this=Interval::EMPTY_SET; return *this; }
+
+	const FI_BASE& a(lb());
+	const FI_BASE& b(ub());
+	const FI_BASE& c(y.lb());
+	const FI_BASE& d(y.ub());
+
+	if ((a==0 && b==0) || (c==0 && d==0)) { *this=Interval(0.0,0.0); return *this; }
+
+	if (((a<0) && (b>0)) && (c==NEG_INFINITY || d==POS_INFINITY)) { *this=Interval(NEG_INFINITY, POS_INFINITY); return *this; }
+
+	if (((c<0) && (d>0)) && (a==NEG_INFINITY || b==POS_INFINITY)) { *this=Interval(NEG_INFINITY, POS_INFINITY); return *this; }
+
+	// [-inf, _] x [_ 0] ou [0,_] x [_, +inf]
+	if (((a==NEG_INFINITY) && (d==0)) || ((d==POS_INFINITY) && (a==0))) {
+		if ((b<=0) || (c>=0)) { *this=Interval(0.0, POS_INFINITY); return *this; }
+		else {
+			r = FI_INTERVAL(b)*FI_INTERVAL(c);
+			*this=Interval(r.inf(), POS_INFINITY);
+			return *this;
+		}
+	}
+
+	// [-inf, _] x [0, _] ou [0, _] x [-inf, _]
+	if (((a==NEG_INFINITY) && (c==0)) || ((c==NEG_INFINITY) && (a==0))) {
+		if ((b<=0) || (d<=0)) { *this=Interval(NEG_INFINITY, 0.0); return *this; }
+		else {
+			r = FI_INTERVAL(b)*FI_INTERVAL(d);
+			*this=Interval(NEG_INFINITY, r.sup());
+			return *this;
+		}
+	}
+
+	// [_,0] x [-inf, _] ou [_, +inf] x [0,_]
+	if (((c==NEG_INFINITY) && (b==0)) || ((b==POS_INFINITY) && (c==0))) {
+		if ((d<=0) || (a>=0)) { *this=Interval(0.0, POS_INFINITY); return *this; }
+		else {
+			r = FI_INTERVAL(a)*FI_INTERVAL(d);
+			*this=Interval(r.inf(), POS_INFINITY);
+			return *this;
+		}
+	}
+
+	// [_, +inf] x [_,0] ou [_,0] x [_, +inf]
+	if (((b==POS_INFINITY) && (d==0)) || ((d==POS_INFINITY) && (b==0))) {
+		if ((a>=0) || (c>=0)) { *this=Interval(NEG_INFINITY, 0.0); return *this; }
+		else {
+			r = FI_INTERVAL(a)*FI_INTERVAL(c);
+			*this=Interval(NEG_INFINITY, r.sup());
+			return *this;
+		}
+	}
+	*this= itv*y.itv;
 	return *this;
 }
 
-inline Interval& Interval::operator/=(const Interval& x) {
-	itv/=x.itv;
+
+inline Interval& Interval::operator/=(const Interval& y) {
+
+	if (is_empty()) return *this;
+	if (y.is_empty()) { *this=Interval::EMPTY_SET; return *this; }
+
+	const FI_BASE& a(lb());
+	const FI_BASE& b(ub());
+	const FI_BASE& c(y.lb());
+	const FI_BASE& d(y.ub());
+
+	FI_INTERVAL r;
+
+	if (c==0 && d==0) {
+		*this=Interval::EMPTY_SET;
+		return *this;
+	}
+
+	if (a==0 && b==0) {
+		// TODO: 0/0 can also be 1...
+		return *this;
+	}
+
+	if (c>0 || d<0) {
+		*this= itv / y.itv;
+		return *this;
+	}
+
+	if ((b<=0) && d==0) {
+		r = FI_INTERVAL(b) / FI_INTERVAL(c);
+		*this=Interval(r.inf(), POS_INFINITY);
+		return *this;
+	}
+
+	if (b<=0 && c<0 && d<0) {
+		*this=Interval(NEG_INFINITY, POS_INFINITY);
+		return *this;
+	}
+
+	if (b<=0 && c==0) {
+		r = FI_INTERVAL(b) / FI_INTERVAL(d);		
+		*this=Interval(NEG_INFINITY, r.sup());
+		return *this;
+	}
+
+	if (a>=0 && d==0) {
+		r = FI_INTERVAL(a) / FI_INTERVAL(c);
+		*this=Interval(NEG_INFINITY, r.sup());
+		return *this;
+	}
+
+	if (a>=0 && c<0 && d>0) {
+		*this=Interval(NEG_INFINITY, POS_INFINITY);
+		return *this;
+	}
+
+	if (a>=0 && c==0) {
+		r = FI_INTERVAL(a) / FI_INTERVAL(d);
+		*this=Interval(r.inf(), POS_INFINITY);
+		return *this;
+	}
+
+	*this=Interval(NEG_INFINITY, POS_INFINITY); // a<0<b et c<=0<=d
 	return *this;
+
 }
 
 /*inline Interval Interval::operator+() const {
@@ -142,11 +261,20 @@ inline double Interval::ub() const {
 }
 
 inline double Interval::mid() const {
-	return itv.mid();
+	if (itv.inf()==NEG_INFINITY)
+		if (itv.sup()==POS_INFINITY) return 0;
+		else return -DBL_MAX;
+	else if (itv.sup()==POS_INFINITY) return DBL_MAX;
+	else {
+		double m=itv.mid();
+		if (m<itv.inf()) m=itv.inf(); // watch dog
+		else if (m>itv.sup()) m=itv.sup();
+		return m;
+	}
 }
 
 inline bool Interval::is_subset(const Interval& x) const {
-	return x.itv.subset(itv);
+	return itv.subset(x.itv);
 }
 
 /*inline bool Interval::is_strict_subset(const Interval& x) const {
@@ -154,7 +282,7 @@ inline bool Interval::is_subset(const Interval& x) const {
 }*/
 
 inline bool Interval::is_superset(const Interval& x) const {
-	return x.itv.superset(itv);
+	return itv.superset(x.itv);
 }
 
 
@@ -229,15 +357,19 @@ inline Interval operator-(const Interval& x, double d) {
 inline Interval operator*(const Interval& x, double d) {
 	if(d==NEG_INFINITY || d==POS_INFINITY)
 		return Interval::EMPTY_SET;
-	else
-		return x.itv*d;
+	else {
+		Interval res(d);
+		return res*=x;
+	}
 }
 
 inline Interval operator/(const Interval& x, double d) {
 	if(d==NEG_INFINITY || d==POS_INFINITY)
 		return Interval::EMPTY_SET;
-	else
-		return x.itv/d;
+	else{
+		Interval res(x);
+		return res/=Interval(d);
+	}
 }
 
 inline Interval operator+(double d,const Interval& x) {
@@ -257,15 +389,19 @@ inline Interval operator-(double d, const Interval& x) {
 inline Interval operator*(double d, const Interval& x) {
 	if(d==NEG_INFINITY || d==POS_INFINITY)
 		return Interval::EMPTY_SET;
-	else
-		return d*x.itv;
+	else {
+		Interval res(d);
+		return res*=x;
+	}
 }
 
 inline Interval operator/(double d, const Interval& x) {
 	if(d==NEG_INFINITY || d==POS_INFINITY)
 		return Interval::EMPTY_SET;
-	else
-		return d/x.itv;
+	else{
+		Interval res(d);
+		return res/=x;
+	}
 }
 
 inline Interval operator+(const Interval& x1, const Interval& x2) {
@@ -277,11 +413,13 @@ inline Interval operator-(const Interval& x1, const Interval& x2) {
 }
 
 inline Interval operator*(const Interval& x1, const Interval& x2) {
-	return x1.itv*x2.itv;
+	Interval res(x1);
+	return res*=x2;
 }
 
 inline Interval operator/(const Interval& x1, const Interval& x2) {
-	return x1.itv/x2.itv;
+	Interval res(x1);
+	return res/=Interval(x2);
 }
 
 inline Interval sqr(const Interval& x) {
@@ -293,7 +431,12 @@ inline Interval sqrt(const Interval& x) {
 }
 
 inline Interval pow(const Interval& x, int n) {
-	return filib::power(x.itv,n);
+	if (n==0)
+		return Interval::ONE;
+	else if (n<0)
+		return 1.0/Interval(filib::power(x.itv,-n));
+	else
+		return filib::power(x.itv,n);
 }
 
 inline Interval pow(const Interval &x, double d) {
