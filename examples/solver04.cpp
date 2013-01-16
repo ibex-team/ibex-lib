@@ -21,7 +21,7 @@ int main(int argc, char** argv) {
 	string xnewton = argv[4];    // xn for the additional xnewton contractor
         string bisection= argv[5];   // the bisection heuristics
 	double prec= atof(argv[6]);  // the required precision
-        double time_limit=atof(argv[7]); 
+        double time_limit=atof(argv[7]); // the time limit
 
 
 	srand(1); // random used in corner choice in X_Newton
@@ -67,7 +67,7 @@ int main(int argc, char** argv) {
 	  ctc = & cacidn;
 	else if (filtering== "3bcidhc4n")
 	  ctc = & c3bcidn;
-
+	else {cout << filtering <<  " is not an implemented  contraction  mode "  << endl; return -1;}
 
 	// The X_newton contractor
 
@@ -78,11 +78,10 @@ int main(int argc, char** argv) {
 
 	cpoints.push_back(X_Newton::RANDOM);
 	cpoints.push_back(X_Newton::RANDOM_INV);
-	CtcHC4 propag1(sys.ctrs,ratio_propag);  // the contractor called in the XNewton loop if the gain is > rfp2
+	CtcHC4 hc44xn(sys.ctrs,ratio_propag);  // the contractor called in the XNewton loop if the gain is > rfp2
 
-	//	X_Newton ctcxnewton (sys, &propag1 , cpoints, -1,0,0.2,0.2, LR_contractor::ALL_BOX,X_Newton::HANSEN,100,1.e5,1.e4);
-	X_Newton ctcxnewton (sys, &propag1 , cpoints, -1,0,1,1, LR_contractor::ALL_BOX,X_Newton::HANSEN,100,1.e5,1.e4);
-
+       	X_Newton ctcxnewton (sys, &hc44xn, cpoints, -1,0,0.2,0.2, LR_contractor::ALL_BOX,X_Newton::HANSEN,100,1.e5,1.e4);
+	
 	// the actual contractor ; composition of ctc ,e.g. acidhc4n,  and Xnewton
 
 	CtcCompo cxn (*ctc, ctcxnewton);
@@ -110,8 +109,8 @@ int main(int argc, char** argv) {
 	  bs = new SmearSumRelative(sys,prec);
 	else if (bisection=="smearmaxrel")
 	  bs = new SmearMaxRelative(sys,prec);
-	  
-
+	else {cout << bisection << " is not an implemented  bisection mode "  << endl; return -1;} 
+	
 	// Choose the way the search tree is explored
 	// -------------------------------------
 	// A "CellStack" means a depth-first search.
@@ -135,9 +134,9 @@ int main(int argc, char** argv) {
 	// Display the number of boxes (called "cells")
 	// generated during the search
 	cout << "number of cells=" << s.nb_cells << endl;
-	// Display the average number of "varcided"  variables if acid was called
-	if (filtering=="acidhc4" || filtering=="acidhc4n") 
-	  cout << "nbvarcid=" <<  CtcAcid::nbvarstat << endl;
+	//  stats for acid :  Display the average number of "varcided"  variables if acid was called
+	//	if (filtering=="acidhc4" || filtering=="acidhc4n") 
+	//	  cout << "nbvarcid=" <<  CtcAcid::nbvarstat << endl;
 	cout << "cpu time used=" << s.time << "s."<< endl;
 
  }
