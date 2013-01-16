@@ -449,15 +449,18 @@ inline Interval sqrt(const Interval& x) {
 
 inline Interval pow(const Interval& x, int n) {
 	if (x.is_empty()) return Interval::EMPTY_SET;
-
+	else if (n==0)	return Interval::ONE;
+	else if (n<0)	return 1.0/pow(x,-n);
+	else if (n==1)	return x;
+	else if (n%2!=0) {
 	// there are bugs with negative x
 	// such as Power([-2,3],3)->[-18,27])
-	if (n%2!=0) {
 		if (x.ub()<0) return -Power(-x.itv,n);
 		else if (x.lb()<0) return Interval(Inf(-Power(INTERVAL(-x.lb(),-x.lb()),n)),
 										   Sup( Power(INTERVAL(x.ub(), x.ub()),n)));
+		else return Power(x.itv,n);
 	}
-	return Power(x.itv,n);
+	else return Power(x.itv,n);
 }
 
 inline Interval pow(const Interval& x, double d) {
@@ -476,7 +479,9 @@ inline Interval root(const Interval& x, int n) {
 	INTERVAL r;
 
 	if (x.lb()==0 && x.ub()==0) return Interval::ZERO;
-
+	if (n==0) return Interval::ONE;
+	if (n<0) return 1.0/root(x,-n);
+	if (n==1) return x;
 	// odd root
 	if (n%2==0) {
 		if (x.ub()<0)

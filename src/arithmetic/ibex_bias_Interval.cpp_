@@ -36,7 +36,7 @@ const Interval Interval::HALF_PI = PI/2.0;
 
 std::ostream& operator<<(std::ostream& os, const Interval& x) {
 	if (x.is_empty())
-			return os << "empty";
+			return os << "[ empty ]";
 	else
 		return os << "[" << x.lb() << "," << x.ub() << "]";
 	//return os << x.itv;
