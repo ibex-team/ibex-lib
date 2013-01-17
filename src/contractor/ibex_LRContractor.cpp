@@ -121,7 +121,7 @@ void LR_contractor::iter(IntervalVector & box){
   
   try{
     optimizer(box, mysoplex, n, nb_ctrs);
-  }catch(EmptyBoxException e){
+  }catch(EmptyBoxException e){box.set_empty();
     throw EmptyBoxException();
   }  
   
@@ -213,8 +213,6 @@ void LR_contractor::iter(IntervalVector & box){
 					  Interval& obj, double bound){
     //  mysoplex.writeFile("dump.lp", NULL, NULL, NULL);                                                                    
 
-    int nb_rows=mysoplex.nRows()-n;
-
     if(sense==SPxLP::MINIMIZE)
       mysoplex.changeObj(var, 1.0);
     else
@@ -226,8 +224,8 @@ void LR_contractor::iter(IntervalVector & box){
     mysoplex.changeSense(SPxLP::MINIMIZE);
     mysoplex.setTerminationIter(max_iter_soplex);
     mysoplex.setDelta(1e-10);
-    //   mysoplex.writeFile("dump.lp", NULL, NULL, NULL);              
-    //  system("cat dump.lp");
+    //    mysoplex.writeFile("dump.lp", NULL, NULL, NULL);              
+    //    system("cat dump.lp");
     try{
       stat = mysoplex.solve();
     }catch(SPxException){
