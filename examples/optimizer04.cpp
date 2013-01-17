@@ -36,16 +36,16 @@ int main(int argc, char** argv){
 	double timelimit = atof(argv[6]);
 
 	srand(1);
+	// the extended system 
 	System ext_sys(sys,System::EXTEND);
-	int goal_var= ext_sys.nb_var-1;  // the last variable in ext_sys
+
+        cout << "file " << argv[1] << endl;
 
 	// Build the bisection heuristic
 	// --------------------------
 
 	Bsc * bs;
 
-        cout << "file " << argv[1] << endl;
-	cout << "bisection " << bisection << endl;
 	if (bisection=="roundrobin")
 	  bs = new RoundRobin (prec);
 	else if (bisection== "largestfirst")
@@ -58,74 +58,70 @@ int main(int argc, char** argv){
 	  bs = new SmearSumRelative(ext_sys,prec);
 	else if (bisection=="smearmaxrel")
 	  bs = new SmearMaxRelative(ext_sys,prec);
-
+	else {cout << bisection << " is not an implemented  bisection mode "  << endl; return -1;}
 
 	// The contractors
 
+	// the first contractor called
 	CtcHC4 hc4(ext_sys.ctrs,0.01,true);
-	// hc4 inside acid
+	// hc4 inside acid : incremental beginning with the shaved variable
 	CtcHC4 hc44cid(ext_sys.ctrs,0.1,true);
-	// hc4 inside xnewton loop
+	// hc4 inside xnewton loop 
 	CtcHC4 hc44xn (ext_sys.ctrs,0.01,false);
 
-	CtcAcid acidhc4(ext_sys,BoolMask(ext_sys.nb_var,1),hc44cid,10,1,1.e-8,0.005);
+	// The 3BCID contractor (component of the contractor when filtering == "3bcid")
 	Ctc3BCid c3bcidhc4(BoolMask(ext_sys.nb_var,1),hc44cid,10,1,ext_sys.nb_var);
+	// hc4 followed by 3bcidhc4 : the actual contractor used when filtering == "3bcidhc4" 
+	CtcCompo hc43bcidhc4 (hc4, c3bcidhc4);
+
+	// The ACID contractor (component of the contractor  when filtering == "acidhc4")
+	CtcAcid acidhc4(ext_sys,BoolMask(ext_sys.nb_var,1),hc44cid,true);
+	// hc4 followed by acidhc4 : the actual contractor used when filtering == "acidhc4" 
 	CtcCompo hc4acidhc4 (hc4, acidhc4);
 
 
 
 	Ctc* ctc;
-
-
-
 	if (filtering == "hc4")
 	  ctc= &hc4;
 	else if
-	  (filtering =="acidhc4")
+	  (filtering =="acidhc4")   
 	  ctc = &hc4acidhc4;
 	else if 
 	  (filtering =="3bcidhc4")
 	  ctc= &c3bcidhc4;
-
+	else {cout << filtering <<  " is not an implemented  contraction  mode "  << endl; return -1;}
 
 	// The X_Newton contractor
-	// corner selection 
+	// corner selection for linearizations : two corners are slected, a random one and its opposite
 	vector<X_Newton::corner_point> cpoints;
-	//		cpoints.push_back(X_Newton::SUP_X);
-	//		cpoints.push_back(X_Newton::INF_X);
 	cpoints.push_back(X_Newton::RANDOM);
 	cpoints.push_back(X_Newton::RANDOM_INV);
-	//              cpoints.push_back(X_Newton::K4);
 
-
-	//	X_Newton ctcxnewton (ext_sys, &hc44xn, cpoints, 0,sys.goal,0.2,0.2, LR_contractor::ALL_BOX,X_Newton::HANSEN,100,1.e5,1.e5);
-	X_Newton ctcxnewton (ext_sys, &hc44xn, cpoints, 0,sys.goal,1,1, LR_contractor::ALL_BOX,X_Newton::HANSEN,100,1.e5,1.e5);
+        // the linear contractor XNewton
+	X_Newton ctcxnewton (ext_sys, &hc44xn, cpoints, 0,sys.goal,0.2,0.2, LR_contractor::ALL_BOX,X_Newton::HANSEN,100,1.e6,1.e6);
 
 	//  the actual contractor  ctc + xnewton	
 	CtcCompo  cxn (*ctc, ctcxnewton);
 
+	// one point probed when looking for a new feasible point (updating the loup)
+	int samplesize=1;
 
-	Optimizer o(sys,*bs,cxn,prec,goalprec,goalprec,1);
+	// the optimizer : the same precision goalprec is used as relative and absolute precision
+	Optimizer o(sys,*bs,cxn,prec,goalprec,goalprec,samplesize);
 
-        cout << " sys.box " << sys.box << endl;
-	Interval val = sys.goal->eval(sys.box);
-	// for comparison with v1.20 benchmarks where y is bounded 
-	// if (val.lb() < -1.e8) val = Interval(-1.e8,val.ub());
+	cout << " sys.box " << sys.box << endl;
 
-	ext_sys.box[goal_var]= val;
-	//	cout << " y init " << ext_sys.box[goal_var] << endl;
-
-	//o.in_HC4_flag=false;
-	//o.mono_analysis_flag=false;
+	// the trace 
 	o.trace=1;
+	// the allowed time for search
 	o.timeout=timelimit;
-	o.optimize(sys.box);
-     
-	o.report();
-	// ACID statistics
-	if (filtering == "acidhc4"  )
-	  cout    << " nbcidvar " <<  acidhc4.nbvar_stat() << endl;
 
+	// the search itself 
+	o.optimize(sys.box);
+
+	// printing the results     
+	o.report();
 
 	return 0;
 	}

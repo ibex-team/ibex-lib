@@ -43,28 +43,32 @@ public :
 	 * which is now computed and no more a parameter
 	 * \param  ct_ratio (for contracting ratio), a new parameter, at the kernel of the ACID algorithm:
 	 *         it indicates that variables are useful to be shaved until all variable shavings yield
-	 *         average gains smaller than ct-ratio. the default value is 0.005,
-	 * \param  sys The constraint system useful to compute the order of the variables to be shaved.using
-	 *         a smearsumrel like (cf bisector) criterion
+	 *         average gains smaller than ct_ratio. the default value is 0.005,
+	 * \param optim : boolean parameter : if true, the last variable (the objective in optimization) is put at the first place 
+	 * in the vector of variables to be shaved : useful for optimization only
+	 *
+	 * \param  sys The constraint system useful to compute the order of the variables to be shaved.using a smearsumrel 
+	 * like (cf bisector) criterion : in case of optimization, it should be the extended constraint system (see ibex_Optimizer)
 	 *
 	 */
-	CtcAcid(const System& sys, const BoolMask& cid_vars, Ctc& ctc, int s3b=default_s3b, int scid=default_scid,
-			   double var_min_width=default_var_min_width, double ct_ratio=default_ctratio);
+    CtcAcid(const System& sys, const BoolMask& cid_vars, Ctc& ctc, bool optim=0, int s3b=default_s3b, int scid=default_scid,
+	    double var_min_width=default_var_min_width, double ct_ratio=default_ctratio);
 
 	/**
 	 * \brief the contraction function
 	 *
-	 * TODO : translate comment below in english.
+	 * Adaptive CID : the number nbcidbar of variables on which 3BCID is applied is adaptively determined
+	 * At the beginning, during the first nbinitcalls nodes,there isthe first tuning phase where nbcidvar = nbvar
+	 * This tuning phase is repeated every "factor * nbinitcalls" node during "nbinitcalls" nodes
+	 * During these tuning phases, we call 3BCID with  nbcidvar =  min (max (2, 2 * nbcidvar)  , 5 * nbvar)
+	 * Between two tuning phases,  we use nbcidvar computed in the preceding tuning phase and
+	 * 3BCID is applied on the first nbcidvar variables, the variables being 
+	 * sorted by the smearsumrel criterion
+	 * In case of optimization (optim=true), the last variable corresponding to the objective is placed first in the variables to be shaved.
 	 *
-	 * CID adaptatif :  calcul du nombre de variables nbcidvar sur lesquelles on applique cid
-	 * au début   pour initialiser on essaye pendant nbinitcalls    nbcidvar = nbvar
-	 * cette 1re phase de réglage permet de calculer nbcidvar pour la phase suivante
-	 * ensuite, on refait un réglage qui recalcule le nb de variables tous les factor * nbinitcalls
-	 * en faisant des stats pendant  nbinitcalls  nouuds.
-	 *  pendant cette periode de réglage, on essaye avec  nbcidvar =  min (max (2, 2 * nbcidvar)  , 5 * nbvar)
-	 *
-	 *  Pour les stats, on determine apres combien de variables, on gagne moins en moyenne (sur les dimensions)que ctratio par domaine .
-	 *  ce nb de variables moyen (sur les noeuds de la phase de réglage) deviendra alors nbcidvar
+	 *  For computing nbcidvar during a tuning phase, one determines after how many variables, 
+	 *  the average gain (on all the dimensions of the current box) is less  than ct_ratio:
+	 *  this average number of variables (during the tuning phase) will become nbcidvar.
 	 */
 	virtual void contract(IntervalVector& box);
 
@@ -81,19 +85,19 @@ public :
 
 protected :
 	/**
-	 * TODO: translate comment in english.
-	 *
-	 * Calcul de l'ordre dans lequel les variables seront traitées.
-	 * variante smear d'Ignacio Araya   (cf smearsumrel dans IbexBisector.cpp)
+	 * Order for sorting the variables to be shaved : smear variant by Ignacio Araya
+	 *  (cf SmearSumRelative dans bisector/ibex_SmearFunction.cpp)
 	 */
 	void compute_smearorder(IntervalVector& box);
-
+	/** in case of optimization (optim = true) , the variable corresponding to the objective is put as first variable */
+	void putobjfirst();
 	std::vector<int> smearorder;
 	int nbcalls;
 	double nbctvar;
 	double ctratio;
 	int nbcidvar;
 	int nbtuning;
+	bool optim;
 };
 
 } // end namespace ibex

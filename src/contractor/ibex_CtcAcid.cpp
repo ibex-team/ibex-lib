@@ -18,9 +18,9 @@ namespace ibex {
 double  CtcAcid::nbvarstat=0;
 const double CtcAcid::default_ctratio=0.005;
 
-CtcAcid::CtcAcid(const System& sys, const BoolMask& cid_vars, Ctc& ctc, int s3b, int scid,
+  CtcAcid::CtcAcid(const System& sys, const BoolMask& cid_vars, Ctc& ctc, bool optim, int s3b, int scid,
 		double var_min_width, double ct_ratio): Ctc3BCid (cid_vars,ctc,s3b,scid,cid_vars.nb_set(),var_min_width),
-		system(sys), nbcalls(0), nbctvar(0), nbcidvar(0) ,  nbtuning(0), ctratio(ct_ratio) {
+							system(sys), optim(optim), nbcalls(0), nbctvar(0), nbcidvar(0) ,  nbtuning(0), ctratio(ct_ratio) {
 // [gch] BNE check the argument "cid_vars.nb_set()" given to _3BCID
 }
 
@@ -54,7 +54,7 @@ void CtcAcid::contract(IntervalVector& box) {
 	if (vhandled > nbvarmax) vhandled=nbvarmax;        // pour rester raisonnable et dans les limites du tableau ctstat
 
 	if (vhandled > 0) compute_smearorder(box);         // l'ordre sur les variables est calculé avec la smearsumrel
-
+	if (optim) putobjfirst();                         // pour l'optim (si optim mis à true dans le constructeur, la dernière variable (objectf) est mise en premier
 	for (int v=0; v<vhandled; v++) {
 	  int v1=v%nb_CID_var;                               // [gch] how can v be < nb_var?? [bne]  vhandled can be between 0 and nbvarmax
 	  int v2=smearorder[v1];
@@ -98,6 +98,14 @@ void CtcAcid::contract(IntervalVector& box) {
 		nbvarstat = (nbvarstat * (nbtuning-1) + nbcidvar) / nbtuning;
 	}
 }
+
+  // en optim, l'objectif est placé en 1er
+void CtcAcid::putobjfirst()
+  {   	vector <int>::iterator result = find(smearorder.begin(), smearorder.end(), nb_var-1);
+    smearorder.erase(result);
+    smearorder.insert(smearorder.begin(),nb_var-1);
+      }
+
 
 void CtcAcid::compute_smearorder(IntervalVector& box) {
 
@@ -174,6 +182,7 @@ void CtcAcid::compute_smearorder(IntervalVector& box) {
 	
 	//	assert(smearorder.size()==vhandled);       // [gch]   [bne] assert suppression : vhandled can be > nb_variables
 }
+
 
 double CtcAcid::nbvar_stat() {
 	return nbvarstat;
