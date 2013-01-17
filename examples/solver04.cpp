@@ -16,7 +16,7 @@ int main(int argc, char** argv) {
 	// Load a system of equations
 	// --------------------------
 	System sys(argv[1]);
-	double ratio_propag= atof(argv[2]);
+	double ratio_propag= atof(argv[2]); // the contraction ratio used as stopping criterion for the hc4 propagation loop
 	string filtering= argv[3];   // the main contractor (hc4|acidhc4|3bcidhc4|hc4n|acidhc4n|3bcidhc4n)
 	string xnewton = argv[4];    // xn for the additional xnewton contractor
         string bisection= argv[5];   // the bisection heuristics
@@ -30,64 +30,87 @@ int main(int argc, char** argv) {
 	// A "constraint propagation" loop.
 	// Each constraint in sys.ctrs is an
 	// equation.
+	// the first contractor called
 	CtcHC4 hc4(sys.ctrs,ratio_propag);
+	// hc4 inside acid and 3bcid : incremental propagation beginning with the shaved variable
 	CtcHC4 hc44cid(sys.ctrs,0.1,true);
-	CtcAcid acidhc4(sys,BoolMask(sys.nb_var,1),hc44cid);
-	Ctc3BCid c3bcidhc4(BoolMask(sys.nb_var,1),hc44cid,10,1,sys.nb_var);
+	// The ACID contractor (component of the contractor  when filtering == "acidhc4" or "acidhc4n")
+	CtcAcid acid(sys,BoolMask(sys.nb_var,1),hc44cid);
+	// hc4 followed by 3bcidhc4 : the actual contractor used when filtering == "3bcidhc4" 
+	CtcCompo hc4acid(hc4,acid);
+
+
+	// The 3BCID contractor (3bcid component of the contractor when filtering == "3bcidhc4") on all variables
+	Ctc3BCid c3bcid(BoolMask(sys.nb_var,1),hc44cid);
+	// hc4 followed by 3bcidhc4 : the actual propagation based contractor used when filtering == "3bcidhc4" or "3bcidhc4n"
+	CtcCompo hc43bcid(hc4,c3bcid);
+
 	// Build contractor #2:
 	// --------------------------
 	// An interval Newton iteration
 	// for solving f()=0 where f is
 	// a vector-valued function representing
 	// the system.
-	CtcNewton* ctcnewton;
+	CtcNewton* ctcnewton= NULL;
 	if (filtering == "acidhc4n" || filtering=="hc4n" || filtering=="3bcidhc4n")
 	  ctcnewton= new CtcNewton(sys.f,5e8,prec,1.e-4);
+
+
+        // Build contractor #3
+	//-----------------------------
+	// A Linear relaxation contractor using a linear relaxation of the constraints and calling a linear programming solver
+	// for contracting each domain bound 
+	// The X_newton contractor
+
+	// corner selection 
+	vector<X_Newton::corner_point> cpoints;
+	//	cpoints.push_back(X_Newton::SUP_X);  // selection of the superior corners : not used 
+	//	cpoints.push_back(X_Newton::INF_X);  // selection of the superior corners : not used
+
+	// one random corner and its opposite 
+	cpoints.push_back(X_Newton::RANDOM);
+	cpoints.push_back(X_Newton::RANDOM_INV);
+	// the contractor called in the XNewton loop if the gain is > rfp2 (here 0.2)
+	CtcHC4 hc44xn(sys.ctrs,ratio_propag);  
+	// XNewton contractor  (see Xnexton documentation for paramaters)
+       	X_Newton ctcxnewton (sys, &hc44xn, cpoints, -1,0,0.2,0.2, LR_contractor::ALL_BOX,X_Newton::HANSEN,100,1.e5,1.e4);
+
 
 	// Build the main contractor:
 	// ---------------------------
 	// A composition of the  previous contractors
    
-	CtcCompo cacid(hc4,acidhc4);
-	CtcCompo c3bcid(hc4,c3bcidhc4);
-	CtcCompo hc4n(hc4,*ctcnewton);
-	CtcCompo cacidn(cacid,*ctcnewton);
-	CtcCompo c3bcidn(c3bcid,*ctcnewton);
+	CtcCompo* hc4n;
+	CtcCompo* hc4acidn;
+	CtcCompo* hc43bcidn; 
+
+	if (ctcnewton) { hc4n= new CtcCompo (hc4,*ctcnewton);
+	  hc4acidn = new CtcCompo (hc4acid, *ctcnewton);
+	  hc43bcidn = new CtcCompo (hc43bcid,*ctcnewton);
+	}
 
 	Ctc* ctc;
 	if (filtering== "hc4")
 	  ctc = & hc4;
 	else if (filtering== "acidhc4")
-	  ctc = & cacid;
+	  ctc = & hc4acid;
 	else if (filtering== "3bcidhc4")
 	  ctc = &c3bcid;
 	else if (filtering == "hc4n")
-	  ctc = &hc4n;
+	  ctc = hc4n;
 	else if (filtering== "acidhc4n")
-	  ctc = & cacidn;
+	  ctc =  hc4acidn;
 	else if (filtering== "3bcidhc4n")
-	  ctc = & c3bcidn;
+	  ctc =  hc43bcidn;
 	else {cout << filtering <<  " is not an implemented  contraction  mode "  << endl; return -1;}
 
-	// The X_newton contractor
-
-	// corner selection 
-	vector<X_Newton::corner_point> cpoints;
-	//	cpoints.push_back(X_Newton::SUP_X);
-	//	cpoints.push_back(X_Newton::INF_X);
-
-	cpoints.push_back(X_Newton::RANDOM);
-	cpoints.push_back(X_Newton::RANDOM_INV);
-	CtcHC4 hc44xn(sys.ctrs,ratio_propag);  // the contractor called in the XNewton loop if the gain is > rfp2
-
-       	X_Newton ctcxnewton (sys, &hc44xn, cpoints, -1,0,0.2,0.2, LR_contractor::ALL_BOX,X_Newton::HANSEN,100,1.e5,1.e4);
 	
+
 	// the actual contractor ; composition of ctc ,e.g. acidhc4n,  and Xnewton
-
 	CtcCompo cxn (*ctc, ctcxnewton);
-
 	Ctc* contractor;
-        if (xnewton=="xn")
+
+        if (xnewton=="xn" ||xnewton=="xnewton" )
 	  contractor= & cxn;
 	else
 	  contractor=ctc;

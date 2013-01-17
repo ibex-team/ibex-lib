@@ -64,13 +64,13 @@ int main(int argc, char** argv){
 
 	// the first contractor called
 	CtcHC4 hc4(ext_sys.ctrs,0.01,true);
-	// hc4 inside acid : incremental beginning with the shaved variable
+	// hc4 inside acid and 3bcid : incremental propagation beginning with the shaved variable
 	CtcHC4 hc44cid(ext_sys.ctrs,0.1,true);
 	// hc4 inside xnewton loop 
 	CtcHC4 hc44xn (ext_sys.ctrs,0.01,false);
 
-	// The 3BCID contractor (component of the contractor when filtering == "3bcid")
-	Ctc3BCid c3bcidhc4(BoolMask(ext_sys.nb_var,1),hc44cid,10,1,ext_sys.nb_var);
+	// The 3BCID contractor on all variables (component of the contractor when filtering == "3bcidhc4") 
+	Ctc3BCid c3bcidhc4(BoolMask(ext_sys.nb_var,1),hc44cid);
 	// hc4 followed by 3bcidhc4 : the actual contractor used when filtering == "3bcidhc4" 
 	CtcCompo hc43bcidhc4 (hc4, c3bcidhc4);
 
@@ -86,10 +86,10 @@ int main(int argc, char** argv){
 	  ctc= &hc4;
 	else if
 	  (filtering =="acidhc4")   
-	  ctc = &hc4acidhc4;
+	  ctc= &hc4acidhc4;
 	else if 
 	  (filtering =="3bcidhc4")
-	  ctc= &c3bcidhc4;
+	  ctc= &hc43bcidhc4;
 	else {cout << filtering <<  " is not an implemented  contraction  mode "  << endl; return -1;}
 
 	// The X_Newton contractor
