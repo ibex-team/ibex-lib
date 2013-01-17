@@ -63,7 +63,7 @@ void ExprPrinter::visit(const ExprVector& e) {
 	(*os) << "(";
 	for (int i=0; i<e.length(); i++) {
 		visit(e.get(i));
-		if (i<e.length()-1) (*os) << ",";
+		if (i<e.length()-1) (*os) << (e.row_vector()? "," : ";");
 	}
 	(*os) << ")";
 }

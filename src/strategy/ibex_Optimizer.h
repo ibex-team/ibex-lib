@@ -185,6 +185,8 @@ public:
 	/** The "uplo" (uppermost lower bound of the criterion) */
 	double uplo;
 
+	/** The point satisfying the constraints corresponding to the loup */
+	Vector loup_point;
 
 protected:
 	/**
@@ -322,9 +324,6 @@ private:
 
 	/** Inner contractor (for the negation of g) */
 	CtcUnion* is_inside;
-
-	/** The point satisfying the constraints corresponding to the loup */
-	Vector loup_point;
 
 	/** Lower bound of the small boxes taken by the precision contractor */
 	double uplo_of_epsboxes;

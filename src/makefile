@@ -10,7 +10,7 @@ DYNAMIC_TARGET:=$(IBEX_LIB_DIR)/libibex.dylib
 endif
 
 ARITH:=arithmetic
-SUBDIRS:=tools $(ARITH) numeric symbolic function combinatorial contractor bisector strategy parser java
+SUBDIRS:=tools $(ARITH) numeric symbolic function combinatorial contractor bisector strategy parser java predicate
 SUBLIB_DEF:=_IBEX_WITH_`echo $(SUBLIB) | tr '[:lower:]' '[:upper:]'`_
 DISTRIB=ibex-$(RELEASE)-$(KERNEL)
  
@@ -26,7 +26,8 @@ OBJS  =$(wildcard $(IBEX_SRC_DIR)/tools/*.o) \
        $(wildcard $(IBEX_SRC_DIR)/bisector/*.o) \
        $(wildcard $(IBEX_SRC_DIR)/strategy/*.o) \
        $(wildcard $(IBEX_SRC_DIR)/parser/*.o) \
-       $(wildcard $(IBEX_SRC_DIR)/java/*.o)
+       $(wildcard $(IBEX_SRC_DIR)/java/*.o) \
+       $(wildcard $(IBEX_SRC_DIR)/predicate/*.o)
 
 # The dynamic library encompasses all the dependencies (in a single library 
 # that can be directly uploaded, in particular from Choco).
