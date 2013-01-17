@@ -94,10 +94,10 @@ void  LR_contractor::contract( IntervalVector & box) {
    do{
      IntervalVector savebox=box;
      iter(box);
-
      if(ctc) {
        gain = ratio_maxreduction(savebox,box);
-       if (gain >= ratio_fp2) ctc->contract(box);
+       if (gain >= ratio_fp2){  
+	 ctc->contract(box);}
      }
 
      gain = ratio_maxreduction(savebox,box);
@@ -115,13 +115,12 @@ void LR_contractor::iter(IntervalVector & box){
   
   IntervalVector initbox=box;
   //returns the number of constraints in the linearized system
-  int nb_ctrs = Linearization(box,mysoplex);
- // cout << nb_ctrs << endl;
-  if(nb_ctrs<1)  return;
-  
-  try{
+  int nb_ctrs;
+  try {nb_ctrs = Linearization(box,mysoplex);
+    if(nb_ctrs<1)  return;
     optimizer(box, mysoplex, n, nb_ctrs);
-  }catch(EmptyBoxException e){box.set_empty();
+  }  
+  catch(EmptyBoxException e){box.set_empty(); // empty the box before exiting in case of EmptyBoxException
     throw EmptyBoxException();
   }  
   
