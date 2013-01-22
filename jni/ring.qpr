@@ -1,0 +1,23 @@
+
+
+Constants
+ zero in [[0,0] ; [0,0]];
+
+Variables
+ x[2] in [[-7,7] ; [-7,7]];
+
+function z=dist(x[2],y[2])
+ z=sqrt((x[1]-y[1])^2+(x[2]-y[2])^2);
+end
+
+contractor sat
+ dist(x,zero) in [5,6];
+end
+
+contractor unsat
+ dist(x,zero) not-in [5,6];
+end
+
+contractor stop
+ maxdiamGT(0.01);
+end

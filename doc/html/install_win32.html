@@ -1,0 +1,101 @@
+
+<html>
+<body>
+
+<h1>
+Instructions for building Ibex/Quimper under Windows Platform
+</h1>
+
+Gilles Chabert, sept 09.
+<p>
+The instructions are for the MinGW/MSys chain tool.
+Hence, you must install first MinGW and MSys.<br>
+I won't give directions for installing these softwares, there are
+already many over the web (see, e.g.: <a href="http://max.berger.name/howto/cdt/ar01s03.jsp#wincompiler">http://max.berger.name/howto/cdt/ar01s03.jsp#wincompiler</a>).
+
+<p>
+Below, the root directories of MinGW and MSys are assumed to be C:\MinGW and C:\Msys\1.0.<br>
+In case you have installed these softwares in other places, simply 
+substitute the actual directories to these.
+
+<p>
+Note that MSys should have created a "home" directory, C:\Msys\home\[login]
+where [login] is typically the name of your machine under Windows.<br>
+Check for it before going further.
+
+<p>
+<h2>Install Flex & Bison</h2>
+<hr>
+Download the installer (Setup) of the last version of Flex at
+<a href="http://gnuwin32.sourceforge.net/packages/flex.htm">http://gnuwin32.sourceforge.net/packages/flex.htm</a>
+(Currently: <a href="http://gnuwin32.sourceforge.net/downlinks/flex.php">http://gnuwin32.sourceforge.net/downlinks/flex.php</a>)
+
+<p>
+Run the installer:
+<ul>
+<li>Enter C:\Msys\1.0\ as Destination Location
+<li> Only select "binaries" as component to be installed
+<li> Don't create a start menu folder
+<li> Do not download sources
+</ul>
+
+<p>
+Similarly, download the installer (Setup) of last version of Bison at
+<a href="http://gnuwin32.sourceforge.net/packages/bison.htm">http://gnuwin32.sourceforge.net/packages/bison.htm</a>
+(Currently: <a href="http://downloads.sourceforge.net/gnuwin32/bison-2.4.1-setup.exe">http://downloads.sourceforge.net/gnuwin32/bison-2.4.1-setup.exe</a>)
+<br>
+... and proceed exactly the same way.
+
+
+<p>
+<h2>Install GTK</h2>
+<hr>
+Go to <a href="http://www.gtk.org/download-windows.html">http://www.gtk.org/download-windows.html</a>.<br>
+Download the "all-in-one bundle" file of the last version (a big zip file).
+(Currently: <a href="http://ftp.gnome.org/pub/gnome/binaries/win32/gtk+/2.16/gtk+-bundle_2.16.6-20090911_win32.zip">http://ftp.gnome.org/pub/gnome/binaries/win32/gtk+/2.16/gtk+-bundle_2.16.6-20090911_win32.zip</a>).<br>
+Unzip the file in C:\MinGW:<br>
+<ul>
+<li> Everytime it asks for your confirmation to merge folders, answer "yes".
+</ul>
+
+
+<p>
+<h2>Install GtkglExt</h2>
+<hr>
+
+Go to <a href="http://www.bonifazi.eu/appunti/2008/02/gtk-glade-gtkglext-all-in-one-windows.html">http://www.bonifazi.eu/appunti/2008/02/gtk-glade-gtkglext-all-in-one-windows.html</a>.<br>
+Download and run the "GtkGlExt installer for Windows"
+(Currently: <a href="http://www.bonifazi.eu/appunti/gtkglext-win32-1.2.0.exe">http://www.bonifazi.eu/appunti/gtkglext-win32-1.2.0.exe</a>)
+<ul>
+<li> Choose C:\MinGW as the Destination Location
+</ul>
+ 
+<p>
+<h2>Install OpenGL</h2>
+<hr>
+
+Go to <a href="http://www.transmissionzero.co.uk/computing/using-glut-with-mingw/">http://www.transmissionzero.co.uk/computing/using-glut-with-mingw/</a>.<br>
+Click on the last version of the "GLUT import libraries for MinGW" 
+(Currently: <"http://www.martinpayne.me.uk/software/development/GLUT/GLUT-MinGW-3.7.6-6.mp.zip">http://www.martinpayne.me.uk/software/development/GLUT/GLUT-MinGW-3.7.6-3.mp.zip</a>)
+<ul>
+<li> Unzip the file
+<li> Copy the libglut32.a file into C:\MinGW\lib
+<li> Copy the glut.h file into C:\MinGW\include\GL
+</ul>
+
+<p>
+<h2>Install Ibex/quimper</h2>
+<hr>
+<ul>
+<li>Copy the ibex-XXX.tar.gz file in C:\MSys\1.0\home\[login]
+<li>In the C:\MSys\1.0 directory, run the batch file "msys.bat".
+  This will open a console. Type the following commands under the console:
+<li>gunzip ibex-XXX.tar.gz
+<li>tar xvf ibex-XXX.tar
+<li>export BIAS_ARCH=13
+<li>cd ibex-XXX
+<li>make
+</ul>
+
+</body>
+</html>
