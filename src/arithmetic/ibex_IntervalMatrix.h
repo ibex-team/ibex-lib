@@ -505,7 +505,7 @@ inline void IntervalMatrix::clear() {
 }
 
 inline void IntervalMatrix::set_empty() {
-	(*this)[0][0]=Interval::EMPTY_SET;
+	(*this)[0].set_empty();
 }
 
 inline IntervalVector& IntervalMatrix::row(int i) {
@@ -533,7 +533,7 @@ inline void IntervalMatrix::set_row(int row, const IntervalVector& v) {
 }
 
 inline bool IntervalMatrix::is_empty() const {
-	return (*this)[0][0].is_empty();
+	return (*this)[0].is_empty();
 }
 
 } // namespace ibex

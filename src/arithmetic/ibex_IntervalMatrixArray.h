@@ -52,6 +52,13 @@ public:
 	void init(const Interval& x);
 
 	/**
+	 * \brief Set this IntervalMatrixArray to the empty IntervalMatrixArray
+	 *
+	 * The dimensions remain the same.
+	 */
+	void set_empty();
+
+	/**
 	 * \brief Delete this.
 	 */
 	~IntervalMatrixArray();
@@ -70,6 +77,11 @@ public:
 	 * \brief Number of columns of each matrix
 	 */
 	int nb_cols() const;
+
+	/**
+	 * \brief Return true iff this IntervalMatrixArray is empty
+	 */
+	bool is_empty() const;
 
 	/**
 	 * \brief Return the ith matrix.
@@ -120,6 +132,14 @@ inline IntervalMatrix& IntervalMatrixArray::operator[](int i) {
 
 inline const IntervalMatrix& IntervalMatrixArray::operator[](int i) const {
 	return array[i];
+}
+
+inline void IntervalMatrixArray::set_empty() {
+	(*this)[0].set_empty();
+}
+
+inline bool IntervalMatrixArray::is_empty() const {
+	return (*this)[0].is_empty();
 }
 
 } // namespace ibex

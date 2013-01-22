@@ -13,13 +13,27 @@
 
 namespace ibex {
 
+
+bool Domain::is_empty() const {
+	switch (dim.type()) {
+		case Dim::SCALAR:       return i().is_empty(); break;
+		case Dim::ROW_VECTOR:
+		case Dim::COL_VECTOR:   return v().is_empty(); break;
+		case Dim::MATRIX:       return m().is_empty(); break;
+		case Dim::MATRIX_ARRAY: return ma().is_empty(); break;
+		}
+	assert(false);
+	return false;
+}
+
+
 void Domain::set_empty() {
 	switch (dim.type()) {
 		case Dim::SCALAR:       i().set_empty(); break;
 		case Dim::ROW_VECTOR:
 		case Dim::COL_VECTOR:   v().set_empty(); break;
 		case Dim::MATRIX:       m().set_empty(); break;
-		case Dim::MATRIX_ARRAY: assert(false); break;
+		case Dim::MATRIX_ARRAY: ma().set_empty(); break;
 		}
 }
 

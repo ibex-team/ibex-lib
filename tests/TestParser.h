@@ -35,6 +35,7 @@ public:
 		TEST_ADD(TestParser::choco01);
 		TEST_ADD(TestParser::func01);
 		TEST_ADD(TestParser::func02);
+		TEST_ADD(TestParser::loop01);
 		//		TEST_ADD(TestParser::error01);
 	}
 
@@ -53,6 +54,7 @@ public:
 	void ponts();
 	void choco01();
 	void error01();
+	void loop01();
 
 };
 

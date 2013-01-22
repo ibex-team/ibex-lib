@@ -247,6 +247,11 @@ public:
 	}
 
 	/**
+	 * \brief True if the domain is empty
+	 */
+	bool is_empty() const;
+
+	/**
 	 * \brief Set the domain to the empty set.
 	 */
 	void set_empty();

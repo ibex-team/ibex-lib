@@ -23,10 +23,16 @@ public:
 	TestInHC4Revise() {
 		TEST_ADD(TestInHC4Revise::add01);
 		TEST_ADD(TestInHC4Revise::add02);
+		TEST_ADD(TestInHC4Revise::dist01);
+		TEST_ADD(TestInHC4Revise::apply01);
+		TEST_ADD(TestInHC4Revise::apply02);
 	}
 
 	void add01();
 	void add02();
+	void dist01();
+	void apply01();
+	void apply02();
 };
 
 } // end namespace

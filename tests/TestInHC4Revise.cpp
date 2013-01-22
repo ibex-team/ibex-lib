@@ -47,5 +47,52 @@ void TestInHC4Revise::add02() {
 }
 
 
+
+void TestInHC4Revise::dist01() {
+	Variable x(2),y(2);
+	Function f(x,y,sqrt(sqr(x[0]-y[0])+sqr(x[1]-y[1])));
+	IntervalVector box(4,Interval(0,4));
+	double _pt[][2] = { {0.5,0.5} , {0.5,0.5} , {1.0,1.0} , {1.0,1.0} };
+	IntervalVector pt(4,_pt);
+	f.iproj(Interval(0,1),box,pt);
+
+	// check the box is inside by testing two corners
+	TEST_ASSERT(f.eval(box.lb()).is_subset(Interval(0,1)));
+	TEST_ASSERT(f.eval(box.ub()).is_subset(Interval(0,1)));
+
+}
+
+void TestInHC4Revise::apply01() {
+	Variable x(2),y(2);
+	Function f(x,y,sqrt(sqr(x[0]-y[0])+sqr(x[1]-y[1])));
+
+	Function g(x,y,f(x,y));
+	IntervalVector box(4,Interval(0,4));
+	double _pt[][2] = { {0.5,0.5} , {0.5,0.5} , {1.0,1.0} , {1.0,1.0} };
+	IntervalVector pt(4,_pt);
+	g.iproj(Interval(0,1),box,pt);
+
+	// check the box is inside by testing two corners
+	TEST_ASSERT(f.eval(box.lb()).is_subset(Interval(0,1)));
+	TEST_ASSERT(f.eval(box.ub()).is_subset(Interval(0,1)));
+
+}
+
+void TestInHC4Revise::apply02() {
+	Variable x(2),y(2);
+	Function f(x,y,sqrt(sqr(x[0]-y[0])+sqr(x[1]-y[1])));
+
+	IntervalVector constY(2,Interval::ONE);
+	Function g(x, f(x,constY));
+	IntervalVector box(2,Interval(0,4));
+	double _pt[][2] = { {0.5,0.5} , {0.5,0.5} };
+	IntervalVector pt(2,_pt);
+	g.iproj(Interval(0,1),box,pt);
+
+	// check the box is inside by testing two corners
+	TEST_ASSERT(almost_eq(g.eval(box.lb()),Interval::ONE,1e-07));
+	TEST_ASSERT(almost_eq(g.eval(box.ub()),Interval::ONE,1e-07));
+}
+
 } // end namespace
 

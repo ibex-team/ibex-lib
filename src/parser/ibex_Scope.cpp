@@ -47,23 +47,26 @@ public:
 class S_Cst : public Scope::S_Object {
 public:
 
-	/**
-	 * Important: since, in the parser expressions, constants are ExprConstantRef
-	 * instead of ExprConstant, we must keep the same references when duplicating constants here.
-	 * Otherwise, in a "for" block, the ExprConstantRef inside expressions will point to domains
-	 * that will no longer exist after parsing (that is, once the scope of the "for" will be deleted).
-	 */
-	S_Cst(const Domain& domain) : domain(domain, true) { }
+	S_Cst(const Domain& domain) : domain(domain) { }
 
 	S_Cst(const Dim& d) : domain(d) { }
 
-	S_Object* copy() const { return new S_Cst(domain); }
+	S_Object* copy() const { return new S_Cst(*this); }
 
 	int token() const { return TK_CONSTANT; }
 
 	void print(ostream& os) const { os << "constant " << domain; }
 
 	Domain domain;
+
+private:
+	/**
+	 * Important: since, in the parser expressions, constants are ExprConstantRef
+	 * instead of ExprConstant, we must keep the same references when duplicating constants here.
+	 * Otherwise, in a "for" block, the ExprConstantRef inside expressions will point to domains
+	 * that will no longer exist after parsing (that is, once the scope of the "for" will be deleted).
+	 */
+	S_Cst(const S_Cst& c) : domain(c.domain,true) { }
 };
 
 class S_Func : public Scope::S_Object {

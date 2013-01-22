@@ -234,7 +234,7 @@ void TestParser::ponts() {
 	TEST_ASSERT(sys.eprs.empty());
 	TEST_ASSERT(sys.sybs.empty());
 	TEST_ASSERT(sys.box.size()==30);
-	TEST_ASSERT(sys.box==sys2.init_box);
+	TEST_ASSERT(almost_eq(sys.box, sys2.init_box,1e-12));
 	TEST_ASSERT(sys.f.nb_arg()==30);
 	TEST_ASSERT(sameExpr(sys.f.expr(),sys2.f->expr()));
 	TEST_ASSERT(sys.ctrs.size()==30);
@@ -258,6 +258,16 @@ void TestParser::choco01() {
 	TEST_ASSERT(sameExpr(sys.f.expr(),"({1}+{0})"));
 	TEST_ASSERT(sys.ctrs.size()==1);
 	TEST_ASSERT(sameExpr(sys.ctrs[0].f.expr(),sys.f.expr()));
+}
+
+void TestParser::loop01() {
+/*	try {
+		System sys("quimper/loop01.qpr");
+		cout << sys << endl;
+	} catch(SyntaxError& s)  {
+		cout << s << endl;
+	}
+*/
 }
 
 void TestParser::error01() {

@@ -28,7 +28,7 @@ public:
 	       void vector_bwd(const ExprVector&,  ExprLabel** compL, const ExprLabel& result)       { not_implemented("Inner projection of \"vector\""); }
 	inline void symbol_bwd(const ExprSymbol& s, const ExprLabel& result)                         { /* nothing to do */ }
 	inline void cst_bwd   (const ExprConstant& c, const ExprLabel& y)                              { /* TODO: improve this. */ if (*(y.d)!=c.get()) throw EmptyBoxException(); }
-	inline void apply_bwd (const ExprApply& a, ExprLabel** x, const ExprLabel& y)                { not_implemented("Inner projection of \"apply\""); }
+	inline void apply_bwd (const ExprApply& a, ExprLabel** x, const ExprLabel& y)                { if (!iproj(a.func, *y.d, x)) throw EmptyBoxException(); }
 	inline void add_bwd   (const ExprAdd&,     ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) { if (!iproj_add(y.d->i(),x1.d->i(),x2.d->i(),x1.p->i(),x2.p->i())) throw EmptyBoxException(); }
 	inline void add_V_bwd (const ExprAdd&,     ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) { not_implemented("Inner projection of \"add_V\""); }
 	inline void add_M_bwd (const ExprAdd&,     ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) { not_implemented("Inner projection of \"add_M\""); }
@@ -69,6 +69,8 @@ public:
 	inline void asinh_bwd (const ExprAsinh& e, ExprLabel& x, const ExprLabel& y)                 { not_implemented("Inner projection of \"asinh\""); }
 	inline void atanh_bwd (const ExprAtanh& e, ExprLabel& x, const ExprLabel& y)                 { not_implemented("Inner projection of \"atanh\""); }
 
+protected:
+	bool iproj(const Function& f, const Domain& y, ExprLabel** x);
 };
 
 } // end namespace ibex

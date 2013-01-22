@@ -358,7 +358,7 @@ void TestExpr::vector01() {
 	TEST_ASSERT(v.length()==4);
 	TEST_ASSERT(v.size==5);
 	TEST_ASSERT(v.type()==Dim::MATRIX);
-	TEST_ASSERT(checkExpr(v,"(x,y,(x+y),(x+(x+y)))"));
+	TEST_ASSERT(checkExpr(v,"(x;y;(x+y);(x+(x+y)))"));
 }
 
 void TestExpr::vector02() {
