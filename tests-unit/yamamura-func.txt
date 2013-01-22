@@ -1,0 +1,15 @@
+// yamamura (n=8) -- GENERATED -- 
+
+Variables
+
+x[8] in [-10^8, 10^8];
+
+function y=foo(x) 
+  y=2.5*x^3 -10.5*x^2 + 11.8*x;
+end
+
+constraints
+  for i=1:8;
+    foo(x[i]) -(i-1) +x[1]+x[2]+x[3]+x[4]+x[5]+x[6]+x[7]+x[8]=0;
+  end;
+end

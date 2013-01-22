@@ -1,0 +1,56 @@
+
+Variables 
+
+O[2],
+N[2],
+M[2],
+L[2],
+K[2],
+J[2],
+I[2],
+H[2],
+G[2],
+F[2],
+E[2],
+D[2],
+C[2],
+B[2],
+A[2];
+
+function y=dist(a[2],b[2]) 
+  y=(a[1]-b[1])^2 + (a[2]-b[2])^2;
+end
+
+constraints  
+
+dist(N,O) = 0.0625; 
+dist(M,O) = 0.0625; 
+dist(M,N) = 0.0625; 
+dist(J,N) = 0.0625; 
+dist(L,M) = 0.0625; 
+dist(K,M) = 0.0625; 
+dist(G,L) = 0.0625; 
+dist(K,L) = 0.089999999999999997; 
+dist(J,K) = 0.0625; 
+dist(K,N) = 0.0625; 
+dist(I,J) = 9; 
+dist(H,J) = 25; 
+dist(B,I) = 25; 
+dist(A,I) = 4; 
+dist(B,H) = 9; 
+dist(H,I) = 16; 
+dist(F,G) = 0.0625; 
+dist(C,G) = 0.0625; 
+dist(F,L) = 0.0625; 
+dist(D,F) = 0.0625; 
+dist(D,E) = 0.0625; 
+dist(E,F) = 0.0625; 
+dist(D,G) = 0.0625; 
+dist(C,D) = 0.0625; 
+dist(C,H) = 18.003049000000004; 
+dist(B,C) = 9; 
+dist(A,B) = 25; 
+B[1] = 0; 
+A[2] = 0; 
+A[1] = 0; 
+end

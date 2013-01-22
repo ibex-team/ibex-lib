@@ -1,0 +1,31 @@
+
+Variables
+
+a in [0,1],
+b in [0,2],
+c in [0,3],
+d in [0,4];
+
+Parameters
+ 
+e in [0,5],
+f in [0,6],
+g in [0,7],
+h in [0,8],
+
+! i in [0,9],
+! j in [0,10],
+! k in [0,11],
+! l in [0,12],
+
+* m in [0,13],
+* n in [0,14],
+* o in [0,15],
+* p in [0,16];
+
+Constraints
+ a+b+e=i+m;
+ b+f+h=j+j+j;
+ g*h*g+m=k+o-m;
+ d+h=h-p+d+m+n+p+p;
+end

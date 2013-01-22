@@ -1,0 +1,6 @@
+
+ Variables
+A_x in [ -50, 50 ] ;
+ Constraints
+A_x = 9;
+end
