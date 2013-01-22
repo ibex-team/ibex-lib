@@ -1,0 +1,7 @@
+Jérôme De Miras
+09/30/2009 02:47 PM
+
+J'ai aussi voulu écrire un produit scalaire. Si je passe deux vecteurs de
+dimension 3 (w1[3] et w2[3] par exemple) et que j'écris dans ma fonction : p
+= w1*w2; le parseur ne voit aucune erreur mais qSolve plante lors de
+l'exécution (ce qui semble normal au vue des dimensions). 

@@ -1,0 +1,6 @@
+ Variables 
+p1_x in [-5,5];
+Constraints
+(p1_x)^2 + 2*p1_x = 0 ; 
+
+end

@@ -1,0 +1,22 @@
+Bonjour messieurs,
+
+Après plusieurs jours de bataille féroce, je vous livre mon analyse du problème de la certification dans Ibex. C'est beaucoup plus délicat que ce que je croyais....
+Je vais devoir laisser tomber (je vais vous expliquer pourquoi) mais je propose également une manière de contourner le problème.
+
+En fait, le fait que la certification ne marche que pour certaines valeurs du paramètre d'inflation n'est pas vraiment un bug: toutes les boîtes sont au final epsilonesques. Mais le fait de partir d'une boîte initiale différente change légèrement les calculs et donc, à quelques flottants près, ces boîtes finales. Dans certains cas, ça "rentre" dans la boîte initiale, dans d'autres non.
+
+Voici quelles ont été mes initiatives:
+- J'ai rajouté un algorithme dans la certification qui découpe des tranches pour essayer d'éliminer ce qui dépasse de la boîte initiale
+- J'ai utilisé Newton comme entonnoir, en faisant descendre sa précision le plus possible (i.e., en mettant 0 - ce qui est possible si on rempace dans le code de Newton les inégalités du type "gain>=prec" par "gain>prec" pour éviter une boucle infinie). Remarquez que j'ai fait cela car mettre la 2B comme entonnoir ici n'a aucun effet. Il me semble que la 2B n'a d'intérêt à cette précision-là que si une solution est à une borne (typiquement: une équation x=0).
+- J'ai également testé à partir de tout un éventail de critères d'inflation (de presque rien à un facteur 10000) pour essayer de "retrouver" la configuration qui a permis d'obtenir cette boîte initiale pendant la recherche (c.a.d., le noeud précédent dans l'arbre).
+- J'ai également implémenté un nouveau Newton utilisant Hansen-Bliek et permettant de s'affranchir de la contraction "stricte".
+
+Tout cela ne marche pas. La raison à mon avis est que je raisonne avec mon niveau de compréhension des choses, qui est celui des intervalles sur les réels. Ici, il faudrait une compétence plus "bas niveau" sur les flottants.
+Ce qui me fait dire ça est notamment le fait que le problème de certification est systématique chez moi alors qu'il ne l'est que pour certaines valeurs du paramètre "prec" chez Bertrand. Si ça dépend de l'architecture, c'est qu'on est en train de se confronter au bas niveau.
+
+Je n'ai pas cette compétence... alors je renonce pour le moment.
+
+Le plus simple pour résoudre concrètement votre problème à mon avis serait tout simplement **d'empêcher** Newton de descendre trop bas en précision, c.a.d., d'arrêter sa convergence dès qu'on descend en dessous de prec. Mais, attention, on arrive souvent un coup trop tard! en effet, avant de tester (gain<prec) et de sortir de la boucle, la boîte peut être déjà extrêmement réduite. A titre d'exemple, j'ai testé kolev16 en ayant multiplié par 200 la précision du Newton, et j'arrive à des boîtes de précision 10^-10... ce qui est largement suffisant, et il n'y a là plus de problème pour certifier.
+
+A bientôt,
+Gilles

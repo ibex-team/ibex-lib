@@ -1,0 +1,14 @@
+
+Variables
+  w1[3] in [-10,10];
+  w2[3] in [-10,10];
+  p in [-oo,oo];
+
+function p=pdtscal(w1[3],w2[3]) 
+ p = w1*w2;
+end
+
+contractor test
+ p = w1*w2;
+// p=pdtscal(w1,w2); 
+end

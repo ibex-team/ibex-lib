@@ -1,0 +1,18 @@
+ 
+Soulevé par J. De Miras
+
+bug multiplication matrix-vector : perte de solutions.
+
+========================================================
+
+
+ancien code dans ContractMult (IbexLinear.cpp)
+
+	  A(i,k).div_intersect(proj, B(k,j));
+	  B(k,j).div_intersect(proj, A(i,k));
+
+
+Nouveau code:
+
+
+	  proj_mult(proj, A(i,k),B(k,j));

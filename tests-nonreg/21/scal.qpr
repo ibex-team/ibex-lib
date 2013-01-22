@@ -1,0 +1,9 @@
+
+Variables
+  w1[1][3];
+  w2[3][1];
+  p[1][1];
+
+contractor test
+ p = w1*w2;
+end

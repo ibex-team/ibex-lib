@@ -1,0 +1,51 @@
+Add non regression tests
+
+--This line, and those below, will be ignored--
+
+A    timeout.cc
+A    timeout.h
+A    old
+A    old/bug004.cc
+A    old/bug013.cc
+A    old/bug005.cc
+A    old/bug006.cc
+A    old/bug015.cc
+A    old/bug007.cc
+A    old/bug008.cc
+A    old/bug009.cc
+A    old/bug010.cc
+A    old/bug002.cc
+A    old/bug011.cc
+A    old/bug003.cc
+A    20
+A    20/scal.qpr
+A    20/descriptif.txt
+A    21
+A    21/scal.qpr
+A    bug020.cc
+A    22
+A    22/essai.qpr
+A    22/notes.txt
+A    bug022.cc
+A    bug016.cc
+A    bug018.cc
+A    nonreg.cc
+M    makefile
+A    bloc14
+A    bug021.cc
+A    17
+AM   17/fix.pdf
+A    17/kolev36
+A    17/geneig-icse.bch
+A    18
+AM   18/bug018.pdf
+A    18/exB1
+A    18/exB2
+A    19
+A    19/IbexNewtonProver.cpp
+A    19/IbexNewtonProver.h
+A    19/kolev36
+A    19/solution_certifiee.txt
+A    19/analyse.txt
+A    bug017.cc
+A    bug019.cc
