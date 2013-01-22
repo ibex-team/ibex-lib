@@ -35,23 +35,33 @@ extern void init_symbol_domain(const char* destname, Domain& dest, const Domain&
 class Scope::S_Object {
 public:
 
-	virtual int token() const=0;
-
 	virtual ~S_Object() { }
 
 	virtual S_Object* copy() const=0;
+
+	virtual int token() const=0;
+
+	virtual void print(ostream& os) const=0;
 };
 
 class S_Cst : public Scope::S_Object {
 public:
 
-	S_Cst(const Domain& domain) : domain(domain) { }
+	/**
+	 * Important: since, in the parser expressions, constants are ExprConstantRef
+	 * instead of ExprConstant, we must keep the same references when duplicating constants here.
+	 * Otherwise, in a "for" block, the ExprConstantRef inside expressions will point to domains
+	 * that will no longer exist after parsing (that is, once the scope of the "for" will be deleted).
+	 */
+	S_Cst(const Domain& domain) : domain(domain, true) { }
 
 	S_Cst(const Dim& d) : domain(d) { }
 
 	S_Object* copy() const { return new S_Cst(domain); }
 
 	int token() const { return TK_CONSTANT; }
+
+	void print(ostream& os) const { os << "constant " << domain; }
 
 	Domain domain;
 };
@@ -60,9 +70,11 @@ class S_Func : public Scope::S_Object {
 public:
 	S_Func(Function* f) : f(f) { }
 
-	virtual int token() const { return TK_FUNC_SYMBOL; }
-
 	virtual S_Func* copy() const { return new S_Func(f); }
+
+	int token() const { return TK_FUNC_SYMBOL; }
+
+	void print(ostream& os) const { os << "function " << *f; }
 
 	Function* f;
 };
@@ -74,9 +86,11 @@ public:
 
 	S_Object* copy() const { return new S_FuncInput(symbol); }
 
-	const ExprSymbol* symbol;
-
 	int token() const { return TK_FUNC_INP_SYMBOL; }
+
+	void print(ostream& os) const { os << "function input"; }
+
+	const ExprSymbol* symbol;
 };
 
 class S_FuncTmp : public Scope::S_Object {
@@ -86,6 +100,8 @@ public:
 	S_Object* copy() const { return new S_FuncTmp(expr); }
 
 	int token() const { return TK_FUNC_TMP_SYMBOL; }
+
+	void print(ostream& os) const { os << "function tmp " << *expr; }
 
 	const ExprNode* expr;
 };
@@ -99,6 +115,8 @@ public:
 
 	int token() const { return TK_ENTITY; }
 
+	void print(ostream& os) const { os << "entity"; }
+
 	const Entity* symbol;
 };
 
@@ -110,6 +128,8 @@ public:
 	S_Object* copy() const { return new S_Iterator(value); }
 
 	int token() const { return TK_ITERATOR; }
+
+	void print(ostream& os) const { os << "iterator " << value; }
 
 	int value;
 };
@@ -247,16 +267,7 @@ ostream& operator<<(ostream& os, const Scope& scope) {
 	os << "--------------------\n";
 	for (IBEXMAP(Scope::S_Object*)::const_iterator it=scope.tab.begin(); it!=scope.tab.end(); it++) {
 		os << "  " << it->first << " ";
-		switch(it->second->token()) {
-		case TK_CONSTANT        : os << "constant"; break;
-		case TK_FUNC_SYMBOL     : os << "function"; break;
-		case TK_FUNC_RET_SYMBOL : os << "function return"; break;
-		case TK_FUNC_INP_SYMBOL : os << "function input"; break;
-		case TK_FUNC_TMP_SYMBOL : os << "function tmp"; break;
-		case TK_ENTITY          : os << "entity"; break;
-		case TK_ITERATOR        : os << "iterator"; break;
-		default                 : os << "???"; break;
-		}
+		it->second->print(os);
 		os << endl;
 	}
 	os << "--------------------\n";
