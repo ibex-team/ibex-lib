@@ -1,0 +1,31 @@
+// submitted by Alexandre Goldsztejn
+// number of solutions = 1932
+// should be solved within a couple of minutes
+
+Constants
+  n = 23;
+  a = 1.4;
+  b = 0.3;
+
+Variables
+  x[n] in [-2,2],
+  y[n] in [-0.5, 0.5];
+
+Constraints
+
+  /* steps 0 --> 1 --> ... --> n-1 */
+  for i=2:n;
+    x(i) = y(i-1)+1 - a*x(i-1)^2;
+    y(i) = b*x(i-1);
+  end;
+
+  /* loop back n-1 --> 0 */
+  x(1) = y(n) + 1 - a*x(n)^2;
+  y(1) = b*x(n);
+
+  /* symmetry breaking */
+  for i=2:n;
+    x(1) <= x(i); // select initial point uniquely
+  end;
+
+end
