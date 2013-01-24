@@ -229,6 +229,7 @@ void TestArith::pow12() { check_pow(Interval(2,POS_INFINITY), 3, Interval(8,POS_
 void TestArith::pow13() { check_pow(Interval(-10,10), -2, Interval(1.0/100,POS_INFINITY)); }
 
 void TestArith::root01() { check(root(Interval(0,1),-1), Interval(1.0,POS_INFINITY)); }
+void TestArith::root02() { TEST_ASSERT(almost_eq(root(Interval(-27,-8), 3),Interval(-3,-2),1e-10)); }
 
 #define checkproj(func,y,xbefore,xafter) { Interval x=xbefore; NAME2(proj_,func)(y,x); check(x,xafter); }
 #define NAME2(a,b)         NAME2_HIDDEN(a,b)

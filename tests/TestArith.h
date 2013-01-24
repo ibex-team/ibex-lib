@@ -128,6 +128,7 @@ public:
 		TEST_ADD(TestArith::pow13);
 
 		TEST_ADD(TestArith::root01);
+		TEST_ADD(TestArith::root02);
 
 		TEST_ADD(TestArith::sqrt01);
 		TEST_ADD(TestArith::sqrt02);
@@ -363,6 +364,7 @@ private:
 	void pow13();
 
 	void root01();
+	void root02();
 
 	/* test: sqrt(const Interval& x); */
 	void sqrt01();
