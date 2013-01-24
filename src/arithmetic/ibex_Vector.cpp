@@ -13,23 +13,23 @@
 
 namespace ibex {
 
-Vector::Vector(int n) : n(n), vec(new double[n]) {
-	assert(n>=1);
-	for (int i=0; i<n; i++) vec[i]=0;
+Vector::Vector(int nn) : n(nn), vec(new double[nn]) {
+	assert(nn>=1);
+	for (int i=0; i<nn; i++) vec[i]=0;
 }
 
-Vector::Vector(int n, double x) : n(n), vec(new double[n]) {
-	assert(n>=1);
-	for (int i=0; i<n; i++) vec[i]=x;
+Vector::Vector(int nn, double x) : n(nn), vec(new double[nn]) {
+	assert(nn>=1);
+	for (int i=0; i<nn; i++) vec[i]=x;
 }
 
 Vector::Vector(const Vector& x) : n(x.n), vec(new double[x.n]) {
 	for (int i=0; i<n; i++) vec[i]=x[i];
 }
 
-Vector::Vector(int n, double x[]) : n(n), vec(new double[n]) {
-	assert(n>=1);
-	for (int i=0; i<n; i++) vec[i]=x[i];
+Vector::Vector(int nn, double x[]) : n(nn), vec(new double[nn]) {
+	assert(nn>=1);
+	for (int i=0; i<nn; i++) vec[i]=x[i];
 }
 
 Vector::~Vector() {

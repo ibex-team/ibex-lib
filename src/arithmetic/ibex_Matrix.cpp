@@ -15,9 +15,9 @@
 namespace ibex {
 
 
-Matrix::Matrix(int nb_rows, int nb_cols) : _nb_rows(nb_rows), _nb_cols(nb_cols) {
-	assert(nb_rows>0);
-	assert(nb_cols>0);
+Matrix::Matrix(int nb_rows1, int nb_cols1) : _nb_rows(nb_rows1), _nb_cols(nb_cols1) {
+	assert(nb_rows1>0);
+	assert(nb_cols1>0);
 
 	M = new Vector[_nb_rows];
 	for (int i=0; i<_nb_rows; i++) {
@@ -25,9 +25,9 @@ Matrix::Matrix(int nb_rows, int nb_cols) : _nb_rows(nb_rows), _nb_cols(nb_cols) 
 	}
 }
 
-Matrix::Matrix(int nb_rows, int nb_cols, double x) : _nb_rows(nb_rows), _nb_cols(nb_cols) {
-	assert(nb_rows>0);
-	assert(nb_cols>0);
+Matrix::Matrix(int nb_rows1, int nb_cols1, double x) : _nb_rows(nb_rows1), _nb_cols(nb_cols1) {
+	assert(nb_rows1>0);
+	assert(nb_cols1>0);
 
 	M = new Vector[_nb_rows];
 	for (int i=0; i<_nb_rows; i++) {
@@ -92,12 +92,12 @@ Vector Matrix::col(int j) const {
 	return res;
 }
 
-void Matrix::set_col(int col, const Vector& v) {
-	assert(col>=0 && col<nb_cols());
+void Matrix::set_col(int col1, const Vector& v) {
+	assert(col1>=0 && col1<nb_cols());
 	assert(nb_rows()==v.size());
 
 	for (int i=0; i<nb_rows(); i++)
-		M[i][col]=v[i];
+		M[i][col1]=v[i];
 }
 
 

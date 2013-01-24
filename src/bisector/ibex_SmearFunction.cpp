@@ -81,7 +81,7 @@ namespace ibex {
   double max_magn = NEG_INFINITY;
   int var = -1;
   // the normalizing factor per constraint
-  double ctrjsum[sys.nb_ctr];
+  double* ctrjsum = new double[sys.nb_ctr];
 
   for (int i=0; i<sys.nb_ctr; i++) 
     {ctrjsum[i]=0;
@@ -104,6 +104,7 @@ namespace ibex {
 	  }
       }
   }
+  delete[] ctrjsum;
   return var;
 }
 
@@ -117,7 +118,7 @@ namespace ibex {
   int var = -1;
 
   
-  double ctrjsum[sys.nb_ctr]; // the normalizing factor per constraint
+  double* ctrjsum = new double[sys.nb_ctr]; // the normalizing factor per constraint
   for (int i=0; i<sys.nb_ctr; i++) 
     {ctrjsum[i]=0;
       for (int j=0; j<nbvars ; j++)
@@ -141,6 +142,7 @@ namespace ibex {
 	  }
 
   }
+  delete[] ctrjsum;
   return var;
 }
 

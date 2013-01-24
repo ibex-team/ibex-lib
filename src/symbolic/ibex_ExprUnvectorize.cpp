@@ -178,19 +178,20 @@ void ExprUnvectorize::visit(const ExprSymbol& x) {
 		// we will get
 		//          (x[0],x[1])->0.1*[x[0],x[1]]
 		// and the right side of the multiplication points to v.
-		const ExprNode* v[x.dim.vec_size()];
+		const ExprNode** v= new const ExprNode* [x.dim.vec_size()];
 		for (int i=0; i<x.dim.vec_size(); i++) {
 			dest_symbols.push_back(& ExprSymbol::new_(index_symbol_2_string(x.name,-1,-1,i)));
 			v[i]=dest_symbols.back();
 		}
 		peers[x.id]=&ExprVector::new_(v,x.dim.vec_size(),x.dim.type()==Dim::ROW_VECTOR);
+		delete [] v;
 	}
 	break;
 	case Dim::MATRIX:
 	{
-		const ExprNode* m[x.dim.dim2];
+		const ExprNode** m= new const ExprNode* [x.dim.dim2];
+		const ExprNode** v= new const ExprNode* [x.dim.dim3];
 		for (int i=0; i<x.dim.dim2; i++) {
-			const ExprNode* v[x.dim.dim3];
 			for (int j=0; j<x.dim.dim3; j++) {
 				dest_symbols.push_back(& ExprSymbol::new_(index_symbol_2_string(x.name,-1,i,j)));
 				v[j]=dest_symbols.back();
@@ -198,15 +199,17 @@ void ExprUnvectorize::visit(const ExprSymbol& x) {
 			m[i]= & ExprVector::new_(v,x.dim.dim3,true);
 		}
 		peers[x.id]=& ExprVector::new_(m,x.dim.dim2,false);
+		delete [] v;
+		delete [] m;
 	}
 	break;
 	case Dim::MATRIX_ARRAY:
 	{
-		const ExprNode* ma[x.dim.dim1];
+		const ExprNode** ma= new const ExprNode* [x.dim.dim1];
+		const ExprNode** m= new const ExprNode* [x.dim.dim2];
+		const ExprNode** v= new const ExprNode* [x.dim.dim3];
 		for (int i=0; i<x.dim.dim1; i++) {
-			const ExprNode* m[x.dim.dim2];
 			for (int j=0; j<x.dim.dim2; j++) {
-				const ExprNode* v[x.dim.dim3];
 				for (int k=0; k<x.dim.dim3; k++) {
 					dest_symbols.push_back(& ExprSymbol::new_(index_symbol_2_string(x.name,i,j,k)));
 					v[k]=dest_symbols.back();
@@ -216,6 +219,9 @@ void ExprUnvectorize::visit(const ExprSymbol& x) {
 			ma[i]= & ExprVector::new_(m,x.dim.dim2,false);
 		}
 		peers[x.id]= & ExprVector::new_(ma,x.dim.dim1,true); // notice: true or false does not matter here
+		delete [] v;
+		delete [] m;
+		delete [] ma;
 
 	}
 	break;
@@ -248,22 +254,24 @@ void ExprUnvectorize::visit(const ExprVector& e) {
 	for (int i=0; i<e.nb_args; i++)
 		visit(e.arg(i));
 
-	const ExprNode* args2[e.nb_args];
+	const ExprNode** args2= new const ExprNode*  [e.nb_args];
 	for (int i=0; i<e.nb_args; i++)
 		args2[i]=peers[e.arg(i).id];
 
 	peers[e.id]=&ExprVector::new_(args2, e.nb_args, e.row_vector());
+	delete [] args2;
 }
 
 void ExprUnvectorize::visit(const ExprApply& e) {
 	for (int i=0; i<e.nb_args; i++)
 		visit(e.arg(i));
 
-	const ExprNode* args2[e.nb_args];
+	const ExprNode** args2= new const ExprNode*  [e.nb_args];
 	for (int i=0; i<e.nb_args; i++)
 		args2[i]=peers[e.arg(i).id];
 
 	peers[e.id]=&ExprApply::new_(e.func, args2);
+	delete [] args2;
 }
 
 void ExprUnvectorize::visit(const ExprAdd& e)   { visit(e.left); visit(e.right); peers[e.id] = &      (*peers[e.left.id] + *peers[e.right.id]); }

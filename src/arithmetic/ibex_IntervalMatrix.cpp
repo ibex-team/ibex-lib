@@ -18,9 +18,9 @@ IntervalMatrix::IntervalMatrix() : _nb_rows(0), _nb_cols(0), M(NULL) {
 
 }
 
-IntervalMatrix::IntervalMatrix(int nb_rows, int nb_cols) : _nb_rows(nb_rows), _nb_cols(nb_cols) {
-	assert(nb_rows>0);
-	assert(nb_cols>0);
+IntervalMatrix::IntervalMatrix(int nb_rows1, int nb_cols1) : _nb_rows(nb_rows1), _nb_cols(nb_cols1) {
+	assert(nb_rows1>0);
+	assert(nb_cols1>0);
 
 	M = new IntervalVector[_nb_rows];
 	for (int i=0; i<_nb_rows; i++) {
@@ -28,9 +28,9 @@ IntervalMatrix::IntervalMatrix(int nb_rows, int nb_cols) : _nb_rows(nb_rows), _n
 	}
 }
 
-IntervalMatrix::IntervalMatrix(int nb_rows, int nb_cols, const Interval& x) : _nb_rows(nb_rows), _nb_cols(nb_cols) {
-	assert(nb_rows>0);
-	assert(nb_cols>0);
+IntervalMatrix::IntervalMatrix(int nb_rows1, int nb_cols1, const Interval& x) : _nb_rows(nb_rows1), _nb_cols(nb_cols1) {
+	assert(nb_rows1>0);
+	assert(nb_cols1>0);
 
 	M = new IntervalVector[_nb_rows];
 	for (int i=0; i<_nb_rows; i++) {
@@ -163,33 +163,33 @@ Matrix IntervalMatrix::mag() const {
 	return res;
 }
 
-void IntervalMatrix::resize(int nb_rows, int nb_cols) {
-	assert(nb_rows>0);
-	assert(nb_cols>0);
+void IntervalMatrix::resize(int nb_rows1, int nb_cols1) {
+	assert(nb_rows1>0);
+	assert(nb_cols1>0);
 	assert((M==NULL && _nb_rows==0) || (_nb_rows!=0 && M!=NULL));
 
-	if (nb_rows==_nb_rows && nb_cols==_nb_cols) return;
+	if (nb_rows1==_nb_rows && nb_cols1==_nb_cols) return;
 
 	IntervalVector* M2;
 
-	if (nb_rows!=_nb_rows)
-		M2 = new IntervalVector[nb_rows];
+	if (nb_rows1!=_nb_rows)
+		M2 = new IntervalVector[nb_rows1];
 	else
 		M2 = M;
 
-	for (int i=0; i<nb_rows; i++) {
-		M2[i].resize(nb_cols);  // ALL_REALS by default
+	for (int i=0; i<nb_rows1; i++) {
+		M2[i].resize(nb_cols1);  // ALL_REALS by default
 		if (i<_nb_rows) {
-			int min_cols=nb_cols<_nb_cols?nb_cols:_nb_cols;
+			int min_cols=nb_cols1<_nb_cols?nb_cols1:_nb_cols;
 			for (int j=0; j<min_cols; j++)
 				M2[i][j]=M[i][j];
 		}
 	}
 
-	if (M!=NULL && nb_rows!=_nb_rows) delete[] M; // M=NULL only in IntervalMatrixArray
+	if (M!=NULL && nb_rows1!=_nb_rows) delete[] M; // M=NULL only in IntervalMatrixArray
 	M=M2;
-	_nb_rows = nb_rows;
-	_nb_cols = nb_cols;
+	_nb_rows = nb_rows1;
+	_nb_cols = nb_cols1;
 }
 
 bool IntervalMatrix::is_zero() const {
@@ -238,12 +238,12 @@ IntervalVector IntervalMatrix::col(int j) const {
 	return res;
 }
 
-void IntervalMatrix::set_col(int col, const IntervalVector& v) {
-	assert(col>=0 && col<nb_cols());
+void IntervalMatrix::set_col(int col1, const IntervalVector& v) {
+	assert(col1>=0 && col1<nb_cols());
 	assert(nb_rows()==v.size());
 
 	for (int i=0; i<nb_rows(); i++)
-		M[i][col]=v[i];
+		M[i][col1]=v[i];
 }
 
 IntervalMatrix& IntervalMatrix::inflate(double rad) {
@@ -272,8 +272,7 @@ bool proj_sub(const IntervalMatrix& y, IntervalMatrix& x1, IntervalMatrix& x2) {
 
 bool proj_mul(const IntervalMatrix& y, Interval& x1, IntervalMatrix& x2) {
 	int n=(y.nb_rows());
-	int m=(y.nb_cols());
-	assert((x2.nb_rows())==n && (x2.nb_cols())==m);
+	assert((x2.nb_rows())==n && (x2.nb_cols())==(y.nb_cols()));
 
 	for (int i=0; i<n; i++) {
 		if (!proj_mul(y[i],x1,x2[i])) {

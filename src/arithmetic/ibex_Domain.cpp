@@ -304,19 +304,19 @@ void load(Array<Domain>& x, const Array<Domain>& y, int nb_used, int* used) {
 	load(x,(const Array<const Domain>&) y, nb_used,used);
 }
 
-Domain Domain::operator[](int i) {
+Domain Domain::operator[](int ii) {
 	switch(dim.type()) {
-	case Dim::SCALAR:       assert(i==0); return Domain(this->i()); break;
+	case Dim::SCALAR:       assert(ii==0); return Domain(this->i());
 	case Dim::ROW_VECTOR:
-	case Dim::COL_VECTOR:   return Domain(v()[i]); break;
-	case Dim::MATRIX:       return Domain(m()[i],true); break;
+	case Dim::COL_VECTOR:   return Domain(v()[ii]);
+	case Dim::MATRIX:       return Domain(m()[ii],true);
 	case Dim::MATRIX_ARRAY:
-	default:                return Domain(ma()[i]); break;
+	default:                return Domain(ma()[ii]);
 	}
 }
 
-const Domain Domain::operator[](int i) const {
-	return ((Domain&) *this)[i];
+const Domain Domain::operator[](int ii) const {
+	return ((Domain&) *this)[ii];
 }
 
 Domain operator+(const Domain& d1, const Domain& d2) {

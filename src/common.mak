@@ -28,7 +28,7 @@ JAVA_INC=/usr/lib/jvm/java-6-openjdk-amd64/include
 # To compile in debug mode: "make DEBUG=yes"
 
 ifeq ($(DEBUG), yes)
-CXXFLAGS:=-O0 -g -pg -Wall -Wno-deprecated -Wno-unknown-pragmas -fmessage-length=0 -frounding-math 
+CXXFLAGS:=-O0 -g -pg -Wall -Wno-deprecated -Wno-unknown-pragmas -fmessage-length=0 -frounding-math  
 else
 CXXFLAGS:=-O3 -DNDEBUG -Wno-deprecated -frounding-math #-g #-pg 
 endif

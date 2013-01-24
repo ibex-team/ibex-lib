@@ -24,7 +24,7 @@ namespace ibex {
 class DimException : public Exception {
 public:
 
-	DimException(std::string message) : msg(message) { }
+	DimException(std::string message1) : msg(message1) { }
 
 	/** \brief Get the message of this exception
 	 */

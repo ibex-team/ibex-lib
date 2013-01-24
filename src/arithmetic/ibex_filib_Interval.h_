@@ -82,8 +82,9 @@ inline Interval& Interval::operator/=(double d) {
 	if (d==POS_INFINITY || d==NEG_INFINITY)
 		set_empty();
 	else{
-		return *this/=Interval(d);
+		*this/=Interval(d);
 	}
+	return *this;
 }
 
 inline Interval& Interval::operator+=(const Interval& x) {
@@ -435,10 +436,8 @@ inline Interval pow(const Interval& x, int n) {
 		return Interval::ONE;
 	else if (n<0)
 		return 1.0/Interval(filib::power(x.itv,-n));
-	else {
+	else 
 		return filib::power(x.itv,n);
-
-	}
 }
 
 inline Interval pow(const Interval &x, double d) {
@@ -455,6 +454,8 @@ inline Interval pow(const Interval &x, double d) {
 inline Interval pow(const Interval &x, const Interval &y) {
 	return filib::pow(x.itv, y.itv);
 }
+
+
 
 inline Interval root(const Interval& x, int n) {
 	Interval e=Interval::ONE;
@@ -578,8 +579,8 @@ inline bool proj_sqr(const Interval& y, Interval& x) {
 	Interval neg_proj = (-proj) & x;
 
 	x = pos_proj | neg_proj;
-
 	return !x.is_empty();
+
 }
 
 inline bool proj_pow(const Interval& y, int expon, Interval& x) {

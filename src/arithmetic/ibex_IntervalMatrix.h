@@ -526,10 +526,10 @@ inline IntervalMatrix IntervalMatrix::cols(int start_index, int end_index) {
 	return submatrix(0, nb_rows()-1, start_index, end_index);
 }
 
-inline void IntervalMatrix::set_row(int row, const IntervalVector& v) {
-	assert(row>=0 && row<nb_rows());
-	assert(nb_cols()==v.size());
-	M[row]=v;
+inline void IntervalMatrix::set_row(int row1, const IntervalVector& v1) {
+	assert(row1>=0 && row1<nb_rows());
+	assert(nb_cols()==v1.size());
+	M[row1]=v1;
 }
 
 inline bool IntervalMatrix::is_empty() const {

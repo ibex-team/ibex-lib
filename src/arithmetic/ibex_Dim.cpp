@@ -19,9 +19,9 @@ using std::stringstream;
 namespace ibex {
 
 /** Build the three-dimensional structure. */
-Dim::Dim(int dim1, int dim2, int dim3) : dim1(dim1), dim2(dim2), dim3(dim3) {
+Dim::Dim(int dim1_, int dim2_, int dim3_) : dim1(dim1_), dim2(dim2_), dim3(dim3_) {
 
-	assert(dim1>0 && dim2>0 && dim3>0);
+	assert(dim1_>0 && dim2_>0 && dim3_>0);
 }
 
 Dim mul_dim(const Dim& l, const Dim& r) {

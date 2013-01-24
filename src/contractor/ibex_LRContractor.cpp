@@ -120,7 +120,7 @@ void LR_contractor::iter(IntervalVector & box){
     if(nb_ctrs<1)  return;
     optimizer(box, mysoplex, n, nb_ctrs);
   }  
-  catch(EmptyBoxException e){box.set_empty(); // empty the box before exiting in case of EmptyBoxException
+  catch(EmptyBoxException& e){box.set_empty(); // empty the box before exiting in case of EmptyBoxException
     throw EmptyBoxException();
   }  
   
@@ -130,8 +130,8 @@ void LR_contractor::iter(IntervalVector & box){
   void LR_contractor::optimizer(IntervalVector & box, SoPlex& mysoplex, int n, int nb_ctrs){
 
   Interval opt(0);
-  int inf_bound[n]; // indicator inf_bound = 1 means the inf bound is feasible or already contracted , call to simplex useless (cf Baharev)
-  int sup_bound[n]; //indicator sup_bound = 1 means the sup bound is feasible or already contracted, call to simplex useless
+  int* inf_bound = new int[n]; // indicator inf_bound = 1 means the inf bound is feasible or already contracted , call to simplex useless (cf Baharev)
+  int* sup_bound = new int[n]; //indicator sup_bound = 1 means the sup bound is feasible or already contracted, call to simplex useless
 
   for (int i=0; i<n ;i++) {inf_bound[i]=0;sup_bound[i]=0;}
   if (goal_ctr !=-1)   sup_bound[n-1]=1;  // in case of optimization, for y the left bound only is contracted
@@ -200,7 +200,8 @@ void LR_contractor::iter(IntervalVector & box){
       else break;  // no more call to soplex                                                                            
   }
 
-  
+  delete [] inf_bound;
+  delete [] sup_bound;
     
   }
 
@@ -227,7 +228,7 @@ void LR_contractor::iter(IntervalVector & box){
     //    system("cat dump.lp");
     try{
       stat = mysoplex.solve();
-    }catch(SPxException){
+    }catch(SPxException&){
       stat = SPxSolver::UNKNOWN;
     }
 

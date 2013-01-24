@@ -265,10 +265,10 @@ inline const Vector& Matrix::row(int i) const {
 	return M[i];
 }
 
-inline void Matrix::set_row(int row, const Vector& v) {
-	assert(row>=0 && row<nb_rows());
-	assert(nb_cols()==v.size());
-	M[row]=v;
+inline void Matrix::set_row(int row1, const Vector& v1) {
+	assert(row1>=0 && row1<nb_rows());
+	assert(nb_cols()==v1.size());
+	M[row1]=v1;
 }
 
 inline Matrix Matrix::eye(int n) {

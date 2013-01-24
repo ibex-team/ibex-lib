@@ -36,7 +36,7 @@ int index_2_string(char* buff, char lbracket, char rbracket, int index) {
 #define BASE_VAR_NAME "_x_"
 #define BASE_FUNC_NAME "_f_"
 
-static char generated_name_buff[MAX_NAME_SIZE];
+static char* generated_name_buff = new char[MAX_NAME_SIZE];
 
 static int generated_var_count=0;
 static int generated_func_count=0;

@@ -40,7 +40,7 @@
 #else
 #ifdef _IBEX_WITH_FILIB_
 	#include "interval/interval.hpp"
-	#include <fp_traits/fp_traits.hpp>
+//	#include <fp_traits/fp_traits.hpp>
 	/* simplify instantiation */
 	#define FI_BASE	double
 	//#define FI_ROUNDING filib::no_rounding
@@ -789,8 +789,8 @@ inline Interval& Interval::operator=(const Interval& x) {
 	return *this;
 }
 
-inline Interval& Interval::inflate(double rad) {
-	(*this) += Interval(-rad,rad);
+inline Interval& Interval::inflate(double radd) {
+	(*this) += Interval(-radd,radd);
 	return *this;
 }
 

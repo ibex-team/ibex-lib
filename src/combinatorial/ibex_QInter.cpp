@@ -36,11 +36,12 @@ IntervalVector qinter(const Array<IntervalVector>& _boxes, int q) {
 
 	// ================================================
 
-	double x[n][2*p];
-	int ind[n];     // ind[i] is the current index in x[(d+i)%n]
+	double ** x= new double* [n]; //double x[n][2*p];
+	int* ind=new int[n];     // ind[i] is the current index in x[(d+i)%n]
 	IntervalVector cell(n);  // current cell on the grid, to be tested
 
 	for (int i=0; i<n; i++) {
+		x[i] = new double[2*p];
 		for (int j=0; j<p; j++) {
 			x[i][2*j]   = boxes[j][i].lb();
 			x[i][2*j+1] = boxes[j][i].ub();
@@ -149,7 +150,9 @@ IntervalVector qinter(const Array<IntervalVector>& _boxes, int q) {
 
 		//cout << "inner box=" << inner_box << endl;
 	}
-
+	for (int i=0;i<n;i++) delete [] x[i];
+	delete [] ind;
+	delete [] x;
 	return inner_box;
 }
 

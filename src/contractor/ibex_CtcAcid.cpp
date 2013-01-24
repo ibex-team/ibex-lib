@@ -20,7 +20,7 @@ const double CtcAcid::default_ctratio=0.005;
 
   CtcAcid::CtcAcid(const System& sys, const BoolMask& cid_vars, Ctc& ctc, bool optim, int s3b, int scid,
 		double var_min_width, double ct_ratio): Ctc3BCid (cid_vars,ctc,s3b,scid,cid_vars.nb_set(),var_min_width),
-							system(sys), optim(optim), nbcalls(0), nbctvar(0), nbcidvar(0) ,  nbtuning(0), ctratio(ct_ratio) {
+							system(sys), nbcalls(0), nbctvar(0), ctratio(ct_ratio),  nbcidvar(0), nbtuning(0), optim(optim)  {
 // [gch] BNE check the argument "cid_vars.nb_set()" given to _3BCID
 }
 
@@ -29,7 +29,7 @@ void CtcAcid::contract(IntervalVector& box) {
 	int nb_CID_var=cid_vars.nb_set();                  // [gch]
 	impact.unset_all();                                // [gch]
 	int nbvarmax=5*nb_CID_var;                         //  au plus 5*nbvar
-	double ctstat[nbvarmax];
+	double* ctstat= new double[nbvarmax];
 
 	int nbinitcalls=50;                                // longueur du réglage
 	int factor = 20;                                   // détermine la période entre les débuts de 2 régalages  successifs : factor*nbinitcalls
@@ -97,6 +97,7 @@ void CtcAcid::contract(IntervalVector& box) {
 		nbtuning++;
 		nbvarstat = (nbvarstat * (nbtuning-1) + nbcidvar) / nbtuning;
 	}
+	delete [] ctstat;
 }
 
   // en optim, l'objectif est placé en 1er
@@ -131,8 +132,8 @@ void CtcAcid::compute_smearorder(IntervalVector& box) {
 	system.f.jacobian(box,J);
 
 
-	double sum_smear[nb_var];
-	double ctrjsum[nb_ctr];
+	double* sum_smear=new double[nb_var];
+	double* ctrjsum= new double[nb_ctr];
 
 	for (int i=0; i<nb_ctr; i++) {
 		ctrjsum[i]=0;
@@ -141,6 +142,8 @@ void CtcAcid::compute_smearorder(IntervalVector& box) {
 		  if (J[i][j].mag()==POS_INFINITY || box[j].diam()==POS_INFINITY)
 		    {for (int i1=0;i1 < nb_var; i1++)
 		      smearorder.push_back(varorder2[i1]);
+		      delete [] sum_smear;
+		      delete [] ctrjsum;
 		      return;}
 		  if (cid_vars[j])                           // [gch] (only varCIDed variables considered?)
 		      ctrjsum[i]+= J[i][j].mag() * box[j].diam();
@@ -178,7 +181,9 @@ void CtcAcid::compute_smearorder(IntervalVector& box) {
 		varorder2.erase(result);
 	}
 	varorder2.clear();
-	
+
+    delete [] sum_smear;
+    delete [] ctrjsum;
 	
 	//	assert(smearorder.size()==vhandled);       // [gch]   [bne] assert suppression : vhandled can be > nb_variables
 }

@@ -20,26 +20,26 @@
 namespace ibex {
 
 
-IntervalVector::IntervalVector(int n) : n(n), vec(new Interval[n]) {
-	assert(n>=1);
-	for (int i=0; i<n; i++) vec[i]=Interval::ALL_REALS;
+IntervalVector::IntervalVector(int nn) : n(nn), vec(new Interval[nn]) {
+	assert(nn>=1);
+	for (int i=0; i<nn; i++) vec[i]=Interval::ALL_REALS;
 }
 
-IntervalVector::IntervalVector(int n, const Interval& x) : n(n), vec(new Interval[n]) {
-	assert(n>=1);
-	for (int i=0; i<n; i++) vec[i]=x;
+IntervalVector::IntervalVector(int n1, const Interval& x) : n(n1), vec(new Interval[n1]) {
+	assert(n1>=1);
+	for (int i=0; i<n1; i++) vec[i]=x;
 }
 
 IntervalVector::IntervalVector(const IntervalVector& x) : n(x.n), vec(new Interval[x.n]) {
 	for (int i=0; i<n; i++) vec[i]=x[i];
 }
 
-IntervalVector::IntervalVector(int n, double bounds[][2]) : n(n), vec(new Interval[n]) {
+IntervalVector::IntervalVector(int n1, double bounds[][2]) : n(n1), vec(new Interval[n1]) {
 	if (bounds==0) // probably, the user called IntervalVector(n,0) and 0 is interpreted as NULL!
-		for (int i=0; i<n; i++)
+		for (int i=0; i<n1; i++)
 			vec[i]=Interval::ZERO;
 	else
-		for (int i=0; i<n; i++)
+		for (int i=0; i<n1; i++)
 			vec[i]=Interval(bounds[i][0],bounds[i][1]);
 }
 
@@ -52,9 +52,9 @@ void IntervalVector::init(const Interval& x) {
 		(*this)[i]=x;
 }
 
-IntervalVector& IntervalVector::inflate(double rad) {
+IntervalVector& IntervalVector::inflate(double rad1) {
 	if (is_empty()) return *this;
-	Interval r(-rad,rad);
+	Interval r(-rad1,rad1);
 	// little optim: we do not call (*this)[i].inflate(rad)
 	// because this would create n times
 	// the interval [-rad,rad]
@@ -413,33 +413,33 @@ void diffI(const Interval& x, const Interval& y, Interval& c1, Interval& c2) {
 
 
 int IntervalVector::diff(const IntervalVector& y, IntervalVector*& result) const {
-	const int n=size();
+	const int nn=size();
 	const IntervalVector& x=*this;
-	IntervalVector *tmp = new IntervalVector[2*n]; // in the worst case, there is 2n boxes
+	IntervalVector *tmp = new IntervalVector[2*nn]; // in the worst case, there is 2n boxes
 	Interval c1, c2;
 	int b=0;
 	if (y.is_empty()) {
-		tmp[b].resize(n);
+		tmp[b].resize(nn);
 		tmp[b]=x; // copy of this
 		b++;
 	} else {
-		for (int var=0; var<n; var++) {
+		for (int var=0; var<nn; var++) {
 
 			diffI(x[var],y[var],c1,c2);
 
 			if (!c1.is_empty()) {
-				tmp[b].resize(n);
+				tmp[b].resize(nn);
 				IntervalVector& v=tmp[b++];
 				for (int i=0; i<var; i++) v[i]=y[i];
 				v[var]=c1;
-				for (int i=var+1; i<n; i++) v[i]=x[i];
+				for (int i=var+1; i<nn; i++) v[i]=x[i];
 
 				if (!c2.is_empty()) {
-					tmp[b].resize(n);
+					tmp[b].resize(nn);
 					IntervalVector& v=tmp[b++];
 					for (int i=0; i<var; i++) v[i]=y[i];
 					v[var]=c2;
-					for (int i=var+1; i<n; i++) v[i]=x[i];
+					for (int i=var+1; i<nn; i++) v[i]=x[i];
 				}
 			}
 		}
@@ -447,13 +447,13 @@ int IntervalVector::diff(const IntervalVector& y, IntervalVector*& result) const
 
 	if (b==0) {
 		result = new IntervalVector[1];
-		result[0].resize(n);
+		result[0].resize(nn);
 		result[0].set_empty();
 		b=1;
 	} else {
 		result=new IntervalVector[b];
 		for (int i=0; i<b; i++) {
-			result[i].resize(n);
+			result[i].resize(nn);
 			result[i]=tmp[i];
 		}
 	}
@@ -536,8 +536,8 @@ bool proj_mul(const Interval& z, IntervalVector& x, IntervalVector& y) {
 		else { x.set_empty(); y.set_empty(); return false; }
 	}
 
-	Interval xy[n];  // xy[i] := x[i]y[i]
-	Interval sum[n-1]; // sum[i] := x[0]y[0]+...x[i]y[i]
+	Interval* xy= new Interval[n];  // xy[i] := x[i]y[i]
+	Interval* sum= new Interval[n-1]; // sum[i] := x[0]y[0]+...x[i]y[i]
 
 	// ------------- forward --------------------
 	for (int i=0; i<n; i++) xy[i]=x[i]*y[i];
@@ -546,16 +546,18 @@ bool proj_mul(const Interval& z, IntervalVector& x, IntervalVector& y) {
 
 	// ------------- backward -------------------
 	// (rem: we have n>=2)
-	if (!proj_add(z, sum[n-2], xy[n-1])) { x.set_empty(); y.set_empty(); return false; }
+	if (!proj_add(z, sum[n-2], xy[n-1])) { x.set_empty(); y.set_empty(); delete[] sum; delete[] xy; return false; }
 
 	for (int i=n-3; i>=0; i--)
-		if (!proj_add(sum[i+1],sum[i],xy[i+1])) { x.set_empty(); y.set_empty(); return false; }
+		if (!proj_add(sum[i+1],sum[i],xy[i+1])) { x.set_empty(); y.set_empty(); delete[] sum; delete[] xy; return false; }
 
-	if ((xy[0] &= sum[0]).is_empty()) { x.set_empty(); y.set_empty(); return false; }
+	if ((xy[0] &= sum[0]).is_empty()) { x.set_empty(); y.set_empty(); delete[] sum; delete[] xy; return false; }
 
 	for (int i=0; i<n; i++)
-		if (!proj_mul(xy[i],x[i],y[i])) { x.set_empty(); y.set_empty(); return false; }
-
+		if (!proj_mul(xy[i],x[i],y[i])) { x.set_empty(); y.set_empty(); delete[] sum; delete[] xy; return false; }
+ 	
+	delete[] sum; 
+	delete[] xy;
 	return true;
 }
 

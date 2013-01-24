@@ -47,7 +47,7 @@ public:
 	/**
 	 * \brief Creates a new domain of dimension \a dim.
 	 */
-	explicit Domain(const Dim& dim) : dim(dim), is_reference(false) {
+	explicit Domain(const Dim& dim1) : dim(dim1), is_reference(false) {
 		build();
 	}
 
@@ -65,8 +65,8 @@ public:
 	 *
 	 *  The internal domain will point to \a v.
 	 */
-	explicit Domain(IntervalVector& v, bool in_row) : dim(in_row? Dim::row_vec(v.size()) : Dim::col_vec(v.size())), is_reference(true) {
-		domain = &v;
+	explicit Domain(IntervalVector& v1, bool in_row) : dim(in_row? Dim::row_vec(v1.size()) : Dim::col_vec(v1.size())), is_reference(true) {
+		domain = &v1;
 	}
 
 	/**
@@ -74,8 +74,8 @@ public:
 	 *
 	 *  The internal domain will point to \a m.
 	 */
-	explicit Domain(IntervalMatrix& m) : dim(Dim::matrix(m.nb_rows(),m.nb_cols())), is_reference(true) {
-		domain = &m;
+	explicit Domain(IntervalMatrix& m1) : dim(Dim::matrix(m1.nb_rows(),m1.nb_cols())), is_reference(true) {
+		domain = &m1;
 	}
 
 	/**
@@ -83,8 +83,8 @@ public:
 	 *
 	 *  The internal domain will point to \a ma.
 	 */
-	explicit Domain(IntervalMatrixArray& ma) : dim(Dim::matrix_array(ma.size(),ma.nb_rows(),ma.nb_cols())), is_reference(true) {
-		domain = &ma;
+	explicit Domain(IntervalMatrixArray& ma1) : dim(Dim::matrix_array(ma1.size(),ma1.nb_rows(),ma1.nb_cols())), is_reference(true) {
+		domain = &ma1;
 	}
 
 	/**
@@ -93,8 +93,8 @@ public:
 	 * If \a is_reference is true, the intenal domain is a reference to the
 	 * internal domain of \a d.
 	 */
-	Domain(const Domain& d, bool is_reference=false) : dim(d.dim), is_reference(is_reference) {
-		if (is_reference) {
+	Domain(const Domain& d, bool is_reference1=false) : dim(d.dim), is_reference(is_reference1) {
+		if (is_reference1) {
 			domain = d.domain;
 		} else {
 			switch (dim.type()) {

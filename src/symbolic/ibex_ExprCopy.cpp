@@ -167,11 +167,12 @@ void ExprCopy::visit(const ExprVector& e) {
 		}
 	}
 
-	const ExprNode* args2[e.nb_args];
+	const ExprNode** args2 = new const ExprNode* [e.nb_args];
 	for (int i=0; i<e.nb_args; i++)
 		args2[i]=&ARG(i);
 
 	e.deco.tmp=&ExprVector::new_(args2, e.nb_args, e.row_vector());
+	delete [] args2;
 }
 
 void ExprCopy::visit(const ExprApply& e) {
@@ -193,11 +194,12 @@ void ExprCopy::visit(const ExprApply& e) {
 		}
 	}
 
-	const ExprNode* args2[e.nb_args];
+	const ExprNode** args2 = new const ExprNode* [e.nb_args];
 	for (int i=0; i<e.nb_args; i++)
 		args2[i]=&ARG(i);
 
 	e.deco.tmp=&ExprApply::new_(e.func, args2);
+	delete [] args2;
 }
 
 #define visit_binary(f) \

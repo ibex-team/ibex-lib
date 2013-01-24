@@ -14,12 +14,12 @@
 
 namespace ibex {
 
-IntervalMatrixArray::IntervalMatrixArray(int n, int nb_rows, int nb_cols) : n(n) {
-	assert(n>0);
+IntervalMatrixArray::IntervalMatrixArray(int n1, int nb_rows1, int nb_cols1) : n(n1) {
+	assert(n1>0);
 
-	array = new IntervalMatrix[n];
-	for (int i=0; i<n; i++)
-		array[i].resize(nb_rows,nb_cols);
+	array = new IntervalMatrix[n1];
+	for (int i=0; i<n1; i++)
+		array[i].resize(nb_rows1,nb_cols1);
 }
 
 IntervalMatrixArray::IntervalMatrixArray(const IntervalMatrixArray& a) : n(a.n) {
