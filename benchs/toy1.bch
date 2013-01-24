@@ -1,0 +1,9 @@
+Variables
+  x,y;
+
+Minimize
+  x+y;
+
+Constraints
+  x^2+y^2<=1;
+end

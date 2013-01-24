@@ -1,0 +1,47 @@
+constants
+pi = 3.14159265;
+
+variables
+
+x1 in [-500,500];
+x2 in [-500,500];
+x3 in [-500,500];
+x4 in [-500,500];
+x5 in [-500,500];
+x6 in [-500,500];
+x7 in [-500,500];
+x8 in [-500,500];
+x9 in [-500,500];
+x10 in [-500,500];
+x11 in [-500,500];
+x12 in [-500,500];
+x13 in [-500,500];
+x14 in [-500,500];
+x15 in [-500,500];
+x16 in [-500,500];
+x17 in [-500,500];
+x18 in [-500,500];
+x19 in [-500,500];
+x20 in [-500,500];
+x21 in [-500,500];
+x22 in [-500,500];
+x23 in [-500,500];
+x24 in [-500,500];
+x25 in [-500,500];
+x26 in [-500,500];
+x27 in [-500,500];
+x28 in [-500,500];
+x29 in [-500,500];
+x30 in [-500,500];
+
+
+minimize
+ 418.9829 * 30 - x1 * sin (sqrt (abs (x1)))   - x2 * sin (sqrt (abs (x2)))
+ - x3 * sin (sqrt (abs (x3))) - x4 * sin (sqrt (abs (x4))) - x5 * sin (sqrt (abs (x5))) - x6 * sin (sqrt (abs (x6)))   - x7 * sin (sqrt (abs (x7)))
+ - x8 * sin (sqrt (abs (x8))) - x9 * sin (sqrt (abs (x9))) - x10 * sin (sqrt (abs (x10)))- x11 * sin (sqrt (abs (x11)))
+ - x12 * sin (sqrt (abs (x12)))- x13 * sin (sqrt (abs (x13)))- x14 * sin (sqrt (abs (x14)))- x15 * sin (sqrt (abs (x15)))- x16 * sin (sqrt (abs (x16)))- x17 * sin (sqrt (abs (x17)))- x18 * sin (sqrt (abs (x18)))- x19 * sin (sqrt (abs (x19)))
+- x20 * sin (sqrt (abs (x20)))- x21 * sin (sqrt (abs (x21)))- x22 * sin (sqrt (abs (x22)))- x23 * sin (sqrt (abs (x23)))
+- x24 * sin (sqrt (abs(x24)))- x25 * sin (sqrt (abs (x25)))- x26 * sin (sqrt (abs (x26)))- x27 * sin (sqrt (abs (x27)))
+- x28 * sin (sqrt (abs (x28)))- x29 * sin (sqrt (abs (x29)))- x30 * sin (sqrt (abs (x30)));
+
+

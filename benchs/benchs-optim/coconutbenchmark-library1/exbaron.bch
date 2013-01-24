@@ -1,0 +1,15 @@
+
+variables
+
+x1 in [-10,10];
+x2 in [-10,10];
+
+
+
+minimize x1;
+
+constraints
+x1^2 - x2 <= 0 ;
+x2 - x1^2* (x1-2) + 1.e-5 <=0 ;
+
+end

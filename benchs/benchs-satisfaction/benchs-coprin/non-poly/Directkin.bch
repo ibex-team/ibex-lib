@@ -1,0 +1,41 @@
+
+Constants
+f1 in 0;
+f2 in 0;
+f3 in 0;
+f4 in 0;
+f5 in 0;
+f6 in 0;
+f7 in 0;
+f8 in 0;
+f9 in 0;
+f10 in 0;
+f11 in 0;
+
+Variables
+xc in [-12.80624847, 12.80624847];
+yc in [-12.80624847, 12.80624847];
+zc in [0, 12.80624847];
+p in [-1.570796327, 1.570796327];
+t in [-1.570796327, 1.570796327];
+x1 in [-12, -2];
+y1 in [10, 20];
+//-3 3
+z1 in [-5, 5]; 
+x2 in [2, 12];
+y2 in [10, 20];
+z2 in [-5, 5];
+
+Constraints
+xc^2+yc^2+zc^2-164=f1;
+304.0192-20*xc-300*cos(p)+100*sin(p)*cos(t)-10*yc-150*sin(p)-50*cos(p)*cos(t)+30*xc*cos(p)-10*xc*sin(p)*cos(t)+30*yc*sin(p)+10*yc*cos(p)*cos(t)+10*zc*sin(t)=f2;
+304.0192+20*xc-300*cos(p)-100*sin(p)*cos(t)-10*yc+150*sin(p)-50*cos(p)*cos(t)-30*xc*cos(p)-10*xc*sin(p)*cos(t)-30*yc*sin(p)+10*yc*cos(p)*cos(t)+10*zc*sin(t)=f3;
+(x1+7)^2+(y1-15)^2+z1^2-25=f4;
+(cos(p)*(x1-xc)+sin(p)*(y1-yc)+7.000000)^2+(-sin(p)*cos(t)*(x1-xc)+cos(p)*cos(t)*(y1-yc)+sin(t)*(z1-zc)-7.011678)^2+(sin(p)*sin(t)*(x1-xc)-cos(p)*sin(t)*(y1-yc)+cos(t)*(z1-zc)+4.065716)^2-25.46010=f5;
+(x2-7)^2+(y2-15)^2+z2^2-25=f6;
+(cos(p)*(x2-xc)+sin(p)*(y2-yc)-7.000000)^2+(-sin(p)*cos(t)*(x2-xc)+cos(p)*cos(t)*(y2-yc)+sin(t)*(z2-zc)-7.011678)^2+(sin(p)*sin(t)*(x2-xc)-cos(p)*sin(t)*(y2-yc)+cos(t)*(z2-zc)+4.065716)^2-25.46010=f7;
+60.*z1-4.*z1*yc+(28.04672*y1-420.7008)*sin(t)+(243.9430-16.26286*y1)*cos(t)+28.*z1*sin(p)+(-16.26286*sin(t)*z1-28.04672*cos(t)*z1)*cos(p)+(-60.+4.*y1)*zc=f8;
+28.*z1+4.*z1*xc+(-196.3270-28.04672*x1)*sin(t)+(113.8400+16.26286*x1)*cos(t)+(-16.26286*sin(t)*z1-28.04672*cos(t)*z1)*sin(p)-28.*z1*cos(p)+(-4.*x1-28.)*zc=f9;
+60.*z2-4.*z2*yc+(-420.7008+28.04672*y2)*sin(t)+(243.9430-16.26286*y2)*cos(t)-28.*z2*sin(p)+(-28.04672*cos(t)*z2-16.26286*sin(t)*z2)*cos(p)+(4.*y2-60.)*zc=f10;
+-28.*z2+4.*z2*xc+(196.3270-28.04672*x2)*sin(t)+(-113.8400+16.26286*x2)*cos(t)+(-28.04672*cos(t)*z2-16.26286*sin(t)*z2)*sin(p)+28.*z2*cos(p)+(-4.*x2+28.)*zc=f11;
+end

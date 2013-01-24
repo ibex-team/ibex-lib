@@ -1,0 +1,12 @@
+constants
+pi=3.14159265;
+
+variables
+
+a in [0,2*pi];
+b in [-10,30];
+
+constraints
+0.7 * exp(-12*b)*cos(12*a)+ 0.3 * exp(-13*b)* cos(13*a)-32=0;
+0.7 * exp(-12*b)*sin(12*a)+ 0.3 * exp(-13*b)* sin(13*a) =0;
+end

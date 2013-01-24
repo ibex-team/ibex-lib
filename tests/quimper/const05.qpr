@@ -1,0 +1,9 @@
+constants 
+ c[2][3]=((0, 1, 2); (3, 4, 5));
+ 
+variables
+ x[3][2] in <c',0.1>;
+ 
+constraints
+ x=0;
+end

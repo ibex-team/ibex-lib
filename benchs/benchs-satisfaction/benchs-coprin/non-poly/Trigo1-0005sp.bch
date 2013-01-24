@@ -1,0 +1,15 @@
+Constants
+pi =3.1415926;
+
+Variables
+x[5] in [1.e-8,2*pi];
+SE[1] in [-5,5];
+
+Constraints
+6 - cos(x(1)) + SE(1) - sin(x(1)) = 0;
+5 + 2*(1 - cos(x(2))) + SE(1) - sin(x(2)) = 0;
+5 + 3*(1 - cos(x(3))) + SE(1) - sin(x(3)) = 0;
+5 + 4*(1 - cos(x(4))) + SE(1) - sin(x(4)) = 0;
+5 + 5*(1 - cos(x(5))) + SE(1) - sin(x(5)) = 0;
+-cos(x(1)) - cos(x(2)) - cos(x(3)) - cos(x(4)) - cos(x(5)) - SE(1) = 0;
+end

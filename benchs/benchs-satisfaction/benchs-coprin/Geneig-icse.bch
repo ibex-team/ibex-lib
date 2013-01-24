@@ -1,0 +1,39 @@
+Variables
+
+x1 in [-1e8,1e8];
+x2 in [-1e8,1e8];
+x3 in [-1e8,1e8];
+x4 in [-1e8,1e8];
+x5 in [-1e8,1e8];
+x6 in [-1e8,1e8];
+x7 in [0,1e16];
+//Auxiliar Variables
+SE[15] in [-10e8,10e8];
+
+Constraints
+//Modified System
+10*x1 + 2*x2 + 2*x4 - 2*x5 + SE(3) + SE(4) + 2*SE(6) + SE(7) + SE(9) - 10*SE(10) + 2*SE(11) + SE(13) + 3*SE(14) = 0 ;
+9*x2 + 3*x3 - x4 - 2*x5 + SE(15) + 2*SE(7) + SE(8) + 2*SE(10) - 11*SE(11) + 2*SE(12) - 2*SE(13) + SE(14) = 0 ;
+-x1 + 3*x2 + 10*x3 - x5 + SE(1) - 2*SE(8) - 2*SE(9) - SE(10) - 12*SE(12) - SE(13) + SE(14) = 0 ;
+2*x1 - x2 + 2*x3 + 12*x4 + x5 + SE(2) + SE(3) + 2*SE(5) + SE(6) + SE(10) - 2*SE(11) - 10*SE(13) + 2*SE(14) = 0 ;
+-2*x1 - 2*x2 + x4 + 10*x5 + SE(2) + SE(4) + 3*SE(6) + 3*SE(8) + 3*SE(10) +SE(11) + SE(12) + 2*SE(13) - 11*SE(14) = 0 ;
+-1 + x1 + x2 + x3 + x4 + x5 = 0;
+
+//Auxiliar Variables
+x7 = x6^2;
+SE(5) = x1*x6;
+SE(6) = x2*x6;
+SE(7) = x3*x6;
+SE(8) = x4*x6;
+SE(9) = x5*x6;
+SE(10) = x1*x7;
+SE(11) = x2*x7;
+SE(12) = x3*x7;
+SE(13) = x4*x7;
+SE(14) = x5*x7;
+SE(4) = -x3 + SE(5);
+SE(3) = 2*SE(8) - SE(12);
+SE(2) = -2*SE(7) + 3*SE(9);
+SE(1) = 2*x4 + SE(5) + 2*SE(6) + 2*SE(11);
+SE(15) = 2*x1 + 2*SE(5) + SE(6) + 3*SE(9);
+end

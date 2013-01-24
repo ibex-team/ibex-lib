@@ -1,0 +1,14 @@
+L'ensemble des benchs IBB en format ibex1.07
+
+correspondent aux exemples traités dans les articles (CP06). + latham (modélisation de 
+mechanism de l'article original)
+avec les tailles des intervalles "larges"  (medium pour mechanism, latham, 4.6*Small pour sierp3eq46)
+
+Ces fichiers ont été créés à partir des sources dans 
+~/CONTRAINTES/IBB/IBB-ibex107
+
+les fichiers *IBB sont ceux avec les variables et contraintes dans l'ordre ibb.
+
+
+
+

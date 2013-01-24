@@ -1,0 +1,11 @@
+variables
+ x[2];
+
+// should raise an error: index 0
+function y=toto(x[2])
+ y  = x(0);
+end
+
+constraints
+ x(1)=toto(x);
+end

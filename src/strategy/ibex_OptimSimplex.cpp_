@@ -1,0 +1,146 @@
+//============================================================================
+//                                  I B E X                                   
+// File        : ibex_OptimSimplex.cpp
+// Author      : Ignacio Araya
+// Copyright   : Ecole des Mines de Nantes (France)
+// License     : See the LICENSE file
+// Created     : Jul 12, 2012
+// Last Update : Jul 12, 2012
+//============================================================================
+
+
+#include "ibex_Optimizer.h"
+
+#include <stdlib.h>
+#include "soplex.h"
+
+using namespace soplex;
+using namespace std;
+
+namespace ibex {
+
+//The system is overconstrained by using the Taylor extension.
+//Then the simplex algorithm is applied to obtain a new upper bound loup
+//If a new loup is found the method returns true
+
+bool Optimizer::update_loup_simplex(const IntervalVector& box) {
+
+  //cout << " box simplex " << box << endl;
+	IntervalVector G(n); // vector to be used by the partial derivatives
+
+	IntervalVector x_inf(box.lb());
+
+	
+
+	SoPlex mysoplex;
+	mysoplex.changeSense(SPxLP::MINIMIZE);	// set the objective sense
+
+	DSVector dummycol(0);
+
+	// ============================================================
+	//                  linearize the objective
+	// ============================================================
+	sys.goal->gradient(box,G);
+
+	for (int i =0; i< n ; i++)
+	  if (G[i].diam() > 1e8) return false;   //to avoid problems with SoPleX
+	int nsimplex=n+1;  // the n variables + the objective
+	DSVector row1(nsimplex);
+
+	//Linear variable yl is created
+	//0 <= yl <= loup   : CONSTRAINT NOT IMPLEMENTED
+	mysoplex.addCol(LPCol(1.0, dummycol, infinity, -infinity ));
+	row1.add(0, -1.0);
+
+	for (int j=0; j<nsimplex-1; j++){
+		//The linear variables are generated
+		//0 <= xl_j <= diam([x_j])
+		mysoplex.addCol(LPCol(0.0, dummycol, box[j].diam(), 0.0));
+		row1.add(j+1, G[j].ub());
+	}
+	//the first constraint:
+	//sup(df/dx_1) xl_1 + ... + sup(df/dx_n) xl_n <= yl
+	mysoplex.addRow(LPRow(-infinity, row1, 0.0));
+	
+	// ============================================================
+	//                  linearize the constraints
+	// ============================================================
+
+	//The linear system is generated
+	if (m>0)
+	  {IntervalVector g_inf(sys.f.eval_vector(x_inf)); // may throw EmptyBoxException?
+	    for (int i=0; i<m; i++) {
+
+		if(sys.f[i].eval(box).ub()<=0) continue;      // the constraint is satified :)
+
+		sys.f[i].gradient(box,G);                     // gradient calculation
+
+		for (int ii =0; ii< n ; ii++)
+		  if (G[ii].diam() > 1e8) {return false;}   //to avoid problems with SoPleX
+		
+
+		DSVector row1(nsimplex);
+
+		//The contraints i is generated:
+		// c_i:  inf([g_i]([x]) + sup(dg_i/dx_1) * xl_1 + ... + sup(dg_i/dx_n) + xl_n  <= -eps_error
+		for (int j=0; j<nsimplex-1; j++) {
+			//			if(op == LEQ || op== LT) {
+			row1.add(j+1, G[j].ub());
+			//			} else {
+			//				row1.add(j+1, Inf(G(j+1)));
+			//			}
+		}
+
+		//		if(op == LEQ || op== LT) {
+		mysoplex.addRow(LPRow(-infinity, row1, (-g_inf)[i].lb()-1e-10));    //  1e-10 ???  BNE
+		//		} else {
+		//			mysoplex.addRow(LPRow(Sup(-eval_inf(i+1))+1e-10, row1, infinity));
+		//		}
+	    }
+	  }
+
+	SPxSolver::Status stat;
+
+	mysoplex.setTerminationIter(100);
+	mysoplex.setDelta(1e-10);
+
+
+	//		mysoplex.writeFile("dump.lp", NULL, NULL, NULL);
+	//		system ("cat dump.lp");
+	try{
+		stat = mysoplex.solve();
+	} catch(SPxException e ) {  //cout << " Simplex error " << endl;
+		return false;
+	}
+//	cout << " stat " << stat << endl;
+	if (stat == SPxSolver::OPTIMAL) {
+		//the linear solution is mapped to intervals and evaluated
+		DVector prim(nsimplex);
+		mysoplex.getPrimal(prim);
+
+		IntervalVector tmpbox(n);
+
+		for (int j=0; j<n; j++)
+			tmpbox[j]=box[j].lb()+prim[j+1];
+//		cout << " simplex result " << tmpbox << endl;
+		bool ret= check_candidate(tmpbox.mid(),false); //  [gch] do we know here that the point is inner??
+
+		if (ret) {
+		  if (trace)
+		    {   int prec=cout.precision();
+			cout.precision(12);
+			cout << "[simplex1]"  << " loup update " << loup  << " loup point  " << loup_point << endl;
+			cout.precision(prec);
+		    }
+			nb_simplex++;
+			diam_simplex= ((nb_simplex-1) * diam_simplex + box.max_diam()) / nb_simplex;
+		}
+		return ret;
+	}
+
+	if(stat == SPxSolver::ABORT_TIME) cout << "Simplex spent too much time" << endl;
+
+	return false;
+}
+
+} // end namespace ibex

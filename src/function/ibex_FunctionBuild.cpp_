@@ -1,0 +1,353 @@
+/* =========é===================================================================
+ * I B E X - Functions
+ * ============================================================================
+ * Copyright   : Ecole des Mines de Nantes (FRANCE)
+ * License     : This program can be distributed under the terms of the GNU LGPL.
+ *               See the file COPYING.LESSER.
+ *
+ * Author(s)   : Gilles Chabert
+ * Created     : Jan 5, 2012
+ * ---------------------------------------------------------------------------- */
+
+#include "ibex_Function.h"
+#include "ibex_Expr.h"
+#include "ibex_Decorator.h"
+#include "ibex_ExprCopy.h"
+#include "ibex_Eval.h"
+#include "ibex_HC4Revise.h"
+#include "ibex_Gradient.h"
+#include "ibex_String.h"
+#include "ibex_UnknownFileException.h"
+#include "ibex_SyntaxError.h"
+
+using namespace std;
+
+namespace ibex {
+
+namespace {
+
+/*
+ * Find the components used in the function
+ * \pre the symbol keys must have been set
+ */
+class FindInputsUsed: public ExprVisitor {
+public:
+	std::vector<bool>& is_used;
+	int* symbol_index; // first variable index of a symbol
+	int current_index; // idem for the subexpression. -1 when subexpression is not an index
+
+	FindInputsUsed(const Array<const ExprSymbol>& x, const ExprNode& y, std::vector<bool>& is_used) : is_used(is_used) {
+		symbol_index = new int[x.size()];
+		int index=0;
+
+		for (int i=0; i<x.size(); i++) {
+			symbol_index[i]=index;
+			for (int j=0; j<x[i].dim.size(); j++) {
+				index++;
+				is_used.push_back(false); // by default
+			}
+		}
+
+		visit(y);
+
+		if (current_index!=-1) {
+			for (int i=0; i<y.dim.size(); i++)
+				is_used[current_index+i]=true;
+		}
+		delete[] symbol_index;
+	}
+
+	virtual void visit(const ExprNode& e)     {
+		e.acceptVisitor(*this);
+	}
+
+	virtual void visit(const ExprLeaf& e)     {
+		e.acceptVisitor(*this);
+	}
+
+	virtual void visit(const ExprIndex& e)    {
+		visit(e.expr);
+		if (current_index!=-1)
+			current_index+=e.index*e.dim.size();
+		// symbol_index is left unchanged.
+	}
+
+	virtual void visit(const ExprSymbol& e)   {
+		current_index=symbol_index[e.key];
+	}
+
+	virtual void visit(const ExprConstant&)   {
+		current_index=-1;
+	}
+
+	virtual void visit(const ExprNAryOp& e)   {
+		for (int i=0; i<e.nb_args; i++) {
+			visit(*e.args[i]);
+			if (current_index!=-1)
+				for (int j=0; j<e.arg(i).dim.size(); j++) is_used[current_index+j]=true;
+		}
+		current_index=-1;
+	}
+
+	virtual void visit(const ExprBinaryOp& e) {
+		visit(e.left);
+		if (current_index!=-1)
+			for (int i=0; i<e.left.dim.size(); i++) is_used[current_index+i]=true;
+		visit(e.right);
+		if (current_index!=-1)
+			for (int i=0; i<e.right.dim.size(); i++) is_used[current_index+i]=true;
+		current_index=-1;
+	}
+
+	virtual void visit(const ExprUnaryOp& e)  {
+		visit(e.expr);
+		if (current_index!=-1)
+			for (int i=0; i<e.expr.dim.size(); i++) is_used[current_index+i]=true;
+		current_index=-1;
+	}
+
+};
+
+/**
+ * Set the id number of each node and
+ * push all the nodes into a vector (ordered by id).
+ */
+class BuildVectorOfNodes: public ExprVisitor {
+public:
+	vector<const ExprNode*>& nodes;
+	int id;
+
+	BuildVectorOfNodes(vector<const ExprNode*>& nodes, const Array<const ExprSymbol>& x, const ExprNode& y) : nodes(nodes), id(0) {
+		for (int i=0; i<x.size(); i++) {
+			nodes.push_back(&x[i]);
+			(int&) x[i].id=id++;
+		}
+		visit(y);
+	}
+
+	virtual void visit(const ExprNode& e) {
+		if (e.id==-1) {
+			e.acceptVisitor(*this);
+			nodes.push_back(&e);
+			(int&) e.id=id++;
+		}
+	}
+
+	virtual void visit(const ExprIndex& e)    { visit(e.expr); }
+	virtual void visit(const ExprLeaf& e)     { }
+	virtual void visit(const ExprNAryOp& e)   { for (int i=0; i<e.nb_args; i++) { visit(*e.args[i]); } }
+	virtual void visit(const ExprBinaryOp& e) { visit(e.left); visit(e.right); }
+	virtual void visit(const ExprUnaryOp& e)  { visit(e.expr); }
+};
+
+const char* duplicate_or_generate(const char* name) {
+	if (name) return strdup(name);
+	else return strdup(ibex::next_generated_func_name());
+}
+
+}
+
+Function::Function() : name(strdup(next_generated_func_name())), root(NULL) {
+	// root==NULL <=> the function is not initialized yet
+}
+
+Function::Function(const ExprSymbol& x, const ExprNode& y, const char* name) : name(duplicate_or_generate(name)) {
+	init(Array<const ExprSymbol>(x),y);
+}
+
+Function::Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprNode& y, const char* name) : name(duplicate_or_generate(name)) {
+	init(Array<const ExprSymbol>(x1,x2),y);
+}
+
+Function::Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprNode& y, const char* name) : name(duplicate_or_generate(name)) {
+	init(Array<const ExprSymbol>(x1,x2,x3),y);
+}
+
+Function::Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprNode& y, const char* name) : name(duplicate_or_generate(name)) {
+	init(Array<const ExprSymbol>(x1,x2,x3,x4),y);
+}
+
+Function::Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprNode& y, const char* name) : name(duplicate_or_generate(name)) {
+	init(Array<const ExprSymbol>(x1,x2,x3,x4,x5),y);
+}
+
+Function::Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprNode& y, const char* name) : name(duplicate_or_generate(name)) {
+	init(Array<const ExprSymbol>(x1,x2,x3,x4,x5,x6),y);
+}
+
+Function::Function(const Array<const ExprSymbol>& x, const ExprNode& y, const char* name) : name(duplicate_or_generate(name)) {
+	init(x,y);
+}
+
+}
+
+extern int ibexparse();
+extern void ibexrestart(FILE *);
+extern FILE* ibexin;
+
+namespace ibex {
+
+namespace parser {
+extern Function* function;
+}
+
+Function::Function(const char* filename) {
+	FILE *fd;
+	if ((fd = fopen(filename, "r")) == NULL) throw UnknownFileException(filename);
+	ibexin = fd;
+
+	try {
+		parser::function=this;
+		ibexparse();
+		parser::function=NULL;
+	}
+	catch(SyntaxError& e) {
+		parser::function=NULL;
+		fclose(fd);
+		ibexrestart(ibexin);
+		throw e;
+	}
+
+	fclose(fd);
+}
+
+Function::Function(const Function& f) : name(strdup(f.name)) {
+	//assert(f.root!=NULL);
+
+	// Create the new symbols
+	// we have to proceed first the symbols in order to guarantee that
+	// they appear in the same order in "dest". Indeed, if we add the symbols
+	// as they appear in the expression the copy of a a function (x,y)->y+x
+	// would yield (y,x)->y+x.
+	Array<const ExprSymbol> x(f.nb_arg());
+	for (int j=0; j<f.nb_arg(); j++) {
+		x.set_ref(j,ExprSymbol::new_(f.arg(j).name,f.arg(j).dim));
+	}
+	//cout << "new x=";
+	//for (int j=0; j<new_x.size(); j++) cout << new_x[j].name << " ";
+	//cout << endl;
+
+	// Duplicate the expression
+	const ExprNode& y=ExprCopy().copy(f.symbs,x,f.expr());
+
+	init(x,y);
+}
+
+void Function::separate() {
+	if (expr().type()==Dim::SCALAR) {
+		comp=this;
+		return;
+	}
+
+	comp = new Function[image_dim()];
+	// rem: dimension()==expr().dim.vec_size() if expr() is a vector
+	//      and also fvec->nb_args if, in addition, fvec!=NULL
+
+	if (expr().dim.is_vector()) {
+		for (int i=0; i<expr().dim.vec_size(); i++) {
+			Array<const ExprSymbol> x(nb_arg());
+			varcopy(symbs,x);
+			const ExprNode& y=ExprCopy().index_copy(symbs, x, expr(), i);
+			comp[i].init(x,y);
+		}
+	}
+
+	else {
+		int n=expr().dim.dim3;
+		for (int i=0; i<expr().dim.dim2; i++) {
+
+			for (int j=0; j<n; j++) {
+				Array<const ExprSymbol> x(nb_arg());
+				varcopy(symbs,x);
+				const ExprNode& y=ExprCopy().index_copy(symbs, x, expr(), i, j);
+				comp[i*n+j].init(x,y);
+			}
+		}
+	}
+
+//	cout << "--------- separation ---------" << endl;
+//	for (int i=0; i<dimension(); i++) {
+//		cout << (*this)[i] << endl << endl;
+//	}
+//	cout << "------------------------------" << endl;
+}
+
+//void Function::set_expr(const ExprNode& expr) {
+void Function::init(const Array<const ExprSymbol>& x, const ExprNode& y) {
+
+	key_count=0;
+	__all_symbols_scalar=true; // by default
+
+	symbs.resize(x.size());
+
+	for (int i=0; i<x.size(); i++) {
+		symbs.set_ref(i,x[i]);
+		add_symbol(&x[i]);
+	}
+
+	root=&y;
+
+	BuildVectorOfNodes(exprnodes, x, y);
+
+	FindInputsUsed fsu(x, y, is_used);
+
+	nb_used_vars=0;
+	for (unsigned int i=0; i<is_used.size(); i++) {
+		if (is_used[i]) nb_used_vars++;
+	}
+
+	used_var=new int[nb_used_vars];
+	int j=0;
+	for (unsigned int i=0; i<is_used.size(); i++) {
+		if (is_used[i]) { used_var[j++]=i; }
+	}
+	assert(j==nb_used_vars);
+
+	for (int i=0; i<nb_nodes(); i++) {
+		assert(node(i).deco.f==NULL); // this node must not belong to another function!
+		node(i).deco.f=this;
+	}
+
+	decorate();
+
+	separate();
+
+	// ===== display adjacency (debug) =========
+//	cout << "adjacency of function" << *this << ":" << endl;
+//	for (int i=0; i<nb_used_inputs; i++)
+//		cout << used_input[i] << " ";
+//	cout << endl;
+}
+
+void Function::add_symbol(const ExprSymbol* symbol) {
+
+  id2info.insert_new(symbol->name, symbol);
+
+  ((ExprSymbol&) *symbol).key = key_count;
+
+  key_count ++;
+
+  __all_symbols_scalar &= symbol->dim.is_scalar();
+
+}
+
+void Function::decorate() const {
+	assert(root!=NULL); // cannot decorate if there is no expression yet!
+
+	Decorator d;
+	d.decorate(*this);
+
+	arg_domains.resize(nb_arg());
+	arg_deriv.resize(nb_arg());
+
+	((CompiledFunction&) cf).compile(*this); // now that it is decorated, it can be "compiled"
+
+	// warning: to place after "compile" if compile modifies deco.d...
+	for (int i=0; i<nb_arg(); i++) {
+		arg_domains.set_ref(i,*arg(i).deco.d);
+		arg_deriv.set_ref(i,*arg(i).deco.g);
+	}
+}
+
+
+} // namespace ibex

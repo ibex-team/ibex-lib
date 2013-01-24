@@ -1,0 +1,22 @@
+constants
+pi = 3.14159265;
+
+variables
+
+x1 in [-32,32];
+x2 in [-32,32];
+x3 in [-32,32];
+x4 in [-32,32];
+x5 in [-32,32];
+x6 in [-32,32];
+x7 in [-32,32];
+x8 in [-32,32];
+x9 in [-32,32];
+x10 in [-32,32];
+
+minimize
+ -20 * exp (-0.2 * sqrt (0.1 * (x1^2 + x2 ^2 + x3^2 + x4^2 + x5^2 + x6^2 +x7^2 +x8^2 + x9^2 + x10^2 
+ ))) - exp (0.1 * (cos (2*pi*x1) + cos (2*pi*x2) +cos (2*pi*x3) 
++ cos (2*pi*x4) + cos (2*pi*x5)+ cos (2*pi*x6)+ cos (2*pi*x7)+ cos (2*pi*x8)+ cos (2*pi*x9)+ cos (2*pi*x10))) + 20 + 2.718281;
+
+

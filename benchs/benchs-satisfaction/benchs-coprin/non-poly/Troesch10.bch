@@ -1,0 +1,22 @@
+constants
+r=10;
+h=1./11;
+
+variables
+x[10]in [-10,10 ];
+
+constraints
+
+2*x(1) + r*h^2* sinh (r*x(1)) - x(2) =0;
+2*x(10) + r*h^2* sinh(r*x(10)) - x(9) -1 =0;
+
+2*x(2) + r*h^2* sinh(r*x(2)) - x(1)-x(3) =0;
+2*x(3) + r*h^2* sinh(r*x(3))  - x(2)-x(4) =0;
+2*x(4) + r*h^2*  sinh(r*x(4)) - x(3)-x(5) =0;
+2*x(5) + r*h^2*  sinh(r*x(5))  - x(4)-x(6) =0;
+2*x(6) + r*h^2* sinh(r*x(6)) - x(5)-x(7) =0;
+2*x(7) + r*h^2* sinh(r*x(7))  - x(6)-x(8) =0;
+2*x(8) + r*h^2* sinh(r*x(8))  - x(7)-x(9) =0;
+2*x(9) + r*h^2* sinh(r*x(9)) - x(8)-x(10) =0;
+
+end

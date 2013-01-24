@@ -1,0 +1,13 @@
+
+
+variables
+x in [-10, +10];
+
+
+
+minimize exp(10^40* x) ;
+constraints
+x >= -1.e-8;
+x <= 1.e-8;
+end
+

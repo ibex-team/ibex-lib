@@ -1,0 +1,16 @@
+
+constants
+eps=1.e-8;
+
+variables
+x1 in [ 0, 2];
+x2 in [0, 3];
+
+
+
+minimize x2^2 - 7*x2 - 12*x1;
+
+constraints
+- 2*x1^4 - x2 + 2 >= -eps;
+- 2*x1^4 - x2 + 2 <= eps;
+end

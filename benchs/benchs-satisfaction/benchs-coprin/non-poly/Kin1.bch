@@ -1,0 +1,21 @@
+//Time of Generation:0.078
+Constants
+pi in 3.14159265358979323846264338328;
+Variables
+
+t1 in [0,2*pi];
+t2 in [0,2*pi];
+t3 in [0,2*pi];
+t4 in [0,2*pi];
+t5 in [0,2*pi];
+t6 in [0,2*pi];
+
+Constraints
+//Original System
+-0.4077 + cos(t2)*cos(t6) + cos(t3)*cos(t6) + cos(t4)*cos(t6) + cos(t5)*sin(t2)*sin(t6) - cos(t5)*sin(t3)*sin(t6) - cos(t5)*sin(t4)*sin(t6) = 0;
+-1.9115 + cos(t5)*sin(t1) + cos(t1)*cos(t2)*sin(t5) + cos(t1)*cos(t3)*sin(t5) + cos(t1)*cos(t4)*sin(t5) = 0;
+-1.9791 + sin(t2)*sin(t5) + sin(t3)*sin(t5) + sin(t4)*sin(t5) = 0;
+-4.0616 + 3*cos(t1)*cos(t2) + 2*cos(t1)*cos(t3) + cos(t1)*cos(t4) = 0;
+-1.7172 + 3*cos(t2)*sin(t1) + 2*cos(t3)*sin(t1) + cos(t4)*sin(t1) = 0;
+-3.9701 + 3*sin(t2) + 2*sin(t3) + sin(t4) = 0;
+end

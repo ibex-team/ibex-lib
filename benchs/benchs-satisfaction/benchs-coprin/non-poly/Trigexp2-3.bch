@@ -1,0 +1,12 @@
+//Time of Generation:0.109
+Variables
+
+x[3] in [-200,200];
+
+Constraints
+//Original System
+-5 + sin(x(1) - x(2) - x(3))*sin(x(1) + x(2) - x(3)) + 2*x(2) + 3*(x(1) - x(3))^3 = 0;
+-3 + 4*x(2) - exp(x(1) - x(2) - x(3))*(x(1) - x(3)) = 0;
+10 - 2*sin(x(1) - x(2) - x(3))*sin(x(1) + x(2) - x(3)) - 4*x(2) - 6*(x(1) - x(3))^3 = 0;
+
+end

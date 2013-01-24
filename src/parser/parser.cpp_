@@ -1,0 +1,251 @@
+//============================================================================
+//                                  I B E X                                   
+// File        : parser.cpp_
+// Author      : Gilles Chabert
+// Copyright   : Ecole des Mines de Nantes (France)
+// License     : See the LICENSE file
+// Created     : Sep 9, 2012
+// Last Update : Sep 9, 2012
+//============================================================================
+
+#include <math.h>
+#include <vector>
+#include <sstream>
+
+#include "ibex_Interval.h"
+#include "ibex_Array.h"
+#include "ibex_System.h"
+#include "ibex_String.h"
+#include "ibex_DimException.h"
+#include "ibex_SyntaxError.h"
+#include "ibex_ParserSource.h"
+#include "ibex_P_Expr.h"
+#include "ibex_P_NumConstraint.h"
+#include "ibex_MainGenerator.h"
+#include "ibex_ConstantGenerator.h"
+#include "ibex_P_ExprGenerator.h"
+#include "ibex_Exception.h"
+
+using namespace std;
+
+extern int ibexlex(void);
+extern char* ibextext;
+extern int ibex_lineno;
+
+// note: do not confuse with ibex_error in tools/ibex_Exception.h
+void ibexerror (const std::string& msg) {
+	throw ibex::SyntaxError(msg, ibextext, ibex_lineno);
+}
+
+namespace ibex {
+
+namespace parser {
+
+/* ==================================== The result of the parser =================================*/
+
+System* system=NULL;            // standard AMPL-like system
+
+// ******************
+// Note: when a stand-alone constraint is read by CHOCO
+// the field system->nb_var must be set *before* calling the parser
+// ******************
+
+Function* function=NULL;       // when a single function is loaded
+
+/* ===============================================================================================*/
+
+static P_Source source;  // static because not to be visible:
+stack<Scope> scopes;     // not static because lexer needs to see it
+
+void begin() {
+	ibex_lineno=-1;
+	if (!setlocale(LC_NUMERIC, "C")) // to accept the dot (instead of the french coma) with numeric numbers
+		ibexerror("platform does not support \"C\" locale");
+
+	ibex_lineno=1;
+
+	/* there may be some pending scopes (if the previous call to the parser failed).
+	 */
+	while (!scopes.empty()) scopes.pop();
+
+	scopes.push(Scope()); // a fresh new scope!
+}
+
+void begin_system() {
+	if (system==NULL) { // someone tries to load a Function from a file containing a system
+		throw SyntaxError("unexpected (global) variable declaration for a function.");
+	}
+	begin();
+}
+
+void begin_choco() {
+	if (system==NULL) { // someone tries to load a Function from a file with CHOCO constraint syntax
+		throw SyntaxError("unexpected constraints declaration for a function.");
+	}
+	begin();
+
+	// ----- generate all the variables {i} -----
+	char buf[10];
+	Interval x(Interval::ALL_REALS);
+	for (int i=0; i<system->nb_var; i++) {
+		ibex::index_2_string(buf,'{','}',i);
+		source.vars.push_back(new Entity(buf,Dim::scalar(),Domain(x)));
+	}
+	// ------------------------------------------
+}
+
+void begin_function() {
+	if (function==NULL) { // someone tries to load a system from a file containing a function only
+		throw SyntaxError("a system requires declaration of variables.");
+	}
+
+	begin();
+}
+
+void end_system() {
+	MainGenerator().generate(source,*system);
+	source.cleanup();
+	// TODO: we have to cleanup the data in case of Syntax Error
+	// this probably requires a kind of garbage collector during
+	// parsing
+}
+
+void end_choco() {
+	MainGenerator().generate(source,*system);
+	source.cleanup();
+	// TODO: see end_system()
+}
+
+void end_function() {
+	if (source.func.empty()) {
+		throw SyntaxError("no function declared in file");
+	}
+	const Function& f=(*source.func[0]);
+	Array<const ExprSymbol> x(f.nb_arg());
+	varcopy(f.args(),x);
+	const ExprNode& y=ExprCopy().copy(f.args(),x,f.expr());
+
+	function->init(x,y);
+	((char*&) function->name)=strdup(f.name);
+	source.cleanup();
+	// TODO: see end_system()
+}
+
+int _2int(const ExprNode& expr) {
+	int n=ConstantGenerator(scopes.top()).eval_integer(expr);
+	cleanup(expr,true); // false or true (there is no symbols)
+	return n;
+}
+
+double _2dbl(const ExprNode& expr) {
+	double d=ConstantGenerator(scopes.top()).eval_double(expr);
+	cleanup(expr,true); // false or true (there is no symbols)
+	return d;
+}
+
+Domain _2domain(const ExprNode& expr) {
+	Domain d=ConstantGenerator(scopes.top()).eval(expr);
+	cleanup(expr,true); // false or true (there is no symbols)
+	return d;
+}
+
+void init_symbol_domain(const char* destname, Domain& dest, const Domain& src) {
+	if (src.dim==dest.dim) {
+		dest=src;
+	} else if (src.dim.is_scalar()) {
+		// when a vector/matrix is initialized with a single interval
+		const Interval& x=src.i();
+		switch(dest.dim.type()) {
+		case Dim::SCALAR :      dest.i()=x; break;
+		case Dim::ROW_VECTOR:
+		case Dim::COL_VECTOR:   dest.v().init(x); break;
+		case Dim::MATRIX:       dest.m().init(x); break;
+		case Dim::MATRIX_ARRAY: dest.ma().init(x); break;
+		}
+	} else {
+		stringstream s;
+		s << "Symbol \"" << destname << "\"";
+
+		if (dest.dim.is_vector() && src.dim.is_vector()) {
+			s << " is a column vector and is initialized with a row vector";
+			s << " (you have probably used \",\" instead of \";\" in the constant vector)";
+			ibexerror(s.str());
+		}
+		else {
+			s << " is not initialized correctly (dimensions do not match)";
+			ibexerror(s.str());
+		}
+	}
+}
+
+const ExprNode& apply(Function& f, const ExprNode& expr) {
+	int n=f.nb_arg();
+	if (n!=1) {
+		stringstream s;
+		s << "function " << f.name << " expects 1 argument";
+		ibexerror(s.str());
+		return expr; // just to avoid a "warning control reaches end of non-void function"
+	} else {
+		try {
+			return f(expr);
+		} catch(DimException& e) {
+			ibexerror(e.message());
+			return expr; // just to avoid a "warning control reaches end of non-void function"
+		}
+	}
+}
+
+const ExprNode& apply(Function& f, const vector<const ExprNode*>& args) {
+	unsigned int n=f.nb_arg();
+	if (n!=args.size()) {
+		stringstream s;
+		s << "function " << f.name << " expects " << n << " argument" << (n>1? "s":"");
+		ibexerror(s.str());
+		return *args[0]; // just to avoid a "warning control reaches end of non-void function"
+	} else {
+		try {
+			return f(args);
+		} catch(DimException& e) {
+			ibexerror(e.message());
+			return *args[0]; // just to avoid a "warning control reaches end of non-void function"
+		}
+	}
+}
+
+Domain ball(const Domain& mid, double rad) {
+	Domain d(mid,false);
+
+	switch (d.dim.type()) {
+	case Dim::SCALAR:
+		d.i().inflate(rad);
+		break;
+	case Dim::COL_VECTOR:
+	case Dim::ROW_VECTOR:
+		d.v().inflate(rad);
+		break;
+	case Dim::MATRIX:
+		d.m().inflate(rad);
+		break;
+	case Dim::MATRIX_ARRAY:
+	{
+		Interval r(-rad,rad);
+		for (int k=0; k<d.dim.dim1; k++)
+			for (int i=0; i<d.dim.dim2; i++)
+				for (int j=0; j<d.dim.dim3; j++)
+					d.ma()[k][i][j]+=r;
+	}
+	break;
+	}
+	return d;
+}
+
+} // end namespace
+} // end namespace
+
+
+using namespace ibex;
+using namespace parser;
+using namespace std;
+
+
+

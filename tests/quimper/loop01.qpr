@@ -1,0 +1,24 @@
+Constants
+  a = 1;
+  b = 2;
+  
+Variables
+  x;
+  
+Constraints
+  for i=1:3;
+    for j=1:i;
+    
+      for k=j:i;
+        x=a+i+j*k;
+      end;
+    
+    end;
+    
+    for j=1:i;
+       x=i+j-b;
+    end;
+    
+  end;
+  
+end

@@ -1,0 +1,33 @@
+Pontseq
+
+( { A_x }  { A_y }  { B_x }  { B_y }  { I_x  I_y }  { H_y  H_x }  { C_x  C_y }  { J_x  J_y }  { M_x  D_x  G_x  D_y  F_x  N_x  K_x  K_y  L_x  F_y  G_y  L_y  M_y  N_y }  { E_y  E_x }  { O_x  O_y } )
+
+Pontsgeo
+( { p01_x }  { p01_y }  { p02_x }  { p02_y }  { p05_x  p05_y }  { p04_x  p04_y }  { p03_y  p03_x }  { p06_x  p06_y }  { p12_x }  { p13_x }  { p13_y }  { p12_y }  { p14_x  p14_y }  { p15_x  p15_y }  { p11_y  p11_x }  { p16_x  p16_y }  { p25_x }  { p25_y }  { p26_x }  { p26_y }  { p24_y  p24_x }  { p22_y  p22_x }  { p21_x  p21_y }  { p23_y  p23_x }  { p27_x  p27_y } )
+
+Tangentgeo
+
+( { A_x }  { A_y }  { B_x }  { B_y }  { D1_a  D1_b  D1_x  D1_y }  { C_y  C_x }  { D2_a  D2_b }  { D2_x  D2_y }  { D_x }  { D_y }  { D3_a }  { D3_b }  { D21_b  D21_a }  { D21_x  D21_y }  { D3_x  D3_y }  { E_x }  { E_y }  { F_x }  { F_y }  { D4_a  D4_b  D4_x  D4_y }  { D31_a  D31_b }  { D22_b  D22_a }  { D31_x  D31_y }  { A1_y  A1_x }  { D22_x  D22_y } )
+
+
+Tangenteq
+( { A_x }  { A_y }  { B_x }  { B_y }  { D1_a  D1_b  D1_x  D1_y }  { C_y  C_x }  { D2_a  D2_b }  { D2_x  D2_y }  { D3_a  D3_b }  { D4_a  D4_b }  { D4_x  D4_y }  { F_x  F_y }  { E_x  E_y }  { D3_y  D3_x }  { D_x  D_y } )
+
+
+Lathameq  (nouveau mechanism)
+( { p1_x }  { p1_y }  { p3_x }  { h2_a  h2_b  h1_a  h1_b  h1_x  h1_y  h2_y  h2_x  p3_y  v1_x  v1_a  v1_b  v1_y }  { h3_a }  { h3_b }  { h4_a }  { h4_b }  { h5_a }  { h5_b }  { l4_a  l4_b }  { l1_a }  { l1_b }  { l2_a  l2_b }  { h6_a }  { h6_b }  { h7_a }  { h7_b }  { h3_y  h3_x }  { h5_x  h5_y }  { v2_a }  { v2_b }  { v3_a }  { v3_b }  { v4_a }  { v4_b }  { v5_a }  { v5_b }  { v5_x  v5_y }  { p2_y  p2_x }  { v2_x  v2_y }  { p4_y  p4_x }  { h4_y  h4_x  p12_y  p12_x  l4_x  l4_y  l1_y  l1_x  p9_x  p9_y }  { p10_x  p10_y }  { h7_x  h7_y }  { p15_x  p15_y }  { p16_x  p16_y }  { l2_x  l2_y }  { p17_y  p17_x }  { h6_y  h6_x }  { p13_y  p13_x }  { l3_a  l3_y  l3_b  l3_x }  { v3_y  v3_x }  { p5_y  p5_x }  { p7_x  p7_y }  { v4_y  v4_x }  { p6_y  p6_x }  { p8_x  p8_y }  { v6_a }  { v6_b }  { v6_x  v6_y }  { p11_y  p11_x }  { p14_y  p14_x } )
+
+Tetra
+( { A_x }  { A_y }  { A_z }  { B_y }  { B_z }  { B_x }  { C_z }  { C_x  C_y }  { G_x  G_y  G_z }  { H_x  E_x  I_x  E_y  E_z  H_y  H_z  I_y  I_z }  { D_y  D_z  D_x }  { F_y  F_z  F_x }  { J_x  J_y  J_z } )
+
+Sierp3eq46
+( { p01_x }  { p01_y }  { p02_y }  { p02_x }  { p05_x  p05_y }  { p04_x  p04_y }  { p03_y  p03_x }  { p06_x  p06_y }  { p22_x  p25_x  p25_y  p24_x  p22_y  p16_x  p14_x  p12_x  p12_y  p14_y  p15_x  p15_y  p16_y  p24_y }  { p13_x  p13_y }  { p26_x  p26_y }  { p55_x  p34_x  p36_x  p52_x  p52_y  p54_x  p46_x  p62_x  p72_x  p75_x  p74_x  p66_x  p82_x  p84_x  p76_x  p76_y  p74_y  p72_y  p75_y  p63_x  p63_y  p64_x  p65_x  p64_y  p62_y  p65_y  p66_y  p85_x  p84_y  p82_y  p85_y  p43_x  p44_x  p43_y  p42_x  p32_x  p32_y  p33_x  p45_x  p45_y  p46_y  p44_y  p42_y  p33_y  p34_y  p35_x  p35_y  p36_y  p55_y  p54_y } 
+
+Sierp3geo
+( { p01_x }  { p01_y }  { p02_x }  { p02_y }  { p05_x  p05_y }  { p04_x  p04_y }  { p03_y  p03_x }  { p06_x  p06_y }  { p12_x }  { p13_x }  { p13_y }  { p12_y }  { p14_x  p14_y }  { p15_x  p15_y }  { p11_y  p11_x }  { p16_x  p16_y }  { p25_x }  { p26_x }  { p26_y }  { p25_y }  { p24_x  p24_y }  { p22_y  p22_x }  { p21_x  p21_y }  { p23_y  p23_x }  { p27_x  p27_y }  { p28_x  p28_y }  { p31_x }  { p31_y }  { p32_x }  { p32_y }  { p35_x  p35_y }  { p34_x  p34_y }  { p33_y  p33_x }  { p36_x  p36_y }  { p41_x }  { p41_y }  { p42_x }  { p42_y }  { p45_x  p45_y }  { p44_x  p44_y }  { p43_y  p43_x }  { p46_x  p46_y }  { p51_x }  { p51_y }  { p52_x }  { p52_y }  { p55_x  p55_y }  { p54_x  p54_y }  { p53_y  p53_x }  { p56_x  p56_y }  { p57_x  p57_y }  { p58_x  p58_y }  { p59_x  p59_y }  { p61_x }  { p61_y }  { p62_x }  { p62_y }  { p65_x  p65_y }  { p64_x  p64_y }  { p63_y  p63_x }  { p66_x  p66_y }  { p71_x }  { p71_y }  { p72_x }  { p72_y }  { p75_x  p75_y }  { p74_x  p74_y }  { p73_y  p73_x }  { p76_x  p76_y }  { p81_x }  { p81_y }  { p82_x }  { p82_y }  { p85_x  p85_y }  { p84_x  p84_y }  { p83_y  p83_x }  { p86_x  p86_y }  { p87_x  p87_y }  { p88_x  p88_y }  { p89_x  p89_y } )
+
+Star
+( { x_6  x_5  y_5  y_6 }  { x_8  x_7  y_7  y_8 }  { x_10  x_9  y_9  y_10 }  { x_11  y_11  x_12  y_12  x_17  y_17 }  { x_13  y_13  x_14  y_14  x_18  y_18 }  { x_15  y_15  x_16  y_16  x_19  y_19 }  { x_20  y_20 }  { x_21  y_21 }  { x_22  y_22 }  { x_23  y_23 }  { x_24  y_24 }  { x_25  y_25 }  { x_26  y_26 }  { x_27  y_27 } )
+
+Chair
+( { E_x }  { E_y }  { E_z }  { F_z }  { H_y }  { H_z }  { H_x }  { D8_y  D8_b  D8_x  D8_c  D8_a  D8_z }  { F_y  F_x  D5_x  D5_y  D5_z  D5_a  D5_b  D5_c }  { D3_b }  { D1_a }  { D3_a }  { D3_c }  { D9_a }  { Pl2_a  Pl2_b  Pl2_c  Pl2_d }  { Pl1_b  Pl1_d  Pl1_c  Pl1_a }  { D_x  D4_y  D4_a  D4_b  D4_c  D4_z  D4_x  D_y  D_z }  { D2_a }  { D2_b }  { D2_c }  { A_x  A_z  A_y }  { D3_z  C_y  C_z  D2_z  D2_y  D2_x  C_x  D3_x  D3_y }  { D1_c  B_y  D1_y  D1_z  D1_b  D1_x  B_x  B_z }  { I_y  I_z  I_x }  { J_y  J_z  J_x  D9_c  D9_b  D9_x  D9_y  D9_z }  { D7_y  D7_z  D7_a  D7_c  D7_b  D7_x  G_x  D6_y  D6_a  D6_b  D6_c  D6_z  D6_x  G_y  G_z }  { Pl3_a }  { Pl3_b  Pl3_c  Pl3_d }  { D10_a }  { D10_b }  { D10_c }  { K_x  K_y  K_z  D10_x  D10_y  D10_z }  { D11_b }  { D11_a  D11_c }  { D11_x  D11_y  D11_z }  { D12_a }  { D12_b }  { D12_c }  { L_y  L_z  L_x  D12_x  D12_y  D12_z }  { D17_y  D17_b  D17_x  D17_a  D17_c  D17_z }  { M_z  M_x  M_y }  { Pl4_a }  { D13_a }  { D14_a }  { D15_a }  { D16_a }  { Pl4_b }  { D13_b }  { D13_c }  { D13_x  D13_z  D13_y }  { D14_b }  { D14_c }  { D14_x  D14_z  D14_y }  { D15_b }  { D15_c }  { D15_x  D15_z  D15_y }  { Q_x  Q_z  Q_y }  { D16_b }  { D16_c }  { D16_x  D16_z  D16_y }  { Pl4_c }  { Pl4_d }  { O_x  O_y  O_z }  { D18_y  D18_b  D18_c  D18_x  D18_a  D18_z }  { N_z  N_y  N_x }  { P_x  P_y  P_z }  { R_y  R_z  R_x } )

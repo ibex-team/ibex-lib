@@ -1,0 +1,63 @@
+constants
+eps= 1.e-8;
+
+variables
+
+
+x1 in [-1.e8,1.e8];
+x2 in [-1.e8,1.e8];
+x4 in [0,1.e8];
+x5 in [0,1.e8];
+x6 in [0,1.e8];
+x7 in [0,1.e8];
+x8 in [0,1.e8];
+x9 in [0,1.e8];
+x10 in [0,1.e8];
+x11 in [0,1.e8];
+x12 in [0,1.e8];
+x13 in [0,1.e8];
+x14 in [0,1.e8];
+
+
+
+minimize - 3*x1 + 2*x2 - x4;
+
+constraints
+
+x1 + 4*x2 - 2*x4 + x5 - 16 >= -eps;
+x1 + 4*x2 - 2*x4 + x5 - 16 <= eps;
+
+3*x1 - 2*x2 + 8*x4 + x6 - 48 >= -eps;
+3*x1 - 2*x2 + 8*x4 + x6 - 48 <= eps;
+
+x1 - 3*x2 - 2*x4 + x7 + 12 >= -eps;
+x1 - 3*x2 - 2*x4 + x7 + 12 <= eps;
+
+- x1 + x8 >= -eps;
+- x1 + x8 <= eps;
+
+x1 + x9 - 4 >= -eps;
+x1 + x9 - 4 <= eps;
+
+x10*x5 >= -eps;
+x10*x5 <= eps;
+
+x11*x6 >= -eps;
+x11*x6 <= eps;
+
+x12*x7 >= -eps;
+x12*x7 <= eps;
+
+x13*x8 >= -eps;
+x13*x8 <= eps;
+
+x14*x9 >= -eps;
+x14*x9 <= eps;
+
+x10 + 3*x11 + x12 - x13 + x14 - 1 >= -eps;
+x10 + 3*x11 + x12 - x13 + x14 - 1 <= eps;
+
+2*x11 - 3*x12 >= -eps;
+2*x11 - 3*x12 <= eps;
+
+end

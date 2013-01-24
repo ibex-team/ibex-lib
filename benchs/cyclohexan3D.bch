@@ -1,0 +1,10 @@
+variables
+ x;
+ y in [-1e08,1e08];
+ z in [-1e08,1e08];
+ 
+constraints
+  y^2 * (1 + z^2) + z * (z - 24 * y) = -13; 
+  x^2 * (1 + y^2) + y * (y - 24 * x) = -13;
+  z^2 * (1 + x^2) + x * (x - 24 * z) = -13;
+end

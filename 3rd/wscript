@@ -1,0 +1,526 @@
+#! /usr/bin/env python
+# encoding: utf-8
+
+import tarfile, os.path, os, re, patch, sys
+from waflib import Utils, Errors, Logs
+
+
+def configure (conf):
+	conf.env.BUILD_GDTOA	= False
+	conf.env.BUILD_MATHLIB	= False
+	conf.env.BUILD_GAOL	= False
+
+	ibex_env = conf.env
+	def ibex_append_path (var, p):
+		if isinstance (p, str):	
+			p = [p]
+
+		ibex_env.append_unique (var, [
+			d if os.path.isabs (d) else os.path.join ("..", "3rd", d)
+			for d in p
+		])
+	
+	enable_shlib = conf.env.ENABLE_SHARED
+	with_bias = conf.options.BIAS_PATH
+	with_gaol = conf.options.GAOL_PATH
+	with_filib = conf.options.FILIB_PATH
+	def join (path, *k):
+		return os.path.abspath (os.path.join (os.path.expanduser (path), *k)) if path else None
+	def use_shlib():
+		if enable_shlib:
+			# configure the environment to produce PIC objects
+			conf.env.CFLAGS.extend   (conf.env.CFLAGS_cshlib)
+			conf.env.CXXFLAGS.extend (conf.env.CXXFLAGS_cxxshlib)
+
+		# return true if we build as a shared library
+		return enable_shlib
+
+	if enable_shlib:
+		# when building a shared, we force using the bundled version of gaol
+		# (in order to ensure that it is compiled as position independent code)
+		conf.env.INTERVAL_LIB = "GAOL"
+		conf.env.BUILD_GAOL = True
+
+	elif with_bias is not None:
+		# build with bias
+		if with_gaol is not None:
+			conf.fatal ("cannot use --with-gaol and --with-bias together")
+
+		conf.env.INTERVAL_LIB = "BIAS"
+
+		if with_bias:
+			conf.env.append_unique ("INCLUDES", join (with_bias, "include"))
+
+		conf.check_cxx (header_name	= "BIAS/BiasF.h")
+
+		kw = {"libpath": join (with_bias, "lib")} if with_bias else {}
+		conf.check_cxx (lib = ["Profil", "Bias", "lr"],
+				uselib_store = "IBEX_DEPS", **kw)
+
+	elif with_filib is not None:
+		# build with filib
+		if with_gaol is not None:
+			conf.fatal ("cannot use --with-gaol and --with-filib together")
+		if with_bias is not None:
+			conf.fatal ("cannot use --with-bias and --with-filib together")
+
+		conf.env.INTERVAL_LIB = "FILIB"
+
+		if with_filib:
+			conf.env.append_unique ("INCLUDES", join (with_filib, "include"))
+
+		conf.check_cxx (header_name	= "interval/interval.hpp")
+
+		kw = {"libpath": join (with_filib, "lib")} if with_filib else {}
+		conf.check_cxx (lib = ["prim"],
+				uselib_store = "IBEX_DEPS", **kw)
+		conf.env.append_unique ("CXXFLAGS", "-frounding-math")
+
+
+	else:
+		# build with gaol
+		conf.env.INTERVAL_LIB = "GAOL"
+		
+		conf.switch_to_32bits()
+		if with_gaol:
+			conf.env.append_unique ("INCLUDES", join (with_gaol, "include"))
+		mandatory = bool (with_gaol)
+
+		has_h = conf.check_cxx (
+				header_name = ["gaol/gaol.h", "gaol/gaol_interval.h"],
+				mandatory = mandatory)
+
+		kw = {"libpath": join (with_gaol, "lib")} if with_gaol else {}
+		has_l = conf.check_cxx (lib=["gaol", "ultim", "gdtoa"], uselib_store="IBEX_DEPS",
+					mandatory = mandatory, **kw)
+
+		if not (has_h and has_l):
+			conf.env.BUILD_GAOL = True
+
+	# common vars for building gaol/gdtoa/mathlib
+	gdtoa_name = "gdtoa-1.0"
+
+	def log_start (name):
+		Logs.pprint ("BLUE", "Starting configuration for %s" % name)
+	
+	if conf.env.BUILD_GAOL:
+		# This will compile the bundled version of gaol
+		#
+		# default config is:    --disable-preserve-rounding
+		#
+
+
+		log_start ("gaol")
+		conf.setenv ("gaol")
+		#TODO: support config options
+
+		conf.env.GAOL = "gaol-3.1.1"
+
+		conf.load ("compiler_cxx compiler_cc")
+		conf.switch_to_32bits()
+
+		# check if we need to build gdtoa and/or mathlib
+		if use_shlib():
+			ibex_env.BUILD_GDTOA = True
+			ibex_env.BUILD_MATHLIB = True
+		else:
+			if (	conf.check_cxx (header_name="gdtoa.h", mandatory=False) and
+				conf.check_cxx (lib="gdtoa", mandatory=False)):
+
+				ibex_env.append_unique ("LIB_IBEX_DEPS", "gdtoa")
+			else:
+				ibex_env.BUILD_GDTOA = True
+
+			if conf.check_cxx (lib="ultim", mandatory=False):
+
+				ibex_env.append_unique ("LIB_IBEX_DEPS", "ultim")
+			else:
+				ibex_env.BUILD_MATHLIB = True
+
+		conf.env.append_unique ("INCLUDES", [conf.env.GAOL, gdtoa_name])
+		ibex_append_path ("INCLUDES", conf.env.GAOL)
+
+		conf.define ("GAOL_USING_APMATHLIB", 1)
+		conf.define ("GAOL_VERBOSE_MODE", 1)
+
+		if conf.env.CC_NAME != "msvc":
+			conf.env.append_unique ("CXXFLAGS", "-O9 -funroll-loops -fomit-frame-pointer -fexpensive-optimizations".split())
+			vis_flags = "-fvisibility-inlines-hidden -fvisibility=hidden".split()
+			if conf.check_cxx (cxxflags=vis_flags, mandatory=False):
+				conf.env.append_unique ("CXXFLAGS", vis_flags)
+				conf.define ("HAVE_VISIBILITY_OPTIONS", 1)
+
+		conf.env.FAST_MATH = "fast"
+
+		conf.define ("GAOL_PRESERVE_ROUNDING", 0)   # --disable-preserve-rounding
+		conf.define ("GAOL_CERTAINLY_RELATIONS", 1)
+		conf.define ("GAOL_EXCEPTIONS_ENABLED", 1)
+		conf.define ("GAOL_USING_ASM", 1)
+
+		if sys.platform in ("cygwin", "win32"):
+			# TODO: some better detection
+			host = "i386-cygwin"
+		else:
+			host = "%s-%s" % (
+				os.uname()[4],
+				Utils.unversioned_sys_platform(),
+			)
+
+		for known, macro in (
+			(".*-linux$", 		"IX86_LINUX"),
+			(".*-cygwin$",		"IX86_CYGWIN"),
+			(".*-darwin$", 		"IX86_LINUX"),
+			("sparc.*-sunos$",	"SPARC_SOLARIS"),
+			("powerpc-",		"POWERPC_UNIX"),
+		):
+			if re.match (known, host):
+				conf.define (macro, 1)
+				break
+		else:
+			conf.fatal ("Sorry, this system (%s) is not yet supported by gaol" % host)
+
+		conf.env.IS_CYGWIN_COND = host.endswith("-cygwin")
+
+		conf.check_cxx (lib = "dl", mandatory = False)
+		if conf.check_cxx (lib = "m", mandatory = False):
+			conf.define ("HAVE_NEXTAFTER", 1)
+
+		conf.define ("STDC_HEADERS", 1)
+		
+		for h in "fenv.h float.h stddef.h stdlib.h string.h sys/time.h unistd.h stdbool.h".split():
+			conf.check_cc (header_name = h, mandatory = False)
+
+		for h in "limits cassert".split():
+			conf.check_cxx (header_name = h, mandatory = False)
+
+		if not conf.check ( 	mandatory = False, features = "c", msg = "Checking for const",
+					fragment = "const int a = 1;"):
+			conf.define ("const", "", False)
+
+		conf.check_inline()
+
+		if not conf.check ( 	mandatory = False, features = "c", msg = "Checking for size_t",
+					fragment = "#include <sys/types.h>\nsize_t a();\n"):
+			conf.define ("size_t", "unsigned int", False)
+
+		if conf.check_endianness() != "little":
+			conf.define ("WORDS_BIGENDIAN", 1)
+
+		def check_sizeof (typ):
+			# not cross-compilation compliant
+			size = conf.check_cc (
+				msg = "Checking size of %s" % typ,
+				fragment =	"#include <stdio.h>\n"
+						'int main() { printf ("%%d", sizeof(%s));\n'
+						'return 0; }\n' % typ,
+				execute = True,
+				define_ret = True,
+			)
+			conf.define ("SIZEOF_%s" % typ.replace(" ", "_").upper(), size, False)
+
+		
+		check_sizeof ("int")
+		check_sizeof ("long")
+		check_sizeof ("long long int")
+
+		if conf.env.CC_NAME != "msvc":
+			rou_flags = "-frounding-math"
+			if conf.check_cxx (cxxflags=rou_flags, mandatory=False):
+				conf.env.append_unique ("CXXFLAGS", rou_flags)
+				conf.define ("HAVE_ROUNDING_MATH_OPTION", 1)
+
+		conf.env.append_unique ("CXXFLAGS", "-ffloat-store")
+
+		for func, header, macro in (
+			("fesetround",	"fenv.h",		None),
+			("floor",	"math.h",		None),
+			("localeconv",	"locale.h",		None),
+			("memset",	"string.h",		None),
+			("pow",		"math.h",		None),
+			("sqrt",	"math.h",		None),
+			("getrusage",	"sys/resource.h",	"GETRUSAGE_IN_HEADER"),
+			("clock",	"time.h",		"CLOCK_IN_HEADER"),
+			("__signbit",	"math.h",		None),
+			("round",	"math.h",		None),
+			("rint",	"math.h",		None),
+			("finite",	"math.h",		None),
+		):
+			v = conf.check (features = "c", mandatory = False,
+					function_name = func, header_name = header)
+			if macro:
+				conf.define (macro, 1 if v else 0)
+
+		# fix to build for macosx
+		if "HAVE_FENV_H=1" in conf.env.DEFINES:
+			check_fenv_t_attrib = lambda attr, mandatory: conf.check (
+				mandatory = mandatory, features = "c",
+				msg = "Checking if fenv_t has .%s" % attr,
+				fragment = """#include <fenv.h>\nvoid a(fenv_t* e) {
+						unsigned short int c;
+						c = e->%s;
+					}\n""" % attr)
+
+			if not check_fenv_t_attrib ("__control_word", False):
+				check_fenv_t_attrib ("__control", True)
+				# FIXME: may produce some side effects
+				conf.define ("__control_word", "__control", False)
+
+		conf.write_config_header ("%s/gaol/gaol_configuration.h" % conf.env.GAOL)
+
+		# TODO: flex & bison
+
+		conf.setenv ("")
+
+	if conf.env.BUILD_GDTOA:
+		log_start ("gdtoa")
+		conf.setenv ("gdtoa")
+
+		conf.env.GDTOA = gdtoa_name
+		gdtoa_includes = conf.env.GDTOA
+
+		conf.load ("compiler_cxx compiler_cc")
+		conf.switch_to_32bits()
+
+		use_shlib()
+
+		conf.define ("INFNAN_CHECK", 1)
+		conf.define ("SET_INEXACT", 1)
+		conf.define ("Honor_FLT_ROUNDS", 1)
+	
+		conf.env.append_unique ("INCLUDES", gdtoa_includes)
+		ibex_append_path ("INCLUDES", gdtoa_includes)
+
+		conf.setenv ("")
+
+	if conf.env.BUILD_MATHLIB:
+		log_start ("mathlib")
+		conf.setenv ("mathlib")
+
+		platform = Utils.unversioned_sys_platform()
+
+		conf.env.MATHLIB = "mathlib-2.0.0" if platform != "darwin" else "mathlib-lion"
+		
+		conf.load ("compiler_cxx compiler_cc")
+		conf.switch_to_32bits()
+
+		use_shlib()
+
+		conf.env.append_unique ("INCLUDES", os.path.join (conf.env.MATHLIB, "src"))
+
+		if conf.env.CC_NAME != "msvc":
+			conf.env.append_unique ("CFLAGS", ["-g0", "-O2"])
+
+		for h in (	"dlfcn.h",
+				"inttypes.h",
+				"memory.h",
+				"stdint.h",
+				"stdlib.h",
+				"strings.h",
+				"string.h",
+				"sys/stat.h",
+				"sys/types.h",
+				"unistd.h",
+				"fenv.h",
+		):
+			conf.check_cc (header_name = h, mandatory = False)
+
+		conf.define ("STDC_HEADERS", 1)
+		conf.define ("VERSION", conf.env.MATHLIB.split("-")[1])
+
+		try:
+			conf.define ({
+				"aix":		"MATHLIB_AIX",
+				"cygwin":	"MATHLIB_CYGWIN",
+				"win32":	"MATHLIB_CYGWIN",
+				"linux":	"MATHLIB_LINUX",
+				"darwin":	"MATHLIB_I86_MACOSX",
+				"sunos":	"MATHLIB_SUN",
+
+			}[platform], 1)
+
+			if platform == "darwin":
+				# this is defined in mathlib-lion
+				# (don't know if it is really useful)
+				conf.define ("IX86_CPU", 1)
+		except KeyError:
+			conf.fatal ("unknown platform: %s" % platform)
+
+		conf.write_config_header ("%s/src/mathlib_configuration.h" % conf.env.MATHLIB)
+
+		conf.setenv ("")
+
+def build (bld):
+
+	# installation paths
+	INCDIR = "${PREFIX}/include/ibex"
+	# NOTE: we do not install the 3rd static libs when ibex is built as a shared library
+	#	(they will be linked within the lib instead)
+	LIBDIR = "${PREFIX}/lib/ibex" if not bld.env.ENABLE_SHARED else None
+
+	def remove (filename):
+		if os.path.isfile (filename):
+			os.remove (filename)
+
+	src_dir = bld.path.abspath()
+	def extract (name):
+		path = os.path.join (src_dir, name)
+
+		if not os.path.isdir (path):
+			# extract the sources
+			os.makedirs (path)
+
+			t = tarfile.open (os.path.join (src_dir, "%s.tar.gz" % name))
+			t.extractall (src_dir)
+
+		node = bld.path.find_dir (name)
+		assert node
+		return node
+
+	def apply_patch (name):
+		patch_file = os.path.join (src_dir, name)
+		p = patch.fromfile (patch_file)
+		try:
+			prev_dir = os.getcwd()
+			os.chdir (src_dir)
+		except:
+			raise
+		else:
+			if not p.apply():
+				raise Errors.WafError ("Cannot apply patch %s" % patch_file)
+		finally:
+			os.chdir (prev_dir)
+
+	if bld.env["BUILD_GDTOA"]:
+		# build gdtoa
+
+		bld.variant = "gdtoa"
+
+		def prfx (file_name):
+			return os.path.join (bld.env.GDTOA, file_name)
+
+		node = extract (bld.env.GDTOA)
+
+		# apply a patch to have strtod() and strtol() match with stdlib.h
+		apply_patch ("gdtoa-nothrow.patch")
+
+		# apply a patch initialise Flt_Rounds with a default value
+		# (becaues BSD's linker do not include uninitialised symbols by default)
+		apply_patch ("gdtoa-initialise-flt-rounds.patch")
+
+		cpat = bld.env.cprogram_PATTERN
+
+		bld.program (
+			target	= prfx ("arithchk"),
+			source	= prfx ("arithchk.c"),
+			install_path = False,
+		)
+
+		bld (
+			target	= prfx ("arith.h"),
+			source	= prfx (cpat % "arithchk"),
+			rule	= "${SRC} > ${TGT}",
+			install_path = INCDIR,
+		)
+
+		bld.program (
+			target	= prfx ("qnan"),
+			source	= prfx ("qnan.c"),
+			install_path = False,
+		)
+
+		bld (
+			target	= prfx ("gd_qnan.h"),
+			source	= prfx (cpat % "qnan"),
+			rule	= "${SRC} > ${TGT}",
+			install_path = INCDIR,
+		)
+
+		bld.objects (
+			source	= [prfx(n) for n in """
+				dmisc.c dtoa.c g_Qfmt.c g__fmt.c g_ddfmt.c g_dfmt.c g_ffmt.c
+				g_xLfmt.c g_xfmt.c gdtoa.c gethex.c gmisc.c hd_init.c hexnan.c
+				misc.c smisc.c strtoIQ.c strtoId.c strtoIdd.c strtoIf.c strtoIg.c
+				strtoIx.c strtoIxL.c strtod.c strtodI.c strtodg.c strtof.c strtopQ.c
+				strtopd.c strtopdd.c strtopf.c strtopx.c strtopxL.c strtorQ.c
+				strtord.c strtordd.c strtorf.c strtorx.c strtorxL.c sum.c ulp.c
+ 				""".split()],
+			target	= "gdtoa_objs",
+			install_path = LIBDIR,
+		)
+
+		bld.install_files (INCDIR, node.ant_glob("*.h"))
+		
+		bld.variant = ""
+	
+	if bld.env["BUILD_MATHLIB"]:
+		# build mathlib
+
+		bld.variant = "mathlib"
+
+		def prfx (file_name):
+			return os.path.join (bld.env.MATHLIB, "src", file_name)
+
+		node = extract (bld.env.MATHLIB)
+		remove (os.path.join (node.abspath(), "src", "mathlib_configuration.h"))
+
+		bld.objects (
+			target = "ultim_objs",
+			source = [prfx(n) for n in """
+				atnat2.c    halfulp.c  mplog.c     slowexp2.c  ucot.c   upow.c 
+				atnat.c     mpa.c      mpsqrt.c    slowexp.c   uexp2.c  urem.c 
+				branred.c   mpatan2.c  mptan.c     slowlog2.c  uexp.c   uroot.c
+				doasin.c    mpatan.c   sincos32.c  slowpow.c   ulog2.c  usncs.c
+				dosincos.c  mpexp.c    slowcot.c   uasncs.c    ulog.c   utan.c 
+				DPChange.c
+				 """.split()],
+			install_path = LIBDIR,
+		)
+				
+
+		bld.variant = ""
+
+	if bld.env["BUILD_GAOL"]:
+		# build gaol
+
+		bld.variant = "gaol"
+
+		def prfx (file_name):
+			return os.path.join (bld.env.GAOL, "gaol", file_name)
+
+		node = extract (bld.env.GAOL)
+		remove (os.path.join (node.abspath(), "gaol", "gaol_double_op.h"))
+		remove (os.path.join (node.abspath(), "gaol", "gaol_configuration.h"))
+		apply_patch ("gaol-mingw.patch")
+
+		GAOL_INCDIR = "%s/gaol" % INCDIR
+
+		@bld.rule (
+			target = prfx ("gaol_double_op.h"),
+			source = prfx ("gaol_double_op_%s.h" % bld.env.FAST_MATH),
+			install_path = GAOL_INCDIR,
+		)
+		def _(tsk):
+			tsk.outputs[0].write (tsk.inputs[0].read())
+
+		bld.install_files (GAOL_INCDIR, node.ant_glob (["gaol/*.h", "gaol/gaol"]))
+		bld.install_files (os.path.join (GAOL_INCDIR, "sysdeps"), node.ant_glob ("gaol/sysdeps/*.h"))
+		bld.install_files (GAOL_INCDIR, node.get_bld().find_or_declare ("gaol/gaol_configuration.h"))
+
+
+		bld.objects (
+			target = "gaol_objs",
+			source = [prfx(n) for n in """
+				gaol_interval.cpp gaol_profile.cpp gaol_common.cpp gaol_parser.cpp
+				gaol_expression.cpp gaol_interval_parser.cpp gaol_interval_lexer.cpp
+				gaol_port.cpp gaol_flt_output.cpp gaol_exceptions.cpp
+				gaol_init_cleanup.cpp s_nextafter.c gaol_exact.c
+				 """.split()],
+			install_path = LIBDIR,
+		)
+
+
+
+		bld.variant = ""
+
+
+

@@ -1,0 +1,24 @@
+
+Diverse benchmarks in constraint satisfaction problems with well constrained problems are stored here.in Quimper 
+
+All these problems have 0 or a finite number of solutions.
+
+
+They are grouped in the following directories
+
+benchs-coprin                     polynomial problems from the constraint benches web page 
+				  http://www-sop.inria.fr/coprin/logiciels/ALIAS/Benches/benches.html
+
+benchs-coprin/non-poly            non polynomial problems from the constraint benches web page
+                                       http://www-sop.inria.fr/coprin/logiciels/ALIAS/Benches/node2.html
+
+benchs-IBB                       decomposable  problems described in the IBB paper in Constraint Journal 2010
+                                 Improving inter-block backtracking with interval Newton by Bertrand Neveu, Gilles Trombettoni and Gilles Chabert
+
+
+benchslib2                       other problems
+
+
+
+Some problems are scalable : they have been generated for several dimensions
+

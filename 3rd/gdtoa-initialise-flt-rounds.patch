@@ -1,0 +1,11 @@
+--- gdtoa-1.0/dtoa.c.orig	2012-10-02 11:13:21.000000000 +0200
++++ gdtoa-1.0/dtoa.c	2012-10-02 11:15:34.000000000 +0200
+@@ -73,7 +73,7 @@
+ #define Rounding Flt_Rounds
+ #endif
+ 
+-int Flt_Rounds;
++int Flt_Rounds = 1; /* round to the nearest by default */
+ 
+  char *
+ dtoa
