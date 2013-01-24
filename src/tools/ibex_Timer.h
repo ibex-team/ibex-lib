@@ -13,7 +13,10 @@
 
 #include "ibex_Exception.h"
 
+#ifndef _MSC_VER
 #include <sys/time.h>
+#endif // _MSC_VER
+
 
 #ifdef __WIN32__
 //#include <ctime>
@@ -21,7 +24,11 @@
 #include <sys/resource.h>
 #endif
 
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif // _MSC_VER
+
+
 
 namespace ibex {
 
