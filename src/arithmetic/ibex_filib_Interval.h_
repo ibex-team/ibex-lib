@@ -15,7 +15,7 @@
 #include "ibex_Exception.h"
 #include <cassert>
 #include <float.h>
-
+#include <iostream>
 
 
 namespace ibex {
@@ -435,8 +435,10 @@ inline Interval pow(const Interval& x, int n) {
 		return Interval::ONE;
 	else if (n<0)
 		return 1.0/Interval(filib::power(x.itv,-n));
-	else
+	else {
 		return filib::power(x.itv,n);
+
+	}
 }
 
 inline Interval pow(const Interval &x, double d) {
@@ -456,14 +458,18 @@ inline Interval pow(const Interval &x, const Interval &y) {
 
 inline Interval root(const Interval& x, int n) {
 	Interval e=Interval::ONE;
-	if (n>=0) {
-		e/=n;
-		return pow(x, e);
+	Interval y;
+
+	e /= n>=0 ? n : -n;
+
+	if (n%2==0) {
+		y=pow(x,e);   // the negative part of x should be removed
+	} else {
+		y=pow(x,e) |  // the negative part of x should be removed
+	    (-pow(-x,e)); // the positive part of x should be removed
 	}
-	else {
-		e/=(-n);
-		return 1.0/pow(x,e);
-	}
+
+	return n>=0 ? y : 1.0/y;
 }
 
 
@@ -577,7 +583,6 @@ inline bool proj_sqr(const Interval& y, Interval& x) {
 }
 
 inline bool proj_pow(const Interval& y, int expon, Interval& x) {
-
 	if (expon % 2 ==0) {
 		Interval proj=root(y,expon);
 		Interval pos_proj= proj & x;
