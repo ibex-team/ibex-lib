@@ -16,6 +16,8 @@ int main(int argc, char** argv) {
 	// Load a system of equations
 	// --------------------------
 	System sys(argv[1]);
+        cout << "file " << argv[1] << endl;
+
 	double ratio_propag= atof(argv[2]); // the contraction ratio used as stopping criterion for the hc4 propagation loop
 	string filtering= argv[3];   // the main contractor (hc4|acidhc4|3bcidhc4|hc4n|acidhc4n|3bcidhc4n)
 	string xnewton = argv[4];    // xn for the additional xnewton contractor
@@ -65,12 +67,12 @@ int main(int argc, char** argv) {
 	// corner selection 
 	vector<X_Newton::corner_point> cpoints;
 	//	cpoints.push_back(X_Newton::SUP_X);  // selection of the superior corners : not used 
-	//	cpoints.push_back(X_Newton::INF_X);  // selection of the superior corners : not used
+	//	cpoints.push_back(X_Newton::INF_X);  // selection of the inferior corners : not used
 
 	// one random corner and its opposite 
 	cpoints.push_back(X_Newton::RANDOM);
 	cpoints.push_back(X_Newton::RANDOM_INV);
-	// the contractor called in the XNewton loop if the gain is > rfp2 (here 0.2)
+	// the hc4 contractor called in the XNewton loop if the gain is > rfp2 (here 0.2)
 	CtcHC4 hc44xn(sys.ctrs,ratio_propag);  
 	// XNewton contractor  (see Xnexton documentation for paramaters)
        	X_Newton ctcxnewton (sys, &hc44xn, cpoints, -1,0,0.2,0.2, LR_contractor::ALL_BOX,X_Newton::HANSEN,100,1.e5,1.e4);
@@ -110,6 +112,7 @@ int main(int argc, char** argv) {
 	CtcCompo cxn (*ctc, ctcxnewton);
 	Ctc* contractor;
 
+	// xnewton is optional and only used if the xnewton parameter is "xn"
         if (xnewton=="xn" ||xnewton=="xnewton" )
 	  contractor= & cxn;
 	else
@@ -118,7 +121,7 @@ int main(int argc, char** argv) {
 	// Build the bisection heuristic
 	// --------------------------
 	Bsc * bs;
-        cout << "file " << argv[1] << endl;
+
 	cout << "bisection " << bisection << endl;
 	if (bisection=="roundrobin")
 	  bs = new RoundRobin (prec);
@@ -147,13 +150,16 @@ int main(int argc, char** argv) {
 	Solver s(*contractor,*bs,buff,prec);
 	s.time_limit = time_limit;;
 	s.trace=1;  // solutions are printed as soon as found when trace=1
-	// Get the solutions
+
+	// Solve the system and get the solutions
 	vector<IntervalVector> sols=s.solve(sys.box);
 
 	// Display the number of solutions
 	cout << "number of solutions=" << sols.size() << endl;
+	// Display the solutions : they are already displayed when s.trace=1, otherwise the following lines can be used.
 	//	for (int i=0; i< sols.size() ; i++)
 	//	  cout << " sol  "<< i+1 << " : " << sols[i] << endl;
+
 	// Display the number of boxes (called "cells")
 	// generated during the search
 	cout << "number of cells=" << s.nb_cells << endl;
