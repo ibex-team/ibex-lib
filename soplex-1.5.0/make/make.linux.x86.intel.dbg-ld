@@ -1,9 +1,0 @@
-#--- $Id: make.linux.x86.intel.dbg-ld,v 1.5 2007/08/17 14:14:08 bzfpfend Exp $
-CXX	=	icc
-CPPFLAGS=	-Isrc -DWITH_LONG_DOUBLE \
-		-DDEFAULT_BND_VIOL=1e-8 -DDEFAULT_EPS_ZERO=1e-22
-CXXFLAGS=	-g -mp -Xc -w2 -wd279,383,444,810,981
-LDFLAGS	=	-lm -static -lstdc++
-ARFLAGS	=	crs
-ZLIB_FLAGS	=
-ZLIB_LDFLAGS 	=	-lz

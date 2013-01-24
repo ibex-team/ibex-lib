@@ -1,8 +1,0 @@
-#--- $Id: make.linux.x86.gnu.gcov,v 1.2 2007/08/17 14:14:08 bzfpfend Exp $
-CXX	=	g++
-CPPFLAGS=	-Isrc
-CXXFLAGS=	-O0 -g -fprofile-arcs -ftest-coverage
-LDFLAGS	=	-lm -static
-ARFLAGS	=	crs
-ZLIB_FLAGS	=
-ZLIB_LDFLAGS 	=	-lz

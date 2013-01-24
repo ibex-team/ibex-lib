@@ -1,8 +1,0 @@
-#--- $Id: make.sunos.x86.gnu.opt-gccold,v 1.1 2010/09/27 15:17:39 bzfwinkm Exp $
-CXX	=	g++
-CPPFLAGS=	-Isrc -DNDEBUG -DNO_ADDITIONAL_CHECKS
-CXXFLAGS=	-O3 -fomit-frame-pointer # -malign-double -ffast-math
-LDFLAGS	=	-lm -Bstatic
-ARFLAGS	=	crs
-ZLIB_FLAGS	=
-ZLIB_LDFLAGS 	=	-lz

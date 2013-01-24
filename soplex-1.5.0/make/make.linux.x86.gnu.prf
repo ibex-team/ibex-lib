@@ -1,9 +1,0 @@
-#--- $Id: make.linux.x86.gnu.prf,v 1.7 2007/10/19 15:44:24 bzforlow Exp $
-CXX	=	g++
-CPPFLAGS=	-Isrc -DNDEBUG
-CXXFLAGS=	-O2 -g -pg -march=pentiumpro  \
-		-ffast-math -fforce-addr -funroll-loops
-LDFLAGS	=	-lm
-ARFLAGS	=	crs
-ZLIB_FLAGS	=
-ZLIB_LDFLAGS 	=	-lz

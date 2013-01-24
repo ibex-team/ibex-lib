@@ -1,8 +1,0 @@
-#--- $Id: make.hp-ux.hppa.hp.opt,v 1.4 2007/08/17 14:14:08 bzfpfend Exp $
-CXX	=	aCC
-CPPFLAGS=	-Isrc -DNDEBUG -DNO_ADDITIONAL_CHECKS
-CXXFLAGS=	-AA +W67 -fast 
-LDFLAGS	=	-lstd_v2 -lCsup_v2 -lm
-RANLIB	=	true
-ZLIB_FLAGS	=
-ZLIB_LDFLAGS 	=

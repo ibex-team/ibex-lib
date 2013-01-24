@@ -1,8 +1,0 @@
-#--- $Id: make.linux.x86.gnu.opt-p4,v 1.7 2007/10/19 15:44:24 bzforlow Exp $
-CXX	=	g++
-CPPFLAGS=	-Isrc -DNDEBUG -DNO_ADDITIONAL_CHECKS
-CXXFLAGS=	-O3 -march=pentium4  #-ffast-math
-LDFLAGS	=	-lm # -static
-ARFLAGS	=	crs
-ZLIB_FLAGS	=
-ZLIB_LDFLAGS 	=	-lz
