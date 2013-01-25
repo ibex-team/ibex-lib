@@ -88,7 +88,7 @@ Optimizer::~Optimizer() {
 
 bool Optimizer::update_loup(const IntervalVector& box) {
 	//  if (trace) cout << "box update loup " << box << endl;
-	int box_loup_changed = update_loup_probing (box);
+	bool box_loup_changed = update_loup_probing (box);
 	box_loup_changed |= update_loup_simplex(box);
 	return box_loup_changed;
 }

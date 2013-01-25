@@ -48,7 +48,7 @@ void ExprGenerator::visit(const P_ExprPower& e) {
 	_type right_type;
 	_type left_type;
 
-	int int_right;
+	int int_right=0;
 	Interval itv_right;
 	Interval itv_left;
 

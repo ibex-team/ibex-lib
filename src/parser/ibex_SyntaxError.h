@@ -24,7 +24,7 @@ namespace ibex {
  */
 class SyntaxError : public Exception {
  public:
-  SyntaxError(const std::string& msg, const char* token=NULL, int line=-1) : msg(msg), token(token? strdup(token) : NULL), line(line) { }
+  SyntaxError(const std::string& msg1, const char* token1=NULL, int line1=-1) : msg(msg1), token(token1? strdup(token1) : NULL), line(line1) { }
 
   SyntaxError(const SyntaxError& e) : msg(e.msg), token(e.token? strdup(e.token) : NULL), line(e.line) { }
 

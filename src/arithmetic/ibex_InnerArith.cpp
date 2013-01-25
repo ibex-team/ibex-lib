@@ -435,7 +435,7 @@ bool iproj_leq_div(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 		// Otherwise, we try to build an inner box in one of the half-planes
 		// (chosen randomly) and, if it fails, we try with the other one.
 
-		bool r=rand()%2; // r==1 : we take first y>0.
+		bool r=((rand()%2)==1); // r==1 : we take first y>0.
 
 		for (int i=0; i<2; i++) {
 			if ((i+r)%2==1) {

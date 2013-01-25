@@ -87,7 +87,7 @@ bool Ctc3BCid::var3BCID(IntervalVector& box, int var) {
 bool Ctc3BCid::var3BCID_dicho(IntervalVector& box, int var, double w3b) {
 	IntervalVector initbox = box;
 
-	int r0= shave_bound_dicho(box, var, w3b, true);    // left shaving , after box contains the left slide
+	bool r0= shave_bound_dicho(box, var, w3b, true);    // left shaving , after box contains the left slide
 
 	if (box[var].ub() == initbox[var].ub())
 		return true;                                   // the left slide reaches the right bound : nothing more to do
@@ -95,7 +95,7 @@ bool Ctc3BCid::var3BCID_dicho(IntervalVector& box, int var, double w3b) {
 	IntervalVector leftbox=box;
 	box=initbox;
 	box[var]= Interval(leftbox[var].lb(),initbox[var].ub());
-	int r1=0;
+	bool r1=false;
 	try {
 		r1= shave_bound_dicho (box, var,  w3b, false); // may throw EmptyBoxException
 	}
@@ -231,7 +231,7 @@ bool Ctc3BCid::var3BCID_slices(IntervalVector& box, int var, int locs3b, double 
 	bool stopLeft = false;
 	double leftBound = dom.lb();
 	double rightBound = dom.ub();
-	double leftCID;
+	double leftCID=0.;
 
 	int k=0;
 
@@ -272,7 +272,7 @@ bool Ctc3BCid::var3BCID_slices(IntervalVector& box, int var, int locs3b, double 
 
 		// Reduce right bound by shaving:
 		bool stopRight = false;
-		double lastInf_k;
+		double lastInf_k=0.;
 
 		int k2 = locs3b - 1;
 

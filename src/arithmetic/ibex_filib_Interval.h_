@@ -510,7 +510,7 @@ inline Interval atan(const Interval& x) {
 	return filib::atan(x.itv);
 }
 
-inline Interval atan2(const Interval& x, const Interval& y) {
+inline Interval atan2(const Interval& , const Interval& ) {
 	ibex_error("atan2 non implemented yet with filib");
 	//return filib::atan2(x.itv,y.itv);
 	return Interval::EMPTY_SET;
@@ -596,7 +596,7 @@ inline bool proj_pow(const Interval& y, int expon, Interval& x) {
 	return !x.is_empty();
 }
 
-inline bool proj_pow(const Interval& y, Interval& x1, Interval& x2) {
+inline bool proj_pow(const Interval& , Interval& , Interval& ) {
 	ibex_error("proj_power(y,x1,x2) (with x1 and x2 intervals) not implemented yet with filib");
 	return false;
 }
@@ -698,7 +698,7 @@ inline bool proj_tan(const Interval& y,  Interval& x) {
 	return proj_trigo(y,x,2);
 }
 
-inline bool proj_atan2(const Interval& y, Interval& x1, Interval& x2) {
+inline bool proj_atan2(const Interval& , Interval& , Interval& ) {
 	ibex_error("warning: proj_atan2 non implemented yet with filib");
 	return false;
 }

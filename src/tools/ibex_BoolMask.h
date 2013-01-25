@@ -193,13 +193,13 @@ inline BoolMask& BoolMask::operator=(const BoolMask& m) {
 
 inline BoolMask& BoolMask::operator&=(const BoolMask& m) {
 	for (int i=0; i<n; i++)
-		(*this)[i] &= m[i];
+		(*this)[i] = ((*this)[i] && m[i]);
 	return *this;
 }
 
 inline BoolMask& BoolMask::operator|=(const BoolMask& m) {
 	for (int i=0; i<n; i++)
-		(*this)[i] |= m[i];
+		(*this)[i] = ((*this)[i] || m[i]);
 	return *this;
 }
 

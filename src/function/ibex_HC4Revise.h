@@ -43,7 +43,7 @@ public:
 
 	inline void index_bwd (const ExprIndex&,   ExprLabel& exprL, const ExprLabel& result)            { /* nothing to do */ }
 	       void vector_bwd(const ExprVector&,  ExprLabel** compL, const ExprLabel& result);
-	inline void symbol_bwd(const ExprSymbol& s, const ExprLabel& result)                             { /* nothing to do */ }
+	inline void symbol_bwd(const ExprSymbol& , const ExprLabel& result)                             { /* nothing to do */ }
 	inline void cst_bwd   (const ExprConstant&, const ExprLabel& y)                                  { /* nothing to do */ }
 	inline void apply_bwd (const ExprApply& a, ExprLabel** x, const ExprLabel& y)                   { proj(a.func,*y.d,x); }
 	inline void add_bwd   (const ExprAdd&,     ExprLabel& x1, ExprLabel& x2, const ExprLabel& y)    { if (!(proj_add(y.d->i(),x1.d->i(),x2.d->i()))) throw EmptyBoxException();  }
