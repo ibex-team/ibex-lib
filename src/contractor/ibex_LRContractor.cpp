@@ -16,8 +16,8 @@ using namespace std;
 using namespace soplex;
 namespace ibex {
 
-const double LR_contractor::default_ratio_fp = 0.1;
-const double LR_contractor::default_ratio_fp2 = 0.01;
+const double LR_contractor::default_ratio_fp = 0.2;
+const double LR_contractor::default_ratio_fp2 = 0.2;
 const double LR_contractor::default_max_diam_box =1e4;
 
 

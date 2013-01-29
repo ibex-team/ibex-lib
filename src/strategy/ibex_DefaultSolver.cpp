@@ -15,7 +15,6 @@
 #include "ibex_CtcNewton.h"
 #include "ibex_XNewton.h"
 #include "ibex_CtcCompo.h"
-#include "ibex_BoolMask.h"
 #include "ibex_CellStack.h"
 #include "ibex_Array.h"
 
@@ -48,13 +47,8 @@ Array<Ctc>*  DefaultSolver::contractor_list (System& sys, double prec) {
 	// the last contractor is XNewton
 	ctc_list->set_ref(index,*new X_Newton(sys,
                                           new CtcHC4 (sys.ctrs,0.01),
-                                          *(default_corners()),
-			                              -1,0,0.2,0.2,
-			                              LR_contractor::ALL_BOX,
-			                              X_Newton::HANSEN,
-			                              100,
-			                              1.e5,
-			                              1.e4));
+					      *(default_corners())));
+
 	ctc_list->resize(index+1);
 	return ctc_list;
 }

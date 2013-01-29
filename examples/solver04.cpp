@@ -64,18 +64,18 @@ int main(int argc, char** argv) {
 	// for contracting each domain bound 
 	// The X_newton contractor
 
-	// corner selection 
+	// corners of the current box where the constraints are linearized
 	vector<X_Newton::corner_point> cpoints;
 	//	cpoints.push_back(X_Newton::SUP_X);  // selection of the superior corners : not used 
 	//	cpoints.push_back(X_Newton::INF_X);  // selection of the inferior corners : not used
 
-	// one random corner and its opposite 
+	// each constraint is linearized twice in one random corner and in its opposite 
 	cpoints.push_back(X_Newton::RANDOM);
 	cpoints.push_back(X_Newton::RANDOM_INV);
 	// the hc4 contractor called in the XNewton loop if the gain is > rfp2 (here 0.2)
 	CtcHC4 hc44xn(sys.ctrs,ratio_propag);  
-	// XNewton contractor  (see Xnexton documentation for paramaters)
-       	X_Newton ctcxnewton (sys, &hc44xn, cpoints, -1,0,0.2,0.2, LR_contractor::ALL_BOX,X_Newton::HANSEN,100,1.e5,1.e4);
+	// XNewton contractor  (call with the system, the internal contractor and the corners : all other  parameters have default values  :see Xnexton documentation for changing parameters)
+       	X_Newton ctcxnewton (sys, &hc44xn, cpoints);
 
 
 	// Build the main contractor:
