@@ -72,116 +72,118 @@ interval computations on functions defined as any mathematical expression.-->
 <p>
 
 <h3 id="start01">Run the default solver</h3>
-A couple of example programs are compiled with Ibex and installed under the
-<span class="txtcode">/__build__/examples/</span> subfolder.
-<br>
 
-<p>
-One of them is the <i>default solver</i> that solves a system of nonlinear equations rigorously
-(that is, it does not lose any solution and return each solution under the form of a 
-small box enclosing the true value). It is called the "default" solver because is resorts to
-a unique black-box strategy (whatever the input problem is) and with a very limited 
-number of parameters. Needless to say, this strategy is a kind of compromise and not the 
-best one for a given problem. <br>
-<p>
-Note that Ibex also supplies a "generic" solver that is much more customizable.
+	A couple of example programs are compiled with Ibex and installed under the
+	<span class="txtcode">/__build__/examples/</span> subfolder.
+	<br>
 
-<p>
-You can directly apply this default solver on one of the benchmark problems 
-distributed with Ibex. 
-The benchmarks are all written in the {anchor anchor='func061' text='Minibex syntax'} and stored 
-in an arborescence under <span class="txtcode">benchs/</span>.
+	<p>
+	One of them is the <i>default solver</i> that solves a system of nonlinear equations rigorously
+	(that is, it does not lose any solution and return each solution under the form of a 
+	small box enclosing the true value). It is called the "default" solver because is resorts to
+	a unique black-box strategy (whatever the input problem is) and with a very limited 
+	number of parameters. Needless to say, this strategy is a kind of compromise and not the 
+	best one for a given problem. <br>
+	<p>
+	Note that Ibex also supplies a "generic" solver that is much more customizable.
 
-<p>
-Open a terminal and move to the examples subfolder:
-<div class="code">
-<span class="path">~/Ibex/ibex-2.0/</span> cd __build__/examples<br>
-<span class="path">~/Ibex/ibex-2.0/__build__/examples/$</span><br>
-</div>
+	<p>
+	You can directly apply this default solver on one of the benchmark problems 
+	distributed with Ibex. 
+	The benchmarks are all written in the {anchor anchor='func061' text='Minibex syntax'} and stored 
+	in an arborescence under <span class="txtcode">benchs/</span>.
 
-Now, run the default solver with, for example, the problem named kolev36 located at the specified path:
-<div class="code">
-<span class="path">~/Ibex/ibex-2.0/__build__/examples/$</span>./defaultsolver <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;../../benchs/benchs-satisfaction/benchlib2/kolev36.bch 1e-07 10
-</div>
-The second argument is the precision required on solution (1e-07). The third and last argument
-is the time limit in seconds (10 seconds).
+	<p>
+	Open a terminal and move to the examples subfolder:
+	<div class="code">
+	<span class="path">~/Ibex/ibex-2.0/</span> cd __build__/examples<br>
+	<span class="path">~/Ibex/ibex-2.0/__build__/examples/$</span><br>
+	</div>
 
-The following result should be displayed:<br><br>
-<div style="font-family:'Courier New'">
-load file ../../benchs/benchs-satisfaction/benchlib2/kolev36.bch.<br>
- sol 1 nb_cells 6 ([0.1173165676349034, 0.1173165676349242] ; <br>
-&nbsp;&nbsp;&nbsp;&nbsp; [0.4999999999996189, 0.5000000000003763] ;<br>
-&nbsp;&nbsp;&nbsp;&nbsp; [0.8826834323643938, 0.8826834323657756] ;<br>
-&nbsp;&nbsp;&nbsp;&nbsp; [-0.2071067811866001, -0.2071067811865033] ;<br> 
-&nbsp;&nbsp;&nbsp;&nbsp; [1.207106781186472, 1.207106781186622] ;<br> 
-&nbsp;&nbsp;&nbsp;&nbsp; [-2.000000000000119, -1.999999999999871])<br>
-number of solutions=1<br>
-cpu time used=0.08000500000000002s.<br>
-number of cells=26<br>
-</div>
+	Now, run the default solver with, for example, the problem named kolev36 located at the specified path:
+	<div class="code">
+	<span class="path">~/Ibex/ibex-2.0/__build__/examples/$</span>./defaultsolver <br>
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;../../benchs/benchs-satisfaction/benchlib2/kolev36.bch 1e-07 10
+	</div>
+	The second argument is the precision required on solution (1e-07). The third and last argument
+	is the time limit in seconds (10 seconds).
 
-<br><br>
-The first simply says that the file has been successfuly loaded.<br>
-The second line (broken here into 6 lines for clarity) details the first solution found. There are 6 variables so 6 intervals are displayed.<br>
-The third line is the total number of solutions found (there is just one here).<br>
-The two last lines report the CPU time and the number of hypothesis (bisections) that was required to solve the problem.
-<p>
+	The following result should be displayed:<br><br>
+	<div style="font-family:'Courier New'">
+	load file ../../benchs/benchs-satisfaction/benchlib2/kolev36.bch.<br>
+	sol 1 nb_cells 6 ([0.1173165676349034, 0.1173165676349242] ; <br>
+	&nbsp;&nbsp;&nbsp;&nbsp; [0.4999999999996189, 0.5000000000003763] ;<br>
+	&nbsp;&nbsp;&nbsp;&nbsp; [0.8826834323643938, 0.8826834323657756] ;<br>
+	&nbsp;&nbsp;&nbsp;&nbsp; [-0.2071067811866001, -0.2071067811865033] ;<br> 
+	&nbsp;&nbsp;&nbsp;&nbsp; [1.207106781186472, 1.207106781186622] ;<br> 
+	&nbsp;&nbsp;&nbsp;&nbsp; [-2.000000000000119, -1.999999999999871])<br>
+	number of solutions=1<br>
+	cpu time used=0.08000500000000002s.<br>
+	number of cells=26<br>
+	</div>
+
+	<br><br>
+	The first simply says that the file has been successfuly loaded.<br>
+	The second line (broken here into 6 lines for clarity) details the first solution found. There are 6 variables so 6 intervals are displayed.<br>
+	The third line is the total number of solutions found (there is just one here).<br>
+	The two last lines report the CPU time and the number of hypothesis (bisections) that was required to solve the problem.
+	<p>
 
 <h3 id="start02">Run the default optimizer</h3>
-Similarly to the default solver, a default optimizer is installed with Ibex.
-This program minimizes a (nonlinear) objective function under (nonlinear) inequality constraints.
-Let us execute this optimizer with the problem ex3_1_3 got from the Coconut library. If you compare
-the Minibex syntax of this benchmark with that of the previous example, you will see that a "minimize"
-keyword has appeared.
-<p>
-<div class="code">
-<span class="path">~/Ibex/ibex-2.0/__build__/examples/$</span>./defaultoptimizer <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;../../benchs/benchs-optim/coconutbenchmark-library1/ex3_1_3.bch 1e-07 1e-07 10
-</div>
-As you see, the optimizer requires 3 arguments, besides the name of the benchmark.
-The extra argument corresponds to the precision on the objective (both relative and absolute). Here, this precision is also set to 1e-07.
-<p>
-The following result should be displayed:<br><br>
-<div style="font-family:'Courier New'">
- best bound in: [-310,-309.999999984]<br>
- Relative precision obtained on objective function: 5.23566394568e-11  [passed]  1e-07<br>
- Absolute precision obtained on objective function: 1.62305582307e-08  [passed]  1e-07<br>
- best feasible point (4.9999999999 ; 1 ; 5 ; 1.53748558193e-10 ; 5 ; 10)<br>
- cpu time used 0.048003s.<br>
- number of cells 78<br>
-</div>
+	
+	Similarly to the default solver, a default optimizer is installed with Ibex.
+	This program minimizes a (nonlinear) objective function under (nonlinear) inequality constraints.
+	Let us execute this optimizer with the problem ex3_1_3 got from the Coconut library. If you compare
+	the Minibex syntax of this benchmark with that of the previous example, you will see that a "minimize"
+	keyword has appeared.
+	<p>
+	<div class="code">
+	<span class="path">~/Ibex/ibex-2.0/__build__/examples/$</span>./defaultoptimizer <br>
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;../../benchs/benchs-optim/coconutbenchmark-library1/ex3_1_3.bch 1e-07 1e-07 10
+	</div>
+	As you see, the optimizer requires 3 arguments, besides the name of the benchmark.
+	The extra argument corresponds to the precision on the objective (both relative and absolute). Here, this precision is also set to 1e-07.
+	<p>
+	The following result should be displayed:<br><br>
+	<div style="font-family:'Courier New'">
+	 best bound in: [-310,-309.999999984]<br>
+	 Relative precision obtained on objective function: 5.23566394568e-11  [passed]  1e-07<br>
+	 Absolute precision obtained on objective function: 1.62305582307e-08  [passed]  1e-07<br>
+	 best feasible point (4.9999999999 ; 1 ; 5 ; 1.53748558193e-10 ; 5 ; 10)<br>
+	 cpu time used 0.048003s.<br>
+	 number of cells 78<br>
+	</div>
 
-<br><br>
-The program has proved that the minimum of the objective lies in [-310,-309.999999984]. It also gives
-a point (4.9999999999 ; 1 ; 5 ; 1.53748558193e-10 ; 5 ; 10) which satisfies the constraints and for which
-the value taken by the objective function is inside this interval.
+	<br><br>
+	The program has proved that the minimum of the objective lies in [-310,-309.999999984]. It also gives
+	a point (4.9999999999 ; 1 ; 5 ; 1.53748558193e-10 ; 5 ; 10) which satisfies the constraints and for which
+	the value taken by the objective function is inside this interval.
 
-<p>
+	<p>
 
 <h3 id="start03">Start a program</h3>
 
-To write a program with Ibex, use the following canvas:
+	To write a program with Ibex, use the following canvas:
 
-<div class="code">
-#include "ibex.h"<br>
-<br>
-using namespace std;<br>
-using namespace ibex;<br>
-<br>
-int main(int argc, char** argv)&#123;<br>
-<br>
+	<div class="code">
+	#include "ibex.h"<br>
+	<br>
+	using namespace std;<br>
+	using namespace ibex;<br>
+	<br>
+	int main(int argc, char** argv)&#123;<br>
+	<br>
         <span class="comment">// write your own code here</span><br>
-<br>
-&#125;<br>
-</div>
-You can execute by yourself all the code snippets of this tutorial, using this canvas.
+	<br>
+	&#125;<br>
+	</div>
+	You can execute by yourself all the code snippets of this tutorial, using this canvas.
 
-<p>
-To compile a program, the easiest way is to copy-paste the <span class="txtcode">makefile</span>
-of the <span class="txtcode">examples</span> subfolder of Ibex.
-See also the <a href="index.php?page=download#examples">guidelines</a>.
-<p>
+	<p>
+	To compile a program, the easiest way is to copy-paste the <span class="txtcode">makefile</span>
+	of the <span class="txtcode">examples</span> subfolder of Ibex.
+	See also the <a href="index.php?page=download#examples">guidelines</a>.
+	<p>
 
 <h3 id="start04">Call the default solver from C++</h3>
 	<p>
@@ -202,6 +204,7 @@ See also the <a href="index.php?page=download#examples">guidelines</a>.
 	&nbsp;&nbsp;&nbsp;&nbsp;cout << "solution n°" <<&zwj;i <<&zwj;" : " <<&zwj; solutions[i] <<&zwj; endl;<br>
 	&#125;<br>
 	</div>
+	<a href="uploads/api/classibex_1_1DefaultSolver.html" target="_blank">See the API</a>.
 	<p>
 
 <h3 id="start05">Call the default optimizer from C++</h3>
