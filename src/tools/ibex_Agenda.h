@@ -56,7 +56,7 @@ class Agenda {
     table[last] = first; // just to remember that (i,j) is set
   }
 
-  inline void pop(int& p) throw(EmptyAgendaException) {
+  inline void pop(int& p)  {
     if (first == -1) throw EmptyAgendaException();
 
     p = first;
