@@ -18,10 +18,15 @@ namespace ibex {
 double  CtcAcid::nbvarstat=0;
 const double CtcAcid::default_ctratio=0.005;
 
-  CtcAcid::CtcAcid(const System& sys, const BoolMask& cid_vars, Ctc& ctc, bool optim, int s3b, int scid,
+CtcAcid::CtcAcid(const System& sys, const BoolMask& cid_vars, Ctc& ctc, bool optim, int s3b, int scid,
 		double var_min_width, double ct_ratio): Ctc3BCid (cid_vars,ctc,s3b,scid,cid_vars.nb_set(),var_min_width),
 							system(sys), nbcalls(0), nbctvar(0), ctratio(ct_ratio),  nbcidvar(0), nbtuning(0), optim(optim)  {
 // [gch] BNE check the argument "cid_vars.nb_set()" given to _3BCID
+}
+
+CtcAcid::CtcAcid(const System& sys,  Ctc& ctc, bool optim, int s3b, int scid,
+		 double var_min_width, double ct_ratio): Ctc3BCid (BoolMask(sys.nb_var,1),ctc,s3b,scid,sys.nb_var,var_min_width),
+							system(sys), optim(optim), nbcalls(0), nbctvar(0), nbcidvar(0) ,  nbtuning(0), ctratio(ct_ratio) {
 }
 
 void CtcAcid::contract(IntervalVector& box) {

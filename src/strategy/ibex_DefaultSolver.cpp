@@ -38,7 +38,7 @@ Array<Ctc>*  DefaultSolver::contractor_list (System& sys, double prec) {
 	// first contractor : non incremental hc4
 	ctc_list->set_ref(0, *new CtcHC4 (sys.ctrs,0.01));
 	// second contractor : acid (hc4)
-	ctc_list->set_ref(1, *new CtcAcid (sys,BoolMask(sys.nb_var,1), *new CtcHC4 (sys.ctrs,0.1,true)));
+	ctc_list->set_ref(1, *new CtcAcid (sys, *new CtcHC4 (sys.ctrs,0.1,true)));
 	int index=2;
 	// if the system is square, the third contractor is Newton
 	if (sys.nb_var==sys.nb_ctr) {

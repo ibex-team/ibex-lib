@@ -25,6 +25,13 @@ Ctc3BCid::Ctc3BCid(const BoolMask& cid_vars, Ctc& ctc, int s3b, int scid, int vh
 
 }
 
+Ctc3BCid::Ctc3BCid( Ctc& ctc, int s3b, int scid, int vhandled, double var_min_width) :
+  Ctc(ctc.nb_var), cid_vars(BoolMask(ctc.nb_var,1)), ctc(ctc), s3b(s3b), scid(scid),
+					vhandled(vhandled<=0? cid_vars.nb_set():vhandled),
+					var_min_width(var_min_width), start_var(0), impact(ctc.nb_var) {
+
+}
+
 
 /* compare the boxes in all dimensions except one (var) */
 bool  Ctc3BCid::equalBoxes (int var, IntervalVector &box1, IntervalVector &box2) {
@@ -64,7 +71,7 @@ bool Ctc3BCid::var3BCID(IntervalVector& box, int var) {
 	Interval& dom(box[var]);
 
 	if (dom.diam() < var_min_width) return false;      // domain already small enough : nothing to do
-        if (dom.diam() == POS_INFINITY) return false;     //  no hanndling infinite domains
+        if (dom.diam() == POS_INFINITY) return false;     //  no handling infinite domains
 	double w_DC = dom.diam() / s3b;
 	int locs3b=s3b;
 

@@ -71,8 +71,7 @@ Array<Ctc>*  DefaultOptimizer::contractor_list (System& sys, System& ext_sys,dou
 	// first contractor on ext_sys : incremental hc4  ratio propag 0.01
 	ctc_list->set_ref(0, *new CtcHC4 (ext_sys.ctrs,0.01,true));
 	// second contractor on ext_sys : acid (hc4)   with incremental hc4  ratio propag 0.1
-	ctc_list->set_ref(1, *new CtcAcid (ext_sys,BoolMask(ext_sys.nb_var,1),
-					   *new CtcHC4 (ext_sys.ctrs,0.1,true),true));
+	ctc_list->set_ref(1, *new CtcAcid (ext_sys,*new CtcHC4 (ext_sys.ctrs,0.1,true),true));
 	// the last contractor is X_Newton  with rfp=0.2 and rfp2=0.2
 	// the limits for calling soplex are 1e5 for the derivatives and 1e5 for the domains : no error found with these bounds
 	ctc_list->set_ref(2,*new X_Newton(ext_sys,

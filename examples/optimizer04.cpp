@@ -70,12 +70,12 @@ int main(int argc, char** argv){
 	CtcHC4 hc44xn (ext_sys.ctrs,0.01,false);
 
 	// The 3BCID contractor on all variables (component of the contractor when filtering == "3bcidhc4") 
-	Ctc3BCid c3bcidhc4(BoolMask(ext_sys.nb_var,1),hc44cid);
+	Ctc3BCid c3bcidhc4(hc44cid);
 	// hc4 followed by 3bcidhc4 : the actual contractor used when filtering == "3bcidhc4" 
 	CtcCompo hc43bcidhc4 (hc4, c3bcidhc4);
 
 	// The ACID contractor (component of the contractor  when filtering == "acidhc4")
-	CtcAcid acidhc4(ext_sys,BoolMask(ext_sys.nb_var,1),hc44cid,true);
+	CtcAcid acidhc4(ext_sys,hc44cid,true);
 	// hc4 followed by acidhc4 : the actual contractor used when filtering == "acidhc4" 
 	CtcCompo hc4acidhc4 (hc4, acidhc4);
 

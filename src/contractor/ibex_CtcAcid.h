@@ -39,7 +39,7 @@ public :
 	/**
 	 * \brief ACID constructor
 	 *
-	 * The parameters are the same as for 3BCID: ctc, s3b, scid, var_min_width  except vhandled
+	 * The parameters are the same as for 3BCID: cid_vars, ctc, s3b, scid, var_min_width  except vhandled
 	 * which is now computed and no more a parameter
 	 * \param  ct_ratio (for contracting ratio), a new parameter, at the kernel of the ACID algorithm:
 	 *         it indicates that variables are useful to be shaved until all variable shavings yield
@@ -52,6 +52,14 @@ public :
 	 *
 	 */
     CtcAcid(const System& sys, const BoolMask& cid_vars, Ctc& ctc, bool optim=0, int s3b=default_s3b, int scid=default_scid,
+	    double var_min_width=default_var_min_width, double ct_ratio=default_ctratio);
+    /**
+    * \brief ACID constructor
+	 *
+         *  ACID constructor on all variables : no need to give the cid_vars parameter 
+	 */
+
+    CtcAcid(const System& sys, Ctc& ctc, bool optim=0, int s3b=default_s3b, int scid=default_scid,
 	    double var_min_width=default_var_min_width, double ct_ratio=default_ctratio);
 
 	/**

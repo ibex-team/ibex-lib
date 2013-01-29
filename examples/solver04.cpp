@@ -37,13 +37,13 @@ int main(int argc, char** argv) {
 	// hc4 inside acid and 3bcid : incremental propagation beginning with the shaved variable
 	CtcHC4 hc44cid(sys.ctrs,0.1,true);
 	// The ACID contractor (component of the contractor  when filtering == "acidhc4" or "acidhc4n")
-	CtcAcid acid(sys,BoolMask(sys.nb_var,1),hc44cid);
+	CtcAcid acid(sys,hc44cid);
 	// hc4 followed by 3bcidhc4 : the actual contractor used when filtering == "3bcidhc4" 
 	CtcCompo hc4acid(hc4,acid);
 
 
 	// The 3BCID contractor (3bcid component of the contractor when filtering == "3bcidhc4") on all variables
-	Ctc3BCid c3bcid(BoolMask(sys.nb_var,1),hc44cid);
+	Ctc3BCid c3bcid(hc44cid);
 	// hc4 followed by 3bcidhc4 : the actual propagation based contractor used when filtering == "3bcidhc4" or "3bcidhc4n"
 	CtcCompo hc43bcid(hc4,c3bcid);
 

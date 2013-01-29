@@ -83,7 +83,7 @@ class Ctc3BCid : public Ctc {
    *                      \a var_min_width to a value greater than #ibex::CtcPrecision::ceil is interesting
    *                      in only a few structured systems, e.g., in Yamamura1 that can found in the
    *                      COCONUT/COPRIN benchmarks.
-  * \param cid_vars       The mask indicating the subset of variables to be shaved, by default all of them.
+  * \param cid_vars       The mask indicating the subset of variables to be shaved.
   *                       Example: this parameter has been used by Araya et al. in conjunction with the
   *                       preprocessing algorithm I-CSE (see Proc. of CP 2008): I-CSE produces a system
   *                       in which are added new auxiliary variables corresponding to common sub-
@@ -92,6 +92,15 @@ class Ctc3BCid : public Ctc {
   */
 	Ctc3BCid(const BoolMask& cid_vars, Ctc& ctc, int s3b=default_s3b, int scid=default_scid,
 			int vhandled=-1, double var_min_width=default_var_min_width);
+
+  /**
+     3BCID constructor 
+*
+         *  ACID constructor on all variables : no need to give the cid_vars parameter ; all variables are the variables of the ctc contractor
+	 */
+	Ctc3BCid( Ctc& ctc, int s3b=default_s3b, int scid=default_scid,
+			int vhandled=-1, double var_min_width=default_var_min_width);
+
 
 	/**
 	 * \brief Apply contraction.
