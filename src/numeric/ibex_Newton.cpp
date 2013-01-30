@@ -66,7 +66,7 @@ bool newton(const Function& f, IntervalVector& box, double prec, double ratio_ga
 			gauss_seidel(J, Fmid, y, ratio_gauss_seidel);
 
 			if (y.is_empty()) { box.set_empty(); throw EmptyBoxException(); }
-		} catch (LinearException& e) {
+		} catch (LinearException& ) {
 			return reducted; // should be false
 		}
 

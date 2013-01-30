@@ -82,7 +82,7 @@ vector<IntervalVector> Solver::solve(const IntervalVector& init_box) {
 				buffer.push(new_cells.second);
 				nb_cells+=2;
 				if (cell_limit >=0 && nb_cells>=cell_limit) throw CellLimitException();}
-			  catch (NoBisectableVariableException){
+			  catch (NoBisectableVariableException ){
 			    new_sol(sols, c->box);
 			    delete buffer.pop(); 
 			    impact.set_all();
@@ -91,7 +91,7 @@ vector<IntervalVector> Solver::solve(const IntervalVector& init_box) {
 			time_limit_check();
 			  
 						
-		} catch(EmptyBoxException&) {
+		} catch(EmptyBoxException& ) {
 			assert(c->box.is_empty());
 			delete buffer.pop();
 			impact.set_all();
@@ -99,9 +99,9 @@ vector<IntervalVector> Solver::solve(const IntervalVector& init_box) {
 		
 	  }
 	}
-	catch (TimeOutException exc) 
+	catch (TimeOutException& )
 	  {cout << "time limit " << time_limit << "s. reached " << endl;}	
-	catch (CellLimitException exc) 
+	catch (CellLimitException& )
 	  {cout << "cell limit " << cell_limit << " reached " << endl;}	
 	
 	Timer::stop();

@@ -766,7 +766,7 @@ inline bool proj_pow(const Interval& y, int expon, Interval& x) {
 	}
 }
 
-inline bool proj_pow(const Interval& y, Interval& x1, Interval& x2) {
+inline bool proj_pow(const Interval& , Interval& , Interval& ) {
 	cerr << "warning: proj_power(y,x1,x2) (with x1 and x2 intervals) not implemented yet with BIAS" << endl;
 	return true;
 }
@@ -866,7 +866,7 @@ inline bool proj_tan(const Interval& y,  Interval& x) {
 	return proj_trigo(y,x,2);
 }
 
-inline bool proj_atan2(const Interval& y, Interval& x1, Interval& x2) {
+inline bool proj_atan2(const Interval& , Interval& , Interval& ) {
 	cerr << "warning: proj_atan2 non implemented yet with Profil/Bias";
 	return true;
 }

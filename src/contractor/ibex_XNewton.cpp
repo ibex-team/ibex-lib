@@ -108,7 +108,7 @@ REAL X_Newton::eval_corner(int ctr, int op, INTERVAL_VECTOR& G, bool* corner){
           
    }
    }
-   catch (EmptyBoxException e)
+   catch (EmptyBoxException& )
      {cout  << endl; space.box=savebox; return 0;}
 
    space.box=savebox;
@@ -238,20 +238,20 @@ int X_Newton::X_Linearization(IntervalVector& box, soplex::SoPlex& mysoplex,
 			} else if (G[j].diam() <= 1e-10) {
 				inf_x = (rand() % 2 == 0);
 			} else if (id_point == 1) {
-				if ((double) nonlinear_var <= (double) nb_nonlinear_vars / 3.0)
+				if (((double) nonlinear_var) <= (((double) nb_nonlinear_vars )/ 3.0))
 					inf_x = base_coin[j];
 				else
 					inf_x = !base_coin[j];
 			} else if (id_point == 2) {
-				if ((double) nonlinear_var > (double) nb_nonlinear_vars / 3.0
+				if (((double) nonlinear_var )> ((double) nb_nonlinear_vars )/ 3.0
 						&& (double) nonlinear_var
 								<= 2 * (double) nb_nonlinear_vars / 3.0)
 					inf_x = base_coin[j];
 				else
 					inf_x = !base_coin[j];
 			} else if (id_point == 3) {
-				if ((double) nonlinear_var
-						> 2 * (double) nb_nonlinear_vars / 3.0)
+				if (((double) nonlinear_var)
+						> 2 * ((double) nb_nonlinear_vars) / 3.0)
 					inf_x = base_coin[j];
 				else
 					inf_x = !base_coin[j];

@@ -69,7 +69,7 @@ void ExprGenerator::visit(const P_ExprPower& e) {
 			double x=itv_right.mid();
 			if (floor(x)==x) {
 				right_type=IBEX_INTEGER;
-				int_right=floor(x);
+				int_right=(int)floor(x);
 			}
 		}
 	} else

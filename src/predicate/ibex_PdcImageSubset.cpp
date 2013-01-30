@@ -59,7 +59,7 @@ BoolInterval PdcImageSubset::test(const IntervalVector& xy) {
 	Matrix C(n,n);
 	try {
 		real_inverse(Jxt,C);
-	} catch(SingularMatrixException& e) {
+	} catch(SingularMatrixException& ) {
 		return MAYBE;
 	}
 
@@ -83,7 +83,7 @@ BoolInterval PdcImageSubset::test(const IntervalVector& xy) {
 		J=C*J;
 		try {
 			x2=inv_diag(J)*(b-(off_diag(J)*x2));
-		} catch (SingularMatrixException& e) {
+		} catch (SingularMatrixException& ) {
 			return MAYBE;
 		}
 

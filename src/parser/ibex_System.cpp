@@ -119,14 +119,23 @@ System::System(const System& sys, copy_mode mode) : nb_var(0), nb_ctr(0), func(0
 			varcopy(args,ctrvars);
 			const ExprNode& f_i=ExprCopy().copy(sys.ctrs[i].f.args(), ctrvars, sys.ctrs[i].f.expr());
 			switch (sys.ctrs[i].op) {
-			case LT:  ibex_warning("warning: strict inequality (<) replaced by inequality (<=).");
-			case LEQ: ctrs.set_ref(j++,*new NumConstraint(ctrvars, f_i<=0));
-			break;
-			case EQ:  not_implemented("Normalization with equality constraints");
-			break;
-			case GT:  ibex_warning("warning: strict inequality (>) replaced by inequality (>=).");
-			case GEQ: ctrs.set_ref(j++,*new NumConstraint(ctrvars, -f_i<=0)); // reverse the inequality
-			break;
+			case LT:
+				ibex_warning("warning: strict inequality (<) replaced by inequality (<=).");
+				ctrs.set_ref(j++,*new NumConstraint(ctrvars, f_i<=0));
+				break;
+			case LEQ:
+				ctrs.set_ref(j++,*new NumConstraint(ctrvars, f_i<=0));
+				break;
+			case EQ:
+				not_implemented("Normalization with equality constraints");
+				break;
+			case GT:
+				ibex_warning("warning: strict inequality (>) replaced by inequality (>=).");
+				ctrs.set_ref(j++,*new NumConstraint(ctrvars, -f_i<=0)); // reverse the inequality
+				break;
+			case GEQ:
+				ctrs.set_ref(j++,*new NumConstraint(ctrvars, -f_i<=0)); // reverse the inequality
+				break;
 			}
 		}
 	}
@@ -209,7 +218,8 @@ void System::init_f_from_ctrs() {
 				for (int l=0; l<fjd.dim3; l++)
 					image.set_ref(i++,e[k][l]);
 			break;
-		default: assert(false);
+		default:
+			assert(false);
 		}
 		/*======================================================================*/
 

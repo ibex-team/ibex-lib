@@ -24,7 +24,7 @@ BoolInterval PdcCleared::test(const IntervalVector& box) {
 		ctc.contract(tmpbox);
 		assert(!tmpbox.is_empty());
 		return MAYBE;
-	} catch(EmptyBoxException& e) {
+	} catch(EmptyBoxException& ) {
 		return YES;
 	}
 }

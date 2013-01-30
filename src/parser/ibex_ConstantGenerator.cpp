@@ -35,7 +35,7 @@ int to_integer(const Domain& d) {
 	assert(d.i().is_degenerated());
 	double x=d.i().mid();
 	assert(floor(x)==x);
-	return x;
+	return (int)x;
 }
 
 double to_double(const Domain& d) {

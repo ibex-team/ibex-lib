@@ -141,7 +141,7 @@ Timer::Time Timer::virtual_utime;
 Timer::Time Timer::virtual_stime;
 long Timer::resident_memory;
 
-#ifndef __WIN32__
+#ifndef _WIN32
 //  std::clock_t Timer::res;
 struct rusage Timer::res;
 #endif
@@ -156,7 +156,7 @@ struct timeval Timer::tp;
  */
 void Timer::start()
 {
-#ifndef __WIN32__
+#ifndef _WIN32
 	//    res = std::clock();
 	getrusage( RUSAGE_SELF, &res );
 
@@ -189,7 +189,7 @@ void Timer::stop( TimerType type )
 	else {
 
 		//      res = std::clock();
-#ifndef __WIN32__
+#ifndef _WIN32
 		getrusage( RUSAGE_SELF, &res );
 		virtual_ulapse = (Time) res.ru_utime.tv_sec +
 				(Time) res.ru_utime.tv_usec / 1000000.0

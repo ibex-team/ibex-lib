@@ -268,12 +268,12 @@ void Optimizer::optimize(const IntervalVector& init_box) {
 				time_limit_check();
 
 			}
-			catch (NoBisectableVariableException& exc) {
+			catch (NoBisectableVariableException& ) {
 				delete buffer.pop();
 			}
 		}
 	}
-	catch (TimeOutException& exc) {
+	catch (TimeOutException& ) {
 		cout << "time limit " << timeout << "s. reached " << endl;
 	}
 

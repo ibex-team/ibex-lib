@@ -440,7 +440,7 @@ inline bool proj_pow(const Interval& y, int expon, Interval& x) {
 	return !x.is_empty();
 }
 
-inline bool proj_pow(const Interval& y, Interval& x1, Interval& x2) {
+inline bool proj_pow(const Interval& , Interval& , Interval& ) {
 	ibex_error("proj_power(y,x1,x2) (with x1 and x2 intervals) not implemented yet with Gaol");
 	return false;
 }
@@ -467,7 +467,7 @@ inline bool proj_tan(const Interval& y,  Interval& x) {
 	return !x.is_empty();
 }
 
-inline bool proj_atan2(const Interval& y, Interval& x1, Interval& x2) {
+inline bool proj_atan2(const Interval& , Interval& , Interval& ) {
 	ibex_error("proj_atan2 non implemented yet with Gaol");
 	return false;
 }

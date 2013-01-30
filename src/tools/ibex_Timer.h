@@ -18,7 +18,7 @@
 #endif // _MSC_VER
 
 
-#ifdef __WIN32__
+#ifdef _WIN32
 //#include <ctime>
 #else
 #include <sys/resource.h>
@@ -77,7 +77,7 @@ class Timer {
   static Time virtual_stime;
   static long resident_memory;
 
-#ifndef __WIN32__
+#ifndef _WIN32
   //  static std::clock_t res;
   static struct rusage res;
 #endif
