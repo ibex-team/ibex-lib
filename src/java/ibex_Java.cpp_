@@ -27,7 +27,9 @@ static vector<int> options; // which contractor is used for the ith constraint?
 
 enum { COMPO=0, HC4=1, HC4_NEWTON=2, INTEGER=3 };
 
-enum { FAIL=0, ENTAILED=1, CONTRACT=2, NOTHING=3 };
+enum { FAIL=0, ENTAILED=1, CONTRACT=2, NOT_SIGNIFICANT=3,
+	  INFLATE=4, FULL_INFLATE=5, BAD_POINT=6,  UNKNOWN_POINT=7
+};
 
 enum { FALSE_=0, TRUE_=1, FALSE_OR_TRUE=2 };
 
@@ -115,7 +117,7 @@ JNIEXPORT jint JNICALL Java_Ibex_contract__I_3DI(JNIEnv *env, jobject, jint n, j
 			if (reif==TRUE_ && savebox.rel_distance(box) >= EPS_CONTRACT) {
 				result=CONTRACT;
 			} else {
-				result=NOTHING;
+				result=NOT_SIGNIFICANT;
 			}
 		} catch(EmptyBoxException&) {
 			result=FAIL;
@@ -135,6 +137,14 @@ JNIEXPORT jint JNICALL Java_Ibex_contract__I_3DI(JNIEnv *env, jobject, jint n, j
 	env->ReleaseDoubleArrayElements(domains, d, 0);
 
 	return result;
+}
+
+JNIEXPORT jint JNICALL Java_ibex_Ibex_inflate
+  (JNIEnv *, jobject, jint, jdoubleArray, jdoubleArray, jint) {
+
+	// TO DO
+
+	return UNKNOWN_POINT;
 }
 
 JNIEXPORT void JNICALL Java_Ibex_release(JNIEnv *, jobject) {
