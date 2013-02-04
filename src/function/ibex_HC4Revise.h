@@ -41,10 +41,10 @@ public:
 	 */
 	static const double RATIO;
 
-	inline void index_bwd (const ExprIndex&,   ExprLabel& exprL, const ExprLabel& result)            { /* nothing to do */ }
+	inline void index_bwd (const ExprIndex&,   ExprLabel& , const ExprLabel& )            { /* nothing to do */ }
 	       void vector_bwd(const ExprVector&,  ExprLabel** compL, const ExprLabel& result);
-	inline void symbol_bwd(const ExprSymbol& , const ExprLabel& result)                             { /* nothing to do */ }
-	inline void cst_bwd   (const ExprConstant&, const ExprLabel& y)                                  { /* nothing to do */ }
+	inline void symbol_bwd(const ExprSymbol& , const ExprLabel& )                             { /* nothing to do */ }
+	inline void cst_bwd   (const ExprConstant&, const ExprLabel& )                                  { /* nothing to do */ }
 	inline void apply_bwd (const ExprApply& a, ExprLabel** x, const ExprLabel& y)                   { proj(a.func,*y.d,x); }
 	inline void add_bwd   (const ExprAdd&,     ExprLabel& x1, ExprLabel& x2, const ExprLabel& y)    { if (!(proj_add(y.d->i(),x1.d->i(),x2.d->i()))) throw EmptyBoxException();  }
 	inline void add_V_bwd  (const ExprAdd&,    ExprLabel& x1, ExprLabel& x2, const ExprLabel& y)    { if (!(proj_add(y.d->v(),x1.d->v(),x2.d->v()))) throw EmptyBoxException();  }
@@ -62,29 +62,29 @@ public:
 	inline void div_bwd   (const ExprDiv&,     ExprLabel& x1, ExprLabel& x2, const ExprLabel& y)    { if (!(proj_div(y.d->i(),x1.d->i(),x2.d->i()))) throw EmptyBoxException();  }
 	inline void max_bwd   (const ExprMax&,     ExprLabel& x1, ExprLabel& x2, const ExprLabel& y)    { if (!(proj_max(y.d->i(),x1.d->i(),x2.d->i()))) throw EmptyBoxException();  }
 	inline void min_bwd   (const ExprMin&,     ExprLabel& x1, ExprLabel& x2, const ExprLabel& y)    { if (!(proj_min(y.d->i(),x1.d->i(),x2.d->i()))) throw EmptyBoxException();  }
-	inline void atan2_bwd (const ExprAtan2& e, ExprLabel& x1, ExprLabel& x2, const ExprLabel& y)    { if (!(proj_atan2(y.d->i(),x1.d->i(),x2.d->i()))) throw EmptyBoxException();  }
-	inline void minus_bwd (const ExprMinus& e, ExprLabel& x, const ExprLabel& y)                    { if ((x.d->i() &=-y.d->i()).is_empty()) throw EmptyBoxException();  }
-    inline void trans_V_bwd(const ExprTrans& e,ExprLabel& x, const ExprLabel& y)                    { if ((x.d->v() &= y.d->v()).is_empty()) throw EmptyBoxException();  }
-    inline void trans_M_bwd(const ExprTrans& e,ExprLabel& x, const ExprLabel& y)                    { if ((x.d->m() &= y.d->m().transpose()).is_empty()) throw EmptyBoxException();  }
-	inline void sign_bwd  (const ExprSign& e,  ExprLabel& x, const ExprLabel& y)                    { if (!(proj_sign(y.d->i(),x.d->i()))) throw EmptyBoxException();  }
-	inline void abs_bwd   (const ExprAbs& e,   ExprLabel& x, const ExprLabel& y)                    { if (!(proj_abs(y.d->i(),x.d->i()))) throw EmptyBoxException();  }
+	inline void atan2_bwd (const ExprAtan2& , ExprLabel& x1, ExprLabel& x2, const ExprLabel& y)    { if (!(proj_atan2(y.d->i(),x1.d->i(),x2.d->i()))) throw EmptyBoxException();  }
+	inline void minus_bwd (const ExprMinus& , ExprLabel& x, const ExprLabel& y)                    { if ((x.d->i() &=-y.d->i()).is_empty()) throw EmptyBoxException();  }
+    inline void trans_V_bwd(const ExprTrans& ,ExprLabel& x, const ExprLabel& y)                    { if ((x.d->v() &= y.d->v()).is_empty()) throw EmptyBoxException();  }
+    inline void trans_M_bwd(const ExprTrans& ,ExprLabel& x, const ExprLabel& y)                    { if ((x.d->m() &= y.d->m().transpose()).is_empty()) throw EmptyBoxException();  }
+	inline void sign_bwd  (const ExprSign& ,  ExprLabel& x, const ExprLabel& y)                    { if (!(proj_sign(y.d->i(),x.d->i()))) throw EmptyBoxException();  }
+	inline void abs_bwd   (const ExprAbs& ,   ExprLabel& x, const ExprLabel& y)                    { if (!(proj_abs(y.d->i(),x.d->i()))) throw EmptyBoxException();  }
 	inline void power_bwd (const ExprPower& e, ExprLabel& x, const ExprLabel& y)                    { if (!(proj_pow(y.d->i(),e.expon, x.d->i()))) throw EmptyBoxException();  }
-	inline void sqr_bwd   (const ExprSqr& e,   ExprLabel& x, const ExprLabel& y)                    { if (!(proj_sqr(y.d->i(),x.d->i()))) throw EmptyBoxException();  }
-	inline void sqrt_bwd  (const ExprSqrt& e,  ExprLabel& x, const ExprLabel& y)                    { if (!(proj_sqrt(y.d->i(),x.d->i()))) throw EmptyBoxException();  }
-	inline void exp_bwd   (const ExprExp& e,   ExprLabel& x, const ExprLabel& y)                    { if (!(proj_exp(y.d->i(),x.d->i()))) throw EmptyBoxException();  }
-	inline void log_bwd   (const ExprLog& e,   ExprLabel& x, const ExprLabel& y)                    { if (!(proj_log(y.d->i(),x.d->i()))) throw EmptyBoxException();  }
-	inline void cos_bwd   (const ExprCos& e,   ExprLabel& x, const ExprLabel& y)                    { if (!(proj_cos(y.d->i(),x.d->i()))) throw EmptyBoxException();  }
-	inline void sin_bwd   (const ExprSin& e,   ExprLabel& x, const ExprLabel& y)                    { if (!(proj_sin(y.d->i(),x.d->i()))) throw EmptyBoxException();  }
-	inline void tan_bwd   (const ExprTan& e,   ExprLabel& x, const ExprLabel& y)                    { if (!(proj_tan(y.d->i(),x.d->i()))) throw EmptyBoxException();  }
-	inline void cosh_bwd  (const ExprCosh& e,  ExprLabel& x, const ExprLabel& y)                    { if (!(proj_cosh(y.d->i(),x.d->i()))) throw EmptyBoxException();  }
-	inline void sinh_bwd  (const ExprSinh& e,  ExprLabel& x, const ExprLabel& y)                    { if (!(proj_sinh(y.d->i(),x.d->i()))) throw EmptyBoxException();  }
-	inline void tanh_bwd  (const ExprTanh& e,  ExprLabel& x, const ExprLabel& y)                    { if (!(proj_tanh(y.d->i(),x.d->i()))) throw EmptyBoxException();  }
-	inline void acos_bwd  (const ExprAcos& e,  ExprLabel& x, const ExprLabel& y)                    { if (!(proj_acos(y.d->i(),x.d->i()))) throw EmptyBoxException();  }
-	inline void asin_bwd  (const ExprAsin& e,  ExprLabel& x, const ExprLabel& y)                    { if (!(proj_asin(y.d->i(),x.d->i()))) throw EmptyBoxException();  }
-	inline void atan_bwd  (const ExprAtan& e,  ExprLabel& x, const ExprLabel& y)                    { if (!(proj_atan(y.d->i(),x.d->i()))) throw EmptyBoxException();  }
-	inline void acosh_bwd (const ExprAcosh& e, ExprLabel& x, const ExprLabel& y)                    { if (!(proj_acosh(y.d->i(),x.d->i()))) throw EmptyBoxException();  }
-	inline void asinh_bwd (const ExprAsinh& e, ExprLabel& x, const ExprLabel& y)                    { if (!(proj_asinh(y.d->i(),x.d->i()))) throw EmptyBoxException();  }
-	inline void atanh_bwd (const ExprAtanh& e, ExprLabel& x, const ExprLabel& y)                    { if (!(proj_atanh(y.d->i(),x.d->i()))) throw EmptyBoxException();  }
+	inline void sqr_bwd   (const ExprSqr& ,   ExprLabel& x, const ExprLabel& y)                    { if (!(proj_sqr(y.d->i(),x.d->i()))) throw EmptyBoxException();  }
+	inline void sqrt_bwd  (const ExprSqrt& ,  ExprLabel& x, const ExprLabel& y)                    { if (!(proj_sqrt(y.d->i(),x.d->i()))) throw EmptyBoxException();  }
+	inline void exp_bwd   (const ExprExp& ,   ExprLabel& x, const ExprLabel& y)                    { if (!(proj_exp(y.d->i(),x.d->i()))) throw EmptyBoxException();  }
+	inline void log_bwd   (const ExprLog& ,   ExprLabel& x, const ExprLabel& y)                    { if (!(proj_log(y.d->i(),x.d->i()))) throw EmptyBoxException();  }
+	inline void cos_bwd   (const ExprCos& ,   ExprLabel& x, const ExprLabel& y)                    { if (!(proj_cos(y.d->i(),x.d->i()))) throw EmptyBoxException();  }
+	inline void sin_bwd   (const ExprSin& ,   ExprLabel& x, const ExprLabel& y)                    { if (!(proj_sin(y.d->i(),x.d->i()))) throw EmptyBoxException();  }
+	inline void tan_bwd   (const ExprTan& ,   ExprLabel& x, const ExprLabel& y)                    { if (!(proj_tan(y.d->i(),x.d->i()))) throw EmptyBoxException();  }
+	inline void cosh_bwd  (const ExprCosh& ,  ExprLabel& x, const ExprLabel& y)                    { if (!(proj_cosh(y.d->i(),x.d->i()))) throw EmptyBoxException();  }
+	inline void sinh_bwd  (const ExprSinh& ,  ExprLabel& x, const ExprLabel& y)                    { if (!(proj_sinh(y.d->i(),x.d->i()))) throw EmptyBoxException();  }
+	inline void tanh_bwd  (const ExprTanh& ,  ExprLabel& x, const ExprLabel& y)                    { if (!(proj_tanh(y.d->i(),x.d->i()))) throw EmptyBoxException();  }
+	inline void acos_bwd  (const ExprAcos& ,  ExprLabel& x, const ExprLabel& y)                    { if (!(proj_acos(y.d->i(),x.d->i()))) throw EmptyBoxException();  }
+	inline void asin_bwd  (const ExprAsin& ,  ExprLabel& x, const ExprLabel& y)                    { if (!(proj_asin(y.d->i(),x.d->i()))) throw EmptyBoxException();  }
+	inline void atan_bwd  (const ExprAtan& ,  ExprLabel& x, const ExprLabel& y)                    { if (!(proj_atan(y.d->i(),x.d->i()))) throw EmptyBoxException();  }
+	inline void acosh_bwd (const ExprAcosh& , ExprLabel& x, const ExprLabel& y)                    { if (!(proj_acosh(y.d->i(),x.d->i()))) throw EmptyBoxException();  }
+	inline void asinh_bwd (const ExprAsinh& , ExprLabel& x, const ExprLabel& y)                    { if (!(proj_asinh(y.d->i(),x.d->i()))) throw EmptyBoxException();  }
+	inline void atanh_bwd (const ExprAtanh& , ExprLabel& x, const ExprLabel& y)                    { if (!(proj_atanh(y.d->i(),x.d->i()))) throw EmptyBoxException();  }
 
 protected:
 	void proj(const Function& f, const Domain& y, ExprLabel** x);

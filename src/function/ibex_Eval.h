@@ -100,9 +100,9 @@ public:
  	 	 	 	 	 	 	 implementation
   ============================================================================*/
 
-inline void Eval::index_fwd(const ExprIndex& e, const ExprLabel& x, ExprLabel& y) { /* nothing to do */ }
+inline void Eval::index_fwd(const ExprIndex& , const ExprLabel& , ExprLabel& ) { /* nothing to do */ }
 
-inline void Eval::symbol_fwd(const ExprSymbol& s, ExprLabel& y) { /* nothing to do */ }
+inline void Eval::symbol_fwd(const ExprSymbol& , ExprLabel& ) { /* nothing to do */ }
 
 inline void Eval::cst_fwd(const ExprConstant& c, ExprLabel& y) {
 	switch (c.type()) {
