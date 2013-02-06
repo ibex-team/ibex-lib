@@ -146,7 +146,7 @@ public class Ibex {
 	 *   UNKWOWN_POINT   - No inflation at all could be done and it could even not be decided 
 	 *                     whether p is inside or outside the constraint.
 	 */
-	public native int inflate(int i, double p[], double bounds[], int in);
+	public native int inflate(int i, double p[], double bounds[], boolean in);
 
 
 	/**

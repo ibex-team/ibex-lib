@@ -140,7 +140,7 @@ JNIEXPORT jint JNICALL Java_Ibex_contract__I_3DI(JNIEnv *env, jobject, jint n, j
 }
 
 JNIEXPORT jint JNICALL Java_ibex_Ibex_inflate
-  (JNIEnv *, jobject, jint, jdoubleArray, jdoubleArray, jint) {
+  (JNIEnv *, jobject, jint, jdoubleArray, jdoubleArray, jboolean) {
 
 	// TO DO
 
