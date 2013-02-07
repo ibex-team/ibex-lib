@@ -117,7 +117,7 @@ JNIEXPORT jint JNICALL Java_Ibex_contract__I_3DI(JNIEnv *env, jobject, jint n, j
 			if (reif==TRUE_ && savebox.rel_distance(box) >= EPS_CONTRACT) {
 				result=CONTRACT;
 			} else {
-				result=NOT_SIGNIFICANT;
+				result=NOTHING;
 			}
 		} catch(EmptyBoxException&) {
 			result=FAIL;

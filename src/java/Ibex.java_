@@ -99,7 +99,7 @@ public class Ibex {
 	 *                     removed part of the domain is inside c. If reif==TRUE, the removed part 
 	 *                     is outside.
 	 *        
-	 *   NOT_SIGNIFICANT - No bound has been reduced and nothing could be proven.
+	 *   NOTHING         - No bound has been reduced and nothing could be proven.
 	 */
 	public native int contract(int i, double bounds[], int reif);    
 
