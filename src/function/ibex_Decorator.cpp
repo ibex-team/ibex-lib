@@ -90,9 +90,12 @@ void Decorator::visit(const ExprConstant& e) {
 }
 
 void Decorator::visit(const ExprSymbol& e) {
-	std::stringstream s;
-	s << "Symbol\"" << e.name << "\" is not an argument of the function";
-	ibex_error(s.str().c_str());
+	e.deco.d = new Domain(e.dim);
+	e.deco.g = new Domain(e.dim);
+	e.deco.p = new Domain(e.dim);
+//	std::stringstream s;
+//	s << "Symbol\"" << e.name << "\" is not an argument of the function";
+//	ibex_error(s.str().c_str());
 }
 
 void Decorator::visit(const ExprBinaryOp& b) {
