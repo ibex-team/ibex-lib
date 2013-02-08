@@ -27,8 +27,8 @@ namespace ibex {
  * \brief Solver
  */
 
-  class CellLimitException : public Exception {} ;
-  
+class CellLimitException : public Exception {} ;
+
 class Solver {
 public:
 	/**
@@ -37,9 +37,24 @@ public:
 	Solver(Ctc& ctc, Bsc& bsc, CellBuffer& buffer, double prec);
 
 	/**
-	 * \brief Solve the system.
+	 * \brief Solve the system (non-interactive mode).
 	 */
 	std::vector<IntervalVector> solve(const IntervalVector& init_box);
+
+	/**
+	 * \brief Start solving (interactive mode).
+	 *
+	 * Can also be used to restart a new search.
+	 */
+	void start(const IntervalVector& init_box);
+
+	/**
+	 * \brief Continue solving (interactive mode).
+	 *
+	 * Look for the next solution and push it into the vector.
+	 * \return false if the search is over (true otherwise).
+	 */
+	bool next(std::vector<IntervalVector>& sols);
 
 	/** Contractor. */
 	Ctc& ctc;
@@ -65,20 +80,26 @@ public:
 	 * on the standard output each time a new cell is created. Default value is \c false.
 	 */
 	int trace;
+
 	/** Number of nodes  in the search tree */
 	int nb_cells;
 
-/** Maximum cpu time used by the solver.
-   * This parameter allows to bound time complexity.
-   * The value can be fixed by the user. By default, it is -1 (no limit). */
+	/** Maximum cpu time used by the solver.
+	 * This parameter allows to bound time complexity.
+	 * The value can be fixed by the user. By default, it is -1 (no limit). */
 
-  double time_limit;
-  /* Remember running time of the last exploration */
-  double time;
- protected :
+	double time_limit;
+
+	/** Remember running time of the last exploration */
+	double time;
+
+protected :
+
 	void time_limit_check();
+
 	void new_sol(std::vector<IntervalVector> & sols, IntervalVector & box);
-  
+
+	BoolMask impact;
 
 };
 
