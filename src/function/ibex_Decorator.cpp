@@ -11,6 +11,9 @@
 #include "ibex_Decorator.h"
 #include "ibex_Function.h"
 #include "ibex_Expr.h"
+#include "ibex_Exception.h"
+
+#include <sstream>
 
 namespace ibex {
 
@@ -22,9 +25,12 @@ void Decorator::decorate(const Function& f) {
 
 
 	// we cannot just call visit(f.expr()) because
-	// some symbols may not appear in the expression
+	// 1- some symbols may not appear in the expression
 	// and they have to be decorated. So we first
 	// decorate all the symbols.
+	// 2- we can check, in this way, that all the
+	// symbols appearing in the expression are arguments
+	// of the function (since they have to be already decorated)
 	for (int i=0; i<f.nb_arg(); i++) {
 		f.arg(i).deco.visited=false;
 		visit((const ExprNode&) f.arg(i)); // cast to ExprNode, in order to set "visited" to true.
@@ -74,9 +80,19 @@ void Decorator::visit(const ExprIndex& idx) {
 }
 
 void Decorator::visit(const ExprLeaf& e) {
+	assert(false);
+}
+
+void Decorator::visit(const ExprConstant& e) {
 	e.deco.d = new Domain(e.dim);
 	e.deco.g = new Domain(e.dim);
 	e.deco.p = new Domain(e.dim);
+}
+
+void Decorator::visit(const ExprSymbol& e) {
+	std::stringstream s;
+	s << "Symbol\"" << e.name << "\" is not an argument of the function";
+	ibex_error(s.str().c_str());
 }
 
 void Decorator::visit(const ExprBinaryOp& b) {

@@ -58,6 +58,10 @@ protected:
 	virtual void visit(const ExprUnaryOp&);
 	/* Visit a binary operator. */
 	virtual void visit(const ExprBinaryOp&);
+	/* Visit a constant. */
+	virtual void visit(const ExprConstant&);
+	/* Visit a symbol. */
+	virtual void visit(const ExprSymbol&);
 };
 
 } // end namespace ibex

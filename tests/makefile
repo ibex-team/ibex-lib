@@ -3,9 +3,15 @@ HEADERS=$(SRCS:.cpp=.h)
 OBJS=$(SRCS:.cpp=.o)
 TARGET=utest
 
-CXXFLAGS := $(shell pkg-config --cflags ibex)  -O3 -DNDEBUG -Wno-deprecated   #-g # -pg 
+CXXFLAGS := $(shell pkg-config --cflags ibex) 
 LIBS	 :=  -static $(shell pkg-config --libs  ibex) -lcpptest
 LIBDIR	 := $(shell pkg-config --libdir  ibex) 
+
+ifeq ($(DEBUG), yes)
+CXXFLAGS := $(CXXFLAGS) -O0 -g -pg -Wall -frounding-math  
+else
+CXXFLAGS := $(CXXFLAGS) -O3 -DNDEBUG -Wno-deprecated -frounding-math 
+endif
 
 $(TARGET):	$(OBJS) 
 	$(CXX) -o $(TARGET) $(CXXFLAGS) $(OBJS) $(LIBS)
