@@ -91,7 +91,7 @@ System::System(const System& sys, copy_mode mode) : nb_var(0), nb_ctr(0), func(0
 	// -------------------------------------------------------------
 
 	// ---------- duplicate the goal function ----------------
-	if (mode!=EXTEND)
+	if (sys.goal!=NULL && mode!=EXTEND)
 		goal = new Function(*sys.goal);
 	else
 		goal = NULL;
@@ -237,7 +237,7 @@ std::ostream& operator<<(std::ostream& os, const System& sys) {
 	os << endl;
 
 	os << "goal: " << endl;
-	if (sys.goal)
+	if (sys.goal!=NULL)
 	    os << "  " << sys.goal->expr() << endl;
 	else
 		os << "  (none)" << endl;

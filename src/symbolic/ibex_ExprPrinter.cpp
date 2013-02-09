@@ -35,7 +35,14 @@ void ExprPrinter::visit(const ExprSymbol& e) {
 
 void ExprPrinter::visit(const ExprConstant& e) {
 	switch (e.type()) {
-	case Dim::SCALAR:     (*os) << e.get_value(); break;
+	case Dim::SCALAR: {
+		const Interval& x=e.get_value();
+		if (x.is_degenerated())
+			(*os) <<  x.mid();
+		else
+			(*os) << x;
+
+	} break;
 	case Dim::COL_VECTOR: (*os) << e.get_vector_value(); break;
 	case Dim::ROW_VECTOR: (*os) << e.get_vector_value() << "'"; break;
 	case Dim::MATRIX:     (*os) << e.get_matrix_value(); break;

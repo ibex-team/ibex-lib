@@ -52,7 +52,8 @@ System::System(const SystemFactory& fac) : nb_var(0) /* tmp */,
 			goal_vars.set_ref(j,ExprSymbol::new_(fac.vars[j]->name, fac.vars[j]->dim));
 
 		goal = new Function(goal_vars, ExprCopy().copy(fac.vars, goal_vars, *fac.goal));
-	}
+	} else
+		goal = NULL;
 
 	// =========== init f
 	Array<const ExprNode> y(nb_ctr);
