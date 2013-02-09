@@ -261,13 +261,33 @@ void TestParser::choco01() {
 }
 
 void TestParser::loop01() {
-/*	try {
+	try {
 		System sys("quimper/loop01.qpr");
-		cout << sys << endl;
+		double a = 1;
+		double b = 2;
+		int c=0;
+		double error=1e-15;
+		for (int i=1;i<=3;i++) {
+		    for (int j=1; j<=i; j++) {
+
+		      for (int k=j; k<=i; k++) {
+		    	  const ExprSub& sub=(const ExprSub&) sys.ctrs[c++].f.expr();
+		    	  const ExprConstant& cst=(const ExprConstant&) sub.right;
+		    	  TEST_ASSERT_DELTA(a+i+j*k,cst.get_value().mid(),error);
+		      }
+		    }
+
+		    for (int j=1; j<=i; j++) {
+		    	const ExprSub& sub=(const ExprSub&) sys.ctrs[c++].f.expr();
+		    	const ExprConstant& cst=(const ExprConstant&) sub.right;
+		    	TEST_ASSERT_DELTA(i+j-b,cst.get_value().mid(),error);
+
+		    }
+		}
+
 	} catch(SyntaxError& s)  {
 		cout << s << endl;
 	}
-*/
 }
 
 void TestParser::error01() {

@@ -13,6 +13,7 @@
 #include "ibex_P_NumConstraint.h"
 #include "ibex_Function.h"
 #include "ibex_P_ExprGenerator.h"
+#include "ibex_ConstantGenerator.h"
 
 using namespace std;
 
@@ -52,8 +53,9 @@ void CtrGenerator::visit(const P_ConstraintList& list) {
 
 void CtrGenerator::visit(const P_ConstraintLoop& loop) {
 	const char* name     = loop.iter;
-	int         begin    = loop.first_value; //scope.it_first_value(name);
-	int         end      = loop.last_value; //scope.it_last_value(name);
+
+	int begin=ConstantGenerator(scopes.top()).eval_integer(loop.first_value); //scope.it_first_value(name);
+	int end=ConstantGenerator(scopes.top()).eval_integer(loop.last_value); //scope.it_last_value(name);
 
 	if (!scopes.empty())
 		scopes.push(scopes.top());

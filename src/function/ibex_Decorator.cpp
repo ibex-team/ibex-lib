@@ -24,16 +24,22 @@ void Decorator::decorate(const Function& f) {
 	f.expr().reset_visited();
 
 
-	// we cannot just call visit(f.expr()) because
+	// we cannot just call visit(f.expr()) because:
+	//
 	// 1- some symbols may not appear in the expression
 	// and they have to be decorated. So we first
 	// decorate all the symbols.
+	//
 	// 2- we can check, in this way, that all the
 	// symbols appearing in the expression are arguments
 	// of the function (since they have to be already decorated)
 	for (int i=0; i<f.nb_arg(); i++) {
-		f.arg(i).deco.visited=false;
-		visit((const ExprNode&) f.arg(i)); // cast to ExprNode, in order to set "visited" to true.
+		const ExprSymbol& x=f.arg(i);
+		//visit((const ExprNode&) x); // don't (because of case 2- above)
+		x.deco.visited=true;
+		x.deco.d = new Domain(x.dim);
+		x.deco.g = new Domain(x.dim);
+		x.deco.p = new Domain(x.dim);
 	}
 
 	visit(f.expr()); // cast -> we know *this will not be modified
@@ -90,12 +96,9 @@ void Decorator::visit(const ExprConstant& e) {
 }
 
 void Decorator::visit(const ExprSymbol& e) {
-	e.deco.d = new Domain(e.dim);
-	e.deco.g = new Domain(e.dim);
-	e.deco.p = new Domain(e.dim);
-//	std::stringstream s;
-//	s << "Symbol\"" << e.name << "\" is not an argument of the function";
-//	ibex_error(s.str().c_str());
+	std::stringstream s;
+	s << "Symbol\"" << e.name << "\" is not an argument of the function";
+	ibex_error(s.str().c_str());
 }
 
 void Decorator::visit(const ExprBinaryOp& b) {

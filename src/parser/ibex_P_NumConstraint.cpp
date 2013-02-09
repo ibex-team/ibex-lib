@@ -39,13 +39,14 @@ P_ConstraintList::~P_ConstraintList() {
 	delete &ctrs;
 }
 
-P_ConstraintLoop::P_ConstraintLoop(const char* iter, int first_value, int last_value, vector<P_NumConstraint*>& ctrs) :
+P_ConstraintLoop::P_ConstraintLoop(const char* iter, const ExprNode& first_value, const ExprNode& last_value, vector<P_NumConstraint*>& ctrs) :
 		 iter(strdup(iter)), first_value(first_value), last_value(last_value), ctrs(ctrs) {
 
 }
 
 P_ConstraintLoop::~P_ConstraintLoop() {
-
+	cleanup(first_value,true); // false or true (there is no symbols)
+	cleanup(last_value,true);
 }
 
 } // end namespace parser
