@@ -120,6 +120,8 @@ public class Ibex {
 	 *
 	 * @param i      - Number of the constraint c (in the order of creation)
 	 *
+	 * @param p      - The coordinates of the point to inflate: (p1,...pn)
+	 *
 	 * @param bounds - The bounds of the enclosing box x under the following form:
 	 *                 (x1-,x1+,x2-,x2+,...,xn-,xn+), where xi- (resp. xi+) is the
 	 *                 lower (resp. upper) bound of the domain of x_i.
