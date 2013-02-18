@@ -4,7 +4,7 @@
 import os, shutil, re
 
 from distutils.version import LooseVersion
-from waflib import Logs
+from waflib import Logs, Scripting
 
 # the following two variables are used by the target "waf dist"
 VERSION="2.0.0alpha"
@@ -171,6 +171,10 @@ def configure (conf):
 def build (bld):
 	bld.recurse ("src examples 3rd")
 
+def distclean (ctx):
+	Scripting.distclean (ctx)
+	ctx.recurse ("3rd")
+
 def dist (ctx):
 	# do not include 3rd/* subdirectories when building the archive
 	get_files_orig = ctx.get_files
@@ -186,4 +190,3 @@ def dist (ctx):
 		return list(filter (is_not_3rd_subdir, get_files_orig()))
 	ctx.get_files = get_files
 		
-

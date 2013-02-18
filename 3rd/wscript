@@ -1,14 +1,34 @@
 #! /usr/bin/env python
 # encoding: utf-8
 
-import tarfile, os.path, os, re, patch, sys
+import tarfile, os.path, os, re, patch, sys, functools
 from waflib import Utils, Errors, Logs
 
+def unpack_archive (src_dir_node, name, filename = None):
+	src_dir = src_dir_node.abspath()
+	path = os.path.join (src_dir, name)
+
+	if not os.path.isdir (path):
+		# extract the sources
+		os.makedirs (path)
+
+		if not filename:
+			filename = "%s.tar.gz" % name
+
+		Logs.pprint ("NORMAL", "Unpacking %s" % filename)
+		t = tarfile.open (os.path.join (src_dir, filename))
+		t.extractall (src_dir)
+
+	node = src_dir_node.find_dir (name)
+	assert node
+	return node
 
 def configure (conf):
 	conf.env.BUILD_GDTOA	= False
 	conf.env.BUILD_MATHLIB	= False
 	conf.env.BUILD_GAOL	= False
+
+	extract = functools.partial (unpack_archive, conf.path)
 
 	ibex_env = conf.env
 	def ibex_append_path (var, p):
@@ -38,25 +58,23 @@ def configure (conf):
 		return with_value is not None
 
 	# allow only one interval lib
-	reduce ((lambda a, b: conf.fatal ("cannot use --with-gaol/--with-bias/--with-filib together")
-		 if a and b else a or b),
-		map (selected ,(with_bias, with_gaol, with_filib)), False)
+	with_any = False
+	for w in with_bias, with_gaol, with_filib:
+		if w is not None:
+			if with_any:
+				conf.fatal ("cannot use --with-gaol/--with-bias/--with-filib together")
+			with_any = True
 
 
-	if any (map (selected, (with_bias, with_gaol, with_filib))):
-		mandatory = True
-	else:
+	if not with_any:
 		# no lib selected
 		# -> will build one if needed
-		mandatory = False
 
 		if conf.env.DEST_CPU == "x86_64":
 			# gaol not working on 64 bit cpu -> use filib instead
 			with_filib = ''
 		else:
 			with_gaol = ''
-		# TODO remove
-		with_filib = ''
 
 	if enable_shlib:
 		# when building a shared, we force using the bundled version of gaol
@@ -85,6 +103,8 @@ def configure (conf):
 
 		conf.env.INTERVAL_LIB = "FILIB"
 
+		mandatory = bool (with_filib)
+
 		if with_filib:
 			conf.env.append_unique ("INCLUDES", join (with_filib, "include"))
 
@@ -107,6 +127,8 @@ def configure (conf):
 	else:
 		# build with gaol
 		conf.env.INTERVAL_LIB = "GAOL"
+
+		mandatory = bool (with_gaol)
 		
 		conf.switch_to_32bits()
 		if with_gaol:
@@ -375,6 +397,24 @@ def configure (conf):
 		conf.write_config_header ("%s/src/mathlib_configuration.h" % conf.env.MATHLIB)
 
 		conf.setenv ("")
+	
+	if conf.env.BUILD_FILIB:
+		log_start ("filib")
+		conf.env.FILIB = "filibsrc"
+		filib_dir = extract (conf.env.FILIB, "filibsrc-3.0.2.tar.gz")
+
+		ibex_append_path ("INCLUDES", conf.env.FILIB)
+		ibex_append_path ("LIBPATH", os.path.join (filib_dir.abspath(), "libprim", ".libs"))
+
+		ibex_env.append_unique ("INCLUDES_IBEX_DEPS", os.path.join (conf.env.PREFIX, "include"))
+		ibex_env.append_unique ("LIB_IBEX_DEPS", "prim")
+
+		conf.find_program ("make")
+
+		cmd = "./configure --prefix=%r" % conf.env.PREFIX
+
+		if conf.exec_command (cmd, cwd=filib_dir.abspath(), stdout=None, stderr=None):
+			conf.fatal ("failed to configure filib (%s)" % cmd)
 
 def build (bld):
 
@@ -389,19 +429,7 @@ def build (bld):
 			os.remove (filename)
 
 	src_dir = bld.path.abspath()
-	def extract (name):
-		path = os.path.join (src_dir, name)
-
-		if not os.path.isdir (path):
-			# extract the sources
-			os.makedirs (path)
-
-			t = tarfile.open (os.path.join (src_dir, "%s.tar.gz" % name))
-			t.extractall (src_dir)
-
-		node = bld.path.find_dir (name)
-		assert node
-		return node
+	extract = functools.partial (unpack_archive, bld.path)
 
 	def apply_patch (name):
 		patch_file = os.path.join (src_dir, name)
@@ -548,6 +576,35 @@ def build (bld):
 
 
 		bld.variant = ""
+	
+	if bld.env["BUILD_FILIB"]:
+		path = bld.path.find_dir (bld.env.FILIB).abspath()
+
+		with subdir (path):
+			cmd = bld.cmd if bld.cmd in ("install", "clean") else ""
+			if bld.exec_command (
+				"%r -j %d %s" % (bld.env.MAKE, bld.options.jobs, cmd),
+				cwd	= path,
+				stdout	= None,
+				stderr	= None,
+			):
+				bld.fatal ("failed to build filib")
+
+class subdir:
+	def __init__ (self, name_or_node):
+		self.name = name_or_node.abspath() if hasattr (name_or_node, "abspath") else str (name_or_node)
+
+	def __enter__ (self):
+		Logs.pprint ("BLUE", "Entering %r" % self.name)
+
+	def __exit__ (self, a, b, c):
+		Logs.pprint ("BLUE", "Leaving %r" % self.name)
 
 
+
+def distclean (ctx):
+	filib_dir = ctx.path.find_dir ("filibsrc")
+	if filib_dir and os.path.exists (os.path.join (filib_dir.abspath(), "Makefile")):
+		with subdir (filib_dir):
+			ctx.exec_command ("make distclean", cwd = filib_dir.abspath())
 

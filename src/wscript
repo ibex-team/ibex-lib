@@ -115,7 +115,7 @@ def build (bld):
 	# c++ compilation
 	tg_ibex = (bld.shlib if bld.env.ENABLE_SHARED else bld.stlib) (
 		target = "ibex",
-		use  = "gaol_objs gdtoa_objs ultim_objs IBEX_DEPS",
+		use  = "gaol_objs gdtoa_objs ultim_objs filib IBEX_DEPS",
 		source = ibex_src,
 		install_path = bld.env.LIBDIR,
 	)
@@ -139,7 +139,8 @@ Cflags: -I${includedir}/ibex %s
 Libs: -L${libdir} %s -libex %s
 """ % (		tsk.env.PREFIX, tsk.env.VERSION,
 		# extra CFLAGS
-		" ".join(("-I%s" % p) for p in filter (os.path.isabs, tsk.env.INCLUDES)),
+		# TODO: maybe remove INCLUDES ?
+		" ".join(("-I%s" % p) for p in filter (os.path.isabs, tsk.env.INCLUDES_IBEX_DEPS + tsk.env.INCLUDES)),
 		# extra LIBPATH
 		" ".join(("-L%s" % p) for p in filter (os.path.isabs, tsk.env.LIBPATH_IBEX_DEPS)),
 		# extra LIB
