@@ -2,7 +2,7 @@ SRCS=$(wildcard *.cpp)
 BINS=$(SRCS:.cpp=)
 
 CXXFLAGS := $(shell pkg-config --cflags ibex) 
-LIBS	 :=  -static $(shell pkg-config --libs  ibex) -lcpptest
+LIBS	 := $(shell pkg-config --libs  ibex)
 LIBDIR	 := $(shell pkg-config --libdir  ibex) 
 
 ifeq ($(DEBUG), yes)
