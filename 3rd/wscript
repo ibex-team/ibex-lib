@@ -34,17 +34,40 @@ def configure (conf):
 
 		# return true if we build as a shared library
 		return enable_shlib
+	def selected (with_value):
+		return with_value is not None
+
+	# allow only one interval lib
+	reduce ((lambda a, b: conf.fatal ("cannot use --with-gaol/--with-bias/--with-filib together")
+		 if a and b else a or b),
+		map (selected ,(with_bias, with_gaol, with_filib)), False)
+
+
+	if any (map (selected, (with_bias, with_gaol, with_filib))):
+		mandatory = True
+	else:
+		# no lib selected
+		# -> will build one if needed
+		mandatory = False
+
+		if conf.env.DEST_CPU == "x86_64":
+			# gaol not working on 64 bit cpu -> use filib instead
+			with_filib = ''
+		else:
+			with_gaol = ''
+		# TODO remove
+		with_filib = ''
 
 	if enable_shlib:
 		# when building a shared, we force using the bundled version of gaol
 		# (in order to ensure that it is compiled as position independent code)
+		# TODO: support shlib with filib
+		# TODO: disallow (conf.fatal) shlib with gaol/bias, but not with filib
 		conf.env.INTERVAL_LIB = "GAOL"
 		conf.env.BUILD_GAOL = True
 
 	elif with_bias is not None:
 		# build with bias
-		if with_gaol is not None:
-			conf.fatal ("cannot use --with-gaol and --with-bias together")
 
 		conf.env.INTERVAL_LIB = "BIAS"
 
@@ -59,23 +82,27 @@ def configure (conf):
 
 	elif with_filib is not None:
 		# build with filib
-		if with_gaol is not None:
-			conf.fatal ("cannot use --with-gaol and --with-filib together")
-		if with_bias is not None:
-			conf.fatal ("cannot use --with-bias and --with-filib together")
 
 		conf.env.INTERVAL_LIB = "FILIB"
 
 		if with_filib:
 			conf.env.append_unique ("INCLUDES", join (with_filib, "include"))
 
-		conf.check_cxx (header_name	= "interval/interval.hpp")
+		has_h = conf.check_cxx (
+				header_name	= "interval/interval.hpp",
+				mandatory	= mandatory)
 
 		kw = {"libpath": join (with_filib, "lib")} if with_filib else {}
-		conf.check_cxx (lib = ["prim"],
-				uselib_store = "IBEX_DEPS", **kw)
-		conf.env.append_unique ("CXXFLAGS", "-frounding-math")
+		has_l = conf.check_cxx (
+				lib = ["prim"],
+				uselib_store = "IBEX_DEPS",
+				mandatory = mandatory,
+				**kw)
 
+		if not (has_h and has_l):
+			conf.env.BUILD_FILIB = True
+
+		conf.env.append_unique ("CXXFLAGS", "-frounding-math")
 
 	else:
 		# build with gaol
