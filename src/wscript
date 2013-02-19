@@ -135,12 +135,14 @@ libdir=${prefix}/lib
 Name: ibex
 Description: A C++ library for interval-based algorithm design
 Version: %s
-Cflags: -I${includedir}/ibex %s
+Cflags: -I${includedir}/ibex %s %s
 Libs: -L${libdir} %s -libex %s
 """ % (		tsk.env.PREFIX, tsk.env.VERSION,
 		# extra CFLAGS
 		# TODO: maybe remove INCLUDES ?
 		" ".join(("-I%s" % p) for p in filter (os.path.isabs, tsk.env.INCLUDES_IBEX_DEPS + tsk.env.INCLUDES)),
+		# FIXME: are we allowed to include arbitrary cflags (other that -I) ?
+		" ".join(tsk.env.CXXFLAGS_IBEX_DEPS),
 		# extra LIBPATH
 		" ".join(("-L%s" % p) for p in filter (os.path.isabs, tsk.env.LIBPATH_IBEX_DEPS)),
 		# extra LIB
