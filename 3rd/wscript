@@ -83,15 +83,7 @@ def configure (conf):
 		else:
 			with_gaol = ''
 
-	if enable_shlib:
-		# when building a shared, we force using the bundled version of gaol
-		# (in order to ensure that it is compiled as position independent code)
-		# TODO: support shlib with filib
-		# TODO: disallow (conf.fatal) shlib with gaol/bias, but not with filib
-		conf.env.INTERVAL_LIB = "GAOL"
-		conf.env.BUILD_GAOL = True
-
-	elif with_bias is not None:
+	if with_bias is not None:
 		# build with bias
 
 		conf.env.INTERVAL_LIB = "BIAS"
@@ -418,15 +410,17 @@ def configure (conf):
 
 		conf.find_program ("make")
 
+		shared = "--enable-shared" if conf.env.ENABLE_SHARED else ""
+
 		if sys.platform == "win32":
 			# mingw build
 			conf.find_program ("sh")
 
 			cmd = [conf.env.SH, "-c",
-				"./configure --prefix=%r"
-				% convert_path_win2msys (conf.env.PREFIX)]
+				"./configure --prefix=%r %s"
+				% (convert_path_win2msys (conf.env.PREFIX), shared)]
 		else:
-			cmd = ["./configure", "--prefix=" + conf.env.PREFIX]
+			cmd =	"./configure --prefix=%r %s" % (conf.env.PREFIX, shared)
 
 		if conf.exec_command (cmd, cwd=filib_dir.abspath(), stdout=None, stderr=None):
 			conf.fatal ("failed to configure filib (%s)" % cmd)

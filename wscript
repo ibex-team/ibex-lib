@@ -84,11 +84,7 @@ def configure (conf):
 
 	# build as shared lib
 	if conf.options.ENABLE_SHARED or conf.options.WITH_JNI:
-		if conf.options.BIAS_PATH != None or conf.options.GAOL_PATH != None or conf.options.FILIB_PATH != None:
-			conf.fatal ("--enable-shlib cannot be used together with --with-bias/--with-gaol/--with-filib (the official libs are not compiled with -fPIC)")
-
 		env.ENABLE_SHARED = True
-
 
 	def find_lib (prefix):
 
