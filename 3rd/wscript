@@ -426,7 +426,7 @@ def configure (conf):
 				"./configure --prefix=%r"
 				% convert_path_win2msys (conf.env.PREFIX)]
 		else:
-			cmd = ["./configure", "--prefix=%r" % conf.env.PREFIX]
+			cmd = ["./configure", "--prefix=" + conf.env.PREFIX]
 
 		if conf.exec_command (cmd, cwd=filib_dir.abspath(), stdout=None, stderr=None):
 			conf.fatal ("failed to configure filib (%s)" % cmd)
