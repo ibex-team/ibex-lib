@@ -174,7 +174,6 @@ JNIEXPORT jint JNICALL Java_Ibex_contract__I_3DI(JNIEnv *env, jobject, jint n, j
 				neg[n]->contract(box);
 
 				if (result==CONTRACT) {
-					cout << "savebox=" << savebox << endl;
 					write_box(env,savebox,d);
 				}
 
