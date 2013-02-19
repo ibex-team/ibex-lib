@@ -23,6 +23,13 @@ def unpack_archive (src_dir_node, name, filename = None):
 	assert node
 	return node
 
+def convert_path_win2msys (path):
+	path = os.path.abspath (path)
+	drv, path = os.path.splitdrive (path)
+
+	return "/%s%s" % (drv[0], path.replace("\\", "/"))
+
+
 def configure (conf):
 	conf.env.BUILD_GDTOA	= False
 	conf.env.BUILD_MATHLIB	= False
@@ -411,7 +418,15 @@ def configure (conf):
 
 		conf.find_program ("make")
 
-		cmd = "./configure --prefix=%r" % conf.env.PREFIX
+		if sys.platform == "win32":
+			# mingw build
+			conf.find_program ("sh")
+
+			cmd = [conf.env.SH, "-c",
+				"./configure --prefix=%r"
+				% convert_path_win2msys (conf.env.PREFIX)]
+		else:
+			cmd = ["./configure", "--prefix=%r" % conf.env.PREFIX]
 
 		if conf.exec_command (cmd, cwd=filib_dir.abspath(), stdout=None, stderr=None):
 			conf.fatal ("failed to configure filib (%s)" % cmd)
@@ -581,9 +596,9 @@ def build (bld):
 		path = bld.path.find_dir (bld.env.FILIB).abspath()
 
 		with subdir (path):
-			cmd = bld.cmd if bld.cmd in ("install", "clean") else ""
+			cmd = [bld.cmd] if bld.cmd in ("install", "clean") else []
 			if bld.exec_command (
-				"%r -j %d %s" % (bld.env.MAKE, bld.options.jobs, cmd),
+				[bld.env.MAKE, "-j", str(bld.options.jobs)] + cmd,
 				cwd	= path,
 				stdout	= None,
 				stderr	= None,
