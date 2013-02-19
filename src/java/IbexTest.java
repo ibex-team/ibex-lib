@@ -43,6 +43,7 @@ public class IbexTest {
         ibex.release();
     }*/
 	
+	
 	@Test
     public void test2() {
         Ibex ibex = new Ibex();
@@ -90,7 +91,8 @@ public class IbexTest {
         double[] domains;
 
         domains = new double[]{0., 1., 0., 1.};
-        Assert.assertEquals(ibex.inflate(0, new double[]{0., 0.}, domains, true), Ibex.INFLATE);
+        
+       Assert.assertEquals(ibex.inflate(0, new double[]{0., 0.}, domains, true), Ibex.INFLATE);
         Assert.assertEquals(ibex.inflate(0, new double[]{0., 0.}, domains, true), Ibex.FULL_INFLATE);
         domains = new double[]{1., 2., 1., 2.};
         Assert.assertEquals(ibex.inflate(0, new double[]{1., 1.}, domains, true), Ibex.BAD_POINT);
@@ -104,7 +106,6 @@ public class IbexTest {
         Assert.assertEquals(ibex.inflate(0, new double[]{0., 0.}, domains, false), Ibex.BAD_POINT);
         domains = new double[]{0., 1.01, -1., 0.};
         Assert.assertEquals(ibex.inflate(0, new double[]{1.01, 0.}, domains, false), Ibex.NOT_SIGNIFICANT);
-
 
         ibex.release();
     }

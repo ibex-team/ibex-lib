@@ -218,6 +218,8 @@ JNIEXPORT jint JNICALL Java_Ibex_contract__I_3DI(JNIEnv *env, jobject, jint n, j
 	return result;
 }
 
+
+// either return BAD_POINT, UNKNOWN_POINT or INFLATE (the latter case also corresponds to the NOT_SIGNIFICANT case)
 jint inflate(NumConstraint& ctr, const IntervalVector& xin, IntervalVector& x, jboolean in) {
 	jint result;
 
@@ -227,8 +229,9 @@ jint inflate(NumConstraint& ctr, const IntervalVector& xin, IntervalVector& x, j
 		// we check this is not a vector-valued constraint
 		assert(ctr.f.image_dim()==1);
 		// the only thing we can do is to check "p"
-		if (yin==Interval::ZERO) result=NOT_SIGNIFICANT;
+		if (yin==Interval::ZERO) result=INFLATE;
 		else result=UNKNOWN_POINT;
+		x=xin;
 	} else {
 		Interval y;
 
@@ -240,10 +243,11 @@ jint inflate(NumConstraint& ctr, const IntervalVector& xin, IntervalVector& x, j
 		case EQ:  ibex_error("inflation with equalities"); break;
 		}
 
-		if (!yin.is_subset(y))
+		if (!yin.is_subset(y)) {
 			if ((yin & y).is_empty()) result=BAD_POINT;
 			else result=UNKNOWN_POINT;
-		else {
+			x=xin;
+		} else {
 			ctr.f.iproj(y,x,xin);
 			result=INFLATE;
 		}
@@ -251,7 +255,7 @@ jint inflate(NumConstraint& ctr, const IntervalVector& xin, IntervalVector& x, j
 	return result;
 }
 
-JNIEXPORT jint JNICALL Java_ibex_Ibex_inflate(JNIEnv *env, jobject, jint n, jdoubleArray p, jdoubleArray X, jboolean in) {
+JNIEXPORT jint JNICALL Java_Ibex_inflate(JNIEnv *env, jobject, jint n, jdoubleArray p, jdoubleArray X, jboolean in) {
 
 	jint result;
 
@@ -270,24 +274,79 @@ JNIEXPORT jint JNICALL Java_ibex_Ibex_inflate(JNIEnv *env, jobject, jint n, jdou
 
 	IntervalVector savebox(x);
 
-	for (int i=0; i<sys[n]->ctrs.size(); i++) {
-		if (in) {
-			NumConstraint& ctr=sys[n]->ctrs[i];
-			int r=inflate(ctr,xin,x,in);
-			if (r!=INFLATE && in) { result=r; break; }
-			if (!in) {
+	if (in) {
+		// try first "full inflate" using negation contractor
+		// (because of inner rounding, the inflation may
+		// fail in entirely proving x is inner so we use
+		// the contractor instead)
+		try {
+			neg[n]->contract(x);
+
+			result=INFLATE; // by default
+		} catch(EmptyBoxException&) {
+
+			result=FULL_INFLATE;
+		}
+
+		x=savebox; // result==FULL_INFLATE => savebox is entirely "inside" this constraint
+
+		if (result!=FULL_INFLATE) {
+			// note: in principle, we could also slightly optimize the
+			// loop below by using the negation contractor of
+			// sub-constraints (to remove the inner rounding effect).
+			// But this would bring non significant gain since the
+			// result would probably not be FULL_INFLATE in this case.
+			for (int i=0; i<sys[n]->ctrs.size(); i++) {
+				NumConstraint& ctr=sys[n]->ctrs[i];
+				result=inflate(ctr,xin,x,in); // will "contract" x to the inflated box.
+				if (result!=INFLATE) break;
+			}
+		}
+	} else {
+
+		// same comments as above
+		try {
+			ctc[n]->contract(x);
+			result=BAD_POINT; // by default
+		} catch(EmptyBoxException&) {
+			result=FULL_INFLATE;
+		}
+
+		x=savebox;
+
+		if (result!=FULL_INFLATE) {
+
+			for (int i=0; i<sys[n]->ctrs.size(); i++) {
+				NumConstraint& ctr=sys[n]->ctrs[i];
+
+				int r=inflate(ctr,xin,x,in);
+
+				// kind of logical "or" between the results of
+				// inflation for of each constraint
+				if (r==INFLATE)
+					result=INFLATE;
+				else if (r==UNKNOWN_POINT && result==BAD_POINT)
+					result=UNKNOWN_POINT;
+
 				xin=x;
 				x=savebox;
 			}
+
+			x=xin;
 		}
 	}
 
-	if (savebox.is_subset(x)) result=FULL_INFLATE;
-	else if (savebox.rel_distance(x) >= EPS_CONTRACT) result=INFLATE;
+	//cout << "savebox=" << savebox << " box=" << x << endl;
 
 	if (result==INFLATE) {
-		write_box(env,x,d);
+		if (savebox.is_subset(x))
+			result=FULL_INFLATE;
+		else if (savebox.rel_distance(x) <= (1.0-EPS_CONTRACT))
+			write_box(env,x,d);
+		else
+			result=NOT_SIGNIFICANT;
 	}
+
 	env->ReleaseDoubleArrayElements(X, d, 0);
 	env->ReleaseDoubleArrayElements(p, d2, 0); // 0-->JNI_ABORT since the array was not modified?
 
@@ -304,4 +363,5 @@ JNIEXPORT void JNICALL Java_Ibex_release(JNIEnv *, jobject) {
 	sys.clear();
 	options.clear();
 	ctc.clear();
+	neg.clear();
 }
