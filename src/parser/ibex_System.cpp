@@ -133,9 +133,12 @@ System::System(const System& sys, copy_mode mode) : nb_var(0), nb_ctr(0), func(0
 				if (p.first==NULL) {
 					not_implemented("Normalization with equality constraints");
 				}
-				const ExprNode& f_i=ExprCopy().copy(sys.ctrs[i].f.args(), ctrvars, *p.first);
-				ctrs.set_ref(j++,*new NumConstraint(ctrvars, f_i<=p.second->ub()));
-				ctrs.set_ref(j++,*new NumConstraint(ctrvars, -f_i<=-p.second->lb()));
+				const ExprNode& f_1=ExprCopy().copy(sys.ctrs[i].f.args(), ctrvars, *p.first);
+				ctrs.set_ref(j++,*new NumConstraint(ctrvars, f_1<=p.second->ub()));
+				ctrvars.clear();
+				varcopy(args,ctrvars);
+				const ExprNode& f_2=ExprCopy().copy(sys.ctrs[i].f.args(), ctrvars, *p.first);
+				ctrs.set_ref(j++,*new NumConstraint(ctrvars, -f_2<=-p.second->lb()));
 
 				continue;
 			}

@@ -131,6 +131,12 @@ public:
 	 */
 	T& operator[](int i) const;
 
+	/**
+	 * \brief Remove all the references (the size
+	 * is unchanged).
+	 */
+	void clear();
+
 protected:
 	int _nb;
 
@@ -282,5 +288,11 @@ T& Array<T>::operator[](int i) const {
 	return *array[i];
 }
 
+template<class T>
+void Array<T>::clear() {
+	for (int i=0; i<_nb; i++) {
+		array[i] = NULL;
+	}
+}
 } // namespace ibex
 #endif // __IBEX_ARRAY_H__

@@ -25,7 +25,7 @@ public:
 		TEST_ADD(TestSystem::factory02);
 		TEST_ADD(TestSystem::copy01);
 		TEST_ADD(TestSystem::copy02);
-//		TEST_ADD(TestSystem::normalize01);
+		TEST_ADD(TestSystem::normalize01);
 //		TEST_ADD(TestSystem::normalize02);
 		TEST_ADD(TestSystem::extend01);
 		TEST_ADD(TestSystem::extend02);
@@ -38,7 +38,7 @@ public:
 	void factory02();
 	void copy01();
 	void copy02();
-//	void normalize01();
+	void normalize01();
 //	void normalize02();
 	void extend01();
 	void extend02();

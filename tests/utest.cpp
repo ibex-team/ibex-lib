@@ -28,6 +28,7 @@
 // ================ symbolic ===============
 #include "TestExpr.h"
 #include "TestFunction.h"
+#include "TestNumConstraint.h"
 #include "TestEval.h"
 #include "TestGradient.h"
 #include "TestHC4Revise.h"
@@ -68,6 +69,7 @@ int main() {
 
     ts.add(auto_ptr<Test::Suite>(new TestExpr()));
     ts.add(auto_ptr<Test::Suite>(new TestFunction()));
+    ts.add(auto_ptr<Test::Suite>(new TestNumConstraint()));
     ts.add(auto_ptr<Test::Suite>(new TestEval()));
 
     ts.add(auto_ptr<Test::Suite>(new TestParser()));

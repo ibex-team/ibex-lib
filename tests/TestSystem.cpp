@@ -51,6 +51,20 @@ static System* sysex2() {
 	return new System(fac);
 }
 
+static System* sysex3() {
+	SystemFactory fac;
+	Variable x("x");
+	Variable y("y");
+
+	fac.add_var(x);
+	fac.add_var(y);
+	fac.add_ctr(x+y=Interval(-1,1));
+	fac.add_ctr(x-y<=1);
+	fac.add_ctr(x-y>=-1);
+
+	return new System(fac);
+}
+
 void TestSystem::factory01() {
 
 	System& sys(*sysex1());
@@ -168,5 +182,29 @@ void TestSystem::extend02() {
 	TEST_ASSERT(sameExpr(sys.ctrs[0].f.expr(),"(__goal__-(x+y))"));
 	TEST_ASSERT(sys.ctrs[0].op==EQ);
 }
+
+void TestSystem::normalize01() {
+	System& _sys(*sysex3());
+	System sys(_sys,System::NORMALIZE);
+	delete &_sys;
+
+	TEST_ASSERT(sys.nb_ctr==4);
+	TEST_ASSERT(sys.nb_var==2);
+	TEST_ASSERT(sys.goal==NULL);
+	TEST_ASSERT(sys.ctrs.size()==4);
+	TEST_ASSERT(sys.f.nb_arg()==2);
+	TEST_ASSERT(sys.f.nb_var()==2);
+	TEST_ASSERT(sys.f.image_dim()==4)
+
+	TEST_ASSERT(sameExpr(sys.ctrs[0].f.expr(),"((x+y)-1)"));
+	TEST_ASSERT(sameExpr(sys.ctrs[1].f.expr(),"((-(x+y))-1)"));
+	TEST_ASSERT(sameExpr(sys.ctrs[2].f.expr(),"((x-y)-1)"));
+	TEST_ASSERT(sameExpr(sys.ctrs[3].f.expr(),"(-((x-y)--1))"));
+	TEST_ASSERT(sys.ctrs[0].op==LEQ);
+	TEST_ASSERT(sys.ctrs[1].op==LEQ);
+	TEST_ASSERT(sys.ctrs[2].op==LEQ);
+	TEST_ASSERT(sys.ctrs[3].op==LEQ);
+}
+
 
 } // end namespace

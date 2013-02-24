@@ -90,7 +90,8 @@ public:
 	 * <li> COPY:      copy
 	 * <li> NORMALIZE: copy and make all inequalities under the form f_i(x)<=0.
 	 *                 Thick equalities f(x)=[a,b] are also accepted and will be
-	 *                 transformed into two inequalities, f(x)<=b and -f(x)<=-a.
+	 *                 transformed into two inequalities, f(x)<=b and -f(x)<=-a
+	 *                 (in this precise order).
 	 *                 Note that the number of constraints of the resulting system
 	 *                 in this case is greater than the number or the original one.
 	 * <li> EXTEND:    normalize and encode the goal function as a constraint.
