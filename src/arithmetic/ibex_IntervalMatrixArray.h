@@ -41,6 +41,13 @@ public:
 	IntervalMatrixArray& operator=(const IntervalMatrixArray& a);
 
 	/**
+	 * \brief Set *this to its intersection with x
+	 *
+	 * \return a reference to this.
+	 */
+	IntervalMatrixArray& operator&=(const IntervalMatrixArray& x);
+
+	/**
 	 * \brief Check equality
 	 */
 	bool operator==(const IntervalMatrixArray& m) const;

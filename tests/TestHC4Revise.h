@@ -21,22 +21,24 @@ class TestHC4Revise : public TestIbex {
 
 public:
 	TestHC4Revise() {
+		TEST_ADD(TestHC4Revise::id01);
 		TEST_ADD(TestHC4Revise::add01);
 		TEST_ADD(TestHC4Revise::add02);
 		TEST_ADD(TestHC4Revise::add03);
 		TEST_ADD(TestHC4Revise::add04);
 		TEST_ADD(TestHC4Revise::mul01);
-
+		TEST_ADD(TestHC4Revise::min01);
 		TEST_ADD(TestHC4Revise::dist01);
 		TEST_ADD(TestHC4Revise::dist02);
 	}
-
+	void id01();
 	void add01();
 	void add02();
 	void add03();
 	void add04();
 
 	void mul01();
+	void min01();
 
 	void dist01();
 	void dist02();

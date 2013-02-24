@@ -13,7 +13,6 @@
 #define __IBEX_CTC_FWDBWD_H__
 
 #include "ibex_Ctc.h"
-#include "ibex_HC4Revise.h"
 #include "ibex_NumConstraint.h"
 
 namespace ibex {
@@ -54,12 +53,6 @@ public:
 	 * The constraint.
 	 */
 	const NumConstraint ctr;
-
-	/**
-	 * HC4Revise algorithm.
-	 */
-	HC4Revise hc4r;
-private:
 
 };
 

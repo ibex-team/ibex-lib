@@ -10,6 +10,7 @@
  * ---------------------------------------------------------------------------- */
 
 #include "ibex_CtcFwdBwd.h"
+#include "ibex_HC4Revise.h"
 
 namespace ibex {
 

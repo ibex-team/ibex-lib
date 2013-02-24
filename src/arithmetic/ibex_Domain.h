@@ -153,6 +153,21 @@ public:
 	}
 
 	/**
+	 * \brief Intersect the domain with another domain.
+	 */
+	Domain& operator&=(const Domain& d) {
+		assert((*this).dim==d.dim);
+		switch((*this).dim.type()) {
+		case Dim::SCALAR:       i()&=d.i(); break;
+		case Dim::ROW_VECTOR:
+		case Dim::COL_VECTOR:   v()&=d.v(); break;
+		case Dim::MATRIX:       m()&=d.m(); break;
+		case Dim::MATRIX_ARRAY: ma()&=d.ma(); break;
+		}
+		return *this;
+	}
+
+	/**
 	 * \brief Equality operator
 	 */
 	bool operator==(const Domain& d) const {

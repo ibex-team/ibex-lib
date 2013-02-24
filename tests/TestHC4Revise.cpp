@@ -19,6 +19,16 @@ using namespace std;
 
 namespace ibex {
 
+void TestHC4Revise::id01() {
+	Variable _x;
+	Function f(_x,_x);
+	Domain y(Dim::scalar());
+	y.i()=Interval(1,POS_INFINITY);
+	IntervalVector x(1,Interval(0,2));
+	HC4Revise().proj(f,y,x);
+	TEST_ASSERT(x[0]==Interval(1,2));
+}
+
 void TestHC4Revise::add01() {
 
 	const ExprSymbol& x = ExprSymbol::new_("x");
@@ -50,6 +60,25 @@ void TestHC4Revise::add03() {
 
 void TestHC4Revise::add04() {
 
+}
+
+void TestHC4Revise::min01() {
+	const ExprSymbol& x = ExprSymbol::new_("x");
+	const ExprSymbol& y = ExprSymbol::new_("y");
+	Function f(x,y,min(x,y));
+
+	double init_xy[][2]= { {0,3}, {2,4} };
+	IntervalVector box(2,init_xy);
+
+	Domain zero(Dim::scalar());
+	zero.i()=Interval(1,1);
+	f.backward(zero,box);
+	//cout << box << endl;
+
+	double res_xy[][2]= { {1,1}, {2,4} };
+	IntervalVector box1(2,res_xy);
+
+	TEST_ASSERT(box==box1);
 }
 
 void TestHC4Revise::mul01() {
