@@ -91,6 +91,19 @@ public:
 	 */
 	const CmpOp op;
 
+	/*
+	 * \brief Check if this constraint is a thick equality.
+	 *
+	 * A thick equality is a constraint under the form g(x)=[a,b]
+	 * or [a,b]=g(x). In this case, we have f(x)=+/-(g(x)-[a,b]).
+	 *
+	 * This function returns a pair containing pointers to
+	 * the subexpression g(x) and the constant [a,b], if f
+	 * can be decomposed in this way. Otherwise, it returns
+	 * the pair <NULL,NULL>.
+	 */
+	std::pair<const ExprNode*, const Interval*> is_thick_equality() const;
+
 protected:
 	bool own_f;
 };

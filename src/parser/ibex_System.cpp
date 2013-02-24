@@ -52,14 +52,19 @@ System::System(int n, const char* syntax) : nb_var(n), /* NOT TMP (required by p
 
 System::System(const System& sys, copy_mode mode) : nb_var(0), nb_ctr(0), func(0), box(1) {
 
-	// do not initalize x with with sys.f.args
+	// do not initialize x with with sys.f.args
 	// since f may be uninitialized (unconstrained problem)
 	const Array<const ExprSymbol>& x=sys.args;
 	int nb_arg=x.size();  // warning: x.size()<>n in general
 
-	// ---------- check all constraints have same variables ---------
+	// ---------- check all constraints have same variables
+	// and detect thick equalities. A thick equality increments
+	// the number of constraints
+	//  ---------
+	int nb_thick_eq=0;
 	for (int i=0; i<sys.nb_ctr; i++) {
 		assert(sys.f[i].nb_arg()==nb_arg);
+		if (sys.ctrs[i].op==EQ) nb_thick_eq++; // we will check that it is a thick equality later
 		for (int j=0; j<nb_arg; j++)
 			assert(sys.f[i].arg(j).dim==x[j].dim);
 	}
@@ -67,10 +72,14 @@ System::System(const System& sys, copy_mode mode) : nb_var(0), nb_ctr(0), func(0
 
 	// ---------- build the variables "vars" ----------------
 	if (mode==EXTEND) {
-		(int&) nb_var = sys.nb_var+1;
-		(int&) nb_ctr = sys.nb_ctr+1;
+		(int&) nb_var = sys.nb_var + 1;
+		(int&) nb_ctr = sys.nb_ctr + nb_thick_eq + 1;
 		args.resize(nb_arg+1);
-	} else {
+	} else if (mode==NORMALIZE) {
+		(int&) nb_var = sys.nb_var;
+		(int&) nb_ctr = sys.nb_ctr + nb_thick_eq;
+		args.resize(nb_arg);
+	} else { // mode==COPY
 		(int&) nb_var = sys.nb_var;
 		(int&) nb_ctr = sys.nb_ctr;
 		args.resize(nb_arg);
@@ -115,9 +124,24 @@ System::System(const System& sys, copy_mode mode) : nb_var(0), nb_ctr(0), func(0
 		// note: sys.ctrs.size()<>sys.nb_ctr in general but
 		// with EXTEND/NORMALIZE, they actually match (only scalar constraints).
 		for (int i=0; i<sys.ctrs.size(); i++) {
+
 			Array<const ExprSymbol> ctrvars(args.size());
 			varcopy(args,ctrvars);
+
+			if (sys.ctrs[i].op==EQ) {
+				pair<const ExprNode*, const Interval*> p=sys.ctrs[i].is_thick_equality();
+				if (p.first==NULL) {
+					not_implemented("Normalization with equality constraints");
+				}
+				const ExprNode& f_i=ExprCopy().copy(sys.ctrs[i].f.args(), ctrvars, *p.first);
+				ctrs.set_ref(j++,*new NumConstraint(ctrvars, f_i<=p.second->ub()));
+				ctrs.set_ref(j++,*new NumConstraint(ctrvars, -f_i<=-p.second->lb()));
+
+				continue;
+			}
+
 			const ExprNode& f_i=ExprCopy().copy(sys.ctrs[i].f.args(), ctrvars, sys.ctrs[i].f.expr());
+
 			switch (sys.ctrs[i].op) {
 			case LT:
 				ibex_warning("warning: strict inequality (<) replaced by inequality (<=).");
@@ -127,7 +151,7 @@ System::System(const System& sys, copy_mode mode) : nb_var(0), nb_ctr(0), func(0
 				ctrs.set_ref(j++,*new NumConstraint(ctrvars, f_i<=0));
 				break;
 			case EQ:
-				not_implemented("Normalization with equality constraints");
+				assert(false); // impossible
 				break;
 			case GT:
 				ibex_warning("warning: strict inequality (>) replaced by inequality (>=).");

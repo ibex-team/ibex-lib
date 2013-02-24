@@ -89,12 +89,18 @@ public:
 	 * <ul>
 	 * <li> COPY:      copy
 	 * <li> NORMALIZE: copy and make all inequalities under the form f_i(x)<=0.
+	 *                 Thick equalities f(x)=[a,b] are also accepted and will be
+	 *                 transformed into two inequalities, f(x)<=b and -f(x)<=-a.
+	 *                 Note that the number of constraints of the resulting system
+	 *                 in this case is greater than the number or the original one.
 	 * <li> EXTEND:    normalize and encode the goal function as a constraint.
-	 * The resulting system includes (n+1) variables, the n original variables x_1,...,x_n and
-	 * an an additional "goal" variable y. The goal variable is added at the end (after the others).
-	 * It also includes (m+1) constraints. The first constraint is y-goal(x)=0 where goal(x) is the
-	 * goal function. The others constraints are normalized copy of the original ones.
-	 * The name of the goal variable is #goal_name.
+	 *                 The resulting system includes (n+1) variables, the n original
+	 *                 variables x_1,...,x_n and an an additional "goal" variable y.
+	 *                 The goal variable is added at the end (after the others). It
+	 *                 also includes (m+1) constraints. The first constraint is y-goal(x)=0
+	 *                 where goal(x) is the goal function. The others constraints are
+	 *                 normalized copy of the original ones. The name of the goal
+	 *                 variable is #goal_name.
 	 * </ul>
 	 */
 	System(const System& sys, copy_mode mode=COPY);
