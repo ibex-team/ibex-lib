@@ -19,11 +19,12 @@ namespace ibex {
  *
  * \brief Precision contractor.
  *
- * Stop criterion for solvers, pavers, etc. This contractor usually controls the precision
- * of solutions of a solver: when the interval diameter of all the variables in the current
+ * Typically used as a stop criterion for pavers. This contractor controls the precision
+ * of boxes of a paver: when the interval diameter of all the variables in the current
  * box is lower than \link CtcPrecision::ceil ceil \endlink, the box is entirely contracted
- * (#ibex::EmptyBoxException). Solutions are therefore usually associated to this contractor
- * in a solving process. Precision of solutions is directly related to the parameter
+ * (#ibex::EmptyBoxException). The boundary of the set to be described by the paver is therefore
+ * usually associated to the boxes this contractor has removed from the search.
+ * In this case, the precision of the boundary is directly related to the parameter
  * \link CtcPrecision::ceil ceil \endlink.
  *
  */

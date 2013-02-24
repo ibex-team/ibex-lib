@@ -157,6 +157,44 @@ void Gradient::apply_bwd (const ExprApply& a, ExprLabel** x, const ExprLabel& y)
 	}
 }
 
+void Gradient::max_bwd(const ExprMax&, ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) {
+	Interval gx1,gx2;
+
+	if (x1.d->i().lb() > x2.d->i().ub()) {
+		gx1=Interval::ONE;
+		gx2=Interval::ZERO;
+	}
+	else if (x2.d->i().lb() > x1.d->i().ub()) {
+		gx1=Interval::ZERO;
+		gx2=Interval::ONE;
+	} else {
+		gx1=Interval(0,1);
+		gx2=Interval(0,1);
+	}
+
+	x1.g->i() += y.g->i() * gx1;
+	x2.g->i() += y.g->i() * gx2;
+}
+
+void Gradient::min_bwd(const ExprMin&, ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) {
+	Interval gx1,gx2;
+
+	if (x1.d->i().lb() < x2.d->i().ub()) {
+		gx1=Interval::ONE;
+		gx2=Interval::ZERO;
+	}
+	else if (x2.d->i().lb() < x1.d->i().ub()) {
+		gx1=Interval::ZERO;
+		gx2=Interval::ONE;
+	} else {
+		gx1=Interval(0,1);
+		gx2=Interval(0,1);
+	}
+
+	x1.g->i() += y.g->i() * gx1;
+	x2.g->i() += y.g->i() * gx2;
+}
+
 void Gradient::sign_bwd  (const ExprSign& e,  ExprLabel& exprL, const ExprLabel& result) {
 	if (exprL.d->i().contains(0)) exprL.g->i() += result.g->i()*Interval::POS_REALS;
 	else ; // nothing to do: derivative is zero

@@ -149,8 +149,7 @@ bool Optimizer::line_probing(const IntervalVector& box, const Vector& start, boo
 		double r=-g[j]/dist[j]; // space.box is bounded (precondition) => 0<|dist|<inf
 
 		if (r<0) {  // r is necessarily >=0
-			cout << "[gch] bug: negative ratio.\n";
-			exit(-1);
+			ibex_error("line probing in Optimizer has given a negative ratio");
 		}
 
 		if (r > max_ratio) {
@@ -197,16 +196,16 @@ bool Optimizer::line_probing(const IntervalVector& box, const Vector& start, boo
 
 			// watch dog
 			if (pt[j]<box[j].lb()) {
-				cout << "watchdog! j=" << j << endl;
+				//cout << "watchdog! j=" << j << endl;
 				pt[j]=box[j].lb();
 			} else if (pt[j]>box[j].ub()) {
-				cout << "watchdog! j=" << j << endl;
+				//cout << "watchdog! j=" << j << endl;
 				pt[j]=box[j].ub();
 			}
 		}
 
 		if (recursive) {
-			if (check_candidate(pt, is_inner))  {
+			if (check_candidate(pt, is_inner)) {
 				if (i<sample_size-1)
 					line_probing(box, pt, is_inner, sample_size-i-1, true);
 				return true;
@@ -232,25 +231,25 @@ bool Optimizer::update_loup_probing(const IntervalVector& box) {
 	IntervalVector inbox=box;
 	bool inner_found=false;
 	if (m==0)  // unconstrained problem
-	  inner_found=true;
+		inner_found=true;
 	//	cout << "inbox " << inbox << endl;
-        else
-	  {	if (in_HC4_flag) {
-		inner_found=in_HC4(inbox); // inbox will be contracted to an inner box (possibly empty)
-		//		cout << "inner_found ? " << inner_found << " inbox=" << inbox << endl;
-	    }
-	    else {
-	      try {
-		is_inside->contract(inbox); // compared to in_HC4, works the other way around: if inbox is inner, it is emptied.
-		inner_found=false;
-		inbox.set_empty();
-		} catch(EmptyBoxException&) {
-			inbox = box;
-			inner_found=true;
+	else {
+		if (in_HC4_flag) {
+			inner_found=in_HC4(inbox); // inbox will be contracted to an inner box (possibly empty)
+			//		cout << "inner_found ? " << inner_found << " inbox=" << inbox << endl;
 		}
-	    }
-	  }
-	
+		else {
+			try {
+				is_inside->contract(inbox); // compared to in_HC4, works the other way around: if inbox is inner, it is emptied.
+				inner_found=false;
+				inbox.set_empty();
+			} catch(EmptyBoxException&) {
+				inbox = box;
+				inner_found=true;
+			}
+		}
+	}
+
 	if (inner_found && mono_analysis_flag)
 		monotonicity_analysis(inbox);
 
@@ -265,28 +264,27 @@ bool Optimizer::update_loup_probing(const IntervalVector& box) {
 	//  else
 	//    if (!loup_changed)
 	bool loup_changed; // return value
-//	cout <<  " inner ? " << inner_found? << " box " << box << " inbox " << inbox << endl;
+	//	cout <<  " inner ? " << inner_found? << " box " << box << " inbox " << inbox << endl;
 	loup_changed = random_probing(inner_found? inbox : box, inner_found);
 
 	if (loup_changed) {
 
-	  if (trace) trace_loup(inner_found);
+		if (trace) trace_loup(inner_found);
 
-	  if (inner_found) {
-	    nb_inhc4++;
-	    diam_inhc4 = ((nb_inhc4-1) *diam_inhc4 + inbox.max_diam()) / nb_inhc4;
-	  } else {
-	    nb_rand++;
-	    diam_rand = ((nb_rand-1) *diam_rand + box.max_diam()) / nb_rand;
-	  }
+		if (inner_found) {
+			nb_inhc4++;
+			diam_inhc4 = ((nb_inhc4-1) *diam_inhc4 + inbox.max_diam()) / nb_inhc4;
+		} else {
+			nb_rand++;
+			diam_rand = ((nb_rand-1) *diam_rand + box.max_diam()) / nb_rand;
+		}
 	}
 
 	return loup_changed;
 }
 
 
-void Optimizer::trace_loup (bool inner_found)
-{
+void Optimizer::trace_loup (bool inner_found) {
 
   if (inner_found) cout << "[in!]";
   cout << setprecision (12) << " loup update " << loup  << " loup point  " << loup_point << endl;
