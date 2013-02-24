@@ -16,7 +16,7 @@ const double HC4Revise::RATIO = 0.1;
 
 void HC4Revise::proj(const Function& f, const Domain& y, Array<Domain>& x) {
 	Eval().eval(f,x);
-	*f.expr().deco.d = y;
+	*f.expr().deco.d &= y; // "&" for the case of a function x->x
 	f.backward<HC4Revise>(*this);
 	// note: not very clean.
 	// the box x is not emptied if an EmptyBoxException is thrown
@@ -26,7 +26,7 @@ void HC4Revise::proj(const Function& f, const Domain& y, Array<Domain>& x) {
 
 void HC4Revise::proj(const Function& f, const Domain& y, IntervalVector& x) {
 	Eval().eval(f,x);
-	*f.expr().deco.d = y;
+	*f.expr().deco.d &= y;
 	f.backward<HC4Revise>(*this);
 
 	if (f.all_args_scalar()) {
@@ -42,7 +42,7 @@ void HC4Revise::proj(const Function& f, const Domain& y, IntervalVector& x) {
 
 void HC4Revise::proj(const Function& f, const Domain& y, ExprLabel** x) {
 	Eval().eval(f,x);
-	*f.expr().deco.d = y;
+	*f.expr().deco.d &= y;
 	f.backward<HC4Revise>(*this);
 
 	Array<Domain> argD(f.nb_arg());

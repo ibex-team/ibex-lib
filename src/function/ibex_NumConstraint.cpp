@@ -18,6 +18,10 @@ namespace ibex {
 
 pair<const ExprNode*, const Interval*> NumConstraint::is_thick_equality() const {
 
+	// an inequality g(x)<=[a,b] is not considered as
+	// a thick equality, although it could...
+	if (op!=EQ) RETURN(NULL,NULL);
+
 	const ExprSub* sub=dynamic_cast<const ExprSub* >(&f.expr());
 
 	if (sub) {
@@ -29,7 +33,7 @@ pair<const ExprNode*, const Interval*> NumConstraint::is_thick_equality() const 
 				RETURN(&sub->left, &cst->get_value());
 		} else {
 
-			const ExprConstant* cst=dynamic_cast<const ExprConstant* >(&sub->left);
+			cst=dynamic_cast<const ExprConstant* >(&sub->left);
 
 			if (cst) {
 				if (cst->dim.is_scalar())

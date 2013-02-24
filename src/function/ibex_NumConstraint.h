@@ -101,6 +101,9 @@ public:
 	 * the subexpression g(x) and the constant [a,b], if f
 	 * can be decomposed in this way. Otherwise, it returns
 	 * the pair <NULL,NULL>.
+	 *
+	 * Note: an inequality g(x)<=[a,b] is not considered as
+	 * a thick equality, although it could...
 	 */
 	std::pair<const ExprNode*, const Interval*> is_thick_equality() const;
 
