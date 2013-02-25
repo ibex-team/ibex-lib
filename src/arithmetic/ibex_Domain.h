@@ -271,6 +271,11 @@ public:
 	 */
 	void set_empty();
 
+	/**
+	 * \brief Set the domain to ZERO.
+	 */
+	void clear();
+
 private:
 	friend class Domains;
 

@@ -37,6 +37,16 @@ void Domain::set_empty() {
 		}
 }
 
+void Domain::clear() {
+	switch (dim.type()) {
+	case Dim::SCALAR:     i()=0; break;
+	case Dim::ROW_VECTOR:
+	case Dim::COL_VECTOR: v().clear(); break;
+	case Dim::MATRIX:     m().clear(); break;
+	case Dim::MATRIX_ARRAY: for (int i=0; i<dim.dim1; i++) ma()[i].clear(); break;
+	}
+}
+
 std::ostream& operator<<(std::ostream& os,const Domain& d) {
 	switch (d.dim.type()) {
 		case Dim::SCALAR:       os << d.i(); break;

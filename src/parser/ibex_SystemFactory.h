@@ -32,7 +32,7 @@ public:
 	/**
 	 * \brief Add a new variable.
 	 */
-	void add_var(Variable& v);
+	void add_var(const ExprSymbol& v);
 
 	/**
 	 * \brief Add a goal function.

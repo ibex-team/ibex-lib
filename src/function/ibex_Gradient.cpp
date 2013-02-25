@@ -74,41 +74,11 @@ void Gradient::jacobian(const Function& f, const Array<Domain>& d, IntervalMatri
 	}
 }
 
-void Gradient::cst_fwd(const ExprConstant& c, ExprLabel& y) {
-	switch (c.type()) {
-	case Dim::SCALAR:       y.g->i()=0; break;
-	case Dim::ROW_VECTOR:
-	case Dim::COL_VECTOR:   y.g->v().clear(); break;
-	case Dim::MATRIX:       y.g->m().clear(); break;
-	case Dim::MATRIX_ARRAY: assert(false); break;
-	}
-}
-
-void Gradient::symbol_fwd(const ExprSymbol& s, ExprLabel& y) {
-	switch (s.type()) {
-		case Dim::SCALAR:       y.g->i()=0; break;
-		case Dim::ROW_VECTOR:
-		case Dim::COL_VECTOR:   y.g->v().clear(); break;
-		case Dim::MATRIX:       y.g->m().clear(); break;
-		case Dim::MATRIX_ARRAY: for (int i=0; i<s.dim.dim1; i++) y.g->ma()[i].clear(); break;
-		}
-}
-
 void Gradient::vector_fwd(const ExprVector& v, const ExprLabel** x, ExprLabel& y) {
 	if (v.dim.is_vector())
 		y.g->v().clear();
 	else
 		y.g->m().clear();
-}
-
-void Gradient::apply_fwd(const ExprApply& a, ExprLabel**, ExprLabel& y) {
-	switch (a.type()) {
-		case Dim::SCALAR:       y.g->i()=0; break;
-		case Dim::ROW_VECTOR:
-		case Dim::COL_VECTOR:   y.g->v().clear(); break;
-		case Dim::MATRIX:       y.g->m().clear(); break;
-		case Dim::MATRIX_ARRAY: assert(false); break;
-		}
 }
 
 void Gradient::vector_bwd(const ExprVector& v, ExprLabel** compL, const ExprLabel& y) {

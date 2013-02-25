@@ -41,9 +41,9 @@ public:
 
 	inline void index_fwd(const ExprIndex& , const ExprLabel& , ExprLabel& ) { /* nothing to do */ }
 	       void vector_fwd(const ExprVector& v, const ExprLabel** s, ExprLabel& y);
-	       void cst_fwd(const ExprConstant& c, ExprLabel& y);
-	       void symbol_fwd(const ExprSymbol& s, ExprLabel& y);
-	       void apply_fwd(const ExprApply& a, ExprLabel** argL, ExprLabel& y);
+	       void cst_fwd(const ExprConstant& c, ExprLabel& y)                                  { y.g->clear(); }
+	       void symbol_fwd(const ExprSymbol& s, ExprLabel& y)                                 { y.g->clear(); }
+	       void apply_fwd(const ExprApply& a, ExprLabel** argL, ExprLabel& y)                 { y.g->clear(); }
 	inline void add_fwd(const ExprAdd&, const ExprLabel&, const ExprLabel&, ExprLabel& y)     { y.g->i()=0; }
 	inline void mul_fwd(const ExprMul&, const ExprLabel&, const ExprLabel&, ExprLabel& y)     { y.g->i()=0; }
 	inline void sub_fwd(const ExprSub&, const ExprLabel&, const ExprLabel&, ExprLabel& y)     { y.g->i()=0; }
