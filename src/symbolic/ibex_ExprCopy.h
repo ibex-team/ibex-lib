@@ -15,6 +15,7 @@
 #include "ibex_ExprVisitor.h"
 #include "ibex_Array.h"
 #include "ibex_Domain.h"
+#include "ibex_NodeMap.h"
 
 namespace ibex {
 
@@ -109,7 +110,7 @@ protected:
 	void visit(const ExprAtanh& e);
 
 	bool fold;
-
+	NodeMap<const ExprNode*> map;
 };
 
 } // end namespace ibex

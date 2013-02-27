@@ -15,7 +15,6 @@
 #include "ibex_ExprPrinter.h"
 #include "ibex_ExprNodes.h"
 #include "ibex_ExprSize.h"
-#include "ibex_ExprReset.h"
 #include "ibex_String.h"
 #include <sstream>
 #include <limits.h>
@@ -49,10 +48,6 @@ ExprNode::ExprNode(int height, int size, const Dim& dim) :
 
 const ExprNode** ExprNode::subnodes() const {
 	return ExprNodes().nodes(*this);
-}
-
-void ExprNode::reset_visited() const {
-	ExprReset().reset(*this);
 }
 
 void cleanup(const ExprNode& expr, bool delete_symbols) {

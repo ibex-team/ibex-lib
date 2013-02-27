@@ -65,21 +65,21 @@ const ExprNode& ExprCopy::index_copy(const Array<const ExprSymbol>& old_x, const
 const ExprNode& ExprCopy::copy(const Array<const ExprSymbol>& old_x, const Array<const ExprSymbol>& new_x, const ExprNode& y, bool fold_cst) {
 
 	fold = fold_cst;
-
-	y.reset_visited();
+	map.clean();
 
 	assert(new_x.size()>=old_x.size());
 
-	for (int i=0; i<old_x.size(); i++)
-		old_x[i].deco.tmp=&new_x[i]; // must be done *after* y.reset_visited()
+	for (int i=0; i<old_x.size(); i++) {
+		map.insert(old_x[i],&new_x[i]);
+	}
 
 	visit(y);
 
-	return *(const ExprNode*) y.deco.tmp;
+	return *map[y];
 }
 
 void ExprCopy::visit(const ExprNode& e) {
-	if (e.deco.tmp==NULL) {
+	if (!map.found(e)) {
 		e.acceptVisitor(*this);
 	}
 }
@@ -87,17 +87,17 @@ void ExprCopy::visit(const ExprNode& e) {
 void ExprCopy::visit(const ExprIndex& i) {
 
 	visit(i.expr);
-	const ExprNode* node=(const ExprNode*) i.expr.deco.tmp;
+	const ExprNode* node=map[i.expr];
 	if (fold) {
 		const ExprConstant* c=dynamic_cast<const ExprConstant*>(node);
 		if (c) {
-			i.deco.tmp = &ExprConstant::new_(c->get()[i.index]);
+			map.insert(i,&ExprConstant::new_(c->get()[i.index]));
 			delete c;
 			return;
 		}
 	}
 
-	i.deco.tmp =& (*node)[i.index];
+	map.insert(i, &(*node)[i.index]);
 }
 
 void ExprCopy::visit(const ExprSymbol& x) {
@@ -105,7 +105,7 @@ void ExprCopy::visit(const ExprSymbol& x) {
 }
 
 void ExprCopy::visit(const ExprConstant& c) {
-	c.deco.tmp = &c.copy();
+	map.insert(c, &c.copy());
 }
 
 // (useless so far)
@@ -127,11 +127,10 @@ void ExprCopy::visit(const ExprUnaryOp& u) {
 	u.acceptVisitor(*this);
 }
 
-
-#define ARG(i) (*((const ExprNode*) e.arg(i).deco.tmp))
-#define LEFT   (*((const ExprNode*) e.left.deco.tmp))
-#define RIGHT  (*((const ExprNode*) e.right.deco.tmp))
-#define EXPR   (*((const ExprNode*) e.expr.deco.tmp))
+#define ARG(i) (*map[e.arg(i)])
+#define LEFT   (*map[e.left])
+#define RIGHT  (*map[e.right])
+#define EXPR   (*map[e.expr])
 
 void ExprCopy::visit(const ExprVector& e) {
 	for (int i=0; i<e.nb_args; i++)
@@ -148,20 +147,20 @@ void ExprCopy::visit(const ExprVector& e) {
 				for (i=0; i<e.nb_args; i++) {
 					v[i]=((const ExprConstant&) ARG(i)).get_value();
 				}
-				e.deco.tmp=&ExprConstant::new_vector(v,e.row_vector());
+				map.insert(e, &ExprConstant::new_vector(v,e.row_vector()));
 			} else if (e.dim.type()==Dim::MATRIX) {
 				IntervalMatrix m(e.dim.dim2,e.dim.dim3);
 				for (i=0; i<e.nb_args; i++) {
 					m.set_row(i,((const ExprConstant&) ARG(i)).get_vector_value());
 				}
-				e.deco.tmp=&ExprConstant::new_matrix(m);
+				map.insert(e, &ExprConstant::new_matrix(m));
 			} else {
 				assert(e.dim.type()==Dim::MATRIX_ARRAY);
 				IntervalMatrixArray ma(e.dim.dim1,e.dim.dim2,e.dim.dim3);
 				for (i=0; i<e.nb_args; i++) {
 					ma[i]=((const ExprConstant&) ARG(i)).get_matrix_value();
 				}
-				e.deco.tmp=&ExprConstant::new_matrix_array(ma);
+				map.insert(e, &ExprConstant::new_matrix_array(ma));
 			}
 			return;
 		}
@@ -171,7 +170,7 @@ void ExprCopy::visit(const ExprVector& e) {
 	for (int i=0; i<e.nb_args; i++)
 		args2[i]=&ARG(i);
 
-	e.deco.tmp=&ExprVector::new_(args2, e.nb_args, e.row_vector());
+	map.insert(e, &ExprVector::new_(args2, e.nb_args, e.row_vector()));
 	delete [] args2;
 }
 
@@ -189,7 +188,7 @@ void ExprCopy::visit(const ExprApply& e) {
 			for (i=0; i<e.nb_args; i++) {
 				d.set_ref(i,((const ExprConstant&) ARG(i)).get());
 			}
-			e.deco.tmp=&ExprConstant::new_(Eval().eval(e.func,d));
+			map.insert(e, &ExprConstant::new_(Eval().eval(e.func,d)));
 			return;
 		}
 	}
@@ -198,7 +197,7 @@ void ExprCopy::visit(const ExprApply& e) {
 	for (int i=0; i<e.nb_args; i++)
 		args2[i]=&ARG(i);
 
-	e.deco.tmp=&ExprApply::new_(e.func, args2);
+	map.insert(e, &ExprApply::new_(e.func, args2));
 	delete [] args2;
 }
 
@@ -211,14 +210,14 @@ void ExprCopy::visit(const ExprApply& e) {
 				const ExprConstant* cr=dynamic_cast<const ExprConstant*>(&RIGHT); \
 				if (cr) { \
 					/* evaluate the constant expression on-the-fly */ \
-					e.deco.tmp = &ExprConstant::new_(f(cl->get(),cr->get())); \
-					delete cl; \
-					delete cr; \
-					return; \
+		map.insert(e, &ExprConstant::new_(f(cl->get(),cr->get()))); \
+		delete cl; \
+		delete cr; \
+		return; \
 				} \
 			} \
 		} \
-		e.deco.tmp = &f(LEFT,RIGHT); \
+		map.insert(e, &f(LEFT,RIGHT)); \
 
 void ExprCopy::visit(const ExprAdd& e)   { visit_binary(operator+); }
 void ExprCopy::visit(const ExprMul& e)   { visit_binary(operator*); }
@@ -234,12 +233,12 @@ void ExprCopy::visit(const ExprPower& e) {
 		const ExprConstant* c=dynamic_cast<const ExprConstant*>(&EXPR);
 		if (c) {
 			/* evaluate the constant expression on-the-fly */
-			e.deco.tmp = &ExprConstant::new_(pow(c->get(),e.expon));
+			map.insert(e, &ExprConstant::new_(pow(c->get(),e.expon)));
 			delete c;
 			return;
 		}
 	}
-	e.deco.tmp = &pow(EXPR,e.expon);
+	map.insert(e, &pow(EXPR,e.expon));
 }
 
 #define visit_unary(f) \
@@ -248,12 +247,12 @@ void ExprCopy::visit(const ExprPower& e) {
 			const ExprConstant* c=dynamic_cast<const ExprConstant*>(&EXPR); \
 			if (c) { \
 				/* evaluate the constant expression on-the-fly */ \
-				e.deco.tmp = &ExprConstant::new_(f(c->get())); \
-				delete c; \
-				return; \
+		map.insert(e, &ExprConstant::new_(f(c->get()))); \
+		delete c; \
+		return; \
 			} \
 		} \
-		e.deco.tmp = &f(EXPR); \
+		map.insert(e, &f(EXPR)); \
 
 void ExprCopy::visit(const ExprMinus& e) { visit_unary( - ); }
 void ExprCopy::visit(const ExprTrans& e) { visit_unary( transpose ); }

@@ -140,9 +140,6 @@ public:
 	 */
 	const ExprNode** subnodes() const;
 
-	/** Set all the "visited" tags of the DAG to "false.
-	 * \see ibex::ExprLabel::visited. */
-	void reset_visited() const;
 };
 
 /**

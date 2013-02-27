@@ -9,48 +9,54 @@
  * Created     : Jan 05, 2012
  * ---------------------------------------------------------------------------- */
 
-#ifndef _IBEX_SYMBOL_MAP_H
-#define _IBEX_SYMBOL_MAP_H
+#ifndef __IBEX_SYMBOL_MAP_H__
+#define __IBEX_SYMBOL_MAP_H__
 
 #include <stdlib.h>
 #include <string.h>
 #include <iostream>
 #include <cassert>
-
-//#include "ibex_NonRecoverableException.h"
-
-#ifdef __GNUC__
-// === deprecated headers ===
-#include <ext/hash_map>
-using __gnu_cxx::hash;
-using __gnu_cxx::hash_map;
-
-/* #include <unordered_map> */
-/* using std::unordered_map; */
-
-#else
-#ifdef _WIN32
-#include <hash_map>
-using stdext::hash_compare;
-using stdext::hash_map;
-#endif
-#endif
-
-#ifdef __GNUC__
-// deprecated header
-#define IBEXMAP(T) hash_map<const char*, T, hash<const char*>, equal_string>
-//#define IBEXMAP(T) unordered_map<const char*, T, hash<const char*>, equal_string>
-#else
-#define IBEXMAP(T) hash_map<const char*, T, hash_compare<const char*,equal_string> >
-#endif
+#include <functional>
 
 namespace ibex {
+
+struct hash_string {
+
+	// There is no hash function for char* now... see:
+	//   http://gcc.gnu.org/ml/libstdc++/2008-10/msg00126.html
+	// so we implement our own (copied from here:)
+	//   http://www.cse.yorku.ca/~oz/hash.html
+
+	unsigned long operator()(const char *str) const {
+
+		unsigned long hash = 0;
+		int c;
+
+		while ((c = *str++))
+			hash = c + (hash << 6) + (hash << 16) - hash;
+
+		return hash;
+	}
+};
 
 struct equal_string {
 	bool operator() (const char* s1, const char* s2) const {
 		return strcmp (s1, s2) == 0;
 	}
 };
+
+}
+
+#ifdef __GNUC__
+#include <tr1/unordered_map>
+#define IBEXMAP(T) std::tr1::unordered_map<const char*, T, struct ibex::hash_string, struct ibex::equal_string>
+#else
+#include <unordered_map>
+#define IBEXMAP(T) std::unordered_map<const char*, T, struct ibex::hash_string, struct 	ibex::equal_string>
+#endif
+
+
+namespace ibex {
 
 /** \ingroup tools
  * \brief Structure to map symbol to any data.
@@ -193,4 +199,4 @@ private:
 
 } // end namespace
 
-#endif // end _IBEX_SYMBOL_MAP_
+#endif // end __IBEX_SYMBOL_MAP__

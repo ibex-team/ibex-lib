@@ -21,9 +21,6 @@ void Decorator::decorate(const Function& f) {
 
 	if (f.expr().deco.d) return; // already decorated
 
-	f.expr().reset_visited();
-
-
 	// we cannot just call visit(f.expr()) because:
 	//
 	// 1- some symbols may not appear in the expression
@@ -36,7 +33,7 @@ void Decorator::decorate(const Function& f) {
 	for (int i=0; i<f.nb_arg(); i++) {
 		const ExprSymbol& x=f.arg(i);
 		//visit((const ExprNode&) x); // don't (because of case 2- above)
-		x.deco.visited=true;
+		map.insert(x,true);
 		x.deco.d = new Domain(x.dim);
 		x.deco.g = new Domain(x.dim);
 		x.deco.p = new Domain(x.dim);
@@ -46,8 +43,8 @@ void Decorator::decorate(const Function& f) {
 }
 
 void Decorator::visit(const ExprNode& e) {
-	if (!e.deco.visited) {
-		e.deco.visited=true;
+	if (!map.found(e)) {
+		map.insert(e,true);
 		e.acceptVisitor(*this);
 	}
 }

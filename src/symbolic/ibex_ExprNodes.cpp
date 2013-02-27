@@ -10,21 +10,33 @@
 
 #include "ibex_ExprNodes.h"
 #include "ibex_Expr.h"
+#include <algorithm>
 
 namespace ibex {
 
+namespace {
+bool compare(const ExprNode* x, const ExprNode* y) { return (x->height>y->height); }
+}
+
 const ExprNode** ExprNodes::nodes(const ExprNode& e) {
-	subnodes = new const ExprNode*[e.size];
-	e.reset_visited();
-	j=0;
+	map.clean();
+
 	visit(e);
+
+	const ExprNode** subnodes = new const ExprNode*[e.size];
+	int i=0;
+	for (IBEX_NODE_MAP(const ExprNode*)::const_iterator it=map.begin(); it!=map.end(); it++) {
+		subnodes[i++]=it->second;
+	}
+	// Sort the nodes by decreasing height
+	std::sort(subnodes,subnodes+e.size,compare);
+
 	return subnodes;
 }
 
 void ExprNodes::visit(const ExprNode& e) {
-	if (!e.deco.visited) {
-		e.deco.visited=true;
-		subnodes[j++]=&e;
+	if (!map.found(e)) {
+		map.insert(e,&e);
 		e.acceptVisitor(*this);
 	}
 }

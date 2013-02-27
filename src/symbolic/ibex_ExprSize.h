@@ -12,6 +12,7 @@
 #define __IBEX_EXPR_SIZE_H__
 
 #include "ibex_ExprVisitor.h"
+#include "ibex_NodeMap.h"
 
 namespace ibex {
 
@@ -46,6 +47,8 @@ protected:
 	 void visit(const ExprNAryOp& e);
 	 void visit(const ExprBinaryOp& e);
 	 void visit(const ExprUnaryOp& e);
+
+	 NodeMap<bool> map;
 };
 
 } // end namespace ibex

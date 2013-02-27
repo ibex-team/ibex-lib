@@ -14,6 +14,7 @@
 #include "ibex_P_ExprVisitor.h"
 #include "ibex_Expr.h"
 #include "ibex_Scope.h"
+#include "ibex_NodeMap.h"
 
 namespace ibex {
 
@@ -81,7 +82,11 @@ protected:
 	void visit(const ExprIter& i);
 	void visit(const ExprInfinity&);
 
+	void unary_eval(const ExprUnaryOp& e, Domain (*f)(const Domain&));
+	void binary_eval(const ExprBinaryOp& e, Domain (*f)(const Domain&, const Domain&));
+
 	const Scope& scope;
+	NodeMap<Domain*> map;
 
 	int number_type;
 };

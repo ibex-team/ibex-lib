@@ -12,11 +12,13 @@
 #define __IBEX_EXPR_NODES_H__
 
 #include "ibex_ExprVisitor.h"
+#include "ibex_NodeMap.h"
 
 namespace ibex {
 
 /**
  * \brief Return all the (sub)nodes of an expression (including itself)
+ *        sorted by topological order (the first is the root of the expression)
  */
 class ExprNodes : public virtual ExprVisitor {
 public:
@@ -29,14 +31,13 @@ public:
 	const ExprNode** nodes(const ExprNode& e);
 
 protected:
-	const ExprNode** subnodes;
-	int j;
 	void visit(const ExprNode& e);
 	void visit(const ExprIndex& i);
 	void visit(const ExprLeaf& e);
 	void visit(const ExprNAryOp& e);
 	void visit(const ExprBinaryOp& b);
 	void visit(const ExprUnaryOp& u);
+	NodeMap<const ExprNode*> map;
 };
 
 } // end namespace ibex

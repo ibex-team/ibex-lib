@@ -11,6 +11,8 @@
 #include "ibex_ExprSize.h"
 #include "ibex_Expr.h"
 
+using namespace std;
+
 namespace ibex {
 
 int bin_size(const ExprNode& left, const ExprNode& right) {
@@ -22,20 +24,17 @@ int nary_size(const ExprNode** args, int n) {
 }
 
 ExprSize::ExprSize(const ExprNode& l, const ExprNode& r) : size(0) {
-	l.reset_visited();
-	r.reset_visited();
 	visit(l);
 	visit(r);
 }
 
 ExprSize::ExprSize(const ExprNode** args, int n) : size(0) {
-	for (int i=0; i<n; i++) args[i]->reset_visited();
 	for (int i=0; i<n; i++) visit(*args[i]);
 }
 
 void ExprSize::visit(const ExprNode& e) {
-	if (!e.deco.visited) {
-		e.deco.visited=true;
+	if (!map.found(e)) {
+		map.insert(e,true);
 		size++;
 		e.acceptVisitor(*this);
 	}

@@ -13,6 +13,7 @@
 
 #include "ibex_Domain.h"
 #include "ibex_ExprVisitor.h"
+#include "ibex_NodeMap.h"
 
 namespace ibex {
 
@@ -62,6 +63,8 @@ protected:
 	virtual void visit(const ExprConstant&);
 	/* Visit a symbol. */
 	virtual void visit(const ExprSymbol&);
+
+	 NodeMap<bool> map;
 };
 
 } // end namespace ibex
