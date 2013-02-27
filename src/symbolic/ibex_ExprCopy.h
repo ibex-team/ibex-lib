@@ -110,7 +110,24 @@ protected:
 	void visit(const ExprAtanh& e);
 
 	bool fold;
-	NodeMap<const ExprNode*> map;
+	NodeMap<const ExprNode*> clone;
+
+	// ========== only in "fold" mode ===========
+	// mark[node] is the copy of "node" appears is
+	// the resulting expression. If it does not, it means it has to
+	// be freed.
+	//
+	// Note: we cannot free copies of constant nodes as we "fold" them
+	// because a constant node may be pointed to by another node than
+	// the current father (we have DAG, not a tree). Ex: assuming the
+	// node "1" is the same in both subexpressions:
+	//           (1*2)+(x+1)
+	// we must not delete "1" when copying (1*2).
+	NodeMap<bool> used;
+
+	void mark(const ExprNode&);
+	bool unary_copy(const ExprUnaryOp& e, Domain (*fcst)(const Domain&));
+	bool binary_copy(const ExprBinaryOp& e, Domain (*fcst)(const Domain&, const Domain&));
 };
 
 } // end namespace ibex

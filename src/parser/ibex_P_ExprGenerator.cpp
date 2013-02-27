@@ -25,13 +25,13 @@ const ExprNode& ExprGenerator::generate(const Array<const ExprSymbol>& old_x, co
 }
 
 void ExprGenerator::visit(const ExprNode& e) {
-	if (!map.found(e)) {
+	if (!clone.found(e)) {
 		e.acceptVisitor(*this);
 	}
 }
 
-#define LEFT   (*map[e.left])
-#define RIGHT  (*map[e.right])
+#define LEFT   (*clone[e.left])
+#define RIGHT  (*clone[e.right])
 
 void ExprGenerator::visit(const P_ExprPower& e) {
 
@@ -39,8 +39,10 @@ void ExprGenerator::visit(const P_ExprPower& e) {
 	visit(e.right);
 
 	if (!fold) {
-		// if fold is false, even x^(1) will be transformed into exp(1*ln(x)) :-(
-		map.insert(e, &exp(RIGHT * log(LEFT)));
+		// TODO: if fold is false, even x^(1) will be transformed into exp(1*ln(x)) :-(
+		mark(e.left);
+		mark(e.right);
+		clone.insert(e, &exp(RIGHT * log(LEFT)));
 		return;
 	}
 
@@ -58,8 +60,8 @@ void ExprGenerator::visit(const P_ExprPower& e) {
 
 		right_type=IBEX_INTERVAL;
 		itv_right=cr->get_value();
-		delete cr;
-		// NOTE: we can delete cr right now because
+		//delete cr; // not now (see comment in ExprCopy.h)
+		// NOTE: we can delete cr because
 		// even in the case where right_type==IBEX_INTERVAL and left_type==IBEX_EXPRNODE
 		// we will recreate a ExprConstant node by multiplying itv_right (instead of RIGHT)
 		// with LEFT.
@@ -80,26 +82,29 @@ void ExprGenerator::visit(const P_ExprPower& e) {
 	if (cl) {
 		left_type=IBEX_INTERVAL;
 		itv_left=cl->get_value();
-		delete cl; // LEFT will no longer be used
+		//delete cl; // LEFT will no longer be used // not now (see comment in ExprCopy.h)
 	} else
 		left_type=IBEX_EXPRNODE;
 
 
 	if (left_type==IBEX_INTERVAL) {
 		if (right_type==IBEX_INTEGER) {
-			map.insert(e, &ExprConstant::new_scalar(pow(itv_left,int_right)));
+			clone.insert(e, &ExprConstant::new_scalar(pow(itv_left,int_right)));
 		} else if (right_type==IBEX_INTERVAL) {
-			map.insert(e, &ExprConstant::new_scalar(pow(itv_left,itv_right)));
+			clone.insert(e, &ExprConstant::new_scalar(pow(itv_left,itv_right)));
 		} else {
-			map.insert(e, &exp(RIGHT * log(itv_left))); // *log(...) will create a new ExprConstant.
+			mark(e.right);
+			clone.insert(e, &exp(RIGHT * log(itv_left))); // *log(...) will create a new ExprConstant.
 		}
 	}  else {
+		mark(e.left);
 		if (right_type==IBEX_INTEGER) {
-			map.insert(e, &(pow(LEFT,int_right)));
+			clone.insert(e, &(pow(LEFT,int_right)));
 		} else if (right_type==IBEX_INTERVAL) { // do not forget this case (RIGHT does not exist anymore)
-			map.insert(e, &exp(itv_right * log(LEFT)));
+			clone.insert(e, &exp(itv_right * log(LEFT)));
 		} else {
-			map.insert(e, &exp(RIGHT * log(LEFT)));
+			mark(e.right);
+			clone.insert(e, &exp(RIGHT * log(LEFT)));
 		}
 	}
 
@@ -120,8 +125,8 @@ void ExprGenerator::visit(const P_ExprIndex& e) {
 	if (fold) {
 		const ExprConstant* c=dynamic_cast<const ExprConstant*>(&LEFT);
 		if (c) {
-			map.insert(e, &ExprConstant::new_(c->get()[real_index]));
-			delete c;
+			clone.insert(e, &ExprConstant::new_(c->get()[real_index]));
+			//delete c; // not now (see comment in ExprCopy.h)
 			return;
 		}
 	}
@@ -129,16 +134,17 @@ void ExprGenerator::visit(const P_ExprIndex& e) {
 	const ExprConstantRef* s=dynamic_cast<const ExprConstantRef*>(&LEFT);
 	if (s) {
 		if (dynamic_cast<const P_ExprIndex*>(e.father)) {
-			map.insert(e, new ExprConstantRef(s->value[real_index]));
+			clone.insert(e, new ExprConstantRef(s->value[real_index]));
 		} else {
 			// "last time": we cannot keep reference anymore.
-			map.insert(e, &ExprConstant::new_(s->value[real_index]));
+			clone.insert(e, &ExprConstant::new_(s->value[real_index]));
 		}
-		delete s;
+		//delete s; // not now: there may be inside a DAG (via a function) (see comment in ExprCopy.h)
 		return;
 	}
 
-	map.insert(e, &(LEFT[real_index]));
+	mark(e.left);
+	clone.insert(e, &(LEFT[real_index]));
 }
 
 void ExprGenerator::visit(const ExprConstantRef& c) {
@@ -146,19 +152,19 @@ void ExprGenerator::visit(const ExprConstantRef& c) {
 		// temporary copy (with domain passed by reference).
 		// will be replaced by a ExprConstant at the
 		// last time (in P_ExprIndex)
-		map.insert(c, new ExprConstantRef(c.value));
+		clone.insert(c, new ExprConstantRef(c.value));
 	} else {
-		map.insert(c, & ExprConstant::new_(c.value)); //ExprConstSymbol(c.value));
+		clone.insert(c, & ExprConstant::new_(c.value)); //ExprConstSymbol(c.value));
 	}
 }
 
 void ExprGenerator::visit(const ExprIter& x) {
-	map.insert(x, & ExprConstant::new_scalar(scope.get_iter_value(x.name)));
+	clone.insert(x, & ExprConstant::new_scalar(scope.get_iter_value(x.name)));
 }
 
 void ExprGenerator::visit(const ExprInfinity& x) {
 	ibex_warning("infinity value \"oo\" inside an expression means the empty interval");
-	map.insert(x, & ExprConstant::new_scalar(Interval::EMPTY_SET));
+	clone.insert(x, & ExprConstant::new_scalar(Interval::EMPTY_SET));
 }
 
 } // end namespace parser
