@@ -13,6 +13,7 @@
 #include "ibex_Expr.h"
 #include "ibex_Decorator.h"
 #include "ibex_ExprCopy.h"
+#include "ibex_ExprDiff.h"
 #include "ibex_Eval.h"
 #include "ibex_HC4Revise.h"
 #include "ibex_Gradient.h"
@@ -211,7 +212,7 @@ Function::Function(const char* filename) {
 	fclose(fd);
 }
 
-Function::Function(const Function& f) : name(strdup(f.name)) {
+Function::Function(const Function& f, copy_mode mode) : name(strdup(f.name)) {
 	//assert(f.root!=NULL);
 
 	// Create the new symbols
@@ -220,6 +221,7 @@ Function::Function(const Function& f) : name(strdup(f.name)) {
 	// as they appear in the expression the copy of a a function (x,y)->y+x
 	// would yield (y,x)->y+x.
 	Array<const ExprSymbol> x(f.nb_arg());
+	// TODO: replace next block with "varcopy"
 	for (int j=0; j<f.nb_arg(); j++) {
 		x.set_ref(j,ExprSymbol::new_(f.arg(j).name,f.arg(j).dim));
 	}
@@ -228,9 +230,13 @@ Function::Function(const Function& f) : name(strdup(f.name)) {
 	//cout << endl;
 
 	// Duplicate the expression
-	const ExprNode& y=ExprCopy().copy(f.symbs,x,f.expr());
+	const ExprNode* y;
+	if (mode==COPY)
+		y= & ExprCopy().copy(f.symbs,x,f.expr());
+	else
+		y= & ExprDiff().diff(f.symbs,x,f.expr());
 
-	init(x,y);
+	init(x,*y);
 }
 
 void Function::separate() {

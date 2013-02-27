@@ -102,6 +102,8 @@ public:
 	 */
 	~Function();
 
+	typedef enum { COPY, DIFF } copy_mode;
+
 	/**
 	 * \brief Duplicate this function.
 	 *
@@ -111,7 +113,7 @@ public:
 	 * Decoration is not copied.
 	 * The resulting function is not decorated.
 	 */
-	Function(const Function&);
+	Function(const Function&, copy_mode mode=COPY);
 
 	/**
 	 * \brief Return the total number of variables.
