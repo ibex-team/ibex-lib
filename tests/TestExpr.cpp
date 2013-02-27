@@ -502,8 +502,9 @@ void TestExpr::subnodes01() {
 	TEST_ASSERT(nodes[0]==&e4);
 	TEST_ASSERT(nodes[1]==&e3);
 	TEST_ASSERT(nodes[2]==&e2);
-	TEST_ASSERT(nodes[3]==&x);
-	TEST_ASSERT(nodes[4]==&e1);
+	TEST_ASSERT(nodes[3]==&e1);
+	TEST_ASSERT((nodes[5]==&x && nodes[6]==&y) ||
+			    (nodes[5]==&y && nodes[6]==&x));
 }
 
 

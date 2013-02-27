@@ -1,0 +1,7 @@
+//
+// check that there can be an arbitrary
+// number of arguments
+//
+function f(a,b,c,d,e,f,g,h,i,j)
+  return a+b+c+d+e+f+g+h+i+j;
+end

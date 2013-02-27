@@ -221,6 +221,19 @@ void TestParser::func02() {
 	}
 }
 
+
+void TestParser::func03() {
+	try {
+		Function f("quimper/func03.qpr");
+
+		TEST_ASSERT(strcmp(f.name,"f")==0);
+		TEST_ASSERT(f.nb_arg()==10);
+	} catch(SyntaxError& e) {
+		cout << e << endl;
+		TEST_ASSERT(false);
+	}
+}
+
 void TestParser::ponts() {
 	System sys("quimper/ponts.qpr");
 	Ponts30 sys2;

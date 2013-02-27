@@ -15,6 +15,7 @@
 
 // ================ tools ===============
 #include "TestString.h"
+#include "TestSymbolMap.h"
 
 // ================ arithmetic ===============
 #include "TestInterval.h"
@@ -59,6 +60,7 @@ int main() {
 
     Test::Suite ts;
     ts.add(auto_ptr<Test::Suite>(new TestString()));
+    ts.add(auto_ptr<Test::Suite>(new TestSymbolMap()));
 
     ts.add(auto_ptr<Test::Suite>(new TestInterval()));
     ts.add(auto_ptr<Test::Suite>(new TestIntervalVector()));
