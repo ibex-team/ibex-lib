@@ -274,7 +274,7 @@ void Optimizer::optimize(const IntervalVector& init_box) {
 		}
 	}
 	catch (TimeOutException& ) {
-		cout << "time limit " << timeout << "s. reached " << endl;
+	  cout << "time limit " << timeout << "s. reached " << endl; return;
 	}
 
 	Timer::stop();
