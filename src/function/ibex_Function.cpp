@@ -37,6 +37,7 @@ Function::~Function() {
 			delete node(i).deco.d;
 			delete node(i).deco.g;
 			delete node(i).deco.p;
+			delete node(i).deco.af2;
 		}
 		cleanup(expr(),false);
 

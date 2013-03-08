@@ -24,6 +24,7 @@
 #include "TestDim.h"
 #include "TestArith.h"
 #include "TestInnerArith.h"
+#include "TestAffine2.h"
 //#include "TestDomain.h"
 
 // ================ symbolic ===============
@@ -59,6 +60,8 @@ int main() {
     Test::TextOutput output(Test::TextOutput::Verbose);
 
     Test::Suite ts;
+
+/*
     ts.add(auto_ptr<Test::Suite>(new TestString()));
     ts.add(auto_ptr<Test::Suite>(new TestSymbolMap()));
 
@@ -69,8 +72,10 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestArith()));
     ts.add(auto_ptr<Test::Suite>(new TestInnerArith()));
     //ts.add(auto_ptr<Test::Suite>(new TestDomain()));
+*/
+    ts.add(auto_ptr<Test::Suite>(new TestAffine2()));
 
-    ts.add(auto_ptr<Test::Suite>(new TestExpr()));
+/*    ts.add(auto_ptr<Test::Suite>(new TestExpr()));
     ts.add(auto_ptr<Test::Suite>(new TestFunction()));
     ts.add(auto_ptr<Test::Suite>(new TestNumConstraint()));
     ts.add(auto_ptr<Test::Suite>(new TestEval()));
@@ -88,7 +93,7 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestCtcInteger()));
     ts.add(auto_ptr<Test::Suite>(new TestCtcSubBox()));
     ts.add(auto_ptr<Test::Suite>(new TestCtcNotIn()));
-
+*/
     return ts.run(output,false) ? EXIT_SUCCESS : EXIT_FAILURE;
 
 }

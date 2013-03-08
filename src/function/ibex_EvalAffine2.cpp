@@ -9,9 +9,10 @@
 
 #include "ibex_EvalAffine2.h"
 #include "ibex_Eval.h"
+// #include <stdio.h>
 
 namespace ibex {
-// TODO
+
 DomainAffine2& EvalAffine2::eval_affine2(const Function& f, ExprLabel** args) const {
 	assert(f.expr().deco.af2);
 
@@ -24,16 +25,15 @@ DomainAffine2& EvalAffine2::eval_affine2(const Function& f, ExprLabel** args) co
 	load(f.arg_af2,argD,f.nb_used_vars,f.used_var);
 
 	//------------- for debug
-	//	cout << "Function " << f.name << ", domains before eval:" << endl;
-	//	for (int i=0; i<f.nb_arg(); i++) {
-	//		cout << "arg[" << i << "]=" << f.arg_domains[i] << endl;
-	//	}
+//	std::cout << "Function " << f.name << ", domains before eval:" << std::endl;
+//		for (int i=0; i<f.nb_arg(); i++) {
+//			std::cout << "arg[" << i << "]=" << f.arg_domains[i] << std::endl;
+//		}
 
 	return *f.forward<EvalAffine2>(*this).af2;
 }
 
 
-// TODO
 
 DomainAffine2& EvalAffine2::eval_affine2(const Function& f, const IntervalVector& box) const {
 	assert(f.expr().deco.af2);
@@ -42,11 +42,13 @@ DomainAffine2& EvalAffine2::eval_affine2(const Function& f, const IntervalVector
 		int j;
 		for (int i=0; i<f.nb_used_vars; i++) {
 			j=f.used_var[i];
-			f.arg_af2[j].i()= Affine2(f.nb_used_vars,j+1,box[j]);
+			f.arg_af2[j].i()= Affine2(f.nb_var(),j+1,box[j]);
 		}
+
 	}
 	else
 		load(f.arg_af2,Affine2Vector(box),f.nb_used_vars,f.used_var); // load the domains of all the symbols
+
 
 	return *f.forward<EvalAffine2>(*this).af2;
 

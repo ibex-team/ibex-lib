@@ -345,6 +345,7 @@ void Function::decorate() const {
 
 	arg_domains.resize(nb_arg());
 	arg_deriv.resize(nb_arg());
+	arg_af2.resize(nb_arg());
 
 	((CompiledFunction&) cf).compile(*this); // now that it is decorated, it can be "compiled"
 
@@ -352,6 +353,7 @@ void Function::decorate() const {
 	for (int i=0; i<nb_arg(); i++) {
 		arg_domains.set_ref(i,*arg(i).deco.d);
 		arg_deriv.set_ref(i,*arg(i).deco.g);
+		arg_af2.set_ref(i,*arg(i).deco.af2);
 	}
 }
 
