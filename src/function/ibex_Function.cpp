@@ -12,6 +12,7 @@
 #include "ibex_Function.h"
 #include "ibex_Expr.h"
 #include "ibex_Eval.h"
+#include "ibex_EvalAffine2.h"
 #include "ibex_HC4Revise.h"
 #include "ibex_InHC4Revise.h"
 #include "ibex_Gradient.h"
@@ -61,6 +62,12 @@ int Function::nb_var() const {
 Domain& Function::eval_domain(const IntervalVector& box) const {
 	return Eval().eval(*this,box);
 }
+
+
+DomainAffine2& Function::eval_domainaffine2(const IntervalVector& box) const {
+	return EvalAffine2().eval_affine2(*this,box);
+}
+
 
 void Function::backward(const Domain& y, IntervalVector& x) const {
 	HC4Revise().proj(*this,y,x);

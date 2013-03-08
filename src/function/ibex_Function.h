@@ -255,6 +255,12 @@ public:
 	Domain& eval_domain(const IntervalVector& box) const;
 
 	/**
+	 * \brief Calculate the affine2 form of f(box)
+	 */
+	DomainAffine2& eval_domainaffine2(const IntervalVector& box) const;
+	Affine2 eval_affine2(const IntervalVector& box) const;
+
+	/**
 	 * \brief Calculate f(box).
 	 *
 	 * \pre f must be real-valued
@@ -372,6 +378,12 @@ public:
 	 * \note The structure is initialized by #ibex::GradDecorator.
 	 */
 	mutable Array<Domain> arg_deriv;
+
+	/*
+	 * \brief The domains of the arguments.
+	 *
+	 */
+	mutable Array<DomainAffine2> arg_af2;
 
 	/**
 	 * Number of used variables
@@ -601,6 +613,10 @@ inline bool Function::all_args_scalar() const {
 
 inline Interval Function::eval(const IntervalVector& box) const {
 	return eval_domain(box).i();
+}
+
+inline Affine2 Function::eval_affine2(const IntervalVector& box) const {
+	return eval_domainaffine2(box).i();
 }
 
 inline IntervalVector Function::eval_vector(const IntervalVector& box) const {

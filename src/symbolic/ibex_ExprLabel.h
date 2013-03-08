@@ -13,6 +13,7 @@
 #define __IBEX_EXPR_LABEL_H__
 
 #include "ibex_Domain.h"
+#include "ibex_DomainAffine2.h"
 
 namespace ibex {
 
@@ -30,6 +31,11 @@ public:
 	 * The function this node belongs to.
 	 */
 	Function* f;
+
+	/**
+	 * The affine2 form (evaluation)
+	 */
+	DomainAffine2 *af2;
 
 	/**
 	 * The domain (evaluation)
