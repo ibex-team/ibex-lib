@@ -20,6 +20,9 @@
 #include "ibex_bias_or_gaol.h"
 /* ======================================================= */
 
+
+
+
 #ifdef _IBEX_WITH_GAOL_
 	extern "C" {
 	  //#include "gdtoaimp.h"
@@ -60,6 +63,8 @@
 #endif
 
 namespace ibex {
+
+class Affine2;
 
 /** \defgroup arithmetic Interval Arithmetic */
 
@@ -141,6 +146,8 @@ class Interval {
      */
     Interval& operator=(const Interval& x);
 
+    Interval& operator=(const Affine2& x);
+
     /** \brief Set *this to d.
      */
     Interval& operator=(double x);
@@ -149,9 +156,13 @@ class Interval {
      * \param x - the interval to compute the intersection with.*/
     Interval& operator&=(const Interval& x);
 
+    Interval& operator&=( const Affine2& x);
+
     /** \brief Union of *this and I.
      * \param x - the interval to compute the hull with.*/
     Interval& operator|=(const Interval& x);
+
+    Interval& operator|=(const Affine2& x);
 
     /**
      * \brief Add [-rad,+rad] to *this.
@@ -784,6 +795,7 @@ inline Interval& Interval::operator=(double x) {
 		itv = x;
 	return *this;
 }
+
 
 inline Interval& Interval::operator=(const Interval& x) {
 	itv = x.itv;
