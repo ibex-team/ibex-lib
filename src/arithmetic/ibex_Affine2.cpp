@@ -13,9 +13,9 @@ namespace ibex {
 Affine2::Affine2() :
 		 _n		(-1		),
 		 _val	(NULL	),
-		 _err	(Interval::EMPTY_SET),
+		 _err	(Interval::ALL_REALS),
 		 _actif	(false	),
-		 _itv	(Interval::EMPTY_SET) {
+		 _itv	(Interval::ALL_REALS) {
  }
 
 Affine2::Affine2(int n) :
@@ -176,14 +176,14 @@ Affine2& Affine2::operator =(double d) {
 
 Affine2& Affine2::operator =(const Interval& x) {
 	_itv = x;
-	_actif = true;
-	_err = x.rad();
-
-	if (_val==NULL) { _val = new double[1]; }
-
-	_val[0] = x.mid();
-	for (int i = 1; i <= _n; i++) {
-		_val[i] = 0;
+	_actif = (!x.is_empty());
+	if (_actif) {
+		if (_val==NULL) { _val = new double[1]; }
+		_val[0] = x.mid();
+		for (int i = 1; i <= _n; i++) {
+			_val[i] = 0;
+		}
+		_err = x.rad();
 	}
 	return *this;
 }
@@ -1554,12 +1554,8 @@ Affine2 sign(const Affine2& x) {
 //============================= Proj operator =========================================
 
 bool proj_add(const Affine2& y, Affine2& x1, Affine2& x2) {
-	Interval t1(x1.itv());
-	Interval t2(x2.itv());
-	bool b = proj_add(y.itv(), t1, t2);
+	bool b = proj_add(y.itv(), x1.ITV(), x2.ITV());
 	if (b) {
-		x1.setItv(t1);
-		x2.setItv(t2);
 		x1.setActif(false);
 		x2.setActif(false);
 	}
@@ -1569,12 +1565,8 @@ bool proj_add(const Affine2& y, Affine2& x1, Affine2& x2) {
 
 
 bool proj_sub(const Affine2& y, Affine2& x1, Affine2& x2) {
-	Interval t1(x1.itv());
-	Interval t2(x2.itv());
-	bool b = proj_sub(y.itv(), t1, t2);
+	bool b = proj_sub(y.itv(), x1.ITV(), x2.ITV());
 	if (b) {
-		x1.setItv(t1);
-		x2.setItv(t2);
 		x1.setActif(false);
 		x2.setActif(false);
 	}
@@ -1582,12 +1574,25 @@ bool proj_sub(const Affine2& y, Affine2& x1, Affine2& x2) {
 }
 
 bool proj_mul(const Affine2& y, Affine2& x1, Affine2& x2) {
-	Interval t1(x1.itv());
-	Interval t2(x2.itv());
-	bool b = proj_mul(y.itv(), t1, t2);
+	bool b = proj_mul(y.itv(), x1.ITV(), x2.ITV());
 	if (b) {
-		x1.setItv(t1);
-		x2.setItv(t2);
+		x1.setActif(false);
+		x2.setActif(false);
+	}
+	return b;
+}
+
+bool proj_mul(const Affine2& y, Interval& x1, Affine2& x2) {
+	bool b = proj_mul(y.itv(), x1, x2.ITV());
+	if (b) {
+		x2.setActif(false);
+	}
+	return b;
+}
+
+bool proj_mul(const Interval& y, Affine2& x1, Affine2& x2) {
+	bool b = proj_mul(y, x1.ITV(), x2.ITV());
+	if (b) {
 		x1.setActif(false);
 		x2.setActif(false);
 	}
@@ -1595,12 +1600,8 @@ bool proj_mul(const Affine2& y, Affine2& x1, Affine2& x2) {
 }
 
 bool proj_div(const Affine2& y, Affine2& x1, Affine2& x2) {
-	Interval t1(x1.itv());
-	Interval t2(x2.itv());
-	bool b = proj_div(y.itv(), t1, t2);
+	bool b = proj_div(y.itv(), x1.ITV(), x2.ITV());
 	if (b) {
-		x1.setItv(t1);
-		x2.setItv(t2);
 		x1.setActif(false);
 		x2.setActif(false);
 	}
@@ -1608,42 +1609,32 @@ bool proj_div(const Affine2& y, Affine2& x1, Affine2& x2) {
 }
 
 bool proj_sqr(const Affine2& y, Affine2& x) {
-	Interval t1(x.itv());
-	bool b = proj_sqr(y.itv(), t1);
+	bool b = proj_sqr(y.itv(), x.ITV());
 	if (b) {
-		x.setItv(t1);
 		x.setActif(false);
 	}
 	return b;
 }
 
 bool proj_sqrt(const Affine2& y, Affine2& x) {
-	Interval t1(x.itv());
-	bool b = proj_sqrt(y.itv(), t1);
+	bool b = proj_sqrt(y.itv(), x.ITV());
 	if (b) {
-		x.setItv(t1);
 		x.setActif(false);
 	}
 	return b;
 }
 
 bool proj_pow(const Affine2& y, int n, Affine2& x) {
-	Interval t1(x.itv());
-	bool b = proj_pow(y.itv(), n, t1);
+	bool b = proj_pow(y.itv(), n, x.ITV());
 	if (b) {
-		x.setItv(t1);
 		x.setActif(false);
 	}
 	return b;
 }
 
 bool proj_pow(const Affine2& y, Affine2& x1, Affine2& x2) {
-	Interval t1(x1.itv());
-	Interval t2(x2.itv());
-	bool b = proj_pow(y.itv(), t1, t2);
+	bool b = proj_pow(y.itv(), x1.ITV(), x2.ITV());
 	if (b) {
-		x1.setItv(t1);
-		x2.setItv(t2);
 		x1.setActif(false);
 		x2.setActif(false);
 	}
@@ -1651,150 +1642,120 @@ bool proj_pow(const Affine2& y, Affine2& x1, Affine2& x2) {
 }
 
 bool proj_root(const Affine2& y, int n, Affine2& x) {
-	Interval t1(x.itv());
-	bool b = proj_root(y.itv(), n, t1);
+	bool b = proj_root(y.itv(), n, x.ITV());
 	if (b) {
-		x.setItv(t1);
 		x.setActif(false);
 	}
 	return b;
 }
 
 bool proj_exp(const Affine2& y, Affine2& x) {
-	Interval t1(x.itv());
-	bool b = proj_exp(y.itv(), t1);
+	bool b = proj_exp(y.itv(), x.ITV());
 	if (b) {
-		x.setItv(t1);
 		x.setActif(false);
 	}
 	return b;
 }
 
 bool proj_log(const Affine2& y, Affine2& x) {
-	Interval t1(x.itv());
-	bool b = proj_log(y.itv(), t1);
+	bool b = proj_log(y.itv(), x.ITV());
 	if (b) {
-		x.setItv(t1);
 		x.setActif(false);
 	}
 	return b;
 }
 
 bool proj_cos(const Affine2& y, Affine2& x) {
-	Interval t1(x.itv());
-	bool b = proj_cos(y.itv(), t1);
+	bool b = proj_cos(y.itv(), x.ITV());
 	if (b) {
-		x.setItv(t1);
 		x.setActif(false);
 	}
 	return b;
 }
 
 bool proj_sin(const Affine2& y, Affine2& x) {
-	Interval t1(x.itv());
-	bool b = proj_sin(y.itv(), t1);
+	bool b = proj_sin(y.itv(), x.ITV());
 	if (b) {
-		x.setItv(t1);
 		x.setActif(false);
 	}
 	return b;
 }
 
 bool proj_tan(const Affine2& y, Affine2& x) {
-	Interval t1(x.itv());
-	bool b = proj_tan(y.itv(), t1);
+	bool b = proj_tan(y.itv(), x.ITV());
 	if (b) {
-		x.setItv(t1);
 		x.setActif(false);
 	}
 	return b;
 }
 
 bool proj_acos(const Affine2& y, Affine2& x) {
-	Interval t1(x.itv());
-	bool b = proj_acos(y.itv(), t1);
+	bool b = proj_acos(y.itv(), x.ITV());
 	if (b) {
-		x.setItv(t1);
 		x.setActif(false);
 	}
 	return b;
 }
 
 bool proj_asin(const Affine2& y, Affine2& x) {
-	Interval t1(x.itv());
-	bool b = proj_asin(y.itv(), t1);
+	bool b = proj_asin(y.itv(), x.ITV());
 	if (b) {
-		x.setItv(t1);
 		x.setActif(false);
 	}
 	return b;
 }
 
 bool proj_atan(const Affine2& y, Affine2& x) {
-	Interval t1(x.itv());
-	bool b = proj_atan(y.itv(), t1);
+	bool b = proj_atan(y.itv(), x.ITV());
 	if (b) {
-		x.setItv(t1);
 		x.setActif(false);
 	}
 	return b;
 }
 
 bool proj_cosh(const Affine2& y, Affine2& x) {
-	Interval t1(x.itv());
-	bool b = proj_cosh(y.itv(), t1);
+	bool b = proj_cosh(y.itv(), x.ITV());
 	if (b) {
-		x.setItv(t1);
 		x.setActif(false);
 	}
 	return b;
 }
 
 bool proj_sinh(const Affine2& y, Affine2& x) {
-	Interval t1(x.itv());
-	bool b = proj_sinh(y.itv(), t1);
+	bool b = proj_sinh(y.itv(), x.ITV());
 	if (b) {
-		x.setItv(t1);
 		x.setActif(false);
 	}
 	return b;
 }
 
 bool proj_tanh(const Affine2& y, Affine2& x) {
-	Interval t1(x.itv());
-	bool b = proj_tanh(y.itv(), t1);
+	bool b = proj_tanh(y.itv(), x.ITV());
 	if (b) {
-		x.setItv(t1);
 		x.setActif(false);
 	}
 	return b;
 }
 
 bool proj_abs(const Affine2& y, Affine2& x) {
-	Interval t1(x.itv());
-	bool b = proj_abs(y.itv(), t1);
+	bool b = proj_abs(y.itv(), x.ITV());
 	if (b) {
-		x.setItv(t1);
 		x.setActif(false);
 	}
 	return b;
 }
 
 bool proj_sign(const Affine2& y, Affine2& x) {
-	Interval t1(x.itv());
-	bool b = proj_sqrt(y.itv(), t1);
+	bool b = proj_sqrt(y.itv(), x.ITV());
 	if (b) {
-		x.setItv(t1);
 		x.setActif(false);
 	}
 	return b;
 }
 
 bool proj_integer(Affine2& x) {
-	Interval t1(x.itv());
-	bool b = proj_integer(t1);
+	bool b = proj_integer(x.ITV());
 	if (b) {
-		x.setItv(t1);
 		x.setActif(false);
 	}
 	return b;

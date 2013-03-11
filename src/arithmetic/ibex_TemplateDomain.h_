@@ -1,0 +1,447 @@
+/*
+ * ibex_TemplateDomain.h
+ *
+ *  Created on: 10 mars 2013
+ *      Author: jninin
+ */
+
+#ifndef IBEX_TEMPLATEDOMAIN_H_
+#define IBEX_TEMPLATEDOMAIN_H_
+
+#include "ibex_Interval.h"
+#include "ibex_Affine2.h"
+#include "ibex_TemplateVector.h"
+#include "ibex_TemplateMatrix.h"
+#include "ibex_TemplateMatrixArray.h"
+#include "ibex_Dim.h"
+
+namespace ibex {
+
+/**
+ * \ingroup arithmetic
+ *
+ * \brief Generic Domain.
+ *
+ * A generic domain is either:
+ * <ul><li> an T (#ibex:Interval) or (#ibex:Affine2)
+ *     <li> a vector of intervals (#ibex::TemplateVector<T>)
+ *     <li> a matrix of intervals (#ibex::TemplateMatrix<T>)
+ *     <li> or an array of interval matrices (#ibex::TemplateMatrixArray<T>)
+ * </ul>
+ *
+ */
+
+
+template <class T>
+class TemplateDomain  {
+public:
+
+	/**
+	 * \brief The dimension of the internal domain.
+	 */
+	const Dim dim;
+
+	/**
+	 * \brief True if the internal domain is a reference.
+	 */
+	const bool is_reference;
+
+
+	/**
+	 * \brief Creates a new domain of dimension \a dim.
+	 */
+	explicit TemplateDomain(const Dim& dim1) : dim(dim1), is_reference(false) {
+		build();
+	}
+
+	/**
+	 * \brief Creates a reference to an interval.
+	 *
+	 * The internal domain will point to \a itv.
+	 */
+	explicit TemplateDomain(T& itv) : dim(), is_reference(true) {
+		domain = &itv;
+	}
+
+	/**
+	 * \brief Creates a reference to an interval vector.
+	 *
+	 *  The internal domain will point to \a v.
+	 */
+	explicit TemplateDomain(TemplateVector<T>& v1, bool in_row) : dim(in_row? Dim::row_vec(v1.size()) : Dim::col_vec(v1.size())), is_reference(true) {
+		domain = &v1;
+	}
+
+	/**
+	 * \brief Creates a reference to an interval matrix.
+	 *
+	 *  The internal domain will point to \a m.
+	 */
+	explicit TemplateDomain(TemplateMatrix<T>& m1) : dim(Dim::matrix(m1.nb_rows(),m1.nb_cols())), is_reference(true) {
+		domain = &m1;
+	}
+
+	/**
+	 * \brief Creates a reference to an array of interval matrices.
+	 *
+	 *  The internal domain will point to \a ma.
+	 */
+	explicit TemplateDomain(TemplateMatrixArray<T>& ma1) : dim(Dim::matrix_array(ma1.size(),ma1.nb_rows(),ma1.nb_cols())), is_reference(true) {
+		domain = &ma1;
+	}
+
+	/**
+	 * \brief Creates a domain by copy.
+	 *
+	 * If \a is_reference is true, the intenal domain is a reference to the
+	 * internal domain of \a d.
+	 */
+	TemplateDomain(const TemplateDomain<T>& d, bool is_reference1=false) : dim(d.dim), is_reference(is_reference1) {
+		if (is_reference1) {
+			domain = d.domain;
+		} else {
+			switch (dim.type()) {
+			case Dim::SCALAR:       domain = new T(d.i()); break;
+			case Dim::ROW_VECTOR:
+			case Dim::COL_VECTOR:   domain = new TemplateVector<T>(d.v()); break;
+			case Dim::MATRIX:       domain = new TemplateMatrix<T>(d.m()); break;
+			case Dim::MATRIX_ARRAY: domain = new TemplateMatrixArray<T>(d.ma()); break;
+			}
+		}
+	}
+
+
+	/**
+	 * \brief Return the ith component of *this.
+	 *
+	 * Creates a domain that points to the ith component of the internal domain.
+	 */
+	TemplateDomain<T> operator[](int index);
+
+	/**
+	 * \brief Return the ith component of *this.
+	 *
+	 * Creates a domain that points to the ith component of the internal domain.
+	 */
+	const TemplateDomain<T> operator[](int index) const;
+
+	/**
+	 * \brief Delete *this.
+	 */
+	~TemplateDomain() {
+		if (!is_reference) {
+			switch(dim.type()) {
+			case Dim::SCALAR:   delete (T*) domain;  break;
+			case Dim::ROW_VECTOR:
+			case Dim::COL_VECTOR:   delete &v();  break;
+			case Dim::MATRIX:       delete &m();  break;
+			case Dim::MATRIX_ARRAY: delete &ma(); break;
+			}
+		}
+	}
+
+	/**
+	 * \brief Load the domain from another domain.
+	 */
+	TemplateDomain<T>& operator=(const Domain& d) {
+		assert((*this).dim==d.dim);
+		switch((*this).dim.type()) {
+		case Dim::SCALAR:       i()=d.i(); break;
+		case Dim::ROW_VECTOR:
+		case Dim::COL_VECTOR:   v()=d.v(); break;
+		case Dim::MATRIX:       m()=d.m(); break;
+		case Dim::MATRIX_ARRAY: ma()=d.ma(); break;
+		}
+		return *this;
+	}
+
+	/**
+	 * \brief Intersect the domain with another domain.
+	 */
+	TemplateDomain<T>& operator&=(const TemplateDomain<T>& d) {
+		assert((*this).dim==d.dim);
+		switch((*this).dim.type()) {
+		case Dim::SCALAR:       i()&=d.i(); break;
+		case Dim::ROW_VECTOR:
+		case Dim::COL_VECTOR:   v()&=d.v(); break;
+		case Dim::MATRIX:       m()&=d.m(); break;
+		case Dim::MATRIX_ARRAY: ma()&=d.ma(); break;
+		}
+		return *this;
+	}
+
+	TemplateDomain<Affine2>& operator&=(const TemplateDomain<Affine2>& d) {
+		assert((*this).dim==d.dim);
+		switch((*this).dim.type()) {
+		case Dim::SCALAR:       i() = i()&d.i(); break;
+		case Dim::ROW_VECTOR:
+		case Dim::COL_VECTOR:   v() = v()&d.v(); break;
+		case Dim::MATRIX:       m() = m()&d.m(); break;
+		case Dim::MATRIX_ARRAY: ma() = ma()&d.ma(); break;
+		}
+		return *this;
+	}
+
+	/**
+	 * \brief Equality operator
+	 */
+	bool operator==(const TemplateDomain<T>& d) const {
+		if (dim!=d.dim) return false;
+		switch(dim.type()) {
+		case Dim::SCALAR:       return i()==d.i();
+		case Dim::ROW_VECTOR:
+		case Dim::COL_VECTOR:   return v()==d.v();
+		case Dim::MATRIX:       return m()==d.m();
+		case Dim::MATRIX_ARRAY: return ma()==d.ma();
+		default:                assert(false); return false;
+		}
+	}
+
+
+	/**
+	 * \brief Difference operator
+	 */
+	bool operator!=(const TemplateDomain<T>& d) const {
+		return !(*this==d);
+	}
+
+	/**
+	 * \brief Return the domain as an interval.
+	 */
+	inline T& i()        {
+		assert(domain);
+		assert(dim.is_scalar());
+		return *(T*) domain;
+	}
+
+	/**
+	 * \brief Return the domain as an vector.
+	 */
+	inline TemplateVector<T>& v()  {
+		assert(domain);
+		assert(dim.is_vector());
+		return *(TemplateVector<T>*) domain;
+	}
+
+	/**
+	 * \brief Return the domain as a matrix.
+	 */
+	inline TemplateMatrix<T>& m()  {
+		assert(domain);
+		assert(dim.type()==Dim::MATRIX);
+		return *(TemplateMatrix<T>*) domain;
+	}
+
+	/**
+	 * \brief Return the domain as an array of matrices.
+	 */
+	inline TemplateMatrixArray<T>& ma() {
+		assert(domain);
+		assert(dim.type()==Dim::MATRIX_ARRAY);
+		return *(TemplateMatrixArray<T>*) domain;
+	}
+
+	/**
+	 * \brief Return the domain as a const interval.
+	 */
+	inline const T& i() const  {
+		assert(domain);
+		assert(dim.is_scalar());
+		return *(T*) domain;
+	}
+
+	/**
+	 * \brief Return the domain as a const vector.
+	 */
+	inline const TemplateVector<T>& v() const  {
+		assert(domain);
+		assert(dim.is_vector());
+		return *(TemplateVector<T>*) domain;
+	}
+	/**
+	 * \brief Return the domain as a matrix.
+	 */
+	inline const TemplateMatrix<T>& m() const  {
+		assert(domain);
+		assert(dim.type()==Dim::MATRIX);
+		return *(TemplateMatrix<T>*) domain;
+	}
+
+	/**
+	 * \brief Return the domain as an array of matrices.
+	 */
+	inline const TemplateMatrixArray<T>& ma() const {
+		assert(domain);
+		assert(dim.type()==Dim::MATRIX_ARRAY);
+		return *(TemplateMatrixArray<T>*) domain;
+	}
+
+	/**
+	 * \brief True if the domain is empty
+	 */
+	bool is_empty() const;
+
+	/**
+	 * \brief Set the domain to the empty set.
+	 */
+	void set_empty();
+
+	/**
+	 * \brief Set the domain to ZERO.
+	 */
+	void clear();
+
+private:
+	friend class Domains;
+
+	TemplateDomain() : dim(), is_reference(false), domain(NULL) { }
+
+	void build() {
+		switch(dim.type()) {
+		case Dim::SCALAR:       domain = new T(); break;
+		case Dim::ROW_VECTOR:   domain = new TemplateVector<T>(dim.dim3); break;
+		case Dim::COL_VECTOR:   domain = new TemplateVector<T>(dim.dim2); break;
+		case Dim::MATRIX:       domain = new TemplateMatrix<T>(dim.dim2,dim.dim3); break;
+		case Dim::MATRIX_ARRAY: domain = new TemplateMatrixArray<T>(dim.dim1,dim.dim2,dim.dim3); break;
+		}
+	}
+
+	void* domain;
+};
+
+/** \ingroup arithmetic */
+/*@{*/
+
+/**
+ * \brief Output a domain.
+ */
+template <class T>
+std::ostream& operator<<(std::ostream& os,const TemplateDomain<T>&);
+
+/**
+ * \brief Load domains from a flat vector
+ */
+template <class T>
+void load(Array<TemplateDomain<T>>& domains, const TemplateVector<T>& box, int nb_used=-1, int* used=NULL);
+
+/**
+ * \brief Load domains into an interval vector.
+ */
+template <class T>
+void load(TemplateVector<T>& box, const Array<const TemplateDomain<T>>& domains, int nb_used=-1, int* used=NULL);
+
+/**
+ * \brief Load domains into an interval vector.
+ */
+template <class T>
+inline void load(TemplateVector<T>& box, const Array<TemplateDomain<T>>& domains, int nb_used=-1, int* used=NULL) {
+	load(box, (const Array<const TemplateDomain<T>>&) domains, nb_used, used);
+}
+
+/**
+ * \brief x:=y
+ */
+template <class T>
+void load(Array<TemplateDomain<T>>& x, const Array<const TemplateDomain<T>>& y, int nb_used=-1, int* used=NULL);
+
+/**
+ * \brief x:=y
+ */
+template <class T>
+void load(Array<TemplateDomain<T>>& x, const Array<TemplateDomain<T>>& y, int nb_used=-1, int* used=NULL);
+
+/** Add two domains. */
+template <class T>
+TemplateDomain<T> operator+(const TemplateDomain<T>& d1, const TemplateDomain<T>& d2);
+/** Multiply two domains. */
+template <class T>
+TemplateDomain<T> operator*(const TemplateDomain<T>& d1, const TemplateDomain<T>& d2);
+/** Subtract two domains. */
+template <class T>
+TemplateDomain<T> operator-(const TemplateDomain<T>& d1, const TemplateDomain<T>& d2);
+/** Divide two domains. */
+template <class T>
+TemplateDomain<T> operator/(const TemplateDomain<T>& d1, const TemplateDomain<T>& d2);
+/** Max of two domains. */
+template <class T>
+TemplateDomain<T> max(const TemplateDomain<T>& d1, const TemplateDomain<T>& d2);
+/** Min of two domains. */
+template <class T>
+TemplateDomain<T> min(const TemplateDomain<T>& d1, const TemplateDomain<T>& d2);
+/** Atan2 of two domains. */
+template <class T>
+TemplateDomain<T> atan2(const TemplateDomain<T>& d1, const TemplateDomain<T>& d2);
+/** Opposite of a domain. */
+template <class T>
+TemplateDomain<T> operator-(const TemplateDomain<T>& d1);
+/** Transpose. */
+template <class T>
+TemplateDomain<T> transpose(const TemplateDomain<T>& d1);
+/** Sign. */
+template <class T>
+TemplateDomain<T> sign(const TemplateDomain<T>& d1);
+/** Absolute value. */
+template <class T>
+TemplateDomain<T> abs(const TemplateDomain<T>& d);
+/** Raise a domain to the power \a p. */
+template <class T>
+TemplateDomain<T> pow(const TemplateDomain<T>& d, int p);
+/** Raise a domain to the power \a p. */
+template <class T>
+TemplateDomain<T> pow(const TemplateDomain<T>& d, const TemplateDomain<T>& p);
+/** Square of a domain. */
+template <class T>
+TemplateDomain<T> sqr(const TemplateDomain<T>& d);
+/** Square root of a domain. */
+template <class T>
+TemplateDomain<T> sqrt(const TemplateDomain<T>& d);
+/** Exponential. */
+template <class T>
+TemplateDomain<T> exp(const TemplateDomain<T>& d);
+/** Logarithm. */
+template <class T>
+TemplateDomain<T> log(const TemplateDomain<T>& d);
+/** Cosine. */
+template <class T>
+TemplateDomain<T> cos(const TemplateDomain<T>& d);
+/** Sine. */
+template <class T>
+TemplateDomain<T> sin(const TemplateDomain<T>& d);
+/** Tangent. */
+template <class T>
+TemplateDomain<T> tan(const TemplateDomain<T>& d);
+/** Arccosine. */
+template <class T>
+TemplateDomain<T> acos(const TemplateDomain<T>& d);
+/** Arcsine. */
+template <class T>
+TemplateDomain<T> asin(const TemplateDomain<T>& d);
+/** Arctangent. */
+template <class T>
+TemplateDomain<T> atan(const TemplateDomain<T>& d);
+/** Hyperbolic cosine. */
+template <class T>
+TemplateDomain<T> cosh(const TemplateDomain<T>& d);
+/** Hyperbolic sine. */
+template <class T>
+TemplateDomain<T> sinh(const TemplateDomain<T>& d);
+/** Hyperbolic tangent. */
+template <class T>
+TemplateDomain<T> tanh(const TemplateDomain<T>& d);
+/** Hyperbolic arccosine. */
+template <class T>
+TemplateDomain<T> acosh(const TemplateDomain<T>& d);
+/** Hyperbolic arcsine. */
+template <class T>
+TemplateDomain<T> asinh(const TemplateDomain<T>& d);
+/** Hyperbolic arctangent. */
+template <class T>
+TemplateDomain<T> atanh(const TemplateDomain<T>& d);
+
+/*@}*/
+
+} // end namespace
+
+
+
+#endif /* IBEX_TEMPLATEDOMAIN_H_ */

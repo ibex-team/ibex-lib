@@ -1,0 +1,926 @@
+/*
+ * ibex_TemplateVector.cpp
+ *
+ *  Created on: 11 mars 2013
+ *      Author: nininjo
+ */
+
+
+
+#include "ibex_TemplateVector.h"
+#include <vector>
+#include <stdlib.h>
+#include <sstream>
+#include <math.h>
+#include <float.h>
+#include <algorithm>
+
+namespace ibex {
+
+
+TemplateVector<Interval>::TemplateVector(int n) : _n(n), _vec(new Interval[n]) {
+	assert(n>=1);
+	for (int i=0; i<n; i++) _vec[i]=Interval::ALL_REALS;
+}
+TemplateVector<Affine2>::TemplateVector(int n) : _n(n), _vec(new Affine2[n]) {
+		assert(n>=1);
+		for (int i = 0; i < n; i++){
+			_vec[i] = Affine2(n);
+		}
+	}
+
+TemplateVector<Interval>::TemplateVector(int n, const Interval& x) : _n(n), _vec(new Interval[n]) {
+	assert(n>=1);
+	for (int i=0; i<n; i++) _vec[i]=x;
+}
+TemplateVector<Affine2>::TemplateVector(int n, const Affine2& x) :  _n(n), _vec(new Affine2[n]) {
+	assert(n>=1);
+	for (int i = 0; i < n; i++) {
+		_vec[i] = Affine2(n, i + 1, x);
+	}
+}
+
+
+TemplateVector<Interval>::TemplateVector(const TemplateVector<Interval>& x) : _n(x.size()), _vec(new Interval[x.size()]) {
+	for (int i=0; i<_n; i++) _vec[i]=x[i];
+}
+TemplateVector<Interval>::TemplateVector(const TemplateVector<Affine2>& x) : _n(x.size()), _vec(new Interval[x.size()]) {
+	for (int i=0; i<_n; i++) _vec[i]=x[i].itv();
+}
+TemplateVector<Affine2>::TemplateVector(const TemplateVector<Affine2>& x) : _n(x.size()), _vec(new Affine2[x.size()]) {
+	for (int i=0; i<_n; i++) _vec[i]=x[i];
+}
+TemplateVector<Affine2>::TemplateVector(const TemplateVector<Interval>& x) : _n(x.size()), _vec(new Affine2[x.size()]) {
+	for (int i=0; i<_n; i++) _vec[i]= Affine2(x.size(), i + 1, x[i]);
+}
+
+
+TemplateVector<Interval>::TemplateVector(int n1, double bounds[][2]) : _n(n1), _vec(new Interval[n1]) {
+	if (bounds==0) // probably, the user called TemplateVector<Interval>(n,0) and 0 is interpreted as NULL!
+		for (int i=0; i<n1; i++)
+			_vec[i]=Interval::ZERO;
+	else
+		for (int i=0; i<n1; i++)
+			_vec[i]=Interval(bounds[i][0],bounds[i][1]);
+}
+TemplateVector<Affine2>::TemplateVector(int n1, double bounds[][2]) : _n(n1), _vec(new Affine2[n1]) {
+	if (bounds == 0){ // probably, the user called Affine2Vector(n,0) and 0 is interpreted as NULL!
+		for (int i = 0; i < _n; i++){
+			_vec[i] = Affine2(_n, i + 1, 0.0);
+		}
+	} else {
+		for (int i = 0; i < _n; i++){
+			_vec[i] = Affine2(_n, i + 1, Interval(bounds[i][0], bounds[i][1]));
+		}
+	}
+}
+
+TemplateVector<Interval>::TemplateVector(const Vector& x) : _n(x.size()), _vec(new Interval[x.size()]) {
+	for (int i=0; i<_n; i++) _vec[i]=x[i];
+}
+TemplateVector<Affine2>::TemplateVector(const Vector& x) : _n(x.size()), _vec(new Affine2[x.size()]) {
+	for (int i = 0; i < _n; i++){
+		_vec[i] = Affine2(_n, i + 1, x[i]);
+	}
+}
+
+
+void TemplateVector<Interval>::init(const Interval& x) {
+	for (int i=0; i<size(); i++)
+		(*this)[i]=x;
+}
+void TemplateVector<Affine2>::init(const Affine2& x) {
+	for (int i=0; i<size(); i++)
+		(*this)[i]=x;
+}
+void TemplateVector<Interval>::init(const Affine2& x) {
+	for (int i=0; i<size(); i++)
+		(*this)[i]=x.itv();
+}
+
+template <class T>
+TemplateVector<T>& TemplateVector<T>::inflate(double rad1) {
+	if (is_empty()) return *this;
+	Interval r(-rad1,rad1);
+	// little optim: we do not call (*this)[i].inflate(rad)
+	// because this would create n times
+	// the interval [-rad,rad]
+	for (int i=0; i<_n; i++)
+		(*this)[i]+=r;
+	return *this;
+}
+
+
+
+void TemplateVector<Interval>::resize(int n2) {
+	assert(n2>=1);
+	assert((_vec==NULL && _n==0) || (_n!=0 && _vec!=NULL));
+
+	if (n2==size()) return;
+
+	Interval* newVec=new Interval[n2];
+	int i=0;
+	for (; i<size() && i<n2; i++)
+		newVec[i]=_vec[i];
+	for (; i<n2; i++)
+		newVec[i]=Interval::ALL_REALS;
+	if (_vec!=NULL) // vec==NULL happens when default constructor is used (n==0)
+		delete[] _vec;
+
+	_n   = n2;
+	_vec = newVec;
+}
+void TemplateVector<Affine2>::resize(int n) {
+	assert(n>=1);
+	assert((_vec==NULL && _n==0) || (_n!=0 && _vec!=NULL));
+
+	if (n==size()) return;
+
+	Affine2* newVec=new Affine2[n];
+	int i=0;
+	for (; i<_n && i<n; i++){
+		newVec[i]=_vec[i];
+	}
+	for (; i<n; i++){
+		newVec[i]= Affine2(n,0.0);
+	}
+	if (_vec!=NULL) { // vec==NULL happens when default constructor is used (n==0)
+		delete[] _vec;
+	}
+	_n   = n;
+	_vec = newVec;
+}
+
+template <class T>
+TemplateVector<T> TemplateVector<T>::subvector(int start_index, int end_index) const {
+	assert(!is_empty());
+	assert(end_index>=0 && start_index>=0);
+	assert(end_index<size() && start_index<=end_index);
+	//throw InvalidTemplateVector<Interval>Op("Invalid indices for TemplateVector<Interval>::subvector");
+
+	TemplateVector<T> v(end_index-start_index+1);
+	int j=0;
+	for (int i=start_index; i<=end_index; i++) {
+		v[j++]=(*this)[i];
+	}
+	return v;
+}
+
+template <class T>
+void TemplateVector<T>::put(int start_index, const TemplateVector<T>& subvec) {
+	assert(!is_empty());
+	int end_index=start_index+subvec.size()-1;
+	assert(start_index>=0 && end_index<size());
+
+	int j=0;
+	for (int i=start_index; i<=end_index; i++) {
+		(*this)[i]=subvec[j++];
+	}
+}
+
+TemplateVector<Interval>& TemplateVector<Interval>::operator=(const TemplateVector<Interval>& x) {
+	assert(size()==x.size()); // throw InvalidTemplateVector<Interval>Op("Cannot set a TemplateVector<Interval> to a TemplateVector<Interval> with different dimension");
+
+	if (x.is_empty())
+		set_empty();
+	else
+		// don't use "set(...)" because the test "is_empty()" called inside
+		// may return prematurely in case "this" is empty.
+		// use physical copy instead:
+		for (int i=0; i<size(); i++)
+			(*this)[i]=x[i];
+
+	return *this;
+}
+TemplateVector<Interval>& TemplateVector<Interval>::operator=(const TemplateVector<Affine2>& x) {
+	assert(size()==x.size()); // throw InvalidTemplateVector<Interval>Op("Cannot set a TemplateVector<Interval> to a TemplateVector<Interval> with different dimension");
+
+	if (x.is_empty())
+		set_empty();
+	else
+		// don't use "set(...)" because the test "is_empty()" called inside
+		// may return prematurely in case "this" is empty.
+		// use physical copy instead:
+		for (int i=0; i<size(); i++)
+			(*this)[i]=x[i].itv();
+
+	return *this;
+}
+TemplateVector<Affine2>& TemplateVector<Affine2>::operator=(const TemplateVector<Affine2>& x) {
+	assert(size()==x.size());
+	if (x.is_empty()) {
+		set_empty();
+	} else {
+		// don't use "set(...)" because the test "is_empty()" called inside
+		// may return prematurely in case "this" is empty.
+		// use physical copy instead:
+		for (int i = 0; i < size(); i++) {
+			(*this)[i] = x[i];
+		}
+	}
+
+	return *this;
+}
+TemplateVector<Affine2>& TemplateVector<Affine2>::operator=(const TemplateVector<Interval>& x) {
+	assert(size()==x.size());
+	if (x.is_empty()) {
+		set_empty();
+	} else {
+		// don't use "set(...)" because the test "is_empty()" called inside
+		// may return prematurely in case "this" is empty.
+		// use physical copy instead:
+		for (int i = 0; i < size(); i++) {
+			(*this)[i] = Affine2(size(), i+1,x[i]);
+		}
+	}
+
+	return *this;
+}
+
+TemplateVector<Interval>& TemplateVector<Interval>::operator&=(const TemplateVector<Interval>& x)  {
+	// dimensions are non zero henceforth
+	if (size()!=x.size()) throw InvalidIntervalVectorOp("Cannot intersect TemplateVectores with different dimensions");
+
+	if (is_empty()) return *this;
+	if (x.is_empty()) { set_empty(); return *this; }
+
+	for (int i=0; i<size(); i++) {
+		(*this)[i] &= x[i];
+		if ((*this)[i].is_empty()) {
+			set_empty();
+			return *this;
+		}
+	}
+	return *this;
+}
+TemplateVector<Interval>& TemplateVector<Interval>::operator&=(const TemplateVector<Affine2>& x)  {
+	// dimensions are non zero henceforth
+	if (size()!=x.size()) throw InvalidIntervalVectorOp("Cannot intersect TemplateVectores with different dimensions");
+
+	if (is_empty()) return *this;
+	if (x.is_empty()) { set_empty(); return *this; }
+
+	for (int i=0; i<size(); i++) {
+		(*this)[i] &= x[i].itv();
+		if ((*this)[i].is_empty()) {
+			set_empty();
+			return *this;
+		}
+	}
+	return *this;
+}
+
+
+TemplateVector<Interval>& TemplateVector<Interval>::operator|=(const TemplateVector<Interval>& x)  {
+	// dimensions are non zero henceforth
+	if (size()!=x.size()) throw InvalidIntervalVectorOp("Cannot make the hull of TemplateVectores with different dimensions");
+
+	if (x.is_empty()) return *this;
+	if (is_empty()) { *this=x; return *this; }
+
+	for (int i=0; i<size(); i++) {
+		(*this)[i] |= x[i];
+	}
+	return *this;
+}
+TemplateVector<Interval>& TemplateVector<Interval>::operator|=(const TemplateVector<Affine2>& x)  {
+	// dimensions are non zero henceforth
+	if (size()!=x.size()) throw InvalidIntervalVectorOp("Cannot make the hull of TemplateVectores with different dimensions");
+
+	if (x.is_empty()) return *this;
+	if (is_empty()) { *this=x; return *this; }
+
+	for (int i=0; i<size(); i++) {
+		(*this)[i] |= x[i].itv();
+	}
+	return *this;
+}
+
+template <class T>
+bool TemplateVector<T>::operator==(const TemplateVector<Interval>& x) const {
+	if (size()!=x.size()) return false;
+	if (is_empty() || x.is_empty()) return is_empty() && x.is_empty();
+	for (int i=0; i<size(); i++)
+		if ((*this)[i]!=(x[i])) return false;
+	return true;
+}
+template <class T>
+bool TemplateVector<T>::operator==(const TemplateVector<Affine2>& x) const {
+	if (size()!=x.size()) return false;
+	if (is_empty() || x.is_empty()) return is_empty() && x.is_empty();
+	for (int i=0; i<size(); i++)
+		if ((*this)[i]!=(x[i].itv())) return false;
+	return true;
+}
+
+template <class T>
+TemplateVector<Interval> TemplateVector<Affine2>::itv() const {
+	assert(!is_empty());
+	TemplateVector<Interval> itv(size());
+	for (int i=0; i<size(); i++) {
+		itv[i]=(*this)[i].itv();
+	}
+	return itv;
+}
+
+template <class T>
+Vector TemplateVector<T>::lb() const {
+	assert(!is_empty());
+
+	Vector l(size());
+	for (int i=0; i<size(); i++) {
+		l[i]=(*this)[i].lb();
+	}
+	return l;
+}
+
+template <class T>
+Vector TemplateVector<T>::ub() const {
+	assert(!is_empty());
+
+	Vector u(size());
+	for (int i=0; i<size(); i++) {
+		u[i]=(*this)[i].ub();
+	}
+	return u;
+}
+
+template <class T>
+Vector TemplateVector<T>::mid() const {
+	assert(!is_empty());
+
+	Vector mV(size());
+	for (int i=0; i<size(); i++) {
+		mV[i]=(*this)[i].mid();
+	}
+	return mV;
+}
+
+template <class T>
+Vector TemplateVector<T>::mig() const {
+	assert(!is_empty());
+
+	Vector res(size());
+	for (int i=0; i<size(); i++) {
+		res[i]=(*this)[i].mig();
+	}
+	return res;
+}
+
+template <class T>
+Vector TemplateVector<T>::mag() const {
+	assert(!is_empty());
+
+	Vector res(size());
+	for (int i=0; i<size(); i++) {
+		res[i]=(*this)[i].mag();
+	}
+	return res;
+}
+
+template <class T>
+bool TemplateVector<T>::is_flat() const {
+	if (is_empty()) return true;
+	for (int i=0; i<size(); i++)
+		if ((*this)[i].is_degenerated()) // don't use diam() because of roundoff
+			return true;
+	return false;
+}
+
+template <class T>
+bool TemplateVector<T>::contains(const Vector& x) const {
+  for (int i=0; i<size(); i++)
+    if (!(*this)[i].contains(x[i])) return false;
+  return true;
+}
+
+template <class T>
+bool TemplateVector<T>::is_unbounded() const {
+  if (is_empty()) return false;
+  for (int i=0; i<size(); i++)
+    if ((*this)[i].is_unbounded()) return true;
+  return false;
+}
+
+template <class T>
+bool TemplateVector<T>::is_subset(const TemplateVector<Interval>& x) const {
+  if (is_empty()) return true;
+  for (int i=0; i<size(); i++)
+    if (!(*this)[i].is_subset(x[i])) return false;
+  return true;
+}
+template <class T>
+bool TemplateVector<T>::is_subset(const TemplateVector<Affine2>& x) const {
+	if (is_empty()) return true;
+	for (int i=0; i<size(); i++)
+		if (!(*this)[i].is_subset(x[i].itv())) return false;
+	return true;
+}
+
+
+template <class T>
+bool TemplateVector<T>::is_strict_subset(const TemplateVector<Interval>& x) const {
+  if (is_empty() && !x.is_empty()) return true;
+  if (x.is_empty()) return false;
+  for (int i=0; i<size(); i++)
+    if (!(*this)[i].is_strict_subset(x[i])) return false;
+  return true;
+}
+template <class T>
+bool TemplateVector<T>::is_strict_subset(const TemplateVector<Affine2>& x) const {
+	  if (is_empty() && !x.is_empty()) return true;
+	  if (x.is_empty()) return false;
+	  for (int i=0; i<size(); i++)
+	    if (!(*this)[i].is_strict_subset(x[i].itv())) return false;
+	  return true;
+	}
+
+template <class T>
+bool TemplateVector<T>::is_zero() const {
+	for (int i=0; i<size(); i++)
+		if ((*this)[i]!=Interval::ZERO) return false;
+	return true;
+}
+
+template <class T>
+bool TemplateVector<T>::is_bisectable() const {
+	for (int i=0; i<size(); i++)
+		if ((*this)[i].is_bisectable()) return true;
+	return false;
+}
+
+template <class T>
+Vector TemplateVector<T>::rad() const {
+	Vector r(size());
+	for (int i=0; i<size(); i++)
+		r[i]=(*this)[i].rad();
+	return r;
+}
+
+template <class T>
+Vector TemplateVector<T>::diam() const {
+	Vector d(size());
+	for (int i=0; i<size(); i++)
+		d[i]=(*this)[i].diam();
+	return d;
+}
+
+template <class T>
+int TemplateVector<T>::extr_diam_index(bool min) const {
+	double d=(*this)[0].diam();
+	int selectedIndex=0;
+	if (is_empty()) throw InvalidIntervalVectorOp("Diameter of an empty TemplateVector is undefined");
+	for (int i=1; i<size(); i++) {
+		double w=(*this)[i].diam();
+		if (min? w<d : w>d) {
+			selectedIndex=i;
+			d=w;
+		}
+	}
+	return selectedIndex;
+}
+
+namespace {
+
+template <class T>
+const TemplateVector<T>* tmp;
+bool diam_lt(const int& i, const int& j) {
+	return (*tmp)[i].diam()<(*tmp)[j].diam();
+}
+bool diam_gt(const int& i, const int& j) {
+	return (*tmp)[i].diam()>(*tmp)[j].diam();
+}
+
+} // end namespace
+
+template <class T>
+void TemplateVector<T>::sort_indices(bool min, int tab[]) const {
+	for (int i=0; i<size(); i++) tab[i]=i;
+	tmp=this;
+	std::sort(tab,tab+size(),min? diam_lt:diam_gt);
+}
+
+template <class T>
+std::ostream& operator<<(std::ostream& os, const TemplateVector<T>& x) {
+	if (x.is_empty()) return os << "empty vector";
+
+	os << "(";
+	for (int i=0; i<x.size(); i++)
+		os << x[i] << (i<x.size()-1? " ; " : "");
+	os << ")";
+	return os;
+}
+
+template <class T>
+double TemplateVector<T>::volume() const {
+	if ((*this)[0].is_unbounded()) return POS_INFINITY;
+	if ((*this)[0].is_degenerated()) return 0;
+	double vol=::log(((*this)[0]).diam());
+	for (int i=1; i<size(); i++) {
+		if ((*this)[i].is_unbounded()) return POS_INFINITY;
+		if ((*this)[i].is_degenerated()) return 0;
+		vol+=::log(((*this)[i]).diam());
+	}
+	return ::exp(vol);
+}
+
+template <class T>
+double TemplateVector<T>::perimeter() const {
+	if ((*this)[0].is_unbounded()) return POS_INFINITY;
+	double per=((*this)[0]).diam();
+	for (int i=1; i<size(); i++) {
+		if ((*this)[i].is_unbounded()) return POS_INFINITY;
+		per+=((*this)[i]).diam();
+	}
+	return per;
+}
+
+template <class T, class R>
+double distance(const TemplateVector<T>& x1, const TemplateVector<R>& x2) {
+	assert(x1.size()==x2.size());
+
+	double max = ibex::distance(x1[0],x2[0]);
+	for (int i=1; i<x1.size(); i++) {
+		double cand = ibex::distance(x1[i],x2[i]);
+		if (max<cand) max = cand;
+	}
+	return max;
+}
+
+template <class T>
+double TemplateVector<T>::maxdelta(const TemplateVector<Interval>& x) {
+	double max = (*this)[0].delta(x[0]);
+	for (int i=1; i<size(); i++) {
+		double cand = (*this)[i].delta(x[i]);
+		if (max<cand) max = cand;
+	}
+	return max;
+}
+template <class T>
+double TemplateVector<T>::maxdelta(const TemplateVector<Affine2>& x) {
+	double max = (*this)[0].delta(x[0].itv());
+	for (int i=1; i<size(); i++) {
+		double cand = (*this)[i].delta(x[i].itv());
+		if (max<cand) max = cand;
+	}
+	return max;
+}
+
+
+template <class T>
+double TemplateVector<T>::rel_distance(const TemplateVector<Interval>& x) const {
+	double max = (*this)[0].rel_distance(x[0]);
+	for (int i=1; i<size(); i++) {
+		double cand = (*this)[i].rel_distance(x[i]);
+		if (max<cand) max = cand;
+	}
+	return max;
+}
+template <class T>
+double TemplateVector<T>::rel_distance(const TemplateVector<Affine2>& x) const {
+	double max = (*this)[0].rel_distance(x[0].itv());
+	for (int i=1; i<size(); i++) {
+		double cand = (*this)[i].rel_distance(x[i].itv());
+		if (max<cand) max = cand;
+	}
+	return max;
+}
+
+
+namespace { // to create anonymous structure/functions
+
+/** \brief Complementary of an Interval
+ *
+ * Compute the complementary of x. The result is (c1 union c2)
+ */
+void complI(const Interval& x, Interval& c1, Interval& c2) {
+	if (x.is_empty() || x.is_degenerated()) { // x.is_empty() should not happen if called from compl()
+		c1=Interval::ALL_REALS;
+		c2=Interval::EMPTY_SET;
+		return;
+	}
+	else {
+		if (x.lb()>NEG_INFINITY) {
+			c1=Interval(NEG_INFINITY,x.lb());
+			if (x.ub()<POS_INFINITY)
+				c2=Interval(x.ub(),POS_INFINITY);
+			else
+				c2=Interval::EMPTY_SET;
+		} else if (x.ub()<POS_INFINITY) {
+			c1=Interval(x.ub(),POS_INFINITY);
+			c2=Interval::EMPTY_SET;
+		} else {
+			c1=c2=Interval::EMPTY_SET;
+		}
+	}
+}
+
+/** \brief x\y
+ *
+ */
+void diffI(const Interval& x, const Interval& y, Interval& c1, Interval& c2) {
+	complI(y,c1,c2);
+	c1 &= x;
+	if (c1.is_degenerated()) c1=Interval::EMPTY_SET;
+	c2 &= x;
+	if (c2.is_degenerated()) c2=Interval::EMPTY_SET;
+
+	if (c1.is_empty()) {
+		c1=c2;
+		c2=Interval::EMPTY_SET;
+	}
+}
+
+} // end namespace
+
+
+int TemplateVector<Interval>::diff(const TemplateVector<Interval>& y, TemplateVector<Interval>*& result) const {
+	const int nn=size();
+	const TemplateVector<Interval>& x=*this;
+	TemplateVector<Interval> *tmp = new TemplateVector<Interval>[2*nn]; // in the worst case, there is 2n boxes
+	Interval c1, c2;
+	int b=0;
+	if (y.is_empty()) {
+		tmp[b].resize(nn);
+		tmp[b]=x; // copy of this
+		b++;
+	} else {
+		for (int var=0; var<nn; var++) {
+
+			diffI(x[var],y[var],c1,c2);
+
+			if (!c1.is_empty()) {
+				tmp[b].resize(nn);
+				TemplateVector<Interval>& v=tmp[b++];
+				for (int i=0; i<var; i++) v[i]=y[i];
+				v[var]=c1;
+				for (int i=var+1; i<nn; i++) v[i]=x[i];
+
+				if (!c2.is_empty()) {
+					tmp[b].resize(nn);
+					TemplateVector<Interval>& v=tmp[b++];
+					for (int i=0; i<var; i++) v[i]=y[i];
+					v[var]=c2;
+					for (int i=var+1; i<nn; i++) v[i]=x[i];
+				}
+			}
+		}
+	}
+
+	if (b==0) {
+		result = new TemplateVector<Interval>[1];
+		result[0].resize(nn);
+		result[0].set_empty();
+		b=1;
+	} else {
+		result=new TemplateVector<Interval>[b];
+		for (int i=0; i<b; i++) {
+			result[i].resize(nn);
+			result[i]=tmp[i];
+		}
+	}
+	delete[] tmp;
+
+	return b;
+}
+int TemplateVector<Affine2>::diff(const TemplateVector<Affine2>& y, TemplateVector<Interval>*& result) const {
+	return (this->itv()).diff(y.itv(),result);
+}
+int TemplateVector<Affine2>::diff(const TemplateVector<Interval>& y, TemplateVector<Interval>*& result) const {
+	return (this->itv()).diff(y,result);
+}
+int TemplateVector<Interval>::diff(const TemplateVector<Affine2>& y, TemplateVector<Interval>*& result) const {
+	return (this->diff(y.itv(),result));
+}
+
+template <class T>
+int TemplateVector<T>::complementary(TemplateVector<Interval>*& result) const {
+	return TemplateVector<Interval>(size()).diff(*this,result);
+}
+
+
+template <class T>
+std::pair<TemplateVector<Interval>,TemplateVector<Interval>> TemplateVector<T>::bisect(int i, double ratio) const {
+	assert(0<ratio && ratio<1.0);
+	assert(0<=i && i<size());
+
+	if (!(*this)[i].is_bisectable()) {
+		std::ostringstream oss;
+		oss << "Unable to bisect " << *this;
+		throw InvalidIntervalVectorOp(oss.str());
+	}
+	TemplateVector<Interval> left(*this);
+	TemplateVector<Interval> right(*this);
+
+	std::pair<Interval,Interval> p=(*this)[i].bisect(ratio);
+
+	left[i] = p.first;
+	right[i] = p.second;
+
+	return std::pair<TemplateVector<Interval>,TemplateVector<Interval>>(left,right);
+}
+
+template <class T>
+Vector TemplateVector<T>::random() const {
+	assert(!is_empty());
+
+	Vector b(size());
+	for (int i=0; i<size(); i++) {
+		const T& xi=(*this)[i];
+		// get a random number in [-0.5,0.5]
+		double r=rand()/(double) RAND_MAX -0.5;
+		// pick a point in the domain of the ith variable
+		double p = xi.mid() + r*xi.diam();
+		// watch dog
+		if (p<xi.lb()) p=xi.lb();
+		else if (p>xi.ub()) p=xi.ub();
+		b[i]=p;
+	}
+	return b;
+}
+
+bool proj_add(const TemplateVector<Interval>& y, TemplateVector<Interval>& x1, TemplateVector<Interval>& x2) {
+	x1 &= y-x2;
+	x2 &= y-x1;
+	return !x1.is_empty() && !x2.is_empty();
+}
+bool proj_add(const TemplateVector<Affine2>& y, TemplateVector<Affine2>& x1, TemplateVector<Affine2>& x2) {
+	for (int i=0; i<y.size(); i++)
+		if (!proj_add(y[i], x1[i], x2[i])) {
+			x1.set_empty();
+			x2.set_empty();
+			return false;
+		}
+	return true;
+}
+bool proj_add(const TemplateVector<Affine2>& y, TemplateVector<Interval>& x1, TemplateVector<Affine2>& x2) {
+	for (int i=0; i<y.size(); i++)
+		if (!proj_add(y[i].itv(), x1[i], x2[i].ITV())) {
+			x1.set_empty();
+			x2.set_empty();
+			return false;
+		}
+	return true;
+}
+
+bool proj_sub(const TemplateVector<Interval>& y, TemplateVector<Interval>& x1, TemplateVector<Interval>& x2) {
+	x1 &= y+x2;
+	x2 &= x1-y;
+	return !x1.is_empty() && !x2.is_empty();
+}
+bool proj_sub(const TemplateVector<Affine2>& y, TemplateVector<Affine2>& x1, TemplateVector<Affine2>& x2) {
+	for (int i=0; i<y.size(); i++)
+		if (!proj_sub(y[i], x1[i], x2[i])) {
+			x1.set_empty();
+			x2.set_empty();
+			return false;
+		}
+	return true;
+}
+bool proj_sub(const TemplateVector<Affine2>& y, TemplateVector<Interval>& x1, TemplateVector<Affine2>& x2) {
+	for (int i=0; i<y.size(); i++)
+		if (!proj_sub(y[i].itv(), x1[i], x2[i].ITV())) {
+			x1.set_empty();
+			x2.set_empty();
+			return false;
+		}
+	return true;
+}
+
+bool proj_mul(const TemplateVector<Interval>& y, Interval& x1, TemplateVector<Interval>& x2) {
+	assert(y.size()==x2.size());
+
+	for (int i=0; i<x2.size(); i++)
+		if (!proj_mul(y[i], x1, x2[i])) {
+			x2.set_empty();
+			return false;
+		}
+	return true;
+}
+bool proj_mul(const TemplateVector<Affine2>& y, Affine2& x1, TemplateVector<Affine2>& x2) {
+	assert(y.size()==x2.size());
+
+	for (int i=0; i<x2.size(); i++)
+		if (!proj_mul(y[i], x1, x2[i])) {
+			x2.set_empty();
+			return false;
+		}
+	return true;
+}
+bool proj_mul(const TemplateVector<Affine2>& y, Interval& x1, TemplateVector<Affine2>& x2) {
+	assert(y.size()==x2.size());
+
+	for (int i=0; i<x2.size(); i++)
+		if (!proj_mul(y[i], x1, x2[i])) {
+			x2.set_empty();
+			return false;
+		}
+	return true;
+}
+
+
+bool proj_mul(const Interval& z, TemplateVector<Interval>& x, TemplateVector<Interval>& y) {
+	assert(x.size()==y.size());
+	int n=x.size();
+
+	if (n==1) {
+		if (proj_mul(z,x[0],y[0])) return true;
+		else { x.set_empty(); y.set_empty(); return false; }
+	}
+
+	Interval* xy= new Interval[n];  // xy[i] := x[i]y[i]
+	Interval* sum= new Interval[n-1]; // sum[i] := x[0]y[0]+...x[i]y[i]
+
+	// ------------- forward --------------------
+	for (int i=0; i<n; i++) xy[i]=x[i]*y[i];
+	sum[0]=xy[0];
+	for (int i=1; i<n-1; i++) sum[i]=sum[i-1]+xy[i];
+
+	// ------------- backward -------------------
+	// (rem: we have n>=2)
+	if (!proj_add(z, sum[n-2], xy[n-1])) { x.set_empty(); y.set_empty(); delete[] sum; delete[] xy; return false; }
+
+	for (int i=n-3; i>=0; i--)
+		if (!proj_add(sum[i+1],sum[i],xy[i+1])) { x.set_empty(); y.set_empty(); delete[] sum; delete[] xy; return false; }
+
+	if ((xy[0] &= sum[0]).is_empty()) { x.set_empty(); y.set_empty(); delete[] sum; delete[] xy; return false; }
+
+	for (int i=0; i<n; i++)
+		if (!proj_mul(xy[i],x[i],y[i])) { x.set_empty(); y.set_empty(); delete[] sum; delete[] xy; return false; }
+
+	delete[] sum;
+	delete[] xy;
+	return true;
+}
+
+template <class T>
+bool proj_mul(const T& z, TemplateVector<T>& x, TemplateVector<T>& y) {
+	assert(x.size()==y.size());
+	int n=x.size();
+
+	if (n==1) {
+		if (proj_mul(z,x[0],y[0])) return true;
+		else { x.set_empty(); y.set_empty(); return false; }
+	}
+
+	T* xy= new T[n];  // xy[i] := x[i]y[i]
+	T* sum= new T[n-1]; // sum[i] := x[0]y[0]+...x[i]y[i]
+
+	// ------------- forward --------------------
+	for (int i=0; i<n; i++) xy[i]=x[i]*y[i];
+	sum[0]=xy[0];
+	for (int i=1; i<n-1; i++) sum[i]=sum[i-1]+xy[i];
+
+	// ------------- backward -------------------
+	// (rem: we have n>=2)
+	if (!proj_add(z, sum[n-2], xy[n-1])) { x.set_empty(); y.set_empty(); delete[] sum; delete[] xy; return false; }
+
+	for (int i=n-3; i>=0; i--)
+		if (!proj_add(sum[i+1],sum[i],xy[i+1])) { x.set_empty(); y.set_empty(); delete[] sum; delete[] xy; return false; }
+
+	if ((xy[0] &= sum[0]).is_empty()) { x.set_empty(); y.set_empty(); delete[] sum; delete[] xy; return false; }
+
+	for (int i=0; i<n; i++)
+		if (!proj_mul(xy[i],x[i],y[i])) { x.set_empty(); y.set_empty(); delete[] sum; delete[] xy; return false; }
+
+	delete[] sum;
+	delete[] xy;
+	return true;
+}
+bool proj_mul(const Interval& z, TemplateVector<Affine2>& x, TemplateVector<Affine2>& y) {
+	assert(x.size()==y.size());
+	int n=x.size();
+
+	if (n==1) {
+		if (proj_mul(z,x[0].ITV(),y[0].ITV())) return true;
+		else { x.set_empty(); y.set_empty(); return false; }
+	}
+
+	Affine2* xy= new Affine2[n];  // xy[i] := x[i]y[i]
+	Affine2* sum= new Affine2[n-1]; // sum[i] := x[0]y[0]+...x[i]y[i]
+
+	// ------------- forward --------------------
+	for (int i=0; i<n; i++) xy[i]=x[i]*y[i];
+	sum[0]=xy[0];
+	for (int i=1; i<n-1; i++) sum[i]=sum[i-1]+xy[i];
+
+	// ------------- backward -------------------
+	// (rem: we have n>=2)
+	if (!proj_add(z, sum[n-2].ITV(), xy[n-1].ITV())) { x.set_empty(); y.set_empty(); delete[] sum; delete[] xy; return false; }
+
+	for (int i=n-3; i>=0; i--)
+		if (!proj_add(sum[i+1].ITV(),sum[i].ITV(),xy[i+1].ITV())) { x.set_empty(); y.set_empty(); delete[] sum; delete[] xy; return false; }
+
+	if ((xy[0] &= sum[0]).is_empty()) { x.set_empty(); y.set_empty(); delete[] sum; delete[] xy; return false; }
+
+	for (int i=0; i<n; i++)
+		if (!proj_mul(xy[i].ITV(),x[i],y[i])) { x.set_empty(); y.set_empty(); delete[] sum; delete[] xy; return false; }
+
+	delete[] sum;
+	delete[] xy;
+	return true;
+}
+
+
+} // end namespace
+
