@@ -680,113 +680,176 @@ Affine2 sign(const Affine2& x);
  *
  * Set $([x]_1,[x]_2)$ to $([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=x_1+x_2\}$. */
 bool proj_add(const Affine2& y, Affine2& x1, Affine2& x2);
+bool proj_add(const Affine2& y, Interval& x1, Affine2& x2);
+bool proj_add(const Affine2& y, Affine2& x1, Interval& x2);
+bool proj_add(const Affine2& y, Interval& x1, Interval& x2);
+bool proj_add(const Interval& y, Affine2& x1, Affine2& x2);
+bool proj_add(const Interval& y, Interval& x1, Affine2& x2);
+bool proj_add(const Interval& y, Affine2& x1, Interval& x2);
 
 /** \brief Projection of $y=x_1-x_2$.
  *
  * Set $([x]_1,[x]_2)$ to $([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=x_1-x_2\}$. */
 bool proj_sub(const Affine2& y, Affine2& x1, Affine2& x2);
+bool proj_sub(const Affine2& y, Interval& x1, Affine2& x2);
+bool proj_sub(const Affine2& y, Affine2& x1, Interval& x2);
+bool proj_sub(const Affine2& y, Interval& x1, Interval& x2);
+bool proj_sub(const Interval& y, Affine2& x1, Affine2& x2);
+bool proj_sub(const Interval& y, Interval& x1, Affine2& x2);
+bool proj_sub(const Interval& y, Affine2& x1, Interval& x2);
 
 /** \brief Projection of $y=x_1*x_2$.
  *
  * Set $([x]_1,[x]_2)$ to $([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=x_1\times x_2\}$. */
 bool proj_mul(const Affine2& y, Affine2& x1, Affine2& x2);
 bool proj_mul(const Affine2& y, Interval& x1, Affine2& x2);
+bool proj_mul(const Affine2& y, Affine2& x1, Interval& x2);
+bool proj_mul(const Affine2& y, Interval& x1, Interval& x2);
 bool proj_mul(const Interval& y, Affine2& x1, Affine2& x2);
+bool proj_mul(const Interval& y, Interval& x1, Affine2& x2);
+bool proj_mul(const Interval& y, Affine2& x1, Interval& x2);
+
 
 /** \brief Projection of $y=x_1/x_2$.
  *
  * Set $([x]_1,[x]_2)$ to $([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=x_1/x_2\}$. */
 bool proj_div(const Affine2& y, Affine2& x1, Affine2& x2);
+bool proj_div(const Affine2& y, Interval& x1, Affine2& x2);
+bool proj_div(const Affine2& y, Affine2& x1, Interval& x2);
+bool proj_div(const Affine2& y, Interval& x1, Interval& x2);
+bool proj_div(const Interval& y, Affine2& x1, Affine2& x2);
+bool proj_div(const Interval& y, Interval& x1, Affine2& x2);
+bool proj_div(const Interval& y, Affine2& x1, Interval& x2);
 
 /** \brief Projection of $y=x^2$.
  *
  * Set $[x]$ to $[x]\cap { x\in [x] \exists y\in [y], \quad y=x^2 \}$. */
 bool proj_sqr(const Affine2& y, Affine2& x);
+bool proj_sqr(const Interval& y, Affine2& x);
+bool proj_sqr(const Affine2& y, Interval& x);
 
 /** \brief Projection of $y=\sqrt{x}$.
  *
  * Set $[x]$ to $[x]\cap { x\in [x] \exists y\in [y], \quad y=\sqrt{x} \}$. */
 bool proj_sqrt(const Affine2& y, Affine2& x);
+bool proj_sqrt(const Interval& y, Affine2& x);
+bool proj_sqrt(const Affine2& y, Interval& x);
 
 /** \brief Projection of $y=x^n$.
  *
  * Set $[x]$ to $[x]\cap { x\in [x] \exists y\in [y], \quad y=x^n \}$. */
 bool proj_pow(const Affine2& y, int n, Affine2& x);
+bool proj_pow(const Interval& y,int n, Affine2& x);
+bool proj_pow(const Affine2& y, int n, Interval& x);
 
 /** \brief Projection of $y=x_1^{x_2}$.
  *
  * Set $([x]_1,[x]_2)$ to $([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=x_1^{x_2}\}$. */
 bool proj_pow(const Affine2& y, Affine2& x1, Affine2& x2);
+bool proj_pow(const Affine2& y, Interval& x1, Affine2& x2);
+bool proj_pow(const Affine2& y, Affine2& x1, Interval& x2);
+bool proj_pow(const Affine2& y, Interval& x1, Interval& x2);
+bool proj_pow(const Interval& y, Affine2& x1, Affine2& x2);
+bool proj_pow(const Interval& y, Interval& x1, Affine2& x2);
+bool proj_pow(const Interval& y, Affine2& x1, Interval& x2);
 
 /** \brief Projection of the $y=x^{\frac{1}{n}}$.
  *
  * Set $[x]$ to $[x]\cap { x\in [x] \exists y\in [y], \quad y=x^{\frac{1}{n}} \}$. */
 bool proj_root(const Affine2& y, int n, Affine2& x);
+bool proj_root(const Interval& y,int n, Affine2& x);
+bool proj_root(const Affine2& y, int n, Interval& x);
 
 /** \brief Projection of $y=\exp(x)$.
  *
  * Set $[x]$ to $[x]\cap { x\in [x] \exists y\in [y], \quad y=\exp(x) \}$. */
 bool proj_exp(const Affine2& y, Affine2& x);
+bool proj_exp(const Interval& y, Affine2& x);
+bool proj_exp(const Affine2& y, Interval& x);
 
 /** \brief Projection of $y=\log(x)$.
  *
  * Set $[x]$ to $[x]\cap { x\in [x] \exists y\in [y], \quad y=\log(x) \}$. */
 bool proj_log(const Affine2& y, Affine2& x);
+bool proj_log(const Interval& y, Affine2& x);
+bool proj_log(const Affine2& y, Interval& x);
 
 /** \brief Projection of $y=\cos(x)$.
  *
  * Set $[x]$ to $[x]\cap { x\in [x] \exists y\in [y], \quad y=\cos(x) \}$. */
 bool proj_cos(const Affine2& y, Affine2& x);
+bool proj_cos(const Interval& y, Affine2& x);
+bool proj_cos(const Affine2& y, Interval& x);
 
 /** \brief Projection of $y=\sin(x)$.
  *
  * Set $[x]$ to $[x]\cap { x\in [x] \exists y\in [y], \quad y=\sin(x) \}$. */
 bool proj_sin(const Affine2& y, Affine2& x);
+bool proj_sin(const Interval& y, Affine2& x);
+bool proj_sin(const Affine2& y, Interval& x);
 
 /** \brief Projection of $y=\tan(x)$.
  *
  * Set $[x]$ to $[x]\cap { x\in [x] \exists y\in [y], \quad y=\tan(x) \}$. */
 bool proj_tan(const Affine2& y, Affine2& x);
+bool proj_tan(const Interval& y, Affine2& x);
+bool proj_tan(const Affine2& y, Interval& x);
 
 /** \brief Projection of $y=\acos(x)$.
  *
  * Set $[x]$ to $[x]\cap { x\in [x] \exists y\in [y], \quad y=\acos(x) \}$. */
 bool proj_acos(const Affine2& y, Affine2& x);
+bool proj_acos(const Interval& y, Affine2& x);
+bool proj_acos(const Affine2& y, Interval& x);
 
 /** \brief Projection of $y=\asin(x)$.
  *
  * Set $[x]$ to $[x]\cap { x\in [x] \exists y\in [y], \quad y=\asin(x) \}$. */
 bool proj_asin(const Affine2& y, Affine2& x);
+bool proj_asin(const Interval& y, Affine2& x);
+bool proj_asin(const Affine2& y, Interval& x);
 
 /** \brief Projection of $y=\atan(x)$.
  *
  * Set $[x]$ to $[x]\cap { x\in [x] \exists y\in [y], \quad y=\atan(x) \}$. */
 bool proj_atan(const Affine2& y, Affine2& x);
+bool proj_atan(const Interval& y, Affine2& x);
+bool proj_atan(const Affine2& y, Interval& x);
 
 /** \brief Projection of $y=\cosh(x)$.
  *
  * Set $[x]$ to $[x]\cap { x\in [x] \exists y\in [y], \quad y=\cosh(x) \}$. */
 bool proj_cosh(const Affine2& y, Affine2& x);
+bool proj_cosh(const Interval& y, Affine2& x);
+bool proj_cosh(const Affine2& y, Interval& x);
 
 /** \brief Projection of $y=\sinh(x)$.
  *
  * Set $[x]$ to $[x]\cap { x\in [x] \exists y\in [y], \quad y=\sinh(x) \}$. */
 bool proj_sinh(const Affine2& y, Affine2& x);
+bool proj_sinh(const Interval& y, Affine2& x);
+bool proj_sinh(const Affine2& y, Interval& x);
 
 /** \brief Projection of $y=\tanh(x)$.
  *
  * Set $[x]$ to $[x]\cap { x\in [x] \exists y\in [y], \quad y=\tanh(x) \}$. */
 bool proj_tanh(const Affine2& y, Affine2& x);
+bool proj_tanh(const Interval& y, Affine2& x);
+bool proj_tanh(const Affine2& y, Interval& x);
 
 /** \brief Projection of $y=|x|$.
  *
  * Set $[x]$ to $[x]\cap { x\in [x] \exists y\in [y], \quad y=|x| \}$. */
 bool proj_abs(const Affine2& y, Affine2& x);
+bool proj_abs(const Interval& y, Affine2& x);
+bool proj_abs(const Affine2& y, Interval& x);
 
 /** \brief Projection of $y=sign(x)$.
  *
  * Set $[x]$ to $[x]\cap { x\in [x] \exists y\in [y], \quad y=sign(x) \}$. */
 bool proj_sign(const Affine2& y, Affine2& x);
+bool proj_sign(const Interval& y, Affine2& x);
+bool proj_sign(const Affine2& y, Interval& x);
 
 /** \brief Contract x w.r.t. the fact that it must be integral.
  *
@@ -1367,6 +1430,203 @@ inline Affine2 integer(const Affine2& x){
 	return Affine2(x);
 }
 
+inline bool proj_add(const Affine2& y, Affine2& x1, Affine2& x2) {
+	return proj_add(y.itv(), x1, x2);
+}
+inline bool proj_add(const Affine2& y, Interval& x1, Affine2& x2) {
+	return proj_add(y.itv(), x2, x1);
+}
+inline bool proj_add(const Affine2& y, Affine2& x1, Interval& x2) {
+	return proj_add(y.itv(), x1, x2);
+}
+inline bool proj_add(const Interval& y, Interval& x1, Affine2& x2) {
+	return proj_add(y, x2, x1);
+}
+inline bool proj_add(const Affine2& y, Interval& x1, Interval& x2) {
+	return proj_add(y.itv(), x1, x2);
+}
+
+inline bool proj_sub(const Affine2& y, Affine2& x1, Affine2& x2) {
+	return proj_sub(y.itv(), x1, x2);
+}
+inline bool proj_sub(const Affine2& y, Interval& x1, Affine2& x2) {
+	return proj_sub(y.itv(), x1, x2);
+}
+inline bool proj_sub(const Affine2& y, Affine2& x1, Interval& x2) {
+	return proj_sub(y.itv(), x1, x2);
+}
+inline bool proj_sub(const Affine2& y, Interval& x1, Interval& x2) {
+	return proj_sub(y.itv(), x1, x2);
+}
+
+inline bool proj_mul(const Affine2& y, Affine2& x1, Affine2& x2) {
+	return proj_mul(y.itv(), x1, x2);
+}
+inline bool proj_mul(const Affine2& y, Interval& x1, Affine2& x2) {
+	return proj_mul(y.itv(), x2, x1);
+}
+inline bool proj_mul(const Affine2& y, Affine2& x1, Interval& x2) {
+	return proj_mul(y.itv(), x1, x2);
+}
+inline bool proj_mul(const Interval& y, Interval& x1, Affine2& x2) {
+	return proj_mul(y, x2, x1);
+}
+inline bool proj_mul(const Affine2& y, Interval& x1, Interval& x2) {
+	return proj_mul(y.itv(), x1, x2);
+}
+
+
+inline bool proj_div(const Affine2& y, Affine2& x1, Affine2& x2) {
+	return proj_div(y.itv(), x1, x2);
+}
+inline bool proj_div(const Affine2& y, Interval& x1, Affine2& x2) {
+	return proj_div(y.itv(), x1, x2);
+}
+inline bool proj_div(const Affine2& y, Affine2& x1, Interval& x2) {
+	return proj_div(y.itv(), x1, x2);
+}
+inline bool proj_div(const Affine2& y, Interval& x1, Interval& x2) {
+	return proj_div(y.itv(), x1, x2);
+}
+
+
+inline bool proj_sqr(const Affine2& y, Affine2& x){
+	return proj_sqr(y.itv(),x);
+}
+inline bool proj_sqr(const Affine2& y, Interval& x){
+	return proj_sqr(y.itv(),x);
+}
+
+inline bool proj_pow(const Affine2& y,int n, Affine2& x){
+	return proj_pow(y.itv(),n,x);
+}
+inline bool proj_pow(const Affine2& y,int n, Interval& x){
+	return proj_pow(y.itv(),n, x);
+}
+
+/** \brief Projection of $y=x_1^{x_2}$.
+ *
+ * Set $([x]_1,[x]_2)$ to $([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=x_1^{x_2}\}$. */
+bool proj_pow(const Affine2& y, Affine2& x1, Affine2& x2){
+	return proj_pow(y.itv(), x1, x2);
+}
+bool proj_pow(const Affine2& y, Interval& x1, Affine2& x2){
+	return proj_pow(y.itv(), x1, x2);
+}
+bool proj_pow(const Affine2& y, Affine2& x1, Interval& x2){
+	return proj_pow(y.itv(), x1, x2);
+}
+bool proj_pow(const Affine2& y, Interval& x1, Interval& x2){
+	return proj_pow(y.itv(), x1, x2);
+}
+
+/** \brief Projection of the $y=x^{\frac{1}{n}}$.
+ *
+ * Set $[x]$ to $[x]\cap { x\in [x] \exists y\in [y], \quad y=x^{\frac{1}{n}} \}$. */
+bool proj_root(const Affine2& y, int n, Affine2& x){
+	return proj_pow(y.itv(),n, x);
+}
+bool proj_root(const Affine2& y, int n, Interval& x){
+	return proj_pow(y.itv(),n, x);
+}
+
+
+inline bool proj_sqrt(const Affine2& y, Affine2& x){
+	return proj_sqrt(y.itv(),x);
+}
+inline bool proj_sqrt(const Affine2& y, Interval& x){
+	return proj_sqrt(y.itv(),x);
+}
+inline bool proj_exp(const Affine2& y, Affine2& x){
+	return proj_exp(y.itv(),x);
+}
+inline bool proj_exp(const Affine2& y, Interval& x){
+	return proj_exp(y.itv(),x);
+}
+
+inline bool proj_log(const Affine2& y, Affine2& x){
+	return proj_log(y.itv(),x);
+}
+inline bool proj_log(const Affine2& y, Interval& x){
+	return proj_log(y.itv(),x);
+}
+
+inline bool proj_cos(const Affine2& y, Affine2& x){
+	return proj_cos(y.itv(),x);
+}
+inline bool proj_cos(const Affine2& y, Interval& x){
+	return proj_cos(y.itv(),x);
+}
+
+inline bool proj_sin(const Affine2& y, Affine2& x){
+	return proj_sin(y.itv(),x);
+}
+inline bool proj_sin(const Affine2& y, Interval& x){
+	return proj_sin(y.itv(),x);
+}
+
+inline bool proj_tan(const Affine2& y, Affine2& x){
+	return proj_tan(y.itv(),x);
+}
+inline bool proj_tan(const Affine2& y, Interval& x){
+	return proj_tan(y.itv(),x);
+}
+
+inline bool proj_acos(const Affine2& y, Affine2& x){
+	return proj_acos(y.itv(),x);
+}
+inline bool proj_acos(const Affine2& y, Interval& x){
+	return proj_acos(y.itv(),x);
+}
+
+inline bool proj_asin(const Affine2& y, Affine2& x){
+	return proj_asin(y.itv(),x);
+}
+inline bool proj_asin(const Affine2& y, Interval& x){
+	return proj_asin(y.itv(),x);
+}
+
+inline bool proj_atan(const Affine2& y, Affine2& x){
+	return proj_atan(y.itv(),x);
+}
+inline bool proj_atan(const Affine2& y, Interval& x){
+	return proj_atan(y.itv(),x);
+}
+
+inline bool proj_cosh(const Affine2& y, Affine2& x){
+	return proj_cosh(y.itv(),x);
+}
+inline bool proj_cosh(const Affine2& y, Interval& x){
+	return proj_cosh(y.itv(),x);
+}
+
+inline bool proj_sinh(const Affine2& y, Affine2& x){
+	return proj_sinh(y.itv(),x);
+}
+inline bool proj_sinh(const Affine2& y, Interval& x){
+	return proj_sinh(y.itv(),x);
+}
+
+inline bool proj_tanh(const Affine2& y, Affine2& x){
+	return proj_tanh(y.itv(),x);
+}
+inline bool proj_tanh(const Affine2& y, Interval& x){
+	return proj_tanh(y.itv(),x);
+}
+
+inline bool proj_abs(const Affine2& y, Affine2& x){
+	return proj_abs(y.itv(),x);
+}
+inline bool proj_abs(const Affine2& y, Interval& x){
+	return proj_abs(y.itv(),x);
+}
+
+inline bool proj_sign(const Affine2& y, Affine2& x){
+	return proj_sign(y.itv(),x);
+}
+inline bool proj_sign(const Affine2& y, Interval& x){
+	return proj_sign(y.itv(),x);
+}
 
 } // end namespace ibex
 

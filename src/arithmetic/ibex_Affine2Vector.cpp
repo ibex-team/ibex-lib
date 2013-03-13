@@ -5,10 +5,21 @@
  *      Author: nininjo
  */
 
+#include "ibex_IntervalVector.h"
+#include "ibex_IntervalVector.cpp"
 #include "ibex_Affine2Vector.h"
 #include <sstream>
 
 namespace ibex {
+
+
+IntervalVector& IntervalVector::operator=(const Affine2Vector& x) {
+	assert(size()==x.size());
+	for (int i = 0; i < size(); i++){
+		vec[i] = x[i].itv();
+	}
+	return *this;
+}
 
 Affine2Vector::Affine2Vector(int n) :
 		_n(n),
@@ -76,8 +87,12 @@ Affine2Vector::Affine2Vector(const Vector& x) :
 	}
 }
 
-
 void Affine2Vector::init(const Interval& x) {
+	for (int i = 0; i < size(); i++) {
+		(*this)[i] = x;
+	}
+}
+void Affine2Vector::init(const Affine2& x) {
 	for (int i = 0; i < size(); i++) {
 		(*this)[i] = x;
 	}
@@ -109,7 +124,7 @@ void Affine2Vector::resize(int n) {
 		newVec[i]=_vec[i];
 	}
 	for (; i<n; i++){
-		newVec[i]= Affine2(n,0.0);
+		newVec[i]= Affine2(n);
 	}
 	if (_vec!=NULL) { // vec==NULL happens when default constructor is used (n==0)
 		delete[] _vec;
@@ -191,6 +206,83 @@ bool Affine2Vector::operator ==(const Affine2Vector& x) const {
 
 	return true;
 }
+bool Affine2Vector::operator ==(const IntervalVector& x) const {
+	if (_n != x.size()) {
+		return false;
+	}
+	if (is_empty() || x.is_empty()) {
+		return is_empty() && x.is_empty();
+	}
+	for (int i = 0; i < _n; i++) {
+		if ((*this)[i] != (x[i])) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+IntervalVector operator&(const Affine2Vector& y,const IntervalVector& x)  {
+	// dimensions are non zero henceforth
+	if (y.size()!=x.size()) throw InvalidIntervalVectorOp("Cannot intersect Affine2Vectores with different dimensions");
+
+	if (y.is_empty()||x.is_empty())
+		return IntervalVector::empty(y.size());
+
+	IntervalVector res(y.size());
+	for (int i=0; i<y.size(); i++) {
+		res [i] = y[i] & x[i];
+		if (res[i].is_empty()) {
+			res.set_empty();
+			return res;
+		}
+	}
+	return res;
+}
+IntervalVector operator&(const Affine2Vector& y,const Affine2Vector& x)  {
+	// dimensions are non zero henceforth
+	if (y.size()!=x.size()) throw InvalidIntervalVectorOp("Cannot intersect Affine2Vectores with different dimensions");
+
+	if (y.is_empty()||x.is_empty())
+		return IntervalVector::empty(y.size());
+
+	IntervalVector res(y.size());
+	for (int i=0; i<y.size(); i++) {
+		res [i] = y[i] & x[i];
+		if (res[i].is_empty()) {
+			res.set_empty();
+			return res;
+		}
+	}
+	return res;
+}
+IntervalVector operator|(const Affine2Vector& y,const IntervalVector& x)  {
+	// dimensions are non zero henceforth
+	if (y.size()!=x.size()) throw InvalidIntervalVectorOp("Cannot make the hull of Affine2Vectores with different dimensions");
+
+	if (y.is_empty()||x.is_empty())
+		return IntervalVector::empty(y.size());
+
+	IntervalVector res(y.size());
+	for (int i=0; i<y.size(); i++) {
+		res [i] = y[i] | x[i];
+	}
+	return res;
+}
+IntervalVector operator|(const Affine2Vector& y,const Affine2Vector& x)  {
+	// dimensions are non zero henceforth
+	if (y.size()!=x.size()) throw InvalidIntervalVectorOp("Cannot make the hull of Affine2Vectores with different dimensions");
+
+	if (y.is_empty()||x.is_empty())
+		return IntervalVector::empty(y.size());
+
+	IntervalVector res(y.size());
+	for (int i=0; i<y.size(); i++) {
+		res [i] = y[i] | x[i];
+	}
+	return res;
+}
+
 
 IntervalVector Affine2Vector::itv() const {
 	assert(!is_empty());
@@ -474,6 +566,70 @@ double Affine2Vector::rel_distance(const Affine2Vector& x) const {
 }
 
 
+
+int Affine2Vector::diff(const IntervalVector& y, IntervalVector*& result) const {
+	const int nn=size();
+	const IntervalVector& x=*this;
+	IntervalVector *tmp = new IntervalVector[2*nn]; // in the worst case, there is 2n boxes
+	Interval c1, c2;
+	int b=0;
+	if (y.is_empty()) {
+		tmp[b].resize(nn);
+		tmp[b]=x; // copy of this
+		b++;
+	} else {
+		for (int var=0; var<nn; var++) {
+
+			diffI(x[var],y[var],c1,c2);
+
+			if (!c1.is_empty()) {
+				tmp[b].resize(nn);
+				IntervalVector& v=tmp[b++];
+				for (int i=0; i<var; i++) v[i]=y[i];
+				v[var]=c1;
+				for (int i=var+1; i<nn; i++) v[i]=x[i];
+
+				if (!c2.is_empty()) {
+					tmp[b].resize(nn);
+					IntervalVector& v=tmp[b++];
+					for (int i=0; i<var; i++) v[i]=y[i];
+					v[var]=c2;
+					for (int i=var+1; i<nn; i++) v[i]=x[i];
+				}
+			}
+		}
+	}
+
+	if (b==0) {
+		result = new IntervalVector[1];
+		result[0].resize(nn);
+		result[0].set_empty();
+		b=1;
+	} else {
+		result=new IntervalVector[b];
+		for (int i=0; i<b; i++) {
+			result[i].resize(nn);
+			result[i]=tmp[i];
+		}
+	}
+	delete[] tmp;
+
+	return b;
+}
+
+int Affine2Vector::diff(const Affine2Vector& y, IntervalVector*& result) const {
+	return (this->itv()).diff(y.itv(),result);
+}
+int Affine2Vector::diff(const IntervalVector& y, IntervalVector*& result) const {
+	return ((this->itv()).diff(y,result));
+}
+
+int Affine2Vector::complementary(IntervalVector*& result) const {
+	IntervalVector tmp= *this->itv();
+	return IntervalVector(size()).diff(tmp,result);
+}
+
+
 std::pair<IntervalVector,IntervalVector> Affine2Vector::bisect(int i, double ratio) const {
 	assert(0<ratio && ratio<1.0);
 	assert(0<=i && i<size());
@@ -510,6 +666,190 @@ Vector Affine2Vector::random() const {
 		b[i]=p;
 	}
 	return b;
+}
+
+
+
+bool proj_add(const IntervalVector& y, Affine2Vector& x1, Affine2Vector& x2) {
+	for (int i=0; i<y.size(); i++)
+		if (!proj_add(y[i], x1[i], x2[i])) {
+			x1.set_empty();
+			x2.set_empty();
+			return false;
+		}
+	return true;
+}
+bool proj_add(const IntervalVector& y, Affine2Vector& x1, IntervalVector& x2) {
+	for (int i=0; i<y.size(); i++)
+		if (!proj_add(y[i], x1[i], x2[i])) {
+			x1.set_empty();
+			x2.set_empty();
+			return false;
+		}
+	return true;
+}
+
+
+bool proj_sub(const IntervalVector& y, Affine2Vector& x1, Affine2Vector& x2) {
+	for (int i=0; i<y.size(); i++)
+		if (!proj_sub(y[i], x1[i], x2[i])) {
+			x1.set_empty();
+			x2.set_empty();
+			return false;
+		}
+	return true;
+}
+bool proj_sub(const IntervalVector& y, IntervalVector& x1, Affine2Vector& x2) {
+	for (int i=0; i<y.size(); i++)
+		if (!proj_sub(y[i], x1[i], x2[i])) {
+			x1.set_empty();
+			x2.set_empty();
+			return false;
+		}
+	return true;
+}
+bool proj_sub(const IntervalVector& y, Affine2Vector& x1, IntervalVector& x2) {
+	for (int i=0; i<y.size(); i++)
+		if (!proj_sub(y[i], x1[i], x2[i])) {
+			x1.set_empty();
+			x2.set_empty();
+			return false;
+		}
+	return true;
+}
+
+bool proj_mul(const IntervalVector& y, Affine2& x1, Affine2Vector& x2) {
+	assert(y.size()==x2.size());
+
+	for (int i=0; i<x2.size(); i++)
+		if (!proj_mul(y[i], x1, x2[i])) {
+			x2.set_empty();
+			return false;
+		}
+	return true;
+}
+bool proj_mul(const IntervalVector& y, Interval& x1, Affine2Vector& x2) {
+	assert(y.size()==x2.size());
+
+	for (int i=0; i<x2.size(); i++)
+		if (!proj_mul(y[i], x1, x2[i])) {
+			x2.set_empty();
+			return false;
+		}
+	return true;
+}
+bool proj_mul(const IntervalVector& y, Affine2& x1, IntervalVector& x2) {
+	assert(y.size()==x2.size());
+
+	for (int i=0; i<x2.size(); i++)
+		if (!proj_mul(y[i], x1, x2[i])) {
+			x2.set_empty();
+			return false;
+		}
+	return true;
+}
+
+
+bool proj_mul(const Interval& z, Affine2Vector& x, Affine2Vector& y) {
+	assert(x.size()==y.size());
+	int n=x.size();
+
+	if (n==1) {
+		if (proj_mul(z,x[0],y[0])) return true;
+		else { x.set_empty(); y.set_empty(); return false; }
+	}
+
+	Affine2* xy= new Affine2[n];  // xy[i] := x[i]y[i]
+	Affine2* sum= new Affine2[n-1]; // sum[i] := x[0]y[0]+...x[i]y[i]
+
+	// ------------- forward --------------------
+	for (int i=0; i<n; i++) xy[i]=x[i]*y[i];
+	sum[0]=xy[0];
+	for (int i=1; i<n-1; i++) sum[i]=sum[i-1]+xy[i];
+
+	// ------------- backward -------------------
+	// (rem: we have n>=2)
+	if (!proj_add(z, sum[n-2], xy[n-1])) { x.set_empty(); y.set_empty(); delete[] sum; delete[] xy; return false; }
+
+	for (int i=n-3; i>=0; i--)
+		if (!proj_add(sum[i+1],sum[i],xy[i+1])) { x.set_empty(); y.set_empty(); delete[] sum; delete[] xy; return false; }
+
+	if ((xy[0] &= sum[0]).is_empty()) { x.set_empty(); y.set_empty(); delete[] sum; delete[] xy; return false; }
+
+	for (int i=0; i<n; i++)
+		if (!proj_mul(xy[i],x[i],y[i])) { x.set_empty(); y.set_empty(); delete[] sum; delete[] xy; return false; }
+
+	delete[] sum;
+	delete[] xy;
+	return true;
+}
+bool proj_mul(const Interval& z, Affine2Vector& x, IntervalVector& y) {
+	assert(x.size()==y.size());
+	int n=x.size();
+
+	if (n==1) {
+		if (proj_mul(z,x[0],y[0])) return true;
+		else { x.set_empty(); y.set_empty(); return false; }
+	}
+
+	Affine2* xy= new Affine2[n];  // xy[i] := x[i]y[i]
+	Affine2* sum= new Affine2[n-1]; // sum[i] := x[0]y[0]+...x[i]y[i]
+
+	// ------------- forward --------------------
+	for (int i=0; i<n; i++) xy[i]=x[i]*y[i];
+	sum[0]=xy[0];
+	for (int i=1; i<n-1; i++) sum[i]=sum[i-1]+xy[i];
+
+	// ------------- backward -------------------
+	// (rem: we have n>=2)
+	if (!proj_add(z, sum[n-2], xy[n-1])) { x.set_empty(); y.set_empty(); delete[] sum; delete[] xy; return false; }
+
+	for (int i=n-3; i>=0; i--)
+		if (!proj_add(sum[i+1],sum[i],xy[i+1])) { x.set_empty(); y.set_empty(); delete[] sum; delete[] xy; return false; }
+
+	if ((xy[0] &= sum[0]).is_empty()) { x.set_empty(); y.set_empty(); delete[] sum; delete[] xy; return false; }
+
+	for (int i=0; i<n; i++)
+		if (!proj_mul(xy[i],x[i],y[i])) { x.set_empty(); y.set_empty(); delete[] sum; delete[] xy; return false; }
+
+	delete[] sum;
+	delete[] xy;
+	return true;
+}
+
+
+
+
+// TODO
+
+
+
+
+Affine2Vector& Affine2Vector::operator +=(const Vector& x2) {
+}
+
+Affine2Vector& Affine2Vector::operator +=(const IntervalVector& x2) {
+}
+
+Affine2Vector& Affine2Vector::operator +=(const Affine2Vector& x2) {
+}
+
+Affine2Vector& Affine2Vector::operator -=(const Vector& x2) {
+}
+
+Affine2Vector& Affine2Vector::operator -=(const IntervalVector& x2) {
+}
+
+Affine2Vector& Affine2Vector::operator -=(const Affine2Vector& x2) {
+}
+
+Affine2Vector& Affine2Vector::operator *=(double d) {
+}
+
+Affine2Vector& Affine2Vector::operator *=(const Interval& x1) {
+}
+
+Affine2Vector& Affine2Vector::operator *=(const Affine2& x1) {
 }
 
 

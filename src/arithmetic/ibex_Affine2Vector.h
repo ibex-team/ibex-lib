@@ -14,7 +14,6 @@
 
 #include <cassert>
 #include <iostream>
-#include <utility>
 #include "ibex_Interval.h"
 #include "ibex_Affine2.h"
 #include "ibex_IntervalVector.h"
@@ -35,6 +34,7 @@ class Affine2Vector {
 
 
 private:
+	friend class Affine2Matrix;
 
 	Affine2Vector() : _n(0), _vec(NULL) { }
 
@@ -96,7 +96,7 @@ public:
 	/**
 	 * \brief Delete this vector
 	 */
-	~Affine2Vector();
+	virtual ~Affine2Vector();
 
 	/**
 	 * \brief Return the ith Affine2
@@ -134,6 +134,7 @@ public:
 	 * \note Emptiness is "overridden".
 	 */
 	void init(const Interval& x);
+	void init(const Affine2& x);
 
 	/**
 	 * \brief Add [-rad,+rad] to all the components of *this.
@@ -177,13 +178,19 @@ public:
 	 * \note Emptiness is overridden.
 	 */
 	Affine2Vector& operator=(const Affine2Vector& x);
-
 	Affine2Vector& operator=(const IntervalVector& x);
 
 	/**
 	 * \brief Return true if the bounds of this Affine2Vector match that of \a x.
 	 */
 	bool operator==(const Affine2Vector& x) const;
+	bool operator==(const IntervalVector& x) const;
+
+	/**
+	 * \brief Return true if one bounds of one component of *this differs from \a x.
+	 */
+	bool operator!=(const IntervalVector& x) const;
+	bool operator!=(const Affine2Vector& x) const;
 
 
 	/**
@@ -266,16 +273,6 @@ public:
 	 * \sa #ibex::Interval::is_subset(const Interval&) const.
 	 */
 	bool is_subset(const Affine2Vector& x) const;
-
-	/**
-	 * \brief True iff this interval vector is a subset of \a x.
-	 *
-	 * \pre Dimension of \a x must be equal to the dimension of this vector.
-
-	 * \note Always return true if this interval vector is empty.
-
-	 * \sa #ibex::Interval::is_subset(const Interval&) const.
-	 */
 	bool is_subset(const IntervalVector& x) const;
 
 	/**
@@ -288,16 +285,6 @@ public:
 	 * \sa #ibex::Interval::is_strict_subset(const Interval&) const.
 	 */
 	bool is_strict_subset(const Affine2Vector& x) const;
-
-	/**
-	 * \brief True iff this interval vector is inside the interior of \a x.
-	 *
-	 * \pre Dimension of \a x must be equal to the dimension of this vector.
-	 *
-	 * \note return true if this interval vector is empty and \a x not.
-	 *
-	 * \sa #ibex::Interval::is_strict_subset(const Interval&) const.
-	 */
 	bool is_strict_subset(const IntervalVector& x) const;
 
 	/**
@@ -310,16 +297,6 @@ public:
 	 * \sa #ibex::Interval::is_superset(const Interval&) const.
 	 */
 	bool is_superset(const Affine2Vector& x) const;
-
-	/**
-	 * \brief True iff this interval vector is a superset of \a x.
-	 *
-	 * \pre Dimension of \a x must be equal to the dimension of this vector.
-
-	 * \note Always return true if \a x is empty.
-
-	 * \sa #ibex::Interval::is_superset(const Interval&) const.
-	 */
 	bool is_superset(const IntervalVector& x) const;
 
 	/**
@@ -332,19 +309,7 @@ public:
 	 * \sa #ibex::Interval::is_strict_superset(const Interval&) const.
 	 */
 	bool is_strict_superset(const Affine2Vector& x) const;
-
-
-	/**
-	 * \brief True iff \a x is inside the interior of (*this).
-	 *
-	 * \pre Dimension of \a x must be equal to the dimension of this vector.
-	 *
-	 * \note return true if x is empty and not (*this).
-	 *
-	 * \sa #ibex::Interval::is_strict_superset(const Interval&) const.
-	 */
 	bool is_strict_superset(const IntervalVector& x) const;
-
 
 	/**
 	 * \brief True iff *this is a vector of zeros.
@@ -420,6 +385,7 @@ public:
 	  * Deprecated. Kept for compatibility with ibex 1.xx.
 	  */
 	double maxdelta(const Affine2Vector&);
+	double maxdelta(const IntervalVector&);
 
 	/**
 	 * \brief Return the relative distance with x.
@@ -430,14 +396,37 @@ public:
 	 * \sa #ibex::Interval::rel_distance(const Interval& x) const.
 	 */
 	double rel_distance(const Affine2Vector& x) const;
-
+	double rel_distance(const IntervalVector& x) const;
 
 	/**
-	 * \brief Return a random vector inside *this.
+	 * \brief Return *this \ y (set difference).
 	 *
-	 * \pre (*this) must be nonempty.
+	 * Store the difference under the form of a union of non-overlapping IntervalVectors
+	 * into \a result, and return the size of the union.
+	 *
+	 * <p>
+	 * If the difference is empty, \a result is an array of one element set to the empty box.
+	 * It is <b>not</b> a zero-sized array containing no element.
 	 */
-	Vector random() const;
+	int diff(const IntervalVector& y, IntervalVector*& result) const;
+	int diff(const Affine2Vector& y, IntervalVector*& result) const;
+
+	/**
+	 * \brief Return the complementary of *this.
+	 *
+	 * Store the complementary under the form of a union of non-overlapping IntervalVectors,
+	 * into \a result, and return the size of the union.
+	 *
+	 * <p>
+	 * If (*this) is the empty set with n components, the complementary of (*this) is
+	 * the n-dimensional box (-oo,oo)x...(-oo,oo).
+	 *
+	 * <p>
+	 * If the complementary is empty, \a result is an array of one element set to the empty box.
+	 * It is <b>not</b> a zero-sized array containing no element.
+	 */
+	int complementary(IntervalVector*& result) const;
+
 
 	/**
 	 * \brief Bisect the box
@@ -453,12 +442,211 @@ public:
 	 */
 	std::pair<IntervalVector,IntervalVector> bisect(int i, double ratio) const;
 
+	/**
+	 * \brief Return a random vector inside *this.
+	 *
+	 * \pre (*this) must be nonempty.
+	 */
+	Vector random() const;
+
+	/**
+	 * \brief (*this)+=x2.
+	 */
+	Affine2Vector& operator+=(const Vector& x2);
+
+	/**
+	 * \brief (*this)+=x2.
+	 */
+	Affine2Vector& operator+=(const IntervalVector& x2);
+	Affine2Vector& operator+=(const Affine2Vector& x2);
+
+	/**
+	 * \brief (*this)-=x2.
+	 */
+	Affine2Vector& operator-=(const Vector& x2);
+
+	/**
+	 * \brief (*this)-=x2.
+	 */
+	Affine2Vector& operator-=(const IntervalVector& x2);
+	Affine2Vector& operator-=(const Affine2Vector& x2);
+
+	/**
+	 * \brief x=d*x
+	 */
+	Affine2Vector& operator*=(double d);
+
+	/**
+	 * \brief (*this)=x1*(*this).
+	 */
+	Affine2Vector& operator*=(const Interval& x1);
+	Affine2Vector& operator*=(const Affine2& x1);
 
 
 };
 
 /** \ingroup arithmetic */
 /*@{*/
+
+
+
+/**
+ * \brief Return the intersection of this and x.
+ */
+IntervalVector operator&(const Affine2Vector& x, const Affine2Vector& y) const;
+IntervalVector operator&(const IntervalVector& x, const Affine2Vector& y) const;
+IntervalVector operator&(const Affine2Vector& x, const IntervalVector& y) const;
+
+/**
+ * \brief Return the hull of this & x.
+ */
+IntervalVector operator|(const Affine2Vector& x, const Affine2Vector& y) const;
+IntervalVector operator|(const IntervalVector& x, const Affine2Vector& y) const;
+IntervalVector operator|(const Affine2Vector& x, const IntervalVector& y) const;
+
+/**
+ * \brief Return the infinite Hausdorff distance (i.e. the maximum of the distance componentwise).
+ *
+ * \return \f$\displaystyle \max_{i=1..n} distance(x1_i, x2_i)\f$.
+ *
+ * \pre Dimension of \a x1 and \a x2 must be equal.
+ *
+ * \sa #ibex::distance(const Interval&, const Interval&).
+ */
+double distance(const IntervalVector& x1, const Affine2Vector& x2);
+double distance(const Affine2Vector& x1, const IntervalVector& x2);
+double distance(const Affine2Vector& x1, const Affine2Vector& x2);
+
+/**
+ * \brief -x.
+ */
+Affine2Vector operator-(const Affine2Vector& x);
+
+/**
+ * \brief x1+x2.
+ */
+
+Affine2Vector operator+(const Vector& x1, const Affine2Vector& x2);
+
+/**
+ * \brief x1+x2.
+ */
+Affine2Vector operator+(const Affine2Vector& x1, const Vector& x2);
+
+/**
+ * \brief x1+x2.
+ */
+Affine2Vector operator+(const Affine2Vector& x1, const IntervalVector& x2);
+Affine2Vector operator+(const IntervalVector& x1, const Affine2Vector& x2);
+Affine2Vector operator+(const Affine2Vector& x1, const Affine2Vector& x2);
+
+/**
+ * \brief x1-x2.
+ */
+Affine2Vector operator-(const Vector& x1, const Affine2Vector& x2);
+
+/**
+ * \brief x1-x2.
+ */
+
+Affine2Vector operator-(const Affine2Vector& x1, const Vector& x2);
+
+/**
+ * \brief x1-x2.
+ */
+Affine2Vector operator-(const Affine2Vector& x1, const IntervalVector& x2);
+Affine2Vector operator-(const IntervalVector& x1, const Affine2Vector& x2);
+Affine2Vector operator-(const Affine2Vector& x1, const Affine2Vector& x2);
+
+/**
+ * \brief x1*x2.
+ */
+Affine2 operator*(const Vector& x1, const Affine2Vector& x2);
+
+/**
+ * \brief x1*x2.
+ */
+Affine2 operator*(const Affine2Vector& x1, const Vector& x2);
+
+/**
+ * \brief x1*x2.
+ */
+Affine2 operator*(const Affine2Vector& x1, const IntervalVector& x2);
+Affine2 operator*(const IntervalVector& x1, const Affine2Vector& x2);
+Affine2 operator*(const Affine2Vector& x1, const Affine2Vector& x2);
+
+/**
+ * \brief d*x
+ */
+Affine2Vector operator*(double d, const Affine2Vector& x);
+
+/**
+ * \brief x1*x2.
+ */
+Affine2Vector operator*(const Affine2& x1, const Vector& x2);
+
+/**
+ *  \brief x1*x2.
+ */
+Affine2Vector operator*(const Affine2& x1, const Affine2Vector& x2);
+Affine2Vector operator*(const Interval& x1, const Affine2Vector& x2);
+
+/**
+ * \brief |x|.
+ */
+Affine2Vector abs(const Affine2Vector& x);
+
+/**
+ * \brief Projection of $y=x_1+x_2$.
+ *
+ * Set $([x]_1,[x]_2)$ to $([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=x_1+x_2\}$.
+ */
+bool proj_add(const Affine2Vector& y, Affine2Vector& x1, Affine2Vector& x2);
+bool proj_add(const IntervalVector& y, Affine2Vector& x1, Affine2Vector& x2);
+bool proj_add(const Affine2Vector& y, IntervalVector& x1, Affine2Vector& x2);
+bool proj_add(const Affine2Vector& y, Affine2Vector& x1, IntervalVector& x2);
+bool proj_add(const IntervalVector& y, IntervalVector& x1, Affine2Vector& x2);
+bool proj_add(const Affine2Vector& y, IntervalVector& x1, IntervalVector& x2);
+bool proj_add(const IntervalVector& y, Affine2Vector& x1, IntervalVector& x2);
+
+/**
+ * \brief Projection of $y=x_1-x_2$.
+ *
+ * Set $([x]_1,[x]_2)$ to $([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=x_1-x_2\}$.
+ */
+bool proj_sub(const Affine2Vector& y, Affine2Vector& x1, Affine2Vector& x2);
+bool proj_sub(const IntervalVector& y, Affine2Vector& x1, Affine2Vector& x2);
+bool proj_sub(const Affine2Vector& y, IntervalVector& x1, Affine2Vector& x2);
+bool proj_sub(const Affine2Vector& y, Affine2Vector& x1, IntervalVector& x2);
+bool proj_sub(const IntervalVector& y, IntervalVector& x1, Affine2Vector& x2);
+bool proj_sub(const Affine2Vector& y, IntervalVector& x1, IntervalVector& x2);
+bool proj_sub(const IntervalVector& y, Affine2Vector& x1, IntervalVector& x2);
+
+/**
+ * \brief Projection of $y=x_1*x_2$ (scalar product).
+ *
+ * Set $([x]_1,[x]_2)$ to $([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=x_1*x_2\}$.
+ */
+bool proj_mul(const Affine2Vector& y, Affine2& x1, Affine2Vector& x2);
+bool proj_mul(const IntervalVector& y, Affine2& x1, Affine2Vector& x2);
+bool proj_mul(const Affine2Vector& y, Interval& x1, Affine2Vector& x2);
+bool proj_mul(const IntervalVector& y, Interval& x1, Affine2Vector& x2);
+bool proj_mul(const Affine2Vector& y, Affine2& x1, IntervalVector& x2);
+bool proj_mul(const IntervalVector& y, Affine2& x1, IntervalVector& x2);
+bool proj_mul(const Affine2Vector& y, Interval& x1, IntervalVector& x2);
+
+/**
+ * \brief Projection of $y=x_1*x_2$ (dot product).
+ *
+ * Set $([x]_1,[x]_2)$ to $([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=x_1*x_2\}$.
+ */
+bool proj_mul(const Affine2& y, Affine2Vector& x1, Affine2Vector& x2);
+bool proj_mul(const Interval& y, Affine2Vector& x1, Affine2Vector& x2);
+bool proj_mul(const Affine2& y, IntervalVector& x1, Affine2Vector& x2);
+bool proj_mul(const Affine2& y, Affine2Vector& x1, IntervalVector& x2);
+bool proj_mul(const Interval& y, IntervalVector& x1, Affine2Vector& x2);
+bool proj_mul(const Affine2& y, IntervalVector& x1, IntervalVector& x2);
+bool proj_mul(const Interval& y, Affine2Vector& x1, IntervalVector& x2);
 
 /**
  * \brief Display the Affine2Vector \a x
@@ -501,6 +689,13 @@ inline void Affine2Vector::clear() {
 	init(0);
 }
 
+inline bool Affine2Vector::operator!=(const IntervalVector& x) const {
+	return !(*this==x);
+}
+inline bool Affine2Vector::operator!=(const Affine2Vector& x) const {
+	return !(*this==x);
+}
+
 inline int Affine2Vector::size() const {
 	return _n;
 }
@@ -532,12 +727,99 @@ inline double Affine2Vector::min_diam() const {
 	return (*this)[extr_diam_index(true)].diam();
 }
 
+
+inline IntervalVector operator&(const IntervalVector& x, const Affine2Vector& y) const{
+	return (y &  x);
+}
+
+inline IntervalVector operator|(const IntervalVector& x, const Affine2Vector& y) const{
+	return (y |  x);
+}
+
+inline double distance(const IntervalVector& x1, const Affine2Vector& x2) {
+	return distance(x2,x1);
+}
+
+inline Affine2Vector operator+(const IntervalVector& x1, const Affine2Vector& x2) {
+	return x2 + x1;
+}
+
+inline Affine2 operator*(const IntervalVector& x1, const Affine2Vector& x2){
+	return x2*x1;
+}
+
+
 inline Affine2Vector cart_prod(const Affine2Vector& x, const Affine2Vector& y) {
 	Affine2Vector z(x.size()+y.size());
 	z.put(0,x);
 	z.put(x.size(),y);
 	return z;
 }
+
+inline bool proj_add(const Affine2Vector& y, Affine2Vector& x1, Affine2Vector& x2) {
+	return proj_add(y.itv(),x1,x2);
+}
+inline bool proj_add(const Affine2Vector& y, IntervalVector& x1, Affine2Vector& x2){
+	return proj_add(y.itv(),x2,x1);
+}
+inline bool proj_add(const Affine2Vector& y, Affine2Vector& x1, IntervalVector& x2){
+	return proj_add(y.itv(),x1,x2);
+}
+inline bool proj_add(const IntervalVector& y, IntervalVector& x1, Affine2Vector& x2){
+	return proj_add(y,x2,x1);
+}
+inline bool proj_add(const Affine2Vector& y, IntervalVector& x1, IntervalVector& x2){
+	return proj_add(y.itv(),x1,x2);
+}
+
+
+
+inline bool proj_sub(const Affine2Vector& y, Affine2Vector& x1, Affine2Vector& x2) {
+	return proj_sub(y.itv(),x1,x2);
+}
+inline bool proj_sub(const Affine2Vector& y, IntervalVector& x1, Affine2Vector& x2){
+	return proj_sub(y.itv(),x1,x2);
+}
+inline bool proj_sub(const Affine2Vector& y, Affine2Vector& x1, IntervalVector& x2){
+	return proj_sub(y.itv(),x1,x2);
+}
+inline bool proj_sub(const Affine2Vector& y, IntervalVector& x1, IntervalVector& x2){
+	return proj_sub(y.itv(),x1,x2);
+}
+
+
+inline bool proj_mul(const Affine2Vector& y, Affine2& x1, Affine2Vector& x2){
+	return proj_mul(y.itv(),x1,x2);
+}
+inline bool proj_mul(const Affine2Vector& y, Interval& x1, Affine2Vector& x2){
+	return proj_mul(y.itv(),x1,x2);
+}
+inline bool proj_mul(const Affine2Vector& y, Affine2& x1, IntervalVector& x2){
+	return proj_mul(y.itv(),x1,x2);
+}
+inline bool proj_mul(const Affine2Vector& y, Interval& x1, IntervalVector& x2){
+	return proj_mul(y.itv(),x1,x2);
+}
+
+
+
+inline bool proj_mul(const Affine2& y, Affine2Vector& x1, Affine2Vector& x2){
+	return proj_mul(y.itv(),x1,x2);
+}
+inline bool proj_mul(const Affine2& y, IntervalVector& x1, Affine2Vector& x2){
+	return proj_mul(y.itv(),x2,x1);
+}
+inline bool proj_mul(const Affine2& y, Affine2Vector& x1, IntervalVector& x2){
+	return proj_mul(y.itv(),x1,x2);
+}
+inline bool proj_mul(const Interval& y, IntervalVector& x1, Affine2Vector& x2){
+	return proj_mul(y,x2,x1);
+}
+inline bool proj_mul(const Affine2& y, IntervalVector& x1, IntervalVector& x2){
+	return proj_mul(y.itv(),x1,x2);
+}
+
+
 
 } // end namespace
 

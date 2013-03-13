@@ -23,6 +23,7 @@
 namespace ibex {
 
 class IntervalMatrix; // declared only for friendship
+class Affine2Vector;
 
 /**
  * \ingroup arithmetic
@@ -167,6 +168,7 @@ public:
 	 */
 	IntervalVector& operator=(const IntervalVector& x);
 
+	IntervalVector& operator=(const Affine2Vector& x);
 	/**
 	 * \brief Set *this to its intersection with x
 	 *
