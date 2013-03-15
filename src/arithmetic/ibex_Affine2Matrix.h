@@ -70,9 +70,9 @@ public:
 	Affine2Matrix(const Affine2Matrix& x, bool b);
 
 	/**
-	 * \brief Create a degenerated Affine2 matrix.
+	 * \brief Create a degenerated Affine2 matrix. The length of each Affine2 form i s \a sizeAF2.
 	 */
-	Affine2Matrix(const Matrix& m);
+	Affine2Matrix(const Matrix& m,int sizeAF2);
 
 	/**
 	 * \brief Create an Affine2 matrix from an array of doubles.
@@ -641,6 +641,13 @@ inline IntervalMatrix operator&(const IntervalMatrix& x, const Affine2Matrix& y)
 }
 
 
+inline Affine2Matrix operator+(const Affine2Matrix& m1, const Matrix& m2) {
+	return Affine2Matrix(m1)+=m2;
+}
+
+inline Affine2Matrix operator+(const Matrix& m1, const Affine2Matrix& m2) {
+	 return Affine2Matrix(m2)+=m1;
+}
 
 inline Affine2Matrix operator+(const Affine2Matrix& m1, const Affine2Matrix& m2){
  	 return Affine2Matrix(m1)+=m2;
@@ -652,13 +659,13 @@ inline Affine2Matrix operator+(const IntervalMatrix& m1, const Affine2Matrix& m2
  	 return Affine2Matrix(m2)+=m1;
 }
 
-
+inline Affine2Matrix operator-(const Affine2Matrix& m) {
+	return Affine2Matrix(m,true);
+}
 
 inline Affine2Matrix operator-(const Matrix& m1, const Affine2Matrix& m2){
  	 return Affine2Matrix(m2,true)+=m1;
 }
-
-
 
 
 inline Affine2Matrix operator-(const Affine2Matrix& m1, const Affine2Matrix& m2){
@@ -671,11 +678,13 @@ inline Affine2Matrix operator-(const IntervalMatrix& m1, const Affine2Matrix& m2
  	 return Affine2Matrix(m2,true)+=m1;
 }
 
+inline Affine2Matrix operator-(const Affine2Matrix& m1, const Matrix& m2) {
+	return Affine2Matrix(m1)-=m2;
+}
 
 inline Affine2Matrix operator*(double d, const Affine2Matrix& m){
  	 return Affine2Matrix(m)*=d;
 }
-
 
 inline Affine2Matrix operator*(const Affine2& x, const Affine2Matrix& m){
  	 return Affine2Matrix(m)*=x;
@@ -684,6 +693,17 @@ inline Affine2Matrix operator*(const Interval& x, const Affine2Matrix& m){
  	 return Affine2Matrix(m)*=x;
 }
 
+inline Affine2Matrix& Affine2Matrix::operator*=(const Matrix& m) {
+	return (*this)=(*this)*m;
+}
+
+inline Affine2Matrix& Affine2Matrix::operator*=(const Affine2Matrix& m) {
+	return (*this)=(*this)*m;
+}
+
+inline Affine2Matrix& Affine2Matrix::operator*=(const IntervalMatrix& m) {
+	return (*this)=(*this)*m;
+}
 
 
 inline bool proj_add(const Affine2Matrix& y, Affine2Matrix& x1, Affine2Matrix& x2){
@@ -704,9 +724,6 @@ inline bool proj_add(const Affine2Matrix& y, IntervalMatrix& x1, IntervalMatrix&
 
 
 inline bool proj_sub(const Affine2Matrix& y, Affine2Matrix& x1, Affine2Matrix& x2){
- 	 return proj_sub(y.itv(),x1,x2);
-}
-inline bool proj_sub(const Affine2Matrix& y, Affine2Matrix& x1, IntervalMatrix& x2){
  	 return proj_sub(y.itv(),x1,x2);
 }
 inline bool proj_sub(const Affine2Matrix& y, IntervalMatrix& x1, IntervalMatrix& x2){

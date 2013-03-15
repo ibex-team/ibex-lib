@@ -27,7 +27,7 @@ Affine2Vector::Affine2Vector(int n) :
 		_vec(new Affine2[n]) {
 	assert(n>=1);
 	for (int i = 0; i < n; i++){
-		_vec[i] = Affine2(n, 0.0);
+		_vec[i] = Affine2(0,0.0); // OR Affine() OR  Affine2(n, 0.0);  I do not know
 	}
 }
 
@@ -275,7 +275,7 @@ IntervalVector operator|(const Affine2Vector& y,const IntervalVector& x)  {
 	// dimensions are non zero henceforth
 	if (y.size()!=x.size()) throw InvalidIntervalVectorOp("Cannot make the hull of Affine2Vectores with different dimensions");
 
-	if (y.is_empty()||x.is_empty())
+	if (y.is_empty()&&x.is_empty())
 		return IntervalVector::empty(y.size());
 
 	IntervalVector res(y.size());
@@ -288,7 +288,7 @@ IntervalVector operator|(const Affine2Vector& y,const Affine2Vector& x)  {
 	// dimensions are non zero henceforth
 	if (y.size()!=x.size()) throw InvalidIntervalVectorOp("Cannot make the hull of Affine2Vectores with different dimensions");
 
-	if (y.is_empty()||x.is_empty())
+	if (y.is_empty()&&x.is_empty())
 		return IntervalVector::empty(y.size());
 
 	IntervalVector res(y.size());
