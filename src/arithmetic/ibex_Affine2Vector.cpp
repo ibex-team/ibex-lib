@@ -7,6 +7,7 @@
 
 #include "ibex_IntervalVector.h"
 #include "ibex_IntervalVector.cpp"
+#include "ibex_LinearArith.cpp"
 #include "ibex_Affine2Vector.h"
 #include <sstream>
 
@@ -57,6 +58,20 @@ Affine2Vector::Affine2Vector(const Affine2Vector& x) :
 	}
 }
 
+Affine2Vector::Affine2Vector(const Affine2Vector& x, bool b) :
+		_n(x.size()),
+		_vec(new Affine2[x.size()]) {
+	if (b) {
+		for (int i = 0; i < _n; i++){
+			_vec[i] = Affine2(x[i],b);
+		}
+	} else {
+		for (int i = 0; i < _n; i++){
+			_vec[i] = x[i];
+		}
+	}
+}
+
 Affine2Vector::Affine2Vector(const IntervalVector& x) :
 		_n(x.size()),
 		_vec(new Affine2[x.size()]) {
@@ -89,7 +104,7 @@ Affine2Vector::Affine2Vector(const Vector& x) :
 
 void Affine2Vector::init(const Interval& x) {
 	for (int i = 0; i < size(); i++) {
-		(*this)[i] = x;
+		(*this)[i] = Affine2(size(),x);
 	}
 }
 void Affine2Vector::init(const Affine2& x) {
@@ -114,17 +129,17 @@ Affine2Vector& Affine2Vector::inflate(double rad) {
 
 void Affine2Vector::resize(int n) {
 	assert(n>=1);
-	assert((_vec==NULL && _n==0) || (_n!=0 && _vec!=NULL));
+	assert((_vec==NULL && _n==0) || (size()!=0 && _vec!=NULL));
 
 	if (n==size()) return;
 
 	Affine2* newVec=new Affine2[n];
 	int i=0;
-	for (; i<_n && i<n; i++){
+	for (; i<size() && i<n; i++){
 		newVec[i]=_vec[i];
 	}
 	for (; i<n; i++){
-		newVec[i]= Affine2(n);
+		newVec[i]= Affine2();
 	}
 	if (_vec!=NULL) { // vec==NULL happens when default constructor is used (n==0)
 		delete[] _vec;
@@ -184,7 +199,7 @@ Affine2Vector& Affine2Vector::operator=(const IntervalVector& x) {
 		// may return prematurely in case "this" is empty.
 		// use physical copy instead:
 		for (int i = 0; i < size(); i++) {
-			(*this)[i] = Affine2(size(), i+1,x[i]);
+			(*this)[i] = Affine2(size(),x[i]);
 		}
 	}
 
@@ -545,7 +560,28 @@ double distance(const Affine2Vector& x1, const Affine2Vector& x2) {
 	return max;
 }
 
+double distance(const Affine2Vector& x1, const IntervalVector& x2) {
+	assert(x1.size() == x2.size());
+	double max = ibex::distance(x1[0], x2[0]);
+	for (int i = 1; i < x1.size(); i++) {
+		double cand = ibex::distance(x1[i], x2[i]);
+		if (max < cand)
+			max = cand;
+	}
+	return max;
+}
+
 double Affine2Vector::maxdelta(const Affine2Vector& x) {
+	double max = (*this)[0].delta(x[0]);
+	for (int i = 1; i < size(); i++) {
+		double cand = (*this)[i].delta(x[i]);
+		if (max < cand)
+			max = cand;
+	}
+	return max;
+}
+
+double Affine2Vector::maxdelta(const IntervalVector& x) {
 	double max = (*this)[0].delta(x[0]);
 	for (int i = 1; i < size(); i++) {
 		double cand = (*this)[i].delta(x[i]);
@@ -565,7 +601,15 @@ double Affine2Vector::rel_distance(const Affine2Vector& x) const {
 	return max;
 }
 
-
+double Affine2Vector::rel_distance(const IntervalVector& x) const {
+	double max = (*this)[0].rel_distance(x[0]);
+	for (int i = 1; i < size(); i++) {
+		double cand = (*this)[i].rel_distance(x[i]);
+		if (max < cand)
+			max = cand;
+	}
+	return max;
+}
 
 int Affine2Vector::diff(const IntervalVector& y, IntervalVector*& result) const {
 	const int nn=size();
@@ -668,6 +712,46 @@ Vector Affine2Vector::random() const {
 	return b;
 }
 
+
+Affine2Vector& Affine2Vector::operator +=(const Vector& x2) {
+	return set_addV<Affine2Vector,Vector>(*this,x2);
+}
+
+Affine2Vector& Affine2Vector::operator +=(const IntervalVector& x2) {
+	return set_addV<Affine2Vector,IntervalVector>(*this,x2);
+}
+
+Affine2Vector& Affine2Vector::operator +=(const Affine2Vector& x2) {
+	return set_addV<Affine2Vector,Affine2Vector>(*this,x2);
+}
+
+Affine2Vector& Affine2Vector::operator -=(const Vector& x2) {
+	return set_subV<Affine2Vector,Vector>(*this,x2);
+}
+
+Affine2Vector& Affine2Vector::operator -=(const IntervalVector& x2) {
+	return set_subV<Affine2Vector,IntervalVector>(*this,x2);
+}
+
+Affine2Vector& Affine2Vector::operator -=(const Affine2Vector& x2) {
+	return set_subV<Affine2Vector,Affine2Vector>(*this,x2);
+}
+
+Affine2Vector& Affine2Vector::operator *=(double d) {
+	return set_mulSV<double,Affine2Vector>(d,*this);
+}
+
+Affine2Vector& Affine2Vector::operator *=(const Interval& x1) {
+	return set_mulSV<Interval,Affine2Vector>(x1,*this);
+}
+
+Affine2Vector& Affine2Vector::operator *=(const Affine2& x1) {
+	return set_mulSV<Affine2,Affine2Vector>(x1,*this);
+}
+
+Affine2Vector abs( const Affine2Vector& x) {
+	return absV(x);
+}
 
 
 bool proj_add(const IntervalVector& y, Affine2Vector& x1, Affine2Vector& x2) {
@@ -819,38 +903,6 @@ bool proj_mul(const Interval& z, Affine2Vector& x, IntervalVector& y) {
 
 
 
-
-// TODO
-
-
-
-
-Affine2Vector& Affine2Vector::operator +=(const Vector& x2) {
-}
-
-Affine2Vector& Affine2Vector::operator +=(const IntervalVector& x2) {
-}
-
-Affine2Vector& Affine2Vector::operator +=(const Affine2Vector& x2) {
-}
-
-Affine2Vector& Affine2Vector::operator -=(const Vector& x2) {
-}
-
-Affine2Vector& Affine2Vector::operator -=(const IntervalVector& x2) {
-}
-
-Affine2Vector& Affine2Vector::operator -=(const Affine2Vector& x2) {
-}
-
-Affine2Vector& Affine2Vector::operator *=(double d) {
-}
-
-Affine2Vector& Affine2Vector::operator *=(const Interval& x1) {
-}
-
-Affine2Vector& Affine2Vector::operator *=(const Affine2& x1) {
-}
 
 
 

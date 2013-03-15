@@ -169,6 +169,7 @@ public:
 	IntervalVector& operator=(const IntervalVector& x);
 
 	IntervalVector& operator=(const Affine2Vector& x);
+
 	/**
 	 * \brief Set *this to its intersection with x
 	 *
@@ -318,19 +319,19 @@ public:
 	 */
 	bool is_zero() const;
 
-    /**
-     * \brief True iff *this can be bisected along one dimension.
-     *
-     * \sa #ibex::Interval::is_bisectable().
-     */
-    bool is_bisectable() const;
+	/**
+	 * \brief True iff *this can be bisected along one dimension.
+	 *
+	 * \sa #ibex::Interval::is_bisectable().
+	 */
+	bool is_bisectable() const;
 
-    /**
-      * \brief Vector of radii.
-      */
-    Vector rad() const;
+	/**
+	 * \brief Vector of radii.
+	 */
+	Vector rad() const;
 
-    /**
+	/**
 	 * \brief Return the vector of diameters.
 	 */
 	Vector diam() const;

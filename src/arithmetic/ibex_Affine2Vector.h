@@ -67,6 +67,12 @@ public:
 	 */
 	Affine2Vector(const Affine2Vector& x);
 
+
+	/**
+	 * \brief Create  a copy of \a -x if (b) else xif (!b) with x.
+	 */
+	Affine2Vector(const Affine2Vector& x, bool b);
+
 	/**
 	 * \brief Create \a n Affine2Vector  initialized by [bounds[i][0],bounds[i][1]]
 	 *
@@ -75,6 +81,10 @@ public:
 	 */
 	Affine2Vector(int n, double  bounds[][2]);
 
+	/**
+	 * \brief Create \a x.size Affine2Vector of dimension \a x.size with
+	 * the [i] component initialized to \a Affine2(x.size(), i+1,x[i]).
+	 */
 	Affine2Vector(const IntervalVector& x);
 
 	/**
@@ -194,16 +204,15 @@ public:
 
 
 	/**
-	 * \brief The dimension (number of components)
-	 */
-	int size() const;
-
-	/**
 	 * \brief Return the IntervalVector compose by the interval of each Affine2 form
 	 * \pre (*this) must be nonempty
 	 */
 	IntervalVector itv() const;
 
+	/**
+	 * \brief The dimension (number of components)
+	 */
+	int size() const;
 
 	/**
 	 * \brief Return the lower bound vector
@@ -316,19 +325,19 @@ public:
 	 */
 	bool is_zero() const;
 
-    /**
-     * \brief True iff *this can be bisected along one dimension.
-     *
-     * \sa #ibex::Interval::is_bisectable().
-     */
-    bool is_bisectable() const;
+	/**
+	 * \brief True iff *this can be bisected along one dimension.
+	 *
+	 * \sa #ibex::Interval::is_bisectable().
+	 */
+	bool is_bisectable() const;
 
-    /**
-      * \brief Vector of radii.
-      */
-    Vector rad() const;
+	/**
+	 * \brief Vector of radii.
+	 */
+	Vector rad() const;
 
-    /**
+	/**
 	 * \brief Return the vector of diameters.
 	 */
 	Vector diam() const;
@@ -337,7 +346,7 @@ public:
 	 * \brief Return the index of a component with minimal/maximal diameter.
 	 *
 	 *  \param min true => minimal diameter
-	 *  \throws InvalidAffine2VectorOp if the Affine2Vector is empty.
+	 *  \throws InvalidIntervalVectorOp if the Affine2Vector is empty.
 	 */
 	int extr_diam_index(bool min) const;
 
@@ -350,14 +359,14 @@ public:
 	/**
 	 * \brief Return the maximal diameter among all the components.
 	 *
-	 *  \throws InvalidAffine2VectorOp if the Affine2Vector is empty.
+	 *  \throws InvalidIntervalVectorOp if the Affine2Vector is empty.
 	 */
 	double max_diam() const;
 
 	/**
 	 * \brief Return the minimal diameter among all the components.
 	 *
-	 * \throws InvalidAffine2VectorOp if the Affine2Vector is empty.
+	 * \throws InvalidIntervalVectorOp if the Affine2Vector is empty.
 	 */
 	double min_diam() const;
 
@@ -491,14 +500,14 @@ public:
 
 
 /**
- * \brief Return the intersection of this and x.
+ * \brief Return the intersection of x and y.
  */
 IntervalVector operator&(const Affine2Vector& x, const Affine2Vector& y) const;
 IntervalVector operator&(const IntervalVector& x, const Affine2Vector& y) const;
 IntervalVector operator&(const Affine2Vector& x, const IntervalVector& y) const;
 
 /**
- * \brief Return the hull of this & x.
+ * \brief Return the hull of x & y.
  */
 IntervalVector operator|(const Affine2Vector& x, const Affine2Vector& y) const;
 IntervalVector operator|(const IntervalVector& x, const Affine2Vector& y) const;
@@ -672,7 +681,7 @@ inline Affine2Vector::~Affine2Vector() {
 }
 
 inline void Affine2Vector::set_empty() {
-	(*this)[0]=Interval::EMPTY_SET;
+	(*this)[0] = Interval::EMPTY_SET;
 }
 
 inline const Affine2& Affine2Vector::operator[](int i) const {
@@ -740,6 +749,7 @@ inline double distance(const IntervalVector& x1, const Affine2Vector& x2) {
 	return distance(x2,x1);
 }
 
+
 inline Affine2Vector operator+(const IntervalVector& x1, const Affine2Vector& x2) {
 	return x2 + x1;
 }
@@ -748,6 +758,78 @@ inline Affine2 operator*(const IntervalVector& x1, const Affine2Vector& x2){
 	return x2*x1;
 }
 
+
+inline Affine2Vector operator -(const Affine2Vector& x) {
+	return Affine2Vector(x,true);
+}
+
+inline Affine2Vector operator +(const Vector& x1, const Affine2Vector& x2) {
+	return Affine2Vector(x2)+=x1;
+}
+
+inline Affine2Vector operator +(const Affine2Vector& x1, const Vector& x2) {
+	return Affine2Vector(x1)+=x2;
+}
+
+inline Affine2Vector operator +(const Affine2Vector& x1, const IntervalVector& x2) {
+	return Affine2Vector(x1)+=x2;
+}
+
+inline Affine2Vector operator +(const Affine2Vector& x1, const Affine2Vector& x2) {
+	return Affine2Vector(x1)+=x2;
+}
+
+inline Affine2Vector operator -(const Vector& x1, const Affine2Vector& x2) {
+	return Affine2Vector(x2,true)+=x2;
+}
+
+inline Affine2Vector operator -(const Affine2Vector& x1, const Vector& x2) {
+	return Affine2Vector(x1)-=x2;
+}
+
+inline Affine2Vector operator -(const Affine2Vector& x1, const IntervalVector& x2) {
+	return Affine2Vector(x1)-=x2;
+}
+
+inline Affine2Vector operator -(const IntervalVector& x1, const Affine2Vector& x2) {
+	return Affine2Vector(x2,true)+=x1;
+}
+
+inline Affine2Vector operator -(const Affine2Vector& x1, const Affine2Vector& x2) {
+	return Affine2Vector(x2,true)+=x1;
+}
+
+inline Affine2 operator *(const Vector& x1, const Affine2Vector& x2) {
+	return Affine2Vector(x2)*=x1;
+}
+
+inline Affine2 operator *(const Affine2Vector& x1, const Vector& x2) {
+	return Affine2Vector(x1)*=x2;
+}
+
+inline Affine2 operator *(const Affine2Vector& x1, const IntervalVector& x2) {
+	return Affine2Vector(x1)*=x2;
+}
+
+inline Affine2 operator *(const Affine2Vector& x1, const Affine2Vector& x2) {
+	return Affine2Vector(x1)*=x2;
+}
+
+inline Affine2Vector operator *(double d, const Affine2Vector& x) {
+	return Affine2Vector(x)*=d;
+}
+
+inline Affine2Vector operator *(const Affine2& x1, const Vector& x2) {
+	return Affine2Vector(x2.size(),x1)*=x2;
+}
+
+inline Affine2Vector operator *(const Affine2& x1, const Affine2Vector& x2) {
+	return Affine2Vector(x2)*=x1;
+}
+
+inline Affine2Vector operator *(const Interval& x1, const Affine2Vector& x2) {
+	return Affine2Vector(x2)*=x1;
+}
 
 inline Affine2Vector cart_prod(const Affine2Vector& x, const Affine2Vector& y) {
 	Affine2Vector z(x.size()+y.size());

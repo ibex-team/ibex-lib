@@ -90,8 +90,7 @@ Affine2::Affine2(const Affine2& x, bool b) :
 		_n		(x.size()),
 		_val	(new double[x.size() + 1]),
 		_err	(x.err()),
-		_actif	(x.isActif()),
-		_itv	(Interval::ZERO) {
+		_actif	(x.isActif()) {
 	if (b) {
 		_itv = -x.itv();
 		if (x.isActif()) {
@@ -165,7 +164,10 @@ Affine2& Affine2::operator =(double d) {
 	_err = Interval::ZERO;
 	_itv = Interval(d);
 
-	if (_val==NULL) { _val = new double[1]; }
+	if ((_val==NULL)||(_n<0)) {
+		_n = 0;
+		_val = new double[1];
+	}
 
 	_val[0] = d;
 	for (int i = 1; i <= _n; i++) {
@@ -178,7 +180,10 @@ Affine2& Affine2::operator =(const Interval& x) {
 	_itv = x;
 	_actif = (!x.is_empty());
 	if (_actif) {
-		if (_val==NULL) { _val = new double[1]; }
+		if ((_val==NULL)||(_n<0)) {
+			_n = 0;
+			_val = new double[1];
+		}
 		_val[0] = x.mid();
 		for (int i = 1; i <= _n; i++) {
 			_val[i] = 0;
@@ -220,9 +225,10 @@ Affine2& Affine2::saxpy(double alpha, const Affine2& y, double beta,
 		}
 
 		if (B2) {  // add a affine2 form y
+
 			_itv += y.itv();
 			if (y.isActif()) {
-				assert(_n==y.size());
+				assert(this->size()==y.size());
 
 				ttt=0.0;
 				sss=0.0;
@@ -241,8 +247,25 @@ Affine2& Affine2::saxpy(double alpha, const Affine2& y, double beta,
 				_err +=AF_EE()*(AF_EM()*ttt);
 				_err += AF_EE()*sss;
 			}
-			else {
-				_actif = false;
+			else { // y is not a valid affine2 form. So we add y.itv() such as an interval
+				_itv += y.itv();
+				if (y.itv().is_unbounded()) {
+					ttt=0.0;
+					sss=0.0;
+					double tmp_mid = y.itv().mid();
+					temp = _val[0]+ tmp_mid;
+					ttt = (fabs(_val[0])>fabs(tmp_mid))? fabs(_val[0]) :fabs(tmp_mid);
+					if (fabs(temp)<AF_EC()) {
+						sss+= fabs(temp);
+						_val[0] = 0.0;
+					}
+					else {
+						_val[0]=temp;
+					}
+					_err +=AF_EE()*(AF_EM()*ttt);
+					_err += AF_EE()*sss;
+				}
+				_err += y.rad();
 			}
 		}
 		if (B3) {  //add a constant beta
@@ -381,8 +404,7 @@ Affine2& Affine2::operator *=(const Affine2& y) {
 		}
 		delete[] xTmp;
 	} else {
-		_actif = false;
-		_itv *= y.itv();
+		*this *= y.itv();
 	}
 	return *this;
 }
