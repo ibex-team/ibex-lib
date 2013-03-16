@@ -1,11 +1,13 @@
-/*
- * ibex_Affine2Vector.cpp
+/* ============================================================================
+ * I B E X - Affine2 Vector definition
+ * ============================================================================
+ * License     : This program can be distributed under the terms of the GNU LGPL.
+ *               See the file COPYING.LESSER.
  *
- *  Created on: 12 nov. 2012
- *      Author: nininjo
- */
+ * Author(s)   : Jordan Ninin
+ * Created     : March 13, 2013
+ * ---------------------------------------------------------------------------- */
 
-#include "ibex_IntervalVector.h"
 #include "ibex_IntervalVector.cpp"
 #include "ibex_LinearArith.cpp"
 #include "ibex_Affine2Vector.h"
@@ -27,7 +29,7 @@ Affine2Vector::Affine2Vector(int n) :
 		_vec(new Affine2[n]) {
 	assert(n>=1);
 	for (int i = 0; i < n; i++){
-		_vec[i] = Affine2(0,0.0); // OR Affine() OR  Affine2(n, 0.0);  I do not know
+		_vec[i] = Affine2(); // OR Affine(0,0) OR  Affine2(n, 0.0);  I do not know
 	}
 }
 
@@ -104,7 +106,7 @@ Affine2Vector::Affine2Vector(const Vector& x) :
 
 void Affine2Vector::init(const Interval& x) {
 	for (int i = 0; i < size(); i++) {
-		(*this)[i] = Affine2(size(),x);
+		(*this)[i] = x;
 	}
 }
 void Affine2Vector::init(const Affine2& x) {
@@ -199,7 +201,7 @@ Affine2Vector& Affine2Vector::operator=(const IntervalVector& x) {
 		// may return prematurely in case "this" is empty.
 		// use physical copy instead:
 		for (int i = 0; i < size(); i++) {
-			(*this)[i] = Affine2(size(),x[i]);
+			(*this)[i] = x[i];
 		}
 	}
 

@@ -1,7 +1,6 @@
 /* ============================================================================
  * I B E X - Affine2 definition
  * ============================================================================
- * Copyright   : Ecole des Mines de Nantes (FRANCE)
  * License     : This program can be distributed under the terms of the GNU LGPL.
  *               See the file COPYING.LESSER.
  *
@@ -1121,7 +1120,9 @@ inline Affine2& Affine2::operator*=(double d){
 
 /** \brief Divide *this by \a d and return the result. */
 inline 	Affine2& Affine2::operator/=(double d) {
-	return *this *= Affine2(_n, 1.0 / Interval(d));
+	Affine2 tmp(0, 1.0 / Interval(d));
+	tmp.setActif(false);
+	return *this *=tmp ;
 }
 
 /** \brief Add \a x to *this and return the result. */
@@ -1136,12 +1137,16 @@ inline Affine2& Affine2::operator-=(const Interval& x){
 
 /** \brief Multiply *this by \a x and return the result. */
 inline Affine2& Affine2::operator*=(const Interval& x){
-	return *this *= Affine2(_n, x);
+	Affine2 tmp(0, x);
+	tmp.setActif(false);
+	return *this *=tmp ;
 }
 
 /** \brief Divide *this by \a x and return the result.*/
 inline Affine2& Affine2::operator/=(const Interval& x){
-	return *this *= Affine2(_n, 1.0 / x);
+	Affine2 tmp(0, 1.0/x);
+	tmp.setActif(false);
+	return *this *=tmp ;
 }
 
 /** \brief Add \a x to *this and return the result. */

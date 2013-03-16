@@ -1,12 +1,11 @@
 /* ============================================================================
- * I B E X - Interval Vector definition
+ * I B E X - Affine2 Vector definition
  * ============================================================================
- * Copyright   : Ecole des Mines de Nantes (FRANCE)
  * License     : This program can be distributed under the terms of the GNU LGPL.
  *               See the file COPYING.LESSER.
  *
- * Author(s)   : Gilles Chabert
- * Created     : Dec 05, 2011
+ * Author(s)   : Jordan Ninin
+ * Created     : March 13, 2013
  * ---------------------------------------------------------------------------- */
 
 #ifndef __IBEX_AFFINE2_VECTOR_H__

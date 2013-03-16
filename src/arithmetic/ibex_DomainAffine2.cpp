@@ -7,6 +7,7 @@
 
 
 #include "ibex_DomainAffine2.h"
+#include "ibex_Affine2.h"
 
 namespace ibex {
 
@@ -16,8 +17,8 @@ bool DomainAffine2::is_empty() const {
 		case Dim::SCALAR:       return i().is_empty(); break;
 		case Dim::ROW_VECTOR:
 		case Dim::COL_VECTOR:   return v().is_empty(); break;
-//		case Dim::MATRIX:       return m().is_empty(); break;
-//		case Dim::MATRIX_ARRAY: return ma().is_empty(); break;
+		case Dim::MATRIX:       return m().is_empty(); break;
+		case Dim::MATRIX_ARRAY: return ma().is_empty(); break;
 		}
 	assert(false);
 	return false;
@@ -29,8 +30,8 @@ void DomainAffine2::set_empty() {
 		case Dim::SCALAR:       i().set_empty(); break;
 		case Dim::ROW_VECTOR:
 		case Dim::COL_VECTOR:   v().set_empty(); break;
-//		case Dim::MATRIX:       m().set_empty(); break;
-//		case Dim::MATRIX_ARRAY: ma().set_empty(); break;
+		case Dim::MATRIX:       m().set_empty(); break;
+		case Dim::MATRIX_ARRAY: ma().set_empty(); break;
 		}
 }
 
@@ -39,8 +40,8 @@ void DomainAffine2::clear() {
 	case Dim::SCALAR:     i()=0; break;
 	case Dim::ROW_VECTOR:
 	case Dim::COL_VECTOR: v().clear(); break;
-//	case Dim::MATRIX:     m().clear(); break;
-//	case Dim::MATRIX_ARRAY: for (int i=0; i<dim.dim1; i++) ma()[i].clear(); break;
+	case Dim::MATRIX:     m().clear(); break;
+	case Dim::MATRIX_ARRAY: for (int i=0; i<dim.dim1; i++) ma()[i].clear(); break;
 	}
 }
 
@@ -49,14 +50,14 @@ std::ostream& operator<<(std::ostream& os,const DomainAffine2& d) {
 		case Dim::SCALAR:       os << d.i(); break;
 		case Dim::ROW_VECTOR:
 		case Dim::COL_VECTOR:   os << d.v(); break;
-//		case Dim::MATRIX:       os << d.m(); break;
-//		case Dim::MATRIX_ARRAY: os << d.ma(); break;
+		case Dim::MATRIX:       os << d.m(); break;
+		case Dim::MATRIX_ARRAY: os << d.ma(); break;
 		}
 	return os;
 }
 
 
-
+// TODO TO check
 /**
  * \brief Load domains into an Affine2 vector.
  */
@@ -99,35 +100,35 @@ void load(Array<DomainAffine2>& d, const Affine2Vector& x, int nb_used, int* use
 		}
 		break;
 
-//		case Dim::MATRIX:
-//		{
-//			Affine2Matrix& M=d[s].m();
-//			for (int k=0; k<dim.dim2; k++)
-//				for (int j=0; j<dim.dim3; j++) {
-//					if (nb_used==-1 || i==used[u]) {
-//						M[k][j]=x[i];
-//						u++;
-//						if (u==nb_used) return;
-//					}
-//					i++;
-//				}
-//		}
-//		break;
-//		case Dim::MATRIX_ARRAY:
-//		{
-//			Affine2MatrixArray& A=d[s].ma();
-//			for (int l=0; l<dim.dim1; l++)
-//				for (int k=0; k<dim.dim2; k++)
-//					for (int j=0; j<dim.dim3; j++) {
-//						if (nb_used==-1 || i==used[u]) {
-//							A[l][k][j]=x[i];
-//							u++;
-//							if (u==nb_used) return;
-//						}
-//						i++;
-//					}
-//		}
-//		break;
+		case Dim::MATRIX:
+		{
+			Affine2Matrix& M=d[s].m();
+			for (int k=0; k<dim.dim2; k++)
+				for (int j=0; j<dim.dim3; j++) {
+					if (nb_used==-1 || i==used[u]) {
+						M[k][j]=x[i];
+						u++;
+						if (u==nb_used) return;
+					}
+					i++;
+				}
+		}
+		break;
+		case Dim::MATRIX_ARRAY:
+		{
+			Affine2MatrixArray& A=d[s].ma();
+			for (int l=0; l<dim.dim1; l++)
+				for (int k=0; k<dim.dim2; k++)
+					for (int j=0; j<dim.dim3; j++) {
+						if (nb_used==-1 || i==used[u]) {
+							A[l][k][j] = x[i];
+							u++;
+							if (u==nb_used) return;
+						}
+						i++;
+					}
+		}
+		break;
 		}
 	}
 	assert(nb_used==-1 || u==nb_used);
@@ -174,35 +175,35 @@ void load(Affine2Vector& x, const Array<const DomainAffine2>& d, int nb_used, in
 		}
 		break;
 
-//		case Dim::MATRIX:
-//		{
-//			const Affine2Matrix& M=d[s].m();
-//			for (int k=0; k<dim.dim2; k++)
-//				for (int j=0; j<dim.dim3; j++) {
-//					if (nb_used==-1 || i==used[u]) {
-//						x[i]=M[k][j];
-//						u++;
-//						if (u==nb_used) return;
-//					}
-//					i++;
-//				}
-//		}
-//		break;
-//		case Dim::MATRIX_ARRAY:
-//		{
-//			const Affine2MatrixArray& A=d[s].ma();
-//			for (int l=0; l<dim.dim1; l++)
-//				for (int k=0; k<dim.dim2; k++)
-//					for (int j=0; j<dim.dim3; j++) {
-//						if (nb_used==-1 || i==used[u]) {
-//							x[i]=A[l][k][j];
-//							u++;
-//							if (u==nb_used) return;
-//						}
-//						i++;
-//					}
-//		}
-//		break;
+		case Dim::MATRIX:
+		{
+			const Affine2Matrix& M=d[s].m();
+			for (int k=0; k<dim.dim2; k++)
+				for (int j=0; j<dim.dim3; j++) {
+					if (nb_used==-1 || i==used[u]) {
+						x[i]=M[k][j];
+						u++;
+						if (u==nb_used) return;
+					}
+					i++;
+				}
+		}
+		break;
+		case Dim::MATRIX_ARRAY:
+		{
+			const Affine2MatrixArray& A=d[s].ma();
+			for (int l=0; l<dim.dim1; l++)
+				for (int k=0; k<dim.dim2; k++)
+					for (int j=0; j<dim.dim3; j++) {
+						if (nb_used==-1 || i==used[u]) {
+							x[i]=A[l][k][j];
+							u++;
+							if (u==nb_used) return;
+						}
+						i++;
+					}
+		}
+		break;
 		}
 	}
 	assert(nb_used==-1 || u==nb_used);
@@ -267,35 +268,35 @@ void load(Array<DomainAffine2>& x, const Array<const DomainAffine2>& y, int nb_u
 			}
 			break;
 
-//			case Dim::MATRIX:
-//			{
-//				for (int k=0; k<dim.dim2; k++)
-//					for (int j=0; j<dim.dim3; j++) {
-//						if (i==used[u]) {
-//							x[s][k][j]=y[s][k][j];
-//							u++;
-//							if (u==nb_used) return;
-//						}
-//						i++;
-//					}
-//			}
-//			break;
-//			case Dim::MATRIX_ARRAY:
-//			{
-//				for (int l=0; l<dim.dim1; l++)
-//					for (int k=0; k<dim.dim2; k++)
-//						for (int j=0; j<dim.dim3; j++) {
-//							// TODO: are all these temporary DomainAffine2 objects
-//							// created by [] really safe?
-//							if (i==used[u]) {
-//								x[s][l][k][j]=y[s][l][k][j];
-//								u++;
-//								if (u==nb_used) return;
-//							}
-//							i++;
-//						}
-//			}
-//			break;
+			case Dim::MATRIX:
+			{
+				for (int k=0; k<dim.dim2; k++)
+					for (int j=0; j<dim.dim3; j++) {
+						if (i==used[u]) {
+							x[s][k][j]=y[s][k][j];
+							u++;
+							if (u==nb_used) return;
+						}
+						i++;
+					}
+			}
+			break;
+			case Dim::MATRIX_ARRAY:
+			{
+				for (int l=0; l<dim.dim1; l++)
+					for (int k=0; k<dim.dim2; k++)
+						for (int j=0; j<dim.dim3; j++) {
+							// TODO: are all these temporary DomainAffine2 objects
+							// created by [] really safe?
+							if (i==used[u]) {
+								x[s][l][k][j]=y[s][l][k][j];
+								u++;
+								if (u==nb_used) return;
+							}
+							i++;
+						}
+			}
+			break;
 			}
 		}
 		assert(nb_used==-1 || u==nb_used);
@@ -316,9 +317,9 @@ DomainAffine2 DomainAffine2::operator[](int ii) {
 	case Dim::SCALAR:       assert(ii==0); return DomainAffine2(this->i());
 	case Dim::ROW_VECTOR:
 	case Dim::COL_VECTOR:   return DomainAffine2(v()[ii]);
-//	case Dim::MATRIX:       return DomainAffine2(m()[ii],true);
-//	case Dim::MATRIX_ARRAY:
-//	default:                return DomainAffine2(ma()[ii]);
+	case Dim::MATRIX:       return DomainAffine2(m()[ii],true);
+	case Dim::MATRIX_ARRAY:
+	default:                return DomainAffine2(ma()[ii]);
 	}
 }
 
@@ -333,10 +334,10 @@ DomainAffine2 operator+(const DomainAffine2& d1, const DomainAffine2& d2) {
 
 	switch(dim.type()) {
 	case Dim::SCALAR:       d.i()=d1.i()+d2.i(); break;
-//	case Dim::ROW_VECTOR:
-//	case Dim::COL_VECTOR:   d.v()=d1.v()+d2.v(); break;
-//	case Dim::MATRIX:       d.m()=d1.m()+d2.m(); break;
-//	case Dim::MATRIX_ARRAY: assert(false); break;
+	case Dim::ROW_VECTOR:
+	case Dim::COL_VECTOR:   d.v()=d1.v()+d2.v(); break;
+	case Dim::MATRIX:       d.m()=d1.m()+d2.m(); break;
+	case Dim::MATRIX_ARRAY: assert(false); break;
 	}
 	return d;
 }
@@ -348,29 +349,29 @@ DomainAffine2 operator*(const DomainAffine2& d1, const DomainAffine2& d2) {
 	if (d1.dim.is_scalar()) {
 		switch(d2.dim.type()) {
 		case Dim::SCALAR:       d.i()=d1.i()*d2.i(); break;
-//		case Dim::ROW_VECTOR:
-//		case Dim::COL_VECTOR:   d.v()=d1.i()*d2.v(); break;
-//		case Dim::MATRIX:       d.m()=d1.i()*d2.m(); break;
-//		default:                assert(false); break;
+		case Dim::ROW_VECTOR:
+		case Dim::COL_VECTOR:   d.v()=d1.i()*d2.v(); break;
+		case Dim::MATRIX:       d.m()=d1.i()*d2.m(); break;
+		default:                assert(false); break;
 		}
-//	} else if (d1.dim.type()==Dim::ROW_VECTOR) {
-//		switch(d2.dim.type()) {
-//		case Dim::COL_VECTOR:   d.i()=d1.v()*d2.v(); break;
-//		case Dim::MATRIX:       d.v()=d1.v()*d2.m(); break;
-//		default: assert(false); break;
-//		}
-//	} else if (d1.dim.type()==Dim::COL_VECTOR) {
-//		switch(d2.dim.type()) {
-//		case Dim::SCALAR:       d.v()=d2.i()*d1.v(); break;
-//		case Dim::ROW_VECTOR:   d.m()=outer_product(d1.v(),d2.v()); break;
-//		default: assert(false); break;
-//		}
-//	} else { // MATRIX
-//		switch(d2.dim.type()) {
-//		case Dim::COL_VECTOR:   d.v()=d1.m()*d2.v(); break;
-//		case Dim::MATRIX:       d.m()=d1.m()*d2.m(); break;
-//		default:                assert(false); break;
-//		}
+	} else if (d1.dim.type()==Dim::ROW_VECTOR) {
+		switch(d2.dim.type()) {
+		case Dim::COL_VECTOR:   d.i()=d1.v()*d2.v(); break;
+		case Dim::MATRIX:       d.v()=d1.v()*d2.m(); break;
+		default: assert(false); break;
+		}
+	} else if (d1.dim.type()==Dim::COL_VECTOR) {
+		switch(d2.dim.type()) {
+		case Dim::SCALAR:       d.v()=d2.i()*d1.v(); break;
+		case Dim::ROW_VECTOR:   d.m()=outer_product(d1.v(),d2.v()); break;
+		default: assert(false); break;
+		}
+	} else { // MATRIX
+		switch(d2.dim.type()) {
+		case Dim::COL_VECTOR:   d.v()=d1.m()*d2.v(); break;
+		case Dim::MATRIX:       d.m()=d1.m()*d2.m(); break;
+		default:                assert(false); break;
+		}
 	}
 
 	return d;
@@ -383,10 +384,10 @@ DomainAffine2 operator-(const DomainAffine2& d1, const DomainAffine2& d2) {
 
 	switch(dim.type()) {
 	case Dim::SCALAR:       d.i()=d1.i()-d2.i(); break;
-//	case Dim::ROW_VECTOR:
-//	case Dim::COL_VECTOR:   d.v()=d1.v()-d2.v(); break;
-//	case Dim::MATRIX:       d.m()=d1.m()-d2.m(); break;
-//	case Dim::MATRIX_ARRAY: assert(false); break;
+	case Dim::ROW_VECTOR:
+	case Dim::COL_VECTOR:   d.v()=d1.v()-d2.v(); break;
+	case Dim::MATRIX:       d.m()=d1.m()-d2.m(); break;
+	case Dim::MATRIX_ARRAY: assert(false); break;
 	}
 	return d;
 }
@@ -397,10 +398,10 @@ DomainAffine2 operator-(const DomainAffine2& d1) {
 
 	switch(d.dim.type()) {
 	case Dim::SCALAR:       d.i()=-d1.i(); break;
-//	case Dim::ROW_VECTOR:
-//	case Dim::COL_VECTOR:   d.v()=-d1.v(); break;
-//	case Dim::MATRIX:       d.m()=-d1.m(); break;
-//	case Dim::MATRIX_ARRAY: assert(false); break;
+	case Dim::ROW_VECTOR:
+	case Dim::COL_VECTOR:   d.v()=-d1.v(); break;
+	case Dim::MATRIX:       d.m()=-d1.m(); break;
+	case Dim::MATRIX_ARRAY: assert(false); break;
 	}
 	return d;
 }
@@ -410,10 +411,10 @@ DomainAffine2 transpose(const DomainAffine2& d1) {
 
 	switch(d.dim.type()) {
 	case Dim::SCALAR:       d.i()=d1.i(); break;
-//	case Dim::ROW_VECTOR:
-//	case Dim::COL_VECTOR:   d.v()=d1.v(); break;
-//	case Dim::MATRIX:       d.m()=d1.m().transpose(); break;
-//	case Dim::MATRIX_ARRAY: assert(false); break;
+	case Dim::ROW_VECTOR:
+	case Dim::COL_VECTOR:   d.v()=d1.v(); break;
+	case Dim::MATRIX:       d.m()=d1.m().transpose(); break;
+	case Dim::MATRIX_ARRAY: assert(false); break;
 	}
 	return d;
 }

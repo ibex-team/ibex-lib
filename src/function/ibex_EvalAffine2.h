@@ -23,6 +23,15 @@ class EvalAffine2 : public FwdAlgorithm {
 
 public:
 	/**
+	 * \brief Run the forward algorithm with input domains.
+	 */
+	DomainAffine2& eval_affine2(const Function& f, const Array<const DomainAffine2>& d) const;
+
+	/**
+	 * \brief Run the forward algorithm with input domains.
+	 */
+	DomainAffine2& eval_affine2(const Function& f, const Array<DomainAffine2>& d) const;
+	/**
 	 * \brief Calculate the gradient of f on the box \a box and store the result in \a g.
 	 */
 	DomainAffine2& eval_affine2(const Function& f, const IntervalVector& box) const;
@@ -90,11 +99,32 @@ inline void EvalAffine2::symbol_fwd(const ExprSymbol& , ExprLabel& ) { /* nothin
 
 inline void EvalAffine2::cst_fwd(const ExprConstant& c, ExprLabel& y) {
 	switch (c.type()) {
-	case Dim::SCALAR:       y.af2->i() = c.get_value();         break;
+	case Dim::SCALAR:      {
+		y.af2->i() = Affine2(0,c.get_value());
+		y.af2->i().setActif(false);
+		break;
+	}
 	case Dim::ROW_VECTOR:
-	case Dim::COL_VECTOR:
-	case Dim::MATRIX:
-	case Dim::MATRIX_ARRAY: assert(false); /* impossible */ break;
+	case Dim::COL_VECTOR: {
+		for (int i=0; i<c.get_vector_value().size() ; i++ ) {
+			y.af2->v()[i] = Affine2(0,c.get_vector_value()[i]);
+			y.af2->v()[i].setActif(false);
+		}
+		break;
+	}
+	case Dim::MATRIX: {
+		for (int i=0; i<c.get_matrix_value().nb_rows() ; i++ ) {
+			for (int j=0 ; j<c.get_matrix_value().nb_cols() ; j++) {
+				(y.af2->m()[i])[j] = Affine2(0,c.get_matrix_value()[i][j]);
+				y.af2->m()[i][j].setActif(false);
+			}
+		}
+		break;
+	}
+	case Dim::MATRIX_ARRAY:  {
+		assert(false); /* impossible */
+		break;
+	}
 	}
 }
 inline void EvalAffine2::apply_fwd(const ExprApply& a, ExprLabel** x, ExprLabel& y)                          { *y.af2 = eval_affine2(a.func,x); }

@@ -10,6 +10,9 @@
 
 #include "ibex_Affine2.h"
 #include "ibex_Affine2Vector.h"
+#include "ibex_Affine2Matrix.h"
+#include "ibex_Affine2MatrixArray.h"
+#include "ibex_Domain.h"
 #include "ibex_Dim.h"
 
 namespace ibex {
@@ -28,6 +31,24 @@ namespace ibex {
  *
  */
 class DomainAffine2  {
+
+private:
+	friend class Domains;
+
+	DomainAffine2() : dim(), is_reference(false), domain(NULL) { }
+
+	void build() {
+		switch(dim.type()) {
+		case Dim::SCALAR:       domain = new Affine2(); break;
+		case Dim::ROW_VECTOR:   domain = new Affine2Vector(dim.dim3); break;
+		case Dim::COL_VECTOR:   domain = new Affine2Vector(dim.dim2); break;
+		case Dim::MATRIX:       domain = new Affine2Matrix(dim.dim2,dim.dim3); break;
+		case Dim::MATRIX_ARRAY: domain = new Affine2MatrixArray(dim.dim1,dim.dim2,dim.dim3); break;
+		}
+	}
+
+	void* domain;
+
 public:
 
 	/**
@@ -44,7 +65,9 @@ public:
 	/**
 	 * \brief Creates a new DomainAffine2 of dimension \a dim.
 	 */
-	explicit DomainAffine2(const Dim& dim1) : dim(dim1), is_reference(false) {
+	explicit DomainAffine2(const Dim& dim1) :
+			dim(dim1),
+			is_reference(false) {
 		build();
 	}
 
@@ -53,7 +76,9 @@ public:
 	 *
 	 * The internal domain will point to \a itv.
 	 */
-	explicit DomainAffine2(Affine2& itv) : dim(), is_reference(true) {
+	explicit DomainAffine2(Affine2& itv) :
+			dim(),
+			is_reference(true) {
 		domain = &itv;
 	}
 
@@ -62,7 +87,9 @@ public:
 	 *
 	 *  The internal domain will point to \a v.
 	 */
-	explicit DomainAffine2(Affine2Vector& v1, bool in_row) : dim(in_row? Dim::row_vec(v1.size()) : Dim::col_vec(v1.size())), is_reference(true) {
+	explicit DomainAffine2(Affine2Vector& v1, bool in_row) :
+			dim(in_row? Dim::row_vec(v1.size()) :Dim::col_vec(v1.size())),
+			is_reference(true) {
 		domain = &v1;
 	}
 
@@ -71,18 +98,22 @@ public:
 	 *
 	 *  The internal domain will point to \a m.
 	 */
-//	explicit DomainAffine2(Affine2Matrix& m1) : dim(Dim::matrix(m1.nb_rows(),m1.nb_cols())), is_reference(true) {
-//		domain = &m1;
-//	}
+	explicit DomainAffine2(Affine2Matrix& m1) :
+			dim(Dim::matrix(m1.nb_rows(),m1.nb_cols())),
+			is_reference(true) {
+		domain = &m1;
+	}
 
 	/**
 	 * \brief Creates a reference to an array of interval matrices.
 	 *
 	 *  The internal domain will point to \a ma.
 	 */
-//	explicit DomainAffine2(Affine2MatrixArray& ma1) : dim(Dim::matrix_array(ma1.size(),ma1.nb_rows(),ma1.nb_cols())), is_reference(true) {
-//		domain = &ma1;
-//	}
+	explicit DomainAffine2(Affine2MatrixArray& ma1) :
+			dim(Dim::matrix_array(ma1.size(),ma1.nb_rows(),ma1.nb_cols())),
+			is_reference(true) {
+		domain = &ma1;
+	}
 
 	/**
 	 * \brief Creates a domain by copy.
@@ -90,7 +121,9 @@ public:
 	 * If \a is_reference is true, the intenal domain is a reference to the
 	 * internal domain of \a d.
 	 */
-	DomainAffine2(const DomainAffine2& d, bool is_reference1=false) : dim(d.dim), is_reference(is_reference1) {
+	DomainAffine2(const DomainAffine2& d, bool is_reference1=false) :
+			dim(d.dim),
+			is_reference(is_reference1) {
 		if (is_reference1) {
 			domain = d.domain;
 		} else {
@@ -98,8 +131,8 @@ public:
 			case Dim::SCALAR:       domain = new Affine2(d.i()); break;
 			case Dim::ROW_VECTOR:
 			case Dim::COL_VECTOR:   domain = new Affine2Vector(d.v()); break;
-//			case Dim::MATRIX:       domain = new Affine2Matrix(d.m()); break;
-//			case Dim::MATRIX_ARRAY: domain = new Affine2MatrixArray(d.ma()); break;
+			case Dim::MATRIX:       domain = new Affine2Matrix(d.m()); break;
+			case Dim::MATRIX_ARRAY: domain = new Affine2MatrixArray(d.ma()); break;
 			}
 		}
 	}
@@ -128,8 +161,8 @@ public:
 			case Dim::SCALAR:   delete (Affine2*) domain;  break;
 			case Dim::ROW_VECTOR:
 			case Dim::COL_VECTOR:   delete &v();  break;
-//			case Dim::MATRIX:       delete &m();  break;
-//			case Dim::MATRIX_ARRAY: delete &ma(); break;
+			case Dim::MATRIX:       delete &m();  break;
+			case Dim::MATRIX_ARRAY: delete &ma(); break;
 			}
 		}
 	}
@@ -143,23 +176,8 @@ public:
 		case Dim::SCALAR:       i()=d.i(); break;
 		case Dim::ROW_VECTOR:
 		case Dim::COL_VECTOR:   v()=d.v(); break;
-//		case Dim::MATRIX:       m()=d.m(); break;
-//		case Dim::MATRIX_ARRAY: ma()=d.ma(); break;
-		}
-		return *this;
-	}
-
-	/**
-	 * \brief Intersect the domain with another domain.
-	 */
-	DomainAffine2& operator&=(const DomainAffine2& d) {
-		assert((*this).dim==d.dim);
-		switch((*this).dim.type()) {
-		case Dim::SCALAR:       i()= i() & d.i(); break;
-//		case Dim::ROW_VECTOR:
-//		case Dim::COL_VECTOR:   v()&=d.v(); break;
-//		case Dim::MATRIX:       m()&=d.m(); break;
-//		case Dim::MATRIX_ARRAY: ma()&=d.ma(); break;
+		case Dim::MATRIX:       m()=d.m(); break;
+		case Dim::MATRIX_ARRAY: ma()=d.ma(); break;
 		}
 		return *this;
 	}
@@ -173,8 +191,8 @@ public:
 		case Dim::SCALAR:       return i()==d.i();
 		case Dim::ROW_VECTOR:
 		case Dim::COL_VECTOR:   return v()==d.v();
-//		case Dim::MATRIX:       return m()==d.m();
-//		case Dim::MATRIX_ARRAY: return ma()==d.ma();
+		case Dim::MATRIX:       return m()==d.m();
+		case Dim::MATRIX_ARRAY: return ma()==d.ma();
 		default:                assert(false); return false;
 		}
 	}
@@ -207,21 +225,21 @@ public:
 
 	/**
 	 * \brief Return the domain as a matrix.
-//	 */
-//	inline Affine2Matrix& m()  {
-//		assert(domain);
-//		assert(dim.type()==Dim::MATRIX);
-//		return *(Affine2Matrix*) domain;
-//	}
+	 */
+	inline Affine2Matrix& m()  {
+		assert(domain);
+		assert(dim.type()==Dim::MATRIX);
+		return *(Affine2Matrix*) domain;
+	}
 
 	/**
 	 * \brief Return the domain as an array of matrices.
 	 */
-//	inline Affine2MatrixArray& ma() {
-//		assert(domain);
-//		assert(dim.type()==Dim::MATRIX_ARRAY);
-//		return *(Affine2MatrixArray*) domain;
-//	}
+	inline Affine2MatrixArray& ma() {
+		assert(domain);
+		assert(dim.type()==Dim::MATRIX_ARRAY);
+		return *(Affine2MatrixArray*) domain;
+	}
 
 	/**
 	 * \brief Return the domain as a const interval.
@@ -243,20 +261,20 @@ public:
 	/**
 	 * \brief Return the domain as a matrix.
 	 */
-//	inline const Affine2Matrix& m() const  {
-//		assert(domain);
-//		assert(dim.type()==Dim::MATRIX);
-//		return *(Affine2Matrix*) domain;
-//	}
+	inline const Affine2Matrix& m() const  {
+		assert(domain);
+		assert(dim.type()==Dim::MATRIX);
+		return *(Affine2Matrix*) domain;
+	}
 
 	/**
 	 * \brief Return the domain as an array of matrices.
 	 */
-//	inline const Affine2MatrixArray& ma() const {
-//		assert(domain);
-//		assert(dim.type()==Dim::MATRIX_ARRAY);
-//		return *(Affine2MatrixArray*) domain;
-//	}
+	inline const Affine2MatrixArray& ma() const {
+		assert(domain);
+		assert(dim.type()==Dim::MATRIX_ARRAY);
+		return *(Affine2MatrixArray*) domain;
+	}
 
 	/**
 	 * \brief True if the domain is empty
@@ -273,26 +291,27 @@ public:
 	 */
 	void clear();
 
-private:
-	friend class Domains;
-
-	DomainAffine2() : dim(), is_reference(false), domain(NULL) { }
-
-	void build() {
-		switch(dim.type()) {
-		case Dim::SCALAR:       domain = new Affine2(); break;
-		case Dim::ROW_VECTOR:   domain = new Affine2Vector(dim.dim3); break;
-		case Dim::COL_VECTOR:   domain = new Affine2Vector(dim.dim2); break;
-//		case Dim::MATRIX:       domain = new Affine2Matrix(dim.dim2,dim.dim3); break;
-//		case Dim::MATRIX_ARRAY: domain = new Affine2MatrixArray(dim.dim1,dim.dim2,dim.dim3); break;
-		}
-	}
-
-	void* domain;
 };
 
 /** \ingroup arithmetic */
 /*@{*/
+
+
+/**
+ * \brief Intersect the domain with another domain.
+ */
+Domain operator&(const DomainAffine2& d1, const DomainAffine2& d2) {
+	assert(d1.dim==d2.dim);
+	Domain res(d1.dim);
+	switch(res.dim.type()) {
+	case Dim::SCALAR:       res.i()= d1.i() & d2.i(); break;
+	case Dim::ROW_VECTOR:
+	case Dim::COL_VECTOR:   res.v()= d1.v() & d2.v(); break;
+	case Dim::MATRIX:       res.m()= d1.m() & d2.m(); break;
+	case Dim::MATRIX_ARRAY: res.ma() =d1.ma() & d2.ma(); break;
+	}
+	return *this;
+}
 
 /**
  * \brief Output a domain.

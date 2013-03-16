@@ -1,12 +1,11 @@
 /* ============================================================================
  * I B E X - ibex_Affine2Matrix.cpp
  * ============================================================================
- * Copyright   : Ecole des Mines de Nantes (FRANCE)
  * License     : This program can be distributed under the terms of the GNU LGPL.
  *               See the file COPYING.LESSER.
  *
- * Author(s)   : Gilles Chabert
- * Created     : Jan 6, 2012
+ * Author(s)   : Jordan Ninin
+ * Created     : March 16, 2013
  * ---------------------------------------------------------------------------- */
 
 #include "ibex_Affine2Matrix.h"
@@ -47,7 +46,7 @@ Affine2Matrix::Affine2Matrix(int nb_rows1, int nb_cols1, const Affine2& x) : _nb
 	}
 }
 
-Affine2Matrix::Affine2Matrix(int nb_rows1, int nb_cols1, const Interval& x) : _nb_rows(nb_rows1), _nb_cols(nb_cols1) {
+Affine2Matrix::Affine2Matrix(int nb_rows1, int nb_cols1, int sizeAF2) : _nb_rows(nb_rows1), _nb_cols(nb_cols1) {
 	assert(nb_rows1>0);
 	assert(nb_cols1>0);
 	int b=0;// counter for "bounds"
@@ -55,13 +54,13 @@ Affine2Matrix::Affine2Matrix(int nb_rows1, int nb_cols1, const Interval& x) : _n
 	for (int i=0; i<_nb_rows; i++) {
 		_M[i].resize(_nb_cols);
 		for (int j=0; j<_nb_cols; j++) {
-			_M[i]._vec[j]=Affine2(_nb_rows*_nb_cols,b+1,x);
+			_M[i]._vec[j]=Affine2(sizeAF2);
 			b++;
 		}
 	}
 }
 
-
+/*
 Affine2Matrix::Affine2Matrix(int m, int n, double bounds[][2]) : _nb_rows(m), _nb_cols(n) {
 	assert(m>0);
 	assert(n>0);
@@ -71,11 +70,12 @@ Affine2Matrix::Affine2Matrix(int m, int n, double bounds[][2]) : _nb_rows(m), _n
 	for (int i=0; i<_nb_rows; i++) {
 		_M[i].resize(_nb_cols);
 		for (int j=0; j<_nb_cols; j++) {
-			_M[i]._vec[j]=Affine2(m*n,b+1,bounds[b][0],bounds[b][1]);
+			_M[i]._vec[j]=Affine2(m*n,b+1,bounds[b][0],bounds[b][1]);  <- I'm not sur
 			b++;
 		}
 	}
 }
+*/
 
 Affine2Matrix::Affine2Matrix(const Affine2Matrix& m) : _nb_rows(m.nb_rows()), _nb_cols(m.nb_cols()){
 	_M = new Affine2Vector[_nb_rows];
@@ -101,17 +101,19 @@ Affine2Matrix::Affine2Matrix(const Affine2Matrix& m, bool b) : _nb_rows(m.nb_row
 	}
 }
 
-Affine2Matrix::Affine2Matrix(const IntervalMatrix& m) : _nb_rows(m.nb_rows()), _nb_cols(m.nb_cols()){
+/*  It is too difficult to know the size of each AF2. So we let the user do what exactly he want to do.
+Affine2Matrix::Affine2Matrix(const IntervalMatrix& m, int sizeAF2) : _nb_rows(m.nb_rows()), _nb_cols(m.nb_cols()){
 	_M = new Affine2Vector[_nb_rows];
 	int b=0; // counter for "bounds"
 	for (int i=0; i<_nb_rows; i++) {
 		_M[i].resize(_nb_cols);
 		for (int j=0; j<_nb_cols; j++)  {
-			_M[i]._vec[j]=Affine2(_nb_rows*_nb_cols,b+1,m[i][j]);
+			_M[i]._vec[j]=Affine2(sizeAF2,b+1,m[i][j]);
 			b++;
 		}
 	}
 }
+*/
 
 Affine2Matrix::Affine2Matrix(const Matrix& m, int sizeAF2) : _nb_rows(m.nb_rows()), _nb_cols(m.nb_cols()){
 	_M = new Affine2Vector[_nb_rows];
@@ -130,14 +132,14 @@ Affine2Matrix::~Affine2Matrix() {
 Affine2Matrix& Affine2Matrix::operator=(const Affine2Matrix& x) {
 	resize(x.nb_rows(), x.nb_cols());
 	for (int i=0; i<nb_rows(); i++)
-		(*this)[i]=x[i];
+		(*this)[i] = x[i];
 	return *this;
 }
 
 Affine2Matrix& Affine2Matrix::operator=(const IntervalMatrix& x) {
 	resize(x.nb_rows(), x.nb_cols());
 	for (int i=0; i<nb_rows(); i++){
-		(*this)[i]=x[i];
+		(*this)[i] = x[i];
 	}
 	return *this;
 }
@@ -162,7 +164,7 @@ void Affine2Matrix::init(const Affine2& x) {
 void Affine2Matrix::init(const Interval& x) {
 	for (int i=0; i<nb_rows(); i++) {
 		for (int j = 0; i < nb_cols(); i++) {
-			(*this)[i] = Affine2(nb_cols()*nb_rows(),x);
+			(*this)[i][j] = x;
 		}
 	}
 }
@@ -280,16 +282,15 @@ bool Affine2Matrix::is_zero() const {
 	return true;
 }
 
-Affine2Matrix Affine2Matrix::submatrix(int row_start_index, int row_end_index,
-		int col_start_index, int col_end_index) {
+Affine2Matrix Affine2Matrix::submatrix(int row_start_index, int row_end_index,	int col_start_index, int col_end_index) {
 	assert(row_start_index >= 0 && row_start_index < nb_rows());
 	assert(row_end_index >= 0 && row_end_index < nb_rows());
 	assert(row_start_index <= row_end_index);
 	assert(col_start_index >= 0 && col_start_index < nb_cols());
 	assert(col_end_index >= 0 && col_end_index < nb_cols());
 	assert(col_start_index <= col_end_index);
-	Affine2Matrix sub(row_end_index - row_start_index + 1,
-			col_end_index - col_start_index + 1);
+
+	Affine2Matrix sub(row_end_index - row_start_index + 1,	col_end_index - col_start_index + 1);
 	//cout << "m=" << (row_end_index-row_start_index+1) << "n=" << (col_end_index-col_start_index+1) << endl;
 	//cout << sub << endl;
 	int i2 = 0;
@@ -552,10 +553,6 @@ IntervalMatrix operator|(const Affine2Matrix& x,	const IntervalMatrix& y) const 
 	}
 	return res;
 }
-
-
-//  TODO
-
 
 
 Affine2Matrix operator*(const Affine2& x, const Matrix& m) {

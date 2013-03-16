@@ -1,9 +1,13 @@
-/*
- * ibex_Affine2.cpp
+/* ============================================================================
+ * I B E X - Affine2 definition
+ * ============================================================================
+ * License     : This program can be distributed under the terms of the GNU LGPL.
+ *               See the file COPYING.LESSER.
  *
- *  Created on: 12 nov. 2012
- *      Author: nininjo
- */
+ * Author(s)   : Jordan Ninin
+ * Bug fixes   :
+ * Created     : Nov 12, 2012
+ * ---------------------------------------------------------------------------- */
 
 #include "ibex_Affine2.h"
 
@@ -24,24 +28,30 @@ Affine2::Affine2(int n) :
 		_err	(Interval::ALL_REALS),
 		_actif	(true),
 		_itv	(Interval::ALL_REALS) {
+	assert(n>=0);
 }
 
 Affine2::Affine2(int n, int m, const Interval& itv) :
-		_n		(n),
-		_val	(new double[n + 1]),
-		_err	(Interval::ZERO),
-		_actif	(true),
-		_itv	(itv) {
+			_n 		(n),
+			_val	(NULL),
+			_err 	(Interval::ZERO),
+			_actif	(!(itv.is_unbounded()||itv.is_empty())),
+			_itv	(itv) {
+	assert((n>=0) && (m>=0) && (m<=n));
+	if (_actif) {
+		_val	=new double[n + 1];
+		_val[0] = itv.mid();
+		for (int i = 1; i <= n; i++){
+			_val[i] = 0.0;
+		}
 
-	_val[0] = itv.mid();
-	for (int i = 1; i <= n; i++){
-		_val[i] = 0.0;
-	}
-
-	if (m == 0) {
-		_err += itv.rad();
+		if (m == 0) {
+			_err += itv.rad();
+		} else {
+			_val[m] = itv.rad();
+		}
 	} else {
-		_val[m] = itv.rad();
+		_n = -1;
 	}
 }
 
@@ -52,7 +62,7 @@ Affine2::Affine2(int n, const double d) :
 		_err	(Interval::ZERO),
 		_actif	(true),
 		_itv	(Interval::ZERO) {
-
+	assert(n>=0);
 	_val[0] = d;
 	for (int i = 1; i <= n; i++){
 		_val[i] = 0.0;
@@ -61,49 +71,62 @@ Affine2::Affine2(int n, const double d) :
 }
 
 Affine2::Affine2(int n, const Interval & itv) :
-		_n		(n),
-		_val	(new double[n + 1]),
-		_err	(itv.rad()),
-		_actif	(true),
-		_itv	(itv) {
+					_actif	(!(itv.is_unbounded()||itv.is_empty())),
+					_itv	(itv) {
 	assert(n>=0);
-	_val[0] = itv.mid();
-	for (int i = 1; i <= n; i++){
-		_val[i] = 0.0;
+	if (_actif) {
+		_n		=n;
+		_err	=itv.rad();
+		_val	=new double[n + 1];
+		_val[0] = itv.mid();
+		for (int i = 1; i <= n; i++){
+			_val[i] = 0.0;
+		}
+	} else {
+		_n = -1;
 	}
 }
 
+
 Affine2::Affine2(const Affine2& x) :
 		_n		(x.size()),
-		_val	(new double[x.size() + 1]),
 		_err	(x.err()),
 		_actif	(x.isActif()),
 		_itv	(x.itv()) {
 	if (x.isActif()) {
+		_val	=new double[x.size() + 1];
 		for (int i = 0; i <= x.size(); i++){
 			_val[i] = x.val(i);
 		}
+	} else {
+		_n = -1;
 	}
 }
 
 Affine2::Affine2(const Affine2& x, bool b) :
 		_n		(x.size()),
-		_val	(new double[x.size() + 1]),
+		_val	(NULL),
 		_err	(x.err()),
 		_actif	(x.isActif()) {
 	if (b) {
 		_itv = -x.itv();
 		if (x.isActif()) {
+			_val =new double[x.size() + 1];
 			for (int i = 0; i <= x.size(); i++){
 				_val[i] = -x.val(i);
 			}
+		} else {
+			_n = -1;
 		}
 	} else {
 		_itv = x.itv();
 		if (x.isActif()) {
+			_val =new double[x.size() + 1];
 			for (int i = 0; i <= x.size(); i++){
 				_val[i] = x.val(i);
 			}
+		} else {
+			_n = -1;
 		}
 	}
 }
@@ -114,15 +137,16 @@ void Affine2::resize(int n) {
 	if (n==_n) return;
 	double* newVec=new double[n+1];
 	int i=0;
-	for (; (i<(_n+1)) && (i<(n+1)); i++) {
-		newVec[i]=_val[i];
+	if (_val!=NULL) {// vec==NULL happens when default constructor is used (n==0)
+		for (; (i<(_n+1)) && (i<(n+1)); i++) {
+			newVec[i]=_val[i];
+		}
+		delete[] _val;
 	}
 	for (; i<n; i++){
 		newVec[i]=0;
 	}
-	if (_val!=NULL) {// vec==NULL happens when default constructor is used (n==0)
-		delete[] _val;
-	}
+	_actif =true;
 	_n   = n;
 	_val = newVec;
 }
@@ -137,6 +161,8 @@ void Affine2::update_itv() {
 		res += _err * pmOne;
 		_itv &= res;
 		_actif = !(_itv.is_empty());
+	} else {
+		_actif = false;
 	}
 }
 
@@ -178,7 +204,7 @@ Affine2& Affine2::operator =(double d) {
 
 Affine2& Affine2::operator =(const Interval& x) {
 	_itv = x;
-	_actif = (!x.is_empty());
+	_actif = (!(x.is_unbounded()||x.is_empty()));
 	if (_actif) {
 		if ((_val==NULL)||(_n<0)) {
 			_n = 0;
@@ -195,8 +221,7 @@ Affine2& Affine2::operator =(const Interval& x) {
 
 
 
-Affine2& Affine2::saxpy(double alpha, const Affine2& y, double beta,
-		double ddelta, bool B1, bool B2, bool B3, bool B4) {
+Affine2& Affine2::saxpy(double alpha, const Affine2& y, double beta, double ddelta, bool B1, bool B2, bool B3, bool B4) {
 //std::cout << "saxpy " << alpha << " x " << *this << " + " << y << " + "<< beta << " +error " << ddelta << " / "<< B1 << B2 << B3 << B4 << std::endl;
 	double temp, ttt, sss;
 	int i;
@@ -249,7 +274,7 @@ Affine2& Affine2::saxpy(double alpha, const Affine2& y, double beta,
 			}
 			else { // y is not a valid affine2 form. So we add y.itv() such as an interval
 				_itv += y.itv();
-				if (y.itv().is_unbounded()) {
+				if (!(y.itv().is_unbounded()||y.itv().is_empty())) {
 					ttt=0.0;
 					sss=0.0;
 					double tmp_mid = y.itv().mid();
@@ -264,8 +289,10 @@ Affine2& Affine2::saxpy(double alpha, const Affine2& y, double beta,
 					}
 					_err +=AF_EE()*(AF_EM()*ttt);
 					_err += AF_EE()*sss;
+					_err += y.rad();
+				} else {
+					_actif = false;
 				}
-				_err += y.rad();
 			}
 		}
 		if (B3) {  //add a constant beta
@@ -327,7 +354,6 @@ Affine2& Affine2::saxpy(double alpha, const Affine2& y, double beta,
 
 Affine2& Affine2::operator *=(const Affine2& y) {
 
-
 	if (_actif && (y.isActif())) {
 
 		double Sx=0.0, Sy=0.0, Sxy=0.0, Sz=0.0, ttt=0.0, sss=0.0, ppp=0.0, tmp=0.0, xVal0=0.0;
@@ -353,7 +379,7 @@ Affine2& Affine2::operator *=(const Affine2& y) {
 		}
 
 		xVal0 = _val[0];
-		// RES = X%(0) * res
+		// RES = X%T(0) * res
 		for (i = 0; i <= _n; i++) {
 			_val[i] *= y.val(0);
 			ttt += fabs(_val[i]);
@@ -372,7 +398,7 @@ Affine2& Affine2::operator *=(const Affine2& y) {
 				xTmp[i] = 0.0;
 			}
 		}
-		//RES = Xtmp + X = Y%(0) * X + X%T(0) * Y - X%T(0)*Y%(0)
+		//RES =  RES + Xtmp = ( Y%(0) * X ) + ( X%T(0) * Y - X%T(0)*Y%(0) )
 		for (i = 0; i <= _n; i++) {
 			tmp = _val[i] + xTmp[i];
 			ttt += fabs(tmp);
@@ -403,8 +429,50 @@ Affine2& Affine2::operator *=(const Affine2& y) {
 			}
 		}
 		delete[] xTmp;
-	} else {
-		*this *= y.itv();
+	}
+
+	else if ((!_actif) && y.isActif()) {
+		Interval inter = _itv;
+		*this = Affine2(y);
+		return *this *= inter;
+	}
+	else if (_actif && (!y.isActif())) {
+		if (y.is_unbounded()||y.is_empty()) {
+			_itv *=y.itv();
+			_actif = false;
+		} else {
+			double  ttt=0.0, sss=0.0, ppp=0.0, tmp=0.0, yVal0=0.0;
+			int i;
+
+			yVal0 = y.itv().mid();
+			// RES = X%(0) * res
+			for (i = 0; i <= _n; i++) {
+				_val[i] *= yVal0;
+				ttt += fabs(_val[i]);
+				if (fabs(_val[i]) < AF_EC()) {
+					sss += fabs(_val[i]);
+					_val[i] = 0.0;
+				}
+			}
+
+			_err *= fabs(yVal0);
+			_err *= y.itv().rad();
+			_err += AF_EE() * (AF_EM() * ttt);
+			_err += AF_EE() * sss;
+
+			_itv *= y.itv();
+			update_itv();
+
+			if (_actif)  {
+				for (i = 0; i <= _n; i++) {
+					_actif &= (fabs(_val[i]) < POS_INFINITY);
+				}
+			}
+		}
+
+	} else {  // no one is actif
+		_itv *= y.itv();
+		_n = -1;
 	}
 	return *this;
 }
@@ -1554,8 +1622,7 @@ Affine2 root(const Affine2& x, int n) {
 		//ibex_error("warning: Affine2 ROOT non completely well implemented yet");
 		//		y=pow(x,e) |  // the negative part of x should be removed
 		//	    (-pow(-x,e)); // the positive part of x should be removed
-		Interval yitv = pow(x, e)| (-pow(-x,e));
-		y = yitv;
+		y =  pow(x, e)| (-pow(-x,e));  // BE CAREFULL the result of this union is an INTERVAL, so y lost all its affine form
 	}
 
 	return n >= 0 ? y : 1.0 / y;

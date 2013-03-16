@@ -1,12 +1,11 @@
 /* ============================================================================
- * I B E X - Matrix of Affine2s
+ * I B E X - Matrix of Affine2 forms
  * ============================================================================
- * Copyright   : Ecole des Mines de Nantes (FRANCE)
  * License     : This program can be distributed under the terms of the GNU LGPL.
  *               See the file COPYING.LESSER.
  *
- * Author(s)   : Gilles Chabert
- * Created     : Jan 6, 2012
+ * Author(s)   : Jordan Ninin
+ * Created     : March 16, 2013
  * ---------------------------------------------------------------------------- */
 
 #ifndef __IBEX_Affine2_MATRIX_H__
@@ -49,7 +48,7 @@ public:
 	 * all the elements with x.
 	 */
 	Affine2Matrix(int nb_rows, int nb_cols, const Affine2& x);
-	Affine2Matrix(int nb_rows, int nb_cols, const Interval& x);
+	Affine2Matrix(int nb_rows, int nb_cols, int sizeAF2);
 
 	/**
 	 * \brief Duplicate a matrix.
@@ -57,11 +56,11 @@ public:
 	Affine2Matrix(const Affine2Matrix& m);
 
 
-	/**
+	/** It is too difficult to know the size of each AF2. So we let the user do what exactly he want to do.
 	 * \brief Create \a x.size Affine2Vector of dimension \a x.nb_col*x.nb_row with
-	 * the [i][j] component initialized to \a Affine2(x.nb_col*x.nb_row, j+i*nb_row+1,x[i][j]).
+	 * the [i][j] component initialized to \a Affine2(sizeAF2, j , x[i][j]).
 	 */
-	Affine2Matrix(const IntervalMatrix& m);
+// Affine2Matrix(const IntervalMatrix& m,int sizeAF2);
 
 
 	/**
@@ -72,7 +71,7 @@ public:
 	/**
 	 * \brief Create a degenerated Affine2 matrix. The length of each Affine2 form i s \a sizeAF2.
 	 */
-	Affine2Matrix(const Matrix& m,int sizeAF2);
+	Affine2Matrix(const Matrix& m, int sizeAF2);
 
 	/**
 	 * \brief Create an Affine2 matrix from an array of doubles.
@@ -86,7 +85,7 @@ public:
 	 * \param bounds an (mxn)x2 array of doubles
 	 * \pre m>0, n>0
 	 */
-	Affine2Matrix(int m, int n, double x[][2]);
+//	Affine2Matrix(int m, int n, double x[][2]);
 
 	/**
 	 * \brief Delete *this.
