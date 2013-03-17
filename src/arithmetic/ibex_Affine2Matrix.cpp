@@ -114,7 +114,7 @@ Affine2Matrix::Affine2Matrix(const IntervalMatrix& m, int sizeAF2) : _nb_rows(m.
 	}
 }
 */
-
+/*
 Affine2Matrix::Affine2Matrix(const Matrix& m, int sizeAF2) : _nb_rows(m.nb_rows()), _nb_cols(m.nb_cols()){
 	_M = new Affine2Vector[_nb_rows];
 	for (int i=0; i<_nb_rows; i++) {
@@ -123,7 +123,7 @@ Affine2Matrix::Affine2Matrix(const Matrix& m, int sizeAF2) : _nb_rows(m.nb_rows(
 			_M[i]._vec[j]=Affine2(sizeAF2,m[i][j]);
 		}
 	}
-}
+}*/
 
 Affine2Matrix::~Affine2Matrix() {
 	if (_M!=NULL) delete[] _M;
@@ -326,43 +326,25 @@ void Affine2Matrix::set_col(int col1, const Affine2Vector& v) {
 	for (int i = 0; i < nb_rows(); i++)
 		_M[i]._vec[col1] = v[i];
 }
-Affine2Matrix& Affine2Matrix::operator+=(const Matrix& m) {
-	return set_addM<Affine2Matrix,Matrix>(*this,m);
+
+void Affine2Matrix::set_colITV(int col1, const IntervalVector& v) {
+	assert(col1 >= 0 && col1 < nb_cols());
+	assert(nb_rows() == v.size());
+	for (int i = 0; i < nb_rows(); i++) {
+		_M[i]._vec[col1].ITV() = v[i];
+		_M[i]._vec[col1].setActif(false);
+	}
+
 }
 
-Affine2Matrix& Affine2Matrix::operator+=(const Affine2Matrix& m) {
-	return set_addM<Affine2Matrix,Affine2Matrix>(*this,m);
+void Affine2Matrix::set_rowITV(int row1, const IntervalVector& v) {
+	assert(row1>=0 && row1<nb_rows());
+	assert(nb_cols()==v.size());
+	for (int i = 0; i < nb_cols(); i++) {
+		_M[row1]._vec[i].ITV() = v[i];
+		_M[row1]._vec[i].setActif(false);
+	}
 }
-
-Affine2Matrix& Affine2Matrix::operator+=(const IntervalMatrix& m) {
-	return set_addM<Affine2Matrix,IntervalMatrix>(*this,m);
-}
-
-Affine2Matrix& Affine2Matrix::operator-=(const Matrix& m) {
-	return set_subM<Affine2Matrix,Matrix>(*this,m);
-}
-
-Affine2Matrix& Affine2Matrix::operator-=(const Affine2Matrix& m) {
-	return set_subM<Affine2Matrix,Affine2Matrix>(*this,m);
-}
-
-Affine2Matrix& Affine2Matrix::operator-=(const IntervalMatrix& m) {
-	return set_subM<Affine2Matrix,IntervalMatrix>(*this,m);
-}
-
-Affine2Matrix& Affine2Matrix::operator*=(double x) {
-	return set_mulSM<double,Affine2Matrix>(x,*this);
-}
-
-Affine2Matrix& Affine2Matrix::operator*=(const Affine2& x) {
-	return set_mulSM<Affine2,Affine2Matrix>(x,*this);
-}
-
-Affine2Matrix& Affine2Matrix::operator*=(const Interval& x) {
-	return set_mulSM<Interval,Affine2Matrix>(x,*this);
-}
-
-
 
 Affine2Matrix& Affine2Matrix::inflate(double rad) {
 	// see comment in Affine2Vector::inflate
@@ -375,121 +357,15 @@ Affine2Matrix& Affine2Matrix::inflate(double rad) {
 			(*this)[i][j] += r;
 	return *this;
 }
-bool proj_add(const Affine2Matrix& y, Affine2Matrix& x1, Affine2Matrix& x2) {
-	for (int i = 0; i < y.nb_rows(); i++)
-		if (!proj_add(y[i], x1[i], x2[i])) {
-			x1.set_empty();
-			x2.set_empty();
-			return false;
-		}
-	return true;
-}
 
-bool proj_sub(const Affine2Matrix& y, Affine2Matrix& x1, Affine2Matrix& x2) {
-	for (int i = 0; i < y.nb_rows(); i++)
-		if (!proj_sub(y[i], x1[i], x2[i])) {
-			x1.set_empty();
-			x2.set_empty();
-			return false;
-		}
-	return true;
-}
-
-bool proj_mul(const Affine2Matrix& y, Affine2& x1, Affine2Matrix& x2) {
-	int n = (y.nb_rows());
-	assert((x2.nb_rows()) == n && (x2.nb_cols()) == (y.nb_cols()));
-	for (int i = 0; i < n; i++) {
-		if (!proj_mul(y[i], x1, x2[i])) {
-			x2.set_empty();
-			return false;
-		}
-	}
-
-	return true;
-}
-
-bool proj_mul(const Affine2Vector& y, Affine2Matrix& x1, Affine2Vector& x2,double ratio) {
-	assert(x1.nb_rows() == y.size());
-	assert(x1.nb_cols() == x2.size());
-	int last_row = 0;
-	int i = 0;
-	int n = y.size();
-	do {
-		Affine2Vector x2old = x2;
-		if (!proj_mul(y[i], x1[i], x2)) {
-			x1.set_empty();
-			return false;
-		}
-		if (x2old.rel_distance(x2) > ratio)
-			last_row = i;
-
-		i = (i + 1) % n;
-	} while (i != last_row);
-	return true;
-}
-
-bool proj_mul(const Affine2Vector& y, Affine2Vector& x1, Affine2Matrix& x2,double ratio) {
-	Affine2Matrix x2t = x2.transpose();
-	bool res = proj_mul(y, x2t, x1, ratio);
-	x2 = x2t.transpose();
-	return res;
-}
-
-bool proj_mul(const Affine2Matrix& y, Affine2Matrix& x1, Affine2Matrix& x2,double ratio) {
-	int m = y.nb_rows();
-	int n = y.nb_cols();
-	assert(x1.nb_cols() == x2.nb_rows());
-	assert(x1.nb_rows() == m);
-	assert(x2.nb_cols() == n);
-	// each coefficient (i,j) of y is considered as a binary "dot product" constraint
-	// between the ith row of x1 and the jth column of x2
-	// (advantage: we have exact projection for the dot product)
-	//
-	// we propagate these constraints using a simple agenda.
-	Agenda a(m * n);
-	//init
-	for (int i = 0; i < m; i++)
-		for (int j = 0; j < n; j++)
-			a.push(i * n + j);
-	int k;
-	while (!a.empty()) {
-		a.pop(k);
-		int i = k / n;
-		int j = k % n;
-		Affine2Vector x1old = x1[i];
-		Affine2Vector x2j = x2.col(j);
-		Affine2Vector x2old = x2j;
-		if (!proj_mul(y[i][j], x1[i], x2j)) {
-			x1.set_empty();
-			x2.set_empty();
-			return false;
-		} else {
-			if (x1old.rel_distance(x1[i]) >= ratio) {
-				for (int j2 = 0; j2 < n; j2++)
-					if (j2 != j)
-						a.push(i * n + j2);
-			}
-			if (x2old.rel_distance(x2j) >= ratio) {
-				for (int i2 = 0; i2 < m; i2++)
-					if (i2 != i)
-						a.push(i2 * n + j);
-			}
-			x2.set_col(j, x2j);
-		}
-
-	}
-
-	return true;
-}
-
-IntervalMatrix operator&(const Affine2Matrix& x, const Affine2Matrix& y) const {
+IntervalMatrix operator&(const Affine2Matrix& x, const Affine2Matrix& y) {
 	assert(x.nb_rows()==y.nb_rows());
 	assert(x.nb_cols()==y.nb_cols());
 
 	if (y.is_empty()||x.is_empty())
-		return Affine2Matrix::empty(x.nb_rows(),x.nb_cols());
+		return IntervalMatrix::empty(x.nb_rows(),x.nb_cols());
 
-	Affine2Matrix res(x.nb_rows(),x.nb_cols());
+	IntervalMatrix res(x.nb_rows(),x.nb_cols());
 	for (int i=0; i<x.nb_rows(); i++) {
 		res [i] = x[i] & y[i];
 		if (res[i].is_empty()) {
@@ -500,14 +376,14 @@ IntervalMatrix operator&(const Affine2Matrix& x, const Affine2Matrix& y) const {
 	return res;
 }
 
-IntervalMatrix operator&(const Affine2Matrix& x, const IntervalMatrix& y) const {
+IntervalMatrix operator&(const Affine2Matrix& x, const IntervalMatrix& y) {
 	assert(x.nb_rows()==y.nb_rows());
 	assert(x.nb_cols()==y.nb_cols());
 
 	if (y.is_empty()||x.is_empty())
-		return Affine2Matrix::empty(x.nb_rows(),x.nb_cols());
+		return IntervalMatrix::empty(x.nb_rows(),x.nb_cols());
 
-	Affine2Matrix res(x.nb_rows(),x.nb_cols());
+	IntervalMatrix res(x.nb_rows(),x.nb_cols());
 	for (int i=0; i<x.nb_rows(); i++) {
 		res [i] = x[i] & y[i];
 		if (res[i].is_empty()) {
@@ -518,14 +394,14 @@ IntervalMatrix operator&(const Affine2Matrix& x, const IntervalMatrix& y) const 
 	return res;
 }
 
-IntervalMatrix operator|(const Affine2Matrix& x,	const Affine2Matrix& y) const {
+IntervalMatrix operator|(const Affine2Matrix& x,	const Affine2Matrix& y) {
 	assert(x.nb_rows()==y.nb_rows());
 	assert(x.nb_cols()==y.nb_cols());
 
 	if (y.is_empty()&&x.is_empty())
-		return Affine2Matrix::empty(x.nb_rows(),x.nb_cols());
+		return IntervalMatrix::empty(x.nb_rows(),x.nb_cols());
 
-	Affine2Matrix res(x.nb_rows(),x.nb_cols());
+	IntervalMatrix res(x.nb_rows(),x.nb_cols());
 	for (int i=0; i<x.nb_rows(); i++) {
 		res [i] = x[i] | y[i];
 		if (res[i].is_empty()) {
@@ -536,14 +412,14 @@ IntervalMatrix operator|(const Affine2Matrix& x,	const Affine2Matrix& y) const {
 	return res;
 }
 
-IntervalMatrix operator|(const Affine2Matrix& x,	const IntervalMatrix& y) const {
+IntervalMatrix operator|(const Affine2Matrix& x,	const IntervalMatrix& y) {
 	assert(x.nb_rows()==y.nb_rows());
 	assert(x.nb_cols()==y.nb_cols());
 
 	if (y.is_empty()&&x.is_empty())
-		return Affine2Matrix::empty(x.nb_rows(),x.nb_cols());
+		return IntervalMatrix::empty(x.nb_rows(),x.nb_cols());
 
-	Affine2Matrix res(x.nb_rows(),x.nb_cols());
+	IntervalMatrix res(x.nb_rows(),x.nb_cols());
 	for (int i=0; i<x.nb_rows(); i++) {
 		res [i] = x[i] | y[i];
 		if (res[i].is_empty()) {
@@ -579,91 +455,6 @@ Affine2Matrix operator*(const Affine2& x, const IntervalMatrix& m) {
 		}
 	}
 	return res;
-}
-//  TODO to check what if really this sub function
-Affine2Vector operator*(const Affine2Matrix& m, const Vector& x) {
-	return mulMV<Affine2Matrix,Vector,Affine2Vector>(m,x);
-}
-
-Affine2Vector operator*(const Matrix& m, const Affine2Vector& x) {
-	return mulMV<Matrix,Affine2Vector,Affine2Vector>(m,x);
-}
-
-Affine2Vector operator*(const Affine2Matrix& m, const Affine2Vector& x) {
-	return mulMV<Affine2Matrix,Affine2Vector,Affine2Vector>(m,x);
-}
-
-Affine2Vector operator*(const Affine2Matrix& m, const IntervalVector& x) {
-	return mulMV<Affine2Matrix,IntervalVector,Affine2Vector>(m,x);
-}
-
-Affine2Vector operator*(const IntervalMatrix& m, const Affine2Vector& x) {
-	return mulMV<IntervalMatrix,Affine2Vector,Affine2Vector>(m,x);
-}
-
-Affine2Vector operator*(const Vector& x, const Affine2Matrix& m) {
-	return mulVM<Vector,Affine2Matrix,Affine2Vector>(x,m);
-}
-
-Affine2Vector operator*(const Affine2Vector& x, const Matrix& m) {
-	return mulVM<Affine2Vector,Matrix,Affine2Vector>(x,m);
-}
-
-Affine2Vector operator*(const Affine2Vector& x, const Affine2Matrix& m) {
-	return mulVM<Affine2Vector,Affine2Matrix,Affine2Vector>(x,m);
-}
-
-Affine2Vector operator*(const Affine2Vector& x, const IntervalMatrix& m) {
-	return mulVM<Affine2Vector,IntervalMatrix,Affine2Vector>(x,m);
-}
-
-Affine2Vector operator*(const IntervalVector& x, const Affine2Matrix& m) {
-	return mulVM<IntervalVector,Affine2Matrix,Affine2Vector>(x,m);
-}
-
-Affine2Matrix operator*(const Affine2Matrix& m1, const Matrix& m2) {
-	return mulMM<Affine2Matrix,Matrix,Affine2Matrix>(m1,m2);
-}
-
-Affine2Matrix operator*(const Matrix& m1, const Affine2Matrix& m2) {
-	return mulMM<Matrix,Affine2Matrix,Affine2Matrix>(m1,m2);
-}
-
-Affine2Matrix operator*(const Affine2Matrix& m1, const Affine2Matrix& m2) {
-	return mulMM<Affine2Matrix,Affine2Matrix,Affine2Matrix>(m1,m2);
-}
-
-Affine2Matrix operator*(const Affine2Matrix& m1, const IntervalMatrix& m2) {
-	return mulMM<Affine2Matrix,IntervalMatrix,Affine2Matrix>(m1,m2);
-}
-
-Affine2Matrix operator*(const IntervalMatrix& m1, const Affine2Matrix& m2) {
-	return mulMM<IntervalMatrix,Affine2Matrix,Affine2Matrix>(m1,m2);
-}
-
-
-Affine2Matrix outer_product(const Affine2Vector& x1, const Vector& x2) {
-	return outer_prod<Affine2Vector,Vector,Affine2Matrix>(x1,x2);
-}
-
-Affine2Matrix outer_product(const Vector& x1, const Affine2Vector& x2) {
-	return outer_prod<Vector,Affine2Vector,Affine2Matrix>(x1,x2);
-}
-
-Affine2Matrix outer_product(const Affine2Vector& x1, const Affine2Vector& x2) {
-	return outer_prod<Affine2Vector,Affine2Vector,Affine2Matrix>(x1,x2);
-}
-
-Affine2Matrix outer_product(const Affine2Vector& x1, const IntervalVector& x2) {
-	return outer_prod<Affine2Vector,IntervalVector,Affine2Matrix>(x1,x2);
-}
-
-Affine2Matrix outer_product(const IntervalVector& x1, const Affine2Vector& x2) {
-	return outer_prod<IntervalVector,Affine2Vector,Affine2Matrix>(x1,x2);
-}
-
-Affine2Matrix abs(const Affine2Matrix& m) {
-	return absM(m);
 }
 
 //  TODO
@@ -783,9 +574,9 @@ bool proj_mul(const IntervalVector& y, Affine2Matrix& x1, Affine2Vector& x2, 	do
 	int last_row=0;
 	int i=0;
 	int n=y.size();
-
+	IntervalVector x2old(x2.size());
 	do {
-		IntervalVector x2old=x2;
+		x2old=x2;
 		if (!proj_mul(y[i],x1[i],x2)) {
 			x1.set_empty();
 			return false;
@@ -804,9 +595,9 @@ bool proj_mul(const IntervalVector& y, IntervalMatrix& x1, Affine2Vector& x2,	do
 	int last_row=0;
 	int i=0;
 	int n=y.size();
-
+	IntervalVector x2old(x2.size());
 	do {
-		IntervalVector x2old=x2;
+		x2old=x2;
 		if (!proj_mul(y[i],x1[i],x2)) {
 			x1.set_empty();
 			return false;
@@ -840,7 +631,7 @@ bool proj_mul(const IntervalVector& y, Affine2Matrix& x1, IntervalVector& x2,	do
 }
 
 bool proj_mul(const IntervalVector& y, Affine2Vector& x1, Affine2Matrix& x2,	double ratio) {
-	IntervalMatrix x2t=x2.transpose();
+	Affine2Matrix x2t=x2.transpose();
 
 	bool res=proj_mul(y,x2t,x1,ratio);
 
@@ -849,7 +640,7 @@ bool proj_mul(const IntervalVector& y, Affine2Vector& x1, Affine2Matrix& x2,	dou
 }
 
 bool proj_mul(const IntervalVector& y, IntervalVector& x1, Affine2Matrix& x2,	double ratio) {
-	IntervalMatrix x2t=x2.transpose();
+	Affine2Matrix x2t=x2.transpose();
 
 	bool res=proj_mul(y,x2t,x1,ratio);
 
@@ -887,14 +678,17 @@ bool proj_mul(const IntervalMatrix& y, Affine2Matrix& x1, Affine2Matrix& x2,	dou
 		for (int j=0; j<n; j++)
 			a.push(i*n+j);
 
+	IntervalVector x1old(x1.nb_cols());
+	IntervalVector x2j(x2.nb_rows());
+	IntervalVector x2old(x2.nb_rows());
 	int k;
 	while (!a.empty()) {
 		a.pop(k);
 		int i=k/n;
 		int j=k%n;
-		IntervalVector x1old=x1[i];
-		IntervalVector x2j=x2.col(j);
-		IntervalVector x2old=x2j;
+		x1old=x1[i];
+		x2j=x2.col(j);
+		x2old=x2j;
 		if (!proj_mul(y[i][j],x1[i],x2j)) {
 			x1.set_empty();
 			x2.set_empty();
@@ -908,7 +702,7 @@ bool proj_mul(const IntervalMatrix& y, Affine2Matrix& x1, Affine2Matrix& x2,	dou
 				for (int i2=0; i2<m; i2++)
 					if (i2!=i) a.push(i2*n+j);
 			}
-			x2.set_col(j,x2j);
+			x2.set_colITV(j,x2j);
 		}
 	}
 	return true;
@@ -932,14 +726,17 @@ bool proj_mul(const IntervalMatrix& y, IntervalMatrix& x1, Affine2Matrix& x2,	do
 		for (int j=0; j<n; j++)
 			a.push(i*n+j);
 
+	IntervalVector x1old(x1.nb_cols());
+	IntervalVector x2j(x2.nb_rows());
+	IntervalVector x2old(x2.nb_rows());
 	int k;
 	while (!a.empty()) {
 		a.pop(k);
 		int i=k/n;
 		int j=k%n;
-		IntervalVector x1old=x1[i];
-		IntervalVector x2j=x2.col(j);
-		IntervalVector x2old=x2j;
+		x1old=x1[i];
+		x2j=x2.col(j);
+		x2old=x2j;
 		if (!proj_mul(y[i][j],x1[i],x2j)) {
 			x1.set_empty();
 			x2.set_empty();
@@ -953,7 +750,7 @@ bool proj_mul(const IntervalMatrix& y, IntervalMatrix& x1, Affine2Matrix& x2,	do
 				for (int i2=0; i2<m; i2++)
 					if (i2!=i) a.push(i2*n+j);
 			}
-			x2.set_col(j,x2j);
+			x2.set_colITV(j,x2j);
 		}
 	}
 	return true;
@@ -977,14 +774,17 @@ bool proj_mul(const IntervalMatrix& y, Affine2Matrix& x1, IntervalMatrix& x2,	do
 		for (int j=0; j<n; j++)
 			a.push(i*n+j);
 
+	IntervalVector x1old(x1.nb_rows());
+	IntervalVector x2j(x2.nb_cols());
+	IntervalVector x2old(x2.nb_cols());
 	int k;
 	while (!a.empty()) {
 		a.pop(k);
 		int i=k/n;
 		int j=k%n;
-		IntervalVector x1old=x1[i];
-		IntervalVector x2j=x2.col(j);
-		IntervalVector x2old=x2j;
+		x1old=x1[i];
+		x2j=x2.col(j);
+		x2old=x2j;
 		if (!proj_mul(y[i][j],x1[i],x2j)) {
 			x1.set_empty();
 			x2.set_empty();

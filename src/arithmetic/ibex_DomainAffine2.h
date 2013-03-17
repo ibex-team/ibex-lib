@@ -35,7 +35,7 @@ class DomainAffine2  {
 private:
 	friend class Domains;
 
-	DomainAffine2() : dim(), is_reference(false), domain(NULL) { }
+	DomainAffine2() : domain(NULL),  dim(), is_reference(false){ }
 
 	void build() {
 		switch(dim.type()) {
@@ -300,18 +300,7 @@ public:
 /**
  * \brief Intersect the domain with another domain.
  */
-Domain operator&(const DomainAffine2& d1, const DomainAffine2& d2) {
-	assert(d1.dim==d2.dim);
-	Domain res(d1.dim);
-	switch(res.dim.type()) {
-	case Dim::SCALAR:       res.i()= d1.i() & d2.i(); break;
-	case Dim::ROW_VECTOR:
-	case Dim::COL_VECTOR:   res.v()= d1.v() & d2.v(); break;
-	case Dim::MATRIX:       res.m()= d1.m() & d2.m(); break;
-	case Dim::MATRIX_ARRAY: res.ma() =d1.ma() & d2.ma(); break;
-	}
-	return *this;
-}
+Domain operator&(const DomainAffine2& d1, const DomainAffine2& d2);
 
 /**
  * \brief Output a domain.

@@ -111,7 +111,7 @@ IntervalMatrixArray operator&(const Affine2MatrixArray& x1, const Affine2MatrixA
 	for (int i=0; i<x1.size(); i++) {
 		res[i] = x1[i] & x2[i];
 	}
-	return *this;
+	return res;
 }
 IntervalMatrixArray operator&(const Affine2MatrixArray& x1, const IntervalMatrixArray& x2) {
 	assert(x1.size()==x2.size());
@@ -119,7 +119,7 @@ IntervalMatrixArray operator&(const Affine2MatrixArray& x1, const IntervalMatrix
 	for (int i=0; i<x1.size(); i++) {
 		res[i] = x1[i] & x2[i];
 	}
-	return *this;
+	return res;
 }
 
 

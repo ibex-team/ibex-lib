@@ -441,7 +441,7 @@ Affine2& Affine2::operator *=(const Affine2& y) {
 			_itv *=y.itv();
 			_actif = false;
 		} else {
-			double  ttt=0.0, sss=0.0, ppp=0.0, tmp=0.0, yVal0=0.0;
+			double  ttt=0.0, sss=0.0,  yVal0=0.0;
 			int i;
 
 			yVal0 = y.itv().mid();

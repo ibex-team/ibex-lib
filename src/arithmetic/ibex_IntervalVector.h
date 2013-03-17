@@ -58,6 +58,7 @@ public:
 	 * \brief Create a copy of \a x.
 	 */
 	IntervalVector(const IntervalVector& x);
+	explicit IntervalVector(const Affine2Vector& x);
 
 	/**
 	 * \brief Create the IntervalVector [bounds[0][0],bounds[0][1]]x...x[bounds[n-1][0],bounds[n-1][1]]
@@ -481,6 +482,7 @@ public:
 
 private:
 	friend class IntervalMatrix;
+	friend class Affine2Vector;
 
 	IntervalVector() : n(0), vec(NULL) { } // for IntervalMatrix & complementary()
 

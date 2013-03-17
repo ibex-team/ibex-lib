@@ -166,7 +166,7 @@ inline bool Affine2MatrixArray::is_empty() const {
 	return (*this)[0].is_empty();
 }
 
-inline Affine2MatrixArray operator&(const IntervalMatrixArray& x1, const Affine2MatrixArray& x2) {
+inline IntervalMatrixArray operator&(const IntervalMatrixArray& x1, const Affine2MatrixArray& x2) {
 	return (x2 & x1);
 }
 

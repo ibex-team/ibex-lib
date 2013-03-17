@@ -13,7 +13,7 @@
 #define IBEX_AFFINE2_H_
 
 #include "ibex_Interval.h"
-#include "ibex_IntervalVector.h"
+//#include "ibex_IntervalVector.h"
 #include <cmath>
 
 namespace ibex {
@@ -951,7 +951,7 @@ inline Interval Affine2::itv() const {
 	return _itv;
 }
 inline Interval& Affine2::ITV() {
-	return *_itv;
+	return _itv;
 }
 
 
@@ -1512,26 +1512,26 @@ inline bool proj_pow(const Affine2& y,int n, Interval& x){
 /** \brief Projection of $y=x_1^{x_2}$.
  *
  * Set $([x]_1,[x]_2)$ to $([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=x_1^{x_2}\}$. */
-bool proj_pow(const Affine2& y, Affine2& x1, Affine2& x2){
+inline bool proj_pow(const Affine2& y, Affine2& x1, Affine2& x2){
 	return proj_pow(y.itv(), x1, x2);
 }
-bool proj_pow(const Affine2& y, Interval& x1, Affine2& x2){
+inline bool proj_pow(const Affine2& y, Interval& x1, Affine2& x2){
 	return proj_pow(y.itv(), x1, x2);
 }
-bool proj_pow(const Affine2& y, Affine2& x1, Interval& x2){
+inline bool proj_pow(const Affine2& y, Affine2& x1, Interval& x2){
 	return proj_pow(y.itv(), x1, x2);
 }
-bool proj_pow(const Affine2& y, Interval& x1, Interval& x2){
+inline bool proj_pow(const Affine2& y, Interval& x1, Interval& x2){
 	return proj_pow(y.itv(), x1, x2);
 }
 
 /** \brief Projection of the $y=x^{\frac{1}{n}}$.
  *
  * Set $[x]$ to $[x]\cap { x\in [x] \exists y\in [y], \quad y=x^{\frac{1}{n}} \}$. */
-bool proj_root(const Affine2& y, int n, Affine2& x){
+inline bool proj_root(const Affine2& y, int n, Affine2& x){
 	return proj_pow(y.itv(),n, x);
 }
-bool proj_root(const Affine2& y, int n, Interval& x){
+inline bool proj_root(const Affine2& y, int n, Interval& x){
 	return proj_pow(y.itv(),n, x);
 }
 

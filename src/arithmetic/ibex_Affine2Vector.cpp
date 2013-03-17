@@ -8,8 +8,8 @@
  * Created     : March 13, 2013
  * ---------------------------------------------------------------------------- */
 
-#include "ibex_IntervalVector.cpp"
-#include "ibex_LinearArith.cpp"
+
+
 #include "ibex_Affine2Vector.h"
 #include <sstream>
 
@@ -23,6 +23,12 @@ IntervalVector& IntervalVector::operator=(const Affine2Vector& x) {
 	}
 	return *this;
 }
+
+
+IntervalVector::IntervalVector(const Affine2Vector& x) : n(x.size()), vec(new Interval[x.size()]) {
+	for (int i=0; i<n; i++) vec[i]=x[i].itv();
+}
+
 
 Affine2Vector::Affine2Vector(int n) :
 		_n(n),
@@ -96,13 +102,14 @@ Affine2Vector::Affine2Vector(int n, double bounds[][2]) :
 	}
 }
 
+/*
 Affine2Vector::Affine2Vector(const Vector& x) :
 		_n(x.size()),
 		_vec(new Affine2[x.size()]) {
 	for (int i = 0; i < _n; i++){
 		_vec[i] = Affine2(_n, i + 1, x[i]);
 	}
-}
+}*/
 
 void Affine2Vector::init(const Interval& x) {
 	for (int i = 0; i < size(); i++) {
@@ -208,7 +215,8 @@ Affine2Vector& Affine2Vector::operator=(const IntervalVector& x) {
 	return *this;
 }
 
-bool Affine2Vector::operator ==(const Affine2Vector& x) const {
+
+bool Affine2Vector::operator==(const Affine2Vector& x) const {
 	if (_n != x.size()) {
 		return false;
 	}
@@ -223,7 +231,7 @@ bool Affine2Vector::operator ==(const Affine2Vector& x) const {
 
 	return true;
 }
-bool Affine2Vector::operator ==(const IntervalVector& x) const {
+bool Affine2Vector::operator==(const IntervalVector& x) const {
 	if (_n != x.size()) {
 		return false;
 	}
@@ -509,7 +517,7 @@ void Affine2Vector::sort_indices(bool min, int tab[]) const {
 	std::sort(tab, tab + _n, min ? diam_ltA : diam_gtA);
 }
 
-std::ostream& operator <<(std::ostream& os, const Affine2Vector& x) {
+std::ostream& operator<<(std::ostream& os, const Affine2Vector& x) {
 	if (x.is_empty())
 		return os << "empty vector";
 
@@ -613,9 +621,59 @@ double Affine2Vector::rel_distance(const IntervalVector& x) const {
 	return max;
 }
 
+
+namespace { // to create anonymous structure/functions
+
+/** \brief Complementary of an Interval
+ *
+ * Compute the complementary of x. The result is (c1 union c2)
+ */
+void complI2(const Interval& x, Interval& c1, Interval& c2) {
+	if (x.is_empty() || x.is_degenerated()) { // x.is_empty() should not happen if called from compl()
+		c1=Interval::ALL_REALS;
+		c2=Interval::EMPTY_SET;
+		return;
+	}
+	else {
+		if (x.lb()>NEG_INFINITY) {
+			c1=Interval(NEG_INFINITY,x.lb());
+			if (x.ub()<POS_INFINITY)
+				c2=Interval(x.ub(),POS_INFINITY);
+			else
+				c2=Interval::EMPTY_SET;
+		} else if (x.ub()<POS_INFINITY) {
+			c1=Interval(x.ub(),POS_INFINITY);
+			c2=Interval::EMPTY_SET;
+		} else {
+			c1=c2=Interval::EMPTY_SET;
+		}
+	}
+}
+
+/** \brief x\y
+ *
+ */
+void diffI2(const Interval& x, const Interval& y, Interval& c1, Interval& c2) {
+	complI2(y,c1,c2);
+	c1 &= x;
+	if (c1.is_degenerated()) c1=Interval::EMPTY_SET;
+	c2 &= x;
+	if (c2.is_degenerated()) c2=Interval::EMPTY_SET;
+
+	if (c1.is_empty()) {
+		c1=c2;
+		c2=Interval::EMPTY_SET;
+	}
+}
+
+} // end namespace
+
+
+
+
 int Affine2Vector::diff(const IntervalVector& y, IntervalVector*& result) const {
 	const int nn=size();
-	const IntervalVector& x=*this;
+	const IntervalVector& x=this->itv();
 	IntervalVector *tmp = new IntervalVector[2*nn]; // in the worst case, there is 2n boxes
 	Interval c1, c2;
 	int b=0;
@@ -626,7 +684,7 @@ int Affine2Vector::diff(const IntervalVector& y, IntervalVector*& result) const 
 	} else {
 		for (int var=0; var<nn; var++) {
 
-			diffI(x[var],y[var],c1,c2);
+			diffI2(x[var],y[var],c1,c2);
 
 			if (!c1.is_empty()) {
 				tmp[b].resize(nn);
@@ -666,12 +724,13 @@ int Affine2Vector::diff(const IntervalVector& y, IntervalVector*& result) const 
 int Affine2Vector::diff(const Affine2Vector& y, IntervalVector*& result) const {
 	return (this->itv()).diff(y.itv(),result);
 }
+/*
 int Affine2Vector::diff(const IntervalVector& y, IntervalVector*& result) const {
 	return ((this->itv()).diff(y,result));
-}
+}*/
 
 int Affine2Vector::complementary(IntervalVector*& result) const {
-	IntervalVector tmp= *this->itv();
+	IntervalVector tmp(*this);
 	return IntervalVector(size()).diff(tmp,result);
 }
 
@@ -715,45 +774,92 @@ Vector Affine2Vector::random() const {
 }
 
 
-Affine2Vector& Affine2Vector::operator +=(const Vector& x2) {
-	return set_addV<Affine2Vector,Vector>(*this,x2);
+
+//TODO
+Affine2 operator*(const Vector& v1, const Affine2Vector& v2) {
+	assert(v1.size()==v2.size());
+
+	const int n=v1.size();
+	Affine2 y(v2[0].size(),0);
+
+	if (v2.is_empty()) {
+		y.set_empty();
+		return y;
+	}
+
+	for (int i=0; i<n; i++) {
+		y+=v1[i]*v2[i];
+	}
+	return y;
 }
 
-Affine2Vector& Affine2Vector::operator +=(const IntervalVector& x2) {
-	return set_addV<Affine2Vector,IntervalVector>(*this,x2);
+Affine2 operator*(const Affine2Vector& v1, const Vector& v2) {
+	assert(v1.size()==v2.size());
+
+	const int n=v1.size();
+	Affine2 y(v1[0].size(),0);
+
+	if (v1.is_empty()) {
+		y.set_empty();
+		return y;
+	}
+
+	for (int i=0; i<n; i++) {
+		y+=v1[i]*v2[i];
+	}
+	return y;
 }
 
-Affine2Vector& Affine2Vector::operator +=(const Affine2Vector& x2) {
-	return set_addV<Affine2Vector,Affine2Vector>(*this,x2);
+
+Affine2 operator*(const IntervalVector& x1, const Affine2Vector& x2){
+	return x2*x1;
 }
 
-Affine2Vector& Affine2Vector::operator -=(const Vector& x2) {
-	return set_subV<Affine2Vector,Vector>(*this,x2);
+
+Affine2 operator*(const Affine2Vector& v1, const IntervalVector& v2) {
+	assert(v1.size()==v2.size());
+
+	const int n=v1.size();
+	Affine2 y(v1[0].size(),0);
+
+	if (v1.is_empty() || v2.is_empty()) {
+		y.set_empty();
+		return y;
+	}
+
+	for (int i=0; i<n; i++) {
+		y+=v1[i] * v2[i];
+	}
+	return y;
 }
 
-Affine2Vector& Affine2Vector::operator -=(const IntervalVector& x2) {
-	return set_subV<Affine2Vector,IntervalVector>(*this,x2);
+Affine2 operator*(const Affine2Vector& v1, const Affine2Vector& v2) {
+	assert(v1.size()==v2.size());
+	assert(v1.size()==v2.size());
+
+	const int n=v1.size();
+	Affine2 y(v1[0].size(),0);
+
+	if (v1.is_empty() || v2.is_empty()) {
+		y.set_empty();
+		return y;
+	}
+
+	for (int i=0; i<n; i++) {
+		y+=v1[i] * v2[i];
+	}
+	return y;
 }
 
-Affine2Vector& Affine2Vector::operator -=(const Affine2Vector& x2) {
-	return set_subV<Affine2Vector,Affine2Vector>(*this,x2);
+Affine2Vector operator*(const Affine2& x1, const Vector& x2) {
+	Affine2Vector res(x2.size(),x1);
+	for (int i=0; i<x2.size(); i++) {
+		res[i] *= x2[i];
+	}
+	return  res;
 }
 
-Affine2Vector& Affine2Vector::operator *=(double d) {
-	return set_mulSV<double,Affine2Vector>(d,*this);
-}
 
-Affine2Vector& Affine2Vector::operator *=(const Interval& x1) {
-	return set_mulSV<Interval,Affine2Vector>(x1,*this);
-}
-
-Affine2Vector& Affine2Vector::operator *=(const Affine2& x1) {
-	return set_mulSV<Affine2,Affine2Vector>(x1,*this);
-}
-
-Affine2Vector abs( const Affine2Vector& x) {
-	return absV(x);
-}
 
 
 bool proj_add(const IntervalVector& y, Affine2Vector& x1, Affine2Vector& x2) {
@@ -845,8 +951,8 @@ bool proj_mul(const Interval& z, Affine2Vector& x, Affine2Vector& y) {
 		else { x.set_empty(); y.set_empty(); return false; }
 	}
 
-	Affine2* xy= new Affine2[n];  // xy[i] := x[i]y[i]
-	Affine2* sum= new Affine2[n-1]; // sum[i] := x[0]y[0]+...x[i]y[i]
+	Interval* xy= new Interval[n];  // xy[i] := x[i]y[i]
+	Interval* sum= new Interval[n-1]; // sum[i] := x[0]y[0]+...x[i]y[i]
 
 	// ------------- forward --------------------
 	for (int i=0; i<n; i++) xy[i]=x[i]*y[i];
@@ -878,8 +984,8 @@ bool proj_mul(const Interval& z, Affine2Vector& x, IntervalVector& y) {
 		else { x.set_empty(); y.set_empty(); return false; }
 	}
 
-	Affine2* xy= new Affine2[n];  // xy[i] := x[i]y[i]
-	Affine2* sum= new Affine2[n-1]; // sum[i] := x[0]y[0]+...x[i]y[i]
+	Interval* xy= new Interval[n];  // xy[i] := x[i]y[i]
+	Interval* sum= new Interval[n-1]; // sum[i] := x[0]y[0]+...x[i]y[i]
 
 	// ------------- forward --------------------
 	for (int i=0; i<n; i++) xy[i]=x[i]*y[i];

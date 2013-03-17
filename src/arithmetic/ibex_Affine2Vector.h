@@ -14,9 +14,9 @@
 #include <cassert>
 #include <iostream>
 #include "ibex_Interval.h"
-#include "ibex_Affine2.h"
 #include "ibex_IntervalVector.h"
 #include "ibex_Vector.h"
+#include "ibex_Affine2.h"
 
 namespace ibex {
 
@@ -84,13 +84,13 @@ public:
 	 * \brief Create \a x.size Affine2Vector of dimension \a x.size with
 	 * the [i] component initialized to \a Affine2(x.size(), i+1,x[i]).
 	 */
-	Affine2Vector(const IntervalVector& x);
+	explicit Affine2Vector(const IntervalVector& x);
 
 	/**
 	 * \brief Create the degenerated Affine2Vector x
 	 *
 	 */
-	Affine2Vector(const Vector& x);
+//	Affine2Vector(const Vector& x);
 
 	/**
 	 * \brief Create [empty; ...; empty]
@@ -501,16 +501,16 @@ public:
 /**
  * \brief Return the intersection of x and y.
  */
-IntervalVector operator&(const Affine2Vector& x, const Affine2Vector& y) const;
-IntervalVector operator&(const IntervalVector& x, const Affine2Vector& y) const;
-IntervalVector operator&(const Affine2Vector& x, const IntervalVector& y) const;
+IntervalVector operator&(const Affine2Vector& x, const Affine2Vector& y);
+IntervalVector operator&(const IntervalVector& x, const Affine2Vector& y);
+IntervalVector operator&(const Affine2Vector& x, const IntervalVector& y);
 
 /**
  * \brief Return the hull of x & y.
  */
-IntervalVector operator|(const Affine2Vector& x, const Affine2Vector& y) const;
-IntervalVector operator|(const IntervalVector& x, const Affine2Vector& y) const;
-IntervalVector operator|(const Affine2Vector& x, const IntervalVector& y) const;
+IntervalVector operator|(const Affine2Vector& x, const Affine2Vector& y);
+IntervalVector operator|(const IntervalVector& x, const Affine2Vector& y);
+IntervalVector operator|(const Affine2Vector& x, const IntervalVector& y);
 
 /**
  * \brief Return the infinite Hausdorff distance (i.e. the maximum of the distance componentwise).
@@ -736,11 +736,11 @@ inline double Affine2Vector::min_diam() const {
 }
 
 
-inline IntervalVector operator&(const IntervalVector& x, const Affine2Vector& y) const{
+inline IntervalVector operator&(const IntervalVector& x, const Affine2Vector& y) {
 	return (y &  x);
 }
 
-inline IntervalVector operator|(const IntervalVector& x, const Affine2Vector& y) const{
+inline IntervalVector operator|(const IntervalVector& x, const Affine2Vector& y) {
 	return (y |  x);
 }
 
@@ -751,10 +751,6 @@ inline double distance(const IntervalVector& x1, const Affine2Vector& x2) {
 
 inline Affine2Vector operator+(const IntervalVector& x1, const Affine2Vector& x2) {
 	return x2 + x1;
-}
-
-inline Affine2 operator*(const IntervalVector& x1, const Affine2Vector& x2){
-	return x2*x1;
 }
 
 
@@ -798,28 +794,8 @@ inline Affine2Vector operator -(const Affine2Vector& x1, const Affine2Vector& x2
 	return Affine2Vector(x2,true)+=x1;
 }
 
-inline Affine2 operator *(const Vector& x1, const Affine2Vector& x2) {
-	return Affine2Vector(x2)*=x1;
-}
-
-inline Affine2 operator *(const Affine2Vector& x1, const Vector& x2) {
-	return Affine2Vector(x1)*=x2;
-}
-
-inline Affine2 operator *(const Affine2Vector& x1, const IntervalVector& x2) {
-	return Affine2Vector(x1)*=x2;
-}
-
-inline Affine2 operator *(const Affine2Vector& x1, const Affine2Vector& x2) {
-	return Affine2Vector(x1)*=x2;
-}
-
 inline Affine2Vector operator *(double d, const Affine2Vector& x) {
 	return Affine2Vector(x)*=d;
-}
-
-inline Affine2Vector operator *(const Affine2& x1, const Vector& x2) {
-	return Affine2Vector(x2.size(),x1)*=x2;
 }
 
 inline Affine2Vector operator *(const Affine2& x1, const Affine2Vector& x2) {

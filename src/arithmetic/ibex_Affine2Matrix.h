@@ -11,11 +11,10 @@
 #ifndef __IBEX_Affine2_MATRIX_H__
 #define __IBEX_Affine2_MATRIX_H__
 
-#include "ibex_Affine2Vector.h"
 #include "ibex_IntervalMatrix.h"
 #include "ibex_Matrix.h"
-
 #include <iostream>
+#include "ibex_Affine2Vector.h"
 
 namespace ibex {
 
@@ -71,7 +70,7 @@ public:
 	/**
 	 * \brief Create a degenerated Affine2 matrix. The length of each Affine2 form i s \a sizeAF2.
 	 */
-	Affine2Matrix(const Matrix& m, int sizeAF2);
+//	Affine2Matrix(const Matrix& m, int sizeAF2);
 
 	/**
 	 * \brief Create an Affine2 matrix from an array of doubles.
@@ -265,9 +264,19 @@ public:
 	void set_row(int row, const Affine2Vector& v);
 
 	/**
+	 * \brief Set a row and setAvtif(false) to all the AF2 form of this row.
+	 */
+	void set_rowITV(int row, const IntervalVector& v);
+
+	/**
 	 * \brief Set a column.
 	 */
 	void set_col(int col, const Affine2Vector& v);
+
+	/**
+	 * \brief Set a column and setAvtif(false) to all the AF2 form of this column
+	 */
+	void set_colITV(int col, const IntervalVector& v);
 
     /**
      * \brief (*this)+=m.
@@ -329,16 +338,16 @@ public:
 /**
  * \brief Return the intersection of x and y.
  */
-IntervalMatrix operator&(const Affine2Matrix& x, const Affine2Matrix& y) const;
-IntervalMatrix operator&(const IntervalMatrix& x, const Affine2Matrix& y) const;
-IntervalMatrix operator&(const Affine2Matrix& x, const IntervalMatrix& y) const;
+IntervalMatrix operator&(const Affine2Matrix& x, const Affine2Matrix& y);
+IntervalMatrix operator&(const IntervalMatrix& x, const Affine2Matrix& y);
+IntervalMatrix operator&(const Affine2Matrix& x, const IntervalMatrix& y);
 
 /**
  * \brief Return the hull of x & y.
  */
-IntervalMatrix operator|(const Affine2Matrix& x, const Affine2Matrix& y) const;
-IntervalMatrix operator|(const IntervalMatrix& x, const Affine2Matrix& y) const;
-IntervalMatrix operator|(const Affine2Matrix& x, const IntervalMatrix& y) const;
+IntervalMatrix operator|(const Affine2Matrix& x, const Affine2Matrix& y);
+IntervalMatrix operator|(const IntervalMatrix& x, const Affine2Matrix& y);
+IntervalMatrix operator|(const Affine2Matrix& x, const IntervalMatrix& y);
 
 /**
  * \brief Return -m.
@@ -564,7 +573,9 @@ std::ostream& operator<<(std::ostream& os, const Affine2Matrix&);
 /*================================== inline implementations ========================================*/
 
 inline Affine2Matrix Affine2Matrix::empty(int m, int n) {
-	return Affine2Matrix(m, n, Interval::EMPTY_SET);
+	Affine2Matrix  res(m, n);
+	res.set_empty();
+	return res;
 }
 
 inline bool Affine2Matrix::operator!=(const Affine2Matrix& m) const {
@@ -624,18 +635,18 @@ inline void Affine2Matrix::set_row(int row1, const Affine2Vector& v1) {
 	_M[row1]=v1;
 }
 
+
 inline bool Affine2Matrix::is_empty() const {
 	return (*this)[0].is_empty();
 }
 
 
 
-
-inline IntervalMatrix operator|(const IntervalMatrix& x, const Affine2Matrix& y) const{
+inline IntervalMatrix operator|(const IntervalMatrix& x, const Affine2Matrix& y) {
  	 return   (y | x );
 }
 
-inline IntervalMatrix operator&(const IntervalMatrix& x, const Affine2Matrix& y) const{
+inline IntervalMatrix operator&(const IntervalMatrix& x, const Affine2Matrix& y) {
  	 return   (y & x);
 }
 
