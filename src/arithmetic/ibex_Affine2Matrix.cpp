@@ -10,7 +10,6 @@
 
 #include "ibex_Affine2Matrix.h"
 #include "ibex_Agenda.h"
-#include "ibex_LinearArith.cpp"
 
 namespace ibex {
 
@@ -332,7 +331,7 @@ void Affine2Matrix::set_colITV(int col1, const IntervalVector& v) {
 	assert(nb_rows() == v.size());
 	for (int i = 0; i < nb_rows(); i++) {
 		_M[i]._vec[col1].ITV() = v[i];
-		_M[i]._vec[col1].setActif(false);
+		_M[i]._vec[col1].set_actif(false);
 	}
 
 }
@@ -342,7 +341,7 @@ void Affine2Matrix::set_rowITV(int row1, const IntervalVector& v) {
 	assert(nb_cols()==v.size());
 	for (int i = 0; i < nb_cols(); i++) {
 		_M[row1]._vec[i].ITV() = v[i];
-		_M[row1]._vec[i].setActif(false);
+		_M[row1]._vec[i].set_actif(false);
 	}
 }
 
@@ -804,9 +803,6 @@ bool proj_mul(const IntervalMatrix& y, Affine2Matrix& x1, IntervalMatrix& x2,	do
 	return true;
 }
 
-std::ostream& operator<<(std::ostream& os, const Affine2Matrix& m) {
-	return print < Affine2Matrix > (os, m);
-}
 
 
 } // namespace ibex

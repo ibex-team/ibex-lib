@@ -26,7 +26,7 @@ Affine2::Affine2(int n) :
 		_n		(n),
 		_val	(new double[n + 1]),
 		_err	(Interval::ALL_REALS),
-		_actif	(true),
+		_actif	(false ),
 		_itv	(Interval::ALL_REALS) {
 	assert(n>=0);
 }
@@ -57,17 +57,20 @@ Affine2::Affine2(int n, int m, const Interval& itv) :
 
 
 Affine2::Affine2(int n, const double d) :
-		_n		(n),
-		_val	(new double[n + 1]),
-		_err	(Interval::ZERO),
-		_actif	(true),
-		_itv	(Interval::ZERO) {
-	assert(n>=0);
-	_val[0] = d;
-	for (int i = 1; i <= n; i++){
-		_val[i] = 0.0;
+		_actif	(fabs(d)<POS_INFINITY),
+		_itv	(Interval(d)) {
+	if (_actif) {
+		assert(n>=0);
+		_n = n;
+		_val = new double[n + 1];
+		_err = Interval::ZERO;
+		_val[0] = d;
+		for (int i = 1; i <= n; i++){
+			_val[i] = 0.0;
+		}
+	} else {
+		_n = -1;
 	}
-	_itv = d;
 }
 
 Affine2::Affine2(int n, const Interval & itv) :
@@ -91,9 +94,9 @@ Affine2::Affine2(int n, const Interval & itv) :
 Affine2::Affine2(const Affine2& x) :
 		_n		(x.size()),
 		_err	(x.err()),
-		_actif	(x.isActif()),
+		_actif	(x.is_actif()),
 		_itv	(x.itv()) {
-	if (x.isActif()) {
+	if (x.is_actif()) {
 		_val	=new double[x.size() + 1];
 		for (int i = 0; i <= x.size(); i++){
 			_val[i] = x.val(i);
@@ -107,10 +110,10 @@ Affine2::Affine2(const Affine2& x, bool b) :
 		_n		(x.size()),
 		_val	(NULL),
 		_err	(x.err()),
-		_actif	(x.isActif()) {
+		_actif	(x.is_actif()) {
 	if (b) {
 		_itv = -x.itv();
-		if (x.isActif()) {
+		if (x.is_actif()) {
 			_val =new double[x.size() + 1];
 			for (int i = 0; i <= x.size(); i++){
 				_val[i] = -x.val(i);
@@ -120,7 +123,7 @@ Affine2::Affine2(const Affine2& x, bool b) :
 		}
 	} else {
 		_itv = x.itv();
-		if (x.isActif()) {
+		if (x.is_actif()) {
 			_val =new double[x.size() + 1];
 			for (int i = 0; i <= x.size(); i++){
 				_val[i] = x.val(i);
@@ -166,14 +169,14 @@ void Affine2::update_itv() {
 	}
 }
 
-Affine2& Affine2::operator =(const Affine2& x) {
+Affine2& Affine2::operator=(const Affine2& x) {
 	if (this != &x) {
 		if (_n!=x.size()) {
 			if (_val!=NULL) { delete[] _val; }
 			_n =x.size();
 			_val = new double[x.size()+1];
 		}
-		_actif = x.isActif();
+		_actif = x.is_actif();
 		_err = x.err();
 		_itv = x.itv();
 		if (_actif) {
@@ -185,24 +188,27 @@ Affine2& Affine2::operator =(const Affine2& x) {
 	return *this;
 }
 
-Affine2& Affine2::operator =(double d) {
-	_actif = true;
+Affine2& Affine2::operator=(double d) {
+	_actif = (fabs(d)<POS_INFINITY);
 	_err = Interval::ZERO;
 	_itv = Interval(d);
+	if (_actif) {
+		if ((_val==NULL)||(_n<0)) {
+			_n = 0;
+			_val = new double[1];
+		}
 
-	if ((_val==NULL)||(_n<0)) {
-		_n = 0;
-		_val = new double[1];
-	}
-
-	_val[0] = d;
-	for (int i = 1; i <= _n; i++) {
-		_val[i] = 0;
+		_val[0] = d;
+		for (int i = 1; i <= _n; i++) {
+			_val[i] = 0;
+		}
+	} else {
+		_n= -1;
 	}
 	return *this;
 }
 
-Affine2& Affine2::operator =(const Interval& x) {
+Affine2& Affine2::operator=(const Interval& x) {
 	_itv = x;
 	_actif = (!(x.is_unbounded()||x.is_empty()));
 	if (_actif) {
@@ -252,7 +258,7 @@ Affine2& Affine2::saxpy(double alpha, const Affine2& y, double beta, double ddel
 		if (B2) {  // add a affine2 form y
 
 			_itv += y.itv();
-			if (y.isActif()) {
+			if (y.is_actif()) {
 				assert(this->size()==y.size());
 
 				ttt=0.0;
@@ -352,9 +358,9 @@ Affine2& Affine2::saxpy(double alpha, const Affine2& y, double beta, double ddel
 
 }
 
-Affine2& Affine2::operator *=(const Affine2& y) {
+Affine2& Affine2::operator*=(const Affine2& y) {
 
-	if (_actif && (y.isActif())) {
+	if (_actif && (y.is_actif())) {
 
 		double Sx=0.0, Sy=0.0, Sxy=0.0, Sz=0.0, ttt=0.0, sss=0.0, ppp=0.0, tmp=0.0, xVal0=0.0;
 		int i;
@@ -431,12 +437,12 @@ Affine2& Affine2::operator *=(const Affine2& y) {
 		delete[] xTmp;
 	}
 
-	else if ((!_actif) && y.isActif()) {
+	else if ((!_actif) && y.is_actif()) {
 		Interval inter = _itv;
 		*this = Affine2(y);
 		return *this *= inter;
 	}
-	else if (_actif && (!y.isActif())) {
+	else if (_actif && (!y.is_actif())) {
 		if (y.is_unbounded()||y.is_empty()) {
 			_itv *=y.itv();
 			_actif = false;
@@ -1564,12 +1570,12 @@ Affine2& Affine2::linChebyshev(affine2_expr num) {
 }
 
 
-std::ostream& operator <<(std::ostream& os, const Affine2& x) {
+std::ostream& operator<<(std::ostream& os, const Affine2& x) {
 	if (x.is_empty()) {
 		return os << "[ empty ]";
 	} else {
 		os << x.itv() << " : ";
-		if (x.isActif()) {
+		if (x.is_actif()) {
 			os << x.val(0);
 			for (int i = 1; i <= x.size(); i++) {
 				os << " + " << x.val(i) << " eps_" << i;
@@ -1645,8 +1651,8 @@ Affine2 sign(const Affine2& x) {
 bool proj_add(const Interval& y, Affine2& x1, Affine2& x2) {
 	bool b = proj_add(y, x1.ITV(), x2.ITV());
 	if (b) {
-		x1.setActif(false);
-		x2.setActif(false);
+		x1.set_actif(false);
+		x2.set_actif(false);
 	}
 	return b;
 }
@@ -1654,7 +1660,7 @@ bool proj_add(const Interval& y, Affine2& x1, Affine2& x2) {
 bool proj_add(const Interval& y, Affine2& x1, Interval& x2) {
 	bool b = proj_add(y, x1.ITV(), x2);
 	if (b) {
-		x1.setActif(false);
+		x1.set_actif(false);
 	}
 	return b;
 }
@@ -1662,22 +1668,22 @@ bool proj_add(const Interval& y, Affine2& x1, Interval& x2) {
 bool proj_sub(const Interval& y, Affine2& x1, Affine2& x2) {
 	bool b = proj_sub(y, x1.ITV(), x2.ITV());
 	if (b) {
-		x1.setActif(false);
-		x2.setActif(false);
+		x1.set_actif(false);
+		x2.set_actif(false);
 	}
 	return b;
 }
 bool proj_sub(const Interval& y, Affine2& x1, Interval& x2) {
 	bool b = proj_sub(y, x1.ITV(), x2);
 	if (b) {
-		x1.setActif(false);
+		x1.set_actif(false);
 	}
 	return b;
 }
 bool proj_sub(const Interval& y, Interval& x1, Affine2& x2) {
 	bool b = proj_sub(y, x1, x2.ITV());
 	if (b) {
-		x2.setActif(false);
+		x2.set_actif(false);
 	}
 	return b;
 }
@@ -1685,8 +1691,8 @@ bool proj_sub(const Interval& y, Interval& x1, Affine2& x2) {
 bool proj_mul(const Interval& y, Affine2& x1, Affine2& x2) {
 	bool b = proj_mul(y, x1.ITV(), x2.ITV());
 	if (b) {
-		x1.setActif(false);
-		x2.setActif(false);
+		x1.set_actif(false);
+		x2.set_actif(false);
 	}
 	return b;
 }
@@ -1694,7 +1700,7 @@ bool proj_mul(const Interval& y, Affine2& x1, Affine2& x2) {
 bool proj_mul(const Interval& y, Affine2& x1, Interval& x2) {
 	bool b = proj_mul(y, x1.ITV(), x2);
 	if (b) {
-		x1.setActif(false);
+		x1.set_actif(false);
 	}
 	return b;
 }
@@ -1702,22 +1708,22 @@ bool proj_mul(const Interval& y, Affine2& x1, Interval& x2) {
 bool proj_div(const Interval& y, Affine2& x1, Affine2& x2) {
 	bool b = proj_div(y, x1.ITV(), x2.ITV());
 	if (b) {
-		x1.setActif(false);
-		x2.setActif(false);
+		x1.set_actif(false);
+		x2.set_actif(false);
 	}
 	return b;
 }
 bool proj_div(const Interval& y, Affine2& x1, Interval& x2) {
 	bool b = proj_div(y, x1.ITV(), x2);
 	if (b) {
-		x1.setActif(false);
+		x1.set_actif(false);
 	}
 	return b;
 }
 bool proj_div(const Interval& y, Interval& x1, Affine2& x2) {
 	bool b = proj_div(y, x1, x2.ITV());
 	if (b) {
-		x2.setActif(false);
+		x2.set_actif(false);
 	}
 	return b;
 }
@@ -1725,7 +1731,7 @@ bool proj_div(const Interval& y, Interval& x1, Affine2& x2) {
 bool proj_sqrt(const Interval& y, Affine2& x) {
 	bool b = proj_sqrt(y, x.ITV());
 	if (b) {
-		x.setActif(false);
+		x.set_actif(false);
 	}
 	return b;
 }
@@ -1734,7 +1740,7 @@ bool proj_sqrt(const Interval& y, Affine2& x) {
 bool proj_sqr(const Interval& y, Affine2& x) {
 	bool b = proj_sqr(y, x.ITV());
 	if (b) {
-		x.setActif(false);
+		x.set_actif(false);
 	}
 	return b;
 }
@@ -1742,7 +1748,7 @@ bool proj_sqr(const Interval& y, Affine2& x) {
 bool proj_pow(const Interval& y, int n, Affine2& x) {
 	bool b = proj_pow(y, n, x.ITV());
 	if (b) {
-		x.setActif(false);
+		x.set_actif(false);
 	}
 	return b;
 }
@@ -1750,22 +1756,22 @@ bool proj_pow(const Interval& y, int n, Affine2& x) {
 bool proj_pow(const Interval& y, Affine2& x1, Affine2& x2) {
 	bool b = proj_pow(y, x1.ITV(), x2.ITV());
 	if (b) {
-		x1.setActif(false);
-		x2.setActif(false);
+		x1.set_actif(false);
+		x2.set_actif(false);
 	}
 	return b;
 }
 bool proj_pow(const Interval& y, Interval& x1, Affine2& x2) {
 	bool b = proj_pow(y, x1, x2.ITV());
 	if (b) {
-		x2.setActif(false);
+		x2.set_actif(false);
 	}
 	return b;
 }
 bool proj_pow(const Interval& y, Affine2& x1, Interval& x2) {
 	bool b = proj_pow(y, x1.ITV(), x2);
 	if (b) {
-		x1.setActif(false);
+		x1.set_actif(false);
 	}
 	return b;
 }
@@ -1775,7 +1781,7 @@ bool proj_pow(const Interval& y, Affine2& x1, Interval& x2) {
 bool proj_root(const Interval& y, int n, Affine2& x) {
 	bool b = proj_root(y, n, x.ITV());
 	if (b) {
-		x.setActif(false);
+		x.set_actif(false);
 	}
 	return b;
 }
@@ -1783,7 +1789,7 @@ bool proj_root(const Interval& y, int n, Affine2& x) {
 bool proj_exp(const Interval& y, Affine2& x) {
 	bool b = proj_exp(y, x.ITV());
 	if (b) {
-		x.setActif(false);
+		x.set_actif(false);
 	}
 	return b;
 }
@@ -1791,7 +1797,7 @@ bool proj_exp(const Interval& y, Affine2& x) {
 bool proj_log(const Interval& y, Affine2& x) {
 	bool b = proj_log(y, x.ITV());
 	if (b) {
-		x.setActif(false);
+		x.set_actif(false);
 	}
 	return b;
 }
@@ -1799,7 +1805,7 @@ bool proj_log(const Interval& y, Affine2& x) {
 bool proj_cos(const Interval& y, Affine2& x) {
 	bool b = proj_cos(y, x.ITV());
 	if (b) {
-		x.setActif(false);
+		x.set_actif(false);
 	}
 	return b;
 }
@@ -1807,7 +1813,7 @@ bool proj_cos(const Interval& y, Affine2& x) {
 bool proj_sin(const Interval& y, Affine2& x) {
 	bool b = proj_sin(y, x.ITV());
 	if (b) {
-		x.setActif(false);
+		x.set_actif(false);
 	}
 	return b;
 }
@@ -1815,7 +1821,7 @@ bool proj_sin(const Interval& y, Affine2& x) {
 bool proj_tan(const Interval& y, Affine2& x) {
 	bool b = proj_tan(y, x.ITV());
 	if (b) {
-		x.setActif(false);
+		x.set_actif(false);
 	}
 	return b;
 }
@@ -1823,7 +1829,7 @@ bool proj_tan(const Interval& y, Affine2& x) {
 bool proj_acos(const Interval& y, Affine2& x) {
 	bool b = proj_acos(y, x.ITV());
 	if (b) {
-		x.setActif(false);
+		x.set_actif(false);
 	}
 	return b;
 }
@@ -1831,7 +1837,7 @@ bool proj_acos(const Interval& y, Affine2& x) {
 bool proj_asin(const Interval& y, Affine2& x) {
 	bool b = proj_asin(y, x.ITV());
 	if (b) {
-		x.setActif(false);
+		x.set_actif(false);
 	}
 	return b;
 }
@@ -1839,7 +1845,7 @@ bool proj_asin(const Interval& y, Affine2& x) {
 bool proj_atan(const Interval& y, Affine2& x) {
 	bool b = proj_atan(y, x.ITV());
 	if (b) {
-		x.setActif(false);
+		x.set_actif(false);
 	}
 	return b;
 }
@@ -1847,7 +1853,7 @@ bool proj_atan(const Interval& y, Affine2& x) {
 bool proj_cosh(const Interval& y, Affine2& x) {
 	bool b = proj_cosh(y, x.ITV());
 	if (b) {
-		x.setActif(false);
+		x.set_actif(false);
 	}
 	return b;
 }
@@ -1855,7 +1861,7 @@ bool proj_cosh(const Interval& y, Affine2& x) {
 bool proj_sinh(const Interval& y, Affine2& x) {
 	bool b = proj_sinh(y, x.ITV());
 	if (b) {
-		x.setActif(false);
+		x.set_actif(false);
 	}
 	return b;
 }
@@ -1863,7 +1869,7 @@ bool proj_sinh(const Interval& y, Affine2& x) {
 bool proj_tanh(const Interval& y, Affine2& x) {
 	bool b = proj_tanh(y, x.ITV());
 	if (b) {
-		x.setActif(false);
+		x.set_actif(false);
 	}
 	return b;
 }
@@ -1871,7 +1877,7 @@ bool proj_tanh(const Interval& y, Affine2& x) {
 bool proj_abs(const Interval& y, Affine2& x) {
 	bool b = proj_abs(y, x.ITV());
 	if (b) {
-		x.setActif(false);
+		x.set_actif(false);
 	}
 	return b;
 }
@@ -1879,15 +1885,59 @@ bool proj_abs(const Interval& y, Affine2& x) {
 bool proj_sign(const Interval& y, Affine2& x) {
 	bool b = proj_sign(y, x.ITV());
 	if (b) {
-		x.setActif(false);
+		x.set_actif(false);
 	}
 	return b;
 }
 
+
+bool proj_max(const Interval& y, Affine2& x1, Affine2& x2) {
+	bool b = proj_max(y, x1.ITV(), x2.ITV());
+	if (b) {
+		x1.set_actif(false);
+		x2.set_actif(false);
+	}
+	return b;
+}
+
+
+bool proj_max(const Interval& y, Affine2& x1, Interval& x2) {
+	bool b = proj_max(y, x1.ITV(), x2);
+	if (b) {
+		x1.set_actif(false);
+	}
+	return b;
+}
+
+
+bool proj_min(const Interval& y, Affine2& x1, Affine2& x2) {
+	bool b = proj_min(y, x1.ITV(), x2.ITV());
+	if (b) {
+		x1.set_actif(false);
+		x2.set_actif(false);
+	}
+	return b;
+
+
+}
+
+
+bool proj_min(const Interval& y, Affine2& x1, Interval& x2) {
+	bool b = proj_min(y, x1.ITV(), x2);
+	if (b) {
+		x1.set_actif(false);
+	}
+	return b;
+
+
+}
+
+
+
 bool proj_integer(Affine2& x) {
 	bool b = proj_integer(x.ITV());
 	if (b) {
-		x.setActif(false);
+		x.set_actif(false);
 	}
 	return b;
 }

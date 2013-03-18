@@ -90,7 +90,7 @@ public:
 	/**
 	 * \brief Creates a domain by copy.
 	 *
-	 * If \a is_reference is true, the intenal domain is a reference to the
+	 * If \a is_reference is true, the internal domain is a reference to the
 	 * internal domain of \a d.
 	 */
 	Domain(const Domain& d, bool is_reference1=false) : dim(d.dim), is_reference(is_reference1) {

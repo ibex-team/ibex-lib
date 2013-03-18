@@ -12,7 +12,7 @@
 #include "ibex_Function.h"
 #include "ibex_Expr.h"
 #include "ibex_Eval.h"
-#include "ibex_EvalAffine2.h"
+#include "ibex_Affine2Eval.h"
 #include "ibex_HC4Revise.h"
 #include "ibex_InHC4Revise.h"
 #include "ibex_Gradient.h"
@@ -65,8 +65,8 @@ Domain& Function::eval_domain(const IntervalVector& box) const {
 }
 
 
-DomainAffine2& Function::eval_domainaffine2(const IntervalVector& box) const {
-	return EvalAffine2().eval_affine2(*this,box);
+Affine2Domain& Function::eval_affine2domain(const IntervalVector& box) const {
+	return Affine2Eval().eval_affine2(*this,box);
 }
 
 

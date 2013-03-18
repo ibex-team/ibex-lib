@@ -14,7 +14,7 @@
 #include "ibex_Domain.h"
 #include "ibex_ExprVisitor.h"
 #include "ibex_NodeMap.h"
-#include "ibex_DomainAffine2.h"
+#include "ibex_Affine2Domain.h"
 
 namespace ibex {
 

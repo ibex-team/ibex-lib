@@ -13,7 +13,7 @@
 #define __IBEX_EXPR_LABEL_H__
 
 #include "ibex_Domain.h"
-#include "ibex_DomainAffine2.h"
+#include "ibex_Affine2Domain.h"
 
 namespace ibex {
 
@@ -35,7 +35,7 @@ public:
 	/**
 	 * The affine2 form (evaluation)
 	 */
-	DomainAffine2 *af2;
+	Affine2Domain *af2;
 
 	/**
 	 * The domain (evaluation)

@@ -745,6 +745,10 @@ Affine2Matrix abs(const Affine2Matrix& m) {
 }
 
 
+std::ostream& operator<<(std::ostream& os, const Affine2Matrix& m) {
+	return print < Affine2Matrix > (os, m);
+}
+
 
 } // namespace ibex
 

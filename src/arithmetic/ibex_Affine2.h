@@ -199,12 +199,12 @@ public:
 	/**
 	 * \brief return 1 if the affine form is actif and valid
 	 */
-	 bool isActif() const;
+	 bool is_actif() const;
 
 	/**
 	 * \brief return 1 if the affine form is actif and valid
 	 */
-	 void setActif(bool b);
+	 void set_actif(bool b);
 
 	/** \brief Lower bound.
 	 *
@@ -628,39 +628,24 @@ Affine2 root(const Affine2& x, int n);
 
 
  Interval max(const Affine2& x, const Affine2& y);
-
  Interval max(const Interval& x, const Affine2& y);
-
  Interval max(const Affine2& x, const Interval& y);
 
  Interval min(const Affine2& x, const Affine2& y);
-
  Interval min(const Interval& x, const Affine2& y) ;
-
  Interval min(const Affine2& x, const Interval& y);
 
 
  /** \brief $[x]_1\cap [x]_2$.
   * \return Interval::EMPTY if the intersection is empty. */
  Interval operator&(const Affine2& x1, const Affine2& x2);
-
- /** \brief $[x]_1\cap [x]_2$.
-  * \return Interval::EMPTY if the intersection is empty. */
  Interval operator&(const Interval& x1, const Affine2& x2);
-
-
- /** \brief $[x]_1\cap [x]_2$.
-  * \return Interval::EMPTY if the intersection is empty. */
  Interval operator&(const Affine2& x1, const Interval& x2);
 
 
  /** \brief $\square([x]_1\cup [x]_2)$. */
  Interval operator|(const Affine2& x1, const Affine2& x2);
-
- /** \brief $\square([x]_1\cup [x]_2)$. */
  Interval operator|(const Interval& x1, const Affine2& x2);
-
- /** \brief $\square([x]_1\cup [x]_2)$. */
  Interval operator|(const Affine2& x1, const Interval& x2);
 
 /**
@@ -850,13 +835,35 @@ bool proj_sign(const Affine2& y, Affine2& x);
 bool proj_sign(const Interval& y, Affine2& x);
 bool proj_sign(const Affine2& y, Interval& x);
 
+
+/** \brief Projection of $y=\max(x_1,x_2)$.
+ *
+ * Set $([x]_1,[x]_2)$ to $([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=\max(x_1,x_2)\}$. */
+bool proj_max(const Affine2& y, Affine2& x1, Affine2& x2);
+bool proj_max(const Interval& y, Affine2& x1, Affine2& x2);
+bool proj_max(const Affine2& y, Interval& x1, Affine2& x2);
+bool proj_max(const Affine2& y, Affine2& x1, Interval& x2);
+bool proj_max(const Interval& y, Interval& x1, Affine2& x2);
+bool proj_max(const Affine2& y, Interval& x1, Interval& x2);
+bool proj_max(const Interval& y, Affine2& x1, Interval& x2);
+
+
+/** \brief Projection of $y=\min(x_1,x_2)$.
+ *
+ * Set $([x]_1,[x]_2)$ to $([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=\min(x_1,x_2)\}$. */
+bool proj_min(const Affine2& y, Affine2& x1, Affine2& x2);
+bool proj_min(const Interval& y, Affine2& x1, Affine2& x2);
+bool proj_min(const Affine2& y, Interval& x1, Affine2& x2);
+bool proj_min(const Affine2& y, Affine2& x1, Interval& x2);
+bool proj_min(const Interval& y, Interval& x1, Affine2& x2);
+bool proj_min(const Affine2& y, Interval& x1, Interval& x2);
+bool proj_min(const Interval& y, Affine2& x1, Interval& x2);
+
+
 /** \brief Contract x w.r.t. the fact that it must be integral.
  *
  */
 bool proj_integer(Affine2& x);
-
-
-
 }
 
 /*@}*/
@@ -973,12 +980,12 @@ inline Interval Affine2::err() const{
 }
 
 /** \brief return 1 if the affine form is actif and valid*/
-inline bool Affine2::isActif() const{
+inline bool Affine2::is_actif() const{
 	return _actif;
 }
 
 /** \brief return 1 if the affine form is actif and valid*/
-inline void Affine2::setActif(bool b){
+inline void Affine2::set_actif(bool b){
 	_actif = b;
 }
 
@@ -1121,7 +1128,7 @@ inline Affine2& Affine2::operator*=(double d){
 /** \brief Divide *this by \a d and return the result. */
 inline 	Affine2& Affine2::operator/=(double d) {
 	Affine2 tmp(0, 1.0 / Interval(d));
-	tmp.setActif(false);
+	tmp.set_actif(false);
 	return *this *=tmp ;
 }
 
@@ -1138,14 +1145,14 @@ inline Affine2& Affine2::operator-=(const Interval& x){
 /** \brief Multiply *this by \a x and return the result. */
 inline Affine2& Affine2::operator*=(const Interval& x){
 	Affine2 tmp(0, x);
-	tmp.setActif(false);
+	tmp.set_actif(false);
 	return *this *=tmp ;
 }
 
 /** \brief Divide *this by \a x and return the result.*/
 inline Affine2& Affine2::operator/=(const Interval& x){
 	Affine2 tmp(0, 1.0/x);
-	tmp.setActif(false);
+	tmp.set_actif(false);
 	return *this *=tmp ;
 }
 
@@ -1632,6 +1639,46 @@ inline bool proj_sign(const Affine2& y, Affine2& x){
 inline bool proj_sign(const Affine2& y, Interval& x){
 	return proj_sign(y.itv(),x);
 }
+
+inline bool proj_max(const Affine2& y, Affine2& x1, Affine2& x2) {
+	return proj_max(y.itv(), x1, x2);
+}
+
+inline bool proj_max(const Affine2& y, Interval& x1, Affine2& x2) {
+	return proj_max(y.itv(), x1, x2);
+}
+inline bool proj_max(const Affine2& y, Affine2& x1, Interval& x2) {
+	return proj_max(y.itv(), x1, x2);
+}
+inline bool proj_max(const Interval& y, Interval& x1, Affine2& x2) {
+	return proj_max(y, x2, x1);
+}
+inline bool proj_max(const Affine2& y, Interval& x1, Interval& x2) {
+	return proj_max(y.itv(), x1, x2);
+}
+
+
+inline bool proj_min(const Affine2& y, Affine2& x1, Affine2& x2){
+	return proj_min(y.itv(), x1, x2);
+}
+inline bool proj_min(const Affine2& y, Interval& x1, Affine2& x2){
+	return proj_min(y.itv(), x1, x2);
+}
+inline bool proj_min(const Affine2& y, Affine2& x1, Interval& x2){
+	return proj_min(y.itv(), x1, x2);
+}
+inline bool proj_min(const Interval& y, Interval& x1, Affine2& x2){
+	return proj_min(y, x2, x1);
+}
+inline bool proj_min(const Affine2& y, Interval& x1, Interval& x2){
+	return proj_min(y.itv(), x1, x2);
+}
+
+
+
+
+
+
 
 } // end namespace ibex
 
