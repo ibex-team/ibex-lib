@@ -9,7 +9,7 @@
 
 #include "ibex_Affine2Eval.h"
 #include "ibex_Eval.h"
-// #include <stdio.h>
+//#include <stdio.h>
 
 namespace ibex {
 
@@ -66,9 +66,9 @@ Affine2Domain& Affine2Eval::eval_affine2(const Function& f, const IntervalVector
 		}
 
 	}
-	else
+	else {
 		load(f.arg_af2,Affine2Vector(box),f.nb_used_vars,f.used_var); // load the domains of all the symbols
-
+	}
 
 	return *f.forward<Affine2Eval>(*this).af2;
 

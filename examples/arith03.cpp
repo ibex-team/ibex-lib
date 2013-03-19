@@ -12,8 +12,8 @@
 #include "ibex.h"
 #include <time.h>
 
-using namespace ibex;
 using namespace std;
+using namespace ibex;
 
 int main() {
 
@@ -21,11 +21,11 @@ int main() {
 	{cout << "TEST 1: " << endl;
 		Variable x(2);
 		Variable x1, x2;
-		Function f(x,log(x[0]+x[1]));
+		Function f(x,tan(x[0])+x[0]);
 
-		IntervalVector I(2,Interval(1,2));
-
-
+		IntervalVector I(2,Interval(0.,1));
+		Interval fi = f.eval(I);
+		cout << fi <<endl;
 		Affine2 faa = f.eval_affine2(I);
 	cout << faa <<endl;
 
@@ -50,8 +50,8 @@ int main() {
 
 		LargestFirst bbb;
 		CellStack ccc;
-		Solver sol1(ft1,bbb, ccc, 0.01 );
-		Solver sol2(ft2,bbb, ccc, 0.01 );
+		Solver sol1(ft1,bbb, ccc, 0.0001  );
+		Solver sol2(ft2,bbb, ccc, 0.0001  );
 		vector<IntervalVector>  vect1 =sol1.solve(I);
 		vector<IntervalVector>  vect2 =sol2.solve(I);
 
@@ -65,12 +65,14 @@ int main() {
 		cout << "TEST 2: " << endl;
 		Variable x(2);
 		Variable x1, x2;
-		Function f(x,x[0]+x[1]);
-		Function ff(x1,x2,x1*x2+exp(x2*x1));
+//		Function f(x,x[0]+x[1]);
 
-		IntervalVector I(2,Interval(1,2));
+		Function ff(x,x2, x[0]*pow(x[1],2)-exp(x[0] * x[1]));
 
-
+		IntervalVector I(3,Interval(1,2));
+		I[1] = Interval(1,3);
+		Interval fi = ff.eval(I);
+		cout << fi <<endl;
 		Affine2 faa = ff.eval_affine2(I);
 		cout << faa <<endl;
 
@@ -78,8 +80,8 @@ int main() {
 //		Function linsup(x, faa.val(0)+faa.err().ub() + faa.val(1)*(2*x[0]-(I[0].lb()+I[0].ub()))/(I[0].diam()) + faa.val(2)*(2*x[1]-(I[1].lb()+I[1].ub()))/(I[1].diam())) ;
 
 
-		Function lininf(x1,x2, faa.val(0)-faa.err().ub() + faa.val(1)*(2*x1-(I[0].lb()+I[0].ub()))/(I[0].diam()) + faa.val(2)*(2*x2-(I[1].lb()+I[1].ub()))/(I[1].diam())) ;
-		Function linsup(x1,x2, faa.val(0)+faa.err().ub() + faa.val(1)*(2*x1-(I[0].lb()+I[0].ub()))/(I[0].diam()) + faa.val(2)*(2*x2-(I[1].lb()+I[1].ub()))/(I[1].diam())) ;
+		Function lininf(x,x2, faa.val(0)-faa.err().ub() + faa.val(1)*(2*x[0]-(I[0].lb()+I[0].ub()))/(I[0].diam()) + faa.val(2)*(2*x[1]-(I[1].lb()+I[1].ub()))/(I[1].diam())  + faa.val(3)*(2*x2-(I[2].lb()+I[2].ub()))/(I[2].diam())  ) ;
+		Function linsup(x,x2, faa.val(0)+faa.err().ub() + faa.val(1)*(2*x[0]-(I[0].lb()+I[0].ub()))/(I[0].diam()) + faa.val(2)*(2*x[1]-(I[1].lb()+I[1].ub()))/(I[1].diam())  + faa.val(3)*(2*x2-(I[2].lb()+I[2].ub()))/(I[2].diam())) ;
 
 	//	for (int i=0;i<I.size();i++){
 	//		lininf += faa.val(i+1)*(2*x[i]-(I[i].lb()+I[i].ub()))/(I[i].diam());
@@ -91,8 +93,8 @@ int main() {
 //		Function c_sup(x, f(x) -linsup(x));
 
 
-		Function c_inf(x1,x2,lininf(x1,x2)-ff(x1,x2));
-		Function c_sup(x1,x2, ff(x1,x2) -linsup(x1,x2));
+		Function c_inf(x,x2,lininf(x,x2)-ff(x,x2));
+		Function c_sup(x,x2, ff(x,x2) -linsup(x,x2));
 
 		CtcFwdBwd ct1(c_inf,GT);
 		CtcFixPoint ft1(ct1,0.001);
@@ -102,11 +104,13 @@ int main() {
 
 		LargestFirst bbb;
 		CellStack ccc;
-		Solver sol1(ft1,bbb, ccc, 0.01 );
-		Solver sol2(ft2,bbb, ccc, 0.01 );
+		Solver sol1(ft1,bbb, ccc, 0.001 );
+		Solver sol2(ft2,bbb, ccc, 0.001 );
+		vector<IntervalVector>  vect1 =sol1.solve(I);
+		vector<IntervalVector>  vect2 =sol2.solve(I);
 
-		cout << " ok?  : " << ((sol1.solve(I).empty()) && (sol2.solve(I).empty())) << endl ;
-		cout << " size?  : " << (sol1.solve(I).size()) << " et "<< (sol2.solve(I).size()) << endl ;
+		cout << " ok?  : " << ((vect1.empty()) && (vect2.empty())) << endl ;
+		cout << " size?  : " << (vect1.size()) << " et "<< (vect2.size()) << endl ;
 	}
 
 

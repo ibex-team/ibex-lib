@@ -10,6 +10,7 @@
  * ---------------------------------------------------------------------------- */
 
 #include "ibex_Affine2.h"
+#include <stdio.h>
 
 namespace ibex {
 
@@ -228,10 +229,10 @@ Affine2& Affine2::operator=(const Interval& x) {
 
 
 Affine2& Affine2::saxpy(double alpha, const Affine2& y, double beta, double ddelta, bool B1, bool B2, bool B3, bool B4) {
-//std::cout << "saxpy " << alpha << " x " << *this << " + " << y << " + "<< beta << " +error " << ddelta << " / "<< B1 << B2 << B3 << B4 << std::endl;
+//std::cout << "saxpy IN " << alpha << " x " << *this << " + " << y << " + "<< beta << " +error " << ddelta << " / "<< B1 << B2 << B3 << B4 << std::endl;
 	double temp, ttt, sss;
 	int i;
-
+//	std::cout << "in saxpy alpha=" << alpha  <<  "  beta= " <<  beta <<   "  delta = " << ddelta   << std::endl;
 	if (_actif) {
 		if (B1) {  // multiply by a scalar alpha
 			_itv *= alpha;
@@ -241,7 +242,7 @@ Affine2& Affine2::saxpy(double alpha, const Affine2& y, double beta, double ddel
 				for (i=0; i<=_n;i++) {
 					_val[i] *= alpha;
 					ttt += fabs(_val[i]);
-					if (fabs(_val[i]<AF_EC())) {
+					if (fabs(_val[i])<AF_EC()) {  std::cout << "COUCOUC  "<< _val[i]<< "  "<<AF_EC()<<std::endl;
 						sss += fabs(_val[i]);
 						_val[i] = 0.0;
 					}
@@ -354,12 +355,13 @@ Affine2& Affine2::saxpy(double alpha, const Affine2& y, double beta, double ddel
 			_itv += Interval(-ddelta,ddelta);
 		}
 	}
+//	std::cout << " saxpy OUT x= "<< *this<<std::endl;
 	return *this;
 
 }
 
 Affine2& Affine2::operator*=(const Affine2& y) {
-
+	std::cout << "in *= "<<std::endl;
 	if (_actif && (y.is_actif())) {
 
 		double Sx=0.0, Sy=0.0, Sxy=0.0, Sz=0.0, ttt=0.0, sss=0.0, ppp=0.0, tmp=0.0, xVal0=0.0;
@@ -480,12 +482,13 @@ Affine2& Affine2::operator*=(const Affine2& y) {
 		_itv *= y.itv();
 		_n = -1;
 	}
+	std::cout << "out *= "<<std::endl;
 	return *this;
 }
 
 
 Affine2& Affine2::sqr() {
-
+	std::cout << "in sqr "<<std::endl;
 	if (_actif) {
 
 		double Sx = 0, Sx2 = 0, ttt = 0, sss = 0, ppp = 0, x0 = 0;
@@ -535,11 +538,12 @@ Affine2& Affine2::sqr() {
 	} else {
 		_itv = pow(_itv,2);
 	}
+	std::cout << "out sqr "<<std::endl;
 	return *this;
 }
 
 Affine2& Affine2::power(int n) {
-
+	std::cout << "in power "<<std::endl;
 	if (_itv.is_unbounded()) {
 		_actif = false;
 		_itv = pow(_itv, n);
@@ -659,6 +663,7 @@ Affine2& Affine2::power(int n) {
 		_actif &= (!(_itv.is_unbounded()) && !(_itv.is_empty()));
 
 	}
+	std::cout << "out power "<<std::endl;
 	return *this;
 }
 
@@ -913,8 +918,8 @@ Affine2& Affine2::linMinRange(affine2_expr num) {
 	return *this;
 }
 
-Affine2& Affine2::linChebyshev(affine2_expr num) {
-
+Affine2& Affine2::linChebyshev(affine2_expr num) {  // TODO SEGMENTATION FALTE
+	std::cout << "linChebyshev IN x =  "<< *this << num<< std::endl;
 	if (_actif) {
 		double alpha, beta, ddelta, t1, t2;
 		Interval dmm(0.0), TEMP1(0.0), TEMP2(0.0), band(0.0);
@@ -1566,6 +1571,7 @@ Affine2& Affine2::linChebyshev(affine2_expr num) {
 	}
 	_actif &= (!(_itv.is_unbounded()) && !(_itv.is_empty()));
 
+	std::cout << "linChebyshev OUT x =  "<< *this << num<< std::endl;
 	return *this;
 }
 
@@ -1589,7 +1595,7 @@ std::ostream& operator<<(std::ostream& os, const Affine2& x) {
 	}
 }
 
-Affine2 pow(const Affine2& x, int n) {
+Affine2 pow(const Affine2& x, int n) { 	std::cout << "in pow "<<std::endl;
 	if (n == 0)
 		return Affine2(x.size(), Interval::ONE);
 	else if (n == 1)
