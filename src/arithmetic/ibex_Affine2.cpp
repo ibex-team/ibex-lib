@@ -242,7 +242,7 @@ Affine2& Affine2::saxpy(double alpha, const Affine2& y, double beta, double ddel
 				for (i=0; i<=_n;i++) {
 					_val[i] *= alpha;
 					ttt += fabs(_val[i]);
-					if (fabs(_val[i])<AF_EC()) {  std::cout << "COUCOUC  "<< _val[i]<< "  "<<AF_EC()<<std::endl;
+					if (fabs(_val[i])<AF_EC()) {  //std::cout << " COUCOU : "<< _val[i]<< "  "<<AF_EC()<<std::endl;
 						sss += fabs(_val[i]);
 						_val[i] = 0.0;
 					}
@@ -919,7 +919,7 @@ Affine2& Affine2::linMinRange(affine2_expr num) {
 }
 
 Affine2& Affine2::linChebyshev(affine2_expr num) {  // TODO SEGMENTATION FALTE
-	std::cout << "linChebyshev IN x =  "<< *this << num<< std::endl;
+//	std::cout << "linChebyshev IN x =  "<< *this << num<< std::endl;
 	if (_actif) {
 		double alpha, beta, ddelta, t1, t2;
 		Interval dmm(0.0), TEMP1(0.0), TEMP2(0.0), band(0.0);
@@ -1571,7 +1571,7 @@ Affine2& Affine2::linChebyshev(affine2_expr num) {  // TODO SEGMENTATION FALTE
 	}
 	_actif &= (!(_itv.is_unbounded()) && !(_itv.is_empty()));
 
-	std::cout << "linChebyshev OUT x =  "<< *this << num<< std::endl;
+//std::cout << "linChebyshev OUT x =  "<< *this << num<< std::endl;
 	return *this;
 }
 
