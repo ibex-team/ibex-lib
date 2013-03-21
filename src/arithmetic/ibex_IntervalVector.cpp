@@ -10,7 +10,6 @@
  * ---------------------------------------------------------------------------- */
 
 #include "ibex_IntervalVector.h"
-#include "ibex_Affine2Vector.h"
 #include <vector>
 #include <stdlib.h>
 #include <sstream>

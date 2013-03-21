@@ -21,22 +21,22 @@ namespace ibex {
  * \ingroup symbolic
  * \brief Calculates the gradient of a function.
  */
-class Affine2Eval : public FwdAlgorithm, public BwdAlgorithm {
+class Affine2Eval : public FwdAlgorithm {
 
 public:
 	/**
 	 * \brief Run the forward algorithm with input domains.
 	 */
-	Affine2Domain& eval_affine2(const Function& f, const Array<const Affine2Domain>& d) const;
+	Affine2Domain& eval(const Function& f, const Array<const Affine2Domain>& d) const;
 
 	/**
 	 * \brief Run the forward algorithm with input domains.
 	 */
-	Affine2Domain& eval_affine2(const Function& f, const Array<Affine2Domain>& d) const;
+	Affine2Domain& eval(const Function& f, const Array<Affine2Domain>& d) const;
 	/**
 	 * \brief Calculate the gradient of f on the box \a box and store the result in \a g.
 	 */
-	Affine2Domain& eval_affine2(const Function& f, const IntervalVector& box) const;
+	Affine2Domain& eval(const Function& f, const IntervalVector& box) const;
 
 	void index_fwd(const ExprIndex&, const ExprLabel& x, ExprLabel& y);
 	       void vector_fwd(const ExprVector&, const ExprLabel** compL, ExprLabel& y);
@@ -85,77 +85,11 @@ public:
 	void sub_M_fwd(const ExprSub&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y);
 
 
-	/**
-	 * \brief Project f(x)=y onto x (backward algorithm)
-	 */
-	void proj_affine2(const Function& f, const Affine2Domain& y, Array<Affine2Domain>& x);
-
-	/**
-	 * \brief Project f(x)=y onto x (backward algorithm)
-	 */
-	void proj_affine2(const Function& f, const Affine2Domain& y, IntervalVector& x);
-
-	/**
-	 * \brief Ratio for the contraction of a
-	 * matrix-vector / matrix-matrix multiplication.
-	 * Set to 0.1.
-	 */
-	static const double RATIO;
-
-	void index_bwd (const ExprIndex&,   ExprLabel& , const ExprLabel& )   ;
-	       void vector_bwd(const ExprVector&,  ExprLabel** compL, const ExprLabel& result);
-	void symbol_bwd(const ExprSymbol& , const ExprLabel& )   ;
-	void cst_bwd   (const ExprConstant&, const ExprLabel& ) ;
-	void apply_bwd (const ExprApply& a, ExprLabel** x, const ExprLabel& y);
-	void add_bwd   (const ExprAdd&,     ExprLabel& x1, ExprLabel& x2, const ExprLabel& y);
-	void add_V_bwd  (const ExprAdd&,    ExprLabel& x1, ExprLabel& x2, const ExprLabel& y);
-	void add_M_bwd  (const ExprAdd&,    ExprLabel& x1, ExprLabel& x2, const ExprLabel& y);
-	void mul_bwd    (const ExprMul&,    ExprLabel& x1, ExprLabel& x2, const ExprLabel& y);
-	void mul_SV_bwd (const ExprMul&,    ExprLabel& x1, ExprLabel& x2, const ExprLabel& y);
-	void mul_SM_bwd (const ExprMul&,    ExprLabel& x1, ExprLabel& x2, const ExprLabel& y);
-	void mul_VV_bwd (const ExprMul&,    ExprLabel& x1, ExprLabel& x2, const ExprLabel& y);
-	void mul_MV_bwd (const ExprMul&,    ExprLabel& x1, ExprLabel& x2, const ExprLabel& y);
-	void mul_VM_bwd (const ExprMul&,    ExprLabel& x1, ExprLabel& x2, const ExprLabel& y);
-	void mul_MM_bwd (const ExprMul&,    ExprLabel& x1, ExprLabel& x2, const ExprLabel& y);
-	void sub_bwd   (const ExprSub&,     ExprLabel& x1, ExprLabel& x2, const ExprLabel& y);
-	void sub_V_bwd (const ExprSub&,     ExprLabel& x1, ExprLabel& x2, const ExprLabel& y);
-	void sub_M_bwd (const ExprSub&,     ExprLabel& x1, ExprLabel& x2, const ExprLabel& y);
-	void div_bwd   (const ExprDiv&,     ExprLabel& x1, ExprLabel& x2, const ExprLabel& y);
-	void max_bwd   (const ExprMax&,     ExprLabel& x1, ExprLabel& x2, const ExprLabel& y);
-	void min_bwd   (const ExprMin&,     ExprLabel& x1, ExprLabel& x2, const ExprLabel& y);
-	void atan2_bwd (const ExprAtan2& , ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) ;
-	void minus_bwd (const ExprMinus& , ExprLabel& x, const ExprLabel& y);
-    void trans_V_bwd(const ExprTrans& ,ExprLabel& x, const ExprLabel& y);
-    void trans_M_bwd(const ExprTrans& ,ExprLabel& x, const ExprLabel& y);
-	void sign_bwd  (const ExprSign& ,  ExprLabel& x, const ExprLabel& y);
-	void abs_bwd   (const ExprAbs& ,   ExprLabel& x, const ExprLabel& y);
-	void power_bwd (const ExprPower& e, ExprLabel& x, const ExprLabel& y);
-	void sqr_bwd   (const ExprSqr& ,   ExprLabel& x, const ExprLabel& y);
-	void sqrt_bwd  (const ExprSqrt& ,  ExprLabel& x, const ExprLabel& y);
-	void exp_bwd   (const ExprExp& ,   ExprLabel& x, const ExprLabel& y);
-	void log_bwd   (const ExprLog& ,   ExprLabel& x, const ExprLabel& y);
-	void cos_bwd   (const ExprCos& ,   ExprLabel& x, const ExprLabel& y);
-	void sin_bwd   (const ExprSin& ,   ExprLabel& x, const ExprLabel& y);
-	void tan_bwd   (const ExprTan& ,   ExprLabel& x, const ExprLabel& y);
-	void cosh_bwd  (const ExprCosh& ,  ExprLabel& x, const ExprLabel& y);
-	void sinh_bwd  (const ExprSinh& ,  ExprLabel& x, const ExprLabel& y);
-	void tanh_bwd  (const ExprTanh& ,  ExprLabel& x, const ExprLabel& y);
-	void acos_bwd  (const ExprAcos& ,  ExprLabel& x, const ExprLabel& y);
-	void asin_bwd  (const ExprAsin& ,  ExprLabel& x, const ExprLabel& y);
-	void atan_bwd  (const ExprAtan& ,  ExprLabel& x, const ExprLabel& y);
-	void acosh_bwd (const ExprAcosh& , ExprLabel& x, const ExprLabel& y);
-	void asinh_bwd (const ExprAsinh& , ExprLabel& x, const ExprLabel& y);
-	void atanh_bwd (const ExprAtanh& , ExprLabel& x, const ExprLabel& y);
-
-
-protected:
+//protected:
 	/**
 	 * \brief Run the forward algorithm with input domains.
 	 */
-	Affine2Domain& eval_affine2(const Function&, ExprLabel** d) const;
-
-
-	void proj_affine2(const Function& f, const Affine2Domain& y, ExprLabel** x);
+	Affine2Domain& eval(const Function&, ExprLabel** d) const;
 };
 
 /* ============================================================================
@@ -196,7 +130,7 @@ inline void Affine2Eval::cst_fwd(const ExprConstant& c, ExprLabel& y) {
 	}
 	}
 }
-inline void Affine2Eval::apply_fwd(const ExprApply& a, ExprLabel** x, ExprLabel& y)                          { *y.af2 = eval_affine2(a.func,x); }
+inline void Affine2Eval::apply_fwd(const ExprApply& a, ExprLabel** x, ExprLabel& y)                          { *y.af2 = eval(a.func,x); }
 inline void Affine2Eval::add_fwd(const ExprAdd&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)     { y.af2->i()=x1.af2->i()+x2.af2->i(); }
 inline void Affine2Eval::mul_fwd(const ExprMul&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)     { y.af2->i()=x1.af2->i()*x2.af2->i(); }
 inline void Affine2Eval::sub_fwd(const ExprSub&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)     { y.af2->i()=x1.af2->i()-x2.af2->i(); }
@@ -239,66 +173,6 @@ inline void Affine2Eval::mul_VM_fwd(const ExprMul&, const ExprLabel& x1, const E
 inline void Affine2Eval::mul_MM_fwd(const ExprMul&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)  { y.af2->m()=x1.af2->m()*x2.af2->m(); }
 inline void Affine2Eval::sub_V_fwd(const ExprSub&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)   { y.af2->v()=x1.af2->v()-x2.af2->v(); }
 inline void Affine2Eval::sub_M_fwd(const ExprSub&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)   { y.af2->m()=x1.af2->m()-x2.af2->m(); }
-
-
-
-
-
-
-inline void Affine2Eval::index_bwd (const ExprIndex&,   ExprLabel& , const ExprLabel& )            { /* nothing to do */ }
-inline void Affine2Eval::symbol_bwd(const ExprSymbol& , const ExprLabel& )                             { /* nothing to do */ }
-inline void Affine2Eval::cst_bwd   (const ExprConstant&, const ExprLabel& )                                  { /* nothing to do */ }
-inline void Affine2Eval::apply_bwd (const ExprApply& a, ExprLabel** x, const ExprLabel& y)                   { proj_affine2(a.func,*y.af2,x); }
-inline void Affine2Eval::add_bwd   (const ExprAdd&,     ExprLabel& x1, ExprLabel& x2, const ExprLabel& y)    { if (!(proj_add(y.af2->i(),x1.af2->i(),x2.af2->i()))) throw EmptyBoxException();  }
-inline void Affine2Eval::add_V_bwd  (const ExprAdd&,    ExprLabel& x1, ExprLabel& x2, const ExprLabel& y)    { if (!(proj_add(y.af2->v(),x1.af2->v(),x2.af2->v()))) throw EmptyBoxException();  }
-inline void Affine2Eval::add_M_bwd  (const ExprAdd&,    ExprLabel& x1, ExprLabel& x2, const ExprLabel& y)    { if (!(proj_add(y.af2->m(),x1.af2->m(),x2.af2->m()))) throw EmptyBoxException();  }
-inline void Affine2Eval::mul_bwd    (const ExprMul&,    ExprLabel& x1, ExprLabel& x2, const ExprLabel& y)    { if (!(proj_mul(y.af2->i(),x1.af2->i(),x2.af2->i()))) throw EmptyBoxException();  }
-inline void Affine2Eval::mul_SV_bwd (const ExprMul&,    ExprLabel& x1, ExprLabel& x2, const ExprLabel& y)    { if (!(proj_mul(y.af2->v(),x1.af2->i(),x2.af2->v()))) throw EmptyBoxException();  }
-inline void Affine2Eval::mul_SM_bwd (const ExprMul&,    ExprLabel& x1, ExprLabel& x2, const ExprLabel& y)    { if (!(proj_mul(y.af2->m(),x1.af2->i(),x2.af2->m()))) throw EmptyBoxException();  }
-inline void Affine2Eval::mul_VV_bwd (const ExprMul&,    ExprLabel& x1, ExprLabel& x2, const ExprLabel& y)    { if (!(proj_mul(y.af2->i(),x1.af2->v(),x2.af2->v()))) throw EmptyBoxException();  }
-inline void Affine2Eval::mul_MV_bwd (const ExprMul&,    ExprLabel& x1, ExprLabel& x2, const ExprLabel& y)    { if (!(proj_mul(y.af2->v(),x1.af2->m(),x2.af2->v(), RATIO))) throw EmptyBoxException();  }
-inline void Affine2Eval::mul_VM_bwd (const ExprMul&,    ExprLabel& x1, ExprLabel& x2, const ExprLabel& y)    { if (!(proj_mul(y.af2->v(),x1.af2->v(),x2.af2->m(), RATIO))) throw EmptyBoxException();  }
-inline void Affine2Eval::mul_MM_bwd (const ExprMul&,    ExprLabel& x1, ExprLabel& x2, const ExprLabel& y)    { if (!(proj_mul(y.af2->m(),x1.af2->m(),x2.af2->m(), RATIO))) throw EmptyBoxException();  }
-inline void Affine2Eval::sub_bwd   (const ExprSub&,     ExprLabel& x1, ExprLabel& x2, const ExprLabel& y)    { if (!(proj_sub(y.af2->i(),x1.af2->i(),x2.af2->i()))) throw EmptyBoxException();  }
-inline void Affine2Eval::sub_V_bwd (const ExprSub&,     ExprLabel& x1, ExprLabel& x2, const ExprLabel& y)    { if (!(proj_sub(y.af2->v(),x1.af2->v(),x2.af2->v()))) throw EmptyBoxException();  }
-inline void Affine2Eval::sub_M_bwd (const ExprSub&,     ExprLabel& x1, ExprLabel& x2, const ExprLabel& y)    { if (!(proj_sub(y.af2->m(),x1.af2->m(),x2.af2->m()))) throw EmptyBoxException();  }
-inline void Affine2Eval::div_bwd   (const ExprDiv&,     ExprLabel& x1, ExprLabel& x2, const ExprLabel& y)    { if (!(proj_div(y.af2->i(),x1.af2->i(),x2.af2->i()))) throw EmptyBoxException();  }
-inline void Affine2Eval::max_bwd   (const ExprMax&,     ExprLabel& x1, ExprLabel& x2, const ExprLabel& y)    { if (!(proj_max(y.af2->i(),x1.af2->i(),x2.af2->i()))) throw EmptyBoxException();  }
-inline void Affine2Eval::min_bwd   (const ExprMin&,     ExprLabel& x1, ExprLabel& x2, const ExprLabel& y)    { if (!(proj_min(y.af2->i(),x1.af2->i(),x2.af2->i()))) throw EmptyBoxException();  }
-inline void Affine2Eval::atan2_bwd (const ExprAtan2& , ExprLabel& x1, ExprLabel& x2, const ExprLabel& y)    { not_implemented("Inner projection of \"atan2\"");  }
-inline void Affine2Eval::minus_bwd (const ExprMinus& , ExprLabel& x, const ExprLabel& y) { x.af2->i() =(x.af2->i() &(-y.af2->i())); if ((x.af2->i()).is_empty()) { throw EmptyBoxException();}  }
-inline void Affine2Eval::trans_V_bwd(const ExprTrans& ,ExprLabel& x, const ExprLabel& y) { x.af2->v() =(x.af2->v() &( y.af2->v())); if ((x.af2->i()).is_empty()) { throw EmptyBoxException();}  }
-inline void Affine2Eval::trans_M_bwd(const ExprTrans& ,ExprLabel& x, const ExprLabel& y) { x.af2->m() =(x.af2->m() & (y.af2->m().transpose())); if (( x.af2->m()).is_empty()) { throw EmptyBoxException();}}
-inline void Affine2Eval::sign_bwd  (const ExprSign& ,  ExprLabel& x, const ExprLabel& y)                    { if (!(proj_sign(y.af2->i(),x.af2->i()))) throw EmptyBoxException();  }
-inline void Affine2Eval::abs_bwd   (const ExprAbs& ,   ExprLabel& x, const ExprLabel& y)                    { if (!(proj_abs(y.af2->i(),x.af2->i()))) throw EmptyBoxException();  }
-inline void Affine2Eval::power_bwd (const ExprPower& e, ExprLabel& x, const ExprLabel& y)                    { if (!(proj_pow(y.af2->i(),e.expon, x.af2->i()))) throw EmptyBoxException();  }
-inline void Affine2Eval::sqr_bwd   (const ExprSqr& ,   ExprLabel& x, const ExprLabel& y)                    { if (!(proj_sqr(y.af2->i(),x.af2->i()))) throw EmptyBoxException();  }
-inline void Affine2Eval::sqrt_bwd  (const ExprSqrt& ,  ExprLabel& x, const ExprLabel& y)                    { if (!(proj_sqrt(y.af2->i(),x.af2->i()))) throw EmptyBoxException();  }
-inline void Affine2Eval::exp_bwd   (const ExprExp& ,   ExprLabel& x, const ExprLabel& y)                    { if (!(proj_exp(y.af2->i(),x.af2->i()))) throw EmptyBoxException();  }
-inline void Affine2Eval::log_bwd   (const ExprLog& ,   ExprLabel& x, const ExprLabel& y)                    { if (!(proj_log(y.af2->i(),x.af2->i()))) throw EmptyBoxException();  }
-inline void Affine2Eval::cos_bwd   (const ExprCos& ,   ExprLabel& x, const ExprLabel& y)                    { if (!(proj_cos(y.af2->i(),x.af2->i()))) throw EmptyBoxException();  }
-inline void Affine2Eval::sin_bwd   (const ExprSin& ,   ExprLabel& x, const ExprLabel& y)                    { if (!(proj_sin(y.af2->i(),x.af2->i()))) throw EmptyBoxException();  }
-inline void Affine2Eval::tan_bwd   (const ExprTan& ,   ExprLabel& x, const ExprLabel& y)                    { if (!(proj_tan(y.af2->i(),x.af2->i()))) throw EmptyBoxException();  }
-inline void Affine2Eval::cosh_bwd  (const ExprCosh& ,  ExprLabel& x, const ExprLabel& y)                    { if (!(proj_cosh(y.af2->i(),x.af2->i()))) throw EmptyBoxException();  }
-inline void Affine2Eval::sinh_bwd  (const ExprSinh& ,  ExprLabel& x, const ExprLabel& y)                    { if (!(proj_sinh(y.af2->i(),x.af2->i()))) throw EmptyBoxException();  }
-inline void Affine2Eval::tanh_bwd  (const ExprTanh& ,  ExprLabel& x, const ExprLabel& y)                    { if (!(proj_tanh(y.af2->i(),x.af2->i()))) throw EmptyBoxException();  }
-inline void Affine2Eval::acos_bwd  (const ExprAcos& ,  ExprLabel& x, const ExprLabel& y)                    { if (!(proj_acos(y.af2->i(),x.af2->i()))) throw EmptyBoxException();  }
-inline void Affine2Eval::asin_bwd  (const ExprAsin& ,  ExprLabel& x, const ExprLabel& y)                    { if (!(proj_asin(y.af2->i(),x.af2->i()))) throw EmptyBoxException();  }
-inline void Affine2Eval::atan_bwd  (const ExprAtan& ,  ExprLabel& x, const ExprLabel& y)                    { if (!(proj_atan(y.af2->i(),x.af2->i()))) throw EmptyBoxException();  }
-inline void Affine2Eval::acosh_bwd (const ExprAcosh& , ExprLabel& x, const ExprLabel& y)                    { not_implemented("Affine2 projection of \"acosh\" ");  }
-inline void Affine2Eval::asinh_bwd (const ExprAsinh& , ExprLabel& x, const ExprLabel& y)                    { not_implemented("Affine2 projection of \"asinh\" ");  }
-inline void Affine2Eval::atanh_bwd (const ExprAtanh& , ExprLabel& x, const ExprLabel& y)                    { not_implemented("Affine2 projection of \"atanh\" "); }
-
-
-
-
-
-
-
-
-
-
-
 
 } // namespace ibex
 

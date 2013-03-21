@@ -14,6 +14,7 @@
 
 #include "ibex_Ctc.h"
 #include "ibex_NumConstraint.h"
+#include "ibex_HC4Revise.h"
 
 namespace ibex {
 
@@ -29,8 +30,10 @@ public:
 	 * \brief HC4Revise on f(x)=0 or f(x)<=0.
 	 *
 	 * \param op: by default: true.
+	 * \param mode see #ibex::HC4Revise::HC4Revise(HC4Revise::FwdMode).
+	 *
 	 */
-	CtcFwdBwd(Function& f, CmpOp op=EQ);
+	CtcFwdBwd(Function& f, CmpOp op=EQ, HC4Revise::FwdMode mode=HC4Revise::INTERVAL);
 
 	/**
 	 * \remark ctr is not kept by reference.
@@ -54,6 +57,8 @@ public:
 	 */
 	const NumConstraint ctr;
 
+protected:
+	HC4Revise hc4r;
 };
 
 } // namespace ibex

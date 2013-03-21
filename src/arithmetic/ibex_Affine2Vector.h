@@ -605,58 +605,6 @@ Affine2Vector operator*(const Interval& x1, const Affine2Vector& x2);
 Affine2Vector abs(const Affine2Vector& x);
 
 /**
- * \brief Projection of $y=x_1+x_2$.
- *
- * Set $([x]_1,[x]_2)$ to $([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=x_1+x_2\}$.
- */
-bool proj_add(const Affine2Vector& y, Affine2Vector& x1, Affine2Vector& x2);
-bool proj_add(const IntervalVector& y, Affine2Vector& x1, Affine2Vector& x2);
-bool proj_add(const Affine2Vector& y, IntervalVector& x1, Affine2Vector& x2);
-bool proj_add(const Affine2Vector& y, Affine2Vector& x1, IntervalVector& x2);
-bool proj_add(const IntervalVector& y, IntervalVector& x1, Affine2Vector& x2);
-bool proj_add(const Affine2Vector& y, IntervalVector& x1, IntervalVector& x2);
-bool proj_add(const IntervalVector& y, Affine2Vector& x1, IntervalVector& x2);
-
-/**
- * \brief Projection of $y=x_1-x_2$.
- *
- * Set $([x]_1,[x]_2)$ to $([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=x_1-x_2\}$.
- */
-bool proj_sub(const Affine2Vector& y, Affine2Vector& x1, Affine2Vector& x2);
-bool proj_sub(const IntervalVector& y, Affine2Vector& x1, Affine2Vector& x2);
-bool proj_sub(const Affine2Vector& y, IntervalVector& x1, Affine2Vector& x2);
-bool proj_sub(const Affine2Vector& y, Affine2Vector& x1, IntervalVector& x2);
-bool proj_sub(const IntervalVector& y, IntervalVector& x1, Affine2Vector& x2);
-bool proj_sub(const Affine2Vector& y, IntervalVector& x1, IntervalVector& x2);
-bool proj_sub(const IntervalVector& y, Affine2Vector& x1, IntervalVector& x2);
-
-/**
- * \brief Projection of $y=x_1*x_2$ (scalar product).
- *
- * Set $([x]_1,[x]_2)$ to $([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=x_1*x_2\}$.
- */
-bool proj_mul(const Affine2Vector& y, Affine2& x1, Affine2Vector& x2);
-bool proj_mul(const IntervalVector& y, Affine2& x1, Affine2Vector& x2);
-bool proj_mul(const Affine2Vector& y, Interval& x1, Affine2Vector& x2);
-bool proj_mul(const IntervalVector& y, Interval& x1, Affine2Vector& x2);
-bool proj_mul(const Affine2Vector& y, Affine2& x1, IntervalVector& x2);
-bool proj_mul(const IntervalVector& y, Affine2& x1, IntervalVector& x2);
-bool proj_mul(const Affine2Vector& y, Interval& x1, IntervalVector& x2);
-
-/**
- * \brief Projection of $y=x_1*x_2$ (dot product).
- *
- * Set $([x]_1,[x]_2)$ to $([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=x_1*x_2\}$.
- */
-bool proj_mul(const Affine2& y, Affine2Vector& x1, Affine2Vector& x2);
-bool proj_mul(const Interval& y, Affine2Vector& x1, Affine2Vector& x2);
-bool proj_mul(const Affine2& y, IntervalVector& x1, Affine2Vector& x2);
-bool proj_mul(const Affine2& y, Affine2Vector& x1, IntervalVector& x2);
-bool proj_mul(const Interval& y, IntervalVector& x1, Affine2Vector& x2);
-bool proj_mul(const Affine2& y, IntervalVector& x1, IntervalVector& x2);
-bool proj_mul(const Interval& y, Affine2Vector& x1, IntervalVector& x2);
-
-/**
  * \brief Display the Affine2Vector \a x
  */
 std::ostream& operator<<(std::ostream& os, const Affine2Vector& x);
@@ -812,70 +760,6 @@ inline Affine2Vector cart_prod(const Affine2Vector& x, const Affine2Vector& y) {
 	z.put(x.size(),y);
 	return z;
 }
-
-inline bool proj_add(const Affine2Vector& y, Affine2Vector& x1, Affine2Vector& x2) {
-	return proj_add(y.itv(),x1,x2);
-}
-inline bool proj_add(const Affine2Vector& y, IntervalVector& x1, Affine2Vector& x2){
-	return proj_add(y.itv(),x2,x1);
-}
-inline bool proj_add(const Affine2Vector& y, Affine2Vector& x1, IntervalVector& x2){
-	return proj_add(y.itv(),x1,x2);
-}
-inline bool proj_add(const IntervalVector& y, IntervalVector& x1, Affine2Vector& x2){
-	return proj_add(y,x2,x1);
-}
-inline bool proj_add(const Affine2Vector& y, IntervalVector& x1, IntervalVector& x2){
-	return proj_add(y.itv(),x1,x2);
-}
-
-
-
-inline bool proj_sub(const Affine2Vector& y, Affine2Vector& x1, Affine2Vector& x2) {
-	return proj_sub(y.itv(),x1,x2);
-}
-inline bool proj_sub(const Affine2Vector& y, IntervalVector& x1, Affine2Vector& x2){
-	return proj_sub(y.itv(),x1,x2);
-}
-inline bool proj_sub(const Affine2Vector& y, Affine2Vector& x1, IntervalVector& x2){
-	return proj_sub(y.itv(),x1,x2);
-}
-inline bool proj_sub(const Affine2Vector& y, IntervalVector& x1, IntervalVector& x2){
-	return proj_sub(y.itv(),x1,x2);
-}
-
-
-inline bool proj_mul(const Affine2Vector& y, Affine2& x1, Affine2Vector& x2){
-	return proj_mul(y.itv(),x1,x2);
-}
-inline bool proj_mul(const Affine2Vector& y, Interval& x1, Affine2Vector& x2){
-	return proj_mul(y.itv(),x1,x2);
-}
-inline bool proj_mul(const Affine2Vector& y, Affine2& x1, IntervalVector& x2){
-	return proj_mul(y.itv(),x1,x2);
-}
-inline bool proj_mul(const Affine2Vector& y, Interval& x1, IntervalVector& x2){
-	return proj_mul(y.itv(),x1,x2);
-}
-
-
-
-inline bool proj_mul(const Affine2& y, Affine2Vector& x1, Affine2Vector& x2){
-	return proj_mul(y.itv(),x1,x2);
-}
-inline bool proj_mul(const Affine2& y, IntervalVector& x1, Affine2Vector& x2){
-	return proj_mul(y.itv(),x2,x1);
-}
-inline bool proj_mul(const Affine2& y, Affine2Vector& x1, IntervalVector& x2){
-	return proj_mul(y.itv(),x1,x2);
-}
-inline bool proj_mul(const Interval& y, IntervalVector& x1, Affine2Vector& x2){
-	return proj_mul(y,x2,x1);
-}
-inline bool proj_mul(const Affine2& y, IntervalVector& x1, IntervalVector& x2){
-	return proj_mul(y.itv(),x1,x2);
-}
-
 
 
 } // end namespace

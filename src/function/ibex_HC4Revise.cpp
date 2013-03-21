@@ -9,23 +9,21 @@
 //============================================================================
 
 #include "ibex_HC4Revise.h"
+#include "ibex_Eval.h"
+#include "ibex_Affine2Eval.h"
 
 namespace ibex {
 
 const double HC4Revise::RATIO = 0.1;
 
-void HC4Revise::proj(const Function& f, const Domain& y, Array<Domain>& x) {
-	Eval().eval(f,x);
-	*f.expr().deco.d &= y; // "&" for the case of a function x->x
-	f.backward<HC4Revise>(*this);
-	// note: not very clean.
-	// the box x is not emptied if an EmptyBoxException is thrown
-	// before (this is done by the contractor).
-	load(x,f.arg_domains,f.nb_used_vars,f.used_var);
+HC4Revise::HC4Revise(FwdMode mode) : fwd_mode(mode) {
+
 }
 
+#define EVAL(f,x) if (fwd_mode==INTERVAL) Eval().eval(f,x); else Affine2Eval().eval(f,x);
+
 void HC4Revise::proj(const Function& f, const Domain& y, IntervalVector& x) {
-	Eval().eval(f,x);
+	EVAL(f,x);
 	*f.expr().deco.d &= y;
 	f.backward<HC4Revise>(*this);
 
@@ -41,7 +39,7 @@ void HC4Revise::proj(const Function& f, const Domain& y, IntervalVector& x) {
 }
 
 void HC4Revise::proj(const Function& f, const Domain& y, ExprLabel** x) {
-	Eval().eval(f,x);
+	EVAL(f,x);
 	*f.expr().deco.d &= y;
 	f.backward<HC4Revise>(*this);
 

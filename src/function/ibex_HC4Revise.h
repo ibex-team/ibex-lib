@@ -11,7 +11,6 @@
 #ifndef __IBEX_HC4_REVISE_H__
 #define __IBEX_HC4_REVISE_H__
 
-#include "ibex_Eval.h"
 #include "ibex_EmptyBoxException.h"
 #include "ibex_Function.h"
 
@@ -24,10 +23,15 @@ namespace ibex {
  */
 class HC4Revise : public BwdAlgorithm {
 public:
+
+	typedef enum { INTERVAL, AFFINE } FwdMode;
+
 	/**
-	 * \brief Project f(x)=y onto x (backward algorithm)
+	 * \brief HC4Revise
+	 *
+	 * \param mode  the arithmetic for forward evaluation. By default: interval arithmetic.
 	 */
-	void proj(const Function& f, const Domain& y, Array<Domain>& x);
+	HC4Revise(FwdMode mode=INTERVAL);
 
 	/**
 	 * \brief Project f(x)=y onto x (backward algorithm)
@@ -88,6 +92,7 @@ public:
 
 protected:
 	void proj(const Function& f, const Domain& y, ExprLabel** x);
+	FwdMode fwd_mode;
 };
 
 } /* namespace ibex */
