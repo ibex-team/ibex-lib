@@ -18,7 +18,7 @@ namespace ibex {
 
 
   const double CtcLinearRelaxation::default_max_diam_box =1e4;
-  
+    
 
   CtcLinearRelaxation::CtcLinearRelaxation(const System& sys, int goal_ctr,Function* fgoal,
 				 ctc_mode cmode, int max_iter_soplex, double max_diam_box) : 
@@ -73,7 +73,7 @@ namespace ibex {
 
 
 void CtcLinearRelaxation::contract (IntervalVector & box){
-
+  if (box.max_diam() > max_diam_box) return; // is it necessary?  YES (BNE) Soplex can give false infeasible results with large numbers
   int n=sys.nb_var;
   
   SoPlex mysoplex;
