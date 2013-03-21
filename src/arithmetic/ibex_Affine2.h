@@ -15,6 +15,7 @@
 #include "ibex_Interval.h"
 //#include "ibex_IntervalVector.h"
 #include <cmath>
+#include <cassert>
 
 namespace ibex {
 

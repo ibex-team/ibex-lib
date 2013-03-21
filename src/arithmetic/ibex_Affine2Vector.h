@@ -406,50 +406,50 @@ public:
 	double rel_distance(const Affine2Vector& x) const;
 	double rel_distance(const IntervalVector& x) const;
 
-	/**
-	 * \brief Return *this \ y (set difference).
-	 *
-	 * Store the difference under the form of a union of non-overlapping IntervalVectors
-	 * into \a result, and return the size of the union.
-	 *
-	 * <p>
-	 * If the difference is empty, \a result is an array of one element set to the empty box.
-	 * It is <b>not</b> a zero-sized array containing no element.
-	 */
-	int diff(const IntervalVector& y, IntervalVector*& result) const;
-	int diff(const Affine2Vector& y, IntervalVector*& result) const;
-
-	/**
-	 * \brief Return the complementary of *this.
-	 *
-	 * Store the complementary under the form of a union of non-overlapping IntervalVectors,
-	 * into \a result, and return the size of the union.
-	 *
-	 * <p>
-	 * If (*this) is the empty set with n components, the complementary of (*this) is
-	 * the n-dimensional box (-oo,oo)x...(-oo,oo).
-	 *
-	 * <p>
-	 * If the complementary is empty, \a result is an array of one element set to the empty box.
-	 * It is <b>not</b> a zero-sized array containing no element.
-	 */
-	int complementary(IntervalVector*& result) const;
-
-
-	/**
-	 * \brief Bisect the box
-	 *
-	 * The box is bisected along the dimension \a i
-	 * and with a ratio \a ratio. If (*this)[i] is the interval [a,a+d]:
-	 * <ul>
-	 * <li> The first box of the result is (*this)[0]x...x(*this)[i-1]x[a+ratio*d]x...
-	 * <li> The second box is (*this)[0]x...x(*this)[i-1]x[a+ratio*d,a+d]x...
-	 * </ul>
-	 * Default value for the ratio is 0.5.
-	 * \pre 0<ratio<1
-	 */
-	std::pair<IntervalVector,IntervalVector> bisect(int i, double ratio) const;
-
+//	/**
+//	 * \brief Return *this \ y (set difference).
+//	 *
+//	 * Store the difference under the form of a union of non-overlapping IntervalVectors
+//	 * into \a result, and return the size of the union.
+//	 *
+//	 * <p>
+//	 * If the difference is empty, \a result is an array of one element set to the empty box.
+//	 * It is <b>not</b> a zero-sized array containing no element.
+//	 */
+//	int diff(const IntervalVector& y, IntervalVector*& result) const;
+//	int diff(const Affine2Vector& y, IntervalVector*& result) const;
+//
+//	/**
+//	 * \brief Return the complementary of *this.
+//	 *
+//	 * Store the complementary under the form of a union of non-overlapping IntervalVectors,
+//	 * into \a result, and return the size of the union.
+//	 *
+//	 * <p>
+//	 * If (*this) is the empty set with n components, the complementary of (*this) is
+//	 * the n-dimensional box (-oo,oo)x...(-oo,oo).
+//	 *
+//	 * <p>
+//	 * If the complementary is empty, \a result is an array of one element set to the empty box.
+//	 * It is <b>not</b> a zero-sized array containing no element.
+//	 */
+//	int complementary(IntervalVector*& result) const;
+//
+//
+//	/**
+//	 * \brief Bisect the box
+//	 *
+//	 * The box is bisected along the dimension \a i
+//	 * and with a ratio \a ratio. If (*this)[i] is the interval [a,a+d]:
+//	 * <ul>
+//	 * <li> The first box of the result is (*this)[0]x...x(*this)[i-1]x[a+ratio*d]x...
+//	 * <li> The second box is (*this)[0]x...x(*this)[i-1]x[a+ratio*d,a+d]x...
+//	 * </ul>
+//	 * Default value for the ratio is 0.5.
+//	 * \pre 0<ratio<1
+//	 */
+//	std::pair<IntervalVector,IntervalVector> bisect(int i, double ratio) const;
+//
 	/**
 	 * \brief Return a random vector inside *this.
 	 *

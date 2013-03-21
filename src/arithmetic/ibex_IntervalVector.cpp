@@ -10,6 +10,7 @@
  * ---------------------------------------------------------------------------- */
 
 #include "ibex_IntervalVector.h"
+#include "ibex_Affine2Vector.h"
 #include <vector>
 #include <stdlib.h>
 #include <sstream>
@@ -17,8 +18,10 @@
 #include <float.h>
 #include <algorithm>
 
-namespace ibex {
 
+#include "ibex_TemplateVector.cpp_"
+
+namespace ibex {
 
 IntervalVector::IntervalVector(int nn) : n(nn), vec(new Interval[nn]) {
 	assert(nn>=1);
@@ -52,16 +55,6 @@ void IntervalVector::init(const Interval& x) {
 		(*this)[i]=x;
 }
 
-IntervalVector& IntervalVector::inflate(double rad1) {
-	if (is_empty()) return *this;
-	Interval r(-rad1,rad1);
-	// little optim: we do not call (*this)[i].inflate(rad)
-	// because this would create n times
-	// the interval [-rad,rad]
-	for (int i=0; i<size(); i++)
-		(*this)[i]+=r;
-	return *this;
-}
 
 void IntervalVector::resize(int n2) {
 	assert(n2>=1);
@@ -82,45 +75,6 @@ void IntervalVector::resize(int n2) {
 	vec = newVec;
 }
 
-IntervalVector IntervalVector::subvector(int start_index, int end_index) const {
-	assert(!is_empty());
-	assert(end_index>=0 && start_index>=0);
-	assert(end_index<size() && start_index<=end_index);
-	//throw InvalidIntervalVectorOp("Invalid indices for IntervalVector::subvector");
-
-	IntervalVector v(end_index-start_index+1);
-	int j=0;
-	for (int i=start_index; i<=end_index; i++) {
-		v[j++]=(*this)[i];
-	}
-	return v;
-}
-
-void IntervalVector::put(int start_index, const IntervalVector& subvec) {
-	assert(!is_empty());
-	int end_index=start_index+subvec.size()-1;
-	assert(start_index>=0 && end_index<size());
-
-	int j=0;
-	for (int i=start_index; i<=end_index; i++) {
-		(*this)[i]=subvec[j++];
-	}
-}
-
-IntervalVector& IntervalVector::operator=(const IntervalVector& x) {
-	assert(size()==x.size()); // throw InvalidIntervalVectorOp("Cannot set a IntervalVector to a IntervalVector with different dimension");
-
-	if (x.is_empty())
-		set_empty();
-	else
-		// don't use "set(...)" because the test "is_empty()" called inside
-		// may return prematurely in case "this" is empty.
-		// use physical copy instead:
-		for (int i=0; i<size(); i++)
-			(*this)[i]=x[i];
-
-	return *this;
-}
 
 IntervalVector& IntervalVector::operator&=(const IntervalVector& x)  {
 	// dimensions are non zero henceforth
@@ -152,139 +106,6 @@ IntervalVector& IntervalVector::operator|=(const IntervalVector& x)  {
 	return *this;
 }
 
-bool IntervalVector::operator==(const IntervalVector& x) const {
-	if (n!=x.size()) return false;
-	if (is_empty() || x.is_empty()) return is_empty() && x.is_empty();
-	for (int i=0; i<n; i++)
-		if ((*this)[i]!=(x[i])) return false;
-	return true;
-}
-
-Vector IntervalVector::lb() const {
-	assert(!is_empty());
-
-	Vector l(size());
-	for (int i=0; i<size(); i++) {
-		l[i]=(*this)[i].lb();
-	}
-	return l;
-}
-
-Vector IntervalVector::ub() const {
-	assert(!is_empty());
-
-	Vector u(size());
-	for (int i=0; i<size(); i++) {
-		u[i]=(*this)[i].ub();
-	}
-	return u;
-}
-
-Vector IntervalVector::mid() const {
-	assert(!is_empty());
-
-	Vector mV(size());
-	for (int i=0; i<size(); i++) {
-		mV[i]=(*this)[i].mid();
-	}
-	return mV;
-}
-
-Vector IntervalVector::mig() const {
-	assert(!is_empty());
-
-	Vector res(size());
-	for (int i=0; i<size(); i++) {
-		res[i]=(*this)[i].mig();
-	}
-	return res;
-}
-
-Vector IntervalVector::mag() const {
-	assert(!is_empty());
-
-	Vector res(size());
-	for (int i=0; i<size(); i++) {
-		res[i]=(*this)[i].mag();
-	}
-	return res;
-}
-
-bool IntervalVector::is_flat() const {
-	if (is_empty()) return true;
-	for (int i=0; i<size(); i++)
-		if ((*this)[i].is_degenerated()) // don't use diam() because of roundoff
-			return true;
-	return false;
-}
-
-bool IntervalVector::contains(const Vector& x) const {
-  for (int i=0; i<size(); i++)
-    if (!(*this)[i].contains(x[i])) return false;
-  return true;
-}
-
-bool IntervalVector::is_unbounded() const {
-  if (is_empty()) return false;
-  for (int i=0; i<size(); i++)
-    if ((*this)[i].is_unbounded()) return true;
-  return false;
-}
-
-bool IntervalVector::is_subset(const IntervalVector& x) const {
-  if (is_empty()) return true;
-  for (int i=0; i<size(); i++)
-    if (!(*this)[i].is_subset(x[i])) return false;
-  return true;
-}
-
-bool IntervalVector::is_strict_subset(const IntervalVector& x) const {
-  if (is_empty() && !x.is_empty()) return true;
-  if (x.is_empty()) return false;
-  for (int i=0; i<size(); i++)
-    if (!(*this)[i].is_strict_subset(x[i])) return false;
-  return true;
-}
-
-bool IntervalVector::is_zero() const {
-	for (int i=0; i<size(); i++)
-		if ((*this)[i]!=Interval::ZERO) return false;
-	return true;
-}
-
-bool IntervalVector::is_bisectable() const {
-	for (int i=0; i<size(); i++)
-		if ((*this)[i].is_bisectable()) return true;
-	return false;
-}
-
-Vector IntervalVector::rad() const {
-	Vector r(size());
-	for (int i=0; i<size(); i++)
-		r[i]=(*this)[i].rad();
-	return r;
-}
-
-Vector IntervalVector::diam() const {
-	Vector d(size());
-	for (int i=0; i<size(); i++)
-		d[i]=(*this)[i].diam();
-	return d;
-}
-
-int IntervalVector::extr_diam_index(bool min) const {
-	double d=(*this)[0].diam();
-	int selectedIndex=0;
-	if (is_empty()) throw InvalidIntervalVectorOp("Diameter of an empty IntervalVector is undefined");
-	for (int i=1; i<size(); i++) {
-		double w=(*this)[i].diam();
-		if (min? w<d : w>d) {
-			selectedIndex=i;
-			d=w;
-		}
-	}
-	return selectedIndex;
-}
 
 namespace {
 
@@ -296,44 +117,12 @@ bool diam_gt(const int& i, const int& j) {
 	return (*tmp)[i].diam()>(*tmp)[j].diam();
 }
 
-} // end namespace
+} // end anonymous namespace
 
 void IntervalVector::sort_indices(bool min, int tab[]) const {
 	for (int i=0; i<n; i++) tab[i]=i;
 	tmp=this;
 	std::sort(tab,tab+n,min? diam_lt:diam_gt);
-}
-
-std::ostream& operator<<(std::ostream& os, const IntervalVector& x) {
-	if (x.is_empty()) return os << "empty vector";
-
-	os << "(";
-	for (int i=0; i<x.size(); i++)
-		os << x[i] << (i<x.size()-1? " ; " : "");
-	os << ")";
-	return os;
-}
-
-double IntervalVector::volume() const {
-	if ((*this)[0].is_unbounded()) return POS_INFINITY;
-	if ((*this)[0].is_degenerated()) return 0;
-	double vol=::log(((*this)[0]).diam());
-	for (int i=1; i<size(); i++) {
-		if ((*this)[i].is_unbounded()) return POS_INFINITY;
-		if ((*this)[i].is_degenerated()) return 0;
-		vol+=::log(((*this)[i]).diam());
-	}
-	return ::exp(vol);
-}
-
-double IntervalVector::perimeter() const {
-	if ((*this)[0].is_unbounded()) return POS_INFINITY;
-	double per=((*this)[0]).diam();
-	for (int i=1; i<size(); i++) {
-		if ((*this)[i].is_unbounded()) return POS_INFINITY;
-		per+=((*this)[i]).diam();
-	}
-	return per;
 }
 
 double distance(const IntervalVector& x1, const IntervalVector& x2) {
@@ -356,14 +145,6 @@ double IntervalVector::maxdelta(const IntervalVector& x) {
 	return max;
 }
 
-double IntervalVector::rel_distance(const IntervalVector& x) const {
-	double max = (*this)[0].rel_distance(x[0]);
-	for (int i=1; i<size(); i++) {
-		double cand = (*this)[i].rel_distance(x[i]);
-		if (max<cand) max = cand;
-	}
-	return max;
-}
 
 namespace { // to create anonymous structure/functions
 
@@ -466,43 +247,6 @@ int IntervalVector::complementary(IntervalVector*& result) const {
 	return IntervalVector(size()).diff(*this,result);
 }
 
-std::pair<IntervalVector,IntervalVector> IntervalVector::bisect(int i, double ratio) const {
-	assert(0<ratio && ratio<1.0);
-	assert(0<=i && i<size());
-
-	if (!(*this)[i].is_bisectable()) {
-		std::ostringstream oss;
-		oss << "Unable to bisect " << *this;
-		throw InvalidIntervalVectorOp(oss.str());
-	}
-	IntervalVector left(*this);
-	IntervalVector right(*this);
-
-	std::pair<Interval,Interval> p=(*this)[i].bisect(ratio);
-
-	left[i] = p.first;
-	right[i] = p.second;
-
-	return std::pair<IntervalVector,IntervalVector>(left,right);
-}
-
-Vector IntervalVector::random() const {
-	assert(!is_empty());
-
-	Vector b(size());
-	for (int i=0; i<size(); i++) {
-		const Interval& xi=(*this)[i];
-		// get a random number in [-0.5,0.5]
-		double r=rand()/(double) RAND_MAX -0.5;
-		// pick a point in the domain of the ith variable
-		double p = xi.mid() + r*xi.diam();
-		// watch dog
-		if (p<xi.lb()) p=xi.lb();
-		else if (p>xi.ub()) p=xi.ub();
-		b[i]=p;
-	}
-	return b;
-}
 
 bool proj_add(const IntervalVector& y, IntervalVector& x1, IntervalVector& x2) {
 	x1 &= y-x2;
@@ -555,10 +299,40 @@ bool proj_mul(const Interval& z, IntervalVector& x, IntervalVector& y) {
 
 	for (int i=0; i<n; i++)
 		if (!proj_mul(xy[i],x[i],y[i])) { x.set_empty(); y.set_empty(); delete[] sum; delete[] xy; return false; }
- 	
+
 	delete[] sum; 
 	delete[] xy;
 	return true;
 }
 
+
+IntervalVector& IntervalVector::inflate(double rad1)                              { return _inflate(*this,rad1); }
+IntervalVector  IntervalVector::subvector(int start_index, int end_index) const   { return _subvector(*this,start_index,end_index); }
+void            IntervalVector::put(int start_index, const IntervalVector& x)     { _put(*this, start_index, x); }
+IntervalVector& IntervalVector::operator=(const IntervalVector& x)                { return _assign(*this,x); }
+bool            IntervalVector::operator==(const IntervalVector& x) const         { return _equals(*this,x); }
+Vector          IntervalVector::lb() const                                        { return _lb(*this); }
+Vector          IntervalVector::ub() const                                        { return _ub(*this); }
+Vector          IntervalVector::mid() const                                       { return _mid(*this); }
+Vector          IntervalVector::mig() const                                       { return _mig(*this); }
+Vector          IntervalVector::mag() const                                       { return _mag(*this); }
+bool            IntervalVector::is_flat() const                                   { return _is_flat(*this); }
+bool            IntervalVector::contains(const Vector& x) const                   { return _contains(*this,x); }
+bool            IntervalVector::is_unbounded() const                              { return _is_unbounded(*this); }
+bool            IntervalVector::is_subset(const IntervalVector& x) const          { return _is_subset(*this,x); }
+bool            IntervalVector::is_strict_subset(const IntervalVector& x) const   { return _is_strict_subset(*this,x); }
+bool            IntervalVector::is_zero() const                                   { return _is_zero(*this); }
+bool            IntervalVector::is_bisectable() const                             { return _is_bisectable(*this); }
+Vector          IntervalVector::rad() const                                       { return _rad(*this); }
+Vector          IntervalVector::diam() const                                      { return _diam(*this); }
+int             IntervalVector::extr_diam_index(bool min) const                   { return _extr_diam_index(*this,min); }
+std::ostream&   operator<<(std::ostream& os, const IntervalVector& x)             { return _display(os,x); }
+double          IntervalVector::volume() const                                    { return _volume(*this); }
+double          IntervalVector::perimeter() const                                 { return _perimeter(*this); }
+double          IntervalVector::rel_distance(const IntervalVector& x) const       { return _rel_distance(*this,x); }
+Vector          IntervalVector::random() const                                    { return _random<IntervalVector,Interval>(*this); }
+std::pair<IntervalVector,IntervalVector> IntervalVector::bisect(int i, double ratio) const  { return _bisect(*this, i, ratio); }
+
+
 } // end namespace
+
