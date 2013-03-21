@@ -55,12 +55,12 @@ DefaultOptimizer::DefaultOptimizer(System& _sys, double prec, double goal_prec) 
 
 	srand(1);}
 
-// the corners for X_Newton : one random orner and its opposite
-vector<X_Newton::corner_point>*  DefaultOptimizer::default_corners () {
-	vector<X_Newton::corner_point>* x;
-	x= new vector<X_Newton::corner_point>;
-	x->push_back(X_Newton::RANDOM);
-	x->push_back(X_Newton::RANDOM_INV);
+// the corners for CtcXNewtonIter : one random orner and its opposite
+vector<CtcXNewtonIter::corner_point>*  DefaultOptimizer::default_corners () {
+	vector<CtcXNewtonIter::corner_point>* x;
+	x= new vector<CtcXNewtonIter::corner_point>;
+	x->push_back(CtcXNewtonIter::RANDOM);
+	x->push_back(CtcXNewtonIter::RANDOM_INV);
 	return x;
 }
 
@@ -72,13 +72,12 @@ Array<Ctc>*  DefaultOptimizer::contractor_list (System& sys, System& ext_sys,dou
 	ctc_list->set_ref(0, *new CtcHC4 (ext_sys.ctrs,0.01,true));
 	// second contractor on ext_sys : acid (hc4)   with incremental hc4  ratio propag 0.1
 	ctc_list->set_ref(1, *new CtcAcid (ext_sys,*new CtcHC4 (ext_sys.ctrs,0.1,true),true));
-	// the last contractor is X_Newton  with rfp=0.2 and rfp2=0.2
+	// the last contractor is CtcXNewtonIter  with rfp=0.2 and rfp2=0.2
 	// the limits for calling soplex are 1e5 for the derivatives and 1e5 for the domains : no error found with these bounds
-	ctc_list->set_ref(2,*new X_Newton(ext_sys,
-			new CtcHC4 (ext_sys.ctrs,0.01),  // called in the X_Newton external loop
-			*(default_corners()),
-					  0,sys.goal,0.2,0.2,LR_contractor::ALL_BOX,X_Newton::HANSEN,100,1.e6,1.e6));
-
+	ctc_list->set_ref(2,*new CtcXNewton 
+			  (*new CtcXNewtonIter(ext_sys,	*(default_corners()),
+					       0,sys.goal,CtcLinearRelaxation::ALL_BOX,CtcXNewtonIter::HANSEN,100,1.e6,1.e6),
+			   *new CtcHC4 (ext_sys.ctrs,0.01)));
 	return ctc_list;
 }
 
@@ -86,13 +85,16 @@ Array<Ctc>*  DefaultOptimizer::contractor_list (System& sys, System& ext_sys,dou
 // deletion of all dynamically created objects
 DefaultOptimizer::~DefaultOptimizer() {
 	delete &((dynamic_cast<CtcAcid*> (&__ctc->list[1]))->ctc);
-	delete (dynamic_cast<X_Newton*> (&__ctc->list[2]))->ctc;
-	delete &((dynamic_cast<X_Newton*> (&__ctc->list[2]))->cpoints);
+	CtcCompo* ctccompo= dynamic_cast<CtcCompo*>(&(dynamic_cast<CtcXNewton*>( &__ctc->list[2])->ctc));
+	delete &((dynamic_cast<CtcXNewtonIter*> (&(ctccompo->list[0]))->cpoints));
+	delete &(ctccompo->list[0]);
+	delete &(ctccompo->list[1]);
 	for (int i=0 ; i<__ctc->list.size(); i++)
 		delete &__ctc->list[i];
 	delete __ctc;
 	delete __bsc;
 	delete __ext_sys;
+
 }
 
 } // end namespace ibex
