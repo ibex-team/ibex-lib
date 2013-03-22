@@ -27,6 +27,8 @@ namespace ibex {
 
 namespace {
 
+int id_count=0;
+
 int max_height(const ExprNode& n1, const ExprNode& n2) {
 	if (n1.height>n2.height) return n1.height;
 	else return n2.height;
@@ -42,7 +44,7 @@ int max_height(const ExprNode** args, int n) {
 } // end anonymous namespace
 
 ExprNode::ExprNode(int height, int size, const Dim& dim) :
-  height(height), size(size), id(-1), dim(dim), father(NULL) {
+  height(height), size(size), id(id_count++), dim(dim), father(NULL) {
 
 }
 

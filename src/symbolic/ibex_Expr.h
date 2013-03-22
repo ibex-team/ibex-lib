@@ -71,10 +71,13 @@ public:
 	 * two subnodes referencing the same object count for 1).*/
 	const int size;
 
-	/** Unique number identifying this node in the global function.
+	/** Unique number identifying this expression node
 	 *
-	 * Undefined while this node is not part of a function expression. */
-	const int id;
+	 * This field is typically used as key in hash maps. The physical address of the
+	 * object is indeed not a good candidate (for being a key) because reproductibility
+	 * is lost in this case.
+	 */
+	const long id;
 
 	/** Dimensions */
 	const Dim dim;

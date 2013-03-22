@@ -24,10 +24,10 @@ namespace ibex {
  */
 class HC4Revise : public BwdAlgorithm {
 public:
-	/**
+	/*
 	 * \brief Project f(x)=y onto x (backward algorithm)
 	 */
-	void proj(const Function& f, const Domain& y, Array<Domain>& x);
+//	void proj(const Function& f, const Domain& y, Array<Domain>& x);
 
 	/**
 	 * \brief Project f(x)=y onto x (backward algorithm)

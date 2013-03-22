@@ -12,16 +12,31 @@
 #define __IBEX_NODE_MAP_H__
 
 #include "ibex_Expr.h"
+#include <functional>
 
 #ifdef __GNUC__
 #include <tr1/unordered_map>
-#define IBEX_NODE_MAP(T) std::tr1::unordered_map<const ExprNode*,T>
+#define HASH std::tr1::hash
+#define IBEX_NODE_MAP(T) std::tr1::unordered_map<const ExprNode*,T,hash_node,same_node>
 #else
 #include <unordered_map>
-#define IBEX_NODE_MAP(T) std::unordered_map<const ExprNode*,T>
+#define HASH std::hash
+#define IBEX_NODE_MAP(T) std::unordered_map<const ExprNode*,T,hash_node,same_node>
 #endif
 
 namespace ibex {
+
+struct same_node {
+	bool operator() (const ExprNode* node1, const ExprNode* node2) const {
+		return node1->id == node2->id;
+	}
+};
+
+struct hash_node {
+	unsigned long operator()(const ExprNode* node) const {
+		 return HASH<long>()(node->id);
+	}
+};
 
 /**
  * \brief An unordered map which keys are expression nodes.

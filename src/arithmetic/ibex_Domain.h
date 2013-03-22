@@ -244,7 +244,7 @@ public:
 		return *(IntervalVector*) domain;
 	}
 	/**
-	 * \brief Return the domain as a matrix.
+	 * \brief Return the domain as a const matrix.
 	 */
 	inline const IntervalMatrix& m() const  {
 		assert(domain);
@@ -253,7 +253,7 @@ public:
 	}
 
 	/**
-	 * \brief Return the domain as an array of matrices.
+	 * \brief Return the domain as a const array of matrices.
 	 */
 	inline const IntervalMatrixArray& ma() const {
 		assert(domain);
@@ -277,7 +277,6 @@ public:
 	void clear();
 
 private:
-	friend class Domains;
 
 	Domain() : dim(), is_reference(false), domain(NULL) { }
 

@@ -254,101 +254,101 @@ const char* CompiledFunction::op(operation o) const {
 
 // for debug only
 void CompiledFunction::print() const {
-	const CompiledFunction& f=*this;
-	for (int i=0; i<f.n; i++) {
-		switch(f.code[i]) {
-		case CompiledFunction::IDX:
-		{
-			ExprIndex& e=(ExprIndex&) *(f.nodes[i]);
-			cout << e.id << ": [" << e.index << "]" << " " << *f.args[i][0] << " " << e.expr.id ;
-		}
-		break;
-		case CompiledFunction::VEC:
-		{
-			ExprVector& e=(ExprVector&) *(f.nodes[i]);
-			cout << e.id << ": vec " << " " << *f.args[i][0] << " ";
-			for (int i=0; i<e.nb_args; i++)
-				cout << (e.arg(i).id) << " ";
-		}
-		break;
-		case CompiledFunction::SYM:
-		{
-			ExprSymbol& e=(ExprSymbol&) *(f.nodes[i]);
-			cout << e.id << ": " << e.name << " " << *f.args[i][0];
-		}
-		break;
-		case CompiledFunction::CST:
-		{
-			ExprConstant& e=(ExprConstant&) *(f.nodes[i]);
-			cout << e.id << ": cst=";
-			if (e.dim.is_scalar()) cout << e.get_value();
-			else if (e.dim.is_vector()) cout << e.get_vector_value();
-			else e.get_matrix_value();
-			cout << " " <<  *f.args[i][0];
-		}
-		break;
-		case CompiledFunction::APPLY:
-		{
-			ExprApply& e=(ExprApply&) *(f.nodes[i]);
-			cout << e.id << ": " << "func()" << " " << *f.args[i][0];
-			for (int j=0; j<e.nb_args; j++)
-				cout << " " << e.arg(j).id;
-		}
-		break;
-		case CompiledFunction::ADD:
-		case CompiledFunction::ADD_V:
-		case CompiledFunction::ADD_M:
-		case CompiledFunction::MUL:
-		case CompiledFunction::MUL_SV:
-		case CompiledFunction::MUL_SM:
-		case CompiledFunction::MUL_VV:
-		case CompiledFunction::MUL_MV:
-		case CompiledFunction::MUL_MM:
-		case CompiledFunction::SUB:
-		case CompiledFunction::SUB_V:
-		case CompiledFunction::SUB_M:
-		case CompiledFunction::DIV:
-		case CompiledFunction::MAX:
-		case CompiledFunction::MIN:
-		case CompiledFunction::ATAN2:
-		{
-			ExprBinaryOp& e=(ExprBinaryOp&) *(f.nodes[i]);
-			cout << e.id << ": " << f.op(f.code[i]) << " " << *f.args[i][0] << " ";
-			cout << e.left.id << " " << e.right.id;
-		}
-		break;
-
-		case CompiledFunction::MINUS:
-		case CompiledFunction::TRANS_V:
-		case CompiledFunction::TRANS_M:
-		case CompiledFunction::SIGN:
-		case CompiledFunction::ABS:
-		case CompiledFunction::POWER:
-		case CompiledFunction::SQR:
-		case CompiledFunction::SQRT:
-		case CompiledFunction::EXP:
-		case CompiledFunction::LOG:
-		case CompiledFunction::COS:
-		case CompiledFunction::SIN:
-		case CompiledFunction::TAN:
-		case CompiledFunction::COSH:
-		case CompiledFunction::SINH:
-		case CompiledFunction::TANH:
-		case CompiledFunction::ACOS:
-		case CompiledFunction::ASIN:
-		case CompiledFunction::ATAN:
-		case CompiledFunction::ACOSH:
-		case CompiledFunction::ASINH:
-		case CompiledFunction::ATANH:
-		{
-			ExprUnaryOp& e=(ExprUnaryOp&) *(f.nodes[i]);
-			cout << e.id << ": " << f.op(f.code[i]) << " " << *f.args[i][0] << " ";
-			cout << e.expr.id;
-		}
-		break;
-		}
-		cout << endl;
-	}
+//	const CompiledFunction& f=*this;
+//	for (int i=0; i<f.n; i++) {
+//		switch(f.code[i]) {
+//		case CompiledFunction::IDX:
+//		{
+//			ExprIndex& e=(ExprIndex&) *(f.nodes[i]);
+//			cout << e.id << ": [" << e.index << "]" << " " << *f.args[i][0] << " " << e.expr.id ;
+//		}
+//		break;
+//		case CompiledFunction::VEC:
+//		{
+//			ExprVector& e=(ExprVector&) *(f.nodes[i]);
+//			cout << e.id << ": vec " << " " << *f.args[i][0] << " ";
+//			for (int i=0; i<e.nb_args; i++)
+//				cout << (e.arg(i).id) << " ";
+//		}
+//		break;
+//		case CompiledFunction::SYM:
+//		{
+//			ExprSymbol& e=(ExprSymbol&) *(f.nodes[i]);
+//			cout << e.id << ": " << e.name << " " << *f.args[i][0];
+//		}
+//		break;
+//		case CompiledFunction::CST:
+//		{
+//			ExprConstant& e=(ExprConstant&) *(f.nodes[i]);
+//			cout << e.id << ": cst=";
+//			if (e.dim.is_scalar()) cout << e.get_value();
+//			else if (e.dim.is_vector()) cout << e.get_vector_value();
+//			else e.get_matrix_value();
+//			cout << " " <<  *f.args[i][0];
+//		}
+//		break;
+//		case CompiledFunction::APPLY:
+//		{
+//			ExprApply& e=(ExprApply&) *(f.nodes[i]);
+//			cout << e.id << ": " << "func()" << " " << *f.args[i][0];
+//			for (int j=0; j<e.nb_args; j++)
+//				cout << " " << e.arg(j).id;
+//		}
+//		break;
+//		case CompiledFunction::ADD:
+//		case CompiledFunction::ADD_V:
+//		case CompiledFunction::ADD_M:
+//		case CompiledFunction::MUL:
+//		case CompiledFunction::MUL_SV:
+//		case CompiledFunction::MUL_SM:
+//		case CompiledFunction::MUL_VV:
+//		case CompiledFunction::MUL_MV:
+//		case CompiledFunction::MUL_MM:
+//		case CompiledFunction::SUB:
+//		case CompiledFunction::SUB_V:
+//		case CompiledFunction::SUB_M:
+//		case CompiledFunction::DIV:
+//		case CompiledFunction::MAX:
+//		case CompiledFunction::MIN:
+//		case CompiledFunction::ATAN2:
+//		{
+//			ExprBinaryOp& e=(ExprBinaryOp&) *(f.nodes[i]);
+//			cout << e.id << ": " << f.op(f.code[i]) << " " << *f.args[i][0] << " ";
+//			cout << e.left.id << " " << e.right.id;
+//		}
+//		break;
+//
+//		case CompiledFunction::MINUS:
+//		case CompiledFunction::TRANS_V:
+//		case CompiledFunction::TRANS_M:
+//		case CompiledFunction::SIGN:
+//		case CompiledFunction::ABS:
+//		case CompiledFunction::POWER:
+//		case CompiledFunction::SQR:
+//		case CompiledFunction::SQRT:
+//		case CompiledFunction::EXP:
+//		case CompiledFunction::LOG:
+//		case CompiledFunction::COS:
+//		case CompiledFunction::SIN:
+//		case CompiledFunction::TAN:
+//		case CompiledFunction::COSH:
+//		case CompiledFunction::SINH:
+//		case CompiledFunction::TANH:
+//		case CompiledFunction::ACOS:
+//		case CompiledFunction::ASIN:
+//		case CompiledFunction::ATAN:
+//		case CompiledFunction::ACOSH:
+//		case CompiledFunction::ASINH:
+//		case CompiledFunction::ATANH:
+//		{
+//			ExprUnaryOp& e=(ExprUnaryOp&) *(f.nodes[i]);
+//			cout << e.id << ": " << f.op(f.code[i]) << " " << *f.args[i][0] << " ";
+//			cout << e.expr.id;
+//		}
+//		break;
+//		}
+//		cout << endl;
+//	}
 }
 
 } // end namespace
