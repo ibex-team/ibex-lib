@@ -74,7 +74,7 @@ double ConstantGenerator::eval_double(const ExprNode& expr) {
 	switch(number_type) {
 	case NEG_INF: return NEG_INFINITY;
 	case POS_INF: return POS_INFINITY;
-	default:      return to_double(eval(expr));
+	default:      return to_double(d); //eval(expr));
 	}
 }
 
@@ -103,6 +103,7 @@ void ConstantGenerator::visit(const ExprConstantRef& s) {
 
 void ConstantGenerator::visit(const ExprConstant& c) {
 	map.insert(c, new Domain(c.get(),false));
+//	cout << c.id << " " << c << " " << map[c]->dim << endl;
 	number_type = OTHER; // neither -oo nor +oo
 }
 
@@ -229,7 +230,11 @@ void ConstantGenerator::visit(const ExprMinus& e) {
 		map.insert(e, map[e.expr]); // the empty set
 		break;
 	default:
-		unary_eval(e,operator-);
+		const Domain* dx = map[e.expr];
+		Domain* dy = new Domain(e.dim);
+		*dy = -*dx;
+		delete dx;
+		map.insert(e, dy);
 		break;
 	}
 }
