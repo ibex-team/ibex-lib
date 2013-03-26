@@ -77,11 +77,13 @@ void Decorator::visit(const ExprIndex& idx) {
 		idx.deco.d = new Domain(d.m()[idx.index],true);
 		idx.deco.g = new Domain(g.m()[idx.index],true);
 		idx.deco.p = new Domain(di.m()[idx.index],true);
+		idx.deco.af2 = new Affine2Domain(af2.m()[idx.index],true);
 		break;
 	case Dim::MATRIX_ARRAY:
 		idx.deco.d = new Domain(d.ma()[idx.index]);
 		idx.deco.g = new Domain(g.ma()[idx.index]);
 		idx.deco.p = new Domain(di.ma()[idx.index]);
+		idx.deco.af2 = new Affine2Domain(af2.ma()[idx.index]);
 		break;
 	}
 

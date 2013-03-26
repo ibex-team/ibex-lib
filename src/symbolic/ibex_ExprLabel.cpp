@@ -13,7 +13,7 @@
 
 namespace ibex {
 
-ExprLabel::ExprLabel() : f(NULL), d(NULL), g(NULL) { }
+ExprLabel::ExprLabel() :  f(NULL), af2(NULL), d(NULL), g(NULL), p(NULL) { }
 
 std::ostream& operator<<(std::ostream& os, const ExprLabel& l) {
 	if (l.af2) os << "af2=" << *l.af2 << " ";
