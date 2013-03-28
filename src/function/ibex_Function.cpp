@@ -65,8 +65,80 @@ Domain& Function::eval_domain(const IntervalVector& box) const {
 }
 
 
-Affine2Domain& Function::eval_affine2domain(const IntervalVector& box) const {
-	return Affine2Eval().eval(*this,box).af2;
+Domain& Function::eval_affine2domain(const IntervalVector& box) const {
+	return *Affine2Eval().eval(*this,box).d;
+}
+
+Domain& Function::eval_affine2domain(const IntervalVector& box, Affine2Domain *affine) const {
+	ExprLabel res = Affine2Eval().eval(*this,box);
+	*affine = *res.af2;
+	return *res.d;
+}
+
+
+Interval Function::eval_affine2(const IntervalVector& box) const {
+	return eval_affine2domain(box).i();
+}
+
+Interval Function::eval_affine2(const IntervalVector& box, Affine2 *affine) const {
+	Affine2Domain tmp(Dim(1,1,1));
+	Interval res = eval_affine2domain(box,&tmp).i();
+	*affine = tmp.i();
+	return res;
+}
+
+
+IntervalVector Function::eval_affine2vector(const IntervalVector& box) const {
+	return expr().dim.is_scalar() ? IntervalVector(1,eval_affine2domain(box).i()) : eval_affine2domain(box).v();
+}
+
+
+IntervalVector Function::eval_affine2vector(const IntervalVector& box, Affine2Vector *affine) const {
+	Affine2Domain tmp(expr().dim);
+	if (expr().dim.is_scalar() ) {
+		IntervalVector res = IntervalVector(1,eval_affine2domain(box,&tmp).i()) ;
+		*affine = Affine2Vector(1,tmp.i());
+		return res;
+	} else {
+		IntervalVector res = eval_affine2domain(box,&tmp).v();
+		*affine = tmp.v();
+		return res;
+	}
+}
+
+
+IntervalMatrix Function::eval_affine2matrix(const IntervalVector& box, Affine2Matrix *affine) const {
+	Affine2Domain tmp(expr().dim);
+	switch (expr().dim.type()) {
+	case Dim::SCALAR     : {
+		IntervalMatrix res = IntervalMatrix(1,1,eval_affine2domain(box,&tmp).i());
+		*affine = Affine2Matrix(1,1,tmp.i());
+		return res;
+	}
+	case Dim::ROW_VECTOR : {
+		IntervalMatrix M(image_dim(),1);
+		*affine =  Affine2Matrix(image_dim(),1);
+		M.set_row(0,eval_affine2domain(box,&tmp).v());
+		affine->set_row(0,tmp.v());
+		return M;
+	}
+	case Dim::COL_VECTOR : {
+		IntervalMatrix M(1,image_dim());
+		*affine =  Affine2Matrix(1,image_dim());
+		M.set_col(0,eval_affine2domain(box,&tmp).v());
+		affine->set_col(0,tmp.v());
+		return M;
+	}
+	case Dim::MATRIX: {
+		IntervalMatrix res = eval_affine2domain(box,&tmp).m();
+		*affine = tmp.m();
+		return res;
+
+	}
+	default : {
+		assert(false);
+	}
+	}
 }
 
 

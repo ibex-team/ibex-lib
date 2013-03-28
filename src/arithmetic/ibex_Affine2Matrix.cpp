@@ -326,24 +326,6 @@ void Affine2Matrix::set_col(int col1, const Affine2Vector& v) {
 		_M[i]._vec[col1] = v[i];
 }
 
-void Affine2Matrix::set_colITV(int col1, const IntervalVector& v) {
-	assert(col1 >= 0 && col1 < nb_cols());
-	assert(nb_rows() == v.size());
-	for (int i = 0; i < nb_rows(); i++) {
-		_M[i]._vec[col1].ITV() = v[i];
-		_M[i]._vec[col1].set_actif(false);
-	}
-
-}
-
-void Affine2Matrix::set_rowITV(int row1, const IntervalVector& v) {
-	assert(row1>=0 && row1<nb_rows());
-	assert(nb_cols()==v.size());
-	for (int i = 0; i < nb_cols(); i++) {
-		_M[row1]._vec[i].ITV() = v[i];
-		_M[row1]._vec[i].set_actif(false);
-	}
-}
 
 Affine2Matrix& Affine2Matrix::inflate(double rad) {
 	// see comment in Affine2Vector::inflate

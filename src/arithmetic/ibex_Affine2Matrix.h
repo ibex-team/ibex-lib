@@ -263,20 +263,12 @@ public:
 	 */
 	void set_row(int row, const Affine2Vector& v);
 
-	/**
-	 * \brief Set a row and setAvtif(false) to all the AF2 form of this row.
-	 */
-	void set_rowITV(int row, const IntervalVector& v);
 
 	/**
 	 * \brief Set a column.
 	 */
 	void set_col(int col, const Affine2Vector& v);
 
-	/**
-	 * \brief Set a column and setAvtif(false) to all the AF2 form of this column
-	 */
-	void set_colITV(int col, const IntervalVector& v);
 
     /**
      * \brief (*this)+=m.

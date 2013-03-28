@@ -21,13 +21,14 @@ int main() {
 	{cout << "TEST 1: " << endl;
 		Variable x(2);
 		Variable x1, x2;
-		Function f(x,tan(x[0])+x[0]);
+		Function f(x,cos(x[0]+x[1])+x[1]);
 
 		IntervalVector I(2,Interval(0.,1));
 		Interval fi = f.eval(I);
 		cout << fi <<endl;
-		Affine2 faa = f.eval_affine2(I);
-	cout << faa <<endl;
+		Affine2 faa;
+		Interval fi2 = f.eval_affine2(I,&faa);
+	cout << fi2<<"  ////  " <<faa <<endl;
 
 
 		Function lininf(x, faa.val(0)-faa.err().ub() + faa.val(1)*(2*x[0]-(I[0].lb()+I[0].ub()))/(I[0].diam()) + faa.val(2)*(2*x[1]-(I[1].lb()+I[1].ub()))/(I[1].diam())) ;
@@ -59,7 +60,7 @@ int main() {
 		cout << " size?  : " << (vect1.size()) << " et "<< (vect2.size()) << endl ;
 	}
 
-
+/*
 
 	{
 		cout << "TEST 2: " << endl;
@@ -73,7 +74,8 @@ int main() {
 		I[1] = Interval(1,3);
 		Interval fi = ff.eval(I);
 		cout << fi <<endl;
-		Affine2 faa = ff.eval_affine2(I);
+		Affine2 faa;
+		ff.eval_affine2(I,faa);
 		cout << faa <<endl;
 
 //		Function lininf(x, faa.val(0)-faa.err().ub() + faa.val(1)*(2*x[0]-(I[0].lb()+I[0].ub()))/(I[0].diam()) + faa.val(2)*(2*x[1]-(I[1].lb()+I[1].ub()))/(I[1].diam())) ;
@@ -185,16 +187,16 @@ int main() {
 
 		cout<<g<<endl;
 
-/*		Affine2 *h;
-		int n=4;
-		IntervalVector vect(n,Interval(0,2));
-		h=init_Affine2(vect);
-		for (int i=0;i<n;i++) cout<<h[i]<<endl;
-*/
+//		Affine2 *h;
+//		int n=4;
+//		IntervalVector vect(n,Interval(0,2));
+//		h=init_Affine2(vect);
+//		for (int i=0;i<n;i++) cout<<h[i]<<endl;
+/
 
 		// test de l'erreur non modifiable
 		cout << faa.err() << endl;
-		faa.err() += Interval(10000);
+//		faa.err() += Interval(10000);
 
 		cout << faa.err() <<endl;
 
@@ -368,13 +370,13 @@ int main() {
 			cout << "Affine2 : CPU-time = " << cpuTime<< " secondes"<<endl;
 		}
 
-/*		double : CPU-time = 0 secondes
-		Interval : CPU-time = 95.73 secondes
-		Affine2 : CPU-time = 3015.36 secondes
-*/
+/:		double : CPU-time = 0 secondes
+//		Interval : CPU-time = 95.73 secondes
+//		Affine2 : CPU-time = 3015.36 secondes
+
 
 	}
-	}
+	} */
 	return 0;
 }
 

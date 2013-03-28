@@ -406,34 +406,34 @@ bool TestAffine2::check_af2 (Function& f, Interval& I){
 
 	Affine2 faa = f.eval_affine2(IntervalVector(1,I));
 	std::cout  << " RES = " << faa << std::endl;
-
-	Variable x;
-
-
-	const ExprNode *e =& (faa.val(0)+faa.val(1)*(2* (x)-(I.lb()+I.ub()))/(I.diam()));
-	Function lininf(x,*e);
+	if (faa.is_actif()) {
+		Variable x;
+		const ExprNode *e =& (faa.val(0)+faa.val(1)*(2* (x)-(I.lb()+I.ub()))/(I.diam()));
+		Function lininf(x,*e);
 
 
-	 Function linsup(x, lininf(x)+faa.err().lb());
+		Function linsup(x, lininf(x)+faa.err().lb());
 
-	Function c_inf(x,lininf(x)+faa.err().lb()  -f(x));
-	Function c_sup(x, f(x) -linsup(x));
+		Function c_inf(x,lininf(x)+faa.err().lb()  -f(x));
+		Function c_sup(x, f(x) -linsup(x));
 
-	CtcFwdBwd ct1(c_inf,GT);
-	CtcFixPoint ft1(ct1,0.0001);
+		CtcFwdBwd ct1(c_inf,GT);
+		CtcFixPoint ft1(ct1,0.0001);
 
-	CtcFwdBwd ct2(c_sup,GT);
-	CtcFixPoint ft2(ct2,0.0001);
+		CtcFwdBwd ct2(c_sup,GT);
+		CtcFixPoint ft2(ct2,0.0001);
 
-	LargestFirst bbb;
-	CellStack ccc;
-	Solver sol1(ft1,bbb, ccc, 0.0001 );
-	Solver sol2(ft2,bbb, ccc, 0.0001 );
+		LargestFirst bbb;
+		CellStack ccc;
+		Solver sol1(ft1,bbb, ccc, 0.0001 );
+		Solver sol2(ft2,bbb, ccc, 0.0001 );
 
+
+
+		//return ((sol1.solve(IntervalVector(1,I)).empty()) && (sol2.solve(IntervalVector(1,I)).empty()));
+
+	}
 	return true;
-
-	return ((sol1.solve(IntervalVector(1,I)).empty()) && (sol2.solve(IntervalVector(1,I)).empty()));
-
 
 }
 
@@ -441,36 +441,38 @@ bool TestAffine2::check_af2 (Function& f, Interval& I){
 bool TestAffine2::check_af2 (Function& f, IntervalVector& I){
 
 	Affine2 faa = f.eval_affine2(I);
-std::cout  << " RES = " << faa << std::endl;
+	std::cout  << " RES = " << faa << std::endl;
 
-	Variable x(I.size());
+	if (faa.is_actif()) {
+		Variable x(I.size());
 
-	const ExprNode *e =& (faa.val(0)+faa.val(1)*(2* (x[0])-(I[0].lb()+I[0].ub()))/(I[0].diam()));
-	for (int i=1; i<I.size(); i++) {
-		e =& ((*e) + (faa.val(i+1)*(2*x[i]-(I[i].lb()+I[i].ub()))/(I[i].diam())));
+		const ExprNode *e =& (faa.val(0)+faa.val(1)*(2* (x[0])-(I[0].lb()+I[0].ub()))/(I[0].diam()));
+		for (int i=1; i<I.size(); i++) {
+			e =& ((*e) + (faa.val(i+1)*(2*x[i]-(I[i].lb()+I[i].ub()))/(I[i].diam())));
+		}
+		Function lininf(x,*e);
+
+
+		Function linsup(x, lininf(x)+faa.err().lb());
+
+		Function c_inf(x,lininf(x)+faa.err().lb()  -f(x));
+		Function c_sup(x, f(x) -linsup(x));
+
+		CtcFwdBwd ct1(c_inf,GT);
+		CtcFixPoint ft1(ct1,0.0001);
+
+		CtcFwdBwd ct2(c_sup,GT);
+		CtcFixPoint ft2(ct2,0.0001);
+
+		LargestFirst bbb;
+		CellStack ccc;
+		Solver sol1(ft1,bbb, ccc, 0.0001 );
+		Solver sol2(ft2,bbb, ccc, 0.0001 );
+
+
+		//return ((sol1.solve(I).empty()) && (sol2.solve(I).empty()));
 	}
-	Function lininf(x,*e);
-
-
-	 Function linsup(x, lininf(x)+faa.err().lb());
-
-	Function c_inf(x,lininf(x)+faa.err().lb()  -f(x));
-	Function c_sup(x, f(x) -linsup(x));
-
-	CtcFwdBwd ct1(c_inf,GT);
-	CtcFixPoint ft1(ct1,0.0001);
-
-	CtcFwdBwd ct2(c_sup,GT);
-	CtcFixPoint ft2(ct2,0.0001);
-
-	LargestFirst bbb;
-	CellStack ccc;
-	Solver sol1(ft1,bbb, ccc, 0.0001 );
-	Solver sol2(ft2,bbb, ccc, 0.0001 );
-
-
-	return ((sol1.solve(I).empty()) && (sol2.solve(I).empty()));
-
+	return true;
 
 }
 

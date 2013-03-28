@@ -257,7 +257,8 @@ public:
 	/**
 	 * \brief Calculate the affine2 form of f(box)
 	 */
-	Affine2Domain& eval_affine2domain(const IntervalVector& box) const;
+	Domain& eval_affine2domain(const IntervalVector& box) const;
+	Domain& eval_affine2domain(const IntervalVector& box, Affine2Domain *result) const;
 
 	/**
 	 * \brief Calculate f(box).
@@ -265,7 +266,8 @@ public:
 	 * \pre f must be real-valued
 	 */
 	Interval eval(const IntervalVector& box) const;
-	Affine2 eval_affine2(const IntervalVector& box) const;
+	Interval eval_affine2(const IntervalVector& box) const;
+	Interval eval_affine2(const IntervalVector& box, Affine2 *result) const;
 
 	/**
 	 * \brief Calculate f(box).
@@ -273,7 +275,8 @@ public:
 	 * \pre f must be vector-valued
 	 */
 	IntervalVector eval_vector(const IntervalVector& box) const;
-	Affine2Vector eval_affine2vector(const IntervalVector& box) const;
+	IntervalVector eval_affine2vector(const IntervalVector& box) const;
+	IntervalVector eval_affine2vector(const IntervalVector& box, Affine2Vector *affine) const;
 
 	/**
 	 * \brief Calculate f(x).
@@ -281,7 +284,8 @@ public:
 	 * \pre f must be matrix-valued
 	 */
 	IntervalMatrix eval_matrix(const IntervalVector& x) const;
-	Affine2Matrix eval_affine2matrix(const IntervalVector& box) const;
+	IntervalMatrix eval_affine2matrix(const IntervalVector& box) const;
+	IntervalMatrix eval_affine2matrix(const IntervalVector& box, Affine2Matrix* affine) const;
 
 	/**
 	 * \brief Calculate the gradient of f.
@@ -327,6 +331,7 @@ public:
 	 */
 	void backward(const Domain& y, IntervalVector& x) const;
 
+	friend class Affine2Eval;
 	/**
 	 * \brief Contract x w.r.t. f(x)=y.
 	 * \throw EmptyBoxException if x is empty.
@@ -617,16 +622,8 @@ inline Interval Function::eval(const IntervalVector& box) const {
 	return eval_domain(box).i();
 }
 
-inline Affine2 Function::eval_affine2(const IntervalVector& box) const {
-	return eval_affine2domain(box).i();
-}
-
 inline IntervalVector Function::eval_vector(const IntervalVector& box) const {
 	return expr().dim.is_scalar() ? IntervalVector(1,eval_domain(box).i()) : eval_domain(box).v();
-}
-
-inline Affine2Vector Function::eval_affine2vector(const IntervalVector& box) const {
-	return expr().dim.is_scalar() ? Affine2Vector(1,eval_affine2domain(box).i()) : eval_affine2domain(box).v();
 }
 
 inline IntervalMatrix Function::eval_matrix(const IntervalVector& box) const {
@@ -644,27 +641,6 @@ inline IntervalMatrix Function::eval_matrix(const IntervalVector& box) const {
 		return M;
 	}
 	case Dim::MATRIX: return eval_domain(box).m();
-	default : {
-		assert(false);
-	}
-	}
-}
-
-inline Affine2Matrix Function::eval_affine2matrix(const IntervalVector& box) const {
-	switch (expr().dim.type()) {
-	case Dim::SCALAR     :
-		return Affine2Matrix(1,1,eval_affine2domain(box).i());
-	case Dim::ROW_VECTOR : {
-		Affine2Matrix M(image_dim(),1);
-		M.set_row(0,eval_affine2domain(box).v());
-		return M;
-	}
-	case Dim::COL_VECTOR : {
-		Affine2Matrix M(1,image_dim());
-		M.set_col(0,eval_affine2domain(box).v());
-		return M;
-	}
-	case Dim::MATRIX: return eval_affine2domain(box).m();
 	default : {
 		assert(false);
 	}

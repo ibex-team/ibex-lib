@@ -58,16 +58,6 @@ bool Affine2Domain::is_actif() const {
 }
 
 
-void Affine2Domain::set_actif(bool b) {
-	switch (dim.type()) {
-		case Dim::SCALAR:       i().set_actif(b); break;
-		case Dim::ROW_VECTOR:
-		case Dim::COL_VECTOR:   v()[0].set_actif(b); break;
-		case Dim::MATRIX:       m()[0][0].set_actif(b); break;
-		case Dim::MATRIX_ARRAY: ma()[0][0][0].set_actif(b); break;
-		}
-}
-
 
 
 

@@ -132,9 +132,9 @@ inline void Affine2Eval::cst_fwd(const ExprConstant& c, ExprLabel& y) {
 }
 
 inline void Affine2Eval::apply_fwd(const ExprApply& a, ExprLabel** x, ExprLabel& y)                          {
-	ExprLabel& tmp = eval(a.func,x);
-	*y.af2 = tmp.af2;
-	*y.d = tmp.d;
+	ExprLabel tmp = eval(a.func,x);
+	y.af2 = tmp.af2;
+	y.d = tmp.d;
 }
 inline void Affine2Eval::add_fwd(const ExprAdd&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)     {
 	y.af2->i()=x1.af2->i()+x2.af2->i();
@@ -261,7 +261,8 @@ inline void Affine2Eval::add_V_fwd(const ExprAdd&, const ExprLabel& x1, const Ex
 }
 inline void Affine2Eval::add_M_fwd(const ExprAdd&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)   {
 	y.af2->m()=x1.af2->m()+x2.af2->m();
-	y.d->m()=(y.af2->m().itv() & (x1.d->m()+x2.d->m()));
+	y.d->m()=(y.af2->m().itv());
+	y.d->m() &= (x1.d->m()+x2.d->m());
 }
 inline void Affine2Eval::mul_SV_fwd(const ExprMul&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)  {
 	y.af2->v()=x1.af2->i()*x2.af2->v();
@@ -269,7 +270,8 @@ inline void Affine2Eval::mul_SV_fwd(const ExprMul&, const ExprLabel& x1, const E
 }
 inline void Affine2Eval::mul_SM_fwd(const ExprMul&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)  {
 	y.af2->m()=x1.af2->i()*x2.af2->m();
-	y.d->m()=(y.af2->m().itv() & (x1.d->i()*x2.d->m()));
+	y.d->m()=(y.af2->m().itv());
+	y.d->m() &= (x1.d->i()*x2.d->m());
 }
 inline void Affine2Eval::mul_VV_fwd(const ExprMul&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)  {
 	y.af2->i()=x1.af2->v()*x2.af2->v();
@@ -285,7 +287,8 @@ inline void Affine2Eval::mul_VM_fwd(const ExprMul&, const ExprLabel& x1, const E
 }
 inline void Affine2Eval::mul_MM_fwd(const ExprMul&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)  {
 	y.af2->m()=x1.af2->m()*x2.af2->m();
-	y.d->m()=(y.af2->m().itv() & (x1.d->m()*x2.d->m()));
+	y.d->m()=(y.af2->m().itv()) ;
+	y.d->m() &=  (x1.d->m()*x2.d->m());
 }
 inline void Affine2Eval::sub_V_fwd(const ExprSub&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)   {
 	y.af2->v()=x1.af2->v()-x2.af2->v();
@@ -293,7 +296,8 @@ inline void Affine2Eval::sub_V_fwd(const ExprSub&, const ExprLabel& x1, const Ex
 }
 inline void Affine2Eval::sub_M_fwd(const ExprSub&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)   {
 	y.af2->m()=x1.af2->m()-x2.af2->m();
-	y.d->m()=(y.af2->m().itv() & (x1.d->m()-x2.d->m()));
+	y.d->m() = y.af2->m().itv();
+	y.d->m() &= (x1.d->m()-x2.d->m());
 }
 
 } // namespace ibex

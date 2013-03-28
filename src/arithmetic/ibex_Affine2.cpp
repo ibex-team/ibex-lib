@@ -30,7 +30,8 @@ Affine2::Affine2(int n) :
 
 Affine2::Affine2(int n, int m, const Interval& itv) :
 			_n 		(n),
-			_val	(NULL) {
+			_val	(NULL),
+			_err	(Interval::ZERO) {
 	assert((n>=0) && (m>=0) && (m<=n));
 	if (!(itv.is_unbounded()||itv.is_empty())) {
 		_val	=new double[n + 1];
@@ -500,7 +501,7 @@ Affine2& Affine2::operator*=(const Interval& y) {
 		}
 
 	} else {
-		_err = itv()*y.itv();
+		_err = itv()*y;
 		_n = -1;
 		delete[] _val;
 		_val = NULL;
@@ -1392,8 +1393,8 @@ Affine2& Affine2::linChebyshev(affine2_expr num, const Interval itv) {  // TODO 
 	// inverse function
 		case AF_ACOS :
 		case AF_ASIN :
-			if (itv.lb<-1 || itv.ub>1 ) {
-				return linChebyshev(num,itv & Interval(-1,1));
+			if ((itv.lb() < (-1))||(itv.ub() > 1)) {
+				return linChebyshev(num,(itv & Interval(-1,1)));
 			}
 		case AF_ATAN :
 	// hyperbolic function
@@ -1598,7 +1599,6 @@ Affine2& Affine2::linChebyshev(affine2_expr num, const Interval itv) {  // TODO 
 			break;
 		case AF_EXP :
 			_err = exp(itv);
-			_n = -1;
 			break;
 		case AF_LOG :
 			_err = log(itv);

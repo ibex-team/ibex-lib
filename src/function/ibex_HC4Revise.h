@@ -24,14 +24,14 @@ namespace ibex {
 class HC4Revise : public BwdAlgorithm {
 public:
 
-	typedef enum { INTERVAL, AFFINE } FwdMode;
+	typedef enum { HC4_INTERVAL, HC4_AFFINE } FwdMode;
 
 	/**
 	 * \brief HC4Revise
 	 *
 	 * \param mode  the arithmetic for forward evaluation. By default: interval arithmetic.
 	 */
-	HC4Revise(FwdMode mode=INTERVAL);
+	HC4Revise(FwdMode mode=HC4_INTERVAL);
 
 	/**
 	 * \brief Project f(x)=y onto x (backward algorithm)

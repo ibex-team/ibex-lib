@@ -305,11 +305,6 @@ public:
 	 */
 	 bool is_actif() const;
 
-	/**
-	 * \brief return 1 if the affine form is actif and valid
-	 */
-	 void set_actif(bool b);
-
 
 	/**
 	 * \brief Set the domain to ZERO.

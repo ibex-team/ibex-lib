@@ -40,7 +40,7 @@ ExprLabel& Affine2Eval::eval(const Function& f, ExprLabel** args) const {
 //			std::cout << "arg[" << i << "]=" << f.arg_domains[i] << std::endl;
 //		}
 
-	return *f.forward<Affine2Eval>(*this);
+	return f.forward<Affine2Eval>(*this);
 }
 
 
@@ -63,7 +63,7 @@ ExprLabel& Affine2Eval::eval(const Function& f, const IntervalVector& box) const
 		load(f.arg_domains,box,f.nb_used_vars,f.used_var); // load the domains of all the symbols
 	}
 
-	return *f.forward<Affine2Eval>(*this);
+	return f.forward<Affine2Eval>(*this);
 
 }
 
