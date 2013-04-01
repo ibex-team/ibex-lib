@@ -12,6 +12,7 @@
 #include "ibex_ExprCopy.h"
 #include "ibex_ExprNodes.h"
 #include "ibex_Expr.h"
+#include "ibex_NodeSet.h"
 
 using namespace std;
 
@@ -38,15 +39,19 @@ const ExprNode& ExprDiff::diff(const Array<const ExprSymbol>& old_x, const Array
 	int nb_var=old_x.size();
 
 	add_grad_expr(*nodes[0],ONE);
-
+	NodeSet ns;
 	// visit nodes in topological order
-	for (int i=0; i<n; i++)
+	for (int i=0; i<n; i++) {
 		visit(*nodes[i]);
+		ns.insert(*nodes[i]);
+	}
+	delete[] nodes; // no longer used
 
 	Array<const ExprNode> dX(nb_var);
 
 	for (int i=0; i<nb_var; i++) {
 		if (!grad.found(old_x[i])) { // this symbol does not appear in the expression -> null derivative
+			leaves.push_back(&old_x[i]);
 			Domain d(old_x[i].dim);
 			d.clear();
 			grad.insert(old_x[i], &ExprConstant::new_(d));
@@ -67,13 +72,34 @@ const ExprNode& ExprDiff::diff(const Array<const ExprSymbol>& old_x, const Array
 
 	const ExprNode& result=ExprCopy().copy(old_x,new_x,df,true);
 
-	// now we can clean up the gradient.
+	// ------------------------- CLEANUP -------------------------
 	// cleanup(df,true); // don't! some nodes are shared with y
 
-	// don't! some grad are references to others!
-	// and some are entire DAG !
+	// don't! some grad are references to nodes of y!
 	//	for (int i=0; i<n; i++)
-//		delete grad[*nodes[i]];
+	//	  delete grad[*nodes[i]];
+
+	// we build the vector of the partial derivatives
+	// wrt all the leaves, including constants.
+	Array<const ExprNode> _dAll(leaves.size());
+
+	for (unsigned int i=0; i<leaves.size(); i++) {
+		_dAll.set_ref(i,*grad[*leaves[i]]);
+	}
+
+	// build the global DAG
+	const ExprNode* dAll=&ExprVector::new_(_dAll,false);
+
+	const ExprNode** gnodes = dAll->subnodes();
+	int k=dAll->size;
+	for (int j=0; j<k; j++) {
+		if (!ns.found(*gnodes[j])) { // if the node is not in the original expression
+			//cout << "not found:" << *gnodes[j] << endl;
+			delete gnodes[j];      // delete it.
+		}
+	}
+	delete[] gnodes;
+	delete &df;
 
 	return result;
 }
@@ -87,30 +113,30 @@ void ExprDiff::visit(const ExprIndex& i) {
 }
 
 void ExprDiff::visit(const ExprSymbol& x) {
-
+	leaves.push_back(&x);
 }
 
 void ExprDiff::visit(const ExprConstant& c) {
-
+	leaves.push_back(&c);
 }
 
 // (useless so far)
 void ExprDiff::visit(const ExprNAryOp& e) {
-	e.acceptVisitor(*this);
+	assert(false);
 }
 
 void ExprDiff::visit(const ExprLeaf& e) {
-	e.acceptVisitor(*this);
+	assert(false);
 }
 
 // (useless so far)
 void ExprDiff::visit(const ExprBinaryOp& b) {
-	b.acceptVisitor(*this);
+	assert(false);
 }
 
 // (useless so far)
 void ExprDiff::visit(const ExprUnaryOp& u) {
-	u.acceptVisitor(*this);
+	assert(false);
 }
 
 
