@@ -33,19 +33,17 @@ const ExprNode& ExprDiff::diff(const Array<const ExprSymbol>& old_x, const Array
 
 	grad.clean();
 
-	const ExprNode** nodes = y.subnodes();
+	SubNodes nodes(y);
 
 	int n=y.size;
 	int nb_var=old_x.size();
 
-	add_grad_expr(*nodes[0],ONE);
-	NodeSet ns;
+	add_grad_expr(nodes[0],ONE);
+
 	// visit nodes in topological order
-	for (int i=0; i<n; i++) {
-		visit(*nodes[i]);
-		ns.insert(*nodes[i]);
+	 for (int i=0; i<n; i++) {
+		visit(nodes[i]);
 	}
-	delete[] nodes; // no longer used
 
 	Array<const ExprNode> dX(nb_var);
 
@@ -90,15 +88,15 @@ const ExprNode& ExprDiff::diff(const Array<const ExprSymbol>& old_x, const Array
 	// build the global DAG
 	const ExprNode* dAll=&ExprVector::new_(_dAll,false);
 
-	const ExprNode** gnodes = dAll->subnodes();
+	SubNodes gnodes(*dAll);
 	int k=dAll->size;
 	for (int j=0; j<k; j++) {
-		if (!ns.found(*gnodes[j])) { // if the node is not in the original expression
+		if (!nodes.found(gnodes[j])) { // if the node is not in the original expression
 			//cout << "not found:" << *gnodes[j] << endl;
-			delete gnodes[j];      // delete it.
+			delete &gnodes[j];      // delete it.
 		}
 	}
-	delete[] gnodes;
+
 	delete &df;
 
 	return result;

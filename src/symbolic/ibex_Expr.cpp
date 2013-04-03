@@ -48,17 +48,12 @@ ExprNode::ExprNode(int height, int size, const Dim& dim) :
 
 }
 
-const ExprNode** ExprNode::subnodes() const {
-	return ExprNodes().nodes(*this);
-}
-
 void cleanup(const ExprNode& expr, bool delete_symbols) {
-	const ExprNode** nodes=expr.subnodes();
+	SubNodes nodes(expr);
 	int size=expr.size; // (warning: expr will be deleted in the loop)
 	for (int i=0; i<size; i++)
-		if (delete_symbols || (!dynamic_cast<const ExprSymbol*>(nodes[i])))
-			delete (ExprNode*) nodes[i];
-	delete[] nodes;
+		if (delete_symbols || (!dynamic_cast<const ExprSymbol*>(&nodes[i])))
+			delete (ExprNode*) &nodes[i];
 }
 
 ExprIndex::ExprIndex(const ExprNode& subexpr, int index)

@@ -49,7 +49,7 @@ public:
 	/**
 	 * \brief True if e is in the map
 	 */
-	bool found(const ExprNode& e) {
+	bool found(const ExprNode& e) const {
 		return map.find(&e)!=map.end();
 	}
 

@@ -14,8 +14,8 @@
 
 #include <vector>
 #include <iostream>
+#include <string.h>
 
-#include "ibex_SymbolMap.h"
 #include "ibex_ExprVisitor.h"
 #include "ibex_Interval.h"
 #include "ibex_IntervalVector.h"
@@ -29,6 +29,7 @@ namespace ibex {
 class ExprCtr;
 class ExprIndex;
 class Function;
+
 
 /**
  * \ingroup symbolic
@@ -134,14 +135,6 @@ public:
 
 	/** Create an inequality constraint expr>value. */
 	const ExprCtr& operator>(const Interval& value) const;
-
-	/**
-	 * \brief Return all the subnodes.
-	 *
-	 * Subnodes appear only once in the array.
-	 * The size of the array is this->size().
-	 */
-	const ExprNode** subnodes() const;
 
 };
 
