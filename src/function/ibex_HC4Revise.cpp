@@ -20,7 +20,7 @@ HC4Revise::HC4Revise(FwdMode mode) : fwd_mode(mode) {
 
 }
 
-#define EVAL(f,x) if (fwd_mode==HC4_INTERVAL) Eval().eval(f,x); else Affine2Eval().eval(f,x);
+#define EVAL(f,x) if (fwd_mode==HC4Revise::INTERVAL_MODE) Eval().eval(f,x); else Affine2Eval().eval(f,x);
 
 void HC4Revise::proj(const Function& f, const Domain& y, IntervalVector& x) {
 	EVAL(f,x);

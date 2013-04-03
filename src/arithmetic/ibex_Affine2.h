@@ -34,6 +34,7 @@ private:
 	int _n; 		// dimension (size of val)-1  , ie number of variable
 	double * _val; 		// vector of elements of the affine form
 	Interval _err; 	// error of the affine form, corresponded to the last term
+//	bool _actif; // boolean to know if the affine form is actif or not. This is to manage the particular case of EMPTY and an unbounded Interval
 
 	static double AF_EM() {
 		return __builtin_powi(2.0, -51);
@@ -75,24 +76,18 @@ public:
 	/** \brief Create an empty affine form. */
 	Affine2();
 
-	/** \brief Create an affine form with n variables, initialized with  [-oo,+oo]. */
-	explicit Affine2(int n);
 
 	/** \brief Create an affine form with n variables and  initialized val[0] with d. */
-	Affine2(int n, const double d);
+	explicit Affine2(const double d);
 
 	/** \brief Create an affine form with n variables and  initialized val[0] with  itv. */
-	Affine2(int n, const Interval& itv);
+	explicit Affine2(const Interval& itv);
 
 	/** \brief Create an affine form with n variables and  initialized the m^th variable with  itv. */
 	Affine2(int n, int m, const Interval& itv);
 
-
-	/** \brief Create an affine form with n variables, initialized with x. */
-	Affine2(const Affine2& x);
-
 	/** \brief Create an affine form with n variables, initialized with -x if (b) elseif (!b) with x. */
-	Affine2(const Affine2& x, bool b);
+	Affine2(const Affine2& x, bool b=false);
 
 	/** \brief  Delete the affine form */
 	virtual ~Affine2();
@@ -100,13 +95,11 @@ public:
 	/**
 	 *\brief compute the min-range linearization of an unary operator
 	 */
-	Affine2& linMinRange(affine2_expr num);
 	Affine2& linMinRange(affine2_expr num, const Interval itv);
 
 	/**
 	 *\brief compute the chebyshev linearization of an unary operator
 	 */
-	Affine2& linChebyshev(affine2_expr num);
 	Affine2& linChebyshev(affine2_expr num, const Interval itv);
 
 	/** \brief Return sqr(*this) */
@@ -164,7 +157,7 @@ public:
 	/**
 	 * \brief Change the number
 	 */
-	void resize(int n);
+//	void resize(int n);
 
 	/**
 	 * \brief number of variable represented
@@ -680,14 +673,6 @@ inline Affine2::~Affine2() {
 	if (_val!=NULL) delete[] _val;
 }
 
-inline Affine2& Affine2::linMinRange(affine2_expr num) {
-	return linMinRange(num,this->itv());
-}
-
-inline Affine2& Affine2::linChebyshev(affine2_expr num) {
-	return linChebyshev(num,this->itv());
-}
-
 
 inline Interval& Interval::operator&=(const Affine2& x) {
 	return (*this &= x.itv());
@@ -748,10 +733,13 @@ inline bool Affine2::operator!=(const Interval& x) const {
 
 /** \brief Set this interval to the empty set. */
 inline void Affine2::set_empty(){
+	//_actif = false;
+	_n = -1;
 	_err.set_empty();
 }
 
 inline Affine2& Affine2::inflate(double radd){
+	if (fabs(radd)> POS_INFINITY) _n = -1; //_actif = false;
 	_err += radd;
 	return *this;
 }
@@ -769,7 +757,7 @@ inline double * Affine2::val() const{
 
 /** \brief return _val[i] */
 inline double Affine2::val(int i) const{
-	assert(i>=0 && i<=_n);
+	assert((0<=i) && (i<=_n));
 	return _val[i];
 }
 
@@ -779,6 +767,7 @@ inline const Interval Affine2::err() const{
 }
 
 inline bool Affine2::is_actif() const{
+	//return _actif;
 	return (_n>-1);
 }
 /** \brief Lower bound.
@@ -906,17 +895,17 @@ inline double Affine2::rel_distance(const Interval& x) const{
 
 /** \brief Add \a d to *this and return the result.  */
 inline Affine2& Affine2::operator+=(double d){
-	return saxpy(1.0, Affine2(0), d, 0.0, false, false, true, false);
+	return saxpy(1.0, Affine2(), d, 0.0, false, false, true, false);
 }
 
 /** \brief Subtract \a d to *this and return the result. */
 inline Affine2& Affine2::operator-=(double d){
-	return saxpy(1.0, Affine2(0), (-d), 0.0, false, false, true, false);
+	return saxpy(1.0, Affine2(), (-d), 0.0, false, false, true, false);
 }
 
 /** \brief Multiply *this by \a d and return the result. */
 inline Affine2& Affine2::operator*=(double d){
-	return saxpy(d, Affine2(0), 0.0, 0.0, true, false, false, false);
+	return saxpy(d, Affine2(), 0.0, 0.0, true, false, false, false);
 }
 
 /** \brief Divide *this by \a d and return the result. */
@@ -926,7 +915,7 @@ inline 	Affine2& Affine2::operator/=(double d) {
 
 /** \brief Add \a x to *this and return the result. */
 inline Affine2& Affine2::operator+=(const Interval& x){
-	return saxpy(1.0, Affine2(0), x.mid(), x.rad(), false, false, true, true);
+	return saxpy(1.0, Affine2(), x.mid(), x.rad(), false, false, true, true);
 }
 
 /** \brief Subtract \a x to *this and return the result. */
@@ -951,7 +940,7 @@ inline Affine2& Affine2::operator-=(const Affine2& x){
 }
 
 inline Affine2& Affine2::operator/=(const Affine2& x){
-	return *this *= (Affine2(x).linChebyshev(Affine2::AF_INV));
+	return *this *= (Affine2(x).linChebyshev(Affine2::AF_INV, x.itv()));
 }
 
 
@@ -1069,7 +1058,7 @@ inline Affine2 operator/(const Affine2& x, double d){
 
 /** \brief $d/AF[x]$. */
 inline Affine2 operator/(double d, const Affine2& x){
-	return Affine2(x.size(), d) *= (Affine2(x).linChebyshev(Affine2::AF_INV));
+	return Affine2(d) *= (Affine2(x).linChebyshev(Affine2::AF_INV,x.itv()));
 }
 
 /** \brief $AF[x]_1/[x]_2$. */
@@ -1079,7 +1068,7 @@ inline Affine2 operator/(const Affine2& x1, const Interval& x2){
 
 /** \brief $[x]_1/AF[x]_2$. */
 inline Affine2 operator/(const Interval& x1, const Affine2& x2){
-	return Affine2(x2.size(), x1) *= (Affine2(x2).linChebyshev(Affine2::AF_INV));
+	return Affine2(x1) *= (Affine2(x2).linChebyshev(Affine2::AF_INV,x2.itv()));
 }
 
 /** \brief Hausdorff distance of $AF[x]_1$ and $AF[x]_2$. */
@@ -1099,7 +1088,7 @@ inline double distance(const Affine2 &x1, const Interval &x2){
 
 /** \brief $1/AF[x]$ */
 inline Affine2 inv(const Affine2& x){
-	return Affine2(x).linChebyshev(Affine2::AF_INV);
+	return inv(x,x.itv());
 }
 
 inline Affine2 inv(const Affine2& x, const Interval itv){
@@ -1116,29 +1105,29 @@ inline Affine2 sqr(const Affine2& x, const Interval itv){
 
 /** \brief $\sqrt{AF[x]}$ */
 inline Affine2 sqrt(const Affine2& x){
-	return Affine2(x).linChebyshev(Affine2::AF_SQRT);
+	return sqrt(x,x.itv());
 }
 
 inline Affine2 sqrt(const Affine2& x, const Interval itv){
-	return Affine2(x).linChebyshev(Affine2::AF_SQRT);
+	return Affine2(x).linChebyshev(Affine2::AF_SQRT,itv);
 }
 
 /** \brief $\exp(AF[x])$. */
 inline Affine2 exp(const Affine2& x){
-	return Affine2(x).linChebyshev(Affine2::AF_EXP);
+	return exp(x,x.itv());
 }
 
 inline Affine2 exp(const Affine2& x, const Interval itv){
-	return Affine2(x).linChebyshev(Affine2::AF_EXP);
+		return Affine2(x).linChebyshev(Affine2::AF_EXP,itv);
 }
 
 /** \brief $\log(AF[x])$. */
 inline Affine2 log(const Affine2& x){
-	return Affine2(x).linChebyshev(Affine2::AF_LOG);
+	return log(x,x.itv());
 }
 
 inline Affine2 log(const Affine2& x, const Interval itv){
-	return Affine2(x).linChebyshev(Affine2::AF_LOG);
+	return Affine2(x).linChebyshev(Affine2::AF_LOG,itv);
 }
 
 /** \brief $AF[x]^n$. */
@@ -1154,7 +1143,7 @@ inline Affine2 pow(const Affine2& x, double d){
 /** \brief $AF[x]^[y]$. */
 inline Affine2 pow(const Affine2 &x, const Interval &y){
 	// return exp(y * log(x));
-	return (y * Affine2(x).linChebyshev(Affine2::AF_LOG)).linChebyshev(Affine2::AF_EXP);
+	return pow(x,y,x.itv());
 }
 
 inline Affine2 pow(const Affine2 &x, const Interval &y, const Interval itvx){
@@ -1175,7 +1164,7 @@ inline Affine2 root(const Affine2& x, int n) {
 
 /** \brief $\cos(AF[x])$. */
 inline Affine2 cos(const Affine2& x){
-	return Affine2(x).linChebyshev(Affine2::AF_COS);
+	return cos(x,x.itv());
 }
 
 inline Affine2 cos(const Affine2& x, const Interval itv){
@@ -1184,26 +1173,26 @@ inline Affine2 cos(const Affine2& x, const Interval itv){
 
 /** \brief $\sin(AF[x])$. */
 inline Affine2 sin(const Affine2& x){
-	return Affine2(x).linChebyshev(Affine2::AF_SIN);
+	return sin(x,x.itv());
 }
 
 inline Affine2 sin(const Affine2& x, const Interval itv){
-	return Affine2(x).linChebyshev(Affine2::AF_SIN);
+	return Affine2(x).linChebyshev(Affine2::AF_SIN,itv);
 }
 
 
 /** \brief $\tan(AF[x])$. */
 inline Affine2 tan(const Affine2& x){
-	return Affine2(x).linChebyshev(Affine2::AF_TAN);
+	return tan(x,x.itv());
 }
 
 inline Affine2 tan(const Affine2& x, const Interval itv){
-	return Affine2(x).linChebyshev(Affine2::AF_TAN);
+	return Affine2(x).linChebyshev(Affine2::AF_TAN,itv);
 }
 
 /** \brief $\acos(AF[x])$. */
 inline Affine2 acos(const Affine2& x){
-	return Affine2(x).linChebyshev(Affine2::AF_ACOS);
+	return acos(x,x.itv());
 }
 
 inline Affine2 acos(const Affine2& x, const Interval itv){
@@ -1212,7 +1201,7 @@ inline Affine2 acos(const Affine2& x, const Interval itv){
 
 /** \brief $\asin(AF[x])$. */
 inline Affine2 asin(const Affine2& x){
-	return Affine2(x).linChebyshev(Affine2::AF_ASIN);
+	return asin(x,x.itv());
 }
 
 inline Affine2 asin(const Affine2& x, const Interval itv){
@@ -1221,7 +1210,7 @@ inline Affine2 asin(const Affine2& x, const Interval itv){
 
 /** \brief $\atan(AF[x])$. */
 inline Affine2 atan(const Affine2& x){
-	return Affine2(x).linChebyshev(Affine2::AF_ATAN);
+	return atan(x,x.itv());
 }
 
 inline Affine2 atan(const Affine2& x, const Interval itv){
@@ -1230,7 +1219,7 @@ inline Affine2 atan(const Affine2& x, const Interval itv){
 
 /** \brief $\cosh(AF[x])$. */
 inline Affine2 cosh(const Affine2& x){
-	return Affine2(x).linChebyshev(Affine2::AF_COSH);
+	return cosh(x,x.itv());
 }
 
 inline Affine2 cosh(const Affine2& x, const Interval itv){
@@ -1239,7 +1228,7 @@ inline Affine2 cosh(const Affine2& x, const Interval itv){
 
 /** \brief $\sinh(AF[x])$. */
 inline Affine2 sinh(const Affine2& x){
-	return Affine2(x).linChebyshev(Affine2::AF_SINH);
+	return sinh(x,x.itv());
 }
 
 inline Affine2 sinh(const Affine2& x, const Interval itv){
@@ -1248,7 +1237,7 @@ inline Affine2 sinh(const Affine2& x, const Interval itv){
 
 /** \brief $\tanh(AF[x])$. */
 inline Affine2 tanh(const Affine2& x){
-	return Affine2(x).linChebyshev(Affine2::AF_TANH);
+	return tanh(x,x.itv());
 }
 
 inline Affine2 tanh(const Affine2& x, const Interval itv){
@@ -1257,7 +1246,7 @@ inline Affine2 tanh(const Affine2& x, const Interval itv){
 
 /** \brief $\abs(AF[x]) = sqrt(sqr(AF[x]))$. */
 inline Affine2 abs(const Affine2 &x){
-	return Affine2(x).linChebyshev(Affine2::AF_ABS);
+	return abs(x,x.itv());
 }
 
 inline Affine2 abs(const Affine2 &x, const Interval itv){

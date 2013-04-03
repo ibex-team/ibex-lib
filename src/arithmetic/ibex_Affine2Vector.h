@@ -48,11 +48,13 @@ public:
 	explicit Affine2Vector(int n);
 
 	/**
-	 * \brief  Create \a n Affine2Vector of dimension \a n with
-	 * all the components initialized to \a x.
+	 * \brief  Create an Affine2Vector of dimension \a n with
+	 * all the components initialized to
+	 *  if (!b) Affine2(\a x)
+	 *  else Affine2(\a n,i+1,\a x) }.
 	 * \pre n>0
 	 */
-	Affine2Vector(int n, const Interval& x);
+	Affine2Vector(int n, const Interval& x, bool b =false);
 
 	/**
 	 * \brief  Create \a n Affine2Vector of dimension \a n with
@@ -64,33 +66,37 @@ public:
 	/**
 	 * \brief Create a copy of \a x.
 	 */
-	Affine2Vector(const Affine2Vector& x);
+//	Affine2Vector(const Affine2Vector& x);
 
 
 	/**
-	 * \brief Create  a copy of \a -x if (b) else xif (!b) with x.
+	 * \brief Create  a copy of  { \a  x if !(\a b)  else -(\a x) }.
 	 */
-	Affine2Vector(const Affine2Vector& x, bool b);
+	Affine2Vector(const Affine2Vector& x, bool b =false);
 
 	/**
-	 * \brief Create \a n Affine2Vector  initialized by [bounds[i][0],bounds[i][1]]
+	 * \brief Create \a n Affine2Vector  initialized by
+	 * if !(\a b)  Affine2(Interval(bounds[i][0],bounds[i][1]) )
+	 * else Affine2(\a n, i+1,Interval(bounds[i][0],bounds[i][1]) )
 	 *
 	 * \param bounds an nx2 array of doubles
 	 * \pre n>0
 	 */
-	Affine2Vector(int n, double  bounds[][2]);
+	Affine2Vector(int n, double  bounds[][2], bool b =false);
 
 	/**
 	 * \brief Create \a x.size Affine2Vector of dimension \a x.size with
-	 * the [i] component initialized to \a Affine2(x.size(), i+1,x[i]).
+	 * the [i] component initialized to
+	 * if !(\a b) Affine2(x[i])
+	 * else  Affine2(x.size(), i+1,x[i])
 	 */
-	explicit Affine2Vector(const IntervalVector& x);
+	Affine2Vector(const IntervalVector& x, bool b =false);
 
 	/**
 	 * \brief Create the degenerated Affine2Vector x
 	 *
 	 */
-//	Affine2Vector(const Vector& x);
+	explicit Affine2Vector(const Vector& x);
 
 	/**
 	 * \brief Create [empty; ...; empty]
@@ -138,11 +144,19 @@ public:
 	void clear();
 
 	/**
-	 * \brief Set all the elements to x (even if empty).
+	 * \brief Set all the elements to
+	 *  if !(\a b) Affine2(x)
+	 *  else Affine2(n,i+1,x)
 	 *
 	 * \note Emptiness is "overridden".
 	 */
-	void init(const Interval& x);
+	void init(const Interval& x, bool b =false);
+
+	/**
+	 * \brief Set all the elements to x
+	 *
+	 * \note Emptiness is "overridden".
+	 */
 	void init(const Affine2& x);
 
 	/**

@@ -45,84 +45,55 @@ Affine2Matrix::Affine2Matrix(int nb_rows1, int nb_cols1, const Affine2& x) : _nb
 	}
 }
 
-Affine2Matrix::Affine2Matrix(int nb_rows1, int nb_cols1, int sizeAF2) : _nb_rows(nb_rows1), _nb_cols(nb_cols1) {
-	assert(nb_rows1>0);
-	assert(nb_cols1>0);
-	int b=0;// counter for "bounds"
-	_M = new Affine2Vector[_nb_rows];
-	for (int i=0; i<_nb_rows; i++) {
-		_M[i].resize(_nb_cols);
-		for (int j=0; j<_nb_cols; j++) {
-			_M[i]._vec[j]=Affine2(sizeAF2);
-			b++;
-		}
-	}
-}
 
-/*
+
 Affine2Matrix::Affine2Matrix(int m, int n, double bounds[][2]) : _nb_rows(m), _nb_cols(n) {
 	assert(m>0);
 	assert(n>0);
-
-	int b=0; // counter for "bounds"
-	_M = new Affine2Vector[_nb_rows];
-	for (int i=0; i<_nb_rows; i++) {
-		_M[i].resize(_nb_cols);
-		for (int j=0; j<_nb_cols; j++) {
-			_M[i]._vec[j]=Affine2(m*n,b+1,bounds[b][0],bounds[b][1]);  <- I'm not sur
-			b++;
+		int k=0; // counter for "bounds"
+		_M = new Affine2Vector[_nb_rows];
+		for (int i=0; i<_nb_rows; i++) {
+			_M[i].resize(_nb_cols);
+			for (int j=0; j<_nb_cols; j++) {
+				_M[i]._vec[j]=Affine2(Interval(bounds[k][0],bounds[k][1]));
+				k++;
+			}
 		}
-	}
 }
-*/
-
-Affine2Matrix::Affine2Matrix(const Affine2Matrix& m) : _nb_rows(m.nb_rows()), _nb_cols(m.nb_cols()){
-	_M = new Affine2Vector[_nb_rows];
-	for (int i=0; i<_nb_rows; i++) {
-		_M[i].resize(_nb_cols);
-		for (int j=0; j<_nb_cols; j++) _M[i]._vec[j]=m[i][j];
-	}
-}
-
 
 Affine2Matrix::Affine2Matrix(const Affine2Matrix& m, bool b) : _nb_rows(m.nb_rows()), _nb_cols(m.nb_cols()){
 	_M = new Affine2Vector[_nb_rows];
-	if (b) {
-		for (int i=0; i<_nb_rows; i++) {
-			_M[i].resize(_nb_cols);
-			for (int j=0; j<_nb_cols; j++) _M[i]._vec[j]=Affine2(m[i][j],true);
-		}
-	} else {
-		for (int i=0; i<_nb_rows; i++) {
-			_M[i].resize(_nb_cols);
-			for (int j=0; j<_nb_cols; j++) _M[i]._vec[j]=m[i][j];
+
+	for (int i=0; i<_nb_rows; i++) {
+		_M[i].resize(_nb_cols);
+		for (int j=0; j<_nb_cols; j++) _M[i]._vec[j]=Affine2(m[i][j],b);
+	}
+
+}
+
+
+Affine2Matrix::Affine2Matrix(const IntervalMatrix& m) : _nb_rows(m.nb_rows()), _nb_cols(m.nb_cols()){
+	_M = new Affine2Vector[_nb_rows];
+	int k=0; // counter for "bounds"
+	for (int i=0; i<_nb_rows; i++) {
+		_M[i].resize(_nb_cols);
+		for (int j=0; j<_nb_cols; j++)  {
+			_M[i]._vec[j]=Affine2(m[i][j]);
+			k++;
 		}
 	}
 }
 
-/*  It is too difficult to know the size of each AF2. So we let the user do what exactly he want to do.
-Affine2Matrix::Affine2Matrix(const IntervalMatrix& m, int sizeAF2) : _nb_rows(m.nb_rows()), _nb_cols(m.nb_cols()){
-	_M = new Affine2Vector[_nb_rows];
-	int b=0; // counter for "bounds"
-	for (int i=0; i<_nb_rows; i++) {
-		_M[i].resize(_nb_cols);
-		for (int j=0; j<_nb_cols; j++)  {
-			_M[i]._vec[j]=Affine2(sizeAF2,b+1,m[i][j]);
-			b++;
-		}
-	}
-}
-*/
-/*
-Affine2Matrix::Affine2Matrix(const Matrix& m, int sizeAF2) : _nb_rows(m.nb_rows()), _nb_cols(m.nb_cols()){
+
+Affine2Matrix::Affine2Matrix(const Matrix& m) : _nb_rows(m.nb_rows()), _nb_cols(m.nb_cols()){
 	_M = new Affine2Vector[_nb_rows];
 	for (int i=0; i<_nb_rows; i++) {
 		_M[i].resize(_nb_cols);
 		for (int j=0; j<_nb_cols; j++) {
-			_M[i]._vec[j]=Affine2(sizeAF2,m[i][j]);
+			_M[i]._vec[j]=Affine2(m[i][j]);
 		}
 	}
-}*/
+}
 
 Affine2Matrix::~Affine2Matrix() {
 	if (_M!=NULL) delete[] _M;
@@ -163,7 +134,7 @@ void Affine2Matrix::init(const Affine2& x) {
 void Affine2Matrix::init(const Interval& x) {
 	for (int i=0; i<nb_rows(); i++) {
 		for (int j = 0; i < nb_cols(); i++) {
-			(*this)[i][j] = x;
+			(*this)[i][j] = Affine2(x);
 		}
 	}
 }

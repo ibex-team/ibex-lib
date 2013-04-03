@@ -59,7 +59,7 @@ ExprLabel& Affine2Eval::eval(const Function& f, const IntervalVector& box) const
 
 	}
 	else {
-		load(f.arg_af2,Affine2Vector(box),f.nb_used_vars,f.used_var);
+		load(f.arg_af2,Affine2Vector(box,true),f.nb_used_vars,f.used_var);
 		load(f.arg_domains,box,f.nb_used_vars,f.used_var); // load the domains of all the symbols
 	}
 

@@ -36,16 +36,22 @@ Affine2Vector::Affine2Vector(int n) :
 		_vec(new Affine2[n]) {
 	assert(n>=1);
 	for (int i = 0; i < n; i++){
-		_vec[i] = Affine2(); // OR Affine(0,0) OR  Affine2(n, 0.0);  I do not know
+		_vec[i] = Affine2();
 	}
 }
 
-Affine2Vector::Affine2Vector(int n, const Interval& x) :
+Affine2Vector::Affine2Vector(int n, const Interval& x, bool b) :
 		_n(n),
 		_vec(new Affine2[n]) {
 	assert(n>=1);
-	for (int i = 0; i < n; i++) {
-		_vec[i] = Affine2(n, i + 1, x);
+	if (!b) {
+		for (int i = 0; i < n; i++) {
+			_vec[i] = Affine2(x);
+		}
+	} else {
+		for (int i = 0; i < n; i++) {
+			_vec[i] = Affine2(n, i + 1, x);
+		}
 	}
 }
 
@@ -59,62 +65,69 @@ Affine2Vector::Affine2Vector(int n, const Affine2& x) :
 }
 
 
-Affine2Vector::Affine2Vector(const Affine2Vector& x) :
-		_n(x.size()),
-		_vec(new Affine2[x.size()]) {
-	for (int i = 0; i < _n; i++){
-		_vec[i] = x[i];
-	}
-}
-
 Affine2Vector::Affine2Vector(const Affine2Vector& x, bool b) :
 		_n(x.size()),
 		_vec(new Affine2[x.size()]) {
-	if (b) {
-		for (int i = 0; i < _n; i++){
-			_vec[i] = Affine2(x[i],b);
-		}
-	} else {
-		for (int i = 0; i < _n; i++){
-			_vec[i] = x[i];
-		}
+
+	for (int i = 0; i < _n; i++){
+		_vec[i] = Affine2(x[i],b);
 	}
+
 }
 
-Affine2Vector::Affine2Vector(const IntervalVector& x) :
-		_n(x.size()),
-		_vec(new Affine2[x.size()]) {
-	for (int i = 0; i < x.size(); i++) {
-		_vec[i] = Affine2(x.size(), i + 1, x[i]);
-	}
-}
-
-Affine2Vector::Affine2Vector(int n, double bounds[][2]) :
+Affine2Vector::Affine2Vector(int n, double bounds[][2], bool b) :
 		_n(n),
 		_vec(new Affine2[n]) {
 	if (bounds == 0){ // probably, the user called Affine2Vector(n,0) and 0 is interpreted as NULL!
 		for (int i = 0; i < n; i++){
-			_vec[i] = Affine2(n, i + 1, 0.0);
+			_vec[i] = Affine2( 0.0); // Affine2(n, i + 1, 0.0);
 		}
-	} else {
-		for (int i = 0; i < n; i++){
-			_vec[i] = Affine2(n, i + 1, Interval(bounds[i][0], bounds[i][1]));
+	}
+	else {
+		if (!b) {
+			for (int i = 0; i < n; i++){
+				_vec[i] =  Affine2(Interval(bounds[i][0], bounds[i][1]));
+			}
+		} else {
+			for (int i = 0; i < n; i++){
+				_vec[i] =  Affine2(n, i + 1, Interval(bounds[i][0], bounds[i][1]));
+			}
 		}
 	}
 }
 
-/*
+
+Affine2Vector::Affine2Vector(const IntervalVector& x, bool b) :
+		_n(x.size()),
+		_vec(new Affine2[x.size()]) {
+	if (!b) {
+		for (int i = 0; i < x.size(); i++) {
+			_vec[i] = Affine2(x[i]);
+		}
+	} else {
+		for (int i = 0; i < x.size(); i++) {
+			_vec[i] = Affine2(x.size(), i + 1, x[i]);
+		}
+	}
+}
+
 Affine2Vector::Affine2Vector(const Vector& x) :
 		_n(x.size()),
 		_vec(new Affine2[x.size()]) {
 	for (int i = 0; i < _n; i++){
-		_vec[i] = Affine2(_n, i + 1, x[i]);
+		_vec[i] = Affine2(x[i]);
 	}
-}*/
+}
 
-void Affine2Vector::init(const Interval& x) {
-	for (int i = 0; i < size(); i++) {
-		(*this)[i] = x;
+void Affine2Vector::init(const Interval& x, bool b) {
+	if (!b) {
+		for (int i = 0; i < size(); i++) {
+			(*this)[i] = Affine2(x);
+		}
+	} else {
+		for (int i = 0; i < size(); i++) {
+			(*this)[i] = Affine2(size(),i+1,x);
+		}
 	}
 }
 void Affine2Vector::init(const Affine2& x) {
@@ -216,12 +229,12 @@ IntervalVector Affine2Vector::itv() const {
 }
 
 
-//TODO
+
 Affine2 operator*(const Vector& v1, const Affine2Vector& v2) {
 	assert(v1.size()==v2.size());
 
-	const int n=v1.size();
-	Affine2 y(v2[0].size(),0);
+	int n=v1.size();
+	Affine2 y(0);
 
 	if (v2.is_empty()) {
 		y.set_empty();
@@ -237,8 +250,8 @@ Affine2 operator*(const Vector& v1, const Affine2Vector& v2) {
 Affine2 operator*(const Affine2Vector& v1, const Vector& v2) {
 	assert(v1.size()==v2.size());
 
-	const int n=v1.size();
-	Affine2 y(v1[0].size(),0);
+	int n=v1.size();
+	Affine2 y(0);
 
 	if (v1.is_empty()) {
 		y.set_empty();
@@ -260,8 +273,8 @@ Affine2 operator*(const IntervalVector& x1, const Affine2Vector& x2){
 Affine2 operator*(const Affine2Vector& v1, const IntervalVector& v2) {
 	assert(v1.size()==v2.size());
 
-	const int n=v1.size();
-	Affine2 y(v1[0].size(),0);
+	int n=v1.size();
+	Affine2 y(0);
 
 	if (v1.is_empty() || v2.is_empty()) {
 		y.set_empty();
@@ -278,8 +291,8 @@ Affine2 operator*(const Affine2Vector& v1, const Affine2Vector& v2) {
 	assert(v1.size()==v2.size());
 	assert(v1.size()==v2.size());
 
-	const int n=v1.size();
-	Affine2 y(v1[0].size(),0);
+	int n=v1.size();
+	Affine2 y(0);
 
 	if (v1.is_empty() || v2.is_empty()) {
 		y.set_empty();

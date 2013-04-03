@@ -20,7 +20,7 @@ CtcFwdBwd::CtcFwdBwd(Function& f, CmpOp op, HC4Revise::FwdMode mode) : Ctc(f.nb_
 
 }
 
-CtcFwdBwd::CtcFwdBwd(const NumConstraint& ctr) : Ctc(ctr.f.nb_var()), ctr(ctr.f,ctr.op) {
+CtcFwdBwd::CtcFwdBwd(const NumConstraint& ctr, HC4Revise::FwdMode mode) : Ctc(ctr.f.nb_var()), ctr(ctr.f,ctr.op), hc4r(mode) {
 	for (int v=0; v<ctr.f.nb_var(); v++)
 		output[v]=input[v]=ctr.f.used(v);
 }

@@ -33,12 +33,12 @@ public:
 	 * \param mode see #ibex::HC4Revise::HC4Revise(HC4Revise::FwdMode).
 	 *
 	 */
-	CtcFwdBwd(Function& f, CmpOp op=EQ, HC4Revise::FwdMode mode=HC4Revise::HC4_INTERVAL);
+	CtcFwdBwd(Function& f, CmpOp op=EQ, HC4Revise::FwdMode mode=HC4Revise::INTERVAL_MODE);
 
 	/**
 	 * \remark ctr is not kept by reference.
 	 */
-	CtcFwdBwd(const NumConstraint& ctr);
+	CtcFwdBwd(const NumConstraint& ctr, HC4Revise::FwdMode mode=HC4Revise::INTERVAL_MODE);
 
 	/**
 	 * \brief Contract the box.
