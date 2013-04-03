@@ -12,7 +12,6 @@
 #include "ibex_ExprCopy.h"
 #include "ibex_ExprNodes.h"
 #include "ibex_Expr.h"
-#include "ibex_NodeSet.h"
 
 using namespace std;
 
