@@ -181,18 +181,13 @@ int main() {
 		Affine2 g ;
 
 		cout<<g<<endl;
-		g=Affine2(3);
+		g=Affine2();
 
 		g=faa;
 
 		cout<<g<<endl;
 
-//		Affine2 *h;
-//		int n=4;
-//		IntervalVector vect(n,Interval(0,2));
-//		h=init_Affine2(vect);
-//		for (int i=0;i<n;i++) cout<<h[i]<<endl;
-/
+
 
 		// test de l'erreur non modifiable
 		cout << faa.err() << endl;

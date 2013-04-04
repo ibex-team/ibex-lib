@@ -22,7 +22,7 @@ public:
 		TEST_ADD(TestAffine2::test_exp);
 		TEST_ADD(TestAffine2::test_log);
 		TEST_ADD(TestAffine2::test_inv);
-	/*	TEST_ADD(TestAffine2::test_cos);
+		TEST_ADD(TestAffine2::test_cos);
 		TEST_ADD(TestAffine2::test_sin);
 		TEST_ADD(TestAffine2::test_tan);
 		TEST_ADD(TestAffine2::test_abs);
@@ -33,12 +33,22 @@ public:
 		TEST_ADD(TestAffine2::test_sinh);
 		TEST_ADD(TestAffine2::test_tanh);
 
-*/
+
 
 	}
 
 	bool check_af2 (Function& f, IntervalVector& I);
 	bool check_af2 (Function& f, Interval& I);
+
+//	void test_root2();
+//	void test_root4();
+//	void test_root5();
+	void test_pow2();
+	void test_pow4();
+	void test_pow5();
+	void test_powINT1();
+	void test_powINT2();
+
 
 	void test_sqrt();
 	void test_exp();
