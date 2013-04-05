@@ -30,15 +30,15 @@ public:
 	 * \brief HC4Revise on f(x)=0 or f(x)<=0.
 	 *
 	 * \param op: by default: true.
-	 * \param mode see #ibex::HC4Revise::HC4Revise(HC4Revise::FwdMode).
+	 * \param mode see #ibex::HC4Revise::HC4Revise(FwdMode).
 	 *
 	 */
-	CtcFwdBwd(Function& f, CmpOp op=EQ, HC4Revise::FwdMode mode=HC4Revise::INTERVAL_MODE);
+	CtcFwdBwd(Function& f, CmpOp op=EQ, FwdMode mode=INTERVAL_MODE);
 
 	/**
 	 * \remark ctr is not kept by reference.
 	 */
-	CtcFwdBwd(const NumConstraint& ctr, HC4Revise::FwdMode mode=HC4Revise::INTERVAL_MODE);
+	CtcFwdBwd(const NumConstraint& ctr, FwdMode mode=INTERVAL_MODE);
 
 	/**
 	 * \brief Contract the box.

@@ -36,7 +36,8 @@ public:
 	/**
 	 * \brief Calculate the gradient of f on the box \a box and store the result in \a g.
 	 */
-	ExprLabel& eval(const Function& f, const IntervalVector& box) const;
+	Domain& eval(const Function& f, const IntervalVector& box) const;
+	ExprLabel& eval_Label(const Function& f, const IntervalVector& box) const;
 
 	void index_fwd(const ExprIndex&, const ExprLabel& x, ExprLabel& y);
 	       void vector_fwd(const ExprVector&, const ExprLabel** compL, ExprLabel& y);
@@ -89,12 +90,23 @@ public:
 	/**
 	 * \brief Run the forward algorithm with input domains.
 	 */
-	ExprLabel& eval(const Function&, ExprLabel** d) const;
+	ExprLabel& eval_Label(const Function& f, ExprLabel** d) const;
+	Domain& eval(const Function& f , ExprLabel** d) const;
 };
 
 /* ============================================================================
  	 	 	 	 	 	 	 implementation
   ============================================================================*/
+
+inline Domain& Affine2Eval::eval(const Function& f, ExprLabel** e) const {
+	return *eval_Label(f,e).d;
+}
+
+inline Domain& Affine2Eval::eval(const Function& f,const IntervalVector& box) const {
+	return *(eval_Label(f,box)).d;
+}
+
+
 
 inline void Affine2Eval::index_fwd(const ExprIndex& , const ExprLabel& , ExprLabel& ) { /* nothing to do */ }
 
@@ -132,9 +144,9 @@ inline void Affine2Eval::cst_fwd(const ExprConstant& c, ExprLabel& y) {
 }
 
 inline void Affine2Eval::apply_fwd(const ExprApply& a, ExprLabel** x, ExprLabel& y)                          {
-	ExprLabel tmp = eval(a.func,x);
-	y.af2 = tmp.af2;
-	y.d = tmp.d;
+	ExprLabel tmp = eval_Label(a.func,x);
+	*y.af2 = *tmp.af2;
+	*y.d = *tmp.d;
 }
 inline void Affine2Eval::add_fwd(const ExprAdd&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)     {
 	y.af2->i()=x1.af2->i()+x2.af2->i();

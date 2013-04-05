@@ -14,13 +14,13 @@
 
 namespace ibex {
 
-CtcFwdBwd::CtcFwdBwd(Function& f, CmpOp op, HC4Revise::FwdMode mode) : Ctc(f.nb_var()), ctr(f,op), hc4r(mode) {
+CtcFwdBwd::CtcFwdBwd(Function& f, CmpOp op, FwdMode mode) : Ctc(f.nb_var()), ctr(f,op), hc4r(mode) {
 	for (int v=0; v<ctr.f.nb_var(); v++)
 		output[v]=input[v]=ctr.f.used(v);
 
 }
 
-CtcFwdBwd::CtcFwdBwd(const NumConstraint& ctr, HC4Revise::FwdMode mode) : Ctc(ctr.f.nb_var()), ctr(ctr.f,ctr.op), hc4r(mode) {
+CtcFwdBwd::CtcFwdBwd(const NumConstraint& ctr, FwdMode mode) : Ctc(ctr.f.nb_var()), ctr(ctr.f,ctr.op), hc4r(mode) {
 	for (int v=0; v<ctr.f.nb_var(); v++)
 		output[v]=input[v]=ctr.f.used(v);
 }

@@ -66,11 +66,11 @@ Domain& Function::eval_domain(const IntervalVector& box) const {
 
 
 Domain& Function::eval_affine2domain(const IntervalVector& box) const {
-	return *Affine2Eval().eval(*this,box).d;
+	return Affine2Eval().eval(*this,box);
 }
 
 Domain& Function::eval_affine2domain(const IntervalVector& box, Affine2Domain *affine) const {
-	ExprLabel res = Affine2Eval().eval(*this,box);
+	ExprLabel res = Affine2Eval().eval_Label(*this,box);
 	*affine = *res.af2;
 	return *res.d;
 }

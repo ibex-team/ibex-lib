@@ -1087,46 +1087,45 @@ void TestAffine2::test_tanh() {
 
 
 bool TestAffine2::check_af2 (Function& f, Interval& I){
-
 	Affine2 faa;
 	Interval itv =f.eval_affine2(IntervalVector(1,I), &faa);
 	Interval itv2 =f.eval(IntervalVector(1,I));
 
-	if (!(itv2.is_subset(faa.itv()))) {
+	if (!(itv2.is_subset(faa.itv())))
+	{
 		std::cout  << " DEP = "<< I<< "  "  << f<< std::endl;
 		std::cout  << " RES = "<< itv2 << " /// "<< itv << " ///// " << faa << std::endl;
 	//	std::cout  << " RES = "<< itv2 << " ///// " << faa << std::endl;
 
 		return false;
 	}
-	/*	if (faa.size()>0) {
+	if (faa.size()>0) {
 		Variable x;
-		const ExprNode *e =& (faa.val(0)+faa.val(1)*(2* (x)-(I.lb()+I.ub()))/(I.diam()));
-		Function lininf(x,*e);
-
+		Function lininf(x,(faa.val(0)+faa.val(1)*(2* (x)-(I.lb()+I.ub()))/(I.diam())));
 
 		Function linsup(x, lininf(x)+faa.err().lb());
 
 		Function c_inf(x,lininf(x)+faa.err().lb()  -f(x));
 		Function c_sup(x, f(x) -linsup(x));
 
-		CtcFwdBwd ct1(c_inf,GT);
-		CtcFixPoint ft1(ct1,0.0001);
+		CtcFwdBwd ct1(c_inf,GT,AFFINE2_MODE);
+		CtcFixPoint ft1(ct1,0.1);
 
-		CtcFwdBwd ct2(c_sup,GT);
-		CtcFixPoint ft2(ct2,0.0001);
+		CtcFwdBwd ct2(c_sup,GT,AFFINE2_MODE);
+		CtcFixPoint ft2(ct2,0.1);
 
 		LargestFirst bbb;
 		CellStack ccc;
-		Solver sol1(ft1,bbb, ccc, 0.001 );
-		Solver sol2(ft2,bbb, ccc, 0.001 );
+		Solver sol1(ft1,bbb, ccc, 0.1 );
+		Solver sol2(ft2,bbb, ccc, 0.1 );
 
 
-//		std::cout<< " PAVING = "<< I.diam()<< " /// " << sol1.solve(IntervalVector(1,I)).size() << " et "<<sol2.solve(IntervalVector(1,I)).size() << std::endl;
+		std::cout  << " DEP = "<< I<< "  "  << f<< std::endl;
+		std::cout  << " RES = "<< itv2 << " /// "<< itv << " ///// " << faa << std::endl;
+		std::cout<< " PAVING = "<< I.diam()<< " /// " << sol1.solve(IntervalVector(1,I)).size() << " et "<<sol2.solve(IntervalVector(1,I)).size() << std::endl;
 //		return ((sol1.solve(IntervalVector(1,I)).empty()) && (sol2.solve(IntervalVector(1,I)).empty()));
-
 	}
-	*/
+
 	return true;
 
 }
@@ -1143,7 +1142,7 @@ bool TestAffine2::check_af2 (Function& f, IntervalVector& I){
 		std::cout  << " RES = "<< itv2 << " /// "<< itv << " ///// " << faa << std::endl;
 		return false;
 	}
-	/*if (faa.size()>0) {
+	if (faa.size()>0) {
 		Variable x(I.size());
 
 		const ExprNode *e =& (faa.val(0)+faa.val(1)*(2* (x[0])-(I[0].lb()+I[0].ub()))/(I[0].diam()));
@@ -1158,21 +1157,21 @@ bool TestAffine2::check_af2 (Function& f, IntervalVector& I){
 		Function c_inf(x,lininf(x)+faa.err().lb()  -f(x));
 		Function c_sup(x, f(x) -linsup(x));
 
-		CtcFwdBwd ct1(c_inf,GT);
-		CtcFixPoint ft1(ct1,0.0001);
+		CtcFwdBwd ct1(c_inf,GT,AFFINE2_MODE);
+		CtcFixPoint ft1(ct1,0.1);
 
-		CtcFwdBwd ct2(c_sup,GT);
-		CtcFixPoint ft2(ct2,0.0001);
+		CtcFwdBwd ct2(c_sup,GT,AFFINE2_MODE);
+		CtcFixPoint ft2(ct2,0.1);
 
 		LargestFirst bbb;
 		CellStack ccc;
-		Solver sol1(ft1,bbb, ccc, 0.001 );
-		Solver sol2(ft2,bbb, ccc, 0.001 );
+		Solver sol1(ft1,bbb, ccc, 0.1 );
+		Solver sol2(ft2,bbb, ccc, 0.1 );
 
-	//	std::cout<< " PAVING = "<< I.max_diam()<< " ///  " << sol1.solve(I).size() << " et "<<sol2.solve(I).size() << std::endl;
+		std::cout<< " PAVING = "<< I.max_diam()<< " ///  " << sol1.solve(I).size() << " et "<<sol2.solve(I).size() << std::endl;
 		//return ((sol1.solve(I).empty()) && (sol2.solve(I).empty()));
 	}
-	*/
+
 
 	return true;
 

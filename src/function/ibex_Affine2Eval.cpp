@@ -17,7 +17,7 @@ namespace ibex {
 //======================== Forward =======================
 
 
-ExprLabel& Affine2Eval::eval(const Function& f, ExprLabel** args) const {
+ExprLabel& Affine2Eval::eval_Label(const Function& f, ExprLabel** args) const {
 	assert(f.expr().deco.af2);
 	assert(f.expr().deco.d);
 
@@ -45,7 +45,7 @@ ExprLabel& Affine2Eval::eval(const Function& f, ExprLabel** args) const {
 
 
 
-ExprLabel& Affine2Eval::eval(const Function& f, const IntervalVector& box) const {
+ExprLabel& Affine2Eval::eval_Label(const Function& f, const IntervalVector& box) const {
 	assert(f.expr().deco.af2);
 	assert(f.expr().deco.d);
 
