@@ -1,9 +1,12 @@
-/*
- * ibex_Affine2Eval.h
+/* ============================================================================
+ * I B E X - Evaluation of Affine2 forms
+ * ============================================================================
+ * License     : This program can be distributed under the terms of the GNU LGPL.
+ *               See the file COPYING.LESSER.
  *
- *  Created on: 7 mars 2013
- *      Author: nininjo
- */
+ * Author(s)   : Jordan Ninin
+ * Created     : April 08, 2013
+ * ---------------------------------------------------------------------------- */
 
 #ifndef IBEX_AFFINE2_EVAL_H_
 #define IBEX_AFFINE2_EVAL_H_
@@ -13,7 +16,6 @@
 #include "ibex_Affine2MatrixArray.h"
 #include "ibex_EmptyBoxException.h"
 #include "ibex_FwdAlgorithm.h"
-#include "ibex_BwdAlgorithm.h"
 
 namespace ibex {
 

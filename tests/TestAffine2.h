@@ -1,9 +1,12 @@
-/*
- * TestAffine2.h
+/* ============================================================================
+ * I B E X - Affine2 Test
+ * ============================================================================
+ * License     : This program can be distributed under the terms of the GNU LGPL.
+ *               See the file COPYING.LESSER.
  *
- *  Created on: 6 mars 2013
- *      Author: nininjo
- */
+ * Author(s)   : Jordan Ninin
+ * Created     : April 08, 2013
+ * ---------------------------------------------------------------------------- */
 
 
 #ifndef __TEST_AFFINE2_H__

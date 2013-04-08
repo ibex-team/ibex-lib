@@ -647,7 +647,7 @@ Affine2 root(const Affine2& x, int n, const Interval itv);
 
 /**
  * \brief Return the largest integer interval included in x.
- *  TODO  not yet implemented integer
+ *  TODO Affine2::integer not yet implemented integer
  */
  Affine2 integer(const Affine2& x);
 
@@ -1278,7 +1278,6 @@ inline Interval min(const Affine2& x, const Interval& y) {
 
 
 inline Affine2 integer(const Affine2& x){
-	// TODO not yet implemented
 	return Affine2(x);
 }
 
@@ -1290,7 +1289,6 @@ inline Affine2 sign(const Affine2& x) {
 
 #endif /* IBEX_AFFINE2_H_ */
 
-// TODO to finish the projections and other functions
 
 /** \brief $\atan2(AF[x],AF[y])$. */
 //Affine2 atan2(const Affine2& x, const Affine2& y);

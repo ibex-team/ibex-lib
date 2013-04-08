@@ -1,5 +1,5 @@
 /* ============================================================================
- * I B E X - ibex_Affine2MatrixArray.h
+ * I B E X - Matrix Array of Affine2 form
  * ============================================================================
  * License     : This program can be distributed under the terms of the GNU LGPL.
  *               See the file COPYING.LESSER.

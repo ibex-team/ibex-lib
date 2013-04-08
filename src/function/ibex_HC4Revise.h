@@ -16,7 +16,7 @@
 
 namespace ibex {
 
-	typedef enum { INTERVAL_MODE, AFFINE2_MODE } FwdMode;
+	typedef enum { INTERVAL_MODE, AFFINE2_MODE, AFFINE_MODE } FwdMode;
 /**
  * \ingroup symbolic
  * \brief The famous forward-backward contraction algorithm.

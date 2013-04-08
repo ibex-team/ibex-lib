@@ -1,9 +1,13 @@
-/*
- * ibex_Domaine2.cpp
+/* ============================================================================
+ * I B E X - ibex_Affine2Domain.cpp
+ * ============================================================================
+ * License     : This program can be distributed under the terms of the GNU LGPL.
+ *               See the file COPYING.LESSER.
  *
- *  Created on: 8 mars 2013
- *      Author: nininjo
- */
+ * Author(s)   : Jordan Ninin
+ * Bug fixes   :
+ * Created     : March 08, 2013
+ * ---------------------------------------------------------------------------- */
 
 
 #include "ibex_Affine2Domain.h"

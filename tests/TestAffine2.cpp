@@ -1,10 +1,12 @@
-/*
- * TestAffine2.cpp
+/* ============================================================================
+ * I B E X - Affine2 Test
+ * ============================================================================
+ * License     : This program can be distributed under the terms of the GNU LGPL.
+ *               See the file COPYING.LESSER.
  *
- *  Created on: 6 mars 2013
- *      Author: nininjo
- */
-
+ * Author(s)   : Jordan Ninin
+ * Created     : April 08, 2013
+ * ---------------------------------------------------------------------------- */
 
 #include "TestAffine2.h"
 
@@ -1093,13 +1095,13 @@ bool TestAffine2::check_af2 (Function& f, Interval& I){
 
 	if (!(itv2.is_subset(faa.itv())))
 	{
-		std::cout  << " DEP = "<< I<< "  "  << f<< std::endl;
-		std::cout  << " RES = "<< itv2 << " /// "<< itv << " ///// " << faa << std::endl;
+//		std::cout  << " DEP = "<< I<< "  "  << f<< std::endl;
+//		std::cout  << " RES = "<< itv2 << " /// "<< itv << " ///// " << faa << std::endl;
 	//	std::cout  << " RES = "<< itv2 << " ///// " << faa << std::endl;
 
 		return false;
 	}
-	if (faa.size()>0) {
+/*	if (faa.size()>0) {
 		Variable x;
 		Function lininf(x,(faa.val(0)+faa.val(1)*(2* (x)-(I.lb()+I.ub()))/(I.diam())));
 
@@ -1125,7 +1127,7 @@ bool TestAffine2::check_af2 (Function& f, Interval& I){
 		std::cout<< " PAVING = "<< I.diam()<< " /// " << sol1.solve(IntervalVector(1,I)).size() << " et "<<sol2.solve(IntervalVector(1,I)).size() << std::endl;
 //		return ((sol1.solve(IntervalVector(1,I)).empty()) && (sol2.solve(IntervalVector(1,I)).empty()));
 	}
-
+*/
 	return true;
 
 }
@@ -1138,11 +1140,11 @@ bool TestAffine2::check_af2 (Function& f, IntervalVector& I){
 	Interval itv =f.eval_affine2(I, &faa);
 	Interval itv2 =f.eval(I);
 	if (!(itv2.is_subset(faa.itv()))) {
-		std::cout  << " DEP = "<< I<< "  "  << f<<std::endl;
-		std::cout  << " RES = "<< itv2 << " /// "<< itv << " ///// " << faa << std::endl;
+//		std::cout  << " DEP = "<< I<< "  "  << f<<std::endl;
+//		std::cout  << " RES = "<< itv2 << " /// "<< itv << " ///// " << faa << std::endl;
 		return false;
 	}
-	if (faa.size()>0) {
+/*	if (faa.size()>0) {
 		Variable x(I.size());
 
 		const ExprNode *e =& (faa.val(0)+faa.val(1)*(2* (x[0])-(I[0].lb()+I[0].ub()))/(I[0].diam()));
@@ -1171,7 +1173,7 @@ bool TestAffine2::check_af2 (Function& f, IntervalVector& I){
 		std::cout<< " PAVING = "<< I.max_diam()<< " ///  " << sol1.solve(I).size() << " et "<<sol2.solve(I).size() << std::endl;
 		//return ((sol1.solve(I).empty()) && (sol2.solve(I).empty()));
 	}
-
+*/
 
 	return true;
 

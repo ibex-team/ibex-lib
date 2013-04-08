@@ -1,5 +1,5 @@
 /* ============================================================================
- * I B E X - Affine2 definition
+ * I B E X - ibex_Affine2.cpp
  * ============================================================================
  * License     : This program can be distributed under the terms of the GNU LGPL.
  *               See the file COPYING.LESSER.
@@ -53,7 +53,7 @@ Affine2::Affine2(const double d) :
 			_val	(NULL)  {
 	if (fabs(d)<POS_INFINITY) {
 		_val = new double[1];
-		_err = AF_EC();
+		_err = abs(d)*AF_EE();
 		_val[0] = d;
 	} else {
 		_err = Interval(d);
@@ -139,7 +139,7 @@ Affine2& Affine2::operator=(const Affine2& x) {
 
 Affine2& Affine2::operator=(double d) {
 	if (fabs(d)<POS_INFINITY) {
-		_err = AF_EC();
+		_err = abs(d)*AF_EC();
 		if (_n<0)  {
 			_n = 0;
 			if (_val!=NULL) { delete[] _val; }
@@ -189,7 +189,6 @@ Affine2& Affine2::operator=(const Interval& x) {
 }
 
 
-// TODO Nothing to do . It is just to see the line quickly.
 Affine2& Affine2::saxpy(double alpha, const Affine2& y, double beta, double ddelta, bool B1, bool B2, bool B3, bool B4) {
 //std::cout << "saxpy IN " << alpha << " x " << *this << " + " << y << " + "<< beta << " +error " << ddelta << " / "<< B1 << B2 << B3 << B4 << std::endl;
 	double temp, ttt, sss;
@@ -683,7 +682,7 @@ Affine2& Affine2::power(int n, const Interval itv) {
 	return *this;
 }
 
-// TODO
+
 Affine2& Affine2::linMinRange(affine2_expr num, const Interval itv) {
 
 	Interval res_itv;
@@ -952,7 +951,7 @@ Affine2& Affine2::linMinRange(affine2_expr num, const Interval itv) {
 	return *this;
 }
 
-Affine2& Affine2::linChebyshev(affine2_expr num, const Interval itv) {  // TODO
+Affine2& Affine2::linChebyshev(affine2_expr num, const Interval itv) {
 	//  std::cout << "linChebyshev IN itv= "<<itv << " x =  "<< *this << num<< std::endl;
 
 	Interval res_itv;

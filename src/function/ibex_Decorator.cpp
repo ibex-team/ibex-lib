@@ -5,7 +5,7 @@
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Apr 4, 2012
-// Last Update : Jul 16, 2012
+// Last Update : Apr 08, 2013
 //============================================================================
 
 #include "ibex_Decorator.h"

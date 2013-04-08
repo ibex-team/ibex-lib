@@ -1,5 +1,5 @@
 /* ============================================================================
- * I B E X - Affine2 Vector definition
+ * I B E X - ibex_Affine2Vector.cpp
  * ============================================================================
  * License     : This program can be distributed under the terms of the GNU LGPL.
  *               See the file COPYING.LESSER.

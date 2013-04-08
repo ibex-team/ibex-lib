@@ -1,9 +1,13 @@
-/*
- * ibex_Affine2Domain.h
+/* ============================================================================
+ * I B E X - Affine2Domain definition
+ * ============================================================================
+ * License     : This program can be distributed under the terms of the GNU LGPL.
+ *               See the file COPYING.LESSER.
  *
- *  Created on: 8 mars 2013
- *      Author: nininjo
- */
+ * Author(s)   : Jordan Ninin
+ * Bug fixes   :
+ * Created     : March 08, 2013
+ * ---------------------------------------------------------------------------- */
 
 #ifndef IBEX_AFFINE2_DOMAIN_H_
 #define IBEX_AFFINE2_DOMAIN_H_
