@@ -69,9 +69,9 @@ Domain& Function::eval_affine2domain(const IntervalVector& box) const {
 	return Affine2Eval().eval(*this,box);
 }
 
-Domain& Function::eval_affine2domain(const IntervalVector& box, Affine2Domain *affine) const {
+Domain& Function::eval_affine2domain(const IntervalVector& box, Affine2Domain& affine) const {
 	ExprLabel res = Affine2Eval().eval_Label(*this,box);
-	*affine = *res.af2;
+	affine = *res.af2;
 	return *res.d;
 }
 
@@ -80,67 +80,60 @@ Interval Function::eval_affine2(const IntervalVector& box) const {
 	return eval_affine2domain(box).i();
 }
 
-Interval Function::eval_affine2(const IntervalVector& box, Affine2 *affine) const {
-	Affine2Domain tmp(Dim(1,1,1));
-	Interval res = eval_affine2domain(box,&tmp).i();
-	*affine = tmp.i();
-	return res;
+Interval Function::eval_affine2(const IntervalVector& box, Affine2& affine) const {
+	ExprLabel res = Affine2Eval().eval_Label(*this,box);
+	affine = res.af2->i();
+	return res.d->i();
 }
 
 
 IntervalVector Function::eval_affine2vector(const IntervalVector& box) const {
-	return expr().dim.is_scalar() ? IntervalVector(1,eval_affine2domain(box).i()) : eval_affine2domain(box).v();
+	return expr().dim.is_scalar() ? IntervalVector(1,Eval().eval(*this,box).i()) : Eval().eval(*this,box).v();
 }
 
 
-IntervalVector Function::eval_affine2vector(const IntervalVector& box, Affine2Vector *affine) const {
-	Affine2Domain tmp(expr().dim);
+IntervalVector Function::eval_affine2vector(const IntervalVector& box, Affine2Vector& affine) const {
+	ExprLabel res = Affine2Eval().eval_Label(*this,box);
 	if (expr().dim.is_scalar() ) {
-		IntervalVector res = IntervalVector(1,eval_affine2domain(box,&tmp).i()) ;
-		*affine = Affine2Vector(1,tmp.i());
-		return res;
+		affine = Affine2Vector(1,res.af2->i());
+		return IntervalVector(1,res.d->i());
 	} else {
-		IntervalVector res = eval_affine2domain(box,&tmp).v();
-		*affine = tmp.v();
-		return res;
+		affine = res.af2->v();
+		return res.d->v();
 	}
 }
 
 
-IntervalMatrix Function::eval_affine2matrix(const IntervalVector& box, Affine2Matrix *affine) const {
-	Affine2Domain tmp(expr().dim);
+IntervalMatrix Function::eval_affine2matrix(const IntervalVector& box, Affine2Matrix& affine) const {
+	ExprLabel res = Affine2Eval().eval_Label(*this,box);
+	affine = Affine2Matrix(expr().dim.dim2, expr().dim.dim3);
+
 	switch (expr().dim.type()) {
 	case Dim::SCALAR     : {
-		IntervalMatrix res = IntervalMatrix(1,1,eval_affine2domain(box,&tmp).i());
-		*affine = Affine2Matrix(1,1,tmp.i());
-		return res;
+		affine[0][0] = res.af2->i();
+		return IntervalMatrix(1,1,res.d->i());
 	}
 	case Dim::ROW_VECTOR : {
+		affine.set_row(0,res.af2->v());
 		IntervalMatrix M(image_dim(),1);
-		*affine =  Affine2Matrix(image_dim(),1);
-		M.set_row(0,eval_affine2domain(box,&tmp).v());
-		affine->set_row(0,tmp.v());
+		M.set_row(0,res.d->v());
 		return M;
 	}
 	case Dim::COL_VECTOR : {
+		affine.set_col(0,res.af2->v());
 		IntervalMatrix M(1,image_dim());
-		*affine =  Affine2Matrix(1,image_dim());
-		M.set_col(0,eval_affine2domain(box,&tmp).v());
-		affine->set_col(0,tmp.v());
+		M.set_col(0,res.d->v());
 		return M;
 	}
 	case Dim::MATRIX: {
-		IntervalMatrix res = eval_affine2domain(box,&tmp).m();
-		*affine = tmp.m();
-		return res;
-
+		affine = res.af2->m();
+		return res.d->m();
 	}
 	default : {
 		assert(false);
 	}
 	}
 }
-
 
 void Function::backward(const Domain& y, IntervalVector& x) const {
 	HC4Revise().proj(*this,y,x);

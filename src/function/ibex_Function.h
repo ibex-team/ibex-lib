@@ -248,42 +248,85 @@ public:
 	bool all_args_scalar() const;
 
 	/**
-	 * \brief Calculate f(box)
+	 * \brief Calculate f(box) using interval arithmetic.
 	 */
 	Domain& eval_domain(const IntervalVector& box) const;
 
 	/**
-	 * \brief Calculate the affine2 form of f(box)
+	 * \brief Calculate f(box) using affine arithmetic.
 	 */
 	Domain& eval_affine2domain(const IntervalVector& box) const;
-	Domain& eval_affine2domain(const IntervalVector& box, Affine2Domain *result) const;
 
 	/**
-	 * \brief Calculate f(box).
+	 * \brief Calculate f(box) using affine arithmetic.
+	 *
+	 * The resulting affine form is stored in \a result.
+	 */
+	Domain& eval_affine2domain(const IntervalVector& box, Affine2Domain& result) const;
+
+	/**
+	 * \brief Calculate f(box) using interval arithmetic.
 	 *
 	 * \pre f must be real-valued
 	 */
 	Interval eval(const IntervalVector& box) const;
-	Interval eval_affine2(const IntervalVector& box) const;
-	Interval eval_affine2(const IntervalVector& box, Affine2 *result) const;
 
 	/**
-	 * \brief Calculate f(box).
+	 * \brief Calculate f(box) using affine arithmetic.
+	 *
+	 */
+	Interval eval_affine2(const IntervalVector& box) const;
+
+	/**
+	 * \brief Calculate f(box) using affine arithmetic.
+	 *
+	 * The resulting affine form is stored in \a affine.
+	 */
+	Interval eval_affine2(const IntervalVector& box, Affine2& result) const;
+
+	/**
+	 * \brief Calculate f(box) using interval arithmetic.
 	 *
 	 * \pre f must be vector-valued
 	 */
 	IntervalVector eval_vector(const IntervalVector& box) const;
-	IntervalVector eval_affine2vector(const IntervalVector& box) const;
-	IntervalVector eval_affine2vector(const IntervalVector& box, Affine2Vector *affine) const;
 
 	/**
-	 * \brief Calculate f(x).
+	 * \brief Calculate f(box) using affine arithmetic.
+	 *
+	 * \pre f must be vector-valued
+	 */
+	IntervalVector eval_affine2vector(const IntervalVector& box) const;
+
+	/**
+	 * \brief Calculate f(box) using affine arithmetic.
+	 *
+	 * The resulting affine form is stored in \a affine.
+	 * \pre f must be vector-valued
+	 */
+	IntervalVector eval_affine2vector(const IntervalVector& box, Affine2Vector& affine) const;
+
+	/**
+	 * \brief Calculate f(x) using interval arithmetic.
 	 *
 	 * \pre f must be matrix-valued
 	 */
 	IntervalMatrix eval_matrix(const IntervalVector& x) const;
+
+	/**
+	 * \brief Calculate f(box) using affine arithmetic.
+	 *
+	 * \pre f must be matrix-valued
+	 */
 	IntervalMatrix eval_affine2matrix(const IntervalVector& box) const;
-	IntervalMatrix eval_affine2matrix(const IntervalVector& box, Affine2Matrix* affine) const;
+
+	/**
+	 * \brief Calculate f(box) using affine arithmetic.
+	 *
+	 * The resulting affine form is stored in \a affine.
+	 * \pre f must be matrix-valued
+	 */
+	IntervalMatrix eval_affine2matrix(const IntervalVector& box, Affine2Matrix& affine) const;
 
 	/**
 	 * \brief Calculate the gradient of f.

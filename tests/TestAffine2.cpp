@@ -1090,7 +1090,7 @@ void TestAffine2::test_tanh() {
 
 bool TestAffine2::check_af2 (Function& f, Interval& I){
 	Affine2 faa;
-	Interval itv =f.eval_affine2(IntervalVector(1,I), &faa);
+	Interval itv =f.eval_affine2(IntervalVector(1,I), faa);
 	Interval itv2 =f.eval(IntervalVector(1,I));
 
 	if (!(itv2.is_subset(faa.itv())))
@@ -1137,7 +1137,7 @@ bool TestAffine2::check_af2 (Function& f, IntervalVector& I){
 
 
 	Affine2 faa;
-	Interval itv =f.eval_affine2(I, &faa);
+	Interval itv =f.eval_affine2(I, faa);
 	Interval itv2 =f.eval(I);
 	if (!(itv2.is_subset(faa.itv()))) {
 //		std::cout  << " DEP = "<< I<< "  "  << f<<std::endl;

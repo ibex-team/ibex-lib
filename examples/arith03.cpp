@@ -30,7 +30,7 @@ int main() {
 		Interval fi = ff.eval(I);
 		cout << fi << endl;
 		Affine2 faa;
-		ff.eval_affine2(I, &faa);
+		ff.eval_affine2(I, faa);
 		cout << faa << endl;
 
 //		Function lininf(x, faa.val(0)-faa.err().ub() + faa.val(1)*(2*x[0]-(I[0].lb()+I[0].ub()))/(I[0].diam()) + faa.val(2)*(2*x[1]-(I[1].lb()+I[1].ub()))/(I[1].diam())) ;
