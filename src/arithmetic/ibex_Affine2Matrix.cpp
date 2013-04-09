@@ -61,12 +61,12 @@ Affine2Matrix::Affine2Matrix(int m, int n, double bounds[][2]) : _nb_rows(m), _n
 		}
 }
 
-Affine2Matrix::Affine2Matrix(const Affine2Matrix& m, bool b) : _nb_rows(m.nb_rows()), _nb_cols(m.nb_cols()){
+Affine2Matrix::Affine2Matrix(const Affine2Matrix& m) : _nb_rows(m.nb_rows()), _nb_cols(m.nb_cols()){
 	_M = new Affine2Vector[_nb_rows];
 
 	for (int i=0; i<_nb_rows; i++) {
 		_M[i].resize(_nb_cols);
-		for (int j=0; j<_nb_cols; j++) _M[i]._vec[j]=Affine2(m[i][j],b);
+		for (int j=0; j<_nb_cols; j++) _M[i]._vec[j]=Affine2(m[i][j]);
 	}
 
 }
@@ -164,55 +164,6 @@ bool Affine2Matrix::operator==(const IntervalMatrix& m) const {
 	return true;
 }
 
-Matrix Affine2Matrix::lb() const {
-	assert(!is_empty());
-
-	Matrix l(nb_rows(), nb_cols());
-	for (int i=0; i<nb_rows(); i++) {
-		l[i]=(*this)[i].lb();
-	}
-	return l;
-}
-
-Matrix Affine2Matrix::ub() const {
-	assert(!is_empty());
-
-	Matrix u(nb_rows(), nb_cols());
-	for (int i=0; i<nb_rows(); i++) {
-		u[i]=(*this)[i].ub();
-	}
-	return u;
-}
-
-Matrix Affine2Matrix::mid() const {
-	assert(!is_empty());
-
-	Matrix mV(nb_rows(), nb_cols());
-	for (int i=0; i<nb_rows(); i++) {
-		mV[i]=(*this)[i].mid();
-	}
-	return mV;
-}
-
-Matrix Affine2Matrix::mig() const {
-	assert(!is_empty());
-
-	Matrix res(nb_rows(), nb_cols());
-	for (int i=0; i<nb_rows(); i++) {
-		res[i]=(*this)[i].mig();
-	}
-	return res;
-}
-
-Matrix Affine2Matrix::mag() const {
-	assert(!is_empty());
-
-	Matrix res(nb_rows(), nb_cols());
-	for (int i=0; i<nb_rows(); i++) {
-		res[i]=(*this)[i].mag();
-	}
-	return res;
-}
 
 void Affine2Matrix::resize(int nb_rows1, int nb_cols1) {
 	assert(nb_rows1>0);
@@ -242,14 +193,6 @@ void Affine2Matrix::resize(int nb_rows1, int nb_cols1) {
 	_M = M2;
 	_nb_rows = nb_rows1;
 	_nb_cols = nb_cols1;
-}
-
-bool Affine2Matrix::is_zero() const {
-	for (int i = 0; i < nb_rows(); i++) {
-		if (!(*this)[i].is_zero())
-			return false;
-	}
-	return true;
 }
 
 Affine2Matrix Affine2Matrix::submatrix(int row_start_index, int row_end_index,	int col_start_index, int col_end_index) {

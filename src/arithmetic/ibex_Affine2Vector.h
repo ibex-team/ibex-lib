@@ -72,7 +72,7 @@ public:
 	/**
 	 * \brief Create  a copy of  { \a  x if !(\a b)  else -(\a x) }.
 	 */
-	Affine2Vector(const Affine2Vector& x, bool b =false);
+	Affine2Vector(const Affine2Vector& x);
 
 	/**
 	 * \brief Create \a n Affine2Vector  initialized by
@@ -228,55 +228,9 @@ public:
 	int size() const;
 
 	/**
-	 * \brief Return the lower bound vector
-	 * \pre (*this) must be nonempty
-	 */
-	Vector lb() const;
-
-	/**
-	 * \brief Return the upper bound vector
-	 * \pre (*this) must be nonempty
-	 */
-	Vector ub() const;
-
-	/**
-	 * \brief Return the midpoint
-	 * \pre (*this) must be nonempty
-	 */
-	Vector mid() const;
-
-	/**
-	 * \brief Return the mignitude vector.
-	 * \pre (*this) must be nonempty
-	 */
-	Vector mig() const;
-
-	/**
-	 * \brief Return the magnitude vector.
-	 * \pre (*this) must be nonempty
-	 */
-	Vector mag() const;
-
-	/**
 	 * \brief Return true iff this Affine2Vector is empty
 	 */
 	bool is_empty() const;
-
-	/**
-	 * \brief Return true iff this Affine2Vector is flat.
-	 *
-	 * An Affine2Vector is "flat" if the radius is 0 on at least one dimension
-	 * An empty interval vector is considered as flat.
-	 */
-	bool is_flat() const;
-
-	/**
-	 * \brief True iff this interval vector contains \a x.
-	 *
-	 * \pre Dimension of \a x must be equal to the dimension of (*this).
-	 * \sa #ibex::Interval::contains(double) const.
-	 */
-	bool contains(const Vector& x) const;
 
 	/**
 	 * \brief true iff this interval vector contains an infinite bound.
@@ -284,192 +238,6 @@ public:
 	 * \note An empty interval vector is always bounded.
 	 */
 	bool is_unbounded() const;
-
-	/**
-	 * \brief True iff this interval vector is a subset of \a x.
-	 *
-	 * \pre Dimension of \a x must be equal to the dimension of this vector.
-
-	 * \note Always return true if this interval vector is empty.
-
-	 * \sa #ibex::Interval::is_subset(const Interval&) const.
-	 */
-	bool is_subset(const Affine2Vector& x) const;
-	bool is_subset(const IntervalVector& x) const;
-
-	/**
-	 * \brief True iff this interval vector is inside the interior of \a x.
-	 *
-	 * \pre Dimension of \a x must be equal to the dimension of this vector.
-	 *
-	 * \note return true if this interval vector is empty and \a x not.
-	 *
-	 * \sa #ibex::Interval::is_strict_subset(const Interval&) const.
-	 */
-	bool is_strict_subset(const Affine2Vector& x) const;
-	bool is_strict_subset(const IntervalVector& x) const;
-
-	/**
-	 * \brief True iff this interval vector is a superset of \a x.
-	 *
-	 * \pre Dimension of \a x must be equal to the dimension of this vector.
-
-	 * \note Always return true if \a x is empty.
-
-	 * \sa #ibex::Interval::is_superset(const Interval&) const.
-	 */
-	bool is_superset(const Affine2Vector& x) const;
-	bool is_superset(const IntervalVector& x) const;
-
-	/**
-	 * \brief True iff \a x is inside the interior of (*this).
-	 *
-	 * \pre Dimension of \a x must be equal to the dimension of this vector.
-	 *
-	 * \note return true if x is empty and not (*this).
-	 *
-	 * \sa #ibex::Interval::is_strict_superset(const Interval&) const.
-	 */
-	bool is_strict_superset(const Affine2Vector& x) const;
-	bool is_strict_superset(const IntervalVector& x) const;
-
-	/**
-	 * \brief True iff *this is a vector of zeros.
-	 */
-	bool is_zero() const;
-
-	/**
-	 * \brief True iff *this can be bisected along one dimension.
-	 *
-	 * \sa #ibex::Interval::is_bisectable().
-	 */
-	bool is_bisectable() const;
-
-	/**
-	 * \brief Vector of radii.
-	 */
-	Vector rad() const;
-
-	/**
-	 * \brief Return the vector of diameters.
-	 */
-	Vector diam() const;
-
-	/**
-	 * \brief Return the index of a component with minimal/maximal diameter.
-	 *
-	 *  \param min true => minimal diameter
-	 *  \throws InvalidIntervalVectorOp if the Affine2Vector is empty.
-	 */
-	int extr_diam_index(bool min) const;
-
-
-	/**
-	 * \brief Return the indices of all the components, sorted by increasing/decreasing diameter.
-	 */
-	void sort_indices(bool min, int tab[]) const;
-
-	/**
-	 * \brief Return the maximal diameter among all the components.
-	 *
-	 *  \throws InvalidIntervalVectorOp if the Affine2Vector is empty.
-	 */
-	double max_diam() const;
-
-	/**
-	 * \brief Return the minimal diameter among all the components.
-	 *
-	 * \throws InvalidIntervalVectorOp if the Affine2Vector is empty.
-	 */
-	double min_diam() const;
-
-	/**
-	 * \brief Return the volume of this interval vector.
-	 *
-	 * \note Return \c POS_INFINITY if the vector is unbounded and not flat.
-	 * \note Return 0 if the vector is flat and not unbounded.
-	 * \warning If the interval vector is both flat and unbounded, the result is undefined.
-	 * \sa #flat()
-	 * \sa #unbounded()
-	 */
-	double volume() const;
-
-	/**
-	 * \brief Return the perimeter of this interval vector.
-	 *
-	 * \note Return \c POS_INFINITY if unbounded.
-	 */
-	double perimeter() const;
-
-	 /**
-	  * \brief Return max of the delta, for x\subseteq *this [deprecated]
-	  *
-	  * Deprecated. Kept for compatibility with ibex 1.xx.
-	  */
-	double maxdelta(const Affine2Vector&);
-	double maxdelta(const IntervalVector&);
-
-	/**
-	 * \brief Return the relative distance with x.
-	 *
-	 * \return \f$\displaystyle \max_{i=1..n} rel\_distance([this]_i, x_i)/diam([this]_i)\f$.
-	 *
-	 * \sa #ibex::distance(const Affine2Vector& x1, const Affine2Vector& x2).
-	 * \sa #ibex::Interval::rel_distance(const Interval& x) const.
-	 */
-	double rel_distance(const Affine2Vector& x) const;
-	double rel_distance(const IntervalVector& x) const;
-
-//	/**
-//	 * \brief Return *this \ y (set difference).
-//	 *
-//	 * Store the difference under the form of a union of non-overlapping IntervalVectors
-//	 * into \a result, and return the size of the union.
-//	 *
-//	 * <p>
-//	 * If the difference is empty, \a result is an array of one element set to the empty box.
-//	 * It is <b>not</b> a zero-sized array containing no element.
-//	 */
-//	int diff(const IntervalVector& y, IntervalVector*& result) const;
-//	int diff(const Affine2Vector& y, IntervalVector*& result) const;
-//
-//	/**
-//	 * \brief Return the complementary of *this.
-//	 *
-//	 * Store the complementary under the form of a union of non-overlapping IntervalVectors,
-//	 * into \a result, and return the size of the union.
-//	 *
-//	 * <p>
-//	 * If (*this) is the empty set with n components, the complementary of (*this) is
-//	 * the n-dimensional box (-oo,oo)x...(-oo,oo).
-//	 *
-//	 * <p>
-//	 * If the complementary is empty, \a result is an array of one element set to the empty box.
-//	 * It is <b>not</b> a zero-sized array containing no element.
-//	 */
-//	int complementary(IntervalVector*& result) const;
-//
-//
-//	/**
-//	 * \brief Bisect the box
-//	 *
-//	 * The box is bisected along the dimension \a i
-//	 * and with a ratio \a ratio. If (*this)[i] is the interval [a,a+d]:
-//	 * <ul>
-//	 * <li> The first box of the result is (*this)[0]x...x(*this)[i-1]x[a+ratio*d]x...
-//	 * <li> The second box is (*this)[0]x...x(*this)[i-1]x[a+ratio*d,a+d]x...
-//	 * </ul>
-//	 * Default value for the ratio is 0.5.
-//	 * \pre 0<ratio<1
-//	 */
-//	std::pair<IntervalVector,IntervalVector> bisect(int i, double ratio) const;
-//
-	/**
-	 * \brief Return a random vector inside *this.
-	 *
-	 * \pre (*this) must be nonempty.
-	 */
-	Vector random() const;
 
 	/**
 	 * \brief (*this)+=x2.
@@ -525,19 +293,6 @@ IntervalVector operator&(const Affine2Vector& x, const IntervalVector& y);
 IntervalVector operator|(const Affine2Vector& x, const Affine2Vector& y);
 IntervalVector operator|(const IntervalVector& x, const Affine2Vector& y);
 IntervalVector operator|(const Affine2Vector& x, const IntervalVector& y);
-
-/**
- * \brief Return the infinite Hausdorff distance (i.e. the maximum of the distance componentwise).
- *
- * \return \f$\displaystyle \max_{i=1..n} distance(x1_i, x2_i)\f$.
- *
- * \pre Dimension of \a x1 and \a x2 must be equal.
- *
- * \sa #ibex::distance(const Interval&, const Interval&).
- */
-double distance(const IntervalVector& x1, const Affine2Vector& x2);
-double distance(const Affine2Vector& x1, const IntervalVector& x2);
-double distance(const Affine2Vector& x1, const Affine2Vector& x2);
 
 /**
  * \brief -x.
@@ -674,30 +429,6 @@ inline bool Affine2Vector::is_empty() const {
 	return (*this)[0].is_empty();
 }
 
-inline bool Affine2Vector::is_superset(const IntervalVector& x) const {
-	return x.is_subset((*this).itv());
-}
-
-inline bool Affine2Vector::is_superset(const Affine2Vector& x) const {
-	return x.is_subset(*this);
-}
-
-inline bool Affine2Vector::is_strict_superset(const IntervalVector& x) const {
-	return x.is_strict_subset((*this).itv());
-}
-inline bool Affine2Vector::is_strict_superset(const Affine2Vector& x) const {
-	return x.is_strict_subset(*this);
-}
-
-inline double Affine2Vector::max_diam() const {
-	return (*this)[extr_diam_index(false)].diam();
-}
-
-inline double Affine2Vector::min_diam() const {
-	return (*this)[extr_diam_index(true)].diam();
-}
-
-
 inline IntervalVector operator&(const IntervalVector& x, const Affine2Vector& y) {
 	return (y &  x);
 }
@@ -706,19 +437,10 @@ inline IntervalVector operator|(const IntervalVector& x, const Affine2Vector& y)
 	return (y |  x);
 }
 
-inline double distance(const IntervalVector& x1, const Affine2Vector& x2) {
-	return distance(x2,x1);
-}
-
-
 inline Affine2Vector operator+(const IntervalVector& x1, const Affine2Vector& x2) {
 	return x2 + x1;
 }
 
-
-inline Affine2Vector operator -(const Affine2Vector& x) {
-	return Affine2Vector(x,true);
-}
 
 inline Affine2Vector operator +(const Vector& x1, const Affine2Vector& x2) {
 	return Affine2Vector(x2)+=x1;
@@ -737,7 +459,9 @@ inline Affine2Vector operator +(const Affine2Vector& x1, const Affine2Vector& x2
 }
 
 inline Affine2Vector operator -(const Vector& x1, const Affine2Vector& x2) {
-	return Affine2Vector(x2,true)+=x2;
+	Affine2Vector res(x2.size());
+	res = (-x2);
+	return res += x1;
 }
 
 inline Affine2Vector operator -(const Affine2Vector& x1, const Vector& x2) {
@@ -749,11 +473,13 @@ inline Affine2Vector operator -(const Affine2Vector& x1, const IntervalVector& x
 }
 
 inline Affine2Vector operator -(const IntervalVector& x1, const Affine2Vector& x2) {
-	return Affine2Vector(x2,true)+=x1;
+	Affine2Vector res(x2.size());
+	res = (-x2);
+	return res += x1;
 }
 
 inline Affine2Vector operator -(const Affine2Vector& x1, const Affine2Vector& x2) {
-	return Affine2Vector(x2,true)+=x1;
+	return Affine2Vector(x1) += (-x2);
 }
 
 inline Affine2Vector operator *(double d, const Affine2Vector& x) {

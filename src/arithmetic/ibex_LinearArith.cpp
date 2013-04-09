@@ -51,7 +51,7 @@ inline V minusV(const V& v) {
 	if (is_empty(v)) { set_empty(y); return y; }
 
 	for (int i=0; i<n; i++) {
-		y[i]=-v[i];
+		y[i]= (-v[i]);
 	}
 	return y;
 }
@@ -87,7 +87,7 @@ inline M minusM(const M& m) {
 	if (is_empty(m)) { set_empty(res); return res; }
 
 	for (int i=0; i<m.nb_rows(); i++)
-		res[i]=-m[i];
+		res[i]= (-m[i]);
 
 	return res;
 }
@@ -575,8 +575,13 @@ std::ostream& operator<<(std::ostream& os, const IntervalMatrix& m) {
 //================================== Affine2 Implementation ======
 
 
+Affine2Vector operator-(const Affine2Vector& x) {
+	return minusV(x);
+}
 
-
+Affine2Matrix operator-(const Affine2Matrix& m) {
+	return minusM(m);
+}
 
 Affine2Vector& Affine2Vector::operator+=(const Vector& x2) {
 	return set_addV<Affine2Vector,Vector>(*this,x2);
@@ -656,9 +661,6 @@ Affine2Matrix& Affine2Matrix::operator*=(const Interval& x) {
 }
 
 
-
-
-//  TODO to check what if really this sub function
 Affine2Vector operator*(const Affine2Matrix& m, const Vector& x) {
 	return mulMV<Affine2Matrix,Vector,Affine2Vector>(m,x);
 }

@@ -53,7 +53,7 @@ Affine2::Affine2(const double d) :
 			_val	(NULL)  {
 	if (fabs(d)<POS_INFINITY) {
 		_val = new double[1];
-		_err = abs(d)*AF_EE();
+		_err = 0.0; //abs(d)*AF_EE();
 		_val[0] = d;
 	} else {
 		_err = Interval(d);
@@ -76,22 +76,14 @@ Affine2::Affine2(const Interval & itv):
 }
 
 
-Affine2::Affine2(const Affine2& x, bool b) :
+Affine2::Affine2(const Affine2& x) :
 		_n		(x.size()),
 		_val	(NULL	 ),
 		_err	(x.err() ) {
 	if (is_actif()) {
 		_val =new double[x.size() + 1];
-		if (b) {
-			for (int i = 0; i <= x.size(); i++){
-				_val[i] = -x.val(i);
-			}
-
-		} else {
-			for (int i = 0; i <= x.size(); i++){
-				_val[i] = x.val(i);
-			}
-
+		for (int i = 0; i <= x.size(); i++){
+			_val[i] = x.val(i);
 		}
 	}
 }
@@ -187,6 +179,25 @@ Affine2& Affine2::operator=(const Interval& x) {
 
 	return *this;
 }
+
+
+
+/** \brief Return (-x) */
+Affine2 Affine2::operator-() const {
+	Affine2 res;
+	res._n = _n;
+	res._err = _err;
+	if (is_actif()) {
+		res._val = new double[_n+1];
+		for (int i = 0; i <= _n; i++) {
+			res._val[i] = (-_val[i]);
+		}
+
+	}
+	return res;
+}
+
+
 
 
 Affine2& Affine2::saxpy(double alpha, const Affine2& y, double beta, double ddelta, bool B1, bool B2, bool B3, bool B4) {
@@ -1243,7 +1254,7 @@ Affine2& Affine2::linChebyshev(affine2_expr num, const Interval itv) {
 				return *this;
 			}
 			else if (itv.ub()<=0) {
-				return *this = Affine2(*this,true);
+				return *this = -Affine2(*this);
 			}
 		/*	else if (itv.is_unbounded() ) {
 				_err = abs(itv);
@@ -1687,10 +1698,10 @@ Affine2 pow(const Affine2& x, double d, const Interval itv) {
 Affine2 root(const Affine2& x, int n, const Interval itv) {
 
 	if (x.is_empty()) return Affine2(Interval::EMPTY_SET);
-	else if (x.lb()==0 && x.ub()==0) return Affine2(Interval::ZERO);
 	else if (n==0) return Affine2(Interval::ONE);
 	else if (n==1) return x;
 	else if (n<0) return inv(root(x,-n,itv),root(itv,-n));
+	else if (x.is_degenerated()) return Affine2(pow(Interval(x.val(0)),1.0/n));
 	else if (n % 2 == 0) return pow(x, Interval::ONE/n,itv); // the negative part of x should be removed
 	else if (0 <= itv.lb()) return  pow(x, Interval::ONE/n,itv);
 	else if (itv.ub() <= 0) return  -pow(-x, Interval::ONE/n,-itv);

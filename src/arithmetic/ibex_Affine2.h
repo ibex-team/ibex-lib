@@ -86,8 +86,8 @@ public:
 	/** \brief Create an affine form with n variables and  initialized the m^th variable with  itv. */
 	Affine2(int n, int m, const Interval& itv);
 
-	/** \brief Create an affine form with n variables, initialized with -x if (b) elseif (!b) with x. */
-	Affine2(const Affine2& x, bool b=false);
+	/** \brief Create an affine form with n variables, initialized with x  */
+	Affine2(const Affine2& x);
 
 	/** \brief  Delete the affine form */
 	virtual ~Affine2();
@@ -101,6 +101,9 @@ public:
 	 *\brief compute the chebyshev linearization of an unary operator
 	 */
 	Affine2& linChebyshev(affine2_expr num, const Interval itv);
+
+    /** \brief Return -*this. */
+	Affine2 operator-() const;
 
 	/** \brief Return sqr(*this) */
 	Affine2& sqr(const Interval itv);
@@ -189,153 +192,15 @@ public:
 	 bool is_actif() const;
 
 
-	 /** \brief Lower bound.
-	  *
-	  * Return the lower bound of *this. */
-	 double lb() const;
-
-	 /** \brief Upper bound.
-	  *
-	  * Return the upper bound of *this. */
-	 double ub() const;
-
-	 /** \brief Midpoint.
-	  *
-	  * Returns the midpoint of *this.
-	  * The return point is guaranteed to be included in *this
-	  * but not necessarily to be the closest floating point
-	  * from the real midpoint.
-	  *
-	  * Cases are:
-	  * - \emptyset  -> Quiet NaN
-	  * - [-oo, +oo] -> midP = 0.0
-	  * - [-oo, b]   -> midP = -MAXREAL
-	  * - [a, +oo]   -> midP = MAXREAL
-	  * - [a, b]     -> midP ~ a + .5*(b-a) */
-	 double mid() const;
-
-	 /**
-	  * \brief Radius.
-	  *
-	  * Return the diameter of *this.
-	  * By convention, 0 if *this is empty.*/
-	 double rad() const;
-
-	 /**
-	  * \brief Diameter.
-	  *
-	  * Return the diameter of *this.
-	  * By convention, 0 if *this is empty.*/
-	 double diam() const;
-	 /**
-	  * \brief Mignitude.
-	  *
-	  * Returns the mignitude of *this:
-	  * <lu>
-	  * <li> +(lower bound)  if *this > 0
-	  * <li> -(upper bound) if *this < 0
-	  * <li> 0 otherwise.
-	  * </lu> */
-	 double mig() const;
-
-	 /**
-	  * \brief Magnitude.
-	  *
-	  * Returns the magnitude of *this:
-	  * mag(*this)=max(|lower bound|, |upper bound|). */
-	 double mag() const;
-
-	 /**
-	  * \brief True iff this affine form is a subset of \a x.
-	  *
-	  * \note Always return true if *this is empty. */
-	 bool is_subset(const Affine2& x) const;
-	 /**
-	  * \brief True iff this affine form is a subset of \a x.
-	  *
-	  * \note Always return true if *this is empty. */
-	 bool is_subset(const Interval& x) const;
-
-	 /**
-	  * \brief True iff this interval is in the interior of \a x.
-	  *
-	  * \note In particular, (-oo,oo) is a strict subset of (-oo,oo)
-	  * and the empty set is a strict subset of the empty set.
-	  * \note Always return true if *this is empty. */
-	 bool is_strict_subset(const Affine2& x) const;
-	 /**
-	  * \brief True iff this interval is in the interior of \a x.
-	  *
-	  * \note In particular, (-oo,oo) is a strict subset of (-oo,oo)
-	  * and the empty set is a strict subset of the empty set.
-	  * \note Always return true if *this is empty. */
-	 bool is_strict_subset(const Interval& x) const;
-
-	 /**
-	  * \brief True iff this interval is a superset of \a x.
-	  *
-	  * \note Always return true if x is empty. */
-	 bool is_superset(const Affine2& x) const;
-
-	 /**
-	  * \brief True iff this interval is a superset of \a x.
-	  *
-	  * \note Always return true if x is empty. */
-	 bool is_superset(const Interval& x) const;
-
-	 /**
-	  * \brief True iff the interior of *this is a superset of \a x.
-	  *
-	  * \note In particular, (-oo,oo) is a strict superset of (-oo,oo)
-	  */
-	 bool is_strict_superset(const Affine2& x) const;
-
-	 /**
-	  * \brief True iff the interior of *this is a superset of \a x.
-	  *
-	  * \note In particular, (-oo,oo) is a strict superset of (-oo,oo)
-	  */
-	 bool is_strict_superset(const Interval& x) const;
-
-	 /**
-	  * \brief True iff *this contains \a d.
-	  *
-	  * \note d can also be an "open bound", i.e., infinity.
-	  * So this function is not restricted to a set-membership
-	  * interpretation. */
-	 bool contains(double d) const;
-
-	 /**
-	  * \brief True iff the interior of *this contains \a d.
-	  *
-	  * \note d can also be an "open bound", i.e., infinity.
-	  * So this function is not restricted to a set-membership
-	  * interpretation. */
-	 bool strictly_contains(double d) const;
-
-	 /**
-	  * \brief True iff *this and \a x do not intersect.
-	  *
-	  */
-	 bool is_disjoint(const Affine2 &x) const;
-
-	 /**
-	  * \brief True iff *this and \a x do not intersect.
-	  *
-	  */
-	 bool is_disjoint(const Interval &x) const;
 	 /**
 	  * \brief True iff *this is empty.
 	  */
 	 bool is_empty() const;
 
 	 /**
-	  * \brief True iff *this is degenerated.
-	  *
-	  * An affine form is degenerated if it is of the form [a, a]
-	  *
-	  * \note An empty affine form is considered here as degenerated. */
-	 bool is_degenerated() const ;
+	  * \brief True iff *this is empty.
+	  */
+	 bool is_degenerated() const;
 
 	 /**
 	  * \brief True if one bound of *this is infinite.
@@ -345,26 +210,9 @@ public:
 	 bool is_unbounded() const;
 
 	 /**
-	  * \brief True iff *this can be bisected along one dimension.
-	  *
-	  * \sa #ibex::Interval::is_bisectable().
+	  * \brief the middle of *this
 	  */
-	 bool is_bisectable() const;
-
-	 /**
-	  * \brief Relative Hausdorff distance between *this and x.
-	  *
-	  * The relative distance is basically distance(x)/diam(*this).
-	  */
-	 double rel_distance(const Affine2& x) const;
-
-	 /**
-	  * \brief Relative Hausdorff distance between *this and x.
-	  *
-	  * The relative distance is basically distance(x)/diam(*this).
-	  */
-	 double rel_distance(const Interval& x) const;
-
+	 double mid() const;
 
 	 /** \brief Add \a d to *this and return the result.  */
 	 Affine2& operator+=(double d);
@@ -402,62 +250,6 @@ public:
 	/** \brief Divide *this by \a x and return the result. */
 	 Affine2& operator/=(const Affine2& x);
 
-	 /**
-	  * \brief Return diam(*this)-diam(x), for x\subseteq *this [deprecated]
-	  *
-	  * Deprecated. Kept for compatibility with ibex 1.xx.
-	  *
-	  * \pre \a x must be included in this interval.
-	  * \note The result may be +oo (if the set difference is infinite).
-	  * \note An empty interval is considered here to have a null diamater (as a degenerated interval). <br>
-	  * If either \a x or this interval is empty, then the method returns the diameter of this interval
-	  * (which is 0 if the latter is empty).
-	  */
-	 double delta(const Affine2& x) const;
-
-	 /**
-	  * \brief Return diam(*this)-diam(x), for x\subseteq *this [deprecated]
-	  *
-	  * Deprecated. Kept for compatibility with ibex 1.xx.
-	  *
-	  * \pre \a x must be included in this interval.
-	  * \note The result may be +oo (if the set difference is infinite).
-	  * \note An empty interval is considered here to have a null diamater (as a degenerated interval). <br>
-	  * If either \a x or this interval is empty, then the method returns the diameter of this interval
-	  * (which is 0 if the latter is empty).
-	  */
-	 double delta(const Interval& x) const;
-
-	 /**
-	  * \brief Compute the ratio of the diameter to #delta(x) [deprecated].
-	  *
-	  * Deprecated. Kept for compatibility with ibex 1.xx.
-	  *
-	  * \pre \a x must be included in this interval.
-	  * \note An empty interval is considered to have a null diamater (as a degenerated interval). <br>
-	  * <ul><li>If either \a x or this interval is empty, then
-	  * <ul><li>the method returns 1 (100% of reduction) if this diameter is not null,
-	  *     <li>0 otherwise (as if 0/0=0).</ul>
-	  * <li>As a pure convention, the method returns \c 1 if one bound of this interval is infinite and the corresponding bound of \a x
-	  * is not (in particular if this interval is unbounded and \a x not). </ul>
-	  */
-	 double ratiodelta(const Affine2& x) const;
-
-	 /**
-	  * \brief Compute the ratio of the diameter to #delta(x) [deprecated].
-	  *
-	  * Deprecated. Kept for compatibility with ibex 1.xx.
-	  *
-	  * \pre \a x must be included in this interval.
-	  * \note An empty interval is considered to have a null diamater (as a degenerated interval). <br>
-	  * <ul><li>If either \a x or this interval is empty, then
-	  * <ul><li>the method returns 1 (100% of reduction) if this diameter is not null,
-	  *     <li>0 otherwise (as if 0/0=0).</ul>
-	  * <li>As a pure convention, the method returns \c 1 if one bound of this interval is infinite and the corresponding bound of \a x
-	  * is not (in particular if this interval is unbounded and \a x not). </ul>
-	  */
-	 double ratiodelta(const Interval& x) const;
-
 
 
 };
@@ -468,8 +260,6 @@ public:
 /** \brief Stream out \a x. */
 std::ostream& operator<<(std::ostream& os, const Affine2& x);
 
-/** \brief Return -x. */
- Affine2 operator-(const Affine2& x);
 
 /** \brief $AF[x]_1+AF[x]_2$. */
  Affine2 operator+(const Affine2& x1, const Affine2& x2);
@@ -770,128 +560,23 @@ inline bool Affine2::is_actif() const{
 	//return _actif;
 	return (_n>-1);
 }
-/** \brief Lower bound.
- *
- * Return the lower bound of *this. */
-inline double Affine2::lb() const{
-	return itv().lb();
-}
 
-/** \brief Upper bound.
- *
- * Return the upper bound of *this. */
-inline double Affine2::ub() const{
-	return itv().ub();
-}
-
-/** \brief Midpoint. */
-inline double Affine2::mid() const{
-	return itv().mid();
-}
-
-/** \brief Radius.*/
-inline double Affine2::rad() const{
-	return itv().rad();
-}
-
-/** \brief Diameter.*/
-inline double Affine2::diam() const{
-	return itv().diam();
-}
-
-/**
- * \brief Mignitude. */
-inline double Affine2::mig() const{
-	return itv().mig();
-}
-
-/** \brief Magnitude. */
-inline double Affine2::mag() const{
-	return itv().mag();
-}
-
-
-inline bool Affine2::is_subset(const Affine2& x) const{
-	return (itv().is_subset(x.itv()));
-}
-
-inline bool Affine2::is_subset(const Interval& x) const{
-	return (itv().is_subset(x));
-}
-
-
-inline bool Affine2::is_strict_subset(const Affine2& x) const{
-	return (itv().is_strict_subset(x.itv()));
-}
-
-inline bool Affine2::is_strict_subset(const Interval& x) const{
-	return (itv().is_strict_subset(x));
-}
-
-inline bool Affine2::is_superset(const Affine2& x) const{
-	return (itv().is_superset(x.itv()));
-}
-
-
-inline bool Affine2::is_superset(const Interval& x) const{
-	return (itv().is_superset(x));
-}
-
-
-inline bool Affine2::is_strict_superset(const Affine2& x) const{
-	return (itv().is_strict_superset(x.itv()));
-}
-
-inline bool Affine2::is_strict_superset(const Interval& x) const{
-	return (itv().is_strict_superset(x));
-}
-
-
-inline bool Affine2::contains(double d) const{
-	return (itv().contains(d));
-}
-
-
-inline bool Affine2::strictly_contains(double d) const{
-	return (itv().strictly_contains(d));
-}
-
-
-inline bool Affine2::is_disjoint(const Affine2 &x) const{
-	return (itv().is_disjoint(x.itv()));
-}
-
-
-inline bool Affine2::is_disjoint(const Interval &x) const{
-	return (itv().is_disjoint(x));
-}
 
 inline bool Affine2::is_empty() const{
 	return (_err.is_empty());
 }
 
-
 inline bool Affine2::is_degenerated() const {
-	return (itv().is_degenerated());
+	return (itv().diam() <	AF_EC());
 }
 
 inline bool Affine2::is_unbounded() const{
 	return (_err.is_unbounded());
 }
 
-inline bool Affine2::is_bisectable() const {
-	return (itv().is_bisectable());
+inline double Affine2::mid() const{
+	return (is_actif())? _val[0] : _err.mid();
 }
-
-inline double Affine2::rel_distance(const Affine2& x) const{
-	return (itv().rel_distance(x.itv()));
-}
-
-inline double Affine2::rel_distance(const Interval& x) const{
-	return (itv().rel_distance(x));
-}
-
-
 
 /** \brief Add \a d to *this and return the result.  */
 inline Affine2& Affine2::operator+=(double d){
@@ -936,39 +621,11 @@ inline Affine2& Affine2::operator+=(const Affine2& x){
 
 /** \brief Subtract \a x to *this and return the result. */
 inline Affine2& Affine2::operator-=(const Affine2& x){
-	return *this += Affine2(x,true);
+	return *this += (-Affine2(x));
 }
 
 inline Affine2& Affine2::operator/=(const Affine2& x){
 	return *this *= (Affine2(x).linChebyshev(Affine2::AF_INV, x.itv()));
-}
-
-
-
-inline double Affine2::delta(const Affine2& x) const{
-	return itv().delta(x.itv());
-}
-
-
-inline double Affine2::delta(const Interval& x) const{
-	return itv().delta(x);
-}
-
-
-inline double Affine2::ratiodelta(const Affine2& x) const {
-	return itv().ratiodelta(x.itv());
-}
-
-
-inline double Affine2::ratiodelta(const Interval& x) const {
-	return itv().ratiodelta(x);
-}
-
-
-
-/** \brief Return -x. */
-inline Affine2 operator-(const Affine2& x){
-	return Affine2(x, true); // y = -x
 }
 
 /** \brief $AF[x]_1+AF[x]_2$. */
@@ -998,7 +655,7 @@ inline Affine2 operator+(const Interval& x1, const Affine2& x2){
 
 /** \brief $AF[x]_1-AF[x]_2$. */
 inline Affine2 operator-(const Affine2& x1, const Affine2& x2){
-	return Affine2(x2, true) += x1;
+	return Affine2(x1) += (-x2);
 }
 
 /** \brief $AF[x]-d$. */
@@ -1008,7 +665,8 @@ inline Affine2 operator-(const Affine2& x, double d){
 
 /** \brief $d-AF[x]$. */
 inline Affine2 operator-(double d, const Affine2& x){
-	return Affine2(x, true) += d;
+	Affine2 res = (-x);
+	return res += d;
 }
 
 /** \brief $AF[x]_1-[x]_2$. */
@@ -1018,7 +676,8 @@ inline Affine2 operator-(const Affine2& x1, const Interval& x2) {
 
 /** \brief $[x]_1-AF[x]_2$. */
 inline Affine2 operator-(const Interval& x1, const Affine2& x2) {
-	return Affine2(x2, true) += x1;
+	Affine2 res = (- x2);
+	return res += x1;
 }
 
 /** \brief $AF[x]_1*AF[x]_2$. */

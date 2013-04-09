@@ -65,12 +65,12 @@ Affine2Vector::Affine2Vector(int n, const Affine2& x) :
 }
 
 
-Affine2Vector::Affine2Vector(const Affine2Vector& x, bool b) :
+Affine2Vector::Affine2Vector(const Affine2Vector& x) :
 		_n(x.size()),
 		_vec(new Affine2[x.size()]) {
 
 	for (int i = 0; i < _n; i++){
-		_vec[i] = Affine2(x[i],b);
+		_vec[i] = Affine2(x[i]);
 	}
 
 }
@@ -221,7 +221,7 @@ IntervalVector operator|(const Affine2Vector& y,const Affine2Vector& x)  {
 
 IntervalVector Affine2Vector::itv() const {
 	assert(!is_empty());
-	IntervalVector intv(size());
+	IntervalVector intv(_n);
 	for (int i = 0; i < _n; i++) {
 		intv[i] = (*this)[i].itv();
 	}
@@ -320,29 +320,29 @@ Affine2Vector& Affine2Vector::operator=(const Affine2Vector& x)                 
 Affine2Vector& Affine2Vector::operator=(const IntervalVector& x)                { return _assign(*this,x); }
 bool           Affine2Vector::operator==(const Affine2Vector& x) const          { return _equals(*this,x); }
 bool           Affine2Vector::operator==(const IntervalVector& x) const         { return _equals(*this,x); }
-Vector         Affine2Vector::lb() const                                        { return _lb(*this); }
-Vector         Affine2Vector::ub() const                                        { return _ub(*this); }
-Vector         Affine2Vector::mid() const                                       { return _mid(*this); }
-Vector         Affine2Vector::mig() const                                       { return _mig(*this); }
-Vector         Affine2Vector::mag() const                                       { return _mag(*this); }
-bool           Affine2Vector::is_flat() const                                   { return _is_flat(*this); }
-bool           Affine2Vector::contains(const Vector& x) const                   { return _contains(*this,x); }
+//Vector         Affine2Vector::lb() const                                        { return _lb(*this); }
+//Vector         Affine2Vector::ub() const                                        { return _ub(*this); }
+//Vector         Affine2Vector::mid() const                                       { return _mid(*this); }
+//Vector         Affine2Vector::mig() const                                       { return _mig(*this); }
+//Vector         Affine2Vector::mag() const                                       { return _mag(*this); }
+//bool           Affine2Vector::is_flat() const                                   { return _is_flat(*this); }
+//bool           Affine2Vector::contains(const Vector& x) const                   { return _contains(*this,x); }
 bool           Affine2Vector::is_unbounded() const                              { return _is_unbounded(*this); }
-bool           Affine2Vector::is_subset(const Affine2Vector& x) const           { return _is_subset(*this,x); }
-bool           Affine2Vector::is_subset(const IntervalVector& x) const          { return _is_subset(*this,x); }
-bool           Affine2Vector::is_strict_subset(const Affine2Vector& x) const    { return _is_strict_subset(*this,x); }
-bool           Affine2Vector::is_strict_subset(const IntervalVector& x) const   { return _is_strict_subset(*this,x); }
-bool           Affine2Vector::is_zero() const                                   { return _is_zero(*this); }
-bool           Affine2Vector::is_bisectable() const                             { return _is_bisectable(*this); }
-Vector         Affine2Vector::rad() const                                       { return _rad(*this); }
-Vector         Affine2Vector::diam() const                                      { return _diam(*this); }
-int            Affine2Vector::extr_diam_index(bool min) const                   { return _extr_diam_index(*this,min); }
+//bool           Affine2Vector::is_subset(const Affine2Vector& x) const           { return _is_subset(*this,x); }
+//bool           Affine2Vector::is_subset(const IntervalVector& x) const          { return _is_subset(*this,x); }
+//bool           Affine2Vector::is_strict_subset(const Affine2Vector& x) const    { return _is_strict_subset(*this,x); }
+//bool           Affine2Vector::is_strict_subset(const IntervalVector& x) const   { return _is_strict_subset(*this,x); }
+//bool           Affine2Vector::is_zero() const                                   { return _is_zero(*this); }
+//bool           Affine2Vector::is_bisectable() const                             { return _is_bisectable(*this); }
+//Vector         Affine2Vector::rad() const                                       { return _rad(*this); }
+//Vector         Affine2Vector::diam() const                                      { return _diam(*this); }
+//int            Affine2Vector::extr_diam_index(bool min) const                   { return _extr_diam_index(*this,min); }
 std::ostream& operator<<(std::ostream& os, const Affine2Vector& x)              { return _display(os,x); }
-double         Affine2Vector::volume() const                                    { return _volume(*this); }
-double         Affine2Vector::perimeter() const                                 { return _perimeter(*this); }
-double         Affine2Vector::rel_distance(const Affine2Vector& x) const        { return _rel_distance(*this,x); }
-double         Affine2Vector::rel_distance(const IntervalVector& x) const       { return _rel_distance(*this,x); }
-Vector         Affine2Vector::random() const                                    { return _random<Affine2Vector,Affine2>(*this); }
+//double         Affine2Vector::volume() const                                    { return _volume(*this); }
+//double         Affine2Vector::perimeter() const                                 { return _perimeter(*this); }
+//double         Affine2Vector::rel_distance(const Affine2Vector& x) const        { return _rel_distance(*this,x); }
+//double         Affine2Vector::rel_distance(const IntervalVector& x) const       { return _rel_distance(*this,x); }
+//Vector         Affine2Vector::random() const                                    { return _random<Affine2Vector,Affine2>(*this); }
 
 //int          Affine2Vector::diff(const Affine2Vector& y, IntervalVector*& result) const   { return _diff(itv(), y.itv(), result); }
 //int          Affine2Vector::diff(const IntervalVector& y, IntervalVector*& result) const  { return _diff(itv(), y, result); }

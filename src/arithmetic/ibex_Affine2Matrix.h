@@ -8,8 +8,8 @@
  * Created     : March 16, 2013
  * ---------------------------------------------------------------------------- */
 
-#ifndef __IBEX_Affine2_MATRIX_H__
-#define __IBEX_Affine2_MATRIX_H__
+#ifndef __IBEX_AFFINE2_MATRIX_H__
+#define __IBEX_AFFINE2_MATRIX_H__
 
 #include "ibex_IntervalMatrix.h"
 #include "ibex_Matrix.h"
@@ -55,11 +55,9 @@ public:
 	explicit Affine2Matrix(const IntervalMatrix& m);
 
 	/**
-	 * \brief Create  a copy of
-	 * if (!b) \a x
-	 * else -(\a x)
+	 * \brief Create  a copy of x
 	 */
-	Affine2Matrix(const Affine2Matrix& x, bool b= false);
+	Affine2Matrix(const Affine2Matrix& x);
 
 	/**
 	 * \brief Create a degenerated Affine2 matrix.
@@ -154,36 +152,6 @@ public:
 	int nb_rows() const;
 
 	/**
-	 * \brief Return the lower bound matrix
-	 * \pre (*this) must be nonempty
-	 */
-	Matrix lb() const;
-
-	/**
-	 * \brief Return the upper bound matrix
-	 * \pre (*this) must be nonempty
-	 */
-	Matrix ub() const;
-
-	/**
-	 * \brief Return the midmatrix
-	 * \pre (*this) must be nonempty
-	 */
-	Matrix mid() const;
-
-	/**
-	 * \brief Return the mignitude matrix.
-	 * \pre (*this) must be nonempty
-	 */
-	Matrix mig() const;
-
-	/**
-	 * \brief Return the magnitude matrix.
-	 * \pre (*this) must be nonempty
-	 */
-	Matrix mag() const;
-
-	/**
 	 * \brief Return true iff this Affine2Matrix is empty
 	 */
 	bool is_empty() const;
@@ -208,11 +176,6 @@ public:
 	 * The dimensions remain the same.
 	 */
 	void set_empty();
-
-	/**
-	 * \brief True iff *this is a matrix of zeros.
-	 */
-	bool is_zero() const;
 
 	/**
 	 * \brief Return a submatrix.
@@ -573,23 +536,22 @@ inline Affine2Matrix operator+(const IntervalMatrix& m1, const Affine2Matrix& m2
  	 return Affine2Matrix(m2)+=m1;
 }
 
-inline Affine2Matrix operator-(const Affine2Matrix& m) {
-	return Affine2Matrix(m,true);
-}
-
 inline Affine2Matrix operator-(const Matrix& m1, const Affine2Matrix& m2){
- 	 return Affine2Matrix(m2,true)+=m1;
+	 Affine2Matrix res(m2.nb_rows(),m2.nb_cols());
+	 res = (-m2);
+ 	 return res+=m1;
 }
-
 
 inline Affine2Matrix operator-(const Affine2Matrix& m1, const Affine2Matrix& m2){
- 	 return Affine2Matrix(m2,true)+=m1;
+	 return Affine2Matrix(m1) += (-m2);
 }
 inline Affine2Matrix operator-(const Affine2Matrix& m1, const IntervalMatrix& m2){
  	 return Affine2Matrix(m1)-=m2;
 }
 inline Affine2Matrix operator-(const IntervalMatrix& m1, const Affine2Matrix& m2){
- 	 return Affine2Matrix(m2,true)+=m1;
+	 Affine2Matrix res(m2.nb_rows(),m2.nb_cols());
+	 res = (-m2);
+	 return res+=m1;
 }
 
 inline Affine2Matrix operator-(const Affine2Matrix& m1, const Matrix& m2) {
@@ -623,4 +585,4 @@ inline Affine2Matrix& Affine2Matrix::operator*=(const IntervalMatrix& m) {
 
 
 } // namespace ibex
-#endif // __IBEX_Affine2_MATRIX_H__
+#endif // __IBEX_AFFINE2_MATRIX_H__

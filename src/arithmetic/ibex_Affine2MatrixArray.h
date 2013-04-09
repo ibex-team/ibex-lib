@@ -8,8 +8,8 @@
  * Created     : March 16, 2013
  * ---------------------------------------------------------------------------- */
 
-#ifndef __IBEX_Affine2_MATRIX_ARRAY_H__
-#define __IBEX_Affine2_MATRIX_ARRAY_H__
+#ifndef __IBEX_AFFINE2_MATRIX_ARRAY_H__
+#define __IBEX_AFFINE2_MATRIX_ARRAY_H__
 
 #include <iostream>
 #include "ibex_IntervalMatrixArray.h"
@@ -173,4 +173,4 @@ inline IntervalMatrixArray operator&(const IntervalMatrixArray& x1, const Affine
 
 } // namespace ibex
 
-#endif // __IBEX_Affine2_MATRIX_ARRAY_H__
+#endif // __IBEX_AFFINE2_MATRIX_ARRAY_H__
