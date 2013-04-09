@@ -223,8 +223,7 @@ public:
 	 * Run a forward algorithm and
 	 * return a reference to the label of the root node.
 	 *
-	 * V must be a subclass of FwdAlgorithm<T> and the
-	 * nodes of this function must have been decorated with T.
+	 * V must be a subclass of FwdAlgorithm.
 	 *
 	 * Note that the type V is just passed in order to have static linkage.
 	 */
@@ -234,8 +233,7 @@ public:
 	/**
 	 * \brief Run a backward algorithm.
 	 *
-	 * V must be a subclass of FwdAlgorithm<T> and the
-	 * nodes of this function must have been decorated with T.
+	 * V must be a subclass of FwdAlgorithm.
 	 *
 	 * Note that the type V is just passed in order to have static linkage.
 	 */

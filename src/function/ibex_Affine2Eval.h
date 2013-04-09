@@ -21,7 +21,7 @@ namespace ibex {
 
 /**
  * \ingroup symbolic
- * \brief Calculates the gradient of a function.
+ * \brief Evaluate a function with affine form.
  */
 class Affine2Eval : public FwdAlgorithm {
 

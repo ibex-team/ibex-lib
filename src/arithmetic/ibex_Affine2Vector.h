@@ -437,63 +437,6 @@ inline IntervalVector operator|(const IntervalVector& x, const Affine2Vector& y)
 	return (y |  x);
 }
 
-inline Affine2Vector operator+(const IntervalVector& x1, const Affine2Vector& x2) {
-	return x2 + x1;
-}
-
-
-inline Affine2Vector operator +(const Vector& x1, const Affine2Vector& x2) {
-	return Affine2Vector(x2)+=x1;
-}
-
-inline Affine2Vector operator +(const Affine2Vector& x1, const Vector& x2) {
-	return Affine2Vector(x1)+=x2;
-}
-
-inline Affine2Vector operator +(const Affine2Vector& x1, const IntervalVector& x2) {
-	return Affine2Vector(x1)+=x2;
-}
-
-inline Affine2Vector operator +(const Affine2Vector& x1, const Affine2Vector& x2) {
-	return Affine2Vector(x1)+=x2;
-}
-
-inline Affine2Vector operator -(const Vector& x1, const Affine2Vector& x2) {
-	Affine2Vector res(x2.size());
-	res = (-x2);
-	return res += x1;
-}
-
-inline Affine2Vector operator -(const Affine2Vector& x1, const Vector& x2) {
-	return Affine2Vector(x1)-=x2;
-}
-
-inline Affine2Vector operator -(const Affine2Vector& x1, const IntervalVector& x2) {
-	return Affine2Vector(x1)-=x2;
-}
-
-inline Affine2Vector operator -(const IntervalVector& x1, const Affine2Vector& x2) {
-	Affine2Vector res(x2.size());
-	res = (-x2);
-	return res += x1;
-}
-
-inline Affine2Vector operator -(const Affine2Vector& x1, const Affine2Vector& x2) {
-	return Affine2Vector(x1) += (-x2);
-}
-
-inline Affine2Vector operator *(double d, const Affine2Vector& x) {
-	return Affine2Vector(x)*=d;
-}
-
-inline Affine2Vector operator *(const Affine2& x1, const Affine2Vector& x2) {
-	return Affine2Vector(x2)*=x1;
-}
-
-inline Affine2Vector operator *(const Interval& x1, const Affine2Vector& x2) {
-	return Affine2Vector(x2)*=x1;
-}
-
 inline Affine2Vector cart_prod(const Affine2Vector& x, const Affine2Vector& y) {
 	Affine2Vector z(x.size()+y.size());
 	z.put(0,x);

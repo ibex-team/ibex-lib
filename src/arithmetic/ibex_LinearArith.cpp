@@ -623,7 +623,6 @@ Affine2Vector abs( const Affine2Vector& x) {
 	return absV(x);
 }
 
-
 Affine2Matrix& Affine2Matrix::operator+=(const Matrix& m) {
 	return set_addM<Affine2Matrix,Matrix>(*this,m);
 }
@@ -660,6 +659,62 @@ Affine2Matrix& Affine2Matrix::operator*=(const Interval& x) {
 	return set_mulSM<Interval,Affine2Matrix>(x,*this);
 }
 
+Affine2Vector operator+(const Vector& x1, const Affine2Vector& x2) {
+	return Affine2Vector(x2)+=x1;
+}
+
+Affine2Vector operator+(const Affine2Vector& x1, const Vector& x2) {
+	return Affine2Vector(x1)+=x2;
+}
+
+Affine2Vector operator+(const IntervalVector& x1, const Affine2Vector& x2) {
+	return x2 + x1;
+}
+
+Affine2Vector operator+(const Affine2Vector& x1, const IntervalVector& x2) {
+	return Affine2Vector(x1)+=x2;
+}
+
+Affine2Vector operator+(const Affine2Vector& x1, const Affine2Vector& x2) {
+	return Affine2Vector(x1)+=x2;
+}
+
+
+Affine2Vector operator-(const Vector& x1, const Affine2Vector& x2) {
+	Affine2Vector res(x2.size());
+	res = (-x2);
+	return res += x1;
+}
+
+Affine2Vector operator-(const Affine2Vector& x1, const Vector& x2) {
+	return Affine2Vector(x1)-=x2;
+}
+
+Affine2Vector operator-(const Affine2Vector& x1, const IntervalVector& x2) {
+	return Affine2Vector(x1)-=x2;
+}
+
+Affine2Vector operator-(const IntervalVector& x1, const Affine2Vector& x2) {
+	Affine2Vector res(x2.size());
+	res = (-x2);
+	return res += x1;
+}
+
+Affine2Vector operator-(const Affine2Vector& x1, const Affine2Vector& x2) {
+	return Affine2Vector(x1) += (-x2);
+}
+
+Affine2Vector operator*(double d, const Affine2Vector& x) {
+	return Affine2Vector(x)*=d;
+}
+
+Affine2Vector operator*(const Affine2& x1, const Affine2Vector& x2) {
+	return Affine2Vector(x2)*=x1;
+}
+
+Affine2Vector operator*(const Interval& x1, const Affine2Vector& x2) {
+	return Affine2Vector(x2)*=x1;
+}
 
 Affine2Vector operator*(const Affine2Matrix& m, const Vector& x) {
 	return mulMV<Affine2Matrix,Vector,Affine2Vector>(m,x);
@@ -720,7 +775,6 @@ Affine2Matrix operator*(const Affine2Matrix& m1, const IntervalMatrix& m2) {
 Affine2Matrix operator*(const IntervalMatrix& m1, const Affine2Matrix& m2) {
 	return mulMM<IntervalMatrix,Affine2Matrix,Affine2Matrix>(m1,m2);
 }
-
 
 Affine2Matrix outer_product(const Affine2Vector& x1, const Vector& x2) {
 	return outer_prod<Affine2Vector,Vector,Affine2Matrix>(x1,x2);

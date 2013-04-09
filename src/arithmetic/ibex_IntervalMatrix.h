@@ -84,7 +84,11 @@ public:
 	 * \brief Set *this to m.
 	 */
 	IntervalMatrix& operator=(const IntervalMatrix& x);
-	IntervalMatrix& operator=(const Affine2Matrix& x);
+
+	/**
+	 * \brief Set *this to m.
+	 */
+	IntervalMatrix& operator=(const Affine2Matrix& m);
 
 	/**
 	 * \brief Set *this to its intersection with x
