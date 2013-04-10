@@ -65,7 +65,8 @@ protected:
 	/* Visit a symbol. */
 	virtual void visit(const ExprSymbol&);
 
-	 NodeMap<bool> map;
+	// mark who is visited
+	NodeMap<bool> map;
 };
 
 } // end namespace ibex

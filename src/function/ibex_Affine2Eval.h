@@ -8,9 +8,8 @@
  * Created     : April 08, 2013
  * ---------------------------------------------------------------------------- */
 
-#ifndef IBEX_AFFINE2_EVAL_H_
-#define IBEX_AFFINE2_EVAL_H_
-
+#ifndef __IBEX_AFFINE2_EVAL_H__
+#define __IBEX_AFFINE2_EVAL_H__
 
 #include "ibex_Function.h"
 #include "ibex_Affine2MatrixArray.h"
@@ -21,28 +20,34 @@ namespace ibex {
 
 /**
  * \ingroup symbolic
+ *
  * \brief Evaluate a function with affine form.
  */
 class Affine2Eval : public FwdAlgorithm {
 
 public:
 	/**
-	 * \brief Run the forward algorithm with input domains.
-	 */
-//	Affine2Domain& eval(const Function& f, const Array<const Affine2Domain>& d) const;
-
-	/**
-	 * \brief Run the forward algorithm with input domains.
-	 */
-//	Affine2Domain& eval(const Function& f, const Array<Affine2Domain>& d) const;
-	/**
-	 * \brief Calculate the gradient of f on the box \a box and store the result in \a g.
+	 * \brief Run the forward algorithm on the box \a box and return the result as an interval domain.
 	 */
 	Domain& eval(const Function& f, const IntervalVector& box) const;
-	ExprLabel& eval_Label(const Function& f, const IntervalVector& box) const;
+
+	/**
+	 * \brief Run the forward algorithm on the box \a box and return the root node label.
+	 */
+	ExprLabel& eval_label(const Function& f, const IntervalVector& box) const;
+
+	/**
+	 * \brief Run the forward algorithm with input node labels and return the result as an interval domain.
+	 */
+	ExprLabel& eval_label(const Function& f, ExprLabel** d) const;
+
+	/**
+	 * \brief Run the forward algorithm with input node labels and return the root node label.
+	 */
+	Domain& eval(const Function& f , ExprLabel** d) const;
 
 	void index_fwd(const ExprIndex&, const ExprLabel& x, ExprLabel& y);
-	       void vector_fwd(const ExprVector&, const ExprLabel** compL, ExprLabel& y);
+	void vector_fwd(const ExprVector&, const ExprLabel** compL, ExprLabel& y);
 	void cst_fwd(const ExprConstant&, ExprLabel& y);
 	void symbol_fwd(const ExprSymbol&, ExprLabel& y);
 	void apply_fwd(const ExprApply&, ExprLabel** x, ExprLabel& y);
@@ -87,13 +92,6 @@ public:
 	void sub_V_fwd(const ExprSub&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y);
 	void sub_M_fwd(const ExprSub&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y);
 
-
-//protected:
-	/**
-	 * \brief Run the forward algorithm with input domains.
-	 */
-	ExprLabel& eval_Label(const Function& f, ExprLabel** d) const;
-	Domain& eval(const Function& f , ExprLabel** d) const;
 };
 
 /* ============================================================================
@@ -101,13 +99,12 @@ public:
   ============================================================================*/
 
 inline Domain& Affine2Eval::eval(const Function& f, ExprLabel** e) const {
-	return *eval_Label(f,e).d;
+	return *eval_label(f,e).d;
 }
 
 inline Domain& Affine2Eval::eval(const Function& f,const IntervalVector& box) const {
-	return *(eval_Label(f,box)).d;
+	return *(eval_label(f,box)).d;
 }
-
 
 
 inline void Affine2Eval::index_fwd(const ExprIndex& , const ExprLabel& , ExprLabel& ) { /* nothing to do */ }
@@ -123,18 +120,12 @@ inline void Affine2Eval::cst_fwd(const ExprConstant& c, ExprLabel& y) {
 	}
 	case Dim::ROW_VECTOR:
 	case Dim::COL_VECTOR: {
-		for (int i=0; i<c.get_vector_value().size() ; i++ ) {
-			y.af2->v()[i] = Affine2(c.get_vector_value()[i]);
-		}
+		y.af2->v() = Affine2Vector(c.get_vector_value(),false);
 		y.d->v() = c.get_vector_value();
 		break;
 	}
 	case Dim::MATRIX: {
-		for (int i=0; i<c.get_matrix_value().nb_rows() ; i++ ) {
-			for (int j=0 ; j<c.get_matrix_value().nb_cols() ; j++) {
-				(y.af2->m()[i])[j] = Affine2(c.get_matrix_value()[i][j]);
-			}
-		}
+		y.af2->m() = Affine2Matrix(c.get_matrix_value());
 		y.d->m() = c.get_matrix_value();
 		break;
 	}
@@ -146,7 +137,7 @@ inline void Affine2Eval::cst_fwd(const ExprConstant& c, ExprLabel& y) {
 }
 
 inline void Affine2Eval::apply_fwd(const ExprApply& a, ExprLabel** x, ExprLabel& y)                          {
-	ExprLabel tmp = eval_Label(a.func,x);
+	ExprLabel tmp = eval_label(a.func,x);
 	*y.af2 = *tmp.af2;
 	*y.d = *tmp.d;
 }
@@ -317,4 +308,4 @@ inline void Affine2Eval::sub_M_fwd(const ExprSub&, const ExprLabel& x1, const Ex
 } // namespace ibex
 
 
-#endif /* IBEX_AFFINE2_EVAL_H_ */
+#endif /* __IBEX_AFFINE2_EVAL_H__ */

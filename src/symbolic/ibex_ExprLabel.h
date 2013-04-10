@@ -5,7 +5,7 @@
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : May 22, 2012
-// Last Update : Apr 08, 2013
+// Last Update : Apr 10, 2013
 //============================================================================
 
 
@@ -25,30 +25,36 @@ class Function;
  */
 class ExprLabel {
 public:
+
+	/**
+	 * \brief Build an uninitialized label.
+	 */
 	ExprLabel();
 
 	/**
-	 * The function this node belongs to.
+	 * \brief The function this node belongs to.
 	 */
 	Function* f;
 
 	/**
-	 * The affine2 form (evaluation)
+	 * \brief The affine2 form (evaluation)
 	 */
 	Affine2Domain *af2;
 
 	/**
-	 * The domain (evaluation)
+	 * \brief The interval domain (evaluation and backward)
 	 */
 	Domain *d;
 
 	/**
-	 * The gradient (differentiation)
+	 * \brief The gradient (differentiation)
 	 */
 	Domain *g;
 
 	/**
-	 * The inflated "point" (or degenerated domain). See InHC4Revise.
+	 * \brief The inflated "point" (or degenerated domain).
+	 *
+	 * See InHC4Revise.
 	 */
 	Domain *p;
 };
@@ -57,4 +63,4 @@ std::ostream& operator<<(std::ostream& os, const ExprLabel&);
 
 } // end namespace ibex
 
-#endif // IBEX_EXPRLABEL_H_
+#endif // __IBEX_EXPRLABEL_H__

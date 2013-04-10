@@ -65,35 +65,32 @@ Domain& Function::eval_domain(const IntervalVector& box) const {
 }
 
 
-Domain& Function::eval_affine2domain(const IntervalVector& box) const {
+Domain& Function::eval_affine2_domain(const IntervalVector& box) const {
 	return Affine2Eval().eval(*this,box);
 }
 
-Domain& Function::eval_affine2domain(const IntervalVector& box, Affine2Domain& affine) const {
-	ExprLabel res = Affine2Eval().eval_Label(*this,box);
+Domain& Function::eval_affine2_domain(const IntervalVector& box, Affine2Domain& affine) const {
+	ExprLabel res = Affine2Eval().eval_label(*this,box);
 	affine = *res.af2;
 	return *res.d;
 }
 
-
 Interval Function::eval_affine2(const IntervalVector& box) const {
-	return eval_affine2domain(box).i();
+	return eval_affine2_domain(box).i();
 }
 
 Interval Function::eval_affine2(const IntervalVector& box, Affine2& affine) const {
-	ExprLabel res = Affine2Eval().eval_Label(*this,box);
+	ExprLabel res = Affine2Eval().eval_label(*this,box);
 	affine = res.af2->i();
 	return res.d->i();
 }
 
-
-IntervalVector Function::eval_affine2vector(const IntervalVector& box) const {
+IntervalVector Function::eval_affine2_vector(const IntervalVector& box) const {
 	return expr().dim.is_scalar() ? IntervalVector(1,Eval().eval(*this,box).i()) : Eval().eval(*this,box).v();
 }
 
-
-IntervalVector Function::eval_affine2vector(const IntervalVector& box, Affine2Vector& affine) const {
-	ExprLabel res = Affine2Eval().eval_Label(*this,box);
+IntervalVector Function::eval_affine2_vector(const IntervalVector& box, Affine2Vector& affine) const {
+	ExprLabel res = Affine2Eval().eval_label(*this,box);
 	if (expr().dim.is_scalar() ) {
 		affine = Affine2Vector(1,res.af2->i());
 		return IntervalVector(1,res.d->i());
@@ -103,9 +100,8 @@ IntervalVector Function::eval_affine2vector(const IntervalVector& box, Affine2Ve
 	}
 }
 
-
-IntervalMatrix Function::eval_affine2matrix(const IntervalVector& box, Affine2Matrix& affine) const {
-	ExprLabel res = Affine2Eval().eval_Label(*this,box);
+IntervalMatrix Function::eval_affine2_matrix(const IntervalVector& box, Affine2Matrix& affine) const {
+	ExprLabel res = Affine2Eval().eval_label(*this,box);
 	affine = Affine2Matrix(expr().dim.dim2, expr().dim.dim3);
 
 	switch (expr().dim.type()) {

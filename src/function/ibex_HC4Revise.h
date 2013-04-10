@@ -16,7 +16,8 @@
 
 namespace ibex {
 
-	typedef enum { INTERVAL_MODE, AFFINE2_MODE, AFFINE_MODE } FwdMode;
+typedef enum { INTERVAL_MODE, AFFINE2_MODE, AFFINE_MODE } FwdMode;
+
 /**
  * \ingroup symbolic
  * \brief The famous forward-backward contraction algorithm.
@@ -25,11 +26,11 @@ namespace ibex {
 class HC4Revise : public BwdAlgorithm {
 public:
 
-
 	/**
 	 * \brief HC4Revise
 	 *
 	 * \param mode  the arithmetic for forward evaluation. By default: interval arithmetic.
+	 * Accepted values are: INTERVAL_MODE or AFFINE2_MODE.
 	 */
 	HC4Revise(FwdMode mode=INTERVAL_MODE);
 
