@@ -92,23 +92,24 @@ int main(int argc, char** argv){
 	  ctc= &hc43bcidhc4;
 	else {cout << filtering <<  " is not an implemented  contraction  mode "  << endl; return -1;}
 
-	// The X_Newton contractor
+	// The CtcXNewtonIter contractor
 	// corner selection for linearizations : two corners are slected, a random one and its opposite
-	vector<X_Newton::corner_point> cpoints;
-	cpoints.push_back(X_Newton::RANDOM);
-	cpoints.push_back(X_Newton::RANDOM_INV);
+	vector<CtcXNewtonIter::corner_point> cpoints;
+	cpoints.push_back(CtcXNewtonIter::RANDOM);
+	cpoints.push_back(CtcXNewtonIter::RANDOM_INV);
 
-        // the linear contractor XNewton
-	X_Newton ctcxnewton (ext_sys, &hc44xn, cpoints, 0,sys.goal,0.2,0.2, LR_contractor::ALL_BOX,X_Newton::HANSEN,100,1.e6,1.e6);
+        // the linear relaxation contractor 
+	CtcXNewtonIter ctcxnewton (ext_sys,cpoints, 0,sys.goal, CtcLinearRelaxation::ALL_BOX,CtcXNewtonIter::HANSEN,100,1.e6,1.e6);
 
+	// fixpoint linear relaxation , hc4  with default fix point ratio 0.2
+	CtcXNewton cxn (ctcxnewton, hc44xn);
 	//  the actual contractor  ctc + xnewton	
-	CtcCompo  cxn (*ctc, ctcxnewton);
-
+        CtcCompo ctcxn (*ctc, cxn);
 	// one point probed when looking for a new feasible point (updating the loup)
 	int samplesize=1;
 
 	// the optimizer : the same precision goalprec is used as relative and absolute precision
-	Optimizer o(sys,*bs,cxn,prec,goalprec,goalprec,samplesize);
+	Optimizer o(sys,*bs,ctcxn,prec,goalprec,goalprec,samplesize);
 
 	cout << " sys.box " << sys.box << endl;
 
@@ -122,7 +123,6 @@ int main(int argc, char** argv){
 
 	// printing the results     
 	o.report();
-
 	return 0;
 	}
 

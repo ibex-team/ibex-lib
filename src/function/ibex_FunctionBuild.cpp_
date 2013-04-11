@@ -116,21 +116,21 @@ public:
 class BuildVectorOfNodes: public ExprVisitor {
 public:
 	vector<const ExprNode*>& nodes;
-	int id;
+	NodeMap<bool> map;
 
-	BuildVectorOfNodes(vector<const ExprNode*>& nodes, const Array<const ExprSymbol>& x, const ExprNode& y) : nodes(nodes), id(0) {
+	BuildVectorOfNodes(vector<const ExprNode*>& nodes, const Array<const ExprSymbol>& x, const ExprNode& y) : nodes(nodes) {//, id(0) {
 		for (int i=0; i<x.size(); i++) {
 			nodes.push_back(&x[i]);
-			(int&) x[i].id=id++;
+			map.insert(x[i],true);
 		}
 		visit(y);
 	}
 
 	virtual void visit(const ExprNode& e) {
-		if (e.id==-1) {
+		if (!map.found(e)) {
 			e.acceptVisitor(*this);
 			nodes.push_back(&e);
-			(int&) e.id=id++;
+			map.insert(e,true);
 		}
 	}
 

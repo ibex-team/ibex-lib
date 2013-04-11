@@ -1,0 +1,14 @@
+variables
+
+x1 in [0.5,1.35];
+x2 in [0,2.33];
+
+constraints
+
+x2 <= x1^2 + 0.5 ;
+
+x2 >= 2.5 * sin(4*x1 + 1) + 2;
+
+x2 >= sqrt(x1-0.5);
+
+end

@@ -69,6 +69,12 @@ protected:
 	void add_grad_expr(const ExprNode& node, const ExprNode& expr);
 
 	NodeMap<const ExprNode*> grad;
+
+	// Leaves of this expression including symbols with respect
+	// to which we are calculating derivative and that do not appear
+	// in the expression (assimilated to "leaves" here, although they
+	// are not part of the DAG). Information for cleanup only.
+	std::vector<const ExprNode*> leaves;
 };
 
 } // end namespace ibex

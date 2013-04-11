@@ -36,7 +36,7 @@ public:
 	 */
 	virtual void contract(IntervalVector& box);
 
-	/** The list of sub-contractors */
+	/** The sub-contractor */
 	Ctc& ctc;
 
 	/**

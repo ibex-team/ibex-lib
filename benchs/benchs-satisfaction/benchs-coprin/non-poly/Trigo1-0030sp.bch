@@ -2,7 +2,8 @@ Constants
 pi = 3.1415926;
 
 Variables
-x[30] in [1.e-8,2*pi];
+//x[30] in [1.e-8,2*pi-1.e-3];
+x[30] in [1.e-3,2*pi-1.e-3];
 SE[1] in [-30,30];
 Constraints
 31 - cos(x(1)) + SE(1) - sin(x(1)) = 0;

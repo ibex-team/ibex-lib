@@ -26,13 +26,15 @@ typedef enum { INTERVAL_MODE, AFFINE2_MODE, AFFINE_MODE } FwdMode;
 class HC4Revise : public BwdAlgorithm {
 public:
 
-	/**
+	/*
 	 * \brief HC4Revise
 	 *
 	 * \param mode  the arithmetic for forward evaluation. By default: interval arithmetic.
 	 * Accepted values are: INTERVAL_MODE or AFFINE2_MODE.
 	 */
 	HC4Revise(FwdMode mode=INTERVAL_MODE);
+
+	//void proj(const Function& f, const Domain& y, Array<Domain>& x);
 
 	/**
 	 * \brief Project f(x)=y onto x (backward algorithm)

@@ -8,29 +8,27 @@
 // Last Update : Nov 15, 2012
 //============================================================================
 
-#include "ibex_XNewton.h"
+#include "ibex_CtcXNewtonIter.h"
 
 using std::vector;
 
 namespace ibex {
 
-const double X_Newton::default_max_diam_deriv =1e5;
+const double CtcXNewtonIter::default_max_diam_deriv =1e5;
 
   using namespace std;
 
 using namespace soplex;
 
 // the constructor
-X_Newton::X_Newton(const System& sys, Ctc* ctc, vector<corner_point>& cpoints, int goal_ctr, Function* fgoal, 
-     		   double ratio_fp, double ratio_fp2,
+CtcXNewtonIter::CtcXNewtonIter(const System& sys, vector<corner_point>& cpoints, int goal_ctr, Function* fgoal, 
 		   ctc_mode cmode, linear_mode lmode, int max_iter_soplex, double max_diam_deriv, double max_diam_box):
-  LR_contractor(sys,ctc,goal_ctr,fgoal,ratio_fp,ratio_fp2,cmode,max_iter_soplex,max_diam_box), cpoints(cpoints),
+  CtcLinearRelaxation(sys,goal_ctr,fgoal,cmode,max_iter_soplex,max_diam_box), cpoints(cpoints),
   max_diam_deriv(max_diam_deriv), lmode(lmode){
 
   last_rnd = new int[sys.nb_var];
   base_coin = new int[sys.nb_var]; 
- 
-		}
+}
 
 
 
@@ -39,7 +37,7 @@ X_Newton::X_Newton(const System& sys, Ctc* ctc, vector<corner_point>& cpoints, i
 
   /*  pas implanté en version 2 
 
-void X_Newton::best_corner(int ctr, int op, INTERVAL_VECTOR& G, bool* corner){
+void CtcXNewtonIter::best_corner(int ctr, int op, INTERVAL_VECTOR& G, bool* corner){
    int n=sys.nb_var;
 
    int total_backtracks=1; int nb_var=0;
@@ -76,7 +74,7 @@ void X_Newton::best_corner(int ctr, int op, INTERVAL_VECTOR& G, bool* corner){
 }
 
 
-REAL X_Newton::eval_corner(int ctr, int op, INTERVAL_VECTOR& G, bool* corner){
+REAL CtcXNewtonIter::eval_corner(int ctr, int op, INTERVAL_VECTOR& G, bool* corner){
    INTERVAL_VECTOR savebox(sys.box);
    INTERVAL ev(0.0);
    int n=sys.nb_var;
@@ -119,7 +117,7 @@ REAL X_Newton::eval_corner(int ctr, int op, INTERVAL_VECTOR& G, bool* corner){
 
  
 
-  int X_Newton::X_Linearization(IntervalVector& box, soplex::SoPlex& mysoplex, int ctr, corner_point cpoint, vector<Interval>& taylor_ev,
+  int CtcXNewtonIter::X_Linearization(IntervalVector& box, soplex::SoPlex& mysoplex, int ctr, corner_point cpoint, vector<Interval>& taylor_ev,
 			      IntervalVector& G, int id_point, int& nb_nonlinear_vars){
 
     CmpOp op= sys.ctrs[ctr].op;
@@ -138,7 +136,7 @@ REAL X_Newton::eval_corner(int ctr, int op, INTERVAL_VECTOR& G, bool* corner){
 }
 
 //return 0 only when the linearization is not performed
-int X_Newton::X_Linearization(IntervalVector& box, soplex::SoPlex& mysoplex,
+int CtcXNewtonIter::X_Linearization(IntervalVector& box, soplex::SoPlex& mysoplex,
 		int ctr, corner_point cpoint, CmpOp op, vector<Interval>& taylor_ev,
 		IntervalVector& G, int id_point, int& nb_nonlinear_vars) {
 	int n = sys.nb_var;
@@ -401,8 +399,8 @@ int X_Newton::X_Linearization(IntervalVector& box, soplex::SoPlex& mysoplex,
 
 
 
-//the X_NewtonIteration
-  int X_Newton::Linearization( IntervalVector & box, soplex::SoPlex& mysoplex){
+//the CtcXNewtonIterIteration
+  int CtcXNewtonIter::Linearization( IntervalVector & box, soplex::SoPlex& mysoplex){
   int n = sys.nb_var;
   int nvarsimplex=n;
 

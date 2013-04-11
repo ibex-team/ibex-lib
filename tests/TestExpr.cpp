@@ -39,7 +39,6 @@ void TestExpr::symbol() {
 	TEST_ASSERT(x.deco.f==&f);
 	TEST_ASSERT(x.dim==Dim::scalar());
 	TEST_ASSERT(x.height==0);
-	TEST_ASSERT(x.id==0);
 	TEST_ASSERT(x.key==0);
 	TEST_ASSERT(strcmp(x.name,"x")==0);
 	TEST_ASSERT(x.size==1);
@@ -55,8 +54,7 @@ void TestExpr::addxy01() {
 	const ExprNode& e=x+y;
 	Function f(x,y,e);
 
-	TEST_ASSERT(x.id==0);
-	TEST_ASSERT(y.id==1);
+	TEST_ASSERT(y.id==x.id+1);
 	TEST_ASSERT(x.key==0);
 	TEST_ASSERT(y.key==1);
 	TEST_ASSERT(strcmp(y.name,"y")==0);
@@ -64,7 +62,7 @@ void TestExpr::addxy01() {
 	TEST_ASSERT(e.deco.f==&f);
 	TEST_ASSERT(e.dim==Dim::scalar());
 	TEST_ASSERT(e.height==1);
-	TEST_ASSERT(e.id==2);
+	TEST_ASSERT(e.id==y.id+1);
 	TEST_ASSERT(e.size==3);
 	TEST_ASSERT(e.deco.d->dim==e.dim);
 	TEST_ASSERT(!e.is_zero());
@@ -109,7 +107,6 @@ void TestExpr::addxx01() {
 	TEST_ASSERT(e.deco.f==&f);
 	TEST_ASSERT(e.dim==Dim::scalar());
 	TEST_ASSERT(e.height==1);
-	TEST_ASSERT(e.id==1);
 	TEST_ASSERT(e.size==2);
 	TEST_ASSERT(e.deco.d->dim==e.dim);
 	TEST_ASSERT(!e.is_zero());
@@ -218,12 +215,12 @@ void TestExpr::dag01() {
 	TEST_ASSERT(e3.height==4);
 	TEST_ASSERT(e4.height==5);
 
-	TEST_ASSERT(x.id==0);
-	TEST_ASSERT(y.id==1);
-	TEST_ASSERT(e1.id==3);
-	TEST_ASSERT(e2.id==4);
-	TEST_ASSERT(e3.id==5);
-	TEST_ASSERT(e4.id==6);
+	int id=x.id;
+	TEST_ASSERT(y.id==id+1);
+	TEST_ASSERT(e1.id==id+3);
+	TEST_ASSERT(e2.id==id+4);
+	TEST_ASSERT(e3.id==id+5);
+	TEST_ASSERT(e4.id==id+6);
 
 	TEST_ASSERT(e1.size==4);
 	TEST_ASSERT(e2.size==5);
@@ -276,7 +273,6 @@ void TestExpr::cst01() {
 	TEST_ASSERT(c.deco.f==NULL);
 	TEST_ASSERT(c.dim==Dim::scalar());
 	TEST_ASSERT(c.height==0);
-	TEST_ASSERT(c.id==-1);
 	TEST_ASSERT(c.size==1);
 	TEST_ASSERT(c.deco.d==NULL);
 	TEST_ASSERT(!c.is_zero());
@@ -352,7 +348,6 @@ void TestExpr::vector01() {
 	TEST_ASSERT(v.deco.d==NULL);
 	TEST_ASSERT(v.dim==Dim::matrix(4,3));
 	TEST_ASSERT(v.height==3);
-	TEST_ASSERT(v.id==-1);
 	TEST_ASSERT(!v.row_vector());
 	TEST_ASSERT(v.nb_args==4);
 	TEST_ASSERT(v.length()==4);
@@ -389,7 +384,6 @@ void TestExpr::index01() {
 	TEST_ASSERT(e.deco.d->dim==e.dim);
 	TEST_ASSERT(e.dim==Dim::matrix(3,4));
 	TEST_ASSERT(e.height==1);
-	TEST_ASSERT(e.id==1);
 	TEST_ASSERT(e.size==2);
 	TEST_ASSERT(e.type()==Dim::MATRIX);
 	TEST_ASSERT(checkExpr(e,"x[1]"));
@@ -406,7 +400,6 @@ void TestExpr::index02() {
 	TEST_ASSERT(e.deco.d->dim==e.dim);
 	TEST_ASSERT(e.dim==Dim::row_vec(4));
 	TEST_ASSERT(e.height==2);
-	TEST_ASSERT(e.id==2);
 	TEST_ASSERT(e.size==3);
 	TEST_ASSERT(e.type()==Dim::ROW_VECTOR);
 	TEST_ASSERT(checkExpr(e,"x[1][1]"));
@@ -421,7 +414,6 @@ void TestExpr::index03() {
 	TEST_ASSERT(e.deco.f==&f);
 	TEST_ASSERT(e.deco.d->dim==e.dim);
 	TEST_ASSERT(e.height==3);
-	TEST_ASSERT(e.id==3);
 	TEST_ASSERT(e.size==4);
 	TEST_ASSERT(e.type()==Dim::SCALAR);
 	TEST_ASSERT(checkExpr(e,"x[1][1][1]"));
@@ -452,7 +444,6 @@ void TestExpr::apply01() {
 	TEST_ASSERT(e.deco.f==&f2);
 	TEST_ASSERT(e.deco.d->dim==e.dim);
 	TEST_ASSERT(e.height==2);
-	TEST_ASSERT(e.id==4);
 	TEST_ASSERT(e.size==5);
 	TEST_ASSERT(e.type()==Dim::COL_VECTOR);
 	TEST_ASSERT(checkExpr(e,"func(x2,(A2*y2),A2)"));
@@ -476,7 +467,6 @@ void TestExpr::apply03() {
 	const ExprNode& e = f3.expr();
 
 	TEST_ASSERT(e.height==2);
-	TEST_ASSERT(e.id==3);
 	TEST_ASSERT(e.size==4);
 	TEST_ASSERT(checkExpr(e,"(f1(x3,x3)-f2(x3,x3))"));
 }
@@ -497,14 +487,14 @@ void TestExpr::subnodes01() {
 
 	Function f(x,__z__,y,e5);
 
-	const ExprNode** nodes=e4.subnodes();
+	SubNodes nodes(e4);
 
-	TEST_ASSERT(nodes[0]==&e4);
-	TEST_ASSERT(nodes[1]==&e3);
-	TEST_ASSERT(nodes[2]==&e2);
-	TEST_ASSERT(nodes[3]==&e1);
-	TEST_ASSERT((nodes[5]==&x && nodes[6]==&y) ||
-			    (nodes[5]==&y && nodes[6]==&x));
+	TEST_ASSERT(&nodes[0]==&e4);
+	TEST_ASSERT(&nodes[1]==&e3);
+	TEST_ASSERT(&nodes[2]==&e2);
+	TEST_ASSERT(&nodes[3]==&e1);
+	TEST_ASSERT((&nodes[5]==&x && &nodes[6]==&y) ||
+			    (&nodes[5]==&y && &nodes[6]==&x));
 }
 
 

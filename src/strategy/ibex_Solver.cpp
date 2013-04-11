@@ -105,7 +105,7 @@ bool Solver::next(std::vector<IntervalVector>& sols) {
 	  }
 	}
 	catch (TimeOutException&) {
-		cout << "time limit " << time_limit << "s. reached " << endl;
+	  cout << "time limit " << time_limit << "s. reached " << endl; return false;
 	}
 	catch (CellLimitException&) {
 		cout << "cell limit " << cell_limit << " reached " << endl;

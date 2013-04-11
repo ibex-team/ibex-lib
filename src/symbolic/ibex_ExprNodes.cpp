@@ -15,36 +15,69 @@
 namespace ibex {
 
 namespace {
+
+class ExprNodes : public virtual ExprVisitor {
+public:
+
+	ExprNodes() {
+		//map.clean();
+	}
+
+	void visit(const ExprIndex& i)    { visit(i.expr); }
+	void visit(const ExprLeaf& e)     { }
+	void visit(const ExprNAryOp& e)   { for (int i=0; i<e.nb_args; i++) visit(e.arg(i)); }
+	void visit(const ExprBinaryOp& b) { visit(b.left); visit(b.right); }
+	void visit(const ExprUnaryOp& u)  {	visit(u.expr); }
+
+	void visit(const ExprNode& e)     {
+		if (!map.found(e)) {
+			map.insert(e,&e);
+			e.acceptVisitor(*this);
+		}
+	}
+
+
+	NodeMap<const ExprNode*> map;
+};
+
 bool compare(const ExprNode* x, const ExprNode* y) { return (x->height>y->height); }
+
+} // end anonymous namespace
+
+SubNodes::SubNodes() : tab(NULL) {
+
 }
 
-const ExprNode** ExprNodes::nodes(const ExprNode& e) {
-	map.clean();
+SubNodes::SubNodes(const ExprNode& e) {
+	init(e);
+}
 
-	visit(e);
+void SubNodes::init(const ExprNode& e) {
 
-	const ExprNode** subnodes = new const ExprNode*[e.size];
+	ExprNodes en;
+	en.visit(e);
+
+	tab = new const ExprNode*[e.size];
 	int i=0;
-	for (IBEX_NODE_MAP(const ExprNode*)::const_iterator it=map.begin(); it!=map.end(); it++) {
-		subnodes[i++]=it->second;
+	for (IBEX_NODE_MAP(const ExprNode*)::const_iterator it=en.map.begin(); it!=en.map.end(); it++) {
+		assert(i<e.size);
+		tab[i++]=it->second;
 	}
+	assert(i==e.size);
+
 	// Sort the nodes by decreasing height
-	std::sort(subnodes,subnodes+e.size,compare);
+	std::sort(tab,tab+e.size,compare);
 
-	return subnodes;
-}
-
-void ExprNodes::visit(const ExprNode& e) {
-	if (!map.found(e)) {
-		map.insert(e,&e);
-		e.acceptVisitor(*this);
+	for (int i=0; i<e.size; i++) {
+		map.insert(*tab[i],i);
 	}
 }
 
-void ExprNodes::visit(const ExprIndex& i)    { visit(i.expr); }
-void ExprNodes::visit(const ExprLeaf& e)     { }
-void ExprNodes::visit(const ExprNAryOp& e)   { for (int i=0; i<e.nb_args; i++) visit(e.arg(i)); }
-void ExprNodes::visit(const ExprBinaryOp& b) { visit(b.left); visit(b.right); }
-void ExprNodes::visit(const ExprUnaryOp& u)  {	visit(u.expr); }
+SubNodes::~SubNodes() {
+	if (tab) delete[] tab;
+	// it may happen tab==NULL e.g. with an unconstrained system
+	// (the main function is not initialized and so are the "compiled function"
+	// and the nodes inside)
+}
 
 } // end namespace ibex

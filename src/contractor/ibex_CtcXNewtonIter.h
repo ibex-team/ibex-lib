@@ -1,22 +1,22 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_XNewton.h
+// File        : ibex_CtcXNewtonIter.h
 // Author      : Ignacio Araya, 
 //               Bertrand Neveu, Gilles Trombettoni
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Jul 20, 2012
-// Last Update : Nov 15, 2012
+// Last Update : March 19, 2013
 //============================================================================
 
 
-#ifndef __IBEX_CTC_XNEWTON_H__
-#define __IBEX_CTC_XNEWTON_H__
+#ifndef __IBEX_CTC_XNEWTONITER_H__
+#define __IBEX_CTC_XNEWTONITER_H__
 
 #include "ibex_Ctc.h"
 #include "ibex_System.h"
 #include "ibex_NumConstraint.h"
-#include "ibex_LRContractor.h"
+#include "ibex_CtcLinearRelaxation.h"
 #include "soplex.h"
 
 #include <vector>
@@ -31,7 +31,7 @@ namespace ibex {
  * \date February 2011
  */
 
-class X_Newton : public LR_contractor {
+class CtcXNewtonIter : public CtcLinearRelaxation {
 
  public:
 
@@ -44,12 +44,9 @@ class X_Newton : public LR_contractor {
   /** Creates the X_Newton
    *
    * \param sys The system (the extended system in case of optimization)
-   * \param ctc Internal contractor in the X-Newton loop (e.g., CtcHC4, NULL)
    * \param cpoints The vector of corner selection in linearization (X_INF, X_SUP, RANDOM, RANDOM_INV)
    * \param goal_ctr  (goal index for optimization, -1 for constraint solving)
    * \param goal   (goal function pointer for optimization, NULL for constraint solving)
-   * \param ratio_fp fixpoint precision for X-Newton
-   * \param ratio_fp2 gain ratio threshold to recall the ctc contractor
    * \param cmode X_NEWTON (contracts all the box) | LOWER_BOUNDING (in optimization only improves the left bound of the variable y) 
    * \param lmode TAYLOR | HANSEN : linear relaxation method. 
    * \param max_iter_soplex : the maximum number of iterations for Soplex (default value 100)
@@ -58,13 +55,12 @@ class X_Newton : public LR_contractor {
  */
 
 
-  X_Newton(const System& sys, Ctc* ctc, std::vector<corner_point>& cpoints, int goal_ctr=-1, Function* goal=0,
-     double ratio_fp=default_ratio_fp, double ratio_fp2=default_ratio_fp2, 
-	   LR_contractor::ctc_mode cmode=ALL_BOX, linear_mode lmode=HANSEN, int max_iter_soplex=100, double max_diam_deriv=default_max_diam_deriv, double max_diam_box=default_max_diam_box);
+  CtcXNewtonIter(const System& sys, std::vector<corner_point>& cpoints, int goal_ctr=-1, Function* goal=0,
+		 CtcLinearRelaxation::ctc_mode cmode=ALL_BOX, linear_mode lmode=HANSEN, int max_iter_soplex=100, double max_diam_deriv=default_max_diam_deriv, double max_diam_box=default_max_diam_box);
 
 
   /** Deletes this instance. */  
-  ~X_Newton() {
+  ~CtcXNewtonIter() {
     if(linear) delete[] linear;
     delete[] last_rnd;
     delete[] base_coin;

@@ -16,6 +16,7 @@
 #include "ibex_CompiledFunction.h"
 #include "ibex_Decorator.h"
 #include "ibex_Array.h"
+#include "ibex_SymbolMap.h"
 
 #include <stdarg.h>
 

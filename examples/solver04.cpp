@@ -65,18 +65,22 @@ int main(int argc, char** argv) {
 	// The X_newton contractor
 
 	// corners of the current box where the constraints are linearized
-	vector<X_Newton::corner_point> cpoints;
-	//	cpoints.push_back(X_Newton::SUP_X);  // selection of the superior corners : not used 
-	//	cpoints.push_back(X_Newton::INF_X);  // selection of the inferior corners : not used
+	vector<CtcXNewtonIter::corner_point> cpoints;
+	//	cpoints.push_back(CtcXNewtonIter::SUP_X);  // selection of the superior corners : not used 
+	//	cpoints.push_back(CtcXNewtonIter::INF_X);  // selection of the inferior corners : not used
 
 	// each constraint is linearized twice in one random corner and in its opposite 
-	cpoints.push_back(X_Newton::RANDOM);
-	cpoints.push_back(X_Newton::RANDOM_INV);
-	// the hc4 contractor called in the XNewton loop if the gain is > rfp2 (here 0.2)
-	CtcHC4 hc44xn(sys.ctrs,ratio_propag);  
-	// XNewton contractor  (call with the system, the internal contractor and the corners : all other  parameters have default values  :see Xnexton documentation for changing parameters)
-       	X_Newton ctcxnewton (sys, &hc44xn, cpoints);
+	cpoints.push_back(CtcXNewtonIter::RANDOM);
+	cpoints.push_back(CtcXNewtonIter::RANDOM_INV);
+	// XNewtonIter contractor  (called with the system and the corners : all other  parameters have default values  :see Xnexton documentation for changing parameters)
 
+       	CtcXNewtonIter xnewtoniter (sys, cpoints);
+
+	// the hc4 contractor called in the following fixpoint contractor
+	CtcHC4 hc44xn(sys.ctrs,ratio_propag);  
+
+	// Fixpoint with the sequence of 2 contractors (XNewtonIter and Hc4) 
+       	CtcXNewton ctcxnewton(xnewtoniter,hc44xn);
 
 	// Build the main contractor:
 	// ---------------------------
@@ -105,7 +109,7 @@ int main(int argc, char** argv) {
 	else if (filtering== "3bcidhc4n")
 	  ctc =  hc43bcidn;
 	else {cout << filtering <<  " is not an implemented  contraction  mode "  << endl; return -1;}
-
+        cout << "filtering " << filtering << endl;
 	
 
 	// the actual contractor ; composition of ctc ,e.g. acidhc4n,  and Xnewton
@@ -122,7 +126,7 @@ int main(int argc, char** argv) {
 	// --------------------------
 	Bsc * bs;
 
-	cout << "bisection " << bisection << endl;
+
 	if (bisection=="roundrobin")
 	  bs = new RoundRobin (prec);
 	else if (bisection== "largestfirst")
@@ -136,7 +140,8 @@ int main(int argc, char** argv) {
 	else if (bisection=="smearmaxrel")
 	  bs = new SmearMaxRelative(sys,prec);
 	else {cout << bisection << " is not an implemented  bisection mode "  << endl; return -1;} 
-	
+
+	cout << "bisection " << bisection << endl;	
 	// Choose the way the search tree is explored
 	// -------------------------------------
 	// A "CellStack" means a depth-first search.
@@ -163,9 +168,7 @@ int main(int argc, char** argv) {
 	// Display the number of boxes (called "cells")
 	// generated during the search
 	cout << "number of cells=" << s.nb_cells << endl;
-	//  stats for acid :  Display the average number of "varcided"  variables if acid was called
-	//	if (filtering=="acidhc4" || filtering=="acidhc4n") 
-	//	  cout << "nbvarcid=" <<  CtcAcid::nbvarstat << endl;
+	// Display the cpu time used
 	cout << "cpu time used=" << s.time << "s."<< endl;
 
  }
