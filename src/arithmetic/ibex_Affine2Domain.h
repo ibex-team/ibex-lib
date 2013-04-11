@@ -33,12 +33,39 @@ namespace ibex {
  */
 typedef TemplateDomain<Affine2> Affine2Domain;
 
+
 template<>
 inline TemplateDomain<Affine2>& TemplateDomain<Affine2>::operator&=(const TemplateDomain<Affine2>& d) {
-
 	/* intersection is forbidden with affine forms */
 	assert(false);
 }
+
+
+template<>
+inline TemplateDomain<Affine2> atan2(const TemplateDomain<Affine2>& d1, const TemplateDomain<Affine2>& d2) {
+	/* atan2 is forbidden with affine forms */
+	assert(false);
+}
+
+template<>
+inline TemplateDomain<Affine2> acosh(const TemplateDomain<Affine2>& d) {
+	/* acosh is forbidden with affine forms */
+	assert(false);
+}
+
+template<>
+inline TemplateDomain<Affine2> asinh(const TemplateDomain<Affine2>& d) {
+	/* asinh is forbidden with affine forms */
+	assert(false);
+}
+
+
+template<>
+inline TemplateDomain<Affine2> atanh(const TemplateDomain<Affine2>& d) {
+	/* atanh is forbidden with affine forms */
+	assert(false);
+}
+
 
 } // end namespace
 
