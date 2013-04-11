@@ -458,19 +458,20 @@ inline Interval pow(const Interval &x, const Interval &y) {
 
 
 inline Interval root(const Interval& x, int n) {
-	Interval e=Interval::ONE;
-	Interval y;
 
-	e /= n>=0 ? n : -n;
+	if (x.is_empty()) return Interval::EMPTY_SET;
+	if (x.lb()==0 && x.ub()==0) return Interval::ZERO;
+	if (n==0) return Interval::ONE;
+	if (n<0) return 1.0/root(x,-n);
+	if (n==1) return x;
 
 	if (n%2==0) {
-		y=pow(x,e);   // the negative part of x should be removed
+		return pow(x,Interval::ONE/n);   // the negative part of x should be removed
 	} else {
-		y=pow(x,e) |  // the negative part of x should be removed
-	    (-pow(-x,e)); // the positive part of x should be removed
+		return pow(x,Interval::ONE/n) |  // the negative part of x should be removed
+	    (-pow(-x,Interval::ONE/n)); // the positive part of x should be removed
 	}
 
-	return n>=0 ? y : 1.0/y;
 }
 
 

@@ -10,17 +10,17 @@
  * ---------------------------------------------------------------------------- */
 
 #include "ibex_CtcFwdBwd.h"
-#include "ibex_HC4Revise.h"
+
 
 namespace ibex {
 
-CtcFwdBwd::CtcFwdBwd(Function& f, CmpOp op) : Ctc(f.nb_var()), ctr(f,op) {
+CtcFwdBwd::CtcFwdBwd(Function& f, CmpOp op, FwdMode mode) : Ctc(f.nb_var()), ctr(f,op), hc4r(mode) {
 	for (int v=0; v<ctr.f.nb_var(); v++)
 		output[v]=input[v]=ctr.f.used(v);
 
 }
 
-CtcFwdBwd::CtcFwdBwd(const NumConstraint& ctr) : Ctc(ctr.f.nb_var()), ctr(ctr.f,ctr.op) {
+CtcFwdBwd::CtcFwdBwd(const NumConstraint& ctr, FwdMode mode) : Ctc(ctr.f.nb_var()), ctr(ctr.f,ctr.op), hc4r(mode) {
 	for (int v=0; v<ctr.f.nb_var(); v++)
 		output[v]=input[v]=ctr.f.used(v);
 }
@@ -47,7 +47,7 @@ void CtcFwdBwd::contract(IntervalVector& box) {
 	}
 
 	try {
-		HC4Revise().proj(ctr.f,root_label,box);
+		hc4r.proj(ctr.f,root_label,box);
 	} catch (EmptyBoxException& e) {
 		box.set_empty();
 		throw e;

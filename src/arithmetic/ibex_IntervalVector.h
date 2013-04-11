@@ -23,6 +23,7 @@
 namespace ibex {
 
 class IntervalMatrix; // declared only for friendship
+class Affine2Vector;
 
 /**
  * \ingroup arithmetic
@@ -57,6 +58,7 @@ public:
 	 * \brief Create a copy of \a x.
 	 */
 	IntervalVector(const IntervalVector& x);
+	explicit IntervalVector(const Affine2Vector& x);
 
 	/**
 	 * \brief Create the IntervalVector [bounds[0][0],bounds[0][1]]x...x[bounds[n-1][0],bounds[n-1][1]]
@@ -166,6 +168,8 @@ public:
 	 * \note Emptiness is overridden.
 	 */
 	IntervalVector& operator=(const IntervalVector& x);
+
+	IntervalVector& operator=(const Affine2Vector& x);
 
 	/**
 	 * \brief Set *this to its intersection with x
@@ -316,19 +320,19 @@ public:
 	 */
 	bool is_zero() const;
 
-    /**
-     * \brief True iff *this can be bisected along one dimension.
-     *
-     * \sa #ibex::Interval::is_bisectable().
-     */
-    bool is_bisectable() const;
+	/**
+	 * \brief True iff *this can be bisected along one dimension.
+	 *
+	 * \sa #ibex::Interval::is_bisectable().
+	 */
+	bool is_bisectable() const;
 
-    /**
-      * \brief Vector of radii.
-      */
-    Vector rad() const;
+	/**
+	 * \brief Vector of radii.
+	 */
+	Vector rad() const;
 
-    /**
+	/**
 	 * \brief Return the vector of diameters.
 	 */
 	Vector diam() const;
@@ -476,10 +480,12 @@ public:
 	 */
 	IntervalVector& operator*=(const Interval& x1);
 
+	IntervalVector() : n(0), vec(NULL) { } // for IntervalMatrix & complementary()
+
 private:
 	friend class IntervalMatrix;
+	friend class Affine2Vector;
 
-	IntervalVector() : n(0), vec(NULL) { } // for IntervalMatrix & complementary()
 
 	int n;             // dimension (size of vec)
 	Interval *vec;	   // vector of elements

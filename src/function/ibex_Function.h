@@ -106,12 +106,18 @@ public:
 	typedef enum { COPY, DIFF } copy_mode;
 
 	/**
-	 * \brief Duplicate this function.
+	 * \brief Build a function from another function.
+	 *
+	 * The new function can either be a clone of the function
+	 * in argument (COPY mode), or its differential (DIFF mode).
+	 *
+	 * \param mode: either Function::COPY or Function::DIFF.
 	 *
 	 * The resulting function is independent from *this
-	 * (no reference shared). The DAG is entirely duplicated.
+	 * (no reference shared). In particular, in copy mode,
+	 * The DAG is entirely duplicated.
 	 *
-	 * Decoration is not copied.
+	 * However, decoration (considered as temporary data) is not copied.
 	 * The resulting function is not decorated.
 	 */
 	Function(const Function&, copy_mode mode=COPY);
@@ -224,8 +230,7 @@ public:
 	 * Run a forward algorithm and
 	 * return a reference to the label of the root node.
 	 *
-	 * V must be a subclass of FwdAlgorithm<T> and the
-	 * nodes of this function must have been decorated with T.
+	 * V must be a subclass of FwdAlgorithm.
 	 *
 	 * Note that the type V is just passed in order to have static linkage.
 	 */
@@ -235,8 +240,7 @@ public:
 	/**
 	 * \brief Run a backward algorithm.
 	 *
-	 * V must be a subclass of FwdAlgorithm<T> and the
-	 * nodes of this function must have been decorated with T.
+	 * V must be a subclass of FwdAlgorithm.
 	 *
 	 * Note that the type V is just passed in order to have static linkage.
 	 */
@@ -251,30 +255,85 @@ public:
 	bool all_args_scalar() const;
 
 	/**
-	 * \brief Calculate f(box)
+	 * \brief Calculate f(box) using interval arithmetic.
 	 */
 	Domain& eval_domain(const IntervalVector& box) const;
 
 	/**
-	 * \brief Calculate f(box).
+	 * \brief Calculate f(box) using affine arithmetic.
+	 */
+	Domain& eval_affine2_domain(const IntervalVector& box) const;
+
+	/**
+	 * \brief Calculate f(box) using affine arithmetic.
+	 *
+	 * The resulting affine form is stored in \a result.
+	 */
+	Domain& eval_affine2_domain(const IntervalVector& box, Affine2Domain& result) const;
+
+	/**
+	 * \brief Calculate f(box) using interval arithmetic.
 	 *
 	 * \pre f must be real-valued
 	 */
 	Interval eval(const IntervalVector& box) const;
 
 	/**
-	 * \brief Calculate f(box).
+	 * \brief Calculate f(box) using affine arithmetic.
+	 *
+	 */
+	Interval eval_affine2(const IntervalVector& box) const;
+
+	/**
+	 * \brief Calculate f(box) using affine arithmetic.
+	 *
+	 * The resulting affine form is stored in \a affine.
+	 */
+	Interval eval_affine2(const IntervalVector& box, Affine2& result) const;
+
+	/**
+	 * \brief Calculate f(box) using interval arithmetic.
 	 *
 	 * \pre f must be vector-valued
 	 */
 	IntervalVector eval_vector(const IntervalVector& box) const;
 
 	/**
-	 * \brief Calculate f(x).
+	 * \brief Calculate f(box) using affine arithmetic.
+	 *
+	 * \pre f must be vector-valued
+	 */
+	IntervalVector eval_affine2_vector(const IntervalVector& box) const;
+
+	/**
+	 * \brief Calculate f(box) using affine arithmetic.
+	 *
+	 * The resulting affine form is stored in \a affine.
+	 * \pre f must be vector-valued
+	 */
+	IntervalVector eval_affine2_vector(const IntervalVector& box, Affine2Vector& affine) const;
+
+	/**
+	 * \brief Calculate f(x) using interval arithmetic.
 	 *
 	 * \pre f must be matrix-valued
 	 */
 	IntervalMatrix eval_matrix(const IntervalVector& x) const;
+
+	/**
+	 * \brief Calculate f(box) using affine arithmetic.
+	 *
+	 * \pre f must be matrix-valued
+	 */
+	IntervalMatrix eval_affine2_matrix(const IntervalVector& box) const;
+
+	/**
+	 * \brief Calculate f(box) using affine arithmetic.
+	 *
+	 * The resulting affine form is stored in \a affine.
+	 * \pre f must be matrix-valued
+	 */
+	IntervalMatrix eval_affine2_matrix(const IntervalVector& box, Affine2Matrix& affine) const;
 
 	/**
 	 * \brief Calculate the gradient of f.
@@ -373,6 +432,12 @@ public:
 	 * \note The structure is initialized by #ibex::GradDecorator.
 	 */
 	mutable Array<Domain> arg_deriv;
+
+	/*
+	 * \brief The domains of the arguments.
+	 *
+	 */
+	mutable Array<Affine2Domain> arg_af2;
 
 	/**
 	 * Number of used variables
@@ -623,9 +688,12 @@ inline IntervalMatrix Function::eval_matrix(const IntervalVector& box) const {
 		return M;
 	}
 	case Dim::MATRIX: return eval_domain(box).m();
-	default : assert(false);
+	default : {
+		assert(false);
+	}
 	}
 }
+
 
 inline void Function::backward(const Interval& y, IntervalVector& x) const {
 	backward(Domain((Interval&) y),x); // y will not be modified
