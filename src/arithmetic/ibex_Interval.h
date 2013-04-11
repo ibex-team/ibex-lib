@@ -65,6 +65,9 @@
 namespace ibex {
 
 class Affine2;
+class IntervalVector;
+class IntervalMatrix;
+class IntervalMatrixArray;
 
 /** \defgroup arithmetic Interval Arithmetic */
 
@@ -431,6 +434,11 @@ class Interval {
     static const Interval NEG_REALS;
 
 //    friend class IntervalVector;
+
+    typedef Interval SCALAR;
+    typedef IntervalVector VECTOR;
+    typedef IntervalMatrix MATRIX;
+    typedef IntervalMatrixArray MATRIX_ARRAY;
 
 //private:
 #ifdef _IBEX_WITH_GAOL_

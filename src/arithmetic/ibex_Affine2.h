@@ -19,6 +19,9 @@
 
 namespace ibex {
 
+class Affine2Vector;
+class Affine2Matrix;
+class Affine2MatrixArray;
 
 /**
  * \ingroup arithmetic
@@ -250,7 +253,10 @@ public:
 	/** \brief Divide *this by \a x and return the result. */
 	 Affine2& operator/=(const Affine2& x);
 
-
+	 typedef Affine2 SCALAR;
+	 typedef Affine2Vector VECTOR;
+	 typedef Affine2Matrix MATRIX;
+	 typedef Affine2MatrixArray MATRIX_ARRAY;
 
 };
 
