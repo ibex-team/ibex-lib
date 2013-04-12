@@ -10,6 +10,7 @@
  * ---------------------------------------------------------------------------- */
 
 #include "ibex_Affine2.h"
+#include "ibex_Exception.h"
 #include <stdio.h>
 
 namespace ibex {
