@@ -177,6 +177,26 @@ void TestArith::sqrt05() { check(sqrt(Interval(-9,-4)),     Interval::EMPTY_SET)
 #define piL Interval::PI.lb()
 #define piU Interval::PI.ub()
 
+void TestArith::check_sinh(const Interval& x) {
+	double xl=x.lb();
+	double xu=x.ub();
+	double yl=xl==NEG_INFINITY? NEG_INFINITY : 0.5*(exp(xl)-exp(-xl));
+	double yu=xu==POS_INFINITY? POS_INFINITY : 0.5*(exp(xu)-exp(-xu));
+
+	check(sinh(x), Interval(yl,yu));
+	check(sinh(-x), Interval(-yu,-yl));
+	check(x,asinh(sinh(x)));
+	check(-x,asinh(sinh(-x)));
+}
+
+void TestArith::sinh01() { check_sinh(Interval::ALL_REALS); }
+void TestArith::sinh02() { check_sinh(Interval::POS_REALS); }
+void TestArith::sinh03() { check_sinh(Interval(0,1)); }
+void TestArith::sinh04() { check_sinh(Interval(1,POS_INFINITY)); }
+void TestArith::sinh05() { check_sinh(Interval(1,1)); }
+void TestArith::sinh06() { check_sinh(Interval(2,3)); }
+void TestArith::sinh07() { check_sinh(Interval(4,5)); }
+
 void TestArith::check_trigo(const Interval& x, const Interval& sin_x_expected) {
 	check(sin(x), sin_x_expected);
 	check(sin(Interval::PI-x), sin_x_expected);

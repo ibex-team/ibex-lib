@@ -381,7 +381,14 @@ inline Interval acosh(const Interval& x) {
 }
 
 inline Interval asinh(const Interval& x) {
-	return gaol::asinh(x.itv);
+	if (x.is_empty()) return Interval::EMPTY_SET;
+	else if (x.lb()>=0) return gaol::asinh(x.itv);
+	else if (x.ub()<=0) return -gaol::asinh(-x.itv);
+	else {
+		gaol::interval y1=gaol::asinh(gaol::interval(0,x.ub()));
+		gaol::interval y2=gaol::asinh(gaol::interval(0,-x.lb()));
+		return Interval(-y2.right(),y1.right());
+	}
 }
 
 inline Interval atanh(const Interval& x) {
@@ -478,7 +485,8 @@ inline bool proj_cosh(const Interval& y,  Interval& x) {
 }
 
 inline bool proj_sinh(const Interval& y,  Interval& x) {
-	x = gaol::asinh_rel(y.itv,x.itv);
+	//x = gaol::asinh_rel(y.itv,x.itv);
+	x &= asinh(y);
 	return !x.is_empty();
 }
 
