@@ -632,7 +632,14 @@ inline Interval cosh(const Interval& x) {
 
 inline Interval sinh(const Interval& x) {
 	if (x.is_empty()) return Interval::EMPTY_SET;
-	else return Sinh(x.itv);
+	else if (x.lb()==NEG_INFINITY) {
+		if (x.ub()==POS_INFINITY) return Interval::ALL_REALS;
+		else return Interval(NEG_INFINITY,Sup(Sinh(x.ub())));
+	}
+	else if (x.ub()==POS_INFINITY)
+		return Interval(Inf(Sinh(x.lb())),POS_INFINITY);
+	else
+		return Sinh(x.itv);
 }
 
 inline Interval tanh(const Interval& x) {
