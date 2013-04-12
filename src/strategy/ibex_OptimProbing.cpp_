@@ -54,14 +54,8 @@ bool Optimizer::in_HC4(IntervalVector& box) {
 /* last update: GCH  */
 bool Optimizer::check_candidate(const Vector& pt, bool _is_inner) {
 
-	Interval fx=sys.goal->eval(pt);
-//	cout << " check candidate " << pt << " eval " << fx << endl;
-	if (fx.is_empty()) { // means: outside of the definition domain of the function
-		return false;
-	}
-
 	// "res" will contain an upper bound of the criterion
-	double res = fx.ub();
+	double res = goal(pt);
 
 	// check if f(x) is below the "loup" (the current upper bound).
 	//
@@ -92,28 +86,71 @@ bool Optimizer::random_probing (const IntervalVector& box, bool is_inner) {
 		loup_changed |= check_candidate (pt, is_inner);
 	}
 
+	/*=================== "intensification" =================== */
+	// --> does not bring substantial gain
+//	if (loup_changed)
+//		// we activate line probing only if the starting point has improved the goal.
+//		// we use the full box (not inbox)
+//		line_probing(box);
+//	else
+//		// Try Hansen dichotomy between the last candidate point (pt)
+//		// and the loup (note: the segment goes outside of the box, this is on purpose).
+//		//
+//		// Possible improvement: chose the random point with the smallest criterion
+//		// instead of the last one.
+//		loup_changed = dichotomic_line_search(pt,true);
+	/*========================================================*/
+
 	return loup_changed;
 }
 
-bool Optimizer::line_probing(const IntervalVector& box, const Vector& start, bool is_inner, int sample_size, bool recursive) {
-	Vector diam = box.diam();
-	Vector pt(n);
-	bool loup_changed=false;
 
-	IntervalVector savebox = box;
+bool Optimizer::dichotomic_line_search(const Vector& end_point, bool exit_if_above_loup) {
+	Vector seg=end_point-loup_point;
+
+	double eps=1.0/16.0;
+	double alpha0=0;
+	double alpha1=1.0;
+	double alpha2=alpha1;
+
+	double fy0=loup;
+
+	while (alpha2-alpha0>eps) {
+
+		Vector y1=loup_point+alpha1*seg;
+		double fy1=goal(y1);
+		if (fy1<fy0) {
+			if (is_inner(y1)) {
+				//cout << " better loup!......" << endl;
+				alpha0=alpha1;
+				fy0=fy1;
+			} else {
+				alpha2=alpha1;
+			}
+		} else {
+			if (exit_if_above_loup) break;
+		}
+
+		alpha1=0.5*(alpha0+alpha2);
+	}
+
+	if (alpha0>0) {
+		loup_point += alpha0*seg;
+		loup = fy0;
+		return true;
+	} else {
+		return false;
+	}
+}
+
+bool Optimizer::line_probing(const IntervalVector& box) {
+
+	bool loup_changed=false;
 
 	// ------------------------------------------------------------------------
 	// Calculates the gradient of f at the startpoint of the box (once for all)
 	// ------------------------------------------------------------------------
-	IntervalVector ig(n);              // interval gradient
-
-	(IntervalVector&) box = start;     // take the startpoint of the box
-
-	sys.goal->gradient(box,ig);
-
-	(IntervalVector&) box = savebox;   // restore domains
-
-	Vector g=ig.mid();                 // same as iG, but double-typed
+	Vector g = sys.goal->gradient(loup_point).lb();
 
 	// --------------------------------------------------
 	// Build the (signed) distance Vector. This Vector gives
@@ -129,10 +166,12 @@ bool Optimizer::line_probing(const IntervalVector& box, const Vector& start, boo
 		// ----------------------------
 		// NOTE : dist(j)<0 <=> G(j)>0
 		// ----------------------------
+		assert(box[j].contains(start[j]));
+
 		if (g[j]>0)
-			dist[j]=box[j].lb()-start[j];
+			dist[j]=box[j].lb()-loup_point[j];
 		else
-			dist[j]=box[j].ub()-start[j];
+			dist[j]=box[j].ub()-loup_point[j];
 	}
 
 	// --------------------------------------------------
@@ -144,9 +183,9 @@ bool Optimizer::line_probing(const IntervalVector& box, const Vector& start, boo
 	int mj=-1;                         // the index of the "main direction"
 	for (int j=0; j<n; j++) {
 
-		if (dist[j]==0) continue;
+		if (dist[j]==0) continue; // ok, the jth component of the line direction will be zero
 
-		double r=-g[j]/dist[j]; // space.box is bounded (precondition) => 0<|dist|<inf
+		double r=-g[j]/dist[j]; // box is bounded (precondition) => 0<|dist|<inf
 
 		if (r<0) {  // r is necessarily >=0
 			ibex_error("line probing in Optimizer has given a negative ratio");
@@ -159,11 +198,10 @@ bool Optimizer::line_probing(const IntervalVector& box, const Vector& start, boo
 	}
 
 	if (mj==-1) {
-		// There is a problem: either the inner box is a single point or
-		// the gradient is null in all the non-degenerated directions
-		//cout << "warning: no gradient descent possible" << endl;
-		// Use random probing (by default)
-		return random_probing(box, is_inner);
+		// This is not necessarily an error: the monotonicity analysis
+		// may reduce the inner box to a single point;
+		// or the gradient may be null.
+		return false; //return random_probing(box, is_inner);
 	}
 
 	// max_coeff determines the point where the half-line starting
@@ -173,53 +211,27 @@ bool Optimizer::line_probing(const IntervalVector& box, const Vector& start, boo
 	// and either belongs to the facet x_{mj}^+ or x_{mj}^-,
 	// (mj is the "main axis")
 
-	double max_coeff = -dist[mj]/g[mj];
+	double max_coeff = 1.0/max_ratio;
 
 	/*-------------- debug ------------------*/
-	//    for (int j=1; j<=n; j++) {
-	//      if (diam(j)==0) continue;
-	//      cout << " j=" << j << " " << Inf(box[j)) << " " << start(j)-max_coeff*fabs(G(j)) << "  " << start(j) << "  " << start(j)+max_coeff*fabs(G(j)) << "  " << Sup(box[j)) << endl;
-	//    }
+//	for (int j=0; j<n; j++) {
+//		if (box[j].diam()==0)
+//			cout << " j=" << j << " zero" << endl;
+//		else
+//		cout << " j=" << j << " lb=" << box[j].lb() << "<= " << start[j]-max_coeff*g[j] << "<=  ub=" << box[j].ub() << endl;
+//	}
 	/*---------------------------------------*/
 
-	for(int i=0; i<sample_size ; i++){
-
-		// pick a point in the direction -g
-		for (int j=0; j<n; j++) {
-
-			if (dist[j]==0)
-				pt[j] = start[j];
-			else
-				// pick a point in the gradient-directed
-				// half-line emanating from the startpoint
-				pt[j] = start[j] - (i*max_coeff/((double) sample_size))*g[j];
-
-			// watch dog
-			if (pt[j]<box[j].lb()) {
-				//cout << "watchdog! j=" << j << endl;
-				pt[j]=box[j].lb();
-			} else if (pt[j]>box[j].ub()) {
-				//cout << "watchdog! j=" << j << endl;
-				pt[j]=box[j].ub();
-			}
-		}
-
-		if (recursive) {
-			if (check_candidate(pt, is_inner)) {
-				if (i<sample_size-1)
-					line_probing(box, pt, is_inner, sample_size-i-1, true);
-				return true;
-			}
-		}
-		else {
-			loup_changed |= check_candidate(pt, is_inner);
-		}
-
+	Vector facet_point(n); // direc is the segment joining the startpoint to a point on the facet, in the direction of the negative gradient.
+	for (int j=0; j<n; j++) {
+		if (dist[j]==0)
+			facet_point[j] = loup_point[j]; // project the gradient on the (flat) box
+		else
+			facet_point[j]=loup_point[j]-max_coeff*g[j];
 	}
 
-	return loup_changed;
+	return dichotomic_line_search(facet_point,false);
 }
-
 
 /* ====================== 3nd method: make a double gradient descent ===============================
 * TO DO...........
@@ -253,16 +265,6 @@ bool Optimizer::update_loup_probing(const IntervalVector& box) {
 	if (inner_found && mono_analysis_flag)
 		monotonicity_analysis(inbox);
 
-	//  if (innerfound)
-
-	// first option: startpoint = midpoint
-	//
-	//  loup_changed = line_probing(sys, space,   Mid(space.box), 3*sample_size, true);
-	// other option: chose startpoint randomly
-	//  loup_changed = line_probing(sys, space,  random_point(space.box), 5* sample_size, true);
-
-	//  else
-	//    if (!loup_changed)
 	bool loup_changed; // return value
 	//	cout <<  " inner ? " << inner_found? << " box " << box << " inbox " << inbox << endl;
 	loup_changed = random_probing(inner_found? inbox : box, inner_found);

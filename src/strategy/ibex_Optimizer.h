@@ -190,6 +190,19 @@ public:
 
 protected:
 	/**
+	 * \brief Return an upper bound of f(x).
+	 *
+	 * Return +oo if x is outside the definition domain of f.
+	 */
+	inline double goal(const Vector& x) const {
+		Interval fx=sys.goal->eval(x);
+		if (fx.is_empty())  // means: outside of the definition domain of the function
+			return POS_INFINITY;
+		else
+			return fx.ub();
+	}
+
+	/**
 	 * \brief Main procedure for processing a box.
 	 *
 	 * <ul>
@@ -259,23 +272,24 @@ protected:
 	bool random_probing (const IntervalVector& box, bool is_innner);
 
 	/**
+	 * \brief Perform a dichotomic search of a minimum in a line (see Hansen's book).
+	 *
+	 * The search is performed on the segment delimited by the current loup-point and \a end_point.
+	 *
+	 * If \a exit_if_above_loup is true, the search stops as soon as we fall on
+	 * a candidate x with f(x)>loup.
+	 */
+	bool dichotomic_line_search(const Vector& end_point, bool exit_if_above_loup);
+
+	/**
 	 * \brief Second method for probing
 	 *
-	 * Pick equidistant points in the opposite direction of the
-	 * gradient calculated at a starting point "start".
-	 *
-	 * This function is simpler than a "gradient descent" since the step is calculated
-	 * by the simple geometric rule explained below (we do not use rules like Wolfe's criterion, etc.).
-	 *
-	 * This function can be called in two different modes:
-	 * - recursive=false: all the points are taken on the same half-line, starting from "start"
-	 *                    and ending at a facet of the box.
-	 * - recursive=true:  as soon as the "loup" is modified, a new gradient is calculated and the
-	 *                    line changes accordingly. This variant is more similar to a gradient descent.
+	 * Performs a dichotomic search between the current loup-point and its projection on the
+	 * facet of the input box in the opposite direction of its gradient.
 	 *
 	 * return true if the loup has been modified.
 	 */
-	bool line_probing(const IntervalVector& box, const Vector& start, bool is_inner, int sample_size, bool recursive);
+	bool line_probing(const IntervalVector& box);
 
 	/**
 	 * \brief Update loup either using line_probing or random_probing.
