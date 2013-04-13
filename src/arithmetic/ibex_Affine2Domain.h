@@ -45,18 +45,21 @@ template<>
 inline TemplateDomain<Affine2> atan2(const TemplateDomain<Affine2>& d1, const TemplateDomain<Affine2>& d2) {
 	/* atan2 is not implemented yet with affine forms */
 	not_implemented("atan2 with affine forms");
+	return d1;
 }
 
 template<>
 inline TemplateDomain<Affine2> acosh(const TemplateDomain<Affine2>& d) {
 	/* acosh is not implemented yet with affine forms */
 	not_implemented("acosh with affine forms");
+	return d;
 }
 
 template<>
 inline TemplateDomain<Affine2> asinh(const TemplateDomain<Affine2>& d) {
 	/* asinh is not implemented yet with affine forms */
 	not_implemented("asinh with affine forms");
+	return d;
 }
 
 
@@ -64,6 +67,7 @@ template<>
 inline TemplateDomain<Affine2> atanh(const TemplateDomain<Affine2>& d) {
 	/* atanh is not implemented yet with affine forms */
 	not_implemented("atanh with affine forms");
+	return d;
 }
 
 

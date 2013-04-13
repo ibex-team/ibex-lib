@@ -29,8 +29,26 @@ void ExprDiff::add_grad_expr(const ExprNode& node, const ExprNode& _expr_) {
 }
 
 const ExprNode& ExprDiff::diff(const Array<const ExprSymbol>& old_x, const Array<const ExprSymbol>& new_x, const ExprNode& y) {
+	if (y.dim.is_scalar()) {
+		return gradient(old_x,new_x,y);
+	} else if (y.dim.is_vector()) {
+		const ExprVector* vec=dynamic_cast<const ExprVector*>(&y);
+		int m=y.dim.vec_size();
+		Array<const ExprNode> a(m);
+		for (int i=0; i<m; i++) { // y.dim.vec_size() == vec->nb_args()
+			a.set_ref(i,gradient(old_x,new_x,vec->arg(i)));
+		}
+		return ExprVector::new_(a,false);
+	} else {
+		not_implemented("differentation of matrix-valued functions");
+		return y;
+	}
+}
+
+const ExprNode& ExprDiff::gradient(const Array<const ExprSymbol>& old_x, const Array<const ExprSymbol>& new_x, const ExprNode& y) {
 
 	grad.clean();
+	leaves.clear();
 
 	SubNodes nodes(y);
 
@@ -56,7 +74,7 @@ const ExprNode& ExprDiff::diff(const Array<const ExprSymbol>& old_x, const Array
 		dX.set_ref(i,*grad[old_x[i]]);
 	}
 
-	const ExprNode& df=ExprVector::new_(dX,false);
+	const ExprNode& df=ExprVector::new_(dX,true);
 
 	// Note: it is better to proceed in this way: (1) differentiate
 	// and (2) copy the expression for two reasons
@@ -85,7 +103,7 @@ const ExprNode& ExprDiff::diff(const Array<const ExprSymbol>& old_x, const Array
 	}
 
 	// build the global DAG
-	const ExprNode* dAll=&ExprVector::new_(_dAll,false);
+	const ExprNode* dAll=&ExprVector::new_(_dAll,true);
 
 	SubNodes gnodes(*dAll);
 	int k=dAll->size;
@@ -97,7 +115,7 @@ const ExprNode& ExprDiff::diff(const Array<const ExprSymbol>& old_x, const Array
 	}
 
 	delete &df;
-
+	//cout << "grad:" << result << endl;
 	return result;
 }
 
