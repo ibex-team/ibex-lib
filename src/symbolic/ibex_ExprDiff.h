@@ -29,6 +29,8 @@ public:
 	 *
 	 * The differential is either a row vector for a real-valued function (the gradient)
 	 * or a matrix (the Jacobian matrix) for a vector-valued function.
+	 *
+	 * The node in return may either be an #ExprVector or a #ExprConstant.
 	 */
 	const ExprNode& diff(const Array<const ExprSymbol>& old_x, const Array<const ExprSymbol>& new_x, const ExprNode& y);
 
