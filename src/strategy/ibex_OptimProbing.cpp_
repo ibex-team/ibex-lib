@@ -166,7 +166,7 @@ bool Optimizer::line_probing(const IntervalVector& box) {
 		// ----------------------------
 		// NOTE : dist(j)<0 <=> G(j)>0
 		// ----------------------------
-		assert(box[j].contains(start[j]));
+		assert(box[j].contains(loup_point[j]));
 
 		if (g[j]>0)
 			dist[j]=box[j].lb()-loup_point[j];
