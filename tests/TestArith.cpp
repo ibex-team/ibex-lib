@@ -197,6 +197,42 @@ void TestArith::sinh05() { check_sinh(Interval(1,1)); }
 void TestArith::sinh06() { check_sinh(Interval(2,3)); }
 void TestArith::sinh07() { check_sinh(Interval(4,5)); }
 
+
+void TestArith::check_cosh(const Interval& x) {
+
+	Interval y ;
+	if (x.ub()==POS_INFINITY) {
+		if (x.lb()<=0) y=Interval(1,POS_INFINITY);
+		else y=Interval((cosh(x.lb())),POS_INFINITY);
+	}
+	else if (x.lb()==NEG_INFINITY) {
+		if (x.ub()>=0) y=Interval(1,POS_INFINITY);
+		else y=Interval((cosh(x.ub())),POS_INFINITY);
+	}
+	else if (x.lb()>=0)
+		y=Interval((cosh(x.lb())),(cosh(x.ub())));
+	else if (x.ub()<=0)
+		y=Interval((cosh(x.ub())),(cosh(x.lb())));
+	else
+		y=((fabs(x.lb())> fabs(x.ub())) ? Interval(1,(cosh(x.lb()))) :Interval(1,(cosh(x.ub()))));
+
+
+//	std::cout << x<<" : " << cosh(x)<< "|||  "<<y<<std::endl;
+	check(cosh(x), y);
+	check(cosh(-x), y);
+//	check(x,acosh(cosh(x)));
+//	check(x,acosh(cosh(-x)));
+}
+
+void TestArith::cosh01() { check_cosh(Interval::ALL_REALS); }
+void TestArith::cosh02() { check_cosh(Interval::POS_REALS); }
+void TestArith::cosh03() { check_cosh(Interval(0,1)); }
+void TestArith::cosh04() { check_cosh(Interval(1,POS_INFINITY)); }
+void TestArith::cosh05() { check_cosh(Interval(1,1)); }
+void TestArith::cosh06() { check_cosh(Interval(2,3)); }
+void TestArith::cosh07() { check_cosh(Interval(4,5)); }
+
+
 void TestArith::check_trigo(const Interval& x, const Interval& sin_x_expected) {
 	check(sin(x), sin_x_expected);
 	check(sin(Interval::PI-x), sin_x_expected);

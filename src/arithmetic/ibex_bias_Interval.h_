@@ -627,7 +627,20 @@ inline Interval atan2(const Interval& a, const Interval& b) {
 
 inline Interval cosh(const Interval& x) {
 	if (x.is_empty()) return Interval::EMPTY_SET;
-	else return Cosh(x.itv);
+	else if (x.ub()==POS_INFINITY) {
+		if (x.lb()<=0) return Interval(1,POS_INFINITY);
+		else return Interval(Inf(Cosh(x.lb())),POS_INFINITY);
+	}
+	else if (x.lb()==NEG_INFINITY) {
+		if (x.ub()>=0) return Interval(1,POS_INFINITY);
+		else return Interval(Inf(Cosh(x.ub())),POS_INFINITY);
+	}
+	else if (x.lb()>=0)
+		return Interval(Inf(Cosh(x.lb())),Sup(Cosh(x.ub())));
+	else if (x.ub()<=0)
+		return Interval(Inf(Cosh(x.ub())),Sup(Cosh(x.lb())));
+	else
+		return ((fabs(x.lb())> fabs(x.ub())) ? Interval(1,Sup(Cosh(x.lb()))) :Interval(1,Sup(Cosh(x.ub()))));
 }
 
 inline Interval sinh(const Interval& x) {
@@ -668,6 +681,7 @@ inline Interval tanh(const Interval& x) {
 inline Interval acosh(const Interval& x) {
 	if (x.is_empty()) return Interval::EMPTY_SET;
 	if (x.ub()<1.0) return Interval::EMPTY_SET;
+
 
 	INTERVAL r;
 
