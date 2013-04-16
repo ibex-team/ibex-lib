@@ -129,6 +129,7 @@ bool Optimizer::dichotomic_line_search(const Vector& end_point, bool exit_if_abo
 			}
 		} else {
 			if (exit_if_above_loup) break;
+			else alpha2=alpha1;
 		}
 
 		alpha1=0.5*(alpha0+alpha2);
