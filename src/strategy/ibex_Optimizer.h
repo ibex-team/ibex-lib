@@ -17,6 +17,7 @@
 #include "ibex_Backtrackable.h"
 #include "ibex_CellHeapOptim.h"
 #include "ibex_System.h"
+#include "ibex_EntailedCtr.h"
 
 namespace ibex {
 
@@ -229,11 +230,17 @@ protected:
 
 	/**
 	 * \brief Quick check that the box is not infeasible.
+	 *
+	 * The box must be a sub-box of the current cells's box (because constraints marked as
+	 * entailed as skipped from the check)
 	 */
 	bool is_feasible(const IntervalVector& box);
 
 	/**
 	 * \brief Quick check that the box is inside g(x)<=0.
+	 *
+	 * The box must be a sub-box of the current cells's box (because constraints marked as
+	 * entailed as skipped from the check)
 	 */
 	bool is_inner(const IntervalVector& box);
 
@@ -307,6 +314,11 @@ protected:
 	bool update_loup_simplex(const IntervalVector& box);
 
 	/**
+	 * \brief Update the entailed constraint for the current box
+	 */
+	void update_entailed_ctr(const IntervalVector& box);
+
+	/**
 	 * \brief Main procedure for updating the loup.
 	 */
 	bool update_loup(const IntervalVector& box);
@@ -342,8 +354,11 @@ private:
 	/** Lower bound of the small boxes taken by the precision contractor */
 	double uplo_of_epsboxes;
 
-        /** Number of cells put into the heap (which passed through the contractors)  */
+	/** Number of cells put into the heap (which passed through the contractors)  */
 	int nb_cells;
+
+	/** Currently entailed constraints */
+	EntailedCtr* entailed;
 
 	/** Miscellaneous   for statistics */
 	int nb_simplex;

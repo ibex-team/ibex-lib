@@ -29,14 +29,20 @@ void Optimizer::monotonicity_analysis(IntervalVector& box) {
 }
 
 bool Optimizer::is_feasible(const IntervalVector& box) {
-	for (int j=0; j<m; j++)
-		if (sys.f[j].eval(box).lb()>0) return false;
+
+	for (int j=0; j<m; j++) {
+		if ((*entailed)[j]) continue;
+		Interval y=sys.f[j].eval(box);
+		if (y.lb()>0) return false;
+	}
 	return true;
 }
 
 bool Optimizer::is_inner(const IntervalVector& box) {
-	for (int j=0; j<m; j++)
+	for (int j=0; j<m; j++) {
+		if ((*entailed)[j]) continue;
 		if (sys.f[j].eval(box).ub()>0) return false;
+	}
 	return true;
 }
 
@@ -45,6 +51,7 @@ bool Optimizer::in_HC4(IntervalVector& box) {
 	if (!is_feasible(box)) { box.set_empty(); return false; }
 
 	for (int j=0; j<m; j++) {
+		if ((*entailed)[j]) continue;
 		sys.f[j].iproj(Interval(NEG_INFINITY,0),box);
 		if (box.is_empty()) return false;
 	}
@@ -87,7 +94,7 @@ bool Optimizer::random_probing (const IntervalVector& box, bool is_inner) {
 	}
 
 	/*=================== "intensification" =================== */
-	// --> does not bring substantial gain
+//	// --> does not bring substantial gain
 //	if (loup_changed)
 //		// we activate line probing only if the starting point has improved the goal.
 //		// we use the full box (not inbox)

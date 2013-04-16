@@ -17,6 +17,7 @@
 #include "ibex_ExprCopy.h"
 #include "ibex_Function.h"
 #include "ibex_NoBisectableVariableException.h"
+
 #include <float.h>
 
 using namespace std;
@@ -53,8 +54,8 @@ Optimizer::Optimizer(System& user_sys, Bsc& bsc, Ctc& ctc, double prec,
 		prec(prec), goal_rel_prec(goal_rel_prec), goal_abs_prec(goal_abs_prec),
 		sample_size(sample_size), mono_analysis_flag(true), in_HC4_flag(true), trace(false),
 		timeout(1e08), loup(POS_INFINITY), uplo(NEG_INFINITY), loup_point(n),
-		/* df(*user_sys.goal,Function::DIFF), */ nb_cells(0),
-		uplo_of_epsboxes(POS_INFINITY) {
+		/* df(*user_sys.goal,Function::DIFF), */
+		uplo_of_epsboxes(POS_INFINITY), nb_cells(0) {
 
 	// ====== build the reversed inequalities g_i(x)>0 ===============
 	if(m>0) {
@@ -92,6 +93,19 @@ bool Optimizer::update_loup(const IntervalVector& box) {
 	bool box_loup_changed = update_loup_probing (box);
 	box_loup_changed |= update_loup_simplex(box);
 	return box_loup_changed;
+}
+
+void Optimizer::update_entailed_ctr(const IntervalVector& box) {
+	for (int j=0; j<m; j++) {
+		if ((*entailed)[j]) {
+			continue;
+		}
+		Interval y=sys.f[j].eval(box);
+		if (y.lb()>0) throw EmptyBoxException();
+		else if (y.ub()<=0) {
+			(*entailed)[j]=true;
+		}
+	}
 }
 
 bool Optimizer::contract_and_bound(Cell& c) {
@@ -132,6 +146,10 @@ bool Optimizer::contract_and_bound(Cell& c) {
 	/*========================= update loup ==============================*/
 	IntervalVector tmp_box(n);
 	read_ext_box(c.box,tmp_box);
+
+	entailed = &c.get<EntailedCtr>();
+	update_entailed_ctr(tmp_box);
+
 	bool loup_changed = update_loup(tmp_box);
 	/*====================================================================*/
 	if (tmp_box.max_diam()<=prec || !c.box.is_bisectable()) {
@@ -173,6 +191,11 @@ void Optimizer::optimize(const IntervalVector& init_box) {
 	// add data required by the bisector
 	bsc.init_root(*root);
 
+	// add data required by optimizer + Fritz John contractor
+	root->add<EntailedCtr>();
+	entailed=&root->get<EntailedCtr>();
+	entailed->init_root(m);
+
 	bool loup_changed=0;
 	time=0;
 	Timer::start();
@@ -197,6 +220,7 @@ void Optimizer::optimize(const IntervalVector& init_box) {
 			if (trace >= 2) cout << ((CellBuffer&) buffer) << endl;
 
 			Cell* c=buffer.top();
+
 			//	    cout << " box before bisection " <<  c->box << endl;
 
 			try {
