@@ -99,7 +99,7 @@ int main(int argc, char** argv){
 	cpoints.push_back(CtcXNewtonIter::RANDOM_INV);
 
         // the linear relaxation contractor 
-	CtcXNewtonIter ctcxnewton (ext_sys,cpoints, 0,sys.goal, CtcLinearRelaxation::ALL_BOX,CtcXNewtonIter::HANSEN,100,1.e6,1.e6);
+	CtcXNewtonIter ctcxnewton (ext_sys,cpoints, 0,sys.goal);
 
 	// fixpoint linear relaxation , hc4  with default fix point ratio 0.2
 	CtcXNewton cxn (ctcxnewton, hc44xn);

@@ -41,9 +41,9 @@ namespace ibex {
      * \param sys The system                                                                                           
      * \param goal_ctr The id of the goal function, -1 in CSPs                                                         
      * \param goal   goal function pointer for optimization, NULL for constraint solving
-     * \param cmode ALL_BOX (contracts all variables in the box) | ONLY_Y (only improves the left bound of the variable y) 
+     * \param cmode ALL_BOX (contracts all variables in the box) | ONLY_Y (in optimization :only improves the left bound of the objective) 
      * \param max_iter_soplex : the maximum number of iterations for Soplex (default value 100)                 
-     * \param max_diam_box : the maximum diameter of the box for calling Soplex (default value 1.e5)  
+     * \param max_diam_box : the maximum diameter of the box for calling Soplex (default value 1.e6)  
      */
     CtcLinearRelaxation(const System& sys, int goal_ctr=-1, Function* goal=0,
 		  ctc_mode cmode=ALL_BOX, int max_iter_soplex=100, double max_diam_box=default_max_diam_box);
@@ -56,7 +56,7 @@ namespace ibex {
     /** The system */
     const System& sys;
 
-    /** Default max_diam_box value, set to 1e4  */
+    /** Default max_diam_box value, set to 1e6  */
     static const double default_max_diam_box;
 
     /** The contraint related to the objective function */
@@ -73,7 +73,7 @@ namespace ibex {
     /** The maximum diameter of the box for calling Soplex (default value 1.e5)  */
     double max_diam_box;
 
-    /** Indicates if only y is contracted (cmode=ONLY_Y) or all the box (ALL_BOX) */
+    /** Indicates if in optimization  only the objective is contracted (cmode=ONLY_Y) or all the box (ALL_BOX) */
     ctc_mode cmode;
 
 

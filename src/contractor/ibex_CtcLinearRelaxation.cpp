@@ -17,8 +17,8 @@ using namespace soplex;
 namespace ibex {
 
 
-  const double CtcLinearRelaxation::default_max_diam_box =1e4;
-    
+  const double CtcLinearRelaxation::default_max_diam_box =1e6;
+  
 
   CtcLinearRelaxation::CtcLinearRelaxation(const System& sys, int goal_ctr,Function* fgoal,
 				 ctc_mode cmode, int max_iter_soplex, double max_diam_box) : 
@@ -100,8 +100,10 @@ void CtcLinearRelaxation::contract (IntervalVector & box){
 
   for (int i=0; i<n ;i++) {inf_bound[i]=0;sup_bound[i]=0;}
   if (goal_ctr !=-1)   sup_bound[n-1]=1;  // in case of optimization, for y the left bound only is contracted
+
+  int firsti=0;
   // in the case of lower_bounding, only the left bound of y is contracted
-  int firsti=(cmode==ONLY_Y)? 2*n-1:0;
+  if (goal_ctr!=-1 && cmode==ONLY_Y) firsti=2*n-1;
 
   int nexti=-1;  // the next variable to be contracted
   int infnexti=0; // the bound to be contracted contract  infnexti=0 for the lower bound, infnexti=1 for the upper bound
@@ -110,13 +112,11 @@ void CtcLinearRelaxation::contract (IntervalVector & box){
     int i= ii/2;
     if (nexti != -1) i=nexti;
     //    cout << " i "<< i << " infnexti " << infnexti << " infbound " << inf_bound[i] << " supbound " << sup_bound[i] << endl;
-    if (infnexti==0 && inf_bound[i]==0)
+    if (infnexti==0 && inf_bound[i]==0)  // computing the left bound : minimizing x_i
       {
 	inf_bound[i]=1;
-	SPxSolver::Status stat = run_simplex(box,mysoplex, SPxLP::MINIMIZE, i, n, opt,box[i].lb()/*, taylor_ev*/);
-	//	cout << " stat " <<  stat << endl;
+	SPxSolver::Status stat = run_simplex(box,mysoplex, SPxLP::MINIMIZE, i, n, opt,box[i].lb());
         if( stat == SPxSolver::OPTIMAL ){
-
           if(opt.lb()>box[i].ub())  throw EmptyBoxException();
           choose_next_variable(box,mysoplex ,nexti,infnexti, inf_bound, sup_bound);
           if(opt.lb() > box[i].lb() ){
@@ -124,7 +124,12 @@ void CtcLinearRelaxation::contract (IntervalVector & box){
             mysoplex.changeLhs(nb_ctrs+i,opt.lb());
           }
         }
-	else if(stat == SPxSolver::INFEASIBLE) throw EmptyBoxException();
+	else if(stat == SPxSolver::INFEASIBLE) 
+	  {if (goal_ctr ==-1) break; // in satisfaction we keep the box: soplex is not reliable and may lose solutions.
+	    else 
+	      // in optimization we leave the exception: it is not reliable, but no bug is reported yet and the pruning is very important in many problems
+	      throw EmptyBoxException();
+	  }
         else if (stat == SPxSolver::UNKNOWN)
           {int next=-1;
             for (int j=0;j<n;j++)
@@ -137,12 +142,11 @@ void CtcLinearRelaxation::contract (IntervalVector & box){
 
       }
     else
-      if(infnexti==1 && sup_bound[i]==0 ){
-        //max x                                                                                                         
+      if(infnexti==1 && sup_bound[i]==0)// computing the right bound :  maximizing x_i
+	{
 	sup_bound[i]=1;
-	SPxSolver::Status stat= run_simplex(box,mysoplex, SPxLP::MAXIMIZE, i, n, opt, box[i].ub()/*, taylor_ev*/);
+	SPxSolver::Status stat= run_simplex(box,mysoplex, SPxLP::MAXIMIZE, i, n, opt, box[i].ub());
         if( stat == SPxSolver::OPTIMAL ){
-
           if(opt.ub() <box[i].lb())   throw EmptyBoxException();
           choose_next_variable(box, mysoplex ,nexti,infnexti, inf_bound, sup_bound);
 	  if (opt.ub() < box[i].ub()) {
@@ -150,8 +154,12 @@ void CtcLinearRelaxation::contract (IntervalVector & box){
 	    mysoplex.changeRhs(nb_ctrs+i,opt.ub());
 	  }
         } 
-        else if(stat == SPxSolver::INFEASIBLE)  throw EmptyBoxException();
-        else if (stat == SPxSolver::UNKNOWN)
+        else if(stat == SPxSolver::INFEASIBLE) 
+	  {if (goal_ctr ==-1) break;  // in satisfaction we keep the box: soplex not reliable and may lose solutions.
+	    else 
+	      // in optimization we leave the exception: it is not reliable, but no bug is reported yet and the pruning is very important in many problems
+	      throw EmptyBoxException();} 
+	else if (stat == SPxSolver::UNKNOWN)
           {int next=-1;
             for (int j=0;j<n;j++)
               {if (inf_bound[j]==0) {nexti=j; next=0;infnexti=0;break;}
@@ -162,7 +170,8 @@ void CtcLinearRelaxation::contract (IntervalVector & box){
 
 
       }
-      else break;  // no more call to soplex                                                                            
+      else {
+	break;}  // no more call to soplex                                                                            
   }
 
   delete [] inf_bound;
@@ -297,7 +306,7 @@ void CtcLinearRelaxation::contract (IntervalVector & box){
     for (int j=0;j<n;j++)
 
       { 
-	//	cout << " j " << j << " infbound " << inf_bound[j]    << " supbound " << sup_bound[j] << endl;  
+
 	if (inf_bound[j]==0)
           {deltaj= fabs (primal[j]- box[j].lb());
             if ((fabs (box[j].lb()) < 1 && deltaj < prec_bound)
@@ -318,7 +327,7 @@ void CtcLinearRelaxation::contract (IntervalVector & box){
 	  }
 
       }
-    //    cout << " nexti " <<nexti <<  " infnexti " << infnexti << endl ;   
+
   }
 
 

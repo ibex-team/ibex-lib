@@ -16,7 +16,8 @@ using namespace std;
 namespace ibex {
 
 double  CtcAcid::nbvarstat=0;
-const double CtcAcid::default_ctratio=0.005;
+  //const double CtcAcid::default_ctratio=0.005;
+const double CtcAcid::default_ctratio=0.002;
 
 CtcAcid::CtcAcid(const System& sys, const BoolMask& cid_vars, Ctc& ctc, bool optim, int s3b, int scid,
 		double var_min_width, double ct_ratio): Ctc3BCid (cid_vars,ctc,s3b,scid,cid_vars.nb_set(),var_min_width),

@@ -14,7 +14,7 @@ using std::vector;
 
 namespace ibex {
 
-const double CtcXNewtonIter::default_max_diam_deriv =1e5;
+const double CtcXNewtonIter::default_max_diam_deriv =1e6;
 
   using namespace std;
 
