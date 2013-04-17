@@ -13,6 +13,9 @@
 
 #include "ibex_IntervalVector.h"
 #include "ibex_Array.h"
+#include "ibex_IntStack.h"
+
+using namespace std;
 
 namespace ibex {
 
@@ -22,9 +25,39 @@ namespace ibex {
 
 /**
  * \ingroup combinatorial
- * \brief Q-intersection.
+ * \brief Q-intersection - EXACT - Jaulin-Golsztejn algorithm
  */
 IntervalVector qinter(const Array<IntervalVector>& boxes, int q);
+
+/**
+ * \ingroup combinatorial
+ * \brief Q-intersection - HEURISTIC - Jaulin's algorithm
+ */
+IntervalVector qinter_jaulin(const Array<IntervalVector>& _boxes, int q);
+
+/**
+ * \ingroup combinatorial
+ * \brief Q-intersection - HEURISTIC - improved Gutowski algorithm
+ */
+IntervalVector qinter_gutow(const Array<IntervalVector>& _boxes, int q);
+
+/**
+ * \ingroup combinatorial
+ * \brief Q-intersection - EXACT - Cliquer-based approach without filtering
+ */
+IntervalVector qinter_chabs(const Array<IntervalVector>& _boxes, int q);
+
+/**
+ * \ingroup combinatorial
+ * \brief Q-intersection - EXACT - Cliquer-based approach with filtering
+ */
+IntervalVector qinter_chabs_gutow(const Array<IntervalVector>& _boxes, int q);
+
+/**
+ * \ingroup combinatorial
+ * \brief Q-intersection existence using Cliquer
+ */
+IntervalVector qinterex_cliquer(const vector<IntervalVector *>& boxes, int q);
 
 } // end namespace ibex
 #endif // __IBEX_Q_INTER_H__
