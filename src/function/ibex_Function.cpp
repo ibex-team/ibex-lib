@@ -12,6 +12,7 @@
 #include "ibex_Function.h"
 #include "ibex_Expr.h"
 #include "ibex_Eval.h"
+#include "ibex_Affine2Eval.h"
 #include "ibex_HC4Revise.h"
 #include "ibex_InHC4Revise.h"
 #include "ibex_Gradient.h"
@@ -36,6 +37,7 @@ Function::~Function() {
 			delete node(i).deco.d;
 			delete node(i).deco.g;
 			delete node(i).deco.p;
+			delete node(i).deco.af2;
 		}
 		cleanup(expr(),false);
 
@@ -60,6 +62,73 @@ int Function::nb_var() const {
 
 Domain& Function::eval_domain(const IntervalVector& box) const {
 	return Eval().eval(*this,box);
+}
+
+
+Domain& Function::eval_affine2_domain(const IntervalVector& box) const {
+	return Affine2Eval().eval(*this,box);
+}
+
+Domain& Function::eval_affine2_domain(const IntervalVector& box, Affine2Domain& affine) const {
+	ExprLabel res = Affine2Eval().eval_label(*this,box);
+	affine = *res.af2;
+	return *res.d;
+}
+
+Interval Function::eval_affine2(const IntervalVector& box) const {
+	return eval_affine2_domain(box).i();
+}
+
+Interval Function::eval_affine2(const IntervalVector& box, Affine2& affine) const {
+	ExprLabel res = Affine2Eval().eval_label(*this,box);
+	affine = res.af2->i();
+	return res.d->i();
+}
+
+IntervalVector Function::eval_affine2_vector(const IntervalVector& box) const {
+	return expr().dim.is_scalar() ? IntervalVector(1,Eval().eval(*this,box).i()) : Eval().eval(*this,box).v();
+}
+
+IntervalVector Function::eval_affine2_vector(const IntervalVector& box, Affine2Vector& affine) const {
+	ExprLabel res = Affine2Eval().eval_label(*this,box);
+	if (expr().dim.is_scalar() ) {
+		affine = Affine2Vector(1,res.af2->i());
+		return IntervalVector(1,res.d->i());
+	} else {
+		affine = res.af2->v();
+		return res.d->v();
+	}
+}
+
+IntervalMatrix Function::eval_affine2_matrix(const IntervalVector& box, Affine2Matrix& affine) const {
+	ExprLabel res = Affine2Eval().eval_label(*this,box);
+	affine = Affine2Matrix(expr().dim.dim2, expr().dim.dim3);
+
+	switch (expr().dim.type()) {
+	case Dim::SCALAR     : {
+		affine[0][0] = res.af2->i();
+		return IntervalMatrix(1,1,res.d->i());
+	}
+	case Dim::ROW_VECTOR : {
+		affine.set_row(0,res.af2->v());
+		IntervalMatrix M(image_dim(),1);
+		M.set_row(0,res.d->v());
+		return M;
+	}
+	case Dim::COL_VECTOR : {
+		affine.set_col(0,res.af2->v());
+		IntervalMatrix M(1,image_dim());
+		M.set_col(0,res.d->v());
+		return M;
+	}
+	case Dim::MATRIX: {
+		affine = res.af2->m();
+		return res.d->m();
+	}
+	default : {
+		assert(false);
+	}
+	}
 }
 
 void Function::backward(const Domain& y, IntervalVector& x) const {

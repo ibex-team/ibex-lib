@@ -17,28 +17,72 @@
 namespace ibex {
 
 /**
- * \brief Return all the (sub)nodes of an expression (including itself)
+ * \brief All the (sub)nodes of an expression (including itself)
  *        sorted by topological order (the first is the root of the expression)
+ *
+ * Each sub-node appears only once in the set.
+ * The size of the set is also root.size().
  */
-class ExprNodes : public virtual ExprVisitor {
+class SubNodes {
 public:
+	/**
+	 * \brief Build the subnodes of e.
+	 */
+	SubNodes(const ExprNode& e);
 
 	/**
-	 * \brief Return the (sub)nodes of e.
-	 *
-	 * \warning The result array must be freed by the caller
+	 * \brief Build an uinitialized object (must be followed by a call to #init).
 	 */
-	const ExprNode** nodes(const ExprNode& e);
+	SubNodes();
 
-protected:
-	void visit(const ExprNode& e);
-	void visit(const ExprIndex& i);
-	void visit(const ExprLeaf& e);
-	void visit(const ExprNAryOp& e);
-	void visit(const ExprBinaryOp& b);
-	void visit(const ExprUnaryOp& u);
-	NodeMap<const ExprNode*> map;
+	/**
+	 * \brief Delete *this.
+	 */
+	~SubNodes();
+
+	/**
+	 * \brief Build *this (as the subnodes of e).
+	 */
+	void init(const ExprNode& e);
+
+	/**
+	 * \brief Number of subnodes.
+	 */
+	int size() const;
+
+	/**
+	 * Return the ith subnode, by decreasing height.
+	 */
+	const ExprNode& operator[](int i) const;
+
+	/**
+	 * True iff e is a subnode.
+	 */
+	bool found(const ExprNode& e) const;
+
+private:
+	friend class ExprNodes;
+	const ExprNode** tab;
+	// map a node to its index in the array
+	NodeMap<int> map;
 };
+
+
+/* ============================================================================
+ 	 	 	 	 	 	 	 inline implementation
+  ============================================================================*/
+
+inline const ExprNode& SubNodes::operator[](int i) const {
+	return *tab[i];
+}
+
+inline int SubNodes::size() const {
+	return tab[0]->size;
+}
+
+inline bool SubNodes::found(const ExprNode& e) const {
+	return map.found(e);
+}
 
 } // end namespace ibex
 #endif // __IBEX_EXPR_NODES_H__

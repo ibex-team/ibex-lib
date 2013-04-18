@@ -15,7 +15,8 @@
 #include "ibex_System.h"
 #include "ibex_CellBuffer.h"
 #include "ibex_CtcCompo.h"
-#include "ibex_XNewton.h"
+#include "ibex_CtcXNewton.h"
+#include "ibex_CtcXNewtonIter.h"
 
 namespace ibex {
 
@@ -45,7 +46,7 @@ private:
 	Bsc* __bsc;
 	CellBuffer* __buffer;
 	Array<Ctc>*  contractor_list (System& sys, double prec);
-	std::vector<X_Newton::corner_point>* default_corners ();
+	std::vector<CtcXNewtonIter::corner_point>* default_corners ();
 };
 
 } // end namespace ibex

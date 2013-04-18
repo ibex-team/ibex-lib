@@ -5,7 +5,7 @@
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Aug 27, 2012
-// Last Update : Sep 28, 2012
+// Last Update : March 21, 2013
 //============================================================================
 
 #ifndef __IBEX_DEFAULT_OPTIMIZER_H__
@@ -13,7 +13,8 @@
 
 #include "ibex_Optimizer.h"
 #include "ibex_CtcCompo.h"
-#include "ibex_XNewton.h"
+#include "ibex_CtcXNewton.h"
+#include "ibex_CtcXNewtonIter.h"
 
 namespace ibex {
 
@@ -39,7 +40,7 @@ public:
 
 private:
 	Array<Ctc>*  contractor_list (System& sys, System& ext_sys,double prec);
-	std::vector<X_Newton::corner_point>* default_corners ();
+	std::vector<CtcXNewtonIter::corner_point>* default_corners ();
 
 
 	// -------- information stored for cleanup ----------

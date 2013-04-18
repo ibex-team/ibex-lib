@@ -35,6 +35,11 @@ public:
 	void add_var(const ExprSymbol& v);
 
 	/**
+	 * \brief Add all variables of an array.
+	 */
+	void add_var(const Array<const ExprSymbol>& a);
+
+	/**
 	 * \brief Add a goal function.
 	 *
 	 * \pre All the variables must have been added.

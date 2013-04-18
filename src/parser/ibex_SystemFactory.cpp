@@ -24,6 +24,13 @@ void SystemFactory::add_var(const ExprSymbol& v) {
 	vars.push_back(&v);
 
 }
+
+void SystemFactory::add_var(const Array<const ExprSymbol>& a) {
+	if (goal || !exprs.empty()) ibex_error("cannot add a variable to a system after a constraint (or the goal function)");
+	for (int i=0; i<a.size(); i++)
+		vars.push_back(&a[i]);
+}
+
 void SystemFactory::add_goal(const ExprNode& goal) {
 	this->goal = &goal;
 }

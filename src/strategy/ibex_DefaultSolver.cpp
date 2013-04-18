@@ -5,7 +5,7 @@
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Aug 27, 2012
-// Last Update : Aug 27, 2012
+// Last Update : March 21, 2013
 //============================================================================
 
 #include "ibex_DefaultSolver.h"
@@ -13,7 +13,8 @@
 #include "ibex_CtcHC4.h"
 #include "ibex_CtcAcid.h"
 #include "ibex_CtcNewton.h"
-#include "ibex_XNewton.h"
+#include "ibex_CtcXNewton.h"
+#include "ibex_CtcXNewtonIter.h"
 #include "ibex_CtcCompo.h"
 #include "ibex_CellStack.h"
 #include "ibex_Array.h"
@@ -22,11 +23,11 @@ namespace ibex {
 
 
 // the corners for  Xnewton
-std::vector<X_Newton::corner_point>*  DefaultSolver::default_corners () {
-	std::vector<X_Newton::corner_point>* x;
-	x= new std::vector<X_Newton::corner_point>;
-	x->push_back(X_Newton::RANDOM);
-	x->push_back(X_Newton::RANDOM_INV);
+std::vector<CtcXNewtonIter::corner_point>*  DefaultSolver::default_corners () {
+	std::vector<CtcXNewtonIter::corner_point>* x;
+	x= new std::vector<CtcXNewtonIter::corner_point>;
+	x->push_back(CtcXNewtonIter::RANDOM);
+	x->push_back(CtcXNewtonIter::RANDOM_INV);
 	return x;
 }
 
@@ -45,9 +46,12 @@ Array<Ctc>*  DefaultSolver::contractor_list (System& sys, double prec) {
 		index++;
 	}
 	// the last contractor is XNewton
-	ctc_list->set_ref(index,*new X_Newton(sys,
-                                          new CtcHC4 (sys.ctrs,0.01),
-					      *(default_corners())));
+	//	ctc_list->set_ref(index,*new CtcXNewtonIter(sys,
+	//                                          new CtcHC4 (sys.ctrs,0.01),
+	//*(default_corners())));
+
+	ctc_list->set_ref(index,*new CtcXNewton (*new CtcXNewtonIter (sys,*(default_corners())),
+						 *new CtcHC4 (sys.ctrs,0.01)));
 
 	ctc_list->resize(index+1);
 	return ctc_list;
@@ -68,8 +72,10 @@ DefaultSolver::~DefaultSolver() {
 	int ind_xnewton=2;
 	if (sys.nb_var==sys.nb_ctr) ind_xnewton=3;
 	delete &((dynamic_cast<CtcAcid*> (&__ctc->list[1]))->ctc);
-	delete (dynamic_cast<X_Newton*> (&__ctc->list[ind_xnewton]))->ctc;
-	delete &((dynamic_cast<X_Newton*> (&__ctc->list[ind_xnewton]))->cpoints);
+	CtcCompo* ctccompo= dynamic_cast<CtcCompo*>(&(dynamic_cast<CtcXNewton*>( &__ctc->list[ind_xnewton])->ctc));
+	delete &((dynamic_cast<CtcXNewtonIter*> (&(ctccompo->list[0]))->cpoints));
+	delete &(ctccompo->list[0]);
+	delete &(ctccompo->list[1]);
 	for (int i=0 ; i<__ctc->list.size(); i++)
 		delete &__ctc->list[i];
 	delete __ctc;

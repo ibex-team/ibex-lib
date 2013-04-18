@@ -24,6 +24,14 @@ namespace ibex {
 class ExprDiff : public virtual ExprVisitor {
 public:
 
+	/**
+	 * \brief Return the differential
+	 *
+	 * The differential is either a row vector for a real-valued function (the gradient)
+	 * or a matrix (the Jacobian matrix) for a vector-valued function.
+	 *
+	 * The node in return may either be an #ExprVector or a #ExprConstant.
+	 */
 	const ExprNode& diff(const Array<const ExprSymbol>& old_x, const Array<const ExprSymbol>& new_x, const ExprNode& y);
 
 protected:
@@ -66,9 +74,17 @@ protected:
 	void visit(const ExprAsinh& e);
 	void visit(const ExprAtanh& e);
 
+	const ExprNode& gradient(const Array<const ExprSymbol>& old_x, const Array<const ExprSymbol>& new_x, const ExprNode& y);
+
 	void add_grad_expr(const ExprNode& node, const ExprNode& expr);
 
 	NodeMap<const ExprNode*> grad;
+
+	// Leaves of this expression including symbols with respect
+	// to which we are calculating derivative and that do not appear
+	// in the expression (assimilated to "leaves" here, although they
+	// are not part of the DAG). Information for cleanup only.
+	std::vector<const ExprNode*> leaves;
 };
 
 } // end namespace ibex

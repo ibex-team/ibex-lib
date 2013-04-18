@@ -71,7 +71,8 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 	  {IntervalVector g_inf(sys.f.eval_vector(x_inf)); // may throw EmptyBoxException?
 	    for (int i=0; i<m; i++) {
 
-		if(sys.f[i].eval(box).ub()<=0) continue;      // the constraint is satified :)
+	    if ((*entailed)[i]) continue;
+		//if (sys.f[i].eval(box).ub()<=0) continue;      // the constraint is satified :)
 
 		sys.f[i].gradient(box,G);                     // gradient calculation
 

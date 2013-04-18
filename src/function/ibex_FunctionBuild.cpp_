@@ -116,21 +116,21 @@ public:
 class BuildVectorOfNodes: public ExprVisitor {
 public:
 	vector<const ExprNode*>& nodes;
-	int id;
+	NodeMap<bool> map;
 
-	BuildVectorOfNodes(vector<const ExprNode*>& nodes, const Array<const ExprSymbol>& x, const ExprNode& y) : nodes(nodes), id(0) {
+	BuildVectorOfNodes(vector<const ExprNode*>& nodes, const Array<const ExprSymbol>& x, const ExprNode& y) : nodes(nodes) {//, id(0) {
 		for (int i=0; i<x.size(); i++) {
 			nodes.push_back(&x[i]);
-			(int&) x[i].id=id++;
+			map.insert(x[i],true);
 		}
 		visit(y);
 	}
 
 	virtual void visit(const ExprNode& e) {
-		if (e.id==-1) {
+		if (!map.found(e)) {
 			e.acceptVisitor(*this);
 			nodes.push_back(&e);
-			(int&) e.id=id++;
+			map.insert(e,true);
 		}
 	}
 
@@ -345,6 +345,7 @@ void Function::decorate() const {
 
 	arg_domains.resize(nb_arg());
 	arg_deriv.resize(nb_arg());
+	arg_af2.resize(nb_arg());
 
 	((CompiledFunction&) cf).compile(*this); // now that it is decorated, it can be "compiled"
 
@@ -352,6 +353,7 @@ void Function::decorate() const {
 	for (int i=0; i<nb_arg(); i++) {
 		arg_domains.set_ref(i,*arg(i).deco.d);
 		arg_deriv.set_ref(i,*arg(i).deco.g);
+		arg_af2.set_ref(i,*arg(i).deco.af2);
 	}
 }
 

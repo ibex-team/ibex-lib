@@ -20,6 +20,9 @@
 #include "ibex_bias_or_gaol.h"
 /* ======================================================= */
 
+
+
+
 #ifdef _IBEX_WITH_GAOL_
 	extern "C" {
 	  //#include "gdtoaimp.h"
@@ -60,6 +63,11 @@
 #endif
 
 namespace ibex {
+
+class Affine2;
+class IntervalVector;
+class IntervalMatrix;
+class IntervalMatrixArray;
 
 /** \defgroup arithmetic Interval Arithmetic */
 
@@ -141,6 +149,10 @@ class Interval {
      */
     Interval& operator=(const Interval& x);
 
+    /** \brief Set *this to x.
+     */
+    Interval& operator=(const Affine2& x);
+
     /** \brief Set *this to d.
      */
     Interval& operator=(double x);
@@ -149,9 +161,17 @@ class Interval {
      * \param x - the interval to compute the intersection with.*/
     Interval& operator&=(const Interval& x);
 
-    /** \brief Union of *this and I.
+    /** \brief Intersection of *this and x.
+     * \param x - the affine form to compute the intersection with.*/
+    Interval& operator&=( const Affine2& x);
+
+    /** \brief Union of *this and x.
      * \param x - the interval to compute the hull with.*/
     Interval& operator|=(const Interval& x);
+
+    /** \brief Union of *this and x.
+     * \param x - the affine form to compute the hull with.*/
+    Interval& operator|=(const Affine2& x);
 
     /**
      * \brief Add [-rad,+rad] to *this.
@@ -414,6 +434,11 @@ class Interval {
     static const Interval NEG_REALS;
 
 //    friend class IntervalVector;
+
+    typedef Interval SCALAR;
+    typedef IntervalVector VECTOR;
+    typedef IntervalMatrix MATRIX;
+    typedef IntervalMatrixArray MATRIX_ARRAY;
 
 //private:
 #ifdef _IBEX_WITH_GAOL_
@@ -784,6 +809,7 @@ inline Interval& Interval::operator=(double x) {
 		itv = x;
 	return *this;
 }
+
 
 inline Interval& Interval::operator=(const Interval& x) {
 	itv = x.itv;

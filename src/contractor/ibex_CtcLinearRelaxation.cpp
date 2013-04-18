@@ -1,31 +1,30 @@
 //============================================================================
 //                                  I B E X
 // Linear Relaxation Contractor                                   
-// File        : ibex_LRContractor.cpp     
+// File        : ibex_CtcLinearRelaxation.cpp     
 // Author      : Bertrand Neveu , Gilles Trombettoni
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Nov 14, 2012
-// Last Update : Nov 15, 2012
+// Last Update : March 21, 2013
 //============================================================================ 
 
- #include "ibex_LRContractor.h"
+ #include "ibex_CtcLinearRelaxation.h"
 
 using namespace std;
 
 using namespace soplex;
 namespace ibex {
 
-const double LR_contractor::default_ratio_fp = 0.2;
-const double LR_contractor::default_ratio_fp2 = 0.2;
-const double LR_contractor::default_max_diam_box =1e4;
 
+  const double CtcLinearRelaxation::default_max_diam_box =1e6;
+  
 
-  LR_contractor::LR_contractor(const System& sys, Ctc* ctc, int goal_ctr,Function* fgoal,
-				double ratio_fp, double ratio_fp2, ctc_mode cmode, int max_iter_soplex, double max_diam_box) : 
+  CtcLinearRelaxation::CtcLinearRelaxation(const System& sys, int goal_ctr,Function* fgoal,
+				 ctc_mode cmode, int max_iter_soplex, double max_diam_box) : 
 
-     Ctc(sys.nb_var), sys(sys), ctc(ctc? ctc:NULL), goal_ctr(goal_ctr),
-     ratio_fp(ratio_fp), ratio_fp2(ratio_fp2),  cmode(cmode),  max_iter_soplex(max_iter_soplex), max_diam_box(max_diam_box),
+     Ctc(sys.nb_var), sys(sys),  goal_ctr(goal_ctr),
+     cmode(cmode),  max_iter_soplex(max_iter_soplex), max_diam_box(max_diam_box),
      LinearCoef(sys.nb_ctr, sys.nb_var)
 
  {
@@ -72,43 +71,9 @@ const double LR_contractor::default_max_diam_box =1e4;
  }    
   
 
-  double LR_contractor::ratio_maxreduction(IntervalVector& box1, IntervalVector& box2){
-    double maxratio=0.0;
-    for(int i=0;i<box1.size();i++){
-      double ratio=0.0;
 
-      if(box1[i].diam()>1e-20)
-	ratio=1.0-box2[i].diam()/box1[i].diam();
-
-      if(ratio>maxratio)
-        maxratio=ratio;
-    }
-    return maxratio;
-  }
-  
-void  LR_contractor::contract( IntervalVector & box) {
-   double gain;
-
-   if (box.max_diam() > max_diam_box) return; // is it necessary?  YES (BNE) Soplex can give false infeasible results with large numbers
-   
-   do{
-     IntervalVector savebox=box;
-     iter(box);
-     if(ctc) {
-       gain = ratio_maxreduction(savebox,box);
-       if (gain >= ratio_fp2){  
-	 ctc->contract(box);}
-     }
-
-     gain = ratio_maxreduction(savebox,box);
-   }
-   while(gain >= ratio_fp);
-
-}
-
-
-void LR_contractor::iter(IntervalVector & box){
-
+void CtcLinearRelaxation::contract (IntervalVector & box){
+  if (box.max_diam() > max_diam_box) return; // is it necessary?  YES (BNE) Soplex can give false infeasible results with large numbers
   int n=sys.nb_var;
   
   SoPlex mysoplex;
@@ -127,7 +92,7 @@ void LR_contractor::iter(IntervalVector & box){
 
 }
 
-  void LR_contractor::optimizer(IntervalVector & box, SoPlex& mysoplex, int n, int nb_ctrs){
+  void CtcLinearRelaxation::optimizer(IntervalVector & box, SoPlex& mysoplex, int n, int nb_ctrs){
 
   Interval opt(0);
   int* inf_bound = new int[n]; // indicator inf_bound = 1 means the inf bound is feasible or already contracted , call to simplex useless (cf Baharev)
@@ -135,8 +100,10 @@ void LR_contractor::iter(IntervalVector & box){
 
   for (int i=0; i<n ;i++) {inf_bound[i]=0;sup_bound[i]=0;}
   if (goal_ctr !=-1)   sup_bound[n-1]=1;  // in case of optimization, for y the left bound only is contracted
+
+  int firsti=0;
   // in the case of lower_bounding, only the left bound of y is contracted
-  int firsti=(cmode==ONLY_Y)? 2*n-1:0;
+  if (goal_ctr!=-1 && cmode==ONLY_Y) firsti=2*n-1;
 
   int nexti=-1;  // the next variable to be contracted
   int infnexti=0; // the bound to be contracted contract  infnexti=0 for the lower bound, infnexti=1 for the upper bound
@@ -145,13 +112,11 @@ void LR_contractor::iter(IntervalVector & box){
     int i= ii/2;
     if (nexti != -1) i=nexti;
     //    cout << " i "<< i << " infnexti " << infnexti << " infbound " << inf_bound[i] << " supbound " << sup_bound[i] << endl;
-    if (infnexti==0 && inf_bound[i]==0)
+    if (infnexti==0 && inf_bound[i]==0)  // computing the left bound : minimizing x_i
       {
 	inf_bound[i]=1;
-	SPxSolver::Status stat = run_simplex(box,mysoplex, SPxLP::MINIMIZE, i, n, opt,box[i].lb()/*, taylor_ev*/);
-	//	cout << " stat " <<  stat << endl;
+	SPxSolver::Status stat = run_simplex(box,mysoplex, SPxLP::MINIMIZE, i, n, opt,box[i].lb());
         if( stat == SPxSolver::OPTIMAL ){
-
           if(opt.lb()>box[i].ub())  throw EmptyBoxException();
           choose_next_variable(box,mysoplex ,nexti,infnexti, inf_bound, sup_bound);
           if(opt.lb() > box[i].lb() ){
@@ -159,7 +124,12 @@ void LR_contractor::iter(IntervalVector & box){
             mysoplex.changeLhs(nb_ctrs+i,opt.lb());
           }
         }
-	else if(stat == SPxSolver::INFEASIBLE) throw EmptyBoxException();
+	else if(stat == SPxSolver::INFEASIBLE) 
+	  {if (goal_ctr ==-1) break; // in satisfaction we keep the box: soplex is not reliable and may lose solutions.
+	    else 
+	      // in optimization we leave the exception: it is not reliable, but no bug is reported yet and the pruning is very important in many problems
+	      throw EmptyBoxException();
+	  }
         else if (stat == SPxSolver::UNKNOWN)
           {int next=-1;
             for (int j=0;j<n;j++)
@@ -172,12 +142,11 @@ void LR_contractor::iter(IntervalVector & box){
 
       }
     else
-      if(infnexti==1 && sup_bound[i]==0 ){
-        //max x                                                                                                         
+      if(infnexti==1 && sup_bound[i]==0)// computing the right bound :  maximizing x_i
+	{
 	sup_bound[i]=1;
-	SPxSolver::Status stat= run_simplex(box,mysoplex, SPxLP::MAXIMIZE, i, n, opt, box[i].ub()/*, taylor_ev*/);
+	SPxSolver::Status stat= run_simplex(box,mysoplex, SPxLP::MAXIMIZE, i, n, opt, box[i].ub());
         if( stat == SPxSolver::OPTIMAL ){
-
           if(opt.ub() <box[i].lb())   throw EmptyBoxException();
           choose_next_variable(box, mysoplex ,nexti,infnexti, inf_bound, sup_bound);
 	  if (opt.ub() < box[i].ub()) {
@@ -185,8 +154,12 @@ void LR_contractor::iter(IntervalVector & box){
 	    mysoplex.changeRhs(nb_ctrs+i,opt.ub());
 	  }
         } 
-        else if(stat == SPxSolver::INFEASIBLE)  throw EmptyBoxException();
-        else if (stat == SPxSolver::UNKNOWN)
+        else if(stat == SPxSolver::INFEASIBLE) 
+	  {if (goal_ctr ==-1) break;  // in satisfaction we keep the box: soplex not reliable and may lose solutions.
+	    else 
+	      // in optimization we leave the exception: it is not reliable, but no bug is reported yet and the pruning is very important in many problems
+	      throw EmptyBoxException();} 
+	else if (stat == SPxSolver::UNKNOWN)
           {int next=-1;
             for (int j=0;j<n;j++)
               {if (inf_bound[j]==0) {nexti=j; next=0;infnexti=0;break;}
@@ -197,7 +170,8 @@ void LR_contractor::iter(IntervalVector & box){
 
 
       }
-      else break;  // no more call to soplex                                                                            
+      else {
+	break;}  // no more call to soplex                                                                            
   }
 
   delete [] inf_bound;
@@ -209,7 +183,7 @@ void LR_contractor::iter(IntervalVector & box){
 
 
 
-  SPxSolver::Status LR_contractor::run_simplex(IntervalVector& box,SoPlex& mysoplex, SPxLP::SPxSense sense, int var, int n, \
+  SPxSolver::Status CtcLinearRelaxation::run_simplex(IntervalVector& box,SoPlex& mysoplex, SPxLP::SPxSense sense, int var, int n, \
 					  Interval& obj, double bound){
     //  mysoplex.writeFile("dump.lp", NULL, NULL, NULL);                                                                    
 
@@ -307,7 +281,7 @@ void LR_contractor::iter(IntervalVector & box){
 
 
 
-  bool LR_contractor::isInner(IntervalVector & box,const System& sys, int j){
+  bool CtcLinearRelaxation::isInner(IntervalVector & box,const System& sys, int j){
     Interval eval=sys.ctrs[j].f.eval(box);
 
     if((sys.ctrs[j].op==LEQ && eval.ub() > 0) || (sys.ctrs[j].op==LT && eval.ub() >= 0) ||
@@ -321,7 +295,7 @@ void LR_contractor::iter(IntervalVector & box){
   // The Achterberg heuristic for choosing the next variable (nexti) and its bound (infnexti) to be contracted (cf Baharev paper)
   // and updating the indicators if a bound has been found feasible (with the precision prec_bound)
 
-  void LR_contractor::choose_next_variable ( IntervalVector & box, SoPlex& mysoplex , int & nexti, int & infnexti, int* inf_bound, int* sup_bound)
+  void CtcLinearRelaxation::choose_next_variable ( IntervalVector & box, SoPlex& mysoplex , int & nexti, int & infnexti, int* inf_bound, int* sup_bound)
   {
     double prec_bound = 1.e-8; // relative precision for the indicators                                                 
     int n=sys.nb_var;
@@ -332,7 +306,7 @@ void LR_contractor::iter(IntervalVector & box){
     for (int j=0;j<n;j++)
 
       { 
-	//	cout << " j " << j << " infbound " << inf_bound[j]    << " supbound " << sup_bound[j] << endl;  
+
 	if (inf_bound[j]==0)
           {deltaj= fabs (primal[j]- box[j].lb());
             if ((fabs (box[j].lb()) < 1 && deltaj < prec_bound)
@@ -353,7 +327,7 @@ void LR_contractor::iter(IntervalVector & box){
 	  }
 
       }
-    //    cout << " nexti " <<nexti <<  " infnexti " << infnexti << endl ;   
+
   }
 
 

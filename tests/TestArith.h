@@ -136,6 +136,22 @@ public:
 		TEST_ADD(TestArith::sqrt04);
 		TEST_ADD(TestArith::sqrt05);
 
+		TEST_ADD(TestArith::sinh01);
+		TEST_ADD(TestArith::sinh02);
+		TEST_ADD(TestArith::sinh03);
+		TEST_ADD(TestArith::sinh04);
+		TEST_ADD(TestArith::sinh05);
+		TEST_ADD(TestArith::sinh06);
+		TEST_ADD(TestArith::sinh07);
+
+		TEST_ADD(TestArith::cosh01);
+		TEST_ADD(TestArith::cosh02);
+		TEST_ADD(TestArith::cosh03);
+		TEST_ADD(TestArith::cosh04);
+		TEST_ADD(TestArith::cosh05);
+		TEST_ADD(TestArith::cosh06);
+		TEST_ADD(TestArith::cosh07);
+
 		TEST_ADD(TestArith::proj_mul01);
 		TEST_ADD(TestArith::proj_mul02);
 		TEST_ADD(TestArith::proj_mul03);
@@ -373,6 +389,22 @@ private:
 	void sqrt04();
 	void sqrt05();
 
+	void sinh01();
+	void sinh02();
+	void sinh03();
+	void sinh04();
+	void sinh05();
+	void sinh06();
+	void sinh07();
+
+	void cosh01();
+	void cosh02();
+	void cosh03();
+	void cosh04();
+	void cosh05();
+	void cosh06();
+	void cosh07();
+
 	/* test: proj_mul */
 	void proj_mul01();
 	void proj_mul02();
@@ -463,6 +495,8 @@ private:
 	void check_div_scal(const Interval& x, double z, const Interval& y_expected);
 	void check_div(const Interval& x, const Interval& z, const Interval& y_expected);
 	void check_div2(const Interval& x, const Interval& y, const Interval& out1, const Interval& out2);
+	void check_sinh(const Interval& x);
+	void check_cosh(const Interval& x);
 	void check_trigo(const Interval& x, const Interval& y);
 	void check_pow(const Interval& x, int p, const Interval& y_expected);
 	bool checkproj_mul(const Interval& y, const Interval& x1_before, const Interval& x2_before, const Interval& x1_after, const Interval& x2_after);

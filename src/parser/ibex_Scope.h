@@ -13,6 +13,7 @@
 
 #include <iostream>
 #include "ibex_P_Expr.h"
+#include "ibex_SymbolMap.h"
 
 namespace ibex {
 
