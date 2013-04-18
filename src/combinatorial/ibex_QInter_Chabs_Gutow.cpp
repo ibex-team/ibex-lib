@@ -22,11 +22,13 @@ void propagateGutow(const Array<IntervalVector>& boxes, KCoreGraph ***dirboxes, 
 	for (int i=0; i<p; i++) {
 		b = boxes[i];
 		
-		/* First check : is this box at the left of our q-inter ? If true, we can remove it from all the lists */
+		/* First check (could be done along with the 3rd...) : the q-inter is a valid upper bound for the opposite direction */
+		if (left && (b[dimension].ub() <= curr_qinter[dimension].ub())) {
+			if (dirboxes[dimension][1]->contain(i)) dirboxes[dimension][1]->remove(i);
+		}
+		
+		/* Second check : is this box at the left of our q-inter ? If true, we can remove it from all the lists */
 		if ((left && (b[dimension].ub() < curr_qinter[dimension].lb())) || (!left && (b[dimension].lb() > curr_qinter[dimension].ub()))) {
-			if (left) {
-				if (dirboxes[dimension][1]->contain(i)) dirboxes[dimension][1]->remove(i);
-			}
 			for (int k=dimension+1; k<n; k++) {
 				if (dirboxes[k][0]->contain(i)) dirboxes[k][0]->remove(i);
 				if (dirboxes[k][1]->contain(i)) dirboxes[k][1]->remove(i);
@@ -35,7 +37,7 @@ void propagateGutow(const Array<IntervalVector>& boxes, KCoreGraph ***dirboxes, 
 			continue;
 		}
 		
-		/* Second check : the q-intersection provides a valid upper bound for the orthogonal dimensions. */
+		/* Third check : the q-intersection provides a valid upper bound for the orthogonal dimensions. */
 		for (int j=dimension+1; j<n; j++) {
 			if (b[j].lb() >= curr_qinter[j].lb()) {
 				if (dirboxes[j][0]->contain(i)) dirboxes[j][0]->remove(i);
@@ -43,7 +45,6 @@ void propagateGutow(const Array<IntervalVector>& boxes, KCoreGraph ***dirboxes, 
 				if (dirboxes[j][1]->contain(i)) dirboxes[j][1]->remove(i);
 			}
 		}
-		
 	}
 }
 

@@ -78,11 +78,12 @@ int main() {
 	cout << "Chabs+Gutow result = " << res << endl;
 	cout << "Time : " << ((double)(end)-(double)(start))/CLOCKS_PER_SEC << " seconds" << endl;
 	
+	/*
 	start = clock();
 	res = qinter(boxes,Q);
 	end = clock();
 	
 	cout << "Alex result = " << res << endl;
 	cout << "Time : " << ((double)(end)-(double)(start))/CLOCKS_PER_SEC << " seconds" << endl;
-
+	*/
 };

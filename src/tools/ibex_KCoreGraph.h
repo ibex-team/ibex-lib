@@ -18,33 +18,6 @@ using namespace std;
 
 namespace ibex {
 
-/*
- * 
- * Basic vertex structure, using a Sparse Set to store its neighbors.
- * 
- */
-class KCoreVertex {
-public:
-	/* Constructors */
-	KCoreVertex(const int idvert, const int maxsize) {id = idvert; neighbors = new IntStack(0,maxsize-1,false);};
-	KCoreVertex(KCoreVertex *cpy) {id = cpy->id; neighbors = new IntStack(cpy->neighbors);};
-	
-	/* Destructor */
-	~KCoreVertex() {delete(neighbors);};
-	
-	int id;
-	IntStack *neighbors;
-	
-	inline int degree() {return neighbors->size;};
-	inline void add_neighbor(const int elt) {neighbors->add(elt);};
-	inline void remove_neighbor(const int elt) {neighbors->remove(elt);};
-};
-
-/*
- * 
- * Graph class.
- * 
- */
 class KCoreGraph {
 public:
 	/* Constructors */
@@ -65,15 +38,15 @@ public:
 	
 	/* Graph-specific methods */
 	inline void add_edge(const int elt1, const int elt2) {
-		all_vertices.at(elt1)->add_neighbor(elt2);
-		all_vertices.at(elt2)->add_neighbor(elt1);
+		neighbourhoods.at(elt1)->add(elt2);
+		neighbourhoods.at(elt2)->add(elt1);
 	};
 	
 	/* Coreness related methods */
 	void apply_coreness();
 	
 	/* Misc */
-	inline int maxsize() {return all_vertices.size();};
+	inline int maxsize() {return neighbourhoods.size();};
 private:
 	/* Coreness level */
 	int k;
@@ -81,8 +54,8 @@ private:
 	/* All the active vertices' ids */
 	IntStack *allid;
 	
-	/* Map id -> pointer */
-	vector<KCoreVertex *> all_vertices;
+	/* Adjacency lists */
+	vector<IntStack *> neighbourhoods;
 	
 	/* Used to avoid recursive calls when removing vertices */
 	IntStack *tbr;
