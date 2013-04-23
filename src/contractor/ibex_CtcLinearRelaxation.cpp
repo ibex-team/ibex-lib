@@ -108,14 +108,18 @@ void CtcLinearRelaxation::contract (IntervalVector & box){
   int nexti=-1;  // the next variable to be contracted
   int infnexti=0; // the bound to be contracted contract  infnexti=0 for the lower bound, infnexti=1 for the upper bound
 
+
   for(int ii=firsti;ii<2*n;ii++){  // at most 2*n calls                                                                 
     int i= ii/2;
     if (nexti != -1) i=nexti;
     //    cout << " i "<< i << " infnexti " << infnexti << " infbound " << inf_bound[i] << " supbound " << sup_bound[i] << endl;
     if (infnexti==0 && inf_bound[i]==0)  // computing the left bound : minimizing x_i
+
       {
+	infeasibility=0;
 	inf_bound[i]=1;
 	SPxSolver::Status stat = run_simplex(box,mysoplex, SPxLP::MINIMIZE, i, n, opt,box[i].lb());
+
         if( stat == SPxSolver::OPTIMAL ){
           if(opt.lb()>box[i].ub())  throw EmptyBoxException();
           choose_next_variable(box,mysoplex ,nexti,infnexti, inf_bound, sup_bound);
@@ -125,9 +129,11 @@ void CtcLinearRelaxation::contract (IntervalVector & box){
           }
         }
 	else if(stat == SPxSolver::INFEASIBLE) 
-	  {if (goal_ctr ==-1) break; // in satisfaction we keep the box: soplex is not reliable and may lose solutions.
+	  {if (infeasibility==0) 
+	    // the infeasibility is not proved : no other call is useful , we quit the loop without doing nothing
+	      break;
 	    else 
-	      // in optimization we leave the exception: it is not reliable, but no bug is reported yet and the pruning is very important in many problems
+	      // the infeasibility is proved, the EmptyBox exception is raised
 	      throw EmptyBoxException();
 	  }
         else if (stat == SPxSolver::UNKNOWN)
@@ -143,9 +149,11 @@ void CtcLinearRelaxation::contract (IntervalVector & box){
       }
     else
       if(infnexti==1 && sup_bound[i]==0)// computing the right bound :  maximizing x_i
-	{
+	{	
+	  infeasibility=0;
 	sup_bound[i]=1;
 	SPxSolver::Status stat= run_simplex(box,mysoplex, SPxLP::MAXIMIZE, i, n, opt, box[i].ub());
+
         if( stat == SPxSolver::OPTIMAL ){
           if(opt.ub() <box[i].lb())   throw EmptyBoxException();
           choose_next_variable(box, mysoplex ,nexti,infnexti, inf_bound, sup_bound);
@@ -155,10 +163,14 @@ void CtcLinearRelaxation::contract (IntervalVector & box){
 	  }
         } 
         else if(stat == SPxSolver::INFEASIBLE) 
-	  {if (goal_ctr ==-1) break;  // in satisfaction we keep the box: soplex not reliable and may lose solutions.
+	  {if (infeasibility==0) 
+	    // the infeasibility is not proved : no other call is useful , we quit the loop without doing nothing
+	      break;
 	    else 
-	      // in optimization we leave the exception: it is not reliable, but no bug is reported yet and the pruning is very important in many problems
-	      throw EmptyBoxException();} 
+	      // the infeasibility is proved,  the EmptyBox exception is raised 
+	      throw EmptyBoxException();
+	  }
+
 	else if (stat == SPxSolver::UNKNOWN)
           {int next=-1;
             for (int j=0;j<n;j++)
@@ -184,7 +196,7 @@ void CtcLinearRelaxation::contract (IntervalVector & box){
 
 
   SPxSolver::Status CtcLinearRelaxation::run_simplex(IntervalVector& box,SoPlex& mysoplex, SPxLP::SPxSense sense, int var, int n, \
-					  Interval& obj, double bound){
+						     Interval& obj, double bound){
     //  mysoplex.writeFile("dump.lp", NULL, NULL, NULL);                                                                    
 
     if(sense==SPxLP::MINIMIZE)
@@ -203,77 +215,98 @@ void CtcLinearRelaxation::contract (IntervalVector & box){
     try{
       stat = mysoplex.solve();
     }catch(SPxException&){
-      stat = SPxSolver::UNKNOWN;
-    }
+      stat = SPxSolver::UNKNOWN; }
 
     if(stat == SPxSolver::OPTIMAL){
       if( (sense==SPxLP::MINIMIZE && mysoplex.objValue()<=bound) ||
-	  (sense==SPxLP::MAXIMIZE && -mysoplex.objValue()>=bound) )
-	stat = SPxSolver::UNKNOWN;
-    }//else if(SPxSolver::ABORT_ITER) stat = SPxSolver::OPTIMAL;                                                          
+	  (sense==SPxLP::MAXIMIZE && -mysoplex.objValue()>=bound) )  
+	{stat = SPxSolver::UNKNOWN;}
+    }
 
-    if(stat == SPxSolver::OPTIMAL){
-
-      IntervalMatrix As (mysoplex.nRows(),n);
-      IntervalVector C(n);
-      for(int i=0;i<n;i++){
-	C[i]=0;
-	if(i==var){
-	  if(sense==SPxLP::MINIMIZE)
-	    C[var]=1.0;
-	  else
-	    C[var]=-1.0;
+    // Neumaier - Shcherbina postprocessing 
+    if (stat == SPxSolver::OPTIMAL ||stat == SPxSolver::INFEASIBLE) 
+      { IntervalMatrix As (mysoplex.nRows(),n);
+	IntervalVector C(n);
+	for(int i=0;i<n;i++){
+	  C[i]=0;
+	  if(i==var){
+	    if(sense==SPxLP::MINIMIZE)
+	      C[var]=1.0;
+	    else
+	      C[var]=-1.0;
+	  }
 	}
-      }
 
-      for (int i=0;i<mysoplex.nRows(); i++){
-	for(int j=0; j<n; j++)
-	  As[i][j]=mysoplex.rowVector(i)[j];
-      }
+	for (int i=0;i<mysoplex.nRows(); i++){
+	  for(int j=0; j<n; j++)
+	    As[i][j]=mysoplex.rowVector(i)[j];
+	}
       // cout << As << endl;                                                                                             
 
-      IntervalVector B(mysoplex.nRows());
-      for (int i=0;i<mysoplex.nRows(); i++){	
-	B[i]=Interval((mysoplex.lhs()[i]!=-infinity)? mysoplex.lhs()[i]:-1.e20,(mysoplex.rhs()[i]!=infinity)?  
-		      mysoplex.rhs()[i]:1.e20); 
-	//Idea: replace 1e20 (resp. -1e20) by Sup([g_i]) (resp. Inf([g_i])), where [g_i] is an evaluation of the nonlinear function <-- IA 
-
-	//           cout << B(i+1) << endl;                                                                                    
-      }
-
-      DVector dual(mysoplex.nRows());
-      mysoplex.getDual(dual);
-      // Shchberbina - Neumaier postprocessing                                                                            
-      IntervalVector Lambda(mysoplex.nRows());
-      for (int i =0; i< mysoplex.nRows() ; i++)
-	{if( 
-	    (B[i].ub()==1e+20 && dual[i]<0 ) || (B[i].lb() ==-1e+20 && dual[i]>0 )) //Modified by IA  
-	    Lambda[i]=0;
-	  else
-	    Lambda[i]=dual[i];
+	IntervalVector B(mysoplex.nRows());
+	for (int i=0;i<mysoplex.nRows(); i++){	
+	  B[i]=Interval((mysoplex.lhs()[i]!=-infinity)? mysoplex.lhs()[i]:-1.e20,(mysoplex.rhs()[i]!=infinity)?  
+			mysoplex.rhs()[i]:1.e20); 
+	  //Idea: replace 1e20 (resp. -1e20) by Sup([g_i]) (resp. Inf([g_i])), where [g_i] is an evaluation of the nonlinear function <-- IA 
+	  //           cout << B(i+1) << endl;                                                                                    
 	}
+	if(stat == SPxSolver::OPTIMAL){
+	  DVector dual(mysoplex.nRows());
+	  mysoplex.getDual(dual);
+	  IntervalVector Lambda(mysoplex.nRows());
+	  for (int i =0; i< mysoplex.nRows() ; i++)
+	    {if( 
+		(B[i].ub()==1e+20 && dual[i]<0 ) || (B[i].lb() ==-1e+20 && dual[i]>0 )) //Modified by IA  
+		Lambda[i]=0;
+	      else
+		Lambda[i]=dual[i];
+	    }
 
-      IntervalVector Rest(n);
-      IntervalMatrix AsTranspose (n, mysoplex.nRows());
-      for (int i =0; i< mysoplex.nRows() ; i++)
-	for (int j= 0; j<n ;j++)
-	  AsTranspose[j][i]= As[i][j];
-      Rest = AsTranspose *Lambda - C;
+	  IntervalVector Rest(n);
+	  IntervalMatrix AsTranspose (n, mysoplex.nRows());
+	  for (int i =0; i< mysoplex.nRows() ; i++)
+	    for (int j= 0; j<n ;j++)
+	      AsTranspose[j][i]= As[i][j];
+	  Rest = AsTranspose *Lambda - C;
 
 
-      if(sense==SPxLP::MINIMIZE)
-	obj = Lambda * B - Rest * box;
-      else
-	obj = -(Lambda * B - Rest * box);
-
-      //     cout << sense << endl;                                                                                           
-      //     cout << obj << endl;                                                                                             
-      //     cout << mysoplex.objValue()<< endl;                                                                              
-
-    }
+	  if(sense==SPxLP::MINIMIZE) 
+	    obj = Lambda * B - Rest * box;
+	  else
+	    obj = -(Lambda * B - Rest * box);
+	}
+	
+	// infeasibility test  cf Neumaier Shcherbina paper
+	else if(stat == SPxSolver::INFEASIBLE) 
+	  {SPxSolver::Status stat1;
+	    DVector v(mysoplex.nRows());
+	    stat1 = mysoplex.getDualfarkas(v);
+	    IntervalVector Lambda(mysoplex.nRows());
+	    for (int i =0; i< mysoplex.nRows() ; i++)
+	      {if( 
+		  (B[i].ub()==1e+20 && v[i]<0 ) || (B[i].lb() ==-1e+20 && v[i]>0 )) // blind copy from OPTIMAL case useful in this case ?? BN
+		  Lambda[i]=0; 
+		else
+		  Lambda[i]=v[i];
+	      }
+	    IntervalVector Rest(n);
+	    IntervalMatrix AsTranspose (n, mysoplex.nRows());
+	    for (int i =0; i< mysoplex.nRows() ; i++)
+	      for (int j= 0; j<n ;j++)
+		AsTranspose[j][i]= As[i][j];
+	    Rest = AsTranspose *Lambda;
+	    Interval d= Rest *box - Lambda * B;
+	    // if 0 does not belong to d, the infeasibility is proved
+	    if (d.lb() > 0 || d.ub() <0) 
+	      infeasibility=1;
+	    else 
+	      infeasibility=0;
+	  }
+      }
+    
     mysoplex.changeObj(var, 0.0);
-    //    cout << "stat " << stat << endl;
     return stat;
+    
   }
 
 
@@ -281,6 +314,7 @@ void CtcLinearRelaxation::contract (IntervalVector & box){
 
 
 
+  // check if the constraint is satisfied in the box : in this case, no linear relaxation is made.
   bool CtcLinearRelaxation::isInner(IntervalVector & box,const System& sys, int j){
     Interval eval=sys.ctrs[j].f.eval(box);
 

@@ -88,7 +88,9 @@ namespace ibex {
     /** the linearization technique. It must be implemented in the subclasses */
     virtual int Linearization(IntervalVector& box, soplex::SoPlex& mysoplex) = 0;
 
-    //Soplex related functions and variables    
+    /*Soplex related functions and variables    */
+    /* set to 1 by run_simplex in case of infeasibility proved */
+    bool infeasibility;
 
     /* call to Soplex */
     soplex::SPxSolver::Status run_simplex(IntervalVector &box, soplex::SoPlex& mysoplex, soplex::SPxLP::SPxSense sense, int var, int n, Interval & obj, double bound);
