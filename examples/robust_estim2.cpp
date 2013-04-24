@@ -16,10 +16,10 @@ using namespace ibex;
  */
 
 /*================== data =================*/
-const int N=6;				 // problem dimension
-const int P=1000;        	 // number of measurements
-const int Q=P*0.2;			 // number of consistant measurements
-const double L=10;      	 // the target & the beacons are in the area [0,L]x[0,L]
+const int N=6;			// problem dimension
+const int P=1000;		// number of measurements
+const int Q=P*0.2;		// number of consistant measurements
+const double L=10;		// the target & the beacons are in the area [0,L]x[0,L]
 /*=========================================*/
 
 int main() {
