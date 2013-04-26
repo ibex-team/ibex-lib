@@ -67,7 +67,7 @@ IntervalVector qinter_gutow(const Array<IntervalVector>& _boxes, int q) {
 		k++;
 		preval = val;
 		val = origin->next(preval);
-	}	
+	}
 	
 	/* For each direction, select the qth bound. */
 	/* Remark : we use sort() here, but a selection algorithm would be more appropriate */

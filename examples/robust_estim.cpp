@@ -57,6 +57,7 @@ int main() {
 	Array<Ctc> m_ctc3(P);
 	Array<Ctc> m_ctc4(P);
 	Array<Ctc> m_ctc5(P);
+	Array<Ctc> m_ctc6(P);
 	
 	for (int i=0; i<P; i++) {
 		Variable x(N);
@@ -77,6 +78,8 @@ int main() {
 		m_ctc4.set_ref(i,*new CtcFwdBwd(*m_func[i]));
 		m_func[i] = new Function(x,distance(x,a)-d);
 		m_ctc5.set_ref(i,*new CtcFwdBwd(*m_func[i]));
+		m_func[i] = new Function(x,distance(x,a)-d);
+		m_ctc6.set_ref(i,*new CtcFwdBwd(*m_func[i]));
 	}
 
 	// the initial box [0,L]x[0,L]
@@ -85,6 +88,7 @@ int main() {
 	double _box3[N][2];
 	double _box4[N][2];
 	double _box5[N][2];
+	double _box6[N][2];
 	for (int j=0; j<N; j++) {
 		_box[j][0] = 0;
 		_box[j][1] = L;
@@ -96,6 +100,8 @@ int main() {
 		_box4[j][1] = L;
 		_box5[j][0] = 0;
 		_box5[j][1] = L;
+		_box6[j][0] = 0;
+		_box6[j][1] = L;
 	}
 	
 	IntervalVector box(N,_box);
@@ -103,6 +109,7 @@ int main() {
 	IntervalVector box3(N,_box3);
 	IntervalVector box4(N,_box4);
 	IntervalVector box5(N,_box5);
+	IntervalVector box6(N,_box6);
 	
 	// The q-intersection of the P contractors
 	CtcQInter ctcq(m_ctc,Q);
@@ -110,6 +117,7 @@ int main() {
 	CtcQInterChabsGutow ctcq3(m_ctc3,Q);
 	CtcQInterJaulin ctcq4(m_ctc4,Q);
 	CtcQInterGutow ctcq5(m_ctc5,Q);
+	CtcQInterChabsNogoods ctcq6(m_ctc6,Q);
 
 	// Fixpoint
 	CtcFixPoint fix(ctcq);
@@ -117,6 +125,7 @@ int main() {
 	CtcFixPoint fix3(ctcq3);
 	CtcFixPoint fix4(ctcq4);
 	CtcFixPoint fix5(ctcq5);
+	CtcFixPoint fix6(ctcq6);
 	
 	clock_t start;
 	clock_t end;
@@ -177,6 +186,18 @@ int main() {
 	} catch (EmptyBoxException&) { }
 	end = clock();
 	cout << "Chabs+Gutow result = " << box3 << endl;
+	cout << "Time : " << ((double)(end)-(double)(start))/CLOCKS_PER_SEC << " seconds" << endl;
+	
+	start = clock();
+	try {
+		if (qinteronly) {
+			ctcq6.contract(box6);
+		} else {
+			fix6.contract(box6);
+		}
+	} catch (EmptyBoxException&) { }
+	end = clock();
+	cout << "Chabs+Nogoods result = " << box6 << endl;
 	cout << "Time : " << ((double)(end)-(double)(start))/CLOCKS_PER_SEC << " seconds" << endl;
 	
 	start = clock();

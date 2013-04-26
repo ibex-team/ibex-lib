@@ -49,6 +49,12 @@ IntervalVector qinter_chabs(const Array<IntervalVector>& _boxes, int q);
 
 /**
  * \ingroup combinatorial
+ * \brief Q-intersection - EXACT - Cliquer-based approach without filtering, but with nogoods recording
+ */
+IntervalVector qinter_chabs_nogoods(const Array<IntervalVector>& _boxes, int q);
+
+/**
+ * \ingroup combinatorial
  * \brief Q-intersection - EXACT - Cliquer-based approach with filtering
  */
 IntervalVector qinter_chabs_gutow(const Array<IntervalVector>& _boxes, int q);

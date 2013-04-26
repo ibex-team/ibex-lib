@@ -92,6 +92,32 @@ void CtcQInterChabsGutow::contract(IntervalVector& box) {
 	if (box.is_empty()) throw EmptyBoxException();
 }
 
+CtcQInterChabsNogoods::CtcQInterChabsNogoods(const Array<Ctc>& list, int q) : Ctc(list[0].nb_var), list(list),
+		n(list[0].nb_var), q(q), boxes(list.size(), n) {
+
+	for (int i=0; i<list.size(); i++) {
+		assert(list[i].nb_var==n);
+	}
+}
+
+void CtcQInterChabsNogoods::contract(IntervalVector& box) {
+	Array<IntervalVector> refs(list.size());
+
+	for (int i=0; i<list.size(); i++) {
+		try {
+			boxes[i]=box;
+			list[i].contract(boxes[i]);
+		} catch(EmptyBoxException&) {
+			assert(boxes[i].is_empty());
+		}
+		refs.set_ref(i,boxes[i]);
+	}
+
+	box = qinter_chabs_nogoods(refs,q);
+
+	if (box.is_empty()) throw EmptyBoxException();
+}
+
 CtcQInterJaulin::CtcQInterJaulin(const Array<Ctc>& list, int q) : Ctc(list[0].nb_var), list(list),
 		n(list[0].nb_var), q(q), boxes(list.size(), n) {
 

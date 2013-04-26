@@ -9,28 +9,29 @@ using namespace ibex;
 
 /*
  * 
- * Detects circles in noisy pictures. For more details, see L. Jaulin and S. Bazeille, 
+ * Detects circles in noisy pictures using q-intersection. For more details, see L. Jaulin and S. Bazeille, 
  * "Image Shape Extraction using Interval Methods", Sysid 2009
  * 
- * To see the results, use the command "gnuplot -persist out.plt". If the blue circles don't show up,
- * use the "replot" button on the top left corner of the gnuplot window.
+ * To see the results, use the command "gnuplot -persist data/out.plt". 
+ * 
+ * If the blue circles don't show up, use the "replot" button on the top left corner of the gnuplot window.
  * 
  */
 
 /*==============input options================*/
-const int max_line_length = 1024;				//Number of characters we read in each line
-const string input_x_filename = "x.txt";		//File containing the "x" coordinates
-const string input_y_filename = "y.txt";		//File containing the "y" coordinates
-const string output_datafile = "xy.dat";		//points (x,y) formatted for GNUPLOT
-const string output_scriptfile = "out.plt";		//GNUPLOT script to see the results
+const int max_line_length = 1024;					//Number of characters we read in each line
+const string input_x_filename = "data/x.txt";		//File containing the "x" coordinates
+const string input_y_filename = "data/y.txt";		//File containing the "y" coordinates
+const string output_datafile = "data/xy.dat";		//points (x,y) formatted for GNUPLOT
+const string output_scriptfile = "data/out.plt";	//GNUPLOT script to see the results
 /*===========================================*/
 
 /*===============parameters==================*/
-const double POS_ERROR = 0.4;					//Uncertainty of the pixels positions
-const double MIN = 0;							//Minimum value for x,y,r
-const double MAX = 256;							//Maximum value for x,y,r
-const double eps = 2;							//Maximum diameter of the outputted boxes
-const double Qprop = 0.20;						//Minimum ratio of consistent measurements
+const double POS_ERROR = 0.4;						//Uncertainty of the pixels positions
+const double MIN = 0;								//Minimum value for x,y,r
+const double MAX = 256;								//Maximum value for x,y,r
+const double eps = 2;								//Maximum diameter of the outputted boxes
+const double Qprop = 0.20;							//Minimum ratio of consistent measurements
 /*===========================================*/
 
 vector<int> *readFile(string filename) {
@@ -150,7 +151,7 @@ int main() {
 		
 		if (b.max_diam() > eps) {
 			assert(b.is_bisectable());
-			pair<IntervalVector, IntervalVector> pr = b.bisect(b.extr_diam_index(false));
+			pair<IntervalVector, IntervalVector> pr = b.bisect(b.extr_diam_index(false),0.5);
 			pendingList.push_front(pr.first);
 			pendingList.push_front(pr.second);
 		} else {

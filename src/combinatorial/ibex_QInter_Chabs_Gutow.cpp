@@ -132,7 +132,7 @@ IntervalVector qinter_chabs_gutow(const Array<IntervalVector>& _boxes, int q) {
 		/* ######################################################## */
 
 		nboxes = dirboxes[i][0]->size();
-		cout << "processing dimension " << i << ", left-hand side. Nboxes : " << nboxes << endl;
+		//cout << "processing dimension " << i << ", left-hand side. Nboxes : " << nboxes << endl;
 		
 		/* Sort the boxes by increasing order of their left bounds */
 		
@@ -159,19 +159,17 @@ IntervalVector qinter_chabs_gutow(const Array<IntervalVector>& _boxes, int q) {
 			}
 			
 			/* Call to the existence procedure */
-			if (neighboxes.size() >= q-1) {
-				
-				curr_qinter = qinterex_cliquer(neighboxes, q-1);
-				curr_qinter = curr_qinter & boxes[b];
+			if (neighboxes.size() < q-1) continue;
 			
-				if (!curr_qinter.is_empty()) {
-					
-					/* Optimal q-inter found : extend the q-inter hull and propagate the bounds */
-					hull_qinter = hull_qinter | curr_qinter;
-					propagateGutow(boxes, dirboxes, i, true, curr_qinter);
-					break;
-				}
-			}
+			curr_qinter = qinterex_cliquer(neighboxes, q-1);
+			curr_qinter = curr_qinter & boxes[b];
+			
+			if (curr_qinter.is_empty()) continue;
+			
+			/* Optimal q-inter found : extend the q-inter hull and propagate the bounds */
+			hull_qinter = hull_qinter | curr_qinter;
+			propagateGutow(boxes, dirboxes, i, true, curr_qinter);
+			break;
 		}
 		
 		if (first_pass && curr_qinter.is_empty()) {
@@ -188,7 +186,7 @@ IntervalVector qinter_chabs_gutow(const Array<IntervalVector>& _boxes, int q) {
 		/* ######################################################## */
 		
 		nboxes = dirboxes[i][1]->size();
-		cout << "processing dimension " << i << ", right-hand side. Nboxes : " << nboxes << endl;
+		//cout << "processing dimension " << i << ", right-hand side. Nboxes : " << nboxes << endl;
 		
 		/* Sort the boxes by decreasing order of their right bounds */
 		
@@ -214,20 +212,18 @@ IntervalVector qinter_chabs_gutow(const Array<IntervalVector>& _boxes, int q) {
 				if (!iv.is_empty()) neighboxes.push_back(&(boxes[b2]));
 			}
 			
-			if (neighboxes.size() >= q-1) {
-				
-				/* Call to the existence procedure */
-				curr_qinter = qinterex_cliquer(neighboxes, q-1);
-				curr_qinter = curr_qinter & boxes[b];
+			if (neighboxes.size() < q-1)  continue;
 			
-				if (!curr_qinter.is_empty()) {
-					
-					/* Optimal q-inter found : extend the q-inter hull and propagate the bounds */
-					hull_qinter = hull_qinter | curr_qinter;
-					propagateGutow(boxes, dirboxes, i, false, curr_qinter);
-					break;
-				}
-			}
+			/* Call to the existence procedure */
+			curr_qinter = qinterex_cliquer(neighboxes, q-1);
+			curr_qinter = curr_qinter & boxes[b];
+			
+			if (curr_qinter.is_empty()) continue;
+			
+			/* Optimal q-inter found : extend the q-inter hull and propagate the bounds */
+			hull_qinter = hull_qinter | curr_qinter;
+			if (i!=n) propagateGutow(boxes, dirboxes, i, false, curr_qinter);
+			break;
 		}
 	}
 	
