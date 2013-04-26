@@ -22,12 +22,20 @@ Ctc::Ctc(int n) : nb_var(n), input(n), output(n) {
 Ctc::~Ctc() {
 }
 
-//void Ctc::contract(Cell& cell) {
-//	contract(cell.box);
-//}
+void Ctc::contract(Cell& cell) {
+	contract(cell.box);
+}
 
 void Ctc::contract(IntervalVector& box, const BoolMask& impact) {
 	contract(box);
+}
+
+void Ctc::add_backtrackable(Cell& root) {
+
+}
+
+bool Ctc::idempotent() {
+	return false;
 }
 
 } // namespace ibex

@@ -57,9 +57,10 @@ public:
 	 * Allows to add the backtrackable data required
 	 * by this bisector to the root cell before a
 	 * strategy is executed.<br>
-	 * By default: does nothing.
+	 * By default: add information on the last bisected variable. See #ibex::BisectedVar.
 	 */
-	virtual void init_root(Cell& root);
+	virtual void add_backtrackable(Cell& root);
+
 	static const double default_prec;
 	static const double default_ratio;
 

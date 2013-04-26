@@ -10,6 +10,7 @@
 
 #include "ibex_Vector.h"
 #include <float.h>
+#include <math.h>
 
 namespace ibex {
 
@@ -91,6 +92,13 @@ std::ostream& operator<<(std::ostream& os, const Vector& x) {
 		os << x[i] << (i<x.size()-1? " ; " : "");
 	os << ")";
 	return os;
+}
+
+double Vector::norm() const {
+	double n=0;
+	for (int i=0; i<size(); i++)
+		n+=::pow((*this)[i],2);
+	return ::sqrt(n);
 }
 
 } // end namespace ibex

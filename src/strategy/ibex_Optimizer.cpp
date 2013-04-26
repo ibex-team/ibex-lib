@@ -17,6 +17,7 @@
 #include "ibex_ExprCopy.h"
 #include "ibex_Function.h"
 #include "ibex_NoBisectableVariableException.h"
+#include "ibex_Multipliers.h"
 
 #include <float.h>
 
@@ -189,12 +190,14 @@ void Optimizer::optimize(const IntervalVector& init_box) {
 	//ctc.init_root(*root); // we know there is none (not incremental HC4).
 
 	// add data required by the bisector
-	bsc.init_root(*root);
+	bsc.add_backtrackable(*root);
 
 	// add data required by optimizer + Fritz John contractor
 	root->add<EntailedCtr>();
+	//root->add<Multipliers>();
 	entailed=&root->get<EntailedCtr>();
 	entailed->init_root(m);
+	//root->get<Multipliers>().init_root(m);
 
 	bool loup_changed=0;
 	time=0;

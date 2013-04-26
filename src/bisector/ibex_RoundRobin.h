@@ -66,7 +66,7 @@ class RoundRobin : public Bsc {
   /**
    * \brief Add an instance of #ibex::BisectedVar to the backtrackle data of the root cell.
    */
-  void init_root(Cell& root);
+  void add_backtrackable(Cell& root);
 
   /**
    * \brief Precision.

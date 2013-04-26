@@ -118,6 +118,11 @@ public:
 	double min() const;
 
 	/**
+	 * \brief ||x||.
+	 */
+	double norm() const;
+
+	/**
 	 * \brief (*this)+=x2.
 	 */
 	Vector& operator+=(const Vector& x2);

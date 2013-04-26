@@ -15,15 +15,15 @@ using std::pair;
 
 namespace ibex {
 
+const double Bsc::default_prec = 1.e-7;
+const double Bsc::default_ratio = 0.45;
+
 pair<IntervalVector,IntervalVector> Bsc::bisect(Cell& cell) {
 	return bisect(cell.box);
 }
 
-  const double Bsc::default_prec = 1.e-7;
-  const double Bsc::default_ratio = 0.45;
-
-  void Bsc::init_root(Cell& root) {
+void Bsc::add_backtrackable(Cell& root) {
 	root.add<BisectedVar>();
-  }
+}
 
 } // end namespace ibex

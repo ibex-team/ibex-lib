@@ -53,13 +53,13 @@ public:
 	 */
 	virtual void contract(IntervalVector& box, const BoolMask& impact);
 
-	/*
+	/**
 	 * \brief Contraction of a cell (optional)
 	 *
 	 * Implementation is optional. By default, call
 	 * contract(cell.box).
 	 */
-	//virtual void contract(Cell& cell);
+	virtual void contract(Cell& cell);
 
 	/**
 	 * \brief Delete *this.
@@ -75,17 +75,14 @@ public:
 	 *
 	 * By default: does nothing.
 	 */
-	//virtual void init_root(Cell& root) { }
-
+	virtual void add_backtrackable(Cell& root);
 
 	/**
 	 * \brief Whether this contractor is idempotent (optional)
 	 *
 	 * By default: return false.
 	 */
-	virtual bool idempotent() {
-		return false;
-	}
+	virtual bool idempotent();
 
 	/**
 	 * \brief The number of variables this contractor works with.
@@ -104,4 +101,5 @@ public:
 };
 
 } // namespace ibex
+
 #endif // __IBEX_CONTRACTOR_H__

@@ -97,7 +97,7 @@ SubPaving* Paver::pave(const IntervalVector& init_box) {
 //		ctc[i].init_root(*root);
 //	}
 	// add data required by the bisector
-	bsc.init_root(*root);
+	bsc.add_backtrackable(*root);
 
 	buffer.push(root);
 

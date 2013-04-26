@@ -56,7 +56,7 @@ pair<IntervalVector,IntervalVector> RoundRobin::bisect(Cell& cell) {
 	return bisect(cell.box,v.var);
 }
 
-void RoundRobin::init_root(Cell& root) {
+void RoundRobin::add_backtrackable(Cell& root) {
 	root.add<BisectedVar>();
 }
 
