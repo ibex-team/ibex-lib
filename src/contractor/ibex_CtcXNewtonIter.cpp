@@ -172,23 +172,10 @@ int CtcXNewtonIter::X_Linearization(IntervalVector& box, soplex::SoPlex& mysople
 
 		if (sys.ctrs[ctr].f.used(j)) {
 			if (lmode == HANSEN && !linear[ctr]) {
-				if (ctr == goal_ctr) // objective function in optimization
-						{
-					IntervalVector box1(sys.nb_var - 1);
-					for (int i = 0; i < sys.nb_var - 1; i++)
-						box1[i] = box[i];
-					IntervalVector G1(sys.nb_var - 1);
-					goal->gradient(box1, G1);
-					for (int i = 0; i < sys.nb_var - 1; i++)
-						G[i] = G1[i];
-					G[sys.nb_var - 1] = 0;
-				}
-
-				else
-					sys.ctrs[ctr].f.gradient(box, G);
+			  gradient_computation(box,G,ctr);
 			}
-		} else
-			continue;
+		} 
+		else  continue;
 
 		if (G[j].diam() > max_diam_deriv) {
 			box = savebox;
@@ -399,42 +386,45 @@ int CtcXNewtonIter::X_Linearization(IntervalVector& box, soplex::SoPlex& mysople
 
 
 
-//the CtcXNewtonIterIteration
-  int CtcXNewtonIter::Linearization( IntervalVector & box, soplex::SoPlex& mysoplex){
+  /* Computes the gradient G of the constraint ctr : special case if ctr==goal_ctr */
+  
+  void CtcXNewtonIter::gradient_computation (IntervalVector& box, IntervalVector& G, int ctr)
+  {
+    if(goal_ctr==ctr)  // objective function  in optimization
+      {IntervalVector box1(sys.nb_var-1);
+	for (int i=0; i<sys.nb_var-1; i++)
+	  box1[i]=box[i];
+	IntervalVector G1(sys.nb_var-1);
+	goal->gradient(box1,G1);
+	for (int i=0; i<sys.nb_var-1; i++)
+	  G[i]=G1[i];
+	G[sys.nb_var-1]=0;
+      }
+    
+    else
+      sys.ctrs[ctr].f.gradient(box,G);
+  }
+
+/*********generation of the linearized system*********/
+int CtcXNewtonIter::Linearization( IntervalVector & box, soplex::SoPlex& mysoplex){
   int n = sys.nb_var;
   int nvarsimplex=n;
 
   DSVector dummycol(0);
   vector<Interval> taylor_ev;
 
-  /*********generation of the linearized system*********/
   for (int j=0; j<nvarsimplex; j++){
 	mysoplex.addCol(LPCol(0.0, dummycol, infinity, - infinity ));
   }
 
   int nb_ctrs=0;
 
-
   for(int ctr=0; ctr<sys.nb_ctr;ctr++){
 
     IntervalVector G(sys.nb_var);
-    if (linear[ctr]) G= LinearCoef[ctr]; // constant derivatives are already computed
-    else    if(lmode==TAYLOR){ //derivatives are computed once (Taylor)
-      
-
-       if(goal_ctr==ctr)  // objective function  in optimization
-	 {IntervalVector box1(sys.nb_var-1);
-	  for (int i=0; i<sys.nb_var-1; i++)
-	    box1[i]=box[i];
-	  IntervalVector G1(sys.nb_var-1);
-	   goal->gradient(box1,G1);
-	   for (int i=0; i<sys.nb_var-1; i++)
-	     G[i]=G1[i];
-	   G[sys.nb_var-1]=0;
-	 }
-
-       else
-	 sys.ctrs[ctr].f.gradient(box,G);
+    if (linear[ctr]) G= LinearCoef[ctr]; // constant derivatives have been already computed
+    else if(lmode==TAYLOR){ //derivatives are computed once (Taylor)
+      gradient_computation(box, G, ctr);
     }
 
     int nb_nonlinear_vars;
@@ -442,14 +432,13 @@ int CtcXNewtonIter::X_Linearization(IntervalVector& box, soplex::SoPlex& mysople
     if(cpoints[0]==K4){
 	 for(int j=0; j<4; j++)
 	   nb_ctrs+=X_Linearization(box,mysoplex, ctr, K4, taylor_ev, G, j, nb_nonlinear_vars);
-    }else
+    }else  //  linearizations k corners per constraint
        for(int k=0;k<cpoints.size();k++){
 	 nb_ctrs+=X_Linearization(box,mysoplex, ctr, cpoints[k], taylor_ev, G, k, nb_nonlinear_vars);
 
      }
      
   }
-
 
   for (int j=0; j<nvarsimplex; j++){
         DSVector row1(nvarsimplex);

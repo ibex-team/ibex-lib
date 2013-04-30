@@ -64,7 +64,7 @@ class CtcXNewtonIter : public CtcLinearRelaxation {
     delete[] last_rnd;
     delete[] base_coin;
   }
-
+  
 
   /** X_Newton iteration. 
   Linearize the system and performs 2n calls to Simplex in order to reduce 
@@ -79,7 +79,8 @@ class CtcXNewtonIter : public CtcLinearRelaxation {
   std::vector<corner_point>& cpoints;
 
   protected:
-
+  /* Computes the gradient G of the constraint ctr : special case if ctr==goal_ctr */
+  void gradient_computation (IntervalVector& box, IntervalVector& G, int ctr);
 
 
   /* for implementing RANDOM_INV one needs to store the last random corners */
