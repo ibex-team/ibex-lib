@@ -33,7 +33,7 @@ namespace ibex {
     // ============================================================
     
    linear = new bool[sys.nb_ctr];
-   
+   primal_solution = new double[sys.nb_var];
 
     for(int ctr=0; ctr<sys.nb_ctr;ctr++){
 
@@ -122,7 +122,7 @@ void CtcLinearRelaxation::contract (IntervalVector & box){
 
         if( stat == SPxSolver::OPTIMAL ){
           if(opt.lb()>box[i].ub())  throw EmptyBoxException();
-          choose_next_variable(box,mysoplex ,nexti,infnexti, inf_bound, sup_bound);
+          choose_next_variable(box,nexti,infnexti, inf_bound, sup_bound);
           if(opt.lb() > box[i].lb() ){
             box[i]=Interval(opt.lb(),box[i].ub());
             mysoplex.changeLhs(nb_ctrs+i,opt.lb());
@@ -145,7 +145,6 @@ void CtcLinearRelaxation::contract (IntervalVector & box){
             if (next==-1) break;
           }
 
-
       }
     else
       if(infnexti==1 && sup_bound[i]==0)// computing the right bound :  maximizing x_i
@@ -156,7 +155,7 @@ void CtcLinearRelaxation::contract (IntervalVector & box){
 
         if( stat == SPxSolver::OPTIMAL ){
           if(opt.ub() <box[i].lb())   throw EmptyBoxException();
-          choose_next_variable(box, mysoplex ,nexti,infnexti, inf_bound, sup_bound);
+          choose_next_variable(box,nexti,infnexti, inf_bound, sup_bound);
 	  if (opt.ub() < box[i].ub()) {
 	    box[i] =Interval( box[i].lb(), opt.ub());
 	    mysoplex.changeRhs(nb_ctrs+i,opt.ub());
@@ -251,6 +250,10 @@ void CtcLinearRelaxation::contract (IntervalVector & box){
 	  //           cout << B(i+1) << endl;                                                                                    
 	}
 	if(stat == SPxSolver::OPTIMAL){
+	  DVector primal(n);
+	  mysoplex.getPrimal(primal);
+	  for (int i=0; i< n ; i++)
+	    primal_solution[i]=primal[i];
 	  DVector dual(mysoplex.nRows());
 	  mysoplex.getDual(dual);
 	  IntervalVector Lambda(mysoplex.nRows());
@@ -328,21 +331,19 @@ void CtcLinearRelaxation::contract (IntervalVector & box){
 
   // The Achterberg heuristic for choosing the next variable (nexti) and its bound (infnexti) to be contracted (cf Baharev paper)
   // and updating the indicators if a bound has been found feasible (with the precision prec_bound)
+  // called only when a solution is found (use of primal_solution)
 
-  void CtcLinearRelaxation::choose_next_variable ( IntervalVector & box, SoPlex& mysoplex , int & nexti, int & infnexti, int* inf_bound, int* sup_bound)
+  void CtcLinearRelaxation::choose_next_variable ( IntervalVector & box, int & nexti, int & infnexti, int* inf_bound, int* sup_bound)
   {
     double prec_bound = 1.e-8; // relative precision for the indicators                                                 
     int n=sys.nb_var;
-    DVector primal(n);
-    mysoplex.getPrimal(primal);
     double delta=1.e100;
     double deltaj=delta;
     for (int j=0;j<n;j++)
-
       { 
 
 	if (inf_bound[j]==0)
-          {deltaj= fabs (primal[j]- box[j].lb());
+          {deltaj= fabs (primal_solution[j]- box[j].lb());
             if ((fabs (box[j].lb()) < 1 && deltaj < prec_bound)
 		||
                 (fabs (box[j].lb()) >= 1 && fabs (deltaj /(box[j].lb())) < prec_bound))
@@ -351,7 +352,7 @@ void CtcLinearRelaxation::contract (IntervalVector & box){
               {nexti=j; infnexti=0;delta=deltaj;}
           }
         if (sup_bound[j]==0)
-          {     deltaj = fabs (primal[j]- box[j].ub());
+          {     deltaj = fabs (primal_solution[j]- box[j].ub());
             if ((fabs (box[j].ub()) < 1 && deltaj < prec_bound)
             ||
                 (fabs (box[j].ub()) >= 1 && fabs (deltaj/(box[j].ub())) < prec_bound))

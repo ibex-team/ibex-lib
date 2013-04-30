@@ -61,7 +61,6 @@ class CtcXNewtonIter : public CtcLinearRelaxation {
 
   /** Deletes this instance. */  
   ~CtcXNewtonIter() {
-    if(linear) delete[] linear;
     delete[] last_rnd;
     delete[] base_coin;
   }

@@ -48,6 +48,8 @@ namespace ibex {
     CtcLinearRelaxation(const System& sys, int goal_ctr=-1, Function* goal=0,
 		  ctc_mode cmode=ALL_BOX, int max_iter_soplex=100, double max_diam_box=default_max_diam_box);
 
+    ~CtcLinearRelaxation ()
+      {delete [] linear; delete[] primal_solution;}
 
     /** Basic iteration of the LR-based contractor. Linearize the system and performs calls to Simplex *\
     Apply contraction. **/
@@ -91,12 +93,14 @@ namespace ibex {
     /*Soplex related functions and variables    */
     /* set to 1 by run_simplex in case of infeasibility proved */
     bool infeasibility;
+    
+    double* primal_solution;
 
     /* call to Soplex */
     soplex::SPxSolver::Status run_simplex(IntervalVector &box, soplex::SoPlex& mysoplex, soplex::SPxLP::SPxSense sense, int var, int n, Interval & obj, double bound);
 
     /* Achterberg heuristic for choosing the next variable  and which bound to optimize */
-    void choose_next_variable ( IntervalVector &box, soplex::SoPlex& mysoplex , int & nexti, int & infnexti, int* inf_bound, int* sup_bound);
+    void choose_next_variable ( IntervalVector &box,  int & nexti, int & infnexti, int* inf_bound, int* sup_bound);
     void optimizer(IntervalVector &box, soplex::SoPlex& mysoplex, int n, int nb_ctrs);
 
 
