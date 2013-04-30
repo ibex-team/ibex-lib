@@ -95,10 +95,10 @@ class CtcXNewtonIter : public CtcLinearRelaxation {
   linear_mode lmode;
 
   /** Tries to add a linearization in the model mysoplex. Returns true if it is succesful */
-  int X_Linearization(IntervalVector & box,soplex::SoPlex& mysoplex, int ctr, corner_point cpoint, std::vector<Interval>& taylor_ev, IntervalVector &G,
+  int X_Linearization(IntervalVector & box,soplex::SoPlex& mysoplex, int ctr, corner_point cpoint,  IntervalVector &G,
 		      int id_point, int& non_linear_vars);
 
-  int X_Linearization(IntervalVector& box, soplex::SoPlex& mysoplex, int ctr, corner_point cpoint, CmpOp op, std::vector<Interval>& taylor_ev,
+  int X_Linearization(IntervalVector& box, soplex::SoPlex& mysoplex, int ctr, corner_point cpoint, CmpOp op,
   IntervalVector &G, int id_point, int& non_linear_vars);
 
 

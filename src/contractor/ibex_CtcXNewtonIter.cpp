@@ -117,7 +117,7 @@ REAL CtcXNewtonIter::eval_corner(int ctr, int op, INTERVAL_VECTOR& G, bool* corn
 
  
 
-  int CtcXNewtonIter::X_Linearization(IntervalVector& box, soplex::SoPlex& mysoplex, int ctr, corner_point cpoint, vector<Interval>& taylor_ev,
+  int CtcXNewtonIter::X_Linearization(IntervalVector& box, soplex::SoPlex& mysoplex, int ctr, corner_point cpoint, 
 			      IntervalVector& G, int id_point, int& nb_nonlinear_vars){
 
     CmpOp op= sys.ctrs[ctr].op;
@@ -127,17 +127,17 @@ REAL CtcXNewtonIter::eval_corner(int ctr, int op, INTERVAL_VECTOR& G, bool* corn
     int cont=0;
     if(ctr==goal_ctr) op = LEQ;
     if(op==EQ){
-      cont+=X_Linearization(box,mysoplex, ctr, cpoint, LEQ, taylor_ev, G, id_point, nb_nonlinear_vars);
-      cont+=X_Linearization(box,mysoplex, ctr, cpoint, GEQ, taylor_ev, G, id_point, nb_nonlinear_vars);
+      cont+=X_Linearization(box,mysoplex, ctr, cpoint, LEQ, G, id_point, nb_nonlinear_vars);
+      cont+=X_Linearization(box,mysoplex, ctr, cpoint, GEQ, G, id_point, nb_nonlinear_vars);
        
     }else
-      cont+=X_Linearization(box,mysoplex, ctr, cpoint, op, taylor_ev, G, id_point, nb_nonlinear_vars);
+      cont+=X_Linearization(box,mysoplex, ctr, cpoint, op,  G, id_point, nb_nonlinear_vars);
     return cont;
 }
 
 //return 0 only when the linearization is not performed
 int CtcXNewtonIter::X_Linearization(IntervalVector& box, soplex::SoPlex& mysoplex,
-		int ctr, corner_point cpoint, CmpOp op, vector<Interval>& taylor_ev,
+		int ctr, corner_point cpoint, CmpOp op, 
 		IntervalVector& G, int id_point, int& nb_nonlinear_vars) {
 	int n = sys.nb_var;
 	int nonlinear_var = 0;
@@ -373,7 +373,6 @@ int CtcXNewtonIter::X_Linearization(IntervalVector& box, soplex::SoPlex& mysople
           added=true;
        }
     }
-    if(added)  taylor_ev.push_back(tot_ev);
 
     box=savebox;
     
@@ -411,7 +410,6 @@ int CtcXNewtonIter::Linearization( IntervalVector & box, soplex::SoPlex& mysople
   int nvarsimplex=n;
 
   DSVector dummycol(0);
-  vector<Interval> taylor_ev;
 
   for (int j=0; j<nvarsimplex; j++){
 	mysoplex.addCol(LPCol(0.0, dummycol, infinity, - infinity ));
@@ -431,10 +429,10 @@ int CtcXNewtonIter::Linearization( IntervalVector & box, soplex::SoPlex& mysople
 
     if(cpoints[0]==K4){
 	 for(int j=0; j<4; j++)
-	   nb_ctrs+=X_Linearization(box,mysoplex, ctr, K4, taylor_ev, G, j, nb_nonlinear_vars);
+	   nb_ctrs+=X_Linearization(box,mysoplex, ctr, K4, G, j, nb_nonlinear_vars);
     }else  //  linearizations k corners per constraint
        for(int k=0;k<cpoints.size();k++){
-	 nb_ctrs+=X_Linearization(box,mysoplex, ctr, cpoints[k], taylor_ev, G, k, nb_nonlinear_vars);
+	 nb_ctrs+=X_Linearization(box,mysoplex, ctr, cpoints[k],  G, k, nb_nonlinear_vars);
 
      }
      
