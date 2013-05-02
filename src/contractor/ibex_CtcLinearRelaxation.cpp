@@ -35,6 +35,7 @@ namespace ibex {
    linear = new bool[sys.nb_ctr];
    primal_solution = new double[sys.nb_var];
 
+
     for(int ctr=0; ctr<sys.nb_ctr;ctr++){
 
       IntervalVector G(sys.nb_var);
@@ -95,8 +96,8 @@ void CtcLinearRelaxation::contract (IntervalVector & box){
   void CtcLinearRelaxation::optimizer(IntervalVector & box, SoPlex& mysoplex, int n, int nb_ctrs){
 
   Interval opt(0);
-  int* inf_bound = new int[n]; // indicator inf_bound = 1 means the inf bound is feasible or already contracted , call to simplex useless (cf Baharev)
-  int* sup_bound = new int[n]; //indicator sup_bound = 1 means the sup bound is feasible or already contracted, call to simplex useless
+  int* inf_bound = new int[n]; // indicator inf_bound = 1 means the inf bound is feasible or already contracted, call to simplex useless (cf Baharev)
+  int* sup_bound = new int[n]; // indicator sup_bound = 1 means the sup bound is feasible or already contracted, call to simplex useless
 
   for (int i=0; i<n ;i++) {inf_bound[i]=0;sup_bound[i]=0;}
   if (goal_ctr !=-1)   sup_bound[n-1]=1;  // in case of optimization, for y the left bound only is contracted
@@ -197,13 +198,11 @@ void CtcLinearRelaxation::contract (IntervalVector & box){
   SPxSolver::Status CtcLinearRelaxation::run_simplex(IntervalVector& box,SoPlex& mysoplex, SPxLP::SPxSense sense, int var, int n, \
 						     Interval& obj, double bound){
     //  mysoplex.writeFile("dump.lp", NULL, NULL, NULL);                                                                    
-
+    int nr=mysoplex.nRows();
     if(sense==SPxLP::MINIMIZE)
       mysoplex.changeObj(var, 1.0);
     else
       mysoplex.changeObj(var, -1.0);
-
-
 
     SPxSolver::Status stat;
     mysoplex.changeSense(SPxLP::MINIMIZE);
@@ -219,102 +218,129 @@ void CtcLinearRelaxation::contract (IntervalVector & box){
     if(stat == SPxSolver::OPTIMAL){
       if( (sense==SPxLP::MINIMIZE && mysoplex.objValue()<=bound) ||
 	  (sense==SPxLP::MAXIMIZE && -mysoplex.objValue()>=bound) )  
+	     
+      if (mysoplex.objValue()<=bound) 
 	{stat = SPxSolver::UNKNOWN;}
     }
 
     // Neumaier - Shcherbina postprocessing 
     if (stat == SPxSolver::OPTIMAL ||stat == SPxSolver::INFEASIBLE) 
-      { IntervalMatrix As (mysoplex.nRows(),n);
-	IntervalVector C(n);
-	for(int i=0;i<n;i++){
-	  C[i]=0;
-	  if(i==var){
-	    if(sense==SPxLP::MINIMIZE)
-	      C[var]=1.0;
-	    else
-	      C[var]=-1.0;
-	  }
-	}
+      { IntervalMatrix As (nr,n);
 
-	for (int i=0;i<mysoplex.nRows(); i++){
+	for (int i=0;i<nr; i++){
 	  for(int j=0; j<n; j++)
 	    As[i][j]=mysoplex.rowVector(i)[j];
 	}
       // cout << As << endl;                                                                                             
 
-	IntervalVector B(mysoplex.nRows());
-	for (int i=0;i<mysoplex.nRows(); i++){	
+	IntervalVector B(nr);
+	for (int i=0;i<nr; i++){	
 	  B[i]=Interval((mysoplex.lhs()[i]!=-infinity)? mysoplex.lhs()[i]:-1.e20,(mysoplex.rhs()[i]!=infinity)?  
 			mysoplex.rhs()[i]:1.e20); 
 	  //Idea: replace 1e20 (resp. -1e20) by Sup([g_i]) (resp. Inf([g_i])), where [g_i] is an evaluation of the nonlinear function <-- IA 
 	  //           cout << B(i+1) << endl;                                                                                    
 	}
 	if(stat == SPxSolver::OPTIMAL){
+	  // the primal solution : used by choose_next_variable
 	  DVector primal(n);
 	  mysoplex.getPrimal(primal);
 	  for (int i=0; i< n ; i++)
 	    primal_solution[i]=primal[i];
-	  DVector dual(mysoplex.nRows());
+
+	  // the dual solution ; used by Neumaier Shcherbina test
+	  DVector dual(nr);
 	  mysoplex.getDual(dual);
-	  IntervalVector Lambda(mysoplex.nRows());
-	  for (int i =0; i< mysoplex.nRows() ; i++)
-	    {if( 
-		(B[i].ub()==1e+20 && dual[i]<0 ) || (B[i].lb() ==-1e+20 && dual[i]>0 )) //Modified by IA  
-		Lambda[i]=0;
-	      else
-		Lambda[i]=dual[i];
-	    }
 
-	  IntervalVector Rest(n);
-	  IntervalMatrix AsTranspose (n, mysoplex.nRows());
-	  for (int i =0; i< mysoplex.nRows() ; i++)
-	    for (int j= 0; j<n ;j++)
-	      AsTranspose[j][i]= As[i][j];
-	  Rest = AsTranspose *Lambda - C;
+	  dual_solution= new double[nr];
+	  for (int i=0; i< nr ; i++)
+	    dual_solution[i]=dual[i];
 
-
-	  if(sense==SPxLP::MINIMIZE) 
-	    obj = Lambda * B - Rest * box;
-	  else
-	    obj = -(Lambda * B - Rest * box);
+	  bool minimization=false;
+	  if (sense==SPxLP::MINIMIZE) 
+	    minimization=true;
+					
+	  NeumaierShcherbina_postprocessing (n, nr, var, obj, box, As, B, minimization);
+	  delete [] dual_solution;
 	}
 	
 	// infeasibility test  cf Neumaier Shcherbina paper
 	else if(stat == SPxSolver::INFEASIBLE) 
 	  {SPxSolver::Status stat1;
-	    DVector v(mysoplex.nRows());
-	    stat1 = mysoplex.getDualfarkas(v);
-	    IntervalVector Lambda(mysoplex.nRows());
-	    for (int i =0; i< mysoplex.nRows() ; i++)
-	      {if( 
-		  (B[i].ub()==1e+20 && v[i]<0 ) || (B[i].lb() ==-1e+20 && v[i]>0 )) // blind copy from OPTIMAL case useful in this case ?? BN
-		  Lambda[i]=0; 
-		else
-		  Lambda[i]=v[i];
-	      }
-	    IntervalVector Rest(n);
-	    IntervalMatrix AsTranspose (n, mysoplex.nRows());
-	    for (int i =0; i< mysoplex.nRows() ; i++)
-	      for (int j= 0; j<n ;j++)
-		AsTranspose[j][i]= As[i][j];
-	    Rest = AsTranspose *Lambda;
-	    Interval d= Rest *box - Lambda * B;
-	    // if 0 does not belong to d, the infeasibility is proved
-	    if (d.lb() > 0 || d.ub() <0) 
-	      infeasibility=1;
-	    else 
-	      infeasibility=0;
+	    DVector dual(nr);
+	    stat1 = mysoplex.getDualfarkas(dual);
+	    dual_solution= new double[nr];
+	    for (int i=0; i< nr ; i++)
+	      dual_solution[i]=dual[i];
+            infeasibility =  NeumaierShcherbina_infeasibilitytest (n, nr, box, As, B);
+	    delete [] dual_solution;
 	  }
       }
-    
     mysoplex.changeObj(var, 0.0);
+    
     return stat;
     
   }
+  
 
+  // Neumaier Shcherbina postprocessing in case of optimal solution found : the result obj is made reliable
+  void CtcLinearRelaxation::NeumaierShcherbina_postprocessing (int n, int nr, int var, Interval & obj, IntervalVector& box, IntervalMatrix & As, IntervalVector& B, bool minimization)    
+  {
+    IntervalVector C(n);
+    for(int i=0;i<n;i++){
+      C[i]=0;
+      if(i==var){
+	if(minimization)
+	  C[var]=1.0;
+	else
+	  C[var]=-1.0;
+      }
+    }
+    IntervalVector Lambda(nr);
+    for (int i =0; i< nr ; i++)
+      {if( 
+	  (B[i].ub()==1e+20 && dual_solution[i]<0 ) || (B[i].lb() ==-1e+20 && dual_solution[i]>0 )) //Modified by IA  
+	  Lambda[i]=0;
+	else
+	  Lambda[i]=dual_solution[i];
+      }
 
+    IntervalVector Rest(n);
+    IntervalMatrix AsTranspose (n, nr);
+    for (int i =0; i< nr ; i++)
+      for (int j= 0; j<n ;j++)
+	AsTranspose[j][i]= As[i][j];
+    Rest = AsTranspose *Lambda - C;
 
+    if(minimization==true) 
+      obj = Lambda * B - Rest * box;
+    else
+      obj = -(Lambda * B - Rest * box);
+  }
 
+  // Neumaier Shcherbina postprocessing in case of infeasibilty found by LP  returns true if the infeasibility is proved
+ bool  CtcLinearRelaxation::NeumaierShcherbina_infeasibilitytest (int n, int nr, IntervalVector& box, IntervalMatrix & As, IntervalVector& B)
+ {
+   IntervalVector Lambda(nr);
+   for (int i =0; i< nr ; i++)
+     {if( 
+	 (B[i].ub()==1e+20 && dual_solution[i]<0 ) || (B[i].lb() ==-1e+20 && dual_solution[i]>0 )) // blind copy from OPTIMAL case useful in this case ?? BN
+	 Lambda[i]=0; 
+       else
+	 Lambda[i]=dual_solution[i];
+     }
+   IntervalVector Rest(n);
+   IntervalMatrix AsTranspose (n, nr);
+   for (int i =0; i< nr ; i++)
+     for (int j= 0; j<n ;j++)
+       AsTranspose[j][i]= As[i][j];
+   Rest = AsTranspose *Lambda;
+   Interval d= Rest *box - Lambda * B;
+   // if 0 does not belong to d, the infeasibility is proved
+   if (d.lb() > 0 || d.ub() <0) 
+     return true;
+   else 
+     return false;
+ }
 
 
   // check if the constraint is satisfied in the box : in this case, no linear relaxation is made.
@@ -331,7 +357,7 @@ void CtcLinearRelaxation::contract (IntervalVector & box){
 
   // The Achterberg heuristic for choosing the next variable (nexti) and its bound (infnexti) to be contracted (cf Baharev paper)
   // and updating the indicators if a bound has been found feasible (with the precision prec_bound)
-  // called only when a solution is found (use of primal_solution)
+  // called only when a solution is found by the LP solver (use of primal_solution)
 
   void CtcLinearRelaxation::choose_next_variable ( IntervalVector & box, int & nexti, int & infnexti, int* inf_bound, int* sup_bound)
   {
@@ -366,7 +392,5 @@ void CtcLinearRelaxation::contract (IntervalVector & box){
   }
 
 
+}// end namespace ibex
 
-
-
-}

@@ -78,14 +78,11 @@ namespace ibex {
     /** Indicates if in optimization  only the objective is contracted (cmode=ONLY_Y) or all the box (ALL_BOX) */
     ctc_mode cmode;
 
-
     /** indicates if the constraint is linear */
     bool* linear;
 
-
     /** stores the coefficients of linear constraints */
     IntervalMatrix LinearCoef;
-
 
     /** the linearization technique. It must be implemented in the subclasses */
     virtual int Linearization(IntervalVector& box, soplex::SoPlex& mysoplex) = 0;
@@ -94,20 +91,26 @@ namespace ibex {
     /* set to 1 by run_simplex in case of infeasibility proved */
     bool infeasibility;
     
+    /* the optimal solution found by the LP solver */
     double* primal_solution;
+
+    /* the duall solution found by the LP solver */
+    double* dual_solution;
+
+    /*Neumaier Shcherbina postprocessing in case of optimal solution found : the result obj is made reliable */
+    void NeumaierShcherbina_postprocessing (int n, int nr, int var, Interval & obj, IntervalVector& box, IntervalMatrix & As, IntervalVector& B, bool minimization);
+    /* Neumaier Shcherbina postprocessing in case of infeasibilty found by LP  returns true if the infeasibility is proved */
+    bool  NeumaierShcherbina_infeasibilitytest (int n, int nr, IntervalVector& box, IntervalMatrix & As, IntervalVector& B);
 
     /* call to Soplex */
     soplex::SPxSolver::Status run_simplex(IntervalVector &box, soplex::SoPlex& mysoplex, soplex::SPxLP::SPxSense sense, int var, int n, Interval & obj, double bound);
 
     /* Achterberg heuristic for choosing the next variable  and which bound to optimize */
     void choose_next_variable ( IntervalVector &box,  int & nexti, int & infnexti, int* inf_bound, int* sup_bound);
+
     void optimizer(IntervalVector &box, soplex::SoPlex& mysoplex, int n, int nb_ctrs);
 
-
     bool isInner(IntervalVector & box, const System& sys, int j); /* redoundant method? */
-
-
-
   };
 }
 
