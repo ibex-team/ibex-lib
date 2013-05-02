@@ -10,7 +10,7 @@ using namespace std;
 /*================== data =================*/
 const bool qinteronly=false;  // do we use q-intersection alone ?
 const int N=2;				  // problem dimension
-const int P=100;        	  // number of measurements
+const int P=1000;        	  // number of measurements
 const int Q=P*0.90;			  // number of consistent measurements
 const double L=10;      	  // the target & the beacons are in the area [0,L]x[0,L]
 double beacons[P][N];   	  // positions (x,y) of the P beacons

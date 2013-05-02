@@ -6,7 +6,7 @@ using namespace std;
 #define LEFT_BOUND 0
 #define RIGHT_BOUND 1
 
-bool paircomp (pair<double,int> i,pair<double,int> j) { return (i.first<j.first); }
+bool paircomp (const pair<double,int>& i, const pair<double,int>& j) { return (i.first<j.first); }
 
 namespace ibex {
 

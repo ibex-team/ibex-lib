@@ -22,13 +22,9 @@ IntervalVector qinterex_cliquer(const vector<IntervalVector *>& boxes, int q) {
 	
 	graph_t *g = graph_new(p);
 	
-	IntervalVector iv(n);
 	for (int i=0; i<p; i++) {
 		for (int j=i+1; j<p; j++) {
-			iv = *boxes[i] & *boxes[j];
-			if (!iv.is_empty()) {
-				GRAPH_ADD_EDGE(g,i,j);
-			}
+			if ((*boxes[i]).intersects(*boxes[j])) GRAPH_ADD_EDGE(g,i,j);
 		}
 	}
 	
@@ -47,14 +43,13 @@ IntervalVector qinterex_cliquer(const vector<IntervalVector *>& boxes, int q) {
 			if (SET_CONTAINS(res,k)) inter = inter & *(boxes[k]);
 			k++;
 		}
-		graph_free(g);
 		set_free(res);
-		return inter;
 	} else {
-		graph_free(g);
 		inter.set_empty();
-		return inter;
 	}
+	
+	graph_free(g);
+	return inter;
 }
 
 } // end namespace ibex

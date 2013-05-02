@@ -18,16 +18,17 @@ using namespace ibex;
 /*================== data =================*/
 const int N=25;					// problem dimension
 const int P=200;				// number of measurements
-const int Q=P*0.30;				// number of consistant measurements
+const int Q=P*0.30;				// number of consistent measurements
 const double L=10;				// the target & the beacons are in the area [0,L]x[0,L]
 const double widthFactor=7;		// The sides of our boxes are picked at random in [0,widthFactor*L]
 /*=========================================*/
 
 /* Good numbers :
  * 
- * N=6; P=1000; Q=P*0.2; L=10; widthFactor=2;
- * N=15; P=500; Q=P*0.2; L=10; widthFactor=4; [VERY SLOW]
- * N=25; P=200; Q=P*0.3; L=10; widthFactor=7; [~35 seconds]
+ * N=6; P=1000; Q=P*0.20; L=10; widthFactor=2;
+ * N=15; P=500; Q=P*0.20; L=10; widthFactor=4; [~650 seconds]
+ * N=25; P=200; Q=P*0.30; L=10; widthFactor=7; [~25 seconds]
+ * N=25; P=300; Q=P*0.32; L=10; widthFactor=8; [~150 seconds]
  * 
  */
 
@@ -81,17 +82,17 @@ int main() {
 	cout << "Time : " << ((double)(end)-(double)(start))/CLOCKS_PER_SEC << " seconds" << endl;
 	
 	start = clock();
-	res = qinter_chabs(boxes,Q);
-	end = clock();
-	
-	cout << "Chabs result = " << res << endl;
-	cout << "Time : " << ((double)(end)-(double)(start))/CLOCKS_PER_SEC << " seconds" << endl;
-	
-	start = clock();
 	res = qinter_chabs_nogoods(boxes,Q);
 	end = clock();
 	
 	cout << "Chabs+nogoods result = " << res << endl;
+	cout << "Time : " << ((double)(end)-(double)(start))/CLOCKS_PER_SEC << " seconds" << endl;
+	
+	start = clock();
+	res = qinter_chabs(boxes,Q);
+	end = clock();
+	
+	cout << "Chabs result = " << res << endl;
 	cout << "Time : " << ((double)(end)-(double)(start))/CLOCKS_PER_SEC << " seconds" << endl;
 	
 	/*

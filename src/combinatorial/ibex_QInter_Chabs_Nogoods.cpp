@@ -2,8 +2,8 @@
 #include "ibex_BitSet.h"
 #include <algorithm>
 
-bool leftpaircompN (pair<double,int> i,pair<double,int> j) { return (i.first<j.first); };
-bool rightpaircompN (pair<double,int> i,pair<double,int> j) { return (i.first>j.first); };
+bool leftpaircompN (const pair<double,int>& i, const pair<double,int>& j) { return (i.first<j.first); };
+bool rightpaircompN (const pair<double,int>& i, const pair<double,int>& j) { return (i.first>j.first); };
 
 namespace ibex {
 
@@ -106,7 +106,6 @@ IntervalVector qinter_chabs_nogoods(const Array<IntervalVector>& _boxes, int q) 
 	
 	int b,b2,nboxes;
 	pair<double,int> x[p];
-	IntervalVector iv(n);
 	bool first_pass = true;
 	bool ng;
 	
@@ -144,8 +143,7 @@ IntervalVector qinter_chabs_nogoods(const Array<IntervalVector>& _boxes, int q) 
 			neighboxes.clear();
 			for (int l=0; l<k; l++) {
 				b2 = x[l].second;
-				iv = boxes[b2] & boxes[b];
-				if (!iv.is_empty()) {
+				if (boxes[b].intersects(boxes[b2])) {
 					neighboxes.push_back(&(boxes[b2]));
 					curr_set->add(b2);
 				}
@@ -213,8 +211,7 @@ IntervalVector qinter_chabs_nogoods(const Array<IntervalVector>& _boxes, int q) 
 			neighboxes.clear();
 			for (int l=0; l<k; l++) {
 				b2 = x[l].second;
-				iv = boxes[b2] & boxes[b];
-				if (!iv.is_empty()) {
+				if (boxes[b].intersects(boxes[b2])) {
 					neighboxes.push_back(&(boxes[b2]));
 					curr_set->add(b2);
 				}

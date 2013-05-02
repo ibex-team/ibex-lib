@@ -12,6 +12,7 @@
 #define __IBEX_Q_INTER_H__
 
 #include "ibex_IntervalVector.h"
+#include "ibex_KCoreGraph.h"
 #include "ibex_Array.h"
 #include "ibex_IntStack.h"
 

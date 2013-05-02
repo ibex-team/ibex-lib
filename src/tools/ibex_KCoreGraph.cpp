@@ -87,4 +87,33 @@ void KCoreGraph::apply_coreness() {
 	}
 };
 
+graph_t *KCoreGraph::subgraph(IntStack *vset) {
+	
+	assert(!vset->empty());
+	
+	graph_t *g = graph_new(maxsize());
+	IntStack *nb;
+	
+	int val,preval,val2,preval2;
+	
+	val = vset->head();
+	preval = val-1;
+	while (val != preval) {
+		nb = neighbourhoods.at(val);
+		if (!nb->empty()) {
+			val2 = nb->head();
+			preval2 = val2-1;
+			while (val2 != preval2) {
+				if ((val > val2) && vset->contain(val2)) GRAPH_ADD_EDGE(g,val,val2);
+				preval2 = val2;
+				val2 = nb->next(preval2);
+			}
+		}
+		preval = val;
+		val = vset->next(preval);
+	}
+	
+	return g;
+};
+
 }; // end namespace ibex

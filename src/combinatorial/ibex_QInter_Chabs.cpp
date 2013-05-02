@@ -1,8 +1,8 @@
 #include "ibex_QInter.h"
 #include <algorithm>
 
-bool leftpaircomp (pair<double,int> i,pair<double,int> j) { return (i.first<j.first); };
-bool rightpaircomp (pair<double,int> i,pair<double,int> j) { return (i.first>j.first); };
+bool leftpaircomp (const pair<double,int>& i, const pair<double,int>& j) { return (i.first<j.first); };
+bool rightpaircomp (const pair<double,int>& i, const pair<double,int>& j) { return (i.first>j.first); };
 
 namespace ibex {
 
@@ -93,7 +93,6 @@ IntervalVector qinter_chabs(const Array<IntervalVector>& _boxes, int q) {
 	
 	int b,b2,nboxes;
 	pair<double,int> x[p];
-	IntervalVector iv(n);
 	bool first_pass = true;
 	
 	/* Compute the q-inter hull */
@@ -128,10 +127,7 @@ IntervalVector qinter_chabs(const Array<IntervalVector>& _boxes, int q) {
 			neighboxes.clear();
 			for (int l=0; l<k; l++) {
 				b2 = x[l].second;
-				iv = boxes[b2] & boxes[b];
-				if (!iv.is_empty()) {
-					neighboxes.push_back(&(boxes[b2]));
-				}
+				if (boxes[b].intersects(boxes[b2])) neighboxes.push_back(&(boxes[b2]));
 			}
 			
 			if (neighboxes.size() < q-1) continue;
@@ -183,8 +179,7 @@ IntervalVector qinter_chabs(const Array<IntervalVector>& _boxes, int q) {
 			neighboxes.clear();
 			for (int l=0; l<k; l++) {
 				b2 = x[l].second;
-				iv = boxes[b2] & boxes[b];
-				if (!iv.is_empty()) neighboxes.push_back(&(boxes[b2]));
+				if (boxes[b].intersects(boxes[b2])) neighboxes.push_back(&(boxes[b2]));
 			}
 			
 			if (neighboxes.size() < q-1) continue;

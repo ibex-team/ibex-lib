@@ -1,9 +1,8 @@
 #include "ibex_QInter.h"
-#include "ibex_KCoreGraph.h"
 #include <algorithm>
 
-bool leftpaircompG (pair<double,int> i,pair<double,int> j) { return (i.first<j.first); };
-bool rightpaircompG (pair<double,int> i,pair<double,int> j) { return (i.first>j.first); };
+bool leftpaircompG (const pair<double,int>& i, const pair<double,int>& j) { return (i.first<j.first); };
+bool rightpaircompG (const pair<double,int>& i, const pair<double,int>& j) { return (i.first>j.first); };
 
 namespace ibex {
 
@@ -78,13 +77,9 @@ IntervalVector qinter_chabs_gutow(const Array<IntervalVector>& _boxes, int q) {
 	
 	/* Add edges */
 	
-	IntervalVector ivi(n);
 	for (int i=0; i<p; i++) {
 		for (int j=i+1; j<p; j++) {
-			ivi = boxes[i] & boxes[j];
-			if (!ivi.is_empty()) {
-				origin->add_edge(i,j);
-			}
+			if (boxes[i].intersects(boxes[j])) origin->add_edge(i,j);
 		}
 	}
 	
@@ -100,7 +95,6 @@ IntervalVector qinter_chabs_gutow(const Array<IntervalVector>& _boxes, int q) {
 	int b,b2,nboxes;
 	pair<double,int> x[p];
 	
-	IntervalVector iv(n);
 	bool first_pass = true;
 	
 	/* Perform the initial (q-1)-core filtering */
@@ -154,8 +148,7 @@ IntervalVector qinter_chabs_gutow(const Array<IntervalVector>& _boxes, int q) {
 			neighboxes.clear();
 			for (int l=0; l<k; l++) {
 				b2 = x[l].second;
-				iv = boxes[b2] & boxes[b];
-				if (!iv.is_empty()) neighboxes.push_back(&(boxes[b2]));
+				if (boxes[b].intersects(boxes[b2])) neighboxes.push_back(&(boxes[b2]));
 			}
 			
 			/* Call to the existence procedure */
@@ -208,8 +201,7 @@ IntervalVector qinter_chabs_gutow(const Array<IntervalVector>& _boxes, int q) {
 			neighboxes.clear();
 			for (int l=0; l<k; l++) {
 				b2 = x[l].second;
-				iv = boxes[b2] & boxes[b];
-				if (!iv.is_empty()) neighboxes.push_back(&(boxes[b2]));
+				if (boxes[b].intersects(boxes[b2])) neighboxes.push_back(&(boxes[b2]));
 			}
 			
 			if (neighboxes.size() < q-1)  continue;

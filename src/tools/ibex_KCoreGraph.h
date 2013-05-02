@@ -2,6 +2,7 @@
 #define __IBEX_K_CORE_GRAPH_H__
 
 #include "ibex_IntStack.h"
+#include "cliquer.h"
 
 #include <list>
 #include <vector>
@@ -47,6 +48,7 @@ public:
 	
 	/* Misc */
 	inline int maxsize() {return neighbourhoods.size();};
+	graph_t *subgraph(IntStack *vset);
 private:
 	/* Coreness level */
 	int k;
