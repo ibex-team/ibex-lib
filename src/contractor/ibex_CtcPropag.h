@@ -50,21 +50,13 @@ public:
 	 *
 	 * Call #contract(IntervalVector&, const BoolMask&) with the mask
 	 * set to all the variables.
+	 * If #incremental is true, the propagation will start from the
+	 * impacted variables only (instead of from all the variables).
 	 *
 	 * \see #contract(IntervalVector&, const BoolMask&).
 	 * \throw #ibex::EmptyBoxException - if inconsistency is detected.
 	 */
 	virtual void contract(IntervalVector& box);
-
-	/**
-	 * \brief Incremental contraction.
-	 *
-	 * If #incremental is true, the propagation will start from the
-	 * impacted variables only (instead of from all the variables).
-	 *
-	 * \throw #ibex::EmptyBoxException - if inconsistency is detected.
-	 */
-	virtual void contract(IntervalVector& box, const BoolMask& impact);
 
 	/** The list of contractors to propagate */
 	Array<Ctc> list;

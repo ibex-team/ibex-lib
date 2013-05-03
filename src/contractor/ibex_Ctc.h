@@ -43,25 +43,6 @@ public:
 	virtual void contract(IntervalVector& box)=0;
 
 	/**
-	 * \brief Incremental contraction.
-	 *
-	 * The \a impact specifies the variables that have been
-	 * modified since the last call to this contractor.
-	 * By default, this function calls contract(box).
-	 *
-	 * \see #contract(IntervalVector&).
-	 */
-	virtual void contract(IntervalVector& box, const BoolMask& impact);
-
-	/**
-	 * \brief Contraction of a cell (optional)
-	 *
-	 * Implementation is optional. By default, call
-	 * contract(cell.box).
-	 */
-	virtual void contract(Cell& cell);
-
-	/**
 	 * \brief Delete *this.
 	 */
 	virtual ~Ctc();
@@ -85,6 +66,41 @@ public:
 	virtual bool idempotent();
 
 	/**
+	 * \brief Contraction with specified impact.
+	 *
+	 * Information on the impact allows incremental contraction.
+	 * The \a impact specifies the variables that have been
+	 * modified since the last call to this contractor.
+	 * By default, this function calls contract(box).
+	 *
+	 * \see #contract(IntervalVector&).
+	 */
+	void contract(IntervalVector& box, const BoolMask& impact);
+
+	/**
+	 * \brief Contraction of a cell.
+	 */
+	void contract(Cell& cell);
+
+	/**
+	 * \brief Contraction of a cell, with impact specified.
+	 */
+	void contract(Cell& cell, const BoolMask& impact);
+
+	/**
+	 * \brief Return the current impact (NULL pointer if none).
+	 *
+	 * \return if NULL, it does not mean that there is no impact but that the information on
+	 * the impact is not provided.
+	 */
+	const BoolMask* impact();
+
+	/**
+	 * \brief Return the current cell (NULL pointer if none).
+	 */
+	Cell* cell();
+
+	/**
 	 * \brief The number of variables this contractor works with.
 	 */
 	const int nb_var;
@@ -98,7 +114,25 @@ public:
 	 * \brief The output variables
 	 */
 	BoolMask output;
+
+private:
+	Cell* _cell;
+	const BoolMask* _impact;
 };
+
+
+/* ============================================================================
+ 	 	 	 	 	 	 	 inline implementation
+  ============================================================================*/
+
+inline const BoolMask* Ctc::impact() {
+	return _impact;
+}
+
+inline Cell* Ctc::cell() {
+	return _cell;
+}
+
 
 } // namespace ibex
 

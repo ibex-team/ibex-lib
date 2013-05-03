@@ -32,6 +32,9 @@ int main(int argc, char** argv) {
 		double goal_prec  = convert("goal_prec",argv[3]);  // the required precision for the objective
 		double time_limit = convert("timelimit",argv[4]);
 
+		if (!sys.goal) {
+			ibex_error(" input file has not goal (it is not an optimization problem).");
+		}
 
 		// Build the default optimizer
 		DefaultOptimizer o(sys,prec,goal_prec);

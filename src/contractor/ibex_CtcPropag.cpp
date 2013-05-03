@@ -39,17 +39,22 @@ CtcPropag::CtcPropag(const Array<Ctc>& cl, double ratio, bool incremental) :
 //	cout << g << endl;
 }
 
-void CtcPropag::contract(IntervalVector& box) {
-	contract(box,all_vars);
-}
-
-void  CtcPropag::contract(IntervalVector& box, const BoolMask& start) {
-
-	assert(start.size()==nb_var);
+void  CtcPropag::contract(IntervalVector& box) {
 
 	if (incremental) {
+		/**
+		 * Note: when impact() is NULL, we can
+		 * also push all the contractors in a simple loop,
+		 * as in the "else" part below.
+		 * But the order in the agenda is different
+		 * and this one turns to be slightly more efficient.
+		 * Maybe we should do the same when incremental==false.
+		 */
+
+		assert(!impact() || (impact()->size()==nb_var));
+
 		for (int i=0; i<nb_var; i++) {
-			if (start[i]) {
+			if (!impact() || (*impact())[i]) {
 				set<int> ctrs=g.output_ctrs(i);
 				for (set<int>::iterator c=ctrs.begin(); c!=ctrs.end(); c++)
 					agenda.push(*c);

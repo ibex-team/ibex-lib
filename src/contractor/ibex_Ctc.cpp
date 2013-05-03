@@ -14,7 +14,7 @@
 
 namespace ibex {
 
-Ctc::Ctc(int n) : nb_var(n), input(n), output(n) {
+Ctc::Ctc(int n) : nb_var(n), input(n), output(n), _impact(NULL), _cell(NULL) {
 	input.set_all();   // by default
 	output.set_all();  // by default
 }
@@ -23,12 +23,49 @@ Ctc::~Ctc() {
 }
 
 void Ctc::contract(Cell& cell) {
-	contract(cell.box);
+	_cell = &cell;
+
+	try {
+		contract(cell.box);
+	}
+	catch(EmptyBoxException& e) {
+		_cell = NULL;
+		throw e;
+	}
+	_cell = NULL;
 }
 
 void Ctc::contract(IntervalVector& box, const BoolMask& impact) {
-	contract(box);
+	_impact = &impact;
+
+	try {
+		contract(box);
+	}
+	catch(EmptyBoxException& e) {
+		_impact = NULL;
+		throw e;
+	}
+
+	_impact = NULL;
 }
+
+void Ctc::contract(Cell& cell, const BoolMask& impact) {
+	_cell = &cell;
+	_impact = &impact;
+
+	try {
+		contract(cell.box);
+	}
+	catch(EmptyBoxException& e) {
+		_cell = NULL;
+		_impact = NULL;
+		throw e;
+	}
+
+	_cell = NULL;
+	_impact = NULL;
+}
+
 
 void Ctc::add_backtrackable(Cell& root) {
 
