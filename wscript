@@ -77,7 +77,7 @@ def configure (conf):
 
 	# optimised compilation flags
 	if conf.options.DEBUG:
-		flags = "-O0 -g -pg -Wall -Wno-unknown-pragmas -fmessage-length=0"
+		flags = "-O0 -g -pg -Wall -Wno-unknown-pragmas -Wno-unused-variable -fmessage-length=0"
 	else:
 		flags = "-O3 -Wno-deprecated"
 		conf.define ("NDEBUG", 1)
@@ -167,6 +167,9 @@ def configure (conf):
 	conf.env.append_unique ("LIBPATH", ["3rd", "src"])
 	conf.recurse ("3rd src")
 
+	if conf.options.GAOL_PATH is not None:
+		switch_to_32bits() 
+    
 def build (bld):
 	bld.recurse ("src examples 3rd")
 
