@@ -33,9 +33,9 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 	// random corner choice
 	for (int i=0; i<n ; i++)
 	  {if (rand()%2)
-	      corner[n]=false;
+	      corner[i]=false;
 	    else
-	      corner[n]=true;}  
+	      corner[i]=true;}  
 	// the corner used
 	IntervalVector x_corner(n);
 	for (int i=0 ; i< n ; i++)
@@ -125,7 +125,7 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 	//		mysoplex.writeFile("dump.lp", NULL, NULL, NULL);
 	//		system ("cat dump.lp");
 	try{
-		stat = mysoplex.solve();
+	  stat = mysoplex.solve();
 	} catch(SPxException  ) {  //cout << " Simplex error " << endl;
 		return false;
 	}
