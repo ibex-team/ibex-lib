@@ -13,13 +13,11 @@
 #define __IBEX_CONTRACTOR_H__
 
 #include "ibex_IntervalVector.h"
-//#include "ibex_Indicators.h"
 #include "ibex_EmptyBoxException.h"
 #include "ibex_BoolMask.h"
+#include "ibex_Cell.h"
 
 namespace ibex {
-
-class Cell;
 
 /**
  * \defgroup contractor Contractors

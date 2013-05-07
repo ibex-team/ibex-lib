@@ -49,6 +49,7 @@
 #include "TestCtcInteger.h"
 #include "TestCtcSubBox.h"
 #include "TestCtcNotIn.h"
+#include "TestCtcFritzJohn.h"
 
 #include "TestAffine2.h"
 
@@ -63,7 +64,6 @@ int main() {
     Test::TextOutput output(Test::TextOutput::Verbose);
 
     Test::Suite ts;
-
 
     ts.add(auto_ptr<Test::Suite>(new TestString()));
     ts.add(auto_ptr<Test::Suite>(new TestSymbolMap()));
@@ -96,6 +96,7 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestCtcInteger()));
     ts.add(auto_ptr<Test::Suite>(new TestCtcSubBox()));
     ts.add(auto_ptr<Test::Suite>(new TestCtcNotIn()));
+    ts.add(auto_ptr<Test::Suite>(new TestCtcFritzJohn()));
 
     return ts.run(output,false) ? EXIT_SUCCESS : EXIT_FAILURE;
 
