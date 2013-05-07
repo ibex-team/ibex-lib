@@ -1,11 +1,11 @@
 //============================================================================
 //                                  I B E X                                   
 // File        : ibex_OptimSimplex.cpp
-// Author      : Ignacio Araya
+// Author      : Ignacio Araya  Bertrand Neveu
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Jul 12, 2012
-// Last Update : Jul 12, 2012
+// Last Update : May 07, 2013
 //============================================================================
 
 
@@ -19,7 +19,7 @@ using namespace std;
 
 namespace ibex {
 
-//The system is overconstrained by using the Taylor extension.
+//The system is overconstrained by using the Taylor extension in one corner randomly chosen
 //Then the simplex algorithm is applied to obtain a new upper bound loup
 //If a new loup is found the method returns true
 
@@ -28,10 +28,24 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
   //cout << " box simplex " << box << endl;
 	IntervalVector G(n); // vector to be used by the partial derivatives
 
-	IntervalVector x_inf(box.lb());
-
-	
-
+	// boolean indicating which corner in direction i is used : true for inferior corner, false for superior one.
+        bool corner[n]; 
+	// random corner choice
+	for (int i=0; i<n ; i++)
+	  {if (rand()%2)
+	      corner[n]=false;
+	    else
+	      corner[n]=true;}  
+	// the corner used
+	IntervalVector x_corner(n);
+	for (int i=0 ; i< n ; i++)
+	  {  
+	    if (corner[i])
+	      x_corner[i]=box[i].lb();
+	    else
+	      x_corner[i]=box[i].ub();
+	  }
+	      
 	SoPlex mysoplex;
 	mysoplex.changeSense(SPxLP::MINIMIZE);	// set the objective sense
 
@@ -52,11 +66,15 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 	mysoplex.addCol(LPCol(1.0, dummycol, infinity, -infinity ));
 	row1.add(0, -1.0);
 
-	for (int j=0; j<nsimplex-1; j++){
+	for (int j=0; j<n; j++){
 		//The linear variables are generated
 		//0 <= xl_j <= diam([x_j])
-		mysoplex.addCol(LPCol(0.0, dummycol, box[j].diam(), 0.0));
-		row1.add(j+1, G[j].ub());
+	  if (corner[j])
+	    {mysoplex.addCol(LPCol(0.0, dummycol, box[j].diam(), 0.0));
+	      row1.add(j+1, G[j].ub());}
+	  else
+	    {mysoplex.addCol(LPCol(0.0, dummycol, 0.0, -(box[j].diam())));
+	      row1.add(j+1, G[j].lb());}
 	}
 	//the first constraint:
 	//sup(df/dx_1) xl_1 + ... + sup(df/dx_n) xl_n <= yl
@@ -68,7 +86,10 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 
 	//The linear system is generated
 	if (m>0)
-	  {IntervalVector g_inf(sys.f.eval_vector(x_inf)); // may throw EmptyBoxException?
+	  {
+	    // the evaluation of the constraints in the corner x_corner
+	    IntervalVector g_corner(sys.f.eval_vector(x_corner)); 
+
 	    for (int i=0; i<m; i++) {
 
 	    if ((*entailed)[i]) continue;
@@ -79,24 +100,19 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 		for (int ii =0; ii< n ; ii++)
 		  if (G[ii].diam() > 1e8) {return false;}   //to avoid problems with SoPleX
 		
-
 		DSVector row1(nsimplex);
 
 		//The contraints i is generated:
 		// c_i:  inf([g_i]([x]) + sup(dg_i/dx_1) * xl_1 + ... + sup(dg_i/dx_n) + xl_n  <= -eps_error
-		for (int j=0; j<nsimplex-1; j++) {
-			//			if(op == LEQ || op== LT) {
-			row1.add(j+1, G[j].ub());
-			//			} else {
-			//				row1.add(j+1, Inf(G(j+1)));
-			//			}
+		for (int j=0; j<n; j++) {
+
+		  if (corner[j])
+		    row1.add(j+1, G[j].ub());
+		  else
+		    row1.add(j+1, G[j].lb());
 		}
 
-		//		if(op == LEQ || op== LT) {
-		mysoplex.addRow(LPRow(-infinity, row1, (-g_inf)[i].lb()-1e-10));    //  1e-10 ???  BNE
-		//		} else {
-		//			mysoplex.addRow(LPRow(Sup(-eval_inf(i+1))+1e-10, row1, infinity));
-		//		}
+		mysoplex.addRow(LPRow(-infinity, row1, (-g_corner)[i].lb()-1e-10));    //  1e-10 ???  BNE
 	    }
 	  }
 
@@ -113,7 +129,7 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 	} catch(SPxException  ) {  //cout << " Simplex error " << endl;
 		return false;
 	}
-//	cout << " stat " << stat << endl;
+	//	cout << " stat " << stat << endl;
 	if (stat == SPxSolver::OPTIMAL) {
 		//the linear solution is mapped to intervals and evaluated
 		DVector prim(nsimplex);
@@ -122,8 +138,8 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 		IntervalVector tmpbox(n);
 
 		for (int j=0; j<n; j++)
-			tmpbox[j]=box[j].lb()+prim[j+1];
-//		cout << " simplex result " << tmpbox << endl;
+		  tmpbox[j]=x_corner[j]+prim[j+1];
+		//		cout << " simplex result " << tmpbox << endl;
 		bool ret= check_candidate(tmpbox.mid(),false); //  [gch] do we know here that the point is inner??
 
 		if (ret) {
