@@ -13,6 +13,7 @@
 
 #include "ibex_Ctc.h"
 #include "ibex_CtcHC4.h"
+#include "ibex_CtcNewton.h"
 #include "ibex_System.h"
 
 namespace ibex {
@@ -26,6 +27,8 @@ public:
 
 	/**
 	 * \brief Build the contractor for an optimization problem.
+	 *
+	 * The contractor expects an extended box (of size n+1, including the objective).
 	 */
 	CtcFritzJohn(const System& sys);
 
@@ -40,17 +43,25 @@ public:
 	 */
 	void add_backtrackable(Cell& root);
 
-	/** Fritz-John conditions. */
-	System fritz;
+	/** Fritz-John' conditions:
+	 * f'+lambda_1*g'_1+...lambda_m*g'm = 0.
+	 * lambda_i*g_i = 0. */
+	System *fritz;
 
 	/** Contractor associated to \a "fritz". */
-	CtcHC4 ctc;
+	CtcHC4 *ctc;
+
+	/** Newton associated to \a "fritz". */
+	CtcNewton *newton;
 
 	/** Number of basic variables */
 	const int n;
 
-	/** Number of constraints */
-	const int m;
+	/** Number of inequalities */
+	const int M;
+
+	/** Number of equalities */
+	const int R;
 
 	/** Number of bound constraints */
 	const int K;

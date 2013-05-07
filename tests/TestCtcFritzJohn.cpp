@@ -33,17 +33,18 @@ void TestCtcFritzJohn::test01() {
 
 	CtcFritzJohn fj(sys);
 	double s=::sqrt(2)/2.0;
-	double _box[][2] = {{s,s},{s,s}}; //0.7,0.8},{0.7,0.8}};
-	IntervalVector box(2,_box);
+	double _box[][2] = {{0.7,0.8},{0.7,0.8},{NEG_INFINITY,POS_INFINITY}};
+	//double _box[][2] = {{s,s},{s,s}};
+	IntervalVector box(3,_box);
 	try {
 	fj.contract(box);
 	} catch(EmptyBoxException& e) {
 
 	}
-	double _extbox[][2] = {{0.7,0.8},{0.7,0.8}};
-	IntervalVector extbox(2,_box);
 
 	TEST_ASSERT(!fj.ext_box.is_empty());
+
+	//cout << fj.ext_box << endl;
 
 	Interval& u=fj.ext_box[2];
 	Interval& l=fj.ext_box[3];
