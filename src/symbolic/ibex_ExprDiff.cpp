@@ -40,7 +40,7 @@ const ExprNode& ExprDiff::diff(const Array<const ExprSymbol>& old_x, const Array
 		}
 		return ExprVector::new_(a,false);
 	} else {
-		not_implemented("differentation of matrix-valued functions");
+		not_implemented("differentiation of matrix-valued functions");
 		return y;
 	}
 }
@@ -53,25 +53,70 @@ const ExprNode& ExprDiff::gradient(const Array<const ExprSymbol>& old_x, const A
 	SubNodes nodes(y);
 	//cout << "y =" << y;
 	int n=y.size;
-	int nb_var=old_x.size();
+	int nb_var=0;
+	for (int i=0; i<old_x.size(); i++) {
+		nb_var += old_x[i].dim.size();
+	}
 
 	add_grad_expr(nodes[0],ONE);
 
 	// visit nodes in topological order
-	 for (int i=0; i<n; i++) {
+	for (int i=0; i<n; i++) {
 		visit(nodes[i]);
 	}
 
 	Array<const ExprNode> dX(nb_var);
 
-	for (int i=0; i<nb_var; i++) {
-		if (!grad.found(old_x[i])) { // this symbol does not appear in the expression -> null derivative
-			leaves.push_back(&old_x[i]);
-			Domain d(old_x[i].dim);
-			d.clear();
-			grad.insert(old_x[i], &ExprConstant::new_(d));
+	{   // =============== build dX ===================
+		int k=0;
+		for (int i=0; i<old_x.size(); i++) {
+
+			switch (old_x[i].dim.type()) {
+			case Dim::SCALAR:
+				if (!grad.found(old_x[i])) { // this symbol does not appear in the expression -> null derivative
+					dX.set_ref(k,ExprConstant::new_scalar(0));
+					leaves.push_back(&dX[k++]); // note: nothing will be associated to grad[old_x[i]] but this map is not used hereinafter
+				} else
+					dX.set_ref(k++,*grad[old_x[i]]);
+				break;
+			case Dim::ROW_VECTOR:
+			case Dim::COL_VECTOR:
+				if (!grad.found(old_x[i])) // this symbol does not appear in the expression -> null derivative
+					for (int j=0; j<old_x[i].dim.vec_size(); j++) {
+						dX.set_ref(k,ExprConstant::new_scalar(0));
+						leaves.push_back(&dX[k++]);
+					}
+				else {
+					const ExprVector& vec = * ((const ExprVector*) grad[old_x[i]]);
+					for (int j=0; j<old_x[i].dim.vec_size(); j++)
+						dX.set_ref(k++,vec.arg(j));
+				}
+				break;
+			case Dim::MATRIX:
+				if (!grad.found(old_x[i])) // this symbol does not appear in the expression -> null derivative
+					for (int j2=0; j2<old_x[i].dim.dim2; j2++)
+						for (int j3=0; j3<old_x[i].dim.dim3; j3++) {
+							dX.set_ref(k,ExprConstant::new_scalar(0));
+							leaves.push_back(&dX[k++]);
+						}
+				else {
+					const ExprVector& vec = * ((const ExprVector*) grad[old_x[i]]);
+
+					for (int j2=0; j2<old_x[i].dim.dim2; j2++) {
+						const ExprVector& vec2 = (const ExprVector&) vec.arg(j2);
+
+						for (int j3=0; j3<old_x[i].dim.dim3; j3++)
+							dX.set_ref(k++, vec.arg(j3));
+					}
+				}
+				break;
+
+			default:
+				not_implemented("diff with matrix arrays");
+				break;
+			}
 		}
-		dX.set_ref(i,*grad[old_x[i]]);
+		assert(k==nb_var);
 	}
 
 	const ExprNode& df=ExprVector::new_(dX,true);
@@ -124,7 +169,51 @@ void ExprDiff::visit(const ExprNode& e) {
 }
 
 void ExprDiff::visit(const ExprIndex& i) {
-	not_implemented("diff with index");
+
+	if (i.expr.dim.is_scalar()) { // => i.index==0
+		add_grad_expr(i.expr, *grad[i]);
+		return;
+	}
+
+	if (i.expr.dim.type()==Dim::MATRIX_ARRAY) {
+		not_implemented("diff with matrix arrays");
+	}
+
+	int n = i.expr.dim.max_index()+1;
+
+	// we will build a new vector from scratch
+	Array<const ExprNode> new_comp(n);
+
+	if (grad.found(i.expr)) {
+		const ExprVector* old_g=(const ExprVector*) grad[i.expr];
+		assert(old_g);
+		for (int j=0; j<n; j++) {
+			if (j!=i.index)
+				// duplicate all other components
+				new_comp.set_ref(j, old_g->arg(j));
+			else {
+				if (old_g->arg(i.index).is_zero()) {
+					new_comp.set_ref(i.index, *(grad[i]));
+					delete &old_g->arg(i.index);
+				}
+				else
+					new_comp.set_ref(i.index, old_g->arg(i.index) + *(grad[i]));
+			}
+		}
+		// do not call cleanup(*old_g) because subnodes are still used.
+		delete old_g;
+	} else {
+		// not found means "zero"
+		for (int j=0; j<n; j++) {
+			if (j!=i.index)
+				// duplicate all other components
+				new_comp.set_ref(j, ExprConstant::new_scalar(Interval::ZERO));
+			else
+				new_comp.set_ref(i.index, *(grad[i]));
+		}
+	}
+
+	grad[i.expr] = & ExprVector::new_(new_comp, i.expr.dim.type()==Dim::MATRIX || i.expr.dim.type()==Dim::ROW_VECTOR);
 }
 
 void ExprDiff::visit(const ExprSymbol& x) {
@@ -170,7 +259,8 @@ void ExprDiff::visit(const ExprApply& e) {
 
 void ExprDiff::visit(const ExprAdd& e)   { add_grad_expr(e.left,  *grad[e]);
                                            add_grad_expr(e.right, *grad[e]); }
-void ExprDiff::visit(const ExprMul& e)   { add_grad_expr(e.left,  e.right * (*grad[e]));
+void ExprDiff::visit(const ExprMul& e)   { if (!e.dim.is_scalar()) not_implemented("diff with matrix/vector multiplication"); // TODO
+                                           add_grad_expr(e.left,  e.right * (*grad[e]));
                                            add_grad_expr(e.right, e.left * (*grad[e])); }
 void ExprDiff::visit(const ExprSub& e)   { add_grad_expr(e.left,  *grad[e]);
 										   add_grad_expr(e.right, -*grad[e]); }
@@ -186,9 +276,9 @@ void ExprDiff::visit(const ExprPower& e) {
 }
 
 void ExprDiff::visit(const ExprMinus& e) { add_grad_expr(e.expr, -*grad[e]); }
-void ExprDiff::visit(const ExprTrans& e) { not_implemented("diff with transpose"); }
-void ExprDiff::visit(const ExprSign& e)  { not_implemented("diff with sign"); }
-void ExprDiff::visit(const ExprAbs& e)   { not_implemented("diff with abs"); }
+void ExprDiff::visit(const ExprTrans& e) { not_implemented("diff with transpose"); } //TODO
+void ExprDiff::visit(const ExprSign& e)  { not_implemented("diff with sign"); }      //TODO
+void ExprDiff::visit(const ExprAbs& e)   { not_implemented("diff with abs"); }       //TODO
 void ExprDiff::visit(const ExprSqr& e)   { add_grad_expr(e.expr, (*grad[e])*Interval(2.0)*e.expr); }
 void ExprDiff::visit(const ExprSqrt& e)  { add_grad_expr(e.expr, (*grad[e])*Interval(0.5)/sqrt(e.expr)); }
 void ExprDiff::visit(const ExprExp& e)   { add_grad_expr(e.expr, (*grad[e])*exp(e.expr)); }
