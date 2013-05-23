@@ -43,7 +43,7 @@ public:
 	 */
 	void add_backtrackable(Cell& root);
 
-	/** Fritz-John' conditions:
+	/** Fritz-John' conditions +
 	 * f'+lambda_1*g'_1+...lambda_m*g'm = 0.
 	 * lambda_i*g_i = 0. */
 	System *fritz;

@@ -41,4 +41,12 @@ EntailedCtr::~EntailedCtr() {
 	 delete[] entailed;
 }
 
+std::ostream& operator<<(std::ostream& os, const EntailedCtr& e) {
+	os << '(';
+	for (int i=0; i<e.n; i++) {
+		os << e[i] << (i<e.n-1?" ":"");
+	}
+	return os << ')';
+}
+
 } // end namespace ibex

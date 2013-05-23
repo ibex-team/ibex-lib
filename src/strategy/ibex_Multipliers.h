@@ -27,11 +27,15 @@ public:
 	Multipliers();
 
 	/**
-	 * \brief Set the number of Lagrange Multiplier to n
+	 * \brief Set the number of Lagrange Multiplier to 1+m+r+k
 	 *
-	 * And set their domain to [0,1].
+	 * m corresponds to the number of inequalities, r
+	 * to the number of equalities, k the number of bound constraints.
+	 * Set the domain of the "special" multiplier u to [0,1], the domain
+	 * for the m+k inequalities/bound constraints to [0,1] and
+	 * the domain for the r equalities to [-1,1].
 	 */
-	void init_root(int n);
+	void init_root(int m, int r, int k);
 
 	/**
 	 * \brief Delete *this.

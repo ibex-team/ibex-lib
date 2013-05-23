@@ -16,12 +16,20 @@ Multipliers::Multipliers() {
 
 }
 
-void Multipliers::init_root(int n) {
-	lambda.resize(n);
+void Multipliers::init_root(int M, int R, int K) {
 
-	for (int i=0; i<n; i++) {
-		lambda[i]=Interval(0,1);
-	}
+	lambda.resize(1+M+R+K);
+
+	lambda[0]=Interval(0,1);
+
+	for (int m=0; m<M; m++)
+		lambda[1+m]=Interval(0,1);
+
+	for (int r=0; r<R; r++)
+		lambda[1+M+r]=Interval(-1,1);
+
+	for (int k=0; k<K; k++)
+		lambda[1+M+R+k]=Interval(0,1);
 }
 
 

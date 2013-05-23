@@ -12,6 +12,7 @@
 #define __IBEX_ENTAILED_CTR_H__
 
 #include "ibex_Backtrackable.h"
+#include <iostream>
 
 namespace ibex {
 
@@ -44,6 +45,13 @@ public:
 	bool& operator[](int i);
 
 	/**
+	 * \brief Entailement of the ith constraint.
+	 *
+	 * Must be set to "true" only if the ith constraint is entailed.
+	 */
+	const bool& operator[](int i) const;
+
+	/**
 	 * \brief Duplicate the structure into the left/right nodes
 	 */
 	std::pair<Backtrackable*,Backtrackable*> down();
@@ -59,9 +67,16 @@ protected:
 };
 
 
+std::ostream& operator<<(std::ostream& os, const EntailedCtr&);
+
 /*============================================ inline implementation ============================================ */
 
 inline bool& EntailedCtr::operator[](int i) {
+	return entailed[i];
+}
+
+
+inline const bool& EntailedCtr::operator[](int i) const {
 	return entailed[i];
 }
 

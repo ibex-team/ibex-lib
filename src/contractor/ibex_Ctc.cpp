@@ -10,29 +10,15 @@
  * ---------------------------------------------------------------------------- */
 
 #include "ibex_Ctc.h"
-#include "ibex_Cell.h"
 
 namespace ibex {
 
-Ctc::Ctc(int n) : nb_var(n), input(n), output(n), _impact(NULL), _cell(NULL) {
+Ctc::Ctc(int n) : nb_var(n), input(n), output(n), _impact(NULL) {
 	input.set_all();   // by default
 	output.set_all();  // by default
 }
 
 Ctc::~Ctc() {
-}
-
-void Ctc::contract(Cell& cell) {
-	_cell = &cell;
-
-	try {
-		contract(cell.box);
-	}
-	catch(EmptyBoxException& e) {
-		_cell = NULL;
-		throw e;
-	}
-	_cell = NULL;
 }
 
 void Ctc::contract(IntervalVector& box, const BoolMask& impact) {
@@ -49,30 +35,24 @@ void Ctc::contract(IntervalVector& box, const BoolMask& impact) {
 	_impact = NULL;
 }
 
-void Ctc::contract(Cell& cell, const BoolMask& impact) {
-	_cell = &cell;
+
+void Ctc::contract(IntervalVector& box, const BoolMask& impact, BoolMask& flags) {
 	_impact = &impact;
+	_output_flags = &flags;
+
+	flags.unset_all();
 
 	try {
-		contract(cell.box);
+		contract(box);
 	}
 	catch(EmptyBoxException& e) {
-		_cell = NULL;
 		_impact = NULL;
+		_output_flags = NULL;
 		throw e;
 	}
 
-	_cell = NULL;
 	_impact = NULL;
-}
-
-
-void Ctc::add_backtrackable(Cell& root) {
-
-}
-
-bool Ctc::idempotent() {
-	return false;
+	_output_flags = NULL;
 }
 
 } // namespace ibex

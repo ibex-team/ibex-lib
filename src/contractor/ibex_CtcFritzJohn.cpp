@@ -250,10 +250,10 @@ CtcFritzJohn::CtcFritzJohn(const System& sys): Ctc(sys.nb_var+1), n(sys.nb_var),
 	ext_box.resize(n+M+R+K+1);
 
 	fritz=new System(fac);
-	//cout << "Gradient system:\n" << *fritz << endl << endl;
+	cout << "System:\n" << *fritz << endl << endl;
 
 	ctc=new CtcHC4(fritz->ctrs);
-	newton=new CtcNewton(fritz->f,POS_INFINITY); // we will use our own "ceil" mechanism
+	newton=new CtcNewton(fritz->f); // we will also in addition a regularity condition
 }
 
 CtcFritzJohn::~CtcFritzJohn() {
@@ -265,52 +265,67 @@ CtcFritzJohn::~CtcFritzJohn() {
 
 void CtcFritzJohn::add_backtrackable(Cell& root) {
 	root.add<Multipliers>();
-	root.get<Multipliers>().init_root(M+K+1);
+	root.get<Multipliers>().init_root(M,R,K);
 
 }
 
 void CtcFritzJohn::contract(IntervalVector& box) {
 
-	// read original variables
-	for (int i=0; i<n; i++) ext_box[i] = box[i];
-	// Note: box[n] is goal var!!
-	// TODO: skip "goal_var" instead (in case one day goal_var<n...)
+//	//IntervalVector savebox(box);
+//
+//	// read original variables
+//	for (int i=0; i<n; i++) ext_box[i] = box[i];
+//	// Note: box[n] is goal var!!
+//	// TODO: skip "goal_var" instead (in case one day goal_var<n...)
+//
+//
+//	// read multipliers
+//	if (cell()) {
+//		Multipliers& mult=cell()->get<Multipliers>();
+//		for (int i=0; i<M+R+K+1; i++) ext_box[n+i] = mult[i];
+//
+//		//cout << "extended Fritz box=" << ext_box << endl;
+//	} else {
+//								ext_box[n]        = Interval(0,1);
+//		for (int m=0; m<M; m++) ext_box[n+1+m]    = Interval(0,1);
+//		for (int r=0; r<R; r++) ext_box[n+1+M+r]  = Interval(-1,1);
+//		for (int k=0; k<K; k++) ext_box[n+1+M+R+k]= Interval(0,1);
+//	}
+//
+//	// TODO: call HC4 incrementally (because
+//	// no multiplier are impacted) ?
+//	ctc->contract(ext_box);
+//
+//	// at least one multiplier must not have 0 in its domain
+//	// for the system to be non singular
+//	bool launch_newton=false;
+//	for (int i=0; i<M+R+K+1; i++) {
+//		launch_newton |= (!(ext_box[n+i].contains(0)));
+//	}
+//
+//	if (launch_newton) {
+//		cout << "launch Newton!" << endl;
+//		newton->contract(ext_box);
+//	}
+//
+//	// write original variables
+//	for (int i=0; i<n; i++) box[i] = ext_box[i];
+//
+//	// write multipliers
+//	if (cell()) {
+//		Multipliers& mult=cell()->get<Multipliers>();
+//		for (int i=0; i<M+R+K+1; i++) mult[i] = ext_box[n+i];
+//	}
+//
+////	if (!box.is_subset(savebox)) {
+////		cerr << "bug" << endl;
+////		exit(1);
+////	} else {
+////		if (savebox.rel_distance(box)>0) {
+////			cout << "gain=" << savebox.rel_distance(box) << endl;
+////		}
+////	}
 
-
-	// read multipliers
-	if (cell()) {
-		Multipliers& mult=cell()->get<Multipliers>();
-		for (int i=0; i<M+R+K+1; i++) ext_box[n+i] = mult[i];
-
-		//cout << "extended Fritz box=" << ext_box << endl;
-	} else {
-		for (int i=0; i<M+R+K+1; i++) ext_box[n+i] = Interval(0,1);
 	}
-
-	// TODO: call HC4 incrementally (because
-	// no multiplier are impacted) ?
-	ctc->contract(ext_box);
-
-	// at least one multiplier must not have 0 in its domain
-	// for the system to be non singular
-	bool launch_newton=false;
-	for (int i=0; i<M+R+K+1; i++) {
-		launch_newton |= (ext_box[n+i].lb()>0);
-	}
-
-	if (launch_newton) {
-		cout << "launch Newton!" << endl;
-		newton->contract(ext_box);
-	}
-
-	// write original variables
-	for (int i=0; i<n; i++) box[i] = ext_box[i];
-
-	// write multipliers
-	if (cell()) {
-		Multipliers& mult=cell()->get<Multipliers>();
-		for (int i=0; i<M+R+K+1; i++) mult[i] = ext_box[n+i];
-	}
-}
 
 } // end namespace ibex

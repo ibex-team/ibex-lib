@@ -41,8 +41,25 @@ CtcPropag::CtcPropag(const Array<Ctc>& cl, double ratio, bool incremental) :
 
 void  CtcPropag::contract(IntervalVector& box) {
 
+	/*
+	 * When we call a contractor, we assume all
+	 * its variables have been impacted although there might be
+	 * only of them impacted. In a future
+	 * version, we may consider a more fine propagation
+	 * where the information about the variables that are actually impacted is
+	 * given to the awaken contractor.
+	 */
+	BoolMask _impact(nb_var);
+	_impact.set_all();
+
+	// To get the status of a contraction
+	BoolMask flags(Ctc::NB_OUTPUT_FLAGS);
+
 	if (incremental) {
 		/**
+		 * impact() is the impact given to CtcPropag. Not
+		 * to be confused with _impact.
+		 *
 		 * Note: when impact() is NULL, we can
 		 * also push all the contractors in a simple loop,
 		 * as in the "else" part below.
@@ -98,7 +115,7 @@ void  CtcPropag::contract(IntervalVector& box) {
 		//cout << "Contraction with " << c << endl;
 
 		try {
-			list[c].contract(box);
+			list[c].contract(box, _impact, flags);
 		}
 		catch (EmptyBoxException& e) {
 			agenda.flush();
@@ -117,7 +134,7 @@ void  CtcPropag::contract(IntervalVector& box) {
 			if (old_box[v].ratiodelta(box[v])>=ratio) {
 				set<int> ctrs=g.output_ctrs(v);
 				for (set<int>::iterator c2=ctrs.begin(); c2!=ctrs.end(); c2++) {
-					if (c!=*c2 || !list[c].idempotent())
+					if (c!=*c2 || !flags[FIXPOINT])
 						agenda.push(*c2);
 				}
 				// ===================== coarse propagation =========================

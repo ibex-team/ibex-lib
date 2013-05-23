@@ -41,8 +41,5 @@ void CtcSubBox::contract(IntervalVector& x) {
 		if (mask[i]) x[i]=y[j++];
 }
 
-bool CtcSubBox::idempotent() {
-	return ctc.idempotent();
-}
 
 } // end namespace ibex

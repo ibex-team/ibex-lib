@@ -41,11 +41,6 @@ public:
 	virtual void contract(IntervalVector& box);
 
 	/**
-	 * \brief Is it idempotent?
-	 */
-	virtual bool idempotent();
-
-	/**
 	 * The contractor.
 	 */
 	Ctc& ctc;
