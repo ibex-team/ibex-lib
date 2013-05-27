@@ -47,7 +47,10 @@ void CtcFwdBwd::contract(IntervalVector& box) {
 	}
 
 	try {
-		hc4r.proj(ctr.f,root_label,box);
+		if (hc4r.proj(ctr.f,root_label,box)) {
+			set_flag(INACTIVE);
+			set_flag(FIXPOINT);
+		}
 	} catch (EmptyBoxException& e) {
 		box.set_empty();
 		throw e;

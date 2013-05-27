@@ -38,8 +38,10 @@ public:
 
 	/**
 	 * \brief Project f(x)=y onto x (backward algorithm)
+	 *
+	 * \brief true if f(x) is included in y (inactive constraint)
 	 */
-	void proj(const Function& f, const Domain& y, IntervalVector& x);
+	bool proj(const Function& f, const Domain& y, IntervalVector& x);
 
 	/**
 	 * \brief Ratio for the contraction of a

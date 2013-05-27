@@ -66,13 +66,6 @@ public:
 	void contract(IntervalVector& box, const BoolMask& impact, BoolMask& flags);
 
 	/**
-	 * \brief Return the current impact (NULL pointer if none).
-	 *
-	 * \return if NULL, it does not mean that there is no impact but that the information on
-	 * the impact is not provided.
-	 */
-	const BoolMask* impact();
-	/**
 	 * \brief The number of variables this contractor works with.
 	 */
 	const int nb_var;
@@ -100,9 +93,23 @@ public:
 	 */
 	enum {FIXPOINT, INACTIVE, NB_OUTPUT_FLAGS};
 
+protected:
+	/**
+	 * \brief Return the current impact (NULL pointer if none).
+	 *
+	 * \return if NULL, it does not mean that there is no impact but that the information on
+	 * the impact is not provided.
+	 */
+	const BoolMask* impact();
+
+	/**
+	 * Set an output flag.
+	 */
+	void set_flag(unsigned int);
+
 private:
 	const BoolMask* _impact;
-	const BoolMask* _output_flags;
+	BoolMask* _output_flags;
 };
 
 
@@ -112,6 +119,11 @@ private:
 
 inline const BoolMask* Ctc::impact() {
 	return _impact;
+}
+
+inline void Ctc::set_flag(unsigned int f) {
+	assert(f<NB_OUTPUT_FLAGS);
+	if (_output_flags) _output_flags[f]=true;
 }
 
 } // namespace ibex

@@ -79,7 +79,12 @@ protected:
 
 	Agenda agenda;
 
-	BoolMask all_vars; // used when incremental=false
+	BoolMask _impact; // impact given to sub-contractors
+
+	BoolMask flags;   // status of a contraction
+
+	BoolMask active;  // mark active sub-contractors
+
 
 };
 

@@ -24,7 +24,7 @@ namespace ibex {
 CtcPropag::CtcPropag(const Array<Ctc>& cl, double ratio, bool incremental) :
 		  Ctc(cl[0].nb_var), list(cl), ratio(ratio), incremental(incremental),
 		  accumulate(false), g(cl.size(), cl[0].nb_var), agenda(cl.size()),
-		  all_vars(cl[0].nb_var) {
+		  _impact(nb_var), flags(Ctc::NB_OUTPUT_FLAGS), active(cl.size()) {
 
 	for (int i=1; i<list.size(); i++)
 		assert(list[i].nb_var==nb_var);
@@ -35,7 +35,6 @@ CtcPropag::CtcPropag(const Array<Ctc>& cl, double ratio, bool incremental) :
 			if (list[i].output[j]) g.add_arc(i,j,false);
 		}
 
-	all_vars.set_all();
 //	cout << g << endl;
 }
 
@@ -44,21 +43,20 @@ void  CtcPropag::contract(IntervalVector& box) {
 	/*
 	 * When we call a contractor, we assume all
 	 * its variables have been impacted although there might be
-	 * only of them impacted. In a future
-	 * version, we may consider a more fine propagation
-	 * where the information about the variables that are actually impacted is
+	 * only one of them impacted. In a future version, we may
+	 * consider a more fine propagation where the information
+	 * about the variables that are actually impacted is
 	 * given to the awaken contractor.
 	 */
-	BoolMask _impact(nb_var);
 	_impact.set_all();
 
-	// To get the status of a contraction
-	BoolMask flags(Ctc::NB_OUTPUT_FLAGS);
+	// By default, all contractors are active
+	active.set_all();
 
 	if (incremental) {
 		/**
-		 * impact() is the impact given to CtcPropag. Not
-		 * to be confused with _impact.
+		 * impact() is the impact in input (given to CtcPropag).
+		 * Not to be confused with _impact.
 		 *
 		 * Note: when impact() is NULL, we can
 		 * also push all the contractors in a simple loop,
@@ -116,6 +114,9 @@ void  CtcPropag::contract(IntervalVector& box) {
 
 		try {
 			list[c].contract(box, _impact, flags);
+			if (flags[INACTIVE]) {
+				active[c]=false;
+			}
 		}
 		catch (EmptyBoxException& e) {
 			agenda.flush();
@@ -134,7 +135,7 @@ void  CtcPropag::contract(IntervalVector& box) {
 			if (old_box[v].ratiodelta(box[v])>=ratio) {
 				set<int> ctrs=g.output_ctrs(v);
 				for (set<int>::iterator c2=ctrs.begin(); c2!=ctrs.end(); c2++) {
-					if (c!=*c2 || !flags[FIXPOINT])
+					if ((c!=*c2 && active[*c2]) || (c==*c2 && !flags[FIXPOINT]))
 						agenda.push(*c2);
 				}
 				// ===================== coarse propagation =========================
