@@ -123,7 +123,7 @@ inline const BoolMask* Ctc::impact() {
 
 inline void Ctc::set_flag(unsigned int f) {
 	assert(f<NB_OUTPUT_FLAGS);
-	if (_output_flags) _output_flags[f]=true;
+	if (_output_flags) (*_output_flags)[f]=true;
 }
 
 } // namespace ibex
