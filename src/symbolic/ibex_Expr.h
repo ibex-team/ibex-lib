@@ -75,7 +75,7 @@ public:
 	/** Unique number identifying this expression node
 	 *
 	 * This field is typically used as key in hash maps. The physical address of the
-	 * object is indeed not a good candidate (for being a key) because reproductibility
+	 * object is indeed not a good candidate (for being a key) because reproducibility
 	 * is lost in this case.
 	 */
 	const long id;

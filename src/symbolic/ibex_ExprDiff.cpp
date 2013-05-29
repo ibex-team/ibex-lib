@@ -10,7 +10,7 @@
 
 #include "ibex_ExprDiff.h"
 #include "ibex_ExprCopy.h"
-#include "ibex_ExprNodes.h"
+#include "ibex_ExprSubNodes.h"
 #include "ibex_Expr.h"
 
 using namespace std;

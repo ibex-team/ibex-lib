@@ -15,7 +15,7 @@
 
 #include "ibex_Expr.h"
 #include "ibex_ExprVisitor.h"
-#include "ibex_ExprNodes.h"
+#include "ibex_ExprSubNodes.h"
 #include "ibex_FwdAlgorithm.h"
 #include "ibex_BwdAlgorithm.h"
 

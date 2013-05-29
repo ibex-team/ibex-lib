@@ -13,7 +13,7 @@
 #include "ibex_DimException.h"
 #include "ibex_Function.h"
 #include "ibex_ExprPrinter.h"
-#include "ibex_ExprNodes.h"
+#include "ibex_ExprSubNodes.h"
 #include "ibex_ExprSize.h"
 #include "ibex_String.h"
 #include <sstream>
