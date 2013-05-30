@@ -5,7 +5,7 @@
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Aug 27, 2012
-// Last Update : Aug 27, 2012
+// Last Update : May 26, 2013
 //============================================================================
 
 #ifndef __IBEX_SYSTEM_FACTORY_H__
@@ -29,40 +29,68 @@ public:
 	 */
 	SystemFactory();
 
+	~SystemFactory();
+
 	/**
 	 * \brief Add a new variable.
+	 *
+	 * 	The reference to this variable is kept
+	 * 	until the system is built.
 	 */
 	void add_var(const ExprSymbol& v);
 
 	/**
-	 * \brief Add all variables of an array.
+	 * \brief Add all variables.
+	 *
+	 *  References to the variables are kept
+	 * 	until the system is built.
 	 */
 	void add_var(const Array<const ExprSymbol>& a);
 
 	/**
-	 * \brief Add a goal function.
+	 * \brief Add a goal function (by copy)
 	 *
 	 * \pre All the variables must have been added.
-	 * \note A reference to the argument is kept until
-	 * the system is built.
+	 * \warning for convenience, goal is cleaned up (the expression
+	 * does not exist anymore after this function call).
 	 */
 	void add_goal(const ExprNode& goal);
 
 	/**
-	 * \brief Add a new constraint.
+	 * \brief Add a goal function (by copy).
+	 */
+	void add_goal(const Function& goal);
+
+	/**
+	 * \brief Add a new constraint (by copy).
 	 *
 	 * \pre All the variables must have been added.
-	 * \note A reference to the argument is kept until
-	 * the system is built.
 	 */
 	void add_ctr(const ExprCtr& ctr);
 
+	/**
+	 * \brief Add a new constraint (by copy).
+	 *
+	 * \pre All the variables must have been added.
+	 */
+	void add_ctr(const NumConstraint& ctr);
+	void add_ctr2(const ExprCtr& ctr);
 protected:
 	friend class System;
-	std::vector<const ExprSymbol*> vars;
-	const ExprNode* goal;
-	std::vector<const ExprNode*> exprs;
-	std::vector<CmpOp> ops;
+
+	// total number of arguments
+	int nb_arg;
+	// total number of variables
+	int nb_var;
+
+	Function* goal;
+
+	// temporary arguments
+	std::vector<const ExprSymbol*> tmp_args;
+	// definitive arguments
+	Array<const ExprSymbol>* args;
+
+	std::vector<NumConstraint*> ctrs;
 };
 
 } // end namespace ibex

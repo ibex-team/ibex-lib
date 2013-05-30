@@ -1,0 +1,91 @@
+//============================================================================
+//                                  I B E X                                   
+// File        : ibex_SystemExtend.cpp_
+// Author      : Gilles Chabert
+// Copyright   : Ecole des Mines de Nantes (France)
+// License     : See the LICENSE file
+// Created     : May 27, 2013
+// Last Update : May 27, 2013
+//============================================================================
+
+#include "ibex_SystemFactory.h"
+
+using std::pair;
+
+namespace ibex {
+
+class SystemExtend : public SystemFactory {
+
+public:
+
+	SystemExtend(const System& sys) {
+
+
+		Variable y(System::goal_name); // y is a scalar
+		// warning: y must be added at the end (goal_var is set to n in constructor)
+		// We set goal_var to n (<=>y variable is the nth variable)
+		// to simplify the copy of expressions (see ibex_ExprCopy).
+
+//		Array<const ExprSymbol> sys.args(sys.args.size()+1);
+//		varcopy(sys.args,sys.args);
+//		sys.args.set_ref(sys.args.size(),y);
+
+		// do not initialize variables with sys.f.args
+		// since f may be uninitialized (unconstrained problem)
+		add_var(sys.args);
+		add_var(y);
+
+		// first, add y=goal(x).
+		if (sys.goal)  {
+			const ExprNode& goal_expr=y-ExprCopy().copy(sys.goal->args(), sys.args, sys.goal->expr());
+			add_ctr(ExprCtr(goal_expr,EQ));
+			cleanup(goal_expr, false);
+		}
+
+
+		// TODO: factorize code with SystemNormalize
+		// note: sys.ctrs.size()<>sys.nb_ctr in general but
+		// with EXTEND, they actually match (only scalar constraints).
+		for (int i=0; i<sys.ctrs.size(); i++) {
+
+			if (sys.ctrs[i].op==EQ) {
+				pair<const ExprNode*, const Interval*> p=sys.ctrs[i].is_thick_equality();
+
+				if (p.first==NULL) not_implemented("normalization with equality constraints");
+
+				const ExprNode& f_1=ExprCopy().copy(sys.ctrs[i].f.args(), sys.args, *p.first) - p.second->ub();
+				add_ctr(ExprCtr(f_1,LEQ));
+				cleanup(f_1, false);
+
+				const ExprNode& f_2=(-ExprCopy().copy(sys.ctrs[i].f.args(), sys.args, *p.first)) - p.second->lb();
+				add_ctr(ExprCtr(f_2,LEQ));
+				cleanup(f_2, false);
+
+				continue;
+			}
+
+			const ExprNode* f_i=&ExprCopy().copy(sys.ctrs[i].f.args(), sys.args, sys.ctrs[i].f.expr());
+
+			switch (sys.ctrs[i].op) {
+			case LT:
+				ibex_warning("warning: strict inequality (<) replaced by inequality (<=).");
+			case LEQ:
+				break;
+			case EQ:
+				assert(false); // impossible
+				break;
+			case GT:
+				ibex_warning("warning: strict inequality (>) replaced by inequality (>=).");
+			case GEQ:
+				f_i = & (- (*f_i)); // reverse the inequality
+				break;
+			}
+
+			add_ctr(ExprCtr(*f_i,LEQ));
+
+			cleanup(*f_i, false);
+		}
+	}
+};
+
+} // end namespace ibex
