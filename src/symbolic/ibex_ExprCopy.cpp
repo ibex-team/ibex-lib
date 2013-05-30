@@ -30,6 +30,13 @@ void varcopy(const Array<const ExprSymbol>& src, Array<const ExprSymbol>& dest) 
 	}
 }
 
+bool varequals(const Array<const ExprSymbol>& arg1, Array<const ExprSymbol>& arg2) {
+	if (arg1.size()!=arg2.size()) return false;
+	for (int j=0; j<arg1.size(); j++)
+		if (arg1[j].dim!=arg2[j].dim) return false;
+	return true;
+}
+
 const ExprNode& ExprCopy::index_copy(const Array<const ExprSymbol>& old_x, const Array<const ExprSymbol>& new_x, const ExprNode& y, int i, bool fold_cst) {
 
 	const ExprVector* vec=dynamic_cast<const ExprVector*>(&y);

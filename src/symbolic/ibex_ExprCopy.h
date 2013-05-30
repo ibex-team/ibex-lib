@@ -29,6 +29,11 @@ namespace ibex {
  */
 void varcopy(const Array<const ExprSymbol>& src, Array<const ExprSymbol>& dest);
 
+/**
+ * \brief Check that two array of variables are the same.
+ *
+ */
+bool varequals(const Array<const ExprSymbol>& args1, Array<const ExprSymbol>& args2);
 
 
 /**
