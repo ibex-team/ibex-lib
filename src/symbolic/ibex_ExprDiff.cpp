@@ -50,7 +50,7 @@ const ExprNode& ExprDiff::gradient(const Array<const ExprSymbol>& old_x, const A
 	grad.clean();
 	leaves.clear();
 
-	SubNodes nodes(y);
+	ExprSubNodes nodes(y);
 	//cout << "y =" << y;
 	int n=y.size;
 	int nb_var=0;
@@ -150,7 +150,7 @@ const ExprNode& ExprDiff::gradient(const Array<const ExprSymbol>& old_x, const A
 	// build the global DAG
 	const ExprNode* dAll=&ExprVector::new_(_dAll,true);
 
-	SubNodes gnodes(*dAll);
+	ExprSubNodes gnodes(*dAll);
 	int k=dAll->size;
 	for (int j=0; j<k; j++) {
 		if (!nodes.found(gnodes[j])) { // if the node is not in the original expression

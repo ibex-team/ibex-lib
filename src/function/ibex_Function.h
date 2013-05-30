@@ -17,7 +17,7 @@
 #include "ibex_Decorator.h"
 #include "ibex_Array.h"
 #include "ibex_SymbolMap.h"
-
+#include "ibex_ExprSubNodes.h"
 #include <stdarg.h>
 
 namespace ibex {
@@ -467,7 +467,7 @@ private:
 	const ExprNode* root;                       // the root node
 	Array<const ExprSymbol> symbs;              // to retrieve symbol (node)s by appearing order.
 	std::vector<bool> is_used;                  // tells whether the i^th component is used.
-	std::vector<const ExprNode*> exprnodes;     // all the nodes
+	ExprSubNodes exprnodes;                         // all the nodes (of x and f(x))
 	SymbolMap<const ExprSymbol*> id2info;       // to retrieve a symbol node from its name.
 	int key_count;                              // count the number of arguments
 
@@ -644,7 +644,7 @@ inline int Function::nb_nodes() const {
 }
 
 inline const ExprNode& Function::node(int i) const {
-	return *exprnodes[i];
+	return exprnodes[i];
 }
 
 inline const ExprNode& Function::expr() const {

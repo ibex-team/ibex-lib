@@ -37,7 +37,7 @@ void CompiledFunction::compile(const Function& f) {
 
 	// Get the nodes of the DAG
 	// (the DAG may not necessarily contains all the nodes of f)
-	nodes.init(f.expr());
+	nodes.init(NULL, f.expr());
 
 	// Process each node of the DAG
 	for (ptr=0; ptr<n; ptr++) {

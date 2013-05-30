@@ -293,7 +293,7 @@ void Function::init(const Array<const ExprSymbol>& x, const ExprNode& y) {
 
 	root=&y;
 
-	BuildVectorOfNodes(exprnodes, x, y);
+	exprnodes.init(&x,y);
 
 	FindInputsUsed fsu(x, y, is_used);
 

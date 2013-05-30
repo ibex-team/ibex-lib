@@ -130,7 +130,7 @@ protected:
 	friend std::ostream& operator<<(std::ostream&,const CompiledFunction&);
 
 	int n; // == the size of the root expression of the expression
-	SubNodes nodes;
+	ExprSubNodes nodes;
 	operation *code;
 	int* nb_args;
 	mutable ExprLabel*** args;
