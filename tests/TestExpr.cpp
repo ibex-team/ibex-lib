@@ -487,7 +487,7 @@ void TestExpr::subnodes01() {
 
 	Function f(x,__z__,y,e5);
 
-	SubNodes nodes(e4);
+	ExprSubNodes nodes(e4);
 
 	TEST_ASSERT(&nodes[0]==&e4);
 	TEST_ASSERT(&nodes[1]==&e3);

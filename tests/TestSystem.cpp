@@ -197,7 +197,7 @@ void TestSystem::normalize01() {
 	TEST_ASSERT(sys.f.image_dim()==4)
 
 	TEST_ASSERT(sameExpr(sys.ctrs[0].f.expr(),"((x+y)-1)"));
-	TEST_ASSERT(sameExpr(sys.ctrs[1].f.expr(),"((-(x+y))-1)"));
+	TEST_ASSERT(sameExpr(sys.ctrs[1].f.expr(),"((-(x+y))+-1)"));
 	TEST_ASSERT(sameExpr(sys.ctrs[2].f.expr(),"((x-y)-1)"));
 	TEST_ASSERT(sameExpr(sys.ctrs[3].f.expr(),"(-((x-y)--1))"));
 	TEST_ASSERT(sys.ctrs[0].op==LEQ);
