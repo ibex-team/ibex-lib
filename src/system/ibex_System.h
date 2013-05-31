@@ -23,7 +23,8 @@ class MainGenerator;
 class SystemFactory;
 
 /**
- * \ingroup parser
+ * \defgroup system Systems
+ * \ingroup system
  *
  * \brief System.
  *
@@ -158,12 +159,17 @@ public:
 	/** Name of the goal variable ("y"). */
 	static const char* goal_name;
 
+protected:
+	/** Uninitialized system */
+	System();
+
+	/** Initialize the system with a factory. */
+	void init(const SystemFactory&);
+
 private:
 	friend class parser::MainGenerator;
 
 	void load(FILE* file);
-
-	void init(const SystemFactory&);
 
 	// initialize f from the constraints in ctrs,
 	// once *all* the other fields are set (including args and nb_ctr).

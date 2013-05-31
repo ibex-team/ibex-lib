@@ -38,6 +38,13 @@ public:
 	ExprSubNodes(const ExprNode& e);
 
 	/**
+	 * \brief Build the subnodes of several expressions.
+	 *
+	 * Subnodes in common appear only once.
+	 */
+	ExprSubNodes(Array<const ExprNode> exprs);
+
+	/**
 	 * \brief Build the subnodes of x and f_x.
 	 *
 	 * Example:<br>
@@ -65,7 +72,7 @@ public:
 	/**
 	 * \brief Build *this (as the subnodes of x and f_x).
 	 */
-	void init(const Array<const ExprSymbol>* x, const ExprNode& y);
+	void init(const Array<const ExprSymbol>* x, const Array<const ExprNode>& y);
 
 	/**
 	 * \brief Number of subnodes.

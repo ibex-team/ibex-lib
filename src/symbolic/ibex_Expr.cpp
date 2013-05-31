@@ -48,10 +48,9 @@ ExprNode::ExprNode(int height, int size, const Dim& dim) :
 
 }
 
-void cleanup(const ExprNode& expr, bool delete_symbols) {
+void cleanup(const Array<const ExprNode>& expr, bool delete_symbols) {
 	ExprSubNodes nodes(expr);
-	int size=expr.size; // (warning: expr will be deleted in the loop)
-	for (int i=0; i<size; i++)
+	for (int i=0; i<nodes.size(); i++)
 		if (delete_symbols || (!dynamic_cast<const ExprSymbol*>(&nodes[i])))
 			delete (ExprNode*) &nodes[i];
 }

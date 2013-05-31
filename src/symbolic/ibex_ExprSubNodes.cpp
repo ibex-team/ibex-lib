@@ -56,21 +56,28 @@ ExprSubNodes::ExprSubNodes() : tab(NULL), _size(0) {
 }
 
 ExprSubNodes::ExprSubNodes(const ExprNode& e) {
-	init(NULL,e);
+	init(NULL, e);
+}
+
+ExprSubNodes::ExprSubNodes(Array<const ExprNode> exprs) {
+	init(NULL, exprs);
 }
 
 ExprSubNodes::ExprSubNodes(const Array<const ExprSymbol>& args, const ExprNode& e) {
-	init(&args,e);
+	init(&args, e);
 }
 
-void ExprSubNodes::init(const Array<const ExprSymbol>* args, const ExprNode& e) {
+void ExprSubNodes::init(const Array<const ExprSymbol>* args, const Array<const ExprNode>& e) {
 
 	ExprNodes en(args);
-	en.visit(e);
+
+	for (int i=0; i<e.size(); i++)
+		en.visit(e[i]);
 
 	_size=en.nodes.size();
 
-	assert((args && e.size<=_size) || (!args && e.size==_size));
+	// only true for a single expr:
+	//assert((args && e.size<=_size) || (!args && e.size==_size));
 
 	tab = new const ExprNode*[_size];
 	int i=0;

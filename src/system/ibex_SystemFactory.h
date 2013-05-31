@@ -16,7 +16,7 @@
 namespace ibex {
 
 /**
- * \ingroup parser
+ * \ingroup system
  * \brief System factory.
  *
  * All the build a system step-by-step.
@@ -29,7 +29,7 @@ public:
 	 */
 	SystemFactory();
 
-	~SystemFactory();
+	virtual ~SystemFactory();
 
 	/**
 	 * \brief Add a new variable.

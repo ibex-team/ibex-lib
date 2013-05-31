@@ -144,11 +144,11 @@ public:
 std::ostream& operator<<(std::ostream&, const ExprNode&);
 
 /**
- * \brief Delete all the nodes of an expression, including itself.
+ * \brief Delete all the nodes of several expression, including themselves.
  *
  * \param delete_symbols if false, symbols are not deleted.
  */
-void cleanup(const ExprNode& expr, bool delete_symbols);
+void cleanup(const Array<const ExprNode>& expr, bool delete_symbols);
 
 /**
  * \ingroup symbolic

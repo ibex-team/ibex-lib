@@ -35,6 +35,10 @@ extern System* system;
 
 const char* System::goal_name = "__goal__";
 
+System::System() : nb_var(0), nb_ctr(0), box(1) /* tmp */ {
+
+}
+
 System::System(const char* filename) : nb_var(0), nb_ctr(0), box(1) /* tmp */ {
 	FILE *fd;
 	if ((fd = fopen(filename, "r")) == NULL) throw UnknownFileException(filename);

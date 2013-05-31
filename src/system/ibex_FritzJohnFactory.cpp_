@@ -1,0 +1,298 @@
+//============================================================================
+//                                  I B E X                                   
+// File        : ibex_FritzJohnFactory.cpp_
+// Author      : Gilles Chabert
+// Copyright   : Ecole des Mines de Nantes (France)
+// License     : See the LICENSE file
+// Created     : Apr 13, 2013
+// Last Update : May 31, 2013
+//============================================================================
+
+#include "ibex_SystemFactory.h"
+#include "ibex_ExprCopy.h"
+#include "ibex_ExprDiff.h"
+
+namespace ibex {
+
+#define LB 0
+#define UB 1
+
+namespace {
+
+/*
+ * Get the ith subnode of node if it is a vector of expressions (<-> Exprvector)
+ * or the ith interval (as an ExprConstant) if it is a vector of constants (<-> ExprConstant).
+ *
+ * This function is necessary to get a partial derivative from the gradient,
+ * because diff() may return nodes of either type.
+ */
+const ExprNode& arg(const ExprNode& node, int i) {
+	const ExprVector* vec=dynamic_cast<const ExprVector*>(&node);
+	if (vec) return vec->arg(i);
+	else {
+		const ExprConstant* cst=dynamic_cast<const ExprConstant*>(&node);
+		assert(cst);
+		assert(cst->dim.is_vector());
+		assert(i<cst->dim.vec_size());
+		return ExprConstant::new_scalar(cst->get_vector_value()[i]);
+	}
+}
+
+class FritzJohnFactory : public SystemFactory {
+
+public:
+
+	static const double ACTIVE_BOUND_CEIL;
+
+	/** bound_ctr is an array representing the bounds of the initial box of the system
+	 * that are less (in absolute value) than #ACTIVE_BOUND_CEIL.
+	* bound_ctr[i][0] is the number of the variable and bound_ctr[i] is
+	* 0 (resp 1) is this is the lower (resp. upper) bound.
+	*/
+	int (*bound_ctr)[2];
+
+	int n,M,R,K;
+
+	FritzJohnFactory(const System& sys) {
+
+		n=sys.nb_var;
+		int N=sys.args.size(); // warning N<>n (maybe)
+
+		// ------------------  Count equalities/inequalities --------------------
+		int m=0; // counter of inequalities
+		int r=0; // counter of equalities
+
+		if (sys.nb_ctr!=sys.ctrs.size())
+			ibex_error("cannot use Fritz-John conditions with vector constraints");
+		if (!sys.goal)
+			ibex_error("cannot use Fritz-John conditions without goal function");
+
+		for (int i=0; i<sys.nb_ctr; i++) {
+			if (sys.ctrs[i].op==EQ) r++;
+			else m++;
+		}
+		R=r;
+		M=m;
+
+		// ------------------  Detect and count bound constraints --------------
+		int k=0; // counter of bound constraints
+
+		// count the number of bound constraint
+		for (int j=0; j<n; j++) {
+			if (sys.box[j].lb() > -ACTIVE_BOUND_CEIL) k++;
+			if (sys.box[j].ub() <  ACTIVE_BOUND_CEIL) k++;
+		}
+		K=k;
+
+		//cout << "found " << K << " bound constraints" << endl;
+		bound_ctr = new int[K][2];
+
+		k=0;
+		// record which bound is a constraint
+		for (int j=0; j<n; j++) {
+			if (sys.box[j].lb() > -ACTIVE_BOUND_CEIL) {
+				bound_ctr[k][0]=j;
+				bound_ctr[k++][1]=LB;
+			}
+			if (sys.box[j].ub() < ACTIVE_BOUND_CEIL)  {
+				bound_ctr[k][0]=j;
+				bound_ctr[k++][1]=UB;
+			}
+		}
+		assert(k==K);
+
+		// -------------  Create variables -----------------------------------------
+		// There are up to three extra variables:
+		// 1- a "special" multiplier u for the gradient of f.
+		// 2- a vector of m multipliers (one for each constraint, if any)
+	    // 3- a vector of K multipliers (one for each bound of the initial box, if any).
+
+		int N2=N+1; // default number of arguments of Fritz system
+
+		const ExprSymbol* lambda=NULL;
+		if (M>0) {
+			N2++;
+			lambda=&ExprSymbol::new_("_l",Dim::col_vec(M));
+		}
+
+		const ExprSymbol* mu=NULL;
+		if (R>0) {
+			N2++;
+			mu=&ExprSymbol::new_("_m",Dim::col_vec(R));
+		}
+
+		const ExprSymbol* bmult=NULL;
+		if (K>0) {
+			N2++;
+			bmult=&ExprSymbol::new_("_b",Dim::col_vec(K));
+		}
+
+		Array<const ExprSymbol> vars(N2);
+
+		const ExprSymbol& u=ExprSymbol::new_("_u");
+
+		// note: we declare the multipliers after the original variables
+		// x, as recommended by Hansen in order to avoid multipliers occurring as
+		// intervals in the Hansen matrix (see Function::hansen_matrix).
+		varcopy(sys.args, vars);
+
+		int i=N;
+		vars.set_ref(i++,u);
+		if (M>0) vars.set_ref(i++,*lambda);
+		if (R>0) vars.set_ref(i++,*mu);
+		if (K>0) vars.set_ref(i++,*bmult);
+
+		add_var(vars);
+		// --------------------------------------------------------------------------
+
+		// -------------  Normalization constraint ----------------------------------
+		const ExprNode* e=&u;
+		for (m=0; m<M; m++)
+			e = &(*e + (*lambda)[m]);
+		for (r=0; r<R; r++)
+			e = &(*e + sqr((*mu)[r]));
+		for (k=0; k<K; k++)
+			e = &(*e + (*bmult)[k]);
+		const ExprNode& norm_expr=*e-1;
+		add_ctr(ExprCtr(norm_expr,EQ));
+		cleanup(norm_expr,false);
+		// --------------------------------------------------------------------------
+
+
+		// -------------  Main constraint -------------------------------------------
+		// The linear dependency of the gradients
+		const ExprNode& df=ExprDiff().diff(sys.goal->args(), vars, sys.goal->expr());
+		const ExprNode* dg=NULL;
+		if (M>0 || R>0) dg=&ExprDiff().diff(sys.f.args(), vars, sys.f.expr());
+
+		// to ease memory cleanup, we represent all
+		// constraints with a single multivalued function
+		std::vector<const ExprNode*> to_clean;
+		to_clean.push_back(&df);
+		to_clean.push_back(dg);
+
+		k=0;
+
+		for (int j=0; j<n; j++) {
+			e=NULL;
+			const ExprNode& dfj=df.dim.is_scalar()? /* => j=0 */ df : arg(df,j);
+
+			if (!dfj.is_zero())
+				e=&(u*dfj);
+
+			m=r=0;
+
+			for (int i=0; i<sys.nb_ctr; i++) {
+
+				const ExprNode& dgij=dg->dim.is_scalar()? /* => i=j=0 */ *dg :
+								    (dg->dim.is_vector()? /* => i=0 */   arg(*dg,j) :
+								    		                             arg(arg(*dg,i),j));
+
+				to_clean.push_back(&dgij); // because we may have created new constants...
+
+				if (!dgij.is_zero()) {
+					if (e) {
+						switch(sys.ctrs[i].op) {
+						case LT:
+						case LEQ: e = & (*e + (*lambda)[m]*dgij); break;
+						case EQ:  e = & (*e + (*mu)[r]*dgij);     break;
+						default:  e = & (*e - (*lambda)[m]*dgij); break;
+						}
+					} else {
+						switch(sys.ctrs[i].op) {
+						case LT:
+						case LEQ: e = & ( (*lambda)[m]*dgij); break;
+						case EQ:  e = & ( (*mu)[r]*dgij);     break;
+						default:  e = & (-(*lambda)[m]*dgij); break;
+						}
+					}
+				}
+
+				switch(sys.ctrs[i].op) {
+				case LT:
+				case LEQ: m++; break;
+				case EQ:  r++; break;
+				default:  m++; break;
+				}
+
+			}
+
+			assert(m==M);
+			assert(r==R);
+
+			if (k<K && bound_ctr[k][0]==j) { // either for the lower or upper bound
+				if (e)
+					e = & (*e + (*bmult)[k]);
+				else
+					e = & (*bmult)[k];
+				k++;
+			}
+
+			if (k<K && bound_ctr[k][0]==j) { // can only be for the upper bound
+				if (e)
+					e = & (*e + (*bmult)[k]);
+				else
+					e = & (*bmult)[k];
+				k++;
+			}
+
+			if (e) {
+				//cout << "j=" << j << *e << endl;
+				add_ctr(ExprCtr(*e,EQ));
+				// don't cleanup *e! some nodes belongs to df and dg... -> whence grad_ctrs
+				to_clean.push_back(e);
+			}
+		}
+		assert(k==K);
+		// --------------------------------------------------------------------------
+
+
+		// -------------  Nullifying equalities or multipliers of inactive inequalities -----------
+		m=0;
+		for (int i=0; i<sys.nb_ctr; i++) {
+			const ExprNode* gi=&ExprCopy().copy(sys.ctrs[i].f.args(), vars, sys.ctrs[i].f.expr());
+
+			if (sys.ctrs[i].op!=EQ)
+				gi = & ((*lambda)[m++]*(*gi));
+
+			add_ctr(ExprCtr(*gi,EQ));
+			// don't cleanup *gi!
+			to_clean.push_back(gi);
+		}
+		assert(m==M);
+
+		for (k=0; k<K; k++) {
+			int i=bound_ctr[k][0];
+			const ExprNode* bk;
+			if (bound_ctr[k][1]==LB)
+				bk = & ((*bmult)[k]*(sys.box[i].lb()-vars[i]));
+			else
+				bk = & ((*bmult)[k]*(vars[i]-sys.box[i].ub()));
+			to_clean.push_back(bk);
+		}
+
+		/** cleanup constraints and variables */
+		cleanup(to_clean,false);
+		// don't cleanup variables now, they are required
+		// by System::init(...)
+		// TODO: try to simplify this ?
+	}
+
+	~FritzJohnFactory() {
+		delete[] bound_ctr;
+
+		for (int i=0; i<args->size(); i++)
+			delete &(*args)[i];
+	}
+};
+
+
+const double FritzJohnFactory::ACTIVE_BOUND_CEIL = 1e7;
+
+} // end anonymous namespace
+
+
+} // end namespace ibex
+
+
+

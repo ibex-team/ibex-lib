@@ -19,6 +19,19 @@ namespace ibex {
 
 #define ONE          ExprConstant::new_scalar(1.0)
 
+
+const ExprVector& zeros(int n, bool in_row) {
+	Array<const ExprNode> zeros(n);
+	for (int i=0; i<n; i++) zeros.set_ref(i,ExprConstant::new_scalar(0));
+	return ExprVector::new_(zeros,in_row);
+}
+
+const ExprVector& zeros(int m, int n) {
+	Array<const ExprNode> _zeros(m);
+	for (int i=0; i<m; i++) _zeros.set_ref(i,zeros(n,true));
+	return ExprVector::new_(_zeros,false);
+}
+
 void ExprDiff::add_grad_expr(const ExprNode& node, const ExprNode& _expr_) {
 
 	if (grad.found(node))
@@ -67,50 +80,61 @@ const ExprNode& ExprDiff::gradient(const Array<const ExprSymbol>& old_x, const A
 
 	Array<const ExprNode> dX(nb_var);
 
+	{   // =============== set null derivative for missing variables ===================
+		// note: we have to make the association with grad[old_x[i]] because this map is
+		// cleared after.
+		for (int i=0; i<old_x.size(); i++) {
+
+			const ExprNode& v=old_x[i];
+
+			if (grad.found(v)) continue;
+
+			leaves.push_back(&v);
+
+			// this symbol does not appear in the expression -> null derivative
+			switch (v.dim.type()) {
+			case Dim::SCALAR:
+				grad.insert(v, &ExprConstant::new_scalar(0));
+				break;
+			case Dim::ROW_VECTOR:
+			case Dim::COL_VECTOR:
+				grad.insert(v, &zeros(v.dim.vec_size(), v.dim.type()==Dim::ROW_VECTOR));
+				break;
+			case Dim::MATRIX:
+				grad.insert(v, &zeros(v.dim.dim2,v.dim.dim3));
+				break;
+			default:
+				not_implemented("diff with matrix arrays");
+				break;
+			}
+		}
+	}
+
 	{   // =============== build dX ===================
 		int k=0;
 		for (int i=0; i<old_x.size(); i++) {
 
 			switch (old_x[i].dim.type()) {
 			case Dim::SCALAR:
-				if (!grad.found(old_x[i])) { // this symbol does not appear in the expression -> null derivative
-					dX.set_ref(k,ExprConstant::new_scalar(0));
-					leaves.push_back(&dX[k++]); // note: nothing will be associated to grad[old_x[i]] but this map is not used hereinafter
-				} else
-					dX.set_ref(k++,*grad[old_x[i]]);
+				dX.set_ref(k++,*grad[old_x[i]]);
 				break;
 			case Dim::ROW_VECTOR:
 			case Dim::COL_VECTOR:
-				if (!grad.found(old_x[i])) // this symbol does not appear in the expression -> null derivative
-					for (int j=0; j<old_x[i].dim.vec_size(); j++) {
-						dX.set_ref(k,ExprConstant::new_scalar(0));
-						leaves.push_back(&dX[k++]);
-					}
-				else {
-					const ExprVector& vec = * ((const ExprVector*) grad[old_x[i]]);
+				{	const ExprVector& vec = * ((const ExprVector*) grad[old_x[i]]);
 					for (int j=0; j<old_x[i].dim.vec_size(); j++)
 						dX.set_ref(k++,vec.arg(j));
 				}
-				break;
+			break;
 			case Dim::MATRIX:
-				if (!grad.found(old_x[i])) // this symbol does not appear in the expression -> null derivative
-					for (int j2=0; j2<old_x[i].dim.dim2; j2++)
-						for (int j3=0; j3<old_x[i].dim.dim3; j3++) {
-							dX.set_ref(k,ExprConstant::new_scalar(0));
-							leaves.push_back(&dX[k++]);
-						}
-				else {
-					const ExprVector& vec = * ((const ExprVector*) grad[old_x[i]]);
-
-					for (int j2=0; j2<old_x[i].dim.dim2; j2++) {
-						const ExprVector& vec2 = (const ExprVector&) vec.arg(j2);
-
-						for (int j3=0; j3<old_x[i].dim.dim3; j3++)
-							dX.set_ref(k++, vec.arg(j3));
-					}
-				}
-				break;
-
+			    {
+			    	const ExprVector& vec = * ((const ExprVector*) grad[old_x[i]]);
+			    	for (int j2=0; j2<old_x[i].dim.dim2; j2++) {
+			    		const ExprVector& vec2 = (const ExprVector&) vec.arg(j2);
+			    		for (int j3=0; j3<old_x[i].dim.dim3; j3++)
+			    			dX.set_ref(k++, vec.arg(j3));
+			    	}
+			    }
+			    break;
 			default:
 				not_implemented("diff with matrix arrays");
 				break;
@@ -146,6 +170,7 @@ const ExprNode& ExprDiff::gradient(const Array<const ExprSymbol>& old_x, const A
 	for (unsigned int i=0; i<leaves.size(); i++) {
 		_dAll.set_ref(i,*grad[*leaves[i]]);
 	}
+	cout << "==================" << endl;
 
 	// build the global DAG
 	const ExprNode* dAll=&ExprVector::new_(_dAll,true);
@@ -207,13 +232,16 @@ void ExprDiff::visit(const ExprIndex& i) {
 		for (int j=0; j<n; j++) {
 			if (j!=i.index)
 				// duplicate all other components
-				new_comp.set_ref(j, ExprConstant::new_scalar(Interval::ZERO));
+				if (i.expr.dim.is_vector())
+					new_comp.set_ref(j, ExprConstant::new_scalar(0));
+				else
+					new_comp.set_ref(j, zeros(i.expr.dim.dim3,false));
 			else
 				new_comp.set_ref(i.index, *(grad[i]));
 		}
 	}
 
-	grad[i.expr] = & ExprVector::new_(new_comp, i.expr.dim.type()==Dim::MATRIX || i.expr.dim.type()==Dim::ROW_VECTOR);
+	grad[i.expr] = & ExprVector::new_(new_comp, i.expr.dim.type()==Dim::ROW_VECTOR);
 }
 
 void ExprDiff::visit(const ExprSymbol& x) {
