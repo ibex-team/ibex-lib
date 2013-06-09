@@ -36,29 +36,31 @@ class SystemNormalize : public SystemFactory {
 			if (sys.ctrs[i].op==EQ) {
 				pair<const ExprNode*, const Interval*> p=sys.ctrs[i].is_thick_equality();
 
-				if (p.first==NULL) not_implemented("normalization with equality constraints");
+				if (p.first!=NULL) { //not_implemented("normalization with equality constraints");
 
-				const ExprNode& f_1=ExprCopy().copy(sys.ctrs[i].f.args(), sys.args, *p.first) - p.second->ub();
-				add_ctr(ExprCtr(f_1,LEQ));
-				cleanup(f_1, false);
+					const ExprNode& f_1=ExprCopy().copy(sys.ctrs[i].f.args(), sys.args, *p.first) - p.second->ub();
+					add_ctr(ExprCtr(f_1,LEQ));
+					cleanup(f_1, false);
 
-				double toto=-p.second->lb();
-				const ExprNode& f_2=(-ExprCopy().copy(sys.ctrs[i].f.args(), sys.args, *p.first)) -toto;
-				add_ctr(ExprCtr(f_2,LEQ));
-				cleanup(f_2, false);
+					double toto=-p.second->lb();
+					const ExprNode& f_2=(-ExprCopy().copy(sys.ctrs[i].f.args(), sys.args, *p.first)) -toto;
+					add_ctr(ExprCtr(f_2,LEQ));
+					cleanup(f_2, false);
 
-				continue;
+					continue;
+				}
 			}
 
 			const ExprNode* f_i=&ExprCopy().copy(sys.ctrs[i].f.args(), sys.args, sys.ctrs[i].f.expr());
 
+			CmpOp op=LEQ;
 			switch (sys.ctrs[i].op) {
 			case LT:
 				ibex_warning("warning: strict inequality (<) replaced by inequality (<=).");
 			case LEQ:
 				break;
 			case EQ:
-				assert(false); // impossible
+				op=EQ;
 				break;
 			case GT:
 				ibex_warning("warning: strict inequality (>) replaced by inequality (>=).");
@@ -67,7 +69,7 @@ class SystemNormalize : public SystemFactory {
 				break;
 			}
 
-			add_ctr(ExprCtr(*f_i,LEQ));
+			add_ctr(ExprCtr(*f_i,op));
 
 			cleanup(*f_i, false);
 		}

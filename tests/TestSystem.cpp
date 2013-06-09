@@ -61,6 +61,7 @@ static System* sysex3() {
 	fac.add_ctr(x+y=Interval(-1,1));
 	fac.add_ctr(x-y<=1);
 	fac.add_ctr(x-y>=-1);
+	fac.add_ctr(x=y);
 
 	return new System(fac);
 }
@@ -107,7 +108,7 @@ void TestSystem::factory02() {
 void TestSystem::copy01() {
 	System& _sys(*sysex1());
 	System sys(_sys,System::COPY);
-	//delete &_sys;
+	delete &_sys;
 
 	// all the lines below are copy-pasted from factory01...
 	TEST_ASSERT(sys.nb_ctr==2);
@@ -134,10 +135,30 @@ void TestSystem::copy01() {
 void TestSystem::copy02() {
 	System _sys("quimper/unconstrained.qpr");
 	System sys(_sys, System::COPY);
+
 	TEST_ASSERT(sys.nb_ctr==0);
 	TEST_ASSERT(sys.nb_var==2);
 	TEST_ASSERT(sameExpr(sys.goal->expr(),"(x+y)"));
 	TEST_ASSERT(sys.ctrs.size()==0);
+}
+
+void TestSystem::ineq01() {
+	System& _sys(*sysex3());
+	System sys(_sys,System::INEQ);
+	delete &_sys;
+
+	TEST_ASSERT(sys.nb_ctr==2);
+	TEST_ASSERT(sys.nb_var==2);
+	TEST_ASSERT(sys.goal==NULL);
+	TEST_ASSERT(sys.ctrs.size()==2);
+	TEST_ASSERT(sys.f.nb_arg()==2);
+	TEST_ASSERT(sys.f.nb_var()==2);
+	TEST_ASSERT(sys.f.image_dim()==2)
+
+	TEST_ASSERT(sameExpr(sys.ctrs[0].f.expr(),"((x-y)-1)"));
+	TEST_ASSERT(sameExpr(sys.ctrs[1].f.expr(),"((x-y)--1)"));
+	TEST_ASSERT(sys.ctrs[0].op==LEQ);
+	TEST_ASSERT(sys.ctrs[1].op==GEQ);
 }
 
 void TestSystem::extend01() {
@@ -188,22 +209,24 @@ void TestSystem::normalize01() {
 	System sys(_sys,System::NORMALIZE);
 	delete &_sys;
 
-	TEST_ASSERT(sys.nb_ctr==4);
+	TEST_ASSERT(sys.nb_ctr==5);
 	TEST_ASSERT(sys.nb_var==2);
 	TEST_ASSERT(sys.goal==NULL);
-	TEST_ASSERT(sys.ctrs.size()==4);
+	TEST_ASSERT(sys.ctrs.size()==5);
 	TEST_ASSERT(sys.f.nb_arg()==2);
 	TEST_ASSERT(sys.f.nb_var()==2);
-	TEST_ASSERT(sys.f.image_dim()==4)
+	TEST_ASSERT(sys.f.image_dim()==5)
 
 	TEST_ASSERT(sameExpr(sys.ctrs[0].f.expr(),"((x+y)-1)"));
 	TEST_ASSERT(sameExpr(sys.ctrs[1].f.expr(),"((-(x+y))-1)"));
 	TEST_ASSERT(sameExpr(sys.ctrs[2].f.expr(),"((x-y)-1)"));
 	TEST_ASSERT(sameExpr(sys.ctrs[3].f.expr(),"(-((x-y)--1))"));
+	TEST_ASSERT(sameExpr(sys.ctrs[4].f.expr(),"(x-y)"));
 	TEST_ASSERT(sys.ctrs[0].op==LEQ);
 	TEST_ASSERT(sys.ctrs[1].op==LEQ);
 	TEST_ASSERT(sys.ctrs[2].op==LEQ);
 	TEST_ASSERT(sys.ctrs[3].op==LEQ);
+	TEST_ASSERT(sys.ctrs[4].op==EQ);
 }
 
 void TestSystem::merge01() {

@@ -18,17 +18,18 @@ class SystemCopy : public SystemFactory {
 
 public:
 
-	SystemCopy(const System& sys) {
+	SystemCopy(const System& sys, const System::copy_mode& mode) {
 
 		// do not initialize variables with sys.f.args
 		// since f may be uninitialized (unconstrained problem)
 		add_var(sys.args);
 
-		if (sys.goal!=NULL)
+		if (mode==System::COPY && sys.goal!=NULL)
 			add_goal(*sys.goal);
 
 		for (int i=0; i<sys.nb_ctr; i++) {
-			add_ctr(sys.ctrs[i]);
+			if (mode==System::COPY || sys.ctrs[i].op!=EQ)
+				add_ctr(sys.ctrs[i]);
 		}
 	}
 };

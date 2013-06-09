@@ -81,21 +81,21 @@ public:
 	 * have to be initialized. #goal is set to NULL.
 	 */
 
-	typedef enum { COPY, NORMALIZE, EXTEND } copy_mode;
+	typedef enum { COPY, NORMALIZE, EXTEND, INEQ } copy_mode;
 
 	/**
 	 * \brief Duplicate/Transform the system.
 	 *
 	 * The \a mode field controls the copy:
 	 * <ul>
-	 * <li> COPY:      copy
-	 * <li> NORMALIZE: copy and make all inequalities under the form f_i(x)<=0.
-	 *                 Thick equalities f(x)=[a,b] are also accepted and will be
-	 *                 transformed into two inequalities, f(x)<=b and -f(x)<=-a
-	 *                 (in this precise order).
+	 * <li> COPY:      Copy
+	 * <li> NORMALIZE: Copy and make all inequalities under the form f_i(x)<=0.
+	 *                 Thick equalities f(x)=[a,b] are also transformed into two
+	 *                 inequalities, f(x)<=b and -f(x)<=-a (in this precise order).
+	 *                 Other equalities are just copied.
 	 *                 Note that the number of constraints of the resulting system
 	 *                 in this case is greater than the number or the original one.
-	 * <li> EXTEND:    normalize and encode the goal function as a constraint.
+	 * <li> EXTEND:    Normalize and encode the goal function as a constraint.
 	 *                 The resulting system includes (n+1) variables, the n original
 	 *                 variables x_1,...,x_n and an an additional "goal" variable y.
 	 *                 The goal variable is added at the end (after the others). It
@@ -103,6 +103,7 @@ public:
 	 *                 where goal(x) is the goal function. The others constraints are
 	 *                 normalized copy of the original ones. The name of the goal
 	 *                 variable is #goal_name.
+	 * <li> INEQ:      Copy the inequalities only. The goal is not copied.
 	 * </ul>
 	 */
 	System(const System& sys, copy_mode mode=COPY);
