@@ -49,8 +49,6 @@ void SystemFactory::add_goal(const ExprNode& goal) {
 	varcopy(*args,goal_vars);
 	const ExprNode& goal_expr=ExprCopy().copy(*args, goal_vars, goal); //, true);
 	this->goal = new Function(goal_vars, goal_expr);
-
-	cleanup(goal,false);
 }
 
 void SystemFactory::add_goal(const Function& goal) {

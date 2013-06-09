@@ -12,6 +12,8 @@
 
 namespace ibex {
 
+namespace {
+
 class SystemCopy : public SystemFactory {
 
 public:
@@ -30,6 +32,8 @@ public:
 		}
 	}
 };
+
+} // end anonymous namespace
 
 } // end namespace ibex
 

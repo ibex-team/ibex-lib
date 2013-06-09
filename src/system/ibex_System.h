@@ -107,6 +107,11 @@ public:
 	 */
 	System(const System& sys, copy_mode mode=COPY);
 
+	/**
+	 * Merge two systems.
+	 */
+	System(const System& sys1, const System& sys2);
+
 	/** \brief Delete *this. */
 	~System();
 

@@ -14,6 +14,8 @@ using std::pair;
 
 namespace ibex {
 
+namespace {
+
 class SystemExtend : public SystemFactory {
 
 public:
@@ -87,5 +89,7 @@ public:
 		}
 	}
 };
+
+} // end anonymous namespace
 
 } // end namespace ibex

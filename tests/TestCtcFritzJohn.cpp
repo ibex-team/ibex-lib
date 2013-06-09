@@ -10,7 +10,8 @@
  * ---------------------------------------------------------------------------- */
 
 #include "TestCtcFritzJohn.h"
-#include "ibex_CtcFritzJohn.h"
+#include "ibex_FritzJohnCond.h"
+#include "ibex_CtcHC4.h"
 #include "ibex_SystemFactory.h"
 #include "ibex_SyntaxError.h"
 
@@ -21,7 +22,7 @@ namespace ibex {
 void TestCtcFritzJohn::test01() {
 	SystemFactory fac;
 
-	Variable x("x"),y("y"),z;
+	Variable x("x"),y("y");
 	fac.add_var(x);
 	fac.add_var(y);
 
@@ -31,23 +32,22 @@ void TestCtcFritzJohn::test01() {
 
 	System sys(fac);
 
-	CtcFritzJohn fj(sys);
+	FritzJohnCond fj(sys); //CtcFritzJohn fj(sys);
+	CtcHC4 hc4(fj.ctrs);
 	double s=::sqrt(2)/2.0;
-	double _box[][2] = {{0.7,0.8},{0.7,0.8},{NEG_INFINITY,POS_INFINITY}};
+	double _box[][2] = {{0.7,0.8},{0.7,0.8},{NEG_INFINITY,POS_INFINITY},{NEG_INFINITY,POS_INFINITY}};
 	//double _box[][2] = {{s,s},{s,s}};
-	IntervalVector box(3,_box);
+	IntervalVector box(4,_box);
 	try {
-	fj.contract(box);
+		hc4.contract(box);
 	} catch(EmptyBoxException& e) {
-
+		TEST_ASSERT(false);
 	}
-
-	TEST_ASSERT(!fj.ext_box.is_empty());
 
 	//cout << fj.ext_box << endl;
 
-	Interval& u=fj.ext_box[2];
-	Interval& l=fj.ext_box[3];
+	Interval& u=box[2];
+	Interval& l=box[3];
 	TEST_ASSERT(almost_eq(u+l, Interval(1,1), ERROR));
 	TEST_ASSERT(almost_eq(-u+::sqrt(2)*l, Interval::ZERO, ERROR));
 }

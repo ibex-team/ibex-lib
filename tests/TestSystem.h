@@ -30,8 +30,10 @@ public:
 		TEST_ADD(TestSystem::extend01);
 		TEST_ADD(TestSystem::extend02);
 //		TEST_ADD(TestSystem::extend02);
-
-
+		TEST_ADD(TestSystem::merge01);
+		TEST_ADD(TestSystem::merge02);
+		TEST_ADD(TestSystem::merge03);
+		TEST_ADD(TestSystem::merge04);
 	}
 
 	void factory01();
@@ -43,7 +45,10 @@ public:
 	void extend01();
 	void extend02();
 //	void extend02();
-
+	void merge01();
+	void merge02();
+	void merge03();
+	void merge04();
 };
 
 } // end namespace

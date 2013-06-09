@@ -15,6 +15,7 @@
 #include "ibex_SystemCopy.cpp_"
 #include "ibex_SystemNormalize.cpp_"
 #include "ibex_SystemExtend.cpp_"
+#include "ibex_SystemMerge.cpp_"
 #include <stdio.h>
 #include <sstream>
 #include <vector>
@@ -67,6 +68,9 @@ System::System(const System& sys, copy_mode mode) : nb_var(0), nb_ctr(0), func(0
 
 }
 
+System::System(const System& sys1, const System& sys2) : nb_var(0), nb_ctr(0), func(0), box(1) {
+	init(SystemMerge(sys1,sys2));
+}
 
 std::ostream& operator<<(std::ostream& os, const System& sys) {
 
