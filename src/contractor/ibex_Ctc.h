@@ -71,14 +71,14 @@ public:
 	const int nb_var;
 
 	/**
-	 * \brief The input variables
+	 * \brief The input variables (NULL pointer means "unspecified")
 	 */
-	BoolMask input;
+	BoolMask* input;
 
 	/**
-	 * \brief The output variables
+	 * \brief The output variables NULL pointer means "unspecified")
 	 */
-	BoolMask output;
+	BoolMask* output;
 
 	/**
 	 * \brief Output flag numbers

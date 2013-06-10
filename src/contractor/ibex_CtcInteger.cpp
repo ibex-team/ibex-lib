@@ -12,9 +12,17 @@
 
 namespace ibex {
 
+CtcInteger::~CtcInteger() {
+	delete input;
+	delete output;
+}
+
 CtcInteger::CtcInteger(int nb_var, const BoolMask& is_int) : Ctc(nb_var), is_int(is_int) {
+	input = new BoolMask(nb_var);
+	output = new BoolMask(nb_var);
+
 	for (int v=0; v<nb_var; v++)
-		output[v]=input[v]=is_int[v];
+		(*output)[v]=(*input)[v]=is_int[v];
 }
 
 void CtcInteger::contract(IntervalVector& box) {

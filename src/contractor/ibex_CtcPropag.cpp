@@ -31,8 +31,8 @@ CtcPropag::CtcPropag(const Array<Ctc>& cl, double ratio, bool incremental) :
 
 	for (int i=0; i<list.size(); i++)
 		for (int j=0; j<nb_var; j++) {
-			if (list[i].input[j]) g.add_arc(i,j,true);
-			if (list[i].output[j]) g.add_arc(i,j,false);
+			if (list[i].input && (*list[i].input)[j]) g.add_arc(i,j,true);
+			if (list[i].input && (*list[i].output)[j]) g.add_arc(i,j,false);
 		}
 
 //	cout << g << endl;
