@@ -487,6 +487,9 @@ public:
 	/** Create the expression x[index]. */
 	const ExprIndex& operator[](int index) { return ((const ExprNode&) *this)[index]; }
 
+	/** Create an equality constraint x=y. */
+	const ExprCtr& operator=(const Variable& y) const { return ((const ExprNode&) *this)=y; }
+
 	/** Create an equality constraint x=value. */
 	const ExprCtr& operator=(const Interval& value) const { return ((const ExprNode&) *this)=value; }
 
