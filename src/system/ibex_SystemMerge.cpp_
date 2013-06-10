@@ -1,0 +1,95 @@
+//============================================================================
+//                                  I B E X                                   
+// File        : ibex_SystemMerge.cpp_
+// Author      : Gilles Chabert
+// Mergeright   : Ecole des Mines de Nantes (France)
+// License     : See the LICENSE file
+// Created     : May 27, 2013
+// Last Update : May 27, 2013
+//============================================================================
+
+#include "ibex_SystemFactory.h"
+#include "ibex_Exception.h"
+
+#include <sstream>
+
+namespace ibex {
+
+namespace {
+
+class SystemMerge : public SystemFactory {
+
+public:
+
+	SystemMerge(const System& sys1, const System& sys2) {
+
+		SymbolMap<const ExprSymbol*> map;
+
+		/* the set of symbols of the resulting system,
+		 * starting by that of sys1 */
+		std::vector<const ExprSymbol*> vars1;
+		/* the same set but starting with symbols of sys2
+		 * (the symbols of sys1 that do not appear in sys2
+		 * are actually not appended because they are not necessary) */
+		std::vector<const ExprSymbol*> vars2;
+
+		for (int i=0; i<sys1.args.size(); i++) {
+			map.insert_new(sys1.args[i].name,&sys1.args[i]);
+			vars1.push_back(&sys1.args[i]);
+		}
+
+		for (int i=0; i<sys2.args.size(); i++) {
+			if (map.used(sys2.args[i].name)) {
+				const ExprSymbol* x=map[sys2.args[i].name];
+				if (x->dim!=sys2.args[i].dim) {
+					std::stringstream s;
+					s << "cannot merge systems: symbol\"" << x->name << "\" has different dimensions";
+					ibex_error(s.str().c_str());
+				}
+			} else {
+				map.insert_new(sys2.args[i].name,&sys2.args[i]);
+				vars1.push_back(&sys2.args[i]);
+			}
+			vars2.push_back(map[sys2.args[i].name]);
+		}
+
+		Array<const ExprSymbol> newvars(vars1);
+
+		add_var(newvars);
+
+		// -------------  Add goal (if any) -----------
+		if (sys1.goal!=NULL) {
+			if (sys2.goal!=NULL)
+				ibex_error("cannot merge two systems with goal functions");
+			else {
+				const ExprNode& e=ExprCopy().copy(sys1.goal->args(), vars1, sys1.goal->expr());
+				add_goal(e);
+				cleanup(e, false);
+			}
+		}
+		else if (sys2.goal) {
+			const ExprNode& e=ExprCopy().copy(sys2.goal->args(), vars2, sys2.goal->expr());
+			add_goal(e);
+			cleanup(e, false);
+		}
+
+		// -------------  Add constraints -----------
+		for (int i=0; i<sys1.ctrs.size(); i++) {
+			const ExprNode& e=ExprCopy().copy(sys1.ctrs[i].f.args(), vars1, sys1.ctrs[i].f.expr());
+			add_ctr(ExprCtr(e,sys1.ctrs[i].op));
+			cleanup(e, false);
+		}
+		for (int i=0; i<sys2.ctrs.size(); i++) {
+			const ExprNode& e=ExprCopy().copy(sys2.ctrs[i].f.args(), vars2, sys2.ctrs[i].f.expr());
+			add_ctr(ExprCtr(e,sys2.ctrs[i].op));
+			cleanup(e, false);
+		}
+	}
+};
+
+} // end anonymous namespace
+
+} // end namespace ibex
+
+
+
