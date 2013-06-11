@@ -17,13 +17,13 @@ const double CtcCompo::default_ratio = 0.1;
 
 void CtcCompo::init_impacts() {
 
-	impacts = new BoolMask[list.size()];
-
-	for (int i=0; i<list.size(); i++) {
-		assert(list[i].nb_var==nb_var);
-		impacts[i].resize(nb_var);
-		impacts[i].set_all();
-	}
+//	impacts = new BoolMask[list.size()];
+//
+//	for (int i=0; i<list.size(); i++) {
+//		assert(list[i].nb_var==nb_var);
+//		impacts[i].resize(nb_var);
+//		impacts[i].set_all();
+//	}
 }
 
 CtcCompo::CtcCompo(const Array<Ctc>& list, bool incremental, double ratio) :
@@ -71,7 +71,7 @@ CtcCompo::CtcCompo(Ctc& c1, Ctc& c2, Ctc& c3, Ctc& c4, Ctc& c5, Ctc& c6, bool in
 
 
 CtcCompo::~CtcCompo() {
-	delete[] impacts;
+//	delete[] impacts;
 }
 
 
