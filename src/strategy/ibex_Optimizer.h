@@ -18,6 +18,7 @@
 #include "ibex_CellHeapOptim.h"
 #include "ibex_System.h"
 #include "ibex_EntailedCtr.h"
+#include "ibex_LinearSolver.h"
 
 namespace ibex {
 
@@ -84,6 +85,16 @@ public:
 	 * </ul>
 	 */
 	void report();
+
+	/**
+	 * \brief Displays on standard output a report of the last call to #optimize(const IntervalVector&).
+	 *
+	 * Information provided:
+	 * <ul><li> interval of the cost  [uplo,loup]
+	 *     <li>total running time
+	 * </ul>
+	 */
+	void report_perf();
 
 	/** Number of variables. */
 	const int n;
@@ -347,6 +358,9 @@ protected:
 
 
 private:
+
+	/** linear solver used in ibex_OptimSimplex.cpp_ */
+	LinearSolver *mylp;
 
 	/** Inner contractor (for the negation of g) */
 	CtcUnion* is_inside;

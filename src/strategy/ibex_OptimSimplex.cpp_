@@ -10,12 +10,9 @@
 
 
 #include "ibex_Optimizer.h"
-
 #include <stdlib.h>
-#include "soplex.h"
 
-using namespace soplex;
-using namespace std;
+
 
 namespace ibex {
 
@@ -46,117 +43,111 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 	      x_corner[i]=box[i].ub();
 	  }
 	      
-	SoPlex mysoplex;
-	mysoplex.changeSense(SPxLP::MINIMIZE);	// set the objective sense
 
-	DSVector dummycol(0);
+	Vector row(n+1);
+	IntervalVector bound(n+1);
 
-	// ============================================================
-	//                  linearize the objective
-	// ============================================================
 	sys.goal->gradient(box,G);
-
 	for (int i =0; i< n ; i++)
 	  if (G[i].diam() > 1e8) return false;   //to avoid problems with SoPleX
-	int nsimplex=n+1;  // the n variables + the objective
-	DSVector row1(nsimplex);
 
-	//Linear variable yl is created
-	//0 <= yl <= loup   : CONSTRAINT NOT IMPLEMENTED
-	mysoplex.addCol(LPCol(1.0, dummycol, infinity, -infinity ));
-	row1.add(0, -1.0);
+
+	// ============================================================
+	//   Initialization of the bounds and linearize the objective
+	// ============================================================
+
+
+	row[0] = -1.0;
+	bound[0] = Interval::ALL_REALS;
 
 	for (int j=0; j<n; j++){
 		//The linear variables are generated
 		//0 <= xl_j <= diam([x_j])
-	  if (corner[j])
-	    {mysoplex.addCol(LPCol(0.0, dummycol, box[j].diam(), 0.0));
-	      row1.add(j+1, G[j].ub());}
-	  else
-	    {mysoplex.addCol(LPCol(0.0, dummycol, 0.0, -(box[j].diam())));
-	      row1.add(j+1, G[j].lb());}
-	}
-	//the first constraint:
-	//sup(df/dx_1) xl_1 + ... + sup(df/dx_n) xl_n <= yl
-	mysoplex.addRow(LPRow(-infinity, row1, 0.0));
-	
-	// ============================================================
-	//                  linearize the constraints
-	// ============================================================
-
-	//The linear system is generated
-	if (m>0)
-	  {
-	    // the evaluation of the constraints in the corner x_corner
-	    IntervalVector g_corner(sys.f.eval_vector(x_corner)); 
-
-	    for (int i=0; i<m; i++) {
-
-	    if ((*entailed)[i]) continue;
-		//if (sys.f[i].eval(box).ub()<=0) continue;      // the constraint is satified :)
-
-		sys.f[i].gradient(box,G);                     // gradient calculation
-
-		for (int ii =0; ii< n ; ii++)
-		  if (G[ii].diam() > 1e8) {return false;}   //to avoid problems with SoPleX
-		
-		DSVector row1(nsimplex);
-
-		//The contraints i is generated:
-		// c_i:  inf([g_i]([x]) + sup(dg_i/dx_1) * xl_1 + ... + sup(dg_i/dx_n) + xl_n  <= -eps_error
-		for (int j=0; j<n; j++) {
-
-		  if (corner[j])
-		    row1.add(j+1, G[j].ub());
-		  else
-		    row1.add(j+1, G[j].lb());
-		}
-
-		mysoplex.addRow(LPRow(-infinity, row1, (-g_corner)[i].lb()-1e-10));    //  1e-10 ???  BNE
-	    }
+	  if (corner[j])    {
+		  bound[j+1] = Interval(0,box[j].diam());
+	      row[j+1]=G[j].ub();
+	  }
+	  else   {
+		  bound[j+1] = Interval(-box[j].diam(),0);
+	      row[j+1] = G[j].lb();
 	  }
 
-	SPxSolver::Status stat;
-
-	mysoplex.setTerminationIter(100);
-	mysoplex.setDelta(1e-10);
-
-
-	//		mysoplex.writeFile("dump.lp", NULL, NULL, NULL);
-	//		system ("cat dump.lp");
-	try{
-	  stat = mysoplex.solve();
-	} catch(SPxException  ) {  //cout << " Simplex error " << endl;
-		return false;
 	}
-	//	cout << " stat " << stat << endl;
-	if (stat == SPxSolver::OPTIMAL) {
+
+	mylp->cleanConst();
+	mylp->initBoundVar(bound);
+	mylp->setVarObj(0,1.0); // set the objective
+
+	mylp->addConstraint(row,LEQ,0.0); // add the constraint of the objective function
+
+	row[0] = 0.0;
+	//The linear system is generated
+	if (m>0)
+	{
+		// the evaluation of the constraints in the corner x_corner
+		IntervalVector g_corner(sys.f.eval_vector(x_corner));
+
+		for (int i=0; i<m; i++) {
+
+			if ((*entailed)[i]) continue;
+			//if (sys.f[i].eval(box).ub()<=0) continue;      // the constraint is satified :)
+
+			sys.f[i].gradient(box,G);                     // gradient calculation
+
+			for (int ii =0; ii< n ; ii++)
+				if (G[ii].diam() > 1e8) {
+					return false; //to avoid problems with SoPleX
+				}
+
+			//The contraints i is generated:
+			// c_i:  inf([g_i]([x]) + sup(dg_i/dx_1) * xl_1 + ... + sup(dg_i/dx_n) + xl_n  <= -eps_error
+			for (int j=0; j<n; j++) {
+
+				if (corner[j])
+					row[j+1]=G[j].ub();
+				else
+					row[j+1]=G[j].lb();
+			}
+			mylp->addConstraint(row,LEQ, (-g_corner)[i].lb()-mylp->getEpsilon());  //  1e-10 ???  BNE
+			//mysoplex.addRow(LPRow(-infinity, row1, (-g_corner)[i].lb()-1e-10));    //  1e-10 ???  BNE
+		}
+	}
+
+
+	//		mylp->writeFile("dump.lp");
+	//		system ("cat dump.lp");
+
+	LinearSolver::Status_Sol stat = mylp->solve();
+
+	//	std::cout << " stat " << stat << std::endl;
+	if (stat == LinearSolver::OPTIMAL) {
 		//the linear solution is mapped to intervals and evaluated
-		DVector prim(nsimplex);
-		mysoplex.getPrimal(prim);
+		Vector prim(n+1);
+		mylp->getPrimalSol(prim);
 
 		IntervalVector tmpbox(n);
 
 		for (int j=0; j<n; j++)
 		  tmpbox[j]=x_corner[j]+prim[j+1];
-		//		cout << " simplex result " << tmpbox << endl;
+		//		std::cout << " simplex result " << tmpbox << std::endl;
 		bool ret= check_candidate(tmpbox.mid(),false); //  [gch] do we know here that the point is inner??
 
 		if (ret) {
 		  if (trace)
 		    {   int prec=cout.precision();
-			cout.precision(12);
-			cout << "[simplex1]"  << " loup update " << loup  << " loup point  " << loup_point << endl;
-			cout.precision(prec);
+		    std::cout.precision(12);
+			std::cout << "[simplex1]"  << " loup update " << loup  << " loup point  " << loup_point << std::endl;
+			std::cout.precision(prec);
 		    }
 			nb_simplex++;
 			diam_simplex= ((nb_simplex-1) * diam_simplex + box.max_diam()) / nb_simplex;
 		}
 		return ret;
 	}
-
-	if(stat == SPxSolver::ABORT_TIME) cout << "Simplex spent too much time" << endl;
-
+	if (trace) {
+		if(stat == LinearSolver::TIME_OUT) std::cout << "Simplex spent too much time" << std::endl;
+		if(stat == LinearSolver::MAX_ITER) std::cout << "Simplex spent too much iteration" << std::endl;
+	}
 	return false;
 }
 

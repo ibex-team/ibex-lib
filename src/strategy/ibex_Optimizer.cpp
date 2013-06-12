@@ -76,6 +76,9 @@ Optimizer::Optimizer(System& user_sys, Bsc& bsc, Ctc& ctc, double prec,
 	diam_simplex=0;
 	nb_rand=0;
 	diam_rand=0;
+
+	//====================================
+	mylp = new LinearSolver(n+1,m);
 }
 
 Optimizer::~Optimizer() {
@@ -87,6 +90,8 @@ Optimizer::~Optimizer() {
 		delete is_inside;
 	}
 	buffer.flush();
+
+	delete mylp;
 }
 
 bool Optimizer::update_loup(const IntervalVector& box) {
@@ -261,7 +266,7 @@ void Optimizer::optimize(const IntervalVector& init_box) {
 						ymax = loup - goal_abs_prec;
 					((CellHeap&) buffer ).contract_heap(ymax);
 					if (ymax <=-DBL_MAX) {
-						cout << " infinite value for the minimum " << endl;
+						if (trace) cout << " infinite value for the minimum " << endl;
 						break;
 					}
 					if (trace) cout << setprecision(12) << "ymax=" << ymax << " uplo= " <<  uplo << endl;
@@ -302,7 +307,10 @@ void Optimizer::optimize(const IntervalVector& init_box) {
 		}
 	}
 	catch (TimeOutException& ) {
-	  cout << "time limit " << timeout << "s. reached " << endl; return;
+		if (trace) {
+			cout << "time limit " << timeout << "s. reached " << endl;
+			return;
+		}
 	}
 
 	Timer::stop();
@@ -313,8 +321,15 @@ void Optimizer::optimize(const IntervalVector& init_box) {
 
 void Optimizer::report() {
 	// No solution found and optimization stopped with empy buffer  before the required precision is reached => means infeasible problem
+
+	if (timeout >0 &&  time >=timeout ) {
+		cout << "time limit " << timeout << "s. reached " << endl;
+	}
+
 	if (buffer.empty() && uplo_of_epsboxes == POS_INFINITY && loup==POS_INFINITY) {
 		cout << " infeasible problem " << endl;
+		cout << " cpu time used " << time << "s." << endl;
+		cout << " number of cells " << nb_cells << endl;
 	}
 
 	else {
@@ -325,9 +340,9 @@ void Optimizer::report() {
 		if (loup==POS_INFINITY)
 			rel_prec= POS_INFINITY;
 		else
-			rel_prec=(loup-uplo)/(fabs (loup));
+			rel_prec=(loup-uplo)/(fabs (loup))-1.e-15;
 
-		double abs_prec=loup-uplo;
+		double abs_prec=loup-uplo-1.e-15;
 
 		cout << " Relative precision obtained on objective function: " << rel_prec << " " <<
 				(rel_prec <= goal_rel_prec? " [passed]" : " [failed]") << "  " << goal_rel_prec <<  endl;
@@ -342,16 +357,39 @@ void Optimizer::report() {
 			cout << " no feasible point found " << endl;
 		else
 			cout << " best feasible point " << loup_point << endl;
-	}
 
-	cout << " cpu time used " << time << "s." << endl;
-	cout << " number of cells " << nb_cells << endl;
+
+		cout << " cpu time used " << time << "s." << endl;
+		cout << " number of cells " << nb_cells << endl;
+	}
 	/*   // statistics on upper bounding
     if (trace) {
       cout << " nbrand " << nb_rand << " nb_inhc4 " << nb_inhc4 << " nb simplex " << nb_simplex << endl;
       cout << " diam_rand " << diam_rand << " diam_inhc4 " << diam_inhc4 << " diam_simplex " << diam_simplex << endl;
     }
 	*/
+}
+
+void Optimizer::report_perf() {
+
+	double rel_prec;
+	if (loup==POS_INFINITY)
+		rel_prec= POS_INFINITY;
+	else
+		rel_prec=(loup-uplo)/(fabs(loup))-1.e-15;
+
+	double abs_prec=loup-uplo-1.e-15;
+
+	cout << (	((rel_prec <= goal_rel_prec)||
+				(abs_prec <= goal_abs_prec)||
+				((buffer.empty() && uplo_of_epsboxes == POS_INFINITY && loup==POS_INFINITY))||
+				(uplo<-1.e300)
+			)? " T & " : " F & " );
+
+	cout << uplo << " & " << loup << " & ";
+	cout <<  time << "  "<< endl ;
+
+
 }
 
 void Optimizer::time_limit_check () {
