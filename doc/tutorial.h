@@ -222,10 +222,16 @@ to its distance with a constant point (1,2). To this end, we first define a gene
 dist(a,b) as above.
 \snippet tutorial.cpp func-compo
 
+The display is as folllows. Note that constant values like 0 are automatically replaced
+by degenerated intervals (like [0,0]):
+\verbatim
+f:(x)->(dist(x,(<0, 0> ; <0, 0>));dist(x,(<1, 1> ; <1, 1>)))
+\endverbatim
+
 \subsection func-vec-value Vector-valued functions
 
 In line with the previous example, we define now the function that
-associates to a vector x its distance with two different points:
+associates to a vector x its distance with two fixed points \c pt1=\(0,0) and \c pt2=(1,1).
 
 \f[f:x->( \|x-(1,1)\| , \|x-(0,0)\| )\f]
 \snippet tutorial.cpp func-vec-value
