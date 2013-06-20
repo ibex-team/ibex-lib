@@ -212,7 +212,9 @@ int main() {
   Vector pt2=Vector::ones(2);
 
   /* create the function x->(dist(x,pt1),dist(x,pt2)). */
-  Function f(x,Return(dist(x,pt1),dist(x,pt2)));
+  Function f(x,Return(dist(x,pt1),dist(x,pt2)),"f");
+
+  cout << f << endl;
   //! [func-vec-value]
   }
 
