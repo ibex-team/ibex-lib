@@ -93,6 +93,7 @@ bool Solver::next(std::vector<IntervalVector>& sols) {
 			    new_sol(sols, c->box);
 			    delete buffer.pop(); 
 			    impact.set_all();
+			    return !buffer.empty();
 			  }
 			}
 			time_limit_check();
