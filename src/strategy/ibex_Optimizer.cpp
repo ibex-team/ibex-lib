@@ -307,11 +307,9 @@ void Optimizer::optimize(const IntervalVector& init_box) {
 		}
 	}
 	catch (TimeOutException& ) {
-		if (trace) {
-			cout << "time limit " << timeout << "s. reached " << endl;
-			return;
-		}
+	  return;
 	}
+	
 
 	Timer::stop();
 	time+= Timer::VIRTUAL_TIMELAPSE();
@@ -320,12 +318,12 @@ void Optimizer::optimize(const IntervalVector& init_box) {
 
 
 void Optimizer::report() {
-	// No solution found and optimization stopped with empy buffer  before the required precision is reached => means infeasible problem
+
 
 	if (timeout >0 &&  time >=timeout ) {
 		cout << "time limit " << timeout << "s. reached " << endl;
 	}
-
+	// No solution found and optimization stopped with empy buffer  before the required precision is reached => means infeasible problem
 	if (buffer.empty() && uplo_of_epsboxes == POS_INFINITY && loup==POS_INFINITY) {
 		cout << " infeasible problem " << endl;
 		cout << " cpu time used " << time << "s." << endl;
