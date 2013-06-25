@@ -65,22 +65,22 @@ int main(int argc, char** argv) {
 	// The X_newton contractor
 
 	// corners of the current box where the constraints are linearized
-	vector<CtcXNewtonIter::corner_point> cpoints;
+	vector<CtcXNewton::corner_point> cpoints;
 	//	cpoints.push_back(CtcXNewtonIter::SUP_X);  // selection of the superior corners : not used 
 	//	cpoints.push_back(CtcXNewtonIter::INF_X);  // selection of the inferior corners : not used
 
 	// each constraint is linearized twice in one random corner and in its opposite 
-	cpoints.push_back(CtcXNewtonIter::RANDOM);
-	cpoints.push_back(CtcXNewtonIter::RANDOM_INV);
+	cpoints.push_back(CtcXNewton::RANDOM);
+	cpoints.push_back(CtcXNewton::RANDOM_INV);
 	// XNewtonIter contractor  (called with the system and the corners : all other  parameters have default values  :see Xnexton documentation for changing parameters)
 
-       	CtcXNewtonIter xnewtoniter (sys, cpoints);
+       	CtcXNewton xnewtoniter (sys, cpoints);
 
 	// the hc4 contractor called in the following fixpoint contractor
 	CtcHC4 hc44xn(sys.ctrs,ratio_propag);  
 
 	// Fixpoint with the sequence of 2 contractors (XNewtonIter and Hc4) 
-       	CtcXNewton ctcxnewton(xnewtoniter,hc44xn);
+       	CtcLinearRelaxation ctcxnewton(xnewtoniter,hc44xn);
 
 	// Build the main contractor:
 	// ---------------------------
