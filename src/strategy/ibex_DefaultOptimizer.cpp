@@ -56,13 +56,13 @@ DefaultOptimizer::DefaultOptimizer(System& _sys, double prec, double goal_prec) 
 	srand(1);}
 
 // the corners for CtcXNewtonIter : one random orner and its opposite
-vector<CtcXNewtonIter::corner_point>*  DefaultOptimizer::default_corners () {
-	vector<CtcXNewtonIter::corner_point>* x;
-	x= new vector<CtcXNewtonIter::corner_point>;
-	x->push_back(CtcXNewtonIter::RANDOM);
-	x->push_back(CtcXNewtonIter::RANDOM_INV);
+/*vector<CtcXNewton::corner_point>*  DefaultOptimizer::default_corners () {
+	vector<CtcXNewton::corner_point>* x;
+	x= new vector<CtcXNewton::corner_point>;
+	x->push_back(CtcXNewton::RANDOM);
+	x->push_back(CtcXNewton::RANDOM_INV);
 	return x;
-}
+}*/
 
 // the contractor list  hc4, acid(hc4), xnewton
 Array<Ctc>*  DefaultOptimizer::contractor_list (System& sys, System& ext_sys,double prec) {
@@ -74,9 +74,9 @@ Array<Ctc>*  DefaultOptimizer::contractor_list (System& sys, System& ext_sys,dou
 	ctc_list->set_ref(1, *new CtcAcid (ext_sys,*new CtcHC4 (ext_sys.ctrs,0.1,true),true));
 	// the last contractor is CtcXNewtonIter  with rfp=0.2 and rfp2=0.2
 	// the limits for calling soplex are the default values 1e6 for the derivatives and 1e6 for the domains : no error found with these bounds
-	ctc_list->set_ref(2,*new CtcXNewton 
-			  (*new CtcXNewtonIter(ext_sys,	*(default_corners())),
-			   *new CtcHC4 (ext_sys.ctrs,0.01)));
+	ctc_list->set_ref(2,*new CtcLinearRelaxation
+			  ((*new CtcLR (ext_sys,CtcLR::ALL_BOX, CtcLR::XNEWTON)),
+			   (*new CtcHC4 (ext_sys.ctrs,0.01))));
 	return ctc_list;
 }
 
@@ -84,8 +84,7 @@ Array<Ctc>*  DefaultOptimizer::contractor_list (System& sys, System& ext_sys,dou
 // deletion of all dynamically created objects
 DefaultOptimizer::~DefaultOptimizer() {
 	delete &((dynamic_cast<CtcAcid*> (&__ctc->list[1]))->ctc);
-	CtcCompo* ctccompo= dynamic_cast<CtcCompo*>(&(dynamic_cast<CtcXNewton*>( &__ctc->list[2])->ctc));
-	delete &((dynamic_cast<CtcXNewtonIter*> (&(ctccompo->list[0]))->cpoints));
+	CtcCompo* ctccompo= dynamic_cast<CtcCompo*>(&(dynamic_cast<CtcLinearRelaxation*>( &__ctc->list[2])->ctc));
 	delete &(ctccompo->list[0]);
 	delete &(ctccompo->list[1]);
 	for (int i=0 ; i<__ctc->list.size(); i++)

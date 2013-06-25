@@ -15,7 +15,7 @@
 
 #define _IBEX_WITH_SOPLEX_ 1
 //#define _IBEX_WITH_CPLEX_ 1
-
+//#define _IBEX_WITH_ILOCPLEX_ 1
 
 #include <string.h>
 #include <stdio.h>
@@ -26,10 +26,17 @@
 
 #ifdef _IBEX_WITH_SOPLEX_
 #include "soplex.h"
-#endif
 
+#else
 #ifdef _IBEX_WITH_CPLEX_
 #include "cplex.h"
+
+#else
+#ifdef _IBEX_WITH_ILOCPLEX_
+#include <ilcplex/ilocplex.h>
+
+#endif
+#endif
 #endif
 
 namespace ibex {
@@ -61,6 +68,14 @@ private:
 	double *  	cmatval;
 	int * 		cmatind;
 #endif
+
+#ifdef _IBEX_WITH_ILOCPLEX_
+	IloEnv		*myenv;
+    IloModel 	*mymodel;
+	IloCplex	*mycplex;
+#endif
+
+
 
 public:
 

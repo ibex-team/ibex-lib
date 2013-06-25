@@ -13,8 +13,8 @@
 
 #include "ibex_Optimizer.h"
 #include "ibex_CtcCompo.h"
-#include "ibex_CtcXNewton.h"
-#include "ibex_CtcXNewtonIter.h"
+#include "ibex_CtcLR.h"
+#include "ibex_CtcLinearRelaxation.h"
 
 namespace ibex {
 
@@ -40,7 +40,7 @@ public:
 
 private:
 	Array<Ctc>*  contractor_list (System& sys, System& ext_sys,double prec);
-	std::vector<CtcXNewtonIter::corner_point>* default_corners ();
+//	std::vector<CtcXNewton::corner_point>* default_corners ();
 
 
 	// -------- information stored for cleanup ----------
