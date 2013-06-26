@@ -13,7 +13,7 @@
 
 namespace ibex {
 
-Ctc::Ctc(int n) : nb_var(n), input(NULL), output(NULL), _impact(NULL) {
+Ctc::Ctc(int n) : nb_var(n), input(NULL), output(NULL), _impact(NULL), _output_flags(NULL) {
 
 }
 
