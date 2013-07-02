@@ -14,7 +14,6 @@
 #include "ibex_ExprCopy.h"
 #include "ibex_SystemCopy.cpp_"
 #include "ibex_SystemNormalize.cpp_"
-#include "ibex_SystemExtend.cpp_"
 #include "ibex_SystemMerge.cpp_"
 #include <stdio.h>
 #include <sstream>
@@ -33,8 +32,6 @@ namespace ibex {
 namespace parser {
 extern System* system;
 }
-
-const char* System::goal_name = "__goal__";
 
 System::System() : nb_var(0), nb_ctr(0), box(1) /* tmp */ {
 
@@ -63,7 +60,6 @@ System::System(const System& sys, copy_mode mode) : nb_var(0), nb_ctr(0), func(0
 	switch(mode) {
 	case COPY :      init(SystemCopy(sys,COPY)); break;
 	case NORMALIZE : init(SystemNormalize(sys)); break;
-	case EXTEND :    init(SystemExtend(sys)); break;
 	case INEQ:       init(SystemCopy(sys,INEQ)); break;
 	}
 

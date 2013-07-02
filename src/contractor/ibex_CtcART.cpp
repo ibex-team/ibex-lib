@@ -29,7 +29,7 @@ CtcART::~CtcART() {
 int CtcART::linearization(IntervalVector & box, LinearSolver *mysolver) {
 
 	Affine2 af2;
-	Vector rowconst(sys.nb_var);
+	Vector rowconst(Ctc::nb_var);
 	Interval ev(0.0);
 	Interval center(0.0);
 	Interval err(0.0);

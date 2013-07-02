@@ -81,7 +81,7 @@ public:
 	 * have to be initialized. #goal is set to NULL.
 	 */
 
-	typedef enum { COPY, NORMALIZE, EXTEND, INEQ } copy_mode;
+	typedef enum { COPY, NORMALIZE, INEQ } copy_mode;
 
 	/**
 	 * \brief Duplicate/Transform the system.
@@ -95,14 +95,6 @@ public:
 	 *                 Other equalities are just copied.
 	 *                 Note that the number of constraints of the resulting system
 	 *                 in this case is greater than the number or the original one.
-	 * <li> EXTEND:    Normalize and encode the goal function as a constraint.
-	 *                 The resulting system includes (n+1) variables, the n original
-	 *                 variables x_1,...,x_n and an an additional "goal" variable y.
-	 *                 The goal variable is added at the end (after the others). It
-	 *                 also includes (m+1) constraints. The first constraint is y-goal(x)=0
-	 *                 where goal(x) is the goal function. The others constraints are
-	 *                 normalized copy of the original ones. The name of the goal
-	 *                 variable is #goal_name.
 	 * <li> INEQ:      Copy the inequalities only. The goal is not copied.
 	 * </ul>
 	 */
@@ -114,7 +106,7 @@ public:
 	System(const System& sys1, const System& sys2);
 
 	/** \brief Delete *this. */
-	~System();
+	virtual ~System();
 
 	/** Number of variables.
 	 *
@@ -161,9 +153,6 @@ public:
 	 * If this system represents an unconstrained optimization problem,
 	 * this array is zero-sized. */
 	Array<NumConstraint> ctrs;
-
-	/** Name of the goal variable ("y"). */
-	static const char* goal_name;
 
 protected:
 	/** Uninitialized system */

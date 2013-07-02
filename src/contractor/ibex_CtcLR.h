@@ -37,9 +37,6 @@ public:
 	 *
 	 * \param sys The system (the extended system in case of optimization)
 	 * \param cpoints The vector of corner selection in linearization (X_INF, X_SUP, RANDOM, RANDOM_INV)
-	 * \param goal_ctr  (goal index for optimization, -1 for constraint solving)
-	 * \param goal_var
-	 * \param goal   (goal function pointer for optimization, NULL for constraint solving)
 	 * \param cmode X_NEWTON (contracts all the box) | LOWER_BOUNDING (in optimization only improves the left bound of the variable y)
 	 * \param lmode AFFINE2 | TAYLOR | HANSEN | COMPO: linear relaxation method.
 	 * \param max_iter_soplex : the maximum number of iterations for Soplex (default value 100)

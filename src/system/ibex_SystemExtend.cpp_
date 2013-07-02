@@ -9,6 +9,7 @@
 //============================================================================
 
 #include "ibex_SystemFactory.h"
+#include "ibex_ExprCopy.h"
 
 using std::pair;
 
@@ -23,7 +24,7 @@ public:
 	SystemExtend(const System& sys) {
 
 
-		Variable y(System::goal_name); // y is a scalar
+		Variable y(ExtendedSystem::goal_name); // y is a scalar
 		// warning: y must be added at the end (goal_var is set to n in constructor)
 		// We set goal_var to n (<=>y variable is the nth variable)
 		// to simplify the copy of expressions (see ibex_ExprCopy).

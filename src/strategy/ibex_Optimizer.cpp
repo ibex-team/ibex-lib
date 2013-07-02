@@ -34,7 +34,7 @@ const int Optimizer::default_sample_size = 10;
 void Optimizer::write_ext_box(const IntervalVector& box, IntervalVector& ext_box) {
 	int i2=0;
 	for (int i=0; i<n; i++,i2++) {
-		if (i2==goal_var) i2++; // skip goal variable
+		if (i2==ext_sys.goal_var()) i2++; // skip goal variable
 		ext_box[i2]=box[i];
 	}
 }
@@ -42,7 +42,7 @@ void Optimizer::write_ext_box(const IntervalVector& box, IntervalVector& ext_box
 void Optimizer::read_ext_box(const IntervalVector& ext_box, IntervalVector& box) {
 	int i2=0;
 	for (int i=0; i<n; i++,i2++) {
-		if (i2==goal_var) i2++; // skip goal variable
+		if (i2==ext_sys.goal_var()) i2++; // skip goal variable
 		box[i]=ext_box[i2];
 	}
 }
@@ -50,8 +50,8 @@ void Optimizer::read_ext_box(const IntervalVector& ext_box, IntervalVector& box)
 Optimizer::Optimizer(System& user_sys, Bsc& bsc, Ctc& ctc, double prec,
 		double goal_rel_prec, double goal_abs_prec, int sample_size) :
 		n(user_sys.nb_var), m(user_sys.nb_ctr),
-		sys(user_sys,System::NORMALIZE),
-		bsc(bsc), ctc(ctc), buffer(n), goal_var(n),
+		sys(user_sys,System::NORMALIZE), ext_sys(user_sys),
+		bsc(bsc), ctc(ctc), buffer(n),
 		prec(prec), goal_rel_prec(goal_rel_prec), goal_abs_prec(goal_abs_prec),
 		sample_size(sample_size), mono_analysis_flag(true), in_HC4_flag(true), trace(false),
 		timeout(1e08), loup(POS_INFINITY), uplo(NEG_INFINITY), loup_point(n),
@@ -117,7 +117,7 @@ void Optimizer::update_entailed_ctr(const IntervalVector& box) {
 bool Optimizer::contract_and_bound(Cell& c) {
 	//         cout << "box " <<c.box << endl;
 	/*======================== contract y with y<=loup ========================*/
-	Interval& y=c.box[goal_var];
+	Interval& y=c.box[ext_sys.goal_var()];
 
 	//cout << "loup=" << loup << endl;
 

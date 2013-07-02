@@ -327,7 +327,7 @@ void Function::init(const Array<const ExprSymbol>& x, const ExprNode& y) {
 
 void Function::add_symbol(const ExprSymbol* symbol) {
 
-  id2info.insert_new(symbol->name, symbol);
+  //id2info.insert_new(symbol->name, symbol);
 
   ((ExprSymbol&) *symbol).key = key_count;
 

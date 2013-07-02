@@ -29,11 +29,11 @@ namespace {
 // to pass the extended system "ext_sys" to the base class
 // constructor before it is built as a member of the class
 
-System* tmp_ext_sys=NULL;
+ExtendedSystem* tmp_ext_sys=NULL;
 
-System& get_ext_sys(System& sys) {
+ExtendedSystem& get_ext_sys(System& sys) {
 	if (tmp_ext_sys==NULL)
-		tmp_ext_sys=new System(sys,System::EXTEND);
+		tmp_ext_sys=new ExtendedSystem(sys);
 	return *tmp_ext_sys;
 }
 

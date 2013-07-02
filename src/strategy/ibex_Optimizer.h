@@ -17,6 +17,7 @@
 #include "ibex_Backtrackable.h"
 #include "ibex_CellHeapOptim.h"
 #include "ibex_System.h"
+#include "ibex_ExtendedSystem.h"
 #include "ibex_EntailedCtr.h"
 #include "ibex_LinearSolver.h"
 
@@ -103,16 +104,29 @@ public:
 	const int m;
 
 	/**
-	 * \brief The extended system 
+	 * \brief The normalized system
 	 *
-	 * Corresponds to the extended  system (see constructor) with all inequalities
+	 * Corresponds to the system (see constructor) with all inequalities
 	 * under the form g_i(x)<=0.
 	 */
 	System sys;
 
+	/**
+	 * \brief The extended system
+	 *
+	 * Corresponds to the normalized system with the goal f(x)
+	 * represented as a variable "y" and with the additional constraint
+	 * y=f(x). The domain of y stores the interval [uplo,loup] where
+	 * "uplo" is the uppermost lower bound on f(x) and "loup" the
+	 * lowest upper bound.
+	 *
+	 * The index of y is ext_sys.nb_var.
+	 * See #ibex::ExtendedSystem::goal_var.
+	 */
+	ExtendedSystem ext_sys;
+
 	/** Bisector. */
 	Bsc& bsc;
-
 
 	/** Contractor for the extended system
 	 * (y=f(x), g_1(x)<=0,...,g_m(x)<=0). */
@@ -125,14 +139,7 @@ public:
 	/**
 	 * \brief Index of the goal variable y in the extended box.
 	 *
-	 * This variables stores the interval [uplo,loup] where "uplo" is
-	 * the uppermost lower bound on f(x) and "loup" the lowest upper
-	 * bound.
-	 *
-	 * The value of goal_var is nb_var (last variable). see
-	 * #ibex::System::System(const ibex::System& sys, System::copy_mode mode).
 	 */
-	const int goal_var;
 
 	/** Precision (bisection control) */
 	const double prec;

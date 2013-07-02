@@ -468,7 +468,7 @@ private:
 	Array<const ExprSymbol> symbs;              // to retrieve symbol (node)s by appearing order.
 	std::vector<bool> is_used;                  // tells whether the i^th component is used.
 	ExprSubNodes exprnodes;                         // all the nodes (of x and f(x))
-	SymbolMap<const ExprSymbol*> id2info;       // to retrieve a symbol node from its name.
+	//SymbolMap<const ExprSymbol*> id2info;       // to retrieve a symbol node from its name.
 	int key_count;                              // count the number of arguments
 
 	Function* comp;                             // the components. ==this if output_size()==1.
