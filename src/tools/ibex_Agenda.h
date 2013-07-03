@@ -22,7 +22,7 @@ namespace ibex {
  * \ingroup tools
  * \brief Empty agenda exception.
  *
- * Thrown when an element is retreived from an empty agenda.
+ * Thrown when an element is retrieved from an empty agenda.
  */
 class EmptyAgendaException : public Exception { };
 

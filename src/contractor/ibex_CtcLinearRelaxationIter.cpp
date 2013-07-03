@@ -18,7 +18,7 @@ namespace ibex {
 
 CtcLinearRelaxationIter::CtcLinearRelaxationIter(const System& sys,
 		ctc_mode cmode, int max_iter, int time_out, double eps, double max_diam_box1):
-								 Ctc(nb_var), sys(sys), goal_var(-1), cmode(cmode), max_diam_box(max_diam_box1) {
+								 Ctc(sys.nb_var), sys(sys), goal_var(-1), cmode(cmode), max_diam_box(max_diam_box1) {
 
 	if (dynamic_cast<const ExtendedSystem*>(&sys)) {
 		(int&) goal_var=((const ExtendedSystem&) sys).goal_var();
