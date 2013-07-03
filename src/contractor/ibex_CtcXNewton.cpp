@@ -329,10 +329,12 @@ int CtcXNewton::X_Linearization(IntervalVector& box,
 	if(corner) delete[] corner;
 	 */
 	if(ctr==goal_ctr) {
-		IntervalVector tmp(box);
-		tmp[goal_var]=Interval::ALL_REALS;
-		sys.ctrs[ctr].f.backward(0,tmp); // will calculate "y" from "x".
-		ev+=tmp[goal_var];
+		// [gch] warning: using sys.ctrs[ctr].f.backward
+		// instead of original_goal
+		// may give an EmptyBoxException even if
+		// the domain of "y" is (-oo,oo).
+		// This happens with ex6_2_9.bch.
+		ev+=((const ExtendedSystem&) sys).original_goal.eval(box);
 	} else
 		ev+= sys.ctrs[ctr].f.eval(box);
 
