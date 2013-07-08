@@ -44,7 +44,8 @@ public:
 	 * \param max_diam_box : the maximum diameter of the variables for calling Soplex (default value 1.e4) Soplex may lose solutions when it is called with "big" domains.
 	 */
 
-	CtcLR(const System& sys,ctc_mode cmode=ALL_BOX, linear_mode lmode=COMPO);
+	CtcLR(const System& sys,ctc_mode cmode=ALL_BOX, linear_mode lmode=COMPO,
+			bool init_lp=true);
 
 	/** Deletes this instance. */
 	~CtcLR();

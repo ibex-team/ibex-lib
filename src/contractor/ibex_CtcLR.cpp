@@ -14,45 +14,52 @@ namespace ibex {
 
 // the constructor
 
-CtcLR::CtcLR(const System& sys1,ctc_mode cmode1, linear_mode lmode1) :
-			CtcLinearRelaxationIter(sys1,cmode1),
+CtcLR::CtcLR(const System& sys1,ctc_mode cmode1, linear_mode lmode1, bool init_lp) :
+			CtcLinearRelaxationIter(sys1,cmode1,LinearSolver::default_max_iter, LinearSolver::default_max_time_out,
+					LinearSolver::default_eps, LinearSolver::default_max_diam_box, init_lp),
 			lmode(lmode1) {
 
 	switch (lmode) {
 	case ART:
 	case AFFINE2: {
-		myart =new CtcART(sys1,cmode1);
+		myart =new CtcART(sys1,cmode1,LinearSolver::default_max_iter, LinearSolver::default_max_time_out,
+				LinearSolver::default_eps, LinearSolver::default_max_diam_box, false);
 		break;
 	}
 	case XNEWTON: {
 		// the default corner of XNewton linear relaxation
 		cpoints.push_back(CtcXNewton::RANDOM);
 		cpoints.push_back(CtcXNewton::RANDOM_INV);
-		myxnewton = new CtcXNewton(sys1,cpoints,cmode1);
+		myxnewton = new CtcXNewton(sys1,cpoints,cmode1,CtcXNewton::HANSEN, LinearSolver::default_max_iter,
+				CtcXNewton::default_max_diam_deriv,LinearSolver::default_max_diam_box, false);
 		break;
 	}
 	case TAYLOR:{
 		// the default corner of XNewton linear relaxation
 		cpoints.push_back(CtcXNewton::RANDOM);
 		cpoints.push_back(CtcXNewton::RANDOM_INV);
-		myxnewton = new CtcXNewton(sys1,cpoints,cmode1,CtcXNewton::TAYLOR);
+		myxnewton = new CtcXNewton(sys1,cpoints,cmode1,CtcXNewton::TAYLOR, LinearSolver::default_max_iter,
+				CtcXNewton::default_max_diam_deriv,LinearSolver::default_max_diam_box, false);
 		break;
 	}
 	case HANSEN: {
 		// the default corner of XNewton linear relaxation
 		cpoints.push_back(CtcXNewton::RANDOM);
 		cpoints.push_back(CtcXNewton::RANDOM_INV);
-		myxnewton = new CtcXNewton(sys1,cpoints,cmode1,CtcXNewton::HANSEN);
+		myxnewton = new CtcXNewton(sys1,cpoints,cmode1,CtcXNewton::HANSEN,LinearSolver::default_max_iter,
+				CtcXNewton::default_max_diam_deriv,LinearSolver::default_max_diam_box, false);
 		break;
 	}
 	case COMPO: {
 
-		myart =new CtcART(sys1,cmode1);
+		myart =new CtcART(sys1,cmode1,LinearSolver::default_max_iter, LinearSolver::default_max_time_out,
+				LinearSolver::default_eps, LinearSolver::default_max_diam_box, false);
 
 		// the default corner of XNewton linear relaxation
 		cpoints.push_back(CtcXNewton::RANDOM);
 		cpoints.push_back(CtcXNewton::RANDOM_INV);
-		myxnewton = new CtcXNewton(sys1,cpoints,cmode1);
+		myxnewton = new CtcXNewton(sys1,cpoints,cmode1,CtcXNewton::HANSEN, LinearSolver::default_max_iter,
+				CtcXNewton::default_max_diam_deriv,LinearSolver::default_max_diam_box, false);
 
 		break;
 	}

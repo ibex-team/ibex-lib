@@ -17,18 +17,19 @@ using namespace std;
 namespace ibex {
 
 CtcLinearRelaxationIter::CtcLinearRelaxationIter(const System& sys,
-		ctc_mode cmode, int max_iter, int time_out, double eps, double max_diam_box1):
+		ctc_mode cmode, int max_iter, int time_out, double eps, double max_diam_box1, bool init_lp):
 								 Ctc(sys.nb_var), sys(sys), goal_var(-1), cmode(cmode), max_diam_box(max_diam_box1) {
 
 	if (dynamic_cast<const ExtendedSystem*>(&sys)) {
 		(int&) goal_var=((const ExtendedSystem&) sys).goal_var();
 	}
 
-	mylinearsolver = new LinearSolver(nb_var, sys.nb_ctr, max_iter, time_out, eps);
+	mylinearsolver = NULL;
+	if (init_lp) mylinearsolver = new LinearSolver(nb_var, sys.nb_ctr, max_iter, time_out, eps);
 }
 
 CtcLinearRelaxationIter::~CtcLinearRelaxationIter () {
-	delete mylinearsolver;
+	if (mylinearsolver!=NULL) delete mylinearsolver;
 }
 
 int CtcLinearRelaxationIter::linearization(IntervalVector& box) {

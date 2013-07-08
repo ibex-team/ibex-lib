@@ -46,7 +46,8 @@ public:
 	 */
 	CtcLinearRelaxationIter(const System& sys, ctc_mode cmode=ALL_BOX,
 			int max_iter=LinearSolver::default_max_iter, int time_out=LinearSolver::default_max_time_out,
-			double eps=LinearSolver::default_eps, double max_diam=LinearSolver::default_max_diam_box);
+			double eps=LinearSolver::default_eps, double max_diam=LinearSolver::default_max_diam_box,
+			bool init_lp=true);
 
 	/**
 	 * \brief Delete *this

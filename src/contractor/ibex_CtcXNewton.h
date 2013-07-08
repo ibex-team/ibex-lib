@@ -39,6 +39,9 @@ public:
 	 */
 	typedef enum  {RANDOM_INV, NEG, INF_X, SUP_X, RANDOM, GREEDY1, GREEDY5, GREEDY6, BEST , MONO,NEGMONO, K4} corner_point;
 
+	/** Default max_diam_deriv value, set to 1e6  **/
+	static const double default_max_diam_deriv;
+
 	/**
 	 * \brief Creates the X_Newton contractor.
 	 *
@@ -52,7 +55,8 @@ public:
 	 */
 	CtcXNewton(const System& sys, std::vector<corner_point>& cpoints,
 			ctc_mode cmode=ALL_BOX, linear_mode lmode=HANSEN, int max_iter=LinearSolver::default_max_iter,
-			double max_diam_deriv=default_max_diam_deriv, double max_diam_box=LinearSolver::default_max_diam_box);
+			double max_diam_deriv=default_max_diam_deriv, double max_diam_box=LinearSolver::default_max_diam_box,
+			bool init_lp=true);
 
 	/**
 	 * \brief Deletes this instance.
@@ -78,9 +82,6 @@ public:
 private:
 	/* Computes the gradient G of the constraint ctr : special case if ctr==goal_ctr */
 	void gradient_computation (IntervalVector& box, IntervalVector& G, int ctr);
-
-	/** Default max_diam_deriv value, set to 1e5  **/
-	static const double default_max_diam_deriv;
 
 	/**
 	 * \brief Goal constraint (in case of extended system, -1 otherwise).
