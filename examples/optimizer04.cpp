@@ -36,8 +36,6 @@ int main(int argc, char** argv){
 	double timelimit = atof(argv[6]);
 
 	srand(1);
-	// the extended system 
-	System ext_sys(sys,System::EXTEND);
 
         cout << "file " << argv[1] << endl;
 
@@ -51,23 +49,23 @@ int main(int argc, char** argv){
 	else if (bisection== "largestfirst")
           bs= new LargestFirst();
 	else if (bisection=="smearsum")
-	  bs = new SmearSum(ext_sys,prec);
+	  bs = new SmearSum(sys,prec);
 	else if (bisection=="smearmax")
-	  bs = new SmearMax(ext_sys,prec);
+	  bs = new SmearMax(sys,prec);
 	else if (bisection=="smearsumrel")
-	  bs = new SmearSumRelative(ext_sys,prec);
+	  bs = new SmearSumRelative(sys,prec);
 	else if (bisection=="smearmaxrel")
-	  bs = new SmearMaxRelative(ext_sys,prec);
+	  bs = new SmearMaxRelative(sys,prec);
 	else {cout << bisection << " is not an implemented  bisection mode "  << endl; return -1;}
 
 	// The contractors
 
 	// the first contractor called
-	CtcHC4 hc4(ext_sys.ctrs,0.01,true);
+	CtcHC4 hc4(sys.ctrs,0.01,true);
 	// hc4 inside acid and 3bcid : incremental propagation beginning with the shaved variable
-	CtcHC4 hc44cid(ext_sys.ctrs,0.1,true);
+	CtcHC4 hc44cid(sys.ctrs,0.1,true);
 	// hc4 inside xnewton loop 
-	CtcHC4 hc44xn (ext_sys.ctrs,0.01,false);
+	CtcHC4 hc44xn (sys.ctrs,0.01,false);
 
 	// The 3BCID contractor on all variables (component of the contractor when filtering == "3bcidhc4") 
 	Ctc3BCid c3bcidhc4(hc44cid);
@@ -75,7 +73,7 @@ int main(int argc, char** argv){
 	CtcCompo hc43bcidhc4 (hc4, c3bcidhc4);
 
 	// The ACID contractor (component of the contractor  when filtering == "acidhc4")
-	CtcAcid acidhc4(ext_sys,hc44cid,true);
+	CtcAcid acidhc4(sys,hc44cid,true);
 	// hc4 followed by acidhc4 : the actual contractor used when filtering == "acidhc4" 
 	CtcCompo hc4acidhc4 (hc4, acidhc4);
 
@@ -99,7 +97,7 @@ int main(int argc, char** argv){
 	cpoints.push_back(CtcXNewton::RANDOM_INV);
 
         // the linear relaxation contractor 
-	 CtcXNewton ctcxnewton (ext_sys,cpoints);
+	 CtcXNewton ctcxnewton (sys,cpoints);
 
 	// fixpoint linear relaxation , hc4  with default fix point ratio 0.2
 	CtcLinearRelaxation cxn (ctcxnewton, hc44xn);

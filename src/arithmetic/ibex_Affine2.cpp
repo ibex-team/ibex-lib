@@ -132,18 +132,11 @@ Affine2& Affine2::operator=(const Affine2& x) {
 
 Affine2& Affine2::operator=(double d) {
 	if (fabs(d)<POS_INFINITY) {
-		_err = abs(d)*AF_EC();
-		if (_n<0)  {
-			_n = 0;
-			if (_val!=NULL) { delete[] _val; }
-			_val = new double[1];
-		}
-		if (_val==NULL) _val = new double[_n + 1];
-
+		if (_val!=NULL) { delete[] _val; }
+		_n = 0;
+		_val = new double[1];
 		_val[0] = d;
-		for (int i = 1; i <= _n; i++) {
-			_val[i] = 0;
-		}
+		_err = abs(d)*AF_EC();
 	} else {
 		_err = d;
 		_n = -1;
@@ -157,18 +150,11 @@ Affine2& Affine2::operator=(double d) {
 
 Affine2& Affine2::operator=(const Interval& x) {
 	if (!(x.is_unbounded()||x.is_empty())) {
-		_err = x.rad();
-		if (_n<0)  {
-			_n = 0;
-			if (_val!=NULL) { delete[] _val; }
-			_val = new double[1];
-		}
-		if (_val==NULL) _val = new double[_n + 1];
-
+		if (_val!=NULL) { delete[] _val; }
+		_n = 0;
+		_val = new double[1];
 		_val[0] = x.mid();
-		for (int i = 1; i <= _n; i++) {
-			_val[i] = 0;
-		}
+		_err = x.rad();
 	} else {
 		_err = x;
 		_n = -1;
@@ -652,7 +638,6 @@ Affine2& Affine2::power(int n, const Interval itv) {
 			xb1 = Interval(0.5) * (itv.diam() * (-x0) + itv.lb() + itv.ub());
 			c0 = Interval(0.5) * (pow(xb0, n) + pow(xb1, n));
 			c1 = x0 * pow(xb0, n) - x0 * pow(xb1, n);
-			x0 = pow(itv, n);
 
 			TEMP1 = 2 * c1 / (itv.diam());
 			TEMP2 = c0 - c1 * ((itv.lb() + itv.ub()) / (itv.diam()));
@@ -661,9 +646,9 @@ Affine2& Affine2::power(int n, const Interval itv) {
 			beta = TEMP2.mid();
 			ddelta = ((_n * Interval(TEMP1.rad())) + Interval(TEMP2.rad())).ub();
 
+
 			// compute the maximal error
 			double max_error = 0.0;
-			Interval period_0, nb_period;
 
 			// compute the error at _itv.lb() and _itv.ub()
 			max_error = (abs(

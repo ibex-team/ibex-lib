@@ -44,7 +44,7 @@ int CtcART::linearization(IntervalVector & box, LinearSolver *mysolver) {
 		ev = sys.ctrs[ctr].f.eval_affine2(box, af2);
 		op = sys.ctrs[ctr].op;
 
-		if (af2.size() != sys.nb_var+1) { // if the affine2 form is valid
+		if (af2.size() == sys.nb_var) { // if the affine2 form is valid
 
 			// convert the epsilon variables to the original box
 			double tmp=0;
