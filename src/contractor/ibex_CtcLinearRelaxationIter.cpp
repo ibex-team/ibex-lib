@@ -180,9 +180,6 @@ void CtcLinearRelaxationIter::optimizer(IntervalVector& box) {
 				if (next==-1) break;
 			}
 		}
-		else {
-			break;
-		}  // no more call to the LP Solver
 	}
 
 	delete[] inf_bound;
