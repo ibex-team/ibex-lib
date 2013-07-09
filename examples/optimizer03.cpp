@@ -37,6 +37,8 @@ int main(int argc, char** argv){
 		double goalprec= atof (argv[5]);
 
 
+		ExtendedSystem ext_sys(sys);
+
 		// Build the bisection heuristic
 		// --------------------------
 		// Round-robin means that the domain
@@ -49,20 +51,20 @@ int main(int argc, char** argv){
 		else if (bisection== "largestfirst")
 			bs= new LargestFirst();
 		else if (bisection=="smearsum")
-			bs = new SmearSum(sys,prec);
+			bs = new SmearSum(ext_sys,prec);
 		else if (bisection=="smearmax")
-			bs = new SmearMax(sys,prec);
+			bs = new SmearMax(ext_sys,prec);
 		else if (bisection=="smearsumrel")
-			bs = new SmearSumRelative(sys,prec);
+			bs = new SmearSumRelative(ext_sys,prec);
 		else if (bisection=="smearmaxrel")
-			bs = new SmearMaxRelative(sys,prec);
+			bs = new SmearMaxRelative(ext_sys,prec);
 
 		Ctc *ctc;
 
-		CtcHC4 hc4(sys.ctrs,0.01);
-		CtcHC4 hc44cid(sys.ctrs,0.1,true);
-		CtcAcid acidhc4(sys,BoolMask(sys.nb_var,1),hc44cid);
-		Ctc3BCid c3bcidhc4(BoolMask(sys.nb_var,1),hc44cid,10,1,sys.nb_var);
+		CtcHC4 hc4(ext_sys.ctrs,0.01);
+		CtcHC4 hc44cid(ext_sys.ctrs,0.1,true);
+		CtcAcid acidhc4(ext_sys,BoolMask(sys.nb_var,1),hc44cid);
+		Ctc3BCid c3bcidhc4(BoolMask(ext_sys.nb_var,1),hc44cid,10,1,ext_sys.nb_var);
 		CtcCompo hc4acidhc4 (hc4, acidhc4);
 
 		if (filtering == "hc4")
@@ -76,8 +78,8 @@ int main(int argc, char** argv){
 
 		Optimizer o(sys,*bs,*ctc,prec,goalprec,goalprec,1);
 
-		sys.box[sys.nb_var]= sys.goal->eval(sys.box);
-		cout << " y init " << sys.box[sys.nb_var] << endl;
+		ext_sys.box[sys.nb_var]= sys.goal->eval(sys.box);
+		cout << " y init " << ext_sys.box[sys.nb_var] << endl;
 
 		//o.in_HC4_flag=false;
 		o.mono_analysis_flag=false;

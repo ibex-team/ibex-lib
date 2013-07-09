@@ -33,7 +33,12 @@ int main(int argc, char** argv){
 
 	RoundRobin rr;
 
-	CtcHC4 ctc(sys.ctrs);
+
+	ExtendedSystem ext(sys);
+
+	CtcHC4 ctc(ext.ctrs);
+
+
 	// =============================================================
 
 	Optimizer o(sys,rr,ctc);
