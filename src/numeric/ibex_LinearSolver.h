@@ -107,7 +107,7 @@ public:
 
 	Status_Sol solve();
 
-	Status writeFile(std::string name="save_LP.lp");
+	Status writeFile(const char* name="save_LP.lp");
 
 
 // GET

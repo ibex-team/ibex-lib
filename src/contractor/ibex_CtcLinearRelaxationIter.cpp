@@ -51,7 +51,7 @@ void CtcLinearRelaxationIter::contract (IntervalVector & box){
 		optimizer(box);
 
 		//	mylinearsolver->writeFile("LP.lp");
-		//		system ("cat dump.lp");
+		//		system ("cat LP.lp");
 		//cout << " box after  LR " << box << endl;
 		mylinearsolver->cleanConst();
 
@@ -77,7 +77,7 @@ void CtcLinearRelaxationIter::optimizer(IntervalVector& box) {
 			inf_bound[i]=1;
 			sup_bound[i]=1;
 		}
-		inf_bound[goal_var]=0;
+		if (goal_var>-1) inf_bound[goal_var]=0;
 	}
 	else {
 		for (int i=0; i<nb_var; i++) {
@@ -85,7 +85,7 @@ void CtcLinearRelaxationIter::optimizer(IntervalVector& box) {
 			inf_bound[i]=0;
 			sup_bound[i]=0;
 		}
-		sup_bound[goal_var]=1;
+		if (goal_var>-1) sup_bound[goal_var]=1;
 	}
 
 	int nexti=-1;   // the next variable to be contracted
@@ -186,6 +186,8 @@ void CtcLinearRelaxationIter::optimizer(IntervalVector& box) {
 
 	delete[] inf_bound;
 	delete[] sup_bound;
+
+
 }
 
 
@@ -199,8 +201,8 @@ LinearSolver::Status_Sol CtcLinearRelaxationIter::run_simplex(IntervalVector& bo
 		mylinearsolver->setVarObj(var, -1.0);
 
 	//mylinearsolver->setSense(LinearSolver::MINIMIZE);
-	//	mylinearsolver->writeFile("dump.lp");
-	//	system("cat dump.lp");
+	//	mylinearsolver->writeFile("coucou.lp");
+	//	system("cat coucou.lp");
 	LinearSolver::Status_Sol stat = mylinearsolver->solve();
 	//	cout << " stat solver " << stat << endl;
 

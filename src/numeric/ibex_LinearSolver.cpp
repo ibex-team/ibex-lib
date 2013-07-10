@@ -99,6 +99,7 @@ LinearSolver::Status_Sol LinearSolver::solve() {
 	LinearSolver::Status_Sol res= UNKNOWN;
 
 	try{
+
 	        stat = mysoplex->solve();
 		if (stat==soplex::SPxSolver::OPTIMAL) {
 		  obj_value = mysoplex->objValue();
@@ -121,10 +122,10 @@ LinearSolver::Status_Sol LinearSolver::solve() {
 
 }
 
-LinearSolver::Status LinearSolver::writeFile(std::string name) {
+LinearSolver::Status LinearSolver::writeFile(const char* name) {
 	LinearSolver::Status res= FAIL;
 	try {
-		mysoplex->writeFile("dump.lp", NULL, NULL, NULL);
+		mysoplex->writeFile(name, NULL, NULL, NULL);
 		res = OK;
 	}
 	catch(soplex::SPxException& ) {

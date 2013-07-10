@@ -17,7 +17,9 @@ namespace ibex {
 CtcLR::CtcLR(const System& sys1,ctc_mode cmode1, linear_mode lmode1, bool init_lp) :
 			CtcLinearRelaxationIter(sys1,cmode1,LinearSolver::default_max_iter, LinearSolver::default_max_time_out,
 					LinearSolver::default_eps, LinearSolver::default_max_diam_box, init_lp),
-			lmode(lmode1) {
+			lmode(lmode1),
+			myart(NULL),
+			myxnewton(NULL)  {
 
 	switch (lmode) {
 	case ART:
@@ -68,26 +70,9 @@ CtcLR::CtcLR(const System& sys1,ctc_mode cmode1, linear_mode lmode1, bool init_l
 }
 
 CtcLR::~CtcLR() {
-	switch (lmode) {
-	case ART:
-	case AFFINE2: {
-		delete myart;
-		break;
-	}
-	case XNEWTON:
-	case TAYLOR:
-	case HANSEN: {
-		cpoints.clear();
-		delete myxnewton;
-		break;
-	}
-	case COMPO: {
-		cpoints.clear();
-		delete myxnewton;
-		delete myart;
-		break;
-	}
-	}
+	cpoints.clear();
+	if (myart!=NULL) delete myart;
+	if (myxnewton!=NULL) delete myxnewton;
 }
 
 
