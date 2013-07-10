@@ -74,16 +74,18 @@ void CtcLinearRelaxationIter::optimizer(IntervalVector& box) {
 	if (cmode==ONLY_Y) {
 		for (int i=0; i<nb_var; i++) {
 			// in the case of lower_bounding, only the left bound of y is contracted
-			inf_bound[i]=(i==goal_var?0:1);
+			inf_bound[i]=1;
 			sup_bound[i]=1;
 		}
+		inf_bound[goal_var]=0;
 	}
 	else {
 		for (int i=0; i<nb_var; i++) {
 			// in case of optimization, the right bound of y is not contracted
 			inf_bound[i]=0;
-			sup_bound[i]=(i==goal_var?1:0);
+			sup_bound[i]=0;
 		}
+		sup_bound[goal_var]=1;
 	}
 
 	int nexti=-1;   // the next variable to be contracted

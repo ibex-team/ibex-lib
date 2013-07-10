@@ -19,7 +19,8 @@ const double CtcXNewton::default_max_diam_deriv =1e6;
 
 CtcXNewton::CtcXNewton(const System& sys1, std::vector<corner_point>& cpoints1,
 		ctc_mode cmode, linear_mode lmode1, int max_iter1, double max_diam_deriv1, double max_diam_box, bool init_lp):
-			CtcLinearRelaxationIter(sys1,cmode,max_iter1,max_diam_box, init_lp),
+			CtcLinearRelaxationIter(sys1,cmode,max_iter1, LinearSolver::default_max_time_out,
+					LinearSolver::default_eps,max_diam_box, init_lp),
 			cpoints(cpoints1), goal_ctr(-1),
 			max_diam_deriv(max_diam_deriv1),
 			lmode(lmode1),
