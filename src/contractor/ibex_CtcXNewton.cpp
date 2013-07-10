@@ -1,6 +1,6 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_XNewton.cpp
+// File        : ibex_CtcXNewton.cpp
 // Author      : Ignacio Araya, Bertrand Neveu , Gilles Trombettoni
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
@@ -45,7 +45,6 @@ void CtcXNewton::init_linear_coeffs() {
 
 		if(ctr==goal_ctr) {
 			G=-G;           // the gradient of (y-f(x)) will give (1,-grad{f}).
-			G[goal_var]=0;  // [gch]: why 0 and not -1?
 		}
 
 		linear[ctr]=true;
@@ -124,7 +123,6 @@ int CtcXNewton::X_Linearization(IntervalVector& box,
 
 	if (id_point != 0 && linear[ctr])
 		return 0; // only one corner for a linear constraint
-	//Linear variable y<=loup (should be y<=Sup(y)?)
 
 	/*
 	 bool* corner=NULL;
@@ -143,34 +141,30 @@ int CtcXNewton::X_Linearization(IntervalVector& box,
 	Interval tot_ev(0.0);
 	Vector row1(n);
 
-	if (ctr==goal_ctr) {
-		row1[goal_var] += -1.0;
-	}
+
 	for (int j=0; j< n; j++) {
 
-		if (j==goal_var) {
-			assert(goal_ctr>-1);
-			continue; //the variable y!
-		}
+	  if (sys.ctrs[ctr].f.used(j)) {
+	    if (lmode == HANSEN && !linear[ctr])
+	      {if (j != goal_var)  
+		  gradient_computation(box,G,ctr);
+		else  // code optimization , no need to recompute the gradient for the objective : we know the result.
+		  G[j]=-1.0;
+	      }
+	  } 
+	  else continue;
 
-		if (sys.ctrs[ctr].f.used(j)) {
-			if (lmode == HANSEN && !linear[ctr]) {
-				gradient_computation(box,G,ctr);
-			}
-		} 
-		else continue;
+	  if (G[j].diam() > max_diam_deriv) {
+	    box = savebox; // [gch] where box has been modified?  at the end of the loop (for Hansen computation) [bne]
+	    return 0;      // To avoid problems with SoPleX
+	  }
 
-		if (G[j].diam() > max_diam_deriv) {
-			box = savebox; // [gch] where box has been modified?
-			return 0;      // To avoid problems with SoPleX
-		}
+	  if (linear[ctr])
+	    cpoint = INF_X;
+	  else if (G[j].diam() > 1e-10)
+	    nonlinear_var++;
 
-		if (linear[ctr])
-			cpoint = INF_X;
-		else if (G[j].diam() > 1e-10)
-			nonlinear_var++;
-
-		bool inf_x;
+	  bool inf_x;
 
 		/*  for GREEDY heuristics :not implemented in v2
 		 IntervalVector save;
@@ -178,7 +172,7 @@ int CtcXNewton::X_Linearization(IntervalVector& box,
 		 double D;
 		 */
 
-		switch (cpoint) {
+	  switch (cpoint) {
 		/*
 		 case BEST:
 		 inf_x=corner[j]; last_rnd[j]=inf_x? 0:1;  break;
@@ -317,27 +311,23 @@ int CtcXNewton::X_Linearization(IntervalVector& box,
 		}
 
 		//      cout << " j " << j <<  " " << savebox[j] << G[j] << endl;
-		box[j]=inf_x? savebox[j].lb():savebox[j].ub();
-		Interval a = ((inf_x && (op == LEQ || op== LT)) ||
-				(!inf_x && (op == GEQ || op== GT)))	? G[j].lb() : G[j].ub();
-		row1[j] +=  a.mid();
-		ev -= a*box[j];
+	  box[j]=inf_x? savebox[j].lb():savebox[j].ub();
+	  Interval a = ((inf_x && (op == LEQ || op== LT)) ||
+			(!inf_x && (op == GEQ || op== GT)))	? G[j].lb() : G[j].ub();
+	  row1[j] =  a.mid();
+	  ev -= a*box[j];
 
 	}
 
-	// cout << " ev  " << ev << endl;
+	//	cout << " ev  " << ev << endl;
 	/*  used in BEST not implemented in v2.0
 	if(corner) delete[] corner;
 	 */
-	if(ctr==goal_ctr) {
-		// [gch] warning: using sys.ctrs[ctr].f.backward
-		// instead of original_goal
-		// may give an EmptyBoxException even if
-		// the domain of "y" is (-oo,oo).
-		// This happens with ex6_2_9.bch.
-		ev+=((const ExtendedSystem&) sys).original_goal.eval(box);
-	} else
-		ev+= sys.ctrs[ctr].f.eval(box);
+	if(ctr==goal_ctr) 
+	  ev-= sys.ctrs[ctr].f.eval(box);  // opposite sign for the objective
+	else
+	  ev+= sys.ctrs[ctr].f.eval(box);
+
 
 	if(id_point==0) nb_nonlinear_vars=nonlinear_var;
 
@@ -345,8 +335,9 @@ int CtcXNewton::X_Linearization(IntervalVector& box,
 		tot_ev+=row1[j]*savebox[j]; //natural evaluation of the left side of the linear constraint
 
 
+
 	bool added=false;
-	if (op ==LEQ || op== LT) {
+	if (op == LEQ || op == LT) {
 		//g(xb) + a1' x1 + ... + an xn <= 0
 		if(tot_ev.lb()>(-ev).ub())
 			throw EmptyBoxException();  // the constraint is not satisfied
@@ -371,10 +362,8 @@ int CtcXNewton::X_Linearization(IntervalVector& box,
 
 void CtcXNewton::gradient_computation (IntervalVector& box, IntervalVector& G, int ctr) {
 	sys.ctrs[ctr].f.gradient(box,G);
-
 	if (goal_ctr==ctr) { // objective function in optimization
 		G=-G;
-		G[goal_var]=0; //G[sys.nb_var-1]=0;
 	}
 }
 
