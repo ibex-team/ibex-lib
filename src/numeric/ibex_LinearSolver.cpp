@@ -189,8 +189,9 @@ LinearSolver::Status  LinearSolver::getB(IntervalVector& B) {
 
 		// Get the bounds of the constraints
 		for (int i=nb_vars;i<nb_rows; i++){
-			B[i]=Interval( 	(mysoplex->lhs(i)!=-soplex::infinity)? mysoplex->lhs(i):-default_max_bound,
-							(mysoplex->rhs(i)!= soplex::infinity)? mysoplex->rhs(i): default_max_bound   );
+			B[i]=Interval( 	(mysoplex->lhs(i)>-default_max_bound)? mysoplex->lhs(i):-default_max_bound,
+							(mysoplex->rhs(i)< default_max_bound)? mysoplex->rhs(i): default_max_bound   );
+		//	B[i]=Interval( 	mysoplex->lhs(i),mysoplex->rhs(i));
 			//Idea: replace 1e20 (resp. -1e20) by Sup([g_i]) (resp. Inf([g_i])), where [g_i] is an evaluation of the nonlinear function <-- IA
 			//           cout << B(i+1) << endl;
 		}

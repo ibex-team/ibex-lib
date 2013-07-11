@@ -43,8 +43,8 @@ void CtcLinearRelaxationIter::contract (IntervalVector & box){
 	if (!(limit_diam_box.contains(box.max_diam()))) return;
 	// is it necessary?  YES (BNE) Soplex can give false infeasible results with large numbers
 
-	try {
 
+	try {
 		// Update the bounds the variables
 		mylinearsolver->initBoundVar(box);
 
@@ -59,12 +59,14 @@ void CtcLinearRelaxationIter::contract (IntervalVector & box){
 		//cout << " box after  LR " << box << endl;
 		mylinearsolver->cleanConst();
 
+
 	}
 	catch(EmptyBoxException&) {
 		box.set_empty(); // empty the box before exiting in case of EmptyBoxException
 		mylinearsolver->cleanConst();
 		throw EmptyBoxException();
 	}
+
 
 }
 
@@ -97,6 +99,7 @@ void CtcLinearRelaxationIter::optimizer(IntervalVector& box) {
 	LinearSolver::Status_Sol stat=LinearSolver::UNKNOWN;
 
 	for(int ii=0; ii<(2*nb_var); ii++) {  // at most 2*n calls
+
 		int i= ii/2;
 		if (nexti != -1) i=nexti;
 		//		cout << " i "<< i << " infnexti " << infnexti << " infbound " << inf_bound[i] << " supbound " << sup_bound[i] << endl;
@@ -107,8 +110,9 @@ void CtcLinearRelaxationIter::optimizer(IntervalVector& box) {
 			stat = run_simplex(box, LinearSolver::MINIMIZE, i, opt,box[i].lb());
 			//			cout << " stat " << stat <<  " opt " << opt << endl;
 			if (stat == LinearSolver::OPTIMAL) {
-				if(opt.lb()>box[i].ub())
+				if(opt.lb()>box[i].ub()) {
 					throw EmptyBoxException();
+				}
 
 				if(opt.lb() > box[i].lb()) {
 					box[i]=Interval(opt.lb(),box[i].ub());
@@ -150,8 +154,9 @@ void CtcLinearRelaxationIter::optimizer(IntervalVector& box) {
 			stat= run_simplex(box, LinearSolver::MAXIMIZE, i, opt, box[i].ub());
 			//			cout << " stat " << stat <<  " opt " << opt << endl;
 			if( stat == LinearSolver::OPTIMAL) {
-				if(opt.ub() <box[i].lb())
+				if(opt.ub() <box[i].lb()) {
 					throw EmptyBoxException();
+				}
 
 				if (opt.ub() < box[i].ub()) {
 					box[i] =Interval( box[i].lb(), opt.ub());
@@ -266,9 +271,9 @@ LinearSolver::Status_Sol CtcLinearRelaxationIter::run_simplex(IntervalVector& bo
 		LinearSolver::Status stat3 = mylinearsolver->getB(B);
 
 		if ((stat1==LinearSolver::OK) && (stat2==LinearSolver::OK) && (stat3==LinearSolver::OK) &&
-				(NeumaierShcherbina_infeasibilitytest (mylinearsolver->getNbRows(), box, A_trans, B, infeasible_dir)))
+				(NeumaierShcherbina_infeasibilitytest (mylinearsolver->getNbRows(), box, A_trans, B, infeasible_dir))) {
 			stat = LinearSolver::INFEASIBLE;
-
+		}
 	}
 
 	// Reset the objective of the LP solver
@@ -287,8 +292,8 @@ void CtcLinearRelaxationIter::NeumaierShcherbina_postprocessing ( int nr, int va
 	IntervalVector Lambda(nr);
 
 	for (int i=0; i<nr; i++) {
-		if( (B[i].ub()==LinearSolver::default_max_bound && dual_solution[i]<0) ||
-		    (B[i].lb() ==-LinearSolver::default_max_bound && dual_solution[i]>0   )) //Modified by IA
+		if( (B[i].ub()>=LinearSolver::default_max_bound && dual_solution[i]<0) ||
+		    (B[i].lb() <=-LinearSolver::default_max_bound && dual_solution[i]>0   )) //Modified by IA
 		Lambda[i]=0;
 	else
 		Lambda[i]=dual_solution[i];
@@ -316,16 +321,18 @@ bool CtcLinearRelaxationIter::NeumaierShcherbina_infeasibilitytest(int nr, Inter
 	IntervalVector Lambda(nr);
 
 	for (int i =0; i<nr; i++) {
-		if( (B[i].ub()==LinearSolver::default_max_bound  && infeasible_dir[i]<0 ) ||
-			(B[i].lb() ==-LinearSolver::default_max_bound  && infeasible_dir[i]>0 ))
+		if( (B[i].ub()>=LinearSolver::default_max_bound  && infeasible_dir[i]<0 ) ||
+				(B[i].lb() <=-LinearSolver::default_max_bound  && infeasible_dir[i]>0 )){
 			// blind copy from OPTIMAL case useful in this case ?? BN
-		Lambda[i]=0;
-	else
-		Lambda[i]=infeasible_dir[i];
+			Lambda[i]=0;
+		}
+		else {
+			Lambda[i]=infeasible_dir[i];
+		}
 	}
 
 	IntervalVector Rest(nb_var);
-	Rest = A_trans * infeasible_dir ;
+	Rest = A_trans * Lambda ;
 	Interval d= Rest *box - Lambda * B;
 
 	// if 0 does not belong to d, the infeasibility is proved
