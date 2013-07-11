@@ -17,8 +17,10 @@ using namespace std;
 namespace ibex {
 
 CtcLinearRelaxationIter::CtcLinearRelaxationIter(const System& sys,
-		ctc_mode cmode, int max_iter, int time_out, double eps, double max_diam_box1, bool init_lp):
-								 Ctc(sys.nb_var), sys(sys), goal_var(-1), cmode(cmode), max_diam_box(max_diam_box1) {
+		ctc_mode cmode, int max_iter, int time_out, double eps, Interval limit_diam, bool init_lp):
+				Ctc(sys.nb_var), sys(sys), goal_var(-1), cmode(cmode),
+				limit_diam_box(( (eps>limit_diam.lb()) ? eps : limit_diam.lb()  )	, limit_diam.ub())
+				{
 
 	if (dynamic_cast<const ExtendedSystem*>(&sys)) {
 		(int&) goal_var=((const ExtendedSystem&) sys).goal_var();
@@ -37,8 +39,10 @@ int CtcLinearRelaxationIter::linearization(IntervalVector& box) {
 }
 
 void CtcLinearRelaxationIter::contract (IntervalVector & box){
-	if (box.max_diam() > max_diam_box) return; // is it necessary?  YES (BNE) Soplex can give false infeasible results with large numbers
-	//		cout << " box before XNewtonIter " << box << endl;
+
+	if (!(limit_diam_box.contains(box.max_diam()))) return;
+	// is it necessary?  YES (BNE) Soplex can give false infeasible results with large numbers
+
 	try {
 
 		// Update the bounds the variables

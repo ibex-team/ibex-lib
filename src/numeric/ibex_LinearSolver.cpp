@@ -17,7 +17,7 @@ const double LinearSolver::default_eps = 1e-10;
 const double LinearSolver::default_max_bound = 1e20;
 const int LinearSolver::default_max_time_out=100;
 const int LinearSolver::default_max_iter=100;
-const double LinearSolver::default_max_diam_box = 1.e6;
+const Interval LinearSolver::default_limit_diam_box = Interval(1.e-14,1.e6);
 
 
 

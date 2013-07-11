@@ -14,8 +14,8 @@ namespace ibex {
 
 // the constructor
 CtcART::CtcART(const System& sys1, ctc_mode cmode, int max_iter1,
-		int time_out1, double eps, double max_diam_box, bool init_lp) :
-		CtcLinearRelaxationIter(sys1, cmode, max_iter1, time_out1, eps, max_diam_box, init_lp) {
+		int time_out1, double eps, Interval limit_diam_box1, bool init_lp) :
+		CtcLinearRelaxationIter(sys1, cmode, max_iter1, time_out1, eps, limit_diam_box1, init_lp) {
 
 }
 

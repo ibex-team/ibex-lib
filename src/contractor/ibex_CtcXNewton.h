@@ -55,7 +55,7 @@ public:
 	 */
 	CtcXNewton(const System& sys, std::vector<corner_point>& cpoints,
 			ctc_mode cmode=ALL_BOX, linear_mode lmode=HANSEN, int max_iter=LinearSolver::default_max_iter,
-			double max_diam_deriv=default_max_diam_deriv, double max_diam_box=LinearSolver::default_max_diam_box,
+			double max_diam_deriv=default_max_diam_deriv, Interval max_diam_box=LinearSolver::default_limit_diam_box,
 			bool init_lp=true);
 
 	/**
