@@ -308,10 +308,10 @@ cause linking problems with other libraries).<br><br>
 
 	You can alternatively try the following command line directly, but the success is less guaranteed.
 
-	The basic line is:<br>
+	If Ibex is installed with Gaol, the basic line is:<br>
 	<p>
 	<div class="code">
-	g++ -I<i>[prefix]</i>/include/ibex -I<i>[soplex path]</i>/src -L<i>[soplex path]</i>/lib -libex -lsoplex -lz <br/>
+	g++ -I<i>[prefix]</i>/include/ibex -I<i>[soplex path]</i>/src -L<i>[soplex path]</i>/lib -libex -lsoplex -lz -lultim <br/>
 	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-o <i>[filename]</i> <i>[filename]</i>.cpp 
 	</div>
 	where <i>[prefix]</i> is <span class="txtcode">/usr/local</span> by default or whatever path specified via <span class="txtcode">--prefix</span>.
@@ -324,7 +324,7 @@ cause linking problems with other libraries).<br><br>
 
 	<li><b>If Ibex is installed in a local folder</b><br>
 	<ul>
-	<li>Add -L<i>[ibex path]</i><span class="txtcode">/__build__/src</span></li>
+	<li>Add -L<i>[ibex path]</i><span class="txtcode">/lib</span></li>
 	</ul>
 	</li>
 
@@ -405,10 +405,11 @@ cause linking problems with other libraries).<br><br>
 	<p>
 
 	<div class="code">
-	<span class="path">~/Ibex/ibex-2.0.6$</span> ./waf uninstall<br/>
+	<span class="path">~/Ibex/ibex-2.0.6$</span>sudo ./waf uninstall<br/>
 	<span class="path">~/Ibex/ibex-2.0.6$</span> ./waf distclean<br/>
 	</div>
 	<p>
+	<b>Note: </b>sudo is useless if Ibex is installed in a local folder.
 	<p>
 	<h2 id="trouble">Troubleshooting</h2>
 	<h3 id="wrong-package">UnsatisfiedLinkError with Choco</h3>

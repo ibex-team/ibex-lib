@@ -271,7 +271,7 @@ of the initial one.
 
 \subsubsection mod-func-op-grad Gradient
 
-Consider <i>f:(x,y)&arr; x&times;y</i>.
+Consider <i>f:(x,y)&rarr; x&times;y</i>.
 The first and most simple way of calculating the gradient is:
 \code
   double init_xy[][2] = { {1,2}, {3,4} };
@@ -321,18 +321,18 @@ You can also compute with IBEX the ``Hansen matrix''. This matrix
 is another \e slope matrix, thiner than the interval Jacobian (but slower to be calculated).
 It is, for example, used inside the interval Newton operator.
 The Hansen matrix corresponds to the following matrix, where \f$(x_1,\ldots,x_n)\f$ denotes
-the midvector of \f$[ix]\f$.
+the midvector of \f$[x]\f$.
 
 \f[\left(\begin{array}{cccc}
-\frac{\partial{f_1}}{\partial{x_1}}([ix]_1,x_2,\ldots,x_n) & 
-\frac{\partial{f_1}}{\partial{x_2}}([ix]_1,[ix]_2,\ldots,x_n) & 
+\frac{\partial{f_1}}{\partial{x_1}}([x]_1,x_2,\ldots,x_n) & 
+\frac{\partial{f_1}}{\partial{x_2}}([x]_1,[x]_2,\ldots,x_n) & 
 \ldots & 
-\frac{\partial{f_1}}{\partial{x_n}}([ix]_1,[ix]_2,\ldots,[ix]_n) \\
+\frac{\partial{f_1}}{\partial{x_n}}([x]_1,[x]_2,\ldots,[x]_n) \\
 \vdots & \\
-\frac{\partial{f_m}}{\partial{x_1}}([ix]_1,x_2,\ldots,x_n) & 
-\frac{\partial{f_n}}{\partial{x_2}}([ix]_1,[ix]_2,\ldots,x_n) & 
+\frac{\partial{f_m}}{\partial{x_1}}([x]_1,x_2,\ldots,x_n) & 
+\frac{\partial{f_n}}{\partial{x_2}}([x]_1,[x]_2,\ldots,x_n) & 
 \ldots & 
-\frac{\partial{f_m}}{\partial{x_n}}([ix]_1,[ix]_2,\ldots,[ix]_n) \\
+\frac{\partial{f_m}}{\partial{x_n}}([x]_1,[x]_2,\ldots,[x]_n) \\
 \end{array}\right)\f]
 
 Here is an example:
@@ -442,7 +442,7 @@ You can create a DAG instead of an expression tree. This will result in a gain i
 For that, you need to handle references of shared subexpressions with variables types \c const ExprNode&.
 
 In the following example we create the function :
-\f[f:x\mapsto (\cos(x)+1)^2, \cos(x)+1)^3)\f]
+\f[f:x\mapsto ((\cos(x)+1)^2, (\cos(x)+1)^3)\f]
 and we want the subexpression cos(x)+1 to be shared:
 
 \snippet modeling.cpp func-dag
@@ -474,7 +474,7 @@ Here is an example of system:
 Minimize x+y<br>
 with x &isin;[-1,1], y&isin;[-1,1]<br>
 such that<br>
-x^2+y^2<=1 and y\gex^2.<br>
+x^2+y^2<=1 and y>=x^2.<br>
 </center>
 
 One is usually interested in solving the system while minimizing the criterion, if any.
@@ -833,7 +833,7 @@ through different examples.
 0 &  0 & [0,1] \\
 \end{array}\right)\f$.</td></tr>
 <tr><td><tt> x[10][5] in [0,1]</tt> </td><td> declares a matrix \c x with each entry <tt> x(i,j)</tt> &isin;[0,1].</td></tr>
-<tr><td><tt> x[2][10][5] in [0,1]</tt> </td><td> declares an array of 2 \f 10x5 matrices with each entry <tt> x(i,j,k)</tt> &isin;[0,1].</td></tr>
+<tr><td><tt> x[2][10][5] in [0,1]</tt> </td><td> declares an array of two 10x5 matrices with each entry <tt> x(i,j,k)</tt> &isin;[0,1].</td></tr>
 </table>
 
 \subsection mod-minibex-func Functions
@@ -947,6 +947,18 @@ Constraints
 end
 \endverbatim</div>
 
+\subsubsection mod-minibex-ctrs-index Indexing vector or matrix variables
+
+Use parenthesis like in Matlab.
+Ex:
+<div class="minibex">\verbatim
+Variables
+  x[10][10] in [0,oo];
+Constraints
+  x(1,1)=0;
+end
+\endverbatim</div>
+
 \subsubsection mod-minibex-ctrs-loop Loops
 
 You can resort to loops in a Matlab-like syntax to define constraints. Example:
@@ -965,8 +977,8 @@ end
 \subsection mod-minibex-cpp Some differences with C++
 
 <ul>
-<li> Vectors are surrounded by parenthesis (not brackets)
-<li> Indices start by \f$1\f$ instead of \f$0\f$
-<li> You can use the "^" symbol
+<li> Vectors indices are surrounded by parenthesis (not brackets),
+<li> Indices start by 1 instead of 0,
+<li> You can use the "^" symbol (instead of \c sqr or \c pow).
 </ul>
 */
