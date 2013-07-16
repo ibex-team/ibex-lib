@@ -24,7 +24,7 @@ namespace ibex {
  * \brief Affine Domain.
  *
  * An affine domain is either:
- * <ul><li> an affine form (#ibex:Affine2)
+ * <ul><li> an affine form (#ibex::Affine2)
  *     <li> a vector of affine forms (#ibex::Affine2Vector)
  *     <li> a matrix of affine forms (#ibex::Affine2Matrix)
  *     <li> or an array of affine matrices (#ibex::Affine2MatrixArray)

@@ -501,7 +501,7 @@ private:
  *
  * \pre Dimension of \a x1 and \a x2 must be equal.
  *
- * \sa #ibex::distance(const Interval&, const Interval&).
+ * \sa #ibex::distance(const ibex::Interval& x1, const ibex::Interval& x2).
  */
 double distance(const IntervalVector& x1, const IntervalVector& x2);
 

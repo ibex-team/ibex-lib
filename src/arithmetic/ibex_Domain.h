@@ -24,7 +24,7 @@ namespace ibex {
  * \brief Interval Domain.
  *
  * An interval domain is either:
- * <ul><li> an interval (#ibex:Interval)
+ * <ul><li> an interval (#ibex::Interval)
  *     <li> a vector of intervals (#ibex::IntervalVector)
  *     <li> a matrix of intervals (#ibex::IntervalMatrix)
  *     <li> or an array of interval matrices (#ibex::IntervalMatrixArray)

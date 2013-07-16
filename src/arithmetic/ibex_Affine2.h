@@ -263,154 +263,154 @@ public:
 std::ostream& operator<<(std::ostream& os, const Affine2& x);
 
 
-/** \brief $AF[x]_1+AF[x]_2$. */
+/** \brief AF[x]_1+AF[x]_2. */
 Affine2 operator+(const Affine2& x1, const Affine2& x2);
 
-/** \brief $AF[x]+d$. */
+/** \brief AF[x]+d. */
 Affine2 operator+(const Affine2& x, double d);
 
-/** \brief $d+AF[x]$. */
+/** \brief d+AF[x]. */
 Affine2 operator+(double d, const Affine2& x);
 
-/** \brief $AF[x]_1+[x]_2$. */
+/** \brief AF[x]_1+[x]_2. */
 Affine2 operator+(const Affine2& x1, const Interval& x2);
 
-/** \brief $[x]_1+AF[x]_2$. */
+/** \brief [x]_1+AF[x]_2. */
 Affine2 operator+(const Interval& x1, const Affine2& x2);
 
-/** \brief $AF[x]_1-AF[x]_2$. */
+/** \brief AF[x]_1-AF[x]_2. */
 Affine2 operator-(const Affine2& x1, const Affine2& x2);
 
-/** \brief $AF[x]-d$. */
+/** \brief AF[x]-d. */
 Affine2 operator-(const Affine2& x, double d);
 
-/** \brief $d-AF[x]$. */
+/** \brief d-AF[x]. */
 Affine2 operator-(double d, const Affine2& x);
 
-/** \brief $AF[x]_1-[x]_2$. */
+/** \brief AF[x]_1-[x]_2. */
 Affine2 operator-(const Affine2& x1, const Interval& x2);
 
-/** \brief $[x]_1-AF[x]_2$. */
+/** \brief [x]_1-AF[x]_2. */
 Affine2 operator-(const Interval& x1, const Affine2& x2);
 
-/** \brief $AF[x]_1*AF[x]_2$. */
+/** \brief AF[x]_1*AF[x]_2. */
 Affine2 operator*(const Affine2& x1, const Affine2& x2);
 
-/** \brief $AF[x]*d$. */
+/** \brief AF[x]*d. */
 Affine2 operator*(const Affine2& x, double d);
 
-/** \brief $d*AF[x]$. */
+/** \brief d*AF[x]. */
 Affine2 operator*(double d, const Affine2& x);
 
-/** \brief $AF[x]_1*[x]_2$. */
+/** \brief AF[x]_1*[x]_2. */
 Affine2 operator*(const Affine2& x1, const Interval& x2);
 
-/** \brief $[x]_1*AF[x]_2$. */
+/** \brief [x]_1*AF[x]_2. */
 Affine2 operator*(const Interval& x1, const Affine2& x2);
 
-/** \brief $AF[x]_1/AF[x]_2$. */
+/** \brief AF[x]_1/AF[x]_2. */
 Affine2 operator/(const Affine2& x1, const Affine2& x2);
 
-/** \brief $AF[x]/d$. */
+/** \brief AF[x]/d. */
 Affine2 operator/(const Affine2& x, double d);
 
-/** \brief $d/AF[x]$. */
+/** \brief d/AF[x]. */
 Affine2 operator/(double d, const Affine2& x);
 
-/** \brief $AF[x]_1/[x]_2$. */
+/** \brief AF[x]_1/[x]_2. */
 Affine2 operator/(const Affine2& x1, const Interval& x2);
 
-/** \brief $[x]_1/AF[x]_2$. */
+/** \brief [x]_1/AF[x]_2. */
 Affine2 operator/(const Interval& x1, const Affine2& x2);
 
 
-/** \brief Hausdorff distance of $AF[x]_1$ and $AF[x]_2$. */
+/** \brief Hausdorff distance of AF[x]_1 and AF[x]_2. */
 double distance(const Affine2 &x1, const Affine2 &x2);
 
-/** \brief Hausdorff distance of $[x]_1$ and $AF[x]_2$. */
+/** \brief Hausdorff distance of [x]_1 and AF[x]_2. */
 double distance(const Interval &x1, const Affine2 &x2);
 
-/** \brief Hausdorff distance of $AF[x]_1$ and $[x]_2$. */
+/** \brief Hausdorff distance of AF[x]_1 and [x]_2. */
 double distance(const Affine2 &x1, const Interval &x2);
 
 
-/** \brief $1/AF[x]$ */
+/** \brief 1/AF[x] */
 Affine2 inv(const Affine2& x);
 Affine2 inv(const Affine2& x, const Interval itv);
 
-/** \brief $AF[x]^2$ */
+/** \brief AF[x]^2 */
 Affine2 sqr(const Affine2& x);
 Affine2 sqr(const Affine2& x, const Interval itv);
 
-/** \brief $\sqrt{AF[x]}$ */
+/** \brief sqrt{AF[x]} */
 Affine2 sqrt(const Affine2& x);
 Affine2 sqrt(const Affine2& x, const Interval itv);
 
-/** \brief $\exp(AF[x])$. */
+/** \brief exp(AF[x]). */
 Affine2 exp(const Affine2& x);
 Affine2 exp(const Affine2& x, const Interval itv);
 
-/** \brief $\log(AF[x])$. */
+/** \brief log(AF[x]). */
 Affine2 log(const Affine2& x);
 Affine2 log(const Affine2& x, const Interval itv);
 
-/** \brief $AF[x]^n$. */
+/** \brief AF[x]^n. */
 Affine2 pow(const Affine2& x, int n);
 Affine2 pow(const Affine2& x, int n, const Interval itv);
 
-/** \brief $AF[x]^d$. */
+/** \brief AF[x]^d. */
 Affine2 pow(const Affine2& x, double d);
 Affine2 pow(const Affine2& x, double d, const Interval itv);
 
-/** \brief $AF[x]^[y]$. */
+/** \brief AF[x]^[y]. */
 Affine2 pow(const Affine2 &x, const Interval &y);
 Affine2 pow(const Affine2 &x, const Interval &y, const Interval itvx);
 
-/** \brief $AF[x]^AF[y]$. */
+/** \brief AF[x]^AF[y]. */
 Affine2 pow(const Affine2 &x, const Affine2 &y);
 
-/** \brief $n^{th}$ root of $AF[x]$. */
+/** \brief nth root of AF[x]. */
 Affine2 root(const Affine2& x, int n);
 Affine2 root(const Affine2& x, int n, const Interval itv);
 
-/** \brief $\cos(AF[x])$. */
+/** \brief cos(AF[x]). */
 Affine2 cos(const Affine2& x);
 Affine2 cos(const Affine2& x, const Interval itv);
 
-/** \brief $\sin(AF[x])$. */
+/** \brief sin(AF[x]). */
 Affine2 sin(const Affine2& x);
 Affine2 sin(const Affine2& x, const Interval itv);
 
-/** \brief $\tan(AF[x])$. */
+/** \brief tan(AF[x]). */
 Affine2 tan(const Affine2& x);
 Affine2 tan(const Affine2& x, const Interval itv);
 
-/** \brief $\acos(AF[x])$. */
+/** \brief acos(AF[x]). */
 Affine2 acos(const Affine2& x);
 Affine2 acos(const Affine2& x, const Interval itv);
 
-/** \brief $\asin(AF[x])$. */
+/** \brief asin(AF[x]). */
 Affine2 asin(const Affine2& x);
 Affine2 asin(const Affine2& x, const Interval itv);
 
-/** \brief $\atan(AF[x])$. */
+/** \brief atan(AF[x]). */
 Affine2 atan(const Affine2& x);
 Affine2 atan(const Affine2& x, const Interval itv);
 
-/** \brief $\cosh(AF[x])$. */
+/** \brief cosh(AF[x]). */
 Affine2 cosh(const Affine2& x);
 Affine2 cosh(const Affine2& x, const Interval itv);
 
-/** \brief $\sinh(AF[x])$. */
+/** \brief sinh(AF[x]). */
 Affine2 sinh(const Affine2& x);
 Affine2 sinh(const Affine2& x, const Interval itv);
 
-/** \brief $\tanh(AF[x])$. */
+/** \brief tanh(AF[x]). */
 Affine2 tanh(const Affine2& x);
 
 Affine2 tanh(const Affine2& x, const Interval itv);
 
-/** \brief $\abs(AF[x]) = sqrt(sqr(AF[x]))$. */
+/** \brief abs(AF[x]) = sqrt(sqr(AF[x])). */
 Affine2 abs(const Affine2 &x);
 
 Affine2 abs(const Affine2 &x, const Interval itv);
@@ -425,14 +425,14 @@ Interval min(const Interval& x, const Affine2& y) ;
 Interval min(const Affine2& x, const Interval& y);
 
 
-/** \brief $[x]_1\cap [x]_2$.
+/** \brief \f$[x]_1\cap [x]_2\f$.
  * \return Interval::EMPTY if the intersection is empty. */
 Interval operator&(const Affine2& x1, const Affine2& x2);
 Interval operator&(const Interval& x1, const Affine2& x2);
 Interval operator&(const Affine2& x1, const Interval& x2);
 
 
-/** \brief $\square([x]_1\cup [x]_2)$. */
+/** \brief \f$\square([x]_1\cup [x]_2)\f$. */
 Interval operator|(const Affine2& x1, const Affine2& x2);
 Interval operator|(const Interval& x1, const Affine2& x2);
 Interval operator|(const Affine2& x1, const Interval& x2);
@@ -444,7 +444,7 @@ Interval operator|(const Affine2& x1, const Interval& x2);
  */
 Affine2 integer(const Affine2& x);
 
-/** \brief Sign of $AF[x]$.
+/** \brief Sign of AF[x].
  *
  *  Return \f$sign(AF[x]) = hull \{ sign{x}, x\inAF[x] \}\f$.
  * \remark By convention, \f$ 0\inAF[x] \Longrightarrow sign(AF[x])=[-1,1]\f$. */
@@ -886,10 +886,10 @@ inline Affine2 sign(const Affine2& x) {
 #endif /* IBEX_AFFINE2_H_ */
 
 
-/** \brief $\atan2(AF[x],AF[y])$. */
+/** \brief atan2(AF[x],AF[y]). */
 //Affine2 atan2(const Affine2& x, const Affine2& y);
-/** \brief $\atan2([x],AF[y])$. */
+/** \brief atan2([x],AF[y]). */
 //Affine2 atan2(const Interval& x, const Affine2& y);
-/** \brief $\atan2(AF[x],[y])$. */
+/** \brief atan2(AF[x],[y]). */
 //Affine2 atan2(const Affine2& x, const Interval& y);
-/** \brief $\cosh(AF[x])$. */
+/** \brief cosh(AF[x]). */
