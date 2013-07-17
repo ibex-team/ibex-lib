@@ -67,9 +67,9 @@ Affine2::Affine2(const Interval & itv):
 			_n 		(0),
 			_val	(NULL) {
 	if (!(itv.is_unbounded()||itv.is_empty())) {
-		_err	=itv.rad();
 		_val	=new double[1];
 		_val[0] = itv.mid();
+		_err	=itv.rad();
 	} else {
 		_err = itv;
 		_n = -1;
@@ -194,7 +194,13 @@ Affine2& Affine2::saxpy(double alpha, const Affine2& y, double beta, double ddel
 //	std::cout << "in saxpy alpha=" << alpha  <<  "  beta= " <<  beta <<   "  delta = " << ddelta   << std::endl;
 	if (is_actif()) {
 		if (B1) {  // multiply by a scalar alpha
-			if ((fabs(alpha)) < POS_INFINITY) {
+			if (alpha==0.0) {
+				for (i=0; i<=_n;i++) {
+					_val[i]=0;
+				}
+				_err = 0;
+			}
+			else if ((fabs(alpha)) < POS_INFINITY) {
 				ttt= 0.0;
 				sss= 0.0;
 				for (i=0; i<=_n;i++) {
@@ -212,8 +218,10 @@ Affine2& Affine2::saxpy(double alpha, const Affine2& y, double beta, double ddel
 			else {
 				_err = itv()*alpha;
 				_n = -1;
-				delete[] _val;
-				_val = NULL;
+				if (_val!=NULL) {
+					delete[] _val;
+					_val = NULL;
+				}
 			}
 		}
 
@@ -252,8 +260,10 @@ Affine2& Affine2::saxpy(double alpha, const Affine2& y, double beta, double ddel
 			else { // y is not a valid affine2 form. So we add y.itv() such as an interval
 				_err = itv()+y.itv();
 				_n = -1;
-				delete[] _val;
-				_val = NULL;
+				if (_val!=NULL) {
+					delete[] _val;
+					_val = NULL;
+				}
 
 			}
 		}
@@ -276,8 +286,10 @@ Affine2& Affine2::saxpy(double alpha, const Affine2& y, double beta, double ddel
 			else {
 				_err = itv()+beta;
 				_n = -1;
-				delete[] _val;
-				_val = NULL;
+				if (_val!=NULL) {
+					delete[] _val;
+					_val = NULL;
+				}
 			}
 		}
 
@@ -290,7 +302,7 @@ Affine2& Affine2::saxpy(double alpha, const Affine2& y, double beta, double ddel
 			else {
 				_err = itv()+Interval(-ddelta,ddelta);
 				_n = -1;
-				delete[] _val;
+				if (_val!=NULL) delete[] _val;
 				_val = NULL;
 			}
 		}
@@ -303,8 +315,10 @@ Affine2& Affine2::saxpy(double alpha, const Affine2& y, double beta, double ddel
 			if (!b) {
 				_err = Interval::ALL_REALS;
 				_n = -1;
-				delete[] _val;
-				_val = NULL;
+				if (_val!=NULL) {
+					delete[] _val;
+					_val = NULL;
+				}
 			}
 		}
 
@@ -341,8 +355,6 @@ Affine2& Affine2::operator*=(const Affine2& y) {
 			double Sx=0.0, Sy=0.0, Sxy=0.0, Sz=0.0, ttt=0.0, sss=0.0, ppp=0.0, tmp=0.0, xVal0=0.0;
 			int i;
 			double * xTmp;
-
-
 
 			xTmp = new double[_n + 1];
 
@@ -417,10 +429,10 @@ Affine2& Affine2::operator*=(const Affine2& y) {
 			delete[] xTmp;
 
 		} else {
-			if (size()>y.size()) {
+			if (_n>y.size()) {
 				*this *= y.itv();
 			} else {
-				Interval tmp1 = itv();
+				Interval tmp1 = this->itv();
 				*this = y;
 				*this *= tmp1;
 			}
@@ -457,7 +469,8 @@ Affine2& Affine2::operator*=(const Interval& y) {
 			}
 		}
 
-		_err *= (fabs(yVal0)+Interval(y.rad()));
+		//_err *= (fabs(yVal0)+Interval(y.rad()));
+		_err *= abs(y).ub();
 		_err += AF_EE() * (AF_EM() * ttt);
 		_err += AF_EE() * sss;
 
@@ -469,8 +482,10 @@ Affine2& Affine2::operator*=(const Interval& y) {
 			if (!b) {
 				_err = Interval::ALL_REALS;
 				_n = -1;
-				delete[] _val;
-				_val = NULL;
+				if (_val!=NULL) {
+					delete[] _val;
+					_val = NULL;
+				}
 			}
 		}
 
@@ -488,6 +503,7 @@ Affine2& Affine2::operator*=(const Interval& y) {
 
 Affine2& Affine2::sqr(const Interval itv) {
 //	std::cout << "in sqr "<<std::endl;
+
 	bool b = (!(itv.is_empty()||itv.is_unbounded()));
 	if (!b) {
 		_err = pow(itv,2);
@@ -497,6 +513,8 @@ Affine2& Affine2::sqr(const Interval itv) {
 			_val = NULL;
 		}
 	} else if (!is_actif()) {
+		*this = pow(itv,2);
+	} else if (itv.diam() < AF_EC()) {
 		*this = pow(itv,2);
 	} else  {  // _actif && b
 
@@ -549,13 +567,14 @@ Affine2& Affine2::sqr(const Interval itv) {
 		}
 
 	}
+
 //	std::cout << "out sqr "<<std::endl;
 	return *this;
 }
 
 
 Affine2& Affine2::power(int n, const Interval itv) {
-//	std::cout << "in power "<<std::endl;
+	//	std::cout << "in power "<<std::endl;
 	bool b = (!(itv.is_empty()||itv.is_unbounded()));
 	if (!b) {
 		_err = pow(itv,n);
@@ -567,7 +586,8 @@ Affine2& Affine2::power(int n, const Interval itv) {
 
 	} else if (!is_actif()) {
 		*this = pow(itv,n);
-
+	} else if (itv.diam()< AF_EC()) {
+		*this = pow(itv,n);
 	} else {
 		if (n == 0) {
 			*this = Interval::ONE;
@@ -581,33 +601,28 @@ Affine2& Affine2::power(int n, const Interval itv) {
 
 		} else if (n % 2 == 0) {
 
+//			Affine2 tmp(*this);
+//			((*this).power((n/2),itv)).sqr(pow(itv,n/2));
+
 			double alpha, beta, ddelta, t1, t2;
 			Interval dmm(0.0), TEMP1(0.0), TEMP2(0.0), band(0.0);
 
 			dmm = pow(itv, n);
-			if (itv.diam() < AF_EC()) {
-				alpha = 0.0;
-				band = dmm;
+			alpha = ((std::pow(itv.ub(),n)-std::pow(itv.lb(),n))/itv.diam());
+
+			TEMP1 = Interval(dmm.lb()) - alpha * (itv.lb());
+			TEMP2 = Interval(dmm.ub()) - alpha * (itv.ub());
+			// u = (alpha/n)^(1/(n-1))
+			if (TEMP1.ub() > TEMP2.ub()) {
+				TEMP2 = Interval(alpha) / n;
+				band = Interval(
+						((1 - n) * TEMP2 * (root(TEMP2, n - 1))).lb(),
+						TEMP1.ub());
 			} else {
-				alpha = (dmm.diam()
-						/ (Interval(itv.ub()) - Interval(itv.lb()))).ub();
-				if (alpha < 0)
-					alpha = 0;
-				//u = log(alpha);
-				TEMP1 = dmm.lb() - alpha * (itv.lb());
-				TEMP2 = dmm.ub() - alpha * (itv.ub());
-				// u = (alpha/n)^(1/(n-1))
-				if (TEMP1.ub() > TEMP2.ub()) {
-					TEMP2 = Interval(alpha) / n;
-					band = Interval(
-							((1 - n) * TEMP2 * (root(TEMP2, n - 1))).lb(),
-							TEMP1.ub());
-				} else {
-					TEMP1 = Interval(alpha) / n;
-					band = Interval(
-							((1 - n) * TEMP1 * (root(TEMP1, n - 1))).lb(),
-							TEMP2.ub());
-				}
+				TEMP1 = Interval(alpha) / n;
+				band = Interval(
+						((1 - n) * TEMP1 * (root(TEMP1, n - 1))).lb(),
+						TEMP2.ub());
 			}
 
 			beta = band.mid();
@@ -616,20 +631,26 @@ Affine2& Affine2::power(int n, const Interval itv) {
 			ddelta = (t1 > t2) ? t1 : t2;
 
 			saxpy(alpha, Affine2(), beta, ddelta, true, false, true, true);
+//
+
 
 		} else {
-			/*  for _itv = [a,b]
-			 * x0 = 1/sqrt(2)
-			 * x1= - x0
-			 * xb0 = 0.5*((b-a)*x0 +(a+b))
-			 * xb1 = 0.5*((b-a)*x1 +(a+b))
-			 * c0 = 0.5 (f(xb0)+f(xb1))
-			 * c1 = x0*f(xb0)+x1*f(xb1)
-			 * alpha = 2*c1/(b-a)
-			 * beta = c0-c1*(a+b)/(b-a)
-			 *  old : ddelta = (b-a)^2 * f''(_itv)/16
-			 *  ddelta = evaluate the error at the bound and the points when f'(x)=alpha
-			 */
+//			Affine2 tmp(*this);
+//			(*this).power((n-1),itv);
+//			*this *=tmp;
+
+			// for _itv = [a,b]
+			// x0 = 1/sqrt(2)
+			// x1= - x0
+			// xb0 = 0.5*((b-a)*x0 +(a+b))
+			// xb1 = 0.5*((b-a)*x1 +(a+b))
+			// c0 = 0.5 (f(xb0)+f(xb1))
+			// c1 = x0*f(xb0)+x1*f(xb1)
+			// alpha = 2*c1/(b-a)
+			// beta = c0-c1*(a+b)/(b-a)
+			//  old : ddelta = (b-a)^2 * f''(_itv)/16
+			//  ddelta = evaluate the error at the bound and the points when f'(x)=alpha
+
 			Interval x0, x1, xb0, xb1, fxb0, fxb1, c0, c1, TEMP1, TEMP2;
 			double alpha, beta, ddelta, t1;
 
@@ -653,10 +674,10 @@ Affine2& Affine2::power(int n, const Interval itv) {
 			// compute the error at _itv.lb() and _itv.ub()
 			max_error = (abs(
 					pow(Interval(itv.lb()), n)
-							- (alpha * Interval(itv.lb()) + beta))).ub();
+					- (alpha * Interval(itv.lb()) + beta))).ub();
 			t1 = (abs(
 					pow(Interval(itv.ub()), n)
-							- (alpha * Interval(itv.ub()) + beta))).ub();
+					- (alpha * Interval(itv.ub()) + beta))).ub();
 			if (t1 > max_error) max_error= t1 ;
 			// u = (alpha/n)^(1/(n-1))
 			TEMP2 = pow(Interval(alpha) / n, 1.0 / Interval(n - 1));
@@ -671,283 +692,15 @@ Affine2& Affine2::power(int n, const Interval itv) {
 
 			saxpy(alpha, Affine2(), beta, ddelta, true, false, true, true);
 			saxpy(1.0, Affine2(), 0.0, max_error, false, false, false, true);
-
+//
 		}
 
 	}
-//	std::cout << "out power "<<std::endl;
+	//	std::cout << "out power "<<std::endl;
 	return *this;
 }
 
-
-Affine2& Affine2::linMinRange(affine2_expr num, const Interval itv) {
-
-	Interval res_itv;
-	switch (num) {
-	case AF_SQRT :
-		res_itv = sqrt(itv);
-		break;
-	case AF_EXP :
-		res_itv = exp(itv);
-		break;
-	case AF_LOG :
-		res_itv = log(itv);
-		break;
-	case AF_INV :
-		res_itv = 1.0/itv;
-		break;
-	case AF_COS :
-		res_itv = cos(itv);
-		break;
-	case AF_SIN :
-		res_itv = sin(itv);
-		break;
-	case AF_TAN :
-		res_itv = tan(itv);
-		break;
-	case AF_ABS :
-		res_itv = abs(itv);
-		break;
-	case AF_ACOS :
-		res_itv = acos(itv);
-		break;
-	case AF_ASIN :
-		res_itv = asin(itv);
-		break;
-	case AF_ATAN :
-		res_itv = atan(itv);
-		break;
-	case AF_COSH :
-		res_itv = cosh(itv);
-		break;
-	case AF_SINH :
-		res_itv = sinh(itv);
-		break;
-	case AF_TANH :
-		res_itv = tanh(itv);
-		break;
-	default:
-		ibex_error("Not implemented yet");
-		break;
-	}
-
-
-	bool b = (!(res_itv.is_empty()||res_itv.is_unbounded()));
-	if (!b) {
-		_err = res_itv;
-		_n = -1;
-		if (_val !=NULL) {
-			delete[] _val;
-			_val = NULL;
-		}
-	} else if (!is_actif()) {
-		*this =res_itv;
-
-
-	} else  {  // _actif && b
-		double alpha, beta, ddelta, t1, t2;
-		Interval dmm(0.0), TEMP1(0.0), TEMP2(0.0), band(0.0), itv2;
-
-		switch (num) {
-		/*  for _itv = [a,b]
-		 * if f increase,
-		 *  alpha = f'(a)
-		 *  band = Interval(a- alpha*a , b-alpha*b)
-		 * if f decrease
-		 *  alpha = f'(b)
-		 *  band = Interval(a- alpha*b , b-alpha*a)
-		 *
-		 *  beta = band.mid()
-		 *  ddelta = band.rad()
-		 */
-
-		case AF_SQRT: {
-			/*if ((itv.ub() == POS_INFINITY) || (itv.ub()<0) ) {
-				_err = sqrt(itv);
-				_actif = false;
-				delete[] _val;
-				_val = NULL;
-			}
-			else { */
-				if (itv.lb()<0) {
-					itv2 = Interval(0.0,itv.ub());
-				} else {
-					itv2 =itv;
-				}
-
-				dmm = sqrt(itv2);
-				if (itv2.diam()< AF_EC()) {
-					alpha = 0.0;
-					band =dmm;
-				}
-				else {
-					alpha = (1.0/(2.0*dmm)).lb();  // compute the derivative
-					if (alpha<=0) {
-						alpha = 0.0;
-						band = dmm;
-					}
-					else {
-						TEMP1 = Interval(dmm.lb()) -alpha*itv2.lb();
-						TEMP2 = Interval(dmm.ub()) -alpha*itv2.ub();
-						if (TEMP1.lb()>TEMP2.ub()) {
-							band = Interval(TEMP2.lb(),TEMP1.ub());
-							// normally this case never happen
-						}
-						else {
-							band = Interval(TEMP1.lb(),TEMP2.ub());
-						}
-					}
-				}
-
-				beta = band.mid();
-				t1 = (beta -band).ub();
-				t2 = (band-beta).ub();
-				ddelta = (t1>t2)? t1 : t2;
-
-				saxpy(alpha, Affine2(), beta, ddelta, true,false,true,true);
-
-			//}
-			break;
-		}
-		case AF_EXP : {
-
-			if (itv.lb()<=NEG_INFINITY)  {
-				*this = res_itv;
-			}
-			else {
-				dmm = res_itv;
-				if (itv.diam()< AF_EC()) {
-					alpha = 0.0;
-					band =dmm;
-				}
-				else {
-					alpha = dmm.lb();  // compute the derivative
-					if (alpha<=0) {
-						alpha = 0.0;
-						band = dmm;
-					}
-					else {
-						TEMP1 = Interval(dmm.lb()) -alpha*itv.lb();
-						TEMP2 = Interval(dmm.ub()) -alpha*itv.ub();
-						if (TEMP1.lb()>TEMP2.ub()) {
-							band = Interval(TEMP2.lb(),TEMP1.ub());
-							// normally this case never happen
-						}
-						else {
-							band = Interval(TEMP1.lb(),TEMP2.ub());
-						}
-					}
-				}
-
-				beta = band.mid();
-				t1 = (beta -band).ub();
-				t2 = (band-beta).ub();
-				ddelta = (t1>t2)? t1 : t2;
-
-				saxpy(alpha, Affine2(), beta, ddelta, true,false,true,true);
-			}
-
-			break;
-		}
-		case AF_LOG : {
-
-			/*if ((itv.lb()<= 0) ||(itv.ub()==POS_INFINITY) ) {
-				_err = log(itv);
-				_actif = false;
-				delete[] _val;
-				_val = NULL;
-			}
-			else {*/
-
-				dmm = res_itv;
-				if (itv.diam()< AF_EC()) {
-					alpha = 0.0;
-					band =dmm;
-				}
-				else {
-					alpha = (1.0/itv).lb();  // compute the derivative
-					if (alpha<=0) {
-						alpha = 0.0;
-						band = dmm;
-					}
-					else {
-						TEMP1 = Interval(dmm.lb()) -alpha*itv.lb();
-						TEMP2 = Interval(dmm.ub()) -alpha*itv.ub();
-						if (TEMP1.lb()>TEMP2.ub()) {
-							band = Interval(TEMP2.lb(),TEMP1.ub());
-							// normally this case never happen
-						}
-						else {
-							band = Interval(TEMP1.lb(),TEMP2.ub());
-						}
-					}
-				}
-
-				beta = band.mid();
-				t1 = (beta -band).ub();
-				t2 = (band-beta).ub();
-				ddelta = (t1>t2)? t1 : t2;
-
-				saxpy(alpha, Affine2(), beta, ddelta, true,false,true,true);
-
-			//}
-
-			break;
-		}
-		case AF_INV : {
-
-			if (itv.is_unbounded()) {
-				*this= res_itv;
-			}
-			else {
-
-				dmm = (1.0/abs(itv));
-				if (itv.diam()< AF_EC()) {
-					alpha = 0.0;
-					band = dmm;
-				}
-				else {
-					alpha = ((-1.0)/pow(itv,2)).ub(); // compute the derivative
-					if (alpha<=0) {
-						alpha = 0.0;
-						band = dmm;
-					}
-					else {
-						TEMP1 = Interval(dmm.lb()) -alpha*itv.ub();
-						TEMP2 = Interval(dmm.ub()) -alpha*itv.lb();
-						if (TEMP1.lb()>TEMP2.ub()) {
-							band = Interval(TEMP2.lb(),TEMP1.ub());
-							// normally this case never happens
-						}
-						else {
-							band = Interval(TEMP1.lb(),TEMP2.ub());
-						}
-					}
-				}
-
-				beta = band.mid();
-				t1 = (beta -band).ub();
-				t2 = (band-beta).ub();
-				ddelta = (t1>t2)? t1 : t2;
-
-				if (itv.lb()<0.0) beta = -beta;
-
-				saxpy(alpha, Affine2(), beta, ddelta, true,false,true,true);
-
-			}
-			break;
-		}
-		default :{
-			linChebyshev(num, itv);
-			break;
-		}
-		}
-
-	}
-
-	return *this;
-}
-
+//TODO debut linChebyshev
 Affine2& Affine2::linChebyshev(affine2_expr num, const Interval itv) {
 	//  std::cout << "linChebyshev IN itv= "<<itv << " x =  "<< *this << num<< std::endl;
 
@@ -1001,7 +754,7 @@ Affine2& Affine2::linChebyshev(affine2_expr num, const Interval itv) {
 	}
 	}
 
-
+	// Particular case
 	bool b = (!(res_itv.is_empty()||res_itv.is_unbounded()));
 	if (!b) {
 		_err = res_itv;
@@ -1014,63 +767,50 @@ Affine2& Affine2::linChebyshev(affine2_expr num, const Interval itv) {
 		*this =res_itv;
 	}  else  { // _actif && b
 
+
 		double alpha, beta, ddelta, t1, t2;
 		Interval dmm(0.0), TEMP1(0.0), TEMP2(0.0), band(0.0);
 
 		switch (num) {
-		/* alpha = (F(sup(x)) - F(inf(x)))/diam(X)
-		 * u = (f')^{-1}(alpha)
-		 * d_a = f(inf(x)) -alpha*inf(X)
-		 * d_b = f(sup(x)) -alpha*sup(x)
-		 * d_min = min(d_a,d_b)
-		 * d_max = f(u) - alpha*u
-		 * beta = Interval(d_min,d_max).mid()
-		 * zeta = Interval(d_min,d_max).rad()
-		 */
+		// alpha = (F(sup(x)) - F(inf(x)))/diam(X)
+		// u = (f')^{-1}(alpha)
+		// d_a = f(inf(x)) -alpha*inf(X)
+		// d_b = f(sup(x)) -alpha*sup(x)
+		// d_min = min(d_a,d_b)
+		// d_max = f(u) - alpha*u
+		// beta = Interval(d_min,d_max).mid()
+		// zeta = Interval(d_min,d_max).rad()
+
 		case AF_SQRT: {
-			/*if ((itv.ub() == POS_INFINITY) || (itv.ub()<0) ) {
-				_err = sqrt(itv);
-				_actif = false;
-				delete[] _val;
-				_val = NULL;
-
-			} else {*/
-				Interval itv2;
-				if (itv.lb()<0) {
-					itv2 = Interval(0.0,itv.ub());
+			Interval itv2;
+			if (itv.lb()<0) {
+				itv2 = Interval(0.0,itv.ub());
+			} else {
+				itv2 = itv;
+			}
+			dmm = sqrt(itv2);
+			alpha = (dmm.diam()/(Interval(itv2.ub())-Interval(itv2.lb()))).lb();
+			if (alpha<0) {
+				alpha = 0;
+				band = dmm;
+			} else {
+				//u = 1/(4*alpha^2);
+				TEMP1 = Interval(dmm.lb())-alpha*(itv2.lb());
+				TEMP2 = Interval(dmm.ub())-alpha*(itv2.ub());
+				if (TEMP1.lb()>TEMP2.lb()) {
+					band = Interval(TEMP2.lb(),(1.0/(4*Interval(alpha))).ub());
 				} else {
-					itv2 = itv;
+					band = Interval(TEMP1.lb(),(1.0/(4*Interval(alpha))).ub());
 				}
-				dmm = sqrt(itv2);
-			/*	if (itv2.diam()< AF_EC()) {
-					alpha = 0.0;
-					band = dmm;
-				}
-				else */ {
-					alpha = (dmm.diam()/(Interval(itv2.ub())-Interval(itv2.lb()))).lb();
-					if (alpha<0) {
-						alpha = 0;
-						band = dmm;
-					} else {
-						//u = 1/(4*alpha^2);
-						TEMP1 = Interval(dmm.lb())-alpha*(itv2.lb());
-						TEMP2 = Interval(dmm.ub())-alpha*(itv2.ub());
-						if (TEMP1.lb()>TEMP2.lb()) {
-							band = Interval(TEMP2.lb(),(1.0/(4*Interval(alpha))).ub());
-						} else {
-							band = Interval(TEMP1.lb(),(1.0/(4*Interval(alpha))).ub());
-						}
-					}
-				}
+			}
 
-				beta = band.mid();
-				t1 = (beta -band).ub();
-				t2 = (band-beta).ub();
-				ddelta = (t1>t2)? t1 : t2;
+			beta = band.mid();
+			t1 = (beta -band).ub();
+			t2 = (band-beta).ub();
+			ddelta = (t1>t2)? t1 : t2;
 
-				saxpy(alpha, Affine2(), beta, ddelta, true,false,true,true);
+			saxpy(alpha, Affine2(), beta, ddelta, true,false,true,true);
 
-			//}
 
 			break;
 		}
@@ -1082,26 +822,21 @@ Affine2& Affine2::linChebyshev(affine2_expr num, const Interval itv) {
 			} else {
 
 				dmm = res_itv;
-				/*if (itv.diam()< AF_EC()) {
-					alpha = 0.0;
-					band = dmm;
-				}
-				else */{
-					alpha = (dmm.diam()/(Interval(itv.ub())-Interval(itv.lb()))).ub();
-					if (alpha<0) {
-						alpha = 0;
-						band =dmm;
+				alpha = (dmm.diam()/(Interval(itv.ub())-Interval(itv.lb()))).ub();
+				if (alpha<0) {
+					alpha = 0;
+					band =dmm;
+				} else {
+					//u = log(alpha);
+					TEMP1 = Interval(dmm.lb())-alpha*(itv.lb());
+					TEMP2 = Interval(dmm.ub())-alpha*(itv.ub());
+					if (TEMP1.ub()>TEMP2.ub()) {
+						band = Interval((alpha*(1-log(Interval(alpha)))).lb(),TEMP1.ub());
 					} else {
-						//u = log(alpha);
-						TEMP1 = Interval(dmm.lb())-alpha*(itv.lb());
-						TEMP2 = Interval(dmm.ub())-alpha*(itv.ub());
-						if (TEMP1.ub()>TEMP2.ub()) {
-							band = Interval((alpha*(1-log(Interval(alpha)))).lb(),TEMP1.ub());
-						} else {
-							band = Interval((alpha*(1-log(Interval(alpha)))).lb(),TEMP2.ub());
-						}
+						band = Interval((alpha*(1-log(Interval(alpha)))).lb(),TEMP2.ub());
 					}
 				}
+
 
 				beta = band.mid();
 				t1 = (beta -band).ub();
@@ -1115,44 +850,30 @@ Affine2& Affine2::linChebyshev(affine2_expr num, const Interval itv) {
 			break;
 		}
 		case AF_LOG : {
-
-		/*	if ((itv.lb()<= 0) ||(itv.ub()==POS_INFINITY) ) {
-				_err = log(itv);
-				_actif = false;
-				delete[] _val;
-				_val = NULL;
-			} else {*/
-
-				dmm = res_itv;
-				/*if (itv.diam()< AF_EC()) {
-					alpha = 0.0;
-					band = dmm;
-				} else */{
-					alpha = (dmm.diam()/(Interval(itv.ub())-Interval(itv.lb()))).lb();
-					if (alpha<0) {
-						alpha = 0;
-						band = dmm;
-					} else {
-						//u = 1/alpha;
-						TEMP1 = Interval(dmm.lb())-alpha*(itv.lb());
-						TEMP2 = Interval(dmm.ub())-alpha*(itv.ub());
-						if (TEMP1.lb()>TEMP2.lb()) {
-							band = Interval(TEMP2.lb(),(-log(Interval(alpha))-1).ub());
-						}
-						else {
-							band = Interval(TEMP1.lb(),(-log(Interval(alpha))-1).ub());
-						}
-					}
+			dmm = res_itv;
+			alpha = (dmm.diam()/(Interval(itv.ub())-Interval(itv.lb()))).lb();
+			if (alpha<0) {
+				alpha = 0;
+				band = dmm;
+			} else {
+				//u = 1/alpha;
+				TEMP1 = Interval(dmm.lb())-alpha*(itv.lb());
+				TEMP2 = Interval(dmm.ub())-alpha*(itv.ub());
+				if (TEMP1.lb()>TEMP2.lb()) {
+					band = Interval(TEMP2.lb(),(-log(Interval(alpha))-1).ub());
 				}
+				else {
+					band = Interval(TEMP1.lb(),(-log(Interval(alpha))-1).ub());
+				}
+			}
 
-				beta = band.mid();
-				t1 = (beta -band).ub();
-				t2 = (band-beta).ub();
-				ddelta = (t1>t2)? t1 : t2;
 
-				saxpy(alpha, Affine2(), beta, ddelta, true,false,true,true);
+			beta = band.mid();
+			t1 = (beta -band).ub();
+			t2 = (band -beta).ub();
+			ddelta = (t1>t2)? t1 : t2;
 
-			//}
+			saxpy(alpha, Affine2(), beta, ddelta, true,false,true,true);
 
 			break;
 		}
@@ -1162,27 +883,22 @@ Affine2& Affine2::linChebyshev(affine2_expr num, const Interval itv) {
 			}
 			else {
 				dmm = (1.0/abs(itv));
-				/*if (itv.diam()< AF_EC()) {
-					alpha = 0.0;
+				alpha = -(dmm.diam()/(Interval(itv.ub())-Interval(itv.lb()))).lb();
+				if (alpha>0) {
+					alpha = 0;
 					band = dmm;
-				}
-				else */ {
-					alpha = -(dmm.diam()/(Interval(itv.ub())-Interval(itv.lb()))).lb();
-					if (alpha>0) {
-						alpha = 0;
-						band = dmm;
-					} else {
-						//u = 1/sqrt(-alpha);
-						TEMP1 = (1.0/Interval(abs(itv).lb()))-alpha*(abs(itv).lb());
-						TEMP2 = (1.0/Interval(abs(itv).ub()))-alpha*(abs(itv).ub());
-						if (TEMP1.ub()>TEMP2.ub()) {
-							band = Interval((2*sqrt(-Interval(alpha))).lb(),TEMP1.ub());
-						}
-						else {
-							band = Interval((2*sqrt(-Interval(alpha))).lb(),TEMP2.ub());
-						}
+				} else {
+					//u = 1/sqrt(-alpha);
+					TEMP1 = (1.0/Interval(abs(itv).lb()))-alpha*(abs(itv).lb());
+					TEMP2 = (1.0/Interval(abs(itv).ub()))-alpha*(abs(itv).ub());
+					if (TEMP1.ub()>TEMP2.ub()) {
+						band = Interval((2*sqrt(-Interval(alpha))).lb(),TEMP1.ub());
+					}
+					else {
+						band = Interval((2*sqrt(-Interval(alpha))).lb(),TEMP2.ub());
 					}
 				}
+
 
 				beta = band.mid();
 				t1 = (beta -band).ub();
@@ -1197,41 +913,28 @@ Affine2& Affine2::linChebyshev(affine2_expr num, const Interval itv) {
 		}
 		case AF_COSH : {
 
-			/*if (itv.is_unbounded()) {
-				_err = cosh(itv);
-				_actif = false;
-				delete[] _val;
-				_val = NULL;
+
+			dmm = res_itv;
+			alpha = ((cosh(Interval(itv.ub()))-cosh(Interval(itv.lb())))/(Interval(itv.ub())-Interval(itv.lb()))).lb();
+			//u = asinh(alpha);
+			TEMP1 = Interval(cosh(itv.lb()))-alpha*(itv.lb());
+			TEMP2 = Interval(cosh(itv.ub()))-alpha*(itv.ub());
+			if (TEMP1.ub()>TEMP2.ub()) {
+				// cosh(asinh(alpha)) = sqrt(sqr(alpha)+1)
+				band = Interval((sqrt(pow(Interval(alpha),2)+1)-alpha*asinh(Interval(alpha))).lb(),TEMP1.ub());
 			}
-			else { */
+			else {
+				band = Interval((sqrt(pow(Interval(alpha),2)+1)-alpha*asinh(Interval(alpha))).lb(),TEMP2.ub());
+			}
 
-				dmm = res_itv;
-				/*if (itv.diam()< AF_EC()) {
-					alpha = 0.0;
-					band = dmm;
-				}
-				else */ {
-					alpha = ((cosh(Interval(itv.ub()))-cosh(Interval(itv.lb())))/(Interval(itv.ub())-Interval(itv.lb()))).lb();
-					//u = asinh(alpha);
-					TEMP1 = Interval(cosh(itv.lb()))-alpha*(itv.lb());
-					TEMP2 = Interval(cosh(itv.ub()))-alpha*(itv.ub());
-					if (TEMP1.ub()>TEMP2.ub()) {
-						// cosh(asinh(alpha)) = sqrt(sqr(alpha)+1)
-						band = Interval((sqrt(pow(Interval(alpha),2)+1)-alpha*asinh(Interval(alpha))).lb(),TEMP1.ub());
-					}
-					else {
-						band = Interval((sqrt(pow(Interval(alpha),2)+1)-alpha*asinh(Interval(alpha))).lb(),TEMP2.ub());
-					}
-				}
 
-				beta = band.mid();
-				t1 = (beta -band).ub();
-				t2 = (band-beta).ub();
-				ddelta = (t1>t2)? t1 : t2;
+			beta = band.mid();
+			t1 = (beta -band).ub();
+			t2 = (band-beta).ub();
+			ddelta = (t1>t2)? t1 : t2;
 
-				saxpy(alpha, Affine2(), beta, ddelta, true,false,true,true);
+			saxpy(alpha, Affine2(), beta, ddelta, true,false,true,true);
 
-			//}
 
 			break;
 		}
@@ -1242,33 +945,22 @@ Affine2& Affine2::linChebyshev(affine2_expr num, const Interval itv) {
 			else if (itv.ub()<=0) {
 				return *this = -Affine2(*this);
 			}
-		/*	else if (itv.is_unbounded() ) {
-				_err = abs(itv);
-				_actif = false;
-				delete[] _val;
-				_val = NULL;
-			}*/
 			else {
 
 				dmm = res_itv;
-				/*if (itv.diam()< AF_EC()) {
-					alpha = 0.0;
-					band = dmm;
+				alpha = ((abs(Interval(itv.ub()))-abs(Interval(itv.lb())))/(Interval(itv.ub())-Interval(itv.lb()))).ub();
+				if (alpha<0) alpha = 0;
+				//u = log(alpha);
+				TEMP1 = Interval(dmm.lb())-alpha*(itv.lb());
+				TEMP2 = Interval(dmm.ub())-alpha*(itv.ub());
+				if (TEMP1.ub()>TEMP2.ub()) {
+					// u = 0
+					band = Interval(0.0,TEMP1.ub());
 				}
-				else */{
-					alpha = ((abs(Interval(itv.ub()))-abs(Interval(itv.lb())))/(Interval(itv.ub())-Interval(itv.lb()))).ub();
-					if (alpha<0) alpha = 0;
-					//u = log(alpha);
-					TEMP1 = Interval(dmm.lb())-alpha*(itv.lb());
-					TEMP2 = Interval(dmm.ub())-alpha*(itv.ub());
-					if (TEMP1.ub()>TEMP2.ub()) {
-						// u = 0
-						band = Interval(0.0,TEMP1.ub());
-					}
-					else {
-						band = Interval(0.0,TEMP2.ub());
-					}
+				else {
+					band = Interval(0.0,TEMP2.ub());
 				}
+
 
 				beta = band.mid();
 				t1 = (beta -band).ub();
@@ -1284,13 +976,6 @@ Affine2& Affine2::linChebyshev(affine2_expr num, const Interval itv) {
 	// now the other non-convex or concave function
 	// trigo function
 		case AF_TAN :
-			/*if (tan(itv).is_unbounded()) {
-				_err = tan(itv);
-				_actif = false;
-				delete[] _val;
-				_val = NULL;
-				break;
-			}*/
 		case AF_COS :
 		case AF_SIN : {
 			if (itv.diam()>=Interval::TWO_PI.lb()) {
@@ -1298,18 +983,17 @@ Affine2& Affine2::linChebyshev(affine2_expr num, const Interval itv) {
 				_err = 1.0;
 				break;
 			}
-			/*  pour _itv = [a,b]
-			 * x0 = 1/sqrt(2)
-			 * x1= - x0
-			 * xb0 = 0.5*((b-a)*x0 +(a+b))
-			 * xb1 = 0.5*((b-a)*x1 +(a+b))
-			 * c0 = 0.5 (f(xb0)+f(xb1))
-			 * c1 = x0*f(xb0)+x1*f(xb1)
-			 * alpha = 2*c1/(b-a)
-			 * beta = c0-c1*(a+b)/(b-a)
-			 *  old : ddelta = (b-a)^2 * f''(_itv)/16
-			 *  ddelta = evaluate the error at the bound and the points when f'(x)=alpha
-			 */
+			//  pour _itv = [a,b]
+			// x0 = 1/sqrt(2)
+			// x1= - x0
+			// xb0 = 0.5*((b-a)*x0 +(a+b))
+			// xb1 = 0.5*((b-a)*x1 +(a+b))
+			// c0 = 0.5 (f(xb0)+f(xb1))
+			// c1 = x0*f(xb0)+x1*f(xb1)
+			// alpha = 2*c1/(b-a)
+			// beta = c0-c1*(a+b)/(b-a)
+			//  old : ddelta = (b-a)^2 * f''(_itv)/16
+			//  ddelta = evaluate the error at the bound and the points when f'(x)=alpha
 
 			Interval x0,x1,xb0,xb1,fxb0,fxb1,c0,c1;
 
@@ -1430,9 +1114,9 @@ Affine2& Affine2::linChebyshev(affine2_expr num, const Interval itv) {
 
 			break;
 		}
-	// inverse function and
-	// hyperbolic function
 
+	// inverse trigonometric function and
+	// hyperbolic function
 		case AF_ACOS :
 		case AF_ASIN :
 			if ((itv.lb() < (-1))||(itv.ub() > 1)) {
@@ -1444,44 +1128,18 @@ Affine2& Affine2::linChebyshev(affine2_expr num, const Interval itv) {
 				return *this = res_itv ;
 			}
 		case AF_SINH : {
-			/*if (itv.is_unbounded()|| itv.is_empty()) {
-				_actif = false;
-				delete[] _val;
-				_val = NULL;
-				switch(num) {
-				case AF_ACOS :
-					_err = acos(itv);
-					break;
-				case AF_ASIN :
-					_err = asin(itv);
-					break;
-				case AF_ATAN :
-					_err = atan(itv);
-					break;
-				case AF_TANH :
-					_err = tanh(itv);
-					break;
-				case AF_SINH :
-					_err = sinh(itv);
-					break;
-				default:
-					ibex_error("this should not appear");
-					break;
-				}
-				break;
-			} */
-			/*  pour _itv = [a,b]
-			 * x0 = 1/sqrt(2)
-			 * x1= - x0
-			 * xb0 = 0.5*((b-a)*x0 +(a+b))
-			 * xb1 = 0.5*((b-a)*x1 +(a+b))
-			 * c0 = 0.5 (f(xb0)+f(xb1))
-			 * c1 = x0*f(xb0)+x1*f(xb1)
-			 * alpha = 2*c1/(b-a)
-			 * beta = c0-c1*(a+b)/(b-a)
-			 *  old : ddelta = (b-a)^2 * f''(_itv)/16
-			 *  ddelta = evaluate the error at the bound and the points when f'(x)=alpha
-			 */
+			//  pour _itv = [a,b]
+			// x0 = 1/sqrt(2)
+			// x1= - x0
+			// xb0 = 0.5*((b-a)*x0 +(a+b))
+			// xb1 = 0.5*((b-a)*x1 +(a+b))
+			// c0 = 0.5 (f(xb0)+f(xb1))
+			// c1 = x0*f(xb0)+x1*f(xb1)
+			// alpha = 2*c1/(b-a)
+			// beta = c0-c1*(a+b)/(b-a)
+			//  old : ddelta = (b-a)^2 * f''(_itv)/16
+			//  ddelta = evaluate the error at the bound and the points when f'(x)=alpha
+
 			Interval x0,x1,xb0,xb1,fxb0,fxb1,c0,c1;
 
 			x0 = 1.0/sqrt(Interval(2));
@@ -1713,5 +1371,297 @@ Affine2 sign(const Affine2& x, const Interval itv) {
 	}
 }
 
+
+
+
+/*
+//TODO debut linMinRange  NOT USE !!!!
+Affine2& Affine2::linMinRange(affine2_expr num, const Interval itv) {
+
+	Interval res_itv;
+	switch (num) {
+	case AF_SQRT :
+		res_itv = sqrt(itv);
+		break;
+	case AF_EXP :
+		res_itv = exp(itv);
+		break;
+	case AF_LOG :
+		res_itv = log(itv);
+		break;
+	case AF_INV :
+		res_itv = 1.0/itv;
+		break;
+	case AF_COS :
+		res_itv = cos(itv);
+		break;
+	case AF_SIN :
+		res_itv = sin(itv);
+		break;
+	case AF_TAN :
+		res_itv = tan(itv);
+		break;
+	case AF_ABS :
+		res_itv = abs(itv);
+		break;
+	case AF_ACOS :
+		res_itv = acos(itv);
+		break;
+	case AF_ASIN :
+		res_itv = asin(itv);
+		break;
+	case AF_ATAN :
+		res_itv = atan(itv);
+		break;
+	case AF_COSH :
+		res_itv = cosh(itv);
+		break;
+	case AF_SINH :
+		res_itv = sinh(itv);
+		break;
+	case AF_TANH :
+		res_itv = tanh(itv);
+		break;
+	default:
+		ibex_error("Not implemented yet");
+		break;
+	}
+
+
+	bool b = (!(res_itv.is_empty()||res_itv.is_unbounded()));
+	if (!b) {
+		_err = res_itv;
+		_n = -1;
+		if (_val !=NULL) {
+			delete[] _val;
+			_val = NULL;
+		}
+	} else if (!is_actif()) {
+		*this =res_itv;
+
+
+	} else  {  // _actif && b
+		double alpha, beta, ddelta, t1, t2;
+		Interval dmm(0.0), TEMP1(0.0), TEMP2(0.0), band(0.0), itv2;
+
+		switch (num) {
+		/// for _itv = [a,b]
+		 //if f increase,
+		 // alpha = f'(a)
+		 // band = Interval(a- alpha*a , b-alpha*b)
+		 //if f decrease
+		 // alpha = f'(b)
+		 // band = Interval(a- alpha*b , b-alpha*a)
+		 //
+		 // beta = band.mid()
+		 //  ddelta = band.rad()
+		 //
+
+		case AF_SQRT: {
+			//if ((itv.ub() == POS_INFINITY) || (itv.ub()<0) ) {
+			//	_err = sqrt(itv);
+			//	_actif = false;
+			//	delete[] _val;
+			//	_val = NULL;
+			//}
+			//else {
+				if (itv.lb()<0) {
+					itv2 = Interval(0.0,itv.ub());
+				} else {
+					itv2 =itv;
+				}
+
+				dmm = sqrt(itv2);
+				if (itv2.diam()< AF_EC()) {
+					alpha = 0.0;
+					band =dmm;
+				}
+				else {
+					alpha = (1.0/(2.0*dmm)).lb();  // compute the derivative
+					if (alpha<=0) {
+						alpha = 0.0;
+						band = dmm;
+					}
+					else {
+						TEMP1 = Interval(dmm.lb()) -alpha*itv2.lb();
+						TEMP2 = Interval(dmm.ub()) -alpha*itv2.ub();
+						if (TEMP1.lb()>TEMP2.ub()) {
+							band = Interval(TEMP2.lb(),TEMP1.ub());
+							// normally this case never happen
+						}
+						else {
+							band = Interval(TEMP1.lb(),TEMP2.ub());
+						}
+					}
+				}
+
+				beta = band.mid();
+				t1 = (beta -band).ub();
+				t2 = (band-beta).ub();
+				ddelta = (t1>t2)? t1 : t2;
+
+				saxpy(alpha, Affine2(), beta, ddelta, true,false,true,true);
+
+			//}
+			break;
+		}
+		case AF_EXP : {
+
+			if (itv.lb()<=NEG_INFINITY)  {
+				*this = res_itv;
+			}
+			else {
+				dmm = res_itv;
+				if (itv.diam()< AF_EC()) {
+					alpha = 0.0;
+					band =dmm;
+				}
+				else {
+					alpha = dmm.lb();  // compute the derivative
+					if (alpha<=0) {
+						alpha = 0.0;
+						band = dmm;
+					}
+					else {
+						TEMP1 = Interval(dmm.lb()) -alpha*itv.lb();
+						TEMP2 = Interval(dmm.ub()) -alpha*itv.ub();
+						if (TEMP1.lb()>TEMP2.ub()) {
+							band = Interval(TEMP2.lb(),TEMP1.ub());
+							// normally this case never happen
+						}
+						else {
+							band = Interval(TEMP1.lb(),TEMP2.ub());
+						}
+					}
+				}
+
+				beta = band.mid();
+				t1 = (beta -band).ub();
+				t2 = (band-beta).ub();
+				ddelta = (t1>t2)? t1 : t2;
+
+				saxpy(alpha, Affine2(), beta, ddelta, true,false,true,true);
+			}
+
+			break;
+		}
+		case AF_LOG : {
+
+			//if ((itv.lb()<= 0) ||(itv.ub()==POS_INFINITY) ) {
+			//	_err = log(itv);
+			//	_actif = false;
+			//	delete[] _val;
+			//	_val = NULL;
+			//}
+			//else {
+
+				dmm = res_itv;
+				if (itv.diam()< AF_EC()) {
+					alpha = 0.0;
+					band =dmm;
+				}
+				else {
+					alpha = (1.0/itv).lb();  // compute the derivative
+					if (alpha<=0) {
+						alpha = 0.0;
+						band = dmm;
+					}
+					else {
+						TEMP1 = Interval(dmm.lb()) -alpha*itv.lb();
+						TEMP2 = Interval(dmm.ub()) -alpha*itv.ub();
+						if (TEMP1.lb()>TEMP2.ub()) {
+							band = Interval(TEMP2.lb(),TEMP1.ub());
+							// normally this case never happen
+						}
+						else {
+							band = Interval(TEMP1.lb(),TEMP2.ub());
+						}
+					}
+				}
+
+				beta = band.mid();
+				t1 = (beta -band).ub();
+				t2 = (band-beta).ub();
+				ddelta = (t1>t2)? t1 : t2;
+
+				saxpy(alpha, Affine2(), beta, ddelta, true,false,true,true);
+
+			//}
+
+			break;
+		}
+		case AF_INV : {
+
+			if (itv.is_unbounded()) {
+				*this= res_itv;
+			}
+			else {
+
+				dmm = (1.0/abs(itv));
+				if (itv.diam()< AF_EC()) {
+					alpha = 0.0;
+					band = dmm;
+				}
+				else {
+					alpha = ((-1.0)/pow(itv,2)).ub(); // compute the derivative
+					if (alpha<=0) {
+						alpha = 0.0;
+						band = dmm;
+					}
+					else {
+						TEMP1 = Interval(dmm.lb()) -alpha*itv.ub();
+						TEMP2 = Interval(dmm.ub()) -alpha*itv.lb();
+						if (TEMP1.lb()>TEMP2.ub()) {
+							band = Interval(TEMP2.lb(),TEMP1.ub());
+							// normally this case never happens
+						}
+						else {
+							band = Interval(TEMP1.lb(),TEMP2.ub());
+						}
+					}
+				}
+
+				beta = band.mid();
+				t1 = (beta -band).ub();
+				t2 = (band-beta).ub();
+				ddelta = (t1>t2)? t1 : t2;
+
+				if (itv.lb()<0.0) beta = -beta;
+
+				saxpy(alpha, Affine2(), beta, ddelta, true,false,true,true);
+
+			}
+			break;
+		}
+		default :{
+			linChebyshev(num, itv);
+			break;
+		}
+		}
+
+	}
+
+	return *this;
+}
+*/
+
+
+
+
+
+
+
 }// end namespace ibex
+
+
+
+
+
+
+
+
+
+
+
+
 

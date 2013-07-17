@@ -97,7 +97,7 @@ public:
 	/**
 	 *\brief compute the min-range linearization of an unary operator
 	 */
-	Affine2& linMinRange(affine2_expr num, const Interval itv);
+	//Affine2& linMinRange(affine2_expr num, const Interval itv);
 
 	/**
 	 *\brief compute the chebyshev linearization of an unary operator
@@ -758,7 +758,7 @@ inline Affine2 pow(const Affine2 &x, const Interval &y){
 
 inline Affine2 pow(const Affine2 &x, const Interval &y, const Interval itvx){
 	// return exp(y * log(x));
-	return (y * Affine2(x).linChebyshev(Affine2::AF_LOG, itvx)).linChebyshev(Affine2::AF_EXP, y*log(itvx));
+	return (y * Affine2(x).linChebyshev(Affine2::AF_LOG, itvx)).linChebyshev(Affine2::AF_EXP, (y*log(itvx)));
 }
 
 inline Affine2 pow(const Affine2 &x, const Affine2 &y){
