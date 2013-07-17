@@ -11,11 +11,8 @@
 #ifndef IBEX_LINEARSOLVER_H_
 #define IBEX_LINEARSOLVER_H_
 
+#include "ibex_cplex_or_soplex.h"
 
-
-#define _IBEX_WITH_SOPLEX_ 1
-//#define _IBEX_WITH_CPLEX_ 1
-//#define _IBEX_WITH_ILOCPLEX_ 1
 
 #include <string.h>
 #include <stdio.h>
@@ -29,7 +26,7 @@
 
 #else
 #ifdef _IBEX_WITH_CPLEX_
-#include "cplex.h"
+#include "ilcplex/cplex.h"
 
 #else
 #ifdef _IBEX_WITH_ILOCPLEX_
@@ -62,11 +59,15 @@ private:
 #ifdef _IBEX_WITH_CPLEX_
 	CPXENVptr  envcplex;
 	CPXLPptr lpcplex;
+	double * primal_solution;
+	double * dual_solution;
+	int status_prim;
+	int status_dual;
 	int * indice;
 	double * 	tmp;
-	int *  		cmatbeg;
-	double *  	cmatval;
-	int * 		cmatind;
+	int *  		r_matbeg;
+	double *  	r_matval;
+	int * 		r_matind;
 #endif
 
 #ifdef _IBEX_WITH_ILOCPLEX_

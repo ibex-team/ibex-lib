@@ -41,6 +41,8 @@ def options (opt):
 			help = "location of the filib lib")
 	opt.add_option ("--with-soplex", action="store", type="string", dest="SOPLEX_PATH",
 			help = "location of the Soplex lib")
+	opt.add_option ("--with-cplex", action="store", type="string", dest="CPLEX_PATH",
+			help = "location of the Cplex lib")
 
 	opt.add_option ("--with-jni", action="store_true", dest="WITH_JNI",
 			help = "enable the compilation of the JNI adapter (note: your JAVA_HOME environment variable must be properly set if you want to use this option)")
@@ -116,19 +118,21 @@ def configure (conf):
 
 		return os.path.abspath (os.path.expanduser (path)) if path else find_lib (prefix)
 
+	path_so = candidate_lib_path ("SOPLEX_PATH", "soplex-")
+	path_c = candidate_lib_path ("CPLEX_PATH", "cplex")
+	
 	# Soplex lib
-	path = candidate_lib_path ("SOPLEX_PATH", "soplex-")
-	if path:
-		conf.msg ("Candidate directory for lib Soplex", path)
+	if path_so:
+		conf.msg ("Candidate directory for lib Soplex", path_so)
 
-		env.append_unique ("INCLUDES",  os.path.join (path, "src"))
+		env.append_unique ("INCLUDES",  os.path.join (path_so, "src"))
 
 		conf.check_cxx (header_name	= "soplex.h")
 
 		# Try without and with -lz (soplex may be built without zlib)
 		for l in ("soplex", ["soplex", "z"]):
 			if (conf.check_cxx (lib = l, uselib_store = "IBEX_DEPS",
-					libpath = [os.path.join (path, "lib")],
+					libpath = [os.path.join (path_so, "lib")],
 					mandatory = False,
 					fragment = """
 						#include <soplex.h>
@@ -141,9 +145,30 @@ def configure (conf):
 				break
 		else:
 			conf.fatal ("cannot link with the Soplex library")
-	else:
-		conf.fatal ("cannot find the Soplex library, please use --with-soplex=SOPLEX_PATH")
+			
+	# CPLEX lib
+	elif path_c:
+		conf.msg ("Candidate directory for lib Cplex", path_c)
 
+		env.append_unique ("INCLUDES",  os.path.join (path_c, "cplex/include/"))
+		conf.check_cxx (header_name	= "ilcplex/cplex.h")
+		
+		# ATTENTION  IL faut adapter en fonction des differentes configurations
+		if (not(conf.check_cxx (lib = ["cplex", "pthread"], uselib_store = "IBEX_DEPS",
+				libpath = [os.path.join (path_c, "cplex/lib/x86-64_sles10_4.1/static_pic")],  
+				mandatory = False,
+				fragment = """
+					#include "ilcplex/cplex.h"
+					int main (int argc, char* argv[]) {
+						CPXENVptr  envcplex;
+						CPXLPptr lpcplex;
+						return 0;
+					}
+				"""))):
+			conf.fatal ("cannot link with the Cplex library")			
+	else:
+		conf.fatal ("cannot find the Soplex library or the Cplex library,  please use --with-soplex=SOPLEX_PATH or --with-cplex=CPLEX_PATH")
+	
 
 	# JNI
 	env.WITH_JNI = conf.options.WITH_JNI

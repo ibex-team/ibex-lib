@@ -53,6 +53,25 @@ def configure (conf):
 	with_bias = conf.options.BIAS_PATH
 	with_gaol = conf.options.GAOL_PATH
 	with_filib = conf.options.FILIB_PATH
+	with_soplex = conf.options.SOPLEX_PATH
+	with_cplex = conf.options.CPLEX_PATH
+	
+	# allow only one linear solver
+	with_any_solver = False
+	for w in with_soplex, with_cplex:
+		if w is not None:
+			if with_any_solver:
+				conf.fatal ("cannot use --with-cplex/--with-soplex")
+			with_any_solver = True
+
+	if with_cplex is not None:
+		# build with cplex
+		conf.env.LP_LIB = "CPLEX"
+
+	if with_soplex is not None:
+		# build with soplex
+		conf.env.LP_LIB = "SOPLEX"	
+	
 	def join (path, *k):
 		return os.path.abspath (os.path.join (os.path.expanduser (path), *k)) if path else None
 	def use_shlib():

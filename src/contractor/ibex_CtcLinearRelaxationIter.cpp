@@ -292,10 +292,6 @@ void CtcLinearRelaxationIter::NeumaierShcherbina_postprocessing ( int nr, int va
 	IntervalVector Lambda(nr);
 
 	for (int i=0; i<nr; i++) {
-		if( (B[i].ub()>=LinearSolver::default_max_bound && dual_solution[i]<0) ||
-		    (B[i].lb() <=-LinearSolver::default_max_bound && dual_solution[i]>0   )) //Modified by IA
-		Lambda[i]=0;
-	else
 		Lambda[i]=dual_solution[i];
 	}
 
@@ -321,14 +317,7 @@ bool CtcLinearRelaxationIter::NeumaierShcherbina_infeasibilitytest(int nr, Inter
 	IntervalVector Lambda(nr);
 
 	for (int i =0; i<nr; i++) {
-		if( (B[i].ub()>=LinearSolver::default_max_bound  && infeasible_dir[i]<0 ) ||
-				(B[i].lb() <=-LinearSolver::default_max_bound  && infeasible_dir[i]>0 )){
-			// blind copy from OPTIMAL case useful in this case ?? BN
-			Lambda[i]=0;
-		}
-		else {
-			Lambda[i]=infeasible_dir[i];
-		}
+		Lambda[i]=infeasible_dir[i];
 	}
 
 	IntervalVector Rest(nb_var);
