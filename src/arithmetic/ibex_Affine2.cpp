@@ -249,11 +249,11 @@ Affine2& Affine2::saxpy(double alpha, const Affine2& y, double beta, double ddel
 
 				} else  {
 					if (_n>y.size()) {
-						return *this += y.itv();
+						*this += y.itv();
 					} else {
 						Interval tmp1 = itv();
 						*this = y;
-						return *this += tmp1;
+						*this += tmp1;
 					}
 				}
 			}
@@ -302,8 +302,10 @@ Affine2& Affine2::saxpy(double alpha, const Affine2& y, double beta, double ddel
 			else {
 				_err = itv()+Interval(-ddelta,ddelta);
 				_n = -1;
-				if (_val!=NULL) delete[] _val;
-				_val = NULL;
+				if (_val!=NULL) {
+					delete[] _val;
+					_val = NULL;
+				}
 			}
 		}
 
@@ -457,6 +459,8 @@ Affine2& Affine2::operator*=(const Interval& y) {
 	if (is_actif()&& (!(y.is_empty()||y.is_unbounded()))) {
 		double  ttt=0.0, sss=0.0,  yVal0=0.0;
 		int i;
+//std::cout << "in *  "<<y<<std::endl;
+//saxpy(y.mid(), Affine2(), 0.0, y.rad(), true, false, false, true);
 
 		yVal0 = y.mid();
 		// RES = X%(0) * res
@@ -816,13 +820,15 @@ Affine2& Affine2::linChebyshev(affine2_expr num, const Interval itv) {
 		}
 		case AF_EXP : {
 
+
 			if (itv.is_unbounded()) {
 				*this = res_itv;
 
 			} else {
 
 				dmm = res_itv;
-				alpha = (dmm.diam()/(Interval(itv.ub())-Interval(itv.lb()))).ub();
+				//alpha = (dmm.diam()/(Interval(itv.ub())-Interval(itv.lb()))).ub();
+				alpha = (dmm.diam()/itv.diam());
 				if (alpha<0) {
 					alpha = 0;
 					band =dmm;
@@ -851,7 +857,8 @@ Affine2& Affine2::linChebyshev(affine2_expr num, const Interval itv) {
 		}
 		case AF_LOG : {
 			dmm = res_itv;
-			alpha = (dmm.diam()/(Interval(itv.ub())-Interval(itv.lb()))).lb();
+			//alpha = (dmm.diam()/(Interval(itv.ub())-Interval(itv.lb()))).lb();
+			alpha = (dmm.diam()/itv.diam());
 			if (alpha<0) {
 				alpha = 0;
 				band = dmm;
@@ -1643,11 +1650,11 @@ Affine2& Affine2::linMinRange(affine2_expr num, const Interval itv) {
 
 	return *this;
 }
+
+
+
+
 */
-
-
-
-
 
 
 
