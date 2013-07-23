@@ -24,7 +24,8 @@ CtcXNewton::CtcXNewton(const System& sys1, std::vector<corner_point>& cpoints1,
 			cpoints(cpoints1), goal_ctr(-1),
 			max_diam_deriv(max_diam_deriv1),
 			lmode(lmode1),
-			linear_coef(sys1.nb_ctr, sys1.nb_var) {
+			linear_coef(sys1.nb_ctr, sys1.nb_var),
+			df(sys1.f,Function::DIFF) {
 
 	if (goal_var!=-1)
 		((int&) goal_ctr)=((const ExtendedSystem&) sys).goal_ctr();
@@ -36,22 +37,23 @@ void CtcXNewton::init_linear_coeffs() {
 
 	last_rnd = new int[sys.nb_var];
 	base_coin = new int[sys.nb_var];
-	linear = new bool[sys.nb_ctr];
+	linear = new bool*[sys.nb_ctr];
+	linear_ctr = new bool[sys.nb_ctr];
 
 	for(int ctr=0; ctr<sys.nb_ctr; ctr++) {
+
+		linear[ctr] = new bool[sys.nb_var];
 
 		IntervalVector G(sys.nb_var);
 		sys.ctrs[ctr].f.gradient(sys.box,G);
 
-		linear[ctr]=true;
 		// for testing if a function is linear (with scalar coefficients) w.r.t all its variables,
 		// we test the diameter of the gradient components.
+		linear_ctr[ctr]=true;
 
 		for(int i=0; i<sys.nb_var; i++) {
-			if (G[i].diam()>1e-10) { // [gch]: TODO: 1e-10 should not be hard-coded
-				linear[ctr]=false;
-				break;
-			}
+			if (! (linear[ctr][i]=G[i].diam()<=1e-10)) // [gch]: TODO: 1e-10 should not be hard-coded
+				linear_ctr[ctr]=false;
 		}
 
 		linear_coef.row(ctr) = G;  // in case of a linear function, the coefficients are already computed.
@@ -62,7 +64,9 @@ void CtcXNewton::init_linear_coeffs() {
 CtcXNewton::~CtcXNewton() {
 	delete[] last_rnd;
 	delete[] base_coin;
+	for(int ctr=0; ctr<sys.nb_ctr; ctr++) delete[] linear[ctr];
 	delete[] linear;
+	delete[] linear_ctr;
 }
 
 int CtcXNewton::linearization( IntervalVector & box, LinearSolver *mysolver)  {
@@ -73,10 +77,14 @@ int CtcXNewton::linearization( IntervalVector & box, LinearSolver *mysolver)  {
 	for(int ctr=0; ctr<sys.nb_ctr; ctr++) {
 
 		IntervalVector G(sys.nb_var);
-		if (linear[ctr]) G=linear_coef.row(ctr); // constant derivatives have been already computed
-		else if(lmode==TAYLOR) {                 // derivatives are computed once (Taylor)
+
+		if(lmode==TAYLOR) {                 // derivatives are computed once (Taylor)
 			sys.ctrs[ctr].f.gradient(box,G);
 		}
+		else
+			// to set all the constant derivatives that have been already computed
+			// (the other will be overwritten)
+			G=linear_coef.row(ctr);
 
 		int nb_nonlinear_vars;
 		if(cpoints[0]==K4) {
@@ -112,12 +120,13 @@ int CtcXNewton::X_Linearization(IntervalVector& box, int ctr, corner_point cpoin
 
 int CtcXNewton::X_Linearization(IntervalVector& box,
 		int ctr, corner_point cpoint, CmpOp op, 
-		IntervalVector& G, int id_point, int& nb_nonlinear_vars, LinearSolver *mysolver) {
+		IntervalVector& G2, int id_point, int& nb_nonlinear_vars, LinearSolver *mysolver) {
 
+	IntervalVector G = G2;
 	int n = sys.nb_var;
 	int nonlinear_var = 0;
 
-	if (id_point != 0 && linear[ctr])
+	if (id_point != 0 && linear_ctr[ctr])
 		return 0; // only one corner for a linear constraint
 
 	/*
@@ -141,13 +150,10 @@ int CtcXNewton::X_Linearization(IntervalVector& box,
 	for (int j=0; j< n; j++) {
 
 	  if (sys.ctrs[ctr].f.used(j)) {
-	    if (lmode == HANSEN && !linear[ctr])
-	      {if (j != goal_var)  
-	    	  sys.ctrs[ctr].f.gradient(box,G);
-		else  // code optimization , no need to recompute the gradient for the objective : we know the result.
-		  G[j]=-1.0;
-	      }
-	  } 
+		  if (lmode == HANSEN && !linear[ctr][j])
+			  // get the partial derivative of ctr w.r.t. var n°j
+	    	  G[j]=df[ctr*n+j].eval(box);
+	  }
 	  else continue;
 
 	  if (G[j].diam() > max_diam_deriv) {
@@ -155,7 +161,7 @@ int CtcXNewton::X_Linearization(IntervalVector& box,
 	    return 0;      // To avoid problems with SoPleX
 	  }
 
-	  if (linear[ctr])
+	  if (linear[ctr][j])
 	    cpoint = INF_X;
 	  else if (G[j].diam() > 1e-10)
 	    nonlinear_var++;

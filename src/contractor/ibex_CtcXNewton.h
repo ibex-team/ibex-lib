@@ -1,8 +1,8 @@
 //============================================================================
 //                                  I B E X                                   
 // File        : ibex_CtcXNewton.h
-// Author      : Ignacio Araya, 
-//               Bertrand Neveu, Gilles Trombettoni
+// Author      : Ignacio Araya, Bertrand Neveu,
+//               Gilles Trombettoni, Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Jul 20, 2012
@@ -99,8 +99,11 @@ private:
 
 	int* base_coin;
 
-	/** Indicates if the constraint is linear */
-	bool* linear;
+	/** Indicates if the constraint is linear wrt to each variable */
+	bool** linear;
+
+	/** Indicates if the constraint is linear wrt to each variable */
+	bool* linear_ctr;
 
 	/**
 	 * Initialize the #linear and #linear_coef fields.
@@ -117,6 +120,11 @@ private:
 
 	int X_Linearization(IntervalVector& box, int ctr, corner_point cpoint, CmpOp op,
 			IntervalVector &G, int id_point, int& non_linear_vars, LinearSolver *mysolver);
+
+	/**
+	 * \brief Symbolic jacobian
+	 */
+	Function df;
 
 //	// used in greedy heuristics :  not implemented in v2.0
 //	inline double abs(double a){
