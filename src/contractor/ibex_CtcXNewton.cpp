@@ -100,7 +100,7 @@ int CtcXNewton::X_Linearization(IntervalVector& box, int ctr, corner_point cpoin
 	if(op!=EQ && isInner(box, sys, ctr)) return 0; //the constraint is satisfied
 
 	int cont=0;
-	//if(ctr==goal_ctr) op = LEQ;
+	if(ctr==goal_ctr) op = LEQ;
 	if(op==EQ) {
 		cont+=X_Linearization(box, ctr, cpoint, LEQ, G, id_point, nb_nonlinear_vars, mysolver);
 		cont+=X_Linearization(box, ctr, cpoint, GEQ, G, id_point, nb_nonlinear_vars, mysolver);
