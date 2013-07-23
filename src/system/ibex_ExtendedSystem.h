@@ -53,10 +53,10 @@ public:
 	 */
 	int goal_ctr() const;
 
-	/**
+	/*
 	 * \brief Goal of the original system.
 	 */
-	Function original_goal;
+	//Function original_goal;
 
 };
 

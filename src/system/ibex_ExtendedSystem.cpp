@@ -15,7 +15,7 @@ namespace ibex {
 
 const char* ExtendedSystem::goal_name = "__goal__";
 
-ExtendedSystem::ExtendedSystem(const System& sys) : original_goal(*sys.goal) {
+ExtendedSystem::ExtendedSystem(const System& sys) /*: original_goal(*sys.goal)*/ {
 	init(SystemExtend(sys));
 }
 
