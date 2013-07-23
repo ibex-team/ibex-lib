@@ -43,10 +43,6 @@ void CtcXNewton::init_linear_coeffs() {
 		IntervalVector G(sys.nb_var);
 		sys.ctrs[ctr].f.gradient(sys.box,G);
 
-		if(ctr==goal_ctr) {
-			G=-G;           // the gradient of (y-f(x)) will give (1,-grad{f}).
-		}
-
 		linear[ctr]=true;
 		// for testing if a function is linear (with scalar coefficients) w.r.t all its variables,
 		// we test the diameter of the gradient components.
@@ -79,7 +75,7 @@ int CtcXNewton::linearization( IntervalVector & box, LinearSolver *mysolver)  {
 		IntervalVector G(sys.nb_var);
 		if (linear[ctr]) G=linear_coef.row(ctr); // constant derivatives have been already computed
 		else if(lmode==TAYLOR) {                 // derivatives are computed once (Taylor)
-			gradient_computation(box, G, ctr);
+			sys.ctrs[ctr].f.gradient(box,G);
 		}
 
 		int nb_nonlinear_vars;
@@ -104,7 +100,7 @@ int CtcXNewton::X_Linearization(IntervalVector& box, int ctr, corner_point cpoin
 	if(op!=EQ && isInner(box, sys, ctr)) return 0; //the constraint is satisfied
 
 	int cont=0;
-	if(ctr==goal_ctr) op = LEQ;
+	//if(ctr==goal_ctr) op = LEQ;
 	if(op==EQ) {
 		cont+=X_Linearization(box, ctr, cpoint, LEQ, G, id_point, nb_nonlinear_vars, mysolver);
 		cont+=X_Linearization(box, ctr, cpoint, GEQ, G, id_point, nb_nonlinear_vars, mysolver);
@@ -147,7 +143,7 @@ int CtcXNewton::X_Linearization(IntervalVector& box,
 	  if (sys.ctrs[ctr].f.used(j)) {
 	    if (lmode == HANSEN && !linear[ctr])
 	      {if (j != goal_var)  
-		  gradient_computation(box,G,ctr);
+	    	  sys.ctrs[ctr].f.gradient(box,G);
 		else  // code optimization , no need to recompute the gradient for the objective : we know the result.
 		  G[j]=-1.0;
 	      }
@@ -323,11 +319,8 @@ int CtcXNewton::X_Linearization(IntervalVector& box,
 	/*  used in BEST not implemented in v2.0
 	if(corner) delete[] corner;
 	 */
-	if(ctr==goal_ctr) 
-	  ev-= sys.ctrs[ctr].f.eval(box);  // opposite sign for the objective
-	else
-	  ev+= sys.ctrs[ctr].f.eval(box);
 
+	ev+= sys.ctrs[ctr].f.eval(box);
 
 	if(id_point==0) nb_nonlinear_vars=nonlinear_var;
 
@@ -358,13 +351,6 @@ int CtcXNewton::X_Linearization(IntervalVector& box,
 
 	return (added)? 1:0;
 
-}
-
-void CtcXNewton::gradient_computation (IntervalVector& box, IntervalVector& G, int ctr) {
-	sys.ctrs[ctr].f.gradient(box,G);
-	if (goal_ctr==ctr) { // objective function in optimization
-		G=-G;
-	}
 }
 
 /* not implemented in version 2

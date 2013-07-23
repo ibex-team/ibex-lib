@@ -38,9 +38,11 @@ public:
 		add_var(sys.args);
 		add_var(y);
 
-		// first, add y=goal(x).
+		// first, add goal(x)<=y.
 		if (sys.goal)  {
-			const ExprNode& goal_expr=y-ExprCopy().copy(sys.goal->args(), sys.args, sys.goal->expr());
+			// warning: needs to be f(x)-y=0 and not y-f(x)=0
+			// because XNewton replaces the "=" sign by "<=".
+			const ExprNode& goal_expr=ExprCopy().copy(sys.goal->args(), sys.args, sys.goal->expr())-y;
 			add_ctr(ExprCtr(goal_expr,EQ));
 			cleanup(goal_expr, false);
 		}

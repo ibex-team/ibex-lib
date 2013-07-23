@@ -80,9 +80,6 @@ public:
 
 
 private:
-	/* Computes the gradient G of the constraint ctr : special case if ctr==goal_ctr */
-	void gradient_computation (IntervalVector& box, IntervalVector& G, int ctr);
-
 	/**
 	 * \brief Goal constraint (in case of extended system, -1 otherwise).
 	 */
