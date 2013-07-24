@@ -1,16 +1,26 @@
+//============================================================================
+//                                  I B E X                                   
+// File        : Approximate Q-intersection, using Luc Jaulin's algorithm
+// Author      : Clement Carbonnel
+// Copyright   : Ecole des Mines de Nantes (France)
+// License     : See the LICENSE file
+// Created     : Jul 24, 2013
+// Last Update : Jul 24, 2013
+//============================================================================
+
 #include "ibex_QInter.h"
 #include <algorithm>
 
 using namespace std;
 
-#define LEFT_BOUND 0
-#define RIGHT_BOUND 1
+#define PROJ_LEFT_BOUND 0
+#define PROJ_RIGHT_BOUND 1
 
 bool paircomp (const pair<double,int>& i, const pair<double,int>& j) { return (i.first<j.first); }
 
 namespace ibex {
 
-IntervalVector qinter_jaulin(const Array<IntervalVector>& _boxes, int q) {
+IntervalVector qinter_projf(const Array<IntervalVector>& _boxes, int q) {
 	
 	assert(q>0);
 	assert(_boxes.size()>0);
@@ -31,6 +41,8 @@ IntervalVector qinter_jaulin(const Array<IntervalVector>& _boxes, int q) {
 		if (!_boxes[i].is_empty()) boxes.set_ref(j++,_boxes[i]);
 	}
 	
+	/* Main loop : solve the q-inter independently on each dimension, and return the cartesian product */
+	
 	double lb0,rb0;
 	IntervalVector res(n);
 	pair<double,int> x[2*p];
@@ -40,8 +52,8 @@ IntervalVector qinter_jaulin(const Array<IntervalVector>& _boxes, int q) {
 		/* Solve the q-inter for dimension i */
 		
 		for (int j=0; j<p; j++) {
-			x[2*j]   = make_pair(boxes[j][i].lb(),LEFT_BOUND);
-			x[2*j+1] = make_pair(boxes[j][i].ub(),RIGHT_BOUND);
+			x[2*j]   = make_pair(boxes[j][i].lb(),PROJ_LEFT_BOUND);
+			x[2*j+1] = make_pair(boxes[j][i].ub(),PROJ_RIGHT_BOUND);
 		}
 		
 		sort(x,x+2*p,paircomp);
@@ -50,14 +62,13 @@ IntervalVector qinter_jaulin(const Array<IntervalVector>& _boxes, int q) {
 		c=0;
 		lb0 = POS_INFINITY;
 		for (int k=0; k<2*p; k++) {
-			(x[k].second == LEFT_BOUND) ? c++ : c--;
+			(x[k].second == PROJ_LEFT_BOUND) ? c++ : c--;
 			if (c==q) {
 				lb0 = x[k].first;
 				break;
 			}
 		}
 		
-		/* Checking it once is enough, but hey... */
 		if (lb0 == POS_INFINITY) {
 			res.set_empty();
 			break;
@@ -66,7 +77,7 @@ IntervalVector qinter_jaulin(const Array<IntervalVector>& _boxes, int q) {
 		/* Find the right bound */
 		c=0;
 		for (int k=2*p-1; k>=0; k--) {
-			(x[k].second == RIGHT_BOUND) ? c++ : c--;
+			(x[k].second == PROJ_RIGHT_BOUND) ? c++ : c--;
 			if (c==q) {
 				rb0 = x[k].first;
 				break;

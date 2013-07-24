@@ -8,6 +8,8 @@ KCoreGraph::KCoreGraph(const int maxs, const int mind, bool full) {
 	allid = new IntStack(0,maxs-1,full);
 	tbr = new IntStack(0,maxs-1,false);
 	neighbourhoods.resize(maxs);
+	colors = (int *)calloc(maxs, sizeof(int));
+	used = new BitSet(0,maxs,BitSet::empt);
 	
 	if (full) {
 		for (int i=0; i<maxs; i++) neighbourhoods.at(i) = new IntStack(0,maxs-1,false);
@@ -22,7 +24,9 @@ KCoreGraph::KCoreGraph(KCoreGraph *cpy) {
 	allid = new IntStack(cpy->allid);
 	tbr = new IntStack(0, cpy->maxsize()-1, false);
 	neighbourhoods.resize(cpy->maxsize());
-
+	colors = (int *)calloc(cpy->maxsize(), sizeof(int));
+	used = new BitSet(0,cpy->maxsize(),BitSet::empt);
+	
 	// Initialization
 	for (int i=0; i<neighbourhoods.size(); i++) {
 		(cpy->neighbourhoods.at(i) != NULL) ? neighbourhoods.at(i) = new IntStack(cpy->neighbourhoods.at(i)) : neighbourhoods.at(i) = NULL;
@@ -38,6 +42,8 @@ KCoreGraph::~KCoreGraph() {
 		neighbourhoods.at(val) = NULL;
 		allid->remove(val);
 	}
+	free(colors);
+	delete(used);
 	delete(allid);
 	delete(tbr);
 };
@@ -45,7 +51,10 @@ KCoreGraph::~KCoreGraph() {
 void KCoreGraph::remove_vertex(const int idvert) {
 	assert(neighbourhoods.at(idvert) != NULL);
 	
+	/* Vertex to be removed */
 	IntStack *vn = neighbourhoods.at(idvert);
+	
+	/* Remove the edges between vn and its neighbors */
 	int val;
 	while (!vn->empty()) {
 		val = vn->head();
@@ -56,6 +65,7 @@ void KCoreGraph::remove_vertex(const int idvert) {
 		vn->remove(val);
 	}
 	
+	/* Remove vn */
 	neighbourhoods.at(idvert) = NULL;
 	delete(vn);
 };
@@ -67,6 +77,9 @@ void KCoreGraph::add_vertex(const int idvert) {
 	
 void KCoreGraph::propagate() {
 	int elt;
+	
+	/* Remove vertices in "tbr" until it becomes empty */
+	/* Note : vertices whose degree falls below k during the process are removed as well */
 	while (!tbr->empty()) {
 		elt = tbr->head();
 		tbr->remove(elt);
@@ -85,6 +98,57 @@ void KCoreGraph::apply_coreness() {
 			propagate();
 		}
 	}
+};
+
+int KCoreGraph::qcoloring(const std::pair<double, int>* boxes, int nboxes, int q) {
+	
+	assert(maxsize() == nboxes);
+	
+	/* Reinit the coloring vector, just in case */
+	for (int i=0; i<maxsize(); i++) {
+		colors[i] = 0;
+	}
+	
+	int vert;
+	for (int i=0; i<nboxes; i++) {
+		
+		/* The current box to be colored */
+		vert = boxes[i].second;
+		
+		/* Find the smallest available color for "vert" */
+		
+		if (!allid->contain(vert)) continue;
+		
+		if (neighbourhoods.at(vert)->empty()) {
+			colors[vert] = 1;
+			continue;
+		}
+		
+		used->clear();
+		
+		int val = neighbourhoods.at(vert)->head();
+		int preval = val-1;
+		while (val != preval) {
+			if (colors[val] != 0) {
+				used->add(colors[val]);
+			}
+			preval = val;
+			val = neighbourhoods.at(vert)->next(preval);
+		}
+		
+		/* "used" now contains all the colors used in the neighbourhood of "vert" */
+		
+		for (int j=1; j<q; j++) {
+			if (!used->contain(j)) {
+				colors[vert] = j;
+				break;
+			}
+			/* Note : q-1 is actually the qth color */
+			if (j==q-1) return vert;
+		}
+	}
+	
+	return -1;
 };
 
 graph_t *KCoreGraph::subgraph(IntStack *vset) {

@@ -1,3 +1,13 @@
+//============================================================================
+//                                  I B E X                                   
+// File        : Check for nonempty Q-intersection (with Cliquer)
+// Author      : Clement Carbonnel
+// Copyright   : Ecole des Mines de Nantes (France)
+// License     : See the LICENSE file
+// Created     : Jul 24, 2013
+// Last Update : Jul 24, 2013
+//============================================================================
+
 #include "ibex_QInter.h"
 #include "cliquer.h"
 #include <algorithm>
@@ -9,7 +19,7 @@ namespace ibex {
 /*
  * Uses Cliquer to solve a q-inter-existence problem.
  */
-IntervalVector qinterex_cliquer(const vector<IntervalVector *>& boxes, int q) {
+IntervalVector qinterex_cliquer(const vector<IntervalVector *>& boxes, const vector<int>& indices, int q, KCoreGraph* origin) {
 	
 	assert(q>0);
 	assert(boxes.size()>0); // This assert does not seem to work... am I missing something ?
@@ -24,7 +34,7 @@ IntervalVector qinterex_cliquer(const vector<IntervalVector *>& boxes, int q) {
 	
 	for (int i=0; i<p; i++) {
 		for (int j=i+1; j<p; j++) {
-			if ((*boxes[i]).intersects(*boxes[j])) GRAPH_ADD_EDGE(g,i,j);
+			if (origin->is_edge(indices[i],indices[j])) GRAPH_ADD_EDGE(g,i,j);
 		}
 	}
 	

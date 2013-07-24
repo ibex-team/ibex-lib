@@ -26,45 +26,33 @@ namespace ibex {
 
 /**
  * \ingroup combinatorial
- * \brief Q-intersection - EXACT - Jaulin-Golsztejn algorithm
+ * \brief Q-intersection - EXACT - Jaulin-Goldsztejn algorithm
  */
 IntervalVector qinter(const Array<IntervalVector>& boxes, int q);
 
 /**
  * \ingroup combinatorial
- * \brief Q-intersection - HEURISTIC - Jaulin's algorithm
+ * \brief Q-intersection - HEURISTIC - Luc Jaulin's algorithm
  */
-IntervalVector qinter_jaulin(const Array<IntervalVector>& _boxes, int q);
+IntervalVector qinter_projf(const Array<IntervalVector>& _boxes, int q);
 
 /**
  * \ingroup combinatorial
- * \brief Q-intersection - HEURISTIC - improved Gutowski algorithm
+ * \brief Q-intersection - HEURISTIC - k-core filtering + greedy coloring
  */
-IntervalVector qinter_gutow(const Array<IntervalVector>& _boxes, int q);
+IntervalVector qinter_coref(const Array<IntervalVector>& _boxes, int q);
 
 /**
  * \ingroup combinatorial
- * \brief Q-intersection - EXACT - Cliquer-based approach without filtering
- */
-IntervalVector qinter_chabs(const Array<IntervalVector>& _boxes, int q);
-
-/**
- * \ingroup combinatorial
- * \brief Q-intersection - EXACT - Cliquer-based approach without filtering, but with nogoods recording
+ * \brief Q-intersection - EXACT - Cliquer-based approach
  */
 IntervalVector qinter_chabs_nogoods(const Array<IntervalVector>& _boxes, int q);
 
 /**
  * \ingroup combinatorial
- * \brief Q-intersection - EXACT - Cliquer-based approach with filtering
+ * \brief Checks for nonempty Q-intersection (Cliquer)
  */
-IntervalVector qinter_chabs_gutow(const Array<IntervalVector>& _boxes, int q);
-
-/**
- * \ingroup combinatorial
- * \brief Q-intersection existence using Cliquer
- */
-IntervalVector qinterex_cliquer(const vector<IntervalVector *>& boxes, int q);
+IntervalVector qinterex_cliquer(const vector<IntervalVector *>& boxes, const vector<int>& indices, int q, KCoreGraph* origin);
 
 } // end namespace ibex
 #endif // __IBEX_Q_INTER_H__

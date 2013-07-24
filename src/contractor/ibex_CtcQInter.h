@@ -56,74 +56,6 @@ protected:
 	IntervalMatrix boxes; // store boxes for each contraction
 };
 
-class CtcQInterChabs : public Ctc {
-public:
-	/**
-	 * \brief q-intersection on a list of contractors.
-	 *
-	 * The list itself is not kept by reference.
-	 */
-	CtcQInterChabs(const Array<Ctc>& list, int q);
-
-	/**
-	 * \brief Contract the box.
-	 */
-	virtual void contract(IntervalVector& box);
-
-	/**
-	 * List of contractors
-	 */
-	Array<Ctc> list;
-
-	/**
-	 * Dimension of the box (number of variables)
-	 */
-	int n;
-
-	/**
-	 * The number of contractors we have to intersect the
-	 * result.
-	 */
-	int q;
-
-protected:
-	IntervalMatrix boxes; // store boxes for each contraction
-};
-
-class CtcQInterChabsGutow : public Ctc {
-public:
-	/**
-	 * \brief q-intersection on a list of contractors.
-	 *
-	 * The list itself is not kept by reference.
-	 */
-	CtcQInterChabsGutow(const Array<Ctc>& list, int q);
-
-	/**
-	 * \brief Contract the box.
-	 */
-	virtual void contract(IntervalVector& box);
-
-	/**
-	 * List of contractors
-	 */
-	Array<Ctc> list;
-
-	/**
-	 * Dimension of the box (number of variables)
-	 */
-	int n;
-
-	/**
-	 * The number of contractors we have to intersect the
-	 * result.
-	 */
-	int q;
-
-protected:
-	IntervalMatrix boxes; // store boxes for each contraction
-};
-
 class CtcQInterChabsNogoods : public Ctc {
 public:
 	/**
@@ -158,14 +90,14 @@ protected:
 	IntervalMatrix boxes; // store boxes for each contraction
 };
 
-class CtcQInterJaulin : public Ctc {
+class CtcQInterProjF : public Ctc {
 public:
 	/**
 	 * \brief q-intersection on a list of contractors.
 	 *
 	 * The list itself is not kept by reference.
 	 */
-	CtcQInterJaulin(const Array<Ctc>& list, int q);
+	CtcQInterProjF(const Array<Ctc>& list, int q);
 
 	/**
 	 * \brief Contract the box.
@@ -192,14 +124,14 @@ protected:
 	IntervalMatrix boxes; // store boxes for each contraction
 };
 
-class CtcQInterGutow : public Ctc {
+class CtcQInterCoreF : public Ctc {
 public:
 	/**
 	 * \brief q-intersection on a list of contractors.
 	 *
 	 * The list itself is not kept by reference.
 	 */
-	CtcQInterGutow(const Array<Ctc>& list, int q);
+	CtcQInterCoreF(const Array<Ctc>& list, int q);
 
 	/**
 	 * \brief Contract the box.

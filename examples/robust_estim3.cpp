@@ -73,7 +73,7 @@ void printOutput(vector<int> *x, vector<int> *y, list<IntervalVector>& res) {
 	o << "set xrange [0:256]" << endl;
 	o << "set yrange [0:256]" << endl;
 	
-	o << "plot \"" << output_datafile << "\"" << endl;
+	o << "plot \"" << output_datafile << "\" ps 0.1" << endl;
 	
 	Vector estimate(3);
 	/* Draw the circles */
@@ -132,14 +132,16 @@ int main() {
 	
 	pendingList.push_back(box);
 	
-	CtcQInterJaulin ctcq(m_ctc,Q);
+	CtcQInterCoreF ctcq(m_ctc,Q);
 	CtcFixPoint ctcf(ctcq);
 
+	int counter = 0;
+	
 	/* Main optimization loop */
 	clock_t start, end;
 	start = clock();
 	while (!pendingList.empty()) {
-	
+		counter++;
 		b = pendingList.front();
 		pendingList.pop_front();
 	
@@ -162,6 +164,7 @@ int main() {
 	end = clock();
 	
 	cout << "Shape extraction : OK. Time : " << ((double)(end)-(double)(start))/CLOCKS_PER_SEC << " seconds" << endl;
+	cout << "Number of branches : " << counter << endl;
 	/* output the box */
 	printOutput(x, y, res);
 };

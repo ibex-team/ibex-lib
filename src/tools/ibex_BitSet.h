@@ -1,7 +1,12 @@
 #ifndef __IBEX_BITSET_H__
 #define __IBEX_BITSET_H__
 
+/* BitSet : Bitset representation of integer sets.
+ * 
+ * This code is extracted from Mistral (Emmanuel Hebrard). */
+
 #include <limits.h>
+#include <algorithm>
 
 const int getlast[256] = {-1, 0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3,
                            4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 

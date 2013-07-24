@@ -40,58 +40,6 @@ void CtcQInter::contract(IntervalVector& box) {
 	if (box.is_empty()) throw EmptyBoxException();
 }
 
-CtcQInterChabs::CtcQInterChabs(const Array<Ctc>& list, int q) : Ctc(list[0].nb_var), list(list),
-		n(list[0].nb_var), q(q), boxes(list.size(), n) {
-
-	for (int i=0; i<list.size(); i++) {
-		assert(list[i].nb_var==n);
-	}
-}
-
-void CtcQInterChabs::contract(IntervalVector& box) {
-	Array<IntervalVector> refs(list.size());
-
-	for (int i=0; i<list.size(); i++) {
-		try {
-			boxes[i]=box;
-			list[i].contract(boxes[i]);
-		} catch(EmptyBoxException&) {
-			assert(boxes[i].is_empty());
-		}
-		refs.set_ref(i,boxes[i]);
-	}
-
-	box = qinter_chabs(refs,q);
-
-	if (box.is_empty()) throw EmptyBoxException();
-}
-
-CtcQInterChabsGutow::CtcQInterChabsGutow(const Array<Ctc>& list, int q) : Ctc(list[0].nb_var), list(list),
-		n(list[0].nb_var), q(q), boxes(list.size(), n) {
-
-	for (int i=0; i<list.size(); i++) {
-		assert(list[i].nb_var==n);
-	}
-}
-
-void CtcQInterChabsGutow::contract(IntervalVector& box) {
-	Array<IntervalVector> refs(list.size());
-
-	for (int i=0; i<list.size(); i++) {
-		try {
-			boxes[i]=box;
-			list[i].contract(boxes[i]);
-		} catch(EmptyBoxException&) {
-			assert(boxes[i].is_empty());
-		}
-		refs.set_ref(i,boxes[i]);
-	}
-
-	box = qinter_chabs_gutow(refs,q);
-
-	if (box.is_empty()) throw EmptyBoxException();
-}
-
 CtcQInterChabsNogoods::CtcQInterChabsNogoods(const Array<Ctc>& list, int q) : Ctc(list[0].nb_var), list(list),
 		n(list[0].nb_var), q(q), boxes(list.size(), n) {
 
@@ -118,7 +66,7 @@ void CtcQInterChabsNogoods::contract(IntervalVector& box) {
 	if (box.is_empty()) throw EmptyBoxException();
 }
 
-CtcQInterJaulin::CtcQInterJaulin(const Array<Ctc>& list, int q) : Ctc(list[0].nb_var), list(list),
+CtcQInterProjF::CtcQInterProjF(const Array<Ctc>& list, int q) : Ctc(list[0].nb_var), list(list),
 		n(list[0].nb_var), q(q), boxes(list.size(), n) {
 
 	for (int i=0; i<list.size(); i++) {
@@ -126,7 +74,7 @@ CtcQInterJaulin::CtcQInterJaulin(const Array<Ctc>& list, int q) : Ctc(list[0].nb
 	}
 }
 
-void CtcQInterJaulin::contract(IntervalVector& box) {
+void CtcQInterProjF::contract(IntervalVector& box) {
 	Array<IntervalVector> refs(list.size());
 
 	for (int i=0; i<list.size(); i++) {
@@ -139,12 +87,12 @@ void CtcQInterJaulin::contract(IntervalVector& box) {
 		refs.set_ref(i,boxes[i]);
 	}
 
-	box = qinter_jaulin(refs,q);
+	box = qinter_projf(refs,q);
 
 	if (box.is_empty()) throw EmptyBoxException();
 }
 
-CtcQInterGutow::CtcQInterGutow(const Array<Ctc>& list, int q) : Ctc(list[0].nb_var), list(list),
+CtcQInterCoreF::CtcQInterCoreF(const Array<Ctc>& list, int q) : Ctc(list[0].nb_var), list(list),
 		n(list[0].nb_var), q(q), boxes(list.size(), n) {
 
 	for (int i=0; i<list.size(); i++) {
@@ -152,7 +100,7 @@ CtcQInterGutow::CtcQInterGutow(const Array<Ctc>& list, int q) : Ctc(list[0].nb_v
 	}
 }
 
-void CtcQInterGutow::contract(IntervalVector& box) {
+void CtcQInterCoreF::contract(IntervalVector& box) {
 	Array<IntervalVector> refs(list.size());
 
 	for (int i=0; i<list.size(); i++) {
@@ -165,7 +113,7 @@ void CtcQInterGutow::contract(IntervalVector& box) {
 		refs.set_ref(i,boxes[i]);
 	}
 
-	box = qinter_gutow(refs,q);
+	box = qinter_coref(refs,q);
 
 	if (box.is_empty()) throw EmptyBoxException();
 }

@@ -3,9 +3,7 @@
 
 /* IntStack : Sparse Set of integers.
  * 
- * This code is extracted from Mistral (Emmanuel Hebrard).
- * 
- * Maybe we should make our own structure ?... */
+ * This code is extracted from Mistral (Emmanuel Hebrard). */
 
 #include <cstring>
 

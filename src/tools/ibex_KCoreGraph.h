@@ -2,6 +2,7 @@
 #define __IBEX_K_CORE_GRAPH_H__
 
 #include "ibex_IntStack.h"
+#include "ibex_BitSet.h"
 #include "cliquer.h"
 
 #include <list>
@@ -42,9 +43,16 @@ public:
 		neighbourhoods.at(elt1)->add(elt2);
 		neighbourhoods.at(elt2)->add(elt1);
 	};
+	inline bool is_edge(const int elt1, const int elt2) {
+		return neighbourhoods.at(elt1)->contain(elt2);
+	};
 	
-	/* Coreness related methods */
+	/* Removes all vertices that do not belong to the k-core of the graph */
 	void apply_coreness();
+	
+	/* Performs a greedy coloring accroding to the order given by "boxes".
+	 * Returns the first box of color at least q (or -1 if none is found) */
+	int qcoloring(const std::pair<double, int>* boxes, int nboxes, int q);
 	
 	/* Misc */
 	inline int maxsize() {return neighbourhoods.size();};
@@ -58,6 +66,10 @@ private:
 	
 	/* Adjacency lists */
 	vector<IntStack *> neighbourhoods;
+	
+	/* Coloring structures */
+	int* colors;
+	BitSet *used;
 	
 	/* Used to avoid recursive calls when removing vertices */
 	IntStack *tbr;

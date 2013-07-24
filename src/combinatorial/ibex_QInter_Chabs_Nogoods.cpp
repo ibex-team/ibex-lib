@@ -1,22 +1,33 @@
+//============================================================================
+//                                  I B E X                                   
+// File        : Q-intersection, using clique search
+// Author      : Clement Carbonnel
+// Copyright   : Ecole des Mines de Nantes (France)
+// License     : See the LICENSE file
+// Created     : Jul 24, 2013
+// Last Update : Jul 24, 2013
+//============================================================================
+
 #include "ibex_QInter.h"
 #include "ibex_BitSet.h"
 #include <algorithm>
 
-bool leftpaircompN (const pair<double,int>& i, const pair<double,int>& j) { return (i.first<j.first); };
-bool rightpaircompN (const pair<double,int>& i, const pair<double,int>& j) { return (i.first>j.first); };
+bool leftpaircomp (const pair<double,int>& i, const pair<double,int>& j) { return (i.first<j.first); };
+bool rightpaircomp (const pair<double,int>& i, const pair<double,int>& j) { return (i.first>j.first); };
 
 namespace ibex {
 
 /* 
- * Bound propagation. Assumes that dimensions are processed in the ascending order and left side first.
+ * Bound propagation and nogood recording. Assumes that dimensions are processed in the ascending order and left side first.
  */
-void propagateN(const Array<IntervalVector>& boxes, IntStack ***dirboxes, int dimension, bool left, IntervalVector& curr_qinter, vector<BitSet *>& nogoods) {
+void propagate(const Array<IntervalVector>& boxes, IntStack ***dirboxes, int dimension, bool left, IntervalVector& curr_qinter, vector<BitSet *>& nogoods) {
 	
 	unsigned int n = curr_qinter.size();
 	unsigned int p = boxes.size();
 	
 	IntervalVector b(n);
 	
+	/* Create the new nogood */
 	BitSet *newNogood = new BitSet(0,p-1,BitSet::empt);
 	
 	/* We iterate through the boxes to propagate bounds */
@@ -24,16 +35,17 @@ void propagateN(const Array<IntervalVector>& boxes, IntStack ***dirboxes, int di
 	for (int i=0; i<p; i++) {
 		b = boxes[i];
 		
+		/* Check if the box can be added to the new nogood */
 		if ((left && (b[dimension].lb() < curr_qinter[dimension].lb())) || (!left && (b[dimension].ub() > curr_qinter[dimension].ub()))) {
 			newNogood->add(i);	
 		}
 		
-		/* First check (could be done along with the 3rd...) : the q-inter is a valid upper bound for the opposite direction */
+		/* First check : the q-inter is a valid upper bound for the opposite direction */
 		if (left && (b[dimension].ub() <= curr_qinter[dimension].ub())) {
 			if (dirboxes[dimension][1]->contain(i)) dirboxes[dimension][1]->remove(i);
 		}
 		
-		/* Second check : is this box at the left of our q-inter ? If true, we can remove it from all the lists */
+		/* Second check : check if the box is strictly outside our current q-inter hull */
 		if ((left && (b[dimension].ub() < curr_qinter[dimension].lb())) || (!left && (b[dimension].lb() > curr_qinter[dimension].ub()))) {
 			for (int k=dimension+1; k<n; k++) {
 				if (dirboxes[k][0]->contain(i)) dirboxes[k][0]->remove(i);
@@ -47,7 +59,8 @@ void propagateN(const Array<IntervalVector>& boxes, IntStack ***dirboxes, int di
 		for (int j=dimension+1; j<n; j++) {
 			if (b[j].lb() >= curr_qinter[j].lb()) {
 				if (dirboxes[j][0]->contain(i)) dirboxes[j][0]->remove(i);
-			} else if (b[j].ub() <= curr_qinter[j].ub()) {
+			}
+			if (b[j].ub() <= curr_qinter[j].ub()) {
 				if (dirboxes[j][1]->contain(i)) dirboxes[j][1]->remove(i);
 			}
 		}
@@ -90,6 +103,18 @@ IntervalVector qinter_chabs_nogoods(const Array<IntervalVector>& _boxes, int q) 
 		}
 	}
 	
+	/* Create the original intersection graph */
+	
+	KCoreGraph *origin = new KCoreGraph(p,q-1,true);
+	
+	/* Add edges */
+	
+	for (int i=0; i<p; i++) {
+		for (int j=i+1; j<p; j++) {
+			if (boxes[i].intersects(boxes[j])) origin->add_edge(i,j);
+		}
+	}
+	
 	/* Initialize the data structures */
 	
 	vector<BitSet *> nogoods;
@@ -103,6 +128,8 @@ IntervalVector qinter_chabs_nogoods(const Array<IntervalVector>& _boxes, int q) 
 	
 	vector<IntervalVector *> neighboxes;
 	neighboxes.reserve(p);
+	vector<int> n_indices;
+	n_indices.reserve(p);
 	
 	int b,b2,nboxes;
 	pair<double,int> x[p];
@@ -120,7 +147,6 @@ IntervalVector qinter_chabs_nogoods(const Array<IntervalVector>& _boxes, int q) 
 		/* ######################################################## */
 
 		nboxes = dirboxes[i][0]->size;
-		//cout << "processing dimension " << i << ", left-hand side. Nboxes : " << nboxes << endl;
 		
 		/* Sort the boxes by increasing order of their left bounds */
 		
@@ -130,7 +156,7 @@ IntervalVector qinter_chabs_nogoods(const Array<IntervalVector>& _boxes, int q) 
 			b = dirboxes[i][0]->next(b);
 		}
 		
-		sort(x,x+nboxes,leftpaircompN);
+		sort(x,x+nboxes,leftpaircomp);
 		
 		/* For each box, look for a (q-1)-inter in its left neighbourhood */
 		
@@ -141,10 +167,12 @@ IntervalVector qinter_chabs_nogoods(const Array<IntervalVector>& _boxes, int q) 
 			
 			/* Find the left neighbors */
 			neighboxes.clear();
+			n_indices.clear();
 			for (int l=0; l<k; l++) {
 				b2 = x[l].second;
-				if (boxes[b].intersects(boxes[b2])) {
+				if (origin->is_edge(b,b2)) {
 					neighboxes.push_back(&(boxes[b2]));
+					n_indices.push_back(b2);
 					curr_set->add(b2);
 				}
 			}
@@ -163,14 +191,14 @@ IntervalVector qinter_chabs_nogoods(const Array<IntervalVector>& _boxes, int q) 
 			if (ng) continue;
 			
 			/* Call to the existence procedure */
-			curr_qinter = qinterex_cliquer(neighboxes, q-1);
+			curr_qinter = qinterex_cliquer(neighboxes, n_indices, q-1, origin);
 			curr_qinter = curr_qinter & boxes[b];
 		
 			if (curr_qinter.is_empty()) continue;
 			
 			/* Optimal q-inter found : extend the q-inter hull and propagate the bounds */
 			hull_qinter = hull_qinter | curr_qinter;
-			propagateN(boxes, dirboxes, i, true, curr_qinter, nogoods);
+			propagate(boxes, dirboxes, i, true, curr_qinter, nogoods);
 			break;
 		}
 		
@@ -188,7 +216,6 @@ IntervalVector qinter_chabs_nogoods(const Array<IntervalVector>& _boxes, int q) 
 		/* ######################################################## */
 		
 		nboxes = dirboxes[i][1]->size;
-		//cout << "processing dimension " << i << ", right-hand side. Nboxes : " << nboxes << endl;
 		
 		/* Sort the boxes by decreasing order of their right bounds */
 		
@@ -198,7 +225,7 @@ IntervalVector qinter_chabs_nogoods(const Array<IntervalVector>& _boxes, int q) 
 			b = dirboxes[i][1]->next(b);
 		}
 		
-		sort(x,x+nboxes,rightpaircompN);
+		sort(x,x+nboxes,rightpaircomp);
 		
 		/* For each box, look for a (q-1)-inter in its right neighbourhood */
 		
@@ -209,10 +236,12 @@ IntervalVector qinter_chabs_nogoods(const Array<IntervalVector>& _boxes, int q) 
 			
 			/* Find the right neighbors */
 			neighboxes.clear();
+			n_indices.clear();
 			for (int l=0; l<k; l++) {
 				b2 = x[l].second;
-				if (boxes[b].intersects(boxes[b2])) {
+				if (origin->is_edge(b,b2)) {
 					neighboxes.push_back(&(boxes[b2]));
+					n_indices.push_back(b2);
 					curr_set->add(b2);
 				}
 			}
@@ -231,14 +260,14 @@ IntervalVector qinter_chabs_nogoods(const Array<IntervalVector>& _boxes, int q) 
 			if (ng) continue;
 			
 			/* Call to the existence procedure */
-			curr_qinter = qinterex_cliquer(neighboxes, q-1);
+			curr_qinter = qinterex_cliquer(neighboxes, n_indices, q-1, origin);
 			curr_qinter = curr_qinter & boxes[b];
 			
 			if (curr_qinter.is_empty()) continue;
 			
 			/* Optimal q-inter found : extend the q-inter hull and propagate the bounds */
 			hull_qinter = hull_qinter | curr_qinter;
-			if (i!=n) propagateN(boxes, dirboxes, i, false, curr_qinter, nogoods);
+			if (i!=n) propagate(boxes, dirboxes, i, false, curr_qinter, nogoods);
 			break;
 		}
 	}
@@ -252,14 +281,12 @@ IntervalVector qinter_chabs_nogoods(const Array<IntervalVector>& _boxes, int q) 
 	}
 	free(dirboxes);
 	
+	delete(origin);
+	
 	delete(curr_set);
 	for (int i=0; i<nogoods.size(); i++) delete(nogoods.at(i));
 	
 	return hull_qinter;
 }
-
-
-
-
 
 } ; // end namespace ibex
