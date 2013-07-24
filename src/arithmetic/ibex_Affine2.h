@@ -13,9 +13,14 @@
 #define IBEX_AFFINE2_H_
 
 #include "ibex_Interval.h"
-//#include "ibex_IntervalVector.h"
 #include <cmath>
 #include <cassert>
+
+
+
+//#define _IBEX_WITH_FAF1_
+#define _IBEX_WITH_FAF2_
+
 
 namespace ibex {
 
@@ -34,10 +39,50 @@ class Affine2 {
 
 private:
 
+
+
+#ifdef _IBEX_WITH_FAF1_
+
+
+	/**
+	 * Code for the particular case:
+	 * if the affine form is actif, _n>1  and _n is the size of the affine form
+	 * if the set is degenerate, _n = 0 or itv().diam()< AF_EC()
+	 * if the set is empty, _n = -1
+	 * if the set is ]-oo,+oo[, _n = -2 and _ err=]-oo,+oo[
+	 * if the set is [a, +oo[ , _n = -3 and _err = [a, +oo[
+	 * if the set is ]-oo, a] , _n = -4 and _err = ]-oo, a]
+	 *
+	 */
+
 	int _n; 		// dimension (size of val)-1  , ie number of variable
 	double * _val; 		// vector of elements of the affine form
 	Interval _err; 	// error of the affine form, corresponded to the last term
 	//	bool _actif; // boolean to know if the affine form is actif or not. This is to manage the particular case of EMPTY and an unbounded Interval
+
+
+#else
+#ifdef _IBEX_WITH_FAF2_
+
+	/**
+	 * Code for the particular case:
+	 * if the affine form is actif, _n>1  and _n is the size of the affine form
+	 * if the set is degenerate, _n = 0 or itv().diam()< AF_EC()
+	 * if the set is empty, _n = -1
+	 * if the set is ]-oo,+oo[, _n = -2
+	 * if the set is [a, +oo[ , _n = -3 and _err= a
+	 * if the set is ]-oo, a] , _n = -4 and _err= a
+	 *
+	 */
+
+	int _n; 		// dimension (size of val)-1  , ie number of variable
+	double * _val; 		// vector of elements of the affine form
+	double _err; 	// error of the affine form, corresponded to the last term
+	//	bool _actif; // boolean to know if the affine form is actif or not. This is to manage the particular case of EMPTY and an unbounded Interval
+
+
+#endif
+#endif
 
 	static double AF_EM() {
 		return __builtin_powi(2.0, -51);
@@ -57,6 +102,23 @@ private:
 	Affine2& saxpy(double alpha, const Affine2& y, double beta, double delta,
 			bool B1, bool B2, bool B3, bool B4);
 
+
+#ifdef _IBEX_WITH_FAF2_
+
+	/**
+	 * \brief return the exact rounding error of the addition of 2 floating-point numbers
+	 */
+	double twoSum(double a, double b, double *res);
+
+	/**
+	 * \brief return the exact rounding error of the multiplication of 2 floating-point numbers
+	 */
+	double twoProd(double a, double b, double *res);
+	void Split(double x, int sp, double *x_high, double *x_low);
+
+#endif
+
+
 public:
 
 	typedef enum {
@@ -75,6 +137,31 @@ public:
 		AF_SINH,
 		AF_TANH
 	} affine2_expr; // ...etc...
+
+
+#ifdef _IBEX_WITH_FAF1_
+
+
+	/**
+	 * \brief return _err
+	 */
+	const Interval err() const;
+
+
+#else
+#ifdef _IBEX_WITH_FAF2_
+
+
+	/**
+	 * \brief return _err
+	 */
+	double err() const;
+
+
+#endif
+#endif
+
+
 
 	/** \brief Create an empty affine form. */
 	Affine2();
@@ -180,11 +267,6 @@ public:
 	 * \brief return _val[i]
 	 */
 	double val(int i) const;
-
-	/**
-	 * \brief return _err
-	 */
-	const Interval err() const;
 
 	/**
 	 * \brief return 1 if the affine form is actif and valid
@@ -462,6 +544,33 @@ Affine2 sign(const Affine2& x, const Interval itv);
 
 namespace ibex {
 
+#ifdef _IBEX_WITH_FAF1_
+
+
+inline const Interval Affine2::err() const{
+	return _err;
+}
+
+
+#else
+#ifdef _IBEX_WITH_FAF2_
+
+
+inline double Affine2::err() const{
+	return _err;
+}
+
+
+
+#endif
+#endif
+
+
+
+
+
+
+
 inline Affine2::~Affine2() {
 	if (_val!=NULL) delete[] _val;
 }
@@ -520,15 +629,18 @@ inline bool Affine2::operator!=(const Interval& x) const {
 	return (this->itv() != x);
 }
 
+
 inline void Affine2::set_empty(){
-	//_actif = false;
-	_n = -1;
-	_err.set_empty();
+	*this = Interval::EMPTY_SET;
 }
 
+
 inline Affine2& Affine2::inflate(double radd){
-	if (fabs(radd)> POS_INFINITY) _n = -1; //_actif = false;
-	_err += radd;
+	if (fabs(radd)>= POS_INFINITY) {
+		*this = Interval::ALL_REALS;
+	} else {
+		saxpy(1.0, Affine2(),0.0, radd, false, false, false, true);
+	}
 	return *this;
 }
 
@@ -545,17 +657,13 @@ inline double Affine2::val(int i) const{
 	return _val[i];
 }
 
-inline const Interval Affine2::err() const{
-	return _err;
-}
-
 inline bool Affine2::is_actif() const{
 	//return _actif;
 	return (_n>-1);
 }
 
 inline bool Affine2::is_empty() const{
-	return (_err.is_empty());
+	return (_n==-1);
 }
 
 inline bool Affine2::is_degenerated() const {
@@ -563,11 +671,11 @@ inline bool Affine2::is_degenerated() const {
 }
 
 inline bool Affine2::is_unbounded() const{
-	return (_err.is_unbounded());
+	return ((-1>_n)&&(_n>-5));
 }
 
 inline double Affine2::mid() const{
-	return (is_actif())? _val[0] : _err.mid();
+	return (is_actif())? _val[0] : itv().mid();
 }
 
 inline Affine2& Affine2::operator+=(double d){
@@ -880,6 +988,17 @@ inline Affine2 integer(const Affine2& x){
 inline Affine2 sign(const Affine2& x) {
 	return sign(x, x.itv());
 }
+
+
+
+
+
+
+
+
+
+
+
 
 } // end namespace ibex
 

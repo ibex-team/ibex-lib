@@ -1,0 +1,565 @@
+/* ============================================================================
+ * I B E X - Implementation of the Affine2 class based on fAF version 1
+ * ============================================================================
+ * Copyright   : Ecole des Mines de Nantes (FRANCE)
+ * License     : This program can be distributed under the terms of the GNU LGPL.
+ *               See the file COPYING.LESSER.
+ *
+ * Author(s)   : Jordan Ninin
+ * Created     : Jul 16, 2013
+ * ---------------------------------------------------------------------------- */
+
+
+
+namespace ibex {
+
+
+
+Affine2::Affine2() :
+		 _n		(-2		),
+		 _val	(NULL	),
+		 _err	(Interval::ALL_REALS)	{
+ }
+
+Affine2::Affine2(int n, int m, const Interval& itv) :
+			_n 		(n),
+			_val	(NULL),
+			_err	(0.0)
+{
+	assert((n>=0) && (m>=0) && (m<=n));
+	if (!(itv.is_unbounded()||itv.is_empty())) {
+		_val	=new double[n + 1];
+		_val[0] = itv.mid();
+		for (int i = 1; i <= n; i++){
+			_val[i] = 0.0;
+		}
+
+		if (m == 0) {
+			_err = itv.rad();
+		} else {
+			_val[m] = itv.rad();
+		}
+	} else {
+		*this = itv;
+	}
+}
+
+
+Affine2::Affine2(const double d) :
+			_n 		(0),
+			_val	(NULL),
+			_err	(0.0) {
+	if (fabs(d)<POS_INFINITY) {
+		_val = new double[1];
+		_err = 0.0; //abs(d)*AF_EE();
+		_val[0] = d;
+	} else {
+		if (d>0) {
+			_n = -3;
+		} else {
+			_n = -4;
+		}
+		_err = Interval(d);
+	}
+}
+
+
+Affine2::Affine2(const Interval & itv):
+			_n 		(0),
+			_val	(NULL),
+			_err	(0.0) {
+
+	if (itv.is_empty()) {
+		_n = -1;
+		_err = itv;
+	} else if (itv.ub()>= POS_INFINITY && itv.lb()<= NEG_INFINITY ) {
+		_n = -2;
+		_err = itv;
+	} else if (itv.ub()>= POS_INFINITY ) {
+		_n = -3;
+		_err = itv;
+	} else if (itv.lb()<= NEG_INFINITY ) {
+		_n = -4;
+		_err = itv;
+	} else  {
+		_n = 0;
+		_val	= new double[1];
+		_val[0] = itv.mid();
+		_err	= itv.rad();
+	}
+}
+
+
+Affine2::Affine2(const Affine2& x) :
+		_n		(x._n),
+		_val	(NULL	 ),
+		_err	(x._err ) {
+	if (is_actif()) {
+		_val =new double[x.size() + 1];
+		for (int i = 0; i <= x.size(); i++){
+			_val[i] = x.val(i);
+		}
+	}
+}
+
+
+const Interval Affine2::itv() const {
+
+	if (is_actif()) {
+		Interval res(_val[0]);
+		Interval pmOne(-1.0, 1.0);
+		for (int i = 1; i <= _n; i++){
+			res += (_val[i] * pmOne);
+		}
+		res += _err * pmOne;
+		return res;
+	} else {
+		return _err;
+	}
+}
+
+Affine2& Affine2::operator=(const Affine2& x) {
+	if (this != &x) {
+		_err = x.err();
+		if (x.is_actif()) {
+			if (_n!=x.size()) {
+				_n =x.size();
+				if (_val!=NULL) { delete[] _val; }
+				_val = new double[_n+1];
+			}
+			if (_val==NULL) _val = new double[_n+1];
+
+			for (int i = 0; i <= x.size(); i++) {
+				_val[i] = x.val(i);
+			}
+		} else {
+			_n = x._n;
+			if (_val != NULL) {
+				delete[] _val;
+				_val = NULL;
+			}
+		}
+	}
+	return *this;
+
+}
+
+Affine2& Affine2::operator=(double d) {
+
+	if (fabs(d)<POS_INFINITY) {
+		if (_val!=NULL) { delete[] _val; }
+		_n = 0;
+		_val = new double[1];
+		_err = 0.0; //abs(d)*AF_EE();
+		_val[0] = d;
+	} else {
+		_err = d;
+		_n = -1;
+		if (_val != NULL) {
+			delete[] _val;
+			_val = NULL;
+		}
+	}
+	return *this;
+}
+
+Affine2& Affine2::operator=(const Interval& x) {
+
+	if (x.is_empty()) {
+		_n = -1;
+		_err = x;
+		if (_val != NULL) {
+			delete[] _val;
+			_val = NULL;
+		}
+	} else if (x.ub()>= POS_INFINITY && x.lb()<= NEG_INFINITY ) {
+		_n = -2;
+		_err = x;
+		if (_val != NULL) {
+			delete[] _val;
+			_val = NULL;
+		}
+	} else if (x.ub()>= POS_INFINITY ) {
+		_n = -3;
+		_err = x;
+		if (_val != NULL) {
+			delete[] _val;
+			_val = NULL;
+		}
+	} else if (x.lb()<= NEG_INFINITY ) {
+		_n = -4;
+		_err = x;
+		if (_val != NULL) {
+			delete[] _val;
+			_val = NULL;
+		}
+	} else  {
+		if (_val!=NULL) { delete[] _val; }
+		_n = 0;
+		_val	= new double[1];
+		_val[0] = x.mid();
+		_err	= x.rad();
+	}
+	return *this;
+}
+
+
+
+/** \brief Return (-x) */
+Affine2 Affine2::operator-() const {
+	Affine2 res;
+	res._n = _n;
+	res._err = _err;
+	if (is_actif()) {
+		res._val = new double[_n+1];
+		for (int i = 0; i <= _n; i++) {
+			res._val[i] = (-_val[i]);
+		}
+
+	}
+	return res;
+}
+
+
+
+
+Affine2& Affine2::saxpy(double alpha, const Affine2& y, double beta, double ddelta, bool B1, bool B2, bool B3, bool B4) {
+//std::cout << "saxpy IN " << alpha << " x " << *this << " + " << y << " + "<< beta << " +error " << ddelta << " / "<< B1 << B2 << B3 << B4 << std::endl;
+	double temp, ttt, sss;
+	int i;
+//	std::cout << "in saxpy alpha=" << alpha  <<  "  beta= " <<  beta <<   "  delta = " << ddelta   << std::endl;
+	if (is_actif()) {
+		if (B1) {  // multiply by a scalar alpha
+			if (alpha==0.0) {
+				for (i=0; i<=_n;i++) {
+					_val[i]=0;
+				}
+				_err = 0;
+			}
+			else if ((fabs(alpha)) < POS_INFINITY) {
+				ttt= 0.0;
+				sss= 0.0;
+				for (i=0; i<=_n;i++) {
+					_val[i] *= alpha;
+					ttt += fabs(_val[i]);
+					if (fabs(_val[i])<AF_EC()) {
+						sss += fabs(_val[i]);
+						_val[i] = 0.0;
+					}
+				}
+				_err *= fabs(alpha);
+				_err +=AF_EE()*(AF_EM()*ttt);
+				_err += AF_EE()*sss;
+			}
+			else {
+				*this = itv()*alpha;
+			}
+		}
+
+		if (B2) {  // add a affine2 form y
+
+			if (y.is_actif()) {
+				if (_n==y.size()) {
+
+					ttt=0.0;
+					sss=0.0;
+					for(i=0;i<=_n;i++) {
+						temp = _val[i]+ y.val(i);
+						ttt += (fabs(_val[i])>fabs(y.val(i)))? fabs(_val[i]) :fabs(y.val(i));
+						if (fabs(temp)<AF_EC()) {
+							sss+= fabs(temp);
+							_val[i] = 0.0;
+						}
+						else {
+							_val[i]=temp;
+						}
+					}
+					_err += y.err();
+					_err +=AF_EE()*(AF_EM()*ttt);
+					_err += AF_EE()*sss;
+
+				} else  {
+					if (_n>y.size()) {
+						*this += y.itv();
+					} else {
+						Interval tmp1 = itv();
+						*this = y;
+						*this += tmp1;
+					}
+				}
+			}
+			else { // y is not a valid affine2 form. So we add y.itv() such as an interval
+				*this = itv()+y.itv();
+			}
+		}
+		if (B3) {  //add a constant beta
+			if ((fabs(beta))<POS_INFINITY) {
+				ttt=0.0;
+				sss=0.0;
+				temp = _val[0]+ beta;
+				ttt = (fabs(_val[0])>fabs(beta))? fabs(_val[0]) :fabs(beta);
+				if (fabs(temp)<AF_EC()) {
+					sss+= fabs(temp);
+					_val[0] = 0.0;
+				}
+				else {
+					_val[0]=temp;
+				}
+				_err +=AF_EE()*(AF_EM()*ttt);
+				_err += AF_EE()*sss;
+			}
+			else {
+				*this = itv()+beta;
+			}
+		}
+
+
+		if (B4) {  // add an error  ddelta
+
+			if ((fabs(ddelta))<POS_INFINITY) {
+				_err += ddelta;
+			}
+			else {
+				*this = itv()+Interval(-ddelta,ddelta);
+			}
+		}
+
+		if (_val != NULL) {
+			bool b = true;
+			for (i=0;i<=_n;i++) {
+				b &= (fabs(_val[i])<POS_INFINITY);
+			}
+			if (!b) {
+				*this = Interval::ALL_REALS;
+			}
+		}
+
+	} else {
+		if (B1) {  //scalar alpha
+			*this = itv()* alpha;
+		}
+		if (B2) {  // add y
+			*this = itv()+ y.itv();
+		}
+		if (B3) {  //constant beta
+			*this = itv()+ beta;
+		}
+		if (B4) {  // error  delta
+			*this = itv()+ Interval(-ddelta,ddelta);
+		}
+	}
+//	std::cout << " saxpy OUT x= "<< *this<<std::endl;
+	return *this;
+
+}
+
+Affine2& Affine2::operator*=(const Affine2& y) {
+//	std::cout << "in *= "<<std::endl;
+
+	if (is_actif() && (y.is_actif())) {
+
+		if (_n==y.size()) {
+			double Sx=0.0, Sy=0.0, Sxy=0.0, Sz=0.0, ttt=0.0, sss=0.0, ppp=0.0, tmp=0.0, xVal0=0.0;
+			int i;
+			double * xTmp;
+
+			xTmp = new double[_n + 1];
+
+			for (i = 1; i <= _n; i++) {
+				ppp = _val[i] * y.val(i);
+				ttt += fabs(ppp);
+				ttt += (fabs(ppp) > fabs(Sz )) ? fabs(ppp) : fabs(Sz );
+				ttt += (fabs(ppp) > fabs(Sxy)) ? fabs(ppp) : fabs(Sxy);
+				Sz += ppp;
+				Sxy += fabs(ppp);
+				ttt += (fabs( _val[i]) > fabs(Sx)) ? fabs( _val[i]) : fabs(Sx);
+				ttt += (fabs(y.val(i)) > fabs(Sy)) ? fabs(y.val(i)) : fabs(Sy);
+				Sx += fabs(_val[i]);
+				Sy += fabs(y.val(i));
+
+			}
+
+			xVal0 = _val[0];
+			// RES = X%T(0) * res
+			for (i = 0; i <= _n; i++) {
+				_val[i] *= y.val(0);
+				ttt += fabs(_val[i]);
+				if (fabs(_val[i]) < AF_EC()) {
+					sss += fabs(_val[i]);
+					_val[i] = 0.0;
+				}
+			}
+			// Xtmp = X%T(0) * Y
+			xTmp[0] = 0.0;
+			for (i = 1; i <= _n; i++) {
+				xTmp[i] = xVal0 * y.val(i);
+				ttt += fabs(xTmp[i]);
+				if (fabs(xTmp[i]) < AF_EC()) {
+					sss += fabs(xTmp[i]);
+					xTmp[i] = 0.0;
+				}
+			}
+			//RES =  RES + Xtmp = ( Y%(0) * X ) + ( X%T(0) * Y - X%T(0)*Y%(0) )
+			for (i = 0; i <= _n; i++) {
+				tmp = _val[i] + xTmp[i];
+				ttt += fabs(tmp);
+				if (fabs(tmp) < AF_EC()) {
+					sss += fabs(tmp);
+					_val[i] = 0.0;
+				} else
+					_val[i] = tmp;
+			}
+
+			ttt += fabs(0.5 * Sz);
+			ttt += (fabs(_val[0]) > fabs(0.5 * Sz)) ?
+					fabs(_val[0]) : fabs(0.5 * Sz)  ;
+
+			_val[0] += 0.5 * Sz;
+
+			_err = (fabs(y.val(0)) * _err + fabs(xVal0) * y.err() - 0.5 * Sxy)
+						+ (_err + Sx) * (y.err() + Sy);
+			_err += AF_EE() * (AF_EM() * ttt);
+			_err += AF_EE() * sss;
+
+			{
+				bool b = true;
+				for (i=0;i<=_n;i++) {
+					b &= (fabs(_val[i])<POS_INFINITY);
+				}
+				if (!b) {
+					*this = Interval::ALL_REALS;
+				}
+			}
+			delete[] xTmp;
+
+		} else {
+			if (_n>y.size()) {
+				*this *= y.itv();
+			} else {
+				Interval tmp1 = this->itv();
+				*this = y;
+				*this *= tmp1;
+			}
+		}
+
+
+	} else {
+		*this = itv()*y.itv();
+	}
+//	std::cout << "out *= "<<std::endl;
+
+	return *this;
+}
+
+
+Affine2& Affine2::operator*=(const Interval& y) {
+	if (is_actif()&& (!(y.is_empty()||y.is_unbounded()))) {
+		double  ttt=0.0, sss=0.0,  yVal0=0.0;
+		int i;
+//std::cout << "in *  "<<y<<std::endl;
+//saxpy(y.mid(), Affine2(), 0.0, y.rad(), true, false, false, true);
+
+		yVal0 = y.mid();
+		// RES = X%(0) * res
+		for (i = 0; i <= _n; i++) {
+			_val[i] *= yVal0;
+			ttt += fabs(_val[i]);
+			if (fabs(_val[i]) < AF_EC()) {
+				sss += fabs(_val[i]);
+				_val[i] = 0.0;
+			}
+		}
+
+		//_err *= (fabs(yVal0)+Interval(y.rad()));
+		_err *= abs(y).ub();
+		_err += AF_EE() * (AF_EM() * ttt);
+		_err += AF_EE() * sss;
+
+		{
+			bool b = true;
+			for (i=0;i<=_n;i++) {
+				b &= (fabs(_val[i])<POS_INFINITY);
+			}
+			if (!b) {
+				*this = Interval::ALL_REALS;
+			}
+		}
+
+	} else {
+		*this = itv()*y;
+	}
+	return *this;
+}
+
+
+Affine2& Affine2::sqr(const Interval itv) {
+//	std::cout << "in sqr "<<std::endl;
+
+	bool b = (!(itv.is_empty()||itv.is_unbounded()));
+	if (!b) {
+		*this = pow(itv,2);
+	} else if (!is_actif()) {
+		*this = pow(itv,2);
+	} else if (itv.diam() < AF_EC()) {
+		*this = pow(itv,2);
+	} else  {  // _actif && b
+
+		double Sx = 0, Sx2 = 0, ttt = 0, sss = 0, ppp = 0, x0 = 0;
+		// compute the error
+		for (int i = 1; i <= _n; i++) {
+			ppp = _val[i] * _val[i];
+			ttt += fabs(ppp) + (fabs(ppp) > fabs(Sx2) ? fabs(ppp) : fabs(Sx2));
+			Sx2 += ppp;
+			ttt += (fabs(_val[i]) > fabs(Sx) ? fabs(_val[i]) : fabs(Sx));
+			Sx += fabs(_val[i]);
+		}
+		// compute 2*_val[0]*(*this)
+		x0 = _val[0];
+		_val[0] = x0 * x0;
+		ttt += fabs(_val[0]);
+		if (fabs(_val[0]) < AF_EC()) {
+			sss += fabs(_val[0]);
+			_val[0] = 0;
+		}
+		// compute 2*_val[0]*(*this)
+		for (int i = 1; i <= _n; i++) {
+			_val[i] = (2 * x0) * _val[i];
+			ttt += fabs(_val[i]);
+			if (fabs(_val[i]) < AF_EC()) {
+				sss += fabs(_val[i]);
+				_val[i] = 0;
+			}
+		}
+
+		ttt += fabs(0.5 * Sx2) +( (fabs(_val[0]) > fabs(0.5 * Sx2)) ?
+				fabs(_val[0]) : fabs(0.5 * Sx2) );
+		_val[0] += 0.5 * Sx2;
+
+		_err = (2 * fabs(x0) * _err - 0.5 * Sx2) + pow((_err + Sx), 2);
+		_err += AF_EE() * (AF_EM() * ttt);
+		_err += AF_EE() * sss;
+
+		{
+			bool b = true;
+			for (int i=0;i<=_n;i++) {
+				b &= (fabs(_val[i])<POS_INFINITY);
+			}
+			if (!b) {
+				*this = Interval::ALL_REALS;
+			}
+		}
+
+	}
+
+//	std::cout << "out sqr "<<std::endl;
+	return *this;
+}
+
+
+
+
+}// end namespace ibex
+
+
+
+

@@ -36,6 +36,7 @@ int CtcART::linearization(IntervalVector & box, LinearSolver *mysolver) {
 	int cont = 0;
 	LinearSolver::Status stat = LinearSolver::FAIL;
 
+
 	// Create the linear relaxation of each constraint
 	for (int ctr = 0; ctr < sys.nb_ctr; ctr++) {
 
@@ -51,14 +52,14 @@ int CtcART::linearization(IntervalVector & box, LinearSolver *mysolver) {
 			err =0;
 			for (int i =0; i <sys.nb_var; i++) {
 				tmp = box[i].rad();
-				if (tmp> 1.e-12) {
+		//		if (tmp> mysolver->getEpsilon()) {
 					rowconst[i] =af2.val(i+1) / tmp;
 					center += rowconst[i]*box[i].mid();
-					err += fabs(rowconst[i])*pow(2,-50); // TODO to check
-				} else {
-					rowconst[i] = 1.0;
-					err += tmp;
-				}
+					err += fabs(rowconst[i])*  pow(2,-50); // TODO to check
+		//		} else {
+		//			rowconst[i] = 0;
+		//			err += tmp;
+		//		}
 			}
 
 			switch (op) {
@@ -87,10 +88,11 @@ int CtcART::linearization(IntervalVector & box, LinearSolver *mysolver) {
 				break;
 			}
 			case EQ: {
-				if (!ev.contains(0.0))
+				if (!ev.contains(0.0)) {
 					throw EmptyBoxException();
+				}
 				else {
-					if (ev.diam()>1.e-6) {  // TODO recuperer la precision du systeme
+					if (ev.diam()>2*mysolver->getEpsilon()) {
 						stat = mysolver->addConstraint(rowconst, GEQ,	(-(af2.err()+err) - (af2.val(0)-center)).lb());
 						if (stat == LinearSolver::OK)	cont++;
 						stat = mysolver->addConstraint(rowconst, LEQ,	((af2.err()+err) - (af2.val(0)-center)).ub());
@@ -106,13 +108,12 @@ int CtcART::linearization(IntervalVector & box, LinearSolver *mysolver) {
 	return cont;
 
 }
-/*
-void CtcART::convert_back(IntervalVector & box, IntervalVector & epsilon) {
 
-	for (int i = 0; i < box.size(); i++) {
-		box[i] &= box[i].mid() + (box[i].rad() * epsilon[i]);
-	}
-
-}*/
+//void CtcART::convert_back(IntervalVector & box, IntervalVector & epsilon) {
+//
+//	for (int i = 0; i < box.size(); i++) {
+//		box[i] &= box[i].mid() + (box[i].rad() * epsilon[i]);
+//	}
+//}
 
 }
