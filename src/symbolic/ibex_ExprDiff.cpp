@@ -163,25 +163,28 @@ const ExprNode& ExprDiff::gradient(const Array<const ExprSymbol>& old_x, const A
 	//	for (int i=0; i<n; i++)
 	//	  delete grad[*nodes[i]];
 
-	// we build the vector of the partial derivatives
-	// wrt all the leaves, including constants.
-	Array<const ExprNode> _dAll(leaves.size());
+	// we cannot build a (artificial) big ExprVector gathering
+	// all the leaves' gradients and use ExprSubNodes on
+	// this vector to get all the nodes because the gradients
+	// are of heterogenous dimensions when we use
+	// vector or matrix variables.
+	NodeMap<bool> other_nodes;
 
 	for (unsigned int i=0; i<leaves.size(); i++) {
-		_dAll.set_ref(i,*grad[*leaves[i]]);
-	}
-	cout << "==================" << endl;
-
-	// build the global DAG
-	const ExprNode* dAll=&ExprVector::new_(_dAll,true);
-
-	ExprSubNodes gnodes(*dAll);
-	int k=dAll->size;
-	for (int j=0; j<k; j++) {
-		if (!nodes.found(gnodes[j])) { // if the node is not in the original expression
-			//cout << "not found:" << *gnodes[j] << endl;
-			delete &gnodes[j];      // delete it.
+		ExprSubNodes gnodes(*grad[*leaves[i]]);
+		for (int i=0; i<gnodes.size(); i++) {
+			if (!nodes.found(gnodes[i])       // if it is not in the original expression
+			     &&
+			    !other_nodes.found(gnodes[i]) // and not yet collected
+			   ) {
+				other_nodes.insert(gnodes[i],true);
+			}
 		}
+	//cout << "==================" << endl;
+	}
+
+	for (IBEX_NODE_MAP(bool)::const_iterator it=other_nodes.begin(); it!=other_nodes.end(); it++) {
+		delete it->first;
 	}
 
 	delete &df;
