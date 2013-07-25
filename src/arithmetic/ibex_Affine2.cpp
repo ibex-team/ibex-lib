@@ -14,13 +14,23 @@
 #include "ibex_Exception.h"
 
 
-#ifdef _IBEX_WITH_FAF1_
+#ifdef _IBEX_AFFINE2_WITH_FAF1_
 #include "ibex_Affine2_fAF1.cpp_"
 
 #else
-#ifdef _IBEX_WITH_FAF2_
+#if defined(_IBEX_AFFINE2_WITH_FAF2_) || defined(_IBEX_AFFINE2_WITH_FAF2_FMA_)
 #include "ibex_Affine2_fAF2.cpp_"
 
+#else
+#if defined(_IBEX_AFFINE2_WITH_NO_)
+#include "ibex_Affine2_No.cpp_"
+
+#else
+#if defined(_IBEX_AFFINE2_WITH_iAF_)
+#include "ibex_Affine2_iAF.cpp_"
+
+#endif
+#endif
 #endif
 #endif
 
@@ -57,7 +67,7 @@ Affine2& Affine2::power(int n, const Interval itv) {
 			Interval dmm(0.0), TEMP1(0.0), TEMP2(0.0), band(0.0);
 
 			dmm = pow(itv, n);
-			alpha = ((std::pow(itv.ub(),n)-std::pow(itv.lb(),n))/itv.diam());
+			alpha = ((__builtin_powi(itv.ub(),n)-__builtin_powi(itv.lb(),n))/itv.diam());
 
 			TEMP1 = Interval(dmm.lb()) - alpha * (itv.lb());
 			TEMP2 = Interval(dmm.ub()) - alpha * (itv.ub());

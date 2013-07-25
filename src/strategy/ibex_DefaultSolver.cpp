@@ -49,7 +49,7 @@ Array<Ctc>*  DefaultSolver::contractor_list (System& sys, double prec) {
 	//                                          new CtcHC4 (sys.ctrs,0.01),
 	//*(default_corners())));
 
-	ctc_list->set_ref(index,*new CtcLinearRelaxation(*new CtcLR (sys,CtcLR::ALL_BOX,CtcLR::XNEWTON),*new CtcHC4 (sys.ctrs,0.01)));
+	ctc_list->set_ref(index,*new CtcLinearRelaxation(*new CtcLR (sys,CtcLR::ALL_BOX,CtcLR::COMPO),*new CtcHC4 (sys.ctrs,0.01)));
 
 	ctc_list->resize(index+1);
 	return ctc_list;

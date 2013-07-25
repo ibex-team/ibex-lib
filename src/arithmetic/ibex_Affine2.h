@@ -13,13 +13,17 @@
 #define IBEX_AFFINE2_H_
 
 #include "ibex_Interval.h"
-#include <cmath>
+#include <math.h>
 #include <cassert>
 
 
 
-//#define _IBEX_WITH_FAF1_
-#define _IBEX_WITH_FAF2_
+//#define _IBEX_AFFINE2_WITH_FAF1_
+#define _IBEX_AFFINE2_WITH_FAF2_
+//#define _IBEX_AFFINE2_WITH_FAF2_FMA_
+//#define _IBEX_AFFINE2_WITH_NO_
+//#define _IBEX_AFFINE2_WITH_iAF_
+
 
 
 namespace ibex {
@@ -41,7 +45,7 @@ private:
 
 
 
-#ifdef _IBEX_WITH_FAF1_
+#ifdef _IBEX_AFFINE2_WITH_FAF1_
 
 
 	/**
@@ -62,7 +66,7 @@ private:
 
 
 #else
-#ifdef _IBEX_WITH_FAF2_
+#if defined(_IBEX_AFFINE2_WITH_FAF2_) || defined(_IBEX_AFFINE2_WITH_FAF2_FMA_) || defined(_IBEX_AFFINE2_WITH_NO_)
 
 	/**
 	 * Code for the particular case:
@@ -80,7 +84,27 @@ private:
 	double _err; 	// error of the affine form, corresponded to the last term
 	//	bool _actif; // boolean to know if the affine form is actif or not. This is to manage the particular case of EMPTY and an unbounded Interval
 
+#else
+#ifdef _IBEX_AFFINE2_WITH_iAF_
 
+	/**
+	 * Code for the particular case:
+	 * if the affine form is actif, _n>1  and _n is the size of the affine form
+	 * if the set is degenerate, _n = 0 or itv().diam()< AF_EC()
+	 * if the set is empty, _n = -1
+	 * if the set is ]-oo,+oo[, _n = -2
+	 * if the set is [a, +oo[ , _n = -3 and _err= a
+	 * if the set is ]-oo, a] , _n = -4 and _err= a
+	 *
+	 */
+
+	int _n; 		// dimension (size of val)-1  , ie number of variable
+	Interval * _val; 		// vector of elements of the affine form
+	Interval _err; 	// error of the affine form, corresponded to the last term
+	//	bool _actif; // boolean to know if the affine form is actif or not. This is to manage the particular case of EMPTY and an unbounded Interval
+
+
+#endif
 #endif
 #endif
 
@@ -103,7 +127,7 @@ private:
 			bool B1, bool B2, bool B3, bool B4);
 
 
-#ifdef _IBEX_WITH_FAF2_
+#if defined(_IBEX_AFFINE2_WITH_FAF2_) || defined(_IBEX_AFFINE2_WITH_FAF2_FMA_)
 
 	/**
 	 * \brief return the exact rounding error of the addition of 2 floating-point numbers
@@ -139,8 +163,7 @@ public:
 	} affine2_expr; // ...etc...
 
 
-#ifdef _IBEX_WITH_FAF1_
-
+#if defined(_IBEX_AFFINE2_WITH_FAF1_)|| defined(_IBEX_AFFINE2_WITH_iAF_)
 
 	/**
 	 * \brief return _err
@@ -149,14 +172,12 @@ public:
 
 
 #else
-#ifdef _IBEX_WITH_FAF2_
-
+#if defined(_IBEX_AFFINE2_WITH_FAF2_) || defined(_IBEX_AFFINE2_WITH_FAF2_FMA_) || defined(_IBEX_AFFINE2_WITH_NO_)
 
 	/**
 	 * \brief return _err
 	 */
 	double err() const;
-
 
 #endif
 #endif
@@ -259,10 +280,6 @@ public:
 	 */
 	const Interval itv() const ;
 
-	/**
-	 * \brief return _val
-	 */
-	double * val() const;
 	/**
 	 * \brief return _val[i]
 	 */
@@ -544,24 +561,66 @@ Affine2 sign(const Affine2& x, const Interval itv);
 
 namespace ibex {
 
-#ifdef _IBEX_WITH_FAF1_
+#if defined( _IBEX_AFFINE2_WITH_FAF1_)
+
+
+inline double Affine2::val(int i) const{
+	assert((0<=i) && (i<=_n));
+	return _val[i];
+}
 
 
 inline const Interval Affine2::err() const{
 	return _err;
 }
 
+inline double Affine2::mid() const{
+	return (is_actif())? _val[0] : itv().mid();
+}
+
 
 #else
-#ifdef _IBEX_WITH_FAF2_
+#if defined(_IBEX_AFFINE2_WITH_FAF2_) || defined(_IBEX_AFFINE2_WITH_FAF2_FMA_) || defined(_IBEX_AFFINE2_WITH_NO_)
+
+inline double Affine2::val(int i) const{
+	assert((0<=i) && (i<=_n));
+	return _val[i];
+}
 
 
 inline double Affine2::err() const{
 	return _err;
 }
 
+inline double Affine2::mid() const{
+	return (is_actif())? _val[0] : itv().mid();
+}
 
 
+#else
+#if defined( _IBEX_AFFINE2_WITH_iAF_)
+
+
+inline double Affine2::val(int i) const{
+	assert((0<=i) && (i<=_n));
+	return (_val[i]).mid();
+}
+
+
+inline const Interval Affine2::err() const{
+	Interval tmp(_err);
+	for (int i=0;i<=_n; i++) {
+		tmp += _val[i].rad();
+	}
+	return tmp;
+}
+
+inline double Affine2::mid() const{
+	return itv().mid();
+}
+
+
+#endif
 #endif
 #endif
 
@@ -648,15 +707,6 @@ inline int Affine2::size() const{
 	return _n;
 }
 
-inline double * Affine2::val() const{
-	return _val;
-}
-
-inline double Affine2::val(int i) const{
-	assert((0<=i) && (i<=_n));
-	return _val[i];
-}
-
 inline bool Affine2::is_actif() const{
 	//return _actif;
 	return (_n>-1);
@@ -672,10 +722,6 @@ inline bool Affine2::is_degenerated() const {
 
 inline bool Affine2::is_unbounded() const{
 	return ((-1>_n)&&(_n>-5));
-}
-
-inline double Affine2::mid() const{
-	return (is_actif())? _val[0] : itv().mid();
 }
 
 inline Affine2& Affine2::operator+=(double d){

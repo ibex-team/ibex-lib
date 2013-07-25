@@ -75,7 +75,7 @@ Array<Ctc>*  DefaultOptimizer::contractor_list (System& sys, System& ext_sys,dou
 	// the last contractor is CtcXNewtonIter  with rfp=0.2 and rfp2=0.2
 	// the limits for calling soplex are the default values 1e6 for the derivatives and 1e6 for the domains : no error found with these bounds
 	ctc_list->set_ref(2,*new CtcLinearRelaxation
-			  ((*new CtcLR (ext_sys,CtcLR::ALL_BOX, CtcLR::XNEWTON)),
+			  ((*new CtcLR (ext_sys,CtcLR::ALL_BOX, CtcLR::COMPO)),
 			   (*new CtcHC4 (ext_sys.ctrs,0.01))));
 	return ctc_list;
 }
