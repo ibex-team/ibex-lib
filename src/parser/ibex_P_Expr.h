@@ -79,7 +79,7 @@ public:
 };
 
 /**
- * An iterator symbol (for parser only).
+ * \brief Iterator symbol (for parser only).
  */
 class ExprIter : public ExprLeaf {
 public:

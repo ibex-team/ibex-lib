@@ -11,10 +11,43 @@
 #include "ibex_SetImage.h"
 #include "ibex_PdcImageSubset.h"
 #include "ibex_LargestFirst.h"
+#include "ibex_BoolInterval.h"
 
 using namespace std;
 
 namespace ibex {
+
+
+namespace {
+
+class CtcInter : public Ctc {
+public:
+	CtcInter(const IntervalVector& x) : Ctc(x.size()), x(x) { }
+
+	void contract(IntervalVector& box) {
+		box &= x;
+		if (box.is_empty()) throw EmptyBoxException();
+	}
+	const IntervalVector& x;
+};
+
+class PdcSubset : public Pdc {
+public:
+	PdcSubset(const IntervalVector& x) : Pdc(x.size()), x(x) { }
+
+	BoolInterval test(const IntervalVector& box) {
+		if (box.is_subset(x)) return YES;
+		if ((box & x).is_empty()) return NO;
+		else return MAYBE;
+	}
+	const IntervalVector& x;
+};
+
+}
+
+SetImage::SetImage(Function& f, const IntervalVector& x) : f(f), n(f.nb_var()), c_out(*new CtcInter(x)), p_in(*new PdcSubset(x)) {
+	assert(f.image_dim()==n);
+}
 
 SetImage::SetImage(Function& f, Ctc& c_out, Pdc& p_in) : f(f), n(f.nb_var()), c_out(c_out), p_in(p_in) {
 	assert(f.image_dim()==n);

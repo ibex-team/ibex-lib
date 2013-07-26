@@ -10,7 +10,7 @@ LIBDIR	 := $(shell pkg-config --libdir  ibex)
 ifeq ($(DEBUG), yes)
 CXXFLAGS := $(CXXFLAGS) -O0 -g -pg -Wall -frounding-math  
 else
-CXXFLAGS := $(CXXFLAGS) -O3 -DNDEBUG -Wno-deprecated -frounding-math 
+CXXFLAGS := $(CXXFLAGS) -O3 -DNDEBUG -Wno-unused-variable -frounding-math 
 endif
 
 $(TARGET):	$(OBJS) 
