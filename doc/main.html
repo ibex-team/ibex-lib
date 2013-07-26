@@ -1,0 +1,96 @@
+<p> </p>
+<p><a href="index.php?page=download">Download the alpha release</a>.</p>
+
+Ibex is a C++ numerical library based on <b>interval arithmetic</b> and <b>constraint programming</b>.
+
+<p>
+It can be used to solve a variety of problems that can roughly be formulated as:
+
+<center>
+<i>Find a reliable characterization with boxes (Cartesian product of intervals) of sets implicitely defined by constraints</i>
+</center>
+
+<p>
+<!--<h4>Examples of problems</h4>-->
+
+<!--<h4>Reliability</h4>-->
+<i>Reliable</i> means that all sources of uncertainty should be taken into account, including:
+<ul>
+<li>approximation of real numbers by floating-point numbers
+<li>round-off errors
+<li>linearization truncatures
+<li>model parameter uncertainty
+<li>measurement noise
+<li>...
+</ul>
+
+
+<center>
+<img src="uploads/prob02.png" width="300"/>
+<br><br>
+<b>Example of problem:</b> <i>Given a set of nonlinear inequalities f1<=0,...fn<=0,<br>
+ find two sets of boxes S1 and S2 such that<br/>
+S1&sube; &#123;x, &nbsp; f1(x)<=0 &and; ... &and; fn(x)<=0&#125; &sube; S2.</i>
+</center>
+
+<p>
+<hr>
+<p>
+
+<h3>The API</h3>
+The API of Ibex can be broken into three layers:
+<ul>
+<li>An extended (symbolic-numeric) interval calculator</li>
+<li>A contractor programming library</li>
+<li>A system solver / global optimizer</li>
+</ul>
+Each usage corresponds to a different layer and each layer is built on top of the previous one.
+<p>Ibex does not include low-level interval arithmetic. It can be compiled with different existing implementations such as <a href="http://sourceforge.net/projects/gaol/">Gaol</a>, <a href="http://www2.math.uni-wuppertal.de/~xsc/software/filib.html">Filib</a> or <a href="http://www.ti3.tu-harburg.de/keil/profil/index_e.html">Profil/Bias</a>. It can also be linked with different linear solvers, Cplex or <a href="http://soplex.zib.de/">Soplex</a>.</p>
+
+<h4>An extended interval calculator</h4>
+<p>Ibex allows you to declare symbolically a mathematical function and to perform interval computations with it. For example:</p>
+<div class="code">Variable x;<br /> Function f(x,sin(x)+1);</div>
+<p>defines the "mathematical" object x → sin(x)+1.</p>
+<p><b>Note:</b> <i>Functions (as well as equalities or inequalities) can either be entered programmatically (using C++ operator overloading) or using a parser of an AMPL-like language called Minibex. Functions accept vector or matrix variables or values; similarities with Matlab are shared on purpose. See the modeling guide.</i></p>
+
+<p>Now that functions are built, you can use them to perform interval or symbolic operations. Example:</p>
+<div class="code">Interval x(0,1);<br /> Interval y=f.eval(x); <span class="comment">// calculate the image of x by f</span> <br /> <br /> Function df(f,Function::DIFF); <span class="comment">// derivate f</span> <br /> <br /> Interval z=df.eval_affine(x); <span class="comment">// calculate the image of x by df using affine forms</span> </div>
+<p>All the classical operations with intervals can be performed with the previously defined functions, including relational (backward) operators, inner arithmetics, automatic differentiation, affine arithmetic, etc.</p>
+
+<h4>Contractor programming</h4>
+<p>Ibex gives you the ability to build high-level interval-based algorithms declaratively through the <a href="../gchabe08/quimper.pdf"><em>contractor programming</em></a> paradigm.</p>
+<p>A contractor is basically an operator that transforms a box to a smaller (included) box, by safely removing points with respect to some mathematical property.</p>
+<p>The first property one usually wants to enforce is a numerical constraint, like an equation or inequality:</p>
+<div class="code">
+Variable x,y,z;<br />
+Function f(x,y,z,...);<br>  
+NumConstraint c(x,y,z,f(x,y,z)=0);<br /> 
+CtcFwdBwd ctc(c); <span class="comment">// build the contractor w.r.t f(x,y,z)=0</span>
+</div>
+
+<p>Contraction is performed with a call to the function <span class="txtcode">contract(...)</span>:</p>
+
+<div class="code">
+IntervalVector box(3); <span class="comment">// build a box for x, y and z</span><br/> 
+box[0]=...;<br /> 
+box[1]=...;<br /> 
+box[2]=...;<br /> 
+ctc.contract(box); <span class="comment">// contract the box</span></div>
+
+<p><strong>Note</strong>: <i>A contractor is the equivalent of a propagator in finite domain solvers except that it is a pure numerical function (no state).</i></p>
+<p>More complex properties are obtained by combining contractors. For instance</p>
+<div class="code">
+Ctc&amp; c1=...<br /> 
+Ctc&amp; c2=...<br /> 
+Ctc&amp; c3=...<br /> 
+CtcUnion u(CtcInter(c1,c2),c3);
+</div>
+will define the contractor ((C1 &cap; C_2) &cup; C_3)).
+<p>
+Ibex contains a variety of built-in operators (HC4, Shaving, ACID, X-newton, q-intersection, etc.). 
+<p>
+
+<h4>System solving and global optimization</h4>
+<p>
+Finally, Ibex also comes with a default black-box solver and global optimizer for immediate usage.
+See the tutorial.
