@@ -4,7 +4,7 @@
 # Project related configuration options
 #---------------------------------------------------------------------------
 PROJECT_NAME           = IBEX
-PROJECT_NUMBER         = 2.00
+PROJECT_NUMBER         = 2.06
 OUTPUT_DIRECTORY       = ./doc
 CREATE_SUBDIRS         = NO
 OUTPUT_LANGUAGE        = English
@@ -82,17 +82,17 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 # configuration options related to the input files
 #---------------------------------------------------------------------------
-INPUT                  = include
+INPUT                  = ./include/ibex
 FILE_PATTERNS          = *.h \
                          *.java \
 RECURSIVE              = YES
 EXCLUDE                = 
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE_PATTERNS       = 
-EXAMPLE_PATH           = ./doc/api/html
+EXAMPLE_PATH           = ./examples 
 EXAMPLE_PATTERNS       = *
-EXAMPLE_RECURSIVE      = NO
-IMAGE_PATH             = ./doc/api/html
+EXAMPLE_RECURSIVE      = YES
+IMAGE_PATH             = ./doc ./doc/api/html
 INPUT_FILTER           = 
 FILTER_PATTERNS        = 
 FILTER_SOURCE_FILES    = NO
@@ -119,8 +119,10 @@ IGNORE_PREFIX          =
 GENERATE_HTML          = YES
 HTML_OUTPUT            = api/html/gen
 HTML_FILE_EXTENSION    = .html
-HTML_HEADER            = 
-HTML_FOOTER            = 
+#./new_header.html
+HTML_HEADER            = ./doc/new_header.html
+#./new_footer.html
+HTML_FOOTER            = ./doc/new_footer.html
 HTML_STYLESHEET        = 
 HTML_ALIGN_MEMBERS     = YES
 GENERATE_HTMLHELP      = NO
@@ -142,7 +144,7 @@ LATEX_CMD_NAME         = latex
 MAKEINDEX_CMD_NAME     = makeindex
 COMPACT_LATEX          = NO
 PAPER_TYPE             = a4wide
-EXTRA_PACKAGES         = 
+EXTRA_PACKAGES         = amsfonts amssymb
 LATEX_HEADER           = 
 PDF_HYPERLINKS         = NO
 USE_PDFLATEX           = NO
