@@ -123,17 +123,17 @@ const Interval Affine2::itv() const {
 
 Affine2& Affine2::operator=(const Affine2& x) {
 	if (this != &x) {
-		_err = x.err();
+		_err = x._err;
 		if (x.is_actif()) {
-			if (_n!=x.size()) {
-				_n =x.size();
+			if (_n!=x._n) {
+				_n =x._n;
 				if (_val!=NULL) { delete[] _val; }
 				_val = new double[_n+1];
 			}
 			if (_val==NULL) _val = new double[_n+1];
 
 			for (int i = 0; i <= x.size(); i++) {
-				_val[i] = x.val(i);
+				_val[i] = x._val[i];
 			}
 		} else {
 			_n = x._n;
@@ -262,10 +262,10 @@ Affine2& Affine2::saxpy(double alpha, const Affine2& y, double beta, double ddel
 				if (_n==y.size()) {
 
 					for(i=0;i<=_n;i++) {
-						_val[i] +=y.val(i);
+						_val[i] +=y._val[i];
 					}
 
-					_err += y.err();
+					_err += y._err;
 
 				} else  {
 					if (_n>y.size()) {
@@ -350,7 +350,7 @@ Affine2& Affine2::operator*=(const Affine2& y) {
 				Sz += tmp;
 				Sxy += fabs(tmp);
 				Sx += fabs(_val[i]);
-				Sy += fabs(y.val(i));
+				Sy += fabs(y._val[i]);
 
 			}
 
@@ -372,7 +372,7 @@ Affine2& Affine2::operator*=(const Affine2& y) {
 			}
 
 			_val[0] += 0.5 *Sz ;
-			_err = fabs(y.val(0)) * _err + fabs(xVal0) * y.err() +(_err+Sx)*(y.err()+Sy)- 0.5 *  Sxy;
+			_err = fabs(y._val[0]) * _err + fabs(xVal0) * y._err +(_err+Sx)*(y._err+Sy)- 0.5 *  Sxy;
 
 
 			{

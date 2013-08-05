@@ -37,7 +37,7 @@ int main() {
 //		Function linsup(x, faa.val(0)+faa.err().ub() + faa.val(1)*(2*x[0]-(I[0].lb()+I[0].ub()))/(I[0].diam()) + faa.val(2)*(2*x[1]-(I[1].lb()+I[1].ub()))/(I[1].diam())) ;
 
 		Function lininf(x, x2,
-				faa.val(0) - faa.err().ub()
+				faa.val(0) - faa.err()
 						+ faa.val(1) * (2 * x[0] - (I[0].lb() + I[0].ub()))
 								/ (I[0].diam())
 						+ faa.val(2) * (2 * x[1] - (I[1].lb() + I[1].ub()))
@@ -45,7 +45,7 @@ int main() {
 						+ faa.val(3) * (2 * x2 - (I[2].lb() + I[2].ub()))
 								/ (I[2].diam()));
 		Function linsup(x, x2,
-				faa.val(0) + faa.err().ub()
+				faa.val(0) + faa.err()
 						+ faa.val(1) * (2 * x[0] - (I[0].lb() + I[0].ub()))
 								/ (I[0].diam())
 						+ faa.val(2) * (2 * x[1] - (I[1].lb() + I[1].ub()))

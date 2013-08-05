@@ -163,25 +163,6 @@ public:
 	} affine2_expr; // ...etc...
 
 
-#if defined(_IBEX_AFFINE2_WITH_FAF1_)|| defined(_IBEX_AFFINE2_WITH_iAF_)
-
-	/**
-	 * \brief return _err
-	 */
-	const Interval err() const;
-
-
-#else
-#if defined(_IBEX_AFFINE2_WITH_FAF2_) || defined(_IBEX_AFFINE2_WITH_FAF2_FMA_) || defined(_IBEX_AFFINE2_WITH_NO_)
-
-	/**
-	 * \brief return _err
-	 */
-	double err() const;
-
-#endif
-#endif
-
 
 
 	/** \brief Create an empty affine form. */
@@ -284,6 +265,11 @@ public:
 	 * \brief return _val[i]
 	 */
 	double val(int i) const;
+
+	/**
+	 * \brief return _err
+	 */
+	double err() const;
 
 	/**
 	 * \brief return 1 if the affine form is actif and valid
@@ -570,8 +556,8 @@ inline double Affine2::val(int i) const{
 }
 
 
-inline const Interval Affine2::err() const{
-	return _err;
+inline double Affine2::err() const{
+	return _err.ub();
 }
 
 inline double Affine2::mid() const{
@@ -607,12 +593,12 @@ inline double Affine2::val(int i) const{
 }
 
 
-inline const Interval Affine2::err() const{
+inline double Affine2::err() const{
 	Interval tmp(_err);
 	for (int i=0;i<=_n; i++) {
 		tmp += _val[i].rad();
 	}
-	return tmp;
+	return tmp.ub();
 }
 
 inline double Affine2::mid() const{

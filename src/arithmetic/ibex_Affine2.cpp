@@ -483,7 +483,7 @@ Affine2& Affine2::linChebyshev(affine2_expr num, const Interval itv) {
 
 			alpha= TEMP1.mid();
 			beta = TEMP2.mid();
-			ddelta = ((_n*Interval(TEMP1.rad())) + Interval(TEMP2.rad())).ub();
+			ddelta = ((size()*Interval(TEMP1.rad())) + Interval(TEMP2.rad())).ub();
 
 			// compute the maximal error
 			double max_error= 0.0;

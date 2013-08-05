@@ -45,7 +45,7 @@
 	#include "interval/interval.hpp"
 //	#include <fp_traits/fp_traits.hpp>
 	/* simplify instantiation */
-	#define FI_BASE	double
+	#define FI_BASE double
 	//#define FI_ROUNDING filib::no_rounding
 	//#define FI_ROUNDING filib::multiplicative
 	#define FI_ROUNDING filib::native_switched

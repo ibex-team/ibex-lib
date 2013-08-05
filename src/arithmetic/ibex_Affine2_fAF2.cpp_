@@ -438,7 +438,7 @@ Affine2& Affine2::saxpy(double alpha, const Affine2& y, double beta, double ddel
 
 }
 
-//TODO
+
 Affine2& Affine2::operator*=(const Affine2& y) {
 //	std::cout << "in *= "<< *this <<std::endl;
 
