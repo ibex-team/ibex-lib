@@ -23,18 +23,19 @@ int main(int argc, char** argv){
 	// --------------------------
 	try {
 
-	if (argc<7) {
-		cerr << "usage: optimizer04 filename filtering bisection prec goal_prec timelimit "  << endl;
+	if (argc<8) {
+		cerr << "usage: optimizer04 filename filtering linear_relaxation bisection prec goal_prec timelimit "  << endl;
 		exit(1);
 	}
 
 	System sys(argv[1]);
-        string filtering = argv[2];
-	string bisection= argv[3];
-	double prec= atof(argv[4]);
-	double goalprec= atof (argv[5]);
-	double timelimit = atof(argv[6]);
-
+	string filtering = argv[2];
+	string linearrelaxation= argv[3];
+	string bisection= argv[4];
+	double prec= atof(argv[5]);
+	double goalprec= atof (argv[6]);
+	double timelimit = atof(argv[7]);
+	
 	srand(1);
 
 	// the extended system 
@@ -94,18 +95,23 @@ int main(int argc, char** argv){
 	  ctc= &hc43bcidhc4;
 	else {cout << filtering <<  " is not an implemented  contraction  mode "  << endl; return -1;}
 
-	// The CtcXNewtonIter contractor
-	// corner selection for linearizations : two corners are slected, a random one and its opposite
+	// The CtcXNewton contractor
+	// corner selection for linearizations : two corners are selected, a random one and its opposite
 	vector<CtcXNewton::corner_point> cpoints;
 	cpoints.push_back(CtcXNewton::RANDOM);
 	cpoints.push_back(CtcXNewton::RANDOM_INV);
 
-        // the linear relaxation contractor 
-	 CtcXNewton ctcxnewton (ext_sys,cpoints);
-
+	CtcLinearRelaxationIter* ctclr;
+	if (linearrelaxation=="art")
+	  ctclr= new CtcLR(ext_sys,CtcLR::ALL_BOX, CtcLR::ART);
+	else if  (linearrelaxation=="compo")
+	  ctclr= new CtcLR(ext_sys,CtcLR::ALL_BOX, CtcLR::COMPO);
+	else if (linearrelaxation=="xn")
+	  ctclr= new CtcXNewton (ext_sys,cpoints);
+	else {cout << linearrelaxation  <<  " is not an implemented  linear relaxation mode "  << endl; return -1;}
 	// fixpoint linear relaxation , hc4  with default fix point ratio 0.2
-	CtcLinearRelaxation cxn (ctcxnewton, hc44xn);
-	//  the actual contractor  ctc + xnewton	
+	CtcLinearRelaxation cxn (*ctclr, hc44xn);
+	//  the actual contractor  ctc + linear relaxation 
         CtcCompo ctcxn (*ctc, cxn);
 	// one point probed when looking for a new feasible point (updating the loup)
 	int samplesize=1;

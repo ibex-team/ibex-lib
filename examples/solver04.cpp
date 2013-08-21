@@ -8,8 +8,8 @@ int main(int argc, char** argv) {
  try {
 	// Load a system of equations
 	// --------------------------
-         if (argc<7) {
-	   cerr << "usage: solver04 filename ratiopropag filtering xnewton bisection prec  timelimit "  << endl;
+         if (argc<8) {
+	   cerr << "usage: solver04 filename ratiopropag filtering linearrelaxation bisection prec  timelimit "  << endl;
 	   exit(1);
 	 }
 
@@ -20,7 +20,7 @@ int main(int argc, char** argv) {
 
 	double ratio_propag= atof(argv[2]); // the contraction ratio used as stopping criterion for the hc4 propagation loop
 	string filtering= argv[3];   // the main contractor (hc4|acidhc4|3bcidhc4|hc4n|acidhc4n|3bcidhc4n)
-	string xnewton = argv[4];    // xn for the additional xnewton contractor
+	string linearrelaxation = argv[4];    // the linearrelaxation contractor
         string bisection= argv[5];   // the bisection heuristics
 	double prec= atof(argv[6]);  // the required precision
         double time_limit=atof(argv[7]); // the time limit
@@ -56,31 +56,36 @@ int main(int argc, char** argv) {
 	CtcNewton* ctcnewton= NULL;
 	if (filtering == "acidhc4n" || filtering=="hc4n" || filtering=="3bcidhc4n")
 	  ctcnewton= new CtcNewton(sys.f,5e8,prec,1.e-4);
-
+	  
 
         // Build contractor #3
 	//-----------------------------
 	// A Linear relaxation contractor using a linear relaxation of the constraints and calling a linear programming solver
 	// for contracting each domain bound 
-	// The X_newton contractor
+	// The LR contractor
 
-	// corners of the current box where the constraints are linearized
+
+	// The CtcXNewton contractor (if linearrelaxation=="xn")
+	// corner selection for linearizations : two corners are selected, a random one and its opposite
 	vector<CtcXNewton::corner_point> cpoints;
-	//	cpoints.push_back(CtcXNewtonIter::SUP_X);  // selection of the superior corners : not used 
-	//	cpoints.push_back(CtcXNewtonIter::INF_X);  // selection of the inferior corners : not used
-
-	// each constraint is linearized twice in one random corner and in its opposite 
 	cpoints.push_back(CtcXNewton::RANDOM);
 	cpoints.push_back(CtcXNewton::RANDOM_INV);
-	// XNewtonIter contractor  (called with the system and the corners : all other  parameters have default values  :see Xnexton documentation for changing parameters)
 
-       	CtcXNewton xnewtoniter (sys, cpoints);
+
+	// the linear relaxation contractor 
+	CtcLinearRelaxationIter* ctclr;
+	if (linearrelaxation=="art")
+	  ctclr = new CtcLR(sys, CtcLinearRelaxationIter::ALL_BOX, CtcLR::ART);
+	else if (linearrelaxation=="compo")
+	  ctclr = new CtcLR(sys, CtcLinearRelaxationIter::ALL_BOX, CtcLR::COMPO);
+	else if (linearrelaxation=="xn")
+	  ctclr = new CtcXNewton (sys,cpoints);
 
 	// the hc4 contractor called in the following fixpoint contractor
 	CtcHC4 hc44xn(sys.ctrs,ratio_propag);  
 
-	// Fixpoint with the sequence of 2 contractors (XNewtonIter and Hc4) 
-       	CtcLinearRelaxation ctcxnewton(xnewtoniter,hc44xn);
+	// fixpoint linear relaxation , hc4  with default fix point ratio 0.2
+	 CtcLinearRelaxation ctcxn (*ctclr, hc44xn);
 
 	// Build the main contractor:
 	// ---------------------------
@@ -112,12 +117,12 @@ int main(int argc, char** argv) {
         cout << "filtering " << filtering << endl;
 	
 
-	// the actual contractor ; composition of ctc ,e.g. acidhc4n,  and Xnewton
-	CtcCompo cxn (*ctc, ctcxnewton);
+	// the actual contractor ; composition of ctc ,e.g. acidhc4n,  and Linearrelaxation
+	CtcCompo cxn (*ctc, ctcxn);
 	Ctc* contractor;
 
-	// xnewton is optional and only used if the xnewton parameter is "xn"
-        if (xnewton=="xn" ||xnewton=="xnewton" )
+	// linearrelaxation is optional and only used if the linearrelaxation parameter is xn, art or compo
+        if (linearrelaxation=="xn" ||linearrelaxation=="compo" || linearrelaxation=="art" )
 	  contractor= & cxn;
 	else
 	  contractor=ctc;
