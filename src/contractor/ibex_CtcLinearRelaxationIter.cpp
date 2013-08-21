@@ -42,6 +42,7 @@ void CtcLinearRelaxationIter::contract (IntervalVector & box){
 
 	if (!(limit_diam_box.contains(box.max_diam()))) return;
 	// is it necessary?  YES (BNE) Soplex can give false infeasible results with large numbers
+	//       	cout << " box before LR " << box << endl;
 
 
 	try {
@@ -56,7 +57,7 @@ void CtcLinearRelaxationIter::contract (IntervalVector & box){
 
 		//	mylinearsolver->writeFile("LP.lp");
 		//		system ("cat LP.lp");
-		//cout << " box after  LR " << box << endl;
+		//		cout << " box after  LR " << box << endl;
 		mylinearsolver->cleanConst();
 
 
@@ -103,7 +104,7 @@ void CtcLinearRelaxationIter::optimizer(IntervalVector& box) {
 		int i= ii/2;
 		if (nexti != -1) i=nexti;
 		//		cout << " i "<< i << " infnexti " << infnexti << " infbound " << inf_bound[i] << " supbound " << sup_bound[i] << endl;
-		//			cout << " box avant simplex " << box << endl;
+		//		cout << " box avant simplex " << box << endl;
 		if (infnexti==0 && inf_bound[i]==0)  // computing the left bound : minimizing x_i
 		{
 			inf_bound[i]=1;
@@ -191,8 +192,8 @@ void CtcLinearRelaxationIter::optimizer(IntervalVector& box) {
 				if (next==-1) break;
 			}
 		}
+		else break; // in case of stat==MAX_ITER  we do not recall the simplex on a another variable  (for efficiency reason)
 	}
-
 	delete[] inf_bound;
 	delete[] sup_bound;
 
@@ -204,12 +205,12 @@ LinearSolver::Status_Sol CtcLinearRelaxationIter::run_simplex(IntervalVector& bo
 		LinearSolver::Sense sense, int var, Interval& obj, double bound) {
 	int nvar=nb_var;
 	int nctr=mylinearsolver->getNbRows();
+	// the linear solver is always called in a minimization mode : in case of maximization of var , the opposite of var is minimized
 	if(sense==LinearSolver::MINIMIZE)
 		mylinearsolver->setVarObj(var, 1.0);
 	else
 		mylinearsolver->setVarObj(var, -1.0);
 
-	//mylinearsolver->setSense(LinearSolver::MINIMIZE);
 	//	mylinearsolver->writeFile("coucou.lp");
 	//	system("cat coucou.lp");
 	LinearSolver::Status_Sol stat = mylinearsolver->solve();
@@ -262,11 +263,6 @@ LinearSolver::Status_Sol CtcLinearRelaxationIter::run_simplex(IntervalVector& bo
 		Matrix A_trans (nb_var,mylinearsolver->getNbRows()) ;
 		LinearSolver::Status stat2 = mylinearsolver->getCoefConstraint_trans(A_trans);
 
-		/*IntervalMatrix IA_trans (nb_var,mylinearsolver->getNbRows());
-		for (int i=0;i<nvar; i++){
-		  for(int j=0; j<nctr; j++)
-		    IA_trans[i][j]= A_trans[i][j];
-		}*/
 		IntervalVector B(mylinearsolver->getNbRows());
 		LinearSolver::Status stat3 = mylinearsolver->getB(B);
 
