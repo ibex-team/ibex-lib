@@ -221,6 +221,13 @@ protected:
 			return fx.ub();
 	}
 
+
+	/**
+	 * \brief Symbolic gradient ob the objective
+	 */
+	Function df;
+
+
 	/**
 	 * \brief Main procedure for processing a box.
 	 *
@@ -233,7 +240,7 @@ protected:
 	 *
 	 * Return true iff the loup has been decreased
 	 */
-	bool contract_and_bound(Cell& c);
+	bool contract_and_bound(Cell& c, const IntervalVector& init_box);
 
 	/*=======================================================================================================*/
 	/*             Functions to update the loup (see ibex_OptimProbing and ibex_OptimSimplex)                */

@@ -55,7 +55,7 @@ Optimizer::Optimizer(System& user_sys, Bsc& bsc, Ctc& ctc, double prec,
 		prec(prec), goal_rel_prec(goal_rel_prec), goal_abs_prec(goal_abs_prec),
 		sample_size(sample_size), mono_analysis_flag(true), in_HC4_flag(true), trace(false),
 		timeout(1e08), loup(POS_INFINITY), uplo(NEG_INFINITY), loup_point(n),
-		/* df(*user_sys.goal,Function::DIFF), */
+		df(*user_sys.goal,Function::DIFF), 
 		uplo_of_epsboxes(POS_INFINITY), nb_cells(0) {
 
 	// ====== build the reversed inequalities g_i(x)>0 ===============
@@ -76,9 +76,10 @@ Optimizer::Optimizer(System& user_sys, Bsc& bsc, Ctc& ctc, double prec,
 	diam_simplex=0;
 	nb_rand=0;
 	diam_rand=0;
-
+	int niter=100;
+	if (niter < 3*n) niter=3*n;
 	//====================================
-	mylp = new LinearSolver(n+1,m);
+	mylp = new LinearSolver(n+1,m,niter );
 }
 
 Optimizer::~Optimizer() {
@@ -114,7 +115,7 @@ void Optimizer::update_entailed_ctr(const IntervalVector& box) {
 	}
 }
 
-bool Optimizer::contract_and_bound(Cell& c) {
+  bool Optimizer::contract_and_bound(Cell& c, const IntervalVector& init_box) {
 	//         cout << "box " <<c.box << endl;
 	/*======================== contract y with y<=loup ========================*/
 	Interval& y=c.box[ext_sys.goal_var()];
@@ -179,9 +180,27 @@ bool Optimizer::contract_and_bound(Cell& c) {
 		}
 		throw EmptyBoxException();
 	}
+	//  gradient test for unconstrained optimization 
+	if (m==0 
+	    && n>1  // does not work with function of one variable (bug)
+	  //	    || is_inner(tmp_box)   does not improve the solving in constrained optimization 
+	    )
+	  { 
+	    bool bound=false;
+	    for (int i=0; i<n ; i++)
+	      if (tmp_box[i].contains(init_box[i].ub()) || tmp_box[i].contains(init_box[i].lb()))
+		{bound=true; break;}
+	    if (bound==false)
+	      for (int i=0; i< n; i++)
+		if (!(df[i].eval(tmp_box)).contains(0))
+		  {throw EmptyBoxException();}
+	  }
 
 	return loup_changed;
 }
+
+
+
 
 void Optimizer::optimize(const IntervalVector& init_box) {
 
@@ -208,7 +227,7 @@ void Optimizer::optimize(const IntervalVector& init_box) {
 	time=0;
 	Timer::start();
 	try {
-		loup_changed=contract_and_bound(*root);
+	  loup_changed=contract_and_bound(*root, init_box);
 	}
 	catch(EmptyBoxException&) {
 		delete root;
@@ -242,7 +261,7 @@ void Optimizer::optimize(const IntervalVector& init_box) {
 				loup_changed=0;
 
 				try{
-					loup_changed = contract_and_bound(*new_cells.first);
+				        loup_changed = contract_and_bound(*new_cells.first, init_box);
 					buffer.push(new_cells.first);
 					nb_cells++;
 				}
@@ -250,7 +269,7 @@ void Optimizer::optimize(const IntervalVector& init_box) {
 					delete new_cells.first;
 				}
 				try {
-					loup_changed |= contract_and_bound(*new_cells.second);
+				        loup_changed |= contract_and_bound(*new_cells.second, init_box);
 					buffer.push(new_cells.second);
 					nb_cells++;
 				}
