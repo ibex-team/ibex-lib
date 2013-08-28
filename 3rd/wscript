@@ -67,8 +67,7 @@ def configure (conf):
 	if with_cplex is not None:
 		# build with cplex
 		conf.env.LP_LIB = "CPLEX"
-
-	if with_soplex is not None:
+	else: # include the case where both with_cplex and with_soplex are None
 		# build with soplex
 		conf.env.LP_LIB = "SOPLEX"	
 	
