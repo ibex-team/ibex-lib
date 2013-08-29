@@ -311,7 +311,7 @@ void ExprDiff::visit(const ExprPower& e) {
 void ExprDiff::visit(const ExprMinus& e) { add_grad_expr(e.expr, -*grad[e]); }
 void ExprDiff::visit(const ExprTrans& e) { not_implemented("diff with transpose"); } //TODO
 void ExprDiff::visit(const ExprSign& e)  { not_implemented("diff with sign"); }      //TODO
-void ExprDiff::visit(const ExprAbs& e)   { not_implemented("diff with abs"); }       //TODO
+void ExprDiff::visit(const ExprAbs& e)   { add_grad_expr(e.expr, (*grad[e])*sign(e.expr)); }
 void ExprDiff::visit(const ExprSqr& e)   { add_grad_expr(e.expr, (*grad[e])*Interval(2.0)*e.expr); }
 void ExprDiff::visit(const ExprSqrt& e)  { add_grad_expr(e.expr, (*grad[e])*Interval(0.5)/sqrt(e.expr)); }
 void ExprDiff::visit(const ExprExp& e)   { add_grad_expr(e.expr, (*grad[e])*exp(e.expr)); }
