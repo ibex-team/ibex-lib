@@ -24,6 +24,9 @@ class SystemFactory;
 
 /**
  * \defgroup system Systems
+ */
+
+/**
  * \ingroup system
  *
  * \brief System.

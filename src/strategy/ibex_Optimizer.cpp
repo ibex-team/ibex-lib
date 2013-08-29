@@ -182,12 +182,14 @@ void Optimizer::update_entailed_ctr(const IntervalVector& box) {
 	}
 	//  gradient test for unconstrained optimization 
 	if (m==0 
-			&& n>1  // does not work with function of one variable (bug)
 			//	    || is_inner(tmp_box)   does not improve the solving in constrained optimization
 	) {
 		if (tmp_box.is_strict_subset(init_box)) {
 			// may throw an EmptyBoxException:
-			df.backward(IntervalVector(n,Interval::ZERO),tmp_box);
+			if (n==1)
+				df.backward(Interval::ZERO,tmp_box);
+			else
+				df.backward(IntervalVector(n,Interval::ZERO),tmp_box);
 			write_ext_box(tmp_box,c.box);
 		}
 	}

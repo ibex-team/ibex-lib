@@ -30,6 +30,9 @@ class ExprCtr;
 class ExprIndex;
 class Function;
 
+/**
+ * \defgroup symbolic Symbolic computation
+ */
 
 /**
  * \ingroup symbolic

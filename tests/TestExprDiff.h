@@ -25,12 +25,14 @@ public:
 		TEST_ADD(TestExprDiff::poly01);
 		TEST_ADD(TestExprDiff::vec01);
 		TEST_ADD(TestExprDiff::vec02);
+		TEST_ADD(TestExprDiff::one_var_one_func);
 	}
 
 	void linear01();
 	void poly01();
 	void vec01();
 	void vec02();
+	void one_var_one_func();
 };
 
 } // namespace ibex

@@ -42,6 +42,14 @@ void TestExprDiff::poly01() {
 	TEST_ASSERT(sameExpr(v->arg(1),"((2*x)+(3*y^2))"));
 }
 
+void TestExprDiff::one_var_one_func() {
+	Variable x("x");
+	Function f(x,sqr(x)+1);
+	Function df(f,Function::DIFF);
+	TEST_ASSERT(df.expr().dim.type()==Dim::SCALAR);
+	TEST_ASSERT(sameExpr(df.expr(),"(2*x)"));
+}
+
 void TestExprDiff::vec01() {
 
 	Variable x(4,"x");

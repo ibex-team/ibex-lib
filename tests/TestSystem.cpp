@@ -11,6 +11,7 @@
 
 #include "TestSystem.h"
 #include "ibex_System.h"
+#include "ibex_ExtendedSystem.h"
 #include "ibex_SystemFactory.h"
 #include "ibex_SyntaxError.h"
 
@@ -77,7 +78,6 @@ void TestSystem::factory01() {
 	TEST_ASSERT(sys.args[1].dim==Dim::matrix(3,3));
 	TEST_ASSERT(sys.args[2].dim==Dim::scalar());
 	TEST_ASSERT(sameExpr(sys.goal->expr(),"(y-cos(x[1]))"));
-	TEST_ASSERT(strcmp(sys.goal_name,System::goal_name)==0);
 
 	TEST_ASSERT(sys.box.size()==13);
 
@@ -101,7 +101,6 @@ void TestSystem::factory02() {
 	TEST_ASSERT(sys.nb_var==2);
 	TEST_ASSERT(sys.args.size()==2);
 	TEST_ASSERT(sameExpr(sys.goal->expr(),"(x+y)"));
-	TEST_ASSERT(strcmp(sys.goal_name,System::goal_name)==0);
 	TEST_ASSERT(sys.ctrs.size()==0);
 }
 
@@ -118,7 +117,6 @@ void TestSystem::copy01() {
 	TEST_ASSERT(sys.args[1].dim==Dim::matrix(3,3));
 	TEST_ASSERT(sys.args[2].dim==Dim::scalar());
 	TEST_ASSERT(sameExpr(sys.goal->expr(),"(y-cos(x[1]))"));
-	TEST_ASSERT(strcmp(sys.goal_name,System::goal_name)==0);
 
 	TEST_ASSERT(sys.box.size()==13);
 
@@ -163,7 +161,7 @@ void TestSystem::ineq01() {
 
 void TestSystem::extend01() {
 	System& _sys(*sysex2());
-	System sys(_sys,System::EXTEND);
+	ExtendedSystem sys(_sys);
 	delete &_sys;
 
 	TEST_ASSERT(sys.nb_ctr==4);
@@ -192,7 +190,7 @@ void TestSystem::extend01() {
 
 void TestSystem::extend02() {
 	System _sys("quimper/unconstrained.qpr");
-	System sys(_sys, System::EXTEND);
+	ExtendedSystem sys(_sys);
 	TEST_ASSERT(sys.nb_ctr==1);
 	TEST_ASSERT(sys.nb_var==3);
 	TEST_ASSERT(sys.goal==NULL);

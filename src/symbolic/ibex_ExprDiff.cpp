@@ -143,7 +143,8 @@ const ExprNode& ExprDiff::gradient(const Array<const ExprSymbol>& old_x, const A
 		assert(k==nb_var);
 	}
 
-	const ExprNode& df=ExprVector::new_(dX,true);
+    // dX.size()==1 is the univariate case (the node df must be scalar)
+	const ExprNode& df=dX.size()==1? dX[0] : ExprVector::new_(dX,true);
 
 	// Note: it is better to proceed in this way: (1) differentiate
 	// and (2) copy the expression for two reasons
@@ -187,7 +188,8 @@ const ExprNode& ExprDiff::gradient(const Array<const ExprSymbol>& old_x, const A
 		delete it->first;
 	}
 
-	delete &df;
+	if (dX.size()>1) delete &df; // delete the Vector node
+
 	//cout << "   ---> grad:" << result << endl;
 	return result;
 }
