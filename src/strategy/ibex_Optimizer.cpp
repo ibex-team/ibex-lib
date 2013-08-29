@@ -182,19 +182,15 @@ void Optimizer::update_entailed_ctr(const IntervalVector& box) {
 	}
 	//  gradient test for unconstrained optimization 
 	if (m==0 
-	    && n>1  // does not work with function of one variable (bug)
-	  //	    || is_inner(tmp_box)   does not improve the solving in constrained optimization 
-	    )
-	  { 
-	    bool bound=false;
-	    for (int i=0; i<n ; i++)
-	      if (tmp_box[i].contains(init_box[i].ub()) || tmp_box[i].contains(init_box[i].lb()))
-		{bound=true; break;}
-	    if (bound==false)
-	      for (int i=0; i< n; i++)
-		if (!(df[i].eval(tmp_box)).contains(0))
-		  {throw EmptyBoxException();}
-	  }
+			&& n>1  // does not work with function of one variable (bug)
+			//	    || is_inner(tmp_box)   does not improve the solving in constrained optimization
+	) {
+		if (tmp_box.is_strict_subset(init_box)) {
+			// may throw an EmptyBoxException:
+			df.backward(IntervalVector(n,Interval::ZERO),tmp_box);
+			write_ext_box(tmp_box,c.box);
+		}
+	}
 
 	return loup_changed;
 }
