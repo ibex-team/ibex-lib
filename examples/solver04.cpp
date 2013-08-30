@@ -78,7 +78,8 @@ int main(int argc, char** argv) {
 	  ctclr = new CtcLR(sys, CtcLinearRelaxationIter::ALL_BOX, CtcLR::ART);
 	else if (linearrelaxation=="compo")
 	  ctclr = new CtcLR(sys, CtcLinearRelaxationIter::ALL_BOX, CtcLR::COMPO);
-	else if (linearrelaxation=="xn")
+	else 
+	  //if (linearrelaxation=="xn")  // ctclr must be initialized
 	  ctclr = new CtcXNewton (sys,cpoints);
 
 	// the hc4 contractor called in the following fixpoint contractor
@@ -175,7 +176,8 @@ int main(int argc, char** argv) {
 	cout << "number of cells=" << s.nb_cells << endl;
 	// Display the cpu time used
 	cout << "cpu time used=" << s.time << "s."<< endl;
-
+	//	if (filtering == "acidhc4" || filtering=="acidhc4n" )
+	//	  cout    << " nbcidvar " <<  acid.nbvar_stat() << endl;
  }
 
  catch(ibex::SyntaxError& e) {
