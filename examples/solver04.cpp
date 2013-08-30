@@ -78,15 +78,11 @@ int main(int argc, char** argv) {
 	  ctclr = new CtcLR(sys, CtcLinearRelaxationIter::ALL_BOX, CtcLR::ART);
 	else if (linearrelaxation=="compo")
 	  ctclr = new CtcLR(sys, CtcLinearRelaxationIter::ALL_BOX, CtcLR::COMPO);
-	else 
-	  //if (linearrelaxation=="xn")  // ctclr must be initialized
+	else   if (linearrelaxation=="xn") 
 	  ctclr = new CtcXNewton (sys,cpoints);
+	
 
-	// the hc4 contractor called in the following fixpoint contractor
-	CtcHC4 hc44xn(sys.ctrs,ratio_propag);  
-
-	// fixpoint linear relaxation , hc4  with default fix point ratio 0.2
-	 CtcLinearRelaxation ctcxn (*ctclr, hc44xn);
+   
 
 	// Build the main contractor:
 	// ---------------------------
@@ -117,14 +113,15 @@ int main(int argc, char** argv) {
 	else {cout << filtering <<  " is not an implemented  contraction  mode "  << endl; return -1;}
         cout << "filtering " << filtering << endl;
 	
-
-	// the actual contractor ; composition of ctc ,e.g. acidhc4n,  and Linearrelaxation
-	CtcCompo cxn (*ctc, ctcxn);
 	Ctc* contractor;
 
 	// linearrelaxation is optional and only used if the linearrelaxation parameter is xn, art or compo
+	// we build a fixpoint linear relaxation with ctclr and hc44xn  with default fix point ratio 0.2
+	// the hc4 contractor called in the following fixpoint contractor
+	CtcHC4 hc44xn(sys.ctrs,ratio_propag);  
+
         if (linearrelaxation=="xn" ||linearrelaxation=="compo" || linearrelaxation=="art" )
-	  contractor= & cxn;
+	  contractor = new CtcCompo (*ctc, *(new CtcLinearRelaxation (*ctclr, hc44xn)));
 	else
 	  contractor=ctc;
 	  
@@ -176,8 +173,11 @@ int main(int argc, char** argv) {
 	cout << "number of cells=" << s.nb_cells << endl;
 	// Display the cpu time used
 	cout << "cpu time used=" << s.time << "s."<< endl;
+
 	//	if (filtering == "acidhc4" || filtering=="acidhc4n" )
-	//	  cout    << " nbcidvar " <<  acid.nbvar_stat() << endl;
+	//	  	  cout    << " nbcidvar " <<  acid.nbvar_stat() << endl;
+	
+	
  }
 
  catch(ibex::SyntaxError& e) {
