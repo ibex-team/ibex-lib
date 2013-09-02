@@ -131,6 +131,10 @@ int main(int argc, char** argv){
 
 	// printing the results     
 	o.report();
+	
+	delete bs;
+	delete ctclr;
+
 	return 0;
 	}
 
