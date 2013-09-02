@@ -38,14 +38,10 @@ int main(int argc, char** argv) {
 	CtcHC4 hc44cid(sys.ctrs,0.1,true);
 	// The ACID contractor (component of the contractor  when filtering == "acidhc4" or "acidhc4n")
 	CtcAcid acid(sys,hc44cid);
-	// hc4 followed by 3bcidhc4 : the actual contractor used when filtering == "3bcidhc4" 
-	CtcCompo hc4acid(hc4,acid);
-
-
 	// The 3BCID contractor (3bcid component of the contractor when filtering == "3bcidhc4") on all variables
 	Ctc3BCid c3bcid(hc44cid);
-	// hc4 followed by 3bcidhc4 : the actual propagation based contractor used when filtering == "3bcidhc4" or "3bcidhc4n"
-	CtcCompo hc43bcid(hc4,c3bcid);
+
+
 
 	// Build contractor #2:
 	// --------------------------
@@ -73,14 +69,23 @@ int main(int argc, char** argv) {
 
 
 	// the linear relaxation contractor 
-	CtcLinearRelaxationIter* ctclr;
+	CtcLinearRelaxationIter* ctclriter=NULL;
 	if (linearrelaxation=="art")
-	  ctclr = new CtcLR(sys, CtcLinearRelaxationIter::ALL_BOX, CtcLR::ART);
+	  ctclriter = new CtcLR(sys, CtcLinearRelaxationIter::ALL_BOX, CtcLR::ART);
 	else if (linearrelaxation=="compo")
-	  ctclr = new CtcLR(sys, CtcLinearRelaxationIter::ALL_BOX, CtcLR::COMPO);
+	  ctclriter = new CtcLR(sys, CtcLinearRelaxationIter::ALL_BOX, CtcLR::COMPO);
 	else   if (linearrelaxation=="xn") 
-	  ctclr = new CtcXNewton (sys,cpoints);
-	
+	  ctclriter = new CtcXNewton (sys,cpoints);
+
+	// linearrelaxation is optional and only used if the linearrelaxation parameter is xn, art or compo
+	// we build a fixpoint linear relaxation with ctclr and hc44xn  with default fix point ratio 0.2
+	// the hc4 contractor called in the following fixpoint contractor
+	CtcHC4 hc44xn(sys.ctrs,ratio_propag);  
+
+
+	CtcLinearRelaxation* ctclr=NULL;
+	if (linearrelaxation=="xn" ||linearrelaxation=="compo" || linearrelaxation=="art" )
+	  ctclr= (new CtcLinearRelaxation (*ctclriter, hc44xn));
 
    
 
@@ -88,40 +93,29 @@ int main(int argc, char** argv) {
 	// ---------------------------
 	// A composition of the  previous contractors
    
-	CtcCompo* hc4n;
-	CtcCompo* hc4acidn;
-	CtcCompo* hc43bcidn; 
-
-	if (ctcnewton) { hc4n= new CtcCompo (hc4,*ctcnewton);
-	  hc4acidn = new CtcCompo (hc4acid, *ctcnewton);
-	  hc43bcidn = new CtcCompo (hc43bcid,*ctcnewton);
-	}
 
 	Ctc* ctc;
 	if (filtering== "hc4")
-	  ctc = & hc4;
+	  ctc = new CtcHC4 (sys.ctrs,ratio_propag);
 	else if (filtering== "acidhc4")
-	  ctc = & hc4acid;
+	  ctc = new CtcCompo(hc4,acid);
 	else if (filtering== "3bcidhc4")
-	  ctc = &c3bcid;
+	  ctc = new CtcCompo (hc4,c3bcid);
 	else if (filtering == "hc4n")
-	  ctc = hc4n;
+	  ctc = new CtcCompo (hc4,*ctcnewton);
 	else if (filtering== "acidhc4n")
-	  ctc =  hc4acidn;
+	  ctc =  new CtcCompo (hc4,acid, *ctcnewton);
 	else if (filtering== "3bcidhc4n")
-	  ctc =  hc43bcidn;
+	  ctc =  new CtcCompo (hc4,c3bcid,*ctcnewton);
 	else {cout << filtering <<  " is not an implemented  contraction  mode "  << endl; return -1;}
         cout << "filtering " << filtering << endl;
 	
+	
+	// The actual contractor
 	Ctc* contractor;
 
-	// linearrelaxation is optional and only used if the linearrelaxation parameter is xn, art or compo
-	// we build a fixpoint linear relaxation with ctclr and hc44xn  with default fix point ratio 0.2
-	// the hc4 contractor called in the following fixpoint contractor
-	CtcHC4 hc44xn(sys.ctrs,ratio_propag);  
-
-        if (linearrelaxation=="xn" ||linearrelaxation=="compo" || linearrelaxation=="art" )
-	  contractor = new CtcCompo (*ctc, *(new CtcLinearRelaxation (*ctclr, hc44xn)));
+	if (linearrelaxation=="xn" ||linearrelaxation=="compo" || linearrelaxation=="art" )
+	  contractor = new CtcCompo (*ctc, *ctclr);
 	else
 	  contractor=ctc;
 	  
@@ -142,8 +136,8 @@ int main(int argc, char** argv) {
 	  bs = new SmearSumRelative(sys,prec);
 	else if (bisection=="smearmaxrel")
 	  bs = new SmearMaxRelative(sys,prec);
-	else {cout << bisection << " is not an implemented  bisection mode "  << endl; return -1;} 
-
+	else {cout << bisection << " is not an implemented  bisection mode "  << endl; return -1;}
+ 
 	cout << "bisection " << bisection << endl;	
 	// Choose the way the search tree is explored
 	// -------------------------------------
@@ -175,9 +169,18 @@ int main(int argc, char** argv) {
 	cout << "cpu time used=" << s.time << "s."<< endl;
 
 	//	if (filtering == "acidhc4" || filtering=="acidhc4n" )
-	//	  	  cout    << " nbcidvar " <<  acid.nbvar_stat() << endl;
+	//	  cout    << " nbcidvar " <<  acid.nbvar_stat() << endl;
+	delete bs;
+	delete ctc;
+	if (linearrelaxation=="xn" ||linearrelaxation=="compo" || linearrelaxation=="art" )
+	  {delete contractor; 
+	    delete ctclriter;
+	    delete ctclr;
+	  }
+	if (ctcnewton) delete ctcnewton;
 	
-	
+
+
  }
 
  catch(ibex::SyntaxError& e) {
