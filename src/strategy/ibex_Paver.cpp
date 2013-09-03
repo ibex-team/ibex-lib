@@ -17,7 +17,7 @@ using namespace std;
 namespace ibex {
 
 Paver::Paver(const Array<Ctc>& c, Bsc& b, CellBuffer& buffer) :
-		capacity(-1), ctc_loop(true), ctc(c), bsc(bsc), buffer(buffer) {
+		capacity(-1), ctc_loop(true), ctc(c), bsc(b), buffer(buffer) {
 
 	assert(ctc.size()>0);
 }
