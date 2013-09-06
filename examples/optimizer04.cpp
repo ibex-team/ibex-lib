@@ -53,6 +53,13 @@ int main(int argc, char** argv){
 	  bs = new RoundRobin (prec);
 	else if (bisection== "largestfirst")
           bs= new LargestFirst();
+	else if (bisection== "largestfirstnoobj")
+          bs= new LargestFirstNvar (sys.nb_var);
+	else if (bisection=="roundrobinnoobj")
+	  bs = new RoundRobinNvar(sys.nb_var,prec);
+	else if (bisection=="smearsumrelprop")
+	  bs = new SmearSumRelProp(ext_sys,prec);
+
 	else if (bisection=="smearsum")
 	  bs = new SmearSum(ext_sys,prec);
 	else if (bisection=="smearmax")
@@ -82,7 +89,7 @@ int main(int argc, char** argv){
 	// hc4 followed by acidhc4 : the actual contractor used when filtering == "acidhc4" 
 	CtcCompo hc4acidhc4 (hc4, acidhc4);
 
-
+      
 
 	Ctc* ctc;
 	if (filtering == "hc4")
@@ -108,16 +115,22 @@ int main(int argc, char** argv){
 	  ctclr= new CtcLR(ext_sys,CtcLR::ALL_BOX, CtcLR::COMPO);
 	else if (linearrelaxation=="xn")
 	  ctclr= new CtcXNewton (ext_sys,cpoints);
-	else {cout << linearrelaxation  <<  " is not an implemented  linear relaxation mode "  << endl; return -1;}
+	//	else {cout << linearrelaxation  <<  " is not an implemented  linear relaxation mode "  << endl; return -1;}
 	// fixpoint linear relaxation , hc4  with default fix point ratio 0.2
-	CtcLinearRelaxation cxn (*ctclr, hc44xn);
+	CtcLinearRelaxation* cxn;
+	if (linearrelaxation=="compo" || linearrelaxation=="art"|| linearrelaxation=="xn")
+	  cxn = new CtcLinearRelaxation (*ctclr, hc44xn);
 	//  the actual contractor  ctc + linear relaxation 
-        CtcCompo ctcxn (*ctc, cxn);
+	Ctc* ctcxn;
+	if (linearrelaxation=="compo" || linearrelaxation=="art"|| linearrelaxation=="xn")
+          ctcxn= new CtcCompo  (*ctc, cxn);
+	else
+	  ctcxn = ctc;
 	// one point probed when looking for a new feasible point (updating the loup)
 	int samplesize=1;
 
 	// the optimizer : the same precision goalprec is used as relative and absolute precision
-	Optimizer o(sys,*bs,ctcxn,prec,goalprec,goalprec,samplesize);
+	Optimizer o(sys,*bs,*ctcxn,prec,goalprec,goalprec,samplesize);
 
 	cout << " sys.box " << sys.box << endl;
 
@@ -131,11 +144,21 @@ int main(int argc, char** argv){
 
 	// printing the results     
 	o.report();
-	
+
+
+	//	if (filtering == "acidhc4"  )
+	//cout    << " nbcidvar " <<  acidhc4.nbvar_stat() << endl;
+
 	delete bs;
-	delete ctclr;
+	if (linearrelaxation=="xn" ||linearrelaxation=="compo" || linearrelaxation=="art" )
+	  {delete ctclr;
+	    delete ctcxn;
+	    delete cxn;}
+
+
 
 	return 0;
+	
 	}
 
 
