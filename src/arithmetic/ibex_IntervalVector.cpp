@@ -33,6 +33,7 @@ IntervalVector::IntervalVector(int n1, const Interval& x) : n(n1), vec(new Inter
 }
 
 IntervalVector::IntervalVector(const IntervalVector& x) : n(x.n), vec(new Interval[x.n]) {
+	assert(x.vec!=NULL); // forbidden to copy uninitialized boxes
 	for (int i=0; i<n; i++) vec[i]=x[i];
 }
 
