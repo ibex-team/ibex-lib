@@ -53,13 +53,6 @@ int main(int argc, char** argv){
 	  bs = new RoundRobin (prec);
 	else if (bisection== "largestfirst")
           bs= new LargestFirst();
-	else if (bisection== "largestfirstnoobj")
-          bs= new LargestFirstNvar (sys.nb_var);
-	else if (bisection=="roundrobinnoobj")
-	  bs = new RoundRobinNvar(sys.nb_var,prec);
-	else if (bisection=="smearsumrelprop")
-	  bs = new SmearSumRelProp(ext_sys,prec);
-
 	else if (bisection=="smearsum")
 	  bs = new SmearSum(ext_sys,prec);
 	else if (bisection=="smearmax")
@@ -136,6 +129,7 @@ int main(int argc, char** argv){
 
 	// the trace 
 	o.trace=1;
+
 	// the allowed time for search
 	o.timeout=timelimit;
 
