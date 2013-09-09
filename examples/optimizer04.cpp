@@ -17,7 +17,7 @@ int main(int argc, char** argv){
 
 
 	// ------------------------------------------------
-	// Parameterized Optimizer (with a system loaded from a file, and choice of contractor and bisectors)
+	// Parameterized Optimizer (with a system loaded from a file, and choice of contractor and bisector)
 	// with X_Newton
         // Load a problem to optimize
 	// --------------------------
@@ -116,7 +116,7 @@ int main(int argc, char** argv){
 	//  the actual contractor  ctc + linear relaxation 
 	Ctc* ctcxn;
 	if (linearrelaxation=="compo" || linearrelaxation=="art"|| linearrelaxation=="xn")
-          ctcxn= new CtcCompo  (*ctc, cxn);
+          ctcxn= new CtcCompo  (*ctc, *cxn); 
 	else
 	  ctcxn = ctc;
 	// one point probed when looking for a new feasible point (updating the loup)
