@@ -274,7 +274,8 @@ void Optimizer::optimize(const IntervalVector& init_box) {
 				catch(EmptyBoxException&) {
 					delete new_cells.second;
 				}
-
+				if (uplo_of_epsboxes == NEG_INFINITY)
+				  {cout << " possible infinite minimum " << endl; break;}
 				if (loup_changed) {
 					// In case of a new upper bound (loup_changed == true), all the boxes
 					// with a lower bound greater than (loup - goal_prec) are removed and deleted.
