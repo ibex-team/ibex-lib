@@ -64,7 +64,8 @@
 
 namespace ibex {
 
-class Affine2;
+template <class T>  class Affine2Main;
+
 class IntervalVector;
 class IntervalMatrix;
 class IntervalMatrixArray;
@@ -151,7 +152,8 @@ class Interval {
 
     /** \brief Set *this to x.
      */
-    Interval& operator=(const Affine2& x);
+    template<class T>
+    Interval& operator=(const Affine2Main<T>& x);
 
     /** \brief Set *this to d.
      */
@@ -163,7 +165,8 @@ class Interval {
 
     /** \brief Intersection of *this and x.
      * \param x - the affine form to compute the intersection with.*/
-    Interval& operator&=( const Affine2& x);
+    template<class T>
+    Interval& operator&=( const Affine2Main<T>& x);
 
     /** \brief Union of *this and x.
      * \param x - the interval to compute the hull with.*/
@@ -171,7 +174,8 @@ class Interval {
 
     /** \brief Union of *this and x.
      * \param x - the affine form to compute the hull with.*/
-    Interval& operator|=(const Affine2& x);
+    template<class T>
+    Interval& operator|=(const Affine2Main<T>& x);
 
     /**
      * \brief Add [-rad,+rad] to *this.
