@@ -74,7 +74,7 @@ inline AF_fAF2_fma::~AF_fAF2_fma() {
 
 
 /////////////////////
-double AF_fAF2_fma::twoProd(double x, double y, double *res) {
+inline double AF_fAF2_fma::twoProd(double x, double y, double *res) {
 	*res = x * y;
 	return fma(x,y,-(*res));
 
