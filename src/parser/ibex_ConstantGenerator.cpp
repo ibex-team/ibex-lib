@@ -194,6 +194,10 @@ Domain _power(const Domain& d, const Domain& expon) {
 }
 
 void ConstantGenerator::visit(const P_ExprIndex& e) {
+	visit(e.left);
+	NOT_INF;
+	visit(e.right);
+	NOT_INF;
 	const Domain* dx1 = map[e.left];
 	const Domain* dx2 = map[e.right];
 	if (dx1->is_reference) {
