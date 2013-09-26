@@ -292,6 +292,7 @@ std::pair<IntervalVector,IntervalVector> _bisect(const V& v, int i, double ratio
 template<class V,class T>
 Vector _random(const V& v) {
 	assert(!v.is_empty());
+	assert(!v.is_unbounded());
 
 	Vector b(v.size());
 	for (int i=0; i<v.size(); i++) {
