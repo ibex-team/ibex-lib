@@ -292,15 +292,26 @@ std::pair<IntervalVector,IntervalVector> _bisect(const V& v, int i, double ratio
 template<class V,class T>
 Vector _random(const V& v) {
 	assert(!v.is_empty());
-	assert(!v.is_unbounded());
 
 	Vector b(v.size());
 	for (int i=0; i<v.size(); i++) {
 		const T& xi=v[i];
 		// get a random number in [-0.5,0.5]
-		double r=rand()/(double) RAND_MAX -0.5;
+			double p;
 		// pick a point in the domain of the ith variable
-		double p = xi.mid() + r*xi.diam();
+		if (xi.lb()==NEG_INFINITY)
+			if (xi.ub()==POS_INFINITY)
+				p=rand();
+			else
+				p=xi.ub()-rand();
+		else
+			if (xi.ub()==POS_INFINITY)
+				p=xi.lb()+rand();
+			else {
+				double r=rand()/(double) RAND_MAX -0.5;
+				p = xi.mid() + r*xi.diam();
+			}
+
 		// watch dog
 		if (p<xi.lb()) p=xi.lb();
 		else if (p>xi.ub()) p=xi.ub();
