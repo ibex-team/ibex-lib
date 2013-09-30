@@ -1,0 +1,14 @@
+variables
+
+x[4]in [-500.000001,500.000001];
+
+minimize
+
+
+ (x(2)+1) * sin (sqrt (abs (x(1) + x(2)+1))) * cos (sqrt (abs (x(2)- x(1)+1))) + 
+     x(1) * cos (sqrt (abs (x(1) + x(2)+1))) * sin (sqrt (abs (x(2)- x(1)+1))) +
+ (x(3)+1) * sin (sqrt (abs (x(2) + x(3)+1))) * cos (sqrt (abs (x(3)- x(2)+1))) + 
+     x(2) * cos (sqrt (abs (x(2) + x(3)+1))) * sin (sqrt (abs (x(3)- x(2)+1))) +
+ (x(4)+1) * sin (sqrt (abs (x(3) + x(4)+1))) * cos (sqrt (abs (x(4)- x(3)+1))) + 
+     x(3) * cos (sqrt (abs (x(3) + x(4)+1))) * sin (sqrt (abs (x(4)- x(3)+1)))
+;

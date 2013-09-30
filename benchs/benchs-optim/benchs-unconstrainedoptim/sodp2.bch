@@ -1,0 +1,7 @@
+variables
+
+x[10] in [-1,1]; 
+
+minimize
+
+abs (x(1)^2) + abs(x(2)^3) ;

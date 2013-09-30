@@ -1,0 +1,6 @@
+variables
+
+x[1] in [-10,10];
+
+minimize
+ abs(x(1) *sin(x(1))+ 0.1 * x(1)) ;

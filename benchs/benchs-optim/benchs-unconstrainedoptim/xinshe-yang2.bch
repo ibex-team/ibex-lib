@@ -1,0 +1,7 @@
+
+variables 
+
+x[2] in [-6.283185307,6.283185307];
+
+minimize 
+(abs(x(1)) + abs(x(2))) / exp (sin (x(1)^2)  +  sin (x(2)^2)) ;

@@ -1,0 +1,12 @@
+variables
+
+x[20] in [-1,1]; 
+
+minimize
+
+abs (x(1)^2) + abs(x(2)^3) + abs (x(3)^4) + abs(x(4)^5)  +abs (x(5)^6) + abs(x(6)^7)  +abs (x(7)^8) + abs (x(8)^9  )
++ abs (x(9)^10 ) + abs (x(10)^11) 
++ abs (x(11)^12) + abs(x(12)^13) + abs (x(13)^14) + abs(x(14)^15)  +abs (x(15)^16) + abs(x(16)^17)  +abs (x(17)^18) + abs (x(18)^19  )
++ abs (x(19)^20 ) + abs (x(20)^21)
+
+;

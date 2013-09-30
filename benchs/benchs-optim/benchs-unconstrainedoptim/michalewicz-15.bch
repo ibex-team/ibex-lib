@@ -1,8 +1,8 @@
 
 constants
 
+pi= [3.14159265,3.14159266] ;
 
-pi= 3.14159265;
 variables
 
 x[15] in [0,pi];

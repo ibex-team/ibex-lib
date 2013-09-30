@@ -1,0 +1,12 @@
+
+variables 
+
+x[10] in [-6.283185307,6.283185307];
+
+minimize 
+(abs(x(1)) + abs(x(2)) + abs(x(3)) +  abs(x(4)) + abs(x(5)) + abs(x(6)) + abs(x(7)) + abs(x(8)) + abs(x(9)) + abs(x(10)) )
+
+/ exp (sin (x(1)^2) + sin(x(2)^2)+ sin (x(3)^2) + sin (x(4)^2)+ sin (x(5)^2) + sin (x(6)^2) + sin (x(7)^2)   + sin (x(8)^2) 
+  + sin (x(9)^2) + sin (x(10)^2)  ) 
+
+ ; 
