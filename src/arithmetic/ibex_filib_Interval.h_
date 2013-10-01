@@ -511,37 +511,6 @@ inline Interval atan(const Interval& x) {
 	return filib::atan(x.itv);
 }
 
-inline Interval atan2(const Interval& a, const Interval& b) {
-	if (a.is_empty() || b.is_empty()) return Interval::EMPTY_SET;
-
-	if (( a.lb() > 0 && b.lb() > 0) || (  a.lb() > 0 &&   b.ub() < 0 )  || ( b.lb() < 0 && b.ub()> 0  && a.lb() > 0 ) )
-
-		return atan(b/a);
-
-	else if  ( a.lb()<=0  &&  a.ub()>0 )
-
-		return 2*atan(b/a);
-
-	else if  (a.ub()< 0 && b.lb()> 0)
-
-		return atan(b/a)+Interval::PI;
-
-	else if (a.ub() < 0 && b.ub()< 0)
-
-		return atan(b/a)-Interval::PI;
-
-	else if (b.lb() < 0 && b.ub() > 0 && a.ub()< 0 ) {
-
-		if (  (atan(b/a)+Interval::PI).lb() <= (atan(b/a)-Interval::PI).ub() )
-
-			return 2*Interval((atan(b/a)+Interval::PI).lb(), (atan(b/a)-Interval::PI).ub());
-
-		else
-			return 2*Interval((atan(b/a)-Interval::PI).lb() , (atan(b/a)+Interval::PI).ub() );
-	}
-}
-
-
 inline Interval cosh(const Interval& x) {
 	return filib::cosh(x.itv);
 }

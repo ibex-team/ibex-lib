@@ -15,6 +15,7 @@
 #include "ibex_Interval.h"
 #include <math.h>
 #include <cassert>
+#include "ibex_Exception.h"
 
 #include "ibex_Affine2_fAF1.h"
 #include "ibex_Affine2_fAF2.h"

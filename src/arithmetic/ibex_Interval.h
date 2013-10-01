@@ -904,6 +904,61 @@ inline Interval sign(const Interval& x) {
 	return x.ub()<0 ? Interval(-1,-1) : x.lb()>0 ? Interval(1,1) : Interval(-1,1);
 }
 
+
+
+// ArcTan2 by Jordan Ninin (Sept 2013) car ni Gaol, ni Profil/Bias ni Filib n'implemente atan2
+inline Interval atan2(const Interval& y, const Interval& x) {
+	if (y.is_empty() || x.is_empty()) return Interval::EMPTY_SET;
+
+	if ( x.lb()> 0) {
+		return atan(y/x);
+	}
+	else if  (x.ub()< 0 && y.lb()> 0) {
+		return atan(y/x)+Interval::PI;
+	}
+	else if (x.ub() < 0 && y.ub()< 0) {
+		return atan(y/x)-Interval::PI;
+	}
+	else if (y.contains(0.0) && x.contains(0.0)) {
+		return Interval(-1,1)*Interval::PI;
+	}
+	else {
+		return 2*atan((sqrt(pow(x,2)+pow(y,2))-x)/y);
+	}
+}
+/*
+// ArcTan2 by Firas Khemane (feb 2010)
+inline Interval atan2(const Interval& a, const Interval& b) {
+	if (a.is_empty() || b.is_empty()) return Interval::EMPTY_SET;
+
+	if (( a.lb() > 0 && b.lb() > 0) || (  a.lb() > 0 &&   b.ub() < 0 )  || ( b.lb() < 0 && b.ub()> 0  && a.lb() > 0 ) )
+
+		return atan(b/a);
+
+	else if  ( a.lb()<=0  &&  a.ub()>0 )
+
+		return 2*atan(b/a);
+
+	else if  (a.ub()< 0 && b.lb()> 0)
+
+		return atan(b/a)+Interval::PI;
+
+	else if (a.ub() < 0 && b.ub()< 0)
+
+		return atan(b/a)-Interval::PI;
+
+	else if (b.lb() < 0 && b.ub() > 0 && a.ub()< 0 ) {
+
+		if (  (atan(b/a)+Interval::PI).lb() <= (atan(b/a)-Interval::PI).ub() )
+
+			return 2*INTERVAL((atan(b/a)+Interval::PI).lb(), (atan(b/a)-Interval::PI).ub());
+
+		else
+			return 2*INTERVAL((atan(b/a)-Interval::PI).lb() , (atan(b/a)+Interval::PI).ub() );
+	}
+}
+*/
+
 inline bool proj_add(const Interval& y, Interval& x1, Interval& x2) {
 	if ((x1 &= y-x2).is_empty()) { x2.set_empty(); return false; }
 	if ((x2 &= y-x1).is_empty()) { x1.set_empty(); return false; }

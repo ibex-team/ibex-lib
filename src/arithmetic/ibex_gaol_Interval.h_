@@ -360,10 +360,6 @@ inline Interval atan(const Interval& x) {
 	return gaol::atan(x.itv);
 }
 
-inline Interval atan2(const Interval& x, const Interval& y) {
-	return gaol::atan2(x.itv,y.itv);
-}
-
 inline Interval cosh(const Interval& x) {
 	return gaol::cosh(x.itv);
 }
