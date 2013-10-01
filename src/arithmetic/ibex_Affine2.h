@@ -19,6 +19,7 @@
 #include "ibex_Affine2_fAF1.h"
 #include "ibex_Affine2_fAF2.h"
 #include "ibex_Affine2_iAF.h"
+#include "ibex_Affine2_fAF2_fma.h"
 #include "ibex_Affine2_No.h"
 
 
@@ -288,15 +289,288 @@ public:
 
 
 
+/** \ingroup arithmetic */
+/*@{*/
+
+/** \brief Stream out \a x. */
+template<class T>
+std::ostream& operator<<(std::ostream& os, const Affine2Main<T>&  x);
+
+
+/** \brief AF[x]_1+AF[x]_2. */
+template<class T>
+Affine2Main<T> operator+(const Affine2Main<T>&  x1, const Affine2Main<T>&  x2);
+
+/** \brief AF[x]+d. */
+template<class T>
+Affine2Main<T> operator+(const Affine2Main<T>&  x, double d);
+
+/** \brief d+AF[x]. */
+template<class T>
+Affine2Main<T> operator+(double d, const Affine2Main<T>&  x);
+
+/** \brief AF[x]_1+[x]_2. */
+template<class T>
+Affine2Main<T> operator+(const Affine2Main<T>&  x1, const Interval& x2);
+
+/** \brief [x]_1+AF[x]_2. */
+template<class T>
+Affine2Main<T> operator+(const Interval& x1, const Affine2Main<T>&  x2);
+
+/** \brief AF[x]_1-AF[x]_2. */
+template<class T>
+Affine2Main<T> operator-(const Affine2Main<T>&  x1, const Affine2Main<T>&  x2);
+
+/** \brief AF[x]-d. */
+template<class T>
+Affine2Main<T> operator-(const Affine2Main<T>&  x, double d);
+
+/** \brief d-AF[x]. */
+template<class T>
+Affine2Main<T> operator-(double d, const Affine2Main<T>&  x);
+
+/** \brief AF[x]_1-[x]_2. */
+template<class T>
+Affine2Main<T> operator-(const Affine2Main<T>&  x1, const Interval& x2);
+
+/** \brief [x]_1-AF[x]_2. */
+template<class T>
+Affine2Main<T> operator-(const Interval& x1, const Affine2Main<T>&  x2);
+
+/** \brief AF[x]_1*AF[x]_2. */
+template<class T>
+Affine2Main<T> operator*(const Affine2Main<T>&  x1, const Affine2Main<T>&  x2);
+
+/** \brief AF[x]*d. */
+template<class T>
+Affine2Main<T> operator*(const Affine2Main<T>&  x, double d);
+
+/** \brief d*AF[x]. */
+template<class T>
+Affine2Main<T> operator*(double d, const Affine2Main<T>&  x);
+
+/** \brief AF[x]_1*[x]_2. */
+template<class T>
+Affine2Main<T> operator*(const Affine2Main<T>&  x1, const Interval& x2);
+
+/** \brief [x]_1*AF[x]_2. */
+template<class T>
+Affine2Main<T> operator*(const Interval& x1, const Affine2Main<T>&  x2);
+
+/** \brief AF[x]_1/AF[x]_2. */
+template<class T>
+Affine2Main<T> operator/(const Affine2Main<T>&  x1, const Affine2Main<T>&  x2);
+
+/** \brief AF[x]/d. */
+template<class T>
+Affine2Main<T> operator/(const Affine2Main<T>&  x, double d);
+
+/** \brief d/AF[x]. */
+template<class T>
+Affine2Main<T> operator/(double d, const Affine2Main<T>&  x);
+
+/** \brief AF[x]_1/[x]_2. */
+template<class T>
+Affine2Main<T> operator/(const Affine2Main<T>&  x1, const Interval& x2);
+
+/** \brief [x]_1/AF[x]_2. */
+template<class T>
+Affine2Main<T> operator/(const Interval& x1, const Affine2Main<T>&  x2);
+
+
+/** \brief Hausdorff distance of AF[x]_1 and AF[x]_2. */
+template<class T>
+double distance(const Affine2Main<T>& x1, const Affine2Main<T>& x2);
+
+/** \brief Hausdorff distance of [x]_1 and AF[x]_2. */
+template<class T>
+double distance(const Interval &x1, const Affine2Main<T>& x2);
+
+/** \brief Hausdorff distance of AF[x]_1 and [x]_2. */
+template<class T>
+double distance(const Affine2Main<T>& x1, const Interval &x2);
+
+
+/** \brief 1/AF[x] */
+template<class T>
+Affine2Main<T> inv(const Affine2Main<T>&  x);
+template<class T>
+Affine2Main<T> inv(const Affine2Main<T>&  x, const Interval itv);
+
+/** \brief AF[x]^2 */
+template<class T>
+Affine2Main<T> sqr(const Affine2Main<T>&  x);
+template<class T>
+Affine2Main<T> sqr(const Affine2Main<T>&  x, const Interval itv);
+
+/** \brief sqrt{AF[x]} */
+template<class T>
+Affine2Main<T> sqrt(const Affine2Main<T>&  x);
+template<class T>
+Affine2Main<T> sqrt(const Affine2Main<T>&  x, const Interval itv);
+
+/** \brief exp(AF[x]). */
+template<class T>
+Affine2Main<T> exp(const Affine2Main<T>&  x);
+template<class T>
+Affine2Main<T> exp(const Affine2Main<T>&  x, const Interval itv);
+
+/** \brief log(AF[x]). */
+template<class T>
+Affine2Main<T> log(const Affine2Main<T>&  x);
+template<class T>
+Affine2Main<T> log(const Affine2Main<T>&  x, const Interval itv);
+
+/** \brief AF[x]^n. */
+template<class T>
+Affine2Main<T> pow(const Affine2Main<T>&  x, int n);
+template<class T>
+Affine2Main<T> pow(const Affine2Main<T>&  x, int n, const Interval itv);
+
+/** \brief AF[x]^d. */
+template<class T>
+Affine2Main<T> pow(const Affine2Main<T>&  x, double d);
+template<class T>
+Affine2Main<T> pow(const Affine2Main<T>&  x, double d, const Interval itv);
+
+/** \brief AF[x]^[y]. */
+template<class T>
+Affine2Main<T> pow(const Affine2Main<T>& x, const Interval &y);
+template<class T>
+Affine2Main<T> pow(const Affine2Main<T>& x, const Interval &y, const Interval itvx);
+
+/** \brief AF[x]^AF[y]. */
+template<class T>
+Affine2Main<T> pow(const Affine2Main<T>& x, const Affine2Main<T>& y);
+
+/** \brief nth root of AF[x]. */
+template<class T>
+Affine2Main<T> root(const Affine2Main<T>&  x, int n);
+template<class T>
+Affine2Main<T> root(const Affine2Main<T>&  x, int n, const Interval itv);
+
+/** \brief cos(AF[x]). */
+template<class T>
+Affine2Main<T> cos(const Affine2Main<T>&  x);
+template<class T>
+Affine2Main<T> cos(const Affine2Main<T>&  x, const Interval itv);
+
+/** \brief sin(AF[x]). */
+template<class T>
+Affine2Main<T> sin(const Affine2Main<T>&  x);
+template<class T>
+Affine2Main<T> sin(const Affine2Main<T>&  x, const Interval itv);
+
+/** \brief tan(AF[x]). */
+template<class T>
+Affine2Main<T> tan(const Affine2Main<T>&  x);
+template<class T>
+Affine2Main<T> tan(const Affine2Main<T>&  x, const Interval itv);
+
+/** \brief acos(AF[x]). */
+template<class T>
+Affine2Main<T> acos(const Affine2Main<T>&  x);
+template<class T>
+Affine2Main<T> acos(const Affine2Main<T>&  x, const Interval itv);
+
+/** \brief asin(AF[x]). */
+template<class T>
+Affine2Main<T> asin(const Affine2Main<T>&  x);
+template<class T>
+Affine2Main<T> asin(const Affine2Main<T>&  x, const Interval itv);
+
+/** \brief atan(AF[x]). */
+template<class T>
+Affine2Main<T> atan(const Affine2Main<T>&  x);
+template<class T>
+Affine2Main<T> atan(const Affine2Main<T>&  x, const Interval itv);
+
+/** \brief cosh(AF[x]). */
+template<class T>
+Affine2Main<T> cosh(const Affine2Main<T>&  x);
+template<class T>
+Affine2Main<T> cosh(const Affine2Main<T>&  x, const Interval itv);
+
+/** \brief sinh(AF[x]). */
+template<class T>
+Affine2Main<T> sinh(const Affine2Main<T>&  x);
+template<class T>
+Affine2Main<T> sinh(const Affine2Main<T>&  x, const Interval itv);
+
+/** \brief tanh(AF[x]). */
+template<class T>
+Affine2Main<T> tanh(const Affine2Main<T>&  x);
+
+template<class T>
+Affine2Main<T> tanh(const Affine2Main<T>&  x, const Interval itv);
+
+/** \brief abs(AF[x]) = sqrt(sqr(AF[x])). */
+template<class T>
+Affine2Main<T> abs(const Affine2Main<T>& x);
+
+template<class T>
+Affine2Main<T> abs(const Affine2Main<T>& x, const Interval itv);
+
+template<class T>
+Interval max(const Affine2Main<T>&  x, const Affine2Main<T>&  y);
+template<class T>
+Interval max(const Interval& x, const Affine2Main<T>&  y);
+template<class T>
+Interval max(const Affine2Main<T>&  x, const Interval& y);
+
+template<class T>
+Interval min(const Affine2Main<T>&  x, const Affine2Main<T>&  y);
+template<class T>
+Interval min(const Interval& x, const Affine2Main<T>&  y) ;
+template<class T>
+Interval min(const Affine2Main<T>&  x, const Interval& y);
+
+
+/** \brief \f$[x]_1\cap [x]_2\f$.
+ * \return Interval::EMPTY if the intersection is empty. */
+template<class T>
+Interval operator&(const Affine2Main<T>&  x1, const Affine2Main<T>&  x2);
+template<class T>
+Interval operator&(const Interval& x1, const Affine2Main<T>&  x2);
+template<class T>
+Interval operator&(const Affine2Main<T>&  x1, const Interval& x2);
+
+
+/** \brief \f$\square([x]_1\cup [x]_2)\f$. */
+template<class T>
+Interval operator|(const Affine2Main<T>&  x1, const Affine2Main<T>&  x2);
+template<class T>
+Interval operator|(const Interval& x1, const Affine2Main<T>&  x2);
+template<class T>
+Interval operator|(const Affine2Main<T>&  x1, const Interval& x2);
+
+
+/**
+ * \brief Return the largest integer interval included in x.
+ *  TODO Affine2::integer not yet implemented integer
+ */
+template<class T>
+Affine2Main<T> integer(const Affine2Main<T>&  x);
+
+/** \brief Sign of AF[x].
+ *
+ *  Return \f$sign(AF[x]) = hull \{ sign{x}, x\inAF[x] \}\f$.
+ * \remark By convention, \f$ 0\inAF[x] \Longrightarrow sign(AF[x])=[-1,1]\f$. */
+template<class T>
+Affine2Main<T> sign(const Affine2Main<T>&  x);
+template<class T>
+Affine2Main<T> sign(const Affine2Main<T>&  x, const Interval itv);
+
 
 }
+
 
 /*@}*/
 
 /*============================================ inline implementation ============================================ */
 
 
-#include "ibex_Affine2.cpp_"
+#include "ibex_Affine2.h_"
 
 
 namespace ibex {

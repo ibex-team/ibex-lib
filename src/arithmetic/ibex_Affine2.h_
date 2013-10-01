@@ -11,8 +11,8 @@
  * ---------------------------------------------------------------------------- */
 
 
-#ifndef IBEX_AFFINE2_CPP_
-#define IBEX_AFFINE2_CPP_
+#ifndef IBEX_AFFINE2_H2_
+#define IBEX_AFFINE2_H2_
 
 namespace ibex {
 
