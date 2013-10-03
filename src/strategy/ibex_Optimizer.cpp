@@ -163,22 +163,8 @@ void Optimizer::update_entailed_ctr(const IntervalVector& box) {
 		// rem1: tmp_box and not c.box because y is handled with goal_prec_rec and goal_abs_prec
 		// rem2: do not use a precision contractor here since it would make the box empty (and y==(-inf,-inf)!!)
 		// rem 3 : the extended  boxes with no bisectable  domains  should be catched for avoiding infinite bisections
-
-		// the box is a "solution"
-		// uplo of epsboxes can only go down, but not under uplo : it is an upperbound for uplo, that indicates a lowerbound for the objective in all the small boxes
-		// found by the precision criterion
-		//	  cout << " small box " << tmp_box <<  "  " << c.box <<  endl;
-		if (uplo_of_epsboxes > y.lb() && uplo_of_epsboxes > uplo) {
-			if (y.lb() > uplo)
-				uplo_of_epsboxes = y.lb();
-			else
-				uplo_of_epsboxes = uplo;
-			if (trace) {
-				cout << "uplo_of_epsboxes:" << setprecision(12) <<  uplo_of_epsboxes << " uplo " << uplo << endl;
-			}
-
-		}
-		throw EmptyBoxException();
+	  update_uplo_of_epsboxes(y.lb());
+	  throw EmptyBoxException();
 	}
 	//  gradient test for unconstrained optimization 
 	if (m==0 
@@ -320,7 +306,8 @@ void Optimizer::optimize(const IntervalVector& init_box) {
 
 			}
 			catch (NoBisectableVariableException& ) {
-				delete buffer.pop();
+			  update_uplo_of_epsboxes ((c->box)[ext_sys.goal_var()].lb());
+			  delete buffer.pop();
 			}
 		}
 	}
@@ -334,8 +321,25 @@ void Optimizer::optimize(const IntervalVector& init_box) {
 }
 
 
+  void Optimizer::update_uplo_of_epsboxes(double ymin)  {
+		// the current box cannot be bisected :  _uplo_of_epsboxes must be updated
+		// uplo of epsboxes can only go down, but not under uplo : it is an upperbound for uplo, that indicates a lowerbound for the objective in all the small boxes
+		// found by the precision criterion
+		//	  cout << " small box " << tmp_box <<  "  " << c.box <<  endl;
+		if (uplo_of_epsboxes > ymin && uplo_of_epsboxes > uplo) {
+			if (ymin > uplo)
+				uplo_of_epsboxes = ymin;
+			else
+				uplo_of_epsboxes = uplo;
+			if (trace) {
+				cout << "uplo_of_epsboxes:" << setprecision(12) <<  uplo_of_epsboxes << " uplo " << uplo << endl;
+			}
+		}
+  }
 
-void Optimizer::report() {
+
+
+  void Optimizer::report() {
 
 
 	if (timeout >0 &&  time >=timeout ) {

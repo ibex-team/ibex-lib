@@ -349,6 +349,11 @@ protected:
 	bool update_loup(const IntervalVector& box);
 
 	/**
+	 * \brief Update the uplo of non bisectable boxes
+	 */
+        void update_uplo_of_epsboxes(double ymin);
+
+	/**
 	 * \brief Display the loup (for debug)
 	 */
 	void trace_loup(bool inner_found);
