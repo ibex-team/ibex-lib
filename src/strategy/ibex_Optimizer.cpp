@@ -18,6 +18,7 @@
 #include "ibex_Function.h"
 #include "ibex_NoBisectableVariableException.h"
 //#include "ibex_Multipliers.h"
+#include "ibex_PdcFirstOrder.h"
 
 #include <float.h>
 
@@ -178,6 +179,10 @@ void Optimizer::update_entailed_ctr(const IntervalVector& box) {
 				df.backward(IntervalVector(n,Interval::ZERO),tmp_box);
 			write_ext_box(tmp_box,c.box);
 		}
+	} else {
+		PdcFirstOrder p(sys);
+		p.set_entailed(entailed);
+		if (p.test(tmp_box)==NO) throw EmptyBoxException();
 	}
 
 	return loup_changed;

@@ -221,13 +221,6 @@ protected:
 			return fx.ub();
 	}
 
-
-	/**
-	 * \brief Symbolic gradient ob the objective
-	 */
-	Function df;
-
-
 	/**
 	 * \brief Main procedure for processing a box.
 	 *
@@ -375,6 +368,10 @@ protected:
 	 */
 	void read_ext_box(const IntervalVector& ext_box, IntervalVector& box);
 
+	/**
+	 * \brief Symbolic gradient ob the objective
+	 */
+	Function df;
 
 private:
 

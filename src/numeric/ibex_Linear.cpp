@@ -5,7 +5,7 @@
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Apr 18, 2012
-// Last Update : Apr 18, 2012
+// Last Update : Aug 29, 2013
 //============================================================================
 
 #include <math.h>
@@ -16,32 +16,40 @@
 
 namespace ibex {
 
-void real_LU(const Matrix& A, Matrix& LU, int* p) {
+namespace {
+double _mig(double x)          { return fabs(x); }
+double _mig(const Interval& x) { return x.mig(); }
+bool _zero(double x)           { return x==0; }
+bool _zero(const Interval& x)  { return x.contains(0); }
 
-	int n = (A.nb_rows());
-	assert(n == (A.nb_cols())); // throw NotSquareMatrixException();
-	assert(n == (LU.nb_rows()) && n == (LU.nb_cols()));
+// S=scalar (double or Interval)
+// M=matrix (Matrix or IntervalMatrix)
+template<typename S, class M>
+void LU(const M& A, M& LU, int* p) {
+
+	int m = (A.nb_rows());
+	int n = (A.nb_cols());
+	assert(m == (LU.nb_rows()) && n == (LU.nb_cols()));
 
 	// check the matrix has no "infinite" values
-	for (int i=0; i<n; i++) {
+	for (int i=0; i<m; i++) {
 		for (int j=0; j<n; j++) {
-			if (fabs(A[i][j])>=TOO_LARGE) throw SingularMatrixException();
+			if (_mig(A[i][j])>=TOO_LARGE) throw SingularMatrixException();
 		}
 	}
 
 	LU = A;
-	for (int i=0; i<n; i++) p[i]=i;
+	for (int i=0; i<m; i++) p[i]=i;
 
 	// LU computation
-	double pivot;
+	S pivot;
 
-	for (int i=0; i<n; i++) {
-		// pivot search
+	for (int i=0; i<m; i++) {
+		// partial pivot search
 		int swap = i;
 		pivot = LU[p[i]][i];
-		for (int j=i+1; j<n; j++) {
-			volatile double tmp=LU[p[j]][i];
-			if (fabs(tmp)>fabs(LU[p[swap]][i])) swap=j;
+		for (int j=i+1; j<m; j++) {
+			if (_mig(LU[p[j]][i])>_mig(LU[p[swap]][i])) swap=j;
 		}
 		int tmp = p[i];
 		p[i] = p[swap];
@@ -49,10 +57,10 @@ void real_LU(const Matrix& A, Matrix& LU, int* p) {
 		// --------------------------------------------------
 
 		pivot = LU[p[i]][i];
-		if (pivot==0.0) throw SingularMatrixException();
-		if (fabs(1/pivot)>=TOO_LARGE) throw SingularMatrixException();
+		if (_zero(pivot)) throw SingularMatrixException();
+		if (_mig(1/pivot)>=TOO_LARGE) throw SingularMatrixException();
 
-		for (int j=i+1; j<n; j++) {
+		for (int j=i+1; j<m; j++) {
 			for (int k=i+1; k<n; k++) {
 				//cout << LU[p[j]][k] << " " << LU[p[j]][i] << " " << pivot << endl;
 				LU[p[j]][k]-=(LU[p[j]][i]/pivot)*LU[p[i]][k];
@@ -60,6 +68,78 @@ void real_LU(const Matrix& A, Matrix& LU, int* p) {
 			LU[p[j]][i] = LU[p[j]][i]/pivot;
 		}
 	}
+}
+
+template<typename S, class M>
+void LU(const M& A, M& LU, int* pr, int* pc) {
+
+	int m = (A.nb_rows());
+	int n = (A.nb_cols());
+	assert(m == (LU.nb_rows()) && n == (LU.nb_cols()));
+
+	// check the matrix has no "infinite" values
+	for (int i=0; i<m; i++) {
+		for (int j=0; j<n; j++) {
+			// TODO: change this exception (rectangular case)
+			if (_mig(A[i][j])>=TOO_LARGE) throw SingularMatrixException();
+		}
+	}
+
+	LU = A;
+	for (int i=0; i<m; i++) pr[i]=i;
+	for (int j=0; j<n; j++) pc[j]=j;
+
+	// LU computation
+	S pivot;
+
+	for (int i=0; i<m; i++) {
+		// complete pivot search
+		int swapR = i;
+		int swapC = i;
+		pivot = LU[pr[i]][i];
+		for (int j=i; j<m; j++) {
+			for (int k=i; k<n; k++) {
+				if (_mig(LU[pr[j]][pc[k]])>_mig(LU[pr[swapR]][pc[swapC]])) { swapR=j; swapC=k; }
+			}
+		}
+		int tmp = pr[i];
+		pr[i] = pr[swapR];
+		pr[swapR] = tmp;
+
+		tmp = pc[i];
+		pc[i] = pc[swapC];
+		pc[swapC] = tmp;
+		// --------------------------------------------------
+
+		pivot = LU[pr[i]][pc[i]];
+		if (_zero(pivot)) throw SingularMatrixException();
+		if (_mig(1/pivot)>=TOO_LARGE) throw SingularMatrixException();
+
+		for (int j=i+1; j<m; j++) {
+			for (int k=i+1; k<n; k++) {
+				//cout << LU[p[j]][k] << " " << LU[p[j]][i] << " " << pivot << endl;
+				LU[pr[j]][pc[k]]-=(LU[pr[j]][pc[i]]/pivot)*LU[pr[i]][pc[k]];
+			}
+			LU[pr[j]][pc[i]] = LU[pr[j]][pc[i]]/pivot;
+		}
+	}
+}
+} // end anonymous namespace
+
+void real_LU(const Matrix& A, Matrix& _LU, int* p) {
+	LU<double,Matrix>(A,_LU,p);
+}
+
+void real_LU(const Matrix& A, Matrix& _LU, int* pr, int* pc) {
+	LU<double,Matrix>(A,_LU,pr,pc);
+}
+
+void interval_LU(const IntervalMatrix& A, IntervalMatrix& _LU, int* p) {
+	LU<Interval,IntervalMatrix>(A,_LU,p);
+}
+
+void interval_LU(const IntervalMatrix& A, IntervalMatrix& _LU, int* pr, int* pc) {
+	LU<Interval,IntervalMatrix>(A,_LU,pr,pc);
 }
 
 namespace {
@@ -121,6 +201,22 @@ void real_inverse(const Matrix& A, Matrix& invA) {
 		throw e;
 	}
 	delete[] p;
+}
+
+void precond(IntervalMatrix& A) {
+	int n=(A.nb_rows());
+	assert(n == A.nb_cols()); //throw NotSquareMatrixException();  // not well-constraint problem
+
+	Matrix C(n,n);
+	try { real_inverse(A.mid(), C); }
+	catch (SingularMatrixException&) {
+		try { real_inverse(A.lb(), C); }
+		catch (SingularMatrixException&) {
+			real_inverse(A.ub(), C);
+		}
+	}
+
+	A = C*A;
 }
 
 void precond(IntervalMatrix& A, IntervalVector& b) {

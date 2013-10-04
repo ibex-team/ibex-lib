@@ -18,6 +18,10 @@
 
 namespace ibex {
 
+/**
+ * \defgroup strategy Strategies
+ */
+
 /** \ingroup strategy
  *
  * \brief Representation of the search space.

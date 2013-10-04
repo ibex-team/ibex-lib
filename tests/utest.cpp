@@ -43,6 +43,7 @@
 #include "TestSystem.h"
 
 // ================ numeric ===============
+#include "TestLinear.h"
 #include "TestNewton.h"
 
 // ================ contractor ===============
@@ -92,6 +93,7 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestInHC4Revise()));
     ts.add(auto_ptr<Test::Suite>(new TestGradient()));
 
+    ts.add(auto_ptr<Test::Suite>(new TestLinear()));
     ts.add(auto_ptr<Test::Suite>(new TestNewton()));
 
     ts.add(auto_ptr<Test::Suite>(new TestHC4()));
