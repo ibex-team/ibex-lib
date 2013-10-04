@@ -44,7 +44,8 @@ void LU(const M& A, M& LU, int* p) {
 	// LU computation
 	S pivot;
 
-	for (int i=0; i<m; i++) {
+	int min_m_n=m<n? m : n;
+	for (int i=0; i<min_m_n; i++) {
 		// partial pivot search
 		int swap = i;
 		pivot = LU[p[i]][i];
@@ -91,8 +92,8 @@ void LU(const M& A, M& LU, int* pr, int* pc) {
 
 	// LU computation
 	S pivot;
-
-	for (int i=0; i<m; i++) {
+	int min_m_n=m<n? m : n;
+	for (int i=0; i<min_m_n; i++) {
 		// complete pivot search
 		int swapR = i;
 		int swapC = i;
