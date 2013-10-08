@@ -24,6 +24,8 @@ BoolInterval PdcFirstOrder::test(const IntervalVector& box) {
 		if (e && (*e)[j]) M--;
 	}
 
+	if (M>n) return MAYBE; // cannote be full rank
+
 	int j2=0;
 	IntervalMatrix J(M+1,n); // +1 because we add the gradient of f
 
