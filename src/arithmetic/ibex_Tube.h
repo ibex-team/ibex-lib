@@ -541,9 +541,15 @@ Tube scale( const Tube &x, double alpha);
 Tube scale( const Tube &x, const Interval &alpha);
 
 /**
- * \brief Return the tube \a f(\a x)
+ * \brief Return the tube  $f(x)$
  */
-Tube compose(const Function &f, const Tube &x);
+Tube eval(const Function &f, const Tube &x);
+
+
+/**
+ * \brief Return the tube  $f^{-1}(x)$
+ */
+Tube inverse(const Function &f, const Tube &x);
 
 /**
  * \brief Display the Tube \a x

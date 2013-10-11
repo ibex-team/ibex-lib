@@ -14,6 +14,7 @@
 #ifndef IBEX_AFFINE2_H2_
 #define IBEX_AFFINE2_H2_
 
+
 namespace ibex {
 
 template<class T>
@@ -293,22 +294,22 @@ Affine2Main<T>& Affine2Main<T>::linChebyshev(Affine2_expr num, const Interval it
 
 			double x0,xb0,xb1,fxb0,fxb1,c0,c1;
 
-			x0 = 1.0/sqrt(2);
+			x0 = 1.0/std::sqrt(2.);
 			xb0 = (0.5)*(itv.diam()*x0 +itv.lb()+itv.ub());
 			xb1 = (0.5)*(itv.diam()*(-x0) +itv.lb()+itv.ub());
 
 			switch (num) {
 			case AF_COS :
-				fxb0 = cos(xb0);
-				fxb1 = cos(xb1);
+				fxb0 = std::cos(xb0);
+				fxb1 = std::cos(xb1);
 				break;
 			case AF_SIN :
-				fxb0 = sin(xb0);
-				fxb1 = sin(xb1);
+				fxb0 = std::sin(xb0);
+				fxb1 = std::sin(xb1);
 				break;
 			case AF_TAN :
-				fxb0 = tan(xb0);
-				fxb1 = tan(xb1);
+				fxb0 = std::tan(xb0);
+				fxb1 = std::tan(xb1);
 				break;
 			default:
 				ibex_error("Not implemented yet");
@@ -436,29 +437,29 @@ Affine2Main<T>& Affine2Main<T>::linChebyshev(Affine2_expr num, const Interval it
 
 			double x0,xb0,xb1,fxb0,fxb1,c0,c1;
 
-			x0 = 1.0/sqrt(2);
+			x0 = 1.0/std::sqrt(2.);
 			xb0 = (0.5)*(itv.diam()*  x0  +itv.lb()+itv.ub());
 			xb1 = (0.5)*(itv.diam()*(-x0) +itv.lb()+itv.ub());
 			switch (num) {
 			case AF_SINH :
-				fxb0 = sinh(xb0);
-				fxb1 = sinh(xb1);
+				fxb0 = std::sinh(xb0);
+				fxb1 = std::sinh(xb1);
 				break;
 			case AF_TANH :
-				fxb0 = tanh(xb0);
-				fxb1 = tanh(xb1);
+				fxb0 = std::tanh(xb0);
+				fxb1 = std::tanh(xb1);
 				break;
 			case AF_ATAN :
-				fxb0 = atan(xb0);
-				fxb1 = atan(xb1);
+				fxb0 = std::atan(xb0);
+				fxb1 = std::atan(xb1);
 				break;
 			case AF_ACOS :
-				fxb0 = acos(xb0);
-				fxb1 = acos(xb1);
+				fxb0 = std::acos(xb0);
+				fxb1 = std::acos(xb1);
 				break;
 			case AF_ASIN :
-				fxb0 = asin(xb0);
-				fxb1 = asin(xb1);
+				fxb0 = std::asin(xb0);
+				fxb1 = std::asin(xb1);
 				break;
 			default:
 				ibex_error("Not implemented yet");
@@ -658,11 +659,11 @@ Affine2Main<T>& Affine2Main<T>::power(int n, const Interval itv) {
 			Interval  TEMP1, TEMP2;
 			double alpha, beta, ddelta, t1, x0, xb0, xb1, fxb0, fxb1, c0, c1;
 
-			x0  = 1.0 / sqrt(2);
+			x0  = 1.0 / std::sqrt(2.);
 			xb0 = (0.5) * (itv.diam() * ( x0) + itv.lb() + itv.ub());
 			xb1 = (0.5) * (itv.diam() * (-x0) + itv.lb() + itv.ub());
-			fxb0 = pow(xb0, n);
-			fxb1 = pow(xb1, n);
+			fxb0 = std::pow(xb0, n);
+			fxb1 = std::pow(xb1, n);
 			c0 = (0.5) * (fxb0 + fxb1);
 			c1 = x0 * fxb0 - x0 * fxb1;
 

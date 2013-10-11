@@ -151,12 +151,25 @@ Tube& Tube::ctcScale(const Interval& alpha) {
 }
 
 
-Tube compose(const Function& f, const Tube& x) {
+Tube eval(const Function& f, const Tube& x) {
 	IntervalVector vec(x.size());
 	for (int i=0;i<x.size();i++) {vec[i]=f.eval(IntervalVector(1,x[i]));}
 	return Tube(x.getT0(),x.getTf(),x.getDeltaT(),vec);
-	//TODO to check
 }
+
+
+Tube inverse(const Function& f, const Tube& x) {
+	IntervalVector vec(x.size());
+	IntervalVector tmp(1);
+	for (int i=0;i<x.size();i++) {
+		tmp[1] = Interval::ALL_REALS;
+		f.backward(x[i],tmp);
+		vec[i] = tmp[1];
+	}
+	return Tube(x.getT0(),x.getTf(),x.getDeltaT(),vec);
+}
+
+
 
 
 std::ostream& operator <<(std::ostream& os, const Tube& x) {
