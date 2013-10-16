@@ -94,18 +94,20 @@ bool Optimizer::random_probing (const IntervalVector& box, bool is_inner) {
 	}
 
 	/*=================== "intensification" =================== */
-//	// --> does not bring substantial gain
-//	if (loup_changed)
+	if (m==0){
+//	// --> does not bring substantial gain for constrained optimization ; useful for unconstrained optimization
+	  if (loup_changed)
 //		// we activate line probing only if the starting point has improved the goal.
 //		// we use the full box (not inbox)
-//		line_probing(box);
-//	else
+	    line_probing(box);
+	  else
 //		// Try Hansen dichotomy between the last candidate point (pt)
 //		// and the loup (note: the segment goes outside of the box, this is on purpose).
 //		//
 //		// Possible improvement: chose the random point with the smallest criterion
 //		// instead of the last one.
-//		loup_changed = dichotomic_line_search(pt,true);
+	    loup_changed = dichotomic_line_search(pt,true);
+	}
 	/*========================================================*/
 
 	return loup_changed;
