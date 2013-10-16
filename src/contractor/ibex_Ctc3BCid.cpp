@@ -46,14 +46,12 @@ bool  Ctc3BCid::equalBoxes (int var, IntervalVector &box1, IntervalVector &box2)
 
 void Ctc3BCid::contract(IntervalVector& box) {
 	int var;                                           // [gch] variable to be carCIDed
-	int i=0;
+
 	start_var=nb_var-1;                                //  patch pour l'optim  A RETIRER ??
 	impact.unset_all();                                // [gch]
 	for (int k=0; k<vhandled; k++) {                   // [gch] k counts the number of varCIDed variables [gch]
 
-	  i++;
-
-	  var=(start_var+i)%nb_var;
+	  var=(start_var+k)%nb_var;
 
 	  impact.set(var);                              // [gch]
 	  var3BCID(box,var);
@@ -62,7 +60,7 @@ void Ctc3BCid::contract(IntervalVector& box) {
 	  if(box.is_empty()) throw EmptyBoxException();
 	}
 
-	start_var=(start_var+vhandled)%nb_var;             //  en contradiction avec le patch pour l'optim
+	//	start_var=(start_var+vhandled)%nb_var;             //  en contradiction avec le patch pour l'optim
 }
 
 
