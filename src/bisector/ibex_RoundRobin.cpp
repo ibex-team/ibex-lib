@@ -33,7 +33,7 @@ pair<IntervalVector,IntervalVector> RoundRobin::bisect(const IntervalVector& box
     var = (var + 1)%n;  
 
 // if no variable can be bisected an exception is thrown
-  if (var==last_var && box[var].diam()<w) throw NoBisectableVariableException();
+  if (var==last_var && (box[var].diam()<w|| !(box[var].is_bisectable())) ) throw NoBisectableVariableException();
   // the next line ensures that in the case where all the domains
   // have width less than w, we keep on round robin.
   //  if (var==last_var && box[var].diam()<w) var = (last_var+1)%n;    suppressed  BNE  (incompatible with NoBisectableVariableException)
