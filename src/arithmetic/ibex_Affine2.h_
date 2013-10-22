@@ -662,8 +662,8 @@ Affine2Main<T>& Affine2Main<T>::power(int n, const Interval itv) {
 			x0  = 1.0 / std::sqrt(2.);
 			xb0 = (0.5) * (itv.diam() * ( x0) + itv.lb() + itv.ub());
 			xb1 = (0.5) * (itv.diam() * (-x0) + itv.lb() + itv.ub());
-			fxb0 = std::pow(xb0, n);
-			fxb1 = std::pow(xb1, n);
+			fxb0 = __builtin_powi(xb0, n);
+			fxb1 = __builtin_powi(xb1, n);
 			c0 = (0.5) * (fxb0 + fxb1);
 			c1 = x0 * fxb0 - x0 * fxb1;
 

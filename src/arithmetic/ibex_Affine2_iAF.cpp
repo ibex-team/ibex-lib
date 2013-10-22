@@ -323,7 +323,7 @@ Affine2Main<AF_iAF>& Affine2Main<AF_iAF>::saxpy(double alpha, const Affine2Main<
 
 			}
 			else {
-				*this = itv()+Interval(-ddelta,ddelta);
+				*this = itv()+Interval(-1,1)*ddelta;
 			}
 		}
 
@@ -348,7 +348,7 @@ Affine2Main<AF_iAF>& Affine2Main<AF_iAF>::saxpy(double alpha, const Affine2Main<
 			*this = itv()+ beta;
 		}
 		if (B4) {  // error  delta
-			*this = itv()+ Interval(-ddelta,ddelta);
+			*this = itv()+Interval(-1,1)*ddelta;;
 		}
 	}
 //	std::cout << " saxpy OUT x= "<< *this<<std::endl;
@@ -502,7 +502,7 @@ Affine2Main<AF_iAF>& Affine2Main<AF_iAF>::sqr(const Interval itv) {
 		}
 		_elt._val[0] += 0.5 *Sx2;
 
-		_elt._err = 2*abs(x0) * _elt._err + (_elt._err+Sx)*(_elt._err+Sx);
+		_elt._err = (2*abs(x0) * _elt._err - 0.5 * Sx2) + pow((_elt._err+Sx),2);
 
 
 		{

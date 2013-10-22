@@ -346,10 +346,10 @@ Affine2Main<AF_fAF1>& Affine2Main<AF_fAF1>::saxpy(double alpha, const Affine2Mai
 		if (B4) {  // add an error  ddelta
 
 			if ((fabs(ddelta))<POS_INFINITY) {
-				_elt._err += ddelta;
+				_elt._err += fabs(ddelta);
 			}
 			else {
-				*this = itv()+Interval(-ddelta,ddelta);
+				*this = itv()+Interval(-1,1)*ddelta;
 			}
 		}
 
@@ -374,7 +374,7 @@ Affine2Main<AF_fAF1>& Affine2Main<AF_fAF1>::saxpy(double alpha, const Affine2Mai
 			*this = itv()+ beta;
 		}
 		if (B4) {  // error  delta
-			*this = itv()+ Interval(-ddelta,ddelta);
+			*this = itv()+Interval(-1,1)*ddelta;
 		}
 	}
 //	std::cout << " saxpy OUT x= "<< *this<<std::endl;

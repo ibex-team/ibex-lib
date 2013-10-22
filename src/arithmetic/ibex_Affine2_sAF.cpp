@@ -1,5 +1,5 @@
 /* ============================================================================
- * I B E X - Implementation of the Affine2Main<AF_fAF2_fma> class based on fAF version 2
+ * I B E X - Implementation of the Affine2Main<AF_sAF> class based on fAF version 2
  * ============================================================================
  * Copyright   : Ecole des Mines de Nantes (FRANCE)
  * License     : This program can be distributed under the terms of the GNU LGPL.
@@ -8,7 +8,7 @@
  * Author(s)   : Jordan Ninin
  * Created     : Jul 16, 2013
  * ---------------------------------------------------------------------------- */
-#include "ibex_Affine2_fAF2_fma.h"
+#include "ibex_Affine2_sAF.h"
 #include "ibex_Affine2.h"
 
 
@@ -17,7 +17,7 @@ namespace ibex {
 
 
 template<>
-Affine2Main<AF_fAF2_fma>& Affine2Main<AF_fAF2_fma>::operator=(const Interval& x) {
+Affine2Main<AF_sAF>& Affine2Main<AF_sAF>::operator=(const Interval& x) {
 
 	if (x.is_empty()) {
 		_n = -1;
@@ -60,13 +60,13 @@ Affine2Main<AF_fAF2_fma>& Affine2Main<AF_fAF2_fma>::operator=(const Interval& x)
 
 
 template<>
-Affine2Main<AF_fAF2_fma>::Affine2Main() :
+Affine2Main<AF_sAF>::Affine2Main() :
 		 _n		(-2		),
 		 _elt	(NULL	,POS_INFINITY)	{
  }
 
 template<>
-Affine2Main<AF_fAF2_fma>::Affine2Main(int n, int m, const Interval& itv) :
+Affine2Main<AF_sAF>::Affine2Main(int n, int m, const Interval& itv) :
 			_n 		(n),
 			_elt	(NULL,0.0)
 {
@@ -90,7 +90,7 @@ Affine2Main<AF_fAF2_fma>::Affine2Main(int n, int m, const Interval& itv) :
 
 
 template<>
-Affine2Main<AF_fAF2_fma>::Affine2Main(const double d) :
+Affine2Main<AF_sAF>::Affine2Main(const double d) :
 			_n 		(0),
 			_elt	(NULL,0.0) {
 	if (fabs(d)<POS_INFINITY) {
@@ -109,7 +109,7 @@ Affine2Main<AF_fAF2_fma>::Affine2Main(const double d) :
 
 
 template<>
-Affine2Main<AF_fAF2_fma>::Affine2Main(const Interval & itv):
+Affine2Main<AF_sAF>::Affine2Main(const Interval & itv):
 			_n 		(0),
 			_elt	(NULL,0.0) {
 
@@ -133,7 +133,7 @@ Affine2Main<AF_fAF2_fma>::Affine2Main(const Interval & itv):
 
 
 template<>
-Affine2Main<AF_fAF2_fma>::Affine2Main(const Affine2Main<AF_fAF2_fma>& x) :
+Affine2Main<AF_sAF>::Affine2Main(const Affine2Main<AF_sAF>& x) :
 		_n		(x._n),
 		_elt	(NULL	,x._elt._err ) {
 	if (is_actif()) {
@@ -147,20 +147,20 @@ Affine2Main<AF_fAF2_fma>::Affine2Main(const Affine2Main<AF_fAF2_fma>& x) :
 
 
 template<>
-double Affine2Main<AF_fAF2_fma>::val(int i) const{
+double Affine2Main<AF_sAF>::val(int i) const{
 	assert((0<=i) && (i<=_n));
 	return _elt._val[i];
 }
 
 template<>
-double Affine2Main<AF_fAF2_fma>::err() const{
+double Affine2Main<AF_sAF>::err() const{
 	return _elt._err;
 }
 
 
 
 template<>
-const Interval Affine2Main<AF_fAF2_fma>::itv() const {
+const Interval Affine2Main<AF_sAF>::itv() const {
 
 	if (is_actif()) {
 		Interval res(_elt._val[0]);
@@ -184,14 +184,14 @@ const Interval Affine2Main<AF_fAF2_fma>::itv() const {
 
 
 template<>
-double Affine2Main<AF_fAF2_fma>::mid() const{
+double Affine2Main<AF_sAF>::mid() const{
 	return (is_actif())? _elt._val[0] : itv().mid();
 }
 
 
 
 template<>
-Affine2Main<AF_fAF2_fma>& Affine2Main<AF_fAF2_fma>::operator=(const Affine2Main<AF_fAF2_fma>& x) {
+Affine2Main<AF_sAF>& Affine2Main<AF_sAF>::operator=(const Affine2Main<AF_sAF>& x) {
 	if (this != &x) {
 		_elt._err = x._elt._err;
 		if (x.is_actif()) {
@@ -218,7 +218,7 @@ Affine2Main<AF_fAF2_fma>& Affine2Main<AF_fAF2_fma>::operator=(const Affine2Main<
 }
 
 template<>
-Affine2Main<AF_fAF2_fma>& Affine2Main<AF_fAF2_fma>::operator=(double d) {
+Affine2Main<AF_sAF>& Affine2Main<AF_sAF>::operator=(double d) {
 
 	if (fabs(d)<POS_INFINITY) {
 		if (_elt._val!=NULL) { delete[] _elt._val; }
@@ -245,8 +245,8 @@ Affine2Main<AF_fAF2_fma>& Affine2Main<AF_fAF2_fma>::operator=(double d) {
 
 /** \brief Return (-x) */
 template<>
-Affine2Main<AF_fAF2_fma> Affine2Main<AF_fAF2_fma>::operator-() const {
-	Affine2Main<AF_fAF2_fma> res;
+Affine2Main<AF_sAF> Affine2Main<AF_sAF>::operator-() const {
+	Affine2Main<AF_sAF> res;
 	res._n = _n;
 	res._elt._err = _elt._err;
 	if (is_actif()) {
@@ -262,9 +262,9 @@ Affine2Main<AF_fAF2_fma> Affine2Main<AF_fAF2_fma>::operator-() const {
 
 
 template<>
-Affine2Main<AF_fAF2_fma>& Affine2Main<AF_fAF2_fma>::saxpy(double alpha, const Affine2Main<AF_fAF2_fma>& y, double beta, double ddelta, bool B1, bool B2, bool B3, bool B4) {
+Affine2Main<AF_sAF>& Affine2Main<AF_sAF>::saxpy(double alpha, const Affine2Main<AF_sAF>& y, double beta, double ddelta, bool B1, bool B2, bool B3, bool B4) {
 //std::cout << "saxpy IN " << alpha << " x " << *this << " + " << y << " + "<< beta << " +error " << ddelta << " / "<< B1 << B2 << B3 << B4 << std::endl;
-	double temp, ttt, sss, eee;
+	double temp, ttt;
 	int i;
 //	std::cout << "in saxpy alpha=" << alpha  <<  "  beta= " <<  beta <<   "  delta = " << ddelta   << std::endl;
 	if (is_actif()) {
@@ -277,23 +277,12 @@ Affine2Main<AF_fAF2_fma>& Affine2Main<AF_fAF2_fma>::saxpy(double alpha, const Af
 			}
 			else if ((fabs(alpha)) < POS_INFINITY) {
 				ttt= 0.0;
-				sss= 0.0;
 				for (i=0; i<=_n;i++) {
-					eee = _elt.twoProd(_elt._val[i], alpha, &temp);
+					temp = _elt._val[i] * alpha;
+					ttt = nextafter( ttt+ std::max(nextafter(temp,POS_INFINITY)-temp, temp - nextafter(temp,NEG_INFINITY) ), POS_INFINITY);
 					_elt._val[i] = temp;
-					ttt = (1+2*AF_EM())*(ttt+fabs(eee));
-					if (fabs(_elt._val[i])<AF_EC()) {
-						sss = (1+2*AF_EM())*(sss+ fabs(_elt._val[i]));
-						_elt._val[i] = 0.0;
-					}
 				}
-
-//				_elt._err = (1+2*AF_EM())*((1+2*AF_EM())*fabs(alpha)*_elt._err+AF_EE()*AF_EM()*ttt + AF_EE()*sss);
-				_elt._err = (1+2*AF_EM())*(
-						((1+2*AF_EM())*fabs(alpha)*_elt._err) +
-						((AF_EE()*ttt) +
-						(AF_EE()*sss))
-						);
+				_elt._err = nextafter( ttt+ nextafter(fabs(alpha)*_elt._err,POS_INFINITY),POS_INFINITY);
 
 			}
 			else {
@@ -307,24 +296,12 @@ Affine2Main<AF_fAF2_fma>& Affine2Main<AF_fAF2_fma>::saxpy(double alpha, const Af
 				if (_n==y.size()) {
 
 					ttt=0.0;
-					sss=0.0;
 					for(i=0;i<=_n;i++) {
-						eee = _elt.twoSum(_elt._val[i], y._elt._val[i], &temp);
-						ttt = (1+2*AF_EM())*(ttt+fabs(eee));
-						if (fabs(temp)<AF_EC()) {
-							sss = (1+2*AF_EM())*(sss+ fabs(temp));
-							_elt._val[i] = 0.0;
-						}
-						else {
-							_elt._val[i]=temp;
-						}
+						temp = _elt._val[i] + y._elt._val[i];
+						ttt = nextafter( ttt+ std::max(nextafter(temp,POS_INFINITY)-temp, temp - nextafter(temp,NEG_INFINITY) ), POS_INFINITY);
+						_elt._val[i]=temp;
 					}
-//					_elt._err = (1+2*AF_EM())*((_elt._err+y._elt._err+ (AF_EE()*(AF_EM()*ttt)+AF_EE()*sss));
-					_elt._err = (1+2*AF_EM())*(
-							(_elt._err+y._elt._err) +
-							((AF_EE()*(ttt)) +
-							(AF_EE()*sss))
-							);
+					_elt._err = nextafter( ttt+ nextafter(_elt._err + y._elt._err,POS_INFINITY),POS_INFINITY);
 
 				} else  {
 					if (_n>y.size()) {
@@ -342,23 +319,11 @@ Affine2Main<AF_fAF2_fma>& Affine2Main<AF_fAF2_fma>::saxpy(double alpha, const Af
 		}
 		if (B3) {  //add a constant beta
 			if ((fabs(beta))<POS_INFINITY) {
-				ttt=0.0;
-				sss=0.0;
-				eee = _elt.twoSum(_elt._val[0],beta,&temp);
-				ttt = (1+2*AF_EM())*(ttt+fabs(eee));
-				if (fabs(temp)<AF_EC()) {
-					sss = (1+2*AF_EM())*(sss+fabs(temp));
-					_elt._val[0] = 0.0;
-				}
-				else {
-					_elt._val[0]=temp;
-				}
-//				_elt._err = (1+2*AF_EM())*(_elt._err+ (AF_EE()*(AF_EM()*ttt)+AF_EE()*sss));
-				_elt._err = (1+2*AF_EM())*(
-						_elt._err +
-						(AF_EE()*(ttt)+
-						AF_EE()*sss)
-						);
+
+				temp = _elt._val[0] + beta;
+				ttt = std::max(nextafter(temp,POS_INFINITY)-temp, temp - nextafter(temp,NEG_INFINITY) );
+				_elt._val[0]=temp;
+				_elt._err = nextafter( ttt+ _elt._err ,POS_INFINITY);
 
 			}
 			else {
@@ -369,21 +334,7 @@ Affine2Main<AF_fAF2_fma>& Affine2Main<AF_fAF2_fma>::saxpy(double alpha, const Af
 		if (B4) {  // add an error  ddelta
 
 			if ((fabs(ddelta))<POS_INFINITY) {
-				ttt=0.0;
-				sss=0.0;
-				eee = _elt.twoSum(_elt._err,fabs(ddelta), &temp);
-				ttt = (1+2*AF_EM())*(fabs(eee));
-				if (fabs(temp)<AF_EC()) {
-					sss = (1+2*AF_EM())*(fabs(temp));
-					temp =0;
-				}
-//				_elt._err = (1+2*AF_EM())*(temp+ (AF_EE()*(AF_EM()*ttt)));;
-				_elt._err = (1+2*AF_EM())*(
-						temp +
-						(AF_EE()*(ttt) +
-						AF_EE()*sss)
-						);
-
+				_elt._err = nextafter( fabs(ddelta)+ _elt._err ,POS_INFINITY);
 			}
 			else {
 				*this = itv()+Interval(-1,1)*ddelta;
@@ -421,38 +372,27 @@ Affine2Main<AF_fAF2_fma>& Affine2Main<AF_fAF2_fma>::saxpy(double alpha, const Af
 
 
 template<>
-Affine2Main<AF_fAF2_fma>& Affine2Main<AF_fAF2_fma>::operator*=(const Interval& y) {
+Affine2Main<AF_sAF>& Affine2Main<AF_sAF>::operator*=(const Interval& y) {
 	if (	(!is_actif())||
 			y.is_empty()||
 			y.is_unbounded() ) {
 		*this = itv()*y;
 
 	} else {
-		double  ttt, sss,  yVal0, eee, temp;
+		double  ttt, yVal0, temp;
 		int i;
 //std::cout << "in *  "<<y<<std::endl;
-//saxpy(y.mid(), Affine2Main<AF_fAF2_fma>(), 0.0, y.rad(), true, false, false, true);
+//saxpy(y.mid(), Affine2Main<AF_sAF>(), 0.0, y.rad(), true, false, false, true);
 
-		ttt=0.0; sss=0.0;  yVal0=0.0; eee=0.0;
+		ttt=0.0;   yVal0=0.0;
 		yVal0 = y.mid();
 		// RES = X%(0) * res
 		for (i=0; i<=_n;i++) {
-			eee = _elt.twoProd(_elt._val[i], yVal0, &temp);
-			_elt._val[i] = temp;
-			ttt = (1+2*AF_EM())*(ttt+fabs(eee));
-			if (fabs(_elt._val[i])<AF_EC()) {
-				sss = (1+2*AF_EM())*(sss+ fabs(_elt._val[i]));
-				_elt._val[i] = 0.0;
-			}
+			temp = _elt._val[i] * yVal0;
+			ttt = nextafter( ttt+ std::max(nextafter(temp,POS_INFINITY)-temp, temp - nextafter(temp,NEG_INFINITY) ), POS_INFINITY);
+			_elt._val[i]=temp;
 		}
-
-		//_elt._err *= (fabs(yVal0)+Interval(y.rad()));
-		_elt._err = (1+2*AF_EM())*(
-				(1+2*AF_EM())*(abs(y).ub())*_elt._err +
-//				AF_EE()*AF_EM()*ttt +
-				((AF_EE()*ttt) +
-				(AF_EE()*sss))
-				);
+		_elt._err = nextafter( ttt+ nextafter(abs(y).ub()*_elt._err,POS_INFINITY),POS_INFINITY);
 
 		{
 			bool b = (_elt._err<POS_INFINITY);
@@ -471,129 +411,83 @@ Affine2Main<AF_fAF2_fma>& Affine2Main<AF_fAF2_fma>::operator*=(const Interval& y
 
 
 template<>
-Affine2Main<AF_fAF2_fma>& Affine2Main<AF_fAF2_fma>::operator*=(const Affine2Main<AF_fAF2_fma>& y) {
+Affine2Main<AF_sAF>& Affine2Main<AF_sAF>::operator*=(const Affine2Main<AF_sAF>& y) {
 //	std::cout << "in *= "<< *this <<std::endl;
 
 	if (is_actif() && (y.is_actif())) {
 
 		if (_n==y.size()) {
-			double Sx, Sy, Sxy, Sz, ttt, sss, ppp, tmp, xVal0, eee;
+			double Sx, Sy, Sxy, Sz, ttt, ppp, tmp, xVal0;
 			int i;
 			double * xTmp;
 
 			xTmp = new double[_n + 1];
-			Sx=0.0; Sy=0.0; Sxy=0.0; Sz=0.0; ttt=0.0; sss=0.0; ppp=0.0; tmp=0.0; xVal0=0.0; eee=0.0;
+			Sx=0.0; Sy=0.0; Sxy=0.0; Sz=0.0; ttt=0.0;  ppp=0.0; tmp=0.0; xVal0=0.0;
 
 			for (i = 1; i <= _n; i++) {
-				eee = _elt.twoProd(_elt._val[i],y._elt._val[i], &ppp);
-				ttt = (1+2*AF_EM())*(ttt+fabs(eee));
+				ppp = _elt._val[i]*y._elt._val[i];
+				ttt = nextafter( ttt+ std::max(nextafter(ppp,POS_INFINITY)-ppp, ppp - nextafter(ppp,NEG_INFINITY) ), POS_INFINITY);
 
-				eee = _elt.twoSum(Sz,ppp, &tmp);
-				ttt = (1+2*AF_EM())*(ttt+fabs(eee));
+				tmp = Sz + ppp;
+				ttt = nextafter( ttt+ std::max(nextafter(tmp,POS_INFINITY)-tmp, tmp - nextafter(tmp,NEG_INFINITY) ), POS_INFINITY);
 				Sz = tmp;
 
-				if (fabs(Sz) < AF_EC()) {
-					sss = (1+2*AF_EM())*(sss+ fabs(Sz));
-					Sz = 0.0;
-				}
-
-				eee = _elt.twoSum(Sxy,fabs(ppp), &tmp);
-				ttt = (1+2*AF_EM())*(ttt+fabs(eee));
+				tmp = Sxy + fabs(ppp);
+				ttt = nextafter( ttt+ std::max(nextafter(tmp,POS_INFINITY)-tmp, tmp - nextafter(tmp,NEG_INFINITY) ), POS_INFINITY);
 				Sxy = tmp;
 
-				if (fabs(Sxy) < AF_EC()) {
-					sss = (1+2*AF_EM())*(sss+ fabs(Sxy));
-					Sxy = 0.0;
-				}
-
-				eee = _elt.twoSum(Sx,fabs(_elt._val[i]), &tmp);
-				ttt = (1+2*AF_EM())*(ttt+fabs(eee));
+				tmp = Sx + fabs(_elt._val[i]);
+				ttt = nextafter( ttt+ std::max(nextafter(tmp,POS_INFINITY)-tmp, tmp - nextafter(tmp,NEG_INFINITY) ), POS_INFINITY);
 				Sx = tmp;
 
-				if (fabs(Sx) < AF_EC()) {
-					sss = (1+2*AF_EM())*(sss+ fabs(Sx));
-					Sx = 0.0;
-				}
-				eee = _elt.twoSum(Sy,fabs(y._elt._val[i]), &tmp);
-				ttt = (1+2*AF_EM())*(ttt+fabs(eee));
+				tmp = Sy + fabs(y._elt._val[i]);
+				ttt = nextafter( ttt+ std::max(nextafter(tmp,POS_INFINITY)-tmp, tmp - nextafter(tmp,NEG_INFINITY) ), POS_INFINITY);
 				Sy = tmp;
-
-				if (fabs(Sy) < AF_EC()) {
-					sss = (1+2*AF_EM())*(sss+ fabs(Sy));
-					Sy = 0.0;
-				}
 
 			}
 
 			xVal0 = _elt._val[0];
 			// RES = X%T(0) * res
 			for (i = 0; i <= _n; i++) {
-				eee = _elt.twoProd(_elt._val[i],y._elt._val[0], &ppp);
-				ttt = (1+2*AF_EM())*(ttt+fabs(eee));
+				ppp = _elt._val[i] * y._elt._val[0];
+				ttt = nextafter( ttt+ std::max(nextafter(ppp,POS_INFINITY)-ppp, ppp - nextafter(ppp,NEG_INFINITY) ), POS_INFINITY);
 				_elt._val[i] = ppp;
-
-				if (fabs(_elt._val[i]) < AF_EC()) {
-					sss = (1+2*AF_EM())*(sss+ fabs(_elt._val[i]));
-					_elt._val[i] = 0.0;
-				}
 			}
 
 			// Xtmp = X%T(0) * Y
 			xTmp[0] = 0.0;
 			for (i = 1; i <= _n; i++) {
-				eee = _elt.twoProd(xVal0,y._elt._val[i], &ppp);
-				ttt = (1+2*AF_EM())*(ttt+fabs(eee));
+				ppp = xVal0 * y._elt._val[i];
+				ttt = nextafter( ttt+ std::max(nextafter(ppp,POS_INFINITY)-ppp, ppp - nextafter(ppp,NEG_INFINITY) ), POS_INFINITY);
 				xTmp[i] = ppp;
-
-				if (fabs(xTmp[i]) < AF_EC()) {
-					sss = (1+2*AF_EM())*(sss+ fabs(xTmp[i]));
-					xTmp[i] = 0.0;
-				}
-
 			}
 
 			//RES =  RES + Xtmp = ( Y%(0) * X ) + ( X%T(0) * Y - X%T(0)*Y%(0) )
 			for (i = 0; i <= _n; i++) {
-
-				eee = _elt.twoSum(_elt._val[i],xTmp[i], &tmp);
-				ttt = (1+2*AF_EM())*(ttt+fabs(eee));
+				tmp = _elt._val[i]+ xTmp[i];
+				ttt = nextafter( ttt+ std::max(nextafter(tmp,POS_INFINITY)-tmp, tmp - nextafter(tmp,NEG_INFINITY) ), POS_INFINITY);
 				_elt._val[i] = tmp;
-
-				if (fabs(_elt._val[i]) < AF_EC()) {
-					sss = (1+2*AF_EM())*(sss+ fabs(_elt._val[i]));
-					_elt._val[i] = 0.0;
-				}
-
 			}
 
-			eee = _elt.twoProd(0.5,Sz, &ppp);
-			ttt = (1+2*AF_EM())*(ttt+fabs(eee));
+			ppp = 0.5 * Sz;
+			ttt = nextafter( ttt+ std::max(nextafter(ppp,POS_INFINITY)-ppp, ppp - nextafter(ppp,NEG_INFINITY) ), POS_INFINITY);
 
-			eee = _elt.twoSum(_elt._val[0],ppp, &tmp);
-			ttt = (1+2*AF_EM())*(ttt+fabs(eee));
+			tmp = _elt._val[0] + ppp;
+			ttt = nextafter( ttt+ std::max(nextafter(tmp,POS_INFINITY)-tmp, tmp - nextafter(tmp,NEG_INFINITY) ), POS_INFINITY);
 			_elt._val[0] = tmp;
 
-			if (fabs(_elt._val[0]) < AF_EC()) {
-				sss = (1+2*AF_EM())*(sss+ fabs(_elt._val[0]));
-				_elt._val[0] = 0.0;
-			}
+			tmp = _elt._err+ Sx;
+			ttt = nextafter( ttt+ std::max(nextafter(tmp,POS_INFINITY)-tmp, tmp - nextafter(tmp,NEG_INFINITY) ), POS_INFINITY);
 
-			eee = _elt.twoSum(_elt._err,Sx, &tmp);
-			ttt = (1+2*AF_EM())*(ttt+fabs(eee));
+			ppp = y._elt._err + Sy;
+			ttt = nextafter( ttt+ std::max(nextafter(ppp,POS_INFINITY)-ppp, ppp - nextafter(ppp,NEG_INFINITY) ), POS_INFINITY);
 
-			eee = _elt.twoSum(y._elt._err,Sy, &ppp);
-			ttt = (1+2*AF_EM())*(ttt+fabs(eee));
-
-
-			_elt._err = (1+ 2*AF_EM()) * (
-					((1+ 2*AF_EM()) *fabs(y._elt._val[0]) * _elt._err)  +
-					((1+ 2*AF_EM()) *fabs(xVal0) * y._elt._err)  +
-					((1+ 2*AF_EM()) *(tmp * ppp)) +
-					((1- 2*AF_EM()) *(-0.5) *  Sxy)  +
-//					(AF_EE() * (AF_EM() * ttt))  +
-					(AF_EE() * (ttt))  +
-					(AF_EE() * sss)
-					);
+			_elt._err =nextafter( nextafter(  nextafter( nextafter(
+						ttt +
+					nextafter(fabs(y._elt._val[0]) * _elt._err,POS_INFINITY),POS_INFINITY) +
+					nextafter(fabs(xVal0) * y._elt._err,POS_INFINITY)  , POS_INFINITY)  +
+					nextafter((tmp * ppp),POS_INFINITY)  , POS_INFINITY) +
+					nextafter((-0.5) *  Sxy,POS_INFINITY)  , POS_INFINITY) ;
 
 			{
 				bool b = (_elt._err<POS_INFINITY);
@@ -627,7 +521,7 @@ Affine2Main<AF_fAF2_fma>& Affine2Main<AF_fAF2_fma>::operator*=(const Affine2Main
 
 
 template<>
-Affine2Main<AF_fAF2_fma>& Affine2Main<AF_fAF2_fma>::sqr(const Interval itv) {
+Affine2Main<AF_sAF>& Affine2Main<AF_sAF>::sqr(const Interval itv) {
 //	std::cout << "in sqr "<<std::endl;
 
 	bool b = (!(itv.is_empty()||itv.is_unbounded()));
@@ -645,77 +539,47 @@ Affine2Main<AF_fAF2_fma>& Affine2Main<AF_fAF2_fma>::sqr(const Interval itv) {
 		// compute the error
 		for (int i = 1; i <= _n; i++) {
 
-			eee = _elt.twoProd(_elt._val[i],_elt._val[i], &ppp);
-			ttt = (1+2*AF_EM())*(ttt+fabs(eee));
+			ppp = _elt._val[i] * _elt._val[i];
+			ttt = nextafter( ttt+ std::max(nextafter(ppp,POS_INFINITY)-ppp, ppp - nextafter(ppp,NEG_INFINITY) ), POS_INFINITY);
 
-			eee = _elt.twoSum(Sx2,ppp, &tmp);
-			ttt = (1+2*AF_EM())*(ttt+fabs(eee));
+			tmp = Sx2 + ppp;
+			ttt = nextafter( ttt+ std::max(nextafter(tmp,POS_INFINITY)-tmp, tmp - nextafter(tmp,NEG_INFINITY) ), POS_INFINITY);
 			Sx2 = tmp;
 
-			if (fabs(Sx2) < AF_EC()) {
-				sss = (1+2*AF_EM())*(sss+ fabs(Sx2));
-				Sx2 = 0.0;
-			}
-
-			eee = _elt.twoSum(Sx,fabs(_elt._val[i]), &tmp);
-			ttt = (1+2*AF_EM())*(ttt+fabs(eee));
+			tmp = Sx + fabs(_elt._val[i]);
+			ttt = nextafter( ttt+ std::max(nextafter(tmp,POS_INFINITY)-tmp, tmp - nextafter(tmp,NEG_INFINITY) ), POS_INFINITY);
 			Sx = tmp;
-
-			if (fabs(Sx) < AF_EC()) {
-				sss = (1+2*AF_EM())*(sss+ fabs(Sx));
-				Sx = 0.0;
-			}
 
 		}
 		// compute 2*_elt._val[0]*(*this)
 		x0 = _elt._val[0];
 
-		eee = _elt.twoProd(x0,x0, &ppp);
-		ttt = (1+2*AF_EM())*(ttt+fabs(eee));
+		ppp = x0 * x0;
+		ttt = nextafter( ttt+ std::max(nextafter(ppp,POS_INFINITY)-ppp, ppp - nextafter(ppp,NEG_INFINITY) ), POS_INFINITY);
 		_elt._val[0] = ppp;
-
-		if (fabs(_elt._val[0]) < AF_EC()) {
-			sss = (1+2*AF_EM())*(sss+ fabs(_elt._val[0]));
-			_elt._val[0] = 0.0;
-		}
 
 		// compute 2*_elt._val[0]*(*this)
 		for (int i = 1; i <= _n; i++) {
-
-			eee = _elt.twoProd((2*x0),_elt._val[i], &ppp);
-			ttt = (1+2*AF_EM())*(ttt+fabs(eee));
+			ppp = (2*x0) * _elt._val[i];
+			ttt = nextafter( ttt+ std::max(nextafter(ppp,POS_INFINITY)-ppp, ppp - nextafter(ppp,NEG_INFINITY) ), POS_INFINITY);
 			_elt._val[i] = ppp;
-
-			if (fabs(_elt._val[i]) < AF_EC()) {
-				sss = (1+2*AF_EM())*(sss+ fabs(_elt._val[i]));
-				_elt._val[i] = 0.0;
-			}
-
 		}
 
-		eee = _elt.twoProd(0.5,Sx2, &ppp);
-		ttt = (1+2*AF_EM())*(ttt+fabs(eee));
+		ppp = 0.5 * Sx2;
+		ttt = nextafter( ttt+ std::max(nextafter(ppp,POS_INFINITY)-ppp, ppp - nextafter(ppp,NEG_INFINITY) ), POS_INFINITY);
 
-		eee = _elt.twoSum(_elt._val[0],ppp, &tmp);
-		ttt = (1+2*AF_EM())*(ttt+fabs(eee));
+		tmp = _elt._val[0] + ppp;
+		ttt = nextafter( ttt+ std::max(nextafter(tmp,POS_INFINITY)-tmp, tmp - nextafter(tmp,NEG_INFINITY) ), POS_INFINITY);
 		_elt._val[0] = tmp;
 
-		if (fabs(_elt._val[0]) < AF_EC()) {
-			sss = (1+2*AF_EM())*(sss+ fabs(_elt._val[0]));
-			_elt._val[0] = 0.0;
-		}
+		tmp = _elt._err + Sx;
+		ttt = nextafter( ttt+ std::max(nextafter(tmp,POS_INFINITY)-tmp, tmp - nextafter(tmp,NEG_INFINITY) ), POS_INFINITY);
 
-		eee = _elt.twoSum(_elt._err,Sx, &tmp);
-		ttt = (1+2*AF_EM())*(ttt+fabs(eee));
-
-		_elt._err = (1+ 2*AF_EM()) * (
-				((1+ 2*AF_EM()) *2*fabs(x0) * _elt._err)  +
-				((1+ 2*AF_EM()) *(tmp * tmp)) +
-				((1- 2*AF_EM()) *(-0.5) *  Sx2)  +
-//					(AF_EE() * (AF_EM() * ttt))  +
-				(AF_EE() * (ttt))  +
-				(AF_EE() * sss)
-				);
+		_elt._err =nextafter( nextafter(  nextafter(
+					ttt +
+				nextafter(2*fabs(x0) * _elt._err  ,POS_INFINITY),POS_INFINITY) +
+				nextafter((tmp * tmp)  ,POS_INFINITY)  , POS_INFINITY)  +
+				nextafter((-0.5) *  Sx2 ,POS_INFINITY)  , POS_INFINITY) ;
 
 		{
 			bool b = (_elt._err<POS_INFINITY);

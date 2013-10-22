@@ -371,7 +371,7 @@ Affine2Main<AF_fAF2>& Affine2Main<AF_fAF2>::saxpy(double alpha, const Affine2Mai
 			if ((fabs(ddelta))<POS_INFINITY) {
 				ttt=0.0;
 				sss=0.0;
-				eee = _elt.twoSum(_elt._err,ddelta, &temp);
+				eee = _elt.twoSum(_elt._err,fabs(ddelta), &temp);
 				ttt = (1+2*AF_EM())*(fabs(eee));
 				if (fabs(temp)<AF_EC()) {
 					sss = (1+2*AF_EM())*(fabs(temp));
@@ -382,11 +382,11 @@ Affine2Main<AF_fAF2>& Affine2Main<AF_fAF2>::saxpy(double alpha, const Affine2Mai
 						temp +
 						(AF_EE()*(ttt) +
 						AF_EE()*sss)
-						);;
+						);
 
 			}
 			else {
-				*this = itv()+Interval(-ddelta,ddelta);
+				*this = itv()+Interval(-1,1)*ddelta;
 			}
 		}
 
@@ -411,7 +411,7 @@ Affine2Main<AF_fAF2>& Affine2Main<AF_fAF2>::saxpy(double alpha, const Affine2Mai
 			*this = itv()+ beta;
 		}
 		if (B4) {  // error  delta
-			*this = itv()+ Interval(-ddelta,ddelta);
+			*this = itv()+Interval(-1,1)*ddelta;
 		}
 	}
 //	std::cout << " saxpy OUT x= "<< *this<<std::endl;

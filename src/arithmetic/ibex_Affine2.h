@@ -21,6 +21,7 @@
 #include "ibex_Affine2_fAF2.h"
 #include "ibex_Affine2_iAF.h"
 #include "ibex_Affine2_fAF2_fma.h"
+#include "ibex_Affine2_sAF.h"
 #include "ibex_Affine2_No.h"
 
 
