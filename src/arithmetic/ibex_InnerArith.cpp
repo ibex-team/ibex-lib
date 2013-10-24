@@ -643,6 +643,8 @@ bool iproj_pow(const Interval& y, Interval& x, int p, const Interval &xin) {
 					return true;
 				}
 				else {
+					// First alternative: choose randomly a side
+					// ============================================================
 					Interval xtmp=x;
 					bool q=(rand()%2==1); // q==1 : we first consider x>0.
 
@@ -651,6 +653,17 @@ bool iproj_pow(const Interval& y, Interval& x, int p, const Interval &xin) {
 
 					x = xtmp & (q? Interval(-up,-lo) : Interval(lo,up));
 					return !x.is_empty();
+					// ============================================================
+
+
+					// second alternative: choose the side with maximal interval
+					// ============================================================
+//					Interval xtmp =x & Interval(lo,up);
+//					x &= Interval(-up,-lo);
+//					std::cout << " zozo x=" << x << "xtmp=" << xtmp << std::endl;
+//					if (xtmp.diam()>x.diam()) x=xtmp;
+//					return !x.is_empty();
+					// ============================================================
 				}
 			}
 			else {

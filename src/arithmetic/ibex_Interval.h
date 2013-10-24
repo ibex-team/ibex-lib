@@ -830,10 +830,14 @@ inline bool Interval::operator!=(const Interval& x) const {
 }
 
 inline double Interval::rad() const {
-	double t = mid();
-	double t1 =(t-*this).ub();
-	double t2= (*this-t).ub();
-	return (t1>t2) ? t1 : t2;
+	if (is_empty()) return 0;
+	else if (is_unbounded()) return POS_INFINITY;
+	else {
+		double t = mid();
+		double t1 =(t-*this).ub();
+		double t2= (*this-t).ub();
+		return (t1>t2) ? t1 : t2;
+	}
 }
 
 inline bool Interval::is_strict_subset(const Interval& x) const {
