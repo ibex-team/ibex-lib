@@ -22,8 +22,9 @@ namespace ibex {
 
 using namespace std;
 
-
 namespace {
+
+const double default_relax_ratio = 0.2;
 
 // These variable and function are necessary because we need
 // to pass the extended system "ext_sys" to the base class
@@ -76,9 +77,10 @@ Array<Ctc>*  DefaultOptimizer::contractor_list (System& sys, System& ext_sys,dou
 	// the limits for calling soplex are the default values 1e6 for the derivatives and 1e6 for the domains : no error found with these bounds
 	int index=2;
 	if (sys.nb_ctr > 0)
-	  {ctc_list->set_ref(2,*new CtcLinearRelaxation
-			    ((*new CtcLR (ext_sys,CtcLR::ALL_BOX, CtcLR::COMPO)),
-			     (*new CtcHC4 (ext_sys.ctrs,0.01))));
+	  {ctc_list->set_ref(2,*new CtcFixPoint
+			    (*new CtcCompo(
+			    		*new CtcLR (ext_sys,CtcLR::ALL_BOX, CtcLR::COMPO),
+			    		*new CtcHC4(ext_sys.ctrs,0.01)), default_relax_ratio));
 	    index++;}
 	ctc_list->resize(index);
 	return ctc_list;

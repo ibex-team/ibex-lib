@@ -11,6 +11,8 @@
 
 #include "ibex.h"
 
+const double default_relax_ratio = 0.2;
+
 using namespace std;
 using namespace ibex;
 int main(int argc, char** argv){
@@ -36,7 +38,7 @@ int main(int argc, char** argv){
 	double goalprec= atof (argv[6]);
 	double timelimit = atof(argv[7]);
 	
-	srand(1);
+	srand(2);
 
 	// the extended system 
 	ExtendedSystem ext_sys(sys);
@@ -110,9 +112,10 @@ int main(int argc, char** argv){
 	  ctclr= new CtcXNewton (ext_sys,cpoints);
 	//	else {cout << linearrelaxation  <<  " is not an implemented  linear relaxation mode "  << endl; return -1;}
 	// fixpoint linear relaxation , hc4  with default fix point ratio 0.2
-	CtcLinearRelaxation* cxn;
+	CtcFixPoint* cxn;
 	if (linearrelaxation=="compo" || linearrelaxation=="art"|| linearrelaxation=="xn")
-	  cxn = new CtcLinearRelaxation (*ctclr, hc44xn);
+	  //cxn = new CtcLinearRelaxation (*ctclr, hc44xn);
+		cxn = new CtcFixPoint (*new CtcCompo(*ctclr, hc44xn), default_relax_ratio);
 	//  the actual contractor  ctc + linear relaxation 
 	Ctc* ctcxn;
 	if (linearrelaxation=="compo" || linearrelaxation=="art"|| linearrelaxation=="xn")
