@@ -8,32 +8,32 @@
 // Last Update : Jul 02, 2013 (Gilles Chabert)
 //============================================================================
 
-#include "ibex_CtcXNewton.h"
+#include "ibex_LinearRelaxXTaylor.h"
 #include "ibex_ExtendedSystem.h"
+#include "ibex_EmptyBoxException.h"
 
 using namespace std;
 
 namespace ibex {
 
-const double CtcXNewton::default_max_diam_deriv =1e6;
+const double LinearRelaxXTaylor::default_max_diam_deriv =1e6;
 
-CtcXNewton::CtcXNewton(const System& sys1, std::vector<corner_point>& cpoints1,
-		ctc_mode cmode, linear_mode lmode1, int max_iter1, double max_diam_deriv1, Interval limit_diam_box1, bool init_lp):
-			CtcLinearRelaxationIter(sys1,cmode,max_iter1, LinearSolver::default_max_time_out,
-					LinearSolver::default_eps,limit_diam_box1, init_lp),
-			cpoints(cpoints1), goal_ctr(-1),
+LinearRelaxXTaylor::LinearRelaxXTaylor(const System& sys1, std::vector<corner_point>& cpoints1,
+		linear_mode lmode1, double max_diam_deriv1):
+			LinearRelax(sys1), cpoints(cpoints1), goal_ctr(-1),
 			max_diam_deriv(max_diam_deriv1),
 			lmode(lmode1),
 			linear_coef(sys1.nb_ctr, sys1.nb_var),
 			df(sys1.f,Function::DIFF) {
 
-	if (goal_var!=-1)
+	if (dynamic_cast<const ExtendedSystem*>(&sys)) {
 		((int&) goal_ctr)=((const ExtendedSystem&) sys).goal_ctr();
+	}
 
 	init_linear_coeffs();
 }
 
-void CtcXNewton::init_linear_coeffs() {
+void LinearRelaxXTaylor::init_linear_coeffs() {
 
 	last_rnd = new int[sys.nb_var];
 	base_coin = new int[sys.nb_var];
@@ -61,7 +61,7 @@ void CtcXNewton::init_linear_coeffs() {
 
 }
 
-CtcXNewton::~CtcXNewton() {
+LinearRelaxXTaylor::~LinearRelaxXTaylor() {
 	delete[] last_rnd;
 	delete[] base_coin;
 	for(int ctr=0; ctr<sys.nb_ctr; ctr++) delete[] linear[ctr];
@@ -69,7 +69,7 @@ CtcXNewton::~CtcXNewton() {
 	delete[] linear_ctr;
 }
 
-int CtcXNewton::linearization( IntervalVector & box, LinearSolver *mysolver)  {
+int LinearRelaxXTaylor::linearization( IntervalVector & box, LinearSolver *mysolver)  {
 
 	int cont =0;
 
@@ -100,7 +100,7 @@ int CtcXNewton::linearization( IntervalVector & box, LinearSolver *mysolver)  {
 
 
 // TODO A quoi sert "nb_nonlinear_vars" ?
-int CtcXNewton::X_Linearization(IntervalVector& box, int ctr, corner_point cpoint,
+int LinearRelaxXTaylor::X_Linearization(IntervalVector& box, int ctr, corner_point cpoint,
 		IntervalVector& G, int id_point, int& nb_nonlinear_vars, LinearSolver *mysolver) {
 
 	CmpOp op= sys.ctrs[ctr].op;
@@ -118,7 +118,7 @@ int CtcXNewton::X_Linearization(IntervalVector& box, int ctr, corner_point cpoin
 	return cont;
 }
 
-int CtcXNewton::X_Linearization(IntervalVector& box,
+int LinearRelaxXTaylor::X_Linearization(IntervalVector& box,
 		int ctr, corner_point cpoint, CmpOp op, 
 		IntervalVector& G2, int id_point, int& nb_nonlinear_vars, LinearSolver *mysolver) {
 

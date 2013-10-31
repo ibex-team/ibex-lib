@@ -15,8 +15,6 @@
 #include "ibex_System.h"
 #include "ibex_CellBuffer.h"
 #include "ibex_CtcCompo.h"
-#include "ibex_CtcLR.h"
-#include "ibex_CtcLinearRelaxation.h"
 
 namespace ibex {
 

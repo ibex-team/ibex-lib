@@ -8,39 +8,32 @@
 //============================================================================
 
 
-#ifndef __IBEX_CTC_ART_H__
-#define __IBEX_CTC_ART_H__
+#ifndef __IBEX_LINEAR_RELAX_AFFINE2_H__
+#define __IBEX_LINEAR_RELAX_AFFINE2_H__
 
-#include "ibex_Ctc.h"
 #include "ibex_System.h"
-#include "ibex_NumConstraint.h"
-#include "ibex_CtcLinearRelaxationIter.h"
-#include "ibex_LinearSolver.h"
+#include "ibex_LinearRelax.h"
 #include "ibex_Affine2.h"
 
 #include <vector>
 
 namespace ibex {
 
-/** \ingroup ctcgroup
- * \brief ART contractor
+/** \ingroup numeric
+ * \brief Affine-based linearization
  *
-* This class is an implementation of the ART algorithm
+ * This class is an implementation of the ART algorithm
  * \author Jordan Ninin
  * \date May 2013
  */
 
-class CtcART : public CtcLinearRelaxationIter {
+class LinearRelaxAffine2 : public LinearRelax {
 
 public:
 
+	LinearRelaxAffine2 (const System& sys);
 
-	CtcART (const System& sys,	ctc_mode cmode=ALL_BOX,
-			int max_iter=LinearSolver::default_max_iter, int time_out=LinearSolver::default_max_time_out,
-			double eps=LinearSolver::default_eps, Interval max_diam_box=LinearSolver::default_limit_diam_box,
-			bool init_lp=true);
-
-	~CtcART ();
+	~LinearRelaxAffine2 ();
 
 	/** ART iteration.
   Linearize the system and performs 2n calls to Simplex in order to reduce
@@ -51,6 +44,5 @@ public:
 
 } // end namespace ibex
 
-
-#endif /* CTC_ARTITER_H_ */
+#endif /* __IBEX_LINEAR_RELAX_AFFINE2_H__ */
 

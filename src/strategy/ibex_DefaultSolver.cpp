@@ -13,9 +13,11 @@
 #include "ibex_CtcHC4.h"
 #include "ibex_CtcAcid.h"
 #include "ibex_CtcNewton.h"
-#include "ibex_CtcLinearRelaxation.h"
+#include "ibex_CtcPolytopeHull.h"
 #include "ibex_CtcCompo.h"
+#include "ibex_CtcFixPoint.h"
 #include "ibex_CellStack.h"
+#include "ibex_LinearRelaxCombo.h"
 #include "ibex_Array.h"
 
 namespace ibex {
@@ -49,7 +51,9 @@ Array<Ctc>*  DefaultSolver::contractor_list (System& sys, double prec) {
 	//                                          new CtcHC4 (sys.ctrs,0.01),
 	//*(default_corners())));
 
-	ctc_list->set_ref(index,*new CtcLinearRelaxation(*new CtcLR (sys,CtcLR::ALL_BOX,CtcLR::COMPO),*new CtcHC4 (sys.ctrs,0.01)));
+	ctc_list->set_ref(index,*new CtcFixPoint(*new CtcCompo(
+			*new CtcPolytopeHull(*new LinearRelaxCombo(sys,LinearRelaxCombo::COMPO),CtcPolytopeHull::ALL_BOX),
+			*new CtcHC4 (sys.ctrs,0.01))));
 
 	ctc_list->resize(index+1);
 	return ctc_list;
@@ -70,7 +74,7 @@ DefaultSolver::~DefaultSolver() {
 	int ind_xnewton=2;
 	if (sys.nb_var==sys.nb_ctr) ind_xnewton=3;
 	delete &((dynamic_cast<CtcAcid*> (&__ctc->list[1]))->ctc);
-	CtcCompo* ctccompo= dynamic_cast<CtcCompo*>(&(dynamic_cast<CtcLinearRelaxation*>( &__ctc->list[ind_xnewton])->ctc));
+	CtcCompo* ctccompo= dynamic_cast<CtcCompo*>(&(dynamic_cast<CtcFixPoint*>( &__ctc->list[ind_xnewton])->ctc));
 	delete &(ctccompo->list[0]);
 	delete &(ctccompo->list[1]);
 	for (int i=0 ; i<__ctc->list.size(); i++)

@@ -44,7 +44,7 @@ int main(int argc, char** argv) {
 		o.timeout=time_limit;
 
 		// This option prints each better feasible point when it is found
-		o.trace=1;
+		o.trace=0;
 
 		// display solutions with up to 12 decimals
 		cout.precision(12);

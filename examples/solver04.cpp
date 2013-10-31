@@ -63,19 +63,19 @@ int main(int argc, char** argv) {
 
 	// The CtcXNewton contractor (if linearrelaxation=="xn")
 	// corner selection for linearizations : two corners are selected, a random one and its opposite
-	vector<CtcXNewton::corner_point> cpoints;
-	cpoints.push_back(CtcXNewton::RANDOM);
-	cpoints.push_back(CtcXNewton::RANDOM_INV);
+	vector<LinearRelaxXTaylor::corner_point> cpoints;
+	cpoints.push_back(LinearRelaxXTaylor::RANDOM);
+	cpoints.push_back(LinearRelaxXTaylor::RANDOM_INV);
 
 
 	// the linear relaxation contractor 
-	CtcLinearRelaxationIter* ctclriter=NULL;
+	LinearRelax* lr=NULL;
 	if (linearrelaxation=="art")
-	  ctclriter = new CtcLR(sys, CtcLinearRelaxationIter::ALL_BOX, CtcLR::ART);
+	  lr = new LinearRelaxCombo(sys, LinearRelaxCombo::ART);
 	else if (linearrelaxation=="compo")
-	  ctclriter = new CtcLR(sys, CtcLinearRelaxationIter::ALL_BOX, CtcLR::COMPO);
+	  lr = new LinearRelaxCombo(sys, LinearRelaxCombo::COMPO);
 	else   if (linearrelaxation=="xn") 
-	  ctclriter = new CtcXNewton (sys,cpoints);
+	  lr = new LinearRelaxXTaylor (sys,cpoints);
 
 	// linearrelaxation is optional and only used if the linearrelaxation parameter is xn, art or compo
 	// we build a fixpoint linear relaxation with ctclr and hc44xn  with default fix point ratio 0.2
@@ -83,9 +83,9 @@ int main(int argc, char** argv) {
 	CtcHC4 hc44xn(sys.ctrs,ratio_propag);  
 
 
-	CtcLinearRelaxation* ctclr=NULL;
+	CtcFixPoint* ctclr=NULL;
 	if (linearrelaxation=="xn" ||linearrelaxation=="compo" || linearrelaxation=="art" )
-	  ctclr= (new CtcLinearRelaxation (*ctclriter, hc44xn));
+	  ctclr= (new CtcFixPoint (*new CtcCompo(* new CtcPolytopeHull(*lr, CtcPolytopeHull::ALL_BOX), hc44xn)));
 
    
 
@@ -174,7 +174,7 @@ int main(int argc, char** argv) {
 	delete ctc;
 	if (linearrelaxation=="xn" ||linearrelaxation=="compo" || linearrelaxation=="art" )
 	  {delete contractor; 
-	    delete ctclriter;
+	    delete lr;
 	    delete ctclr;
 	  }
 	if (ctcnewton) delete ctcnewton;

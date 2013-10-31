@@ -1,44 +1,35 @@
 //============================================================================
-//                                  I B E X
-// Linear Relaxation Contractor
-// File        : ibex_CtcLinearRelaxation.cpp
-// Author      : Bertrand Neveu , Gilles Trombettoni, Jordan Ninin
+//                                  I B E X                                   
+// File        : ibex_CtcPolytopeHull.cpp
+// Author      : Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
-// Created     : Nov 14, 2012
-// Last Update : Jul 02, 2013 (Gilles Chabert)
+// Created     : Oct 31, 2013
+// Last Update : Oct 31, 2013
 //============================================================================
 
-#include "ibex_CtcLinearRelaxationIter.h"
+#include "ibex_CtcPolytopeHull.h"
 #include "ibex_ExtendedSystem.h"
-
-using namespace std;
 
 namespace ibex {
 
-CtcLinearRelaxationIter::CtcLinearRelaxationIter(const System& sys,
-		ctc_mode cmode, int max_iter, int time_out, double eps, Interval limit_diam, bool init_lp):
-				Ctc(sys.nb_var), sys(sys), goal_var(-1), cmode(cmode),
-				limit_diam_box(( (eps>limit_diam.lb()) ? eps : limit_diam.lb()  )	, limit_diam.ub())
-				{
+CtcPolytopeHull::CtcPolytopeHull(LinearRelax& lr, ctc_mode cmode, int max_iter, int time_out, double eps, Interval limit_diam, bool init_lp) : Ctc(lr.sys.nb_var), lr(lr), sys(lr.sys),
+		goal_var(-1), cmode(cmode), limit_diam_box(eps>limit_diam.lb()? eps : limit_diam.lb(), limit_diam.ub()) {
 
-	if (dynamic_cast<const ExtendedSystem*>(&sys)) {
-		(int&) goal_var=((const ExtendedSystem&) sys).goal_var();
+	if (dynamic_cast<const ExtendedSystem*>(&lr.sys)) {
+		(int&) goal_var=((const ExtendedSystem&) lr.sys).goal_var();
 	}
 
 	mylinearsolver = NULL;
-	if (init_lp) mylinearsolver = new LinearSolver(nb_var, sys.nb_ctr, max_iter, time_out, eps);
+	if (init_lp) mylinearsolver = new LinearSolver(nb_var, lr.sys.nb_ctr, max_iter, time_out, eps);
+
 }
 
-CtcLinearRelaxationIter::~CtcLinearRelaxationIter () {
+CtcPolytopeHull::~CtcPolytopeHull() {
 	if (mylinearsolver!=NULL) delete mylinearsolver;
 }
 
-int CtcLinearRelaxationIter::linearization(IntervalVector& box) {
-	return linearization(box, mylinearsolver);
-}
-
-void CtcLinearRelaxationIter::contract (IntervalVector & box){
+void CtcPolytopeHull::contract(IntervalVector& box) {
 
 	if (!(limit_diam_box.contains(box.max_diam()))) return;
 	// is it necessary?  YES (BNE) Soplex can give false infeasible results with large numbers
@@ -50,7 +41,7 @@ void CtcLinearRelaxationIter::contract (IntervalVector & box){
 		mylinearsolver->initBoundVar(box);
 
 		//returns the number of constraints in the linearized system
-		int cont = linearization(box);
+		int cont = lr.linearization(box,mylinearsolver);
 
 		if(cont<1)  return;
 		optimizer(box);
@@ -68,11 +59,9 @@ void CtcLinearRelaxationIter::contract (IntervalVector & box){
 		throw EmptyBoxException();
 	}
 
-
 }
 
-
-void CtcLinearRelaxationIter::optimizer(IntervalVector& box) {
+void CtcPolytopeHull::optimizer(IntervalVector& box) {
 
 	Interval opt(0.0);
 	int* inf_bound = new int[nb_var]; // indicator inf_bound = 1 means the inf bound is feasible or already contracted, call to simplex useless (cf Baharev)
@@ -200,8 +189,7 @@ void CtcLinearRelaxationIter::optimizer(IntervalVector& box) {
 
 }
 
-
-LinearSolver::Status_Sol CtcLinearRelaxationIter::run_simplex(IntervalVector& box,
+LinearSolver::Status_Sol CtcPolytopeHull::run_simplex(IntervalVector& box,
 		LinearSolver::Sense sense, int var, Interval& obj, double bound) {
 	int nvar=nb_var;
 	int nctr=mylinearsolver->getNbRows();
@@ -242,7 +230,7 @@ LinearSolver::Status_Sol CtcLinearRelaxationIter::run_simplex(IntervalVector& bo
 		LinearSolver::Status stat_B = mylinearsolver->getB(B);
 
 		bool minimization=false;
-		if (sense==LinearSolver::MINIMIZE) 
+		if (sense==LinearSolver::MINIMIZE)
 			minimization=true;
 		//	  cout << "B " << B << endl;
 		//	  cout << "A_trans " << IA_trans << endl;
@@ -279,7 +267,7 @@ LinearSolver::Status_Sol CtcLinearRelaxationIter::run_simplex(IntervalVector& bo
 
 }
 
-void CtcLinearRelaxationIter::NeumaierShcherbina_postprocessing ( int nr, int var, Interval & obj, IntervalVector& box,
+void CtcPolytopeHull::NeumaierShcherbina_postprocessing ( int nr, int var, Interval & obj, IntervalVector& box,
 		Matrix & A_trans, IntervalVector& B, Vector & dual_solution, bool minimization) {
 
 	//std::cout <<" BOUND_test "<<std::endl;
@@ -301,13 +289,13 @@ void CtcLinearRelaxationIter::NeumaierShcherbina_postprocessing ( int nr, int va
 	//	cout << " dual " << Lambda << endl;
 	//	cout << " dual B " << Lambda * B << endl;
 	//	cout << " rest box " << Rest * box  << endl;
-	if(minimization==true) 
+	if(minimization==true)
 		obj = Lambda * B - Rest * box;
 	else
 		obj = -(Lambda * B - Rest * box);
 }
 
-bool CtcLinearRelaxationIter::NeumaierShcherbina_infeasibilitytest(int nr, IntervalVector& box,
+bool CtcPolytopeHull::NeumaierShcherbina_infeasibilitytest(int nr, IntervalVector& box,
 		Matrix& A_trans, IntervalVector& B, Vector& infeasible_dir) {
 
 	IntervalVector Lambda(nr);
@@ -329,17 +317,7 @@ bool CtcLinearRelaxationIter::NeumaierShcherbina_infeasibilitytest(int nr, Inter
 
 }
 
-bool CtcLinearRelaxationIter::isInner(IntervalVector & box, const System& sys, int j) {
-	Interval eval=sys.ctrs[j].f.eval(box);
-
-	if((sys.ctrs[j].op==LEQ && eval.ub() > 0) || (sys.ctrs[j].op==LT && eval.ub() >= 0) ||
-			(sys.ctrs[j].op==GEQ && eval.lb() < 0) || (sys.ctrs[j].op==GT && eval.lb() <= 0))
-		return false;
-	else
-		return true;
-}
-
-bool CtcLinearRelaxationIter::choose_next_variable(IntervalVector & box,
+bool CtcPolytopeHull::choose_next_variable(IntervalVector & box,
 		int & nexti, int & infnexti, int* inf_bound, int* sup_bound) {
 
 	bool found = false;
@@ -405,5 +383,4 @@ bool CtcLinearRelaxationIter::choose_next_variable(IntervalVector & box,
 
 }
 
-}// end namespace ibex
-
+} // end namespace ibex

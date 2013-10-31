@@ -13,26 +13,28 @@
 #ifndef __IBEX_CTC_XNEWTON_H__
 #define __IBEX_CTC_XNEWTON_H__
 
-#include "ibex_Ctc.h"
 #include "ibex_System.h"
-#include "ibex_NumConstraint.h"
-#include "ibex_CtcLinearRelaxationIter.h"
-#include "ibex_LinearSolver.h"
+#include "ibex_LinearRelax.h"
 
 #include <vector>
 
 namespace ibex {
 
 /**
- * \ingroup ctcgroup
+ * \ingroup numeric
  * \brief X_Newton contractor 
  *
  * This class is an implementation of the X-Newton algorithm
  */
 
-class CtcXNewton : public CtcLinearRelaxationIter {
+class LinearRelaxXTaylor : public LinearRelax {
 
 public:
+
+	/**
+	 * TODO: add comment
+	 */
+	typedef enum  { TAYLOR, HANSEN } linear_mode;
 
 	/**
 	 * \brief Strategies for selecting corner points.
@@ -47,21 +49,17 @@ public:
 	 *
 	 * \param sys             - The system (extended or not).
 	 * \param cpoints         - The vector of corner selection in linearization (X_INF, X_SUP, RANDOM, RANDOM_INV)
-	 * \param cmode           - X_NEWTON (contracts all the box) | LOWER_BOUNDING (in optimization only improves the left bound of the variable y)
 	 * \param lmode           - TAYLOR | HANSEN : linear relaxation method.
-	 * \param max_iter_soplex - The maximum number of iterations for Soplex (default value 100)
-	 * \param max_diam_deriv  - The maximum diameter of the derivatives for calling Soplex (default value 1.e5)
-	 * \param max_diam_box    - The maximum diameter of the variables for calling Soplex (default value 1.e4) Soplex may lose solutions when it is called with "big" domains.
+	 * \param max_diam_deriv  - The maximum diameter of the box for for the linear solver (default value 1.e6).
+	 * 	  				        Soplex may lose solutions when it is called with "big" domains.
 	 */
-	CtcXNewton(const System& sys, std::vector<corner_point>& cpoints,
-			ctc_mode cmode=ALL_BOX, linear_mode lmode=HANSEN, int max_iter=LinearSolver::default_max_iter,
-			double max_diam_deriv=default_max_diam_deriv, Interval max_diam_box=LinearSolver::default_limit_diam_box,
-			bool init_lp=true);
+	LinearRelaxXTaylor(const System& sys, std::vector<corner_point>& cpoints,
+			linear_mode lmode=HANSEN, double max_diam_deriv=default_max_diam_deriv);
 
 	/**
 	 * \brief Deletes this instance.
 	 */
-	~CtcXNewton();
+	~LinearRelaxXTaylor();
 
 	/**
 	 * \brief The vector of corner selection in linearization

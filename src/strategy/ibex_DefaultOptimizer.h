@@ -13,8 +13,6 @@
 
 #include "ibex_Optimizer.h"
 #include "ibex_CtcCompo.h"
-#include "ibex_CtcLR.h"
-#include "ibex_CtcLinearRelaxation.h"
 
 namespace ibex {
 

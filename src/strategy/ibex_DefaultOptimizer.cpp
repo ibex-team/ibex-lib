@@ -13,6 +13,9 @@
 #include "ibex_CtcHC4.h"
 #include "ibex_CtcAcid.h"
 #include "ibex_CtcCompo.h"
+#include "ibex_CtcFixPoint.h"
+#include "ibex_CtcPolytopeHull.h"
+#include "ibex_LinearRelaxCombo.h"
 #include "ibex_BoolMask.h"
 #include "ibex_CellStack.h"
 #include "ibex_Array.h"
@@ -79,7 +82,8 @@ Array<Ctc>*  DefaultOptimizer::contractor_list (System& sys, System& ext_sys,dou
 	if (sys.nb_ctr > 0)
 	  {ctc_list->set_ref(2,*new CtcFixPoint
 			    (*new CtcCompo(
-			    		*new CtcLR (ext_sys,CtcLR::ALL_BOX, CtcLR::COMPO),
+			    		*new CtcPolytopeHull(*new LinearRelaxCombo (ext_sys,LinearRelaxCombo::COMPO),
+			    				CtcPolytopeHull::ALL_BOX),
 			    		*new CtcHC4(ext_sys.ctrs,0.01)), default_relax_ratio));
 	    index++;}
 	ctc_list->resize(index);
@@ -91,7 +95,7 @@ Array<Ctc>*  DefaultOptimizer::contractor_list (System& sys, System& ext_sys,dou
 DefaultOptimizer::~DefaultOptimizer() {
 	delete &((dynamic_cast<CtcAcid*> (&__ctc->list[1]))->ctc);
 	if (sys.nb_ctr > 0)
-	  {CtcCompo* ctccompo= dynamic_cast<CtcCompo*>(&(dynamic_cast<CtcLinearRelaxation*>( &__ctc->list[2])->ctc));
+	  {CtcCompo* ctccompo= dynamic_cast<CtcCompo*>(&(dynamic_cast<CtcFixPoint*>( &__ctc->list[2])->ctc));
 	    delete &(ctccompo->list[0]);
 	    delete &(ctccompo->list[1]);
 	  }

@@ -8,27 +8,27 @@
 // Last Update : Nov 15, 2012
 //============================================================================
 
-#include "ibex_CtcART.h"
+#include "ibex_LinearRelaxAffine2.h"
+#include "ibex_EmptyBoxException.h"
 
 namespace ibex {
 
 // the constructor
-CtcART::CtcART(const System& sys1, ctc_mode cmode, int max_iter1,
-		int time_out1, double eps, Interval limit_diam_box1, bool init_lp) :
-		CtcLinearRelaxationIter(sys1, cmode, max_iter1, time_out1, eps, limit_diam_box1, init_lp) {
+LinearRelaxAffine2::LinearRelaxAffine2(const System& sys1) :
+				LinearRelax(sys1) {
 
 }
 
-CtcART::~CtcART() {
+LinearRelaxAffine2::~LinearRelaxAffine2() {
 
 }
 
 
 /*********generation of the linearized system*********/
-int CtcART::linearization(IntervalVector & box, LinearSolver *mysolver) {
+int LinearRelaxAffine2::linearization(IntervalVector & box, LinearSolver *mysolver) {
 
 	Affine2 af2;
-	Vector rowconst(Ctc::nb_var);
+	Vector rowconst(sys.nb_var);
 	Interval ev(0.0);
 	Interval center(0.0);
 	Interval err(0.0);
@@ -52,14 +52,14 @@ int CtcART::linearization(IntervalVector & box, LinearSolver *mysolver) {
 			err =0;
 			for (int i =0; i <sys.nb_var; i++) {
 				tmp = box[i].rad();
-		//		if (tmp> mysolver->getEpsilon()) {
-					rowconst[i] =af2.val(i+1) / tmp;
-					center += rowconst[i]*box[i].mid();
-					err += fabs(rowconst[i])*  pow(2,-50); // TODO to check
-		//		} else {
-		//			rowconst[i] = 0;
-		//			err += tmp;
-		//		}
+				//		if (tmp> mysolver->getEpsilon()) {
+				rowconst[i] =af2.val(i+1) / tmp;
+				center += rowconst[i]*box[i].mid();
+				err += fabs(rowconst[i])*  pow(2,-50); // TODO to check
+				//		} else {
+				//			rowconst[i] = 0;
+				//			err += tmp;
+				//		}
 			}
 
 			switch (op) {
@@ -78,6 +78,7 @@ int CtcART::linearization(IntervalVector & box, LinearSolver *mysolver) {
 			case GEQ:
 				if (ev.ub() == 0.0)
 					throw EmptyBoxException();
+				break;
 			case GT: {
 				if (ev.ub() < 0.0)
 					throw EmptyBoxException();
