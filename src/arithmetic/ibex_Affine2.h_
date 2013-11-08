@@ -402,7 +402,6 @@ Affine2Main<T>& Affine2Main<T>::linChebyshev(Affine2_expr num, const Interval it
 			}
 
 			saxpy(alpha, Affine2Main<T>(), beta, ddelta, true,false,true,true);
-			saxpy(1.0, Affine2Main<T>(), 0.0, ddelta, false,false,false,true);
 			break;
 		}
 
