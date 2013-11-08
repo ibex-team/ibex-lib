@@ -10,8 +10,8 @@
 //============================================================================
 
 
-#ifndef __IBEX_CTC_XNEWTON_H__
-#define __IBEX_CTC_XNEWTON_H__
+#ifndef __IBEX_CTC_XTAYLOR_H__
+#define __IBEX_CTC_XTAYLOR_H__
 
 #include "ibex_System.h"
 #include "ibex_LinearRelax.h"
@@ -22,9 +22,9 @@ namespace ibex {
 
 /**
  * \ingroup numeric
- * \brief X_Newton contractor 
+ * \brief X_Taylor contractor
  *
- * This class is an implementation of the X-Newton algorithm
+ * This class is an implementation of the X-Taylor algorithm
  */
 
 class LinearRelaxXTaylor : public LinearRelax {
@@ -45,7 +45,7 @@ public:
 	static const double default_max_diam_deriv;
 
 	/**
-	 * \brief Creates the X_Newton contractor.
+	 * \brief Creates the X_Taylor contractor.
 	 *
 	 * \param sys             - The system (extended or not).
 	 * \param cpoints         - The vector of corner selection in linearization (X_INF, X_SUP, RANDOM, RANDOM_INV)

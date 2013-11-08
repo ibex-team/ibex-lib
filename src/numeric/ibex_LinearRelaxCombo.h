@@ -13,7 +13,6 @@
 #ifndef __IBEX_LINEAR_RELAX_COMBO_H__
 #define __IBEX_LINEAR_RELAX_COMBO_H__
 
-#include "ibex_CtcLinearRelaxationIter.h"
 #include "ibex_LinearRelaxAffine2.h"
 #include "ibex_LinearRelaxXTaylor.h"
 
