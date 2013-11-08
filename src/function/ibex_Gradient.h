@@ -44,6 +44,7 @@ public:
 	       void cst_fwd(const ExprConstant& c, ExprLabel& y)                                  { y.g->clear(); }
 	       void symbol_fwd(const ExprSymbol& s, ExprLabel& y)                                 { y.g->clear(); }
 	       void apply_fwd(const ExprApply& a, ExprLabel** argL, ExprLabel& y)                 { y.g->clear(); }
+	inline void chi_fwd(const ExprChi&, const ExprLabel& x1, const ExprLabel& x2, const ExprLabel& x3, ExprLabel& y)  { y.g->i()=0; }
 	inline void add_fwd(const ExprAdd&, const ExprLabel&, const ExprLabel&, ExprLabel& y)     { y.g->i()=0; }
 	inline void mul_fwd(const ExprMul&, const ExprLabel&, const ExprLabel&, ExprLabel& y)     { y.g->i()=0; }
 	inline void sub_fwd(const ExprSub&, const ExprLabel&, const ExprLabel&, ExprLabel& y)     { y.g->i()=0; }
@@ -90,7 +91,8 @@ public:
 	       void vector_bwd(const ExprVector&,  ExprLabel** x,               const ExprLabel& y);
 	inline void symbol_bwd(const ExprSymbol&,                               const ExprLabel& ) { /*cout << "symbol bwd=" << y.g->v() << endl;*/ /* nothing to do */ }
 	inline void cst_bwd   (const ExprConstant&,                             const ExprLabel& ) { /* nothing to do */ }
-	inline void apply_bwd (const ExprApply&,  ExprLabel** x,                const ExprLabel& y);
+	       void apply_bwd (const ExprApply&,  ExprLabel** x,                const ExprLabel& y);
+	       void chi_bwd   (const ExprChi&,    ExprLabel& x1, ExprLabel& x2, ExprLabel& x3, const ExprLabel& y);
 	inline void add_bwd   (const ExprAdd&,    ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) { x1.g->i() += y.g->i();  x2.g->i() += y.g->i(); }
 	inline void mul_bwd   (const ExprMul&,    ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) { x1.g->i() += y.g->i() * x2.d->i(); x2.g->i() += y.g->i() * x1.d->i(); }
 	inline void sub_bwd   (const ExprSub&,    ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) { x1.g->i() += y.g->i();          x2.g->i() += -y.g->i(); }

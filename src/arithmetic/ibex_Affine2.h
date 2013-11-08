@@ -564,6 +564,24 @@ template<class T>
 Affine2Main<T> sign(const Affine2Main<T>&  x, const Interval itv);
 
 
+
+/** \brief Chi of AF[a], AF[b] and AF[c].
+ *
+ *  Return \f$chi(AF[a],AF[b],AF[c]) = 0.5*(1-\sign(AF[a]))*AF[b] + 0.5*(\sign(AF[a])+1)*AF[c]. \f$
+ * \remark  chi(AF[a],AF[b],AF[c]) =AF[b] if [a]<=0, AF[c] if AF[a]>0, hull \{AF[b], AF[c]\} else.  */
+template<class T>
+Affine2Main<T> chi(const Affine2Main<T>&  a,const Affine2Main<T>&  b,const Affine2Main<T>&  c);
+template<class T>
+Affine2Main<T> chi(const Interval&  a,const Affine2Main<T>&  b,const Affine2Main<T>&  c);
+template<class T>
+Affine2Main<T> chi(const Interval&  a,const Interval&  b,const Affine2Main<T>&  c);
+template<class T>
+Affine2Main<T> chi(const Interval&  a,const Affine2Main<T>&  b,const Interval&  c);
+template<class T>
+Affine2Main<T> chi(const Affine2Main<T>&  a,const Interval&  b,const Affine2Main<T>&  c);
+template<class T>
+Affine2Main<T> chi(const Affine2Main<T>&  a,const Affine2Main<T>&  b,const Interval&  c);
+
 }
 
 
@@ -1065,12 +1083,49 @@ inline Interval min(const Affine2Main<T>& x, const Interval& y) {
 
 template<class T>
 inline Affine2Main<T> integer(const Affine2Main<T>& x){
-	return Affine2Main<T>(x);
+	Interval tmp= x.itv();
+	if ((tmp.lb()==(int) tmp.lb())&&(tmp.ub()==(int) tmp.ub())) {
+		return Affine2Main<T>(x);
+	} else  {
+		return Affine2Main<T>(integer(tmp));
+	}
 }
 
 template<class T>
 inline Affine2Main<T> sign(const Affine2Main<T>& x) {
 	return sign(x, x.itv());
+}
+
+
+template<class T>
+inline Affine2Main<T> chi(const Affine2Main<T>&  a,const Affine2Main<T>&  b,const Affine2Main<T>&  c) {
+	return chi(a.itv(),b,c);
+}
+template<class T>
+inline Affine2Main<T> chi(const Interval&  a,const Interval&  b,const Affine2Main<T>&  c) {
+	return chi(a,Affine2Main<T>(b),c);
+}
+template<class T>
+inline Affine2Main<T> chi(const Interval&  a,const Affine2Main<T>&  b,const Interval&  c) {
+	return chi(a,b,Affine2Main<T>(c));
+}
+template<class T>
+inline Affine2Main<T> chi(const Affine2Main<T>&  a,const Interval&  b,const Affine2Main<T>&  c) {
+	return chi(a.itv(),Affine2Main<T>(b),c);
+}
+template<class T>
+inline Affine2Main<T> chi(const Affine2Main<T>&  a,const Affine2Main<T>&  b,const Interval&  c){
+	return chi(a.itv(),b,Affine2Main<T>(c));
+}
+template<class T>
+inline Affine2Main<T> chi(const Interval&  a,const Affine2Main<T>&  b,const Affine2Main<T>&  c){
+	if (a.ub()<=0) {
+		return Affine2Main<T>(b);
+	} else if (a.lb()>0) {
+		return Affine2Main<T>(c);
+	} else {
+		return  Affine2Main<T>(b|c);
+	}
 }
 
 

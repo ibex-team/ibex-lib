@@ -55,7 +55,7 @@
 %token TK_SQRT TK_EXPO  TK_LOG 
 %token TK_COS  TK_SIN   TK_TAN  TK_ACOS  TK_ASIN  TK_ATAN TK_ATAN2
 %token TK_COSH TK_SINH  TK_TANH TK_ACOSH TK_ASINH TK_ATANH
-%token TK_LEQ  TK_GEQ   TK_EQU  TK_ASSIGN
+%token TK_LEQ  TK_GEQ   TK_EQU  TK_ASSIGN TK_CHI
 
 %token TK_BEGIN TK_END TK_FOR TK_FROM TK_TO TK_RETURN
 
@@ -298,6 +298,7 @@ expr          : expr '+' expr	                { try { $$ = &(*$1 + *$3);    } ca
               | TK_ACOSH '(' expr ')'           { try { $$ = &acosh(*$3);     } catch(DimException& e) { ibexerror(e.message()); } }
               | TK_ASINH '(' expr ')'           { try { $$ = &asinh(*$3);     } catch(DimException& e) { ibexerror(e.message()); } }
               | TK_ATANH '(' expr ')'           { try { $$ = &atanh(*$3);     } catch(DimException& e) { ibexerror(e.message()); } }
+              | TK_CHI '(' expr ',' expr ',' expr ')'  { try { $$ = &chi(*$3,*$5,*$7); } catch(DimException& e) { ibexerror(e.message()); } }
               | '+' expr                        { $$ = $2; }
               | '(' expr ')'		            { $$ = $2; }
               | '<' expr ',' expr '>'           { $$ = &ExprConstant::new_(ball(_2domain(*$2),_2dbl(*$4))); }

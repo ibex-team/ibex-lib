@@ -55,6 +55,7 @@ public:
 	inline void symbol_bwd(const ExprSymbol& , const ExprLabel& )                             { /* nothing to do */ }
 	inline void cst_bwd   (const ExprConstant&, const ExprLabel& )                                  { /* nothing to do */ }
 	inline void apply_bwd (const ExprApply& a, ExprLabel** x, const ExprLabel& y)                   { proj(a.func,*y.d,x); }
+	inline void chi_bwd   (const ExprChi&,ExprLabel& a,ExprLabel& b,ExprLabel& c,const ExprLabel& f){ if (!(proj_chi(f.d->i(),a.d->i(),b.d->i(),c.d->i()))) throw EmptyBoxException();  }
 	inline void add_bwd   (const ExprAdd&,     ExprLabel& x1, ExprLabel& x2, const ExprLabel& y)    { if (!(proj_add(y.d->i(),x1.d->i(),x2.d->i()))) throw EmptyBoxException();  }
 	inline void add_V_bwd  (const ExprAdd&,    ExprLabel& x1, ExprLabel& x2, const ExprLabel& y)    { if (!(proj_add(y.d->v(),x1.d->v(),x2.d->v()))) throw EmptyBoxException();  }
 	inline void add_M_bwd  (const ExprAdd&,    ExprLabel& x1, ExprLabel& x2, const ExprLabel& y)    { if (!(proj_add(y.d->m(),x1.d->m(),x2.d->m()))) throw EmptyBoxException();  }

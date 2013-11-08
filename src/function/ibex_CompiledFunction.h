@@ -67,7 +67,7 @@ public:
 
 protected:
 	typedef enum {
-		IDX, VEC, SYM, CST, APPLY,
+		IDX, VEC, SYM, CST, APPLY, CHI,
 		ADD, MUL, SUB, DIV, MAX, MIN, ATAN2,
 		MINUS, TRANS_V, TRANS_M, SIGN, ABS, POWER,
 		SQR, SQRT, EXP, LOG,
@@ -94,6 +94,7 @@ private:
 	void visit(const ExprConstant& c);
 	void visit(const ExprVector& e);
 	void visit(const ExprApply& e);
+	void visit(const ExprChi& e);
 	void visit(const ExprAdd& e);
 	void visit(const ExprMul& e);
 	void visit(const ExprSub& e);
@@ -149,6 +150,7 @@ ExprLabel& CompiledFunction::forward(const V& algo) const {
 		case SYM:    ((V&) algo).symbol_fwd((ExprSymbol&)  nodes[i],               *args[i][0]); break;
 		case CST:    ((V&) algo).cst_fwd  ((ExprConstant&) nodes[i],               *args[i][0]); break;
 		case APPLY:  ((V&) algo).apply_fwd((ExprApply&)    nodes[i], &(args[i][1]),*args[i][0]); break;
+		case CHI:    ((V&) algo).chi_fwd  ((ExprChi&)      nodes[i], *args[i][1], *args[i][2],  *args[i][3],*args[i][0]); break;
 		case ADD:    ((V&) algo).add_fwd  ((ExprAdd&)      nodes[i], *args[i][1], *args[i][2], *args[i][0]); break;
 		case ADD_V:  ((V&) algo).add_V_fwd  ((ExprAdd&)    nodes[i], *args[i][1], *args[i][2], *args[i][0]); break;
 		case ADD_M:  ((V&) algo).add_M_fwd  ((ExprAdd&)    nodes[i], *args[i][1], *args[i][2], *args[i][0]); break;
@@ -204,6 +206,7 @@ void CompiledFunction::backward(const V& algo) const {
 		case SYM:    ((V&) algo).symbol_bwd((ExprSymbol&)  nodes[i],                *args[i][0]); break;
 		case CST:    ((V&) algo).cst_bwd  ((ExprConstant&) nodes[i],                *args[i][0]); break;
 		case APPLY:  ((V&) algo).apply_bwd  ((ExprApply&)  nodes[i], &(args[i][1]), *args[i][0]); break;
+		case CHI:    ((V&) algo).chi_bwd    ((ExprChi&)    nodes[i], *args[i][1], *args[i][2], *args[i][3], *args[i][0]); break;
 		case ADD:    ((V&) algo).add_bwd    ((ExprAdd&)    nodes[i], *args[i][1], *args[i][2], *args[i][0]); break;
 		case ADD_V:  ((V&) algo).add_V_bwd  ((ExprAdd&)    nodes[i], *args[i][1], *args[i][2], *args[i][0]); break;
 		case ADD_M:  ((V&) algo).add_M_bwd  ((ExprAdd&)    nodes[i], *args[i][1], *args[i][2], *args[i][0]); break;

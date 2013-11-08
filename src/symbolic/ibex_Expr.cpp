@@ -121,6 +121,22 @@ ExprVector::ExprVector(const ExprNode** comp, int n, bool in_row) :
 		ExprNAryOp(comp, n, vec_dim(dims(comp,n),in_row)) {
 }
 
+const ExprChi& ExprChi::new_(const ExprNode** args) {
+	if (!(args[0]->type() == Dim::SCALAR)) throw DimException("\"chi\" expects scalar arguments");
+	if (!(args[1]->type() == Dim::SCALAR)) throw DimException("\"chi\" expects scalar arguments");
+	if (!(args[2]->type() == Dim::SCALAR)) throw DimException("\"chi\" expects scalar arguments");
+	return *new ExprChi(args);
+}
+
+const ExprChi& ExprChi::new_(const ExprNode& a, const ExprNode& b, const ExprNode& c) {
+	if (!(a.type() == Dim::SCALAR)) throw DimException("\"chi\" expects scalar arguments");
+	if (!(b.type() == Dim::SCALAR)) throw DimException("\"chi\" expects scalar arguments");
+	if (!(c.type() == Dim::SCALAR)) throw DimException("\"chi\" expects scalar arguments");
+	const ExprNode* args2[3] = {&a,&b,&c};
+	return *new ExprChi(args2);
+}
+
+
 ExprApply::ExprApply(const Function& f, const ExprNode** args) :
 		ExprNAryOp(args,f.nb_arg(),f.expr().dim),
 		func(f) {

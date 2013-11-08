@@ -620,6 +620,12 @@ Interval min(const Interval& x, const Interval& y);
  * \remark By convention, \f$ 0\in[x] \Longrightarrow sign[x]=[-1,1]\f$. */
 Interval sign(const Interval& x);
 
+/** \brief Chi of [a], [b] and [c].
+ *
+ *  Return \f$chi([a],[b],[c]) = 0.5*(1-\sign([a]))*[b] + 0.5*(\sign([a])+1)*[c]. \f$
+ * \remark  chi([a],[b],[c]) =[b] if [a]<=0, [c] if [a]>0, hull \{[b], [c]\} else.  */
+Interval chi(const Interval& a, const Interval& b, const Interval& c);
+
 /**
  * \brief Return the largest integer interval included in x.
  */
@@ -765,6 +771,9 @@ bool proj_min(const Interval& y, Interval& x1, Interval& x2);
  * Set [x] to \f$[x]\cap \{ x\in [x] \exists y\in [y], \quad y=sign(x) \}\f$. */
 bool proj_sign(const Interval& y, Interval& x);
 
+/** \brief Projection of f=chi(a,b,c). */
+bool proj_chi(const Interval& f, Interval& a, Interval& b, Interval& c);
+
 /** \brief Contract x w.r.t. the fact that it must be integral.
  *
  */
@@ -908,7 +917,15 @@ inline Interval sign(const Interval& x) {
 	return x.ub()<0 ? Interval(-1,-1) : x.lb()>0 ? Interval(1,1) : Interval(-1,1);
 }
 
-
+inline Interval chi(const Interval& a, const Interval& b, const Interval& c){
+	if (a.ub()<=0) {
+		return b;
+	} else if (a.lb()>0) {
+		return c;
+	} else {
+		return b|c;
+	}
+}
 
 // ArcTan2 by Jordan Ninin (Sept 2013) car ni Gaol, ni Profil/Bias ni Filib n'implemente atan2
 inline Interval atan2(const Interval& y, const Interval& x) {
@@ -1086,6 +1103,18 @@ inline bool proj_sign(const Interval& y,  Interval& x) {
 	x &= Interval::POS_REALS;
 	return !x.is_empty();
 }
+
+
+inline bool proj_chi(const Interval& f, Interval& a, Interval& b, Interval& c){
+	if      (a.ub()<=0) {if ((b &= f).is_empty()) { a.set_empty(); c.set_empty(); return false; } }
+	else if (a.lb()>0)  {if ((c &= f).is_empty()) { a.set_empty(); b.set_empty(); return false; } }
+
+	if (f.is_disjoint(b)) {if ((a &= Interval::POS_REALS).is_empty()) { b.set_empty(); c.set_empty(); return false; } }
+	if (f.is_disjoint(c)) {if ((a &= Interval::NEG_REALS).is_empty()) { b.set_empty(); c.set_empty(); return false; } }
+
+	return true;
+}
+
 
 inline bool proj_integer(Interval& x) {
 	return !(x = integer(x)).is_empty();

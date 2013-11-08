@@ -48,6 +48,7 @@ public:
 	inline void cst_fwd(const ExprConstant&, ExprLabel& y);
 	inline void symbol_fwd(const ExprSymbol&, ExprLabel& y);
 	inline void apply_fwd(const ExprApply&, ExprLabel** x, ExprLabel& y);
+	inline void chi_fwd(const ExprChi&, const ExprLabel& x1, const ExprLabel& x2, const ExprLabel& x3, ExprLabel& y);
 	inline void add_fwd(const ExprAdd&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y);
 	inline void mul_fwd(const ExprMul&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y);
 	inline void sub_fwd(const ExprSub&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y);
@@ -114,6 +115,7 @@ inline void Eval::cst_fwd(const ExprConstant& c, ExprLabel& y) {
 	}
 }
 inline void Eval::apply_fwd(const ExprApply& a, ExprLabel** x, ExprLabel& y)                          { *y.d = eval(a.func,x); }
+inline void Eval::chi_fwd(const ExprChi&, const ExprLabel& x1, const ExprLabel& x2, const ExprLabel& x3, ExprLabel& y) { y.d->i() = chi(x1.d->i(),x2.d->i(),x3.d->i()); }
 inline void Eval::add_fwd(const ExprAdd&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)     { y.d->i()=x1.d->i()+x2.d->i(); }
 inline void Eval::mul_fwd(const ExprMul&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)     { y.d->i()=x1.d->i()*x2.d->i(); }
 inline void Eval::sub_fwd(const ExprSub&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)     { y.d->i()=x1.d->i()-x2.d->i(); }

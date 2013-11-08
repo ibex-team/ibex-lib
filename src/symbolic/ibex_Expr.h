@@ -371,6 +371,32 @@ private:
 	ExprApply(const Function& expr, const ExprNode** args);
 };
 
+/**
+ * \ingroup symbolic
+ * \brief Chi function of 3 expressions
+ */
+class ExprChi : public ExprNAryOp {
+public:
+
+	/** Create an equality constraint chi(a,b,c)=expr. */
+	const ExprCtr& operator=(const ExprNode& expr) const { return ((ExprNode&) *this)=expr; }
+
+	/** Create an equality constraint chi(a,b,c)=value. */
+	const ExprCtr& operator=(const Interval& value) const  { return ((ExprNode&) *this)=value; }
+
+	/** Accept an #ibex::ExprVisitor visitor. */
+	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
+
+	static const ExprChi& new_(const ExprNode** args);
+	static const ExprChi& new_(const ExprNode& a, const ExprNode& b, const ExprNode& c);
+
+private:
+	ExprChi(const ExprNode** args) : ExprNAryOp(args,3,Dim()) {	}
+
+	ExprChi(const ExprChi&); // copy constructor forbidden
+};
+
+
 namespace parser {
 class ExprEntity;
 }
@@ -1447,6 +1473,10 @@ inline const ExprMin& min(const ExprNode& left, const ExprNode& right) {
 /** Arctangent2 of two expressions */
 inline const ExprAtan2& atan2(const ExprNode& exp1, const ExprNode& exp2) {
 	return ExprAtan2::new_(exp1, exp2); }
+
+/** Chi function of three expressions */
+inline const ExprChi& chi(const ExprNode& exp1, const ExprNode& exp2, const ExprNode& exp3) {
+	return ExprChi::new_(exp1, exp2, exp3); }
 
 /** Addition of an expression to a constant */
 inline const ExprAdd& operator+(const ExprNode& left, const Interval& value) {

@@ -62,6 +62,7 @@ using namespace ibex::parser;
 "acosh"                          { return TK_ACOSH; }
 "asinh"                          { return TK_ASINH; }
 "atanh"                          { return TK_ATANH; }
+"chi"                            { return TK_CHI; }
 
 "in"                             { return TK_IN;  }
 "inf"                            { return TK_INF; }

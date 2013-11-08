@@ -290,6 +290,12 @@ void ExprDiff::visit(const ExprApply& e) {
 	not_implemented("diff with apply");
 }
 
+void ExprDiff::visit(const ExprChi& e) {
+
+	//TODO
+	not_implemented("diff with chi");
+}
+
 void ExprDiff::visit(const ExprAdd& e)   { add_grad_expr(e.left,  *grad[e]);
                                            add_grad_expr(e.right, *grad[e]); }
 void ExprDiff::visit(const ExprMul& e)   { if (!e.dim.is_scalar()) not_implemented("diff with matrix/vector multiplication"); // TODO

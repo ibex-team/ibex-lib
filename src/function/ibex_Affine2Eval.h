@@ -51,6 +51,7 @@ public:
 	void cst_fwd(const ExprConstant&, ExprLabel& y);
 	void symbol_fwd(const ExprSymbol&, ExprLabel& y);
 	void apply_fwd(const ExprApply&, ExprLabel** x, ExprLabel& y);
+	void chi_fwd(const ExprChi&, const ExprLabel& x1, const ExprLabel& x2, const ExprLabel& x3, ExprLabel& y);
 	void add_fwd(const ExprAdd&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y);
 	void mul_fwd(const ExprMul&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y);
 	void sub_fwd(const ExprSub&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y);
@@ -140,6 +141,10 @@ inline void Affine2Eval::apply_fwd(const ExprApply& a, ExprLabel** x, ExprLabel&
 	ExprLabel tmp = eval_label(a.func,x);
 	*y.af2 = *tmp.af2;
 	*y.d = *tmp.d;
+}
+inline void Affine2Eval::chi_fwd(const ExprChi&,  const ExprLabel& x1, const ExprLabel& x2, const ExprLabel& x3, ExprLabel& y)                         {
+	y.af2->i()=chi(x1.d->i(),x2.af2->i(),x3.af2->i());
+	y.d->i()  =chi(x1.d->i(),x2.d->i(),x3.d->i());
 }
 inline void Affine2Eval::add_fwd(const ExprAdd&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)     {
 	y.af2->i()=x1.af2->i()+x2.af2->i();

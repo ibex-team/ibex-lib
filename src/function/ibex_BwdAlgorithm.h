@@ -38,6 +38,9 @@ protected:
 	/** TO BE DEFINED (by the subclass) */
 	void apply_bwd(const ExprApply&, ExprLabel** argL, const ExprLabel& result);
 
+	/** TO BE DEFINED (by the subclass) */
+	void chi_bwd(const ExprChi&,  ExprLabel& a, ExprLabel& b, ExprLabel& c, const ExprLabel& result);
+
 	/*==================== binary operators =========================*/
 	/** TO BE DEFINED (by the subclass) */
 	void add_bwd(const ExprAdd&, ExprLabel& leftL, ExprLabel& rightL, const ExprLabel& result);

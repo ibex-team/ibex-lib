@@ -234,6 +234,22 @@ void ExprCopy::visit(const ExprApply& e) {
 	delete [] args2;
 }
 
+void ExprCopy::visit(const ExprChi& e) {  // TODO to check  Jordan: Gilles C. help me
+	for (int i=0; i<e.nb_args; i++)
+		visit(e.arg(i));
+
+	const ExprNode** args2 = new const ExprNode* [e.nb_args];
+	for (int i=0; i<e.nb_args; i++) {
+		args2[i]=&ARG(i);
+		// don't remove this node even if it is a constant because
+		// it is an argument of this function call.
+		mark(e.arg(i));
+	}
+	clone.insert(e, &ExprChi::new_(args2));
+	delete [] args2;
+}
+
+
 
 typedef Domain (*dom_func2)(const Domain&, const Domain&);
 

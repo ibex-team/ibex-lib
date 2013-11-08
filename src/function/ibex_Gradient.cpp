@@ -127,6 +127,26 @@ void Gradient::apply_bwd (const ExprApply& a, ExprLabel** x, const ExprLabel& y)
 	}
 }
 
+void Gradient::chi_bwd (const ExprChi&, ExprLabel& a, ExprLabel& b, ExprLabel& c, const ExprLabel& y) {
+	Interval gx1,gx2;
+// TODO Jordan: to check please Gilles C. :D it is inspired from "max"
+	if (a.d->i().ub()<=0) {
+		gx1=Interval::ONE;
+		gx2=Interval::ZERO;
+	}
+	else if (a.d->i().lb()>0) {
+		gx1=Interval::ZERO;
+		gx2=Interval::ONE;
+	} else {
+		gx1=Interval(0,1);
+		gx2=Interval(0,1);
+	}
+
+	b.g->i() += y.g->i() * gx1;
+	c.g->i() += y.g->i() * gx2;
+}
+
+
 void Gradient::max_bwd(const ExprMax&, ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) {
 	Interval gx1,gx2;
 

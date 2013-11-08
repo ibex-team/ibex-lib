@@ -30,6 +30,7 @@ public:
 	inline void symbol_bwd(const ExprSymbol& , const ExprLabel& )                         { /* nothing to do */ }
 	inline void cst_bwd   (const ExprConstant& c, const ExprLabel& y)                              { /* TODO: improve this. */ if (*(y.d)!=c.get()) throw EmptyBoxException(); }
 	inline void apply_bwd (const ExprApply& a, ExprLabel** x, const ExprLabel& y)                { if (!iproj(a.func, *y.d, x)) throw EmptyBoxException(); }
+	inline void chi_bwd   (const ExprChi&,ExprLabel& a,ExprLabel& b,ExprLabel& c,const ExprLabel& f) { not_implemented("Inner projection of \"chi\""); }
 	inline void add_bwd   (const ExprAdd&,     ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) { if (!iproj_add(y.d->i(),x1.d->i(),x2.d->i(),x1.p->i(),x2.p->i())) throw EmptyBoxException(); }
 	inline void add_V_bwd (const ExprAdd&,     ExprLabel& , ExprLabel& , const ExprLabel& ) { not_implemented("Inner projection of \"add_V\""); }
 	inline void add_M_bwd (const ExprAdd&,     ExprLabel& , ExprLabel& , const ExprLabel& ) { not_implemented("Inner projection of \"add_M\""); }

@@ -84,6 +84,15 @@ void ExprPrinter::visit(const ExprApply& a) {
 	(*os) << ")";
 }
 
+void ExprPrinter::visit(const ExprChi& a) {
+	(*os) << "chi(";
+	for (int i=0; i<a.nb_args; i++) {
+		visit(*a.args[i]);
+		if (i<a.nb_args-1) (*os) << ",";
+	}
+	(*os) << ")";
+}
+
 void ExprPrinter::visit(const ExprAdd& e)   { (*os) << "("; visit(e.left); (*os) << "+"; visit(e.right); (*os) << ")"; }
 void ExprPrinter::visit(const ExprMul& e)   { (*os) << "("; visit(e.left); (*os) << "*"; visit(e.right); (*os) << ")"; }
 void ExprPrinter::visit(const ExprSub& e)   { (*os) << "("; visit(e.left); (*os) << "-"; visit(e.right); (*os) << ")"; }

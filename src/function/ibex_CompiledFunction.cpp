@@ -128,6 +128,8 @@ void CompiledFunction::visit(const ExprVector& e) { visit(e,VEC); }
 
 void CompiledFunction::visit(const ExprApply& e) { visit(e,APPLY); }
 
+void CompiledFunction::visit(const ExprChi& e) { visit(e,CHI); }
+
 void CompiledFunction::visit(const ExprAdd& e)   {
 	if (e.dim.is_scalar())      visit(e,ADD);
 	else if (e.dim.is_vector()) visit(e,ADD_V);
@@ -212,6 +214,7 @@ const char* CompiledFunction::op(operation o) const {
 	case CST:   return "const";
 	case SYM:   return "symbl";
 	case APPLY: return "apply";
+	case CHI: return "chi";
 	case ADD: case ADD_V: case ADD_M:
 		        return "+";
 	case MUL: case MUL_SV: case MUL_SM: case MUL_VV: case MUL_MV: case MUL_MM:
@@ -289,6 +292,14 @@ void CompiledFunction::print() const {
 			cout << e.id << ": " << "func()" << " " << *f.args[i][0];
 			for (int j=0; j<e.nb_args; j++)
 				cout << " " << e.arg(j).id;
+		}
+		break;
+		case CompiledFunction::CHI:
+		{
+			ExprChi& e=(ExprChi&) f.nodes[i];
+			cout << e.id << ": chi " << " " << *f.args[i][0] << " ";
+			for (int i=0; i<e.nb_args; i++)
+				cout << (e.arg(i).id) << " ";
 		}
 		break;
 		case CompiledFunction::ADD:
