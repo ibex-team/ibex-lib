@@ -13,7 +13,6 @@
 #define IBEX_AFFINE2_NO_H_
 
 #include "ibex_Interval.h"
-#include "ibex_Affine2.h"
 
 
 namespace ibex {

@@ -42,8 +42,9 @@ class Affine2MatrixArray;
 
 //typedef AF_fAF1  AF_Default;
 typedef AF_fAF2  AF_Default;
-//typedef AF_fAF2_FMA  AF_Default;
+//typedef AF_fAF2_fma  AF_Default;
 //typedef AF_iAF  AF_Default;
+//typedef AF_sAF  AF_Default;
 //typedef AF_No  AF_Default;
 
 
