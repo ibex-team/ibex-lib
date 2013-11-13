@@ -1,6 +1,6 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_UpdateLoup.cpp
+// File        : ibex_OptimProbing.cpp_
 // Author      : Gilles Chabert, Ignacio Araya, Bertrand Neveu
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
@@ -46,6 +46,7 @@ bool Optimizer::is_inner(const IntervalVector& box) {
 	return true;
 }
 
+
 /* last update: IAR  */
 bool Optimizer::in_HC4(IntervalVector& box) {
 	if (!is_feasible(box)) { box.set_empty(); return false; }
@@ -71,9 +72,9 @@ bool Optimizer::check_candidate(const Vector& pt, bool _is_inner) {
 	// The test of the constraints is done only when the evaluation of the criterion
 	// is better than the loup (a cheaper test).
 
-	//  cout << " res " <<  res << " loup " << loup << endl;
+	//        cout << " res " <<  res << " loup " <<  loup <<  " is_inner " << _is_inner << endl;
 	if (res<loup) {
-		if (_is_inner || is_inner(pt)) {
+	  if (_is_inner || is_inner(pt)) {
 			loup = res;
 			loup_point = pt;
 			return true;
@@ -83,7 +84,7 @@ bool Optimizer::check_candidate(const Vector& pt, bool _is_inner) {
 	return false;
 }
 
-bool Optimizer::random_probing (const IntervalVector& box, bool is_inner) {
+  bool Optimizer::random_probing (const IntervalVector& box, const IntervalVector & fullbox, bool is_inner) {
 	Vector pt(n);
 	bool loup_changed=false;
 
@@ -94,22 +95,25 @@ bool Optimizer::random_probing (const IntervalVector& box, bool is_inner) {
 	}
 
 	/*=================== "intensification" =================== */
-	if (m==0){
-//	// --> does not bring substantial gain for constrained optimization ; useful for unconstrained optimization
-	  if (loup_changed)
+//	// --> does not bring substantial gain
+
+	if (m==0)  // interesting for unconstrained optimization
+	  
+	  {	if (loup_changed)
 //		// we activate line probing only if the starting point has improved the goal.
 //		// we use the full box (not inbox)
-	    line_probing(box);
-	  else
+	      line_probing(fullbox);
+	    else
 //		// Try Hansen dichotomy between the last candidate point (pt)
 //		// and the loup (note: the segment goes outside of the box, this is on purpose).
 //		//
 //		// Possible improvement: chose the random point with the smallest criterion
 //		// instead of the last one.
-	    loup_changed = dichotomic_line_search(pt,true);
-	}
+	      loup_changed = dichotomic_line_search(pt,true);
+	  }
+	  
 	/*========================================================*/
-
+	
 	return loup_changed;
 }
 
@@ -243,7 +247,7 @@ bool Optimizer::line_probing(const IntervalVector& box) {
 	return dichotomic_line_search(facet_point,false);
 }
 
-/* ====================== 3nd method: make a double gradient descent ===============================
+/* ====================== 3rd method: make a double gradient descent ===============================
 * TO DO...........
 * It probably requires Hessian matrix.
 */
@@ -277,7 +281,7 @@ bool Optimizer::update_loup_probing(const IntervalVector& box) {
 
 	bool loup_changed; // return value
 	//	cout <<  " inner ? " << inner_found? << " box " << box << " inbox " << inbox << endl;
-	loup_changed = random_probing(inner_found? inbox : box, inner_found);
+	loup_changed = random_probing(inner_found? inbox : box, box, inner_found);
 
 	if (loup_changed) {
 

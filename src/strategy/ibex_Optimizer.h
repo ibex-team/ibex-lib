@@ -13,6 +13,7 @@
 
 #include "ibex_Bsc.h"
 #include "ibex_CtcHC4.h"
+#include "ibex_Ctc3BCid.h"
 #include "ibex_CtcUnion.h"
 #include "ibex_Backtrackable.h"
 #include "ibex_CellHeapOptim.h"
@@ -40,9 +41,9 @@ public:
 	/**
 	 *  \brief Create an optimizer.
 	 *
-	 *   \param sys   - the <b>extended system</b> (see below)
+	 *   \param sys   - the system to optimize
 	 *   \param bsc   - bisector for extended boxes
-	 *   \param ctc   - contractor for the <b>extended system</b>
+	 *   \param ctc   - contractor for the <b>extended system</b> (see below)
 	 *
 	 * And optionally:
 	 *   \param prec          - absolute precision for the boxes (bisection control)
@@ -50,20 +51,21 @@ public:
 	 *   \pram  goal_abs_prec - absolute precision of the objective (the optimizer stops once reached).
 	 *   \param sample_size   - number of samples taken when looking for a "loup"
 	 *
-	 * <ul> The extended system (see copy constructor of #ibex::System) contains:
+	 * <ul> The extended system (see ExtendedSystem constructor) contains:
 	 * <li> (n+1) variables, x_1,...x_n,y. The index of y is #goal_var (==n).
 	 * <li> A (m+1)-valued function f:(x,y)->(y-f(x),g_0(x),...,g_m(x))
 	 * <li> (m+1) constraints: y-f(x)=0, g_1(x)<=0, ..., g_m(x)<=0.
 	 * </ul>
 	 *
-	 * \warning The optimizer relies on the contractor \a ctc to contract the domain of the goal variable.
-	 * If this contractor never contracts this goal variable, the optimizer will never stop.
+	 * \warning The optimizer relies on the contractor \a ctc to contract the domain of the goal variable and increase the uplo.
+	 * If this contractor never contracts this goal variable, the optimizer will only rely on the evaluation of f  and will be very slow.
 	 *
 	 */
 
 	Optimizer(System& sys, Bsc& bsc, Ctc& ctc, double prec=default_prec,
 			double goal_rel_prec=default_goal_rel_prec, double goal_abs_prec=default_goal_abs_prec,
 			int sample_size=default_sample_size);
+
 
 	/**
 	 * \brief Delete *this.
@@ -72,6 +74,8 @@ public:
 
 	/**
 	 * \brief Run the optimization.
+
+	 * \param init_box    -  the initial box
 	 */
 	void optimize(const IntervalVector& init_box);
 
@@ -116,9 +120,9 @@ public:
 	 *
 	 * Corresponds to the normalized system with the goal f(x)
 	 * represented as a variable "y" and with the additional constraint
-	 * y=f(x). The domain of y stores the interval [uplo,loup] where
-	 * "uplo" is the uppermost lower bound on f(x) and "loup" the
-	 * lowest upper bound.
+	 * y=f(x). The domain of y in an extended box stores the interval [ylb,yub] where
+	 * "ylb" is the lower bound of f(x) in the box and "yub" its 
+	 * upper bound.  (y is contracted with y <= ymax : see compute_ymax)
 	 *
 	 * The index of y is ext_sys.nb_var.
 	 * See #ibex::ExtendedSystem::goal_var.
@@ -131,6 +135,8 @@ public:
 	/** Contractor for the extended system
 	 * (y=f(x), g_1(x)<=0,...,g_m(x)<=0). */
 	Ctc& ctc;
+
+
 
 
 	/** Cell buffer. */
@@ -212,7 +218,7 @@ protected:
 	 * \brief Return an upper bound of f(x).
 	 *
 	 * Return +oo if x is outside the definition domain of f.
-	 */
+	 */	
 	inline double goal(const Vector& x) const {
 		Interval fx=sys.goal->eval(x);
 		if (fx.is_empty())  // means: outside of the definition domain of the function
@@ -225,19 +231,81 @@ protected:
 	 * \brief Main procedure for processing a box.
 	 *
 	 * <ul>
+	 * <li> contract and bound  the cell box (see contract_and_bound)
+	 * <li> push the cell onto the heap or delete the cell in case of empty box detected
+	 * </ul>
+	 *
+	 */
+
+	void handle_cell(Cell& c, const IntervalVector& init_box);
+
+	/**
+	 * \brief Contract and bound procedure for processing a box.
+	 *
+	 * <ul>
 	 * <li> contract the cell's box w.r.t the "loup",
 	 * <li> contract with the contractor ctc,
 	 * <li> search for a new loup,
-	 * <li> push the box onto the heap.
+	 * <li> call the first order contractor
 	 * </ul>
 	 *
-	 * Return true iff the loup has been decreased
 	 */
-	bool contract_and_bound(Cell& c, const IntervalVector& init_box);
+	void contract_and_bound(Cell& c, const IntervalVector& init_box);
+
+
+
+	/** 
+	 * \brief Contraction procedure for processing a box.
+	 *
+	 * <ul>
+	 * <li> contract with the contractor ctc,
+	 * </ul>
+	 *
+         */
+
+	 virtual void contract(IntervalVector& box, const IntervalVector& init_box );
+
+
+	/** 
+	 * \brief First order contraction procedure for processing a box.
+	 *
+	 * <ul>
+	 * <li>  gradient=0 contraction for unconstrained optimization ; 
+	 * <li>  first order test for constrained optimization (useful only when there are no equations replaced by inequalities) 
+	 * </ul>
+	 *
+	 */
+
+	virtual void firstorder_contract ( IntervalVector& box, const IntervalVector& init_box);
+
+
+	/**
+	 * \brief Update the entailed constraint for the current box
+	 */
+	void update_entailed_ctr(const IntervalVector& box);
+
+
+	/**
+	 * \brief Update the uplo of non bisectable boxes
+	 */
+        void update_uplo_of_epsboxes(double ymin);
+
+	/**
+	 * \brief Update the uplo
+	 */
+        void update_uplo();
+
+
+	/**
+	 * \brief Main procedure for updating the loup.
+	 */
+	void update_loup(const IntervalVector& box);
+
 
 	/*=======================================================================================================*/
 	/*             Functions to update the loup (see ibex_OptimProbing and ibex_OptimSimplex)                */
 	/*=======================================================================================================*/
+	
 	/**
 	 * \brief Monotonicity analysis.
 	 *
@@ -261,6 +329,7 @@ protected:
 	 * entailed as skipped from the check)
 	 */
 	bool is_inner(const IntervalVector& box);
+
 
 	/**
 	 * \brief Reduce the box to an inner box using inHC4 algorithm.
@@ -289,12 +358,15 @@ protected:
 	 *
 	 * Take random points in any directions.
 	 *
+	 * \param box  the box in which a random point is searched for (the found inner box if is_inner i strue)
+	 * \param fullbox the box where an intensification is made (in the current version only in case of unconstrained optimization)
 	 * \param is_inner - If true, the box is already known to be an inner box so there
 	 *                   is no need to check constraints again.
 	 *
 	 * \return true in case of success, i.e., if the loup has been decreased.
 	 */
-	bool random_probing (const IntervalVector& box, bool is_innner);
+
+	bool random_probing (const IntervalVector& box, const IntervalVector& fullbox, bool is_innner);
 
 	/**
 	 * \brief Perform a dichotomic search of a minimum in a line (see Hansen's book).
@@ -328,23 +400,10 @@ protected:
 
 	/**
 	 * \brief Update loup using inner linearizations.
+	 * return true if the loup has been modified.
 	 */
 	bool update_loup_simplex(const IntervalVector& box);
 
-	/**
-	 * \brief Update the entailed constraint for the current box
-	 */
-	void update_entailed_ctr(const IntervalVector& box);
-
-	/**
-	 * \brief Main procedure for updating the loup.
-	 */
-	bool update_loup(const IntervalVector& box);
-
-	/**
-	 * \brief Update the uplo of non bisectable boxes
-	 */
-        void update_uplo_of_epsboxes(double ymin);
 
 	/**
 	 * \brief Display the loup (for debug)
@@ -369,9 +428,19 @@ protected:
 	void read_ext_box(const IntervalVector& ext_box, IntervalVector& box);
 
 	/**
-	 * \brief Symbolic gradient ob the objective
+	 * \brief Symbolic gradient of the objective
 	 */
 	Function df;
+
+
+	/** 
+	 * \brief Computes and returns  the value ymax (the loup decreased with the precision)
+	 * the heap and the current box are actually contracted with y <= ymax
+	 *
+	 */
+	double compute_ymax ();
+
+	bool loup_changed;
 
 private:
 
@@ -381,7 +450,7 @@ private:
 	/** Inner contractor (for the negation of g) */
 	CtcUnion* is_inside;
 
-	/** Lower bound of the small boxes taken by the precision contractor */
+	/** Lower bound of the small boxes taken by the precision */
 	double uplo_of_epsboxes;
 
 	/** Number of cells put into the heap (which passed through the contractors)  */
@@ -397,6 +466,7 @@ private:
 	double diam_rand;
 	int nb_inhc4;
 	double diam_inhc4;
+
 
 };
 

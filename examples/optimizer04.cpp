@@ -19,8 +19,7 @@ int main(int argc, char** argv){
 
 
 	// ------------------------------------------------
-	// Parameterized Optimizer (with a system loaded from a file, and choice of contractor and bisector)
-	// with X_Newton
+	// Parameterized Optimizer (with a system loaded from a file, and choice of contractor, linearization  and bisector)
         // Load a problem to optimize
 	// --------------------------
 	try {
@@ -38,7 +37,7 @@ int main(int argc, char** argv){
 	double goalprec= atof (argv[6]);
 	double timelimit = atof(argv[7]);
 	
-	srand(2);
+	srand(1);
 
 	// the extended system 
 	ExtendedSystem ext_sys(sys);

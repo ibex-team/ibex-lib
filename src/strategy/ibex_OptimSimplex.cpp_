@@ -1,6 +1,6 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_OptimSimplex.cpp
+// File        : ibex_OptimSimplex.cpp_
 // Author      : Ignacio Araya  Bertrand Neveu
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
@@ -146,7 +146,7 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 	}
 	if (trace) {
 		if(stat == LinearSolver::TIME_OUT) std::cout << "Simplex spent too much time" << std::endl;
-		if(stat == LinearSolver::MAX_ITER) std::cout << "Simplex spent too much iteration" << std::endl;
+		if(stat == LinearSolver::MAX_ITER) std::cout << "Simplex spent too many iterations" << std::endl;
 	}
 	return false;
 }
