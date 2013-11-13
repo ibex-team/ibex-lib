@@ -1109,9 +1109,14 @@ inline bool proj_chi(const Interval& f, Interval& a, Interval& b, Interval& c){
 	if      (a.ub()<=0) {if ((b &= f).is_empty()) { a.set_empty(); c.set_empty(); return false; } }
 	else if (a.lb()>0)  {if ((c &= f).is_empty()) { a.set_empty(); b.set_empty(); return false; } }
 
-	if (f.is_disjoint(b)) {if ((a &= Interval::POS_REALS).is_empty()) { b.set_empty(); c.set_empty(); return false; } }
-	if (f.is_disjoint(c)) {if ((a &= Interval::NEG_REALS).is_empty()) { b.set_empty(); c.set_empty(); return false; } }
-
+	if (f.is_disjoint(b)) {
+		if ((a &= Interval::POS_REALS).is_empty()) { b.set_empty(); c.set_empty(); return false; }
+		if ((c &= f).is_empty()) { a.set_empty(); b.set_empty(); return false; }
+	}
+	if (f.is_disjoint(c)) {
+		if ((a &= Interval::NEG_REALS).is_empty()) { b.set_empty(); c.set_empty(); return false; }
+		if ((b &= f).is_empty()) { a.set_empty(); c.set_empty(); return false; }
+	}
 	return true;
 }
 
