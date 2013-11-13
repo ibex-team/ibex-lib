@@ -161,13 +161,13 @@ Tube& Tube::operator=(const IntervalVector& x) {
 }
 
 Tube& Tube::operator &=(const Tube& x) {
-	__ASSERT_TUBE_TIME_DOMAIN__(*this,x);
+	__assert_tube_time_domain__(*this,x);
 	((IntervalVector&) (*this))&=x;
 	return *this;
 }
 
 Tube& Tube::operator |=(const Tube& x) {
-	__ASSERT_TUBE_TIME_DOMAIN__(*this,x);
+	__assert_tube_time_domain__(*this,x);
 	((IntervalVector&) (*this))|=x;
 	return *this;
 }
@@ -207,7 +207,7 @@ Tube& Tube::ctcIn(const Interval& time, const Interval& in){
 }
 
 Tube& Tube::ctcInter(const Tube& x){
-	__ASSERT_TUBE_TIME_DOMAIN__(*this,x);
+	__assert_tube_time_domain__(*this,x);
 	for(int i=0;i<size();i++){
 		(*this)[i] &= x[i];
 	}
@@ -215,7 +215,7 @@ Tube& Tube::ctcInter(const Tube& x){
 }
 
 Tube& Tube::ctcUnion(const Tube& x){
-	__ASSERT_TUBE_TIME_DOMAIN__(*this,x);
+	__assert_tube_time_domain__(*this,x);
 	for(int i=0;i<size();i++){
 		(*this)[i] |= x[i];
 	}
@@ -223,7 +223,7 @@ Tube& Tube::ctcUnion(const Tube& x){
 }
 
 Tube& Tube::ctcEq(const Tube& x){
-	__ASSERT_TUBE_TIME_DOMAIN__(*this,x);
+	__assert_tube_time_domain__(*this,x);
 	for(int i=0;i<size();i++){
 		(*this)[i] &= x[i];
 	}
@@ -231,7 +231,7 @@ Tube& Tube::ctcEq(const Tube& x){
 }
 
 Tube& Tube::ctcSup(const Tube& x){
-	__ASSERT_TUBE_TIME_DOMAIN__(*this,x);
+	__assert_tube_time_domain__(*this,x);
 	Interval intt, intx;
 	for(int i=0;i<size();i++){
 		intt=(*this)[i]; intx=x[i];
@@ -242,7 +242,7 @@ Tube& Tube::ctcSup(const Tube& x){
 }
 
 Tube& Tube::ctcInf(const Tube& x){
-	__ASSERT_TUBE_TIME_DOMAIN__(*this,x);
+	__assert_tube_time_domain__(*this,x);
 	Interval intt, intx;
 	for(int i=0;i<size();i++){
 		intt=(*this)[i]; intx=x[i];

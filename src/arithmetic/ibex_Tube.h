@@ -300,12 +300,20 @@ public:
      * \brief Contract *this at time \a time to interval \a in .
      */
     Tube& ctcIn(double time, const Interval& in);
+
+    /**
+     * \brief Contract *this at time \a time to interval \a in .
+     */
     Tube& ctcIn(const Interval& time, const Interval& in);
 
     /**
-     * \brief Contract *this to its intersection or union with tube \a x .
+     * \brief Contract *this to its intersection with tube \a x .
      */
     Tube& ctcInter(const Tube& x);
+
+    /**
+     * \brief Contract *this to its union with tube \a x .
+     */
     Tube& ctcUnion(const Tube& x);
 
     /**
@@ -353,6 +361,10 @@ public:
      * \brief Return the integral of the  tube
      */
     Interval integral(unsigned int kmin, unsigned int kmax);
+
+    /**
+     * \brief Return the integral of the  tube
+     */
     Tube& integral();
 };
 
@@ -497,7 +509,7 @@ std::ostream& operator<<(std::ostream& os, const Tube& x);
 
 /*============================================ inline implementation ============================================ */
 
-#define __ASSERT_TUBE_TIME_DOMAIN__(t1,t2) assert(((t1).get_t0()==(t2).get_t0()) \
+#define __assert_tube_time_domain__(t1,t2) assert(((t1).get_t0()==(t2).get_t0()) \
 											   && ((t1).get_tF()==(t2).get_tF()) \
 											   && ((t1).get_delta_t()==(t2).get_delta_t()))
 
@@ -544,7 +556,7 @@ inline Tube& Tube::operator+=(const Interval& x2) {
 }
 
 inline Tube& Tube::operator+=(const Tube& x2) {
-	__ASSERT_TUBE_TIME_DOMAIN__(*this,x2);
+	__assert_tube_time_domain__(*this,x2);
 	((IntervalVector&) (*this))+=x2;
 	return *this;
 }
@@ -560,7 +572,7 @@ inline Tube& Tube::operator-=(const Interval& x2) {
 }
 
 inline Tube& Tube::operator-=(const Tube& x2){
-	__ASSERT_TUBE_TIME_DOMAIN__(*this,x2);
+	__assert_tube_time_domain__(*this,x2);
 	((IntervalVector&) (*this))-=x2;
 	return *this;
 }
@@ -576,7 +588,7 @@ inline Tube& Tube::operator*=(const Interval& x2){
 }
 
 inline Tube& Tube::operator*=(const Tube& x2){
-	__ASSERT_TUBE_TIME_DOMAIN__(*this,x2);
+	__assert_tube_time_domain__(*this,x2);
 	return (*this)=hadamard_product(*this,x2);
 }
 
@@ -591,7 +603,7 @@ inline Tube& Tube::operator/=(const Interval& x2){
 }
 
 inline Tube& Tube::operator/=(const Tube& x2) {
-	__ASSERT_TUBE_TIME_DOMAIN__(*this,x2);
+	__assert_tube_time_domain__(*this,x2);
 	for (int i = 0; i < size(); i++) {
 		((IntervalVector&) (*this))[i] /= x2[i];
 	}
