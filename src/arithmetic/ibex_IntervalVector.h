@@ -573,6 +573,30 @@ IntervalVector operator*(const Interval& x1, const Vector& x2);
 IntervalVector operator*(const Interval& x1, const IntervalVector& x2);
 
 /**
+ * \brief Hadamard product of x and y.
+ *
+ * The Hadamard product is a component-wise multiplication:
+ * z[i]=x[i]*y[i].
+ */
+IntervalVector hadamard_product(const IntervalVector& x, const Vector& y);
+
+/**
+ * \brief Hadamard product of x and y.
+ *
+ * The Hadamard product is a component-wise multiplication:
+ * z[i]=x[i]*y[i].
+ */
+IntervalVector hadamard_product(const Vector& x, const IntervalVector& y);
+
+/**
+ * \brief Hadamard product of x and y.
+ *
+ * The Hadamard product is a component-wise multiplication:
+ * z[i]=x[i]*y[i].
+ */
+IntervalVector hadamard_product(const IntervalVector& x, const IntervalVector& y);
+
+/**
  * \brief |x|.
  */
 IntervalVector abs(const IntervalVector& x);
@@ -610,10 +634,8 @@ bool proj_mul(const Interval& y, IntervalVector& x1, IntervalVector& x2);
  */
 std::ostream& operator<<(std::ostream& os, const IntervalVector& x);
 
-
 /**
  * \brief Cartesian product of x and y.
- *
  */
 IntervalVector cart_prod(const IntervalVector& x, const IntervalVector& y);
 

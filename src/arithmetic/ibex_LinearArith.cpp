@@ -174,6 +174,23 @@ inline M outer_prod(const Vin1& v1, const Vin2& v2) {
 	return y;
 }
 
+template<class Vin1, class Vin2, class Vout>
+inline Vout hadamard_prod(const Vin1& v1, const Vin2& v2) {
+
+	assert(v1.size()==v2.size());
+	Vout y(v1.size());
+
+	if (is_empty(v1) || is_empty(v2)) {
+		set_empty(y);
+		return y;
+	}
+
+	for (int i=0; i<v1.size(); i++) {
+			y[i]=v1[i]*v2[i];
+	}
+	return y;
+}
+
 template<class M, class Vin, class Vout>
 inline Vout mulMV(const M& m, const Vin& v) {
 	assert(m.nb_cols()==v.size());
@@ -497,6 +514,22 @@ IntervalMatrix outer_product(const IntervalVector& v1, const Vector& v2) {
 
 IntervalMatrix outer_product(const IntervalVector& v1, const IntervalVector& v2) {
 	return outer_prod<IntervalVector,IntervalVector,IntervalMatrix>(v1,v2);
+}
+
+Vector hadamard_product(const Vector& v1, const Vector& v2) {
+	return hadamard_prod<Vector,Vector,Vector>(v1,v2);
+}
+
+Vector hadamard_product(const Vector& v1, const IntervalVector& v2) {
+	return hadamard_prod<Vector,IntervalVector,IntervalVector>(v1,v2);
+}
+
+Vector hadamard_product(const IntervalVector& v1, const Vector& v2) {
+	return hadamard_prod<IntervalVector,Vector,IntervalVector>(v1,v2);
+}
+
+Vector hadamard_product(const IntervalVector& v1, const IntervalVector& v2) {
+	return hadamard_prod<IntervalVector,IntervalVector,IntervalVector>(v1,v2);
 }
 
 Vector operator*(const Matrix& m, const Vector& v) {

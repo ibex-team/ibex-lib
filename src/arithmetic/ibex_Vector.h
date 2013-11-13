@@ -185,6 +185,14 @@ double operator*(const Vector& x1, const Vector& x2);
 Matrix outer_product(const Vector& x1, const Vector& x2);
 
 /**
+ * \brief Hadamard product of x and y.
+ *
+ * The Hadamard product is a component-wise multiplication:
+ * z[i]=x[i]*y[i].
+ */
+Vector hadamard_product(const Vector& x, const Vector& y);
+
+/**
  * \brief d*x
  */
 Vector operator*(double d, const Vector& x);
