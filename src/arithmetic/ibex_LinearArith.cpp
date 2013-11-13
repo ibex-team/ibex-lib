@@ -520,15 +520,15 @@ Vector hadamard_product(const Vector& v1, const Vector& v2) {
 	return hadamard_prod<Vector,Vector,Vector>(v1,v2);
 }
 
-Vector hadamard_product(const Vector& v1, const IntervalVector& v2) {
+IntervalVector hadamard_product(const Vector& v1, const IntervalVector& v2) {
 	return hadamard_prod<Vector,IntervalVector,IntervalVector>(v1,v2);
 }
 
-Vector hadamard_product(const IntervalVector& v1, const Vector& v2) {
+IntervalVector hadamard_product(const IntervalVector& v1, const Vector& v2) {
 	return hadamard_prod<IntervalVector,Vector,IntervalVector>(v1,v2);
 }
 
-Vector hadamard_product(const IntervalVector& v1, const IntervalVector& v2) {
+IntervalVector hadamard_product(const IntervalVector& v1, const IntervalVector& v2) {
 	return hadamard_prod<IntervalVector,IntervalVector,IntervalVector>(v1,v2);
 }
 
