@@ -477,6 +477,7 @@ private:
 
 	Function& operator=(const Function&);       // forbidden
 
+	Function* df;
 public:
 
 	/**
@@ -499,6 +500,13 @@ public:
 	 * Works only if it is a ternary function.
 	 */
 	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3);
+
+	/**
+	 * \brief Apply this function to the arguments
+	 *
+	 * Works only if the function has four arguments.
+	 */
+	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4);
 
 	/**
 	 * \brief Apply this function to the arguments

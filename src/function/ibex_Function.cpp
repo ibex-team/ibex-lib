@@ -146,8 +146,9 @@ void Function::iproj(const Domain& y, IntervalVector& x, const IntervalVector& x
 void Function::gradient(const IntervalVector& x, IntervalVector& g) const {
 	assert(g.size()==nb_var());
 	assert(x.size()==nb_var());
-
 	Gradient().gradient(*this,x,g);
+//	if (!df) ((Function*) this)->df=new Function(*this,DIFF);
+//	g=df->eval_vector(x);
 }
 
 void Function::jacobian(const IntervalVector& x, IntervalMatrix& J) const {
@@ -212,6 +213,11 @@ const ExprApply& Function::operator()(const ExprNode& arg1, const ExprNode& arg2
 
 const ExprApply& Function::operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3) {
 	const ExprNode* args[3] = { &arg1, &arg2, &arg3 };
+	return (*this)(args);
+}
+
+const ExprApply& Function::operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4) {
+	const ExprNode* args[4] = { &arg1, &arg2, &arg3, &arg4 };
 	return (*this)(args);
 }
 
