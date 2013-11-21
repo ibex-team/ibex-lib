@@ -133,34 +133,28 @@ void Optimizer::update_entailed_ctr(const IntervalVector& box) {
 }
 
 
-
 void Optimizer::update_uplo() {
 	double new_uplo=POS_INFINITY;
 
-	if (! buffer.empty())
-		new_uplo= buffer.minimum();
+	if (! buffer.empty()){
+	  new_uplo= buffer.minimum();
+	  if (new_uplo < uplo_of_epsboxes) uplo = new_uplo;
+	  else uplo= uplo_of_epsboxes;
+	}
+	
 	else if (buffer.empty() && loup != POS_INFINITY) {
 		// empty buffer : new uplo is set to ymax (loup - precision) if a loup has been found
 		new_uplo=compute_ymax(); // [gch] TODO: why not new_uplo=loup ?
+		//[bn] because constraint y <= ymax was enforced
 		//	cout << " new uplo buffer empty " << new_uplo << " uplo " << uplo << endl;
-	}
-
-	// [gch] TODO: can we remplace the condition (new_uplo > uplo)
-	//             by assert(new_uplo >=uplo) ? Since we have
-	//             contracted the heap with ymax>=uplo
-	//             and since uplo<=ymax...
-	if (new_uplo < uplo_of_epsboxes && new_uplo > uplo) {
-		// cout << " new uplo " << new_uplo << " uplo " << uplo << endl;
-		uplo=new_uplo;
-	}
-	// [gch] TODO: I would only write "else {" here because
-	// if uplo_of_epsboxes==+oo and if new_uplo>=uplo_of_epsboxes
-	// then new_uplo==+oo so the assignment makes no problem
-	else if (new_uplo >=uplo_of_epsboxes && uplo_of_epsboxes != POS_INFINITY) {
-		uplo=uplo_of_epsboxes;
-		//cout << " uplo " << uplo << endl;
+		if (new_uplo > uplo && new_uplo <= uplo_of_epsboxes) 
+		  uplo=new_uplo;
+		else  if (new_uplo > uplo_of_epsboxes)
+		  uplo= uplo_of_epsboxes;
 	}
 }
+
+
 
 
 /* contract the box of the cell c , try to find a new loup :;
@@ -216,6 +210,9 @@ void Optimizer::contract_and_bound(Cell& c, const IntervalVector& init_box) {
 	// [gch] TODO: the case (!c.box.is_bisectable()) seems redundant
 	// with the case of a NoBisectableVariableException in
 	// optimize(). Is update_uplo_of_epsboxes called twice in this case?
+	// (bn] NO , the NoBisectableVariableException is raised by the bisector, 
+	// there are actually 2 different cases of a non bisected box that may cause an update 
+	// of uplo_of_epsboxes
 	if ((tmp_box.max_diam()<=prec && y.diam() <=goal_abs_prec) || !c.box.is_bisectable()) {
 		// rem1: tmp_box and not c.box because y is handled with goal_rel_prec and goal_abs_prec
 		// rem2: do not use a precision contractor here since it would make the box empty (and y==(-inf,-inf)!!)
@@ -336,25 +333,24 @@ void Optimizer::optimize(const IntervalVector& init_box) {
 	time+= Timer::VIRTUAL_TIMELAPSE();
 }
 
+
 void Optimizer::update_uplo_of_epsboxes(double ymin) {
 
-	// the current box is a "solution"'
+	// the current box cannot be bisected.  ymin is a lower bound of the objective in this box
 	// uplo of epsboxes can only go down, but not under uplo : it is an upperbound for uplo,
-	//that indicates a lowerbound for the objective in all the small boxes
+	// that indicates a lowerbound for the objective in all the small boxes
 	// found by the precision criterion
-	//	  cout << " small box " << tmp_box <<  "  " << c.box <<  endl;
-	// [gch] TODO: replace condition uplo_of_epsboxes > uplo below
-	//             by assert(uplo_of_epsboxes >=uplo) ?
-	if (uplo_of_epsboxes > ymin && uplo_of_epsboxes > uplo) {
-		if (ymin > uplo)
-			uplo_of_epsboxes = ymin;
-		else
-			uplo_of_epsboxes = uplo;
-		if (trace) {
-			cout << "uplo_of_epsboxes:" << setprecision(12) <<  uplo_of_epsboxes << " uplo " << uplo << endl;
-		}
-	}
+  assert (uplo_of_epsboxes >= uplo);
+  assert(ymin >= uplo);
+  if (uplo_of_epsboxes > ymin) 
+    {uplo_of_epsboxes = ymin;
+      if (trace) {
+	cout << "uplo_of_epsboxes:" << setprecision(12) <<  uplo_of_epsboxes << " uplo " << uplo << endl;
+      }
+    }
 }
+
+
 
 void Optimizer::report() {
 
