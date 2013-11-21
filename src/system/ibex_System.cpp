@@ -55,11 +55,11 @@ System::System(int n, const char* syntax) : nb_var(n), /* NOT TMP (required by p
 	}
 }
 
-System::System(const System& sys, copy_mode mode) : nb_var(0), nb_ctr(0), func(0), box(1) {
+System::System(const System& sys, copy_mode mode, double eps) : nb_var(0), nb_ctr(0), func(0), box(1) {
 
 	switch(mode) {
 	case COPY :      init(SystemCopy(sys,COPY)); break;
-	case NORMALIZE : init(SystemNormalize(sys)); break;
+	case NORMALIZE : init(SystemNormalize(sys,eps)); break;
 	case INEQ:       init(SystemCopy(sys,INEQ)); break;
 	}
 

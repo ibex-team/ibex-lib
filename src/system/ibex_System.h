@@ -89,19 +89,23 @@ public:
 	/**
 	 * \brief Duplicate/Transform the system.
 	 *
-	 * The \a mode field controls the copy:
+	 * \param mode   Controls the copy:
 	 * <ul>
 	 * <li> COPY:      Copy
 	 * <li> NORMALIZE: Copy and make all inequalities under the form f_i(x)<=0.
 	 *                 Thick equalities f(x)=[a,b] are also transformed into two
 	 *                 inequalities, f(x)<=b and -f(x)<=-a (in this precise order).
-	 *                 Other equalities are just copied.
+	 *                 Other equalities f=0 are transformed into f<=eps and -f<=eps,
+	 *                 where eps is the value given in 3rd argument.
 	 *                 Note that the number of constraints of the resulting system
 	 *                 in this case is greater than the number or the original one.
 	 * <li> INEQ:      Copy the inequalities only. The goal is not copied.
 	 * </ul>
+	 *
+	 * \param eps   Only for NORMALIZE. Transforms an equation f=0 into two
+	 *              inequalities: f<=eps and -f<=eps.
 	 */
-	System(const System& sys, copy_mode mode=COPY);
+	System(const System& sys, copy_mode mode=COPY, double eps=0);
 
 	/**
 	 * Merge two systems.
