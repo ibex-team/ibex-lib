@@ -141,17 +141,17 @@ void Optimizer::update_uplo() {
 	  if (new_uplo < uplo_of_epsboxes) uplo = new_uplo;
 	  else uplo= uplo_of_epsboxes;
 	}
-	
 	else if (buffer.empty() && loup != POS_INFINITY) {
-		// empty buffer : new uplo is set to ymax (loup - precision) if a loup has been found
-		new_uplo=compute_ymax(); // [gch] TODO: why not new_uplo=loup ?
-		//[bn] because constraint y <= ymax was enforced
-		//	cout << " new uplo buffer empty " << new_uplo << " uplo " << uplo << endl;
-		if (new_uplo > uplo && new_uplo <= uplo_of_epsboxes) 
-		  uplo=new_uplo;
-		else  if (new_uplo > uplo_of_epsboxes)
-		  uplo= uplo_of_epsboxes;
+	  // empty buffer : new uplo is set to ymax (loup - precision) if a loup has been found
+	  new_uplo=compute_ymax(); // not new_uplo=loup, because constraint y <= ymax was enforced
+         //    cout << " new uplo buffer empty " << new_uplo << " uplo " << uplo << endl;
+
+	  double m = min(new_uplo, uplo_of_epsboxes);
+	  if (uplo < m) uplo = m;
+         // note: we always have uplo <= uplo_of_epsboxes but we may have uplo > new_uplo, because
+         // ymax is strictly lower than the loup.
 	}
+
 }
 
 
