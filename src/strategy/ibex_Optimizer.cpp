@@ -133,6 +133,13 @@ void Optimizer::update_entailed_ctr(const IntervalVector& box) {
 }
 
 
+double minimum (double a, double b)
+  {if(a<=b) return a;
+    else return b;
+  }
+
+
+
 void Optimizer::update_uplo() {
 	double new_uplo=POS_INFINITY;
 
@@ -146,7 +153,7 @@ void Optimizer::update_uplo() {
 	  new_uplo=compute_ymax(); // not new_uplo=loup, because constraint y <= ymax was enforced
          //    cout << " new uplo buffer empty " << new_uplo << " uplo " << uplo << endl;
 
-	  double m = min(new_uplo, uplo_of_epsboxes);
+	  double m = minimum(new_uplo, uplo_of_epsboxes);
 	  if (uplo < m) uplo = m;
          // note: we always have uplo <= uplo_of_epsboxes but we may have uplo > new_uplo, because
          // ymax is strictly lower than the loup.
