@@ -374,9 +374,9 @@ int main() {
 	double bd[]={5.0111,2.5197,7.5308,3.52119,5.85707,4.73568};
 
 	// The corresponding intervals (uncertainty is taken into account)
-	Interval bX[N];
-	Interval bY[N];
-	Interval bD[N];
+	IntervalVector bX(N);
+	IntervalVector bY(N);
+	IntervalVector bD(N);
 
 	// add uncertainty on measurements
 	for (int i=0; i<N; i++) {
