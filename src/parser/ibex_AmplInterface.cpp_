@@ -2,18 +2,18 @@
 //                                  I B E X
 // File        : ibex_AmplInterface.cpp Adapted from CouenneAmplInterface
 // Author      : Jordan Ninin
-// Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Nov 5, 2013
 // Last Update : Nov 5, 2013
 //============================================================================
 
-#include "ibex_AmplInterface.h"
+#include "ibex_AmplInterface.h_"
 
 #include "solvers/asl.h"
 #include "solvers/nlp.h"
 #include "solvers/getstub.h"
 #include "solvers/opcode.hd"
+#include <stdint.h>
 
 // get ASL op. code relative to function pointer passed as parameter
 int getOperator (efunc *);
@@ -22,6 +22,8 @@ int getOperator (efunc *);
 #define VAR_E     ((const ASL_fg *) asl) -> I.var_e_
 #define CON_DE    ((const ASL_fg *) asl) -> I.con_de_
 #define OBJ_sense ((const ASL_fg *) asl) -> i.objtype_
+#define CEXPS1 ((const ASL_fg *) asl) -> I.cexps1_
+#define CEXPS ((const ASL_fg *) asl) -> I.cexps_
 
 #include "solvers/r_opn.hd" /* for N_OPS */
 
@@ -39,17 +41,19 @@ Option_Info Oinfo = { const_cast<char*>("testampl"), const_cast<char*>("ANALYSIS
 
 // (C++) code starts here ///////////////////////////////////////////////////////////////////////////
 
-using namespace ibex;
+namespace ibex {
 
+AmplInterface::AmplInterface(std::string nlfile) :
+			_problem(NULL),	_bound_init(NULL), asl(NULL), _nlfile(nlfile), _x(NULL){
+
+}
 
 AmplInterface::~AmplInterface() {
 	delete _problem;
+	delete _bound_init;
+	delete _x;
 
-	if (_asl) {
-		delete[] X0;
-		delete[] havex0;
-		delete[] pi0;
-		delete[] havepi0;
+	if (asl) {
 		ASL_free(&asl);
 	}
 }
@@ -57,7 +61,7 @@ AmplInterface::~AmplInterface() {
 // create an AMPL problem by using ASL interface to the .nl file
 System AmplInterface::getSystem() {
 	if (_problem)
-		return System(_problem);
+		return System(*_problem);
 
 	if (!readASLfg())
 		return NULL;
@@ -70,352 +74,92 @@ System AmplInterface::getSystem() {
 		return NULL;
 	}
 
-	return System(_problem);
+	return System(*_problem);
 }
 
 
+
+
 // Reads a NLP from an AMPL .nl file through the ASL methods
-bool AmplInterface::readnl(std::string nlfile) {
+bool AmplInterface::readASLfg() {
+	assert(asl == NULL);
 
-	//std::string nlfile;
-	//options->GetStringValue("nlfile", nlfile, "");
-	//_problem -> setProblemName (nlfile);
 
-	// number of defined variables (aka common expressions)
-//	problem -> setNDefVars(como + comc + comb + como1 + comc1);
+	if (_nlfile == "")
+		return false;
 
-	// see "hooking your solver to AMPL", by David M. Gay, tables 3, 4, and 5
-/*
-	// nonlinear in both objectives and constraints
-	if (nlvb >= 0) {
-		for (int i = 0; i < nlvb - nlvbi; i++) problem -> addVariable (false, problem -> domain ());
-		for (int i = 0; i < nlvbi;        i++) problem -> addVariable (true,  problem -> domain ());
-	}
+	char** argv = new char*[3];
+	argv[0] = const_cast<char*>("dummy");
+	argv[1] = strdup(_nlfile.c_str());
+	argv[2] = NULL;
 
-	// nonlinear in either objectives or constraints
-	if (nlvo > nlvc) {
-		for (int i = 0; i < nlvc - (nlvb + nlvci); i++) problem -> addVariable (false, problem -> domain ());
-		for (int i = 0; i < nlvci;                 i++) problem -> addVariable (true,  problem -> domain ());
-		for (int i = 0; i < nlvo - (nlvc + nlvoi); i++) problem -> addVariable (false, problem -> domain ());
-		for (int i = 0; i < nlvoi;                 i++) problem -> addVariable (true,  problem -> domain ());
-	} else {
-		for (int i = 0; i < nlvo - (nlvb + nlvoi); i++) problem -> addVariable (false, problem -> domain ());
-		for (int i = 0; i < nlvoi;                 i++) problem -> addVariable (true,  problem -> domain ());
-		for (int i = 0; i < nlvc - (nlvo + nlvci); i++) problem -> addVariable (false, problem -> domain ());
-		for (int i = 0; i < nlvci;                 i++) problem -> addVariable (true,  problem -> domain ());
-	}
+	// Create the ASL structure
+	asl = (ASL*) ASL_alloc (ASL_read_fg);
 
-	for (int i = 0; i < nwv; i++)                                  problem -> addVariable(false, problem -> domain ());//arc
-	for (int i = n_var - (CoinMax (nlvc,nlvo) +niv+nbv+nwv); i--;) problem -> addVariable(false, problem -> domain ());//other
-	for (int i = 0; i < nbv; i++)                                  problem -> addVariable(true,  problem -> domain ());//binary
-	for (int i = 0; i < niv; i++)                                  problem -> addVariable(true,  problem -> domain ());//int.
+	char* stub = getstub (&argv, &Oinfo);
 
-	// add space for common expressions
-	for (int i = problem->nDefVars(); i--;)  problem -> addVariable(false, problem -> domain ());
+	// Although very intuitive, we shall explain why the second argument
+	// is passed with a minus sign: it is to tell the ASL to retrieve
+	// the nonlinear information too.
+	FILE* nl = jac0dim (stub, - (fint) strlen (stub));
 
-	// common expressions (or defined variables) ///////////////////////////////////////
+	// Set options in the asl structure
+	want_xpi0 = 1 | 2;  // allocate initial values for primal and dual if available
+	obj_no = 0;         // always want to work with the first (and only?) objective
 
-#ifdef DEBUG
-	printf ("tot var = %d\n", variables_ . size ());
-	printf ("c_vars_ = %d\n", ((const ASL_fg *) asl) -> i.c_vars_ );
-	printf ("comb_ = %d\n",   ((const ASL_fg *) asl) -> i.comb_  );
-	printf ("combc_ = %d\n",  ((const ASL_fg *) asl) -> i.combc_ );
-	printf ("comc1_ = %d\n",  ((const ASL_fg *) asl) -> i.comc1_ );
-	printf ("comc_ = %d\n",   ((const ASL_fg *) asl) -> i.comc_  );
-	printf ("como1_ = %d\n",  ((const ASL_fg *) asl) -> i.como1_ );
-	printf ("como_ = %d\n",   ((const ASL_fg *) asl) -> i.como_  );
-#endif
+	// read the rest of the nl file
+	fg_read (nl, ASL_return_read_err | ASL_findgroups);
+
+	//FIXME freeing argv and argv[1] gives segfault !!!
+	//  free(argv[1]);
+	//  delete[] argv;
+
+	return true;
+}
+
+
+
+
+// Reads a NLP from an AMPL .nl file through the ASL methods
+bool AmplInterface::readnl() {
+
+
+	if (!_problem) {return false;}
+
+	_x =new Variable(n_var);
+	_bound_init = new IntervalVector(n_var, Interval::ALL_REALS);
+	_problem->add_var(*_x);
+
 
 	// Each has a linear and a nonlinear part (thanks to Dominique
 	// Orban: http://www.gerad.ca/~orban/drampl/def-vars.html)
 
 	try {
-		for (int i = 0; i < como + comc + comb; i++) {
-
-			struct cexp *common = ((const ASL_fg *) _asl) -> I.cexps_ + i;
-			ExprNode *nle = nl2e (common -> e);
-
-#ifdef DEBUG
-			printf ("cexp  %d [%d]: ", i, problem -> nVars()); nle -> print ();  printf (" ||| ");
-#endif
-
-			int nlin = common -> nlin;  // Number of linear terms
-
-			if (nlin > 0) {
-
-				int       *indexL = new int       [nlin+1];
-				double *coeff  = new double [nlin];
-
-				linpart *L = common -> L;
-
-				for (int j = 0; j < nlin; j++) {
-					//vp = (expr_v *)((char *)L->v.rp - ((char *)&ev.v - (char *)&ev));
-					//Printf( " %-g x[%-d]", L->fac, (int)(vp - VAR_E) );
-					coeff [j] = L [j]. fac;
-					indexL [j] = ((uintptr_t) (L [j].v.rp) - (uintptr_t) VAR_E) / sizeof (expr_v);
-#ifdef DEBUG
-					Printf( " %+g x_%-3d", L [j]. fac,
-							(expr_v *) (L [j].v.rp) - VAR_E //((const ASL_fg *) asl) -> I.cexps_
-							//L [j]. v.i
-					);
-#endif
-				}
-
-				indexL [nlin] = -1;
-
-				ExprNode **al = new ExprNode * [1];
-				*al = nle;
-
-				std::vector <std::pair <exprVar *, double> > lcoeff;
-				problem -> indcoe2vector (indexL, coeff, lcoeff);
-
-				ExprNode *eg = exprGroup::genExprGroup (0, lcoeff, al, 1);
-				problem -> commonExprs (). push_back (eg);
-			}
-			else problem -> commonExprs () . push_back (nle);
-#ifdef DEBUG
-			printf ("\n");
-#endif
-		}
-
-		for (int i = 0; i < como1 + comc1; i++) {
-
-			struct cexp1 *common = ((const ASL_fg *) asl) -> I.cexps1_ + i;
-			expression *nle = nl2e (common -> e);
-
-#ifdef DEBUG
-			printf ("cexp1 %d [%d]: ", i, variables_ . size ()); nle -> print ();  printf (" ||| ");
-#endif
-
-			int nlin = common -> nlin;  // Number of linear terms
-
-			if (nlin > 0) {
-
-				int       *indexL = new int       [nlin+1];
-				CouNumber *coeff  = new CouNumber [nlin];
-
-				linpart *L = common -> L;
-
-				for (int j = 0; j < nlin; j++) {
-					//vp = (expr_v *)((char *)L->v.rp - ((char *)&ev.v - (char *)&ev));
-					coeff  [j] = L [j]. fac;
-					indexL [j] = ((uintptr_t) (L [j].v.rp) - (uintptr_t) VAR_E) / sizeof (expr_v);
-#ifdef DEBUG
-					Printf( " %+g x_%-3d", L [j]. fac,
-							(expr_v *) (L [j].v.rp) - VAR_E //((const ASL_fg *) asl) -> I.cexps_
-							//L [j]. v.i
-					);
-#endif
-				}
-
-				indexL [nlin] = -1;
-
-				expression **al = new expression * [1];
-				*al = nle;
-
-				std::vector <std::pair <exprVar *, CouNumber> > lcoeff;
-				problem -> indcoe2vector (indexL, coeff, lcoeff);
-
-				expression *eg = exprGroup::genExprGroup (0, lcoeff, al, 1);
-				problem -> commonExprs () . push_back (eg);
-			}
-			else problem -> commonExprs () . push_back (nle);
-#ifdef DEBUG
-			printf ("\n");
-#endif
-			//    addAuxiliary (nl2e (((const ASL_fg *) asl) -> I.cexps1_ [i] . e));
-		}
-
-
-
-		*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 		// objective functions /////////////////////////////////////////////////////////////
+		if (n_obj>1) {ibexerror("too much objective function"); return false;}
 
 		for (int i = 0; i < n_obj; i++) {
 
-			////////////////////////////////////////////////
-			int nterms = 0;
+			ExprNode& body = nl2expr (OBJ_DE [i] . e);
 
-			// count nonzero terms in linear part
-
-			for (ograd *objgrad = Ograd [i];
-					objgrad;
-					objgrad = objgrad -> next)
-				if (fabs (objgrad -> coef) > COUENNE_EPS)
-					nterms++;
-
-			expression
-			*body,
-			*nl = nl2e (OBJ_DE [i] . e);
-
-			if (nterms) { // have linear terms
-
-				int       *indexL = new int       [nterms+1];
-				CouNumber *coeff  = new CouNumber [nterms];
-
-				for (ograd *objgrad = Ograd [i]; objgrad; objgrad = objgrad -> next)
-					if (fabs (objgrad -> coef) > COUENNE_EPS) {
-
-						*indexL++ = objgrad -> varno;
-						*coeff++  = objgrad -> coef;
-					}
-
-				*indexL = -1;
-
-				indexL -= nterms;
-				coeff  -= nterms;
-
-				std::vector <std::pair <exprVar *, CouNumber> > lcoeff;
-				problem -> indcoe2vector (indexL, coeff, lcoeff);
-
-				if (nl -> code () == COU_EXPRSUM) {
-					body = exprGroup::genExprGroup (0., lcoeff, nl -> ArgList (), nl -> nArgs ());
-					// delete node without deleting children (they are now in body)
-					nl -> ArgList (NULL);
-					delete nl;
-				}
-				else {
-
-					expression **nll = new expression * [1];
-
-					*nll = nl;
-
-					// apparently, objconst (i) is included in the obj expression
-					body = exprGroup::genExprGroup (0., lcoeff, nll, 1);
-					//body = new exprGroup (objconst (i), indexL, coeff, nll, 1);
-				}
-
-				delete [] indexL;
-				delete [] coeff;
-
-			} else
-				// apparently, objconst (i) is included in the obj expression
-				body = nl;
-			//if (fabs (objconst (i) > COUENNE_EPS))
-			//body = new exprSum (nl, new exprConst (objconst (i)));
-			//else
-
-			///////////////////////////////////////////////////
-
-			expression *subst = Simplified (body);//  -> simplify ();
-
-			// if (subst) {
-			//   delete body; // VALGRIND
-			//   body = subst;
-			// }
-
-			// ThirdParty/ASL/solvers/asl.h, line 336: 0 is minimization, 1 is maximization
-			problem -> addObjective (body, (OBJ_sense [i] == 0) ? "min" : "max");
+			// 3rd/ASL/solvers/asl.h, line 336: 0 is minimization, 1 is maximization
+			if (OBJ_sense [i] == 0) {
+				_problem->add_goal(body);
+			} else {
+				_problem->add_goal(-body);
+			}
 		}
+
 
 		// constraints ///////////////////////////////////////////////////////////////////
 
-		int *nterms = new int [n_con];
-
-		// allocate space for argument list of all constraints' summations
-		// of linear and nonlinear terms
-
-		// init array with # terms of each constraint
-		for (int i = n_con; i--;)
-			*nterms++ = 0;
-		nterms -= n_con;
-
-		cgrad *congrad;
-
-		// count all linear terms
-		if (A_colstarts && A_vals)         // Constraints' linear info is stored in A_vals
-			for (register int j = A_colstarts [n_var]; j--;) {
-
-				real coeff = A_vals [j];
-
-				if (fabs (coeff) > COUENNE_EPS)
-					nterms [A_rownos [j]] ++;
-			}
-		else {                             // Constraints' linear info is stored in Cgrad
-			for (register int i = 0; i < n_con; i++)
-				for (congrad = Cgrad [i];
-						congrad;
-						congrad = congrad -> next)
-					if (fabs (congrad -> coef) > COUENNE_EPS)
-						nterms [i] ++;
-		}
-
-
-		// vectors of the linear part
-		CouNumber **coeff  = new CouNumber * [n_con];
-		int       **indexL = new int       * [n_con];
-
-		for (register int i = n_con; i--;)
-			*indexL++ = NULL;
-
-		indexL -= n_con;
-
-
-		// set linear terms
-
-		if (A_colstarts && A_vals)         // Constraints' linear info is stored in A_vals
-			for (int j = 0; j < n_var; j++)
-				for (register int i = A_colstarts [j], k = A_colstarts [j+1] - i; k--; i++) {
-
-					int rowno = A_rownos [i],
-							nt    = nterms [rowno] --;
-
-					CouNumber **cline = coeff  + rowno;
-					int       **iline = indexL + rowno;
-
-					if (*iline==NULL) {
-						*cline = new CouNumber [nt];
-						*iline = new int       [nt+1];
-						(*iline) [nt] = -1;
-					}
-
-					(*cline) [--nt] = A_vals [i];
-					(*iline)   [nt] = j;
-
-				}
-		else {                             // Constraints' linear info is stored in Cgrad
-			for (int i=0; i < n_con; i++) {
-
-				int nt = nterms [i];
-
-				CouNumber **cline = coeff + i;
-				int       **iline = indexL + i;
-
-				*cline = new CouNumber [nt];
-				*iline = new int       [nt+1];
-				(*iline) [nt] = -1;
-
-				for (congrad = Cgrad [i]; congrad; congrad = congrad -> next)
-					if (fabs (congrad -> coef) > COUENNE_EPS) {
-						(*cline) [--nt] = congrad -> coef;
-						(*iline)   [nt] = congrad -> varno;
-					}
-			}
-		}
-
-		// set constraints' bound and sign and store nonlinear part ///////////////////////////////
-
 		for (int i = 0; i < n_con; i++) {
 
-			enum con_sign sign;
+			CmpOp sign;
 			double lb, ub;
 
+			/* LUrhs is the constraint lower bound if Urhsx!=0, and the constraint lower and upper bound if Uvx == 0 */
 			if (Urhsx) {
 				lb = LUrhs [i];
 				ub = Urhsx [i];
@@ -426,256 +170,179 @@ bool AmplInterface::readnl(std::string nlfile) {
 			}
 
 			// set constraint sign
-			if (lb > negInfinity)
-				if (ub < Infinity) sign = COUENNE_RNG;
-				else               sign = COUENNE_GE;
-			else                 sign = COUENNE_LE;
+			if (negInfinity < lb)
+				if (ub < Infinity) {sign = CmpOp::EQ; }
+				else                sign = GEQ;
+			else                    sign = LEQ;
 
-			// this is an equality constraint
-			if (fabs (lb - ub) < COUENNE_EPS)
-				sign = COUENNE_EQ;
-
-			expression *body;
-
-			expression **nll = new expression * [1];
-			*nll = nl2e (CON_DE [i] . e);
-
-			if (indexL [i] && (*(indexL [i]) >= 0)) {
-
-				int code = (*nll) -> code ();
-
-				std::vector <std::pair <exprVar *, CouNumber> > lcoeff;
-				problem -> indcoe2vector (indexL [i], coeff [i], lcoeff);
-
-				/*std::vector <std::pair <exprVar *, CouNumber> > lcoeff;
-      for (int i=0, *ind = indexL; *ind >= 0; *ind++, i++)
-      lcoeff.push_back (std::pair <exprVar *, CouNumber> (Var (*ind), coeff [i]));*/
-
-				if ((code == COU_EXPRSUM) ||
-						(code == COU_EXPRGROUP)) {
-
-					body    = exprGroup::genExprGroup (0., lcoeff, (*nll) -> ArgList (), (*nll) -> nArgs ());
-					// delete node without deleting children (they are now in body)
-					(*nll) -> ArgList (NULL);
-					delete *nll;
-					delete [] nll;
-				}
-				else body = exprGroup::genExprGroup (0., lcoeff, nll, 1);
-			}
-			else {
-				body = *nll;
-				delete [] nll;
-			}
-
-			expression *subst = Simplified (body);
-
-			// -> simplify ();
-			// if (subst) {
-			//   delete body; // VALGRIND
-			//   body = subst;
-			// }
+			ExprNode& body = nl2expr (CON_DE [i] . e);
 
 			// add them (and set lower-upper bound)
 			switch (sign) {
 
-			case COUENNE_EQ:  problem -> addEQConstraint  (body, new exprConst (ub)); break;
-			case COUENNE_LE:  problem -> addLEConstraint  (body, new exprConst (ub)); break;
-			case COUENNE_GE:  problem -> addGEConstraint  (body, new exprConst (lb)); break;
-			case COUENNE_RNG: problem -> addRNGConstraint (body, new exprConst (lb),
-					new exprConst (ub)); break;
-			default: jnlst->Printf(Ipopt::J_ERROR, Ipopt::J_INITIALIZATION, "Error: could not recognize constraint\n"); return false;
+			case  CmpOp::EQ :  _problem->add_ctr(ExprCtr(body-Interval(lb,ub),CmpOp::EQ)); break;
+			case  CmpOp::LEQ:  _problem->add_ctr(ExprCtr(body-ub,CmpOp::LEQ)); break;
+			case  CmpOp::GEQ:  _problem->add_ctr(ExprCtr(body-lb,CmpOp::GEQ)); break;
+			default: ibexerror("Error: could not recognize a constraint\n"); return false;
 			}
-
-			delete [] indexL [i];
-			delete [] coeff  [i];
 		}
-
-		delete [] indexL;
-		delete [] coeff;
-		delete [] nterms;
 
 	} catch (...) {
 		return false;
 	}
 
-	// create room for problem's variables and bounds
-	CouNumber
-	*x  = (CouNumber *) malloc ((n_var + problem -> nDefVars() ) * sizeof (CouNumber)),
-	*lb = (CouNumber *) malloc ((n_var + problem -> nDefVars() ) * sizeof (CouNumber)),
-	*ub = (CouNumber *) malloc ((n_var + problem -> nDefVars() ) * sizeof (CouNumber));
-
-	for (int i = n_var + problem -> nDefVars(); i--;) {
-		x  [i] =  0.;
-		lb [i] = -COUENNE_INFINITY;
-		ub [i] =  COUENNE_INFINITY;
-	}
-
-	problem -> domain () -> push (n_var + problem -> nDefVars(), x, lb, ub);
-	free (x); free (lb); free (ub);
-
-	// suggested:
-	// problem -> domain () -> push (n_var + problem -> nDefVars(), x, lb, ub, false);
-	// //free (x); free (lb); free (ub);
-	// saves three allocations (default last parameter is true, which copies x,l,b)
 
 	// lower and upper bounds ///////////////////////////////////////////////////////////////
 
 	if (LUv) {
-
 		real *Uvx_copy = Uvx;
-
+		/* LUv is the variable lower bound if Uvx!=0, and the variable lower and upper bound if Uvx == 0 */
 		if (!Uvx_copy)
 			for (register int i=0; i<n_var; i++) {
 
 				register int j = 2*i;
-
-				problem -> Lb (i) = LUv[j]   <= -COUENNE_INFINITY ? -COUENNE_INFINITY : LUv[j]  ;
-				problem -> Ub (i) = LUv[j+1] >=  COUENNE_INFINITY ?  COUENNE_INFINITY : LUv[j+1];
+				(*_bound_init)[i] = Interval(  ((LUv[j]   <= NEG_INFINITY) ? NEG_INFINITY : LUv[j]  ),
+											((LUv[j+1] >= POS_INFINITY) ? POS_INFINITY : LUv[j+1]) );
 			}
 		else
 			for (register int i=n_var; i--;) {
-				problem -> Lb (i) = LUv [i]      <= -COUENNE_INFINITY ? -COUENNE_INFINITY : LUv[i];
-				problem -> Ub (i) = Uvx_copy [i] >=  COUENNE_INFINITY ?  COUENNE_INFINITY : Uvx_copy[i];
+				(*_bound_init)[i] = Interval(	(LUv [i]      <= NEG_INFINITY ? NEG_INFINITY : LUv[i]     ),
+											(Uvx_copy [i] >= POS_INFINITY ? POS_INFINITY : Uvx_copy[i]) );
 			}
 
-	} else
-		for (register int i=n_var; i--;) {
-			problem -> Lb (i) = - COUENNE_INFINITY;
-			problem -> Ub (i) =   COUENNE_INFINITY;
-		}
+	} // else it is [-oo,+oo]
 
-	// initial x ////////////////////////////////////////////////////////////////////
-
-	for (register int i=n_var; i--;)
-
-		if (X0 && havex0 [i]) problem -> X (i) = X0 [i];
-
-		else {
-
-			CouNumber x, l = problem -> Lb (i), u = problem -> Ub (i);
-
-			if      (l < - COUENNE_INFINITY)
-				if    (u >   COUENNE_INFINITY)  x = 0.;
-				else                            x = u;
-			else if (u >   COUENNE_INFINITY)  x = l;
-			else                              x = 0.5 * (l+u);
-
-			problem -> X (i) = x;
-		}
-
-	for (register int i=n_var; i < problem -> nDefVars() ; i++) {  //FIXME: shouldn't this loop go until n_var + problem -> nDefVars() ?
-
-		problem -> X  (i) =  0.;
-		problem -> Lb (i) = -COUENNE_INFINITY;
-		problem -> Ub (i) =  COUENNE_INFINITY;
-	}
 
 	return true;
 }
 
-
-// warning for non-implemented functions -- return 0 constant expression
-//expression *notimpl (const std::string &fname) {
-//static void notimpl (const std::string &fname) {
-//  std::cerr << "*** Error: " << fname << " not implemented" << std::endl;
-//  exit (-1);
-//}
-
 // converts an AMPL expression (sub)tree into an expression* (sub)tree
-ExprNode* AmplInterface::nl2e(expr *e) {
+// thank to Dominique Orban for the explication of the DAG inside AMPL:
+// http://www.gerad.ca/~orban/drampl/dag.html
+ExprNode& AmplInterface::nl2expr(expr *e) {
 
 	switch (getOperator (e -> op)) {
 
-	case OPPLUS:  return new exprSum (nl2e (e -> L.e), nl2e (e -> R.e));
-	case OPMINUS: return new exprSub (nl2e (e -> L.e), nl2e (e -> R.e));
-	case OPMULT:  return new exprMul (nl2e (e -> L.e), nl2e (e -> R.e));
-	case OPDIV:   return new exprDiv (nl2e (e -> L.e), nl2e (e -> R.e));
+	case OPPLUS:  return   ((nl2expr (e -> L.e)) + (nl2expr (e -> R.e)));
+	case OPMINUS: return   ((nl2expr (e -> L.e)) - (nl2expr (e -> R.e)));
+	case OPMULT:  return   ((nl2expr (e -> L.e)) * (nl2expr (e -> R.e)));
+	case OPDIV:   return   ((nl2expr (e -> L.e)) / (nl2expr (e -> R.e)));
 	//case OPREM:   notimpl ("remainder");
-	case OPPOW:   return new exprPow (nl2e (e -> L.e), nl2e (e -> R.e));
+	case OPPOW:   return   pow(nl2expr (e -> L.e), nl2expr (e -> R.e));
 	//case OPLESS:  notimpl ("less");
-	//case MINLIST: notimpl ("min");
-	//case MAXLIST: notimpl ("max");
+	case MINLIST: {
+		expr **ep = e->L.ep;
+		const ExprNode* ee=&(nl2expr (*ep));
+		while (ep < e->R.ep) {
+			ee = & (min(*ee , nl2expr (*ep)));
+			ep++;
+		}
+		return ee;
+	}
+	case MAXLIST:  {
+		expr **ep = e->L.ep;
+		const ExprNode* ee=&(nl2expr (*ep));
+		while (ep < e->R.ep) {
+			ee = & (max(*ee , nl2expr (*ep)));
+			ep++;
+		}
+		return ee;
+	}
 	//case FLOOR:   notimpl ("floor");
 	//case CEIL:    notimpl ("ceil");
-	case ABS:     return new exprAbs (nl2e (e -> L.e));
-	case OPUMINUS:return new exprOpp (nl2e (e -> L.e));
-	//          return new exprOpp (nl2e (e -> L.e -> L.e));
-	//case OPIFnl:  { notimpl ("ifnl");
+	case ABS:     return (abs(nl2expr (e -> L.e)));
+	case OPUMINUS:return (-(nl2expr (e -> L.e)));
+	//case OPIFnl:  return (chi(nl2expr(????)))
 
-	// see ASL/solvers/rops.c, IfNL
-	//}
+	case OP_tanh: return tanh(nl2expr (e->L.e));
 
-	case OP_tanh: return new exprDiv
-			(new exprSub (new exprExp (nl2e (e -> L.e)),
-					new exprExp (new exprOpp (nl2e (e->L.e)))),
-					new exprSum (new exprExp (nl2e (e -> L.e)),
-							new exprExp (new exprOpp (nl2e (e->L.e)))));
-
-	case OP_tan: {
-		expression *arg;
-		arg = nl2e (e -> L.e);
-		return new exprDiv (new exprSin (arg), new exprCos (new exprClone (arg)));
-	}
-	case OP_sqrt:    return new exprPow (nl2e (e -> L.e), new exprConst (0.5));
-	case OP_sinh:    return new exprMul (new exprConst (0.5), new exprSub (new exprExp (nl2e (e -> L.e)),new exprExp (new exprOpp (nl2e (e->L.e)))));
-	case OP_sin:     return new exprSin (nl2e (e -> L.e));
-	case OP_log10:   return new exprMul (new exprConst (1.0 / log (10.0)), 	new exprLog (nl2e (e -> L.e)));
-	case OP_log:     return new exprLog (nl2e (e -> L.e));
-	case OP_exp:     return new exprExp (nl2e (e -> L.e));
-	case OP_cosh:    return new exprMul (new exprConst (0.5),new exprSum (new exprExp (nl2e (e -> L.e)),new exprExp (new exprOpp (nl2e (e->L.e)))));
-	case OP_cos:   return new exprCos (nl2e (e -> L.e));
+	case OP_tan:   return tan(nl2expr (e->L.e));
+	case OP_sqrt:  return sqrt(nl2expr (e -> L.e));
+	case OP_sinh:  return sinh(nl2expr (e -> L.e));
+	case OP_sin:   return sin(nl2expr (e -> L.e));
+	case OP_log10: return ((ExprConstant::new_scalar(1.0/log(Interval(10.0)))) * log(nl2expr (e -> L.e)));
+	case OP_log:   return log(nl2expr (e -> L.e));
+	case OP_exp:   return exp(nl2expr (e -> L.e));
+	case OP_cosh:  return cosh(nl2expr (e->L.e));
+	case OP_cos:   return cos(nl2expr (e -> L.e));
 	//case OP_atanh: notimpl ("atanh");
-	//case OP_atan2: notimpl ("atan2");
-	//case OP_atan:  notimpl ("atan");
+	case OP_atan2: return atan2(nl2expr (e -> L.e), nl2expr (e -> R.e));
+	case OP_atan:  return tan(nl2expr (e -> L.e));
 	//case OP_asinh: notimpl ("asinh");
-	//case OP_asin:  notimpl ("asin");
+	case OP_asin:  return asin(nl2expr (e -> L.e));
 	//case OP_acosh: notimpl ("acosh");
-	//case OP_acos:  notimpl ("acos");
+	case OP_acos:  return acos(nl2expr (e -> L.e));
 
 	case OPSUMLIST: {
-		int i=0;
-		expression **al = new expression * [(e->R.ep - e->L.ep)];
-		for (expr **ep = e->L.ep; ep < e->R.ep; ep++)
-			al [i++] = nl2e (*ep);
-		return new exprSum (al, i);
+		expr **ep = e->L.ep;
+		const ExprNode* ee=&(nl2expr (*ep));
+		while (ep < e->R.ep) {
+			ee = & (*ee + nl2expr (*ep));
+			ep++;
+		}
+		return ee;
 	}
 	//case OPintDIV: notimpl ("intdiv");
 	//case OPprecision: notimpl ("precision");
 	//case OPround:  notimpl ("round");
 	//case OPtrunc:  notimpl ("trunc");
 
-	case OP1POW: return new exprPow (nl2e (e -> L.e),
-			new exprConst (((expr_n *)e->R.e)->v));
-	case OP2POW: return new exprPow (nl2e (e -> L.e),
-			new exprConst (2.));
-	case OPCPOW: return new exprPow (new exprConst (((expr_n *)e->L.e)->v),
-			nl2e (e -> R.e));
+	case OP1POW: return pow( (nl2expr (e -> L.e)), ExprConstant::new_scalar(((expr_n *)e->R.e)->v));
+	case OP2POW: return sqr( nl2expr (e -> L.e));
+	case OPCPOW: return pow(ExprConstant::new_scalar(((expr_n *)e->L.e)->v), nl2expr (e -> R.e));
 	//case OPFUNCALL: notimpl ("function call");
-	case OPNUM:     return new exprConst (((expr_n *)e)->v);
+	case OPNUM:     return (ExprConstant::new_scalar(((expr_n *)e)->v));
 	//case OPPLTERM:  notimpl ("plterm");
 	//case OPIFSYM:   notimpl ("ifsym");
 	//case OPHOL:     notimpl ("hol");
 	case OPVARVAL:  {
+////////////////////////////////////////////////////////////////////// TODO a FINIR
 
 		int j = ((expr_v *) e) -> a;
 
-		if (j >= problem -> nOrigVars()) // common expression
-			// use base pointer otherwise the .a field returns an awkward, out-of-bound index
-			j = ((expr_v *) e) - ((const ASL_fg *) asl) -> I.var_e_;
+		if (j<n_var) {
+			return (*_x)[j];
 
-		if (j >= problem -> nOrigVars() + problem -> nDefVars()) {
-			jnlst -> Printf (Ipopt::J_ERROR, Ipopt::J_INITIALIZATION, "Error: unknown variable x_%d\n", j);
+		}
+		else if (j < n_var + como + comc + comb + como1 + comc1) {// common expression | defined variable
+			// use base pointer otherwise the .a field returns an awkward, out-of-bound index
+
+		     // This is a common expression. Find pointer to its root.
+
+		     j = j - n_var;
+		     cexp *common;
+		     if( j < ncom0 )
+		    	 common = CEXPS + j;
+		     else
+		    	 common = CEXPS1 - ncom0 +j ;
+
+		     ExprNode& body = nl2expr (common->e);
+
+		     int nlin = common->nlin; // Number of linear terms
+		     if( nlin > 0 ) {
+		    	 linpart * L = common->L;
+		    	 for(int i = 1; i < nlin; i++ ) {
+
+		    		 int coeff = L [i]. fac;
+		    		 int index = ((uintptr_t) (L [j].v.rp) - (uintptr_t) VAR_E) / sizeof (expr_v);
+		    		 body = &(body +coeff * (*_x)[index]);
+		    	 }
+		     }
+		     return body;
+		}
+		else {
+			ibexerror( "Error: unknown variable x_"+ j +"\n");
 			throw -1;
 		}
 
-		return new exprClone (problem -> Variables() [j]);
 	}
 
 	default:
-		jnlst -> Printf (Ipopt::J_ERROR, Ipopt::J_INITIALIZATION, "ERROR: unknown operator (address %p), aborting.\n", Intcast (e -> op));
+		ibexerror( "ERROR: unknown operator (address " + Intcast (e -> op) + "), aborting.\n");
 		throw -2;
 	}
 
-	return new exprConst (0.);
+	return ExprConstant::new_scalar(0.);
 }
 
+}

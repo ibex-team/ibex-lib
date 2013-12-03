@@ -24,18 +24,21 @@ namespace ibex {
 class AmplInterface  {
 private:
 	SystemFactory* 	_problem;
-	struct ASL*     _asl;
+	IntervalVector* 	_bound_init;
+	ASL*     asl;
+	std::string _nlfile;
+	Variable* _x;
 
-	bool readnl(std::string nlfile);
-	ExprNode* nl2e(expr *e);
+	bool readnl();
+	bool readASLfg();
+	ExprNode& nl2expr(expr *e);
 
 public:
-	AmplInterface();
+	AmplInterface(std::string nlfile);
 
 	virtual ~AmplInterface();
 
 	System getSystem();
-
 
 };
 
