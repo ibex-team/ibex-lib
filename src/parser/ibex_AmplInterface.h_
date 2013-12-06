@@ -31,7 +31,7 @@ private:
 
 	bool readnl();
 	bool readASLfg();
-	ExprNode& nl2expr(expr *e);
+	const ExprNode& nl2expr(expr *e);
 
 public:
 	AmplInterface(std::string nlfile);
@@ -39,6 +39,8 @@ public:
 	virtual ~AmplInterface();
 
 	System getSystem();
+
+	bool writeSolution(double* sol, bool found);
 
 };
 
