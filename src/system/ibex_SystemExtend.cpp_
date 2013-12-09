@@ -43,7 +43,7 @@ public:
 			// warning: needs to be f(x)-y=0 and not y-f(x)=0
 			// because XNewton replaces the "=" sign by "<=".
 			const ExprNode& goal_expr=ExprCopy().copy(sys.goal->args(), sys.args, sys.goal->expr())-y;
-			add_ctr(ExprCtr(goal_expr,IBEX_EQ));
+			add_ctr(ExprCtr(goal_expr,EQ));
 			cleanup(goal_expr, false);
 		}
 
@@ -53,17 +53,17 @@ public:
 		// with EXTEND, they actually match (only scalar constraints).
 		for (int i=0; i<sys.ctrs.size(); i++) {
 
-			if (sys.ctrs[i].op==IBEX_EQ) {
+			if (sys.ctrs[i].op==EQ) {
 				pair<const ExprNode*, const Interval*> p=sys.ctrs[i].is_thick_equality();
 
 				if (p.first==NULL) not_implemented("normalization with equality constraints");
 
 				const ExprNode& f_1=ExprCopy().copy(sys.ctrs[i].f.args(), sys.args, *p.first) - p.second->ub();
-				add_ctr(ExprCtr(f_1,IBEX_LEQ));
+				add_ctr(ExprCtr(f_1,LEQ));
 				cleanup(f_1, false);
 
 				const ExprNode& f_2=(-ExprCopy().copy(sys.ctrs[i].f.args(), sys.args, *p.first)) - p.second->lb();
-				add_ctr(ExprCtr(f_2,IBEX_LEQ));
+				add_ctr(ExprCtr(f_2,LEQ));
 				cleanup(f_2, false);
 
 				continue;
@@ -72,21 +72,21 @@ public:
 			const ExprNode* f_i=&ExprCopy().copy(sys.ctrs[i].f.args(), sys.args, sys.ctrs[i].f.expr());
 
 			switch (sys.ctrs[i].op) {
-			case IBEX_LT:
+			case LT:
 				ibex_warning("warning: strict inequality (<) replaced by inequality (<=).");
-			case IBEX_LEQ:
+			case LEQ:
 				break;
-			case IBEX_EQ:
+			case EQ:
 				assert(false); // impossible
 				break;
-			case IBEX_GT:
+			case GT:
 				ibex_warning("warning: strict inequality (>) replaced by inequality (>=).");
-			case IBEX_GEQ:
+			case GEQ:
 				f_i = & (- (*f_i)); // reverse the inequality
 				break;
 			}
 
-			add_ctr(ExprCtr(*f_i,IBEX_LEQ));
+			add_ctr(ExprCtr(*f_i,LEQ));
 
 			cleanup(*f_i, false);
 		}

@@ -69,7 +69,7 @@ Optimizer::Optimizer(System& user_sys, Bsc& bsc, Ctc& ctc, double prec,
 	if(m>0) {
 		Array<Ctc> ng(m);
 		for (int i=0; i<m; i++) {
-			ng.set_ref(i, *new CtcFwdBwd(sys.f[i],IBEX_GT));
+			ng.set_ref(i, *new CtcFwdBwd(sys.f[i],GT));
 		}
 		is_inside=new CtcUnion(ng);
 	}

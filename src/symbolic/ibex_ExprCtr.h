@@ -51,51 +51,51 @@ inline std::ostream& operator<<(std::ostream& os, const ExprCtr& c) {
 }
 
 inline const ExprCtr& ExprNode::operator=(const ExprNode& right) const {
-  return *new ExprCtr(right.is_zero()? *this : *this-right, IBEX_EQ);
+  return *new ExprCtr(right.is_zero()? *this : *this-right, EQ);
 }
 
 inline const ExprCtr& ExprNode::operator=(const Interval& value) const {
-  return *new ExprCtr(value.lb()==0 && value.ub()==0? *this : *this-value, IBEX_EQ);
+  return *new ExprCtr(value.lb()==0 && value.ub()==0? *this : *this-value, EQ);
 }
 
 inline const ExprCtr& ExprNode::operator=(const IntervalVector& value) const {
-  return *new ExprCtr(value.is_zero()? *this : *this-value, IBEX_EQ);
+  return *new ExprCtr(value.is_zero()? *this : *this-value, EQ);
 }
 
 inline const ExprCtr& ExprNode::operator=(const IntervalMatrix& value) const {
-  return *new ExprCtr(value.is_zero()? *this : *this-value, IBEX_EQ);
+  return *new ExprCtr(value.is_zero()? *this : *this-value, EQ);
 }
 
 inline const ExprCtr& ExprNode::operator<=(const ExprNode& right) const {
-  return *new ExprCtr(right.is_zero()? *this : *this-right, IBEX_LEQ);
+  return *new ExprCtr(right.is_zero()? *this : *this-right, LEQ);
 }
 
 inline const ExprCtr& ExprNode::operator<=(const Interval& value) const {
-  return *new ExprCtr(value.lb()==0 && value.ub()==0? *this : *this-value, IBEX_LEQ);
+  return *new ExprCtr(value.lb()==0 && value.ub()==0? *this : *this-value, LEQ);
 }
 
 inline const ExprCtr& ExprNode::operator>=(const ExprNode& right) const {
-  return *new ExprCtr(right.is_zero()? *this : *this-right, IBEX_GEQ);
+  return *new ExprCtr(right.is_zero()? *this : *this-right, GEQ);
 }
 
 inline const ExprCtr& ExprNode::operator>=(const Interval& value) const {
-  return *new ExprCtr(value.lb()==0 && value.ub()==0? *this : *this-value, IBEX_GEQ);
+  return *new ExprCtr(value.lb()==0 && value.ub()==0? *this : *this-value, GEQ);
 }
 
 inline const ExprCtr& ExprNode::operator<(const ExprNode& right) const {
-  return *new ExprCtr(right.is_zero()? *this : *this-right, IBEX_LT);
+  return *new ExprCtr(right.is_zero()? *this : *this-right, LT);
 }
 
 inline const ExprCtr& ExprNode::operator<(const Interval& value) const {
-  return *new ExprCtr(value.lb()==0 && value.ub()==0? *this : *this-value, IBEX_LT);
+  return *new ExprCtr(value.lb()==0 && value.ub()==0? *this : *this-value, LT);
 }
 
 inline const ExprCtr& ExprNode::operator>(const ExprNode& right) const {
-  return *new ExprCtr(right.is_zero()? *this : *this-right, IBEX_GT);
+  return *new ExprCtr(right.is_zero()? *this : *this-right, GT);
 }
 
 inline const ExprCtr& ExprNode::operator>(const Interval& value) const {
-  return *new ExprCtr(value.lb()==0 && value.ub()==0? *this : *this-value, IBEX_GT);
+  return *new ExprCtr(value.lb()==0 && value.ub()==0? *this : *this-value, GT);
 }
 
 

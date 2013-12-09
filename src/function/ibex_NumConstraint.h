@@ -34,7 +34,7 @@ public:
 	/**
 	 * \brief Build a constraint.
 	 */
-	NumConstraint(Function& f, CmpOp op=IBEX_EQ, bool own_f=false);
+	NumConstraint(Function& f, CmpOp op=EQ, bool own_f=false);
 
 	/**
 	 * \brief Build a constraint (f(x) op 0).

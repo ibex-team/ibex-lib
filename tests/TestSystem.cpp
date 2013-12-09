@@ -86,9 +86,9 @@ void TestSystem::factory01() {
 	TEST_ASSERT(sys.f.nb_var()==13);
 	TEST_ASSERT(sys.f.image_dim()==4);
 	TEST_ASSERT(sameExpr(sys.ctrs[0].f.expr(),"(A*x)"));
-	TEST_ASSERT(sys.ctrs[0].op==IBEX_EQ);
+	TEST_ASSERT(sys.ctrs[0].op==EQ);
 	TEST_ASSERT(sameExpr(sys.ctrs[1].f.expr(),"(y-x[0])"));
-	TEST_ASSERT(sys.ctrs[1].op==IBEX_GEQ);
+	TEST_ASSERT(sys.ctrs[1].op==GEQ);
 
 	delete &sys;
 }
@@ -125,9 +125,9 @@ void TestSystem::copy01() {
 	TEST_ASSERT(sys.f.nb_var()==13);
 	TEST_ASSERT(sys.f.image_dim()==4);
 	TEST_ASSERT(sameExpr(sys.ctrs[0].f.expr(),"(A*x)"));
-	TEST_ASSERT(sys.ctrs[0].op==IBEX_EQ);
+	TEST_ASSERT(sys.ctrs[0].op==EQ);
 	TEST_ASSERT(sameExpr(sys.ctrs[1].f.expr(),"(y-x[0])"));
-	TEST_ASSERT(sys.ctrs[1].op==IBEX_GEQ);
+	TEST_ASSERT(sys.ctrs[1].op==GEQ);
 }
 
 void TestSystem::copy02() {
@@ -155,8 +155,8 @@ void TestSystem::ineq01() {
 
 	TEST_ASSERT(sameExpr(sys.ctrs[0].f.expr(),"((x-y)-1)"));
 	TEST_ASSERT(sameExpr(sys.ctrs[1].f.expr(),"((x-y)--1)"));
-	TEST_ASSERT(sys.ctrs[0].op==IBEX_LEQ);
-	TEST_ASSERT(sys.ctrs[1].op==IBEX_GEQ);
+	TEST_ASSERT(sys.ctrs[0].op==LEQ);
+	TEST_ASSERT(sys.ctrs[1].op==GEQ);
 }
 
 void TestSystem::extend01() {
@@ -179,13 +179,13 @@ void TestSystem::extend01() {
 	TEST_ASSERT(sys.f.nb_var()==5);
 	TEST_ASSERT(sys.f.image_dim()==4);
 	TEST_ASSERT(sameExpr(sys.ctrs[0].f.expr(),"((y-cos(x[1]))-__goal__)"));
-	TEST_ASSERT(sys.ctrs[0].op==IBEX_EQ);
+	TEST_ASSERT(sys.ctrs[0].op==EQ);
 	TEST_ASSERT(sameExpr(sys.ctrs[1].f.expr(),"(-(x[0]+x[1]))"));
-	TEST_ASSERT(sys.ctrs[1].op==IBEX_LEQ);
+	TEST_ASSERT(sys.ctrs[1].op==LEQ);
 	TEST_ASSERT(sameExpr(sys.ctrs[2].f.expr(),"((x[1]+x[2])-y)"));
-	TEST_ASSERT(sys.ctrs[2].op==IBEX_LEQ);
+	TEST_ASSERT(sys.ctrs[2].op==LEQ);
 	TEST_ASSERT(sameExpr(sys.ctrs[3].f.expr(),"(-(y-x[0]))"));
-	TEST_ASSERT(sys.ctrs[3].op==IBEX_LEQ);
+	TEST_ASSERT(sys.ctrs[3].op==LEQ);
 }
 
 void TestSystem::extend02() {
@@ -200,7 +200,7 @@ void TestSystem::extend02() {
 	TEST_ASSERT(sys.f.nb_var()==3);
 	TEST_ASSERT(sys.f.image_dim()==1);
 	TEST_ASSERT(sameExpr(sys.ctrs[0].f.expr(),"((x+y)-__goal__)"));
-	TEST_ASSERT(sys.ctrs[0].op==IBEX_EQ);
+	TEST_ASSERT(sys.ctrs[0].op==EQ);
 }
 
 void TestSystem::normalize01() {
@@ -222,12 +222,12 @@ void TestSystem::normalize01() {
 	TEST_ASSERT(sameExpr(sys.ctrs[3].f.expr(),"(-((x-y)--1))"));
 	TEST_ASSERT(sameExpr(sys.ctrs[4].f.expr(),"((x-y)-0.1)"));
 	TEST_ASSERT(sameExpr(sys.ctrs[5].f.expr(),"((-(x-y))-0.1)"));
-	TEST_ASSERT(sys.ctrs[0].op==IBEX_LEQ);
-	TEST_ASSERT(sys.ctrs[1].op==IBEX_LEQ);
-	TEST_ASSERT(sys.ctrs[2].op==IBEX_LEQ);
-	TEST_ASSERT(sys.ctrs[3].op==IBEX_LEQ);
-	TEST_ASSERT(sys.ctrs[4].op==IBEX_LEQ);
-	TEST_ASSERT(sys.ctrs[5].op==IBEX_LEQ);
+	TEST_ASSERT(sys.ctrs[0].op==LEQ);
+	TEST_ASSERT(sys.ctrs[1].op==LEQ);
+	TEST_ASSERT(sys.ctrs[2].op==LEQ);
+	TEST_ASSERT(sys.ctrs[3].op==LEQ);
+	TEST_ASSERT(sys.ctrs[4].op==LEQ);
+	TEST_ASSERT(sys.ctrs[5].op==LEQ);
 }
 
 void TestSystem::merge01() {

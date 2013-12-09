@@ -58,10 +58,10 @@ int main() {
 		Function c_inf(x, x2, lininf(x, x2) - ff(x, x2));
 		Function c_sup(x, x2, ff(x, x2) - linsup(x, x2));
 
-		CtcFwdBwd ct1(c_inf, IBEX_GT, AFFINE2_MODE);   // HC4revise Algorithm with Affine2 in the forward step.
+		CtcFwdBwd ct1(c_inf, GT, AFFINE2_MODE);   // HC4revise Algorithm with Affine2 in the forward step.
 		CtcFixPoint ft1(ct1, 0.001);
 
-		CtcFwdBwd ct2(c_sup, IBEX_GT, AFFINE2_MODE);  // HC4revise Algorithm with Affine2 in the forward step.
+		CtcFwdBwd ct2(c_sup, GT, AFFINE2_MODE);  // HC4revise Algorithm with Affine2 in the forward step.
 		CtcFixPoint ft2(ct2, 0.001);
 
 		LargestFirst bbb;

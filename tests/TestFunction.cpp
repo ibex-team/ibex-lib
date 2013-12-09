@@ -150,7 +150,7 @@ void TestFunction::numctr01() {
 	Variable x("x");
 	Variable y("y");
 	Function f(x,y,x+y);
-	NumConstraint c(f,IBEX_EQ);
+	NumConstraint c(f,EQ);
 }
 
 } // end namespace

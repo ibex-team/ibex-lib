@@ -68,7 +68,7 @@ public:
 			ibex_error("cannot use Fritz-John conditions without goal function");
 
 		for (int i=0; i<sys.nb_ctr; i++) {
-			if (sys.ctrs[i].op==IBEX_EQ) r++;
+			if (sys.ctrs[i].op==EQ) r++;
 			else m++;
 		}
 		R=r;
@@ -154,7 +154,7 @@ public:
 		for (k=0; k<K; k++)
 			e = &(*e + (*bmult)[k]);
 		const ExprNode& norm_expr=*e-1;
-		add_ctr(ExprCtr(norm_expr,IBEX_EQ));
+		add_ctr(ExprCtr(norm_expr,EQ));
 		cleanup(norm_expr,false);
 		// --------------------------------------------------------------------------
 
@@ -193,25 +193,25 @@ public:
 				if (!dgij.is_zero()) {
 					if (e) {
 						switch(sys.ctrs[i].op) {
-						case IBEX_LT:
-						case IBEX_LEQ: e = & (*e + (*lambda)[m]*dgij); break;
-						case IBEX_EQ:  e = & (*e + (*mu)[r]*dgij);     break;
+						case LT:
+						case LEQ: e = & (*e + (*lambda)[m]*dgij); break;
+						case EQ:  e = & (*e + (*mu)[r]*dgij);     break;
 						default:  e = & (*e - (*lambda)[m]*dgij); break;
 						}
 					} else {
 						switch(sys.ctrs[i].op) {
-						case IBEX_LT:
-						case IBEX_LEQ: e = & ( (*lambda)[m]*dgij); break;
-						case IBEX_EQ:  e = & ( (*mu)[r]*dgij);     break;
+						case LT:
+						case LEQ: e = & ( (*lambda)[m]*dgij); break;
+						case EQ:  e = & ( (*mu)[r]*dgij);     break;
 						default:  e = & (-(*lambda)[m]*dgij); break;
 						}
 					}
 				}
 
 				switch(sys.ctrs[i].op) {
-				case IBEX_LT:
-				case IBEX_LEQ: m++; break;
-				case IBEX_EQ:  r++; break;
+				case LT:
+				case LEQ: m++; break;
+				case EQ:  r++; break;
 				default:  m++; break;
 				}
 
@@ -238,7 +238,7 @@ public:
 
 			if (e) {
 				//cout << "j=" << j << *e << endl;
-				add_ctr(ExprCtr(*e,IBEX_EQ));
+				add_ctr(ExprCtr(*e,EQ));
 				// don't cleanup *e! some nodes belongs to df and dg... -> whence grad_ctrs
 				to_clean.push_back(e);
 			}
@@ -252,10 +252,10 @@ public:
 		for (int i=0; i<sys.nb_ctr; i++) {
 			const ExprNode* gi=&ExprCopy().copy(sys.ctrs[i].f.args(), vars, sys.ctrs[i].f.expr());
 
-			if (sys.ctrs[i].op!=IBEX_EQ)
+			if (sys.ctrs[i].op!=EQ)
 				gi = & ((*lambda)[m++]*(*gi));
 
-			add_ctr(ExprCtr(*gi,IBEX_EQ));
+			add_ctr(ExprCtr(*gi,EQ));
 			// don't cleanup *gi!
 			to_clean.push_back(gi);
 		}

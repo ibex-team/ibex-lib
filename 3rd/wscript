@@ -36,8 +36,6 @@ def configure (conf):
 	conf.env.BUILD_GDTOA	= False
 	conf.env.BUILD_MATHLIB	= False
 	conf.env.BUILD_GAOL	= False
-	conf.env.BUILD_FILIB = False
-	conf.env.BUILD_AMPL = False
 
 	extract = functools.partial (unpack_archive, conf.path)
 
@@ -57,32 +55,7 @@ def configure (conf):
 	with_filib = conf.options.FILIB_PATH
 	with_soplex = conf.options.SOPLEX_PATH
 	with_cplex = conf.options.CPLEX_PATH
-	with_ampl = conf.options.AMPL_PATH
-
-	# AMPL configure
-
-	mandatory = bool (with_ampl)
-	if with_ampl:
-		conf.env.append_unique ("INCLUDES", with_ampl)
-
-	has_asl = conf.check_cxx (
-			header_name	= "asl.h",
-			mandatory	= mandatory)
-	has_arith = conf.check_cxx (
-			header_name	= "arith.h",
-			mandatory	= mandatory)
-
-	kw = {"libpath": with_ampl} if with_ampl else {}
-	has_ampl = conf.check_cxx (
-			lib = ["amplsolver"],
-			uselib_store = "IBEX_DEPS",
-			mandatory = mandatory,
-			**kw)
-
-	if not (has_asl and has_arith and has_ampl):
-		conf.env.BUILD_AMPL = True
-
-
+	
 	# allow only one linear solver
 	with_any_solver = False
 	for w in with_soplex, with_cplex:
@@ -110,7 +83,6 @@ def configure (conf):
 		return enable_shlib
 	def selected (with_value):
 		return with_value is not None
-
 
 	# allow only one interval lib
 	with_any = False
@@ -476,35 +448,8 @@ def configure (conf):
 		if conf.exec_command (cmd, cwd=filib_dir.abspath(), stdout=None, stderr=None):
 			conf.fatal ("failed to configure filib (%s)" % cmd)
 
-
-	# AMPL interface 
-	# FIXME allow a given path
-	# BUILD
-	if conf.env.BUILD_AMPL:
-		log_start ("AMPL")
-		conf.env.AMPL="solvers"
-		ampl_dir = extract (conf.env.AMPL, "amplsolvers.tar.gz")
-		ibex_append_path ("INCLUDES", conf.env.AMPL)
-		ibex_append_path ("LIBPATH", ampl_dir.abspath())
-
-		ibex_env.append_unique ("INCLUDES_IBEX_DEPS", os.path.join (conf.env.PREFIX, "include"))
-		ibex_env.append_unique ("LIB_IBEX_DEPS", ["amplsolver","dl"])
-		conf.find_program ("make")
-
-		shared = "--enable-shared" if conf.env.ENABLE_SHARED else ""
-		if sys.platform == "win32":
-			# mingw build
-			conf.find_program ("sh")
-
-			cmd = [conf.env.SH, "-c",
-				"./configurehere "]
-		else:
-			cmd = "./configurehere "
-
-		if conf.exec_command (cmd, cwd=ampl_dir.abspath(), stdout=None, stderr=None):
-			conf.fatal ("failed to configure AMPL (%s)" % cmd)
-
 def build (bld):
+
 	# installation paths
 	INCDIR = "${PREFIX}/include/ibex"
 	# NOTE: we do not install the 3rd static libs when ibex is built as a shared library
@@ -660,6 +605,8 @@ def build (bld):
 			install_path = LIBDIR,
 		)
 
+
+
 		bld.variant = ""
 	
 	if bld.env["BUILD_FILIB"]:
@@ -674,19 +621,6 @@ def build (bld):
 				stderr	= None,
 			):
 				bld.fatal ("failed to build filib")
-	
-
-	if bld.env["BUILD_AMPL"]:
-		path_ampl = bld.path.find_dir (bld.env.AMPL).abspath()
-		cmd = [bld.cmd] if bld.cmd in ("clean") else []
-		
-		if bld.exec_command (
-			[bld.env.MAKE, "-j", str(bld.options.jobs)] + cmd,
-			cwd	= path_ampl,
-			stdout	= None,
-			stderr	= None,
-		):
-			bld.fatal ("failed to build ampl")
 
 class subdir:
 	def __init__ (self, name_or_node):
@@ -705,9 +639,4 @@ def distclean (ctx):
 	if filib_dir and os.path.exists (os.path.join (filib_dir.abspath(), "Makefile")):
 		with subdir (filib_dir):
 			ctx.exec_command ("make distclean", cwd = filib_dir.abspath())
-
-	ampl_dir = ctx.path.find_dir ("solvers")
-	if ampl_dir and os.path.exists (os.path.join (ampl_dir.abspath(), "Makefile")):
-		with subdir (ampl_dir):
-			ctx.exec_command ("make clean", cwd = ampl_dir.abspath())
 

@@ -33,7 +33,7 @@ public:
 	 * \param mode see #ibex::HC4Revise::HC4Revise(FwdMode).
 	 *
 	 */
-	CtcFwdBwd(Function& f, CmpOp op=IBEX_EQ, FwdMode mode=INTERVAL_MODE);
+	CtcFwdBwd(Function& f, CmpOp op=EQ, FwdMode mode=INTERVAL_MODE);
 
 	/**
 	 * \remark ctr is not kept by reference.

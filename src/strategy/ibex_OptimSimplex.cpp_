@@ -78,7 +78,7 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 	mylp->initBoundVar(bound);
 	mylp->setVarObj(0,1.0); // set the objective
 
-	mylp->addConstraint(row,IBEX_LEQ,0.0); // add the constraint of the objective function
+	mylp->addConstraint(row,LEQ,0.0); // add the constraint of the objective function
 
 	row[0] = 0.0;
 	//The linear system is generated
@@ -108,7 +108,7 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 				else
 					row[j+1]=G[j].lb();
 			}
-			mylp->addConstraint(row,IBEX_LEQ, (-g_corner)[i].lb()-mylp->getEpsilon());  //  1e-10 ???  BNE
+			mylp->addConstraint(row,LEQ, (-g_corner)[i].lb()-mylp->getEpsilon());  //  1e-10 ???  BNE
 			//mysoplex.addRow(LPRow(-infinity, row1, (-g_corner)[i].lb()-1e-10));    //  1e-10 ???  BNE
 		}
 	}

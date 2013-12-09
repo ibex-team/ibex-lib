@@ -105,13 +105,13 @@ int LinearRelaxXTaylor::X_Linearization(IntervalVector& box, int ctr, corner_poi
 
 	CmpOp op= sys.ctrs[ctr].op;
 
-	if(op!=IBEX_EQ && isInner(box, sys, ctr)) return 0; //the constraint is satisfied
+	if(op!=EQ && isInner(box, sys, ctr)) return 0; //the constraint is satisfied
 
 	int cont=0;
-	if(ctr==goal_ctr) op = IBEX_LEQ;
-	if(op==IBEX_EQ) {
-		cont+=X_Linearization(box, ctr, cpoint, IBEX_LEQ, G, id_point, nb_nonlinear_vars, mysolver);
-		cont+=X_Linearization(box, ctr, cpoint, IBEX_GEQ, G, id_point, nb_nonlinear_vars, mysolver);
+	if(ctr==goal_ctr) op = LEQ;
+	if(op==EQ) {
+		cont+=X_Linearization(box, ctr, cpoint, LEQ, G, id_point, nb_nonlinear_vars, mysolver);
+		cont+=X_Linearization(box, ctr, cpoint, GEQ, G, id_point, nb_nonlinear_vars, mysolver);
 	} else
 		cont+=X_Linearization(box, ctr, cpoint, op,  G, id_point, nb_nonlinear_vars, mysolver);
 
@@ -314,8 +314,8 @@ int LinearRelaxXTaylor::X_Linearization(IntervalVector& box,
 
 		//      cout << " j " << j <<  " " << savebox[j] << G[j] << endl;
 	  box[j]=inf_x? savebox[j].lb():savebox[j].ub();
-	  Interval a = ((inf_x && (op == IBEX_LEQ || op== IBEX_LT)) ||
-			(!inf_x && (op == IBEX_GEQ || op== IBEX_GT)))	? G[j].lb() : G[j].ub();
+	  Interval a = ((inf_x && (op == LEQ || op== LT)) ||
+			(!inf_x && (op == GEQ || op== GT)))	? G[j].lb() : G[j].ub();
 	  row1[j] =  a.mid();
 	  ev -= a*box[j];
 
@@ -336,19 +336,19 @@ int LinearRelaxXTaylor::X_Linearization(IntervalVector& box,
 
 
 	bool added=false;
-	if (op == IBEX_LEQ || op == IBEX_LT) {
+	if (op == LEQ || op == LT) {
 		//g(xb) + a1' x1 + ... + an xn <= 0
 		if(tot_ev.lb()>(-ev).ub())
 			throw EmptyBoxException();  // the constraint is not satisfied
 		if((-ev).ub()<tot_ev.ub()) {    // otherwise the constraint is satisfied for any point in the box
-			mysolver->addConstraint( row1, IBEX_LEQ, (-ev).ub());
+			mysolver->addConstraint( row1, LEQ, (-ev).ub());
 			added=true;
 		}
 	} else {
 		if(tot_ev.ub()<(-ev).lb())
 			throw EmptyBoxException();
 		if ((-ev).lb()>tot_ev.lb()) {
-			mysolver->addConstraint( row1, IBEX_GEQ, (-ev).lb() );
+			mysolver->addConstraint( row1, GEQ, (-ev).lb() );
 			added=true;
 		}
 	}

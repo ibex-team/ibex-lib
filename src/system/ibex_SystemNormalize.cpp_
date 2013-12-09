@@ -36,7 +36,7 @@ class SystemNormalize : public SystemFactory {
 		}
 		for (int i=0; i<sys.ctrs.size(); i++) {
 
-			if (sys.ctrs[i].op==IBEX_EQ) {
+			if (sys.ctrs[i].op==EQ) {
 				pair<const ExprNode*, const Interval*> p=sys.ctrs[i].is_thick_equality();
 				const ExprNode *f_1;
 				const ExprNode *f_2;
@@ -47,26 +47,26 @@ class SystemNormalize : public SystemFactory {
 					f_1=&( ExprCopy().copy(sys.ctrs[i].f.args(), sys.args, sys.ctrs[i].f.expr()) - eps);
 					f_2=&(-ExprCopy().copy(sys.ctrs[i].f.args(), sys.args, sys.ctrs[i].f.expr()) - eps);
 				}
-				add_ctr(ExprCtr(*f_1,IBEX_LEQ));
+				add_ctr(ExprCtr(*f_1,LEQ));
 				cleanup(*f_1, false);
-				add_ctr(ExprCtr(*f_2,IBEX_LEQ));
+				add_ctr(ExprCtr(*f_2,LEQ));
 				cleanup(*f_2, false);
 			} else {
 
 				const ExprNode* f_i=&ExprCopy().copy(sys.ctrs[i].f.args(), sys.args, sys.ctrs[i].f.expr());
 
 				switch (sys.ctrs[i].op) {
-				case IBEX_LT:
+				case LT:
 					ibex_warning("warning: strict inequality (<) replaced by inequality (<=).");
 					break;
-				case IBEX_GT:
+				case GT:
 					ibex_warning("warning: strict inequality (>) replaced by inequality (>=).");
-				case IBEX_GEQ:
+				case GEQ:
 					f_i = & (- (*f_i)); // reverse the inequality
 					break;
 				}
 
-				add_ctr(ExprCtr(*f_i,IBEX_LEQ));
+				add_ctr(ExprCtr(*f_i,LEQ));
 				cleanup(*f_i, false);
 			}
 

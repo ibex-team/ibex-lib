@@ -36,7 +36,7 @@ void TestParser::var01() {
 	TEST_ASSERT(sys.ctrs.size()==1);
 	TEST_ASSERT(sys.ctrs[0].f.nb_arg()==1);
 	TEST_ASSERT(sameExpr(sys.ctrs[0].f.expr(),"x"));
-	TEST_ASSERT(sys.ctrs[0].op==IBEX_GEQ);
+	TEST_ASSERT(sys.ctrs[0].op==GEQ);
 }
 
 void TestParser::const01() {
@@ -254,7 +254,7 @@ void TestParser::ponts() {
 
 	for (int i=0; i<30; i++) {
 		TEST_ASSERT(sameExpr(sys.ctrs[i].f.expr(),sys.f[i].expr()));
-		TEST_ASSERT(sys.ctrs[i].op==IBEX_EQ);
+		TEST_ASSERT(sys.ctrs[i].op==EQ);
 	}
 }
 
