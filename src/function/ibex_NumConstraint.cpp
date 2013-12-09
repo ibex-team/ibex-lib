@@ -20,7 +20,7 @@ pair<const ExprNode*, const Interval*> NumConstraint::is_thick_equality() const 
 
 	// an inequality g(x)<=[a,b] is not considered as
 	// a thick equality, although it could...
-	if (op!=EQ) RETURN(NULL,NULL);
+	if (op!=IBEX_EQ) RETURN(NULL,NULL);
 
 	const ExprSub* sub=dynamic_cast<const ExprSub* >(&f.expr());
 

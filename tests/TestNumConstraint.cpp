@@ -21,7 +21,7 @@ void TestNumConstraint::is_thick_eq01() {
 	Variable x,y;
 	// a subtraction with no constant term is not a thick equality
 	Function f1(x,y,x-y);
-	NumConstraint c1(f1,EQ);
+	NumConstraint c1(f1,IBEX_EQ);
 	pair<const ExprNode*,const Interval*> p=c1.is_thick_equality();
 
 	TEST_ASSERT(p.first==NULL);

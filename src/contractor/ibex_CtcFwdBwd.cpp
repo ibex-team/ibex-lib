@@ -42,11 +42,11 @@ void CtcFwdBwd::contract(IntervalVector& box) {
 	Interval right_cst;
 
 	switch (ctr.op) {
-	case LT :
-	case LEQ : right_cst=Interval(NEG_INFINITY, 0); break;
-	case EQ  : right_cst=Interval(0,0); break;
-	case GEQ :
-	case GT : right_cst=Interval(0,POS_INFINITY); break;
+	case IBEX_LT :
+	case IBEX_LEQ : right_cst=Interval(NEG_INFINITY, 0); break;
+	case IBEX_EQ  : right_cst=Interval(0,0); break;
+	case IBEX_GEQ :
+	case IBEX_GT : right_cst=Interval(0,POS_INFINITY); break;
 	}
 
 	switch(d.type()) {

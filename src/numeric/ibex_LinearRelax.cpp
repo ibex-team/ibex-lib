@@ -19,8 +19,8 @@ LinearRelax::~LinearRelax() { }
 bool LinearRelax::isInner(IntervalVector & box, const System& sys, int j) {
 	Interval eval=sys.ctrs[j].f.eval(box);
 
-	if((sys.ctrs[j].op==LEQ && eval.ub() > 0) || (sys.ctrs[j].op==LT && eval.ub() >= 0) ||
-			(sys.ctrs[j].op==GEQ && eval.lb() < 0) || (sys.ctrs[j].op==GT && eval.lb() <= 0))
+	if((sys.ctrs[j].op==IBEX_LEQ && eval.ub() > 0) || (sys.ctrs[j].op==IBEX_LT && eval.ub() >= 0) ||
+			(sys.ctrs[j].op==IBEX_GEQ && eval.lb() < 0) || (sys.ctrs[j].op==IBEX_GT && eval.lb() <= 0))
 		return false;
 	else
 		return true;

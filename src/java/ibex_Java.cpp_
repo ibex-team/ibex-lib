@@ -59,7 +59,7 @@ JNIEXPORT void JNICALL Java_Ibex_add_1ctr__ILjava_lang_String_2(JNIEnv *env, job
 }
 
 Ctc* negation(const NumConstraint& c) {
-	if (c.op==EQ) {
+	if (c.op==IBEX_EQ) {
                 /** 
                  * OPTIMIZATION: discard negation in case of equality
                  */
@@ -237,7 +237,7 @@ jint inflate(NumConstraint& ctr, const IntervalVector& xin, IntervalVector& x, j
 
 	Interval yin=ctr.f.eval(xin);
 
-	if (ctr.op==EQ) {
+	if (ctr.op==IBEX_EQ) {
 		// we check this is not a vector-valued constraint
 		assert(ctr.f.image_dim()==1);
 		// the only thing we can do is to check "p"
@@ -248,11 +248,11 @@ jint inflate(NumConstraint& ctr, const IntervalVector& xin, IntervalVector& x, j
 		Interval y;
 
 		switch (ctr.op) {
-		case LT:  y = in? Interval(NEG_INFINITY,ibex::previous_float(0)) : Interval::POS_REALS; break;
-		case LEQ: y = in? Interval::NEG_REALS : Interval(ibex::next_float(0),POS_INFINITY); break;
-		case GEQ: y = in? Interval::POS_REALS : Interval(NEG_INFINITY,ibex::previous_float(0)); break;
-		case GT:  y = in? Interval(ibex::next_float(0),POS_INFINITY) : Interval::NEG_REALS; break;
-		case EQ:  ibex_error("inflation with equalities"); break;
+		case IBEX_LT:  y = in? Interval(NEG_INFINITY,ibex::previous_float(0)) : Interval::POS_REALS; break;
+		case IBEX_LEQ: y = in? Interval::NEG_REALS : Interval(ibex::next_float(0),POS_INFINITY); break;
+		case IBEX_GEQ: y = in? Interval::POS_REALS : Interval(NEG_INFINITY,ibex::previous_float(0)); break;
+		case IBEX_GT:  y = in? Interval(ibex::next_float(0),POS_INFINITY) : Interval::NEG_REALS; break;
+		case IBEX_EQ:  ibex_error("inflation with equalities"); break;
 		}
 
 		if (!yin.is_subset(y)) {

@@ -417,12 +417,12 @@ LinearSolver::Status LinearSolver::addConstraint(ibex::Vector& row, CmpOp sign, 
 			row1.add(i, row[i]);
 		}
 
-		if (sign==LEQ || sign==LT) {
+		if (sign==IBEX_LEQ || sign==IBEX_LT) {
 			mysoplex->addRow(soplex::LPRow(-soplex::infinity, row1, rhs));
 			nb_rows++;
 			res=  OK;
 		}
-		else if (sign==GEQ || sign==GT) {
+		else if (sign==IBEX_GEQ || sign==IBEX_GT) {
 			mysoplex->addRow(soplex::LPRow(rhs, row1, soplex::infinity));
 			nb_rows++;
 			res = OK;
@@ -451,7 +451,7 @@ LinearSolver::Status LinearSolver::addConstraint(ibex::Vector& row, CmpOp sign, 
 
 
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////// TODO
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
 #ifdef _IBEX_WITH_CPLEX_
 
 LinearSolver::LinearSolver(int nb_vars1, int nb_ctr1, int max_iter,
@@ -1123,7 +1123,7 @@ LinearSolver::Status LinearSolver::addConstraint(ibex::Vector& row, CmpOp sign, 
 
 
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////// TODO
+////////////////////////////////////////////////////////////////////////////////////////////////////////// TODO not finish
 #ifdef _IBEX_WITH_ILOCPLEX_
 
 LinearSolver::LinearSolver(int nb_vars1, int nb_ctr1, int max_iter,
@@ -1257,7 +1257,7 @@ LinearSolver::Status LinearSolver::getCoefConstraint(Matrix &A) {
 
 		myenv->getV
 
-//  TODO
+//  TODO not finish
 
 
 

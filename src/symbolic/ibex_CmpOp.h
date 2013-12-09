@@ -22,7 +22,7 @@ namespace ibex {
  *
  * Used, e.g., in #ibex::NumConstraint and #ibex::ExprCtr.
  */
-typedef enum { LT, LEQ, EQ, GEQ, GT } CmpOp;
+typedef enum { IBEX_LT, IBEX_LEQ, IBEX_EQ, IBEX_GEQ, IBEX_GT } CmpOp;
 
 /**
  * \ingroup symbolic

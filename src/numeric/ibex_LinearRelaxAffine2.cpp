@@ -63,40 +63,40 @@ int LinearRelaxAffine2::linearization(IntervalVector & box, LinearSolver *mysolv
 			}
 
 			switch (op) {
-			case LEQ:
+			case IBEX_LEQ:
 				if (0.0 == ev.lb())
 					throw EmptyBoxException();
-			case LT: {
+			case IBEX_LT: {
 				if (0.0 < ev.lb())
 					throw EmptyBoxException();
 				else if (0.0 < ev.ub()) {
-					stat = mysolver->addConstraint(rowconst, LEQ,	((af2.err()+err) - (af2.val(0)-center)).ub());
+					stat = mysolver->addConstraint(rowconst, IBEX_LEQ,	((af2.err()+err) - (af2.val(0)-center)).ub());
 					if (stat == LinearSolver::OK)	cont++;
 				}
 				break;
 			}
-			case GEQ:
+			case IBEX_GEQ:
 				if (ev.ub() == 0.0)
 					throw EmptyBoxException();
 				break;
-			case GT: {
+			case IBEX_GT: {
 				if (ev.ub() < 0.0)
 					throw EmptyBoxException();
 				else if (ev.lb() < 0.0) {
-					stat = mysolver->addConstraint(rowconst, GEQ,	(-(af2.err()+err) - (af2.val(0)-center)).lb());
+					stat = mysolver->addConstraint(rowconst, IBEX_GEQ,	(-(af2.err()+err) - (af2.val(0)-center)).lb());
 					if (stat == LinearSolver::OK)	cont++;
 				}
 				break;
 			}
-			case EQ: {
+			case IBEX_EQ: {
 				if (!ev.contains(0.0)) {
 					throw EmptyBoxException();
 				}
 				else {
 					if (ev.diam()>2*mysolver->getEpsilon()) {
-						stat = mysolver->addConstraint(rowconst, GEQ,	(-(af2.err()+err) - (af2.val(0)-center)).lb());
+						stat = mysolver->addConstraint(rowconst, IBEX_GEQ,	(-(af2.err()+err) - (af2.val(0)-center)).lb());
 						if (stat == LinearSolver::OK)	cont++;
-						stat = mysolver->addConstraint(rowconst, LEQ,	((af2.err()+err) - (af2.val(0)-center)).ub());
+						stat = mysolver->addConstraint(rowconst, IBEX_LEQ,	((af2.err()+err) - (af2.val(0)-center)).ub());
 						if (stat == LinearSolver::OK)	cont++;
 					}
 				}
