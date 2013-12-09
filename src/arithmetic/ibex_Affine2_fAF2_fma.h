@@ -83,12 +83,12 @@ inline double AF_fAF2_fma::twoProd(double x, double y, double *res) {
 
 
 inline double AF_fAF2_fma::twoSum(double a, double b, double *res) {
-	*res = a+b;
-	double a2 = *res - b;
-	double b2 = *res - a2;
-	double delta_a = a - a2;
-	double delta_b = b - b2;
-	return delta_a + delta_b;
+	*res = (a+b);
+	double a2 = (*res - b);
+	double b2 = (*res - a2);
+	double delta_a = (a - a2);
+	double delta_b = (b - b2);
+	return (delta_a + delta_b);
 }
 
 //////////////////////

@@ -36,7 +36,7 @@ std::ostream& operator<<(std::ostream& os, const Affine2Main<T>& x) {
 }
 
 
-//TODO debut linChebyshev
+// debut linChebyshev
 template<class T>
 Affine2Main<T>& Affine2Main<T>::linChebyshev(Affine2_expr num, const Interval itv) {
 	//  std::cout << "linChebyshev IN itv= "<<itv << " x =  "<< *this << num<< std::endl;
@@ -764,7 +764,7 @@ Affine2Main<T> sign(const Affine2Main<T>& x, const Interval itv) {
 
 
 /*
-//TODO debut linMinRange  NOT USE !!!!
+// debut linMinRange  NOT USE !!!!
 template<class T>
 Affine2Main<T>& Affine2Main<T>::linMinRange(Affine2_expr num, const Interval itv) {
 

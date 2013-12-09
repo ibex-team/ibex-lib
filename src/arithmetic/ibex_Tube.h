@@ -360,7 +360,7 @@ public:
     /**
      * \brief Return the integral of the  tube
      */
-    Interval integral(unsigned int kmin, unsigned int kmax);
+    Interval integral(const int kmin, const int kmax);
 
     /**
      * \brief Return the integral of the  tube
@@ -537,6 +537,10 @@ inline Interval& Tube::at(double t) {
 	return (*this)[(int)((t-_t0)/_deltaT)];
 }
 
+inline Tube& Tube::ctcEq(const Tube& x) {
+	return (*this).ctcInter(x);
+}
+
 inline Tube Tube::operator&(const Tube& x) const {
 	return Tube(*this) &= x;
 }
@@ -707,27 +711,27 @@ inline Tube operator/(const Interval& x1, const Tube& x2) {
 		for (int i=0;i<x.size();i++) {vec[i]=f(x[i],p);} \
 		return Tube(x.get_t0(),x.get_tF(),x.get_delta_t(),vec);
 
-inline Tube abs(const Tube& x)           { func_unary_tube(abs); }
-inline Tube sqr(const Tube& x)           { func_unary_tube(sqr); }
-inline Tube sqrt(const Tube& x)          { func_unary_tube(sqrt); }
-inline Tube pow(const Tube& x, int p)    { func_binary_tube(pow); }
-inline Tube pow(const Tube& x, double p) { func_binary_tube(pow); }
-inline Tube pow(const Tube &x, const Interval &p) { func_binary_tube(pow); }
-inline Tube root(const Tube& x, int p)   { func_binary_tube(root); }
-inline Tube exp(const Tube& x)           { func_unary_tube(exp); }
-inline Tube log(const Tube& x)           { func_unary_tube(log); }
-inline Tube cos(const Tube& x)           { func_unary_tube(cos); }
-inline Tube sin(const Tube& x)           { func_unary_tube(sin); }
-inline Tube tan(const Tube& x)           { func_unary_tube(tan); }
-inline Tube acos(const Tube& x)          { func_unary_tube(acos); }
-inline Tube asin(const Tube& x)          { func_unary_tube(asin); }
-inline Tube atan(const Tube& x)          { func_unary_tube(atan); }
-inline Tube cosh(const Tube& x)          { func_unary_tube(cosh); }
-inline Tube sinh(const Tube& x)          { func_unary_tube(sinh); }
-inline Tube tanh(const Tube& x)          { func_unary_tube(tanh); }
-inline Tube acosh(const Tube& x)         { func_unary_tube(acosh); }
-inline Tube asinh(const Tube& x)         { func_unary_tube(asinh); }
-inline Tube atanh(const Tube& x)         { func_unary_tube(atanh); }
+inline Tube abs(const Tube& x)           { func_unary_tube(abs) }
+inline Tube sqr(const Tube& x)           { func_unary_tube(sqr) }
+inline Tube sqrt(const Tube& x)          { func_unary_tube(sqrt)}
+inline Tube pow(const Tube& x, int p)    { func_binary_tube(pow) }
+inline Tube pow(const Tube& x, double p) { func_binary_tube(pow) }
+inline Tube pow(const Tube &x, const Interval &p) { func_binary_tube(pow) }
+inline Tube root(const Tube& x, int p)   { func_binary_tube(root) }
+inline Tube exp(const Tube& x)           { func_unary_tube(exp) }
+inline Tube log(const Tube& x)           { func_unary_tube(log) }
+inline Tube cos(const Tube& x)           { func_unary_tube(cos) }
+inline Tube sin(const Tube& x)           { func_unary_tube(sin) }
+inline Tube tan(const Tube& x)           { func_unary_tube(tan) }
+inline Tube acos(const Tube& x)          { func_unary_tube(acos) }
+inline Tube asin(const Tube& x)          { func_unary_tube(asin) }
+inline Tube atan(const Tube& x)          { func_unary_tube(atan) }
+inline Tube cosh(const Tube& x)          { func_unary_tube(cosh) }
+inline Tube sinh(const Tube& x)          { func_unary_tube(sinh) }
+inline Tube tanh(const Tube& x)          { func_unary_tube(tanh) }
+inline Tube acosh(const Tube& x)         { func_unary_tube(acosh) }
+inline Tube asinh(const Tube& x)         { func_unary_tube(asinh) }
+inline Tube atanh(const Tube& x)         { func_unary_tube(atanh) }
 
 
 inline Tube atan2(const Tube& x, const Tube& y) {

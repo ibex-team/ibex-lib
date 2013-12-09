@@ -530,7 +530,7 @@ Affine2Main<AF_No>& Affine2Main<AF_No>::sqr(const Interval itv) {
 
 
 
-//TODO debut linChebyshev
+// debut linChebyshev
 template<>
 Affine2Main<AF_No>& Affine2Main<AF_No>::linChebyshev(Affine2_expr num, const Interval itv) {
 	//  std::cout << "linChebyshev IN itv= "<<itv << " x =  "<< *this << num<< std::endl;

@@ -533,8 +533,8 @@ Affine2Main<AF_sAF>& Affine2Main<AF_sAF>::sqr(const Interval itv) {
 
 	} else  {
 
-		double Sx, Sx2, ttt, sss, ppp, x0, eee,tmp;
-		Sx = 0; Sx2 = 0; ttt = 0; sss = 0; ppp = 0; x0 = 0; eee =0.0; tmp =0.0;
+		double Sx, Sx2, ttt, ppp, x0, tmp;
+		Sx = 0; Sx2 = 0; ttt = 0;  ppp = 0; x0 = 0; tmp =0.0;
 
 		// compute the error
 		for (int i = 1; i <= _n; i++) {

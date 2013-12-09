@@ -74,14 +74,14 @@ inline AF_fAF2::~AF_fAF2() {
 
 
 /////////////////////
-// CODE extract from "Handbook of Floating-Point Arithmetic"
+// CODE extract from "Handbook of Floating-Point Arithmetic" p.132-139
 inline void AF_fAF2::Split(double x, int sp, double *x_high, double *x_low)
 {
 	unsigned long C = (1UL << sp) + 1;
-	double gamma = C * x;
-	double delta = x - gamma;
-	*x_high= gamma + delta;
-	*x_low= x - *x_high;
+	double gamma = (C * x);
+	double delta = (x - gamma);
+	*x_high= (gamma + delta);
+	*x_low= (x - *x_high);
 }
 
 inline double AF_fAF2::twoProd(double x, double y, double *r_1)
@@ -94,26 +94,27 @@ inline double AF_fAF2::twoProd(double x, double y, double *r_1)
 	double t_3;
 	Split(x, SHIFT_POW, &x_high, &x_low);
 	Split(y, SHIFT_POW, &y_high, &y_low);
-	*r_1 = x * y;
-	t_1 = -*r_1 + x_high * y_high ;
-	t_2 =   t_1 + x_high * y_low;
-	t_3 =	t_2 + x_low * y_high;
-	return  t_3 + x_low * y_low;
+	*r_1 = (x * y);
+	t_1 = (-*r_1 + x_high * y_high);
+	t_2 =   (t_1 + x_high * y_low );
+	t_3 =	(t_2 + x_low  * y_high);
+	return  (t_3 + x_low  * y_low );
 }
 
 
 
+// CODE extract from "Handbook of Floating-Point Arithmetic" p.130
 inline double AF_fAF2::twoSum(double a, double b, double *res) {
-	*res = a+b;
-	double a2 = *res - b;
-	double b2 = *res - a2;
-	double delta_a = a - a2;
-	double delta_b = b - b2;
-	return delta_a + delta_b;
+	*res = (a+b);
+	double a2 = (*res - b);
+	double b2 = (*res - a2);
+	double delta_a = (a - a2);
+	double delta_b = (b - b2);
+	return (delta_a + delta_b);
 }
 
 //////////////////////
 
 }
 
-#endif /* IBEX_Affine2_H_ */
+#endif /* IBEX_AFFINE2_FAF2_H_ */
