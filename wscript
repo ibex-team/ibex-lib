@@ -43,6 +43,8 @@ def options (opt):
 			help = "location of the Soplex lib")
 	opt.add_option ("--with-cplex", action="store", type="string", dest="CPLEX_PATH",
 			help = "location of the Cplex lib")
+	opt.add_option ("--with-ampl",   action="store", type="string", dest="AMPL_PATH",
+			help = "location of the amplsolver lib")
 
 	opt.add_option ("--with-jni", action="store_true", dest="WITH_JNI",
 			help = "enable the compilation of the JNI adapter (note: your JAVA_HOME environment variable must be properly set if you want to use this option)")
@@ -153,9 +155,9 @@ def configure (conf):
 		env.append_unique ("INCLUDES",  os.path.join (path_c, "cplex/include/"))
 		conf.check_cxx (header_name	= "ilcplex/cplex.h")
 		
-		# ATTENTION  IL faut adapter en fonction des differentes configurations
+		# FIXME ATTENTION  IL faut adapter en fonction des differentes configurations (32/64, linux, mac, win)
 		if (not(conf.check_cxx (lib = ["cplex", "pthread"], uselib_store = "IBEX_DEPS",
-				libpath = [os.path.join (path_c, "cplex/lib/x86-64_sles10_4.1/static_pic")],  
+				libpath = [os.path.join (path_c, "cplex/lib/x86-64_sles10_4.1/static_pic")],  # FIXME changer le chemin
 				mandatory = False,
 				fragment = """
 					#include "ilcplex/cplex.h"
