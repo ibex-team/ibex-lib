@@ -641,9 +641,9 @@ Affine2Main<AF_No>& Affine2Main<AF_No>::linChebyshev(Affine2_expr num, const Int
 				TEMP1 = dmm.lb()-alpha*(itv.lb());
 				TEMP2 = dmm.ub()-alpha*(itv.ub());
 				if (TEMP1>TEMP2) {
-					band = Interval((alpha*(1-std::log((alpha)))),TEMP1);
+					band = Interval((alpha*(1- ::log((alpha)))),TEMP1);
 				} else {
-					band = Interval((alpha*(1-std::log((alpha)))),TEMP2);
+					band = Interval((alpha*(1- ::log((alpha)))),TEMP2);
 				}
 
 				saxpy(alpha, Affine2Main<AF_No>(), band.mid(), band.diam()/2, true,false,true,true);
@@ -659,10 +659,10 @@ Affine2Main<AF_No>& Affine2Main<AF_No>::linChebyshev(Affine2_expr num, const Int
 			TEMP1 = dmm.lb()-alpha*(itv.lb());
 			TEMP2 = dmm.ub()-alpha*(itv.ub());
 			if (TEMP1>TEMP2) {
-				band = Interval(TEMP2,(-std::log((alpha))-1));
+				band = Interval(TEMP2,(- ::log((alpha))-1));
 			}
 			else {
-				band = Interval(TEMP1,(-std::log((alpha))-1));
+				band = Interval(TEMP1,(- ::log((alpha))-1));
 			}
 
 			saxpy(alpha, Affine2Main<AF_No>(), band.mid(), band.diam()/2, true,false,true,true);
@@ -680,10 +680,10 @@ Affine2Main<AF_No>& Affine2Main<AF_No>::linChebyshev(Affine2_expr num, const Int
 				TEMP1 = (1.0/(abs(itv).lb()))-alpha*(abs(itv).lb());
 				TEMP2 = (1.0/(abs(itv).ub()))-alpha*(abs(itv).ub());
 				if (TEMP1>TEMP2) {
-					band = Interval((2*std::sqrt(-(alpha))),TEMP1);
+					band = Interval((2* ::sqrt(-(alpha))),TEMP1);
 				}
 				else {
-					band = Interval((2*std::sqrt(-(alpha))),TEMP2);
+					band = Interval((2* ::sqrt(-(alpha))),TEMP2);
 				}
 
 				beta = band.mid();
@@ -696,17 +696,17 @@ Affine2Main<AF_No>& Affine2Main<AF_No>::linChebyshev(Affine2_expr num, const Int
 		case AF_COSH : {
 
 			dmm = res_itv;
-			alpha = ((std::cosh((itv.ub()))-std::cosh((itv.lb())))/itv.diam());
+			alpha = (( ::cosh((itv.ub()))- ::cosh((itv.lb())))/itv.diam());
 
 			//u = asinh(alpha);
-			TEMP1 = std::cosh((itv.lb()))-alpha*(itv.lb());
-			TEMP2 = std::cosh((itv.ub()))-alpha*(itv.ub());
+			TEMP1 =  ::cosh((itv.lb()))-alpha*(itv.lb());
+			TEMP2 =  ::cosh((itv.ub()))-alpha*(itv.ub());
 			if (TEMP1>TEMP2) {
 				// cosh(asinh(alpha)) = sqrt(sqr(alpha)+1)
-				band = Interval((std::sqrt(std::pow((alpha),2)+1)-alpha* ::asinh(alpha)),TEMP1);
+				band = Interval(( ::sqrt( ::pow((alpha),2)+1)-alpha* ::asinh(alpha)),TEMP1);
 			}
 			else {
-				band = Interval((std::sqrt(std::pow(alpha,2)+1)-alpha* ::asinh(alpha)),TEMP2);
+				band = Interval(( ::sqrt( ::pow(alpha,2)+1)-alpha* ::asinh(alpha)),TEMP2);
 			}
 			saxpy(alpha, Affine2Main<AF_No>(), band.mid(), band.diam()/2, true,false,true,true);
 			break;
@@ -759,22 +759,22 @@ Affine2Main<AF_No>& Affine2Main<AF_No>::linChebyshev(Affine2_expr num, const Int
 
 			double x0,xb0,xb1,fxb0,fxb1,c0,c1;
 
-			x0 = 1.0/std::sqrt(2.);
+			x0 = 1.0/ ::sqrt(2.);
 			xb0 = (0.5)*(itv.diam()*x0 +itv.lb()+itv.ub());
 			xb1 = (0.5)*(itv.diam()*(-x0) +itv.lb()+itv.ub());
 
 			switch (num) {
 			case AF_COS :
-				fxb0 = std::cos(xb0);
-				fxb1 = std::cos(xb1);
+				fxb0 =  ::cos(xb0);
+				fxb1 =  ::cos(xb1);
 				break;
 			case AF_SIN :
-				fxb0 = std::sin(xb0);
-				fxb1 = std::sin(xb1);
+				fxb0 =  ::sin(xb0);
+				fxb1 =  ::sin(xb1);
 				break;
 			case AF_TAN :
-				fxb0 = std::tan(xb0);
-				fxb1 = std::tan(xb1);
+				fxb0 =  ::tan(xb0);
+				fxb1 =  ::tan(xb1);
 				break;
 			default:
 				ibex_error("Not implemented yet");
@@ -796,24 +796,24 @@ Affine2Main<AF_No>& Affine2Main<AF_No>::linChebyshev(Affine2_expr num, const Int
 			// compute the error at _itv.lb() and _itv.ub() and compute the first point such as f'(u) = alpha
 			switch (num) {
 			case AF_COS :
-				ddelta = (std::abs(std::cos((itv.lb()))-(alpha*(itv.lb())+beta)));
-				t1     = (std::abs(std::cos((itv.ub()))-(alpha*(itv.ub())+beta)));
+				ddelta = ( fabs( ::cos((itv.lb()))-(alpha*(itv.lb())+beta)));
+				t1     = ( fabs( ::cos((itv.ub()))-(alpha*(itv.ub())+beta)));
 				if (t1>ddelta)  ddelta= t1;
-				u = std::asin(-(alpha));
+				u =  ::asin(-(alpha));
 				nb_period = (itv+Interval::HALF_PI.ub()) / Interval::PI.lb();
 				break;
 			case AF_SIN :
-				ddelta = (std::abs(std::sin((itv.lb()))-(alpha*(itv.lb())+beta)));
-				t1     = (std::abs(std::sin((itv.ub()))-(alpha*(itv.ub())+beta)));
+				ddelta = ( fabs( ::sin((itv.lb()))-(alpha*(itv.lb())+beta)));
+				t1     = ( fabs( ::sin((itv.ub()))-(alpha*(itv.ub())+beta)));
 				if (t1>ddelta)  ddelta= t1;
-				u = std::acos((alpha));
+				u =  ::acos((alpha));
 				nb_period = (itv) / Interval::PI.lb();
 				break;
 			case AF_TAN :
-				ddelta = (std::abs(std::tan((itv.lb()))-(alpha*(itv.lb())+beta)));
-				t1     = (std::abs(std::tan((itv.ub()))-(alpha*(itv.ub())+beta)));
+				ddelta = ( fabs( ::tan((itv.lb()))-(alpha*(itv.lb())+beta)));
+				t1     = ( fabs( ::tan((itv.ub()))-(alpha*(itv.ub())+beta)));
 				if (t1>ddelta)  ddelta= t1;
-				u = std::acos(1/std::sqrt((alpha)));
+				u =  ::acos(1/ ::sqrt((alpha)));
 				nb_period = (itv) / Interval::PI.lb();
 				break;
 			default:
@@ -831,7 +831,7 @@ Affine2Main<AF_No>& Affine2Main<AF_No>::linChebyshev(Affine2_expr num, const Int
 				while (i<=p2) { // looking for a point
 					TEMP1 = (i%2==0? (u + i*Interval::PI.lb()) : (i*Interval::PI.lb() - u));
 					if ((itv.contains(TEMP1))) { // check if maximize the error
-						t1 = (std::abs(std::cos(TEMP1)-(alpha*TEMP1+beta)));
+						t1 = ( fabs( ::cos(TEMP1)-(alpha*TEMP1+beta)));
 						if (t1>ddelta)  ddelta= t1;
 					}
 					i++;
@@ -841,7 +841,7 @@ Affine2Main<AF_No>& Affine2Main<AF_No>::linChebyshev(Affine2_expr num, const Int
 				while (i<=p2) { // looking for a point
 					TEMP1 =  (i%2==0? (u + i*Interval::PI.lb()) : ((i+1)*Interval::PI.lb() - u));
 					if (itv.contains(TEMP1)) {
-						t1 = (std::abs(std::sin(TEMP1)-(alpha*TEMP1+beta)));
+						t1 = ( fabs( ::sin(TEMP1)-(alpha*TEMP1+beta)));
 						if (t1>ddelta)  ddelta= t1;
 					}
 					i++;
@@ -851,12 +851,12 @@ Affine2Main<AF_No>& Affine2Main<AF_No>::linChebyshev(Affine2_expr num, const Int
 				while (i<=p2) { // looking for a point
 					TEMP1 = ( ( i*Interval::PI.lb() + u));
 					if (((itv.contains(TEMP1)))) {
-						t1 = (std::abs(std::tan(TEMP1)-(alpha*TEMP1+beta)));
+						t1 = ( fabs( ::tan(TEMP1)-(alpha*TEMP1+beta)));
 						if (t1>ddelta)  ddelta= t1;
 					}
 					TEMP1 = ( ( i*Interval::PI.lb() - u ));
 					if (itv.contains(TEMP1)) {
-						t1 = (std::abs(std::tan(TEMP1)-(alpha*TEMP1+beta)));
+						t1 = ( fabs( ::tan(TEMP1)-(alpha*TEMP1+beta)));
 						if (t1>ddelta)  ddelta= t1;
 					}
 					i++;
@@ -902,29 +902,29 @@ Affine2Main<AF_No>& Affine2Main<AF_No>::linChebyshev(Affine2_expr num, const Int
 
 			double x0,xb0,xb1,fxb0,fxb1,c0,c1;
 
-			x0 = 1.0/std::sqrt(2.);
+			x0 = 1.0/ ::sqrt(2.);
 			xb0 = (0.5)*(itv.diam()*  x0  +itv.lb()+itv.ub());
 			xb1 = (0.5)*(itv.diam()*(-x0) +itv.lb()+itv.ub());
 			switch (num) {
 			case AF_SINH :
-				fxb0 = std::sinh(xb0);
-				fxb1 = std::sinh(xb1);
+				fxb0 =  ::sinh(xb0);
+				fxb1 =  ::sinh(xb1);
 				break;
 			case AF_TANH :
-				fxb0 = std::tanh(xb0);
-				fxb1 = std::tanh(xb1);
+				fxb0 =  ::tanh(xb0);
+				fxb1 =  ::tanh(xb1);
 				break;
 			case AF_ATAN :
-				fxb0 = std::atan(xb0);
-				fxb1 = std::atan(xb1);
+				fxb0 =  ::atan(xb0);
+				fxb1 =  ::atan(xb1);
 				break;
 			case AF_ACOS :
-				fxb0 = std::acos(xb0);
-				fxb1 = std::acos(xb1);
+				fxb0 =  ::acos(xb0);
+				fxb1 =  ::acos(xb1);
 				break;
 			case AF_ASIN :
-				fxb0 = std::asin(xb0);
-				fxb1 = std::asin(xb1);
+				fxb0 =  ::asin(xb0);
+				fxb1 =  ::asin(xb1);
 				break;
 			default:
 				ibex_error("Not implemented yet");
@@ -944,86 +944,86 @@ Affine2Main<AF_No>& Affine2Main<AF_No>::linChebyshev(Affine2_expr num, const Int
 			// compute the error at _itv.lb(), _itv.ub() and u such as f'(u) =alpha
 			switch (num) {
 			case AF_SINH :
-				ddelta = std::abs(std::sinh((itv.lb()))-(alpha*(itv.lb())+beta));
-				t1     = std::abs(std::sinh((itv.ub()))-(alpha*(itv.ub())+beta));
+				ddelta =  fabs( ::sinh((itv.lb()))-(alpha*(itv.lb())+beta));
+				t1     =  fabs( ::sinh((itv.ub()))-(alpha*(itv.ub())+beta));
 				if (t1>ddelta)  ddelta= t1;
 				// u = acosh(alpha)
 				TEMP2 = ::acosh((alpha));
 				if (((itv.contains(TEMP2)))) {
 					// sinh(acosh(x)) = sqrt(sqr(x)-1)
-					t1 = (std::abs(std::sqrt(std::pow(alpha,2)-1)-(alpha*TEMP2+beta)));
+					t1 = ( fabs( ::sqrt( ::pow(alpha,2)-1)-(alpha*TEMP2+beta)));
 					if (t1>ddelta)  ddelta= t1;
 				}
 				if (((itv.contains(-TEMP2)))) {
 					// sinh(acosh(-x)) = -sqrt(sqr(x)-1)
-					t1 = (std::abs((-std::sqrt(std::pow(alpha,2)-1))-(alpha*(-TEMP2)+beta)));
+					t1 = ( fabs((- ::sqrt( ::pow(alpha,2)-1))-(alpha*(-TEMP2)+beta)));
 					if (t1>ddelta)  ddelta= t1;
 				}
 				break;
 			case AF_TANH :
-				ddelta = (std::abs(std::tanh((itv.lb()))-(alpha*(itv.lb())+beta)));
-				t1     = (std::abs(std::tanh((itv.ub()))-(alpha*(itv.ub())+beta)));
+				ddelta = ( fabs( ::tanh((itv.lb()))-(alpha*(itv.lb())+beta)));
+				t1     = ( fabs( ::tanh((itv.ub()))-(alpha*(itv.ub())+beta)));
 				if (t1>ddelta)  ddelta= t1;
 				// tanh'(u)=alpha
 				// cosh(u)= -2/alpha -1
 				// u = +-acosh(-2/alpha -1)
 				TEMP2 = ::acosh(-2/alpha -1);
 				if (((itv.contains(TEMP2)))) {
-					t1 = (std::abs(std::tanh(TEMP2)-(alpha*TEMP2+beta)));
+					t1 = ( fabs( ::tanh(TEMP2)-(alpha*TEMP2+beta)));
 					if (t1>ddelta)  ddelta= t1;
 				}
 				if (((itv.contains(-TEMP2)))) {
-					t1 = (std::abs(std::tanh(-TEMP2)-(alpha*(-TEMP2)+beta)));
+					t1 = ( fabs( ::tanh(-TEMP2)-(alpha*(-TEMP2)+beta)));
 					if (t1>ddelta)  ddelta= t1;
 				}
 				break;
 			case AF_ATAN :
-				ddelta = (std::abs(std::atan((itv.lb()))-(alpha*(itv.lb())+beta)));
-				t1     = (std::abs(std::atan((itv.ub()))-(alpha*(itv.ub())+beta)));
+				ddelta = ( fabs( ::atan((itv.lb()))-(alpha*(itv.lb())+beta)));
+				t1     = ( fabs( ::atan((itv.ub()))-(alpha*(itv.ub())+beta)));
 				if (t1>ddelta)  ddelta= t1;
 				// atan'(u)=1/(u^2+1) = alpha
 				// u = +-sqrt(1/alpha -1)
-				TEMP2 = std::sqrt(1/alpha-1);
+				TEMP2 =  ::sqrt(1/alpha-1);
 				if (((itv.contains(TEMP2)))) {
-					t1 = (std::abs(std::atan(TEMP2)-(alpha*TEMP2+beta)));
+					t1 = ( fabs( ::atan(TEMP2)-(alpha*TEMP2+beta)));
 					if (t1>ddelta)  ddelta= t1;
 				}
 				if (((itv.contains(-TEMP2)))) {
-					t1 = (std::abs(std::atan(-TEMP2)-(alpha*(-TEMP2)+beta)));
+					t1 = ( fabs( ::atan(-TEMP2)-(alpha*(-TEMP2)+beta)));
 					if (t1>ddelta)  ddelta= t1;
 				}
 				break;
 			case AF_ACOS :
-				ddelta = (std::abs(std::acos(itv.lb())-(alpha*(itv.lb())+beta)));
-				t1     = (std::abs(std::acos(itv.ub())-(alpha*(itv.ub())+beta)));
+				ddelta = ( fabs( ::acos(itv.lb())-(alpha*(itv.lb())+beta)));
+				t1     = ( fabs( ::acos(itv.ub())-(alpha*(itv.ub())+beta)));
 				if (t1>ddelta)  ddelta= t1;
 				// acos'(u)=-1/sqrt(1-u^2) = alpha
 				// u = +-sqrt(1-1/(alpha^2))
-				TEMP2 = std::sqrt(1-1/(std::pow(alpha,2)));
+				TEMP2 =  ::sqrt(1-1/( ::pow(alpha,2)));
 				if (((itv.contains(TEMP2)))) {
-					t1 = (std::abs(std::acos(TEMP2)-(alpha*TEMP2+beta)));
+					t1 = ( fabs( ::acos(TEMP2)-(alpha*TEMP2+beta)));
 					if (t1>ddelta)  ddelta= t1;
 				}
 				if (((itv.contains(-TEMP2)))) {
-					t1 = (std::abs(std::acos(-TEMP2)-(alpha*(-TEMP2)+beta)));
+					t1 = ( fabs( ::acos(-TEMP2)-(alpha*(-TEMP2)+beta)));
 					if (t1>ddelta)  ddelta= t1;
 				}
 				break;
 			case AF_ASIN :
-				ddelta = (std::abs(std::asin((itv.lb()))-(alpha*(itv.lb())+beta)));
-				t1     = (std::abs(std::asin((itv.ub()))-(alpha*(itv.ub())+beta)));
+				ddelta = ( fabs( ::asin((itv.lb()))-(alpha*(itv.lb())+beta)));
+				t1     = ( fabs( ::asin((itv.ub()))-(alpha*(itv.ub())+beta)));
 				if (t1>ddelta)  ddelta= t1;
 				// asin'(u)=1/sqrt(1-u^2) = alpha
 				// u = sqrt(1-1/(alpha^2))
-				TEMP2 = std::sqrt(1/(alpha)-1);
+				TEMP2 =  ::sqrt(1/(alpha)-1);
 				if (((itv.contains(TEMP2)))) {
 					// tanh(acosh(x)) = sqrt(sqr(x)-1) :x
-					t1 = (std::abs(std::asin(TEMP2)-(alpha*TEMP2+beta)));
+					t1 = ( fabs( ::asin(TEMP2)-(alpha*TEMP2+beta)));
 					if (t1>ddelta)  ddelta= t1;
 				}
 				if (((itv.contains(-TEMP2)))) {
 					// sinh(acosh(-x)) = -sqrt(sqr(x)-1)
-					t1 = (std::abs(std::asin(-TEMP2)-(alpha*(-TEMP2)+beta)));
+					t1 = ( fabs( ::asin(-TEMP2)-(alpha*(-TEMP2)+beta)));
 					if (t1>ddelta)  ddelta= t1;
 				}
 				break;
@@ -1084,7 +1084,7 @@ Affine2Main<AF_No>& Affine2Main<AF_No>::power(int n, const Interval itv) {
 			Interval  dmm(0.0), band(0.0);
 
 			dmm = pow(itv, n);
-			alpha = ((std::pow(itv.ub(),n)-std::pow(itv.lb(),n))/itv.diam());
+			alpha = (( ::pow(itv.ub(),n)- ::pow(itv.lb(),n))/itv.diam());
 
 			TEMP1 = (dmm.lb()) - alpha * (itv.lb());
 			TEMP2 = (dmm.ub()) - alpha * (itv.ub());
@@ -1092,12 +1092,12 @@ Affine2Main<AF_No>& Affine2Main<AF_No>::power(int n, const Interval itv) {
 			if (TEMP1 > TEMP2) {
 				TEMP2 = alpha/ n;
 				band = Interval(
-						((1 - n) * TEMP2 * (std::pow(TEMP2, 1.0/(n - 1)))),
+						((1 - n) * TEMP2 * ( ::pow(TEMP2, 1.0/(n - 1)))),
 						TEMP1);
 			} else {
 				TEMP1 = alpha/ n;
 				band = Interval(
-						((1 - n) * TEMP1 * (std::pow(TEMP1, 1.0/(n - 1)))),
+						((1 - n) * TEMP1 * ( ::pow(TEMP1, 1.0/(n - 1)))),
 						TEMP2);
 			}
 			saxpy(alpha, Affine2Main<AF_No>(), band.mid(), band.diam()/2, true,false,true,true);
@@ -1117,11 +1117,11 @@ Affine2Main<AF_No>& Affine2Main<AF_No>::power(int n, const Interval itv) {
 
 			double alpha, beta, ddelta, t1, x0, xb0, xb1, fxb0, fxb1, c0, c1, TEMP1, TEMP2;
 
-			x0  = 1.0 / std::sqrt(2.);
+			x0  = 1.0 /  ::sqrt(2.);
 			xb0 = (0.5) * (itv.diam() * ( x0) + itv.lb() + itv.ub());
 			xb1 = (0.5) * (itv.diam() * (-x0) + itv.lb() + itv.ub());
-			fxb0 = std::pow(xb0, n);
-			fxb1 = std::pow(xb1, n);
+			fxb0 =  ::pow(xb0, n);
+			fxb1 =  ::pow(xb1, n);
 			c0 = (0.5) * (fxb0 + fxb1);
 			c1 = x0 * fxb0 - x0 * fxb1;
 
@@ -1132,17 +1132,17 @@ Affine2Main<AF_No>& Affine2Main<AF_No>::power(int n, const Interval itv) {
 			// compute the maximal error
 
 			// compute the error at _itv.lb() and _itv.ub()
-			ddelta = (std::abs(std::pow(itv.lb(), n)- (alpha * (itv.lb()) + beta)));
-			t1     = (std::abs(std::pow(itv.ub(), n)- (alpha * (itv.ub()) + beta)));
+			ddelta = ( fabs( ::pow(itv.lb(), n)- (alpha * (itv.lb()) + beta)));
+			t1     = ( fabs( ::pow(itv.ub(), n)- (alpha * (itv.ub()) + beta)));
 			if (t1 > ddelta) ddelta= t1 ;
 			// u = (alpha/n)^(1/(n-1))
-			TEMP2 = std::pow(alpha / n, 1.0 / n - 1);
+			TEMP2 =  ::pow(alpha / n, 1.0 / n - 1);
 			if (((itv.contains(TEMP2)))) {
-				t1 = (std::abs(std::pow(TEMP2, n) - (alpha * TEMP2 + beta)));
+				t1 = ( fabs( ::pow(TEMP2, n) - (alpha * TEMP2 + beta)));
 				if (t1 > ddelta) ddelta= t1 ;
 			}
 			if (((itv.contains(-TEMP2)))) {
-				t1 = (std::abs(std::pow(-TEMP2, n) - (alpha * (-TEMP2) + beta)));
+				t1 = ( fabs( ::pow(-TEMP2, n) - (alpha * (-TEMP2) + beta)));
 				if (t1 > ddelta) ddelta= t1 ;
 			}
 

@@ -239,7 +239,7 @@ int main() {
 				for (int i = 1; i < 5; i++) {
 					z = 0;
 					for (int j = 0; j < 4; j++) {
-						z = z + pow((x[j] - A[i][j]), 2);
+						z = z + ::pow((x[j] - A[i][j]), 2);
 					}
 					f = f - 1.0 / (z + c[i]);
 				}

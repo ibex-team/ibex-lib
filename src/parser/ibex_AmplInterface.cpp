@@ -168,11 +168,11 @@ bool AmplInterface::writeSolution(double * sol, bool found) {
 }
 
 // create an AMPL problem by using ASL interface to the .nl file
-System AmplInterface::getSystem() {
+System& AmplInterface::getSystem() {
 	if (_problem)
-		return System(*_problem);
+		return *(new System(*_problem));
 	else
-		return NULL;
+		return *(new System(SystemFactory()));
 }
 
 
@@ -339,13 +339,12 @@ bool AmplInterface::readnl() {
 				else                sign =2; // GEQ;
 			else                    sign =3; // LEQ;
 
-
 			// add them (and set lower-upper bound)
 			switch (sign) {
 
 			case  1:  _problem->add_ctr_eq((*(body_con[i])-Interval(lb,ub))); break;
-			case  2:  _problem->add_ctr(ExprCtr(*(body_con[i])-ub,LEQ)); break;
-			case  3:  _problem->add_ctr(ExprCtr(*(body_con[i])-lb,GEQ)); break;
+			case  2:  _problem->add_ctr(ExprCtr(*(body_con[i])-lb,GEQ)); break;
+			case  3:  _problem->add_ctr(ExprCtr(*(body_con[i])-ub,LEQ)); break;
 			default: ibex_error("Error: could not recognize a constraint\n"); return false;
 			}
 		}

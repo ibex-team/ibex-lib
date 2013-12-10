@@ -38,9 +38,13 @@ public:
 
 	virtual ~AmplInterface();
 
-	System getSystem();
+	System& getSystem();
 
 	bool writeSolution(double* sol, bool found);
+
+	IntervalVector& getBoundInit() const {
+		return *_bound_init;
+	}
 
 };
 

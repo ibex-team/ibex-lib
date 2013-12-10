@@ -678,8 +678,12 @@ def build (bld):
 
 	if bld.env["BUILD_AMPL"]:
 		path_ampl = bld.path.find_dir (bld.env.AMPL).abspath()
-		cmd = [bld.cmd] if bld.cmd in ("clean") else []
-		
+
+		if  bld.env["INTERVAL_LIB"] is "GAOL":
+			cmd = [bld.cmd] if bld.cmd in ("clean") else ["CFLAGS=-DNo_dtoa"]
+		else:
+			cmd = [bld.cmd] if bld.cmd in ("clean") else []
+
 		if bld.exec_command (
 			[bld.env.MAKE, "-j", str(bld.options.jobs)] + cmd,
 			cwd	= path_ampl,

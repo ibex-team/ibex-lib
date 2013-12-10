@@ -32,7 +32,7 @@ int main() {
 			for (int i=0; i<5; i++) {
 				z= 0;
 				for (int j=0; j<4; j++) {
-					z = z+pow((x1[j]-a[i][j]),2);
+					z = z+ ::pow((x1[j]-a[i][j]),2);
 				}
 				f -= 1/(z+c[i]);
 			}
