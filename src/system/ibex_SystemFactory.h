@@ -75,6 +75,14 @@ public:
 	 */
 	void add_ctr(const NumConstraint& ctr);
 	void add_ctr2(const ExprCtr& ctr);
+
+	/**
+	 * \brief Add a new equality constraint (by copy).
+	 *
+	 * \pre All the variables must have been added.
+	 */
+	void add_ctr_eq (const ExprNode& exp);
+
 protected:
 	friend class System;
 
@@ -92,6 +100,12 @@ protected:
 
 	std::vector<NumConstraint*> ctrs;
 };
+
+
+inline void SystemFactory::add_ctr_eq (const ExprNode& exp) {
+	return add_ctr(ExprCtr(exp,EQ));
+}
+
 
 } // end namespace ibex
 #endif // __IBEX_SYSTEM_FACTORY_H__
