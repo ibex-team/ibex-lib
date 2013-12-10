@@ -59,10 +59,15 @@ class SystemNormalize : public SystemFactory {
 				case LT:
 					ibex_warning("warning: strict inequality (<) replaced by inequality (<=).");
 					break;
+				case LEQ:
+					break;
 				case GT:
 					ibex_warning("warning: strict inequality (>) replaced by inequality (>=).");
 				case GEQ:
 					f_i = & (- (*f_i)); // reverse the inequality
+					break;
+				default:
+					assert(false);
 					break;
 				}
 

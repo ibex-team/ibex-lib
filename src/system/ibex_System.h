@@ -84,7 +84,7 @@ public:
 	 * have to be initialized. #goal is set to NULL.
 	 */
 
-	typedef enum { COPY, NORMALIZE, INEQ } copy_mode;
+	typedef enum { COPY, NORMALIZE, INEQ_ONLY, EQ_ONLY } copy_mode;
 
 	/**
 	 * \brief Duplicate/Transform the system.
@@ -99,7 +99,8 @@ public:
 	 *                 where eps is the value given in 3rd argument.
 	 *                 Note that the number of constraints of the resulting system
 	 *                 in this case is greater than the number or the original one.
-	 * <li> INEQ:      Copy the inequalities only. The goal is not copied.
+	 * <li> INEQ_ONLY: Copy the inequalities only. The goal is not copied.
+	 * <li> EQ_ONLY:   Copy the equalities only. The goal is not copied.
 	 * </ul>
 	 *
 	 * \param eps   Only for NORMALIZE. Transforms an equation f=0 into two

@@ -12,6 +12,7 @@
 #include "ibex_Exception.h"
 #include "ibex_ExprCtr.h"
 #include "ibex_ExprCopy.h"
+#include "ibex_EmptySystemException.h"
 
 using std::vector;
 
@@ -167,7 +168,9 @@ System::System(const SystemFactory& fac) : nb_var(0), nb_ctr(0) {
 
 void System::init(const SystemFactory& fac) {
 
-	if (!fac.args) ibex_error("system with no goal and no constraint");
+	// the field fac.args is initialized upon addition of an objective
+	// function or a constraint.
+	if (!fac.args) throw EmptySystemException();
 
 	(int&) nb_var = fac.nb_var;
 	(int&) nb_ctr = fac.ctrs.size();

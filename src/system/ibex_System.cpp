@@ -60,7 +60,8 @@ System::System(const System& sys, copy_mode mode, double eps) : nb_var(0), nb_ct
 	switch(mode) {
 	case COPY :      init(SystemCopy(sys,COPY)); break;
 	case NORMALIZE : init(SystemNormalize(sys,eps)); break;
-	case INEQ:       init(SystemCopy(sys,INEQ)); break;
+	case INEQ_ONLY:  init(SystemCopy(sys,INEQ_ONLY)); break;
+	case EQ_ONLY:    init(SystemCopy(sys,EQ_ONLY)); break;
 	}
 
 }
