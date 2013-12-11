@@ -21,10 +21,9 @@ namespace ibex {
 double default_newton_prec=1e-07;
 double default_gauss_seidel_ratio=1e-04;
 
-bool newton(const Function& f, IntervalVector& box, double prec, double ratio_gauss_seidel) {
-	assert(f.expr().dim.is_vector());
+bool newton(const Fnc& f, IntervalVector& box, double prec, double ratio_gauss_seidel) {
 	int n=f.nb_var();
-	int m=f.expr().dim.vec_size();
+	int m=f.image_dim();
 
 	IntervalMatrix J(m, n);
 	IntervalVector y(n);

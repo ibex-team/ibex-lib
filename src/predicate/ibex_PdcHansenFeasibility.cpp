@@ -9,20 +9,70 @@
 //============================================================================
 
 #include "ibex_PdcHansenFeasibility.h"
-#include "ibex_Newton.h" // just for default_gauss_seidel_ratio!
-#include "ibex_Linear.h" // just for default_gauss_seidel_ratio!
+#include "ibex_Newton.h"
+#include "ibex_Linear.h"
+#include "ibex_EmptyBoxException.h"
 
 namespace ibex {
 
-PdcHansenFeasibility::PdcHansenFeasibility(Function& f) : Pdc(f.nb_var()), f(f) {
+
+namespace {
+
+class PartialFnc : public Fnc {
+public:
+	/**
+	 * \param f    - a function from R^n to R^m
+	 * \param pc   - Variable indices permutation: the m "first" are variables, the (n-m) "last" are constants.
+	 * \param pts -  points (to initialize the n-m last coordinates)
+	 */
+	PartialFnc(Function f, int* pc, int m, IntervalVector& pts) : Fnc(m,m), f(f), m(m), n(f.nb_var()), pc(pc), pts(pts),_J(m,n) {
+
+	}
+
+	virtual IntervalVector eval_vector(const IntervalVector& box) const {
+		return f.eval_vector(extend(box));
+	}
+
+	virtual void jacobian(const IntervalVector& x, IntervalMatrix& J) const {
+		f.jacobian(extend(x),_J);
+
+		for (int i=0; i<m; i++) J.set_row(i,chop(_J.row(i)));
+	}
+
+	// Extend the m-box to an n-box by fixing the n-m "last" coordinates to their point
+	IntervalVector extend(const IntervalVector& box) const {
+		assert(box.size()==m);
+		IntervalVector x(n);
+		for (int i=0; i<m; i++) x[pc[i]]=box[i];
+		for (int i=m; i<n; i++) x[pc[i]]=pts[pc[i]];
+		return x;
+	}
+
+	// Restrict the n-box to an m-box by removing the n-m "last" coordinates
+	IntervalVector chop(const IntervalVector& box) const {
+		assert(box.size()==n);
+		IntervalVector x(m);
+		for (int i=0; i<m; i++) x[i]=box[pc[i]];
+		return x;
+	}
+
+	Function& f;
+	int m, n;
+	int* pc;
+	IntervalVector& pts;
+	mutable IntervalMatrix _J; // temp object
+};
+
+}
+
+PdcHansenFeasibility::PdcHansenFeasibility(Function& f) : Pdc(f.nb_var()), f(f), _solution(f.nb_var()) {
 
 }
 
 BoolInterval PdcHansenFeasibility::test(const IntervalVector& box) {
 
-	assert(f.expr().dim.is_vector());
 	int n=f.nb_var();
-	int m=f.expr().dim.vec_size();
+	int m=f.image_dim();
 	IntervalVector mid=box.mid();
 
 	/* Determine the "most influencing" variable thanks to
@@ -35,52 +85,23 @@ BoolInterval PdcHansenFeasibility::test(const IntervalVector& box) {
 	real_LU(A,LU,pr,pc);
 	// ==============================================================
 
-	/* Fix the n-m last coordinates to their midpoint */
-	IntervalVector x(n);
-	for (int i=0; i<n; i++) {
-		if (pc[i]>m) x[i]=box[i].mid();
-		else x[i]=box[i];
-	}
 
-	/* Calculate the Jacobi matrix and image of this subbox */
-	// TODO: we should give the permutation to hansen_matrix?
-	IntervalMatrix J(m,n);
-	f.hansen_matrix(x,J);
-	IntervalVector Fmid=f.eval_vector(x);
+	PartialFnc pf(f,pc,m,mid);
 
-	/* Build the square subsystem */
-	IntervalMatrix J2(m,m);
-	for (int i=0; i<m; i++) {
-		for (int j=0; j<m; j++) J2[i][j]=J[i][pc[j]];
-	}
-	IntervalVector box2(m);
-	for (int j=0; j<m; j++) box2[j]=box[pc[j]];
-
-	IntervalVector mid2(m);
-	for (int j=0; j<m; j++) mid2[j]=mid[pc[j]];
-
-	IntervalVector y = mid-box;
+	IntervalVector box2(pf.chop(box));
+	IntervalVector savebox(box2);
 
 	try {
-		// What Hansen suggests apparently is to reuse the
-		// LU decomposition above for calculating an approximate
-		// inverse of J2's midpoint. Seems complicated to implement
-		precond(J2, Fmid);
+		newton(pf,box2);
+		if (box2.is_strict_subset(savebox)) {
+			_solution = pf.extend(box2);
+			return YES;
+		}
+	} catch (EmptyBoxException& ) {	}
 
-		gauss_seidel(J2, Fmid, y, default_gauss_seidel_ratio);
-
-		if (y.is_empty()) { return MAYBE; }
-	} catch (LinearException& ) {
-		return MAYBE;
-	}
-
-	IntervalVector box3=mid-y;
-
-	if ((box3 &= box).is_empty()) { return MAYBE; }
-
-	if (box3.is_strict_subset(box)) return YES;
-
+	_solution.set_empty();
 	return MAYBE;
+
 }
 
 } // end namespace ibex

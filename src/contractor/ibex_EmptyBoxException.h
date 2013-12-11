@@ -17,7 +17,7 @@
 namespace ibex {
 
 /**
- * \ingroup level2
+ * \ingroup contractor
  * \brief Thrown when a box is empty.
  */
 class EmptyBoxException : public Exception {

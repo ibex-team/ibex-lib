@@ -50,16 +50,6 @@ Function::~Function() {
 	free((char*) name);
 }
 
-int Function::nb_var() const {
-	return is_used.size();
-	/*
-	int sum=0;
-	for (int i=0; i<nb_symbols(); i++)
-		sum+=symbol(i).dim.size();
-	return sum;
-	*/
-}
-
 Domain& Function::eval_domain(const IntervalVector& box) const {
 	return Eval().eval(*this,box);
 }
@@ -162,32 +152,6 @@ void Function::jacobian(const IntervalVector& x, IntervalMatrix& J) const {
 	for (int i=0; i<image_dim(); i++) {
 		(*this)[i].gradient(x,J[i]);
 	}
-}
-
-void Function::hansen_matrix(const IntervalVector& box, IntervalMatrix& H) const {
-	int n=nb_var();
-	int m=expr().dim.vec_size();
-
-	assert(H.nb_cols()==n);
-	assert(box.size()==n);
-	assert(expr().dim.is_vector());
-	assert(H.nb_rows()==m);
-
-	IntervalVector x=box.mid();
-	IntervalMatrix J(m,n);
-
-	// test!
-//	int tab[box.size()];
-//	box.sort_indices(false,tab);
-//	int var;
-
-	for (int var=0; var<n; var++) {
-		//var=tab[i];
-		x[var]=box[var];
-		jacobian(x,J);
-		H.set_col(var,J.col(var));
-	}
-
 }
 
 std::ostream& operator<<(std::ostream& os, const Function& f) {

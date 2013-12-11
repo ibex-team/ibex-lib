@@ -158,6 +158,8 @@ void System::init_f_from_ctrs() {
 	}
 	assert(i==total_output_size);
 
+	// TODO: we should probably homgenize; in the case of a scalar function
+	// a 1-sized vector should be created.
 	f.init(args, total_output_size>1? ExprVector::new_(image,false) : image[0]);
 }
 

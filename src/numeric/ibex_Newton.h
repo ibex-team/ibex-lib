@@ -11,7 +11,7 @@
 #ifndef __IBEX_NEWTON_H__
 #define __IBEX_NEWTON_H__
 
-#include "ibex_Function.h"
+#include "ibex_Fnc.h"
 
 namespace ibex {
 
@@ -43,7 +43,7 @@ extern double default_gauss_seidel_ratio;
  * The default value is #default_gauss_seidel_ratio (1e-04).
  * \return True if one variable has been reduced by more than \a prec.
  */
-bool newton(const Function& f, IntervalVector& box, double prec=default_newton_prec, double gauss_seidel_ratio=default_gauss_seidel_ratio);
+bool newton(const Fnc& f, IntervalVector& box, double prec=default_newton_prec, double gauss_seidel_ratio=default_gauss_seidel_ratio);
 
 
 } // end namespace ibex

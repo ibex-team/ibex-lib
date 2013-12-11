@@ -281,6 +281,7 @@ void Function::separate() {
 //void Function::set_expr(const ExprNode& expr) {
 void Function::init(const Array<const ExprSymbol>& x, const ExprNode& y) {
 
+	//df=NULL;
 	key_count=0;
 	__all_symbols_scalar=true; // by default
 
@@ -313,6 +314,9 @@ void Function::init(const Array<const ExprSymbol>& x, const ExprNode& y) {
 		assert(node(i).deco.f==NULL); // this node must not belong to another function!
 		node(i).deco.f=this;
 	}
+
+	(int&) Fnc::_nb_var = is_used.size();
+	(int&) Fnc::_image_dim = y.dim.size();
 
 	decorate();
 

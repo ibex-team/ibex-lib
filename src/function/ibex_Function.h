@@ -13,6 +13,7 @@
 #define _IBEX_FUNCTION_H_
 
 #include "ibex_Expr.h"
+#include "ibex_Fnc.h"
 #include "ibex_CompiledFunction.h"
 #include "ibex_Decorator.h"
 #include "ibex_Array.h"
@@ -25,8 +26,8 @@ namespace ibex {
 class System;
 
 /**
- * \ingroup symbolic
- * \brief Function (x->f(x) where f(x) is the DAG of an arithmetical expression).
+ * \ingroup function
+ * \brief Symbolic function (x->f(x) where f(x) is the DAG of an arithmetical expression).
  *
  * Every expression in ibex (like x^2+y^2) is considered as a function,
  * (here: (x,y)->x^2+y^2) where the order of the arguments ("x" and "y")
@@ -36,11 +37,22 @@ class System;
  * We distinguish <i>arguments</i> from <i>variables</i>. For instance, if
  * f:(x,y)->x[0]+y where x is a vector of 9 components, the functions has
  * 2 arguments and 10 variables.
+ *
+ * Note that contrary to the input of a function, there
+ * is a unique output and if this output is a vector/matrix, all
+ * the components have the same dimension.
+ *
+ * As a vector-valued function (#ibex::Fnc), if f is real-valued, the
+ * output vector has 1 component. If f is a m*n matrix function,
+ * the output vector has m*n components.
+ *
+ *
  */
-class Function {
+class Function : public Fnc {
 public:
 	/**
 	 * \brief Creates a function y=f(x).
+	 *
 	 */
 	Function(const ExprSymbol& x, const ExprNode& y, const char* name=NULL);
 
@@ -123,28 +135,6 @@ public:
 	Function(const Function&, copy_mode mode=COPY);
 
 	/**
-	 * \brief Return the total number of variables.
-	 *
-	 * The number of variables is the sum
-	 * of the number of components of each argument.
-	 *
-	 * \see #nb_arg() const.
-	 */
-	int nb_var() const;
-
-	/**
-	 * \brief Number of components of f
-	 *
-	 * If f is a real-valued function, the result is 1.
-	 * If f is a m*n matrix function, the result is m*n.
-	 *
-	 * Note that contrary to the input of a function, there
-	 * is a unique output and if this output is a vector, all
-	 * the components have the same dimension.
-	 */
-	int image_dim() const;
-
-	/**
 	 * \brief Return the ith component of f.
 	 *
 	 * The vector-valued function f is also
@@ -170,6 +160,10 @@ public:
 
 	/**
 	 * \brief Return the number of arguments.
+	 *
+	 * \note The number of variables returned by nb_var()
+	 * is the sum of the number of components of each argument.
+	 *
 	 */
 	int nb_arg() const;
 
@@ -296,7 +290,7 @@ public:
 	 *
 	 * \pre f must be vector-valued
 	 */
-	IntervalVector eval_vector(const IntervalVector& box) const;
+	virtual IntervalVector eval_vector(const IntervalVector& box) const;
 
 	/**
 	 * \brief Calculate f(box) using affine arithmetic.
@@ -353,22 +347,25 @@ public:
 
 	/**
 	 * \brief Calculate the Jacobian matrix of f
-	 * \pre f must be vector-valued
-	 */
-	IntervalMatrix jacobian(const IntervalVector& x) const;
-
-	/**
-	 * \brief Calculate the Jacobian matrix of f
 	 *
 	 * \param x - the input box
 	 * \param J - where the Jacobian matrix has to be stored (output parameter).
 	 *
 	 * \pre f must be vector-valued
 	 */
-	void jacobian(const IntervalVector& x, IntervalMatrix& J) const;
+	virtual void jacobian(const IntervalVector& x, IntervalMatrix& J) const;
+
+	/**
+	 * \brief Calculate the Jacobian matrix of f
+	 * \pre f must be vector-valued
+	 *
+	 * \pre f must be vector-valued
+	 */
+	IntervalMatrix jacobian(const IntervalVector& x) const;
 
 	/**
 	 * \brief Calculate the Hansen matrix of f
+	 *
 	 * \pre f must be vector-valued
 	 */
 	void hansen_matrix(const IntervalVector& x, IntervalMatrix& h) const;
@@ -477,7 +474,7 @@ private:
 
 	Function& operator=(const Function&);       // forbidden
 
-	Function* df;
+	//Function* df;
 public:
 
 	/**
@@ -609,16 +606,6 @@ std::ostream& operator<<(std::ostream&, const Function&);
 
 /*================================== inline implementations ========================================*/
 
-inline int Function::image_dim() const {
-	switch (expr().dim.type()) {
-	case Dim::SCALAR: return 1;
-	case Dim::ROW_VECTOR:
-	case Dim::COL_VECTOR: return expr().dim.vec_size();
-	case Dim::MATRIX: return expr().dim.dim2*expr().dim.dim3;
-	default: assert(false); return 0;
-	}
-}
-
 inline Function& Function::operator[](int i) {
 	return comp[i];
 }
@@ -730,10 +717,14 @@ inline IntervalVector Function::gradient(const IntervalVector& x) const {
 	return g;
 }
 
+// never understood why we have to do this explictly in c++
 inline IntervalMatrix Function::jacobian(const IntervalVector& x) const {
-	IntervalMatrix J(image_dim(),x.size());
-	jacobian(x,J);
-	return J;
+	return Fnc::jacobian(x);
+}
+
+// never understood why we have to do this explictly in c++
+inline void Function::hansen_matrix(const IntervalVector& x, IntervalMatrix& h) const {
+	Fnc::hansen_matrix(x,h);
 }
 
 } // namespace ibex

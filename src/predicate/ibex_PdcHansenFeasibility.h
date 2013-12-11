@@ -31,13 +31,28 @@ public:
 	PdcHansenFeasibility(Function& f);
 
 	/**
+	 * \brief Return the enclosure of the last solution found.
+	 */
+	const IntervalVector& solution() const;
+
+	/**
 	 * \brief Apply the predicate to the given box.
 	 */
 	virtual BoolInterval test(const IntervalVector& box);
 
 	/** The function */
 	Function& f;
+
+protected:
+	IntervalVector _solution;
 };
+
+
+/*================================== inline implementations ========================================*/
+
+inline const IntervalVector& PdcHansenFeasibility::solution() const {
+	return _solution;
+}
 
 } // end namespace ibex
 #endif // __IBEX_PDC_HANSEN_FEASIBILITY_H__
