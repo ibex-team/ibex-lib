@@ -46,6 +46,9 @@
 #include "TestLinear.h"
 #include "TestNewton.h"
 
+// ================ predicates ===============
+#include "TestPdcHansenFeasibility.h"
+
 // ================ contractor ===============
 #include "TestHC4.h"
 #include "TestCtcInteger.h"
@@ -95,6 +98,8 @@ int main() {
 
     ts.add(auto_ptr<Test::Suite>(new TestLinear()));
     ts.add(auto_ptr<Test::Suite>(new TestNewton()));
+
+    ts.add(auto_ptr<Test::Suite>(new TestPdcHansenFeasibility()));
 
     ts.add(auto_ptr<Test::Suite>(new TestHC4()));
     ts.add(auto_ptr<Test::Suite>(new TestCtcInteger()));

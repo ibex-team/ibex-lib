@@ -25,9 +25,11 @@ public:
 	 * \param pc   - Variable indices permutation: the m "first" are variables, the (n-m) "last" are constants.
 	 * \param pts -  points (to initialize the n-m last coordinates)
 	 */
-	PartialFnc(Function f, int* pc, int m, IntervalVector& pts) : Fnc(m,m), f(f), m(m), n(f.nb_var()), pc(pc), pts(pts),_J(m,n) {
+	PartialFnc(const Fnc& f, int* pc, int m, IntervalVector& pts) : Fnc(m,m), f(f), m(m), n(f.nb_var()), pc(pc), pts(pts),_J(m,n) {
 
 	}
+
+	~PartialFnc() {  }
 
 	virtual IntervalVector eval_vector(const IntervalVector& box) const {
 		return f.eval_vector(extend(box));
@@ -56,7 +58,7 @@ public:
 		return x;
 	}
 
-	Function& f;
+	const Fnc& f;
 	int m, n;
 	int* pc;
 	IntervalVector& pts;
@@ -65,7 +67,7 @@ public:
 
 }
 
-PdcHansenFeasibility::PdcHansenFeasibility(Function& f) : Pdc(f.nb_var()), f(f), _solution(f.nb_var()) {
+PdcHansenFeasibility::PdcHansenFeasibility(Fnc& f) : Pdc(f.nb_var()), f(f), _solution(f.nb_var()) {
 
 }
 
