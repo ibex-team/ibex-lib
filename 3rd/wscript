@@ -59,30 +59,6 @@ def configure (conf):
 	with_cplex = conf.options.CPLEX_PATH
 	with_ampl = conf.options.AMPL_PATH
 
-	# AMPL configure
-
-	mandatory = bool (with_ampl)
-	if with_ampl:
-		conf.env.append_unique ("INCLUDES", with_ampl)
-
-	has_asl = conf.check_cxx (
-			header_name	= "asl.h",
-			mandatory	= mandatory)
-	has_arith = conf.check_cxx (
-			header_name	= "arith.h",
-			mandatory	= mandatory)
-
-	kw = {"libpath": with_ampl} if with_ampl else {}
-	has_ampl = conf.check_cxx (
-			lib = ["amplsolver"],
-			uselib_store = "IBEX_DEPS",
-			mandatory = mandatory,
-			**kw)
-
-	if not (has_asl and has_arith and has_ampl):
-		conf.env.BUILD_AMPL = True
-
-
 	# allow only one linear solver
 	with_any_solver = False
 	for w in with_soplex, with_cplex:
@@ -195,6 +171,34 @@ def configure (conf):
 
 		if not (has_h and has_l):
 			conf.env.BUILD_GAOL = True
+
+	# AMPL configure
+	mandatory = bool (with_ampl)
+	if with_ampl:
+		conf.env.append_unique ("INCLUDES", with_ampl)
+
+	has_asl = conf.check_cxx (
+			header_name	= "asl.h",
+			mandatory	= mandatory)
+	has_arith = conf.check_cxx (
+			header_name	= "arith.h",
+			mandatory	= mandatory)
+
+	kw = {"libpath": with_ampl} if with_ampl else {}
+	has_ampl = conf.check_cxx (
+			lib = ["amplsolver"],
+			uselib_store = "IBEX_DEPS",
+			mandatory = mandatory,
+			**kw)
+
+	if not (has_asl and has_arith and has_ampl):
+		conf.env.BUILD_AMPL = True
+	else:
+		conf.check_cxx (
+			lib = ["dl"],
+			uselib_store = "IBEX_DEPS",
+			mandatory = False
+			)
 
 	# common vars for building gaol/gdtoa/mathlib
 	gdtoa_name = "gdtoa-1.0"
@@ -478,20 +482,20 @@ def configure (conf):
 
 
 	# AMPL interface 
-	# FIXME allow a given path
 	# BUILD
 	if conf.env.BUILD_AMPL:
 		log_start ("AMPL")
 		conf.env.AMPL="solvers"
 		ampl_dir = extract (conf.env.AMPL, "amplsolvers.tar.gz")
+
 		ibex_append_path ("INCLUDES", conf.env.AMPL)
 		ibex_append_path ("LIBPATH", ampl_dir.abspath())
 
 		ibex_env.append_unique ("INCLUDES_IBEX_DEPS", os.path.join (conf.env.PREFIX, "include"))
 		ibex_env.append_unique ("LIB_IBEX_DEPS", ["amplsolver","dl"])
+
 		conf.find_program ("make")
 
-		shared = "--enable-shared" if conf.env.ENABLE_SHARED else ""
 		if sys.platform == "win32":
 			# mingw build
 			conf.find_program ("sh")
@@ -677,20 +681,33 @@ def build (bld):
 	
 
 	if bld.env["BUILD_AMPL"]:
-		path_ampl = bld.path.find_dir (bld.env.AMPL).abspath()
+		path = bld.path.find_dir (bld.env.AMPL).abspath()
 
 		if  bld.env["INTERVAL_LIB"] is "GAOL":
-			cmd = [bld.cmd] if bld.cmd in ("clean") else ["CFLAGS=-DNo_dtoa"]
+			cmd = [bld.cmd] if bld.cmd in ("clean") else ["CFLAGS=-DNo_dtoa -m32"]
 		else:
 			cmd = [bld.cmd] if bld.cmd in ("clean") else []
-
+		
+		
 		if bld.exec_command (
 			[bld.env.MAKE, "-j", str(bld.options.jobs)] + cmd,
-			cwd	= path_ampl,
+			cwd	= path,
 			stdout	= None,
 			stderr	= None,
 		):
 			bld.fatal ("failed to build ampl")
+
+		if bld.exec_command (
+			'mkdir -p %s && cp %s %s' % (
+			bld.env.LIBDIR,
+			os.path.join(path,"libamplsolver.a"), 
+			os.path.join(bld.env.LIBDIR,"libamplsolver.a")),
+			cwd	= path,
+			stdout	= None,
+			stderr	= None,
+		):
+			bld.fatal ("failed to copy the ampl librarie")
+
 
 class subdir:
 	def __init__ (self, name_or_node):
