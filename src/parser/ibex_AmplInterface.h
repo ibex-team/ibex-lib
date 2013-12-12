@@ -24,7 +24,7 @@ namespace ibex {
 class AmplInterface  {
 private:
 	SystemFactory* 	_problem;
-	IntervalVector* 	_bound_init;
+	IntervalVector 	_bound_init;
 	ASL*     asl;
 	std::string _nlfile;
 	Variable* _x;
@@ -38,13 +38,10 @@ public:
 
 	virtual ~AmplInterface();
 
-	System& getSystem();
+	System* getSystem() const;
 
 	bool writeSolution(double* sol, bool found);
 
-	IntervalVector& getBoundInit() const {
-		return *_bound_init;
-	}
 
 };
 

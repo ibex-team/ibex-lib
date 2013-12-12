@@ -127,7 +127,7 @@ size_t getOperator (efunc *f) {
 namespace ibex {
 
 AmplInterface::AmplInterface(std::string nlfile) :
-															_problem(NULL),	_bound_init(NULL), asl(NULL), _nlfile(nlfile), _x(NULL){
+	_problem(NULL),	_bound_init(1), asl(NULL), _nlfile(nlfile), _x(NULL){
 
 	if (!readASLfg())
 		ibex_error("Fail to read the ampl file.\n");
@@ -144,7 +144,6 @@ AmplInterface::AmplInterface(std::string nlfile) :
 
 AmplInterface::~AmplInterface() {
 	delete _problem;
-	delete _bound_init;
 	delete _x;
 
 	if (asl) {
@@ -168,11 +167,14 @@ bool AmplInterface::writeSolution(double * sol, bool found) {
 }
 
 // create an AMPL problem by using ASL interface to the .nl file
-System& AmplInterface::getSystem() {
+System* AmplInterface::getSystem() const{
+	System *sys;
 	if (_problem)
-		return *(new System(*_problem));
+		sys= new System(*_problem);
 	else
-		return *(new System(SystemFactory()));
+		sys= new System(SystemFactory());
+	sys->box = _bound_init;
+	return sys;
 }
 
 
@@ -224,7 +226,7 @@ bool AmplInterface::readnl() {
 	if (!_problem) {return false;}
 
 	_x =new Variable(n_var);
-	_bound_init = new IntervalVector(n_var, Interval::ALL_REALS);
+	_bound_init.resize(n_var);
 	_problem->add_var(*_x);
 
 
@@ -364,12 +366,12 @@ bool AmplInterface::readnl() {
 			for (register int i=0; i<n_var; i++) {
 
 				register int j = 2*i;
-				(*_bound_init)[i] = Interval(  ((LUv[j]   <= NEG_INFINITY) ? NEG_INFINITY : LUv[j]  ),
+				_bound_init[i] = Interval(  ((LUv[j]   <= NEG_INFINITY) ? NEG_INFINITY : LUv[j]  ),
 						((LUv[j+1] >= POS_INFINITY) ? POS_INFINITY : LUv[j+1]) );
 			}
 		else
 			for (register int i=n_var; i--;) {
-				(*_bound_init)[i] = Interval(	(LUv [i]      <= NEG_INFINITY ? NEG_INFINITY : LUv[i]     ),
+				_bound_init[i] = Interval(	(LUv [i]      <= NEG_INFINITY ? NEG_INFINITY : LUv[i]     ),
 						(Uvx_copy [i] >= POS_INFINITY ? POS_INFINITY : Uvx_copy[i]) );
 			}
 

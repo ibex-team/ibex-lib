@@ -17,16 +17,11 @@ int main(int argc, char** argv) {
 	cout<<"begin"<< endl;
 	AmplInterface interface(argv[1]);
 	cout<<"creation ok"<< endl;
-	System sys =interface.getSystem();
+	System *sys = interface.getSystem();
 
-	cout<<"Goal"<< endl;
-	cout<<*(sys.goal)<< endl;
-
-	cout<<"Constraints"<< endl;
-	cout<<sys.ctrs[0]<< endl;
-	cout<<sys.ctrs[1]<< endl;
-
-
+	cout<<"Bound_sys"<< endl;
+	cout<<sys->box<<endl;
+	cout<<*sys<<endl;
 	return 0;
 
 }
