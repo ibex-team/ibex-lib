@@ -21,7 +21,7 @@ class SystemExtend : public SystemFactory {
 
 public:
 
-	SystemExtend(const System& sys) {
+	SystemExtend(const System& sys, double eps) {
 
 
 		Variable y(ExtendedSystem::goal_name); // y is a scalar
@@ -29,9 +29,9 @@ public:
 		// We set goal_var to n (<=>y variable is the nth variable)
 		// to simplify the copy of expressions (see ibex_ExprCopy).
 
-//		Array<const ExprSymbol> sys.args(sys.args.size()+1);
-//		varcopy(sys.args,sys.args);
-//		sys.args.set_ref(sys.args.size(),y);
+		//		Array<const ExprSymbol> sys.args(sys.args.size()+1);
+		//		varcopy(sys.args,sys.args);
+		//		sys.args.set_ref(sys.args.size(),y);
 
 		// do not initialize variables with sys.f.args
 		// since f may be uninitialized (unconstrained problem)
@@ -55,42 +55,47 @@ public:
 
 			if (sys.ctrs[i].op==EQ) {
 				pair<const ExprNode*, const Interval*> p=sys.ctrs[i].is_thick_equality();
+				const ExprNode *f_1;
+				const ExprNode *f_2;
+				if (p.first!=NULL) {
+					f_1=&( ExprCopy().copy(sys.ctrs[i].f.args(), sys.args, *p.first) - p.second->ub());
+					f_2=&(-ExprCopy().copy(sys.ctrs[i].f.args(), sys.args, *p.first) - (-p.second->lb()));
+				} else {
+					f_1=&( ExprCopy().copy(sys.ctrs[i].f.args(), sys.args, sys.ctrs[i].f.expr()) - eps);
+					f_2=&(-ExprCopy().copy(sys.ctrs[i].f.args(), sys.args, sys.ctrs[i].f.expr()) - eps);
+				}
+				add_ctr(ExprCtr(*f_1,LEQ));
+				cleanup(*f_1, false);
+				add_ctr(ExprCtr(*f_2,LEQ));
+				cleanup(*f_2, false);
+			} else {
 
-				if (p.first==NULL) not_implemented("normalization with equality constraints");
+				const ExprNode* f_i=&ExprCopy().copy(sys.ctrs[i].f.args(), sys.args, sys.ctrs[i].f.expr());
 
-				const ExprNode& f_1=ExprCopy().copy(sys.ctrs[i].f.args(), sys.args, *p.first) - p.second->ub();
-				add_ctr(ExprCtr(f_1,LEQ));
-				cleanup(f_1, false);
+				switch (sys.ctrs[i].op) {
+				case LT:
+					ibex_warning("warning: strict inequality (<) replaced by inequality (<=).");
+					break;
+				case LEQ:
+					break;
+				case GT:
+					ibex_warning("warning: strict inequality (>) replaced by inequality (>=).");
+				case GEQ:
+					f_i = & (- (*f_i)); // reverse the inequality
+					break;
+				default:
+					assert(false);
+					break;
+				}
 
-				const ExprNode& f_2=(-ExprCopy().copy(sys.ctrs[i].f.args(), sys.args, *p.first)) - p.second->lb();
-				add_ctr(ExprCtr(f_2,LEQ));
-				cleanup(f_2, false);
-
-				continue;
+				add_ctr(ExprCtr(*f_i,LEQ));
+				cleanup(*f_i, false);
 			}
 
-			const ExprNode* f_i=&ExprCopy().copy(sys.ctrs[i].f.args(), sys.args, sys.ctrs[i].f.expr());
 
-			switch (sys.ctrs[i].op) {
-			case LT:
-				ibex_warning("warning: strict inequality (<) replaced by inequality (<=).");
-			case LEQ:
-				break;
-			case EQ:
-				assert(false); // impossible
-				break;
-			case GT:
-				ibex_warning("warning: strict inequality (>) replaced by inequality (>=).");
-			case GEQ:
-				f_i = & (- (*f_i)); // reverse the inequality
-				break;
-			}
-
-			add_ctr(ExprCtr(*f_i,LEQ));
-
-			cleanup(*f_i, false);
 		}
 	}
+
 };
 
 } // end anonymous namespace

@@ -29,14 +29,14 @@ pair<const ExprNode*, const Interval*> NumConstraint::is_thick_equality() const 
 		const ExprConstant* cst=dynamic_cast<const ExprConstant* >(&sub->right);
 
 		if (cst) {
-			if (cst->dim.is_scalar())
+			if (cst->dim.is_scalar() && cst->get_value().diam()>0)
 				RETURN(&sub->left, &cst->get_value());
 		} else {
 
 			cst=dynamic_cast<const ExprConstant* >(&sub->left);
 
 			if (cst) {
-				if (cst->dim.is_scalar())
+				if (cst->dim.is_scalar() && cst->get_value().diam()>0)
 					RETURN(&sub->right, &cst->get_value());
 			}
 		}
