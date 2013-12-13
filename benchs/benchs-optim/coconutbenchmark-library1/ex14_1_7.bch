@@ -1,5 +1,5 @@
 constants
-eps = 1.e-8;
+ 
 
 variables
 x1 in [0,10];
@@ -67,6 +67,6 @@ constraints
 - 1) - x10 <= 191.267;
 
 x1*x3 - x2*x4 >= - eps;
-x1*x3 - x2*x4 <= eps;
+
 
 end

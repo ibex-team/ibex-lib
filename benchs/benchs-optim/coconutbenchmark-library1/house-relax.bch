@@ -1,0 +1,41 @@
+constants
+eps=1.e-8;
+
+variables
+x1 in [-1.e8,1.e8];
+x2 in [-1.e8,1.e8];
+x3 in [-1.e8,1.e8];
+x4 in [ 40, 68];
+x5 in [-1.e8,1.e8];
+x6 in [ 56, 100];
+x7 in [-1.e8,3000];
+x8 in [-1.e8,1.e8];
+
+
+
+minimize - x7 - x8;
+
+constraints
+
+- (x1*x2 + x5*x4) + x7 >= -eps;
+- (x1*x2 + x5*x4) + x7 <= eps;
+
+- x1*x3 + x8 >= -eps;
+- x1*x3 + x8 <= eps;
+
+- x2 - x5 + x6 >= -eps;
+- x2 - x5 + x6 <= eps;
+
+x1 - 0.333333333333333*x4 >= 0;
+
+x1 - 0.5*x4 <= 0;
+
+x2*(x4 - x1) >= 1500;
+
+- 0.5*x2 + x3 - x5 >= -eps;
+- 0.5*x2 + x3 - x5 <= eps;
+
+- 0.5*x2 + x5 >= -eps;
+- 0.5*x2 + x5 <= eps;
+
+end

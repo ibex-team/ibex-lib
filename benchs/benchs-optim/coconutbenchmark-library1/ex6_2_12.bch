@@ -1,5 +1,5 @@
 constants
-eps = 1.e-8;
+ 
 
 
 variables
@@ -25,9 +25,9 @@ minimize x2*ln(x2/(8*x2 + x4)) + x4*ln(x4/(8*x2 + x4)) +
 
 constraints
 
-x2 + x3 - 0.5 >= -eps;
-x2 + x3 - 0.5 <= eps;
+x2 + x3 - 0.5 =0;
 
-x4 + x5 - 0.5 >= -eps;
-x4 + x5 - 0.5 <= eps;
+
+x4 + x5 - 0.5 =0;
+
 end

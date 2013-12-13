@@ -1,5 +1,5 @@
 constants
-eps=1.e-8;
+ 
 
 variables
  x1 in [0,1];
@@ -31,8 +31,8 @@ minimize
 	3369558.8652*x8 + 439695.6796*x9;
 constraints
 
-x1 + x2 + x3 + x4 + x5 + x6 + x7 + x8 + x9 -1 >= -eps;
-x1 + x2 + x3 + x4 + x5 + x6 + x7 + x8 + x9 -1 <= eps;
+x1 + x2 + x3 + x4 + x5 + x6 + x7 + x8 + x9 -1 =0;
+
 
 
 	0 <= 680.0*x1 + 729.0*x2 + 680.0*x3 + 680.0*x4 + 729.0*x5 + 782.0*x6 + 648.0*x7 

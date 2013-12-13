@@ -1,0 +1,13 @@
+variables
+
+x1 in [ 0, 3];
+x2 in [ 0, 4];
+
+
+minimize - x1 - x2;
+
+constraints
+8*x1^3 - 2*x1^4 - 8*x1^2 + x2 <= 2;
+
+32*x1^3 - 4*x1^4 - 88*x1^2 + 96*x1 + x2 <= 36;
+end
