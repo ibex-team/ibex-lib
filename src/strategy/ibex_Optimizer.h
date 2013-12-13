@@ -101,12 +101,6 @@ public:
 	 */
 	void report_perf();
 
-	/** Number of variables. */
-	const int n;
-
-	/** Number of constraints. */
-	const int m;
-
 	/**
 	 * \brief The normalized system
 	 *
@@ -114,6 +108,12 @@ public:
 	 * under the form g_i(x)<=0.
 	 */
 	System sys;
+
+	/** Number of variables. */
+	const int n;
+
+	/** Number of constraints. */
+	const int m;
 
 	/**
 	 * \brief The extended system

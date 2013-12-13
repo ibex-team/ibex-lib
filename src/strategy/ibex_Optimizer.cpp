@@ -56,8 +56,8 @@ void Optimizer::read_ext_box(const IntervalVector& ext_box, IntervalVector& box)
 
 Optimizer::Optimizer(System& user_sys, Bsc& bsc, Ctc& ctc, double prec,
 		double goal_rel_prec, double goal_abs_prec, int sample_size) :
-				n(user_sys.nb_var), m(user_sys.nb_ctr),
-				sys(user_sys,System::NORMALIZE), ext_sys(user_sys),
+				sys(user_sys,System::NORMALIZE,goal_abs_prec), n(user_sys.nb_var), m(sys.nb_ctr) /* (warning: not user_sys.nb_ctr) */,
+			        ext_sys(user_sys),
 				bsc(bsc), ctc(ctc), buffer(n),
 				prec(prec), goal_rel_prec(goal_rel_prec), goal_abs_prec(goal_abs_prec),
 				sample_size(sample_size), mono_analysis_flag(true), in_HC4_flag(true), trace(false),
