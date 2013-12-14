@@ -387,20 +387,20 @@ const ExprNode& AmplInterface::nl2expr(expr *e) {
 	//case OPLESS:  notimpl ("less");
 	case MINLIST: {
 		expr **ep = e->L.ep;
-		const ExprNode* ee=&(nl2expr (*ep));
+		const ExprNode* ee = &(nl2expr (*ep));
 		ep++;
 		while (ep < e->R.ep) {
-			ee = & (min(*ee , nl2expr (*ep)));
+			ee = &(min(*ee , nl2expr (*ep)));
 			ep++;
 		}
 		return *ee;
 	}
 	case MAXLIST:  {
 		expr **ep = e->L.ep;
-		const ExprNode* ee=&(nl2expr (*ep));
+		const ExprNode* ee = &(nl2expr (*ep));
 		ep++;
 		while (ep < e->R.ep) {
-			ee = & (max(*ee , nl2expr (*ep)));
+			ee = &(max(*ee , nl2expr (*ep)));
 			ep++;
 		}
 		return *ee;
@@ -430,10 +430,10 @@ const ExprNode& AmplInterface::nl2expr(expr *e) {
 	case OP_acos:  return acos(nl2expr (e -> L.e));
 	case OPSUMLIST: {
 		expr **ep = e->L.ep;
-		const ExprNode* ee=&(nl2expr (*ep));
+		const ExprNode* ee = &(nl2expr (*ep));
 		ep++;
 		while (ep < e->R.ep) {
-			ee = & (*ee + nl2expr (*ep));
+			ee = &(*ee + nl2expr (*ep));
 			ep++;
 		}
 		return *ee;
@@ -474,7 +474,7 @@ const ExprNode& AmplInterface::nl2expr(expr *e) {
 						linpart * L = common->L;
 						for(int i = 1; i < nlin; i++ ) {
 							coeff = L [i]. fac;
-							index = ((uintptr_t) (L [j].v.rp) - (uintptr_t) VAR_E) / sizeof (expr_v);
+							index = ((uintptr_t) (L [i].v.rp) - (uintptr_t) VAR_E) / sizeof (expr_v);
 							if (coeff==1) {
 								body = &(*body + (*_x)[index]);
 							} else if (coeff==-1) {
@@ -496,7 +496,7 @@ const ExprNode& AmplInterface::nl2expr(expr *e) {
 						linpart * L = common->L;
 						for(int i = 1; i < nlin; i++ ) {
 							coeff = L [i]. fac;
-							index = ((uintptr_t) (L [j].v.rp) - (uintptr_t) VAR_E) / sizeof (expr_v);
+							index = ((uintptr_t) (L [i].v.rp) - (uintptr_t) VAR_E) / sizeof (expr_v);
 							if (coeff==1) {
 								body = &(*body + (*_x)[index]);
 							} else if (coeff==-1) {
