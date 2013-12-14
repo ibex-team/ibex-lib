@@ -14,6 +14,7 @@ using namespace std;
 using namespace ibex;
 
 int main() {
+	int n= 1.e8;
 	double a[5][4]= { {4,4,4,4}, {1,1,1,1}, {8,8,8,8}, {6,6,6,6}, { 3,7,3,7}};
 	double c[5] = {0.1, 0.2, 0.2, 0.4, 0.4};
 
@@ -21,13 +22,13 @@ int main() {
 	IntervalVector x2(4,Interval(3.9,4.1));
 
 	cout<< "-----------------------------------------------------------" << endl;
-	cout << " CPU-time for 1.e6 evaluation of the Shekel-5 function at the point x1=(4,4,4,4)" <<endl;
+	cout << " CPU-time for "<<n<<" evaluations of the Shekel-5 function at the point x1=(4,4,4,4)" <<endl;
 	{
 		double time=0;
 		Timer::start();
 
 		double f, z;
-		for (int k =0; k<1.e6; k++){
+		for (int k =0; k<n; k++){
 			f= 0;
 			for (int i=0; i<5; i++) {
 				z= 0;
@@ -46,7 +47,7 @@ int main() {
 		Timer::start();
 		IntervalVector x(4,Interval(4));
 		Interval f, z;
-		for (int k =0; k<1.e6; k++){
+		for (int k =0; k<n; k++){
 			f= 0;
 			for (int i=0; i<5; i++) {
 				z= 0;
@@ -69,7 +70,7 @@ int main() {
 		}
 
 		Affine2Main<AF_No> f, z;
-		for (int k =0; k<1.e6; k++){
+		for (int k =0; k<n; k++){
 			f= 0;
 			for (int i=0; i<5; i++) {
 				z= 0;
@@ -92,7 +93,7 @@ int main() {
 		}
 
 		Affine2Main<AF_sAF> f, z;
-		for (int k =0; k<1.e6; k++){
+		for (int k =0; k<n; k++){
 			f= 0;
 			for (int i=0; i<5; i++) {
 				z= 0;
@@ -115,7 +116,7 @@ int main() {
 		}
 
 		Affine2Main<AF_iAF> f, z;
-		for (int k =0; k<1.e6; k++){
+		for (int k =0; k<n; k++){
 			f= 0;
 			for (int i=0; i<5; i++) {
 				z= 0;
@@ -139,7 +140,7 @@ int main() {
 		}
 
 		Affine2Main<AF_fAF1> f, z;
-		for (int k =0; k<1.e6; k++){
+		for (int k =0; k<n; k++){
 			f= 0;
 			for (int i=0; i<5; i++) {
 				z= 0;
@@ -163,7 +164,7 @@ int main() {
 		}
 
 		Affine2Main<AF_fAF2> f, z;
-		for (int k =0; k<1.e6; k++){
+		for (int k =0; k<n; k++){
 			f= 0;
 			for (int i=0; i<5; i++) {
 				z= 0;
@@ -187,7 +188,7 @@ int main() {
 		}
 
 		Affine2Main<AF_fAF2_fma> f, z;
-		for (int k =0; k<1.e6; k++){
+		for (int k =0; k<n; k++){
 			f= 0;
 			for (int i=0; i<5; i++) {
 				z= 0;
@@ -203,14 +204,14 @@ int main() {
 	}
 
 	cout<< "-----------------------------------------------------------" << endl;
-	cout << " CPU-time for 1.e6 evaluation of the Shekel-5 function at the Interval x1=([3.9,4.1],[3.9,4.1],[3.9,4.1],[3.9,4.1])" <<endl;
+	cout << " CPU-time for "<<n<<" evaluations of the Shekel-5 function at the Interval x2=([3.9,4.1],[3.9,4.1],[3.9,4.1],[3.9,4.1])" <<endl;
 
 	{
 		double time=0;
 		Timer::start();
 		IntervalVector x(4,Interval(3.9,4.1));
 		Interval f, z;
-		for (int k =0; k<1.e6; k++){
+		for (int k =0; k<n; k++){
 			f= 0;
 			for (int i=0; i<5; i++) {
 				z= 0;
@@ -233,7 +234,7 @@ int main() {
 		}
 
 		Affine2Main<AF_No> f, z;
-		for (int k =0; k<1.e6; k++){
+		for (int k =0; k<n; k++){
 			f= 0;
 			for (int i=0; i<5; i++) {
 				z= 0;
@@ -256,7 +257,7 @@ int main() {
 		}
 
 		Affine2Main<AF_sAF> f, z;
-		for (int k =0; k<1.e6; k++){
+		for (int k =0; k<n; k++){
 			f= 0;
 			for (int i=0; i<5; i++) {
 				z= 0;
@@ -279,7 +280,7 @@ int main() {
 		}
 
 		Affine2Main<AF_iAF> f, z;
-		for (int k =0; k<1.e6; k++){
+		for (int k =0; k<n; k++){
 			f= 0;
 			for (int i=0; i<5; i++) {
 				z= 0;
@@ -303,7 +304,7 @@ int main() {
 		}
 
 		Affine2Main<AF_fAF1> f, z;
-		for (int k =0; k<1.e6; k++){
+		for (int k =0; k<n; k++){
 			f= 0;
 			for (int i=0; i<5; i++) {
 				z= 0;
@@ -327,7 +328,7 @@ int main() {
 		}
 
 		Affine2Main<AF_fAF2> f, z;
-		for (int k =0; k<1.e6; k++){
+		for (int k =0; k<n; k++){
 			f= 0;
 			for (int i=0; i<5; i++) {
 				z= 0;
@@ -351,7 +352,7 @@ int main() {
 		}
 
 		Affine2Main<AF_fAF2_fma> f, z;
-		for (int k =0; k<1.e6; k++){
+		for (int k =0; k<n; k++){
 			f= 0;
 			for (int i=0; i<5; i++) {
 				z= 0;

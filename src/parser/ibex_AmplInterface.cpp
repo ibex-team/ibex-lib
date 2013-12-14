@@ -222,24 +222,24 @@ bool AmplInterface::readASLfg() {
 // Reads a NLP from an AMPL .nl file through the ASL methods
 bool AmplInterface::readnl() {
 
-
 	if (!_problem) {return false;}
 
+	// the variable /////////////////////////////////////////////////////////////
+	// TODO only continuous variables for the moment
 	_x =new Variable(n_var);
 	_bound_init.resize(n_var);
 	_problem->add_var(*_x);
 
-
-	// Each has a linear and a nonlinear part (thanks to Dominique
-	// Orban: http://www.gerad.ca/~orban/drampl/def-vars.html)
+		// Each has a linear and a nonlinear part
+		// thanks to Dominique Orban:
+		//        http://www.gerad.ca/~orban/drampl/def-vars.html
+		//        http://www.gerad.ca/~orban/drampl/dag.html
 
 	try {
-
-		// objective functions /////////////////////////////////////////////////////////////
-		if (n_obj>1) {ibex_error("too much objective function"); return false;}
+	// objective functions /////////////////////////////////////////////////////////////
+		if (n_obj>1) {ibex_error("too much objective function in the ampl model"); return false;}
 
 		for (int i = 0; i < n_obj; i++) {
-
 			///////////////////////////////////////////////////
 			//  the nonlinear part
 			const ExprNode *body = &(nl2expr (OBJ_DE [i] . e));
@@ -247,29 +247,23 @@ bool AmplInterface::readnl() {
 			////////////////////////////////////////////////
 			// The linear part
 			// count nonzero terms in linear part
-
-			int nterms = 0;
-			for (ograd *objgrad = Ograd [i];
-					objgrad;
-					objgrad = objgrad -> next)
-				if (fabs (objgrad -> coef) > 1.e-18) // FIXME enlever la precision en dure
-					nterms++;
-
-			if (nterms) { // have linear terms
-				for (ograd *objgrad = Ograd [i]; objgrad; objgrad = objgrad -> next) {
-					if (fabs (objgrad -> coef) > 1.e-18) {// FIXME enlever la precision en dure
-
-						int coeff = objgrad -> coef;
-						int index = objgrad -> varno;
-						if (coeff==1) {
-							body = &(*body + (*_x)[index]);
-						} else {
-							body = &(*body +coeff * (*_x)[index]);
-						}
+			int coeff, index;
+			for (ograd *objgrad = Ograd [i]; objgrad; objgrad = objgrad -> next) {
+				if (fabs (objgrad -> coef) != 0.0) {
+					coeff = objgrad -> coef;
+					index = objgrad -> varno;
+					if (coeff==1) {
+						body = &(*body + (*_x)[index]);
+					} else if (coeff==-1) {
+						body = &(*body - (*_x)[index]);
+					} else {
+						body = &(*body +coeff * (*_x)[index]);
 					}
 				}
 			}
 
+			////////////////////////////////////////////////
+			// Max or Min
 			// 3rd/ASL/solvers/asl.h, line 336: 0 is minimization, 1 is maximization
 			if (OBJ_sense [i] == 0) {
 				_problem->add_goal(*body);
@@ -278,51 +272,52 @@ bool AmplInterface::readnl() {
 			}
 		}
 
-
-		// constraints ///////////////////////////////////////////////////////////////////
-
-		// count the linear part of the constraints
-
-		int *nterms = new int [n_con];
-		const ExprNode **body_con = new const ExprNode*[n_con];
+	// constraints ///////////////////////////////////////////////////////////////////
 		// allocate space for argument list of all constraints' summations
 		// of linear and nonlinear terms
-
-		// init array of each constraint with the nonlinear part
+		const ExprNode **body_con = new const ExprNode*[n_con];
+		///////////////////////////////////////////////////
+		// The nonlinear part :
+		//init array of each constraint with the nonlinear part
 		for (int i = 0; i<n_con;i++)
-			body_con[i]=&(nl2expr (CON_DE [i] . e));
+			body_con[i] = &(nl2expr (CON_DE [i] . e));
 
+		///////////////////////////////////////////////////
 		// count all linear terms
 		if (A_colstarts && A_vals)    {      // Constraints' linear info is stored in A_vals
-
 			for (int j = 0; j < n_var; j++){
 				for (register int i = A_colstarts [j], k = A_colstarts [j+1] - i; k--; i++) {
 					if (A_vals[i]==1) {
-						body_con[A_rownos [i]] = &(*(body_con[A_rownos [i]]) + (*_x)[j]);
+						body_con[A_rownos[i]] = &(*(body_con[A_rownos[i]]) + (*_x)[j]);
+					} else if (A_vals[i]==-1) {
+						body_con[A_rownos[i]] = &(*(body_con[A_rownos[i]]) - (*_x)[j]);
 					} else {
-						body_con[A_rownos [i]] = &(*(body_con[A_rownos [i]]) + (A_vals[i]) * (*_x)[j]);
+						body_con[A_rownos[i]] = &(*(body_con[A_rownos[i]]) + (A_vals[i]) * (*_x)[j]);
 					}
 				}
 			}
-		} else {
-			cgrad *congrad;                  // Constraints' linear info is stored in Cgrad
+		} else {		// Constraints' linear info is stored in Cgrad
+			cgrad *congrad;
+			int coeff, index;
 			for ( int i = 0; i < n_con; i++)
 				for (congrad = Cgrad [i]; congrad; congrad = congrad -> next) {
-					if (fabs (congrad -> coef) > 1.e-18) {// FIXME enlever la precision en dure
-						int coeff = congrad -> coef;
-						int index = congrad -> varno;
+					coeff = congrad -> coef;
+					if (fabs (coeff) != 0.0) {// TODO to check
+						index = congrad -> varno;
 						if (coeff==1) {
 							body_con[i] = &(*(body_con[i]) + (*_x)[index]);
+						} else if (coeff==-1) {
+							body_con[i] = &(*(body_con[i]) - (*_x)[index]);
 						} else {
 							body_con[i] = &(*(body_con[i]) + (coeff) * (*_x)[index]);
 						}
 					}
 				}
 		}
-		//
+		///////////////////////////////////////////////////
+		// Kind of constraints : equality, inequality
 		for (int i = 0; i < n_con; i++) {
-
-			int sign;
+			int sig;
 			double lb, ub;
 
 			/* LUrhs is the constraint lower bound if Urhsx!=0, and the constraint lower and upper bound if Uvx == 0 */
@@ -330,19 +325,18 @@ bool AmplInterface::readnl() {
 				lb = LUrhs [i];
 				ub = Urhsx [i];
 			} else {
-				int j = 2*i;
-				lb = LUrhs [j];
-				ub = LUrhs [j+1];
+				lb = LUrhs [2*i];
+				ub = LUrhs [2*i+1];
 			}
 
 			// set constraint sign
 			if (negInfinity < lb)
-				if (ub < Infinity)  sign =1; // EQ;
-				else                sign =2; // GEQ;
-			else                    sign =3; // LEQ;
+				if (ub < Infinity)  sig =1; // EQ;
+				else                sig =2; // GEQ;
+			else                    sig =3; // LEQ;
 
 			// add them (and set lower-upper bound)
-			switch (sign) {
+			switch (sig) {
 
 			case  1:  _problem->add_ctr_eq((*(body_con[i])-Interval(lb,ub))); break;
 			case  2:  _problem->add_ctr(ExprCtr(*(body_con[i])-lb,GEQ)); break;
@@ -350,33 +344,29 @@ bool AmplInterface::readnl() {
 			default: ibex_error("Error: could not recognize a constraint\n"); return false;
 			}
 		}
+
+	// lower and upper bounds of the variables ///////////////////////////////////////////////////////////////
+		if (LUv) {
+			real *Uvx_copy = Uvx;
+			// LUv is the variable lower bound if Uvx!=0, and the variable lower and upper bound if Uvx == 0
+			if (!Uvx_copy)
+				for (int i=0; i<n_var; i++) {
+					_bound_init[i] = Interval(  ((LUv[2*i] <= NEG_INFINITY) ? NEG_INFINITY : LUv[2*i] ),
+							((LUv[2*i+1] >= POS_INFINITY) ? POS_INFINITY : LUv[2*i+1]) );
+				}
+			else
+				for (register int i=n_var; i--;) {
+					_bound_init[i] = Interval(	(LUv [i] <= NEG_INFINITY ? NEG_INFINITY : LUv[i] ),
+							(Uvx_copy [i] >= POS_INFINITY ? POS_INFINITY : Uvx_copy[i]) );
+				}
+
+		} // else it is [-oo,+oo]
+
 		delete[] body_con;
 
 	} catch (...) {
 		return false;
 	}
-
-
-	// lower and upper bounds ///////////////////////////////////////////////////////////////
-
-	if (LUv) {
-		real *Uvx_copy = Uvx;
-		/* LUv is the variable lower bound if Uvx!=0, and the variable lower and upper bound if Uvx == 0 */
-		if (!Uvx_copy)
-			for (register int i=0; i<n_var; i++) {
-
-				register int j = 2*i;
-				_bound_init[i] = Interval(  ((LUv[j]   <= NEG_INFINITY) ? NEG_INFINITY : LUv[j]  ),
-						((LUv[j+1] >= POS_INFINITY) ? POS_INFINITY : LUv[j+1]) );
-			}
-		else
-			for (register int i=n_var; i--;) {
-				_bound_init[i] = Interval(	(LUv [i]      <= NEG_INFINITY ? NEG_INFINITY : LUv[i]     ),
-						(Uvx_copy [i] >= POS_INFINITY ? POS_INFINITY : Uvx_copy[i]) );
-			}
-
-	} // else it is [-oo,+oo]
-
 
 	return true;
 }
@@ -417,13 +407,11 @@ const ExprNode& AmplInterface::nl2expr(expr *e) {
 	}
 	//case FLOOR:   notimpl ("floor");
 	//case CEIL:    notimpl ("ceil");
-	case ABS:     return (abs(nl2expr (e -> L.e)));
-	case OPUMINUS:return (-(nl2expr (e -> L.e)));
+	case ABS:      return (abs(nl2expr (e -> L.e)));
+	case OPUMINUS: return (-(nl2expr (e -> L.e)));
 	//case OPIFnl:  // TODO return (chi(nl2expr(????))) BoolInterval??
-	// see ASL/solvers/rops.c, see f_OPIFnl and  expr_if
-
-	case OP_tanh: return tanh(nl2expr (e->L.e));
-
+	                // see ASL/solvers/rops.c, see f_OPIFnl and  expr_if
+	case OP_tanh:  return tanh(nl2expr (e->L.e));
 	case OP_tan:   return tan(nl2expr (e->L.e));
 	case OP_sqrt:  return sqrt(nl2expr (e -> L.e));
 	case OP_sinh:  return sinh(nl2expr (e -> L.e));
@@ -440,7 +428,6 @@ const ExprNode& AmplInterface::nl2expr(expr *e) {
 	case OP_asin:  return asin(nl2expr (e -> L.e));
 	//case OP_acosh: notimpl ("acosh");
 	case OP_acos:  return acos(nl2expr (e -> L.e));
-
 	case OPSUMLIST: {
 		expr **ep = e->L.ep;
 		const ExprNode* ee=&(nl2expr (*ep));
@@ -455,7 +442,6 @@ const ExprNode& AmplInterface::nl2expr(expr *e) {
 	//case OPprecision: notimpl ("precision");
 	//case OPround:  notimpl ("round");
 	//case OPtrunc:  notimpl ("trunc");
-
 	case OP1POW: return pow( (nl2expr (e -> L.e)), ExprConstant::new_scalar(((expr_n *)e->R.e)->v));
 	case OP2POW: return sqr( nl2expr (e -> L.e));
 	case OPCPOW: return pow(ExprConstant::new_scalar(((expr_n *)e->L.e)->v), nl2expr (e -> R.e));
@@ -470,52 +456,64 @@ const ExprNode& AmplInterface::nl2expr(expr *e) {
 		if (j<n_var) {
 			return (*_x)[j];
 		}
-		// http://www.gerad.ca/~orban/drampl/def-vars.html
-		//else if (j <= n_var + como + comc + comb + como1 + comc1) {
-		// common expression | defined variable
+		else {
+			// http://www.gerad.ca/~orban/drampl/def-vars.html
+			// common expression | defined variable
+			int k = (expr_v *)e - VAR_E;
+			int coeff, index;
+			if( k >= n_var ) {
+				// This is a common expression. Find pointer to its root.
+				j = k - n_var;
+				if( j < ncom0 ) {
+					cexp *common = CEXPS + j;
+					// init with the nonlinear part
+					const ExprNode* body = &(nl2expr (common->e));
 
-		int k = (expr_v *)e - VAR_E;
-		if( k >= n_var ) {
-			// This is a common expression. Find pointer to its root.
-			j = k - n_var;
-			if( j < ncom0 ) {
-				cexp *common = CEXPS + j;
-				// init with the nonlinear part
-				const ExprNode* body = &(nl2expr (common->e));
-
-				int nlin = common->nlin; // Number of linear terms
-				if( nlin > 0 ) {
-					linpart * L = common->L;
-					for(int i = 1; i < nlin; i++ ) {
-						int coeff = L [i]. fac;
-						int index = ((uintptr_t) (L [j].v.rp) - (uintptr_t) VAR_E) / sizeof (expr_v);
-						body = &(*body +coeff * (*_x)[index]);
+					int nlin = common->nlin; // Number of linear terms
+					if( nlin > 0 ) {
+						linpart * L = common->L;
+						for(int i = 1; i < nlin; i++ ) {
+							coeff = L [i]. fac;
+							index = ((uintptr_t) (L [j].v.rp) - (uintptr_t) VAR_E) / sizeof (expr_v);
+							if (coeff==1) {
+								body = &(*body + (*_x)[index]);
+							} else if (coeff==-1) {
+								body = &(*body - (*_x)[index]);
+							} else if (coeff != 0) {
+								body = &(*body +coeff * (*_x)[index]);
+							}
+						}
 					}
+					return *body;
 				}
-				return *body;
-			}
-			else {
-				cexp1 *common = (CEXPS1 - ncom0) +j ;
-				// init with the nonlinear part
-				const ExprNode* body = &(nl2expr (common->e));
+				else {
+					cexp1 *common = (CEXPS1 - ncom0) +j ;
+					// init with the nonlinear part
+					const ExprNode* body = &(nl2expr (common->e));
 
-				int nlin = common->nlin; // Number of linear terms
-				if( nlin > 0 ) {
-					linpart * L = common->L;
-					for(int i = 1; i < nlin; i++ ) {
-						int coeff = L [i]. fac;
-						int index = ((uintptr_t) (L [j].v.rp) - (uintptr_t) VAR_E) / sizeof (expr_v);
-						body = &(*body +coeff * (*_x)[index]);
+					int nlin = common->nlin; // Number of linear terms
+					if( nlin > 0 ) {
+						linpart * L = common->L;
+						for(int i = 1; i < nlin; i++ ) {
+							coeff = L [i]. fac;
+							index = ((uintptr_t) (L [j].v.rp) - (uintptr_t) VAR_E) / sizeof (expr_v);
+							if (coeff==1) {
+								body = &(*body + (*_x)[index]);
+							} else if (coeff==-1) {
+								body = &(*body - (*_x)[index]);
+							} else if (coeff != 0) {
+								body = &(*body +coeff * (*_x)[index]);
+							}
+						}
 					}
+					return *body;
 				}
-				return *body;
-			}
 
-		} else {
-			ibex_error("Error: unknown variable x \n");
-			throw -1;
+			} else {
+				ibex_error("Error: unknown variable x \n");
+				throw -1;
+			}
 		}
-
 	}
 
 	default: {
