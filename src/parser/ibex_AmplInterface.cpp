@@ -247,7 +247,8 @@ bool AmplInterface::readnl() {
 			////////////////////////////////////////////////
 			// The linear part
 			// count nonzero terms in linear part
-			int coeff, index;
+			double coeff;
+			int index;
 			for (ograd *objgrad = Ograd [i]; objgrad; objgrad = objgrad -> next) {
 				if (fabs (objgrad -> coef) != 0.0) {
 					coeff = objgrad -> coef;
@@ -298,7 +299,8 @@ bool AmplInterface::readnl() {
 			}
 		} else {		// Constraints' linear info is stored in Cgrad
 			cgrad *congrad;
-			int coeff, index;
+			double coeff;
+			int index;
 			for ( int i = 0; i < n_con; i++)
 				for (congrad = Cgrad [i]; congrad; congrad = congrad -> next) {
 					coeff = congrad -> coef;
@@ -380,7 +382,7 @@ const ExprNode& AmplInterface::nl2expr(expr *e) {
 
 	case OPPLUS:  return   ((nl2expr (e -> L.e)) + (nl2expr (e -> R.e)));
 	case OPMINUS: return   ((nl2expr (e -> L.e)) - (nl2expr (e -> R.e)));
-	case OPMULT:  return   ((nl2expr (e -> L.e)) * (nl2expr (e -> R.e)));
+	case OPMULT:  return   (operator*((nl2expr (e -> L.e)) , (nl2expr (e -> R.e))));
 	case OPDIV:   return   ((nl2expr (e -> L.e)) / (nl2expr (e -> R.e)));
 	//case OPREM:   notimpl ("remainder");
 	case OPPOW:   return   pow(nl2expr (e -> L.e), nl2expr (e -> R.e));
@@ -408,7 +410,7 @@ const ExprNode& AmplInterface::nl2expr(expr *e) {
 	//case FLOOR:   notimpl ("floor");
 	//case CEIL:    notimpl ("ceil");
 	case ABS:      return (abs(nl2expr (e -> L.e)));
-	case OPUMINUS: return (-(nl2expr (e -> L.e)));
+	case OPUMINUS: return (operator-(nl2expr (e -> L.e)));
 	//case OPIFnl:  // TODO return (chi(nl2expr(????))) BoolInterval??
 	                // see ASL/solvers/rops.c, see f_OPIFnl and  expr_if
 	case OP_tanh:  return tanh(nl2expr (e->L.e));
@@ -452,7 +454,6 @@ const ExprNode& AmplInterface::nl2expr(expr *e) {
 	//case OPHOL:     notimpl ("hol");
 	case OPVARVAL:  {
 		int j = ((expr_v *) e) -> a;
-
 		if (j<n_var) {
 			return (*_x)[j];
 		}
@@ -460,20 +461,21 @@ const ExprNode& AmplInterface::nl2expr(expr *e) {
 			// http://www.gerad.ca/~orban/drampl/def-vars.html
 			// common expression | defined variable
 			int k = (expr_v *)e - VAR_E;
-			int coeff, index;
+			double coeff;
+			int index;
 			if( k >= n_var ) {
 				// This is a common expression. Find pointer to its root.
 				j = k - n_var;
-				if( j < ncom0 ) {
-					cexp *common = CEXPS + j;
+				if( j < ncom0 ) 	{
+					cexp *common = CEXPS +j;
 					// init with the nonlinear part
 					const ExprNode* body = &(nl2expr (common->e));
 
 					int nlin = common->nlin; // Number of linear terms
 					if( nlin > 0 ) {
 						linpart * L = common->L;
-						for(int i = 1; i < nlin; i++ ) {
-							coeff = L [i]. fac;
+						for(int i = 0; i < nlin; i++ ) {
+							coeff = (L [i]).fac;
 							index = ((uintptr_t) (L [i].v.rp) - (uintptr_t) VAR_E) / sizeof (expr_v);
 							if (coeff==1) {
 								body = &(*body + (*_x)[index]);
@@ -494,8 +496,8 @@ const ExprNode& AmplInterface::nl2expr(expr *e) {
 					int nlin = common->nlin; // Number of linear terms
 					if( nlin > 0 ) {
 						linpart * L = common->L;
-						for(int i = 1; i < nlin; i++ ) {
-							coeff = L [i]. fac;
+						for(int i = 0; i < nlin; i++ ) {
+							coeff = (L [i]).fac;
 							index = ((uintptr_t) (L [i].v.rp) - (uintptr_t) VAR_E) / sizeof (expr_v);
 							if (coeff==1) {
 								body = &(*body + (*_x)[index]);
@@ -521,7 +523,6 @@ const ExprNode& AmplInterface::nl2expr(expr *e) {
 		throw -2;
 	}
 	}
-
 	return ExprConstant::new_scalar(0.);
 }
 

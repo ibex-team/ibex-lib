@@ -82,14 +82,14 @@ std::ostream& operator<<(std::ostream& os, const System& sys) {
 	    os << "  " << sys.goal->expr() << endl;
 	else
 		os << "  (none)" << endl;
+	if (sys.nb_ctr>0) {
+		os << "main func size= " << sys.f.expr().size << endl;
 
-	os << "main func size= " << sys.f.expr().size << endl;
-
-	os << "constraints:" << endl;
-	for (int i=0; i<sys.ctrs.size(); i++)
-		os << "  " << sys.ctrs[i] << " " << sys.ctrs[i].f.expr().size << endl;
-	os << endl;
-
+		os << "constraints:" << endl;
+		for (int i=0; i<sys.ctrs.size(); i++)
+			os << "  " << sys.ctrs[i] << " " << sys.ctrs[i].f.expr().size << endl;
+		os << endl;
+	}
 	return os;
 }
 
