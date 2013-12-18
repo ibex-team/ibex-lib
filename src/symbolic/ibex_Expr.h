@@ -91,8 +91,16 @@ public:
 	 * Uninitialized while this node is not part of a function expression. */
 	mutable ExprLabel deco;
 
-	/** The father node. NULL if none. */
-	const ExprNode* father;
+	/**
+	 * \brief The father nodes.
+	 *
+	 * \warning: there are as many father nodes as there are arcs pointing to
+	 * the current node x in the DAG which means that the same node can appear
+	 * several times in \a fathers.
+	 * E.g., in the expression x+x where x is the same node, x has two fathers
+	 * which are both references to the node "+".
+	 * */
+	Array<const ExprNode> fathers;
 
 	/** Return true if this subexpression is the constant 0. */
 	virtual bool is_zero() const;

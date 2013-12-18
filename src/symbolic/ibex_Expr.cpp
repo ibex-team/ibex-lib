@@ -44,7 +44,7 @@ int max_height(const ExprNode** args, int n) {
 } // end anonymous namespace
 
 ExprNode::ExprNode(int height, int size, const Dim& dim) :
-  height(height), size(size), id(id_count++), dim(dim), father(NULL) {
+  height(height), size(size), id(id_count++), dim(dim) {
 
 }
 
@@ -59,9 +59,8 @@ ExprIndex::ExprIndex(const ExprNode& subexpr, int index)
 : ExprNode(subexpr.height+1, subexpr.size+1, subexpr.dim.index_dim()), expr(subexpr), index(index) {
 	if (index<0 || index>subexpr.dim.max_index())
 		throw DimException("index out of bounds");
-	((ExprNode*&) (subexpr.father))=this;
+	((ExprNode&) (subexpr)).fathers.add(*this);
 }
-
 
 bool ExprIndex::indexed_symbol() const {
 	// we prefer to use directly a dynamic cast here
@@ -80,7 +79,7 @@ ExprNAryOp::ExprNAryOp(const ExprNode** _args, int n, const Dim& dim) :
 	args = new const ExprNode*[n];
 	for (int i=0; i<n; i++) {
 		args[i]=_args[i];
-		((ExprNode*&) args[i]->father)=this;
+		((ExprNode&) *args[i]).fathers.add(*this);
 	}
 }
 
@@ -217,8 +216,8 @@ ExprBinaryOp::ExprBinaryOp(const ExprNode& left, const ExprNode& right, const Di
 					dim ),
 		left(left), right(right) {
 
-	((ExprNode*&) left.father)=this;
-	((ExprNode*&) right.father)=this;
+	((ExprNode&) left).fathers.add(*this);
+	((ExprNode&) right).fathers.add(*this);
 }
 
 ExprAdd::ExprAdd(const ExprNode& left, const ExprNode& right) :
@@ -261,7 +260,7 @@ ExprAtan2::ExprAtan2(const ExprNode& left, const ExprNode& right) :
 
 ExprUnaryOp::ExprUnaryOp(const ExprNode& subexpr, const Dim& dim) :
 				ExprNode(subexpr.height+1, subexpr.size+1, dim), expr(subexpr) {
-	((ExprNode*&) expr.father)=this;
+	((ExprNode&) expr).fathers.add(*this);
 }
 
 ExprSign::ExprSign(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) {

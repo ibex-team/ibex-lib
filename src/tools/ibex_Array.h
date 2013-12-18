@@ -50,6 +50,11 @@ public:
 	void resize(int n);
 
 	/**
+	 * \brief Increments the size of the array by 1 and add the new element.
+	 */
+	void add(T& obj);
+
+	/**
 	 * \brief Set the ith reference to the object \a obj.
 	 */
 	void set_ref(int i, T& obj);
@@ -185,6 +190,12 @@ void Array<T>::set_ref(int i, T& obj) {
 	assert(!array[i]);
 
 	array[i]=&obj;
+}
+
+template<class T>
+void Array<T>::add(T& obj) {
+	resize(size()+1);
+	set_ref(size()-1,obj);
 }
 
 template<class T>

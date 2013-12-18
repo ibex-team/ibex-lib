@@ -14,6 +14,8 @@
 #include "ibex_Function.h"
 #include <sstream>
 
+using namespace std;
+
 namespace ibex {
 
 static IntervalVector v1() {
@@ -43,6 +45,7 @@ void TestExpr::symbol() {
 	TEST_ASSERT(strcmp(x.name,"x")==0);
 	TEST_ASSERT(x.size==1);
 	TEST_ASSERT(x.deco.d->dim==x.dim);
+	TEST_ASSERT(x.fathers.size()==0);
 	TEST_ASSERT(!x.is_zero());
 	TEST_ASSERT(x.type()==Dim::SCALAR);
 	TEST_ASSERT(checkExpr(x,"x"));
@@ -65,6 +68,10 @@ void TestExpr::addxy01() {
 	TEST_ASSERT(e.id==y.id+1);
 	TEST_ASSERT(e.size==3);
 	TEST_ASSERT(e.deco.d->dim==e.dim);
+	TEST_ASSERT(x.fathers.size()==1);
+	TEST_ASSERT(&x.fathers[0]==&e);
+	TEST_ASSERT(y.fathers.size()==1);
+	TEST_ASSERT(&y.fathers[0]==&e);
 	TEST_ASSERT(!e.is_zero());
 	TEST_ASSERT(e.type()==Dim::SCALAR);
 
@@ -109,7 +116,9 @@ void TestExpr::addxx01() {
 	TEST_ASSERT(e.height==1);
 	TEST_ASSERT(e.size==2);
 	TEST_ASSERT(e.deco.d->dim==e.dim);
-	TEST_ASSERT(!e.is_zero());
+	TEST_ASSERT(x.fathers.size()==2);
+	TEST_ASSERT(&x.fathers[0]==&e);
+	TEST_ASSERT(&x.fathers[1]==&e);
 	TEST_ASSERT(e.type()==Dim::SCALAR);
 
 	TEST_ASSERT(checkExpr(e,"(x+x)"));
@@ -204,7 +213,8 @@ void TestExpr::dag01() {
 
 	const ExprSymbol& x=ExprSymbol::new_("x",Dim::scalar());
 	const ExprSymbol& y=ExprSymbol::new_("y",Dim::scalar());
-	const ExprNode& e1=pow(x+y,2);
+	const ExprNode& e0=x+y;
+	const ExprNode& e1=pow(e0,2);
 	const ExprNode& e2=x-e1;
 	const ExprNode& e3=e2*e1;
 	const ExprNode& e4=e3+e2;
@@ -227,8 +237,23 @@ void TestExpr::dag01() {
 	TEST_ASSERT(e3.size==6);
 	TEST_ASSERT(e4.size==7);
 
-	TEST_ASSERT(checkExpr(e4,"(((x-(x+y)^2)*(x+y)^2)+(x-(x+y)^2))"));
 
+	TEST_ASSERT(x.fathers.size()==2);
+	TEST_ASSERT(&x.fathers[0]==&e0);
+	TEST_ASSERT(&x.fathers[1]==&e2);
+	TEST_ASSERT(y.fathers.size()==1);
+	TEST_ASSERT(&y.fathers[0]==&e0);
+	TEST_ASSERT(e1.fathers.size()==2);
+	TEST_ASSERT(&e1.fathers[0]==&e2);
+	TEST_ASSERT(&e1.fathers[1]==&e3);
+	TEST_ASSERT(e2.fathers.size()==2);
+	TEST_ASSERT(&e2.fathers[0]==&e3);
+	TEST_ASSERT(&e2.fathers[1]==&e4);
+	TEST_ASSERT(e3.fathers.size()==1);
+	TEST_ASSERT(&e3.fathers[0]==&e4);
+	TEST_ASSERT(e4.fathers.size()==0);
+
+	TEST_ASSERT(checkExpr(e4,"(((x-(x+y)^2)*(x+y)^2)+(x-(x+y)^2))"));
 }
 
 void TestExpr::unaryOp() {
