@@ -84,7 +84,14 @@ BoolInterval PdcHansenFeasibility::test(const IntervalVector& box) {
 	Matrix LU(m,n);
 	int pr[m];
 	int pc[n]; // the interesting output: the variables permutation
-	real_LU(A,LU,pr,pc);
+
+	try {
+		real_LU(A,LU,pr,pc);
+	} catch(SingularMatrixException&) {
+		// means in particular that we could not extract an
+		// invertible m*m submatrix
+		return MAYBE;
+	}
 	// ==============================================================
 
 
