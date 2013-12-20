@@ -58,7 +58,7 @@ void Optimizer::read_ext_box(const IntervalVector& ext_box, IntervalVector& box)
 
 Optimizer::Optimizer(System& user_sys, Bsc& bsc, Ctc& ctc, double prec,
 		double goal_rel_prec, double goal_abs_prec, int sample_size, double equ_eps, bool rigor) :
-				sys(user_sys,goal_abs_prec), n(user_sys.nb_var), m(sys.nb_ctr) /* (warning: not user_sys.nb_ctr) */,
+				user_sys(user_sys), sys(user_sys,goal_abs_prec), n(user_sys.nb_var), m(sys.nb_ctr) /* (warning: not user_sys.nb_ctr) */,
 				ext_sys(user_sys),
 				bsc(bsc), ctc(ctc), buffer(n),
 				prec(prec), goal_rel_prec(goal_rel_prec), goal_abs_prec(goal_abs_prec),
@@ -180,13 +180,13 @@ void Optimizer::update_loup(const IntervalVector& box) {
 
 void Optimizer::update_entailed_ctr(const IntervalVector& box) {
 	for (int j=0; j<m; j++) {
-		if ((*entailed)[j]) {
+		if (entailed->normalized(j)) {
 			continue;
 		}
 		Interval y=sys.f[j].eval(box);
 		if (y.lb()>0) throw EmptyBoxException();
 		else if (y.ub()<=0) {
-			(*entailed)[j]=true;
+			entailed->set_normalized_entailed(j);
 		}
 	}
 }
@@ -310,9 +310,9 @@ void Optimizer::firstorder_contract(  IntervalVector& box, const  IntervalVector
 	}
 
 	else {
-		PdcFirstOrder p(sys);
-		p.set_entailed(entailed);
-		if (p.test(box)==NO) throw EmptyBoxException();
+//		PdcFirstOrder p(user_sys);
+//		p.set_entailed(entailed);
+//		if (p.test(box)==NO) throw EmptyBoxException();
 	}
 
 }
@@ -336,7 +336,7 @@ void Optimizer::optimize(const IntervalVector& init_box) {
 	root->add<EntailedCtr>();
 	//root->add<Multipliers>();
 	entailed=&root->get<EntailedCtr>();
-	entailed->init_root(m);
+	entailed->init_root(user_sys,sys);
 
 	loup_changed=false;
 	loup_point=init_box.mid();

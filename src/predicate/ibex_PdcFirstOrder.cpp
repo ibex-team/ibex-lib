@@ -20,8 +20,9 @@ BoolInterval PdcFirstOrder::test(const IntervalVector& box) {
 	int n=sys.nb_var;
 	int M=sys.nb_ctr;
 	// count the number of active constraints
+	// in the original system
 	for (int j=0; j<sys.nb_ctr; j++) {
-		if (e && (*e)[j]) M--;
+		if (e && e->original(j)) M--;
 	}
 
 	if (M>n) return MAYBE; // cannote be full rank
@@ -32,7 +33,7 @@ BoolInterval PdcFirstOrder::test(const IntervalVector& box) {
 	sys.goal->gradient(box,J.row(j2++));
 
 	for (int j=0; j<sys.nb_ctr; j++) {
-		if (e && (*e)[j]) {
+		if (e && e->original(j)) {
 			continue;
 		}
 		sys.f[j].gradient(box,J.row(j2++));

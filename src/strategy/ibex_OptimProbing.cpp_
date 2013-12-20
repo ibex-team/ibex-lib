@@ -32,7 +32,7 @@ void Optimizer::monotonicity_analysis(IntervalVector& box) {
 bool Optimizer::is_feasible(const IntervalVector& box) {
 
 	for (int j=0; j<m; j++) {
-		if ((*entailed)[j]) continue;
+		if (entailed->normalized(j)) continue;
 		Interval y=sys.f[j].eval(box);
 		if (y.lb()>0) return false;
 	}
@@ -41,7 +41,7 @@ bool Optimizer::is_feasible(const IntervalVector& box) {
 
 bool Optimizer::is_inner(const IntervalVector& box) {
 	for (int j=0; j<m; j++) {
-		if ((*entailed)[j]) continue;
+		if (entailed->normalized(j)) continue;
 		if (sys.f[j].eval(box).ub()>0) return false;
 	}
 	return true;
@@ -53,7 +53,7 @@ bool Optimizer::in_HC4(IntervalVector& box) {
 	if (!is_feasible(box)) { box.set_empty(); return false; }
 
 	for (int j=0; j<m; j++) {
-		if ((*entailed)[j]) continue;
+		if (entailed->normalized(j)) continue;
 		sys.f[j].iproj(Interval(NEG_INFINITY,0),box);
 		if (box.is_empty()) return false;
 	}

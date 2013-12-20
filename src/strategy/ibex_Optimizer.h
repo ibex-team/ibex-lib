@@ -105,6 +105,13 @@ public:
 	void report_perf();
 
 	/**
+	 * \brief The original system
+	 *
+	 * \warning kept by reference.
+	 */
+	System& user_sys;
+
+	/**
 	 * \brief The normalized system
 	 *
 	 * Corresponds to the system (see constructor) with all inequalities
@@ -131,7 +138,6 @@ public:
 	 * See #ibex::ExtendedSystem::goal_var.
 	 */
 	ExtendedSystem ext_sys;
-
 
 	/**
 	 * \brief The equalities of the original system.
