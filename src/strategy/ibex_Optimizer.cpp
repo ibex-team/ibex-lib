@@ -310,9 +310,9 @@ void Optimizer::firstorder_contract(  IntervalVector& box, const  IntervalVector
 	}
 
 	else {
-//		PdcFirstOrder p(user_sys);
-//		p.set_entailed(entailed);
-//		if (p.test(box)==NO) throw EmptyBoxException();
+		PdcFirstOrder p(user_sys);
+		p.set_entailed(entailed);
+		if (p.test(box)==NO) throw EmptyBoxException();
 	}
 
 }
