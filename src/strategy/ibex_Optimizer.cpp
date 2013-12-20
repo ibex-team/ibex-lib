@@ -10,6 +10,7 @@
 
 #include "ibex_Optimizer.h"
 #include "ibex_EmptyBoxException.h"
+#include "ibex_EmptySystemException.h"
 #include "ibex_Timer.h"
 #include "ibex_OptimProbing.cpp_"
 #include "ibex_OptimSimplex.cpp_"
@@ -32,8 +33,9 @@ namespace ibex {
 const double Optimizer::default_prec = 1e-07;
 const double Optimizer::default_goal_rel_prec = 1e-07;
 const double Optimizer::default_goal_abs_prec = 1e-07;
-const int Optimizer::default_sample_size = 10;
-
+const int    Optimizer::default_sample_size = 10;
+const double Optimizer::default_equ_eps = 1e-08;
+const double Optimizer::default_loup_tolerance = 0.1;
 
 void Optimizer::write_ext_box(const IntervalVector& box, IntervalVector& ext_box) {
 	int i2=0;
@@ -55,15 +57,23 @@ void Optimizer::read_ext_box(const IntervalVector& ext_box, IntervalVector& box)
 
 
 Optimizer::Optimizer(System& user_sys, Bsc& bsc, Ctc& ctc, double prec,
-		double goal_rel_prec, double goal_abs_prec, int sample_size) :
+		double goal_rel_prec, double goal_abs_prec, int sample_size, double equ_eps, bool rigor) :
 				sys(user_sys,System::NORMALIZE,goal_abs_prec), n(user_sys.nb_var), m(sys.nb_ctr) /* (warning: not user_sys.nb_ctr) */,
-			        ext_sys(user_sys),
+				ext_sys(user_sys),
 				bsc(bsc), ctc(ctc), buffer(n),
 				prec(prec), goal_rel_prec(goal_rel_prec), goal_abs_prec(goal_abs_prec),
 				sample_size(sample_size), mono_analysis_flag(true), in_HC4_flag(true), trace(false),
-				timeout(1e08), loup(POS_INFINITY), uplo(NEG_INFINITY), loup_point(n),
-				df(*user_sys.goal,Function::DIFF),
+				timeout(1e08), loup(POS_INFINITY), uplo(NEG_INFINITY), pseudo_loup(POS_INFINITY),
+				loup_point(n), loup_box(n),
+				df(*user_sys.goal,Function::DIFF), rigor(rigor),
 				uplo_of_epsboxes(POS_INFINITY), nb_cells(0), loup_changed(false) {
+
+	// ==== build the system of equalities only ====
+	try {
+		equs= new System(user_sys,System::EQ_ONLY);
+	} catch(EmptySystemException&) {
+		equs= NULL;
+	}
 
 	// ====== build the reversed inequalities g_i(x)>0 ===============
 	if(m>0) {
@@ -112,10 +122,59 @@ double Optimizer::compute_ymax() {
 	return ymax;}
 
 
+bool Optimizer::update_real_loup() {
+	//================  launch Hansen test ======================
+	IntervalVector epsbox(loup_point);
+	// TODO: replace default_equ_eps by something else!
+	epsbox.inflate(default_equ_eps);
+
+	// TODO: maybe we should check first if epsbox is inner...
+	// otherwise the probability to get a feasible point is
+	// perhaps too small?
+
+	// TODO: HansenFeasibility uses midpoint
+	//       but maybe we should use random
+	PdcHansenFeasibility pdc(equs->f);
+	if (pdc.test(epsbox)==YES) {
+		Interval resI = sys.goal->eval(pdc.solution());
+		if (!resI.is_empty()) {
+			double res=resI.ub();
+			if (res<loup) {
+				//TODO : in is_inner, we check again all equalities,
+				// it's useless in this case!
+				if (is_inner(pdc.solution())) {
+					loup = res;
+					loup_box = pdc.solution();
+
+					cout << setprecision (12) << " *real* loup update " << loup  << " loup box: " << loup_box << endl;
+					return true;
+				}
+			}
+		}
+	}
+	//===========================================================
+	return false;
+}
+
 // 2 methods for searching a better feasible point and a better loup
 void Optimizer::update_loup(const IntervalVector& box) {
-	loup_changed |= update_loup_probing (box);
-	loup_changed |= update_loup_simplex(box);
+	if (rigor && equs!=NULL) { // a loup point will not be safe (pseudo loup is not the real loup)
+		double old_pseudo_loup=pseudo_loup;
+		if (update_loup_probing(box) && pseudo_loup < old_pseudo_loup + default_loup_tolerance*fabs(loup-pseudo_loup)) {
+			// update pseudo_loup
+			loup_changed |= update_real_loup();
+			old_pseudo_loup=pseudo_loup; // because has changed
+		}
+		if (update_loup_simplex(box) && pseudo_loup < old_pseudo_loup + default_loup_tolerance*fabs(loup-pseudo_loup)) {
+			loup_changed |= update_real_loup();
+		}
+	} else {
+		loup_changed |= update_loup_probing(box); // update pseudo_loup
+		// the loup point is safe: the pseudo loup is the real loup.
+		loup=pseudo_loup;
+		loup_changed |= update_loup_simplex(box);  // update pseudo_loup
+		loup = pseudo_loup;
+	}
 }
 
 
@@ -154,7 +213,7 @@ void Optimizer::update_uplo() {
          //    cout << " new uplo buffer empty " << new_uplo << " uplo " << uplo << endl;
 
 	  double m = minimum(new_uplo, uplo_of_epsboxes);
-	  if (uplo < m) uplo = m;
+	  if (uplo < m) uplo = m; // warning: hides the field "m" of the class
          // note: we always have uplo <= uplo_of_epsboxes but we may have uplo > new_uplo, because
          // ymax is strictly lower than the loup.
 	}
@@ -349,7 +408,7 @@ void Optimizer::update_uplo_of_epsboxes(double ymin) {
 	// found by the precision criterion
   assert (uplo_of_epsboxes >= uplo);
   assert(ymin >= uplo);
-  if (uplo_of_epsboxes > ymin) 
+  if (uplo_of_epsboxes > ymin)
     {uplo_of_epsboxes = ymin;
       if (trace) {
 	cout << "uplo_of_epsboxes:" << setprecision(12) <<  uplo_of_epsboxes << " uplo " << uplo << endl;

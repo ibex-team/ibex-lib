@@ -10,6 +10,7 @@
 
 #include "ibex_Optimizer.h"
 #include "ibex_EmptyBoxException.h"
+#include "ibex_BoolInterval.h"
 
 #include <stdlib.h>
 #include <math.h> // for fabs
@@ -20,12 +21,12 @@ using namespace std;
 namespace ibex {
 
 void Optimizer::monotonicity_analysis(IntervalVector& box) {
-  IntervalVector g(n);
-  sys.goal->gradient(box,g);
-  for (int j=0; j<n; j++) {
-	  if (g[j].lb()>=0) box[j]=box[j].lb();
-	  if (g[j].ub()<=0) box[j]=box[j].ub();
-  }
+	IntervalVector g(n);
+	sys.goal->gradient(box,g);
+	for (int j=0; j<n; j++) {
+		if (g[j].lb()>=0) box[j]=box[j].lb();
+		if (g[j].ub()<=0) box[j]=box[j].ub();
+	}
 }
 
 bool Optimizer::is_feasible(const IntervalVector& box) {
@@ -72,10 +73,10 @@ bool Optimizer::check_candidate(const Vector& pt, bool _is_inner) {
 	// The test of the constraints is done only when the evaluation of the criterion
 	// is better than the loup (a cheaper test).
 
-	//        cout << " res " <<  res << " loup " <<  loup <<  " is_inner " << _is_inner << endl;
+	//        cout << " res " <<  res << " loup " <<  pseudo_loup <<  " is_inner " << _is_inner << endl;
 	if (res<loup) {
-	  if (_is_inner || is_inner(pt)) {
-			loup = res;
+		if (_is_inner || is_inner(pt)) {
+			pseudo_loup = res;
 			loup_point = pt;
 			return true;
 		}
@@ -84,40 +85,43 @@ bool Optimizer::check_candidate(const Vector& pt, bool _is_inner) {
 	return false;
 }
 
-  bool Optimizer::random_probing (const IntervalVector& box, const IntervalVector & fullbox, bool is_inner) {
+bool Optimizer::random_probing (const IntervalVector& box, const IntervalVector & fullbox, bool is_inner) {
 	Vector pt(n);
 	bool loup_changed=false;
 
 	for(int i=0; i<sample_size; i++) {
 		pt = box.random();
-	//	cout << " box " << box << " pt " << pt << endl;
+		//	cout << " box " << box << " pt " << pt << endl;
 		loup_changed |= check_candidate (pt, is_inner);
 	}
 
 	/*=================== "intensification" =================== */
-//	// --> does not bring substantial gain
+	// --> does not bring substantial gain except for unconstrained optimization
 
-	if (m==0)  // interesting for unconstrained optimization
-	  
-	  {	if (loup_changed)
-//		// we activate line probing only if the starting point has improved the goal.
-//		// we use the full box (not inbox)
-	      line_probing(fullbox);
-	    else
-//		// Try Hansen dichotomy between the last candidate point (pt)
-//		// and the loup (note: the segment goes outside of the box, this is on purpose).
-//		//
-//		// Possible improvement: chose the random point with the smallest criterion
-//		// instead of the last one.
-	      loup_changed = dichotomic_line_search(pt,true);
-	  }
-	  
+	if (m==0) {
+		if (loup_changed)
+		// we activate line probing only if the starting point has improved the goal.
+		// we use the full box (not inbox)
+		line_probing(fullbox);
+	else
+		// Try Hansen dichotomy between the last candidate point (pt)
+		// and the loup (note: the segment goes outside of the box, this is on purpose).
+		//
+		// Possible improvement: chose the random point with the smallest criterion
+		// instead of the last one.
+		loup_changed = dichotomic_line_search(pt,true);
+	}
+
 	/*========================================================*/
-	
+
 	return loup_changed;
 }
 
-
+/**
+ * TODO: this function is *unsafe* if applied with equality
+ *       constraints in rigorous mode (is_inner is used as
+ *       a sat check).
+ */
 bool Optimizer::dichotomic_line_search(const Vector& end_point, bool exit_if_above_loup) {
 	Vector seg=end_point-loup_point;
 
@@ -133,8 +137,7 @@ bool Optimizer::dichotomic_line_search(const Vector& end_point, bool exit_if_abo
 		Vector y1=loup_point+alpha1*seg;
 		double fy1=goal(y1);
 		if (fy1<fy0) {
-			if (is_inner(y1)) {
-				//cout << " better loup!......" << endl;
+			if (is_inner(y1)) { // a better loup is found!
 				alpha0=alpha1;
 				fy0=fy1;
 			} else {
@@ -150,7 +153,7 @@ bool Optimizer::dichotomic_line_search(const Vector& end_point, bool exit_if_abo
 
 	if (alpha0>0) {
 		loup_point += alpha0*seg;
-		loup = fy0;
+		pseudo_loup = fy0;
 		return true;
 	} else {
 		return false;
@@ -228,12 +231,12 @@ bool Optimizer::line_probing(const IntervalVector& box) {
 	double max_coeff = 1.0/max_ratio;
 
 	/*-------------- debug ------------------*/
-//	for (int j=0; j<n; j++) {
-//		if (box[j].diam()==0)
-//			cout << " j=" << j << " zero" << endl;
-//		else
-//		cout << " j=" << j << " lb=" << box[j].lb() << "<= " << start[j]-max_coeff*g[j] << "<=  ub=" << box[j].ub() << endl;
-//	}
+	//	for (int j=0; j<n; j++) {
+	//		if (box[j].diam()==0)
+	//			cout << " j=" << j << " zero" << endl;
+	//		else
+	//		cout << " j=" << j << " lb=" << box[j].lb() << "<= " << start[j]-max_coeff*g[j] << "<=  ub=" << box[j].ub() << endl;
+	//	}
 	/*---------------------------------------*/
 
 	Vector facet_point(n); // direc is the segment joining the startpoint to a point on the facet, in the direction of the negative gradient.
@@ -248,9 +251,9 @@ bool Optimizer::line_probing(const IntervalVector& box) {
 }
 
 /* ====================== 3rd method: make a double gradient descent ===============================
-* TO DO...........
-* It probably requires Hessian matrix.
-*/
+ * TODO...........
+ * It probably requires Hessian matrix.
+ */
 
 bool Optimizer::update_loup_probing(const IntervalVector& box) {
 
@@ -280,7 +283,7 @@ bool Optimizer::update_loup_probing(const IntervalVector& box) {
 		monotonicity_analysis(inbox);
 
 	bool loup_changed; // return value
-	//	cout <<  " inner ? " << inner_found? << " box " << box << " inbox " << inbox << endl;
+	//	cout <<  " inner ? " << inner_found << " box " << box << " inbox " << inbox << endl;
 	loup_changed = random_probing(inner_found? inbox : box, box, inner_found);
 
 	if (loup_changed) {
@@ -302,8 +305,8 @@ bool Optimizer::update_loup_probing(const IntervalVector& box) {
 
 void Optimizer::trace_loup (bool inner_found) {
 
-  if (inner_found) cout << "[in!]";
-  cout << setprecision (12) << " loup update " << loup  << " loup point  " << loup_point << endl;
+	if (inner_found) cout << "[in!]";
+	cout << setprecision (12) << " loup update " << pseudo_loup << " loup point  " << loup_point << endl;
 
 }
 

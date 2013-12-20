@@ -21,6 +21,7 @@
 #include "ibex_ExtendedSystem.h"
 #include "ibex_EntailedCtr.h"
 #include "ibex_LinearSolver.h"
+#include "ibex_PdcHansenFeasibility.h"
 
 namespace ibex {
 
@@ -50,6 +51,8 @@ public:
 	 *   \param goal_rel_prec - relative precision of the objective (the optimizer stops once reached).
 	 *   \pram  goal_abs_prec - absolute precision of the objective (the optimizer stops once reached).
 	 *   \param sample_size   - number of samples taken when looking for a "loup"
+	 *   \param equ_eps       - thickness of equations when relaxed to inequalities
+	 *   \param rigor         - look for points that strictly satisfy equalities. By default: false
 	 *
 	 * <ul> The extended system (see ExtendedSystem constructor) contains:
 	 * <li> (n+1) variables, x_1,...x_n,y. The index of y is #goal_var (==n).
@@ -64,7 +67,7 @@ public:
 
 	Optimizer(System& sys, Bsc& bsc, Ctc& ctc, double prec=default_prec,
 			double goal_rel_prec=default_goal_rel_prec, double goal_abs_prec=default_goal_abs_prec,
-			int sample_size=default_sample_size);
+			int sample_size=default_sample_size, double equ_eps=default_equ_eps, bool rigor=false);
 
 
 	/**
@@ -129,15 +132,20 @@ public:
 	 */
 	ExtendedSystem ext_sys;
 
+
+	/**
+	 * \brief The equalities of the original system.
+	 *
+	 * NULL means no equality.
+	 */
+	System* equs;
+
 	/** Bisector. */
 	Bsc& bsc;
 
 	/** Contractor for the extended system
 	 * (y=f(x), g_1(x)<=0,...,g_m(x)<=0). */
 	Ctc& ctc;
-
-
-
 
 	/** Cell buffer. */
 	CellHeapOptim buffer;
@@ -168,15 +176,12 @@ public:
 	 * The value can be fixed by the user. By default: true. */
 	bool in_HC4_flag;
 
-
 	/** Trace activation flag.
 	 * The value can be fixed by the user. By default: 0  nothing is printed
 	 1 for printing each better found feasible point
 	  2 for printing each handled node */
 	int trace;
 
-
-	
 	/**
 	 * \brief Time limit.
 	 *
@@ -203,15 +208,33 @@ public:
 	/** Default sample size */
 	static const int default_sample_size;
 
+	/** Default epsilon applied to equations */
+	static const double default_equ_eps;
 
-	/** The "loup" (lowest upper bound of the criterion) */
+	/** Default tolerance increase ratio for the pseudo-loup. */
+	static const double default_loup_tolerance;
+	/**
+	 * \brief The "loup" (lowest upper bound of the criterion)
+	 *
+	 * In rigor mode, represents the real-loup (not the pseudo-loup).
+	 */
 	double loup;
+
+	/**
+	 * \brief The pseudo-loup.
+	 *
+	 * Represents, in rigor mode only, the loup for the relaxed problem.
+	 */
+	double pseudo_loup;
 
 	/** The "uplo" (uppermost lower bound of the criterion) */
 	double uplo;
 
 	/** The point satisfying the constraints corresponding to the loup */
 	Vector loup_point;
+
+	/** Rigor mode: the box satisfying the constraints corresponding to the loup */
+	IntervalVector loup_box;
 
 protected:
 	/**
@@ -236,7 +259,6 @@ protected:
 	 * </ul>
 	 *
 	 */
-
 	void handle_cell(Cell& c, const IntervalVector& init_box);
 
 	/**
@@ -252,8 +274,6 @@ protected:
 	 */
 	void contract_and_bound(Cell& c, const IntervalVector& init_box);
 
-
-
 	/** 
 	 * \brief Contraction procedure for processing a box.
 	 *
@@ -261,8 +281,7 @@ protected:
 	 * <li> contract with the contractor ctc,
 	 * </ul>
 	 *
-         */
-
+	 */
 	 virtual void contract(IntervalVector& box, const IntervalVector& init_box );
 
 
@@ -288,12 +307,12 @@ protected:
 	/**
 	 * \brief Update the uplo of non bisectable boxes
 	 */
-        void update_uplo_of_epsboxes(double ymin);
+	void update_uplo_of_epsboxes(double ymin);
 
 	/**
 	 * \brief Update the uplo
 	 */
-        void update_uplo();
+	void update_uplo();
 
 
 	/**
@@ -349,9 +368,20 @@ protected:
 	 *                   means "unknown" and a quick check (see
 	 *                   #is_inner(const IntervalVector&)) is performed.
 	 *
+	 * \note In rigorous mode, the equalities have to be checked anyway (even if
+	 *       is_inner==true) because the innership is only wrt the relaxed system.
+	 *       In this case, the resulting loup_point may be different than \a pt (the
+	 *		 procedure used to check satisfiability
 	 * \return true in case of success, i.e., if the loup has been decreased.
 	 */
 	bool check_candidate(const Vector& pt, bool is_inner);
+
+	/**
+	 * Look for a loup box (in rigor mode) starting from a pseudo-loup.
+	 *
+	 * Start from the last loup point found in relaxed mode.
+	 */
+	bool update_real_loup();
 
 	/**
 	 * \brief First method for probing
@@ -443,6 +473,9 @@ protected:
 	bool loup_changed;
 
 private:
+
+	/** Rigor mode (eps_equ==0) */
+	const bool rigor;
 
 	/** linear solver used in ibex_OptimSimplex.cpp_ */
 	LinearSolver *mylp;
