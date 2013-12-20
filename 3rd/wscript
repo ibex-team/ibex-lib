@@ -670,10 +670,10 @@ def build (bld):
 		path = bld.path.find_dir (bld.env.FILIB).abspath()
 
 		with subdir (path):
-			if bld.cmd in ("uninstall"):
-				cmd = ["clean"]
+			if bld.cmd in ("install"):
+				cmd = [bld.cmd]
 			else :	
-				cmd = [bld.cmd] if bld.cmd in ("install", "clean") else []
+				cmd = ["clean"] if bld.cmd in ("uninstall", "clean") else []
 			if bld.exec_command (
 				[bld.env.MAKE, "-j", str(bld.options.jobs)] + cmd,
 				cwd	= path,
