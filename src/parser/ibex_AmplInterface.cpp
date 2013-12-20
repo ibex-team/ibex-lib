@@ -1,6 +1,7 @@
 //============================================================================
 //                                  I B E X
 // File        : ibex_AmplInterface.cpp Adapted from CouenneAmplInterface
+//				by Pietro Belotti, Leo Liberti and Sonia Caffieri
 // Author      : Jordan Ninin
 // License     : See the LICENSE file
 // Created     : Nov 5, 2013
@@ -380,78 +381,78 @@ const ExprNode& AmplInterface::nl2expr(expr *e) {
 
 	switch (getOperator (e -> op)) {
 
-	case OPPLUS:  return   ((nl2expr (e -> L.e)) + (nl2expr (e -> R.e)));
-	case OPMINUS: return   ((nl2expr (e -> L.e)) - (nl2expr (e -> R.e)));
-	case OPMULT:  return   (operator*((nl2expr (e -> L.e)) , (nl2expr (e -> R.e))));
-	case OPDIV:   return   ((nl2expr (e -> L.e)) / (nl2expr (e -> R.e)));
-	//case OPREM:   notimpl ("remainder");
-	case OPPOW:   return   pow(nl2expr (e -> L.e), nl2expr (e -> R.e));
-	//case OPLESS:  notimpl ("less");
+	case OPNUM:    return (ExprConstant::new_scalar(((expr_n *)e)->v));
+	case OPPLUS:   return  (( nl2expr(e -> L.e)) + (nl2expr(e -> R.e)));
+	case OPMINUS:  return  (( nl2expr(e -> L.e)) - (nl2expr(e -> R.e)));
+	case OPDIV:    return  (( nl2expr(e -> L.e)) / (nl2expr(e -> R.e)));
+	case OPMULT:   return  (operator*((nl2expr (e -> L.e)) , (nl2expr(e -> R.e))));
+	case OPPOW:    return pow( nl2expr(e -> L.e), nl2expr(e -> R.e));
+	case OP1POW:   return pow( nl2expr(e -> L.e), ExprConstant::new_scalar(((expr_n *)e->R.e)->v));
+	case OP2POW:   return sqr( nl2expr(e -> L.e));
+	case OPCPOW:   return pow(ExprConstant::new_scalar(((expr_n *)e->L.e)->v), nl2expr(e -> R.e));
 	case MINLIST: {
 		expr **ep = e->L.ep;
-		const ExprNode* ee = &(nl2expr (*ep));
+		const ExprNode* ee = &(nl2expr(*ep));
 		ep++;
 		while (ep < e->R.ep) {
-			ee = &(min(*ee , nl2expr (*ep)));
+			ee = &(min(*ee , nl2expr(*ep)));
 			ep++;
 		}
 		return *ee;
 	}
 	case MAXLIST:  {
 		expr **ep = e->L.ep;
-		const ExprNode* ee = &(nl2expr (*ep));
+		const ExprNode* ee = &(nl2expr(*ep));
 		ep++;
 		while (ep < e->R.ep) {
-			ee = &(max(*ee , nl2expr (*ep)));
+			ee = &(max(*ee , nl2expr(*ep)));
 			ep++;
 		}
 		return *ee;
 	}
-	//case FLOOR:   notimpl ("floor");
-	//case CEIL:    notimpl ("ceil");
-	case ABS:      return (abs(nl2expr (e -> L.e)));
-	case OPUMINUS: return (operator-(nl2expr (e -> L.e)));
-	//case OPIFnl:  // TODO return (chi(nl2expr(????))) BoolInterval??
-	                // see ASL/solvers/rops.c, see f_OPIFnl and  expr_if
-	case OP_tanh:  return tanh(nl2expr (e->L.e));
-	case OP_tan:   return tan(nl2expr (e->L.e));
-	case OP_sqrt:  return sqrt(nl2expr (e -> L.e));
-	case OP_sinh:  return sinh(nl2expr (e -> L.e));
-	case OP_sin:   return sin(nl2expr (e -> L.e));
-	case OP_log10: return ((ExprConstant::new_scalar(1.0/log(Interval(10.0)))) * log(nl2expr (e -> L.e)));
-	case OP_log:   return log(nl2expr (e -> L.e));
-	case OP_exp:   return exp(nl2expr (e -> L.e));
-	case OP_cosh:  return cosh(nl2expr (e->L.e));
-	case OP_cos:   return cos(nl2expr (e -> L.e));
-	//case OP_atanh: notimpl ("atanh");
-	case OP_atan2: return atan2(nl2expr (e -> L.e), nl2expr (e -> R.e));
-	case OP_atan:  return tan(nl2expr (e -> L.e));
-	//case OP_asinh: notimpl ("asinh");
-	case OP_asin:  return asin(nl2expr (e -> L.e));
-	//case OP_acosh: notimpl ("acosh");
-	case OP_acos:  return acos(nl2expr (e -> L.e));
 	case OPSUMLIST: {
 		expr **ep = e->L.ep;
-		const ExprNode* ee = &(nl2expr (*ep));
+		const ExprNode* ee = &(nl2expr(*ep));
 		ep++;
 		while (ep < e->R.ep) {
-			ee = &(*ee + nl2expr (*ep));
+			ee = &(*ee + nl2expr(*ep));
 			ep++;
 		}
 		return *ee;
 	}
+	case ABS:      return abs( nl2expr(e -> L.e));
+	case OPUMINUS: return operator-(nl2expr (e -> L.e));
+	case OP_sqrt:  return sqrt(nl2expr(e -> L.e));
+	case OP_exp:   return exp( nl2expr(e -> L.e));
+	case OP_log:   return log( nl2expr(e -> L.e));
+	case OP_log10: return ((ExprConstant::new_scalar(1.0/log(Interval(10.0)))) * log(nl2expr (e -> L.e)));
+	case OP_cos:   return cos( nl2expr(e -> L.e));
+	case OP_sin:   return sin( nl2expr(e -> L.e));
+	case OP_tan:   return tan( nl2expr(e -> L.e));
+	case OP_cosh:  return cosh(nl2expr(e -> L.e));
+	case OP_sinh:  return sinh(nl2expr(e -> L.e));
+	case OP_tanh:  return tanh(nl2expr(e -> L.e));
+	case OP_acos:  return acos(nl2expr(e -> L.e));
+	case OP_asin:  return asin(nl2expr(e -> L.e));
+	case OP_atan:  return atan(nl2expr(e -> L.e));
+	//case OP_asinh: notimpl ("asinh");
+	//case OP_acosh: notimpl ("acosh");
+	//case OP_atanh: notimpl ("atanh");
+	case OP_atan2: return atan2(nl2expr(e -> L.e), nl2expr(e -> R.e));
 	//case OPintDIV: notimpl ("intdiv");
 	//case OPprecision: notimpl ("precision");
 	//case OPround:  notimpl ("round");
 	//case OPtrunc:  notimpl ("trunc");
-	case OP1POW: return pow( (nl2expr (e -> L.e)), ExprConstant::new_scalar(((expr_n *)e->R.e)->v));
-	case OP2POW: return sqr( nl2expr (e -> L.e));
-	case OPCPOW: return pow(ExprConstant::new_scalar(((expr_n *)e->L.e)->v), nl2expr (e -> R.e));
+	//case FLOOR:   notimpl ("floor");
+	//case CEIL:    notimpl ("ceil");
 	//case OPFUNCALL: notimpl ("function call");
-	case OPNUM:     return (ExprConstant::new_scalar(((expr_n *)e)->v));
 	//case OPPLTERM:  notimpl ("plterm");
 	//case OPIFSYM:   notimpl ("ifsym");
 	//case OPHOL:     notimpl ("hol");
+	//case OPREM:   notimpl ("remainder");
+	//case OPLESS:  notimpl ("less");
+	//case OPIFnl:  // TODO return (chi(nl2expr(????))) BoolInterval??
+	                // see ASL/solvers/rops.c, see f_OPIFnl and  expr_if
 	case OPVARVAL:  {
 		int j = ((expr_v *) e) -> a;
 		if (j<n_var) {
@@ -469,14 +470,14 @@ const ExprNode& AmplInterface::nl2expr(expr *e) {
 				if( j < ncom0 ) 	{
 					cexp *common = CEXPS +j;
 					// init with the nonlinear part
-					const ExprNode* body = &(nl2expr (common->e));
+					const ExprNode* body = &(nl2expr(common->e));
 
 					int nlin = common->nlin; // Number of linear terms
 					if( nlin > 0 ) {
 						linpart * L = common->L;
 						for(int i = 0; i < nlin; i++ ) {
-							coeff = (L [i]).fac;
-							index = ((uintptr_t) (L [i].v.rp) - (uintptr_t) VAR_E) / sizeof (expr_v);
+							coeff = (L[i]).fac;
+							index = ((uintptr_t) (L[i].v.rp) - (uintptr_t) VAR_E) / sizeof (expr_v);
 							if (coeff==1) {
 								body = &(*body + (*_x)[index]);
 							} else if (coeff==-1) {
@@ -491,14 +492,14 @@ const ExprNode& AmplInterface::nl2expr(expr *e) {
 				else {
 					cexp1 *common = (CEXPS1 - ncom0) +j ;
 					// init with the nonlinear part
-					const ExprNode* body = &(nl2expr (common->e));
+					const ExprNode* body = &(nl2expr(common->e));
 
 					int nlin = common->nlin; // Number of linear terms
 					if( nlin > 0 ) {
 						linpart * L = common->L;
 						for(int i = 0; i < nlin; i++ ) {
-							coeff = (L [i]).fac;
-							index = ((uintptr_t) (L [i].v.rp) - (uintptr_t) VAR_E) / sizeof (expr_v);
+							coeff = (L[i]).fac;
+							index = ((uintptr_t) (L[i].v.rp) - (uintptr_t) VAR_E) / sizeof (expr_v);
 							if (coeff==1) {
 								body = &(*body + (*_x)[index]);
 							} else if (coeff==-1) {
