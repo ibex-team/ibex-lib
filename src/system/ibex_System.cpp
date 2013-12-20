@@ -13,7 +13,6 @@
 #include "ibex_UnknownFileException.h"
 #include "ibex_ExprCopy.h"
 #include "ibex_SystemCopy.cpp_"
-#include "ibex_SystemNormalize.cpp_"
 #include "ibex_SystemMerge.cpp_"
 #include <stdio.h>
 #include <sstream>
@@ -55,11 +54,10 @@ System::System(int n, const char* syntax) : nb_var(n), /* NOT TMP (required by p
 	}
 }
 
-System::System(const System& sys, copy_mode mode, double eps) : nb_var(0), nb_ctr(0), func(0), box(1) {
+System::System(const System& sys, copy_mode mode) : nb_var(0), nb_ctr(0), func(0), box(1) {
 
 	switch(mode) {
 	case COPY :      init(SystemCopy(sys,COPY)); break;
-	case NORMALIZE : init(SystemNormalize(sys,eps)); break;
 	case INEQ_ONLY:  init(SystemCopy(sys,INEQ_ONLY)); break;
 	case EQ_ONLY:    init(SystemCopy(sys,EQ_ONLY)); break;
 	}

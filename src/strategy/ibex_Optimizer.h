@@ -17,7 +17,7 @@
 #include "ibex_CtcUnion.h"
 #include "ibex_Backtrackable.h"
 #include "ibex_CellHeapOptim.h"
-#include "ibex_System.h"
+#include "ibex_NormalizedSystem.h"
 #include "ibex_ExtendedSystem.h"
 #include "ibex_EntailedCtr.h"
 #include "ibex_LinearSolver.h"
@@ -110,7 +110,7 @@ public:
 	 * Corresponds to the system (see constructor) with all inequalities
 	 * under the form g_i(x)<=0.
 	 */
-	System sys;
+	NormalizedSystem sys;
 
 	/** Number of variables. */
 	const int n;

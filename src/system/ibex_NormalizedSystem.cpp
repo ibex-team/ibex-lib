@@ -1,21 +1,23 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_SystemNormalize.cpp_
+// File        : ibex_NormalizedSystem.cpp
 // Author      : Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
-// Created     : May 27, 2013
-// Last Update : May 27, 2013
+// Created     : Dec 20, 2013
+// Last Update : Dec 20, 2013
 //============================================================================
 
+#include "ibex_NormalizedSystem.h"
 #include "ibex_SystemFactory.h"
+#include "ibex_ExprCopy.h"
+#include <utility>
 
-using std::pair;
+using namespace std;
 
 namespace ibex {
 
 namespace {
-
 
 class SystemNormalize : public SystemFactory {
 
@@ -29,6 +31,7 @@ class SystemNormalize : public SystemFactory {
 
 		if (sys.goal!=NULL) add_goal(*sys.goal);
 
+		// TODO: factorize code with SystemExtend
 		// note: sys.ctrs.size()<>sys.nb_ctr in general but
 		// with NORMALIZE, they have to match (only scalar constraints).
 		if(sys.ctrs.size()!=sys.nb_ctr) {
@@ -81,5 +84,21 @@ class SystemNormalize : public SystemFactory {
 };
 
 } // end anonymous namespace
+
+NormalizedSystem::NormalizedSystem(const System& sys, double eps) {
+	init(SystemNormalize(sys,eps));
+
+	_orig_index = new int[nb_ctr];
+	int j=0;
+	for (int i=0; i<sys.nb_ctr; i++) {
+		_orig_index[j++]=i;
+		if (sys.ctrs[i].op==EQ) _orig_index[j++]=i;
+	}
+	assert(j==nb_ctr);
+}
+
+NormalizedSystem::~NormalizedSystem() {
+	delete[] _orig_index;
+}
 
 } // end namespace ibex

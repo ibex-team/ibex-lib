@@ -84,7 +84,7 @@ public:
 	 * have to be initialized. #goal is set to NULL.
 	 */
 
-	typedef enum { COPY, NORMALIZE, INEQ_ONLY, EQ_ONLY } copy_mode;
+	typedef enum { COPY, INEQ_ONLY, EQ_ONLY } copy_mode;
 
 	/**
 	 * \brief Duplicate/Transform the system.
@@ -92,21 +92,12 @@ public:
 	 * \param mode   Controls the copy:
 	 * <ul>
 	 * <li> COPY:      Copy
-	 * <li> NORMALIZE: Copy and make all inequalities under the form f_i(x)<=0.
-	 *                 Thick equalities f(x)=[a,b] are also transformed into two
-	 *                 inequalities, f(x)<=b and -f(x)<=-a (in this precise order).
-	 *                 Other equalities f=0 are transformed into f<=eps and -f<=eps,
-	 *                 where eps is the value given in 3rd argument.
-	 *                 Note that the number of constraints of the resulting system
-	 *                 in this case is greater than the number or the original one.
 	 * <li> INEQ_ONLY: Copy the inequalities only. The goal is not copied.
 	 * <li> EQ_ONLY:   Copy the equalities only. The goal is not copied.
 	 * </ul>
 	 *
-	 * \param eps   Only for NORMALIZE. Transforms an equation f=0 into two
-	 *              inequalities: f<=eps and -f<=eps.
 	 */
-	System(const System& sys, copy_mode mode=COPY, double eps=0);
+	System(const System& sys, copy_mode mode=COPY);
 
 	/**
 	 * Merge two systems.
