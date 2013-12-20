@@ -670,7 +670,10 @@ def build (bld):
 		path = bld.path.find_dir (bld.env.FILIB).abspath()
 
 		with subdir (path):
-			cmd = [bld.cmd] if bld.cmd in ("install", "clean") else []
+			if bld.cmd in ("uninstall"):
+				cmd = ["clean"]
+			else :	
+				cmd = [bld.cmd] if bld.cmd in ("install", "clean") else []
 			if bld.exec_command (
 				[bld.env.MAKE, "-j", str(bld.options.jobs)] + cmd,
 				cwd	= path,
@@ -684,9 +687,9 @@ def build (bld):
 		path = bld.path.find_dir (bld.env.AMPL).abspath()
 
 		if  bld.env["INTERVAL_LIB"] is "GAOL":
-			cmd = [bld.cmd] if bld.cmd in ("clean") else ["CFLAGS=-DNo_dtoa -m32"]
+			cmd = ["clean"] if bld.cmd in ("clean", "uninstall") else ["CFLAGS=-DNo_dtoa -m32"]
 		else:
-			cmd = [bld.cmd] if bld.cmd in ("clean") else []
+			cmd = ["clean"] if bld.cmd in ("clean", "uninstall") else []
 		
 		
 		if bld.exec_command (
@@ -696,18 +699,26 @@ def build (bld):
 			stderr	= None,
 		):
 			bld.fatal ("failed to build ampl")
-
-		if bld.exec_command (
-			'mkdir -p %s && cp %s %s' % (
-			bld.env.LIBDIR,
-			os.path.join(path,"libamplsolver.a"), 
-			os.path.join(bld.env.LIBDIR,"libamplsolver.a")),
-			cwd	= path,
-			stdout	= None,
-			stderr	= None,
-		):
-			bld.fatal ("failed to copy the ampl librarie")
-
+			
+		if not bld.cmd in ("clean", "uninstall"):
+			if bld.exec_command (
+				'mkdir -p %s && cp %s %s' % (
+				bld.env.LIBDIR,
+				os.path.join(path,"libamplsolver.a"), 
+				os.path.join(bld.env.LIBDIR,"libamplsolver.a")),
+				cwd	= path,
+				stdout	= None,
+				stderr	= None,
+			):
+				bld.fatal ("failed to copy the ampl librarie")
+		else:
+			bld.exec_command (
+				'rm %s' % (
+				os.path.join(bld.env.LIBDIR,"libamplsolver.a")),
+				cwd	= path,
+				stdout	= None,
+				stderr	= None,
+			)
 
 class subdir:
 	def __init__ (self, name_or_node):
