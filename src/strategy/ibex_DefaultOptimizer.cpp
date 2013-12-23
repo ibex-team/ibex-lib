@@ -35,19 +35,20 @@ const double default_relax_ratio = 0.2;
 
 ExtendedSystem* tmp_ext_sys=NULL;
 
-ExtendedSystem& get_ext_sys(System& sys) {
+  ExtendedSystem& get_ext_sys(System& sys,double goal_prec) {
 	if (tmp_ext_sys==NULL)
-		tmp_ext_sys=new ExtendedSystem(sys);
+	  tmp_ext_sys=new ExtendedSystem(sys,goal_prec);
 	return *tmp_ext_sys;
 }
 
 }
 
 // the defaultoptimizer constructor  1 point for sample_size
+// the equality constraints are relaxed with goal_prec
 DefaultOptimizer::DefaultOptimizer(System& _sys, double prec, double goal_prec) :
 		Optimizer(_sys,
-				  *new SmearSumRelative(get_ext_sys(_sys),prec),
-				  *new CtcCompo (* (contractor_list(_sys,get_ext_sys(_sys),prec))), // warning: we don't know which argument is evaluated first (tmp_ext_sys may be NULL)
+			  *new SmearSumRelative(get_ext_sys(_sys,goal_prec),prec),
+			  *new CtcCompo (* (contractor_list(_sys,get_ext_sys(_sys,goal_prec),prec))), // warning: we don't know which argument is evaluated first (tmp_ext_sys may be NULL)
 				  prec,
 				  goal_prec,
 				  goal_prec,

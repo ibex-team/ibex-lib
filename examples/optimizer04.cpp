@@ -40,7 +40,7 @@ int main(int argc, char** argv){
 	srand(1);
 
 	// the extended system 
-	ExtendedSystem ext_sys(sys);
+	ExtendedSystem ext_sys(sys,goalprec);
 
 
         cout << "file " << argv[1] << endl;
