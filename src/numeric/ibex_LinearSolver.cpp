@@ -60,8 +60,10 @@ std::ostream& operator<<(std::ostream& os, const LinearSolver::Status_Sol x){
 #ifdef _IBEX_WITH_SOPLEX_
 
 
-LinearSolver::LinearSolver(int nb_vars, int nb_ctr, int max_iter, int max_time_out, double eps) :
-			nb_ctrs(nb_ctr), nb_vars(nb_vars), nb_rows(0), obj_value(0.0), epsilon(eps) {
+LinearSolver::LinearSolver(int nb_vars1, int nb_ctr, int max_iter, int max_time_out, double eps) :
+			nb_ctrs(nb_ctr), nb_vars(nb_vars1), nb_rows(0), obj_value(0.0), epsilon(eps),
+			primal_solution(new double[nb_vars1]), dual_solution(NULL),
+			status_prim(0), status_dual(0)  {
 
 
 	mysoplex= new soplex::SoPlex();
@@ -90,6 +92,8 @@ LinearSolver::LinearSolver(int nb_vars, int nb_ctr, int max_iter, int max_time_o
 }
 
 LinearSolver::~LinearSolver() {
+	delete [] primal_solution;
+	if (dual_solution!=NULL) delete [] dual_solution;
 	delete mysoplex;
 }
 
@@ -99,10 +103,30 @@ LinearSolver::Status_Sol LinearSolver::solve() {
 	LinearSolver::Status_Sol res= UNKNOWN;
 
 	try{
-
 	    stat = mysoplex->solve();
 		if (stat==soplex::SPxSolver::OPTIMAL) {
 		  obj_value = mysoplex->objValue();
+
+		  // the primal solution : used by choose_next_variable
+		  soplex::DVector primal(nb_vars);
+		  status_prim = mysoplex->getPrimal(primal);
+		  for (int i=0; i< nb_vars ; i++) {
+			  primal_solution[i]=primal[i];
+		  }
+		  // the dual solution ; used by Neumaier Shcherbina test
+		  soplex::DVector dual(nb_rows);
+		  if (dual_solution != NULL) delete [] dual_solution;
+		  dual_solution = new double[nb_rows];
+		  status_dual = mysoplex->getDual(dual);
+		  for (int i=0; i<nb_rows; i++) {
+			  if 	( ((mysoplex->rhs(i) >=  default_max_bound) && (dual[i]<=0)) ||
+					  ((mysoplex->lhs(i) <= -default_max_bound) && (dual[i]>=0))   ) {
+				  dual_solution[i]=0;
+			  }
+			  else {
+				  dual_solution[i]=dual[i];
+			  }
+		  }
 		  res= OPTIMAL;
 		}
 		else if (stat==soplex::SPxSolver::ABORT_TIME)
@@ -190,8 +214,8 @@ LinearSolver::Status  LinearSolver::getB(IntervalVector& B) {
 		// Get the bounds of the constraints
 		for (int i=nb_vars;i<nb_rows; i++){
 			B[i]=Interval( 	(mysoplex->lhs(i)>-default_max_bound)? mysoplex->lhs(i):-default_max_bound,
-							(mysoplex->rhs(i)< default_max_bound)? mysoplex->rhs(i): default_max_bound   );
-		//	B[i]=Interval( 	mysoplex->lhs(i),mysoplex->rhs(i));
+					        (mysoplex->rhs(i)< default_max_bound)? mysoplex->rhs(i): default_max_bound   );
+			//	B[i]=Interval( 	mysoplex->lhs(i),mysoplex->rhs(i));
 			//Idea: replace 1e20 (resp. -1e20) by Sup([g_i]) (resp. Inf([g_i])), where [g_i] is an evaluation of the nonlinear function <-- IA
 			//           cout << B(i+1) << endl;
 		}
@@ -204,16 +228,15 @@ LinearSolver::Status  LinearSolver::getB(IntervalVector& B) {
 }
 
 
-LinearSolver::Status LinearSolver::getPrimalSol(Vector & primal_solution) {
+LinearSolver::Status LinearSolver::getPrimalSol(Vector & solution_primal) {
 	LinearSolver::Status res= FAIL;
 	try {
-		// the primal solution : used by choose_next_variable
-		soplex::DVector primal(nb_vars);
-		mysoplex->getPrimal(primal);
-		for (int i=0; i< nb_vars ; i++) {
-			primal_solution[i]=primal[i];
+		if (status_prim == soplex::SPxSolver::OPTIMAL) {
+			for (int i=0; i< nb_vars ; i++) {
+				solution_primal[i] = primal_solution[i];
+			}
+			res = OK;
 		}
-		res = OK;
 	}
 	catch(soplex::SPxException&) {
 		res = FAIL;
@@ -221,24 +244,15 @@ LinearSolver::Status LinearSolver::getPrimalSol(Vector & primal_solution) {
 	return res;
 }
 
-LinearSolver::Status LinearSolver::getDualSol(Vector & dual_solution) {
+LinearSolver::Status LinearSolver::getDualSol(Vector & solution_dual) {
 	LinearSolver::Status res= FAIL;
 	try {
-		// the dual solution ; used by Neumaier Shcherbina test
-		soplex::DVector dual(nb_rows);
-		mysoplex->getDual(dual);
-
-
-		for (int i=0; i<nb_rows; i++) {
-			if 	( ((mysoplex->rhs(i) >=  default_max_bound) && (dual[i]<=0)) ||
-				  ((mysoplex->lhs(i) <= -default_max_bound) && (dual[i]>=0))   ) {
-				dual_solution[i]=0;
-				}
-			else {
-				dual_solution[i]=dual[i];
+		if (status_dual == soplex::SPxSolver::OPTIMAL) {
+			for (int i=0; i<nb_rows; i++) {
+				solution_dual[i] = dual_solution[i];
 			}
+			res =OK;
 		}
-		res =OK;
 	}
 	catch(soplex::SPxException& ) {
 		res = FAIL;
@@ -281,6 +295,10 @@ LinearSolver::Status LinearSolver::getInfeasibleDir(Vector & sol) {
 LinearSolver::Status LinearSolver::cleanConst() {
 	LinearSolver::Status res= FAIL;
 	try {
+		if (dual_solution!=NULL) delete[] dual_solution;
+		dual_solution=NULL;
+		status_prim = 0;
+		status_dual = 0;
 		mysoplex->removeRowRange(nb_vars, nb_rows-1);
 		nb_rows = nb_vars;
 		obj_value = POS_INFINITY;
@@ -295,6 +313,10 @@ LinearSolver::Status LinearSolver::cleanConst() {
 LinearSolver::Status LinearSolver::cleanAll() {
 	LinearSolver::Status res= FAIL;
 	try {
+		if (dual_solution!=NULL) delete[] dual_solution;
+		dual_solution=NULL;
+		status_prim = 0;
+		status_dual = 0;
 		mysoplex->removeRowRange(0, nb_rows-1);
 		nb_rows = 0;
 		obj_value = POS_INFINITY;
@@ -459,7 +481,7 @@ LinearSolver::LinearSolver(int nb_vars1, int nb_ctr1, int max_iter,
 		nb_ctrs(nb_ctr1), nb_vars(nb_vars1), nb_rows(0), obj_value(0.0),
 		epsilon(eps), envcplex(NULL), lpcplex(NULL),
 		primal_solution(new double[nb_vars1]), dual_solution(NULL),
-		status_prim(1), status_dual(1) {
+		status_prim(0), status_dual(0) {
 
 	int status;
 	envcplex = CPXopenCPLEX(&status);
@@ -688,6 +710,7 @@ LinearSolver::Status_Sol LinearSolver::solve() {
 			} else if (solstat == CPX_STAT_OPTIMAL) {
 				CPXgetobjval(envcplex, lpcplex, &obj_value);
 				status_prim =CPXgetx(envcplex, lpcplex, primal_solution, 0, nb_vars - 1);
+				if (dual_solution != NULL) delete [] dual_solution;
 				dual_solution = new double[nb_rows];
 				status_dual = CPXgetpi(envcplex, lpcplex, dual_solution, 0, nb_rows - 1);
 				res = OPTIMAL;
@@ -1369,7 +1392,7 @@ LinearSolver::Status LinearSolver::getPrimalSol(Vector & primal_solution) {
 	return LinearSolver::FAIL;
 }
 
-LinearSolver::Status LinearSolver::getDualSol(Vector & dual_solution) {
+LinearSolver::Status LinearSolver::getDualSol(Vector & dual_solution2) {
 	// In this modelization, the dual is directly stored in CPLEX
 	// So the Dual solution is the primal solution
 	LinearSolver::Status res = FAIL;
@@ -1380,7 +1403,7 @@ LinearSolver::Status LinearSolver::getDualSol(Vector & dual_solution) {
 
 		if (status == 0) {
 			for (int i = 0; i < nb_rows; i++) {
-				dual_solution[i] = solution[i];
+				dual_solution2[i] = solution[i];
 			}
 			res = OK;
 		} else

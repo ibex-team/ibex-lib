@@ -52,6 +52,11 @@ private:
 
 	double epsilon;
 
+	int status_prim;
+	int status_dual;
+	double * primal_solution;
+	double * dual_solution;
+
 #ifdef _IBEX_WITH_SOPLEX_
 	soplex::SoPlex *mysoplex;
 #endif
@@ -59,10 +64,6 @@ private:
 #ifdef _IBEX_WITH_CPLEX_
 	CPXENVptr  envcplex;
 	CPXLPptr lpcplex;
-	double * primal_solution;
-	double * dual_solution;
-	int status_prim;
-	int status_dual;
 	int * indice;
 	double * 	tmp;
 	int *  		r_matbeg;
