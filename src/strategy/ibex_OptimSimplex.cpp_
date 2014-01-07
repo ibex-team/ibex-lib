@@ -35,14 +35,24 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 	      corner[i]=true;}  
 	// the corner used
 	IntervalVector x_corner(n);
-	for (int i=0 ; i< n ; i++)
-	  {  
-	    if (corner[i])
-	      x_corner[i]=box[i].lb();
-	    else
-	      x_corner[i]=box[i].ub();
-	  }
-	      
+	for (int i=0 ; i< n ; i++)	  {
+		if (corner[i]) {
+			if (box[i].lb()>NEG_INFINITY)
+				x_corner[i]=box[i].lb() ;
+			else if  (box[i].ub()<POS_INFINITY)
+				x_corner[i]=box[i].ub() ;
+			else
+				return false;
+		}
+		else {
+			if (box[i].ub()<POS_INFINITY)
+				x_corner[i]=box[i].ub() ;
+			else if  (box[i].lb()>NEG_INFINITY)
+				x_corner[i]=box[i].lb() ;
+			else
+				return false;
+		}
+	}
 
 	Vector row(n+1);
 	IntervalVector bound(n+1);
@@ -50,7 +60,6 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 	sys.goal->gradient(box,G);
 	for (int i =0; i< n ; i++)
 	  if (G[i].diam() > 1e8) return false;   //to avoid problems with SoPleX
-
 
 	// ============================================================
 	//   Initialization of the bounds and linearize the objective

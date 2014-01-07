@@ -375,7 +375,7 @@ void Optimizer::optimize(const IntervalVector& init_box) {
 
 					double ymax= compute_ymax();
 					buffer.contract_heap(ymax);
-					if (ymax <=-DBL_MAX) {
+					if (ymax <=NEG_INFINITY) {
 						if (trace) cout << " infinite value for the minimum " << endl;
 						break;
 					}
