@@ -22,6 +22,13 @@
 
 namespace ibex {
 
+/* patch */
+bool square_eq_sys(const System& sys) {
+	if (sys.nb_var!=sys.nb_ctr) return false;
+	for (int i=0; i<sys.nb_ctr; i++)
+		if (sys.ctrs[i].op!=EQ) return false;
+	return true;
+}
 
 // the corners for  Xnewton
 /*std::vector<CtcXNewton::corner_point>*  DefaultSolver::default_corners () {
@@ -41,8 +48,8 @@ Array<Ctc>*  DefaultSolver::contractor_list (System& sys, double prec) {
 	// second contractor : acid (hc4)
 	ctc_list->set_ref(1, *new CtcAcid (sys, *new CtcHC4 (sys.ctrs,0.1,true)));
 	int index=2;
-	// if the system is square, the third contractor is Newton
-	if (sys.nb_var==sys.nb_ctr) {
+	// if the system is a square system of equations, the third contractor is Newton
+	if (square_eq_sys(sys)) {
 		ctc_list->set_ref(index,*new CtcNewton(sys.f,5e8,prec,1.e-4));
 		index++;
 	}
@@ -72,7 +79,7 @@ DefaultSolver::DefaultSolver(System& sys, double prec) : Solver(*new CtcCompo (*
 
 DefaultSolver::~DefaultSolver() {
 	int ind_xnewton=2;
-	if (sys.nb_var==sys.nb_ctr) ind_xnewton=3;
+	if (square_eq_sys(sys)) ind_xnewton=3;
 	delete &((dynamic_cast<CtcAcid*> (&__ctc->list[1]))->ctc);
 	CtcCompo* ctccompo= dynamic_cast<CtcCompo*>(&(dynamic_cast<CtcFixPoint*>( &__ctc->list[ind_xnewton])->ctc));
 	delete &(ctccompo->list[0]);
