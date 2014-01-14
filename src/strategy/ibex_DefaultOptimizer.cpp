@@ -28,6 +28,7 @@ using namespace std;
 namespace {
 
 const double default_relax_ratio = 0.2;
+const double default_eq_eps = 1.e-8;
 
 // These variable and function are necessary because we need
 // to pass the extended system "ext_sys" to the base class
@@ -37,7 +38,7 @@ ExtendedSystem* tmp_ext_sys=NULL;
 
   ExtendedSystem& get_ext_sys(System& sys,double goal_prec) {
 	if (tmp_ext_sys==NULL)
-	  tmp_ext_sys=new ExtendedSystem(sys,goal_prec);
+	  tmp_ext_sys=new ExtendedSystem(sys,default_eq_eps);
 	return *tmp_ext_sys;
 }
 
@@ -47,8 +48,8 @@ ExtendedSystem* tmp_ext_sys=NULL;
 // the equality constraints are relaxed with goal_prec
 DefaultOptimizer::DefaultOptimizer(System& _sys, double prec, double goal_prec) :
 		Optimizer(_sys,
-			  *new SmearSumRelative(get_ext_sys(_sys,goal_prec),prec),
-			  *new CtcCompo (* (contractor_list(_sys,get_ext_sys(_sys,goal_prec),prec))), // warning: we don't know which argument is evaluated first (tmp_ext_sys may be NULL)
+			  *new SmearSumRelative(get_ext_sys(_sys,default_eq_eps),prec),
+			  *new CtcCompo (* (contractor_list(_sys,get_ext_sys(_sys,default_eq_eps),prec))), // warning: we don't know which argument is evaluated first (tmp_ext_sys may be NULL)
 				  prec,
 				  goal_prec,
 				  goal_prec,

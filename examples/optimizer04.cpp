@@ -36,11 +36,12 @@ int main(int argc, char** argv){
 	double prec= atof(argv[5]);
 	double goalprec= atof (argv[6]);
 	double timelimit = atof(argv[7]);
-	
+	double eqeps= 1.e-8;
+
 	srand(1);
 
 	// the extended system 
-	ExtendedSystem ext_sys(sys,goalprec);
+	ExtendedSystem ext_sys(sys,eqeps);
 
 
         cout << "file " << argv[1] << endl;
@@ -125,7 +126,7 @@ int main(int argc, char** argv){
 	int samplesize=1;
 
 	// the optimizer : the same precision goalprec is used as relative and absolute precision
-	Optimizer o(sys,*bs,*ctcxn,prec,goalprec,goalprec,samplesize);
+	Optimizer o(sys,*bs,*ctcxn,prec,goalprec,goalprec,samplesize,eqeps);
 
 	cout << " sys.box " << sys.box << endl;
 
