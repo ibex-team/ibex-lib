@@ -387,7 +387,12 @@ const ExprNode& AmplInterface::nl2expr(expr *e) {
 	case OPDIV:    return  (( nl2expr(e -> L.e)) / (nl2expr(e -> R.e)));
 	case OPMULT:   return  (operator*((nl2expr (e -> L.e)) , (nl2expr(e -> R.e))));
 	case OPPOW:    return pow( nl2expr(e -> L.e), nl2expr(e -> R.e));
-	case OP1POW:   return pow( nl2expr(e -> L.e), ExprConstant::new_scalar(((expr_n *)e->R.e)->v));
+	case OP1POW:   {
+		if (((int) (((expr_n *)e->R.e)->v) )==(((expr_n *)e->R.e)->v)) {
+			return pow( nl2expr(e -> L.e), (int) (((expr_n *)e->R.e)->v));
+		} else
+			return pow( nl2expr(e -> L.e), ExprConstant::new_scalar(((expr_n *)e->R.e)->v));
+	}
 	case OP2POW:   return sqr( nl2expr(e -> L.e));
 	case OPCPOW:   return pow(ExprConstant::new_scalar(((expr_n *)e->L.e)->v), nl2expr(e -> R.e));
 	case MINLIST: {
