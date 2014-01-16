@@ -8,8 +8,8 @@
 // Last Update : August 21, 2013
 //============================================================================
 
-#ifndef IBEX_SOLVER_H_
-#define IBEX_SOLVER_H_
+#ifndef __IBEX_SOLVER_H__
+#define __IBEX_SOLVER_H__
 
 #include "ibex_Ctc.h"
 #include "ibex_CtcPrecision.h"
@@ -130,4 +130,4 @@ protected :
 };
 
 } // end namespace ibex
-#endif // IBEX_SOLVER_H_
+#endif // __IBEX_SOLVER_H__

@@ -49,4 +49,4 @@ class CellStack : public CellBuffer {
 };
 
 } // end namespace ibex
-#endif // IBEX_CELLSTACK_H_
+#endif // __IBEX_CELLSTACK_H__

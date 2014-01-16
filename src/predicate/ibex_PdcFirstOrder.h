@@ -30,8 +30,11 @@ public:
 
 	/**
 	 * \brief Create the rejection test based on first order condition
+	 *
+	 * \param sys - the system
+	 * \param box - init box (bounding constraints)
 	 */
-	PdcFirstOrder(const System& sys);
+	PdcFirstOrder(const System& sys, const IntervalVector& init_box);
 
 	/**
 	 * \brief Set the entailed (inactive) constraints
@@ -49,6 +52,11 @@ public:
 	 * \brief The system.
 	 */
 	const System& sys;
+
+	/**
+	 * \brief The bounding constraints
+	 */
+	const IntervalVector& init_box;
 
 protected:
 

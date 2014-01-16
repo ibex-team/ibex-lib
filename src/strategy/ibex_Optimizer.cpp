@@ -308,13 +308,12 @@ void Optimizer::firstorder_contract(  IntervalVector& box, const  IntervalVector
 				df.backward(IntervalVector(n,Interval::ZERO),box);
 		}
 	}
-	/*
+
 	else {
-		PdcFirstOrder p(user_sys);
+		PdcFirstOrder p(user_sys,init_box);
 		p.set_entailed(entailed);
 		if (p.test(box)==NO) throw EmptyBoxException();
 	}
-	*/
 
 }
 
