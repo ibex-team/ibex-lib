@@ -47,8 +47,12 @@ BoolInterval PdcFirstOrder::test(const IntervalVector& box) {
 		if (!box[i].is_strict_subset(init_box[i])) N--;
 	}
 
-	IntervalMatrix* J2;
+	IntervalMatrix* J2=J;
 	if (N==n) J2=J; // useless to build J a second time.
+	else if (M+1>N) { // cannot be full rank
+		delete J;
+		return MAYBE;
+	}
 	else {
 		J2 = new IntervalMatrix(M+1,N);
 		int i2=0;
@@ -67,6 +71,7 @@ BoolInterval PdcFirstOrder::test(const IntervalVector& box) {
 	try {
 		// note: seems worse with complete pivoting
 		interval_LU(*J2, LU, p); //, q);
+		// the matrix is rank M+1
 		return NO;
 	} catch(SingularMatrixException&) {
 		return MAYBE;
