@@ -23,10 +23,26 @@ public:
 	TestExprSplitOcc() {
 		TEST_ADD(TestExprSplitOcc::test01);
 		TEST_ADD(TestExprSplitOcc::test02);
+		TEST_ADD(TestExprSplitOcc::test03);
+		TEST_ADD(TestExprSplitOcc::test04);
+		TEST_ADD(TestExprSplitOcc::test05);
+		TEST_ADD(TestExprSplitOcc::test07);
 	}
 
+	// two occurrences of scalar var
 	void test01();
+	// several scalar vars
 	void test02();
+	// vector var: one occurrence for the whole vector, one with index
+	void test03();
+	// vector var: same index node with several fathers
+	void test04();
+	// vector var: several occurrences of an index (but different nodes)
+	void test05();
+	// vector var: only indices
+	void test06();
+	// vector var: more complex example
+	void test07();
 };
 
 } // namespace ibex

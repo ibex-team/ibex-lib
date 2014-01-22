@@ -17,17 +17,17 @@ using namespace std;
 namespace ibex {
 
 void TestString::test01() {
-	char buf[10];
-	int n=index_2_string(buf,'[',']',12478);
-	TEST_ASSERT(strcmp(buf,"[12478]")==0);
-	TEST_ASSERT(n==7);
+	char* buf=append_index("foo",'[',']',12478);
+	TEST_ASSERT(strcmp(buf,"foo[12478]")==0);
+	TEST_ASSERT(strlen(buf)==10);
+	free(buf);
 }
 
 void TestString::test02() {
-	char buf[10];
-	int n=index_2_string(buf,'{','}',0);
-	TEST_ASSERT(strcmp(buf,"{0}")==0);
-	TEST_ASSERT(n==3);
+	char* buf=append_index("bar",'{','}',0);
+	TEST_ASSERT(strcmp(buf,"bar{0}")==0);
+	TEST_ASSERT(strlen(buf)==6);
+	free(buf);
 }
 
 } // end namespace

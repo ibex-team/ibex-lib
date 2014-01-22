@@ -9,6 +9,7 @@
 //============================================================================
 
 #include "ibex_String.h"
+#include <stdlib.h>
 
 namespace ibex {
 
@@ -18,17 +19,20 @@ namespace ibex {
 #define SNPRINTF snprintf
 #endif // _MSC_VER
 
-int index_2_string(char* buff, char lbracket, char rbracket, int index) {
+char* append_index(const char* buff, char lbracket, char rbracket, int index) {
 	assert(index<1000000);
-	int k=0;
 	char number[6];
-	buff[k++]=lbracket;
 	SNPRINTF(number, 6, "%d", index);
-	strcpy(&buff[k], number);
+
+	int k=strlen(buff);
+	char* res=(char*) malloc(k+strlen(number)+3);
+	strcpy(res,buff);
+	res[k++]=lbracket;
+	strcpy(&res[k], number);
 	k+=strlen(number);
-	buff[k++]=rbracket;
-	buff[k]='\0';
-	return k;
+	res[k++]=rbracket;
+	res[k]='\0';
+	return res;
 }
 
 #define MAX_NAME_SIZE 20

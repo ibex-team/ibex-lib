@@ -41,4 +41,75 @@ void TestExprSplitOcc::test02() {
 	TEST_ASSERT(sameExpr(f2.expr(),"(((x_0_+y_0_)-(x_1_^2*y_1_))+y_2_)"));
 	TEST_ASSERT(eso.get_x().size()==5);
 }
+
+
+void TestExprSplitOcc::test03() {
+	Variable x(2,"x");
+	Function f1(x,(-x)[1]+x[0]);
+	ExprSplitOcc eso(f1.args(),f1.expr());
+
+	const Array<const ExprSymbol>& x2=eso.get_x();
+	const ExprNode& y2=eso.get_y();
+	TEST_ASSERT(x2.size()==2);
+	TEST_ASSERT(x2[0].dim==((const ExprNode&) x).dim);
+	TEST_ASSERT(x2[1].dim==((const ExprNode&) x).dim);
+	TEST_ASSERT(sameExpr(y2,"((-x_0_)[1]+x[0])"));
+}
+
+void TestExprSplitOcc::test04() {
+	Variable x(2,"x");
+	// same index node with several fathers
+	const ExprNode& idx=x[0];
+	Function f1(x,idx-idx);
+	ExprSplitOcc eso(f1.args(),f1.expr());
+
+	const Array<const ExprSymbol>& x2=eso.get_x();
+	const ExprNode& y2=eso.get_y();
+	TEST_ASSERT(x2.size()==2);
+	TEST_ASSERT(x2[0].dim==((const ExprNode&) x).dim);
+	TEST_ASSERT(x2[1].dim.is_scalar());
+	TEST_ASSERT(sameExpr(y2,"(x[0]-x[0]_1_)"));
+}
+
+
+void TestExprSplitOcc::test05() {
+	Variable x(2,"x");
+	// several occurrences of an index (but different nodes)
+	Function f1(x,x[0]-x[0]);
+	ExprSplitOcc eso(f1.args(),f1.expr());
+
+	const Array<const ExprSymbol>& x2=eso.get_x();
+	const ExprNode& y2=eso.get_y();
+	TEST_ASSERT(x2.size()==2);
+	TEST_ASSERT(x2[0].dim==((const ExprNode&) x).dim);
+	TEST_ASSERT(x2[1].dim.is_scalar());
+	TEST_ASSERT(sameExpr(y2,"(x[0]-x[0]_1_)"));
+}
+
+
+void TestExprSplitOcc::test06() {
+	Variable x(3,"x");
+	// several occurrences of an index (but different nodes)
+	Function f1(x,x[0]-x[1]+x[2]+x[0]);
+	ExprSplitOcc eso(f1.args(),f1.expr());
+
+	const Array<const ExprSymbol>& x2=eso.get_x();
+	const ExprNode& y2=eso.get_y();
+	TEST_ASSERT(x2.size()==2);
+	TEST_ASSERT(x2[0].dim==((const ExprNode&) x).dim);
+	TEST_ASSERT(sameExpr(y2,"(((x[0]-x[1])+x[2])+x[0]_1_)"));
+}
+
+void TestExprSplitOcc::test07() {
+	Variable x(3,"x");
+	// several occurrences of an index (but different nodes)
+	Function f1(x,(x[0]+(-x)[1])+x[1]+x[0]+x[1]);
+	ExprSplitOcc eso(f1.args(),f1.expr());
+
+	const Array<const ExprSymbol>& x2=eso.get_x();
+	const ExprNode& y2=eso.get_y();
+	TEST_ASSERT(x2.size()==4);
+	TEST_ASSERT(sameExpr(y2,"((((x[0]+(-x_0_)[1])+x[1])+x[0]_1_)+x[1]_1_)"));
+}
+
 } // end namespace

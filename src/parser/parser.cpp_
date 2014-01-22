@@ -85,11 +85,11 @@ void begin_choco() {
 	begin();
 
 	// ----- generate all the variables {i} -----
-	char buf[10];
 	Interval x(Interval::ALL_REALS);
 	for (int i=0; i<system->nb_var; i++) {
-		ibex::index_2_string(buf,'{','}',i);
-		source.vars.push_back(new Entity(buf,Dim::scalar(),Domain(x)));
+		char* name=append_index("\0",'{','}',i);
+		source.vars.push_back(new Entity(name,Dim::scalar(),Domain(x)));
+		free(name);
 	}
 	// ------------------------------------------
 }

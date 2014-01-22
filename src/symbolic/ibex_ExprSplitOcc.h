@@ -16,6 +16,17 @@
 #include "ibex_NodeMap.h"
 #include "ibex_ExprVisitor.h"
 #include <utility>
+#include <functional>
+
+#ifdef __GNUC__
+#include <tr1/unordered_map>
+#define HASH std::tr1::hash
+#define IBEX_INT_MAP(T) std::tr1::unordered_map<int,T>
+#else
+#include <unordered_map>
+#define HASH std::hash
+#define IBEX_INT_MAP(T) std::unordered_map<int,T>
+#endif
 
 namespace ibex {
 
@@ -94,8 +105,59 @@ protected:
 	void visit(const ExprAsinh& e);
 	void visit(const ExprAtanh& e);
 
+	/*
+	 * Clone structure associated to indexed symbols (ExprIndex).
+	 * The clone for the first occurrence of x[j] is y[j] where y is the
+	 * "special clone" of x. Then, other occurrences of x[j] are new
+	 * symbols named x[j]_xxx_.
+	 */
+	struct IndexClone {
+		IndexClone() : nb_clones(0), clones(NULL), clone_counter(0) { }
+
+		// count the clones for each occurence of an indexed symbol (like x[i])
+		// (the integer is incremented at each occurrence, including the first one).
+		int nb_clones;
+
+		// The clones.
+		const ExprNode** clones;
+
+		// For the visitor
+		int clone_counter;
+	};
+
+	/*
+	 * Clone structure associated to a symbol. There is one clone for each
+	 * occurrence of the symbol except when the occurrence corresponds to
+	 * an indexation (like x[0]). All the occurrences that are indexations
+	 * of a symbol become indexations of the same "special" clone of the symbol.
+	 */
+	struct SymbolClone {
+		SymbolClone() : nb_clones(0), clones(NULL), clone_counter(0), special_clone(NULL) { }
+
+		// the special clone is not included in the count
+		int nb_clones;
+
+		// all the clones except the "special" one.
+		const ExprSymbol** clones;
+
+		// For the visitor: count the clones for each occurence of the symbol
+		// (the integer is incremeted at each occurrence), except in
+		// indexation
+		int clone_counter;
+
+		// The special clone of a symbol, the one shared by all indexations
+		// of the symbol. E.g., in x[0]+x[1] -> y[0]+y[1] where y is the
+		// special clone. This field is NULL if there is no indexation.
+		const ExprSymbol* special_clone;
+
+		IBEX_INT_MAP(IndexClone*) indices;
+	};
+
+
+
 	// Store the peer node of each node in the origin expression
-	// (including unused symbols)
+	// (including unused symbols). The peer node of a symbol
+	// change dynamically.
 	NodeMap<const ExprNode*> clone;
 
 	// Origin expression
@@ -104,9 +166,8 @@ protected:
 	// Array of new symbols resulting from occurrence splitting
 	Array<const ExprSymbol> new_x;
 
-	// count the clones for each symbol
-	// (the integer is incremeted at each occurrence)
-	NodeMap<std::pair<const ExprSymbol**,int> > clone_counter;
+	// Clone structure for each symbol
+	NodeMap<SymbolClone*> symbol_clone;
 
 	void nary_copy(const ExprNAryOp& e, const ExprNode& (*f)(const Array<const ExprNode>&));
 	void binary_copy(const ExprBinaryOp& e, const ExprNode& (*f)(const ExprNode&, const ExprNode&));
@@ -114,10 +175,6 @@ protected:
 };
 
 /*================================== inline implementations ========================================*/
-
-inline ExprSplitOcc::~ExprSplitOcc() {
-
-}
 
 inline const Array<const ExprSymbol>& ExprSplitOcc::get_x() const {
 	return new_x;

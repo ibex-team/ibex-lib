@@ -18,18 +18,17 @@
 namespace ibex {
 
 /**
- * \brief Write an index into a string, surrounded with two
+ * \brief Write an index at the end of a string, surrounded with two
  * symbols (like '['...']' or '{'..'}', etc.), including the
  * '\0' terminal character.
  *
- * For example, 12 ---> "[12]"
+ * For example, append_index("foo",12) ---> "foo[12]"
  *
  * \warning Up to 6 digits are allowed.
  *
- * \return the length of the string (the length does not take into
- * account the '\0' character.
+ * \return the new string. It has to be freed by the caller.
  */
-int index_2_string(char* buff, char lbracket, char rbracket, int index);
+char* append_index(const char* base, char lbracket, char rbracket, int index);
 
 /**
  * \brief Generate a variable name (_x_i).
