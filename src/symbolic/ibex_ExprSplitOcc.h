@@ -58,6 +58,14 @@ public:
 	const ExprNode& get_y() const;
 
 	/**
+	 * \brief Get the original node.
+	 *
+	 * Get the subexpression in the original expression "y" that corresponds
+	 * to the symbol x.
+	 */
+	const ExprNode& node(const ExprSymbol& x);
+
+	/**
 	 * \brief Delete this.
 	 */
 	virtual ~ExprSplitOcc();
@@ -118,6 +126,9 @@ protected:
 		// (the integer is incremented at each occurrence, including the first one).
 		int nb_clones;
 
+		// The nodes
+		std::vector<const ExprNode*> nodes;
+
 		// The clones.
 		const ExprNode** clones;
 
@@ -169,6 +180,16 @@ protected:
 	// Clone structure for each symbol
 	NodeMap<SymbolClone*> symbol_clone;
 
+	// Gives, for the ith new symbol, the first position of the
+	// corresponding symbol in the "flattened" array of origin variables.
+	// Allows to make connections between the components of an origin box
+	// and that of the extended box (with new symbols).
+	//int* origin_position;
+
+	// Gives the subexpression of the origin expression
+	// that corresponds to a symbol in the new expression
+	NodeMap<const ExprNode*> maps_to;
+
 	void nary_copy(const ExprNAryOp& e, const ExprNode& (*f)(const Array<const ExprNode>&));
 	void binary_copy(const ExprBinaryOp& e, const ExprNode& (*f)(const ExprNode&, const ExprNode&));
 	void unary_copy(const ExprUnaryOp& e, const ExprNode& (*f)(const ExprNode&));
@@ -184,6 +205,9 @@ inline const ExprNode& ExprSplitOcc::get_y() const {
 	return *(((ExprSplitOcc*) this)->clone[old_y]);
 }
 
+inline const ExprNode& ExprSplitOcc::node(const ExprSymbol& x) {
+	return *maps_to[x];
+}
 
 } // end namespace ibex
 #endif // __IBEX_EXPR_OCC_SPLIT_H__

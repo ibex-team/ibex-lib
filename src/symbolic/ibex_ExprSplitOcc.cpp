@@ -47,7 +47,7 @@ ExprSplitOcc::ExprSplitOcc(const Array<const ExprSymbol>& x, const ExprNode& y) 
 			for (int k=0; k<x[i].fathers.size(); k++) {
 				// check if the kth father of x is an expression x[j]
 				const ExprIndex* idx=dynamic_cast<const ExprIndex*>(&x[i].fathers[k]);
-				cout << "father " << k << "=" << x[i].fathers[k] << endl;
+				//cout << "father " << k << "=" << x[i].fathers[k] << endl;
 				if (idx!=NULL) {
 					// the special clone is only created once.
 					if (s->special_clone==NULL) {
@@ -79,24 +79,32 @@ ExprSplitOcc::ExprSplitOcc(const Array<const ExprSymbol>& x, const ExprNode& y) 
 				}
 			}
 		}
-		cout << "number of clones for " << x[i].name << ":" << s->nb_clones << endl;
+		//cout << "number of clones for " << x[i].name << ":" << s->nb_clones << endl;
 	}
 
 	new_x.resize(nb_new_var);
+	//origin_position = new int[nb_new_var];
 
 	//fill the array of new variables
-	int j=0; // index for the new
-	int j2=0; // clone counter for each symbol
-
+	int j=0;   // index for the new symbol
+	int j2=0;  // clone counter for each symbol
+	//int pos=0; // position in the origin array
 	for (int i=0; i<x.size(); i++) {
 		SymbolClone* s=symbol_clone[x[i]];
 		if (x[i].fathers.size()==0) {
 			s->clones=new const ExprSymbol*[1];
-			s->clones[0]=&ExprSymbol::new_(x[i].name, x[i].dim);
-			new_x.set_ref(j++, *(s->clones[0]));
+			const ExprSymbol* sbl=&ExprSymbol::new_(x[i].name, x[i].dim);
+			s->clones[0]=sbl;
+			new_x.set_ref(j, *sbl);
+			maps_to.insert(*sbl,&x[i]);
+			//origin_position[j]=pos;
+			j++;
 		} else {
 			if (s->special_clone!=NULL) {
-				new_x.set_ref(j++,*s->special_clone);
+				new_x.set_ref(j,*s->special_clone);
+				maps_to.insert(*s->special_clone,&x[i]); // map is done here (not in visit)
+				//origin_position[j]=pos;
+				j++;
 			}
 
 			s->clones=new const ExprSymbol*[s->nb_clones];
@@ -109,7 +117,9 @@ ExprSplitOcc::ExprSplitOcc(const Array<const ExprSymbol>& x, const ExprNode& y) 
 					const ExprSymbol* sbl=&ExprSymbol::new_(name, x[i].dim);
 					s->clones[j2++]=sbl;
 					free(name);
-					new_x.set_ref(j++,*sbl);
+					new_x.set_ref(j,*sbl);
+					//origin_position[j]=pos;
+					j++;
 				}
 			}
 			assert(j2==s->nb_clones);
@@ -119,7 +129,7 @@ ExprSplitOcc::ExprSplitOcc(const Array<const ExprSymbol>& x, const ExprNode& y) 
 				IndexClone* ic=it->second;
 				ic->clones = new const ExprNode*[ic->nb_clones];
 				ic->clones[0] = &((*s->special_clone)[it->first]); // create new subexpression
-				cout << "number of clones for index " << x[i].name << "[" << it->first << "]:" << ic->nb_clones << endl;
+				//cout << "number of clones for index " << x[i].name << "[" << it->first << "]:" << ic->nb_clones << endl;
 
 				for (int k=1; k<ic->nb_clones; k++) { // additional occurrence --> new symbol
 					char* name=append_index(s->special_clone->name, '[',']',it->first);
@@ -128,10 +138,14 @@ ExprSplitOcc::ExprSplitOcc(const Array<const ExprSymbol>& x, const ExprNode& y) 
 					ic->clones[k]=sbl;
 					free(name2);
 					free(name);
-					new_x.set_ref(j++,*sbl);
+					new_x.set_ref(j,*sbl);
+					//origin_position[j]=pos+(it->first);
+					j++;
 				}
 			}
 		}
+		//pos+=x[i].dim.size();
+
 	}
 	assert(j==new_x.size());
 
@@ -147,6 +161,7 @@ ExprSplitOcc::~ExprSplitOcc() {
 		delete[] it->second->clones;
 		delete it->second;
 	}
+	//delete[] origin_position;
 }
 
 void ExprSplitOcc::visit(const ExprNode& e) {
@@ -163,12 +178,23 @@ void ExprSplitOcc::visit(const ExprIndex& i) {
 	if (i.indexed_symbol()) {
 		const ExprSymbol& s=(const ExprSymbol&) i.expr;
 		IndexClone* ic=symbol_clone[s]->indices[i.index];
-		const ExprNode* occurrence=ic->clones[ic->clone_counter++];
+		const ExprNode* occurrence=ic->clones[ic->clone_counter];
+
+		if (ic->clone_counter>0) {
+			assert(dynamic_cast<const ExprSymbol*>(occurrence));
+			maps_to.insert(*occurrence,&i);
+		} else {
+			// visit(i.expr); no-> "visit" is not called for the special clone
+		}
+
+		ic->clone_counter++;
+
 		if (!clone.found(i)) {
 			clone.insert(i,occurrence); // insert the first occurrence
 		} else {
 			clone[i] = occurrence;      // or replace the old one
 		}
+
 	} else {
 		visit(i.expr);
 		clone.insert(i, &(*clone[i.expr])[i.index]);
@@ -202,6 +228,8 @@ void ExprSplitOcc::visit(const ExprSymbol& e) {
 	// that is placed in the the "clone" structure
 	SymbolClone* sc = symbol_clone[e];
 	const ExprNode* occurrence=sc->clones[sc->clone_counter++];
+	maps_to.insert(*occurrence,&e); // note: "visit" is not called for the special clone
+
 	if (!clone.found(e)) {
 		clone.insert(e,occurrence); // insert the first occurrence
 	} else {
