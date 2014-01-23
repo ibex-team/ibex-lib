@@ -154,20 +154,22 @@ def configure (conf):
 
 		env.append_unique ("INCLUDES",  os.path.join (path_c, "cplex/include/"))
 		conf.check_cxx (header_name	= "ilcplex/cplex.h")
-		
-		# FIXME ATTENTION  IL faut adapter en fonction des differentes configurations (32/64, linux, mac, win)
-		if (not(conf.check_cxx (lib = ["cplex", "pthread"], uselib_store = "IBEX_DEPS",
-				libpath = [os.path.join (path_c, "cplex/lib/x86-64_sles10_4.1/static_pic")],  # FIXME changer le chemin
-				mandatory = False,
-				fragment = """
-					#include "ilcplex/cplex.h"
-					int main (int argc, char* argv[]) {
-						CPXENVptr  envcplex;
-						CPXLPptr lpcplex;
-						return 0;
-					}
-				"""))):
-			conf.fatal ("cannot link with the Cplex library")			
+		dirtmp1 = os.path.join(path_c, "cplex/lib/")
+		for pp in os.listdir(dirtmp1) :
+			dirtmp2= os.path.join (dirtmp1,pp)
+			if (os.path.isdir(dirtmp2)):
+				if (not(conf.check_cxx (lib = ["cplex", "pthread"], uselib_store = "IBEX_DEPS",
+						libpath = [os.path.join(dirtmp2, "static_pic/")],  
+						mandatory = False,
+						fragment = """
+							#include "ilcplex/cplex.h"
+							int main (int argc, char* argv[]) {
+								CPXENVptr  envcplex;
+								CPXLPptr lpcplex;
+								return 0;
+							}
+						"""))):
+					conf.fatal ("cannot link with the Cplex library")			
 	else:
 		conf.fatal ("cannot find the Soplex library or the Cplex library,  please use --with-soplex=SOPLEX_PATH or --with-cplex=CPLEX_PATH")
 	
