@@ -63,7 +63,19 @@ public:
 	 * Get the subexpression in the original expression "y" that corresponds
 	 * to the symbol x.
 	 */
-	const ExprNode& node(const ExprSymbol& x);
+	const ExprNode& node(const ExprSymbol& x) const;
+
+
+	/**
+	 * \brief Variable indices map structure
+	 *
+	 * var is an array (allocated by the function) such
+	 * that var[i] gives the index of the variable corresponding
+	 * to the ith one in the original expression.
+	 *
+	 * \return The size of the array
+	 */
+	int var_map(int*& var) const;
 
 	/**
 	 * \brief Delete this.
@@ -71,7 +83,6 @@ public:
 	virtual ~ExprSplitOcc();
 
 protected:
-
 	void visit(const ExprNode& e);
 	void visit(const ExprIndex& i);
 	void visit(const ExprNAryOp& e);
@@ -171,6 +182,9 @@ protected:
 	// change dynamically.
 	NodeMap<const ExprNode*> clone;
 
+	// Origin varaibles
+	const Array<const ExprSymbol>& old_x;
+
 	// Origin expression
 	const ExprNode& old_y;
 
@@ -205,7 +219,7 @@ inline const ExprNode& ExprSplitOcc::get_y() const {
 	return *(((ExprSplitOcc*) this)->clone[old_y]);
 }
 
-inline const ExprNode& ExprSplitOcc::node(const ExprSymbol& x) {
+inline const ExprNode& ExprSplitOcc::node(const ExprSymbol& x) const {
 	return *maps_to[x];
 }
 

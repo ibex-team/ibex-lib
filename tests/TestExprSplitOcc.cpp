@@ -32,6 +32,11 @@ void TestExprSplitOcc::test01() {
 	TEST_ASSERT(strcmp(x2[1].name,"x_1_")==0);
 	TEST_ASSERT(&eso.node(x2[0])==&x);
 	TEST_ASSERT(&eso.node(x2[1])==&x);
+	int* var;
+	int n=eso.var_map(var);
+	TEST_ASSERT(n==2);
+	TEST_ASSERT(var[0]==0);
+	TEST_ASSERT(var[1]==0);
 }
 
 void TestExprSplitOcc::test02() {
@@ -49,6 +54,14 @@ void TestExprSplitOcc::test02() {
 	TEST_ASSERT(&eso.node(x2[2])==&y);
 	TEST_ASSERT(&eso.node(x2[3])==&y);
 	TEST_ASSERT(&eso.node(x2[4])==&y);
+	int* var;
+	int n=eso.var_map(var);
+	TEST_ASSERT(n==5);
+	TEST_ASSERT(var[0]==0);
+	TEST_ASSERT(var[1]==0);
+	TEST_ASSERT(var[2]==1);
+	TEST_ASSERT(var[3]==1);
+	TEST_ASSERT(var[4]==1);
 }
 
 
@@ -66,6 +79,13 @@ void TestExprSplitOcc::test03() {
 	TEST_ASSERT(sameExpr(y2,"((-x_0_)[1]+x[0])"));
 	TEST_ASSERT(&eso.node(x2[0])==&x);
 	TEST_ASSERT(&eso.node(x2[1])==&x);
+	int* var;
+	int n=eso.var_map(var);
+	TEST_ASSERT(n==4);
+	TEST_ASSERT(var[0]==0);
+	TEST_ASSERT(var[1]==1);
+	TEST_ASSERT(var[2]==0);
+	TEST_ASSERT(var[3]==1);
 }
 
 void TestExprSplitOcc::test04() {
@@ -83,6 +103,12 @@ void TestExprSplitOcc::test04() {
 	TEST_ASSERT(sameExpr(y2,"(x[0]-x[0]_1_)"));
 	TEST_ASSERT(&eso.node(x2[0])==&x);
 	TEST_ASSERT(&eso.node(x2[1])==&e1);
+	int* var;
+	int n=eso.var_map(var);
+	TEST_ASSERT(n==3);
+	TEST_ASSERT(var[0]==0);
+	TEST_ASSERT(var[1]==1);
+	TEST_ASSERT(var[2]==0);
 }
 
 
@@ -102,6 +128,12 @@ void TestExprSplitOcc::test05() {
 	TEST_ASSERT(sameExpr(y2,"(x[0]-x[0]_1_)"));
 	TEST_ASSERT(&eso.node(x2[0])==&x);
 	TEST_ASSERT(&eso.node(x2[1])==&e1);
+	int* var;
+	int n=eso.var_map(var);
+	TEST_ASSERT(n==3);
+	TEST_ASSERT(var[0]==0);
+	TEST_ASSERT(var[1]==1);
+	TEST_ASSERT(var[2]==0);
 }
 
 
@@ -120,6 +152,13 @@ void TestExprSplitOcc::test06() {
 	TEST_ASSERT(sameExpr(y2,"(((x[0]-x[1])+x[2])+x[0]_1_)"));
 	TEST_ASSERT(&eso.node(x2[0])==&x);
 	TEST_ASSERT(&eso.node(x2[1])==&e1);
+	int* var;
+	int n=eso.var_map(var);
+	TEST_ASSERT(n==4);
+	TEST_ASSERT(var[0]==0);
+	TEST_ASSERT(var[1]==1);
+	TEST_ASSERT(var[2]==2);
+	TEST_ASSERT(var[3]==0);
 }
 
 void TestExprSplitOcc::test07() {
@@ -139,6 +178,17 @@ void TestExprSplitOcc::test07() {
 	TEST_ASSERT(&eso.node(x2[1])==&x);
 	TEST_ASSERT(&eso.node(x2[2])==&e1);
 	TEST_ASSERT(&eso.node(x2[3])==&e2);
+	int* var;
+	int n=eso.var_map(var);
+	TEST_ASSERT(n==8);
+	TEST_ASSERT(var[0]==0);
+	TEST_ASSERT(var[1]==1);
+	TEST_ASSERT(var[2]==2);
+	TEST_ASSERT(var[3]==0);
+	TEST_ASSERT(var[4]==1);
+	TEST_ASSERT(var[5]==2);
+	TEST_ASSERT(var[6]==0);
+	TEST_ASSERT(var[7]==1);
 }
 
 } // end namespace

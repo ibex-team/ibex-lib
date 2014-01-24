@@ -18,7 +18,7 @@ using namespace std;
 
 namespace ibex {
 
-ExprSplitOcc::ExprSplitOcc(const Array<const ExprSymbol>& x, const ExprNode& y) : old_y(y) {
+ExprSplitOcc::ExprSplitOcc(const Array<const ExprSymbol>& x, const ExprNode& y) : old_x(x), old_y(y) {
 
 	// count the number of variables
 
@@ -150,6 +150,47 @@ ExprSplitOcc::ExprSplitOcc(const Array<const ExprSymbol>& x, const ExprNode& y) 
 	assert(j==new_x.size());
 
 	visit(y);
+}
+
+int ExprSplitOcc::var_map(int*& var) const {
+
+	// get the first index of each original symbol
+	// in the "flat" array of original variables
+	int k=0;
+	NodeMap<int> origin_index;
+	for (int i=0; i<old_x.size(); i++) {
+		origin_index.insert(old_x[i],k);
+		k+=old_x[i].dim.size();
+	}
+
+	// calculate total size of the "flat" array
+	// of new variables
+	int n=0;
+	for (int i=0; i<new_x.size(); i++) {
+		n+=new_x[i].dim.size();
+	}
+
+	// build the map array
+	var=new int[n];
+
+	// fill it
+	k=0;
+	for (int i=0; i<new_x.size(); i++) {
+		const ExprNode& _node=node(new_x[i]);
+		const ExprIndex* idx=dynamic_cast<const ExprIndex*>(&_node);
+		if (idx==NULL) {
+			const ExprSymbol* sbl=dynamic_cast<const ExprSymbol*>(&_node);
+			assert(sbl);
+			int start_index=origin_index[*sbl];
+			for (int j=0; j<new_x[i].dim.size(); j++) {
+				var[k++]=start_index+j;
+			}
+		} else {
+			assert(new_x[i].dim==Dim::scalar());
+			var[k++]=origin_index[idx->expr]+idx->index;
+		}
+	}
+	return n;
 }
 
 ExprSplitOcc::~ExprSplitOcc() {

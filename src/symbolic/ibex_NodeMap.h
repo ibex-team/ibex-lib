@@ -71,6 +71,14 @@ public:
 		return map[&e];
 	}
 
+	/** \brief Return the value associated to \a e.
+	 *
+	 * Return a const reference.
+	 */
+	const T& operator[](const ExprNode& e) const {
+		return ((NodeMap<T>*) this)->map[&e];
+	}
+
 	/**
 	 * \brief Erase all elements.
 	 */
