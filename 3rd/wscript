@@ -3,7 +3,7 @@
 
 from __future__ import with_statement # needed for python 2.5
 
-import tarfile, os.path, os, re, patch, sys, functools
+import tarfile, os.path, os, re, patch, sys, functools, shutil
 from waflib import Utils, Errors, Logs
 
 def unpack_archive (src_dir_node, name, filename = None):
@@ -686,11 +686,10 @@ def build (bld):
 	if bld.env["BUILD_AMPL"]:
 		path = bld.path.find_dir (bld.env.AMPL).abspath()
 
-		if  bld.env["INTERVAL_LIB"] is "GAOL":
+		if  (bld.env["INTERVAL_LIB"] is "GAOL") :
 			cmd = ["clean"] if bld.cmd in ("clean", "uninstall") else ["CFLAGS=-DNo_dtoa -m32"]
 		else:
 			cmd = ["clean"] if bld.cmd in ("clean", "uninstall") else []
-		
 		
 		if bld.exec_command (
 			[bld.env.MAKE, "-j", str(bld.options.jobs)] + cmd,
@@ -699,26 +698,13 @@ def build (bld):
 			stderr	= None,
 		):
 			bld.fatal ("failed to build ampl")
-			
+
 		if not bld.cmd in ("clean", "uninstall"):
-			if bld.exec_command (
-				'mkdir -p %s && cp %s %s' % (
-				bld.env.LIBDIR,
-				os.path.join(path,"libamplsolver.a"), 
-				os.path.join(bld.env.LIBDIR,"libamplsolver.a")),
-				cwd	= path,
-				stdout	= None,
-				stderr	= None,
-			):
-				bld.fatal ("failed to copy the ampl librarie")
+			shutil.copyfile(os.path.join(path,"libamplsolver.a"),os.path.join(bld.env.LIBDIR,"libamplsolver.a"))
 		else:
-			bld.exec_command (
-				'rm %s' % (
-				os.path.join(bld.env.LIBDIR,"libamplsolver.a")),
-				cwd	= path,
-				stdout	= None,
-				stderr	= None,
-			)
+			os.remove(os.path.join(bld.env.LIBDIR,"libamplsolver.a"))
+
+
 
 class subdir:
 	def __init__ (self, name_or_node):

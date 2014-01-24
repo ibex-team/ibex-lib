@@ -75,7 +75,8 @@ def configure (conf):
 	env = conf.env
 	conf.load ('compiler_cxx compiler_cc bison')
 	conf.load ('flex', '.')
-
+	
+	conf.env.LIBDIR = conf.env['PREFIX'] + '/lib'
 
 	env.VERSION = VERSION
 
