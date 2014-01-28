@@ -40,9 +40,13 @@ bool Optimizer::is_feasible(const IntervalVector& box) {
 }
 
 bool Optimizer::is_inner(const IntervalVector& box) {
+  //	cout << " box " << box << endl;
 	for (int j=0; j<m; j++) {
 		if (entailed->normalized(j)) continue;
-		if (sys.f[j].eval(box).ub()>0) return false;
+		Interval ev=sys.f[j].eval(box);
+		if (ev.is_empty()) return false;
+		if (ev.ub()>0) return false;
+		//			cout << j << " " << sys.f[j] << "  " << sys.f[j].eval(box)<< endl;
 	}
 	return true;
 }
