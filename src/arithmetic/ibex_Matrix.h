@@ -145,6 +145,12 @@ public:
 	void put(int row_start_index, int col_start_index, const Matrix& M);
 
 	/**
+	 * \brief Insert a vector at some position
+	 * \param row_vec true if the vector is a row vector
+	 */
+	void put(int row_start_index, int col_start_index, const Vector& v, bool row_vec);
+
+	/**
      * \brief Set *this to (*this)+m.
      */
     Matrix& operator+=(const Matrix& m);

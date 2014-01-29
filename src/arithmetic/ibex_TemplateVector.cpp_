@@ -58,6 +58,7 @@ inline V _subvector(const V& v, int start_index, int end_index) {
 template<class V>
 inline void _put(V& v, int start_index, const V& subvec) {
 	assert(!is_empty(v));
+	assert(!is_empty(subvec));
 	int end_index=start_index+subvec.size()-1;
 	assert(start_index>=0 && end_index<v.size());
 

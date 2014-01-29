@@ -49,21 +49,41 @@ inline M _submatrix(const M& m, int row_start_index, int row_end_index, int col_
 }
 
 
-template<class M>
-inline void _put(M& m, int row_start_index, int col_start_index, const M& sub) {
+template<class M1, class M2>
+inline void _put(M1& m, int row_start_index, int col_start_index, const M2& sub) {
 	assert(row_start_index>=0);
 	assert(row_start_index+sub.nb_rows()<=m.nb_rows());
 	assert(col_start_index>=0);
 	assert(col_start_index+sub.nb_cols()<=m.nb_cols());
 	assert(!is_empty(m));
+	assert(!is_empty(sub));
 
 	int i=row_start_index;
-	for (int i2=0; i2<=sub.nb_rows(); i++,i2++) {
+	for (int i2=0; i2<sub.nb_rows(); i++,i2++) {
 		int j=col_start_index;
-		for (int j2=0; j<=sub.nb_cols(); j++,j2++)
+		for (int j2=0; j2<sub.nb_cols(); j++,j2++)
 			m[i][j] = sub[i2][j2];
 	}
 }
+
+template<class M, class V>
+inline void _put(M& m, int row_start_index, int col_start_index, const V& v, bool row_vec) {
+	assert(row_start_index>=0);
+	assert(row_vec || row_start_index+v.size()<=m.nb_rows());
+	assert(col_start_index>=0);
+	assert(!row_vec || col_start_index+v.size()<=m.nb_cols());
+	assert(!is_empty(m));
+	//TODO: assert(!is_empty(v))
+
+	int i=row_start_index;
+	int j=col_start_index;
+	for (int k=0; k<v.size(); k++) {
+		m[i][j]=v[k];
+		if (row_vec) j++;
+		else i++;
+	}
+}
+
 
 template<class M>
 inline M _transpose(const M& m) {

@@ -190,11 +190,23 @@ bool IntervalMatrix::is_zero() const {
 }
 
 IntervalMatrix IntervalMatrix::submatrix(int row_start_index, int row_end_index, int col_start_index, int col_end_index) const {
-	return _submatrix(*this,row_start_index,row_end_index,col_start_index,col_end_index);
+	return _submatrix(*this, row_start_index, row_end_index, col_start_index, col_end_index);
+}
+
+void IntervalMatrix::put(int row_start_index, int col_start_index, const Matrix& sub) {
+	_put<IntervalMatrix,Matrix>(*this, row_start_index, col_start_index, sub);
 }
 
 void IntervalMatrix::put(int row_start_index, int col_start_index, const IntervalMatrix& sub) {
-	_put(*this,row_start_index, col_start_index, sub);
+	_put<IntervalMatrix,IntervalMatrix>(*this, row_start_index, col_start_index, sub);
+}
+
+void IntervalMatrix::put(int row_start_index, int col_start_index, const Vector& sub, bool row_vec) {
+	_put<IntervalMatrix,Vector>(*this, row_start_index, col_start_index, sub, row_vec);
+}
+
+void IntervalMatrix::put(int row_start_index, int col_start_index, const IntervalVector& sub, bool row_vec) {
+	_put<IntervalMatrix,IntervalVector>(*this, row_start_index, col_start_index, sub, row_vec);
 }
 
 IntervalMatrix IntervalMatrix::transpose() const {
@@ -325,6 +337,5 @@ bool proj_mul(const IntervalMatrix& y, IntervalMatrix& x1, IntervalMatrix& x2, d
 	}
 	return true;
 }
-
 
 } // namespace ibex

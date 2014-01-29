@@ -260,7 +260,27 @@ public:
 	 * \brief Insert a submatrix at some position
 	 * \pre (*this) must be nonempty
 	 */
+	void put(int row_start_index, int col_start_index, const Matrix& M);
+
+	/**
+	 * \brief Insert a submatrix at some position
+	 * \pre (*this) must be nonempty
+	 */
 	void put(int row_start_index, int col_start_index, const IntervalMatrix& M);
+
+	/**
+	 * \brief Insert a subvecvtor at some position
+	 * \param row_vec true if the vector is a row vector
+	 * \pre (*this) must be nonempty
+	 */
+	void put(int row_start_index, int col_start_index, const Vector& V, bool row_vec);
+
+	/**
+	 * \brief Insert a subvecvtor at some position
+	 * \param row_vec true if the vector is a row vector
+	 * \pre (*this) must be nonempty
+	 */
+	void put(int row_start_index, int col_start_index, const IntervalVector& V, bool row_vec);
 
     /**
      * \brief (*this)+=m.

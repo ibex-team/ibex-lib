@@ -73,11 +73,15 @@ bool Matrix::operator==(const Matrix& m) const {
 }
 
 Matrix Matrix::submatrix(int row_start_index, int row_end_index, int col_start_index, int col_end_index) const {
-	return _submatrix(*this,row_start_index,row_end_index,col_start_index,col_end_index);
+	return _submatrix(*this, row_start_index,row_end_index,col_start_index,col_end_index);
 }
 
 void Matrix::put(int row_start_index, int col_start_index, const Matrix& sub) {
-	_put(*this,row_start_index, col_start_index, sub);
+	_put<Matrix,Matrix>(*this, row_start_index, col_start_index, sub);
+}
+
+void Matrix::put(int row_start_index, int col_start_index, const Vector& sub, bool row_vec) {
+	_put<Matrix,Vector>(*this, row_start_index, col_start_index, sub, row_vec);
 }
 
 Matrix Matrix::transpose() const {
@@ -95,7 +99,5 @@ void Matrix::set_col(int col1, const Vector& v) {
 std::ostream& operator<<(std::ostream& os, const Matrix& m) {
 	return display(os,m);
 }
-
-
 
 } // namespace ibex
