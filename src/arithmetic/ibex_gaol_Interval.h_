@@ -330,8 +330,11 @@ inline Interval exp(const Interval& x) {
 inline Interval log(const Interval& x) {
 	if (x.ub()<=0) // gaol returns (-oo,-DBL_MAX) if x.ub()==0, instead of EMPTY_SET
 		return Interval::EMPTY_SET;
-	else
-		return gaol::log(x.itv);
+	else {
+		Interval res=gaol::log(x.itv);
+		fpu_round_up();
+		return res;
+	}
 }
 
 inline Interval cos(const Interval& x) {
