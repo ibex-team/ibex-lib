@@ -273,23 +273,6 @@ inline M absM(const M& m) {
 	return res;
 }
 
-template<class M>
-inline std::ostream& print(std::ostream& os, const M& m) {
-	if (is_empty(m)) { return os << "empty matrix"; }
-	os << "(";
-	for (int i=0; i<m.nb_rows(); i++) {
-		os << "(";
-		for (int j=0; j<m.nb_cols(); j++) {
-			os << m[i][j];
-			if (j<m.nb_cols()-1) os << " ; ";
-		}
-		os << ")";
-		if (i<m.nb_rows()-1) os << std::endl;
-	}
-	os << ")";
-	return os;
-}
-
 }
 
 Vector& Vector::operator+=(const Vector& x) {
@@ -596,15 +579,6 @@ IntervalMatrix abs(const IntervalMatrix& m) {
 	return absM(m);
 }
 
-std::ostream& operator<<(std::ostream& os, const Matrix& m) {
-	return print<Matrix>(os,m);
-}
-
-std::ostream& operator<<(std::ostream& os, const IntervalMatrix& m) {
-	return print<IntervalMatrix>(os,m);
-}
-
-
 //================================== Affine2 Implementation ======
 
 
@@ -831,11 +805,6 @@ Affine2Matrix outer_product(const IntervalVector& x1, const Affine2Vector& x2) {
 
 Affine2Matrix abs(const Affine2Matrix& m) {
 	return absM(m);
-}
-
-
-std::ostream& operator<<(std::ostream& os, const Affine2Matrix& m) {
-	return print < Affine2Matrix > (os, m);
 }
 
 

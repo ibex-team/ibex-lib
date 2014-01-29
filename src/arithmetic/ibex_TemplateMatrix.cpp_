@@ -1,0 +1,150 @@
+/* ============================================================================
+ * I B E X - Template Domain Matrix implementation
+ * ============================================================================
+ * Copyright   : Ecole des Mines de Nantes (FRANCE)
+ * License     : This program can be distributed under the terms of the GNU LGPL.
+ *               See the file COPYING.LESSER.
+ *
+ * Author(s)   : Gilles Chabert
+ * Created     : Jan 28, 2014
+ * ---------------------------------------------------------------------------- */
+
+#include "ibex_IntervalMatrix.h"
+#include "ibex_Affine2Matrix.h"
+#include <cassert>
+
+namespace ibex {
+
+namespace { // to create anonymous functions
+
+inline bool is_empty(const Matrix& m)         { return false; }
+inline bool is_empty(const IntervalMatrix& m) { return m.is_empty(); }
+inline bool is_empty(const Affine2Matrix& m)  { return m.is_empty(); }
+
+inline void set_empty(Matrix& m)         { }
+inline void set_empty(IntervalMatrix& m) { m.set_empty(); }
+inline void set_empty(Affine2Matrix& m)  { m.set_empty(); }
+
+
+template<class M>
+inline M _submatrix(const M& m, int row_start_index, int row_end_index, int col_start_index, int col_end_index) {
+	assert(row_start_index>=0 && row_start_index<m.nb_rows());
+	assert(row_end_index>=0 && row_end_index<m.nb_rows());
+	assert(row_start_index<=row_end_index);
+	assert(col_start_index>=0 && col_start_index<m.nb_cols());
+	assert(col_end_index>=0 && col_end_index<m.nb_cols());
+	assert(col_start_index<=col_end_index);
+	assert(!is_empty(m));
+
+	M sub(row_end_index-row_start_index+1, col_end_index-col_start_index+1);
+	//cout << "m=" << (row_end_index-row_start_index+1) << "n=" << (col_end_index-col_start_index+1) << endl;
+	//cout << sub << endl;
+	int i2=0;
+	for (int i=row_start_index; i<=row_end_index; i++, i2++) {
+		int j2=0;
+		for (int j=col_start_index; j<=col_end_index; j++,j2++)
+			sub[i2][j2] = m[i][j];
+	}
+	return sub;
+}
+
+
+template<class M>
+inline void _put(M& m, int row_start_index, int col_start_index, const M& sub) {
+	assert(row_start_index>=0);
+	assert(row_start_index+sub.nb_rows()<=m.nb_rows());
+	assert(col_start_index>=0);
+	assert(col_start_index+sub.nb_cols()<=m.nb_cols());
+	assert(!is_empty(m));
+
+	int i=row_start_index;
+	for (int i2=0; i2<=sub.nb_rows(); i++,i2++) {
+		int j=col_start_index;
+		for (int j2=0; j<=sub.nb_cols(); j++,j2++)
+			m[i][j] = sub[i2][j2];
+	}
+}
+
+template<class M>
+inline M _transpose(const M& m) {
+	assert(!is_empty(m));
+
+	M m2(m.nb_cols(), m.nb_rows());
+
+	for (int i=0; i<m.nb_rows(); i++) {
+		for (int j=0; j<m.nb_cols(); j++) {
+			m2[j][i]=m[i][j];
+		}
+	}
+	return m2;
+}
+
+template<class M,class V>
+inline V _col(const M& m, int j) {
+	assert(!is_empty(m));
+	assert(j>=0 && j<m.nb_cols());
+
+	V res(m.nb_rows());
+	for (int i=0; i<m.nb_rows(); i++)
+		res[i]=m[i][j];
+	return res;
+}
+
+template<class M,class V>
+inline void _set_col(M& m, int col1, const V& v) {
+	assert(!is_empty(m));
+	assert(col1>=0 && col1<m.nb_cols());
+	assert(m.nb_rows()==v.size());
+
+	for (int i=0; i<m.nb_rows(); i++)
+		m[i][col1]=v[i];
+}
+
+
+template<class M1,class M2>
+M1& _assign(M1& m1, const M2& m2) {
+	assert(m1.nb_rows()==m2.nb_rows() && m1.nb_cols()==m2.nb_cols());
+	// or implement "resize"
+	//resize(x.nb_rows(), x.nb_cols());
+	if (is_empty(m2))
+		set_empty(m1);
+	else
+		for (int i=0; i<m1.nb_rows(); i++)
+			m1.set_row(i,m2[i]);
+
+	return m1;
+}
+
+template<class M1,class M2>
+bool _equals(M1& m1, const M2& m2) {
+	if (m1.nb_rows()!=m2.nb_rows()) return false;
+	if (m1.nb_cols()!=m2.nb_cols()) return false;
+
+	if (is_empty(m1)) return is_empty(m2);
+	if (is_empty(m2)) return is_empty(m1);
+
+	for (int i=0; i<m1.nb_rows(); i++) {
+		if (m1.row(i)!=m2.row(i)) return false;
+	}
+	return true;
+}
+
+template<class M>
+inline std::ostream& display(std::ostream& os, const M& m) {
+	if (is_empty(m)) { return os << "empty matrix"; }
+	os << "(";
+	for (int i=0; i<m.nb_rows(); i++) {
+		os << "(";
+		for (int j=0; j<m.nb_cols(); j++) {
+			os << m[i][j];
+			if (j<m.nb_cols()-1) os << " ; ";
+		}
+		os << ")";
+		if (i<m.nb_rows()-1) os << std::endl;
+	}
+	os << ")";
+	return os;
+}
+} // end anonymous namespace
+
+} // end namespace ibex

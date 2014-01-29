@@ -101,6 +101,16 @@ public:
 	const Vector& operator[](int i) const;
 
 	/**
+	 * \brief Return a submatrix.
+	 */
+	Matrix submatrix(int row_start_index, int row_end_index, int col_start_index, int col_end_index) const;
+
+	/**
+	 * \brief Transpose of *this.
+	 */
+	Matrix transpose() const;
+
+	/**
 	 * \brief Return the ith row.
 
 	 * Equivalent to (*this)[i.
@@ -129,7 +139,12 @@ public:
 	 */
 	void set_col(int col, const Vector& v);
 
-    /**
+	/**
+	 * \brief Insert a submatrix at some position
+	 */
+	void put(int row_start_index, int col_start_index, const Matrix& M);
+
+	/**
      * \brief Set *this to (*this)+m.
      */
     Matrix& operator+=(const Matrix& m);

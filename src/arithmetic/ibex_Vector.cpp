@@ -11,6 +11,7 @@
 #include "ibex_Vector.h"
 #include <float.h>
 #include <math.h>
+#include "ibex_TemplateVector.cpp_"
 
 namespace ibex {
 
@@ -56,22 +57,6 @@ void Vector::resize(int n2) {
 	vec = newVec;
 }
 
-Vector& Vector::operator=(const Vector& x) {
-	assert(size()==x.size()); // throw InvalidVectorOp("Cannot set a Vector to a Vector with different dimension");
-
-	for (int i=0; i<size(); i++)
-		(*this)[i]=x[i];
-
-	return *this;
-}
-
-bool Vector::operator==(const Vector& x) const {
-	if (n!=x.size()) return false;
-	for (int i=0; i<n; i++)
-		if ((*this)[i]!=(x[i])) return false;
-	return true;
-}
-
 double Vector::min() const {
 	double res=DBL_MAX;
 	for (int i=0; i<n; i++)
@@ -86,13 +71,6 @@ double Vector::max() const {
 	return res;
 }
 
-std::ostream& operator<<(std::ostream& os, const Vector& x) {
-	os << "(";
-	for (int i=0; i<x.size(); i++)
-		os << x[i] << (i<x.size()-1? " ; " : "");
-	os << ")";
-	return os;
-}
 
 double Vector::norm() const {
 	double n=0;
@@ -100,5 +78,11 @@ double Vector::norm() const {
 		n+=::pow((*this)[i],2);
 	return ::sqrt(n);
 }
+
+Vector  Vector::subvector(int start_index, int end_index) const   { return _subvector(*this,start_index,end_index); }
+void    Vector::put(int start_index, const Vector& x)             { _put(*this, start_index, x); }
+Vector& Vector::operator=(const Vector& x)                        { return _assign(*this,x); }
+bool    Vector::operator==(const Vector& x) const                 { return _equals(*this,x); }
+std::ostream&   operator<<(std::ostream& os, const Vector& x)     { return _display(os,x); }
 
 } // end namespace ibex

@@ -94,7 +94,6 @@ public:
 	 * \brief Set *this to its intersection with x
 	 *
 	 * \return a reference to this.
-	 * \throws
 	 */
 	IntervalMatrix& operator&=(const IntervalMatrix& x);
 
@@ -201,11 +200,13 @@ public:
 
 	/**
 	 * \brief Return a submatrix.
+	 * \pre (*this) must be nonempty
 	 */
-	IntervalMatrix submatrix(int row_start_index, int row_end_index, int col_start_index, int col_end_index);
+	IntervalMatrix submatrix(int row_start_index, int row_end_index, int col_start_index, int col_end_index) const;
 
 	/**
 	 * \brief Transpose of *this.
+	 * \pre (*this) must be nonempty
 	 */
 	IntervalMatrix transpose() const;
 
@@ -213,6 +214,7 @@ public:
 	 * \brief Return the ith row.
 
 	 * Equivalent to (*this)[i.
+	 * \pre (*this) must be nonempty
 	 */
 	IntervalVector& row(int i);
 
@@ -220,33 +222,45 @@ public:
 	 * \brief Return a const reference to the ith row.
 
 	 * Equivalent to (*this)[i.
+	 * \pre (*this) must be nonempty
 	 */
 	const IntervalVector& row(int i) const;
 
 	/**
 	 * \brief Return a column
+	 * \pre (*this) must be nonempty
 	 */
 	IntervalVector col(int i) const;
 
 	/**
 	 * \brief Return a subset of rows.
+	 * \pre (*this) must be nonempty
 	 */
 	IntervalMatrix rows(int start_index, int end_index);
 
 	/**
 	 * \brief Return a subset of columns.
+	 * \pre (*this) must be nonempty
 	 */
 	IntervalMatrix cols(int start_index, int end_index);
 
 	/**
 	 * \brief Set a row.
+	 * \pre (*this) must be nonempty
 	 */
 	void set_row(int row, const IntervalVector& v);
 
 	/**
 	 * \brief Set a column.
+	 * \pre (*this) must be nonempty
 	 */
 	void set_col(int col, const IntervalVector& v);
+
+	/**
+	 * \brief Insert a submatrix at some position
+	 * \pre (*this) must be nonempty
+	 */
+	void put(int row_start_index, int col_start_index, const IntervalMatrix& M);
 
     /**
      * \brief (*this)+=m.

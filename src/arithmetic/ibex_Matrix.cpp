@@ -11,6 +11,7 @@
 
 #include "ibex_Matrix.h"
 #include "ibex_Agenda.h"
+#include "ibex_TemplateMatrix.cpp_"
 
 namespace ibex {
 
@@ -64,41 +65,37 @@ Matrix::~Matrix() {
 }
 
 Matrix& Matrix::operator=(const Matrix& x) {
-	assert(nb_rows()==x.nb_rows() && nb_cols()==x.nb_cols()); // or implement "resize"
-	//resize(x.nb_rows(), x.nb_cols());
-
-	for (int i=0; i<nb_rows(); i++)
-		(*this)[i]=x[i];
-	return *this;
+	return _assign(*this,x);
 }
 
 bool Matrix::operator==(const Matrix& m) const {
-	if (m.nb_rows()!=nb_rows()) return false;
-	if (m.nb_cols()!=nb_cols()) return false;
-
-	for (int i=0; i<_nb_rows; i++) {
-		if (row(i)!=m.row(i)) return false;
-	}
-	return true;
+	return _equals(*this,m);
 }
 
+Matrix Matrix::submatrix(int row_start_index, int row_end_index, int col_start_index, int col_end_index) const {
+	return _submatrix(*this,row_start_index,row_end_index,col_start_index,col_end_index);
+}
+
+void Matrix::put(int row_start_index, int col_start_index, const Matrix& sub) {
+	_put(*this,row_start_index, col_start_index, sub);
+}
+
+Matrix Matrix::transpose() const {
+	return _transpose(*this);
+}
 
 Vector Matrix::col(int j) const {
-	assert(j>=0 && j<nb_cols());
-
-	Vector res(nb_rows());
-	for (int i=0; i<nb_rows(); i++)
-		res[i]=(*this)[i][j];
-	return res;
+	return _col<Matrix,Vector>(*this,j);
 }
 
 void Matrix::set_col(int col1, const Vector& v) {
-	assert(col1>=0 && col1<nb_cols());
-	assert(nb_rows()==v.size());
-
-	for (int i=0; i<nb_rows(); i++)
-		M[i][col1]=v[i];
+	_set_col(*this,col1,v);
 }
+
+std::ostream& operator<<(std::ostream& os, const Matrix& m) {
+	return display(os,m);
+}
+
 
 
 } // namespace ibex

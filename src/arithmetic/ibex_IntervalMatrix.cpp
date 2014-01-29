@@ -11,6 +11,7 @@
 
 #include "ibex_IntervalMatrix.h"
 #include "ibex_Agenda.h"
+#include "ibex_TemplateMatrix.cpp_"
 
 namespace ibex {
 
@@ -77,9 +78,8 @@ IntervalMatrix::~IntervalMatrix() {
 
 IntervalMatrix& IntervalMatrix::operator=(const IntervalMatrix& x) {
 	resize(x.nb_rows(), x.nb_cols());
-	for (int i=0; i<nb_rows(); i++)
-		(*this)[i]=x[i];
-	return *this;
+	// need to be resized when called from operator*= (dimension can change)
+	return _assign(*this,x);
 }
 
 IntervalMatrix& IntervalMatrix::operator&=(const IntervalMatrix& m) {
@@ -101,16 +101,7 @@ void IntervalMatrix::init(const Interval& x) {
 }
 
 bool IntervalMatrix::operator==(const IntervalMatrix& m) const {
-	if (m.nb_rows()!=nb_rows()) return false;
-	if (m.nb_cols()!=nb_cols()) return false;
-
-	if (is_empty()) return m.is_empty();
-	if (m.is_empty()) return is_empty();
-
-	for (int i=0; i<_nb_rows; i++) {
-		if (row(i)!=m.row(i)) return false;
-	}
-	return true;
+	return _equals(*this,m);
 }
 
 Matrix IntervalMatrix::lb() const {
@@ -198,52 +189,24 @@ bool IntervalMatrix::is_zero() const {
 	return true;
 }
 
-IntervalMatrix IntervalMatrix::submatrix(int row_start_index, int row_end_index, int col_start_index, int col_end_index) {
-	assert(row_start_index>=0 && row_start_index<nb_rows());
-	assert(row_end_index>=0 && row_end_index<nb_rows());
-	assert(row_start_index<=row_end_index);
-	assert(col_start_index>=0 && col_start_index<nb_cols());
-	assert(col_end_index>=0 && col_end_index<nb_cols());
-	assert(col_start_index<=col_end_index);
+IntervalMatrix IntervalMatrix::submatrix(int row_start_index, int row_end_index, int col_start_index, int col_end_index) const {
+	return _submatrix(*this,row_start_index,row_end_index,col_start_index,col_end_index);
+}
 
-	IntervalMatrix sub(row_end_index-row_start_index+1, col_end_index-col_start_index+1);
-	//cout << "m=" << (row_end_index-row_start_index+1) << "n=" << (col_end_index-col_start_index+1) << endl;
-	//cout << sub << endl;
-	int i2=0;
-	for (int i=row_start_index; i<=row_end_index; i++, i2++) {
-		int j2=0;
-		for (int j=col_start_index; j<=col_end_index; j++,j2++)
-			sub[i2][j2] = M[i][j];
-	}
-	return sub;
+void IntervalMatrix::put(int row_start_index, int col_start_index, const IntervalMatrix& sub) {
+	_put(*this,row_start_index, col_start_index, sub);
 }
 
 IntervalMatrix IntervalMatrix::transpose() const {
-	IntervalMatrix m(nb_cols(), nb_rows());
-
-	for (int i=0; i<nb_rows(); i++) {
-		for (int j=0; j<nb_cols(); j++) {
-			m[j][i]=(*this)[i][j];
-		}
-	}
-	return m;
+	return _transpose(*this);
 }
 
 IntervalVector IntervalMatrix::col(int j) const {
-	assert(j>=0 && j<nb_cols());
-
-	IntervalVector res(nb_rows());
-	for (int i=0; i<nb_rows(); i++)
-		res[i]=(*this)[i][j];
-	return res;
+	return _col<IntervalMatrix,IntervalVector>(*this,j);
 }
 
 void IntervalMatrix::set_col(int col1, const IntervalVector& v) {
-	assert(col1>=0 && col1<nb_cols());
-	assert(nb_rows()==v.size());
-
-	for (int i=0; i<nb_rows(); i++)
-		M[i][col1]=v[i];
+	_set_col(*this,col1,v);
 }
 
 IntervalMatrix& IntervalMatrix::inflate(double rad) {
@@ -256,6 +219,10 @@ IntervalMatrix& IntervalMatrix::inflate(double rad) {
 		for (int j=0; j<nb_cols(); j++)
 			(*this)[i][j]+=r;
 	return *this;
+}
+
+std::ostream& operator<<(std::ostream& os, const IntervalMatrix& m) {
+	return display(os,m);
 }
 
 bool proj_add(const IntervalMatrix& y, IntervalMatrix& x1, IntervalMatrix& x2) {

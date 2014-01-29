@@ -10,6 +10,7 @@
 
 #include "ibex_Affine2Matrix.h"
 #include "ibex_Agenda.h"
+#include "ibex_TemplateMatrix.cpp_"
 
 namespace ibex {
 
@@ -100,18 +101,13 @@ Affine2Matrix::~Affine2Matrix() {
 }
 
 Affine2Matrix& Affine2Matrix::operator=(const Affine2Matrix& x) {
-	resize(x.nb_rows(), x.nb_cols());
-	for (int i=0; i<nb_rows(); i++)
-		(*this)[i] = x[i];
-	return *this;
+	//resize(x.nb_rows(), x.nb_cols());
+	return _assign(*this,x);
 }
 
 Affine2Matrix& Affine2Matrix::operator=(const IntervalMatrix& x) {
-	resize(x.nb_rows(), x.nb_cols());
-	for (int i=0; i<nb_rows(); i++){
-		(*this)[i] = x[i];
-	}
-	return *this;
+	//resize(x.nb_rows(), x.nb_cols());
+	return _assign(*this,x);
 }
 
 IntervalMatrix Affine2Matrix::itv() const {
@@ -140,30 +136,12 @@ void Affine2Matrix::init(const Interval& x) {
 }
 
 bool Affine2Matrix::operator==(const Affine2Matrix& m) const {
-	if (m.nb_rows()!=nb_rows()) return false;
-	if (m.nb_cols()!=nb_cols()) return false;
-
-	if (is_empty()) return m.is_empty();
-	if (m.is_empty()) return is_empty();
-
-	for (int i=0; i<_nb_rows; i++) {
-		if (row(i)!=m.row(i)) return false;
-	}
-	return true;
+	return _equals(*this,m);
 }
+
 bool Affine2Matrix::operator==(const IntervalMatrix& m) const {
-	if (m.nb_rows()!=nb_rows()) return false;
-	if (m.nb_cols()!=nb_cols()) return false;
-
-	if (is_empty()) return m.is_empty();
-	if (m.is_empty()) return is_empty();
-
-	for (int i=0; i<_nb_rows; i++) {
-		if (row(i)!=m.row(i)) return false;
-	}
-	return true;
+	return _equals(*this,m);
 }
-
 
 void Affine2Matrix::resize(int nb_rows1, int nb_cols1) {
 	assert(nb_rows1>0);
@@ -196,50 +174,20 @@ void Affine2Matrix::resize(int nb_rows1, int nb_cols1) {
 }
 
 Affine2Matrix Affine2Matrix::submatrix(int row_start_index, int row_end_index,	int col_start_index, int col_end_index) {
-	assert(row_start_index >= 0 && row_start_index < nb_rows());
-	assert(row_end_index >= 0 && row_end_index < nb_rows());
-	assert(row_start_index <= row_end_index);
-	assert(col_start_index >= 0 && col_start_index < nb_cols());
-	assert(col_end_index >= 0 && col_end_index < nb_cols());
-	assert(col_start_index <= col_end_index);
-
-	Affine2Matrix sub(row_end_index - row_start_index + 1,	col_end_index - col_start_index + 1);
-	//cout << "m=" << (row_end_index-row_start_index+1) << "n=" << (col_end_index-col_start_index+1) << endl;
-	//cout << sub << endl;
-	int i2 = 0;
-	for (int i = row_start_index; i <= row_end_index; i++, i2++) {
-		int j2 = 0;
-		for (int j = col_start_index; j <= col_end_index; j++, j2++)
-			sub[i2][j2] = _M[i][j];
-	}
-	return sub;
+	return _submatrix(*this,row_start_index,row_end_index,col_start_index,col_end_index);
 }
 
 Affine2Matrix Affine2Matrix::transpose() const {
-	Affine2Matrix m(nb_cols(), nb_rows());
-	for (int i = 0; i < nb_rows(); i++) {
-		for (int j = 0; j < nb_cols(); j++) {
-			m[j][i] = (*this)[i][j];
-		}
-	}
-
-	return m;
+	return _transpose(*this);
 }
 
 Affine2Vector Affine2Matrix::col(int j) const {
-	assert(j >= 0 && j < nb_cols());
-	Affine2Vector res(nb_rows());
-	for (int i = 0; i < nb_rows(); i++)
-		res[i] = (*this)[i][j];
-	return res;
-}
-void Affine2Matrix::set_col(int col1, const Affine2Vector& v) {
-	assert(col1 >= 0 && col1 < nb_cols());
-	assert(nb_rows() == v.size());
-	for (int i = 0; i < nb_rows(); i++)
-		_M[i]._vec[col1] = v[i];
+	return _col<Affine2Matrix,Affine2Vector>(*this,j);
 }
 
+void Affine2Matrix::set_col(int col1, const Affine2Vector& v) {
+	_set_col(*this,col1,v);
+}
 
 Affine2Matrix& Affine2Matrix::inflate(double rad) {
 	// see comment in Affine2Vector::inflate
@@ -350,6 +298,10 @@ Affine2Matrix operator*(const Affine2& x, const IntervalMatrix& m) {
 		}
 	}
 	return res;
+}
+
+std::ostream& operator<<(std::ostream& os, const Affine2Matrix& m) {
+	return display(os, m);
 }
 
 
