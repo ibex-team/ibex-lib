@@ -269,7 +269,6 @@ LinearSolver::Status LinearSolver::getInfeasibleDir(Vector & sol) {
 		//stat1 = mysoplex->getDualfarkas(sol_found);
 		// if (stat1==soplex::SPxSolver::OPTIMAL) // TODO I'm not sure of the value that return getDualfarkas : this condition does not work BNE
 
-
 		for (int i=0; i<nb_rows; i++) {
 			if (((mysoplex->lhs(i) <= -default_max_bound) && (sol_found[i]>=0))||
 				((mysoplex->rhs(i) >=  default_max_bound) && (sol_found[i]<=0))	) {
@@ -297,8 +296,8 @@ LinearSolver::Status LinearSolver::cleanConst() {
 	try {
 		if (dual_solution!=NULL) delete[] dual_solution;
 		dual_solution=NULL;
-		status_prim = 0;
-		status_dual = 0;
+		status_prim = soplex::SPxSolver::UNKNOWN;
+		status_dual = soplex::SPxSolver::UNKNOWN;
 		mysoplex->removeRowRange(nb_vars, nb_rows-1);
 		nb_rows = nb_vars;
 		obj_value = POS_INFINITY;
@@ -315,8 +314,8 @@ LinearSolver::Status LinearSolver::cleanAll() {
 	try {
 		if (dual_solution!=NULL) delete[] dual_solution;
 		dual_solution=NULL;
-		status_prim = 0;
-		status_dual = 0;
+		status_prim = soplex::SPxSolver::UNKNOWN;
+		status_dual = soplex::SPxSolver::UNKNOWN;
 		mysoplex->removeRowRange(0, nb_rows-1);
 		nb_rows = 0;
 		obj_value = POS_INFINITY;

@@ -15,7 +15,7 @@ namespace ibex {
 
 CtcNotIn::CtcNotIn(Function& f, const Interval& y) :
 		Ctc(f.nb_var()), f(f), d1(Dim()), d2(Dim()) {
-
+	assert(f.expr().dim.is_scalar());
 	d1.i()=Interval(NEG_INFINITY,y.lb());
 	d2.i()=Interval(y.ub(),POS_INFINITY);
 }

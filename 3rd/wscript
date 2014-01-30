@@ -700,6 +700,8 @@ def build (bld):
 			bld.fatal ("failed to build ampl")
 
 		if not bld.cmd in ("clean", "uninstall"):
+			if not os.path.exists(bld.env.LIBDIR):
+				os.makedirs(bld.env.LIBDIR)
 			shutil.copyfile(os.path.join(path,"libamplsolver.a"),os.path.join(bld.env.LIBDIR,"libamplsolver.a"))
 		else:
 			os.remove(os.path.join(bld.env.LIBDIR,"libamplsolver.a"))

@@ -19,6 +19,7 @@
 #include "ibex_Vector.h"
 #include "ibex_Matrix.h"
 #include "ibex_IntervalVector.h"
+#include "ibex_Interval.h"
 #include "ibex_CmpOp.h"
 
 #ifdef _IBEX_WITH_SOPLEX_
