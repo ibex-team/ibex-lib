@@ -30,7 +30,7 @@ void CtcForAll::contract(IntervalVector& x) {
 	assert(x.size()+_init.size()==nb_var);
 
 	IntervalVector  box(nb_var);
-	IntervalVector 	save(nb_var);
+	IntervalVector 	box_mid(nb_var);
 	IntervalVector sub(nb_var-x.size());
 	box.put(0, x);
 	box.put(x.size(), _init);
@@ -44,16 +44,16 @@ void CtcForAll::contract(IntervalVector& x) {
 		try {
 			_ctc.contract(box);
 			sub = box.subvector(x.size(), nb_var - 1);
-			for(int i=0; i<x.size(); i++)         save[i]= box[i];
-			for(int i=0; i< nb_var-x.size(); i++) save[i+x.size()] = sub[i].mid();
+			for(int i=0; i<x.size(); i++)         box_mid[i]= box[i];
+			for(int i=0; i< nb_var-x.size(); i++) box_mid[i+x.size()] = sub[i].mid();
 
 			try {
-				_ctc.contract(save);
-			} catch (EmptyBoxException&) {
+				_ctc.contract(box_mid);
+			} catch (EmptyBoxException& e) {
 				x.is_empty();
-				return;
+				throw e;
 			}
-			x &= save.subvector(0, x.size() - 1);
+			x &= box_mid.subvector(0, x.size() - 1);
 			if (x.is_empty())	return;
 
 			if (sub.max_diam()>= _prec) {
@@ -63,13 +63,11 @@ void CtcForAll::contract(IntervalVector& x) {
 				box.put(x.size(), cut.second);
 				l.push(box);
 			}
-		} catch (EmptyBoxException&) {
+		} catch (EmptyBoxException& e) {
 			x.is_empty();
-			return;
+			throw e;
 		}
 	}
-	return;
-
 }
 
 } // end namespace ibex

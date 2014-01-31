@@ -69,8 +69,8 @@ void CtcExist::contract(IntervalVector& x) {
 			}
 		}
 	}
-	x= res;
-	return;
+	x &= res;
+	if (x.is_empty()) throw EmptyBoxException();
 
 }
 
