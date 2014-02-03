@@ -36,11 +36,11 @@ void CtcExist::contract(IntervalVector& x) {
 	box.put(x.size(), _init);
 
 	LargestFirst bsc;
-	std::stack<IntervalVector> l;
-	l.push(box);
+	std::list<IntervalVector> l;
+	l.push_back(box);
 
 	while (!l.empty()) {
-		box = l.top();	l.pop();
+		box = l.front();	l.pop_front();
 		try {
 			_ctc.contract(box);
 		} catch (EmptyBoxException&) { continue; }
@@ -63,9 +63,9 @@ void CtcExist::contract(IntervalVector& x) {
 
 				std::pair<IntervalVector, IntervalVector> cut = bsc.bisect(sub2);
 				box.put(x.size(), cut.first);
-				l.push(box);
+				l.push_back(box);
 				box.put(x.size(), cut.second);
-				l.push(box);
+				l.push_back(box);
 			}
 		}
 	}

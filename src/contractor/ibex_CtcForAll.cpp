@@ -36,36 +36,36 @@ void CtcForAll::contract(IntervalVector& x) {
 	box.put(x.size(), _init);
 
 	LargestFirst bsc;
-	std::stack<IntervalVector> l;
-	l.push(box);
+	std::list<IntervalVector> l;
+	l.push_back(box);
 
 	while (!l.empty()) {
-		box = l.top();	l.pop();
+		box = l.front();	l.pop_front();
 		try {
 			_ctc.contract(box);
-			sub = box.subvector(x.size(), nb_var - 1);
-			for(int i=0; i<x.size(); i++)         box_mid[i]= box[i];
-			for(int i=0; i< nb_var-x.size(); i++) box_mid[i+x.size()] = sub[i].mid();
-
-			try {
-				_ctc.contract(box_mid);
-			} catch (EmptyBoxException& e) {
-				x.is_empty();
-				throw e;
-			}
-			x &= box_mid.subvector(0, x.size() - 1);
-			if (x.is_empty())	return;
-
-			if (sub.max_diam()>= _prec) {
-				std::pair<IntervalVector, IntervalVector> cut = bsc.bisect(sub);
-				box.put(x.size(), cut.first);
-				l.push(box);
-				box.put(x.size(), cut.second);
-				l.push(box);
-			}
 		} catch (EmptyBoxException& e) {
-			x.is_empty();
+			x.set_empty();
 			throw e;
+		}
+		sub = box.subvector(x.size(), nb_var - 1);
+		for(int i=0; i<x.size(); i++)         box_mid[i]= box[i];
+		for(int i=0; i< nb_var-x.size(); i++) box_mid[i+x.size()] = sub[i].mid();
+
+		try {
+			_ctc.contract(box_mid);
+		} catch (EmptyBoxException& e) {
+			x.set_empty();
+			throw e;
+		}
+		x &= box_mid.subvector(0, x.size() - 1);
+		if (x.is_empty()) throw EmptyBoxException();
+
+		if (sub.max_diam()>= _prec) {
+			std::pair<IntervalVector, IntervalVector> cut = bsc.bisect(sub);
+			box.put(x.size(), cut.first);
+			l.push_back(box);
+			box.put(x.size(), cut.second);
+			l.push_back(box);
 		}
 	}
 }
