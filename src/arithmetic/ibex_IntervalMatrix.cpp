@@ -189,6 +189,7 @@ bool IntervalMatrix::is_zero() const {
 	return true;
 }
 
+
 IntervalMatrix IntervalMatrix::submatrix(int row_start_index, int row_end_index, int col_start_index, int col_end_index) const {
 	return _submatrix(*this, row_start_index, row_end_index, col_start_index, col_end_index);
 }
@@ -337,5 +338,14 @@ bool proj_mul(const IntervalMatrix& y, IntervalMatrix& x1, IntervalMatrix& x2, d
 	}
 	return true;
 }
+
+
+
+
+bool            IntervalMatrix::is_subset(const IntervalMatrix& x) const          { return _is_subsetM(*this,x); }
+bool            IntervalMatrix::is_strict_subset(const IntervalMatrix& x) const   { return _is_strict_subsetM(*this,x); }
+
+
+
 
 } // namespace ibex

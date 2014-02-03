@@ -26,6 +26,24 @@ inline void set_empty(IntervalMatrix& m) { m.set_empty(); }
 inline void set_empty(Affine2Matrix& m)  { m.set_empty(); }
 
 
+
+template<class V1,class V2>
+bool _is_subsetM(const V1& v, const V2& x) {
+	if (v.is_empty()) return true;
+	for (int i=0; i<v.nb_rows(); i++)
+		if (!v[i].is_subset(x[i])) return false;
+	return true;
+}
+
+template<class V1,class V2>
+bool _is_strict_subsetM(const V1& v, const V2& x) {
+	if (v.is_empty() && !x.is_empty()) return true;
+	if (x.is_empty()) return false;
+	for (int i=0; i<v.nb_rows(); i++)
+		if (!v[i].is_strict_subset(x[i])) return false;
+	return true;
+}
+
 template<class M>
 inline M _submatrix(const M& m, int row_start_index, int row_end_index, int col_start_index, int col_end_index) {
 	assert(row_start_index>=0 && row_start_index<m.nb_rows());

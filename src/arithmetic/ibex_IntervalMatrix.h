@@ -198,6 +198,52 @@ public:
 	 */
 	bool is_zero() const;
 
+
+	/**
+	 * \brief True iff this interval matrix is a subset of \a x.
+	 *
+	 * \pre Dimension of \a x must be equal to the dimension of this matrix.
+
+	 * \note Always return true if this interval matrix is empty.
+
+	 * \sa #ibex::Interval::is_subset(const Interval&) const.
+	 */
+	bool is_subset(const IntervalMatrix& x) const;
+
+	/**
+	 * \brief True iff this interval matrix is inside the interior of \a x.
+	 *
+	 * \pre Dimension of \a x must be equal to the dimension of this matrix.
+	 *
+	 * \note return true if this interval matrix is empty and \a x not.
+	 *
+	 * \sa #ibex::Interval::is_strict_subset(const Interval&) const.
+	 */
+	bool is_strict_subset(const IntervalMatrix& x) const;
+
+	/**
+	 * \brief True iff this interval matrix is a superset of \a x.
+	 *
+	 * \pre Dimension of \a x must be equal to the dimension of this matrix.
+
+	 * \note Always return true if \a x is empty.
+
+	 * \sa #ibex::Interval::is_superset(const Interval&) const.
+	 */
+	bool is_superset(const IntervalMatrix& x) const;
+
+	/**
+	 * \brief True iff \a x is inside the interior of (*this).
+	 *
+	 * \pre Dimension of \a x must be equal to the dimension of this matrix.
+	 *
+	 * \note return true if x is empty and not (*this).
+	 *
+	 * \sa #ibex::Interval::is_strict_superset(const Interval&) const.
+	 */
+	bool is_strict_superset(const IntervalMatrix& x) const;
+
+
 	/**
 	 * \brief Return a submatrix.
 	 * \pre (*this) must be nonempty
@@ -574,6 +620,14 @@ inline void IntervalMatrix::set_row(int row1, const IntervalVector& v1) {
 
 inline bool IntervalMatrix::is_empty() const {
 	return (*this)[0].is_empty();
+}
+
+inline bool IntervalMatrix::is_superset(const IntervalMatrix& x) const {
+	return x.is_subset(*this);
+}
+
+inline bool IntervalMatrix::is_strict_superset(const IntervalMatrix& x) const {
+	return x.is_strict_subset(*this);
 }
 
 } // namespace ibex

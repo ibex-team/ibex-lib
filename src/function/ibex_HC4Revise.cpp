@@ -40,8 +40,7 @@ bool HC4Revise::proj(const Function& f, const Domain& y, IntervalVector& x) {
 	case Dim::SCALAR:       if (root.i().is_subset(y.i())) return true; break;
 	case Dim::ROW_VECTOR:
 	case Dim::COL_VECTOR:   if (root.v().is_subset(y.v())) return true; break;
-	case Dim::MATRIX:       // TODO: is_subset not implemented for matrices.
-							break;
+	case Dim::MATRIX:       if (root.m().is_subset(y.m())) return true; break;
 	case Dim::MATRIX_ARRAY: assert(false); /* impossible */ break;
 	}
 
