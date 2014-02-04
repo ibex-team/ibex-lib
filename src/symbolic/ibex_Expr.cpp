@@ -172,6 +172,10 @@ ExprConstant::ExprConstant(const Interval& x)
 	value.i() = x;
 }
 
+Interval::operator const ExprConstant&() const {
+	return ExprConstant::new_scalar(*this);
+}
+
 ExprConstant::ExprConstant(const IntervalVector& v, bool in_row)
   : ExprLeaf(in_row? Dim::row_vec(v.size()) : Dim::col_vec(v.size())),
     value(in_row? Dim::row_vec(v.size()) : Dim::col_vec(v.size())) {
@@ -179,11 +183,27 @@ ExprConstant::ExprConstant(const IntervalVector& v, bool in_row)
 	value.v() = v;
 }
 
+Vector::operator const ExprConstant&() const {
+	return ExprConstant::new_vector(*this,false);
+}
+
+IntervalVector::operator const ExprConstant&() const {
+	return ExprConstant::new_vector(*this,false);
+}
+
 ExprConstant::ExprConstant(const IntervalMatrix& m)
   : ExprLeaf(Dim::matrix(m.nb_rows(),m.nb_cols())),
     value(Dim::matrix(m.nb_rows(),m.nb_cols())) {
 
 	value.m() = m;
+}
+
+Matrix::operator const ExprConstant&() const {
+	return ExprConstant::new_matrix(*this);
+}
+
+IntervalMatrix::operator const ExprConstant&() const {
+	return ExprConstant::new_matrix(*this);
 }
 
 ExprConstant::ExprConstant(const IntervalMatrixArray& ma)

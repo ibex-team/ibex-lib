@@ -375,6 +375,11 @@ public:
      */
     IntervalMatrix& operator*=(const IntervalMatrix& m);
 
+    /**
+     * \brief Cast the matrix to an expression
+     */
+    operator const ExprConstant&() const;
+
 private:
 	friend class IntervalMatrixArray;
 

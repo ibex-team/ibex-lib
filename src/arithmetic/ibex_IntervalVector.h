@@ -480,6 +480,11 @@ public:
 	 */
 	IntervalVector& operator*=(const Interval& x1);
 
+    /**
+     * \brief Cast the vector to an expression
+     */
+	operator const ExprConstant&() const;
+
 	IntervalVector() : n(0), vec(NULL) { } // for IntervalMatrix & complementary()
 
 private:

@@ -69,6 +69,7 @@ template <class T>  class Affine2Main;
 class IntervalVector;
 class IntervalMatrix;
 class IntervalMatrixArray;
+class ExprConstant;
 
 /** \defgroup arithmetic Interval Arithmetic */
 
@@ -444,7 +445,12 @@ class Interval {
     typedef IntervalMatrix MATRIX;
     typedef IntervalMatrixArray MATRIX_ARRAY;
 
-//private:
+    /**
+     * \brief Cast the interval to an expression
+     */
+    operator const ExprConstant&() const;
+
+    //private:
 #ifdef _IBEX_WITH_GAOL_
 	/* \brief Wrap the gaol-interval [x]. */
     Interval(const gaol::interval& x);

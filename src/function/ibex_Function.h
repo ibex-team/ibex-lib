@@ -507,6 +507,20 @@ public:
 
 	/**
 	 * \brief Apply this function to the arguments
+	 *
+	 * Works only if the function has five arguments.
+	 */
+	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5);
+
+	/**
+	 * \brief Apply this function to the arguments
+	 *
+	 * Works only if the function has six arguments.
+	 */
+	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6);
+
+	/**
+	 * \brief Apply this function to the arguments
 	 */
 	const ExprApply& operator()(const ExprNode** arg);
 
@@ -515,91 +529,6 @@ public:
 	 */
 	const ExprApply& operator()(const std::vector<const ExprNode*>& arg);
 
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const ExprNode& arg1, const Interval& arg2);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const ExprNode& arg1, const IntervalVector& arg2);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const ExprNode& arg1, const IntervalMatrix& arg2);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const Interval& arg1, const ExprNode& arg2);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const IntervalVector& arg1, const ExprNode& arg2);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const IntervalMatrix& arg1, const ExprNode& arg2);
-
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const Interval& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const IntervalVector& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const IntervalMatrix& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const ExprNode& arg1, const Interval& arg2, const ExprNode& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const ExprNode& arg1, const Interval& arg2, const Interval& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const ExprNode& arg1, const Interval& arg2, const IntervalVector& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const ExprNode& arg1, const Interval& arg2, const IntervalMatrix& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const ExprNode& arg1, const IntervalVector& arg2, const ExprNode& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const ExprNode& arg1, const IntervalVector& arg2, const Interval& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const ExprNode& arg1, const IntervalVector& arg2, const IntervalVector& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const ExprNode& arg1, const IntervalVector& arg2, const IntervalMatrix& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const ExprNode& arg1, const IntervalMatrix& arg2, const ExprNode& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const ExprNode& arg1, const IntervalMatrix& arg2, const Interval& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const ExprNode& arg1, const IntervalMatrix& arg2, const IntervalVector& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const ExprNode& arg1, const IntervalMatrix& arg2, const IntervalMatrix& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const Interval& arg1, const ExprNode& arg2, const ExprNode& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const Interval& arg1, const ExprNode& arg2, const Interval& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const Interval& arg1, const ExprNode& arg2, const IntervalVector& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const Interval& arg1, const ExprNode& arg2, const IntervalMatrix& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const IntervalVector& arg1, const ExprNode& arg2, const ExprNode& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const IntervalVector& arg1, const ExprNode& arg2, const Interval& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const IntervalVector& arg1, const ExprNode& arg2, const IntervalVector& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const IntervalVector& arg1, const ExprNode& arg2, const IntervalMatrix& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const IntervalMatrix& arg1, const ExprNode& arg2, const ExprNode& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const IntervalMatrix& arg1, const ExprNode& arg2, const Interval& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const IntervalMatrix& arg1, const ExprNode& arg2, const IntervalVector& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const IntervalMatrix& arg1, const ExprNode& arg2, const IntervalMatrix& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const Interval& arg1, const Interval& arg3, const ExprNode& arg2);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const Interval& arg1, const IntervalVector& arg3, const ExprNode& arg2);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const Interval& arg1, const IntervalMatrix& arg3, const ExprNode& arg2);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const IntervalVector& arg1, const Interval& arg3, const ExprNode& arg2);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const IntervalVector& arg1, const IntervalVector& arg3, const ExprNode& arg2);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const IntervalVector& arg1, const IntervalMatrix& arg3, const ExprNode& arg2);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const IntervalMatrix& arg1, const Interval& arg3, const ExprNode& arg2);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const IntervalMatrix& arg1, const IntervalVector& arg3, const ExprNode& arg2);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const IntervalMatrix& arg1, const IntervalMatrix& arg3, const ExprNode& arg2);
 };
 
 std::ostream& operator<<(std::ostream&, const Function&);

@@ -195,6 +195,11 @@ public:
      */
     static Matrix ones(int m, int n);
 
+    /**
+     * \brief Cast the matrix to an expression
+     */
+    operator const ExprConstant&() const;
+
 private:
 	int _nb_rows;
 	int _nb_cols;

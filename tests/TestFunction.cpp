@@ -153,4 +153,16 @@ void TestFunction::numctr01() {
 	NumConstraint c(f,EQ);
 }
 
+void TestFunction::apply01() {
+	Variable x("x");
+	Variable y("y");
+	Function f(x,y,x+y,"f");
+	Interval c(0,1);
+	Variable z("z");
+	Function f2(z,f(z,c));
+
+	std::cout << f2 << std::endl;
+	TEST_ASSERT(sameExpr(f2.expr(),"f(z,[0, 1])"));
+}
+
 } // end namespace

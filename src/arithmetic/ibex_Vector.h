@@ -17,6 +17,7 @@
 namespace ibex {
 
 class Matrix; // declared only for friendship
+class ExprConstant;
 
 /**
  * \ingroup arithmetic
@@ -161,6 +162,11 @@ public:
 	 * \brief Create a vector of ones of size n.
 	 */
 	static Vector ones(int n);
+
+	/**
+	 * \brief Cast the vector to an expression
+	 */
+	operator const ExprConstant&() const;
 
 private:
 	friend class Matrix;

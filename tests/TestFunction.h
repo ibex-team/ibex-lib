@@ -28,6 +28,7 @@ public:
 		TEST_ADD(TestFunction::used);
 		TEST_ADD(TestFunction::used02);
 		TEST_ADD(TestFunction::numctr01);
+		TEST_ADD(TestFunction::apply01);
 	}
 
 	// an uninitialized function must be deletable
@@ -45,6 +46,8 @@ public:
 	void used02();
 
 	void numctr01();
+
+	void apply01();
 };
 
 } // end namespace
