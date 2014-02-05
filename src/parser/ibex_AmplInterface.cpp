@@ -9,6 +9,8 @@
 //============================================================================
 
 #include "ibex_AmplInterface.h"
+
+#ifdef _IBEX_WITH_AMPL_
 #include "ibex_Exception.h"
 
 #include "asl.h"
@@ -533,7 +535,6 @@ const ExprNode& AmplInterface::nl2expr(expr *e) {
 }
 
 
-
-
-
 }
+
+#endif // _IBEX_WITH_AMPL_

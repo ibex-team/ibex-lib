@@ -11,7 +11,7 @@
 #ifndef IBEX_LINEARSOLVER_H_
 #define IBEX_LINEARSOLVER_H_
 
-#include "ibex_cplex_or_soplex.h"
+#include "ibex_Setting.h"
 
 
 #include <string.h>
@@ -21,6 +21,7 @@
 #include "ibex_IntervalVector.h"
 #include "ibex_Interval.h"
 #include "ibex_CmpOp.h"
+#include "ibex_Exception.h"
 
 #ifdef _IBEX_WITH_SOPLEX_
 #include "soplex.h"
@@ -30,9 +31,13 @@
 #include "ilcplex/cplex.h"
 
 #else
+#ifdef _IBEX_WITH_CLP_
+#include "coin/ClpSimplex.hpp"
+#else
 #ifdef _IBEX_WITH_ILOCPLEX_
 #include <ilcplex/ilocplex.h>
 // TODO not finish yet
+#endif
 #endif
 #endif
 #endif
@@ -53,8 +58,8 @@ private:
 
 	double epsilon;
 
-	int status_prim;
-	int status_dual;
+	int status_prim; //= 1 if OK
+	int status_dual; //= 1 if OK
 	double * primal_solution;
 	double * dual_solution;
 
@@ -78,6 +83,12 @@ private:
 	IloCplex	*mycplex;
 #endif
 
+
+#ifdef _IBEX_WITH_CLP_
+	ClpSimplex 	*myclp;
+	int * _which;
+	int * _row1Index;
+#endif
 
 
 public:

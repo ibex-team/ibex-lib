@@ -12,6 +12,10 @@
 #ifndef __IBEX_AMPL_INTERFACE_H__
 #define __IBEX_AMPL_INTERFACE_H__
 
+#include "ibex_Setting.h"
+
+#ifdef _IBEX_WITH_AMPL_
+
 #include "ibex_System.h"
 #include "ibex_SystemFactory.h"
 #include "ibex_Expr.h"
@@ -48,4 +52,5 @@ public:
 }
 
 
+#endif
 #endif /* IBEX_AMPLINTERFACE_H_ */

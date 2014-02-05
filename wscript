@@ -32,6 +32,9 @@ def options (opt):
 
 	opt.add_option ("--with-debug",  action="store_true", dest="DEBUG",
 			help = "enable debugging")
+	
+	opt.add_option ("--disable-ampl", action="store_true", dest="DISABLE_AMPL",
+			help = "do not use AMPL")
 
 	opt.add_option ("--with-gaol",   action="store", type="string", dest="GAOL_PATH",
 			help = "location of the Gaol lib")
@@ -39,10 +42,14 @@ def options (opt):
 			help = "location of the Profil/Bias lib")
 	opt.add_option ("--with-filib",   action="store", type="string", dest="FILIB_PATH",
 			help = "location of the filib lib")
+	
 	opt.add_option ("--with-soplex", action="store", type="string", dest="SOPLEX_PATH",
 			help = "location of the Soplex lib")
 	opt.add_option ("--with-cplex", action="store", type="string", dest="CPLEX_PATH",
 			help = "location of the Cplex lib")
+	opt.add_option ("--with-clp", action="store", type="string", dest="CLP_PATH",
+			help = "location of the Clp lib")
+	
 	opt.add_option ("--with-ampl",   action="store", type="string", dest="AMPL_PATH",
 			help = "location of the amplsolver lib")
 
@@ -121,60 +128,12 @@ def configure (conf):
 
 		return os.path.abspath (os.path.expanduser (path)) if path else find_lib (prefix)
 
-	path_so = candidate_lib_path ("SOPLEX_PATH", "soplex-")
-	path_c = candidate_lib_path ("CPLEX_PATH", "cplex")
-	
-	# Soplex lib
-	if path_so:
-		conf.msg ("Candidate directory for lib Soplex", path_so)
-
-		env.append_unique ("INCLUDES",  os.path.join (path_so, "src"))
-
-		conf.check_cxx (header_name	= "soplex.h")
-
-		# Try without and with -lz (soplex may be built without zlib)
-		for l in ("soplex", ["soplex", "z"]):
-			if (conf.check_cxx (lib = l, uselib_store = "IBEX_DEPS",
-					libpath = [os.path.join (path_so, "lib")],
-					mandatory = False,
-					fragment = """
-						#include <soplex.h>
-						int main (int argc, char* argv[]) {
-							soplex::SPxLP lp;
-							lp.read(std::cin);
-							return 0;
-						}
-					""")):
-				break
-		else:
-			conf.fatal ("cannot link with the Soplex library")
-			
-	# CPLEX lib
-	elif path_c:
-		conf.msg ("Candidate directory for lib Cplex", path_c)
-
-		env.append_unique ("INCLUDES",  os.path.join (path_c, "cplex/include/"))
-		conf.check_cxx (header_name	= "ilcplex/cplex.h")
-		dirtmp1 = os.path.join(path_c, "cplex/lib/")
-		for pp in os.listdir(dirtmp1) :
-			dirtmp2= os.path.join (dirtmp1,pp)
-			if (os.path.isdir(dirtmp2)):
-				if (not(conf.check_cxx (lib = ["cplex", "pthread"], uselib_store = "IBEX_DEPS",
-						libpath = [os.path.join(dirtmp2, "static_pic/")],  
-						mandatory = False,
-						fragment = """
-							#include "ilcplex/cplex.h"
-							int main (int argc, char* argv[]) {
-								CPXENVptr  envcplex;
-								CPXLPptr lpcplex;
-								return 0;
-							}
-						"""))):
-					conf.fatal ("cannot link with the Cplex library")			
-	else:
-		conf.fatal ("cannot find the Soplex library or the Cplex library,  please use --with-soplex=SOPLEX_PATH or --with-cplex=CPLEX_PATH")
-	
-
+	##################################################################################################
+	# AMPL is disable on Window
+	if env.DEST_OS == "win32" or conf.options.DISABLE_AMPL:
+		conf.env.DISABLE_AMPL =True 
+		
+	##################################################################################################
 	# JNI
 	env.WITH_JNI = conf.options.WITH_JNI
 	if env.WITH_JNI:
@@ -200,14 +159,16 @@ def configure (conf):
 			#   http://stackoverflow.com/questions/8063842/mingw32-g-and-stdcall-suffix1
 			env.append_unique ("LINKFLAGS_JAVA", "-Wl,--kill-at")
 			
-
+	##################################################################################################
 	# Bison / Flex
 	env.append_unique ("BISONFLAGS", ["--name-prefix=ibex", "--report=all", "--file-prefix=parser"])
 	env.append_unique ("FLEXFLAGS", "-Pibex")
 
+	##################################################################################################
 	conf.env.append_unique ("LIBPATH", ["3rd", "src"])
 	conf.recurse ("3rd src")
-    
+	
+##################################################################################################
 def build (bld):
 	bld.recurse ("src examples 3rd")
 
