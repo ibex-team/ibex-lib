@@ -58,7 +58,7 @@ std::ostream& operator<<(std::ostream& os, const Interval& x) {
 	if (x.is_empty())
 		return os << "[ empty ]";
 	else
-		filib::interval<FI_BASE,FI_ROUNDING,FI_MODE>::precision(10);
+		filib::interval<FI_BASE,FI_ROUNDING,FI_MODE>::precision(os.precision());
 		return os << x.itv;
 }
 

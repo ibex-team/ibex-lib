@@ -583,10 +583,10 @@ def configure (conf):
 			conf.find_program ("sh")
 
 			cmd = [conf.env.SH, "-c",
-				"./configure --prefix=%r %s"
+				"./configure --quiet --prefix=%r %s"
 				% (convert_path_win2msys (conf.env.PREFIX), shared)]
 		else:
-			cmd =	"./configure --prefix=%r %s" % (conf.env.PREFIX, shared)
+			cmd =	"./configure --quiet --prefix=%r %s" % (conf.env.PREFIX, shared)
 
 		if conf.exec_command (cmd, cwd=filib_dir.abspath(), stdout=None, stderr=None):
 			conf.fatal ("failed to configure filib (%s)" % cmd)
@@ -629,7 +629,7 @@ def configure (conf):
 		ibex_append_path ("INCLUDES", os.path.join (conf.env.PREFIX, "include"))
 		ibex_append_path ("LIBPATH", os.path.join (conf.env.PREFIX, "lib"))
 
-	#	ibex_env.append_unique ("INCLUDES_IBEX_DEPS", os.path.join (conf.env.PREFIX, "include"))
+		ibex_env.append_unique ("INCLUDES_IBEX_DEPS", os.path.join (conf.env.PREFIX, "include"))
 		ibex_env.append_unique ("LIB_IBEX_DEPS", ["Clp","CoinUtils","m"])
 		
 		conf.find_program ("make")
@@ -643,7 +643,7 @@ def configure (conf):
 				"./configure -C --disable-zlib  --disable-bzlib --prefix=%r %s"
 				% (convert_path_win2msys (conf.env.PREFIX), shared)]
 		else:
-			cmd =	"./configure -C  --disable-zlib --disable-bzlib --prefix=%r %s" % (os.path.abspath (conf.env.PREFIX), shared)
+			cmd =	"./configure -C --disable-zlib --disable-bzlib --prefix=%r %s" % (os.path.abspath (conf.env.PREFIX), shared)
 
 		if conf.exec_command (cmd, cwd=clp_dir.abspath(), stdout=None, stderr=None):
 			conf.fatal ("failed to configure CLP (%s)" % cmd)
@@ -818,7 +818,7 @@ def build (bld):
 			if bld.cmd in ("install"):
 				cmd = [bld.cmd]
 			else :	
-				cmd = ["clean"] if bld.cmd in ("uninstall", "clean") else ["install"]
+				cmd = ["uninstall"] if bld.cmd in ("uninstall", "clean") else ["install"]
 			if bld.exec_command (
 				[bld.env.MAKE, "-j", str(bld.options.jobs)] + cmd,
 				cwd	= path,

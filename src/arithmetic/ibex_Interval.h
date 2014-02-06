@@ -53,9 +53,11 @@
 	#define FI_MODE filib::i_mode_extended_flag
 	//#define FI_MODE filib::i_mode_normal
 	/** \brief NEG_INFINITY: <double> representation of -oo */
-	#define NEG_INFINITY filib::primitive::compose(1,0x7FF,0,0)
+	//#define NEG_INFINITY filib::primitive::compose(1,0x7FF,0,0)
+	#define NEG_INFINITY filib::primitive::compose(1,0x7FE,(1 << 21)-1,0xffffffff)
 	/** \brief POS_INFINITY: <double> representation of +oo */
-	#define POS_INFINITY filib::primitive::compose(0,0x7FF,0,0)
+	//#define POS_INFINITY filib::primitive::compose(0,0x7FF,0,0)
+	#define POS_INFINITY filib::primitive::compose(0,0x7FE,(1 << 21)-1,0xffffffff)
 	/** \brief IBEX_NAN: <double> representation of NaN */
 	#define IBEX_NAN filib::primitive::compose(0,0x7FF,1 << 19,0)
 #endif
