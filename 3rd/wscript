@@ -255,16 +255,19 @@ def configure (conf):
 							myclp.resize(2,2);
 							return 0;
 						} """, mandatory = False)	
-		
-		has_Clplib = conf.check_cxx (lib = ["Clp","CoinUtils","m"], uselib_store = "IBEX_DEPS",
-									libpath = [os.path.join (with_clp, "lib")],
-									fragment = """
-						#include "coin/ClpSimplex.hpp"
-						int main (int argc, char* argv[]) {
-							ClpSimplex 	myclp;
-							myclp.resize(2,2);
-							return 0;
-						} """, mandatory = False)	
+		if not has_Clplib_z:
+			has_Clplib = conf.check_cxx (lib = ["Clp","CoinUtils","m"], uselib_store = "IBEX_DEPS",
+										libpath = [os.path.join (with_clp, "lib")],
+										fragment = """
+							#include "coin/ClpSimplex.hpp"
+							int main (int argc, char* argv[]) {
+								ClpSimplex 	myclp;
+								myclp.resize(2,2);
+								return 0;
+							} """, mandatory = False)	
+		else:
+			has_Clplib = True
+			
 		if mandatory and (not (has_Clplib or has_Clplib_z)):
 			conf.fatal ("cannot link with the Clp library")
 			
@@ -568,7 +571,7 @@ def configure (conf):
 		ibex_append_path ("INCLUDES", conf.env.FILIB)
 		ibex_append_path ("LIBPATH", os.path.join (filib_dir.abspath(), "libprim", ".libs"))
 
-	#	ibex_env.append_unique ("INCLUDES_IBEX_DEPS", os.path.join (conf.env.PREFIX, "include"))
+		ibex_env.append_unique ("INCLUDES_IBEX_DEPS", os.path.join (conf.env.PREFIX, "include"))
 		ibex_env.append_unique ("LIB_IBEX_DEPS", "prim")
 
 		conf.find_program ("make")
@@ -599,7 +602,7 @@ def configure (conf):
 		ibex_append_path ("INCLUDES", conf.env.AMPL)
 		ibex_append_path ("LIBPATH", ampl_dir.abspath())
 
-	#	ibex_env.append_unique ("INCLUDES_IBEX_DEPS", os.path.join (conf.env.PREFIX, "include"))
+		ibex_env.append_unique ("INCLUDES_IBEX_DEPS", os.path.join (conf.env.PREFIX, "include"))
 		ibex_env.append_unique ("LIB_IBEX_DEPS", ["amplsolver","dl"])
 
 		conf.find_program ("make")

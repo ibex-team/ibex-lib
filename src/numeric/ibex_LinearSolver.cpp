@@ -1412,17 +1412,19 @@ LinearSolver::Status LinearSolver::getDualSol(Vector & solution_dual) {
 LinearSolver::Status LinearSolver::getInfeasibleDir(Vector & sol) {
 	LinearSolver::Status res= FAIL;
 	try {
-		if (myclp->rayExists()){
-			double * sol_found = myclp->ray();
+
+		double * sol_found = myclp->infeasibilityRay();
+		if (sol_found) {
 			for (int i=0; i<nb_rows; i++) {
 				if (((myclp->getRowLower()[i] <= -default_max_bound) && (sol_found[i]>=0))||
-				   (( myclp->getRowUpper()[i] >=  default_max_bound) && (sol_found[i]<=0))	) {
+						(( myclp->getRowUpper()[i] >=  default_max_bound) && (sol_found[i]<=0))	) {
 					sol[i]=0.0;
 				}
 				else {
 					sol[i]=sol_found[i];
 				}
 			}
+			delete [] sol_found;
 			res =OK;
 		}  else	{
 			res = FAIL;
