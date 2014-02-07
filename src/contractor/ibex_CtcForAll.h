@@ -13,7 +13,6 @@
 #include "ibex_Ctc.h"
 #include "ibex_CtcFwdBwd.h"
 #include "ibex_LargestFirst.h"
-#include <list>
 
 namespace ibex {
 
@@ -37,6 +36,9 @@ public:
 	 * \brief Contract a box.
 	 */
 	void contract(IntervalVector& box);
+
+	IntervalVector& getInit();
+	void setInit(IntervalVector& init);
 
 private:
 	/**

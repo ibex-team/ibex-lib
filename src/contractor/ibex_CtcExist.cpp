@@ -26,6 +26,15 @@ CtcExist::CtcExist(Ctc& p, double prec,const  IntervalVector& init_box) :
 	assert(init_box.size()<nb_var);
 }
 
+IntervalVector& CtcExist::getInit(){
+	return _init;
+}
+void CtcExist::setInit(IntervalVector& init){
+	_init = init;
+}
+
+
+
 void CtcExist::contract(IntervalVector& x) {
 	assert(x.size()+_init.size()==nb_var);
 
@@ -36,11 +45,11 @@ void CtcExist::contract(IntervalVector& x) {
 	box.put(x.size(), _init);
 
 	LargestFirst bsc;
-	std::list<IntervalVector> l;
-	l.push_back(box);
+	std::stack<IntervalVector> l;
+	l.push(box);
 
 	while (!l.empty()) {
-		box = l.front();	l.pop_front();
+		box = l.top();	l.pop();
 		try {
 			_ctc.contract(box);
 		} catch (EmptyBoxException&) { continue; }
@@ -63,9 +72,9 @@ void CtcExist::contract(IntervalVector& x) {
 
 				std::pair<IntervalVector, IntervalVector> cut = bsc.bisect(sub2);
 				box.put(x.size(), cut.first);
-				l.push_back(box);
+				l.push(box);
 				box.put(x.size(), cut.second);
-				l.push_back(box);
+				l.push(box);
 			}
 		}
 	}

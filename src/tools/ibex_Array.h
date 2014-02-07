@@ -105,6 +105,76 @@ public:
 	Array(T& x1, T& x2, T& x3, T& x4, T& x5, T& x6);
 
 	/**
+	 * \brief Create an array with 7 references.
+	 */
+	Array(T& x1, T& x2, T& x3, T& x4, T& x5, T& x6, T& x7);
+
+	/**
+	 * \brief Create an array with 8 references.
+	 */
+	Array(T& x1, T& x2, T& x3, T& x4, T& x5, T& x6, T& x7, T& x8);
+
+	/**
+	 * \brief Create an array with 9 references.
+	 */
+	Array(T& x1, T& x2, T& x3, T& x4, T& x5, T& x6, T& x7, T& x8, T& x9);
+
+	/**
+	 * \brief Create an array with 10 references.
+	 */
+	Array(T& x1, T& x2, T& x3, T& x4, T& x5, T& x6, T& x7, T& x8, T& x9, T& x10);
+
+	/**
+	 * \brief Create an array with 11 references.
+	 */
+	Array(T& x1, T& x2, T& x3, T& x4, T& x5, T& x6, T& x7, T& x8, T& x9, T& x10, T& x11);
+
+	/**
+	 * \brief Create an array with 12 references.
+	 */
+	Array(T& x1, T& x2, T& x3, T& x4, T& x5, T& x6, T& x7, T& x8, T& x9, T& x10, T& x11, T& x12);
+
+	/**
+	 * \brief Create an array with 13 references.
+	 */
+	Array(T& x1, T& x2, T& x3, T& x4, T& x5, T& x6, T& x7, T& x8, T& x9, T& x10, T& x11, T& x12, T& x13);
+
+	/**
+	 * \brief Create an array with 14 references.
+	 */
+	Array(T& x1, T& x2, T& x3, T& x4, T& x5, T& x6, T& x7, T& x8, T& x9, T& x10, T& x11, T& x12, T& x13, T& x14);
+
+	/**
+	 * \brief Create an array with 15 references.
+	 */
+	Array(T& x1, T& x2, T& x3, T& x4, T& x5, T& x6, T& x7, T& x8, T& x9, T& x10, T& x11, T& x12, T& x13, T& x14, T& x15);
+
+	/**
+	 * \brief Create an array with 16 references.
+	 */
+	Array(T& x1, T& x2, T& x3, T& x4, T& x5, T& x6, T& x7, T& x8, T& x9, T& x10, T& x11, T& x12, T& x13, T& x14, T& x15, T& x16);
+
+	/**
+	 * \brief Create an array with 17 references.
+	 */
+	Array(T& x1, T& x2, T& x3, T& x4, T& x5, T& x6, T& x7, T& x8, T& x9, T& x10, T& x11, T& x12, T& x13, T& x14, T& x15, T& x16, T& x17);
+
+	/**
+	 * \brief Create an array with 18 references.
+	 */
+	Array(T& x1, T& x2, T& x3, T& x4, T& x5, T& x6, T& x7, T& x8, T& x9, T& x10, T& x11, T& x12, T& x13, T& x14, T& x15, T& x16, T& x17, T& x18);
+
+	/**
+	 * \brief Create an array with 19 references.
+	 */
+	Array(T& x1, T& x2, T& x3, T& x4, T& x5, T& x6, T& x7, T& x8, T& x9, T& x10, T& x11, T& x12, T& x13, T& x14, T& x15, T& x16, T& x17, T& x18, T& x19);
+
+	/**
+	 * \brief Create an array with 20 references.
+	 */
+	Array(T& x1, T& x2, T& x3, T& x4, T& x5, T& x6, T& x7, T& x8, T& x9, T& x10, T& x11, T& x12, T& x13, T& x14, T& x15, T& x16, T& x17, T& x18, T& x19, T& x20);
+
+	/**
 	 * \brief Duplicate this instance.
 	 *
 	 */
@@ -259,6 +329,251 @@ Array<T>::Array(T& x1, T& x2, T& x3, T& x4, T& x5, T& x6) : _nb(6), array(new T*
 	array[3] = &x4;
 	array[4] = &x5;
 	array[5] = &x6;
+}
+
+template<class T>
+Array<T>::Array(T& x1, T& x2, T& x3, T& x4, T& x5, T& x6, T& x7) : _nb(7), array(new T*[7]) {
+	array[0] = &x1;
+	array[1] = &x2;
+	array[2] = &x3;
+	array[3] = &x4;
+	array[4] = &x5;
+	array[5] = &x6;
+	array[6] = &x7;
+}
+
+template<class T>
+Array<T>::Array(T& x1, T& x2, T& x3, T& x4, T& x5, T& x6, T& x7, T& x8) : _nb(8), array(new T*[8]) {
+	array[0] = &x1;
+	array[1] = &x2;
+	array[2] = &x3;
+	array[3] = &x4;
+	array[4] = &x5;
+	array[5] = &x6;
+	array[6] = &x7;
+	array[7] = &x8;
+}
+
+template<class T>
+Array<T>::Array(T& x1, T& x2, T& x3, T& x4, T& x5, T& x6, T& x7, T& x8, T& x9) : _nb(9), array(new T*[9]) {
+	array[0] = &x1;
+	array[1] = &x2;
+	array[2] = &x3;
+	array[3] = &x4;
+	array[4] = &x5;
+	array[5] = &x6;
+	array[6] = &x7;
+	array[7] = &x8;
+	array[8] = &x9;
+}
+
+template<class T>
+Array<T>::Array(T& x1, T& x2, T& x3, T& x4, T& x5, T& x6, T& x7, T& x8, T& x9, T& x10) : _nb(10), array(new T*[10]) {
+	array[0]  = &x1;
+	array[1]  = &x2;
+	array[2]  = &x3;
+	array[3]  = &x4;
+	array[4]  = &x5;
+	array[5]  = &x6;
+	array[6]  = &x7;
+	array[7]  = &x8;
+	array[8]  = &x9;
+	array[9]  = &x10;
+}
+
+template<class T>
+Array<T>::Array(T& x1, T& x2, T& x3, T& x4, T& x5, T& x6, T& x7, T& x8, T& x9, T& x10, T& x11) : _nb(11), array(new T*[11]) {
+	array[0]  = &x1;
+	array[1]  = &x2;
+	array[2]  = &x3;
+	array[3]  = &x4;
+	array[4]  = &x5;
+	array[5]  = &x6;
+	array[6]  = &x7;
+	array[7]  = &x8;
+	array[8]  = &x9;
+	array[9]  = &x10;
+	array[10] = &x11;
+}
+
+template<class T>
+Array<T>::Array(T& x1, T& x2, T& x3, T& x4, T& x5, T& x6, T& x7, T& x8, T& x9, T& x10, T& x11, T& x12) : _nb(12), array(new T*[12]) {
+	array[0]  = &x1;
+	array[1]  = &x2;
+	array[2]  = &x3;
+	array[3]  = &x4;
+	array[4]  = &x5;
+	array[5]  = &x6;
+	array[6]  = &x7;
+	array[7]  = &x8;
+	array[8]  = &x9;
+	array[9]  = &x10;
+	array[10] = &x11;
+	array[11] = &x12;
+}
+
+template<class T>
+Array<T>::Array(T& x1, T& x2, T& x3, T& x4, T& x5, T& x6, T& x7, T& x8, T& x9, T& x10, T& x11, T& x12, T& x13) : _nb(13), array(new T*[13]) {
+	array[0]  = &x1;
+	array[1]  = &x2;
+	array[2]  = &x3;
+	array[3]  = &x4;
+	array[4]  = &x5;
+	array[5]  = &x6;
+	array[6]  = &x7;
+	array[7]  = &x8;
+	array[8]  = &x9;
+	array[9]  = &x10;
+	array[10] = &x11;
+	array[11] = &x12;
+	array[12] = &x13;
+}
+
+template<class T>
+Array<T>::Array(T& x1, T& x2, T& x3, T& x4, T& x5, T& x6, T& x7, T& x8, T& x9, T& x10, T& x11, T& x12, T& x13, T& x14) : _nb(14), array(new T*[14]) {
+	array[0]  = &x1;
+	array[1]  = &x2;
+	array[2]  = &x3;
+	array[3]  = &x4;
+	array[4]  = &x5;
+	array[5]  = &x6;
+	array[6]  = &x7;
+	array[7]  = &x8;
+	array[8]  = &x9;
+	array[9]  = &x10;
+	array[10] = &x11;
+	array[11] = &x12;
+	array[12] = &x13;
+	array[13] = &x14;
+}
+
+template<class T>
+Array<T>::Array(T& x1, T& x2, T& x3, T& x4, T& x5, T& x6, T& x7, T& x8, T& x9, T& x10, T& x11, T& x12, T& x13, T& x14, T& x15) : _nb(15), array(new T*[15]) {
+	array[0]  = &x1;
+	array[1]  = &x2;
+	array[2]  = &x3;
+	array[3]  = &x4;
+	array[4]  = &x5;
+	array[5]  = &x6;
+	array[6]  = &x7;
+	array[7]  = &x8;
+	array[8]  = &x9;
+	array[9]  = &x10;
+	array[10] = &x11;
+	array[11] = &x12;
+	array[12] = &x13;
+	array[13] = &x14;
+	array[14] = &x15;
+}
+
+template<class T>
+Array<T>::Array(T& x1, T& x2, T& x3, T& x4, T& x5, T& x6, T& x7, T& x8, T& x9, T& x10, T& x11, T& x12, T& x13, T& x14, T& x15, T& x16) : _nb(16), array(new T*[16]) {
+	array[0]  = &x1;
+	array[1]  = &x2;
+	array[2]  = &x3;
+	array[3]  = &x4;
+	array[4]  = &x5;
+	array[5]  = &x6;
+	array[6]  = &x7;
+	array[7]  = &x8;
+	array[8]  = &x9;
+	array[9]  = &x10;
+	array[10] = &x11;
+	array[11] = &x12;
+	array[12] = &x13;
+	array[13] = &x14;
+	array[14] = &x15;
+	array[15] = &x16;
+}
+
+template<class T>
+Array<T>::Array(T& x1, T& x2, T& x3, T& x4, T& x5, T& x6, T& x7, T& x8, T& x9, T& x10, T& x11, T& x12, T& x13, T& x14, T& x15, T& x16, T& x17) : _nb(17), array(new T*[17]) {
+	array[0]  = &x1;
+	array[1]  = &x2;
+	array[2]  = &x3;
+	array[3]  = &x4;
+	array[4]  = &x5;
+	array[5]  = &x6;
+	array[6]  = &x7;
+	array[7]  = &x8;
+	array[8]  = &x9;
+	array[9]  = &x10;
+	array[10] = &x11;
+	array[11] = &x12;
+	array[12] = &x13;
+	array[13] = &x14;
+	array[14] = &x15;
+	array[15] = &x16;
+	array[16] = &x17;
+}
+
+template<class T>
+Array<T>::Array(T& x1, T& x2, T& x3, T& x4, T& x5, T& x6, T& x7, T& x8, T& x9, T& x10, T& x11, T& x12, T& x13, T& x14, T& x15, T& x16, T& x17, T& x18) : _nb(18), array(new T*[18]) {
+	array[0]  = &x1;
+	array[1]  = &x2;
+	array[2]  = &x3;
+	array[3]  = &x4;
+	array[4]  = &x5;
+	array[5]  = &x6;
+	array[6]  = &x7;
+	array[7]  = &x8;
+	array[8]  = &x9;
+	array[9]  = &x10;
+	array[10] = &x11;
+	array[11] = &x12;
+	array[12] = &x13;
+	array[13] = &x14;
+	array[14] = &x15;
+	array[15] = &x16;
+	array[16] = &x17;
+	array[17] = &x18;
+}
+
+template<class T>
+Array<T>::Array(T& x1, T& x2, T& x3, T& x4, T& x5, T& x6, T& x7, T& x8, T& x9, T& x10, T& x11, T& x12, T& x13, T& x14, T& x15, T& x16, T& x17, T& x18, T& x19) : _nb(19), array(new T*[19]) {
+	array[0]  = &x1;
+	array[1]  = &x2;
+	array[2]  = &x3;
+	array[3]  = &x4;
+	array[4]  = &x5;
+	array[5]  = &x6;
+	array[6]  = &x7;
+	array[7]  = &x8;
+	array[8]  = &x9;
+	array[9]  = &x10;
+	array[10] = &x11;
+	array[11] = &x12;
+	array[12] = &x13;
+	array[13] = &x14;
+	array[14] = &x15;
+	array[15] = &x16;
+	array[16] = &x17;
+	array[17] = &x18;
+	array[18] = &x19;
+}
+
+template<class T>
+Array<T>::Array(T& x1, T& x2, T& x3, T& x4, T& x5, T& x6, T& x7, T& x8, T& x9, T& x10, T& x11, T& x12, T& x13, T& x14, T& x15, T& x16, T& x17, T& x18, T& x19, T& x20) : _nb(20), array(new T*[20]) {
+	array[0]  = &x1;
+	array[1]  = &x2;
+	array[2]  = &x3;
+	array[3]  = &x4;
+	array[4]  = &x5;
+	array[5]  = &x6;
+	array[6]  = &x7;
+	array[7]  = &x8;
+	array[8]  = &x9;
+	array[9]  = &x10;
+	array[10] = &x11;
+	array[11] = &x12;
+	array[12] = &x13;
+	array[13] = &x14;
+	array[14] = &x15;
+	array[15] = &x16;
+	array[16] = &x17;
+	array[17] = &x18;
+	array[18] = &x19;
+	array[19] = &x20;
 }
 
 template<class T>

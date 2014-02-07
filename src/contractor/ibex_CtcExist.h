@@ -39,6 +39,9 @@ public:
 	 */
 	void contract(IntervalVector& x);
 
+	IntervalVector& getInit();
+	void setInit(IntervalVector& init);
+
 private:
 	/**
 	 * \brief The Contractor.
