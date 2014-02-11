@@ -49,8 +49,16 @@ System* system=NULL;            // standard AMPL-like system
 // Note: when a stand-alone constraint is read by CHOCO
 // the field system->nb_var must be set *before* calling the parser
 // ******************
+bool choco_start=false;        // activate generation of pseudo-start token
+                               // for CHOCO
 
-Function* function=NULL;       // when a single function is loaded
+Function* function=NULL;       // used when a single function is loaded 
+                               // either from a file or using a string in C++ directly
+			       // e.g., Function f("x","y","x+y");
+
+// when a function is created with a string in C++
+// we need to now the symbols of the variables
+const Array<const ExprSymbol>* function_vars;
 
 /* ===============================================================================================*/
 
@@ -69,6 +77,7 @@ void begin() {
 	while (!scopes.empty()) scopes.pop();
 
 	scopes.push(Scope()); // a fresh new scope!
+	// TODO: it seems that this first scope is not popped during this call to the parser (but the next one)
 }
 
 void begin_system() {
@@ -94,12 +103,26 @@ void begin_choco() {
 	// ------------------------------------------
 }
 
-void begin_function() {
+void begin_function_file() {
 	if (function==NULL) { // someone tries to load a system from a file containing a function only
 		throw SyntaxError("a system requires declaration of variables.");
 	}
 
 	begin();
+}
+
+void begin_function_expr() {
+	if (function==NULL) { // someone tries to load a system from a file containing an expression only
+		throw SyntaxError("a system requires declaration of variables.");
+	} 
+	if (function_vars==NULL) { // someone tries to load a function from a file containing an expression only
+		throw SyntaxError("missing \"function\" keyword.");
+	}
+	begin();
+	//scopes.push(Scope(scopes.top(),true)); // useless
+	for (int i=0; i<function_vars->size(); i++) {
+		scopes.top().add_func_input((*function_vars)[i].name, &((*function_vars)[i]));
+	}
 }
 
 void end_system() {
@@ -116,7 +139,7 @@ void end_choco() {
 	// TODO: see end_system()
 }
 
-void end_function() {
+void end_function_file() {
 	if (source.func.empty()) {
 		throw SyntaxError("no function declared in file");
 	}
@@ -124,11 +147,22 @@ void end_function() {
 	Array<const ExprSymbol> x(f.nb_arg());
 	varcopy(f.args(),x);
 	const ExprNode& y=ExprCopy().copy(f.args(),x,f.expr());
+	// TODO: where is source.func[0] deleted?
 
 	function->init(x,y);
 	((char*&) function->name)=strdup(f.name);
 	source.cleanup();
 	// TODO: see end_system()
+}
+
+void end_function_expr(const ExprNode& expr) {
+	Array<const ExprSymbol> x(function_vars->size());
+	varcopy(*function_vars,x);
+	const ExprNode& y=ExprGenerator(scopes.top()).generate(*function_vars,x,expr);
+	cleanup(expr,true); // warning: will delete symbols in function_vars.
+	//scopes.pop();     // useless (see begin_function_expr)
+	function->init(x,y);
+	source.cleanup();
 }
 
 int _2int(const ExprNode& expr) {

@@ -35,6 +35,8 @@
 
 }
 
+%token TK_CHOCO                        // pseudo-start token
+
 %token <str> TK_CONSTANT
 %token <str> TK_NEW_SYMBOL
 %token <str> TK_FUNC_SYMBOL
@@ -58,7 +60,6 @@
 %token TK_LEQ  TK_GEQ   TK_EQU  TK_ASSIGN TK_CHI
 
 %token TK_BEGIN TK_END TK_FOR TK_FROM TK_TO TK_RETURN
-
 %token TK_CTRS TK_MINIMIZE
 
 %token TK_IN
@@ -99,9 +100,11 @@
 program       :                                 { begin_system(); }         
                 system                          { end_system(); } 
               |                                 { begin_choco(); } 
-                choco_ctr                       { end_choco(); }
-              |                                 { begin_function(); }
-                decl_fnc                        { end_function(); }
+                TK_CHOCO choco_ctr              { end_choco(); }
+              |                                 { begin_function_file(); }
+                decl_fnc                        { end_function_file(); }
+              |                                 { begin_function_expr(); }
+                expr                            { end_function_expr(*$2); }              
               ;
               
 

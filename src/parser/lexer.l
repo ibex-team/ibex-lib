@@ -24,6 +24,7 @@
 namespace ibex {
 namespace parser {
 extern std::stack<Scope> scopes;
+extern bool choco_start;
 
 } // end namespace
 } // end namespace
@@ -37,7 +38,15 @@ using namespace ibex::parser;
 
 %%
 
-"constants"|"Constants"|"CONSTANTS"	 { return TK_CONST; }
+%{
+  if (choco_start) {
+    choco_start = false; // reinit
+    /* return pseudo-start token (to avoid shift/reduce conflict) */
+    return TK_CHOCO;
+  }
+%}
+
+"constants"|"Constants"|"CONSTANTS"	     { return TK_CONST; }
 "variables"|"Variables"|"VARIABLES"      { return TK_VARS; }
 "parameters"|"Parameters"|"PARAMETERS"	 { return TK_PARAM; }
 "function"|"Function"|"FUNCTION"         { return TK_FUNCTION; }
@@ -75,7 +84,7 @@ using namespace ibex::parser;
 "for"|"For"|"FOR"                { return TK_FOR;  }
 
 "constraints"|"Constraints"|"CONSTRAINTS" { return TK_CTRS; }
-
+ 
 "oo"                             { return TK_INFINITY; } 
 "\""[^\n]*"\""                   { ibexlval.str = (char*) malloc(strlen(ibextext)-1);
                                    /* copy while removing quotes */

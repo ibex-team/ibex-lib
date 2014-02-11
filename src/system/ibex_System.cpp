@@ -15,8 +15,6 @@
 #include "ibex_SystemCopy.cpp_"
 #include "ibex_SystemMerge.cpp_"
 #include <stdio.h>
-#include <sstream>
-#include <vector>
 
 extern int ibexparse();
 extern void ibexparse_string(const char* syntax);
@@ -30,6 +28,7 @@ namespace ibex {
 
 namespace parser {
 extern System* system;
+extern bool choco_start;
 }
 
 System::System() : nb_var(0), nb_ctr(0), box(1) /* tmp */ {
@@ -45,6 +44,7 @@ System::System(const char* filename) : nb_var(0), nb_ctr(0), box(1) /* tmp */ {
 System::System(int n, const char* syntax) : nb_var(n), /* NOT TMP (required by parser) */
 		                                    nb_ctr(0), box(1) /* tmp */ {
 	try {
+		parser::choco_start=true;
 		parser::system=this;
 		ibexparse_string(syntax);
 		parser::system=NULL;
