@@ -14,6 +14,7 @@
 #include "ibex_ExtendedSystem.h"
 #include "ibex_SystemFactory.h"
 #include "ibex_SyntaxError.h"
+#include "ibex_NormalizedSystem.h"
 
 using namespace std;
 
@@ -140,9 +141,9 @@ void TestSystem::copy02() {
 	TEST_ASSERT(sys.ctrs.size()==0);
 }
 
-void TestSystem::ineq01() {
+void TestSystem::ineq_only01() {
 	System& _sys(*sysex3());
-	System sys(_sys,System::INEQ);
+	System sys(_sys,System::INEQ_ONLY);
 	delete &_sys;
 
 	TEST_ASSERT(sys.nb_ctr==2);
@@ -157,6 +158,25 @@ void TestSystem::ineq01() {
 	TEST_ASSERT(sameExpr(sys.ctrs[1].f.expr(),"((x-y)--1)"));
 	TEST_ASSERT(sys.ctrs[0].op==LEQ);
 	TEST_ASSERT(sys.ctrs[1].op==GEQ);
+}
+
+void TestSystem::eq_only01() {
+	System& _sys(*sysex3());
+	System sys(_sys,System::EQ_ONLY);
+	delete &_sys;
+
+	TEST_ASSERT(sys.nb_ctr==2);
+	TEST_ASSERT(sys.nb_var==2);
+	TEST_ASSERT(sys.goal==NULL);
+	TEST_ASSERT(sys.ctrs.size()==2);
+	TEST_ASSERT(sys.f.nb_arg()==2);
+	TEST_ASSERT(sys.f.nb_var()==2);
+	TEST_ASSERT(sys.f.image_dim()==2)
+
+	TEST_ASSERT(sameExpr(sys.ctrs[0].f.expr(),"((x+y)-[-1, 1])"));
+	TEST_ASSERT(sameExpr(sys.ctrs[1].f.expr(),"(x-y)"));
+	TEST_ASSERT(sys.ctrs[0].op==EQ);
+	TEST_ASSERT(sys.ctrs[1].op==EQ);
 }
 
 void TestSystem::extend01() {
@@ -205,7 +225,7 @@ void TestSystem::extend02() {
 
 void TestSystem::normalize01() {
 	System& _sys(*sysex3());
-	System sys(_sys,System::NORMALIZE,0.1);
+	NormalizedSystem sys(_sys,0.5);
 	delete &_sys;
 
 	TEST_ASSERT(sys.nb_ctr==6);
@@ -220,8 +240,8 @@ void TestSystem::normalize01() {
 	TEST_ASSERT(sameExpr(sys.ctrs[1].f.expr(),"((-(x+y))-1)"));
 	TEST_ASSERT(sameExpr(sys.ctrs[2].f.expr(),"((x-y)-1)"));
 	TEST_ASSERT(sameExpr(sys.ctrs[3].f.expr(),"(-((x-y)--1))"));
-	TEST_ASSERT(sameExpr(sys.ctrs[4].f.expr(),"((x-y)-0.1)"));
-	TEST_ASSERT(sameExpr(sys.ctrs[5].f.expr(),"((-(x-y))-0.1)"));
+	TEST_ASSERT(sameExpr(sys.ctrs[4].f.expr(),"((x-y)-0.5)"));
+	TEST_ASSERT(sameExpr(sys.ctrs[5].f.expr(),"((-(x-y))-0.5)"));
 	TEST_ASSERT(sys.ctrs[0].op==LEQ);
 	TEST_ASSERT(sys.ctrs[1].op==LEQ);
 	TEST_ASSERT(sys.ctrs[2].op==LEQ);

@@ -15,6 +15,8 @@
 #include "ibex_Expr.h"
 #include <sstream>
 
+using namespace std;
+
 namespace ibex {
 
 void TestFunction::build01() {
@@ -50,20 +52,19 @@ void TestFunction::copy() {
 	TEST_ASSERT(f2.nb_nodes()==3);
 	TEST_ASSERT(f2.nb_arg()==2);
 
-	const ExprSymbol* x2=dynamic_cast<const ExprSymbol*>(&f2.node(0));
-	TEST_ASSERT(x2!=NULL);
+	const ExprMul* e2=dynamic_cast<const ExprMul*>(&f2.node(0));
+	TEST_ASSERT(e2!=NULL);
+	TEST_ASSERT(sameExpr(f2.expr(),"(A*x)"));
+
+	const ExprSymbol* x2=dynamic_cast<const ExprSymbol*>(&f2.node(1));
 	TEST_ASSERT(strcmp(x2->name,"x")==0);
 	TEST_ASSERT(x2->dim==x.dim);
 
-	const ExprSymbol* A2=dynamic_cast<const ExprSymbol*>(&f2.node(1));
+	const ExprSymbol* A2=dynamic_cast<const ExprSymbol*>(&f2.node(2));
 	TEST_ASSERT(A2!=NULL);
 	TEST_ASSERT(strcmp(A2->name,"A")==0);
 	TEST_ASSERT(A2->dim==A.dim);
 
-	const ExprMul* e2=dynamic_cast<const ExprMul*>(&f2.node(2));
-	TEST_ASSERT(e2!=NULL);
-
-	TEST_ASSERT(sameExpr(f2.expr(),"(A*x)"));
 }
 
 void TestFunction::separate() {
@@ -161,7 +162,6 @@ void TestFunction::apply01() {
 	Variable z("z");
 	Function f2(z,f(z,c));
 
-	std::cout << f2 << std::endl;
 	TEST_ASSERT(sameExpr(f2.expr(),"f(z,[0, 1])"));
 }
 
