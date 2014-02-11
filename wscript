@@ -33,7 +33,7 @@ def options (opt):
 	opt.add_option ("--with-debug",  action="store_true", dest="DEBUG",
 			help = "enable debugging")
 	
-	opt.add_option ("--disable-ampl", action="store_true", dest="DISABLE_AMPL",
+	opt.add_option ("--with-ampl", action="store_true", dest="WITH_AMPL",
 			help = "do not use AMPL")
 
 	opt.add_option ("--with-gaol",   action="store", type="string", dest="GAOL_PATH",
@@ -50,9 +50,6 @@ def options (opt):
 	opt.add_option ("--with-clp", action="store", type="string", dest="CLP_PATH",
 			help = "location of the Clp lib")
 	
-	opt.add_option ("--with-ampl",   action="store", type="string", dest="AMPL_PATH",
-			help = "location of the amplsolver lib")
-
 	opt.add_option ("--with-jni", action="store_true", dest="WITH_JNI",
 			help = "enable the compilation of the JNI adapter (note: your JAVA_HOME environment variable must be properly set if you want to use this option)")
 	opt.add_option ("--with-java-package", action="store", type="string", dest="JAVA_PACKAGE",
@@ -130,8 +127,12 @@ def configure (conf):
 
 	##################################################################################################
 	# AMPL is disable on Window
-	if env.DEST_OS == "win32" or conf.options.DISABLE_AMPL:
-		conf.env.DISABLE_AMPL =True 
+	if env.DEST_OS == "win32":
+		if (conf.options.WITH_AMPL):
+			Logs.pprint ("YELLOW", "Warning: AMPL is not supported on win32")
+		conf.env.WITH_AMPL =False 
+	elif (conf.options.WITH_AMPL):
+		conf.env.WITH_AMPL =True 
 		
 	##################################################################################################
 	# JNI

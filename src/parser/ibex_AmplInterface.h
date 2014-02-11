@@ -2,7 +2,6 @@
 //                                  I B E X
 // File        : ibex_AmplInterface.h Adapted from CouenneAmplInterface
 // Author      : Jordan Ninin
-// Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Nov 5, 2013
 // Last Update : Nov 5, 2013

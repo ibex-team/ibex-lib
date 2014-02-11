@@ -92,8 +92,7 @@ size_t getOperator (efunc *f) {
 
 	/* FIX cast for 64 bit machines */
 
-	if ((Intcast f <  N_OPS) &&
-			(Intcast f > -N_OPS))
+	if ((Intcast f <  N_OPS) &&	(Intcast f > -N_OPS))
 		return Intcast f;
 
 	key.fp = f;
@@ -232,7 +231,7 @@ bool AmplInterface::readnl() {
 
 	// the variable /////////////////////////////////////////////////////////////
 	// TODO only continuous variables for the moment
-	_x =new Variable(n_var);
+	_x =new Variable(n_var,"x");
 	_bound_init.resize(n_var);
 	_problem->add_var(*_x);
 
@@ -257,6 +256,7 @@ bool AmplInterface::readnl() {
 			int index;
 			for (ograd *objgrad = Ograd [i]; objgrad; objgrad = objgrad -> next) {
 				if ((dynamic_cast<const ExprConstant*>(body))&&(((ExprConstant*)(body))->is_zero())) {
+					delete body;
 					if (fabs (objgrad -> coef) != 0.0) {
 						coeff = objgrad -> coef;
 						index = objgrad -> varno;
@@ -309,6 +309,7 @@ bool AmplInterface::readnl() {
 			for (int j = 0; j < n_var; j++){
 				for (int i = A_colstarts [j], k = A_colstarts [j+1] - i; k--; i++) {
 					if ((dynamic_cast<const ExprConstant*>(body_con[A_rownos[i]]))&&(((ExprConstant*)(body_con[A_rownos[i]]))->is_zero())) {
+						delete body_con[A_rownos[i]];
 						if (A_vals[i]==1) {
 							body_con[A_rownos[i]] = &((*_x)[j]);
 						} else if (A_vals[i]==-1) {
@@ -335,6 +336,7 @@ bool AmplInterface::readnl() {
 			for ( int i = 0; i < n_con; i++)
 				for (congrad = Cgrad [i]; congrad; congrad = congrad -> next) {
 					if ((dynamic_cast<const ExprConstant*>(body_con[i]))&&(((ExprConstant*)(body_con[i]))->is_zero())) {
+						delete body_con[i];
 						coeff = congrad -> coef;
 						if (fabs (coeff) != 0.0) {
 							index = congrad -> varno;
@@ -459,19 +461,21 @@ const ExprNode& AmplInterface::nl2expr(expr *e) {
 
 	case OPNUM:    return  (ExprConstant::new_scalar(((expr_n *)e)->v));
 	case OPPLUS:   {
-		const ExprNode *tmp = &(nl2expr(e -> R.e));
-		if (dynamic_cast<const ExprMinus*>(tmp)) {
-			return  (( nl2expr(e -> L.e)) - (((const ExprMinus*)tmp)->expr) );
+		if (getOperator(e->R.e->op)==OPUMINUS) {
+			return  (( nl2expr(e -> L.e)) - nl2expr((e->R.e)->L.e) );
 		} else {
-			return  (( nl2expr(e -> L.e)) + *tmp);
+			if (getOperator(e->L.e->op)==OPUMINUS) {
+				return  (nl2expr(e->R.e) - nl2expr((e->L.e)->L.e) );
+			} else {
+				return  (nl2expr(e->R.e) + nl2expr(e->L.e) );
+			}
 		}
 	}
 	case OPMINUS:  {
-		const ExprNode *tmp = &(nl2expr(e -> R.e));
-		if (dynamic_cast<const ExprMinus*>(tmp)) {
-			return  (( nl2expr(e -> L.e)) + (((const ExprMinus*)tmp)->expr) );
+		if (getOperator(e->R.e->op)==OPUMINUS)  {
+			return (( nl2expr(e->L.e)) + nl2expr((e->R.e)->L.e) );
 		} else {
-			return  (( nl2expr(e -> L.e)) - *tmp);
+			return  (( nl2expr(e->L.e)) - nl2expr(e->R.e));
 		}
 	}
 	case OPDIV:    return  (( nl2expr(e -> L.e)) / (nl2expr(e -> R.e)));
@@ -510,13 +514,23 @@ const ExprNode& AmplInterface::nl2expr(expr *e) {
 		const ExprNode* ee = &(nl2expr(*ep));
 		ep++;
 		while (ep < e->R.ep) {
-			ee = &(*ee + nl2expr(*ep));
+			if (getOperator((*ep)->op)==OPUMINUS) {
+				ee = &(*ee - nl2expr((*ep)->L.e) );
+			} else {
+				ee = &(*ee + nl2expr(*ep) );
+			}
 			ep++;
 		}
 		return *ee;
 	}
 	case ABS:      return abs( nl2expr(e -> L.e));
-	case OPUMINUS: return operator-(nl2expr (e -> L.e));
+	case OPUMINUS: {
+		if (getOperator(e->L.e->op)==OPUMINUS)  {
+			return  (nl2expr((e -> L.e)->L.e));
+		} else {
+			return  (operator-(nl2expr(e -> L.e)));
+		}
+	}
 	case OP_sqrt:  return sqrt(nl2expr(e -> L.e));
 	case OP_exp:   return exp( nl2expr(e -> L.e));
 	case OP_log:   return log( nl2expr(e -> L.e));

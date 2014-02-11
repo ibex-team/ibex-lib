@@ -17,7 +17,7 @@ def build (bld):
 	ibex_hdr = bld.path.ant_glob ("**/ibex_*.h")
 	ibex_hdr.append ("ibex_Setting.h")
 
-	if (not(bld.env.DISABLE_AMPL)):
+	if (bld.env.WITH_AMPL):
 		# headers
 		@bld.rule (
 			target = "ibex_Setting.h",

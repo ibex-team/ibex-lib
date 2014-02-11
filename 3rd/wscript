@@ -63,7 +63,6 @@ def configure (conf):
 	with_cplex = conf.options.CPLEX_PATH
 	with_clp = conf.options.CLP_PATH
 	
-	with_ampl = conf.options.AMPL_PATH
 	
 	def join (path, *k):
 		return os.path.abspath (os.path.join (os.path.expanduser (path), *k)) if path else None
@@ -277,28 +276,21 @@ def configure (conf):
 
 	#####################################################################################################
 	# AMPL configure
-	if not conf.env.DISABLE_AMPL:
-		mandatory = bool (with_ampl)
-		if with_ampl:
-			conf.env.append_unique ("INCLUDES", with_ampl)
+	if conf.env.WITH_AMPL:
 	
 		has_asl = conf.check_cxx (
 				header_name	= "asl.h",
-				mandatory	= mandatory)
+				mandatory	= False)
 		has_arith = conf.check_cxx (
 				header_name	= "arith.h",
-				mandatory	= mandatory)
-	
-		kw = {"libpath": with_ampl} if with_ampl else {}
+				mandatory	= False)
 		has_ampl = conf.check_cxx (
 				lib = ["amplsolver"],
 				uselib_store = "IBEX_DEPS",
-				mandatory = mandatory,
-				**kw)
-		
+				mandatory = False)
 	
 		if not (has_asl and has_arith and has_ampl):
-			if not conf.env.DISABLE_AMPL:
+			if (conf.env.WITH_AMPL):
 				conf.env.BUILD_AMPL = True
 		else:
 			if (not conf.check_cxx (
@@ -606,15 +598,7 @@ def configure (conf):
 		ibex_env.append_unique ("LIB_IBEX_DEPS", ["amplsolver","dl"])
 
 		conf.find_program ("make")
-
-		if sys.platform == "win32":
-			# mingw build
-			conf.find_program ("sh")
-
-			cmd = [conf.env.SH, "-c",
-				"./configurehere "]
-		else:
-			cmd = "./configurehere "
+		cmd = "./configurehere "
 
 		if conf.exec_command (cmd, cwd=ampl_dir.abspath(), stdout=None, stderr=None):
 			conf.fatal ("failed to configure AMPL (%s)" % cmd)
@@ -815,10 +799,12 @@ def build (bld):
 		path = bld.path.find_dir (bld.env.FILIB).abspath()
 
 		with subdir (path):
-			if bld.cmd in ("install"):
-				cmd = [bld.cmd]
-			else :	
-				cmd = ["uninstall"] if bld.cmd in ("uninstall", "clean") else ["install"]
+			if bld.cmd=="install":
+				cmd = ["install"]
+			elif bld.cmd in ("uninstall", "clean"): 	
+				cmd = ["uninstall"]
+			else :
+				cmd = []
 			if bld.exec_command (
 				[bld.env.MAKE, "-j", str(bld.options.jobs)] + cmd,
 				cwd	= path,
@@ -847,14 +833,15 @@ def build (bld):
 			):
 				bld.fatal ("failed to build ampl")
 	
-			if not bld.cmd in ("clean", "uninstall"):
+			if bld.cmd=="install":
 				if not os.path.exists(bld.env.LIBDIR):
 					os.makedirs(bld.env.LIBDIR)
 				shutil.copyfile(os.path.join(path,"libamplsolver.a"),os.path.join(bld.env.LIBDIR,"libamplsolver.a"))
-			else:
+			elif  bld.cmd in ("clean", "uninstall"):
 				os.remove(os.path.join(bld.env.LIBDIR,"libamplsolver.a"))
 
 		bld.variant = ""
+		
 	##################################
 	if bld.env["BUILD_CLP"]:
 		bld.variant = "Clp"
@@ -893,7 +880,7 @@ def distclean (ctx):
 	filib_dir = ctx.path.find_dir ("filibsrc")
 	if filib_dir and os.path.exists (os.path.join (filib_dir.abspath(), "Makefile")):
 		with subdir (filib_dir):
-			ctx.exec_command ("make distclean", cwd = filib_dir.abspath())
+			ctx.exec_command ("make uninstall", cwd = filib_dir.abspath())
 
 	ampl_dir = ctx.path.find_dir ("solvers")
 	if ampl_dir and os.path.exists (os.path.join (ampl_dir.abspath(), "Makefile")):
