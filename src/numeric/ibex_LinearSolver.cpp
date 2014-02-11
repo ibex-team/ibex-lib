@@ -1162,6 +1162,9 @@ LinearSolver::LinearSolver(int nb_vars1, int nb_ctr, int max_iter, int max_time_
 	myclp->setMaximumSeconds(max_time_out);
 	myclp->setPrimalTolerance(epsilon);
 
+	// no log
+	myclp->setLogLevel(0);
+
 
 	// initialize the number of variables of the LP
 	myclp->resize(0,nb_vars);
@@ -1180,16 +1183,16 @@ LinearSolver::LinearSolver(int nb_vars1, int nb_ctr, int max_iter, int max_time_
 		myclp->addRow(1, row2Index, row2Value, NEG_INFINITY, POS_INFINITY);
 	}
 
-	nb_rows += nb_vars;
+	nb_rows = nb_vars;
 
-	_which =new int[nb_rows-nb_vars];
-	for (int i=0;i<(nb_rows-nb_vars);i++) {
+	_which =new int[10*nb_ctrs];
+	for (int i=0;i<(10*nb_ctrs);i++) {
 		_which[i]=i+nb_vars;
 	}
 
-	_row1Index = new int[nb_vars];
+	_col1Index = new int[nb_vars];
 	for (int i=0;i<nb_vars;i++) {
-		_row1Index[i]=i;
+		_col1Index[i]=i;
 	}
 
 }
@@ -1199,7 +1202,7 @@ LinearSolver::~LinearSolver() {
 	if (dual_solution!=NULL) delete [] dual_solution;
 	delete myclp;
 	delete [] _which;
-	delete [] _row1Index;
+	delete [] _col1Index;
 }
 
 LinearSolver::Status_Sol LinearSolver::solve() {
@@ -1291,14 +1294,13 @@ LinearSolver::Status LinearSolver::getCoefConstraint(Matrix &A) {
 	try {
 		CoinPackedMatrix * mat=myclp->matrix();
 		// see mat.getCorefficient()
-
 		A = Matrix::zeros(nb_rows,nb_vars);
 		if (mat->isColOrdered()) {
 			for (int cc=0;cc<nb_vars; cc++){
 				CoinBigIndex j;
 				CoinBigIndex end=mat->getVectorStarts()[cc]+mat->getVectorLengths()[cc];;
 				for (j=mat->getVectorStarts()[cc];j<end;j++) {
-					A.row(j)[cc] = mat->getElements()[j];
+					A.row(mat->getIndices()[j])[cc] = mat->getElements()[j];
 				}
 			}
 
@@ -1307,7 +1309,7 @@ LinearSolver::Status LinearSolver::getCoefConstraint(Matrix &A) {
 				CoinBigIndex j;
 				CoinBigIndex end=mat->getVectorStarts()[rr]+mat->getVectorLengths()[rr];;
 				for (j=mat->getVectorStarts()[rr];j<end;j++) {
-					A.row(rr)[j] = mat->getElements()[j];
+					A.row(rr)[mat->getIndices()[j]] = mat->getElements()[j];
 				}
 			}
 		}
@@ -1324,14 +1326,14 @@ LinearSolver::Status LinearSolver::getCoefConstraint_trans(Matrix &A_trans) {
 	try {
 		CoinPackedMatrix * mat=myclp->matrix();
 		// see mat.getCorefficient()
-
 		A_trans = Matrix::zeros(nb_vars,nb_rows);
 		if (mat->isColOrdered()) {
 			for (int cc=0;cc<nb_vars; cc++){
 				CoinBigIndex j;
 				CoinBigIndex end=mat->getVectorStarts()[cc]+mat->getVectorLengths()[cc];;
 				for (j=mat->getVectorStarts()[cc];j<end;j++) {
-					A_trans.row(cc)[j] = mat->getElements()[j];
+					int jj = mat->getIndices()[j];
+					A_trans.row(cc)[jj] = mat->getElements()[j];
 				}
 			}
 
@@ -1340,7 +1342,7 @@ LinearSolver::Status LinearSolver::getCoefConstraint_trans(Matrix &A_trans) {
 				CoinBigIndex j;
 				CoinBigIndex end=mat->getVectorStarts()[rr]+mat->getVectorLengths()[rr];;
 				for (j=mat->getVectorStarts()[rr];j<end;j++) {
-					A_trans.row(j)[rr] = mat->getElements()[j];
+					A_trans.row(mat->getIndices()[j])[rr] = mat->getElements()[j];
 				}
 			}
 		}
@@ -1582,12 +1584,12 @@ LinearSolver::Status LinearSolver::addConstraint(ibex::Vector& row, CmpOp sign, 
 	LinearSolver::Status res= FAIL;
 	try {
 		if (sign==LEQ || sign==LT) {
-			myclp->addRow(nb_vars,_row1Index,&(row[0]),NEG_INFINITY,rhs);
+			myclp->addRow(nb_vars,_col1Index,&(row[0]),NEG_INFINITY,rhs);
 			nb_rows++;
 			res=  OK;
 		}
 		else if (sign==GEQ || sign==GT) {
-			myclp->addRow(nb_vars,_row1Index,&(row[0]),rhs,POS_INFINITY);
+			myclp->addRow(nb_vars,_col1Index,&(row[0]),rhs,POS_INFINITY);
 			nb_rows++;
 			res = OK;
 		}

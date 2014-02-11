@@ -37,6 +37,7 @@ private:
 	bool readASLfg();
 	const ExprNode& nl2expr(expr *e);
 
+
 public:
 	AmplInterface(std::string nlfile);
 
@@ -46,6 +47,8 @@ public:
 
 	bool writeSolution(double* sol, bool found);
 
+
+	static const double default_max_bound;
 
 };
 

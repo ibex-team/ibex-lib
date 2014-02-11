@@ -129,6 +129,9 @@ size_t getOperator (efunc *f) {
 
 namespace ibex {
 
+const double AmplInterface::default_max_bound= 1.e20;
+
+
 AmplInterface::AmplInterface(std::string nlfile) :
 	_problem(NULL),	_bound_init(1), asl(NULL), _nlfile(nlfile), _x(NULL){
 
@@ -240,7 +243,7 @@ bool AmplInterface::readnl() {
 
 	try {
 	// objective functions /////////////////////////////////////////////////////////////
-		if (n_obj>1) {ibex_error("too much objective function in the ampl model"); return false;}
+		if (n_obj>1) {ibex_error("too much objective function in the ampl model."); return false;}
 
 		for (int i = 0; i < n_obj; i++) {
 			///////////////////////////////////////////////////
@@ -253,15 +256,29 @@ bool AmplInterface::readnl() {
 			double coeff;
 			int index;
 			for (ograd *objgrad = Ograd [i]; objgrad; objgrad = objgrad -> next) {
-				if (fabs (objgrad -> coef) != 0.0) {
-					coeff = objgrad -> coef;
-					index = objgrad -> varno;
-					if (coeff==1) {
-						body = &(*body + (*_x)[index]);
-					} else if (coeff==-1) {
-						body = &(*body - (*_x)[index]);
-					} else {
-						body = &(*body +coeff * (*_x)[index]);
+				if ((dynamic_cast<const ExprConstant*>(body))&&(((ExprConstant*)(body))->is_zero())) {
+					if (fabs (objgrad -> coef) != 0.0) {
+						coeff = objgrad -> coef;
+						index = objgrad -> varno;
+						if (coeff==1) {
+							body = &((*_x)[index]);
+						} else if (coeff==-1) {
+							body = &( - (*_x)[index]);
+						} else {
+							body = &(coeff * (*_x)[index]);
+						}
+					}
+				} else {
+					if (fabs (objgrad -> coef) != 0.0) {
+						coeff = objgrad -> coef;
+						index = objgrad -> varno;
+						if (coeff==1) {
+							body = &(*body + (*_x)[index]);
+						} else if (coeff==-1) {
+							body = &(*body - (*_x)[index]);
+						} else {
+							body = &(*body +coeff * (*_x)[index]);
+						}
 					}
 				}
 			}
@@ -290,14 +307,25 @@ bool AmplInterface::readnl() {
 		// count all linear terms
 		if (A_colstarts && A_vals)    {      // Constraints' linear info is stored in A_vals
 			for (int j = 0; j < n_var; j++){
-				for (register int i = A_colstarts [j], k = A_colstarts [j+1] - i; k--; i++) {
-					if (A_vals[i]==1) {
-						body_con[A_rownos[i]] = &(*(body_con[A_rownos[i]]) + (*_x)[j]);
-					} else if (A_vals[i]==-1) {
-						body_con[A_rownos[i]] = &(*(body_con[A_rownos[i]]) - (*_x)[j]);
+				for (int i = A_colstarts [j], k = A_colstarts [j+1] - i; k--; i++) {
+					if ((dynamic_cast<const ExprConstant*>(body_con[A_rownos[i]]))&&(((ExprConstant*)(body_con[A_rownos[i]]))->is_zero())) {
+						if (A_vals[i]==1) {
+							body_con[A_rownos[i]] = &((*_x)[j]);
+						} else if (A_vals[i]==-1) {
+							body_con[A_rownos[i]] = &(- (*_x)[j]);
+						} else {
+							body_con[A_rownos[i]] = &((A_vals[i]) * (*_x)[j]);
+						}
 					} else {
-						body_con[A_rownos[i]] = &(*(body_con[A_rownos[i]]) + (A_vals[i]) * (*_x)[j]);
+						if (A_vals[i]==1) {
+							body_con[A_rownos[i]] = &(*(body_con[A_rownos[i]]) + (*_x)[j]);
+						} else if (A_vals[i]==-1) {
+							body_con[A_rownos[i]] = &(*(body_con[A_rownos[i]]) - (*_x)[j]);
+						} else {
+							body_con[A_rownos[i]] = &(*(body_con[A_rownos[i]]) + (A_vals[i]) * (*_x)[j]);
+						}
 					}
+
 				}
 			}
 		} else {		// Constraints' linear info is stored in Cgrad
@@ -306,15 +334,30 @@ bool AmplInterface::readnl() {
 			int index;
 			for ( int i = 0; i < n_con; i++)
 				for (congrad = Cgrad [i]; congrad; congrad = congrad -> next) {
-					coeff = congrad -> coef;
-					if (fabs (coeff) != 0.0) {// TODO to check
-						index = congrad -> varno;
-						if (coeff==1) {
-							body_con[i] = &(*(body_con[i]) + (*_x)[index]);
-						} else if (coeff==-1) {
-							body_con[i] = &(*(body_con[i]) - (*_x)[index]);
-						} else {
-							body_con[i] = &(*(body_con[i]) + (coeff) * (*_x)[index]);
+					if ((dynamic_cast<const ExprConstant*>(body_con[i]))&&(((ExprConstant*)(body_con[i]))->is_zero())) {
+						coeff = congrad -> coef;
+						if (fabs (coeff) != 0.0) {
+							index = congrad -> varno;
+							if (coeff==1) {
+								body_con[i] = &( (*_x)[index]);
+							} else if (coeff==-1) {
+								body_con[i] = &(-(*_x)[index]);
+							} else {
+								body_con[i] = &((coeff) * (*_x)[index]);
+							}
+						}
+
+					} else {
+						coeff = congrad -> coef;
+						if (fabs (coeff) != 0.0) {
+							index = congrad -> varno;
+							if (coeff==1) {
+								body_con[i] = &(*(body_con[i]) + (*_x)[index]);
+							} else if (coeff==-1) {
+								body_con[i] = &(*(body_con[i]) - (*_x)[index]);
+							} else {
+								body_con[i] = &(*(body_con[i]) + (coeff) * (*_x)[index]);
+							}
 						}
 					}
 				}
@@ -343,9 +386,40 @@ bool AmplInterface::readnl() {
 			// add them (and set lower-upper bound)
 			switch (sig) {
 
-			case  1:  _problem->add_ctr_eq((*(body_con[i])-Interval(lb,ub))); break;
-			case  2:  _problem->add_ctr(ExprCtr(*(body_con[i])-lb,GEQ)); break;
-			case  3:  _problem->add_ctr(ExprCtr(*(body_con[i])-ub,LEQ)); break;
+			case  1:  {
+				if (lb==ub) {
+					if (lb==0) {
+						_problem->add_ctr_eq((*(body_con[i])));
+					} else if (lb<0) {
+						_problem->add_ctr_eq((*(body_con[i])+(-lb)));
+					} else {
+						_problem->add_ctr_eq((*(body_con[i])-lb));
+					}
+				} else  {
+					 _problem->add_ctr_eq((*(body_con[i])-Interval(lb,ub)));
+				}
+				break;
+			}
+			case  2:  {
+				if (lb==0) {
+					_problem->add_ctr(ExprCtr(*(body_con[i]),GEQ));
+				} else if (lb<0) {
+					_problem->add_ctr(ExprCtr(*(body_con[i])+(-lb),GEQ));
+				} else {
+					_problem->add_ctr(ExprCtr(*(body_con[i])-lb,GEQ));
+				}
+				break;
+			}
+			case  3: {
+				if (ub==0) {
+					_problem->add_ctr(ExprCtr(*(body_con[i]),LEQ));
+				} else if (ub<0) {
+					 _problem->add_ctr(ExprCtr(*(body_con[i])+(-ub),LEQ));
+				} else {
+					 _problem->add_ctr(ExprCtr(*(body_con[i])-ub,LEQ));
+				}
+				break;
+			}
 			default: ibex_error("Error: could not recognize a constraint\n"); return false;
 			}
 		}
@@ -356,13 +430,13 @@ bool AmplInterface::readnl() {
 			// LUv is the variable lower bound if Uvx!=0, and the variable lower and upper bound if Uvx == 0
 			if (!Uvx_copy)
 				for (int i=0; i<n_var; i++) {
-					_bound_init[i] = Interval(  ((LUv[2*i] <= NEG_INFINITY) ? NEG_INFINITY : LUv[2*i] ),
-							((LUv[2*i+1] >= POS_INFINITY) ? POS_INFINITY : LUv[2*i+1]) );
+					_bound_init[i] = Interval(  ((LUv[2*i] <= -default_max_bound) ? -default_max_bound : LUv[2*i] ),
+							((LUv[2*i+1] >= default_max_bound) ? default_max_bound : LUv[2*i+1]) );
 				}
 			else
-				for (register int i=n_var; i--;) {
-					_bound_init[i] = Interval(	(LUv [i] <= NEG_INFINITY ? NEG_INFINITY : LUv[i] ),
-							(Uvx_copy [i] >= POS_INFINITY ? POS_INFINITY : Uvx_copy[i]) );
+				for (int i=n_var; i--;) {
+					_bound_init[i] = Interval(	(LUv [i] <= -default_max_bound ? -default_max_bound : LUv[i] ),
+							(Uvx_copy [i] >= default_max_bound ? default_max_bound : Uvx_copy[i]) );
 				}
 
 		} // else it is [-oo,+oo]
@@ -383,12 +457,26 @@ const ExprNode& AmplInterface::nl2expr(expr *e) {
 
 	switch (getOperator (e -> op)) {
 
-	case OPNUM:    return (ExprConstant::new_scalar(((expr_n *)e)->v));
-	case OPPLUS:   return  (( nl2expr(e -> L.e)) + (nl2expr(e -> R.e)));
-	case OPMINUS:  return  (( nl2expr(e -> L.e)) - (nl2expr(e -> R.e)));
+	case OPNUM:    return  (ExprConstant::new_scalar(((expr_n *)e)->v));
+	case OPPLUS:   {
+		const ExprNode *tmp = &(nl2expr(e -> R.e));
+		if (dynamic_cast<const ExprMinus*>(tmp)) {
+			return  (( nl2expr(e -> L.e)) - (((const ExprMinus*)tmp)->expr) );
+		} else {
+			return  (( nl2expr(e -> L.e)) + *tmp);
+		}
+	}
+	case OPMINUS:  {
+		const ExprNode *tmp = &(nl2expr(e -> R.e));
+		if (dynamic_cast<const ExprMinus*>(tmp)) {
+			return  (( nl2expr(e -> L.e)) + (((const ExprMinus*)tmp)->expr) );
+		} else {
+			return  (( nl2expr(e -> L.e)) - *tmp);
+		}
+	}
 	case OPDIV:    return  (( nl2expr(e -> L.e)) / (nl2expr(e -> R.e)));
 	case OPMULT:   return  (operator*((nl2expr (e -> L.e)) , (nl2expr(e -> R.e))));
-	case OPPOW:    return pow( nl2expr(e -> L.e), nl2expr(e -> R.e));
+	case OPPOW:    return  pow( nl2expr(e -> L.e), nl2expr(e -> R.e));
 	case OP1POW:   {
 		if (((int) (((expr_n *)e->R.e)->v) )==(((expr_n *)e->R.e)->v)) {
 			return pow( nl2expr(e -> L.e), (int) (((expr_n *)e->R.e)->v));
@@ -483,14 +571,26 @@ const ExprNode& AmplInterface::nl2expr(expr *e) {
 					if( nlin > 0 ) {
 						linpart * L = common->L;
 						for(int i = 0; i < nlin; i++ ) {
-							coeff = (L[i]).fac;
-							index = ((uintptr_t) (L[i].v.rp) - (uintptr_t) VAR_E) / sizeof (expr_v);
-							if (coeff==1) {
-								body = &(*body + (*_x)[index]);
-							} else if (coeff==-1) {
-								body = &(*body - (*_x)[index]);
-							} else if (coeff != 0) {
-								body = &(*body +coeff * (*_x)[index]);
+							if ((dynamic_cast<const ExprConstant*>(body))&&(((ExprConstant*)(body))->is_zero())) {
+								coeff = (L[i]).fac;
+								index = ((uintptr_t) (L[i].v.rp) - (uintptr_t) VAR_E) / sizeof (expr_v);
+								if (coeff==1) {
+									body = &((*_x)[index]);
+								} else if (coeff==-1) {
+									body = &( - (*_x)[index]);
+								} else if (coeff != 0) {
+									body = &(coeff * (*_x)[index]);
+								}
+							} else {
+								coeff = (L[i]).fac;
+								index = ((uintptr_t) (L[i].v.rp) - (uintptr_t) VAR_E) / sizeof (expr_v);
+								if (coeff==1) {
+									body = &(*body + (*_x)[index]);
+								} else if (coeff==-1) {
+									body = &(*body - (*_x)[index]);
+								} else if (coeff != 0) {
+									body = &(*body +coeff * (*_x)[index]);
+								}
 							}
 						}
 					}
@@ -505,14 +605,27 @@ const ExprNode& AmplInterface::nl2expr(expr *e) {
 					if( nlin > 0 ) {
 						linpart * L = common->L;
 						for(int i = 0; i < nlin; i++ ) {
-							coeff = (L[i]).fac;
-							index = ((uintptr_t) (L[i].v.rp) - (uintptr_t) VAR_E) / sizeof (expr_v);
-							if (coeff==1) {
-								body = &(*body + (*_x)[index]);
-							} else if (coeff==-1) {
-								body = &(*body - (*_x)[index]);
-							} else if (coeff != 0) {
-								body = &(*body +coeff * (*_x)[index]);
+							if ((dynamic_cast<const ExprConstant*>(body))&&(((ExprConstant*)(body))->is_zero())) {
+								coeff = (L[i]).fac;
+								index = ((uintptr_t) (L[i].v.rp) - (uintptr_t) VAR_E) / sizeof (expr_v);
+								if (coeff==1) {
+									body = &( (*_x)[index]);
+								} else if (coeff==-1) {
+									body = &( - (*_x)[index]);
+								} else if (coeff != 0) {
+									body = &(coeff * (*_x)[index]);
+								}
+							} else {
+								coeff = (L[i]).fac;
+								index = ((uintptr_t) (L[i].v.rp) - (uintptr_t) VAR_E) / sizeof (expr_v);
+								if (coeff==1) {
+									body = &(*body + (*_x)[index]);
+								} else if (coeff==-1) {
+									body = &(*body - (*_x)[index]);
+								} else if (coeff != 0) {
+									body = &(*body +coeff * (*_x)[index]);
+								}
+
 							}
 						}
 					}

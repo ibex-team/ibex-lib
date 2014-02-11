@@ -62,4 +62,4 @@ typedef  CtcForAll CtcProjInter;
 
 
 } // end namespace ibex
-#endif // __IBEX_PDC_FORALL_H__
+#endif // __IBEX_CTC_FORALL_H__

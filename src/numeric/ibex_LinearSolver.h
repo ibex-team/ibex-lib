@@ -58,10 +58,10 @@ private:
 
 	double epsilon;
 
-	int status_prim; //= 1 if OK
-	int status_dual; //= 1 if OK
 	double * primal_solution;
 	double * dual_solution;
+	int status_prim; //= 1 if OK
+	int status_dual; //= 1 if OK
 
 #ifdef _IBEX_WITH_SOPLEX_
 	soplex::SoPlex *mysoplex;
@@ -87,7 +87,7 @@ private:
 #ifdef _IBEX_WITH_CLP_
 	ClpSimplex 	*myclp;
 	int * _which;
-	int * _row1Index;
+	int * _col1Index;
 #endif
 
 

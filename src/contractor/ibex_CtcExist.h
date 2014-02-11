@@ -63,4 +63,4 @@ private:
 typedef  CtcExist CtcProjUnion;
 
 } // end namespace ibex
-#endif // __IBEX_PDC_EXIST_H__
+#endif // __IBEX_CTC_EXIST_H__
