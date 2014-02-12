@@ -7,7 +7,7 @@ from distutils.version import LooseVersion
 from waflib import Logs, Scripting
 
 # the following two variables are used by the target "waf dist"
-VERSION="2.0.0alpha"
+VERSION="2.0.10alpha"
 APPNAME='ibex-lib'
 
 top = '.'
@@ -44,11 +44,11 @@ def options (opt):
 			help = "location of the filib lib")
 	
 	opt.add_option ("--with-soplex", action="store", type="string", dest="SOPLEX_PATH",
-			help = "location of the Soplex lib")
+			help = "location of Soplex")
 	opt.add_option ("--with-cplex", action="store", type="string", dest="CPLEX_PATH",
-			help = "location of the Cplex lib")
+			help = "location of Cplex")
 	opt.add_option ("--with-clp", action="store", type="string", dest="CLP_PATH",
-			help = "location of the Clp lib")
+			help = "location of Clp solver")
 	
 	opt.add_option ("--with-jni", action="store_true", dest="WITH_JNI",
 			help = "enable the compilation of the JNI adapter (note: your JAVA_HOME environment variable must be properly set if you want to use this option)")

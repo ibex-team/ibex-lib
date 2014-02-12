@@ -762,6 +762,16 @@ Affine2Main<T> sign(const Affine2Main<T>& x, const Interval itv) {
 
 
 
+// Specialization
+
+
+template<>
+Affine2Main<AF_No>& Affine2Main<AF_No>::linChebyshev(Affine2_expr num, const Interval itv);
+
+template<>
+Affine2Main<AF_No>& Affine2Main<AF_No>::power(int n, const Interval itv);
+
+
 
 /*
 // debut linMinRange  NOT USE !!!!
