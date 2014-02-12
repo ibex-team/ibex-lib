@@ -102,9 +102,7 @@ program       :                                 { begin_system(); }
               |                                 { begin_choco(); } 
                 TK_CHOCO choco_ctr              { end_choco(); }
               |                                 { begin_function_file(); }
-                decl_fnc                        { end_function_file(); }
-              |                                 { begin_function_expr(); }
-                expr                            { end_function_expr(*$2); }              
+                decl_fnc                        { end_function_file(); }        
               ;
               
 
@@ -201,7 +199,8 @@ decl_fnc      : TK_FUNCTION                     { scopes.push(Scope(scopes.top()
                                                   scopes.top().add_func($3,f); 
                                                   source.func.push_back(f);
                                                   free($3); 
-                                                  cleanup(*$9,true); // will also delete symbols in $5
+                                                  cleanup(*$9,false); // with "true", will also delete symbols in $5... but not those that do not appear in $9!
+                                                  for(vector<const ExprSymbol*>::const_iterator it=$5->begin(); it!=$5->end(); it++) delete *it;
                                                   delete $5; }
               ;
 

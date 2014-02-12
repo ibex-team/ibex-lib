@@ -9,11 +9,8 @@
 //============================================================================
 
 #include "ibex_Entity.h"
-#include <sstream>
 
 extern void ibexerror (const std::string& msg);
-
-using std::stringstream;
 
 namespace ibex {
 namespace parser {

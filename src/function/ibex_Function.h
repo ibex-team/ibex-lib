@@ -174,6 +174,67 @@ public:
 	Function(const Array<const ExprSymbol>& x, const ExprNode& y, const char* name=NULL);
 
 	/**
+	 * \brief Creates a function y=f(x).
+	 *
+	 * The parameter x may not only contain the name
+	 * of the function argument but also the dimension of the symbol
+	 * (like for the arguments of a Minibex function). E.g.:
+	 *
+	 * Function f("x[2]","x(1)+x(2)");
+	 *
+	 */
+	Function(const char* x1, const char* y);
+
+	/**
+	 * \brief Creates a function y=f(x1,x2).
+	 *
+	 * \see Function(const char* x1, const char* y).
+	 */
+	Function(const char* x1, const char* x2, const char* y);
+
+	/**
+	 * \brief Creates a function y=f(x1,x2,x3).
+	 *
+	 * \see Function(const char* x1, const char* y).
+	 */
+	Function(const char* x1, const char* x2, const char* x3, const char* y);
+
+	/**
+	 * \brief Creates a function y=f(x1,x2,x3,x4).
+	 *
+	 * \see Function(const char* x1, const char* y).
+	 */
+	Function(const char* x1, const char* x2, const char* x3, const char* x4, const char* y);
+
+	/**
+	 * \brief Creates a function y=f(x1,x2,x3,x4,x5).
+	 *
+	 * \see Function(const char* x1, const char* y).
+	 */
+	Function(const char* x1, const char* x2, const char* x3, const char* x4, const char* x5, const char* y);
+
+	/**
+	 * \brief Creates a function y=f(x1,x2,x3,x4,x5,x6).
+	 *
+	 * \see Function(const char* x1, const char* y).
+	 */
+	Function(const char* x1, const char* x2, const char* x3, const char* x4, const char* x5, const char* x6, const char* y);
+
+	/**
+	 * \brief Creates a function y=f(x1,x2,x3,x4,x5,x6,x7).
+	 *
+	 * \see Function(const char* x1, const char* y).
+	 */
+	Function(const char* x1, const char* x2, const char* x3, const char* x4, const char* x5, const char* x6, const char* x7, const char* y);
+
+	/**
+	 * \brief Creates a function y=f(x1,x2,x3,x4,x5,x6,x7,x8).
+	 *
+	 * \see Function(const char* x1, const char* y).
+	 */
+	Function(const char* x1, const char* x2, const char* x3, const char* x4, const char* x5, const char* x6, const char* x7, const char* x8, const char* y);
+
+	/**
 	 * \brief Load a function from a file.
 	 */
 	Function(const char* filename);
@@ -534,6 +595,8 @@ public:
 private:
 
 	void add_symbol(const ExprSymbol* x);
+
+	void build_from_string(const Array<const char*>& x, const char* y);
 
 	/*
 	 * \brief Apply default Decoration (and compile) the function.

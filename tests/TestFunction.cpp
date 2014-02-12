@@ -13,6 +13,7 @@
 #include "ibex_Function.h"
 #include "ibex_NumConstraint.h"
 #include "ibex_Expr.h"
+#include "ibex_SyntaxError.h"
 #include <sstream>
 
 using namespace std;
@@ -152,6 +153,7 @@ void TestFunction::numctr01() {
 	Variable y("y");
 	Function f(x,y,x+y);
 	NumConstraint c(f,EQ);
+	TEST_ASSERT(true); // TO DO
 }
 
 void TestFunction::apply01() {
@@ -164,5 +166,51 @@ void TestFunction::apply01() {
 
 	TEST_ASSERT(sameExpr(f2.expr(),"f(z,[0, 1])"));
 }
+
+void TestFunction::from_string01() {
+	try {
+		Function f("x","sin(x)");
+		TEST_ASSERT(f.nb_arg()==1);
+		TEST_ASSERT(sameExpr(f.expr(),"sin(x)"));
+	}
+	catch(SyntaxError& e) {
+		TEST_ASSERT(false);
+	}
+}
+void TestFunction::from_string02() {
+	try {
+		Function f("x","y","x+y");
+
+		TEST_ASSERT(f.nb_arg()==2);
+		TEST_ASSERT(sameExpr(f.expr(),"(x+y)"));
+	} catch(SyntaxError& e) {
+		TEST_ASSERT(false);
+	}
+}
+
+void TestFunction::from_string03() {
+	try {
+		Function f("x[2]","y[1][3]","x(1)+y(2)");
+
+		TEST_ASSERT(f.nb_arg()==2);
+		TEST_ASSERT(f.arg(0).dim.dim2==2);
+		TEST_ASSERT(f.arg(1).dim.dim3==3);
+		TEST_ASSERT(sameExpr(f.expr(),"(x[0]+y[1])"));
+	} catch(SyntaxError& e) {
+		TEST_ASSERT(false);
+	}
+}
+
+void TestFunction::from_string04() {
+	try {
+		Function f("a","b","c","d","e","f","g","h","a+e");
+
+		TEST_ASSERT(f.nb_arg()==8);
+		TEST_ASSERT(sameExpr(f.expr(),"(a+e)"));
+	} catch(SyntaxError& e) {
+		TEST_ASSERT(false);
+	}
+}
+
 
 } // end namespace
