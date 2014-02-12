@@ -182,6 +182,8 @@ public:
 	 *
 	 * Function f("x[2]","x(1)+x(2)");
 	 *
+	 * \warning: Note that the Minibex convention (not C++) is applied for indices!
+	 *
 	 */
 	Function(const char* x1, const char* y);
 
