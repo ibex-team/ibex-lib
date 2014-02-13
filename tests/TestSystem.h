@@ -25,7 +25,8 @@ public:
 		TEST_ADD(TestSystem::factory02);
 		TEST_ADD(TestSystem::copy01);
 		TEST_ADD(TestSystem::copy02);
-		TEST_ADD(TestSystem::ineq01);
+		TEST_ADD(TestSystem::ineq_only01);
+		TEST_ADD(TestSystem::eq_only01);
 		TEST_ADD(TestSystem::normalize01);
 //		TEST_ADD(TestSystem::normalize02);
 		TEST_ADD(TestSystem::extend01);
@@ -41,7 +42,8 @@ public:
 	void factory02();
 	void copy01();
 	void copy02();
-	void ineq01();
+	void ineq_only01();
+	void eq_only01();
 	void normalize01();
 //	void normalize02();
 	void extend01();

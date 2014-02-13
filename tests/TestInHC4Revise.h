@@ -24,6 +24,7 @@ public:
 		TEST_ADD(TestInHC4Revise::add01);
 		TEST_ADD(TestInHC4Revise::add02);
 		TEST_ADD(TestInHC4Revise::dist01);
+		TEST_ADD(TestInHC4Revise::dist02);
 		TEST_ADD(TestInHC4Revise::apply01);
 		TEST_ADD(TestInHC4Revise::apply02);
 	}
@@ -31,6 +32,7 @@ public:
 	void add01();
 	void add02();
 	void dist01();
+	void dist02();
 	void apply01();
 	void apply02();
 };

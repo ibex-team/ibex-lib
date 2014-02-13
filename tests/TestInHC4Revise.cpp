@@ -62,6 +62,22 @@ void TestInHC4Revise::dist01() {
 
 }
 
+void TestInHC4Revise::dist02() {
+	Variable x(2);
+	Function f(x,sqr(x[0])+sqr(x[1]));
+	double _box[][2] = { {0, 1.5}, {-1, 0.1} };
+	IntervalVector box(2,_box);
+	double _pt[][2] = { {1.5,1.5} , {0.1,0.1} };
+	IntervalVector pt(2,_pt);
+	f.iproj(Interval(1,POS_INFINITY),box,pt);
+
+	cout << "INN BOX=" << box << endl;
+//	// check the box is inside by testing two corners
+//	TEST_ASSERT(f.eval(box.lb()).is_subset(Interval(0,1)));
+//	TEST_ASSERT(f.eval(box.ub()).is_subset(Interval(0,1)));
+
+}
+
 void TestInHC4Revise::apply01() {
 	Variable x(2),y(2);
 	Function f(x,y,sqrt(sqr(x[0]-y[0])+sqr(x[1]-y[1])));
