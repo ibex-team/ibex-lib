@@ -82,7 +82,7 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 # configuration options related to the input files
 #---------------------------------------------------------------------------
-INPUT                  = ./include/ibex
+INPUT                  = ./include/ibex ./doc
 FILE_PATTERNS          = *.h \
                          *.java \
 RECURSIVE              = YES
@@ -138,7 +138,7 @@ TREEVIEW_WIDTH         = 250
 #---------------------------------------------------------------------------
 # configuration options related to the LaTeX output
 #---------------------------------------------------------------------------
-GENERATE_LATEX         = NO
+GENERATE_LATEX         = YES
 LATEX_OUTPUT           = api/latex/gen
 LATEX_CMD_NAME         = latex
 MAKEINDEX_CMD_NAME     = makeindex
