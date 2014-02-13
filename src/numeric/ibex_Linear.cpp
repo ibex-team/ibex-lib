@@ -9,8 +9,10 @@
 //============================================================================
 
 #include <math.h>
+#include <float.h>
 #include "ibex_Linear.h"
 #include "ibex_LinearException.h"
+
 #define TOO_LARGE 1e30
 #define TOO_SMALL 1e-10
 
@@ -289,6 +291,32 @@ void gauss_seidel(const IntervalMatrix& A, const IntervalVector& b, IntervalVect
 	} while (red >= ratio);
 }
 
+bool inflating_gauss_seidel(const IntervalMatrix& A, const IntervalVector& b, IntervalVector& x, double ratio, double mu_max) {
+	int n=(A.nb_rows());
+	assert(n == (A.nb_cols())); // throw NotSquareMatrixException();
+	assert(n == (x.size()) && n == (b.size()));
+
+	double red;
+	IntervalVector xold(n);
+	Interval proj;
+	double d=DBL_MAX; // Hausdorff distances between 2 iterations
+	double dold;
+	double mu; // ratio of dist(x_k,x_{k-1)) / dist(x_{k-1},x_{k-2}).
+	do {
+		dold = d;
+		xold = x;
+		for (int i=0; i<n; i++) {
+			proj = b[i];
+			for (int j=0; j<n; j++)	if (j!=i) proj -= A[i][j]*x[j];
+			x[i] = proj/A[i][i];
+		}
+		d=distance(xold,x);
+		mu=d/dold;
+	} while (mu<mu_max || xold.rel_distance(x)>ratio);
+
+	return (mu<mu_max);
+
+}
 
 // void PrecGaussSeidel(IntervalMatrix& A, IntervalVector& b, IntervalVector& x) throw(LinearException) {
 //   Precond(A, b);

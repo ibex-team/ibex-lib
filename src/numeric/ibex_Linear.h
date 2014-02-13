@@ -132,26 +132,32 @@ void precond(IntervalMatrix& A);
  * \param A - The interval matrix [A].
  * \param b - The interval vector [b].
  * \param x (in/output) - The box to be contracted in return.
- * \param ratio - Stopping criterion: the iteration is stopped when each dimension of x has not been reduced by more
+ * \param ratio (optional) - Stopping criterion: the iteration is stopped when each dimension of x has not been reduced by more
  * than \a ratio \%. Default value is 0.1 (10\%).
  *
  */
 void gauss_seidel(const IntervalMatrix& A, const IntervalVector& b, IntervalVector& x, double ratio=0.01);
 
 /*
- * Applies Gauss-Seidel algorithm with preconditioning.<br>
- * Compute outer approximation of \f$\Sigma(C[A],C[b])\f$
- *  where C is a preconditioning matrix (usually the middle of \a [A])
+ * \ingroup numeric
+ *
+ * \brief Gauss-Seidel algorithm (inflating variant).<br>
+ *
+ * Compute a non-rigorous approximation of \f$\Sigma([A],[b])\f$
  *  i.e., yields an interval vector \a [x] such that
  *  \f$ (\exists A\in[A],\ \exists b\in[b] \ | \ Ax=b) \Longrightarrow x \in [x]\f$.
  *
- * \throw NotSquareMatrixException if \a [A] is not square.
- * \throw BadArgDimException if the dimension of \a b does not match the number of rows of A.
- * \throw SingularMatrixException if no precondition matrix could be inversed successfully.
- * \author Gilles Chabert
- * \date March 2007 */
-//void PrecGaussSeidel(IntervalMatrix& A, IntervalVector& b, IntervalVector& x) throw(LinearException);
-
+ * \param ratio (optional)
+ *     - Stopping criterion: the iteration is stopped when each dimension of x has not been reduced by more
+ *       than \a ratio \%. Default value is 0.1 (10\%).
+ * \param mu_max_divergence (optional)
+ *     - stop criterion. When the Hausdorff distance between two iterates increases by
+ *       a ratio greater than mu_max_divergence, the procedure halts. Value 1.0 by default
+ *       is for detecting divergence.
+ *
+ * \return true if the iteration has not diverged, false otherwise.
+ */
+bool inflating_gauss_seidel(const IntervalMatrix& A, const IntervalVector& b, IntervalVector& x, double ratio=0.01, double mu_max_divergence=1.0);
 
 /**
  * \ingroup numeric

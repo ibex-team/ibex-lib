@@ -21,6 +21,19 @@ namespace ibex {
 double default_newton_prec=1e-07;
 double default_gauss_seidel_ratio=1e-04;
 
+
+namespace {
+//
+//inline bool newton_step(const Fnc& f, IntervalVector& box,
+//		IntervalVector& mid, IntervalVector& Fmid, IntervalMatrix& J) {
+//
+//	f.hansen_matrix(box,J); //may throw EmptyBoxException?
+//	if (J.is_empty()) { return false; }
+//	mid = box.mid();
+//	Fmid=f.eval_vector(mid);
+//
+}
+
 bool newton(const Fnc& f, IntervalVector& box, double prec, double ratio_gauss_seidel) {
 	int n=f.nb_var();
 	int m=f.image_dim();
@@ -82,6 +95,21 @@ bool newton(const Fnc& f, IntervalVector& box, double prec, double ratio_gauss_s
 	}
 	while (gain >= prec);
 	return reducted;
+}
+
+bool newton(const Fnc& f, const Vector& pt, IntervalVector& box, double k_max, double mu_max, double delta, double chi, double gauss_seidel_ratio) {
+//	int n=f.nb_var();
+//	assert(box.size()==n);
+//	assert(pt.size()==n);
+//
+//	int k=0;
+//	double mu=0;
+//	box=pt;
+//	while (k<k_max && mu<mu_max) {
+//		IntervalVector box2=
+//
+//	}
+	return false;
 }
 
 } // end namespace ibex

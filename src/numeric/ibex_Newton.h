@@ -27,9 +27,9 @@ extern double default_gauss_seidel_ratio;
 
 /** \ingroup numeric
  *
- * \brief Multivariate Newton operator.
+ * \brief Multivariate Newton operator (contracting).
  *
- * This function implements the Hansen-Sengupta variant of the interval Newton iteration.
+ * This function implements the Hansen-Sengupta variant of the contracting interval Newton iteration.
  * It can be used either as a contractor or as an existence test.
  * The underlying linear routine is \link ibex::gauss_seidel(const IntervalMatrix&, const IntervalVector&, IntervalVector&, double) Gauss-Seidel \endlink.
  *
@@ -45,6 +45,42 @@ extern double default_gauss_seidel_ratio;
  */
 bool newton(const Fnc& f, IntervalVector& box, double prec=default_newton_prec, double gauss_seidel_ratio=default_gauss_seidel_ratio);
 
+/** \ingroup numeric
+ *
+ * \brief Multivariate Newton operator (inflating).
+ *
+ * This function implements the inflating Newton iteration as described in page 9 of
+ * "Certified Parallelotope Continuation for One-Manifolds" by Martin et al., SINUM 2013.
+ *
+ * The underlying linear routine is \link ibex::gauss_seidel(const IntervalMatrix&, const IntervalVector&, IntervalVector&, double) Gauss-Seidel \endlink.
+ *
+ * The box is inflated at each step as follows:
+ *    [x] <- mid[x] + delta*(rad[x]) + chi*[-1,+1]
+ *
+ * \param f                 - The function
+ * \param pt                - The starting point
+ * \param box               - In case of success, a box proven to contain a solution.
+ * \param k_max_iteration (optional)
+ *                          - maximal number of iterations
+ * \param mu_max_divergence (optional)
+ *                          - stop criterion. When the Hausdorff distance between two iterates increases by
+ *                            a ratio greater than mu_max_divergence, the procedure halts. Value 1.0 by default
+ *                            is for detecting divergence.
+ * \param delta_relative_inflat (optional)
+ *                          - The box is inflated at each step as follows:
+ *                            [x] <- mid[x] + delta*(rad[x]) + chi*[-1,+1]
+ * \param chi_absolute_inflat (optional)
+ *                          - The box is inflated at each step as follows:
+ *                            [x] <- mid[x] + delta*(rad[x]) + chi*[-1,+1]
+ * \param gauss_seidel_ratio (optional)
+ *                          - Criterion for stopping the inner Gauss-Seidel loop.
+ *
+ * \return True if it is proven that the output box contains a solution.
+ */
+bool newton(const Fnc& f, const Vector& pt, IntervalVector& box,
+		double k_max_iteration=15, double mu_max_divergence=1.0,
+		double delta_relative_inflat=1.1, double chi_absolute_inflat=1e-12,
+		double gauss_seidel_ratio=default_gauss_seidel_ratio);
 
 } // end namespace ibex
 #endif // __IBEX_NEWTON_H__
