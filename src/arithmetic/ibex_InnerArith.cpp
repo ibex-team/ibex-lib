@@ -235,6 +235,8 @@ bool iproj_cmp_mono_op(bool geq, double z, Interval& x, Interval& y, const Inter
 	}
 
 	x = (inc_var1)? Interval(x0,x.ub()):Interval(x.lb(),x0);
+
+	if (!inc_var1 || !inc_var2) fpu_round_up(); // default mode. TODO: valid for gaol and... ?
 	// [gch] if op==MUL and z=0 we have y=[0,0]
 	// and x=[x^-,x0] (or x=[x0,x^+]) which is correct in both
 	// case although we could take x entirely in this case.
