@@ -95,6 +95,9 @@ public:
 		TEST_ADD(TestInnerArith::mul13_2);
 		TEST_ADD(TestInnerArith::mul13_3);
 		TEST_ADD(TestInnerArith::mul13_4);
+		TEST_ADD(TestInnerArith::mul14_1);
+		TEST_ADD(TestInnerArith::mul14_2);
+		TEST_ADD(TestInnerArith::mul14_3);
 
 		TEST_ADD(TestInnerArith::div08_1);
 		TEST_ADD(TestInnerArith::div08_2);
@@ -112,7 +115,7 @@ public:
 		TEST_ADD(TestInnerArith::sqrt03);
 		TEST_ADD(TestInnerArith::sqrt04);
 		TEST_ADD(TestInnerArith::sqrt05);
-
+		TEST_ADD(TestInnerArith::bugr894);
 	}
 
 	// x+y<=z with contraction (no inflation)
@@ -257,6 +260,14 @@ public:
 	// x*y in [z], inflating a box xin<0 yin<0
 	void mul13_4();
 
+	// x*y with y=0 and 0 in [z]
+	void mul14_1();
+	// x*y with y=0 and [z]<>0
+	void mul14_2();
+	// x*y with y=0 and [z]=0
+	void mul14_3();
+
+
 	// x/y<=z with z>0 non inflating,with only possible positive half-plane
 	void div08_1();
 	// x/y<=z with z>0 non inflating,with only possible negative half-plane
@@ -277,6 +288,9 @@ public:
 	void sqrt03();
 	void sqrt04();
 	void sqrt05();
+
+	// bug in release r893 (fixed in r894).
+	void bugr894();
 
 private:
 	void check_add_sub(const Interval& z, const Interval& xin, const Interval& yin, bool lb, bool ub);

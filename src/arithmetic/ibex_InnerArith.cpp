@@ -71,7 +71,7 @@ Interval eval(const Interval& x, const Interval& y, int op) {
     case ADD: return x+y;
     case SUB: return x-y;
     case MUL: return x*y;
-    default: return x/y;
+    default:  return x/y;
   }
 }
 
@@ -80,10 +80,8 @@ double projx(double z, double y, int op, bool round_up) {
   switch(op) {
     case ADD: return z-y;
     case SUB: return z+y;
-    case MUL:
-
-    	return (y==0)? POS_INFINITY:z/y;
-    default: return z*y;
+    case MUL: return (y==0)? POS_INFINITY:z/y;
+    default:  return z*y;
   }
   //fpu_round_near(); // unreachable!
 }
@@ -329,8 +327,24 @@ bool iproj_leq_mul(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 		return true;
 	}
 
-	else { // z_sup<=0
+	else if (z_sup==0) {
 
+		if (!x.contains(0) || (inflate && !xin.contains(0))) {
+			assert(!inflate || yin.contains(0));
+			return !(y&=Interval::ZERO).is_empty();
+		}
+		else if (!y.contains(0) || (inflate && !yin.contains(0))) {
+			assert(!inflate || xin.contains(0));
+			return !(x&=Interval::ZERO).is_empty();
+		} else { // both are possible: either fix x=0 or y=0
+			// we chose to fix the variable of minimal diameter
+			if (!x.is_unbounded() && (y.is_unbounded() || x.diam()<y.diam()))
+				return !(x&=Interval::ZERO).is_empty();
+			else
+				return !(y&=Interval::ZERO).is_empty();
+		}
+
+	} else { // z_sup<=0
 		if (inflate) {
 			// in this case, we directly know in which quadrant
 			// an inner box has to be found
@@ -338,15 +352,11 @@ bool iproj_leq_mul(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 				assert(yin.ub()<=0);
 				x &= Interval::POS_REALS;
 				y &= Interval::NEG_REALS;
-				if (z_sup==0) return true;
 				// note: we know x.ub()>0 && y.lb()<0
 				assert(yin.lb()<0);
 				return iproj_cmp_mono_op(false, z_sup, x, y, xin, yin, MUL, false, true);
-			} else if (xin.ub()>0) {
-				assert(yin==Interval::ZERO);
-				assert(z_sup==0);
-				return !(y&=Interval::ZERO).is_empty();
 			} else {
+				assert(xin.ub()<=0); // => because xin.ub()>0 => z_sup=0.
 				assert(yin.lb()>=0);
 				x &= Interval::NEG_REALS;
 				y &= Interval::POS_REALS;

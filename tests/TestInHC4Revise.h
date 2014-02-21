@@ -27,6 +27,7 @@ public:
 		TEST_ADD(TestInHC4Revise::dist02);
 		TEST_ADD(TestInHC4Revise::apply01);
 		TEST_ADD(TestInHC4Revise::apply02);
+		TEST_ADD(TestInHC4Revise::add_mult01);
 	}
 
 	void add01();
@@ -35,6 +36,8 @@ public:
 	void dist02();
 	void apply01();
 	void apply02();
+	// z=x+0*y
+	void add_mult01();
 };
 
 } // end namespace

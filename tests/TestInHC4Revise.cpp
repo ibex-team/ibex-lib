@@ -110,5 +110,23 @@ void TestInHC4Revise::apply02() {
 	TEST_ASSERT(almost_eq(g.eval(box.ub()),Interval::ONE,1e-07));
 }
 
+void TestInHC4Revise::add_mult01() {
+//	Function g("x","y","x+y"); //0*y");
+//	Variable x,y;
+//	Function f(x,y,g(x,0*y));
+//	IntervalVector box(2,Interval(0,2));
+//	Interval iz(0.9,1.1);
+//	f.iproj(iz,box);
+//	f.cf.print();
+//	cout << "inhc4 box=" << box << endl;
+
+	Function f("x","y","z","0*(x-y)+z");
+	IntervalVector box(3,Interval(0,2));
+	Interval iw(0.9,1.1);
+	f.iproj(iw,box);
+	f.cf.print();
+	cout << "inhc4 box=" << box << endl;
+
+}
 } // end namespace
 
