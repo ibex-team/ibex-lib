@@ -279,11 +279,16 @@ void Optimizer::contract_and_bound(Cell& c, const IntervalVector& init_box) {
 	// (bn] NO , the NoBisectableVariableException is raised by the bisector, 
 	// there are actually 2 different cases of a non bisected box that may cause an update 
 	// of uplo_of_epsboxes
-	if ((tmp_box.max_diam()<=prec && y.diam() <=goal_abs_prec) || !c.box.is_bisectable()) {
+	double tmp_diam =tmp_box.max_diam();
+	if ((tmp_diam<=prec && y.diam() <=goal_abs_prec) || !c.box.is_bisectable()) {
 		// rem1: tmp_box and not c.box because y is handled with goal_rel_prec and goal_abs_prec
 		// rem2: do not use a precision contractor here since it would make the box empty (and y==(-inf,-inf)!!)
 		// rem 3 : the extended  boxes with no bisectable  domains  should be catched for avoiding infinite bisections
-		update_uplo_of_epsboxes(y.lb());
+		if  (!(tmp_box.is_unbounded())) {
+			// rem4: this case can append if the interval [1.79769e+308,inf] is in c.box.
+			// It is only numerical degenerated case
+			update_uplo_of_epsboxes(y.lb());
+		}
 		throw EmptyBoxException();
 	}
 
@@ -386,7 +391,16 @@ void Optimizer::optimize(const IntervalVector& init_box) {
 
 			}
 			catch (NoBisectableVariableException& ) {
-				update_uplo_of_epsboxes ((c->box)[ext_sys.goal_var()].lb());
+				bool bb=false;
+				for (int i=0;(!bb)&&( i<(c->box).size()); i++) {
+					if (i!=ext_sys.goal_var())  // skip goal variable
+						bb=bb||(c->box)[i].is_unbounded();
+				}
+				if (!bb) {
+					// rem4: this case can append if the interval [1.79769e+308,inf] is in c.box.
+					// It is only numerical degenerated case
+					update_uplo_of_epsboxes ((c->box)[ext_sys.goal_var()].lb());
+				}
 				delete buffer.pop();
 			}
 		}
