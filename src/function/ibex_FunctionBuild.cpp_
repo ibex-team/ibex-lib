@@ -152,7 +152,7 @@ const char* duplicate_or_generate(const char* name) {
 
 }
 
-Function::Function() : name(strdup(next_generated_func_name())), root(NULL) {
+Function::Function() : name(strdup(next_generated_func_name())), root(NULL), df(NULL) {
 	// root==NULL <=> the function is not initialized yet
 }
 
@@ -399,7 +399,7 @@ void Function::separate() {
 //void Function::set_expr(const ExprNode& expr) {
 void Function::init(const Array<const ExprSymbol>& x, const ExprNode& y) {
 
-	//df=NULL;
+	df=NULL;
 	key_count=0;
 	__all_symbols_scalar=true; // by default
 

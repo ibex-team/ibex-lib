@@ -75,4 +75,42 @@ void TestExprDiff::vec02() {
 	TEST_ASSERT(sameExpr(v->arg(3),x[0]));
 }
 
+void TestExprDiff::vec03() {
+	Variable x(2,"x");
+	Array<const ExprNode> _vec1(x[0],x[1]);
+	const ExprNode& vec1=ExprVector::new_(_vec1,false);
+	Function f(x,vec1[1]);
+	Function df(f,Function::DIFF);
+	const ExprConstant* c=dynamic_cast<const ExprConstant*>(&df.expr());
+	TEST_ASSERT(c);
+	TEST_ASSERT(c->dim.type()==Dim::COL_VECTOR);
+	double _v[][2]= {{0,0},{1,1}};
+	TEST_ASSERT(c->get_vector_value()==IntervalVector(2,_v));
+}
+
+void TestExprDiff::mat01() {
+	Variable x(2,2,"x");
+	Function f(x,x[1][0]);
+	Function df(f,Function::DIFF);
+	const ExprConstant* c=dynamic_cast<const ExprConstant*>(&df.expr());
+	TEST_ASSERT(c!=NULL);
+	TEST_ASSERT(c->dim.type()==Dim::MATRIX);
+	double _M[][2]= {{0,0},{0,0},{1,1},{0,0}};
+	TEST_ASSERT(c->get_matrix_value()==IntervalMatrix(2,2,_M));
+}
+
+void TestExprDiff::mat02() {
+	Variable x(2,2,"x");
+	Array<const ExprNode> vec1(x[0],x[1]);
+	Function f(x,vec1[1][0]);
+	Function df(f,Function::DIFF);
+	const ExprConstant* c=dynamic_cast<const ExprConstant*>(&df.expr());
+	TEST_ASSERT(c!=NULL);
+	TEST_ASSERT(c->dim.type()==Dim::MATRIX);
+	double _M[][2]= {{0,0},{0,0},{1,1},{0,0}};
+	TEST_ASSERT(c->get_matrix_value()==IntervalMatrix(2,2,_M));
+}
+
+
+
 } // end namespace

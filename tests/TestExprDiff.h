@@ -26,12 +26,14 @@ public:
 		TEST_ADD(TestExprDiff::vec01);
 		TEST_ADD(TestExprDiff::vec02);
 		TEST_ADD(TestExprDiff::one_var_one_func);
+		TEST_ADD(TestExprDiff::mat01);
 	}
 
 	void linear01();
 	void poly01();
 	void vec01();
 	void vec02();
+	void mat01();
 	void one_var_one_func();
 };
 

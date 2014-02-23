@@ -282,6 +282,11 @@ public:
 	Function(const Function&, copy_mode mode=COPY);
 
 	/**
+	 * \brief Differentiate this function.
+	 */
+	const Function& diff() const;
+
+	/**
 	 * \brief Return the ith component of f.
 	 *
 	 * The vector-valued function f is also
@@ -623,7 +628,9 @@ private:
 
 	Function& operator=(const Function&);       // forbidden
 
-	//Function* df;
+	// if at some point, symbolic differentiation is needed for this function,
+	// we store the resulting function for future usage.
+	Function* df;
 public:
 
 	/**
@@ -631,156 +638,160 @@ public:
 	 *
 	 * Works only if it is a unary function.
 	 */
-	const ExprApply& operator()(const ExprNode& arg1);
+	const ExprApply& operator()(const ExprNode& arg1) const;
 
 	/**
 	 * \brief Apply this function to the arguments
 	 *
 	 * Works only if it is a binary function.
 	 */
-	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2);
+	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2) const;
 
 	/**
 	 * \brief Apply this function to the arguments
 	 *
 	 * Works only if it is a ternary function.
 	 */
-	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3);
+	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3) const;
 
 	/**
 	 * \brief Apply this function to the arguments
 	 *
 	 * Works only if the function has four arguments.
 	 */
-	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4);
+	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4) const;
 
 	/**
 	 * \brief Apply this function to the arguments
 	 *
 	 * Works only if the function has five arguments.
 	 */
-	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5);
+	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5) const;
 
 	/**
 	 * \brief Apply this function to the arguments
 	 *
 	 * Works only if the function has six arguments.
 	 */
-	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6);
+	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6) const;
 
 	/**
 	 * \brief Apply this function to the arguments
 	 *
 	 * Works only if the function has 7 arguments.
 	 */
-	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7);
+	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7) const;
 
 	/**
 	 * \brief Apply this function to the arguments
 	 *
 	 * Works only if the function has 8 arguments.
 	 */
-	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8);
+	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8) const;
 
 	/**
 	 * \brief Apply this function to the arguments
 	 *
 	 * Works only if the function has 9 arguments.
 	 */
-	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9);
+	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9) const;
 
 	/**
 	 * \brief Apply this function to the arguments
 	 *
 	 * Works only if the function has 10 arguments.
 	 */
-	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10);
+	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10) const;
 
 	/**
 	 * \brief Apply this function to the arguments
 	 *
 	 * Works only if the function has 11 arguments.
 	 */
-	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10, const ExprNode& arg11);
+	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10, const ExprNode& arg11) const;
 
 	/**
 	 * \brief Apply this function to the arguments
 	 *
 	 * Works only if the function has 12 arguments.
 	 */
-	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10, const ExprNode& arg11, const ExprNode& arg12);
+	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10, const ExprNode& arg11, const ExprNode& arg12) const;
 
 	/**
 	 * \brief Apply this function to the arguments
 	 *
 	 * Works only if the function has 13 arguments.
 	 */
-	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10, const ExprNode& arg11, const ExprNode& arg12, const ExprNode& arg13);
+	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10, const ExprNode& arg11, const ExprNode& arg12, const ExprNode& arg13) const;
 
 	/**
 	 * \brief Apply this function to the arguments
 	 *
 	 * Works only if the function has 14 arguments.
 	 */
-	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10,const ExprNode& arg11, const ExprNode& arg12, const ExprNode& arg13, const ExprNode& arg14);
+	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10,const ExprNode& arg11, const ExprNode& arg12, const ExprNode& arg13, const ExprNode& arg14) const;
 
 	/**
 	 * \brief Apply this function to the arguments
 	 *
 	 * Works only if the function has 15 arguments.
 	 */
-	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10, const ExprNode& arg11, const ExprNode& arg12, const ExprNode& arg13, const ExprNode& arg14, const ExprNode& arg15);
+	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10, const ExprNode& arg11, const ExprNode& arg12, const ExprNode& arg13, const ExprNode& arg14, const ExprNode& arg15) const;
 
 	/**
 	 * \brief Apply this function to the arguments
 	 *
 	 * Works only if the function has 16 arguments.
 	 */
-	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10, const ExprNode& arg11, const ExprNode& arg12, const ExprNode& arg13, const ExprNode& arg14, const ExprNode& arg15, const ExprNode& arg16);
+	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10, const ExprNode& arg11, const ExprNode& arg12, const ExprNode& arg13, const ExprNode& arg14, const ExprNode& arg15, const ExprNode& arg16) const;
 
 	/**
 	 * \brief Apply this function to the arguments
 	 *
 	 * Works only if the function has 17 arguments.
 	 */
-	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10, const ExprNode& arg11, const ExprNode& arg12, const ExprNode& arg13, const ExprNode& arg14, const ExprNode& arg15, const ExprNode& arg16, const ExprNode& arg17);
+	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10, const ExprNode& arg11, const ExprNode& arg12, const ExprNode& arg13, const ExprNode& arg14, const ExprNode& arg15, const ExprNode& arg16, const ExprNode& arg17) const;
 
 	/**
 	 * \brief Apply this function to the arguments
 	 *
 	 * Works only if the function has 18 arguments.
 	 */
-	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10, const ExprNode& arg11, const ExprNode& arg12, const ExprNode& arg13, const ExprNode& arg14, const ExprNode& arg15, const ExprNode& arg16, const ExprNode& arg17, const ExprNode& arg18);
+	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10, const ExprNode& arg11, const ExprNode& arg12, const ExprNode& arg13, const ExprNode& arg14, const ExprNode& arg15, const ExprNode& arg16, const ExprNode& arg17, const ExprNode& arg18) const;
 
 	/**
 	 * \brief Apply this function to the arguments
 	 *
 	 * Works only if the function has 19 arguments.
 	 */
-	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10, const ExprNode& arg11, const ExprNode& arg12, const ExprNode& arg13, const ExprNode& arg14, const ExprNode& arg15, const ExprNode& arg16, const ExprNode& arg17, const ExprNode& arg18, const ExprNode& arg19);
+	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10, const ExprNode& arg11, const ExprNode& arg12, const ExprNode& arg13, const ExprNode& arg14, const ExprNode& arg15, const ExprNode& arg16, const ExprNode& arg17, const ExprNode& arg18, const ExprNode& arg19) const;
 
 	/**
 	 * \brief Apply this function to the arguments
 	 *
 	 * Works only if the function has 20 arguments.
 	 */
-	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10, const ExprNode& arg11, const ExprNode& arg12, const ExprNode& arg13, const ExprNode& arg14, const ExprNode& arg15, const ExprNode& arg16, const ExprNode& arg17, const ExprNode& arg18, const ExprNode& arg19, const ExprNode& arg20);
+	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10, const ExprNode& arg11, const ExprNode& arg12, const ExprNode& arg13, const ExprNode& arg14, const ExprNode& arg15, const ExprNode& arg16, const ExprNode& arg17, const ExprNode& arg18, const ExprNode& arg19, const ExprNode& arg20) const;
 
 	/**
 	 * \brief Apply this function to the arguments
 	 */
-	const ExprApply& operator()(const ExprNode** arg);
+	const ExprApply& operator()(const ExprNode** arg) const;
 
 	/**
 	 * \brief Apply this function to the arguments
 	 */
-	const ExprApply& operator()(const std::vector<const ExprNode*>& arg);
+	const ExprApply& operator()(const std::vector<const ExprNode*>& arg) const;
 
 };
 
 std::ostream& operator<<(std::ostream&, const Function&);
 
 /*================================== inline implementations ========================================*/
+
+inline const Function& Function::diff() const {
+	return *(df ? df : (((Function*&) df) = new Function(*this,DIFF)));
+}
 
 inline Function& Function::operator[](int i) {
 	return comp[i];

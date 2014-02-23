@@ -89,4 +89,4 @@ protected:
 };
 
 } // end namespace ibex
-#endif // IBEX_EXPR_DIFF_H_
+#endif // __IBEX_EXPR_DIFF_H__
