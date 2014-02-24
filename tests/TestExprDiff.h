@@ -25,15 +25,38 @@ public:
 		TEST_ADD(TestExprDiff::poly01);
 		TEST_ADD(TestExprDiff::vec01);
 		TEST_ADD(TestExprDiff::vec02);
+		TEST_ADD(TestExprDiff::vec03);
 		TEST_ADD(TestExprDiff::one_var_one_func);
 		TEST_ADD(TestExprDiff::mat01);
+		TEST_ADD(TestExprDiff::mat02);
+		TEST_ADD(TestExprDiff::apply01);
+		TEST_ADD(TestExprDiff::apply02)
+		TEST_ADD(TestExprDiff::apply03);
 	}
 
 	void linear01();
+
 	void poly01();
+
+	// x (vec) -> x[0]+x[3]
 	void vec01();
+	// x (vec) -> x[0]*x[3]
 	void vec02();
+	// x (vec) -> (x[0];x[1])[1]
+	void vec03();
+
+	// x (mat) -> x[1][0]
 	void mat01();
+	// x (mat) -> (x[0];x[1])[1][0]
+	void mat02();
+
+	// x -> f(3*x) with f(y)=y²
+	void apply01();
+	// x -> 3*f(x) with f(y)=y²
+	void apply02();
+	// (x,y) -> f(2*x,3*y) with f(z,k)=z*k
+	void apply03();
+
 	void one_var_one_func();
 };
 

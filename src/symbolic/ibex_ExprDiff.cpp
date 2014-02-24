@@ -114,7 +114,7 @@ const ExprNode& ExprDiff::gradient(const Array<const ExprSymbol>& old_x, const A
 		int k=0;
 		for (int i=0; i<old_x.size(); i++) {
 
-			cout << "grad % " << old_x[i].name << " : " << *grad[old_x[i]] << endl;
+			//cout << "grad % " << old_x[i].name << " : " << *grad[old_x[i]] << endl;
 			switch (old_x[i].dim.type()) {
 			case Dim::SCALAR:
 				dX.set_ref(k++,*grad[old_x[i]]);
@@ -151,9 +151,9 @@ const ExprNode& ExprDiff::gradient(const Array<const ExprSymbol>& old_x, const A
 		assert(k==nb_var);
 	}
 
-	cout << "(";
-	for (int k=0; k<nb_var; k++) cout << dX[k] << " , ";
-	cout << ")" << endl;
+//	cout << "(";
+//	for (int k=0; k<nb_var; k++) cout << dX[k] << " , ";
+//	cout << ")" << endl;
 
     // dX.size()==1 is the univariate case (the node df must be scalar)
 	const ExprNode& df=dX.size()==1? dX[0] : ExprVector::new_(dX,true);
@@ -186,17 +186,13 @@ const ExprNode& ExprDiff::gradient(const Array<const ExprSymbol>& old_x, const A
 	for (unsigned int i=0; i<leaves.size(); i++) {
 		ExprSubNodes gnodes(*grad[*leaves[i]]);
 		for (int i=0; i<gnodes.size(); i++) {
-			cout << "subnode n°i=" << gnodes[i];
 			if (!nodes.found(gnodes[i])       // if it is not in the original expression
 			     &&
 			    !other_nodes.found(gnodes[i]) // and not yet collected
 			   ) {
 				other_nodes.insert(gnodes[i],true);
-				cout << " delete" << endl;
- 			} else cout << " not delete" << endl;
-
+ 			}
 		}
-	//cout << "==================" << endl;
 	}
 
 	for (IBEX_NODE_MAP(bool)::const_iterator it=other_nodes.begin(); it!=other_nodes.end(); it++) {
@@ -262,7 +258,7 @@ void ExprDiff::visit(const ExprIndex& i) {
 	}
 
 	grad[i.expr] = & ExprVector::new_(new_comp, i.expr.dim.type()==Dim::ROW_VECTOR);
-	cout << " grad of " << i.expr << " --> " << *grad[i.expr] << endl;
+	//cout << " grad of " << i.expr << " --> " << *grad[i.expr] << endl;
 }
 
 void ExprDiff::visit(const ExprSymbol& x) {
@@ -309,7 +305,10 @@ void ExprDiff::visit(const ExprApply& e) {
 	for (int i=0; i<e.nb_args; i++) {
 		switch (e.arg(i).dim.type()) {
 		case Dim::SCALAR:
-			add_grad_expr(e.arg(i), gradf[k++]*(*grad[e]));
+			if (e.nb_args==1)
+				add_grad_expr(e.arg(i), gradf*(*grad[e])); // to avoid a useless [0] index
+			else
+				add_grad_expr(e.arg(i), gradf[k++]*(*grad[e]));
 			break;
 		case Dim::ROW_VECTOR:
 		case Dim::COL_VECTOR:

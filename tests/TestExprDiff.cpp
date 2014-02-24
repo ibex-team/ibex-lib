@@ -83,7 +83,7 @@ void TestExprDiff::vec03() {
 	Function df(f,Function::DIFF);
 	const ExprConstant* c=dynamic_cast<const ExprConstant*>(&df.expr());
 	TEST_ASSERT(c);
-	TEST_ASSERT(c->dim.type()==Dim::COL_VECTOR);
+	TEST_ASSERT(c->dim.type()==Dim::ROW_VECTOR);
 	double _v[][2]= {{0,0},{1,1}};
 	TEST_ASSERT(c->get_vector_value()==IntervalVector(2,_v));
 }
@@ -94,9 +94,10 @@ void TestExprDiff::mat01() {
 	Function df(f,Function::DIFF);
 	const ExprConstant* c=dynamic_cast<const ExprConstant*>(&df.expr());
 	TEST_ASSERT(c!=NULL);
-	TEST_ASSERT(c->dim.type()==Dim::MATRIX);
+	//TEST_ASSERT(c->dim.type()==Dim::MATRIX);
 	double _M[][2]= {{0,0},{0,0},{1,1},{0,0}};
-	TEST_ASSERT(c->get_matrix_value()==IntervalMatrix(2,2,_M));
+	//TEST_ASSERT(c->get_matrix_value()==IntervalMatrix(2,2,_M));
+	TEST_ASSERT(c->get_vector_value()==IntervalVector(4,_M));
 }
 
 void TestExprDiff::mat02() {
@@ -106,11 +107,39 @@ void TestExprDiff::mat02() {
 	Function df(f,Function::DIFF);
 	const ExprConstant* c=dynamic_cast<const ExprConstant*>(&df.expr());
 	TEST_ASSERT(c!=NULL);
-	TEST_ASSERT(c->dim.type()==Dim::MATRIX);
+	//TEST_ASSERT(c->dim.type()==Dim::MATRIX);
 	double _M[][2]= {{0,0},{0,0},{1,1},{0,0}};
-	TEST_ASSERT(c->get_matrix_value()==IntervalMatrix(2,2,_M));
+	//TEST_ASSERT(c->get_matrix_value()==IntervalMatrix(2,2,_M));
+	TEST_ASSERT(c->get_vector_value()==IntervalVector(4,_M));
 }
 
+void TestExprDiff::apply01() {
+	Variable x("x");
+	Function f(x,sqr(x),"f");
+	Function g(x,f(3*x));
+	Function dg(g,Function::DIFF);
+	TEST_ASSERT(sameExpr(f.diff().expr(),"(2*x)"));
+	TEST_ASSERT(sameExpr(dg.expr(),"(3*df((3*x)))"));
+}
 
+void TestExprDiff::apply02() {
+	Variable x("x");
+	Function f(x,sqr(x),"f");
+	Function g(x,3*f(x));
+	Function dg(g,Function::DIFF);
+	TEST_ASSERT(sameExpr(dg.expr(),"(df(x)*3)"));
+}
+
+void TestExprDiff::apply03() {
+	Variable x("x"),y("y");
+	Function f(x,y,x*y,"f");
+	Function g(x,y,f(2*x,3*y));
+	Function dg(g,Function::DIFF);
+	TEST_ASSERT(sameExpr(dg.expr(),"((2*df((2*x),(3*y))[0]),(3*df((2*x),(3*y))[1]))"));
+	double _box[][2]={{1,1},{2,2}};
+	double _dg_box[][2]={{12,12},{6,6}};
+	IntervalVector dg_box(dg.eval_vector(IntervalVector(2,_box)));
+	TEST_ASSERT(dg_box==IntervalVector(2,_dg_box));
+}
 
 } // end namespace

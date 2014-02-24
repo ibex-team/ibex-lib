@@ -31,6 +31,8 @@ namespace ibex {
 
 namespace {
 
+const char* DIFF_PREFIX = "d"; // when the differential of a function is generated, the name is prefixed with DIFF_PREFIX
+
 /*
  * Find the components used in the function
  * \pre the symbol keys must have been set
@@ -351,9 +353,13 @@ Function::Function(const Function& f, copy_mode mode) : name(strdup(f.name)) {
 	const ExprNode* y;
 	if (mode==COPY)
 		y= & ExprCopy().copy(f.symbs,x,f.expr());
-	else
+	else {
+		free((char*) name);
+		name = (char*) malloc(strlen(name)+strlen(DIFF_PREFIX)+1); // +1 for null character
+		strcpy((char*) name,DIFF_PREFIX);
+		strcat((char*) name,f.name);
 		y= & ExprDiff().diff(f.symbs,x,f.expr());
-
+	}
 	init(x,*y);
 }
 
