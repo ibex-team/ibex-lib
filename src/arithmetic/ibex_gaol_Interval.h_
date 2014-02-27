@@ -344,7 +344,9 @@ inline Interval cos(const Interval& x) {
 }
 
 inline Interval sin(const Interval& x) {
-	return gaol::sin(x.itv);
+	Interval res = gaol::sin(x.itv);
+	fpu_round_up();
+	return res;
 }
 
 inline Interval tan(const Interval& x) {

@@ -28,6 +28,7 @@ public:
 		TEST_ADD(TestInHC4Revise::apply01);
 		TEST_ADD(TestInHC4Revise::apply02);
 		TEST_ADD(TestInHC4Revise::add_mult01);
+		TEST_ADD(TestInHC4Revise::bugr900);
 	}
 
 	void add01();
@@ -38,6 +39,7 @@ public:
 	void apply02();
 	// z=x+0*y
 	void add_mult01();
+	void bugr900();
 };
 
 } // end namespace

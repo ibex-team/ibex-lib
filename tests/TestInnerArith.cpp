@@ -645,8 +645,6 @@ void TestInnerArith::bugr899() {
 	Interval px(ibex::previous_float(1.0),1);
 	Interval y(Interval::ZERO);
 	iproj_add(Interval(1),x,y,px,y);
-	cout << "899 x= " << x << endl;
-
 	TEST_ASSERT(x==px);
 }
 

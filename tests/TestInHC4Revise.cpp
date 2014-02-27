@@ -71,7 +71,6 @@ void TestInHC4Revise::dist02() {
 	IntervalVector pt(2,_pt);
 	f.iproj(Interval(1,POS_INFINITY),box,pt);
 
-	cout << "INN BOX=" << box << endl;
 //	// check the box is inside by testing two corners
 //	TEST_ASSERT(f.eval(box.lb()).is_subset(Interval(0,1)));
 //	TEST_ASSERT(f.eval(box.ub()).is_subset(Interval(0,1)));
@@ -124,9 +123,18 @@ void TestInHC4Revise::add_mult01() {
 	IntervalVector box(3,Interval(0,2));
 	Interval iw(0.9,1.1);
 	f.iproj(iw,box);
-	f.cf.print();
-	cout << "inhc4 box=" << box << endl;
-
+//	f.cf.print();
+//	cout << "inhc4 box=" << box << endl;
 }
+
+void TestInHC4Revise::bugr900() {
+	Function f("x","1+sin(x)");
+	IntervalVector box(1,Interval(0,ibex::next_float(0)));
+	IntervalVector pt(1,Interval::ZERO);
+	f.iproj(f.eval(pt),box,pt);
+	TEST_ASSERT(!box.is_empty());
+}
+
+
 } // end namespace
 
