@@ -499,7 +499,7 @@ void TestInnerArith::mul14_1() {
 	Interval x(-1,1);
 	Interval y=Interval::ZERO;
 	iproj_mul(Interval(-1,1),x,y);
-	TEST_ASSERT(x==Interval(-1,1)); // TODO: FAIL!! (not optimal)
+	TEST_ASSERT(x==Interval(-1,1));
 }
 
 void TestInnerArith::mul14_2() {
@@ -514,7 +514,7 @@ void TestInnerArith::mul14_3() {
 	Interval x(-1,1);
 	Interval y=Interval::ZERO;
 	iproj_mul(Interval::ZERO,x,y,Interval::ZERO,Interval::ZERO);
-	TEST_ASSERT(x==Interval(-1,1)); // TODO: FAIL!! (not optimal)
+	TEST_ASSERT(x==Interval(-1,1));
 }
 
 void TestInnerArith::div08_1() {
@@ -637,6 +637,17 @@ void TestInnerArith::bugr894() {
 	IntervalVector box(1);//,_box);
 	f.iproj(Interval::NEG_REALS,box,pt);
 	TEST_ASSERT(!f.eval(pt).is_empty());
+}
+
+void TestInnerArith::bugr899() {
+
+	Interval x(ibex::previous_float(1.0),1);
+	Interval px(ibex::previous_float(1.0),1);
+	Interval y(Interval::ZERO);
+	iproj_add(Interval(1),x,y,px,y);
+	cout << "899 x= " << x << endl;
+
+	TEST_ASSERT(x==px);
 }
 
 } // end namespace

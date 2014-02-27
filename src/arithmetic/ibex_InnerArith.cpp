@@ -13,6 +13,8 @@
 #include <stdlib.h>
 #include <cassert>
 
+using namespace std;
+
 namespace ibex {
 
 namespace {
@@ -205,6 +207,7 @@ bool iproj_cmp_mono_op(bool geq, double z, Interval& x, Interval& y, const Inter
 		y.set_empty();
 		//cout << "  result: x=" << x << " y=" << y << endl;
 		//cout << "----------------------------------------------------------" << endl;
+		if (!inc_var1) fpu_round_up(); // default mode. TODO: valid for gaol and... ?
 		return false;
 	} else if((inc_var1 && xmax < x.lb()) || (!inc_var1 && xmin > x.ub())) {
 		// all the box is inner
@@ -214,6 +217,12 @@ bool iproj_cmp_mono_op(bool geq, double z, Interval& x, Interval& y, const Inter
 		if (inflate) {
 			if (inc_var1) { if (xmax>xin.lb()) xmax=xin.lb(); }
 			else          { if (xmin<xin.ub()) xmin=xin.ub(); }
+			if (xmin>xmax) {
+				if (!inc_var1) fpu_round_up(); // default mode. TODO: valid for gaol and... ?
+				x=xin;
+				y=yin;
+				return true;
+			}
 		}
 		//cout << "  xmin=" << xmin << " xmax=" << xmax << endl;
 		Interval xx= x & Interval(xmin,xmax);
@@ -628,7 +637,7 @@ bool iproj_sqr(const Interval& y, Interval& x, const Interval& xin) {
 }
 
 bool iproj_pow(const Interval& y, Interval& x, int p, const Interval &xin) {
-	//   cout << "[sqr] xin=" << xin << " x=" << x << " y=" << y << endl;
+	//   //cout << "[sqr] xin=" << xin << " x=" << x << " y=" << y << endl;
 	// Interval xini(X);
 	bool inflate=!xin.is_empty();
 	assert(xin.is_subset(x));
@@ -672,7 +681,6 @@ bool iproj_pow(const Interval& y, Interval& x, int p, const Interval &xin) {
 					// ============================================================
 //					Interval xtmp =x & Interval(lo,up);
 //					x &= Interval(-up,-lo);
-//					std::cout << " zozo x=" << x << "xtmp=" << xtmp << std::endl;
 //					if (xtmp.diam()>x.diam()) x=xtmp;
 //					return !x.is_empty();
 					// ============================================================
