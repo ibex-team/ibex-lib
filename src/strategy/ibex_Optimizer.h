@@ -1,5 +1,5 @@
 //============================================================================
-//                                  I B E X                                   
+//                                  I B E X
 // File        : ibex_Optimizer.h
 // Author      : Gilles Chabert, Bertrand Neveu
 // Copyright   : Ecole des Mines de Nantes (France)
@@ -131,7 +131,7 @@ public:
 	 * Corresponds to the normalized system with the goal f(x)
 	 * represented as a variable "y" and with the additional constraint
 	 * y=f(x). The domain of y in an extended box stores the interval [ylb,yub] where
-	 * "ylb" is the lower bound of f(x) in the box and "yub" its 
+	 * "ylb" is the lower bound of f(x) in the box and "yub" its
 	 * upper bound.  (y is contracted with y <= ymax : see compute_ymax)
 	 *
 	 * The index of y is ext_sys.nb_var.
@@ -242,12 +242,15 @@ public:
 	/** Rigor mode: the box satisfying the constraints corresponding to the loup */
 	IntervalVector loup_box;
 
+	/** Number of cells put into the heap (which passed through the contractors)  */
+	int nb_cells;
+
 protected:
 	/**
 	 * \brief Return an upper bound of f(x).
 	 *
 	 * Return +oo if x is outside the definition domain of f.
-	 */	
+	 */
 	inline double goal(const Vector& x) const {
 		Interval fx=sys.goal->eval(x);
 		if (fx.is_empty())  // means: outside of the definition domain of the function
@@ -280,7 +283,7 @@ protected:
 	 */
 	void contract_and_bound(Cell& c, const IntervalVector& init_box);
 
-	/** 
+	/**
 	 * \brief Contraction procedure for processing a box.
 	 *
 	 * <ul>
@@ -291,12 +294,12 @@ protected:
 	 virtual void contract(IntervalVector& box, const IntervalVector& init_box );
 
 
-	/** 
+	/**
 	 * \brief First order contraction procedure for processing a box.
 	 *
 	 * <ul>
-	 * <li>  gradient=0 contraction for unconstrained optimization ; 
-	 * <li>  first order test for constrained optimization (useful only when there are no equations replaced by inequalities) 
+	 * <li>  gradient=0 contraction for unconstrained optimization ;
+	 * <li>  first order test for constrained optimization (useful only when there are no equations replaced by inequalities)
 	 * </ul>
 	 *
 	 */
@@ -330,7 +333,7 @@ protected:
 	/*=======================================================================================================*/
 	/*             Functions to update the loup (see ibex_OptimProbing and ibex_OptimSimplex)                */
 	/*=======================================================================================================*/
-	
+
 	/**
 	 * \brief Monotonicity analysis.
 	 *
@@ -469,7 +472,7 @@ protected:
 	Function df;
 
 
-	/** 
+	/**
 	 * \brief Computes and returns  the value ymax (the loup decreased with the precision)
 	 * the heap and the current box are actually contracted with y <= ymax
 	 *
@@ -492,8 +495,7 @@ private:
 	/** Lower bound of the small boxes taken by the precision */
 	double uplo_of_epsboxes;
 
-	/** Number of cells put into the heap (which passed through the contractors)  */
-	int nb_cells;
+
 
 	/** Currently entailed constraints */
 	EntailedCtr* entailed;
