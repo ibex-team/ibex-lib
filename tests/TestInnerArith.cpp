@@ -648,4 +648,15 @@ void TestInnerArith::bugr899() {
 	TEST_ASSERT(x==px);
 }
 
+void TestInnerArith::bugr902() {
+	Interval z(0, 0.292491);
+	Interval x(-0, 0.70709);
+	Interval y(0.411992, 5.41199);
+	Interval xin(0.70709);
+	Interval yin(0.411992);
+	iproj_mul(z,x,y,xin,yin);
+	TEST_ASSERT(!x.is_empty());
+	TEST_ASSERT(!y.is_empty());
+}
+
 } // end namespace

@@ -202,13 +202,18 @@ bool iproj_cmp_mono_op(bool geq, double z, Interval& x, Interval& y, const Inter
 
 
 	if ((inc_var1 && xmin > x.ub()) || (!inc_var1 && xmax < x.lb())) {
-		assert(!inflate);
+		// this may happen including with inflate mode.
+		// e.g.: x=<1,1>, y=[0,eps] and z=1. then xmax<1.
+		if (!inc_var1) fpu_round_up(); // default mode. TODO: valid for gaol and... ?
+				if (inflate) {x=xin; y=yin; return true;}
+		else {
 		x.set_empty();
 		y.set_empty();
+		return false;
+		}
 		//cout << "  result: x=" << x << " y=" << y << endl;
 		//cout << "----------------------------------------------------------" << endl;
-		if (!inc_var1) fpu_round_up(); // default mode. TODO: valid for gaol and... ?
-		return false;
+		//return false;
 	} else if((inc_var1 && xmax < x.lb()) || (!inc_var1 && xmin > x.ub())) {
 		// all the box is inner
 		x0=(inc_var1)? x.lb():x.ub();
@@ -338,15 +343,24 @@ bool iproj_leq_mul(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 
 	else if (z_sup==0) {
 
-		if (!x.contains(0) || (inflate && !xin.contains(0))) {
-			assert(!inflate || yin.contains(0));
-			return !(y&=Interval::ZERO).is_empty();
-		}
-		else if (!y.contains(0) || (inflate && !yin.contains(0))) {
-			assert(!inflate || xin.contains(0));
-			return !(x&=Interval::ZERO).is_empty();
-		} else { // both are possible: either fix x=0 or y=0
-			// we chose to fix the variable of minimal diameter
+		if (x.lb()>0 || (inflate && xin.lb()>0))
+			return !(y&=Interval::NEG_REALS).is_empty();
+		else if (x.ub()<0 || (inflate && xin.ub()<0))
+			return !(y&=Interval::POS_REALS).is_empty();
+		else if (y.lb()>0 || (inflate && yin.lb()>0))
+			return !(x&=Interval::NEG_REALS).is_empty();
+		else if (y.ub()<0 || (inflate && yin.ub()<0))
+			return !(x&=Interval::POS_REALS).is_empty();
+		else {
+			if (inflate) {
+				if (xin.lb()<0 || xin.ub()>0) // xin<>0
+					return !(y&=Interval::ZERO).is_empty();
+				else if (yin.lb()<0 || yin.ub()>0) // yin<>0
+					return !(x&=Interval::ZERO).is_empty();
+			}
+
+			// (x,y) strictly contains 0, and either inflate==false or (xin,yin)==(0,0)
+			// chose to fix to 0 the interval with minimal diameter
 			if (!x.is_unbounded() && (y.is_unbounded() || x.diam()<y.diam()))
 				return !(x&=Interval::ZERO).is_empty();
 			else

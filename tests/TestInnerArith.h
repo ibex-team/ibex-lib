@@ -117,6 +117,7 @@ public:
 		TEST_ADD(TestInnerArith::sqrt05);
 		TEST_ADD(TestInnerArith::bugr894);
 		TEST_ADD(TestInnerArith::bugr899);
+		TEST_ADD(TestInnerArith::bugr902);
 	}
 
 	// x+y<=z with contraction (no inflation)
@@ -294,6 +295,8 @@ public:
 	void bugr894();
 	// bug in release r899 (fixed in r900).
 	void bugr899();
+	// bug in release r902 (fixed in r903).
+	void bugr902();
 
 private:
 	void check_add_sub(const Interval& z, const Interval& xin, const Interval& yin, bool lb, bool ub);
