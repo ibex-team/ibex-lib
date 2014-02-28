@@ -892,8 +892,8 @@ bool Function_OG::occurrence_grouping(int i, bool _og){
 
    if(G_m.lb()<0 && G_m.ub()>0){ //G_m contains 0
       OG_case2(i, G_plus.lb(), G_minus.lb(), G_plus.ub(), G_minus.ub());
-      ga[i]=INTERVAL(0,G_m.ub());
-      gb[i]=INTERVAL(G_m.lb(),0);
+      ga[i]=Interval(0,G_m.ub());
+      gb[i]=Interval(G_m.lb(),0);
    }else{
       OG_case3(X_m, X_nm, G_m);
       if(G_m.ub()>0) ga[i]=G_m;
