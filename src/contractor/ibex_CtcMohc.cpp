@@ -159,6 +159,7 @@ void CtcMohcRevise::contract(IntervalVector& b) {
         set_flag(INACTIVE);
 		set_flag(FIXPOINT);
 		active_mono_proc=0;
+		b=box;
 		return;
      }
   }catch (EmptyBoxException& e) {
@@ -535,9 +536,9 @@ try{
      Interval t_a=LB[i];
      Interval t_b=LB[i];
      if(ApplyFmax[i]!=NO)
-       t_a=fog.Newton_it(LB[i],LB[i].ub(),zmax.ub(),i,false); //x_a
+       t_a=fog.Newton_it(LB[i],LB[i].ub(),zmax.ub(),i,true); //x_a (increasing=true)
      if(ApplyFmin[i]!=NO)
-       t_b=fog.Newton_it(LB[i],LB[i].ub(),zmin.lb(),i,true); //x_b
+       t_b=fog.Newton_it(LB[i],LB[i].ub(),zmin.lb(),i,false); //x_b
 
 
      if(!t_a.is_empty() && (t_a.lb() > LB[i].lb())){
