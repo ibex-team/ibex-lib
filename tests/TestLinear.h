@@ -20,13 +20,24 @@ namespace ibex {
 class TestLinear : public TestIbex {
 
 public:
+
 	TestLinear() {
 		TEST_ADD(TestLinear::lu_partial_underctr);
+		TEST_ADD(TestLinear::inflating_gauss_seidel01);
+		TEST_ADD(TestLinear::inflating_gauss_seidel02);
+		TEST_ADD(TestLinear::inflating_gauss_seidel03);
 	}
 
 	void lu_partial_underctr();
 	void lu_complete_underctr();
 	void lu_complete_overctr();
+
+	// convergence, start with degenerated vector
+	void inflating_gauss_seidel01();
+	// convergence, start with thick vector
+	void inflating_gauss_seidel02();
+	// divergence, start with thick vector
+	void inflating_gauss_seidel03();
 };
 
 } // end namespace ibex

@@ -16,6 +16,8 @@
 #define TOO_LARGE 1e30
 #define TOO_SMALL 1e-10
 
+using namespace std;
+
 namespace ibex {
 
 namespace {
@@ -291,11 +293,11 @@ void gauss_seidel(const IntervalMatrix& A, const IntervalVector& b, IntervalVect
 	} while (red >= ratio);
 }
 
-bool inflating_gauss_seidel(const IntervalMatrix& A, const IntervalVector& b, IntervalVector& x, double ratio, double mu_max) {
+bool inflating_gauss_seidel(const IntervalMatrix& A, const IntervalVector& b, IntervalVector& x, double min_dist, double mu_max) {
 	int n=(A.nb_rows());
-	assert(n == (A.nb_cols())); // throw NotSquareMatrixException();
+	assert(n == (A.nb_cols()));
 	assert(n == (x.size()) && n == (b.size()));
-
+	//cout << " ====== inflating Gauss-Seidel ========= " << endl;
 	double red;
 	IntervalVector xold(n);
 	Interval proj;
@@ -312,8 +314,9 @@ bool inflating_gauss_seidel(const IntervalMatrix& A, const IntervalVector& b, In
 		}
 		d=distance(xold,x);
 		mu=d/dold;
-	} while (mu<mu_max || xold.rel_distance(x)>ratio);
-
+		//cout << "  x=" << x << " d=" << d << " mu=" << mu << endl;
+	} while (mu<mu_max && d>min_dist);
+	//cout << " ======================================= " << endl;
 	return (mu<mu_max);
 
 }

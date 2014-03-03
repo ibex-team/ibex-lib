@@ -43,4 +43,54 @@ void TestLinear::lu_complete_underctr() {
 
 }
 
+void TestLinear::inflating_gauss_seidel01() {
+	int n=4;
+	Matrix A=(n+1)*Matrix::eye(n)-Matrix::ones(n); // diagonally dominant matrix
+	Vector b(n);
+	for (int i=1; i<=n; i++) b[i-1]=::pow(-1.0,i)*i; // just an arbitrary example
+
+	Matrix invA(n,n);
+	real_inverse(A,invA);
+	IntervalVector sol=invA*b; // with n=4: x=(0.2000;0.8000;-0.2000;1.2000)
+
+	IntervalVector x=Vector::zeros(n);
+
+	bool ret=inflating_gauss_seidel(A,b,x);
+	TEST_ASSERT(ret);
+	TEST_ASSERT(sol.rel_distance(x)<0.01);
+}
+
+void TestLinear::inflating_gauss_seidel02() {
+	int n=4;
+	Matrix A=(n+1)*Matrix::eye(n)-Matrix::ones(n); // diagonally dominant matrix
+	Vector b(n);
+	for (int i=1; i<=n; i++) b[i-1]=::pow(-1.0,i)*i; // just an arbitrary example
+
+	Matrix invA(n,n);
+	real_inverse(A,invA);
+	IntervalVector sol=invA*b; // with n=4: x=(0.2000;0.8000;-0.2000;1.2000)
+
+	IntervalVector x=0.1*Interval(-1,1)*Vector::ones(n);
+
+	bool ret=inflating_gauss_seidel(A,b,x);
+	TEST_ASSERT(ret);
+	TEST_ASSERT(sol.rel_distance(x)<0.01);
+}
+
+void TestLinear::inflating_gauss_seidel03() {
+	int n=4;
+	Matrix A=(n-1)*Matrix::eye(n)-Matrix::ones(n); // diagonally dominant matrix
+	Vector b(n);
+	for (int i=1; i<=n; i++) b[i-1]=::pow(-1.0,i)*i; // just an arbitrary example
+
+	Matrix invA(n,n);
+	real_inverse(A,invA);
+	IntervalVector sol=invA*b; // with n=4: x=(0.2000;0.8000;-0.2000;1.2000)
+
+	IntervalVector x=0.1*Interval(-1,1)*Vector::ones(n);
+
+	bool ret=inflating_gauss_seidel(A,b,x);
+	TEST_ASSERT(!ret);
+}
+
 } // end namespace ibex

@@ -147,17 +147,17 @@ void gauss_seidel(const IntervalMatrix& A, const IntervalVector& b, IntervalVect
  *  i.e., yields an interval vector \a [x] such that
  *  \f$ (\exists A\in[A],\ \exists b\in[b] \ | \ Ax=b) \Longrightarrow x \in [x]\f$.
  *
- * \param ratio (optional)
- *     - Stopping criterion: the iteration is stopped when each dimension of x has not been reduced by more
- *       than \a ratio \%. Default value is 0.1 (10\%).
+ * \param min_dist (optional)
+ *     - Stopping criterion: the iteration is stopped when the Hausdorff distance between two iterates is less
+ *       than min_dist (absolute value), which means that convergence is achieved. Default value is 1e-12.
  * \param mu_max_divergence (optional)
  *     - stop criterion. When the Hausdorff distance between two iterates increases by
  *       a ratio greater than mu_max_divergence, the procedure halts. Value 1.0 by default
  *       is for detecting divergence.
  *
- * \return true if the iteration has not diverged, false otherwise.
+ * \return true if the iteration has not "diverged" (mu<mu_max_divergence), false otherwise.
  */
-bool inflating_gauss_seidel(const IntervalMatrix& A, const IntervalVector& b, IntervalVector& x, double ratio=0.01, double mu_max_divergence=1.0);
+bool inflating_gauss_seidel(const IntervalMatrix& A, const IntervalVector& b, IntervalVector& x, double min_dist=1e-12, double mu_max_divergence=1.0);
 
 /**
  * \ingroup numeric
