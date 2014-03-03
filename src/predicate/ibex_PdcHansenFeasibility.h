@@ -25,10 +25,12 @@ namespace ibex {
  */
 class PdcHansenFeasibility : public Pdc {
 public:
+
 	/**
 	 * \brief Build the predicate for f=0.
+	 * \param inflating - true means that Newton is used in "contracting" mode
 	 */
-	PdcHansenFeasibility(Fnc& f);
+	PdcHansenFeasibility(Fnc& f, bool inflating=false);
 
 	/**
 	 * \brief Return the enclosure of the last solution found.
@@ -45,6 +47,7 @@ public:
 
 protected:
 	IntervalVector _solution;
+	bool inflating;
 };
 
 

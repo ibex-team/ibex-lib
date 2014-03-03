@@ -67,7 +67,7 @@ public:
 
 }
 
-PdcHansenFeasibility::PdcHansenFeasibility(Fnc& f) : Pdc(f.nb_var()), f(f), _solution(f.nb_var()) {
+PdcHansenFeasibility::PdcHansenFeasibility(Fnc& f, bool inflating) : Pdc(f.nb_var()), f(f), _solution(f.nb_var()), inflating(inflating) {
 
 }
 
@@ -100,13 +100,21 @@ BoolInterval PdcHansenFeasibility::test(const IntervalVector& box) {
 	IntervalVector box2(pf.chop(box));
 	IntervalVector savebox(box2);
 
-	try {
-		newton(pf,box2);
-		if (box2.is_strict_subset(savebox)) {
+	if (inflating) {
+		if (inflating_newton(pf,box2)) {
 			_solution = pf.extend(box2);
 			return YES;
 		}
-	} catch (EmptyBoxException& ) {	}
+	}
+	else {
+		try {
+			newton(pf,box2);
+			if (box2.is_strict_subset(savebox)) {
+				_solution = pf.extend(box2);
+				return YES;
+			}
+		} catch (EmptyBoxException& ) {	}
+	}
 
 	_solution.set_empty();
 	return MAYBE;

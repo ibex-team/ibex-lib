@@ -19,7 +19,7 @@ $(TARGET):	$(OBJS)
 utest.o : $(SRCS) $(HEADERS) 
 
 %.o :	%.cpp
-	$(CXX) $(CPPFLAGS) $(LDFLAGS) $(CXXFLAGS) -c -o $@ $< $(LIBS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $< $(LIBS)
 
 clean:
 	rm -f $(OBJS) $(TARGET)

@@ -122,19 +122,31 @@ double Optimizer::compute_ymax() {
 	return ymax;}
 
 
+// launch Hansen test
 bool Optimizer::update_real_loup() {
-	//================  launch Hansen test ======================
-	IntervalVector epsbox(loup_point);
-	// TODO: replace default_equ_eps by something else!
-	epsbox.inflate(default_equ_eps);
 
-	// TODO: maybe we should check first if epsbox is inner...
+	IntervalVector epsbox(loup_point);
+
+	// ====================================================
+	// solution #1: we inflate the loup-point and
+	//              call Hansen test in contracting mode.
+	// TODO: replace default_equ_eps by something else!
+//	epsbox.inflate(default_equ_eps);
+//	PdcHansenFeasibility pdc(equs->f, false);
+	// ====================================================
+
+	// ====================================================
+	// solution #2: we call Hansen test in inflating mode.
+	PdcHansenFeasibility pdc(equs->f, true);
+	// ====================================================
+
+	// TODO: maybe we should check first if the epsbox is inner...
 	// otherwise the probability to get a feasible point is
 	// perhaps too small?
 
 	// TODO: HansenFeasibility uses midpoint
 	//       but maybe we should use random
-	PdcHansenFeasibility pdc(equs->f);
+
 	if (pdc.test(epsbox)==YES) {
 		Interval resI = sys.goal->eval(pdc.solution());
 		if (!resI.is_empty()) {

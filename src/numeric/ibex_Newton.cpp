@@ -127,8 +127,11 @@ bool inflating_newton(const Fnc& f, IntervalVector& box, int k_max, double mu_ma
 		if (y==y1) break;
 		y1=y;
 
-		precond(J, Fmid);
-
+		try {
+			precond(J, Fmid);
+		} catch(LinearException&) {
+			return success; // should be false
+		}
 		// Note: giving mu_max to gauss-seidel (GS) is slightly different from checking the condition "mu<mu_max" in the
 		// Newton procedure itself. If GS transforms x0 to x1 in n iterations, and then x1 to x2 in n other iterations
 		// it is possible that each of these 2n iterations satisfies mu<mu_max, whereas the two global Newton iterations
