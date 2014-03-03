@@ -105,7 +105,6 @@ int main() {
 
     ts.add(auto_ptr<Test::Suite>(new TestHC4()));
     ts.add(auto_ptr<Test::Suite>(new TestCtcInteger()));
- //   ts.add(auto_ptr<Test::Suite>(new TestCtcSubBox()));
     ts.add(auto_ptr<Test::Suite>(new TestCtcNotIn()));
     ts.add(auto_ptr<Test::Suite>(new TestCtcFritzJohn()));
 

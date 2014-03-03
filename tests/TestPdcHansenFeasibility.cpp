@@ -33,7 +33,7 @@ void TestPdcHansenFeasibility::test01() {
 
 	// test that the fixed dimension is "y"
 	TEST_ASSERT(sol[1].is_degenerated());
-	cout << "sol=" << sol << endl;
+	//cout << "sol=" << sol << endl;
 	TEST_ASSERT(!(sol[0] & sqrt(sol[1])).is_empty());
 
 	TEST_ASSERT(sol[0].diam() <=1e-08);

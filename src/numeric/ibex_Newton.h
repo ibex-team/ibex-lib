@@ -58,8 +58,8 @@ bool newton(const Fnc& f, IntervalVector& box, double prec=default_newton_prec, 
  *    [x] <- mid[x] + delta*(rad[x]) + chi*[-1,+1]
  *
  * \param f                 - The function
- * \param pt                - The starting point
- * \param box               - In case of success, a box proven to contain a solution.
+ * \param box               - Input/output argument. Input: starting box. Output: In case of success, this box is proven to contain a solution.
+ *                            Otherwise, nothing can be said.
  * \param k_max_iteration (optional)
  *                          - maximal number of iterations
  * \param mu_max_divergence (optional)
@@ -72,15 +72,12 @@ bool newton(const Fnc& f, IntervalVector& box, double prec=default_newton_prec, 
  * \param chi_absolute_inflat (optional)
  *                          - The box is inflated at each step as follows:
  *                            [x] <- mid[x] + delta*(rad[x]) + chi*[-1,+1]
- * \param gauss_seidel_ratio (optional)
- *                          - Criterion for stopping the inner Gauss-Seidel loop.
  *
  * \return True if it is proven that the output box contains a solution.
  */
-bool newton(const Fnc& f, const Vector& pt, IntervalVector& box,
-		double k_max_iteration=15, double mu_max_divergence=1.0,
-		double delta_relative_inflat=1.1, double chi_absolute_inflat=1e-12,
-		double gauss_seidel_ratio=default_gauss_seidel_ratio);
+bool inflating_newton(const Fnc& f, IntervalVector& box,
+		int k_max_iteration=15, double mu_max_divergence=1.0,
+		double delta_relative_inflat=1.1, double chi_absolute_inflat=1e-12);
 
 } // end namespace ibex
 #endif // __IBEX_NEWTON_H__

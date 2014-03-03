@@ -22,9 +22,11 @@ class TestNewton : public TestIbex {
 public:
 	TestNewton() {
 		TEST_ADD(TestNewton::newton01);
+		TEST_ADD(TestNewton::inflating_newton01);
 	}
 
 	void newton01();
+	void inflating_newton01();
 };
 
 } // end namespace ibex

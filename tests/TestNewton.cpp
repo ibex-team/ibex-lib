@@ -85,22 +85,33 @@ double BOX2[][2]= {
 
 void TestNewton::newton01() {
 	Ponts30 p30;
-	double error=1e-10;
 	IntervalVector box(30,BOX1);
 	try {
 		newton(*p30.f,box);
 	} catch (EmptyBoxException& e) {
-		cout << "empty box" << endl;
+		//cout << "empty box" << endl;
 		TEST_ASSERT(false);
 	} catch (LinearException& e) {
-		cout << "linear exception" << endl;
+		//cout << "linear exception" << endl;
 		TEST_ASSERT(false);
 	}
 
 	IntervalVector expected(30,BOX2);
 	//cout << expected << endl << endl << endl;
 	//cout << box << endl;
-	TEST_ASSERT(almost_eq(box,expected,error));
+	TEST_ASSERT(almost_eq(box,expected,1e-10));
+}
+
+void TestNewton::inflating_newton01() {
+	Ponts30 p30;
+	double eps=1e-2;
+	IntervalVector error(30,-eps);
+	IntervalVector box(30,BOX2);
+	box += error;
+	IntervalVector expected(30,BOX2);
+	bool ret=inflating_newton(*p30.f,box);
+	TEST_ASSERT(ret);
+	TEST_ASSERT(almost_eq(box,expected,1e-10));
 }
 
 } // end namespace ibex

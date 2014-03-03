@@ -297,6 +297,7 @@ bool inflating_gauss_seidel(const IntervalMatrix& A, const IntervalVector& b, In
 	int n=(A.nb_rows());
 	assert(n == (A.nb_cols()));
 	assert(n == (x.size()) && n == (b.size()));
+	assert(min_dist>0);
 	//cout << " ====== inflating Gauss-Seidel ========= " << endl;
 	double red;
 	IntervalVector xold(n);
