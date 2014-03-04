@@ -13,7 +13,6 @@
 #include "ibex_CtcFwdBwd.h"
 #include "ibex_Ctc.h"
 #include "ibex_LargestFirst.h"
-#include <list>
 
 namespace ibex {
 
@@ -35,6 +34,11 @@ public:
 	CtcExist(Ctc& p, double prec, const IntervalVector& init_box);
 
 	/**
+	 * \brief Delete this.
+	 */
+	~CtcExist();
+
+	/**
 	 * \brief Contract a box.
 	 */
 	void contract(IntervalVector& x);
@@ -42,11 +46,18 @@ public:
 	IntervalVector& getInit();
 	void setInit(IntervalVector& init);
 
+
+
 private:
 	/**
 	 * \brief The Contractor.
 	 */
 	Ctc& _ctc;
+
+	/**
+	 *  \brief a bisector
+	 */
+	LargestFirst _bsc;
 
 	/**
 	 * \brief Initialization of the variable where the existence will be verifyed.
@@ -58,6 +69,8 @@ private:
 	 * \brief precision
 	 */
 	double _prec;
+
+	bool _own_ctc;
 };
 
 typedef  CtcExist CtcProjUnion;

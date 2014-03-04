@@ -32,6 +32,12 @@ public:
 	CtcForAll(Function& f, CmpOp op, double prec,const  IntervalVector& init_box);
 	CtcForAll(Ctc& p, double prec,const  IntervalVector& init_box);
 
+
+	/**
+	 * \brief Delete this.
+	 */
+	~CtcForAll();
+
 	/**
 	 * \brief Contract a box.
 	 */
@@ -47,6 +53,11 @@ private:
 	Ctc& _ctc;
 
 	/**
+	 *  \brief a bisector
+	 */
+	LargestFirst _bsc;
+
+	/**
 	 * \brief Initialization of the variable where the ForAll  will be looking for
 	 *  _ctr.nb_var = box.size() + _init.size()
 	 */
@@ -56,6 +67,8 @@ private:
 	 * \brief precision
 	 */
 	double _prec;
+
+	bool _own_ctc;
 };
 
 typedef  CtcForAll CtcProjInter;

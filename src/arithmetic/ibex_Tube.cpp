@@ -9,6 +9,8 @@
  * Created     : Oct 7, 2013
  * ---------------------------------------------------------------------------- */
 
+#define __IBEX_TUBE_H__
+#ifndef __IBEX_TUBE_H__ // The class Tube is not ready !!!
 
 #include "ibex_Tube.h"
 #include "assert.h"
@@ -405,3 +407,6 @@ std::ostream& operator <<(std::ostream& os, const Tube& x) {
 
 
 } // end namespace ibex
+
+
+#endif /* _IBEX_TUBE_H_ */

@@ -9,8 +9,8 @@
  * Created     : Oct 7, 2013
  * ---------------------------------------------------------------------------- */
 
-#ifndef __IBEX_TUBE_H__
 #define __IBEX_TUBE_H__
+#ifndef __IBEX_TUBE_H__  // The class Tube is not ready !!!
 
 #include <cassert>
 #include "ibex_Interval.h"

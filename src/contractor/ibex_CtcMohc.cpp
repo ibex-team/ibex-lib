@@ -69,7 +69,7 @@ bool hc4r_ev(const Function& f, const Domain& y, IntervalVector& x, Interval& z)
 	Eval().eval(f,x);
 
 	Domain& root=*f.expr().deco.d;
-	assert(d.type()==SCALAR);
+	assert(root.dim.type()==Dim::SCALAR);
 
 
 	if (root.i().is_subset(y.i())){
@@ -150,7 +150,7 @@ void CtcMohcRevise::contract(IntervalVector& b) {
 	case GT : right_cst=Interval(0,POS_INFINITY); break;
   }
 
-  assert(d.type()==SCALAR);
+  assert(d.type()==Dim::SCALAR);
   root_label.i()=right_cst;
   Interval z;
 
