@@ -47,37 +47,37 @@ void CtcExist::contract(IntervalVector& x) {
 	assert(x.size()==nb_var);
 
 	IntervalVector  box(nb_var+_init.size()), box_mid(nb_var+_init.size());
-	IntervalVector res(nb_var);
+	IntervalVector res(nb_var), tmp(nb_var);
 	bool in, mdiam;
 	for (int i=0;i<nb_var; i++)	res[i].set_empty();
 
 	box.put(0, x);
 	box.put(nb_var, _init);
-	std::list<IntervalVector> l;
-	l.push_back(box);
+	std::stack<IntervalVector> l;
+	l.push(box);
 	std::pair<IntervalVector,IntervalVector> cut(_init,_init);
 	
 	while (!l.empty()) {
-		cut = _bsc.bisect(l.front().subvector(nb_var,nb_var+_init.size()-1));
-		for(int i=0; i< nb_var; i++)        box[i]= (l.front())[i];
+		tmp = l.top(); 	l.pop();
+		cut = _bsc.bisect(tmp.subvector(nb_var,nb_var+_init.size()-1));
+		for(int i=0; i< nb_var; i++)        box[i]= tmp[i];
 		for(int i=0; i< _init.size() ; i++) box[i+nb_var] = cut.first[i];
 
 		for (int j=1;j<=2;j++) {
 			if (j==2) {
-				for(int i=0; i< nb_var; i++)        box[i]= (l.front())[i];
+				for(int i=0; i< nb_var; i++)        box[i]= tmp[i];
 				for(int i=0; i< _init.size() ; i++) box[i+nb_var] = cut.second[i];
-				l.pop_front();
 			}
 			try {
 				_ctc.contract(box);
 			} catch (EmptyBoxException&) { continue; }
 
 			in = true;
-			for (int i=0; in&&(i<nb_var) ; i++)	 in = in && box[i].is_subset(res[i]);
+			for (int i=0; in&&(i<nb_var) ; i++)	 in = (in && box[i].is_subset(res[i]));
 
 			if (!in) {
 				mdiam=true;
-				for (int i=0; mdiam&&(i<_init.size()); i++) mdiam = mdiam&&(box[nb_var+i].diam()<= _prec);
+				for (int i=0; mdiam&&(i<_init.size()); i++) mdiam = (mdiam&&(box[nb_var+i].diam()<= _prec));
 				if (mdiam) {
 					for (int i=0;i<nb_var; i++)	res[i] |= box[i];
 					if (res==x) return;
@@ -91,7 +91,7 @@ void CtcExist::contract(IntervalVector& x) {
 						if (res==x) return;
 					} catch (EmptyBoxException&) {	}
 
-					l.push_back(box);
+					l.push(box);
 				}
 			}
 		}
