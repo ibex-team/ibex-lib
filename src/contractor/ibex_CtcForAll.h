@@ -69,6 +69,7 @@ private:
 	double _prec;
 
 	bool _own_ctc;
+	double _max_iter;
 };
 
 typedef  CtcForAll CtcProjInter;

@@ -14,19 +14,19 @@ namespace ibex {
 
 CtcForAll::CtcForAll(const NumConstraint& ctr, double prec,const  IntervalVector& init_box) :
 		Ctc(ctr.f.nb_var()-init_box.size()), _ctc(*new CtcFwdBwd(ctr)),_bsc(),
-		_init(init_box), _prec(prec), _own_ctc(true)  {
+		_init(init_box), _prec(prec), _own_ctc(true),_max_iter(1.e6)  {
 	assert(init_box.size()<ctr.f.nb_var());
 }
 
 CtcForAll::CtcForAll(Function& f, CmpOp op, double prec,const  IntervalVector& init_box) :
 		Ctc(f.nb_var()-init_box.size()), _ctc(*new CtcFwdBwd(f, op)),_bsc(),
-		_init(init_box), _prec(prec), _own_ctc(true)   {
+		_init(init_box), _prec(prec), _own_ctc(true),_max_iter(1.e6)   {
 	assert(init_box.size()<f.nb_var());
 }
 
 CtcForAll::CtcForAll(Ctc& p, double prec,const  IntervalVector& init_box) :
 		Ctc(p.nb_var-init_box.size()), _ctc(p),_bsc(),
-		_init(init_box), _prec(prec), _own_ctc(false)   {
+		_init(init_box), _prec(prec), _own_ctc(false),_max_iter(1.e6)   {
 	assert(init_box.size()<p.nb_var);
 }
 
@@ -47,14 +47,14 @@ void CtcForAll::contract(IntervalVector& x) {
 
 	IntervalVector  box(nb_var+_init.size());
 	IntervalVector * sub;
-	bool mdiam;
+	bool mdiam; int iter =0;
 	box.put(0, x);
 
 	std::list<IntervalVector> l;
 	l.push_back(_init);
 	std::pair<IntervalVector,IntervalVector> cut(_init,_init);
 
-	while (!l.empty()) {
+	while ((!l.empty())&&(iter<_max_iter)) {
 		cut = _bsc.bisect(l.front());
 		l.pop_front();
 		sub = &(cut.first);
@@ -75,6 +75,7 @@ void CtcForAll::contract(IntervalVector& x) {
 			for (int i=0;mdiam&&(i<_init.size()); i++) 	mdiam = mdiam&&((*sub)[i].diam()<= _prec);
 			if (!mdiam) {
 				l.push_back(*sub);
+				iter++;
 			}
 		}
 	}
