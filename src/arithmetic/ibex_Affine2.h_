@@ -750,7 +750,7 @@ Affine2Main<T> root(const Affine2Main<T>& x, int n, const Interval itv) {
 
 
 template<class T>
-Affine2Main<T> sign(const Affine2Main<T>& x, const Interval itv) {
+Affine2Main<T> sign(const Affine2Main<T>&, const Interval itv) {
 	if (itv.lb() > 0) {
 		return Affine2Main<T>(1.0);
 	} else if (itv.ub() < 0) {

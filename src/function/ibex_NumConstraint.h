@@ -41,35 +41,83 @@ public:
 	 *
 	 * If c=(expr,op), the constraint is f(x) op 0 with f:x->expr.
 	 */
-	NumConstraint(const ExprSymbol& x, const ExprCtr& c);
-
+	NumConstraint(const ExprSymbol& x1, const ExprCtr& c);
 	/**
 	 * \brief Build a constraint (f(x1,x2) op 0).
 	 */
 	NumConstraint(const ExprSymbol& x1, const ExprSymbol& x2, const ExprCtr& c);
-
 	/**
 	 * \brief Build a constraint (f(x1,x2,x3) op 0).
 	 */
 	NumConstraint(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprCtr& c);
-
-
 	/**
 	 * \brief Build a constraint (f(x1,x2,x3,x4) op 0).
 	 */
 	NumConstraint(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprCtr& c);
-
-
 	/**
 	 * \brief Build a constraint (f(x1,x2,x3,x4,x5) op 0).
 	 */
 	NumConstraint(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprCtr& c);
-
-
 	/**
 	 * \brief Build a constraint (f(x1,x2,x3,x4,x5,x6) op 0).
 	 */
 	NumConstraint(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprCtr& c);
+	/**
+	 * \brief Build a constraint (f(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15,x16,x17,x18,x19,x20) op 0).
+	 */
+	NumConstraint(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprCtr& c);
+	/**
+	 * \brief Build a constraint (f(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15,x16,x17,x18,x19,x20) op 0).
+	 */
+	NumConstraint(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprCtr& c);
+	/**
+	 * \brief Build a constraint (f(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15,x16,x17,x18,x19,x20) op 0).
+	 */
+	NumConstraint(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprSymbol& x9, const ExprCtr& c);
+	/**
+	 * \brief Build a constraint (f(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15,x16,x17,x18,x19,x20) op 0).
+	 */
+	NumConstraint(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprSymbol& x9, const ExprSymbol& x10, const ExprCtr& c);
+	/**
+	 * \brief Build a constraint (f(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15,x16,x17,x18,x19,x20) op 0).
+	 */
+	NumConstraint(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprSymbol& x9, const ExprSymbol& x10, const ExprSymbol& x11, const ExprCtr& c);
+	/**
+	 * \brief Build a constraint (f(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15,x16,x17,x18,x19,x20) op 0).
+	 */
+	NumConstraint(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprSymbol& x9, const ExprSymbol& x10, const ExprSymbol& x11, const ExprSymbol& x12, const ExprCtr& c);
+	/**
+	 * \brief Build a constraint (f(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15,x16,x17,x18,x19,x20) op 0).
+	 */
+	NumConstraint(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprSymbol& x9, const ExprSymbol& x10, const ExprSymbol& x11, const ExprSymbol& x12, const ExprSymbol& x13, const ExprCtr& c);
+	/**
+	 * \brief Build a constraint (f(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15,x16,x17,x18,x19,x20) op 0).
+	 */
+	NumConstraint(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprSymbol& x9, const ExprSymbol& x10, const ExprSymbol& x11, const ExprSymbol& x12, const ExprSymbol& x13, const ExprSymbol& x14, const ExprCtr& c);
+	/**
+	 * \brief Build a constraint (f(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15,x16,x17,x18,x19,x20) op 0).
+	 */
+	NumConstraint(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprSymbol& x9, const ExprSymbol& x10, const ExprSymbol& x11, const ExprSymbol& x12, const ExprSymbol& x13, const ExprSymbol& x14, const ExprSymbol& x15, const ExprCtr& c);
+	/**
+	 * \brief Build a constraint (f(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15,x16,x17,x18,x19,x20) op 0).
+	 */
+	NumConstraint(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprSymbol& x9, const ExprSymbol& x10, const ExprSymbol& x11, const ExprSymbol& x12, const ExprSymbol& x13, const ExprSymbol& x14, const ExprSymbol& x15, const ExprSymbol& x16, const ExprCtr& c);
+	/**
+	 * \brief Build a constraint (f(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15,x16,x17,x18,x19,x20) op 0).
+	 */
+	NumConstraint(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprSymbol& x9, const ExprSymbol& x10, const ExprSymbol& x11, const ExprSymbol& x12, const ExprSymbol& x13, const ExprSymbol& x14, const ExprSymbol& x15, const ExprSymbol& x16, const ExprSymbol& x17, const ExprCtr& c);
+	/**
+	 * \brief Build a constraint (f(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15,x16,x17,x18,x19,x20) op 0).
+	 */
+	NumConstraint(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprSymbol& x9, const ExprSymbol& x10, const ExprSymbol& x11, const ExprSymbol& x12, const ExprSymbol& x13, const ExprSymbol& x14, const ExprSymbol& x15, const ExprSymbol& x16, const ExprSymbol& x17, const ExprSymbol& x18, const ExprCtr& c);
+	/**
+	 * \brief Build a constraint (f(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15,x16,x17,x18,x19,x20) op 0).
+	 */
+	NumConstraint(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprSymbol& x9, const ExprSymbol& x10, const ExprSymbol& x11, const ExprSymbol& x12, const ExprSymbol& x13, const ExprSymbol& x14, const ExprSymbol& x15, const ExprSymbol& x16, const ExprSymbol& x17, const ExprSymbol& x18, const ExprSymbol& x19, const ExprCtr& c);
+	/**
+	 * \brief Build a constraint (f(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15,x16,x17,x18,x19,x20) op 0).
+	 */
+	NumConstraint(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprSymbol& x9, const ExprSymbol& x10, const ExprSymbol& x11, const ExprSymbol& x12, const ExprSymbol& x13, const ExprSymbol& x14, const ExprSymbol& x15, const ExprSymbol& x16, const ExprSymbol& x17, const ExprSymbol& x18, const ExprSymbol& x19, const ExprSymbol& x20, const ExprCtr& c);
 
 	/**
 	 * \brief Creates a constraint (f(x1,...,xn) op 0).
@@ -120,17 +168,41 @@ std::ostream& operator<<(std::ostream&, const NumConstraint&);
 
 inline NumConstraint::NumConstraint(Function& f, CmpOp op, bool own_f) : f(f), op(op), own_f(own_f) { }
 
-inline NumConstraint::NumConstraint(const ExprSymbol& x, const ExprCtr& c) : f(*new Function(x,c.e)), op(c.op), own_f(true) { }
-
+inline NumConstraint::NumConstraint(const ExprSymbol& x1, const ExprCtr& c) : f(*new Function(x1,c.e)), op(c.op), own_f(true) { }
 inline NumConstraint::NumConstraint(const ExprSymbol& x1, const ExprSymbol& x2, const ExprCtr& c): f(*new Function(x1,x2,c.e)), op(c.op), own_f(true) { }
-
 inline NumConstraint::NumConstraint(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprCtr& c): f(*new Function(x1,x2,x3,c.e)), op(c.op), own_f(true) { }
-
 inline NumConstraint::NumConstraint(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprCtr& c): f(*new Function(x1,x2,x3,x4,c.e)), op(c.op), own_f(true) { }
-
 inline NumConstraint::NumConstraint(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprCtr& c): f(*new Function(x1,x2,x3,x4,x5,c.e)), op(c.op), own_f(true) { }
-
 inline NumConstraint::NumConstraint(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprCtr& c): f(*new Function(x1,x2,x3,x4,x5,x6,c.e)), op(c.op), own_f(true) { }
+inline NumConstraint::NumConstraint(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprCtr& c):
+		f(*new Function(x1,x2,x3,x4,x5,x6,x7,c.e)), op(c.op), own_f(true) { }
+inline NumConstraint::NumConstraint(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprCtr& c):
+		f(*new Function(x1,x2,x3,x4,x5,x6,x7,x8,c.e)), op(c.op), own_f(true) { }
+inline NumConstraint::NumConstraint(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprSymbol& x9, const ExprCtr& c):
+		f(*new Function(x1,x2,x3,x4,x5,x6,x7,x8,x9,c.e)), op(c.op), own_f(true) { }
+inline NumConstraint::NumConstraint(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprSymbol& x9, const ExprSymbol& x10, const ExprCtr& c):
+		f(*new Function(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,c.e)), op(c.op), own_f(true) { }
+inline NumConstraint::NumConstraint(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprSymbol& x9, const ExprSymbol& x10, const ExprSymbol& x11, const ExprCtr& c):
+		f(*new Function(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,c.e)), op(c.op), own_f(true) { }
+inline NumConstraint::NumConstraint(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprSymbol& x9, const ExprSymbol& x10, const ExprSymbol& x11, const ExprSymbol& x12, const ExprCtr& c):
+		f(*new Function(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,c.e)), op(c.op), own_f(true) { }
+inline NumConstraint::NumConstraint(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprSymbol& x9, const ExprSymbol& x10, const ExprSymbol& x11, const ExprSymbol& x12, const ExprSymbol& x13, const ExprCtr& c):
+		f(*new Function(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,c.e)), op(c.op), own_f(true) { }
+inline NumConstraint::NumConstraint(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprSymbol& x9, const ExprSymbol& x10, const ExprSymbol& x11, const ExprSymbol& x12, const ExprSymbol& x13, const ExprSymbol& x14, const ExprCtr& c):
+		f(*new Function(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,c.e)), op(c.op), own_f(true) { }
+inline NumConstraint::NumConstraint(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprSymbol& x9, const ExprSymbol& x10, const ExprSymbol& x11, const ExprSymbol& x12, const ExprSymbol& x13, const ExprSymbol& x14, const ExprSymbol& x15, const ExprCtr& c):
+		f(*new Function(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15,c.e)), op(c.op), own_f(true) { }
+inline NumConstraint::NumConstraint(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprSymbol& x9, const ExprSymbol& x10, const ExprSymbol& x11, const ExprSymbol& x12, const ExprSymbol& x13, const ExprSymbol& x14, const ExprSymbol& x15, const ExprSymbol& x16, const ExprCtr& c):
+		f(*new Function(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15,x16,c.e)), op(c.op), own_f(true) { }
+inline NumConstraint::NumConstraint(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprSymbol& x9, const ExprSymbol& x10, const ExprSymbol& x11, const ExprSymbol& x12, const ExprSymbol& x13, const ExprSymbol& x14, const ExprSymbol& x15, const ExprSymbol& x16, const ExprSymbol& x17, const ExprCtr& c):
+		f(*new Function(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15,x16,x17,c.e)), op(c.op), own_f(true) { }
+inline NumConstraint::NumConstraint(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprSymbol& x9, const ExprSymbol& x10, const ExprSymbol& x11, const ExprSymbol& x12, const ExprSymbol& x13, const ExprSymbol& x14, const ExprSymbol& x15, const ExprSymbol& x16, const ExprSymbol& x17, const ExprSymbol& x18, const ExprCtr& c):
+		f(*new Function(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15,x16,x17,x18,c.e)), op(c.op), own_f(true) { }
+inline NumConstraint::NumConstraint(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprSymbol& x9, const ExprSymbol& x10, const ExprSymbol& x11, const ExprSymbol& x12, const ExprSymbol& x13, const ExprSymbol& x14, const ExprSymbol& x15, const ExprSymbol& x16, const ExprSymbol& x17, const ExprSymbol& x18, const ExprSymbol& x19, const ExprCtr& c):
+		f(*new Function(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15,x16,x17,x18,x19,c.e)), op(c.op), own_f(true) { }
+inline NumConstraint::NumConstraint(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprSymbol& x9, const ExprSymbol& x10, const ExprSymbol& x11, const ExprSymbol& x12, const ExprSymbol& x13, const ExprSymbol& x14, const ExprSymbol& x15, const ExprSymbol& x16, const ExprSymbol& x17, const ExprSymbol& x18, const ExprSymbol& x19, const ExprSymbol& x20, const ExprCtr& c):
+		f(*new Function(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15,x16,x17,x18,x19,x20,c.e)), op(c.op), own_f(true) { }
+
 
 inline NumConstraint::NumConstraint(const Array<const ExprSymbol>& x, const ExprCtr& c): f(*new Function(x,c.e)), op(c.op), own_f(true) { }
 
