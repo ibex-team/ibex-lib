@@ -16,7 +16,7 @@ namespace ibex {
 PdcFirstOrder::PdcFirstOrder(const System& sys, const IntervalVector& init_box) : Pdc(sys.nb_var), sys(sys), init_box(init_box), e(NULL) { }
 
 BoolInterval PdcFirstOrder::test(const IntervalVector& box) {
-
+	BoolInterval res;
 	int n=sys.nb_var;
 	int M=sys.nb_ctr;
 	// count the number of active constraints
@@ -72,12 +72,12 @@ BoolInterval PdcFirstOrder::test(const IntervalVector& box) {
 		// note: seems worse with complete pivoting
 		interval_LU(*J2, LU, p); //, q);
 		// the matrix is rank M+1
-		return NO;
+		res = NO;
 	} catch(SingularMatrixException&) {
-		return MAYBE;
+		res = MAYBE;
 	}
-
 	delete J2;
+	return res;
 }
 
 

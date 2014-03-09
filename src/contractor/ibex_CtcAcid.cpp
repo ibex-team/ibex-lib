@@ -27,7 +27,7 @@ CtcAcid::CtcAcid(const System& sys, const BoolMask& cid_vars, Ctc& ctc, bool opt
 
 CtcAcid::CtcAcid(const System& sys,  Ctc& ctc, bool optim, int s3b, int scid,
 		 double var_min_width, double ct_ratio): Ctc3BCid (BoolMask(sys.nb_var,1),ctc,s3b,scid,sys.nb_var,var_min_width),
-							system(sys), optim(optim), nbcalls(0), nbctvar(0), nbcidvar(0) ,  nbtuning(0), ctratio(ct_ratio) {
+							system(sys), nbcalls(0), nbctvar(0), ctratio(ct_ratio), nbcidvar(0) ,  nbtuning(0), optim(optim) {
 }
 
 void CtcAcid::contract(IntervalVector& box) {
@@ -173,12 +173,12 @@ void CtcAcid::compute_smearorder(IntervalVector& box) {
 	for ( int  i=0; i<nb_var; i++) {
 		if (!cid_vars[i]) continue;                    // [gch]
 		int k=0;
-		int k0=0;
+		//int k0=0;
 		double sz=0;
-		for (int k1=0; k1<varorder2.size(); k1++) {
+		for (int k1=0; (k1<(varorder2.size())); k1++) {
 			if (sum_smear[varorder2[k1]]>sz) {
 				k=k1;
-				k0=1;
+				//k0=1;
 				sz=sum_smear[varorder2[k1]];
 			}
 		}

@@ -63,10 +63,10 @@ Optimizer::Optimizer(System& user_sys, Bsc& bsc, Ctc& ctc, double prec,
 				bsc(bsc), ctc(ctc), buffer(n),
 				prec(prec), goal_rel_prec(goal_rel_prec), goal_abs_prec(goal_abs_prec),
 				sample_size(sample_size), mono_analysis_flag(true), in_HC4_flag(true), trace(false),
-				timeout(1e08), loup(POS_INFINITY), uplo(NEG_INFINITY), pseudo_loup(POS_INFINITY),
-				loup_point(n), loup_box(n),
-				df(*user_sys.goal,Function::DIFF), rigor(rigor),
-				uplo_of_epsboxes(POS_INFINITY), nb_cells(0), loup_changed(false) {
+				timeout(1e08), loup(POS_INFINITY), pseudo_loup(POS_INFINITY), uplo(NEG_INFINITY),
+				loup_point(n), loup_box(n), nb_cells(0),
+				df(*user_sys.goal,Function::DIFF),
+				loup_changed(false), rigor(rigor), uplo_of_epsboxes(POS_INFINITY) {
 
 	// ==== build the system of equalities only ====
 	try {

@@ -33,7 +33,7 @@ Function::~Function() {
 		 */
 		if (!expr().dim.is_scalar()) delete[] comp;
 
-		for (unsigned int i=0; i<exprnodes.size(); i++) {
+		for (unsigned int i=0; (i<(exprnodes.size())); i++) {
 			delete node(i).deco.d;
 			delete node(i).deco.g;
 			delete node(i).deco.p;

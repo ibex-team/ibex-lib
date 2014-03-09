@@ -31,7 +31,7 @@ int main() {
   vector<IntervalVector> solutions = solver.solve(system.box); // Run the solver
 
   /* Display the solutions. */
-  for (int i=0; i<solutions.size(); i++) {
+  for (int i=0; i<(solutions.size()); i++) {
 	  cout << "solution n°" << i << ": " << solutions[i] << endl;
   }
   //! [start-call-solver]
