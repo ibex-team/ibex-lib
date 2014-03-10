@@ -692,11 +692,6 @@ inline bool proj_tan(const Interval& y,  Interval& x) {
 	return proj_trigo(y,x,2);
 }
 
-inline bool proj_atan2(const Interval& , Interval& , Interval& ) {
-	ibex_error("warning: proj_atan2 non implemented yet with filib");
-	return false;
-}
-
 inline bool proj_cosh(const Interval& y,  Interval& x) {
 
 	Interval proj=acosh(y);

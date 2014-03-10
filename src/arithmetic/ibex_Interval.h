@@ -942,22 +942,26 @@ inline Interval atan2(const Interval& y, const Interval& x) {
 	if ( x.lb()> 0) {
 		return atan(y/x);
 	}
-	else if  (x.ub()< 0 && y.lb()> 0) {
+	else if  (x.ub()< 0 && y.lb()>= 0) {
 		return atan(y/x)+Interval::PI;
 	}
 	else if (x.ub() < 0 && y.ub()< 0) {
 		return atan(y/x)-Interval::PI;
 	}
-	else if (y.contains(0.0) && x.contains(0.0)) {
+	else if (x.ub() < 0) {
+		return Interval(-1,1)*Interval::PI;
+	}
+	else if (x.contains(0.0) && y.contains(0.0) ) {
 		return Interval(-1,1)*Interval::PI;
 	}
 	else {
-		return 2*atan((sqrt(pow(x,2)+pow(y,2))-x)/y);
+		return 2*atan((sqrt(sqr(x)+sqr(y))-x)/y);
 	}
 }
+
 /*
 // ArcTan2 by Firas Khemane (feb 2010)
-inline Interval atan2(const Interval& a, const Interval& b) {
+inline Interval atan2(const Interval& b, const Interval& a) {
 	if (a.is_empty() || b.is_empty()) return Interval::EMPTY_SET;
 
 	if (( a.lb() > 0 && b.lb() > 0) || (  a.lb() > 0 &&   b.ub() < 0 )  || ( b.lb() < 0 && b.ub()> 0  && a.lb() > 0 ) )
@@ -1110,6 +1114,39 @@ inline bool proj_sign(const Interval& y,  Interval& x) {
 	/* At this point, y.ub()>0. */
 	x &= Interval::POS_REALS;
 	return !x.is_empty();
+}
+
+
+inline bool proj_atan2(const Interval& theta, Interval& y, Interval& x) {
+	bool b=true;
+	if (theta.is_empty()) {
+		x.set_empty(); y.set_empty();
+		b=false;
+	}
+	//not_implemented("proj_atan2 non implemented yet");
+	//  <=> cos(Theta)*X - sin(Theta)*Y > 0;
+	//      sin(Theta)*X + cos(Theta)*Y = 0
+/*
+	Interval costheta, sintheta, xcostheta, xsintheta, ycostheta, ysintheta, equ1, equ2;
+	costheta = cos(theta);
+	sintheta = sin(theta);
+	for (int i=0; b && (i<1);i++) {
+		xcostheta = x*costheta;
+		xsintheta = x*sintheta;
+		ycostheta = y*costheta;
+		ysintheta = y*sintheta;
+		equ1 = (xcostheta - ysintheta)& Interval::POS_REALS;
+		equ2 = (xsintheta + ycostheta)& Interval::ZERO;
+		b= b && (!equ1.is_empty()||!equ2.is_empty());
+		b= b && proj_sub(equ1, xcostheta, ysintheta);
+		b= b && proj_add(equ2, xsintheta, ycostheta);
+		b= b && proj_mul(xcostheta, x, costheta);
+		b= b && proj_mul(xsintheta, x, sintheta);
+		b= b && proj_mul(ysintheta, y, sintheta);
+		b= b && proj_mul(ycostheta, y, costheta);
+	}
+*/
+	return b;
 }
 
 

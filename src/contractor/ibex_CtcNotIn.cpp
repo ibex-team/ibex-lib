@@ -29,10 +29,10 @@ void CtcNotIn::contract(IntervalVector& box) {
 	IntervalVector savebox(box);
 	try {
 		HC4Revise().proj(f,d1,box);
-	} catch (EmptyBoxException& e) {box.set_empty(); }
+	} catch (EmptyBoxException& ) {box.set_empty(); }
 	try {
 		HC4Revise().proj(f,d2,savebox);
-	} catch (EmptyBoxException& e) {savebox.set_empty(); }
+	} catch (EmptyBoxException& ) {savebox.set_empty(); }
 
 	box |= savebox;
 	if (box.is_empty()) throw EmptyBoxException();

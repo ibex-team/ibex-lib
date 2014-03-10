@@ -856,11 +856,6 @@ inline bool proj_tan(const Interval& y,  Interval& x) {
 	return proj_trigo(y,x,2);
 }
 
-inline bool proj_atan2(const Interval& , Interval& , Interval& ) {
-	cerr << "warning: proj_atan2 non implemented yet with Profil/Bias";
-	return true;
-}
-
 inline bool proj_cosh(const Interval& y,  Interval& x) {
 
 	Interval proj=acosh(y);

@@ -475,11 +475,6 @@ inline bool proj_tan(const Interval& y,  Interval& x) {
 	return !x.is_empty();
 }
 
-inline bool proj_atan2(const Interval& , Interval& , Interval& ) {
-	ibex_error("proj_atan2 non implemented yet with Gaol");
-	return false;
-}
-
 inline bool proj_cosh(const Interval& y,  Interval& x) {
 	x = gaol::acosh_rel(y.itv,x.itv);
 	return !x.is_empty();
