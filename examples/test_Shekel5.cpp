@@ -20,6 +20,7 @@ int main() {
 
 	double x1[4] = {4,4,4,4};
 	IntervalVector x2(4,Interval(3.9,4.1));
+	cout.precision(15);
 
 	cout<< "-----------------------------------------------------------" << endl;
 	cout << " CPU-time for "<<n<<" evaluations of the Shekel-5 function at the point x1=(4,4,4,4)" <<endl;
