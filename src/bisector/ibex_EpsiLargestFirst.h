@@ -7,8 +7,8 @@
 // Last Update : July 19, 2012
 //============================================================================
 
-#ifndef __IBEX_REL_LARGEST_FIRST_H__
-#define __IBEX_REL_LARGEST_FIRST_H__
+#ifndef __IBEX_EPSI_LARGEST_FIRST_H__
+#define __IBEX_EPSI_LARGEST_FIRST_H__
 
 #include "ibex_Bsc.h"
 #include "ibex_Backtrackable.h"
