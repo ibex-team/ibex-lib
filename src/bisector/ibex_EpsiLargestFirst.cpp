@@ -34,7 +34,16 @@ pair<IntervalVector,IntervalVector> EpsiLargestFirst::bisect(const IntervalVecto
 		}
 	}
 	if (var !=-1){
-
+		l=0.0;
+		for (int i=0; i< box.size(); i++)	{
+			if (box[i].is_bisectable()){
+				if (var==-1) var=i;
+				else {
+					double l_tmp =box[i].diam();
+					if ((l_tmp/init_epsi[i]>l)) { var = i; l= l_tmp/init_epsi[i];}
+				}
+			}
+		}
 	}
 
 	if (var !=-1){
