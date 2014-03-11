@@ -1123,7 +1123,7 @@ inline bool proj_atan2(const Interval& theta, Interval& y, Interval& x) {
 		x.set_empty(); y.set_empty();
 		b=false;
 	}
-	//not_implemented("proj_atan2 non implemented yet");
+	not_implemented("proj_atan2 non implemented yet");
 	//  <=> cos(Theta)*X - sin(Theta)*Y > 0;
 	//      sin(Theta)*X + cos(Theta)*Y = 0
 /*
