@@ -794,10 +794,12 @@ inline const Function& Function::diff() const {
 }
 
 inline Function& Function::operator[](int i) {
+	if (!comp) separate();
 	return comp[i];
 }
 
 inline Function& Function::operator[](int i) const {
+	if (!comp) ((Function&) *this).separate();
 	return comp[i];
 }
 

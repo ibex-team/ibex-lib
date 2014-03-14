@@ -154,7 +154,7 @@ const char* duplicate_or_generate(const char* name) {
 
 }
 
-Function::Function() : name(strdup(next_generated_func_name())), root(NULL), df(NULL) {
+Function::Function() : name(strdup(next_generated_func_name())), root(NULL), df(NULL), comp(NULL) {
 	// root==NULL <=> the function is not initialized yet
 }
 
@@ -406,6 +406,8 @@ void Function::separate() {
 void Function::init(const Array<const ExprSymbol>& x, const ExprNode& y) {
 
 	df=NULL;
+	comp=NULL;
+
 	key_count=0;
 	__all_symbols_scalar=true; // by default
 
@@ -443,8 +445,6 @@ void Function::init(const Array<const ExprSymbol>& x, const ExprNode& y) {
 	(int&) Fnc::_image_dim = y.dim.size();
 
 	decorate();
-
-	separate();
 
 	// ===== display adjacency (debug) =========
 //	cout << "adjacency of function" << *this << ":" << endl;
