@@ -19,9 +19,16 @@
 #include <functional>
 
 #ifdef __GNUC__
+#include <ciso646> // just to initialize _LIBCPP_VERSION
+#ifdef _LIBCPP_VERSION
+#include <unordered_map>
+#define HASH std::hash
+#define IBEX_INT_MAP(T) std::unordered_map<int,T>
+#else
 #include <tr1/unordered_map>
 #define HASH std::tr1::hash
 #define IBEX_INT_MAP(T) std::tr1::unordered_map<int,T>
+#endif
 #else
 #include <unordered_map>
 #define HASH std::hash

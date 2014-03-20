@@ -48,8 +48,14 @@ struct equal_string {
 }
 
 #ifdef __GNUC__
+#include <ciso646> // just to initialize _LIBCPP_VERSION
+#ifdef _LIBCPP_VERSION
+#include <unordered_map>
+#define IBEXMAP(T) std::unordered_map<const char*, T, struct ibex::hash_string, struct ibex::equal_string>
+#else
 #include <tr1/unordered_map>
 #define IBEXMAP(T) std::tr1::unordered_map<const char*, T, struct ibex::hash_string, struct ibex::equal_string>
+#endif
 #else
 #include <unordered_map>
 #define IBEXMAP(T) std::unordered_map<const char*, T, struct ibex::hash_string, struct 	ibex::equal_string>
