@@ -25,7 +25,8 @@ namespace ibex {
  * also transformed into two inequalities, f(x)<=b and -f(x)<=-a
  * (in this precise order).
  * Other equalities f=0 are transformed into f<=eps and -f<=eps,
- * where eps is the value given in 3rd argument of the constructor.
+ * where eps is the value given in 3rd argument of the constructor
+ * (except if eps==0).
  * Note that the number of constraints of the resulting system
  * in this case is greater than the number or the original one.
  *
@@ -37,8 +38,9 @@ public:
 	/**
 	 * \brief Normalize \a sys.
 	 *
-	 * \param eps - Transforms an equation f=0 into two
-	 *              inequalities: f<=eps and -f<=eps.
+	 * \param eps - if >0, transforms an equation f=0 into two
+	 *              inequalities: f<=eps and -f<=eps. If eps==0
+	 *              equalities are duplicated.
 	 */
 	NormalizedSystem(const System& sys, double eps=0);
 

@@ -41,19 +41,25 @@ class SystemNormalize : public SystemFactory {
 
 			if (sys.ctrs[i].op==EQ) {
 				pair<const ExprNode*, const Interval*> p=sys.ctrs[i].is_thick_equality();
-				const ExprNode *f_1;
-				const ExprNode *f_2;
-				if (p.first!=NULL) {
-					f_1=&( ExprCopy().copy(sys.ctrs[i].f.args(), sys.args, *p.first) - p.second->ub());
-					f_2=&(-ExprCopy().copy(sys.ctrs[i].f.args(), sys.args, *p.first) - (-p.second->lb()));
+				if (p.first!=NULL || eps>0) {
+					const ExprNode *f_1;
+					const ExprNode *f_2;
+					if (p.first!=NULL) {
+						f_1=&( ExprCopy().copy(sys.ctrs[i].f.args(), sys.args, *p.first) - p.second->ub());
+						f_2=&(-ExprCopy().copy(sys.ctrs[i].f.args(), sys.args, *p.first) - (-p.second->lb()));
+					} else {
+						f_1=&( ExprCopy().copy(sys.ctrs[i].f.args(), sys.args, sys.ctrs[i].f.expr()) - eps);
+						f_2=&(-ExprCopy().copy(sys.ctrs[i].f.args(), sys.args, sys.ctrs[i].f.expr()) - eps);
+					}
+					add_ctr(ExprCtr(*f_1,LEQ));
+					cleanup(*f_1, false);
+					add_ctr(ExprCtr(*f_2,LEQ));
+					cleanup(*f_2, false);
 				} else {
-					f_1=&( ExprCopy().copy(sys.ctrs[i].f.args(), sys.args, sys.ctrs[i].f.expr()) - eps);
-					f_2=&(-ExprCopy().copy(sys.ctrs[i].f.args(), sys.args, sys.ctrs[i].f.expr()) - eps);
+					const ExprNode* f_i=&ExprCopy().copy(sys.ctrs[i].f.args(), sys.args, sys.ctrs[i].f.expr());
+					add_ctr(ExprCtr(*f_i,EQ));
+					cleanup(*f_i, false);
 				}
-				add_ctr(ExprCtr(*f_1,LEQ));
-				cleanup(*f_1, false);
-				add_ctr(ExprCtr(*f_2,LEQ));
-				cleanup(*f_2, false);
 			} else {
 
 				const ExprNode* f_i=&ExprCopy().copy(sys.ctrs[i].f.args(), sys.args, sys.ctrs[i].f.expr());
@@ -61,7 +67,6 @@ class SystemNormalize : public SystemFactory {
 				switch (sys.ctrs[i].op) {
 				case LT:
 					ibex_warning("warning: strict inequality (<) replaced by inequality (<=).");
-					break;
 				case LEQ:
 					break;
 				case GT:
@@ -73,8 +78,8 @@ class SystemNormalize : public SystemFactory {
 					assert(false);
 					break;
 				}
-
 				add_ctr(ExprCtr(*f_i,LEQ));
+
 				cleanup(*f_i, false);
 			}
 
@@ -92,7 +97,7 @@ NormalizedSystem::NormalizedSystem(const System& sys, double eps) {
 	int j=0;
 	for (int i=0; i<sys.nb_ctr; i++) {
 		_orig_index[j++]=i;
-		if (sys.ctrs[i].op==EQ) _orig_index[j++]=i;
+		if (sys.ctrs[i].op==EQ && (sys.ctrs[i].is_thick_equality().first!=NULL || eps>0)) _orig_index[j++]=i;
 	}
 	assert(j==nb_ctr);
 }
