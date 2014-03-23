@@ -330,7 +330,7 @@ std::ostream&   operator<<(std::ostream& os, const IntervalVector& x)           
 double          IntervalVector::volume() const                                    { return _volume(*this); }
 double          IntervalVector::perimeter() const                                 { return _perimeter(*this); }
 double          IntervalVector::rel_distance(const IntervalVector& x) const       { return _rel_distance(*this,x); }
-Vector          IntervalVector::random() const                                    { return _random<IntervalVector,Interval>(*this); }
+Vector          IntervalVector::random(int seed) const                            { return _random<IntervalVector,Interval>(*this,seed); }
 std::pair<IntervalVector,IntervalVector> IntervalVector::bisect(int i, double ratio) const  { return _bisect(*this, i, ratio); }
 
 

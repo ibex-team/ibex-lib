@@ -448,7 +448,7 @@ public:
 	 *
 	 * \pre (*this) must be nonempty.
 	 */
-	Vector random() const;
+	Vector random(int seed=1) const;
 
 	/**
 	 * \brief (*this)+=x2.

@@ -302,9 +302,9 @@ std::pair<IntervalVector,IntervalVector> _bisect(const V& v, int i, double ratio
 }
 
 template<class V,class T>
-Vector _random(const V& v) {
+Vector _random(const V& v,int seed) {
 	assert(!v.is_empty());
-
+	srand(seed);
 	Vector b(v.size());
 	for (int i=0; i<v.size(); i++) {
 		const T& xi=v[i];
@@ -320,7 +320,7 @@ Vector _random(const V& v) {
 			if (xi.ub()==POS_INFINITY)
 				p=xi.lb()+rand();
 			else {
-				double r=rand()/(double) RAND_MAX -0.5;
+				double r=(rand()/(double)RAND_MAX) -0.5;
 				p = xi.mid() + r*xi.diam();
 			}
 

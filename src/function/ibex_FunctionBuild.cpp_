@@ -154,7 +154,7 @@ const char* duplicate_or_generate(const char* name) {
 
 }
 
-Function::Function() : name(strdup(next_generated_func_name())), root(NULL), df(NULL), comp(NULL) {
+Function::Function() : name(strdup(next_generated_func_name())), root(NULL), comp(NULL), df(NULL) {
 	// root==NULL <=> the function is not initialized yet
 }
 

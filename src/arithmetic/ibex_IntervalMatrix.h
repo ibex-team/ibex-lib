@@ -328,6 +328,13 @@ public:
 	 */
 	void put(int row_start_index, int col_start_index, const IntervalVector& V, bool row_vec);
 
+	/**
+	 * \brief Return a random matix inside *this.
+	 *
+	 * \pre (*this) must be nonempty.
+	 */
+	Matrix random(int seed=1) const;
+
     /**
      * \brief (*this)+=m.
      */
