@@ -26,13 +26,13 @@ namespace ibex {
 
 /**
  * \ingroup combinatorial
- * \brief Q-intersection - EXACT - Jaulin-Goldsztejn algorithm
+ * \brief Q-intersection - EXACT - Grid algorithm
  */
 IntervalVector qinter(const Array<IntervalVector>& boxes, int q);
 
 /**
  * \ingroup combinatorial
- * \brief Q-intersection - HEURISTIC - Luc Jaulin's algorithm
+ * \brief Q-intersection - HEURISTIC - Projective filtering
  */
 IntervalVector qinter_projf(const Array<IntervalVector>& _boxes, int q);
 
@@ -44,9 +44,9 @@ IntervalVector qinter_coref(const Array<IntervalVector>& _boxes, int q);
 
 /**
  * \ingroup combinatorial
- * \brief Q-intersection - EXACT - Cliquer-based approach
+ * \brief Q-intersection - EXACT - QInter2 : Cliquer-based solver
  */
-IntervalVector qinter_chabs_nogoods(const Array<IntervalVector>& _boxes, int q);
+IntervalVector qinter2(const Array<IntervalVector>& _boxes, int q);
 
 /**
  * \ingroup combinatorial

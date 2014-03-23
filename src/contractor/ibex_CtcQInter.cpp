@@ -40,7 +40,7 @@ void CtcQInter::contract(IntervalVector& box) {
 	if (box.is_empty()) throw EmptyBoxException();
 }
 
-CtcQInterChabsNogoods::CtcQInterChabsNogoods(const Array<Ctc>& list, int q) : Ctc(list[0].nb_var), list(list),
+CtcQInter2::CtcQInter2(const Array<Ctc>& list, int q) : Ctc(list[0].nb_var), list(list),
 		n(list[0].nb_var), q(q), boxes(list.size(), n) {
 
 	for (int i=0; i<list.size(); i++) {
@@ -48,7 +48,7 @@ CtcQInterChabsNogoods::CtcQInterChabsNogoods(const Array<Ctc>& list, int q) : Ct
 	}
 }
 
-void CtcQInterChabsNogoods::contract(IntervalVector& box) {
+void CtcQInter2::contract(IntervalVector& box) {
 	Array<IntervalVector> refs(list.size());
 
 	for (int i=0; i<list.size(); i++) {
@@ -61,7 +61,7 @@ void CtcQInterChabsNogoods::contract(IntervalVector& box) {
 		refs.set_ref(i,boxes[i]);
 	}
 
-	box = qinter_chabs_nogoods(refs,q);
+	box = qinter2(refs,q);
 
 	if (box.is_empty()) throw EmptyBoxException();
 }

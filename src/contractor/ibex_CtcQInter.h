@@ -56,14 +56,14 @@ protected:
 	IntervalMatrix boxes; // store boxes for each contraction
 };
 
-class CtcQInterChabsNogoods : public Ctc {
+class CtcQInter2 : public Ctc {
 public:
 	/**
 	 * \brief q-intersection on a list of contractors.
 	 *
 	 * The list itself is not kept by reference.
 	 */
-	CtcQInterChabsNogoods(const Array<Ctc>& list, int q);
+	CtcQInter2(const Array<Ctc>& list, int q);
 
 	/**
 	 * \brief Contract the box.

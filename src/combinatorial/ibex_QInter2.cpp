@@ -69,10 +69,48 @@ void propagate(const Array<IntervalVector>& boxes, IntStack ***dirboxes, int dim
 	nogoods.push_back(newNogood);
 }
 
-/* 
- * Improved q-intersection algorithm, WITHOUT the (q-1)-core filtering.
+/*
+ * Restricted propagation procedure. Used when a direction is solved, but no new q-intersection is found.
+ * Same as propagate, except that upper bounds are not recorded (because we did not find a curr_qinter to work with).
  */
-IntervalVector qinter_chabs_nogoods(const Array<IntervalVector>& _boxes, int q) {
+void propagate_no_ub(const Array<IntervalVector>& boxes, IntStack ***dirboxes, int dimension, bool left, IntervalVector& hull_qinter, vector<BitSet *>& nogoods) {
+	
+	unsigned int n = hull_qinter.size();
+	unsigned int p = boxes.size();
+	
+	IntervalVector b(n);
+	
+	/* Create the new nogood */
+	BitSet *newNogood = new BitSet(0,p-1,BitSet::empt);
+	
+	/* We iterate through the boxes to propagate bounds */
+	/* This does not seem to be optimal ; maybe we should study directly the directions' lists ? */
+	for (int i=0; i<p; i++) {
+		b = boxes[i];
+		
+		/* Check if the box can be added to the new nogood */
+		if ((left && (b[dimension].lb() < hull_qinter[dimension].lb())) || (!left && (b[dimension].ub() > hull_qinter[dimension].ub()))) {
+			newNogood->add(i);	
+		}
+		
+		/* Check if the box is strictly outside our current q-inter hull */
+		if ((left && (b[dimension].ub() < hull_qinter[dimension].lb())) || (!left && (b[dimension].lb() > hull_qinter[dimension].ub()))) {
+			for (int k=dimension+1; k<n; k++) {
+				if (dirboxes[k][0]->contain(i)) dirboxes[k][0]->remove(i);
+				if (dirboxes[k][1]->contain(i)) dirboxes[k][1]->remove(i);
+			}
+			
+			continue;
+		}
+	}
+	
+	nogoods.push_back(newNogood);
+}
+
+/* 
+ * Improved q-intersection algorithm.
+ */
+IntervalVector qinter2(const Array<IntervalVector>& _boxes, int q) {
 	
 	assert(q>0);
 	assert(_boxes.size()>0);
@@ -209,6 +247,12 @@ IntervalVector qinter_chabs_nogoods(const Array<IntervalVector>& _boxes, int q) 
 		
 		first_pass = false;
 		
+		if (curr_qinter.is_empty()) {
+			/* A face of the q-inter hull has been proved optimal, but has not been updated.
+			 * There is still some information we can propagate. */
+			propagate_no_ub(boxes, dirboxes, i, true, hull_qinter, nogoods);
+		}
+		
 		/* ######################################################## */
 		/* #####                                              ##### */
 		/* #####               Right ----> Left               ##### */
@@ -269,6 +313,12 @@ IntervalVector qinter_chabs_nogoods(const Array<IntervalVector>& _boxes, int q) 
 			hull_qinter = hull_qinter | curr_qinter;
 			if (i!=n) propagate(boxes, dirboxes, i, false, curr_qinter, nogoods);
 			break;
+		}
+		
+		if (curr_qinter.is_empty() && (i!=n)) {
+			/* A face of the q-inter hull has been proved optimal, but has not been updated.
+			 * There is still some information we can propagate. */
+			propagate_no_ub(boxes, dirboxes, i, false, hull_qinter, nogoods);
 		}
 	}
 	
