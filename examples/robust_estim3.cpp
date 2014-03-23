@@ -132,7 +132,7 @@ int main() {
 	
 	pendingList.push_back(box);
 	
-	CtcQInterCoreF ctcq(m_ctc,Q);
+	CtcQInterProjF ctcq(m_ctc,Q);
 	CtcFixPoint ctcf(ctcq);
 
 	int counter = 0;

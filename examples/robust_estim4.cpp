@@ -7,23 +7,32 @@
 
 using namespace std;
 
+/*
+ * 
+ * Generates uniformly a n-dimensional localization problem and solves it using q-intersection.
+ * 
+ * This program was used to generate instances for the q-intersection paper.
+ * 
+ */
+
 /*================== data =================*/
+const int seed=1111;		  // seed used by the random number generator
 const bool qinteronly=false;  // do we use q-intersection alone or FixedPoint ?
-const int N=6;				  // problem dimension
-const int P=200;        	  // number of measurements
-const int Q=P*0.8;			  // number of consistent measurements
+const int N=4;				  // problem dimension
+const int P=500;        	  // number of measurements
+const int Q=P*0.2;			  // number of consistent measurements
 const double L=10;      	  // the target & the beacons are in the area [0,L]x[0,L]
 double beacons[P][N];   	  // positions (x,y) of the P beacons
 double dist[P];				  // distance between the target and each beacon
 double BEACON_ERROR=0.1; 	  // the uncertainty on the beacon position
 double DIST_ERROR=0.1;   	  // the uncertainty on the distance
 double OUTLIERS_ERROR=L/2;    // average error on each dimension for outliers
-const double eps = 0.01;	  // Maximum diameter of the outputted boxes
+const double eps = 0.001;	  // Maximum diameter of the outputted boxes
 /*=========================================*/
 
 // init data (simulate measurements)
 void init_data() {
-	srand(1111);
+	srand(seed);
 
 	double center[N];
 	for (int j=0; j<N; j++) center[j] = ((double) rand()/RAND_MAX)*L;
@@ -89,7 +98,7 @@ int main() {
 		
 	IntervalVector box(N,_box);
 		
-	CtcQInterProjF ctcq(m_ctc,Q);
+	CtcQInterCoreF ctcq(m_ctc,Q);
 	CtcFixPoint fix(ctcq);
 	
 	list<IntervalVector> pendingList;
@@ -131,7 +140,7 @@ int main() {
 	}
 	end = clock();
 	
-	std::cout << "Computation over. Time : " << ((double)(end)-(double)(start))/CLOCKS_PER_SEC << " seconds" << endl;
+	std::cout << "Computation over. Time : " << ((long double)(end)-(long double)(start))/CLOCKS_PER_SEC << " seconds" << endl;
 	std::cout << "Target : " << res.front().mid() << endl;
 	std::cout << "Number of branches : " << counter << endl;
 }
