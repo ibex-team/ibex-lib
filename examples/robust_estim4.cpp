@@ -97,7 +97,9 @@ int main() {
 	}
 		
 	IntervalVector box(N,_box);
-		
+	
+	/* use CtcQInterProjF ctcq(m_ctc,Q)
+	 * for projective filtering */
 	CtcQInterCoreF ctcq(m_ctc,Q);
 	CtcFixPoint fix(ctcq);
 	
