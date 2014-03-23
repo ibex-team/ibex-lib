@@ -57,7 +57,6 @@ public:
 	/**
 	 * \brief Run the optimization.
 	 *
-	 *
 	 * \return - x_min contains the final point. In the case the iteration is *
 	 *           interrupted prematurely (return code different from SUCCESS),
 	 *           x_min contains the last valid point found. However, note that
@@ -69,7 +68,12 @@ public:
 	 *                The procedure stops when the norm of the projection of the gradient onto the
 	 *                bounding box is less than eps.
 	 */
-	ReturnCode minimize(const Vector& x0, Vector& x_min, double eps, int max_iter);
+	ReturnCode minimize( const Vector& x0, Vector& x_min, double eps=1.e-8, int max_iter=100);
+
+	/**
+	 * \brief get the number of iteration of the last minimization
+	 */
+	int nb_iter() const;
 
 	virtual ~UnconstrainedLocalSearch();
 
@@ -91,6 +95,9 @@ private:
 	// sigma is set to (eps/sqrt(n+1)) to be compatible with
 	// the convergence criterion (see stop function)
 	double sigma;
+
+	// number of iteration
+	int niter ;
 
 	LineSearchData data; // for internal usage of LineSearch
 
@@ -147,6 +154,9 @@ private:
 
 
 /*============================================ inline implementation ============================================ */
+inline int UnconstrainedLocalSearch::nb_iter() const {
+	return this->niter;
+}
 
 inline double UnconstrainedLocalSearch::_mid(const Interval& x) {
 	if (x.is_empty() || x.is_unbounded()) throw InvalidPointException();
