@@ -57,6 +57,37 @@ void TestGradient::add02() {
 void TestGradient::add03() { }
 void TestGradient::add04() { }
 
+void TestGradient::mulVV() {
+	Variable x(1,3);
+	Variable y(3);
+	Function f(x,y,x*y);
+	double _xy[]={1,2,3,4,5,6};
+	IntervalVector xy(Vector(6,_xy));
+	double _g[]={4,5,6,1,2,3};
+	TEST_ASSERT(f.gradient(xy)==IntervalVector(Vector(6,_g)));
+}
+
+void TestGradient::transpose01() {
+	Variable x(3);
+	Variable y(3);
+	Function f(x,y,transpose(x)*y);
+	double _xy[]={1,2,3,4,5,6};
+	IntervalVector xy(Vector(6,_xy));
+	double _g[]={4,5,6,1,2,3};
+	TEST_ASSERT(f.gradient(xy)==IntervalVector(Vector(6,_g)));
+}
+
+void TestGradient::mulMV01() {
+	double _M[]={1,2,2,3};
+	Matrix M(2,2,_M);
+	Variable x(2);
+	Function f(x,transpose(x)*(M*x)); // the gradient is 2*M*x
+	IntervalVector box(2,Interval(1.0));
+	IntervalVector g=f.gradient(box);
+	TEST_ASSERT(g[0]==Interval(6));
+	TEST_ASSERT(g[1]==Interval(10));
+}
+
 void TestGradient::dist() {
 	Variable xA,xB,yA,yB;
 	Function dist(xA,xB,yA,yB,sqr(xA-xB)+sqr(yA-yB));
