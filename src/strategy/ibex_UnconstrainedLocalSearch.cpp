@@ -70,10 +70,12 @@ UnconstrainedLocalSearch::ReturnCode UnconstrainedLocalSearch::minimize(const Ve
 	niter = 0; //number of iteration
 
 	try {
+		cout << " [minimize] xk= " << xk1 << endl;
+
 		// Initialize the quadratic approximation at the initial point x0
 		// like in the quasi-Newton algorithm
-		double fk=f.eval(xk1).mid();
-		Vector gk=f.gradient(xk1).mid();
+		double fk=_mid(f.eval(xk1));
+		Vector gk=_mid(f.gradient(xk1));
 		Matrix Bk=Matrix::eye(n);
 		cout << " [minimize] gk= " << gk << endl;
 
@@ -105,7 +107,7 @@ UnconstrainedLocalSearch::ReturnCode UnconstrainedLocalSearch::minimize(const Ve
 			xk1 = conj_grad(gk,Bk,xk,x_gcp,region,I);
 
 			// Compute the ration of achieved to predicted reduction in the function
-			fk1 = f.eval(xk1).mid();
+			fk1 = _mid(f.eval(xk1));
 			cout << " [minimize] xk1= " << xk1 <<"  fk1 = "<<fk1<<"   fk=" <<fk<< endl;
 
 			// computing m(xk1)-f(xk) = (xk1-xk)^T gk + 1/2 (xk1-xk)^T Bk (xk1-xzk)
@@ -126,7 +128,7 @@ UnconstrainedLocalSearch::ReturnCode UnconstrainedLocalSearch::minimize(const Ve
 
 				// update x_k, f(x_k) and g(x_k)
 				if (rhok > mu) {
-					gk1 = f.gradient(xk1).mid();
+					gk1 = _mid(f.gradient(xk1));
 					update_B_SR1(Bk,sk,gk,gk1);
 					fk = fk1;
 					xk = xk1;
