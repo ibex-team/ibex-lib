@@ -76,7 +76,7 @@ Vector LineSearch::endpoint() {
 		else if (data.ctr[i]!=PARALLEL) {
 			x2[i] += alpha1*d[i];
 			// check we do not touch a face we are not supposed to touch
-			cout << " [endpoint] test contains " << x2[i] << " in " << box[i] << endl;
+			//  cout << " [endpoint] test contains " << x2[i] << " in " << box[i] << endl;
 			assert(box[i].strictly_contains(x2[i]));
 		}
 	}

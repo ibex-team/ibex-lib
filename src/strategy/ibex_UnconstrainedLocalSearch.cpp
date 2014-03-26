@@ -35,7 +35,7 @@ void UnconstrainedLocalSearch::update_B_SR1(Matrix& Bk, const Vector& sk, const 
 	// but due to rounding error in the computation of the stopping criteria,
 	// we cannot detect it.
 	// If the norm of the correction is too large we skip the correction
-	cout << " [update_B_SR1] r*r/r*sk = "<< (r*r)/tmp<<endl;
+	//  cout << " [update_B_SR1] r*r/r*sk = "<< (r*r)/tmp<<endl;
 	if ((tmp!=0)&&( fabs((r*r)/tmp)<=1.e8)) Bk += (1/tmp)*outer_product(r,r);
 }
 
@@ -70,14 +70,14 @@ UnconstrainedLocalSearch::ReturnCode UnconstrainedLocalSearch::minimize(const Ve
 	niter = 0; //number of iteration
 
 	try {
-		cout << " [minimize] xk= " << xk1 << endl;
+		//  cout << " [minimize] xk= " << xk1 << endl;
 
 		// Initialize the quadratic approximation at the initial point x0
 		// like in the quasi-Newton algorithm
 		double fk=_mid(f.eval(xk1));
 		Vector gk=_mid(f.gradient(xk1));
 		Matrix Bk=Matrix::eye(n);
-		cout << " [minimize] gk= " << gk << endl;
+		//  cout << " [minimize] gk= " << gk << endl;
 
 		// initialize the current point
 		xk=xk1;
@@ -89,8 +89,8 @@ UnconstrainedLocalSearch::ReturnCode UnconstrainedLocalSearch::minimize(const Ve
 
 		while ((niter<max_iter)&&(!stop(xk,gk))) {
 			niter++;
-			cout << " [minimize] ITER= " << niter << endl;
-			cout << " [minimize] gk= " << gk << endl;
+			//  cout << " [minimize] ITER= " << niter<<"  fk= " << fk <<" ||gk||= " << gk.norm() << endl;
+			//  cout << " [minimize] gk= " << gk << endl;
 			// creates the trust region (intersection with bounding box)
 			region=box & (IntervalVector(xk).inflate(Delta));
 
@@ -108,12 +108,12 @@ UnconstrainedLocalSearch::ReturnCode UnconstrainedLocalSearch::minimize(const Ve
 
 			// Compute the ration of achieved to predicted reduction in the function
 			fk1 = _mid(f.eval(xk1));
-			cout << " [minimize] xk1= " << xk1 <<"  fk1 = "<<fk1<<"   fk=" <<fk<< endl;
+			//  cout << " [minimize] xk1= " << xk1 <<"  fk1 = "<<fk1<<"   fk=" <<fk<< endl;
 
 			// computing m(xk1)-f(xk) = (xk1-xk)^T gk + 1/2 (xk1-xk)^T Bk (xk1-xzk)
 			Vector sk = xk1-xk;
 			double m =(sk*gk + 0.5* (sk*(Bk*sk)));
-			cout << " [minimize] sk= " << sk <<"  m= "<<m<< endl;
+			//  cout << " [minimize] sk= " << sk <<"  m= "<<m<< endl;
 			// warning if xk1=xk => sk =0 and m =0.
 			// In this case, xk = x_gcp = xk1. That means that we have converge
 			// but due to rounding error in the computation of the stopping criteria,
@@ -123,7 +123,7 @@ UnconstrainedLocalSearch::ReturnCode UnconstrainedLocalSearch::minimize(const Ve
 				niter=max_iter;
 			else {
 				double rhok = (fk1-fk)/m;
-				cout << " [minimize] rhok= " << rhok << endl;
+				//  cout << " [minimize] rhok= " << rhok << endl;
 				// rhok can be <0 if we do not improve the criterion
 
 				// update x_k, f(x_k) and g(x_k)
@@ -140,7 +140,7 @@ UnconstrainedLocalSearch::ReturnCode UnconstrainedLocalSearch::minimize(const Ve
 					Delta = gamma0*Delta;
 				}
 				else if (rhok>=eta) Delta = gamma2*Delta;
-				cout << " [minimize] Delta= " << Delta << endl;
+				//  cout << " [minimize] Delta= " << Delta << endl;
 			}
 		}
 	} catch(InvalidPointException&) {
@@ -169,7 +169,7 @@ bool UnconstrainedLocalSearch::stop(const Vector& z, const Vector& g) {
 			}
 		}
 	}
-	cout << "STOP = " <<::sqrt(res)<< endl;
+	//  cout << "STOP = " <<::sqrt(res)<< endl;
 	return ::sqrt(res)<eps;
 }
 
@@ -177,10 +177,10 @@ Vector UnconstrainedLocalSearch::find_gcp(const Vector& gk, const Matrix& Bk, co
 
 	// ====================== STEP 2.0 : initialization ======================
 
-	//cout << " [find_gcp] initial region=" << region << endl;
+	////  cout << " [find_gcp] initial region=" << region << endl;
 	// The Cauchy point
 	Vector z_gcp = zk;
-	cout << " [find_gcp] initial zk=" << zk << endl;
+	//  cout << " [find_gcp] initial zk=" << zk << endl;
 
 	// The opposite of the gradient of z->z^T*Bk*z - gk^T z
 	Vector g = gk - Bk*zk;
@@ -202,14 +202,14 @@ Vector UnconstrainedLocalSearch::find_gcp(const Vector& gk, const Matrix& Bk, co
 			d[i] = -gk[i];
 		// else d[i] remains equal to 0.
 	}
-	cout << " [find_gcp] initial d=" << d << endl;
+	//  cout << " [find_gcp] initial d=" << d << endl;
 	// compute f'
 	double fp = gk*d;
-	cout << " [find_gcp] initial fp=" << fp << endl;
+	//  cout << " [find_gcp] initial fp=" << fp << endl;
 
 	// compute f''
 	double fs = d*(Bk*d);
-	cout << " [find_gcp] initial fs=" << fs << endl;
+	//  cout << " [find_gcp] initial fs=" << fs << endl;
 
 
 	bool gcp_found = (fp >= -eps);
@@ -222,7 +222,7 @@ Vector UnconstrainedLocalSearch::find_gcp(const Vector& gk, const Matrix& Bk, co
 			LineSearch ls(region,z_gcp,d,data,sigma); // if d~0, an exception is raised
 
 			double deltat = ls.alpha_max();
-			cout << " [find_gcp] deltat=" << deltat << endl;
+			//  cout << " [find_gcp] deltat=" << deltat << endl;
 
 			// check if we are in a corner
 			// deltat can be very large even if the norm of the gradient is > eps
@@ -273,15 +273,15 @@ Vector UnconstrainedLocalSearch::find_gcp(const Vector& gk, const Matrix& Bk, co
 				// update d and I
 				for (int i=0; i<n; i++) {
 					if (ls.next_activated(i)) {
-						cout << " [find_gcp] activate ctr n°" << i << endl;
+						//  cout << " [find_gcp] activate ctr n°" << i << endl;
 						d[i] = 0.0;
 					}
 				}
 
-				cout << " [find_gcp] current d=" << d << endl;
-				cout << " [find_gcp] current z_gcp=" << z_gcp << endl;
-				cout << " [find_gcp] current fp=" << fp << endl;
-				cout << " [find_gcp] current fs=" << fs << endl;
+				//  cout << " [find_gcp] current d=" << d << endl;
+				//  cout << " [find_gcp] current z_gcp=" << z_gcp << endl;
+				//  cout << " [find_gcp] current fp=" << fp << endl;
+				//  cout << " [find_gcp] current fs=" << fs << endl;
 				// update the termination condition
 				gcp_found = (fp >= -eps); // the minimum is at a breakpoint
 			}
@@ -292,7 +292,7 @@ Vector UnconstrainedLocalSearch::find_gcp(const Vector& gk, const Matrix& Bk, co
 	}
 
 	// ====================== STEP 2.4 : termination with GCP ======================
-	cout << " [find_gcp] z_gcp =" << z_gcp << endl;
+	//  cout << " [find_gcp] z_gcp =" << z_gcp << endl;
 	assert(region.contains(z_gcp));
 
 	return z_gcp;
@@ -326,7 +326,7 @@ double UnconstrainedLocalSearch::get_eta(const Vector& gk, const Vector& zk, con
 Vector UnconstrainedLocalSearch::conj_grad(const Vector& gk, const Matrix& Bk, const Vector& xk, const Vector& x_gcp, const IntervalVector& region, const BoolMask& I) {
 	int hn = I.nb_unset(); // the restricted dimension
 
-	cout << " [conj_grad] init x_gcp= " << x_gcp << endl;
+	//  cout << " [conj_grad] init x_gcp= " << x_gcp << endl;
 	if (hn==0) return x_gcp;  // we are in a corner: nothing to do
 
 	// ====================== STEP 3.0 : Initialization ======================
@@ -390,11 +390,12 @@ Vector UnconstrainedLocalSearch::conj_grad(const Vector& gk, const Matrix& Bk, c
 			// \hat{y} = \hat{Bk}*\hat{p}
 			hy = hB*hp;
 
-			cout << " [conj_grad] current hp=" << hp << endl;
+			//  cout << " [conj_grad] current hr=" << hr << endl;
+			//  cout << " [conj_grad] current hp=" << hp << endl;
 			LineSearch ls(hregion,hx,hp,data,sigma);
 
 			double alpha1=ls.alpha_max();
-			cout << " [conj_grad] alpha1=" << alpha1 << endl;
+			//  cout << " [conj_grad] alpha1=" << alpha1 << endl;
 
 			// first termination condition
 			// we check if the hessian is "positive definite for \hat{p}"
@@ -436,9 +437,20 @@ Vector UnconstrainedLocalSearch::conj_grad(const Vector& gk, const Matrix& Bk, c
 			p++;
 		}
 	}
-	cout << " [conj_grad] new x= " << x << endl;
+	//  cout << " [conj_grad] new x= " << x << endl;
 	return x;
 }
+
+
+std::ostream& operator<<(std::ostream& os, const UnconstrainedLocalSearch::ReturnCode& res) {
+	switch (res) {
+	case UnconstrainedLocalSearch::INVALID_POINT : os << " INVALID_POINT "; break;
+	case UnconstrainedLocalSearch::TOO_MANY_ITER : os << " TOO_MANY_ITER "; break;
+	case UnconstrainedLocalSearch::SUCCESS :	   os << " SUCCESS ";		 break;
+	}
+	return os;
+}
+
 
 } // end namespace
 

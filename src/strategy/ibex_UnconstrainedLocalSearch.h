@@ -153,6 +153,9 @@ private:
 };
 
 
+/** Streams out this expression. */
+std::ostream& operator<<(std::ostream& cc, const UnconstrainedLocalSearch::ReturnCode& res);
+
 /*============================================ inline implementation ============================================ */
 inline int UnconstrainedLocalSearch::nb_iter() const {
 	return this->niter;
