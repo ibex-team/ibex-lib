@@ -137,13 +137,19 @@ void CompiledFunction::visit(const ExprAdd& e)   {
 }
 
 void CompiledFunction::visit(const ExprMul& e)   {
-	if (e.left.dim.is_scalar())
+	if (e.left.dim.is_scalar()) {
 		if (e.right.dim.is_scalar())      visit(e,MUL);
 		else if (e.right.dim.is_vector()) visit(e,MUL_SV);
 		else                              visit(e,MUL_SM);
-	else if (e.left.dim.is_vector())      visit(e,MUL_VV);
+	}
+	else if (e.left.dim.is_vector())      {
+		if (e.right.dim.is_vector()) 	  visit(e,MUL_VV);
+		else if (e.right.dim.is_matrix()) visit(e,MUL_VM);
+		else							  assert(false);
+	}
 	else if (e.right.dim.is_vector())     visit(e,MUL_MV);
-		else                              visit(e,MUL_MM);
+	else if (e.right.dim.is_matrix())	  visit(e,MUL_MM);
+	else								  assert(false);
 }
 
 void CompiledFunction::visit(const ExprSub& e)   {
@@ -217,7 +223,7 @@ const char* CompiledFunction::op(operation o) const {
 	case CHI: return "chi";
 	case ADD: case ADD_V: case ADD_M:
 		        return "+";
-	case MUL: case MUL_SV: case MUL_SM: case MUL_VV: case MUL_MV: case MUL_MM:
+	case MUL: case MUL_SV: case MUL_SM: case MUL_VV: case MUL_MV: case MUL_MM:  case MUL_VM:
 		        return "*";
 	case MINUS: case SUB: case SUB_V: case SUB_M:
 		        return "-";
@@ -310,6 +316,7 @@ void CompiledFunction::print() const {
 		case CompiledFunction::MUL_SM:
 		case CompiledFunction::MUL_VV:
 		case CompiledFunction::MUL_MV:
+		case CompiledFunction::MUL_VM:
 		case CompiledFunction::MUL_MM:
 		case CompiledFunction::SUB:
 		case CompiledFunction::SUB_V:

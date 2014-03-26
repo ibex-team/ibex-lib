@@ -75,7 +75,7 @@ protected:
 		COSH, SINH, TANH, ACOSH, ASINH, ATANH,
 
 		ADD_V, ADD_M, SUB_V, SUB_M,
-		MUL_SV, MUL_SM, MUL_VV, MUL_MV, MUL_MM
+		MUL_SV, MUL_SM, MUL_VV, MUL_MV, MUL_MM, MUL_VM
 	} operation;
 
 private:
@@ -160,6 +160,7 @@ ExprLabel& CompiledFunction::forward(const V& algo) const {
 		case MUL_VV: ((V&) algo).mul_VV_fwd ((ExprMul&)    nodes[i], *args[i][1], *args[i][2], *args[i][0]); break;
 		case MUL_MV: ((V&) algo).mul_MV_fwd ((ExprMul&)    nodes[i], *args[i][1], *args[i][2], *args[i][0]); break;
 		case MUL_MM: ((V&) algo).mul_MM_fwd ((ExprMul&)    nodes[i], *args[i][1], *args[i][2], *args[i][0]); break;
+		case MUL_VM: ((V&) algo).mul_VM_fwd ((ExprMul&)    nodes[i], *args[i][1], *args[i][2], *args[i][0]); break;
 		case SUB:    ((V&) algo).sub_fwd  ((ExprSub&)      nodes[i], *args[i][1], *args[i][2], *args[i][0]); break;
 		case SUB_V:  ((V&) algo).sub_V_fwd  ((ExprSub&)    nodes[i], *args[i][1], *args[i][2], *args[i][0]); break;
 		case SUB_M:  ((V&) algo).sub_M_fwd  ((ExprSub&)    nodes[i], *args[i][1], *args[i][2], *args[i][0]); break;
@@ -189,6 +190,7 @@ ExprLabel& CompiledFunction::forward(const V& algo) const {
 		case ACOSH:  ((V&) algo).acosh_fwd((ExprAcosh&)    nodes[i], *args[i][1],                   *args[i][0]); break;
 		case ASINH:  ((V&) algo).asinh_fwd((ExprAsinh&)    nodes[i], *args[i][1],                   *args[i][0]); break;
 		case ATANH:  ((V&) algo).atanh_fwd((ExprAtanh&)    nodes[i], *args[i][1],                   *args[i][0]); break;
+		default: 	 assert(false);
 		}
 	}
 	return *args[0][0];
@@ -216,6 +218,7 @@ void CompiledFunction::backward(const V& algo) const {
 		case MUL_VV: ((V&) algo).mul_VV_bwd ((ExprMul&)    nodes[i], *args[i][1], *args[i][2], *args[i][0]); break;
 		case MUL_MV: ((V&) algo).mul_MV_bwd ((ExprMul&)    nodes[i], *args[i][1], *args[i][2], *args[i][0]); break;
 		case MUL_MM: ((V&) algo).mul_MM_bwd ((ExprMul&)    nodes[i], *args[i][1], *args[i][2], *args[i][0]); break;
+		case MUL_VM: ((V&) algo).mul_VM_bwd ((ExprMul&)    nodes[i], *args[i][1], *args[i][2], *args[i][0]); break;
 		case SUB:    ((V&) algo).sub_bwd    ((ExprSub&)    nodes[i], *args[i][1], *args[i][2], *args[i][0]); break;
 		case SUB_V:  ((V&) algo).sub_V_bwd  ((ExprSub&)    nodes[i], *args[i][1], *args[i][2], *args[i][0]); break;
 		case SUB_M:  ((V&) algo).sub_M_bwd  ((ExprSub&)    nodes[i], *args[i][1], *args[i][2], *args[i][0]); break;
@@ -245,6 +248,7 @@ void CompiledFunction::backward(const V& algo) const {
 		case ACOSH:  ((V&) algo).acosh_bwd((ExprAcosh&)    nodes[i], *args[i][1],                   *args[i][0]); break;
 		case ASINH:  ((V&) algo).asinh_bwd((ExprAsinh&)    nodes[i], *args[i][1],                   *args[i][0]); break;
 		case ATANH:  ((V&) algo).atanh_bwd((ExprAtanh&)    nodes[i], *args[i][1],                   *args[i][0]); break;
+		default: 	 assert(false);
 		}
 	}
 }

@@ -131,6 +131,7 @@ public:
 	inline void mul_VV_bwd(const ExprMul&, ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) { x1.g->v() += y.g->i()*x2.d->v(); x2.g->v() += y.g->i()*x1.d->v(); }
 	inline void mul_MV_bwd(const ExprMul&, ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) { x1.g->m() += outer_product(y.g->v(),x2.d->v()); x2.g->v() += x1.d->m().transpose()*y.g->v(); }
 	inline void mul_MM_bwd(const ExprMul&, ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) { x1.g->m() += y.g->m()*x2.d->m().transpose(); x2.g->m() += x1.d->m().transpose()*y.g->m(); }
+	inline void mul_VM_bwd(const ExprMul&, ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) { x1.g->v() += y.g->v()*x2.d->m().transpose(); x2.g->m() += outer_product(y.d->v(),x1.g->v()); }
 	inline void sub_V_bwd (const ExprSub&, ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) { x1.g->v() += y.g->v(); x2.g->v() -= y.g->v(); }
 	inline void sub_M_bwd (const ExprSub&, ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) { x1.g->m() += y.g->m(); x2.g->m() -= y.g->m(); }
 };
