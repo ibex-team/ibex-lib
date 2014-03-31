@@ -70,7 +70,21 @@ void Gradient::jacobian(const Function& f, const Array<Domain>& d, IntervalMatri
 
 	// calculate the gradient of each component of f
 	for (int i=0; i<m; i++) {
-		gradient(f[i],d,J[i]);
+		Function* fi=dynamic_cast<Function*>(&f[i]);
+		if (fi!=NULL) {
+			// if this is a Function object we can
+			// directly calculate the gradient with d
+			gradient(*fi,d,J[i]);
+		} else {
+			// otherwise we must give a box in argument
+			// TODO add gradient with Array<Domain> in argument
+			// in Function interface?
+			// But, for the moment, cannot happen, because
+			// this function is called by apply_bwd.
+			IntervalVector box(f.nb_var());
+			load(box,d);
+			f[i].gradient(box,J[i]);
+		}
 	}
 }
 

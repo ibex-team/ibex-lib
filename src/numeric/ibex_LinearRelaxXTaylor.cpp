@@ -75,17 +75,17 @@ int LinearRelaxXTaylor::linearization( IntervalVector & box, LinearSolver *mysol
 
 	// Create the linear relaxation of each constraint
 	for(int ctr=0; ctr<sys.nb_ctr; ctr++) {
-
+		//cout << "[LinearRelaxXTaylor] ctr n°" << ctr << endl;
 		IntervalVector G(sys.nb_var);
 
 		if(lmode==TAYLOR) {                 // derivatives are computed once (Taylor)
 			sys.ctrs[ctr].f.gradient(box,G);
 		}
-		else
+		else {
 			// to set all the constant derivatives that have been already computed
 			// (the other will be overwritten)
 			G=linear_coef.row(ctr);
-
+		}
 		int nb_nonlinear_vars;
 		if(cpoints[0]==K4) {
 			for(int j=0; j<4; j++)
@@ -148,13 +148,15 @@ int LinearRelaxXTaylor::X_Linearization(IntervalVector& box,
 
 
 	for (int j=0; j< n; j++) {
-
+		//cout << "[LinearRelaxXTaylor] variable n°" << j << endl;
 	  if (sys.ctrs[ctr].f.used(j)) {
 		  if (lmode == HANSEN && !linear[ctr][j])
 			  // get the partial derivative of ctr w.r.t. var n°j
 	    	  G[j]=df[ctr*n+j].eval(box);
 	  }
-	  else continue;
+	  else
+		  continue;
+	  //cout << "[LinearRelaxXTaylor] coeffs=" << G[j] << endl;
 
 	  if (G[j].diam() > max_diam_deriv) {
 	    box = savebox; // [gch] where box has been modified?  at the end of the loop (for Hansen computation) [bne]

@@ -26,15 +26,6 @@ Function::~Function() {
 
 	if (root!=NULL) {
 
-		if (comp!=NULL)
-			/* warning... if there is only one constraint
-			 * then comp is the same object as f itself!
-			 *
-			 * This is not a very consistent choice...
-			 */
-
-			if (!expr().dim.is_scalar()) delete[] comp;
-
 		for (unsigned int i=0; (i<(exprnodes.size())); i++) {
 			delete node(i).deco.d;
 			delete node(i).deco.g;

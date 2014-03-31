@@ -1,4 +1,3 @@
-//============================================================================
 //                                  I B E X                                   
 // File        : ibex_Optimizer.cpp
 // Author      : Gilles Chabert, Bertrand Neveu
@@ -79,7 +78,7 @@ Optimizer::Optimizer(System& user_sys, Bsc& bsc, Ctc& ctc, double prec,
 	if(m>0) {
 		Array<Ctc> ng(m);
 		for (int i=0; i<m; i++) {
-			ng.set_ref(i, *new CtcFwdBwd(sys.f[i],GT));
+			ng.set_ref(i, *new CtcFwdBwd(sys.ctrs[i].f,GT));
 		}
 		is_inside=new CtcUnion(ng);
 	}
@@ -195,7 +194,7 @@ void Optimizer::update_entailed_ctr(const IntervalVector& box) {
 		if (entailed->normalized(j)) {
 			continue;
 		}
-		Interval y=sys.f[j].eval(box);
+		Interval y=sys.ctrs[j].f.eval(box);
 		if (y.lb()>0) throw EmptyBoxException();
 		else if (y.ub()<=0) {
 			entailed->set_normalized_entailed(j);
@@ -249,7 +248,7 @@ void Optimizer::handle_cell(Cell& c, const IntervalVector& init_box) {
 }
 
 void Optimizer::contract_and_bound(Cell& c, const IntervalVector& init_box) {
-	//         cout << "box " <<c.box << endl;
+
 	/*======================== contract y with y<=loup ========================*/
 	Interval& y=c.box[ext_sys.goal_var()];
 
@@ -264,14 +263,13 @@ void Optimizer::contract_and_bound(Cell& c, const IntervalVector& init_box) {
 	}
 
 	/*================ contract x with f(x)=y and g(x)<=0 ================*/
-	//	cout << "y=f(x) and g(x)<=0 " << endl;
-	//		cout << "   x before=" << c.box << endl;
-	//		cout << "   y before=" << y << endl;
+	//cout << " [contract]  x before=" << c.box << endl;
+	//cout << " [contract]  y before=" << y << endl;
 
 	contract(c.box, init_box);
 
-	//		cout << "   x after=" << c.box << endl;
-	//		cout << "   y after=" << y << endl;
+	//cout << " [contract]  x after=" << c.box << endl;
+	//cout << " [contract]  y after=" << y << endl;
 	// TODO: no more cell in argument here (just a box). Does it matter?
 	/*====================================================================*/
 

@@ -129,10 +129,9 @@ void end_function_file() {
 	Array<const ExprSymbol> x(f.nb_arg());
 	varcopy(f.args(),x);
 	const ExprNode& y=ExprCopy().copy(f.args(),x,f.expr());
-	// TODO: where is source.func[0] deleted?
 
-	function->init(x,y);
-	((char*&) function->name)=strdup(f.name);
+	function->init(x,y,f.name);
+
 	source.cleanup();
 	delete source.func[0]; // This is an ugly stuff but we are obliged (see destructor of ParserSource)
 	// TODO: see end_system()

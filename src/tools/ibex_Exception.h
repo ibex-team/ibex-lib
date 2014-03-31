@@ -9,19 +9,19 @@
  * Created     : Dec 13, 2011
  * ---------------------------------------------------------------------------- */
 
-#ifndef _IBEX_EXCEPTION_H_
-#define _IBEX_EXCEPTION_H_
+#ifndef __IBEX_EXCEPTION_H__
+#define __IBEX_EXCEPTION_H__
 
 #include <iostream>
 #include <string>
 
 namespace ibex {
 
-void ibex_error(const char*);
+void ibex_error(const char*) __attribute__ ((noreturn));
 
 void ibex_warning(const char*);
 
-void not_implemented(const char*);
+void not_implemented(const char*) __attribute__ ((noreturn));
 
 /**
  * \brief Root class of all exceptions raised by IBEX
@@ -30,4 +30,4 @@ class Exception { };
 
 } // namespace ibex
 
-#endif // _IBEX_EXCEPTION_H_
+#endif // __IBEX_EXCEPTION_H__

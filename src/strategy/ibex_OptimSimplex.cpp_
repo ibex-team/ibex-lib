@@ -101,7 +101,7 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 			if (entailed->normalized(i)) continue;
 			//if (sys.f[i].eval(box).ub()<=0) continue;      // the constraint is satified :)
 
-			sys.f[i].gradient(box,G);                     // gradient calculation
+			sys.ctrs[i].f.gradient(box,G);                     // gradient calculation
 
 			for (int ii =0; ii< n ; ii++)
 				if (G[ii].diam() > 1e8) {

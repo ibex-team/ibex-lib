@@ -253,7 +253,7 @@ public:
 	/**
 	 * \brief Initialize this function (set the "x" and the "y").
 	 */
-	void init(const Array<const ExprSymbol>& x, const ExprNode& y);
+	void init(const Array<const ExprSymbol>& x, const ExprNode& y, const char* name=NULL);
 
 	/**
 	 * \brief Delete the function.
@@ -285,30 +285,6 @@ public:
 	 * \brief Differentiate this function.
 	 */
 	const Function& diff() const;
-
-	/**
-	 * \brief Return the ith component of f.
-	 *
-	 * The vector-valued function f is also
-	 * n real-valued functions f_1, ... f_n
-	 * that can be used independently.
-	 *
-	 * Of course the list of arguments "x" is
-	 * the same for each component. For instance
-	 *
-	 * (x,y,z)->(x+y,z-x) is transformed into:  <br>
-	 *    { (x,y,z)->x+y ; (x,y,z)->z-y } <br>
-	 *
-	 * *not* in:   <br>
-	 *    { (x,y)->x+y ; (z,y)->z-y }
-	 */
-	Function& operator[](int i);
-
-	/**
-	 * \brief Return the ith component of f.
-	 * \see operator[](int).
-	 */
-	Function& operator[](int i) const;
 
 	/**
 	 * \brief Return the number of arguments.
@@ -483,19 +459,13 @@ public:
 
 	/**
 	 * \brief Calculate the gradient of f.
-	 * \pre f must be real-valued
-	 */
-	IntervalVector gradient(const IntervalVector& x) const;
-
-	/**
-	 * \brief Calculate the gradient of f.
 	 *
 	 * \param x - the input box
 	 * \param g - where the gradient has to be stored (output parameter).
 	 *
 	 * \pre f must be real-valued
 	 */
-	void gradient(const IntervalVector& x, IntervalVector& g) const;
+	virtual void gradient(const IntervalVector& x, IntervalVector& g) const;
 
 	/**
 	 * \brief Calculate the Jacobian matrix of f
@@ -506,21 +476,6 @@ public:
 	 * \pre f must be vector-valued
 	 */
 	virtual void jacobian(const IntervalVector& x, IntervalMatrix& J) const;
-
-	/**
-	 * \brief Calculate the Jacobian matrix of f
-	 * \pre f must be vector-valued
-	 *
-	 * \pre f must be vector-valued
-	 */
-	IntervalMatrix jacobian(const IntervalVector& x) const;
-
-	/**
-	 * \brief Calculate the Hansen matrix of f
-	 *
-	 * \pre f must be vector-valued
-	 */
-	void hansen_matrix(const IntervalVector& x, IntervalMatrix& h) const;
 
 	/**
 	 * \brief Contract x w.r.t. f(x)=y.
@@ -599,11 +554,19 @@ public:
 	int* used_var;
 
 
+	// never understood why we have to do this explicitly in c++
+	IntervalVector gradient(const IntervalVector& x) const;
+	IntervalMatrix jacobian(const IntervalVector& x) const;
+	void hansen_matrix(const IntervalVector& x, IntervalMatrix& h) const;
+
+protected:
+	virtual void generate_comp();
+
 private:
 
 	void add_symbol(const ExprSymbol* x);
 
-	void build_from_string(const Array<const char*>& x, const char* y);
+	void build_from_string(const Array<const char*>& x, const char* y, const char* name=NULL);
 
 	/*
 	 * \brief Apply default Decoration (and compile) the function.
@@ -613,16 +576,12 @@ private:
 	 */
 	void decorate() const;
 
-	void separate();
-
 	const ExprNode* root;                       // the root node
 	Array<const ExprSymbol> symbs;              // to retrieve symbol (node)s by appearing order.
 	std::vector<bool> is_used;                  // tells whether the i^th component is used.
 	ExprSubNodes exprnodes;                         // all the nodes (of x and f(x))
 	//SymbolMap<const ExprSymbol*> id2info;       // to retrieve a symbol node from its name.
 	int key_count;                              // count the number of arguments
-
-	Function* comp;                             // the components. ==this if output_size()==1.
 
 	bool __all_symbols_scalar;                  // true if all symbols are scalar
 
@@ -793,16 +752,6 @@ inline const Function& Function::diff() const {
 	return *(df ? df : (((Function*&) df) = new Function(*this,DIFF)));
 }
 
-inline Function& Function::operator[](int i) {
-	if (!comp) separate();
-	return comp[i];
-}
-
-inline Function& Function::operator[](int i) const {
-	if (!comp) ((Function&) *this).separate();
-	return comp[i];
-}
-
 inline int Function::nb_arg() const {
 	return key_count;
 }
@@ -900,21 +849,19 @@ inline void Function::iproj(const Interval& y, IntervalVector& x, const Interval
 	iproj(Domain((Interval&) y),x,xin);
 }
 
+// ========== never understood why we have to do this explicitly in c++ =======
 inline IntervalVector Function::gradient(const IntervalVector& x) const {
-	IntervalVector g(x.size());
-	gradient(x,g);
-	return g;
+	return Fnc::gradient(x);
 }
 
-// never understood why we have to do this explictly in c++
 inline IntervalMatrix Function::jacobian(const IntervalVector& x) const {
 	return Fnc::jacobian(x);
 }
 
-// never understood why we have to do this explictly in c++
 inline void Function::hansen_matrix(const IntervalVector& x, IntervalMatrix& h) const {
 	Fnc::hansen_matrix(x,h);
 }
+// ============================================================================
 
 } // namespace ibex
 #endif // _IBEX_FUNCTION_H_

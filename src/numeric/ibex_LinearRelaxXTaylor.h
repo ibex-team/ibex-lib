@@ -1,6 +1,6 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_CtcXNewton.h
+// File        : ibex_LinearRelaxXTaylor.h
 // Author      : Ignacio Araya, Bertrand Neveu,
 //               Gilles Trombettoni, Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
@@ -10,8 +10,8 @@
 //============================================================================
 
 
-#ifndef __IBEX_CTC_XTAYLOR_H__
-#define __IBEX_CTC_XTAYLOR_H__
+#ifndef __IBEX_LINEAR_RELAX_X_TAYLOR__
+#define __IBEX_LINEAR_RELAX_X_TAYLOR__
 
 #include "ibex_System.h"
 #include "ibex_LinearRelax.h"
@@ -120,7 +120,7 @@ private:
 			IntervalVector &G, int id_point, int& non_linear_vars, LinearSolver *mysolver);
 
 	/**
-	 * \brief Symbolic jacobian
+	 * \brief Symbolic Jacobian
 	 */
 	Function df;
 
@@ -139,5 +139,5 @@ private:
 
 } // end namespace ibex
 
-#endif /* __IBEX_CTC_XNEWTON_H__ */
+#endif /* __IBEX_LINEAR_RELAX_X_TAYLOR__ */
 

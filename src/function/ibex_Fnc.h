@@ -33,6 +33,30 @@ public:
 	Fnc(int n, int m);
 
 	/**
+	 * \brief Return the ith component of f.
+	 *
+	 * The vector-valued function f is also
+	 * n real-valued functions f_1, ... f_n
+	 * that can be used independently.
+	 *
+	 * Of course the list of arguments "x" is
+	 * the same for each component. For instance
+	 *
+	 * (x,y,z)->(x+y,z-x) is transformed into:  <br>
+	 *    { (x,y,z)->x+y ; (x,y,z)->z-y } <br>
+	 *
+	 * *not* in:   <br>
+	 *    { (x,y)->x+y ; (z,y)->z-y }
+	 */
+	Fnc& operator[](int i);
+
+	/**
+	 * \brief Return the ith component of f.
+	 * \see operator[](int).
+	 */
+	Fnc& operator[](int i) const;
+
+	/**
 	 * \brief Delete this.
 	 */
 	virtual ~Fnc();
@@ -50,8 +74,38 @@ public:
 
 	/**
 	 * \brief Calculate f(box) using interval arithmetic.
+	 *
+	 * \pre f must be real-valued
 	 */
-	virtual IntervalVector eval_vector(const IntervalVector& box) const=0;
+	virtual Interval eval(const IntervalVector& box) const;
+
+	/**
+	 * \brief Calculate f(box) using interval arithmetic.
+	 */
+	virtual IntervalVector eval_vector(const IntervalVector& box) const;
+
+	/**
+	 * \brief Calculate f(x) using interval arithmetic.
+	 *
+	 * \pre f must be matrix-valued
+	 */
+	virtual IntervalMatrix eval_matrix(const IntervalVector& x) const;
+
+	/**
+	 * \brief Calculate the gradient of f.
+	 *
+	 * \param x - the input box
+	 * \param g - where the gradient has to be stored (output parameter).
+	 *
+	 * \pre f must be real-valued
+	 */
+	virtual void gradient(const IntervalVector& x, IntervalVector& g) const;
+
+	/**
+	 * \brief Calculate the gradient of f.
+	 * \pre f must be real-valued
+	 */
+	IntervalVector gradient(const IntervalVector& x) const;
 
 	/**
 	 * \brief Calculate the Jacobian matrix of f
@@ -60,7 +114,7 @@ public:
 	 * \param J - where the Jacobian matrix has to be stored (output parameter).
 	 *
 	 */
-	virtual void jacobian(const IntervalVector& x, IntervalMatrix& J) const=0;
+	virtual void jacobian(const IntervalVector& x, IntervalMatrix& J) const;
 
 	/**
 	 * \brief Calculate the Jacobian matrix of f
@@ -73,21 +127,57 @@ public:
 	 */
 	void hansen_matrix(const IntervalVector& x, IntervalMatrix& h) const;
 
+	/**
+	 * \brief Return the number of used variables
+	 */
+	int nb_used_vars();
+
+	/**
+	 * \brief Return the ith used variable
+	 *
+	 * \pre 0<=i<nb_used_vars().
+	 */
+	int used(int i);
+
 protected:
+	virtual void generate_comp();
+	virtual void generate_used_vars();
+
 	Fnc(); // temporary construction
 	const int _nb_var;
 	const int _image_dim;
+
+	// the components. ==this if output_size()==1.
+	// only generated if required
+	Fnc** comp;
+
+	// number of used vars (value "-1" means "not yet generated")
+	int _nb_used_vars;
+
+	// only generated if required
+	int* _used_var;
+
 };
 
 
 /*================================== inline implementations ========================================*/
 
-inline Fnc::Fnc() : _nb_var(0), _image_dim(0) {
+inline Fnc::Fnc() : _nb_var(0), _image_dim(0), comp(NULL), _nb_used_vars(-1), _used_var(NULL) {
 
 }
 
-inline Fnc::Fnc(int n, int m) : _nb_var(n), _image_dim(m) {
+inline Fnc::Fnc(int n, int m) : _nb_var(n), _image_dim(m), comp(NULL), _nb_used_vars(-1), _used_var(NULL) {
 
+}
+
+inline Fnc& Fnc::operator[](int i) {
+	if (!comp) generate_comp();
+	return *comp[i];
+}
+
+inline Fnc& Fnc::operator[](int i) const {
+	if (!comp) ((Fnc&) *this).generate_comp();
+	return *comp[i];
 }
 
 inline int Fnc::nb_var() const {
@@ -98,10 +188,31 @@ inline int Fnc::image_dim() const {
 	return _image_dim;
 }
 
+inline IntervalVector Fnc::gradient(const IntervalVector& x) const {
+	IntervalVector g(x.size());
+	gradient(x,g);
+	return g;
+}
+
 inline IntervalMatrix Fnc::jacobian(const IntervalVector& x) const {
 	IntervalMatrix J(image_dim(),x.size());
 	jacobian(x,J);
 	return J;
+}
+
+inline int Fnc::nb_used_vars() {
+	if (_nb_used_vars==-1) generate_used_vars();
+	return _nb_used_vars;
+}
+
+/**
+ * \brief Return the ith used variable
+ *
+ * \pre 0<=i<nb_used_vars().
+ */
+inline int Fnc::used(int i) {
+	if (_nb_used_vars==-1) generate_used_vars();
+	return _used_var[i];
 }
 
 } // end namespace ibex

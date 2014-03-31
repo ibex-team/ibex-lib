@@ -33,7 +33,7 @@ bool Optimizer::is_feasible(const IntervalVector& box) {
 
 	for (int j=0; j<m; j++) {
 		if (entailed->normalized(j)) continue;
-		Interval y=sys.f[j].eval(box);
+		Interval y=sys.ctrs[j].f.eval(box);
 		if (y.lb()>0) return false;
 	}
 	return true;
@@ -43,7 +43,7 @@ bool Optimizer::is_inner(const IntervalVector& box) {
   //	cout << " box " << box << endl;
 	for (int j=0; j<m; j++) {
 		if (entailed->normalized(j)) continue;
-		Interval ev=sys.f[j].eval(box);
+		Interval ev=sys.ctrs[j].f.eval(box);
 		if (ev.is_empty()) return false;
 		if (ev.ub()>0) return false;
 		//			cout << j << " " << sys.f[j] << "  " << sys.f[j].eval(box)<< endl;
@@ -58,7 +58,7 @@ bool Optimizer::in_HC4(IntervalVector& box) {
 
 	for (int j=0; j<m; j++) {
 		if (entailed->normalized(j)) continue;
-		sys.f[j].iproj(Interval(NEG_INFINITY,0),box);
+		sys.ctrs[j].f.iproj(Interval(NEG_INFINITY,0),box);
 		if (box.is_empty()) return false;
 	}
 	return true;

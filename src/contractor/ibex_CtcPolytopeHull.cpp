@@ -11,6 +11,8 @@
 #include "ibex_CtcPolytopeHull.h"
 #include "ibex_ExtendedSystem.h"
 
+using namespace std;
+
 namespace ibex {
 
 CtcPolytopeHull::CtcPolytopeHull(LinearRelax& lr, ctc_mode cmode, int max_iter, int time_out, double eps, Interval limit_diam, bool init_lp) : Ctc(lr.sys.nb_var), lr(lr), sys(lr.sys),
@@ -33,8 +35,7 @@ void CtcPolytopeHull::contract(IntervalVector& box) {
 
 	if (!(limit_diam_box.contains(box.max_diam()))) return;
 	// is it necessary?  YES (BNE) Soplex can give false infeasible results with large numbers
-	//       	cout << " box before LR " << box << endl;
-
+	//cout << "[polytope-hull] box before LR (linear relaxation): " << box << endl;
 
 	try {
 		// Update the bounds the variables
@@ -42,16 +43,15 @@ void CtcPolytopeHull::contract(IntervalVector& box) {
 
 		//returns the number of constraints in the linearized system
 		int cont = lr.linearization(box,mylinearsolver);
-
+		//cout << "[polytope-hull] end of LR" << endl;
 		if(cont<1)  return;
+
 		optimizer(box);
 
 		//	mylinearsolver->writeFile("LP.lp");
 		//		system ("cat LP.lp");
-		//		cout << " box after  LR " << box << endl;
+		//cout << "[polytope-hull] box after LR: " << box << endl;
 		mylinearsolver->cleanConst();
-
-
 	}
 	catch(EmptyBoxException&) {
 		box.set_empty(); // empty the box before exiting in case of EmptyBoxException
@@ -92,13 +92,13 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 
 		int i= ii/2;
 		if (nexti != -1) i=nexti;
-		//		cout << " i "<< i << " infnexti " << infnexti << " infbound " << inf_bound[i] << " supbound " << sup_bound[i] << endl;
-		//		cout << " box avant simplex " << box << endl;
+		//cout << "[polytope-hull]->[optimize] var n°"<< i << " infnexti=" << infnexti << " infbound=" << inf_bound[i] << " supbound=" << sup_bound[i] << endl;
+		//cout << "[polytope-hull]->[optimize] box before simplex: " << box << endl;
 		if (infnexti==0 && inf_bound[i]==0)  // computing the left bound : minimizing x_i
 		{
 			inf_bound[i]=1;
 			stat = run_simplex(box, LinearSolver::MINIMIZE, i, opt,box[i].lb());
-			//			cout << " stat " << stat <<  " opt " << opt << endl;
+			//cout << "[polytope-hull]->[optimize] simplex for left bound returns stat:" << stat <<  " opt: " << opt << endl;
 			if (stat == LinearSolver::OPTIMAL) {
 				if(opt.lb()>box[i].ub()) {
 					throw EmptyBoxException();
@@ -142,7 +142,7 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 		else if (infnexti==1 && sup_bound[i]==0) { // computing the right bound :  maximizing x_i
 			sup_bound[i]=1;
 			stat= run_simplex(box, LinearSolver::MAXIMIZE, i, opt, box[i].ub());
-			//			cout << " stat " << stat <<  " opt " << opt << endl;
+			//cout << "[polytope-hull]->[optimize] simplex for right bound returns stat=" << stat << " opt=" << opt << endl;
 			if( stat == LinearSolver::OPTIMAL) {
 				if(opt.ub() <box[i].lb()) {
 					throw EmptyBoxException();
@@ -202,7 +202,7 @@ LinearSolver::Status_Sol CtcPolytopeHull::run_simplex(IntervalVector& box,
 	//	mylinearsolver->writeFile("coucou.lp");
 	//	system("cat coucou.lp");
 	LinearSolver::Status_Sol stat = mylinearsolver->solve();
-	//	cout << " stat solver " << stat << endl;
+	//cout << "[polytope-hull]->[run_simplex] solver returns " << stat << endl;
 
 	if(stat == LinearSolver::OPTIMAL) {
 		if( ((sense==LinearSolver::MINIMIZE) && (  mylinearsolver->getObjValue() <=bound)) ||
@@ -270,7 +270,7 @@ LinearSolver::Status_Sol CtcPolytopeHull::run_simplex(IntervalVector& box,
 void CtcPolytopeHull::NeumaierShcherbina_postprocessing ( int nr, int var, Interval & obj, IntervalVector& box,
 		Matrix & A_trans, IntervalVector& B, Vector & dual_solution, bool minimization) {
 
-	//std::cout <<" BOUND_test "<<std::endl;
+	//cout <<" BOUND_test "<< endl;
 	IntervalVector Rest(nb_var);
 
 	IntervalVector Lambda(nr);
@@ -285,10 +285,10 @@ void CtcPolytopeHull::NeumaierShcherbina_postprocessing ( int nr, int var, Inter
 	else
 		Rest[var] +=1;
 
-	//	cout << " Rest " << Rest << endl;
-	//	cout << " dual " << Lambda << endl;
-	//	cout << " dual B " << Lambda * B << endl;
-	//	cout << " rest box " << Rest * box  << endl;
+	//cout << " Rest " << Rest << endl;
+	//cout << " dual " << Lambda << endl;
+	//cout << " dual B " << Lambda * B << endl;
+	//cout << " rest box " << Rest * box  << endl;
 	if(minimization==true)
 		obj = Lambda * B - Rest * box;
 	else
@@ -325,7 +325,7 @@ bool CtcPolytopeHull::choose_next_variable(IntervalVector & box,
 	// the primal solution : used by choose_next_variable
 	Vector primal_solution(nb_var);
 	LinearSolver::Status stat_prim = mylinearsolver->getPrimalSol(primal_solution);
-	//	cout << " primal " << primal_solution << endl;
+	//cout << " primal " << primal_solution << endl;
 	if (stat_prim==LinearSolver::OK) {
 		// The Achterberg heuristic for choosing the next variable (nexti) and its bound (infnexti) to be contracted (cf Baharev paper)
 		// and updating the indicators if a bound has been found feasible (with the precision prec_bound)
