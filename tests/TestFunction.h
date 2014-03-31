@@ -24,7 +24,8 @@ public:
 		TEST_ADD(TestFunction::build01);
 		TEST_ADD(TestFunction::add_symbol);
 		TEST_ADD(TestFunction::copy);
-		TEST_ADD(TestFunction::separate);
+		TEST_ADD(TestFunction::separate01);
+		TEST_ADD(TestFunction::separate02);
 		TEST_ADD(TestFunction::used);
 		TEST_ADD(TestFunction::used02);
 		TEST_ADD(TestFunction::numctr01);
@@ -44,7 +45,8 @@ public:
 
 	void copy();
 
-	void separate();
+	void separate01();
+	void separate02();
 
 	void used();
 	void used02();

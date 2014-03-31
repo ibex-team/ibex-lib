@@ -11,6 +11,7 @@
 
 #include "TestFunction.h"
 #include "ibex_Function.h"
+#include "ibex_FncConstant.h"
 #include "ibex_NumConstraint.h"
 #include "ibex_Expr.h"
 #include "ibex_SyntaxError.h"
@@ -68,7 +69,7 @@ void TestFunction::copy() {
 
 }
 
-void TestFunction::separate() {
+void TestFunction::separate01() {
 	const ExprSymbol& x=ExprSymbol::new_("x");
 	const ExprSymbol& y=ExprSymbol::new_("y");
 	const ExprSymbol& z=ExprSymbol::new_("z");
@@ -99,6 +100,29 @@ void TestFunction::separate() {
 	TEST_ASSERT(sameExpr(f2->expr(),"(y-z)"));
 }
 
+void TestFunction::separate02() {
+	const ExprSymbol& x=ExprSymbol::new_("x");
+
+	const ExprNode& e1=x;
+	const ExprNode& e2=ExprConstant::new_scalar(1);
+	const ExprNode& e3=ExprConstant::new_scalar(2);
+
+	const ExprNode* v[3] = { &e1, &e2, &e3 };
+
+	const ExprVector& e=ExprVector::new_(v, 3, false);
+
+	Function f(x,e);
+
+	Function* f0=dynamic_cast<Function*>(&(f[0]));
+	TEST_ASSERT(f0!=NULL);
+	FncConstant* f1=dynamic_cast<FncConstant*>(&(f[1]));
+	TEST_ASSERT(f1!=NULL);
+	TEST_ASSERT(f1->cst.i()==1);
+	FncConstant* f2=dynamic_cast<FncConstant*>(&(f[2]));
+	TEST_ASSERT(f2!=NULL);
+	TEST_ASSERT(f2->cst.i()==2);
+}
+
 void TestFunction::used() {
 	const ExprSymbol& x=ExprSymbol::new_("x");
 	const ExprSymbol& y=ExprSymbol::new_("y");
@@ -113,26 +137,18 @@ void TestFunction::used() {
 
 	Function f(x,y,z,e);
 
-//	TEST_ASSERT(f[0].used(0));
-//	TEST_ASSERT(f[0].used(1));
-//	TEST_ASSERT(f[0].used(2));
-//	TEST_ASSERT(f[0].used(0));
-//	TEST_ASSERT(f[0].used(1));
-//	TEST_ASSERT(f[0].used(2));
-//
-//	TEST_ASSERT(f[1].used(0));
-//	TEST_ASSERT(!f[1].used(1));
-//	TEST_ASSERT(f[1].used(2));
-//	TEST_ASSERT(f[1].used(0));
-//	TEST_ASSERT(!f[1].used(1));
-//	TEST_ASSERT(f[1].used(2));
-//
-//	TEST_ASSERT(!f[2].used(0));
-//	TEST_ASSERT(f[2].used(1));
-//	TEST_ASSERT(f[2].used(2));
-//	TEST_ASSERT(!f[2].used(0));
-//	TEST_ASSERT(f[2].used(1));
-//	TEST_ASSERT(f[2].used(2));
+	TEST_ASSERT(f[0].nb_used_vars()==3);
+	TEST_ASSERT(f[0].used_var(0)==0);
+	TEST_ASSERT(f[0].used_var(1)==1);
+	TEST_ASSERT(f[0].used_var(2)==2);
+
+	TEST_ASSERT(f[1].nb_used_vars()==2);
+	TEST_ASSERT(f[1].used_var(0)==0);
+	TEST_ASSERT(f[1].used_var(1)==2);
+
+	TEST_ASSERT(f[2].nb_used_vars()==2);
+	TEST_ASSERT(f[2].used_var(0)==1);
+	TEST_ASSERT(f[2].used_var(1)==2);
 }
 
 void TestFunction::used02() {
