@@ -13,6 +13,7 @@
 #define __IBEX_FNC_CONSTANT_H__
 
 #include "ibex_Fnc.h"
+#include "ibex_Domain.h"
 
 namespace ibex {
 
@@ -23,30 +24,30 @@ namespace ibex {
 class FncConstant : public Fnc {
 public:
 
-	/**
-	 * \brief Override
-	 */
+	FncConstant(const Domain& d);
+
+	/** \brief Override */
 	virtual Interval eval(const IntervalVector& box) const;
 
-	/**
-	 * \brief Override
-	 */
+	/** \brief Override */
 	virtual IntervalVector eval_vector(const IntervalVector& box) const;
 
-	/**
-	 * \brief Override
-	 */
+	/** \brief Override */
 	virtual IntervalMatrix eval_matrix(const IntervalVector& x) const;
 
-	/**
-	 * \brief Override
-	 */
+	/** \brief Override */
 	virtual void gradient(const IntervalVector& x, IntervalVector& g) const;
 
-	/**
-	 * \brief Override
-	 */
+	/** \brief Override */
 	virtual void jacobian(const IntervalVector& x, IntervalMatrix& J) const;
+
+
+protected:
+	/** \brief Override */
+	virtual void generate_comp() const;
+
+	/** \brief Override */
+	virtual void generate_used_vars() const;
 
 	// ========== never understood why we have to do this in c++ =================
 	IntervalVector gradient(const IntervalVector& x) const;
@@ -64,6 +65,11 @@ public:
 
 
 /*================================== inline implementations ========================================*/
+
+inline FncConstant::FncConstant(const Domain& d) : cst(d) {
+
+}
+
 inline Interval FncConstant::eval(const IntervalVector& box) const {
 	return cst.i();
 }
@@ -82,6 +88,10 @@ inline void FncConstant::gradient(const IntervalVector& x, IntervalVector& g) co
 
 inline void FncConstant::jacobian(const IntervalVector& x, IntervalMatrix& J) const {
 	J.clear();
+}
+
+inline void FncConstant::generate_used_vars() const {
+	_nb_used_vars=0;
 }
 
 // ========== never understood why we have to do this in c++ =================

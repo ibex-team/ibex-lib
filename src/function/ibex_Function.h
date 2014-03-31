@@ -435,9 +435,7 @@ public:
 	 */
 	Domain& eval_affine2_domain(const IntervalVector& box, Affine2Domain& result) const;
 
-	/**
-	 * \brief Override
-	 */
+	/** \brief Override */
 	virtual Interval eval(const IntervalVector& box) const;
 
 	/**
@@ -453,9 +451,7 @@ public:
 	 */
 	Interval eval_affine2(const IntervalVector& box, Affine2& result) const;
 
-	/**
-	 * \brief Override
-	 */
+	/** \brief Override */
 	virtual IntervalVector eval_vector(const IntervalVector& box) const;
 
 	/**
@@ -473,10 +469,8 @@ public:
 	 */
 	IntervalVector eval_affine2_vector(const IntervalVector& box, Affine2Vector& affine) const;
 
-	/**
-	 * \brief Override
-	 */
-	IntervalMatrix eval_matrix(const IntervalVector& x) const;
+	/** \brief Override */
+	virtual IntervalMatrix eval_matrix(const IntervalVector& x) const;
 
 	/**
 	 * \brief Calculate f(box) using affine arithmetic.
@@ -493,14 +487,10 @@ public:
 	 */
 	IntervalMatrix eval_affine2_matrix(const IntervalVector& box, Affine2Matrix& affine) const;
 
-	/**
-	 * \brief Override
-	 */
+	/** \brief Override */
 	virtual void gradient(const IntervalVector& x, IntervalVector& g) const;
 
-	/**
-	 * \brief Override
-	 */
+	/** \brief Override */
 	virtual void jacobian(const IntervalVector& x, IntervalMatrix& J) const;
 
 	/**
@@ -579,7 +569,9 @@ public:
 
 
 protected:
+	/** \brief Override */
 	virtual void generate_comp() const;
+	/** \brief Override */
 	virtual void generate_used_vars() const;
 
 private:

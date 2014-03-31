@@ -12,6 +12,7 @@
 #include <sstream>
 
 #include "ibex_Function.h"
+#include "ibex_FncConstant.h"
 #include "ibex_Expr.h"
 #include "ibex_Decorator.h"
 #include "ibex_ExprCopy.h"
@@ -380,7 +381,14 @@ void Function::generate_comp() const {
 			Array<const ExprSymbol> x(nb_arg());
 			varcopy(symbs,x);
 			const ExprNode& y=ExprCopy().index_copy(symbs, x, expr(), i);
-			comp[i] = new Function(x,y);
+			Function* fi=new Function(x,y);
+			const ExprConstant* c=dynamic_cast<const ExprConstant*>(&(fi->expr()));
+			if (c) { // use a more efficient structure than a DAG!
+				comp[i] = new FncConstant(c->get());
+				delete fi;
+			} else {
+				comp[i] = fi;
+			}
 		}
 	}
 
@@ -392,7 +400,15 @@ void Function::generate_comp() const {
 				Array<const ExprSymbol> x(nb_arg());
 				varcopy(symbs,x);
 				const ExprNode& y=ExprCopy().index_copy(symbs, x, expr(), i, j);
-				comp[i*n+j] = new Function(x,y);
+				Function* fij=new Function(x,y);
+				const ExprConstant* c=dynamic_cast<const ExprConstant*>(&(fij->expr()));
+				if (c) { // use a more efficient structure than a DAG!
+					comp[i*n+j] = new FncConstant(c->get());
+					delete fij;
+				} else {
+					comp[i*n+j] = fij;
+				}
+
 			}
 		}
 	}
