@@ -436,11 +436,9 @@ public:
 	Domain& eval_affine2_domain(const IntervalVector& box, Affine2Domain& result) const;
 
 	/**
-	 * \brief Calculate f(box) using interval arithmetic.
-	 *
-	 * \pre f must be real-valued
+	 * \brief Override
 	 */
-	Interval eval(const IntervalVector& box) const;
+	virtual Interval eval(const IntervalVector& box) const;
 
 	/**
 	 * \brief Calculate f(box) using affine arithmetic.
@@ -456,9 +454,7 @@ public:
 	Interval eval_affine2(const IntervalVector& box, Affine2& result) const;
 
 	/**
-	 * \brief Calculate f(box) using interval arithmetic.
-	 *
-	 * \pre f must be vector-valued
+	 * \brief Override
 	 */
 	virtual IntervalVector eval_vector(const IntervalVector& box) const;
 
@@ -478,9 +474,7 @@ public:
 	IntervalVector eval_affine2_vector(const IntervalVector& box, Affine2Vector& affine) const;
 
 	/**
-	 * \brief Calculate f(x) using interval arithmetic.
-	 *
-	 * \pre f must be matrix-valued
+	 * \brief Override
 	 */
 	IntervalMatrix eval_matrix(const IntervalVector& x) const;
 
@@ -500,22 +494,12 @@ public:
 	IntervalMatrix eval_affine2_matrix(const IntervalVector& box, Affine2Matrix& affine) const;
 
 	/**
-	 * \brief Calculate the gradient of f.
-	 *
-	 * \param x - the input box
-	 * \param g - where the gradient has to be stored (output parameter).
-	 *
-	 * \pre f must be real-valued
+	 * \brief Override
 	 */
 	virtual void gradient(const IntervalVector& x, IntervalVector& g) const;
 
 	/**
-	 * \brief Calculate the Jacobian matrix of f
-	 *
-	 * \param x - the input box
-	 * \param J - where the Jacobian matrix has to be stored (output parameter).
-	 *
-	 * \pre f must be vector-valued
+	 * \brief Override
 	 */
 	virtual void jacobian(const IntervalVector& x, IntervalMatrix& J) const;
 
