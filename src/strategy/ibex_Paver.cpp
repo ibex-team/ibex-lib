@@ -37,7 +37,7 @@ void Paver::contract(Cell& cell, SubPaving* paving) {
 	IntervalVector tmpbox(cell.box.size());
 
 	try {
-		while (fix_count<n) {
+		while (fix_count<n && i<ctc.size()) {
 
 			//cout << "[contractor " << i << "] box=" << endl;
 
@@ -62,7 +62,7 @@ void Paver::contract(Cell& cell, SubPaving* paving) {
 				if (trace) cout << " -> nothing" << endl;
 			}
 
-			i = (i+1)%ctc.size();
+			i = ctc_loop? (i+1)%ctc.size() : i+1;
 
 		}
 	} catch(EmptyBoxException&) {
