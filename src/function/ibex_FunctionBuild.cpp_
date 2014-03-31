@@ -364,10 +364,10 @@ Function::Function(const Function& f, copy_mode mode) {
 	}
 }
 
-void Function::generate_comp() {
+void Function::generate_comp() const {
 	if (expr().type()==Dim::SCALAR) {
 		comp=new Fnc*[1];
-		comp[0]=this;
+		comp[0]=(Fnc*) this; // a function cannot be modified anyway
 		return;
 	}
 
@@ -404,6 +404,20 @@ void Function::generate_comp() {
 //	cout << "------------------------------" << endl;
 }
 
+void Function::generate_used_vars() const {
+	_nb_used_vars=0;
+	for (unsigned int i=0; i<is_used.size(); i++) {
+		if (is_used[i]) _nb_used_vars++;
+	}
+
+	_used_var=new int[_nb_used_vars];
+	int j=0;
+	for (unsigned int i=0; i<is_used.size(); i++) {
+		if (is_used[i]) { _used_var[j++]=i; }
+	}
+	assert(j==_nb_used_vars);
+}
+
 //void Function::set_expr(const ExprNode& expr) {
 void Function::init(const Array<const ExprSymbol>& x, const ExprNode& y, const char* name) {
 
@@ -427,18 +441,6 @@ void Function::init(const Array<const ExprSymbol>& x, const ExprNode& y, const c
 	exprnodes.init(&x,y);
 
 	FindInputsUsed fsu(x, y, is_used);
-
-	nb_used_vars=0;
-	for (unsigned int i=0; i<is_used.size(); i++) {
-		if (is_used[i]) nb_used_vars++;
-	}
-
-	used_var=new int[nb_used_vars];
-	int j=0;
-	for (unsigned int i=0; i<is_used.size(); i++) {
-		if (is_used[i]) { used_var[j++]=i; }
-	}
-	assert(j==nb_used_vars);
 
 	for (int i=0; i<nb_nodes(); i++) {
 		assert(node(i).deco.f==NULL); // this node must not belong to another function!

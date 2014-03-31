@@ -49,13 +49,13 @@ bool HC4Revise::proj(const Function& f, const Domain& y, IntervalVector& x) {
 
 	if (f.all_args_scalar()) {
 		int j;
-		for (int i=0; i<f.nb_used_vars; i++) {
-			j=f.used_var[i];
+		for (int i=0; i<f.nb_used_vars(); i++) {
+			j=f.used_var(i);
 			x[j]=f.arg_domains[j].i();
 		}
 	}
 	else
-		load(x,f.arg_domains,f.nb_used_vars,f.used_var);
+		f.read_arg_domains(x);
 
 	return false;
 }
@@ -71,7 +71,7 @@ void HC4Revise::proj(const Function& f, const Domain& y, ExprLabel** x) {
 		argD.set_ref(i,*(x[i]->d));
 	}
 
-	load(argD,f.arg_domains,f.nb_used_vars,f.used_var);
+	f.read_arg_domains(argD);
 }
 
 void HC4Revise::vector_bwd(const ExprVector& v, ExprLabel** compL, const ExprLabel& y) {

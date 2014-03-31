@@ -33,7 +33,7 @@ void Gradient::gradient(const Function& f, const Array<Domain>& d, IntervalVecto
 			g[i]=f.arg_deriv[i].i();
 		}
 	} else {
-		load(g,f.arg_deriv);
+		load(g,f.arg_deriv); //TODO: used used_var etc.
 	}
 }
 
@@ -70,7 +70,7 @@ void Gradient::jacobian(const Function& f, const Array<Domain>& d, IntervalMatri
 
 	// calculate the gradient of each component of f
 	for (int i=0; i<m; i++) {
-		Function* fi=dynamic_cast<Function*>(&f[i]);
+		const Function* fi=dynamic_cast<const Function*>(&f[i]);
 		if (fi!=NULL) {
 			// if this is a Function object we can
 			// directly calculate the gradient with d

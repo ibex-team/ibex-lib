@@ -130,18 +130,18 @@ public:
 	/**
 	 * \brief Return the number of used variables
 	 */
-	int nb_used_vars();
+	int nb_used_vars() const;
 
 	/**
 	 * \brief Return the ith used variable
 	 *
 	 * \pre 0<=i<nb_used_vars().
 	 */
-	int used(int i);
+	int used_var(int i) const;
 
 protected:
-	virtual void generate_comp();
-	virtual void generate_used_vars();
+	virtual void generate_comp() const;
+	virtual void generate_used_vars() const;
 
 	Fnc(); // temporary construction
 	const int _nb_var;
@@ -149,13 +149,14 @@ protected:
 
 	// the components. ==this if output_size()==1.
 	// only generated if required
-	Fnc** comp;
+	mutable Fnc** comp;
 
 	// number of used vars (value "-1" means "not yet generated")
-	int _nb_used_vars;
+	mutable int _nb_used_vars;
 
+public: // TMP
 	// only generated if required
-	int* _used_var;
+	mutable int* _used_var;
 
 };
 
@@ -200,7 +201,7 @@ inline IntervalMatrix Fnc::jacobian(const IntervalVector& x) const {
 	return J;
 }
 
-inline int Fnc::nb_used_vars() {
+inline int Fnc::nb_used_vars() const {
 	if (_nb_used_vars==-1) generate_used_vars();
 	return _nb_used_vars;
 }
@@ -210,7 +211,7 @@ inline int Fnc::nb_used_vars() {
  *
  * \pre 0<=i<nb_used_vars().
  */
-inline int Fnc::used(int i) {
+inline int Fnc::used_var(int i) const {
 	if (_nb_used_vars==-1) generate_used_vars();
 	return _used_var[i];
 }

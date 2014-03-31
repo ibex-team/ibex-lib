@@ -36,8 +36,6 @@ Function::~Function() {
 
 		for (int i=0; i<nb_arg(); i++)
 			delete &arg(i);
-
-		delete[] used_var;
 	}
 
 	if (df!=NULL) delete df;

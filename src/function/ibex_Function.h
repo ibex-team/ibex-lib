@@ -369,12 +369,54 @@ public:
 	template<class V>
 	void backward(const V& algo) const;
 
+	// ======================== for Forward/Backward algorithms ====================
 	/**
 	 * \brief True if all the arguments are scalar
 	 *
 	 * Useful for various code optimization.
 	 */
 	bool all_args_scalar() const;
+
+	/**
+	 * \brief Initialize symbols domains from d
+	 */
+	void write_arg_domains(const Array<Domain>& d) const;
+
+	/**
+	 * \brief Initialize symbols domains from d
+	 */
+	void write_arg_domains(const Array<const Domain>& d) const;
+
+	/**
+	 * \brief Initialize symbols domains from a box
+	 */
+	void write_arg_domains(const IntervalVector& box) const;
+
+	/**
+	 * \brief Initialize symbols affine domains from d
+	 */
+	void write_arg_af2_domains(const Array<Affine2Domain>& d) const;
+
+	/**
+	 * \brief Initialize symbols affine domains from d
+	 */
+	void write_arg_af2_domains(const Array<const Affine2Domain>& d) const;
+
+	/**
+	 * \brief Initialize symbols affine domains from a box
+	 */
+	void write_arg_af2_domains(const Affine2Vector& box) const;
+
+	/**
+	 * \brief Initialize d from symbols domains
+	 */
+	void read_arg_domains(Array<Domain>& d) const;
+
+	/**
+	 * \brief Initialize a box from symbols domains
+	 */
+	void read_arg_domains(IntervalVector& box) const;
+	// =============================================================================
 
 	/**
 	 * \brief Calculate f(box) using interval arithmetic.
@@ -543,24 +585,18 @@ public:
 	 */
 	mutable Array<Affine2Domain> arg_af2;
 
-	/**
-	 * Number of used variables
-	 */
-	int nb_used_vars;
-
-	/**
-	 * Array of used variables (indices in declaration order)
-	 */
-	int* used_var;
-
-
-	// never understood why we have to do this explicitly in c++
+	// ========== never understood why we have to do this in c++ =================
 	IntervalVector gradient(const IntervalVector& x) const;
 	IntervalMatrix jacobian(const IntervalVector& x) const;
 	void hansen_matrix(const IntervalVector& x, IntervalMatrix& h) const;
+	int nb_used_vars() const;
+	int used_var(int i) const;
+	// ============================================================================
+
 
 protected:
-	virtual void generate_comp();
+	virtual void generate_comp() const;
+	virtual void generate_used_vars() const;
 
 private:
 
@@ -798,6 +834,46 @@ inline bool Function::all_args_scalar() const {
 	return __all_symbols_scalar;
 }
 
+inline void Function::write_arg_domains(const Array<Domain>& d) const {
+	if (_nb_used_vars==-1) this->generate_used_vars();
+	load(arg_domains,d,nb_used_vars(),_used_var);
+}
+
+inline void Function::write_arg_domains(const Array<const Domain>& d) const {
+	if (_nb_used_vars==-1) this->generate_used_vars();
+	load(arg_domains,d,nb_used_vars(),_used_var);
+}
+
+inline void Function::write_arg_domains(const IntervalVector& box) const {
+	if (_nb_used_vars==-1) this->generate_used_vars();
+	load(arg_domains,box,nb_used_vars(),_used_var);
+}
+
+inline void Function::write_arg_af2_domains(const Array<Affine2Domain>& d) const {
+	if (_nb_used_vars==-1) this->generate_used_vars();
+	load(arg_af2,d,nb_used_vars(),_used_var);
+}
+
+inline void Function::write_arg_af2_domains(const Array<const Affine2Domain>& d) const {
+	if (_nb_used_vars==-1) this->generate_used_vars();
+	load(arg_af2,d,nb_used_vars(),_used_var);
+}
+
+inline void Function::write_arg_af2_domains(const Affine2Vector& box) const {
+	if (_nb_used_vars==-1) this->generate_used_vars();
+	load(arg_af2,box,nb_used_vars(),_used_var);
+}
+
+inline void Function::read_arg_domains(Array<Domain>& d) const {
+	if (_nb_used_vars==-1) this->generate_used_vars();
+	load(d,arg_domains,nb_used_vars(),_used_var);
+}
+
+inline void Function::read_arg_domains(IntervalVector& box) const {
+	if (_nb_used_vars==-1) this->generate_used_vars();
+	load(box,arg_domains,nb_used_vars(),_used_var);
+}
+
 inline Interval Function::eval(const IntervalVector& box) const {
 	return eval_domain(box).i();
 }
@@ -849,7 +925,7 @@ inline void Function::iproj(const Interval& y, IntervalVector& x, const Interval
 	iproj(Domain((Interval&) y),x,xin);
 }
 
-// ========== never understood why we have to do this explicitly in c++ =======
+// ========== never understood why we have to do this in c++ =================
 inline IntervalVector Function::gradient(const IntervalVector& x) const {
 	return Fnc::gradient(x);
 }
@@ -861,6 +937,15 @@ inline IntervalMatrix Function::jacobian(const IntervalVector& x) const {
 inline void Function::hansen_matrix(const IntervalVector& x, IntervalMatrix& h) const {
 	Fnc::hansen_matrix(x,h);
 }
+
+inline int Function::nb_used_vars() const {
+	return Fnc::nb_used_vars();
+}
+
+inline int Function::used_var(int i) const {
+	return Fnc::used_var(i);
+}
+
 // ============================================================================
 
 } // namespace ibex

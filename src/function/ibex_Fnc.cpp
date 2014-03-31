@@ -27,6 +27,10 @@ Fnc::~Fnc() {
 		}
 		delete[] comp;
 	}
+
+	if (_used_var!=NULL)
+		delete[] _used_var;
+
 }
 
 void Fnc::hansen_matrix(const IntervalVector& box, IntervalMatrix& H) const {
@@ -76,11 +80,11 @@ void Fnc::jacobian(const IntervalVector& x, IntervalMatrix& J) const {
 	not_implemented("jacobian");
 }
 
-void Fnc::generate_comp() {
+void Fnc::generate_comp() const {
 	not_implemented("generate_comp");
 }
 
-void Fnc::generate_used_vars()  {
+void Fnc::generate_used_vars() const {
 	not_implemented("generate_comp");
 }
 

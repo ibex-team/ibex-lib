@@ -24,7 +24,7 @@ Domain& Eval::eval(const Function& f, ExprLabel** args) const {
 		argD.set_ref(i,*(args[i]->d));
 	}
 
-	load(f.arg_domains,argD,f.nb_used_vars,f.used_var);
+	f.write_arg_domains(argD);
 
 	//------------- for debug
 	//	cout << "Function " << f.name << ", domains before eval:" << endl;
@@ -38,7 +38,7 @@ Domain& Eval::eval(const Function& f, ExprLabel** args) const {
 Domain& Eval::eval(const Function& f, const Array<const Domain>& d) const {
 	assert(f.expr().deco.d);
 
-	load(f.arg_domains,d,f.nb_used_vars,f.used_var);
+	f.write_arg_domains(d);
 
 	return *f.forward<Eval>(*this).d;
 }
@@ -46,7 +46,7 @@ Domain& Eval::eval(const Function& f, const Array<const Domain>& d) const {
 Domain& Eval::eval(const Function& f, const Array<Domain>& d) const {
 	assert(f.expr().deco.d);
 
-	load(f.arg_domains,d,f.nb_used_vars,f.used_var);
+	f.write_arg_domains(d);
 
 	return *f.forward<Eval>(*this).d;
 }
@@ -56,13 +56,13 @@ Domain& Eval::eval(const Function &f, const IntervalVector& box) const {
 
 	if (f.all_args_scalar()) {
 		int j;
-		for (int i=0; i<f.nb_used_vars; i++) {
-			j=f.used_var[i];
+		for (int i=0; i<f.nb_used_vars(); i++) {
+			j=f.used_var(i);
 			f.arg_domains[j].i()=box[j];
 		}
 	}
 	else
-		load(f.arg_domains,box,f.nb_used_vars,f.used_var); // load the domains of all the symbols
+		f.write_arg_domains(box);
 
 	return *f.forward<Eval>(*this).d;
 }
