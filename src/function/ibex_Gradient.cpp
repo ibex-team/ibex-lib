@@ -24,9 +24,6 @@ void Gradient::gradient(const Function& f, const Array<Domain>& d, IntervalVecto
 	g.clear();
 
 	f.write_arg_domains(g,true);
-//
-//	for (int i=0; i<f.nb_arg(); i++)
-//		((Gradient&) *this).symbol_fwd(f.arg(i), f.arg(i).deco);
 
 	f.forward<Gradient>(*this);
 
@@ -47,9 +44,6 @@ void Gradient::gradient(const Function& f, const IntervalVector& box, IntervalVe
 	g.clear();
 
 	f.write_arg_domains(g,true);
-
-//	for (int i=0; i<f.nb_arg(); i++)
-//		((Gradient&) *this).symbol_fwd(f.arg(i), f.arg(i).deco);
 
 	f.forward<Gradient>(*this);
 

@@ -41,6 +41,10 @@ public:
 	/** \brief Override */
 	virtual void jacobian(const IntervalVector& x, IntervalMatrix& J) const;
 
+	/**
+	 * The constant
+	 */
+	Domain cst;
 
 protected:
 	/** \brief Override */
@@ -56,11 +60,6 @@ protected:
 	int nb_used_vars() const;
 	int used_var(int i) const;
 	// ============================================================================
-
-	/**
-	 * The constant
-	 */
-	Domain cst;
 };
 
 

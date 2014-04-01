@@ -28,7 +28,7 @@ class Fnc {
 public:
 
 	/**
-	 * \brief Bulid the function from R^n to R^m.
+	 * \brief Build the function from R^n to R^m.
 	 */
 	Fnc(int n, int m);
 

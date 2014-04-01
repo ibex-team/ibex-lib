@@ -37,6 +37,8 @@ public:
 		TEST_ADD(TestGradient::mulVV);
 		TEST_ADD(TestGradient::transpose01);
 		TEST_ADD(TestGradient::mulMV01);
+		TEST_ADD(TestGradient::mulVM01);
+		TEST_ADD(TestGradient::mulVM02);
 	}
 
 	void deco01();
@@ -56,7 +58,8 @@ public:
 	void transpose01();
 	// with constant matrix
 	void mulMV01();
-
+	void mulVM01();
+	void mulVM02();
 private:
 	void check_deco(const ExprNode& e);
 };
