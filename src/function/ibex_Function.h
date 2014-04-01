@@ -9,8 +9,8 @@
  * Created     : Jan 5, 2012
  * ---------------------------------------------------------------------------- */
 
-#ifndef _IBEX_FUNCTION_H_
-#define _IBEX_FUNCTION_H_
+#ifndef __IBEX_FUNCTION_H__
+#define __IBEX_FUNCTION_H__
 
 #include "ibex_Expr.h"
 #include "ibex_Fnc.h"
@@ -49,7 +49,9 @@ class System;
  *
  */
 class Function : public Fnc {
+
 public:
+
 	/**
 	 * \brief Creates a function y=f(x).
 	 *
@@ -251,360 +253,6 @@ public:
 	Function();
 
 	/**
-	 * \brief Initialize this function (set the "x" and the "y").
-	 */
-	void init(const Array<const ExprSymbol>& x, const ExprNode& y, const char* name=NULL);
-
-	/**
-	 * \brief Delete the function.
-	 *
-	 * This will delete all the associated expression nodes (including symbols).
-	 */
-	~Function();
-
-	typedef enum { COPY, DIFF } copy_mode;
-
-	/**
-	 * \brief Build a function from another function.
-	 *
-	 * The new function can either be a clone of the function
-	 * in argument (COPY mode), or its differential (DIFF mode).
-	 *
-	 * \param mode: either Function::COPY or Function::DIFF.
-	 *
-	 * The resulting function is independent from *this
-	 * (no reference shared). In particular, in copy mode,
-	 * The DAG is entirely duplicated.
-	 *
-	 * However, decoration (considered as temporary data) is not copied.
-	 * The resulting function is not decorated.
-	 */
-	Function(const Function&, copy_mode mode=COPY);
-
-	/**
-	 * \brief Differentiate this function.
-	 */
-	const Function& diff() const;
-
-	/**
-	 * \brief Return the number of arguments.
-	 *
-	 * \note The number of variables returned by nb_var()
-	 * is the sum of the number of components of each argument.
-	 *
-	 */
-	int nb_arg() const;
-
-	/**
-	 * \brief Return true if the ith variable is used in the function.
-	 *
-	 * \warning The function is seen as a function from R^n to R^m. So, the
-	 * ith variable is <b>not</b> the ith symbol.
-	 *
-	 */
-	bool used(int i) const;
-
-	/**
-	 * \brief Return the current number of nodes in the DAG.
-	 */
-	int nb_nodes() const;
-
-	/**
-	 * \brief Return the ith node.
-	 */
-	const ExprNode& node(int i) const;
-
-	/**
-	 * \brief Return the arguments.
-	 */
-	const Array<const ExprSymbol>& args() const;
-
-	/**
-	 * \brief Return the name of the ith argument.
-	 *
-	 * Corresponds to the ith parameter of the function.
-	 */
-	const char* arg_name(int i) const;
-
-	/**
-	 * Return the ith argument.
-	 */
-	const ExprSymbol& arg(int i) const;
-
-	/**
-	 * \brief Return the expression f(x) of the function.
-	 *
-	 * Corresponds to the root node.
-	 */
-	const ExprNode& expr() const;
-
-	/**
-	 * \brief Name of the function.
-	 *
-	 * Null pointer if the function is anonymous.
-	 */
-	const char* name;
-
-
-	/**
-	 * \brief Run a forward algorithm.
-	 *
-	 * Run a forward algorithm and
-	 * return a reference to the label of the root node.
-	 *
-	 * V must be a subclass of FwdAlgorithm.
-	 *
-	 * Note that the type V is just passed in order to have static linkage.
-	 */
-	template<class V>
-	ExprLabel& forward(const V& algo) const;
-
-	/**
-	 * \brief Run a backward algorithm.
-	 *
-	 * V must be a subclass of FwdAlgorithm.
-	 *
-	 * Note that the type V is just passed in order to have static linkage.
-	 */
-	template<class V>
-	void backward(const V& algo) const;
-
-	// ======================== for Forward/Backward algorithms ====================
-	/**
-	 * \brief True if all the arguments are scalar
-	 *
-	 * Useful for various code optimization.
-	 */
-	bool all_args_scalar() const;
-
-	/**
-	 * \brief Initialize symbols domains from d
-	 */
-	void write_arg_domains(const Array<Domain>& d) const;
-
-	/**
-	 * \brief Initialize symbols domains from d
-	 */
-	void write_arg_domains(const Array<const Domain>& d) const;
-
-	/**
-	 * \brief Initialize symbols domains from a box
-	 */
-	void write_arg_domains(const IntervalVector& box) const;
-
-	/**
-	 * \brief Initialize symbols affine domains from d
-	 */
-	void write_arg_af2_domains(const Array<Affine2Domain>& d) const;
-
-	/**
-	 * \brief Initialize symbols affine domains from d
-	 */
-	void write_arg_af2_domains(const Array<const Affine2Domain>& d) const;
-
-	/**
-	 * \brief Initialize symbols affine domains from a box
-	 */
-	void write_arg_af2_domains(const Affine2Vector& box) const;
-
-	/**
-	 * \brief Initialize d from symbols domains
-	 */
-	void read_arg_domains(Array<Domain>& d) const;
-
-	/**
-	 * \brief Initialize a box from symbols domains
-	 */
-	void read_arg_domains(IntervalVector& box) const;
-	// =============================================================================
-
-	/**
-	 * \brief Calculate f(box) using interval arithmetic.
-	 */
-	Domain& eval_domain(const IntervalVector& box) const;
-
-	/**
-	 * \brief Calculate f(box) using affine arithmetic.
-	 */
-	Domain& eval_affine2_domain(const IntervalVector& box) const;
-
-	/**
-	 * \brief Calculate f(box) using affine arithmetic.
-	 *
-	 * The resulting affine form is stored in \a result.
-	 */
-	Domain& eval_affine2_domain(const IntervalVector& box, Affine2Domain& result) const;
-
-	/** \brief Override */
-	virtual Interval eval(const IntervalVector& box) const;
-
-	/**
-	 * \brief Calculate f(box) using affine arithmetic.
-	 *
-	 */
-	Interval eval_affine2(const IntervalVector& box) const;
-
-	/**
-	 * \brief Calculate f(box) using affine arithmetic.
-	 *
-	 * The resulting affine form is stored in \a affine.
-	 */
-	Interval eval_affine2(const IntervalVector& box, Affine2& result) const;
-
-	/** \brief Override */
-	virtual IntervalVector eval_vector(const IntervalVector& box) const;
-
-	/**
-	 * \brief Calculate f(box) using affine arithmetic.
-	 *
-	 * \pre f must be vector-valued
-	 */
-	IntervalVector eval_affine2_vector(const IntervalVector& box) const;
-
-	/**
-	 * \brief Calculate f(box) using affine arithmetic.
-	 *
-	 * The resulting affine form is stored in \a affine.
-	 * \pre f must be vector-valued
-	 */
-	IntervalVector eval_affine2_vector(const IntervalVector& box, Affine2Vector& affine) const;
-
-	/** \brief Override */
-	virtual IntervalMatrix eval_matrix(const IntervalVector& x) const;
-
-	/**
-	 * \brief Calculate f(box) using affine arithmetic.
-	 *
-	 * \pre f must be matrix-valued
-	 */
-	IntervalMatrix eval_affine2_matrix(const IntervalVector& box) const;
-
-	/**
-	 * \brief Calculate f(box) using affine arithmetic.
-	 *
-	 * The resulting affine form is stored in \a affine.
-	 * \pre f must be matrix-valued
-	 */
-	IntervalMatrix eval_affine2_matrix(const IntervalVector& box, Affine2Matrix& affine) const;
-
-	/** \brief Override */
-	virtual void gradient(const IntervalVector& x, IntervalVector& g) const;
-
-	/** \brief Override */
-	virtual void jacobian(const IntervalVector& x, IntervalMatrix& J) const;
-
-	/**
-	 * \brief Contract x w.r.t. f(x)=y.
-	 * \throw EmptyBoxException if x is empty.
-	 */
-	void backward(const Domain& y, IntervalVector& x) const;
-
-	/**
-	 * \brief Contract x w.r.t. f(x)=y.
-	 * \throw EmptyBoxException if x is empty.
-	 */
-	void backward(const Interval& y, IntervalVector& x) const;
-
-	/**
-	 * \brief Contract x w.r.t. f(x)=y.
-	 * \throw EmptyBoxException if x is empty.
-	 */
-	void backward(const IntervalVector& y, IntervalVector& x) const;
-
-	/**
-	 * \brief Contract x w.r.t. f(x)=y.
-	 * \throw EmptyBoxException if x is empty.
-	 */
-	void backward(const IntervalMatrix& y, IntervalVector& x) const;
-
-	/**
-	 * \brief Inner projection f(x)=y onto x.
-	 */
-	void iproj(const Domain& y, IntervalVector& x) const;
-
-	/**
-	 * \brief Inner projection f(x)=y onto x, inflating xin.
-	 */
-	void iproj(const Domain& y, IntervalVector& x, const IntervalVector& xin) const;
-
-	/**
-	 * \brief Inner projection f(x)=y onto x.
-	 */
-	void iproj(const Interval& y, IntervalVector& x) const;
-
-	/**
-	 * \brief Inner projection f(x)=y onto x, inflating xin.
-	 */
-	void iproj(const Interval& y, IntervalVector& x, const IntervalVector& xin) const;
-
-
-	CompiledFunction cf; // "public" just for debug
-
-	/*
-	 * \brief The domains of the arguments.
-	 *
-	 */
-	mutable Array<Domain> arg_domains;
-
-	/*
-	 * \brief The derivative label of the arguments.
-	 *
-	 * \note The structure is initialized by #ibex::GradDecorator.
-	 */
-	mutable Array<Domain> arg_deriv;
-
-	/*
-	 * \brief The domains of the arguments.
-	 *
-	 */
-	mutable Array<Affine2Domain> arg_af2;
-
-	// ========== never understood why we have to do this in c++ =================
-	IntervalVector gradient(const IntervalVector& x) const;
-	IntervalMatrix jacobian(const IntervalVector& x) const;
-	void hansen_matrix(const IntervalVector& x, IntervalMatrix& h) const;
-	int nb_used_vars() const;
-	int used_var(int i) const;
-	// ============================================================================
-
-
-protected:
-	/** \brief Override */
-	virtual void generate_comp() const;
-	/** \brief Override */
-	virtual void generate_used_vars() const;
-
-private:
-
-	void add_symbol(const ExprSymbol* x);
-
-	void build_from_string(const Array<const char*>& x, const char* y, const char* name=NULL);
-
-	/*
-	 * \brief Apply default Decoration (and compile) the function.
-	 *
-	 * Declared "const" because the decoration is
-	 * not considered as part of the definition of the function.
-	 */
-	void decorate() const;
-
-	const ExprNode* root;                       // the root node
-	Array<const ExprSymbol> symbs;              // to retrieve symbol (node)s by appearing order.
-	std::vector<bool> is_used;                  // tells whether the i^th component is used.
-	ExprSubNodes exprnodes;                         // all the nodes (of x and f(x))
-	//SymbolMap<const ExprSymbol*> id2info;       // to retrieve a symbol node from its name.
-	int key_count;                              // count the number of arguments
-
-	bool __all_symbols_scalar;                  // true if all symbols are scalar
-
-	Function& operator=(const Function&);       // forbidden
-
-	// if at some point, symbolic differentiation is needed for this function,
-	// we store the resulting function for future usage.
-	Function* df;
-public:
-
-	/**
 	 * \brief Apply this function to the argument
 	 *
 	 * Works only if it is a unary function.
@@ -754,8 +402,381 @@ public:
 	 */
 	const ExprApply& operator()(const std::vector<const ExprNode*>& arg) const;
 
+	/**
+	 * \brief Initialize this function (set the "x" and the "y").
+	 */
+	void init(const Array<const ExprSymbol>& x, const ExprNode& y, const char* name=NULL);
+
+	/**
+	 * \brief Delete the function.
+	 *
+	 * This will delete all the associated expression nodes (including symbols).
+	 */
+	~Function();
+
+	/**
+	 * \brief Copy mode (see copy constructor)
+	 */
+	typedef enum { COPY, DIFF } copy_mode;
+
+	/**
+	 * \brief Build a function from another function.
+	 *
+	 * The new function can either be a clone of the function
+	 * in argument (COPY mode), or its differential (DIFF mode).
+	 *
+	 * \param mode: either Function::COPY or Function::DIFF.
+	 *
+	 * The resulting function is independent from *this
+	 * (no reference shared). In particular, in copy mode,
+	 * The DAG is entirely duplicated.
+	 *
+	 * However, decoration (considered as temporary data) is not copied.
+	 * The resulting function is not decorated.
+	 */
+	Function(const Function&, copy_mode mode=COPY);
+
+	/**
+	 * \brief Differentiate this function.
+	 */
+	const Function& diff() const;
+
+	/**
+	 * \brief Return the number of arguments.
+	 *
+	 * \note The number of variables returned by nb_var()
+	 * is the sum of the number of components of each argument.
+	 *
+	 */
+	int nb_arg() const;
+
+	/**
+	 * \brief Return true if the ith variable is used in the function.
+	 *
+	 * \warning The function is seen as a function from R^n to R^m. So, the
+	 * ith variable is <b>not</b> the ith symbol.
+	 *
+	 */
+	bool used(int i) const;
+
+	/**
+	 * \brief Return the current number of nodes in the DAG.
+	 */
+	int nb_nodes() const;
+
+	/**
+	 * \brief Return the ith node.
+	 */
+	const ExprNode& node(int i) const;
+
+	/**
+	 * \brief Return the arguments.
+	 */
+	const Array<const ExprSymbol>& args() const;
+
+	/**
+	 * \brief Return the name of the ith argument.
+	 *
+	 * Corresponds to the ith parameter of the function.
+	 */
+	const char* arg_name(int i) const;
+
+	/**
+	 * Return the ith argument.
+	 */
+	const ExprSymbol& arg(int i) const;
+
+	/**
+	 * \brief Return the expression f(x) of the function.
+	 *
+	 * Corresponds to the root node.
+	 */
+	const ExprNode& expr() const;
+
+	/**
+	 * \brief Run a forward algorithm.
+	 *
+	 * Run a forward algorithm and
+	 * return a reference to the label of the root node.
+	 *
+	 * V must be a subclass of FwdAlgorithm.
+	 *
+	 * Note that the type V is just passed in order to have static linkage.
+	 */
+	template<class V>
+	ExprLabel& forward(const V& algo) const;
+
+	/**
+	 * \brief Run a backward algorithm.
+	 *
+	 * V must be a subclass of FwdAlgorithm.
+	 *
+	 * Note that the type V is just passed in order to have static linkage.
+	 */
+	template<class V>
+	void backward(const V& algo) const;
+
+	// ======================== for Forward/Backward algorithms ====================
+
+	/**
+	 * \brief Initialize symbols domains from d
+	 *
+	 * \param grad - true<=>update "g" (gradient) false <=>update "d" (domain)
+	 * \see #ibex::ExprLabel
+	 */
+	void write_arg_domains(const Array<Domain>& d, bool grad=false) const;
+
+	/**
+	 * \brief Initialize symbols domains from d
+	 *
+	 * \param grad - true<=>update "g" (gradient) false <=>update "d" (domain)
+	 * \see #ibex::ExprLabel
+	 */
+	void write_arg_domains(const Array<const Domain>& d, bool grad=false) const;
+
+	/**
+	 * \brief Initialize symbols domains from a box
+	 *
+	 * \param grad - true<=>update "g" (gradient) false <=>update "d" (domain)
+	 * \see #ibex::ExprLabel
+	 */
+	void write_arg_domains(const IntervalVector& box, bool grad=false) const;
+
+	/**
+	 * \brief Initialize symbols affine domains from d
+	 */
+	void write_arg_af2_domains(const Array<Affine2Domain>& d) const;
+
+	/**
+	 * \brief Initialize symbols affine domains from d
+	 */
+	void write_arg_af2_domains(const Array<const Affine2Domain>& d) const;
+
+	/**
+	 * \brief Initialize symbols affine domains from a box
+	 */
+	void write_arg_af2_domains(const IntervalVector& box) const;
+
+	/**
+	 * \brief Initialize d from symbols domains
+	 *
+	 * \param grad - true<=>read "g" (gradient) false <=>read "d" (domain)
+	 * \see #ibex::ExprLabel
+	 */
+	void read_arg_domains(Array<Domain>& d, bool grad=false) const;
+
+	/**
+	 * \brief Initialize a box from symbols domains
+	 *
+	 * \param grad - true<=>read "g" (gradient) false <=>read "d" (domain)
+	 * \see #ibex::ExprLabel
+	 */
+	void read_arg_domains(IntervalVector& box, bool grad=false) const;
+	// =============================================================================
+
+
+	// =========================== Overriding Fnc interface ========================
+	/** \brief Override */
+	virtual Interval eval(const IntervalVector& box) const;
+
+	/** \brief Override */
+	virtual IntervalVector eval_vector(const IntervalVector& box) const;
+
+	/** \brief Override */
+	virtual IntervalMatrix eval_matrix(const IntervalVector& x) const;
+
+	/** \brief Override */
+	virtual void gradient(const IntervalVector& x, IntervalVector& g) const;
+
+	/** \brief Override */
+	virtual void jacobian(const IntervalVector& x, IntervalMatrix& J) const;
+	// =============================================================================
+
+	/**
+	 * \brief Calculate f(box) using interval arithmetic.
+	 */
+	Domain& eval_domain(const IntervalVector& box) const;
+
+	/**
+	 * \brief Calculate f(box) using affine arithmetic.
+	 */
+	Domain& eval_affine2_domain(const IntervalVector& box) const;
+
+	/**
+	 * \brief Calculate f(box) using affine arithmetic.
+	 *
+	 * The resulting affine form is stored in \a result.
+	 */
+	Domain& eval_affine2_domain(const IntervalVector& box, Affine2Domain& result) const;
+
+	/**
+	 * \brief Calculate f(box) using affine arithmetic.
+	 *
+	 */
+	Interval eval_affine2(const IntervalVector& box) const;
+
+	/**
+	 * \brief Calculate f(box) using affine arithmetic.
+	 *
+	 * The resulting affine form is stored in \a affine.
+	 */
+	Interval eval_affine2(const IntervalVector& box, Affine2& result) const;
+
+	/**
+	 * \brief Calculate f(box) using affine arithmetic.
+	 *
+	 * \pre f must be vector-valued
+	 */
+	IntervalVector eval_affine2_vector(const IntervalVector& box) const;
+
+	/**
+	 * \brief Calculate f(box) using affine arithmetic.
+	 *
+	 * The resulting affine form is stored in \a affine.
+	 * \pre f must be vector-valued
+	 */
+	IntervalVector eval_affine2_vector(const IntervalVector& box, Affine2Vector& affine) const;
+
+	/**
+	 * \brief Calculate f(box) using affine arithmetic.
+	 *
+	 * \pre f must be matrix-valued
+	 */
+	IntervalMatrix eval_affine2_matrix(const IntervalVector& box) const;
+
+	/**
+	 * \brief Calculate f(box) using affine arithmetic.
+	 *
+	 * The resulting affine form is stored in \a affine.
+	 * \pre f must be matrix-valued
+	 */
+	IntervalMatrix eval_affine2_matrix(const IntervalVector& box, Affine2Matrix& affine) const;
+
+	/**
+	 * \brief Contract x w.r.t. f(x)=y.
+	 * \throw EmptyBoxException if x is empty.
+	 */
+	void backward(const Domain& y, IntervalVector& x) const;
+
+	/**
+	 * \brief Contract x w.r.t. f(x)=y.
+	 * \throw EmptyBoxException if x is empty.
+	 */
+	void backward(const Interval& y, IntervalVector& x) const;
+
+	/**
+	 * \brief Contract x w.r.t. f(x)=y.
+	 * \throw EmptyBoxException if x is empty.
+	 */
+	void backward(const IntervalVector& y, IntervalVector& x) const;
+
+	/**
+	 * \brief Contract x w.r.t. f(x)=y.
+	 * \throw EmptyBoxException if x is empty.
+	 */
+	void backward(const IntervalMatrix& y, IntervalVector& x) const;
+
+	/**
+	 * \brief Inner projection f(x)=y onto x.
+	 */
+	void iproj(const Domain& y, IntervalVector& x) const;
+
+	/**
+	 * \brief Inner projection f(x)=y onto x, inflating xin.
+	 */
+	void iproj(const Domain& y, IntervalVector& x, const IntervalVector& xin) const;
+
+	/**
+	 * \brief Inner projection f(x)=y onto x.
+	 */
+	void iproj(const Interval& y, IntervalVector& x) const;
+
+	/**
+	 * \brief Inner projection f(x)=y onto x, inflating xin.
+	 */
+	void iproj(const Interval& y, IntervalVector& x, const IntervalVector& xin) const;
+
+	// ========== never understood why we have to do this in c++ =================
+	IntervalVector gradient(const IntervalVector& x) const;
+	IntervalMatrix jacobian(const IntervalVector& x) const;
+	void hansen_matrix(const IntervalVector& x, IntervalMatrix& h) const;
+	int nb_used_vars() const;
+	int used_var(int i) const;
+	// ============================================================================
+
+	CompiledFunction cf; // "public" just for debug
+
+	/**
+	 * \brief Name of the function.
+	 *
+	 * Null pointer if the function is anonymous.
+	 */
+	const char* name;
+
+	/*
+	 * \brief The domains of the arguments.
+	 *
+	 */
+	mutable Array<Domain> arg_domains;
+
+	/*
+	 * \brief The derivative label of the arguments.
+	 *
+	 * \note The structure is initialized by #ibex::GradDecorator.
+	 */
+	mutable Array<Domain> arg_deriv;
+
+	/*
+	 * \brief The domains of the arguments.
+	 *
+	 */
+	mutable Array<Affine2Domain> arg_af2;
+
+
+protected:
+	/** \brief Override */
+	virtual void generate_comp() const;
+	/** \brief Override */
+	virtual void generate_used_vars() const;
+
+private:
+	/**
+	 * \brief True if all the arguments are scalar
+	 *
+	 * Useful for various code optimization.
+	 */
+	bool all_args_scalar() const;
+
+	void add_symbol(const ExprSymbol* x);
+
+	void build_from_string(const Array<const char*>& x, const char* y, const char* name=NULL);
+
+	Function& operator=(const Function&);       // forbidden
+
+	/*
+	 * \brief Apply default Decoration (and compile) the function.
+	 *
+	 * Declared "const" because the decoration is
+	 * not considered as part of the definition of the function.
+	 */
+	void decorate() const;
+
+	const ExprNode* root;                       // the root node
+	Array<const ExprSymbol> symbs;              // to retrieve symbol (node)s by appearing order.
+	std::vector<bool> is_used;                  // tells whether the i^th component is used.
+	ExprSubNodes exprnodes;                     // all the nodes (of x and f(x))
+	int key_count;                              // count the number of arguments
+
+	bool __all_symbols_scalar;                  // true if all symbols are scalar
+
+	// if at some point, symbolic differentiation is needed for this function,
+	// we store the resulting function for future usage.
+	Function* df;
 };
 
+/**
+ * \brief Streams out a function
+ */
 std::ostream& operator<<(std::ostream&, const Function&);
 
 /*================================== inline implementations ========================================*/
@@ -810,19 +831,34 @@ inline bool Function::all_args_scalar() const {
 	return __all_symbols_scalar;
 }
 
-inline void Function::write_arg_domains(const Array<Domain>& d) const {
+inline void Function::write_arg_domains(const Array<Domain>& d, bool grad) const {
 	if (_nb_used_vars==-1) this->generate_used_vars();
-	load(arg_domains,d,nb_used_vars(),_used_var);
+	load(grad? arg_deriv : arg_domains,d,nb_used_vars(),_used_var);
 }
 
-inline void Function::write_arg_domains(const Array<const Domain>& d) const {
+inline void Function::write_arg_domains(const Array<const Domain>& d, bool grad) const {
 	if (_nb_used_vars==-1) this->generate_used_vars();
-	load(arg_domains,d,nb_used_vars(),_used_var);
+	load(grad? arg_deriv : arg_domains,d,nb_used_vars(),_used_var);
 }
 
-inline void Function::write_arg_domains(const IntervalVector& box) const {
+inline void Function::write_arg_domains(const IntervalVector& box, bool grad) const {
 	if (_nb_used_vars==-1) this->generate_used_vars();
-	load(arg_domains,box,nb_used_vars(),_used_var);
+
+	if (all_args_scalar()) {
+		int j;
+		if (grad)
+			for (int i=0; i<nb_used_vars(); i++) {
+				j=used_var(i);
+				arg_deriv[j].i()=box[j];
+			}
+		else
+			for (int i=0; i<nb_used_vars(); i++) {
+				j=used_var(i);
+				arg_domains[j].i()=box[j];
+			}
+	}
+	else
+		load(grad? arg_deriv : arg_domains, box, nb_used_vars(), _used_var);
 }
 
 inline void Function::write_arg_af2_domains(const Array<Affine2Domain>& d) const {
@@ -835,19 +871,42 @@ inline void Function::write_arg_af2_domains(const Array<const Affine2Domain>& d)
 	load(arg_af2,d,nb_used_vars(),_used_var);
 }
 
-inline void Function::write_arg_af2_domains(const Affine2Vector& box) const {
+inline void Function::write_arg_af2_domains(const IntervalVector& box) const {
 	if (_nb_used_vars==-1) this->generate_used_vars();
-	load(arg_af2,box,nb_used_vars(),_used_var);
+	if (all_args_scalar()) {
+		int j;
+		for (int i=0; i<nb_used_vars(); i++) {
+			j=used_var(i);
+			arg_af2[j].i()=Affine2(nb_var(),j+1,box[j]);
+		}
+	}
+	else
+		load(arg_af2,Affine2Vector(box,true),nb_used_vars(),_used_var);
 }
 
-inline void Function::read_arg_domains(Array<Domain>& d) const {
+inline void Function::read_arg_domains(Array<Domain>& d, bool grad) const {
 	if (_nb_used_vars==-1) this->generate_used_vars();
-	load(d,arg_domains,nb_used_vars(),_used_var);
+	load(d,grad? arg_deriv : arg_domains,nb_used_vars(),_used_var);
 }
 
-inline void Function::read_arg_domains(IntervalVector& box) const {
+inline void Function::read_arg_domains(IntervalVector& box, bool grad) const {
 	if (_nb_used_vars==-1) this->generate_used_vars();
-	load(box,arg_domains,nb_used_vars(),_used_var);
+	if (all_args_scalar()) {
+		int j;
+		if (grad)
+			for (int i=0; i<nb_used_vars(); i++) {
+				j=used_var(i);
+				box[j]=arg_deriv[j].i();
+			}
+		else
+			for (int i=0; i<nb_used_vars(); i++) {
+				j=used_var(i);
+				box[j]=arg_domains[j].i();
+			}
+	}
+	else {
+		load(box,grad? arg_deriv : arg_domains, nb_used_vars(), _used_var);
+	}
 }
 
 inline Interval Function::eval(const IntervalVector& box) const {
@@ -878,7 +937,6 @@ inline IntervalMatrix Function::eval_matrix(const IntervalVector& box) const {
 	}
 	}
 }
-
 
 inline void Function::backward(const Interval& y, IntervalVector& x) const {
 	backward(Domain((Interval&) y),x); // y will not be modified
@@ -921,8 +979,7 @@ inline int Function::nb_used_vars() const {
 inline int Function::used_var(int i) const {
 	return Fnc::used_var(i);
 }
-
 // ============================================================================
 
 } // namespace ibex
-#endif // _IBEX_FUNCTION_H_
+#endif // __IBEX_FUNCTION_H__

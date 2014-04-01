@@ -80,17 +80,10 @@ bool hc4r_ev(const Function& f, const Domain& y, IntervalVector& x, Interval& z)
     z=root.i();
 
 	root &= y;
+
 	f.backward<HC4Revise>(HC4Revise(INTERVAL_MODE));
 
-	if (f.all_args_scalar()) {
-		int j;
-		for (int i=0; i<f.nb_used_vars(); i++) {
-			j=f.used_var(i);
-			x[j]=f.arg_domains[j].i();
-		}
-	}
-	else
-		f.write_arg_domains(x);
+	f.write_arg_domains(x);
 
    return false;
 }

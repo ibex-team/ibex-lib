@@ -43,7 +43,7 @@ public:
 	       void vector_fwd(const ExprVector& v, const ExprLabel** s, ExprLabel& y);
 	       void cst_fwd(const ExprConstant&, ExprLabel& y)                                  { y.g->clear(); }
 	       void symbol_fwd(const ExprSymbol&, ExprLabel& y)                                 { y.g->clear(); }
-	       void apply_fwd(const ExprApply&, ExprLabel**, ExprLabel& y)                 { y.g->clear(); }
+	       void apply_fwd(const ExprApply&, ExprLabel**, ExprLabel& y)                      { y.g->clear(); }
 	inline void chi_fwd(const ExprChi&, const ExprLabel&, const ExprLabel&, const ExprLabel&, ExprLabel& y)  { y.g->i()=0; }
 	inline void add_fwd(const ExprAdd&, const ExprLabel&, const ExprLabel&, ExprLabel& y)     { y.g->i()=0; }
 	inline void mul_fwd(const ExprMul&, const ExprLabel&, const ExprLabel&, ExprLabel& y)     { y.g->i()=0; }
@@ -57,7 +57,7 @@ public:
 	inline void trans_M_fwd(const ExprTrans&, const ExprLabel&, ExprLabel& y) { y.g->m().clear(); }
 	inline void sign_fwd(const ExprSign&, const ExprLabel&, ExprLabel& y)     { y.g->i()=0; }
 	inline void abs_fwd(const ExprAbs&, const ExprLabel&, ExprLabel& y)       { y.g->i()=0; }
-	inline void power_fwd(const ExprPower& , const ExprLabel&, ExprLabel& y) { y.g->i()=0; }
+	inline void power_fwd(const ExprPower& , const ExprLabel&, ExprLabel& y)  { y.g->i()=0; }
 	inline void sqr_fwd(const ExprSqr&, const ExprLabel&, ExprLabel& y)       { y.g->i()=0; }
 	inline void sqrt_fwd(const ExprSqrt&, const ExprLabel&, ExprLabel& y)     { y.g->i()=0; }
 	inline void exp_fwd(const ExprExp&, const ExprLabel&, ExprLabel& y)       { y.g->i()=0; }
@@ -99,7 +99,7 @@ public:
 	inline void div_bwd   (const ExprDiv&,    ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) { x1.g->i() += y.g->i() / x2.d->i(); x2.g->i() += y.g->i()*(-x1.d->i())/sqr(x2.d->i()); }
 	       void max_bwd   (const ExprMax&,    ExprLabel& ,   ExprLabel& ,   const ExprLabel& );
 	       void min_bwd   (const ExprMin&,    ExprLabel& ,   ExprLabel& ,   const ExprLabel& );
-	inline void atan2_bwd (const ExprAtan2& , ExprLabel& ,   ExprLabel& ,   const ExprLabel& ) { /* not implemented yet */ assert(false); }
+	inline void atan2_bwd (const ExprAtan2& , ExprLabel& ,   ExprLabel& ,   const ExprLabel& )  { /* not implemented yet */ assert(false); }
 	inline void minus_bwd (const ExprMinus& , ExprLabel& x,                 const ExprLabel& y) { x.g->i() += -1.0*y.g->i(); }
     inline void trans_V_bwd(const ExprTrans&, ExprLabel& x,                 const ExprLabel& y) { /* nothing to do because x.g->v() is a reference to y.g->v()
                                                                                                      see Decorator */ }
@@ -124,16 +124,16 @@ public:
 	inline void asinh_bwd (const ExprAsinh& , ExprLabel& x,                 const ExprLabel& y) { x.g->i() += y.g->i() * 1.0 / sqrt(1.0+sqr(x.d->i())); }
 	inline void atanh_bwd (const ExprAtanh& , ExprLabel& x,                 const ExprLabel& y) { x.g->i() += y.g->i() * 1.0 / (1.0-sqr(x.d->i())); }
 
-	inline void add_V_bwd (const ExprAdd&, ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) { x1.g->v() += y.g->v();        x2.g->v() += y.g->v(); }
-	inline void add_M_bwd (const ExprAdd&, ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) { x1.g->m() += y.g->m();        x2.g->m() += y.g->m(); }
-	inline void mul_SV_bwd(const ExprMul&, ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) { x1.g->i() += y.g->v()*x2.d->v(); x2.g->v() += x1.d->i()*y.g->v(); }
-	inline void mul_SM_bwd(const ExprMul&, ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) { for (int i=0; i<y.d->m().nb_rows(); i++) x1.g->i()+=y.g->m()[i]*x2.d->m()[i]; x2.g->m() += x1.d->i()*y.g->m();  }
-	inline void mul_VV_bwd(const ExprMul&, ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) { x1.g->v() += y.g->i()*x2.d->v(); x2.g->v() += y.g->i()*x1.d->v(); }
-	inline void mul_MV_bwd(const ExprMul&, ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) { x1.g->m() += outer_product(y.g->v(),x2.d->v()); x2.g->v() += x1.d->m().transpose()*y.g->v(); }
-	inline void mul_MM_bwd(const ExprMul&, ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) { x1.g->m() += y.g->m()*x2.d->m().transpose(); x2.g->m() += x1.d->m().transpose()*y.g->m(); }
-	inline void mul_VM_bwd(const ExprMul&, ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) { x1.g->v() += y.g->v()*x2.d->m().transpose(); x2.g->m() += outer_product(y.d->v(),x1.g->v()); }
-	inline void sub_V_bwd (const ExprSub&, ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) { x1.g->v() += y.g->v(); x2.g->v() -= y.g->v(); }
-	inline void sub_M_bwd (const ExprSub&, ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) { x1.g->m() += y.g->m(); x2.g->m() -= y.g->m(); }
+	inline void add_V_bwd (const ExprAdd&, ExprLabel& x1, ExprLabel& x2,    const ExprLabel& y) { x1.g->v() += y.g->v();        x2.g->v() += y.g->v(); }
+	inline void add_M_bwd (const ExprAdd&, ExprLabel& x1, ExprLabel& x2,    const ExprLabel& y) { x1.g->m() += y.g->m();        x2.g->m() += y.g->m(); }
+	inline void mul_SV_bwd(const ExprMul&, ExprLabel& x1, ExprLabel& x2,    const ExprLabel& y) { x1.g->i() += y.g->v()*x2.d->v(); x2.g->v() += x1.d->i()*y.g->v(); }
+	inline void mul_SM_bwd(const ExprMul&, ExprLabel& x1, ExprLabel& x2,    const ExprLabel& y) { for (int i=0; i<y.d->m().nb_rows(); i++) x1.g->i()+=y.g->m()[i]*x2.d->m()[i]; x2.g->m() += x1.d->i()*y.g->m();  }
+	inline void mul_VV_bwd(const ExprMul&, ExprLabel& x1, ExprLabel& x2,    const ExprLabel& y) { x1.g->v() += y.g->i()*x2.d->v(); x2.g->v() += y.g->i()*x1.d->v(); }
+	inline void mul_MV_bwd(const ExprMul&, ExprLabel& x1, ExprLabel& x2,    const ExprLabel& y) { x1.g->m() += outer_product(y.g->v(),x2.d->v()); x2.g->v() += x1.d->m().transpose()*y.g->v(); }
+	inline void mul_MM_bwd(const ExprMul&, ExprLabel& x1, ExprLabel& x2,    const ExprLabel& y) { x1.g->m() += y.g->m()*x2.d->m().transpose(); x2.g->m() += x1.d->m().transpose()*y.g->m(); }
+	inline void mul_VM_bwd(const ExprMul&, ExprLabel& x1, ExprLabel& x2,    const ExprLabel& y) { x1.g->v() += y.g->v()*x2.d->m().transpose(); x2.g->m() += outer_product(y.d->v(),x1.g->v()); }
+	inline void sub_V_bwd (const ExprSub&, ExprLabel& x1, ExprLabel& x2,    const ExprLabel& y) { x1.g->v() += y.g->v(); x2.g->v() -= y.g->v(); }
+	inline void sub_M_bwd (const ExprSub&, ExprLabel& x1, ExprLabel& x2,    const ExprLabel& y) { x1.g->m() += y.g->m(); x2.g->m() -= y.g->m(); }
 };
 
 } // namespace ibex

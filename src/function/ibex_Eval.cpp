@@ -54,15 +54,7 @@ Domain& Eval::eval(const Function& f, const Array<Domain>& d) const {
 Domain& Eval::eval(const Function &f, const IntervalVector& box) const {
 	assert(f.expr().deco.d);
 
-	if (f.all_args_scalar()) {
-		int j;
-		for (int i=0; i<f.nb_used_vars(); i++) {
-			j=f.used_var(i);
-			f.arg_domains[j].i()=box[j];
-		}
-	}
-	else
-		f.write_arg_domains(box);
+	f.write_arg_domains(box);
 
 	return *f.forward<Eval>(*this).d;
 }

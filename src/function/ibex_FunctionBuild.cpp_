@@ -334,7 +334,7 @@ Function::Function(const char* filename) {
 }
 
 Function::Function(const Function& f, copy_mode mode) {
-	//assert(f.root!=NULL);
+	assert(f.root!=NULL);
 
 	// Create the new symbols
 	// we have to proceed first the symbols in order to guarantee that
@@ -342,13 +342,7 @@ Function::Function(const Function& f, copy_mode mode) {
 	// as they appear in the expression the copy of a a function (x,y)->y+x
 	// would yield (y,x)->y+x.
 	Array<const ExprSymbol> x(f.nb_arg());
-	// TODO: replace next block with "varcopy"
-	for (int j=0; j<f.nb_arg(); j++) {
-		x.set_ref(j,ExprSymbol::new_(f.arg(j).name,f.arg(j).dim));
-	}
-	//cout << "new x=";
-	//for (int j=0; j<new_x.size(); j++) cout << new_x[j].name << " ";
-	//cout << endl;
+	varcopy(f.args(),x);
 
 	// Duplicate the expression
 	const ExprNode* y;
@@ -434,7 +428,6 @@ void Function::generate_used_vars() const {
 	assert(j==_nb_used_vars);
 }
 
-//void Function::set_expr(const ExprNode& expr) {
 void Function::init(const Array<const ExprSymbol>& x, const ExprNode& y, const char* name) {
 
 	df=NULL;
@@ -476,8 +469,6 @@ void Function::init(const Array<const ExprSymbol>& x, const ExprNode& y, const c
 }
 
 void Function::add_symbol(const ExprSymbol* symbol) {
-
-  //id2info.insert_new(symbol->name, symbol);
 
   ((ExprSymbol&) *symbol).key = key_count;
 

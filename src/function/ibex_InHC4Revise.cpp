@@ -25,16 +25,7 @@ void InHC4Revise::iproj(const Function& f, const Domain& y, IntervalVector& x) {
 	try {
 		f.backward<InHC4Revise>(*this);
 
-		if (f.all_args_scalar()) {
-			int j;
-				for (int i=0; i<f.nb_used_vars(); i++) {
-					j=f.used_var(i);
-					x[j]=f.arg_domains[j].i();
-				}
-
-			}
-		else
-			f.read_arg_domains(x);
+		f.read_arg_domains(x);
 
 	} catch(EmptyBoxException&) {
 		x.set_empty();
@@ -63,15 +54,7 @@ void InHC4Revise::iproj(const Function& f, const Domain& y, IntervalVector& x, c
 
 		f.backward<InHC4Revise>(*this);
 
-		if (f.all_args_scalar()) {
-			int j;
-			for (int i=0; i<f.nb_used_vars(); i++) {
-				j=f.used_var(i);
-				x[j]=f.arg_domains[j].i();
-			}
-		}
-		else
-			f.read_arg_domains(x);
+		f.read_arg_domains(x);
 
 	} catch(EmptyBoxException&) {
 		x.set_empty();
@@ -114,7 +97,6 @@ bool InHC4Revise::iproj(const Function& f, const Domain& y, ExprLabel** x) {
 		f.backward<InHC4Revise>(*this);
 
 		f.read_arg_domains(argD);
-
 
 	} catch(EmptyBoxException&) {
 		// should we force argD to be the empty set here?

@@ -45,17 +45,10 @@ bool HC4Revise::proj(const Function& f, const Domain& y, IntervalVector& x) {
 	}
 
 	root &= y;
+
 	f.backward<HC4Revise>(*this);
 
-	if (f.all_args_scalar()) {
-		int j;
-		for (int i=0; i<f.nb_used_vars(); i++) {
-			j=f.used_var(i);
-			x[j]=f.arg_domains[j].i();
-		}
-	}
-	else
-		f.read_arg_domains(x);
+	f.read_arg_domains(x);
 
 	return false;
 }
