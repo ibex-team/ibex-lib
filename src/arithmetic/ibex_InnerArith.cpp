@@ -657,6 +657,8 @@ bool iproj_pow(const Interval& y, Interval& x, int p, const Interval &xin) {
 	assert(xin.is_subset(x));
 	assert(!inflate || (p==2 && sqr(xin).is_subset(y)) || (p!=2 && pow(xin,p).is_subset(y)));
 
+        if (pow(x,p).is_subset(y)) return true;
+
 	/* volatile */double lo=p==2? UP(sqrt,y.lb()) : UP_root(y.lb(), p);
 	/* volatile */double up=p==2? LO(sqrt,y.ub()) : LO_root(y.ub(), p);
 
