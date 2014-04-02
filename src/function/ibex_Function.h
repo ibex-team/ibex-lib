@@ -738,6 +738,10 @@ protected:
 	virtual void generate_comp() const;
 	/** \brief Override */
 	virtual void generate_used_vars() const;
+	/** \brief Override */
+	virtual void print(std::ostream& os) const;
+	/** \brief Override */
+	void print_expr(std::ostream& os) const;
 
 private:
 	/**
@@ -773,11 +777,6 @@ private:
 	// we store the resulting function for future usage.
 	Function* df;
 };
-
-/**
- * \brief Streams out a function
- */
-std::ostream& operator<<(std::ostream&, const Function&);
 
 /*================================== inline implementations ========================================*/
 
@@ -936,6 +935,10 @@ inline IntervalMatrix Function::eval_matrix(const IntervalVector& box) const {
 		assert(false);
 	}
 	}
+}
+
+inline void Function::print_expr(std::ostream& os) const {
+	os << expr();
 }
 
 inline void Function::backward(const Interval& y, IntervalVector& x) const {

@@ -49,9 +49,12 @@ public:
 protected:
 	/** \brief Override */
 	virtual void generate_comp() const;
-
 	/** \brief Override */
 	virtual void generate_used_vars() const;
+	/** \brief Override */
+	virtual void print(std::ostream& os) const;
+	/** \brief Override */
+	void print_expr(std::ostream& os) const;
 
 	// ========== never understood why we have to do this in c++ =================
 	IntervalVector gradient(const IntervalVector& x) const;
@@ -91,6 +94,14 @@ inline void FncConstant::jacobian(const IntervalVector& x, IntervalMatrix& J) co
 
 inline void FncConstant::generate_used_vars() const {
 	_nb_used_vars=0;
+}
+
+inline void FncConstant::print(std::ostream& os) const {
+	os << "x[" << nb_var() << "]->" << cst;
+}
+
+inline void FncConstant::print_expr(std::ostream& os) const {
+	os << cst;
 }
 
 // ========== never understood why we have to do this in c++ =================

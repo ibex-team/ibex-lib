@@ -80,6 +80,14 @@ void Fnc::jacobian(const IntervalVector& x, IntervalMatrix& J) const {
 	not_implemented("jacobian");
 }
 
+void Fnc::print(std::ostream& os) const {
+	not_implemented("print");
+}
+
+void Fnc::print_expr(std::ostream& os) const {
+	not_implemented("print_expr");
+}
+
 void Fnc::generate_comp() const {
 	not_implemented("generate_comp");
 }

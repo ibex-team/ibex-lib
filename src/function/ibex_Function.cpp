@@ -147,15 +147,14 @@ void Function::jacobian(const IntervalVector& x, IntervalMatrix& J) const {
 	}
 }
 
-std::ostream& operator<<(std::ostream& os, const Function& f) {
-	if (f.name!=NULL) os << f.name << ":";
+void Function::print(std::ostream& os) const {
+	if (name!=NULL) os << name << ":";
 	os << "(";
-	for (int i=0; i<f.nb_arg(); i++) {
-		os << f.arg_name(i);
-		if (i<f.nb_arg()-1) os << ",";
+	for (int i=0; i<nb_arg(); i++) {
+		os << arg_name(i);
+		if (i<nb_arg()-1) os << ",";
 	}
-	os << ")->" << f.expr();
-	return os;
+	os << ")->" << expr();
 }
 
 const ExprApply& Function::operator()(const ExprNode& arg1) const {

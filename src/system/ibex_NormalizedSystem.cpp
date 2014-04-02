@@ -39,30 +39,32 @@ class SystemNormalize : public SystemFactory {
 		}
 		for (int i=0; i<sys.ctrs.size(); i++) {
 
+			Function& fi=sys.ctrs[i].f;
+
 			if (sys.ctrs[i].op==EQ) {
 				pair<const ExprNode*, const Interval*> p=sys.ctrs[i].is_thick_equality();
 				if (p.first!=NULL || eps>0) {
 					const ExprNode *f_1;
 					const ExprNode *f_2;
 					if (p.first!=NULL) {
-						f_1=&( ExprCopy().copy(sys.ctrs[i].f.args(), sys.args, *p.first) - p.second->ub());
-						f_2=&(-ExprCopy().copy(sys.ctrs[i].f.args(), sys.args, *p.first) - (-p.second->lb()));
+						f_1=&( ExprCopy().copy(fi.args(), sys.args, *p.first) - p.second->ub());
+						f_2=&(-ExprCopy().copy(fi.args(), sys.args, *p.first) - (-p.second->lb()));
 					} else {
-						f_1=&( ExprCopy().copy(sys.ctrs[i].f.args(), sys.args, sys.ctrs[i].f.expr()) - eps);
-						f_2=&(-ExprCopy().copy(sys.ctrs[i].f.args(), sys.args, sys.ctrs[i].f.expr()) - eps);
+						f_1=&( ExprCopy().copy(fi.args(), sys.args, fi.expr()) - eps);
+						f_2=&(-ExprCopy().copy(fi.args(), sys.args, fi.expr()) - eps);
 					}
 					add_ctr(ExprCtr(*f_1,LEQ));
 					cleanup(*f_1, false);
 					add_ctr(ExprCtr(*f_2,LEQ));
 					cleanup(*f_2, false);
 				} else {
-					const ExprNode* f_i=&ExprCopy().copy(sys.ctrs[i].f.args(), sys.args, sys.ctrs[i].f.expr());
+					const ExprNode* f_i=&ExprCopy().copy(fi.args(), sys.args, fi.expr());
 					add_ctr(ExprCtr(*f_i,EQ));
 					cleanup(*f_i, false);
 				}
 			} else {
 
-				const ExprNode* f_i=&ExprCopy().copy(sys.ctrs[i].f.args(), sys.args, sys.ctrs[i].f.expr());
+				const ExprNode* f_i=&ExprCopy().copy(fi.args(), sys.args, fi.expr());
 
 				switch (sys.ctrs[i].op) {
 				case LT:

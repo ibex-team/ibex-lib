@@ -20,6 +20,8 @@ namespace ibex {
  * \defgroup function Functions
  */
 
+class NumConstraint;
+
 /**
  * \ingroup function
  * \brief Abstract class of function
@@ -140,8 +142,28 @@ public:
 	int used_var(int i) const;
 
 protected:
+	friend std::ostream& operator<<(std::ostream& os, const Fnc& f);
+	friend std::ostream& operator<<(std::ostream&, const NumConstraint&);
+
+	/**
+	 * \brief Generate f[0], f[1], etc. (all stored in "comp")
+	 */
 	virtual void generate_comp() const;
+
+	/**
+	 * \brief Initialize _nb_used_vars and _used_var
+	 */
 	virtual void generate_used_vars() const;
+
+	/**
+	 * \brief Print the function "x->f(x)" (including arguments)
+	 */
+	virtual void print(std::ostream& os) const;
+
+	/**
+	 * \brief Print the expression "f(x)"
+	 */
+	virtual void print_expr(std::ostream& os) const;
 
 	Fnc(); // temporary construction
 	const int _nb_var;
@@ -160,6 +182,10 @@ public: // TMP
 
 };
 
+/**
+ * \brief Streams out a function
+ */
+std::ostream& operator<<(std::ostream& os, const Fnc& f);
 
 /*================================== inline implementations ========================================*/
 
@@ -206,15 +232,17 @@ inline int Fnc::nb_used_vars() const {
 	return _nb_used_vars;
 }
 
-/**
- * \brief Return the ith used variable
- *
- * \pre 0<=i<nb_used_vars().
- */
 inline int Fnc::used_var(int i) const {
 	if (_nb_used_vars==-1) generate_used_vars();
 	return _used_var[i];
 }
 
+inline std::ostream& operator<<(std::ostream& os, const Fnc& f) {
+	f.print(os);
+	return os;
+}
+
+
 } // end namespace ibex
+
 #endif // __IBEX_FNC_H__
