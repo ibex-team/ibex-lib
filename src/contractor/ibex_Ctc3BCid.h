@@ -149,7 +149,7 @@ class Ctc3BCid : public Ctc {
 	 * Call the right, left (3B) and central (CID) contractions, the right and left
 	 * shavings being done in a dichotomic way : returns true if a contraction is done
 	 */
-	bool var3BCID_dicho(IntervalVector& box, int var, double wv);
+  virtual	bool var3BCID_dicho(IntervalVector& box, int var, double wv);
 
 	/**
 	 * Applies 3BCID contraction on the variable var with a linear 3B algorithm
@@ -174,7 +174,7 @@ class Ctc3BCid : public Ctc {
 	 * CID process. In var3BCID_slices, newbox=([B_left] | [B_right])
 	 * is transmitted to the method varCID (var3Bcid_box=newbox).
 	 */
-	bool var3BCID_slices(IntervalVector& box, int var, int locs3b, double w_DC, Interval & dom);
+	virtual bool var3BCID_slices(IntervalVector& box, int var, int locs3b, double w_DC, Interval & dom);
 
 	/**
 	 * Left or right shaving in a dichotomic way.
@@ -228,6 +228,9 @@ class Ctc3BCid : public Ctc {
 	/** Used to pass the shaved variable to the sub-contractor.
 	 * Allow to benefit from the incrementality of the sub-contractor. */
 	BoolMask impact;
+
+	virtual int limitCIDDichotomy () ;
+	
 };
 
 } // end namespace ibex

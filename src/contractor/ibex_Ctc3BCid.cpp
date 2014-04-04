@@ -32,6 +32,10 @@ Ctc3BCid::Ctc3BCid( Ctc& ctc, int s3b, int scid, int vhandled, double var_min_wi
 
 }
 
+  int Ctc3BCid::limitCIDDichotomy () 
+  {return LimitCIDDichotomy;}
+  
+	
 
 /* compare the boxes in all dimensions except one (var) */
 bool  Ctc3BCid::equalBoxes (int var, IntervalVector &box1, IntervalVector &box2) {
@@ -83,7 +87,7 @@ bool Ctc3BCid::var3BCID(IntervalVector& box, int var) {
 	}
 
 	// depending of the actual number of slices, calls the 3BCID contractor with a dichotomic or a linear shaving.
-	if (locs3b > LimitCIDDichotomy)
+	if (locs3b > limitCIDDichotomy())
 		return var3BCID_dicho(box, var, w_DC);
 	else
 		return var3BCID_slices(box, var, locs3b, w_DC, dom);
@@ -125,20 +129,6 @@ bool Ctc3BCid::var3BCID_dicho(IntervalVector& box, int var, double w3b) {
 }
 
 
-// left shaving only (for optimization)
-/*
-bool _3BCID::var3BCID_dicho(int var, double w3b){
-  IntervalVector initbox = box;
-
-  int r0= shave_bound_dicho(var, w3b, true);  // left shaving , after box contains the left slide
-  if (Sup(box[var]) == Sup(initbox[var]))
-    return true; // the left slide reaches the right bound : nothing more to do
-  IntervalVector leftbox=box;
-  box=initbox;
-  box[var]= Interval(Inf(leftbox[var]),Sup(initbox[var]));
-  return r0;
-}
- */
 
 bool Ctc3BCid::shave_bound_dicho(IntervalVector& box, int var,  double wv, bool left) {
 
@@ -339,61 +329,6 @@ bool Ctc3BCid::var3BCID_slices(IntervalVector& box, int var, int locs3b, double 
 }
 
 
-
-// left only (for optimization)
-/*
-bool _3BCID::var3BCID_slices(int var, int locs3b, double w_DC, Interval& dom) {
-
-  IntervalVector savebox(box);
-
-  // Reduce left bound by shaving:
-
-  bool stopLeft = false;
-  double leftBound = dom.lb();
-  double rightBound = dom.ub();
-  double leftCID;
-
-  int k=0;
-
-  while (k < locs3b && ! stopLeft) {
-
-    // Compute a slice 'dom'
-    if (k > 0) box = savebox;
-    double inf_k = dom.lb()+k*w_DC;
-    double sup_k = dom.lb()+(k+1)*w_DC;
-    if (sup_k > dom.ub() || (k == locs3b - 1 && sup_k<dom.ub())) sup_k = dom.ub();
-    dom = Interval(inf_k, sup_k);
-
-    // Try to refute this slice
-    try{
-      ctc.contract(space, Indicators(var,ALL_VARS));
-    }catch(EmptyBoxException e) {
-      leftBound = sup_k;
-      k++;
-      continue;
-    }
-    //non empty box
-    stopLeft = true;
-    leftCID = sup_k;
-    leftBound = dom.lb();
-    k++;
-  }
-
-  if (!stopLeft) { // all slices give an empty box
-    box.set_empty();
-    throw EmptyBoxException();
-  } else if (k == locs3b) {
-    // Only the last slice gives a non-empty box : box is reduced to this last slice
-    return true;
-  }else {
-
-    IntervalVector newbox (box); // newbox is initialized with the last slice handled in the previous loop
-    box=savebox;
-    box[var]= Interval(Inf(newbox[var]),Sup(savebox[var]));
-    return true;
-  }
-}
- */
 
 bool Ctc3BCid::varCID(int var, IntervalVector &varcid_box, IntervalVector &var3Bcid_box){
 
