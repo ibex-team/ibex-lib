@@ -333,7 +333,8 @@ public:
 	 *
 	 * \pre (*this) must be nonempty.
 	 */
-	Matrix random(int seed=1) const;
+	Matrix random(int seed) const;
+	Matrix random() const;
 
     /**
      * \brief (*this)+=m.

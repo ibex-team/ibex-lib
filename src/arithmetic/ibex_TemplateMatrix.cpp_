@@ -184,6 +184,17 @@ inline std::ostream& display(std::ostream& os, const M& m) {
 	return os;
 }
 
+template<class M,class V>
+Matrix _randomM(const M& m) {
+	assert(!m.is_empty());
+
+	Matrix mm(m.nb_rows(), m.nb_cols());
+	for (int i=0; i<m.nb_rows(); i++) {
+		const V& vi=m[i];
+		mm[i] = vi.random();
+	}
+	return mm;
+}
 
 template<class M,class V>
 Matrix _randomM(const M& m, int seed) {

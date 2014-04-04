@@ -344,7 +344,8 @@ bool proj_mul(const IntervalMatrix& y, IntervalMatrix& x1, IntervalMatrix& x2, d
 
 bool            IntervalMatrix::is_subset(const IntervalMatrix& x) const          { return _is_subsetM(*this,x); }
 bool            IntervalMatrix::is_strict_subset(const IntervalMatrix& x) const   { return _is_strict_subsetM(*this,x); }
-Matrix	        IntervalMatrix::random(int seed) const                                    { return _randomM<IntervalMatrix,IntervalVector>(*this,seed); }
+Matrix	        IntervalMatrix::random(int seed) const                            { return _randomM<IntervalMatrix,IntervalVector>(*this,seed); }
+Matrix	        IntervalMatrix::random() const                                    { return _randomM<IntervalMatrix,IntervalVector>(*this); }
 
 
 

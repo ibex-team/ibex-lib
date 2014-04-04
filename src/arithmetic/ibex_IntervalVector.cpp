@@ -331,6 +331,7 @@ double          IntervalVector::volume() const                                  
 double          IntervalVector::perimeter() const                                 { return _perimeter(*this); }
 double          IntervalVector::rel_distance(const IntervalVector& x) const       { return _rel_distance(*this,x); }
 Vector          IntervalVector::random(int seed) const                            { return _random<IntervalVector,Interval>(*this,seed); }
+Vector          IntervalVector::random() const                            		  { return _random<IntervalVector,Interval>(*this); }
 std::pair<IntervalVector,IntervalVector> IntervalVector::bisect(int i, double ratio) const  { return _bisect(*this, i, ratio); }
 
 
