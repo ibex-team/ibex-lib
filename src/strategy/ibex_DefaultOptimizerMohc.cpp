@@ -95,8 +95,10 @@ Array<Ctc>*  DefaultOptimizerMohc::contractor_list (System& sys2, System& ext_sy
 
         mohc=new CtcMohc (ext_sys.ctrs, 0.01, false, 0.01, CtcMohc::default_univ_newton_min_width, tau_mohc);
         ctc_list->set_ref(index, *mohc);
-    }else if(hcc==HC4)
-	    ctc_list->set_ref(index, *new CtcHC4 (sys.ctrs,0.01));
+    }else if(hcc==HC4){
+
+	    ctc_list->set_ref(index, *new CtcHC4 (ext_sys.ctrs,0.01));
+    }
 
     index++;
 
@@ -112,14 +114,14 @@ Array<Ctc>*  DefaultOptimizerMohc::contractor_list (System& sys2, System& ext_sy
        if(hcc==HC4) ctc_list->set_ref(index, *new Ctc3BCid (*new CtcHC4 (ext_sys.ctrs,0.1,true),10,1));
 	   else if(hcc>=MOHC50 && hcc<=MOHC100)
 	     ctc_list->set_ref(index, *new Ctc3BCid (
-            *new CtcMohc (sys.ctrs,mohc->active_mono_proc,0.1,true, 0.1, CtcMohc::default_univ_newton_min_width),10,1));
+            *new CtcMohc (ext_sys.ctrs,mohc->active_mono_proc,0.1,true, 0.1, CtcMohc::default_univ_newton_min_width),10,1));
        index++;
 	}
 
 
 	// the last contractor is CtcXNewtonIter  with rfp=0.2 and rfp2=0.2
 	// the limits for calling soplex are the default values 1e6 for the derivatives and 1e6 for the domains : no error found with these bounds
-	if (lrc>=COMPO && sys.nb_ctr > 0){
+	if (lrc>=COMPO && ext_sys.nb_ctr > 0){
         if(lrc==COMPO){
             ctc_list->set_ref(index,*new CtcFixPoint
 			    (*new CtcCompo(

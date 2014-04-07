@@ -66,6 +66,11 @@ bool CtcMohcRevise::hasMultOcc(Function &f){
 }
 
 bool hc4r_ev(const Function& f, const Domain& y, IntervalVector& x, Interval& z) {
+
+	//we need to obtain the interval evaluation z but the
+	//standard projection does not compute it
+	//bool ret=HC4Revise(INTERVAL_MODE).proj(f,y,x);
+
 	Eval().eval(f,x);
 
 	Domain& root=*f.expr().deco.d;
@@ -79,13 +84,15 @@ bool hc4r_ev(const Function& f, const Domain& y, IntervalVector& x, Interval& z)
 
     z=root.i();
 
+
 	root &= y;
 
 	f.backward<HC4Revise>(HC4Revise(INTERVAL_MODE));
 
-	f.write_arg_domains(x);
+	f.read_arg_domains(x);
 
    return false;
+
 }
 
 void CtcMohcRevise::update_active_mono_proc(Interval& z){
@@ -122,14 +129,12 @@ void CtcMohcRevise::update_active_mono_proc(Interval& z){
        }
 
 
-	   if(rho<tau_mohc) {active_mono_proc=1; }
+	   if(rho<tau_mohc) {active_mono_proc=1;}
 	   else active_mono_proc=0;
 }
 
 void CtcMohcRevise::contract(IntervalVector& b) {
-
-  box=b;
-
+  if(b.is_empty()) throw EmptyBoxException(); //no deberia ocurrir
   const Dim& d=ctr.f.expr().dim;
   Domain root_label(d);
   Interval right_cst;
@@ -148,11 +153,11 @@ void CtcMohcRevise::contract(IntervalVector& b) {
   Interval z;
 
   try{
-     if(hc4r_ev(ctr.f, root_label, box,z)){
+     if(hc4r_ev(ctr.f, root_label, b,z)){
+        //box is feasible
         set_flag(INACTIVE);
 		set_flag(FIXPOINT);
 		active_mono_proc=0;
-		b=box;
 		return;
      }
   }catch (EmptyBoxException& e) {
@@ -161,18 +166,23 @@ void CtcMohcRevise::contract(IntervalVector& b) {
   }
 
   //if(ctr.op!=EQ) z&=right_cst;
+  //cout << 1 << endl;
 
-  if(!hasMultOcc(ctr.f))
+
+   if(!hasMultOcc(ctr.f))
     active_mono_proc=0;
 
 
+   box=b;
+
+bool flag=false;
 try{
   if(active_mono_proc != 0){ //monotonic procedures
 
     bool y_set=_minmax;//the Y set is created only if minmax is used
     IntervalVector initbox=box;
 
-    if(!fog.occurrence_grouping(box, y_set, _og)) {b=box; return;}
+    if(!fog.occurrence_grouping(box, y_set, _og)) { return;}
 
     initialize_apply(); //initialize applyfmin and applyfmax arrays
 
@@ -182,11 +192,17 @@ try{
 	if(ctr.op==EQ || ctr.op==LEQ || ctr.op==LT){
 	  if(_minmax){
           zmin=fog.revise(box,true);
+        /*if(initbox[3]!=box[3]){
+          cout << "box    :" << initbox << endl;
+          cout << "box_min:" << box << endl;
+          flag=true;
+          initbox=box;
+        }*/
 	  }else{
 	      zmin=fog.eval(box, true);
 
-	    zmin &= Interval(NEG_INFINITY,0);
-	    if (zmin.is_empty ()) throw EmptyBoxException();
+	      zmin &= Interval(NEG_INFINITY,0);
+	    if (zmin.is_empty ()) {b.set_empty(); throw EmptyBoxException();}
 	  }
 	}else
 	  apply_fmin_to_false_except(-1);
@@ -194,12 +210,17 @@ try{
 	if(ctr.op==EQ || ctr.op==GEQ || ctr.op==GT){
 	  if(_minmax){
         zmax=fog.revise(box,false); // contract Y, W
+       /* if(initbox[3]!=box[3]){
+          cout << "box    :" << initbox << endl;
+          cout << "box_max:" << box << endl;
+          flag=true;
+        }*/
 	  }else{
 	    // only the existence test
 	    zmax=fog.eval(box, false); //og
 
 	    zmax &= Interval(0, POS_INFINITY);
-	    if (zmax.is_empty ()) throw EmptyBoxException();
+	    if (zmax.is_empty ()){b.set_empty(); throw EmptyBoxException();}
 	  }
 	}else
 	  apply_fmax_to_false_except(-1);
@@ -212,6 +233,7 @@ try{
 
     if(epsilon>0 && _monobox)
         MonoBoxNarrow();
+
   }
   }catch (EmptyBoxException& e) {
 		b.set_empty();
@@ -219,6 +241,7 @@ try{
   }
 
   b=box;
+  //if(flag) cout << "box____:" << b << endl;
 }
 
   void CtcMohcRevise::MonoBoxNarrow(){
@@ -247,6 +270,7 @@ try{
       //  if(fog.nb_occ[i]==0 || (fog.nb_occ[i]==1 && _minmax) || box[i].diam() < 1e-8) continue;
        box[i]=Interval(LB[i].lb(), RB[i].ub());
      }
+
   }
 
   void CtcMohcRevise::MonoBoxNarrow(int i){
@@ -257,9 +281,9 @@ try{
      if(ApplyFmax[i]!=NO || ApplyFmin[i]!=NO){
       bool og_treated=false;
 
-      for(int j=0; j<fog.occ[i].size(); j++)
+      for(int j=0; j<fog.occ[i].size(); j++){
            if(fog.r_c[fog.occ[i][j]].ub() < 1.0){og_treated=true; break;}
-
+      }
       //~ for(int occ=fog.first_occ[i];occ<fog.first_occ[i+1];occ++)
            //~ if(fog.r_c[occ].ub() < 1.0){og_treated=true; break;}
 
@@ -549,7 +573,7 @@ try{
      if(!t_a.is_empty() || !t_b.is_empty())
      {
        if(!t_a.is_empty()) LB[i]&=t_a;
-       if(!t_b.is_empty()) LB[i]=Interval((LB[i].lb()>=t_b.lb())?LB[i].lb():t_b.lb(), LB[i].ub()) ;
+       if(!t_b.is_empty()) LB[i]=Interval(std::max(LB[i].lb(),t_b.lb()) , std::min(t_b.ub(),LB[i].ub()) ) ;
 
 //        if(Diam(LB[var])>0){
 //          double deriv_a=ctr_mohc.zmax.ub()/Diam(LB[var]);
@@ -571,12 +595,12 @@ try{
      if(t_a==RB[i] && t_b==RB[i]) return;
 
      if(!t_a.is_empty() && (t_a.ub() < RB[i].ub())){
-        apply_fmax_to_false_except(i);
+        //apply_fmax_to_false_except(i);
         ApplyFmin[i]=YES;
      }
 
      if(!t_b.is_empty() && (t_b.ub() < RB[i].ub())){
-        apply_fmin_to_false_except(i);
+        //apply_fmin_to_false_except(i);
         ApplyFmax[i]=YES;
      }
 
@@ -586,7 +610,7 @@ try{
      if(!t_a.is_empty() || !t_b.is_empty())
      {
        if(!t_a.is_empty()) RB[i]&=t_a;
-       if(!t_b.is_empty()) RB[i]=Interval(RB[i].lb(),  (RB[i].ub()<=t_b.ub())?RB[i].ub():t_b.ub()) ;
+       if(!t_b.is_empty()) RB[i]=Interval(std::max(RB[i].lb(),t_b.lb()) , std::min(t_b.ub(),RB[i].ub()) ) ;
 
 //        if(Diam(RB[i])>0){
 //           double deriv_a=-ctr_mohc.zmin.lb()/Diam(RB[i]);
@@ -734,14 +758,12 @@ try{
 void Function_OG::OG_case1(int i){
    if(g[i].lb()>=0){
       set_ra(i,1);
-      set_rc(i,0);
       ga[i]=g[i];
    }else if(g[i].ub()<=0){
       set_rb(i,1);
-      set_rb(i,0);
       gb[i]=g[i];
    }
-
+      set_rc(i,0);
 }
 
 void Function_OG::OG_case2(int i, Interval inf_G_Xa, Interval inf_G_Xb, Interval sup_G_Xa, Interval sup_G_Xb){
@@ -902,6 +924,7 @@ bool Function_OG::gradient(IntervalVector& box){
 	_setbox(box);
 	_f.gradient(_box,_g);
 
+
     for (int i=0;i < _g.size();i++)
 	  if (_g[i].mag() == POS_INFINITY)
 	    return false;
@@ -917,7 +940,7 @@ bool Function_OG::gradient(IntervalVector& box){
 	//taylor_error=0.0;
 	//for(int i=0; i<g.size(); i++)
     //    taylor_error+=box[i].diam()*g[i].diam();
-
+    return true;
 }
 
 void Function_OG::_eval_leaves(IntervalVector& box, bool minrevise){
@@ -1066,6 +1089,7 @@ CtcMohc::CtcMohc(const Array<NumConstraint>& csp, double ratio, bool incremental
 
           active_mono_proc=new int[csp.size()];
           for(int i=0;i<csp.size();i++) active_mono_proc[i]=1;
+        //  flags[FIXPOINT]=false;
 
 }
 
@@ -1078,6 +1102,7 @@ CtcMohc::CtcMohc(const Array<NumConstraint>& csp, int* active_mono_proc, double 
           active_mono_proc=new int[csp.size()];
           for(int i=0;i<csp.size();i++) active_mono_proc[i]=1;
         }
+       // flags[FIXPOINT]=false;
 }
 
 
