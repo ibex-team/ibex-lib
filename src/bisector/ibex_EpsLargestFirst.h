@@ -21,7 +21,7 @@ namespace ibex {
  * \brief Relative-largest-first bisector.
  *
  */
-class EpsiLargestFirst : public Bsc {
+class EpsLargestFirst : public Bsc {
  public:
   /**
    * \brief Create a bisector with relative largest first heuristic.
@@ -29,7 +29,7 @@ class EpsiLargestFirst : public Bsc {
    * \param ratio (optional) - the ratio between the diameters of the left and the right parts of the
    *            bisected interval. Default value is 0.45.
    */
-    EpsiLargestFirst( const Vector &init, double ratio=Bsc::default_ratio);
+    EpsLargestFirst( const Vector &init, double ratio=Bsc::default_ratio);
 
  
 

@@ -7,20 +7,20 @@
 // Last Update : Mars 19, 2012
 //============================================================================
 
-#include "ibex_EpsiLargestFirst.h"
+#include "ibex_EpsLargestFirst.h"
 #include "ibex_NoBisectableVariableException.h"
 using std::pair;
 
 namespace ibex {
 
-EpsiLargestFirst::EpsiLargestFirst(const Vector &init,  double ratio1) :
+EpsLargestFirst::EpsLargestFirst(const Vector &init,  double ratio1) :
 				  ratio(ratio1), init_epsi(init) {
 	for (int i=0;i<(init.size());i++) {
 		if (init_epsi[i]<=0) init_epsi[i]=1.e-20;
 	}
 }
 
-pair<IntervalVector,IntervalVector> EpsiLargestFirst::bisect(const IntervalVector& box) {
+pair<IntervalVector,IntervalVector> EpsLargestFirst::bisect(const IntervalVector& box) {
 	assert(box.size()<=init_epsi.size());
 	int var =-1;
 	double l=0.0;
