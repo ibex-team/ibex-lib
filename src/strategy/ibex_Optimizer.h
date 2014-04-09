@@ -98,6 +98,18 @@ public:
 	 * \brief Displays on standard output a report of the last call to #optimize(const IntervalVector&).
 	 *
 	 * Information provided:
+	 * <ul><li> interval of the cost  [uplo,loup] in case of termination due to timelimit
+	 *     <li>total running time
+	 *     <li>total number of cells created during the exploration
+	 * </ul>
+	 */
+	
+	void time_cells_report();
+	
+	/**
+	 * \brief Displays on standard output a report of the last call to #optimize(const IntervalVector&).
+	 *
+	 * Information provided:
 	 * <ul><li> interval of the cost  [uplo,loup]
 	 *     <li>total running time
 	 * </ul>

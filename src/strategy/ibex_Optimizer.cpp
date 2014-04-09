@@ -24,6 +24,7 @@
 #include "ibex_PdcFirstOrder.h"
 
 #include <float.h>
+#include <stdlib.h>
 
 using namespace std;
 
@@ -323,13 +324,13 @@ void Optimizer::firstorder_contract(  IntervalVector& box, const  IntervalVector
 				df.backward(IntervalVector(n,Interval::ZERO),box);
 		}
 	}
-
+	
 	else {
 		PdcFirstOrder p(user_sys,init_box);
 		p.set_entailed(entailed);
 		if (p.test(box)==NO) throw EmptyBoxException();
 	}
-
+	
 }
 
 void Optimizer::contract ( IntervalVector& box, const IntervalVector& init_box) {
@@ -491,6 +492,15 @@ void Optimizer::report() {
     }
 	 */
 }
+  /* minimal report for benchmarking */
+  void Optimizer::time_cells_report() {
+	if (timeout >0 &&  time >=timeout ) {
+      cout << "timeout" << timeout << "  " << uplo << " " << loup << " ";}
+    else
+      cout << time << " " ;
+    cout << nb_cells << endl;
+  }
+	
 
 void Optimizer::report_perf() {
 
