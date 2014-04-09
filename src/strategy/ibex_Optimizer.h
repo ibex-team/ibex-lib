@@ -73,14 +73,17 @@ public:
 	/**
 	 * \brief Delete *this.
 	 */
-	~Optimizer();
+	virtual ~Optimizer();
 
 	/**
 	 * \brief Run the optimization.
 
-	 * \param init_box    -  the initial box
+	 * \param init_box       -  the initial box
+	 * \param obj_init_bound - (optional) can be set when an initial upper
+	 *                         bound of the objective minimum is known a priori.
+	 *                         (this bound can be obtained, e.g., by a local solver).
 	 */
-	void optimize(const IntervalVector& init_box);
+	void optimize(const IntervalVector& init_box, double obj_init_bound=POS_INFINITY);
 
 	/**
 	 * \brief Displays on standard output a report of the last call to #optimize(const IntervalVector&).

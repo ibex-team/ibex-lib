@@ -90,10 +90,7 @@ Optimizer::Optimizer(System& user_sys, Bsc& bsc, Ctc& ctc, double prec,
 	if (trace) cout.precision(12);
 
 	//	objshaver= new Ctc3BCid (*new CtcHC4 (ext_sys.ctrs,0.1,true),100,1,1);
-	nb_simplex=0;
-	diam_simplex=0;
-	nb_rand=0;
-	diam_rand=0;
+
 	int niter=100;
 	if (niter < 3*n) niter=3*n;
 
@@ -337,7 +334,18 @@ void Optimizer::contract ( IntervalVector& box, const IntervalVector& init_box) 
 	ctc.contract(box);
 }
 
-void Optimizer::optimize(const IntervalVector& init_box) {
+void Optimizer::optimize(const IntervalVector& init_box, double obj_init_bound) {
+	loup=obj_init_bound;
+	pseudo_loup=obj_init_bound;
+
+	uplo=NEG_INFINITY;
+	uplo_of_epsboxes=POS_INFINITY;
+
+	nb_cells=0;
+	nb_simplex=0;
+	diam_simplex=0;
+	nb_rand=0;
+	diam_rand=0;
 
 	buffer.flush();
 
