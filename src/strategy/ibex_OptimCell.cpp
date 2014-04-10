@@ -1,35 +1,33 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_Cell.cpp
-// Author      : Gilles Chabert
+// File        : ibex_OptimCell.cpp
+// Author      : Bertrand Neveu
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
-// Created     : May 10, 2012
-// Last Update : May 10, 2012
+// Created     : Apr 7, 2014
+// Last Update : Apr 7, 2014
 //============================================================================
 
-#include "ibex_Cell.h"
+#include "ibex_OptimCell.h"
 
 namespace ibex {
- Cell::Cell(const IntervalVector& box) : box(box){
+
+  OptimCell::OptimCell(const IntervalVector& box) : Cell(box),heap_present(0),loup(0) {
 
 }
 
-std::pair<Cell*,Cell*> Cell::bisect(const IntervalVector& left, const IntervalVector& right) {
-	Cell* cleft = new Cell(left);
-	Cell* cright = new Cell(right);
+std::pair<OptimCell*,OptimCell*> OptimCell::bisect(const IntervalVector& left, const IntervalVector& right) {
+
+	OptimCell* cleft = new OptimCell(left);
+	OptimCell* cright = new OptimCell(right);
 	for (IBEXMAP(Backtrackable*)::iterator it=data.begin(); it!=data.end(); it++) {
 		std::pair<Backtrackable*,Backtrackable*> child_data=it->second->down();
 		cleft->data.insert_new(it->first,child_data.first);
 		cright->data.insert_new(it->first,child_data.second);
 	}
-	return std::pair<Cell*,Cell*>(cleft,cright);
+	return std::pair<OptimCell*,OptimCell*>(cleft,cright);
 }
 
-Cell::~Cell() {
-	for (IBEXMAP(Backtrackable*)::iterator it=data.begin(); it!=data.end(); it++)
-		delete it->second;
-}
 
 
 } // end namespace ibex

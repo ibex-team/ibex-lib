@@ -14,7 +14,7 @@
 #include "ibex_OptimProbing.cpp_"
 #include "ibex_OptimSimplex.cpp_"
 #include "ibex_CtcFwdBwd.h"
-#include "ibex_Ctc3BCid.h"
+#include "ibex_CtcOptimShaving.h"
 #include "ibex_CtcHC4.h"
 
 #include "ibex_ExprCopy.h"
@@ -57,16 +57,19 @@ void Optimizer::read_ext_box(const IntervalVector& ext_box, IntervalVector& box)
 
 
 Optimizer::Optimizer(System& user_sys, Bsc& bsc, Ctc& ctc, double prec,
-		double goal_rel_prec, double goal_abs_prec, int sample_size, double equ_eps, bool rigor) :
-				user_sys(user_sys), sys(user_sys,equ_eps), n(user_sys.nb_var), m(sys.nb_ctr) /* (warning: not user_sys.nb_ctr) */,
+					 double goal_rel_prec, double goal_abs_prec, int sample_size, double equ_eps,
+					 bool rigor,  int critpr,CellHeapOptim::criterion crit) :
+                user_sys(user_sys), sys(user_sys,equ_eps),
+				n(user_sys.nb_var), m(sys.nb_ctr) /* (warning: not user_sys.nb_ctr) */,
 				ext_sys(user_sys,equ_eps),
-				bsc(bsc), ctc(ctc), buffer(n),
+				bsc(bsc), ctc(ctc),
+				buffer(n),buffer2(n,crit),  // first buffer with LB, second buffer with ct (default UB))
 				prec(prec), goal_rel_prec(goal_rel_prec), goal_abs_prec(goal_abs_prec),
 				sample_size(sample_size), mono_analysis_flag(true), in_HC4_flag(true), trace(false),
-				timeout(1e08), loup(POS_INFINITY), pseudo_loup(POS_INFINITY), uplo(NEG_INFINITY),
-				loup_point(n), loup_box(n), nb_cells(0),
-				df(*user_sys.goal,Function::DIFF),
-				loup_changed(false), rigor(rigor), uplo_of_epsboxes(POS_INFINITY) {
+				timeout(1e08), loup(POS_INFINITY), uplo(NEG_INFINITY), pseudo_loup(POS_INFINITY),
+				loup_point(n), loup_box(n),
+				df(*user_sys.goal,Function::DIFF), rigor(rigor),
+				uplo_of_epsboxes(POS_INFINITY), nb_cells(0), loup_changed(false), critpr(critpr) {
 
 	// ==== build the system of equalities only ====
 	try {
@@ -89,25 +92,31 @@ Optimizer::Optimizer(System& user_sys, Bsc& bsc, Ctc& ctc, double prec,
 
 	if (trace) cout.precision(12);
 
-	//	objshaver= new Ctc3BCid (*new CtcHC4 (ext_sys.ctrs,0.1,true),100,1,1);
+	//	objshaver= new CtcOptimShaving (*new CtcHC4 (ext_sys.ctrs,0.1,true),20,1,1.e-11);
 
 	int niter=100;
+	// int niter=1000;
 	if (niter < 3*n) niter=3*n;
 
 	//====================================
 	mylp = new LinearSolver(n+1,m,niter );
+	//	cout << "sys " << sys << endl;
 }
 
 Optimizer::~Optimizer() {
 	if (is_inside) {
 		for (int i=0; i<m; i++) {
-			delete &(is_inside->list[i]);
+		  delete &(is_inside->list[i]);
 		}
 
 		delete is_inside;
 	}
 	buffer.flush();
+	if (critpr > 0) buffer2.flush();
+	
 	delete mylp;
+	//	delete &(objshaver->ctc);
+	//	delete objshaver;
 }
 
 // compute the value ymax (decreasing the loup with the precision)
@@ -166,26 +175,29 @@ bool Optimizer::update_real_loup() {
 }
 
 // 2 methods for searching a better feasible point and a better loup
-void Optimizer::update_loup(const IntervalVector& box) {
+
+bool Optimizer::update_loup(const IntervalVector& box) {
+  bool loup_change=false;
 	if (rigor && equs!=NULL) { // a loup point will not be safe (pseudo loup is not the real loup)
 		double old_pseudo_loup=pseudo_loup;
 		if (update_loup_probing(box) && pseudo_loup < old_pseudo_loup + default_loup_tolerance*fabs(loup-pseudo_loup)) {
 			// update pseudo_loup
-			loup_changed |= update_real_loup();
+			loup_change |= update_real_loup();
 			old_pseudo_loup=pseudo_loup; // because has changed
 		}
 		if (update_loup_simplex(box) && pseudo_loup < old_pseudo_loup + default_loup_tolerance*fabs(loup-pseudo_loup)) {
-			loup_changed |= update_real_loup();
+			loup_change |= update_real_loup();
 		}
 	} else {
-		loup_changed |= update_loup_probing(box); // update pseudo_loup
+		loup_change |= update_loup_probing(box); // update pseudo_loup
 		// the loup point is safe: the pseudo loup is the real loup.
 		loup=pseudo_loup;
-		loup_changed |= update_loup_simplex(box);  // update pseudo_loup
+		loup_change |= update_loup_simplex(box);  // update pseudo_loup
 		loup = pseudo_loup;
 	}
-}
+	return loup_change;
 
+}
 
 void Optimizer::update_entailed_ctr(const IntervalVector& box) {
 	for (int j=0; j<m; j++) {
@@ -200,13 +212,10 @@ void Optimizer::update_entailed_ctr(const IntervalVector& box) {
 	}
 }
 
-
-double minimum (double a, double b)
+  double minimum (double a, double b)
   {if(a<=b) return a;
     else return b;
   }
-
-
 
 void Optimizer::update_uplo() {
 	double new_uplo=POS_INFINITY;
@@ -216,7 +225,7 @@ void Optimizer::update_uplo() {
 	  if (new_uplo < uplo_of_epsboxes) uplo = new_uplo;
 	  else uplo= uplo_of_epsboxes;
 	}
-	else if (buffer.empty() && loup != POS_INFINITY) {
+		else if (buffer.empty() && loup != POS_INFINITY) {
 	  // empty buffer : new uplo is set to ymax (loup - precision) if a loup has been found
 	  new_uplo=compute_ymax(); // not new_uplo=loup, because constraint y <= ymax was enforced
          //    cout << " new uplo buffer empty " << new_uplo << " uplo " << uplo << endl;
@@ -231,29 +240,85 @@ void Optimizer::update_uplo() {
 
 
 
-
 /* contract the box of the cell c , try to find a new loup :;
-     push the cell  in the heap or if the contraction makes the box empty, delete the cell */
-void Optimizer::handle_cell(Cell& c, const IntervalVector& init_box) {
-	try {
-		contract_and_bound(c, init_box);  // may throw EmptyBoxException
-		buffer.push(&c);
-		nb_cells++;
-	}
-	catch(EmptyBoxException&) {
-		delete &c;
-	}
-}
+     push the cell  in the 2 heaps or if the contraction makes the box empty, delete the cell. For diversification, rebuild the 2 heaps
+*/
 
-void Optimizer::contract_and_bound(Cell& c, const IntervalVector& init_box) {
+  void Optimizer::handle_cell(OptimCell& c, const IntervalVector& init_box ){
+    try{ contract_and_bound(c, init_box);  // may throw EmptyBoxException
+	  //       objshaver->contract(c.box);
+
+
+		// Computations for the Casado C3, C5, C7 criteria 
+
+	  if ((buffer2.crit==CellHeapOptim::C3)||(buffer2.crit==CellHeapOptim::C5)||(buffer2.crit==CellHeapOptim::C7))
+	    {compute_pf(c);
+		  
+		  if (loup < 1.e8)
+			c.loup=loup;
+		  else
+			c.loup=1.e8;
+		}
+	  
+	  // computations for C5, C7 and PU criteria
+	  if ((buffer2.crit==CellHeapOptim::C5)||(buffer2.crit==CellHeapOptim::C7)||(buffer2.crit==CellHeapOptim::PU))
+		compute_pu(c);
+	  
+	  // the cell is put into the 2 heaps	  
+      buffer.push(&c);
+      if (critpr > 0)      buffer2.push(&c);
+
+      nb_cells++;
+	  // reconstruction of the 2 heaps every heap_build_period nodes
+      int heap_build_period=100;
+      if (nb_cells% heap_build_period ==0)
+	{ buffer.makeheap();
+	  if (critpr > 0) buffer2.makeheap();
+	}
+
+    }
+    catch(EmptyBoxException&) {
+      delete &c;
+    }
+  }
+	void Optimizer::compute_pf(OptimCell& c)
+	{	c.pf=(sys.goal)->eval(c.box);
+	}
+	
+	void Optimizer::compute_pu(OptimCell& c)
+	{	  double pu=1;
+	  for (int j=1; j<m;j++)
+		{
+		  if (entailed->normalized(j)) continue;
+		  Interval eval=sys.f[j].eval(c.box);
+		  double pui=1;
+		  if (eval.diam()>0)
+			pui= -eval.lb()/eval.diam();
+		  pu=pu*pui;
+		}
+	  c.pu=pu;
+	}
+	
+	  
+	
+void Optimizer::contract_and_bound(OptimCell& c, const IntervalVector& init_box) {
 
 	/*======================== contract y with y<=loup ========================*/
 	Interval& y=c.box[ext_sys.goal_var()];
 
+	//	IntervalVector tmp_box(n);
+	//	read_ext_box(c.box,tmp_box);
+
 	double ymax;
 	if (loup==POS_INFINITY) ymax=POS_INFINITY;
-	else ymax= compute_ymax();
-
+	else ymax= compute_ymax()+1.e-15;
+	//	else ymax= compute_ymax();
+	/*
+	if (!(y.ub() == ymax))
+		  y &= Interval(NEG_INFINITY,ymax+1.e-15);
+		else if (y.ub()==ymax && !(tmp_box.contains(loup_point)))
+		  y = Interval(y.lb(), ymax+1.e-15);
+	*/    
 	y &= Interval(NEG_INFINITY,ymax);
 	if (y.is_empty()) {
 		c.box.set_empty();
@@ -265,7 +330,8 @@ void Optimizer::contract_and_bound(Cell& c, const IntervalVector& init_box) {
 	//cout << " [contract]  y before=" << y << endl;
 
 	contract(c.box, init_box);
-
+    
+	
 	//cout << " [contract]  x after=" << c.box << endl;
 	//cout << " [contract]  y after=" << y << endl;
 	// TODO: no more cell in argument here (just a box). Does it matter?
@@ -273,30 +339,27 @@ void Optimizer::contract_and_bound(Cell& c, const IntervalVector& init_box) {
 
 
 	/*========================= update loup =============================*/
+	
 	IntervalVector tmp_box(n);
 	read_ext_box(c.box,tmp_box);
 
 	entailed = &c.get<EntailedCtr>();
 	update_entailed_ctr(tmp_box);
 
-	update_loup(tmp_box);
+	bool loup_ch=update_loup(tmp_box);
+    // update of the upper bound of y in case of a new loup found
+	if (loup_ch)  	y &= Interval(NEG_INFINITY,compute_ymax());
+	loup_changed |= loup_ch;
 	/*====================================================================*/
 	// [gch] TODO: the case (!c.box.is_bisectable()) seems redundant
 	// with the case of a NoBisectableVariableException in
 	// optimize(). Is update_uplo_of_epsboxes called twice in this case?
-	// (bn] NO , the NoBisectableVariableException is raised by the bisector, 
-	// there are actually 2 different cases of a non bisected box that may cause an update 
-	// of uplo_of_epsboxes
-	double tmp_diam =tmp_box.max_diam();
-	if ((tmp_diam<=prec && y.diam() <=goal_abs_prec) || !c.box.is_bisectable()) {
+	// (bn] NO , the NoBisectableVariableException is raised by the bisector, there are 2 different cases of a non bisected box that may cause an update of uplo_of_epsboxes
+	if ((tmp_box.max_diam()<=prec && y.diam() <=goal_abs_prec) || !c.box.is_bisectable()) {
 		// rem1: tmp_box and not c.box because y is handled with goal_rel_prec and goal_abs_prec
 		// rem2: do not use a precision contractor here since it would make the box empty (and y==(-inf,-inf)!!)
 		// rem 3 : the extended  boxes with no bisectable  domains  should be catched for avoiding infinite bisections
-		if  (!(tmp_box.is_unbounded())) {
-			// rem4: this case can append if the interval [1.79769e+308,inf] is in c.box.
-			// It is only numerical degenerated case
-			update_uplo_of_epsboxes(y.lb());
-		}
+		update_uplo_of_epsboxes(y.lb());
 		throw EmptyBoxException();
 	}
 
@@ -306,8 +369,10 @@ void Optimizer::contract_and_bound(Cell& c, const IntervalVector& init_box) {
 	firstorder_contract(tmp_box,init_box);
 	// the current extended box in the cell is updated
 	write_ext_box(tmp_box,c.box);
-
-}
+	
+	
+	  }
+  
 
 // called with the box without the objective
 void Optimizer::firstorder_contract(  IntervalVector& box, const  IntervalVector& init_box) {
@@ -322,11 +387,17 @@ void Optimizer::firstorder_contract(  IntervalVector& box, const  IntervalVector
 		}
 	}
 	
+	/*
+
+	//	else if (equs==NULL)	  {
 	else {
+
 		PdcFirstOrder p(user_sys,init_box);
+
 		p.set_entailed(entailed);
 		if (p.test(box)==NO) throw EmptyBoxException();
-	}
+	  }
+	*/
 	
 }
 
@@ -348,8 +419,9 @@ void Optimizer::optimize(const IntervalVector& init_box, double obj_init_bound) 
 	diam_rand=0;
 
 	buffer.flush();
-
-	Cell* root=new Cell(IntervalVector(n+1));
+	if (critpr > 0) buffer2.flush();
+	
+	OptimCell* root=new OptimCell(IntervalVector(n+1));
 
 	write_ext_box(init_box,root->box);
 
@@ -367,22 +439,47 @@ void Optimizer::optimize(const IntervalVector& init_box, double obj_init_bound) 
 	time=0;
 	Timer::start();
 	handle_cell(*root,init_box);
-
+	int indbuf=0;
+	
 	try {
 		while (!buffer.empty()) {
+		  if (trace >= 2) cout << " buffer " << ((CellBuffer&) buffer) << endl;
+		  if (critpr> 0 && trace >= 2) cout << "  buffer2 " << ((CellBuffer&) buffer2) << endl;
+		  //		  cout << "buffer size "  << buffer.size() << " " << buffer2.size() << endl;
+		  // removes from the heap buffer, the cells already chosen in the other buffer
+		  if (critpr >0)
+			{buffer.cleantop();
+			  buffer2.cleantop();
+			}
+		  update_uplo();
+		  if (buffer.empty() || (critpr > 0 && buffer2.empty())) {
+			  //cout << " buffer empty " << buffer.empty() << " " << buffer2.empty() << endl;
+			  break;
+		  }
+		  
 			loup_changed=false;
-			if (trace >= 2) cout << ((CellBuffer&) buffer) << endl;
-
-			Cell* c=buffer.top();
-
-			//	    cout << " box before bisection " <<  c->box << endl;
-
+			OptimCell *c;
+			// random choice between the 2 buffers corresponding to two criteria implemented in two heaps)
+			// critpr chances over 100 to choose the second heap
+			if (rand() % 100 >=critpr)
+			  { indbuf=0;
+				c=buffer.top();  // the first heap is used
+			  }
+			else {
+			  indbuf=1;
+			  c=buffer2.top();  // the second heap is used
+			}
+			  
 			try {
 				pair<IntervalVector,IntervalVector> boxes=bsc.bisect(*c);
 
-				pair<Cell*,Cell*> new_cells=c->bisect(boxes.first,boxes.second);
-
-				delete buffer.pop();
+				pair<OptimCell*,OptimCell*> new_cells=c->bisect(boxes.first,boxes.second);
+				if (indbuf ==0) 
+				  buffer.pop();
+				else  
+				  buffer2.pop();
+				if (c->heap_present==0) delete c; // deletes the cell if it is no more present in a heap.
+				
 				handle_cell(*new_cells.first, init_box);
 				handle_cell(*new_cells.second, init_box);
 
@@ -390,7 +487,7 @@ void Optimizer::optimize(const IntervalVector& init_box, double obj_init_bound) 
 					cout << " possible infinite minimum " << endl;
 					break;
 				}
-				if (loup_changed ) {
+				if (loup_changed) {
 					// In case of a new upper bound (loup_changed == true), all the boxes
 					// with a lower bound greater than (loup - goal_prec) are removed and deleted.
 					// Note: if contraction was before bisection, we could have the problem
@@ -398,9 +495,12 @@ void Optimizer::optimize(const IntervalVector& init_box, double obj_init_bound) 
 					// older version of the code (before revision 284).
 
 					double ymax= compute_ymax();
+
 					buffer.contract_heap(ymax);
+					if (critpr > 0) buffer2.contract_heap(ymax);
+
 					if (ymax <=NEG_INFINITY) {
-						if (trace) cout << " infinite value for the minimum " << endl;
+					  if (trace) cout << " infinite value for the minimum " << endl;
 						break;
 					}
 					if (trace) cout << setprecision(12) << "ymax=" << ymax << " uplo= " <<  uplo<< endl;
@@ -410,17 +510,14 @@ void Optimizer::optimize(const IntervalVector& init_box, double obj_init_bound) 
 
 			}
 			catch (NoBisectableVariableException& ) {
-				bool bb=false;
-				for (int i=0;(!bb)&&( i<(c->box).size()); i++) {
-					if (i!=ext_sys.goal_var())  // skip goal variable
-						bb=bb||(c->box)[i].is_unbounded();
-				}
-				if (!bb) {
-					// rem4: this case can append if the interval [1.79769e+308,inf] is in c.box.
-					// It is only numerical degenerated case
-					update_uplo_of_epsboxes ((c->box)[ext_sys.goal_var()].lb());
-				}
-				delete buffer.pop();
+				update_uplo_of_epsboxes ((c->box)[ext_sys.goal_var()].lb());
+				if (indbuf ==0)
+				  buffer.pop();
+				else  
+				  buffer2.pop();
+				if (c->heap_present==0) delete c;
+
+
 			}
 		}
 	}
@@ -432,12 +529,11 @@ void Optimizer::optimize(const IntervalVector& init_box, double obj_init_bound) 
 	time+= Timer::VIRTUAL_TIMELAPSE();
 }
 
-
 void Optimizer::update_uplo_of_epsboxes(double ymin) {
 
-	// the current box cannot be bisected.  ymin is a lower bound of the objective in this box
+	// the current box cannot be bisected.  ymin is a lower bound of the objective on this box
 	// uplo of epsboxes can only go down, but not under uplo : it is an upperbound for uplo,
-	// that indicates a lowerbound for the objective in all the small boxes
+	//that indicates a lowerbound for the objective in all the small boxes
 	// found by the precision criterion
   assert (uplo_of_epsboxes >= uplo);
   assert(ymin >= uplo);
@@ -449,7 +545,7 @@ void Optimizer::update_uplo_of_epsboxes(double ymin) {
     }
 }
 
-
+		  
 
 void Optimizer::report() {
 

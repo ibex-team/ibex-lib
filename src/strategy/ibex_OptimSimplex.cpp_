@@ -57,7 +57,7 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 	Vector row(n+1);
 	IntervalVector bound(n+1);
 
-	sys.goal->gradient(box,G);
+	sys.goal->gradient(box.mid(),G);
 	for (int i =0; i< n ; i++)
 	  if (G[i].diam() > 1e8) return false;   //to avoid problems with SoPleX
 

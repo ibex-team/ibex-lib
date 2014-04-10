@@ -22,6 +22,7 @@
 #include "ibex_EntailedCtr.h"
 #include "ibex_LinearSolver.h"
 #include "ibex_PdcHansenFeasibility.h"
+#include "ibex_OptimCell.h"
 
 namespace ibex {
 
@@ -53,6 +54,8 @@ public:
 	 *   \param sample_size   - number of samples taken when looking for a "loup"
 	 *   \param equ_eps       - thickness of equations when relaxed to inequalities
 	 *   \param rigor         - look for points that strictly satisfy equalities. By default: false
+	 *   \param critpr        - probability to choose the second criterion in node selection; integer in [0,100]. By default 50
+	 *  \param crit           - second criterion in node selection (the first criterion is the minimum of the objective estimate). default value CellHeapOPtim::UB
 	 *
 	 * <ul> The extended system (see ExtendedSystem constructor) contains:
 	 * <li> (n+1) variables, x_1,...x_n,y. The index of y is #goal_var (==n).
@@ -67,9 +70,7 @@ public:
 
 	Optimizer(System& sys, Bsc& bsc, Ctc& ctc, double prec=default_prec,
 			double goal_rel_prec=default_goal_rel_prec, double goal_abs_prec=default_goal_abs_prec,
-			int sample_size=default_sample_size, double equ_eps=default_equ_eps, bool rigor=false);
-
-
+			  int sample_size=default_sample_size, double equ_eps=default_equ_eps, bool rigor=false, int critpr=50,CellHeapOptim::criterion crit= CellHeapOptim::UB);
 	/**
 	 * \brief Delete *this.
 	 */
@@ -168,8 +169,13 @@ public:
 	 * (y=f(x), g_1(x)<=0,...,g_m(x)<=0). */
 	Ctc& ctc;
 
-	/** Cell buffer. */
+	/** Cell buffers.
+	Two buffers are used for node selection. the first one corresponds to minimize  the minimum of the objective estimate,
+	the second one to minimize another criterion (by default the maximum of the objective estimate).
+	The second one is chosen at each node with a probability critpr/100 (default value critpr=50)
+	 */
 	CellHeapOptim buffer;
+	CellHeapOptim buffer2;
 
 	/**
 	 * \brief Index of the goal variable y in the extended box.
@@ -203,6 +209,12 @@ public:
 	  2 for printing each handled node */
 	int trace;
 
+	/** Probability to choose the second criterion in node selection in percentage
+	 * integer in [0,100] default value 50
+	 * the value 0 corresponds to use a single criterion for node selection (the classical one : minimizing the lower bound of the estimate of the objective) 
+	 * the value 100 corresponds to use a single criterion for node selection (the second one used in buffer2) */
+	 int critpr;
+	
 	/**
 	 * \brief Time limit.
 	 *
@@ -222,6 +234,12 @@ public:
 
 	/** Default goal relative precision */
 	static const double default_goal_rel_prec;
+
+
+
+
+
+
 
 	/** Default goal absolute precision */
 	static const double default_goal_abs_prec;
@@ -256,7 +274,7 @@ public:
 
 	/** Rigor mode: the box satisfying the constraints corresponding to the loup */
 	IntervalVector loup_box;
-
+	
 	/** Number of cells put into the heap (which passed through the contractors)  */
 	int nb_cells;
 
@@ -272,6 +290,7 @@ protected:
 			return POS_INFINITY;
 		else
 			return fx.ub();
+		
 	}
 
 	/**
@@ -283,7 +302,7 @@ protected:
 	 * </ul>
 	 *
 	 */
-	void handle_cell(Cell& c, const IntervalVector& init_box);
+	void handle_cell(OptimCell& c, const IntervalVector& init_box);
 
 	/**
 	 * \brief Contract and bound procedure for processing a box.
@@ -296,7 +315,7 @@ protected:
 	 * </ul>
 	 *
 	 */
-	void contract_and_bound(Cell& c, const IntervalVector& init_box);
+	void contract_and_bound(OptimCell& c, const IntervalVector& init_box);
 
 	/**
 	 * \brief Contraction procedure for processing a box.
@@ -342,7 +361,7 @@ protected:
 	/**
 	 * \brief Main procedure for updating the loup.
 	 */
-	void update_loup(const IntervalVector& box);
+	bool update_loup(const IntervalVector& box);
 
 
 	/*=======================================================================================================*/
@@ -486,7 +505,6 @@ protected:
 	 */
 	Function df;
 
-
 	/**
 	 * \brief Computes and returns  the value ymax (the loup decreased with the precision)
 	 * the heap and the current box are actually contracted with y <= ymax
@@ -496,6 +514,12 @@ protected:
 
 	bool loup_changed;
 
+	Ctc3BCid* objshaver;
+
+    void compute_pf(OptimCell& c);
+	
+	void compute_pu (OptimCell& c);
+	
 private:
 
 	/** Rigor mode (eps_equ==0) */

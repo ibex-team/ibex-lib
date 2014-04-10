@@ -46,7 +46,7 @@ bool Optimizer::is_inner(const IntervalVector& box) {
 		Interval ev=sys.ctrs[j].f.eval(box);
 		if (ev.is_empty()) return false;
 		if (ev.ub()>0) return false;
-		//			cout << j << " " << sys.f[j] << "  " << sys.f[j].eval(box)<< endl;
+
 	}
 	return true;
 }

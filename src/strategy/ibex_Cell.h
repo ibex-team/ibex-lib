@@ -109,7 +109,6 @@ public:
 	 * \brief The box
 	 */
 	IntervalVector box;
-
 	/**
 	 * \brief Other data.
 	 */
