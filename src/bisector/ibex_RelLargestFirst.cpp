@@ -25,11 +25,16 @@ pair<IntervalVector,IntervalVector> RelLargestFirst::bisect(const IntervalVector
 	assert(box.size()<=init_diam.size());
 
 	int var =-1;
+	double l;
 	for (int i=0; i< box.size(); i++)	{
 		if (box[i].is_bisectable()){
-			if (var==-1) var=i;
+			if (var==-1) {
+				var=i; l=box[i].diam()/init_diam[i];
+			}
 			else {
-				if (box[i].diam()/init_diam[i]>box[var].diam()/init_diam[var])  var = i;
+				if ((box[i].diam()/init_diam[i])>l)  {
+					var = i;  l=box[i].diam()/init_diam[i];
+				}
 			}
 		}
 	}

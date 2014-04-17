@@ -14,14 +14,14 @@ using std::pair;
 namespace ibex {
 
 EpsLargestFirst::EpsLargestFirst(const Vector &init,  double ratio1) :
-				  ratio(ratio1), init_epsi(init) {
+				  ratio(ratio1), init_eps(init) {
 	for (int i=0;i<(init.size());i++) {
-		if (init_epsi[i]<=0) init_epsi[i]=1.e-20;
+		if (init_eps[i]<=0) init_eps[i]=1.e-20;
 	}
 }
 
 pair<IntervalVector,IntervalVector> EpsLargestFirst::bisect(const IntervalVector& box) {
-	assert(box.size()<=init_epsi.size());
+	assert(box.size()<=init_eps.size());
 	int var =-1;
 	double l=0.0;
 	for (int i=0; i< box.size(); i++)	{
@@ -29,7 +29,7 @@ pair<IntervalVector,IntervalVector> EpsLargestFirst::bisect(const IntervalVector
 			if (var==-1) var=i;
 			else {
 				double l_tmp =box[i].diam();
-				if ((l_tmp>init_epsi[i]*1.e-2)&&(l_tmp/init_epsi[i]>l)) { var = i; l= l_tmp/init_epsi[i];}
+				if ((l_tmp>init_eps[i]*1.e-2)&&(l_tmp/init_eps[i]>l)) { var = i; l= l_tmp/init_eps[i];}
 			}
 		}
 	}
@@ -40,7 +40,7 @@ pair<IntervalVector,IntervalVector> EpsLargestFirst::bisect(const IntervalVector
 				if (var==-1) var=i;
 				else {
 					double l_tmp =box[i].diam();
-					if ((l_tmp/init_epsi[i]>l)) { var = i; l= l_tmp/init_epsi[i];}
+					if ((l_tmp/init_eps[i]>l)) { var = i; l= l_tmp/init_eps[i];}
 				}
 			}
 		}

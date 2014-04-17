@@ -3,8 +3,8 @@
 // File        : Relative Largest First bisector
 // Author      : Jordan Ninin
 // License     : See the LICENSE file
-// Created     : July 19, 2012
-// Last Update : July 19, 2012
+// Created     : April 17, 2014
+// Last Update : April 17, 2014
 //============================================================================
 
 #ifndef __IBEX_REL_LARGEST_FIRST_H__
@@ -24,18 +24,19 @@ namespace ibex {
 class RelLargestFirst : public Bsc {
  public:
   /**
-   * \brief Create a bisector with relative largest first heuristic.
+   * \brief Create a bisector with relative-largest first heuristic.
+   *  The bisector bisects following the variable of indices: max_{i}(box[i].diam()/init[i].diam()).
    *
+   * \param init - the initial domain under study to compute the relative diameter.
+   * 	The stored diameter of each variable is bounded by 1.e20.
    * \param ratio (optional) - the ratio between the diameters of the left and the right parts of the
    *            bisected interval. Default value is 0.45.
    */
     RelLargestFirst( const IntervalVector &init, double ratio=Bsc::default_ratio);
 
- 
-
   /**
-   * \brief Bisect the largest box.
-   *
+   * \brief Bisect the relative-largest box.
+   * max_{i}(box[i].diam()/init[i].diam()).
    * called by Bsc::bisect 
    */
   virtual std::pair<IntervalVector,IntervalVector> bisect(const IntervalVector& box);
@@ -60,4 +61,4 @@ class RelLargestFirst : public Bsc {
 
 } // end namespace ibex
 
-#endif // __IBEX_LARGEST_FIRST_H__
+#endif // __IBEX_REL_LARGEST_FIRST_H__
