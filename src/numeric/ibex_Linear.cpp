@@ -62,7 +62,15 @@ void LU(const M& A, M& LU, int* p) {
 		// --------------------------------------------------
 
 		pivot = LU[p[i]][i];
-		if (_zero(pivot)) throw SingularMatrixException();
+
+		if (_zero(pivot)) {
+			if (i<min_m_n-1) throw SingularMatrixException();
+		        else // in this case, the matrix is not full-rank only if all the remaining columns are zero
+			  for (int k=i+1; k<n; k++) {
+			     if (!_zero(LU[p[i]][k])) return; // ok, full rank
+                          }
+                          throw SingularMatrixException();
+                }
 		if (_mig(1/pivot)>=TOO_LARGE) throw SingularMatrixException();
 
 		for (int j=i+1; j<m; j++) {
