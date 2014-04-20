@@ -20,8 +20,6 @@ namespace ibex {
  * \defgroup function Functions
  */
 
-class NumConstraint;
-
 /**
  * \ingroup function
  * \brief Abstract class of function
@@ -33,30 +31,6 @@ public:
 	 * \brief Build the function from R^n to R^m.
 	 */
 	Fnc(int n, int m);
-
-	/**
-	 * \brief Return the ith component of f.
-	 *
-	 * The vector-valued function f is also
-	 * n real-valued functions f_1, ... f_n
-	 * that can be used independently.
-	 *
-	 * Of course the list of arguments "x" is
-	 * the same for each component. For instance
-	 *
-	 * (x,y,z)->(x+y,z-x) is transformed into:  <br>
-	 *    { (x,y,z)->x+y ; (x,y,z)->z-y } <br>
-	 *
-	 * *not* in:   <br>
-	 *    { (x,y)->x+y ; (z,y)->z-y }
-	 */
-	Fnc& operator[](int i);
-
-	/**
-	 * \brief Return the ith component of f.
-	 * \see operator[](int).
-	 */
-	Fnc& operator[](int i) const;
 
 	/**
 	 * \brief Delete this.
@@ -143,12 +117,6 @@ public:
 
 protected:
 	friend std::ostream& operator<<(std::ostream& os, const Fnc& f);
-	friend std::ostream& operator<<(std::ostream&, const NumConstraint&);
-
-	/**
-	 * \brief Generate f[0], f[1], etc. (all stored in "comp")
-	 */
-	virtual void generate_comp() const;
 
 	/**
 	 * \brief Initialize _nb_used_vars and _used_var
@@ -169,10 +137,6 @@ protected:
 	const int _nb_var;
 	const int _image_dim;
 
-	// the components. ==this if output_size()==1.
-	// only generated if required
-	mutable Fnc** comp;
-
 	// number of used vars (value "-1" means "not yet generated")
 	mutable int _nb_used_vars;
 
@@ -189,22 +153,12 @@ std::ostream& operator<<(std::ostream& os, const Fnc& f);
 
 /*================================== inline implementations ========================================*/
 
-inline Fnc::Fnc() : _nb_var(0), _image_dim(0), comp(NULL), _nb_used_vars(-1), _used_var(NULL) {
+inline Fnc::Fnc() : _nb_var(0), _image_dim(0), _nb_used_vars(-1), _used_var(NULL) {
 
 }
 
-inline Fnc::Fnc(int n, int m) : _nb_var(n), _image_dim(m), comp(NULL), _nb_used_vars(-1), _used_var(NULL) {
+inline Fnc::Fnc(int n, int m) : _nb_var(n), _image_dim(m), _nb_used_vars(-1), _used_var(NULL) {
 
-}
-
-inline Fnc& Fnc::operator[](int i) {
-	if (!comp) generate_comp();
-	return *comp[i];
-}
-
-inline Fnc& Fnc::operator[](int i) const {
-	if (!comp) ((Fnc&) *this).generate_comp();
-	return *comp[i];
 }
 
 inline int Fnc::nb_var() const {

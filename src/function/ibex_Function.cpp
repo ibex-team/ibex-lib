@@ -23,11 +23,22 @@ using namespace std;
 namespace ibex {
 
 Function::~Function() {
+	if (comp!=NULL) {
+		/* warning... if there is only one constraint
+		 * then comp[0] is the same object as f itself!
+		 *
+		 * This is not a very consistent choice...
+		 */
+		if (image_dim()>1) {
+			for (int i=0; i<image_dim(); i++)
+				if (!zero || comp[i]!=zero) delete comp[i];
+		}
+		if (zero) delete zero;
+		delete[] comp;
+	}
 
 	if (cf.code!=NULL) {
-		for (unsigned int i=0; i<cf.nodes.size(); i++) {
 
-		}
 		cleanup(expr(),false);
 
 		for (int i=0; i<nb_arg(); i++) {

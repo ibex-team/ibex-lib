@@ -14,23 +14,8 @@
 namespace ibex {
 
 Fnc::~Fnc() {
-	if (comp!=NULL) {
-		/* warning... if there is only one constraint
-		 * then comp[0] is the same object as f itself!
-		 *
-		 * This is not a very consistent choice...
-		 */
-
-		if (image_dim()>1) {
-			for (int i=0; i<image_dim(); i++)
-				delete comp[i];
-		}
-		delete[] comp;
-	}
-
 	if (_used_var!=NULL)
 		delete[] _used_var;
-
 }
 
 void Fnc::hansen_matrix(const IntervalVector& box, IntervalMatrix& H) const {
@@ -86,10 +71,6 @@ void Fnc::print(std::ostream& os) const {
 
 void Fnc::print_expr(std::ostream& os) const {
 	not_implemented("print_expr");
-}
-
-void Fnc::generate_comp() const {
-	not_implemented("generate_comp");
 }
 
 void Fnc::generate_used_vars() const {

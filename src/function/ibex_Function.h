@@ -442,6 +442,30 @@ public:
 	const Function& diff() const;
 
 	/**
+	 * \brief Return the ith component of f.
+	 *
+	 * The vector-valued function f is also
+	 * n real-valued functions f_1, ... f_n
+	 * that can be used independently.
+	 *
+	 * Of course the list of arguments "x" is
+	 * the same for each component. For instance
+	 *
+	 * (x,y,z)->(x+y,z-x) is transformed into:  <br>
+	 *    { (x,y,z)->x+y ; (x,y,z)->z-y } <br>
+	 *
+	 * *not* in:   <br>
+	 *    { (x,y)->x+y ; (z,y)->z-y }
+	 */
+	Function& operator[](int i);
+
+	/**
+	 * \brief Return the ith component of f.
+	 * \see operator[](int).
+	 */
+	Function& operator[](int i) const;
+
+	/**
 	 * \brief Return the number of arguments.
 	 *
 	 * \note The number of variables returned by nb_var()
@@ -734,8 +758,11 @@ public:
 
 
 protected:
-	/** \brief Override */
-	virtual void generate_comp() const;
+	/**
+	 * \brief Generate f[0], f[1], etc. (all stored in "comp")
+	 */
+	void generate_comp();
+
 	/** \brief Override */
 	virtual void generate_used_vars() const;
 	/** \brief Override */
@@ -765,18 +792,36 @@ private:
 
 	Array<const ExprSymbol> symbs;              // to retrieve symbol (node)s by appearing order.
 	std::vector<bool> is_used;                  // tells whether the i^th component is used.
+
+	// only generated if required
+	Function** comp;                             // the components. ==this if output_size()==1.
+
 	bool __all_symbols_scalar;                  // true if all symbols are scalar
 
 	// if at some point, symbolic differentiation is needed for this function,
 	// we store the resulting function for future usage.
 	Function* df;
 
+	// When the Jacobian matrix of the function is sparse, there may be a lot of
+	// zero functions appearing. To avoid memory blow-up, all the zero functions
+	// point to this field (instead of being a copy)
+	Function *zero;
 };
 
 /*================================== inline implementations ========================================*/
 
 inline const Function& Function::diff() const {
 	return *(df ? df : (((Function*&) df) = new Function(*this,DIFF)));
+}
+
+inline Function& Function::operator[](int i) {
+	if (!comp) generate_comp();
+	return *comp[i];
+}
+
+inline Function& Function::operator[](int i) const {
+	if (!comp) ((Function&) *this).generate_comp();
+	return *comp[i];
 }
 
 inline int Function::nb_arg() const {
