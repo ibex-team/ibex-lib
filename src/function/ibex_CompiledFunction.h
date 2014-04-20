@@ -37,7 +37,7 @@ public:
 	 * Create a compiled version of the function \a f, where
 	 * each node is decorated with an object of type "T" via the decorator \a d.
 	 */
-	void compile(const Function& f);
+	void compile(const ExprNode& y);
 
 	/**
 	 * \brier Delete this.
@@ -64,6 +64,8 @@ public:
 	 * Print the structure to the standard output.
 	 */
 	void print() const;
+
+	friend class Function;
 
 protected:
 	typedef enum {

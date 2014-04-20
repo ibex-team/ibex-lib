@@ -412,7 +412,7 @@ public:
 	 *
 	 * This will delete all the associated expression nodes (including symbols).
 	 */
-	~Function();
+	virtual ~Function();
 
 	/**
 	 * \brief Copy mode (see copy constructor)
@@ -751,8 +751,6 @@ private:
 	 */
 	bool all_args_scalar() const;
 
-	void add_symbol(const ExprSymbol* x);
-
 	void build_from_string(const Array<const char*>& x, const char* y, const char* name=NULL);
 
 	Function& operator=(const Function&);       // forbidden
@@ -763,19 +761,16 @@ private:
 	 * Declared "const" because the decoration is
 	 * not considered as part of the definition of the function.
 	 */
-	void decorate() const;
+	void decorate(const Array<const ExprSymbol>& x, const ExprNode& y) const;
 
-	const ExprNode* root;                       // the root node
 	Array<const ExprSymbol> symbs;              // to retrieve symbol (node)s by appearing order.
 	std::vector<bool> is_used;                  // tells whether the i^th component is used.
-	ExprSubNodes exprnodes;                     // all the nodes (of x and f(x))
-	int key_count;                              // count the number of arguments
-
 	bool __all_symbols_scalar;                  // true if all symbols are scalar
 
 	// if at some point, symbolic differentiation is needed for this function,
 	// we store the resulting function for future usage.
 	Function* df;
+
 };
 
 /*================================== inline implementations ========================================*/
@@ -785,11 +780,11 @@ inline const Function& Function::diff() const {
 }
 
 inline int Function::nb_arg() const {
-	return key_count;
+	return symbs.size();
 }
 
 inline bool Function::used(int i) const {
-	return (root!=NULL && is_used[i]);
+	return is_used[i];
 }
 
 inline const Array<const ExprSymbol>& Function::args() const {
@@ -805,15 +800,15 @@ inline const char* Function::arg_name(int i) const {
 }
 
 inline int Function::nb_nodes() const {
-	return exprnodes.size();
+	return cf.nodes.size();
 }
 
 inline const ExprNode& Function::node(int i) const {
-	return exprnodes[i];
+	return cf.nodes[i];
 }
 
 inline const ExprNode& Function::expr() const {
-	return *root;
+	return cf.nodes[0];
 }
 
 template<class V>

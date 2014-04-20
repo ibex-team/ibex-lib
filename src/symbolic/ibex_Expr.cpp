@@ -50,9 +50,11 @@ ExprNode::ExprNode(int height, int size, const Dim& dim) :
 
 void cleanup(const Array<const ExprNode>& expr, bool delete_symbols) {
 	ExprSubNodes nodes(expr);
+
 	for (int i=0; i<nodes.size(); i++)
-		if (delete_symbols || (!dynamic_cast<const ExprSymbol*>(&nodes[i])))
+		if (delete_symbols || (!dynamic_cast<const ExprSymbol*>(&nodes[i]))) {
 			delete (ExprNode*) &nodes[i];
+		}
 }
 
 ExprIndex::ExprIndex(const ExprNode& subexpr, int index)

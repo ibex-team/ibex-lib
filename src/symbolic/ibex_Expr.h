@@ -224,7 +224,7 @@ public:
 	const int nb_args;
 
 	/** Delete the array (but not the subexpressions). */
-	~ExprNAryOp();
+	virtual ~ExprNAryOp();
 
 protected:
 	// TO DO: replace args by Array<...>
@@ -445,7 +445,7 @@ public:
 	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
 
 	/** Deletes this instance. */
-	~ExprSymbol();
+	virtual ~ExprSymbol();
 
 	/** The symbol identifier. */
 	const char* name;

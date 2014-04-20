@@ -17,9 +17,9 @@
 
 namespace ibex {
 
-void Decorator::decorate(const Function& f) {
+void Decorator::decorate(const Array<const ExprSymbol>& x, const ExprNode& y) {
 
-	if (f.expr().deco.d) return; // already decorated
+	if (y.deco.d!=NULL) return; // already decorated
 
 	// we cannot just call visit(f.expr()) because:
 	//
@@ -30,17 +30,16 @@ void Decorator::decorate(const Function& f) {
 	// 2- we can check, in this way, that all the
 	// symbols appearing in the expression are arguments
 	// of the function (since they have to be already decorated)
-	for (int i=0; i<f.nb_arg(); i++) {
-		const ExprSymbol& x=f.arg(i);
+	for (int i=0; i<x.size(); i++) {
 		//visit((const ExprNode&) x); // don't (because of case 2- above)
-		map.insert(x,true);
-		x.deco.d = new Domain(x.dim);
-		x.deco.g = new Domain(x.dim);
-		x.deco.p = new Domain(x.dim);
-		x.deco.af2 = new Affine2Domain(x.dim);
+		map.insert(x[i],true);
+		x[i].deco.d = new Domain(x[i].dim);
+		x[i].deco.g = new Domain(x[i].dim);
+		x[i].deco.p = new Domain(x[i].dim);
+		x[i].deco.af2 = new Affine2Domain(x[i].dim);
 	}
 
-	visit(f.expr()); // cast -> we know *this will not be modified
+	visit(y); // cast -> we know *this will not be modified
 }
 
 void Decorator::visit(const ExprNode& e) {

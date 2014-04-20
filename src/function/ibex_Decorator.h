@@ -40,7 +40,7 @@ public:
 	/**
 	 * \brief Decorates f.
 	 */
-	void decorate(const Function& f);
+	void decorate(const Array<const ExprSymbol>& x, const ExprNode& y);
 
 	/**
 	 * \brief Delete *this.

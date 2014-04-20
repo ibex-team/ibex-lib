@@ -28,16 +28,16 @@ CompiledFunction::CompiledFunction() : 	n(0), code(NULL), nb_args(NULL), args(NU
 
 }
 
-void CompiledFunction::compile(const Function& f) {
+void CompiledFunction::compile(const ExprNode& y) {
 
-	n=f.expr().size;
+	n=y.size;
 	code=new operation[n];
 	args=new ExprLabel**[n];
 	nb_args=new int[n];
 
 	// Get the nodes of the DAG
 	// (the DAG may not necessarily contains all the nodes of f)
-	nodes.init(NULL, f.expr());
+	nodes.init(NULL, y);
 
 	// Process each node of the DAG
 	for (ptr=0; ptr<n; ptr++) {

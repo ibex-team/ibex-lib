@@ -24,18 +24,15 @@ namespace ibex {
 
 Function::~Function() {
 
-	if (root!=NULL) {
+	if (cf.code!=NULL) {
+		for (unsigned int i=0; i<cf.nodes.size(); i++) {
 
-		for (unsigned int i=0; (i<(exprnodes.size())); i++) {
-			delete node(i).deco.d;
-			delete node(i).deco.g;
-			delete node(i).deco.p;
-			delete node(i).deco.af2;
 		}
 		cleanup(expr(),false);
 
-		for (int i=0; i<nb_arg(); i++)
+		for (int i=0; i<nb_arg(); i++) {
 			delete &arg(i);
+		}
 	}
 
 	if (df!=NULL) delete df;
@@ -53,7 +50,7 @@ Domain& Function::eval_affine2_domain(const IntervalVector& box) const {
 }
 
 Domain& Function::eval_affine2_domain(const IntervalVector& box, Affine2Domain& affine) const {
-	ExprLabel res = Affine2Eval().eval_label(*this,box);
+	const ExprLabel& res = Affine2Eval().eval_label(*this,box);
 	affine = *res.af2;
 	return *res.d;
 }
@@ -63,7 +60,7 @@ Interval Function::eval_affine2(const IntervalVector& box) const {
 }
 
 Interval Function::eval_affine2(const IntervalVector& box, Affine2& affine) const {
-	ExprLabel res = Affine2Eval().eval_label(*this,box);
+	const ExprLabel& res = Affine2Eval().eval_label(*this,box);
 	affine = res.af2->i();
 	return res.d->i();
 }
@@ -73,7 +70,7 @@ IntervalVector Function::eval_affine2_vector(const IntervalVector& box) const {
 }
 
 IntervalVector Function::eval_affine2_vector(const IntervalVector& box, Affine2Vector& affine) const {
-	ExprLabel res = Affine2Eval().eval_label(*this,box);
+	const ExprLabel& res = Affine2Eval().eval_label(*this,box);
 	if (expr().dim.is_scalar() ) {
 		affine = Affine2Vector(1,res.af2->i());
 		return IntervalVector(1,res.d->i());
@@ -84,7 +81,7 @@ IntervalVector Function::eval_affine2_vector(const IntervalVector& box, Affine2V
 }
 
 IntervalMatrix Function::eval_affine2_matrix(const IntervalVector& box, Affine2Matrix& affine) const {
-	ExprLabel res = Affine2Eval().eval_label(*this,box);
+	const ExprLabel& res = Affine2Eval().eval_label(*this,box);
 	affine = Affine2Matrix(expr().dim.dim2, expr().dim.dim3);
 
 	switch (expr().dim.type()) {

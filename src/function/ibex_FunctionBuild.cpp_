@@ -116,38 +116,6 @@ public:
 
 };
 
-/**
- * Set the id number of each node and
- * push all the nodes into a vector (ordered by id).
- */
-class BuildVectorOfNodes: public ExprVisitor {
-public:
-	vector<const ExprNode*>& nodes;
-	NodeMap<bool> map;
-
-	BuildVectorOfNodes(vector<const ExprNode*>& nodes, const Array<const ExprSymbol>& x, const ExprNode& y) : nodes(nodes) {//, id(0) {
-		for (int i=0; i<x.size(); i++) {
-			nodes.push_back(&x[i]);
-			map.insert(x[i],true);
-		}
-		visit(y);
-	}
-
-	virtual void visit(const ExprNode& e) {
-		if (!map.found(e)) {
-			e.acceptVisitor(*this);
-			nodes.push_back(&e);
-			map.insert(e,true);
-		}
-	}
-
-	virtual void visit(const ExprIndex& e)    { visit(e.expr); }
-	virtual void visit(const ExprLeaf& e)     { }
-	virtual void visit(const ExprNAryOp& e)   { for (int i=0; i<e.nb_args; i++) { visit(*e.args[i]); } }
-	virtual void visit(const ExprBinaryOp& e) { visit(e.left); visit(e.right); }
-	virtual void visit(const ExprUnaryOp& e)  { visit(e.expr); }
-};
-
 const char* duplicate_or_generate(const char* name) {
 	if (name) return strdup(name);
 	else return strdup(ibex::next_generated_func_name());
@@ -155,7 +123,7 @@ const char* duplicate_or_generate(const char* name) {
 
 }
 
-Function::Function() : name(strdup(next_generated_func_name())), root(NULL), df(NULL) {
+Function::Function() : name(strdup(next_generated_func_name())), df(NULL) {
 	// root==NULL <=> the function is not initialized yet
 }
 
@@ -334,7 +302,8 @@ Function::Function(const char* filename) {
 }
 
 Function::Function(const Function& f, copy_mode mode) {
-	assert(f.root!=NULL);
+
+	assert(f.cf.code!=NULL);
 
 	// Create the new symbols
 	// we have to proceed first the symbols in order to guarantee that
@@ -435,31 +404,22 @@ void Function::init(const Array<const ExprSymbol>& x, const ExprNode& y, const c
 
 	this->name=duplicate_or_generate(name);
 
-	key_count=0;
 	__all_symbols_scalar=true; // by default
 
 	symbs.resize(x.size());
 
 	for (int i=0; i<x.size(); i++) {
 		symbs.set_ref(i,x[i]);
-		add_symbol(&x[i]);
+		((ExprSymbol&) x[i]).key = i;
+		__all_symbols_scalar &= x[i].dim.is_scalar();
 	}
-
-	root=&y;
-
-	exprnodes.init(&x,y);
 
 	FindInputsUsed fsu(x, y, is_used);
-
-	for (int i=0; i<nb_nodes(); i++) {
-		assert(node(i).deco.f==NULL); // this node must not belong to another function!
-		node(i).deco.f=this;
-	}
 
 	(int&) Fnc::_nb_var = is_used.size();
 	(int&) Fnc::_image_dim = y.dim.size();
 
-	decorate();
+	decorate(x,y);
 
 	// ===== display adjacency (debug) =========
 //	cout << "adjacency of function" << *this << ":" << endl;
@@ -468,30 +428,25 @@ void Function::init(const Array<const ExprSymbol>& x, const ExprNode& y, const c
 //	cout << endl;
 }
 
-void Function::add_symbol(const ExprSymbol* symbol) {
+void Function::decorate(const Array<const ExprSymbol>& x, const ExprNode& y) const {
 
-  ((ExprSymbol&) *symbol).key = key_count;
-
-  key_count ++;
-
-  __all_symbols_scalar &= symbol->dim.is_scalar();
-
-}
-
-void Function::decorate() const {
-	assert(root!=NULL); // cannot decorate if there is no expression yet!
-
-	Decorator d;
-	d.decorate(*this);
+	Decorator().decorate(x,y);
 
 	arg_domains.resize(nb_arg());
 	arg_deriv.resize(nb_arg());
 	arg_af2.resize(nb_arg());
 
-	((CompiledFunction&) cf).compile(*this); // now that it is decorated, it can be "compiled"
+	((CompiledFunction&) cf).compile(y); // now that it is decorated, it can be "compiled"
+
+	for (int i=0; i<nb_nodes(); i++) {
+		assert(node(i).deco.d);
+		assert(node(i).deco.f==NULL); // this node must not belong to another function!
+		cf.nodes[i].deco.f=(Function*) this;
+	}
 
 	// warning: to place after "compile" if compile modifies deco.d...
 	for (int i=0; i<nb_arg(); i++) {
+		assert(arg(i).deco.d);
 		arg_domains.set_ref(i,*arg(i).deco.d);
 		arg_deriv.set_ref(i,*arg(i).deco.g);
 		arg_af2.set_ref(i,*arg(i).deco.af2);

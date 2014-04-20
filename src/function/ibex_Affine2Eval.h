@@ -138,7 +138,7 @@ inline void Affine2Eval::cst_fwd(const ExprConstant& c, ExprLabel& y) {
 }
 
 inline void Affine2Eval::apply_fwd(const ExprApply& a, ExprLabel** x, ExprLabel& y)                          {
-	ExprLabel tmp = eval_label(a.func,x);
+	ExprLabel& tmp = eval_label(a.func,x);
 	*y.af2 = *tmp.af2;
 	*y.d = *tmp.d;
 }

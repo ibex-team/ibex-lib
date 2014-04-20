@@ -15,6 +15,12 @@ namespace ibex {
 
 ExprLabel::ExprLabel() :  f(NULL), af2(NULL), d(NULL), g(NULL), p(NULL) { }
 
+ExprLabel::~ExprLabel() {
+	if (af2) delete af2;
+	if (d) delete d;
+	if (g) delete g;
+	if (p) delete p;
+}
 std::ostream& operator<<(std::ostream& os, const ExprLabel& l) {
 	if (l.af2) os << "af2=" << *l.af2 << " ";
 	if (l.d) os << "d=" << *l.d << " ";
