@@ -631,12 +631,12 @@ void TestInnerArith::sqrt05() {
 void TestInnerArith::bugr894() {
 
 	Variable x;
-	Function f(x,sqr(x-Interval::ZERO));
-	double _pt[][2]={{-1.03653, -1.03653}};
+	Interval _pt(-1.03653);
+	Function f(x,sqr(x-_pt));
+	IntervalVector box(1);
 	IntervalVector pt(1,_pt);
-	IntervalVector box(1);//,_box);
 	f.iproj(Interval::NEG_REALS,box,pt);
-	TEST_ASSERT(!f.eval(pt).is_empty());
+	TEST_ASSERT(box==pt);
 }
 
 void TestInnerArith::bugr899() {

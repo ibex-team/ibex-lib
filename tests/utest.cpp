@@ -82,7 +82,7 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestIntervalMatrix()));
     ts.add(auto_ptr<Test::Suite>(new TestDim()));
     ts.add(auto_ptr<Test::Suite>(new TestArith()));
- //   ts.add(auto_ptr<Test::Suite>(new TestInnerArith()));
+    ts.add(auto_ptr<Test::Suite>(new TestInnerArith()));
     //ts.add(auto_ptr<Test::Suite>(new TestDomain()));
 
     ts.add(auto_ptr<Test::Suite>(new TestAffine2()));
@@ -98,7 +98,7 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestSystem()));
 
     ts.add(auto_ptr<Test::Suite>(new TestHC4Revise()));
- //   ts.add(auto_ptr<Test::Suite>(new TestInHC4Revise()));
+    ts.add(auto_ptr<Test::Suite>(new TestInHC4Revise()));
     ts.add(auto_ptr<Test::Suite>(new TestGradient()));
 
     ts.add(auto_ptr<Test::Suite>(new TestLinear()));
