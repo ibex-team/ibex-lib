@@ -9,7 +9,7 @@
  * Created     : May 07, 2013
  * ---------------------------------------------------------------------------- */
 
-#include "TestCtcFritzJohn.h"
+#include "TestFritzJohn.h"
 #include "ibex_FritzJohnCond.h"
 #include "ibex_CtcHC4.h"
 #include "ibex_SystemFactory.h"
@@ -19,7 +19,7 @@ using namespace std;
 
 namespace ibex {
 
-void TestCtcFritzJohn::test01() {
+void TestFritzJohn::test01() {
 	SystemFactory fac;
 
 	Variable x("x"),y("y");
@@ -32,11 +32,12 @@ void TestCtcFritzJohn::test01() {
 
 	System sys(fac);
 
-	FritzJohnCond fj(sys); //CtcFritzJohn fj(sys);
+	FritzJohnCond fj(sys);
+
 	CtcHC4 hc4(fj.ctrs);
 	double s=::sqrt(2)/2.0;
-	double _box[][2] = {{0.7,0.8},{0.7,0.8},{NEG_INFINITY,POS_INFINITY},{NEG_INFINITY,POS_INFINITY}};
-	//double _box[][2] = {{s,s},{s,s}};
+	double _box[][2] = {{0.7,0.8},{0.7,0.8},{0,1},{NEG_INFINITY,POS_INFINITY}};
+
 	IntervalVector box(4,_box);
 	try {
 		hc4.contract(box);
@@ -44,12 +45,19 @@ void TestCtcFritzJohn::test01() {
 		TEST_ASSERT(false);
 	}
 
-	//cout << fj.ext_box << endl;
-
 	Interval& u=box[2];
 	Interval& l=box[3];
-	TEST_ASSERT(almost_eq(u+l, Interval(1,1), ERROR));
-	TEST_ASSERT(almost_eq(-u+::sqrt(2)*l, Interval::ZERO, ERROR));
+
+	TEST_ASSERT((u+l).contains(1));
+	// we have
+	//   u =1-l
+	//   u =l*sqrt(2)
+	// The solution is u=1/(1+1/sqrt(2)).
+	//                 l=1/(sqrt(2)+1)
+
+	TEST_ASSERT(u.contains(1/(1+::sqrt(2)/2)));
+	TEST_ASSERT(l.contains(1/(1+::sqrt(2))));
+	TEST_ASSERT((-u+::sqrt(2)*l).contains(0));
 }
 
 //void TestCtcFritzJohn::test01() {

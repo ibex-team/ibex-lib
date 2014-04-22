@@ -43,6 +43,9 @@
 #include "TestParser.h"
 #include "TestSystem.h"
 
+// ================ system ===============
+#include "TestFritzJohn.h"
+
 // ================ numeric ===============
 #include "TestLinear.h"
 #include "TestNewton.h"
@@ -55,7 +58,7 @@
 #include "TestCtcInteger.h"
 //#include "TestCtcSubBox.h"
 #include "TestCtcNotIn.h"
-#include "TestCtcFritzJohn.h"
+
 
 #include "TestAffine2.h"
 
@@ -79,7 +82,7 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestIntervalMatrix()));
     ts.add(auto_ptr<Test::Suite>(new TestDim()));
     ts.add(auto_ptr<Test::Suite>(new TestArith()));
-    ts.add(auto_ptr<Test::Suite>(new TestInnerArith()));
+ //   ts.add(auto_ptr<Test::Suite>(new TestInnerArith()));
     //ts.add(auto_ptr<Test::Suite>(new TestDomain()));
 
     ts.add(auto_ptr<Test::Suite>(new TestAffine2()));
@@ -95,7 +98,7 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestSystem()));
 
     ts.add(auto_ptr<Test::Suite>(new TestHC4Revise()));
-    ts.add(auto_ptr<Test::Suite>(new TestInHC4Revise()));
+ //   ts.add(auto_ptr<Test::Suite>(new TestInHC4Revise()));
     ts.add(auto_ptr<Test::Suite>(new TestGradient()));
 
     ts.add(auto_ptr<Test::Suite>(new TestLinear()));
@@ -106,7 +109,7 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestHC4()));
     ts.add(auto_ptr<Test::Suite>(new TestCtcInteger()));
     ts.add(auto_ptr<Test::Suite>(new TestCtcNotIn()));
-    ts.add(auto_ptr<Test::Suite>(new TestCtcFritzJohn()));
+    ts.add(auto_ptr<Test::Suite>(new TestFritzJohn()));
 
     return ts.run(output,false) ? EXIT_SUCCESS : EXIT_FAILURE;
 

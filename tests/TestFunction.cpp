@@ -11,7 +11,6 @@
 
 #include "TestFunction.h"
 #include "ibex_Function.h"
-#include "ibex_FncConstant.h"
 #include "ibex_NumConstraint.h"
 #include "ibex_Expr.h"
 #include "ibex_SyntaxError.h"
@@ -32,7 +31,7 @@ void TestFunction::add_symbol() {
 
 	Function f(x,y,x);
 
-	TEST_ASSERT(f.nb_nodes()==2);
+	TEST_ASSERT(f.nb_nodes()==1);
 	TEST_ASSERT(f.nb_arg()==2);
 	TEST_ASSERT(strcmp(f.arg_name(0),"x")==0);
 	TEST_ASSERT(strcmp(f.arg_name(1),"y")==0);
@@ -41,7 +40,6 @@ void TestFunction::add_symbol() {
 	TEST_ASSERT(!f.used(1));
 	TEST_ASSERT(!f.used(1));
 	TEST_ASSERT(&f.node(0)==&x);
-	TEST_ASSERT(&f.node(1)==&y);
 }
 
 void TestFunction::copy() {
@@ -58,18 +56,18 @@ void TestFunction::copy() {
 	TEST_ASSERT(e2!=NULL);
 	TEST_ASSERT(sameExpr(f2.expr(),"(A*x)"));
 
-	const ExprSymbol* x2=dynamic_cast<const ExprSymbol*>(&f2.node(1));
-	TEST_ASSERT(strcmp(x2->name,"x")==0);
-	TEST_ASSERT(x2->dim==x.dim);
-
-	const ExprSymbol* A2=dynamic_cast<const ExprSymbol*>(&f2.node(2));
+	const ExprSymbol* A2=dynamic_cast<const ExprSymbol*>(&f2.node(1));
 	TEST_ASSERT(A2!=NULL);
 	TEST_ASSERT(strcmp(A2->name,"A")==0);
 	TEST_ASSERT(A2->dim==A.dim);
 
+	const ExprSymbol* x2=dynamic_cast<const ExprSymbol*>(&f2.node(2));
+	TEST_ASSERT(strcmp(x2->name,"x")==0);
+	TEST_ASSERT(x2->dim==x.dim);
+
 }
 
-void TestFunction::separate01() {
+void TestFunction::generate_comp01() {
 	const ExprSymbol& x=ExprSymbol::new_("x");
 	const ExprSymbol& y=ExprSymbol::new_("y");
 	const ExprSymbol& z=ExprSymbol::new_("z");
@@ -83,29 +81,22 @@ void TestFunction::separate01() {
 
 	Function f(x,y,z,e);
 
-	Function* f0=dynamic_cast<Function*>(&(f[0]));
-	TEST_ASSERT(f0!=NULL);
-	Function* f1=dynamic_cast<Function*>(&(f[1]));
-	TEST_ASSERT(f1!=NULL);
-	Function* f2=dynamic_cast<Function*>(&(f[2]));
-	TEST_ASSERT(f2!=NULL);
+	TEST_ASSERT(f[0].nb_arg()==3);
+	TEST_ASSERT(sameExpr(f[0].expr(),"((x+y)-z)"));
 
-	TEST_ASSERT(f0->nb_arg()==3);
-	TEST_ASSERT(sameExpr(f0->expr(),"((x+y)-z)"));
+	TEST_ASSERT(f[1].nb_arg()==3);
+	TEST_ASSERT(sameExpr(f[1].expr(),"(x*z)"));
 
-	TEST_ASSERT(f1->nb_arg()==3);
-	TEST_ASSERT(sameExpr(f1->expr(),"(x*z)"));
-
-	TEST_ASSERT(f2->nb_arg()==3);
-	TEST_ASSERT(sameExpr(f2->expr(),"(y-z)"));
+	TEST_ASSERT(f[2].nb_arg()==3);
+	TEST_ASSERT(sameExpr(f[2].expr(),"(y-z)"));
 }
 
-void TestFunction::separate02() {
+void TestFunction::generate_comp02() {
 	const ExprSymbol& x=ExprSymbol::new_("x");
 
 	const ExprNode& e1=x;
-	const ExprNode& e2=ExprConstant::new_scalar(1);
-	const ExprNode& e3=ExprConstant::new_scalar(2);
+	const ExprNode& e2=ExprConstant::new_scalar(0);
+	const ExprNode& e3=ExprConstant::new_scalar(0);
 
 	const ExprNode* v[3] = { &e1, &e2, &e3 };
 
@@ -113,14 +104,12 @@ void TestFunction::separate02() {
 
 	Function f(x,e);
 
-	Function* f0=dynamic_cast<Function*>(&(f[0]));
-	TEST_ASSERT(f0!=NULL);
-	FncConstant* f1=dynamic_cast<FncConstant*>(&(f[1]));
-	TEST_ASSERT(f1!=NULL);
-	TEST_ASSERT(f1->cst.i()==1);
-	FncConstant* f2=dynamic_cast<FncConstant*>(&(f[2]));
-	TEST_ASSERT(f2!=NULL);
-	TEST_ASSERT(f2->cst.i()==2);
+	const ExprConstant* c=dynamic_cast<const ExprConstant*>(&f[1].expr());
+	TEST_ASSERT(c);
+	TEST_ASSERT(c->get_value()==Interval::ZERO);
+	c=dynamic_cast<const ExprConstant*>(&f[2].expr());
+	TEST_ASSERT(c);
+	TEST_ASSERT(c->get_value()==Interval::ZERO);
 }
 
 void TestFunction::used() {
