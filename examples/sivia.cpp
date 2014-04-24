@@ -38,7 +38,8 @@ int main() {
 
 	// Create the precision contractor
 	// Boxes of size less than eps=1e-2 are contracted
-	CtcPrecision boundary(2,0.1);
+	PdcDiameterLT prec(0.1);
+	CtcEmpty boundary(prec);
 
 	// Push all the contractors in an array
 	Array<Ctc> ctc(inside,outside,boundary);

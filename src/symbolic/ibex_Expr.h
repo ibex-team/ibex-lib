@@ -38,7 +38,7 @@ class Function;
  * \ingroup symbolic
  * \brief Node in an expression.
  *
- * An object of this class is a node in a DAG, reprented by a #Function object.
+ * An object of this class is a node in a DAG, represented by a #Function object.
  * Each node has a default decoration: the size of the subDAG (number of nodes) it represents
  * and the height of this node in the global expression.
 

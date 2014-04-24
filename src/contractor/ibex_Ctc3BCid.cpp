@@ -18,27 +18,26 @@ const int Ctc3BCid::default_scid = 1;
 const double Ctc3BCid::default_var_min_width = 1.e-11;
 const int Ctc3BCid::LimitCIDDichotomy=16;
 
-Ctc3BCid::Ctc3BCid(const BoolMask& cid_vars, Ctc& ctc, int s3b, int scid, int vhandled, double var_min_width) :
-					Ctc(ctc.nb_var), cid_vars(cid_vars), ctc(ctc), s3b(s3b), scid(scid),
-					vhandled(vhandled<=0? cid_vars.nb_set():vhandled),
-					var_min_width(var_min_width), start_var(0), impact(ctc.nb_var) {
+Ctc3BCid::Ctc3BCid(int nb_var, const BoolMask& cid_vars, Ctc& ctc, int s3b, int scid, int vhandled, double var_min_width) :
+							nb_var(nb_var), cid_vars(cid_vars), ctc(ctc), s3b(s3b), scid(scid),
+							vhandled(vhandled<=0? cid_vars.nb_set():vhandled),
+							var_min_width(var_min_width), start_var(0), impact(nb_var) {
 
 }
 
-Ctc3BCid::Ctc3BCid( Ctc& ctc, int s3b, int scid, int vhandled, double var_min_width) :
-  Ctc(ctc.nb_var), cid_vars(BoolMask(ctc.nb_var,1)), ctc(ctc), s3b(s3b), scid(scid),
-					vhandled(vhandled<=0? cid_vars.nb_set():vhandled),
-					var_min_width(var_min_width), start_var(0), impact(ctc.nb_var) {
+Ctc3BCid::Ctc3BCid(int nb_var, Ctc& ctc, int s3b, int scid, int vhandled, double var_min_width) :
+                    		nb_var(nb_var), cid_vars(BoolMask(nb_var,1)), ctc(ctc), s3b(s3b), scid(scid),
+                    		vhandled(vhandled<=0? cid_vars.nb_set():vhandled),
+                    		var_min_width(var_min_width), start_var(0), impact(nb_var) {
 
 }
 
-  int Ctc3BCid::limitCIDDichotomy () 
-  {return LimitCIDDichotomy;}
-  
-	
+int Ctc3BCid::limitCIDDichotomy ()  {
+	return LimitCIDDichotomy;
+}
 
 /* compare the boxes in all dimensions except one (var) */
-bool  Ctc3BCid::equalBoxes (int var, IntervalVector &box1, IntervalVector &box2) {
+bool Ctc3BCid::equalBoxes (int var, IntervalVector &box1, IntervalVector &box2) {
 	int nb_var = box1.size();
 
 	for(int j=0; j<nb_var; j++){
@@ -55,13 +54,13 @@ void Ctc3BCid::contract(IntervalVector& box) {
 	impact.unset_all();                                // [gch]
 	for (int k=0; k<vhandled; k++) {                   // [gch] k counts the number of varCIDed variables [gch]
 
-	  var=(start_var+k)%nb_var;
+		var=(start_var+k)%nb_var;
 
-	  impact.set(var);                              // [gch]
-	  var3BCID(box,var);
-	  impact.unset(var);                            // [gch]
+		impact.set(var);                              // [gch]
+		var3BCID(box,var);
+		impact.unset(var);                            // [gch]
 
-	  if(box.is_empty()) throw EmptyBoxException();
+		if(box.is_empty()) throw EmptyBoxException();
 	}
 
 	//	start_var=(start_var+vhandled)%nb_var;             //  en contradiction avec le patch pour l'optim
@@ -73,7 +72,7 @@ bool Ctc3BCid::var3BCID(IntervalVector& box, int var) {
 	Interval& dom(box[var]);
 
 	if (dom.diam() < var_min_width) return false;      // domain already small enough : nothing to do
-        if (dom.diam() == POS_INFINITY) return false;     //  no handling infinite domains
+	if (dom.diam() == POS_INFINITY) return false;     //  no handling infinite domains
 	double w_DC = dom.diam() / s3b;
 	int locs3b=s3b;
 
@@ -110,7 +109,7 @@ bool Ctc3BCid::var3BCID_dicho(IntervalVector& box, int var, double w3b) {
 	}
 	catch (EmptyBoxException& e) {
 		box=leftbox; return true;                      // in case of EmptyBoxException of the right shaving,
-		                                               // the contracted box becomes the left box
+		// the contracted box becomes the left box
 	}
 
 	IntervalVector rightbox=box;
@@ -148,7 +147,7 @@ bool Ctc3BCid::shave_bound_dicho(IntervalVector& box, int var,  double wv, bool 
 
 		double lb  = x.mid();                          // left bound of the border
 		double rb  = sup;                              // right bound of the border (should decrease even when shaving
-		                                               // left, thanks to the "bound" test -not yet-)
+		// left, thanks to the "bound" test -not yet-)
 		while (1) {
 			//      cout << "  inf=" << inf << " lb=" << lb << " rb=" << rb << " sup=" << sup << endl;
 			box[var] = Interval(inf,lb);
@@ -157,8 +156,8 @@ bool Ctc3BCid::shave_bound_dicho(IntervalVector& box, int var,  double wv, bool 
 				ctc.contract(box,impact);              // [gch] only "var" is set in "impact".
 				inf=box[var].lb();
 				volatile double mid = (inf+lb)/2;      // we must subdivide the current slice (declared volatile to prevent
-				                                       //   the compiler from expanding mid in the next line and using higher
-				                                       //   precision than double in the comparisons (messing up the result))
+				//   the compiler from expanding mid in the next line and using higher
+				//   precision than double in the comparisons (messing up the result))
 				if (lb-inf<=wv || inf>=mid || lb<=mid) // the two last conditions prevent from splitting a float in half
 					break;
 				else lb=mid;                           // useless to restore domains (we divide the same slice)
@@ -182,7 +181,7 @@ bool Ctc3BCid::shave_bound_dicho(IntervalVector& box, int var,  double wv, bool 
 
 		double rb  = x.mid();                          // right bound of the border
 		double lb  = inf;                              // left bound of the border (should increase even when shaving
-		                                               // right, thanks to the "bound" test -not yet-)
+		// right, thanks to the "bound" test -not yet-)
 		while (1) {
 			//      cout << "  inf=" << inf << " lb=" << lb << " rb=" << rb << " sup=" << sup << endl;
 			box[var] = Interval(rb,sup);
@@ -191,8 +190,8 @@ bool Ctc3BCid::shave_bound_dicho(IntervalVector& box, int var,  double wv, bool 
 				ctc.contract(box,impact);              // [gch] only "var" is set in "impact".
 				sup=box[var].ub();
 				volatile double mid = (rb+sup)/2;      // we must subdivide the current interval (declared volatile to prevent
-				                                       //   the compiler from expanding mid in the next line and using higher
-				                                       //   precision than double in the comparisons (messing up the result))
+				//   the compiler from expanding mid in the next line and using higher
+				//   precision than double in the comparisons (messing up the result))
 				if (sup-rb<=wv || rb>=mid || sup<=mid) // the two last conditions prevent from splitting a float in half
 					break;
 				else rb=mid;                           // useless to restore domains (we divide the same slice)
@@ -329,8 +328,7 @@ bool Ctc3BCid::var3BCID_slices(IntervalVector& box, int var, int locs3b, double 
 }
 
 
-
-bool Ctc3BCid::varCID(int var, IntervalVector &varcid_box, IntervalVector &var3Bcid_box){
+bool Ctc3BCid::varCID(int var, IntervalVector &varcid_box, IntervalVector &var3Bcid_box) {
 
 	if(scid==0 || equalBoxes (var, varcid_box, var3Bcid_box)) return false;
 

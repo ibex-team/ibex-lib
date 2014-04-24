@@ -13,7 +13,7 @@
 
 namespace ibex {
 
-PdcFirstOrder::PdcFirstOrder(const System& sys, const IntervalVector& init_box) : Pdc(sys.nb_var), sys(sys), init_box(init_box), e(NULL) { }
+PdcFirstOrder::PdcFirstOrder(const System& sys, const IntervalVector& init_box) : sys(sys), init_box(init_box), e(NULL) { }
 
 BoolInterval PdcFirstOrder::test(const IntervalVector& box) {
 	BoolInterval res;

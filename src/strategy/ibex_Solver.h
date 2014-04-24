@@ -12,7 +12,7 @@
 #define __IBEX_SOLVER_H__
 
 #include "ibex_Ctc.h"
-#include "ibex_CtcPrecision.h"
+#include "ibex_Pdc.h"
 #include "ibex_Bsc.h"
 #include "ibex_CellBuffer.h"
 #include "ibex_SubPaving.h"
@@ -44,7 +44,7 @@ public:
 	 * \param buffer - the cell buffer (a CellStack in a depth first search strategy)
 	 * \param prec - the precision for the solutions (stopping criterion for the bisection)
 	 */
-	Solver(Ctc& ctc, Bsc& bsc, CellBuffer& buffer, double prec);
+	Solver(Ctc& ctc, Bsc& bsc, CellBuffer& buffer, Pdc& prec);
 
 	/**
 	 * \brief Solve the system (non-interactive mode).
@@ -86,9 +86,8 @@ public:
 	/** Cell buffer. */
 	CellBuffer& buffer;
 
-	/** Precision of solutions. */
-	double prec;
-
+	/** Predicate for precision of solutions. */
+	Pdc& prec;
 
 	/** Maximum cpu time used by the solver.
 	 * This parameter allows to bound time complexity.

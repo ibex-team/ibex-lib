@@ -31,7 +31,7 @@ public:
 	 */
 	CtcExist(const NumConstraint& ctr, double prec, const IntervalVector& init_box);
 	CtcExist(Function& f, CmpOp op, double prec, const IntervalVector& init_box);
-	CtcExist(Ctc& p, double prec, const IntervalVector& init_box);
+	CtcExist(int nb_var, Ctc& p, double prec, const IntervalVector& init_box);
 
 	/**
 	 * \brief Delete this.
@@ -49,6 +49,11 @@ public:
 
 
 private:
+	/**
+	 * \brief Number of variables
+	 */
+	int nb_var;
+
 	/**
 	 * \brief The Contractor.
 	 */

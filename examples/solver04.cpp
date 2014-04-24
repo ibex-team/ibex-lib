@@ -39,8 +39,7 @@ int main(int argc, char** argv) {
 	// The ACID contractor (component of the contractor  when filtering == "acidhc4" or "acidhc4n")
 	CtcAcid acid(sys,hc44cid);
 	// The 3BCID contractor (3bcid component of the contractor when filtering == "3bcidhc4") on all variables
-	Ctc3BCid c3bcid(hc44cid);
-
+	Ctc3BCid c3bcid(sys.nb_var, hc44cid);
 
 
 	// Build contractor #2:
@@ -149,7 +148,9 @@ int main(int argc, char** argv) {
 	// The last parameter (default value 1e-07) is the precision
 	// required for the solutions
 
-	Solver s(*contractor,*bs,buff,prec);
+	PdcDiameterLT pdc(prec);
+
+	Solver s(*contractor,*bs,buff,pdc);
 	s.time_limit = time_limit;;
 	s.trace=1;  // solutions are printed as soon as found when trace=1
 

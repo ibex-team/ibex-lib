@@ -17,9 +17,8 @@ using namespace std;
 
 namespace ibex {
 
-Solver::Solver(Ctc& ctc, Bsc& bsc, CellBuffer& buffer, double prec) :
-  ctc(ctc), bsc(bsc), buffer(buffer), prec(prec), time_limit(-1), cell_limit(-1), trace(0), time(0),
-  impact(ctc.nb_var) {
+Solver::Solver(Ctc& ctc, Bsc& bsc, CellBuffer& buffer, Pdc& prec) :
+		  ctc(ctc), bsc(bsc), buffer(buffer), prec(prec), time_limit(-1), cell_limit(-1), trace(0), time(0) {
 
 	nb_cells=0;
 
@@ -29,9 +28,6 @@ void Solver::start(const IntervalVector& init_box) {
 	buffer.flush();
 
 	Cell* root=new Cell(init_box);
-
-	// add data required by the contractor
-	//ctc.init_root(*root);
 
 	// add data required by this solver
 	root->add<BisectedVar>();
@@ -43,6 +39,8 @@ void Solver::start(const IntervalVector& init_box) {
 
 	IntervalVector tmpbox(init_box.size());
 
+	impact.resize(init_box.size());
+
 	impact.set_all();
 
 	Timer::start();
@@ -51,67 +49,69 @@ void Solver::start(const IntervalVector& init_box) {
 
 bool Solver::next(std::vector<IntervalVector>& sols) {
 	try  {
-	  while (!buffer.empty()) {
+		while (!buffer.empty()) {
 
-		if (trace==2) cout << buffer << endl;
+			if (trace==2) cout << buffer << endl;
 
-		Cell* c=buffer.top();
+			Cell* c=buffer.top();
 
-		try {
-			int v=c->get<BisectedVar>().var;      // last bisected var.
+			try {
+				int v=c->get<BisectedVar>().var;      // last bisected var.
 
-			if (v!=-1) impact.set(v);
+				if (v!=-1) impact.set(v);
 
-			ctc.contract(c->box,impact);
+				ctc.contract(c->box,impact);
 
-			if (v!=-1) impact.unset(v);
+				if (v!=-1) impact.unset(v);
 
-			if (c->box.max_diam()<=prec) {
-			  new_sol(sols,c->box);
-			  delete buffer.pop();
-			  impact.set_all();
-			  return !buffer.empty();
-			  // note that we skip time_limit_check() here.
-			  // In the case where "next" is called by "solve",
-			  // and if time has exceeded, the exception will be raised by the
-			  // very next call to "next" anyway. This holds, unless "next" finds
-			  // new solutions again and again endlessly. So there is a little risk
-			  // of uncaught timeout in this case (but this case is probably already
-			  // an error case).
-			}
-	       
-			else {
-			  try {pair<IntervalVector,IntervalVector> boxes=bsc.bisect(*c);
-				pair<Cell*,Cell*> new_cells=c->bisect(boxes.first,boxes.second);
+				if (prec.test(c->box)==YES) {
+					new_sol(sols,c->box);
+					delete buffer.pop();
+					impact.set_all();
+					return !buffer.empty();
+					// note that we skip time_limit_check() here.
+					// In the case where "next" is called by "solve",
+					// and if time has exceeded, the exception will be raised by the
+					// very next call to "next" anyway. This holds, unless "next" finds
+					// new solutions again and again endlessly. So there is a little risk
+					// of uncaught timeout in this case (but this case is probably already
+					// an error case).
+				}
 
+				else {
+					try {
+
+						pair<IntervalVector,IntervalVector> boxes=bsc.bisect(*c);
+						pair<Cell*,Cell*> new_cells=c->bisect(boxes.first,boxes.second);
+
+						delete buffer.pop();
+						buffer.push(new_cells.first);
+						buffer.push(new_cells.second);
+						nb_cells+=2;
+						if (cell_limit >=0 && nb_cells>=cell_limit) throw CellLimitException();}
+					catch (NoBisectableVariableException&) {
+						new_sol(sols, c->box);
+						delete buffer.pop();
+						impact.set_all();
+						return !buffer.empty();
+					}
+				}
+				time_limit_check();
+
+			} catch(EmptyBoxException&) {
+				assert(c->box.is_empty());
 				delete buffer.pop();
-				buffer.push(new_cells.first);
-				buffer.push(new_cells.second);
-				nb_cells+=2;
-				if (cell_limit >=0 && nb_cells>=cell_limit) throw CellLimitException();}
-			  catch (NoBisectableVariableException&) {
-			    new_sol(sols, c->box);
-			    delete buffer.pop(); 
-			    impact.set_all();
-			    return !buffer.empty();
-			  }
+				impact.set_all();
 			}
-			time_limit_check();
-						
-		} catch(EmptyBoxException&) {
-			assert(c->box.is_empty());
-			delete buffer.pop();
-			impact.set_all();
 		}
-	  }
 	}
 	catch (TimeOutException&) {
-	  cout << "time limit " << time_limit << "s. reached " << endl; return false;
+		cout << "time limit " << time_limit << "s. reached " << endl; return false;
 	}
 	catch (CellLimitException&) {
 		cout << "cell limit " << cell_limit << " reached " << endl;
 	}
-	
+
 	Timer::stop();
 	time+= Timer::VIRTUAL_TIMELAPSE();
 
@@ -140,7 +140,5 @@ void Solver::new_sol (vector<IntervalVector> & sols, IntervalVector & box) {
 	if (trace >=1)
 		cout << " sol " << sols.size() << " nb_cells " <<  nb_cells << " "  << sols[sols.size()-1] <<   endl;
 }
-
-
 
 } // end namespace ibex

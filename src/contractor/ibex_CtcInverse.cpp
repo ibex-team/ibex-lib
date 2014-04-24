@@ -12,12 +12,15 @@
 
 namespace ibex {
 
-CtcInverse::CtcInverse(Ctc& c, Function& f) : Ctc(f.nb_var()), c(c), f(f), y(f.image_dim()) {
+CtcInverse::CtcInverse(Ctc& c, Function& f) : c(c), f(f), y(f.image_dim()) {
 	const ExprSymbol& y=ExprSymbol::new_(f.expr().dim);
 	id.init(y,y);
 }
 
 void CtcInverse::contract(IntervalVector& box) {
+
+	assert(box.size()==f.nb_var());
+
 	Domain fx=f.eval_domain(box);
 	y.init(Interval::ALL_REALS);
 	id.backward(fx,y);

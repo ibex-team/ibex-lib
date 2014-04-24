@@ -366,7 +366,10 @@ inline Interval atan(const Interval& x) {
 }
 
 inline Interval cosh(const Interval& x) {
-	return gaol::cosh(x.itv);
+	if (x.is_unbounded()) 
+		return Interval(gaol::cosh(x.itv).left(),POS_INFINITY);
+	else
+		return gaol::cosh(x.itv);
 }
 
 inline Interval sinh(const Interval& x) {

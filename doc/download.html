@@ -1,5 +1,5 @@
 	<p>
-	Archive file: &nbsp; <a href="uploads/ibex-2.0.9.tar.gz">ibex-2.0.9.tar.gz</a>. 
+	Archive file: &nbsp; <a href="uploads/ibex-2.1.1.tar.gz">ibex-2.1.1.tar.gz</a>. 
 	<p>
         The current alpha version is still under test.
 	<p>
@@ -65,13 +65,13 @@ cause linking problems with other libraries).<br><br>
 	<span class="path">~/Ibex/soplex-1.7.0$</span> cd ..
 	</div>
 	</li>
-	<li>Save the archive <span class="txtcode">ibex-2.0.9.tar.gz</span> in <span class="txtcode">Ibex</span></li>
+	<li>Save the archive <span class="txtcode">ibex-2.1.1.tar.gz</span> in <span class="txtcode">Ibex</span></li>
 	<li>Compile Ibex<br>
 	<div class="code">
-	<span class="path">~/Ibex/$</span> tar xvfz ibex-2.0.9.tar.gz<br /> 
-	<span class="path">~/Ibex/$</span> cd ibex-2.0.9<br /> 
-	<span class="path">~/Ibex/ibex-2.0.9/$</span> ./waf configure <br /> 
-	<span class="path">~/Ibex/ibex-2.0.9/$</span> sudo ./waf install
+	<span class="path">~/Ibex/$</span> tar xvfz ibex-2.1.1.tar.gz<br /> 
+	<span class="path">~/Ibex/$</span> cd ibex-2.1.1<br /> 
+	<span class="path">~/Ibex/ibex-2.1.1/$</span> ./waf configure <br /> 
+	<span class="path">~/Ibex/ibex-2.1.1/$</span> sudo ./waf install
 	</div>
 	</li>
 	</ul>
@@ -124,20 +124,20 @@ cause linking problems with other libraries).<br><br>
 	<span class="path">~/Ibex/soplex-1.7.0$</span> make ZLIB=false<br/> 
 	<span class="path">~/Ibex/soplex-1.7.0$</span> cd ..
 	</div></li>
-	<li>Save the archive <span class="txtcode">ibex-2.0.9.tar.gz</span> in <span class="txtcode">Ibex</span></li>
+	<li>Save the archive <span class="txtcode">ibex-2.1.1.tar.gz</span> in <span class="txtcode">Ibex</span></li>
 	<li>Compile ibex (still in the shell of MinGW)<br>
 	<div class="code">
 	<span class="path">~/Ibex/$</span> export PATH="$PATH:/c/Python27" <br />
-	<span class="path">~/Ibex/$</span> tar xvfz ibex-2.0.9.tar.gz<br /> 
-	<span class="path">~/Ibex/$</span> cd ibex-2.0.9<br /> 
-	<span class="path">~/Ibex/ibex-2.0.9/$</span> ./waf configure --prefix=<i>[path]</i><br />
+	<span class="path">~/Ibex/$</span> tar xvfz ibex-2.1.1.tar.gz<br /> 
+	<span class="path">~/Ibex/$</span> cd ibex-2.1.1<br /> 
+	<span class="path">~/Ibex/ibex-2.1.1/$</span> ./waf configure --prefix=<i>[path]</i><br />
 	</div>
 	where <i>[path]</i> is the place where you want Ibex to be installed.
 	This path must be entered in Windows-style and with double backslash (&laquo;\\&raquo;) as separator, e.g.,
 	<span class="txtcode">C:\\MyLibraires\\Ibex</span>.<br>
 	Finally:
 	<div class="code">
-	<span class="path">~/Ibex/ibex-2.0.9/$</span> ./waf install<br />
+	<span class="path">~/Ibex/ibex-2.1.1/$</span> ./waf install<br />
 	</div>
 	
 	</li>
@@ -220,14 +220,14 @@ cause linking problems with other libraries).<br><br>
 	<li><b>Linux and MacOS</b><li>
 	Compile Soplex as follows:
 	<div class="code">
-	<span class="path">~/Ibex/ibex-2.0.9/soplex-1.7.0$</span> make SHARED=true ZLIB=false
+	<span class="path">~/Ibex/ibex-2.1.1/soplex-1.7.0$</span> make SHARED=true ZLIB=false
 	</div>
 	</li>
 
 	<li><b>Windows</b><br>
 	Compile Soplex as follows:
 	<div class="code">
-	<span class="path">~/Ibex/ibex-2.0.9/soplex-1.7.0$</span>  make ZLIB=false SHARED=true SHAREDLIBEXT=dll
+	<span class="path">~/Ibex/ibex-2.1.1/soplex-1.7.0$</span>  make ZLIB=false SHARED=true SHAREDLIBEXT=dll
 	</div>
 	</li>
 	</ul>
@@ -300,7 +300,7 @@ cause linking problems with other libraries).<br><br>
 	<span class="txtcode">/usr/local</span> by default or whatever path specified via <span class="txtcode">--prefix</span>:
 
 	<div class="code">
-	<span class="path">~/Ibex/ibex-2.0.9/$</span> export PKG_CONFIG_PATH=/usr/local/share/pkgconfig/ 
+	<span class="path">~/Ibex/ibex-2.1.1/$</span> export PKG_CONFIG_PATH=/usr/local/share/pkgconfig/ 
 	</div>
 
 	<p>
@@ -309,9 +309,9 @@ cause linking problems with other libraries).<br><br>
 	<p>
 	Here is an example:
 	<div class="code">
-	<span class="path">~/Ibex/ibex-2.0.9/$</span> cd examples<br /> 
-	<span class="path">~/Ibex/ibex-2.0.9/$</span> make defaultsolver<br /> 
-	<span class="path">~/Ibex/ibex-2.0.9/$</span> ./defaultsolver ../benchs/cyclohexan3D.bch 1e-05 10<br /> 
+	<span class="path">~/Ibex/ibex-2.1.1/$</span> cd examples<br /> 
+	<span class="path">~/Ibex/ibex-2.1.1/$</span> make defaultsolver<br /> 
+	<span class="path">~/Ibex/ibex-2.1.1/$</span> ./defaultsolver ../benchs/cyclohexan3D.bch 1e-05 10<br /> 
 	</div>
 	<p>
 	The default solver solves the systems of equations in argument (cyclohexan3D) with a precision less than 1e-05 and
@@ -371,14 +371,14 @@ cause linking problems with other libraries).<br><br>
 	<span class="txtcode">/usr/local</span> by default or whatever path specified via <span class="txtcode">--prefix</span>.<br>
 	Then:
 	<div class="code">
-	<span class="path">~$</span> cd Ibex/ibex-2.0.9/__build__/src/java <br />
-	<span class="path">~/Ibex/ibex-2.0.9/__build__/src/java$</span> $JAVA_HOME/bin/java Test <br/>
+	<span class="path">~$</span> cd Ibex/ibex-2.1.1/__build__/src/java <br />
+	<span class="path">~/Ibex/ibex-2.1.1/__build__/src/java$</span> $JAVA_HOME/bin/java Test <br/>
 	</div>
 	Alternatively, you can give the library path directly in argument of the <span class="txtcode">java</span> command instead of using an environment
         variable:
         <div class="code">
-	<span class="path">~$</span> cd Ibex/ibex-2.0.9/__build__/src/java <br />
-	<span class="path">~/Ibex/ibex-2.0.9/__build__/src/java$</span> $JAVA_HOME/bin/java -Djava.library.path=<i>[prefix]</i>/lib Test <br/>
+	<span class="path">~$</span> cd Ibex/ibex-2.1.1/__build__/src/java <br />
+	<span class="path">~/Ibex/ibex-2.1.1/__build__/src/java$</span> $JAVA_HOME/bin/java -Djava.library.path=<i>[prefix]</i>/lib Test <br/>
 	</div>
 	</li>
 	
@@ -390,26 +390,26 @@ cause linking problems with other libraries).<br><br>
 	<span class="txtcode">/usr/local</span> by default or whatever path specified via <span class="txtcode">--prefix</span>.<br>
 	Then:
 	<div class="code">
-	<span class="path">~$</span> cd Ibex/ibex-2.0.9/__build__/src/java <br />
-	<span class="path">~/Ibex/ibex-2.0.9/__build__/src/java$</span>  <br/>
+	<span class="path">~$</span> cd Ibex/ibex-2.1.1/__build__/src/java <br />
+	<span class="path">~/Ibex/ibex-2.1.1/__build__/src/java$</span>  <br/>
 	</div>
 	
 	Alternatively, you can give the library path directly in argument of the <span class="txtcode">java</span> command instead of using an environment variable:
         <div class="code">
-	<span class="path">~$</span> cd Ibex/ibex-2.0.9/__build__/src/java <br />
-	<span class="path">~/Ibex/ibex-2.0.9/__build__/src/java$</span> $JAVA_HOME/bin/java -Djava.library.path=<i>[prefix]</i>/lib Test <br/>
+	<span class="path">~$</span> cd Ibex/ibex-2.1.1/__build__/src/java <br />
+	<span class="path">~/Ibex/ibex-2.1.1/__build__/src/java$</span> $JAVA_HOME/bin/java -Djava.library.path=<i>[prefix]</i>/lib Test <br/>
 	</div>
 	</li>
 	<li><b>Windows</b><br>
 	<p>
-	We assume here that MinGW has been installed in <span class="txtcode">C:\</span> and Ibex in <span class="txtcode">C:\MinGW\msys\1.0\home\<i>[user]</i>\Ibex\ibex-2.0.9</span>.
+	We assume here that MinGW has been installed in <span class="txtcode">C:\</span> and Ibex in <span class="txtcode">C:\MinGW\msys\1.0\home\<i>[user]</i>\Ibex\ibex-2.1.1</span>.
 	
 	<p>
 	Open a command window (not the shell of MinGW) and type:
         <div class="code">
-	<span class="path">C:\Documents and Settings\<i>[user]</i>></span> cd C:\MinGW\msys\1.0\home\<i>[user]</i>\Ibex\ibex-2.0.9\__build__\src\java <br />
-	<span class="path">C:\MinGW\msys\1.0\home\<i>[user]</i>\Ibex\ibex-2.0.9\__build__\src\java></span>set PATH=%PATH%;<i>[prefix]</i>/bin;C:\MinGW\bin<br />
-	<span class="path">C:\MinGW\msys\1.0\home\<i>[user]</i>\Ibex\ibex-2.0.9\__build__\src\java></span>java Test<br />
+	<span class="path">C:\Documents and Settings\<i>[user]</i>></span> cd C:\MinGW\msys\1.0\home\<i>[user]</i>\Ibex\ibex-2.1.1\__build__\src\java <br />
+	<span class="path">C:\MinGW\msys\1.0\home\<i>[user]</i>\Ibex\ibex-2.1.1\__build__\src\java></span>set PATH=%PATH%;<i>[prefix]</i>/bin;C:\MinGW\bin<br />
+	<span class="path">C:\MinGW\msys\1.0\home\<i>[user]</i>\Ibex\ibex-2.1.1\__build__\src\java></span>java Test<br />
         </div>
 </ul>
 	
@@ -423,8 +423,8 @@ cause linking problems with other libraries).<br><br>
 	<p>
 
 	<div class="code">
-	<span class="path">~/Ibex/ibex-2.0.9$</span>sudo ./waf uninstall<br/>
-	<span class="path">~/Ibex/ibex-2.0.9$</span> ./waf distclean<br/>
+	<span class="path">~/Ibex/ibex-2.1.1$</span>sudo ./waf uninstall<br/>
+	<span class="path">~/Ibex/ibex-2.1.1$</span> ./waf distclean<br/>
 	</div>
 	<p>
 	<b>Note: </b>sudo is useless if Ibex is installed in a local folder.

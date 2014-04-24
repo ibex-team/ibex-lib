@@ -419,7 +419,7 @@ int main() {
 	IntervalVector box=initbox;
 
 	// Create the q-intersection of the N contractors
-	CtcQInter q(array,5);
+	CtcQInter q(2,array,5);
 
 	// Perform a first contraction
 	box=initbox;
@@ -465,8 +465,8 @@ int main() {
 	CtcNewton newton(f);
 	RoundRobin rr;
 	CellStack buff;
-
-	Solver s(c,rr,buff,1e-07);
+	PdcDiameterLT prec(1e-07);
+	Solver s(c,rr,buff,prec);
 
 	vector<IntervalVector> sols=s.solve(box);
 
@@ -524,11 +524,12 @@ int main() {
 	// A "CellStack" means a depth-first search.
 	CellStack buff;
 
+	// Set the precision required for the solutions
+	// -------------------------------------
+	PdcDiameterLT prec(1e-3);
+
 	// Build a solver
-	// -------------
-	// The last parameter (1e-07) is the precision
-	// required for the solutions
-	Solver s(c,rr,buff,1e-03);
+	Solver s(c,rr,buff,prec);
 
 	//s.trace=true;
 

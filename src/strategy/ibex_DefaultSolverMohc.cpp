@@ -20,6 +20,7 @@
 #include "ibex_CellStack.h"
 #include "ibex_LinearRelaxCombo.h"
 #include "ibex_Array.h"
+#include "ibex_PdcDiameterLT.h"
 
 namespace ibex {
 
@@ -69,9 +70,9 @@ Array<Ctc>*  DefaultSolverMohc::contractor_list (System& sys, double prec,
 
 	   index++;
 	}else if(shavc==_3BCID){
-       if(hcc==HC4) ctc_list->set_ref(index, *new Ctc3BCid (*new CtcHC4 (sys.ctrs,0.1,true),10,1));
+       if(hcc==HC4) ctc_list->set_ref(index, *new Ctc3BCid (sys.nb_var, *new CtcHC4 (sys.ctrs,0.1,true),10,1));
 	   else if(hcc>=MOHC50 && hcc<=MOHC100)
-	     ctc_list->set_ref(index, *new Ctc3BCid (
+	     ctc_list->set_ref(index, *new Ctc3BCid (sys.nb_var,
             *new CtcMohc (sys.ctrs,mohc->active_mono_proc,0.1,true, 0.1, CtcMohc::default_univ_newton_min_width),10,1));
        index++;
 	}
@@ -93,11 +94,11 @@ Array<Ctc>*  DefaultSolverMohc::contractor_list (System& sys, double prec,
 }
 
 
-DefaultSolverMohc::DefaultSolverMohc(System& sys, double prec,
+DefaultSolverMohc::DefaultSolverMohc(System& sys, double _prec,
                     hc_ctc hcc, shav_ctc shavc, lr_ctc lrc) :
-        Solver(*new CtcCompo (* (contractor_list(sys,prec,hcc,shavc,lrc))),
-		*new SmearSumRelative(sys,prec),
-		*new CellStack(), prec) ,sys(sys) , __bsc(&bsc),__buffer(&buffer){
+        Solver(*new CtcCompo (* (contractor_list(sys,_prec,hcc,shavc,lrc))),
+		*new SmearSumRelative(sys,_prec),
+		*new CellStack(), *new PdcDiameterLT(_prec)) ,sys(sys) , __bsc(&bsc), __pdc(&prec), __buffer(&buffer){
 //		, __ctc(dynamic_cast<CtcCompo*>(&ctc)), __bsc(&bsc),__buffer(&buffer) {
 
 	srand(1);
@@ -116,6 +117,7 @@ DefaultSolverMohc::~DefaultSolverMohc() {
 		//delete &__ctc->list[i];
     //delete __ctc;
 	delete __bsc;
+	delete __pdc;
 	//delete __buffer;
 }
 

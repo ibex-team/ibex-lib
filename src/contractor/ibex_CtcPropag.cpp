@@ -21,13 +21,10 @@ namespace ibex {
 /*! Default propagation ratio. */
 #define __IBEX_DEFAULT_RATIO_PROPAG           0.01
 
-CtcPropag::CtcPropag(const Array<Ctc>& cl, double ratio, bool incremental) :
-		  Ctc(cl[0].nb_var), list(cl), ratio(ratio), incremental(incremental),
-		  accumulate(false), g(cl.size(), cl[0].nb_var), agenda(cl.size()),
+CtcPropag::CtcPropag(int nb_var, const Array<Ctc>& cl, double ratio, bool incremental) :
+		  nb_var(nb_var), list(cl), ratio(ratio), incremental(incremental),
+		  accumulate(false), g(cl.size(), nb_var), agenda(cl.size()),
 		  _impact(nb_var), flags(Ctc::NB_OUTPUT_FLAGS), active(cl.size()) {
-
-	for (int i=1; i<list.size(); i++)
-		assert(list[i].nb_var==nb_var);
 
 	for (int i=0; i<list.size(); i++)
 		for (int j=0; j<nb_var; j++) {
@@ -39,6 +36,8 @@ CtcPropag::CtcPropag(const Array<Ctc>& cl, double ratio, bool incremental) :
 }
 
 void  CtcPropag::contract(IntervalVector& box) {
+
+	assert(box.size()==nb_var);
 
 	/*
 	 * When we call a contractor, we assume all

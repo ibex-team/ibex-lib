@@ -111,9 +111,9 @@ Array<Ctc>*  DefaultOptimizerMohc::contractor_list (System& sys2, System& ext_sy
 
 	   index++;
 	}else if(shavc==_3BCID){
-       if(hcc==HC4) ctc_list->set_ref(index, *new Ctc3BCid (*new CtcHC4 (ext_sys.ctrs,0.1,true),10,1));
+       if(hcc==HC4) ctc_list->set_ref(index, *new Ctc3BCid (ext_sys.nb_var, *new CtcHC4 (ext_sys.ctrs,0.1,true),10,1));
 	   else if(hcc>=MOHC50 && hcc<=MOHC100)
-	     ctc_list->set_ref(index, *new Ctc3BCid (
+	     ctc_list->set_ref(index, *new Ctc3BCid (ext_sys.nb_var,
             *new CtcMohc (ext_sys.ctrs,mohc->active_mono_proc,0.1,true, 0.1, CtcMohc::default_univ_newton_min_width),10,1));
        index++;
 	}

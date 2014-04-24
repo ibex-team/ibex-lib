@@ -57,9 +57,7 @@ public:
 	// bool idempotent();
 	//
 
-	/**
-	 * The constraint.
-	 */
+	/** The constraint. */
 	const NumConstraint ctr;
 
 protected:

@@ -466,7 +466,7 @@ int main() {
   /* Create the array of all the contractors */
   Array<Ctc> array(c0,c1,c2,c3,c4,c5);
   /* Create the q-intersection of the N contractors */
-  CtcQInter q(array,5);// 5 is the number of correct measurement
+  CtcQInter q(2,array,5); // 2 is the number of variables, 5 the number of correct measurement
   /* Perform a first contraction */
   IntervalVector box=initbox;
   q.contract(box);
@@ -487,9 +487,6 @@ int main() {
   //! [ctc-own1]
   class MyContractor : public Ctc {
    public:
-   /* n is the dimension of boxes. It is mandatory to fix it
-    at construction. */
-   MyContractor(int n) : Ctc(n) { }
 
    void contract(IntervalVector& box) {
     box=box.mid()+0.5*Interval(-1,1)*box.rad();
@@ -499,7 +496,7 @@ int main() {
 
   //! [ctc-own2]
   /* build the contractor for 3-dimensional boxes. */
-  MyContractor c(3);
+  MyContractor c;
 
   /* create the box [0,1]x[0,1]x[0,1] */
   IntervalVector x(3,Interval(0,1));

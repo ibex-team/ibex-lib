@@ -29,7 +29,7 @@ public:
 	 *
 	 * The list itself is not kept by reference.
 	 */
-	CtcQInter(const Array<Ctc>& list, int q);
+	CtcQInter(int n, const Array<Ctc>& list, int q);
 
 	/**
 	 * \brief Contract the box.

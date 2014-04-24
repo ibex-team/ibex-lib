@@ -12,23 +12,18 @@
 
 namespace ibex {
 
-PdcAnd::PdcAnd(const Array<Pdc>& list) : Pdc(list[0].nb_var), list(list) {
-	for (int i=1; i<list.size(); i++) {
-		assert(list[i].nb_var==nb_var);
-	}
+PdcAnd::PdcAnd(const Array<Pdc>& list) : list(list) {
+
 }
 
-PdcAnd::PdcAnd(Pdc& c1, Pdc& c2) : Pdc(c1.nb_var), list(2) {
+PdcAnd::PdcAnd(Pdc& c1, Pdc& c2) : list(2) {
 	list.set_ref(0,c1);
-	assert(c2.nb_var==nb_var);
 	list.set_ref(1,c2);
 }
 
-PdcAnd::PdcAnd(Pdc& c1, Pdc& c2, Pdc& c3) : Pdc(c1.nb_var), list(3) {
+PdcAnd::PdcAnd(Pdc& c1, Pdc& c2, Pdc& c3) : list(3) {
 	list.set_ref(0,c1);
-	assert(c2.nb_var==nb_var);
 	list.set_ref(1,c2);
-	assert(c3.nb_var==nb_var);
 	list.set_ref(2,c3);
 }
 

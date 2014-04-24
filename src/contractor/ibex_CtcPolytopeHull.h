@@ -81,6 +81,12 @@ protected:
 	 */
 	void optimizer(IntervalVector &box);
 
+
+	/**
+	 * \brief The number of variables this contractor works with.
+	 */
+	const int nb_var;
+
 	/**
 	 * \brief The linearization technique
 	 */

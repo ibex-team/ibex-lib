@@ -14,21 +14,31 @@
 
 namespace ibex {
 
-CtcFwdBwd::CtcFwdBwd(Function& f, CmpOp op, FwdMode mode) : Ctc(f.nb_var()), ctr(f,op), hc4r(mode) {
+CtcFwdBwd::CtcFwdBwd(Function& f, CmpOp op, FwdMode mode) : ctr(f,op), hc4r(mode) {
+
+	int nb_var = f.nb_var();
 	input = new BoolMask(nb_var);
 	output = new BoolMask(nb_var);
 
-	for (int v=0; v<ctr.f.nb_var(); v++)
-		(*output)[v]=(*input)[v]=ctr.f.used(v);
-
+	int v;
+	for (int i=0; i<f.nb_used_vars(); i++) {
+		v=f.used_var(i);
+		(*output)[v]=(*input)[v]=true;
+	}
 }
 
-CtcFwdBwd::CtcFwdBwd(const NumConstraint& ctr, FwdMode mode) : Ctc(ctr.f.nb_var()), ctr(ctr.f,ctr.op), hc4r(mode) {
+CtcFwdBwd::CtcFwdBwd(const NumConstraint& ctr, FwdMode mode) : ctr(ctr.f,ctr.op), hc4r(mode) {
+
+	int nb_var = ctr.f.nb_var();
+
 	input = new BoolMask(nb_var);
 	output = new BoolMask(nb_var);
 
-	for (int v=0; v<ctr.f.nb_var(); v++)
-		(*output)[v]=(*input)[v]=ctr.f.used(v);
+	int v;
+	for (int i=0; i<ctr.f.nb_used_vars(); i++) {
+		v=ctr.f.used_var(i);
+		(*output)[v]=(*input)[v]=true;
+	}
 }
 
 CtcFwdBwd::~CtcFwdBwd() {
@@ -37,6 +47,9 @@ CtcFwdBwd::~CtcFwdBwd() {
 }
 
 void CtcFwdBwd::contract(IntervalVector& box) {
+
+	assert(box.size()==ctr.f.nb_var());
+
 	const Dim& d=ctr.f.expr().dim;
 	Domain root_label(d);
 	Interval right_cst;

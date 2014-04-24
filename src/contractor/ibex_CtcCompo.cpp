@@ -27,44 +27,38 @@ void CtcCompo::init_impacts() {
 }
 
 CtcCompo::CtcCompo(const Array<Ctc>& list, bool incremental, double ratio) :
-	Ctc(list[0].nb_var), list(list), incremental(incremental),
-	ratio(ratio) {
+	list(list), incremental(incremental), ratio(ratio) {
 
 	init_impacts();
 }
 
 CtcCompo::CtcCompo(Ctc& c1, Ctc& c2, bool incremental, double ratio) :
-	Ctc(c1.nb_var), list(Array<Ctc>(c1,c2)), incremental(incremental),
-	ratio(ratio) {
+	list(Array<Ctc>(c1,c2)), incremental(incremental), ratio(ratio) {
 
 	init_impacts();
 }
 
 CtcCompo::CtcCompo(Ctc& c1, Ctc& c2, Ctc& c3, bool incremental, double ratio) :
-	Ctc(c1.nb_var), list(Array<Ctc>(c1,c2,c3)), incremental(incremental),
-	ratio(ratio) {
+	list(Array<Ctc>(c1,c2,c3)), incremental(incremental), ratio(ratio) {
 
 	init_impacts();
 }
 
 
 CtcCompo::CtcCompo(Ctc& c1, Ctc& c2, Ctc& c3, Ctc& c4, bool incremental, double ratio) :
-	Ctc(c1.nb_var), list(Array<Ctc>(c1,c2,c3,c4)), incremental(incremental),
-	ratio(ratio) {
+	list(Array<Ctc>(c1,c2,c3,c4)), incremental(incremental), ratio(ratio) {
 
 	init_impacts();
 }
 
 CtcCompo::CtcCompo(Ctc& c1, Ctc& c2, Ctc& c3, Ctc& c4, Ctc& c5, bool incremental, double ratio) :
-	Ctc(c1.nb_var), list(Array<Ctc>(c1,c2,c3,c4,c5)), incremental(incremental),
-	ratio(ratio) {
+	list(Array<Ctc>(c1,c2,c3,c4,c5)), incremental(incremental), ratio(ratio) {
 
 	init_impacts();
 }
 
 CtcCompo::CtcCompo(Ctc& c1, Ctc& c2, Ctc& c3, Ctc& c4, Ctc& c5, Ctc& c6, bool incremental, double ratio) :
-	Ctc(c1.nb_var), list(Array<Ctc>(c1,c2,c3,c4,c5,c6)), incremental(incremental),
-	ratio(ratio) {
+	list(Array<Ctc>(c1,c2,c3,c4,c5,c6)), incremental(incremental), ratio(ratio) {
 
 	init_impacts();
 }
@@ -77,6 +71,7 @@ CtcCompo::~CtcCompo() {
 
 void CtcCompo::contract(IntervalVector& box) {
 
+	// TODO: wrong algorithm here
 //	if (incremental) {
 //		for (int i=0; i<list.size(); i++) {
 //			IntervalVector old_box(box);

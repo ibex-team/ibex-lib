@@ -40,7 +40,7 @@ IntervalMatrix off_diag(const IntervalMatrix& m) {
 
 }
 
-PdcImageSubset::PdcImageSubset(Function& f, const IntervalVector& x0, Pdc& p_in) : Pdc(f.nb_var()*2), f(f), x0(x0), p_in(p_in) {
+PdcImageSubset::PdcImageSubset(Function& f, const IntervalVector& x0, Pdc& p_in) : f(f), x0(x0), p_in(p_in) {
 	assert(x0.size()==f.nb_var());
 	assert(f.image_dim()==f.nb_var()); // only square functions accepted
 }

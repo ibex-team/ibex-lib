@@ -13,33 +13,29 @@
 
 namespace ibex {
 
-CtcIn::CtcIn(Function& f, const Domain& y) :
-		Ctc(f.nb_var()), _f(f), _d(_f.expr().dim) {
+CtcIn::CtcIn(Function& f, const Domain& y) : _f(f), _d(_f.expr().dim) {
 	assert(_f.expr().dim==y.dim);
 	_d = y;
 }
 
-CtcIn::CtcIn(Function& f, const Interval& y) :
-		Ctc(f.nb_var()), _f(f), _d(Dim()) {
+CtcIn::CtcIn(Function& f, const Interval& y) : _f(f), _d(Dim()) {
 	assert(_f.expr().dim==_d.dim);
 	_d.i() = y;
 }
 
-CtcIn::CtcIn(Function& f, const IntervalVector& y) :
-		Ctc(f.nb_var()), _f(f), _d(_f.expr().dim) {
+CtcIn::CtcIn(Function& f, const IntervalVector& y) : _f(f), _d(_f.expr().dim) {
 	assert(_f.expr().dim.is_vector());
 	_d.v() = y;
 }
 
-CtcIn::CtcIn(Function& f, const IntervalMatrix& y) :
-		Ctc(f.nb_var()), _f(f), _d(_f.expr().dim) {
+CtcIn::CtcIn(Function& f, const IntervalMatrix& y) : _f(f), _d(_f.expr().dim) {
 	assert(_f.expr().dim==Dim(1,y.nb_rows(),y.nb_cols()));
 	_d.m() = y;
 }
 
-
-
 void CtcIn::contract(IntervalVector& box) {
+
+	assert(box.size()==_f.nb_var());
 
 	// it's simpler here to use direct computation, but
 	// we could also have used CtcFwdBwd

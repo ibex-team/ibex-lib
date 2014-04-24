@@ -34,6 +34,7 @@ public:
 	/**
 	 * \brief Create a AC3-like propagation with a list of contractors.
 	 *
+	 * \param nb_var           - Number of variables contractors work with
 	 * \param cl               - The list of contractors.
 	 * \param ratio (optional) - Criterion for stopping propagation. If a projection does not remove
 	 *                           more that \a ratio times the diameter of a variable domain, then this
@@ -43,7 +44,7 @@ public:
 	 *
 	 * \see #contract(IntervalVector&, const BoolMask&).
 	 */
-	CtcPropag(const Array<Ctc>& cl, double ratio=default_ratio, bool incr=false);
+	CtcPropag(int nb_var, const Array<Ctc>& cl, double ratio=default_ratio, bool incr=false);
 
 	/**
 	 * \brief Enforces propagation (e.g.: HC4 or BOX) fitering.
@@ -75,15 +76,17 @@ public:
 
 protected:
 
-	DirectedHyperGraph g;
+	const int nb_var;     // number of variables
 
-	Agenda agenda;
+	DirectedHyperGraph g; // constraint network (hypergraph)
 
-	BoolMask _impact; // impact given to sub-contractors
+	Agenda agenda;        // propagation agenda
 
-	BoolMask flags;   // status of a contraction
+	BoolMask _impact;     // impact given to sub-contractors
 
-	BoolMask active;  // mark active sub-contractors
+	BoolMask flags;       // status of a contraction
+
+	BoolMask active;      // mark active sub-contractors
 
 
 };

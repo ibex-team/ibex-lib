@@ -14,12 +14,8 @@
 
 namespace ibex {
 
-CtcQInter::CtcQInter(const Array<Ctc>& list, int q) : Ctc(list[0].nb_var), list(list),
-		n(list[0].nb_var), q(q), boxes(list.size(), n) {
+CtcQInter::CtcQInter(int n, const Array<Ctc>& list, int q) : n(n), q(q), boxes(list.size(), n) {
 
-	for (int i=0; i<list.size(); i++) {
-		assert(list[i].nb_var==n);
-	}
 }
 
 void CtcQInter::contract(IntervalVector& box) {

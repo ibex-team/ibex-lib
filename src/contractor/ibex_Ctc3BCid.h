@@ -90,7 +90,7 @@ class Ctc3BCid : public Ctc {
   *                       expressions in the initial system; during the search of solutions that follows,
   *                       the new auxiliary variables are not shaved and are thus removed from \a cid_space.
   */
-	Ctc3BCid(const BoolMask& cid_vars, Ctc& ctc, int s3b=default_s3b, int scid=default_scid,
+	Ctc3BCid(int nb_var, const BoolMask& cid_vars, Ctc& ctc, int s3b=default_s3b, int scid=default_scid,
 			int vhandled=-1, double var_min_width=default_var_min_width);
 
   /**
@@ -98,7 +98,7 @@ class Ctc3BCid : public Ctc {
 *
          *  ACID constructor on all variables : no need to give the cid_vars parameter ; all variables are the variables of the ctc contractor
 	 */
-	Ctc3BCid( Ctc& ctc, int s3b=default_s3b, int scid=default_scid,
+	Ctc3BCid(int nb_var, Ctc& ctc, int s3b=default_s3b, int scid=default_scid,
 			int vhandled=-1, double var_min_width=default_var_min_width);
 
 
@@ -113,6 +113,9 @@ class Ctc3BCid : public Ctc {
 	 * Otherwise, 3BCID will be performed.
 	 */
 	virtual void contract(IntervalVector& box);
+
+	/** The number of variables this contractor works with. */
+	const int nb_var;
 
 	/** The variables to which var3BCID is applied **/
 	BoolMask cid_vars;

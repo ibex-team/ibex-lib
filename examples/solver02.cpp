@@ -58,11 +58,12 @@ int main(int argc, char** argv) {
 	// A "CellStack" means a depth-first search.
 	CellStack buff;
 
+	// Set the precision required for the solutions
+	// -------------------------------------
+	PdcDiameterLT prec(1e-7);
+
 	// Build a solver
-	// -------------
-	// The last parameter (1e-07) is the precision
-	// required for the solutions
-	Solver s(c,rr,buff,1e-07);
+	Solver s(c,rr,buff,prec);
 
 	//s.trace=true;
 

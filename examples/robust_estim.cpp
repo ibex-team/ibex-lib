@@ -73,7 +73,7 @@ int main() {
 	IntervalVector box(2,_box);
 
 	// The q-intersection of the N contractors
-	CtcQInter q(m_ctc,9);
+	CtcQInter q(2,m_ctc,9);
 
 	// Fixpoint
 	CtcFixPoint fix(q);

@@ -15,7 +15,7 @@ using namespace std;
 
 namespace ibex {
 
-CtcPolytopeHull::CtcPolytopeHull(LinearRelax& lr, ctc_mode cmode, int max_iter, int time_out, double eps, Interval limit_diam, bool init_lp) : Ctc(lr.sys.nb_var), lr(lr), sys(lr.sys),
+CtcPolytopeHull::CtcPolytopeHull(LinearRelax& lr, ctc_mode cmode, int max_iter, int time_out, double eps, Interval limit_diam, bool init_lp) : nb_var(lr.sys.nb_var), lr(lr), sys(lr.sys),
 		goal_var(-1), cmode(cmode), limit_diam_box(eps>limit_diam.lb()? eps : limit_diam.lb(), limit_diam.ub()) {
 
 	if (dynamic_cast<const ExtendedSystem*>(&lr.sys)) {

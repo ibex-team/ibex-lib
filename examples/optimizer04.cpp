@@ -75,7 +75,7 @@ int main(int argc, char** argv){
 	CtcHC4 hc44xn (ext_sys.ctrs,0.01,false);
 
 	// The 3BCID contractor on all variables (component of the contractor when filtering == "3bcidhc4") 
-	Ctc3BCid c3bcidhc4(hc44cid);
+	Ctc3BCid c3bcidhc4(ext_sys.nb_var, hc44cid);
 	// hc4 followed by 3bcidhc4 : the actual contractor used when filtering == "3bcidhc4" 
 	CtcCompo hc43bcidhc4 (hc4, c3bcidhc4);
 

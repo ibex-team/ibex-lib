@@ -24,7 +24,7 @@ Array<Ctc> convert(const Array<NumConstraint>& csp) {
 }
 
 CtcHC4::CtcHC4(const Array<NumConstraint>& csp, double ratio, bool incremental) :
-		CtcPropag(convert(csp), ratio, incremental) {
+		CtcPropag(csp[0].f.nb_var(), convert(csp), ratio, incremental) {
 }
 
 CtcHC4::~CtcHC4() {
