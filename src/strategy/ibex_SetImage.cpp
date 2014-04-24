@@ -65,7 +65,7 @@ void SetImage::pave(const IntervalVector& x, double epsilon) {
 	stack<IntervalVector> Ldomain;
 	IntervalVector xtilde(n);
 	IntervalVector ytilde(n);
-	LargestFirst lf;
+	LargestFirst lf(epsilon);
 
 	Ldomain.push(x);
 	while (! Ldomain.empty()) {

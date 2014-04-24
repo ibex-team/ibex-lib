@@ -64,7 +64,7 @@ int main() {
 		CtcFwdBwd ct2(c_sup, GT, AFFINE2_MODE);  // HC4revise Algorithm with Affine2 in the forward step.
 		CtcFixPoint ft2(ct2, 0.001);
 
-		LargestFirst bbb;
+		LargestFirst bbb(0.001);
 		CellStack ccc;
 		PdcDiameterLT prec(0.001);
 

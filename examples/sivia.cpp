@@ -47,7 +47,7 @@ int main() {
 	// Build the way boxes will be bisected.
 	// "LargestFirst" means that the dimension bisected
 	// is always the largest one.
-	LargestFirst lf;
+	LargestFirst lf(0.1);
 
 	// Create a buffer
 	CellStack stack;

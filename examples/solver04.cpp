@@ -126,7 +126,7 @@ int main(int argc, char** argv) {
 	if (bisection=="roundrobin")
 	  bs = new RoundRobin (prec);
 	else if (bisection== "largestfirst")
-          bs= new LargestFirst();
+          bs= new LargestFirst(prec);
 	else if (bisection=="smearsum")
 	  bs = new SmearSum(sys,prec);
 	else if (bisection=="smearmax")

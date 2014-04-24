@@ -13,19 +13,19 @@
 namespace ibex {
 
 CtcExist::CtcExist(const NumConstraint& ctr, double prec,const  IntervalVector& init_box) :
-		nb_var(ctr.f.nb_var()-init_box.size()), _ctc(*new CtcFwdBwd(ctr)), _bsc(),
+		nb_var(ctr.f.nb_var()-init_box.size()), _ctc(*new CtcFwdBwd(ctr)), _bsc(prec),
 		_init(init_box), _prec(prec), _own_ctc(true)  {
 	assert(init_box.size()<ctr.f.nb_var());
 }
 
 CtcExist::CtcExist(Function& f, CmpOp op, double prec,const  IntervalVector& init_box) :
-		nb_var(f.nb_var()-init_box.size()), _ctc(*new CtcFwdBwd(f, op)), _bsc(),
+		nb_var(f.nb_var()-init_box.size()), _ctc(*new CtcFwdBwd(f, op)), _bsc(prec),
 		_init(init_box), _prec(prec), _own_ctc(true)   {
 	assert(init_box.size()<f.nb_var());
 }
 
 CtcExist::CtcExist(int nb_var, Ctc& p, double prec,const  IntervalVector& init_box) :
-		nb_var(nb_var-init_box.size()), _ctc(p), _bsc(),
+		nb_var(nb_var-init_box.size()), _ctc(p), _bsc(prec),
 		_init(init_box), _prec(prec), _own_ctc(false)   {
 	assert(init_box.size()<nb_var);
 }

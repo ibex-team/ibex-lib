@@ -1,6 +1,6 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : tutorial.cpp
+// File        : doc-tutorial.cpp
 // Author      : Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file

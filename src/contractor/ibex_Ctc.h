@@ -88,6 +88,7 @@ public:
 	enum {FIXPOINT, INACTIVE, NB_OUTPUT_FLAGS};
 
 protected:
+
 	/**
 	 * \brief Return the current impact (NULL pointer if none).
 	 *

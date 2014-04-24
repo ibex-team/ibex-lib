@@ -40,7 +40,7 @@ int main() {
 
 	CtcFwdBwd c(f);
 	CtcNewton newton(f);
-	RoundRobin rr;
+	RoundRobin rr(1e-7);
 	CellStack buff;
 
 	PdcDiameterLT pdc(1e-7);

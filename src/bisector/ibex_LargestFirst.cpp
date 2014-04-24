@@ -14,28 +14,37 @@ using std::pair;
 
 namespace ibex {
 
-  LargestFirst::LargestFirst( double ratio1) :  ratio(ratio1) {
+LargestFirst::LargestFirst(double prec, double ratio1) : Bsc(prec), ratio(ratio1) {
+
+}
+
+LargestFirst::LargestFirst(const Vector& prec, double ratio1) : Bsc(prec), ratio(ratio1) {
 
 }
 
 pair<IntervalVector,IntervalVector> LargestFirst::bisect(const IntervalVector& box) {
 
- int var =-1;
-  for (int i=0; i< box.size(); i++)	{
-    if (box[i].is_bisectable()){
-      if (var==-1) var=i;
-      else {
-    	  if (box[i].diam()>box[var].diam())  var = i;
-      }
-    }
-  }
-  
-  if (var !=-1){
-    return box.bisect(var,ratio);
-  }
-  else {
-	  throw NoBisectableVariableException();
-  }
+	int var =-1;
+	double l=0.0;
+	for (int i=0; i< box.size(); i++)	{
+		if (!too_small(box,i)){
+			if (var==-1) var=i;
+			else {
+				double l_tmp = uniform_prec()? box[i].diam() : (box[i].diam()/prec(i));
+				if (l_tmp>l) {
+					var = i;
+					l = l_tmp;
+				}
+			}
+		}
+	}
+
+	if (var !=-1){
+		return box.bisect(var,ratio);
+	}
+	else {
+		throw NoBisectableVariableException();
+	}
 
 }
 

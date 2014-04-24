@@ -14,7 +14,11 @@ using std::pair;
 
 namespace ibex {
 
-RoundRobin::RoundRobin(double w, double ratio) : w(w), ratio(ratio) {
+RoundRobin::RoundRobin(double prec, double ratio) : Bsc(prec), ratio(ratio) {
+
+}
+
+RoundRobin::RoundRobin(const Vector& prec, double ratio) : Bsc(prec), ratio(ratio) {
 
 }
 
@@ -27,16 +31,12 @@ pair<IntervalVector,IntervalVector> RoundRobin::bisect(const IntervalVector& box
   int var = (last_var+1)%n;
 
 
-  while (var != last_var && (box[var].diam()< w 
-			     || !(box[var].is_bisectable())) // test for avoiding to bisect infinite intervals BNE
-	 )
+  while (var != last_var && too_small(box,var))
     var = (var + 1)%n;  
 
-// if no variable can be bisected an exception is thrown
-  if (var==last_var && (box[var].diam()<w|| !(box[var].is_bisectable())) ) throw NoBisectableVariableException();
-  // the next line ensures that in the case where all the domains
-  // have width less than w, we keep on round robin.
-  //  if (var==last_var && box[var].diam()<w) var = (last_var+1)%n;    suppressed  BNE  (incompatible with NoBisectableVariableException)
+  // if no variable can be bisected an exception is thrown
+  if (var==last_var && too_small(box,var))
+	  throw NoBisectableVariableException();
 
   last_var = var; // output
 

@@ -51,7 +51,7 @@ int main(int argc, char** argv) {
 	// --------------------------
 	// Round-robin means that the domain
 	// of each variable is bisected in turn
-	RoundRobin rr;
+	RoundRobin rr(1e-07);
 
 	// Chose the way the search tree is explored
 	// -------------------------------------

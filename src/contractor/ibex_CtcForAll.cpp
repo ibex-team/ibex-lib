@@ -13,19 +13,19 @@
 namespace ibex {
 
 CtcForAll::CtcForAll(const NumConstraint& ctr, double prec,const  IntervalVector& init_box) :
-		nb_var(ctr.f.nb_var()-init_box.size()), _ctc(*new CtcFwdBwd(ctr)),_bsc(),
+		nb_var(ctr.f.nb_var()-init_box.size()), _ctc(*new CtcFwdBwd(ctr)),_bsc(prec),
 		_init(init_box), _prec(prec), _own_ctc(true),_max_iter(1.e6)  {
 	assert(init_box.size()<ctr.f.nb_var());
 }
 
 CtcForAll::CtcForAll(Function& f, CmpOp op, double prec,const  IntervalVector& init_box) :
-		nb_var(f.nb_var()-init_box.size()), _ctc(*new CtcFwdBwd(f, op)),_bsc(),
+		nb_var(f.nb_var()-init_box.size()), _ctc(*new CtcFwdBwd(f, op)),_bsc(prec),
 		_init(init_box), _prec(prec), _own_ctc(true),_max_iter(1.e6)   {
 	assert(init_box.size()<f.nb_var());
 }
 
 CtcForAll::CtcForAll(int nb_var, Ctc& p, double prec,const  IntervalVector& init_box) :
-		nb_var(nb_var-init_box.size()), _ctc(p),_bsc(),
+		nb_var(nb_var-init_box.size()), _ctc(p),_bsc(prec),
 		_init(init_box), _prec(prec), _own_ctc(false),_max_iter(1.e6)   {
 	assert(init_box.size()<nb_var);
 }

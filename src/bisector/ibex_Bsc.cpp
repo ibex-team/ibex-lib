@@ -10,13 +10,22 @@
 
 #include "ibex_Bsc.h"
 #include "ibex_Cell.h"
+#include "ibex_Exception.h"
 
 using std::pair;
 
 namespace ibex {
 
-const double Bsc::default_prec = 1.e-7;
 const double Bsc::default_ratio = 0.45;
+
+Bsc::Bsc(double prec) : _prec(1,prec) {
+	if (prec<=0) ibex_error("precision must be a nonnegative number");
+}
+
+Bsc::Bsc(const Vector& prec) : _prec(prec) {
+	for (int i=0; i<prec.size(); i++)
+		if (prec[i]<=0) ibex_error("precision must be a nonnegative number");
+}
 
 pair<IntervalVector,IntervalVector> Bsc::bisect(Cell& cell) {
 	return bisect(cell.box);
