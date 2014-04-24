@@ -66,11 +66,10 @@ int main() {
 
 		LargestFirst bbb(0.001);
 		CellStack ccc;
-		PdcDiameterLT prec(0.001);
 
 		// Build a solver
-		Solver sol1(ft1, bbb, ccc, prec);
-		Solver sol2(ft2, bbb, ccc, prec);
+		Solver sol1(ft1, bbb, ccc);
+		Solver sol2(ft2, bbb, ccc);
 		vector<IntervalVector> vect1 = sol1.solve(I);
 		vector<IntervalVector> vect2 = sol2.solve(I);
 

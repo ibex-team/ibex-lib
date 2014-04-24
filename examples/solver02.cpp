@@ -51,6 +51,7 @@ int main(int argc, char** argv) {
 	// --------------------------
 	// Round-robin means that the domain
 	// of each variable is bisected in turn
+	// 1e-07 is the precision required for the solutions
 	RoundRobin rr(1e-07);
 
 	// Chose the way the search tree is explored
@@ -58,12 +59,8 @@ int main(int argc, char** argv) {
 	// A "CellStack" means a depth-first search.
 	CellStack buff;
 
-	// Set the precision required for the solutions
-	// -------------------------------------
-	PdcDiameterLT prec(1e-7);
-
 	// Build a solver
-	Solver s(c,rr,buff,prec);
+	Solver s(c,rr,buff);
 
 	//s.trace=true;
 

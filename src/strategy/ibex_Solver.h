@@ -40,11 +40,10 @@ public:
 	 * \brief Build a solver.
 	 *
 	 * \param ctc  -  the contractor (for contracting each node of the search tree) 
-	 * \param bsc  -  the bisector   (for branching)
+	 * \param bsc  -  the bisector   (for branching). Contains the stop criterion.
 	 * \param buffer - the cell buffer (a CellStack in a depth first search strategy)
-	 * \param prec - the precision for the solutions (stopping criterion for the bisection)
 	 */
-	Solver(Ctc& ctc, Bsc& bsc, CellBuffer& buffer, Pdc& prec);
+	Solver(Ctc& ctc, Bsc& bsc, CellBuffer& buffer);
 
 	/**
 	 * \brief Solve the system (non-interactive mode).
@@ -80,14 +79,11 @@ public:
 	 */ 
 	Ctc& ctc;
 
-	/** Bisector. */
+	/** Bisector (tests also precision of boxes). */
 	Bsc& bsc;
 
 	/** Cell buffer. */
 	CellBuffer& buffer;
-
-	/** Predicate for precision of solutions. */
-	Pdc& prec;
 
 	/** Maximum cpu time used by the solver.
 	 * This parameter allows to bound time complexity.

@@ -70,8 +70,8 @@ Array<Ctc>*  DefaultSolver::contractor_list (System& sys, double prec) {
 
 DefaultSolver::DefaultSolver(System& sys, double _prec) : Solver(*new CtcCompo (* (contractor_list(sys,_prec))),
 		*new SmearSumRelative(sys, _prec),
-		*new CellStack(), *new PdcDiameterLT(_prec)),
-		sys(sys), __ctc(dynamic_cast<CtcCompo*>(&ctc)), __bsc(&bsc), __pdc(&prec), __buffer(&buffer) {
+		*new CellStack()),
+		sys(sys), __ctc(dynamic_cast<CtcCompo*>(&ctc)), __bsc(&bsc), __buffer(&buffer) {
 
 	srand(1);
 }
@@ -89,7 +89,6 @@ DefaultSolver::~DefaultSolver() {
 		delete &__ctc->list[i];
 	delete __ctc;
 	delete __bsc;
-	delete __pdc;
 	delete __buffer;
 }
 

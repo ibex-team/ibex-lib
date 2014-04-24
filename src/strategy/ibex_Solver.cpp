@@ -17,8 +17,8 @@ using namespace std;
 
 namespace ibex {
 
-Solver::Solver(Ctc& ctc, Bsc& bsc, CellBuffer& buffer, Pdc& prec) :
-		  ctc(ctc), bsc(bsc), buffer(buffer), prec(prec), time_limit(-1), cell_limit(-1), trace(0), time(0) {
+Solver::Solver(Ctc& ctc, Bsc& bsc, CellBuffer& buffer) :
+		  ctc(ctc), bsc(bsc), buffer(buffer), time_limit(-1), cell_limit(-1), trace(0), time(0) {
 
 	nb_cells=0;
 
@@ -63,9 +63,19 @@ bool Solver::next(std::vector<IntervalVector>& sols) {
 				ctc.contract(c->box,impact);
 
 				if (v!=-1) impact.unset(v);
+				try {
 
-				if (prec.test(c->box)==YES) {
-					new_sol(sols,c->box);
+					pair<IntervalVector,IntervalVector> boxes=bsc.bisect(*c);
+					pair<Cell*,Cell*> new_cells=c->bisect(boxes.first,boxes.second);
+
+					delete buffer.pop();
+					buffer.push(new_cells.first);
+					buffer.push(new_cells.second);
+					nb_cells+=2;
+					if (cell_limit >=0 && nb_cells>=cell_limit) throw CellLimitException();}
+
+				catch (NoBisectableVariableException&) {
+					new_sol(sols, c->box);
 					delete buffer.pop();
 					impact.set_all();
 					return !buffer.empty();
@@ -76,25 +86,6 @@ bool Solver::next(std::vector<IntervalVector>& sols) {
 					// new solutions again and again endlessly. So there is a little risk
 					// of uncaught timeout in this case (but this case is probably already
 					// an error case).
-				}
-
-				else {
-					try {
-
-						pair<IntervalVector,IntervalVector> boxes=bsc.bisect(*c);
-						pair<Cell*,Cell*> new_cells=c->bisect(boxes.first,boxes.second);
-
-						delete buffer.pop();
-						buffer.push(new_cells.first);
-						buffer.push(new_cells.second);
-						nb_cells+=2;
-						if (cell_limit >=0 && nb_cells>=cell_limit) throw CellLimitException();}
-					catch (NoBisectableVariableException&) {
-						new_sol(sols, c->box);
-						delete buffer.pop();
-						impact.set_all();
-						return !buffer.empty();
-					}
 				}
 				time_limit_check();
 

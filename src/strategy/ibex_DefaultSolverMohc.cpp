@@ -98,7 +98,7 @@ DefaultSolverMohc::DefaultSolverMohc(System& sys, double _prec,
                     hc_ctc hcc, shav_ctc shavc, lr_ctc lrc) :
         Solver(*new CtcCompo (* (contractor_list(sys,_prec,hcc,shavc,lrc))),
 		*new SmearSumRelative(sys,_prec),
-		*new CellStack(), *new PdcDiameterLT(_prec)) ,sys(sys) , __bsc(&bsc), __pdc(&prec), __buffer(&buffer){
+		*new CellStack()) ,sys(sys) , __bsc(&bsc), __buffer(&buffer){
 //		, __ctc(dynamic_cast<CtcCompo*>(&ctc)), __bsc(&bsc),__buffer(&buffer) {
 
 	srand(1);
@@ -117,7 +117,6 @@ DefaultSolverMohc::~DefaultSolverMohc() {
 		//delete &__ctc->list[i];
     //delete __ctc;
 	delete __bsc;
-	delete __pdc;
 	//delete __buffer;
 }
 

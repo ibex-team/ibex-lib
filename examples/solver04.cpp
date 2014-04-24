@@ -143,14 +143,8 @@ int main(int argc, char** argv) {
 	// A "CellStack" means a depth-first search.
 	CellStack buff;
 
-	// Build a solver
-	// -------------
-	// The last parameter (default value 1e-07) is the precision
-	// required for the solutions
+	Solver s(*contractor,*bs,buff);
 
-	PdcDiameterLT pdc(prec);
-
-	Solver s(*contractor,*bs,buff,pdc);
 	s.time_limit = time_limit;;
 	s.trace=1;  // solutions are printed as soon as found when trace=1
 

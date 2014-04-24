@@ -43,9 +43,7 @@ int main() {
 	RoundRobin rr(1e-7);
 	CellStack buff;
 
-	PdcDiameterLT pdc(1e-7);
-
-	Solver s(c,rr,buff,pdc);
+	Solver s(c,rr,buff);
 
 	vector<IntervalVector> sols=s.solve(box);
 

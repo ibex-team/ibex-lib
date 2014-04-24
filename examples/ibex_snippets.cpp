@@ -279,8 +279,8 @@ int main() {
 		CtcNewton newton(f);
 		RoundRobin rr(1e-07);
 		CellStack buff;
-		PdcDiameterLT prec(1e-07);
-		Solver s(c,rr,buff,prec);
+
+		Solver s(c,rr,buff);
 
 		vector<IntervalVector> sols=s.solve(box);
 
@@ -338,12 +338,8 @@ int main() {
 		// A "CellStack" means a depth-first search.
 		CellStack buff;
 
-		// Set the precision required for the solutions
-		// -------------------------------------
-		PdcDiameterLT prec(1e-3);
-
 		// Build a solver
-		Solver s(c,rr,buff,prec);
+		Solver s(c,rr,buff);
 
 		//s.trace=true;
 
