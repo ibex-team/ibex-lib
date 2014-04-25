@@ -2,7 +2,7 @@
  * sivia.cpp
  *
  *  Created on: Mar 31, 2014
- *      Author: gilles
+ *  Author: Gilles Chabert
  */
 #include "ibex.h"
 
