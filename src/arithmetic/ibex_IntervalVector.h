@@ -262,6 +262,14 @@ public:
 	 * \sa #ibex::Interval::contains(double) const.
 	 */
 	bool contains(const Vector& x) const;
+	
+	/**
+	 * \brief True iff this interval vector intersects \a x.
+	 *
+	 * \pre Dimension of \a x must be equal to the dimension of (*this), and requires
+	 *      both intervals to be FINITE.
+	 */
+	bool intersects(const IntervalVector& x) const;
 
 	/**
 	 * \brief true iff this interval vector contains an infinite bound.
@@ -673,6 +681,14 @@ inline Interval& IntervalVector::operator[](int i) {
 
 inline void IntervalVector::clear() {
 	init(0);
+}
+
+inline bool IntervalVector::intersects(const IntervalVector& x) const {
+	if (x.is_empty() || (*this).is_empty()) return false;
+	for (int i=0; i<n; i++) {
+		if ((vec[i].lb() > x[i].ub()) || (x[i].lb() > vec[i].ub())) return false;
+	}
+	return true;
 }
 
 inline IntervalVector IntervalVector::operator&(const IntervalVector& x) const {

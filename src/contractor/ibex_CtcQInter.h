@@ -56,5 +56,107 @@ protected:
 	IntervalMatrix boxes; // store boxes for each contraction
 };
 
+class CtcQInter2 : public Ctc {
+public:
+	/**
+	 * \brief q-intersection on a list of contractors.
+	 *
+	 * The list itself is not kept by reference.
+	 */
+	CtcQInter2(int n, const Array<Ctc>& list, int q);
+
+	/**
+	 * \brief Contract the box.
+	 */
+	virtual void contract(IntervalVector& box);
+
+	/**
+	 * List of contractors
+	 */
+	Array<Ctc> list;
+
+	/**
+	 * Dimension of the box (number of variables)
+	 */
+	int n;
+
+	/**
+	 * The number of contractors we have to intersect the
+	 * result.
+	 */
+	int q;
+
+protected:
+	IntervalMatrix boxes; // store boxes for each contraction
+};
+
+class CtcQInterProjF : public Ctc {
+public:
+	/**
+	 * \brief q-intersection on a list of contractors.
+	 *
+	 * The list itself is not kept by reference.
+	 */
+	CtcQInterProjF(int n, const Array<Ctc>& list, int q);
+
+	/**
+	 * \brief Contract the box.
+	 */
+	virtual void contract(IntervalVector& box);
+
+	/**
+	 * List of contractors
+	 */
+	Array<Ctc> list;
+
+	/**
+	 * Dimension of the box (number of variables)
+	 */
+	int n;
+
+	/**
+	 * The number of contractors we have to intersect the
+	 * result.
+	 */
+	int q;
+
+protected:
+	IntervalMatrix boxes; // store boxes for each contraction
+};
+
+class CtcQInterCoreF : public Ctc {
+public:
+	/**
+	 * \brief q-intersection on a list of contractors.
+	 *
+	 * The list itself is not kept by reference.
+	 */
+	CtcQInterCoreF(int n, const Array<Ctc>& list, int q);
+
+	/**
+	 * \brief Contract the box.
+	 */
+	virtual void contract(IntervalVector& box);
+
+	/**
+	 * List of contractors
+	 */
+	Array<Ctc> list;
+
+	/**
+	 * Dimension of the box (number of variables)
+	 */
+	int n;
+
+	/**
+	 * The number of contractors we have to intersect the
+	 * result.
+	 */
+	int q;
+
+protected:
+	IntervalMatrix boxes; // store boxes for each contraction
+};
+
 } // end namespace ibex
 #endif // __IBEX_CTC_Q_INTER_H__
