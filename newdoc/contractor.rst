@@ -3,12 +3,29 @@
 **************************************************
 
 
+
+.. _ctc-fwd-bwd:
+
+------------------------------
+Forward-Backward
+------------------------------
+
 .. _ctc-hc4:
 
 ------------------------------
 HC4
 ------------------------------
 
+A "constraint propagation" loop.
+Each constraint in sys.ctrs is an equation.
+
+
+
+		hc4.accumulate=true;
+
+		// Build contractor #2:
+		// --------------------------
+		
 *(to be completed)*
 
 .. _ctc-acid:

@@ -311,6 +311,8 @@ where a and b are 2-dimensional vectors.
 
 *Note*: :ref:`Evaluation <tuto-func-eval>` of a thick function will necessarily result in an interval with non-null diameter, even if the argument is reduced to a point.
 
+.. _tuto-func-compo:
+
 ------------------------------ 
 Composing functions
 ------------------------------
@@ -328,6 +330,8 @@ The display is as folllows. Note that constant values like 0 are automatically r
 by degenerated intervals (like [0,0])::
 
   f:(x)->(dist(x,(<0, 0> ; <0, 0>));dist(x,(<1, 1> ; <1, 1>)))
+
+.. _tuto-func-vec-value:
 
 ------------------------------ 
 Vector-valued functions
