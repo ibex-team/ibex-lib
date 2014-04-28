@@ -22,8 +22,6 @@ namespace ibex {
 class CtcIdentity : public Ctc {
 public:
 
-	CtcIdentity(int n);
-
 	/**
 	 * \brief Contract a box.
 	 */

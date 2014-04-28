@@ -13,8 +13,7 @@
 
 namespace ibex {
 
-PdcCleared::PdcCleared(Ctc& c) : Pdc(c.nb_var), ctc(c) {
-	// TODO Auto-generated constructor stub
+PdcCleared::PdcCleared(Ctc& c) : ctc(c) {
 
 }
 

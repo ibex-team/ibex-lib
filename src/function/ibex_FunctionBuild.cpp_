@@ -1,4 +1,4 @@
-/* =========é===================================================================
+/* ============================================================================
  * I B E X - Functions
  * ============================================================================
  * Copyright   : Ecole des Mines de Nantes (FRANCE)
@@ -8,6 +8,8 @@
  * Author(s)   : Gilles Chabert
  * Created     : Jan 5, 2012
  * ---------------------------------------------------------------------------- */
+
+#include <sstream>
 
 #include "ibex_Function.h"
 #include "ibex_Expr.h"
@@ -21,11 +23,15 @@
 #include "ibex_UnknownFileException.h"
 #include "ibex_SyntaxError.h"
 
+extern void ibexparse_string(const char* syntax);
+
 using namespace std;
 
 namespace ibex {
 
 namespace {
+
+const char* DIFF_PREFIX = "d"; // when the differential of a function is generated, the name is prefixed with DIFF_PREFIX
 
 /*
  * Find the components used in the function
@@ -109,38 +115,6 @@ public:
 
 };
 
-/**
- * Set the id number of each node and
- * push all the nodes into a vector (ordered by id).
- */
-class BuildVectorOfNodes: public ExprVisitor {
-public:
-	vector<const ExprNode*>& nodes;
-	NodeMap<bool> map;
-
-	BuildVectorOfNodes(vector<const ExprNode*>& nodes, const Array<const ExprSymbol>& x, const ExprNode& y) : nodes(nodes) {//, id(0) {
-		for (int i=0; i<x.size(); i++) {
-			nodes.push_back(&x[i]);
-			map.insert(x[i],true);
-		}
-		visit(y);
-	}
-
-	virtual void visit(const ExprNode& e) {
-		if (!map.found(e)) {
-			e.acceptVisitor(*this);
-			nodes.push_back(&e);
-			map.insert(e,true);
-		}
-	}
-
-	virtual void visit(const ExprIndex& e)    { visit(e.expr); }
-	virtual void visit(const ExprLeaf& e)     { }
-	virtual void visit(const ExprNAryOp& e)   { for (int i=0; i<e.nb_args; i++) { visit(*e.args[i]); } }
-	virtual void visit(const ExprBinaryOp& e) { visit(e.left); visit(e.right); }
-	virtual void visit(const ExprUnaryOp& e)  { visit(e.expr); }
-};
-
 const char* duplicate_or_generate(const char* name) {
 	if (name) return strdup(name);
 	else return strdup(ibex::next_generated_func_name());
@@ -148,39 +122,95 @@ const char* duplicate_or_generate(const char* name) {
 
 }
 
-Function::Function() : name(strdup(next_generated_func_name())), root(NULL) {
+Function::Function() : name(strdup(next_generated_func_name())), comp(NULL), df(NULL), zero(NULL) {
 	// root==NULL <=> the function is not initialized yet
 }
 
-Function::Function(const ExprSymbol& x, const ExprNode& y, const char* name) : name(duplicate_or_generate(name)) {
-	init(Array<const ExprSymbol>(x),y);
+Function::Function(const ExprSymbol& x, const ExprNode& y, const char* name) {
+	init(Array<const ExprSymbol>(x),y,name);
 }
 
-Function::Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprNode& y, const char* name) : name(duplicate_or_generate(name)) {
-	init(Array<const ExprSymbol>(x1,x2),y);
+Function::Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprNode& y, const char* name) {
+	init(Array<const ExprSymbol>(x1,x2),y,name);
 }
 
-Function::Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprNode& y, const char* name) : name(duplicate_or_generate(name)) {
-	init(Array<const ExprSymbol>(x1,x2,x3),y);
+Function::Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprNode& y, const char* name) {
+	init(Array<const ExprSymbol>(x1,x2,x3),y,name);
 }
 
-Function::Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprNode& y, const char* name) : name(duplicate_or_generate(name)) {
-	init(Array<const ExprSymbol>(x1,x2,x3,x4),y);
+Function::Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprNode& y, const char* name) {
+	init(Array<const ExprSymbol>(x1,x2,x3,x4),y,name);
 }
 
-Function::Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprNode& y, const char* name) : name(duplicate_or_generate(name)) {
-	init(Array<const ExprSymbol>(x1,x2,x3,x4,x5),y);
+Function::Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprNode& y, const char* name) {
+	init(Array<const ExprSymbol>(x1,x2,x3,x4,x5),y,name);
 }
 
-Function::Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprNode& y, const char* name) : name(duplicate_or_generate(name)) {
-	init(Array<const ExprSymbol>(x1,x2,x3,x4,x5,x6),y);
+Function::Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprNode& y, const char* name) {
+	init(Array<const ExprSymbol>(x1,x2,x3,x4,x5,x6),y,name);
 }
 
-Function::Function(const Array<const ExprSymbol>& x, const ExprNode& y, const char* name) : name(duplicate_or_generate(name)) {
-	init(x,y);
+Function::Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprNode& y, const char* name) {
+	init(Array<const ExprSymbol>(x1,x2,x3,x4,x5,x6,x7),y,name);
 }
 
+Function::Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprNode& y, const char* name) {
+	init(Array<const ExprSymbol>(x1,x2,x3,x4,x5,x6,x7,x8),y,name);
 }
+
+Function::Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprSymbol& x9, const ExprNode& y, const char* name) {
+	init(Array<const ExprSymbol>(x1,x2,x3,x4,x5,x6,x7,x8,x9),y,name);
+}
+
+Function::Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprSymbol& x9, const ExprSymbol& x10, const ExprNode& y, const char* name) {
+	init(Array<const ExprSymbol>(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10),y,name);
+}
+
+Function::Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprSymbol& x9, const ExprSymbol& x10, const ExprSymbol& x11, const ExprNode& y, const char* name) {
+	init(Array<const ExprSymbol>(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11),y,name);
+}
+
+Function::Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprSymbol& x9, const ExprSymbol& x10, const ExprSymbol& x11, const ExprSymbol& x12, const ExprNode& y, const char* name) {
+	init(Array<const ExprSymbol>(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12),y,name);
+}
+
+Function::Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprSymbol& x9, const ExprSymbol& x10, const ExprSymbol& x11, const ExprSymbol& x12, const ExprSymbol& x13, const ExprNode& y, const char* name) {
+	init(Array<const ExprSymbol>(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13),y,name);
+}
+
+Function::Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprSymbol& x9, const ExprSymbol& x10, const ExprSymbol& x11, const ExprSymbol& x12, const ExprSymbol& x13, const ExprSymbol& x14, const ExprNode& y, const char* name) {
+	init(Array<const ExprSymbol>(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14),y,name);
+}
+
+Function::Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprSymbol& x9, const ExprSymbol& x10, const ExprSymbol& x11, const ExprSymbol& x12, const ExprSymbol& x13, const ExprSymbol& x14, const ExprSymbol& x15, const ExprNode& y, const char* name) {
+	init(Array<const ExprSymbol>(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15),y,name);
+}
+
+Function::Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprSymbol& x9, const ExprSymbol& x10, const ExprSymbol& x11, const ExprSymbol& x12, const ExprSymbol& x13, const ExprSymbol& x14, const ExprSymbol& x15, const ExprSymbol& x16, const ExprNode& y, const char* name) {
+	init(Array<const ExprSymbol>(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15,x16),y,name);
+}
+
+Function::Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprSymbol& x9, const ExprSymbol& x10, const ExprSymbol& x11, const ExprSymbol& x12, const ExprSymbol& x13, const ExprSymbol& x14, const ExprSymbol& x15, const ExprSymbol& x16, const ExprSymbol& x17, const ExprNode& y, const char* name) {
+	init(Array<const ExprSymbol>(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15,x16,x17),y,name);
+}
+
+Function::Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprSymbol& x9, const ExprSymbol& x10, const ExprSymbol& x11, const ExprSymbol& x12, const ExprSymbol& x13, const ExprSymbol& x14, const ExprSymbol& x15, const ExprSymbol& x16, const ExprSymbol& x17, const ExprSymbol& x18, const ExprNode& y, const char* name) {
+	init(Array<const ExprSymbol>(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15,x16,x17,x18),y,name);
+}
+
+Function::Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprSymbol& x9, const ExprSymbol& x10, const ExprSymbol& x11, const ExprSymbol& x12, const ExprSymbol& x13, const ExprSymbol& x14, const ExprSymbol& x15, const ExprSymbol& x16, const ExprSymbol& x17, const ExprSymbol& x18, const ExprSymbol& x19, const ExprNode& y, const char* name) {
+	init(Array<const ExprSymbol>(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15,x16,x17,x18,x19),y,name);
+}
+
+Function::Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprSymbol& x9, const ExprSymbol& x10, const ExprSymbol& x11, const ExprSymbol& x12, const ExprSymbol& x13, const ExprSymbol& x14, const ExprSymbol& x15, const ExprSymbol& x16, const ExprSymbol& x17, const ExprSymbol& x18, const ExprSymbol& x19, const ExprSymbol& x20, const ExprNode& y, const char* name) {
+	init(Array<const ExprSymbol>(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15,x16,x17,x18,x19,x20),y,name);
+}
+
+Function::Function(const Array<const ExprSymbol>& x, const ExprNode& y, const char* name) {
+	init(x,y,name);
+}
+
+} // end namespace ibex
 
 extern int ibexparse();
 extern void ibexrestart(FILE *);
@@ -190,6 +220,64 @@ namespace ibex {
 
 namespace parser {
 extern Function* function;
+}
+
+
+Function::Function(const char* x, const char* y) {
+	build_from_string(Array<const char*>(x),y);
+}
+
+Function::Function(const char* x1, const char* x2, const char* y) {
+	build_from_string(Array<const char*>(x1,x2),y);
+}
+
+Function::Function(const char* x1, const char* x2, const char* x3, const char* y) {
+	build_from_string(Array<const char*>(x1,x2,x3),y);
+}
+
+Function::Function(const char* x1, const char* x2, const char* x3, const char* x4, const char* y) {
+	build_from_string(Array<const char*>(x1,x2,x3,x4),y);
+}
+
+Function::Function(const char* x1, const char* x2, const char* x3, const char* x4, const char* x5, const char* y) {
+	build_from_string(Array<const char*>(x1,x2,x3,x4,x5),y);
+}
+
+Function::Function(const char* x1, const char* x2, const char* x3, const char* x4, const char* x5, const char* x6, const char* y) {
+	build_from_string(Array<const char*>(x1,x2,x3,x4,x5,x6),y);
+}
+
+Function::Function(const char* x1, const char* x2, const char* x3, const char* x4, const char* x5, const char* x6, const char* x7, const char* y) {
+	build_from_string(Array<const char*>(x1,x2,x3,x4,x5,x6,x7),y);
+}
+
+Function::Function(const char* x1, const char* x2, const char* x3, const char* x4, const char* x5, const char* x6, const char* x7, const char* x8, const char* y) {
+	build_from_string(Array<const char*>(x1,x2,x3,x4,x5,x6,x7,x8),y);
+}
+
+void Function::build_from_string(const Array<const char*>& x, const char* y, const char* name) {
+
+	stringstream s;
+	s << "function " << duplicate_or_generate(name) << "(";
+	for (int i=0; i<x.size(); i++) {
+		s << x[i];
+		if (i<x.size()-1) s << ",";
+	}
+	s << ")\n";
+	s << "  return " << y << ";\n";
+	s << "end\n";
+
+	char* syntax = strdup(s.str().c_str());
+	try {
+		parser::function=this;
+		ibexparse_string(syntax);
+		parser::function=NULL;
+		free(syntax);
+	} catch(SyntaxError& e) {
+		parser::function=NULL;
+		free(syntax);
+		throw e;
+	}
 }
 
 Function::Function(const char* filename) {
@@ -212,8 +300,9 @@ Function::Function(const char* filename) {
 	fclose(fd);
 }
 
-Function::Function(const Function& f, copy_mode mode) : name(strdup(f.name)) {
-	//assert(f.root!=NULL);
+Function::Function(const Function& f, copy_mode mode) {
+
+	assert(f.cf.code!=NULL);
 
 	// Create the new symbols
 	// we have to proceed first the symbols in order to guarantee that
@@ -221,31 +310,31 @@ Function::Function(const Function& f, copy_mode mode) : name(strdup(f.name)) {
 	// as they appear in the expression the copy of a a function (x,y)->y+x
 	// would yield (y,x)->y+x.
 	Array<const ExprSymbol> x(f.nb_arg());
-	// TODO: replace next block with "varcopy"
-	for (int j=0; j<f.nb_arg(); j++) {
-		x.set_ref(j,ExprSymbol::new_(f.arg(j).name,f.arg(j).dim));
-	}
-	//cout << "new x=";
-	//for (int j=0; j<new_x.size(); j++) cout << new_x[j].name << " ";
-	//cout << endl;
+	varcopy(f.args(),x);
 
 	// Duplicate the expression
 	const ExprNode* y;
-	if (mode==COPY)
+	if (mode==COPY) {
 		y= & ExprCopy().copy(f.symbs,x,f.expr());
-	else
+		init(x,*y,f.name);
+	} else {
+		char* name = (char*) malloc(strlen(f.name)+strlen(DIFF_PREFIX)+1); // +1 for null character
+		strcpy((char*) name,DIFF_PREFIX);
+		strcat((char*) name,f.name);
 		y= & ExprDiff().diff(f.symbs,x,f.expr());
-
-	init(x,*y);
+		init(x,*y,name);
+		free(name);
+	}
 }
 
-void Function::separate() {
+void Function::generate_comp() {
 	if (expr().type()==Dim::SCALAR) {
-		comp=this;
+		comp=new Function*[1];
+		comp[0]=(Function*) this; // a function cannot be modified anyway
 		return;
 	}
 
-	comp = new Function[image_dim()];
+	comp = new Function*[image_dim()];
 	// rem: dimension()==expr().dim.vec_size() if expr() is a vector
 	//      and also fvec->nb_args if, in addition, fvec!=NULL
 
@@ -254,7 +343,15 @@ void Function::separate() {
 			Array<const ExprSymbol> x(nb_arg());
 			varcopy(symbs,x);
 			const ExprNode& y=ExprCopy().index_copy(symbs, x, expr(), i);
-			comp[i].init(x,y);
+			Function* fi=new Function(x,y);
+			const ExprConstant* c=dynamic_cast<const ExprConstant*>(&(fi->expr()));
+			if (c && c->get_value()==Interval::ZERO) { // use a more efficient structure than a DAG!
+				if (!zero) zero=fi;
+				else delete fi;
+					comp[i] = zero;
+			} else {
+				comp[i] = fi;
+			}
 		}
 	}
 
@@ -266,7 +363,15 @@ void Function::separate() {
 				Array<const ExprSymbol> x(nb_arg());
 				varcopy(symbs,x);
 				const ExprNode& y=ExprCopy().index_copy(symbs, x, expr(), i, j);
-				comp[i*n+j].init(x,y);
+				Function* fij=new Function(x,y);
+				const ExprConstant* c=dynamic_cast<const ExprConstant*>(&(fij->expr()));
+				if (c && c->get_value()==Interval::ZERO) { // use a more efficient structure than a DAG!
+					if (!zero) zero=fij;
+					else delete fij;
+						comp[i*n+j] = zero;
+				} else {
+					comp[i*n+j] = fij;
+				}
 			}
 		}
 	}
@@ -278,45 +383,44 @@ void Function::separate() {
 //	cout << "------------------------------" << endl;
 }
 
-//void Function::set_expr(const ExprNode& expr) {
-void Function::init(const Array<const ExprSymbol>& x, const ExprNode& y) {
+void Function::generate_used_vars() const {
+	_nb_used_vars=0;
+	for (unsigned int i=0; i<is_used.size(); i++) {
+		if (is_used[i]) _nb_used_vars++;
+	}
 
-	key_count=0;
+	_used_var=new int[_nb_used_vars];
+	int j=0;
+	for (unsigned int i=0; i<is_used.size(); i++) {
+		if (is_used[i]) { _used_var[j++]=i; }
+	}
+	assert(j==_nb_used_vars);
+}
+
+void Function::init(const Array<const ExprSymbol>& x, const ExprNode& y, const char* name) {
+
+	df=NULL;
+	comp=NULL;
+	zero=NULL;
+
+	this->name=duplicate_or_generate(name);
+
 	__all_symbols_scalar=true; // by default
 
 	symbs.resize(x.size());
 
 	for (int i=0; i<x.size(); i++) {
 		symbs.set_ref(i,x[i]);
-		add_symbol(&x[i]);
+		((ExprSymbol&) x[i]).key = i;
+		__all_symbols_scalar &= x[i].dim.is_scalar();
 	}
-
-	root=&y;
-
-	BuildVectorOfNodes(exprnodes, x, y);
 
 	FindInputsUsed fsu(x, y, is_used);
 
-	nb_used_vars=0;
-	for (unsigned int i=0; i<is_used.size(); i++) {
-		if (is_used[i]) nb_used_vars++;
-	}
+	(int&) Function::_nb_var = is_used.size();
+	(int&) Function::_image_dim = y.dim.size();
 
-	used_var=new int[nb_used_vars];
-	int j=0;
-	for (unsigned int i=0; i<is_used.size(); i++) {
-		if (is_used[i]) { used_var[j++]=i; }
-	}
-	assert(j==nb_used_vars);
-
-	for (int i=0; i<nb_nodes(); i++) {
-		assert(node(i).deco.f==NULL); // this node must not belong to another function!
-		node(i).deco.f=this;
-	}
-
-	decorate();
-
-	separate();
+	decorate(x,y);
 
 	// ===== display adjacency (debug) =========
 //	cout << "adjacency of function" << *this << ":" << endl;
@@ -325,32 +429,25 @@ void Function::init(const Array<const ExprSymbol>& x, const ExprNode& y) {
 //	cout << endl;
 }
 
-void Function::add_symbol(const ExprSymbol* symbol) {
+void Function::decorate(const Array<const ExprSymbol>& x, const ExprNode& y) const {
 
-  id2info.insert_new(symbol->name, symbol);
-
-  ((ExprSymbol&) *symbol).key = key_count;
-
-  key_count ++;
-
-  __all_symbols_scalar &= symbol->dim.is_scalar();
-
-}
-
-void Function::decorate() const {
-	assert(root!=NULL); // cannot decorate if there is no expression yet!
-
-	Decorator d;
-	d.decorate(*this);
+	Decorator().decorate(x,y);
 
 	arg_domains.resize(nb_arg());
 	arg_deriv.resize(nb_arg());
 	arg_af2.resize(nb_arg());
 
-	((CompiledFunction&) cf).compile(*this); // now that it is decorated, it can be "compiled"
+	((CompiledFunction&) cf).compile(y); // now that it is decorated, it can be "compiled"
+
+	for (int i=0; i<nb_nodes(); i++) {
+		assert(node(i).deco.d);
+		assert(node(i).deco.f==NULL); // this node must not belong to another function!
+		cf.nodes[i].deco.f=(Function*) this;
+	}
 
 	// warning: to place after "compile" if compile modifies deco.d...
 	for (int i=0; i<nb_arg(); i++) {
+		assert(arg(i).deco.d);
 		arg_domains.set_ref(i,*arg(i).deco.d);
 		arg_deriv.set_ref(i,*arg(i).deco.g);
 		arg_af2.set_ref(i,*arg(i).deco.af2);

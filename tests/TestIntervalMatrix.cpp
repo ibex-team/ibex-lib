@@ -399,3 +399,20 @@ void TestIntervalMatrix::mul02() {
 	TEST_ASSERT((m2*=m1).is_empty());
 }
 
+void TestIntervalMatrix::put01() {
+
+	IntervalMatrix M1=2*Matrix::eye(3);
+	IntervalVector V1(3);
+	V1[0]=3; V1[1]=4; V1[2]=5;
+	IntervalMatrix res(4,4);
+	res.put(0,0,M1);
+	res.put(0,3,V1,false);
+	res.put(3,0,Vector::ones(3),true);
+	res[3][3]=6;
+	double _expected[16] = { 2,0,0,3,
+							 0,2,0,4,
+							 0,0,2,5,
+							 1,1,1,6 };
+	TEST_ASSERT(res==(Matrix(4,4,_expected)));
+}
+

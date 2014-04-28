@@ -13,23 +13,32 @@
 #include "ibex_CtcHC4.h"
 #include "ibex_CtcAcid.h"
 #include "ibex_CtcNewton.h"
-#include "ibex_CtcXNewton.h"
-#include "ibex_CtcXNewtonIter.h"
+#include "ibex_CtcPolytopeHull.h"
 #include "ibex_CtcCompo.h"
+#include "ibex_CtcFixPoint.h"
 #include "ibex_CellStack.h"
+#include "ibex_LinearRelaxCombo.h"
 #include "ibex_Array.h"
+#include "ibex_PdcDiameterLT.h"
 
 namespace ibex {
 
+/* patch */
+bool square_eq_sys(const System& sys) {
+	if (sys.nb_var!=sys.nb_ctr) return false;
+	for (int i=0; i<sys.nb_ctr; i++)
+		if (sys.ctrs[i].op!=EQ) return false;
+	return true;
+}
 
 // the corners for  Xnewton
-std::vector<CtcXNewtonIter::corner_point>*  DefaultSolver::default_corners () {
-	std::vector<CtcXNewtonIter::corner_point>* x;
-	x= new std::vector<CtcXNewtonIter::corner_point>;
-	x->push_back(CtcXNewtonIter::RANDOM);
-	x->push_back(CtcXNewtonIter::RANDOM_INV);
+/*std::vector<CtcXNewton::corner_point>*  DefaultSolver::default_corners () {
+	std::vector<CtcXNewton::corner_point>* x;
+	x= new std::vector<CtcXNewton::corner_point>;
+	x->push_back(CtcXNewton::RANDOM);
+	x->push_back(CtcXNewton::RANDOM_INV);
 	return x;
-}
+}*/
 
 // the contractor list  hc4, acid(hc4), newton (if the system is square), xnewton
 Array<Ctc>*  DefaultSolver::contractor_list (System& sys, double prec) {
@@ -40,8 +49,8 @@ Array<Ctc>*  DefaultSolver::contractor_list (System& sys, double prec) {
 	// second contractor : acid (hc4)
 	ctc_list->set_ref(1, *new CtcAcid (sys, *new CtcHC4 (sys.ctrs,0.1,true)));
 	int index=2;
-	// if the system is square, the third contractor is Newton
-	if (sys.nb_var==sys.nb_ctr) {
+	// if the system is a square system of equations, the third contractor is Newton
+	if (square_eq_sys(sys)) {
 		ctc_list->set_ref(index,*new CtcNewton(sys.f,5e8,prec,1.e-4));
 		index++;
 	}
@@ -50,18 +59,19 @@ Array<Ctc>*  DefaultSolver::contractor_list (System& sys, double prec) {
 	//                                          new CtcHC4 (sys.ctrs,0.01),
 	//*(default_corners())));
 
-	ctc_list->set_ref(index,*new CtcXNewton (*new CtcXNewtonIter (sys,*(default_corners())),
-						 *new CtcHC4 (sys.ctrs,0.01)));
+	ctc_list->set_ref(index,*new CtcFixPoint(*new CtcCompo(
+			*new CtcPolytopeHull(*new LinearRelaxCombo(sys,LinearRelaxCombo::COMPO),CtcPolytopeHull::ALL_BOX),
+			*new CtcHC4 (sys.ctrs,0.01))));
 
 	ctc_list->resize(index+1);
 	return ctc_list;
 }
 
 
-DefaultSolver::DefaultSolver(System& sys, double prec) : Solver(*new CtcCompo (* (contractor_list(sys,prec))),
-		*new SmearSumRelative(sys,prec),
-		*new CellStack(), prec),
-		sys(sys), __ctc(dynamic_cast<CtcCompo*>(&ctc)), __bsc(&bsc),__buffer(&buffer) {
+DefaultSolver::DefaultSolver(System& sys, double _prec) : Solver(*new CtcCompo (* (contractor_list(sys,_prec))),
+		*new SmearSumRelative(sys, _prec),
+		*new CellStack()),
+		sys(sys), __ctc(dynamic_cast<CtcCompo*>(&ctc)), __bsc(&bsc), __buffer(&buffer) {
 
 	srand(1);
 }
@@ -70,10 +80,9 @@ DefaultSolver::DefaultSolver(System& sys, double prec) : Solver(*new CtcCompo (*
 
 DefaultSolver::~DefaultSolver() {
 	int ind_xnewton=2;
-	if (sys.nb_var==sys.nb_ctr) ind_xnewton=3;
+	if (square_eq_sys(sys)) ind_xnewton=3;
 	delete &((dynamic_cast<CtcAcid*> (&__ctc->list[1]))->ctc);
-	CtcCompo* ctccompo= dynamic_cast<CtcCompo*>(&(dynamic_cast<CtcXNewton*>( &__ctc->list[ind_xnewton])->ctc));
-	delete &((dynamic_cast<CtcXNewtonIter*> (&(ctccompo->list[0]))->cpoints));
+	CtcCompo* ctccompo= dynamic_cast<CtcCompo*>(&(dynamic_cast<CtcFixPoint*>( &__ctc->list[ind_xnewton])->ctc));
 	delete &(ctccompo->list[0]);
 	delete &(ctccompo->list[1]);
 	for (int i=0 ; i<__ctc->list.size(); i++)

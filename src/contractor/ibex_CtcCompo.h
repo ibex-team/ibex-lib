@@ -68,11 +68,6 @@ public:
 	 */
 	virtual void contract(IntervalVector& box);
 
-	/**
-	 * \brief Contract a box with an impact.
-	 */
-	virtual void contract(IntervalVector& box, const BoolMask& impact);
-
 	/** The list of sub-contractors */
 	Array<Ctc> list;
 

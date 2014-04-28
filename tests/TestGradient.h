@@ -34,6 +34,11 @@ public:
 		TEST_ADD(TestGradient::jac01);
 		TEST_ADD(TestGradient::jac02);
 		TEST_ADD(TestGradient::hansen01);
+		TEST_ADD(TestGradient::mulVV);
+		TEST_ADD(TestGradient::transpose01);
+		TEST_ADD(TestGradient::mulMV01);
+		TEST_ADD(TestGradient::mulVM01);
+		TEST_ADD(TestGradient::mulVM02);
 	}
 
 	void deco01();
@@ -48,6 +53,13 @@ public:
 	void jac02();
 	void hansen01();
 
+	void mulVV();
+	// for vectors
+	void transpose01();
+	// with constant matrix
+	void mulMV01();
+	void mulVM01();
+	void mulVM02();
 private:
 	void check_deco(const ExprNode& e);
 };

@@ -51,7 +51,8 @@ int main(int argc, char** argv) {
 	// --------------------------
 	// Round-robin means that the domain
 	// of each variable is bisected in turn
-	RoundRobin rr;
+	// 1e-07 is the precision required for the solutions
+	RoundRobin rr(1e-07);
 
 	// Chose the way the search tree is explored
 	// -------------------------------------
@@ -59,10 +60,7 @@ int main(int argc, char** argv) {
 	CellStack buff;
 
 	// Build a solver
-	// -------------
-	// The last parameter (1e-07) is the precision
-	// required for the solutions
-	Solver s(c,rr,buff,1e-07);
+	Solver s(c,rr,buff);
 
 	//s.trace=true;
 
@@ -78,7 +76,7 @@ int main(int argc, char** argv) {
 
 	// Display the solutions
 	//
-	for (int i=0; i< sols.size() ; i++)
+	for (int i=0; (i< (sols.size())) ; i++)
 		cout << " sol  "<< i+1 << " : " << sols[i] << endl;
 
 	} catch(ibex::SyntaxError& e) {

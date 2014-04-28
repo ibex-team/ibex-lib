@@ -1,0 +1,44 @@
+//============================================================================
+//                                  I B E X                                   
+// File        : ibex_SystemCopy.cpp_
+// Author      : Gilles Chabert
+// Copyright   : Ecole des Mines de Nantes (France)
+// License     : See the LICENSE file
+// Created     : May 27, 2013
+// Last Update : May 27, 2013
+//============================================================================
+
+#include "ibex_SystemFactory.h"
+
+namespace ibex {
+
+namespace {
+
+class SystemCopy : public SystemFactory {
+
+public:
+
+	SystemCopy(const System& sys, const System::copy_mode& mode) {
+
+		// do not initialize variables with sys.f.args
+		// since f may be uninitialized (unconstrained problem)
+		add_var(sys.args);
+
+		if (mode==System::COPY && sys.goal!=NULL)
+			add_goal(*sys.goal);
+
+		for (int i=0; i<sys.nb_ctr; i++) {
+			if (mode==System::COPY ||
+					(sys.ctrs[i].op==EQ && mode==System::EQ_ONLY) ||
+					(sys.ctrs[i].op!=EQ && mode==System::INEQ_ONLY))
+				add_ctr(sys.ctrs[i]);
+		}
+	}
+};
+
+} // end anonymous namespace
+
+} // end namespace ibex
+
+
+

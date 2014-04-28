@@ -24,15 +24,52 @@ class Cell;
 
 /**
  * \ingroup bisector
+ *
  * \brief Generic bisector
  *
  * Base class of all bisectors. A bisector is an operator used by a strategy
  * (like the \link ibex::Solver solver \endlink) to make a choice point.
  * An implementation of this class must provide a #bisect(const IntervalVector& box) function.
  *
+ * Bisectors also handle a precision: when the domain of a variable is less than
+ * its corresponding precision, the bisector skips this variable.
+ * When all the variables are skipped, the bisector throws a NoBisectableVariableException.
+ * *
+ * This precision allows to control the depth of the search (paver/solver/optimizer).
+ * The boundary of the set to be described by the search is usually associated to the boxes
+ * that were not bisectable. So, the precision of the boundary is directly related to the
+ * \link ibex::Bsc::prec precision \endlink parameter of this class.
+ *
  */
 class Bsc {
+
 public:
+
+	/**
+	 * \brief Build a bisection with the given precision
+	 *
+	 * The precision is the same for all the variables. Therefore the bisector
+	 * throws a NoBisectableVariableException iff the maximal diameter of the
+	 * box is less than \a prec.
+	 */
+	Bsc(double prec);
+
+	/**
+	 * \brief Build a bisection with heterogeneous precision
+	 *
+	 * This predicates works for ceil.size() variables.
+	 *
+	 * The precision vector gives the threshold precision for each variable.
+	 * The bisector throws a NoBisectableVariableException if, for every i,
+	 * the diameter of box[i] is less than prec[i].
+	 */
+	Bsc(const Vector& prec);
+
+	/**
+	 * \brief Delete *this.
+	 */
+	virtual ~Bsc() { }
+
 	/**
 	 * \brief Bisect the current box and return the result.
 	 */
@@ -49,21 +86,45 @@ public:
 	virtual std::pair<IntervalVector,IntervalVector> bisect(Cell& cell);
 
 	/**
-	 * \brief Delete *this.
-	 */
-	virtual ~Bsc() { }
-
-	/**
 	 * Allows to add the backtrackable data required
 	 * by this bisector to the root cell before a
 	 * strategy is executed.<br>
-	 * By default: does nothing.
+	 * By default: add information on the last bisected variable. See #ibex::BisectedVar.
 	 */
-	virtual void init_root(Cell& root);
-	static const double default_prec;
+	virtual void add_backtrackable(Cell& root);
+
+	/**
+	 * \brief Default ratio (0.45)
+	 */
 	static const double default_ratio;
 
- 
+protected:
+
+	/**
+	 * \brief Return true if the precision is the same for all variables.
+	 */
+	bool uniform_prec() const;
+
+	/**
+	 * \brief Precision for the ith variable
+	 */
+	double prec(int i) const;
+
+	/**
+	 * \brief True iff box[i] is greater than the required precision
+	 *        and bisectable.
+	 */
+	bool too_small(const IntervalVector& box, int i) const;
+
+
+private:
+	/*
+	 * The precision values
+	 *
+	 * If the size of _prec is 1, this means the same precision prec[0]
+	 * applies for every variable.
+	 */
+	const Vector _prec;
 };
 
 
@@ -83,6 +144,24 @@ public:
 
 	int var;
 };
+
+
+/*============================================ inline implementation ============================================ */
+
+inline bool Bsc::uniform_prec() const {
+	return _prec.size()==1;
+}
+
+inline double Bsc::prec(int i) const {
+	return uniform_prec() ? _prec[0]  // same precision for all variables
+	                      : _prec[i]; // specific precision
+}
+
+inline bool Bsc::too_small(const IntervalVector& box, int i) const {
+	return (box[i].diam()<prec(i)
+		|| !box[i].is_bisectable() // test for avoiding to bisect infinite intervals BNE
+		   );
+}
 
 } // end namespace ibex
 #endif // __IBEX_BISECTOR_H__

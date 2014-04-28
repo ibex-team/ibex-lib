@@ -32,6 +32,11 @@ public:
 	ExprLabel();
 
 	/**
+	 * \brief Delete this.
+	 */
+	~ExprLabel();
+
+	/**
 	 * \brief The function this node belongs to.
 	 */
 	Function* f;
@@ -57,6 +62,9 @@ public:
 	 * See InHC4Revise.
 	 */
 	Domain *p;
+
+private:
+	ExprLabel(const ExprLabel&); // forbidden
 };
 
 std::ostream& operator<<(std::ostream& os, const ExprLabel&);

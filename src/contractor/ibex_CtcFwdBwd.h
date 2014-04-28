@@ -41,6 +41,11 @@ public:
 	CtcFwdBwd(const NumConstraint& ctr, FwdMode mode=INTERVAL_MODE);
 
 	/**
+	 * \brief Delete this.
+	 */
+	~CtcFwdBwd();
+
+	/**
 	 * \brief Contract the box.
 	 */
 	virtual void contract(IntervalVector& box);
@@ -52,9 +57,7 @@ public:
 	// bool idempotent();
 	//
 
-	/**
-	 * The constraint.
-	 */
+	/** The constraint. */
 	const NumConstraint ctr;
 
 protected:

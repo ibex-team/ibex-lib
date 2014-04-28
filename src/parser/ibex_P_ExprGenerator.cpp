@@ -133,7 +133,8 @@ void ExprGenerator::visit(const P_ExprIndex& e) {
 
 	const ExprConstantRef* s=dynamic_cast<const ExprConstantRef*>(&LEFT);
 	if (s) {
-		if (dynamic_cast<const P_ExprIndex*>(e.father)) {
+		assert(e.fathers.size()==1);
+		if (dynamic_cast<const P_ExprIndex*>(&e.fathers[0])) {
 			clone.insert(e, new ExprConstantRef(s->value[real_index]));
 		} else {
 			// "last time": we cannot keep reference anymore.
@@ -148,7 +149,8 @@ void ExprGenerator::visit(const P_ExprIndex& e) {
 }
 
 void ExprGenerator::visit(const ExprConstantRef& c) {
-	if (dynamic_cast<const P_ExprIndex*>(c.father)) {
+	assert(c.fathers.size()==1);
+	if (dynamic_cast<const P_ExprIndex*>(&c.fathers[0])) {
 		// temporary copy (with domain passed by reference).
 		// will be replaced by a ExprConstant at the
 		// last time (in P_ExprIndex)

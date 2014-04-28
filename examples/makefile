@@ -15,7 +15,7 @@ all: $(BINS)
 
 % :	%.cpp
 	echo $(BINS) $(OBJS)
-	$(CXX) $(CPPFLAGS) $(LDFLAGS) $(CXXFLAGS) -o $@ $< $(LIBS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $< $(LIBS)
 
 clean:
 	rm -f $(BINS)

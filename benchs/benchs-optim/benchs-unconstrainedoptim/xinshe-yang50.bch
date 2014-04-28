@@ -1,0 +1,26 @@
+
+variables 
+
+x[50] in [-6.283185307,6.283185307];
+
+minimize 
+(abs(x(1)) + abs(x(2)) + abs(x(3)) +  abs(x(4)) + abs(x(5)) + abs(x(6)) + abs(x(7)) + abs(x(8)) + abs(x(9)) + abs(x(10))
++ abs(x(11)) + abs(x(12)) + abs(x(13)) +  abs(x(14)) + abs(x(15)) + abs(x(16)) + abs(x(17)) + abs(x(18)) + abs(x(19)) + abs(x(20))
++ abs(x(21)) + abs(x(22)) + abs(x(23)) +  abs(x(24)) + abs(x(25)) + abs(x(26)) + abs(x(27)) + abs(x(28)) + abs(x(29)) + abs(x(30))
++ abs(x(31)) + abs(x(32)) + abs(x(33)) +  abs(x(34)) + abs(x(35)) + abs(x(36)) + abs(x(37)) + abs(x(38)) + abs(x(39)) + abs(x(40))
++
+ abs(x(41)) + abs(x(42)) + abs(x(43)) +  abs(x(44)) + abs(x(45)) + abs(x(46)) + abs(x(47)) + abs(x(48)) + abs(x(49)) + abs(x(50))
+)
+/ exp (sin (x(1)^2) + sin(x(2)^2) + sin (x(3)^2) + sin (x(4)^2)+ sin (x(5)^2) + sin (x(6)^2) + sin (x(7)^2)   + sin (x(8)^2) 
+  + sin (x(9)^2) + sin (x(10)^2)
++ sin (x(11)^2) + sin(x(12)^2) +sin (x(13)^2) + sin (x(14)^2)+ sin (x(15)^2) + sin (x(16)^2) + sin (x(17)^2)   + sin (x(18)^2) 
+  + sin (x(19)^2) + sin (x(20)^2) 
++ sin (x(21)^2) + sin(x(22)^2) +sin (x(23)^2) + sin (x(24)^2)+ sin (x(25)^2) + sin (x(26)^2) + sin (x(27)^2)   + sin (x(28)^2) 
+  + sin (x(29)^2) + sin (x(30)^2) 
++ sin (x(31)^2) + sin(x(32)^2) +sin (x(33)^2) + sin (x(34)^2)+ sin (x(35)^2) + sin (x(36)^2) + sin (x(37)^2)   + sin (x(38)^2) 
+  + sin (x(39)^2) + sin (x(40)^2) 
++ sin (x(41)^2) + sin(x(42)^2) +sin (x(43)^2) + sin (x(44)^2)+ sin (x(45)^2) + sin (x(46)^2) + sin (x(47)^2)   + sin (x(48)^2) 
+  + sin (x(49)^2) + sin (x(50)^2) 
+
+)
+ ; 

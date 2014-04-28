@@ -8,8 +8,8 @@ int main(int argc, char** argv) {
  try {
 	// Load a system of equations
 	// --------------------------
-         if (argc<7) {
-	   cerr << "usage: solver04 filename ratiopropag filtering xnewton bisection prec  timelimit "  << endl;
+         if (argc<8) {
+	   cerr << "usage: solver04 filename ratiopropag filtering linearrelaxation bisection prec  timelimit "  << endl;
 	   exit(1);
 	 }
 
@@ -20,7 +20,7 @@ int main(int argc, char** argv) {
 
 	double ratio_propag= atof(argv[2]); // the contraction ratio used as stopping criterion for the hc4 propagation loop
 	string filtering= argv[3];   // the main contractor (hc4|acidhc4|3bcidhc4|hc4n|acidhc4n|3bcidhc4n)
-	string xnewton = argv[4];    // xn for the additional xnewton contractor
+	string linearrelaxation = argv[4];    // the linearrelaxation contractor
         string bisection= argv[5];   // the bisection heuristics
 	double prec= atof(argv[6]);  // the required precision
         double time_limit=atof(argv[7]); // the time limit
@@ -38,14 +38,9 @@ int main(int argc, char** argv) {
 	CtcHC4 hc44cid(sys.ctrs,0.1,true);
 	// The ACID contractor (component of the contractor  when filtering == "acidhc4" or "acidhc4n")
 	CtcAcid acid(sys,hc44cid);
-	// hc4 followed by 3bcidhc4 : the actual contractor used when filtering == "3bcidhc4" 
-	CtcCompo hc4acid(hc4,acid);
-
-
 	// The 3BCID contractor (3bcid component of the contractor when filtering == "3bcidhc4") on all variables
-	Ctc3BCid c3bcid(hc44cid);
-	// hc4 followed by 3bcidhc4 : the actual propagation based contractor used when filtering == "3bcidhc4" or "3bcidhc4n"
-	CtcCompo hc43bcid(hc4,c3bcid);
+	Ctc3BCid c3bcid(sys.nb_var, hc44cid);
+
 
 	// Build contractor #2:
 	// --------------------------
@@ -56,69 +51,70 @@ int main(int argc, char** argv) {
 	CtcNewton* ctcnewton= NULL;
 	if (filtering == "acidhc4n" || filtering=="hc4n" || filtering=="3bcidhc4n")
 	  ctcnewton= new CtcNewton(sys.f,5e8,prec,1.e-4);
-
+	  
 
         // Build contractor #3
 	//-----------------------------
 	// A Linear relaxation contractor using a linear relaxation of the constraints and calling a linear programming solver
 	// for contracting each domain bound 
-	// The X_newton contractor
+	// The LR contractor
 
-	// corners of the current box where the constraints are linearized
-	vector<CtcXNewtonIter::corner_point> cpoints;
-	//	cpoints.push_back(CtcXNewtonIter::SUP_X);  // selection of the superior corners : not used 
-	//	cpoints.push_back(CtcXNewtonIter::INF_X);  // selection of the inferior corners : not used
 
-	// each constraint is linearized twice in one random corner and in its opposite 
-	cpoints.push_back(CtcXNewtonIter::RANDOM);
-	cpoints.push_back(CtcXNewtonIter::RANDOM_INV);
-	// XNewtonIter contractor  (called with the system and the corners : all other  parameters have default values  :see Xnexton documentation for changing parameters)
+	// The CtcXNewton contractor (if linearrelaxation=="xn")
+	// corner selection for linearizations : two corners are selected, a random one and its opposite
+	vector<LinearRelaxXTaylor::corner_point> cpoints;
+	cpoints.push_back(LinearRelaxXTaylor::RANDOM);
+	cpoints.push_back(LinearRelaxXTaylor::RANDOM_INV);
 
-       	CtcXNewtonIter xnewtoniter (sys, cpoints);
 
+	// the linear relaxation contractor 
+	LinearRelax* lr=NULL;
+	if (linearrelaxation=="art")
+	  lr = new LinearRelaxCombo(sys, LinearRelaxCombo::ART);
+	else if (linearrelaxation=="compo")
+	  lr = new LinearRelaxCombo(sys, LinearRelaxCombo::COMPO);
+	else   if (linearrelaxation=="xn") 
+	  lr = new LinearRelaxXTaylor (sys,cpoints);
+
+	// linearrelaxation is optional and only used if the linearrelaxation parameter is xn, art or compo
+	// we build a fixpoint linear relaxation with ctclr and hc44xn  with default fix point ratio 0.2
 	// the hc4 contractor called in the following fixpoint contractor
 	CtcHC4 hc44xn(sys.ctrs,ratio_propag);  
 
-	// Fixpoint with the sequence of 2 contractors (XNewtonIter and Hc4) 
-       	CtcXNewton ctcxnewton(xnewtoniter,hc44xn);
+
+	CtcFixPoint* ctclr=NULL;
+	if (linearrelaxation=="xn" ||linearrelaxation=="compo" || linearrelaxation=="art" )
+	  ctclr= (new CtcFixPoint (*new CtcCompo(* new CtcPolytopeHull(*lr, CtcPolytopeHull::ALL_BOX), hc44xn)));
+
+   
 
 	// Build the main contractor:
 	// ---------------------------
 	// A composition of the  previous contractors
    
-	CtcCompo* hc4n;
-	CtcCompo* hc4acidn;
-	CtcCompo* hc43bcidn; 
-
-	if (ctcnewton) { hc4n= new CtcCompo (hc4,*ctcnewton);
-	  hc4acidn = new CtcCompo (hc4acid, *ctcnewton);
-	  hc43bcidn = new CtcCompo (hc43bcid,*ctcnewton);
-	}
 
 	Ctc* ctc;
 	if (filtering== "hc4")
-	  ctc = & hc4;
+	  ctc = new CtcHC4 (sys.ctrs,ratio_propag);
 	else if (filtering== "acidhc4")
-	  ctc = & hc4acid;
+	  ctc = new CtcCompo(hc4,acid);
 	else if (filtering== "3bcidhc4")
-	  ctc = &c3bcid;
+	  ctc = new CtcCompo (hc4,c3bcid);
 	else if (filtering == "hc4n")
-	  ctc = hc4n;
+	  ctc = new CtcCompo (hc4,*ctcnewton);
 	else if (filtering== "acidhc4n")
-	  ctc =  hc4acidn;
+	  ctc =  new CtcCompo (hc4,acid, *ctcnewton);
 	else if (filtering== "3bcidhc4n")
-	  ctc =  hc43bcidn;
+	  ctc =  new CtcCompo (hc4,c3bcid,*ctcnewton);
 	else {cout << filtering <<  " is not an implemented  contraction  mode "  << endl; return -1;}
         cout << "filtering " << filtering << endl;
 	
-
-	// the actual contractor ; composition of ctc ,e.g. acidhc4n,  and Xnewton
-	CtcCompo cxn (*ctc, ctcxnewton);
+	
+	// The actual contractor
 	Ctc* contractor;
 
-	// xnewton is optional and only used if the xnewton parameter is "xn"
-        if (xnewton=="xn" ||xnewton=="xnewton" )
-	  contractor= & cxn;
+	if (linearrelaxation=="xn" ||linearrelaxation=="compo" || linearrelaxation=="art" )
+	  contractor = new CtcCompo (*ctc, *ctclr);
 	else
 	  contractor=ctc;
 	  
@@ -130,7 +126,7 @@ int main(int argc, char** argv) {
 	if (bisection=="roundrobin")
 	  bs = new RoundRobin (prec);
 	else if (bisection== "largestfirst")
-          bs= new LargestFirst();
+          bs= new LargestFirst(prec);
 	else if (bisection=="smearsum")
 	  bs = new SmearSum(sys,prec);
 	else if (bisection=="smearmax")
@@ -139,20 +135,16 @@ int main(int argc, char** argv) {
 	  bs = new SmearSumRelative(sys,prec);
 	else if (bisection=="smearmaxrel")
 	  bs = new SmearMaxRelative(sys,prec);
-	else {cout << bisection << " is not an implemented  bisection mode "  << endl; return -1;} 
-
+	else {cout << bisection << " is not an implemented  bisection mode "  << endl; return -1;}
+ 
 	cout << "bisection " << bisection << endl;	
 	// Choose the way the search tree is explored
 	// -------------------------------------
 	// A "CellStack" means a depth-first search.
 	CellStack buff;
 
-	// Build a solver
-	// -------------
-	// The last parameter (default value 1e-07) is the precision
-	// required for the solutions
+	Solver s(*contractor,*bs,buff);
 
-	Solver s(*contractor,*bs,buff,prec);
 	s.time_limit = time_limit;;
 	s.trace=1;  // solutions are printed as soon as found when trace=1
 
@@ -170,6 +162,19 @@ int main(int argc, char** argv) {
 	cout << "number of cells=" << s.nb_cells << endl;
 	// Display the cpu time used
 	cout << "cpu time used=" << s.time << "s."<< endl;
+
+	//	if (filtering == "acidhc4" || filtering=="acidhc4n" )
+	//	  cout    << " nbcidvar " <<  acid.nbvar_stat() << endl;
+	delete bs;
+	delete ctc;
+	if (linearrelaxation=="xn" ||linearrelaxation=="compo" || linearrelaxation=="art" )
+	  {delete contractor; 
+	    delete lr;
+	    delete ctclr;
+	  }
+	if (ctcnewton) delete ctcnewton;
+	
+
 
  }
 

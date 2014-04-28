@@ -24,7 +24,7 @@ namespace ibex {
  * \brief Affine Domain.
  *
  * An affine domain is either:
- * <ul><li> an affine form (#ibex:Affine2)
+ * <ul><li> an affine form (#ibex::Affine2)
  *     <li> a vector of affine forms (#ibex::Affine2Vector)
  *     <li> a matrix of affine forms (#ibex::Affine2Matrix)
  *     <li> or an array of affine matrices (#ibex::Affine2MatrixArray)
@@ -35,14 +35,14 @@ typedef TemplateDomain<Affine2> Affine2Domain;
 
 
 template<>
-inline TemplateDomain<Affine2>& TemplateDomain<Affine2>::operator&=(const TemplateDomain<Affine2>& d) {
+inline TemplateDomain<Affine2>& TemplateDomain<Affine2>::operator&=(const TemplateDomain<Affine2>& ) {
 	/* intersection is forbidden with affine forms */
 	assert(false);
 }
 
 
 template<>
-inline TemplateDomain<Affine2> atan2(const TemplateDomain<Affine2>& d1, const TemplateDomain<Affine2>& d2) {
+inline TemplateDomain<Affine2> atan2(const TemplateDomain<Affine2>& d1, const TemplateDomain<Affine2>& ) {
 	/* atan2 is not implemented yet with affine forms */
 	not_implemented("atan2 with affine forms");
 	return d1;

@@ -34,6 +34,7 @@ public:
 	/**
 	 * \brief Create a AC3-like propagation with a list of contractors.
 	 *
+	 * \param nb_var           - Number of variables contractors work with
 	 * \param cl               - The list of contractors.
 	 * \param ratio (optional) - Criterion for stopping propagation. If a projection does not remove
 	 *                           more that \a ratio times the diameter of a variable domain, then this
@@ -43,28 +44,20 @@ public:
 	 *
 	 * \see #contract(IntervalVector&, const BoolMask&).
 	 */
-	CtcPropag(const Array<Ctc>& cl, double ratio=default_ratio, bool incr=false);
+	CtcPropag(int nb_var, const Array<Ctc>& cl, double ratio=default_ratio, bool incr=false);
 
 	/**
 	 * \brief Enforces propagation (e.g.: HC4 or BOX) fitering.
 	 *
 	 * Call #contract(IntervalVector&, const BoolMask&) with the mask
 	 * set to all the variables.
+	 * If #incremental is true, the propagation will start from the
+	 * impacted variables only (instead of from all the variables).
 	 *
 	 * \see #contract(IntervalVector&, const BoolMask&).
 	 * \throw #ibex::EmptyBoxException - if inconsistency is detected.
 	 */
 	virtual void contract(IntervalVector& box);
-
-	/**
-	 * \brief Incremental contraction.
-	 *
-	 * If #incremental is true, the propagation will start from the
-	 * impacted variables only (instead of from all the variables).
-	 *
-	 * \throw #ibex::EmptyBoxException - if inconsistency is detected.
-	 */
-	virtual void contract(IntervalVector& box, const BoolMask& impact);
 
 	/** The list of contractors to propagate */
 	Array<Ctc> list;
@@ -83,11 +76,18 @@ public:
 
 protected:
 
-	DirectedHyperGraph g;
+	const int nb_var;     // number of variables
 
-	Agenda agenda;
+	DirectedHyperGraph g; // constraint network (hypergraph)
 
-	BoolMask all_vars; // used when incremental=false
+	Agenda agenda;        // propagation agenda
+
+	BoolMask _impact;     // impact given to sub-contractors
+
+	BoolMask flags;       // status of a contraction
+
+	BoolMask active;      // mark active sub-contractors
+
 
 };
 

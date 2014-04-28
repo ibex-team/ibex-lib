@@ -63,4 +63,17 @@ std::ostream& operator<<(std::ostream& os, const ArcAgenda& a) {
 	return os << std::endl;
 }
 
+std::ostream& operator<<(std::ostream& os, const Agenda& a) {
+	if (a.empty()) return os << "(empty)";
+
+	int p=a.first;
+	os << "(";
+	do {
+		os << p;
+		p=a.table[p];
+		if (p!=a.first) os << ' ';
+	} while (p!=a.first);
+	return os << ')';
+}
+
 } // namespace ibex

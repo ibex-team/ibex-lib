@@ -10,6 +10,7 @@
 
 #include "TestInnerArith.h"
 #include "ibex_InnerArith.h"
+#include "ibex_Function.h"
 
 using namespace std;
 
@@ -494,6 +495,28 @@ void TestInnerArith::mul13_4() {
 	check_mul_div(Interval(-1,1), -2, 0.1, true,false,false,true);
 }
 
+void TestInnerArith::mul14_1() {
+	Interval x(-1,1);
+	Interval y=Interval::ZERO;
+	iproj_mul(Interval(-1,1),x,y);
+	TEST_ASSERT(x==Interval(-1,1));
+}
+
+void TestInnerArith::mul14_2() {
+	Interval x(-1,1);
+	Interval y=Interval::ZERO;
+	iproj_mul(Interval(1,1),x,y);
+	TEST_ASSERT(x.is_empty());
+	TEST_ASSERT(y.is_empty());
+}
+
+void TestInnerArith::mul14_3() {
+	Interval x(-1,1);
+	Interval y=Interval::ZERO;
+	iproj_mul(Interval::ZERO,x,y,Interval::ZERO,Interval::ZERO);
+	TEST_ASSERT(x==Interval(-1,1));
+}
+
 void TestInnerArith::div08_1() {
 	Interval x(-2,2);
 	Interval y(0.5,1.0);
@@ -604,4 +627,36 @@ void TestInnerArith::sqrt05() {
 	TEST_ASSERT(f);
 	check(x,y);
 }
+
+void TestInnerArith::bugr894() {
+
+	Variable x;
+	Interval _pt(-1.03653);
+	Function f(x,sqr(x-_pt));
+	IntervalVector box(1);
+	IntervalVector pt(1,_pt);
+	f.iproj(Interval::NEG_REALS,box,pt);
+	TEST_ASSERT(box==pt);
+}
+
+void TestInnerArith::bugr899() {
+
+	Interval x(ibex::previous_float(1.0),1);
+	Interval px(ibex::previous_float(1.0),1);
+	Interval y(Interval::ZERO);
+	iproj_add(Interval(1),x,y,px,y);
+	TEST_ASSERT(x==px);
+}
+
+void TestInnerArith::bugr902() {
+	Interval z(0, 0.292491);
+	Interval x(-0, 0.70709);
+	Interval y(0.411992, 5.41199);
+	Interval xin(0.70709);
+	Interval yin(0.411992);
+	iproj_mul(z,x,y,xin,yin);
+	TEST_ASSERT(!x.is_empty());
+	TEST_ASSERT(!y.is_empty());
+}
+
 } // end namespace

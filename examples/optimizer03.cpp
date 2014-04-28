@@ -36,7 +36,8 @@ int main(int argc, char** argv){
 		double prec= atof(argv[4]);
 		double goalprec= atof (argv[5]);
 
-		System ext_sys(sys,System::EXTEND);
+
+		ExtendedSystem ext_sys(sys);
 
 		// Build the bisection heuristic
 		// --------------------------
@@ -48,7 +49,7 @@ int main(int argc, char** argv){
 		if (bisection=="roundrobin")
 			bs = new RoundRobin (prec);
 		else if (bisection== "largestfirst")
-			bs= new LargestFirst();
+			bs= new LargestFirst(prec);
 		else if (bisection=="smearsum")
 			bs = new SmearSum(ext_sys,prec);
 		else if (bisection=="smearmax")
@@ -62,8 +63,8 @@ int main(int argc, char** argv){
 
 		CtcHC4 hc4(ext_sys.ctrs,0.01);
 		CtcHC4 hc44cid(ext_sys.ctrs,0.1,true);
-		CtcAcid acidhc4(ext_sys,BoolMask(ext_sys.nb_var,1),hc44cid);
-		Ctc3BCid c3bcidhc4(BoolMask(ext_sys.nb_var,1),hc44cid,10,1,ext_sys.nb_var);
+		CtcAcid acidhc4(ext_sys,BoolMask(sys.nb_var,1),hc44cid);
+		Ctc3BCid c3bcidhc4(ext_sys.nb_var, BoolMask(ext_sys.nb_var,1),hc44cid,10,1,ext_sys.nb_var);
 		CtcCompo hc4acidhc4 (hc4, acidhc4);
 
 		if (filtering == "hc4")

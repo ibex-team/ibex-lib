@@ -10,24 +10,48 @@
  * ---------------------------------------------------------------------------- */
 
 #include "ibex_Ctc.h"
-#include "ibex_Cell.h"
 
 namespace ibex {
 
-Ctc::Ctc(int n) : nb_var(n), input(n), output(n) {
-	input.set_all();   // by default
-	output.set_all();  // by default
+Ctc::Ctc() : input(NULL), output(NULL), _impact(NULL), _output_flags(NULL) {
+
 }
 
 Ctc::~Ctc() {
 }
 
-//void Ctc::contract(Cell& cell) {
-//	contract(cell.box);
-//}
-
 void Ctc::contract(IntervalVector& box, const BoolMask& impact) {
-	contract(box);
+	_impact = &impact;
+
+	try {
+		contract(box);
+	}
+	catch(EmptyBoxException& e) {
+		_impact = NULL;
+		throw e;
+	}
+
+	_impact = NULL;
+}
+
+
+void Ctc::contract(IntervalVector& box, const BoolMask& impact, BoolMask& flags) {
+	_impact = &impact;
+	_output_flags = &flags;
+
+	flags.unset_all();
+
+	try {
+		contract(box);
+	}
+	catch(EmptyBoxException& e) {
+		_impact = NULL;
+		_output_flags = NULL;
+		throw e;
+	}
+
+	_impact = NULL;
+	_output_flags = NULL;
 }
 
 } // namespace ibex

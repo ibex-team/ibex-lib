@@ -37,7 +37,7 @@ int main() {
 //		Function linsup(x, faa.val(0)+faa.err().ub() + faa.val(1)*(2*x[0]-(I[0].lb()+I[0].ub()))/(I[0].diam()) + faa.val(2)*(2*x[1]-(I[1].lb()+I[1].ub()))/(I[1].diam())) ;
 
 		Function lininf(x, x2,
-				faa.val(0) - faa.err().ub()
+				faa.val(0) - faa.err()
 						+ faa.val(1) * (2 * x[0] - (I[0].lb() + I[0].ub()))
 								/ (I[0].diam())
 						+ faa.val(2) * (2 * x[1] - (I[1].lb() + I[1].ub()))
@@ -45,7 +45,7 @@ int main() {
 						+ faa.val(3) * (2 * x2 - (I[2].lb() + I[2].ub()))
 								/ (I[2].diam()));
 		Function linsup(x, x2,
-				faa.val(0) + faa.err().ub()
+				faa.val(0) + faa.err()
 						+ faa.val(1) * (2 * x[0] - (I[0].lb() + I[0].ub()))
 								/ (I[0].diam())
 						+ faa.val(2) * (2 * x[1] - (I[1].lb() + I[1].ub()))
@@ -64,10 +64,12 @@ int main() {
 		CtcFwdBwd ct2(c_sup, GT, AFFINE2_MODE);  // HC4revise Algorithm with Affine2 in the forward step.
 		CtcFixPoint ft2(ct2, 0.001);
 
-		LargestFirst bbb;
+		LargestFirst bbb(0.001);
 		CellStack ccc;
-		Solver sol1(ft1, bbb, ccc, 0.001);
-		Solver sol2(ft2, bbb, ccc, 0.001);
+
+		// Build a solver
+		Solver sol1(ft1, bbb, ccc);
+		Solver sol2(ft2, bbb, ccc);
 		vector<IntervalVector> vect1 = sol1.solve(I);
 		vector<IntervalVector> vect2 = sol2.solve(I);
 
@@ -239,7 +241,7 @@ int main() {
 				for (int i = 1; i < 5; i++) {
 					z = 0;
 					for (int j = 0; j < 4; j++) {
-						z = z + pow((x[j] - A[i][j]), 2);
+						z = z + ::pow((x[j] - A[i][j]), 2);
 					}
 					f = f - 1.0 / (z + c[i]);
 				}

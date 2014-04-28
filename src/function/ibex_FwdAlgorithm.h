@@ -38,6 +38,9 @@ class FwdAlgorithm {
 	/** TO BE DEFINED (by the subclass) */
 	void apply_fwd(const ExprApply&, ExprLabel** argL, ExprLabel& result);
 
+	/** TO BE DEFINED (by the subclass) */
+	void chi_fwd(const ExprChi&,  const ExprLabel& a, const ExprLabel& b, const ExprLabel& c, ExprLabel& result);
+
 	/*==================== binary operators =========================*/
 	/** TO BE DEFINED (by the subclass) */
 	void add_fwd(const ExprAdd&, const ExprLabel& leftL, const ExprLabel& rightL, ExprLabel& result);

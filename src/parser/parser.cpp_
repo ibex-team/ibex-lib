@@ -49,8 +49,12 @@ System* system=NULL;            // standard AMPL-like system
 // Note: when a stand-alone constraint is read by CHOCO
 // the field system->nb_var must be set *before* calling the parser
 // ******************
+bool choco_start=false;        // activate generation of pseudo-start token
+                               // for CHOCO
 
-Function* function=NULL;       // when a single function is loaded
+Function* function=NULL;       // used when a single function is loaded 
+                               // either from a file or using a string in C++ directly
+			                   // e.g., Function f("x","y","x+y");
 
 /* ===============================================================================================*/
 
@@ -69,6 +73,7 @@ void begin() {
 	while (!scopes.empty()) scopes.pop();
 
 	scopes.push(Scope()); // a fresh new scope!
+	// TODO: it seems that this first scope is not popped during this call to the parser (but the next one)
 }
 
 void begin_system() {
@@ -85,16 +90,16 @@ void begin_choco() {
 	begin();
 
 	// ----- generate all the variables {i} -----
-	char buf[10];
 	Interval x(Interval::ALL_REALS);
 	for (int i=0; i<system->nb_var; i++) {
-		ibex::index_2_string(buf,'{','}',i);
-		source.vars.push_back(new Entity(buf,Dim::scalar(),Domain(x)));
+		char* name=append_index("\0",'{','}',i);
+		source.vars.push_back(new Entity(name,Dim::scalar(),Domain(x)));
+		free(name);
 	}
 	// ------------------------------------------
 }
 
-void begin_function() {
+void begin_function_file() {
 	if (function==NULL) { // someone tries to load a system from a file containing a function only
 		throw SyntaxError("a system requires declaration of variables.");
 	}
@@ -116,7 +121,7 @@ void end_choco() {
 	// TODO: see end_system()
 }
 
-void end_function() {
+void end_function_file() {
 	if (source.func.empty()) {
 		throw SyntaxError("no function declared in file");
 	}
@@ -125,9 +130,10 @@ void end_function() {
 	varcopy(f.args(),x);
 	const ExprNode& y=ExprCopy().copy(f.args(),x,f.expr());
 
-	function->init(x,y);
-	((char*&) function->name)=strdup(f.name);
+	function->init(x,y,f.name);
+
 	source.cleanup();
+	delete source.func[0]; // This is an ugly stuff but we are obliged (see destructor of ParserSource)
 	// TODO: see end_system()
 }
 

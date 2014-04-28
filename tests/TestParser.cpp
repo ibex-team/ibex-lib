@@ -253,7 +253,9 @@ void TestParser::ponts() {
 	TEST_ASSERT(sys.ctrs.size()==30);
 
 	for (int i=0; i<30; i++) {
-		TEST_ASSERT(sameExpr(sys.ctrs[i].f.expr(),sys.f[i].expr()));
+		Function* fi=dynamic_cast<Function*>(&(sys.f[i]));
+		TEST_ASSERT(fi!=NULL);
+		TEST_ASSERT(sameExpr(sys.ctrs[i].f.expr(),fi->expr()));
 		TEST_ASSERT(sys.ctrs[i].op==EQ);
 	}
 }

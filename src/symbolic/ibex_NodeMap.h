@@ -15,9 +15,17 @@
 #include <functional>
 
 #ifdef __GNUC__
+#include <ciso646> // just to initialize _LIBCPP_VERSION
+#ifdef _LIBCPP_VERSION
+#include <unordered_map>
+#define HASH std::hash
+#define IBEX_NODE_MAP(T) std::unordered_map<const ExprNode*,T,hash_node,same_node>
+#else
 #include <tr1/unordered_map>
 #define HASH std::tr1::hash
 #define IBEX_NODE_MAP(T) std::tr1::unordered_map<const ExprNode*,T,hash_node,same_node>
+#endif
+
 #else
 #include <unordered_map>
 #define HASH std::hash
@@ -69,6 +77,14 @@ public:
 	 */
 	T& operator[](const ExprNode& e) {
 		return map[&e];
+	}
+
+	/** \brief Return the value associated to \a e.
+	 *
+	 * Return a const reference.
+	 */
+	const T& operator[](const ExprNode& e) const {
+		return ((NodeMap<T>*) this)->map[&e];
 	}
 
 	/**

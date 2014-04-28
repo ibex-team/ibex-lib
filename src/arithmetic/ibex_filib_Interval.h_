@@ -511,13 +511,6 @@ inline Interval atan(const Interval& x) {
 	return filib::atan(x.itv);
 }
 
-inline Interval atan2(const Interval& , const Interval& ) {
-	ibex_error("atan2 non implemented yet with filib");
-	//return filib::atan2(x.itv,y.itv);
-	return Interval::EMPTY_SET;
-}
-
-
 inline Interval cosh(const Interval& x) {
 	return filib::cosh(x.itv);
 }
@@ -697,11 +690,6 @@ inline bool proj_sin(const Interval& y,  Interval& x) {
 
 inline bool proj_tan(const Interval& y,  Interval& x) {
 	return proj_trigo(y,x,2);
-}
-
-inline bool proj_atan2(const Interval& , Interval& , Interval& ) {
-	ibex_error("warning: proj_atan2 non implemented yet with filib");
-	return false;
 }
 
 inline bool proj_cosh(const Interval& y,  Interval& x) {

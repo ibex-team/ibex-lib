@@ -1,0 +1,8 @@
+variables
+
+x[10] in [-10,10];
+
+minimize
+(abs(x(1))+abs(x(2))+abs(x(3))+abs(x(4))+abs(x(5))+abs(x(6))+abs(x(7))+abs(x(8))+abs(x(9))+abs(x(10)))
+* (abs(x(1))*abs(x(2))*abs(x(3))*abs(x(4))*abs(x(5))*abs(x(6))*abs(x(7))*abs(x(8))*abs(x(9))*abs(x(10)))
+;

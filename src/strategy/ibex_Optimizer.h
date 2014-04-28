@@ -1,5 +1,5 @@
 //============================================================================
-//                                  I B E X                                   
+//                                  I B E X
 // File        : ibex_Optimizer.h
 // Author      : Gilles Chabert, Bertrand Neveu
 // Copyright   : Ecole des Mines de Nantes (France)
@@ -13,11 +13,16 @@
 
 #include "ibex_Bsc.h"
 #include "ibex_CtcHC4.h"
+#include "ibex_Ctc3BCid.h"
 #include "ibex_CtcUnion.h"
 #include "ibex_Backtrackable.h"
 #include "ibex_CellHeapOptim.h"
-#include "ibex_System.h"
+#include "ibex_NormalizedSystem.h"
+#include "ibex_ExtendedSystem.h"
 #include "ibex_EntailedCtr.h"
+#include "ibex_LinearSolver.h"
+#include "ibex_PdcHansenFeasibility.h"
+#include "ibex_OptimCell.h"
 
 namespace ibex {
 
@@ -38,40 +43,48 @@ public:
 	/**
 	 *  \brief Create an optimizer.
 	 *
-	 *   \param sys   - the <b>extended system</b> (see below)
+	 *   \param sys   - the system to optimize
 	 *   \param bsc   - bisector for extended boxes
-	 *   \param ctc   - contractor for the <b>extended system</b>
+	 *   \param ctc   - contractor for the <b>extended system</b> (see below)
 	 *
 	 * And optionally:
 	 *   \param prec          - absolute precision for the boxes (bisection control)
 	 *   \param goal_rel_prec - relative precision of the objective (the optimizer stops once reached).
 	 *   \pram  goal_abs_prec - absolute precision of the objective (the optimizer stops once reached).
 	 *   \param sample_size   - number of samples taken when looking for a "loup"
+	 *   \param equ_eps       - thickness of equations when relaxed to inequalities
+	 *   \param rigor         - look for points that strictly satisfy equalities. By default: false
+	 *   \param critpr        - probability to choose the second criterion in node selection; integer in [0,100]. By default 50
+	 *  \param crit           - second criterion in node selection (the first criterion is the minimum of the objective estimate). default value CellHeapOPtim::UB
 	 *
-	 * <ul> The extended system (see copy constructor of #ibex::System) contains:
+	 * <ul> The extended system (see ExtendedSystem constructor) contains:
 	 * <li> (n+1) variables, x_1,...x_n,y. The index of y is #goal_var (==n).
 	 * <li> A (m+1)-valued function f:(x,y)->(y-f(x),g_0(x),...,g_m(x))
 	 * <li> (m+1) constraints: y-f(x)=0, g_1(x)<=0, ..., g_m(x)<=0.
 	 * </ul>
 	 *
-	 * \warning The optimizer relies on the contractor \a ctc to contract the domain of the goal variable.
-	 * If this contractor never contracts this goal variable, the optimizer will never stop.
+	 * \warning The optimizer relies on the contractor \a ctc to contract the domain of the goal variable and increase the uplo.
+	 * If this contractor never contracts this goal variable, the optimizer will only rely on the evaluation of f  and will be very slow.
 	 *
 	 */
 
 	Optimizer(System& sys, Bsc& bsc, Ctc& ctc, double prec=default_prec,
 			double goal_rel_prec=default_goal_rel_prec, double goal_abs_prec=default_goal_abs_prec,
-			int sample_size=default_sample_size);
-
+			  int sample_size=default_sample_size, double equ_eps=default_equ_eps, bool rigor=false, int critpr=50,CellHeapOptim::criterion crit= CellHeapOptim::UB);
 	/**
 	 * \brief Delete *this.
 	 */
-	~Optimizer();
+	virtual ~Optimizer();
 
 	/**
 	 * \brief Run the optimization.
+
+	 * \param init_box       -  the initial box
+	 * \param obj_init_bound - (optional) can be set when an initial upper
+	 *                         bound of the objective minimum is known a priori.
+	 *                         (this bound can be obtained, e.g., by a local solver).
 	 */
-	void optimize(const IntervalVector& init_box);
+	void optimize(const IntervalVector& init_box, double obj_init_bound=POS_INFINITY);
 
 	/**
 	 * \brief Displays on standard output a report of the last call to #optimize(const IntervalVector&).
@@ -85,6 +98,43 @@ public:
 	 */
 	void report();
 
+	/**
+	 * \brief Displays on standard output a report of the last call to #optimize(const IntervalVector&).
+	 *
+	 * Information provided:
+	 * <ul><li> interval of the cost  [uplo,loup] in case of termination due to timelimit
+	 *     <li>total running time
+	 *     <li>total number of cells created during the exploration
+	 * </ul>
+	 */
+	
+	void time_cells_report();
+	
+	/**
+	 * \brief Displays on standard output a report of the last call to #optimize(const IntervalVector&).
+	 *
+	 * Information provided:
+	 * <ul><li> interval of the cost  [uplo,loup]
+	 *     <li>total running time
+	 * </ul>
+	 */
+	void report_perf();
+
+	/**
+	 * \brief The original system
+	 *
+	 * \warning kept by reference.
+	 */
+	System& user_sys;
+
+	/**
+	 * \brief The normalized system
+	 *
+	 * Corresponds to the system (see constructor) with all inequalities
+	 * under the form g_i(x)<=0.
+	 */
+	NormalizedSystem sys;
+
 	/** Number of variables. */
 	const int n;
 
@@ -92,36 +142,45 @@ public:
 	const int m;
 
 	/**
-	 * \brief The extended system 
+	 * \brief The extended system
 	 *
-	 * Corresponds to the extended  system (see constructor) with all inequalities
-	 * under the form g_i(x)<=0.
+	 * Corresponds to the normalized system with the goal f(x)
+	 * represented as a variable "y" and with the additional constraint
+	 * y=f(x). The domain of y in an extended box stores the interval [ylb,yub] where
+	 * "ylb" is the lower bound of f(x) in the box and "yub" its
+	 * upper bound.  (y is contracted with y <= ymax : see compute_ymax)
+	 *
+	 * The index of y is ext_sys.nb_var.
+	 * See #ibex::ExtendedSystem::goal_var.
 	 */
-	System sys;
+	ExtendedSystem ext_sys;
+
+	/**
+	 * \brief The equalities of the original system.
+	 *
+	 * NULL means no equality.
+	 */
+	System* equs;
 
 	/** Bisector. */
 	Bsc& bsc;
-
 
 	/** Contractor for the extended system
 	 * (y=f(x), g_1(x)<=0,...,g_m(x)<=0). */
 	Ctc& ctc;
 
-
-	/** Cell buffer. */
+	/** Cell buffers.
+	Two buffers are used for node selection. the first one corresponds to minimize  the minimum of the objective estimate,
+	the second one to minimize another criterion (by default the maximum of the objective estimate).
+	The second one is chosen at each node with a probability critpr/100 (default value critpr=50)
+	 */
 	CellHeapOptim buffer;
+	CellHeapOptim buffer2;
 
 	/**
 	 * \brief Index of the goal variable y in the extended box.
 	 *
-	 * This variables stores the interval [uplo,loup] where "uplo" is
-	 * the uppermost lower bound on f(x) and "loup" the lowest upper
-	 * bound.
-	 *
-	 * The value of goal_var is nb_var (last variable). see
-	 * #ibex::System::System(const ibex::System& sys, System::copy_mode mode).
 	 */
-	const int goal_var;
 
 	/** Precision (bisection control) */
 	const double prec;
@@ -144,14 +203,17 @@ public:
 	 * The value can be fixed by the user. By default: true. */
 	bool in_HC4_flag;
 
-
 	/** Trace activation flag.
 	 * The value can be fixed by the user. By default: 0  nothing is printed
 	 1 for printing each better found feasible point
 	  2 for printing each handled node */
 	int trace;
 
-
+	/** Probability to choose the second criterion in node selection in percentage
+	 * integer in [0,100] default value 50
+	 * the value 0 corresponds to use a single criterion for node selection (the classical one : minimizing the lower bound of the estimate of the objective) 
+	 * the value 100 corresponds to use a single criterion for node selection (the second one used in buffer2) */
+	 int critpr;
 	
 	/**
 	 * \brief Time limit.
@@ -173,21 +235,48 @@ public:
 	/** Default goal relative precision */
 	static const double default_goal_rel_prec;
 
+
+
+
+
+
+
 	/** Default goal absolute precision */
 	static const double default_goal_abs_prec;
 
 	/** Default sample size */
 	static const int default_sample_size;
 
+	/** Default epsilon applied to equations */
+	static const double default_equ_eps;
 
-	/** The "loup" (lowest upper bound of the criterion) */
+	/** Default tolerance increase ratio for the pseudo-loup. */
+	static const double default_loup_tolerance;
+	/**
+	 * \brief The "loup" (lowest upper bound of the criterion)
+	 *
+	 * In rigor mode, represents the real-loup (not the pseudo-loup).
+	 */
 	double loup;
+
+	/**
+	 * \brief The pseudo-loup.
+	 *
+	 * Represents, in rigor mode only, the loup for the relaxed problem.
+	 */
+	double pseudo_loup;
 
 	/** The "uplo" (uppermost lower bound of the criterion) */
 	double uplo;
 
 	/** The point satisfying the constraints corresponding to the loup */
 	Vector loup_point;
+
+	/** Rigor mode: the box satisfying the constraints corresponding to the loup */
+	IntervalVector loup_box;
+	
+	/** Number of cells put into the heap (which passed through the contractors)  */
+	int nb_cells;
 
 protected:
 	/**
@@ -201,25 +290,84 @@ protected:
 			return POS_INFINITY;
 		else
 			return fx.ub();
+		
 	}
 
 	/**
 	 * \brief Main procedure for processing a box.
 	 *
 	 * <ul>
+	 * <li> contract and bound  the cell box (see contract_and_bound)
+	 * <li> push the cell onto the heap or delete the cell in case of empty box detected
+	 * </ul>
+	 *
+	 */
+	void handle_cell(OptimCell& c, const IntervalVector& init_box);
+
+	/**
+	 * \brief Contract and bound procedure for processing a box.
+	 *
+	 * <ul>
 	 * <li> contract the cell's box w.r.t the "loup",
 	 * <li> contract with the contractor ctc,
 	 * <li> search for a new loup,
-	 * <li> push the box onto the heap.
+	 * <li> call the first order contractor
 	 * </ul>
 	 *
-	 * Return true iff the loup has been decreased
 	 */
-	bool contract_and_bound(Cell& c);
+	void contract_and_bound(OptimCell& c, const IntervalVector& init_box);
+
+	/**
+	 * \brief Contraction procedure for processing a box.
+	 *
+	 * <ul>
+	 * <li> contract with the contractor ctc,
+	 * </ul>
+	 *
+	 */
+	 virtual void contract(IntervalVector& box, const IntervalVector& init_box );
+
+
+	/**
+	 * \brief First order contraction procedure for processing a box.
+	 *
+	 * <ul>
+	 * <li>  gradient=0 contraction for unconstrained optimization ;
+	 * <li>  first order test for constrained optimization (useful only when there are no equations replaced by inequalities)
+	 * </ul>
+	 *
+	 */
+
+	virtual void firstorder_contract ( IntervalVector& box, const IntervalVector& init_box);
+
+
+	/**
+	 * \brief Update the entailed constraint for the current box
+	 */
+	void update_entailed_ctr(const IntervalVector& box);
+
+
+	/**
+	 * \brief Update the uplo of non bisectable boxes
+	 */
+	void update_uplo_of_epsboxes(double ymin);
+
+	/**
+	 * \brief Update the uplo
+	 */
+	void update_uplo();
+
+
+	/**
+	 * \brief Main procedure for updating the loup.
+	 */
+	bool update_loup(const IntervalVector& box);
+
 
 	/*=======================================================================================================*/
 	/*             Functions to update the loup (see ibex_OptimProbing and ibex_OptimSimplex)                */
 	/*=======================================================================================================*/
+
 	/**
 	 * \brief Monotonicity analysis.
 	 *
@@ -244,6 +392,7 @@ protected:
 	 */
 	bool is_inner(const IntervalVector& box);
 
+
 	/**
 	 * \brief Reduce the box to an inner box using inHC4 algorithm.
 	 *
@@ -262,21 +411,35 @@ protected:
 	 *                   means "unknown" and a quick check (see
 	 *                   #is_inner(const IntervalVector&)) is performed.
 	 *
+	 * \note In rigorous mode, the equalities have to be checked anyway (even if
+	 *       is_inner==true) because the innership is only wrt the relaxed system.
+	 *       In this case, the resulting loup_point may be different than \a pt (the
+	 *		 procedure used to check satisfiability
 	 * \return true in case of success, i.e., if the loup has been decreased.
 	 */
 	bool check_candidate(const Vector& pt, bool is_inner);
+
+	/**
+	 * Look for a loup box (in rigor mode) starting from a pseudo-loup.
+	 *
+	 * Start from the last loup point found in relaxed mode.
+	 */
+	bool update_real_loup();
 
 	/**
 	 * \brief First method for probing
 	 *
 	 * Take random points in any directions.
 	 *
+	 * \param box  the box in which a random point is searched for (the found inner box if is_inner i strue)
+	 * \param fullbox the box where an intensification is made (in the current version only in case of unconstrained optimization)
 	 * \param is_inner - If true, the box is already known to be an inner box so there
 	 *                   is no need to check constraints again.
 	 *
 	 * \return true in case of success, i.e., if the loup has been decreased.
 	 */
-	bool random_probing (const IntervalVector& box, bool is_innner);
+
+	bool random_probing (const IntervalVector& box, const IntervalVector& fullbox, bool is_innner);
 
 	/**
 	 * \brief Perform a dichotomic search of a minimum in a line (see Hansen's book).
@@ -310,18 +473,10 @@ protected:
 
 	/**
 	 * \brief Update loup using inner linearizations.
+	 * return true if the loup has been modified.
 	 */
 	bool update_loup_simplex(const IntervalVector& box);
 
-	/**
-	 * \brief Update the entailed constraint for the current box
-	 */
-	void update_entailed_ctr(const IntervalVector& box);
-
-	/**
-	 * \brief Main procedure for updating the loup.
-	 */
-	bool update_loup(const IntervalVector& box);
 
 	/**
 	 * \brief Display the loup (for debug)
@@ -345,17 +500,41 @@ protected:
 	 */
 	void read_ext_box(const IntervalVector& ext_box, IntervalVector& box);
 
+	/**
+	 * \brief Symbolic gradient of the objective
+	 */
+	Function df;
 
+	/**
+	 * \brief Computes and returns  the value ymax (the loup decreased with the precision)
+	 * the heap and the current box are actually contracted with y <= ymax
+	 *
+	 */
+	double compute_ymax ();
+
+	bool loup_changed;
+
+	Ctc3BCid* objshaver;
+
+    void compute_pf(OptimCell& c);
+	
+	void compute_pu (OptimCell& c);
+	
 private:
+
+	/** Rigor mode (eps_equ==0) */
+	const bool rigor;
+
+	/** linear solver used in ibex_OptimSimplex.cpp_ */
+	LinearSolver *mylp;
 
 	/** Inner contractor (for the negation of g) */
 	CtcUnion* is_inside;
 
-	/** Lower bound of the small boxes taken by the precision contractor */
+	/** Lower bound of the small boxes taken by the precision */
 	double uplo_of_epsboxes;
 
-	/** Number of cells put into the heap (which passed through the contractors)  */
-	int nb_cells;
+
 
 	/** Currently entailed constraints */
 	EntailedCtr* entailed;
@@ -367,6 +546,7 @@ private:
 	double diam_rand;
 	int nb_inhc4;
 	double diam_inhc4;
+
 
 };
 

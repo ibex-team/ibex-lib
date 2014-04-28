@@ -45,6 +45,12 @@ public:
 	SetImage(Function& f, Ctc& c_out, Pdc& p_in);
 
 	/**
+	 * Build the set image algorithm for the function f
+	 * and the domain x.
+	 */
+	SetImage(Function& f, const IntervalVector& x);
+
+	/**
 	 * Run the set image algorithm that will generate
 	 * two subpavings, one for the interior (returned by
 	 * #interior()) and one for the boundary (returned by

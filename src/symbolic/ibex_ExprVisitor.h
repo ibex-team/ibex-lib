@@ -30,6 +30,7 @@ class ExprConstant;
 
 class ExprVector;
 class ExprApply;
+class ExprChi;
 
 class ExprAdd;
 class ExprMul;
@@ -123,6 +124,12 @@ class ExprVisitor {
    * By default: call visit(const ExprNAryOp& e). */
    virtual void visit(const ExprApply& e) {
 	   visit((const ExprNAryOp&) e);
+   }
+
+   /** Visit a function Chi.
+   * By default: call visit(const ExprNAryOp& e). */
+   virtual void visit(const ExprChi& ee) {
+	   visit((const ExprNAryOp&) ee);
    }
 
   /*==================== binary operators =========================*/

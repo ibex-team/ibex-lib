@@ -20,21 +20,18 @@ void Gradient::gradient(const Function& f, const Array<Domain>& d, IntervalVecto
 	assert(f.expr().deco.g);
 
 	Eval().eval(f,d);
-	for (int i=0; i<f.nb_arg(); i++)
-		((Gradient&) *this).symbol_fwd(f.arg(i), f.arg(i).deco);
+
+	g.clear();
+
+	f.write_arg_domains(g,true);
 
 	f.forward<Gradient>(*this);
 
 	f.expr().deco.g->i()=1.0;
+
 	f.backward<Gradient>(*this);
 
-	if (f.all_args_scalar()) {
-		for (int i=0; i<f.nb_arg(); i++) {
-			g[i]=f.arg_deriv[i].i();
-		}
-	} else {
-		load(g,f.arg_deriv);
-	}
+	f.read_arg_domains(g,true);
 }
 
 void Gradient::gradient(const Function& f, const IntervalVector& box, IntervalVector& g) const {
@@ -43,21 +40,18 @@ void Gradient::gradient(const Function& f, const IntervalVector& box, IntervalVe
 	assert(f.expr().deco.g);
 
 	f.eval_domain(box);
-	for (int i=0; i<f.nb_arg(); i++)
-		((Gradient&) *this).symbol_fwd(f.arg(i), f.arg(i).deco);
+
+	g.clear();
+
+	f.write_arg_domains(g,true);
 
 	f.forward<Gradient>(*this);
 
 	f.expr().deco.g->i()=1.0;
+
 	f.backward<Gradient>(*this);
 
-	if (f.all_args_scalar()) {
-		for (int i=0; i<f.nb_arg(); i++) {
-			g[i]=f.arg_deriv[i].i();
-		}
-	} else {
-		load(g,f.arg_deriv);
-	}
+	f.read_arg_domains(g,true);
 }
 
 
@@ -70,7 +64,21 @@ void Gradient::jacobian(const Function& f, const Array<Domain>& d, IntervalMatri
 
 	// calculate the gradient of each component of f
 	for (int i=0; i<m; i++) {
-		gradient(f[i],d,J[i]);
+		const Function* fi=dynamic_cast<const Function*>(&f[i]);
+		if (fi!=NULL) {
+			// if this is a Function object we can
+			// directly calculate the gradient with d
+			gradient(*fi,d,J[i]);
+		} else {
+			// otherwise we must give a box in argument
+			// TODO add gradient with Array<Domain> in argument
+			// in Function interface?
+			// But, for the moment, cannot happen, because
+			// this function is called by apply_bwd.
+			IntervalVector box(f.nb_var());
+			load(box,d);
+			f[i].gradient(box,J[i]);
+		}
 	}
 }
 
@@ -126,6 +134,26 @@ void Gradient::apply_bwd (const ExprApply& a, ExprLabel** x, const ExprLabel& y)
 		load(g,tmp_g);
 	}
 }
+
+void Gradient::chi_bwd (const ExprChi&, ExprLabel& a, ExprLabel& b, ExprLabel& c, const ExprLabel& y) {
+	Interval gx1,gx2;
+// TODO Jordan: to check please Gilles C. :D it is inspired from "max"
+	if (a.d->i().ub()<=0) {
+		gx1=Interval::ONE;
+		gx2=Interval::ZERO;
+	}
+	else if (a.d->i().lb()>0) {
+		gx1=Interval::ZERO;
+		gx2=Interval::ONE;
+	} else {
+		gx1=Interval(0,1);
+		gx2=Interval(0,1);
+	}
+
+	b.g->i() += y.g->i() * gx1;
+	c.g->i() += y.g->i() * gx2;
+}
+
 
 void Gradient::max_bwd(const ExprMax&, ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) {
 	Interval gx1,gx2;

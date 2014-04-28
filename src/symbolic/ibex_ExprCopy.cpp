@@ -30,6 +30,13 @@ void varcopy(const Array<const ExprSymbol>& src, Array<const ExprSymbol>& dest) 
 	}
 }
 
+bool varequals(const Array<const ExprSymbol>& arg1, Array<const ExprSymbol>& arg2) {
+	if (arg1.size()!=arg2.size()) return false;
+	for (int j=0; j<arg1.size(); j++)
+		if (arg1[j].dim!=arg2[j].dim) return false;
+	return true;
+}
+
 const ExprNode& ExprCopy::index_copy(const Array<const ExprSymbol>& old_x, const Array<const ExprSymbol>& new_x, const ExprNode& y, int i, bool fold_cst) {
 
 	const ExprVector* vec=dynamic_cast<const ExprVector*>(&y);
@@ -37,10 +44,21 @@ const ExprNode& ExprCopy::index_copy(const Array<const ExprSymbol>& old_x, const
 	if (vec) {
 		return copy(old_x, new_x,  vec->arg(i));
 	} else {
-		const ExprNode* tmp=&y[i];
-		const ExprNode& y2=copy(old_x, new_x, *tmp);
-		delete (ExprNode*) tmp; // will delete the "[i]" created on-the-fly (but not y, the subexpression)
-		return y2;
+
+		const ExprConstant* cst=dynamic_cast<const ExprConstant*>(&y);
+		if (cst) {
+			if (cst->dim.is_vector())
+				return ExprConstant::new_scalar(cst->get_vector_value()[i]);
+			else {
+				assert(cst->dim.is_matrix());
+				return ExprConstant::new_vector(cst->get_matrix_value()[i],true);
+			}
+		} else {
+			const ExprNode* tmp=&y[i];
+			const ExprNode& y2=copy(old_x, new_x, *tmp);
+			delete (ExprNode*) tmp; // will delete the "[i]" created on-the-fly (but not y, the subexpression)
+			return y2;
+		}
 	}
 }
 
@@ -53,17 +71,21 @@ const ExprNode& ExprCopy::index_copy(const Array<const ExprSymbol>& old_x, const
 		if (vec2) {
 			return copy(old_x, new_x,  vec2->arg(j));
 		} else {
-			const ExprNode* tmp=&(vec->arg(i)[j]);
-			const ExprNode& y2=copy(old_x, new_x, *tmp);
-			delete (ExprNode*) tmp; // will delete the "[j]" created on-the-fly (but not y[i], the subexpression)
-			return y2;
+			return index_copy(old_x, new_x, vec->arg(i), j);
 		}
 	} else {
-		const ExprIndex* tmp=&(y[i][j]);
-		const ExprNode& y2=copy(old_x, new_x, *tmp);
-		delete &((ExprIndex*) tmp)->expr; // delete y[i][j]
-		delete (ExprNode*) tmp;           // delete y[i]
-		return y2;
+
+		const ExprConstant* cst=dynamic_cast<const ExprConstant*>(&y);
+		if (cst) {
+			assert(cst->dim.is_matrix());
+			return ExprConstant::new_scalar(cst->get_matrix_value()[i][j]);
+		} else {
+			const ExprIndex* tmp=&(y[i][j]);
+			const ExprNode& y2=copy(old_x, new_x, *tmp);
+			delete &((ExprIndex*) tmp)->expr; // delete y[i][j]
+			delete (ExprNode*) tmp;           // delete y[i]
+			return y2;
+		}
 	}
 }
 
@@ -226,6 +248,22 @@ void ExprCopy::visit(const ExprApply& e) {
 	clone.insert(e, &ExprApply::new_(e.func, args2));
 	delete [] args2;
 }
+
+void ExprCopy::visit(const ExprChi& e) {  // TODO to check  Jordan: Gilles C. help me
+	for (int i=0; i<e.nb_args; i++)
+		visit(e.arg(i));
+
+	const ExprNode** args2 = new const ExprNode* [e.nb_args];
+	for (int i=0; i<e.nb_args; i++) {
+		args2[i]=&ARG(i);
+		// don't remove this node even if it is a constant because
+		// it is an argument of this function call.
+		mark(e.arg(i));
+	}
+	clone.insert(e, &ExprChi::new_(args2));
+	delete [] args2;
+}
+
 
 
 typedef Domain (*dom_func2)(const Domain&, const Domain&);

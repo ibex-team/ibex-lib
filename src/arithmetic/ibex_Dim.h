@@ -74,6 +74,9 @@ public:
 	/** \brief True if this is either a row or column vector. */
 	bool is_vector() const;
 
+	/** \brief True if this is either a matrix. */
+	bool is_matrix() const;
+
 	/** \brief If *this is a vector, return the dimension.
 	 *
 	 * This dimension corresponds to dim2 (in case of column vector)
@@ -209,6 +212,11 @@ inline bool Dim::is_scalar() const {
 inline bool Dim::is_vector() const {
 	Type t=type();
 	return t==COL_VECTOR || t==ROW_VECTOR;
+}
+
+inline bool Dim::is_matrix() const {
+	Type t=type();
+	return t==MATRIX;
 }
 
 inline int Dim::vec_size() const {

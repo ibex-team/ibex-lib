@@ -13,7 +13,7 @@
 #include "ibex_DimException.h"
 #include "ibex_Function.h"
 #include "ibex_ExprPrinter.h"
-#include "ibex_ExprNodes.h"
+#include "ibex_ExprSubNodes.h"
 #include "ibex_ExprSize.h"
 #include "ibex_String.h"
 #include <sstream>
@@ -44,25 +44,25 @@ int max_height(const ExprNode** args, int n) {
 } // end anonymous namespace
 
 ExprNode::ExprNode(int height, int size, const Dim& dim) :
-  height(height), size(size), id(id_count++), dim(dim), father(NULL) {
+  height(height), size(size), id(id_count++), dim(dim) {
 
 }
 
-void cleanup(const ExprNode& expr, bool delete_symbols) {
-	SubNodes nodes(expr);
-	int size=expr.size; // (warning: expr will be deleted in the loop)
-	for (int i=0; i<size; i++)
-		if (delete_symbols || (!dynamic_cast<const ExprSymbol*>(&nodes[i])))
+void cleanup(const Array<const ExprNode>& expr, bool delete_symbols) {
+	ExprSubNodes nodes(expr);
+
+	for (int i=0; i<nodes.size(); i++)
+		if (delete_symbols || (!dynamic_cast<const ExprSymbol*>(&nodes[i]))) {
 			delete (ExprNode*) &nodes[i];
+		}
 }
 
 ExprIndex::ExprIndex(const ExprNode& subexpr, int index)
 : ExprNode(subexpr.height+1, subexpr.size+1, subexpr.dim.index_dim()), expr(subexpr), index(index) {
 	if (index<0 || index>subexpr.dim.max_index())
 		throw DimException("index out of bounds");
-	((ExprNode*&) (subexpr.father))=this;
+	((ExprNode&) (subexpr)).fathers.add(*this);
 }
-
 
 bool ExprIndex::indexed_symbol() const {
 	// we prefer to use directly a dynamic cast here
@@ -81,7 +81,7 @@ ExprNAryOp::ExprNAryOp(const ExprNode** _args, int n, const Dim& dim) :
 	args = new const ExprNode*[n];
 	for (int i=0; i<n; i++) {
 		args[i]=_args[i];
-		((ExprNode*&) args[i]->father)=this;
+		((ExprNode&) *args[i]).fathers.add(*this);
 	}
 }
 
@@ -122,6 +122,22 @@ ExprVector::ExprVector(const ExprNode** comp, int n, bool in_row) :
 		ExprNAryOp(comp, n, vec_dim(dims(comp,n),in_row)) {
 }
 
+const ExprChi& ExprChi::new_(const ExprNode** args) {
+	if (!(args[0]->type() == Dim::SCALAR)) throw DimException("\"chi\" expects scalar arguments");
+	if (!(args[1]->type() == Dim::SCALAR)) throw DimException("\"chi\" expects scalar arguments");
+	if (!(args[2]->type() == Dim::SCALAR)) throw DimException("\"chi\" expects scalar arguments");
+	return *new ExprChi(args);
+}
+
+const ExprChi& ExprChi::new_(const ExprNode& a, const ExprNode& b, const ExprNode& c) {
+	if (!(a.type() == Dim::SCALAR)) throw DimException("\"chi\" expects scalar arguments");
+	if (!(b.type() == Dim::SCALAR)) throw DimException("\"chi\" expects scalar arguments");
+	if (!(c.type() == Dim::SCALAR)) throw DimException("\"chi\" expects scalar arguments");
+	const ExprNode* args2[3] = {&a,&b,&c};
+	return *new ExprChi(args2);
+}
+
+
 ExprApply::ExprApply(const Function& f, const ExprNode** args) :
 		ExprNAryOp(args,f.nb_arg(),f.expr().dim),
 		func(f) {
@@ -158,6 +174,10 @@ ExprConstant::ExprConstant(const Interval& x)
 	value.i() = x;
 }
 
+Interval::operator const ExprConstant&() const {
+	return ExprConstant::new_scalar(*this);
+}
+
 ExprConstant::ExprConstant(const IntervalVector& v, bool in_row)
   : ExprLeaf(in_row? Dim::row_vec(v.size()) : Dim::col_vec(v.size())),
     value(in_row? Dim::row_vec(v.size()) : Dim::col_vec(v.size())) {
@@ -165,11 +185,27 @@ ExprConstant::ExprConstant(const IntervalVector& v, bool in_row)
 	value.v() = v;
 }
 
+Vector::operator const ExprConstant&() const {
+	return ExprConstant::new_vector(*this,false);
+}
+
+IntervalVector::operator const ExprConstant&() const {
+	return ExprConstant::new_vector(*this,false);
+}
+
 ExprConstant::ExprConstant(const IntervalMatrix& m)
   : ExprLeaf(Dim::matrix(m.nb_rows(),m.nb_cols())),
     value(Dim::matrix(m.nb_rows(),m.nb_cols())) {
 
 	value.m() = m;
+}
+
+Matrix::operator const ExprConstant&() const {
+	return ExprConstant::new_matrix(*this);
+}
+
+IntervalMatrix::operator const ExprConstant&() const {
+	return ExprConstant::new_matrix(*this);
 }
 
 ExprConstant::ExprConstant(const IntervalMatrixArray& ma)
@@ -202,8 +238,8 @@ ExprBinaryOp::ExprBinaryOp(const ExprNode& left, const ExprNode& right, const Di
 					dim ),
 		left(left), right(right) {
 
-	((ExprNode*&) left.father)=this;
-	((ExprNode*&) right.father)=this;
+	((ExprNode&) left).fathers.add(*this);
+	((ExprNode&) right).fathers.add(*this);
 }
 
 ExprAdd::ExprAdd(const ExprNode& left, const ExprNode& right) :
@@ -246,7 +282,7 @@ ExprAtan2::ExprAtan2(const ExprNode& left, const ExprNode& right) :
 
 ExprUnaryOp::ExprUnaryOp(const ExprNode& subexpr, const Dim& dim) :
 				ExprNode(subexpr.height+1, subexpr.size+1, dim), expr(subexpr) {
-	((ExprNode*&) expr.father)=this;
+	((ExprNode&) expr).fathers.add(*this);
 }
 
 ExprSign::ExprSign(const ExprNode& expr) : ExprUnaryOp(expr,expr.dim) {

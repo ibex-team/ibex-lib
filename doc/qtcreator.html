@@ -1,0 +1,85 @@
+
+<ul>
+<li>{anchor anchor='linux' text='Under Linux'}
+<li>{anchor anchor='windows' text='Under Windows'}
+<li>{anchor anchor='linux-local' text='If Ibex is installed in a local folder (Linux/MacOS)'}
+</ul>
+
+<p>
+
+<h3 id="linux">Under Linux/MacOS</h3>
+
+You just have to add the following lines in the .pro file:
+<div class="code">
+ CONFIG += link_pkgconfig<br>
+ PKGCONFIG += ibex
+</div>
+
+as in the following screenshot:
+<p>
+<center>
+<img width="500" src="uploads/qt06.png">
+</center>
+
+
+<h3 id="windows">Under Windows </h3>
+
+You need to set up paths manually inside the .pro file.
+<p>
+We need two paths, the <i>[ibex path]</i> and <i>[soplex path]</i>
+<p>
+Typically, <i>ibex path</i> is :<br>
+<span class="txtcode">C:\MinGW\msys\1.0\home\<i>[user]</i>\Ibex\ibex-2.0.6</path>
+<p>
+and <i>soplex path</i> is :<br>
+<span class="txtcode">C:\MinGW\msys\1.0\home\<i>[user]</i>\Ibex\soplex-1.7.0</path>
+
+<p>
+<b>If Ibex is install with Gaol</b> (by default with 32 bits):
+<p>
+Insert in the bottom of the .pro file:
+<div class="code">
+CXXFLAGS += -Wno-unused-parameter -Wno-unused-variable<br>
+INCLUDEPATH += <i>[ibex path]</i>\include\ibex <i>[soplex path]</i>\src<br>
+LIBS += -L<i>[ibex path]</i>\bin-L<i>[soplex path]</i>\lib -libex -lsoplex -lz -lultim
+</div>
+<p>
+
+<b>If Ibex is install with Filib</b> (by default with 64 bits):
+<p>
+Insert in the bottom of the .pro file:
+<div class="code">
+CXXFLAGS +=-frounding-math -msse2 -mfpmath=sse -Wno-unused-parameter -Wno-unused-variable<br>
+INCLUDEPATH += <i>[ibex path]</i>\include\ibex <i>[soplex path]</i>\src<br>
+LIBS += -L<i>[ibex path]</i>\bin-L<i>[soplex path]</i>\lib -libex -lsoplex -lz -lprim
+</div>
+
+Example with Windows+Goal:<p>
+<center>
+<img width="800" src="uploads/qt-win-pro.png">
+</center>
+
+<p>
+<p>
+
+<h3 id="linux-local">If Ibex is installed in a local folder (Linux/MacOS)</h3>
+
+Click in "Projects" on the left bar. A window "Build settings" should appear.
+Click on "Details" button on the bottom:
+
+<p>
+<center>
+<img width="500" src="uploads/qt05.png">
+</center>
+
+Then click on "Add" and enter the following variable:
+<p>
+<table borer="0">
+<tr><td>Variable:</td><td> PKG_CONFIG_PATH</td></tr>
+<tr><td>Value:</td><td>  <span class="path"><i>[prefix]</i>/share/pkgconfig</span></td></tr>
+</table>
+<p>
+where <i>[prefix]</i> is the path you specified with <span class="txtcode">--prefix</span> when configuring ibex.
+
+<p>
+It's done.

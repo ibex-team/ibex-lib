@@ -29,6 +29,8 @@
 
 // ================ symbolic ===============
 #include "TestExpr.h"
+#include "TestExprDiff.h"
+#include "TestExprSplitOcc.h"
 #include "TestFunction.h"
 #include "TestNumConstraint.h"
 #include "TestEval.h"
@@ -41,14 +43,22 @@
 #include "TestParser.h"
 #include "TestSystem.h"
 
+// ================ system ===============
+#include "TestFritzJohn.h"
+
 // ================ numeric ===============
+#include "TestLinear.h"
 #include "TestNewton.h"
+
+// ================ predicates ===============
+#include "TestPdcHansenFeasibility.h"
 
 // ================ contractor ===============
 #include "TestHC4.h"
 #include "TestCtcInteger.h"
-#include "TestCtcSubBox.h"
+//#include "TestCtcSubBox.h"
 #include "TestCtcNotIn.h"
+
 
 #include "TestAffine2.h"
 
@@ -64,7 +74,6 @@ int main() {
 
     Test::Suite ts;
 
-
     ts.add(auto_ptr<Test::Suite>(new TestString()));
     ts.add(auto_ptr<Test::Suite>(new TestSymbolMap()));
 
@@ -79,6 +88,8 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestAffine2()));
 
     ts.add(auto_ptr<Test::Suite>(new TestExpr()));
+    ts.add(auto_ptr<Test::Suite>(new TestExprDiff()));
+    ts.add(auto_ptr<Test::Suite>(new TestExprSplitOcc()));
     ts.add(auto_ptr<Test::Suite>(new TestFunction()));
     ts.add(auto_ptr<Test::Suite>(new TestNumConstraint()));
     ts.add(auto_ptr<Test::Suite>(new TestEval()));
@@ -90,12 +101,15 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestInHC4Revise()));
     ts.add(auto_ptr<Test::Suite>(new TestGradient()));
 
+    ts.add(auto_ptr<Test::Suite>(new TestLinear()));
     ts.add(auto_ptr<Test::Suite>(new TestNewton()));
+
+    ts.add(auto_ptr<Test::Suite>(new TestPdcHansenFeasibility()));
 
     ts.add(auto_ptr<Test::Suite>(new TestHC4()));
     ts.add(auto_ptr<Test::Suite>(new TestCtcInteger()));
-    ts.add(auto_ptr<Test::Suite>(new TestCtcSubBox()));
     ts.add(auto_ptr<Test::Suite>(new TestCtcNotIn()));
+    ts.add(auto_ptr<Test::Suite>(new TestFritzJohn()));
 
     return ts.run(output,false) ? EXIT_SUCCESS : EXIT_FAILURE;
 

@@ -11,11 +11,22 @@
 
 #include "ibex_Interval.h"
 #include "ibex_IntervalVector.h"
+#include "ibex_Affine2Vector.h"
 #include <cassert>
+#include <sstream>
 
 namespace ibex {
 
 namespace { // to create anonymous functions
+
+inline bool is_empty(double x)                { return false; }
+inline bool is_empty(const Vector& v)         { return false; }
+inline bool is_empty(const IntervalVector& v) { return v.is_empty(); }
+inline bool is_empty(const Affine2Vector& v)  { return v.is_empty(); }
+
+inline void set_empty(Vector& v)         { }
+inline void set_empty(IntervalVector& v) { v.set_empty(); }
+inline void set_empty(Affine2Vector& v) { v.set_empty(); }
 
 template<class V>
 inline V& _inflate(V& v, double rad1) {
@@ -31,7 +42,7 @@ inline V& _inflate(V& v, double rad1) {
 
 template<class V>
 inline V _subvector(const V& v, int start_index, int end_index) {
-	assert(!v.is_empty());
+	assert(!is_empty(v));
 	assert(end_index>=0 && start_index>=0);
 	assert(end_index<v.size() && start_index<=end_index);
 	//throw InvalidIntervalVectorOp("Invalid indices for IntervalVector::subvector");
@@ -46,7 +57,8 @@ inline V _subvector(const V& v, int start_index, int end_index) {
 
 template<class V>
 inline void _put(V& v, int start_index, const V& subvec) {
-	assert(!v.is_empty());
+	assert(!is_empty(v));
+	assert(!is_empty(subvec));
 	int end_index=start_index+subvec.size()-1;
 	assert(start_index>=0 && end_index<v.size());
 
@@ -60,8 +72,8 @@ template<class V1,class V2>
 V1& _assign(V1& v, const V2& x) {
 	assert(v.size()==x.size()); // throw InvalidIntervalVectorOp("Cannot set a IntervalVector to a IntervalVector with different dimension");
 
-	if (x.is_empty())
-		v.set_empty();
+	if (is_empty(x))
+		set_empty(v);
 	else
 		// don't use "set(...)" because the test "is_empty()" called inside
 		// may return prematurely in case "this" is empty.
@@ -75,7 +87,7 @@ V1& _assign(V1& v, const V2& x) {
 template<class V1,class V2>
 bool _equals(const V1& v, const V2& x) {
 	if (v.size()!=x.size()) return false;
-	if (v.is_empty() || x.is_empty()) return v.is_empty() && x.is_empty();
+	if (is_empty(v) || is_empty(x)) return is_empty(v) && is_empty(x);
 	for (int i=0; i<v.size(); i++)
 		if (v[i]!=(x[i])) return false;
 	return true;
@@ -225,7 +237,7 @@ int _extr_diam_index(const V& v, bool min) {
 
 template<class V>
 std::ostream& _display(std::ostream& os, const V& x) {
-	if (x.is_empty()) return os << "empty vector";
+	if (is_empty(x)) return os << "empty vector";
 
 	os << "(";
 	for (int i=0; i<x.size(); i++)
@@ -290,16 +302,28 @@ std::pair<IntervalVector,IntervalVector> _bisect(const V& v, int i, double ratio
 }
 
 template<class V,class T>
-Vector _random(const V& v) {
+Vector _random(const V& v,int seed) {
 	assert(!v.is_empty());
-
+	srand(seed);
 	Vector b(v.size());
 	for (int i=0; i<v.size(); i++) {
 		const T& xi=v[i];
 		// get a random number in [-0.5,0.5]
-		double r=rand()/(double) RAND_MAX -0.5;
+			double p;
 		// pick a point in the domain of the ith variable
-		double p = xi.mid() + r*xi.diam();
+		if (xi.lb()==NEG_INFINITY)
+			if (xi.ub()==POS_INFINITY)
+				p=rand();
+			else
+				p=xi.ub()-rand();
+		else
+			if (xi.ub()==POS_INFINITY)
+				p=xi.lb()+rand();
+			else {
+				double r=(rand()/(double)RAND_MAX) -0.5;
+				p = xi.mid() + r*xi.diam();
+			}
+
 		// watch dog
 		if (p<xi.lb()) p=xi.lb();
 		else if (p>xi.ub()) p=xi.ub();
@@ -307,6 +331,38 @@ Vector _random(const V& v) {
 	}
 	return b;
 }
+
+
+template<class V,class T>
+Vector _random(const V& v) {
+	assert(!v.is_empty());
+	Vector b(v.size());
+	for (int i=0; i<v.size(); i++) {
+		const T& xi=v[i];
+		// get a random number in [-0.5,0.5]
+			double p;
+		// pick a point in the domain of the ith variable
+		if (xi.lb()==NEG_INFINITY)
+			if (xi.ub()==POS_INFINITY)
+				p=rand();
+			else
+				p=xi.ub()-rand();
+		else
+			if (xi.ub()==POS_INFINITY)
+				p=xi.lb()+rand();
+			else {
+				double r=(rand()/(double)RAND_MAX) -0.5;
+				p = xi.mid() + r*xi.diam();
+			}
+
+		// watch dog
+		if (p<xi.lb()) p=xi.lb();
+		else if (p>xi.ub()) p=xi.ub();
+		b[i]=p;
+	}
+	return b;
+}
+
 
 } // end anonymous namespace
 

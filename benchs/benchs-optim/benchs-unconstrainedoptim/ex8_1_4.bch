@@ -1,0 +1,9 @@
+variables
+x1 ;
+x2 ;
+
+
+minimize 12*x1^2 - 6.3*x1^4 + x1^6 - 6*x1*x2 + 6*x2^2;
+
+
+

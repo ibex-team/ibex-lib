@@ -116,11 +116,11 @@ Interval iatan(const Interval& x);
  * </ul>
  * where op is the operator (either,+,-,* or /)
  *
- * By default xin={} and yin={} (non-inflating mode).
+ * By default xin=&empty; and yin=&empty; (non-inflating mode).
  *
  * \return true iff the result is non empty (always return true in inflating mode)
  *
- * \pre xin=\emptyset iff yin=\emptyset
+ * \pre xin=&empty; iff yin=&empty;
  * \pre (xin,yin) ⊆ (x,y)
  * \pre xin op yin ⊆ z
  */
@@ -159,7 +159,7 @@ bool iproj_div(const Interval& z, Interval& x, Interval& y, const Interval &xin=
  * </ul>
  * where op is the operator (either,+,-,* or /)
  *
- * By default xin={} (non-inflating mode).
+ * By default xin=&empty; (non-inflating mode).
  *
  * \return true iff the result is non empty (always return true in inflating mode)
  *

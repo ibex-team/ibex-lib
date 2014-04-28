@@ -32,6 +32,12 @@ Dim mul_dim(const Dim& l, const Dim& r) {
 		return r;
 	else {
 		if (l.dim3!=r.dim2) {
+			if (l.dim2==r.dim2) {
+				if (r.dim3==1) // dot product
+					return Dim::scalar();
+				else // vector-matrix product
+					return Dim::row_vec(r.dim3);
+			}
 			throw DimException("mismatched dimensions in matrix multiplication");
 		} else {
 			if (l.dim2==1)

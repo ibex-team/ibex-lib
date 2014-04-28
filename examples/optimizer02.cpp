@@ -31,11 +31,13 @@ int main(int argc, char** argv){
 
 	System sys(argv[1]);
 
-	RoundRobin rr;
+	RoundRobin rr(Optimizer::default_prec);
 
-	System ext(sys,System::EXTEND);
+	ExtendedSystem ext(sys);
 
 	CtcHC4 ctc(ext.ctrs);
+
+
 	// =============================================================
 
 	Optimizer o(sys,rr,ctc);

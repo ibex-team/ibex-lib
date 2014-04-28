@@ -330,8 +330,11 @@ inline Interval exp(const Interval& x) {
 inline Interval log(const Interval& x) {
 	if (x.ub()<=0) // gaol returns (-oo,-DBL_MAX) if x.ub()==0, instead of EMPTY_SET
 		return Interval::EMPTY_SET;
-	else
-		return gaol::log(x.itv);
+	else {
+		Interval res=gaol::log(x.itv);
+		fpu_round_up();
+		return res;
+	}
 }
 
 inline Interval cos(const Interval& x) {
@@ -341,7 +344,9 @@ inline Interval cos(const Interval& x) {
 }
 
 inline Interval sin(const Interval& x) {
-	return gaol::sin(x.itv);
+	Interval res = gaol::sin(x.itv);
+	fpu_round_up();
+	return res;
 }
 
 inline Interval tan(const Interval& x) {
@@ -360,12 +365,11 @@ inline Interval atan(const Interval& x) {
 	return gaol::atan(x.itv);
 }
 
-inline Interval atan2(const Interval& x, const Interval& y) {
-	return gaol::atan2(x.itv,y.itv);
-}
-
 inline Interval cosh(const Interval& x) {
-	return gaol::cosh(x.itv);
+	if (x.is_unbounded()) 
+		return Interval(gaol::cosh(x.itv).left(),POS_INFINITY);
+	else
+		return gaol::cosh(x.itv);
 }
 
 inline Interval sinh(const Interval& x) {
@@ -472,11 +476,6 @@ inline bool proj_sin(const Interval& y,  Interval& x) {
 inline bool proj_tan(const Interval& y,  Interval& x) {
 	x = gaol::atan_rel(y.itv,x.itv);
 	return !x.is_empty();
-}
-
-inline bool proj_atan2(const Interval& , Interval& , Interval& ) {
-	ibex_error("proj_atan2 non implemented yet with Gaol");
-	return false;
 }
 
 inline bool proj_cosh(const Interval& y,  Interval& x) {

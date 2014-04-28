@@ -1,0 +1,41 @@
+
+variables 
+
+x[100] in [-6.283185307,6.283185307];
+
+minimize 
+(abs(x(1)) + abs(x(2)) + abs(x(3)) +  abs(x(4)) + abs(x(5)) + abs(x(6)) + abs(x(7)) + abs(x(8)) + abs(x(9)) + abs(x(10))
++ abs(x(11)) + abs(x(12)) + abs(x(13)) +  abs(x(14)) + abs(x(15)) + abs(x(16)) + abs(x(17)) + abs(x(18)) + abs(x(19)) + abs(x(20))
++ abs(x(21)) + abs(x(22)) + abs(x(23)) +  abs(x(24)) + abs(x(25)) + abs(x(26)) + abs(x(27)) + abs(x(28)) + abs(x(29)) + abs(x(30))
++ abs(x(31)) + abs(x(32)) + abs(x(33)) +  abs(x(34)) + abs(x(35)) + abs(x(36)) + abs(x(37)) + abs(x(38)) + abs(x(39)) + abs(x(40))
++ abs(x(41)) + abs(x(42)) + abs(x(43)) +  abs(x(44)) + abs(x(45)) + abs(x(46)) + abs(x(47)) + abs(x(48)) + abs(x(49)) + abs(x(50))
++ abs(x(51)) + abs(x(52)) + abs(x(53)) +  abs(x(54)) + abs(x(55)) + abs(x(56)) + abs(x(57)) + abs(x(58)) + abs(x(59)) + abs(x(60))
++ abs(x(61)) + abs(x(62)) + abs(x(63)) +  abs(x(64)) + abs(x(65)) + abs(x(66)) + abs(x(67)) + abs(x(68)) + abs(x(69)) + abs(x(70))
++ abs(x(71)) + abs(x(72)) + abs(x(73)) +  abs(x(74)) + abs(x(75)) + abs(x(76)) + abs(x(77)) + abs(x(78)) + abs(x(79)) + abs(x(80))
++ abs(x(81)) + abs(x(82)) + abs(x(83)) +  abs(x(84)) + abs(x(85)) + abs(x(86)) + abs(x(87)) + abs(x(88)) + abs(x(89)) + abs(x(90))
++ abs(x(91)) + abs(x(92)) + abs(x(93)) +  abs(x(94)) + abs(x(95)) + abs(x(96)) + abs(x(97)) + abs(x(98)) + abs(x(99)) + abs(x(100))
+
+)
+/ exp (sin (x(1)^2) + sin(x(2)^2) + sin (x(3)^2) + sin (x(4)^2)+ sin (x(5)^2) + sin (x(6)^2) + sin (x(7)^2)   + sin (x(8)^2) 
+  + sin (x(9)^2) + sin (x(10)^2)
++ sin (x(11)^2) + sin(x(12)^2) +sin (x(13)^2) + sin (x(14)^2)+ sin (x(15)^2) + sin (x(16)^2) + sin (x(17)^2)   + sin (x(18)^2) 
+  + sin (x(19)^2) + sin (x(20)^2) 
++ sin (x(21)^2) + sin(x(22)^2) +sin (x(23)^2) + sin (x(24)^2)+ sin (x(25)^2) + sin (x(26)^2) + sin (x(27)^2)   + sin (x(28)^2) 
+  + sin (x(29)^2) + sin (x(30)^2) 
++ sin (x(31)^2) + sin(x(32)^2) +sin (x(33)^2) + sin (x(34)^2)+ sin (x(35)^2) + sin (x(36)^2) + sin (x(37)^2)   + sin (x(38)^2) 
+  + sin (x(39)^2) + sin (x(40)^2) 
++ sin (x(41)^2) + sin(x(42)^2) +sin (x(43)^2) + sin (x(44)^2)+ sin (x(45)^2) + sin (x(46)^2) + sin (x(47)^2)   + sin (x(48)^2) 
+  + sin (x(49)^2) + sin (x(50)^2) 
++ sin (x(51)^2) + sin(x(52)^2) +sin (x(53)^2) + sin (x(54)^2)+ sin (x(55)^2) + sin (x(56)^2) + sin (x(57)^2)   + sin (x(58)^2) 
+  + sin (x(59)^2) + sin (x(60)^2) 
++ sin (x(61)^2) + sin(x(62)^2) +sin (x(63)^2) + sin (x(64)^2)+ sin (x(65)^2) + sin (x(66)^2) + sin (x(67)^2)   + sin (x(68)^2) 
+  + sin (x(69)^2) + sin (x(70)^2) 
++ sin (x(71)^2) + sin(x(72)^2) +sin (x(73)^2) + sin (x(74)^2)+ sin (x(75)^2) + sin (x(76)^2) + sin (x(77)^2)   + sin (x(78)^2) 
+  + sin (x(79)^2) + sin (x(80)^2) 
++ sin (x(81)^2) + sin(x(82)^2) +sin (x(83)^2) + sin (x(84)^2)+ sin (x(85)^2) + sin (x(86)^2) + sin (x(87)^2)   + sin (x(88)^2) 
+  + sin (x(89)^2) + sin (x(90)^2) 
++ sin (x(91)^2) + sin(x(92)^2) +sin (x(93)^2) + sin (x(94)^2)+ sin (x(95)^2) + sin (x(96)^2) + sin (x(97)^2)   + sin (x(98)^2) 
+  + sin (x(99)^2) + sin (x(100)^2) 
+
+)
+ ; 

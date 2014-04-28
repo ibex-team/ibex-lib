@@ -1,0 +1,23 @@
+constants
+pi = 3.14159265;
+
+variables
+
+x1 in [-500,500];
+x2 in [-500,500];
+x3 in [-500,500];
+x4 in [-500,500];
+x5 in [-500,500];
+
+minimize
+418.9829 * 5 - x1 * sin (sqrt (sqrt (x1^2)))   - x2 * sin (sqrt (sqrt (x2^2)))
+ - x3 * sin (sqrt (sqrt (x3^2))) - x4 * sin (sqrt (sqrt (x4^2))) - x5 * sin (sqrt (sqrt (x5^2)));
+
+constraints
+x1 <= 1000;
+x2 <= 1000;
+x3 <= 1000;
+x4 <= 1000;
+x5 <= 1000;
+
+end

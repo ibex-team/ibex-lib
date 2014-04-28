@@ -1,6 +1,6 @@
 constants
 
-eps=1.e-8;
+ 
 
 variables
 
@@ -85,8 +85,8 @@ x6)/x9)^2))) + 2*ln(0.398942448887604*(x1/x7*exp(-0.5*((260 - x4
 constraints
 
 
-x1 + x2 + x3 - 1 >= -eps;
-x1 + x2 + x3 - 1 <= eps;
+x1 + x2 + x3 - 1 =0;
+
 
 - x4 + x5 >= 0;
 

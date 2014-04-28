@@ -174,6 +174,23 @@ inline M outer_prod(const Vin1& v1, const Vin2& v2) {
 	return y;
 }
 
+template<class Vin1, class Vin2, class Vout>
+inline Vout hadamard_prod(const Vin1& v1, const Vin2& v2) {
+
+	assert(v1.size()==v2.size());
+	Vout y(v1.size());
+
+	if (is_empty(v1) || is_empty(v2)) {
+		set_empty(y);
+		return y;
+	}
+
+	for (int i=0; i<v1.size(); i++) {
+			y[i]=v1[i]*v2[i];
+	}
+	return y;
+}
+
 template<class M, class Vin, class Vout>
 inline Vout mulMV(const M& m, const Vin& v) {
 	assert(m.nb_cols()==v.size());
@@ -254,23 +271,6 @@ inline M absM(const M& m) {
 		res[i]=abs(m[i]);
 
 	return res;
-}
-
-template<class M>
-inline std::ostream& print(std::ostream& os, const M& m) {
-	if (is_empty(m)) { return os << "empty matrix"; }
-	os << "(";
-	for (int i=0; i<m.nb_rows(); i++) {
-		os << "(";
-		for (int j=0; j<m.nb_cols(); j++) {
-			os << m[i][j];
-			if (j<m.nb_cols()-1) os << " ; ";
-		}
-		os << ")";
-		if (i<m.nb_rows()-1) os << std::endl;
-	}
-	os << ")";
-	return os;
 }
 
 }
@@ -499,6 +499,22 @@ IntervalMatrix outer_product(const IntervalVector& v1, const IntervalVector& v2)
 	return outer_prod<IntervalVector,IntervalVector,IntervalMatrix>(v1,v2);
 }
 
+Vector hadamard_product(const Vector& v1, const Vector& v2) {
+	return hadamard_prod<Vector,Vector,Vector>(v1,v2);
+}
+
+IntervalVector hadamard_product(const Vector& v1, const IntervalVector& v2) {
+	return hadamard_prod<Vector,IntervalVector,IntervalVector>(v1,v2);
+}
+
+IntervalVector hadamard_product(const IntervalVector& v1, const Vector& v2) {
+	return hadamard_prod<IntervalVector,Vector,IntervalVector>(v1,v2);
+}
+
+IntervalVector hadamard_product(const IntervalVector& v1, const IntervalVector& v2) {
+	return hadamard_prod<IntervalVector,IntervalVector,IntervalVector>(v1,v2);
+}
+
 Vector operator*(const Matrix& m, const Vector& v) {
 	return mulMV<Matrix,Vector,Vector>(m,v);
 }
@@ -562,15 +578,6 @@ Matrix abs(const Matrix& m) {
 IntervalMatrix abs(const IntervalMatrix& m) {
 	return absM(m);
 }
-
-std::ostream& operator<<(std::ostream& os, const Matrix& m) {
-	return print<Matrix>(os,m);
-}
-
-std::ostream& operator<<(std::ostream& os, const IntervalMatrix& m) {
-	return print<IntervalMatrix>(os,m);
-}
-
 
 //================================== Affine2 Implementation ======
 
@@ -798,11 +805,6 @@ Affine2Matrix outer_product(const IntervalVector& x1, const Affine2Vector& x2) {
 
 Affine2Matrix abs(const Affine2Matrix& m) {
 	return absM(m);
-}
-
-
-std::ostream& operator<<(std::ostream& os, const Affine2Matrix& m) {
-	return print < Affine2Matrix > (os, m);
 }
 
 

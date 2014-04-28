@@ -17,6 +17,7 @@
 namespace ibex {
 
 class Matrix; // declared only for friendship
+class ExprConstant;
 
 /**
  * \ingroup arithmetic
@@ -86,6 +87,21 @@ public:
 	void resize(int n2);
 
 	/**
+	 * \brief Return a subvector.
+	 *
+	 * \return [ (*this)[start_index]; ...; (*this)[end_index] ].
+	 */
+	Vector subvector(int start_index, int end_index) const;
+
+	/**
+	 * \brief Put a subvector into *this at a given position.
+	 *
+	 * \param start_index - the position where the subvector
+	 * \param subvec - the subvector
+	 */
+	void put(int start_index, const Vector& subvec);
+
+	/**
 	 * \brief Assign this Vector to x.
 	 *
 	 * \pre Dimensions of this and x must match.
@@ -118,6 +134,11 @@ public:
 	double min() const;
 
 	/**
+	 * \brief ||x||.
+	 */
+	double norm() const;
+
+	/**
 	 * \brief (*this)+=x2.
 	 */
 	Vector& operator+=(const Vector& x2);
@@ -141,6 +162,11 @@ public:
 	 * \brief Create a vector of ones of size n.
 	 */
 	static Vector ones(int n);
+
+	/**
+	 * \brief Cast the vector to an expression
+	 */
+	operator const ExprConstant&() const;
 
 private:
 	friend class Matrix;
@@ -178,6 +204,14 @@ double operator*(const Vector& x1, const Vector& x2);
  * \brief Outer product of x1 and x2.
  */
 Matrix outer_product(const Vector& x1, const Vector& x2);
+
+/**
+ * \brief Hadamard product of x and y.
+ *
+ * The Hadamard product is a component-wise multiplication:
+ * z[i]=x[i]*y[i].
+ */
+Vector hadamard_product(const Vector& x, const Vector& y);
 
 /**
  * \brief d*x

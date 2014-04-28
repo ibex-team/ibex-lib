@@ -30,6 +30,11 @@ public:
 	 */
 	CtcInteger(int nb_var, const BoolMask& is_int);
 
+	/**
+	 * \brief Delete this.
+	 */
+	~CtcInteger();
+
 	virtual void contract(IntervalVector& box);
 
 	virtual void contract(IntervalVector& box, const BoolMask& impact);

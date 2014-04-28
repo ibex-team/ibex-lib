@@ -24,15 +24,22 @@ public:
 		TEST_ADD(TestInHC4Revise::add01);
 		TEST_ADD(TestInHC4Revise::add02);
 		TEST_ADD(TestInHC4Revise::dist01);
+		TEST_ADD(TestInHC4Revise::dist02);
 		TEST_ADD(TestInHC4Revise::apply01);
 		TEST_ADD(TestInHC4Revise::apply02);
+		TEST_ADD(TestInHC4Revise::add_mult01);
+		TEST_ADD(TestInHC4Revise::bugr900);
 	}
 
 	void add01();
 	void add02();
 	void dist01();
+	void dist02();
 	void apply01();
 	void apply02();
+	// z=x+0*y
+	void add_mult01();
+	void bugr900();
 };
 
 } // end namespace

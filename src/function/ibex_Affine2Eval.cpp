@@ -33,8 +33,8 @@ ExprLabel& Affine2Eval::eval_label(const Function& f, ExprLabel** args) const {
 		argD.set_ref(i,*(args[i]->d));
 	}
 
-	load(f.arg_domains,argD,f.nb_used_vars,f.used_var);
-	load(f.arg_af2,argDAF2,f.nb_used_vars,f.used_var);
+	f.write_arg_domains(argD);
+	f.write_arg_af2_domains(argDAF2);
 
 	//------------- for debug
 //	std::cout << "Function " << f.name << ", domains before eval:" << std::endl;
@@ -51,19 +51,8 @@ ExprLabel& Affine2Eval::eval_label(const Function& f, const IntervalVector& box)
 	assert(f.expr().deco.af2);
 	assert(f.expr().deco.d);
 
-	if (f.all_args_scalar()) {
-		int j;
-		for (int i=0; i<f.nb_used_vars; i++) {
-			j=f.used_var[i];
-			f.arg_af2[j].i()= Affine2(f.nb_var(),j+1,box[j]);
-			f.arg_domains[j].i()=box[j];
-		}
-
-	}
-	else {
-		load(f.arg_af2,Affine2Vector(box,true),f.nb_used_vars,f.used_var);
-		load(f.arg_domains,box,f.nb_used_vars,f.used_var); // load the domains of all the symbols
-	}
+	f.write_arg_domains(box);
+	f.write_arg_af2_domains(box);
 
 	return f.forward<Affine2Eval>(*this);
 

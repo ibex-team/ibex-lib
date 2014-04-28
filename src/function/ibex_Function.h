@@ -9,15 +9,16 @@
  * Created     : Jan 5, 2012
  * ---------------------------------------------------------------------------- */
 
-#ifndef _IBEX_FUNCTION_H_
-#define _IBEX_FUNCTION_H_
+#ifndef __IBEX_FUNCTION_H__
+#define __IBEX_FUNCTION_H__
 
 #include "ibex_Expr.h"
+#include "ibex_Fnc.h"
 #include "ibex_CompiledFunction.h"
 #include "ibex_Decorator.h"
 #include "ibex_Array.h"
 #include "ibex_SymbolMap.h"
-
+#include "ibex_ExprSubNodes.h"
 #include <stdarg.h>
 
 namespace ibex {
@@ -25,8 +26,8 @@ namespace ibex {
 class System;
 
 /**
- * \ingroup symbolic
- * \brief Function (x->f(x) where f(x) is the DAG of an arithmetical expression).
+ * \ingroup function
+ * \brief Symbolic function (x->f(x) where f(x) is the DAG of an arithmetical expression).
  *
  * Every expression in ibex (like x^2+y^2) is considered as a function,
  * (here: (x,y)->x^2+y^2) where the order of the arguments ("x" and "y")
@@ -36,11 +37,24 @@ class System;
  * We distinguish <i>arguments</i> from <i>variables</i>. For instance, if
  * f:(x,y)->x[0]+y where x is a vector of 9 components, the functions has
  * 2 arguments and 10 variables.
+ *
+ * Note that contrary to the input of a function, there
+ * is a unique output and if this output is a vector/matrix, all
+ * the components have the same dimension.
+ *
+ * As a vector-valued function (#ibex::Fnc), if f is real-valued, the
+ * output vector has 1 component. If f is a m*n matrix function,
+ * the output vector has m*n components.
+ *
+ *
  */
-class Function {
+class Function : public Fnc {
+
 public:
+
 	/**
 	 * \brief Creates a function y=f(x).
+	 *
 	 */
 	Function(const ExprSymbol& x, const ExprNode& y, const char* name=NULL);
 
@@ -72,10 +86,157 @@ public:
 	 */
 	Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprNode& y, const char* name=NULL);
 
+
+	/**
+	 * \brief Creates a function y=f(x1,x2,x3,x4,x5,x6,x7).
+	 */
+	Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprNode& y, const char* name=NULL);
+
+
+	/**
+	 * \brief Creates a function y=f(x1,x2,x3,x4,x5,x6,x7,x8).
+	 */
+	Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprNode& y, const char* name=NULL);
+
+
+	/**
+	 * \brief Creates a function y=f(x1,x2,x3,x4,x5,x6,x7,x8,x9).
+	 */
+	Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprSymbol& x9, const ExprNode& y, const char* name=NULL);
+
+
+	/**
+	 * \brief Creates a function y=f(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10).
+	 */
+	Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprSymbol& x9, const ExprSymbol& x10, const ExprNode& y, const char* name=NULL);
+
+
+	/**
+	 * \brief Creates a function y=f(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11).
+	 */
+	Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprSymbol& x9, const ExprSymbol& x10, const ExprSymbol& x11, const ExprNode& y, const char* name=NULL);
+
+
+	/**
+	 * \brief Creates a function y=f(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12).
+	 */
+	Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprSymbol& x9, const ExprSymbol& x10, const ExprSymbol& x11, const ExprSymbol& x12, const ExprNode& y, const char* name=NULL);
+
+
+	/**
+	 * \brief Creates a function y=f(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13).
+	 */
+	Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprSymbol& x9, const ExprSymbol& x10, const ExprSymbol& x11, const ExprSymbol& x12, const ExprSymbol& x13, const ExprNode& y, const char* name=NULL);
+
+
+	/**
+	 * \brief Creates a function y=f(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14).
+	 */
+	Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprSymbol& x9, const ExprSymbol& x10, const ExprSymbol& x11, const ExprSymbol& x12, const ExprSymbol& x13, const ExprSymbol& x14, const ExprNode& y, const char* name=NULL);
+
+
+	/**
+	 * \brief Creates a function y=f(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15).
+	 */
+	Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprSymbol& x9, const ExprSymbol& x10, const ExprSymbol& x11, const ExprSymbol& x12, const ExprSymbol& x13, const ExprSymbol& x14, const ExprSymbol& x15, const ExprNode& y, const char* name=NULL);
+
+
+	/**
+	 * \brief Creates a function y=f(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15,x16).
+	 */
+	Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprSymbol& x9, const ExprSymbol& x10, const ExprSymbol& x11, const ExprSymbol& x12, const ExprSymbol& x13, const ExprSymbol& x14, const ExprSymbol& x15, const ExprSymbol& x16, const ExprNode& y, const char* name=NULL);
+
+
+	/**
+	 * \brief Creates a function y=f(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15,x16,x17).
+	 */
+	Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprSymbol& x9, const ExprSymbol& x10, const ExprSymbol& x11, const ExprSymbol& x12, const ExprSymbol& x13, const ExprSymbol& x14, const ExprSymbol& x15, const ExprSymbol& x16, const ExprSymbol& x17, const ExprNode& y, const char* name=NULL);
+
+
+	/**
+	 * \brief Creates a function y=f(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15,x16,x17,x18).
+	 */
+	Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprSymbol& x9, const ExprSymbol& x10, const ExprSymbol& x11, const ExprSymbol& x12, const ExprSymbol& x13, const ExprSymbol& x14, const ExprSymbol& x15, const ExprSymbol& x16, const ExprSymbol& x17, const ExprSymbol& x18, const ExprNode& y, const char* name=NULL);
+
+
+	/**
+	 * \brief Creates a function y=f(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15,x16,x17,x18,x19).
+	 */
+	Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprSymbol& x9, const ExprSymbol& x10, const ExprSymbol& x11, const ExprSymbol& x12, const ExprSymbol& x13, const ExprSymbol& x14, const ExprSymbol& x15, const ExprSymbol& x16, const ExprSymbol& x17, const ExprSymbol& x18, const ExprSymbol& x19,  const ExprNode& y, const char* name=NULL);
+
+
+	/**
+	 * \brief Creates a function y=f(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15,x16,x17,x18,x19,x20).
+	 */
+	Function(const ExprSymbol& x1, const ExprSymbol& x2, const ExprSymbol& x3, const ExprSymbol& x4, const ExprSymbol& x5, const ExprSymbol& x6, const ExprSymbol& x7, const ExprSymbol& x8, const ExprSymbol& x9, const ExprSymbol& x10, const ExprSymbol& x11, const ExprSymbol& x12, const ExprSymbol& x13, const ExprSymbol& x14, const ExprSymbol& x15, const ExprSymbol& x16, const ExprSymbol& x17, const ExprSymbol& x18, const ExprSymbol& x19, const ExprSymbol& x20, const ExprNode& y, const char* name=NULL);
+
 	/**
 	 * \brief Creates a new (anonymous) function y=f(x1,...,xn).
 	 */
 	Function(const Array<const ExprSymbol>& x, const ExprNode& y, const char* name=NULL);
+
+	/**
+	 * \brief Creates a function y=f(x).
+	 *
+	 * The parameter x may not only contain the name
+	 * of the function argument but also the dimension of the symbol
+	 * (like for the arguments of a Minibex function). E.g.:
+	 *
+	 * Function f("x[2]","x(1)+x(2)");
+	 *
+	 * \warning: Note that the Minibex convention (not C++) is applied for indices!
+	 *
+	 */
+	Function(const char* x1, const char* y);
+
+	/**
+	 * \brief Creates a function y=f(x1,x2).
+	 *
+	 * \see Function(const char* x1, const char* y).
+	 */
+	Function(const char* x1, const char* x2, const char* y);
+
+	/**
+	 * \brief Creates a function y=f(x1,x2,x3).
+	 *
+	 * \see Function(const char* x1, const char* y).
+	 */
+	Function(const char* x1, const char* x2, const char* x3, const char* y);
+
+	/**
+	 * \brief Creates a function y=f(x1,x2,x3,x4).
+	 *
+	 * \see Function(const char* x1, const char* y).
+	 */
+	Function(const char* x1, const char* x2, const char* x3, const char* x4, const char* y);
+
+	/**
+	 * \brief Creates a function y=f(x1,x2,x3,x4,x5).
+	 *
+	 * \see Function(const char* x1, const char* y).
+	 */
+	Function(const char* x1, const char* x2, const char* x3, const char* x4, const char* x5, const char* y);
+
+	/**
+	 * \brief Creates a function y=f(x1,x2,x3,x4,x5,x6).
+	 *
+	 * \see Function(const char* x1, const char* y).
+	 */
+	Function(const char* x1, const char* x2, const char* x3, const char* x4, const char* x5, const char* x6, const char* y);
+
+	/**
+	 * \brief Creates a function y=f(x1,x2,x3,x4,x5,x6,x7).
+	 *
+	 * \see Function(const char* x1, const char* y).
+	 */
+	Function(const char* x1, const char* x2, const char* x3, const char* x4, const char* x5, const char* x6, const char* x7, const char* y);
+
+	/**
+	 * \brief Creates a function y=f(x1,x2,x3,x4,x5,x6,x7,x8).
+	 *
+	 * \see Function(const char* x1, const char* y).
+	 */
+	Function(const char* x1, const char* x2, const char* x3, const char* x4, const char* x5, const char* x6, const char* x7, const char* x8, const char* y);
 
 	/**
 	 * \brief Load a function from a file.
@@ -92,17 +253,170 @@ public:
 	Function();
 
 	/**
+	 * \brief Apply this function to the argument
+	 *
+	 * Works only if it is a unary function.
+	 */
+	const ExprApply& operator()(const ExprNode& arg1) const;
+
+	/**
+	 * \brief Apply this function to the arguments
+	 *
+	 * Works only if it is a binary function.
+	 */
+	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2) const;
+
+	/**
+	 * \brief Apply this function to the arguments
+	 *
+	 * Works only if it is a ternary function.
+	 */
+	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3) const;
+
+	/**
+	 * \brief Apply this function to the arguments
+	 *
+	 * Works only if the function has four arguments.
+	 */
+	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4) const;
+
+	/**
+	 * \brief Apply this function to the arguments
+	 *
+	 * Works only if the function has five arguments.
+	 */
+	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5) const;
+
+	/**
+	 * \brief Apply this function to the arguments
+	 *
+	 * Works only if the function has six arguments.
+	 */
+	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6) const;
+
+	/**
+	 * \brief Apply this function to the arguments
+	 *
+	 * Works only if the function has 7 arguments.
+	 */
+	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7) const;
+
+	/**
+	 * \brief Apply this function to the arguments
+	 *
+	 * Works only if the function has 8 arguments.
+	 */
+	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8) const;
+
+	/**
+	 * \brief Apply this function to the arguments
+	 *
+	 * Works only if the function has 9 arguments.
+	 */
+	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9) const;
+
+	/**
+	 * \brief Apply this function to the arguments
+	 *
+	 * Works only if the function has 10 arguments.
+	 */
+	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10) const;
+
+	/**
+	 * \brief Apply this function to the arguments
+	 *
+	 * Works only if the function has 11 arguments.
+	 */
+	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10, const ExprNode& arg11) const;
+
+	/**
+	 * \brief Apply this function to the arguments
+	 *
+	 * Works only if the function has 12 arguments.
+	 */
+	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10, const ExprNode& arg11, const ExprNode& arg12) const;
+
+	/**
+	 * \brief Apply this function to the arguments
+	 *
+	 * Works only if the function has 13 arguments.
+	 */
+	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10, const ExprNode& arg11, const ExprNode& arg12, const ExprNode& arg13) const;
+
+	/**
+	 * \brief Apply this function to the arguments
+	 *
+	 * Works only if the function has 14 arguments.
+	 */
+	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10,const ExprNode& arg11, const ExprNode& arg12, const ExprNode& arg13, const ExprNode& arg14) const;
+
+	/**
+	 * \brief Apply this function to the arguments
+	 *
+	 * Works only if the function has 15 arguments.
+	 */
+	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10, const ExprNode& arg11, const ExprNode& arg12, const ExprNode& arg13, const ExprNode& arg14, const ExprNode& arg15) const;
+
+	/**
+	 * \brief Apply this function to the arguments
+	 *
+	 * Works only if the function has 16 arguments.
+	 */
+	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10, const ExprNode& arg11, const ExprNode& arg12, const ExprNode& arg13, const ExprNode& arg14, const ExprNode& arg15, const ExprNode& arg16) const;
+
+	/**
+	 * \brief Apply this function to the arguments
+	 *
+	 * Works only if the function has 17 arguments.
+	 */
+	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10, const ExprNode& arg11, const ExprNode& arg12, const ExprNode& arg13, const ExprNode& arg14, const ExprNode& arg15, const ExprNode& arg16, const ExprNode& arg17) const;
+
+	/**
+	 * \brief Apply this function to the arguments
+	 *
+	 * Works only if the function has 18 arguments.
+	 */
+	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10, const ExprNode& arg11, const ExprNode& arg12, const ExprNode& arg13, const ExprNode& arg14, const ExprNode& arg15, const ExprNode& arg16, const ExprNode& arg17, const ExprNode& arg18) const;
+
+	/**
+	 * \brief Apply this function to the arguments
+	 *
+	 * Works only if the function has 19 arguments.
+	 */
+	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10, const ExprNode& arg11, const ExprNode& arg12, const ExprNode& arg13, const ExprNode& arg14, const ExprNode& arg15, const ExprNode& arg16, const ExprNode& arg17, const ExprNode& arg18, const ExprNode& arg19) const;
+
+	/**
+	 * \brief Apply this function to the arguments
+	 *
+	 * Works only if the function has 20 arguments.
+	 */
+	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10, const ExprNode& arg11, const ExprNode& arg12, const ExprNode& arg13, const ExprNode& arg14, const ExprNode& arg15, const ExprNode& arg16, const ExprNode& arg17, const ExprNode& arg18, const ExprNode& arg19, const ExprNode& arg20) const;
+
+	/**
+	 * \brief Apply this function to the arguments
+	 */
+	const ExprApply& operator()(const ExprNode** arg) const;
+
+	/**
+	 * \brief Apply this function to the arguments
+	 */
+	const ExprApply& operator()(const std::vector<const ExprNode*>& arg) const;
+
+	/**
 	 * \brief Initialize this function (set the "x" and the "y").
 	 */
-	void init(const Array<const ExprSymbol>& x, const ExprNode& y);
+	void init(const Array<const ExprSymbol>& x, const ExprNode& y, const char* name=NULL);
 
 	/**
 	 * \brief Delete the function.
 	 *
 	 * This will delete all the associated expression nodes (including symbols).
 	 */
-	~Function();
+	virtual ~Function();
 
+	/**
+	 * \brief Copy mode (see copy constructor)
+	 */
 	typedef enum { COPY, DIFF } copy_mode;
 
 	/**
@@ -123,26 +437,9 @@ public:
 	Function(const Function&, copy_mode mode=COPY);
 
 	/**
-	 * \brief Return the total number of variables.
-	 *
-	 * The number of variables is the sum
-	 * of the number of components of each argument.
-	 *
-	 * \see #nb_arg() const.
+	 * \brief Differentiate this function.
 	 */
-	int nb_var() const;
-
-	/**
-	 * \brief Number of components of f
-	 *
-	 * If f is a real-valued function, the result is 1.
-	 * If f is a m*n matrix function, the result is m*n.
-	 *
-	 * Note that contrary to the input of a function, there
-	 * is a unique output and if this output is a vector, all
-	 * the components have the same dimension.
-	 */
-	int image_dim() const;
+	const Function& diff() const;
 
 	/**
 	 * \brief Return the ith component of f.
@@ -170,6 +467,10 @@ public:
 
 	/**
 	 * \brief Return the number of arguments.
+	 *
+	 * \note The number of variables returned by nb_var()
+	 * is the sum of the number of components of each argument.
+	 *
 	 */
 	int nb_arg() const;
 
@@ -217,14 +518,6 @@ public:
 	const ExprNode& expr() const;
 
 	/**
-	 * \brief Name of the function.
-	 *
-	 * Null pointer if the function is anonymous.
-	 */
-	const char* name;
-
-
-	/**
 	 * \brief Run a forward algorithm.
 	 *
 	 * Run a forward algorithm and
@@ -247,12 +540,81 @@ public:
 	template<class V>
 	void backward(const V& algo) const;
 
+	// ======================== for Forward/Backward algorithms ====================
+
 	/**
-	 * \brief True if all the arguments are scalar
+	 * \brief Initialize symbols domains from d
 	 *
-	 * Useful for various code optimization.
+	 * \param grad - true<=>update "g" (gradient) false <=>update "d" (domain)
+	 * \see #ibex::ExprLabel
 	 */
-	bool all_args_scalar() const;
+	void write_arg_domains(const Array<Domain>& d, bool grad=false) const;
+
+	/**
+	 * \brief Initialize symbols domains from d
+	 *
+	 * \param grad - true<=>update "g" (gradient) false <=>update "d" (domain)
+	 * \see #ibex::ExprLabel
+	 */
+	void write_arg_domains(const Array<const Domain>& d, bool grad=false) const;
+
+	/**
+	 * \brief Initialize symbols domains from a box
+	 *
+	 * \param grad - true<=>update "g" (gradient) false <=>update "d" (domain)
+	 * \see #ibex::ExprLabel
+	 */
+	void write_arg_domains(const IntervalVector& box, bool grad=false) const;
+
+	/**
+	 * \brief Initialize symbols affine domains from d
+	 */
+	void write_arg_af2_domains(const Array<Affine2Domain>& d) const;
+
+	/**
+	 * \brief Initialize symbols affine domains from d
+	 */
+	void write_arg_af2_domains(const Array<const Affine2Domain>& d) const;
+
+	/**
+	 * \brief Initialize symbols affine domains from a box
+	 */
+	void write_arg_af2_domains(const IntervalVector& box) const;
+
+	/**
+	 * \brief Initialize d from symbols domains
+	 *
+	 * \param grad - true<=>read "g" (gradient) false <=>read "d" (domain)
+	 * \see #ibex::ExprLabel
+	 */
+	void read_arg_domains(Array<Domain>& d, bool grad=false) const;
+
+	/**
+	 * \brief Initialize a box from symbols domains
+	 *
+	 * \param grad - true<=>read "g" (gradient) false <=>read "d" (domain)
+	 * \see #ibex::ExprLabel
+	 */
+	void read_arg_domains(IntervalVector& box, bool grad=false) const;
+	// =============================================================================
+
+
+	// =========================== Overriding Fnc interface ========================
+	/** \brief Override */
+	virtual Interval eval(const IntervalVector& box) const;
+
+	/** \brief Override */
+	virtual IntervalVector eval_vector(const IntervalVector& box) const;
+
+	/** \brief Override */
+	virtual IntervalMatrix eval_matrix(const IntervalVector& x) const;
+
+	/** \brief Override */
+	virtual void gradient(const IntervalVector& x, IntervalVector& g) const;
+
+	/** \brief Override */
+	virtual void jacobian(const IntervalVector& x, IntervalMatrix& J) const;
+	// =============================================================================
 
 	/**
 	 * \brief Calculate f(box) using interval arithmetic.
@@ -272,13 +634,6 @@ public:
 	Domain& eval_affine2_domain(const IntervalVector& box, Affine2Domain& result) const;
 
 	/**
-	 * \brief Calculate f(box) using interval arithmetic.
-	 *
-	 * \pre f must be real-valued
-	 */
-	Interval eval(const IntervalVector& box) const;
-
-	/**
 	 * \brief Calculate f(box) using affine arithmetic.
 	 *
 	 */
@@ -290,13 +645,6 @@ public:
 	 * The resulting affine form is stored in \a affine.
 	 */
 	Interval eval_affine2(const IntervalVector& box, Affine2& result) const;
-
-	/**
-	 * \brief Calculate f(box) using interval arithmetic.
-	 *
-	 * \pre f must be vector-valued
-	 */
-	IntervalVector eval_vector(const IntervalVector& box) const;
 
 	/**
 	 * \brief Calculate f(box) using affine arithmetic.
@@ -314,13 +662,6 @@ public:
 	IntervalVector eval_affine2_vector(const IntervalVector& box, Affine2Vector& affine) const;
 
 	/**
-	 * \brief Calculate f(x) using interval arithmetic.
-	 *
-	 * \pre f must be matrix-valued
-	 */
-	IntervalMatrix eval_matrix(const IntervalVector& x) const;
-
-	/**
 	 * \brief Calculate f(box) using affine arithmetic.
 	 *
 	 * \pre f must be matrix-valued
@@ -334,44 +675,6 @@ public:
 	 * \pre f must be matrix-valued
 	 */
 	IntervalMatrix eval_affine2_matrix(const IntervalVector& box, Affine2Matrix& affine) const;
-
-	/**
-	 * \brief Calculate the gradient of f.
-	 * \pre f must be real-valued
-	 */
-	IntervalVector gradient(const IntervalVector& x) const;
-
-	/**
-	 * \brief Calculate the gradient of f.
-	 *
-	 * \param x - the input box
-	 * \param g - where the gradient has to be stored (output parameter).
-	 *
-	 * \pre f must be real-valued
-	 */
-	void gradient(const IntervalVector& x, IntervalVector& g) const;
-
-	/**
-	 * \brief Calculate the Jacobian matrix of f
-	 * \pre f must be vector-valued
-	 */
-	IntervalMatrix jacobian(const IntervalVector& x) const;
-
-	/**
-	 * \brief Calculate the Jacobian matrix of f
-	 *
-	 * \param x - the input box
-	 * \param J - where the Jacobian matrix has to be stored (output parameter).
-	 *
-	 * \pre f must be vector-valued
-	 */
-	void jacobian(const IntervalVector& x, IntervalMatrix& J) const;
-
-	/**
-	 * \brief Calculate the Hansen matrix of f
-	 * \pre f must be vector-valued
-	 */
-	void hansen_matrix(const IntervalVector& x, IntervalMatrix& h) const;
 
 	/**
 	 * \brief Contract x w.r.t. f(x)=y.
@@ -417,8 +720,22 @@ public:
 	 */
 	void iproj(const Interval& y, IntervalVector& x, const IntervalVector& xin) const;
 
+	// ========== never understood why we have to do this in c++ =================
+	IntervalVector gradient(const IntervalVector& x) const;
+	IntervalMatrix jacobian(const IntervalVector& x) const;
+	void hansen_matrix(const IntervalVector& x, IntervalMatrix& h) const;
+	int nb_used_vars() const;
+	int used_var(int i) const;
+	// ============================================================================
 
 	CompiledFunction cf; // "public" just for debug
+
+	/**
+	 * \brief Name of the function.
+	 *
+	 * Null pointer if the function is anonymous.
+	 */
+	const char* name;
 
 	/*
 	 * \brief The domains of the arguments.
@@ -439,20 +756,31 @@ public:
 	 */
 	mutable Array<Affine2Domain> arg_af2;
 
-	/**
-	 * Number of used variables
-	 */
-	int nb_used_vars;
 
+protected:
 	/**
-	 * Array of used variables (indices in declaration order)
+	 * \brief Generate f[0], f[1], etc. (all stored in "comp")
 	 */
-	int* used_var;
+	void generate_comp();
 
+	/** \brief Override */
+	virtual void generate_used_vars() const;
+	/** \brief Override */
+	virtual void print(std::ostream& os) const;
+	/** \brief Override */
+	void print_expr(std::ostream& os) const;
 
 private:
+	/**
+	 * \brief True if all the arguments are scalar
+	 *
+	 * Useful for various code optimization.
+	 */
+	bool all_args_scalar() const;
 
-	void add_symbol(const ExprSymbol* x);
+	void build_from_string(const Array<const char*>& x, const char* y, const char* name=NULL);
+
+	Function& operator=(const Function&);       // forbidden
 
 	/*
 	 * \brief Apply default Decoration (and compile) the function.
@@ -460,171 +788,48 @@ private:
 	 * Declared "const" because the decoration is
 	 * not considered as part of the definition of the function.
 	 */
-	void decorate() const;
+	void decorate(const Array<const ExprSymbol>& x, const ExprNode& y) const;
 
-	void separate();
-
-	const ExprNode* root;                       // the root node
 	Array<const ExprSymbol> symbs;              // to retrieve symbol (node)s by appearing order.
 	std::vector<bool> is_used;                  // tells whether the i^th component is used.
-	std::vector<const ExprNode*> exprnodes;     // all the nodes
-	SymbolMap<const ExprSymbol*> id2info;       // to retrieve a symbol node from its name.
-	int key_count;                              // count the number of arguments
 
-	Function* comp;                             // the components. ==this if output_size()==1.
+	// only generated if required
+	Function** comp;                             // the components. ==this if output_size()==1.
 
 	bool __all_symbols_scalar;                  // true if all symbols are scalar
 
-	Function& operator=(const Function&);       // forbidden
+	// if at some point, symbolic differentiation is needed for this function,
+	// we store the resulting function for future usage.
+	Function* df;
 
-public:
-
-	/**
-	 * \brief Apply this function to the argument
-	 *
-	 * Works only if it is a unary function.
-	 */
-	const ExprApply& operator()(const ExprNode& arg1);
-
-	/**
-	 * \brief Apply this function to the arguments
-	 *
-	 * Works only if it is a binary function.
-	 */
-	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2);
-
-	/**
-	 * \brief Apply this function to the arguments
-	 *
-	 * Works only if it is a ternary function.
-	 */
-	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3);
-
-	/**
-	 * \brief Apply this function to the arguments
-	 */
-	const ExprApply& operator()(const ExprNode** arg);
-
-	/**
-	 * \brief Apply this function to the arguments
-	 */
-	const ExprApply& operator()(const std::vector<const ExprNode*>& arg);
-
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const ExprNode& arg1, const Interval& arg2);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const ExprNode& arg1, const IntervalVector& arg2);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const ExprNode& arg1, const IntervalMatrix& arg2);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const Interval& arg1, const ExprNode& arg2);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const IntervalVector& arg1, const ExprNode& arg2);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const IntervalMatrix& arg1, const ExprNode& arg2);
-
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const Interval& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const IntervalVector& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const ExprNode& arg1, const ExprNode& arg2, const IntervalMatrix& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const ExprNode& arg1, const Interval& arg2, const ExprNode& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const ExprNode& arg1, const Interval& arg2, const Interval& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const ExprNode& arg1, const Interval& arg2, const IntervalVector& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const ExprNode& arg1, const Interval& arg2, const IntervalMatrix& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const ExprNode& arg1, const IntervalVector& arg2, const ExprNode& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const ExprNode& arg1, const IntervalVector& arg2, const Interval& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const ExprNode& arg1, const IntervalVector& arg2, const IntervalVector& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const ExprNode& arg1, const IntervalVector& arg2, const IntervalMatrix& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const ExprNode& arg1, const IntervalMatrix& arg2, const ExprNode& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const ExprNode& arg1, const IntervalMatrix& arg2, const Interval& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const ExprNode& arg1, const IntervalMatrix& arg2, const IntervalVector& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const ExprNode& arg1, const IntervalMatrix& arg2, const IntervalMatrix& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const Interval& arg1, const ExprNode& arg2, const ExprNode& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const Interval& arg1, const ExprNode& arg2, const Interval& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const Interval& arg1, const ExprNode& arg2, const IntervalVector& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const Interval& arg1, const ExprNode& arg2, const IntervalMatrix& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const IntervalVector& arg1, const ExprNode& arg2, const ExprNode& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const IntervalVector& arg1, const ExprNode& arg2, const Interval& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const IntervalVector& arg1, const ExprNode& arg2, const IntervalVector& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const IntervalVector& arg1, const ExprNode& arg2, const IntervalMatrix& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const IntervalMatrix& arg1, const ExprNode& arg2, const ExprNode& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const IntervalMatrix& arg1, const ExprNode& arg2, const Interval& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const IntervalMatrix& arg1, const ExprNode& arg2, const IntervalVector& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const IntervalMatrix& arg1, const ExprNode& arg2, const IntervalMatrix& arg3);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const Interval& arg1, const Interval& arg3, const ExprNode& arg2);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const Interval& arg1, const IntervalVector& arg3, const ExprNode& arg2);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const Interval& arg1, const IntervalMatrix& arg3, const ExprNode& arg2);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const IntervalVector& arg1, const Interval& arg3, const ExprNode& arg2);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const IntervalVector& arg1, const IntervalVector& arg3, const ExprNode& arg2);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const IntervalVector& arg1, const IntervalMatrix& arg3, const ExprNode& arg2);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const IntervalMatrix& arg1, const Interval& arg3, const ExprNode& arg2);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const IntervalMatrix& arg1, const IntervalVector& arg3, const ExprNode& arg2);
-	/** \brief Apply the function to the arguments */
-	const ExprApply& operator()(const IntervalMatrix& arg1, const IntervalMatrix& arg3, const ExprNode& arg2);
+	// When the Jacobian matrix of the function is sparse, there may be a lot of
+	// zero functions appearing. To avoid memory blow-up, all the zero functions
+	// point to this field (instead of being a copy)
+	Function *zero;
 };
-
-std::ostream& operator<<(std::ostream&, const Function&);
 
 /*================================== inline implementations ========================================*/
 
-inline int Function::image_dim() const {
-	switch (expr().dim.type()) {
-	case Dim::SCALAR: return 1;
-	case Dim::ROW_VECTOR:
-	case Dim::COL_VECTOR: return expr().dim.vec_size();
-	case Dim::MATRIX: return expr().dim.dim2*expr().dim.dim3;
-	default: assert(false); return 0;
-	}
+inline const Function& Function::diff() const {
+	return *(df ? df : (((Function*&) df) = new Function(*this,DIFF)));
 }
 
 inline Function& Function::operator[](int i) {
-	return comp[i];
+	if (!comp) generate_comp();
+	return *comp[i];
 }
 
 inline Function& Function::operator[](int i) const {
-	return comp[i];
+	if (!comp) ((Function&) *this).generate_comp();
+	return *comp[i];
 }
 
 inline int Function::nb_arg() const {
-	return key_count;
+	return symbs.size();
 }
 
 inline bool Function::used(int i) const {
-	return (root!=NULL && is_used[i]);
+	return is_used[i];
 }
 
 inline const Array<const ExprSymbol>& Function::args() const {
@@ -640,15 +845,15 @@ inline const char* Function::arg_name(int i) const {
 }
 
 inline int Function::nb_nodes() const {
-	return exprnodes.size();
+	return cf.nodes.size();
 }
 
 inline const ExprNode& Function::node(int i) const {
-	return *exprnodes[i];
+	return cf.nodes[i];
 }
 
 inline const ExprNode& Function::expr() const {
-	return *root;
+	return cf.nodes[0];
 }
 
 template<class V>
@@ -663,6 +868,84 @@ inline void Function::backward(const V& algo) const {
 
 inline bool Function::all_args_scalar() const {
 	return __all_symbols_scalar;
+}
+
+inline void Function::write_arg_domains(const Array<Domain>& d, bool grad) const {
+	if (_nb_used_vars==-1) this->generate_used_vars();
+	load(grad? arg_deriv : arg_domains,d,nb_used_vars(),_used_var);
+}
+
+inline void Function::write_arg_domains(const Array<const Domain>& d, bool grad) const {
+	if (_nb_used_vars==-1) this->generate_used_vars();
+	load(grad? arg_deriv : arg_domains,d,nb_used_vars(),_used_var);
+}
+
+inline void Function::write_arg_domains(const IntervalVector& box, bool grad) const {
+	if (_nb_used_vars==-1) this->generate_used_vars();
+
+	if (all_args_scalar()) {
+		int j;
+		if (grad)
+			for (int i=0; i<nb_used_vars(); i++) {
+				j=used_var(i);
+				arg_deriv[j].i()=box[j];
+			}
+		else
+			for (int i=0; i<nb_used_vars(); i++) {
+				j=used_var(i);
+				arg_domains[j].i()=box[j];
+			}
+	}
+	else
+		load(grad? arg_deriv : arg_domains, box, nb_used_vars(), _used_var);
+}
+
+inline void Function::write_arg_af2_domains(const Array<Affine2Domain>& d) const {
+	if (_nb_used_vars==-1) this->generate_used_vars();
+	load(arg_af2,d,nb_used_vars(),_used_var);
+}
+
+inline void Function::write_arg_af2_domains(const Array<const Affine2Domain>& d) const {
+	if (_nb_used_vars==-1) this->generate_used_vars();
+	load(arg_af2,d,nb_used_vars(),_used_var);
+}
+
+inline void Function::write_arg_af2_domains(const IntervalVector& box) const {
+	if (_nb_used_vars==-1) this->generate_used_vars();
+	if (all_args_scalar()) {
+		int j;
+		for (int i=0; i<nb_used_vars(); i++) {
+			j=used_var(i);
+			arg_af2[j].i()=Affine2(nb_var(),j+1,box[j]);
+		}
+	}
+	else
+		load(arg_af2,Affine2Vector(box,true),nb_used_vars(),_used_var);
+}
+
+inline void Function::read_arg_domains(Array<Domain>& d, bool grad) const {
+	if (_nb_used_vars==-1) this->generate_used_vars();
+	load(d,grad? arg_deriv : arg_domains,nb_used_vars(),_used_var);
+}
+
+inline void Function::read_arg_domains(IntervalVector& box, bool grad) const {
+	if (_nb_used_vars==-1) this->generate_used_vars();
+	if (all_args_scalar()) {
+		int j;
+		if (grad)
+			for (int i=0; i<nb_used_vars(); i++) {
+				j=used_var(i);
+				box[j]=arg_deriv[j].i();
+			}
+		else
+			for (int i=0; i<nb_used_vars(); i++) {
+				j=used_var(i);
+				box[j]=arg_domains[j].i();
+			}
+	}
+	else {
+		load(box,grad? arg_deriv : arg_domains, nb_used_vars(), _used_var);
+	}
 }
 
 inline Interval Function::eval(const IntervalVector& box) const {
@@ -694,6 +977,9 @@ inline IntervalMatrix Function::eval_matrix(const IntervalVector& box) const {
 	}
 }
 
+inline void Function::print_expr(std::ostream& os) const {
+	os << expr();
+}
 
 inline void Function::backward(const Interval& y, IntervalVector& x) const {
 	backward(Domain((Interval&) y),x); // y will not be modified
@@ -716,17 +1002,27 @@ inline void Function::iproj(const Interval& y, IntervalVector& x, const Interval
 	iproj(Domain((Interval&) y),x,xin);
 }
 
+// ========== never understood why we have to do this in c++ =================
 inline IntervalVector Function::gradient(const IntervalVector& x) const {
-	IntervalVector g(x.size());
-	gradient(x,g);
-	return g;
+	return Fnc::gradient(x);
 }
 
 inline IntervalMatrix Function::jacobian(const IntervalVector& x) const {
-	IntervalMatrix J(image_dim(),x.size());
-	jacobian(x,J);
-	return J;
+	return Fnc::jacobian(x);
 }
 
+inline void Function::hansen_matrix(const IntervalVector& x, IntervalMatrix& h) const {
+	Fnc::hansen_matrix(x,h);
+}
+
+inline int Function::nb_used_vars() const {
+	return Fnc::nb_used_vars();
+}
+
+inline int Function::used_var(int i) const {
+	return Fnc::used_var(i);
+}
+// ============================================================================
+
 } // namespace ibex
-#endif // _IBEX_FUNCTION_H_
+#endif // __IBEX_FUNCTION_H__

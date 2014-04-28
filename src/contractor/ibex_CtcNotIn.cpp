@@ -13,9 +13,8 @@
 
 namespace ibex {
 
-CtcNotIn::CtcNotIn(Function& f, const Interval& y) :
-		Ctc(f.nb_var()), f(f), d1(Dim()), d2(Dim()) {
-
+CtcNotIn::CtcNotIn(Function& f, const Interval& y) : f(f), d1(Dim()), d2(Dim()) {
+	assert(f.expr().dim.is_scalar());
 	d1.i()=Interval(NEG_INFINITY,y.lb());
 	d2.i()=Interval(y.ub(),POS_INFINITY);
 }
@@ -26,16 +25,17 @@ void CtcNotIn::contract(IntervalVector& box) {
 	// it's simpler here to use direct computation, but
 	// we could also have used CtCunion of two CtcFwdBwd
 
+	IntervalVector savebox(box);
 	try {
-		IntervalVector savebox(box);
-
 		HC4Revise().proj(f,d1,box);
+	} catch (EmptyBoxException& ) {box.set_empty(); }
+	try {
 		HC4Revise().proj(f,d2,savebox);
-		box |= savebox;
-	} catch (EmptyBoxException& e) {
-		box.set_empty();
-		throw e;
-	}
+	} catch (EmptyBoxException& ) {savebox.set_empty(); }
+
+	box |= savebox;
+	if (box.is_empty()) throw EmptyBoxException();
+
 }
 
 } // end namespace ibex

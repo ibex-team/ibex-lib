@@ -33,6 +33,7 @@ IntervalVector::IntervalVector(int n1, const Interval& x) : n(n1), vec(new Inter
 }
 
 IntervalVector::IntervalVector(const IntervalVector& x) : n(x.n), vec(new Interval[x.n]) {
+	assert(x.vec!=NULL); // forbidden to copy uninitialized boxes
 	for (int i=0; i<n; i++) vec[i]=x[i];
 }
 
@@ -329,7 +330,8 @@ std::ostream&   operator<<(std::ostream& os, const IntervalVector& x)           
 double          IntervalVector::volume() const                                    { return _volume(*this); }
 double          IntervalVector::perimeter() const                                 { return _perimeter(*this); }
 double          IntervalVector::rel_distance(const IntervalVector& x) const       { return _rel_distance(*this,x); }
-Vector          IntervalVector::random() const                                    { return _random<IntervalVector,Interval>(*this); }
+Vector          IntervalVector::random(int seed) const                            { return _random<IntervalVector,Interval>(*this,seed); }
+Vector          IntervalVector::random() const                            		  { return _random<IntervalVector,Interval>(*this); }
 std::pair<IntervalVector,IntervalVector> IntervalVector::bisect(int i, double ratio) const  { return _bisect(*this, i, ratio); }
 
 

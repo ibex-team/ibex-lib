@@ -18,6 +18,10 @@
 
 namespace ibex {
 
+/**
+ * \defgroup strategy Strategies
+ */
+
 /** \ingroup strategy
  *
  * \brief Representation of the search space.
@@ -105,7 +109,6 @@ public:
 	 * \brief The box
 	 */
 	IntervalVector box;
-
 	/**
 	 * \brief Other data.
 	 */

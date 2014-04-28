@@ -7,7 +7,7 @@ from distutils.version import LooseVersion
 from waflib import Logs, Scripting
 
 # the following two variables are used by the target "waf dist"
-VERSION="2.0.0alpha"
+VERSION="2.0.10alpha"
 APPNAME='ibex-lib'
 
 top = '.'
@@ -32,6 +32,9 @@ def options (opt):
 
 	opt.add_option ("--with-debug",  action="store_true", dest="DEBUG",
 			help = "enable debugging")
+	
+	opt.add_option ("--with-ampl", action="store_true", dest="WITH_AMPL",
+			help = "do not use AMPL")
 
 	opt.add_option ("--with-gaol",   action="store", type="string", dest="GAOL_PATH",
 			help = "location of the Gaol lib")
@@ -39,9 +42,14 @@ def options (opt):
 			help = "location of the Profil/Bias lib")
 	opt.add_option ("--with-filib",   action="store", type="string", dest="FILIB_PATH",
 			help = "location of the filib lib")
+	
 	opt.add_option ("--with-soplex", action="store", type="string", dest="SOPLEX_PATH",
-			help = "location of the Soplex lib")
-
+			help = "location of Soplex")
+	opt.add_option ("--with-cplex", action="store", type="string", dest="CPLEX_PATH",
+			help = "location of Cplex")
+	opt.add_option ("--with-clp", action="store", type="string", dest="CLP_PATH",
+			help = "location of Clp solver")
+	
 	opt.add_option ("--with-jni", action="store_true", dest="WITH_JNI",
 			help = "enable the compilation of the JNI adapter (note: your JAVA_HOME environment variable must be properly set if you want to use this option)")
 	opt.add_option ("--with-java-package", action="store", type="string", dest="JAVA_PACKAGE",
@@ -71,13 +79,18 @@ def configure (conf):
 	env = conf.env
 	conf.load ('compiler_cxx compiler_cc bison')
 	conf.load ('flex', '.')
-
+	
+	conf.env.LIBDIR = conf.env['PREFIX'] + '/lib'
 
 	env.VERSION = VERSION
 
+	# GAOL cannot be built on 64-bit cpu
+	if conf.options.GAOL_PATH is not None:
+		switch_to_32bits()
+
 	# optimised compilation flags
 	if conf.options.DEBUG:
-		flags = "-O0 -g -pg -Wall -Wno-unknown-pragmas -fmessage-length=0"
+		flags = "-O0 -g -pg -Wall -Wno-unknown-pragmas -Wno-unused-variable -fmessage-length=0"
 	else:
 		flags = "-O3 -Wno-deprecated"
 		conf.define ("NDEBUG", 1)
@@ -112,35 +125,16 @@ def configure (conf):
 
 		return os.path.abspath (os.path.expanduser (path)) if path else find_lib (prefix)
 
-	# Soplex lib
-	path = candidate_lib_path ("SOPLEX_PATH", "soplex-")
-	if path:
-		conf.msg ("Candidate directory for lib Soplex", path)
-
-		env.append_unique ("INCLUDES",  os.path.join (path, "src"))
-
-		conf.check_cxx (header_name	= "soplex.h")
-
-		# Try without and with -lz (soplex may be built without zlib)
-		for l in ("soplex", ["soplex", "z"]):
-			if (conf.check_cxx (lib = l, uselib_store = "IBEX_DEPS",
-					libpath = [os.path.join (path, "lib")],
-					mandatory = False,
-					fragment = """
-						#include <soplex.h>
-						int main (int argc, char* argv[]) {
-							soplex::SPxLP lp;
-							lp.read(std::cin);
-							return 0;
-						}
-					""")):
-				break
-		else:
-			conf.fatal ("cannot link with the Soplex library")
-	else:
-		conf.fatal ("cannot find the Soplex library, please use --with-soplex=SOPLEX_PATH")
-
-
+	##################################################################################################
+	# AMPL is disable on Window
+	if env.DEST_OS == "win32":
+		if (conf.options.WITH_AMPL):
+			Logs.pprint ("YELLOW", "Warning: AMPL is not supported on win32")
+		conf.env.WITH_AMPL =False 
+	elif (conf.options.WITH_AMPL):
+		conf.env.WITH_AMPL =True 
+		
+	##################################################################################################
 	# JNI
 	env.WITH_JNI = conf.options.WITH_JNI
 	if env.WITH_JNI:
@@ -160,13 +154,22 @@ def configure (conf):
 
 		conf.env.JAVA_PACKAGE = conf.options.JAVA_PACKAGE
 
+		if env.DEST_OS == "win32":
+			# fix name-mangling for linking with the JVM on windows
+			#   http://permalink.gmane.org/gmane.comp.gnu.mingw.user/6782
+			#   http://stackoverflow.com/questions/8063842/mingw32-g-and-stdcall-suffix1
+			env.append_unique ("LINKFLAGS_JAVA", "-Wl,--kill-at")
+			
+	##################################################################################################
 	# Bison / Flex
 	env.append_unique ("BISONFLAGS", ["--name-prefix=ibex", "--report=all", "--file-prefix=parser"])
 	env.append_unique ("FLEXFLAGS", "-Pibex")
 
+	##################################################################################################
 	conf.env.append_unique ("LIBPATH", ["3rd", "src"])
 	conf.recurse ("3rd src")
-
+	
+##################################################################################################
 def build (bld):
 	bld.recurse ("src examples 3rd")
 

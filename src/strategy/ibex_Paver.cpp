@@ -17,7 +17,7 @@ using namespace std;
 namespace ibex {
 
 Paver::Paver(const Array<Ctc>& c, Bsc& b, CellBuffer& buffer) :
-		capacity(-1), ctc_loop(true), ctc(c), bsc(bsc), buffer(buffer) {
+		capacity(-1), ctc_loop(true), ctc(c), bsc(b), buffer(buffer) {
 
 	assert(ctc.size()>0);
 }
@@ -37,7 +37,7 @@ void Paver::contract(Cell& cell, SubPaving* paving) {
 	IntervalVector tmpbox(cell.box.size());
 
 	try {
-		while (fix_count<n) {
+		while (fix_count<n && i<ctc.size()) {
 
 			//cout << "[contractor " << i << "] box=" << endl;
 
@@ -62,7 +62,7 @@ void Paver::contract(Cell& cell, SubPaving* paving) {
 				if (trace) cout << " -> nothing" << endl;
 			}
 
-			i = (i+1)%ctc.size();
+			i = ctc_loop? (i+1)%ctc.size() : i+1;
 
 		}
 	} catch(EmptyBoxException&) {
@@ -97,7 +97,7 @@ SubPaving* Paver::pave(const IntervalVector& init_box) {
 //		ctc[i].init_root(*root);
 //	}
 	// add data required by the bisector
-	bsc.init_root(*root);
+	bsc.add_backtrackable(*root);
 
 	buffer.push(root);
 

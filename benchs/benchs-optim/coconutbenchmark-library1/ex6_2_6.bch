@@ -1,5 +1,5 @@
 constants
-eps=1.e-8;
+ 
 
 variables
 x2 in [1.e-6,1];
@@ -29,7 +29,7 @@ x4) - 5.7409*x3*ln(5.31147575751424*x2 + 5.7409*x3 +
 constraints
 
 
-x2 + x3 + x4 - 1 >= -eps;
-x2 + x3 + x4 - 1 <= eps;
+x2 + x3 + x4 - 1 =0;
+
 
 end

@@ -1,0 +1,19 @@
+constants
+pi = 3.14159;
+
+variables
+
+x1 in [-32,32];
+x2 in [-32,32];
+x3 in [-32,32];
+x4 in [-32,32];
+x5 in [-32,32];
+
+minimize
+
+-20 * exp (-0.2 * sqrt (0.2 * (x1^2 + x2 ^2 + x3^2 + x4^2 + x5 ^2))) - exp (0.2 * (cos (2*pi*x1) + cos (2*pi*x2) +cos (2*pi*x3) 
++ cos (2*pi*x4) + cos (2*pi*x5))) + 20 + 2.718281;
+
+constraints
+x1 <= 500;
+end

@@ -69,6 +69,8 @@ public:
 
 		TEST_ADD(TestIntervalMatrix::mul01);
 		TEST_ADD(TestIntervalMatrix::mul02);
+
+		TEST_ADD(TestIntervalMatrix::put01);
 	}
 
 	// test:
@@ -161,6 +163,8 @@ public:
 	//  operator*=(const IntervalMatrix& x)
 	void mul01();
 	void mul02();
+
+	void put01();
 };
 
 #endif // __TEST_INTERVAL_MATRIX_H__

@@ -13,6 +13,8 @@
 #include <stdlib.h>
 #include <cassert>
 
+using namespace std;
+
 namespace ibex {
 
 namespace {
@@ -71,7 +73,7 @@ Interval eval(const Interval& x, const Interval& y, int op) {
     case ADD: return x+y;
     case SUB: return x-y;
     case MUL: return x*y;
-    default: return x/y;
+    default:  return x/y;
   }
 }
 
@@ -80,10 +82,8 @@ double projx(double z, double y, int op, bool round_up) {
   switch(op) {
     case ADD: return z-y;
     case SUB: return z+y;
-    case MUL:
-
-    	return (y==0)? POS_INFINITY:z/y;
-    default: return z*y;
+    case MUL: return (y==0)? POS_INFINITY:z/y;
+    default:  return z*y;
   }
   //fpu_round_near(); // unreachable!
 }
@@ -202,12 +202,18 @@ bool iproj_cmp_mono_op(bool geq, double z, Interval& x, Interval& y, const Inter
 
 
 	if ((inc_var1 && xmin > x.ub()) || (!inc_var1 && xmax < x.lb())) {
-		assert(!inflate);
+		// this may happen including with inflate mode.
+		// e.g.: x=<1,1>, y=[0,eps] and z=1. then xmax<1.
+		if (!inc_var1) fpu_round_up(); // default mode. TODO: valid for gaol and... ?
+				if (inflate) {x=xin; y=yin; return true;}
+		else {
 		x.set_empty();
 		y.set_empty();
+		return false;
+		}
 		//cout << "  result: x=" << x << " y=" << y << endl;
 		//cout << "----------------------------------------------------------" << endl;
-		return false;
+		//return false;
 	} else if((inc_var1 && xmax < x.lb()) || (!inc_var1 && xmin > x.ub())) {
 		// all the box is inner
 		x0=(inc_var1)? x.lb():x.ub();
@@ -216,6 +222,12 @@ bool iproj_cmp_mono_op(bool geq, double z, Interval& x, Interval& y, const Inter
 		if (inflate) {
 			if (inc_var1) { if (xmax>xin.lb()) xmax=xin.lb(); }
 			else          { if (xmin<xin.ub()) xmin=xin.ub(); }
+			if (xmin>xmax) {
+				if (!inc_var1) fpu_round_up(); // default mode. TODO: valid for gaol and... ?
+				x=xin;
+				y=yin;
+				return true;
+			}
 		}
 		//cout << "  xmin=" << xmin << " xmax=" << xmax << endl;
 		Interval xx= x & Interval(xmin,xmax);
@@ -235,6 +247,8 @@ bool iproj_cmp_mono_op(bool geq, double z, Interval& x, Interval& y, const Inter
 	}
 
 	x = (inc_var1)? Interval(x0,x.ub()):Interval(x.lb(),x0);
+
+	if (!inc_var1 || !inc_var2) fpu_round_up(); // default mode. TODO: valid for gaol and... ?
 	// [gch] if op==MUL and z=0 we have y=[0,0]
 	// and x=[x^-,x0] (or x=[x0,x^+]) which is correct in both
 	// case although we could take x entirely in this case.
@@ -327,8 +341,33 @@ bool iproj_leq_mul(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 		return true;
 	}
 
-	else { // z_sup<=0
+	else if (z_sup==0) {
 
+		if (x.lb()>0 || (inflate && xin.lb()>0))
+			return !(y&=Interval::NEG_REALS).is_empty();
+		else if (x.ub()<0 || (inflate && xin.ub()<0))
+			return !(y&=Interval::POS_REALS).is_empty();
+		else if (y.lb()>0 || (inflate && yin.lb()>0))
+			return !(x&=Interval::NEG_REALS).is_empty();
+		else if (y.ub()<0 || (inflate && yin.ub()<0))
+			return !(x&=Interval::POS_REALS).is_empty();
+		else {
+			if (inflate) {
+				if (xin.lb()<0 || xin.ub()>0) // xin<>0
+					return !(y&=Interval::ZERO).is_empty();
+				else if (yin.lb()<0 || yin.ub()>0) // yin<>0
+					return !(x&=Interval::ZERO).is_empty();
+			}
+
+			// (x,y) strictly contains 0, and either inflate==false or (xin,yin)==(0,0)
+			// chose to fix to 0 the interval with minimal diameter
+			if (!x.is_unbounded() && (y.is_unbounded() || x.diam()<y.diam()))
+				return !(x&=Interval::ZERO).is_empty();
+			else
+				return !(y&=Interval::ZERO).is_empty();
+		}
+
+	} else { // z_sup<=0
 		if (inflate) {
 			// in this case, we directly know in which quadrant
 			// an inner box has to be found
@@ -336,15 +375,11 @@ bool iproj_leq_mul(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 				assert(yin.ub()<=0);
 				x &= Interval::POS_REALS;
 				y &= Interval::NEG_REALS;
-				if (z_sup==0) return true;
 				// note: we know x.ub()>0 && y.lb()<0
 				assert(yin.lb()<0);
 				return iproj_cmp_mono_op(false, z_sup, x, y, xin, yin, MUL, false, true);
-			} else if (xin.ub()>0) {
-				assert(yin==Interval::ZERO);
-				assert(z_sup==0);
-				return !(y&=Interval::ZERO).is_empty();
 			} else {
+				assert(xin.ub()<=0); // => because xin.ub()>0 => z_sup=0.
 				assert(yin.lb()>=0);
 				x &= Interval::NEG_REALS;
 				y &= Interval::POS_REALS;
@@ -616,11 +651,13 @@ bool iproj_sqr(const Interval& y, Interval& x, const Interval& xin) {
 }
 
 bool iproj_pow(const Interval& y, Interval& x, int p, const Interval &xin) {
-	//   cout << "[sqr] xin=" << xin << " x=" << x << " y=" << y << endl;
+	//   //cout << "[sqr] xin=" << xin << " x=" << x << " y=" << y << endl;
 	// Interval xini(X);
 	bool inflate=!xin.is_empty();
 	assert(xin.is_subset(x));
 	assert(!inflate || (p==2 && sqr(xin).is_subset(y)) || (p!=2 && pow(xin,p).is_subset(y)));
+
+        if (pow(x,p).is_subset(y)) return true;
 
 	/* volatile */double lo=p==2? UP(sqrt,y.lb()) : UP_root(y.lb(), p);
 	/* volatile */double up=p==2? LO(sqrt,y.ub()) : LO_root(y.ub(), p);
@@ -643,6 +680,8 @@ bool iproj_pow(const Interval& y, Interval& x, int p, const Interval &xin) {
 					return true;
 				}
 				else {
+					// First alternative: choose randomly a side
+					// ============================================================
 					Interval xtmp=x;
 					bool q=(rand()%2==1); // q==1 : we first consider x>0.
 
@@ -651,6 +690,16 @@ bool iproj_pow(const Interval& y, Interval& x, int p, const Interval &xin) {
 
 					x = xtmp & (q? Interval(-up,-lo) : Interval(lo,up));
 					return !x.is_empty();
+					// ============================================================
+
+
+					// second alternative: choose the side with maximal interval
+					// ============================================================
+//					Interval xtmp =x & Interval(lo,up);
+//					x &= Interval(-up,-lo);
+//					if (xtmp.diam()>x.diam()) x=xtmp;
+//					return !x.is_empty();
+					// ============================================================
 				}
 			}
 			else {

@@ -1,0 +1,6 @@
+variables
+
+x1 in [-6,6];
+x2 in [-6,6];
+
+minimize (x1^2 + x2 -11)^2 + (x1+ x2^2 -7)^2 

@@ -12,10 +12,6 @@
 
 namespace ibex {
 
-Pdc::Pdc(int n) : nb_var(n) {
-
-}
-
 Pdc::~Pdc() {
 }
 

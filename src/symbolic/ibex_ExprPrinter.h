@@ -38,6 +38,7 @@ protected:
 	void visit(const ExprConstant& e);
 	void visit(const ExprVector& e);
 	void visit(const ExprApply& a);
+	void visit(const ExprChi& a);
 	void visit(const ExprAdd& e);
 	void visit(const ExprMul& e);
 	void visit(const ExprSub& e);

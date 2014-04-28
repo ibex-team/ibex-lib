@@ -16,18 +16,18 @@ using namespace std;
 namespace ibex {
 
 double  CtcAcid::nbvarstat=0;
-  //const double CtcAcid::default_ctratio=0.005;
+//const double CtcAcid::default_ctratio=0.005;
 const double CtcAcid::default_ctratio=0.002;
 
 CtcAcid::CtcAcid(const System& sys, const BoolMask& cid_vars, Ctc& ctc, bool optim, int s3b, int scid,
-		double var_min_width, double ct_ratio): Ctc3BCid (cid_vars,ctc,s3b,scid,cid_vars.nb_set(),var_min_width),
-							system(sys), nbcalls(0), nbctvar(0), ctratio(ct_ratio),  nbcidvar(0), nbtuning(0), optim(optim)  {
-// [gch] BNE check the argument "cid_vars.nb_set()" given to _3BCID
+		double var_min_width, double ct_ratio): Ctc3BCid (sys.nb_var, cid_vars,ctc,s3b,scid,cid_vars.nb_set(),var_min_width),
+		system(sys), nbcalls(0), nbctvar(0), ctratio(ct_ratio),  nbcidvar(0), nbtuning(0), optim(optim)  {
+	// [gch] BNE check the argument "cid_vars.nb_set()" given to _3BCID
 }
 
 CtcAcid::CtcAcid(const System& sys,  Ctc& ctc, bool optim, int s3b, int scid,
-		 double var_min_width, double ct_ratio): Ctc3BCid (BoolMask(sys.nb_var,1),ctc,s3b,scid,sys.nb_var,var_min_width),
-							system(sys), optim(optim), nbcalls(0), nbctvar(0), nbcidvar(0) ,  nbtuning(0), ctratio(ct_ratio) {
+		double var_min_width, double ct_ratio): Ctc3BCid (sys.nb_var, BoolMask(sys.nb_var,1),ctc,s3b,scid,sys.nb_var,var_min_width),
+		system(sys), nbcalls(0), nbctvar(0), ctratio(ct_ratio), nbcidvar(0) ,  nbtuning(0), optim(optim) {
 }
 
 void CtcAcid::contract(IntervalVector& box) {
@@ -46,44 +46,44 @@ void CtcAcid::contract(IntervalVector& box) {
 	if (nbcall1 < nbinitcalls) {                       // réglage
 
 
-	  if (nbcalls < nbinitcalls) vhandled =nb_CID_var;     // premier réglage 3BCID une fois sur toutes les variables
-	  else	vhandled = 2* nbcidvar;                       //  réglages suivants : sur 2 fois le réglage précédent
-	  
-	  if (vhandled< 2) vhandled= 2;                  // réglage minimum  à 2
+		if (nbcalls < nbinitcalls) vhandled =nb_CID_var;     // premier réglage 3BCID une fois sur toutes les variables
+		else	vhandled = 2* nbcidvar;                       //  réglages suivants : sur 2 fois le réglage précédent
 
-	  for (int i =0; i< nbvarmax; i++)               // initialisation du tableau des gains:
-	    ctstat[i]=0;                               // ctstat[i] gain moyen dû à l'appel de varcid sur la variable i
+		if (vhandled< 2) vhandled= 2;                  // réglage minimum  à 2
+
+		for (int i =0; i< nbvarmax; i++)               // initialisation du tableau des gains:
+			ctstat[i]=0;                               // ctstat[i] gain moyen dû à l'appel de varcid sur la variable i
 	}
 	else
-	  vhandled = nbcidvar;                           // en dehors du réglage , on prend nbcidvar   ( la valeur réglée)
+		vhandled = nbcidvar;                           // en dehors du réglage , on prend nbcidvar   ( la valeur réglée)
 
 	if (vhandled > nbvarmax) vhandled=nbvarmax;        // pour rester raisonnable et dans les limites du tableau ctstat
 
 	if (vhandled > 0) compute_smearorder(box);         // l'ordre sur les variables est calculé avec la smearsumrel
 	if (optim) putobjfirst();                         // pour l'optim (si optim mis à true dans le constructeur, la dernière variable (objectf) est mise en premier
 	for (int v=0; v<vhandled; v++) {
-	  int v1=v%nb_CID_var;                               // [gch] how can v be < nb_var?? [bne]  vhandled can be between 0 and nbvarmax
-	  int v2=smearorder[v1];
-	  impact.set(v2);
-	  var3BCID(box, v2);                             // appel 3BCID sur la variable v2
-	  impact.unset(v2); 
-	  if(box.is_empty())
-	    throw EmptyBoxException();
-	  if (nbcall1 < nbinitcalls) {                   // on fait des stats pour le réglage courant
-	    for (int i=0; i<initbox.size(); i++)
-	      {//cout << i << " initbox " << initbox[i].diam() << " box " << box[i].diam() << endl;
-		if  (initbox[i].diam() !=0 && box[i].diam()!= POS_INFINITY)
-		  // gain sur la ième dimension de la boîte courante après var3BCID sur la v-ième variable
-		  ctstat[v] += 1  - box[i].diam() / initbox[i].diam();}
-	    ctstat[v]=ctstat[v]/ initbox.size();   // gain moyen
-	  }
-	  
-	  initbox=box;
+		int v1=v%nb_CID_var;                               // [gch] how can v be < nb_var?? [bne]  vhandled can be between 0 and nbvarmax
+		int v2=smearorder[v1];
+		impact.set(v2);
+		var3BCID(box, v2);                             // appel 3BCID sur la variable v2
+		impact.unset(v2);
+		if(box.is_empty())
+			throw EmptyBoxException();
+		if (nbcall1 < nbinitcalls) {                   // on fait des stats pour le réglage courant
+			for (int i=0; i<initbox.size(); i++)
+			{//cout << i << " initbox " << initbox[i].diam() << " box " << box[i].diam() << endl;
+				if  (initbox[i].diam() !=0 && box[i].diam()!= POS_INFINITY)
+					// gain sur la ième dimension de la boîte courante après var3BCID sur la v-ième variable
+					ctstat[v] += 1  - box[i].diam() / initbox[i].diam();}
+			ctstat[v]=ctstat[v]/ initbox.size();   // gain moyen
+		}
+
+		initbox=box;
 	}
 
-        int nvar=0;
+	int nvar=0;
 
-        nbcalls++;
+	nbcalls++;
 	nbcall1++;
 	// pendant la phase de réglage
 	if (nbcall1 <= nbinitcalls) {
@@ -106,12 +106,12 @@ void CtcAcid::contract(IntervalVector& box) {
 	delete [] ctstat;
 }
 
-  // en optim, l'objectif est placé en 1er
-void CtcAcid::putobjfirst()
-  {   	vector <int>::iterator result = find(smearorder.begin(), smearorder.end(), nb_var-1);
-    smearorder.erase(result);
-    smearorder.insert(smearorder.begin(),nb_var-1);
-      }
+// en optim, l'objectif est placé en 1er
+void CtcAcid::putobjfirst() {
+	vector <int>::iterator result = find(smearorder.begin(), smearorder.end(), nb_var-1);
+	smearorder.erase(result);
+	smearorder.insert(smearorder.begin(),nb_var-1);
+}
 
 
 void CtcAcid::compute_smearorder(IntervalVector& box) {
@@ -144,15 +144,15 @@ void CtcAcid::compute_smearorder(IntervalVector& box) {
 	for (int i=0; i<nb_ctr; i++) {
 		ctrjsum[i]=0;
 		for (int j=0; j<nb_var ; j++) {
-		  // [bne]  in case of infinite derivatives , natural ordering
-		  if (J[i][j].mag()==POS_INFINITY || box[j].diam()==POS_INFINITY)
-		    {for (int i1=0;i1 < nb_var; i1++)
-		      smearorder.push_back(varorder2[i1]);
-		      delete [] sum_smear;
-		      delete [] ctrjsum;
-		      return;}
-		  if (cid_vars[j])                           // [gch] (only varCIDed variables considered?)
-		      ctrjsum[i]+= J[i][j].mag() * box[j].diam();
+			// [bne]  in case of infinite derivatives , natural ordering
+			if (J[i][j].mag()==POS_INFINITY || box[j].diam()==POS_INFINITY)
+			{for (int i1=0;i1 < nb_var; i1++)
+				smearorder.push_back(varorder2[i1]);
+			delete [] sum_smear;
+			delete [] ctrjsum;
+			return;}
+			if (cid_vars[j])                           // [gch] (only varCIDed variables considered?)
+				ctrjsum[i]+= J[i][j].mag() * box[j].diam();
 		}
 	}
 
@@ -162,23 +162,23 @@ void CtcAcid::compute_smearorder(IntervalVector& box) {
 		sum_smear[i]=0;
 		for (int j=0; j<nb_ctr; j++) {
 			if (ctrjsum[j]>1.e-5)
-			  {
+			{
 				sum_smear[i]+= J[j][i].mag() * box[i].diam()/ctrjsum[j] ; // formule smearsumrel
-                           
-			    // sum_smear[i]+= abs(J[j][i]) * box[i].diam();          // variante smearsum
-			  }
+
+				// sum_smear[i]+= abs(J[j][i]) * box[i].diam();          // variante smearsum
+			}
 		}
 	}
 	// tri des variables selon sum_smear :  resultat dans tableau smearorder
 	for ( int  i=0; i<nb_var; i++) {
 		if (!cid_vars[i]) continue;                    // [gch]
 		int k=0;
-		int k0=0;
+		//int k0=0;
 		double sz=0;
-		for (int k1=0; k1<varorder2.size(); k1++) {
+		for (int k1=0; (k1<(varorder2.size())); k1++) {
 			if (sum_smear[varorder2[k1]]>sz) {
 				k=k1;
-				k0=1;
+				//k0=1;
 				sz=sum_smear[varorder2[k1]];
 			}
 		}
@@ -188,9 +188,9 @@ void CtcAcid::compute_smearorder(IntervalVector& box) {
 	}
 	varorder2.clear();
 
-    delete [] sum_smear;
-    delete [] ctrjsum;
-	
+	delete [] sum_smear;
+	delete [] ctrjsum;
+
 	//	assert(smearorder.size()==vhandled);       // [gch]   [bne] assert suppression : vhandled can be > nb_variables
 }
 

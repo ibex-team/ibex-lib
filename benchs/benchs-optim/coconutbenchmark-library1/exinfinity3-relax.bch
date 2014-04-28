@@ -1,0 +1,12 @@
+
+variables
+x1 in [-oo,1.e8];
+x2 in [-1.e8,1.e8];
+
+
+
+minimize 12*x1^2  + 6*x2^2;
+
+constraints
+x1 >= -1.e8;
+end

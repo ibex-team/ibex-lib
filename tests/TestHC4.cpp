@@ -24,7 +24,9 @@ void TestHC4::ponts30() {
 	CtcFwdBwd* c[30];
 
 	for (int i=0; i<30; i++) {
-		ctr[i]=new NumConstraint((*p30.f)[i],EQ);
+		Function* fi=dynamic_cast<Function*>(&((*p30.f)[i]));
+		TEST_ASSERT(fi!=NULL);
+		ctr[i]=new NumConstraint(*fi,EQ);
 		c[i]=new CtcFwdBwd(*ctr[i]);
 	}
 //	cout << "before="<< box << endl;

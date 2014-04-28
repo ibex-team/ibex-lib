@@ -94,7 +94,6 @@ public:
 	 * \brief Set *this to its intersection with x
 	 *
 	 * \return a reference to this.
-	 * \throws
 	 */
 	IntervalMatrix& operator&=(const IntervalMatrix& x);
 
@@ -199,13 +198,61 @@ public:
 	 */
 	bool is_zero() const;
 
+
+	/**
+	 * \brief True iff this interval matrix is a subset of \a x.
+	 *
+	 * \pre Dimension of \a x must be equal to the dimension of this matrix.
+
+	 * \note Always return true if this interval matrix is empty.
+
+	 * \sa #ibex::Interval::is_subset(const Interval&) const.
+	 */
+	bool is_subset(const IntervalMatrix& x) const;
+
+	/**
+	 * \brief True iff this interval matrix is inside the interior of \a x.
+	 *
+	 * \pre Dimension of \a x must be equal to the dimension of this matrix.
+	 *
+	 * \note return true if this interval matrix is empty and \a x not.
+	 *
+	 * \sa #ibex::Interval::is_strict_subset(const Interval&) const.
+	 */
+	bool is_strict_subset(const IntervalMatrix& x) const;
+
+	/**
+	 * \brief True iff this interval matrix is a superset of \a x.
+	 *
+	 * \pre Dimension of \a x must be equal to the dimension of this matrix.
+
+	 * \note Always return true if \a x is empty.
+
+	 * \sa #ibex::Interval::is_superset(const Interval&) const.
+	 */
+	bool is_superset(const IntervalMatrix& x) const;
+
+	/**
+	 * \brief True iff \a x is inside the interior of (*this).
+	 *
+	 * \pre Dimension of \a x must be equal to the dimension of this matrix.
+	 *
+	 * \note return true if x is empty and not (*this).
+	 *
+	 * \sa #ibex::Interval::is_strict_superset(const Interval&) const.
+	 */
+	bool is_strict_superset(const IntervalMatrix& x) const;
+
+
 	/**
 	 * \brief Return a submatrix.
+	 * \pre (*this) must be nonempty
 	 */
-	IntervalMatrix submatrix(int row_start_index, int row_end_index, int col_start_index, int col_end_index);
+	IntervalMatrix submatrix(int row_start_index, int row_end_index, int col_start_index, int col_end_index) const;
 
 	/**
 	 * \brief Transpose of *this.
+	 * \pre (*this) must be nonempty
 	 */
 	IntervalMatrix transpose() const;
 
@@ -213,6 +260,7 @@ public:
 	 * \brief Return the ith row.
 
 	 * Equivalent to (*this)[i.
+	 * \pre (*this) must be nonempty
 	 */
 	IntervalVector& row(int i);
 
@@ -220,33 +268,73 @@ public:
 	 * \brief Return a const reference to the ith row.
 
 	 * Equivalent to (*this)[i.
+	 * \pre (*this) must be nonempty
 	 */
 	const IntervalVector& row(int i) const;
 
 	/**
 	 * \brief Return a column
+	 * \pre (*this) must be nonempty
 	 */
 	IntervalVector col(int i) const;
 
 	/**
 	 * \brief Return a subset of rows.
+	 * \pre (*this) must be nonempty
 	 */
 	IntervalMatrix rows(int start_index, int end_index);
 
 	/**
 	 * \brief Return a subset of columns.
+	 * \pre (*this) must be nonempty
 	 */
 	IntervalMatrix cols(int start_index, int end_index);
 
 	/**
 	 * \brief Set a row.
+	 * \pre (*this) must be nonempty
 	 */
 	void set_row(int row, const IntervalVector& v);
 
 	/**
 	 * \brief Set a column.
+	 * \pre (*this) must be nonempty
 	 */
 	void set_col(int col, const IntervalVector& v);
+
+	/**
+	 * \brief Insert a submatrix at some position
+	 * \pre (*this) must be nonempty
+	 */
+	void put(int row_start_index, int col_start_index, const Matrix& M);
+
+	/**
+	 * \brief Insert a submatrix at some position
+	 * \pre (*this) must be nonempty
+	 */
+	void put(int row_start_index, int col_start_index, const IntervalMatrix& M);
+
+	/**
+	 * \brief Insert a subvecvtor at some position
+	 * \param row_vec true if the vector is a row vector
+	 * \pre (*this) must be nonempty
+	 */
+	void put(int row_start_index, int col_start_index, const Vector& V, bool row_vec);
+
+	/**
+	 * \brief Insert a subvecvtor at some position
+	 * \param row_vec true if the vector is a row vector
+	 * \pre (*this) must be nonempty
+	 */
+	void put(int row_start_index, int col_start_index, const IntervalVector& V, bool row_vec);
+
+	/**
+	 * \brief Return a random matix inside *this.
+	 *
+	 * \pre (*this) must be nonempty.
+	 */
+	Matrix random(int seed) const;
+	Matrix random() const;
 
     /**
      * \brief (*this)+=m.
@@ -294,6 +382,11 @@ public:
      * \brief (*this)*=m.
      */
     IntervalMatrix& operator*=(const IntervalMatrix& m);
+
+    /**
+     * \brief Cast the matrix to an expression
+     */
+    operator const ExprConstant&() const;
 
 private:
 	friend class IntervalMatrixArray;
@@ -540,6 +633,14 @@ inline void IntervalMatrix::set_row(int row1, const IntervalVector& v1) {
 
 inline bool IntervalMatrix::is_empty() const {
 	return (*this)[0].is_empty();
+}
+
+inline bool IntervalMatrix::is_superset(const IntervalMatrix& x) const {
+	return x.is_subset(*this);
+}
+
+inline bool IntervalMatrix::is_strict_superset(const IntervalMatrix& x) const {
+	return x.is_strict_subset(*this);
 }
 
 } // namespace ibex

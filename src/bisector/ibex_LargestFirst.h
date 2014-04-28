@@ -23,36 +23,45 @@ namespace ibex {
  *
  */
 class LargestFirst : public Bsc {
- public:
-  /**
-   * \brief Create a bisector with largest first heuristic.
-   *
-   * \param ratio (optional) - the ratio between the diameters of the left and the right parts of the
-   *            bisected interval. Default value is 0.45.
-   */
-    LargestFirst( double ratio=Bsc::default_ratio);
+public:
 
- 
+	/**
+	 * \brief Create a bisector with largest first heuristic.
+	 *
+	 * \param prec             - see #Bsc::Bsc(double).
+	 * \param ratio (optional) - the ratio between the diameters of the left and the right parts of the
+	 *                           bisected interval. Default value is 0.45.
+	 */
+	LargestFirst(double prec, double ratio=Bsc::default_ratio);
 
-  /**
-   * \brief Bisect the largest box.
-   *
-   * called by Bsc::bisect 
-   */
-  virtual std::pair<IntervalVector,IntervalVector> bisect(const IntervalVector& box);
+	/**
+	 * \brief Create a bisector with largest first heuristic.
+	 *
+	 * \param prec             - see #Bsc::Bsc(double).
+	 * \param ratio (optional) - the ratio between the diameters of the left and the right parts of the
+	 *                           bisected interval. Default value is 0.45.
+	 */
+	LargestFirst(const Vector& prec, double ratio=Bsc::default_ratio);
+
+	/**
+	 * \brief Bisect the largest box.
+	 *
+	 * called by Bsc::bisect
+	 */
+	virtual std::pair<IntervalVector,IntervalVector> bisect(const IntervalVector& box);
 
 
 
-  /**
-   * \brief Ratio to chose the split point.
-   *
-   * Ratio between the diameters of the left and right parts of a bisected
-   * interval.
-   */
-  const double ratio;
+	/**
+	 * \brief Ratio to chose the split point.
+	 *
+	 * Ratio between the diameters of the left and right parts of a bisected
+	 * interval.
+	 */
+	const double ratio;
 
- 
-  };
+
+};
 
 } // end namespace ibex
 

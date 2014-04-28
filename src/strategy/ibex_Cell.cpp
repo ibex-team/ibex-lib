@@ -11,8 +11,7 @@
 #include "ibex_Cell.h"
 
 namespace ibex {
-
-Cell::Cell(const IntervalVector& box) : box(box) {
+ Cell::Cell(const IntervalVector& box) : box(box){
 
 }
 

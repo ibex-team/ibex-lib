@@ -12,13 +12,25 @@
 
 namespace ibex {
 
-CtcInteger::CtcInteger(int nb_var, const BoolMask& is_int) : Ctc(nb_var), is_int(is_int) {
+CtcInteger::~CtcInteger() {
+	delete input;
+	delete output;
+}
+
+CtcInteger::CtcInteger(int nb_var, const BoolMask& is_int) : is_int(is_int) {
+
+	input = new BoolMask(nb_var);
+	output = new BoolMask(nb_var);
+
 	for (int v=0; v<nb_var; v++)
-		output[v]=input[v]=is_int[v];
+		(*output)[v]=(*input)[v]=is_int[v];
 }
 
 void CtcInteger::contract(IntervalVector& box) {
-	for (int i=0; i<nb_var; i++) {
+
+	assert(box.size()==is_int.size());
+
+	for (int i=0; i<is_int.size(); i++) {
 		if (!is_int[i]) continue;
 		proj_integer(box[i]);
 		if (box[i].is_empty()) {
@@ -29,7 +41,10 @@ void CtcInteger::contract(IntervalVector& box) {
 }
 
 void CtcInteger::contract(IntervalVector& box, const BoolMask& impact) {
-	for (int i=0; i<nb_var; i++) {
+
+	assert(box.size()==is_int.size());
+
+	for (int i=0; i<is_int.size(); i++) {
 		if (is_int[i] && impact[i]) {
 			proj_integer(box[i]);
 			if (box[i].is_empty()) {

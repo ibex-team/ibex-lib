@@ -21,35 +21,54 @@ namespace ibex {
 /*! Default propagation ratio. */
 #define __IBEX_DEFAULT_RATIO_PROPAG           0.01
 
-CtcPropag::CtcPropag(const Array<Ctc>& cl, double ratio, bool incremental) :
-		  Ctc(cl[0].nb_var), list(cl), ratio(ratio), incremental(incremental),
-		  accumulate(false), g(cl.size(), cl[0].nb_var), agenda(cl.size()),
-		  all_vars(cl[0].nb_var) {
-
-	for (int i=1; i<list.size(); i++)
-		assert(list[i].nb_var==nb_var);
+CtcPropag::CtcPropag(int nb_var, const Array<Ctc>& cl, double ratio, bool incremental) :
+		  nb_var(nb_var), list(cl), ratio(ratio), incremental(incremental),
+		  accumulate(false), g(cl.size(), nb_var), agenda(cl.size()),
+		  _impact(nb_var), flags(Ctc::NB_OUTPUT_FLAGS), active(cl.size()) {
 
 	for (int i=0; i<list.size(); i++)
 		for (int j=0; j<nb_var; j++) {
-			if (list[i].input[j]) g.add_arc(i,j,true);
-			if (list[i].output[j]) g.add_arc(i,j,false);
+			if (list[i].input && (*list[i].input)[j]) g.add_arc(i,j,true);
+			if (list[i].input && (*list[i].output)[j]) g.add_arc(i,j,false);
 		}
 
-	all_vars.set_all();
 //	cout << g << endl;
 }
 
-void CtcPropag::contract(IntervalVector& box) {
-	contract(box,all_vars);
-}
+void  CtcPropag::contract(IntervalVector& box) {
 
-void  CtcPropag::contract(IntervalVector& box, const BoolMask& start) {
+	assert(box.size()==nb_var);
 
-	assert(start.size()==nb_var);
+	/*
+	 * When we call a contractor, we assume all
+	 * its variables have been impacted although there might be
+	 * only one of them impacted. In a future version, we may
+	 * consider a more fine propagation where the information
+	 * about the variables that are actually impacted is
+	 * given to the awaken contractor.
+	 */
+	_impact.set_all();
+
+	// By default, all contractors are active
+	active.set_all();
 
 	if (incremental) {
+		/**
+		 * impact() is the impact in input (given to CtcPropag).
+		 * Not to be confused with _impact.
+		 *
+		 * Note: when impact() is NULL, we can
+		 * also push all the contractors in a simple loop,
+		 * as in the "else" part below.
+		 * But the order in the agenda is different
+		 * and this one turns to be slightly more efficient.
+		 * Maybe we should do the same when incremental==false.
+		 */
+
+		assert(!impact() || (impact()->size()==nb_var));
+
 		for (int i=0; i<nb_var; i++) {
-			if (start[i]) {
+			if (!impact() || (*impact())[i]) {
 				set<int> ctrs=g.output_ctrs(i);
 				for (set<int>::iterator c=ctrs.begin(); c!=ctrs.end(); c++)
 					agenda.push(*c);
@@ -93,7 +112,10 @@ void  CtcPropag::contract(IntervalVector& box, const BoolMask& start) {
 		//cout << "Contraction with " << c << endl;
 
 		try {
-			list[c].contract(box);
+			list[c].contract(box, _impact, flags);
+			if (flags[INACTIVE]) {
+				active[c]=false;
+			}
 		}
 		catch (EmptyBoxException& e) {
 			agenda.flush();
@@ -112,7 +134,7 @@ void  CtcPropag::contract(IntervalVector& box, const BoolMask& start) {
 			if (old_box[v].ratiodelta(box[v])>=ratio) {
 				set<int> ctrs=g.output_ctrs(v);
 				for (set<int>::iterator c2=ctrs.begin(); c2!=ctrs.end(); c2++) {
-					if (c!=*c2 || !list[c].idempotent())
+					if ((c!=*c2 && active[*c2]) || (c==*c2 && !flags[FIXPOINT]))
 						agenda.push(*c2);
 				}
 				// ===================== coarse propagation =========================

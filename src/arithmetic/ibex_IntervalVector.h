@@ -456,6 +456,7 @@ public:
 	 *
 	 * \pre (*this) must be nonempty.
 	 */
+	Vector random(int seed) const;
 	Vector random() const;
 
 	/**
@@ -488,6 +489,11 @@ public:
 	 */
 	IntervalVector& operator*=(const Interval& x1);
 
+    /**
+     * \brief Cast the vector to an expression
+     */
+	operator const ExprConstant&() const;
+
 	IntervalVector() : n(0), vec(NULL) { } // for IntervalMatrix & complementary()
 
 private:
@@ -509,7 +515,7 @@ private:
  *
  * \pre Dimension of \a x1 and \a x2 must be equal.
  *
- * \sa #ibex::distance(const Interval&, const Interval&).
+ * \sa #ibex::distance(const ibex::Interval& x1, const ibex::Interval& x2).
  */
 double distance(const IntervalVector& x1, const IntervalVector& x2);
 
@@ -581,6 +587,30 @@ IntervalVector operator*(const Interval& x1, const Vector& x2);
 IntervalVector operator*(const Interval& x1, const IntervalVector& x2);
 
 /**
+ * \brief Hadamard product of x and y.
+ *
+ * The Hadamard product is a component-wise multiplication:
+ * z[i]=x[i]*y[i].
+ */
+IntervalVector hadamard_product(const IntervalVector& x, const Vector& y);
+
+/**
+ * \brief Hadamard product of x and y.
+ *
+ * The Hadamard product is a component-wise multiplication:
+ * z[i]=x[i]*y[i].
+ */
+IntervalVector hadamard_product(const Vector& x, const IntervalVector& y);
+
+/**
+ * \brief Hadamard product of x and y.
+ *
+ * The Hadamard product is a component-wise multiplication:
+ * z[i]=x[i]*y[i].
+ */
+IntervalVector hadamard_product(const IntervalVector& x, const IntervalVector& y);
+
+/**
  * \brief |x|.
  */
 IntervalVector abs(const IntervalVector& x);
@@ -618,10 +648,8 @@ bool proj_mul(const Interval& y, IntervalVector& x1, IntervalVector& x2);
  */
 std::ostream& operator<<(std::ostream& os, const IntervalVector& x);
 
-
 /**
  * \brief Cartesian product of x and y.
- *
  */
 IntervalVector cart_prod(const IntervalVector& x, const IntervalVector& y);
 

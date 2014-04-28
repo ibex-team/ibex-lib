@@ -32,20 +32,25 @@ HC4Revise::HC4Revise(FwdMode mode) : fwd_mode(mode) {
 
 #define EVAL(f,x) if (fwd_mode==INTERVAL_MODE) Eval().eval(f,x); else Affine2Eval().eval(f,x);
 
-void HC4Revise::proj(const Function& f, const Domain& y, IntervalVector& x) {
+bool HC4Revise::proj(const Function& f, const Domain& y, IntervalVector& x) {
 	EVAL(f,x);
-	*f.expr().deco.d &= y;
+
+	Domain& root=*f.expr().deco.d;
+	switch(y.dim.type()) {
+	case Dim::SCALAR:       if (root.i().is_subset(y.i())) return true; break;
+	case Dim::ROW_VECTOR:
+	case Dim::COL_VECTOR:   if (root.v().is_subset(y.v())) return true; break;
+	case Dim::MATRIX:       if (root.m().is_subset(y.m())) return true; break;
+	case Dim::MATRIX_ARRAY: assert(false); /* impossible */ break;
+	}
+
+	root &= y;
+
 	f.backward<HC4Revise>(*this);
 
-	if (f.all_args_scalar()) {
-		int j;
-		for (int i=0; i<f.nb_used_vars; i++) {
-			j=f.used_var[i];
-			x[j]=f.arg_domains[j].i();
-		}
-	}
-	else
-		load(x,f.arg_domains,f.nb_used_vars,f.used_var);
+	f.read_arg_domains(x);
+
+	return false;
 }
 
 void HC4Revise::proj(const Function& f, const Domain& y, ExprLabel** x) {
@@ -59,7 +64,7 @@ void HC4Revise::proj(const Function& f, const Domain& y, ExprLabel** x) {
 		argD.set_ref(i,*(x[i]->d));
 	}
 
-	load(argD,f.arg_domains,f.nb_used_vars,f.used_var);
+	f.read_arg_domains(argD);
 }
 
 void HC4Revise::vector_bwd(const ExprVector& v, ExprLabel** compL, const ExprLabel& y) {

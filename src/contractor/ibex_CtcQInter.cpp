@@ -14,12 +14,8 @@
 
 namespace ibex {
 
-CtcQInter::CtcQInter(const Array<Ctc>& list, int q) : Ctc(list[0].nb_var), list(list),
-		n(list[0].nb_var), q(q), boxes(list.size(), n) {
+CtcQInter::CtcQInter(int n, const Array<Ctc>& list, int q) : list(list), n(n), q(q), boxes(list.size(), n) {
 
-	for (int i=0; i<list.size(); i++) {
-		assert(list[i].nb_var==n);
-	}
 }
 
 void CtcQInter::contract(IntervalVector& box) {
@@ -40,8 +36,7 @@ void CtcQInter::contract(IntervalVector& box) {
 	if (box.is_empty()) throw EmptyBoxException();
 }
 
-CtcQInter2::CtcQInter2(const Array<Ctc>& list, int q) : Ctc(list[0].nb_var), list(list),
-		n(list[0].nb_var), q(q), boxes(list.size(), n) {
+CtcQInter2::CtcQInter2(int n, const Array<Ctc>& list, int q) : list(list), n(n), q(q), boxes(list.size(), n) {
 
 	for (int i=0; i<list.size(); i++) {
 		assert(list[i].nb_var==n);
@@ -66,8 +61,7 @@ void CtcQInter2::contract(IntervalVector& box) {
 	if (box.is_empty()) throw EmptyBoxException();
 }
 
-CtcQInterProjF::CtcQInterProjF(const Array<Ctc>& list, int q) : Ctc(list[0].nb_var), list(list),
-		n(list[0].nb_var), q(q), boxes(list.size(), n) {
+CtcQInterProjF::CtcQInterProjF(int n, const Array<Ctc>& list, int q) : list(list), n(n), q(q), boxes(list.size(), n) {
 
 	for (int i=0; i<list.size(); i++) {
 		assert(list[i].nb_var==n);
@@ -92,8 +86,7 @@ void CtcQInterProjF::contract(IntervalVector& box) {
 	if (box.is_empty()) throw EmptyBoxException();
 }
 
-CtcQInterCoreF::CtcQInterCoreF(const Array<Ctc>& list, int q) : Ctc(list[0].nb_var), list(list),
-		n(list[0].nb_var), q(q), boxes(list.size(), n) {
+CtcQInterCoreF::CtcQInterCoreF(int n, const Array<Ctc>& list, int q) : list(list), n(n), q(q), boxes(list.size(), n) {
 
 	for (int i=0; i<list.size(); i++) {
 		assert(list[i].nb_var==n);
