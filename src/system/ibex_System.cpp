@@ -85,8 +85,7 @@ std::ostream& operator<<(std::ostream& os, const System& sys) {
 
 		os << "constraints:" << endl;
 		for (int i=0; i<sys.ctrs.size(); i++)
-			os << "  " << sys.ctrs[i] << " " << sys.ctrs[i].f.expr().size << endl;
-		os << endl;
+			os << "  " << sys.ctrs[i] << endl;
 	}
 	return os;
 }

@@ -98,8 +98,6 @@ public:
 	 */
 	static const double default_ratio;
 
-protected:
-
 	/**
 	 * \brief Return true if the precision is the same for all variables.
 	 */

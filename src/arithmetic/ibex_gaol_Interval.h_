@@ -315,10 +315,13 @@ inline Interval pow(const Interval &x, const Interval &y) {
 }
 
 inline Interval root(const Interval& x, int n) {
+	Interval res;
 	if (n>=0)
-		return gaol::nth_root(x.itv,n);
+		res=gaol::nth_root(x.itv,n);
 	else
-		return 1.0/gaol::nth_root(x.itv,-n);
+		res=1.0/gaol::nth_root(x.itv,-n);
+	fpu_round_up();
+	return res;
 }
 
 inline Interval exp(const Interval& x) {
