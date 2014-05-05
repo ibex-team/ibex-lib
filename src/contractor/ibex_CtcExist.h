@@ -1,7 +1,7 @@
 //============================================================================
 //                                  I B E X                                   
 // File        : ibex_CtcExist.h
-// Author      : Jordan Ninin
+// Author      : Jordan Ninin, Gilles Chabert
 // License     : See the LICENSE file
 // Created     : Jan 29, 2014
 // Last Update : Jan 29, 2014
@@ -17,8 +17,11 @@
 namespace ibex {
 
 
-/** \ingroup predicate
+/**
+ * \ingroup contractor
+ *
  * \brief Projection union of Contractor, ie. "if there exist a solution"
+ *
  * The given constraint must have a dimension larger than the tested boxes.
  *
  */
@@ -49,10 +52,23 @@ public:
 
 
 private:
+
+	/**
+	 * Contract the "full" box (x,y) where
+	 * - x denotes the vector of variables and
+	 * - y the vector parameters.
+	 */
+	void contract(IntervalVector& x, IntervalVector& y);
+
 	/**
 	 * \brief Number of variables
 	 */
 	int nb_var;
+
+	/**
+	 * \brief Number of parameters
+	 */
+	int nb_param;
 
 	/**
 	 * \brief The Contractor.
@@ -68,12 +84,12 @@ private:
 	 * \brief Initialization of the variable where the existence will be verifyed.
 	 *  _ctr.nb_var = box.size() + _init.size()
 	 */
-	IntervalVector _init;
+	IntervalVector y_init;
 
 	/**
 	 * \brief precision
 	 */
-	double _prec;
+	double prec;
 
 	bool _own_ctc;
 };
