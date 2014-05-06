@@ -72,8 +72,8 @@ void CtcFwdBwd::contract(IntervalVector& box) {
 
 	try {
 		if (hc4r.proj(ctr.f,root_label,box)) {
-			set_flag(INACTIVE);
-			set_flag(FIXPOINT);
+			set_flag(INACTIVE); // TODO: incorrect in general
+			set_flag(FIXPOINT); // TODO: incorrect if multiple occurrences
 		}
 	} catch (EmptyBoxException& e) {
 		box.set_empty();

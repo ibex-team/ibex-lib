@@ -79,15 +79,15 @@ The extra argument corresponds to the precision on the objective (both relative 
 
 The following result should be displayed::
 
-  best bound in: [-310,-309.999999984]
-  Relative precision obtained on objective function: 5.23566394568e-11  [passed]  1e-07
-  Absolute precision obtained on objective function: 1.62305582307e-08  [passed]  1e-07
-  best feasible point (4.9999999999 ; 1 ; 5 ; 1.53748558193e-10 ; 5 ; 10)
-  cpu time used 0.048003s.
-  number of cells 78
+  best bound in: [-310.000030984,-309.999999984]
+  Relative precision obtained on objective function: 9.9999998936e-08  [passed]  1e-07
+  Absolute precision obtained on objective function: 3.09999999776e-05  [failed]  1e-07
+  best feasible point (4.9999999999 ; 1 ; 5 ; 1.00000119296e-10 ; 5 ; 10)
+  cpu time used 0.012s.
+  number of cells 5
 
 The program has proved that the minimum of the objective lies in [-310,-309.999999984]. It also gives
-a point (4.9999999999 ; 1 ; 5 ; 1.53748558193e-10 ; 5 ; 10) which satisfies the constraints and for which
+a point (4.9999999999 ; 1 ; 5 ; 1.00000119296e-10 ; 5 ; 10) which satisfies the constraints and for which
 the value taken by the objective function is inside this interval.
 
 ---------------
@@ -220,7 +220,7 @@ Interval matrices
 Interval matrices can be created in a similar way. However, since we cannot build 3-dimensional arrays in C++,
 all the bounds must be set in a single n*2 array representing the matrix row by row (and n is the total number of entries
 of the matrix). The two first arguments of the constructor are the number of rows and columns respectively. The last one
-is the array of ``double.
+is the array of ``double``.
 Here is an example of a 3x3 matrix:
 
 .. literalinclude:: ../examples/doc-tutorial.cpp 
@@ -288,7 +288,7 @@ For instance, if you want to create the function :math:`x\mapsto\sin(2x)`, just 
 Assume now that the function to be created is :math:`x\mapsto\sin(\pi x)`. It is still possible to
 use a ``double`` representing approximately :math:`\pi`; but to keep
 numerical reliability, it is required in this case to use an interval constant enclosing
-:math:`\pi`. Next function must be seen as a ``thick'' function that rigorously encloses :math:`\sin(\pi x)`:
+:math:`\pi`. Next function must be seen as a "thick" function that rigorously encloses :math:`\sin(\pi x)`:
 
 .. literalinclude:: ../examples/doc-tutorial.cpp 
    :language: cpp
@@ -443,7 +443,7 @@ The interval evaluation of f is the image of the given input interval vector [x]
 
 Let us start with a real-valued function f with scalar arguments:
 
-.. literalinclude:: ../examples/doc-tutorial.cpp func-eval
+.. literalinclude:: ../examples/doc-tutorial.cpp
    :language: cpp
    :start-after: func-eval
    :end-before: func-eval
@@ -524,6 +524,9 @@ With an initial box (x,y)=([1,2],[3,4]), we obtain the result that (x,y) must li
    :start-after: func-bwd
    :end-before: func-bwd
 
+
+.. _tuto-ctc:
+
 ================== 
 Contractors
 ==================
@@ -532,7 +535,7 @@ Contractors
 What is a contractor programming?
 ---------------------------------
 
-The key idea behind *contractor programming* is to abstract the algorithm
+The key idea behind *contractor programming* [Chabert09]_ is to abstract the algorithm
 from the underlying constraint and to view it a function "C":
 
 .. math::
@@ -746,7 +749,10 @@ the distance with each (bX,bY):
 
 We can contract now a box with the q-intersection of these contractors:
 
-.. literalinclude:: ../examples/doc-tutorial.cpp ctc-qinter5
+.. literalinclude:: ../examples/doc-tutorial.cpp
+   :language: cpp
+   :start-after: ctc-qinter5
+   :end-before: ctc-qinter5
 
 The displayed result is ([3.9667, 7.2381] ; [4.5389, 8.1479]). Of course, we can do better by calculating a fixpoint of the q-intersection:
 
@@ -763,8 +769,7 @@ Build your own contractor
 
 To create a contractor, you just have to 
 - declare a class that extends ``Ctc`` 
-- create inside a function ``contract`` that takes a reference to a box (``IntervalVector&``)
-  and contracts it. The function returns ``void``.
+- create inside a function ``contract`` that takes a reference to a box (``IntervalVector&``) and contracts it. The function returns ``void``.
 
 In the following example, we create a contractor that simply divides by two the radius of each component.
 
@@ -837,6 +842,7 @@ Finally, the cell buffer is a stack, which leads to a depth-first search.
    :start-after: strat-basic-solver
    :end-before: strat-basic-solver
 
+.. _tuto-strat-default-solver:
 
 --------------------------------
 Implementing the default solver
@@ -870,11 +876,33 @@ So the following program exactly reproduces the default solver.
 ------------------------------
 The generic optimizer
 ------------------------------
-*(to be completed)*
 
+The generic optimizer is still under active development (at release |release|) and it is not yet
+as "generic" as the generic solver. There are some limitations, namely:
+
+- many actions performed by the optimizer are hard-coded. In particular, the *goal upper bounding* 
+  step cannot yet be controlled by the user. We use a strategy described in [Araya14]_ and 
+  [Trombettoni11]_, based on *inner region extraction*. The basic idea is to create a continuum of feasible points
+  (a box or a polyhedron) where the goal function can be evaluated quickly, that is, without checking for
+  constraints satisfaction.
+	
+- the optimizer only works for scalar (real-valued) constraints. E.g., you cannot
+  enter a matrix-vector multiplication constraint like ``A*x=0``. You have to decompose
+  such constraint into n scalar constraints. 
+
+However, two key steps are generic: the contraction and bisection.
+Note that contrary to the generic solver, the cell buffer cannot be chosen. It is a sorted heap that
+allows to get in priority boxes minimizing the objective (see :ref:`strategy-cell-heap`).
 
 -------------------------------------
 Implementing the default optimizer
 -------------------------------------
-*(to be completed)*
+The contraction performed by the default optimizer is the same as the default solver 
+(see :ref:`tuto-strat-default-solver`) except that it is not applied on the system 
+itself but the :ref:`mod-sys-transfo-extend`.
+
+.. literalinclude:: ../examples/doc-tutorial.cpp 
+   :language: cpp
+   :start-after: strat-default-optimizer
+   :end-before: strat-default-optimizer
 

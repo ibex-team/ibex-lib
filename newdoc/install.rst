@@ -49,13 +49,13 @@ The installation assumes your system meets the `requirements`_
   ~/Ibex/soplex-1.7.0$ cd ..
 
 
-- Save the archive ``ibex-2.1.1.tar.gz`` in ``Ibex``
+- Save the archive ``ibex-|release|.tar.gz`` in ``Ibex``
 - Compile Ibex::
 
-  ~/Ibex/$ tar xvfz ibex-2.1.1.tar.gz 
-  ~/Ibex/$ cd ibex-2.1.1 
-  ~/Ibex/ibex-2.1.1/$ ./waf configure  
-  ~/Ibex/ibex-2.1.1/$ sudo ./waf install
+  ~/Ibex/$ tar xvfz ibex-|release|.tar.gz 
+  ~/Ibex/$ cd ibex-|release| 
+  ~/Ibex/ibex-|release|/$ ./waf configure  
+  ~/Ibex/ibex-|release|/$ sudo ./waf install
 
 
 ^^^^^^^^^^^^ 
@@ -108,20 +108,20 @@ Windows
   ~/Ibex/soplex-1.7.0$ make ZLIB=false   
   ~/Ibex/soplex-1.7.0$ cd ..
 
-- Save the archive ``ibex-2.1.1.tar.gz`` in ``Ibex``
+- Save the archive ``ibex-|release|.tar.gz`` in ``Ibex``
 - Compile ibex (still in the shell of MinGW)::
 
   ~/Ibex/$ export PATH="$PATH:/c/Python27" 
-  ~/Ibex/$ tar xvfz ibex-2.1.1.tar.gz 
-  ~/Ibex/$ cd ibex-2.1.1 
-  ~/Ibex/ibex-2.1.1/$ ./waf configure --prefix=[path]
+  ~/Ibex/$ tar xvfz ibex-|release|.tar.gz 
+  ~/Ibex/$ cd ibex-|release| 
+  ~/Ibex/ibex-|release|/$ ./waf configure --prefix=[path]
 
   where *[path]* is the place where you want Ibex to be installed.
   This path must be entered in Windows-style and with double backslash ("\\") as separator, e.g.,
   ``C:\\MyLibraires\\Ibex``.
   Finally::
 
-    ~/Ibex/ibex-2.1.1/$ ./waf install
+    ~/Ibex/ibex-|release|/$ ./waf install
 
 =======================
 Customized Installation
@@ -210,13 +210,13 @@ There are only a few differences with the standard installation:
 
   Compile Soplex as follows::
   
-    ~/Ibex/ibex-2.1.1/soplex-1.7.0$ make SHARED=true ZLIB=false
+    ~/Ibex/ibex-|release|/soplex-1.7.0$ make SHARED=true ZLIB=false
 
 - **Windows**
 
   Compile Soplex as follows::
   
-    ~/Ibex/ibex-2.1.1/soplex-1.7.0$  make ZLIB=false SHARED=true SHAREDLIBEXT=dll
+    ~/Ibex/ibex-|release|/soplex-1.7.0$  make ZLIB=false SHARED=true SHAREDLIBEXT=dll
 
 Then, you can run ``waf`` ``configure`` with either ``--enable-shared`` or ``--with-jni``.
 
@@ -275,15 +275,15 @@ you may consider using the `basic command line`_ instead.
 **Note:** it may be necessary to set the ``PKG_CONFIG_PATH`` to *PREFIX*\ ``/share/pkgconfig`` where *PREFIX* is 
 ``/usr/local`` by default or whatever path specified via ``--prefix``::
 
-  ~/Ibex/ibex-2.1.1/$ export PKG_CONFIG_PATH=/usr/local/share/pkgconfig/ 
+  ~/Ibex/ibex-|release|/$ export PKG_CONFIG_PATH=/usr/local/share/pkgconfig/ 
 
 **Note:** if some libraries are linked dynamically (like libultim), it may be necessary to set the ``LD_LIBRARY_PATH`` accordingly.
 
 Here is an example::
 
-  ~/Ibex/ibex-2.1.1/$ cd examples 
-  ~/Ibex/ibex-2.1.1/$ make defaultsolver 
-  ~/Ibex/ibex-2.1.1/$ ./defaultsolver ../benchs/cyclohexan3D.bch 1e-05 10 
+  ~/Ibex/ibex-|release|/$ cd examples 
+  ~/Ibex/ibex-|release|/$ make defaultsolver 
+  ~/Ibex/ibex-|release|/$ ./defaultsolver ../benchs/cyclohexan3D.bch 1e-05 10 
 
 The default solver solves the systems of equations in argument (cyclohexan3D) with a precision less than 1e-05 and
 within a time limit of 10 seconds.
@@ -324,13 +324,13 @@ If you have installed Ibex with the ``--with-jni`` option, you can run a java te
 
   where *PREFIX* is ``/usr/local`` by default or whatever path specified via ``--prefix``. Then::
     
-    ~$ cd Ibex/ibex-2.1.1/__build__/src/java 
-    ~/Ibex/ibex-2.1.1/__build__/src/java$ $JAVA_HOME/bin/java Test   
+    ~$ cd Ibex/ibex-|release|/__build__/src/java 
+    ~/Ibex/ibex-|release|/__build__/src/java$ $JAVA_HOME/bin/java Test   
 
   Alternatively, you can give the library path directly in argument of the ``java`` command instead of using an environment variable::
 
-    ~$ cd Ibex/ibex-2.1.1/__build__/src/java 
-    ~/Ibex/ibex-2.1.1/__build__/src/java$ $JAVA_HOME/bin/java -Djava.library.path=PREFIX/lib Test   
+    ~$ cd Ibex/ibex-|release|/__build__/src/java 
+    ~/Ibex/ibex-|release|/__build__/src/java$ $JAVA_HOME/bin/java -Djava.library.path=PREFIX/lib Test   
 
 - **MacOS**::
 
@@ -338,24 +338,24 @@ If you have installed Ibex with the ``--with-jni`` option, you can run a java te
 
   where *PREFIX* is ``/usr/local`` by default or whatever path specified via ``--prefix``. Then::
  
-    ~$ cd Ibex/ibex-2.1.1/__build__/src/java 
-    ~/Ibex/ibex-2.1.1/__build__/src/java$    
+    ~$ cd Ibex/ibex-|release|/__build__/src/java 
+    ~/Ibex/ibex-|release|/__build__/src/java$    
 
   Alternatively, you can give the library path directly in argument of the ``java`` command instead of using an environment variable::
 
-    ~$ cd Ibex/ibex-2.1.1/__build__/src/java 
-    ~/Ibex/ibex-2.1.1/__build__/src/java$ $JAVA_HOME/bin/java -Djava.library.path=PREFIX/lib Test   
+    ~$ cd Ibex/ibex-|release|/__build__/src/java 
+    ~/Ibex/ibex-|release|/__build__/src/java$ $JAVA_HOME/bin/java -Djava.library.path=PREFIX/lib Test   
 
 - **Windows**
 
-  We assume here that MinGW has been installed in ``C:\`` and Ibex in ``C:\MinGW\msys\1.0\home\[user]\Ibex\ibex-2.1.1``.
+  We assume here that MinGW has been installed in ``C:\`` and Ibex in ``C:\MinGW\msys\1.0\home\[user]\Ibex\ibex-|release|``.
 
 
   Open a command window (not the shell of MinGW) and type::
 
-    C:\Documents and Settings\[user]> cd C:\MinGW\msys\1.0\home\[user]\Ibex\ibex-2.1.1\__build__\src\java 
-    C:\MinGW\msys\1.0\home\[user]\Ibex\ibex-2.1.1\__build__\src\java>set PATH=%PATH%;PREFIX/bin;C:\MinGW\bin
-    C:\MinGW\msys\1.0\home\[user]\Ibex\ibex-2.1.1\__build__\src\java>java Test
+    C:\Documents and Settings\[user]> cd C:\MinGW\msys\1.0\home\[user]\Ibex\ibex-|release|\__build__\src\java 
+    C:\MinGW\msys\1.0\home\[user]\Ibex\ibex-|release|\__build__\src\java>set PATH=%PATH%;PREFIX/bin;C:\MinGW\bin
+    C:\MinGW\msys\1.0\home\[user]\Ibex\ibex-|release|\__build__\src\java>java Test
          
   
 Notice: ``$JAVA_HOME`` ensures the JVM is compatible with the version of Java you have compiled Ibex with.
@@ -366,8 +366,8 @@ Uninstall
 
 Simply type in the path of IBEX (under the shell of MinGW for Windows)::
 
-  ~/Ibex/ibex-2.1.1$sudo ./waf uninstall  
-  ~/Ibex/ibex-2.1.1$ ./waf distclean  
+  ~/Ibex/ibex-|release|$sudo ./waf uninstall  
+  ~/Ibex/ibex-|release|$ ./waf distclean  
 
 **Note:** sudo is useless if Ibex is installed in a local folder.
 

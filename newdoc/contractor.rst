@@ -10,6 +10,8 @@
 Forward-Backward
 ------------------------------
 
+*(to be completed)*
+
 .. _ctc-hc4:
 
 ------------------------------
@@ -17,15 +19,16 @@ HC4
 ------------------------------
 
 A "constraint propagation" loop.
-Each constraint in sys.ctrs is an equation.
+
+*(to be completed)*
 
 
+*(to be completed)*
 
-		hc4.accumulate=true;
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+The ``accumulate`` flag
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-		// Build contractor #2:
-		// --------------------------
-		
 *(to be completed)*
 
 .. _ctc-acid:

@@ -58,7 +58,7 @@
 #include "TestCtcInteger.h"
 //#include "TestCtcSubBox.h"
 #include "TestCtcNotIn.h"
-
+#include "TestCtcExist.h"
 
 #include "TestAffine2.h"
 
@@ -109,6 +109,7 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestHC4()));
     ts.add(auto_ptr<Test::Suite>(new TestCtcInteger()));
     ts.add(auto_ptr<Test::Suite>(new TestCtcNotIn()));
+    ts.add(auto_ptr<Test::Suite>(new TestCtcExist()));
     ts.add(auto_ptr<Test::Suite>(new TestFritzJohn()));
 
     return ts.run(output,false) ? EXIT_SUCCESS : EXIT_FAILURE;

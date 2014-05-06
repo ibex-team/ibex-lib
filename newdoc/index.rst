@@ -18,6 +18,7 @@ Contents:
    modeling
    contractor
    strategy
+   reference
 
 
 Indices and tables

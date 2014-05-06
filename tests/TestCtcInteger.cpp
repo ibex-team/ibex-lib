@@ -1,5 +1,5 @@
 /* ============================================================================
- * I B E X - Dim Tests
+ * I B E X - CtcInteger Tests
  * ============================================================================
  * Copyright   : Ecole des Mines de Nantes (FRANCE)
  * License     : This program can be distributed under the terms of the GNU LGPL.

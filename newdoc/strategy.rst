@@ -55,14 +55,17 @@ For instance, with the round-robin bisector:
    :end-before: bsc-different-prec
 
 -------------------------------------
-Respecting the initial box proportion
+Respecting proportions of a box
 -------------------------------------
-The bisector bisects following the variable of indices: max_{i}(box[i].diam()/init[i].diam()).
-*
-* \param init - the initial domain under study to compute the relative diameter.
-* The stored diameter of each variable is bounded by 1.e20. 
- * max_{i}(box[i].diam()/init[i].diam()).
 
+If you want to use a relative precision that respects the proportion betweeen
+the interval widths of an "initial" box, you can simply initialize the vector
+of precision like this:
+
+.. code-block:: cpp
+  
+   Vector prec=1e-07*box.diam(); // box is the initial domain
+   
 
 .. _strategy-smear-function:
 
@@ -103,6 +106,22 @@ maximal sum of impacts
 ============
 Cell buffers
 ============
+
+*(to be completed)*
+
+.. _strategy-cell-stack:
+
+----------------------------------------
+Cell Stack
+----------------------------------------
+
+*(to be completed)*
+
+.. _strategy-cell-heap:
+
+----------------------------------------
+Cell Heap
+----------------------------------------
 
 *(to be completed)*
 

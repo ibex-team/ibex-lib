@@ -329,14 +329,14 @@ public:
  * \ingroup symbolic
  * \brief Function application expression
  *
- * In the following Quimper example:
+ * In the following Minibex example:
  * \code
  * Variables
  *   a in [0,10];
  *
- * function z=foo(x,y)
- *   z=sqrt(x^2+y^2);
- * end;
+ * function foo(x,y)
+ *   return sqrt(x^2+y^2);
+ * end
  *
  * Constraints
  *   foo(a,1-a)=1

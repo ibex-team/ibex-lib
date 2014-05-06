@@ -325,8 +325,8 @@ With an initial box (x,y)=[1,2],[3,4], we obtain the result that (x,y) must lie 
 
 .. literalinclude:: ../examples/doc-tutorial.cpp
    :language: cpp
-   :start-after: func-bwd
-   :end-before: func-bwd
+   :start-after: func-bwd-C
+   :end-before: func-bwd-C
 
 One can indeed check that the resulting box is a consistent narrowing
 of the initial one.
@@ -417,16 +417,14 @@ Here is an example:
 
 .. literalinclude:: ../examples/doc-modeling.cpp
    :language: cpp
-   :start-after: func-hansen
-   :end-before: func-hansen
+   :start-after: func-hansen-C
+   :end-before: func-hansen-C
 
-The display is::
+The display is:
 
-  Hansen matrix:
-  (([3, 6] ; [1, 4])
-  (<2.25, 2.25> ; [2, 8]))
-
-
+.. literalinclude:: ../examples/doc-modeling.txt
+   :start-after: func-hansen-O
+   :end-before: func-hansen-O
 
 .. _mod-func-cpp:
 
@@ -438,19 +436,21 @@ The following piece of code creates the function :math:`(x,y)\mapsto \sin(x+y)`:
 
 .. literalinclude:: ../examples/doc-modeling.cpp
    :language: cpp
-   :start-after: func-cpp1
-   :end-before: func-cpp1
+   :start-after: func-cpp1-C
+   :end-before: func-cpp1-C
 
-The display is::
+The display is:
 
-  _f_0:(x,y)->sin((x+y))
+.. literalinclude:: ../examples/doc-modeling.txt
+   :start-after: func-cpp1-O
+   :end-before: func-cpp1-O
 
 You can directly give up to 20 variables in argument of the ``Function`` constructor:
 
 .. literalinclude:: ../examples/doc-modeling.cpp
    :language: cpp
-   :start-after: func-cpp2
-   :end-before: func-cpp2
+   :start-after: func-cpp2-C
+   :end-before: func-cpp2-C
 
 If more than 20 variables are needed, you need to build an intermediate array for collecting the arguments.
 More precisely, this intermediate object is an ``Array<const ExprSymbol>``. The usage is summarized below. In this
@@ -466,19 +466,16 @@ with one argument (a vector with 7 components), we decide to create the function
 
 with 7 arguments (7 scalar variables):
 
-.. code-block:: cpp
+.. literalinclude:: ../examples/doc-modeling.cpp
+   :language: cpp
+   :start-after: func-cpp3-C
+   :end-before: func-cpp3-C
 
-   Variable x[7]; // not to be confused with x(7)
-   Array<const ExprSymbol> vars(7);
-   for (int i=0; i<7; i++)
-     vars.set_ref(i,x[i]);
-   Function f(vars, x[0]+x[1]+x[2]+x[3]+x[4]+x[5]+x[6]);
-   cout << f << endl;
-	
-The display is::
+The display is:
 
-  _f_1:(_x_0,_x_1,_x_2,_x_3,_x_4,_x_5,_x_6)->
-       ((((((_x_0+_x_1)+_x_2)+_x_3)+_x_4)+_x_5)+_x_6)
+.. literalinclude:: ../examples/doc-modeling.txt
+   :start-after: func-cpp3-O
+   :end-before: func-cpp3-O
 
 .. _mod-func-cpp-renaming:
 
@@ -514,8 +511,8 @@ Here is an example of the distance function between ``(xa,ya)`` and ``(xb,yb)``:
 
 .. literalinclude:: ../examples/doc-modeling.cpp
    :language: cpp
-   :start-after: func-cpp-symbols
-   :end-before: func-cpp-symbols
+   :start-after: func-cpp-symbols-C
+   :end-before: func-cpp-symbols-C
 
 .. _mod-func-cpp-vecargs:
 
@@ -532,8 +529,8 @@ arguments ``a`` and ``b`` instead:
 
 .. literalinclude:: ../examples/doc-modeling.cpp
    :language: cpp
-   :start-after: func-cpp-vec-args
-   :end-before: func-cpp-vec-args
+   :start-after: func-cpp-vec-args-C
+   :end-before: func-cpp-vec-args-C
 
 .. _mod-func-cpp-compo:
 
@@ -545,6 +542,14 @@ You can compose functions. Each argument of the called function can be substitue
 by an argument of the calling function, a subexpression or a constant value.
 
 See the example in the :ref:`tutorial <tuto-func-compo>`.
+
+.. _mod-func-symbolic-diff:
+
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Symbolic differentiation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+*(to be completed)*
 
 .. _mod-func-cpp-vecvalued:
 
@@ -575,8 +580,8 @@ and we want the subexpression cos(x)+1 to be shared:
 
 .. literalinclude:: ../examples/doc-modeling.cpp
    :language: cpp
-   :start-after: func-dag
-   :end-before: func-dag
+   :start-after: func-dag-C
+   :end-before: func-dag-C
 
 .. _mod-func-ex:
 
@@ -596,14 +601,18 @@ The only difficulty is that we cannot assign references in C++, so we need to us
 
 .. literalinclude:: ../examples/doc-modeling.cpp
    :language: cpp
-   :start-after: func-iterated-sum
-   :end-before: func-iterated-sum
+   :start-after: func-iterated-sum-C
+   :end-before: func-iterated-sum-C
 
-The display is::
+The display is:
 
-  f:(x)->(((((((((x[0]^2+x[1]^2)+x[2]^2)+x[3]^2)+x[4]^2)+x[5]^2)+x[6]^2)+x[7]^2)+x[8]^2)+x[9]^2)
+.. literalinclude:: ../examples/doc-modeling.txt
+   :language: cpp
+   :start-after: func-iterated-sum-O
+   :end-before: func-iterated-sum-O
 
 .. _mod-sys:
+
 ===================
 Systems
 ===================
@@ -613,11 +622,15 @@ and an initial domain for variables.
 It corresponds to the usual concept of system in mathematical programming.
 Here is an example of system:
 
+   Minimize :math:`x+y,`
 
-   Minimize :math:`x+y`
-   with :math:`x \in[-1,1], y\in[-1,1]`
+   :math:`x \in[-1,1], y\in[-1,1]`
+
    such that
-   :math:`x^2+y^2\le1` and :math:`y\ge x^2`.
+
+     :math:`x^2+y^2\le1`  
+
+     :math:`y\ge x^2`.
 
 
 One is usually interested in solving the system while minimizing the criterion, if any.
@@ -647,7 +660,7 @@ As a programer, you may actually face two different situations.
 
 Either you indeed want to use a constraint as a contractor in which case you
 build a ``Ctc`` object with this constraint (the actual class depending
-on the algorithm you chose, as explained in :ref:`the tutorial <ctc>` --by default, it is :ref:`ctc-fwd-bwd`--).
+on the algorithm you chose, as explained in :ref:`the tutorial <tuto-ctc>` --by default, it is :ref:`ctc-fwd-bwd`--).
 Either you need to do something else, say, like calculating the Jacobian matrix of the
 function *f*. In this case, you just need to get a reference to this function 
 and call ``jacobian``. In fact, all the information inherent to a constraint
@@ -746,6 +759,10 @@ And if more variables are necessary, you need to build an ``Array<const ExprSymb
 
 .. _mod-sys-fields:
 
+**Note:** There is currently the important restriction that inequalities can only be formed with real-valued (called "scalar") functions.
+It could be possible, in theory, to write :math:`f(x)\le0` with f vector-valued by interpreting the operator componentwise but this
+is not supporter by Ibex.
+
 ------------------------------
 Systems fields
 ------------------------------
@@ -785,7 +802,7 @@ that are detailed below.
 Transformation
 ------------------------------
 
-*(to be completed)*
+We present in this section the different transformations that can be applied to a system.
 
 .. _mod-sys-transfo-copy:
 
@@ -793,7 +810,33 @@ Transformation
 Copy
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-*(to be completed)*
+The first transformation you can apply on a system is a simple copy. Of course, this is done via
+the copy constructor of the ``System`` class.
+
+When calling the copy constructor, you can decide to copy everything,
+only the equations or only the inequalities. For this, set the second parameter of the
+constructor to either: 
+
+==========  =================================
+value       def
+==========  =================================
+COPY        duplicate all the constraints
+INEQ_ONLY   duplicate only inequalities
+EQ_ONLY     duplicate only equalities
+==========  =================================
+
+The first argument of the constructor is the system to copy of course.
+
+.. literalinclude:: ../examples/doc-modeling.cpp
+   :language: cpp
+   :start-after: sys-copy-C
+   :end-before: sys-copy-C
+
+The display is:
+
+.. literalinclude:: ../examples/doc-modeling.txt
+   :start-after: sys-copy-O
+   :end-before: sys-copy-O
 
 .. _mod-sys-transfo-normalize:
 
@@ -801,15 +844,102 @@ Copy
 Normalization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-*(to be completed)*
+It is confortable in some situations to assume that a system is made of inequalities only, and
+that each inequality is under the forme :math:`g(x)\le0`, that is, it is a "less or equal" inequality. 
+This is called a "normalized" system.
+
+This need arises, e.g., in optimization methods where the calculation of
+Lagrange multipliers is simplified when the normalization assumption holds.
+
+It is possible to automatically transform a system into a normalized one.
+The process is immediate.
+If a constraint is:
+
+- :math:`g(x)\le0`                    
+         it is already normalized so it is left unchanged.
+- :math:`g(x)<0`                      
+         it is replaced by :math:`g(x)\le0` (yes, there is a little loss of precision here)
+- :math:`g(x)>0` or :math:`g(x)\ge0`  
+         it is replaced by :math:`-g(x)\le0`
+- :math:`g(x)=0`                      
+         it is replaced by two constraints: :math:`g(x)\le0` and :math:`-g(x)\le0`.
+	 It is also possible to introduce an inflation value or "thickness", that is, to replace
+         the equality by :math:`g(x)\le\varepsilon` and :math:`-g(x)\le \varepsilon`
+         where :math:`\varepsilon` can be fixed to any value.
+
+**Note:** There is a special treatment for "thick equalities", that is, equations of the form
+:math:`g(x)=[l,u]`. This kind of equations appear often in, e.g., robust parameter estimation problems.
+In this case, the equality is replaced by two inequalities, :math:`g(x)\le u` and :math:`-g(x)\le-l`,
+and the :math:`\varepsilon`-inflation is not applied unless :math:`|u-l|<\varepsilon`.
+
+Normalization is done by calling the constructor of ``NormalizedSystem``, a sub-class of ``System``.
+Here is an example where ``sys`` is a system built previously:
+
+.. literalinclude:: ../examples/doc-modeling.cpp
+   :language: cpp
+   :start-after: sys-normalize-C
+   :end-before: sys-normalize-C
+
+
+We get the following display:
+
+.. literalinclude:: ../examples/doc-modeling.txt
+   :start-after: sys-normalize-O
+   :end-before: sys-normalize-O
 
 .. _mod-sys-transfo-extend:
 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Transforming the goal into a constraint
+Extended System
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-*(to be completed)*
+An extended system is a system where the goal function is transformed into a constraint.
+
+For instance, the extension of the system given above:
+
+   Minimize :math:`x+y,`
+
+   :math:`x \in[-1,1], y\in[-1,1]`
+
+   such that
+
+     :math:`x^2+y^2\le1`  
+
+     :math:`y\ge x^2`.
+
+is the following unconstrained system of constraints:
+
+   :math:`x \in[-1,1], y\in[-1,1], \mbox{__goal__}\in(-\infty,\infty)`
+
+   such that
+
+     :math:`x+y=\mbox{__goal__}`
+
+     :math:`x^2+y^2\le1`
+   
+     :math:`y\ge x^2`
+
+Once built, an extended system is a system like any other one, but it has also some extra information:
+
+- the name of the goal variable which is automatically generated (it is "__goal__" in our previous example). 
+- the index of the goal variable (the last (2) in our previous example)
+- the index of the "goal constraint" (the first (0) in our previous example)
+
+For this reason, an extended system is represented by a subclass of ``System`` named ``ExtendedSystem``.
+
+To create an extended system just use the constructor of ``ExtendedSystem``.
+We assume in the following example that the variable ``sys`` is a ``System`` previously built.
+
+.. literalinclude:: ../examples/doc-modeling.cpp
+   :language: cpp
+   :start-after: sys-extended-C
+   :end-before: sys-extended-C
+
+We get the following display:
+
+.. literalinclude:: ../examples/doc-modeling.txt
+   :start-after: sys-extended-O
+   :end-before: sys-extended-O
 
 .. _mod-sys-transfo-fritz-john:
 
@@ -817,7 +947,33 @@ Transforming the goal into a constraint
 Fritz-John (Khun-Tucker) conditions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-*(to be completed)*
+The generalized Khun-Tucker (aka Fritz-John) conditions can be obtained from a system.
+This produces a new system of **n+M+R+K+1** variables where
+
+- n is the number of basic variables (the ones of the original system)
+- M is the number of Lagrange multipliers for inequalities (i.e., the number of inequalities in the original system)
+- R is the number of Lagrange multipliers for equalities (i.e., the number of equalities in the original system)
+- K is the number of Lagrange multipliers for bounding constraints. These bounding constraints correspond to the ``box`` 
+  field of the original system which is taken into account as 2n additional inequalities.
+- The last variable is the "special coefficient" of the goal function that is equal to 0 in the case were constraint
+  qualification (linear independency of constraints gradients) does not hold.
+
+Generation of the Fritz-John conditions is based on :ref:`mod-func-symbolic-diff`.
+
+Example:
+
+.. literalinclude:: ../examples/doc-modeling.cpp
+   :language: cpp
+   :start-after: sys-fritz-john-C
+   :end-before: sys-fritz-john-C
+
+We get the following display. The variable ``_u`` is the coefficient of the goal function. The variable ``_l``
+is the multiplier of the constraint.
+
+.. literalinclude:: ../examples/doc-modeling.txt
+   :start-after: sys-fritz-john-O
+   :end-before: sys-fritz-john-O
+
 
 .. _mod-sys-auxfunc:
 
@@ -988,7 +1144,7 @@ to 0 and the second to 1::
 
 Writing ``x[2]`` is equivalent to ``x[2][1]`` because a column vector is also a 2x1 matrix.
 A row vector is a 1x2 matrix so a row vector has to be declared as follows. 
-On the right side, note that we use commas instead of periods:
+On the right side, note that we use commas instead of periods::
 
   Constants
     x[1][2] = (0, 1);
@@ -1003,8 +1159,8 @@ by brackets would conflict with an interval. So, do note confuse
    This is **not** an open interval.
 -  ``[0,1]`` is the 1-dimensional interval [0,1]. This is **not** a 2-dimensional row vector.
 
-Of course, you mix vector with intervals. For instance:
-``([-oo,0];[0,+oo])`` is a column vector of 2 intervals, :math:`(-\infty,0]` and :math:`\f$[0,+\infty)`.
+Of course, you can mix vector with intervals. For instance:
+``([-oo,0];[0,+oo])`` is a column vector of 2 intervals, :math:`(-\infty,0]` and :math:`[0,+\infty)`.
 
 Here is an example of matrix constant declaration::
 
@@ -1101,7 +1257,7 @@ You will then be able to simplify the writing of constraints::
   distance(xA,xB+xC,yA,yB+yC)=0;
   ...
 
-As you may expect, this will result in the creation of a :ref:`Function` <mod-func>` object that
+As you may expect, this will result in the creation of a :ref:`Function <mod-func>` object that
 you can access from your C++ program via the ``System`` class. See :ref:`auxiliary functions  <mod-sys-auxfunc>`.
 
 A function can return a single value, a vector

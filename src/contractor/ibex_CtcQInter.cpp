@@ -38,9 +38,6 @@ void CtcQInter::contract(IntervalVector& box) {
 
 CtcQInter2::CtcQInter2(int n, const Array<Ctc>& list, int q) : list(list), n(n), q(q), boxes(list.size(), n) {
 
-	for (int i=0; i<list.size(); i++) {
-		assert(list[i].nb_var==n);
-	}
 }
 
 void CtcQInter2::contract(IntervalVector& box) {
@@ -63,9 +60,6 @@ void CtcQInter2::contract(IntervalVector& box) {
 
 CtcQInterProjF::CtcQInterProjF(int n, const Array<Ctc>& list, int q) : list(list), n(n), q(q), boxes(list.size(), n) {
 
-	for (int i=0; i<list.size(); i++) {
-		assert(list[i].nb_var==n);
-	}
 }
 
 void CtcQInterProjF::contract(IntervalVector& box) {
@@ -88,9 +82,6 @@ void CtcQInterProjF::contract(IntervalVector& box) {
 
 CtcQInterCoreF::CtcQInterCoreF(int n, const Array<Ctc>& list, int q) : list(list), n(n), q(q), boxes(list.size(), n) {
 
-	for (int i=0; i<list.size(); i++) {
-		assert(list[i].nb_var==n);
-	}
 }
 
 void CtcQInterCoreF::contract(IntervalVector& box) {
