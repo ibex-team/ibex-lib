@@ -14,7 +14,10 @@
 
 
 
+
 namespace ibex {
+
+
 
 //The system is overconstrained by using the Taylor extension in one corner randomly chosen
 //Then the simplex algorithm is applied to obtain a new upper bound loup
@@ -22,7 +25,7 @@ namespace ibex {
 
 bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 
-  //cout << " box simplex " << box << endl;
+  //  cout << " box simplex " << box << endl;
 	IntervalVector G(n); // vector to be used by the partial derivatives
 
 	// boolean indicating which corner in direction i is used : true for inferior corner, false for superior one.
@@ -139,7 +142,7 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 		for (int j=0; j<n; j++)
 		  tmpbox[j]=x_corner[j]+prim[j+1];
 		//		std::cout << " simplex result " << tmpbox << std::endl;
-		bool ret= check_candidate(tmpbox.mid(),false); //  [gch] do we know here that the point is inner??
+		bool ret= box.contains(tmpbox.mid()) && check_candidate(tmpbox.mid(),false); //  [gch] do we know here that the point is inner??
 
 		if (ret) {
 		  if (trace)
