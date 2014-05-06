@@ -25,6 +25,13 @@ A "constraint propagation" loop.
 
 *(to be completed)*
 
+.. _ctc-inverse:
+
+------------------------------
+Inverse contractor
+------------------------------
+
+
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 The ``accumulate`` flag
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
