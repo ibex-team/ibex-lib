@@ -16,13 +16,13 @@ using namespace std;
 
 int main() {
 
-	 ofstream output;
-	 output.open ("doc-arithmetic.txt");
+	ofstream output;
+	output.open ("doc-arithmetic.txt");
 
-	 output << "================= this file is generated ==============" << endl;
+	output << "================= this file is generated ==============" << endl;
 
 	{
-		output << "![itv-constants-O] << endl;
+		output << "![itv-constants-O]" << endl;
 		//! [itv-constants-C]
 		output << " EMPTY_SET = " <<  Interval::EMPTY_SET << endl;
 		output << " PI = "        <<  Interval::PI <<  endl;
@@ -36,7 +36,7 @@ int main() {
 		output << " POS_REALS = " <<  Interval::POS_REALS << endl;
 		output << " NEG_REALS = " <<  Interval::NEG_REALS << endl;
 		//! [itv-constants-C]
-		output << "![itv-constants-O] << endl;
+		output << "![itv-constants-O]" << endl;
 
 	}
 	{
@@ -47,7 +47,7 @@ int main() {
 		// (Contraction of x w.r.t. to f(x)=y)
 		//
 		// > create three intervals x,y and z with z=x+y
-	    // > project sin(z)=-1 onto z (contracts z)
+		// > project sin(z)=-1 onto z (contracts z)
 		// > project x+y onto x and y (contracts x and y)
 		// ------------------------------------------------
 
