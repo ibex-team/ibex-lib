@@ -24,7 +24,7 @@ int main(int argc, char** argv) {
 			ibex_error("usage: defaultoptimizer filename prec goal_prec timelimit");
 		}
 
-		// Load a sys of equations
+		// Load a system of equations
 		System sys(argv[1]);
 
 		cout << "load file " << argv[1] << "." << endl;
@@ -36,27 +36,6 @@ int main(int argc, char** argv) {
 		if (!sys.goal) {
 			ibex_error(" input file has not goal (it is not an optimization problem).");
 		}
-		CtcHC4 hc4(sys.ctrs,0.01);
-
-
-		CtcHC4 hc4_2(sys.ctrs,0.1,true);
-
-		CtcAcid acid(sys, hc4_2);
-
-		LinearRelaxCombo linear_relax(sys,LinearRelaxCombo::AFFINE2);
-
-		CtcPolytopeHull polytope(linear_relax,CtcPolytopeHull::ALL_BOX);
-		polytope.contract(sys.box);
-		cout << "after acid=" << sys.box << endl;
-
-		CtcCompo polytope_hc4(polytope, hc4);
-
-		CtcFixPoint fixpoint(polytope_hc4);
-
-		CtcCompo compo(hc4,acid,fixpoint);
-
-
-
 
 		// Build the default optimizer
 		DefaultOptimizer o(sys,prec,goal_prec);
@@ -65,7 +44,7 @@ int main(int argc, char** argv) {
 		o.timeout=time_limit;
 
 		// This option prints each better feasible point when it is found
-		o.trace=2;
+		o.trace=0;
 
 		// display solutions with up to 12 decimals
 		cout.precision(12);

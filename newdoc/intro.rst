@@ -70,7 +70,7 @@ All the classical operations with intervals can be performed with the previously
 Contractor programming
 -------------------------------
 
-Ibex gives you the ability to build high-level interval-based algorithms declaratively through the `contractor programming`_
+Ibex gives you the ability to build high-level interval-based algorithms declaratively through the *contractor programming* paradigm [Chabert09]_.
 
 A contractor is basically an operator that transforms a box to a smaller (included) box, by safely removing points with respect to some mathematical property.
 

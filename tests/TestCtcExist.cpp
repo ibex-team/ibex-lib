@@ -20,7 +20,6 @@ void TestCtcExist::test01() {
 
 	Variable x,y;
 	Function f(x,y,1.5*sqr(x)+1.5*sqr(y)-x*y-0.2);
-	cout << f << endl;
 
 	CtcExist e(f,LEQ,0.001,IntervalVector(1,Interval(-10,10)));
 

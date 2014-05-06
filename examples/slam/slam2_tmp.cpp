@@ -45,7 +45,7 @@ int main() {
     // Push the q-intersection of all
     // the contractors in "cdist" in the main
     // vector "ctc"
-    ctc.push_back(new CtcQInter(cdist,N-NB_OUTLIERS));
+    ctc.push_back(new CtcQInter(2,cdist,N-NB_OUTLIERS));
     // ![qinter]
 
     if (t<T-1) {

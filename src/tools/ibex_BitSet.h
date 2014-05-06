@@ -26,7 +26,7 @@ const int getlast[256] = {-1, 0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3,
                            7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7};
 
 const int NOVAL = (int)((~(unsigned int)0)/2);
-#define INFTY NOVAL/2
+// #define INFTY NOVAL/2 // nowhere used and #define are very dangerous
 
 namespace ibex {
 
