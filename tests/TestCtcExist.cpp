@@ -11,6 +11,9 @@
 
 #include "TestCtcExist.h"
 #include "ibex_CtcExist.h"
+#include "ibex_Solver.h"
+#include "ibex_RoundRobin.h"
+#include "ibex_CellStack.h"
 
 using namespace std;
 
@@ -21,15 +24,34 @@ void TestCtcExist::test01() {
 	Variable x,y;
 	Function f(x,y,1.5*sqr(x)+1.5*sqr(y)-x*y-0.2);
 
-	CtcExist e(f,LEQ,0.001,IntervalVector(1,Interval(-10,10)));
+	double prec=1e-05;
+
+	NumConstraint c(f,LEQ);
+	CtcExist exist_y(c,y,IntervalVector(1,Interval(-10,10)),prec);
+	CtcExist exist_x(c,x,IntervalVector(1,Interval(-10,10)),prec);
 
 	IntervalVector box(1,Interval(-10,10));
-	try {
-		e.contract(box);
-	} catch(EmptyBoxException&) {
-		TEST_ASSERT(false);
-	}
-	cout << "TEST EXIST=" << box << endl;
+
+	RoundRobin rr(1e-03);
+	CellStack stack;
+	vector<IntervalVector> sols;
+
+	double right_bound=+0.3872983346072957;
+
+	Solver sx(exist_y,rr,stack);
+	sx.start(box);
+	sx.next(sols);
+	// note: we use the fact that the solver always explores the right
+	// branch first
+	TEST_ASSERT(sols.back()[0].contains(right_bound));
+
+	sols.clear();
+	Solver sy(exist_x,rr,stack);
+	sy.start(box);
+	sy.next(sols);
+	// note: we use the fact that the constraint is symmetric in x/y
+	TEST_ASSERT(sols.back()[0].contains(right_bound));
+
 }
 
 } // end namespace

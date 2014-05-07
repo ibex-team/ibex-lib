@@ -4,7 +4,7 @@
 // Author      : Jordan Ninin, Gilles Chabert
 // License     : See the LICENSE file
 // Created     : Jan 29, 2014
-// Last Update : Jan 29, 2014
+// Last Update : May 7, 2014
 //============================================================================
 
 #ifndef __IBEX_CTC_EXIST_H__
@@ -20,21 +20,87 @@ namespace ibex {
 /**
  * \ingroup contractor
  *
- * \brief Projection union of Contractor, ie. "if there exist a solution"
+ * \brief Projection-union operator (for existentially-quantified constraints)
  *
- * The given constraint must have a dimension larger than the tested boxes.
+ * This operator allows to contract a box [x] with respect to:
  *
+ *    exists y in[y] |  c(x,y).
+ *
+ * where y is a vector of "parameters".
  */
 class CtcExist : public Ctc {
 public:
 
 	/**
-	 * \brief Create the contractor "if there exist a feasible box", ie the projection union of contractor.
-	 * The given constraint must have a dimension larger than the tested boxes.
+	 * \brief Create the contractor for "exists y1 in [y_init] such that c(x,y)".
+	 *
+	 * \see #CtcExist(const NumConstraint&, const Array<const ExprSymbol&>, const IntervalVector&, double).
 	 */
-	CtcExist(const NumConstraint& ctr, double prec, const IntervalVector& init_box);
-	CtcExist(Function& f, CmpOp op, double prec, const IntervalVector& init_box);
-	CtcExist(int nb_var, Ctc& p, double prec, const IntervalVector& init_box);
+	CtcExist(const NumConstraint& c, const ExprSymbol& y1, const IntervalVector& y_init, double prec);
+
+	/**
+	 * \brief Create the contractor for "exists (y1,y2) in [y_init] such that c(x,y)"
+	 *
+	 * \see #CtcExist(const NumConstraint&, const Array<const ExprSymbol&>, const IntervalVector&, double).
+	 */
+	CtcExist(const NumConstraint& c, const ExprSymbol& y1, const ExprSymbol& y2, const IntervalVector& y_init, double prec);
+
+	/**
+	 * \brief Create the contractor for "exists (y1,y2,y3) in [y_init] such that c(x,y)"
+	 *
+	 * \see #CtcExist(const NumConstraint&, const Array<const ExprSymbol&>, const IntervalVector&, double).
+	 */
+	CtcExist(const NumConstraint& c, const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const IntervalVector& y_init, double prec);
+
+	/**
+	 * \brief Create the contractor for "exists (y1,...,y4) in [y_init] such that c(x,y)"
+	 *
+	 * \see #CtcExist(const NumConstraint&, const Array<const ExprSymbol&>, const IntervalVector&, double).
+	 */
+	CtcExist(const NumConstraint& c, const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const IntervalVector& y_init, double prec);
+
+	/**
+	 * \brief Create the contractor for "exists (y1,...,y5) in [y_init] such that c(x,y)"
+	 *
+	 * \see #CtcExist(const NumConstraint&, const Array<const ExprSymbol&>, const IntervalVector&, double).
+	 */
+	CtcExist(const NumConstraint& c, const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const IntervalVector& y_init, double prec);
+
+	/**
+	 * \brief Create the contractor for "exists (y1,...,y6) in [y_init] such that c(x,y)"
+	 *
+	 * \see #CtcExist(const NumConstraint&, const Array<const ExprSymbol&>, const IntervalVector&, double).
+	 */
+	CtcExist(const NumConstraint& c, const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const ExprSymbol& y6, const IntervalVector& y_init, double prec);
+
+	/**
+	 * \brief Create the contractor for "exists y in [y_init] such that c(x,y)"
+	 *
+	 * The constraint c must take n+m arguments where n is the size of x and m the size of y.
+	 * Contrary to what the notation c(x,y) suggests, symbols y1...ym does not necessarily
+	 * need to appear after the symbols x1...xn in c.
+	 *
+	 * \param c       The constraint
+	 * \param y       The parameters
+	 * \param y_init  Initial box for the parameters
+	 * \param prec    Bisection precision on the parameters (the contraction involves a
+	 *                bisection process on y)
+	 */
+	CtcExist(const NumConstraint& c, const Array<const ExprSymbol>& y, const IntervalVector& y_init, double prec);
+
+	/**
+	 * \brief Proj-union operator applied on the contractor c.
+	 *
+	 * This is the generalization of the quantified constraint proposed in "Contractor programming".
+	 * The constraint is implicitly represented by a contractor.
+	 *
+	 * \param c       The contractor
+	 * \param vars    Indicates whether the ith component handled by the contractor c
+	 *                is a variable (vars[i]==true)or a parameter (vars[i]==false).
+	 * \param y_init  Initial box for the parameters
+	 * \param prec    Bisection precision on the parameters
+	 */
+	CtcExist(Ctc& c, const BoolMask& vars, const IntervalVector& y_init, double prec);
 
 	/**
 	 * \brief Delete this.
@@ -46,17 +112,23 @@ public:
 	 */
 	void contract(IntervalVector& x);
 
-	IntervalVector& getInit();
-	void setInit(IntervalVector& init);
-
-
+	/**
+	 * \brief Initial box of the parameters (can be set dynamically)
+	 */
+	IntervalVector y_init;
 
 private:
 
 	/**
-	 * Contract the "full" box (x,y) where
-	 * - x denotes the vector of variables and
-	 * - y the vector parameters.
+	 * \brief Initialization for contractors with symbols y
+	 */
+	void init(const NumConstraint& ctr, const Array<const ExprSymbol>& y, const IntervalVector& y_init, double prec);
+
+	/**
+	 * \brief Contract the "full" box (x,y)
+	 *
+	 * \param x the vector of variables
+	 * \param y the vector parameters.
 	 */
 	void contract(IntervalVector& x, IntervalVector& y);
 
@@ -73,24 +145,25 @@ private:
 	/**
 	 * \brief The Contractor.
 	 */
-	Ctc& _ctc;
+	Ctc* ctc;
 
 	/**
-	 *  \brief a bisector
+	 * \brief a bisector
 	 */
-	LargestFirst _bsc;
+	LargestFirst* bsc;
 
 	/**
-	 * \brief Initialization of the variable where the existence will be verifyed.
-	 *  _ctr.nb_var = box.size() + _init.size()
+	 * vars[i]=true <=> the ith component is a variable ("x_k")
+	 * Otherwise, the ith component is a parameter ("y_k")
 	 */
-	IntervalVector y_init;
+	BoolMask vars;
 
 	/**
 	 * \brief precision
 	 */
 	double prec;
 
+	/* Information for cleanup only */
 	bool _own_ctc;
 };
 

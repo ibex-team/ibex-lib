@@ -4,54 +4,106 @@
 // Author      : Jordan Ninin, Gilles Chabert
 // License     : See the LICENSE file
 // Created     : Jan 29, 2014
-// Last Update : Jan 29, 2014
+// Last Update : May 7, 2014
 //============================================================================
 
 #include "ibex_CtcExist.h"
 #include <list>
+#include <cassert>
 
 using namespace std;
 
 namespace ibex {
 
-CtcExist::CtcExist(const NumConstraint& ctr, double prec,const  IntervalVector& init_box) :
-		nb_var(ctr.f.nb_var()-init_box.size()), nb_param(init_box.size()), _ctc(*new CtcFwdBwd(ctr)), _bsc(prec),
-		y_init(init_box), prec(prec), _own_ctc(true)  {
-	assert(init_box.size()<ctr.f.nb_var());
+CtcExist::CtcExist(const NumConstraint& ctr, const ExprSymbol& y1, const IntervalVector& init_box, double prec) {
+	init(ctr,Array<const ExprSymbol>(y1),init_box,prec);
 }
 
-CtcExist::CtcExist(Function& f, CmpOp op, double prec,const  IntervalVector& init_box) :
-		nb_var(f.nb_var()-init_box.size()), nb_param(init_box.size()), _ctc(*new CtcFwdBwd(f, op)), _bsc(prec),
-		y_init(init_box), prec(prec), _own_ctc(true)   {
-	assert(init_box.size()<f.nb_var());
+CtcExist::CtcExist(const NumConstraint& ctr, const ExprSymbol& y1, const ExprSymbol& y2, const IntervalVector& init_box, double prec) {
+	init(ctr,Array<const ExprSymbol>(y1,y2),init_box,prec);
 }
 
-CtcExist::CtcExist(int nb_var, Ctc& p, double prec,const  IntervalVector& init_box) :
-		nb_var(nb_var-init_box.size()), nb_param(init_box.size()), _ctc(p), _bsc(prec),
-		y_init(init_box), prec(prec), _own_ctc(false)   {
-	assert(init_box.size()<nb_var);
+CtcExist::CtcExist(const NumConstraint& ctr, const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const IntervalVector& init_box, double prec) {
+	init(ctr,Array<const ExprSymbol>(y1,y2,y3),init_box,prec);
+}
+
+CtcExist::CtcExist(const NumConstraint& ctr, const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const IntervalVector& init_box, double prec) {
+	init(ctr,Array<const ExprSymbol>(y1,y2,y3,y4),init_box,prec);
+}
+
+CtcExist::CtcExist(const NumConstraint& ctr, const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const IntervalVector& init_box, double prec) {
+	init(ctr,Array<const ExprSymbol>(y1,y2,y3,y4,y5),init_box,prec);
+}
+
+CtcExist::CtcExist(const NumConstraint& ctr, const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const ExprSymbol& y6, const IntervalVector& init_box, double prec) {
+	init(ctr,Array<const ExprSymbol>(y1,y2,y3,y4,y5,y6),init_box,prec);
+}
+
+void CtcExist::init(const NumConstraint& ctr, const Array<const ExprSymbol>& y, const IntervalVector& init_box, double prec) {
+
+	assert(y.size()>0);
+	assert(ctr.f.nb_arg()>y.size());
+	assert(init_box.size()==y.size());
+
+	nb_var = ctr.f.nb_arg()-y.size();
+
+	nb_param = y.size();
+
+	ctc = new CtcFwdBwd(ctr);
+
+	bsc = new LargestFirst(prec);
+
+	y_init.resize(nb_param);
+
+	y_init = init_box;
+
+	vars.resize(ctr.f.nb_arg());
+
+	vars.set_all(); // by default all are variables
+
+	for (int i=0; i<ctr.f.nb_arg(); i++) {
+		int j=0;
+		while (j<y.size() && strcmp(ctr.f.arg(i).name,y[j].name)!=0) j++;
+		if (j<y.size())    // ths ith argument is found in y
+			vars.unset(i); //  --> marked as a parameter
+	}
+	assert(vars.nb_set()==nb_var);
+
+	this->prec = prec;
+
+	this->_own_ctc = true;
+}
+
+CtcExist::CtcExist(Ctc& ctc, const BoolMask& vars, const IntervalVector& init_box, double prec) :
+	nb_var(vars.nb_set()), nb_param(vars.size()-nb_var), ctc(&ctc), bsc(new LargestFirst(prec)),
+	y_init(init_box), vars(vars), prec(prec), _own_ctc(false) {
+
+	assert(vars.nb_unset()==init_box.size());
+
 }
 
 CtcExist::~CtcExist(){
-	if (_own_ctc) delete &_ctc;
-}
-
-IntervalVector& CtcExist::getInit() {
-	return y_init;
-}
-
-void CtcExist::setInit(IntervalVector& init) {
-	y_init = init;
+	if (_own_ctc) delete ctc;
+	delete bsc;
 }
 
 void CtcExist::contract(IntervalVector& x, IntervalVector& y) {
 	// create the full box by concatening x and y
-	IntervalVector fullbox=cart_prod(x,y);
+	int jx=0;
+	int jy=0;
+	IntervalVector fullbox(nb_var+nb_param);
 
-	_ctc.contract(fullbox);
+	for (int i=0; i<nb_var+nb_param; i++) {
+		if (vars[i]) fullbox[i]=x[jx++];
+		else         fullbox[i]=y[jy++];
+	}
+	ctc->contract(fullbox);
 
-	x=fullbox.subvector(0,nb_var-1);
-	y=fullbox.subvector(nb_var,nb_var+nb_param-1);
+	jx=jy=0;
+	for (int i=0; i<nb_var+nb_param; i++) {
+		if (vars[i]) x[jx++]=fullbox[i];
+		else         y[jy++]=fullbox[i];
+	}
 }
 
 
@@ -77,7 +129,7 @@ void CtcExist::contract(IntervalVector& box) {
 		// get the domain of variables
 		x_save = l.top().first;
 		// get and immediately bisect the domain of parameters (strategy inspired by Optimizer)
-		pair<IntervalVector,IntervalVector> cut = _bsc.bisect(l.top().second);
+		pair<IntervalVector,IntervalVector> cut = bsc->bisect(l.top().second);
 		
 		l.pop();
 
