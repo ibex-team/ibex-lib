@@ -63,7 +63,7 @@ Ctc* negation(const NumConstraint& c) {
                 /** 
                  * OPTIMIZATION: discard negation in case of equality
                  */
-		return rec(new CtcIdentity(c.f.nb_var()));
+		return rec(new CtcIdentity());
 		//return rec(new CtcUnion(*rec(new CtcFwdBwd(c.f, LT)), *rec(new CtcFwdBwd(c.f, GT))));
         }
 	else
@@ -127,7 +127,7 @@ JNIEXPORT void JNICALL Java_Ibex_add_1int_1ctr(JNIEnv *env, jobject o, jint nb_v
 	sys.push_back(NULL);
 	options.push_back(INTEGER);
 	ctc.push_back(rec(new CtcInteger(nb_var,BoolMask(nb_var,true))));
-	neg.push_back(rec(new CtcIdentity(nb_var)));
+	neg.push_back(rec(new CtcIdentity()));
 }
 
 JNIEXPORT jint JNICALL Java_Ibex_contract__I_3D(JNIEnv *env, jobject o, jint n, jdoubleArray domains) {
@@ -162,7 +162,7 @@ JNIEXPORT jint JNICALL Java_Ibex_contract__I_3DI(JNIEnv *env, jobject, jint n, j
 	jint size  = env->GetArrayLength(domains);
 	jint result = NOTHING; // by default
 
-	IntervalVector box(ctc[n]->nb_var); // warning: sys[n]==NULL for INTEGER
+	IntervalVector box(size/2); // warning: sys[n]==NULL for INTEGER
 	read_box(env,d,size,box);
 
 	IntervalVector savebox(box);
@@ -278,11 +278,11 @@ JNIEXPORT jint JNICALL Java_Ibex_inflate(JNIEnv *env, jobject, jint n, jdoubleAr
 	jdouble* d2 = env->GetDoubleArrayElements(p, NULL);
 	jint size2  = env->GetArrayLength(p);
 
-	IntervalVector x(ctc[n]->nb_var); // warning: sys[n]==NULL for INTEGER
+	IntervalVector x(size/2); // warning: sys[n]==NULL for INTEGER
 	read_box(env,d,size,x);
 
-	IntervalVector xin(ctc[n]->nb_var);
-	for (int i=0; i<ctc[n]->nb_var; i++) xin[i]=d2[i];
+	IntervalVector xin(size/2);
+	for (int i=0; i<size/2; i++) xin[i]=d2[i];
 
 	IntervalVector savebox(x);
 
