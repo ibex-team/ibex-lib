@@ -15,7 +15,7 @@ namespace ibex {
 
 // the constructor
 LinearRelaxAffine2::LinearRelaxAffine2(const System& sys1) :
-				LinearRelax(sys1) {
+				LinearRelax(sys1), sys(sys1) {
 
 }
 

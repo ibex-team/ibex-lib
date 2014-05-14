@@ -24,7 +24,15 @@ namespace ibex {
  */
 class LinearRelax {
 public:
+	/**
+	 * \brief Build a relaxation for a system
+	 */
 	LinearRelax(const System& sys);
+
+	/**
+	 * \brief Build a relaxation of nb_ctr constraints.
+	 */
+	LinearRelax(int nb_ctr, int nb_var, int goal_var=-1);
 
 	virtual ~LinearRelax();
 
@@ -43,10 +51,41 @@ public:
 	bool isInner(IntervalVector & box, const System& sys, int j);
 
 	/**
-	 * \brief The system linearized
+	 * \brief Number of variables
 	 */
-	const System& sys;
+	int nb_var() const;
+
+	/**
+	 * \brief (Maximal?) number of constraints
+	 */
+	int nb_ctr() const;
+
+	/**
+	 * \brief Goal variable, if any. -1 otherwise.
+	 */
+	int goal_var() const;
+
+private:
+	int _nb_ctr;
+	int _nb_var;
+	int _goal_var;
 };
+
+
+/*================================== inline implementations ========================================*/
+
+inline int LinearRelax::nb_var() const {
+	return _nb_var;
+}
+
+inline int LinearRelax::nb_ctr() const {
+	return _nb_ctr;
+}
+
+inline int LinearRelax::goal_var() const {
+	return _goal_var;
+}
+
 
 } // end namespace ibex
 #endif // __IBEX_LINEAR_RELAXATION_H__

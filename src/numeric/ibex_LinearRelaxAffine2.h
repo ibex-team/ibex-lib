@@ -40,6 +40,10 @@ public:
   the 2 bounds of each variable */
 	int linearization( IntervalVector & box, LinearSolver *mysolver);
 
+	/**
+	 * \brief The system
+	 */
+	const System& sys;
 };
 
 } // end namespace ibex

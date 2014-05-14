@@ -9,21 +9,16 @@
 //============================================================================
 
 #include "ibex_CtcPolytopeHull.h"
-#include "ibex_ExtendedSystem.h"
 
 using namespace std;
 
 namespace ibex {
 
-CtcPolytopeHull::CtcPolytopeHull(LinearRelax& lr, ctc_mode cmode, int max_iter, int time_out, double eps, Interval limit_diam, bool init_lp) : nb_var(lr.sys.nb_var), lr(lr), sys(lr.sys),
-		goal_var(-1), cmode(cmode), limit_diam_box(eps>limit_diam.lb()? eps : limit_diam.lb(), limit_diam.ub()) {
-
-	if (dynamic_cast<const ExtendedSystem*>(&lr.sys)) {
-		(int&) goal_var=((const ExtendedSystem&) lr.sys).goal_var();
-	}
+CtcPolytopeHull::CtcPolytopeHull(LinearRelax& lr, ctc_mode cmode, int max_iter, int time_out, double eps, Interval limit_diam, bool init_lp) : nb_var(lr.nb_var()), lr(lr),
+		goal_var(lr.goal_var()), cmode(cmode), limit_diam_box(eps>limit_diam.lb()? eps : limit_diam.lb(), limit_diam.ub()) {
 
 	mylinearsolver = NULL;
-	if (init_lp) mylinearsolver = new LinearSolver(nb_var, lr.sys.nb_ctr, max_iter, time_out, eps);
+	if (init_lp) mylinearsolver = new LinearSolver(nb_var, lr.nb_ctr(), max_iter, time_out, eps);
 
 }
 

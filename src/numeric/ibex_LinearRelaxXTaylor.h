@@ -78,6 +78,12 @@ public:
 
 
 private:
+
+	/**
+	 * \brief The system
+	 */
+	const System& sys;
+
 	/**
 	 * \brief Goal constraint (in case of extended system, -1 otherwise).
 	 */

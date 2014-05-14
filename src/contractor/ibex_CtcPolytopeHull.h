@@ -93,11 +93,6 @@ protected:
 	LinearRelax& lr;
 
 	/**
-	 * \brief The system
-	 */
-	const System& sys;
-
-	/**
 	 * \brief Index of the variable corresponding to the objective function
 	 *
 	 * -1 if none (unconstrained problem). */

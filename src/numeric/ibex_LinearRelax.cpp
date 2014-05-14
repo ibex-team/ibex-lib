@@ -9,10 +9,20 @@
 //============================================================================
 
 #include "ibex_LinearRelax.h"
+#include "ibex_ExtendedSystem.h"
 
 namespace ibex {
 
-LinearRelax::LinearRelax(const System& sys) : sys(sys) { }
+LinearRelax::LinearRelax(const System& sys) : _nb_ctr(sys.nb_ctr), _nb_var(sys.nb_var), _goal_var(-1)/* by default */ {
+	if (dynamic_cast<const ExtendedSystem*>(&sys)) {
+		_goal_var=((const ExtendedSystem&) sys).goal_var();
+	}
+
+}
+
+LinearRelax::LinearRelax(int nb_ctr, int nb_var, int goal_var) : _nb_ctr(nb_ctr), _nb_var(nb_var), _goal_var(goal_var) {
+
+}
 
 LinearRelax::~LinearRelax() { }
 
