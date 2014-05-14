@@ -11,6 +11,7 @@
 
 #include "TestIntervalVector.h"
 #include "ibex_Interval.h"
+#include "ibex_SetMembership.h"
 #include "utils.h"
 
 using namespace std;

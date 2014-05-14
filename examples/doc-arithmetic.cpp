@@ -10,6 +10,7 @@
 
 
 #include "ibex.h"
+#include <fstream>
 
 using namespace ibex;
 using namespace std;

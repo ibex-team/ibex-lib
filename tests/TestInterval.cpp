@@ -11,6 +11,7 @@
 
 #include "TestInterval.h"
 #include "utils.h"
+#include "ibex_SetMembership.h"
 #include <float.h>
 
 using namespace std;
