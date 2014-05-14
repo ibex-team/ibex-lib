@@ -19,7 +19,8 @@ namespace ibex {
 const double Bsc::default_ratio = 0.45;
 
 Bsc::Bsc(double prec) : _prec(1,prec) {
-	if (prec<=0) ibex_error("precision must be a nonnegative number");
+	if (prec<0) ibex_error("precision must be a nonnegative number");
+	// note: prec==0 allowed with, e.g., LargestFirst
 }
 
 Bsc::Bsc(const Vector& prec) : _prec(prec) {

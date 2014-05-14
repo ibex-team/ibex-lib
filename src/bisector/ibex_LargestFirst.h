@@ -28,11 +28,11 @@ public:
 	/**
 	 * \brief Create a bisector with largest first heuristic.
 	 *
-	 * \param prec             - see #Bsc::Bsc(double).
+	 * \param prec             - see #Bsc::Bsc(double). By default, 0 which means an endless uniform bisection process.
 	 * \param ratio (optional) - the ratio between the diameters of the left and the right parts of the
 	 *                           bisected interval. Default value is 0.45.
 	 */
-	LargestFirst(double prec, double ratio=Bsc::default_ratio);
+	LargestFirst(double prec=0, double ratio=Bsc::default_ratio);
 
 	/**
 	 * \brief Create a bisector with largest first heuristic.

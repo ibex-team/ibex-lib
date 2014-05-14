@@ -529,7 +529,8 @@ inline Interval tan(const Interval& x) {
 	INTERVAL r;
 
 	Interval nb_period = (x+INTERVAL((x.lb()<0?-1:1)*Interval::PI.lb()/2.0,(x.ub()<0?-1:1)*Interval::PI.ub()/2.0))/Interval::PI;
-	if (((int) nb_period.lb())< ((int) nb_period.ub())) return Interval(NEG_INFINITY, POS_INFINITY);
+	if (nb_period.is_unbounded() ||
+		(((int) nb_period.lb())< ((int) nb_period.ub()))) return Interval(NEG_INFINITY, POS_INFINITY);
 
 	BiasTan (Bias(r), Bias(x.itv));
 	return r;
@@ -638,7 +639,23 @@ inline Interval acosh(const Interval& x) {
 
 inline Interval asinh(const Interval& x) {
 	if (x.is_empty()) return Interval::EMPTY_SET;
-	else return ArSinh(x.itv);
+	INTERVAL r;
+	if (x.lb()==NEG_INFINITY)
+		if (x.ub()==POS_INFINITY) return Interval::ALL_REALS;
+		else {
+			BiasArSinh (Bias(r), Bias(INTERVAL(x.ub())));
+			return Interval(NEG_INFINITY,Sup(r));
+		}
+	else {
+		if (x.ub()==POS_INFINITY) {
+			BiasArSinh (Bias(r), Bias(INTERVAL(x.lb())));
+			return Interval(Inf(r),POS_INFINITY);
+		}
+		else {
+			BiasArSinh (Bias(r), Bias(x.itv));
+			return r;
+		}
+	}
 }
 
 inline Interval atanh(const Interval& x) {
