@@ -57,6 +57,7 @@ void TestIbex::check(const IntervalVector& y_actual, const IntervalVector& y_exp
 
 bool TestIbex::almost_eq(const Interval& y_actual, const Interval& y_expected, double err) {
 	if (y_actual.is_empty() && y_expected.is_empty()) return true;
+	if (y_actual.is_empty() || y_expected.is_empty()) return false;
 
 	if (y_actual.lb()==NEG_INFINITY)
 		if (y_expected.lb()!=NEG_INFINITY) return false;

@@ -172,11 +172,10 @@ void TestFunction::apply01() {
 	Variable x("x");
 	Variable y("y");
 	Function f(x,y,x+y,"f");
-	Interval c(0,1);
+	Interval c(1,1);
 	Variable z("z");
 	Function f2(z,f(z,c));
-
-	TEST_ASSERT(sameExpr(f2.expr(),"f(z,[0, 1])"));
+	TEST_ASSERT(sameExpr(f2.expr(),"f(z,1)"));
 }
 
 void TestFunction::from_string01() {

@@ -26,7 +26,7 @@ void TestCtcNotIn::check_not_in(const Interval& x_input, const Interval& x_expec
 		c.contract(x);
 	} catch(EmptyBoxException&) { }
 
- 	TEST_ASSERT(almost_eq(x[0],x_expected,ERROR));
+ 	TEST_ASSERT(almost_eq(x.is_empty()? Interval::EMPTY_SET : x[0],x_expected,ERROR));
 }
 
 void TestCtcNotIn::contract01() {
@@ -38,7 +38,7 @@ void TestCtcNotIn::contract02() {
 }
 
 void TestCtcNotIn::contract03() {
-	check_not_in(Interval(0.1,1.9),Interval::EMPTY_SET);
+	check_not_in(Interval(0.1,0.9),Interval::EMPTY_SET);
 }
 
 void TestCtcNotIn::contract04() {

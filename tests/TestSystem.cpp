@@ -16,6 +16,8 @@
 #include "ibex_SyntaxError.h"
 #include "ibex_NormalizedSystem.h"
 
+#include <sstream>
+
 using namespace std;
 
 namespace ibex {
@@ -171,9 +173,11 @@ void TestSystem::eq_only01() {
 	TEST_ASSERT(sys.ctrs.size()==2);
 	TEST_ASSERT(sys.f.nb_arg()==2);
 	TEST_ASSERT(sys.f.nb_var()==2);
-	TEST_ASSERT(sys.f.image_dim()==2)
+	TEST_ASSERT(sys.f.image_dim()==2);
 
-	TEST_ASSERT(sameExpr(sys.ctrs[0].f.expr(),"((x+y)-[-1, 1])"));
+	stringstream expr0;
+	expr0 << "((x+y)-" << Interval(-1,1) << ")"; // the way the interval is printed depends on the library
+	TEST_ASSERT(sameExpr(sys.ctrs[0].f.expr(),expr0.str().c_str()));
 	TEST_ASSERT(sameExpr(sys.ctrs[1].f.expr(),"(x-y)"));
 	TEST_ASSERT(sys.ctrs[0].op==EQ);
 	TEST_ASSERT(sys.ctrs[1].op==EQ);
