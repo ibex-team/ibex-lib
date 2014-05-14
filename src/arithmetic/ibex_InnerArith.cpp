@@ -9,7 +9,6 @@
 //============================================================================
 
 #include "ibex_InnerArith.h"
-#include "ibex_SetMembership.h"
 
 #include <stdlib.h>
 #include <cassert>

@@ -10,7 +10,6 @@
 
 #include "ibex_QInter.h"
 #include "ibex_BitSet.h"
-#include "ibex_SetMembership.h"
 
 #include <algorithm>
 

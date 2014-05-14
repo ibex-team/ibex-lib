@@ -11,7 +11,6 @@
 
 #include "ibex_Gradient.h"
 #include "ibex_Eval.h"
-#include "ibex_SetMembership.h"
 
 namespace ibex {
 

@@ -9,9 +9,6 @@
  * Created     : May 13, 2014
  * ---------------------------------------------------------------------------- */
 
-#ifndef __IBEX_SET_MEMBERSHIP_H__
-#define __IBEX_SET_MEMBERSHIP_H__
-
 #include "ibex_IntervalMatrixArray.h"
 
 namespace ibex {
@@ -185,10 +182,10 @@ inline bool is_disjoint(const T& x, const S& y) {
 
 #define __IBEX_GENERATE_SET_OP__(S2,COND) \
   \
-  inline bool Interval::COND(const S2::SCALAR& x) const                  { return ibex::COND(*this,x); } \
-  inline bool IntervalVector::COND(const S2::VECTOR& x) const            { return ibex::COND(*this,x); } \
-  inline bool IntervalMatrix::COND(const S2::MATRIX& x) const            { return ibex::COND(*this,x); } \
-  inline bool IntervalMatrixArray::COND(const S2::MATRIX_ARRAY& x) const { return ibex::COND(*this,x); }
+  bool Interval::COND(const S2::SCALAR& x) const                  { return ibex::COND(*this,x); } \
+  bool IntervalVector::COND(const S2::VECTOR& x) const            { return ibex::COND(*this,x); } \
+  bool IntervalMatrix::COND(const S2::MATRIX& x) const            { return ibex::COND(*this,x); } \
+  bool IntervalMatrixArray::COND(const S2::MATRIX_ARRAY& x) const { return ibex::COND(*this,x); }
 
 __IBEX_GENERATE_SET_OP__(Interval,is_subset)
 __IBEX_GENERATE_SET_OP__(Interval,is_strict_subset)
@@ -270,4 +267,3 @@ __IBEX_GENERATE_SET_OP__(Interval,is_disjoint)
 
 } // namespace ibex
 
-#endif // __IBEX_SET_MEMBERSHIP_H__

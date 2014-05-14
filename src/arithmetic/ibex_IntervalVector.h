@@ -718,6 +718,19 @@ inline bool IntervalVector::operator!=(const IntervalVector& x) const {
 	return !(*this==x);
 }
 
+//__IBEX_GENERATE_BASIC_SET_OP_VECTOR_AND__(Interval,Interval,basic_is_subset)
+//__IBEX_GENERATE_BASIC_SET_OP_VECTOR_AND__(Interval,Interval,basic_is_strict_subset)
+//__IBEX_GENERATE_BASIC_SET_OP_VECTOR_AND__(Interval,__Real,  basic_contains)
+//__IBEX_GENERATE_BASIC_SET_OP_VECTOR_AND__(Interval,__Real,  basic_strictly_contains)
+//__IBEX_GENERATE_BASIC_SET_OP_VECTOR_AND__(Interval,Interval,basic_intersects)
+//__IBEX_GENERATE_BASIC_SET_OP_VECTOR_AND__(Interval,Interval,basic_strictly_intersects)
+//
+//__IBEX_GENERATE_BASIC_SET_OP_VECTOR_OR__ (Interval,Interval,basic_is_disjoint)
+//
+//inline bool IntervalVector::is_subset(const IntervalVector& x) const        { return ibex::is_subset(*this,x); }
+//inline bool IntervalVector::is_strict_subset(const IntervalVector& x) const { return ibex::is_strict_subset(*this,x); }
+
+
 inline int IntervalVector::size() const {
 	return n;
 }
