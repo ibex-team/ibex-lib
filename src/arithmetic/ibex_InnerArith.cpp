@@ -9,6 +9,7 @@
 //============================================================================
 
 #include "ibex_InnerArith.h"
+#include "ibex_SetMembership.h"
 
 #include <stdlib.h>
 #include <cassert>
@@ -124,9 +125,9 @@ double projy(double z, double x, int op, bool round_up) {
  * \pre xin.is_empty()<=>yin.is_empty()
  */
 bool iproj_cmp_mono_op(bool geq, double z, Interval& x, Interval& y, const Interval& xin, const Interval& yin, int op, bool inc_var1, bool inc_var2) {
-	volatile double xmin, xmax;
-	volatile double x0,y0;
-	volatile double y1,y2;
+	/*volatile?*/ double xmin, xmax;
+	/*volatile?*/ double x0,y0;
+	/*volatile?*/ double y1,y2;
 	bool inflate=!xin.is_empty();
 
 	assert(xin.is_subset(x));

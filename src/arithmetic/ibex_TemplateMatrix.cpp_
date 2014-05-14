@@ -11,6 +11,8 @@
 
 #include "ibex_IntervalMatrix.h"
 #include "ibex_Affine2Matrix.h"
+#include "ibex_SetMembership.h"
+
 #include <cassert>
 
 namespace ibex {

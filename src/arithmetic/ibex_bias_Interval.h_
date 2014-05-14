@@ -282,29 +282,6 @@ inline double Interval::mid() const {
 	}
 }
 
-inline bool Interval::is_subset(const Interval& x) const {
-	return is_empty() || (!x.is_empty() && x.lb()<=lb() && x.ub()>=ub());
-}
-
-inline bool Interval::is_superset(const Interval& x) const {
-	return x.is_subset(*this);
-}
-
-inline bool Interval::contains(double d) const {
-	if (is_empty()) return false;
-	else return d>=lb() && d<=ub();
-}
-
-inline bool Interval::strictly_contains(double d) const {
-	if (is_empty()) return false;
-	else return d>lb() && d<ub();
-}
-
-inline bool Interval::is_disjoint(const Interval &x) const {
-	if (is_empty() || x.is_empty()) return true;
-	return lb()>x.ub() || ub()<x.lb();
-}
-
 inline bool Interval::is_empty() const {
 	return ub()==NEG_INFINITY; //*this==EMPTY_SET;
 }

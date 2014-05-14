@@ -12,6 +12,8 @@
 #include "ibex_Linear.h"
 #include "ibex_LinearException.h"
 #include "ibex_EmptyBoxException.h"
+#include "ibex_SetMembership.h"
+
 #include <cassert>
 
 using namespace std;

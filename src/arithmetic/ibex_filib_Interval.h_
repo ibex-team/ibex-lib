@@ -274,32 +274,6 @@ inline double Interval::mid() const {
 	}
 }
 
-inline bool Interval::is_subset(const Interval& x) const {
-	return itv.subset(x.itv);
-}
-
-/*inline bool Interval::is_strict_subset(const Interval& x) const {
-	return x.itv.interior(itv);
-}*/
-
-inline bool Interval::is_superset(const Interval& x) const {
-	return itv.superset(x.itv);
-}
-
-
-inline bool Interval::contains(double d) const {
-	return itv.contains(d);
-}
-
-inline bool Interval::strictly_contains(double d) const {
-	if (is_empty()) return false;
-		else return d>lb() && d<ub();
-}
-
-inline bool Interval::is_disjoint(const Interval &x) const {
-	return itv.disjoint(x.itv);
-}
-
 inline bool Interval::is_empty() const {
 	return itv.isEmpty();
 }

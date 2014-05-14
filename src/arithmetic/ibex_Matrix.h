@@ -17,6 +17,8 @@
 
 namespace ibex {
 
+class MatrixArray; // declared only for friendship
+
 /**
  * \ingroup arithmetic
  *
@@ -42,7 +44,7 @@ public:
 	Matrix(const Matrix& m);
 
 	/**
-	 * \brief Create an interval matrix from an array of doubles.
+	 * \brief Create a matrix from an array of doubles.
 	 *
 	 * Create the Matrix: <br>
 	 *  x[0] ; ... ; x[n-1]   <br>
@@ -74,7 +76,12 @@ public:
 	/**
 	 * \brief True if one entry of (*this) differs from m.
 	 */
-	bool operator!=(const Matrix& m);
+	bool operator!=(const Matrix& m) const;
+
+	/**
+	 * \brief Resize the matrix
+	 */
+	void resize(int nb_rows, int nb_cols);
 
 	/**
 	 * \brief Return the number of columns.
@@ -201,6 +208,10 @@ public:
     operator const ExprConstant&() const;
 
 private:
+	friend class MatrixArray;
+
+	Matrix(); // for MatrixArray
+
 	int _nb_rows;
 	int _nb_cols;
 	Vector* M;
@@ -259,7 +270,7 @@ std::ostream& operator<<(std::ostream& os, const Matrix&);
 /*================================== inline implementations ========================================*/
 
 
-inline bool Matrix::operator!=(const Matrix& m) {
+inline bool Matrix::operator!=(const Matrix& m) const {
 	return !(*this==m);
 }
 

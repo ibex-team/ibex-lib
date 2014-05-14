@@ -145,36 +145,6 @@ inline double Interval::mid() const {
 	return m;
 }
 
-inline bool Interval::is_subset(const Interval& x) const {
-	return x.itv.set_contains(itv);
-}
-
-/* the semantic of goal does not match 
-inline bool Interval::is_strict_subset(const Interval& x) const {
-	return x.itv.set_strictly_contains(itv);
-} */
-
-inline bool Interval::is_superset(const Interval& x) const {
-	return itv.set_contains(x.itv);
-}
-
-/* the semantic of goal does not match
-inline bool Interval::is_strict_superset(const Interval& x) const {
-	return itv.set_strictly_contains(x.itv);
-} */
-
-inline bool Interval::contains(double d) const {
-	return itv.set_contains(d);
-}
-
-inline bool Interval::strictly_contains(double d) const {
-	return itv.set_strictly_contains(d);
-}
-
-inline bool Interval::is_disjoint(const Interval &x) const {
-	return itv.set_disjoint(x.itv);
-}
-
 inline bool Interval::is_empty() const {
 	return itv.is_empty();
 }

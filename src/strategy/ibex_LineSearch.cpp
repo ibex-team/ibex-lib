@@ -10,6 +10,7 @@
 
 #include <cassert>
 #include "ibex_LineSearch.h"
+#include "ibex_SetMembership.h"
 
 using namespace std;
 

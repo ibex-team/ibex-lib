@@ -198,7 +198,6 @@ public:
 	 */
 	bool is_zero() const;
 
-
 	/**
 	 * \brief True iff this interval matrix is a subset of \a x.
 	 *
@@ -242,6 +241,47 @@ public:
 	 * \sa #ibex::Interval::is_strict_superset(const Interval&) const.
 	 */
 	bool is_strict_superset(const IntervalMatrix& x) const;
+
+	/**
+	 * \brief True iff this interval matrix contains \a x.
+	 *
+	 * \pre Dimension of \a x must be equal to the dimension of (*this).
+	 * \sa #ibex::Interval::contains(double) const.
+	 */
+	bool contains(const Matrix& x) const;
+
+	/**
+	 * \brief True iff \a x is in the interior of this interval matrix
+	 *
+	 * \pre Dimension of \a x must be equal to the dimension of (*this).
+	 * \sa #ibex::Interval::strictly_contains(double) const.
+	 */
+	bool strictly_contains(const Matrix& x) const;
+
+	/**
+	 * \brief True iff this interval matrix intersects \a x.
+	 *
+	 * \pre Dimension of \a x must be equal to the dimension of (*this).
+	 * \sa #ibex::Interval::intersects(double) const.
+	 */
+	bool intersects(const IntervalMatrix& x) const;
+
+	/**
+	 * \brief True iff this interval matrix intersects \a x and the intersection has a non-null volume
+	 *
+	 * \pre Dimension of \a x must be equal to the dimension of (*this).
+	 * \sa #ibex::Interval::strictly_intersects(double) const.
+	 */
+	bool strictly_intersects(const IntervalMatrix& x) const;
+
+	/**
+	 * \brief True iff this interval matrix does not intersect \a x.
+	 *
+	 * \pre Dimension of \a x must be equal to the dimension of (*this).
+	 * \sa #ibex::Interval::is_disjoint(double) const.
+	 */
+	bool is_disjoint(const IntervalMatrix& x) const;
+
 
 
 	/**
@@ -633,14 +673,6 @@ inline void IntervalMatrix::set_row(int row1, const IntervalVector& v1) {
 
 inline bool IntervalMatrix::is_empty() const {
 	return (*this)[0].is_empty();
-}
-
-inline bool IntervalMatrix::is_superset(const IntervalMatrix& x) const {
-	return x.is_subset(*this);
-}
-
-inline bool IntervalMatrix::is_strict_superset(const IntervalMatrix& x) const {
-	return x.is_strict_subset(*this);
 }
 
 } // namespace ibex

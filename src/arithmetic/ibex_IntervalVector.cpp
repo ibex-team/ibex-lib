@@ -317,10 +317,7 @@ Vector          IntervalVector::mid() const                                     
 Vector          IntervalVector::mig() const                                       { return _mig(*this); }
 Vector          IntervalVector::mag() const                                       { return _mag(*this); }
 bool            IntervalVector::is_flat() const                                   { return _is_flat(*this); }
-bool            IntervalVector::contains(const Vector& x) const                   { return _contains(*this,x); }
 bool            IntervalVector::is_unbounded() const                              { return _is_unbounded(*this); }
-bool            IntervalVector::is_subset(const IntervalVector& x) const          { return _is_subset(*this,x); }
-bool            IntervalVector::is_strict_subset(const IntervalVector& x) const   { return _is_strict_subset(*this,x); }
 bool            IntervalVector::is_zero() const                                   { return _is_zero(*this); }
 bool            IntervalVector::is_bisectable() const                             { return _is_bisectable(*this); }
 Vector          IntervalVector::rad() const                                       { return _rad(*this); }

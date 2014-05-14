@@ -14,6 +14,7 @@
 
 #include <iostream>
 #include "ibex_IntervalMatrix.h"
+#include "ibex_MatrixArray.h"
 
 namespace ibex {
 
@@ -100,6 +101,91 @@ public:
 	 * \brief Return a const reference to the ith matrix.
 	 */
 	const IntervalMatrix& operator[](int i) const;
+
+	/**
+	 * \brief True iff this interval matrix array is a subset of \a x.
+	 *
+	 * \pre Dimension of \a x must be equal to the dimension of this matrix.
+
+	 * \note Always return true if this interval matrix array is empty.
+
+	 * \sa #ibex::Interval::is_subset(const Interval&) const.
+	 */
+	bool is_subset(const IntervalMatrixArray& x) const;
+
+	/**
+	 * \brief True iff this interval matrix array is inside the interior of \a x.
+	 *
+	 * \pre Dimension of \a x must be equal to the dimension of this matrix.
+	 *
+	 * \note return true if this interval matrix array is empty and \a x not.
+	 *
+	 * \sa #ibex::Interval::is_strict_subset(const Interval&) const.
+	 */
+	bool is_strict_subset(const IntervalMatrixArray& x) const;
+
+	/**
+	 * \brief True iff this interval matrix array is a superset of \a x.
+	 *
+	 * \pre Dimension of \a x must be equal to the dimension of this matrix.
+
+	 * \note Always return true if \a x is empty.
+
+	 * \sa #ibex::Interval::is_superset(const Interval&) const.
+	 */
+	bool is_superset(const IntervalMatrixArray& x) const;
+
+	/**
+	 * \brief True iff \a x is inside the interior of (*this).
+	 *
+	 * \pre Dimension of \a x must be equal to the dimension of this matrix.
+	 *
+	 * \note return true if x is empty and not (*this).
+	 *
+	 * \sa #ibex::Interval::is_strict_superset(const Interval&) const.
+	 */
+	bool is_strict_superset(const IntervalMatrixArray& x) const;
+
+	/**
+	 * \brief True iff this interval matrix array contains \a x.
+	 *
+	 * \pre Dimension of \a x must be equal to the dimension of (*this).
+	 * \sa #ibex::Interval::contains(double) const.
+	 */
+	bool contains(const MatrixArray& x) const;
+
+	/**
+	 * \brief True iff \a x is in the interior of this interval matrix array.
+	 *
+	 * \pre Dimension of \a x must be equal to the dimension of (*this).
+	 * \sa #ibex::Interval::strictly_contains(double) const.
+	 */
+	bool strictly_contains(const MatrixArray& x) const;
+
+	/**
+	 * \brief True iff this interval matrix array intersects \a x.
+	 *
+	 * \pre Dimension of \a x must be equal to the dimension of (*this).
+	 * \sa #ibex::Interval::intersects(double) const.
+	 */
+	bool intersects(const IntervalMatrixArray& x) const;
+
+	/**
+	 * \brief True iff this interval matrix array intersects \a x and the intersection has a non-null volume
+	 *
+	 * \pre Dimension of \a x must be equal to the dimension of (*this).
+	 * \sa #ibex::Interval::strictly_intersects(double) const.
+	 */
+	bool strictly_intersects(const IntervalMatrixArray& x) const;
+
+	/**
+	 * \brief True iff this interval matrix array does not intersect \a x.
+	 *
+	 * \pre Dimension of \a x must be equal to the dimension of (*this).
+	 * \sa #ibex::Interval::is_disjoint(double) const.
+	 */
+	bool is_disjoint(const IntervalMatrixArray& x) const;
+
 
 private:
 	IntervalMatrix* array;

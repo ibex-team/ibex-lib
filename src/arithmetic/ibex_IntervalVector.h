@@ -256,22 +256,6 @@ public:
 	bool is_flat() const;
 
 	/**
-	 * \brief True iff this interval vector contains \a x.
-	 *
-	 * \pre Dimension of \a x must be equal to the dimension of (*this).
-	 * \sa #ibex::Interval::contains(double) const.
-	 */
-	bool contains(const Vector& x) const;
-	
-	/**
-	 * \brief True iff this interval vector intersects \a x.
-	 *
-	 * \pre Dimension of \a x must be equal to the dimension of (*this), and requires
-	 *      both intervals to be FINITE.
-	 */
-	bool intersects(const IntervalVector& x) const;
-
-	/**
 	 * \brief true iff this interval vector contains an infinite bound.
 	 *
 	 * \note An empty interval vector is always bounded.
@@ -322,6 +306,45 @@ public:
 	 */
 	bool is_strict_superset(const IntervalVector& x) const;
 
+	/**
+	 * \brief True iff this interval vector contains \a x.
+	 *
+	 * \pre Dimension of \a x must be equal to the dimension of (*this).
+	 * \sa #ibex::Interval::contains(double) const.
+	 */
+	bool contains(const Vector& x) const;
+
+	/**
+	 * \brief True iff \a x is in the interior of this interval vector
+	 *
+	 * \pre Dimension of \a x must be equal to the dimension of (*this).
+	 * \sa #ibex::Interval::strictly_contains(double) const.
+	 */
+	bool strictly_contains(const Vector& x) const;
+
+	/**
+	 * \brief True iff this interval vector intersects \a x.
+	 *
+	 * \pre Dimension of \a x must be equal to the dimension of (*this).
+	 * \sa #ibex::Interval::intersects(double) const.
+	 */
+	bool intersects(const IntervalVector& x) const;
+
+	/**
+	 * \brief True iff this interval vector intersects \a x and the intersection has a non-null volume
+	 *
+	 * \pre Dimension of \a x must be equal to the dimension of (*this).
+	 * \sa #ibex::Interval::strictly_intersects(double) const.
+	 */
+	bool strictly_intersects(const IntervalVector& x) const;
+
+	/**
+	 * \brief True iff this interval vector does not intersect \a x.
+	 *
+	 * \pre Dimension of \a x must be equal to the dimension of (*this).
+	 * \sa #ibex::Interval::is_disjoint(double) const.
+	 */
+	bool is_disjoint(const IntervalVector& x) const;
 
 	/**
 	 * \brief True iff *this is a vector of zeros.
@@ -683,14 +706,6 @@ inline void IntervalVector::clear() {
 	init(0);
 }
 
-inline bool IntervalVector::intersects(const IntervalVector& x) const {
-	if (x.is_empty() || (*this).is_empty()) return false;
-	for (int i=0; i<n; i++) {
-		if ((vec[i].lb() > x[i].ub()) || (x[i].lb() > vec[i].ub())) return false;
-	}
-	return true;
-}
-
 inline IntervalVector IntervalVector::operator&(const IntervalVector& x) const {
 	return IntervalVector(*this) &= x;
 }
@@ -709,14 +724,6 @@ inline int IntervalVector::size() const {
 
 inline bool IntervalVector::is_empty() const {
 	return (*this)[0].is_empty();
-}
-
-inline bool IntervalVector::is_superset(const IntervalVector& x) const {
-	return x.is_subset(*this);
-}
-
-inline bool IntervalVector::is_strict_superset(const IntervalVector& x) const {
-	return x.is_strict_subset(*this);
 }
 
 inline double IntervalVector::max_diam() const {

@@ -10,6 +10,8 @@
 
 #include "ibex_QInter.h"
 #include "ibex_BitSet.h"
+#include "ibex_SetMembership.h"
+
 #include <algorithm>
 
 bool leftpaircomp (const pair<double,int>& i, const pair<double,int>& j) { return (i.first<j.first); };

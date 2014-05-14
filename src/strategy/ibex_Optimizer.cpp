@@ -22,6 +22,7 @@
 #include "ibex_NoBisectableVariableException.h"
 //#include "ibex_Multipliers.h"
 #include "ibex_PdcFirstOrder.h"
+#include "ibex_SetMembership.h"
 
 #include <float.h>
 #include <stdlib.h>

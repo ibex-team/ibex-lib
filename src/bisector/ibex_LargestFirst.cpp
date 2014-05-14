@@ -28,7 +28,10 @@ pair<IntervalVector,IntervalVector> LargestFirst::bisect(const IntervalVector& b
 	double l=0.0;
 	for (int i=0; i< box.size(); i++)	{
 		if (!too_small(box,i)){
-			if (var==-1) var=i;
+			if (var==-1) {
+				var=i;
+				l = uniform_prec()? box[i].diam() : (box[i].diam()/prec(i));
+			}
 			else {
 				double l_tmp = uniform_prec()? box[i].diam() : (box[i].diam()/prec(i));
 				if (l_tmp>l) {

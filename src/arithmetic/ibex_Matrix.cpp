@@ -15,6 +15,10 @@
 
 namespace ibex {
 
+Matrix::Matrix() : _nb_rows(0), _nb_cols(0), M(NULL) {
+
+}
+
 
 Matrix::Matrix(int nb_rows1, int nb_cols1) : _nb_rows(nb_rows1), _nb_cols(nb_cols1) {
 	assert(nb_rows1>0);
@@ -70,6 +74,35 @@ Matrix& Matrix::operator=(const Matrix& x) {
 
 bool Matrix::operator==(const Matrix& m) const {
 	return _equals(*this,m);
+}
+
+void Matrix::resize(int nb_rows1, int nb_cols1) {
+	assert(nb_rows1>0);
+	assert(nb_cols1>0);
+	assert((M==NULL && _nb_rows==0) || (_nb_rows!=0 && M!=NULL));
+
+	if (nb_rows1==_nb_rows && nb_cols1==_nb_cols) return;
+
+	Vector* M2;
+
+	if (nb_rows1!=_nb_rows)
+		M2 = new Vector[nb_rows1];
+	else
+		M2 = M;
+
+	for (int i=0; i<nb_rows1; i++) {
+		M2[i].resize(nb_cols1);  // filled with 0 by default
+		if (i<_nb_rows) {
+			int min_cols=nb_cols1<_nb_cols?nb_cols1:_nb_cols;
+			for (int j=0; j<min_cols; j++)
+				M2[i][j]=M[i][j];
+		}
+	}
+
+	if (M!=NULL && nb_rows1!=_nb_rows) delete[] M; // M=NULL only in MatrixArray
+	M=M2;
+	_nb_rows = nb_rows1;
+	_nb_cols = nb_cols1;
 }
 
 Matrix Matrix::submatrix(int row_start_index, int row_end_index, int col_start_index, int col_end_index) const {

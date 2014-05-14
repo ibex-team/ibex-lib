@@ -247,7 +247,8 @@ class Interval {
     /**
      * \brief True iff this interval is a subset of \a x.
      *
-     * \note Always return true if *this is empty. */
+     * \note Always return true if *this is empty.
+     */
     bool is_subset(const Interval& x) const;
 
     /**
@@ -255,19 +256,23 @@ class Interval {
      *
      * \note In particular, (-oo,oo) is a strict subset of (-oo,oo)
      * and the empty set is a strict subset of the empty set.
-     * \note Always return true if *this is empty. */
+     * \note Always return true if *this is empty.
+     * \warning The semantic of this operator may change in future releases.
+     */
     bool is_strict_subset(const Interval& x) const;
 
     /**
      * \brief True iff this interval is a superset of \a x.
      *
-     * \note Always return true if x is empty. */
+     * \note Always return true if x is empty.
+     */
     bool is_superset(const Interval& x) const;
 
     /**
      * \brief True iff the interior of *this is a superset of \a x.
      *
      * \note In particular, (-oo,oo) is a strict superset of (-oo,oo)
+     * \warning The semantic of this operator may change in future releases.
      */
     bool is_strict_superset(const Interval& x) const;
 
@@ -276,16 +281,29 @@ class Interval {
      *
      * \note d can also be an "open bound", i.e., infinity.
      * So this function is not restricted to a set-membership
-     * interpretation. */
-    bool contains(double d) const;
+     * interpretation.
+     */
+    bool contains(const double& d) const;
 
     /**
      * \brief True iff the interior of *this contains \a d.
      *
      * \note d can also be an "open bound", i.e., infinity.
      * So this function is not restricted to a set-membership
-     * interpretation. */
-    bool strictly_contains(double d) const;
+     * interpretation.
+     */
+    bool strictly_contains(const double& d) const;
+
+    /**
+     * \brief True iff *this and \a x intersects.
+     */
+    bool intersects(const Interval &x) const;
+
+    /**
+     * \brief True iff *this and \a x intersects and the intersection has a non-null volume.
+     *
+     */
+    bool strictly_intersects(const Interval &x) const;
 
     /**
      * \brief True iff *this and \a x do not intersect.
@@ -855,16 +873,6 @@ inline double Interval::rad() const {
 		double t2= (*this-t).ub();
 		return (t1>t2) ? t1 : t2;
 	}
-}
-
-inline bool Interval::is_strict_subset(const Interval& x) const {
-	return is_empty() ||
-			(!x.is_empty() && (x.lb()==NEG_INFINITY || x.lb()<lb()) &&
-					(x.ub()==POS_INFINITY || x.ub()>ub()));
-}
-
-inline bool Interval::is_strict_superset(const Interval& x) const {
-	return x.is_strict_subset(*this);
 }
 
 inline bool Interval::is_bisectable() const {

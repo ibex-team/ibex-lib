@@ -11,6 +11,7 @@
 #include "ibex_HC4Revise.h"
 #include "ibex_Eval.h"
 #include "ibex_Affine2Eval.h"
+#include "ibex_SetMembership.h"
 
 namespace ibex {
 
