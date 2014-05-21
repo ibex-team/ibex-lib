@@ -202,9 +202,9 @@ public:
 	 * \brief True iff this interval matrix is a subset of \a x.
 	 *
 	 * \pre Dimension of \a x must be equal to the dimension of this matrix.
-
+	 *
 	 * \note Always return true if this interval matrix is empty.
-
+	 *
 	 * \sa #ibex::Interval::is_subset(const Interval&) const.
 	 */
 	bool is_subset(const IntervalMatrix& x) const;
@@ -219,6 +219,28 @@ public:
 	 * \sa #ibex::Interval::is_strict_subset(const Interval&) const.
 	 */
 	bool is_strict_subset(const IntervalMatrix& x) const;
+
+	/**
+	 * \brief True iff this interval matrix is a subset of the interior of \a x.
+	 *
+	 * \pre Dimension of \a x must be equal to the dimension of this matrix.
+	 *
+	 * \note Always return true if this interval matrix is empty.
+	 *
+	 * \sa #ibex::Interval::is_interior_subset(const Interval&) const.
+	 */
+	bool is_interior_subset(const IntervalMatrix& x) const;
+
+	/**
+	 * \brief True iff this interval matrix is a subset of the interior of \a x and different from x.
+	 *
+	 * \pre Dimension of \a x must be equal to the dimension of this matrix.
+	 *
+	 * \note Always return true if this interval matrix is empty.
+	 *
+	 * \sa #ibex::Interval::is_interior_subset(const Interval&) const.
+	 */
+	bool is_strict_interior_subset(const IntervalMatrix& x) const;
 
 	/**
 	 * \brief True iff this interval matrix is a superset of \a x.
@@ -256,7 +278,7 @@ public:
 	 * \pre Dimension of \a x must be equal to the dimension of (*this).
 	 * \sa #ibex::Interval::strictly_contains(double) const.
 	 */
-	bool strictly_contains(const Matrix& x) const;
+	bool interior_contains(const Matrix& x) const;
 
 	/**
 	 * \brief True iff this interval matrix intersects \a x.
@@ -272,7 +294,7 @@ public:
 	 * \pre Dimension of \a x must be equal to the dimension of (*this).
 	 * \sa #ibex::Interval::strictly_intersects(double) const.
 	 */
-	bool strictly_intersects(const IntervalMatrix& x) const;
+	bool overlaps(const IntervalMatrix& x) const;
 
 	/**
 	 * \brief True iff this interval matrix does not intersect \a x.

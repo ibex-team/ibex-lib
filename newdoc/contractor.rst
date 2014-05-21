@@ -2,10 +2,6 @@
              Contractors  (*under construction*)
 **************************************************
 
-
-
-Click and go :ref:`Python home page <Araya14>`.
-
 .. _ctc-fwd-bwd:
 
 ------------------------------

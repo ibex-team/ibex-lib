@@ -105,9 +105,9 @@ public:
 	/**
 	 * \brief True iff this interval matrix array is a subset of \a x.
 	 *
-	 * \pre Dimension of \a x must be equal to the dimension of this matrix.
+	 * \pre Dimension of \a x must be equal to the dimension of *this.
 
-	 * \note Always return true if this interval matrix array is empty.
+	 * \note Always return true if *this is empty.
 
 	 * \sa #ibex::Interval::is_subset(const Interval&) const.
 	 */
@@ -123,6 +123,28 @@ public:
 	 * \sa #ibex::Interval::is_strict_subset(const Interval&) const.
 	 */
 	bool is_strict_subset(const IntervalMatrixArray& x) const;
+
+	/**
+	 * \brief True iff this interval matrix array is a subset of the interior of \a x.
+	 *
+	 * \pre Dimension of \a x must be equal to the dimension of *this.
+	 *
+	 * \note Always return true if *this is empty.
+	 *
+	 * \sa #ibex::Interval::is_interior_subset(const Interval&) const.
+	 */
+	bool is_interior_subset(const IntervalMatrixArray& x) const;
+
+	/**
+	 * \brief True iff this interval matrix array is a subset of the interior of \a x and different from x.
+	 *
+	 * \pre Dimension of \a x must be equal to the dimension of *this.
+	 *
+	 * \note Always return true if *this is empty.
+	 *
+	 * \sa #ibex::Interval::is_interior_subset(const Interval&) const.
+	 */
+	bool is_strict_interior_subset(const IntervalMatrixArray& x) const;
 
 	/**
 	 * \brief True iff this interval matrix array is a superset of \a x.
@@ -160,7 +182,7 @@ public:
 	 * \pre Dimension of \a x must be equal to the dimension of (*this).
 	 * \sa #ibex::Interval::strictly_contains(double) const.
 	 */
-	bool strictly_contains(const MatrixArray& x) const;
+	bool interior_contains(const MatrixArray& x) const;
 
 	/**
 	 * \brief True iff this interval matrix array intersects \a x.
@@ -176,7 +198,7 @@ public:
 	 * \pre Dimension of \a x must be equal to the dimension of (*this).
 	 * \sa #ibex::Interval::strictly_intersects(double) const.
 	 */
-	bool strictly_intersects(const IntervalMatrixArray& x) const;
+	bool overlaps(const IntervalMatrixArray& x) const;
 
 	/**
 	 * \brief True iff this interval matrix array does not intersect \a x.

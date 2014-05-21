@@ -145,54 +145,6 @@ double IntervalVector::maxdelta(const IntervalVector& x) {
 	return max;
 }
 
-
-namespace { // to create anonymous structure/functions
-
-/** \brief Complementary of an Interval
- *
- * Compute the complementary of x. The result is (c1 union c2)
- */
-void complI(const Interval& x, Interval& c1, Interval& c2) {
-	if (x.is_empty() || x.is_degenerated()) { // x.is_empty() should not happen if called from compl()
-		c1=Interval::ALL_REALS;
-		c2=Interval::EMPTY_SET;
-		return;
-	}
-	else {
-		if (x.lb()>NEG_INFINITY) {
-			c1=Interval(NEG_INFINITY,x.lb());
-			if (x.ub()<POS_INFINITY)
-				c2=Interval(x.ub(),POS_INFINITY);
-			else
-				c2=Interval::EMPTY_SET;
-		} else if (x.ub()<POS_INFINITY) {
-			c1=Interval(x.ub(),POS_INFINITY);
-			c2=Interval::EMPTY_SET;
-		} else {
-			c1=c2=Interval::EMPTY_SET;
-		}
-	}
-}
-
-/** \brief x\y
- *
- */
-void diffI(const Interval& x, const Interval& y, Interval& c1, Interval& c2) {
-	complI(y,c1,c2);
-	c1 &= x;
-	if (c1.is_degenerated()) c1=Interval::EMPTY_SET;
-	c2 &= x;
-	if (c2.is_degenerated()) c2=Interval::EMPTY_SET;
-
-	if (c1.is_empty()) {
-		c1=c2;
-		c2=Interval::EMPTY_SET;
-	}
-}
-
-} // end namespace
-
-
 int IntervalVector::diff(const IntervalVector& y, IntervalVector*& result) const {
 	const int nn=size();
 	const IntervalVector& x=*this;
@@ -206,7 +158,7 @@ int IntervalVector::diff(const IntervalVector& y, IntervalVector*& result) const
 	} else {
 		for (int var=0; var<nn; var++) {
 
-			diffI(x[var],y[var],c1,c2);
+			x[var].diff(y[var],c1,c2);
 
 			if (!c1.is_empty()) {
 				tmp[b].resize(nn);

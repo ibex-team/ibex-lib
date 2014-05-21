@@ -1,5 +1,5 @@
 **************************************************
-              References
+              References (*under construction*)
 **************************************************
 
 -------------------------------------
@@ -15,6 +15,8 @@ Articles in Journal and Conferences
 .. _Chabert09b-pdf: http://www.emn.fr/z-info/gchabe08/quimper.pdf
 .. |Chabert09a-pdf| replace:: PDF
 .. _Chabert09a-pdf: http://www.emn.fr/z-info/gchabe08/chabert_jaulin_cp09.pdf
+
+**This page is under construction**
 
 +--------------------+------------------------------+---------------------------------+-------------------------+------+---------------------+
 |                    | Author(s)                    | Title                           | Journal/Conference      | Year | Link                |
@@ -77,17 +79,26 @@ Books
 +--------------------------+------------------------------+-----------------------------------------------+---------------------------+------+
 |                          | Author(s)                    | Title                                         | Publisher                 | Year |
 +==========================+==============================+===============================================+===========================+======+
-| [Jaulin01]               | **L. Jaulin, M. Kieffer,     | *Applied Interval Analysis*                   | Springer                  | 2001 |
+|                          |                              |                                               |                           |      |
+| .. _Jaulin01:            | **L. Jaulin, M. Kieffer,     | *Applied Interval Analysis*                   | Springer                  | 2001 |
 |                          | O. Didrit and E. Walter**    |                                               |                           |      |
+| [Jaulin et al. 2001]     |                              |                                               |                           |      |
 +--------------------------+------------------------------+-----------------------------------------------+---------------------------+------+
 | [Kearfott96]             | **R.B. Kearfott**            | *Rigorous Global Search: Continuous Problems* | Springer                  | 1996 |
 +--------------------------+------------------------------+-----------------------------------------------+---------------------------+------+
 | [Hansen92]               | **E.R. Hansen**              | *Global Optimization using Interval Analysis* | Marcel Dekker             | 1992 |
 +--------------------------+------------------------------+-----------------------------------------------+---------------------------+------+
-| [Neumaier90]             | **A. Neumaier**              | *Interval Methods for Systems of Equations*   | Cambridge University Press| 1990 |
+|                          |                              |                                               |                           |      |
+| .. _Neumaier90:          |                              |                                               |                           |      |
+|                          |                              |                                               |                           |      |
+|[Neumaier 1990]           | **A. Neumaier**              | *Interval Methods for Systems of Equations*   | Cambridge University Press| 1990 |
 +--------------------------+------------------------------+-----------------------------------------------+---------------------------+------+
-| [Moore66]                | **R. Moore**                 | *Interval Analysis*                           | Prentice-Hall             | 1966 |
+|                          |                              |                                               |                           |      |
+| .. _Moore66:             |                              |                                               |                           |      |
+|                          |                              |                                               |                           |      |
+|[Moore 1966]              | **R. Moore**                 | *Interval Analysis*                           | Prentice-Hall             | 1966 |
 +--------------------------+------------------------------+-----------------------------------------------+---------------------------+------+
+
 
 
 

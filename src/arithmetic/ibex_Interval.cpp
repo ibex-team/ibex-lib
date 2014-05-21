@@ -228,4 +228,47 @@ std::pair<Interval,Interval> Interval::bisect(double ratio) const {
 	return std::pair<Interval,Interval>(left,right);
 }
 
+int Interval::complementary(Interval& c1, Interval& c2) const {
+	if (is_empty() || is_degenerated()) { // x.is_empty() should not happen if called from compl()
+		c1=Interval::ALL_REALS;
+		c2=Interval::EMPTY_SET;
+		return 1;
+	}
+	else {
+		if (lb()>NEG_INFINITY) {
+			c1=Interval(NEG_INFINITY,lb());
+			if (ub()<POS_INFINITY) {
+				c2=Interval(ub(),POS_INFINITY);
+				return 2;
+			} else {
+				c2=Interval::EMPTY_SET;
+				return 1;
+			}
+		} else if (ub()<POS_INFINITY) {
+			c1=Interval(ub(),POS_INFINITY);
+			c2=Interval::EMPTY_SET;
+			return 1;
+		} else {
+			c1=c2=Interval::EMPTY_SET;
+			return 0;
+		}
+	}
+}
+
+int Interval::diff(const Interval& y, Interval& c1, Interval& c2) const {
+	y.complementary(c1,c2);
+	c1 &= *this;
+	int res=2;
+	if (c1.is_degenerated()) { c1=Interval::EMPTY_SET; res--; }
+	c2 &= *this;
+	if (c2.is_degenerated()) { c2=Interval::EMPTY_SET; res--; }
+
+	if (c1.is_empty()) {
+		c1=c2;
+		c2=Interval::EMPTY_SET;
+	}
+	return res;
+}
+
+
 } // end namespace

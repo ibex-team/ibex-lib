@@ -906,3 +906,5 @@ itself but the :ref:`mod-sys-transfo-extend`.
    :start-after: strat-default-optimizer
    :end-before: strat-default-optimizer
 
+
+

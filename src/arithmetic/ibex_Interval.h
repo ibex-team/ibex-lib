@@ -254,14 +254,30 @@ class Interval {
     bool is_subset(const Interval& x) const;
 
     /**
-     * \brief True iff this interval is in the interior of \a x.
+     * \brief True iff this interval is a subset of \a x and not \a x itself.
      *
-     * \note In particular, (-oo,oo) is a strict subset of (-oo,oo)
-     * and the empty set is a strict subset of the empty set.
-     * \note Always return true if *this is empty.
-     * \warning The semantic of this operator may change in future releases.
+     * \note In particular, (-oo,oo) is not a strict subset of (-oo,oo)
+     * and the empty set is not a strict subset of the empty set although
+     * in both cases, the first is inside the interior of the second.
      */
     bool is_strict_subset(const Interval& x) const;
+
+    /**
+     * \brief True iff this interval is in the interior of \a x.
+     *
+    * \note In particular, (-oo,oo) is in the interior of (-oo,oo)
+     * and the empty set is in the interior of the empty set.
+     * \note Always return true if *this is empty.
+     */
+    bool is_interior_subset(const Interval& x) const;
+
+    /**
+     * \brief True iff this interval is in the interior of \a x and different from x.
+     *
+     * \note In particular, (-oo,oo) is not "strictly" in the interior of (-oo,oo)
+     * and the empty set is not "strictly" in the interior of the empty set.
+     */
+    bool is_strict_interior_subset(const Interval& x) const;
 
     /**
      * \brief True iff this interval is a superset of \a x.
@@ -271,10 +287,9 @@ class Interval {
     bool is_superset(const Interval& x) const;
 
     /**
-     * \brief True iff the interior of *this is a superset of \a x.
+     * \brief True iff this interval is a superset of \a x different from x.
      *
-     * \note In particular, (-oo,oo) is a strict superset of (-oo,oo)
-     * \warning The semantic of this operator may change in future releases.
+     * \see #is_strict_subset(const Interval&) const.
      */
     bool is_strict_superset(const Interval& x) const;
 
@@ -290,22 +305,20 @@ class Interval {
     /**
      * \brief True iff the interior of *this contains \a d.
      *
-     * \note d can also be an "open bound", i.e., infinity.
-     * So this function is not restricted to a set-membership
-     * interpretation.
      */
-    bool strictly_contains(const double& d) const;
+    bool interior_contains(const double& d) const;
 
     /**
-     * \brief True iff *this and \a x intersects.
+     * \brief True iff *this and \a x intersect.
      */
     bool intersects(const Interval &x) const;
 
     /**
-     * \brief True iff *this and \a x intersects and the intersection has a non-null volume.
+     * \brief True iff *this and \a x intersect and the intersection has a non-null volume.
      *
+     * Equivalently, some interior points (of this or x) must belong to the intersection.
      */
-    bool strictly_intersects(const Interval &x) const;
+    bool overlaps(const Interval &x) const;
 
     /**
      * \brief True iff *this and \a x do not intersect.
@@ -347,6 +360,16 @@ class Interval {
      * \see #ibex::distance (const ibex::Interval &x1, const ibex::Interval &x2).
      */
     double rel_distance(const Interval& x) const;
+
+    /*
+     * \brief The complementary of x.
+     */
+    int complementary(Interval& c1, Interval& c2) const;
+
+    /**
+     * \brief x\y
+     */
+    int diff(const Interval& y, Interval& c1, Interval& c2) const;
 
     /** \brief Return -*this. */
     Interval operator-() const;

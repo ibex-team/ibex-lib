@@ -26,11 +26,20 @@ inline bool basic_is_subset(const Interval& x, const Interval& y) {
 	return (y.lb()<=x.lb() && y.ub()>=x.ub());
 }
 
+// to be used jointly with basic_is_subset
 inline bool basic_is_strict_subset(const Interval& x, const Interval& y) {
+	return (y.lb()<x.lb() || y.ub()>x.ub());
+}
+
+inline bool basic_is_interior_subset(const Interval& x, const Interval& y) {
 	return (y.lb()==NEG_INFINITY || y.lb()<x.lb()) &&
 		   (y.ub()==POS_INFINITY || y.ub()>x.ub());
 }
 
+// to be used jointly with is_interior_subset
+inline bool basic_is_strict_interior_subset(const Interval& x, const Interval& y) {
+	return (y.lb()<x.lb() || y.ub()>x.ub());
+}
 inline bool basic_is_superset(const Interval& x, const Interval& y) {
 	return basic_is_subset(y,x);
 }
@@ -43,7 +52,7 @@ inline bool basic_contains(const Interval& x, double d) {
 	return d>=x.lb() && d<=x.ub();
 }
 
-inline bool basic_strictly_contains(const Interval& x, double d) {
+inline bool basic_interior_contains(const Interval& x, double d) {
 	return d>x.lb() && d<x.ub();
 }
 
@@ -51,8 +60,9 @@ inline bool basic_intersects(const Interval& x, const Interval& y) {
 	return x.lb()<=y.ub() && x.ub()>=y.lb();
 }
 
-inline bool basic_strictly_intersects(const Interval& x, const Interval& y) {
-	return x.lb()<y.ub() && x.ub()>y.lb();
+// to be used jointly with basic_intersects
+inline bool basic_overlaps(const Interval& x, const Interval& y) {
+	return (x.ub()>y.lb() || y.ub()>x.lb());
 }
 
 inline bool basic_is_disjoint(const Interval& x, const Interval& y) {
@@ -80,21 +90,21 @@ inline bool basic_is_disjoint(const Interval& x, const Interval& y) {
 	  assert(x.nb_rows()==y.nb_rows()); \
 	  assert(x.nb_cols()==y.nb_cols()); \
 	  for (int i=0; i<x.nb_rows(); i++) \
-      for (int j=0; j<x.nb_cols(); j++) \
-        if (!BASIC_COND(x[i][j],y[i][j])) return false; \
-    return true; \
-  } \
-\
- inline bool BASIC_COND(const S1::MATRIX_ARRAY& x, const S2::MATRIX_ARRAY& y) { \
-	  assert(x.size()==y.size()); \
-	  assert(x.nb_rows()==y.nb_rows()); \
-	  assert(x.nb_cols()==y.nb_cols()); \
-	  for (int k=0; k<x.size(); k++) \
-	  for (int i=0; i<x.nb_rows(); i++) \
         for (int j=0; j<x.nb_cols(); j++) \
           if (!BASIC_COND(x[i][j],y[i][j])) return false; \
-   return true; \
- }
+    return true; \
+  } \
+  \
+  inline bool BASIC_COND(const S1::MATRIX_ARRAY& x, const S2::MATRIX_ARRAY& y) { \
+	assert(x.size()==y.size()); \
+	assert(x.nb_rows()==y.nb_rows()); \
+	assert(x.nb_cols()==y.nb_cols()); \
+	for (int k=0; k<x.size(); k++) \
+	  for (int i=0; i<x.nb_rows(); i++) \
+        for (int j=0; j<x.nb_cols(); j++) \
+          if (!BASIC_COND(x[k][i][j],y[k][i][j])) return false; \
+    return true; \
+  }
 
 #define __IBEX_GENERATE_BASIC_SET_OP_OR__(S1,S2,BASIC_COND) \
   \
@@ -106,33 +116,72 @@ inline bool basic_is_disjoint(const Interval& x, const Interval& y) {
   } \
   \
   inline bool BASIC_COND(const S1::MATRIX& x, const S2::MATRIX& y) { \
-	  assert(x.nb_rows()==y.nb_rows()); \
-	  assert(x.nb_cols()==y.nb_cols()); \
-	  for (int i=0; i<x.nb_rows(); i++) \
+	assert(x.nb_rows()==y.nb_rows()); \
+	assert(x.nb_cols()==y.nb_cols()); \
+	for (int i=0; i<x.nb_rows(); i++) \
       for (int j=0; j<x.nb_cols(); j++) \
         if (BASIC_COND(x[i][j],y[i][j])) return true; \
     return false; \
   } \
-\
- inline bool BASIC_COND(const S1::MATRIX_ARRAY& x, const S2::MATRIX_ARRAY& y) { \
-	  assert(x.size()==y.size()); \
-	  assert(x.nb_rows()==y.nb_rows()); \
-	  assert(x.nb_cols()==y.nb_cols()); \
-	  for (int k=0; k<x.size(); k++) \
+  \
+  inline bool BASIC_COND(const S1::MATRIX_ARRAY& x, const S2::MATRIX_ARRAY& y) { \
+	assert(x.size()==y.size()); \
+	assert(x.nb_rows()==y.nb_rows()); \
+	assert(x.nb_cols()==y.nb_cols()); \
+	for (int k=0; k<x.size(); k++) \
 	  for (int i=0; i<x.nb_rows(); i++) \
         for (int j=0; j<x.nb_cols(); j++) \
-          if (BASIC_COND(x[i][j],y[i][j])) return true; \
-   return false; \
- }
+          if (BASIC_COND(x[k][i][j],y[k][i][j])) return true; \
+    return false; \
+  }
 
-__IBEX_GENERATE_BASIC_SET_OP_AND__(Interval,Interval,basic_is_subset)
-__IBEX_GENERATE_BASIC_SET_OP_AND__(Interval,Interval,basic_is_strict_subset)
-__IBEX_GENERATE_BASIC_SET_OP_AND__(Interval,__Real,  basic_contains)
-__IBEX_GENERATE_BASIC_SET_OP_AND__(Interval,__Real,  basic_strictly_contains)
-__IBEX_GENERATE_BASIC_SET_OP_AND__(Interval,Interval,basic_intersects)
-__IBEX_GENERATE_BASIC_SET_OP_AND__(Interval,Interval,basic_strictly_intersects)
+#define __IBEX_GENERATE_BASIC_SET_OP_AND_OR__(S1,S2,BASIC_COND_AND,BASIC_COND_OR) \
+  \
+  inline bool BASIC_COND_OR(const S1::VECTOR& x, const S2::VECTOR& y) { \
+	assert(x.size()==y.size()); \
+	bool cond_or=false; \
+    for (int i=0; i<x.size(); i++) { \
+      if (!BASIC_COND_AND(x[i],y[i])) return false; \
+      cond_or |= BASIC_COND_OR(x[i],y[i]); \
+    } \
+    return cond_or; \
+  } \
+  \
+  inline bool BASIC_COND_OR(const S1::MATRIX& x, const S2::MATRIX& y) { \
+	assert(x.nb_rows()==y.nb_rows()); \
+	assert(x.nb_cols()==y.nb_cols()); \
+	bool cond_or=false; \
+	for (int i=0; i<x.nb_rows(); i++) \
+      for (int j=0; j<x.nb_cols(); j++) { \
+        if (!BASIC_COND_AND(x[i][j],y[i][j])) return false; \
+        cond_or |= BASIC_COND_OR(x[i][j],y[i][j]); \
+      } \
+    return cond_or; \
+  } \
+  \
+  inline bool BASIC_COND_OR(const S1::MATRIX_ARRAY& x, const S2::MATRIX_ARRAY& y) { \
+    assert(x.size()==y.size()); \
+    assert(x.nb_rows()==y.nb_rows()); \
+    assert(x.nb_cols()==y.nb_cols()); \
+    bool cond_or=false; \
+    for (int k=0; k<x.size(); k++) \
+	  for (int i=0; i<x.nb_rows(); i++) \
+        for (int j=0; j<x.nb_cols(); j++) { \
+          if (!BASIC_COND_AND(x[k][i][j],y[k][i][j])) return false; \
+          cond_or |= BASIC_COND_OR(x[k][i][j],y[k][i][j]); \
+         } \
+    return cond_or; \
+  }
 
-__IBEX_GENERATE_BASIC_SET_OP_OR__ (Interval,Interval,basic_is_disjoint)
+__IBEX_GENERATE_BASIC_SET_OP_AND__   (Interval,Interval,                         basic_is_subset)
+__IBEX_GENERATE_BASIC_SET_OP_AND_OR__(Interval,Interval,basic_is_subset,         basic_is_strict_subset)
+__IBEX_GENERATE_BASIC_SET_OP_AND__   (Interval,Interval,                         basic_is_interior_subset)
+__IBEX_GENERATE_BASIC_SET_OP_AND_OR__(Interval,Interval,basic_is_interior_subset,basic_is_strict_interior_subset)
+__IBEX_GENERATE_BASIC_SET_OP_AND__   (Interval,__Real,                           basic_contains)
+__IBEX_GENERATE_BASIC_SET_OP_AND__   (Interval,__Real,                           basic_interior_contains)
+__IBEX_GENERATE_BASIC_SET_OP_AND__   (Interval,Interval,                         basic_intersects)
+__IBEX_GENERATE_BASIC_SET_OP_AND_OR__(Interval,Interval,basic_intersects,        basic_overlaps)
+__IBEX_GENERATE_BASIC_SET_OP_OR__    (Interval,Interval,                         basic_is_disjoint)
 
 template<typename T>
 inline bool is_subset(const T& x, const T& y) {
@@ -141,8 +190,17 @@ inline bool is_subset(const T& x, const T& y) {
 
 template<typename T>
 inline bool is_strict_subset(const T& x, const T& y) {
-	//return !y.is_empty() && (x.is_empty() || basic_is_strict_subset(x,y));
-	return x.is_empty() || (!y.is_empty() && basic_is_strict_subset(x,y));
+	return !y.is_empty() && (x.is_empty() || basic_is_strict_subset(x,y));
+}
+
+template<typename T>
+inline bool is_interior_subset(const T& x, const T& y) {
+	return x.is_empty() || (!y.is_empty() && basic_is_interior_subset(x,y));
+}
+
+template<typename T>
+inline bool is_strict_interior_subset(const T& x, const T& y) {
+	return !y.is_empty() && (x.is_empty() || basic_is_strict_interior_subset(x,y));
 }
 
 template<typename T>
@@ -161,8 +219,8 @@ inline bool contains(const T& x, const S& y) {
 }
 
 template<typename T,typename S>
-inline bool strictly_contains(const T& x, const S& y) {
-	return !x.is_empty() && basic_strictly_contains(x,y);
+inline bool interior_contains(const T& x, const S& y) {
+	return !x.is_empty() && basic_interior_contains(x,y);
 }
 
 template<typename T,typename S>
@@ -171,8 +229,8 @@ inline bool intersects(const T& x, const S& y) {
 }
 
 template<typename T,typename S>
-inline bool strictly_intersects(const T& x, const S& y) {
-	return !x.is_empty() && !y.is_empty() && basic_strictly_intersects(x,y);
+inline bool overlaps(const T& x, const S& y) {
+	return !x.is_empty() && !y.is_empty() && basic_overlaps(x,y);
 }
 
 template<typename T,typename S>
@@ -189,12 +247,14 @@ inline bool is_disjoint(const T& x, const S& y) {
 
 __IBEX_GENERATE_SET_OP__(Interval,is_subset)
 __IBEX_GENERATE_SET_OP__(Interval,is_strict_subset)
+__IBEX_GENERATE_SET_OP__(Interval,is_interior_subset)
+__IBEX_GENERATE_SET_OP__(Interval,is_strict_interior_subset)
 __IBEX_GENERATE_SET_OP__(Interval,is_superset)
 __IBEX_GENERATE_SET_OP__(Interval,is_strict_superset)
 __IBEX_GENERATE_SET_OP__(__Real,contains)
-__IBEX_GENERATE_SET_OP__(__Real,strictly_contains)
+__IBEX_GENERATE_SET_OP__(__Real,interior_contains)
 __IBEX_GENERATE_SET_OP__(Interval,intersects)
-__IBEX_GENERATE_SET_OP__(Interval,strictly_intersects)
+__IBEX_GENERATE_SET_OP__(Interval,overlaps)
 __IBEX_GENERATE_SET_OP__(Interval,is_disjoint)
 
 
@@ -217,7 +277,7 @@ __IBEX_GENERATE_SET_OP__(Interval,is_disjoint)
 //	return itv.contains(d);
 //}
 //
-//inline bool Interval::strictly_contains(double d) const {
+//inline bool Interval::interior_contains(double d) const {
 //	if (is_empty()) return false;
 //		else return d>lb() && d<ub();
 //}
@@ -254,7 +314,7 @@ __IBEX_GENERATE_SET_OP__(Interval,is_disjoint)
 //	return itv.set_contains(d);
 //}
 //
-//inline bool Interval::strictly_contains(double d) const {
+//inline bool Interval::interior_contains(double d) const {
 //	return itv.set_strictly_contains(d);
 //}
 //
