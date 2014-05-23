@@ -59,7 +59,7 @@ bool Optimizer::in_HC4(IntervalVector& box) {
 
 	for (int j=0; j<m; j++) {
 		if (entailed->normalized(j)) continue;
-		sys.ctrs[j].f.iproj(Interval(NEG_INFINITY,0),box);
+		sys.ctrs[j].f.ibwd(Interval(NEG_INFINITY,0),box);
 		if (box.is_empty()) return false;
 	}
 	return true;

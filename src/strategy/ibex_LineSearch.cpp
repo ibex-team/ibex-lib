@@ -77,7 +77,7 @@ Vector LineSearch::endpoint() {
 			x2[i] += alpha1*d[i];
 			// check we do not touch a face we are not supposed to touch
 			//  cout << " [endpoint] test contains " << x2[i] << " in " << box[i] << endl;
-			assert(box[i].strictly_contains(x2[i]));
+			assert(box[i].interior_contains(x2[i]));
 		}
 	}
 	assert(box.contains(x2));

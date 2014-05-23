@@ -126,12 +126,12 @@ void Function::backward(const Domain& y, IntervalVector& x) const {
 	HC4Revise().proj(*this,y,x);
 }
 
-void Function::iproj(const Domain& y, IntervalVector& x) const {
-	InHC4Revise().iproj(*this,y,x);
+void Function::ibwd(const Domain& y, IntervalVector& x) const {
+	InHC4Revise().ibwd(*this,y,x);
 }
 
-void Function::iproj(const Domain& y, IntervalVector& x, const IntervalVector& xin) const {
-	InHC4Revise().iproj(*this,y,x,xin);
+void Function::ibwd(const Domain& y, IntervalVector& x, const IntervalVector& xin) const {
+	InHC4Revise().ibwd(*this,y,x,xin);
 }
 
 void Function::gradient(const IntervalVector& x, IntervalVector& g) const {

@@ -32,7 +32,7 @@ void CtcInteger::contract(IntervalVector& box) {
 
 	for (int i=0; i<is_int.size(); i++) {
 		if (!is_int[i]) continue;
-		proj_integer(box[i]);
+		bwd_integer(box[i]);
 		if (box[i].is_empty()) {
 			box.set_empty();
 			throw EmptyBoxException();
@@ -46,7 +46,7 @@ void CtcInteger::contract(IntervalVector& box, const BoolMask& impact) {
 
 	for (int i=0; i<is_int.size(); i++) {
 		if (is_int[i] && impact[i]) {
-			proj_integer(box[i]);
+			bwd_integer(box[i]);
 			if (box[i].is_empty()) {
 				box.set_empty();
 				throw EmptyBoxException();

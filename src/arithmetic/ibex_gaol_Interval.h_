@@ -388,18 +388,18 @@ inline Interval integer(const Interval& x) {
 	return gaol::integer(x.itv);
 }
 
-inline bool proj_mul(const Interval& y, Interval& x1, Interval& x2) {
+inline bool bwd_mul(const Interval& y, Interval& x1, Interval& x2) {
 	x1 = gaol::div_rel(y.itv, x2.itv, x1.itv);
 	x2 = gaol::div_rel(y.itv, x1.itv, x2.itv);
 	return (!x1.is_empty()) && (!x2.is_empty());
 }
 
-inline bool proj_sqr(const Interval& y, Interval& x) {
+inline bool bwd_sqr(const Interval& y, Interval& x) {
 	x = gaol::sqrt_rel(y.itv,x.itv);
 	return !x.is_empty();
 }
 
-inline bool proj_pow(const Interval& y, int expon, Interval& x) {
+inline bool bwd_pow(const Interval& y, int expon, Interval& x) {
 
 	// there is a bug in nth_root_rel
 	//x = gaol::nth_root_rel(y.itv, expon, x.itv);
@@ -424,18 +424,18 @@ inline bool proj_pow(const Interval& y, int expon, Interval& x) {
 	return !x.is_empty();
 }
 
-inline bool proj_pow(const Interval& , Interval& , Interval& ) {
-	ibex_error("proj_power(y,x1,x2) (with x1 and x2 intervals) not implemented yet with Gaol");
+inline bool bwd_pow(const Interval& , Interval& , Interval& ) {
+	ibex_error("bwd_power(y,x1,x2) (with x1 and x2 intervals) not implemented yet with Gaol");
 	return false;
 }
 
-inline bool proj_cos(const Interval& y,  Interval& x) {
+inline bool bwd_cos(const Interval& y,  Interval& x) {
 	x &= gaol::acos_rel(y.itv,x.itv);
 	fpu_round_up();
 	return !x.is_empty();
 }
 
-inline bool proj_sin(const Interval& y,  Interval& x) {
+inline bool bwd_sin(const Interval& y,  Interval& x) {
 	/*fpu_round_up();
 	interval tmp=gaol::asin_rel(y.itv,x.itv);
 	if (!x.itv.set_contains(tmp)) {
@@ -446,28 +446,28 @@ inline bool proj_sin(const Interval& y,  Interval& x) {
 	return !x.is_empty();
 }
 
-inline bool proj_tan(const Interval& y,  Interval& x) {
+inline bool bwd_tan(const Interval& y,  Interval& x) {
 	x = gaol::atan_rel(y.itv,x.itv);
 	return !x.is_empty();
 }
 
-inline bool proj_cosh(const Interval& y,  Interval& x) {
+inline bool bwd_cosh(const Interval& y,  Interval& x) {
 	x = gaol::acosh_rel(y.itv,x.itv);
 	return !x.is_empty();
 }
 
-inline bool proj_sinh(const Interval& y,  Interval& x) {
+inline bool bwd_sinh(const Interval& y,  Interval& x) {
 	//x = gaol::asinh_rel(y.itv,x.itv);
 	x &= asinh(y);
 	return !x.is_empty();
 }
 
-inline bool proj_tanh(const Interval& y,  Interval& x) {
+inline bool bwd_tanh(const Interval& y,  Interval& x) {
 	x = gaol::atanh_rel(y.itv,x.itv);
 	return !x.is_empty();
 }
 
-inline bool proj_abs(const Interval& y,  Interval& x) {
+inline bool bwd_abs(const Interval& y,  Interval& x) {
 	x = gaol::invabs_rel(y.itv,x.itv);
 	return !x.is_empty();
 }

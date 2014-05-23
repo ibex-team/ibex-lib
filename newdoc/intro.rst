@@ -108,5 +108,5 @@ System solving and global optimization
 --------------------------------------
 
 Finally, Ibex also comes with a default black-box solver and global optimizer for immediate usage.
-See the tutorial.
+See the :ref:`tuto`.
 

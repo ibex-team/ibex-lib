@@ -703,22 +703,22 @@ public:
 	/**
 	 * \brief Inner projection f(x)=y onto x.
 	 */
-	void iproj(const Domain& y, IntervalVector& x) const;
+	void ibwd(const Domain& y, IntervalVector& x) const;
 
 	/**
 	 * \brief Inner projection f(x)=y onto x, inflating xin.
 	 */
-	void iproj(const Domain& y, IntervalVector& x, const IntervalVector& xin) const;
+	void ibwd(const Domain& y, IntervalVector& x, const IntervalVector& xin) const;
 
 	/**
 	 * \brief Inner projection f(x)=y onto x.
 	 */
-	void iproj(const Interval& y, IntervalVector& x) const;
+	void ibwd(const Interval& y, IntervalVector& x) const;
 
 	/**
 	 * \brief Inner projection f(x)=y onto x, inflating xin.
 	 */
-	void iproj(const Interval& y, IntervalVector& x, const IntervalVector& xin) const;
+	void ibwd(const Interval& y, IntervalVector& x, const IntervalVector& xin) const;
 
 	// ========== never understood why we have to do this in c++ =================
 	IntervalVector gradient(const IntervalVector& x) const;
@@ -994,12 +994,12 @@ inline void Function::backward(const IntervalMatrix& y, IntervalVector& x) const
 	backward(Domain((IntervalMatrix&) y),x); // y will not be modified
 }
 
-inline void Function::iproj(const Interval& y, IntervalVector& x) const {
-	iproj(Domain((Interval&) y),x);
+inline void Function::ibwd(const Interval& y, IntervalVector& x) const {
+	ibwd(Domain((Interval&) y),x);
 }
 
-inline void Function::iproj(const Interval& y, IntervalVector& x, const IntervalVector& xin) const {
-	iproj(Domain((Interval&) y),x,xin);
+inline void Function::ibwd(const Interval& y, IntervalVector& x, const IntervalVector& xin) const {
+	ibwd(Domain((Interval&) y),x,xin);
 }
 
 // ========== never understood why we have to do this in c++ =================

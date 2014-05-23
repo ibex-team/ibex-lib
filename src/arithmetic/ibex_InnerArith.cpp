@@ -123,7 +123,7 @@ double projy(double z, double x, int op, bool round_up) {
 
  * \pre xin.is_empty()<=>yin.is_empty()
  */
-bool iproj_cmp_mono_op(bool geq, double z, Interval& x, Interval& y, const Interval& xin, const Interval& yin, int op, bool inc_var1, bool inc_var2) {
+bool ibwd_cmp_mono_op(bool geq, double z, Interval& x, Interval& y, const Interval& xin, const Interval& yin, int op, bool inc_var1, bool inc_var2) {
 	/*volatile?*/ double xmin, xmax;
 	/*volatile?*/ double x0,y0;
 	/*volatile?*/ double y1,y2;
@@ -260,16 +260,16 @@ bool iproj_cmp_mono_op(bool geq, double z, Interval& x, Interval& y, const Inter
 	return true;
 }
 
-inline bool iproj_leq_add(double z_sup, Interval& x, Interval& y, const Interval &xin, const Interval& yin) {
-	return iproj_cmp_mono_op(false,z_sup,x,y,xin,yin,ADD,true,true);
+inline bool ibwd_leq_add(double z_sup, Interval& x, Interval& y, const Interval &xin, const Interval& yin) {
+	return ibwd_cmp_mono_op(false,z_sup,x,y,xin,yin,ADD,true,true);
 }
 
-inline bool iproj_leq_sub(double z_sup, Interval& x, Interval& y, const Interval &xin, const Interval& yin) {
-	return iproj_cmp_mono_op(false, z_sup,x,y,xin,yin,SUB,true,false);
+inline bool ibwd_leq_sub(double z_sup, Interval& x, Interval& y, const Interval &xin, const Interval& yin) {
+	return ibwd_cmp_mono_op(false, z_sup,x,y,xin,yin,SUB,true,false);
 }
 
-// Difference with iproj_cmp_mono_op: we do not require monotonicity
-bool iproj_leq_mul(double z_sup, Interval& x, Interval& y, const Interval &xin, const Interval& yin) {
+// Difference with ibwd_cmp_mono_op: we do not require monotonicity
+bool ibwd_leq_mul(double z_sup, Interval& x, Interval& y, const Interval &xin, const Interval& yin) {
 
 	bool inflate=!xin.is_empty();
 
@@ -299,10 +299,10 @@ bool iproj_leq_mul(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 		// ------------------------ quadrant x>0 y>0 ----------------------------------
 		if(!xP.is_empty() && !yP.is_empty() && xP.ub()>0 && yP.ub()>0) { //(!inflate || yin.lb()>0)) {
 			// if xP.ub()==0 or yP.ub()==0, the upper right corner is safe
-			// and these cases cannot be handled properly by iproj_cmp_mono_op
+			// and these cases cannot be handled properly by ibwd_cmp_mono_op
 			xxin=inflate? Interval(max(0.0,xin.lb()), max(0.0,xin.ub())) : Interval::EMPTY_SET;
 			yyin=inflate? Interval(max(0.0,yin.lb()), max(0.0,yin.ub())) : Interval::EMPTY_SET;
-			if(!iproj_cmp_mono_op(false, z_sup, xP, yP, xxin, yyin, MUL, true, true)) {
+			if(!ibwd_cmp_mono_op(false, z_sup, xP, yP, xxin, yyin, MUL, true, true)) {
 				//cout << "[mul] nothing in the positive quadrant --> x and y empty" << endl;
 				x.set_empty();
 				y.set_empty();
@@ -323,7 +323,7 @@ bool iproj_leq_mul(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 			// same remark as above for xN.lb()<0 && yN.lb()<0.
 			xxin=inflate? Interval(min(0.0,xin.lb()),min(0.0,xin.ub())) : Interval::EMPTY_SET;
 			yyin=inflate? Interval(min(0.0,yin.lb()),min(0.0,yin.lb())) : Interval::EMPTY_SET;
-			if(!iproj_cmp_mono_op(false, z_sup, xN, yN, xxin, yyin, MUL, false, false)) {
+			if(!ibwd_cmp_mono_op(false, z_sup, xN, yN, xxin, yyin, MUL, false, false)) {
 				//cout << "[mul] nothing in the negative quadrant --> x and y empty" << endl;
 				x.set_empty();
 				y.set_empty();
@@ -377,7 +377,7 @@ bool iproj_leq_mul(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 				y &= Interval::NEG_REALS;
 				// note: we know x.ub()>0 && y.lb()<0
 				assert(yin.lb()<0);
-				return iproj_cmp_mono_op(false, z_sup, x, y, xin, yin, MUL, false, true);
+				return ibwd_cmp_mono_op(false, z_sup, x, y, xin, yin, MUL, false, true);
 			} else {
 				assert(xin.ub()<=0); // => because xin.ub()>0 => z_sup=0.
 				assert(yin.lb()>=0);
@@ -386,7 +386,7 @@ bool iproj_leq_mul(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 				if (z_sup==0) return true;
 				// note: we know x.ub()>0 && y.lb()<0
 				assert(yin.ub()>0);
-				return iproj_cmp_mono_op(false, z_sup, x, y, xin, yin, MUL, true, false);
+				return ibwd_cmp_mono_op(false, z_sup, x, y, xin, yin, MUL, true, false);
 			}
 		}
 
@@ -404,7 +404,7 @@ bool iproj_leq_mul(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 
 		if (z_sup==0 || ((q? x.ub()>0 : x.lb()<0) &&
 						 (q? y.lb()<0 : y.ub()>0) &&
-						 iproj_cmp_mono_op(false, z_sup, x, y, xin, yin, MUL, !q, q))) {
+						 ibwd_cmp_mono_op(false, z_sup, x, y, xin, yin, MUL, !q, q))) {
 			return true;
 		} else {
 			// intersection with the first quadrant did not succeed.
@@ -419,13 +419,13 @@ bool iproj_leq_mul(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 				return false;
 			}
 			else
-				return iproj_cmp_mono_op(false, z_sup, x, y, xin, yin, MUL, q, !q);
+				return ibwd_cmp_mono_op(false, z_sup, x, y, xin, yin, MUL, q, !q);
 		}
 	}
 }
 
-// Difference with iproj_cmp_mono_op: we do not require monotonicity
-bool iproj_leq_div(double z_sup, Interval& x, Interval& y, const Interval &xin, const Interval& yin) {
+// Difference with ibwd_cmp_mono_op: we do not require monotonicity
+bool ibwd_leq_div(double z_sup, Interval& x, Interval& y, const Interval &xin, const Interval& yin) {
 
 	bool inflate=!xin.is_empty();
 
@@ -481,7 +481,7 @@ bool iproj_leq_div(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 				// ------------------------ quadrant x>0 y>0 ----------------------------------
 				if(!xP.is_empty() && !yP.is_empty() && (!inflate || yin.lb()>0)) {
 					Interval xxin=inflate? Interval(max(0.0,xin.lb()), max(0.0,xin.ub())) : Interval::EMPTY_SET;
-					if(iproj_cmp_mono_op(false, z_sup,xP,yP,xxin,yin,DIV,true,false)) {
+					if(ibwd_cmp_mono_op(false, z_sup,xP,yP,xxin,yin,DIV,true,false)) {
 						// we reintegrate the part of the quadrant (x<0,y>0)
 						x = Interval(x.lb(), xP.ub());
 						y = Interval(yP.lb(), y.ub());
@@ -497,7 +497,7 @@ bool iproj_leq_div(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 				// ------------------------ quadrant x<0 y<0 ----------------------------------
 				if(!xN.is_empty() && !yN.is_empty() && (!inflate || yin.ub()<0)) {
 					Interval xxin=inflate? Interval(min(0.0,xin.lb()),min(0,xin.ub())) : Interval::EMPTY_SET;
-					if(iproj_cmp_mono_op(false, z_sup,xN,yN,xxin,yin,DIV,false,true)) {
+					if(ibwd_cmp_mono_op(false, z_sup,xN,yN,xxin,yin,DIV,false,true)) {
 						// we reintegrate the part of the quadrant (x>0,y<0)
 						x = Interval(xN.lb(), x.ub());
 						y = Interval(y.lb(), yN.ub());
@@ -537,7 +537,7 @@ bool iproj_leq_div(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 
 				// ------------------------ quadrant x<0 y>0 ----------------------------------
 				if(!xN.is_empty() && !yP.is_empty() && (!inflate || yin.lb()>0)) {
-					if(z_sup==0 || iproj_cmp_mono_op(false, z_sup,xN,yP,xin,yin,DIV,true,true)) {
+					if(z_sup==0 || ibwd_cmp_mono_op(false, z_sup,xN,yP,xin,yin,DIV,true,true)) {
 						x = xN;
 						y = yP;
 						//cout << "[div] quadrant (neg,pos): x=" << x << " y=" << y << endl;
@@ -550,7 +550,7 @@ bool iproj_leq_div(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 
 				// ------------------------ quadrant x>0 y<0 ----------------------------------
 				if(!xP.is_empty() && !yN.is_empty() && (!inflate || yin.ub()<0)) {
-					if(z_sup==0 || iproj_cmp_mono_op(false, z_sup,xP,yN,xin,yin,DIV,false,false)) {
+					if(z_sup==0 || ibwd_cmp_mono_op(false, z_sup,xP,yN,xin,yin,DIV,false,false)) {
 						x = xP;
 						y = yN;
 						//cout << "[div] quadrant (pos,neg): x=" << x << " y=" << y << endl;
@@ -566,43 +566,43 @@ bool iproj_leq_div(double z_sup, Interval& x, Interval& y, const Interval &xin, 
 	}
 }
 
-inline bool iproj_geq_add(double z_inf, Interval& x, Interval& y, const Interval &xin, const Interval& yin ) {
-	return iproj_cmp_mono_op(true,z_inf,x,y,xin,yin,ADD,true,true);
+inline bool ibwd_geq_add(double z_inf, Interval& x, Interval& y, const Interval &xin, const Interval& yin ) {
+	return ibwd_cmp_mono_op(true,z_inf,x,y,xin,yin,ADD,true,true);
 }
 
-inline bool iproj_geq_sub(double z_inf, Interval& x, Interval& y, const Interval &xin, const Interval& yin ) {
-	return iproj_cmp_mono_op(true, z_inf,x,y,xin,yin,SUB,true,false);
+inline bool ibwd_geq_sub(double z_inf, Interval& x, Interval& y, const Interval &xin, const Interval& yin ) {
+	return ibwd_cmp_mono_op(true, z_inf,x,y,xin,yin,SUB,true,false);
 }
 
-bool iproj_geq_mul(double z_inf, Interval& x, Interval& y, const Interval &xin, const Interval& yin) {
+bool ibwd_geq_mul(double z_inf, Interval& x, Interval& y, const Interval &xin, const Interval& yin) {
 	Interval x2(-x);
-	bool res=iproj_leq_mul(-z_inf,x2,y,-xin,yin);
+	bool res=ibwd_leq_mul(-z_inf,x2,y,-xin,yin);
 	x=-x2;
 	return res;
 }
 
-bool iproj_geq_div(double z_inf, Interval& x, Interval& y, const Interval &xin, const Interval& yin) {
+bool ibwd_geq_div(double z_inf, Interval& x, Interval& y, const Interval &xin, const Interval& yin) {
 	Interval x2(-x);
- 	bool res=iproj_leq_div(-z_inf,x2,y,-xin,yin);
+ 	bool res=ibwd_leq_div(-z_inf,x2,y,-xin,yin);
 	x=-x2;
 	return res;
 }
 
 } // end namespace
 
-bool iproj_add(const Interval& z, Interval& x, Interval& y, const Interval &xin, const Interval& yin) {
-	return iproj_leq_add(z.ub(),x,y,xin,yin) && iproj_geq_add(z.lb(),x,y,xin,yin);
+bool ibwd_add(const Interval& z, Interval& x, Interval& y, const Interval &xin, const Interval& yin) {
+	return ibwd_leq_add(z.ub(),x,y,xin,yin) && ibwd_geq_add(z.lb(),x,y,xin,yin);
 }
 
-bool iproj_sub(const Interval& z, Interval& x, Interval& y, const Interval& xin, const Interval& yin) {
-	return iproj_leq_sub(z.ub(),x,y,xin,yin) && iproj_geq_sub(z.lb(),x,y,xin,yin);
+bool ibwd_sub(const Interval& z, Interval& x, Interval& y, const Interval& xin, const Interval& yin) {
+	return ibwd_leq_sub(z.ub(),x,y,xin,yin) && ibwd_geq_sub(z.lb(),x,y,xin,yin);
 }
 
-bool iproj_mul(const Interval& z, Interval& x, Interval& y, const Interval &xin, const Interval& yin) {
-	return iproj_leq_mul(z.ub(),x,y,xin,yin) && iproj_geq_mul(z.lb(),x,y,xin,yin);
+bool ibwd_mul(const Interval& z, Interval& x, Interval& y, const Interval &xin, const Interval& yin) {
+	return ibwd_leq_mul(z.ub(),x,y,xin,yin) && ibwd_geq_mul(z.lb(),x,y,xin,yin);
 }
 
-bool iproj_abs(const Interval& y, Interval& x, const Interval& xin) {
+bool ibwd_abs(const Interval& y, Interval& x, const Interval& xin) {
 	bool inflate=!xin.is_empty();
 	assert(xin.is_subset(x));
 	assert(!inflate || abs(xin).is_subset(y));
@@ -641,16 +641,16 @@ bool iproj_abs(const Interval& y, Interval& x, const Interval& xin) {
 	}
 }
 
-bool iproj_div(const Interval& z, Interval& x, Interval& y, const Interval &xin, const Interval& yin) {
-	return iproj_leq_div(z.ub(),x,y,xin,yin) && iproj_geq_div(z.lb(),x,y,xin,yin);
+bool ibwd_div(const Interval& z, Interval& x, Interval& y, const Interval &xin, const Interval& yin) {
+	return ibwd_leq_div(z.ub(),x,y,xin,yin) && ibwd_geq_div(z.lb(),x,y,xin,yin);
 }
 
 // [gch]
-bool iproj_sqr(const Interval& y, Interval& x, const Interval& xin) {
-	return iproj_pow(y,x,2,xin);
+bool ibwd_sqr(const Interval& y, Interval& x, const Interval& xin) {
+	return ibwd_pow(y,x,2,xin);
 }
 
-bool iproj_pow(const Interval& y, Interval& x, int p, const Interval &xin) {
+bool ibwd_pow(const Interval& y, Interval& x, int p, const Interval &xin) {
 	//   //cout << "[sqr] xin=" << xin << " x=" << x << " y=" << y << endl;
 	// Interval xini(X);
 	bool inflate=!xin.is_empty();
@@ -730,7 +730,7 @@ bool iproj_pow(const Interval& y, Interval& x, int p, const Interval &xin) {
 #define SIN 1
 #define TAN 2
 
-static bool iproj_trigo(const Interval& y, Interval& x, const Interval& xin, int ftype) {
+static bool ibwd_trigo(const Interval& y, Interval& x, const Interval& xin, int ftype) {
 
 	bool inflate=!xin.is_empty();
 	assert(xin.is_subset(x));
@@ -861,16 +861,16 @@ static bool iproj_trigo(const Interval& y, Interval& x, const Interval& xin, int
 	return true;
 }
 
-bool iproj_cos(const Interval& y, Interval& x, const Interval& xin) {
-	return iproj_trigo(y,x,xin,COS);
+bool ibwd_cos(const Interval& y, Interval& x, const Interval& xin) {
+	return ibwd_trigo(y,x,xin,COS);
 }
 
-bool iproj_sin(const Interval& y, Interval& x, const Interval& xin) {
-	return iproj_trigo(y,x,xin,SIN);
+bool ibwd_sin(const Interval& y, Interval& x, const Interval& xin) {
+	return ibwd_trigo(y,x,xin,SIN);
 }
 
-bool iproj_tan(const Interval& y, Interval& x, const Interval& xin) {
-	return iproj_trigo(y,x,xin,TAN);
+bool ibwd_tan(const Interval& y, Interval& x, const Interval& xin) {
+	return ibwd_trigo(y,x,xin,TAN);
 }
 
 /*---------------------------------------------------------------------------*/

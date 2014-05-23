@@ -1,8 +1,8 @@
+.. _tuto: 
+
 **************************************
               Tutorial
 **************************************
-
-.. _API: 
 
 ===============
 Getting started
@@ -127,8 +127,6 @@ the solver itself. Then, we just run the solver. Here is a simple example:
    :start-after: start-call-solver
    :end-before: start-call-solver
  
-See the `API`_.
-
 ----------------------------------------------------
 Call the default optimizer from C++
 ----------------------------------------------------

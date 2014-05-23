@@ -200,35 +200,35 @@ int IntervalVector::complementary(IntervalVector*& result) const {
 }
 
 
-bool proj_add(const IntervalVector& y, IntervalVector& x1, IntervalVector& x2) {
+bool bwd_add(const IntervalVector& y, IntervalVector& x1, IntervalVector& x2) {
 	x1 &= y-x2;
 	x2 &= y-x1;
 	return !x1.is_empty() && !x2.is_empty();
 }
 
-bool proj_sub(const IntervalVector& y, IntervalVector& x1, IntervalVector& x2) {
+bool bwd_sub(const IntervalVector& y, IntervalVector& x1, IntervalVector& x2) {
 	x1 &= y+x2;
 	x2 &= x1-y;
 	return !x1.is_empty() && !x2.is_empty();
 }
 
-bool proj_mul(const IntervalVector& y, Interval& x1, IntervalVector& x2) {
+bool bwd_mul(const IntervalVector& y, Interval& x1, IntervalVector& x2) {
 	assert(y.size()==x2.size());
 
 	for (int i=0; i<x2.size(); i++)
-		if (!proj_mul(y[i], x1, x2[i])) {
+		if (!bwd_mul(y[i], x1, x2[i])) {
 			x2.set_empty();
 			return false;
 		}
 	return true;
 }
 
-bool proj_mul(const Interval& z, IntervalVector& x, IntervalVector& y) {
+bool bwd_mul(const Interval& z, IntervalVector& x, IntervalVector& y) {
 	assert(x.size()==y.size());
 	int n=x.size();
 
 	if (n==1) {
-		if (proj_mul(z,x[0],y[0])) return true;
+		if (bwd_mul(z,x[0],y[0])) return true;
 		else { x.set_empty(); y.set_empty(); return false; }
 	}
 
@@ -242,15 +242,15 @@ bool proj_mul(const Interval& z, IntervalVector& x, IntervalVector& y) {
 
 	// ------------- backward -------------------
 	// (rem: we have n>=2)
-	if (!proj_add(z, sum[n-2], xy[n-1])) { x.set_empty(); y.set_empty(); delete[] sum; delete[] xy; return false; }
+	if (!bwd_add(z, sum[n-2], xy[n-1])) { x.set_empty(); y.set_empty(); delete[] sum; delete[] xy; return false; }
 
 	for (int i=n-3; i>=0; i--)
-		if (!proj_add(sum[i+1],sum[i],xy[i+1])) { x.set_empty(); y.set_empty(); delete[] sum; delete[] xy; return false; }
+		if (!bwd_add(sum[i+1],sum[i],xy[i+1])) { x.set_empty(); y.set_empty(); delete[] sum; delete[] xy; return false; }
 
 	if ((xy[0] &= sum[0]).is_empty()) { x.set_empty(); y.set_empty(); delete[] sum; delete[] xy; return false; }
 
 	for (int i=0; i<n; i++)
-		if (!proj_mul(xy[i],x[i],y[i])) { x.set_empty(); y.set_empty(); delete[] sum; delete[] xy; return false; }
+		if (!bwd_mul(xy[i],x[i],y[i])) { x.set_empty(); y.set_empty(); delete[] sum; delete[] xy; return false; }
 
 	delete[] sum; 
 	delete[] xy;

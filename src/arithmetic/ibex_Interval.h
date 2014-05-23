@@ -685,150 +685,150 @@ Interval integer(const Interval& x);
 /** \brief Projection of y=x_1+x_2.
  *
  * Set ([x]_1,[x]_2) to \f$([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=x_1+x_2\}\f$. */
-bool proj_add(const Interval& y, Interval& x1, Interval& x2);
+bool bwd_add(const Interval& y, Interval& x1, Interval& x2);
 
 /** \brief Projection of y=x_1-x_2.
  *
  * Set ([x]_1,[x]_2) to \f$([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=x_1-x_2\}\f$. */
-bool proj_sub(const Interval& y, Interval& x1, Interval& x2);
+bool bwd_sub(const Interval& y, Interval& x1, Interval& x2);
 
 /** \brief Projection of y=x_1*x_2.
  *
  * Set ([x]_1,[x]_2) to \f$([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=x_1\times x_2\}\f$. */
-bool proj_mul(const Interval& y, Interval& x1, Interval& x2);
+bool bwd_mul(const Interval& y, Interval& x1, Interval& x2);
 
 /** \brief Projection of y=x_1/x_2.
  *
  * Set ([x]_1,[x]_2) to \f$([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=x_1/x_2\}\f$. */
-bool proj_div(const Interval& y, Interval& x1, Interval& x2);
+bool bwd_div(const Interval& y, Interval& x1, Interval& x2);
 
 /** \brief Projection of y=x^2.
  *
  * Set [x] to \f$[x]\cap \{ x\in [x] \exists y\in [y], \quad y=x^2 \}\f$. */
-bool proj_sqr(const Interval& y, Interval& x);
+bool bwd_sqr(const Interval& y, Interval& x);
 
 /** \brief Projection of y=sqrt{x}.
  *
  * Set [x] to \f$[x]\cap \{ x\in [x] \exists y\in [y], \quad y=sqrt{x} \}\f$. */
-bool proj_sqrt(const Interval& y, Interval& x);
+bool bwd_sqrt(const Interval& y, Interval& x);
 
 /** \brief Projection of y=x^n.
  *
  * Set [x] to \f$[x]\cap \{ x\in [x] \exists y\in [y], \quad y=x^n \}\f$. */
-bool proj_pow(const Interval& y, int n, Interval& x);
+bool bwd_pow(const Interval& y, int n, Interval& x);
 
 /** \brief Projection of y=x_1^{x_2}.
  *
  * Set ([x]_1,[x]_2) to \f$([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=x_1^{x_2}\}\f$. */
-bool proj_pow(const Interval& y, Interval& x1, Interval& x2);
+bool bwd_pow(const Interval& y, Interval& x1, Interval& x2);
 
 /** \brief Projection of the \f$y=x^{\frac{1}{n}}\f$.
  *
  * Set [x] to \f$[x]\cap \{ x\in [x] \exists y\in [y], \quad y=x^{\frac{1}{n}} \}\f$. */
-bool proj_root(const Interval& y, int n, Interval& x);
+bool bwd_root(const Interval& y, int n, Interval& x);
 
 /** \brief Projection of y=exp(x).
  *
  * Set [x] to \f$[x]\cap \{ x\in [x] \exists y\in [y], \quad y=\exp(x) \}\f$. */
-bool proj_exp(const Interval& y,  Interval& x);
+bool bwd_exp(const Interval& y,  Interval& x);
 
 /** \brief Projection of y=log(x).
  *
  * Set [x] to \f$[x]\cap \{ x\in [x] \exists y\in [y], \quad y=\log(x) \}\f$. */
-bool proj_log(const Interval& y,  Interval& x);
+bool bwd_log(const Interval& y,  Interval& x);
 
 /** \brief Projection of y=cos(x).
  *
  * Set [x] to \f$[x]\cap \{ x\in [x] \exists y\in [y], \quad y=\cos(x) \}\f$. */
-bool proj_cos(const Interval& y,  Interval& x);
+bool bwd_cos(const Interval& y,  Interval& x);
 
 /** \brief Projection of y=sin(x).
  *
  * Set [x] to \f$[x]\cap \{ x\in [x] \exists y\in [y], \quad y=\sin(x) \}\f$. */
-bool proj_sin(const Interval& y,  Interval& x);
+bool bwd_sin(const Interval& y,  Interval& x);
 
 /** \brief Projection of y=tan(x).
  *
  * Set [x] to \f$[x]\cap \{ x\in [x] \exists y\in [y], \quad y=\tan(x) \}\f$. */
-bool proj_tan(const Interval& y,  Interval& x);
+bool bwd_tan(const Interval& y,  Interval& x);
 
 /** \brief Projection of y=acos(x).
  *
  * Set [x] to \f$[x]\cap \{ x\in [x] \exists y\in [y], \quad y=\arccos(x) \}\f$. */
-bool proj_acos(const Interval& y,  Interval& x);
+bool bwd_acos(const Interval& y,  Interval& x);
 
 /** \brief Projection of y=asin(x).
  *
  * Set [x] to \f$[x]\cap \{ x\in [x] \exists y\in [y], \quad y=\arcsin(x) \}\f$. */
-bool proj_asin(const Interval& y,  Interval& x);
+bool bwd_asin(const Interval& y,  Interval& x);
 
 /** \brief Projection of y=atan(x).
  *
  * Set [x] to \f$[x]\cap \{ x\in [x] \exists y\in [y], \quad y=\arctan(x) \}\f$. */
-bool proj_atan(const Interval& y,  Interval& x);
+bool bwd_atan(const Interval& y,  Interval& x);
 
 /** \brief Projection of y=atan2(x_1,x_2).
  *
  * Set ([x]_1,[x]_2) to \f$([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=atan2(x_1,x_2)\f$. */
-bool proj_atan2(const Interval& y, Interval& x1, Interval& x2);
+bool bwd_atan2(const Interval& y, Interval& x1, Interval& x2);
 
 /** \brief Projection of y=cosh(x).
  *
  * Set [x] to \f$[x]\cap \{ x\in [x] \exists y\in [y], \quad y=\cosh(x) \}\f$. */
-bool proj_cosh(const Interval& y,  Interval& x);
+bool bwd_cosh(const Interval& y,  Interval& x);
 
 /** \brief Projection of y=sinh(x).
  *
  * Set [x] to \f$[x]\cap \{ x\in [x] \exists y\in [y], \quad y=\sinh(x) \}\f$. */
-bool proj_sinh(const Interval& y,  Interval& x);
+bool bwd_sinh(const Interval& y,  Interval& x);
 
 /** \brief Projection of y=tanh(x).
  *
  * Set [x] to \f$[x]\cap \{ x\in [x] \exists y\in [y], \quad y=\tanh(x) \}\f$. */
-bool proj_tanh(const Interval& y,  Interval& x);
+bool bwd_tanh(const Interval& y,  Interval& x);
 
 /** \brief Projection of y=acosh(x).
  *
  * Set [x] to \f$[x]\cap \{ x\in [x] \exists y\in [y], \quad y=arccosh(x) \}\f$. */
-bool proj_acosh(const Interval& y,  Interval& x);
+bool bwd_acosh(const Interval& y,  Interval& x);
 
 /** \brief Projection of y=asinh(x).
  *
  * Set [x] to \f$[x]\cap \{ x\in [x] \exists y\in [y], \quad y=arcsinh(x) \}\f$. */
-bool proj_asinh(const Interval& y,  Interval& x);
+bool bwd_asinh(const Interval& y,  Interval& x);
 
 /** \brief Projection of y=atanh(x).
  *
  * Set [x] to \f$[x]\cap \{ x\in [x] \exists y\in [y], \quad y=arctanh(x) \}\f$. */
-bool proj_atanh(const Interval& y,  Interval& x);
+bool bwd_atanh(const Interval& y,  Interval& x);
 
 /** \brief Projection of y=|x|.
  *
  * Set [x] to \f$[x]\cap \{ x\in [x] \exists y\in [y], \quad y=|x| \}\f$. */
-bool proj_abs(const Interval& y,  Interval& x);
+bool bwd_abs(const Interval& y,  Interval& x);
 
 /** \brief Projection of y=max(x_1,x_2).
  *
  * Set ([x]_1,[x]_2) to \f$([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=\max(x_1,x_2)\}\f$. */
-bool proj_max(const Interval& y, Interval& x1, Interval& x2);
+bool bwd_max(const Interval& y, Interval& x1, Interval& x2);
 
 /** \brief Projection of y=min(x_1,x_2).
  *
  * Set ([x]_1,[x]_2) to \f$([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=\min(x_1,x_2)\}\f$. */
-bool proj_min(const Interval& y, Interval& x1, Interval& x2);
+bool bwd_min(const Interval& y, Interval& x1, Interval& x2);
 
 /** \brief Projection of y=sign(x).
  *
  * Set [x] to \f$[x]\cap \{ x\in [x] \exists y\in [y], \quad y=sign(x) \}\f$. */
-bool proj_sign(const Interval& y, Interval& x);
+bool bwd_sign(const Interval& y, Interval& x);
 
 /** \brief Projection of f=chi(a,b,c). */
-bool proj_chi(const Interval& f, Interval& a, Interval& b, Interval& c);
+bool bwd_chi(const Interval& f, Interval& a, Interval& b, Interval& c);
 
 /** \brief Contract x w.r.t. the fact that it must be integral.
  *
  */
-bool proj_integer(Interval& x);
+bool bwd_integer(Interval& x);
 
 } // end namespace ibex
 
@@ -1025,62 +1025,62 @@ inline Interval atan2(const Interval& b, const Interval& a) {
 }
 */
 
-inline bool proj_add(const Interval& y, Interval& x1, Interval& x2) {
+inline bool bwd_add(const Interval& y, Interval& x1, Interval& x2) {
 	if ((x1 &= y-x2).is_empty()) { x2.set_empty(); return false; }
 	if ((x2 &= y-x1).is_empty()) { x1.set_empty(); return false; }
 	return true;
 }
 
-inline bool proj_sub(const Interval& y, Interval& x1, Interval& x2) {
+inline bool bwd_sub(const Interval& y, Interval& x1, Interval& x2) {
 	if ((x1 &= y+x2).is_empty()) { x2.set_empty(); return false; }
 	if ((x2 &= x1-y).is_empty()) { x1.set_empty(); return false; }
 	return true;
 }
 
-inline bool proj_div(const Interval& y, Interval& x1, Interval& x2) {
+inline bool bwd_div(const Interval& y, Interval& x1, Interval& x2) {
 	if ((x1 &= y*x2).is_empty()) { x2.set_empty(); return false; }
 	Interval tmp=y;
-	proj_mul(x1, tmp, x2);
+	bwd_mul(x1, tmp, x2);
 	if (x2.is_empty()) { x1.set_empty(); return false; }
 	return true;
 }
 
-inline bool proj_sqrt(const Interval& y, Interval& x) {
+inline bool bwd_sqrt(const Interval& y, Interval& x) {
 	x &= sqr(y);
 	return !x.is_empty();
 }
 
-inline bool proj_root(const Interval& y, int n, Interval& x) {
+inline bool bwd_root(const Interval& y, int n, Interval& x) {
 	x &= pow(y,n);
 	return !x.is_empty();
 }
 
-inline bool proj_exp(const Interval& y,  Interval& x) {
+inline bool bwd_exp(const Interval& y,  Interval& x) {
 	x &= log(y);
 	return !x.is_empty();
 }
 
-inline bool proj_log(const Interval& y,  Interval& x) {
+inline bool bwd_log(const Interval& y,  Interval& x) {
 	x &= exp(y);
 	return !x.is_empty();
 }
 
-inline bool proj_acos(const Interval& y,  Interval& x) {
+inline bool bwd_acos(const Interval& y,  Interval& x) {
 	x &= cos(y);
 	return !x.is_empty();
 }
 
-inline bool proj_asin(const Interval& y,  Interval& x) {
+inline bool bwd_asin(const Interval& y,  Interval& x) {
 	x &= sin(y);
 	return !x.is_empty();
 }
 
-inline bool proj_atan(const Interval& y,  Interval& x) {
+inline bool bwd_atan(const Interval& y,  Interval& x) {
 	x &= tan(y);
 	return !x.is_empty();
 }
 
-inline bool proj_acosh(const Interval& y,  Interval& x) {
+inline bool bwd_acosh(const Interval& y,  Interval& x) {
 	if (y.ub()<0.0) {
 		x.set_empty(); return false;
 	}
@@ -1090,17 +1090,17 @@ inline bool proj_acosh(const Interval& y,  Interval& x) {
 	}
 }
 
-inline bool proj_asinh(const Interval& y,  Interval& x) {
+inline bool bwd_asinh(const Interval& y,  Interval& x) {
 	x &= sinh(y);
 	return !x.is_empty();
 }
 
-inline bool proj_atanh(const Interval& y,  Interval& x) {
+inline bool bwd_atanh(const Interval& y,  Interval& x) {
 	x &= tanh(y);
 	return !x.is_empty();
 }
 
-inline bool proj_max(const Interval& y, Interval& x1, Interval& x2) {
+inline bool bwd_max(const Interval& y, Interval& x1, Interval& x2) {
 
 	/* ---- Disjoint intervals ---- */
 	if (x2.lb()>x1.ub() || y.lb()>x1.ub()) {
@@ -1124,19 +1124,19 @@ inline bool proj_max(const Interval& y, Interval& x1, Interval& x2) {
 	return true;
 }
 
-inline bool proj_min(const Interval& y, Interval& x1, Interval& x2) {
+inline bool bwd_min(const Interval& y, Interval& x1, Interval& x2) {
 
 	Interval mx1=-x1;
 	Interval mx2=-x2;
 
-	if (!proj_max(-y,mx1,mx2)) return false;
+	if (!bwd_max(-y,mx1,mx2)) return false;
 
 	x1=-mx1;
 	x2=-mx2;
 	return true;
 }
 
-inline bool proj_sign(const Interval& y,  Interval& x) {
+inline bool bwd_sign(const Interval& y,  Interval& x) {
 
 	if (y.contains(0)) return true;
 
@@ -1150,13 +1150,13 @@ inline bool proj_sign(const Interval& y,  Interval& x) {
 }
 
 
-inline bool proj_atan2(const Interval& theta, Interval& y, Interval& x) {
+inline bool bwd_atan2(const Interval& theta, Interval& y, Interval& x) {
 	bool b=true;
 	if (theta.is_empty()) {
 		x.set_empty(); y.set_empty();
 		b=false;
 	}
-	not_implemented("proj_atan2 non implemented yet");
+	not_implemented("bwd_atan2 non implemented yet");
 	//  <=> cos(Theta)*X - sin(Theta)*Y > 0;
 	//      sin(Theta)*X + cos(Theta)*Y = 0
 /*
@@ -1171,19 +1171,19 @@ inline bool proj_atan2(const Interval& theta, Interval& y, Interval& x) {
 		equ1 = (xcostheta - ysintheta)& Interval::POS_REALS;
 		equ2 = (xsintheta + ycostheta)& Interval::ZERO;
 		b= b && (!equ1.is_empty()||!equ2.is_empty());
-		b= b && proj_sub(equ1, xcostheta, ysintheta);
-		b= b && proj_add(equ2, xsintheta, ycostheta);
-		b= b && proj_mul(xcostheta, x, costheta);
-		b= b && proj_mul(xsintheta, x, sintheta);
-		b= b && proj_mul(ysintheta, y, sintheta);
-		b= b && proj_mul(ycostheta, y, costheta);
+		b= b && bwd_sub(equ1, xcostheta, ysintheta);
+		b= b && bwd_add(equ2, xsintheta, ycostheta);
+		b= b && bwd_mul(xcostheta, x, costheta);
+		b= b && bwd_mul(xsintheta, x, sintheta);
+		b= b && bwd_mul(ysintheta, y, sintheta);
+		b= b && bwd_mul(ycostheta, y, costheta);
 	}
 */
 	return b;
 }
 
 
-inline bool proj_chi(const Interval& f, Interval& a, Interval& b, Interval& c){
+inline bool bwd_chi(const Interval& f, Interval& a, Interval& b, Interval& c){
 	if      (a.ub()<=0) {if ((b &= f).is_empty()) { a.set_empty(); c.set_empty(); return false; } }
 	else if (a.lb()>0)  {if ((c &= f).is_empty()) { a.set_empty(); b.set_empty(); return false; } }
 
@@ -1199,7 +1199,7 @@ inline bool proj_chi(const Interval& f, Interval& a, Interval& b, Interval& c){
 }
 
 
-inline bool proj_integer(Interval& x) {
+inline bool bwd_integer(Interval& x) {
 	return !(x = integer(x)).is_empty();
 }
 

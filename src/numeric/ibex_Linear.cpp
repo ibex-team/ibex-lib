@@ -291,7 +291,7 @@ void gauss_seidel(const IntervalMatrix& A, const IntervalVector& b, IntervalVect
 			for (int j=0; j<n; j++)	if (j!=i) proj -= A[i][j]*x[j];
 			tmp=A[i][i];
 
-			proj_mul(proj,tmp,x[i]);
+			bwd_mul(proj,tmp,x[i]);
 
 			if (x[i].is_empty()) { x.set_empty(); return; }
 

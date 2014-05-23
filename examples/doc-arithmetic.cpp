@@ -5,7 +5,7 @@
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Jun 3, 2012
-// Last Update : Jun 3, 2012
+// Last Update : May 22, 2014
 //============================================================================
 
 
@@ -52,6 +52,34 @@ int main() {
 		//! [itv-build-C]
 	}
 
+	{
+		output << "![itv-constants-O]" << endl;
+		//! [itv-constants-C]
+		output << " EMPTY_SET =\t " <<  Interval::EMPTY_SET << endl;
+		output << " PI =\t\t "      <<  Interval::PI <<  endl;
+		output << " 2 PI =\t\t "    <<  Interval::TWO_PI << endl;
+		output << " 1/2 PI =\t "    <<  Interval::HALF_PI << endl;
+		output << " ONE =\t\t "     <<  Interval::ONE << endl;
+		output << " ZERO =\t\t "    <<  Interval::ZERO << endl;
+		output << " ALL_REALS =\t " <<  Interval::ALL_REALS << endl;
+		output << " POS_REALS =\t " <<  Interval::POS_REALS << endl;
+		output << " NEG_REALS =\t " <<  Interval::NEG_REALS << endl;
+		//! [itv-constants-C]
+		output << "![itv-constants-O]" << endl;
+
+	}
+
+	{
+		output << "![itv-div2-O]" << endl;
+		//! [itv-div2-C]
+		Interval intv(-10,10);
+		Interval out2;
+		bool result=intv.div2_inter(Interval(2,3), Interval(-1,2), out2);
+		output << "the intersection is " << (result? "not":"") << " empty" << endl;
+		output << "left part=" << intv << " right part=" << out2 << endl;
+		//! [itv-div2-C]
+		output << "![itv-div2-O]" << endl;
+	}
 
 	{
 		//! [itv-build-vec-C]
@@ -153,13 +181,13 @@ int main() {
 		// equal to the total number of components (9) and
 		// 2 columns (left bound, right bound).
 		double _m2[3*3][2]={{1-eps,1+eps},{-eps,eps},{-eps,eps},
-				            {-eps,eps},{1-eps,1+eps},{-eps,eps},
-				            {-eps,eps},{-eps,eps},{1-eps,1+eps}};
+		      	            {-eps,eps},{1-eps,1+eps},{-eps,eps},
+		                    {-eps,eps},{-eps,eps},{1-eps,1+eps}};
 
 		IntervalMatrix m2(3,3,_m2);
 		output << "m2=" << m2 << endl << endl;
 
-		// create a 2x3 matrix filled with [-eps,eps]
+		// create a 3x3 matrix filled with [-eps,eps]
 		IntervalMatrix m3(3,3,Interval(-eps,eps));
 		m3+=Matrix::eye(3);
 		output << "m3=" << m3 << endl << endl;
@@ -236,36 +264,19 @@ int main() {
 	}
 
 
-	//
-
 	{
-		output << "![itv-constants-O]" << endl;
-		//! [itv-constants-C]
-		output << " EMPTY_SET =\t " <<  Interval::EMPTY_SET << endl;
-		output << " PI =\t\t "      <<  Interval::PI <<  endl;
-		output << " 2 PI =\t\t "    <<  Interval::TWO_PI << endl;
-		output << " 1/2 PI =\t "    <<  Interval::HALF_PI << endl;
-		output << " ONE =\t\t "     <<  Interval::ONE << endl;
-		output << " ZERO =\t\t "    <<  Interval::ZERO << endl;
-		output << " ALL_REALS =\t " <<  Interval::ALL_REALS << endl;
-		output << " POS_REALS =\t " <<  Interval::POS_REALS << endl;
-		output << " NEG_REALS =\t " <<  Interval::NEG_REALS << endl;
-		//! [itv-constants-C]
-		output << "![itv-constants-O]" << endl;
+		output << "! [itv-bisect-O]" << endl;
+		//! [itv-bisect-C]
 
-	}
+		IntervalVector x(3,Interval(0,1)); // [0,1]x[0,1]x[0,1]
 
+		std::pair<IntervalVector,IntervalVector> p = x.bisect(1,0.4); // bisect the second component with ratio 0.4
 
-	{
-		output << "![itv-div2-O]" << endl;
-		//! [itv-div2-C]
-		Interval intv(-10,10);
-		Interval out2;
-		bool result=intv.div2_inter(Interval(2,3), Interval(-1,2), out2);
-		output << "the intersection is " << (result? "not":"") << " empty" << endl;
-		output << "left part=" << intv << " right part=" << out2 << endl;
-		//! [itv-div2-C]
-		output << "![itv-div2-O]" << endl;
+		output << "first box=" << p.first << endl;
+		output << "second box=" << p.second << endl;
+
+		//! [itv-bisect-C]
+		output << "! [itv-bisect-O]" << endl;
 	}
 
 	{
@@ -288,9 +299,9 @@ int main() {
 		output << "x before =" << x << endl;
 		output << "y before =" << y << endl;
 		output << "z before =" << z << endl << endl;
-		proj_sin(-1.0,z);
+		bwd_sin(-1.0,z);
 		output << "z after =" << z << endl;
-		proj_add(z,x,y);
+		bwd_add(z,x,y);
 		output << "x after =" << x << endl;
 		output << "y after =" << y << endl;
 		// ------------------------------------------------
@@ -310,9 +321,9 @@ int main() {
 		output << "x before =" << x << endl;
 		output << "y before =" << y << endl;
 		output << "z before =" << z << endl << endl;
-		proj_sin(1.0,z);
+		bwd_sin(1.0,z);
 		output << "z after =" << z << endl;
-		proj_add(z,x,y);
+		bwd_add(z,x,y);
 		output << "x after =" << x << endl;
 		output << "y after =" << y << endl;
 		// ------------------------------------------------
@@ -339,7 +350,7 @@ int main() {
 		IntervalVector y=Vector::ones(3);
 		output << "M modified=" << M << endl << endl;
 
-		proj_mul(y,M,x,1e-04);
+		bwd_mul(y,M,x,1e-04);
 		output << "x after=" << x << endl;
 		output << "M after=" << M << endl << endl;
 		// ------------------------------------------------

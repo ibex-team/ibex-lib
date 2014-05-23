@@ -238,24 +238,24 @@ std::ostream& operator<<(std::ostream& os, const IntervalMatrix& m) {
 	return display(os,m);
 }
 
-bool proj_add(const IntervalMatrix& y, IntervalMatrix& x1, IntervalMatrix& x2) {
+bool bwd_add(const IntervalMatrix& y, IntervalMatrix& x1, IntervalMatrix& x2) {
 	x1 &= y-x2;
 	x2 &= y-x1;
 	return !x1.is_empty() && !x2.is_empty();
 }
 
-bool proj_sub(const IntervalMatrix& y, IntervalMatrix& x1, IntervalMatrix& x2) {
+bool bwd_sub(const IntervalMatrix& y, IntervalMatrix& x1, IntervalMatrix& x2) {
 	x1 &= y+x2;
 	x2 &= x1-y;
 	return !x1.is_empty() && !x2.is_empty();
 }
 
-bool proj_mul(const IntervalMatrix& y, Interval& x1, IntervalMatrix& x2) {
+bool bwd_mul(const IntervalMatrix& y, Interval& x1, IntervalMatrix& x2) {
 	int n=(y.nb_rows());
 	assert((x2.nb_rows())==n && (x2.nb_cols())==(y.nb_cols()));
 
 	for (int i=0; i<n; i++) {
-		if (!proj_mul(y[i],x1,x2[i])) {
+		if (!bwd_mul(y[i],x1,x2[i])) {
 			x2.set_empty();
 			return false;
 		}
@@ -263,7 +263,7 @@ bool proj_mul(const IntervalMatrix& y, Interval& x1, IntervalMatrix& x2) {
 	return true;
 }
 
-bool proj_mul(const IntervalVector& y, IntervalMatrix& x1, IntervalVector& x2, double ratio) {
+bool bwd_mul(const IntervalVector& y, IntervalMatrix& x1, IntervalVector& x2, double ratio) {
 	assert(x1.nb_rows()==y.size());
 	assert(x1.nb_cols()==x2.size());
 
@@ -273,7 +273,7 @@ bool proj_mul(const IntervalVector& y, IntervalMatrix& x1, IntervalVector& x2, d
 
 	do {
 		IntervalVector x2old=x2;
-		if (!proj_mul(y[i],x1[i],x2)) {
+		if (!bwd_mul(y[i],x1[i],x2)) {
 			x1.set_empty();
 			return false;
 		}
@@ -284,16 +284,16 @@ bool proj_mul(const IntervalVector& y, IntervalMatrix& x1, IntervalVector& x2, d
 	return true;
 }
 
-bool proj_mul(const IntervalVector& y, IntervalVector& x1, IntervalMatrix& x2, double ratio) {
+bool bwd_mul(const IntervalVector& y, IntervalVector& x1, IntervalMatrix& x2, double ratio) {
 	IntervalMatrix x2t=x2.transpose();
 
-	bool res=proj_mul(y,x2t,x1,ratio);
+	bool res=bwd_mul(y,x2t,x1,ratio);
 
 	x2=x2t.transpose();
 	return res;
 }
 
-bool proj_mul(const IntervalMatrix& y, IntervalMatrix& x1, IntervalMatrix& x2, double ratio) {
+bool bwd_mul(const IntervalMatrix& y, IntervalMatrix& x1, IntervalMatrix& x2, double ratio) {
 	int m=y.nb_rows();
 	int n=y.nb_cols();
 	assert(x1.nb_cols()==x2.nb_rows());
@@ -320,7 +320,7 @@ bool proj_mul(const IntervalMatrix& y, IntervalMatrix& x1, IntervalMatrix& x2, d
 		IntervalVector x1old=x1[i];
 		IntervalVector x2j=x2.col(j);
 		IntervalVector x2old=x2j;
-		if (!proj_mul(y[i][j],x1[i],x2j)) {
+		if (!bwd_mul(y[i][j],x1[i],x2j)) {
 			x1.set_empty();
 			x2.set_empty();
 			return false;

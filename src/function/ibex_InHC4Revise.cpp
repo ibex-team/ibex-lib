@@ -13,7 +13,7 @@
 
 namespace ibex {
 
-void InHC4Revise::iproj(const Function& f, const Domain& y, IntervalVector& x) {
+void InHC4Revise::ibwd(const Function& f, const Domain& y, IntervalVector& x) {
 
 	for (int i=0; i<f.nb_nodes(); i++)
 		f.node(i).deco.p->set_empty();
@@ -32,7 +32,7 @@ void InHC4Revise::iproj(const Function& f, const Domain& y, IntervalVector& x) {
 	}
 }
 
-void InHC4Revise::iproj(const Function& f, const Domain& y, IntervalVector& x, const IntervalVector& xin) {
+void InHC4Revise::ibwd(const Function& f, const Domain& y, IntervalVector& x, const IntervalVector& xin) {
 
 	Eval e;
 
@@ -61,7 +61,7 @@ void InHC4Revise::iproj(const Function& f, const Domain& y, IntervalVector& x, c
 	}
 }
 
-bool InHC4Revise::iproj(const Function& f, const Domain& y, ExprLabel** x) {
+bool InHC4Revise::ibwd(const Function& f, const Domain& y, ExprLabel** x) {
 
 	Eval e;
 

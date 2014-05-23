@@ -583,21 +583,21 @@ IntervalMatrix abs(const IntervalMatrix& m);
  *
  * Set $([x]_1,[x]_2)$ to $([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=x_1+x_2\}$.
  */
-bool proj_add(const IntervalMatrix& y, IntervalMatrix& x1, IntervalMatrix& x2);
+bool bwd_add(const IntervalMatrix& y, IntervalMatrix& x1, IntervalMatrix& x2);
 
 /**
  * \brief Projection of $y=x_1-x_2$.
  *
  * Set $([x]_1,[x]_2)$ to $([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=x_1-x_2\}$.
  */
-bool proj_sub(const IntervalMatrix& y, IntervalMatrix& x1, IntervalMatrix& x2);
+bool bwd_sub(const IntervalMatrix& y, IntervalMatrix& x1, IntervalMatrix& x2);
 
 /**
  * \brief Projection of y1=x1*x2 (scalar product of a matrix).
  *
  * Set $([x]_1,[x]_2)$ to $([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=x_1*x_2\}$.
  */
-bool proj_mul(const IntervalMatrix& y, Interval& x1, IntervalMatrix& x2);
+bool bwd_mul(const IntervalMatrix& y, Interval& x1, IntervalMatrix& x2);
 
 /**
  * \brief Projection of y1=x1*x2 (product of a matrix by a vector).
@@ -606,7 +606,7 @@ bool proj_mul(const IntervalMatrix& y, Interval& x1, IntervalMatrix& x2);
  *
  * Set $([x]_1,[x]_2)$ to $([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=x_1*x_2\}$.
  */
-bool proj_mul(const IntervalVector& y, IntervalMatrix& x1, IntervalVector& x2, double ratio);
+bool bwd_mul(const IntervalVector& y, IntervalMatrix& x1, IntervalVector& x2, double ratio);
 
 /**
  * \brief Projection of y1=x1*x2 (product of a row vector by a matrix).
@@ -615,7 +615,7 @@ bool proj_mul(const IntervalVector& y, IntervalMatrix& x1, IntervalVector& x2, d
  *
  * Set $([x]_1,[x]_2)$ to $([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=x_1*x_2\}$.
  */
-bool proj_mul(const IntervalVector& y, IntervalVector& x1, IntervalMatrix& x2, double ratio);
+bool bwd_mul(const IntervalVector& y, IntervalVector& x1, IntervalMatrix& x2, double ratio);
 
 /**
  * \brief Projection of y1=x1*x2 (scalar product of a matrix).
@@ -624,7 +624,7 @@ bool proj_mul(const IntervalVector& y, IntervalVector& x1, IntervalMatrix& x2, d
  *
  * Set $([x]_1,[x]_2)$ to $([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=x_1*x_2\}$.
  */
-bool proj_mul(const IntervalMatrix& y, IntervalMatrix& x1, IntervalMatrix& x2, double ratio);
+bool bwd_mul(const IntervalMatrix& y, IntervalMatrix& x1, IntervalMatrix& x2, double ratio);
 
 /**
  * \brief Stream out a matrix.
