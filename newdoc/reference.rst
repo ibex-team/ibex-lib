@@ -49,8 +49,8 @@ Articles in Journal and Conferences
 |                    |                              |                                 |                         |      |                     |
 | .. _Chabert09a:    |                              |                                 |                         |      |                     |
 |                    | **G. Chabert and L. Jaulin** | *Hull Consistency under         | CP                      | 2009 | |Chabert09a-pdf|_   |
-|[Chabert & Jaulin,  |                              |                                 |                         |      |                     |
-|2009bis]            |                              | Monotonicity*                   |                         |      |                     |
+|[Chabert & Jaulin,  |                              | Monotonicity*                   |                         |      |                     |
+|2009bis]            |                              |                                 |                         |      |                     |
 +--------------------+------------------------------+---------------------------------+-------------------------+------+---------------------+
 |                    |                              |                                 |                         |      |                     |
 | .. _Trombettoni07: |                              |                                 |                         |      |                     |
@@ -68,7 +68,7 @@ Articles in Journal and Conferences
 | .. _Benhamou99:    | **F. Benhamou, F. Goualard,  | *Revising Hull and Box          | ICLP                    | 1999 |                     |
 |                    | L. Granvilliers and J.F.     | Consistency*                    |                         |      |                     |
 | [Benhamou et al.   | Puget**                      |                                 |                         |      |                     |
-| 1999]              | Puget**                      |                                 |                         |      |                     |
+| 1999]              |                              |                                 |                         |      |                     |
 +--------------------+------------------------------+---------------------------------+-------------------------+------+---------------------+
 |                    |                              |                                 |                         |      |                     |
 | .. _Collavizza98:  | **H. Collavizza**            | *A Note on Partial Consistencies| CP                      | 1998 |                     |
