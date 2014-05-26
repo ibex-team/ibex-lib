@@ -68,7 +68,7 @@ public:
 	 *
 	 */
 
-	Optimizer(System& sys, Bsc& bsc, Ctc& ctc, double prec=default_prec,
+	Optimizer(System& sys, Ctc& ctc, Bsc& bsc, double prec=default_prec,
 			double goal_rel_prec=default_goal_rel_prec, double goal_abs_prec=default_goal_abs_prec,
 			  int sample_size=default_sample_size, double equ_eps=default_equ_eps, bool rigor=false, int critpr=50,CellHeapOptim::criterion crit= CellHeapOptim::UB);
 	/**
@@ -162,12 +162,12 @@ public:
 	 */
 	System* equs;
 
-	/** Bisector. */
-	Bsc& bsc;
-
 	/** Contractor for the extended system
 	 * (y=f(x), g_1(x)<=0,...,g_m(x)<=0). */
 	Ctc& ctc;
+
+	/** Bisector. */
+	Bsc& bsc;
 
 	/** Cell buffers.
 	Two buffers are used for node selection. the first one corresponds to minimize  the minimum of the objective estimate,

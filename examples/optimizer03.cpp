@@ -76,7 +76,7 @@ int main(int argc, char** argv){
 		(filtering =="3bcidhc4")
 			ctc= &c3bcidhc4;
 
-		Optimizer o(sys,*bs,*ctc,prec,goalprec,goalprec,1);
+		Optimizer o(sys,*ctc,*bs,prec,goalprec,goalprec,1);
 
 		ext_sys.box[sys.nb_var]= sys.goal->eval(sys.box);
 		cout << " y init " << ext_sys.box[sys.nb_var] << endl;

@@ -49,8 +49,8 @@ ExtendedSystem* tmp_ext_sys=NULL;
 DefaultOptimizerMohc::DefaultOptimizerMohc(System& _sys, double prec, double goal_prec
                                            , hc_ctc hcc, shav_ctc shavc, lr_ctc lrc) :
 		Optimizer(_sys,
-			  *new SmearSumRelative(get_ext_sys(_sys,goal_prec),prec),
 			  *new CtcCompo (* (contractor_list(_sys,get_ext_sys(_sys,goal_prec),prec,hcc,shavc,lrc))), // warning: we don't know which argument is evaluated first (tmp_ext_sys may be NULL)
+			  *new SmearSumRelative(get_ext_sys(_sys,goal_prec),prec),
 				  prec,
 				  goal_prec,
 				  goal_prec,

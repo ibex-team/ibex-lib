@@ -48,8 +48,8 @@ ExtendedSystem* tmp_ext_sys=NULL;
 // the equality constraints are relaxed with goal_prec
 DefaultOptimizer::DefaultOptimizer(System& _sys, double prec, double goal_prec) :
 		Optimizer(_sys,
-			  *new SmearSumRelative(get_ext_sys(_sys,default_eq_eps),prec),
 			  *new CtcCompo (* (contractor_list(_sys,get_ext_sys(_sys,default_eq_eps),prec))), // warning: we don't know which argument is evaluated first (tmp_ext_sys may be NULL)
+			  *new SmearSumRelative(get_ext_sys(_sys,default_eq_eps),prec),
 				  prec,
 				  goal_prec,
 				  goal_prec,

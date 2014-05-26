@@ -191,6 +191,10 @@ Configuration options
 
                     Compiler optimizations are all discarded (``-O0``), low-level assertions in the code are activated and debug information is stored (``-g -pg``)
 
+                    Once Ibex has been compiled with this option, you should also compile your executable in debug mode. If you use the ``makefile`` of examples/,  
+	            simply write:: 
+
+                           make DEBUG=yes ...
 
 ---------------------------------
 Installation as a dynamic library
@@ -370,6 +374,8 @@ Simply type in the path of IBEX (under the shell of MinGW for Windows)::
   ~/Ibex/ibex-|release|$ ./waf distclean  
 
 **Note:** sudo is useless if Ibex is installed in a local folder.
+
+It is highly recommended to uninstall Ibex like this before upgrading to a new release.
 
 ===============
 Troubleshooting

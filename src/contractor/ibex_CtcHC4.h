@@ -12,7 +12,7 @@
 #define __IBEX_CTC_HC4_H__
 
 #include "ibex_CtcPropag.h"
-#include "ibex_NumConstraint.h"
+#include "ibex_System.h"
 #include "ibex_Array.h"
 
 namespace ibex {
@@ -31,6 +31,14 @@ class CtcHC4 : public CtcPropag {
    * \param incremental (optional) - \see #ibex::Propagation
    */
   CtcHC4(const Array<NumConstraint>& csp, double ratio=default_ratio, bool incremental=false);
+
+  /**
+    * \brief Create a HC4 propagation with a system
+    * \param sys - The system
+    * \param ratio (optional) - \see #ibex::Propagation
+    * \param incremental (optional) - \see #ibex::Propagation
+    */
+  CtcHC4(const System& sys, double ratio=default_ratio, bool incremental=false);
 
   /**
    * \brief Delete *this.

@@ -126,7 +126,7 @@ int main(int argc, char** argv){
 	int samplesize=1;
 
 	// the optimizer : the same precision goalprec is used as relative and absolute precision
-	Optimizer o(sys,*bs,*ctcxn,prec,goalprec,goalprec,samplesize,eqeps);
+	Optimizer o(sys,*ctcxn,*bs,prec,goalprec,goalprec,samplesize,eqeps);
 
 	cout << " sys.box " << sys.box << endl;
 

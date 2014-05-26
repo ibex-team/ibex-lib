@@ -21,405 +21,405 @@ using namespace ibex;
 int main() {
 
 	{
-		//! [start-call-solver]
-		/* Build a system of equations from the file */
-		System system("../benchs/benchs-satisfaction/benchlib2/kolev36.bch");
+	//! [start-call-solver]
+	/* Build a system of equations from the file */
+	System system("../benchs/benchs-satisfaction/benchlib2/kolev36.bch");
 
-		/* Build a default solver for the system and with a precision set to 1e-07 */
-		DefaultSolver solver(system,1e-07);
+	/* Build a default solver for the system and with a precision set to 1e-07 */
+	DefaultSolver solver(system,1e-07);
 
-		vector<IntervalVector> solutions = solver.solve(system.box); // Run the solver
+	vector<IntervalVector> solutions = solver.solve(system.box); // Run the solver
 
-		/* Display the solutions. */
-		for (int i=0; i<(solutions.size()); i++) {
-			cout << "solution n°" << i << ": " << solutions[i] << endl;
-		}
-		//! [start-call-solver]
+	/* Display the solutions. */
+	for (int i=0; i<(solutions.size()); i++) {
+		cout << "solution n°" << i << ": " << solutions[i] << endl;
+	}
+	//! [start-call-solver]
 	}
 
 	{
-		//! [start-call-optim]
-		/* Build a constrained optimization problem from the file */
-		System sys("../benchs/benchs-optim/coconutbenchmark-library1/ex3_1_3.bch");
+	//! [start-call-optim]
+	/* Build a constrained optimization problem from the file */
+	System sys("../benchs/benchs-optim/coconutbenchmark-library1/ex3_1_3.bch");
 
-		/* Build a default optimizer with a precision set to 1e-07 for both x and f(x) */
-		DefaultOptimizer o(sys,1e-07,1e-07);
+	/* Build a default optimizer with a precision set to 1e-07 for both x and f(x) */
+	DefaultOptimizer o(sys,1e-07,1e-07);
 
-		o.optimize(sys.box);// Run the optimizer
+	o.optimize(sys.box);// Run the optimizer
 
-		/* Display the result. */
-		cout << "interval for the minimum: " << Interval(o.uplo,o.loup) << endl;
-		cout << "minimizer: " << o.loup_point << endl;
-		//! [start-call-optim]
+	/* Display the result. */
+	cout << "interval for the minimum: " << Interval(o.uplo,o.loup) << endl;
+	cout << "minimizer: " << o.loup_point << endl;
+	//! [start-call-optim]
 	}
 
 	{
-		//! [basic-create-itv]
-		Interval x(1,2);                // create the interval [1,2]
-		Interval y;                     // create the interval (-oo,oo)
-		Interval z=Interval::ALL_REALS; // create the interval (-oo,oo)
-		Interval w=Interval::EMPTY_SET; // create the empty interval
-		//! [basic-create-itv]
+	//! [basic-create-itv]
+	Interval x(1,2);                // create the interval [1,2]
+	Interval y;                     // create the interval (-oo,oo)
+	Interval z=Interval::ALL_REALS; // create the interval (-oo,oo)
+	Interval w=Interval::EMPTY_SET; // create the empty interval
+	//! [basic-create-itv]
 	}
 
 	{
-		//! [basic-op-itv]
-		// - create the inteval x=[1,2] and y=[3,4]
-		// - calculate the interval sum x+y
-		Interval x(1,2);
-		Interval y(3,4);
-		cout << "x+y=" << x+y << endl; // display [4,6]
-		//! [basic-op-itv]
+	//! [basic-op-itv]
+	// - create the inteval x=[1,2] and y=[3,4]
+	// - calculate the interval sum x+y
+	Interval x(1,2);
+	Interval y(3,4);
+	cout << "x+y=" << x+y << endl; // display [4,6]
+	//! [basic-op-itv]
 	}
 
 	{
-		//! [basic-func-itv]
-		Interval x(0,1);
-		Interval y=exp(x+1); //y is [1,7.389...]
-		//! [basic-func-itv]
+	//! [basic-func-itv]
+	Interval x(0,1);
+	Interval y=exp(x+1); //y is [1,7.389...]
+	//! [basic-func-itv]
 	}
 
 	{
-		//! [basic-create-vec1]
-		double _x[3][2]={{0,1},{2,3},{4,5}};
-		IntervalVector x(3,_x); //create ([0,1],[2,3],[4,5])
-		//! [basic-create-vec1]
+	//! [basic-create-vec1]
+	double _x[3][2]={{0,1},{2,3},{4,5}};
+	IntervalVector x(3,_x); //create ([0,1],[2,3],[4,5])
+	//! [basic-create-vec1]
 	}
 
 	{
-		//! [basic-create-vec2]
-		IntervalVector x(3,Interval(1,2));         //create ([1,2],[1,2],[1,2])
-		IntervalVector y=IntervalVector::empty(3); //create a vector of 3 empty intervals
-		//! [basic-create-vec2]
+	//! [basic-create-vec2]
+	IntervalVector x(3,Interval(1,2));         //create ([1,2],[1,2],[1,2])
+	IntervalVector y=IntervalVector::empty(3); //create a vector of 3 empty intervals
+	//! [basic-create-vec2]
 	}
 
 	{
-		//! [basic-create-mat]
-		double _M[9][2]={{0,1},{0,1},{0,1},
-				{0,2},{0,2},{0,2},
-				{0,3},{0,3},{0,3}};
-		IntervalMatrix M(3,3,_M);
-		//create (([0,1] [0,1] [0,1]) ; ([0,2] [0,2] [0,2]) ; ([0,3] [0,3] [0,3]))
-		//! [basic-create-mat]
+	//! [basic-create-mat]
+	double _M[9][2]={{0,1},{0,1},{0,1},
+	                 {0,2},{0,2},{0,2},
+	                 {0,3},{0,3},{0,3}};
+	IntervalMatrix M(3,3,_M);
+	//create (([0,1] [0,1] [0,1]) ; ([0,2] [0,2] [0,2]) ; ([0,3] [0,3] [0,3]))
+	//! [basic-create-mat]
 	}
 
 	{
-		//! [basic-mat-vec]
-		// ------------------------------------------------
-		// Vector/matrix interval arithmetic
-		// - create an interval vector x
-		// - create an interval matrix M
-		// - calculate M*x
-		// - calculate M'*x, where M' is the transpose of M
-		// ------------------------------------------------
+	//! [basic-mat-vec]
+	// ------------------------------------------------
+	// Vector/matrix interval arithmetic
+	// - create an interval vector x
+	// - create an interval matrix M
+	// - calculate M*x
+	// - calculate M'*x, where M' is the transpose of M
+	// ------------------------------------------------
 
-		double _x[3][2]={{0,1},{2,3},{4,5}};
-		IntervalVector x(3,_x);
+	double _x[3][2]={{0,1},{2,3},{4,5}};
+	IntervalVector x(3,_x);
 
-		double _M[9][2]={{0,1},{0,1},{0,1}, // 3*3 matrix of intervals
-				{0,2},{0,2},{0,2},
-				{0,1},{0,1},{0,1}};
+	double _M[9][2]={{0,1},{0,1},{0,1}, // 3*3 matrix of intervals
+	                 {0,2},{0,2},{0,2},
+	                 {0,1},{0,1},{0,1}};
 
-		IntervalMatrix M(3,3,_M);
-		IntervalVector y=M*x;            // matrix-vector multiplication
-		IntervalMatrix N=M.transpose();  // N is M^T
-		//! [basic-mat-vec]
+	IntervalMatrix M(3,3,_M);
+	IntervalVector y=M*x;            // matrix-vector multiplication
+	IntervalMatrix N=M.transpose();  // N is M^T
+	//! [basic-mat-vec]
 	}
 
 	{
-		//! [basic-mid-rad]
-		// ------------------------------------------------
-		// Mixing real/interval vector/matrices
-		// - calculate the magnitude of an interval matrix (a real matrix)
-		// - calculate the midvector of an interval vector (a real vector)
-		// - multiply the latters (floating point arithmetic)
-		// ------------------------------------------------
+	//! [basic-mid-rad]
+	// ------------------------------------------------
+	// Mixing real/interval vector/matrices
+	// - calculate the magnitude of an interval matrix (a real matrix)
+	// - calculate the midvector of an interval vector (a real vector)
+	// - multiply the latters (floating point arithmetic)
+	// ------------------------------------------------
 
-		double _x[][2]={{0,1},{0,1},{0,1}};
-		IntervalVector x(3,_x);
+	double _x[][2]={{0,1},{0,1},{0,1}};
+	IntervalVector x(3,_x);
 
-		double _M[9][2]={{0,1},{0,1},{0,1},
-				{0,2},{0,2},{0,2},
-				{0,1},{0,1},{0,1}};
-		IntervalMatrix M(3,3,_M);
+	double _M[9][2]={{0,1},{0,1},{0,1},
+	                 {0,2},{0,2},{0,2},
+	                 {0,1},{0,1},{0,1}};
+	IntervalMatrix M(3,3,_M);
 
-		Matrix M2=M.mag();   // the matrix of magnitudes
-		Vector x2=x.mid();   // the vector of midpoints
-		Vector y=M2*x2;      // a matrix-vector product (subject to roundoff errors)
-		//! [basic-mid-rad]
+	Matrix M2=M.mag();   // the matrix of magnitudes
+	Vector x2=x.mid();   // the vector of midpoints
+	Vector y=M2*x2;      // a matrix-vector product (subject to roundoff errors)
+	//! [basic-mid-rad]
 	}
 
 	{
-		//! [basic-func-create]
-		Variable x("x");
-		Variable y("y");
-		Function f(x,y,sin(x+y)); // create the function (x,y)->sin(x+y)
-		//! [basic-func-create]
+	//! [basic-func-create]
+	Variable x("x");
+	Variable y("y");
+	Function f(x,y,sin(x+y)); // create the function (x,y)->sin(x+y)
+	//! [basic-func-create]
 	}
 	{
-		//! [basic-func-create-cst1]
-		Variable x;
-		Function f(x,sin(2*x)); // create the function (x,y)->sin(2*x)
-		//! [basic-func-create-cst1]
-	}
-
-	{
-		//! [basic-func-create-cst2]
-		Interval pi(3.1415,3.1416);
-		Variable x;
-		Function f(x,sin(pi*x)); // create the function (x,y)->sin(π*x)
-		//! [basic-func-create-cst2]
+	//! [basic-func-create-cst1]
+	Variable x;
+	Function f(x,sin(2*x)); // create the function (x,y)->sin(2*x)
+	//! [basic-func-create-cst1]
 	}
 
 	{
-		//! [func-vec-arg]
-		Variable a(2);
-		Variable b(2);
-		Function dist(a,b,sqrt(sqr(a[0]-b[0])+sqr(a[1]-b[1])));
-		//! [func-vec-arg]
+	//! [basic-func-create-cst2]
+	Interval pi(3.1415,3.1416);
+	Variable x;
+	Function f(x,sin(pi*x)); // create the function (x,y)->sin(π*x)
+	//! [basic-func-create-cst2]
 	}
 
 	{
-		//! [func-compo]
-		/* create the distance function with 2 arguments */
-		Variable a(2);
-		Variable b(2);
-		Function dist(a,b,sqrt(sqr(a[0]-b[0])+sqr(a[1]-b[1])));
-
-		/* create the constant vector pt=(1,2) */
-		Vector pt(2);
-		pt[0]=1;
-		pt[1]=2;
-
-		/* create the function x->dist(x,pt). */
-		Variable x(2);
-		Function f(x,dist(x,pt));
-		//! [func-compo]
+	//! [func-vec-arg]
+	Variable a(2);
+	Variable b(2);
+	Function dist(a,b,sqrt(sqr(a[0]-b[0])+sqr(a[1]-b[1])));
+	//! [func-vec-arg]
 	}
 
 	{
-		//! [func-vec-value]
-		// ------------------------------------------------
-		// Vector-valued functions
-		// ------------------------------------------------
-		/* create the distance function with 2 arguments */
-		Variable x(2,"x");
-		Variable pt(2,"p");
-		Function dist(x,pt,sqrt(sqr(x[0]-pt[0])+sqr(x[1]-pt[1])),"dist");
+	//! [func-compo]
+	/* create the distance function with 2 arguments */
+	Variable a(2);
+	Variable b(2);
+	Function dist(a,b,sqrt(sqr(a[0]-b[0])+sqr(a[1]-b[1])));
 
-		/* create the two constant vectors */
-		Vector pt1=Vector::zeros(2);
-		Vector pt2=Vector::ones(2);
+	/* create the constant vector pt=(1,2) */
+	Vector pt(2);
+	pt[0]=1;
+	pt[1]=2;
 
-		/* create the function x->(dist(x,pt1),dist(x,pt2)). */
-		Function f(x,Return(dist(x,pt1),dist(x,pt2)),"f");
-
-		cout << f << endl;
-		//! [func-vec-value]
+	/* create the function x->dist(x,pt). */
+	Variable x(2);
+	Function f(x,dist(x,pt));
+	//! [func-compo]
 	}
 
 	{
-		//! [func-mat-value]
-		Variable x("x");
-		Function f(x,Return(Return(2*x,x,true),Return(-x,3*x,true)));
-		//! [func-mat-value]
+	//! [func-vec-value]
+	// ------------------------------------------------
+	// Vector-valued functions
+	// ------------------------------------------------
+	/* create the distance function with 2 arguments */
+	Variable x(2,"x");
+	Variable pt(2,"p");
+	Function dist(x,pt,sqrt(sqr(x[0]-pt[0])+sqr(x[1]-pt[1])),"dist");
+
+	/* create the two constant vectors */
+	Vector pt1=Vector::zeros(2);
+	Vector pt2=Vector::ones(2);
+
+	/* create the function x->(dist(x,pt1),dist(x,pt2)). */
+	Function f(x,Return(dist(x,pt1),dist(x,pt2)),"f");
+
+	cout << f << endl;
+	//! [func-vec-value]
 	}
 
 	{
-		//! [func-eval]
-		Variable x;
-		Variable y;
-		Function f(x,y,sin(x+y));
-
-		double _x[2][2]={{1,2},{3,4}};
-		IntervalVector xy(2,_x); // build xy=([1,2],[3,4])
-		Interval z=f.eval(xy); // z=f(xy)=sin([4,6])=[-1, -0.27941]
-		//! [func-eval]
+	//! [func-mat-value]
+	Variable x("x");
+	Function f(x,Return(Return(2*x,x,true),Return(-x,3*x,true)));
+	//! [func-mat-value]
 	}
 
 	{
-		//! [func-eval-vec]
-		Variable a;
-		Function f(a,Return(sqr(a),-a));
+	//! [func-eval]
+	Variable x;
+	Variable y;
+	Function f(x,y,sin(x+y));
 
-		IntervalVector x(1,Interval(1,2)); // build x=([1,2])
-
-		/* calculate y=f(x)=([1, 4] ; [-2, -1]) */
-		IntervalVector y=f.eval_vector(x);
-		//! [func-eval-vec]
+	double _x[2][2]={{1,2},{3,4}};
+	IntervalVector xy(2,_x); // build xy=([1,2],[3,4])
+	Interval z=f.eval(xy); // z=f(xy)=sin([4,6])=[-1, -0.27941]
+	//! [func-eval]
 	}
 
 	{
-		//! [func-eval-mat]
-		Function f("myfunction.txt");
+	//! [func-eval-vec]
+	Variable a;
+	Function f(a,Return(sqr(a),-a));
 
-		IntervalVector x(1,Interval(0,1));
+	IntervalVector x(1,Interval(1,2)); // build x=([1,2])
 
-		// calculate M=f(x)=(([0, 2] , [-1, -0]) ; ([-1, -0] , [0, 3]))
-		IntervalMatrix M=f.eval_matrix(x);
-		//! [func-eval-mat]
+	/* calculate y=f(x)=([1, 4] ; [-2, -1]) */
+	IntervalVector y=f.eval_vector(x);
+	//! [func-eval-vec]
+	}
+
+	{
+	//! [func-eval-mat]
+	Function f("myfunction.txt");
+
+	IntervalVector x(1,Interval(0,1));
+
+	// calculate M=f(x)=(([0, 2] , [-1, -0]) ; ([-1, -0] , [0, 3]))
+	IntervalMatrix M=f.eval_matrix(x);
+	//! [func-eval-mat]
 	}
 
 
 	{
-		//! [func-grad]
-		Variable x,y,z;
-		Function f(x,y,z,x*y+z*y);
+	//! [func-grad]
+	Variable x,y,z;
+	Function f(x,y,z,x*y+z*y);
 
-		double _xyz[3][2]={{0,1},{0,2},{0,3}};
-		IntervalVector xyz(3,_xyz);
+	double _xyz[3][2]={{0,1},{0,2},{0,3}};
+	IntervalVector xyz(3,_xyz);
 
-		/* calculate g=grad_f(x)=(y,x+z,y)=[0, 2] ; [0, 4] ; [0, 2]) */
-		IntervalVector g=f.gradient(xyz);
-		//! [func-grad]
+	/* calculate g=grad_f(x)=(y,x+z,y)=[0, 2] ; [0, 4] ; [0, 2]) */
+	IntervalVector g=f.gradient(xyz);
+	//! [func-grad]
 	}
 
 	{
-		//! [func-jac]
-		// ------------------------------------------------
-		// Vector-valued functions, Jacobian matrix
-		//
-		// > create the function dist:(x,pt)->||x-pt||
-		// > create the function f:x->(dist(x,pt1),dist(x,pt2)
-		// > calculate the Jacobian matrix of f over the box
-		// ------------------------------------------------
+	//! [func-jac]
+	// ------------------------------------------------
+	// Vector-valued functions, Jacobian matrix
+	//
+	// > create the function dist:(x,pt)->||x-pt||
+	// > create the function f:x->(dist(x,pt1),dist(x,pt2)
+	// > calculate the Jacobian matrix of f over the box
+	// ------------------------------------------------
 
-		Variable x(2,"x");
-		Variable pt(2,"p");
-		Function dist(x,pt,sqrt(sqr(x[0]-pt[0])+sqr(x[1]-pt[1])),"dist");
+	Variable x(2,"x");
+	Variable pt(2,"p");
+	Function dist(x,pt,sqrt(sqr(x[0]-pt[0])+sqr(x[1]-pt[1])),"dist");
 
-		Vector pt1=Vector::zeros(2);
-		Vector pt2=Vector::ones(2);
+	Vector pt1=Vector::zeros(2);
+	Vector pt2=Vector::ones(2);
 
-		Function f(x,Return(dist(x,pt1),dist(x,pt2)));
+	Function f(x,Return(dist(x,pt1),dist(x,pt2)));
 
-		double init_box[][2] = { {-10,10},{-10,10} };
-		IntervalVector box(2,init_box);
+	double init_box[][2] = { {-10,10},{-10,10} };
+	IntervalVector box(2,init_box);
 
-		/* calculate J as a m*n interval enclosure of the Jacobian matrix */
-		IntervalMatrix J=f.jacobian(box);
-		// ------------------------------------------------
+	/* calculate J as a m*n interval enclosure of the Jacobian matrix */
+	IntervalMatrix J=f.jacobian(box);
+	// ------------------------------------------------
 
-		//! [func-jac]
+	//! [func-jac]
 	}
 
 	{
-		//! [func-bwd]
-		Variable x;
-		Variable y;
-		Function f(x,y,sin(x+y));
+	//! [func-bwd]
+	Variable x;
+	Variable y;
+	Function f(x,y,sin(x+y));
 
-		double _box[2][2]={{1,2},{3,4}};
-		IntervalVector box(2,_box);
+	double _box[2][2]={{1,2},{3,4}};
+	IntervalVector box(2,_box);
 
-		/* the backward sets box to ([1, 1.7123] ; [3, 3.7124]) */
-		f.backward(-1.0,box);
-		//! [func-bwd]
+	/* the backward sets box to ([1, 1.7123] ; [3, 3.7124]) */
+	f.backward(-1.0,box);
+	//! [func-bwd]
 	}
 
 	{
-		//! [ctc-fwd-bwd]
-		Variable x,y,z;
-		NumConstraint c(x,y,z,x+y=z);
-		CtcFwdBwd ctc(c);
-		//! [ctc-fwd-bwd]
+	//! [ctc-fwd-bwd]
+	Variable x,y,z;
+	NumConstraint c(x,y,z,x+y=z);
+	CtcFwdBwd ctc(c);
+	//! [ctc-fwd-bwd]
 	}
 
 	{
-		//! [ctc-fwd-bwd2]
-		Variable x,y;
-		double d=0.5*sqrt(2);
-		Function f(x,y,Return(sqrt(sqr(x)+sqr(y))-d, sqrt(sqr(x-1.0)+sqr(y-1.0))-d));
+	//! [ctc-fwd-bwd2]
+	Variable x,y;
+	double d=0.5*sqrt(2);
+	Function f(x,y,Return(sqrt(sqr(x)+sqr(y))-d, sqrt(sqr(x-1.0)+sqr(y-1.0))-d));
 
-		IntervalVector box(2,Interval(-10,10));
+	IntervalVector box(2,Interval(-10,10));
 
-		/* we give f directly (means that the constraint is f=0) */
-		CtcFwdBwd c(f);
-		c.contract(box);
+	/* we give f directly (means that the constraint is f=0) */
+	CtcFwdBwd c(f);
+	c.contract(box);
 
-		/* display ([0.2929, 0.7072] ; [0.2929, 0.7072]) */
-		cout << box << endl;
-		//! [ctc-fwd-bwd2]
+	/* display ([0.2929, 0.7072] ; [0.2929, 0.7072]) */
+	cout << box << endl;
+	//! [ctc-fwd-bwd2]
 	}
 
 	{
-		//! [ctc-fixpoint]
-		Variable x,y;
-		double d=0.5*sqrt(2);
-		Function f(x,y,Return(sqrt(sqr(x)+sqr(y))-d, sqrt(sqr(x-1.0)+sqr(y-1.0))-d));
+	//! [ctc-fixpoint]
+	Variable x,y;
+	double d=0.5*sqrt(2);
+	Function f(x,y,Return(sqrt(sqr(x)+sqr(y))-d, sqrt(sqr(x-1.0)+sqr(y-1.0))-d));
 
-		IntervalVector box(2,Interval(-10,10));
+	IntervalVector box(2,Interval(-10,10));
 
-		CtcFwdBwd c(f);
-		CtcFixPoint fp(c,1e-03);
+	CtcFwdBwd c(f);
+	CtcFixPoint fp(c,1e-03);
 
-		fp.contract(box);
-		/* display ([0.4990, 0.5001] ; [0.4990, 0.5001]) */
-		cout << "box after fixpoint=" << box << endl;
+	fp.contract(box);
+	/* display ([0.4990, 0.5001] ; [0.4990, 0.5001]) */
+	cout << "box after fixpoint=" << box << endl;
 	}
 
 	{
-		Variable x;
-		NumConstraint c1(x,x>=-1);
-		NumConstraint c2(x,x<=1);
-		CtcFwdBwd ctc1(c1);
-		CtcFwdBwd ctc2(c2);
-		IntervalVector box(1,Interval::ALL_REALS);
+	Variable x;
+	NumConstraint c1(x,x>=-1);
+	NumConstraint c2(x,x<=1);
+	CtcFwdBwd ctc1(c1);
+	CtcFwdBwd ctc2(c2);
+	IntervalVector box(1,Interval::ALL_REALS);
 
-		CtcCompo ctc3(ctc1,ctc2);
-		ctc3.contract(box);
-		cout << "compo: " << box << endl;
-		//! [ctc-fixpoint]
+	CtcCompo ctc3(ctc1,ctc2);
+	ctc3.contract(box);
+	cout << "compo: " << box << endl;
+	//! [ctc-fixpoint]
 	}
 
 	{
-		//! [ctc-union]
-		Variable x;
-		NumConstraint c1(x,x<=-1);
-		NumConstraint c2(x,x>=1);
-		CtcFwdBwd ctc1(c1);
-		CtcFwdBwd ctc2(c2);
-		IntervalVector box(1,Interval::POS_REALS); // the box [0,oo)
+	//! [ctc-union]
+	Variable x;
+	NumConstraint c1(x,x<=-1);
+	NumConstraint c2(x,x>=1);
+	CtcFwdBwd ctc1(c1);
+	CtcFwdBwd ctc2(c2);
+	IntervalVector box(1,Interval::POS_REALS); // the box [0,oo)
 
-		CtcUnion ctc3(ctc1,ctc2); // a contractor w.r.t. (x<=-1 or x>=1)
-		ctc3.contract(box); // box will be contracted to [1,oo)
-		cout << box << endl;
-		//! [ctc-union]
+	CtcUnion ctc3(ctc1,ctc2); // a contractor w.r.t. (x<=-1 or x>=1)
+	ctc3.contract(box); // box will be contracted to [1,oo)
+	cout << box << endl;
+	//! [ctc-union]
 	}
 
 	{
-		//! [ctc-inter]
-		Variable x;
-		NumConstraint c1(x,x>=-1);
-		NumConstraint c2(x,x<=1);
-		CtcFwdBwd ctc1(c1);
-		CtcFwdBwd ctc2(c2);
-		IntervalVector box(1,Interval::ALL_REALS);// the box (-oo,oo)
-		CtcCompo ctc3(ctc1,ctc2);// a contractor w.r.t. (x>=-1 and x<=1)
-		ctc3.contract(box); // box will be contracted to [-1,1]
-		cout << box << endl;
-		//! [ctc-inter]
+	//! [ctc-inter]
+	Variable x;
+	NumConstraint c1(x,x>=-1);
+	NumConstraint c2(x,x<=1);
+	CtcFwdBwd ctc1(c1);
+	CtcFwdBwd ctc2(c2);
+	IntervalVector box(1,Interval::ALL_REALS);// the box (-oo,oo)
+	CtcCompo ctc3(ctc1,ctc2);// a contractor w.r.t. (x>=-1 and x<=1)
+	ctc3.contract(box); // box will be contracted to [-1,1]
+	cout << box << endl;
+	//! [ctc-inter]
 	}
 
 	{
-		//! [ctc-newton]
-		Variable x,y;
-		Function f(x,y,Return(sqrt(sqr(x)+sqr(y))-1, sqrt(sqr(x-1.0)+sqr(y-1.0))-1));
-		double init_box[][2]={{0.999,1.001},{-0.001,0.001}};
-		IntervalVector box(2,init_box);
+	//! [ctc-newton]
+	Variable x,y;
+	Function f(x,y,Return(sqrt(sqr(x)+sqr(y))-1, sqrt(sqr(x-1.0)+sqr(y-1.0))-1));
+	double init_box[][2]={{0.999,1.001},{-0.001,0.001}};
+	IntervalVector box(2,init_box);
 
-		// Build an interval Newton iteration
-		// for solving f(x)=0 where f is
-		// a vector-valued function representing
-		// the system.
-		CtcNewton newton(f);
+	// Build an interval Newton iteration
+	// for solving f(x)=0 where f is
+	// a vector-valued function representing
+	// the system.
+	CtcNewton newton(f);
 
-		/* Contract the box with Newton */
-		newton.contract(box);
+	/* Contract the box with Newton */
+	newton.contract(box);
 
-		/* display a very small box enclosing (1,0) */
-		cout << box << endl;
-		//! [ctc-newton]
+	/* display a very small box enclosing (1,0) */
+	cout << box << endl;
+	//! [ctc-newton]
 	}
 
 	//  {
@@ -492,132 +492,181 @@ int main() {
 	//  }
 
 	{
-		//! [ctc-own1]
-		class MyContractor : public Ctc {
-		public:
+	//! [ctc-own1]
+	class MyContractor : public Ctc {
 
-			void contract(IntervalVector& box) {
-				box=box.mid()+0.5*Interval(-1,1)*box.rad();
-			}
-		};
-		//! [ctc-own1]
+	public:
 
-		//! [ctc-own2]
-		/* build the contractor for 3-dimensional boxes. */
-		MyContractor c;
+		void contract(IntervalVector& box) {
+			box=box.mid()+0.5*Interval(-1,1)*box.rad();
+		}
 
-		/* create the box [0,1]x[0,1]x[0,1] */
-		IntervalVector x(3,Interval(0,1));
+	};
+	//! [ctc-own1]
 
-		c.contract(x);
-		cout << x << endl;// ([0.25, 0.75] ; [0.25, 0.75] ; [0.25, 0.75])
+	//! [ctc-own2]
+	/* build the contractor for 3-dimensional boxes. */
+	MyContractor c;
 
-		c.contract(x);
-		cout << x << endl;// ([0.375, 0.625] ; [0.375, 0.625] ; [0.375, 0.625])
+	/* create the box [0,1]x[0,1]x[0,1] */
+	IntervalVector x(3,Interval(0,1));
 
-		c.contract(x);
-		cout << x << endl;// ([0.4375, 0.5625] ; [0.4375, 0.5625] ; [0.4375, 0.5625])
-		//! [ctc-own2]
+	c.contract(x);
+	cout << x << endl;// ([0.25, 0.75] ; [0.25, 0.75] ; [0.25, 0.75])
 
-		//! [ctc-own3]
-		CtcFixPoint fp(c,0.001);
-		fp.contract(x);
-		cout << x << endl;// ([0.4999999999999999, 0.5000000000000001], ...
-		//! [ctc-own3]
+	c.contract(x);
+	cout << x << endl;// ([0.375, 0.625] ; [0.375, 0.625] ; [0.375, 0.625])
+
+	c.contract(x);
+	cout << x << endl;// ([0.4375, 0.5625] ; [0.4375, 0.5625] ; [0.4375, 0.5625])
+	//! [ctc-own2]
+
+	//! [ctc-own3]
+	CtcFixPoint fp(c,0.001);
+	fp.contract(x);
+	cout << x << endl;// ([0.4999999999999999, 0.5000000000000001], ...
+	//! [ctc-own3]
 	}
 
 
 	{
-		//! [strat-basic-solver]
+	//! [strat-basic-solver]
 
-		/* Create the function (x,y)->( ||(x,y)||-d,  ||(x,y)-(1,0)||-d ) */
-		Variable x,y;
-		double d=1.0;
-		Function f(x,y,Return(sqrt(sqr(x)+sqr(y))-d,
-				sqrt(sqr(x-1.0)+sqr(y))-d));
+	/* Create the function (x,y)->( ||(x,y)||-d,  ||(x,y)-(1,0)||-d ) */
+	Variable x,y;
+	double d=1.0;
+	Function f(x,y,Return(sqrt(sqr(x)+sqr(y))-d,
+		                  sqrt(sqr(x-1.0)+sqr(y))-d));
 
-		double init_box[][2] = { {-10,10},{-10,10} };
-		IntervalVector box(2,init_box);
+	double init_box[][2] = { {-10,10},{-10,10} };
+	IntervalVector box(2,init_box);
 
-		/* Create a first contractor w.r.t f(x,y)=0 (forward-backward) */
-		CtcFwdBwd fwdBwd(f);
+	/* Create a first contractor w.r.t f(x,y)=0 (forward-backward) */
+	CtcFwdBwd fwdBwd(f);
 
-		/* Create a second contractor (interval Newton) */
-		CtcNewton newton(f);
+	/* Create a second contractor (interval Newton) */
+	CtcNewton newton(f);
 
-		/* Compose the two contractors */
-		CtcCompo c(fwdBwd,newton);
+	/* Compose the two contractors */
+	CtcCompo compo(fwdBwd,newton);
 
-		/* Create a round-robin bisection heuristic and set the
-		 * precision of boxes to 1e-07 */
-		RoundRobin rr(1e-07);
+	/* Create a round-robin bisection heuristic and set the
+	 * precision of boxes to 1e-07 */
+	RoundRobin bisector(1e-07);
 
-		/* Create a "stack of boxes" (CellStack), which has the effect of
-		 * performing a depth-first search. */
-		CellStack buff;
+	/* Create a "stack of boxes" (CellStack), which has the effect of
+	 * performing a depth-first search. */
+	CellStack buff;
 
-		/* Create a solver with the previous objects */
-		Solver s(c,rr,buff);
+	/* Create a solver with the previous objects */
+	Solver s(compo,bisector,buff);
 
-		/* Run the solver */
-		vector<IntervalVector> sols=s.solve(box);
+	/* Run the solver */
+	vector<IntervalVector> sols=s.solve(box);
 
-		/* Display the solutions */
-		for (int i=0; i<sols.size(); i++)
-			cout << "solution n°" << i << "=\t" << sols[i] << endl;
-		//! [strat-basic-solver]
+	/* Display the solutions */
+	for (int i=0; i<sols.size(); i++)
+		cout << "solution n°" << i << "=\t" << sols[i] << endl;
+	//! [strat-basic-solver]
 	}
 
 
 	{
-		//! [strat-default-solver]
+	//! [strat-default-solver]
 
-		System system("../benchs/benchs-satisfaction/benchlib2/kolev36.bch");
+	System system("../benchs/benchs-satisfaction/benchlib2/kolev36.bch");
 
-	    double prec=1e-7; // precision
+	double prec=1e-7; // precision
 
-	    /* ============================ building contractors ========================= */
-	    CtcHC4 hc4(system.ctrs,0.01);
+	/* ============================ building contractors ========================= */
+	CtcHC4 hc4(system,0.01);
 
-	    CtcHC4 hc4_2(system.ctrs,0.1,true);
+	CtcHC4 hc4_2(system,0.1,true);
 
-	    CtcAcid acid(system, hc4_2);
+	CtcAcid acid(system, hc4_2);
 
-	    CtcNewton newton(system.f, 5e+08, prec, 1e-04);
+	CtcNewton newton(system.f, 5e+08, prec, 1e-04);
 
-	    LinearRelaxCombo linear_relax(system,LinearRelaxCombo::COMPO);
+	LinearRelaxCombo linear_relax(system,LinearRelaxCombo::COMPO);
 
-	    CtcPolytopeHull polytope(linear_relax,CtcPolytopeHull::ALL_BOX);
+	CtcPolytopeHull polytope(linear_relax,CtcPolytopeHull::ALL_BOX);
 
-	    CtcCompo polytope_hc4(polytope, hc4);
+	CtcCompo polytope_hc4(polytope, hc4);
 
-	    CtcFixPoint fixpoint(polytope_hc4);
+	CtcFixPoint fixpoint(polytope_hc4);
 
-	    CtcCompo compo(hc4,acid,newton,fixpoint);
-	    /* =========================================================================== */
+	CtcCompo compo(hc4,acid,newton,fixpoint);
+	/* =========================================================================== */
 
-	    /* Create a smear-function bisection heuristic. */
-	    SmearSumRelative bisector(system, prec);
+	/* Create a smear-function bisection heuristic. */
+	SmearSumRelative bisector(system, prec);
 
-	    /* Create a "stack of boxes" (CellStack) (depth-first search). */
-	    CellStack buff;
+	/* Create a "stack of boxes" (CellStack) (depth-first search). */
+	CellStack buff;
 
-	    /* Create a solver with the previous objects */
-	    Solver s(compo, bisector, buff);
+	/* Create a solver with the previous objects */
+	Solver s(compo, bisector, buff);
 
-	    /* Run the solver */
-	    vector<IntervalVector> sols=s.solve(system.box);
+	/* Run the solver */
+	vector<IntervalVector> sols=s.solve(system.box);
 
-	    /* Display the solutions */
-	    for (int i=0; i<sols.size(); i++)
-	    	cout << "solution n°" << i << "=\t" << sols[i] << endl;
+	/* Display the solutions */
+	for (int i=0; i<sols.size(); i++)
+		cout << "solution n°" << i << "=\t" << sols[i] << endl;
 
-	    /* Report performances */
-	    cout << "cpu time used=" << s.time << "s."<< endl;
-	    cout << "number of cells=" << s.nb_cells << endl;
+	/* Report performances */
+	cout << "cpu time used=" << s.time << "s."<< endl;
+	cout << "number of cells=" << s.nb_cells << endl;
 
-	    //! [strat-default-solver]
+	//! [strat-default-solver]
 	}
+
+	{
+	//! [strat-default-optimizer]
+
+	System system("../benchs/benchs-optim/coconutbenchmark-library1/ex3_1_3.bch");
+
+	double prec=1e-7; // precision
+
+	ExtendedSystem ext_sys(system); // extended system (the objective is transformed to a constraint y=f(x))
+
+	/* ============================ building contractors ========================= */
+	CtcHC4 hc4(ext_sys,0.01);
+
+	CtcHC4 hc4_2(ext_sys,0.1,true);
+
+	CtcAcid acid(ext_sys, hc4_2);
+
+	LinearRelaxCombo linear_relax(ext_sys,LinearRelaxCombo::COMPO);
+
+	CtcPolytopeHull polytope(linear_relax,CtcPolytopeHull::ALL_BOX);
+
+	CtcCompo polytope_hc4(polytope, hc4);
+
+	CtcFixPoint fixpoint(polytope_hc4);
+
+	CtcCompo compo(hc4,acid,fixpoint);
+	/* =========================================================================== */
+
+	/* Create a smear-function bisection heuristic. */
+	SmearSumRelative bisector(ext_sys, prec);
+
+	/* Create a solver with the previous objects */
+	Optimizer o(system, compo, bisector);
+
+	/* Run the optimizer */
+	o.optimize(system.box,prec);
+
+	/* Display a safe enclosure of the minimum */
+	cout << "f* in " << Interval(o.uplo,o.loup) << endl;
+
+	/* Report performances */
+	cout << "cpu time used=" << o.time << "s."<< endl;
+	cout << "number of cells=" << o.nb_cells << endl;
+
+	//! [strat-default-optimizer]
+	}
+
 
 	return 0;
 }

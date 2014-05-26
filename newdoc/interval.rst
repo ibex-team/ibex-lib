@@ -192,7 +192,7 @@ to the API.
 .. table:: Container operations for an interval vector x
 
    +------------------+-------------------------------+-------------------------------------------------------+
-   | Return type      |*C++ code*                     |  *meaning*                                            |
+   | Return type      |*C++ code*                     |  *Meaning*                                            |
    +==================+===============================+=======================================================+
    | int              | x.size()                      | The size (number of components)                       |
    +------------------+-------------------------------+-------------------------------------------------------+
@@ -208,14 +208,14 @@ to the API.
    |                  |                               | the extra components are set to                       |
    |                  | *(int n)*                     | :math:`(-\infty,+\infty)` even if the vector is empty.|
    +------------------+-------------------------------+-------------------------------------------------------+
-   | void             | x.put(i, y)                   | Write the vector y in x at index i.                   |
+   | void             | x.put(i, y)                   | Write the vector [y] in [x] at index i.               |
    |                  |                               |                                                       |
    |                  | *(int i, IntervalVector& y)*  |                                                       |
    +------------------+-------------------------------+-------------------------------------------------------+
-   | void             | x.clear()                     | Set all the elements to [0,0] (even if x is empty).   |
+   | void             | x.clear()                     | Set all the elements to [0,0] (even if [x] is empty). |
    |                  |                               | Emptiness is "overridden".                            |
    +------------------+-------------------------------+-------------------------------------------------------+
-   | void             | x.init(y)                     | Set all the elements to y (even if x is empty).       |
+   | void             | x.init(y)                     | Set all the elements to [y] (even if [x] is empty).   |
    |                  |                               | Emptiness is "overridden".                            |
    |                  | *(Interval& y)*               |                                                       |
    +------------------+-------------------------------+-------------------------------------------------------+
@@ -223,7 +223,7 @@ to the API.
 .. table:: Container operations for an interval matrix m
 
    +------------------+-------------------------------+-------------------------------------------------------+
-   | Return type      |*C++ code*                     |  *meaning*                                            |
+   | Return type      |*C++ code*                     |  *Meaning*                                            |
    +==================+===============================+=======================================================+
    | int              | m.nb_rows()                   | Number of rows                                        |
    +------------------+-------------------------------+-------------------------------------------------------+
@@ -258,15 +258,15 @@ to the API.
    |                  |                               | are set to :math:`(-\infty,+\infty)` even if the      |
    |                  | *(int n1, int n2)*            | matrix is empty.                                      |
    +------------------+-------------------------------+-------------------------------------------------------+
-   | void             | m.set_row(i, y)               | Write the vector y in the ith row of m.               |
+   | void             | m.set_row(i, y)               | Write the vector [y] in the ith row of [m].           |
    |                  |                               |                                                       |
    |                  | *(int i, IntervalVector& y)*  |                                                       |
    +------------------+-------------------------------+-------------------------------------------------------+
-   | void             | m.set_col(i, y)               | Write the vector y in the ith column of m.            |
+   | void             | m.set_col(i, y)               | Write the vector [y] in the ith column of [m].        |
    |                  |                               |                                                       |
    |                  | *(int i, IntervalVector& y)*  |                                                       |
    +------------------+-------------------------------+-------------------------------------------------------+
-   | void             | m.put(i,j,m2)                 | Write the matrix m2 in m at (i,j) and subsequent      |
+   | void             | m.put(i,j,m2)                 | Write the matrix [m2] in [m] at (i,j) and subsequent  |
    |                  |                               | indices                                               |
    |                  | *(int i, int j,               |                                                       |
    |                  | IntervalMatrix& m2)*          |                                                       |
@@ -276,10 +276,10 @@ to the API.
    |                  | *(int i, int j,               |                                                       |
    |                  | IntervalVector& v, bool b)*   |                                                       |
    +------------------+-------------------------------+-------------------------------------------------------+
-   | void             | m.clear()                     | Set all the elements to [0,0] (even if x is empty).   |
+   | void             | m.clear()                     | Set all the elements to [0,0] (even if [m] is empty). |
    |                  |                               | Emptiness is "overridden".                            |
    +------------------+-------------------------------+-------------------------------------------------------+
-   | void             | m.init(y)                     | Set all the elements to y (even if x is empty).       |
+   | void             | m.init(y)                     | Set all the elements to [y] (even if [m] is empty).   |
    |                  |                               | Emptiness is "overridden".                            |
    |                  | *(Interval& y)*               |                                                       |
    +------------------+-------------------------------+-------------------------------------------------------+
@@ -289,7 +289,7 @@ to the API.
 Set-membership operations
 ============================
 
-The operations described here are valid for any "sets" x and y and
+The operations described here are valid for any "sets" [x] and [y] and
 any "point" p, where a "set" designates here on object of either of the following classes:
 
 - ``Interval``
@@ -303,56 +303,56 @@ Similarly, a "point" either refers to a ``double`` or an instance of:
 - ``Matrix``
 - ``MatrixArray``.
 
-Given equidimensional sets x, y and a point p, the following table gives the set-membership
+Given equidimensional sets [x], [y] and a point p, the following table gives the set-membership
 predicates currently available in Ibex (from release |release|) and their mathematical intepretation:
 
-+-------------------------------+--------------------------------------------------+------------------+
-|*C++ code*                     |  *meaning*                                       |  available from  |
-+===============================+==================================================+==================+
-|x==y                           | :math:`x=y`                                      |                  |
-+-------------------------------+--------------------------------------------------+------------------+
-|x!=y                           | :math:`x\neq y`                                  |                  |
-+-------------------------------+--------------------------------------------------+------------------+
-|x.is_empty()                   | :math:`x=\emptyset`                              |                  |
-+-------------------------------+--------------------------------------------------+------------------+
-|x.is_subset(y)                 | :math:`x\subseteq y`                             |                  |
-+-------------------------------+--------------------------------------------------+------------------+
-|x.is_strict_subset(y)          | :math:`x\subseteq y\wedge x\neq y`               |                  |
-+-------------------------------+--------------------------------------------------+------------------+
-|x.is_interior_subset(y)        |  :math:`x\subseteq \mathring{y}`                 | release |release||
-+-------------------------------+--------------------------------------------------+------------------+
-|x.is_strict_interior_subset(y) | :math:`x\subseteq \mathring{y}\wedge x\neq y`    | release |release||
-+-------------------------------+--------------------------------------------------+------------------+
-|x.is_superset(y)               | :math:`x\supseteq y`                             |                  |
-+-------------------------------+--------------------------------------------------+------------------+
-|x.is_strict_superset(y)        | :math:`x\supseteq y\wedge x\neq y`               |                  |
-+-------------------------------+--------------------------------------------------+------------------+
-|x.contains(p)                  | :math:`d\in x`                                   |                  |
-+-------------------------------+--------------------------------------------------+------------------+
-|x.interior_contains(p)         | :math:`d\in \mathring{x}`                        | release |release||
-+-------------------------------+--------------------------------------------------+------------------+
-|x.intersects(y)                | :math:`x\cap y\neq\emptyset`                     | release |release||
-+-------------------------------+--------------------------------------------------+------------------+
-|x.overlaps(y)                  |:math:`\mathring{x}\cap \mathring{y}\neq\emptyset`| release |release||
-+-------------------------------+--------------------------------------------------+------------------+
-|x.is_disjoint(y)               |  :math:`x\cap y=\emptyset`                       | release |release||
-+-------------------------------+--------------------------------------------------+------------------+
++-------------------------------+------------------------------------------------------+------------------+
+|*C++ code*                     |  *Meaning*                                           |  available from  |
++===============================+======================================================+==================+
+|x==y                           | :math:`[x]=[y]`                                      |                  |
++-------------------------------+------------------------------------------------------+------------------+
+|x!=y                           | :math:`[x]\neq [y]`                                  |                  |
++-------------------------------+------------------------------------------------------+------------------+
+|x.is_empty()                   | :math:`[x]=\emptyset`                                |                  |
++-------------------------------+------------------------------------------------------+------------------+
+|x.is_subset(y)                 | :math:`[x]\subseteq [y]`                             |                  |
++-------------------------------+------------------------------------------------------+------------------+
+|x.is_strict_subset(y)          | :math:`[x]\subseteq  [y]\wedge x\neq [y]`            |                  |
++-------------------------------+------------------------------------------------------+------------------+
+|x.is_interior_subset(y)        |  :math:`[x]\subseteq \mathring{[y]}`                 | release |release||
++-------------------------------+------------------------------------------------------+------------------+
+|x.is_strict_interior_subset(y) | :math:`[x]\subseteq \mathring{[y]}\wedge x\neq [y]`  | release |release||
++-------------------------------+------------------------------------------------------+------------------+
+|x.is_superset(y)               | :math:`[x]\supseteq [y]`                             |                  |
++-------------------------------+------------------------------------------------------+------------------+
+|x.is_strict_superset(y)        | :math:`[x]\supseteq [y]\wedge [x]\neq [y]`           |                  |
++-------------------------------+------------------------------------------------------+------------------+
+|x.contains(p)                  | :math:`d\in [x]`                                     |                  |
++-------------------------------+------------------------------------------------------+------------------+
+|x.interior_contains(p)         | :math:`d\in \mathring{[x]}`                          | release |release||
++-------------------------------+------------------------------------------------------+------------------+
+|x.intersects(y)                | :math:`[x]\cap [y]\neq\emptyset`                     | release |release||
++-------------------------------+------------------------------------------------------+------------------+
+|x.overlaps(y)                  |:math:`\mathring{[x]}\cap \mathring{[y]}\neq\emptyset`| release |release||
++-------------------------------+------------------------------------------------------+------------------+
+|x.is_disjoint(y)               |  :math:`[x]\cap [y]=\emptyset`                       | release |release||
++-------------------------------+------------------------------------------------------+------------------+
 
 
 Possible set-membership operations between sets are:
 
 =============================== ==================================================
-*C++ code*                        *meaning*
+*C++ code*                        *Meaning*
 ------------------------------- --------------------------------------------------
-x&y                             :math:`x\cap y`
-x|y                             :math:`\square(x\cup y)`
-x.set_empty()                   :math:`x\leftarrow \emptyset`
-x=y                             :math:`x\leftarrow y`
-x&=y                            :math:`x\leftarrow (x\cap y)`
-x|=y                            :math:`x\leftarrow \square(x \cup y)`
+x&y                             :math:`[x]\cap [y]`
+x|y                             :math:`\square([x]\cup [y])`
+x.set_empty()                   :math:`[x]\leftarrow \emptyset`
+x=y                             :math:`[x]\leftarrow [y]`
+x&=y                            :math:`[x]\leftarrow ([x]\cap [y])`
+x|=y                            :math:`[x]\leftarrow \square([x] \cup [y])`
 =============================== ==================================================
 
-Finally, given two interval vectors x and y one can call::
+Finally, given two interval vectors [x] and [y] one can call::
 
   cart_prod(x,y)
 
@@ -406,7 +406,7 @@ The output is:
    :end-before: itv-compl-vec-O
 
 
-The set difference works exactly the same way except that the function takes as first argument another set y.
+The set difference works exactly the same way except that the function takes as first argument another set [y].
 
 Example with intervals:
 
@@ -434,14 +434,14 @@ Example with interval vectors:
 Geometric operations
 ============================
 
-Here are the functions that can be applied to an **interval x**, seen as a segment of the line.
+Here are the functions that can be applied to an **interval [x]**, seen as a segment of the line.
 
 +------------------+-------------------+----------------------------------------------------------------------+
-| *Return type*    | *C++ code*        | *meaning*                                                            |
+| *Return type*    | *C++ code*        | *Meaning*                                                            |
 +==================+===================+======================================================================+
-| double           | x.lb()            | :math:`\underline{x}`, the lower (left) bound of x                   |
+| double           | x.lb()            | :math:`\underline{x}`, the lower (left) bound of [x]                 |
 +------------------+-------------------+----------------------------------------------------------------------+
-| double           | x.ub()            |  :math:`\overline{x}`, the upper (right) bound of x                  |
+| double           | x.ub()            |  :math:`\overline{x}`, the upper (right) bound of [x]                |
 +------------------+-------------------+----------------------------------------------------------------------+
 | double           | x.diam()          |  diameter, :math:`|\overline{x}-\underline{x}|`                      |
 +------------------+-------------------+----------------------------------------------------------------------+
@@ -453,37 +453,37 @@ Here are the functions that can be applied to an **interval x**, seen as a segme
 |                  |                   |                                                                      |
 |                  | *(double eps)*    |                                                                      |
 +------------------+-------------------+----------------------------------------------------------------------+
-| double           | distance(x,y)     | the (Hausdorff) distance between x and y. The distance is 0          |
-|                  |                   | iff x==y. Otherwise, it returns the minimal value by which one of the|
-|                  | *(Interval& y)*   | intervals (x or y) has to be inflated so that it entirely overlaps   |
-|                  |                   | the other interval.                                                  |
+| double           | distance(x,y)     | the (Hausdorff) distance between [x] and [y]. The distance is 0      |
+|                  |                   | iff [x]==[y]. Otherwise, it returns the minimal value by which one of|
+|                  | *(Interval& y)*   | the intervals ([x] or [y)) has to be inflated so that it entirely    |
+|                  |                   | overlaps the other interval.                                         |
 +------------------+-------------------+----------------------------------------------------------------------+
 | double           | x.rel_distance(y) |  the "relative" distance, that is, distance(x,y)/x.diam()            |
 |                  |                   |                                                                      |
 |                  | *(Interval& y)*   |                                                                      |
 +------------------+-------------------+----------------------------------------------------------------------+
-| bool             | x.is_unbounded()  |  true iff x has one of its bounds infinite.                          |
+| bool             | x.is_unbounded()  |  true iff [x] has one of its bounds infinite.                        |
 +------------------+-------------------+----------------------------------------------------------------------+
-| bool             | x.is_bisectable() |  true iff x, as an interval of floating point numbers, can be        |
+| bool             | x.is_bisectable() |  true iff [x], as an interval of floating point numbers, can be      |
 |                  |                   |  bisected in two non-degenerated intervals of floating point numbers.|
 |                  |                   |  The empty interval or an interval of two consecutive floating points| 
 |                  |                   |  are not bisectable.                                                 |
 +------------------+-------------------+----------------------------------------------------------------------+
 
-Here are the functions that can be applied to an **interval vector x**, seen as a box.
+Here are the functions that can be applied to an **interval vector [x]**, seen as a box.
 
 +------------------+-------------------------+----------------------------------------------------------------------+
-| *Return type*    | *C++ code*              | *meaning*                                                            |
+| *Return type*    | *C++ code*              | *Meaning*                                                            |
 +==================+=========================+======================================================================+
-| Vector           | x.lb()                  | lower-left corner (vector of  lower bounds of x)                     |
+| Vector           | x.lb()                  | lower-left corner (vector of  lower bounds of [x])                   |
 +------------------+-------------------------+----------------------------------------------------------------------+
-| Vector           | x.ub()                  | upper-right corner (vector of  upper bounds of x)                    |
+| Vector           | x.ub()                  | upper-right corner (vector of  upper bounds of [x])                  |
 +------------------+-------------------------+----------------------------------------------------------------------+
 | Vector           | x.diam()                | vector of diameters, :math:`|\overline{x_i}-\underline{x_i}|`        |
 +------------------+-------------------------+----------------------------------------------------------------------+
-| double           | x.min_diam()            | minimal diameter, among all components of x                          |
+| double           | x.min_diam()            | minimal diameter, among all components of [x]                        |
 +------------------+-------------------------+----------------------------------------------------------------------+
-| double           | x.max_diam()            | maximal diameter, among all components of x                          |
+| double           | x.max_diam()            | maximal diameter, among all components of [x]                        |
 +------------------+-------------------------+----------------------------------------------------------------------+
 | int              | x.extr_diam_index(b)    | the index of a component with minimal (if b==true) or maximal        |
 |                  |                         |  (if b==false) diameter.                                             |
@@ -509,18 +509,18 @@ Here are the functions that can be applied to an **interval vector x**, seen as 
 |                  |                         |                                                                      |
 |                  | *(double eps)*          |                                                                      |
 +------------------+-------------------------+----------------------------------------------------------------------+
-| double           | distance(x,y)           | the (Hausdorff) distance between x and y. The distance is 0          |
-|                  |                         | iff x==y. Otherwise, it returns the minimal value by which one of the|
-|                  | *(IntervalVector& y)*   | interval vectors (x or y) has to be inflated so that it entirely     |
-|                  |                         | overlaps the other interval.                                         |
+| double           | distance(x,y)           | the (Hausdorff) distance between [x] and [y]. The distance is 0      |
+|                  |                         | iff [x]==[y]. Otherwise, it returns the minimal value by which one of|
+|                  | *(IntervalVector& y)*   | the boxes ([x] or [y]) has to be inflated so that it                 |
+|                  |                         | entirely overlaps the other box.                                     |
 +------------------+-------------------------+----------------------------------------------------------------------+
 | double           | x.rel_distance(y)       |  the "relative" distance, that is, distance(x,y)/x.max_diam()        |
 |                  |                         |                                                                      |
 |                  | *(IntervalVector& y)*   |                                                                      |
 +------------------+-------------------------+----------------------------------------------------------------------+
-| bool             | x.is_unbounded()        |  true iff x has one of its bounds infinite.                          |
+| bool             | x.is_unbounded()        |  true iff [x] has one of its bounds infinite.                        |
 +------------------+-------------------------+----------------------------------------------------------------------+
-| bool             | x.is_bisectable()       |  true iff at least one component of x is bisectable (see above).     |
+| bool             | x.is_bisectable()       |  true iff at least one component of [x] is bisectable (see above).   |
 +------------------+-------------------------+----------------------------------------------------------------------+
 
 -----------------
@@ -547,28 +547,52 @@ The output is:
    :start-after: itv-bisect-O
    :end-before: itv-bisect-O
 
+====================
+Miscellaneous
+====================
 
-============================
-Miscellaneous operations
-============================
+Given an interval [x]:
 
++------------+--------------------------------------------------------------------------+
+| *C++ code* |  *Meaning*                                                               |
++============+==========================================================================+
+| x.mig()    | Mignitude, :math:`\min_{x\in[x]} |x|` (a double). Also exists for        |
+|            | interval vectors and matrices (gives a vector or matrix of mignitudes).  |
++------------+--------------------------------------------------------------------------+
+| x.mag()    | Magnitude, :math:`\max_{x\in[x]} |x|` (a double). Also exists for        |
+|            | interval vectors and matrices (gives a vector or matrix of magnitudes).  |
++------------+--------------------------------------------------------------------------+
+|integer(x)  | The largest interval [a,b] of integers included in [x].                  |
++------------+--------------------------------------------------------------------------+
 
-*(to be completed)*
+Finally, for an interval vector [v]:
 
-- mig
-- mag
-- abs
-- random
-- is_zero
++------------+--------------------------------------------------------------------------+
+|v.random()  | A random point inside x                                                  |
++------------+--------------------------------------------------------------------------+
 
+.. _itv-arith:
 
 ============================
 Interval arithmetic
 ============================
 
-Interval arithmetic is the main device upon wich IBex is built.
+Interval arithmetic is the main device upon wich Ibex is built.
 
 For a complete introduction of interval arithmetic and interval analysis, see :ref:`[Moore 1966] <Moore66>`, :ref:`[Neumaier 1990] <Neumaier90>` or :ref:`[Jaulin et al. 2001] <Jaulin01>`.
+
+The interval arithmetic defines for each elementary function :math:`f:\mathbb{R}^n\to\mathbb{R}` an interval function 
+:math:`[f]:\mathbb{IR}^n\to\mathbb{IR}` according to the formula:
+
+.. math::
+
+   [f]([x]) \supseteq \square\{f(\alpha), \ \alpha\in [x] \}
+
+The :math:`\square` symbol (called "hull") is here to highlight the fact that an enclosure of the possibly discontinuous set is returned. Note that, among all the functions below,
+only ``tan`` and ``sign`` fail to be continuous. So, in the other cases, the "hull" operator can be ommitted.
+The possible roundoff error accounts for the :math:`\supseteq` symbol.
+
+The function [f] is called an "interval extension" of the original function f (applied on real numbers).
 
 We start by detailing the binary operators (+,-,*,/) and then proceed with the nonlinear ones.
 
@@ -601,7 +625,7 @@ Possible multiplications are:
 
 
 =============================== ==================================================
-*C++ code*                        *meaning*
+*C++ code*                        *Meaning*
 ------------------------------- --------------------------------------------------
 x*y                             multiplication of two "scalars" (double/intervals)
 x*=y                            mulitplication and assignment
@@ -634,23 +658,23 @@ The previous division operator / simply gives (in Ibex) the hull of this union. 
 :math:`(-\infty,\infty)`. If you want to handle the possible outcome of two intervals, 
 you have to call the "div2" function.
 
-Given four intervals x,y, out1 and out2:
+Given four intervals [x],[y], [out1] and [out2]:
 
   ``div2(x,y,out1,out2)``
 
-will store the union representing x/y in out1 and out2. If the result is a single interval, out2 is set to the empty interval. 
-If the result is the empty set, both out1 and out2 are set to the empty interval.
+will store the union representing [x]/[y] in [out1] and [out2]. If the result is a single interval, [out2] is set to the empty interval. 
+If the result is the empty set, both [out1] and [out2] are set to the empty interval.
 
-**Note:** Contrary to the "cset" theory, the result is empty if y=[0,0] (whatever x is).
+**Note:** Contrary to the "cset" theory, the result is empty if y=[0,0] (whatever [x] is).
 
 For convenience, there is also a function in the ``Interval`` class that simultaneously performs divsion and intersection::
 
   bool div2_inter(const Interval& x, const Interval& y, Interval& out2) 
 
-This function sets ``*this`` to the intersection of itself with the division of two others, x and y.
+This function sets ``*this`` to the intersection of itself with the division of two others, [x] and [y].
 
-In return, ``*this`` and out2 contains the lower and upper part respectively of the division. 
-If the result of the generalized division and intersection is a single interval, out2 is set to the empty interval.
+In return, ``*this`` and [out2] contains the lower and upper part respectively of the division. 
+If the result of the generalized division and intersection is a single interval, [out2] is set to the empty interval.
 
 The function returns true if the intersection is non empty.
 
@@ -671,29 +695,20 @@ Example:
 Non-linear elementary functions
 --------------------------------
 
-The following operations are allowed for an interval x.
-They are all interpreted according to the formula:
-
-.. math::
-
-   f([x]) := \square\{f(\alpha), \ \alpha\in [x] \}
-
-The function f, when applied to intervals, is called an "interval extension" of the original function f (applied on real numbers).
-The :math:`\square` operator (called "hull") means that an enclosure of the possibly discontinuous set is returned. Note that, among all the functions below,
-only ``tan``, ``sign`` and ``integer`` fail to be continuous. So, in the other cases, the "hull" operator can be ommitted.
+The following operations are allowed for an interval [x].
 
 ^^^^^^^^^^^^^^^^^^^^^^^^
 Power and roots
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
 ===========   ===================
-*C++ code*    *meaning*
+*C++ code*    *Meaning*
 -----------   -------------------
-sqr(x)        :math:`x^2`          
-sqrt(x)       :math:`\sqrt{x}`
-pow(x,n)      :math:`x^n`          
-pow(x,y)      :math:`x^y = e^{y\log(x)}`
-root(x,n)     :math:`\sqrt[n]{x}`  
+sqr(x)        :math:`[x]^2`          
+sqrt(x)       :math:`\sqrt{[x]}`
+pow(x,n)      :math:`[x]^n`          
+pow(x,y)      :math:`[x]^{[y]} = e^{[y]\log([x])}`
+root(x,n)     :math:`\sqrt[n]{[x]}`  
 ===========   ===================
 
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -730,21 +745,21 @@ The sign function below is the interval extension of
                           \end{array}\right.
 
 +------------+-------------------------------------------------------------------------+
-| *C++ code* |  *meaning*                                                              |
+| *C++ code* |  *Meaning*                                                              |
 +============+=========================================================================+
 |abs(x)      | interval extension of the absolute value. Not to be confused with       |
-|            | magnitude; e.g. with x=[-2,1], abs(x)=[0,2] and x.mag()=2.              |
+|            | magnitude; e.g. with [x]=[-2,1], abs([x])=[0,2] and the magnitude is 2. |
 +------------+-------------------------------------------------------------------------+
 |max(x,y)    | interval extension of the maximum. Not to be confused with              |
-|            | :math:`\max (x\cup y)`; e.g., max([0,3],[1,2])=[1,3].                   |
+|            | :math:`\max ([x]\cup [y])`; e.g., max([0,3],[1,2])=[1,3].               |
 +------------+-------------------------------------------------------------------------+
 |min(x,y)    | interval extension of the minimum. Not to be confused with              |
-|            | :math:`\min (x\cup y)`; e.g., min([0,3],[1,2])=[0,2].                   |
+|            | :math:`\min ([x]\cup [y])`; e.g., min([0,3],[1,2])=[0,2].               |
 +------------+-------------------------------------------------------------------------+
 |sign(x)     | (see above)                                                             |
 +------------+-------------------------------------------------------------------------+
-|integer(x)  | the largest interval [a,b] of integers included in x                    |
-+------------+-------------------------------------------------------------------------+
+
+.. _itv-bwd-arith:
 
 ====================
 Backward arithmetic
@@ -756,19 +771,33 @@ The "backward" or "relationnal" arithmetic consists in contraction operators for
  
    y= x_1+x_2.
 
-More precisely, given a function :math:`f:\mathbb{R}\to\mathbb{R}` (:math:`\sin, \cos, \exp\, \ldots`) the backward operator, also called the "projection" of f,
-contracts an interval [x] as follows:
+More precisely, given a function :math:`f:\mathbb{R}\to\mathbb{R}` (:math:`\sin, \cos, \exp\, \ldots`) the backward operator of f
+is an interval function :math:`[f]_{bwd}:\mathbb{IR}^2\to\mathbb{IR}` that satisfies:
 
 .. math::
   
-   [x]\leftarrow [x]\cap \{ x\in [x] \ | \ \exists y\in [y], \quad y=f(x) \}.
+   [f]_{bwd}([x],[y]) \supseteq \{ x\in [x] \ | \ \exists y\in [y], \quad y=f(x) \}.
 
-Similarly, given a binary function :math:`f:\mathbb{R}\to\mathbb{R}` (:math:`+, -, \times, \max, \ldots`) the backward operator contracts two intervals
-[x] and [y] as follows:
+Similarly, given a binary function :math:`f:\mathbb{R}^2\to\mathbb{R}` (:math:`+, -, \times, \max, \ldots`) the backward operator 
+is a function :math:`[f]_{bwd}:\mathbb{IR}^2\to\mathbb{IR}` that satisfies:
 
 .. math::
   
-   ([x]_1,[x]_2)\leftarrow([x]_1,[x]_2])\cap\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=f(x_1,x_2)\}.
+   [f]_{bwd}([x]_1,[x]_2,[y])\supseteq\{ (x_1,x_2)\in [x]_1\times[x]_2 \ | \ \exists y\in[y],\ y=f(x_1,x_2)\}.
+
+
+In practice, backward operators in Ibex do not return an interval, they directly contracts the input interval [x] (in case of unary functions), that is:
+
+.. math::
+  
+   [x] \leftarrow [f]_{bwd}([x],[y])
+
+or the two intervals [x1], [x2] (in case of binary functions):
+
+.. math::
+   ([x]_1,[x]_2) \leftarrow [f]_{bwd}([x]_1,[x]_2,[y]).
+
+So the bwd_* functions below all return ``void``.
 
 **Note:** One important feature in Ibex is the ability to contract with respect to any constraints and, in particular, with constraints under the form
 
@@ -777,76 +806,185 @@ Similarly, given a binary function :math:`f:\mathbb{R}\to\mathbb{R}` (:math:`+, 
    y=f(x_1,\ldots,x_n)
 
 where f is an arbirary :ref:`function <mod-func>`. So, as a user, there is probably little interset for you to call the low-level routines presented here. 
-Moreover, these routines only contracts the "pre-image argument" x; they **don't contract the "image argument" y**. This is in contrast with high-level contractors
-like :ref:`ctc-fwd-bwd` that do both contractions (on x and y).
+Moreover, these routines only contracts the "pre-image argument" [x]; they **don't contract the "image argument" [y]**. This is in contrast with high-level contractors
+like :ref:`ctc-fwd-bwd` that do both contractions (on [x] and [y]).
 
 
 +--------------------------+-----------------------------------+
-+ C++ code                 | relation                          |
++ *C++ code*               | *Relation*                        |
 +==========================+===================================+
-+ proj_add(y,x1,x2)        | :math:`y=x_1+x_2`                 |
++  bwd_add(y,x1,x2)        | :math:`y=x_1+x_2`                 |
 +--------------------------+-----------------------------------+
-+ proj_sub(y,x1,x2)        | :math:`y=x_1-x_2`                 |
++  bwd_sub(y,x1,x2)        | :math:`y=x_1-x_2`                 |
 +--------------------------+-----------------------------------+
-+ proj_mul(y,x1,x2)        | :math:`y=x_1\times x_2`           |
++  bwd_mul(y,x1,x2)        | :math:`y=x_1\times x_2`           |
 +--------------------------+-----------------------------------+
-+ proj_div(y,x1,x2)        | :math:`y=x_1/x_2`                 |
++  bwd_div(y,x1,x2)        | :math:`y=x_1/x_2`                 |
 +--------------------------+-----------------------------------+
-+ proj_sqr(y,x)            | :math:`y=x^2`                     |
++  bwd_sqr(y,x)            | :math:`y=x^2`                     |
 +--------------------------+-----------------------------------+
-+ proj_sqrt(y,x)           | :math:`y=\sqrt{x}`                |
++  bwd_sqrt(y,x)           | :math:`y=\sqrt{x}`                |
 +--------------------------+-----------------------------------+
-+ proj_pow(y,n,x)          | :math:`y=x^n`                     |
++  bwd_pow(y,n,x)          | :math:`y=x^n`                     |
 +--------------------------+-----------------------------------+
-+ proj_pow(y,x1,x2)        | :math:`y=x_1^{x_2}`               |
++  bwd_pow(y,x1,x2)        | :math:`y=x_1^{x_2}`               |
 +--------------------------+-----------------------------------+
-+ proj_root(y,n,x)         | :math:`y=\sqrt[n]{x}`             |
++  bwd_root(y,n,x)         | :math:`y=\sqrt[n]{x}`             |
 +--------------------------+-----------------------------------+
-+ proj_exp(y,x)            | :math:`y=\exp{x}`                 |
++  bwd_exp(y,x)            | :math:`y=\exp{x}`                 |
 +--------------------------+-----------------------------------+
-+ proj_log(y,x)            | :math:`y=\ln{x}`                  |
++  bwd_log(y,x)            | :math:`y=\ln{x}`                  |
 +--------------------------+-----------------------------------+
-+ proj_cos(y,x)            | :math:`y=\cos{x}`                 |
++  bwd_cos(y,x)            | :math:`y=\cos{x}`                 |
 +--------------------------+-----------------------------------+
-+ proj_sin(y,x)            | :math:`y=\sin{x}`                 |
++  bwd_sin(y,x)            | :math:`y=\sin{x}`                 |
 +--------------------------+-----------------------------------+
-+ proj_tan(y,x)            | :math:`y=\tan{x}`                 |
++  bwd_tan(y,x)            | :math:`y=\tan{x}`                 |
 +--------------------------+-----------------------------------+
-+ proj_acos(y,x)           | :math:`y=\arccos{x}`              |
++  bwd_acos(y,x)           | :math:`y=\arccos{x}`              |
 +--------------------------+-----------------------------------+
-+ proj_asin(y,x)           | :math:`y=\arcsin{x}`              |
++  bwd_asin(y,x)           | :math:`y=\arcsin{x}`              |
 +--------------------------+-----------------------------------+
-+ proj_atan(y,x)           | :math:`y=\arctan{x}`              |
++  bwd_atan(y,x)           | :math:`y=\arctan{x}`              |
 +--------------------------+-----------------------------------+
-+ proj_cosh(y,x)           | :math:`y=\cosh{x}`                |
++  bwd_cosh(y,x)           | :math:`y=\cosh{x}`                |
 +--------------------------+-----------------------------------+
-+ proj_sinh(y,x)           | :math:`y=\sinh{x}`                |
++  bwd_sinh(y,x)           | :math:`y=\sinh{x}`                |
 +--------------------------+-----------------------------------+
-+ proj_tanh(y,x)           | :math:`y=\tanh{x}`                |
++  bwd_tanh(y,x)           | :math:`y=\tanh{x}`                |
 +--------------------------+-----------------------------------+
-+ proj_acosh(y,x)          | :math:`y=\operatorname{arcosh}(x)`|
++  bwd_acosh(y,x)          | :math:`y=\operatorname{arcosh}(x)`|
 +--------------------------+-----------------------------------+
-+ proj_asinh(y,x)          | :math:`y=\operatorname{arsinh}(x)`|
++  bwd_asinh(y,x)          | :math:`y=\operatorname{arsinh}(x)`|
 +--------------------------+-----------------------------------+
-+ proj_atanh(y,x)          | :math:`y=\operatorname{artanh}(x)`|
++  bwd_atanh(y,x)          | :math:`y=\operatorname{artanh}(x)`|
 +--------------------------+-----------------------------------+
-+ proj_atan2(y,x1,x2)      |:math:`y=atan2(x_1,x_2)`           |
++  bwd_atan2(y,x1,x2)      |:math:`y=atan2(x_1,x_2)`           |
 +--------------------------+-----------------------------------+
-+ proj_abs(y,x)            | :math:`y=|x|`                     |
++  bwd_abs(y,x)            | :math:`y=|x|`                     |
 +--------------------------+-----------------------------------+
-+ proj_sign(y,x)           | :math:`y=sign(x)` (see def. above)|
++  bwd_sign(y,x)           | :math:`y=sign(x)` (see def. above)|
 +--------------------------+-----------------------------------+
-+ proj_integer(y,x)        | :math:`y=x \wedge x\in\mathbb{N}` |
++  bwd_integer(y,x)        | :math:`y=x \wedge x\in\mathbb{N}` |
 +--------------------------+-----------------------------------+
-+ proj_min(y,x1,x2)        |:math:`y=\min(x_1,x_2)`            |
++  bwd_min(y,x1,x2)        |:math:`y=\min(x_1,x_2)`            |
 +--------------------------+-----------------------------------+
-+ proj_max(y,x1,x2)        |:math:`y=\max(x_1,x_2)`            |
++  bwd_max(y,x1,x2)        |:math:`y=\max(x_1,x_2)`            |
 +--------------------------+-----------------------------------+
 
 ====================
 Inner arithmetic
 ====================
 
+The inner arithmetic  :ref:`[Chabert & Beldiceanu 2010] <Chabert10>` :ref:`[Araya et al 2014] <Araya14>` consists in two types of operators.
+Given a function :math:`f:\mathbb{R}^n\to\mathbb{R}`:
 
-*(to be completed)*
+- the **forward inner operator** is an interval function 
+  :math:`]f[:\mathbb{IR}^n\to\mathbb{IR}` that satisfies the formula:
+
+  .. math::
+
+     ]f[([x]) \subseteq \{f(\alpha), \ \alpha\in [x] \}
+
+- the **backward inner operator** is an interval function 
+  :math:`]f[_{bwd}:\mathbb{IR}^{n+1}\to\mathbb{IR}` that satisfies the formula:
+
+  .. math::
+
+     ]f[_{bwd}([x],[y]) \subseteq \{ x\in [x] \ | \ \exists y\in [y], \quad y=f(x) \}.
+
+
+Notice that the inclusion symbol has just been reversed, as compared to the classical interval (forward) and backward arithmetic.
+
+
+-------------------------
+Forward operators
+-------------------------
+
+**Note:** The inner operators are not implemented for all elementary functions yet.
+
++------------+--------------+
+| *C++ code* | *Function*   |
++============+==============+
+|iadd(x1,x2) | x1+x2        |
++------------+--------------+
+|isub(x1,x2) | x1-x2        |
++------------+--------------+
+|imul(x1,x2) | x1*x2        |
++------------+--------------+
+|idiv(x1,x2) | x1/x2        |
++------------+--------------+
+|isqr(x)     | x^2          |
++------------+--------------+
+|iminus(x)   | -x           |
++------------+--------------+
+|ilog(x)     | ln(x)        |
++------------+--------------+
+|iexp(x)     | exp(x)       |
++------------+--------------+
+|iacos(x)    | cos(x)       |
++------------+--------------+
+|iasin(x)    | sin(x)       |
++------------+--------------+
+|iatan(x)    | tan(x)       |
++------------+--------------+
+
+-------------------------
+Backward operators
+-------------------------
+
+Let us denote
+
+  .. math::
+
+     \mathcal{S}:=\{ x\in [x] \ | \ \exists y\in [y], \quad y=f(x) \}.
+
+The backward operator also takes an optional argument ``xin`` that represents an "inner" box, that is a box which already satisfies
+
+  .. math::
+
+     [x]_{in} \subseteq \mathcal{S}.
+
+If this argument is set, the operator guarantees that the contracted box [x] will enclose [xin]. The operator works in this case as an *inflator*, the
+inner box [xin] is indeed "inflated" to a larger inner box [x]. More precisely, we have:
+
+  .. math::
+
+     [x]_{in} \ \subseteq \ ]f[_{bwd}([x],[y],[x]_{in}) \subseteq ([x] \cap \mathcal{S}).
+
+**Note:** The inner operators are not implemented for all elementary functions yet.
+
++------------------------------+------------------+
+| *C++ code*                   | *Relation*       |
++============+=================+==================+
+|ibwd_add(y,x1,x2,xin1,xin2)   | y=x1+x2          |
++------------------------------+------------------+
+|ibwd_sub(y,x1,x2,xin1,xin2)   | y=x1-x2          |
++------------------------------+------------------+
+|ibwd_mul(y,x1,x2,xin1,xin2)   | y=x1*x2          |
++------------------------------+------------------+
+|ibwd_div(y,x1,x2,xin1,xin2)   | y=x1/x2          |
++------------------------------+------------------+
+|ibwd_sqr(y,x,xin)             | y=x^2            |
++------------------------------+------------------+
+|ibwd_sqrt(y,x,xin)            |:math:`y=\sqrt{x}`|
++------------------------------+------------------+
+|ibwd_minus(y,x,xin)           | y=-x             |
++------------------------------+------------------+
+|ibwd_abs(y,x,xin)             | :math:`y=|x|`    |
++------------------------------+------------------+
+|ibwd_pow(y,x,p,xin)           | y=x^p            |
++------------------------------+------------------+
+|ibwd_log(y,x,xin)             | y=ln(x)          |
++------------------------------+------------------+
+|ibwd_exp(y,x,xin)             | y=exp(x)         |
++------------------------------+------------------+
+|ibwd_cos(y,x,xin)             | y=cos(x)         |
++------------------------------+------------------+
+|ibwd_sin(y,x,xin)             | y=sin(x)         |
++------------------------------+------------------+
+|ibwd_tan(y,x,xin)             | y=tan(x)         |
++------------------------------+------------------+
+
+
 

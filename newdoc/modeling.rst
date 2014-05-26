@@ -325,8 +325,8 @@ With an initial box (x,y)=[1,2],[3,4], we obtain the result that (x,y) must lie 
 
 .. literalinclude:: ../examples/doc-tutorial.cpp
    :language: cpp
-   :start-after: func-bwd-C
-   :end-before: func-bwd-C
+   :start-after: func-bwd
+   :end-before: func-bwd
 
 One can indeed check that the resulting box is a consistent narrowing
 of the initial one.
@@ -476,6 +476,14 @@ The display is:
 .. literalinclude:: ../examples/doc-modeling.txt
    :start-after: func-cpp3-O
    :end-before: func-cpp3-O
+
+**Note:** Because of a potential conflict with ``std::min`` (or ``std::max``), you might be forced to prefix the min (max) function with ``ibex::``:
+
+.. literalinclude:: ../examples/doc-modeling.cpp
+   :language: cpp
+   :start-after: func-cpp4-C
+   :end-before: func-cpp4-C
+
 
 .. _mod-func-cpp-renaming:
 
@@ -955,7 +963,7 @@ This produces a new system of **n+M+R+K+1** variables where
 - R is the number of Lagrange multipliers for equalities (i.e., the number of equalities in the original system)
 - K is the number of Lagrange multipliers for bounding constraints. These bounding constraints correspond to the ``box`` 
   field of the original system which is taken into account as 2n additional inequalities.
-- The last variable is the "special coefficient" of the goal function that is equal to 0 in the case were constraint
+- The last variable is the "special coefficient" of the goal function that is equal to 0 in the case where constraint
   qualification (linear independency of constraints gradients) does not hold.
 
 Generation of the Fritz-John conditions is based on :ref:`mod-func-symbolic-diff`.

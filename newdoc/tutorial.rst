@@ -299,7 +299,7 @@ Functions with vector arguments
 
 Arguments of a function are not necessarily scalar variables. They can also be vectors
 or matrices. In the following example, we build the distance function:
-:math:`dist:(a,b)\mapsto\Arrowvert a-b \Arrowvert`
+:math:`dist:(a,b)\mapsto\| a-b \|`
 where a and b are 2-dimensional vectors.
 
 .. literalinclude:: ../examples/doc-tutorial.cpp 
@@ -340,7 +340,7 @@ associates to a vector x its distance with two fixed points ``pt1=(0,0)`` and ``
 
 .. math::
    
-   f:x\mapsto(\Arrowvert x-(1,1)\Arrowvert, \Arrowvert x-(0,0)\Arrowvert).
+   f:x\mapsto(\| x-(1,1)\|, \| x-(0,0)\|).
 
 .. literalinclude:: ../examples/doc-tutorial.cpp 
    :language: cpp
@@ -533,7 +533,7 @@ Contractors
 What is a contractor programming?
 ---------------------------------
 
-The key idea behind *contractor programming* [Chabert09]_ is to abstract the algorithm
+The key idea behind *contractor programming* :ref:`[Chabert & Jaulin, 2009] <Chabert09a>` is to abstract the algorithm
 from the underlying constraint and to view it a function "C":
 
 .. math::
@@ -541,7 +541,7 @@ from the underlying constraint and to view it a function "C":
 
 where :math:`\mathbb{IR}` denotes the set of real intervals.
 
-In other word, we take as primary concept the \e operational definition of a constraint.
+In other word, we take as primary concept the *operational* definition of a constraint.
 
 In this way, operators (like the intersection and the others below) can be extended to contractors. 
 
@@ -553,6 +553,9 @@ See the `strategy pattern`_ for more information on this design choice.
 Classes representing contractors are prefixed by ``Ctc``.
 
 .. _strategy pattern: http://en.wikipedia.org/wiki/Strategy_pattern
+
+
+.. _tuto-fwd-bwd:
 
 ------------------------------ 
 Forward-Backward
@@ -664,6 +667,8 @@ solution (1,0) with a radius of 10^-3. Newton's iteration contracts this box dow
    :language: cpp
    :start-after: ctc-newton
    :end-before: ctc-newton
+
+.. _tuto-propag:
 
 ------------------------------ 
 Propagation
@@ -879,8 +884,8 @@ The generic optimizer is still under active development (at release |release|) a
 as "generic" as the generic solver. There are some limitations, namely:
 
 - many actions performed by the optimizer are hard-coded. In particular, the *goal upper bounding* 
-  step cannot yet be controlled by the user. We use a strategy described in [Araya14]_ and 
-  [Trombettoni11]_, based on *inner region extraction*. The basic idea is to create a continuum of feasible points
+  step cannot yet be controlled by the user. We use a strategy described in :ref:`[Araya et al. 2014] <Araya14>` and 
+  :ref:`[Trombettoni et al. 2011] <Trombettoni11>`, based on *inner region extraction*. The basic idea is to create a continuum of feasible points
   (a box or a polyhedron) where the goal function can be evaluated quickly, that is, without checking for
   constraints satisfaction.
 	

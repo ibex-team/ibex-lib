@@ -27,6 +27,11 @@ CtcHC4::CtcHC4(const Array<NumConstraint>& csp, double ratio, bool incremental) 
 		CtcPropag(csp[0].f.nb_var(), convert(csp), ratio, incremental) {
 }
 
+CtcHC4::CtcHC4(const System& sys, double ratio, bool incremental) :
+				CtcPropag(sys.nb_var, convert(sys.ctrs), ratio, incremental) {
+
+}
+
 CtcHC4::~CtcHC4() {
 	for (int i=0; i<list.size(); i++)
 		delete &list[i];

@@ -56,7 +56,7 @@ void Optimizer::read_ext_box(const IntervalVector& ext_box, IntervalVector& box)
 
 
 
-Optimizer::Optimizer(System& user_sys, Bsc& bsc, Ctc& ctc, double prec,
+Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, double prec,
 					 double goal_rel_prec, double goal_abs_prec, int sample_size, double equ_eps,
 					 bool rigor,  int critpr,CellHeapOptim::criterion crit) :
                 user_sys(user_sys), sys(user_sys,equ_eps),
