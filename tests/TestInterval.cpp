@@ -11,7 +11,6 @@
 
 #include "TestInterval.h"
 #include "utils.h"
-#include "ibex_SetMembership.h"
 #include <float.h>
 
 using namespace std;
@@ -209,18 +208,18 @@ void TestInterval::getters06() {
 
 void TestInterval::is_subset01()          { TEST_ASSERT(Interval(0,1).is_subset(Interval(0,2))); }
 void TestInterval::is_subset02()          { TEST_ASSERT(!Interval(0,1).is_subset(Interval(1,2))); }
-void TestInterval::is_strict_subset01()   { TEST_ASSERT(!Interval(0,1).is_strict_subset(Interval(0,2))); }
-void TestInterval::is_strict_subset02()   { TEST_ASSERT(Interval::NEG_REALS.is_strict_subset(Interval::ALL_REALS)); }
-void TestInterval::is_strict_subset03()   { TEST_ASSERT(Interval::EMPTY_SET.is_strict_subset(Interval::EMPTY_SET)); }
+void TestInterval::is_strict_interior_subset01()   { TEST_ASSERT(!Interval(0,1).is_strict_interior_subset(Interval(0,2))); }
+void TestInterval::is_strict_interior_subset02()   { TEST_ASSERT(Interval::NEG_REALS.is_strict_interior_subset(Interval::ALL_REALS)); }
+void TestInterval::is_strict_interior_subset03()   { TEST_ASSERT(Interval::EMPTY_SET.is_strict_interior_subset(Interval(0,1))); }
 void TestInterval::is_superset01()        { TEST_ASSERT(Interval(0,2).is_superset(Interval(0,1))); }
 void TestInterval::is_superset02()        { TEST_ASSERT(!Interval(1,2).is_superset(Interval(0,1))); }
-void TestInterval::is_strict_superset01() { TEST_ASSERT(!Interval(0,2).is_strict_superset(Interval(0,1))); }
+void TestInterval::is_strict_superset01() { TEST_ASSERT(!Interval(0,2).is_strict_superset(Interval(0,2))); }
 void TestInterval::is_strict_superset02() { TEST_ASSERT(Interval::ALL_REALS.is_strict_superset(Interval::NEG_REALS)); }
-void TestInterval::is_strict_superset03() { TEST_ASSERT(Interval::EMPTY_SET.is_strict_superset(Interval::EMPTY_SET)); }
+void TestInterval::is_strict_superset03() { TEST_ASSERT(!Interval::EMPTY_SET.is_strict_superset(Interval::EMPTY_SET)); }
 void TestInterval::contains01()           { TEST_ASSERT(Interval(0,2).contains(0)); }
 void TestInterval::contains02()           { TEST_ASSERT(Interval::ALL_REALS.contains(POS_INFINITY)); }
-void TestInterval::strictly_contains01()  { TEST_ASSERT(!Interval(0,2).strictly_contains(0)); }
-void TestInterval::strictly_contains02()  { TEST_ASSERT(Interval(0,2).strictly_contains(1)); }
+void TestInterval::interior_contains01()  { TEST_ASSERT(!Interval(0,2).interior_contains(0)); }
+void TestInterval::interior_contains02()  { TEST_ASSERT(Interval(0,2).interior_contains(1)); }
 void TestInterval::is_disjoint01()        { TEST_ASSERT(!Interval::NEG_REALS.is_disjoint(Interval::POS_REALS)); }
 void TestInterval::is_disjoint02()        { TEST_ASSERT(Interval(0,1).is_disjoint(Interval(2,3))); }
 void TestInterval::is_empty01()           { TEST_ASSERT(Interval(POS_INFINITY).is_empty()); }
@@ -239,32 +238,32 @@ void TestInterval::is_bisectable05()      { TEST_ASSERT(Interval(0,ibex::next_fl
 
 
 void TestInterval::integer01() {
-	Interval x=Interval::EMPTY_SET; proj_integer(x); check(x,Interval::EMPTY_SET);
+	Interval x=Interval::EMPTY_SET; bwd_integer(x); check(x,Interval::EMPTY_SET);
 }
 void TestInterval::integer02() {
-	Interval x(NEG_INFINITY,-0.000001); proj_integer(x); check(x,Interval(NEG_INFINITY,-1));
+	Interval x(NEG_INFINITY,-0.000001); bwd_integer(x); check(x,Interval(NEG_INFINITY,-1));
 }
 void TestInterval::integer03() {
-	Interval x(0.00000001,POS_INFINITY); proj_integer(x); check(x,Interval(1.0,POS_INFINITY));
+	Interval x(0.00000001,POS_INFINITY); bwd_integer(x); check(x,Interval(1.0,POS_INFINITY));
 }
 void TestInterval::integer04() {
-	Interval x=Interval::ALL_REALS; proj_integer(x); check(x,Interval::ALL_REALS);
+	Interval x=Interval::ALL_REALS; bwd_integer(x); check(x,Interval::ALL_REALS);
 }
 
 void TestInterval::integer05() {
-	Interval x(0.01,2.99); proj_integer(x); check(x,Interval(1,2));
+	Interval x(0.01,2.99); bwd_integer(x); check(x,Interval(1,2));
 }
 
 void TestInterval::integer06() {
-	Interval x(-0.01,2.99); proj_integer(x); check(x,Interval(0,2));
+	Interval x(-0.01,2.99); bwd_integer(x); check(x,Interval(0,2));
 }
 
 void TestInterval::integer07() {
-	Interval x(1.000000001,1.9999999999); proj_integer(x); check(x,Interval::EMPTY_SET);
+	Interval x(1.000000001,1.9999999999); bwd_integer(x); check(x,Interval::EMPTY_SET);
 }
 
 void TestInterval::integer08() {
-	Interval x(1e8, DBL_MAX); proj_integer(x); check(x, Interval(1e8,DBL_MAX));
+	Interval x(1e8, DBL_MAX); bwd_integer(x); check(x, Interval(1e8,DBL_MAX));
 }
 
 void TestInterval::mid01() {

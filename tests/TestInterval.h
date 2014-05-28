@@ -106,9 +106,9 @@ public:
 
 	    TEST_ADD(TestInterval::is_subset01);
 	    TEST_ADD(TestInterval::is_subset02);
-	    TEST_ADD(TestInterval::is_strict_subset01);
-	    TEST_ADD(TestInterval::is_strict_subset02);
-	    TEST_ADD(TestInterval::is_strict_subset03);
+	    TEST_ADD(TestInterval::is_strict_interior_subset01);
+	    TEST_ADD(TestInterval::is_strict_interior_subset02);
+	    TEST_ADD(TestInterval::is_strict_interior_subset03);
 	    TEST_ADD(TestInterval::is_superset01);
 	    TEST_ADD(TestInterval::is_superset02);
 	    TEST_ADD(TestInterval::is_strict_superset01);
@@ -116,8 +116,8 @@ public:
 	    TEST_ADD(TestInterval::is_strict_superset03);
 	    TEST_ADD(TestInterval::contains01);
 	    TEST_ADD(TestInterval::contains02);
-	    TEST_ADD(TestInterval::strictly_contains01);
-	    TEST_ADD(TestInterval::strictly_contains02);
+	    TEST_ADD(TestInterval::interior_contains01);
+	    TEST_ADD(TestInterval::interior_contains02);
 	    TEST_ADD(TestInterval::is_disjoint01);
 	    TEST_ADD(TestInterval::is_disjoint02);
 	    TEST_ADD(TestInterval::is_empty01);
@@ -234,10 +234,10 @@ private:
     void is_subset01();
     void is_subset02();
 
-	/* test: is_strict_subset */
-    void is_strict_subset01();
-    void is_strict_subset02();
-    void is_strict_subset03();
+	/* test: is_strict_interior_subset */
+    void is_strict_interior_subset01();
+    void is_strict_interior_subset02();
+    void is_strict_interior_subset03();
 
 	/* test: is_superset */
     void is_superset01();
@@ -252,9 +252,9 @@ private:
     void contains01();
     void contains02();
 
-	/* test: strictly_contains */
-    void strictly_contains01();
-    void strictly_contains02();
+	/* test: interior_contains */
+    void interior_contains01();
+    void interior_contains02();
 
 	/* test: is_disjoint */
     void is_disjoint01();

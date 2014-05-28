@@ -198,7 +198,7 @@ public:
 
 	// test:
 	//  is_subset(const IntervalVector& x) const
-	//  is_strict_subset(const IntervalVector& x) const
+	//  is_strict_interior_subset(const IntervalVector& x) const
 	//  is_superset(const IntervalVector& x) cons
 	//  is_strict_superset(const IntervalVector& x) const
 	void is_subset01();

@@ -29,7 +29,7 @@ void TestInnerArith::check_add_sub(const Interval& z, const Interval& xin, const
 	Interval x(L,U);
 	Interval y(L,U);
 
-	if (!iproj_add(z,x,y,xin,yin)) TEST_ASSERT(false);
+	if (!ibwd_add(z,x,y,xin,yin)) TEST_ASSERT(false);
 
 	//cout << "x=" << x << " y=" << y << " z=" << z << endl;
 	if (ub)	{
@@ -56,7 +56,7 @@ void TestInnerArith::check_add_sub(const Interval& z, const Interval& xin, const
 	x=Interval(L,U);
 	y=Interval(L,U);
 
-	iproj_sub(z,x,y,xin,-yin);
+	ibwd_sub(z,x,y,xin,-yin);
 	y=-y;
 	//cout << "x=" << x << " y=" << y << " x+y=" << x+y << endl;
 
@@ -95,7 +95,7 @@ void TestInnerArith::check_mul_div_mono(const Interval& z, const Interval& xin, 
 	Interval x(L,U);
 	Interval y(L,U);
 
-	iproj_mul(z,x,y,xin,yin);
+	ibwd_mul(z,x,y,xin,yin);
 
 	if (ub)	{
 		TEST_ASSERT_DELTA(y.ub()*x.ub(),z.ub(),error);
@@ -134,10 +134,10 @@ void TestInnerArith::check_mul_div_mono(const Interval& z, const Interval& xin, 
 	// note: we take the midpoint of xin
 	// because we need an "inner division"
 
-	iproj_div(z2,x2,y,xin2,yin);
+	ibwd_div(z2,x2,y,xin2,yin);
 	Interval one=1.0;
 	//cout << "x2=" << x2 << " y=" << y << endl;
-	iproj_div(x2,one,x); // means x=1/x;
+	ibwd_div(x2,one,x); // means x=1/x;
 
 	if (ub)	{
 		//cout << "x=" << x << " y=" << y << " x*y=" << x.ub()*y.ub() << " " << z.ub() << endl;
@@ -174,7 +174,7 @@ void TestInnerArith::check_mul_div(const Interval& z, const Interval& xin, const
 	Interval x(L,U);
 	Interval y(L,U);
 
-	iproj_mul(z,x,y,xin,yin);
+	ibwd_mul(z,x,y,xin,yin);
   	if (ll)	{
   		//
   		// !!!!!!!!!!!!!! the current code is not optimal.... !!!!!!!!!!!!!
@@ -234,7 +234,7 @@ void TestInnerArith::add_sub02_3() {
 void TestInnerArith::add_sub03() {
 	Interval x(1,2);
 	Interval y(1,2);
-	iproj_add(Interval(NEG_INFINITY,1.0),x,y);
+	ibwd_add(Interval(NEG_INFINITY,1.0),x,y);
 	TEST_ASSERT(x.is_empty());
 	TEST_ASSERT(y.is_empty());
 }
@@ -242,7 +242,7 @@ void TestInnerArith::add_sub03() {
 void TestInnerArith::add_sub03_2() {
 	Interval x(-2,-1);
 	Interval y(-2,-1);
-	iproj_add(Interval(-1.0,POS_INFINITY),x,y);
+	ibwd_add(Interval(-1.0,POS_INFINITY),x,y);
 	TEST_ASSERT(x.is_empty());
 	TEST_ASSERT(y.is_empty());
 }
@@ -315,7 +315,7 @@ void TestInnerArith::add_sub06_2() {
 void TestInnerArith::add_sub07() {
 	Interval x(-1,1);
 	Interval y(-1,1);
-	iproj_add(0,x,y);
+	ibwd_add(0,x,y);
 	TEST_ASSERT(x.is_empty() || (x+y==Interval::ZERO));
 }
 
@@ -348,7 +348,7 @@ void TestInnerArith::mul_div_mono02_3() {
 void TestInnerArith::mul_div_mono03() {
 	Interval x(0.5,2);
 	Interval y(0.5,2);
-	iproj_mul(Interval(0.1,0.2),x,y);
+	ibwd_mul(Interval(0.1,0.2),x,y);
 	TEST_ASSERT(x.is_empty());
 	TEST_ASSERT(y.is_empty());
 }
@@ -356,7 +356,7 @@ void TestInnerArith::mul_div_mono03() {
 void TestInnerArith::mul_div_mono03_2() {
 	Interval x(-2,-0.5);
 	Interval y(0.5,2);
-	iproj_mul(Interval(-0.2,-0.1),x,y);
+	ibwd_mul(Interval(-0.2,-0.1),x,y);
 	TEST_ASSERT(x.is_empty());
 	TEST_ASSERT(y.is_empty());
 }
@@ -429,7 +429,7 @@ void TestInnerArith::mul_div_mono06_2() {
 void TestInnerArith::mul_div_mono07() {
 	Interval x(0.5,2);
 	Interval y(0.5,2);
-	iproj_mul(1,x,y);
+	ibwd_mul(1,x,y);
 	TEST_ASSERT(x.is_empty() || (x*y==1));
 }
 
@@ -440,7 +440,7 @@ void TestInnerArith::mul08() {
 void TestInnerArith::mul09() {
 	Interval x(-0.5,2);
 	Interval y(-0.5,2);
-	iproj_mul(Interval(1,2),x,y);
+	ibwd_mul(Interval(1,2),x,y);
 	TEST_ASSERT_DELTA(x.lb()*y.lb(),1.0,error);
 	TEST_ASSERT_DELTA(x.ub()*y.ub(),2.0,error);
 	TEST_ASSERT((x*y).is_subset(Interval(1,2)));
@@ -449,7 +449,7 @@ void TestInnerArith::mul09() {
 void TestInnerArith::mul10() {
 	Interval x(-2,0.5);
 	Interval y(-2,0.5);
-	iproj_mul(Interval(1,2),x,y);
+	ibwd_mul(Interval(1,2),x,y);
 	TEST_ASSERT_DELTA(x.lb()*y.lb(),2.0,error);
 	TEST_ASSERT_DELTA(x.ub()*y.ub(),1.0,error);
 	TEST_ASSERT((x*y).is_subset(Interval(1,2)));
@@ -458,7 +458,7 @@ void TestInnerArith::mul10() {
 void TestInnerArith::mul11() {
 	Interval x(-2,2);
 	Interval y(-2,2);
-	iproj_mul(Interval(1,2),x,y);
+	ibwd_mul(Interval(1,2),x,y);
 	TEST_ASSERT(fabs(x.lb()*y.lb()-1.0)<error || fabs(x.ub()*y.ub()-1.0)<error);
 	TEST_ASSERT((x*y).is_subset(Interval(1,2)));
 }
@@ -498,14 +498,14 @@ void TestInnerArith::mul13_4() {
 void TestInnerArith::mul14_1() {
 	Interval x(-1,1);
 	Interval y=Interval::ZERO;
-	iproj_mul(Interval(-1,1),x,y);
+	ibwd_mul(Interval(-1,1),x,y);
 	TEST_ASSERT(x==Interval(-1,1));
 }
 
 void TestInnerArith::mul14_2() {
 	Interval x(-1,1);
 	Interval y=Interval::ZERO;
-	iproj_mul(Interval(1,1),x,y);
+	ibwd_mul(Interval(1,1),x,y);
 	TEST_ASSERT(x.is_empty());
 	TEST_ASSERT(y.is_empty());
 }
@@ -513,14 +513,14 @@ void TestInnerArith::mul14_2() {
 void TestInnerArith::mul14_3() {
 	Interval x(-1,1);
 	Interval y=Interval::ZERO;
-	iproj_mul(Interval::ZERO,x,y,Interval::ZERO,Interval::ZERO);
+	ibwd_mul(Interval::ZERO,x,y,Interval::ZERO,Interval::ZERO);
 	TEST_ASSERT(x==Interval(-1,1));
 }
 
 void TestInnerArith::div08_1() {
 	Interval x(-2,2);
 	Interval y(0.5,1.0);
-	iproj_div(Interval(NEG_INFINITY,1),x,y);
+	ibwd_div(Interval(NEG_INFINITY,1),x,y);
 	TEST_ASSERT_DELTA(x.ub()/y.lb(),1.0,error);
 	TEST_ASSERT(x.lb()==-2);
 	TEST_ASSERT(y.ub()==1.0);
@@ -529,7 +529,7 @@ void TestInnerArith::div08_1() {
 void TestInnerArith::div08_2() {
 	Interval x(-2,2);
 	Interval y(-1,-0.5);
-	iproj_div(Interval(NEG_INFINITY,1),x,y);
+	ibwd_div(Interval(NEG_INFINITY,1),x,y);
 	TEST_ASSERT_DELTA(x.lb()/y.ub(),1.0,error);
 	TEST_ASSERT(x.ub()==2);
 	TEST_ASSERT(y.lb()==-1.0);
@@ -538,7 +538,7 @@ void TestInnerArith::div08_2() {
 void TestInnerArith::div09_1() {
 	Interval x(-2,-1);
 	Interval y(-2,2.0);
-	iproj_div(Interval(NEG_INFINITY,-1),x,y);
+	ibwd_div(Interval(NEG_INFINITY,-1),x,y);
 
 	TEST_ASSERT_DELTA(x.ub()/y.ub(),-1.0,error);
 	TEST_ASSERT(x.lb()==-2);
@@ -548,7 +548,7 @@ void TestInnerArith::div09_1() {
 void TestInnerArith::div09_2() {
 	Interval x(1,2);
 	Interval y(-2,2.0);
-	iproj_div(Interval(NEG_INFINITY,-1),x,y);
+	ibwd_div(Interval(NEG_INFINITY,-1),x,y);
 
 	TEST_ASSERT_DELTA(x.lb()/y.lb(),-1.0,error);
 	TEST_ASSERT(x.ub()==2);
@@ -558,54 +558,54 @@ void TestInnerArith::div09_2() {
 
 void TestInnerArith::abs01() {
 	Interval x;
-	bool f=iproj_abs(Interval::EMPTY_SET,x);
+	bool f=ibwd_abs(Interval::EMPTY_SET,x);
 	TEST_ASSERT(!f && x.is_empty());
 }
 
 void TestInnerArith::abs02() {
 	Interval x(0,2);
-	bool f=iproj_abs(Interval(1,3),x);
+	bool f=ibwd_abs(Interval(1,3),x);
 	TEST_ASSERT(f);
 	check(x,Interval(1,2));
 }
 
 void TestInnerArith::abs03() {
 	Interval x(-3,-1);
-	bool f=iproj_abs(Interval(2,4),x);
+	bool f=ibwd_abs(Interval(2,4),x);
 	TEST_ASSERT(f);
 	check(x,Interval(-3,-2));
 }
 
 void TestInnerArith::abs04() {
 	Interval x(-2,2);
-	bool f=iproj_abs(Interval(1,3),x,-2);
+	bool f=ibwd_abs(Interval(1,3),x,-2);
 	TEST_ASSERT(f);
 	check(x,Interval(-2,-1));
 }
 
 void TestInnerArith::abs05() {
 	Interval x(-2,2);
-	bool f=iproj_abs(Interval(1,3),x,2);
+	bool f=ibwd_abs(Interval(1,3),x,2);
 	TEST_ASSERT(f);
 	check(x,Interval(1,2));
 }
 
 void TestInnerArith::sqrt01() {
 	Interval x;
-	bool f=iproj_sqrt(Interval::EMPTY_SET,x);
+	bool f=ibwd_sqrt(Interval::EMPTY_SET,x);
 	TEST_ASSERT(!f && x.is_empty());
 }
 
 void TestInnerArith::sqrt02() {
 	Interval x;
-	bool f=iproj_sqrt(Interval(-1),x);
+	bool f=ibwd_sqrt(Interval(-1),x);
 	TEST_ASSERT(!f && x.is_empty());
 }
 
 void TestInnerArith::sqrt03() {
 	Interval x(0,6);
 	Interval y(2,3);
-	TEST_ASSERT(iproj_sqrt(y,x));
+	TEST_ASSERT(ibwd_sqrt(y,x));
 	check(x,Interval(4,6));
 	//TEST_ASSERT(y.is_superset(sqrt(Interval(x.ub()))));
 	//TEST_ASSERT(y.is_superset(sqrt(Interval(x.lb()))));
@@ -616,14 +616,14 @@ void TestInnerArith::sqrt03() {
 void TestInnerArith::sqrt04() {
 	Interval x(0,1);
 	Interval y(2,3);
-	bool f=iproj_sqrt(y,x);
+	bool f=ibwd_sqrt(y,x);
 	TEST_ASSERT(!f && x.is_empty());
 }
 
 void TestInnerArith::sqrt05() {
 	Interval x;
 	Interval y(1,POS_INFINITY);
-	bool f=iproj_sqrt(y,x);
+	bool f=ibwd_sqrt(y,x);
 	TEST_ASSERT(f);
 	check(x,y);
 }
@@ -635,7 +635,7 @@ void TestInnerArith::bugr894() {
 	Function f(x,sqr(x-_pt));
 	IntervalVector box(1);
 	IntervalVector pt(1,_pt);
-	f.iproj(Interval::NEG_REALS,box,pt);
+	f.ibwd(Interval::NEG_REALS,box,pt);
 	TEST_ASSERT(box==pt);
 }
 
@@ -644,7 +644,7 @@ void TestInnerArith::bugr899() {
 	Interval x(ibex::previous_float(1.0),1);
 	Interval px(ibex::previous_float(1.0),1);
 	Interval y(Interval::ZERO);
-	iproj_add(Interval(1),x,y,px,y);
+	ibwd_add(Interval(1),x,y,px,y);
 	TEST_ASSERT(x==px);
 }
 
@@ -654,7 +654,7 @@ void TestInnerArith::bugr902() {
 	Interval y(0.411992, 5.41199);
 	Interval xin(0.70709);
 	Interval yin(0.411992);
-	iproj_mul(z,x,y,xin,yin);
+	ibwd_mul(z,x,y,xin,yin);
 	TEST_ASSERT(!x.is_empty());
 	TEST_ASSERT(!y.is_empty());
 }

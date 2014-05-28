@@ -11,7 +11,6 @@
 
 #include "TestIntervalVector.h"
 #include "ibex_Interval.h"
-#include "ibex_SetMembership.h"
 #include "utils.h"
 
 using namespace std;
@@ -287,8 +286,8 @@ void TestIntervalVector::is_subset01() {
 
 	TEST_ASSERT(x1.is_superset(x2));
 	TEST_ASSERT(x2.is_subset(x1));
-	TEST_ASSERT(!x1.is_strict_superset(x2));
-	TEST_ASSERT(!x2.is_strict_subset(x1));
+	TEST_ASSERT(x1.is_strict_superset(x2));
+	TEST_ASSERT(!x2.is_strict_interior_subset(x1));
 }
 
 void TestIntervalVector::is_subset02() {
@@ -299,8 +298,8 @@ void TestIntervalVector::is_subset02() {
 
 	TEST_ASSERT(x1.is_superset(x2));
 	TEST_ASSERT(x2.is_subset(x1));
-	TEST_ASSERT(!x1.is_strict_superset(x2));
-	TEST_ASSERT(!x2.is_strict_subset(x1));
+	TEST_ASSERT(x1.is_strict_superset(x2));
+	TEST_ASSERT(!x2.is_strict_interior_subset(x1));
 }
 
 void TestIntervalVector::is_subset03() {
@@ -311,8 +310,8 @@ void TestIntervalVector::is_subset03() {
 
 	TEST_ASSERT(x1.is_superset(x2));
 	TEST_ASSERT(x2.is_subset(x1));
-	TEST_ASSERT(!x1.is_strict_superset(x2));
-	TEST_ASSERT(!x2.is_strict_subset(x1));
+	TEST_ASSERT(x1.is_strict_superset(x2));
+	TEST_ASSERT(!x2.is_strict_interior_subset(x1));
 }
 
 void TestIntervalVector::is_subset04() {
@@ -324,7 +323,7 @@ void TestIntervalVector::is_subset04() {
 	TEST_ASSERT(x1.is_superset(x2));
 	TEST_ASSERT(x2.is_subset(x1));
 	TEST_ASSERT(x1.is_strict_superset(x2));
-	TEST_ASSERT(x2.is_strict_subset(x1));
+	TEST_ASSERT(x2.is_strict_interior_subset(x1));
 }
 
 void TestIntervalVector::is_subset05() {
@@ -335,7 +334,7 @@ void TestIntervalVector::is_subset05() {
 	TEST_ASSERT(x1.is_superset(x2));
 	TEST_ASSERT(x2.is_subset(x1));
 	TEST_ASSERT(x1.is_strict_superset(x2));
-	TEST_ASSERT(x2.is_strict_subset(x1));
+	TEST_ASSERT(x2.is_strict_interior_subset(x1));
 }
 
 void TestIntervalVector::is_subset06() {
@@ -348,7 +347,7 @@ void TestIntervalVector::is_subset06() {
 	TEST_ASSERT(!x1.is_superset(x2));
 	TEST_ASSERT(!x2.is_subset(x1));
 	TEST_ASSERT(!x1.is_strict_superset(x2));
-	TEST_ASSERT(!x2.is_strict_subset(x1));
+	TEST_ASSERT(!x2.is_strict_interior_subset(x1));
 }
 
 void TestIntervalVector::is_subset07() {
@@ -361,7 +360,7 @@ void TestIntervalVector::is_subset07() {
 	TEST_ASSERT(!x1.is_superset(x2));
 	TEST_ASSERT(!x2.is_subset(x1));
 	TEST_ASSERT(!x1.is_strict_superset(x2));
-	TEST_ASSERT(!x2.is_strict_subset(x1));
+	TEST_ASSERT(!x2.is_strict_interior_subset(x1));
 }
 
 void TestIntervalVector::extr_diam_index01() {

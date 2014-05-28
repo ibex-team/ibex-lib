@@ -25,7 +25,7 @@ void TestInHC4Revise::add01() {
 	double init_xy[][2]= { {-1,1}, {-1,1} };
 	IntervalVector box(2,init_xy);
 
-	f.iproj(Interval(0,1),box);
+	f.ibwd(Interval(0,1),box);
 
 	TEST_ASSERT((box[0]+box[1]).is_subset(Interval(0,1)));
 	check(box[0].lb()+box[1].lb(),0);
@@ -40,7 +40,7 @@ void TestInHC4Revise::add02() {
 
 	IntervalVector box(1,Interval(0,1));
 
-	f.iproj(Interval(0,1),box);
+	f.ibwd(Interval(0,1),box);
 
 	TEST_ASSERT(box.is_empty() || // TEMPORARY WRAP
 			box[0]==Interval(1,1));
@@ -54,7 +54,7 @@ void TestInHC4Revise::dist01() {
 	IntervalVector box(4,Interval(0,4));
 	double _pt[][2] = { {0.5,0.5} , {0.5,0.5} , {1.0,1.0} , {1.0,1.0} };
 	IntervalVector pt(4,_pt);
-	f.iproj(Interval(0,1),box,pt);
+	f.ibwd(Interval(0,1),box,pt);
 
 	// check the box is inside by testing two corners
 	TEST_ASSERT(f.eval(box.lb()).is_subset(Interval(0,1)));
@@ -69,7 +69,7 @@ void TestInHC4Revise::dist02() {
 	IntervalVector box(2,_box);
 	double _pt[][2] = { {1.5,1.5} , {0.1,0.1} };
 	IntervalVector pt(2,_pt);
-	f.iproj(Interval(1,POS_INFINITY),box,pt);
+	f.ibwd(Interval(1,POS_INFINITY),box,pt);
 
 //	// check the box is inside by testing two corners
 //	TEST_ASSERT(f.eval(box.lb()).is_subset(Interval(0,1)));
@@ -85,7 +85,7 @@ void TestInHC4Revise::apply01() {
 	IntervalVector box(4,Interval(0,4));
 	double _pt[][2] = { {0.5,0.5} , {0.5,0.5} , {1.0,1.0} , {1.0,1.0} };
 	IntervalVector pt(4,_pt);
-	g.iproj(Interval(0,1),box,pt);
+	g.ibwd(Interval(0,1),box,pt);
 
 	// check the box is inside by testing two corners
 	TEST_ASSERT(f.eval(box.lb()).is_subset(Interval(0,1)));
@@ -102,7 +102,7 @@ void TestInHC4Revise::apply02() {
 	IntervalVector box(2,Interval(0,4));
 	double _pt[][2] = { {0.5,0.5} , {0.5,0.5} };
 	IntervalVector pt(2,_pt);
-	g.iproj(Interval(0,1),box,pt);
+	g.ibwd(Interval(0,1),box,pt);
 
 	// check the box is inside by testing two corners
 	TEST_ASSERT(almost_eq(g.eval(box.lb()),Interval::ONE,1e-07));
@@ -115,14 +115,14 @@ void TestInHC4Revise::add_mult01() {
 //	Function f(x,y,g(x,0*y));
 //	IntervalVector box(2,Interval(0,2));
 //	Interval iz(0.9,1.1);
-//	f.iproj(iz,box);
+//	f.ibwd(iz,box);
 //	f.cf.print();
 //	cout << "inhc4 box=" << box << endl;
 
 	Function f("x","y","z","0*(x-y)+z");
 	IntervalVector box(3,Interval(0,2));
 	Interval iw(0.9,1.1);
-	f.iproj(iw,box);
+	f.ibwd(iw,box);
 //	f.cf.print();
 //	cout << "inhc4 box=" << box << endl;
 }
@@ -131,7 +131,7 @@ void TestInHC4Revise::bugr900() {
 	Function f("x","1+sin(x)");
 	IntervalVector box(1,Interval(0,ibex::next_float(0)));
 	IntervalVector pt(1,Interval::ZERO);
-	f.iproj(f.eval(pt),box,pt);
+	f.ibwd(f.eval(pt),box,pt);
 	TEST_ASSERT(!box.is_empty());
 }
 
