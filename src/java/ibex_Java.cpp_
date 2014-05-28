@@ -260,7 +260,7 @@ jint inflate(NumConstraint& ctr, const IntervalVector& xin, IntervalVector& x, j
 			else result=UNKNOWN_POINT;
 			x=xin;
 		} else {
-			ctr.f.iproj(y,x,xin);
+			ctr.f.ibwd(y,x,xin);
 			result=INFLATE;
 		}
 	}
