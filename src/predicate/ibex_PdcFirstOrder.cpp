@@ -11,11 +11,15 @@
 #include "ibex_PdcFirstOrder.h"
 #include "ibex_Linear.h"
 
+using namespace std;
+
 namespace ibex {
 
 PdcFirstOrder::PdcFirstOrder(const System& sys, const IntervalVector& init_box) : sys(sys), init_box(init_box), e(NULL) { }
 
 BoolInterval PdcFirstOrder::test(const IntervalVector& box) {
+
+
 	BoolInterval res;
 	int n=sys.nb_var;
 	int M=sys.nb_ctr;
@@ -25,7 +29,7 @@ BoolInterval PdcFirstOrder::test(const IntervalVector& box) {
 		if (e && e->original(j)) M--;
 	}
 
-	if (M>n) return MAYBE; // cannote be full rank
+	if (M>n) { return MAYBE; } // cannot be full rank
 
 	int j2=0;
 	IntervalMatrix* J=new IntervalMatrix(M+1,n); // +1 because we add the gradient of f
@@ -66,11 +70,11 @@ BoolInterval PdcFirstOrder::test(const IntervalVector& box) {
 
 	// check for invertibility
 	int p[M+1]; // will not be used
-	//int q[n];   // will not be used
+	int q[n];   // will not be used
 	IntervalMatrix LU(M+1,N); // will not be used
 	try {
 		// note: seems worse with complete pivoting
-		interval_LU(*J2, LU, p); //, q);
+		interval_LU(*J2, LU, p, q); //, q);
 		// the matrix is rank M+1
 		res = NO;
 	} catch(SingularMatrixException&) {

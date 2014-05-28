@@ -65,12 +65,12 @@ void LU(const M& A, M& LU, int* p) {
 
 		if (_zero(pivot)) {
 			if (i<min_m_n-1) throw SingularMatrixException();
-		        else // in this case, the matrix is not full-rank only if all the remaining columns are zero
-			  for (int k=i+1; k<n; k++) {
-			     if (!_zero(LU[p[i]][k])) return; // ok, full rank
-                          }
-                          throw SingularMatrixException();
-                }
+			else // in this case, the matrix is not full-rank only if all the remaining columns are zero
+				for (int k=i+1; k<n; k++) {
+					if (!_zero(LU[p[i]][k])) return; // ok, full rank
+				}
+			throw SingularMatrixException();
+		}
 		if (_mig(1/pivot)>=TOO_LARGE) throw SingularMatrixException();
 
 		for (int j=i+1; j<m; j++) {
@@ -106,6 +106,7 @@ void LU(const M& A, M& LU, int* pr, int* pc) {
 	S pivot;
 	int min_m_n=m<n? m : n;
 	for (int i=0; i<min_m_n; i++) {
+		//cout << "LU=" << LU << endl;
 		// complete pivot search
 		int swapR = i;
 		int swapC = i;
@@ -125,7 +126,16 @@ void LU(const M& A, M& LU, int* pr, int* pc) {
 		// --------------------------------------------------
 
 		pivot = LU[pr[i]][pc[i]];
-		if (_zero(pivot)) throw SingularMatrixException();
+		//cout << "i=" << i << " pivot=" << pivot << endl;
+		if (_zero(pivot)) {
+			if (i<min_m_n-1) throw SingularMatrixException();
+			else // in this case, the matrix is not full-rank only if all the remaining columns are zero
+				for (int k=i+1; k<n; k++) {
+					//cout << "lu[" << pr[i] << "," << pc[k] << "]=" << LU[pr[i]][pc[k]] << endl;
+					if (!_zero(LU[pr[i]][pc[k]])) return; // ok, full rank
+				}
+			throw SingularMatrixException();
+		}
 		if (_mig(1/pivot)>=TOO_LARGE) throw SingularMatrixException();
 
 		for (int j=i+1; j<m; j++) {

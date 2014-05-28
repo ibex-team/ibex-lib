@@ -72,11 +72,11 @@
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
-     inkscape:window-width="1346"
-     inkscape:window-height="1052"
-     inkscape:window-x="164"
-     inkscape:window-y="62"
-     inkscape:window-maximized="0"
+     inkscape:window-width="1855"
+     inkscape:window-height="1176"
+     inkscape:window-x="65"
+     inkscape:window-y="24"
+     inkscape:window-maximized="1"
      inkscape:snap-grids="true">
     <inkscape:grid
        type="xygrid"
@@ -363,6 +363,6 @@
          id="tspan4488-4-6-4"
          x="320"
          y="57.362183"
-         style="font-size:18px">[-16,9]</tspan></text>
+         style="font-size:18px">[-16,81]</tspan></text>
   </g>
 </svg>

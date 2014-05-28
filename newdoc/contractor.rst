@@ -142,7 +142,7 @@ See **examples in the** :ref:`tutorial <tuto-fwd-bwd>`.
 Propagation
 ------------------------------
 
-Propagation is another classical algorithm of constraint programming.
+Propagation :ref:`[Bessiere 2006] <Bessiere06>` is another classical algorithm of constraint programming.
 
 The basic idea is to calculate the fixpoint of a set of n contractors :math:`C_1\ldots,C_n`, that is:
 
@@ -179,6 +179,8 @@ And the algorithm is:
 #. Return to step 1 until  :math:`\mathcal{A}=\emptyset`.
 
 **Note:** The algorithm could be improved by not pushing again in the agenda a contractor C that is idempotent (*under development*).
+
+*(to be completed)*
 
 .. _ctc-hc4:
 

@@ -65,6 +65,11 @@ Articles in Journal and Conferences
 | Granvilliers, 2006]|                              |                                 |                         |      |                     |
 +--------------------+------------------------------+---------------------------------+-------------------------+------+---------------------+
 |                    |                              |                                 |                         |      |                     |
+| .. _Bessiere06:    | **C. Bessiere**              | *Constraint Propagation*        | Handbook of Constraint  | 2006 |                     |
+|                    |                              |                                 | Programming             |      |                     |
+| [Bessiere 2006]    |                              |                                 |                         |      |                     |
++--------------------+------------------------------+---------------------------------+-------------------------+------+---------------------+
+|                    |                              |                                 |                         |      |                     |
 | .. _Benhamou99:    | **F. Benhamou, F. Goualard,  | *Revising Hull and Box          | ICLP                    | 1999 |                     |
 |                    | L. Granvilliers and J.F.     | Consistency*                    |                         |      |                     |
 | [Benhamou et al.   | Puget**                      |                                 |                         |      |                     |
