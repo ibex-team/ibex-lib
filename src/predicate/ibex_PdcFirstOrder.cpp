@@ -22,7 +22,10 @@ BoolInterval PdcFirstOrder::test(const IntervalVector& box) {
 
 	BoolInterval res;
 	int n=sys.nb_var;
+
+	// by default, all the constraints are activated
 	int M=sys.nb_ctr;
+
 	// count the number of active constraints
 	// in the original system
 	for (int j=0; j<sys.nb_ctr; j++) {
@@ -48,7 +51,12 @@ BoolInterval PdcFirstOrder::test(const IntervalVector& box) {
 	for (int i=0; i<sys.nb_var; i++) {
 		// if the ith bounding constraint is active
 		// we will remove the ith column in the matrix J2
-		if (!box[i].is_strict_subset(init_box[i])) N--;
+		if (!box[i].is_interior_subset(init_box[i]))
+			if (box[i].is_superset(init_box[i])) {
+				delete J;
+				return MAYBE; // cannot be full rank
+			}
+			else N--;
 	}
 
 	IntervalMatrix* J2=J;
@@ -61,7 +69,7 @@ BoolInterval PdcFirstOrder::test(const IntervalVector& box) {
 		J2 = new IntervalMatrix(M+1,N);
 		int i2=0;
 		for (int i=0; i<sys.nb_var; i++) {
-			if (box[i].is_strict_subset(init_box[i]))
+			if (box[i].is_interior_subset(init_box[i]))
 				J2->set_col(i2++,J->col(i));
 		}
 		delete J;
