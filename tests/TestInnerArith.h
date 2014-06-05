@@ -115,6 +115,10 @@ public:
 		TEST_ADD(TestInnerArith::sqrt03);
 		TEST_ADD(TestInnerArith::sqrt04);
 		TEST_ADD(TestInnerArith::sqrt05);
+
+		TEST_ADD(TestInnerArith::pow01);
+
+
 		TEST_ADD(TestInnerArith::bugr894);
 		TEST_ADD(TestInnerArith::bugr899);
 		TEST_ADD(TestInnerArith::bugr902);
@@ -290,6 +294,9 @@ public:
 	void sqrt03();
 	void sqrt04();
 	void sqrt05();
+
+    // y=x^3 with y in[-oo,0] and x in [-oo,oo]
+	void pow01();
 
 	// bug in release r893 (fixed in r894).
 	void bugr894();

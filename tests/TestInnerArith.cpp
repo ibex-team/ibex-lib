@@ -628,6 +628,13 @@ void TestInnerArith::sqrt05() {
 	check(x,y);
 }
 
+void TestInnerArith::pow01() {
+	Interval x;
+	bool f=ibwd_pow(Interval::NEG_REALS,x,3,Interval(-1,-1));
+	TEST_ASSERT(f);
+	TEST_ASSERT(x==Interval(NEG_INFINITY,previous_float(0)));
+}
+
 void TestInnerArith::bugr894() {
 
 	Variable x;

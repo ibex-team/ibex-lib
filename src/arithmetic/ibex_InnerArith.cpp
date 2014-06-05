@@ -659,8 +659,17 @@ bool ibwd_pow(const Interval& y, Interval& x, int p, const Interval &xin) {
 
         if (pow(x,p).is_subset(y)) return true;
 
-	/* volatile */double lo=p==2? UP(sqrt,y.lb()) : UP_root(y.lb(), p);
-	/* volatile */double up=p==2? LO(sqrt,y.ub()) : LO_root(y.ub(), p);
+	/* volatile */double lo;
+	if (y.lb()==NEG_INFINITY)
+		lo= p%2==0? POS_INFINITY : NEG_INFINITY;
+	else
+		lo= p==2? UP(sqrt,y.lb()) : UP_root(y.lb(), p);
+
+	double up;
+	if (y.ub()==POS_INFINITY)
+		up= POS_INFINITY;
+	else
+		up= p==2? LO(sqrt,y.ub()) : LO_root(y.ub(), p);
 
 	if (p % 2 ==0) { // even exponant
 		if (up<0) up=0;                       // may happen because of rounding
