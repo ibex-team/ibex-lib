@@ -1137,15 +1137,10 @@ inline bool bwd_min(const Interval& y, Interval& x1, Interval& x2) {
 }
 
 inline bool bwd_sign(const Interval& y,  Interval& x) {
-
-	if (y.contains(0)) return true;
-
-	if(y.lb()<0) {
+	if(y.lb()>0)
+		x &= Interval::POS_REALS;
+	else if(y.ub()<0)
 		x &= Interval::NEG_REALS;
-	}
-
-	/* At this point, y.ub()>0. */
-	x &= Interval::POS_REALS;
 	return !x.is_empty();
 }
 
