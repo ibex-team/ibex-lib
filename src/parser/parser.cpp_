@@ -58,8 +58,16 @@ Function* function=NULL;       // used when a single function is loaded
 
 /* ===============================================================================================*/
 
-static P_Source source;  // static because not to be visible:
-stack<Scope> scopes;     // not static because lexer needs to see it
+
+static P_Source& source() {   // static because not to be visible:
+	static P_Source _source;  // construct-on-first-use idiom (safe: no de-initialization dependency between static objects)
+	return _source;
+}
+
+stack<Scope>& scopes() {  // not static because lexer needs to see it
+	static stack<Scope> _scopes; // construct-on-first-use idiom (safe: no de-initialization dependency between static objects)
+	return _scopes;
+}
 
 void begin() {
 	ibex_lineno=-1;
@@ -70,9 +78,9 @@ void begin() {
 
 	/* there may be some pending scopes (if the previous call to the parser failed).
 	 */
-	while (!scopes.empty()) scopes.pop();
+	while (!scopes().empty()) scopes().pop();
 
-	scopes.push(Scope()); // a fresh new scope!
+	scopes().push(Scope()); // a fresh new scope!
 	// TODO: it seems that this first scope is not popped during this call to the parser (but the next one)
 }
 
@@ -93,7 +101,7 @@ void begin_choco() {
 	Interval x(Interval::ALL_REALS);
 	for (int i=0; i<system->nb_var; i++) {
 		char* name=append_index("\0",'{','}',i);
-		source.vars.push_back(new Entity(name,Dim::scalar(),Domain(x)));
+		source().vars.push_back(new Entity(name,Dim::scalar(),Domain(x)));
 		free(name);
 	}
 	// ------------------------------------------
@@ -108,49 +116,49 @@ void begin_function_file() {
 }
 
 void end_system() {
-	MainGenerator().generate(source,*system);
-	source.cleanup();
+	MainGenerator().generate(source(),*system);
+	source().cleanup();
 	// TODO: we have to cleanup the data in case of Syntax Error
 	// this probably requires a kind of garbage collector during
 	// parsing
 }
 
 void end_choco() {
-	MainGenerator().generate(source,*system);
-	source.cleanup();
+	MainGenerator().generate(source(),*system);
+	source().cleanup();
 	// TODO: see end_system()
 }
 
 void end_function_file() {
-	if (source.func.empty()) {
+	if (source().func.empty()) {
 		throw SyntaxError("no function declared in file");
 	}
-	const Function& f=(*source.func[0]);
+	const Function& f=(*source().func[0]);
 	Array<const ExprSymbol> x(f.nb_arg());
 	varcopy(f.args(),x);
 	const ExprNode& y=ExprCopy().copy(f.args(),x,f.expr());
 
 	function->init(x,y,f.name);
 
-	source.cleanup();
-	delete source.func[0]; // This is an ugly stuff but we are obliged (see destructor of ParserSource)
+	source().cleanup();
+	delete source().func[0]; // This is an ugly stuff but we are obliged (see destructor of ParserSource)
 	// TODO: see end_system()
 }
 
 int _2int(const ExprNode& expr) {
-	int n=ConstantGenerator(scopes.top()).eval_integer(expr);
+	int n=ConstantGenerator(scopes().top()).eval_integer(expr);
 	cleanup(expr,true); // false or true (there is no symbols)
 	return n;
 }
 
 double _2dbl(const ExprNode& expr) {
-	double d=ConstantGenerator(scopes.top()).eval_double(expr);
+	double d=ConstantGenerator(scopes().top()).eval_double(expr);
 	cleanup(expr,true); // false or true (there is no symbols)
 	return d;
 }
 
 Domain _2domain(const ExprNode& expr) {
-	Domain d=ConstantGenerator(scopes.top()).eval(expr);
+	Domain d=ConstantGenerator(scopes().top()).eval(expr);
 	cleanup(expr,true); // false or true (there is no symbols)
 	return d;
 }

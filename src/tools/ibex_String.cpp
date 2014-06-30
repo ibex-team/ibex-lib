@@ -40,22 +40,21 @@ char* append_index(const char* buff, char lbracket, char rbracket, int index) {
 #define BASE_VAR_NAME "_x_"
 #define BASE_FUNC_NAME "_f_"
 
-static char* generated_name_buff = new char[MAX_NAME_SIZE];
-
-static int generated_var_count=0;
-static int generated_func_count=0;
 
 static char* next_generated_name(const char* base, int num) {
+	static char generated_name_buff[MAX_NAME_SIZE];
 	sprintf(generated_name_buff, base);
 	SNPRINTF(&generated_name_buff[strlen(base)], MAX_NAME_SIZE-strlen(base), "%d", num);
 	return generated_name_buff;
 }
 
 char* next_generated_var_name() {
+	static int generated_var_count=0;
 	return next_generated_name(BASE_VAR_NAME,generated_var_count++);
 }
 
 char* next_generated_func_name() {
+	static int generated_func_count=0;
 	return next_generated_name(BASE_FUNC_NAME,generated_func_count++);
 }
 

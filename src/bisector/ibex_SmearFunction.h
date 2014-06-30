@@ -37,9 +37,9 @@ public:
 	 *  \param sys               - The system of equations.
 	 *  \param prec (optional)   - the minimum width (diameter) an interval must have to be bisected.
 	 *  \param ratio (optional)  - the ratio between the diameters of the left and the right parts of the
-	 *                             bisected interval. Default value is #Bsc::default_ratio.
+	 *                             bisected interval. Default value is #Bsc::default_ratio().
 	 */
-	SmearFunction(System& sys, double prec, double ratio=Bsc::default_ratio);
+	SmearFunction(System& sys, double prec, double ratio=Bsc::default_ratio());
 
 	/**
 	 * \brief Create a bisector with Smear function heuristic.
@@ -48,7 +48,7 @@ public:
 	 *
 	 * \see #SmearFunction(System&, double, double)
 	 */
-	SmearFunction(System& sys, const Vector& prec, double ratio=Bsc::default_ratio);
+	SmearFunction(System& sys, const Vector& prec, double ratio=Bsc::default_ratio());
 
 	/**
 	 * \brief Bisect the box.
@@ -91,7 +91,7 @@ public :
      * For the parameters, see #SmearFunction::SmearFunction(System&, double, double).
      *
 	 */
-	SmearMax (System& sys,  double prec, double ratio=Bsc::default_ratio);
+	SmearMax (System& sys,  double prec, double ratio=Bsc::default_ratio());
 
 	/*
 	 * \brief Create a bisector using the Smear function heuristic
@@ -100,7 +100,7 @@ public :
 	 *
 	 * \see #SmearMax(System&, double, double)
 	 */
-	SmearMax (System& sys,  const Vector& prec, double ratio=Bsc::default_ratio);
+	SmearMax (System& sys,  const Vector& prec, double ratio=Bsc::default_ratio());
 
 	/**
 	 * \brief Returns the variable to bisect.
@@ -131,7 +131,7 @@ public :
      *
      * For the parameters, see #SmearFunction::SmearFunction(System&, double, double).
 	 */
-	SmearSum (System& sys, double prec, double ratio=Bsc::default_ratio);
+	SmearSum (System& sys, double prec, double ratio=Bsc::default_ratio());
 
 	 /*
 	 * \brief Create a bisector using Hansen's variant of the Smear function heuristic.
@@ -140,7 +140,7 @@ public :
 	 *
 	 * \see #SmearSum(System&, double, double)
 	 */
-	SmearSum (System& sys, const Vector& prec, double ratio=Bsc::default_ratio);
+	SmearSum (System& sys, const Vector& prec, double ratio=Bsc::default_ratio());
 
 	/**
 	 * \brief Returns the variable to bisect.
@@ -172,14 +172,14 @@ public :
 	 *
      * For the parameters, see #SmearFunction::SmearFunction(System&, double, double).
 	 */
-	SmearSumRelative (System& sys,  double prec, double ratio=Bsc::default_ratio);
+	SmearSumRelative (System& sys,  double prec, double ratio=Bsc::default_ratio());
 
 	 /*
 	 * Variant with a vector of precisions.
 	 *
 	 * \see #SmearSumRelative(System&, double, double)
 	 */
-	SmearSumRelative (System& sys, const Vector& prec, double ratio=Bsc::default_ratio);
+	SmearSumRelative (System& sys, const Vector& prec, double ratio=Bsc::default_ratio());
 
 	/**
 	 * \brief Returns the variable to bisect.
@@ -208,13 +208,13 @@ public :
 	 *
      * For the parameters, see #SmearFunction::SmearFunction(System&, double, double).
 	 */
-	SmearMaxRelative (System& sys, double prec, double ratio=Bsc::default_ratio);
+	SmearMaxRelative (System& sys, double prec, double ratio=Bsc::default_ratio());
 	 /*
 	 * Variant with a vector of precisions.
 	 *
 	 * \see #SmearMaxRelative(System&, double, double)
 	 */
-	SmearMaxRelative (System& sys, const Vector& prec, double ratio=Bsc::default_ratio);
+	SmearMaxRelative (System& sys, const Vector& prec, double ratio=Bsc::default_ratio());
 
 	/**
 	 * Returns the variable to bisect : the variable i with the greatest normalized  impact over the constraints fj :  Dfj/Dxi * Diam (xi) / NC(fj) , where NC(fj) = sum(i) Abs(Dfj/Dxi) * Diam(xi)

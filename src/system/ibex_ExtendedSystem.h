@@ -43,7 +43,7 @@ public:
 	/**
 	 * \brief Name of the goal variable ("y").
 	 */
-	static const char* goal_name;
+	static const char* goal_name();
 
 	/**
 	 * \return The number of the goal variable.

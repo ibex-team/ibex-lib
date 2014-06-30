@@ -31,7 +31,7 @@ public:
 	 * \param ratio (optional) - the ratio between the diameters of the left and the right parts of the
 	 *                           bisected interval. Default value is 0.45.
 	 */
-	RoundRobin(double prec, double ratio=Bsc::default_ratio);
+	RoundRobin(double prec, double ratio=Bsc::default_ratio());
 
 	/**
 	 * \brief Create a bisector with round-robin heuristic.
@@ -40,7 +40,7 @@ public:
 	 * \param ratio (optional) - the ratio between the diameters of the left and the right parts of the
 	 *                           bisected interval. Default value is 0.45.
 	 */
-	RoundRobin(const Vector& prec, double ratio=Bsc::default_ratio);
+	RoundRobin(const Vector& prec, double ratio=Bsc::default_ratio());
 
 	/**
 	 * \brief Bisect a box.

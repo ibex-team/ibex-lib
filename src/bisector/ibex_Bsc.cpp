@@ -16,7 +16,9 @@ using std::pair;
 
 namespace ibex {
 
-const double Bsc::default_ratio = 0.45;
+const double Bsc::default_ratio() {
+	return 0.45;
+}
 
 Bsc::Bsc(double prec) : _prec(1,prec) {
 	if (prec<0) ibex_error("precision must be a nonnegative number");

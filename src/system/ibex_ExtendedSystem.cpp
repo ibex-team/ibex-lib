@@ -13,7 +13,10 @@
 
 namespace ibex {
 
-const char* ExtendedSystem::goal_name = "__goal__";
+const char* ExtendedSystem::goal_name() {
+	static char* _goal_name = "__goal__"; // construct-on-first-use idiom (safe: no de-initialization dependency between static objects)
+	return _goal_name;
+}
 
 ExtendedSystem::ExtendedSystem(const System& sys, double eps) /*: original_goal(*sys.goal)*/ {
 	init(SystemExtend(sys,eps));

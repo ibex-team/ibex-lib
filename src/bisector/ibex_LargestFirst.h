@@ -32,7 +32,7 @@ public:
 	 * \param ratio (optional) - the ratio between the diameters of the left and the right parts of the
 	 *                           bisected interval. Default value is 0.45.
 	 */
-	LargestFirst(double prec=0, double ratio=Bsc::default_ratio);
+	LargestFirst(double prec=0, double ratio=Bsc::default_ratio());
 
 	/**
 	 * \brief Create a bisector with largest first heuristic.
@@ -41,7 +41,7 @@ public:
 	 * \param ratio (optional) - the ratio between the diameters of the left and the right parts of the
 	 *                           bisected interval. Default value is 0.45.
 	 */
-	LargestFirst(const Vector& prec, double ratio=Bsc::default_ratio);
+	LargestFirst(const Vector& prec, double ratio=Bsc::default_ratio());
 
 	/**
 	 * \brief Bisect the largest box.

@@ -23,7 +23,7 @@
 
 namespace ibex {
 namespace parser {
-extern std::stack<Scope> scopes;
+extern std::stack<Scope>& scopes();
 extern bool choco_start;
 
 } // end namespace
@@ -94,7 +94,7 @@ using namespace ibex::parser;
                                  }
 [_a-zA-Z][_a-zA-Z0-9]*	         { ibexlval.str = (char*) malloc(strlen(ibextext)+1);
                                    strcpy(ibexlval.str,ibextext);
-                                   return scopes.top().token(ibextext);				       
+                                   return scopes().top().token(ibextext);				       
                                  }
 ([0-9]{6,10}[0-9]*|([0-9][0-9]*\.[0-9]*)|(\.[0-9]+))(e(\-|\+)?[0-9]+)?|([0-9]{1,5}e(\-|\+)?[0-9]+)  { 
                                    ibexlval.real = atof(ibextext); return TK_FLOAT; 
