@@ -362,13 +362,9 @@ void TestExpr::vector01() {
 	const ExprNode& e2=x+e1;
 	Function f(x,y,e2);
 
-	const ExprNode** c=new const ExprNode*[4];
-	c[0]=&x;
-	c[1]=&y;
-	c[2]=&e1;
-	c[3]=&e2;
+	Array<const ExprNode> c(x,y,e1,e2);
 
-	const ExprVector& v=ExprVector::new_(c,4,false);
+	const ExprVector& v=ExprVector::new_(c,false);
 	TEST_ASSERT(v.deco.f==NULL);
 	TEST_ASSERT(v.deco.d==NULL);
 	TEST_ASSERT(v.dim==Dim::matrix(4,3));
@@ -387,13 +383,9 @@ void TestExpr::vector02() {
 	const ExprNode& e1=x+y;
 	const ExprNode& e2=x+e1;
 
-	const ExprNode** c=new const ExprNode*[4];
-	c[0]=&x;
-	c[1]=&y;
-	c[2]=&e1;
-	c[3]=&e2;
+	Array<const ExprNode> c(x,y,e1,e2);
 
-	const ExprVector& v=ExprVector::new_(c,4,true);
+	const ExprVector& v=ExprVector::new_(c,true);
 	TEST_ASSERT(v.dim==Dim::matrix(3,4));
 	TEST_ASSERT(v.row_vector());
 	TEST_ASSERT(v.type()==Dim::MATRIX);
@@ -457,7 +449,7 @@ void TestExpr::apply01() {
 	const ExprSymbol& y2=ExprSymbol::new_("y2",Dim::col_vec(4));
 	const ExprSymbol& A2=ExprSymbol::new_("A2",Dim::matrix(3,4));
 
-	const ExprNode* args[3] = {&x2, &(A2*y2), &A2};
+	Array<const ExprNode> args(x2, A2*y2, A2);
 
 	const ExprApply& e=ExprApply::new_(f,args);
 	Function f2(x2,y2,A2,e);

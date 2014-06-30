@@ -17,6 +17,10 @@ Articles in Journal and Conferences
 .. _Chabert09b-pdf: http://www.emn.fr/z-info/gchabe08/quimper.pdf
 .. |Chabert09a-pdf| replace:: PDF
 .. _Chabert09a-pdf: http://www.emn.fr/z-info/gchabe08/chabert_jaulin_cp09.pdf
+.. |Trombettoni07-pdf| replace:: PDF
+.. _Trombettoni07-pdf: http://www.lirmm.fr/~trombetton/publis/cid_cp_2007.pdf
+.. |Bessiere04-pdf| replace:: PDF
+.. _Bessiere04-pdf: http://www.emn.fr/z-info/rdebruyn/ecai04ws.pdf
 
 **This page is under construction**
 
@@ -54,9 +58,15 @@ Articles in Journal and Conferences
 +--------------------+------------------------------+---------------------------------+-------------------------+------+---------------------+
 |                    |                              |                                 |                         |      |                     |
 | .. _Trombettoni07: |                              |                                 |                         |      |                     |
-|                    | **G. Trombettoni and         | *Constructive Interval          | CP                      | 2007 |                     |
+|                    | **G. Trombettoni and         | *Constructive Interval          | CP                      | 2007 ||Trombettoni07-pdf|_ |
 |[Trombettoni &      | G. Chabert**                 | Disjunction*                    |                         |      |                     |
 |Chabert 2007]       |                              |                                 |                         |      |                     |
++--------------------+------------------------------+---------------------------------+-------------------------+------+---------------------+
+|                    |                              |                                 |                         |      |                     |
+| .. _Bessiere04:    | **C. Bessiere and            | *Theoretical Analysis of        | ECAI                    | 2004 ||Bessiere04-pdf|_    |
+|                    | R. Debruyne**                | Singleton Arc Consistency*      |                         |      |                     |
+| [Bessiere &        |                              |                                 |                         |      |                     |
+| Debruyne 2004]     |                              |                                 |                         |      |                     |
 +--------------------+------------------------------+---------------------------------+-------------------------+------+---------------------+
 |                    |                              |                                 |                         |      |                     |
 | .. _Benhamou06:    | **F. Benhamou and            | *Continuous and Interval        | Handbook of Constraint  | 2006 |                     |

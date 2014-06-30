@@ -142,4 +142,19 @@ void TestExprDiff::apply03() {
 	TEST_ASSERT(dg_box==IntervalVector(2,_dg_box));
 }
 
+void TestExprDiff::cst_grad() {
+	Function f("x","y","z","10*(x-y)");
+	Function df(f,Function::DIFF);
+	const ExprNode& y=df.expr();
+	const ExprConstant* c = dynamic_cast<const ExprConstant*>(&y);
+
+	TEST_ASSERT(c);
+	TEST_ASSERT(c->dim.is_vector());
+	IntervalVector v(3);
+	v[0]=Interval(10,10);
+	v[1]=Interval(-10,-10);
+	v[2]=Interval(0,0);
+	TEST_ASSERT(c->get_vector_value()==v);
+}
+
 } // end namespace

@@ -395,12 +395,12 @@ public:
 	/**
 	 * \brief Apply this function to the arguments
 	 */
-	const ExprApply& operator()(const ExprNode** arg) const;
+	const ExprApply& operator()(const std::vector<const ExprNode*>& arg) const;
 
 	/**
 	 * \brief Apply this function to the arguments
 	 */
-	const ExprApply& operator()(const std::vector<const ExprNode*>& arg) const;
+	const ExprApply& operator()(const Array<const ExprNode>& arg) const;
 
 	/**
 	 * \brief Initialize this function (set the "x" and the "y").

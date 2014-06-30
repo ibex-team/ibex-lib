@@ -206,16 +206,15 @@ void ExprCopy::visit(const ExprVector& e) {
 		}
 	}
 
-	const ExprNode** args2 = new const ExprNode* [e.nb_args];
+	Array<const ExprNode> args2(e.nb_args);
 	for (int i=0; i<e.nb_args; i++) {
-		args2[i]=&ARG(i);
+		args2.set_ref(i,ARG(i));
 		// don't remove this node even if it is a constant because
 		// it is an element of this vector.
 		mark(e.arg(i));
 	}
 
-	clone.insert(e, &ExprVector::new_(args2, e.nb_args, e.row_vector()));
-	delete [] args2;
+	clone.insert(e, &ExprVector::new_(args2,e.row_vector()));
 }
 
 void ExprCopy::visit(const ExprApply& e) {
@@ -237,33 +236,30 @@ void ExprCopy::visit(const ExprApply& e) {
 		}
 	}
 
-	const ExprNode** args2 = new const ExprNode* [e.nb_args];
+	Array<const ExprNode> args2(e.nb_args);
 	for (int i=0; i<e.nb_args; i++) {
-		args2[i]=&ARG(i);
+		args2.set_ref(i,ARG(i));
 		// don't remove this node even if it is a constant because
 		// it is an argument of this function call.
 		mark(e.arg(i));
 	}
 
 	clone.insert(e, &ExprApply::new_(e.func, args2));
-	delete [] args2;
 }
 
 void ExprCopy::visit(const ExprChi& e) {  // TODO to check  Jordan: Gilles C. help me
 	for (int i=0; i<e.nb_args; i++)
 		visit(e.arg(i));
 
-	const ExprNode** args2 = new const ExprNode* [e.nb_args];
+	Array<const ExprNode> args2(e.nb_args);
 	for (int i=0; i<e.nb_args; i++) {
-		args2[i]=&ARG(i);
+		args2.set_ref(i,ARG(i));
 		// don't remove this node even if it is a constant because
 		// it is an argument of this function call.
 		mark(e.arg(i));
 	}
 	clone.insert(e, &ExprChi::new_(args2));
-	delete [] args2;
 }
-
 
 
 typedef Domain (*dom_func2)(const Domain&, const Domain&);

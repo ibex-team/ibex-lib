@@ -34,10 +34,10 @@ int max_height(const ExprNode& n1, const ExprNode& n2) {
 	else return n2.height;
 }
 
-int max_height(const ExprNode** args, int n) {
+int max_height(const Array<const ExprNode>& args) {
 	int max=0;
-	for (int i=0; i<n; i++)
-		if (args[i]->height > max) max = args[i]->height;
+	for (int i=0; i<args.size(); i++)
+		if (args[i].height > max) max = args[i].height;
 	return max;
 }
 
@@ -75,57 +75,37 @@ bool ExprIndex::indexed_symbol() const {
 	return expr_index->indexed_symbol();
 }
 
-ExprNAryOp::ExprNAryOp(const ExprNode** _args, int n, const Dim& dim) :
-		ExprNode(max_height(_args,n)+1, nary_size(_args,n), dim), nb_args(n) {
+ExprNAryOp::ExprNAryOp(const Array<const ExprNode>& _args, const Dim& dim) :
+		ExprNode(max_height(_args)+1, nary_size(_args), dim),
+		args(_args), nb_args(_args.size()) {
 
-	args = new const ExprNode*[n];
-	for (int i=0; i<n; i++) {
-		args[i]=_args[i];
-		((ExprNode&) *args[i]).fathers.add(*this);
+	for (int i=0; i<nb_args; i++) {
+		((ExprNode&) args[i]).fathers.add(*this);
 	}
 }
 
-ExprNAryOp::~ExprNAryOp() {
-	delete[] args;
-}
-
-static Array<const Dim> dims(const ExprNode** comp, int n) {
-	Array<const Dim> a(n);
-	for (int i=0; i<n; i++) a.set_ref(i,comp[i]->dim);
+static Array<const Dim> dims(const Array<const ExprNode>& comp) {
+	Array<const Dim> a(comp.size());
+	for (int i=0; i<comp.size(); i++) a.set_ref(i,comp[i].dim);
 	return a;
 }
 
-const ExprVector& ExprVector::new_(const ExprNode** comp, int n, bool in_row) {
-	return *new ExprVector(comp,n,in_row);
-}
-
 const ExprVector& ExprVector::new_(const ExprNode& e1, const ExprNode& e2, bool in_row) {
-	const ExprNode** comp=new const ExprNode*[2];
-	comp[0]=&e1;
-	comp[1]=&e2;
-	ExprVector* res=new ExprVector(comp, 2, in_row);
-	delete[] comp;
-	return *res;
+	return *new ExprVector(Array<const ExprNode>(e1,e2), in_row);
 }
 
 const ExprVector& ExprVector::new_(const Array<const ExprNode>& components, bool in_rows) {
-	int n=components.size();
-	const ExprNode** nodes=new const ExprNode*[n];
-	for (int i=0; i<n; i++)
-		nodes[i]=&components[i];
-	ExprVector* res=new ExprVector(nodes,n,in_rows);
-	delete[] nodes;
-	return *res;
+	return *new ExprVector(components,in_rows);
 }
 
-ExprVector::ExprVector(const ExprNode** comp, int n, bool in_row) :
-		ExprNAryOp(comp, n, vec_dim(dims(comp,n),in_row)) {
+ExprVector::ExprVector(const Array<const ExprNode>& comp, bool in_row) :
+		ExprNAryOp(comp, vec_dim(dims(comp),in_row)) {
 }
 
-const ExprChi& ExprChi::new_(const ExprNode** args) {
-	if (!(args[0]->type() == Dim::SCALAR)) throw DimException("\"chi\" expects scalar arguments");
-	if (!(args[1]->type() == Dim::SCALAR)) throw DimException("\"chi\" expects scalar arguments");
-	if (!(args[2]->type() == Dim::SCALAR)) throw DimException("\"chi\" expects scalar arguments");
+const ExprChi& ExprChi::new_(const Array<const ExprNode>& args) {
+	if (!(args[0].type() == Dim::SCALAR)) throw DimException("\"chi\" expects scalar arguments");
+	if (!(args[1].type() == Dim::SCALAR)) throw DimException("\"chi\" expects scalar arguments");
+	if (!(args[2].type() == Dim::SCALAR)) throw DimException("\"chi\" expects scalar arguments");
 	return *new ExprChi(args);
 }
 
@@ -133,22 +113,22 @@ const ExprChi& ExprChi::new_(const ExprNode& a, const ExprNode& b, const ExprNod
 	if (!(a.type() == Dim::SCALAR)) throw DimException("\"chi\" expects scalar arguments");
 	if (!(b.type() == Dim::SCALAR)) throw DimException("\"chi\" expects scalar arguments");
 	if (!(c.type() == Dim::SCALAR)) throw DimException("\"chi\" expects scalar arguments");
-	const ExprNode* args2[3] = {&a,&b,&c};
-	return *new ExprChi(args2);
+
+	return *new ExprChi(Array<const ExprNode>(a,b,c));
 }
 
 
-ExprApply::ExprApply(const Function& f, const ExprNode** args) :
-		ExprNAryOp(args,f.nb_arg(),f.expr().dim),
+ExprApply::ExprApply(const Function& f, const Array<const ExprNode>& args) :
+		ExprNAryOp(args,f.expr().dim),
 		func(f) {
 	for (int i=0; i<f.nb_arg(); i++) {
 
-		if (args[i]->dim.is_vector()) {
+		if (args[i].dim.is_vector()) {
 			// we allow automatic transposition of vector arguments
-			if (f.arg(i).dim.is_vector() && (args[i]->dim.vec_size()==f.arg(i).dim.vec_size())) continue;
+			if (f.arg(i).dim.is_vector() && (args[i].dim.vec_size()==f.arg(i).dim.vec_size())) continue;
 		} else {
 			// otherwise, dimensions must match exactly.
-			if (args[i]->dim == f.arg(i).dim) continue;
+			if (args[i].dim == f.arg(i).dim) continue;
 		}
 
 		stringstream s;

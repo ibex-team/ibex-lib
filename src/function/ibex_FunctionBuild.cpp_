@@ -89,7 +89,7 @@ public:
 
 	virtual void visit(const ExprNAryOp& e)   {
 		for (int i=0; i<e.nb_args; i++) {
-			visit(*e.args[i]);
+			visit(e.args[i]);
 			if (current_index!=-1)
 				for (int j=0; j<e.arg(i).dim.size(); j++) is_used[current_index+j]=true;
 		}

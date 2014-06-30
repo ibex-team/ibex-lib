@@ -78,7 +78,7 @@ void ExprPrinter::visit(const ExprVector& e) {
 void ExprPrinter::visit(const ExprApply& a) {
 	(*os) << a.func.name << "(";
 	for (int i=0; i<a.nb_args; i++) {
-		visit(*a.args[i]);
+		visit(a.args[i]);
 		if (i<a.nb_args-1) (*os) << ",";
 	}
 	(*os) << ")";
@@ -87,7 +87,7 @@ void ExprPrinter::visit(const ExprApply& a) {
 void ExprPrinter::visit(const ExprChi& a) {
 	(*os) << "chi(";
 	for (int i=0; i<a.nb_args; i++) {
-		visit(*a.args[i]);
+		visit(a.args[i]);
 		if (i<a.nb_args-1) (*os) << ",";
 	}
 	(*os) << ")";

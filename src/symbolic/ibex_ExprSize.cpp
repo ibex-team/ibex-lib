@@ -19,8 +19,8 @@ int bin_size(const ExprNode& left, const ExprNode& right) {
 	return ExprSize(left,right).size+1;
 }
 
-int nary_size(const ExprNode** args, int n) {
-	return ExprSize(args,n).size+1;
+int nary_size(const Array<const ExprNode>& args) {
+	return ExprSize(args).size+1;
 }
 
 ExprSize::ExprSize(const ExprNode& l, const ExprNode& r) : size(0) {
@@ -28,8 +28,8 @@ ExprSize::ExprSize(const ExprNode& l, const ExprNode& r) : size(0) {
 	visit(r);
 }
 
-ExprSize::ExprSize(const ExprNode** args, int n) : size(0) {
-	for (int i=0; i<n; i++) visit(*args[i]);
+ExprSize::ExprSize(const Array<const ExprNode>& args) : size(0) {
+	for (int i=0; i<args.size(); i++) visit(args[i]);
 }
 
 void ExprSize::visit(const ExprNode& e) {

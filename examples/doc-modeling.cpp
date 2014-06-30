@@ -1,6 +1,6 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : modeling.cpp
+// File        : doc-modeling.cpp
 // Author      : Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
@@ -127,6 +127,43 @@ int main() {
 	output << f << endl;
 	// ![func-iterated-sum-C]
 	output << "![func-iterated-sum-O]" << endl;
+	}
+
+	{
+	output << "![func-apply-array-O]" << endl;
+	// ![func-apply-array-C]
+	Variable x,y;
+
+	// formal arguments
+	Array<const ExprSymbol> vars(2);
+
+	vars.set_ref(0,x);
+	vars.set_ref(1,y);
+
+	Function f(vars, x+y,"f");
+
+	// actual arguments
+	const ExprSymbol& z=ExprSymbol::new_("z");  // <=> "Variable z" (but more "safe")
+	const ExprConstant& c=ExprConstant::new_scalar(1.0);
+
+	// =============================================
+	// before release 2.1.6:
+//	const ExprNode* args[2];
+//	args[0]=&z;
+//	args[1]=&c;
+	// before release 2.1.6:
+
+	// from release 2.1.6 and subsequents:
+	Array<const ExprNode> args(2);
+	args.set_ref(0,z);
+	args.set_ref(1,c);
+	// =============================================
+
+	Function g(z,f(args),"g");
+
+	output << g << endl;
+	// ![func-apply-array-C]
+	output << "![func-apply-array-O]" << endl;
 	}
 
 	{

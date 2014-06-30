@@ -24,7 +24,7 @@ int bin_size(const ExprNode& left, const ExprNode& right);
 /**
  * Return the size of the DAG (arg[0] op ... op arg[n-1])
  */
-int nary_size(const ExprNode** args, int n);
+int nary_size(const Array<const ExprNode>& args);
 
 /**
  * \brief Calculate the size of a DAG
@@ -35,7 +35,7 @@ public:
 	ExprSize(const ExprNode& l, const ExprNode& r);
 
 	/** For n-ary expressions (ExprApply, ExprVector,...). */
-	ExprSize(const ExprNode** args, int n);
+	ExprSize(const Array<const ExprNode>& args);
 
 	/** The size of the DAG */
 	int size;

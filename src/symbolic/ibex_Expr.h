@@ -215,20 +215,16 @@ public:
 	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
 
 	/** Return a reference to the ith argument expression. */
-	const ExprNode& arg(int i) const { return *args[i]; }
+	const ExprNode& arg(int i) const { return args[i]; }
 
 	/** The arguments. */
-	const ExprNode** args;
+	const Array<const ExprNode> args;
 
 	/** The number of arguments */
 	const int nb_args;
 
-	/** Delete the array (but not the subexpressions). */
-	virtual ~ExprNAryOp();
-
 protected:
-	// TO DO: replace args by Array<...>
-	ExprNAryOp(const ExprNode** args, int n, const Dim& dim);
+	ExprNAryOp(const Array<const ExprNode>& args, const Dim& dim);
 };
 
 /**
@@ -251,11 +247,6 @@ public:
 	 * \brief Accept an #ibex::ExprVisitor visitor.
 	 */
 	void acceptVisitor(ExprVisitor& v) const { v.visit(*this); }
-
-	/**
-	 * \brief Create a vector of expressions.
-	 */
-	static const ExprVector& new_(const ExprNode** components, int n, bool in_rows);
 
 	/**
 	 * \brief Create a vector of expressions.
@@ -296,7 +287,7 @@ public:
 	int length() const { return nb_args; }
 
 private:
-	ExprVector(const ExprNode**, int n, bool in_row);
+	ExprVector(const Array<const ExprNode>&, bool in_row);
 
 };
 
@@ -370,13 +361,13 @@ public:
 	/** The applied function. */
 	const Function& func;
 
-	static const ExprApply& new_(const Function& func, const ExprNode** args) {
+	static const ExprApply& new_(const Function& func, const Array<const ExprNode>& args) {
 		return *new ExprApply(func,args);
 	}
 
 private:
 
-	ExprApply(const Function& expr, const ExprNode** args);
+	ExprApply(const Function& expr, const Array<const ExprNode>& args);
 };
 
 /**
@@ -395,11 +386,11 @@ public:
 	/** Accept an #ibex::ExprVisitor visitor. */
 	virtual void acceptVisitor(ExprVisitor& v) const { v.visit(*this); };
 
-	static const ExprChi& new_(const ExprNode** args);
+	static const ExprChi& new_(const Array<const ExprNode>& args);
 	static const ExprChi& new_(const ExprNode& a, const ExprNode& b, const ExprNode& c);
 
 private:
-	ExprChi(const ExprNode** args) : ExprNAryOp(args,3,Dim()) {	}
+	ExprChi(const Array<const ExprNode>& args) : ExprNAryOp(args,Dim()) {	}
 
 	ExprChi(const ExprChi&); // copy constructor forbidden
 };

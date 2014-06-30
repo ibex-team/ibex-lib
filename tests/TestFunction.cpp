@@ -75,9 +75,9 @@ void TestFunction::generate_comp01() {
 	const ExprNode& e1=x+y-z;
 	const ExprNode& e2=x*z;
 	const ExprNode& e3=y-z;
-	const ExprNode* v[3] = { &e1, &e2, &e3 };
+	Array<const ExprNode> v(e1, e2, e3);
 
-	const ExprVector& e=ExprVector::new_(v, 3, false);
+	const ExprVector& e=ExprVector::new_(v, false);
 
 	Function f(x,y,z,e);
 
@@ -98,9 +98,9 @@ void TestFunction::generate_comp02() {
 	const ExprNode& e2=ExprConstant::new_scalar(0);
 	const ExprNode& e3=ExprConstant::new_scalar(0);
 
-	const ExprNode* v[3] = { &e1, &e2, &e3 };
+	Array<const ExprNode> v(e1, e2, e3);
 
-	const ExprVector& e=ExprVector::new_(v, 3, false);
+	const ExprVector& e=ExprVector::new_(v, false);
 
 	Function f(x,e);
 
@@ -120,9 +120,9 @@ void TestFunction::used() {
 	const ExprNode& e1=x+y-z;
 	const ExprNode& e2=x*z;
 	const ExprNode& e3=y-z;
-	const ExprNode* v[3] = { &e1, &e2, &e3 };
+	Array<const ExprNode> v(e1, e2, e3);
 
-	const ExprVector& e=ExprVector::new_(v, 3, false);
+	const ExprVector& e=ExprVector::new_(v, false);
 
 	Function f(x,y,z,e);
 

@@ -29,6 +29,7 @@
 
 // ================ symbolic ===============
 #include "TestExpr.h"
+#include "TestExprCopy.h"
 #include "TestExprDiff.h"
 #include "TestExprSplitOcc.h"
 #include "TestFunction.h"
@@ -88,6 +89,7 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestAffine2()));
 
     ts.add(auto_ptr<Test::Suite>(new TestExpr()));
+    ts.add(auto_ptr<Test::Suite>(new TestExprCopy()));
     ts.add(auto_ptr<Test::Suite>(new TestExprDiff()));
     ts.add(auto_ptr<Test::Suite>(new TestExprSplitOcc()));
     ts.add(auto_ptr<Test::Suite>(new TestFunction()));

@@ -619,6 +619,36 @@ The display is:
    :start-after: func-iterated-sum-O
    :end-before: func-iterated-sum-O
 
+
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Applying a function with numerous arguments
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+We have explained how to create a function with  :ref:`an arbitrary number of arguments <mod-func-cpp>`. 
+We explain now how to call (perform composition) with such function.
+
+It is as simple as storing all the actual arguments in an array structure, namely, a structure
+of expression nodes (typed ``Array<const ExprNode>``).
+
+However, when an actual argument is not a formal expression but a numerical constant (data), it is necessary to 
+explicitly encapsulate this constant in a expression node. This is what the ``ExprConstant`` class stands for.
+
+Here is an example. We create the function :math:`f:(x,y)\mapsto x+y` and apply it to the hybrid couple (z,1) where
+z is another variable. We do it in the generic way, using arrays:
+
+
+.. literalinclude:: ../examples/doc-modeling.cpp
+   :language: cpp
+   :start-after: func-apply-array-C
+   :end-before: func-apply-array-C
+
+The display is:
+
+.. literalinclude:: ../examples/doc-modeling.txt
+   :language: cpp
+   :start-after: func-apply-array-O
+   :end-before: func-apply-array-O
+
 .. _mod-sys:
 
 ===================

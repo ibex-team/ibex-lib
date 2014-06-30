@@ -218,41 +218,41 @@ void Ponts30::build_equ() {
 //	const ExprSymbol& O_x=ExprSymbol::new_("O_x");
 //	const ExprSymbol& O_y=ExprSymbol::new_("O_y");
 
-	const ExprNode* equ[30];
+	Array<const ExprNode> equ(30);
 	i=0;
 
-	equ[i++]=&(	sqr(N_x - O_x) + sqr(N_y - O_y) - 0.0625 );
-	equ[i++]=&(	sqr(M_x - O_x) + sqr(M_y - O_y) - 0.0625 );
-	equ[i++]=&(	sqr(M_x - N_x) + sqr(M_y - N_y) - 0.0625 );
-	equ[i++]=&(	sqr(J_x - N_x) + sqr(J_y - N_y) - 0.0625 );
-	equ[i++]=&(	sqr(L_x - M_x) + sqr(L_y - M_y) - 0.0625 );
-	equ[i++]=&(	sqr(K_x - M_x) + sqr(K_y - M_y) - 0.0625 );
-	equ[i++]=&(	sqr(G_x - L_x) + sqr(G_y - L_y) - 0.0625 );
-	equ[i++]=&(	sqr(K_x - L_x) + sqr(K_y - L_y) - 0.089999999999999997 );
-	equ[i++]=&(	sqr(J_x - K_x) + sqr(J_y - K_y) - 0.0625 );
-	equ[i++]=&(	sqr(K_x - N_x) + sqr(K_y - N_y) - 0.0625 );
-	equ[i++]=&(	sqr(I_x - J_x) + sqr(I_y - J_y) - 9 );
-	equ[i++]=&(	sqr(H_x - J_x) + sqr(H_y - J_y) - 25 );
-	equ[i++]=&(	sqr(B_x - I_x) + sqr(B_y - I_y) - 25 );
-	equ[i++]=&(	sqr(A_x - I_x) + sqr(A_y - I_y) - 4 );
-	equ[i++]=&(	sqr(B_x - H_x) + sqr(B_y - H_y) - 9 );
-	equ[i++]=&(	sqr(H_x - I_x) + sqr(H_y - I_y) - 16 );
-	equ[i++]=&(	sqr(F_x - G_x) + sqr(F_y - G_y) - 0.0625 );
-	equ[i++]=&(	sqr(C_x - G_x) + sqr(C_y - G_y) - 0.0625 );
-	equ[i++]=&(	sqr(F_x - L_x) + sqr(F_y - L_y) - 0.0625 );
-	equ[i++]=&(	sqr(D_x - F_x) + sqr(D_y - F_y) - 0.0625 );
-	equ[i++]=&(	sqr(D_x - E_x) + sqr(D_y - E_y) - 0.0625 );
-	equ[i++]=&(	sqr(E_x - F_x) + sqr(E_y - F_y) - 0.0625 );
-	equ[i++]=&(	sqr(D_x - G_x) + sqr(D_y - G_y) - 0.0625 );
-	equ[i++]=&(	sqr(C_x - D_x) + sqr(C_y - D_y) - 0.0625 );
-	equ[i++]=&(	sqr(C_x - H_x) + sqr(C_y - H_y) - 18.003049000000004 );
-	equ[i++]=&(	sqr(B_x - C_x) + sqr(B_y - C_y) - 9 );
-	equ[i++]=&(	sqr(A_x - B_x) + sqr(A_y - B_y) - 25 );
-	equ[i++]=&(	B_x );
-	equ[i++]=&(	A_y );
-	equ[i++]=&(	A_x );
+	equ.set_ref(i++,(	sqr(N_x - O_x) + sqr(N_y - O_y) - 0.0625 ));
+	equ.set_ref(i++,(	sqr(M_x - O_x) + sqr(M_y - O_y) - 0.0625 ));
+	equ.set_ref(i++,(	sqr(M_x - N_x) + sqr(M_y - N_y) - 0.0625 ));
+	equ.set_ref(i++,(	sqr(J_x - N_x) + sqr(J_y - N_y) - 0.0625 ));
+	equ.set_ref(i++,(	sqr(L_x - M_x) + sqr(L_y - M_y) - 0.0625 ));
+	equ.set_ref(i++,(	sqr(K_x - M_x) + sqr(K_y - M_y) - 0.0625 ));
+	equ.set_ref(i++,(	sqr(G_x - L_x) + sqr(G_y - L_y) - 0.0625 ));
+	equ.set_ref(i++,(	sqr(K_x - L_x) + sqr(K_y - L_y) - 0.089999999999999997 ));
+	equ.set_ref(i++,(	sqr(J_x - K_x) + sqr(J_y - K_y) - 0.0625 ));
+	equ.set_ref(i++,(	sqr(K_x - N_x) + sqr(K_y - N_y) - 0.0625 ));
+	equ.set_ref(i++,(	sqr(I_x - J_x) + sqr(I_y - J_y) - 9 ));
+	equ.set_ref(i++,(	sqr(H_x - J_x) + sqr(H_y - J_y) - 25 ));
+	equ.set_ref(i++,(	sqr(B_x - I_x) + sqr(B_y - I_y) - 25 ));
+	equ.set_ref(i++,(	sqr(A_x - I_x) + sqr(A_y - I_y) - 4 ));
+	equ.set_ref(i++,(	sqr(B_x - H_x) + sqr(B_y - H_y) - 9 ));
+	equ.set_ref(i++,(	sqr(H_x - I_x) + sqr(H_y - I_y) - 16 ));
+	equ.set_ref(i++,(	sqr(F_x - G_x) + sqr(F_y - G_y) - 0.0625 ));
+	equ.set_ref(i++,(	sqr(C_x - G_x) + sqr(C_y - G_y) - 0.0625 ));
+	equ.set_ref(i++,(	sqr(F_x - L_x) + sqr(F_y - L_y) - 0.0625 ));
+	equ.set_ref(i++,(	sqr(D_x - F_x) + sqr(D_y - F_y) - 0.0625 ));
+	equ.set_ref(i++,(	sqr(D_x - E_x) + sqr(D_y - E_y) - 0.0625 ));
+	equ.set_ref(i++,(	sqr(E_x - F_x) + sqr(E_y - F_y) - 0.0625 ));
+	equ.set_ref(i++,(	sqr(D_x - G_x) + sqr(D_y - G_y) - 0.0625 ));
+	equ.set_ref(i++,(	sqr(C_x - D_x) + sqr(C_y - D_y) - 0.0625 ));
+	equ.set_ref(i++,(	sqr(C_x - H_x) + sqr(C_y - H_y) - 18.003049000000004 ));
+	equ.set_ref(i++,(	sqr(B_x - C_x) + sqr(B_y - C_y) - 9 ));
+	equ.set_ref(i++,(	sqr(A_x - B_x) + sqr(A_y - B_y) - 25 ));
+	equ.set_ref(i++,(	B_x ));
+	equ.set_ref(i++,(	A_y ));
+	equ.set_ref(i++,(	A_x ));
 
-	f =  new Function(symbols,ExprVector::new_(equ,30,false),"ponts30");
+	f =  new Function(symbols,ExprVector::new_(equ,false),"ponts30");
 }
 
 Ponts30::Ponts30() : init_box(30), hc4r_box(30,30), hc4_box(30) {

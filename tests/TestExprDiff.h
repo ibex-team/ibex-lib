@@ -32,6 +32,7 @@ public:
 		TEST_ADD(TestExprDiff::apply01);
 		TEST_ADD(TestExprDiff::apply02)
 		TEST_ADD(TestExprDiff::apply03);
+		TEST_ADD(TestExprDiff::cst_grad);
 	}
 
 	void linear01();
@@ -58,6 +59,9 @@ public:
 	void apply03();
 
 	void one_var_one_func();
+
+	// function with constant gradient
+	void cst_grad();
 };
 
 } // namespace ibex

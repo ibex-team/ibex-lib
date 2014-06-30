@@ -296,23 +296,23 @@ void ExprSplitOcc::visit(const ExprVector& e) {
 }
 
 void ExprSplitOcc::visit(const ExprApply& e) {
-	const ExprNode* new_args[e.nb_args];
+	Array<const ExprNode> new_args(e.nb_args);
 	for (int i=0; i<e.nb_args; i++) {
 		visit(e.arg(i));
 		// warning: if the same symbol appears several times in e.args,
 		// the node "clone[e.arg(i)]" change each time.
-		new_args[i]=clone[e.arg(i)];
+		new_args.set_ref(i,*clone[e.arg(i)]);
 	}
 	clone.insert(e, &ExprApply::new_(e.func,new_args));
 }
 
 void ExprSplitOcc::visit(const ExprChi& e) {
-	const ExprNode* new_args[e.nb_args];
+	Array<const ExprNode> new_args(e.nb_args);
 	for (int i=0; i<e.nb_args; i++) {
 		visit(e.arg(i));
 		// warning: if the same symbol appears several times in e.args,
 		// the node "clone[e.arg(i)]" change each time.
-		new_args[i]=clone[e.arg(i)];
+		new_args.set_ref(i,*clone[e.arg(i)]);
 	}
 	clone.insert(e, &ExprChi::new_(new_args));
 }
