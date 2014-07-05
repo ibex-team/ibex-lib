@@ -21,6 +21,8 @@
 #include "ibex_Array.h"
 #include "ibex_PdcDiameterLT.h"
 
+using namespace std;
+
 namespace ibex {
 
 /* patch */
@@ -30,6 +32,46 @@ bool square_eq_sys(const System& sys) {
 		if (sys.ctrs[i].op!=EQ) return false;
 	return true;
 }
+
+namespace {
+
+// -------- information stored for cleanup ----------
+class Memory {
+public:
+	std::vector<Ctc*> __ctc;
+	Bsc* __bsc;
+	CellBuffer* __buffer;
+	LinearRelax* __relax;
+
+	~Memory() {
+		for (vector<Ctc*>::iterator it=__ctc.begin(); it!=__ctc.end(); it++) {
+			delete *it;
+		}
+		__ctc.clear();
+		delete __bsc;
+		delete __buffer;
+		delete __relax;
+	}
+
+};
+
+Memory** memory() { // construct-on-first-use idiom
+	static Memory* memory=NULL;
+	if (memory==NULL) memory=new Memory();
+	return &memory;
+}
+
+Ctc& rec(Ctc* ptr) {
+	(*memory())->__ctc.push_back(ptr);
+	return *ptr;
+}
+
+LinearRelax& rec(LinearRelax* ptr) { return *((*memory())->__relax = ptr); }
+Bsc& rec(Bsc* ptr)                 { return *((*memory())->__bsc = ptr); }
+CellBuffer& rec(CellBuffer* ptr)   { return *((*memory())->__buffer = ptr); }
+
+}
+// --------------------------------------------------
 
 // the corners for  Xnewton
 /*std::vector<CtcXNewton::corner_point>*  DefaultSolver::default_corners () {
@@ -41,39 +83,44 @@ bool square_eq_sys(const System& sys) {
 }*/
 
 // the contractor list  hc4, acid(hc4), newton (if the system is square), xnewton
-Array<Ctc>*  DefaultSolver::contractor_list (System& sys, double prec) {
-	Array<Ctc>* ctc_list;
-	ctc_list= new Array<Ctc>(4);
+Ctc*  DefaultSolver::ctc (System& sys, double prec) {
+	Array<Ctc> ctc_list(4);
+
 	// first contractor : non incremental hc4
-	ctc_list->set_ref(0, *new CtcHC4 (sys.ctrs,0.01));
+	ctc_list.set_ref(0, rec(new CtcHC4 (sys.ctrs,0.01)));
 	// second contractor : acid (hc4)
-	ctc_list->set_ref(1, *new CtcAcid (sys, *new CtcHC4 (sys.ctrs,0.1,true)));
+	ctc_list.set_ref(1, rec(new CtcAcid (sys, rec(new CtcHC4 (sys.ctrs,0.1,true)))));
 	int index=2;
 	// if the system is a square system of equations, the third contractor is Newton
 	if (square_eq_sys(sys)) {
-		ctc_list->set_ref(index,*new CtcNewton(sys.f,5e8,prec,1.e-4));
+		ctc_list.set_ref(index,rec(new CtcNewton(sys.f,5e8,prec,1.e-4)));
 		index++;
 	}
 	// the last contractor is XNewton
-	//	ctc_list->set_ref(index,*new CtcXNewtonIter(sys,
+	//	ctc_list.set_ref(index,*new CtcXNewtonIter(sys,
 	//                                          new CtcHC4 (sys.ctrs,0.01),
 	//*(default_corners())));
 
-	ctc_list->set_ref(index,*new CtcFixPoint(*new CtcCompo(
-			*new CtcPolytopeHull(*new LinearRelaxCombo(sys,LinearRelaxCombo::COMPO),CtcPolytopeHull::ALL_BOX),
-			*new CtcHC4 (sys.ctrs,0.01))));
+	ctc_list.set_ref(index,rec(new CtcFixPoint(rec(new CtcCompo(
+			rec(new CtcPolytopeHull(rec(new LinearRelaxCombo(sys,LinearRelaxCombo::COMPO)),CtcPolytopeHull::ALL_BOX)),
+			rec(new CtcHC4 (sys.ctrs,0.01)))))));
 
-	ctc_list->resize(index+1);
-	return ctc_list;
+	ctc_list.resize(index+1); // in case the system is not square.
+
+	return new CtcCompo (ctc_list);
 }
 
 
-DefaultSolver::DefaultSolver(System& sys, double _prec) : Solver(*new CtcCompo (* (contractor_list(sys,_prec))),
-		*new SmearSumRelative(sys, _prec),
-		*new CellStack()),
-		sys(sys), __ctc(dynamic_cast<CtcCompo*>(&ctc)), __bsc(&bsc), __buffer(&buffer) {
+DefaultSolver::DefaultSolver(System& sys, double prec) : Solver(rec(ctc(sys,prec)),
+		rec(new SmearSumRelative(sys, prec)),
+		rec(new CellStack())),
+		sys(sys) {
 
 	srand(1);
+
+	data = *memory(); // keep track of my data
+
+	*memory() = NULL; // reset (for next DefaultSolver to be created)
 }
 
 // delete all objects dynamically created in the constructor  TO UPDATE if the constructor is changed
@@ -81,15 +128,8 @@ DefaultSolver::DefaultSolver(System& sys, double _prec) : Solver(*new CtcCompo (
 DefaultSolver::~DefaultSolver() {
 	int ind_xnewton=2;
 	if (square_eq_sys(sys)) ind_xnewton=3;
-	delete &((dynamic_cast<CtcAcid*> (&__ctc->list[1]))->ctc);
-	CtcCompo* ctccompo= dynamic_cast<CtcCompo*>(&(dynamic_cast<CtcFixPoint*>( &__ctc->list[ind_xnewton])->ctc));
-	delete &(ctccompo->list[0]);
-	delete &(ctccompo->list[1]);
-	for (int i=0 ; i<__ctc->list.size(); i++)
-		delete &__ctc->list[i];
-	delete __ctc;
-	delete __bsc;
-	delete __buffer;
+
+	delete (Memory*) data;
 }
 
 

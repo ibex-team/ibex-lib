@@ -39,11 +39,9 @@ public:
 
 	System & sys;
 private:
-	// -------- information stored for cleanup ----------
-	CtcCompo* __ctc;
-	Bsc* __bsc;
-	CellBuffer* __buffer;
-	Array<Ctc>*  contractor_list (System& sys, double prec);
+	void* data;
+
+	Ctc* ctc(System& sys, double prec);
 //	std::vector<CtcXNewton::corner_point>* default_corners ();
 };
 
