@@ -5,7 +5,7 @@
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Aug 27, 2012
-// Last Update : March 21, 2013
+// Last Update : Jul 06, 2014
 //============================================================================
 
 #ifndef __IBEX_DEFAULT_OPTIMIZER_H__
@@ -37,18 +37,14 @@ public:
     ~DefaultOptimizer();
 
 private:
-	Array<Ctc>*  contractor_list (System& sys, System& ext_sys,double prec);
-//	std::vector<CtcXNewton::corner_point>* default_corners ();
+    /**
+     * The contractor: hc4 + acid(hc4) + xnewton
+     */
+	Ctc&  ctc(System& sys, System& ext_sys,double prec);
 
+	//	std::vector<CtcXNewton::corner_point>* default_corners ();
 
-	// -------- information stored for cleanup ----------
-	// Extended system
-	// (the objective is added in the system as the last variable and the first constraint
-    // is used for contraction and bisection)
-    System* __ext_sys;
-
-	CtcCompo* __ctc;
-	Bsc* __bsc;
+	void* data;
 };
 
 } // end namespace ibex

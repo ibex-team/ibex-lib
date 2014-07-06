@@ -5,7 +5,7 @@
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Sep 27, 2012
-// Last Update : Sep 27, 2012
+// Last Update : Jul 06, 2014
 //============================================================================
 
 #ifndef __IBEX_DEFAULT_SOLVER_H__
@@ -39,10 +39,14 @@ public:
 
 	System & sys;
 private:
-	void* data;
-
+	/**
+	 * The contractor: hc4 + acid(hc4) + newton (if the system is square) + xnewton
+	 */
 	Ctc* ctc(System& sys, double prec);
+
 //	std::vector<CtcXNewton::corner_point>* default_corners ();
+
+	void* data;
 };
 
 } // end namespace ibex

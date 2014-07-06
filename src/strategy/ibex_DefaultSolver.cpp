@@ -5,7 +5,7 @@
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Aug 27, 2012
-// Last Update : March 21, 2013
+// Last Update : Jul 06, 2014
 //============================================================================
 
 #include "ibex_DefaultSolver.h"
@@ -19,7 +19,7 @@
 #include "ibex_CellStack.h"
 #include "ibex_LinearRelaxCombo.h"
 #include "ibex_Array.h"
-#include "ibex_PdcDiameterLT.h"
+#include "ibex_DefaultStrategy.cpp_"
 
 using namespace std;
 
@@ -33,46 +33,6 @@ bool square_eq_sys(const System& sys) {
 	return true;
 }
 
-namespace {
-
-// -------- information stored for cleanup ----------
-class Memory {
-public:
-	std::vector<Ctc*> __ctc;
-	Bsc* __bsc;
-	CellBuffer* __buffer;
-	LinearRelax* __relax;
-
-	~Memory() {
-		for (vector<Ctc*>::iterator it=__ctc.begin(); it!=__ctc.end(); it++) {
-			delete *it;
-		}
-		__ctc.clear();
-		delete __bsc;
-		delete __buffer;
-		delete __relax;
-	}
-
-};
-
-Memory** memory() { // construct-on-first-use idiom
-	static Memory* memory=NULL;
-	if (memory==NULL) memory=new Memory();
-	return &memory;
-}
-
-Ctc& rec(Ctc* ptr) {
-	(*memory())->__ctc.push_back(ptr);
-	return *ptr;
-}
-
-LinearRelax& rec(LinearRelax* ptr) { return *((*memory())->__relax = ptr); }
-Bsc& rec(Bsc* ptr)                 { return *((*memory())->__bsc = ptr); }
-CellBuffer& rec(CellBuffer* ptr)   { return *((*memory())->__buffer = ptr); }
-
-}
-// --------------------------------------------------
-
 // the corners for  Xnewton
 /*std::vector<CtcXNewton::corner_point>*  DefaultSolver::default_corners () {
 	std::vector<CtcXNewton::corner_point>* x;
@@ -82,7 +42,6 @@ CellBuffer& rec(CellBuffer* ptr)   { return *((*memory())->__buffer = ptr); }
 	return x;
 }*/
 
-// the contractor list  hc4, acid(hc4), newton (if the system is square), xnewton
 Ctc*  DefaultSolver::ctc (System& sys, double prec) {
 	Array<Ctc> ctc_list(4);
 
@@ -123,16 +82,11 @@ DefaultSolver::DefaultSolver(System& sys, double prec) : Solver(rec(ctc(sys,prec
 	*memory() = NULL; // reset (for next DefaultSolver to be created)
 }
 
-// delete all objects dynamically created in the constructor  TO UPDATE if the constructor is changed
 
 DefaultSolver::~DefaultSolver() {
-	int ind_xnewton=2;
-	if (square_eq_sys(sys)) ind_xnewton=3;
-
+	// delete all objects dynamically created in the constructor
 	delete (Memory*) data;
 }
-
-
 
 
 } // end namespace ibex

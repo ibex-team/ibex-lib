@@ -14,6 +14,8 @@
 
 namespace ibex {
 
+  const double CtcMohc::ADAPTIVE = -1.0;
+
   const double CtcMohc::default_tau_mohc=0.9;
   const double CtcMohc::default_epsilon=0.1;
   const double CtcMohc::default_univ_newton_min_width=1e-8;

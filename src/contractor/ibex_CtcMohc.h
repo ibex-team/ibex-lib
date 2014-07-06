@@ -328,7 +328,7 @@ public:
 
 	~CtcMohc();
 
-	static const double ADAPTIVE = -1.0;
+	static const double ADAPTIVE;
 
 	/** Contract the box using <i>Mohc</i> in the set of constraints \a csp. */
 	virtual void contract(IntervalVector& box){

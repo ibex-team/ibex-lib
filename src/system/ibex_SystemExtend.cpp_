@@ -96,6 +96,10 @@ public:
 		}
 	}
 
+
+	~SystemExtend() {
+		delete &((*args)[nb_arg-1]); // the y variable!
+	}
 };
 
 } // end anonymous namespace
