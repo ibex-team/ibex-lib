@@ -47,7 +47,8 @@ int main() {
 
 	vector<IntervalVector> sols=s.solve(box);
 
-	for (int i=0; i<(sols.size()); i++)
+	int nb =  sols.size();
+	for (int i=0; i<nb; i++)
 		cout << "solution n°" << i << "=\t" << sols[i] << endl;
 
 	cout << "number of cells=" << s.nb_cells << endl;

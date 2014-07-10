@@ -62,14 +62,15 @@ Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, double prec,
                 user_sys(user_sys), sys(user_sys,equ_eps),
 				n(user_sys.nb_var), m(sys.nb_ctr) /* (warning: not user_sys.nb_ctr) */,
 				ext_sys(user_sys,equ_eps),
-				bsc(bsc), ctc(ctc),
+				ctc(ctc),bsc(bsc),
 				buffer(n),buffer2(n,crit),  // first buffer with LB, second buffer with ct (default UB))
 				prec(prec), goal_rel_prec(goal_rel_prec), goal_abs_prec(goal_abs_prec),
 				sample_size(sample_size), mono_analysis_flag(true), in_HC4_flag(true), trace(false),
-				timeout(1e08), loup(POS_INFINITY), uplo(NEG_INFINITY), pseudo_loup(POS_INFINITY),
-				loup_point(n), loup_box(n),
-				df(*user_sys.goal,Function::DIFF), rigor(rigor),
-				uplo_of_epsboxes(POS_INFINITY), nb_cells(0), loup_changed(false), critpr(critpr) {
+				critpr(critpr), timeout(1e08),
+				loup(POS_INFINITY), pseudo_loup(POS_INFINITY),uplo(NEG_INFINITY),
+				loup_point(n), loup_box(n), nb_cells(0),
+				df(*user_sys.goal,Function::DIFF), loup_changed(false),	rigor(rigor),
+				uplo_of_epsboxes(POS_INFINITY) {
 
 	// ==== build the system of equalities only ====
 	try {

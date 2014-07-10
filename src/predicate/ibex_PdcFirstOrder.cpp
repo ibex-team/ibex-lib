@@ -51,12 +51,15 @@ BoolInterval PdcFirstOrder::test(const IntervalVector& box) {
 	for (int i=0; i<sys.nb_var; i++) {
 		// if the ith bounding constraint is active
 		// we will remove the ith column in the matrix J2
-		if (!box[i].is_interior_subset(init_box[i]))
+		if (!box[i].is_interior_subset(init_box[i])) {
 			if (box[i].is_superset(init_box[i])) {
 				delete J;
 				return MAYBE; // cannot be full rank
 			}
-			else N--;
+			else {
+				N--;
+			}
+		}
 	}
 
 	IntervalMatrix* J2=J;

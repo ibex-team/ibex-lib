@@ -68,7 +68,7 @@ IntervalVector qinter_coref(const Array<IntervalVector>& _boxes, int q) {
 	int b;
 	double lb0,ub0;
 	std::pair<double, int> x[p];
-	for (int i=0; i<n; i++) {
+	for (unsigned int i=0; i<n; i++) {
 		
 		/* Left bound */
 		

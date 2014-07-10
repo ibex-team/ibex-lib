@@ -82,15 +82,15 @@ void CtcExist::init(const NumConstraint& ctr, const Array<const ExprSymbol>& y, 
 	assert(ctr.f.nb_arg()>y.size());
 	assert(init_box.size()==y.size());
 
+	y_init.resize(y.size());
+
+	y_init = init_box;
+
 	nb_param = y.size();
 
 	ctc = new CtcFwdBwd(ctr);
 
 	bsc = new LargestFirst(prec);
-
-	y_init.resize(nb_param);
-
-	y_init = init_box;
 
 	vars.resize(ctr.f.nb_arg());
 
@@ -110,8 +110,8 @@ void CtcExist::init(const NumConstraint& ctr, const Array<const ExprSymbol>& y, 
 }
 
 CtcExist::CtcExist(Ctc& ctc, const BoolMask& vars, const IntervalVector& init_box, double prec, bool own_ctc) :
-	Ctc(vars.nb_set()), nb_param(vars.size()-nb_var), ctc(&ctc), bsc(new LargestFirst(prec)),
-	y_init(init_box), vars(vars), prec(prec), _own_ctc(own_ctc) {
+	Ctc(vars.nb_set()), y_init(init_box), nb_param(vars.size()-nb_var), ctc(&ctc), bsc(new LargestFirst(prec)),
+	 vars(vars), prec(prec), _own_ctc(own_ctc) {
 
 	assert(vars.nb_unset()==init_box.size());
 
