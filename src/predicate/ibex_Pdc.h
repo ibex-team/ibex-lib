@@ -30,6 +30,17 @@ namespace ibex {
 class Pdc {
 public:
 	/**
+	 * \brief Build a predicate for n-dimensional boxes
+	 */
+	Pdc(int n);
+
+	/**
+	 * \brief Build with a list of predicates
+	 */
+	Pdc(const Array<Pdc>& list);
+
+
+	/**
 	 * \brief Apply the predicate to the given box.
 	 */
 	virtual BoolInterval test(const IntervalVector& box)=0;
@@ -38,6 +49,11 @@ public:
 	 * \brief Delete *this.
 	 */
 	virtual ~Pdc();
+
+	/**
+	 * \brief The number of variables this predicate works with.
+	 */
+	const int nb_var;
 };
 
 } // end namespace ibex

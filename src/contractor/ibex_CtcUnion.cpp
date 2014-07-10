@@ -12,17 +12,33 @@
 
 namespace ibex {
 
-CtcUnion::CtcUnion(const Array<Ctc>& list) : list(list) { }
+CtcUnion::CtcUnion(const Array<Ctc>& list) : Ctc(list), list(list) { }
 
-CtcUnion::CtcUnion(Ctc& c1, Ctc& c2) : list(2) {
-	list.set_ref(0,c1);
-	list.set_ref(1,c2);
+
+CtcUnion::CtcUnion(Ctc& c1, Ctc& c2) :
+		Ctc((c1.nb_var==-1)?c2.nb_var:c1.nb_var),
+		list(Array<Ctc>(c1,c2)) {
 }
 
-CtcUnion::CtcUnion(Ctc& c1, Ctc& c2, Ctc& c3) : list(3) {
-	list.set_ref(0,c1);
-	list.set_ref(1,c2);
-	list.set_ref(2,c3);
+CtcUnion::CtcUnion(Ctc& c1, Ctc& c2, Ctc& c3) :
+		Ctc((c1.nb_var==-1)?((c2.nb_var==-1)?c3.nb_var:c2.nb_var):c1.nb_var),
+		list(Array<Ctc>(c1,c2,c3)) {
+}
+
+
+CtcUnion::CtcUnion(Ctc& c1, Ctc& c2, Ctc& c3, Ctc& c4) :
+		Ctc((c1.nb_var==-1)?((c2.nb_var==-1)?((c3.nb_var==-1)?c4.nb_var:c3.nb_var):c2.nb_var):c1.nb_var),
+		list(Array<Ctc>(c1,c2,c3,c4)) {
+}
+
+CtcUnion::CtcUnion(Ctc& c1, Ctc& c2, Ctc& c3, Ctc& c4, Ctc& c5) :
+		Ctc((c1.nb_var==-1)?((c2.nb_var==-1)?((c3.nb_var==-1)?((c4.nb_var==-1)?c5.nb_var:c4.nb_var):c3.nb_var):c2.nb_var):c1.nb_var),
+		list(Array<Ctc>(c1,c2,c3,c4,c5)) {
+}
+
+CtcUnion::CtcUnion(Ctc& c1, Ctc& c2, Ctc& c3, Ctc& c4, Ctc& c5, Ctc& c6) :
+		Ctc((c1.nb_var==-1)?((c2.nb_var==-1)?((c3.nb_var==-1)?((c4.nb_var==-1)?((c5.nb_var==-1)?c6.nb_var:c5.nb_var):c4.nb_var):c3.nb_var):c2.nb_var):c1.nb_var),
+		list(Array<Ctc>(c1,c2,c3,c4,c5,c6)) {
 }
 
 

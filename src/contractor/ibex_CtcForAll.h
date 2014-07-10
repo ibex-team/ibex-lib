@@ -24,12 +24,14 @@ namespace ibex {
 class CtcForAll : public Ctc {
 public:
 
+ //TODO to finish like CtcExist
 	/**
 	 * \brief Create the Projection Intersection of Contractor, ie. "if for all box, there exist a solution"
 	 * The given constraint must have a dimension larger than the tested boxes.
 	 */
 	CtcForAll(const NumConstraint& ctr, double prec,const  IntervalVector& init_box);
 	CtcForAll(Function& f, CmpOp op, double prec,const  IntervalVector& init_box);
+	CtcForAll(Ctc& p, double prec,const  IntervalVector& init_box);
 	CtcForAll(int nb_var, Ctc& p, double prec,const  IntervalVector& init_box);
 
 
@@ -47,10 +49,6 @@ public:
 	void setInit(IntervalVector& init);
 
 private:
-	/**
-	 * \brief Number of variables
-	 */
-	int nb_var;
 
 	/**
 	 * \brief The larger contractor.

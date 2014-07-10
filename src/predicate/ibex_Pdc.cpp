@@ -12,6 +12,18 @@
 
 namespace ibex {
 
+Pdc::Pdc(int n) : nb_var(n) {
+}
+
+
+Pdc::Pdc(const Array<Pdc>& l) {
+	int i=0, n=-1;
+	while ((n==-1)&&(i<l.size())) {
+		n=l[i].nb_var;
+	}
+	nb_var=n;
+}
+
 Pdc::~Pdc() {
 }
 

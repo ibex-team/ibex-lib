@@ -14,11 +14,11 @@ using namespace std;
 
 namespace ibex {
 
-CtcPolytopeHull::CtcPolytopeHull(LinearRelax& lr, ctc_mode cmode, int max_iter, int time_out, double eps, Interval limit_diam, bool init_lp) : nb_var(lr.nb_var()), lr(lr),
-		goal_var(lr.goal_var()), cmode(cmode), limit_diam_box(eps>limit_diam.lb()? eps : limit_diam.lb(), limit_diam.ub()) {
+CtcPolytopeHull::CtcPolytopeHull(LinearRelax& lr, ctc_mode cmode, int max_iter, int time_out, double eps, Interval limit_diam) :
+		Ctc(lr.nb_var()), lr(lr), goal_var(lr.goal_var()), cmode(cmode),
+		limit_diam_box(eps>limit_diam.lb()? eps : limit_diam.lb(), limit_diam.ub()) {
 
-	mylinearsolver = NULL;
-	if (init_lp) mylinearsolver = new LinearSolver(nb_var, lr.nb_ctr(), max_iter, time_out, eps);
+	 mylinearsolver = new LinearSolver(nb_var, lr.nb_ctr(), max_iter, time_out, eps);
 
 }
 

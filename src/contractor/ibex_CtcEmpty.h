@@ -29,10 +29,16 @@ namespace ibex {
 class CtcEmpty : public Ctc {
 public:
 
+
+	/**
+	 * \brief Build the contractor for n-dimentional box.
+	 */
+	CtcEmpty(int n=-1);
+
 	/**
 	 * \brief Build the contractor for the predicate \a pdc.
 	 */
-	CtcEmpty(Pdc& pdc);
+	CtcEmpty(Pdc& pdc, bool own=false);
 
 	/**
 	 * \brief Contract a box.
@@ -40,9 +46,18 @@ public:
 	virtual void contract(IntervalVector& box);
 
 	/**
+	 * \brief Delete this.
+	 */
+	~CtcEmpty();
+
+	/**
 	 * \brief The predicate.
 	 */
 	Pdc& pdc;
+
+
+private:
+	bool own_pdc;
 };
 
 } // end namespace ibex

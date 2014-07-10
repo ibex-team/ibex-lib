@@ -17,7 +17,8 @@ CtcInteger::~CtcInteger() {
 	delete output;
 }
 
-CtcInteger::CtcInteger(int nb_var, const BoolMask& is_int) : is_int(is_int) {
+CtcInteger::CtcInteger(const BoolMask& is_int) : Ctc(is_int.size()), is_int(is_int) {
+	assert(nb_var>0);
 
 	input = new BoolMask(nb_var);
 	output = new BoolMask(nb_var);
@@ -25,6 +26,17 @@ CtcInteger::CtcInteger(int nb_var, const BoolMask& is_int) : is_int(is_int) {
 	for (int v=0; v<nb_var; v++)
 		(*output)[v]=(*input)[v]=is_int[v];
 }
+
+CtcInteger::CtcInteger(int n, const BoolMask& is_int) : Ctc(n), is_int(is_int) {
+	assert(nb_var>0);
+
+	input = new BoolMask(nb_var);
+	output = new BoolMask(nb_var);
+
+	for (int v=0; v<nb_var; v++)
+		(*output)[v]=(*input)[v]=is_int[v];
+}
+
 
 void CtcInteger::contract(IntervalVector& box) {
 

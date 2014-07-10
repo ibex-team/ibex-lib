@@ -13,8 +13,17 @@
 
 namespace ibex {
 
-Ctc::Ctc() : input(NULL), output(NULL), _impact(NULL), _output_flags(NULL) {
 
+Ctc::Ctc(int n) : nb_var(n), input(NULL), output(NULL), _impact(NULL), _output_flags(NULL) {
+
+}
+
+Ctc::Ctc(const Array<Ctc>& l) : input(NULL), output(NULL), _impact(NULL), _output_flags(NULL) {
+	int i=0, n=-1;
+	while ((n==-1)&&(i<l.size())) {
+		n=l[i].nb_var;
+	}
+	nb_var=n;
 }
 
 Ctc::~Ctc() {
