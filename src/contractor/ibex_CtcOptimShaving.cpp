@@ -15,10 +15,14 @@ namespace ibex {
 
 const int CtcOptimShaving::LimitCIDDichotomy=100;
   
-  CtcOptimShaving::CtcOptimShaving(int nb_var, Ctc& ctc, int s3b, int scid, int vhandled, double var_min_width) :
-	Ctc3BCid (nb_var,ctc,s3b,scid,vhandled,var_min_width) {
-
+  CtcOptimShaving::CtcOptimShaving(Ctc& ctc, int s3b, int scid, int vhandled, double var_min_width) :
+	Ctc3BCid (ctc,s3b,scid,vhandled,var_min_width) {
 }
+
+  CtcOptimShaving::CtcOptimShaving(int n, Ctc& ctc, int s3b, int scid, int vhandled, double var_min_width) :
+	Ctc3BCid (n,ctc,s3b,scid,vhandled,var_min_width) {
+}
+
 
   void CtcOptimShaving::contract(IntervalVector& box) {
     int	var_obj=start_var;

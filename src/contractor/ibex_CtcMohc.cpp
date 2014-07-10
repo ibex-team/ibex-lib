@@ -42,7 +42,7 @@ namespace ibex {
 
 CtcMohcRevise::CtcMohcRevise(const NumConstraint& c, double epsilon, double univ_newton_min_width,
 		double tau_mohc, bool amohc) :
-		nb_var(c.f.nb_var()), ctr(c.f,c.op), fog(c.f), tau_mohc(tau_mohc), epsilon(epsilon),
+		Ctc(c.f.nb_var()), ctr(c.f,c.op), fog(c.f), tau_mohc(tau_mohc), epsilon(epsilon),
 		univ_newton_min_width(univ_newton_min_width), active_mono_proc(1), amohc(amohc),
 		box(c.f.nb_var()) {
 
