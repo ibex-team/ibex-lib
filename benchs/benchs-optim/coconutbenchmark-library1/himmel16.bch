@@ -1,17 +1,16 @@
 constants
  
-
+x1=0;
+x7=0;
+x8=0;
 variables
 
 
-x1 in [ 0,0];
 x2 in [-1.e8,1.e8];
 x3 in [-1.e8,1.e8];
 x4 in [-1.e8,1.e8];
 x5 in [-1.e8,1.e8];
 x6 in [-1.e8,1.e8];
-x7 in [0,0];
-x8 in [0,0];
 x9 in [-1.e8,1.e8];
 x10 in [-1.e8,1.e8];
 x11 in [-1.e8,1.e8];
