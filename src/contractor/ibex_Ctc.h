@@ -35,7 +35,7 @@ public:
 	 * \brief Build a contractor for n-dimensional boxes
 	 * if n==-1, the contractor is non-dimensional.
 	 */
-	Ctc(int n);
+	Ctc(int n=-1);
 
 	/**
 	 * \brief Build a contractor for (size of the contractor inside l)-dimensional boxes

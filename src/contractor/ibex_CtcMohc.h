@@ -165,9 +165,6 @@ public:
 	/** Contract the box using <i>Mohc-Revise</i> in the constraint \a ctr_mohc. */
 	virtual void contract(IntervalVector& box);
 
-	/** The number of variables this contractor works with. */
-	const int nb_var;
-
 	/** The constraint. */
 	const NumConstraint ctr;
 

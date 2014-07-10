@@ -27,8 +27,8 @@ Ctc3BCid::Ctc3BCid(const BoolMask& cid_vars, Ctc& ctc, int s3b, int scid, int vh
 //		ibex_error("Ctc3BCID : the contractor is non-dimensional, Please specify the dimension with: \n Ctc3BCid(int nb_var, const BoolMask& cid_vars, Ctc& ctc, int s3b, int scid, int vhandled, double var_min_width);");
 }
 
-Ctc3BCid::Ctc3BCid(int  n, const BoolMask& cid_vars, Ctc& ctc, int s3b, int scid, int vhandled, double var_min_width) :
-							Ctc(n), cid_vars(cid_vars), ctc(ctc), s3b(s3b), scid(scid),
+Ctc3BCid::Ctc3BCid(int nb_var, const BoolMask& cid_vars, Ctc& ctc, int s3b, int scid, int vhandled, double var_min_width) :
+							Ctc(nb_var), cid_vars(cid_vars), ctc(ctc), s3b(s3b), scid(scid),
 							vhandled(vhandled<=0? cid_vars.nb_set():vhandled),
 							var_min_width(var_min_width), start_var(0), impact(nb_var) {
 }
@@ -41,6 +41,17 @@ Ctc3BCid::Ctc3BCid(Ctc& ctc, int s3b, int scid, int vhandled, double var_min_wid
 //	if (ctc.nb_var<=0)
 //		ibex_error("Ctc3BCID : the contractor is non-dimensional, Please specify the dimension with: \n Ctc3BCid(int nb_var, Ctc& ctc, int s3b, int scid, int vhandled, double var_min_width);");
 }
+
+
+Ctc3BCid::Ctc3BCid(int nb_var, Ctc& ctc, int s3b, int scid, int vhandled, double var_min_width) :
+                    		Ctc(nb_var), cid_vars(BoolMask(nb_var,1)), ctc(ctc), s3b(s3b), scid(scid),
+                    		vhandled(vhandled<=0? cid_vars.nb_set():vhandled),
+                    		var_min_width(var_min_width), start_var(0), impact(nb_var) {
+	assert(ctc.nb_var>0);
+//	if (ctc.nb_var<=0)
+//		ibex_error("Ctc3BCID : the contractor is non-dimensional, Please specify the dimension with: \n Ctc3BCid(int nb_var, Ctc& ctc, int s3b, int scid, int vhandled, double var_min_width);");
+}
+
 
 int Ctc3BCid::limitCIDDichotomy ()  {
 	return LimitCIDDichotomy;

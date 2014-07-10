@@ -10,19 +10,22 @@
 
 #include "ibex_Pdc.h"
 
+namespace {
+	int nb_var_pdc_list(const ibex::Array<ibex::Pdc>& l) {
+		int i=0, n=-1;
+		while ((n==-1)&&(i<l.size())) {
+			n=l[i].nb_var;
+		}
+		return n;
+	}
+}
+
+
 namespace ibex {
 
-Pdc::Pdc(int n) : nb_var(n) {
-}
+Pdc::Pdc(int n) : nb_var(n) { }
 
-
-Pdc::Pdc(const Array<Pdc>& l) {
-	int i=0, n=-1;
-	while ((n==-1)&&(i<l.size())) {
-		n=l[i].nb_var;
-	}
-	nb_var=n;
-}
+Pdc::Pdc(const Array<Pdc>& l) : nb_var(nb_var_pdc_list(l)) { }
 
 Pdc::~Pdc() {
 }
