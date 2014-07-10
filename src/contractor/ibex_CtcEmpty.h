@@ -13,6 +13,7 @@
 
 #include "ibex_Ctc.h"
 #include "ibex_Pdc.h"
+#include "ibex_PdcYes.h"
 
 namespace ibex {
 

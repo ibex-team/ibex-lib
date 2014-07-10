@@ -32,7 +32,7 @@ public:
 	/**
 	 * \brief Build a predicate for n-dimensional boxes
 	 */
-	Pdc(int n);
+	Pdc(int n=-1);
 
 	/**
 	 * \brief Build with a list of predicates
