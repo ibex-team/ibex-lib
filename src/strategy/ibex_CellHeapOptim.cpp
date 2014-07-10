@@ -120,6 +120,7 @@ struct CellComparatorub {
 		case C5 : 	make_heap(lopt.begin(), lopt.end(), CellComparatorC5()); break;
 		case C7: 	make_heap(lopt.begin(), lopt.end(), CellComparatorC7()); break;
 		case PU: 	make_heap(lopt.begin(), lopt.end(), CellComparatorpu()); break;
+		case LB: ibex_error("impossible");
 		}
 	  }
 	
@@ -159,7 +160,7 @@ struct CellComparatorub {
   if (k>0) lopt.erase(lopt.begin(),it0);
 
   if (crit==C3||crit==C5||crit==C7)
-	for (int i=0;i<lopt.size();i++) (lopt[i].first)->loup=loup;
+	for (unsigned int i=0;i<lopt.size();i++) (lopt[i].first)->loup=loup;
   
   switch (crit)
 		{case LB: make_heap(lopt.begin(), lopt.end() ,CellComparatorlb());break;

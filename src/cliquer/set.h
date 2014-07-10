@@ -2,7 +2,7 @@
 /*
  * This file contains the set handling routines.
  *
- * Copyright (C) 2002 Sampo Niskanen, Patric Östergård.
+ * Copyright (C) 2002 Sampo Niskanen, Patric ï¿½stergï¿½rd.
  * Licensed under the GNU GPL, read the file LICENSE for details.
  */
 
@@ -143,7 +143,7 @@ static int set_bit_count[256] = {
  */
 UNUSED_FUNCTION
 static set_t set_new(int size) {
-	int n;
+	unsigned int n;
 	set_t s;
 
 	ASSERT(size>0);
@@ -175,8 +175,8 @@ static void set_free(set_t s) {
  * Returns a pointer to the new set.
  */
 UNUSED_FUNCTION INLINE
-static set_t set_resize(set_t s, int size) {
-	int n;
+static set_t set_resize(set_t s, unsigned int size) {
+	unsigned int n;
 
 	ASSERT(size>0);
 
@@ -270,7 +270,7 @@ static void set_empty(set_t s) {
  */
 UNUSED_FUNCTION INLINE
 static set_t set_intersection(set_t res,set_t a,set_t b) {
-	int i,max;
+	unsigned int i,max;
 
 	if (res==NULL) {
 		res = set_new(MAX(SET_MAX_SIZE(a),SET_MAX_SIZE(b)));
@@ -303,7 +303,7 @@ static set_t set_intersection(set_t res,set_t a,set_t b) {
  */
 UNUSED_FUNCTION INLINE
 static set_t set_union(set_t res,set_t a,set_t b) {
-	int i,max;
+	unsigned int i,max;
 
 	if (res==NULL) {
 		res = set_new(MAX(SET_MAX_SIZE(a),SET_MAX_SIZE(b)));
@@ -337,7 +337,7 @@ static set_t set_union(set_t res,set_t a,set_t b) {
  * }
  */
 UNUSED_FUNCTION INLINE
-static int set_return_next(set_t s, int n) {
+static int set_return_next(set_t s, unsigned int n) {
 	if (n<0)
 		n=0;
 	else
@@ -375,7 +375,7 @@ static int set_return_next(set_t s, int n) {
  */
 UNUSED_FUNCTION
 static void set_print(set_t s) {
-	int i;
+	unsigned int i;
 	printf("size=%d(max %d)",set_size(s),(int)SET_MAX_SIZE(s));
 	for (i=0; i<SET_MAX_SIZE(s); i++)
 		if (SET_CONTAINS(s,i))

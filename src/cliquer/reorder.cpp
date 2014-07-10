@@ -2,7 +2,7 @@
 /*
  * This file contains the vertex reordering routines.
  *
- * Copyright (C) 2002 Sampo Niskanen, Patric Östergård.
+ * Copyright (C) 2002 Sampo Niskanen, Patric ï¿½stergï¿½rd.
  * Licensed under the GNU GPL, read the file LICENSE for details.
  */
 
@@ -24,7 +24,7 @@
  */
 void reorder_set(set_t s,int *order) {
         set_t tmp;
-        int i,j;
+        unsigned int i,j;
         setelement e;
 
         ASSERT(reorder_is_bijection(order,SET_MAX_SIZE(s)));
