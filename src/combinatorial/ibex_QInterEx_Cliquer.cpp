@@ -24,16 +24,16 @@ IntervalVector qinterex_cliquer(const vector<IntervalVector *>& boxes, const vec
 	assert(q>0);
 	assert(boxes.size()>0); // This assert does not seem to work... am I missing something ?
 	
-	unsigned int p = boxes.size();
-	unsigned int n = boxes[0]->size();
+	int p = boxes.size();
+	int n = boxes[0]->size();
 	IntervalVector inter(n);
 	
 	/* Generate the intersection graph in Cliquer format */
 	
 	graph_t *g = graph_new(p);
 	
-	for (unsigned int i=0; i<p; i++) {
-		for (unsigned int j=i+1; j<p; j++) {
+	for (int i=0; i<p; i++) {
+		for (int j=i+1; j<p; j++) {
 			if (origin->is_edge(indices[i],indices[j])) GRAPH_ADD_EDGE(g,i,j);
 		}
 	}

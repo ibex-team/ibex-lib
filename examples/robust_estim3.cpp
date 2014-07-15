@@ -61,7 +61,8 @@ vector<int> *readFile(string filename) {
 void printOutput(vector<int> *x, vector<int> *y, list<IntervalVector>& res) {
 	
 	ofstream xy(output_datafile.c_str());
-	for (int i=0; i<x->size(); i++) {
+	int n= x->size();
+	for (int i=0; i<n; i++) {
 		xy << x->at(i) << " " << y->at(i) << endl;
 	}
 	

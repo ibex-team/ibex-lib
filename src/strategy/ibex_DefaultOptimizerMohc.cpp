@@ -90,7 +90,8 @@ Array<Ctc>*  DefaultOptimizerMohc::contractor_list (System& sys2, System& ext_sy
             case MOHC80: tau_mohc=0.8; break;
             case MOHC90: tau_mohc=0.9; break;
             case MOHC99: tau_mohc=0.9999; break;
-            case MOHC100: tau_mohc=1.1;
+            case MOHC100: tau_mohc=1.1; break;
+            default: ibex_error("DefaultOptimizerMohc::contractor_list : case impossible.");
         }
 
         mohc=new CtcMohc (ext_sys.ctrs, 0.01, false, 0.01, CtcMohc::default_univ_newton_min_width, tau_mohc);

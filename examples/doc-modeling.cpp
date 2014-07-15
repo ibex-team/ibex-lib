@@ -243,7 +243,7 @@ int main() {
 	output << "-------------------------"<< endl;
 	output << "  number of variables:"   << ext_sys.nb_var << endl;
 	output << "  number of constraints:" << ext_sys.nb_ctr << endl;
-	output << "  goal name:"             << ext_sys.goal_name << endl;
+	output << "  goal name:"             << ext_sys.goal_name() << endl;
 	output << "  goal variable:"         << ext_sys.goal_var() << endl;
 	output << "  goal constraint:"       << ext_sys.goal_ctr() << endl;
 	// ![sys-extended-C]

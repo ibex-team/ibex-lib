@@ -143,7 +143,7 @@ static int set_bit_count[256] = {
  */
 UNUSED_FUNCTION
 static set_t set_new(int size) {
-	unsigned int n;
+	int n;
 	set_t s;
 
 	ASSERT(size>0);

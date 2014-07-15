@@ -61,9 +61,9 @@ const int CtcOptimShaving::LimitCIDDichotomy=100;
   // Reduce left bound by shaving:
 
   bool stopLeft = false;
-  double leftBound = dom.lb();
-  double rightBound = dom.ub();
-  double leftCID;
+  //double leftBound = dom.lb();
+  //double rightBound = dom.ub();
+  //double leftCID;
 
   int k=0;
 
@@ -80,14 +80,14 @@ const int CtcOptimShaving::LimitCIDDichotomy=100;
     try{
       ctc.contract(box,impact);
     }catch(EmptyBoxException e) {
-      leftBound = sup_k;
+      //leftBound = sup_k;
       k++;
       continue;
     }
     //non empty box
     stopLeft = true;
-    leftCID = sup_k;
-    leftBound = dom.lb();
+    //leftCID = sup_k;
+    //leftBound = dom.lb();
     k++;
   }
 
