@@ -23,7 +23,7 @@ IntervalVector qinter_coref(const Array<IntervalVector>& _boxes, int q) {
 	
 	assert(q>0);
 	assert(_boxes.size()>0);
-	unsigned int n = _boxes[0].size();
+	int n = _boxes[0].size();
 	
 	/* Remove the empty boxes from the list */
 	
@@ -68,7 +68,7 @@ IntervalVector qinter_coref(const Array<IntervalVector>& _boxes, int q) {
 	int b;
 	double lb0,ub0;
 	std::pair<double, int> x[p];
-	for (unsigned int i=0; i<n; i++) {
+	for (int i=0; i<n; i++) {
 		
 		/* Left bound */
 		

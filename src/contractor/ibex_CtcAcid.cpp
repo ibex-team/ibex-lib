@@ -175,7 +175,7 @@ void CtcAcid::compute_smearorder(IntervalVector& box) {
 		int k=0;
 		//int k0=0;
 		double sz=0;
-		for (int k1=0; (k1<(varorder2.size())); k1++) {
+		for (unsigned int k1=0; (k1<(varorder2.size())); k1++) {
 			if (sum_smear[varorder2[k1]]>sz) {
 				k=k1;
 				//k0=1;

@@ -14,7 +14,7 @@
 namespace ibex {
 
 const char* ExtendedSystem::goal_name() {
-	static char* _goal_name = "__goal__"; // construct-on-first-use idiom (safe: no de-initialization dependency between static objects)
+	const static char* _goal_name = "__goal__"; // construct-on-first-use idiom (safe: no de-initialization dependency between static objects)
 	return _goal_name;
 }
 

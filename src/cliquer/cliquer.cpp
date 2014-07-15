@@ -979,7 +979,7 @@ static void maximalize_clique(set_t s,graph_t *g) {
  * Returns TRUE is clique is a maximal clique of g, otherwise FALSE.
  */
 static boolean is_maximal(set_t clique, graph_t *g) {
-	unsigned int i,j;
+	int i,j;
 	int *table;
 	int len;
 	boolean addable;
@@ -1082,7 +1082,7 @@ int clique_unweighted_max_weight(graph_t *g, clique_options *opts) {
  */
 set_t clique_unweighted_find_single(graph_t *g,int min_size,int max_size,
 				    boolean maximal, clique_options *opts) {
-	unsigned int i;
+	int i;
 	int *table;
 	set_t s;
 
