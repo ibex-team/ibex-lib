@@ -32,10 +32,16 @@ class Ctc {
 public:
 
 	/**
-	 * \brief Build a contractor for n-dimensional boxes
-	 * if n==-1, the contractor is non-dimensional.
+	 * \brief Build a non-dimensional contractor.
+	 * nb_var=-1
 	 */
-	Ctc(int n=-1);
+	Ctc();
+
+	/**
+	 * \brief Build a contractor for n-dimensional boxes
+	 * if nb_var==-1, the contractor is non-dimensional.
+	 */
+	Ctc(int nb_var);
 
 	/**
 	 * \brief Build a contractor for (size of the contractor inside l)-dimensional boxes
