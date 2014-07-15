@@ -52,7 +52,7 @@ Array<Ctc>*  DefaultSolverMohc::contractor_list (System& sys, double prec,
             case MOHC90: tau_mohc=0.9; break;
             case MOHC99: tau_mohc=0.9999; break;
             case MOHC100: tau_mohc=1.1; break;
-            default: ibex_error("impossible case");
+            default: ibex_error("DefaultSolverMohc::contractor_list : impossible case");
         }
 
         mohc=new CtcMohc (sys.ctrs, 0.01, false, 0.01, CtcMohc::default_univ_newton_min_width, tau_mohc);

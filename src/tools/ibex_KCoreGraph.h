@@ -59,7 +59,7 @@ public:
 	graph_t *subgraph(IntStack *vset);
 private:
 	/* Coreness level */
-	unsigned int k;
+	int k;
 	
 	/* All the active vertices' ids */
 	IntStack *allid;
