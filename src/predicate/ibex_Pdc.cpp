@@ -23,6 +23,8 @@ namespace {
 
 namespace ibex {
 
+Pdc::Pdc() : nb_var(-1) { }
+
 Pdc::Pdc(int n) : nb_var(n) { }
 
 Pdc::Pdc(const Array<Pdc>& l) : nb_var(nb_var_pdc_list(l)) { }

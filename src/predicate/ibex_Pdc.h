@@ -29,10 +29,18 @@ namespace ibex {
  */
 class Pdc {
 public:
+
+	/**
+	 * \brief Build a non-dimensional predicate.
+	 * nb_var = -1
+	 */
+	Pdc();
+
 	/**
 	 * \brief Build a predicate for n-dimensional boxes
+	 * if nb_var==-1, the predicate is non-dimensional
 	 */
-	Pdc(int n=-1);
+	Pdc(int nb_var);
 
 	/**
 	 * \brief Build with a list of predicates
