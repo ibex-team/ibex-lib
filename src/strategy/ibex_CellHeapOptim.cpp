@@ -120,7 +120,7 @@ struct CellComparatorub {
 		case C5 : 	make_heap(lopt.begin(), lopt.end(), CellComparatorC5()); break;
 		case C7: 	make_heap(lopt.begin(), lopt.end(), CellComparatorC7()); break;
 		case PU: 	make_heap(lopt.begin(), lopt.end(), CellComparatorpu()); break;
-		case LB: ibex_error("impossible");
+		default: ibex_error("CellHeapOptim::makeheap : case impossible");
 		}
 	  }
 	

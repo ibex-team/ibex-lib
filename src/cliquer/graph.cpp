@@ -246,8 +246,8 @@ headerlength+=strlen(s);
 boolean graph_write_dimacs_binary(graph_t *g, char *comment,FILE *fp) {
 	char *buf;
 	char *header=NULL;
-	int headersize=0;
-	int headerlength=0;
+	unsigned int headersize=0;
+	unsigned int headerlength=0;
 	int i,j;
 
 	ASSERT((sizeof(setelement)*8)==ELEMENTSIZE);
