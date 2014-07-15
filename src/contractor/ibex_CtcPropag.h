@@ -44,6 +44,7 @@ public:
 	 *
 	 * \see #contract(IntervalVector&, const BoolMask&).
 	 */
+	CtcPropag(const Array<Ctc>& cl, double ratio=default_ratio, bool incr=false);
 	CtcPropag(int nb_var, const Array<Ctc>& cl, double ratio=default_ratio, bool incr=false);
 
 	/**
@@ -76,7 +77,6 @@ public:
 
 protected:
 
-	const int nb_var;     // number of variables
 
 	DirectedHyperGraph g; // constraint network (hypergraph)
 

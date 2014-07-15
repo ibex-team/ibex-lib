@@ -41,6 +41,21 @@ public:
 	PdcOr(Pdc& c1, Pdc& c2, Pdc& c3);
 
 	/**
+	 * \brief Create the logical OR of 4 predicates
+	 */
+	PdcOr(Pdc& c1, Pdc& c2, Pdc& c3, Pdc& c4);
+
+	/**
+	 * \brief Create the logical OR of 5 predicates
+	 */
+	PdcOr(Pdc& c1, Pdc& c2, Pdc& c3, Pdc& c4, Pdc& c5);
+
+	/**
+	 * \brief Create the logical OR of 6 predicates
+	 */
+	PdcOr(Pdc& c1, Pdc& c2, Pdc& c3, Pdc& c4, Pdc& c5, Pdc& c6);
+
+	/**
 	 * \brief Test a box.
 	 */
 	BoolInterval test(const IntervalVector& box);

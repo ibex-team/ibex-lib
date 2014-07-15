@@ -26,39 +26,46 @@ void CtcCompo::init_impacts() {
 //	}
 }
 
+
+
+
+
 CtcCompo::CtcCompo(const Array<Ctc>& list, bool incremental, double ratio) :
-	list(list), incremental(incremental), ratio(ratio) {
+		Ctc(list), list(list), incremental(incremental), ratio(ratio) {
 
 	init_impacts();
 }
 
 CtcCompo::CtcCompo(Ctc& c1, Ctc& c2, bool incremental, double ratio) :
-	list(Array<Ctc>(c1,c2)), incremental(incremental), ratio(ratio) {
+		Ctc((c1.nb_var==-1)?c2.nb_var:c1.nb_var),list(Array<Ctc>(c1,c2)), incremental(incremental), ratio(ratio) {
 
 	init_impacts();
 }
 
 CtcCompo::CtcCompo(Ctc& c1, Ctc& c2, Ctc& c3, bool incremental, double ratio) :
-	list(Array<Ctc>(c1,c2,c3)), incremental(incremental), ratio(ratio) {
+		Ctc((c1.nb_var==-1)?((c2.nb_var==-1)?c3.nb_var:c2.nb_var):c1.nb_var),list(Array<Ctc>(c1,c2,c3)), incremental(incremental), ratio(ratio) {
 
 	init_impacts();
 }
 
 
 CtcCompo::CtcCompo(Ctc& c1, Ctc& c2, Ctc& c3, Ctc& c4, bool incremental, double ratio) :
-	list(Array<Ctc>(c1,c2,c3,c4)), incremental(incremental), ratio(ratio) {
+		Ctc((c1.nb_var==-1)?((c2.nb_var==-1)?((c3.nb_var==-1)?c4.nb_var:c3.nb_var):c2.nb_var):c1.nb_var),
+		list(Array<Ctc>(c1,c2,c3,c4)), incremental(incremental), ratio(ratio) {
 
 	init_impacts();
 }
 
 CtcCompo::CtcCompo(Ctc& c1, Ctc& c2, Ctc& c3, Ctc& c4, Ctc& c5, bool incremental, double ratio) :
-	list(Array<Ctc>(c1,c2,c3,c4,c5)), incremental(incremental), ratio(ratio) {
+		Ctc((c1.nb_var==-1)?((c2.nb_var==-1)?((c3.nb_var==-1)?((c4.nb_var==-1)?c5.nb_var:c4.nb_var):c3.nb_var):c2.nb_var):c1.nb_var),
+		list(Array<Ctc>(c1,c2,c3,c4,c5)), incremental(incremental), ratio(ratio) {
 
 	init_impacts();
 }
 
 CtcCompo::CtcCompo(Ctc& c1, Ctc& c2, Ctc& c3, Ctc& c4, Ctc& c5, Ctc& c6, bool incremental, double ratio) :
-	list(Array<Ctc>(c1,c2,c3,c4,c5,c6)), incremental(incremental), ratio(ratio) {
+		Ctc((c1.nb_var==-1)?((c2.nb_var==-1)?((c3.nb_var==-1)?((c4.nb_var==-1)?((c5.nb_var==-1)?c6.nb_var:c5.nb_var):c4.nb_var):c3.nb_var):c2.nb_var):c1.nb_var),
+		list(Array<Ctc>(c1,c2,c3,c4,c5,c6)), incremental(incremental), ratio(ratio) {
 
 	init_impacts();
 }

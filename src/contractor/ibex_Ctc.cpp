@@ -11,10 +11,25 @@
 
 #include "ibex_Ctc.h"
 
+namespace {
+	int nb_var_ctc_list(const ibex::Array<ibex::Ctc>& l) {
+		int i=0, n=-1;
+		while ((n==-1)&&(i<l.size())) {
+			n=l[i].nb_var;
+		}
+		return n;
+	}
+}
+
 namespace ibex {
 
-Ctc::Ctc() : input(NULL), output(NULL), _impact(NULL), _output_flags(NULL) {
+Ctc::Ctc() : nb_var(-1), input(NULL), output(NULL), _impact(NULL), _output_flags(NULL) {
+}
 
+Ctc::Ctc(int n) : nb_var(n), input(NULL), output(NULL), _impact(NULL), _output_flags(NULL) {
+}
+
+Ctc::Ctc(const Array<Ctc>& l) : nb_var(nb_var_ctc_list(l)), input(NULL), output(NULL), _impact(NULL), _output_flags(NULL) {
 }
 
 Ctc::~Ctc() {

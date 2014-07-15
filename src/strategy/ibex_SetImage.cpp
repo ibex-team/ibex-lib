@@ -22,7 +22,7 @@ namespace {
 
 class CtcInter : public Ctc {
 public:
-	CtcInter(const IntervalVector& x) : x(x) { }
+	CtcInter(const IntervalVector& x) : Ctc(x.size()), x(x) { }
 
 	void contract(IntervalVector& box) {
 		box &= x;
@@ -33,7 +33,7 @@ public:
 
 class PdcSubset : public Pdc {
 public:
-	PdcSubset(const IntervalVector& x) : x(x) { }
+	PdcSubset(const IntervalVector& x) : Pdc(x.size()), x(x) { }
 
 	BoolInterval test(const IntervalVector& box) {
 		if (box.is_subset(x)) return YES;

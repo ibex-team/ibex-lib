@@ -14,9 +14,9 @@
 
 namespace ibex {
 
-CtcQInter::CtcQInter(int n, const Array<Ctc>& list, int q) : list(list), n(n), q(q), boxes(list.size(), n) {
+CtcQInter::CtcQInter(const Array<Ctc>& list, int q) : Ctc(list), list(list), q(q), boxes(list.size(), nb_var) { }
 
-}
+CtcQInter::CtcQInter(int n, const Array<Ctc>& list, int q) : Ctc(n), list(list), q(q), boxes(list.size(), n) { }
 
 void CtcQInter::contract(IntervalVector& box) {
 	Array<IntervalVector> refs(list.size());
@@ -36,9 +36,10 @@ void CtcQInter::contract(IntervalVector& box) {
 	if (box.is_empty()) throw EmptyBoxException();
 }
 
-CtcQInter2::CtcQInter2(int n, const Array<Ctc>& list, int q) : list(list), n(n), q(q), boxes(list.size(), n) {
+CtcQInter2::CtcQInter2(const Array<Ctc>& list, int q) : Ctc(list), list(list), q(q), boxes(list.size(), nb_var) { }
 
-}
+CtcQInter2::CtcQInter2(int n, const Array<Ctc>& list, int q) : Ctc(n), list(list), q(q), boxes(list.size(), n) { }
+
 
 void CtcQInter2::contract(IntervalVector& box) {
 	Array<IntervalVector> refs(list.size());
@@ -58,9 +59,9 @@ void CtcQInter2::contract(IntervalVector& box) {
 	if (box.is_empty()) throw EmptyBoxException();
 }
 
-CtcQInterProjF::CtcQInterProjF(int n, const Array<Ctc>& list, int q) : list(list), n(n), q(q), boxes(list.size(), n) {
+CtcQInterProjF::CtcQInterProjF(const Array<Ctc>& list, int q) : Ctc(list), list(list), q(q), boxes(list.size(), nb_var) { }
 
-}
+CtcQInterProjF::CtcQInterProjF(int n, const Array<Ctc>& list, int q) : Ctc(n), list(list), q(q), boxes(list.size(), n) { }
 
 void CtcQInterProjF::contract(IntervalVector& box) {
 	Array<IntervalVector> refs(list.size());
@@ -80,9 +81,9 @@ void CtcQInterProjF::contract(IntervalVector& box) {
 	if (box.is_empty()) throw EmptyBoxException();
 }
 
-CtcQInterCoreF::CtcQInterCoreF(int n, const Array<Ctc>& list, int q) : list(list), n(n), q(q), boxes(list.size(), n) {
+CtcQInterCoreF::CtcQInterCoreF(const Array<Ctc>& list, int q) :  Ctc(list), list(list), q(q), boxes(list.size(), nb_var) { }
 
-}
+CtcQInterCoreF::CtcQInterCoreF(int n, const Array<Ctc>& list, int q) :  Ctc(n), list(list), q(q), boxes(list.size(), n) { }
 
 void CtcQInterCoreF::contract(IntervalVector& box) {
 	Array<IntervalVector> refs(list.size());

@@ -13,9 +13,9 @@
 
 namespace ibex {
 
-PdcDiameterLT::PdcDiameterLT(double ceil) : ceil(1,ceil) { }
+PdcDiameterLT::PdcDiameterLT(double ceil) : Pdc(1), ceil(1,ceil) { }
 
-PdcDiameterLT::PdcDiameterLT(const Vector& ceil) : ceil(ceil) { }
+PdcDiameterLT::PdcDiameterLT(const Vector& ceil) : Pdc(ceil.size()), ceil(ceil) { }
 
 PdcDiameterLT::~PdcDiameterLT() { }
 

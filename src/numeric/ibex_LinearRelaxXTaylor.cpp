@@ -20,7 +20,7 @@ const double LinearRelaxXTaylor::default_max_diam_deriv =1e6;
 
 LinearRelaxXTaylor::LinearRelaxXTaylor(const System& sys1, std::vector<corner_point>& cpoints1,
 		linear_mode lmode1, double max_diam_deriv1):
-			LinearRelax(sys1), sys(sys1), cpoints(cpoints1), goal_ctr(-1),
+			LinearRelax(sys1), cpoints(cpoints1), sys(sys1), goal_ctr(-1),
 			max_diam_deriv(max_diam_deriv1),
 			lmode(lmode1),
 			linear_coef(sys1.nb_ctr, sys1.nb_var),
@@ -91,7 +91,7 @@ int LinearRelaxXTaylor::linearization( IntervalVector & box, LinearSolver *mysol
 			for(int j=0; j<4; j++)
 				cont += X_Linearization(box, ctr, K4, G, j, nb_nonlinear_vars,mysolver);
 		} else  //  linearizations k corners per constraint
-			for(int k=0; k<(cpoints.size()); k++) {
+			for(unsigned int k=0; k<(cpoints.size()); k++) {
 				cont += X_Linearization(box, ctr, cpoints[k],  G, k, nb_nonlinear_vars,mysolver);
 			}
 	}

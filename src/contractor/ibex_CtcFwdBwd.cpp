@@ -14,9 +14,8 @@
 
 namespace ibex {
 
-CtcFwdBwd::CtcFwdBwd(Function& f, CmpOp op, FwdMode mode) : ctr(f,op), hc4r(mode) {
+CtcFwdBwd::CtcFwdBwd(Function& f, CmpOp op, FwdMode mode) : Ctc(f.nb_var()), ctr(f,op), hc4r(mode)  {
 
-	int nb_var = f.nb_var();
 	input = new BoolMask(nb_var);
 	output = new BoolMask(nb_var);
 
@@ -27,9 +26,8 @@ CtcFwdBwd::CtcFwdBwd(Function& f, CmpOp op, FwdMode mode) : ctr(f,op), hc4r(mode
 	}
 }
 
-CtcFwdBwd::CtcFwdBwd(const NumConstraint& ctr, FwdMode mode) : ctr(ctr.f,ctr.op), hc4r(mode) {
+CtcFwdBwd::CtcFwdBwd(const NumConstraint& ctr, FwdMode mode) : Ctc(ctr.f.nb_var()), ctr(ctr.f,ctr.op), hc4r(mode) {
 
-	int nb_var = ctr.f.nb_var();
 
 	input = new BoolMask(nb_var);
 	output = new BoolMask(nb_var);

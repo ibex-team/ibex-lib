@@ -2,7 +2,7 @@
 /*
  * This file contains the graph handling routines.
  *
- * Copyright (C) 2002 Sampo Niskanen, Patric Östergård.
+ * Copyright (C) 2002 Sampo Niskanen, Patric ï¿½stergï¿½rd.
  * Licensed under the GNU GPL, read the file LICENSE for details.
  */
 
@@ -246,8 +246,8 @@ headerlength+=strlen(s);
 boolean graph_write_dimacs_binary(graph_t *g, char *comment,FILE *fp) {
 	char *buf;
 	char *header=NULL;
-	int headersize=0;
-	int headerlength=0;
+	unsigned int headersize=0;
+	unsigned int headerlength=0;
 	int i,j;
 
 	ASSERT((sizeof(setelement)*8)==ELEMENTSIZE);

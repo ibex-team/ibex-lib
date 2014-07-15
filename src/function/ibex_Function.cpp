@@ -228,8 +228,8 @@ const ExprApply& Function::operator()(const ExprNode& arg1, const ExprNode& arg2
 
 const ExprApply& Function::operator()(const vector<const ExprNode*>& arg) const {
 	Array<const ExprNode> tmp(arg.size());
-	assert(nb_arg()==arg.size());
-	for (int i=0; i<arg.size(); i++)
+	assert(nb_arg()==(int)arg.size());
+	for (unsigned int i=0; i<arg.size(); i++)
 		tmp.set_ref(i,*arg[i]);
 	return ExprApply::new_(*this, tmp);
 }

@@ -74,6 +74,48 @@ public:
 	CtcExist(const NumConstraint& c, const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const ExprSymbol& y6, const IntervalVector& y_init, double prec);
 
 	/**
+	 * \brief Create the contractor for "exists (y1,...,y7) in [y_init] such that c(x,y)"
+	 *
+	 * \see #CtcExist(const NumConstraint&, const Array<const ExprSymbol&>, const IntervalVector&, double).
+	 */
+	CtcExist(const NumConstraint& c, const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const ExprSymbol& y6, const ExprSymbol& y7, const IntervalVector& y_init, double prec);
+
+	/**
+	 * \brief Create the contractor for "exists (y1,...,y8) in [y_init] such that c(x,y)"
+	 *
+	 * \see #CtcExist(const NumConstraint&, const Array<const ExprSymbol&>, const IntervalVector&, double).
+	 */
+	CtcExist(const NumConstraint& c, const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const ExprSymbol& y6, const ExprSymbol& y7, const ExprSymbol& y8, const IntervalVector& y_init, double prec);
+
+	/**
+	 * \brief Create the contractor for "exists (y1,...,y9) in [y_init] such that c(x,y)"
+	 *
+	 * \see #CtcExist(const NumConstraint&, const Array<const ExprSymbol&>, const IntervalVector&, double).
+	 */
+	CtcExist(const NumConstraint& c, const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const ExprSymbol& y6, const ExprSymbol& y7, const ExprSymbol& y8, const ExprSymbol& y9, const IntervalVector& y_init, double prec);
+
+	/**
+	 * \brief Create the contractor for "exists (y1,...,y10) in [y_init] such that c(x,y)"
+	 *
+	 * \see #CtcExist(const NumConstraint&, const Array<const ExprSymbol&>, const IntervalVector&, double).
+	 */
+	CtcExist(const NumConstraint& c, const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const ExprSymbol& y6, const ExprSymbol& y7, const ExprSymbol& y8, const ExprSymbol& y9, const ExprSymbol& y10, const IntervalVector& y_init, double prec);
+
+	/**
+	 * \brief Create the contractor for "exists (y1,...,y11) in [y_init] such that c(x,y)"
+	 *
+	 * \see #CtcExist(const NumConstraint&, const Array<const ExprSymbol&>, const IntervalVector&, double).
+	 */
+	CtcExist(const NumConstraint& c, const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const ExprSymbol& y6, const ExprSymbol& y7, const ExprSymbol& y8, const ExprSymbol& y9, const ExprSymbol& y10, const ExprSymbol& y11, const IntervalVector& y_init, double prec);
+
+	/**
+	 * \brief Create the contractor for "exists (y1,...,y12) in [y_init] such that c(x,y)"
+	 *
+	 * \see #CtcExist(const NumConstraint&, const Array<const ExprSymbol&>, const IntervalVector&, double).
+	 */
+	CtcExist(const NumConstraint& c, const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const ExprSymbol& y6, const ExprSymbol& y7, const ExprSymbol& y8, const ExprSymbol& y9, const ExprSymbol& y10, const ExprSymbol& y11, const ExprSymbol& y12, const IntervalVector& y_init, double prec);
+
+	/**
 	 * \brief Create the contractor for "exists y in [y_init] such that c(x,y)"
 	 *
 	 * The constraint c must take n+m arguments where n is the size of x and m the size of y.
@@ -99,8 +141,9 @@ public:
 	 *                is a variable (vars[i]==true)or a parameter (vars[i]==false).
 	 * \param y_init  Initial box for the parameters
 	 * \param prec    Bisection precision on the parameters
+	 * \param own_ctc Boolean which indicate if the ctc mast be destroy with this
 	 */
-	CtcExist(Ctc& c, const BoolMask& vars, const IntervalVector& y_init, double prec);
+	CtcExist(Ctc& c, const BoolMask& vars, const IntervalVector& y_init, double prec, bool own_ctc=false);
 
 	/**
 	 * \brief Delete this.
@@ -131,11 +174,6 @@ private:
 	 * \param y the vector parameters.
 	 */
 	void contract(IntervalVector& x, IntervalVector& y);
-
-	/**
-	 * \brief Number of variables
-	 */
-	int nb_var;
 
 	/**
 	 * \brief Number of parameters

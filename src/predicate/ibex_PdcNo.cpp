@@ -1,19 +1,23 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_CtcIdentity.cpp
-// Author      : Gilles Chabert
+// File        : ibex_PdcNo.cpp
+// Author      : Jordan Ninin
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
-// Created     : Feb 18, 2013
-// Last Update : Jul 18, 2013
+// Created     : July 10, 2014
+// Last Update : July 10, 2014
 //============================================================================
 
-#include "ibex_CtcIdentity.h"
+
+#include "ibex_PdcNo.h"
 
 namespace ibex {
 
-CtcIdentity::CtcIdentity(int n) : Ctc(n) { }
+PdcNo::PdcNo(int n) : Pdc(n) {
+}
 
-void CtcIdentity::contract(IntervalVector& box) { }
+BoolInterval PdcNo::test(const IntervalVector& box) {
+		return NO;
+}
 
 } // end namespace ibex

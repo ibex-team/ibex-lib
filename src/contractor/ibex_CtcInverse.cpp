@@ -12,7 +12,7 @@
 
 namespace ibex {
 
-CtcInverse::CtcInverse(Ctc& c, Function& f) : c(c), f(f), y(f.image_dim()) {
+CtcInverse::CtcInverse(Ctc& c, Function& f) : Ctc(f.nb_var()), c(c), f(f), y(f.image_dim()) {
 	const ExprSymbol& y=ExprSymbol::new_(f.expr().dim);
 	id.init(y,y);
 }

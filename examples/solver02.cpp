@@ -76,7 +76,8 @@ int main(int argc, char** argv) {
 
 	// Display the solutions
 	//
-	for (int i=0; (i< (sols.size())) ; i++)
+	int nb = sols.size();
+	for (int i=0; i<nb ; i++)
 		cout << " sol  "<< i+1 << " : " << sols[i] << endl;
 
 	} catch(ibex::SyntaxError& e) {

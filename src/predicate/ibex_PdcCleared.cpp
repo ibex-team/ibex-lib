@@ -13,7 +13,7 @@
 
 namespace ibex {
 
-PdcCleared::PdcCleared(Ctc& c) : ctc(c) {
+PdcCleared::PdcCleared(Ctc& c) : Pdc(c.nb_var), ctc(c) {
 
 }
 

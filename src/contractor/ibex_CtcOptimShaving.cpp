@@ -15,10 +15,14 @@ namespace ibex {
 
 const int CtcOptimShaving::LimitCIDDichotomy=100;
   
-  CtcOptimShaving::CtcOptimShaving(int nb_var, Ctc& ctc, int s3b, int scid, int vhandled, double var_min_width) :
-	Ctc3BCid (nb_var,ctc,s3b,scid,vhandled,var_min_width) {
-
+  CtcOptimShaving::CtcOptimShaving(Ctc& ctc, int s3b, int scid, int vhandled, double var_min_width) :
+	Ctc3BCid (ctc,s3b,scid,vhandled,var_min_width) {
 }
+
+  CtcOptimShaving::CtcOptimShaving(int n, Ctc& ctc, int s3b, int scid, int vhandled, double var_min_width) :
+	Ctc3BCid (n,ctc,s3b,scid,vhandled,var_min_width) {
+}
+
 
   void CtcOptimShaving::contract(IntervalVector& box) {
     int	var_obj=start_var;
@@ -57,9 +61,9 @@ const int CtcOptimShaving::LimitCIDDichotomy=100;
   // Reduce left bound by shaving:
 
   bool stopLeft = false;
-  double leftBound = dom.lb();
-  double rightBound = dom.ub();
-  double leftCID;
+  //double leftBound = dom.lb();
+  //double rightBound = dom.ub();
+  //double leftCID;
 
   int k=0;
 
@@ -76,14 +80,14 @@ const int CtcOptimShaving::LimitCIDDichotomy=100;
     try{
       ctc.contract(box,impact);
     }catch(EmptyBoxException e) {
-      leftBound = sup_k;
+      //leftBound = sup_k;
       k++;
       continue;
     }
     //non empty box
     stopLeft = true;
-    leftCID = sup_k;
-    leftBound = dom.lb();
+    //leftCID = sup_k;
+    //leftBound = dom.lb();
     k++;
   }
 

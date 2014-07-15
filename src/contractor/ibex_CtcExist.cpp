@@ -15,29 +15,66 @@ using namespace std;
 
 namespace ibex {
 
-CtcExist::CtcExist(const NumConstraint& ctr, const ExprSymbol& y1, const IntervalVector& init_box, double prec) {
+CtcExist::CtcExist(const NumConstraint& ctr, const ExprSymbol& y1, const IntervalVector& init_box, double prec)
+ : Ctc(ctr.f.nb_arg()-1) {
 	init(ctr,Array<const ExprSymbol>(y1),init_box,prec);
 }
 
-CtcExist::CtcExist(const NumConstraint& ctr, const ExprSymbol& y1, const ExprSymbol& y2, const IntervalVector& init_box, double prec) {
+CtcExist::CtcExist(const NumConstraint& ctr, const ExprSymbol& y1, const ExprSymbol& y2, const IntervalVector& init_box, double prec)
+ : Ctc(ctr.f.nb_arg()-2) {
 	init(ctr,Array<const ExprSymbol>(y1,y2),init_box,prec);
 }
 
-CtcExist::CtcExist(const NumConstraint& ctr, const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const IntervalVector& init_box, double prec) {
+CtcExist::CtcExist(const NumConstraint& ctr, const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const IntervalVector& init_box, double prec)
+ : Ctc(ctr.f.nb_arg()-3) {
 	init(ctr,Array<const ExprSymbol>(y1,y2,y3),init_box,prec);
 }
 
-CtcExist::CtcExist(const NumConstraint& ctr, const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const IntervalVector& init_box, double prec) {
+CtcExist::CtcExist(const NumConstraint& ctr, const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const IntervalVector& init_box, double prec)
+ : Ctc(ctr.f.nb_arg()-4) {
 	init(ctr,Array<const ExprSymbol>(y1,y2,y3,y4),init_box,prec);
 }
 
-CtcExist::CtcExist(const NumConstraint& ctr, const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const IntervalVector& init_box, double prec) {
+CtcExist::CtcExist(const NumConstraint& ctr, const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const IntervalVector& init_box, double prec)
+ : Ctc(ctr.f.nb_arg()-5){
 	init(ctr,Array<const ExprSymbol>(y1,y2,y3,y4,y5),init_box,prec);
 }
 
-CtcExist::CtcExist(const NumConstraint& ctr, const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const ExprSymbol& y6, const IntervalVector& init_box, double prec) {
+CtcExist::CtcExist(const NumConstraint& ctr, const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const ExprSymbol& y6, const IntervalVector& init_box, double prec)
+ : Ctc(ctr.f.nb_arg()-6) {
 	init(ctr,Array<const ExprSymbol>(y1,y2,y3,y4,y5,y6),init_box,prec);
 }
+
+CtcExist::CtcExist(const NumConstraint& ctr, const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const ExprSymbol& y6, const ExprSymbol& y7, const IntervalVector& init_box, double prec)
+ : Ctc(ctr.f.nb_arg()-7) {
+	init(ctr,Array<const ExprSymbol>(y1,y2,y3,y4,y5,y6,y7),init_box,prec);
+}
+
+CtcExist::CtcExist(const NumConstraint& ctr, const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const ExprSymbol& y6, const ExprSymbol& y7, const ExprSymbol& y8, const IntervalVector& init_box, double prec)
+ : Ctc(ctr.f.nb_arg()-8) {
+	init(ctr,Array<const ExprSymbol>(y1,y2,y3,y4,y5,y6,y7,y8),init_box,prec);
+}
+
+CtcExist::CtcExist(const NumConstraint& ctr, const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const ExprSymbol& y6, const ExprSymbol& y7, const ExprSymbol& y8, const ExprSymbol& y9, const IntervalVector& init_box, double prec)
+ : Ctc(ctr.f.nb_arg()-9) {
+	init(ctr,Array<const ExprSymbol>(y1,y2,y3,y4,y5,y6,y7,y8,y9),init_box,prec);
+}
+
+CtcExist::CtcExist(const NumConstraint& ctr, const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const ExprSymbol& y6, const ExprSymbol& y7, const ExprSymbol& y8, const ExprSymbol& y9, const ExprSymbol& y10, const IntervalVector& init_box, double prec)
+ : Ctc(ctr.f.nb_arg()-10) {
+	init(ctr,Array<const ExprSymbol>(y1,y2,y3,y4,y5,y6,y7,y8,y9,y10),init_box,prec);
+}
+
+CtcExist::CtcExist(const NumConstraint& ctr, const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const ExprSymbol& y6, const ExprSymbol& y7, const ExprSymbol& y8, const ExprSymbol& y9, const ExprSymbol& y10, const ExprSymbol& y11, const IntervalVector& init_box, double prec)
+ : Ctc(ctr.f.nb_arg()-11) {
+	init(ctr,Array<const ExprSymbol>(y1,y2,y3,y4,y5,y6,y7,y8,y9,y10,y11),init_box,prec);
+}
+
+CtcExist::CtcExist(const NumConstraint& ctr, const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const ExprSymbol& y6, const ExprSymbol& y7, const ExprSymbol& y8, const ExprSymbol& y9, const ExprSymbol& y10, const ExprSymbol& y11, const ExprSymbol& y12, const IntervalVector& init_box, double prec)
+ : Ctc(ctr.f.nb_arg()-12) {
+	init(ctr,Array<const ExprSymbol>(y1,y2,y3,y4,y5,y6,y7,y8,y9,y10,y11,y12),init_box,prec);
+}
+
 
 void CtcExist::init(const NumConstraint& ctr, const Array<const ExprSymbol>& y, const IntervalVector& init_box, double prec) {
 
@@ -45,17 +82,15 @@ void CtcExist::init(const NumConstraint& ctr, const Array<const ExprSymbol>& y, 
 	assert(ctr.f.nb_arg()>y.size());
 	assert(init_box.size()==y.size());
 
-	nb_var = ctr.f.nb_arg()-y.size();
+	y_init.resize(y.size());
+
+	y_init = init_box;
 
 	nb_param = y.size();
 
 	ctc = new CtcFwdBwd(ctr);
 
 	bsc = new LargestFirst(prec);
-
-	y_init.resize(nb_param);
-
-	y_init = init_box;
 
 	vars.resize(ctr.f.nb_arg());
 
@@ -74,9 +109,9 @@ void CtcExist::init(const NumConstraint& ctr, const Array<const ExprSymbol>& y, 
 	this->_own_ctc = true;
 }
 
-CtcExist::CtcExist(Ctc& ctc, const BoolMask& vars, const IntervalVector& init_box, double prec) :
-	nb_var(vars.nb_set()), nb_param(vars.size()-nb_var), ctc(&ctc), bsc(new LargestFirst(prec)),
-	y_init(init_box), vars(vars), prec(prec), _own_ctc(false) {
+CtcExist::CtcExist(Ctc& ctc, const BoolMask& vars, const IntervalVector& init_box, double prec, bool own_ctc) :
+	Ctc(vars.nb_set()), y_init(init_box), nb_param(vars.size()-nb_var), ctc(&ctc), bsc(new LargestFirst(prec)),
+	 vars(vars), prec(prec), _own_ctc(own_ctc) {
 
 	assert(vars.nb_unset()==init_box.size());
 

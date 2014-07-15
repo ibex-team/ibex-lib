@@ -2,7 +2,7 @@
 /*
  * This file contains the set handling routines.
  *
- * Copyright (C) 2002 Sampo Niskanen, Patric Östergård.
+ * Copyright (C) 2002 Sampo Niskanen, Patric ï¿½stergï¿½rd.
  * Licensed under the GNU GPL, read the file LICENSE for details.
  */
 

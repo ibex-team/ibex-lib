@@ -15,6 +15,7 @@
 #include "ibex_IntervalVector.h"
 #include "ibex_EmptyBoxException.h"
 #include "ibex_BoolMask.h"
+#include "ibex_Array.h"
 
 namespace ibex {
 
@@ -29,10 +30,23 @@ namespace ibex {
 class Ctc {
 
 public:
+
 	/**
-	 * \brief Initialize fields to NULL
+	 * \brief Build a non-dimensional contractor.
+	 * nb_var=-1
 	 */
 	Ctc();
+
+	/**
+	 * \brief Build a contractor for n-dimensional boxes
+	 * if nb_var==-1, the contractor is non-dimensional.
+	 */
+	Ctc(int nb_var);
+
+	/**
+	 * \brief Build a contractor for (size of the contractor inside l)-dimensional boxes
+	 */
+	Ctc(const Array<Ctc>& l);
 
 	/**
 	 * \brief Contraction.
@@ -63,6 +77,11 @@ public:
 	 * \see #flags
 	 */
 	void contract(IntervalVector& box, const BoolMask& impact, BoolMask& flags);
+
+	/**
+	 * \brief The number of variables this contractor works with.
+	 */
+	const int nb_var;
 
 	/**
 	 * \brief The input variables (NULL pointer means "unspecified")
