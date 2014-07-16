@@ -23,6 +23,11 @@ class CtcIdentity : public Ctc {
 public:
 
 	/**
+	 *  \brief Create a contractor which not modified the boxes
+	 */
+	CtcIdentity(int n);
+
+	/**
 	 * \brief Contract a box.
 	 */
 	virtual void contract(IntervalVector& box);

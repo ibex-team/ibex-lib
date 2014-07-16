@@ -41,6 +41,21 @@ public:
 	PdcAnd(Pdc& c1, Pdc& c2, Pdc& c3);
 
 	/**
+	 * \brief Create the logical AND of 4 predicates
+	 */
+	PdcAnd(Pdc& c1, Pdc& c2, Pdc& c3, Pdc& c4);
+
+	/**
+	 * \brief Create the logical AND of 5 predicates
+	 */
+	PdcAnd(Pdc& c1, Pdc& c2, Pdc& c3, Pdc& c4, Pdc& c5);
+
+	/**
+	 * \brief Create the logical AND of 6 predicates
+	 */
+	PdcAnd(Pdc& c1, Pdc& c2, Pdc& c3, Pdc& c4, Pdc& c5, Pdc& c6);
+
+	/**
 	 * \brief Test a box.
 	 */
 	BoolInterval test(const IntervalVector& box);

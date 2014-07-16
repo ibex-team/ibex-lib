@@ -24,7 +24,7 @@ IntervalVector qinter_projf(const Array<IntervalVector>& _boxes, int q) {
 	
 	assert(q>0);
 	assert(_boxes.size()>0);
-	unsigned int n = _boxes[0].size();
+	int n = _boxes[0].size();
 	
 	/* Remove the empty boxes from the list */
 	
@@ -45,7 +45,7 @@ IntervalVector qinter_projf(const Array<IntervalVector>& _boxes, int q) {
 	
 	double lb0,rb0;
 	IntervalVector res(n);
-	pair<double,int> x[2*p];
+	pair<double,int>  *x = new pair<double,int>[2*p];
 	int c;
 	for (int i=0; i<n; i++) {
 		
@@ -87,6 +87,7 @@ IntervalVector qinter_projf(const Array<IntervalVector>& _boxes, int q) {
 		res[i] = Interval(lb0,rb0);
 	}
 	
+	delete [] x;
 	return res;
 }
 

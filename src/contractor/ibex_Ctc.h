@@ -15,6 +15,7 @@
 #include "ibex_IntervalVector.h"
 #include "ibex_EmptyBoxException.h"
 #include "ibex_BoolMask.h"
+#include "ibex_Array.h"
 
 namespace ibex {
 
@@ -29,10 +30,17 @@ namespace ibex {
 class Ctc {
 
 public:
+
+
 	/**
-	 * \brief Initialize fields to NULL
+	 * \brief Build a contractor for n-dimensional boxes
 	 */
-	Ctc();
+	Ctc(int nb_var);
+
+	/**
+	 * \brief Build a contractor for (size of the contractor inside l)-dimensional boxes
+	 */
+	Ctc(const Array<Ctc>& l);
 
 	/**
 	 * \brief Contraction.
@@ -65,6 +73,11 @@ public:
 	void contract(IntervalVector& box, const BoolMask& impact, BoolMask& flags);
 
 	/**
+	 * \brief The number of variables this contractor works with.
+	 */
+	const int nb_var;
+
+	/**
 	 * \brief The input variables (NULL pointer means "unspecified")
 	 */
 	BoolMask* input;
@@ -87,6 +100,7 @@ public:
 	 */
 	enum {FIXPOINT, INACTIVE, NB_OUTPUT_FLAGS};
 
+
 protected:
 
 	/**
@@ -102,15 +116,38 @@ protected:
 	 */
 	void set_flag(unsigned int);
 
+
+
 private:
 	const BoolMask* _impact;
 	BoolMask* _output_flags;
+
+	/**
+	 * \brief Check if the size of all the contractor of the list is the same.
+	 */
+	static bool check_nb_var_ctc_list (const ibex::Array<ibex::Ctc>& l)  {
+		int i=1, n=l[0].nb_var;
+		while ((l[i].nb_var==l[0].nb_var)&&(i<l.size())) {
+			i++;
+		}
+		return (i==l.size());
+	}
 };
 
 
 /* ============================================================================
  	 	 	 	 	 	 	 inline implementation
   ============================================================================*/
+
+
+inline Ctc::Ctc(int n) : nb_var(n), input(NULL), output(NULL), _impact(NULL), _output_flags(NULL) {
+}
+
+inline Ctc::Ctc(const Array<Ctc>& l) : nb_var(l[0].nb_var), input(NULL), output(NULL), _impact(NULL), _output_flags(NULL) {
+}
+
+inline Ctc::~Ctc() {
+}
 
 inline const BoolMask* Ctc::impact() {
 	return _impact;
@@ -120,6 +157,7 @@ inline void Ctc::set_flag(unsigned int f) {
 	assert(f<NB_OUTPUT_FLAGS);
 	if (_output_flags) (*_output_flags)[f]=true;
 }
+
 
 } // namespace ibex
 

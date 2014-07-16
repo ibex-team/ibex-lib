@@ -42,9 +42,9 @@ namespace ibex {
 
 CtcMohcRevise::CtcMohcRevise(const NumConstraint& c, double epsilon, double univ_newton_min_width,
 		double tau_mohc, bool amohc) :
-		nb_var(c.f.nb_var()), ctr(c.f,c.op), fog(c.f), tau_mohc(tau_mohc), epsilon(epsilon),
-		univ_newton_min_width(univ_newton_min_width), active_mono_proc(1), amohc(amohc),
-		box(c.f.nb_var()) {
+		Ctc(c.f.nb_var()), ctr(c.f,c.op), fog(c.f), active_mono_proc(1), box(c.f.nb_var()),
+		tau_mohc(tau_mohc), epsilon(epsilon),
+		univ_newton_min_width(univ_newton_min_width), amohc(amohc) {
 
 	LB.resize(ctr.f.nb_var());
 	RB.resize(ctr.f.nb_var());
@@ -279,7 +279,7 @@ try{
      if(ApplyFmax[i]!=NO || ApplyFmin[i]!=NO){
       bool og_treated=false;
 
-      for(int j=0; j<fog.occ[i].size(); j++){
+      for(unsigned int j=0; j<fog.occ[i].size(); j++){
            if(fog.r_c[fog.occ[i][j]].ub() < 1.0){og_treated=true; break;}
       }
       //~ for(int occ=fog.first_occ[i];occ<fog.first_occ[i+1];occ++)
@@ -771,7 +771,7 @@ void Function_OG::OG_case2(int i, Interval inf_G_Xa, Interval inf_G_Xb, Interval
          Interval m2=( inf_G_Xa*sup_G_Xa + sup_G_Xb*inf_G_Xa )/
                ( inf_G_Xa*sup_G_Xb - inf_G_Xb*sup_G_Xa );
 
-         for(int j=0; j<occ[i].size(); j++){
+         for(unsigned int j=0; j<occ[i].size(); j++){
          //for(int occ=first_occ[i];occ<first_occ[i+1];occ++){
             if(_g[occ[i][j]].lb()>=0){
                r_a[occ[i][j]]=1-m1;
@@ -865,9 +865,9 @@ bool Function_OG::occurrence_grouping(IntervalVector& box, bool y_set, bool _og)
         set_rc(i,1.0);
         ga[i]=0.0;  gb[i]=0.0;
 
-        if(occ[i].size()>0 && (!y_set || occ[i].size()>1))
+        if(occ[i].size()>0 && (!y_set || occ[i].size()>1)) {
            worked |= occurrence_grouping(i,_og);
-
+        }
     }
     return worked;
 }
@@ -889,16 +889,16 @@ bool Function_OG::occurrence_grouping(int i, bool _og){
 
    list<int> X_m, X_nm;
 
-   for(int j=0; j<occ[i].size(); j++){
+   for(unsigned int j=0; j<occ[i].size(); j++){
    //for(int occ=first_occ[i];occ<first_occ[i+1];occ++){ //FOR EACH occurrence j
 
       if (_g[occ[i][j]].lb()>=0){
          X_m.push_back(occ[i][j]);
          G_plus += _g[occ[i][j]];
-      }else if(_g[occ[i][j]].ub()<=0){
+      } else if(_g[occ[i][j]].ub()<=0) {
          X_m.push_back(occ[i][j]);
          G_minus += _g[occ[i][j]];
-      }else{
+      } else {
          X_nm.push_back(occ[i][j]);
       }
    }
@@ -911,7 +911,7 @@ bool Function_OG::occurrence_grouping(int i, bool _og){
       OG_case2(i, G_plus.lb(), G_minus.lb(), G_plus.ub(), G_minus.ub());
       ga[i]=Interval(0,G_m.ub());
       gb[i]=Interval(G_m.lb(),0);
-   }else{
+   } else {
       OG_case3(X_m, X_nm, G_m);
       if(G_m.ub()>0) ga[i]=G_m;
       else gb[i]=G_m;
@@ -926,16 +926,19 @@ bool Function_OG::gradient(IntervalVector& box){
 	_f.gradient(_box,_g);
 
 
-    for (int i=0;i < _g.size();i++)
-	  if (_g[i].mag() == POS_INFINITY)
+    for (int i=0;i < _g.size();i++) {
+	  if (_g[i].mag() == POS_INFINITY) {
 	    return false;
+	  }
+    }
 
 
-	for(int i=0; i<g.size(); i++){
+	for(int i=0; i<g.size(); i++) {
         g[i]=0.0;
-        for(int j=0; j<occ[i].size(); j++)
+        for(unsigned int j=0; j<occ[i].size(); j++) {
         //~ for(int occ=first_occ[i];occ<first_occ[i+1];occ++)
             g[i] += _g[occ[i][j]];
+        }
 	}
 
 	//taylor_error=0.0;
@@ -945,16 +948,16 @@ bool Function_OG::gradient(IntervalVector& box){
 }
 
 void Function_OG::_eval_leaves(IntervalVector& box, bool minrevise){
-   int n=g.size();
 
-   for(int i=0; i<n;i++){
+   for(int i=0; i<g.size();i++){
       if(occ[i].size()==0) {/*_box[i] = box[i];*/ continue; }
-      for(int j=0; j<occ[i].size(); j++){
+      for(unsigned int j=0; j<occ[i].size(); j++){
 		  
-		if(minrevise)
+		if(minrevise) {
 		   aux[occ[i][j]] = r_a[occ[i][j]]*box[i].lb() + r_b[occ[i][j]]*box[i].ub();
-		else
+		} else {
 		   aux[occ[i][j]] = r_a[occ[i][j]]*box[i].ub() + r_b[occ[i][j]]*box[i].lb();
+		}
 
 		_box[occ[i][j]] = aux[occ[i][j]] + r_c[occ[i][j]]*box[i];
 
@@ -968,12 +971,11 @@ void Function_OG::_eval_leaves(IntervalVector& box, bool minrevise){
 
 void Function_OG::_proj_leaves(IntervalVector& box){
    //projection over the variable intervals
-   int n=g.size();
 
-   for(int i=0; i<n;i++){
+   for(int i=0; i<g.size();i++){
        if(occ[i].size()==0) { continue; }
 
-      for(int j=0; j<occ[i].size(); j++){
+      for(unsigned int j=0; j<occ[i].size(); j++){
 		if(r_c[occ[i][j]]==0.0) continue; //occurrence without projection
 
 	    box[i] &= (_box[occ[i][j]] - aux[occ[i][j]]) / r_c[occ[i][j]] ;
@@ -1011,7 +1013,7 @@ Interval Function_OG::revise(IntervalVector& box, bool minrevise){
    return ev;
 }
 
-   Function_OG::Function_OG(const Function& ff) : _f(eso.get_x(),eso.get_y()), eso(ff.args(),ff.expr()){
+   Function_OG::Function_OG(const Function& ff) :  eso(ff.args(),ff.expr()), _f(eso.get_x(),eso.get_y()) {
 
 
        r_a.resize(_f.nb_var());
@@ -1047,19 +1049,19 @@ Interval Function_OG::revise(IntervalVector& box, bool minrevise){
 
 
    void Function_OG::set_ra(int i, Interval val){
-	  for(int j=0; j<occ[i].size(); j++)
+	  for(unsigned int j=0; j<occ[i].size(); j++)
       //~ for(int occ=first_occ[i];occ<first_occ[i+1];occ++) //FOR EACH occurrence occ
          r_a[occ[i][j]]=val;
    }
 
    void Function_OG::set_rb(int i, Interval val){
-	  for(int j=0; j<occ[i].size(); j++)
+	  for(unsigned int j=0; j<occ[i].size(); j++)
       //~ for(int occ=first_occ[i];occ<first_occ[i+1];occ++) //FOR EACH occurrence occ
          r_b[occ[i][j]]=val;
    }
 
    void Function_OG::set_rc(int i, Interval val){
-	  for(int j=0; j<occ[i].size(); j++)
+	  for(unsigned int j=0; j<occ[i].size(); j++)
       //~ for(int occ=first_occ[i];occ<first_occ[i+1];occ++) //FOR EACH occurrence occ
          r_c[occ[i][j]]=val;
    }
@@ -1070,7 +1072,7 @@ Interval Function_OG::revise(IntervalVector& box, bool minrevise){
      for(int i=0; i<g.size();i++){
       if(occ[i].size()!=0) // _box[first_occ[i]]=box[i];
       //else
-        for(int j=0; j<occ[i].size(); j++)
+        for(unsigned int j=0; j<occ[i].size(); j++)
         //for(int occ=first_occ[i];occ<first_occ[i+1];occ++)
            _box[occ[i][j]]=box[i];
 
@@ -1089,10 +1091,12 @@ Array<Ctc> convert(const Array<NumConstraint>& csp, double epsilon, double univ_
 
 CtcMohc::CtcMohc(const Array<NumConstraint>& csp, double ratio, bool incremental,  double epsilon,
 		double univ_newton_min_width, double tau_mohc) :
-		CtcPropag(csp[0].f.nb_var(), convert(csp,epsilon, univ_newton_min_width, tau_mohc, (tau_mohc==ADAPTIVE)), ratio, incremental),
-		update_active_mono_proc(tau_mohc <= 1.0)  {
+		CtcPropag(convert(csp,epsilon, univ_newton_min_width, tau_mohc, (tau_mohc==ADAPTIVE)), ratio, incremental)  {
 
           active_mono_proc=new int[csp.size()];
+
+          update_active_mono_proc = (tau_mohc <= 1.0);
+
           for(int i=0;i<csp.size();i++) active_mono_proc[i]=1;
         //  flags[FIXPOINT]=false;
 
@@ -1100,8 +1104,8 @@ CtcMohc::CtcMohc(const Array<NumConstraint>& csp, double ratio, bool incremental
 
 CtcMohc::CtcMohc(const Array<NumConstraint>& csp, int* active_mono_proc, double ratio, bool incremental,  double epsilon,
 		double univ_newton_min_width) :
-		CtcPropag(csp[0].f.nb_var(), convert(csp,epsilon, univ_newton_min_width, 1.0, false), ratio, incremental),
-		update_active_mono_proc(false), active_mono_proc(active_mono_proc)  {
+		CtcPropag(convert(csp,epsilon, univ_newton_min_width, 1.0, false), ratio, incremental),
+		active_mono_proc(active_mono_proc), update_active_mono_proc(false)  {
 
         if(!active_mono_proc){
           active_mono_proc=new int[csp.size()];

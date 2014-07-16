@@ -100,7 +100,7 @@ int main() {
 	
 	/* use CtcQInterProjF ctcq(m_ctc,Q)
 	 * for projective filtering */
-	CtcQInterCoreF ctcq(N,m_ctc,Q);
+	CtcQInterCoreF ctcq(m_ctc,Q);
 	CtcFixPoint fix(ctcq);
 	
 	list<IntervalVector> pendingList;

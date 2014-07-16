@@ -31,7 +31,7 @@ int main() {
 	vector<IntervalVector> solutions = solver.solve(system.box); // Run the solver
 
 	/* Display the solutions. */
-	for (int i=0; i<(solutions.size()); i++) {
+	for (unsigned int i=0; i<solutions.size(); i++) {
 		cout << "solution n°" << i << ": " << solutions[i] << endl;
 	}
 	//! [start-call-solver]
@@ -496,6 +496,7 @@ int main() {
 	class MyContractor : public Ctc {
 
 	public:
+		MyContractor(int nb_var) : Ctc(nb_var) {}
 
 		void contract(IntervalVector& box) {
 			box=box.mid()+0.5*Interval(-1,1)*box.rad();
@@ -506,7 +507,7 @@ int main() {
 
 	//! [ctc-own2]
 	/* build the contractor for 3-dimensional boxes. */
-	MyContractor c;
+	MyContractor c(3);
 
 	/* create the box [0,1]x[0,1]x[0,1] */
 	IntervalVector x(3,Interval(0,1));
@@ -565,7 +566,7 @@ int main() {
 	vector<IntervalVector> sols=s.solve(box);
 
 	/* Display the solutions */
-	for (int i=0; i<sols.size(); i++)
+	for (unsigned int i=0; i<sols.size(); i++)
 		cout << "solution n°" << i << "=\t" << sols[i] << endl;
 	//! [strat-basic-solver]
 	}
@@ -611,7 +612,7 @@ int main() {
 	vector<IntervalVector> sols=s.solve(system.box);
 
 	/* Display the solutions */
-	for (int i=0; i<sols.size(); i++)
+	for (unsigned int i=0; i<sols.size(); i++)
 		cout << "solution n°" << i << "=\t" << sols[i] << endl;
 
 	/* Report performances */

@@ -11,14 +11,9 @@
 
 #include "ibex_Ctc.h"
 
+
 namespace ibex {
 
-Ctc::Ctc() : input(NULL), output(NULL), _impact(NULL), _output_flags(NULL) {
-
-}
-
-Ctc::~Ctc() {
-}
 
 void Ctc::contract(IntervalVector& box, const BoolMask& impact) {
 	_impact = &impact;

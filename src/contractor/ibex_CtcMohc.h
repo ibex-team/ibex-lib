@@ -100,6 +100,9 @@ private:
 	void OG_case2(int i, Interval inf_G_Xa, Interval inf_G_Xb, Interval sup_G_Xa, Interval sup_G_Xb);
 	void OG_case3(list<int>& X_m, list<int>& X_nm, Interval& G_m);
 
+	ExprSplitOcc eso;
+	Function _f;
+
 	IntervalVector r_a;
 	IntervalVector r_b;
 	IntervalVector r_c;
@@ -108,8 +111,6 @@ private:
 	 * furthermore occ[i].size() is the number of occurrences of var i */
 	vector<int>* occ;
 
-	ExprSplitOcc eso;
-	Function _f;
 	IntervalVector _box;
 
 	/* partial derivatives w.r.t. each occurrence */
@@ -164,9 +165,6 @@ public:
 
 	/** Contract the box using <i>Mohc-Revise</i> in the constraint \a ctr_mohc. */
 	virtual void contract(IntervalVector& box);
-
-	/** The number of variables this contractor works with. */
-	const int nb_var;
 
 	/** The constraint. */
 	const NumConstraint ctr;

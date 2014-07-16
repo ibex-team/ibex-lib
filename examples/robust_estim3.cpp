@@ -61,7 +61,7 @@ vector<int> *readFile(string filename) {
 void printOutput(vector<int> *x, vector<int> *y, list<IntervalVector>& res) {
 	
 	ofstream xy(output_datafile.c_str());
-	for (int i=0; i<x->size(); i++) {
+	for (unsigned int i=0; i<x->size(); i++) {
 		xy << x->at(i) << " " << y->at(i) << endl;
 	}
 	
@@ -133,7 +133,7 @@ int main() {
 	
 	pendingList.push_back(box);
 	
-	CtcQInterProjF ctcq(3,m_ctc,Q);
+	CtcQInterProjF ctcq(m_ctc,Q);
 	CtcFixPoint ctcf(ctcq);
 
 	int counter = 0;

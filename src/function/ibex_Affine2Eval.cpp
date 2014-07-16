@@ -58,6 +58,16 @@ ExprLabel& Affine2Eval::eval_label(const Function& f, const IntervalVector& box)
 
 }
 
+ExprLabel& Affine2Eval::eval_label(const Function& f, const Affine2Vector& box) const {
+	assert(f.expr().deco.af2);
+	assert(f.expr().deco.d);
+
+	f.write_arg_domains(IntervalVector(box));
+	f.write_arg_af2_domains(box);
+
+	return f.forward<Affine2Eval>(*this);
+
+}
 
 void Affine2Eval::vector_fwd(const ExprVector& v, const ExprLabel** compL, ExprLabel& y) {
 

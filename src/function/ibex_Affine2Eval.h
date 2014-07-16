@@ -32,9 +32,19 @@ public:
 	Domain& eval(const Function& f, const IntervalVector& box) const;
 
 	/**
+	 * \brief Run the forward algorithm on the box \a box and return the result as an Affine2 domain.
+	 */
+	Affine2Domain& eval(const Function& f, const Affine2Vector& box) const;
+
+	/**
 	 * \brief Run the forward algorithm on the box \a box and return the root node label.
 	 */
 	ExprLabel& eval_label(const Function& f, const IntervalVector& box) const;
+
+	/**
+	 * \brief Run the forward algorithm on the box \a box and return the root node label.
+	 */
+	ExprLabel& eval_label(const Function& f, const Affine2Vector& box) const;
 
 	/**
 	 * \brief Run the forward algorithm with input node labels and return the result as an interval domain.
@@ -107,6 +117,9 @@ inline Domain& Affine2Eval::eval(const Function& f,const IntervalVector& box) co
 	return *(eval_label(f,box)).d;
 }
 
+inline Affine2Domain& Affine2Eval::eval(const Function& f,const Affine2Vector& box) const {
+	return *(eval_label(f,box)).af2;
+}
 
 inline void Affine2Eval::index_fwd(const ExprIndex& , const ExprLabel& , ExprLabel& ) { /* nothing to do */ }
 

@@ -29,6 +29,18 @@ namespace ibex {
  */
 class Pdc {
 public:
+
+	/**
+	 * \brief Build a predicate for n-dimensional boxes
+	 */
+	Pdc(int nb_var);
+
+	/**
+	 * \brief Build with a list of predicates
+	 */
+	Pdc(const Array<Pdc>& list);
+
+
 	/**
 	 * \brief Apply the predicate to the given box.
 	 */
@@ -38,7 +50,36 @@ public:
 	 * \brief Delete *this.
 	 */
 	virtual ~Pdc();
+
+	/**
+	 * \brief The number of variables this predicate works with.
+	 */
+	const int nb_var;
+
+private:
+
+	/**
+	 * \brief Check if the size of all the predicate of the list is the same.
+	 */
+	static bool check_nb_var_pdc_list (const ibex::Array<ibex::Pdc>& l) {
+		int i=1, n=l[0].nb_var;
+		while ((l[i].nb_var==l[0].nb_var)&&(i<l.size())) {
+			i++;
+		}
+		return (i==l.size());
+	}
+
 };
+
+
+
+inline Pdc::Pdc(int n) : nb_var(n) { }
+
+inline Pdc::Pdc(const Array<Pdc>& l) : nb_var(l[0].nb_var) { }
+
+inline Pdc::~Pdc() {
+}
+
 
 } // end namespace ibex
 #endif // __IBEX_PDC_H__

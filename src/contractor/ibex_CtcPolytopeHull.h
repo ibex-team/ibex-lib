@@ -41,14 +41,13 @@ public:
 	 * \param cmode    - ALL_BOX (contracts all variables in the box) | ONLY_Y (in optimization :only improves
 	 *                   the left bound of the objective)
 	 * \param max_iter - The maximum number of iterations of the linear solver (default value 100)
-	 * \param timeout  - TODO: add comment
-	 * \param eps      - TODO: add comment
-	 * \param init_lp  - TODO: add comment
+	 * \param timeout  - The timeout of the linear solver at each iteration    (default value 100 second)
+	 * \param eps      - The accuracy required on the resolution of the linear program (default value 1e-10)
 	 */
 
 	CtcPolytopeHull(LinearRelax& lr, ctc_mode cmode=ALL_BOX, int max_iter=LinearSolver::default_max_iter,
 			int time_out=LinearSolver::default_max_time_out, double eps=LinearSolver::default_eps,
-			Interval limit_diam=LinearSolver::default_limit_diam_box, bool init_lp=true);
+			Interval limit_diam=LinearSolver::default_limit_diam_box);
 
 	virtual void contract(IntervalVector& box);
 
@@ -80,12 +79,6 @@ protected:
 	 * TODO: add comment
 	 */
 	void optimizer(IntervalVector &box);
-
-
-	/**
-	 * \brief The number of variables this contractor works with.
-	 */
-	const int nb_var;
 
 	/**
 	 * \brief The linearization technique

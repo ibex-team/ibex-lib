@@ -29,7 +29,7 @@ public:
 	 *
 	 * The list itself is not kept by reference.
 	 */
-	CtcQInter(int n, const Array<Ctc>& list, int q);
+	CtcQInter(const Array<Ctc>& list, int q);
 
 	/**
 	 * \brief Contract the box.
@@ -40,11 +40,6 @@ public:
 	 * List of contractors
 	 */
 	Array<Ctc> list;
-
-	/**
-	 * Dimension of the box (number of variables)
-	 */
-	int n;
 
 	/**
 	 * The number of contractors we have to intersect the
@@ -63,7 +58,7 @@ public:
 	 *
 	 * The list itself is not kept by reference.
 	 */
-	CtcQInter2(int n, const Array<Ctc>& list, int q);
+	CtcQInter2(const Array<Ctc>& list, int q);
 
 	/**
 	 * \brief Contract the box.
@@ -74,11 +69,6 @@ public:
 	 * List of contractors
 	 */
 	Array<Ctc> list;
-
-	/**
-	 * Dimension of the box (number of variables)
-	 */
-	int n;
 
 	/**
 	 * The number of contractors we have to intersect the
@@ -97,7 +87,7 @@ public:
 	 *
 	 * The list itself is not kept by reference.
 	 */
-	CtcQInterProjF(int n, const Array<Ctc>& list, int q);
+	CtcQInterProjF(const Array<Ctc>& list, int q);
 
 	/**
 	 * \brief Contract the box.
@@ -108,11 +98,6 @@ public:
 	 * List of contractors
 	 */
 	Array<Ctc> list;
-
-	/**
-	 * Dimension of the box (number of variables)
-	 */
-	int n;
 
 	/**
 	 * The number of contractors we have to intersect the
@@ -131,7 +116,7 @@ public:
 	 *
 	 * The list itself is not kept by reference.
 	 */
-	CtcQInterCoreF(int n, const Array<Ctc>& list, int q);
+	CtcQInterCoreF(const Array<Ctc>& list, int q);
 
 	/**
 	 * \brief Contract the box.
@@ -142,11 +127,6 @@ public:
 	 * List of contractors
 	 */
 	Array<Ctc> list;
-
-	/**
-	 * Dimension of the box (number of variables)
-	 */
-	int n;
 
 	/**
 	 * The number of contractors we have to intersect the
