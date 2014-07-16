@@ -19,3 +19,26 @@
 *.exe
 *.out
 *.app
+
+# eclipse settings
+.cproject
+.settings
+.project
+
+# waf generated stuff
+.waf*
+.lock-waf*
+__build__
+flex.pyc
+
+# ibex generated obj
+3rd
+lib
+include
+share
+bin
+newdoc/_build
+
+*~
+
+
