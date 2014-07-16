@@ -117,11 +117,7 @@ protected:
 	void set_flag(unsigned int);
 
 
-
-private:
-	const BoolMask* _impact;
-	BoolMask* _output_flags;
-
+protected:
 	/**
 	 * \brief Check if the size of all the contractor of the list is the same.
 	 */
@@ -132,6 +128,11 @@ private:
 		}
 		return (i==l.size());
 	}
+
+private:
+	const BoolMask* _impact;
+	BoolMask* _output_flags;
+
 };
 
 

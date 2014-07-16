@@ -56,7 +56,7 @@ public:
 	 */
 	const int nb_var;
 
-private:
+protected:
 
 	/**
 	 * \brief Check if the size of all the predicate of the list is the same.
