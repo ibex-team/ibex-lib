@@ -8,6 +8,9 @@
 #include "graph.h"
 #include "reorder.h"
 
+// ignored warning : comparison between signed and unsigned integer expressions in this file
+#pragma GCC diagnostic ignored "-Wsign-compare"
+
 typedef struct _clique_options clique_options;
 struct _clique_options {
 	int *(*reorder_function)(graph_t *, boolean);
@@ -54,5 +57,9 @@ extern boolean clique_print_time_always(int level, int i, int n, int max,
 /* Alternate spelling (let's be a little forgiving): */
 #define cliquer_options clique_options
 #define cliquer_default_options clique_default_options
+
+
+// Restore warning : comparison between signed and unsigned integer expressions in this file
+#pragma GCC diagnostic pop
 
 #endif /* !CLIQUER_H */

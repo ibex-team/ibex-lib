@@ -14,6 +14,9 @@
 
 #include <limits.h>
 
+// ignored warning : comparison between signed and unsigned integer expressions in this file
+#pragma GCC diagnostic ignored "-Wsign-compare"
+
 
 /*
  * reorder_set()
@@ -24,7 +27,7 @@
  */
 void reorder_set(set_t s,int *order) {
         set_t tmp;
-        unsigned int i,j;
+        int i,j;
         setelement e;
 
         ASSERT(reorder_is_bijection(order,SET_MAX_SIZE(s)));
@@ -426,3 +429,6 @@ int *reorder_by_random(graph_t *g, boolean weighted) {
 	return newt;
 }
 
+
+// Restore warning : comparison between signed and unsigned integer expressions in this file
+#pragma GCC diagnostic pop

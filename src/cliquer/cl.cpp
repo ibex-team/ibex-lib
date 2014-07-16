@@ -10,6 +10,10 @@
 #include "cliquer.h"
 
 
+// ignored warning : comparison between signed and unsigned integer expressions in this file
+#pragma GCC diagnostic ignored "-Wsign-compare"
+
+
 #define TRYFORHELP  "Try `%s -h' for more information.\n",argv[0]
 
 void printhelp(char *prog);
@@ -363,7 +367,7 @@ void print_search(graph_t *g) {
  * Prints the clique s along with it's size and weight.
  */
 void print_clique(set_t s,graph_t *g) {
-	unsigned int i;
+	int i;
 
 	printf("size=%d, weight=%d:  ",set_size(s),graph_subgraph_weight(g,s));
 	for (i=0; i<SET_MAX_SIZE(s); i++) {
@@ -401,3 +405,6 @@ boolean print_clique_func(set_t s,graph_t *g,clique_options *opts) {
 	return TRUE;
 }
 
+
+// Restore warning : comparison between signed and unsigned integer expressions in this file
+#pragma GCC diagnostic pop
