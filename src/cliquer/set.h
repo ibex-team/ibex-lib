@@ -15,12 +15,15 @@
 #include <limits.h>
 #include "misc.h"
 
+
+// ignored warning : comparison between signed and unsigned integer expressions in this file
+#pragma GCC diagnostic ignored "-Wsign-compare"
+
 /*
  * Sets are arrays of setelement's (typically unsigned long int's) with
  * representative bits for each value they can contain.  The values
  * are numbered 0,...,n-1.
  */
-
 
 /*** Variable types and constants. ***/
 
@@ -175,8 +178,8 @@ static void set_free(set_t s) {
  * Returns a pointer to the new set.
  */
 UNUSED_FUNCTION INLINE
-static set_t set_resize(set_t s, int size) {
-	int n;
+static set_t set_resize(set_t s, unsigned int size) {
+	unsigned int n;
 
 	ASSERT(size>0);
 
@@ -383,5 +386,7 @@ static void set_print(set_t s) {
 	printf("\n");
 	return;
 }
+
+#pragma GCC diagnostic pop
 
 #endif /* !CLIQUER_SET_H */
