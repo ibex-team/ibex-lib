@@ -27,19 +27,7 @@ CtcPropag::CtcPropag(const Array<Ctc>& cl, double ratio, bool incremental) :
 		  accumulate(false), g(cl.size(), nb_var), agenda(cl.size()),
 		  _impact(nb_var), flags(Ctc::NB_OUTPUT_FLAGS), active(cl.size()) {
 
-	for (int i=0; i<list.size(); i++)
-		for (int j=0; j<nb_var; j++) {
-			if (list[i].input && (*list[i].input)[j]) g.add_arc(i,j,true);
-			if (list[i].input && (*list[i].output)[j]) g.add_arc(i,j,false);
-		}
-
-//	cout << g << endl;
-}
-
-CtcPropag::CtcPropag(int nb_var, const Array<Ctc>& cl, double ratio, bool incremental) :
-		  Ctc(nb_var), list(cl), ratio(ratio), incremental(incremental),
-		  accumulate(false), g(cl.size(), nb_var), agenda(cl.size()),
-		  _impact(nb_var), flags(Ctc::NB_OUTPUT_FLAGS), active(cl.size()) {
+	assert(check_nb_var_ctc_list(cl));
 
 	for (int i=0; i<list.size(); i++)
 		for (int j=0; j<nb_var; j++) {
@@ -49,6 +37,7 @@ CtcPropag::CtcPropag(int nb_var, const Array<Ctc>& cl, double ratio, bool increm
 
 //	cout << g << endl;
 }
+
 
 void  CtcPropag::contract(IntervalVector& box) {
 

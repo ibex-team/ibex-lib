@@ -30,7 +30,6 @@ public:
 	 * The list itself is not kept by reference.
 	 */
 	CtcQInter(const Array<Ctc>& list, int q);
-	CtcQInter(int n, const Array<Ctc>& list, int q);
 
 	/**
 	 * \brief Contract the box.
@@ -60,7 +59,6 @@ public:
 	 * The list itself is not kept by reference.
 	 */
 	CtcQInter2(const Array<Ctc>& list, int q);
-	CtcQInter2(int n, const Array<Ctc>& list, int q);
 
 	/**
 	 * \brief Contract the box.
@@ -90,7 +88,6 @@ public:
 	 * The list itself is not kept by reference.
 	 */
 	CtcQInterProjF(const Array<Ctc>& list, int q);
-	CtcQInterProjF(int n, const Array<Ctc>& list, int q);
 
 	/**
 	 * \brief Contract the box.
@@ -120,7 +117,6 @@ public:
 	 * The list itself is not kept by reference.
 	 */
 	CtcQInterCoreF(const Array<Ctc>& list, int q);
-	CtcQInterCoreF(int n, const Array<Ctc>& list, int q);
 
 	/**
 	 * \brief Contract the box.

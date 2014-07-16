@@ -24,11 +24,11 @@ Array<Ctc> convert(const Array<NumConstraint>& csp) {
 }
 
 CtcHC4::CtcHC4(const Array<NumConstraint>& csp, double ratio, bool incremental) :
-		CtcPropag(csp[0].f.nb_var(), convert(csp), ratio, incremental) {
+		CtcPropag(convert(csp), ratio, incremental) {
 }
 
 CtcHC4::CtcHC4(const System& sys, double ratio, bool incremental) :
-				CtcPropag(sys.nb_var, convert(sys.ctrs), ratio, incremental) {
+				CtcPropag(convert(sys.ctrs), ratio, incremental) {
 
 }
 

@@ -34,7 +34,7 @@ public:
 	/**
 	 * \brief Build the contractor for n-dimentional box.
 	 */
-	CtcEmpty(int n=-1);
+	CtcEmpty(int n);
 
 	/**
 	 * \brief Build the contractor for the predicate \a pdc.

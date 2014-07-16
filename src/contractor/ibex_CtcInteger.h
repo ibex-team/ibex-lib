@@ -29,7 +29,6 @@ public:
 	 * \param is_int A \a nb-var sized mask with is_int[i] <=> the ith variable is integer.
 	 */
 	CtcInteger(const BoolMask& is_int);
-	CtcInteger(int nb_var, const BoolMask& is_int);
 
 	/**
 	 * \brief Delete this.

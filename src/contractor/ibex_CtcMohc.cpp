@@ -1091,7 +1091,7 @@ Array<Ctc> convert(const Array<NumConstraint>& csp, double epsilon, double univ_
 
 CtcMohc::CtcMohc(const Array<NumConstraint>& csp, double ratio, bool incremental,  double epsilon,
 		double univ_newton_min_width, double tau_mohc) :
-		CtcPropag(csp[0].f.nb_var(), convert(csp,epsilon, univ_newton_min_width, tau_mohc, (tau_mohc==ADAPTIVE)), ratio, incremental)  {
+		CtcPropag(convert(csp,epsilon, univ_newton_min_width, tau_mohc, (tau_mohc==ADAPTIVE)), ratio, incremental)  {
 
           active_mono_proc=new int[csp.size()];
 
@@ -1104,7 +1104,7 @@ CtcMohc::CtcMohc(const Array<NumConstraint>& csp, double ratio, bool incremental
 
 CtcMohc::CtcMohc(const Array<NumConstraint>& csp, int* active_mono_proc, double ratio, bool incremental,  double epsilon,
 		double univ_newton_min_width) :
-		CtcPropag(csp[0].f.nb_var(), convert(csp,epsilon, univ_newton_min_width, 1.0, false), ratio, incremental),
+		CtcPropag(convert(csp,epsilon, univ_newton_min_width, 1.0, false), ratio, incremental),
 		active_mono_proc(active_mono_proc), update_active_mono_proc(false)  {
 
         if(!active_mono_proc){

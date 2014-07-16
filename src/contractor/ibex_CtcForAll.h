@@ -32,7 +32,6 @@ public:
 	CtcForAll(const NumConstraint& ctr, double prec,const  IntervalVector& init_box);
 	CtcForAll(Function& f, CmpOp op, double prec,const  IntervalVector& init_box);
 	CtcForAll(Ctc& p, double prec,const  IntervalVector& init_box);
-	CtcForAll(int nb_var, Ctc& p, double prec,const  IntervalVector& init_box);
 
 
 	/**

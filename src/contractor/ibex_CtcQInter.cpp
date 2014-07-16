@@ -16,7 +16,6 @@ namespace ibex {
 
 CtcQInter::CtcQInter(const Array<Ctc>& list, int q) : Ctc(list), list(list), q(q), boxes(list.size(), nb_var) { }
 
-CtcQInter::CtcQInter(int n, const Array<Ctc>& list, int q) : Ctc(n), list(list), q(q), boxes(list.size(), n) { }
 
 void CtcQInter::contract(IntervalVector& box) {
 	Array<IntervalVector> refs(list.size());
@@ -37,8 +36,6 @@ void CtcQInter::contract(IntervalVector& box) {
 }
 
 CtcQInter2::CtcQInter2(const Array<Ctc>& list, int q) : Ctc(list), list(list), q(q), boxes(list.size(), nb_var) { }
-
-CtcQInter2::CtcQInter2(int n, const Array<Ctc>& list, int q) : Ctc(n), list(list), q(q), boxes(list.size(), n) { }
 
 
 void CtcQInter2::contract(IntervalVector& box) {
@@ -61,7 +58,6 @@ void CtcQInter2::contract(IntervalVector& box) {
 
 CtcQInterProjF::CtcQInterProjF(const Array<Ctc>& list, int q) : Ctc(list), list(list), q(q), boxes(list.size(), nb_var) { }
 
-CtcQInterProjF::CtcQInterProjF(int n, const Array<Ctc>& list, int q) : Ctc(n), list(list), q(q), boxes(list.size(), n) { }
 
 void CtcQInterProjF::contract(IntervalVector& box) {
 	Array<IntervalVector> refs(list.size());
@@ -83,7 +79,6 @@ void CtcQInterProjF::contract(IntervalVector& box) {
 
 CtcQInterCoreF::CtcQInterCoreF(const Array<Ctc>& list, int q) :  Ctc(list), list(list), q(q), boxes(list.size(), nb_var) { }
 
-CtcQInterCoreF::CtcQInterCoreF(int n, const Array<Ctc>& list, int q) :  Ctc(n), list(list), q(q), boxes(list.size(), n) { }
 
 void CtcQInterCoreF::contract(IntervalVector& box) {
 	Array<IntervalVector> refs(list.size());
