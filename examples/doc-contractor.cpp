@@ -97,7 +97,7 @@ int main() {
 	// ================================= with propagation =================================
 	Count::count=0;                            // initialize the counter
 
-	CtcPropag propag(sys.nb_var, ctc, prec);   // Propagation of all contractors
+	CtcPropag propag(ctc, prec);   // Propagation of all contractors
 
 	IntervalVector box2=sys.box;               // tested box (load domains written in the file)
 

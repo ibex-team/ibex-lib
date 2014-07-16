@@ -25,7 +25,7 @@ public:
 	/**
 	 *  \brief Create a contractor which not modified the boxes
 	 */
-	CtcIdentity(int n=-1);
+	CtcIdentity(int n);
 
 	/**
 	 * \brief Contract a box.

@@ -81,7 +81,7 @@ int main() {
 	IntervalVector box=initbox;
 
 	// Create the q-intersection of the N contractors
-	CtcQInter q(2,array,5);
+	CtcQInter q(array,5);
 
 	// Perform a first contraction
 	box=initbox;

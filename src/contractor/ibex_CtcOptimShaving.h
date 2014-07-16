@@ -21,8 +21,6 @@ namespace ibex {
   public:
    CtcOptimShaving(Ctc& ctc, int s3b=default_s3b, int scid=default_scid,
 			int vhandled=-1, double var_min_width=default_var_min_width);
-   CtcOptimShaving(int nb_var, Ctc& ctc, int s3b=default_s3b, int scid=default_scid,
-			int vhandled=-1, double var_min_width=default_var_min_width);
 			
    virtual void contract(IntervalVector& box);
 	static const int LimitCIDDichotomy;

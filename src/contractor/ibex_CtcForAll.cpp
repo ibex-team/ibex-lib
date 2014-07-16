@@ -30,13 +30,6 @@ CtcForAll::CtcForAll(Ctc& p, double prec,const  IntervalVector& init_box) :
 	assert(init_box.size()<p.nb_var);
 }
 
-
-CtcForAll::CtcForAll(int nb_var, Ctc& p, double prec,const  IntervalVector& init_box) :
-		Ctc(nb_var), _ctc(p),_bsc(prec),
-		_init(init_box), _prec(prec), _own_ctc(false),_max_iter(1.e6)   {
-	assert(init_box.size()<nb_var);
-}
-
 CtcForAll::~CtcForAll(){
 	if (_own_ctc) delete &_ctc;
 }

@@ -31,15 +31,9 @@ class Ctc {
 
 public:
 
-	/**
-	 * \brief Build a non-dimensional contractor.
-	 * nb_var=-1
-	 */
-	Ctc();
 
 	/**
 	 * \brief Build a contractor for n-dimensional boxes
-	 * if nb_var==-1, the contractor is non-dimensional.
 	 */
 	Ctc(int nb_var);
 
@@ -106,6 +100,7 @@ public:
 	 */
 	enum {FIXPOINT, INACTIVE, NB_OUTPUT_FLAGS};
 
+
 protected:
 
 	/**
@@ -121,9 +116,22 @@ protected:
 	 */
 	void set_flag(unsigned int);
 
+
+
 private:
 	const BoolMask* _impact;
 	BoolMask* _output_flags;
+
+	/**
+	 * \brief Check if the size of all the contractor of the list is the same.
+	 */
+	static bool check_nb_var_ctc_list (const ibex::Array<ibex::Ctc>& l)  {
+		int i=1, n=l[0].nb_var;
+		while ((l[i].nb_var==l[0].nb_var)&&(i<l.size())) {
+			i++;
+		}
+		return (i==l.size());
+	}
 };
 
 
@@ -139,6 +147,7 @@ inline void Ctc::set_flag(unsigned int f) {
 	assert(f<NB_OUTPUT_FLAGS);
 	if (_output_flags) (*_output_flags)[f]=true;
 }
+
 
 } // namespace ibex
 

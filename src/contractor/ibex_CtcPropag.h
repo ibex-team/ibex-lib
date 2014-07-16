@@ -45,7 +45,6 @@ public:
 	 * \see #contract(IntervalVector&, const BoolMask&).
 	 */
 	CtcPropag(const Array<Ctc>& cl, double ratio=default_ratio, bool incr=false);
-	CtcPropag(int nb_var, const Array<Ctc>& cl, double ratio=default_ratio, bool incr=false);
 
 	/**
 	 * \brief Enforces propagation (e.g.: HC4 or BOX) fitering.

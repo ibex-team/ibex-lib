@@ -92,17 +92,12 @@ class Ctc3BCid : public Ctc {
   */
 	Ctc3BCid(const BoolMask& cid_vars, Ctc& ctc, int s3b=default_s3b, int scid=default_scid,
 			int vhandled=-1, double var_min_width=default_var_min_width);
-	Ctc3BCid(int nb_var, const BoolMask& cid_vars, Ctc& ctc, int s3b=default_s3b, int scid=default_scid,
-			int vhandled=-1, double var_min_width=default_var_min_width);
 
 	/**     3BCID constructor
 	 *
 	 *  ACID constructor on all variables : no need to give the cid_vars parameter ; all variables are the variables of the ctc contractor
 	 */
 	Ctc3BCid(Ctc& ctc, int s3b=default_s3b, int scid=default_scid,
-			int vhandled=-1, double var_min_width=default_var_min_width);
-
-	Ctc3BCid(int nb_var, Ctc& ctc, int s3b=default_s3b, int scid=default_scid,
 			int vhandled=-1, double var_min_width=default_var_min_width);
 
 
