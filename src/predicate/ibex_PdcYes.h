@@ -22,7 +22,7 @@ namespace ibex {
 class PdcYes : public Pdc {
 public:
 
-	PdcYes(int n=-1);
+	PdcYes(int n);
 
 	/**
 	 * \brief Return YES

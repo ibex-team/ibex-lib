@@ -22,7 +22,7 @@ namespace ibex {
 class PdcNo : public Pdc {
 public:
 
-	PdcNo(int n=-1);
+	PdcNo(int n);
 
 	/**
 	 * \brief Return YES
