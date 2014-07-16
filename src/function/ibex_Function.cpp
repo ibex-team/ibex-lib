@@ -75,7 +75,7 @@ Interval Function::eval_affine2(const IntervalVector& box) const {
 }
 
 Affine2 Function::eval_affine2(const Affine2Vector& box) const {
-	return eval_affine2_affinedomain(box);
+	return eval_affine2_affinedomain(box).i();
 }
 
 Interval Function::eval_affine2(const IntervalVector& box, Affine2& affine) const {
