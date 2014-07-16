@@ -171,7 +171,7 @@ IntervalVector qinter2(const Array<IntervalVector>& _boxes, int q) {
 	n_indices.reserve(p);
 	
 	int b,b2,nboxes;
-	pair<double,int> x[p];
+	pair<double,int>  *x = new pair<double,int>[p];
 	bool first_pass = true;
 	bool ng;
 	
@@ -332,6 +332,7 @@ IntervalVector qinter2(const Array<IntervalVector>& _boxes, int q) {
 	}
 	free(dirboxes);
 	
+	delete [] x;
 	delete(origin);
 	
 	delete(curr_set);
