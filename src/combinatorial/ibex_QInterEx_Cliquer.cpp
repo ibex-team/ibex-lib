@@ -9,12 +9,15 @@
 //============================================================================
 
 #include "ibex_QInter.h"
-#include "cliquer.h"
 #include <algorithm>
+// ignored warning : comparison between signed and unsigned integer expressions in this file
+#pragma GCC diagnostic ignored "-Wsign-compare"
+#include "cliquer.h"
 
 using namespace std;
 
 namespace ibex {
+
 
 /*
  * Uses Cliquer to solve a q-inter-existence problem.
@@ -63,3 +66,8 @@ IntervalVector qinterex_cliquer(const vector<IntervalVector *>& boxes, const vec
 }
 
 } // end namespace ibex
+
+
+// Restore warning : comparison between signed and unsigned integer expressions in this file
+#pragma GCC diagnostic pop
+

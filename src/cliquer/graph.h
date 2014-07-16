@@ -2,7 +2,11 @@
 #ifndef CLIQUER_GRAPH_H
 #define CLIQUER_GRAPH_H
 
+
 #include "set.h"
+
+// ignored warning : comparison between signed and unsigned integer expressions in this file
+#pragma GCC diagnostic ignored "-Wsign-compare"
 
 typedef struct _graph_t graph_t;
 struct _graph_t {
@@ -70,4 +74,6 @@ static int graph_vertex_degree(graph_t *g, int v) {
 	return set_size(g->edges[v]);
 }
 
+// Restore warning : comparison between signed and unsigned integer expressions in this file
+#pragma GCC diagnostic pop
 #endif /* !CLIQUER_GRAPH_H */

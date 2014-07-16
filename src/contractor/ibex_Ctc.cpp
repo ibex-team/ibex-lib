@@ -11,15 +11,6 @@
 
 #include "ibex_Ctc.h"
 
-namespace {
-	int nb_var_ctc_list(const ibex::Array<ibex::Ctc>& l) {
-		int i=0, n=-1;
-		while ((n==-1)&&(i<l.size())) {
-			n=l[i].nb_var;
-		}
-		return n;
-	}
-}
 
 namespace ibex {
 

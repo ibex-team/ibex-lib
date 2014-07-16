@@ -56,7 +56,8 @@ public:
 	 */
 	const int nb_var;
 
-private:
+
+protected:
 
 	/**
 	 * \brief Check if the size of all the predicate of the list is the same.
@@ -71,6 +72,13 @@ private:
 
 };
 
+
+inline Pdc::Pdc(int n) : nb_var(n) { }
+
+inline Pdc::Pdc(const Array<Pdc>& l) : nb_var(l[0].nb_var) { }
+
+inline Pdc::~Pdc() {
+}
 
 
 } // end namespace ibex

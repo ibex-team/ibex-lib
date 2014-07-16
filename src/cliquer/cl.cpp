@@ -10,6 +10,10 @@
 #include "cliquer.h"
 
 
+// ignored warning : comparison between signed and unsigned integer expressions in this file
+#pragma GCC diagnostic ignored "-Wsign-compare"
+
+
 #define TRYFORHELP  "Try `%s -h' for more information.\n",argv[0]
 
 void printhelp(char *prog);
@@ -401,3 +405,6 @@ boolean print_clique_func(set_t s,graph_t *g,clique_options *opts) {
 	return TRUE;
 }
 
+
+// Restore warning : comparison between signed and unsigned integer expressions in this file
+#pragma GCC diagnostic pop

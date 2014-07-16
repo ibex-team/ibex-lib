@@ -13,6 +13,9 @@
 #include "graph.h"
 
 
+// ignored warning : comparison between signed and unsigned integer expressions in this file
+#pragma GCC diagnostic ignored "-Wsign-compare"
+
 static graph_t *graph_read_dimacs_binary(FILE *fp,char *firstline);
 static graph_t *graph_read_dimacs_ascii(FILE *fp,char *firstline);
 
@@ -758,3 +761,6 @@ int graph_test_regular(graph_t *g) {
 	return n;
 }
 
+
+// Restore warning : comparison between signed and unsigned integer expressions in this file
+#pragma GCC diagnostic pop

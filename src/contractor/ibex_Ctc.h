@@ -117,11 +117,7 @@ protected:
 	void set_flag(unsigned int);
 
 
-
-private:
-	const BoolMask* _impact;
-	BoolMask* _output_flags;
-
+protected:
 	/**
 	 * \brief Check if the size of all the contractor of the list is the same.
 	 */
@@ -132,6 +128,12 @@ private:
 		}
 		return (i==l.size());
 	}
+
+private:
+	const BoolMask* _impact;
+	BoolMask* _output_flags;
+
+
 };
 
 
@@ -139,6 +141,7 @@ private:
  	 	 	 	 	 	 	 inline implementation
   ============================================================================*/
 
+<<<<<<< HEAD
 inline Ctc::Ctc() : nb_var(-1), input(NULL), output(NULL), _impact(NULL), _output_flags(NULL) {
 }
 
@@ -146,6 +149,13 @@ inline Ctc::Ctc(int n) : nb_var(n), input(NULL), output(NULL), _impact(NULL), _o
 }
 
 inline Ctc::Ctc(const Array<Ctc>& l) : nb_var(nb_var_ctc_list(l)), input(NULL), output(NULL), _impact(NULL), _output_flags(NULL) {
+=======
+
+inline Ctc::Ctc(int n) : nb_var(n), input(NULL), output(NULL), _impact(NULL), _output_flags(NULL) {
+}
+
+inline Ctc::Ctc(const Array<Ctc>& l) : nb_var(l[0].nb_var), input(NULL), output(NULL), _impact(NULL), _output_flags(NULL) {
+>>>>>>> refs/heads/correctif
 }
 
 inline Ctc::~Ctc() {
