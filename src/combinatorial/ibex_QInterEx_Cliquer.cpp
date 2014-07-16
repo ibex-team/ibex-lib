@@ -9,10 +9,11 @@
 //============================================================================
 
 #include "ibex_QInter.h"
+#include "cliquer.h"
 #include <algorithm>
+
 // ignored warning : comparison between signed and unsigned integer expressions in this file
 #pragma GCC diagnostic ignored "-Wsign-compare"
-#include "cliquer.h"
 
 using namespace std;
 

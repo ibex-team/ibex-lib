@@ -22,11 +22,8 @@ namespace ibex {
 class PdcYes : public Pdc {
 public:
 
-<<<<<<< HEAD
-	PdcYes(int n=-1);
-=======
+
 	PdcYes(int n);
->>>>>>> refs/heads/correctif
 
 	/**
 	 * \brief Return YES

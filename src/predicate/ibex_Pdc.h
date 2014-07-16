@@ -62,7 +62,7 @@ protected:
 	/**
 	 * \brief Check if the size of all the predicate of the list is the same.
 	 */
-	static bool check_nb_var_pdc_list (const ibex::Array<ibex::Pdc>& l) {
+	static bool check_nb_var_pdc_list (const Array<Pdc>& l) {
 		int i=1, n=l[0].nb_var;
 		while ((l[i].nb_var==l[0].nb_var)&&(i<l.size())) {
 			i++;
@@ -77,8 +77,7 @@ inline Pdc::Pdc(int n) : nb_var(n) { }
 
 inline Pdc::Pdc(const Array<Pdc>& l) : nb_var(l[0].nb_var) { }
 
-inline Pdc::~Pdc() {
-}
+inline Pdc::~Pdc() { }
 
 
 } // end namespace ibex
