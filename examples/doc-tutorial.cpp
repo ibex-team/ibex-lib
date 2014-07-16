@@ -31,8 +31,7 @@ int main() {
 	vector<IntervalVector> solutions = solver.solve(system.box); // Run the solver
 
 	/* Display the solutions. */
-	int nb = solutions.size();
-	for (int i=0; i<nb; i++) {
+	for (unsigned int i=0; i<solutions.size(); i++) {
 		cout << "solution n°" << i << ": " << solutions[i] << endl;
 	}
 	//! [start-call-solver]
@@ -567,8 +566,7 @@ int main() {
 	vector<IntervalVector> sols=s.solve(box);
 
 	/* Display the solutions */
-	int nb = sols.size();
-	for (int i=0; i<nb; i++)
+	for (unsigned int i=0; i<sols.size(); i++)
 		cout << "solution n°" << i << "=\t" << sols[i] << endl;
 	//! [strat-basic-solver]
 	}
@@ -614,8 +612,7 @@ int main() {
 	vector<IntervalVector> sols=s.solve(system.box);
 
 	/* Display the solutions */
-	int nb2 = sols.size();
-	for (int i=0; i<nb2; i++)
+	for (unsigned int i=0; i<sols.size(); i++)
 		cout << "solution n°" << i << "=\t" << sols[i] << endl;
 
 	/* Report performances */

@@ -73,5 +73,13 @@ private:
 
 
 
+inline Pdc::Pdc(int n) : nb_var(n) { }
+
+inline Pdc::Pdc(const Array<Pdc>& l) : nb_var(l[0].nb_var) { }
+
+inline Pdc::~Pdc() {
+}
+
+
 } // end namespace ibex
 #endif // __IBEX_PDC_H__

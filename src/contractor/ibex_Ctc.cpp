@@ -14,14 +14,6 @@
 
 namespace ibex {
 
-Ctc::Ctc(int n) : nb_var(n), input(NULL), output(NULL), _impact(NULL), _output_flags(NULL) {
-}
-
-Ctc::Ctc(const Array<Ctc>& l) : nb_var(l[0].nb_var), input(NULL), output(NULL), _impact(NULL), _output_flags(NULL) {
-}
-
-Ctc::~Ctc() {
-}
 
 void Ctc::contract(IntervalVector& box, const BoolMask& impact) {
 	_impact = &impact;

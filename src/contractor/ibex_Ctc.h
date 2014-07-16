@@ -139,6 +139,16 @@ private:
  	 	 	 	 	 	 	 inline implementation
   ============================================================================*/
 
+
+inline Ctc::Ctc(int n) : nb_var(n), input(NULL), output(NULL), _impact(NULL), _output_flags(NULL) {
+}
+
+inline Ctc::Ctc(const Array<Ctc>& l) : nb_var(l[0].nb_var), input(NULL), output(NULL), _impact(NULL), _output_flags(NULL) {
+}
+
+inline Ctc::~Ctc() {
+}
+
 inline const BoolMask* Ctc::impact() {
 	return _impact;
 }
