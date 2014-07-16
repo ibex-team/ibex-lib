@@ -67,7 +67,8 @@ IntervalVector qinter_coref(const Array<IntervalVector>& _boxes, int q) {
 	
 	int b;
 	double lb0,ub0;
-	std::pair<double, int> x[p];
+	std::pair<double, int> *x = new std::pair<double, int>[p];
+
 	for (int i=0; i<n; i++) {
 		
 		/* Left bound */
@@ -109,7 +110,7 @@ IntervalVector qinter_coref(const Array<IntervalVector>& _boxes, int q) {
 	
 	/* Cleanup */
 	delete(origin);
-	
+	delete [] x;
 	return res;
 }
 
