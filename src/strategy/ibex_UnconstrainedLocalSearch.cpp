@@ -28,6 +28,11 @@ UnconstrainedLocalSearch::~UnconstrainedLocalSearch() {
 }
 
 
+void UnconstrainedLocalSearch::set_box( const IntervalVector& box1 ) {
+	box = box1;
+}
+
+
 void UnconstrainedLocalSearch::update_B_SR1(Matrix& Bk, const Vector& sk, const Vector& gk, const Vector& gk1) {
 	Vector r = gk1-gk-Bk*sk;
 	double tmp = r*sk;

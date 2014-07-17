@@ -75,6 +75,13 @@ public:
 	 */
 	int nb_iter() const;
 
+	/**
+	 * \brief Set the bounding box which the minize is perform on.
+	 */
+	void set_box( const IntervalVector& box );
+
+
+
 	virtual ~UnconstrainedLocalSearch();
 
 private:
