@@ -8,6 +8,7 @@
 //============================================================================
 
 #include "ibex_Set.h"
+#include "ibex_SetLeaf.h"
 
 using namespace std;
 
@@ -17,12 +18,12 @@ Set::Set(const IntervalVector& bounding_box) : root(new SetLeaf(MAYBE)), boundin
 
 }
 
-void Set::contract(Ctc& ctc, BoolInterval c_status, double eps) {
-	root = root->contract(bounding_box, ctc, c_status, eps);
+void Set::contract(Ctc& ctc_in, Ctc& ctc_out, double eps) {
+	root = root->contract(bounding_box, ctc_in, ctc_out, eps);
 }
 
-void Set::to_vibes() const {
-	root->to_vibes(bounding_box);
+void Set::to_vibes(SetNode::color_code color_func) const {
+	root->to_vibes(color_func, bounding_box);
 }
 
 Set::~Set() {

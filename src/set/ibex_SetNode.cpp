@@ -8,6 +8,8 @@
 //============================================================================
 
 #include "ibex_SetNode.h"
+#include "ibex_SetLeaf.h"
+#include "ibex_SetBisect.h"
 
 using namespace std;
 
@@ -37,7 +39,7 @@ SetNode* diff(const IntervalVector& x, const IntervalVector& y, BoolInterval x_s
 
 		if (!c1.is_empty() && c1.diam()>=eps) {
 			tmp[b].var = var;
-			if (c1.lb()==x.lb()) {
+			if (c1.lb()==x[var].lb()) {
 				tmp[b].pt = c1.ub();
 				tmp[b].y_left = false;
 			} else {
@@ -60,7 +62,7 @@ SetNode* diff(const IntervalVector& x, const IntervalVector& y, BoolInterval x_s
 	if (b==0) {
 		root = new SetLeaf(x_status);
 	} else {
-		SetBisect* bisect=new SetLeaf(y_status);
+		SetNode* bisect=new SetLeaf(y_status);
 
 		for (int i=b-1; i>=0; i--) {
 			if (tmp[i].y_left) {
@@ -94,34 +96,19 @@ SetNode* contract_set(const IntervalVector& box1, Ctc& c, BoolInterval c_status,
 }
 
 
-SetNode* SetNode::contract(const IntervalVector& nodebox, Ctc& c, BoolInterval c_status, double eps) {
+SetNode::~SetNode() {
+
+}
+
+SetNode* SetNode::contract(const IntervalVector& nodebox, Ctc& ctc_in, Ctc& ctc_out, double eps) {
 	// perform contraction
-	SetNode* this2 = inter(nodebox, contract_set(nodebox,c,c_status,eps), nodebox, eps);
+	SetNode* this2 = this->inter(nodebox, contract_set(nodebox, ctc_in, YES, eps), nodebox, eps);
 
-	this2->contract_rec(nodebox, c, c_status, eps);
+	SetNode* this3 = this2->inter(nodebox, contract_set(nodebox, ctc_out, NO, eps), nodebox, eps);
 
-	if (this2)
+	SetNode* this4 = this3->contract_rec(nodebox, ctc_in, ctc_out, eps);
 
-	// warning: cannot use this anymore (use this2 instead)
-	if (!this2->is_leaf()) {
-
-		SetBisect* bisect_node = (SetBisect*) this2;
-
-		// call recursively
-		left = bisect_node->contract(nodebox, c, c_status, eps);
-		right = bisect_node->contract(nodebox, c, c_status, eps);
-
-		// try compaction
-		BoolInterval left_status=bisect_node->left->status();
-		if (left_status!=MAYBE && left_status==bisect_node->right->status()) {
-			delete this2; // warning: suicide again
-			return new SetLeaf(left_status);
-		} else
-			return this;
-	}
-	else {
-		return this;
-	}
+	return this4;
 }
 
 SetNode* SetNode::inter(const IntervalVector& nodebox, const SetNode* other, const IntervalVector& otherbox, double eps) {

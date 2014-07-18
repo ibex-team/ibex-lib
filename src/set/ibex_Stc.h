@@ -10,6 +10,8 @@
 #ifndef __IBEX_STC_H__
 #define __IBEX_STC_H__
 
+#include "ibex_Set.h"
+
 namespace ibex {
 
 class Stc {

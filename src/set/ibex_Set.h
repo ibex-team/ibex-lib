@@ -23,7 +23,7 @@ public:
 
 	Set& operator&=(const Set& set);
 
-	void contract(Ctc& ctc, BoolInterval c_status, double eps);
+	void contract(Ctc& ctc_in, Ctc& ctc_out, double eps);
 
 	void inter(const Set& s2, double eps);
 

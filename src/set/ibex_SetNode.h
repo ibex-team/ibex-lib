@@ -28,13 +28,13 @@ public:
 
 	virtual SetNode* inter(const IntervalVector& nodebox, const IntervalVector& x, BoolInterval x_status, double eps)=0;
 
-	virtual SetNode* contract_rec(const IntervalVector& nodebox, Ctc& c, BoolInterval c_status, double eps)=0;
+	virtual SetNode* contract_rec(const IntervalVector& nodebox, Ctc& ctc_in, Ctc& ctc_out, double eps)=0;
 
 	virtual void to_vibes(color_code color_func, const IntervalVector& nodebox) const=0;
 
 	SetNode* inter(const IntervalVector& nodebox, const SetNode* other, const IntervalVector& otherbox, double eps);
 
-	SetNode* contract(const IntervalVector& nodebox, Ctc& c, BoolInterval c_status, double eps);
+	SetNode* contract(const IntervalVector& nodebox, Ctc& ctc_in, Ctc& ctc_out, double eps);
 };
 
 SetNode* diff(const IntervalVector& x, const IntervalVector& y, BoolInterval x_status, BoolInterval y_status, double eps);

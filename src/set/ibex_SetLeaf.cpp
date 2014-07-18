@@ -8,6 +8,9 @@
 //============================================================================
 
 #include "ibex_SetLeaf.h"
+#include "ibex_SetBisect.h"
+
+#include "/home/gilles/apps/VIBES-0.2.0/client-api/C++/src/vibes.h"
 
 using namespace std;
 
@@ -29,19 +32,19 @@ SetNode* SetLeaf::inter(const IntervalVector& nodebox, const IntervalVector& x, 
 	if (x_status==MAYBE) {
 		return this;
 	} else if (nodebox.is_subset(x)) {
-		assert(status==MAYBE || status==x_status);
-		status=x_status;
+		assert(_status==MAYBE || _status==x_status);
+		_status=x_status;
 		return this;
 	} else {
-		SetNode* new_node=diff(nodebox,x,_status,x_status,eps);
+		SetNode* new_node=diff(nodebox, x, _status, x_status, eps);
 		delete this; // warning: suicide, don't move it before previous line
 		return new_node;
 	}
 }
 
-SetNode* SetLeaf::contract_rec(const IntervalVector& nodebox, Ctc& c, BoolInterval c_status, double eps) {
+SetNode* SetLeaf::contract_rec(const IntervalVector& nodebox, Ctc& ctc_in, Ctc& ctc_out, double eps) {
 
-	if (status()!=MAYBE || nodebox.max_diam()<=eps)
+	if (_status!=MAYBE || nodebox.max_diam()<=eps)
 		return this;
 	else {
 		int var=nodebox.extr_diam_index(false);
@@ -49,15 +52,13 @@ SetNode* SetLeaf::contract_rec(const IntervalVector& nodebox, Ctc& c, BoolInterv
 		double pt=p.first[var].ub();
 		SetBisect* bis = new SetBisect(var, pt, new SetLeaf(MAYBE), new SetLeaf(MAYBE));
 		delete this;
-		return bis->contract_rec(nodebox, c, c_status, eps);
+		return bis->contract_rec(nodebox, ctc_in, ctc_out, eps);
 	}
 
 }
 
 void SetLeaf::to_vibes(color_code color_func, const IntervalVector& nodebox) const {
-#ifdef VIBES_CPP_API_H
-	vibes::drawBox(nodebox[0].lb(), nobdebox[0].ub(), nodebox[1].lb(), nodebox[1].ub(), color_func(status()));
-#endif
+	vibes::drawBox(nodebox[0].lb(), nodebox[0].ub(), nodebox[1].lb(), nodebox[1].ub(), color_func(_status));
 }
 
 

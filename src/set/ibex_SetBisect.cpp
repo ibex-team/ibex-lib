@@ -8,6 +8,7 @@
 //============================================================================
 
 #include "ibex_SetBisect.h"
+#include "ibex_SetLeaf.h"
 #include <stack>
 #include <utility>
 
@@ -15,7 +16,7 @@ using namespace std;
 
 namespace ibex {
 
-SetBisect::SetBisect(int var, double pt, Set* left, Set* right) : var(var), pt(pt), left(*left), right(*right) {
+SetBisect::SetBisect(int var, double pt, SetNode* left, SetNode* right) : var(var), pt(pt), left(left), right(right) {
 
 }
 
@@ -52,9 +53,9 @@ SetNode* SetBisect::inter(const IntervalVector& nodebox, const IntervalVector& x
 	}
 }
 
-SetNode* SetBisect::contract_rec(const IntervalVector& nodebox, Ctc& c, BoolInterval c_status, double eps) {
-	left = left->contract(nodebox, c, c_status, eps);
-	right = right->contract(nodebox, c, c_status, eps);
+SetNode* SetBisect::contract_rec(const IntervalVector& nodebox, Ctc& ctc_in, Ctc& ctc_out, double eps) {
+	left = left->contract(nodebox, ctc_in, ctc_out, eps);
+	right = right->contract(nodebox, ctc_in, ctc_out, eps);
 	// status of children may have changed --> try merge
 	return try_merge();
 }
@@ -76,7 +77,7 @@ IntervalVector SetBisect::right_box(const IntervalVector& nodebox) const {
 	return rightbox;
 }
 
-SetNode* SetBisect::try_merge() const {
+SetNode* SetBisect::try_merge() {
 	if (left->status()!=MAYBE && left->status()==right->status()) {
 		BoolInterval s=left->status();
 		delete this;

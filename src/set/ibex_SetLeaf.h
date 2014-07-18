@@ -16,6 +16,8 @@ namespace ibex {
 
 class SetLeaf : public SetNode {
 
+public:
+
 	SetLeaf(BoolInterval status);
 
 	virtual BoolInterval status() const;
@@ -24,7 +26,7 @@ class SetLeaf : public SetNode {
 
 	virtual SetNode* inter(const IntervalVector& nodebox, const IntervalVector& x, BoolInterval x_status, double eps);
 
-	virtual SetNode* contract_rec(const IntervalVector& nodebox, Ctc& c, BoolInterval c_status, double eps);
+	virtual SetNode* contract_rec(const IntervalVector& nodebox, Ctc& ctc_in, Ctc& ctc_out, double eps);
 
 	virtual void to_vibes(color_code color_func, const IntervalVector& nodebox) const;
 

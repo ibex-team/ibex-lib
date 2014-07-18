@@ -16,7 +16,9 @@ namespace ibex {
 
 class SetBisect : public SetNode {
 
-	SetBisect(int var, double pt, Set* left, Set* right);
+public:
+
+	SetBisect(int var, double pt, SetNode* left, SetNode* right);
 
 	virtual ~SetBisect();
 
@@ -26,7 +28,7 @@ class SetBisect : public SetNode {
 
 	virtual SetNode* inter(const IntervalVector& nodebox, const IntervalVector& x, BoolInterval x_status, double eps);
 
-	virtual SetNode* contract_rec(const IntervalVector& nodebox, Ctc& c, BoolInterval c_status, double eps);
+	virtual SetNode* contract_rec(const IntervalVector& nodebox, Ctc& c_in, Ctc& ctc_out, double eps);
 
 	IntervalVector left_box(const IntervalVector& nodebox) const;
 
@@ -35,8 +37,9 @@ class SetBisect : public SetNode {
 	virtual void to_vibes(color_code color_func, const IntervalVector& nodebox) const;
 
 protected:
+	friend class SetNode;
 
-	SetNode* try_merge() const;
+	SetNode* try_merge();
 
 	int var;
 	double pt;
