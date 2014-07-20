@@ -1,0 +1,200 @@
+#include "ibex_CtcPaving.h"
+
+namespace ibex{
+
+CtcPaving::CtcPaving(int n) : Ctc(n)
+{
+
+}
+
+CtcPaving::CtcPaving(int n,const std::string &filepath) : Ctc(n)
+{
+    load(filepath);
+}
+
+
+void CtcPaving::expand(int i)
+{
+    if(left[i] == -1){
+        std::pair<IntervalVector,IntervalVector> boxes=lf.bisect(B[i]);
+        int n = B.size();
+        left[i] = n;                right[i] = n+1;
+        left.push_back(-1);         right.push_back(-1);
+        left.push_back(-1);         right.push_back(-1);
+        B.push_back(boxes.first);   B.push_back(boxes.second);
+    } else {
+        std::cout << "[erreur] on ne devrait pas être ici !!!!!\n";
+    }
+
+}
+
+void CtcPaving::init(IntervalVector& box){
+    B.clear(); left.clear(); right.clear();
+    B.push_back(box);
+    left.push_back(-1);
+    right.push_back(-1);
+}
+
+void CtcPaving::sivia(Ctc &C, IntervalVector &box, double eps)
+{
+    init(box);
+    int k = 0;
+    std::list<int> L;
+    L.push_back(0);
+    while( !L.empty()){
+        int i = L.front(); L.pop_front();
+        C.contract(B[i]);
+        if(B[i].max_diam() > eps){
+            k++;
+            expand(i);
+            L.push_back(left[i]);
+            L.push_back(right[i]);
+        }
+    }
+    std::cout << "[paving] End of sivia : " << B.size() << " nodes have been generated" << std::endl;
+    std::cout << "[paving] number of leaves" << k << std::endl;
+}
+
+
+bool CtcPaving::isLeaf(int i){
+    return (left[i] == -1 && right[i] == -1 );
+}
+
+
+
+void CtcPaving::load(const std::string &filepath){
+
+    right.clear(); left.clear(); B.clear();
+
+    std::ifstream in_file;
+    in_file.open(filepath.c_str(), std::ios::in | std::ios::binary);
+    if(in_file.fail())
+    {
+        std::cout << "\nCannot open file " << filepath << "for reading data \n";
+        // system("pause");
+        return;
+    }
+
+    // read Number of point
+    try{
+        int box_size; // size of a box
+        int nb_box; // total number of node into the subpaving
+
+        in_file.read((char*)&box_size,sizeof(int));
+        in_file.read((char*)&nb_box,sizeof(int));
+
+        left.resize(nb_box);
+        right.resize(nb_box);
+        in_file.read((char*)&left[0],nb_box*sizeof(int));
+        in_file.read((char*)&right[0],nb_box*sizeof(int));
+
+        B.reserve(nb_box);
+        for(uint i = 0; i < nb_box; i++){
+            double _v[box_size][2];
+            in_file.read((char*)_v,2*box_size*sizeof(double));
+            B.push_back(IntervalVector(box_size,_v));
+        }
+        std::cout << "[paving] read " << nb_box << " node with box of size " << box_size <<" from "  << filepath << std::endl;
+    } catch (std::exception& e){
+        std::cout << "read error " << e.what() << std::endl;
+    }
+    in_file.close();
+}
+
+void CtcPaving::save(const std::string &filename){
+
+    std::ofstream out_file;
+
+    out_file.open(filename.c_str(), std::ios::out | std::ios::trunc | std::ios::binary);
+    if(out_file.fail())
+    {
+        std::cout << "\nCannot open file " << filename << "for dumping data \n";
+        // system("pause");
+        return;
+    }
+
+    try{
+        int box_size = B[0].size();
+        int nb_box = B.size();
+
+        out_file.write((char *)&box_size, sizeof(int));
+        out_file.write((char *)&nb_box, sizeof(int));
+        out_file.write((char*)&left[0],nb_box*sizeof(int));
+        out_file.write((char*)&right[0],nb_box*sizeof(int));
+
+        for(uint i = 0; i < nb_box; i++){
+//            IntervalVector box(B[i]);
+            for(uint j = 0; j < box_size ; j++){
+                double lb  = B[i][j].lb();
+                double ub  = B[i][j].ub();
+                out_file.write((char*)(&lb),sizeof(double));
+                out_file.write((char*)(&ub),sizeof(double));
+            }
+        }
+        std::cout << "[paving] write " << nb_box << " node with box of size " << box_size << " into " << filename << std::endl;
+    } catch (std::exception &e){
+        std::cout << "wrting error " << e.what() << std::endl;
+    }
+
+    out_file.close();
+}
+
+bool isPoint(const IntervalVector &box){
+    for(uint i = 0; i < box.size(); i++){
+        if(! box[i].is_degenerated()) return false;
+    }
+    return true;
+}
+
+IntervalVector CtcPaving::contract(IntervalVector &box, int i){
+
+    if(box.is_empty() || (box & B[i]).is_empty()) return IntervalVector(box.size(),Interval::EMPTY_SET);
+
+    bool isSub = B[i].is_subset(box);
+    bool isleaf = isLeaf(i);
+    if(isSub || isleaf)
+        return B[i] & box;
+    else {
+        IntervalVector tmp = box & B[i];
+        IntervalVector res1 = contract(tmp,left[i]);
+        IntervalVector res2 = contract(tmp,right[i]);
+        if(res1.is_flat()) return res2;
+        if(res2.is_flat()) return res1;
+//        if(isPoint(res1)) return res2;
+//        if(isPoint(res2)) return res1;
+        return res1 | res2;
+    }
+    std::cout << "cas non étudier" << std::endl;
+    return IntervalVector(box.size(),Interval::EMPTY_SET);
+}
+
+void CtcPaving::contract(IntervalVector &box){
+    box &= contract(box,0);
+}
+
+//void CtcPaving::drawPaving(mSimpleDrawer *R){
+
+//    list<int> L;
+//    int k =0;
+//    L.push_back(0);
+//    while(!L.empty()){
+//        int i = L.front(); L.pop_front();
+
+//        if(B[i].is_empty()){
+//            std::cout << "Erreur B[" << i << "] is empty" << std::endl;
+//            continue;
+//        }
+//        if(left[i] == -1){
+//            k++;
+//            R->DrawBox(B[i][0].lb(),B[i][0].ub(),B[i][1].lb(),B[i][1].ub(),QPen(Qt::yellow),QBrush(Qt::NoBrush));
+//        } else {
+//            L.push_back(left[i]);
+//            L.push_back(right[i]);
+//        }
+//    }
+//}
+
+
+
+
+}// end namespace ibex
