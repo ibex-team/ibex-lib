@@ -10,6 +10,7 @@
 #include "ibex_SetNode.h"
 #include "ibex_SetLeaf.h"
 #include "ibex_SetBisect.h"
+ #include <unistd.h>
 
 using namespace std;
 
@@ -36,32 +37,38 @@ SetNode* diff(const IntervalVector& x, const IntervalVector& y, BoolInterval x_s
 	for (int var=0; var<nn; var++) {
 
 		x[var].diff(y[var],c1,c2);
-		cout << "x[var]=" << x[var] << " y[var]=" << y[var] << " c1=" << c1 << " c2=" << c2 << endl;
+		//cout << "x[var]=" << x[var] << " y[var]=" << y[var] << " c1=" << c1 << " c2=" << c2 << endl;
 
-		if (c1.is_empty() || c1.diam()<eps) {
-			break;  // no more bisection
-		} else if (x[var].delta(c1)<eps) {
+		if (c1.is_empty()) continue;
+		if (y_status==MAYBE && c1.diam()<eps) continue;
+		if (x_status==MAYBE && x[var].delta(c1)<eps) {
 			// no (significant) difference at all
 			delete[] tmp;
 			return new SetLeaf(x_status);
-		} else {
-			tmp[b].var = var;
-			if (c1.lb()==x[var].lb()) {
-				tmp[b].pt = c1.ub();
-				tmp[b].y_left = false;
-			} else {
-				tmp[b].pt = c1.lb();
-				tmp[b].y_left = true;
-			}
-			b++;
-
-			if (!c2.is_empty() && x[var].delta(c2)>=eps) {
-				tmp[b].var = var;
-				tmp[b].pt = c2.lb();
-				tmp[b].y_left = true;
-				b++;
-			}
 		}
+
+		tmp[b].var = var;
+		if (c1.lb()==x[var].lb()) {
+			tmp[b].pt = c1.ub();
+			tmp[b].y_left = false;
+		} else {
+			tmp[b].pt = c1.lb();
+			tmp[b].y_left = true;
+		}
+		b++;
+
+		if (c2.is_empty()) continue;
+		if (y_status==MAYBE && c2.diam()<eps)  continue;
+		if (x_status==MAYBE && x[var].delta(c2)<eps) {
+			// no (significant) difference at all
+			delete[] tmp;
+			return new SetLeaf(x_status);
+		}
+
+		tmp[b].var = var;
+		tmp[b].pt = c2.lb();
+		tmp[b].y_left = true;
+		b++;
 	}
 
 	SetNode* root;
@@ -98,8 +105,8 @@ SetNode* contract_set(const IntervalVector& box1, Ctc& c, BoolInterval c_status,
 	} catch(EmptyBoxException&) {
 		root2 = new SetLeaf(c_status);
 	}
-	cout << "contract set:" << endl;
-	root2->print(cout,box1,0);
+	//cout << "contract set:" << endl;
+	//root2->print(cout,box1,0);
 
 	return root2;
 }
@@ -112,23 +119,32 @@ char to_string(const BoolInterval& status) {
 	}
 }
 
+const char* color(BoolInterval status) {
+	switch (status) {
+	case YES: return "g";
+	case NO:  return "r";
+	case MAYBE : return "b";
+	}
+}
+
 SetNode::~SetNode() {
 
 }
 
 SetNode* SetNode::contract(const IntervalVector& nodebox, Ctc& ctc_in, Ctc& ctc_out, double eps) {
 	// perform contraction
-	cout << "=== contract with ctc_in  =======" << endl;
+	//cout << "=== contract with ctc_in  =======" << endl;
 	SetNode* this2 = this->inter(nodebox, contract_set(nodebox, ctc_in, YES, eps), nodebox, eps);
-	cout << " ctc_in gives: ";
-	print(cout,nodebox,0);
-	cout << endl;
+	//cout << " ctc_in gives: ";
+	//this2->print(cout,nodebox,0);
+	//cout << endl;
 
-	cout << "=== contract with ctc_out =======" << endl;
+	//cout << "=== contract with ctc_out =======" << endl;
 	SetNode* this3 = this2->inter(nodebox, contract_set(nodebox, ctc_out, NO, eps), nodebox, eps);
-	cout << " ctc_out gives: ";
-	print(cout,nodebox,0);
-	cout << endl;
+	//cout << " ctc_out gives: ";
+	//this3->print(cout,nodebox,0);
+	//cout << endl;
+
 	SetNode* this4 = this3->contract_rec(nodebox, ctc_in, ctc_out, eps);
 
 	return this4;

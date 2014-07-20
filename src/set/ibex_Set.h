@@ -30,14 +30,14 @@ public:
 	void to_vibes(SetNode::color_code color_func) const;
 
 protected:
-	friend std::ostream operator<<(std::ostream& os, const Set& set);
+	friend std::ostream& operator<<(std::ostream& os, const Set& set);
 
 	SetNode* root;
 
 	IntervalVector bounding_box; // not sure it is really necessary
 };
 
-std::ostream operator<<(std::ostream& os, const Set& set);
+std::ostream& operator<<(std::ostream& os, const Set& set);
 
 } // namespace ibex
 

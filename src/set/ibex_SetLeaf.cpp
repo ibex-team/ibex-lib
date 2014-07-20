@@ -29,17 +29,26 @@ bool SetLeaf::is_leaf() const {
 }
 
 SetNode* SetLeaf::inter(const IntervalVector& nodebox, const IntervalVector& x, BoolInterval x_status, double eps) {
-	cout << nodebox << " " << to_string(_status)  << " inter " << x << " ";
+	//cout << nodebox << " " << to_string(_status)  << " inter " << x << " ";
 	if (x_status==MAYBE || _status==x_status) {
-		{ cout << "this\n"; return this; }
+		{ //cout << "this\n";
+			return this;
+		}
 	} else if (nodebox.is_subset(x)) {
 		assert(_status==MAYBE);
 		_status=x_status;
-		{ cout << "this\n"; return this; }
+		{ //cout << "this\n";
+			return this;
+		}
 	} else {
+		if ((nodebox & x).is_flat()) {
+			//cout << "this\n";
+			return this; }
 		SetNode* new_node=diff(nodebox, x, _status, x_status, eps);
 		delete this; // warning: suicide, don't move it before previous line
-		{ cout << "gives "; new_node->print(cout,nodebox,0); return new_node; }
+		{ //cout << "gives "; new_node->print(cout,nodebox,0);
+			return new_node;
+		}
 	}
 }
 

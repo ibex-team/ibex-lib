@@ -55,8 +55,8 @@ SetNode* SetBisect::inter(const IntervalVector& nodebox, const IntervalVector& x
 }
 
 SetNode* SetBisect::contract_rec(const IntervalVector& nodebox, Ctc& ctc_in, Ctc& ctc_out, double eps) {
-	left = left->contract(nodebox, ctc_in, ctc_out, eps);
-	right = right->contract(nodebox, ctc_in, ctc_out, eps);
+	left = left->contract(left_box(nodebox), ctc_in, ctc_out, eps);
+	right = right->contract(right_box(nodebox), ctc_in, ctc_out, eps);
 	// status of children may have changed --> try merge
 	return try_merge();
 }

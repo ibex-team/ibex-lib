@@ -16,6 +16,8 @@
 
 namespace ibex {
 
+const char* color(BoolInterval status);
+
 class SetNode {
 public:
 	typedef const char* (*color_code) (BoolInterval);
