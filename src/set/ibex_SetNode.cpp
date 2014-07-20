@@ -36,8 +36,15 @@ SetNode* diff(const IntervalVector& x, const IntervalVector& y, BoolInterval x_s
 	for (int var=0; var<nn; var++) {
 
 		x[var].diff(y[var],c1,c2);
+		cout << "x[var]=" << x[var] << " y[var]=" << y[var] << " c1=" << c1 << " c2=" << c2 << endl;
 
-		if (!c1.is_empty() && c1.diam()>=eps) {
+		if (c1.is_empty() || c1.diam()<eps) {
+			break;  // no more bisection
+		} else if (x[var].delta(c1)<eps) {
+			// no (significant) difference at all
+			delete[] tmp;
+			return new SetLeaf(x_status);
+		} else {
 			tmp[b].var = var;
 			if (c1.lb()==x[var].lb()) {
 				tmp[b].pt = c1.ub();
@@ -47,20 +54,20 @@ SetNode* diff(const IntervalVector& x, const IntervalVector& y, BoolInterval x_s
 				tmp[b].y_left = true;
 			}
 			b++;
-		}
 
-		if (!c2.is_empty() && c2.diam()>=eps) {
-			tmp[b].var = var;
-			tmp[b].pt = c2.lb();
-			tmp[b].y_left = true;
-			b++;
+			if (!c2.is_empty() && x[var].delta(c2)>=eps) {
+				tmp[b].var = var;
+				tmp[b].pt = c2.lb();
+				tmp[b].y_left = true;
+				b++;
+			}
 		}
 	}
 
 	SetNode* root;
 
 	if (b==0) {
-		root = new SetLeaf(x_status);
+		root = new SetLeaf(y_status);
 	} else {
 		SetNode* bisect=new SetLeaf(y_status);
 
@@ -91,10 +98,19 @@ SetNode* contract_set(const IntervalVector& box1, Ctc& c, BoolInterval c_status,
 	} catch(EmptyBoxException&) {
 		root2 = new SetLeaf(c_status);
 	}
+	cout << "contract set:" << endl;
+	root2->print(cout,box1,0);
 
 	return root2;
 }
 
+char to_string(const BoolInterval& status) {
+	switch(status) {
+	case YES : return 'Y'; break;
+	case NO : return 'N'; break;
+	case MAYBE : return '?'; break;
+	}
+}
 
 SetNode::~SetNode() {
 
@@ -102,10 +118,17 @@ SetNode::~SetNode() {
 
 SetNode* SetNode::contract(const IntervalVector& nodebox, Ctc& ctc_in, Ctc& ctc_out, double eps) {
 	// perform contraction
+	cout << "=== contract with ctc_in  =======" << endl;
 	SetNode* this2 = this->inter(nodebox, contract_set(nodebox, ctc_in, YES, eps), nodebox, eps);
+	cout << " ctc_in gives: ";
+	print(cout,nodebox,0);
+	cout << endl;
 
+	cout << "=== contract with ctc_out =======" << endl;
 	SetNode* this3 = this2->inter(nodebox, contract_set(nodebox, ctc_out, NO, eps), nodebox, eps);
-
+	cout << " ctc_out gives: ";
+	print(cout,nodebox,0);
+	cout << endl;
 	SetNode* this4 = this3->contract_rec(nodebox, ctc_in, ctc_out, eps);
 
 	return this4;
@@ -123,6 +146,5 @@ SetNode* SetNode::inter(const IntervalVector& nodebox, const SetNode* other, con
 		return this2->inter(nodebox, bisect_node->right, bisect_node->right_box(otherbox), eps);
 	}
 }
-
 
 } // namespace ibex

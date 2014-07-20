@@ -30,6 +30,9 @@ public:
 
 	virtual void to_vibes(color_code color_func, const IntervalVector& nodebox) const;
 
+	virtual void print(std::ostream& os, const IntervalVector& nodebox, int shift) const;
+
+protected:
 	BoolInterval _status;
 
 };

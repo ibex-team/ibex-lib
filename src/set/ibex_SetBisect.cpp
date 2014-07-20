@@ -17,6 +17,7 @@ using namespace std;
 namespace ibex {
 
 SetBisect::SetBisect(int var, double pt, SetNode* left, SetNode* right) : var(var), pt(pt), left(left), right(right) {
+	assert(left->status()==MAYBE || left->status()!=right->status());
 
 }
 
@@ -63,6 +64,13 @@ SetNode* SetBisect::contract_rec(const IntervalVector& nodebox, Ctc& ctc_in, Ctc
 void SetBisect::to_vibes(color_code color_func, const IntervalVector& nodebox) const {
 	left->to_vibes(color_func, left_box(nodebox));
 	right->to_vibes(color_func, right_box(nodebox));
+}
+
+void SetBisect::print(ostream& os, const IntervalVector& nodebox, int shift) const {
+	for (int i=0; i<shift; i++) os << ' ';
+	os << "* " << nodebox << endl;
+	left->print(os, left_box(nodebox), shift+2);
+	right->print(os, right_box(nodebox), shift+2);
 }
 
 IntervalVector SetBisect::left_box(const IntervalVector& nodebox) const {

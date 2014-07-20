@@ -26,6 +26,10 @@ void Set::to_vibes(SetNode::color_code color_func) const {
 	root->to_vibes(color_func, bounding_box);
 }
 
+std::ostream operator<<(std::ostream& os, const Set& set) {
+	set.root->print(cout,set.bounding_box, 0);
+}
+
 Set::~Set() {
 	delete root;
 }

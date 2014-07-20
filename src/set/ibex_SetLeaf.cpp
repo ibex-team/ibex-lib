@@ -29,16 +29,17 @@ bool SetLeaf::is_leaf() const {
 }
 
 SetNode* SetLeaf::inter(const IntervalVector& nodebox, const IntervalVector& x, BoolInterval x_status, double eps) {
-	if (x_status==MAYBE) {
-		return this;
+	cout << nodebox << " " << to_string(_status)  << " inter " << x << " ";
+	if (x_status==MAYBE || _status==x_status) {
+		{ cout << "this\n"; return this; }
 	} else if (nodebox.is_subset(x)) {
-		assert(_status==MAYBE || _status==x_status);
+		assert(_status==MAYBE);
 		_status=x_status;
-		return this;
+		{ cout << "this\n"; return this; }
 	} else {
 		SetNode* new_node=diff(nodebox, x, _status, x_status, eps);
 		delete this; // warning: suicide, don't move it before previous line
-		return new_node;
+		{ cout << "gives "; new_node->print(cout,nodebox,0); return new_node; }
 	}
 }
 
@@ -61,5 +62,9 @@ void SetLeaf::to_vibes(color_code color_func, const IntervalVector& nodebox) con
 	vibes::drawBox(nodebox[0].lb(), nodebox[0].ub(), nodebox[1].lb(), nodebox[1].ub(), color_func(_status));
 }
 
+void SetLeaf::print(ostream& os, const IntervalVector& nodebox, int shift) const {
+	for (int i=0; i<shift; i++) os << ' ';
+	os  << nodebox << " " << to_string(_status) << endl;
+}
 
 } // namespace ibex

@@ -35,7 +35,12 @@ public:
 	SetNode* inter(const IntervalVector& nodebox, const SetNode* other, const IntervalVector& otherbox, double eps);
 
 	SetNode* contract(const IntervalVector& nodebox, Ctc& ctc_in, Ctc& ctc_out, double eps);
+
+	virtual void print(std::ostream& os, const IntervalVector& nodebox, int shift) const=0;
+
 };
+
+char to_string(const BoolInterval& status);
 
 SetNode* diff(const IntervalVector& x, const IntervalVector& y, BoolInterval x_status, BoolInterval y_status, double eps);
 
