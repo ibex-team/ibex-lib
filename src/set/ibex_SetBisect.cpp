@@ -22,8 +22,8 @@ SetBisect::SetBisect(int var, double pt, SetNode* left, SetNode* right) : var(va
 }
 
 SetBisect::~SetBisect() {
-	delete &left;
-	delete &right;
+	delete left;
+	delete right;
 }
 
 

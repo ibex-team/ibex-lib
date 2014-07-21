@@ -19,6 +19,9 @@ namespace ibex {
 SetLeaf::SetLeaf(BoolInterval status) : _status(status) {
 
 }
+SetLeaf::~SetLeaf() {
+
+}
 
 BoolInterval SetLeaf::status() const {
 	return _status;

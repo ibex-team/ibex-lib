@@ -40,7 +40,14 @@ SetNode* diff(const IntervalVector& x, const IntervalVector& y, BoolInterval x_s
 		//cout << "x[var]=" << x[var] << " y[var]=" << y[var] << " c1=" << c1 << " c2=" << c2 << endl;
 
 		if (c1.is_empty()) continue;
+
+		// we discard the y-part if it is not significant
+		// but this is safe only if the status of y is MAYBE.
 		if (y_status==MAYBE && c1.diam()<eps) continue;
+
+		// when the set difference is close to x itself
+		// we return x. But this is safe only if the
+		// status of x is MAYBE.
 		if (x_status==MAYBE && x[var].delta(c1)<eps) {
 			// no (significant) difference at all
 			delete[] tmp;

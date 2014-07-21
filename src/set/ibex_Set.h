@@ -19,7 +19,7 @@ public:
 
 	Set(const IntervalVector& bounding_box);
 
-	virtual ~Set();
+	~Set();
 
 	Set& operator&=(const Set& set);
 

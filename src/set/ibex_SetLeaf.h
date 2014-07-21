@@ -20,6 +20,8 @@ public:
 
 	SetLeaf(BoolInterval status);
 
+	virtual ~SetLeaf();
+
 	virtual BoolInterval status() const;
 
 	virtual bool is_leaf() const;
