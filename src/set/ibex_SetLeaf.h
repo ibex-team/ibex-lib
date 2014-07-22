@@ -18,24 +18,29 @@ class SetLeaf : public SetNode {
 
 public:
 
-	SetLeaf(BoolInterval status);
+	SetLeaf(SetType status);
 
 	virtual ~SetLeaf();
 
-	virtual BoolInterval status() const;
-
 	virtual bool is_leaf() const;
 
-	virtual SetNode* inter(const IntervalVector& nodebox, const IntervalVector& x, BoolInterval x_status, double eps);
+	//virtual SetNode* sync(const IntervalVector& nodebox, const IntervalVector& x, SetType x_status, double eps, Mode mode);
 
-	virtual SetNode* contract_rec(const IntervalVector& nodebox, Ctc& ctc_in, Ctc& ctc_out, double eps);
+	virtual SetNode* sync(const IntervalVector& nodebox, const IntervalVector& x, SetType x_status, double eps);
+
+	virtual SetNode* sync_rec(const IntervalVector& nodebox, Bracket& br, double eps);
+
+	virtual SetNode* inter(const IntervalVector& nodebox, const IntervalVector& x, SetType x_status, double eps);
+
+	virtual SetNode* inter_rec(const IntervalVector& nodebox, Bracket& br, double eps);
 
 	virtual void to_vibes(color_code color_func, const IntervalVector& nodebox) const;
 
 	virtual void print(std::ostream& os, const IntervalVector& nodebox, int shift) const;
 
-protected:
-	BoolInterval _status;
+	virtual void set_in_tmp();
+
+	virtual void unset_in_tmp();
 
 };
 

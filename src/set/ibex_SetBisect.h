@@ -22,22 +22,27 @@ public:
 
 	virtual ~SetBisect();
 
-	virtual BoolInterval status() const;
-
 	virtual bool is_leaf() const;
 
-	virtual SetNode* inter(const IntervalVector& nodebox, const IntervalVector& x, BoolInterval x_status, double eps);
+	virtual SetNode* sync(const IntervalVector& nodebox, const IntervalVector& x, SetType x_status, double eps);
 
-	virtual SetNode* contract_rec(const IntervalVector& nodebox, Ctc& c_in, Ctc& ctc_out, double eps);
+	virtual SetNode* inter(const IntervalVector& nodebox, const IntervalVector& x, SetType x_status, double eps);
 
-	IntervalVector left_box(const IntervalVector& nodebox) const;
+	virtual SetNode* sync_rec(const IntervalVector& nodebox, Bracket& br, double eps);
 
-	IntervalVector right_box(const IntervalVector& nodebox) const;
+	virtual SetNode* inter_rec(const IntervalVector& nodebox, Bracket& br, double eps);
 
 	virtual void to_vibes(color_code color_func, const IntervalVector& nodebox) const;
 
 	virtual void print(std::ostream& os, const IntervalVector& nodebox, int shift) const;
 
+	virtual void set_in_tmp();
+
+	virtual void unset_in_tmp();
+
+	IntervalVector left_box(const IntervalVector& nodebox) const;
+
+	IntervalVector right_box(const IntervalVector& nodebox) const;
 
 protected:
 	friend class SetNode;

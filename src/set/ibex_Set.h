@@ -11,28 +11,33 @@
 #define __IBEX_SET_H__
 
 #include "ibex_SetNode.h"
+#include "ibex_Bracket.h"
 
 namespace ibex {
 
 class Set {
 public:
 
-	Set(const IntervalVector& bounding_box);
+	Set(const IntervalVector& bounding_box, double eps, SetType status=UNK);
 
 	~Set();
 
 	Set& operator&=(const Set& set);
 
-	void contract(Ctc& ctc_in, Ctc& ctc_out, double eps);
+	bool is_empty() const;
 
-	void inter(const Set& s2, double eps);
+	void contract(Bracket& br);
+
+	void sync(Bracket& br);
 
 	void to_vibes(SetNode::color_code color_func) const;
 
 protected:
 	friend std::ostream& operator<<(std::ostream& os, const Set& set);
 
-	SetNode* root;
+	SetNode* root; // NULL means no existing set (warning: different from empty set!)
+
+	double eps;
 
 	IntervalVector bounding_box; // not sure it is really necessary
 };

@@ -1,29 +1,25 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_StcEqual.cpp
+// File        : ibex_Bracket.cpp
 // Author      : Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
-// Created     : Jul 15, 2014
+// Created     : Jul 21, 2014
 //============================================================================
 
-#include "ibex_StcEqual.h"
-#include <stack>
-
-using namespace std;
+#include "ibex_Bracket.h"
+#include "ibex_CtcFwdBwd.h"
 
 namespace ibex {
 
-StcEqual::StcEqual(Ctc& c_in, Ctc& c_out, double eps) : c_in(c_in), c_out(c_out), eps(eps) {
+Bracket::Bracket(Function& f) :
+		ctc_in(*new CtcFwdBwd(*new NumConstraint(f,GT))),
+		ctc_out(*new CtcFwdBwd(*new NumConstraint(f,LEQ))) {
 
 }
 
-void StcEqual::contract(Set& set) {
-	//set.contract(c_in, c_out, eps);
-}
-
-StcEqual::~StcEqual() {
-	// TODO Auto-generated destructor stub
+Bracket::~Bracket() {
+	// TODO
 }
 
 } // namespace ibex
