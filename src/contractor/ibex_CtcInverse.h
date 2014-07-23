@@ -19,13 +19,14 @@ namespace ibex {
 class CtcInverse : public Ctc {
 public:
 	CtcInverse(Ctc& c, Function& f);
+	~CtcInverse();
 	virtual void contract(IntervalVector& box);
 
 	Ctc& c;
 	Function& f;
 
 private:
-	Function id;
+	Function *id;
 	IntervalVector y;
 };
 
