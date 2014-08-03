@@ -113,14 +113,14 @@ SetNode* diff(const IntervalVector& x, const IntervalVector& y, SetType x_status
 
 		if (c1.is_empty()) continue;
 
-		// we discard the y-part if it is not significant
+		// we discard the x-part if it is not significant
 		// but this is safe only if the status of y is UNK.
 		if (y_status==UNK && c1.diam()<eps) continue;
 
 		// when the set difference is close to x itself
 		// we return x. But this is safe only if the
 		// status of x is UNK.
-		if (x_status==UNK && x[var].delta(c1)<eps) {
+		if (x[var]==c1 || (x_status==UNK && x[var].delta(c1)<eps)) {
 			// no (significant) difference at all
 			delete[] tmp;
 			return new SetLeaf(x_status);
@@ -129,16 +129,18 @@ SetNode* diff(const IntervalVector& x, const IntervalVector& y, SetType x_status
 		tmp[b].var = var;
 		if (c1.lb()==x[var].lb()) {
 			tmp[b].pt = c1.ub();
+			assert(x[var].interior_contains(tmp[b].pt));
 			tmp[b].y_left = false;
 		} else {
 			tmp[b].pt = c1.lb();
+			assert(x[var].interior_contains(tmp[b].pt));
 			tmp[b].y_left = true;
 		}
 		b++;
 
 		if (c2.is_empty()) continue;
 		if (y_status==UNK && c2.diam()<eps)  continue;
-		if (x_status==UNK && x[var].delta(c2)<eps) {
+		if (x[var]==c2 || (x_status==UNK && x[var].delta(c2)<eps)) {
 			// no (significant) difference at all
 			delete[] tmp;
 			return new SetLeaf(x_status);
@@ -146,6 +148,7 @@ SetNode* diff(const IntervalVector& x, const IntervalVector& y, SetType x_status
 
 		tmp[b].var = var;
 		tmp[b].pt = c2.lb();
+		assert(x[var].interior_contains(tmp[b].pt));
 		tmp[b].y_left = true;
 		b++;
 	}
@@ -159,8 +162,10 @@ SetNode* diff(const IntervalVector& x, const IntervalVector& y, SetType x_status
 
 		for (int i=b-1; i>=0; i--) {
 			if (tmp[i].y_left) {
+				assert(x[tmp[i].var].interior_contains(tmp[i].pt));
 				bisect=new SetBisect(tmp[i].var,tmp[i].pt, bisect, new SetLeaf(x_status));
 			} else {
+				assert(x[tmp[i].var].interior_contains(tmp[i].pt));
 				bisect=new SetBisect(tmp[i].var,tmp[i].pt, new SetLeaf(x_status), bisect);
 			}
 		}

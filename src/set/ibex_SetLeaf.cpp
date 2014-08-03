@@ -70,6 +70,7 @@ SetNode* SetLeaf::sync_rec(const IntervalVector& nodebox, Bracket& br, double ep
 		int var=nodebox.extr_diam_index(false);
 		pair<IntervalVector,IntervalVector> p=nodebox.bisect(var);
 		double pt=p.first[var].ub();
+		assert(nodebox[var].interior_contains(pt));
 		SetBisect* bis = new SetBisect(var, pt, new SetLeaf(UNK), new SetLeaf(UNK));
 		delete this;
 		return bis->sync_rec(nodebox, br, eps);
@@ -92,7 +93,7 @@ SetNode* SetLeaf::inter(const IntervalVector& nodebox, const IntervalVector& x, 
 		return this;
 	} else {
 		// status=(UNK | IN_TMP), xstatus=(IN | OUT).
-		SetNode* new_node=diff(nodebox, x, status, xstatus, eps);
+		SetNode* new_node=diff(nodebox, x, status, xstatus==OUT? OUT : (status==IN_TMP? IN : UNK), eps);
 		delete this; // warning: suicide, don't move it before previous line
 		//cout << "gives "; new_node->print(cout,nodebox,0);
 		return new_node;
@@ -109,6 +110,7 @@ SetNode* SetLeaf::inter_rec(const IntervalVector& nodebox, Bracket& br, double e
 		int var=nodebox.extr_diam_index(false);
 		pair<IntervalVector,IntervalVector> p=nodebox.bisect(var);
 		double pt=p.first[var].ub();
+		assert(nodebox[var].interior_contains(pt));
 		SetBisect* bis = new SetBisect(var, pt, new SetLeaf(status), new SetLeaf(status));
 		delete this;
 		return bis->inter_rec(nodebox, br, eps);
@@ -116,8 +118,7 @@ SetNode* SetLeaf::inter_rec(const IntervalVector& nodebox, Bracket& br, double e
 }
 
 void SetLeaf::to_vibes(color_code color_func, const IntervalVector& nodebox) const {
-	if (nodebox.min_diam()<0.02) return;
-	double dec=0; //0.01;
+	double dec=0.01; // 0.1*nodebox.min_diam();
 	vibes::drawBox(nodebox[0].lb()+dec, nodebox[0].ub()-dec, nodebox[1].lb()+dec, nodebox[1].ub()-dec, color_func(status));
 }
 

@@ -67,6 +67,10 @@ SetNode* SetBisect::inter(const IntervalVector& nodebox, const IntervalVector& x
 	//	if (x_status==IN) {
 	//		return this;
 	//	}
+	if (x_status==UNK) {
+		return this;
+	}
+
 
 	// certainly_contains_out in comment because does not take into account IN_TMP
     if ((x_status==OUT /*|| !certainly_contains_out(status)*/) && nodebox.is_subset(x)) {

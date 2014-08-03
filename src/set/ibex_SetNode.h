@@ -7,8 +7,8 @@
 // Created     : 13 juil. 2014
 //============================================================================
 
-#ifndef __IBEX_SET_OUTDE_H__
-#define __IBEX_SET_OUTDE_H__
+#ifndef __IBEX_SET_NODE_H__
+#define __IBEX_SET_NODE_H__
 
 #include "ibex_IntervalVector.h"
 #include "ibex_Bracket.h"
@@ -30,12 +30,20 @@ bool certainly_contains_out(SetType x);
 
 const char* color(SetType status);
 
+/**
+ * \brief Exception thrown by sync function.
+ *
+ * Thrown when the set interval is empty (<=> no set exists).
+ */
 class NoSet {
 
 };
 
 class Set;
 
+/**
+ * \brief Set node.
+ */
 class SetNode {
 
 public:
@@ -88,7 +96,7 @@ public:
 	 * Set all "IN_TMP" leaves to "UNK"
 	 *
 	 * This function is useful for calculating set intersection only.
-	 * Once the intersection is calcualted, the nodes that was in the original
+	 * Once the intersection is calculated, the nodes that was in the original
 	 * set but that could not be proven to be inside the intersection
 	 * have "UNK" status.
 	 */
@@ -103,4 +111,4 @@ SetNode* contract_set(const IntervalVector& x, Ctc& c, SetType x_status, SetType
 
 } // namespace ibex
 
-#endif // __IBEX_SET_OUTDE_H__
+#endif // __IBEX_SET_NODE_H__
