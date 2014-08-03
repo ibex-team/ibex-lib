@@ -30,7 +30,7 @@ public:
 
 	void sync(Bracket& br);
 
-	void to_vibes(SetNode::color_code color_func) const;
+	void visit_leaves(SetNode::leaf_func func) const;
 
 protected:
 	friend std::ostream& operator<<(std::ostream& os, const Set& set);

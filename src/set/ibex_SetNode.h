@@ -28,7 +28,6 @@ bool certainly_contains_in(SetType x);
 
 bool certainly_contains_out(SetType x);
 
-const char* color(SetType status);
 
 /**
  * \brief Exception thrown by sync function.
@@ -47,7 +46,7 @@ class Set;
 class SetNode {
 
 public:
-	typedef const char* (*color_code) (SetType);
+	typedef void (*leaf_func) (const IntervalVector&, SetType);
 
 	SetNode(SetType status);
 
@@ -78,7 +77,7 @@ public:
 
 	virtual SetNode* inter_rec(const IntervalVector& nodebox, Bracket& br, double eps)=0;
 
-	virtual void to_vibes(color_code color_func, const IntervalVector& nodebox) const=0;
+	virtual void visit_leaves(leaf_func func, const IntervalVector& nodebox) const=0;
 
 	virtual void print(std::ostream& os, const IntervalVector& nodebox, int shift) const=0;
 

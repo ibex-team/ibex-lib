@@ -32,7 +32,7 @@ public:
 
 	virtual SetNode* inter_rec(const IntervalVector& nodebox, Bracket& br, double eps);
 
-	virtual void to_vibes(color_code color_func, const IntervalVector& nodebox) const;
+	virtual void visit_leaves(leaf_func func, const IntervalVector& nodebox) const;
 
 	virtual void print(std::ostream& os, const IntervalVector& nodebox, int shift) const;
 

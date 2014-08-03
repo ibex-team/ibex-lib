@@ -198,15 +198,7 @@ char to_string(const SetType& status) {
 	switch(status) {
 	case IN : return 'Y'; break;
 	case OUT : return 'N'; break;
-	default : return '?'; break;
-	}
-}
-
-const char* color(SetType status) {
-	switch (status) {
-	case IN: return "g";
-	case OUT:  return "r";
-	default : return "b";
+	default : return '?';
 	}
 }
 

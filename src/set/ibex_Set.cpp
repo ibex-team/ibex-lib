@@ -46,8 +46,8 @@ Set& Set::operator&=(const Set& set) {
 }
 
 
-void Set::to_vibes(SetNode::color_code color_func) const {
-	root->to_vibes(color_func, bounding_box);
+void Set::visit_leaves(SetNode::leaf_func func) const {
+	root->visit_leaves(func, bounding_box);
 }
 
 std::ostream& operator<<(std::ostream& os, const Set& set) {

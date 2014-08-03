@@ -91,9 +91,9 @@ SetNode* SetBisect::inter_rec(const IntervalVector& nodebox, Bracket& br, double
 	return try_merge();
 }
 
-void SetBisect::to_vibes(color_code color_func, const IntervalVector& nodebox) const {
-	left->to_vibes(color_func, left_box(nodebox));
-	right->to_vibes(color_func, right_box(nodebox));
+void SetBisect::visit_leaves(leaf_func func, const IntervalVector& nodebox) const {
+	left->visit_leaves(func, left_box(nodebox));
+	right->visit_leaves(func, right_box(nodebox));
 }
 
 void SetBisect::print(ostream& os, const IntervalVector& nodebox, int shift) const {

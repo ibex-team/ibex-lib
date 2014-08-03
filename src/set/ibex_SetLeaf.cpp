@@ -10,8 +10,6 @@
 #include "ibex_SetLeaf.h"
 #include "ibex_SetBisect.h"
 
-#include "/home/gilles/apps/VIBES-0.2.0/client-api/C++/src/vibes.h"
-
 using namespace std;
 
 namespace ibex {
@@ -117,9 +115,8 @@ SetNode* SetLeaf::inter_rec(const IntervalVector& nodebox, Bracket& br, double e
 	}
 }
 
-void SetLeaf::to_vibes(color_code color_func, const IntervalVector& nodebox) const {
-	double dec=0.01; // 0.1*nodebox.min_diam();
-	vibes::drawBox(nodebox[0].lb()+dec, nodebox[0].ub()-dec, nodebox[1].lb()+dec, nodebox[1].ub()-dec, color_func(status));
+void SetLeaf::visit_leaves(leaf_func func, const IntervalVector& nodebox) const {
+	func(nodebox, status);
 }
 
 void SetLeaf::print(ostream& os, const IntervalVector& nodebox, int shift) const {
