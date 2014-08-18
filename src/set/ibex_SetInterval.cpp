@@ -7,24 +7,24 @@
 // Created     : 13 juil. 2014
 //============================================================================
 
-#include "ibex_Set.h"
+#include "ibex_SetInterval.h"
 #include "ibex_SetLeaf.h"
 
 using namespace std;
 
 namespace ibex {
 
-Set::Set(const IntervalVector& bounding_box, double eps, SetType status) : root(new SetLeaf(status)), eps(eps), bounding_box(bounding_box) {
+SetInterval::SetInterval(const IntervalVector& bounding_box, double eps, bool inner) : root(new SetLeaf(inner? __IBEX_IN__: __IBEX_UNK__)), eps(eps), bounding_box(bounding_box) {
 
 }
 
-bool Set::is_empty() const {
+bool SetInterval::is_empty() const {
 	return root==NULL;
 }
 
-void Set::sync(Bracket& br) {
+void SetInterval::sync(Separator& sep) {
 	try {
-		root = root->sync(bounding_box, br, eps);
+		root = root->sync(bounding_box, sep, eps);
 	} catch(NoSet& e) {
 		delete root;
 		root = NULL;
@@ -32,13 +32,13 @@ void Set::sync(Bracket& br) {
 	}
 }
 
-void Set::contract(Bracket& br) {
+void SetInterval::contract(Separator& sep) {
 	root->set_in_tmp();
-	root = root->inter(bounding_box, br, eps);
+	root = root->inter(bounding_box, sep, eps);
 	root->unset_in_tmp();
 }
 
-Set& Set::operator&=(const Set& set) {
+SetInterval& SetInterval::operator&=(const SetInterval& set) {
 	root->set_in_tmp();
 	root = root->inter(bounding_box, set.root, set.bounding_box, eps);
 	root->unset_in_tmp();
@@ -46,16 +46,16 @@ Set& Set::operator&=(const Set& set) {
 }
 
 
-void Set::visit_leaves(SetNode::leaf_func func) const {
+void SetInterval::visit_leaves(SetNode::leaf_func func) const {
 	root->visit_leaves(func, bounding_box);
 }
 
-std::ostream& operator<<(std::ostream& os, const Set& set) {
+std::ostream& operator<<(std::ostream& os, const SetInterval& set) {
 	set.root->print(os,set.bounding_box, 0);
 	return os;
 }
 
-Set::~Set() {
+SetInterval::~SetInterval() {
 	delete root;
 }
 
