@@ -14,6 +14,16 @@
 
 using namespace std;
 
+// =========== shortcuts ==================
+#define IN         __IBEX_IN__
+#define OUT        __IBEX_OUT__
+#define UNK        __IBEX_UNK__
+#define UNK_IN     __IBEX_UNK_IN__
+#define UNK_OUT    __IBEX_UNK_OUT__
+#define UNK_IN_OUT __IBEX_UNK_IN_OUT__
+#define IN_TMP     __IBEX_IN_TMP__
+// ========================================
+
 namespace ibex {
 
 SetBisect::SetBisect(int var, double pt, SetNode* left, SetNode* right) : SetNode(left->status | right->status), var(var), pt(pt), left(left), right(right) {
@@ -32,7 +42,7 @@ bool SetBisect::is_leaf() const {
 	return false;
 }
 
-SetNode* SetBisect::sync(const IntervalVector& nodebox, const IntervalVector& x, SetType x_status, double eps) {
+SetNode* SetBisect::sync(const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps) {
 	assert(x_status<=UNK);
 
 	if (x_status==UNK) {
@@ -52,15 +62,15 @@ SetNode* SetBisect::sync(const IntervalVector& nodebox, const IntervalVector& x,
 	}
 }
 
-SetNode* SetBisect::sync_rec(const IntervalVector& nodebox, Bracket& br, double eps) {
-	left = left->sync(left_box(nodebox), br, eps);
-	right = right->sync(right_box(nodebox), br, eps);
+SetNode* SetBisect::sync_rec(const IntervalVector& nodebox, Separator& sep, double eps) {
+	left = left->sync(left_box(nodebox), sep, eps);
+	right = right->sync(right_box(nodebox), sep, eps);
 	// status of children may have changed --> try merge
 	return try_merge();
 }
 
 
-SetNode* SetBisect::inter(const IntervalVector& nodebox, const IntervalVector& x, SetType x_status, double eps) {
+SetNode* SetBisect::inter(const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps) {
 	assert(x_status<=UNK);
 
 	// no: keep subnodes informed that x_status is IN (their status can changed from IN_TMP to IN)
@@ -84,9 +94,9 @@ SetNode* SetBisect::inter(const IntervalVector& nodebox, const IntervalVector& x
 	}
 }
 
-SetNode* SetBisect::inter_rec(const IntervalVector& nodebox, Bracket& br, double eps) {
-	left = left->inter(left_box(nodebox), br, eps);
-	right = right->inter(right_box(nodebox), br, eps);
+SetNode* SetBisect::inter_rec(const IntervalVector& nodebox, Separator& sep, double eps) {
+	left = left->inter(left_box(nodebox), sep, eps);
+	right = right->inter(right_box(nodebox), sep, eps);
 	// status of children may have changed --> try merge
 	return try_merge();
 }
@@ -130,7 +140,7 @@ IntervalVector SetBisect::right_box(const IntervalVector& nodebox) const {
 SetNode* SetBisect::try_merge() {
 	// the case left=right=UNK may happen.
 	if (left->status<=UNK && left->status==right->status) {
-		SetType s=left->status;
+		NodeType s=left->status;
 		delete this;
 		return new SetLeaf(s);
 	} else

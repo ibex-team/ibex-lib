@@ -12,9 +12,19 @@
 
 using namespace std;
 
+// =========== shortcuts ==================
+#define IN         __IBEX_IN__
+#define OUT        __IBEX_OUT__
+#define UNK        __IBEX_UNK__
+#define UNK_IN     __IBEX_UNK_IN__
+#define UNK_OUT    __IBEX_UNK_OUT__
+#define UNK_IN_OUT __IBEX_UNK_IN_OUT__
+#define IN_TMP     __IBEX_IN_TMP__
+// ========================================
+
 namespace ibex {
 
-SetLeaf::SetLeaf(SetType status) : SetNode(status) {
+SetLeaf::SetLeaf(NodeType status) : SetNode(status) {
 	if (status>UNK && status!=IN_TMP) {
 		ibex_error("cannot set multiple status to SetLeaf");
 	}
@@ -27,7 +37,7 @@ bool SetLeaf::is_leaf() const {
 	return true;
 }
 
-//SetNode* SetLeaf::sync(const IntervalVector& nodebox, const IntervalVector& x, SetType xstatus, double eps, Mode mode) {
+//SetNode* SetLeaf::sync(const IntervalVector& nodebox, const IntervalVector& x, NodeType xstatus, double eps, Mode mode) {
 //	switch (mode) {
 //	case SYNC: return sync(nodebox, x, xstatus, eps);
 //	case INTER: return inter(nodebox, x, xstatus, eps);
@@ -36,7 +46,7 @@ bool SetLeaf::is_leaf() const {
 //	}
 //}
 
-SetNode* SetLeaf::sync(const IntervalVector& nodebox, const IntervalVector& x, SetType xstatus, double eps) {
+SetNode* SetLeaf::sync(const IntervalVector& nodebox, const IntervalVector& x, NodeType xstatus, double eps) {
 	//cout << nodebox << " " << to_string(status)  << " sync " << x << " ";
 	assert(xstatus<=UNK);
 
@@ -60,7 +70,7 @@ SetNode* SetLeaf::sync(const IntervalVector& nodebox, const IntervalVector& x, S
 	}
 }
 
-SetNode* SetLeaf::sync_rec(const IntervalVector& nodebox, Bracket& br, double eps) {
+SetNode* SetLeaf::sync_rec(const IntervalVector& nodebox, Separator& sep, double eps) {
 
 	if (status<UNK || nodebox.max_diam()<=eps) {
 		return this;
@@ -71,13 +81,13 @@ SetNode* SetLeaf::sync_rec(const IntervalVector& nodebox, Bracket& br, double ep
 		assert(nodebox[var].interior_contains(pt));
 		SetBisect* bis = new SetBisect(var, pt, new SetLeaf(UNK), new SetLeaf(UNK));
 		delete this;
-		return bis->sync_rec(nodebox, br, eps);
+		return bis->sync_rec(nodebox, sep, eps);
 	}
 }
 
 
 
-SetNode* SetLeaf::inter(const IntervalVector& nodebox, const IntervalVector& x, SetType xstatus, double eps) {
+SetNode* SetLeaf::inter(const IntervalVector& nodebox, const IntervalVector& x, NodeType xstatus, double eps) {
 	//cout << nodebox << " " << to_string(status)  << " inter " << x << " ";
 	assert(xstatus<=UNK);
 
@@ -98,7 +108,7 @@ SetNode* SetLeaf::inter(const IntervalVector& nodebox, const IntervalVector& x, 
 	}
 }
 
-SetNode* SetLeaf::inter_rec(const IntervalVector& nodebox, Bracket& br, double eps) {
+SetNode* SetLeaf::inter_rec(const IntervalVector& nodebox, Separator& sep, double eps) {
 
 	if (status<UNK)
 		return this;
@@ -111,12 +121,12 @@ SetNode* SetLeaf::inter_rec(const IntervalVector& nodebox, Bracket& br, double e
 		assert(nodebox[var].interior_contains(pt));
 		SetBisect* bis = new SetBisect(var, pt, new SetLeaf(status), new SetLeaf(status));
 		delete this;
-		return bis->inter_rec(nodebox, br, eps);
+		return bis->inter_rec(nodebox, sep, eps);
 	}
 }
 
 void SetLeaf::visit_leaves(leaf_func func, const IntervalVector& nodebox) const {
-	func(nodebox, status);
+	func(nodebox, status==IN? YES : (status==OUT? NO : MAYBE));
 }
 
 void SetLeaf::print(ostream& os, const IntervalVector& nodebox, int shift) const {

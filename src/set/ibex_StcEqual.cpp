@@ -18,7 +18,7 @@ StcEqual::StcEqual(Ctc& c_in, Ctc& c_out, double eps) : c_in(c_in), c_out(c_out)
 
 }
 
-void StcEqual::contract(Set& set) {
+void StcEqual::contract(SetInterval& set) {
 	//set.contract(c_in, c_out, eps);
 }
 

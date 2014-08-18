@@ -14,81 +14,19 @@
 
 using namespace std;
 
+// =========== shortcuts ==================
+#define IN         __IBEX_IN__
+#define OUT        __IBEX_OUT__
+#define UNK        __IBEX_UNK__
+#define UNK_IN     __IBEX_UNK_IN__
+#define UNK_OUT    __IBEX_UNK_OUT__
+#define UNK_IN_OUT __IBEX_UNK_IN_OUT__
+#define IN_TMP     __IBEX_IN_TMP__
+// ========================================
+
 namespace ibex {
 
-SetType operator|(SetType x, SetType y) {
-	switch (x) {
-	case IN : {
-		switch(y) {
-		case IN :        return IN;
-		case OUT :
-		case UNK_OUT:
-		case UNK_IN_OUT: return UNK_IN_OUT;
-		default :        return UNK_IN;
-		}
-	}
-	break;
-	case OUT : {
-		switch(y) {
-		case OUT :       return OUT;
-		case IN :
-		case UNK_IN:
-		case UNK_IN_OUT: return UNK_IN_OUT;
-		default :        return UNK_OUT;
-		}
-	}
-	break;
-	case UNK : {
-		switch(y) {
-		case IN :
-		case UNK_IN:  return UNK_IN;
-		case OUT :
-		case UNK_OUT: return UNK_OUT;
-		case UNK:     return UNK;
-		default:      return UNK_IN_OUT;
-		}
-	}
-	break;
-	case UNK_IN : {
-		switch(y) {
-		case IN :
-		case UNK_IN:
-		case UNK :    return UNK_IN;
-		default:      return UNK_IN_OUT;
-		}
-	}
-	break;
-	case UNK_OUT : {
-		switch(y) {
-		case OUT :
-		case UNK_OUT:
-		case UNK :    return UNK_OUT;
-		default:      return UNK_IN_OUT;
-		}
-	}
-	break;
-	default :
-		return UNK_IN_OUT;
-	}
-}
-
-bool certainly_contains_in(SetType x) {
-	return x==IN || x==UNK_IN || x==UNK_IN_OUT;
-}
-
-bool certainly_contains_out(SetType x) {
-	return x==OUT || x==UNK_OUT || x==UNK_IN_OUT;
-}
-
-bool possibly_contains_in(SetType x) {
-	return x!=OUT;
-}
-
-bool possibly_contains_out(SetType x) {
-	return x!=IN;
-}
-
-SetNode* diff(const IntervalVector& x, const IntervalVector& y, SetType x_status, SetType y_status, double eps) {
+SetNode* diff(const IntervalVector& x, const IntervalVector& y, NodeType x_status, NodeType y_status, double eps) {
 
 	if (y.is_empty()) {
 		return new SetLeaf(x_status);
@@ -177,7 +115,7 @@ SetNode* diff(const IntervalVector& x, const IntervalVector& y, SetType x_status
 }
 
 // result of a contraction represented as a SetNode
-SetNode* contract_set(const IntervalVector& box1, Ctc& c, SetType x_status, SetType y_status, double eps) {
+SetNode* contract_set(const IntervalVector& box1, Ctc& c, NodeType x_status, NodeType y_status, double eps) {
 	if (x_status==y_status) return new SetLeaf(x_status);
 
 	SetNode* root2;
@@ -194,7 +132,7 @@ SetNode* contract_set(const IntervalVector& box1, Ctc& c, SetType x_status, SetT
 	return root2;
 }
 
-char to_string(const SetType& status) {
+char to_string(const NodeType& status) {
 	switch(status) {
 	case IN : return 'Y'; break;
 	case OUT : return 'N'; break;
@@ -202,7 +140,7 @@ char to_string(const SetType& status) {
 	}
 }
 
-SetNode::SetNode(SetType status) : status(status) {
+SetNode::SetNode(NodeType status) : status(status) {
 
 }
 
@@ -210,24 +148,24 @@ SetNode::~SetNode() {
 
 }
 
-SetNode* SetNode::sync(const IntervalVector& nodebox, Bracket& br, double eps) {
+SetNode* SetNode::sync(const IntervalVector& nodebox, Separator& sep, double eps) {
 	// perform contraction
 	//cout << "=== contract with ctc_in  =======" << endl;
 
 	// we skip other UNK-box if this node is not a leaf. This makes no difference
 	// if we are in SYNC mode but if we are in INTER mode, this prevents from
 	// this node to be "absorbed" by a temporary UNK box resulting from contraction.
-	SetNode* this2 = this->sync(nodebox, contract_set(nodebox, br.ctc_in, IN, UNK, eps), nodebox, eps, !is_leaf());
+	SetNode* this2 = this->sync(nodebox, contract_set(nodebox, sep.ctc_in, IN, UNK, eps), nodebox, eps, !is_leaf());
 
 	//cout << " ctc_in gives: "; this2->print(cout,nodebox,0);
 	//cout << endl;
 
 	//cout << "=== contract with ctc_out =======" << endl;
-	SetNode* this3 = this2->sync(nodebox, contract_set(nodebox, br.ctc_out, OUT, UNK, eps), nodebox, eps, !this2->is_leaf());
+	SetNode* this3 = this2->sync(nodebox, contract_set(nodebox, sep.ctc_out, OUT, UNK, eps), nodebox, eps, !this2->is_leaf());
 	//cout << " ctc_out gives: "; this3->print(cout,nodebox,0);
 	//cout << endl;
 
-	SetNode* this4 = this3->sync_rec(nodebox, br, eps);
+	SetNode* this4 = this3->sync_rec(nodebox, sep, eps);
 
 	return this4;
 }
@@ -248,15 +186,15 @@ SetNode* SetNode::sync(const IntervalVector& nodebox, const SetNode* other, cons
 	}
 }
 
-SetNode* SetNode::inter(const IntervalVector& nodebox, Bracket& br, double eps) {
+SetNode* SetNode::inter(const IntervalVector& nodebox, Separator& sep, double eps) {
 	// we skip other UNK-box if this node is not a leaf. This makes no difference
 	// if we are in SYNC mode but if we are in INTER mode, this prevents from
 	// this node to be "absorbed" by a temporary UNK box resulting from contraction.
-	SetNode* this2 = this->inter(nodebox, contract_set(nodebox, br.ctc_in, IN, UNK, eps), nodebox, eps);
+	SetNode* this2 = this->inter(nodebox, contract_set(nodebox, sep.ctc_in, IN, UNK, eps), nodebox, eps);
 	//cout << " ctc_in gives: "; this2->print(cout,nodebox,0);
-	SetNode* this3 = this2->inter(nodebox, contract_set(nodebox, br.ctc_out, OUT, UNK, eps), nodebox, eps);
+	SetNode* this3 = this2->inter(nodebox, contract_set(nodebox, sep.ctc_out, OUT, UNK, eps), nodebox, eps);
 
-	SetNode* this4 = this3->inter_rec(nodebox, br, eps);
+	SetNode* this4 = this3->inter_rec(nodebox, sep, eps);
 
 	return this4;
 }
@@ -282,4 +220,5 @@ SetNode* SetNode::inter(const IntervalVector& nodebox, const SetNode* other, con
 		return this2->inter(nodebox, bisect_node->right, bisect_node->right_box(otherbox), eps);
 	}
 }
+
 } // namespace ibex

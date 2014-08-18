@@ -10,14 +10,14 @@
 #ifndef __IBEX_STC_H__
 #define __IBEX_STC_H__
 
-#include "ibex_Set.h"
+#include "ibex_SetInterval.h"
 
 namespace ibex {
 
 class Stc {
 public:
 	Stc();
-	virtual void contract(Set& set)=0;
+	virtual void contract(SetInterval& set)=0;
 	virtual ~Stc();
 };
 

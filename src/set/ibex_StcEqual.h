@@ -19,7 +19,7 @@ class StcEqual : public Stc {
 public:
 	StcEqual(Ctc& c_in, Ctc& c_out, double eps);
 
-	void contract(Set& set);
+	void contract(SetInterval& set);
 
 	virtual ~StcEqual();
 
