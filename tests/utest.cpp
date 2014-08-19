@@ -15,6 +15,7 @@
 
 // ================ tools ===============
 #include "TestString.h"
+#include "TestBitSet.h"
 #include "TestSymbolMap.h"
 
 // ================ arithmetic ===============
@@ -76,6 +77,7 @@ int main() {
     Test::Suite ts;
 
     ts.add(auto_ptr<Test::Suite>(new TestString()));
+    ts.add(auto_ptr<Test::Suite>(new TestBitSet()));
     ts.add(auto_ptr<Test::Suite>(new TestSymbolMap()));
 
     ts.add(auto_ptr<Test::Suite>(new TestInterval()));

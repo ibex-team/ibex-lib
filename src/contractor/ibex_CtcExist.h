@@ -143,7 +143,7 @@ public:
 	 * \param prec    Bisection precision on the parameters
 	 * \param own_ctc Boolean which indicate if the ctc mast be destroy with this
 	 */
-	CtcExist(Ctc& c, const BoolMask& vars, const IntervalVector& y_init, double prec, bool own_ctc=false);
+	CtcExist(Ctc& c, const BitSet& vars, const IntervalVector& y_init, double prec, bool own_ctc=false);
 
 	/**
 	 * \brief Delete this.
@@ -194,7 +194,7 @@ private:
 	 * vars[i]=true <=> the ith component is a variable ("x_k")
 	 * Otherwise, the ith component is a parameter ("y_k")
 	 */
-	BoolMask vars;
+	BitSet vars;
 
 	/**
 	 * \brief precision

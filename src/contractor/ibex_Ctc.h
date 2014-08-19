@@ -14,7 +14,7 @@
 
 #include "ibex_IntervalVector.h"
 #include "ibex_EmptyBoxException.h"
-#include "ibex_BoolMask.h"
+#include "ibex_BitSet.h"
 #include "ibex_Array.h"
 
 namespace ibex {
@@ -62,7 +62,7 @@ public:
 	 *
 	 * \see #contract(IntervalVector&).
 	 */
-	void contract(IntervalVector& box, const BoolMask& impact);
+	void contract(IntervalVector& box, const BitSet& impact);
 
 	/**
 	 * \brief Contraction with specified impact and output flags.
@@ -70,7 +70,7 @@ public:
 	 * \see #contract(IntervalVector&, const BoolMask&).
 	 * \see #flags
 	 */
-	void contract(IntervalVector& box, const BoolMask& impact, BoolMask& flags);
+	void contract(IntervalVector& box, const BitSet& impact, BitSet& flags);
 
 	/**
 	 * \brief The number of variables this contractor works with.
@@ -80,12 +80,12 @@ public:
 	/**
 	 * \brief The input variables (NULL pointer means "unspecified")
 	 */
-	BoolMask* input;
+	BitSet* input;
 
 	/**
 	 * \brief The output variables NULL pointer means "unspecified")
 	 */
-	BoolMask* output;
+	BitSet* output;
 
 	/**
 	 * \brief Output flag numbers
@@ -109,7 +109,7 @@ protected:
 	 * \return if NULL, it does not mean that there is no impact but that the information on
 	 * the impact is not provided.
 	 */
-	const BoolMask* impact();
+	const BitSet* impact();
 
 	/**
 	 * Set an output flag.
@@ -124,8 +124,8 @@ protected:
 	static bool check_nb_var_ctc_list (const Array<Ctc>& l);
 
 private:
-	const BoolMask* _impact;
-	BoolMask* _output_flags;
+	const BitSet* _impact;
+	BitSet* _output_flags;
 
 
 };
@@ -143,13 +143,13 @@ inline Ctc::Ctc(const Array<Ctc>& l) : nb_var(l[0].nb_var), input(NULL), output(
 
 inline Ctc::~Ctc() { }
 
-inline const BoolMask* Ctc::impact() {
+inline const BitSet* Ctc::impact() {
 	return _impact;
 }
 
 inline void Ctc::set_flag(unsigned int f) {
 	assert(f<NB_OUTPUT_FLAGS);
-	if (_output_flags) (*_output_flags)[f]=true;
+	if (_output_flags) _output_flags->add(f);
 }
 
 

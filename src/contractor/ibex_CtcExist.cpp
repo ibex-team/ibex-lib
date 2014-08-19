@@ -92,28 +92,28 @@ void CtcExist::init(const NumConstraint& ctr, const Array<const ExprSymbol>& y, 
 
 	bsc = new LargestFirst(prec);
 
-	vars.resize(ctr.f.nb_arg());
+	vars.initialise(0,ctr.f.nb_arg()-1,BitSet::empt);
 
-	vars.set_all(); // by default all are variables
+	vars.fill(0, ctr.f.nb_arg()-1); // by default all are variables
 
 	for (int i=0; i<ctr.f.nb_arg(); i++) {
 		int j=0;
 		while (j<y.size() && strcmp(ctr.f.arg(i).name,y[j].name)!=0) j++;
 		if (j<y.size())    // ths ith argument is found in y
-			vars.unset(i); //  --> marked as a parameter
+			vars.remove(i); //  --> marked as a parameter
 	}
-	assert(vars.nb_set()==nb_var);
+	assert(vars.size()==nb_var);
 
 	this->prec = prec;
 
 	this->_own_ctc = true;
 }
 
-CtcExist::CtcExist(Ctc& ctc, const BoolMask& vars, const IntervalVector& init_box, double prec, bool own_ctc) :
-	Ctc(vars.nb_set()), y_init(init_box), nb_param(vars.size()-nb_var), ctc(&ctc), bsc(new LargestFirst(prec)),
+CtcExist::CtcExist(Ctc& ctc, const BitSet& vars, const IntervalVector& init_box, double prec, bool own_ctc) :
+	Ctc(vars.size()), y_init(init_box), nb_param(vars.size()-nb_var), ctc(&ctc), bsc(new LargestFirst(prec)),
 	 vars(vars), prec(prec), _own_ctc(own_ctc) {
 
-	assert(vars.nb_unset()==init_box.size());
+	assert(vars.size()==init_box.size());
 
 }
 

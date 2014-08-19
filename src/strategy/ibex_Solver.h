@@ -120,7 +120,7 @@ protected :
 
 	void new_sol(std::vector<IntervalVector> & sols, IntervalVector & box);
 
-	BoolMask impact;
+	BitSet impact;
 
 };
 

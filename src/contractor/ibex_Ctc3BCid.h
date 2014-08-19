@@ -13,7 +13,7 @@
 #define __IBEX_CTC_3B_CID_H__
 
 #include "ibex_Ctc.h"
-#include "ibex_BoolMask.h"
+#include "ibex_BitSet.h"
 
 namespace ibex {
 
@@ -90,7 +90,7 @@ class Ctc3BCid : public Ctc {
   *                       expressions in the initial system; during the search of solutions that follows,
   *                       the new auxiliary variables are not shaved and are thus removed from \a cid_space.
   */
-	Ctc3BCid(const BoolMask& cid_vars, Ctc& ctc, int s3b=default_s3b, int scid=default_scid,
+	Ctc3BCid(const BitSet& cid_vars, Ctc& ctc, int s3b=default_s3b, int scid=default_scid,
 			int vhandled=-1, double var_min_width=default_var_min_width);
 
 	/**     3BCID constructor
@@ -114,7 +114,7 @@ class Ctc3BCid : public Ctc {
 	virtual void contract(IntervalVector& box);
 
 	/** The variables to which var3BCID is applied **/
-	BoolMask cid_vars;
+	BitSet cid_vars;
 
 	/** The sub-contractor */
 	Ctc& ctc;
@@ -226,7 +226,7 @@ class Ctc3BCid : public Ctc {
 
 	/** Used to pass the shaved variable to the sub-contractor.
 	 * Allow to benefit from the incrementality of the sub-contractor. */
-	BoolMask impact;
+	BitSet impact;
 
 	virtual int limitCIDDichotomy () ;
 	
