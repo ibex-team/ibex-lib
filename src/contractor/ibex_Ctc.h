@@ -121,13 +121,7 @@ protected:
 	/**
 	 * \brief Check if the size of all the contractor of the list is the same.
 	 */
-	static bool check_nb_var_ctc_list (const Array<Ctc>& l)  {
-		int i=1, n=l[0].nb_var;
-		while ((l[i].nb_var==l[0].nb_var)&&(i<l.size())) {
-			i++;
-		}
-		return (i==l.size());
-	}
+	static bool check_nb_var_ctc_list (const Array<Ctc>& l);
 
 private:
 	const BoolMask* _impact;
