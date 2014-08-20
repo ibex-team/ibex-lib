@@ -258,7 +258,10 @@ Function::Function(const char* x1, const char* x2, const char* x3, const char* x
 void Function::build_from_string(const Array<const char*>& x, const char* y, const char* name) {
 
 	stringstream s;
-	s << "function " << duplicate_or_generate(name) << "(";
+
+	const char* name_copy=duplicate_or_generate(name);
+
+	s << "function " << name_copy << "(";
 	for (int i=0; i<x.size(); i++) {
 		s << x[i];
 		if (i<x.size()-1) s << ",";
@@ -266,6 +269,8 @@ void Function::build_from_string(const Array<const char*>& x, const char* y, con
 	s << ")\n";
 	s << "  return " << y << ";\n";
 	s << "end\n";
+
+	free((char*) name_copy);
 
 	char* syntax = strdup(s.str().c_str());
 	try {
