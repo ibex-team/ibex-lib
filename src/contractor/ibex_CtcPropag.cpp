@@ -35,7 +35,7 @@ CtcPropag::CtcPropag(const Array<Ctc>& cl, double ratio, bool incremental) :
 			if (list[i].input && (*list[i].output)[j]) g.add_arc(i,j,false);
 		}
 
-//	cout << g << endl;
+	//cout << g << endl;
 }
 
 
@@ -51,10 +51,10 @@ void  CtcPropag::contract(IntervalVector& box) {
 	 * about the variables that are actually impacted is
 	 * given to the awaken contractor.
 	 */
-	_impact.clear();
+	_impact.fill(0,nb_var-1);
 
 	// By default, all contractors are active
-	active.clear();
+	active.fill(0,list.size()-1);
 
 	if (incremental) {
 		/**
@@ -126,9 +126,6 @@ void  CtcPropag::contract(IntervalVector& box) {
 			throw e;
 		}
 
-		//cout << "  =>" << box[v] << endl;
-		//cout << agenda << endl;
-
 		for (set<int>::iterator it=vars.begin(); it!=vars.end(); it++) {
 			int v=*it;
 			//cout << "   " << old_box[v] << " % " << box[v] << "   " << old_box[v].ratiodelta(box[v]) << endl;
@@ -146,6 +143,10 @@ void  CtcPropag::contract(IntervalVector& box) {
 				// ================================================================
 			}
 		}
+
+		//cout << "  =>" << box << endl;
+		//cout << agenda << endl;
+
 	}
 	//cout << "=========== End propagation ==========" << endl;
 	/* we cancel the "residual" contractions
