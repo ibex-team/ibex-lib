@@ -39,7 +39,6 @@
 #include "TestGradient.h"
 #include "TestHC4Revise.h"
 #include "TestInHC4Revise.h"
-#include "TestHC4.h"
 
 // ================ parser ===============
 #include "TestParser.h"
@@ -56,9 +55,9 @@
 #include "TestPdcHansenFeasibility.h"
 
 // ================ contractor ===============
-#include "TestHC4.h"
+#include "TestCtcHC4.h"
 #include "TestCtcInteger.h"
-//#include "TestCtcSubBox.h"
+#include "TestCtcFwdBwd.h"
 #include "TestCtcNotIn.h"
 #include "TestCtcExist.h"
 
@@ -110,8 +109,9 @@ int main() {
 
     ts.add(auto_ptr<Test::Suite>(new TestPdcHansenFeasibility()));
 
-    ts.add(auto_ptr<Test::Suite>(new TestHC4()));
+    ts.add(auto_ptr<Test::Suite>(new TestCtcHC4()));
     ts.add(auto_ptr<Test::Suite>(new TestCtcInteger()));
+    ts.add(auto_ptr<Test::Suite>(new TestCtcFwdBwd()));
     ts.add(auto_ptr<Test::Suite>(new TestCtcNotIn()));
     ts.add(auto_ptr<Test::Suite>(new TestCtcExist()));
     ts.add(auto_ptr<Test::Suite>(new TestFritzJohn()));

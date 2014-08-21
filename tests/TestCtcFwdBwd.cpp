@@ -1,29 +1,26 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : TestHC4.h
+// File        : TestCtcFwdBwd.cpp
 // Author      : Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
-// Created     : Apr 10, 2012
-// Last Update : Apr 10, 2012
+// Created     : Aug 21, 2014
 //============================================================================
 
-#ifndef __TEST_HC4_H__
-#define __TEST_HC4_H__
-
-#include "cpptest.h"
-#include "utils.h"
+#include "TestCtcFwdBwd.h"
+#include "ibex_CtcFwdBwd.h"
 
 namespace ibex {
 
-class TestHC4 : public TestIbex {
-public:
-	TestHC4() {
-		TEST_ADD(TestHC4::ponts30);
-	}
+void TestCtcFwdBwd::sqrt_issue28() {
+	Variable x;
+	Function f(x,sqrt(x));
+	NumConstraint c(f);
 
-	void ponts30();
-};
+	CtcFwdBwd ctc(c);
 
-} // end namespace ibex
-#endif // __TEST_HC4_H__
+	IntervalVector box(1,Interval(-2,-1));
+	TEST_THROWS_ANYTHING(ctc.contract(box)); // should raise EmptyBoxException
+}
+
+} // namespace ibex

@@ -13,6 +13,7 @@
 #define _IBEX_EVAL_H_
 
 #include "ibex_Function.h"
+#include "ibex_EmptyBoxException.h"
 #include <iostream>
 
 namespace ibex {
@@ -129,21 +130,21 @@ inline void Eval::sign_fwd(const ExprSign&, const ExprLabel& x, ExprLabel& y)   
 inline void Eval::abs_fwd(const ExprAbs&, const ExprLabel& x, ExprLabel& y)                           { y.d->i()=abs(x.d->i()); }
 inline void Eval::power_fwd(const ExprPower& p, const ExprLabel& x, ExprLabel& y)                     { y.d->i()=pow(x.d->i(),p.expon); }
 inline void Eval::sqr_fwd(const ExprSqr&, const ExprLabel& x, ExprLabel& y)                           { y.d->i()=sqr(x.d->i()); }
-inline void Eval::sqrt_fwd(const ExprSqrt&, const ExprLabel& x, ExprLabel& y)                         { y.d->i()=sqrt(x.d->i()); }
+inline void Eval::sqrt_fwd(const ExprSqrt&, const ExprLabel& x, ExprLabel& y)                         { if ((y.d->i()=sqrt(x.d->i())).is_empty()) throw EmptyBoxException(); }
 inline void Eval::exp_fwd(const ExprExp&, const ExprLabel& x, ExprLabel& y)                           { y.d->i()=exp(x.d->i()); }
-inline void Eval::log_fwd(const ExprLog&, const ExprLabel& x, ExprLabel& y)                           { y.d->i()=log(x.d->i()); }
+inline void Eval::log_fwd(const ExprLog&, const ExprLabel& x, ExprLabel& y)                           { if ((y.d->i()=log(x.d->i())).is_empty()) throw EmptyBoxException(); }
 inline void Eval::cos_fwd(const ExprCos&, const ExprLabel& x, ExprLabel& y)                           { y.d->i()=cos(x.d->i()); }
 inline void Eval::sin_fwd(const ExprSin&, const ExprLabel& x, ExprLabel& y)                           { y.d->i()=sin(x.d->i()); }
-inline void Eval::tan_fwd(const ExprTan&, const ExprLabel& x, ExprLabel& y)                           { y.d->i()=tan(x.d->i()); }
+inline void Eval::tan_fwd(const ExprTan&, const ExprLabel& x, ExprLabel& y)                           { if ((y.d->i()=tan(x.d->i())).is_empty()) throw EmptyBoxException(); }
 inline void Eval::cosh_fwd(const ExprCosh&, const ExprLabel& x, ExprLabel& y)                         { y.d->i()=cosh(x.d->i()); }
 inline void Eval::sinh_fwd(const ExprSinh&, const ExprLabel& x, ExprLabel& y)                         { y.d->i()=sinh(x.d->i()); }
 inline void Eval::tanh_fwd(const ExprTanh&, const ExprLabel& x, ExprLabel& y)                         { y.d->i()=tanh(x.d->i()); }
-inline void Eval::acos_fwd(const ExprAcos&, const ExprLabel& x, ExprLabel& y)                         { y.d->i()=acos(x.d->i()); }
-inline void Eval::asin_fwd(const ExprAsin&, const ExprLabel& x, ExprLabel& y)                         { y.d->i()=asin(x.d->i()); }
+inline void Eval::acos_fwd(const ExprAcos&, const ExprLabel& x, ExprLabel& y)                         { if ((y.d->i()=acos(x.d->i())).is_empty()) throw EmptyBoxException(); }
+inline void Eval::asin_fwd(const ExprAsin&, const ExprLabel& x, ExprLabel& y)                         { if ((y.d->i()=asin(x.d->i())).is_empty()) throw EmptyBoxException(); }
 inline void Eval::atan_fwd(const ExprAtan&, const ExprLabel& x, ExprLabel& y)                         { y.d->i()=atan(x.d->i()); }
-inline void Eval::acosh_fwd(const ExprAcosh&, const ExprLabel& x, ExprLabel& y)                       { y.d->i()=acosh(x.d->i()); }
+inline void Eval::acosh_fwd(const ExprAcosh&, const ExprLabel& x, ExprLabel& y)                       { if ((y.d->i()=acosh(x.d->i())).is_empty()) throw EmptyBoxException(); }
 inline void Eval::asinh_fwd(const ExprAsinh&, const ExprLabel& x, ExprLabel& y)                       { y.d->i()=asinh(x.d->i()); }
-inline void Eval::atanh_fwd(const ExprAtanh&, const ExprLabel& x, ExprLabel& y)                       { y.d->i()=atanh(x.d->i()); }
+inline void Eval::atanh_fwd(const ExprAtanh&, const ExprLabel& x, ExprLabel& y)                       { if ((y.d->i()=atanh(x.d->i())).is_empty()) throw EmptyBoxException(); }
 
 inline void Eval::trans_V_fwd(const ExprTrans&, const ExprLabel& x, ExprLabel& y)                     { y.d->v()=x.d->v(); }
 inline void Eval::trans_M_fwd(const ExprTrans&, const ExprLabel& x, ExprLabel& y)                     { y.d->m()=x.d->m().transpose(); }
