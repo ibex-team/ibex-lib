@@ -90,7 +90,7 @@ UnconstrainedLocalSearch::ReturnCode UnconstrainedLocalSearch::minimize(const Ve
 		// initialization the trust region radius
 		double Delta = 0.1*gk.norm();
 		IntervalVector region(n);
-		BoolMask I(n);
+		BitSet I(BitSet::empty(n));
 
 		while ((niter<max_iter)&&(!stop(xk,gk))) {
 			niter++;
@@ -103,9 +103,11 @@ UnconstrainedLocalSearch::ReturnCode UnconstrainedLocalSearch::minimize(const Ve
 			Vector x_gcp = find_gcp(gk, Bk, xk, region);
 
 			// Compute the active set I
+			I.clear();
 			// TODO: I should be retrieved from the last line search of find_gcp
 			for (int i =0; i<n;i++) {
-				I[i] = fabs(x_gcp[i]-region[i].lb()) <sigma  || fabs(x_gcp[i]-region[i].ub()) <sigma ;
+				if (fabs(x_gcp[i]-region[i].lb()) <sigma  || fabs(x_gcp[i]-region[i].ub()) <sigma)
+					I.add(i);
 			}
 
 			// Compute the conjugate gradient
@@ -303,7 +305,7 @@ Vector UnconstrainedLocalSearch::find_gcp(const Vector& gk, const Matrix& Bk, co
 	return z_gcp;
 }
 
-double UnconstrainedLocalSearch::get_eta(const Vector& gk, const Vector& zk, const IntervalVector& region, const BoolMask& I) {
+double UnconstrainedLocalSearch::get_eta(const Vector& gk, const Vector& zk, const IntervalVector& region, const BitSet& I) {
 
 	double norm=0;
 
@@ -328,8 +330,8 @@ double UnconstrainedLocalSearch::get_eta(const Vector& gk, const Vector& zk, con
 	return sqnorm<0.1? 0.1*norm : sqnorm*norm;
 }
 
-Vector UnconstrainedLocalSearch::conj_grad(const Vector& gk, const Matrix& Bk, const Vector& xk, const Vector& x_gcp, const IntervalVector& region, const BoolMask& I) {
-	int hn = I.nb_unset(); // the restricted dimension
+Vector UnconstrainedLocalSearch::conj_grad(const Vector& gk, const Matrix& Bk, const Vector& xk, const Vector& x_gcp, const IntervalVector& region, const BitSet& I) {
+	int hn = n-I.size(); // the restricted dimension
 
 	//  cout << " [conj_grad] init x_gcp= " << x_gcp << endl;
 	if (hn==0) return x_gcp;  // we are in a corner: nothing to do

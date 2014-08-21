@@ -17,11 +17,9 @@ using namespace std;
 namespace ibex {
 
 void TestCtcInteger::test01() {
-	BoolMask mask(4);
-	mask[0]=false;
-	mask[1]=true;
-	mask[2]=false;
-	mask[3]=true;
+	BitSet mask(BitSet::empty(4));
+	mask.add(1);
+	mask.add(3);
 
 	CtcInteger c(4,mask);
 	double _box[][2] = {{0.5,1.5},  {1.5,2.5},  {2.5,3.5},  {3.5,4.5}};
@@ -36,9 +34,9 @@ void TestCtcInteger::test01() {
 }
 
 void TestCtcInteger::test02() {
-	BoolMask mask(2);
-	mask[0]=true;
-	mask[1]=true;
+	BitSet mask(BitSet::empty(2));
+	mask.add(0);
+	mask.add(1);
 
 	CtcInteger c(2,mask);
 	double _box[][2] = {{0.01,0.99},  {0.01,0.99}};

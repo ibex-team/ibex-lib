@@ -97,7 +97,7 @@ public:
 protected:
 	void init_impacts();
 
-	BoolMask *impacts;
+	BitSet *impacts;
 };
 
 } // end namespace ibex

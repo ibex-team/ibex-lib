@@ -16,7 +16,6 @@
 #include "ibex_CtcFixPoint.h"
 #include "ibex_CtcPolytopeHull.h"
 #include "ibex_LinearRelaxCombo.h"
-#include "ibex_BoolMask.h"
 #include "ibex_CellStack.h"
 #include "ibex_Array.h"
 #include <vector>

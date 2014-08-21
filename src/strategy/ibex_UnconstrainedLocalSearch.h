@@ -13,7 +13,7 @@
 
 #include "ibex_IntervalVector.h"
 #include "ibex_Function.h"
-#include "ibex_BoolMask.h"
+#include "ibex_BitSet.h"
 #include "ibex_LineSearch.h"
 
 namespace ibex {
@@ -128,12 +128,12 @@ private:
 	 *
 	 * Step 3 in the paper.
 	 */
-	Vector conj_grad(const Vector& gk, const Matrix& Bk, const Vector& zk, const Vector& z_gcp, const IntervalVector& region, const BoolMask& I);
+	Vector conj_grad(const Vector& gk, const Matrix& Bk, const Vector& zk, const Vector& z_gcp, const IntervalVector& region, const BitSet& I);
 
 	/**
 	 * \brief Compute eta = min(0.1,sqrt(||gk||))*||gk||:
 	 */
-	double get_eta(const Vector& gk, const Vector& zk, const IntervalVector& region, const BoolMask& I);
+	double get_eta(const Vector& gk, const Vector& zk, const IntervalVector& region, const BitSet& I);
 
 	/**
 	 * \brief Update the approximation Bk of the Hessian

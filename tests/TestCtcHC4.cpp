@@ -1,6 +1,6 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : TestHC4.cpp
+// File        : TestCtcHC4.cpp
 // Author      : Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
@@ -8,7 +8,7 @@
 // Last Update : Apr 10, 2012
 //============================================================================
 
-#include "TestHC4.h"
+#include "TestCtcHC4.h"
 #include "Ponts30.h"
 #include "ibex_CtcFwdBwd.h"
 #include "ibex_CtcHC4.h"
@@ -16,7 +16,7 @@
 
 namespace ibex {
 
-void TestHC4::ponts30() {
+void TestCtcHC4::ponts30() {
 	Ponts30 p30;
 	IntervalVector box = p30.init_box;
 

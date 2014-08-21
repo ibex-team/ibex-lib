@@ -28,7 +28,7 @@ public:
 	/**
 	 * \param is_int A \a nb-var sized mask with is_int[i] <=> the ith variable is integer.
 	 */
-	CtcInteger(const BoolMask& is_int);
+	CtcInteger(int nb_var, const BitSet& is_int);
 
 	/**
 	 * \brief Delete this.
@@ -37,14 +37,14 @@ public:
 
 	virtual void contract(IntervalVector& box);
 
-	virtual void contract(IntervalVector& box, const BoolMask& impact);
+	virtual void contract(IntervalVector& box, const BitSet& impact);
 
 	virtual bool idempotent();
 
 	/**
 	 * The mask.
 	 */
-	BoolMask is_int;
+	BitSet is_int;
 };
 
 } // end namespace ibex

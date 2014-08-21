@@ -49,11 +49,15 @@ CtcMohcRevise::CtcMohcRevise(const NumConstraint& c, double epsilon, double univ
 	LB.resize(ctr.f.nb_var());
 	RB.resize(ctr.f.nb_var());
 
-	input = new BoolMask(nb_var);
-	output = new BoolMask(nb_var);
+	input = new BitSet(0,nb_var-1,BitSet::empt);
+	output = new BitSet(0,nb_var-1,BitSet::empt);
 
-	for (int v=0; v<ctr.f.nb_var(); v++)
-		(*output)[v]=(*input)[v]=ctr.f.used(v);
+	for (int v=0; v<ctr.f.nb_var(); v++) {
+		if (ctr.f.used(v)) {
+			output->add(v);
+			input->add(v);
+		}
+	}
 
 	ApplyFmin=new _3vl[nb_var];
 	ApplyFmax=new _3vl[nb_var];

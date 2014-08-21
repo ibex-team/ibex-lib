@@ -22,10 +22,10 @@ const int CtcOptimShaving::LimitCIDDichotomy=100;
 
   void CtcOptimShaving::contract(IntervalVector& box) {
     int	var_obj=start_var;
-	impact.unset_all();                                // [gch]
-	impact.set(var_obj);                              // [gch]
+	impact.clear();                                // [gch]
+	impact.add(var_obj);                           // [gch]
 	var3BCID(box,var_obj);
-	impact.unset(var_obj);                            // [gch]
+	impact.remove(var_obj);                        // [gch]
 	
 	  if(box.is_empty()) throw EmptyBoxException();
 	}

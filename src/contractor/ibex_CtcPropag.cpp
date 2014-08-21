@@ -25,7 +25,7 @@ namespace ibex {
 CtcPropag::CtcPropag(const Array<Ctc>& cl, double ratio, bool incremental) :
 		  Ctc(cl), list(cl), ratio(ratio), incremental(incremental),
 		  accumulate(false), g(cl.size(), nb_var), agenda(cl.size()),
-		  _impact(nb_var), flags(Ctc::NB_OUTPUT_FLAGS), active(cl.size()) {
+		  _impact(BitSet::empty(nb_var)), flags(BitSet::empty(Ctc::NB_OUTPUT_FLAGS)), active(BitSet::empty(cl.size())) {
 
 	assert(check_nb_var_ctc_list(cl));
 
@@ -35,7 +35,7 @@ CtcPropag::CtcPropag(const Array<Ctc>& cl, double ratio, bool incremental) :
 			if (list[i].input && (*list[i].output)[j]) g.add_arc(i,j,false);
 		}
 
-//	cout << g << endl;
+	//cout << g << endl;
 }
 
 
@@ -51,10 +51,10 @@ void  CtcPropag::contract(IntervalVector& box) {
 	 * about the variables that are actually impacted is
 	 * given to the awaken contractor.
 	 */
-	_impact.set_all();
+	_impact.fill(0,nb_var-1);
 
 	// By default, all contractors are active
-	active.set_all();
+	active.fill(0,list.size()-1);
 
 	if (incremental) {
 		/**
@@ -68,8 +68,6 @@ void  CtcPropag::contract(IntervalVector& box) {
 		 * and this one turns to be slightly more efficient.
 		 * Maybe we should do the same when incremental==false.
 		 */
-
-		assert(!impact() || (impact()->size()==nb_var));
 
 		for (int i=0; i<nb_var; i++) {
 			if (!impact() || (*impact())[i]) {
@@ -118,7 +116,7 @@ void  CtcPropag::contract(IntervalVector& box) {
 		try {
 			list[c].contract(box, _impact, flags);
 			if (flags[INACTIVE]) {
-				active[c]=false;
+				active.remove(c);
 			}
 		}
 		catch (EmptyBoxException& e) {
@@ -127,9 +125,6 @@ void  CtcPropag::contract(IntervalVector& box) {
 			//cout << "   empty!" << endl;
 			throw e;
 		}
-
-		//cout << "  =>" << box[v] << endl;
-		//cout << agenda << endl;
 
 		for (set<int>::iterator it=vars.begin(); it!=vars.end(); it++) {
 			int v=*it;
@@ -148,6 +143,10 @@ void  CtcPropag::contract(IntervalVector& box) {
 				// ================================================================
 			}
 		}
+
+		//cout << "  =>" << box << endl;
+		//cout << agenda << endl;
+
 	}
 	//cout << "=========== End propagation ==========" << endl;
 	/* we cancel the "residual" contractions

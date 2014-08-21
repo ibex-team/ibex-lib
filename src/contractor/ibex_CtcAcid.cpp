@@ -19,21 +19,21 @@ double  CtcAcid::nbvarstat=0;
 //const double CtcAcid::default_ctratio=0.005;
 const double CtcAcid::default_ctratio=0.002;
 
-CtcAcid::CtcAcid(const System& sys, const BoolMask& cid_vars, Ctc& ctc, bool optim, int s3b, int scid,
-		double var_min_width, double ct_ratio): Ctc3BCid (cid_vars,ctc,s3b,scid,cid_vars.nb_set(),var_min_width),
+CtcAcid::CtcAcid(const System& sys, const BitSet& cid_vars, Ctc& ctc, bool optim, int s3b, int scid,
+		double var_min_width, double ct_ratio): Ctc3BCid (cid_vars,ctc,s3b,scid,cid_vars.size(),var_min_width),
 		system(sys), nbcalls(0), nbctvar(0), ctratio(ct_ratio),  nbcidvar(0), nbtuning(0), optim(optim)  {
 	// [gch] BNE check the argument "cid_vars.nb_set()" given to _3BCID
 }
 
-CtcAcid::CtcAcid(const System& sys,  Ctc& ctc, bool optim, int s3b, int scid,
-		double var_min_width, double ct_ratio): Ctc3BCid (BoolMask(sys.nb_var,1),ctc,s3b,scid,sys.nb_var,var_min_width),
+CtcAcid::CtcAcid(const System& sys, Ctc& ctc, bool optim, int s3b, int scid,
+		double var_min_width, double ct_ratio): Ctc3BCid (BitSet::all(sys.nb_var),ctc,s3b,scid,sys.nb_var,var_min_width),
 		system(sys), nbcalls(0), nbctvar(0), ctratio(ct_ratio), nbcidvar(0) ,  nbtuning(0), optim(optim) {
 }
 
 void CtcAcid::contract(IntervalVector& box) {
 
-	int nb_CID_var=cid_vars.nb_set();                  // [gch]
-	impact.unset_all();                                // [gch]
+	int nb_CID_var=cid_vars.size();                    // [gch]
+	impact.clear();                                    // [gch]
 	int nbvarmax=5*nb_CID_var;                         //  au plus 5*nbvar
 	double ctstat[nbvarmax];
 
@@ -64,9 +64,9 @@ void CtcAcid::contract(IntervalVector& box) {
 	for (int v=0; v<vhandled; v++) {
 		int v1=v%nb_CID_var;                               // [gch] how can v be < nb_var?? [bne]  vhandled can be between 0 and nbvarmax
 		int v2=smearorder[v1];
-		impact.set(v2);
+		impact.add(v2);
 		var3BCID(box, v2);                             // appel 3BCID sur la variable v2
-		impact.unset(v2);
+		impact.remove(v2);
 		if(box.is_empty())
 			throw EmptyBoxException();
 		if (nbcall1 < nbinitcalls) {                   // on fait des stats pour le réglage courant

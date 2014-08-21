@@ -16,26 +16,28 @@ namespace ibex {
 
 CtcFwdBwd::CtcFwdBwd(Function& f, CmpOp op, FwdMode mode) : Ctc(f.nb_var()), ctr(f,op), hc4r(mode)  {
 
-	input = new BoolMask(nb_var);
-	output = new BoolMask(nb_var);
+	input = new BitSet(0,nb_var-1,BitSet::empt);
+	output = new BitSet(0,nb_var-1,BitSet::empt);
 
 	int v;
 	for (int i=0; i<f.nb_used_vars(); i++) {
 		v=f.used_var(i);
-		(*output)[v]=(*input)[v]=true;
+		output->add(v);
+		input->add(v);
 	}
 }
 
 CtcFwdBwd::CtcFwdBwd(const NumConstraint& ctr, FwdMode mode) : Ctc(ctr.f.nb_var()), ctr(ctr.f,ctr.op), hc4r(mode) {
 
 
-	input = new BoolMask(nb_var);
-	output = new BoolMask(nb_var);
+	input = new BitSet(0,nb_var-1,BitSet::empt);
+	output = new BitSet(0,nb_var-1,BitSet::empt);
 
 	int v;
 	for (int i=0; i<ctr.f.nb_used_vars(); i++) {
 		v=ctr.f.used_var(i);
-		(*output)[v]=(*input)[v]=true;
+		output->add(v);
+		input->add(v);
 	}
 }
 

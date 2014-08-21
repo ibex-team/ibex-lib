@@ -42,19 +42,19 @@ public:
 	 * \param incr (optional)  - Whether the propagation works incrementally. This parameter is
 	 *                           only used when contraction is called with an "impact" bool mask.
 	 *
-	 * \see #contract(IntervalVector&, const BoolMask&).
+	 * \see #contract(IntervalVector&, const BitSet&).
 	 */
 	CtcPropag(const Array<Ctc>& cl, double ratio=default_ratio, bool incr=false);
 
 	/**
 	 * \brief Enforces propagation (e.g.: HC4 or BOX) fitering.
 	 *
-	 * Call #contract(IntervalVector&, const BoolMask&) with the mask
+	 * Call #contract(IntervalVector&, const BitSet&) with the mask
 	 * set to all the variables.
 	 * If #incremental is true, the propagation will start from the
 	 * impacted variables only (instead of from all the variables).
 	 *
-	 * \see #contract(IntervalVector&, const BoolMask&).
+	 * \see #contract(IntervalVector&, const BitSet&).
 	 * \throw #ibex::EmptyBoxException - if inconsistency is detected.
 	 */
 	virtual void contract(IntervalVector& box);
@@ -81,11 +81,11 @@ protected:
 
 	Agenda agenda;        // propagation agenda
 
-	BoolMask _impact;     // impact given to sub-contractors
+	BitSet _impact;     // impact given to sub-contractors
 
-	BoolMask flags;       // status of a contraction
+	BitSet flags;       // status of a contraction
 
-	BoolMask active;      // mark active sub-contractors
+	BitSet active;      // mark active sub-contractors
 
 
 };

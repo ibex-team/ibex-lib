@@ -14,7 +14,7 @@
 
 namespace ibex {
 
-void Ctc::contract(IntervalVector& box, const BoolMask& impact) {
+void Ctc::contract(IntervalVector& box, const BitSet& impact) {
 	_impact = &impact;
 
 	try {
@@ -29,11 +29,11 @@ void Ctc::contract(IntervalVector& box, const BoolMask& impact) {
 }
 
 
-void Ctc::contract(IntervalVector& box, const BoolMask& impact, BoolMask& flags) {
+void Ctc::contract(IntervalVector& box, const BitSet& impact, BitSet& flags) {
 	_impact = &impact;
 	_output_flags = &flags;
 
-	flags.unset_all();
+	flags.clear();
 
 	try {
 		contract(box);
@@ -46,6 +46,14 @@ void Ctc::contract(IntervalVector& box, const BoolMask& impact, BoolMask& flags)
 
 	_impact = NULL;
 	_output_flags = NULL;
+}
+
+bool Ctc::check_nb_var_ctc_list (const Array<Ctc>& l)  {
+	int i=1, n=l[0].nb_var;
+	while (i<l.size() && l[i].nb_var==n) {
+		i++;
+	}
+	return (i==l.size());
 }
 
 } // namespace ibex

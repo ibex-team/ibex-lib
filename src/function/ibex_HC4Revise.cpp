@@ -35,7 +35,13 @@ HC4Revise::HC4Revise(FwdMode mode) : fwd_mode(mode) {
 bool HC4Revise::proj(const Function& f, const Domain& y, IntervalVector& x) {
 	EVAL(f,x);
 
+	//std::cout << "forward:" << std::endl; f.cf.print();
+
 	Domain& root=*f.expr().deco.d;
+
+	// at this point y cannot be empty because the "forward" functions that
+	// may return an empty set (sqrt, tan) throws an exception in this case
+
 	switch(y.dim.type()) {
 	case Dim::SCALAR:       if (root.i().is_subset(y.i())) return true; break;
 	case Dim::ROW_VECTOR:
@@ -47,6 +53,8 @@ bool HC4Revise::proj(const Function& f, const Domain& y, IntervalVector& x) {
 	root &= y;
 
 	f.backward<HC4Revise>(*this);
+
+	//std::cout << "backward:" << std::endl; f.cf.print();
 
 	f.read_arg_domains(x);
 

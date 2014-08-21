@@ -1,86 +1,110 @@
 //============================================================================
 //                                  I B E X                                   
 // File        : ibex_CtcForAll.cpp
-// Author      : Jordan Ninin
+// Author      : Jordan Ninin, Gilles Chabert
 // License     : See the LICENSE file
 // Created     : Jan 29, 2014
 // Last Update : Jan 29, 2014
 //============================================================================
 
 #include "ibex_CtcForAll.h"
-#include <list>
+#include <cassert>
+
+using namespace std;
 
 namespace ibex {
 
-CtcForAll::CtcForAll(const NumConstraint& ctr, double prec,const  IntervalVector& init_box) :
-		Ctc(ctr.f.nb_var()-init_box.size()), _ctc(*new CtcFwdBwd(ctr)),_bsc(prec),
-		_init(init_box), _prec(prec), _own_ctc(true),_max_iter(1.e6)  {
-	assert(init_box.size()<ctr.f.nb_var());
+CtcForAll::CtcForAll(const NumConstraint& ctr,  const ExprSymbol& y1, const IntervalVector& init_box, double prec)
+ : CtcQuantif(ctr, Array<const ExprSymbol>(y1), init_box, prec) {
 }
 
-CtcForAll::CtcForAll(Function& f, CmpOp op, double prec,const  IntervalVector& init_box) :
-		Ctc(f.nb_var()-init_box.size()), _ctc(*new CtcFwdBwd(f, op)),_bsc(prec),
-		_init(init_box), _prec(prec), _own_ctc(true),_max_iter(1.e6)   {
-	assert(init_box.size()<f.nb_var());
+CtcForAll::CtcForAll(const NumConstraint& ctr,  const ExprSymbol& y1, const ExprSymbol& y2, const IntervalVector& init_box, double prec)
+ : CtcQuantif(ctr, Array<const ExprSymbol>(y1,y2), init_box, prec) {
 }
 
-CtcForAll::CtcForAll(Ctc& p, double prec,const  IntervalVector& init_box) :
-		Ctc(p.nb_var-init_box.size()), _ctc(p),_bsc(prec),
-		_init(init_box), _prec(prec), _own_ctc(false),_max_iter(1.e6)   {
-	assert(init_box.size()<p.nb_var);
+CtcForAll::CtcForAll(const NumConstraint& ctr,  const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const IntervalVector& init_box, double prec)
+ : CtcQuantif(ctr, Array<const ExprSymbol>(y1,y2,y3), init_box, prec) {
 }
 
-CtcForAll::~CtcForAll(){
-	if (_own_ctc) delete &_ctc;
+CtcForAll::CtcForAll(const NumConstraint& ctr,  const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const IntervalVector& init_box, double prec)
+ : CtcQuantif(ctr, Array<const ExprSymbol>(y1,y2,y3,y4), init_box, prec) {
 }
 
-
-IntervalVector& CtcForAll::getInit(){
-	return _init;
-}
-void CtcForAll::setInit(IntervalVector& init){
-	_init = init;
+CtcForAll::CtcForAll(const NumConstraint& ctr,  const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const IntervalVector& init_box, double prec)
+ : CtcQuantif(ctr, Array<const ExprSymbol>(y1,y2,y3,y4,y5), init_box, prec) {
 }
 
-void CtcForAll::contract(IntervalVector& x) {
-	assert(x.size()==nb_var);
+CtcForAll::CtcForAll(const NumConstraint& ctr,  const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const ExprSymbol& y6, const IntervalVector& init_box, double prec)
+ : CtcQuantif(ctr, Array<const ExprSymbol>(y1,y2,y3,y4,y5,y6), init_box, prec) {
+}
 
-	IntervalVector  box(nb_var+_init.size());
-	IntervalVector * sub;
-	bool mdiam; int iter =0;
-	box.put(0, x);
+CtcForAll::CtcForAll(const NumConstraint& ctr,  const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const ExprSymbol& y6, const ExprSymbol& y7, const IntervalVector& init_box, double prec)
+ : CtcQuantif(ctr, Array<const ExprSymbol>(y1,y2,y3,y4,y5,y6,y7), init_box, prec) {
+}
 
-	std::list<IntervalVector> l;
-	l.push_back(_init);
-	std::pair<IntervalVector,IntervalVector> cut(_init,_init);
+CtcForAll::CtcForAll(const NumConstraint& ctr,  const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const ExprSymbol& y6, const ExprSymbol& y7, const ExprSymbol& y8, const IntervalVector& init_box, double prec)
+ : CtcQuantif(ctr, Array<const ExprSymbol>(y1,y2,y3,y4,y5,y6,y7,y8), init_box, prec) {
+}
 
-	while ((!l.empty())&&(iter<_max_iter)) {
-		cut = _bsc.bisect(l.front());
-		l.pop_front();
-		sub = &(cut.first);
-		for (int j=1;j<=2;j++) {
-			if (j==2) sub = &(cut.second);
+CtcForAll::CtcForAll(const NumConstraint& ctr,  const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const ExprSymbol& y6, const ExprSymbol& y7, const ExprSymbol& y8, const ExprSymbol& y9, const IntervalVector& init_box, double prec)
+ : CtcQuantif(ctr, Array<const ExprSymbol>(y1,y2,y3,y4,y5,y6,y7,y8,y9), init_box, prec) {
+}
 
-			for(int i=0; i< _init.size(); i++) {
-				box[i+nb_var] = (*sub)[i].mid();
-			}
-			// it is enough to contract only with the middle, it is more precise and faster.
-			try {
-				_ctc.contract(box);
-			} catch (EmptyBoxException& e) {
-				x.set_empty(); throw e;
-			}
+CtcForAll::CtcForAll(const NumConstraint& ctr,  const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const ExprSymbol& y6, const ExprSymbol& y7, const ExprSymbol& y8, const ExprSymbol& y9, const ExprSymbol& y10, const IntervalVector& init_box, double prec)
+ : CtcQuantif(ctr, Array<const ExprSymbol>(y1,y2,y3,y4,y5,y6,y7,y8,y9,y10), init_box, prec) {
+}
 
-			mdiam=true;
-			for (int i=0;mdiam&&(i<_init.size()); i++) 	mdiam = mdiam&&((*sub)[i].diam()<= _prec);
-			if (!mdiam) {
-				l.push_back(*sub);
-				iter++;
-			}
-		}
+CtcForAll::CtcForAll(const NumConstraint& ctr,  const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const ExprSymbol& y6, const ExprSymbol& y7, const ExprSymbol& y8, const ExprSymbol& y9, const ExprSymbol& y10, const ExprSymbol& y11, const IntervalVector& init_box, double prec)
+ : CtcQuantif(ctr, Array<const ExprSymbol>(y1,y2,y3,y4,y5,y6,y7,y8,y9,y10,y11), init_box, prec) {
+}
+
+CtcForAll::CtcForAll(const NumConstraint& ctr,  const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const ExprSymbol& y6, const ExprSymbol& y7, const ExprSymbol& y8, const ExprSymbol& y9, const ExprSymbol& y10, const ExprSymbol& y11, const ExprSymbol& y12, const IntervalVector& init_box, double prec)
+ : CtcQuantif(ctr, Array<const ExprSymbol>(y1,y2,y3,y4,y5,y6,y7,y8,y9,y10,y11,y12), init_box, prec) {
+}
+
+CtcForAll::CtcForAll(Ctc& ctc, const BitSet& vars, const IntervalVector& init_box, double prec, bool own_ctc) :
+	CtcQuantif(ctc, vars, init_box, prec, own_ctc) {
+}
+
+CtcForAll::CtcForAll(const NumConstraint& c, const Array<const ExprSymbol>& y, const IntervalVector& y_init, double prec) :
+	CtcQuantif(c, y, y_init, prec) {
+}
+
+void CtcForAll::proceed(IntervalVector& x, const IntervalVector& y) {
+
+	try {
+		IntervalVector y_mid = y.mid();
+		CtcQuantif::contract(x, y_mid);
+	} catch (EmptyBoxException& e) {
+		while (!l.empty()) l.pop();
+		throw e;
 	}
-	for(int i=0; i< nb_var; i++)  x[i] &= box[i];
-	if (x.is_empty()) throw EmptyBoxException();
+
+	if (y.max_diam()>prec) {
+		l.push(y);
+	}
 }
+
+void CtcForAll::contract(IntervalVector& box) {
+	assert(box.size()==Ctc::nb_var);
+
+	assert(l.empty()); // when an exception is thrown by this function, l is flushed.
+
+	l.push(y_init);
+
+	while (!l.empty()) {
+
+		// get and immediately bisect the domain of parameters (strategy inspired by Optimizer)
+		pair<IntervalVector,IntervalVector> cut = bsc->bisect(l.top());
+
+		l.pop();
+
+		// proceed with the two sub-boxes for y
+		proceed(box, cut.first);
+		proceed(box, cut.second);
+	}
+
+}
+
 
 } // end namespace ibex
