@@ -82,6 +82,18 @@ DefaultSolver::DefaultSolver(System& sys, double prec) : Solver(rec(ctc(sys,prec
 	*memory() = NULL; // reset (for next DefaultSolver to be created)
 }
 
+// Note: we set the precision for Newton to the minimum of the precisions.
+DefaultSolver::DefaultSolver(System& sys, const Vector& prec) : Solver(rec(ctc(sys,prec.min())),
+		rec(new SmearSumRelative(sys, prec)),
+		rec(new CellStack())),
+		sys(sys) {
+
+	srand(1);
+
+	data = *memory(); // keep track of my data
+
+	*memory() = NULL; // reset (for next DefaultSolver to be created)
+}
 
 DefaultSolver::~DefaultSolver() {
 	// delete all objects dynamically created in the constructor
