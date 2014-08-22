@@ -23,9 +23,9 @@ class LinearSystem : public LinearRelax {
 public:
 	LinearSystem(const Matrix& A, const Vector& b) : LinearRelax(2,2), A(A), b(b) { }
 
-	virtual int linearization(IntervalVector & box, LinearSolver *lp_solver)  {
+	virtual int linearization(const IntervalVector & box, LinearSolver& lp_solver)  {
 		for (int i=0; i<A.nb_rows(); i++)
-	lp_solver->addConstraint(A[i],LEQ,b[i]);
+			lp_solver.addConstraint(A[i],LEQ,b[i]);
 		return A.nb_rows();
 	}
 
