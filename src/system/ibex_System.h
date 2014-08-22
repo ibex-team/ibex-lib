@@ -162,6 +162,7 @@ protected:
 
 private:
 	friend class parser::MainGenerator;
+	friend class NumConstraint; // NumConstraint requires to build a temporary system for parsing a string
 
 	void load(FILE* file);
 

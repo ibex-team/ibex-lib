@@ -17,6 +17,30 @@ using namespace std;
 
 namespace ibex {
 
+void TestNumConstraint::build_from_string01() {
+	try {
+	NumConstraint c("x","x+1<=2");
+
+	TEST_ASSERT(sameExpr(c.f.expr(),"((x+1)-2)"));
+	TEST_ASSERT(c.op==LEQ);
+
+	} catch(SyntaxError&) {
+		TEST_ASSERT(false);
+	}
+}
+
+void TestNumConstraint::build_from_string02() {
+	try {
+	NumConstraint c("x","y","x+y>0");
+
+	TEST_ASSERT(sameExpr(c.f.expr(),"(x+y)"));
+	TEST_ASSERT(c.op==GT);
+
+	} catch(SyntaxError&) {
+		TEST_ASSERT(false);
+	}
+}
+
 void TestNumConstraint::is_thick_eq01() {
 	Variable x,y;
 	// a subtraction with no constant term is not a thick equality
