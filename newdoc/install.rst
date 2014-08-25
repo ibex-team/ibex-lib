@@ -157,6 +157,8 @@ We are working on that.
 
     ~/Ibex/ibex-2.1.5/$ ./waf install
 
+.. _install-custom:
+
 =======================
 Customized Installation
 =======================

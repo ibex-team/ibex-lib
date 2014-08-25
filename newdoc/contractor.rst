@@ -359,7 +359,7 @@ It allows to contract with respect to a :ref:`system <mod-sys>` of constraints.
 
 In Ibex, the ``CtcHC4`` contractor is simply a direct specialization of ``CtcPropag`` (the :ref:`propagation contractor <ctc-propag>`).
 
-The contractors that are propated are nothing but the default (:ref:`ctc-fwd-bwd`) contractors associated to every constraint of the system.
+The contractors that are propagated are nothing but the default (:ref:`ctc-fwd-bwd`) contractors associated to every constraint of the system.
 
 Here is an example:
 
