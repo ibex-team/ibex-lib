@@ -588,6 +588,8 @@ Of course, the result is rather crude. Remember that the purpose of ``CtcFwdBwd`
 is to contract *quickly* with respect to *any* numerical constraint: it is widely applicable and takes
 a time that is only proportional to the expression size. In the other hand, it is not accurate in general.
 
+:ref:`See more <ctc-fwd-bwd>`
+
 ------------------------------ 
 Fixpoint
 ------------------------------
@@ -694,7 +696,8 @@ necessary. Of course, the more sparse the constraint system, the more valuable t
 compared to a simple fixpoint.
 
 The following example compares the number of contractors
-*(to be completed)*
+
+:ref:`See more <ctc-propag>`
 
 --------------------------------------------
 Q-Intersection (robustness w.r.t. outliers)
