@@ -1,5 +1,5 @@
 **************************************************
-             Contractors  (*under construction*)
+             Contractors
 **************************************************
 
 ------------------------------
@@ -89,6 +89,9 @@ Here is the interface for contractors. As one can see, it could not be more mini
 
    class Ctc {
      public:
+
+     // Build a contractor on nb_var variables.
+     Ctc(int nb_var);
 
      // Performs contraction. 
      // This is the only function that must be implemented in a subclass of Ctc.
@@ -225,6 +228,9 @@ The principle is that if a contraction does not remove more that
 
 then this reduction is not propagated. The default value is 0.01 in the case of propagation, 0.1 in the case of fixpoint.
 
+**Warning:** In theory (and sometimes in practice), the fixpoint ratio gives no information on the "distance"
+between the real fixpoint and the one we calculate.
+
 Here we fix the ratio to 1e-03 for both:
 
 .. literalinclude:: ../examples/doc-contractor.cpp
@@ -260,27 +266,87 @@ The display is:
 Input and Output variables
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+The input variables (the ones that potentially impacts the contractor) and the
+output variables (the ones that are potentially impacted) are two lists of variables stored under the form of "bitsets".
 
-*(to be completed)*
-
-The input and output variables of a contractor are two lists of variables stored under the form of "bitsets".
+A biset is nothing but an (efficiently structured) list of integers. 
 
 These bitsets are the two following fields of the``Ctc`` class:
 
- 
-*(to be completed)*
+.. code-block:: cpp
 
-These fields are not built by default. One reason is that the size of the bitset (the number of variables) may be unknown at compile-time. 
-The other is that, in some applications, the number of variables is too large so that one prefers not to build these data structures.
+  	/**
+	 * The input variables (NULL pointer means "unspecified")
+	 */
+	BitSet* input;
+
+	/**
+	 * The output variables NULL pointer means "unspecified")
+	 */
+	BitSet* output;
+
+These fields are not built by default. One reason is for allowing the distinction between an empty bitset and *no bitset* (information not provided).
+The other is that, in some applications, the number of variables is too large so that one prefers not to build these data structures even if they
+are very compacted.
+
+To show the usage of these bitsets and their impact on propagation, we consider the same example as before.
+Let us now force the input/output bitsets of each contractors to contain every variable:
+
+.. literalinclude:: ../examples/doc-contractor.cpp
+   :language: cpp
+   :start-after: ctc-input-output-C
+   :end-before:  ctc-input-output-C
+
+We observe now that the fixpoint with ``CtcPropag`` is reached with as many iterations as without ``CtcPropag``:
+
+.. literalinclude:: ../examples/doc-contractor.txt
+   :start-after:  ctc-input-output-O
+   :end-before:   ctc-input-output-O
+
+If you build a contractor from scratch (not inheriting a built-in contractor like we have just done), don't forget to
+create the bitsets before using them with ``add/remove``. 
+
+Here is a final example. Imagine that we have implemented a contraction algorithm for the following constraint (over 100 variables):
+
+.. math::
+
+   \forall i, 0\le i \le 49, \quad  x[2\times i]>0 \Longrightarrow x[2\times i+1]=0.
+	
+The the input (resp. output) variables is the set of even (resp. odd) numbers. Here is how the initialization could be done:
+
+.. literalinclude:: ../examples/doc-contractor.cpp
+   :language: cpp
+   :start-after: ctc-input-output-2-C
+   :end-before:  ctc-input-output-2-C
+
 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 The ``accumulate`` flag
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-*(to be completed)*
+The accumate flag is a subtle tuning parameter you may ignore on first reading.
 
+As you know now, one annoyance with continuous variables is that we have to stop the fixpoint before it is actually reached,
+which means that unsignificant contractions are not propagated.
 
+Now, to measure the significance of a contractor, we look at the intervals after contraction and compare them to
+the intervals just before contraction. 
 
+One little risk with this strategy is when a lot of unsignificant contractions gradually contracts domains to a point
+where the overall contraction has become significant. The propagation algorithm may stop despite of this significant contraction.
+
+The ``accumulate`` flag avoids this by comparing not with the intervals just before the current contraction, but the intervals
+obtained after the last significant one. The drawback, however, is that all the unsignificant contractions are cumulated
+and attributed to the current contraction, whence a little loss of efficiency.
+
+To set the accumulate flag, just write:
+
+.. code-block:: cpp
+
+   CtcPropag propag(...);
+   propag.accumulate = true;
+
+Often, in practice, setting the ``accumulate`` flag results in a sligthly better contraction with a little more time.
 
 .. _ctc-hc4:
 
@@ -288,12 +354,25 @@ The ``accumulate`` flag
 HC4
 ------------------------------
 
-A "constraint propagation" loop.
+HC4 is the classical "constraint propagation" loop that we found in the literature.
+It allows to contract with respect to a :ref:`system <mod-sys>` of constraints.
 
-*(to be completed)*
+In Ibex, the ``CtcHC4`` contractor is simply a direct specialization of ``CtcPropag`` (the :ref:`propagation contractor <ctc-propag>`).
 
+The contractors that are propagated are nothing but the default (:ref:`ctc-fwd-bwd`) contractors associated to every constraint of the system.
 
-*(to be completed)*
+Here is an example:
+
+.. literalinclude:: ../examples/doc-contractor.cpp 
+   :language: cpp
+   :start-after: ctc-hc4-C
+   :end-before: ctc-hc4-C
+
+And the result:
+
+.. literalinclude:: ../examples/doc-contractor.txt 
+   :start-after: ctc-hc4-O
+   :end-before: ctc-hc4-O
 
 .. _ctc-inverse:
 
@@ -393,6 +472,13 @@ Linear Relaxations
 
 ------------------------------
 X-Newton
+------------------------------
+
+
+*(to be completed)*
+
+------------------------------
+Exists and ForAll
 ------------------------------
 
 *(to be completed)*

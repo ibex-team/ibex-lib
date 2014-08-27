@@ -23,9 +23,9 @@ class LinearSystem : public LinearRelax {
 public:
 	LinearSystem(const Matrix& A, const Vector& b) : LinearRelax(2,2), A(A), b(b) { }
 
-	virtual int linearization(IntervalVector & box, LinearSolver *lp_solver)  {
+	virtual int linearization(const IntervalVector & box, LinearSolver& lp_solver)  {
 		for (int i=0; i<A.nb_rows(); i++)
-	lp_solver->addConstraint(A[i],LEQ,b[i]);
+			lp_solver.addConstraint(A[i],LEQ,b[i]);
 		return A.nb_rows();
 	}
 
@@ -48,9 +48,60 @@ public:
 	}
 };
 
-
 int Count::count=0;
 //! [ctc-propag-1-C]
+
+//! [ctc-input-output-C]
+class Count2 : public CtcFwdBwd {
+public:
+	static int count;
+
+	Count2(const NumConstraint& ctr) : CtcFwdBwd(ctr) {
+
+		// The input bitset should have been created
+		// by the constructor CtcFwdBwd
+		assert(input!=NULL);
+
+		// overwrite the input and output lists calculated
+		// by CtcFwdBwd by adding all the variables
+		for (int i=0; i<nb_var; i++) {
+			input->add(i);
+			output->add(i);
+		}
+	}
+
+	void contract(IntervalVector& box) {
+		CtcFwdBwd::contract(box);
+		count++;
+	}
+};
+
+int Count2::count=0;
+//! [ctc-input-output-C]
+
+
+//! [ctc-input-output-2-C]
+class MyCtc : public Ctc {
+
+	MyCtc() : Ctc(100) { // my contractor works on 100 variables
+
+		// create the input list with all the variables set by default
+		input = new BitSet(BitSet::all(100));
+		// remove all the odd variables
+		for (int i=0; i<100; i++)
+			if (i%2==1) input->remove(i);
+
+		// create the output list with all the variables unset by default
+		output = new BitSet(BitSet::empty(100));
+		// add all the odd variables
+		for (int i=0; i<100; i++)
+			if (i%2==1) output->add(i);
+	}
+
+	//! [ctc-input-output-2-C]
+};
+
+
 
 int main() {
 
@@ -111,6 +162,57 @@ int main() {
 
 	output << "! [ctc-propag-O]" << endl;
 
+	}
+
+	{
+	output << "! [ctc-input-output-O]" << endl;
+	// Load a system of constraints
+	System sys("../benchs/benchs-satisfaction/benchs-coprin/DiscreteBoundary-0100.bch");
+
+	// The array of contractors we will use
+	Array<Ctc> ctc(sys.nb_ctr);
+
+	for (int i=0; i<sys.nb_ctr; i++)
+		// Create contractors from constraints and store them in "ctc"
+		ctc.set_ref(i,*new Count2(sys.ctrs[i]));
+	//! [ctc-propag-2-C]
+
+
+	//! [ctc-propag-3-C]
+	double prec=1e-03;            // Precision upto which we calculate the fixpoint
+	//! [ctc-propag-3-C]
+
+	//! [ctc-propag-4-C]
+	// =============================== with simple fixpoint ==============================
+	Count2::count=0;               // initialize the counter
+
+	CtcPropag propag(ctc, prec);   // Propagation of all contractors
+
+	IntervalVector box2=sys.box;               // tested box (load domains written in the file)
+
+	propag.contract(box2);
+
+	output << " Number of contractions with propagation=" << Count2::count << endl;
+	output << "! [ctc-input-output-O]" << endl;
+	}
+
+	{
+	output << "! [ctc-hc4-O]" << endl;
+	//! [ctc-hc4-C]
+
+	// Load a system of equations
+	System sys("../benchs/benchs-satisfaction/benchlib2/hayes1.bch");
+	// Create the HC4 propagation loop with this system
+	CtcHC4 hc4(sys);
+
+	// Test the contraction
+	IntervalVector box(sys.box);
+	output << " Box before HC4:" << box << endl;
+	hc4.contract(box);
+	output << " Box after HC4:" << box << endl;
+
+	//! [ctc-hc4-C]
+	output << "! [ctc-hc4-O]" << endl;
 	}
 
 	{

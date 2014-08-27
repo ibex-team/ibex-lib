@@ -74,7 +74,7 @@ public:
 	 * Linearize the system and performs 2n calls to Simplex in order to reduce
 	 * the 2 bounds of each variable
 	 */
-	int linearization( IntervalVector & box, LinearSolver *mysolver);
+	int linearization(const IntervalVector& box, LinearSolver& lp_solver);
 
 
 private:
@@ -119,11 +119,11 @@ private:
 	 *
 	 * \return 0 only when the linearization is not performed
 	 */
-	int X_Linearization(IntervalVector & box, int ctr, corner_point cpoint,  IntervalVector &G,
-			int id_point, int& non_linear_vars, LinearSolver *mysolver);
+	int X_Linearization(const IntervalVector & box, int ctr, corner_point cpoint,  IntervalVector &G,
+			int id_point, int& non_linear_vars, LinearSolver& lp_solver);
 
-	int X_Linearization(IntervalVector& box, int ctr, corner_point cpoint, CmpOp op,
-			IntervalVector &G, int id_point, int& non_linear_vars, LinearSolver *mysolver);
+	int X_Linearization(const IntervalVector& box, int ctr, corner_point cpoint, CmpOp op,
+			IntervalVector &G, int id_point, int& non_linear_vars, LinearSolver& lp_solver);
 
 	/**
 	 * \brief Symbolic Jacobian

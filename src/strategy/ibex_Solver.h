@@ -69,7 +69,7 @@ public:
 	 */
 	bool next(std::vector<IntervalVector>& sols);
 
-	 
+
 	/**
 	 * \brief  The contractor 
 	 *

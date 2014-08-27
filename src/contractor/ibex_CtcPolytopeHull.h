@@ -49,6 +49,19 @@ public:
 			int time_out=LinearSolver::default_max_time_out, double eps=LinearSolver::default_eps,
 			Interval limit_diam=LinearSolver::default_limit_diam_box);
 
+	/**
+	 * \brief Creates the contractor w.r.t. Ax<=b
+	 *
+	 * \param A        - Matrix in Ax<=b
+	 * \param b        - Vector in Ax<=b
+	 * \param max_iter - The maximum number of iterations of the linear solver (default value 100)
+	 * \param timeout  - The timeout of the linear solver at each iteration    (default value 100 second)
+	 * \param eps      - The accuracy required on the resolution of the linear program (default value 1e-10)
+	 */
+	CtcPolytopeHull(const Matrix& A, const Vector& b, int max_iter=LinearSolver::default_max_iter,
+			int time_out=LinearSolver::default_max_time_out, double eps=LinearSolver::default_eps,
+			Interval limit_diam=LinearSolver::default_limit_diam_box);
+
 	virtual void contract(IntervalVector& box);
 
 	virtual ~CtcPolytopeHull();
@@ -107,7 +120,8 @@ protected:
 	 */
 	LinearSolver *mylinearsolver;
 
-
+private:
+	bool own_lr;
 
 };
 

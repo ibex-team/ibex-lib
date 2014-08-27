@@ -107,7 +107,7 @@ void begin_choco() {
 	// ------------------------------------------
 }
 
-void begin_function_file() {
+void begin_function() {
 	if (function==NULL) { // someone tries to load a system from a file containing a function only
 		throw SyntaxError("a system requires declaration of variables.");
 	}
@@ -129,7 +129,7 @@ void end_choco() {
 	// TODO: see end_system()
 }
 
-void end_function_file() {
+void end_function() {
 	if (source().func.empty()) {
 		throw SyntaxError("no function declared in file");
 	}

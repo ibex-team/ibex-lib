@@ -27,6 +27,8 @@ Solver::Solver(Ctc& ctc, Bsc& bsc, CellBuffer& buffer) :
 void Solver::start(const IntervalVector& init_box) {
 	buffer.flush();
 
+	assert(init_box.size()==ctc.nb_var);
+
 	Cell* root=new Cell(init_box);
 
 	// add data required by this solver
@@ -37,9 +39,11 @@ void Solver::start(const IntervalVector& init_box) {
 
 	buffer.push(root);
 
-	IntervalVector tmpbox(init_box.size());
+	int nb_var=init_box.size();
 
-	impact.fill();
+	IntervalVector tmpbox(ctc.nb_var);
+
+	impact.fill(0,ctc.nb_var-1);
 
 	Timer::start();
 
@@ -75,7 +79,7 @@ bool Solver::next(std::vector<IntervalVector>& sols) {
 				catch (NoBisectableVariableException&) {
 					new_sol(sols, c->box);
 					delete buffer.pop();
-					impact.fill();
+					impact.fill(0,ctc.nb_var-1);
 					return !buffer.empty();
 					// note that we skip time_limit_check() here.
 					// In the case where "next" is called by "solve",
@@ -90,7 +94,7 @@ bool Solver::next(std::vector<IntervalVector>& sols) {
 			} catch(EmptyBoxException&) {
 				assert(c->box.is_empty());
 				delete buffer.pop();
-				impact.fill();
+				impact.fill(0,ctc.nb_var-1);
 			}
 		}
 	}

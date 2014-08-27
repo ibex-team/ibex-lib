@@ -9,6 +9,7 @@
 //============================================================================
 
 #include "ibex_CtcPolytopeHull.h"
+#include "ibex_LinearRelaxFixed.h"
 
 using namespace std;
 
@@ -16,7 +17,15 @@ namespace ibex {
 
 CtcPolytopeHull::CtcPolytopeHull(LinearRelax& lr, ctc_mode cmode, int max_iter, int time_out, double eps, Interval limit_diam) :
 		Ctc(lr.nb_var()), lr(lr), goal_var(lr.goal_var()), cmode(cmode),
-		limit_diam_box(eps>limit_diam.lb()? eps : limit_diam.lb(), limit_diam.ub()) {
+		limit_diam_box(eps>limit_diam.lb()? eps : limit_diam.lb(), limit_diam.ub()), own_lr(false) {
+
+	 mylinearsolver = new LinearSolver(nb_var, lr.nb_ctr(), max_iter, time_out, eps);
+
+}
+
+CtcPolytopeHull::CtcPolytopeHull(const Matrix& A, const Vector& b, int max_iter, int time_out, double eps, Interval limit_diam) :
+		Ctc(A.nb_cols()), lr(*new LinearRelaxFixed(A,b)), goal_var(lr.goal_var()), cmode(ALL_BOX),
+		limit_diam_box(eps>limit_diam.lb()? eps : limit_diam.lb(), limit_diam.ub()), own_lr(true) {
 
 	 mylinearsolver = new LinearSolver(nb_var, lr.nb_ctr(), max_iter, time_out, eps);
 
@@ -24,6 +33,7 @@ CtcPolytopeHull::CtcPolytopeHull(LinearRelax& lr, ctc_mode cmode, int max_iter, 
 
 CtcPolytopeHull::~CtcPolytopeHull() {
 	if (mylinearsolver!=NULL) delete mylinearsolver;
+	if (own_lr) delete &lr;
 }
 
 void CtcPolytopeHull::contract(IntervalVector& box) {
@@ -37,7 +47,7 @@ void CtcPolytopeHull::contract(IntervalVector& box) {
 		mylinearsolver->initBoundVar(box);
 
 		//returns the number of constraints in the linearized system
-		int cont = lr.linearization(box,mylinearsolver);
+		int cont = lr.linearization(box, *mylinearsolver);
 		//cout << "[polytope-hull] end of LR" << endl;
 		if(cont<1)  return;
 
