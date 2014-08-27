@@ -262,19 +262,27 @@ Functions
 Creating functions
 ------------------------------
 
-To create your own function, you must first build *variables*. As before, the expression of the function
-is then obtained using C++ operator overloading:
+The easiest way to create a function is with a string directly:
 
 .. literalinclude:: ../examples/doc-tutorial.cpp 
    :language: cpp
-   :start-after: basic-func-create
-   :end-before: basic-func-create
+   :start-after: basic-func-create-1
+   :end-before: basic-func-create-1
+
+However, this has some limitations (see :ref:`mod-func-ex`).
+Another (more flexible) way to create function is using C++ operator overloading.
+The only difference is that you must have to first build *variables*:
+
+.. literalinclude:: ../examples/doc-tutorial.cpp 
+   :language: cpp
+   :start-after: basic-func-create-2
+   :end-before: basic-func-create-2
 
 ------------------------------
 Constants inside functions
 ------------------------------
 
-You can insert interval constants in the expresion of a function.
+You can insert interval constants in the expresion of a function, even in C++-style.
 For instance, if you want to create the function :math:`x\mapsto\sin(2x)`, just write:
 
 .. literalinclude:: ../examples/doc-tutorial.cpp 
@@ -293,6 +301,14 @@ numerical reliability, it is required in this case to use an interval constant e
    :start-after: basic-func-create-cst2
    :end-before: basic-func-create-cst2
 
+Or with strings directly:
+
+
+.. literalinclude:: ../examples/doc-tutorial.cpp 
+   :language: cpp
+   :start-after: basic-func-create-cst3
+   :end-before: basic-func-create-cst3
+
 --------------------------------
 Functions with vector arguments
 --------------------------------
@@ -304,8 +320,16 @@ where a and b are 2-dimensional vectors.
 
 .. literalinclude:: ../examples/doc-tutorial.cpp 
    :language: cpp
-   :start-after: func-vec-arg
-   :end-before: func-vec-arg
+   :start-after: func-vec-arg-1
+   :end-before: func-vec-arg-1
+
+We can also create the same function with string directly (note that the syntax quite :ref:`differs <mod-minibex-cpp>`).
+
+.. literalinclude:: ../examples/doc-tutorial.cpp 
+   :language: cpp
+   :start-after: func-vec-arg-2
+   :end-before: func-vec-arg-2
+
 
 *Note*: :ref:`Evaluation <tuto-func-eval>` of a thick function will necessarily result in an interval with non-null diameter, even if the argument is reduced to a point.
 
@@ -335,8 +359,28 @@ by degenerated intervals (like [0,0])::
 Vector-valued functions
 ------------------------------
 
-In line with the previous example, we define now the function that
-associates to a vector x its distance with two fixed points ``pt1=(0,0)`` and ``pt2=(1,1)``:
+Let us start with a basic example: the function :math:`x\mapsto(x-1,x+1)`.
+
+With strings:
+
+
+.. literalinclude:: ../examples/doc-tutorial.cpp 
+   :language: cpp
+   :start-after: func-vec-value-1
+   :end-before: func-vec-value-1
+
+With operator overloading:
+
+.. literalinclude:: ../examples/doc-tutorial.cpp 
+   :language: cpp
+   :start-after: func-vec-value-2
+   :end-before: func-vec-value-2
+
+*Note:* The ``Return`` keyword is only necessary when the output of a function is a vector (or a matrix).
+
+Now, in line with the previous sections, let us define a more complicated example:
+the function that associates to a vector x its distance with two fixed points ``pt1`` and ``pt2``
+initialized in our program to (0,0) and (1,1):
 
 .. math::
    
@@ -344,10 +388,10 @@ associates to a vector x its distance with two fixed points ``pt1=(0,0)`` and ``
 
 .. literalinclude:: ../examples/doc-tutorial.cpp 
    :language: cpp
-   :start-after: func-vec-value
-   :end-before: func-vec-value
+   :start-after: func-vec-value-3
+   :end-before: func-vec-value-3
 
-*Node* The ``Return`` keyword is only necessary when the output of a function is a vector (or a matrix).
+The last construction is much more cumbersome with strings.
 
 ------------------------------ 
 Matrix-valued functions
@@ -360,15 +404,24 @@ Here is an example of a function from :math:`R` to :math:`R^{2\times 2}` where:
    
    f: x \mapsto ( (2x, -x) ; (-x,3x) ).
 
+With strings:
+	
+.. literalinclude:: ../examples/doc-tutorial.cpp 
+   :start-after: func-mat-value-1
+   :end-before: func-mat-value-1
+
+With C++ operator overloading:
+
 .. literalinclude:: ../examples/doc-tutorial.cpp 
    :language: cpp
-   :start-after: func-mat-value
-   :end-before: func-mat-value
+   :start-after: func-mat-value-2
+   :end-before: func-mat-value-2
 
 The boolean value ``true`` given here to the two embedded ``Return``
 means that, each time, the two components must be put in rows, and not in column as it is by default.
 In contrast, the enclosing ``Return`` keeps the default behaviour since the two rows are
 put in column in order to form a 2x2 matrix.
+
 
 ------------------------------ 
 Using the Minibex syntax
@@ -522,6 +575,35 @@ With an initial box (x,y)=([1,2],[3,4]), we obtain the result that (x,y) must li
    :start-after: func-bwd
    :end-before: func-bwd
 
+
+.. _tuto-ctr:
+
+================== 
+Constraints
+==================
+
+To create a constraint, you can also either use strings or C++ objects:
+
+With strings:
+
+.. literalinclude:: ../examples/doc-tutorial.cpp 
+   :language: cpp
+   :start-after: ctr-1
+   :end-before: ctr-1
+
+With C++ objects:
+
+.. literalinclude:: ../examples/doc-tutorial.cpp 
+   :language: cpp
+   :start-after: ctr-2
+   :end-before: ctr-2
+
+You can also refer to a previously defined function f to create, e.g., f(x)<=0:
+
+.. literalinclude:: ../examples/doc-tutorial.cpp 
+   :language: cpp
+   :start-after: ctr-3
+   :end-before: ctr-3
 
 .. _tuto-ctc:
 
@@ -867,7 +949,7 @@ This is a :ref:`composition <tuto-inter-union-compo>` of
 #. :ref:`ACID <ctc-acid>`
 #. `Interval Newton`_ (only if it is a square system of equations)
 #. A `fixpoint`_ of the :ref:`ctc-polytope-hull` of two linear relaxations combined:
-    - the relaxation of the :ref:`ctc-xnewton` contractor (called X-Taylor)
+    - the relaxation called X-Taylor;
     - the relaxation generated by affine arithmetic. See :ref:`ctc-linear-relax`.
    
 The bisector is based on the :ref:`strategy-smear-function` with maximal relative impact.

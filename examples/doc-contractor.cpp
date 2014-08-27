@@ -19,21 +19,30 @@ using namespace ibex;
  * This file contains examples of the documentation.
  */
 
-class LinearSystem : public LinearRelax {
+//! [ctc-polytope-2-C]
+/**
+ * My own linear relaxation of a system
+ */
+class MyLinearRelax : public LinearRelax {
 public:
-	LinearSystem(const Matrix& A, const Vector& b) : LinearRelax(2,2), A(A), b(b) { }
+	/**
+	 * We actually only accept linear systems Ax<=b :)
+	 */
+	MyLinearRelax(const Matrix& A, const Vector& b) : LinearRelax(2,2), A(A), b(b) { }
 
 	virtual int linearization(const IntervalVector & box, LinearSolver& lp_solver)  {
 		for (int i=0; i<A.nb_rows(); i++)
+			// add the constraint in the LP solver
 			lp_solver.addConstraint(A[i],LEQ,b[i]);
+
+		// we return the number of constraints
 		return A.nb_rows();
 	}
 
 	Matrix A;
 	Vector b;
-
 };
-
+//! [ctc-polytope-2-C]
 
 //! [ctc-propag-1-C]
 class Count : public CtcFwdBwd {
@@ -252,7 +261,8 @@ int main() {
 	}
 
 	{
-	//! [ctc-polytope-hull]
+	output << "! [ctc-polytope-1-O]" << endl;
+	//! [ctc-polytope-1-C]
 
 	// build the matrix
 	double _A[4]= {1,1,1,-1};
@@ -261,11 +271,11 @@ int main() {
 	// build the vector
 	Vector b=Vector::zeros(2);
 
-	// create the linear system
-	LinearSystem sys(A,b);
+	// create the linear system (with fixed matrix/vector)
+	LinearRelaxFixed lin(A,b);
 
-	// create the contractor wrt the linear system
-	CtcPolytopeHull ctc(sys);
+	// create the contractor w.r.t the linear system
+	CtcPolytopeHull ctc(lin);
 
 	// create a box
 	IntervalVector box(2,Interval(-1,1));
@@ -275,6 +285,7 @@ int main() {
 	ctc.contract(box);
 	output << "box after contraction=" << box << endl;
 
-	//! [ctc-polytope-hull]
+	//! [ctc-polytope-1-C]
+	output << "! [ctc-polytope-1-O]" << endl;
 	}
 }

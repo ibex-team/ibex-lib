@@ -166,6 +166,17 @@ int main() {
 	output << "![func-apply-array-O]" << endl;
 	}
 
+
+	{
+	output << "![func-diff-O]" << endl;
+	// ![func-diff-C]
+	Function f("x","y","z","x*y*z");
+	Function df(f,Function::DIFF);
+	output << "df=" << df << endl;
+	// ![func-diff-C]
+	output << "![func-diff-O]" << endl;
+	}
+
 	{
 	Variable x("x"),y("y");
 

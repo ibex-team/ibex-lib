@@ -25,12 +25,15 @@ namespace ibex {
 class LinearRelax {
 public:
 	/**
-	 * \brief Build a relaxation for a system
+	 * \brief Build a relaxation for a system.
+	 *
+	 * The system is only used by this constructor to get the number
+	 * of variables and constraints.
 	 */
 	LinearRelax(const System& sys);
 
 	/**
-	 * \brief Build a relaxation of nb_ctr constraints.
+	 * \brief Build a relaxation of nb_ctr constraints on nb_var variables.
 	 */
 	LinearRelax(int nb_ctr, int nb_var, int goal_var=-1);
 

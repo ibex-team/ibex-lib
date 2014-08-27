@@ -9,10 +9,14 @@ Articles in Journal and Conferences
 
 .. |Araya14-pdf| replace:: PDF
 .. _Araya14-pdf: http://www.lirmm.fr/~trombetton/publis/innerregions_jogo_2014.pdf
+.. |Araya12-pdf| replace:: PDF
+.. _Araya12-pdf: http://www.lirmm.fr/~trombetton/publis/xnewton_cpaior_2012.pdf
 .. |Trombettoni11-pdf| replace:: PDF
 .. _Trombettoni11-pdf: http://www.lirmm.fr/~trombetton/publis/ibexopt_aaai_2011.pdf
 .. |Chabert10-pdf| replace:: PDF
 .. _Chabert10-pdf: http://www.emn.fr/z-info/gchabe08/chabert_beldiceanu_cp10.pdf
+.. |Ninin09-pdf| replace:: Slides
+.. _Ninin09-pdf: https://docs.google.com/open?id=1e8P45KPm2UHka3o41eWaLYio0YbofDUwOkpkNOMz9BWp2CrJuTqoFpnBSH2D
 .. |Chabert09b-pdf| replace:: PDF
 .. _Chabert09b-pdf: http://www.emn.fr/z-info/gchabe08/quimper.pdf
 .. |Chabert09a-pdf| replace:: PDF
@@ -33,6 +37,12 @@ Articles in Journal and Conferences
 |[Araya et al. 2014] |                              | under Inequality Constraints*   |                         |      |                     |
 +--------------------+------------------------------+---------------------------------+-------------------------+------+---------------------+
 |                    |                              |                                 |                         |      |                     |
+| .. _Araya12:       | **I. Araya, G. Trombettoni,  | *A Contractor Based on Convex   | CPAIOR                  | 2012 | |Araya12-pdf|_      |
+|                    | and B. Neveu**               | Interval Taylor*                |                         |      |                     |
+|[Araya et al. 2012] |                              |                                 |                         |      |                     | 
+|                    |                              |                                 |                         |      |                     | 
++--------------------+------------------------------+---------------------------------+-------------------------+------+---------------------+
+|                    |                              |                                 |                         |      |                     |
 | .. _Trombettoni11: | **G. Trombettoni, I. Araya,  | *Inner Regions and Interval     | AAAI                    | 2011 | |Trombettoni11-pdf|_|
 |                    | B. Neveu and G. Chabert**    | Linearizations for Global       |                         |      |                     |
 |[Trombettoni et al. |                              | Optimization*                   |                         |      |                     | 
@@ -45,6 +55,12 @@ Articles in Journal and Conferences
 |Beldiceanu 2010]    | N. Beldiceanu**              | Domains*                        |                         |      |                     |
 +--------------------+------------------------------+---------------------------------+-------------------------+------+---------------------+
 |                    |                              |                                 |                         |      |                     |
+| .. _Ninin09:       |                              |                                 |                         |      |                     |
+|                    |                              |                                 |                         |      |                     |
+|[Ninin & Messine,   | **J. Ninin and F. Messine**  | *An Automatic Linear            | ISMP                    | 2009 | |Ninin09-pdf|_      |
+|2009]               |                              | Reformulation Technique Based   |                         |      |                     |
+|                    |                              | on Afﬁne Arithmetic*            |                         |      |                     |
++--------------------+------------------------------+---------------------------------+-------------------------+------+---------------------+
 | .. _Chabert09b:    |                              |                                 |                         |      |                     |
 |                    |                              |                                 |                         |      |                     |
 |[Chabert & Jaulin,  | **G. Chabert and L. Jaulin** | *Contractor Programming*        | Artificial Intelligence | 2009 | |Chabert09b-pdf|_   |

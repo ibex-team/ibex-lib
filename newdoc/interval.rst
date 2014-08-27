@@ -588,7 +588,8 @@ The interval arithmetic defines for each elementary function :math:`f:\mathbb{R}
 
    [f]([x]) \supseteq \square\{f(\alpha), \ \alpha\in [x] \}
 
-The :math:`\square` symbol (called "hull") is here to highlight the fact that an enclosure of the possibly discontinuous set is returned. Note that, among all the functions below,
+where :math:`\square` (the "hull" symbol) in front of a set means "the smallest box enclosing this set".
+The hull symbol is here to highlight the fact that an enclosure of the possibly discontinuous set is returned. Note that, among all the functions below,
 only ``tan`` and ``sign`` fail to be continuous. So, in the other cases, the "hull" operator can be ommitted.
 The possible roundoff error accounts for the :math:`\supseteq` symbol.
 

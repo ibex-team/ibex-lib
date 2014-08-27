@@ -19,7 +19,7 @@ We talk about *modeling* as these objects mathematically model the concrete prob
 C++ versus Minibex
 ------------------------------
 
-There are two possible alternatives for modeling.
+There are three possible alternatives for modeling.
 You can either:
 
 -  write C++ code. Variables, functions, constraints
@@ -28,8 +28,10 @@ You can either:
 -  write all these basic mathematic data in a text file, following
    the (very intuitive) Minibex syntax. All these data are loaded
    simultaneously and stored in a single `System` object.
+-  insert a ``char*`` directly in the code instead of using a file.
+   The syntax is exactly the same (see examples in the tutorial).
 
-In both cases, you will access and use the data in the same way.
+In all cases, you will access and use the data in the same way.
 For instance, you will calculate the interval derivative of a function
 by the same code, would it be created in your C++ program or loaded
 from a Minibex file.
@@ -557,7 +559,19 @@ See the example in the :ref:`tutorial <tuto-func-compo>`.
 Symbolic differentiation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-*(to be completed)*
+Differentiation of a function is another function.
+So symbolic differentiation is obtained via a copy constructor where the copy "mode" is set to the special value ``Function::DIFF``:
+
+.. literalinclude:: ../examples/doc-modeling.cpp
+   :language: cpp
+   :start-after: func-diff-C
+   :end-before: func-diff-C
+
+The output is
+
+.. literalinclude:: ../examples/doc-modeling.txt
+   :start-after: func-diff-O
+   :end-before: func-diff-O
 
 .. _mod-func-cpp-vecvalued:
 
@@ -569,6 +583,12 @@ To define a vector-valued function, the ``Return`` keword allows
 you to list the function's components.
 
 See the example in the :ref:`tutorial <tuto-func-vec-value>`.
+
+.. _mod-func-ex:
+
+------------------------------
+Advanced examples
+------------------------------
 
 .. _mod-func-dag:
 
@@ -590,12 +610,6 @@ and we want the subexpression cos(x)+1 to be shared:
    :language: cpp
    :start-after: func-dag-C
    :end-before: func-dag-C
-
-.. _mod-func-ex:
-
-------------------------------
-Advanced examples
-------------------------------
 
 .. _mod-func-ex-iterated-sum:
 
@@ -1069,6 +1083,9 @@ you use to solve it. In this way, you can run the same program with different
 variants of your model without recompiling it each time.
 
 IBEX provides such possibility. You can directly load a system from a (plain text) input file.
+
+You may also prefer the Minibex syntax by itself to C++ operator overloading and use this syntax inside
+your C++ code by initializing ``Function`` or ``NumConstraint`` objects with ``char*``.
 
 Here is a simple example. Copy-paste the text above in a file named, say, ``problem.txt``. 
 The syntax talks for itself::
