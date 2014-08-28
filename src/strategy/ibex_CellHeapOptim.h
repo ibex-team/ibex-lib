@@ -84,6 +84,9 @@ public:
   /** push a new cell on the heap. */
   void push(OptimCell* cell);
 
+  /** push a new cell on the heap with the cost stored in the variable pf. */
+  void push_costpf(OptimCell* cell);
+
   // unused : only for compilation
   void push(Cell* cell) {};
   
@@ -106,6 +109,9 @@ public:
  protected:
    /** The cost of a cell. */
   Interval& cost(const Cell& c) const;
+  /** The another cost of a cell. */
+  Interval& costpf(const OptimCell& c) const;
+
   // cells and associated "costs"
   std::vector<std::pair<OptimCell*,Interval*> > lopt;
   friend std::ostream& operator<<(std::ostream&, const CellHeapOptim&);
