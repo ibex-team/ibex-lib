@@ -53,6 +53,16 @@ public:
 	SetInterval& operator&=(const SetInterval& set);
 
 	/**
+	 * \brief i-Set Union
+	 *
+	 * In Jaulin's terminology, this operator is the "i-set extension of the union".
+	 *
+	 * If [x] designates this i-set and [y] the i-set in argument, then this will be replace by
+	 *  { x \cup y, x\in[x] and y\in[y] }.
+	 */
+	SetInterval& operator|=(const SetInterval& set);
+
+	/**
 	 * \brief i-Set synchronization
 	 *
 	 * In Jaulin's terminology, this operator is the "intersection of i-sets" (squared symbol)

@@ -77,10 +77,11 @@ SetNode* SetBisect::inter(const IntervalVector& nodebox, const IntervalVector& x
 	//	if (x_status==IN) {
 	//		return this;
 	//	}
-	if (x_status==UNK) {
-		return this;
-	}
 
+	// in comment because certainly_contains_in does not take into account IN_TMP
+//	if (x_status==UNK && !certainly_contains_in(status)) {
+//		return this;
+//	}
 
 	// certainly_contains_out in comment because does not take into account IN_TMP
     if ((x_status==OUT /*|| !certainly_contains_out(status)*/) && nodebox.is_subset(x)) {
@@ -99,6 +100,24 @@ SetNode* SetBisect::inter_rec(const IntervalVector& nodebox, Separator& sep, dou
 	right = right->inter(right_box(nodebox), sep, eps);
 	// status of children may have changed --> try merge
 	return try_merge();
+}
+
+SetNode* SetBisect::union_(const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps) {
+	assert(x_status<=UNK);
+
+	if (x_status>IN) {
+		return this;
+	}
+
+    if (nodebox.is_subset(x)) {
+		delete this; // warning: suicide
+		return new SetLeaf(IN);
+	} else {
+		left = left->union_(left_box(nodebox), x, x_status, eps);
+		right = right->union_(right_box(nodebox), x, x_status, eps);
+		// status of children may have changed --> try merge
+		return try_merge();
+	}
 }
 
 void SetBisect::visit_leaves(leaf_func func, const IntervalVector& nodebox) const {

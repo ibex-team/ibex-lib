@@ -45,6 +45,11 @@ SetInterval& SetInterval::operator&=(const SetInterval& set) {
 	return *this;
 }
 
+SetInterval& SetInterval::operator|=(const SetInterval& set) {
+	root = root->union_(bounding_box, set.root, set.bounding_box, eps);
+	return *this;
+}
+
 
 void SetInterval::visit_leaves(SetNode::leaf_func func) const {
 	root->visit_leaves(func, bounding_box);

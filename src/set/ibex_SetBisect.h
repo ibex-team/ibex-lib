@@ -51,6 +51,9 @@ public:
 	virtual SetNode* inter_rec(const IntervalVector& nodebox, Separator& sep, double eps);
 
 	/** \see SetNode */
+	virtual SetNode* union_(const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps);
+
+	/** \see SetNode */
 	virtual void visit_leaves(leaf_func func, const IntervalVector& nodebox) const;
 
 	/** \see SetNode */

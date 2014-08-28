@@ -112,6 +112,16 @@ public:
 	virtual SetNode* inter_rec(const IntervalVector& nodebox, Separator& sep, double eps)=0;
 
 	/**
+	 * \brief Union with an explicit i-set "other"
+	 */
+	SetNode* union_(const IntervalVector& nodebox, const SetNode* other, const IntervalVector& otherbox, double eps);
+
+	/**
+	 * \brief Union with an i-set reduced to a single box "x" of status "x_status".
+	 */
+	virtual SetNode* union_(const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps)=0;
+
+	/**
 	 * \brief Visit the leaves of a tree with a callback "func"
 	 */
 	virtual void visit_leaves(leaf_func func, const IntervalVector& nodebox) const=0;

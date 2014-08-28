@@ -129,24 +129,23 @@ SetNode* SetLeaf::inter_rec(const IntervalVector& nodebox, Separator& sep, doubl
 }
 
 SetNode* SetLeaf::union_(const IntervalVector& nodebox, const IntervalVector& x, NodeType xstatus, double eps) {
-//	//cout << nodebox << " " << to_string(status)  << " inter " << x << " ";
-//	assert(xstatus<=UNK);
-//
-//	if (status==IN || xstatus>IN) {
-//		//cout << "this\n";
-//		return this;
-//	} else if (nodebox.is_subset(x)) {
-//		status=IN;
-//		 //cout << "this\n";
-//		return this;
-//	} else {
-//		// status=(UNK | OUT), xstatus=(IN).
-//		SetNode* new_node=diff(nodebox, x, status, xstatus==OUT? OUT : (status==IN_TMP? IN : UNK), eps);
-//		delete this; // warning: suicide, don't move it before previous line
-//		//cout << "gives "; new_node->print(cout,nodebox,0);
-//		return new_node;
-//	}
-	return this;
+	//cout << nodebox << " " << to_string(status)  << " union << x << " ";
+	assert(xstatus<=UNK);
+
+	if (status==IN || xstatus>IN) {
+		//cout << "this\n";
+		return this;
+	} else if (nodebox.is_subset(x)) {
+		status=IN;
+		 //cout << "this\n";
+		return this;
+	} else {
+		// status=(UNK | OUT), xstatus=(IN).
+		SetNode* new_node=diff(nodebox, x, status, IN, eps);
+		delete this; // warning: suicide, don't move it before previous line
+		//cout << "gives "; new_node->print(cout,nodebox,0);
+		return new_node;
+	}
 }
 
 void SetLeaf::visit_leaves(leaf_func func, const IntervalVector& nodebox) const {

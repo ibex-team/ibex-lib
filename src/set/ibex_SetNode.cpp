@@ -172,7 +172,9 @@ SetNode* SetNode::sync(const IntervalVector& nodebox, Separator& sep, double eps
 
 SetNode* SetNode::sync(const IntervalVector& nodebox, const SetNode* other, const IntervalVector& otherbox, double eps, bool skip_other_maybe) {
 
-	if (other->is_leaf()) {
+	if (nodebox.is_disjoint(otherbox))
+		return this;
+	else if (other->is_leaf()) {
 		//if (other->status<UNK) // || !skip_other_maybe)
 			return sync(nodebox, otherbox, other->status, eps);
 		//else
@@ -202,7 +204,9 @@ SetNode* SetNode::inter(const IntervalVector& nodebox, Separator& sep, double ep
 
 SetNode* SetNode::inter(const IntervalVector& nodebox, const SetNode* other, const IntervalVector& otherbox, double eps) {
 
-	if (other->is_leaf()) {
+	if (nodebox.is_disjoint(otherbox))
+		return this;
+	else if (other->is_leaf()) {
 		// we consider IN_TMP to be "UNK" until the end. Otherwise, there
 		// would be problems when other->status==UNK. Indeed, if we set the status
 		// of this node to UNK, we lose information ("other" may be an intermediate
@@ -218,6 +222,21 @@ SetNode* SetNode::inter(const IntervalVector& nodebox, const SetNode* other, con
 		SetNode* this2 = inter(nodebox, bisect_node->left, bisect_node->left_box(otherbox), eps);
 		// warning: cannot use this anymore (use this2 instead)
 		return this2->inter(nodebox, bisect_node->right, bisect_node->right_box(otherbox), eps);
+	}
+}
+
+SetNode* SetNode::union_(const IntervalVector& nodebox, const SetNode* other, const IntervalVector& otherbox, double eps) {
+
+	if (nodebox.is_disjoint(otherbox))
+		return this;
+	else if (other->is_leaf()) {
+		return union_(nodebox, otherbox, other->status, eps);
+	} else {
+
+		SetBisect* bisect_node = (SetBisect*) other;
+		SetNode* this2 = union_(nodebox, bisect_node->left, bisect_node->left_box(otherbox), eps);
+		// warning: cannot use this anymore (use this2 instead)
+		return this2->union_(nodebox, bisect_node->right, bisect_node->right_box(otherbox), eps);
 	}
 }
 
