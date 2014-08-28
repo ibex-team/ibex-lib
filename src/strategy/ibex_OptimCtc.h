@@ -11,10 +11,12 @@
 #define __IBEX_OPTIMCTC_H__
 
 #include "ibex_Bsc.h"
+#include "ibex_Ctc.h"
 #include "ibex_Backtrackable.h"
 #include "ibex_CellHeapOptim.h"
 #include "ibex_OptimCell.h"
 #include "ibex_Function.h"
+#include "ibex_UnconstrainedLocalSearch.h"
 
 namespace ibex {
 
@@ -49,7 +51,7 @@ public:
 	 *
 	 */
 
-	OptimCtc(Ctc& ctc_out, Ctc& ctc_in, const Function& f_cost, Bsc& bsc,
+	OptimCtc(Ctc& ctc_out, Ctc& ctc_in, Function& f_cost, Bsc& bsc,
 			double prec = default_prec, double goal_rel_prec = default_goal_rel_prec,
 			double goal_abs_prec =	default_goal_abs_prec,
 			int critpr=50,CellHeapOptim::criterion crit= CellHeapOptim::UB);

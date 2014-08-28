@@ -25,7 +25,7 @@ const double OptimCtc::default_goal_abs_prec = 1e-07;
 
 
 
-OptimCtc::OptimCtc(Ctc&  ctc_out, Ctc&  ctc_in, const Function& f_cost, Bsc& bsc, double prec,
+OptimCtc::OptimCtc( Ctc& ctc_out, Ctc&  ctc_in, Function& f_cost, Bsc& bsc, double prec,
 		double goal_rel_prec, double goal_abs_prec, int critpr,CellHeapOptim::criterion crit) :
 			n(f_cost.nb_var()),
 			_ctc_out(ctc_out), _ctc_in(ctc_in), _f_cost(f_cost),
@@ -44,7 +44,7 @@ OptimCtc::OptimCtc(Ctc&  ctc_out, Ctc&  ctc_in, const Function& f_cost, Bsc& bsc
 	if (trace) cout.precision(12);
 
 	if ((crit==CellHeapOptim::C5)||(crit==CellHeapOptim::C7)||(crit==CellHeapOptim::PU))
-		throw ibex_error("OptimCtc : Criterion option not available choose UB, or C3");
+		ibex_error("OptimCtc : Criterion option not available choose UB, or C3");
 
 }
 
