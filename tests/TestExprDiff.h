@@ -33,6 +33,8 @@ public:
 		TEST_ADD(TestExprDiff::apply02)
 		TEST_ADD(TestExprDiff::apply03);
 		TEST_ADD(TestExprDiff::cst_grad);
+		TEST_ADD(TestExprDiff::vecimg01);
+		TEST_ADD(TestExprDiff::vecimg02);
 	}
 
 	void linear01();
@@ -62,7 +64,14 @@ public:
 
 	// function with constant gradient
 	void cst_grad();
+
+	// x -> (x,x,x)
+	void vecimg01();
+
+	// (x,y) -> (x,y,x)
+	void vecimg02();
 };
+
 
 } // namespace ibex
 #endif // __TEST_EXPR_DIFF_H__
