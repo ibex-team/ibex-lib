@@ -35,6 +35,7 @@ public:
 		TEST_ADD(TestExprDiff::cst_grad);
 		TEST_ADD(TestExprDiff::vecimg01);
 		TEST_ADD(TestExprDiff::vecimg02);
+		TEST_ADD(TestExprDiff::apply_mul);
 	}
 
 	void linear01();
@@ -70,6 +71,9 @@ public:
 
 	// (x,y) -> (x,y,x)
 	void vecimg02();
+
+	// void (x,y) -> f(x,y)*f(y,x) with f(x,y)=x
+	void apply_mul();
 };
 
 
