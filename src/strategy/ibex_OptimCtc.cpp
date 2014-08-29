@@ -314,29 +314,12 @@ void OptimCtc::contract_and_bound(OptimCell& c, const IntervalVector& init_box) 
 	}
 	/*====================================================================*/
 
+
 	if ((c.box.max_diam()<=prec) || !c.box.is_bisectable()) {
 		// rem1: tmp_box and not c.box because y is handled with goal_rel_prec and goal_abs_prec
 		// rem2: do not use a precision contractor here since it would make the box empty (and y==(-inf,-inf)!!)
 		// rem 3 : the extended  boxes with no bisectable  domains  should be catched for avoiding infinite bisections
-
-//if ((c.box.max_diam()<=prec && c.pf.diam() <=goal_abs_prec) || !c.box.is_bisectable()) {
-		cout.precision(12);
-		cout << direct_try(c.box.mid());
-cout<< " ici contract : "<<c.pu<<"  " <<c.pf<<"  "<<c.box<<endl;
-			try{
-				_ctc_out.contract(c.box);
-cout<< " ici contract : "<<c.box<<endl;
-			} catch (EmptyBoxException &) {
-				cout << "OUT"<<endl;
-			}
-			try{
-				_ctc_in.contract(c.box);
-cout<< " ici contract : "<<c.box<<endl;
-			} catch (EmptyBoxException &) {
-				cout << "IN "<<endl;
-			}
-			//compute_pf(*c);
-			update_uplo_of_epsboxes(c.pf.lb());
+		update_uplo_of_epsboxes(c.pf.lb());
 
 		throw EmptyBoxException();
 	}
@@ -466,19 +449,6 @@ void OptimCtc::optimize(const IntervalVector& init_box, double obj_init_bound) {
 
 			}
 			catch (NoBisectableVariableException& ) {
-			//	cout<< " ici opti : "<<c->pu<<"  " <<c->pf<<"  "<<c->box<<endl;
-				try{
-					_ctc_out.contract(c->box);
-				} catch (EmptyBoxException &) {
-					cout << "OUT"<<endl;
-				}
-				try{
-					_ctc_in.contract(c->box);
-				} catch (EmptyBoxException &) {
-					cout << "IN "<<endl;
-				}
-				//compute_pf(*c);
-
 				update_uplo_of_epsboxes (c->pf.lb());
 
 				if (indbuf ==0)
@@ -511,7 +481,7 @@ void OptimCtc::update_uplo_of_epsboxes(double ymin) {
 		uplo_of_epsboxes = ymin;
 		if (trace) { // << setprecision(12)
 			cout << "uplo_of_epsboxes: " <<  uplo_of_epsboxes << " | uplo: " << uplo << " | loup: " << loup << " |"<< endl;
-		exit(-1);}
+		}
 	}
 }
 

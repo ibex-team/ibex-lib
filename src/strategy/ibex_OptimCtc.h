@@ -40,6 +40,7 @@ public:
 	 *
 	 *   \param ctc_out   - the contractor which remove the domain that does not contain any feasible solution
 	 *   \param ctc_in    - the contractor which remove the domain that are entirly feasible
+	 *   \param f_cost    - the objective function
 	 *   \param bsc       - bisector for extended boxes
 	 *   \param ctc       - contractor for the <b>extended system</b> (see below)
 	 *
@@ -55,7 +56,7 @@ public:
 	OptimCtc(Ctc& ctc_out, Ctc& ctc_in, Function& f_cost, Bsc& bsc,
 			double prec = default_prec, double goal_rel_prec = default_goal_rel_prec,
 			double goal_abs_prec =	default_goal_abs_prec,
-			int critpr=0,CellHeapOptim::criterion crit= CellHeapOptim::UB);
+			int critpr=50,CellHeapOptim::criterion crit= CellHeapOptim::UB);
 	/**
 	 * \brief Delete *this.
 	 */
@@ -108,15 +109,16 @@ public:
 	/** Number of variables. */
 	const int n;
 
-// TODO Add comment
+	 /**   the contractor which remove the domain that does not contain any feasible solution */
 	Ctc& _ctc_out;
 
-	// TODO Add comment
+	 /**   the contractor which remove the domain that are entirly feasible */
 	Ctc& _ctc_in;
 
-	// TODO Add comment
+	 /**  the objective function  */
 	Function& _f_cost;
 
+	/** a local minimizer to perform optimization on the feasible domain. */
 	UnconstrainedLocalSearch _localopti;
 
 	/** Bisector. */
