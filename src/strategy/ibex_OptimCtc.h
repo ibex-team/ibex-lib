@@ -12,6 +12,7 @@
 
 #include "ibex_Bsc.h"
 #include "ibex_Ctc.h"
+#include "ibex_HC4Revise.h"
 #include "ibex_Backtrackable.h"
 #include "ibex_CellHeapOptim.h"
 #include "ibex_OptimCell.h"
@@ -54,7 +55,7 @@ public:
 	OptimCtc(Ctc& ctc_out, Ctc& ctc_in, Function& f_cost, Bsc& bsc,
 			double prec = default_prec, double goal_rel_prec = default_goal_rel_prec,
 			double goal_abs_prec =	default_goal_abs_prec,
-			int critpr=50,CellHeapOptim::criterion crit= CellHeapOptim::UB);
+			int critpr=0,CellHeapOptim::criterion crit= CellHeapOptim::UB);
 	/**
 	 * \brief Delete *this.
 	 */
@@ -179,6 +180,9 @@ public:
 	/** Default goal absolute precision */
 	static const double default_goal_abs_prec;
 
+	/** Number of cells put into the heap (which passed through the contractors)  */
+	int nb_cells;
+
 	/**
 	 * \brief The "loup" (lowest upper bound of the criterion)
 	 */
@@ -191,8 +195,6 @@ public:
 	/** The point satisfying the constraints corresponding to the loup */
 	Vector loup_point;
 
-	/** Number of cells put into the heap (which passed through the contractors)  */
-	int nb_cells;
 
 protected:
 		/**
@@ -254,10 +256,17 @@ protected:
 
 
 		/**
-		 * \brief Main procedure for updating the loup.
+		 * \brief Procedure for updating the loup with a local optimizer on each box of \a list_box.
 		 */
-		bool update_loup(const IntervalVector* box, int nb) ;
+		bool localsearch(const IntervalVector* list_box, int nb) ;
 
+
+		/**
+		 * \brief Procedure for trying to update the loup with a given point.
+		 */
+		bool direct_try(const Vector point) ;
+
+		bool loup_changed;
 
 		/**
 		 * \brief Computes and returns  the value ymax (the loup decreased with the precision)
@@ -266,7 +275,6 @@ protected:
 		 */
 		double compute_ymax ();
 	
-		bool loup_changed;
 
 		void compute_pf(OptimCell& c);
 

@@ -33,10 +33,9 @@ OptimCtc::OptimCtc( Ctc& ctc_out, Ctc&  ctc_in, Function& f_cost, Bsc& bsc, doub
 			bsc(bsc), buffer(n), buffer2(n,crit),  // first buffer with LB, second buffer with crit (default UB))
 			prec(prec), goal_rel_prec(goal_rel_prec), goal_abs_prec(goal_abs_prec),
 			trace(false),
-			critpr(critpr), timeout(1e08),
-			loup(POS_INFINITY), uplo(NEG_INFINITY),
-			loup_point(n), nb_cells(0), loup_changed(false),
-			uplo_of_epsboxes(POS_INFINITY), time(0) {
+			critpr(critpr), timeout(1e08), time(0), nb_cells(0),
+			loup(POS_INFINITY), uplo(NEG_INFINITY),	loup_point(n),
+			loup_changed(false),  uplo_of_epsboxes(POS_INFINITY) {
 
 
 	// =============================================================
@@ -67,7 +66,7 @@ double OptimCtc::compute_ymax() {
 
 // 2 methods for searching a better feasible point and a better loup
 
-bool OptimCtc::update_loup(const IntervalVector* box, int nb) {
+bool OptimCtc::localsearch(const IntervalVector* box, int nb) {
 	if (nb<=0) return false;
 
 	bool loup_change=false;
@@ -84,6 +83,12 @@ bool OptimCtc::update_loup(const IntervalVector* box, int nb) {
 					loup = tmp.ub();
 					loup_point = v_tmp;
 					loup_change = true;
+					{
+						int prec=cout.precision();
+						cout.precision(12);
+						cout << "[localsearch]"  << " loup update " << loup  << " loup point  " << loup_point << endl;
+						cout.precision(prec);
+					}
 				}
 			}
 		}
@@ -92,6 +97,28 @@ bool OptimCtc::update_loup(const IntervalVector* box, int nb) {
 
 }
 
+bool OptimCtc::direct_try( const Vector point) {
+	bool loup_change=false;
+	try {
+		IntervalVector tmp(point);
+		_ctc_in.contract(tmp);
+	} catch (EmptyBoxException &) {
+		Interval tmp = _f_cost.eval(point);
+		if (tmp.ub()<loup) {
+			//update the loup
+			loup = tmp.ub();
+			loup_point = point;
+			loup_change = true;
+		    {
+				int prec=cout.precision();
+				cout.precision(12);
+				cout << "[random]"  << " loup update " << loup  << " loup point  " << loup_point << endl;
+				cout.precision(prec);
+		    }
+		}
+	}
+	return loup_change;
+}
 
 
 double minimum (double a, double b) {
@@ -157,8 +184,8 @@ void OptimCtc::handle_cell(OptimCell& c, const IntervalVector& init_box ){
 }
 
 void OptimCtc::compute_pf(OptimCell& c) {
+	//OR 	c.pf &=_f_cost.eval(c.box);
 	c.pf &= _f_cost.eval_affine2(c.box);
-	//OR 	c.pf &= _f_cost.eval_affine2(c.box);
 }
 
 
@@ -174,10 +201,10 @@ void OptimCtc::add_buffer_pf(IntervalVector* list, int size) {
 
 		tmp = _f_cost.eval(list[i]);
 		try {
-			if (ymax <tmp.ub()) {
+			if (ymax <=tmp.ub()) {
 				// Contract with  f_cost(list[i]) <= ymax
 				tmp &= Interval(NEG_INFINITY,ymax);
-				_f_cost.backward(tmp,list[i]);
+				HC4Revise(AFFINE_MODE).proj(_f_cost,Domain(tmp),list[i]); /// equivalent to :_f_cost.backward(tmp,list[i]);
 			}
 			cell=new OptimCell(list[i]);
 			cell->pu  = 1;
@@ -207,10 +234,10 @@ void OptimCtc::contract_and_bound(OptimCell& c, const IntervalVector& init_box) 
 
 
 	// Contract with  f_cost(c.box) <= loup
-	if (ymax <c.pf.ub()) {
+	if (ymax <=c.pf.ub()) {
 		try {
 			c.pf &= Interval(NEG_INFINITY,ymax);
-			_f_cost.backward(c.pf,c.box);
+			HC4Revise(AFFINE_MODE).proj(_f_cost,Domain(c.pf),c.box); /// equivalent to :_f_cost.backward(c.pf,c.box);
 		} catch (EmptyBoxException& e) {
 			c.box.set_empty();
 			throw e;
@@ -240,8 +267,15 @@ void OptimCtc::contract_and_bound(OptimCell& c, const IntervalVector& init_box) 
 	if (c.pu ==0)	{
 		try {
 			IntervalVector tmp(c.box);
-			_ctc_in.contract(c.box);
-			size_box_ok = tmp.diff(c.box,box_ok);
+			_ctc_in.contract(tmp);
+			size_box_ok = c.box.diff(tmp,box_ok);
+			if ((size_box_ok==1)&&(box_ok[0].is_empty())) {
+				size_box_ok=0;
+				delete[] box_ok;
+			}
+			else {
+				c.box = tmp;
+			}
 		} catch (EmptyBoxException &) {
 			c.pu=1;
 		}
@@ -253,29 +287,57 @@ void OptimCtc::contract_and_bound(OptimCell& c, const IntervalVector& init_box) 
 
 	/*========================= update loup =============================*/
 
-	bool loup_ch = update_loup(box_ok,size_box_ok);
+	bool loup_ch = localsearch(box_ok,size_box_ok);
 	if (c.pu==1) {
-		loup_ch = (loup_ch || update_loup(&c.box,1));
+		loup_ch = (loup_ch || localsearch(&c.box,1));
+	}
+	else  {
+		// try on the middle point
+		loup_ch = (loup_ch || direct_try(c.box.random()));
 	}
 
-	c.pf &=_f_cost.eval(c.box);
-
+	c.pf &=_f_cost.eval_affine2(c.box);
 	// update of the upper bound of y in case of a new loup found
 	if (loup_ch)  	c.pf &= Interval(NEG_INFINITY,compute_ymax());
 	loup_changed |= loup_ch;
+
+	if (c.pf.is_empty()) {
+		c.box.set_empty();
+		throw EmptyBoxException();
+	}
 	/*====================================================================*/
 
 	/*=====================add box_ok in the buffer=======================*/
-
-	add_buffer_pf(box_ok,size_box_ok);
-	delete [] box_ok;
+	if (size_box_ok>0) {
+		add_buffer_pf(box_ok,size_box_ok);
+		delete [] box_ok;
+	}
 	/*====================================================================*/
 
-	if ((c.box.max_diam()<=prec && c.pf.diam() <=goal_abs_prec) || !c.box.is_bisectable()) {
+	if ((c.box.max_diam()<=prec) || !c.box.is_bisectable()) {
 		// rem1: tmp_box and not c.box because y is handled with goal_rel_prec and goal_abs_prec
 		// rem2: do not use a precision contractor here since it would make the box empty (and y==(-inf,-inf)!!)
 		// rem 3 : the extended  boxes with no bisectable  domains  should be catched for avoiding infinite bisections
-		update_uplo_of_epsboxes(c.pf.lb());
+
+//if ((c.box.max_diam()<=prec && c.pf.diam() <=goal_abs_prec) || !c.box.is_bisectable()) {
+		cout.precision(12);
+		cout << direct_try(c.box.mid());
+cout<< " ici contract : "<<c.pu<<"  " <<c.pf<<"  "<<c.box<<endl;
+			try{
+				_ctc_out.contract(c.box);
+cout<< " ici contract : "<<c.box<<endl;
+			} catch (EmptyBoxException &) {
+				cout << "OUT"<<endl;
+			}
+			try{
+				_ctc_in.contract(c.box);
+cout<< " ici contract : "<<c.box<<endl;
+			} catch (EmptyBoxException &) {
+				cout << "IN "<<endl;
+			}
+			//compute_pf(*c);
+			update_uplo_of_epsboxes(c.pf.lb());
+
 		throw EmptyBoxException();
 	}
 
@@ -284,9 +346,8 @@ void OptimCtc::contract_and_bound(OptimCell& c, const IntervalVector& init_box) 
 		IntervalVector g(n);
 		_f_cost.gradient(c.box,g);
 		for (int j=0; j<n; j++) {
-			//TODO: if box is unbounded, we have a problem here.
-			if (g[j].lb()>=0) c.box[j]=c.box[j].lb();
-			if (g[j].ub()<=0) c.box[j]=c.box[j].ub();
+			if      ((g[j].lb()>=0)&&(c.box[j].lb()!=NEG_INFINITY)) c.box[j]=c.box[j].lb();
+			else if ((g[j].ub()<=0)&&(c.box[j].ub()!=POS_INFINITY)) c.box[j]=c.box[j].ub();
 		}
 
 	}
@@ -312,7 +373,7 @@ void OptimCtc::optimize(const IntervalVector& init_box, double obj_init_bound) {
 
 	OptimCell* root=new OptimCell(init_box);
 	root->pu = 0;
-	compute_pf(*root);
+	root->pf = _f_cost.eval_affine2(init_box);
 	root->loup=loup;
 
 	// add data required by the bisector
@@ -405,6 +466,19 @@ void OptimCtc::optimize(const IntervalVector& init_box, double obj_init_bound) {
 
 			}
 			catch (NoBisectableVariableException& ) {
+			//	cout<< " ici opti : "<<c->pu<<"  " <<c->pf<<"  "<<c->box<<endl;
+				try{
+					_ctc_out.contract(c->box);
+				} catch (EmptyBoxException &) {
+					cout << "OUT"<<endl;
+				}
+				try{
+					_ctc_in.contract(c->box);
+				} catch (EmptyBoxException &) {
+					cout << "IN "<<endl;
+				}
+				//compute_pf(*c);
+
 				update_uplo_of_epsboxes (c->pf.lb());
 
 				if (indbuf ==0)
@@ -433,11 +507,11 @@ void OptimCtc::update_uplo_of_epsboxes(double ymin) {
 	// found by the precision criterion
 	assert (uplo_of_epsboxes >= uplo);
 	assert(ymin >= uplo);
-	if (uplo_of_epsboxes > ymin)
-	{uplo_of_epsboxes = ymin;
-	if (trace) { // << setprecision(12)
-		cout << "uplo_of_epsboxes:" <<  uplo_of_epsboxes << " uplo " << uplo << endl;
-	}
+	if (uplo_of_epsboxes > ymin) 	{
+		uplo_of_epsboxes = ymin;
+		if (trace) { // << setprecision(12)
+			cout << "uplo_of_epsboxes: " <<  uplo_of_epsboxes << " | uplo: " << uplo << " | loup: " << loup << " |"<< endl;
+		exit(-1);}
 	}
 }
 
