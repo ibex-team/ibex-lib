@@ -12,9 +12,13 @@
 #include "cliquer.h"
 #include <algorithm>
 
+// ignored warning : comparison between signed and unsigned integer expressions in this file
+#pragma GCC diagnostic ignored "-Wsign-compare"
+
 using namespace std;
 
 namespace ibex {
+
 
 /*
  * Uses Cliquer to solve a q-inter-existence problem.
@@ -24,8 +28,8 @@ IntervalVector qinterex_cliquer(const vector<IntervalVector *>& boxes, const vec
 	assert(q>0);
 	assert(boxes.size()>0); // This assert does not seem to work... am I missing something ?
 	
-	unsigned int p = boxes.size();
-	unsigned int n = boxes[0]->size();
+	int p = boxes.size();
+	int n = boxes[0]->size();
 	IntervalVector inter(n);
 	
 	/* Generate the intersection graph in Cliquer format */
@@ -63,3 +67,8 @@ IntervalVector qinterex_cliquer(const vector<IntervalVector *>& boxes, const vec
 }
 
 } // end namespace ibex
+
+
+// Restore warning : comparison between signed and unsigned integer expressions in this file
+#pragma GCC diagnostic pop
+

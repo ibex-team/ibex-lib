@@ -20,7 +20,7 @@ const double LinearRelaxXTaylor::default_max_diam_deriv =1e6;
 
 LinearRelaxXTaylor::LinearRelaxXTaylor(const System& sys1, std::vector<corner_point>& cpoints1,
 		linear_mode lmode1, double max_diam_deriv1):
-			LinearRelax(sys1), sys(sys1), cpoints(cpoints1), goal_ctr(-1),
+			LinearRelax(sys1), cpoints(cpoints1), sys(sys1), goal_ctr(-1),
 			max_diam_deriv(max_diam_deriv1),
 			lmode(lmode1),
 			linear_coef(sys1.nb_ctr, sys1.nb_var),
@@ -69,7 +69,7 @@ LinearRelaxXTaylor::~LinearRelaxXTaylor() {
 	delete[] linear_ctr;
 }
 
-int LinearRelaxXTaylor::linearization( IntervalVector & box, LinearSolver *mysolver)  {
+int LinearRelaxXTaylor::linearization(const IntervalVector& box, LinearSolver& lp_solver)  {
 
 	int cont =0;
 
@@ -89,10 +89,10 @@ int LinearRelaxXTaylor::linearization( IntervalVector & box, LinearSolver *mysol
 		int nb_nonlinear_vars;
 		if(cpoints[0]==K4) {
 			for(int j=0; j<4; j++)
-				cont += X_Linearization(box, ctr, K4, G, j, nb_nonlinear_vars,mysolver);
+				cont += X_Linearization(box, ctr, K4, G, j, nb_nonlinear_vars,lp_solver);
 		} else  //  linearizations k corners per constraint
-			for(int k=0; k<(cpoints.size()); k++) {
-				cont += X_Linearization(box, ctr, cpoints[k],  G, k, nb_nonlinear_vars,mysolver);
+			for(unsigned int k=0; k<(cpoints.size()); k++) {
+				cont += X_Linearization(box, ctr, cpoints[k],  G, k, nb_nonlinear_vars,lp_solver);
 			}
 	}
 	return cont;
@@ -100,8 +100,8 @@ int LinearRelaxXTaylor::linearization( IntervalVector & box, LinearSolver *mysol
 
 
 // TODO A quoi sert "nb_nonlinear_vars" ?
-int LinearRelaxXTaylor::X_Linearization(IntervalVector& box, int ctr, corner_point cpoint,
-		IntervalVector& G, int id_point, int& nb_nonlinear_vars, LinearSolver *mysolver) {
+int LinearRelaxXTaylor::X_Linearization(const IntervalVector& box, int ctr, corner_point cpoint,
+		IntervalVector& G, int id_point, int& nb_nonlinear_vars, LinearSolver& lp_solver) {
 
 	CmpOp op= sys.ctrs[ctr].op;
 
@@ -110,17 +110,17 @@ int LinearRelaxXTaylor::X_Linearization(IntervalVector& box, int ctr, corner_poi
 	int cont=0;
 	if(ctr==goal_ctr) op = LEQ;
 	if(op==EQ) {
-		cont+=X_Linearization(box, ctr, cpoint, LEQ, G, id_point, nb_nonlinear_vars, mysolver);
-		cont+=X_Linearization(box, ctr, cpoint, GEQ, G, id_point, nb_nonlinear_vars, mysolver);
+		cont+=X_Linearization(box, ctr, cpoint, LEQ, G, id_point, nb_nonlinear_vars, lp_solver);
+		cont+=X_Linearization(box, ctr, cpoint, GEQ, G, id_point, nb_nonlinear_vars, lp_solver);
 	} else
-		cont+=X_Linearization(box, ctr, cpoint, op,  G, id_point, nb_nonlinear_vars, mysolver);
+		cont+=X_Linearization(box, ctr, cpoint, op,  G, id_point, nb_nonlinear_vars, lp_solver);
 
 	return cont;
 }
 
-int LinearRelaxXTaylor::X_Linearization(IntervalVector& box,
+int LinearRelaxXTaylor::X_Linearization(const IntervalVector& savebox,
 		int ctr, corner_point cpoint, CmpOp op, 
-		IntervalVector& G2, int id_point, int& nb_nonlinear_vars, LinearSolver *mysolver) {
+		IntervalVector& G2, int id_point, int& nb_nonlinear_vars, LinearSolver& lp_solver) {
 
 	IntervalVector G = G2;
 	int n = sys.nb_var;
@@ -141,7 +141,7 @@ int LinearRelaxXTaylor::X_Linearization(IntervalVector& box,
 
 	 }
 	 */
-	IntervalVector savebox(box);
+	IntervalVector box(savebox);
 	Interval ev(0.0);
 	Interval tot_ev(0.0);
 	Vector row1(n);
@@ -159,7 +159,7 @@ int LinearRelaxXTaylor::X_Linearization(IntervalVector& box,
 	  //cout << "[LinearRelaxXTaylor] coeffs=" << G[j] << endl;
 
 	  if (G[j].diam() > max_diam_deriv) {
-	    box = savebox; // [gch] where box has been modified?  at the end of the loop (for Hansen computation) [bne]
+	   // box = savebox; // [gch] where box has been modified?  at the end of the loop (for Hansen computation) [bne]
 	    return 0;      // To avoid problems with SoPleX
 	  }
 
@@ -266,7 +266,7 @@ int LinearRelaxXTaylor::X_Linearization(IntervalVector& box,
                  //select the coin nearest to the loup 
                  if(goal_ctr!=-1 && Dimension(Optimizer::global_optimizer())>0){
 //                     if(j==0)cout<< Optimizer::global_optimizer()<<end;
-                    inf_x=(abs(Optimizer::global_optimizer()(j+1)-Inf(savebox(j+1))) < 
+                    inf_x=(abs(Optimizer::global_optimizer()(j+1)-Inf(savebox(j+1))) <
                       abs(Optimizer::global_optimizer()(j+1)-Sup(savebox(j+1))))? true:false;
                  }else{ 
                    inf_x=(rand()%2==0);
@@ -343,19 +343,19 @@ int LinearRelaxXTaylor::X_Linearization(IntervalVector& box,
 		if(tot_ev.lb()>(-ev).ub())
 			throw EmptyBoxException();  // the constraint is not satisfied
 		if((-ev).ub()<tot_ev.ub()) {    // otherwise the constraint is satisfied for any point in the box
-			mysolver->addConstraint( row1, LEQ, (-ev).ub());
+			lp_solver.addConstraint( row1, LEQ, (-ev).ub());
 			added=true;
 		}
 	} else {
 		if(tot_ev.ub()<(-ev).lb())
 			throw EmptyBoxException();
 		if ((-ev).lb()>tot_ev.lb()) {
-			mysolver->addConstraint( row1, GEQ, (-ev).lb() );
+			lp_solver.addConstraint( row1, GEQ, (-ev).lb() );
 			added=true;
 		}
 	}
 
-	box=savebox;
+	//box=savebox;
 
 	return (added)? 1:0;
 

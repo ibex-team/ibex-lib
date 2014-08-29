@@ -18,7 +18,7 @@ using namespace std;
 namespace ibex {
 
 Solver::Solver(Ctc& ctc, Bsc& bsc, CellBuffer& buffer) :
-		  ctc(ctc), bsc(bsc), buffer(buffer), time_limit(-1), cell_limit(-1), trace(0), time(0) {
+		  ctc(ctc), bsc(bsc), buffer(buffer), time_limit(-1), cell_limit(-1), trace(0), time(0), impact(BitSet::all(ctc.nb_var)) {
 
 	nb_cells=0;
 
@@ -26,6 +26,8 @@ Solver::Solver(Ctc& ctc, Bsc& bsc, CellBuffer& buffer) :
 
 void Solver::start(const IntervalVector& init_box) {
 	buffer.flush();
+
+	assert(init_box.size()==ctc.nb_var);
 
 	Cell* root=new Cell(init_box);
 
@@ -37,11 +39,11 @@ void Solver::start(const IntervalVector& init_box) {
 
 	buffer.push(root);
 
-	IntervalVector tmpbox(init_box.size());
+	int nb_var=init_box.size();
 
-	impact.resize(init_box.size());
+	IntervalVector tmpbox(ctc.nb_var);
 
-	impact.set_all();
+	impact.fill(0,ctc.nb_var-1);
 
 	Timer::start();
 
@@ -58,11 +60,11 @@ bool Solver::next(std::vector<IntervalVector>& sols) {
 			try {
 				int v=c->get<BisectedVar>().var;      // last bisected var.
 
-				if (v!=-1) impact.set(v);
+				if (v!=-1) impact.add(v);
 
 				ctc.contract(c->box,impact);
 
-				if (v!=-1) impact.unset(v);
+				if (v!=-1) impact.remove(v);
 				try {
 
 					pair<IntervalVector,IntervalVector> boxes=bsc.bisect(*c);
@@ -77,7 +79,7 @@ bool Solver::next(std::vector<IntervalVector>& sols) {
 				catch (NoBisectableVariableException&) {
 					new_sol(sols, c->box);
 					delete buffer.pop();
-					impact.set_all();
+					impact.fill(0,ctc.nb_var-1);
 					return !buffer.empty();
 					// note that we skip time_limit_check() here.
 					// In the case where "next" is called by "solve",
@@ -92,7 +94,7 @@ bool Solver::next(std::vector<IntervalVector>& sols) {
 			} catch(EmptyBoxException&) {
 				assert(c->box.is_empty());
 				delete buffer.pop();
-				impact.set_all();
+				impact.fill(0,ctc.nb_var-1);
 			}
 		}
 	}

@@ -69,7 +69,7 @@ public:
 	 */
 	bool next(std::vector<IntervalVector>& sols);
 
-	 
+
 	/**
 	 * \brief  The contractor 
 	 *
@@ -120,7 +120,7 @@ protected :
 
 	void new_sol(std::vector<IntervalVector> & sols, IntervalVector & box);
 
-	BoolMask impact;
+	BitSet impact;
 
 };
 

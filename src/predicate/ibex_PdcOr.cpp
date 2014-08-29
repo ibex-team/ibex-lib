@@ -12,20 +12,35 @@
 
 namespace ibex {
 
-PdcOr::PdcOr(const Array<Pdc>& list) : list(list) {
+
+PdcOr::PdcOr(const Array<Pdc>& list) : Pdc(list), list(list) {
+	assert(check_nb_var_pdc_list(list));
 }
 
-PdcOr::PdcOr(Pdc& c1, Pdc& c2) : list(2) {
-	list.set_ref(0,c1);
-	list.set_ref(1,c2);
+PdcOr::PdcOr(Pdc& c1, Pdc& c2) :
+		Pdc(c1.nb_var), list(Array<Pdc>(c1,c2)) {
+	assert(check_nb_var_pdc_list(list));
 }
 
-PdcOr::PdcOr(Pdc& c1, Pdc& c2, Pdc& c3) : list(3) {
-	list.set_ref(0,c1);
-	list.set_ref(1,c2);
-	list.set_ref(2,c3);
+PdcOr::PdcOr(Pdc& c1, Pdc& c2, Pdc& c3) :
+		Pdc(c1.nb_var), list(Array<Pdc>(c1,c2,c3)) {
+	assert(check_nb_var_pdc_list(list));
 }
 
+PdcOr::PdcOr(Pdc& c1, Pdc& c2, Pdc& c3, Pdc& c4) :
+		Pdc(c1.nb_var), list(Array<Pdc>(c1,c2,c3,c4)) {
+	assert(check_nb_var_pdc_list(list));
+}
+
+PdcOr::PdcOr(Pdc& c1, Pdc& c2, Pdc& c3, Pdc& c4, Pdc& c5) :
+		Pdc(c1.nb_var),	list(Array<Pdc>(c1,c2,c3,c4,c5)) {
+	assert(check_nb_var_pdc_list(list));
+}
+
+PdcOr::PdcOr(Pdc& c1, Pdc& c2, Pdc& c3, Pdc& c4, Pdc& c5, Pdc& c6) :
+		Pdc(c1.nb_var), list(Array<Pdc>(c1,c2,c3,c4,c5,c6)) {
+	assert(check_nb_var_pdc_list(list));
+}
 
 BoolInterval PdcOr::test(const IntervalVector& box) {
 	assert(list.size()>0);

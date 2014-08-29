@@ -25,12 +25,15 @@ namespace ibex {
 class LinearRelax {
 public:
 	/**
-	 * \brief Build a relaxation for a system
+	 * \brief Build a relaxation for a system.
+	 *
+	 * The system is only used by this constructor to get the number
+	 * of variables and constraints.
 	 */
 	LinearRelax(const System& sys);
 
 	/**
-	 * \brief Build a relaxation of nb_ctr constraints.
+	 * \brief Build a relaxation of nb_ctr constraints on nb_var variables.
 	 */
 	LinearRelax(int nb_ctr, int nb_var, int goal_var=-1);
 
@@ -41,14 +44,14 @@ public:
 	 *
 	 * It must be implemented in the subclasses.
 	 */
-	virtual int linearization(IntervalVector& box, LinearSolver *mysolver) =0;
+	virtual int linearization(const IntervalVector& box, LinearSolver& lp_solver)=0;
 
 	/**
 	 * Check if the constraint is satisfied in the box : in this case, no linear relaxation is made.
 	 *
 	 * TODO: is this function redundant?
 	 */
-	bool isInner(IntervalVector & box, const System& sys, int j);
+	bool isInner(const IntervalVector& box, const System& sys, int j);
 
 	/**
 	 * \brief Number of variables

@@ -125,6 +125,74 @@ public:
 	NumConstraint(const Array<const ExprSymbol>& x, const ExprCtr& c);
 
 	/**
+	 * \brief Creates a constraint c(x1).
+	 *
+	 * The parameter x1 may not only contain the name
+	 * of the constraint argument but also the dimension of the symbol
+	 * (like for the arguments of a Minibex Function). E.g.:
+	 *
+	 * NumConstraint c("x[2]","x(1)<=x(2)");
+	 *
+	 * \warning: Note that the Minibex convention (not C++) is applied for indices!
+	 *
+	 */
+	NumConstraint(const char* x1, const char* c);
+
+	/**
+	 * \brief Creates a constraint c(x1,x2).
+	 *
+	 * \see NumConstraint(const char* x1, const char* c).
+	 */
+	NumConstraint(const char* x1, const char* x2, const char* c);
+
+	/**
+	 * \brief Creates a constraint c(x1,x2,x3).
+	 *
+	 * \see NumConstraint(const char* x1, const char* c).
+	 */
+	NumConstraint(const char* x1, const char* x2, const char* x3, const char* c);
+
+	/**
+	 * \brief Creates a constraint c(x1,x2,x3,x4).
+	 *
+	 * \see NumConstraint(const char* x1, const char* c).
+	 */
+	NumConstraint(const char* x1, const char* x2, const char* x3, const char* x4, const char* c);
+
+	/**
+	 * \brief Creates a constraint c(x1,x2,x3,x4,x5).
+	 *
+	 * \see NumConstraint(const char* x1, const char* c).
+	 */
+	NumConstraint(const char* x1, const char* x2, const char* x3, const char* x4, const char* x5, const char* c);
+
+	/**
+	 * \brief Creates a constraint c(x1,x2,x3,x4,x5,x6).
+	 *
+	 * \see NumConstraint(const char* x1, const char* c).
+	 */
+	NumConstraint(const char* x1, const char* x2, const char* x3, const char* x4, const char* x5, const char* x6, const char* c);
+
+	/**
+	 * \brief Creates a constraint c(x1,x2,x3,x4,x5,x6,x7).
+	 *
+	 * \see NumConstraint(const char* x1, const char* c).
+	 */
+	NumConstraint(const char* x1, const char* x2, const char* x3, const char* x4, const char* x5, const char* x6, const char* x7, const char* c);
+
+	/**
+	 * \brief Creates a constraint c(x1,x2,x3,x4,x5,x6,x7,x8).
+	 *
+	 * \see NumConstraint(const char* x1, const char* c).
+	 */
+	NumConstraint(const char* x1, const char* x2, const char* x3, const char* x4, const char* x5, const char* x6, const char* x7, const char* x8, const char* c);
+
+	/**
+	 * \brief Build a constraint c(x)
+	 */
+	NumConstraint(const Array<const char*>& x, const char* c);
+
+	/**
 	 * \bried Delete *this.
 	 */
 	~NumConstraint();
@@ -155,8 +223,11 @@ public:
 	 */
 	std::pair<const ExprNode*, const Interval*> is_thick_equality() const;
 
-protected:
+private:
+
 	bool own_f;
+
+	void build_from_string(const Array<const char*>& x, const char* c);
 };
 
 std::ostream& operator<<(std::ostream&, const NumConstraint&);

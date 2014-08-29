@@ -61,7 +61,7 @@ Ctc*  DefaultSolver::ctc (System& sys, double prec) {
 	//*(default_corners())));
 
 	ctc_list.set_ref(index,rec(new CtcFixPoint(rec(new CtcCompo(
-			rec(new CtcPolytopeHull(rec(new LinearRelaxCombo(sys,LinearRelaxCombo::COMPO)),CtcPolytopeHull::ALL_BOX)),
+			rec(new CtcPolytopeHull(rec(new LinearRelaxCombo(sys,LinearRelaxCombo::XNEWTON)),CtcPolytopeHull::ALL_BOX)),
 			rec(new CtcHC4 (sys.ctrs,0.01)))))));
 
 	ctc_list.resize(index+1); // in case the system is not square.
@@ -82,6 +82,18 @@ DefaultSolver::DefaultSolver(System& sys, double prec) : Solver(rec(ctc(sys,prec
 	*memory() = NULL; // reset (for next DefaultSolver to be created)
 }
 
+// Note: we set the precision for Newton to the minimum of the precisions.
+DefaultSolver::DefaultSolver(System& sys, const Vector& prec) : Solver(rec(ctc(sys,prec.min())),
+		rec(new SmearSumRelative(sys, prec)),
+		rec(new CellStack())),
+		sys(sys) {
+
+	srand(1);
+
+	data = *memory(); // keep track of my data
+
+	*memory() = NULL; // reset (for next DefaultSolver to be created)
+}
 
 DefaultSolver::~DefaultSolver() {
 	// delete all objects dynamically created in the constructor

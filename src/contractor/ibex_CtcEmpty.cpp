@@ -12,13 +12,20 @@
 
 namespace ibex {
 
-CtcEmpty::CtcEmpty(Pdc& pdc) : pdc(pdc) { }
+
+CtcEmpty::CtcEmpty(int n) : Ctc(n), pdc(*new PdcYes(n)), own_pdc(true) { }
+
+CtcEmpty::CtcEmpty(Pdc& pdc, bool own) : Ctc(pdc.nb_var), pdc(pdc), own_pdc(own){ }
 
 void CtcEmpty::contract(IntervalVector& box) {
 	if (pdc.test(box)==YES) {
 		box.set_empty();
 		throw EmptyBoxException();
 	}
+}
+
+CtcEmpty::~CtcEmpty() {
+	if (own_pdc) delete &pdc;
 }
 
 } // end namespace ibex

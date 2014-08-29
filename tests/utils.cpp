@@ -13,6 +13,8 @@
 #include <math.h>
 #include <sstream>
 
+const double TestIbex::ERROR = 1e-10;
+
 bool TestIbex::sameExpr(const ExprNode& node, const char* expr) {
 	std::stringstream s;
 	s << node;

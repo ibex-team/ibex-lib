@@ -19,7 +19,8 @@
 
 namespace ibex {
 
-/** \ingroup numeric
+/**
+ * \ingroup numeric
  * \brief Affine-based linearization
  *
  * This class is an implementation of the ART algorithm
@@ -38,7 +39,7 @@ public:
 	/** ART iteration.
   Linearize the system and performs 2n calls to Simplex in order to reduce
   the 2 bounds of each variable */
-	int linearization( IntervalVector & box, LinearSolver *mysolver);
+	int linearization(const IntervalVector& box, LinearSolver& lp_solver);
 
 	/**
 	 * \brief The system

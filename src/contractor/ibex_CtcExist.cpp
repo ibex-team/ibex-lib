@@ -1,6 +1,6 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_CtcExist.cpp
+// File        : ibex_CtcQuantif.cpp
 // Author      : Jordan Ninin, Gilles Chabert
 // License     : See the LICENSE file
 // Created     : Jan 29, 2014
@@ -8,124 +8,123 @@
 //============================================================================
 
 #include "ibex_CtcExist.h"
-#include <list>
 #include <cassert>
 
 using namespace std;
 
 namespace ibex {
 
-CtcExist::CtcExist(const NumConstraint& ctr, const ExprSymbol& y1, const IntervalVector& init_box, double prec) {
-	init(ctr,Array<const ExprSymbol>(y1),init_box,prec);
+CtcExist::CtcExist(const NumConstraint& ctr,  const ExprSymbol& y1, const IntervalVector& init_box, double prec)
+ : CtcQuantif(ctr, Array<const ExprSymbol>(y1), init_box, prec) {
 }
 
-CtcExist::CtcExist(const NumConstraint& ctr, const ExprSymbol& y1, const ExprSymbol& y2, const IntervalVector& init_box, double prec) {
-	init(ctr,Array<const ExprSymbol>(y1,y2),init_box,prec);
+CtcExist::CtcExist(const NumConstraint& ctr,  const ExprSymbol& y1, const ExprSymbol& y2, const IntervalVector& init_box, double prec)
+ : CtcQuantif(ctr, Array<const ExprSymbol>(y1,y2), init_box, prec) {
 }
 
-CtcExist::CtcExist(const NumConstraint& ctr, const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const IntervalVector& init_box, double prec) {
-	init(ctr,Array<const ExprSymbol>(y1,y2,y3),init_box,prec);
+CtcExist::CtcExist(const NumConstraint& ctr,  const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const IntervalVector& init_box, double prec)
+ : CtcQuantif(ctr, Array<const ExprSymbol>(y1,y2,y3), init_box, prec) {
 }
 
-CtcExist::CtcExist(const NumConstraint& ctr, const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const IntervalVector& init_box, double prec) {
-	init(ctr,Array<const ExprSymbol>(y1,y2,y3,y4),init_box,prec);
+CtcExist::CtcExist(const NumConstraint& ctr,  const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const IntervalVector& init_box, double prec)
+ : CtcQuantif(ctr, Array<const ExprSymbol>(y1,y2,y3,y4), init_box, prec) {
 }
 
-CtcExist::CtcExist(const NumConstraint& ctr, const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const IntervalVector& init_box, double prec) {
-	init(ctr,Array<const ExprSymbol>(y1,y2,y3,y4,y5),init_box,prec);
+CtcExist::CtcExist(const NumConstraint& ctr,  const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const IntervalVector& init_box, double prec)
+ : CtcQuantif(ctr, Array<const ExprSymbol>(y1,y2,y3,y4,y5), init_box, prec) {
 }
 
-CtcExist::CtcExist(const NumConstraint& ctr, const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const ExprSymbol& y6, const IntervalVector& init_box, double prec) {
-	init(ctr,Array<const ExprSymbol>(y1,y2,y3,y4,y5,y6),init_box,prec);
+CtcExist::CtcExist(const NumConstraint& ctr,  const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const ExprSymbol& y6, const IntervalVector& init_box, double prec)
+ : CtcQuantif(ctr, Array<const ExprSymbol>(y1,y2,y3,y4,y5,y6), init_box, prec) {
 }
 
-void CtcExist::init(const NumConstraint& ctr, const Array<const ExprSymbol>& y, const IntervalVector& init_box, double prec) {
+CtcExist::CtcExist(const NumConstraint& ctr,  const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const ExprSymbol& y6, const ExprSymbol& y7, const IntervalVector& init_box, double prec)
+ : CtcQuantif(ctr, Array<const ExprSymbol>(y1,y2,y3,y4,y5,y6,y7), init_box, prec) {
+}
 
-	assert(y.size()>0);
-	assert(ctr.f.nb_arg()>y.size());
-	assert(init_box.size()==y.size());
+CtcExist::CtcExist(const NumConstraint& ctr,  const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const ExprSymbol& y6, const ExprSymbol& y7, const ExprSymbol& y8, const IntervalVector& init_box, double prec)
+ : CtcQuantif(ctr, Array<const ExprSymbol>(y1,y2,y3,y4,y5,y6,y7,y8), init_box, prec) {
+}
 
-	nb_var = ctr.f.nb_arg()-y.size();
+CtcExist::CtcExist(const NumConstraint& ctr,  const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const ExprSymbol& y6, const ExprSymbol& y7, const ExprSymbol& y8, const ExprSymbol& y9, const IntervalVector& init_box, double prec)
+ : CtcQuantif(ctr, Array<const ExprSymbol>(y1,y2,y3,y4,y5,y6,y7,y8,y9), init_box, prec) {
+}
 
-	nb_param = y.size();
+CtcExist::CtcExist(const NumConstraint& ctr,  const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const ExprSymbol& y6, const ExprSymbol& y7, const ExprSymbol& y8, const ExprSymbol& y9, const ExprSymbol& y10, const IntervalVector& init_box, double prec)
+ : CtcQuantif(ctr, Array<const ExprSymbol>(y1,y2,y3,y4,y5,y6,y7,y8,y9,y10), init_box, prec) {
+}
 
-	ctc = new CtcFwdBwd(ctr);
+CtcExist::CtcExist(const NumConstraint& ctr,  const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const ExprSymbol& y6, const ExprSymbol& y7, const ExprSymbol& y8, const ExprSymbol& y9, const ExprSymbol& y10, const ExprSymbol& y11, const IntervalVector& init_box, double prec)
+ : CtcQuantif(ctr, Array<const ExprSymbol>(y1,y2,y3,y4,y5,y6,y7,y8,y9,y10,y11), init_box, prec) {
+}
 
-	bsc = new LargestFirst(prec);
+CtcExist::CtcExist(const NumConstraint& ctr,  const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const ExprSymbol& y6, const ExprSymbol& y7, const ExprSymbol& y8, const ExprSymbol& y9, const ExprSymbol& y10, const ExprSymbol& y11, const ExprSymbol& y12, const IntervalVector& init_box, double prec)
+ : CtcQuantif(ctr, Array<const ExprSymbol>(y1,y2,y3,y4,y5,y6,y7,y8,y9,y10,y11,y12), init_box, prec) {
+}
 
-	y_init.resize(nb_param);
+CtcExist::CtcExist(Ctc& ctc, const BitSet& vars, const IntervalVector& init_box, double prec, bool own_ctc) :
+	CtcQuantif(ctc, vars, init_box, prec, own_ctc) {
+}
 
-	y_init = init_box;
+CtcExist::CtcExist(const NumConstraint& c, const Array<const ExprSymbol>& y, const IntervalVector& y_init, double prec) :
+	CtcQuantif(c, y, y_init, prec) {
+}
 
-	vars.resize(ctr.f.nb_arg());
+void CtcExist::proceed(const IntervalVector& x_init, const IntervalVector& x_current, IntervalVector& x_res, IntervalVector& y) {
+	IntervalVector x = x_current;
 
-	vars.set_all(); // by default all are variables
-
-	for (int i=0; i<ctr.f.nb_arg(); i++) {
-		int j=0;
-		while (j<y.size() && strcmp(ctr.f.arg(i).name,y[j].name)!=0) j++;
-		if (j<y.size())    // ths ith argument is found in y
-			vars.unset(i); //  --> marked as a parameter
+	try {
+		CtcQuantif::contract(x, y);
+	} catch (EmptyBoxException&) {
+		return;
 	}
-	assert(vars.nb_set()==nb_var);
 
-	this->prec = prec;
+	if (!x.is_subset(x_res)) {
 
-	this->_own_ctc = true;
-}
+		if (y.max_diam()<=prec) {
+			x_res |= x;
+			if (x_res==x_init) return;
+		}
+		else {
 
-CtcExist::CtcExist(Ctc& ctc, const BoolMask& vars, const IntervalVector& init_box, double prec) :
-	nb_var(vars.nb_set()), nb_param(vars.size()-nb_var), ctc(&ctc), bsc(new LargestFirst(prec)),
-	y_init(init_box), vars(vars), prec(prec), _own_ctc(false) {
+			l.push(pair<IntervalVector,IntervalVector>(x,y));
 
-	assert(vars.nb_unset()==init_box.size());
-
-}
-
-CtcExist::~CtcExist(){
-	if (_own_ctc) delete ctc;
-	delete bsc;
-}
-
-void CtcExist::contract(IntervalVector& x, IntervalVector& y) {
-	// create the full box by concatening x and y
-	int jx=0;
-	int jy=0;
-	IntervalVector fullbox(nb_var+nb_param);
-
-	for (int i=0; i<nb_var+nb_param; i++) {
-		if (vars[i]) fullbox[i]=x[jx++];
-		else         fullbox[i]=y[jy++];
+			// ============================== sampling =============================
+			// To converge faster to the result, we contract with the mid-vector of y.
+			// This allows to get an estimate of "res" without waiting for epsilon-sized
+			// parameter boxes (getting quickly some estimate is important for pruning).
+			try {
+				IntervalVector y_mid = y.mid();
+				CtcQuantif::contract(x,y_mid);  // x may be contracted here; that's why we pushed it on the stack *before* sampling.
+				x_res |= x;
+				if (x_res==x_init) return;
+			} catch (EmptyBoxException&) {
+				// do nothing
+			}
+			// =======================================================================
+		}
 	}
-	ctc->contract(fullbox);
 
-	jx=jy=0;
-	for (int i=0; i<nb_var+nb_param; i++) {
-		if (vars[i]) x[jx++]=fullbox[i];
-		else         y[jy++]=fullbox[i];
-	}
 }
-
 
 void CtcExist::contract(IntervalVector& box) {
-	assert(box.size()==nb_var);
+	assert(box.size()==Ctc::nb_var);
 
 	// the returned box, initially empty
-	IntervalVector res=IntervalVector::empty(nb_var);
+	IntervalVector res=IntervalVector::empty(Ctc::nb_var);
 
-	// stack of pairs (x,y)
-	stack<pair<IntervalVector,IntervalVector> > l;
+	assert(l.empty()); // even when an exception is thrown by this function, l is empty.
 
 	l.push(pair<IntervalVector,IntervalVector>(box, y_init));
 	
-	IntervalVector x_save(nb_var);
-	IntervalVector x(nb_var);
+	IntervalVector x_save(Ctc::nb_var);
+	IntervalVector x(Ctc::nb_var);
 
 	IntervalVector y(nb_param);
 	IntervalVector y_mid(nb_param); // for sampling
 
 	while (!l.empty()) {
-		
+
 		// get the domain of variables
 		x_save = l.top().first;
 		// get and immediately bisect the domain of parameters (strategy inspired by Optimizer)
@@ -134,46 +133,14 @@ void CtcExist::contract(IntervalVector& box) {
 		l.pop();
 
 		// proceed with the two sub-boxes for y
-		for (int j=1;j<=2;j++) {
-			x = x_save;
-			y = j==1? cut.first : cut.second;
-
-			try {
-				contract(x, y);
-			} catch (EmptyBoxException&) {
-				continue;
-			}
-
-			if (!x.is_subset(res)) {
-
-				if (y.max_diam()<=prec) {
-					res |= x;
-					if (res==box) return;
-				}
-				else {
-
-					l.push(pair<IntervalVector,IntervalVector>(x,y));
-
-					// ============================== sampling =============================
-					// To converge faster to the result, we contract with the mid-vector of y.
-					// This allows to get an estimate of "res" without waiting for epsilon-sized
-					// parameter boxes (getting quickly some estimate is important for pruning).
-					try {
-						y_mid = y.mid();
-						contract(x,y_mid);  // x may be contracted here; that's why we pushed it on the stack *before* sampling.
-						res |= x;
-						if (res==box) return;
-					} catch (EmptyBoxException&) {
-						// do nothing
-					}
-					// =======================================================================
-				}
-			}
-		}
+		proceed(box, x_save, res, cut.first);
+		proceed(box, x_save, res, cut.second);
 	}
+
 	box &= res;
 	if (box.is_empty()) throw EmptyBoxException();
 
 }
+
 
 } // end namespace ibex

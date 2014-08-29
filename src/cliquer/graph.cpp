@@ -2,7 +2,7 @@
 /*
  * This file contains the graph handling routines.
  *
- * Copyright (C) 2002 Sampo Niskanen, Patric Östergård.
+ * Copyright (C) 2002 Sampo Niskanen, Patric ï¿½stergï¿½rd.
  * Licensed under the GNU GPL, read the file LICENSE for details.
  */
 
@@ -12,6 +12,9 @@
 #include <string.h>
 #include "graph.h"
 
+
+// ignored warning : comparison between signed and unsigned integer expressions in this file
+#pragma GCC diagnostic ignored "-Wsign-compare"
 
 static graph_t *graph_read_dimacs_binary(FILE *fp,char *firstline);
 static graph_t *graph_read_dimacs_ascii(FILE *fp,char *firstline);
@@ -246,8 +249,8 @@ headerlength+=strlen(s);
 boolean graph_write_dimacs_binary(graph_t *g, char *comment,FILE *fp) {
 	char *buf;
 	char *header=NULL;
-	int headersize=0;
-	int headerlength=0;
+	unsigned int headersize=0;
+	unsigned int headerlength=0;
 	int i,j;
 
 	ASSERT((sizeof(setelement)*8)==ELEMENTSIZE);
@@ -758,3 +761,6 @@ int graph_test_regular(graph_t *g) {
 	return n;
 }
 
+
+// Restore warning : comparison between signed and unsigned integer expressions in this file
+#pragma GCC diagnostic pop

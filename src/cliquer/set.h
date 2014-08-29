@@ -2,7 +2,7 @@
 /*
  * This file contains the set handling routines.
  *
- * Copyright (C) 2002 Sampo Niskanen, Patric Östergård.
+ * Copyright (C) 2002 Sampo Niskanen, Patric ï¿½stergï¿½rd.
  * Licensed under the GNU GPL, read the file LICENSE for details.
  */
 
@@ -13,7 +13,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+
 #include "misc.h"
+
+// ignored warning : comparison between signed and unsigned integer expressions in this file
+#pragma GCC diagnostic ignored "-Wsign-compare"
 
 /*
  * Sets are arrays of setelement's (typically unsigned long int's) with
@@ -383,5 +387,8 @@ static void set_print(set_t s) {
 	printf("\n");
 	return;
 }
+
+// Restore warning : comparison between signed and unsigned integer expressions in this file
+#pragma GCC diagnostic pop
 
 #endif /* !CLIQUER_SET_H */

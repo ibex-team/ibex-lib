@@ -1,5 +1,5 @@
 **************************************************
-             Contractors  (*under construction*)
+             Contractors
 **************************************************
 
 ------------------------------
@@ -90,6 +90,9 @@ Here is the interface for contractors. As one can see, it could not be more mini
    class Ctc {
      public:
 
+     // Build a contractor on nb_var variables.
+     Ctc(int nb_var);
+
      // Performs contraction. 
      // This is the only function that must be implemented in a subclass of Ctc.
      // The box in argument is contracted in-place (in-out argument).
@@ -146,6 +149,25 @@ This contractor can either be built with a :ref:`NumConstraint <mod-sys-ctrs>` o
 
 See **examples in the** :ref:`tutorial <tuto-fwd-bwd>`.
 
+------------------------------
+Intersection, Union, etc.
+------------------------------
+
+Basic operators on contractors are :
+
++------------+-------+----------------------------------------------------------+
+| Class name | arity | Definition                                               |
++============+=======+==========================================================+
+|CtcIdentity | 0     | :math:`[x]\mapsto[x]`                                    |
++------------+-------+----------------------------------------------------------+
+|CtcCompo    | n     |:math:`[x]\mapsto(C_1\circ\ldots\circ C_n)([x])`          |
++------------+-------+----------------------------------------------------------+
+|CtcUnion    | n     |:math:`[x]\mapsto \square C_1([x])\cup\ldots\cup C_n([x])`|
++------------+-------+----------------------------------------------------------+
+|CtcFixpoint | 1     |:math:`[x]\mapsto C^\infty([x])`                          |
++------------+-------+----------------------------------------------------------+
+
+Examples are given in the tutorial.
 
 .. _ctc-propag:
 
@@ -225,6 +247,9 @@ The principle is that if a contraction does not remove more that
 
 then this reduction is not propagated. The default value is 0.01 in the case of propagation, 0.1 in the case of fixpoint.
 
+**Warning:** In theory (and sometimes in practice), the fixpoint ratio gives no information on the "distance"
+between the real fixpoint and the one we calculate.
+
 Here we fix the ratio to 1e-03 for both:
 
 .. literalinclude:: ../examples/doc-contractor.cpp
@@ -260,27 +285,87 @@ The display is:
 Input and Output variables
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+The input variables (the ones that potentially impacts the contractor) and the
+output variables (the ones that are potentially impacted) are two lists of variables stored under the form of "bitsets".
 
-*(to be completed)*
-
-The input and output variables of a contractor are two lists of variables stored under the form of "bitsets".
+A biset is nothing but an (efficiently structured) list of integers. 
 
 These bitsets are the two following fields of the``Ctc`` class:
 
- 
-*(to be completed)*
+.. code-block:: cpp
 
-These fields are not built by default. One reason is that the size of the bitset (the number of variables) may be unknown at compile-time. 
-The other is that, in some applications, the number of variables is too large so that one prefers not to build these data structures.
+  	/**
+	 * The input variables (NULL pointer means "unspecified")
+	 */
+	BitSet* input;
+
+	/**
+	 * The output variables NULL pointer means "unspecified")
+	 */
+	BitSet* output;
+
+These fields are not built by default. One reason is for allowing the distinction between an empty bitset and *no bitset* (information not provided).
+The other is that, in some applications, the number of variables is too large so that one prefers not to build these data structures even if they
+are very compacted.
+
+To show the usage of these bitsets and their impact on propagation, we consider the same example as before.
+Let us now force the input/output bitsets of each contractors to contain every variable:
+
+.. literalinclude:: ../examples/doc-contractor.cpp
+   :language: cpp
+   :start-after: ctc-input-output-C
+   :end-before:  ctc-input-output-C
+
+We observe now that the fixpoint with ``CtcPropag`` is reached with as many iterations as without ``CtcPropag``:
+
+.. literalinclude:: ../examples/doc-contractor.txt
+   :start-after:  ctc-input-output-O
+   :end-before:   ctc-input-output-O
+
+If you build a contractor from scratch (not inheriting a built-in contractor like we have just done), don't forget to
+create the bitsets before using them with ``add/remove``. 
+
+Here is a final example. Imagine that we have implemented a contraction algorithm for the following constraint (over 100 variables):
+
+.. math::
+
+   \forall i, 0\le i \le 49, \quad  x[2\times i]>0 \Longrightarrow x[2\times i+1]=0.
+	
+The the input (resp. output) variables is the set of even (resp. odd) numbers. Here is how the initialization could be done:
+
+.. literalinclude:: ../examples/doc-contractor.cpp
+   :language: cpp
+   :start-after: ctc-input-output-2-C
+   :end-before:  ctc-input-output-2-C
+
 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 The ``accumulate`` flag
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-*(to be completed)*
+The accumate flag is a subtle tuning parameter you may ignore on first reading.
 
+As you know now, one annoyance with continuous variables is that we have to stop the fixpoint before it is actually reached,
+which means that unsignificant contractions are not propagated.
 
+Now, to measure the significance of a contractor, we look at the intervals after contraction and compare them to
+the intervals just before contraction. 
 
+One little risk with this strategy is when a lot of unsignificant contractions gradually contracts domains to a point
+where the overall contraction has become significant. The propagation algorithm may stop despite of this significant contraction.
+
+The ``accumulate`` flag avoids this by comparing not with the intervals just before the current contraction, but the intervals
+obtained after the last significant one. The drawback, however, is that all the unsignificant contractions are cumulated
+and attributed to the current contraction, whence a little loss of efficiency.
+
+To set the accumulate flag, just write:
+
+.. code-block:: cpp
+
+   CtcPropag propag(...);
+   propag.accumulate = true;
+
+Often, in practice, setting the ``accumulate`` flag results in a sligthly better contraction with a little more time.
 
 .. _ctc-hc4:
 
@@ -288,12 +373,25 @@ The ``accumulate`` flag
 HC4
 ------------------------------
 
-A "constraint propagation" loop.
+HC4 is the classical "constraint propagation" loop that we found in the literature :ref:`[Benhamou & al., 1999] <Benhamou99>`.
+It allows to contract with respect to a :ref:`system <mod-sys>` of constraints.
 
-*(to be completed)*
+In Ibex, the ``CtcHC4`` contractor is simply a direct specialization of ``CtcPropag`` (the :ref:`propagation contractor <ctc-propag>`).
 
+The contractors that are propagated are nothing but the default (:ref:`ctc-fwd-bwd`) contractors associated to every constraint of the system.
 
-*(to be completed)*
+Here is an example:
+
+.. literalinclude:: ../examples/doc-contractor.cpp 
+   :language: cpp
+   :start-after: ctc-hc4-C
+   :end-before: ctc-hc4-C
+
+And the result:
+
+.. literalinclude:: ../examples/doc-contractor.txt 
+   :start-after: ctc-hc4-O
+   :end-before: ctc-hc4-O
 
 .. _ctc-inverse:
 
@@ -331,7 +429,6 @@ and a contractor with respect to the constraint
 This gives:
 
 .. literalinclude:: ../examples/doc-contractor.txt
-   :language: cpp
    :start-after: ctc-inv-O
    :end-before:  ctc-inv-O
 
@@ -378,21 +475,105 @@ Acid & 3BCid
 Polytope Hull
 ------------------------------
 
-*(to be completed)*
+Consider first a system of linear inequalities.
+Ibex gives you the possibility to contract a box to the :ref:`hull <itv-arith>` of the polytope (the set of feasible points). 
+This is what the contractor ``CtcPolytopeHull`` stands for.
+
+This contractor calls the linear solver Ibex has been configured with (Soplex, Cplex, CLP) to calculate for
+each variable :math:`x_i`, the following bounds:
+
+.. math::
+
+   \min_{A x \le b \wedge x\in[x]} \{ x_i \} \quad \mbox{and} \quad \max_{A x \le b \wedge x\in[x]} \{ x_i \}.
+
+
+where [x] is the box to be contracted. Consider for instance
+
+.. math::
+
+   \left\{\begin{array}{l}x_1+x_2\le 0\\ x_1-x_2\le 0\\\end{array}\right.
+
+Let [x] be [-1,1]x[-1,1]. The following picture depicts the polytope (which is rather a polyhedron in this case) in green, the initial box and the result of the contraction (dashed box).
+
+.. figure:: polytope.png
+   :width: 300 px
+   :align: center
+
+The corresponding program is:
+
+.. literalinclude:: ../examples/doc-contractor.cpp
+   :language: cpp
+   :start-after: ctc-polytope-1-C
+   :end-before:  ctc-polytope-1-C
+
+The output is:
+
+.. literalinclude:: ../examples/doc-contractor.txt
+   :start-after: ctc-polytope-1-O
+   :end-before:  ctc-polytope-1-O
+
+
+In case of a non-linear system, it is also possible to call the ``CtcPolytopeHull`` contractor, providing that you give a way to *linearize* the non-linear system. Next section describes linearization techniques and gives an example of ``CtcPolytopeHull`` with a non-linear system.
 
 .. _ctc-linear-relax:
 
-------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 Linear Relaxations
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Linearization procedures in Ibex are embbeded in a class inheriting the ``LinearRelax`` interface.
+
+There exists some built-in linearization techniques, namely:
+
+- ``LinearRelaxXTaylor``: a corner-based Taylor relaxation :ref:`[Araya & al., 2012] <Araya12>`.
+- ``LinearRelaxAffine2``: a relaxation based on affine arithmetic :ref:`[Ninin & Messine, 2009] <Ninin09>`.
+- ``LinearRelaxCombo``: a combination of the two previous techniques (the polytope is basically the intersection of the polytopes
+  calculated by each technique)
+- ``LinearRelaxFixed``: a fixed linear system (as shown in the example above)
+
+This ``LinearRelax`` interface only imposes to implement a virtual function called ``linearization``:
+
+.. code-block:: cpp
+
+   class LinearRelax {
+   public:
+	/**
+	 * Build a relaxation for a system.
+	 *
+	 * The system is only used by this constructor to get the number
+	 * of variables and constraints.
+	 */
+	LinearRelax(const System& sys);
+
+	/**
+	 * Build a relaxation of nb_ctr constraints on nb_var variables.
+	 */
+	LinearRelax(int nb_ctr, int nb_var);
+
+	/**
+	 * The linearization technique.
+	 *
+	 * It must be implemented in the subclasses.
+	 */
+	virtual int linearization(const IntervalVector& box, LinearSolver& lp_solver)=0;
+   };
+
+The ``linearization`` takes as argument a box because, most of the time, the way you linearize a nonlinear system depends on the domain of the variables. In other words, adding the 2*n bound constraints that represent the box to the system allow to build a far smaller polytope.
+
+The second argument is the linear solver. This is only for efficiency reason: instead of building a matrix A and a vector b, the function directly enters the constraints in the linear solver. Let us now give an example.
+
+Giving an algorithm to linearize a non-linear system is beyond the scope of this documentation so we shall here artificially *linearize a linear system*. The algorithm becomes trivial but this is enough to show you how to implement this interface.
+So let us take the same linear system as above and replace the ``LinearRelaxFixed`` instace by an instance of a home-made class:
+
+.. literalinclude:: ../examples/doc-contractor.cpp
+   :language: cpp
+   :start-after: ctc-polytope-2-C
+   :end-before:  ctc-polytope-2-C
+
+Replacing the ``LinearRelaxFixed`` instance by an instance of ``MyLinearRelax`` gives exactly the same result.
+
 ------------------------------
-
-*(to be completed)*
-
-
-.. _ctc-xnewton:
-
-------------------------------
-X-Newton
+Exists and ForAll
 ------------------------------
 
 *(to be completed)*

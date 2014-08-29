@@ -582,6 +582,11 @@ public:
 	void write_arg_af2_domains(const IntervalVector& box) const;
 
 	/**
+	 * \brief Initialize symbols affine domains from a box
+	 */
+	void write_arg_af2_domains(const Affine2Vector& box) const;
+
+	/**
 	 * \brief Initialize d from symbols domains
 	 *
 	 * \param grad - true<=>read "g" (gradient) false <=>read "d" (domain)
@@ -634,10 +639,21 @@ public:
 	Domain& eval_affine2_domain(const IntervalVector& box, Affine2Domain& result) const;
 
 	/**
+	 * \brief Calculate f(box) using only affine arithmetic.
+	 */
+	Affine2Domain& eval_affine2_affinedomain(const Affine2Vector& box) const;
+
+	/**
 	 * \brief Calculate f(box) using affine arithmetic.
 	 *
 	 */
 	Interval eval_affine2(const IntervalVector& box) const;
+
+	/**
+	 * \brief Calculate f(box) using only affine arithmetic.
+	 *
+	 */
+	Affine2 eval_affine2(const Affine2Vector& box) const;
 
 	/**
 	 * \brief Calculate f(box) using affine arithmetic.
@@ -662,6 +678,13 @@ public:
 	IntervalVector eval_affine2_vector(const IntervalVector& box, Affine2Vector& affine) const;
 
 	/**
+	 * \brief Calculate f(box) using only affine arithmetic.
+	 *
+	 * \pre f must be vector-valued
+	 */
+	Affine2Vector eval_affine2_vector(const Affine2Vector& affine) const;
+
+	/**
 	 * \brief Calculate f(box) using affine arithmetic.
 	 *
 	 * \pre f must be matrix-valued
@@ -675,6 +698,14 @@ public:
 	 * \pre f must be matrix-valued
 	 */
 	IntervalMatrix eval_affine2_matrix(const IntervalVector& box, Affine2Matrix& affine) const;
+
+	/**
+	 * \brief Calculate f(box) using only affine arithmetic.
+	 *
+	 * \pre f must be matrix-valued
+	 */
+	Affine2Matrix eval_affine2_matrix(const Affine2Vector& box) const;
+
 
 	/**
 	 * \brief Contract x w.r.t. f(x)=y.
@@ -922,6 +953,21 @@ inline void Function::write_arg_af2_domains(const IntervalVector& box) const {
 	else
 		load(arg_af2,Affine2Vector(box,true),nb_used_vars(),_used_var);
 }
+
+inline void Function::write_arg_af2_domains(const Affine2Vector& box) const {
+	if (_nb_used_vars==-1) this->generate_used_vars();
+	if (all_args_scalar()) {
+		int j;
+		for (int i=0; i<nb_used_vars(); i++) {
+			j=used_var(i);
+			arg_af2[j].i()=box[j];
+		}
+	}
+	else
+		load(arg_af2,box,nb_used_vars(),_used_var);
+}
+
+
 
 inline void Function::read_arg_domains(Array<Domain>& d, bool grad) const {
 	if (_nb_used_vars==-1) this->generate_used_vars();

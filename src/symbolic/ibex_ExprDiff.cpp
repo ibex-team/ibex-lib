@@ -42,16 +42,44 @@ void ExprDiff::add_grad_expr(const ExprNode& node, const ExprNode& _expr_) {
 }
 
 const ExprNode& ExprDiff::diff(const Array<const ExprSymbol>& old_x, const Array<const ExprSymbol>& new_x, const ExprNode& y) {
+
+	//cout << "diff of " << y << endl;
 	if (y.dim.is_scalar()) {
 		return gradient(old_x,new_x,y);
 	} else if (y.dim.is_vector()) {
+		if (y.dim.dim3>1)
+			ibex_warning("differentiation of a function returning a row vector (considered as a column vector)");
+
 		const ExprVector* vec=dynamic_cast<const ExprVector*>(&y); // TODO: not correct, ex: Function f("x","y","2*(x,y)");
 		int m=y.dim.vec_size();
+		int n=old_x.size();
 		Array<const ExprNode> a(m);
+		// TODO: we should have an "ExprNode to ExprConstant conversion" extracted from ExprCopy
+		// (for the moment, we are obliged to call ExprCopy to benefit from this)
+		bool cst=true;
 		for (int i=0; i<m; i++) { // y.dim.vec_size() == vec->nb_args()
 			a.set_ref(i,gradient(old_x,new_x,vec->arg(i)));
+			cst &= dynamic_cast<const ExprConstant*>(&a[i])!=NULL;
 		}
-		return ExprVector::new_(a,false);
+		if (!cst)
+			return ExprVector::new_(a,false);
+		else {
+			if (n==1) {
+				IntervalVector vec(m);
+				for (int i=0; i<m; i++) {
+					vec[i]=(dynamic_cast<const ExprConstant*>(&a[i]))->get_value();
+				}
+				cleanup(a,false);
+				return ExprConstant::new_vector(vec,false);
+			} else {
+				IntervalMatrix M(m,n);
+				for (int i=0; i<m; i++) {
+					M.set_row(i, (dynamic_cast<const ExprConstant*>(&a[i]))->get_vector_value());
+				}
+				cleanup(a,false);
+				return ExprConstant::new_matrix(M);
+			}
+		}
 	} else {
 		not_implemented("differentiation of matrix-valued functions");
 		return y;

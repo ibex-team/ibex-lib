@@ -2,7 +2,7 @@
 /*
  * This file contains the clique searching routines.
  *
- * Copyright (C) 2002 Sampo Niskanen, Patric Östergård.
+ * Copyright (C) 2002 Sampo Niskanen, Patric ï¿½stergï¿½rd.
  * Licensed under the GNU GPL, read the file LICENSE for details.
  */
 
@@ -13,8 +13,11 @@
 #include <sys/time.h>
 #include <sys/times.h>
 
+
 #include "cliquer.h"
 
+// ignored warning : comparison between signed and unsigned integer expressions in this file
+#pragma GCC diagnostic ignored "-Wsign-compare"
 
 /* Default cliquer options */
 static clique_options clique_default_options_struct = {
@@ -1731,3 +1734,8 @@ boolean clique_print_time_always(int level, int i, int n, int max,
 
 	return TRUE;
 }
+
+
+
+// Restore warning : comparison between signed and unsigned integer expressions in this file
+#pragma GCC diagnostic pop

@@ -17,20 +17,20 @@ CtcInteger::~CtcInteger() {
 	delete output;
 }
 
-CtcInteger::CtcInteger(int nb_var, const BoolMask& is_int) : is_int(is_int) {
+CtcInteger::CtcInteger(int nb_var, const BitSet& is_int) : Ctc(nb_var), is_int(is_int) { // warning is_int.size()<>nb_var
+	assert(nb_var>0);
+	assert(is_int.max()<nb_var);
 
-	input = new BoolMask(nb_var);
-	output = new BoolMask(nb_var);
-
-	for (int v=0; v<nb_var; v++)
-		(*output)[v]=(*input)[v]=is_int[v];
+	input = new BitSet(is_int);
+	output = new BitSet(is_int);
 }
+
 
 void CtcInteger::contract(IntervalVector& box) {
 
-	assert(box.size()==is_int.size());
+	assert(box.size()==nb_var);
 
-	for (int i=0; i<is_int.size(); i++) {
+	for (int i=0; i<nb_var; i++) {
 		if (!is_int[i]) continue;
 		bwd_integer(box[i]);
 		if (box[i].is_empty()) {
@@ -40,11 +40,11 @@ void CtcInteger::contract(IntervalVector& box) {
 	}
 }
 
-void CtcInteger::contract(IntervalVector& box, const BoolMask& impact) {
+void CtcInteger::contract(IntervalVector& box, const BitSet& impact) {
 
-	assert(box.size()==is_int.size());
+	assert(box.size()==nb_var);
 
-	for (int i=0; i<is_int.size(); i++) {
+	for (int i=0; i<nb_var; i++) {
 		if (is_int[i] && impact[i]) {
 			bwd_integer(box[i]);
 			if (box[i].is_empty()) {

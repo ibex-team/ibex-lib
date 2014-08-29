@@ -31,7 +31,7 @@ int main() {
 	vector<IntervalVector> solutions = solver.solve(system.box); // Run the solver
 
 	/* Display the solutions. */
-	for (int i=0; i<(solutions.size()); i++) {
+	for (unsigned int i=0; i<solutions.size(); i++) {
 		cout << "solution n°" << i << ": " << solutions[i] << endl;
 	}
 	//! [start-call-solver]
@@ -150,12 +150,19 @@ int main() {
 	}
 
 	{
-	//! [basic-func-create]
+	//! [basic-func-create-1]
+	Function f("x","y","sin(x+y)"); // create the function (x,y)->sin(x+y)
+	//! [basic-func-create-1]
+	}
+
+	{
+	//! [basic-func-create-2]
 	Variable x("x");
 	Variable y("y");
 	Function f(x,y,sin(x+y)); // create the function (x,y)->sin(x+y)
-	//! [basic-func-create]
+	//! [basic-func-create-2]
 	}
+
 	{
 	//! [basic-func-create-cst1]
 	Variable x;
@@ -172,11 +179,23 @@ int main() {
 	}
 
 	{
-	//! [func-vec-arg]
+	//! [basic-func-create-cst3]
+	Function f("x","sin([3.1415,3.1416]*x)"); // create the function (x,y)->sin(π*x)
+	//! [basic-func-create-cst3]
+	}
+
+	{
+	//! [func-vec-arg-1]
 	Variable a(2);
 	Variable b(2);
 	Function dist(a,b,sqrt(sqr(a[0]-b[0])+sqr(a[1]-b[1])));
-	//! [func-vec-arg]
+	//! [func-vec-arg-1]
+	}
+
+	{
+	//! [func-vec-arg-2]
+	Function dist("a[2]","b[2]","sqrt((a(1)-b(1)^2)+(a(2)-b(2))^2)");
+	//! [func-vec-arg-2]
 	}
 
 	{
@@ -198,7 +217,20 @@ int main() {
 	}
 
 	{
-	//! [func-vec-value]
+	//! [func-vec-value-1]
+	Function f("x","(x-1,x+1)");
+	//! [func-vec-value-1]
+	}
+
+	{
+	//! [func-vec-value-2]
+	Variable x;
+	Function f(x,Return(x-1,x+1));
+	//! [func-vec-value-2]
+	}
+
+	{
+	//! [func-vec-value-3]
 	// ------------------------------------------------
 	// Vector-valued functions
 	// ------------------------------------------------
@@ -215,14 +247,20 @@ int main() {
 	Function f(x,Return(dist(x,pt1),dist(x,pt2)),"f");
 
 	cout << f << endl;
-	//! [func-vec-value]
+	//! [func-vec-value-3]
 	}
 
-	{
-	//! [func-mat-value]
+    {
+	//! [func-mat-value-1]
+	Function f("x","((2*x,x);(-x,3*x))");
+	//! [func-mat-value-1]
+	}
+
+    {
+	//! [func-mat-value-2]
 	Variable x("x");
 	Function f(x,Return(Return(2*x,x,true),Return(-x,3*x,true)));
-	//! [func-mat-value]
+	//! [func-mat-value-2]
 	}
 
 	{
@@ -315,6 +353,27 @@ int main() {
 	/* the backward sets box to ([1, 1.7123] ; [3, 3.7124]) */
 	f.backward(-1.0,box);
 	//! [func-bwd]
+	}
+
+	{
+	//! [ctr-1]
+	NumConstraint c("x","y","z","x+y<=z");
+	//! [ctr-1]
+	}
+
+	{
+	//! [ctr-2]
+	Variable x,y,z;
+	NumConstraint c(x,y,z,x+y<=z);
+	//! [ctr-2]
+	}
+
+	{
+	//! [ctr-3]
+	Variable x,y,z;
+	Function f(x,y,z,x+y-z);
+	NumConstraint c(f,LEQ);
+	//! [ctr-3]
 	}
 
 	{
@@ -496,6 +555,7 @@ int main() {
 	class MyContractor : public Ctc {
 
 	public:
+		MyContractor(int nb_var) : Ctc(nb_var) {}
 
 		void contract(IntervalVector& box) {
 			box=box.mid()+0.5*Interval(-1,1)*box.rad();
@@ -506,7 +566,7 @@ int main() {
 
 	//! [ctc-own2]
 	/* build the contractor for 3-dimensional boxes. */
-	MyContractor c;
+	MyContractor c(3);
 
 	/* create the box [0,1]x[0,1]x[0,1] */
 	IntervalVector x(3,Interval(0,1));
@@ -565,7 +625,7 @@ int main() {
 	vector<IntervalVector> sols=s.solve(box);
 
 	/* Display the solutions */
-	for (int i=0; i<sols.size(); i++)
+	for (unsigned int i=0; i<sols.size(); i++)
 		cout << "solution n°" << i << "=\t" << sols[i] << endl;
 	//! [strat-basic-solver]
 	}
@@ -611,7 +671,7 @@ int main() {
 	vector<IntervalVector> sols=s.solve(system.box);
 
 	/* Display the solutions */
-	for (int i=0; i<sols.size(); i++)
+	for (unsigned int i=0; i<sols.size(); i++)
 		cout << "solution n°" << i << "=\t" << sols[i] << endl;
 
 	/* Report performances */

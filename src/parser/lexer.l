@@ -127,22 +127,43 @@ extern int ibexparse();
 
 void ibexparse_string(const char* syntax) {
 
-	// copy string into new buffer and Switch buffers
-	ibex_scan_string (syntax);
+	// We have to delete the buffer created (new_buff) at the end of
+	// this function otherwise the next call to ibexparse_string(...)
+	// will create another buffer and the first one would leak in memory.
+	// But, then, if we instead parse a file (not a string) right after this
+	// call, a memory fault occurs because YY_CURRENT_BUFFER (which points
+	// to new_buff) has been destroyed.
+	// 
+	// I tried to save YY_CURRENT_BUFFER and restore its old value 
+	// with ibex_switch_to_buffer(...) at the end, but it did not work.
+	
+	// So I force here deletion of YY_CURRENT_BUFFER
+	// and then recreate the buffer using ibexrestart(...) at the end. 
+	
+	ibex_delete_buffer(YY_CURRENT_BUFFER);
+	
+	// copy string into a new buffer and switch buffers
+	YY_BUFFER_STATE new_buff = ibex_scan_string (syntax);
 
 	// analyze the string
 	try {
 	  ibexparse();
 	} catch(SyntaxError& e) {
 	  // delete the new buffer
-	  //ibex_delete_buffer(YY_CURRENT_BUFFER);
+	  ibex_delete_buffer(new_buff);
+	  ibexrestart(stdin);
       throw(e);
 	}
 
 	// delete the new buffer
-	//   --> provokes bug when another file is read after...
-	//ibex_delete_buffer(YY_CURRENT_BUFFER);
-	
+	ibex_delete_buffer(new_buff);
+		
+	// necessary, otherwise provokes a memory fault when another 
+	// file is read after (this fault does not occur if we parse a system 
+	// from a string again). I also tried to save YY_CURRENT_BUFFER
+	// and restore the old buffer with ibex_switch_to_buffer(...) but
+	// it did not work.  
+	ibexrestart(stdin);
 }
 
 //"/""*"*([^*]|("*")+[^/])"*"*"/"    { /* C-like comments */ }

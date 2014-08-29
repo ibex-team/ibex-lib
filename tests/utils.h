@@ -19,8 +19,6 @@
 
 using namespace ibex;
 
-#define ERROR 1e-10
-
 class TestIbex : public Test::Suite {
 public:
 	bool sameExpr(const ExprNode& node, const char* expr);
@@ -30,6 +28,8 @@ public:
 	void check(const IntervalVector& y_actual, const IntervalVector& y_expected);
 	bool almost_eq(const Interval& y_actual, const Interval& y_expected, double err);
 	bool almost_eq(const IntervalVector& y_actual, const IntervalVector& y_expected, double err);
+
+	static const double ERROR;
 };
 
 #endif // __UTILS_H__

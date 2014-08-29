@@ -23,8 +23,8 @@ namespace ibex {
  */
 void propagate(const Array<IntervalVector>& boxes, IntStack ***dirboxes, int dimension, bool left, IntervalVector& curr_qinter, vector<BitSet *>& nogoods) {
 	
-	unsigned int n = curr_qinter.size();
-	unsigned int p = boxes.size();
+	int n = curr_qinter.size();
+	int p = boxes.size();
 	
 	IntervalVector b(n);
 	
@@ -76,8 +76,8 @@ void propagate(const Array<IntervalVector>& boxes, IntStack ***dirboxes, int dim
  */
 void propagate_no_ub(const Array<IntervalVector>& boxes, IntStack ***dirboxes, int dimension, bool left, IntervalVector& hull_qinter, vector<BitSet *>& nogoods) {
 	
-	unsigned int n = hull_qinter.size();
-	unsigned int p = boxes.size();
+	int n = hull_qinter.size();
+	int p = boxes.size();
 	
 	IntervalVector b(n);
 	
@@ -115,7 +115,7 @@ IntervalVector qinter2(const Array<IntervalVector>& _boxes, int q) {
 	
 	assert(q>0);
 	assert(_boxes.size()>0);
-	unsigned int n = _boxes[0].size();
+	int n = _boxes[0].size();
 	
 	/* Remove the empty boxes from the list */
 	
@@ -171,7 +171,7 @@ IntervalVector qinter2(const Array<IntervalVector>& _boxes, int q) {
 	n_indices.reserve(p);
 	
 	int b,b2,nboxes;
-	pair<double,int> x[p];
+	pair<double,int>  *x = new pair<double,int>[p];
 	bool first_pass = true;
 	bool ng;
 	
@@ -216,11 +216,11 @@ IntervalVector qinter2(const Array<IntervalVector>& _boxes, int q) {
 				}
 			}
 			
-			if (neighboxes.size() < q-1) continue;
+			if (((int)neighboxes.size() )< q-1) continue;
 			
 			/* Check if it's a nogood */
 			ng = false;
-			for (int z=0; z<nogoods.size(); z++) {
+			for (unsigned int z=0; z<nogoods.size(); z++) {
 				if (nogoods.at(z)->includes(curr_set)) {
 					ng = true;
 					break;
@@ -291,11 +291,11 @@ IntervalVector qinter2(const Array<IntervalVector>& _boxes, int q) {
 				}
 			}
 			
-			if (neighboxes.size() < q-1) continue;
+			if (((int)neighboxes.size()) < q-1) continue;
 			
 			/* Check if it's a nogood */
 			ng = false;
-			for (int z=0; z<nogoods.size(); z++) {
+			for (unsigned int z=0; z<nogoods.size(); z++) {
 				if (nogoods.at(z)->includes(curr_set)) {
 					ng = true;
 					break;
@@ -332,10 +332,11 @@ IntervalVector qinter2(const Array<IntervalVector>& _boxes, int q) {
 	}
 	free(dirboxes);
 	
+	delete [] x;
 	delete(origin);
 	
 	delete(curr_set);
-	for (int i=0; i<nogoods.size(); i++) delete(nogoods.at(i));
+	for (unsigned int i=0; i<nogoods.size(); i++) delete(nogoods.at(i));
 	
 	return hull_qinter;
 }

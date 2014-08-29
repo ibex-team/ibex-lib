@@ -15,6 +15,7 @@
 
 // ================ tools ===============
 #include "TestString.h"
+#include "TestBitSet.h"
 #include "TestSymbolMap.h"
 
 // ================ arithmetic ===============
@@ -38,7 +39,6 @@
 #include "TestGradient.h"
 #include "TestHC4Revise.h"
 #include "TestInHC4Revise.h"
-#include "TestHC4.h"
 
 // ================ parser ===============
 #include "TestParser.h"
@@ -55,11 +55,13 @@
 #include "TestPdcHansenFeasibility.h"
 
 // ================ contractor ===============
-#include "TestHC4.h"
+#include "TestCtcHC4.h"
 #include "TestCtcInteger.h"
-//#include "TestCtcSubBox.h"
+#include "TestCtcFwdBwd.h"
 #include "TestCtcNotIn.h"
 #include "TestCtcExist.h"
+#include "TestCtcForAll.h"
+#include "TestCtcPolytopeHull.h"
 
 #include "TestAffine2.h"
 
@@ -76,6 +78,7 @@ int main() {
     Test::Suite ts;
 
     ts.add(auto_ptr<Test::Suite>(new TestString()));
+    ts.add(auto_ptr<Test::Suite>(new TestBitSet()));
     ts.add(auto_ptr<Test::Suite>(new TestSymbolMap()));
 
     ts.add(auto_ptr<Test::Suite>(new TestInterval()));
@@ -108,10 +111,14 @@ int main() {
 
     ts.add(auto_ptr<Test::Suite>(new TestPdcHansenFeasibility()));
 
-    ts.add(auto_ptr<Test::Suite>(new TestHC4()));
+    ts.add(auto_ptr<Test::Suite>(new TestCtcHC4()));
     ts.add(auto_ptr<Test::Suite>(new TestCtcInteger()));
+    ts.add(auto_ptr<Test::Suite>(new TestCtcFwdBwd()));
     ts.add(auto_ptr<Test::Suite>(new TestCtcNotIn()));
     ts.add(auto_ptr<Test::Suite>(new TestCtcExist()));
+    ts.add(auto_ptr<Test::Suite>(new TestCtcForAll()));
+    ts.add(auto_ptr<Test::Suite>(new TestCtcPolytopeHull()));
+
     ts.add(auto_ptr<Test::Suite>(new TestFritzJohn()));
 
     return ts.run(output,false) ? EXIT_SUCCESS : EXIT_FAILURE;

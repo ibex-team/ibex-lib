@@ -12,6 +12,8 @@
 
 namespace ibex {
 
+CtcIdentity::CtcIdentity(int n) : Ctc(n) { }
+
 void CtcIdentity::contract(IntervalVector& box) { }
 
 } // end namespace ibex

@@ -14,7 +14,7 @@
 
 #include "ibex_Exception.h"
 #include "ibex_HyperGraph.h"
-#include "ibex_BoolMask.h"
+#include "ibex_BitSet.h"
 
 namespace ibex {
 
@@ -162,7 +162,7 @@ class ArcAgenda : Agenda {
    *
    *  \see #ibex::Propagation.
    */
-  void propagate(const HyperGraph& g, const BoolMask& m);
+  void propagate(const HyperGraph& g, const BitSet& m);
 
 
   /**

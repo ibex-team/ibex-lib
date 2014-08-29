@@ -1,18 +1,28 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_Pdc.cpp
+// File        : TestSetInterval.h
 // Author      : Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
-// Created     : Nov 27, 2012
-// Last Update : Nov 27, 2012
+// Created     : Aug 18, 2014
 //============================================================================
 
-#include "ibex_Pdc.h"
+#ifndef __TEST_SET_INTERVAL_H__
+#define __TEST_SET_INTERVAL_H__
+
+#include "cpptest.h"
+#include "utils.h"
 
 namespace ibex {
 
-Pdc::~Pdc() {
-}
+class TestSetInterval : public TestIbex {
+public:
+	TestSetInterval() {
+		TEST_ADD(TestSetInterval::diff01);
+	}
+
+	void diff01();
+};
 
 } // end namespace ibex
+#endif // __TEST_SET_INTERVAL_H__

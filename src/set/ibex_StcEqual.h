@@ -1,29 +1,33 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : TestHC4.h
+// File        : ibex_StcEqual.h
 // Author      : Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
-// Created     : Apr 10, 2012
-// Last Update : Apr 10, 2012
+// Created     : Jul 15, 2014
 //============================================================================
 
-#ifndef __TEST_HC4_H__
-#define __TEST_HC4_H__
+#ifndef __IBEX_STC_EQUAL_H__
+#define __IBEX_STC_EQUAL_H__
 
-#include "cpptest.h"
-#include "utils.h"
+#include "ibex_Stc.h"
+#include "ibex_Ctc.h"
 
 namespace ibex {
 
-class TestHC4 : public TestIbex {
+class StcEqual : public Stc {
 public:
-	TestHC4() {
-		TEST_ADD(TestHC4::ponts30);
-	}
+	StcEqual(Ctc& c_in, Ctc& c_out, double eps);
 
-	void ponts30();
+	void contract(SetInterval& set);
+
+	virtual ~StcEqual();
+
+	Ctc& c_in;
+	Ctc& c_out;
+	double eps;
 };
 
-} // end namespace ibex
-#endif // __TEST_HC4_H__
+} // namespace ibex
+
+#endif // __IBEX_STC_EQUAL_H__

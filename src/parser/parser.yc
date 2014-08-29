@@ -101,8 +101,8 @@ program       :                                 { begin_system(); }
                 system                          { end_system(); } 
               |                                 { begin_choco(); } 
                 TK_CHOCO choco_ctr              { end_choco(); }
-              |                                 { begin_function_file(); }
-                decl_fnc                        { end_function_file(); }        
+              |                                 { begin_function(); }
+                decl_fnc                        { end_function(); }        
               ;
               
 

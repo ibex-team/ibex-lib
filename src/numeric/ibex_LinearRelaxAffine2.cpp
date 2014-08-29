@@ -25,7 +25,7 @@ LinearRelaxAffine2::~LinearRelaxAffine2() {
 
 
 /*********generation of the linearized system*********/
-int LinearRelaxAffine2::linearization(IntervalVector & box, LinearSolver *mysolver) {
+int LinearRelaxAffine2::linearization(const IntervalVector& box, LinearSolver& lp_solver) {
 
 	Affine2 af2;
 	Vector rowconst(sys.nb_var);
@@ -52,7 +52,7 @@ int LinearRelaxAffine2::linearization(IntervalVector & box, LinearSolver *mysolv
 			err =0;
 			for (int i =0; i <sys.nb_var; i++) {
 				tmp = box[i].rad();
-				//		if (tmp> mysolver->getEpsilon()) {
+				//		if (tmp> lp_solver.getEpsilon()) {
 				rowconst[i] =af2.val(i+1) / tmp;
 				center += rowconst[i]*box[i].mid();
 				err += fabs(rowconst[i])*  pow(2,-50); // TODO to check
@@ -70,7 +70,7 @@ int LinearRelaxAffine2::linearization(IntervalVector & box, LinearSolver *mysolv
 				if (0.0 < ev.lb())
 					throw EmptyBoxException();
 				else if (0.0 < ev.ub()) {
-					stat = mysolver->addConstraint(rowconst, LEQ,	((af2.err()+err) - (af2.val(0)-center)).ub());
+					stat = lp_solver.addConstraint(rowconst, LEQ,	((af2.err()+err) - (af2.val(0)-center)).ub());
 					if (stat == LinearSolver::OK)	cont++;
 				}
 				break;
@@ -83,7 +83,7 @@ int LinearRelaxAffine2::linearization(IntervalVector & box, LinearSolver *mysolv
 				if (ev.ub() < 0.0)
 					throw EmptyBoxException();
 				else if (ev.lb() < 0.0) {
-					stat = mysolver->addConstraint(rowconst, GEQ,	(-(af2.err()+err) - (af2.val(0)-center)).lb());
+					stat = lp_solver.addConstraint(rowconst, GEQ,	(-(af2.err()+err) - (af2.val(0)-center)).lb());
 					if (stat == LinearSolver::OK)	cont++;
 				}
 				break;
@@ -93,10 +93,10 @@ int LinearRelaxAffine2::linearization(IntervalVector & box, LinearSolver *mysolv
 					throw EmptyBoxException();
 				}
 				else {
-					if (ev.diam()>2*mysolver->getEpsilon()) {
-						stat = mysolver->addConstraint(rowconst, GEQ,	(-(af2.err()+err) - (af2.val(0)-center)).lb());
+					if (ev.diam()>2*lp_solver.getEpsilon()) {
+						stat = lp_solver.addConstraint(rowconst, GEQ,	(-(af2.err()+err) - (af2.val(0)-center)).lb());
 						if (stat == LinearSolver::OK)	cont++;
-						stat = mysolver->addConstraint(rowconst, LEQ,	((af2.err()+err) - (af2.val(0)-center)).ub());
+						stat = lp_solver.addConstraint(rowconst, LEQ,	((af2.err()+err) - (af2.val(0)-center)).ub());
 						if (stat == LinearSolver::OK)	cont++;
 					}
 				}

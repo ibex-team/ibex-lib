@@ -40,7 +40,7 @@ void ArcAgenda::propagate(const HyperGraph& g, int c, int v) {
 	}
 }
 
-void ArcAgenda::propagate(const HyperGraph& g, const BoolMask& m) {
+void ArcAgenda::propagate(const HyperGraph& g, const BitSet& m) {
 	for (int i=0; i<nb_var; i++)
 		if (m[i]) propagate(g,-1,i);
 }

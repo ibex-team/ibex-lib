@@ -21,10 +21,14 @@ class TestNumConstraint : public TestIbex {
 
 public:
 	TestNumConstraint() {
+		TEST_ADD(TestNumConstraint::build_from_string01);
+		TEST_ADD(TestNumConstraint::build_from_string02);
 		TEST_ADD(TestNumConstraint::is_thick_eq01);
 		TEST_ADD(TestNumConstraint::is_thick_eq02);
 	}
 
+	void build_from_string01();
+	void build_from_string02();
 	void is_thick_eq01();
 	void is_thick_eq02();
 

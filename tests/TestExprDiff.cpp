@@ -157,4 +157,31 @@ void TestExprDiff::cst_grad() {
 	TEST_ASSERT(c->get_vector_value()==v);
 }
 
+
+void TestExprDiff::vecimg01() {
+	Function f("x","(x;x;x)");
+	Function df(f,Function::DIFF);
+	const ExprNode& y=df.expr();
+	const ExprConstant* c = dynamic_cast<const ExprConstant*>(&y);
+
+	TEST_ASSERT(c);
+	TEST_ASSERT(c->dim.is_vector());
+	IntervalVector v(3,Interval(1.0));
+	TEST_ASSERT(c->get_vector_value()==v);
+}
+
+void TestExprDiff::vecimg02() {
+	Function f("x","y","(x;y;-x)");
+	Function df(f,Function::DIFF);
+	const ExprNode& y=df.expr();
+
+	const ExprConstant* c = dynamic_cast<const ExprConstant*>(&y);
+	TEST_ASSERT(c);
+	TEST_ASSERT(c->dim.is_matrix());
+	double _mat[3*2] = {1,0,0,1,-1,0};
+	Matrix mat(3,2,_mat);
+
+	TEST_ASSERT(c->get_matrix_value()==mat);
+}
+
 } // end namespace

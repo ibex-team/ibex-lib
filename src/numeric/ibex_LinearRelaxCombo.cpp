@@ -75,27 +75,27 @@ LinearRelaxCombo::~LinearRelaxCombo() {
 
 
 /*********generation of the linearized system*********/
-int LinearRelaxCombo::linearization(IntervalVector & box, LinearSolver *mysolver) {
+int LinearRelaxCombo::linearization(const IntervalVector& box, LinearSolver& lp_solver) {
 
 	int cont = 0;
 	// Update the bounds the variables
-	mysolver->initBoundVar(box);
+	lp_solver.initBoundVar(box);
 
 	switch (lmode) {
 	case ART:
 	case AFFINE2: {
-		cont = myart->linearization(box,mysolver);
+		cont = myart->linearization(box,lp_solver);
 		break;
 	}
 	case XNEWTON:
 	case TAYLOR:
 	case HANSEN: {
-		cont = myxnewton->linearization(box,mysolver);
+		cont = myxnewton->linearization(box,lp_solver);
 		break;
 	}
 	case COMPO: {
-		cont  = myxnewton->linearization(box,mysolver);
-		cont += myart->linearization(box,mysolver);
+		cont  = myxnewton->linearization(box,lp_solver);
+		cont += myart->linearization(box,lp_solver);
 		break;
 	}
 	}

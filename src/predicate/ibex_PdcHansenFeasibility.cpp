@@ -67,7 +67,7 @@ public:
 
 }
 
-PdcHansenFeasibility::PdcHansenFeasibility(Fnc& f, bool inflating) : f(f), _solution(f.nb_var()), inflating(inflating) {
+PdcHansenFeasibility::PdcHansenFeasibility(Fnc& f, bool inflating) : Pdc(f.nb_var()), f(f), _solution(f.nb_var()), inflating(inflating) {
 
 }
 

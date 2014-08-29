@@ -28,7 +28,7 @@ KCoreGraph::KCoreGraph(KCoreGraph *cpy) {
 	used = new BitSet(0,cpy->maxsize(),BitSet::empt);
 	
 	// Initialization
-	for (int i=0; i<neighbourhoods.size(); i++) {
+	for (unsigned int i=0; i<neighbourhoods.size(); i++) {
 		(cpy->neighbourhoods.at(i) != NULL) ? neighbourhoods.at(i) = new IntStack(cpy->neighbourhoods.at(i)) : neighbourhoods.at(i) = NULL;
 	}
 };
@@ -59,7 +59,7 @@ void KCoreGraph::remove_vertex(const int idvert) {
 	while (!vn->empty()) {
 		val = vn->head();
 		neighbourhoods.at(val)->remove(idvert);
-		if (neighbourhoods.at(val)->size < k) {
+		if (((int)(neighbourhoods.at(val)->size)) < k) {
 			if (!tbr->contain(val)) tbr->add(val);
 		}
 		vn->remove(val);
@@ -91,8 +91,8 @@ void KCoreGraph::propagate() {
 void KCoreGraph::apply_coreness() {
 	
 	/* Not optimal, obviously */
-	for (int i=0; i<neighbourhoods.size(); i++) {
-		if ((neighbourhoods.at(i) != NULL) && (neighbourhoods.at(i)->size < k)) {
+	for (unsigned int i=0; i<neighbourhoods.size(); i++) {
+		if ((neighbourhoods.at(i) != NULL) && (((int)(neighbourhoods.at(i)->size)) < k)) {
 			remove_vertex(i);
 			allid->remove(i);
 			propagate();

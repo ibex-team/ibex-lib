@@ -33,6 +33,15 @@ public:
     DefaultSolver(System& sys, double prec);
 
 	/**
+	 * \brief Create a default solver.
+	 *
+	 * \param sys  - The system to solve
+	 * \param prec - Stopping criterion for box splitting (vector of absolute precisions,
+	 *               one for each variable)
+	 */
+    DefaultSolver(System& sys, const Vector& prec);
+
+    /**
 	 * \brief Delete *this.
 	 */
 	~DefaultSolver();

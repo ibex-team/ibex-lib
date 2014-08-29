@@ -18,8 +18,9 @@
 
 namespace ibex {
 
-/** \ingroup ctcgroup
- * \brief LR contractor
+/**
+ * \ingroup numeric
+ * \brief LR relaxation
  *
  * This class is an implementation of the LR algorithm
  * \author Ignacio Araya, Gilles Trombettoni, Jordan Ninin, Bertrand Neveu
@@ -54,7 +55,7 @@ public:
   	 *
   	 * Linearize the system.
   	 */
-	int linearization( IntervalVector & box, LinearSolver *mysolver);
+	int linearization(const IntervalVector& box, LinearSolver& lp_solver);
 
 private:
 

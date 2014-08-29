@@ -1207,12 +1207,14 @@ LinearSolver::~LinearSolver() {
 
 LinearSolver::Status_Sol LinearSolver::solve() {
 
-	int stat = -1;
+	//int stat = -1;
 	LinearSolver::Status_Sol res= UNKNOWN;
 
 	try{
 		myclp->primal();
-		stat = myclp->status();
+		//stat = myclp->status();
+		myclp->status();
+
     	     /** Status of problem:
     	         -1 - unknown e.g. before solve or if postSolve says not optimal
     	         0 - optimal
