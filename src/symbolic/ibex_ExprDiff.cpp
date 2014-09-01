@@ -51,6 +51,10 @@ const ExprNode& ExprDiff::diff(const Array<const ExprSymbol>& old_x, const Array
 			ibex_warning("differentiation of a function returning a row vector (considered as a column vector)");
 
 		const ExprVector* vec=dynamic_cast<const ExprVector*>(&y); // TODO: not correct, ex: Function f("x","y","2*(x,y)");
+
+		if (!vec) {
+			not_implemented("differentation of a multivalued function involving vector/matrix operations");
+		}
 		int m=y.dim.vec_size();
 		int n=old_x.size();
 		Array<const ExprNode> a(m);

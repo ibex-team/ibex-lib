@@ -37,7 +37,7 @@ bool varequals(const Array<const ExprSymbol>& arg1, Array<const ExprSymbol>& arg
 	return true;
 }
 
-const ExprNode& ExprCopy::index_copy(const Array<const ExprSymbol>& old_x, const Array<const ExprSymbol>& new_x, const ExprNode& y, int i, bool fold_cst) {
+const ExprNode& ExprCopy::index_copy(const Array<const ExprSymbol>& old_x, const Array<const ExprNode>& new_x, const ExprNode& y, int i, bool fold_cst) {
 
 	const ExprVector* vec=dynamic_cast<const ExprVector*>(&y);
 
@@ -62,7 +62,7 @@ const ExprNode& ExprCopy::index_copy(const Array<const ExprSymbol>& old_x, const
 	}
 }
 
-const ExprNode& ExprCopy::index_copy(const Array<const ExprSymbol>& old_x, const Array<const ExprSymbol>& new_x, const ExprNode& y, int i, int j, bool fold_cst) {
+const ExprNode& ExprCopy::index_copy(const Array<const ExprSymbol>& old_x, const Array<const ExprNode>& new_x, const ExprNode& y, int i, int j, bool fold_cst) {
 
 	const ExprVector* vec=dynamic_cast<const ExprVector*>(&y);
 
@@ -89,7 +89,7 @@ const ExprNode& ExprCopy::index_copy(const Array<const ExprSymbol>& old_x, const
 	}
 }
 
-const ExprNode& ExprCopy::copy(const Array<const ExprSymbol>& old_x, const Array<const ExprSymbol>& new_x, const ExprNode& y, bool fold_cst) {
+const ExprNode& ExprCopy::copy(const Array<const ExprSymbol>& old_x, const Array<const ExprNode>& new_x, const ExprNode& y, bool fold_cst) {
 
 	fold = fold_cst;
 
