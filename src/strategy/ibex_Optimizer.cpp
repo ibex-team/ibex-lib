@@ -59,18 +59,18 @@ void Optimizer::read_ext_box(const IntervalVector& ext_box, IntervalVector& box)
 Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, double prec,
 		double goal_rel_prec, double goal_abs_prec, int sample_size, double equ_eps,
 		bool rigor,  int critpr,CellHeapOptim::criterion crit) :
-                		user_sys(user_sys), sys(user_sys,equ_eps),
-                		n(user_sys.nb_var), m(sys.nb_ctr) /* (warning: not user_sys.nb_ctr) */,
-                		ext_sys(user_sys,equ_eps),
-                		ctc(ctc),bsc(bsc),
-                		buffer(n),buffer2(n,crit),  // first buffer with LB, second buffer with ct (default UB))
-                		prec(prec), goal_rel_prec(goal_rel_prec), goal_abs_prec(goal_abs_prec),
-                		sample_size(sample_size), mono_analysis_flag(true), in_HC4_flag(true), trace(false),
-                		critpr(critpr), timeout(1e08),
-                		loup(POS_INFINITY), pseudo_loup(POS_INFINITY),uplo(NEG_INFINITY),
-                		loup_point(n), loup_box(n), nb_cells(0),
-                		df(*user_sys.goal,Function::DIFF), loup_changed(false),	rigor(rigor),
-                		uplo_of_epsboxes(POS_INFINITY) {
+                				user_sys(user_sys), sys(user_sys,equ_eps),
+                				n(user_sys.nb_var), m(sys.nb_ctr) /* (warning: not user_sys.nb_ctr) */,
+                				ext_sys(user_sys,equ_eps),
+                				ctc(ctc),bsc(bsc),
+                				buffer(n),buffer2(n,crit),  // first buffer with LB, second buffer with ct (default UB))
+                				prec(prec), goal_rel_prec(goal_rel_prec), goal_abs_prec(goal_abs_prec),
+                				sample_size(sample_size), mono_analysis_flag(true), in_HC4_flag(true), trace(false),
+                				critpr(critpr), timeout(1e08),
+                				loup(POS_INFINITY), pseudo_loup(POS_INFINITY),uplo(NEG_INFINITY),
+                				loup_point(n), loup_box(n), nb_cells(0),
+                				df(*user_sys.goal,Function::DIFF), loup_changed(false),	rigor(rigor),
+                				uplo_of_epsboxes(POS_INFINITY) {
 
 	// ==== build the system of equalities only ====
 	try {
@@ -221,8 +221,12 @@ double minimum (double a, double b) {
 void Optimizer::update_uplo() {
 	double new_uplo=POS_INFINITY;
 
-	if (! buffer.empty()){
+	if (! buffer.empty()) {
 		new_uplo= buffer.minimum();
+		if (new_uplo > loup) {
+			cout << " loup = " << loup << " new_uplo=" << new_uplo << endl;
+			ibex_error("optimizer: new_uplo>loup (please report bug)");
+		}
 		if (new_uplo < uplo_of_epsboxes) uplo = new_uplo;
 		else uplo= uplo_of_epsboxes;
 	}
@@ -248,36 +252,36 @@ void Optimizer::update_uplo() {
 void Optimizer::handle_cell(OptimCell& c, const IntervalVector& init_box ){
 	try {
 		contract_and_bound(c, init_box);  // may throw EmptyBoxException
-	//       objshaver->contract(c.box);
+		//       objshaver->contract(c.box);
 
 
-	// Computations for the Casado C3, C5, C7 criteria
+		// Computations for the Casado C3, C5, C7 criteria
 
-	if ((buffer2.crit==CellHeapOptim::C3)||(buffer2.crit==CellHeapOptim::C5)||(buffer2.crit==CellHeapOptim::C7)) {
+		if ((buffer2.crit==CellHeapOptim::C3)||(buffer2.crit==CellHeapOptim::C5)||(buffer2.crit==CellHeapOptim::C7)) {
 
-		compute_pf(c);
+			compute_pf(c);
 
-		if (loup < 1.e8)
-			c.loup=loup;
-		else
-			c.loup=1.e8;
-	}
+			if (loup < 1.e8)
+				c.loup=loup;
+			else
+				c.loup=1.e8;
+		}
 
-	// computations for C5, C7 and PU criteria
-	if ((buffer2.crit==CellHeapOptim::C5)||(buffer2.crit==CellHeapOptim::C7)||(buffer2.crit==CellHeapOptim::PU))
-		compute_pu(c);
+		// computations for C5, C7 and PU criteria
+		if ((buffer2.crit==CellHeapOptim::C5)||(buffer2.crit==CellHeapOptim::C7)||(buffer2.crit==CellHeapOptim::PU))
+			compute_pu(c);
 
-	// the cell is put into the 2 heaps
-	buffer.push(&c);
-	if (critpr > 0)      buffer2.push(&c);
+		// the cell is put into the 2 heaps
+		buffer.push(&c);
+		if (critpr > 0)      buffer2.push(&c);
 
-	nb_cells++;
-	// reconstruction of the 2 heaps every heap_build_period nodes
-	int heap_build_period=100;
-	if (nb_cells% heap_build_period ==0) {
-		buffer.makeheap();
-		if (critpr > 0) buffer2.makeheap();
-	}
+		nb_cells++;
+		// reconstruction of the 2 heaps every heap_build_period nodes
+		int heap_build_period=100;
+		if (nb_cells% heap_build_period ==0) {
+			buffer.makeheap();
+			if (critpr > 0) buffer2.makeheap();
+		}
 
 	}
 	catch(EmptyBoxException&) {
@@ -352,11 +356,12 @@ void Optimizer::contract_and_bound(OptimCell& c, const IntervalVector& init_box)
 	// update of the upper bound of y in case of a new loup found
 	if (loup_ch) y &= Interval(NEG_INFINITY,compute_ymax());
 
+	loup_changed |= loup_ch;
+
 	if (y.is_empty()) { // fix issue #44
 		throw EmptyBoxException();
 	}
 
-	loup_changed |= loup_ch;
 	/*====================================================================*/
 	// [gch] TODO: the case (!c.box.is_bisectable()) seems redundant
 	// with the case of a NoBisectableVariableException in
@@ -505,6 +510,7 @@ void Optimizer::optimize(const IntervalVector& init_box, double obj_init_bound) 
 					double ymax= compute_ymax();
 
 					buffer.contract_heap(ymax);
+					cout << " now buffer is contracted and min=" << buffer.minimum() << endl;
 					if (critpr > 0) buffer2.contract_heap(ymax);
 
 					if (ymax <=NEG_INFINITY) {
