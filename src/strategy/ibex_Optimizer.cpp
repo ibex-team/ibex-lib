@@ -510,7 +510,7 @@ void Optimizer::optimize(const IntervalVector& init_box, double obj_init_bound) 
 					double ymax= compute_ymax();
 
 					buffer.contract_heap(ymax);
-					cout << " now buffer is contracted and min=" << buffer.minimum() << endl;
+					//cout << " now buffer is contracted and min=" << buffer.minimum() << endl;
 					if (critpr > 0) buffer2.contract_heap(ymax);
 
 					if (ymax <=NEG_INFINITY) {
