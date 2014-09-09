@@ -1,7 +1,7 @@
 #include "ibex_CtcVoxelGrid.h"
 
 namespace ibex{
-CtcVoxelGrid::CtcVoxelGrid(const char* ii3D_filename): Ctc(3), ii3D(ii3D_filename)
+CtcVoxelGrid::CtcVoxelGrid(const char* ii3D_filename): Ctc(3)
 {
 
 }
@@ -9,11 +9,9 @@ CtcVoxelGrid::CtcVoxelGrid(const char* ii3D_filename): Ctc(3), ii3D(ii3D_filenam
 //-------------------------------------------------------------------------------------------------------------
 IntBox CtcVoxelGrid::worldToGrid_V2(const Interval &x, const Interval &y, const Interval &z)
 { 
-    const float3 &origin = ii3D.getOrigin();
-    const float3 &scale  = ii3D.getLeafSize();
-    Interval xt = (x - origin[0]) / scale[0];
-    Interval yt = (y - origin[1]) / scale[1];
-    Interval zt = (z - origin[2]) / scale[2];
+    Interval xt = (x - ii3D.origin_[0]) / ii3D.leaf_size_[0];
+    Interval yt = (y - ii3D.origin_[1]) / ii3D.leaf_size_[1];
+    Interval zt = (z - ii3D.origin_[2]) / ii3D.leaf_size_[2];
 
     IntInterval i1( floor(xt.lb()), ceil(xt.ub()-1));
     IntInterval i2( floor(yt.lb()), ceil(yt.ub()-1));
@@ -29,12 +27,9 @@ IntervalBox CtcVoxelGrid::gridToWorld_V2(const IntInterval &ix,const  IntInterva
         return {{Interval::EMPTY_SET,Interval::EMPTY_SET,Interval::EMPTY_SET}};
     Interval i1, i2, i3;
 
-    const float3 &origin = ii3D.getOrigin();
-    const float3 &scale  = ii3D.getLeafSize();
-
-    i1 = Interval(ix.lb(), ix.ub()+1) * scale[0] + origin[0];
-    i2 = Interval(iy.lb(), iy.ub()+1) * scale[1] + origin[1];
-    i3 = Interval(iz.lb(), iz.ub()+1) * scale[2] + origin[2];
+    i1 = Interval(ix.lb(), ix.ub()+1) * ii3D.leaf_size_[0] + ii3D.origin_[0];
+    i2 = Interval(iy.lb(), iy.ub()+1) * ii3D.leaf_size_[1] + ii3D.origin_[1];
+    i3 = Interval(iz.lb(), iz.ub()+1) * ii3D.leaf_size_[2] + ii3D.origin_[2];
 
 
     return {{i1,i2,i3}};
@@ -68,67 +63,5 @@ void CtcVoxelGrid::contract(IntervalVector &box){
     }
 }
 
-//-------------------------------------------------------------------------------------------------------------
-IntInterval::IntInterval():_lb(std::numeric_limits<int>::min()),
-    _ub(std::numeric_limits<int>::min()), empty(true)
-{
-}
-//-------------------------------------------------------------------------------------------------------------
-IntInterval::IntInterval(int lb, int ub, bool empty):_lb(lb), _ub(ub), empty(empty)
-{
-    if(_ub < _lb){
-        std::swap(_ub, _lb);
-    }
-}
-//-------------------------------------------------------------------------------------------------------------
-void IntInterval::inflate(int rad){
-    _ub+= rad;
-    _lb-= rad;
-}
-//-------------------------------------------------------------------------------------------------------------
-IntInterval IntInterval::operator&=(const IntInterval &a)
-{
-    if(this->is_empty() || a.is_empty())
-        this->setEmpty();
-    else {
-        this->_lb = std::max(_lb,a.lb());
-        this->_ub = std::min(_ub,a.ub());
-    }
-}
-//-------------------------------------------------------------------------------------------------------------
-bool IntInterval::is_empty() const{
-    return empty;
-}
-
-//-------------------------------------------------------------------------------------------------------------
-void IntInterval::setEmpty(){
-    empty = true;
-    _lb = _ub =std::numeric_limits<int>::min();
-}
-
-//-------------------------------------------------------------------------------------------------------------
-int IntInterval::lb() const {
-    return _lb;
-}
-//-------------------------------------------------------------------------------------------------------------
-int& IntInterval::lb() {
-    return _lb;
-}
-
-//-------------------------------------------------------------------------------------------------------------
-int IntInterval::ub() const{
-    return _ub;
-}
-
-//-------------------------------------------------------------------------------------------------------------
-int& IntInterval::ub() {
-    return _ub;
-}
-//-------------------------------------------------------------------------------------------------------------
-std::ostream& operator <<(std::ostream& Stream, const IntInterval& obj)
-{
-    Stream << "[ " << obj._lb << " , " << obj._ub << "]";
-    return Stream; // N'oubliez pas de renvoyer le flux, afin de pouvoir chaîner les appels
-}
 
 } // end namespace ibex

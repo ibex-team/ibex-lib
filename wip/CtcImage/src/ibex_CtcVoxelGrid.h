@@ -4,37 +4,11 @@
 #include <ibex_Ctc.h>
 #include <ibex_IntervalVector.h>
 #include <ibex_Interval.h>
-//#include <IntegralImg3D.h>
 #include <Array3D.h>
 #include <iostream>
 
+#include "ibex_IntInterval.h"
 namespace ibex {
-
-class IntInterval
-{
-public:
-    IntInterval();
-    IntInterval(int lb, int ub, bool empty = false);
-
-    int lb() const;
-    int ub() const;
-    int& lb();
-    int& ub();
-    bool is_empty() const;
-    void setEmpty();
-    void inflate(int rad);
-
-    IntInterval operator &=(const IntInterval &a);
-    friend std::ostream& operator <<(std::ostream& Stream, const IntInterval& obj);
-private:
-    int _lb;
-    int _ub;
-    bool empty;
-};
-
-typedef std::array<IntInterval,3> IntBox;
-typedef std::array<Interval,3> IntervalBox;
-
 
 class CtcVoxelGrid : public Ctc
 {

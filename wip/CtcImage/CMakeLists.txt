@@ -22,7 +22,7 @@ set(CMAKE_BUILD_TYPE Debug)
 #include_directories(${ATLAAS_INCLUDE_DIRS})
 
 #others file
-#include_directories("./src")
+include_directories("./src")
 
 FIND_PACKAGE( OpenMP REQUIRED)
    if(OPENMP_FOUND)
@@ -44,8 +44,13 @@ add_definitions(${PC_CPPTEST_CFLAGS_OTHER})
 include_directories(${PC_CPPTEST_INCLUDEDIR} ${PC_CPPTEST_INCLUDE_DIRS} ${PC_CPPTEST_INCLUDES})
 set(LIBS ${LIBS} ${PC_CPPTEST_LIBRARIES})
 
-add_executable (test_CtcArray ./test_Array3D.cpp ./src/Array3D.cpp)
-target_link_libraries(test_CtcArray ${LIBS})
+
+
+add_executable (test_Array3D ./test_Array3D.cpp ./src/Array3D.h)
+target_link_libraries(test_Array3D ${LIBS})
+
+add_executable (test_CtcVoxelGrid ./test_CtcVoxelGrid.cpp ./src/Array3D.h ./src/ibex_CtcVoxelGrid.cpp ./src/ibex_CtcVoxelGrid.h ./src/ibex_IntInterval.cpp ./src/ibex_IntInterval.h)
+target_link_libraries(test_CtcVoxelGrid ${LIBS})
 
 
 
