@@ -94,6 +94,16 @@ struct CellComparatorub {
     return * (new Interval (c.box[y]));
 }
 
+
+
+  /** The cost is already computed, it is the interval
+   * in the variable pf. */
+    Interval& CellHeapOptim::costpf(const OptimCell& c) const {
+      return * (new Interval (c.pf));
+  }
+
+
+
   /* removes from the top of the heap the cells that have already been removed from the other heap (heap_present <2) */
   void CellHeapOptim::cleantop()  {
 	while (!empty() && (lopt.front().first)->heap_present < 2)
@@ -205,6 +215,21 @@ struct CellComparatorub {
 	
 }
 
+  void CellHeapOptim::push_costpf(OptimCell* cell) {
+	if (capacity>0 && size()==capacity) throw CellBufferOverflow();
+
+	lopt.push_back(pair<OptimCell*,Interval*>(cell,&costpf(*cell)));
+	switch (crit) {
+		case LB :	push_heap(lopt.begin(), lopt.end(), CellComparatorlb()); break;
+		case UB :	push_heap(lopt.begin(), lopt.end(), CellComparatorub()); break;
+		case C3 : 	push_heap(lopt.begin(), lopt.end(), CellComparatorC3()); break;
+		case C5 : 	push_heap(lopt.begin(), lopt.end(), CellComparatorC5()); break;
+		case C7 : 	push_heap(lopt.begin(), lopt.end(), CellComparatorC7()); break;
+		case PU : 	push_heap(lopt.begin(), lopt.end(), CellComparatorpu()); break;
+		}
+	cell->heap_present++;
+
+}
 
   // returns the cell on the top of the heap without modifying the heap
   OptimCell* CellHeapOptim::top() const {
