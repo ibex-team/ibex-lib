@@ -30,6 +30,7 @@ struct Array3D{
     inline void init(){
         assert(grid_size_[0]*grid_size_[1]*grid_size_[2] > 0);
         data.resize(grid_size_[0]*grid_size_[1]*grid_size_[2],0);
+        std::fill(data.begin(),data.end(),0);
         divb_mul_[0] = 1;
         divb_mul_[1] = grid_size_[0];
         divb_mul_[2] = grid_size_[0]*grid_size_[1];
@@ -77,6 +78,33 @@ struct Array3D{
 
     T zero;
 };
+
+
+// Compute the integral image of the array passed as argument.
+// The computation is done in place.
+inline void computeIntegralImage( Array3D<unsigned int> &I)
+{
+    assert(I.data.size()>0);
+    for(uint i = 0; i < I.grid_size_[0]; i++){
+        for(uint j = 0; j < I.grid_size_[1]; j++){
+            for(uint k = 0; k < I.grid_size_[2]; k++){
+                uint &val = I(i,j,k);
+                val = I(i-1,j,k) + I(i,j-1,k) + I(i,j,k-1) + I(i-1, j-1, k-1) + I(i,j,k)
+                - I(i-1,j,k-1) - I(i,j-1,k-1) - I(i-1,j-1,k);
+
+            }
+        }
+    }
+//    for(uint k = 0; k < I.grid_size_[2]; k++){
+//        for(uint i = 0; i < I.grid_size_[0]; i++){
+//            for(uint j = 0; j < I.grid_size_[1]; j++){
+//                cerr << std::setfill(' ') << std::setw(2) << I(i,j,k) << " ";
+//            }
+//            cerr << endl;
+//        }
+//        cerr << endl;
+//    }
+}
 
 template<typename T>
 int writeHeader(ofstream &out_file, const Array3D<T>& input){
