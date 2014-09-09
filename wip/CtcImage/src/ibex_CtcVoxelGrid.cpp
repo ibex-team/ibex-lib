@@ -1,10 +1,23 @@
 #include "ibex_CtcVoxelGrid.h"
 
 namespace ibex{
-CtcVoxelGrid::CtcVoxelGrid(const char* ii3D_filename): Ctc(3)
+CtcVoxelGrid::CtcVoxelGrid(): Ctc(3)
 {
 
 }
+
+CtcVoxelGrid::CtcVoxelGrid(Array3D<unsigned int> &data): I(data),Ctc(3)
+{
+
+}
+
+CtcVoxelGrid::CtcVoxelGrid(const char* ii3D_filename): Ctc(3)
+{
+    if(loadArray3D(ii3D_filename, I) == -1){
+        std::cerr << "Error loading array3D\n";
+    }
+}
+
 
 //-------------------------------------------------------------------------------------------------------------
 IntBox CtcVoxelGrid::worldToGrid_V2(const Interval &x, const Interval &y, const Interval &z)

@@ -15,12 +15,14 @@ typedef std::array<Interval,3> IntervalBox;
 class CtcVoxelGrid : public Ctc
 {
 public:
+    CtcVoxelGrid();
+    CtcVoxelGrid(Array3D<unsigned int> & data);
     CtcVoxelGrid(const char *ii3D_filename);
 
     void contract(IntervalVector &box);
-
     IntBox worldToGrid_V2(const Interval &x, const Interval &y, const Interval &z);
     IntervalBox gridToWorld_V2(const IntInterval &ix, const IntInterval &iy, const IntInterval &iz);
+
 
 private:
     Array3D<unsigned int> I;
