@@ -1,7 +1,9 @@
 #ifndef IBEX_INTINTERVAL_H
 #define IBEX_INTINTERVAL_H
 
-
+#include <iostream>
+#include <array>
+#include <limits>
 namespace ibex {
 
 
@@ -28,7 +30,6 @@ private:
 };
 
 typedef std::array<IntInterval,3> IntBox;
-typedef std::array<Interval,3> IntervalBox;
 
 } // end ibex namespace
 

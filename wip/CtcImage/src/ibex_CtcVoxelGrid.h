@@ -10,6 +10,8 @@
 #include "ibex_IntInterval.h"
 namespace ibex {
 
+typedef std::array<Interval,3> IntervalBox;
+
 class CtcVoxelGrid : public Ctc
 {
 public:
@@ -21,7 +23,9 @@ public:
     IntervalBox gridToWorld_V2(const IntInterval &ix, const IntInterval &iy, const IntInterval &iz);
 
 private:
-    Array3D<unsigned int> ii3D;
+    Array3D<unsigned int> I;
+    void contract(int &cxmin, int &cxmax, int &cymin, int &cymax, int &czmin, int &czmax);
+    unsigned int enclosed_pixels(int xmin, int xmax, int ymin, int ymax, int zmin, int zmax);
 };
 
 } // end namespace ibex
