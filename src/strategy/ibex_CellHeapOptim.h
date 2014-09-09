@@ -31,7 +31,7 @@ namespace ibex {
 class CellHeapOptim : public CellBuffer {
 public:
     /* the different criteria implemented for a heap : in optimization : LB for the first one, another for the second one */
-	typedef enum {LB,UB,C3,C5,C7,PU} criterion;
+	typedef enum {LB,UB,C3,C5,C7,PU,PF} criterion;
 	
 	/**
 	 * \brief Build a cell heap for optimization.
@@ -52,10 +52,6 @@ public:
 	 * \param y - the index of the variable "y" that contains the criterion (typically, f(x)) in each cell's box.
 	 */
 
-	
-	
-	
-
 	CellHeapOptim(const int y, criterion crit=LB);
 
 	/** Index of the criterion variable. */
@@ -63,6 +59,7 @@ public:
     /** The criterion used for the heap. */
 	criterion crit;
 	
+
 /**
    * Removes (and deletes) from the heap all the cells
    * with a cost greater than \a loup.
@@ -83,9 +80,6 @@ public:
   
   /** push a new cell on the heap. */
   void push(OptimCell* cell);
-
-  /** push a new cell on the heap with the cost stored in the variable pf. */
-  void push_costpf(OptimCell* cell);
 
   // unused : only for compilation
   void push(Cell* cell) {};
@@ -108,12 +102,10 @@ public:
   
  protected:
    /** The cost of a cell. */
-  Interval& cost(const Cell& c) const;
-  /** The another cost of a cell. */
-  Interval& costpf(const OptimCell& c) const;
+  std::pair<double,double> cost(const OptimCell& c) const;
 
   // cells and associated "costs"
-  std::vector<std::pair<OptimCell*,Interval*> > lopt;
+  std::vector<std::pair<OptimCell*,std::pair<double,double>> > lopt;
   friend std::ostream& operator<<(std::ostream&, const CellHeapOptim&);
 };
 /** Display the buffer */
