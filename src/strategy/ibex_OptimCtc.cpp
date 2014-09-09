@@ -97,10 +97,10 @@ bool OptimCtc::localsearch(const IntervalVector* box, int nb) {
 
 }
 
-	// TODO I am not sure of that
+	// a feasible point is a point contracted by ctc_in
 bool OptimCtc::direct_try( const Vector point) {
 	bool loup_change=false;
-	try {
+/*	try {
 		IntervalVector tmpv(point);
 		_ctc_out.contract(tmpv);  //  <---
 
@@ -117,10 +117,30 @@ bool OptimCtc::direct_try( const Vector point) {
 				cout.precision(prec);
 		    }
 		}
-	} catch (EmptyBoxException &) { /* the point is infeasible */	}  //  <---
+	} catch (EmptyBoxException &) { 	}  //  <---
+*/
+	try {
+		IntervalVector tmpv(point);
+		_ctc_in.contract(tmpv);  //  <---
+	} catch (EmptyBoxException &) {
+		Interval tmp = _f_cost.eval(point);
+		if (tmp.ub()<loup) {
+			//update the loup
+			loup = tmp.ub();
+			loup_point = point;
+			loup_change = true;
+			{
+				int prec=cout.precision();
+				cout.precision(12);
+				cout << "[direct]"  << " loup update " << loup  << " loup point  " << loup_point << endl;
+				cout.precision(prec);
+			}
+		}
+	}  //  <---
 
 	return loup_change;
 }
+
 
 
 double minimum (double a, double b) {
@@ -483,7 +503,7 @@ void OptimCtc::update_uplo_of_epsboxes(double ymin) {
 		uplo_of_epsboxes = ymin;
 		if (trace) {
 			// it is hard to prove the feasability of a point. So there a lot of small boxes.
-//			cout << "uplo_of_epsboxes: " <<  uplo_of_epsboxes << " | uplo: " << uplo << " | loup: " << loup << " |"<< endl;
+			cout << "uplo_of_epsboxes: " <<  uplo_of_epsboxes << " | uplo: " << uplo << " | loup: " << loup << " |"<< endl;
 		}
 	}
 }

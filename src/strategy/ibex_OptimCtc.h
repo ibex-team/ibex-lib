@@ -26,9 +26,7 @@ namespace ibex {
  *
  * \brief Global OptimCtc.
  *
- * This class is an implementation of the global optimization algorithm described
- * in the AAAI'11 paper <i>Inner Regions and Interval Linearizations for Global Optimization</i>
- * by Trombettoni et al.
+ * This class is an implementation of the global optimization algorithm
  *
  * \remark In all the comments of this class, "loup" means "lowest upper bound" of the criterion f
  * and "uplo" means "uppermost lower bound" of the criterion.
@@ -39,10 +37,9 @@ public:
 	 *  \brief Create an OptimCtc.
 	 *
 	 *   \param ctc_out   - the contractor which remove the domain that does not contain any feasible solution
-	 *   \param ctc_in    - the contractor which remove the domain that are entirly feasible
+	 *   \param ctc_in    - the contractor which remove the domain that are entirely feasible
 	 *   \param f_cost    - the objective function
 	 *   \param bsc       - bisector for extended boxes
-	 *   \param ctc       - contractor for the <b>extended system</b> (see below)
 	 *
 	 * And optionally:
 	 *   \param prec          - absolute precision for the boxes (bisection control)
