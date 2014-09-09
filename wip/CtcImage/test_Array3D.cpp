@@ -9,13 +9,14 @@ public:
         TEST_ADD(TestArray3D::saveToDisk);
         TEST_ADD(TestArray3D::loadFromDisk);
         TEST_ADD(TestArray3D::loadFromDisk_failed);
+        TEST_ADD(TestArray3D::testIntegralImage);
     }
 
     void setup(){
 
         leaf_size = {{0.1,0.1,0.1}};
         origin = {{0,0,0}};
-        grid_size = {{5,5,20}};
+        grid_size = {{10,10,10}};
 
         array.setOrigin(origin);
         array.setLeafSize(leaf_size);
@@ -28,7 +29,25 @@ public:
         TEST_ASSERT( (array.leaf_size_ == leaf_size) );
         TEST_ASSERT( (array.origin_ == origin) );
         TEST_ASSERT( (array.grid_size_ == grid_size) );
+        for(uint i = 0; i < array.data.size(); i++){
+            TEST_ASSERT(array[i] == 0);
+        }
 
+    }
+
+    void testIntegralImage(){
+        // Generate shape
+        int x0 = 2, y0 = 2, z0 = 2;
+        for(uint i = x0; i < x0+5; i++){
+            for(uint j = y0; j < y0+5; j++){
+                for(uint k = z0; k < z0+5; k++){
+                    array(i,j,k) = 1;
+                }
+            }
+        }
+        computeIntegralImage(array);
+        std::cerr << *array.data.end() << std::endl;
+        TEST_ASSERT(array(9,9,9) == 125);
     }
 
     void saveToDisk(){
@@ -36,11 +55,17 @@ public:
     }
 
     void loadFromDisk(){
-        Array3D<char> tmp;
+        computeIntegralImage(array);
+        Array3D<unsigned int> tmp;
         loadArray3D("out.test",tmp);
         TEST_ASSERT( (tmp.leaf_size_ == leaf_size) );
         TEST_ASSERT( (tmp.origin_ == origin) );
         TEST_ASSERT( (tmp.grid_size_ == grid_size) );
+
+        TEST_ASSERT_EQUALS(array.data.size(), tmp.data.size());
+        for(uint i = 0; i < array.data.size(); i++){
+            TEST_ASSERT_EQUALS(array[i],tmp[i]);
+        }
     }
 
     void loadFromDisk_failed(){
@@ -53,7 +78,7 @@ private:
     float3 origin;
     int3 grid_size;
 
-    Array3D<char> array;
+    Array3D<unsigned int> array;
 
 };
 
