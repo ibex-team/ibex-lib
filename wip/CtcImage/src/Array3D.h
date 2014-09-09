@@ -95,15 +95,6 @@ inline void computeIntegralImage( Array3D<unsigned int> &I)
             }
         }
     }
-//    for(uint k = 0; k < I.grid_size_[2]; k++){
-//        for(uint i = 0; i < I.grid_size_[0]; i++){
-//            for(uint j = 0; j < I.grid_size_[1]; j++){
-//                cerr << std::setfill(' ') << std::setw(2) << I(i,j,k) << " ";
-//            }
-//            cerr << endl;
-//        }
-//        cerr << endl;
-//    }
 }
 
 template<typename T>
