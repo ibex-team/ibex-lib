@@ -56,4 +56,3 @@ target_link_libraries(test_CtcVoxelGrid ${LIBS})
 
 
 
-
