@@ -27,7 +27,11 @@ void CtrGenerator::generate(const Array<const ExprSymbol>& _src_vars, const P_Co
 
 	assert(dest.empty());
 
+	scopes.push(Scope()); // a fresh new scope! (needed otherwise scopes.top() is NULL -> fix issue #36)
+
 	visit(src);
+
+	scopes.pop();
 }
 
 void CtrGenerator::visit(const P_NumConstraint& c) {
