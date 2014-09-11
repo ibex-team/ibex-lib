@@ -21,10 +21,10 @@ CtcQuantif::CtcQuantif(const NumConstraint& ctr, const Array<const ExprSymbol>& 
 }
 
 CtcQuantif::CtcQuantif(Ctc& ctc, const BitSet& vars, const IntervalVector& init_box, double prec, bool own_ctc) :
-	Ctc(vars.size()), y_init(init_box), nb_param(vars.size()-nb_var), ctc(&ctc), bsc(new LargestFirst(prec)),
+	Ctc(vars.size()), y_init(init_box), nb_param(init_box.size()), ctc(&ctc), bsc(new LargestFirst(prec)),
 	 vars(vars), prec(prec), _own_ctc(own_ctc) {
 
-	assert(vars.size()==init_box.size());
+	assert(ctc.nb_var==(int)vars.size()+init_box.size());
 
 }
 
@@ -59,7 +59,7 @@ void CtcQuantif::init(const NumConstraint& ctr, const Array<const ExprSymbol>& y
 		if (j<y.size())    // ths ith argument is found in y
 			vars.remove(i); //  --> marked as a parameter
 	}
-	assert(vars.size()==nb_var);
+	assert(((int)vars.size())==nb_var);
 
 	this->prec = prec;
 
