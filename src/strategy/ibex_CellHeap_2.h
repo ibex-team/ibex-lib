@@ -16,15 +16,12 @@
 namespace ibex {
 
 
-
-
-
-
 class HeapElt {
 
 private:
 	friend class HeapNode;
 	friend class CellHeap_2;
+	friend class CellDoubleHeap;
 
 	/** create an Elt with a cell and its criterion */
 	HeapElt(int nb_crit,Cell* elt, double *crit);
@@ -178,18 +175,18 @@ protected:
 	double loup;
 
 private:
-
-	/** the root of the heap */
-	HeapNode * root;
-
-	/** the indice of the criterion selected for this heap */
-	int ind_crit;
+	friend class CellDoubleHeap;
 
 	/** The "cost" of a cell.
 	 * => MUST be implemented
 	 */
 	virtual double cost(const Cell&) const {return 0;};
 
+	/** the root of the heap */
+	HeapNode * root;
+
+	/** the indice of the criterion selected for this heap */
+	int ind_crit;
 
 	/** access to the ith node rank by largest-first order */
 	HeapNode * getNode(int i) const;
