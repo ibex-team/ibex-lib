@@ -127,69 +127,86 @@ public:
 	/** Return true if the buffer is empty. */
 	bool empty() const;
 
-	/** push a new cell on the stack. */
+	/** push a new cell on the stack.
+	 *  complexity: o(log(nb_cells))
+	 */
 	void push(Cell* cell);
 
-	/** Pop a cell from the stack and return it.*/
+	/** Pop a cell from the stack and return it.
+	 *  complexity: o(log(nb_cells))
+	 */
 	Cell* pop();
 
-	/** Return the next box (but does not pop it).*/
+	/** Return the next box (but does not pop it).
+	 *  complexity: o(1)
+	 */
 	Cell* top() const;
 
 
-	/** Return the minimum (the criterion for
-	 * the first cell) */
+	/** Return the minimum (the criterion for the first cell) */
 	double minimum() const {
 		return root->elt->crit[ind_crit];
 	}
 
-	/** access to the ith Cell rank by largest-first order */
+	/** access to the ith Cell rank by largest-first order
+	 *  complexity: o(log(nb_cells))
+	 */
 	Cell * getCell(int i) const;
 
 	/**
 	 * Removes (and deletes) from the heap all the cells
 	 * with a cost greater than \a loup.
+	 * complexity in worst case: o(nb_cells*log(nb_cells))
 	 */
 	void contract_heap(double new_loup);
 
-	/** erase only this HeapNope without touch the element */
-	void eraseNode(int i);
-
-	/** sort and update the cost */
+	/** update the cost and sort all the heap
+	 * complexity: o(nb_cells*log(nb_cells))
+	 */
 	void sort() ;
 
 protected:
 
-	/** The "cost" of a cell. */
-	virtual double cost(const Cell&) const {return 0;};
-
-	/** the root of the heap */
-	HeapNode * root;
 
 	/** current value of the loup */
 	double loup;
 
-	friend std::ostream& operator<<(std::ostream&, const CellHeap_2&);
-
 private:
+
+	/** the root of the heap */
+	HeapNode * root;
+
+	/** the indice of the criterion selected for this heap */
+	int ind_crit;
+
+	/** The "cost" of a cell.
+	 * => MUST be implemented
+	 */
+	virtual double cost(const Cell&) const {return 0;};
+
 	/** usefull only for CellDoubleHeap */
 	void push(HeapElt* elt);
 
 	/** access to the ith node rank by largest-first order */
 	HeapNode * getNode(int i) const;
 
-	/** update the heap to reorder the elements */
+	/** update the heap to reorder the elements from the node \var node to the down */
 	void updateOrder(HeapNode *node);
+
+	/** erase only this HeapNope without touch the element */
+	void eraseNode(int i);
 
 	/** remove the last node and put its element at the ith position */
 	HeapNode * eraseNode_noUpdate(int i);
 
+	/** use in the sort function by recursivity */
 	void sort_tmp(HeapNode * node, CellHeap_2 & heap);
 
+	/** use in the contract_heap function by recursivity */
 	void contract_tmp(double new_loup, HeapNode * node, CellHeap_2 & heap);
 
-	/** whitch criteria is selected for this heap */
-	int ind_crit;
+	friend std::ostream& operator<<(std::ostream&, const CellHeap_2&);
+
 
 };
 
@@ -198,7 +215,6 @@ private:
 /** Display the node */
 std::ostream& operator<<(std::ostream& os, const HeapElt& node) ;
 std::ostream& operator<<(std::ostream& os, const HeapNode& node) ;
-
 
 /** Display the buffer */
 std::ostream& operator<<(std::ostream&, const CellHeap_2& heap);

@@ -12,6 +12,7 @@
 
 namespace ibex {
 
+//////////////////////////////////////////////////////////////////////////////////////
 CellHeap_2::CellHeap_2() : root(NULL), ind_crit(0), loup(POS_INFINITY) { }
 
 CellHeap_2::CellHeap_2(int ind_crit) : root(NULL), ind_crit(ind_crit), loup(POS_INFINITY) { }
@@ -257,13 +258,7 @@ void CellHeap_2::sort_tmp(HeapNode * node, CellHeap_2 & heap) {
 }
 
 
-
-std::ostream& operator<<(std::ostream& os, const CellHeap_2& heap) {
-	os << "[ ";
-	os << heap.root << " ";
-	return os << "]";
-}
-
+//////////////////////////////////////////////////////////////////////////////////////
 HeapNode::HeapNode(): elt(NULL), right(NULL), left(NULL), father(NULL) { }
 
 HeapNode::HeapNode(HeapElt* elt): elt(elt), father(NULL), right(NULL), left(NULL) { }
@@ -294,7 +289,7 @@ void HeapNode::switchElt(HeapNode *pt, int ind_crit) {
 
 }
 
-
+//////////////////////////////////////////////////////////////////////////////////////
 /** create an node with a cell and its criterion */
 HeapElt::HeapElt(int nb_crit,Cell* cell, double *crit) : cell(cell), crit(crit), indice(new unsigned long[nb_crit]){
 	for (int i=0;i<nb_crit;i++) indice[i] = 0;
@@ -311,6 +306,7 @@ bool HeapElt::isSup(double d, int ind_crit) const {
 
 
 
+//////////////////////////////////////////////////////////////////////////////////////
 std::ostream& operator<<(std::ostream& os, const HeapElt& node) {
 	os << *(node.cell);
 	return os;
@@ -320,6 +316,13 @@ std::ostream& operator<<(std::ostream& os, const HeapNode& node) {
 	os << *(node.elt) << " ";
 	os <<  *(node.right) << *(node.left);
 	return os;
+}
+
+
+std::ostream& operator<<(std::ostream& os, const CellHeap_2& heap) {
+	os << "[ ";
+	os << heap.root << " ";
+	return os << "]";
 }
 
 
