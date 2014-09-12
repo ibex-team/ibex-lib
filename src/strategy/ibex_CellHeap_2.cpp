@@ -113,6 +113,7 @@ void CellHeap_2::push(Cell* cell, double crit) {
 		}
 
 		// PT indique l element ajoute
+		// on doit maintenant faire un update en remontant vers la racine
 		bool b = true;
 		while (b&&(pt->father)) {
 			if (pt->father->isSup(pt)) {
@@ -126,8 +127,9 @@ void CellHeap_2::push(Cell* cell, double crit) {
 	}
 }
 
-HeapNode * CellHeap_2::selectNode(int i) const {
+HeapNode * CellHeap_2::getNode(int i) const {
 	assert((i>-1)&&(i<nb_cells));
+	assert(nb_cells>0);
 	// RECUPERATION DU DERNIER ELEMENT et suppression du noeud associe
 	// calcul de la hauteur
 	int hauteur = 0;
@@ -148,65 +150,87 @@ HeapNode * CellHeap_2::selectNode(int i) const {
 	return pt;
 }
 
+Cell * CellHeap_2::getCell(int i) const {
+	assert((i>-1)&&(i<nb_cells));
+	assert(nb_cells>0);
+	return getNode(i)->elt;
+}
+
 Cell* CellHeap_2::pop() {
 	assert(nb_cells>0);
-
 	Cell* c_return = root->elt;
+	eraseNode(0);
+
+}
+
+void CellHeap_2::eraseNode(int i) {
+	assert((i>-1)&&(i<nb_cells));
+	assert(nb_cells>0);
 
 	if (nb_cells==1) {
 		root->elt=NULL;
 		delete root;
+	} else if (i==nb_cells-1) {
+		// RECUPERATION DU DERNIER ELEMENT et suppression du noeud associe
+		HeapNode * pt= getNode(nb_cells-1);
+		if (nb_cells%2==0)	{ pt->father->left =NULL; }
+		else 				{ pt->father->right=NULL; }
+		pt->elt = NULL;
+		delete pt;
 	} else {
 		// RECUPERATION DU DERNIER ELEMENT et suppression du noeud associe
-		HeapNode * pt= selectNode(nb_cells-1);
+		HeapNode * pt= getNode(nb_cells-1);
 		Cell* cell = pt->elt;
 		double crit_cell = pt->crit;
 		if (nb_cells%2==0)	{ pt->father->left =NULL; }
 		else 				{ pt->father->right=NULL; }
-
 		pt->elt = NULL;
 		delete pt;
-		// CEL pointe vers l element qu on remet en tete
-		root->elt = cell;
-		root->crit = crit_cell;
+		// CEL pointe vers l element que l on remet à la place du noeud supprime
+		HeapNode * pt_root= getNode(i);
+		pt_root->elt = cell;
+		pt_root->crit = crit_cell;
 
 		// PERMUTATION
-		bool b=true;
-		pt = root;
-		while (b&&(pt->left)) {
-			if (pt->right) {
-				if (pt->isSup(pt->left)) {
-					if (pt->right->isSup(pt->left)) {
-						// le gauche est le plus petit
-						pt->switchElt(pt->left);
-						pt = pt->left;  // au suivant
-					} else {
-						// le droit est le plus petit
-						pt->switchElt(pt->right);
-						pt = pt->right;  // au suivant
-					}
-				} else {
-					if (pt->isSup(pt->right)) {
-						// le droit est le plus petit
-						pt->switchElt(pt->right);
-						pt = pt->right;  // au suivant
-					} else {// le noeud courant est le plus petit des 3 donc on arrete
-						b=false;
-					}
-				}
-			} else { // il n'y a plus de fils droit mais il y a un fils gauche
-				if (pt->isSup(pt->left)) {
+		updateNode(pt_root);
+	}
+	nb_cells--;
+}
+
+void CellHeap_2::updateNode(HeapNode *pt) {
+	// PERMUTATION pour maintenir l'ordre dans le tas en descendant
+	bool b=true;
+	while (b&&(pt->left)) {
+		if (pt->right) {
+			if (pt->isSup(pt->left)) {
+				if (pt->right->isSup(pt->left)) {
 					// le gauche est le plus petit
 					pt->switchElt(pt->left);
 					pt = pt->left;  // au suivant
-				} else { // le noeud courant est le plus petit des 3 donc on arrete , on doit meme avoir touche le fond ;-)
+				} else {
+					// le droit est le plus petit
+					pt->switchElt(pt->right);
+					pt = pt->right;  // au suivant
+				}
+			} else {
+				if (pt->isSup(pt->right)) {
+					// le droit est le plus petit
+					pt->switchElt(pt->right);
+					pt = pt->right;  // au suivant
+				} else {// le noeud courant est le plus petit des 3 donc on arrete
 					b=false;
 				}
 			}
+		} else { // il n'y a plus de fils droit mais il y a un fils gauche
+			if (pt->isSup(pt->left)) {
+				// le gauche est le plus petit
+				pt->switchElt(pt->left);
+				pt = pt->left;  // au suivant
+			} else { // le noeud courant est le plus petit des 3 donc on arrete , on doit meme avoir touche le fond ;-)
+				b=false;
+			}
 		}
 	}
-	nb_cells--;
-	return c_return;
 }
 
 

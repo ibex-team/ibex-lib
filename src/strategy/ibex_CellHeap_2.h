@@ -77,6 +77,12 @@ public:
 	}
 
 
+	/** access to the ith Cell rank by largest-first order */
+	Cell * getCell(int i) const;
+
+	/** access to the ith Cell rank by largest-first order */
+	void eraseNode(int i);
+
 
 protected:
 	/** The "cost" of a cell. */
@@ -89,8 +95,11 @@ protected:
 	friend std::ostream& operator<<(std::ostream&, const CellHeap_2&);
 
 private:
+	/** update the heap to reorder the elements */
+	void CellHeap_2::updateNode(HeapNode *node);
+
 	/** access to the ith node rank by largest-first order */
-	HeapNode * selectNode(int i) const;
+	HeapNode * getNode(int i) const;
 
 	void contract_tmp(double new_loup, HeapNode * node, CellHeap_2 & heap);
 
