@@ -71,6 +71,8 @@ class CellHeap : public CellBuffer {
   }
 
  protected:
+  friend class CellDoubleHeap;
+
   /** The "cost" of a cell. */
   virtual double cost(const Cell&) const=0;
 
