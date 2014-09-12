@@ -11,7 +11,7 @@
 
 namespace ibex {
 
-CellDoubleHeap::CellDoubleHeap(CellHeap& heap1, CellHeap& heap2, int critpr) :
+CellDoubleHeap::CellDoubleHeap(CellHeap_2& heap1, CellHeap_2& heap2, int critpr) :
 				heap1(heap1), heap2(heap2), critpr(critpr), indbuf(0) {
 
 }
@@ -24,12 +24,13 @@ void CellDoubleHeap::flush() {
 int CellDoubleHeap::size() const {
 	//  Because of the zombie cells in each heap, this
 	// number does not match heap1.size() or heap2.size().
-	return alive.size();
+	return heap1.size();
 }
 
-void CellDoubleHeap::contract_heap(double loup)
+void CellDoubleHeap::contract_heap(double new_loup)
 {
-	//TODO
+// TODO
+
 }
 
 
@@ -41,48 +42,31 @@ bool CellDoubleHeap::empty() const {
 
 void CellDoubleHeap::push(Cell* cell) {
 
-	alive.insert(cell->id);
+	double * crit= new double[2];
+	crit[0] = heap1.cost(*cell);
+	crit[1] = heap2.cost(*cell);
+	HeapElt * elt = new HeapElt(2,cell,crit);
 
 	// the cell is put into the first heap
-	heap1.push(cell);
-
+	heap1.push(elt);
 	if (critpr > 0) {
-		// we put a copy in the second heap
-		Cell* copy=new Cell(cell->box);
-		copy->id = cell->id;
-		heap2.push(copy);
-	}
-}
-
-void CellDoubleHeap::clean_top(CellHeap& heap) {
-	while (!heap.empty() && alive.find(heap.top()->id)==alive.end()) {
-		// we can delete the cells, because they are copies
-		delete heap.pop();
+		heap2.push(elt);
 	}
 }
 
 Cell* CellDoubleHeap::pop() {
-
 	// Select the heap
-	CellHeap* heap;
-	if (indbuf ==0 ) heap=&heap1;
-	else heap=&heap2;
-
-	Cell* cell = heap->pop(); // the top is always an alive cell
-
-	// now that it is popped, the cell becomes a "zombie"
-	// note: don't delete the cell, this will be done later by the Optimizer
-	alive.erase(cell->id);
-
-	// Removes the zombie cells (the ones that have
-	// already been removed from the other heap) on top the two heaps.
-	//
-	// We need to clean the two heaps (not only the one we have just made "pop" with)
-	// for the case where the two heaps share the same "top" cell.
-
-	clean_top(heap1);
-	clean_top(heap2);
-
+	HeapElt* elt;
+	if (indbuf ==0 ) {
+		elt = heap1.pop_elt();
+		heap2.eraseNode(elt->indice[1]);
+	} else {
+		elt = heap2.pop_elt();
+		heap1.eraseNode(elt->indice[0]);
+	}
+	Cell* cell = elt->cell;
+	elt->cell=NULL;
+	delete elt;
 	return cell;
 }
 

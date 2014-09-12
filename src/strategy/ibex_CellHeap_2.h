@@ -54,6 +54,7 @@ class HeapNode {
 
 private:
 	friend class CellHeap_2;
+	friend class CelDoublelHeap;
 
 	/** create an empty node */
 	HeapNode();
@@ -132,10 +133,15 @@ public:
 	 */
 	void push(Cell* cell);
 
+	/** usefull only for CellDoubleHeap */
+	void push(HeapElt* elt);
+
+
 	/** Pop a cell from the stack and return it.
 	 *  complexity: o(log(nb_cells))
 	 */
 	Cell* pop();
+	HeapElt* pop_elt();
 
 	/** Return the next box (but does not pop it).
 	 *  complexity: o(1)
@@ -184,8 +190,6 @@ private:
 	 */
 	virtual double cost(const Cell&) const {return 0;};
 
-	/** usefull only for CellDoubleHeap */
-	void push(HeapElt* elt);
 
 	/** access to the ith node rank by largest-first order */
 	HeapNode * getNode(int i) const;

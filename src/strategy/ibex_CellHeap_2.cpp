@@ -157,8 +157,18 @@ Cell * CellHeap_2::getCell(int i) const {
 
 Cell* CellHeap_2::pop() {
 	assert(nb_cells>0);
-	Cell* c_return = root->elt->cell;
+	HeapElt* tmp =pop_elt();
+	Cell * c = tmp->cell;
+	tmp->cell = NULL;
+	delete tmp;
+	return c;
+}
+
+HeapElt* CellHeap_2::pop_elt() {
+	assert(nb_cells>0);
+	HeapElt* c_return = root->elt;
 	eraseNode(0);
+	return c_return;
 }
 
 void CellHeap_2::eraseNode(int i) {
@@ -297,7 +307,9 @@ HeapElt::HeapElt(int nb_crit,Cell* cell, double *crit) : cell(cell), crit(crit),
 
 /** Delete the node and all its sons */
 HeapElt::~HeapElt() {
-
+	if (crit) delete crit;
+	if (indice) delete indice;
+	if (cell) delete cell;
 }
 
 bool HeapElt::isSup(double d, int ind_crit) const {

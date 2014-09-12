@@ -10,15 +10,13 @@
 #ifndef __IBEX_CELL_DOUBLE_HEAP_H__
 #define __IBEX_CELL_DOUBLE_HEAP_H__
 
-#include "ibex_CellHeap.h"
-#include "ibex_BitSet.h"
-#include <set>
+#include "ibex_CellHeap_2.h"
 
 namespace ibex {
 
 class CellDoubleHeap : public CellBuffer {
 public:
-	CellDoubleHeap(CellHeap& heap1, CellHeap& heap2, int critpr=50);
+	CellDoubleHeap(CellHeap_2& heap1, CellHeap_2& heap2, int critpr=50);
 
 	/** Flush the buffer.
 	 * All the remaining cells will be *deleted* */
@@ -47,8 +45,8 @@ public:
 
 	virtual ~CellDoubleHeap();
 
-	CellHeap& heap1;
-	CellHeap& heap2;
+	CellHeap_2& heap1;
+	CellHeap_2& heap2;
 
 	int critpr;
 
@@ -57,13 +55,6 @@ public:
 	 */
 	mutable int indbuf;
 
-	/**
-	 * Records the identifiers of cells alive.
-	 */
-	std::set<unsigned long> alive;
-
-private:
-	void clean_top(CellHeap&);
 
 };
 
