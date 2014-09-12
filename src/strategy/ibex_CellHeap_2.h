@@ -15,6 +15,78 @@
 
 namespace ibex {
 
+
+
+
+
+
+class HeapElt {
+
+private:
+	friend class HeapNode;
+	friend class CellHeap_2;
+
+	/** create an Elt with a cell and its criterion */
+	HeapElt(int nb_crit,Cell* elt, double *crit);
+
+	/** Delete the node and all its sons */
+	~HeapElt() ;
+
+	// the stored Cell
+	Cell* cell;
+
+	// the criterion of the stored cell
+	double *crit;
+
+	unsigned long *indice;
+
+	/** The way to compare two pairs (cells,crit). */
+	bool isSup(double d, int ind_crit) const ;
+
+	friend std::ostream& operator<<(std::ostream& os, const HeapElt& node) ;
+
+
+};
+
+
+
+class HeapNode {
+
+private:
+	friend class CellHeap_2;
+
+	/** create an empty node */
+	HeapNode();
+
+	/** create an node with a cell and its criterion */
+	HeapNode(HeapElt* elt);
+
+	/** Delete the node and all its sons */
+	~HeapNode() ;
+
+	// the stored Cell
+	HeapElt* elt;
+
+	// the sons of the node
+	HeapNode * right;
+	HeapNode * left;
+
+	// the father of the ode in the heap
+	HeapNode * father;
+
+	/** The way to compare two pairs (cells,crit). */
+	bool isSup(HeapNode *n, int ind_crit) const;
+	bool isSup(double d, int ind_crit) const ;
+
+	void switchElt(HeapNode *n, int ind_crit);
+
+	friend std::ostream& operator<<(std::ostream& os, const HeapNode& node) ;
+
+
+};
+
+
+
 /** \ingroup strategy
  *
  * \brief Heap-organized buffer of cells
@@ -39,6 +111,9 @@ class CellHeap_2 : public CellBuffer {
 public:
 
 	CellHeap_2();
+	CellHeap_2(int ind_crit);
+	CellHeap_2(double loup);
+	CellHeap_2(int ind_crit, double loup);
 
 	~CellHeap_2();
 
@@ -55,14 +130,21 @@ public:
 	/** push a new cell on the stack. */
 	void push(Cell* cell);
 
-	/** push a new cell on the stack with the computed criterion. */
-	void push(Cell* cell, double crit);
-
 	/** Pop a cell from the stack and return it.*/
 	Cell* pop();
 
 	/** Return the next box (but does not pop it).*/
 	Cell* top() const;
+
+
+	/** Return the minimum (the criterion for
+	 * the first cell) */
+	double minimum() const {
+		return root->elt->crit[ind_crit];
+	}
+
+	/** access to the ith Cell rank by largest-first order */
+	Cell * getCell(int i) const;
 
 	/**
 	 * Removes (and deletes) from the heap all the cells
@@ -70,88 +152,56 @@ public:
 	 */
 	void contract_heap(double new_loup);
 
-	/** Return the minimum (the criterion for
-	 * the first cell) */
-	double minimum() const {
-		return root->crit;
-	}
-
-
-	/** access to the ith Cell rank by largest-first order */
-	Cell * getCell(int i) const;
-
-	/** access to the ith Cell rank by largest-first order */
+	/** erase only this HeapNope without touch the element */
 	void eraseNode(int i);
 
+	/** sort and update the cost */
+	void sort() ;
 
 protected:
+
 	/** The "cost" of a cell. */
 	virtual double cost(const Cell&) const {return 0;};
-
 
 	/** the root of the heap */
 	HeapNode * root;
 
+	/** current value of the loup */
+	double loup;
+
 	friend std::ostream& operator<<(std::ostream&, const CellHeap_2&);
 
 private:
-	/** update the heap to reorder the elements */
-	void CellHeap_2::updateNode(HeapNode *node);
+	/** usefull only for CellDoubleHeap */
+	void push(HeapElt* elt);
 
 	/** access to the ith node rank by largest-first order */
 	HeapNode * getNode(int i) const;
 
+	/** update the heap to reorder the elements */
+	void updateOrder(HeapNode *node);
+
+	/** remove the last node and put its element at the ith position */
+	HeapNode * eraseNode_noUpdate(int i);
+
+	void sort_tmp(HeapNode * node, CellHeap_2 & heap);
+
 	void contract_tmp(double new_loup, HeapNode * node, CellHeap_2 & heap);
 
+	/** whitch criteria is selected for this heap */
+	int ind_crit;
 
 };
+
+
+
+/** Display the node */
+std::ostream& operator<<(std::ostream& os, const HeapElt& node) ;
+std::ostream& operator<<(std::ostream& os, const HeapNode& node) ;
+
 
 /** Display the buffer */
 std::ostream& operator<<(std::ostream&, const CellHeap_2& heap);
-
-
-class HeapNode {
-
-private:
-	friend class CellHeap_2;
-
-	/** create an empty node */
-	HeapNode();
-
-	/** create an node with a cell and its criterion */
-	HeapNode(Cell* elt, double crit);
-
-	/** Delete the node and all its sons */
-	HeapNode::~HeapNode() ;
-
-	// the stored Cell
-	Cell* elt;
-
-	// the criterion of the stored cell
-	double crit;
-
-	// the sons of the node
-	HeapNode * right;
-	HeapNode * left;
-
-	// the father of the ode in the heap
-	HeapNode * father;
-
-	/** The way to compare two pairs (cells,crit). */
-	bool isSup(HeapNode *n) const;
-	bool isSup(double d) const ;
-
-	void switchElt(HeapNode *n);
-
-
-	friend std::ostream& operator<<(std::ostream& os, const HeapNode& node) ;
-
-
-};
-
-/** Display the node */
-std::ostream& operator<<(std::ostream& os, const HeapNode& node) ;
-
 
 
 
