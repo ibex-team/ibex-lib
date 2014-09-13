@@ -13,13 +13,13 @@
 namespace ibex {
 
 //////////////////////////////////////////////////////////////////////////////////////
-CellHeap_2::CellHeap_2() : root(NULL), ind_crit(0), loup(POS_INFINITY) { }
 
-CellHeap_2::CellHeap_2(int ind_crit) : root(NULL), ind_crit(ind_crit), loup(POS_INFINITY) { }
-
-CellHeap_2::CellHeap_2(double loup) : root(NULL), ind_crit(0), loup(loup) { }
-
-CellHeap_2::CellHeap_2(int ind_crit, double loup) : root(NULL), ind_crit(ind_crit), loup(loup) { }
+CellHeap_2::CellHeap_2(criterion crit, int ind_crit, int ind_va) :
+		root(NULL), ind_crit(ind_crit), crit(crit), ind_var(ind_va), loup(POS_INFINITY) {
+	if (((crit==LB)||(crit==UB))&&(ind_var<0)) {
+		ibex_error("CellHeap_2: you need to indicate the indice of the variable which strae the objective function");
+	}
+}
 
 
 CellHeap_2::~CellHeap_2() {
@@ -43,6 +43,33 @@ Cell* CellHeap_2::top() const {
 	return root->elt->cell;
 }
 
+void CellHeap_2::setLoup( double new_loup) {
+	loup = new_loup;
+}
+
+
+double CellHeap_2::cost(const Cell& c) const {
+switch (crit)	{
+case LB : return c.box[ind_var].lb();
+case UB : return c.box[ind_var].ub();
+default : ibex_error("CellHeap_2::cost : you need a OptimCell and not just a Cell"); return 0;
+}
+}
+
+
+double CellHeap_2::cost(const OptimCell& c) const {
+switch (crit)	{
+case LB : return c.box[ind_var].lb();
+case UB : return c.box[ind_var].ub();
+case C3 : return -((loup - c.pf.lb()) / c.pf.diam() );
+case C5 : return -(c.pu * (loup - c.pf.lb()) / c.pf.diam());
+case C7 : return c.box[ind_var].lb()/(c.pu*(c.loup-c.pf.lb())/c.pf.diam());
+case PU : return -c.pu	;
+case PF : return c.pf.lb();
+}
+}
+
+
 
 // E.g.: called by manage_buffer in Optimizer in case of a new upper bound
 // on the objective ("loup"). This function then removes (and deletes) from
@@ -51,7 +78,8 @@ void CellHeap_2::contract_heap(double new_loup) {
 	loup = new_loup;
 	if (nb_cells==0) return;
 
-	CellHeap_2 heap_tmp(ind_crit,loup);
+	CellHeap_2 heap_tmp(ind_crit);
+	heap_tmp.setLoup(loup);
 	contract_tmp(new_loup, root, heap_tmp);
 
 	if (root) delete root;

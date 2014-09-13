@@ -107,11 +107,11 @@ private:
 class CellHeap_2 : public CellBuffer {
 
 public:
+    /* the different criteria implemented for a heap : in optimization : LB for the first one, another for the second one */
+	typedef enum {LB,UB,C3,C5,C7,PU,PF} criterion;
 
-	CellHeap_2();
-	CellHeap_2(int ind_crit);
-	CellHeap_2(double loup);
-	CellHeap_2(int ind_crit, double loup);
+
+	CellHeap_2(criterion crit, int ind_crit, int ind_var=-1 );
 
 	~CellHeap_2();
 
@@ -168,25 +168,31 @@ public:
 	 */
 	void sort() ;
 
+	void setLoup(double loup);
+
 protected:
 
-
-	/** current value of the loup */
-	double loup;
 
 private:
 	friend class CellDoubleHeap;
 
-	/** The "cost" of a cell.
-	 * => MUST be implemented
-	 */
-	virtual double cost(const Cell&) const {return 0;};
 
 	/** the root of the heap */
 	HeapNode * root;
 
 	/** the indice of the criterion selected for this heap */
-	int ind_crit;
+	const int ind_crit;
+
+
+	const criterion crit;
+	const int ind_var;
+
+	/** current value of the loup */
+	double loup;
+
+	/** The "cost" of a cell.	 */
+	double cost(const Cell&) const;
+	double CellHeap_2::cost(const OptimCell& c) const;
 
 	/** access to the ith node rank by largest-first order */
 	HeapNode * getNode(int i) const;
@@ -210,6 +216,16 @@ private:
 
 
 };
+
+
+
+class CellHeapVar : public CellHeap_2 {
+
+public:
+
+
+
+
 
 
 
