@@ -1,22 +1,11 @@
 #include "ibex_CtcVoxelGrid.h"
 
 namespace ibex{
-CtcVoxelGrid::CtcVoxelGrid(): Ctc(3)
-{
-
-}
-
 CtcVoxelGrid::CtcVoxelGrid(Array3D &data): I(data),Ctc(3)
 {
 
 }
 
-CtcVoxelGrid::CtcVoxelGrid(const char* ii3D_filename): Ctc(3)
-{
-    if(I.loadFromFile(ii3D_filename) == -1){
-        std::cerr << "Error loading array3D\n";
-    }
-}
 
 
 //-------------------------------------------------------------------------------------------------------------

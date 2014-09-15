@@ -27,9 +27,9 @@ void TestCtcVoxelGrid::add_emptyCubes(int3 center, int width, Array3D &I){
 void TestCtcVoxelGrid::setup(){
     // Generate test shapes :
     // define leaf size
-    leaf_size = {{0.1,0.1,0.1}};
-    origin = {{-10,-10,-10}};
-    grid_size = {{200,200,200}};
+    leaf_size = {{1,1,1}};
+    origin = {{-5,-5,-5}};
+    grid_size = {{100,100,100}};
 
     array.setOrigin(origin);
     array.setLeafSize(leaf_size);
@@ -38,9 +38,30 @@ void TestCtcVoxelGrid::setup(){
 
     // Cross centered in (-5, 6, 0)
     add_cross({{50,50,20}},10,array);
-    add_emptyCubes({{120,180,100}},15,array);
+//    add_emptyCubes({{120,180,100}},15,array);
 
     array.saveNDArray("test.voxel");
+
+}
+
+
+void TestCtcVoxelGrid::contractCross(){
+    IntervalVector box(3), res(3);
+    box[0] = Interval(50).inflate(20);
+    box[1] = Interval(50).inflate(20);
+    box[2] = Interval(20).inflate(20);
+
+    res[0] = Interval(50).inflate(10);
+    res[1] = Interval(50).inflate(10);
+    res[2] = Interval(20).inflate(10);
+
+    computeIntegralImage(array);
+    CtcVoxelGrid ctc(array);
+    ctc.contract(box);
+    for(uint i = 0; i < box.size(); i++){
+        TEST_ASSERT_EQUALS(res[i].lb(),box[i].lb());
+        TEST_ASSERT_EQUALS(res[i].ub(),box[i].ub());
+    }
 
 
 }
@@ -70,20 +91,20 @@ void TestCtcVoxelGrid::testContractExternal(){
         }
     }
     computeIntegralImage(array);
-    ctc = new CtcVoxelGrid(array);
+    CtcVoxelGrid ctc(array);
 
 
     double v_[3][2] = {{0,10},{0,10},{0,10}};
     double res_[3][2] = {{2,7},{2,7},{2,7}};
     IntervalVector v(3,v_);
     IntervalVector res(3,res_);
-    ctc->contract(v);
+    ctc.contract(v);
     for(uint i = 0; i < v.size(); i++){
         TEST_ASSERT_EQUALS(res[i].lb(),v[i].lb());
         TEST_ASSERT_EQUALS(res[i].ub(),v[i].ub());
     }
 
-    delete ctc;
+
 }
 
 void TestCtcVoxelGrid::testContractThin(){
@@ -97,20 +118,20 @@ void TestCtcVoxelGrid::testContractThin(){
 
     array({{10,5,18}}) = 1;
     computeIntegralImage(array);
-    ctc = new CtcVoxelGrid(array);
+    CtcVoxelGrid ctc(array);
 
 
     double v_[3][2] = {{-5,10},{-5,10},{-10,10}};
     double res_[3][2] = {{-1,-0.9},{1.5,1.6},{0.9,0.95}};
     IntervalVector v(3,v_);
     IntervalVector res(3,res_);
-    ctc->contract(v);
+    ctc.contract(v);
     for(uint i = 0; i < v.size(); i++){
         TEST_ASSERT_DELTA(res[i].lb(),v[i].lb(), std::numeric_limits<double>::epsilon());
         TEST_ASSERT_DELTA(res[i].ub(),v[i].ub(), std::numeric_limits<double>::epsilon());
     }
 
-    delete ctc;
+
 
 }
 

@@ -32,7 +32,7 @@ add_definitions(${PC_CPPTEST_CFLAGS_OTHER})
 include_directories(${PC_CPPTEST_INCLUDEDIR} ${PC_CPPTEST_INCLUDE_DIRS} ${PC_CPPTEST_INCLUDES})
 set(LIBS ${LIBS} ${PC_CPPTEST_LIBRARIES})
 
-add_library(CtcNDArray ibex_CtcImage.cpp ibex_CtcVoxelGrid.cpp ibex_IntInterval.cpp)
+add_library(CtcNDArray ibex_CtcImage.cpp ibex_CtcVoxelGrid.cpp ibex_IntInterval.cpp ibex_NDArray.h)
 
 
 #add_executable (test_NDArray ./test_NDArray.cpp ./src/NDArray.h ./src/NDArray.cpp)

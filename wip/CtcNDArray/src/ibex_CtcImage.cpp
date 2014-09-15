@@ -114,7 +114,7 @@ void CtcImage::contract(int &cxmin, int &cxmax, int &cymin, int &cymax){
     }
 }
 //////////////////////////////////////////////////////////////////////
-int CtcImage::enclosed_pixels(int xmin,int xmax,int ymin,int ymax){
+unsigned int CtcImage::enclosed_pixels(int xmin,int xmax,int ymin,int ymax){
 
     int b1 = I({{ymax,xmax}});
     int b2 = I({{ymax,xmin-1}});

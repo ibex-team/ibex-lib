@@ -44,8 +44,8 @@ void TestNDArray::test_init2DArray(){
     TEST_ASSERT( (array.origin_ == origin) );
     TEST_ASSERT( (array.grid_size_ == grid_size) );
 
-    for(uint i = 0; i < grid_size[0]; i++){
-        for(uint j = 0; j < grid_size[1]; j++){
+    for(int i = 0; i < grid_size[0]; i++){
+        for(int j = 0; j < grid_size[1]; j++){
             TEST_ASSERT_EQUALS(i + array.divb_mul_[1]*j, array({{i,j}}));
         }
     }
@@ -80,9 +80,9 @@ void TestNDArray::test_init3DArray(){
     TEST_ASSERT( (array.origin_ == origin) );
     TEST_ASSERT( (array.grid_size_ == grid_size) );
 
-    for(uint i = 0; i < grid_size[0]; i++){
-        for(uint j = 0; j < grid_size[1]; j++){
-            for(uint k = 0; k < grid_size[2];k++){
+    for(int i = 0; i < grid_size[0]; i++){
+        for(int j = 0; j < grid_size[1]; j++){
+            for(int k = 0; k < grid_size[2];k++){
                 TEST_ASSERT_EQUALS(i + array.divb_mul_[1]*j+array.divb_mul_[2]*k, array({{i,j,k}}));
             }
         }

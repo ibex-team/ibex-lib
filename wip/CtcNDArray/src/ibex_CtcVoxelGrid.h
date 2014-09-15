@@ -1,3 +1,12 @@
+//============================================================================
+//                                  I B E X
+// File        : Extension of the image contractor (see Yan Sliwka's algorithm) on voxel grid.
+// Author      : Benoit DESROCHERS
+// Copyright   : ENSTA BRETAGNE (France)
+// License     : See the LICENSE file
+// Created     : Sep 04, 2014
+//============================================================================
+
 #ifndef IBEX_CTCVOXELGRID_H
 #define IBEX_CTCVOXELGRID_H
 
@@ -10,17 +19,45 @@
 #include "ibex_IntInterval.h"
 namespace ibex {
 
-typedef std::array<Interval,3> IntervalBox;
 
+typedef std::array<Interval,3> IntervalBox;
+/**
+ * \ingroup contractor
+ * \brief Contractor on voxel grid using the summed table area algorithm.
+ *
+ *  This class implement the voxel grid contractor which is the 3D
+ *  extension of the image contractor (see Yan Sliwka thesis).
+ *
+ */
 class CtcVoxelGrid : public Ctc
 {
 public:
-    CtcVoxelGrid();
-    CtcVoxelGrid(Array3D & data);
-    CtcVoxelGrid(const char *ii3D_filename);
 
+    /**
+     * @brief CtcVoxelGrid contractor on a voxel grid described by data
+     * @param data
+     *  The 3D occupacy grid is described by a voxel grid.
+     *          data(x,y,z) = 1 if the voxel is occuped
+     *          data(x,y,z) = 0 otherwise.
+     *
+     * data must describ the 3D integral image of if voxel grid
+     */
+    CtcVoxelGrid(Array3D & data);
+
+    /**
+     * @brief Contract a box
+     * @param box  box to be contracted
+     */
     void contract(IntervalVector &box);
+
+    /**
+     * @brief worldToGrid_V2 convert coordinates in world frame into coordinates in the image frame.
+     */
     IntBox worldToGrid_V2(const Interval &x, const Interval &y, const Interval &z);
+
+    /**
+     * @brief gridToWorld_V2 convert coordinates in pixel into world frame coordinates.
+     */
     IntervalBox gridToWorld_V2(const IntInterval &ix, const IntInterval &iy, const IntInterval &iz);
 
 

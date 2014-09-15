@@ -10,18 +10,19 @@ public:
     TestCtcVoxelGrid() {
         TEST_ADD(TestCtcVoxelGrid::testContractExternal);
         TEST_ADD(TestCtcVoxelGrid::testContractThin);
+        TEST_ADD(TestCtcVoxelGrid::contractCross);
     }
 
     void add_cross(int3 center, int length, Array3D &I);
     void add_emptyCubes(int3 center, int width, Array3D &I);
     void setup();
     void tear_down();
+    void contractCross();
     void testContractExternal();
     void testContractThin();
 
 private:
     Array3D array;
-    CtcVoxelGrid *ctc;
     double3 leaf_size;
     double3 origin;
     int3 grid_size;
