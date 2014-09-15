@@ -68,7 +68,7 @@ private:
 
 
     /**
-     * @brief I 2D array used for storing the integral image of the occupancy grid²
+     * @brief I 2D array used for storing the integral image of the occupancy grid
      */
     Array2D I;
 

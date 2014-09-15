@@ -62,8 +62,22 @@ public:
 
 
 private:
+
+    /**
+     * @brief I 3D array used for storing the integral image of the occupancy grid
+     */
     Array3D I;
+
+    /**
+     * @brief contract the box defined by [cxmin, cxmax]x[cymin, cymax]x[zmin, zmax] w.r.t the Integral image
+     */
     void contract(int &cxmin, int &cxmax, int &cymin, int &cymax, int &czmin, int &czmax);
+
+
+    /**
+     * @brief enclosed_pixels return the number of 1-valued pixel in the box [xmin,xmax] x [ymin, ymax] x [zmin, zmax]
+     * @return the number of 1-valued pixels.
+     */
     unsigned int enclosed_pixels(int xmin, int xmax, int ymin, int ymax, int zmin, int zmax);
 };
 
