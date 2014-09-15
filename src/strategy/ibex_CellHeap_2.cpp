@@ -12,15 +12,40 @@
 
 namespace ibex {
 
+
+CellHeapVarLB::CellHeapVarLB(int ind_var, int ind_crit) : CellHeap_2(CellHeap_2::LB, ind_var, ind_crit) { };
+CellHeapVarUB::CellHeapVarUB(int ind_var, int ind_crit) : CellHeap_2(CellHeap_2::UB, ind_var, ind_crit) { };
+CellHeapCost::CellHeapCost(criterion & crit, int ind_crit) : CellHeap_2(crit, -1, ind_crit) {
+	if (crit==LB) {
+		ibex_error("CellHeapCost::CellHeapCost : invalid flag, that must be C3,C5,C7,PU or PF");
+	} else if (crit==UB) {
+		ibex_error("CellHeapCost::CellHeapCost : invalid flag, that must be C3,C5,C7,PU or PF");
+	}
+
+};
+
+
+// TODO heu.. là il faudrait avoir le type de Cell
+double CellHeapCost::cost(const OptimCell& c) const {
+
+		switch (crit)	{
+		case C3 : return -((loup - c.pf.lb()) / c.pf.diam() );
+		case C5 : return -(c.pu * (loup - c.pf.lb()) / c.pf.diam());
+		case C7 : return c.box[ind_var].lb()/(c.pu*(c.loup-c.pf.lb())/c.pf.diam());
+		case PU : return -c.pu	;
+		case PF : return c.pf.lb();
+		}
+
+}
+
 //////////////////////////////////////////////////////////////////////////////////////
 
-CellHeap_2::CellHeap_2(criterion crit, int ind_crit, int ind_va) :
-		root(NULL), ind_crit(ind_crit), crit(crit), ind_var(ind_va), loup(POS_INFINITY) {
+CellHeap_2::CellHeap_2(criterion crit, int ind_var, int ind_crit) :
+		nb_cells(0), root(NULL), ind_crit(ind_crit), crit(crit), ind_var(ind_var), loup(POS_INFINITY) {
 	if (((crit==LB)||(crit==UB))&&(ind_var<0)) {
 		ibex_error("CellHeap_2: you need to indicate the indice of the variable which strae the objective function");
 	}
 }
-
 
 CellHeap_2::~CellHeap_2() {
 	if (root) delete root;
@@ -47,26 +72,28 @@ void CellHeap_2::setLoup( double new_loup) {
 	loup = new_loup;
 }
 
-
+// TODO heu.. là il faudrait avoir le type de Cell
 double CellHeap_2::cost(const Cell& c) const {
-switch (crit)	{
-case LB : return c.box[ind_var].lb();
-case UB : return c.box[ind_var].ub();
-default : ibex_error("CellHeap_2::cost : you need a OptimCell and not just a Cell"); return 0;
-}
-}
 
+	const OptimCell* t=dynamic_cast<const OptimCell*>(&c);
+	if (t) {
+		switch (crit)	{
+		case LB : return c.box[ind_var].lb();
+		case UB : return c.box[ind_var].ub();
+		case C3 : return -((loup - t->pf.lb()) / t->pf.diam() );
+		case C5 : return -(t->pu * (loup - t->pf.lb()) / t->pf.diam());
+		case C7 : return t->box[ind_var].lb()/(t->pu*(t->loup-t->pf.lb())/t->pf.diam());
+		case PU : return -t->pu	;
+		case PF : return t->pf.lb();
+		}
+	} else {
+		switch (crit)	{
+		case LB : return c.box[ind_var].lb();
+		case UB : return c.box[ind_var].ub();
+		default : ibex_error("CellHeap_2::cost : you need a OptimCell and not just a Cell"); return POS_INFINITY;
+		}
 
-double CellHeap_2::cost(const OptimCell& c) const {
-switch (crit)	{
-case LB : return c.box[ind_var].lb();
-case UB : return c.box[ind_var].ub();
-case C3 : return -((loup - c.pf.lb()) / c.pf.diam() );
-case C5 : return -(c.pu * (loup - c.pf.lb()) / c.pf.diam());
-case C7 : return c.box[ind_var].lb()/(c.pu*(c.loup-c.pf.lb())/c.pf.diam());
-case PU : return -c.pu	;
-case PF : return c.pf.lb();
-}
+	}
 }
 
 
@@ -78,20 +105,27 @@ void CellHeap_2::contract_heap(double new_loup) {
 	loup = new_loup;
 	if (nb_cells==0) return;
 
-	CellHeap_2 heap_tmp(ind_crit);
-	heap_tmp.setLoup(loup);
-	contract_tmp(new_loup, root, heap_tmp);
+	CellHeap_2 * heap_tmp = init_copy();
+	heap_tmp->setLoup(loup);
+
+	contract_tmp(new_loup, root, *heap_tmp);
 
 	if (root) delete root;
-	root = heap_tmp.root;
-	nb_cells = heap_tmp.size();
-	heap_tmp.root = NULL;
+	root = heap_tmp->root;
+	nb_cells = heap_tmp->size();
+	heap_tmp->root = NULL;
 
 }
 
 
 void CellHeap_2::contract_tmp(double new_loup, HeapNode * node, CellHeap_2 & heap) {
-	if (node->isSup(new_loup,ind_crit)) {
+	double new_cost;
+	switch (crit)	{
+	case C3 :  case C5 :  case C7 :
+		node->elt->crit[ind_crit] = cost(*(node->elt->cell)); break;
+	default: break;
+	}
+	if (node->isSup(new_loup, ind_crit)) {
 		delete node;
 	} else {
 		heap.push(node->elt);
@@ -99,6 +133,42 @@ void CellHeap_2::contract_tmp(double new_loup, HeapNode * node, CellHeap_2 & hea
 		if (node->right) contract_tmp(new_loup, node->right, heap);
 	}
 }
+
+
+
+void CellHeap_2::sort() {
+	if (nb_cells==0) return;
+
+	CellHeap_2 * heap_tmp = init_copy();
+	heap_tmp->setLoup(loup);
+
+	// recursive sort : o(n*log(n))
+	sort_tmp(root, *heap_tmp);
+
+	if (root) delete root;
+	root = heap_tmp->root;
+	nb_cells = heap_tmp->size();
+	heap_tmp->root = NULL;
+
+}
+
+
+void CellHeap_2::sort_tmp(HeapNode * node, CellHeap_2 & heap) {
+
+	if (node->left)	 sort_tmp(node->left, heap);
+	if (node->right) sort_tmp(node->right, heap);
+
+	switch (crit)	{
+	case C3 :  case C5 :  case C7 :
+		node->elt->crit[ind_crit] = cost(*node->elt->cell); break;
+	default: break;
+	}
+	heap.push(node->elt);
+	node->elt = NULL;
+
+	delete node;
+}
+
 
 
 void CellHeap_2::push(Cell* cell) {
@@ -109,7 +179,6 @@ void CellHeap_2::push(Cell* cell) {
 
 
 void CellHeap_2::push(HeapElt* cell) {
-	if (capacity>0 && size()==capacity) throw CellBufferOverflow();
 
 	if (nb_cells==0) {
 		root = new HeapNode(cell);
@@ -199,6 +268,16 @@ HeapElt* CellHeap_2::pop_elt() {
 	return c_return;
 }
 
+Cell* CellHeap_2::pop() {
+	assert(nb_cells>0);
+	HeapElt* tmp =pop_elt();
+	Cell * c = tmp->cell;
+	tmp->cell = NULL;
+	delete tmp;
+	return c;
+}
+
+// erase a node and update the order
 void CellHeap_2::eraseNode(int i) {
 	assert((i>-1)&&(i<nb_cells));
 	assert(nb_cells>0);
@@ -206,6 +285,7 @@ void CellHeap_2::eraseNode(int i) {
 	updateOrder(eraseNode_noUpdate(i));
 }
 
+// erase a node and update the order
 HeapNode * CellHeap_2::eraseNode_noUpdate(int i) {
 	HeapNode * pt_root;
 	if (nb_cells==1) {
@@ -274,30 +354,9 @@ void CellHeap_2::updateOrder(HeapNode *pt) {
 }
 
 
-void CellHeap_2::sort() {
-	if (nb_cells==0) return;
-
-	CellHeap_2 heap_tmp(ind_crit,loup);
-	sort_tmp(root, heap_tmp);
-
-	if (root) delete root;
-	root = heap_tmp.root;
-	nb_cells = heap_tmp.size();
-	heap_tmp.root = NULL;
-
-}
-
-
-void CellHeap_2::sort_tmp(HeapNode * node, CellHeap_2 & heap) {
-	node->elt->crit[ind_crit] = cost(*node->elt->cell);
-	heap.push(node->elt);
-	if (node->left)	 sort_tmp(node->left, heap);
-	if (node->right) sort_tmp(node->right, heap);
-}
-
 
 //////////////////////////////////////////////////////////////////////////////////////
-HeapNode::HeapNode(): elt(NULL), right(NULL), left(NULL), father(NULL) { }
+//HeapNode::HeapNode(): elt(NULL), right(NULL), left(NULL), father(NULL) { }
 
 HeapNode::HeapNode(HeapElt* elt): elt(elt), father(NULL), right(NULL), left(NULL) { }
 

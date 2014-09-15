@@ -54,7 +54,7 @@ private:
 	friend class CelDoublelHeap;
 
 	/** create an empty node */
-	HeapNode();
+//	HeapNode();
 
 	/** create an node with a cell and its criterion */
 	HeapNode(HeapElt* elt);
@@ -104,16 +104,14 @@ private:
  *
  * \see #CellBuffer, #CellHeapBySize
  */
-class CellHeap_2 : public CellBuffer {
+class CellHeap_2 {
 
 public:
     /* the different criteria implemented for a heap : in optimization : LB for the first one, another for the second one */
 	typedef enum {LB,UB,C3,C5,C7,PU,PF} criterion;
 
 
-	CellHeap_2(criterion crit, int ind_crit, int ind_var=-1 );
-
-	~CellHeap_2();
+	virtual ~CellHeap_2();
 
 	/** Flush the buffer.
 	 * All the remaining cells will be *deleted* */
@@ -132,7 +130,6 @@ public:
 
 	/** usefull only for CellDoubleHeap */
 	void push(HeapElt* elt);
-
 
 	/** Pop a cell from the stack and return it.
 	 *  complexity: o(log(nb_cells))
@@ -161,38 +158,44 @@ public:
 	 * with a cost greater than \a loup.
 	 * complexity in worst case: o(nb_cells*log(nb_cells))
 	 */
-	void contract_heap(double new_loup);
+	virtual void contract_heap(double new_loup);
 
 	/** update the cost and sort all the heap
 	 * complexity: o(nb_cells*log(nb_cells))
 	 */
-	void sort() ;
+	virtual void sort();
 
 	void setLoup(double loup);
 
 protected:
 
 
-private:
-	friend class CellDoubleHeap;
-
-
-	/** the root of the heap */
-	HeapNode * root;
+	CellHeap_2(criterion crit, int ind_var, int ind_crit);
 
 	/** the indice of the criterion selected for this heap */
 	const int ind_crit;
 
-
 	const criterion crit;
+
 	const int ind_var;
 
 	/** current value of the loup */
 	double loup;
 
+private:
+	friend class CellDoubleHeap;
+
+	/** Count the number of cells pushed since
+	 * the object is created. */
+	unsigned long nb_cells;
+
+	/** the root of the heap */
+	HeapNode * root;
+
 	/** The "cost" of a cell.	 */
-	double cost(const Cell&) const;
-	double CellHeap_2::cost(const OptimCell& c) const;
+	virtual double cost(const Cell&) const=0;
+
+	virtual CellHeap_2 * init_copy()=0;
 
 	/** access to the ith node rank by largest-first order */
 	HeapNode * getNode(int i) const;
@@ -206,26 +209,49 @@ private:
 	/** remove the last node and put its element at the ith position */
 	HeapNode * eraseNode_noUpdate(int i);
 
-	/** use in the sort function by recursivity */
-	void sort_tmp(HeapNode * node, CellHeap_2 & heap);
-
 	/** use in the contract_heap function by recursivity */
 	void contract_tmp(double new_loup, HeapNode * node, CellHeap_2 & heap);
 
 	friend std::ostream& operator<<(std::ostream&, const CellHeap_2&);
 
-
+	/** use in the sort function by recursivity */
+	void sort_tmp(HeapNode * node, CellHeap_2 & heap);
 };
 
 
 
-class CellHeapVar : public CellHeap_2 {
 
+class CellHeapVarLB: public CellHeap_2 {
+public:
+	CellHeapVarLB(int ind_var, int ind_crit=0) ;
+
+	inline double cost(const Cell& c) const {return c.box[ind_var].lb();};
+
+	inline CellHeapVarLB * init_copy() { return new CellHeapVarLB(ind_var,ind_crit); };
+};
+
+
+class CellHeapVarUB: public CellHeap_2 {
+public:
+	CellHeapVarUB(int ind_var, int ind_crit=0) ;
+
+	inline double cost(const Cell& c) const {return c.box[ind_var].ub();};
+
+	inline CellHeapVarUB * init_copy() { return new CellHeapVarUB(ind_var,ind_crit); };
+};
+
+
+
+class CellHeapCost: public CellHeap_2 {
 public:
 
+	CellHeapCost(criterion & crit, int ind_crit=0) ;
 
+	inline double cost(const Cell& c) const;
+	inline double cost(const OptimCell& c) const ;
 
-
+	inline CellHeapCost * init_copy() { return new CellHeapCost(crit,ind_crit); };
+};
 
 
 
