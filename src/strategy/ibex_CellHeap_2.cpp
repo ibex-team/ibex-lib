@@ -114,6 +114,7 @@ void CellHeap_2::contract_heap(double new_loup) {
 	root = heap_tmp->root;
 	nb_cells = heap_tmp->size();
 	heap_tmp->root = NULL;
+	delete heap_tmp;
 
 }
 
@@ -149,6 +150,7 @@ void CellHeap_2::sort() {
 	root = heap_tmp->root;
 	nb_cells = heap_tmp->size();
 	heap_tmp->root = NULL;
+	delete heap_tmp;
 
 }
 
