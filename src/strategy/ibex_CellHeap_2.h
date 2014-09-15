@@ -108,7 +108,7 @@ class CellHeap_2 {
 
 public:
     /* the different criteria implemented for a heap : in optimization : LB for the first one, another for the second one */
-	typedef enum {LB,UB,C3,C5,C7,PU,PF} criterion;
+	typedef enum {LB,UB,C3,C5,C7,PU,PF_LB, PF_UB} criterion;
 
 
 	virtual ~CellHeap_2();

@@ -33,7 +33,8 @@ double CellHeapCost::cost(const OptimCell& c) const {
 		case C5 : return -(c.pu * (loup - c.pf.lb()) / c.pf.diam());
 		case C7 : return c.box[ind_var].lb()/(c.pu*(c.loup-c.pf.lb())/c.pf.diam());
 		case PU : return -c.pu	;
-		case PF : return c.pf.lb();
+		case PF_LB : return c.pf.lb();
+		case PF_UB : return c.pf.ub();
 		}
 
 }
@@ -71,32 +72,6 @@ Cell* CellHeap_2::top() const {
 void CellHeap_2::setLoup( double new_loup) {
 	loup = new_loup;
 }
-
-// TODO heu.. là il faudrait avoir le type de Cell
-double CellHeap_2::cost(const Cell& c) const {
-
-	const OptimCell* t=dynamic_cast<const OptimCell*>(&c);
-	if (t) {
-		switch (crit)	{
-		case LB : return c.box[ind_var].lb();
-		case UB : return c.box[ind_var].ub();
-		case C3 : return -((loup - t->pf.lb()) / t->pf.diam() );
-		case C5 : return -(t->pu * (loup - t->pf.lb()) / t->pf.diam());
-		case C7 : return t->box[ind_var].lb()/(t->pu*(t->loup-t->pf.lb())/t->pf.diam());
-		case PU : return -t->pu	;
-		case PF : return t->pf.lb();
-		}
-	} else {
-		switch (crit)	{
-		case LB : return c.box[ind_var].lb();
-		case UB : return c.box[ind_var].ub();
-		default : ibex_error("CellHeap_2::cost : you need a OptimCell and not just a Cell"); return POS_INFINITY;
-		}
-
-	}
-}
-
-
 
 // E.g.: called by manage_buffer in Optimizer in case of a new upper bound
 // on the objective ("loup"). This function then removes (and deletes) from
