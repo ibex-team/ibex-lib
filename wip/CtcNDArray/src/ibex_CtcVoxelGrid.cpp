@@ -13,11 +13,16 @@ IntBox CtcVoxelGrid::worldToGrid_V2(const Interval &x, const Interval &y, const 
 { 
     Interval xt = (x - I.origin_[0]) / I.leaf_size_[0];
     Interval yt = (y - I.origin_[1]) / I.leaf_size_[1];
-    Interval zt = (z - I.origin_[2]) / I.leaf_size_[2];
+    Interval zt = (z - I.origin_[2]) / I.leaf_size_[2];   
+
+    xt &= Interval(0,I.grid_size_[0]);
+    yt &= Interval(0,I.grid_size_[1]);
+    zt &= Interval(0,I.grid_size_[2]);
 
     IntInterval i1( floor(xt.lb()), ceil(xt.ub()-1));
     IntInterval i2( floor(yt.lb()), ceil(yt.ub()-1));
     IntInterval i3( floor(zt.lb()), ceil(zt.ub()-1));
+
 
     return {{i1,i2,i3}};
 }

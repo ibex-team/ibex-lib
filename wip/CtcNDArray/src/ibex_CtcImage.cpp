@@ -15,6 +15,11 @@ std::pair<IntInterval, IntInterval> CtcImage::worldToGrid_V2(const Interval &x, 
     Interval xt = (x - I.origin_[0]) / I.leaf_size_[0];
     Interval yt = (y - I.origin_[1]) / I.leaf_size_[1];
 
+    // Limit range to image size on pixel
+    xt &= Interval(0,I.grid_size_[0]);
+    yt &= Interval(0,I.grid_size_[1]);
+
+
     IntInterval i1( floor(xt.lb()), ceil(xt.ub()-1));
     IntInterval i2( floor(yt.lb()), ceil(yt.ub()-1));
 
@@ -116,10 +121,10 @@ void CtcImage::contract(int &cxmin, int &cxmax, int &cymin, int &cymax){
 //////////////////////////////////////////////////////////////////////
 unsigned int CtcImage::enclosed_pixels(int xmin,int xmax,int ymin,int ymax){
 
-    int b1 = I({{ymax,xmax}});
-    int b2 = I({{ymax,xmin-1}});
-    int b3 = I({{ymin-1,xmax}});
-    int b4 = I({{ymin-1,xmin-1}});
+    int b1 = I({{xmax,ymax}});
+    int b2 = I({{xmax,ymin-1}});
+    int b3 = I({{xmin-1,ymax}});
+    int b4 = I({{xmin-1,ymin-1}});
     return b1 - b2 - b3 + b4;
 }
 
