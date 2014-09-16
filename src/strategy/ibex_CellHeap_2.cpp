@@ -57,10 +57,12 @@ CellHeap_2::CellHeap_2(criterion crit, int ind_var, int ind_crit) :
 }
 
 CellHeap_2::~CellHeap_2() {
+	// attention le delete supprime tous les noeuds d'en dessous
 	if (root) delete root;
 }
 
 void CellHeap_2::flush() {
+	// attention le delete supprime tous les noeuds d'en dessous
 	if (root) delete root;
 	nb_cells =0;
 }
@@ -129,9 +131,12 @@ void CellHeap_2::sort() {
 	// recursive sort : o(n*log(n))
 	sort_tmp(root, *heap_tmp);
 
+	// attention le delete supprime tous les noeuds d'en dessous
 	if (root) delete root;
 	root = heap_tmp->root;
 	nb_cells = heap_tmp->size();
+
+	// attention le delete supprime tous les noeuds d'en dessous
 	heap_tmp->root = NULL;
 	delete heap_tmp;
 
@@ -151,6 +156,7 @@ void CellHeap_2::sort_tmp(HeapNode * node, CellHeap_2 & heap) {
 	heap.push(node->elt);
 	node->elt = NULL;
 
+	// attention le delete supprime tous les noeuds d'en dessous
 	delete node;
 }
 
@@ -337,6 +343,7 @@ void CellHeap_2::updateOrder(HeapNode *pt) {
 HeapNode::HeapNode(HeapElt* elt): elt(elt), father(NULL), right(NULL), left(NULL) { }
 
 HeapNode::~HeapNode() {
+	// attention le delete supprime tous les noeuds d'en dessous
 	if (elt) 	delete elt;
 	if (right) 	delete right;
 	if (left)  	delete left;
@@ -370,9 +377,9 @@ HeapElt::HeapElt(int nb_crit,Cell* cell, double *crit) : cell(cell), crit(crit),
 
 /** Delete the node and all its sons */
 HeapElt::~HeapElt() {
-	if (crit) delete crit;
-	if (indice) delete indice;
-	if (cell) delete cell;
+	if (crit) 	delete crit;
+	if (indice)	delete indice;
+	if (cell) 	delete cell;
 }
 
 bool HeapElt::isSup(double d, int ind_crit) const {

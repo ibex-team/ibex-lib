@@ -47,21 +47,22 @@ public:
 
 private:
 	CellHeapVarLB heap1;
+
 	CellHeap_2 *heap2;
 
-	CellHeap_2::criterion crit_2;
+	const CellHeap_2::criterion crit_2;
 
-	int critpr;
+	const int critpr;
 
 	/**
 	 * Current selected buffer.
 	 */
 	mutable int indbuf;
 
-	int ind_var;
+	const int ind_var;
 
 	void contract_tmp(double new_loup, HeapNode * node, CellHeapVarLB & heap);
-	void eraseDoubleHeap( HeapNode * node);
+	void eraseOtherHeaps( HeapNode * node);
 };
 
 } // namespace ibex
