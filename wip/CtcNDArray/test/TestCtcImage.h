@@ -16,28 +16,56 @@
 #include "cpptest.h"
 
 namespace ibex {
-class TestCtcImage : public Test::Suite {
+
+class TestCtcImage_1pixel : public Test::Suite {
 
 public:
-    TestCtcImage() {
-        TEST_ADD(TestCtcImage::testContractExternal);
-        TEST_ADD(TestCtcImage::testContractThin);
+    TestCtcImage_1pixel(){
+    TEST_ADD(TestCtcImage_1pixel::test_emptyBox);
+    TEST_ADD(TestCtcImage_1pixel::test_allReal);
+    TEST_ADD(TestCtcImage_1pixel::test_fullImage);
+    TEST_ADD(TestCtcImage_1pixel::test_corner);
+
     }
 
-//    void setup();
-//    void tear_down();
-
-    void testContractExternal();
-
-    void testContractThin();
-
+protected:
+    void setup();
 private:
+    void test_emptyBox();
+    void test_allReal();
+    void test_fullImage();
+    void test_corner();
+
     Array2D array;
-//    CtcVoxelGrid *ctc;
     double2 leaf_size;
     double2 origin;
     int2 grid_size;
 };
+
+//class TestCtcImage : public Test::Suite {
+
+//public:
+//    TestCtcImage() {
+//        TEST_ADD(TestCtcImage::testContractExternal);
+//        TEST_ADD(TestCtcImage::testContractThin);
+//        TEST_ADD(TestCtcImage::test1pixel);
+//    }
+
+////    void setup();
+////    void tear_down();
+
+//    void testContractExternal();
+
+//    void testContractThin();
+
+//    void test1pixel();
+//private:
+//    Array2D array;
+////    CtcVoxelGrid *ctc;
+//    double2 leaf_size;
+//    double2 origin;
+//    int2 grid_size;
+//};
 
 }
 

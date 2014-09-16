@@ -33,7 +33,7 @@ int main() {
 
     ts.add(auto_ptr<Test::Suite>(new TestNDArray()));
     ts.add(auto_ptr<Test::Suite>(new TestCtcVoxelGrid()));
-    ts.add(auto_ptr<Test::Suite>(new TestCtcImage()));
+    ts.add(auto_ptr<Test::Suite>(new TestCtcImage_1pixel()));
 
     return ts.run(output,false) ? EXIT_SUCCESS : EXIT_FAILURE;
 
