@@ -14,8 +14,11 @@ namespace ibex {
 
 
 CellHeapVarLB::CellHeapVarLB(int ind_var, int ind_crit) : CellHeap_2(CellHeap_2::LB, ind_var, ind_crit) { };
+
 CellHeapVarUB::CellHeapVarUB(int ind_var, int ind_crit) : CellHeap_2(CellHeap_2::UB, ind_var, ind_crit) { };
-CellHeapCost::CellHeapCost(criterion & crit, int ind_crit) : CellHeap_2(crit, -1, ind_crit) {
+
+
+CellHeapCost::CellHeapCost(criterion crit, int ind_crit) : CellHeap_2(crit, -1, ind_crit) {
 	if (crit==LB) {
 		ibex_error("CellHeapCost::CellHeapCost : invalid flag, that must be C3,C5,C7,PU or PF");
 	} else if (crit==UB) {
@@ -25,6 +28,11 @@ CellHeapCost::CellHeapCost(criterion & crit, int ind_crit) : CellHeap_2(crit, -1
 };
 
 
+double CellHeapCost::cost(const Cell& c) const {
+	const OptimCell * t = dynamic_cast<const OptimCell *>(&c);
+	if (t) return cost(*t);
+	else ibex_error("CellHeapCost::cost: that must be a OptimCell and not just a Cell");
+}
 // TODO heu.. là il faudrait avoir le type de Cell
 double CellHeapCost::cost(const OptimCell& c) const {
 
@@ -243,15 +251,6 @@ HeapElt* CellHeap_2::pop_elt() {
 	HeapElt* c_return = root->elt;
 	eraseNode(0);
 	return c_return;
-}
-
-Cell* CellHeap_2::pop() {
-	assert(nb_cells>0);
-	HeapElt* tmp =pop_elt();
-	Cell * c = tmp->cell;
-	tmp->cell = NULL;
-	delete tmp;
-	return c;
 }
 
 // erase a node and update the order

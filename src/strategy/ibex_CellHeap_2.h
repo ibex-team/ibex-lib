@@ -12,6 +12,8 @@
 #define __IBEX_CELL_HEAP_2_H__
 
 #include "ibex_CellBuffer.h"
+#include "ibex_OptimCell.h"
+#include "ibex_Interval.h"
 
 namespace ibex {
 
@@ -104,12 +106,14 @@ private:
  *
  * \see #CellBuffer, #CellHeapBySize
  */
-class CellHeap_2 {
+class CellHeap_2 : public CellBuffer {
 
 public:
     /* the different criteria implemented for a heap : in optimization : LB for the first one, another for the second one */
 	typedef enum {LB,UB,C3,C5,C7,PU,PF_LB, PF_UB} criterion;
 
+
+	CellHeap_2(criterion crit, int ind_var, int ind_crit);
 
 	virtual ~CellHeap_2();
 
@@ -168,9 +172,6 @@ public:
 	void setLoup(double loup);
 
 protected:
-
-
-	CellHeap_2(criterion crit, int ind_var, int ind_crit);
 
 	/** the indice of the criterion selected for this heap */
 	const int ind_crit;
@@ -245,10 +246,10 @@ public:
 class CellHeapCost: public CellHeap_2 {
 public:
 
-	CellHeapCost(criterion & crit, int ind_crit=0) ;
+	CellHeapCost(criterion crit, int ind_crit=0) ;
 
-	inline double cost(const Cell& c) const;
-	inline double cost(const OptimCell& c) const ;
+	double cost(const Cell& c) const;
+	double cost(const OptimCell& c) const ;
 
 	inline CellHeapCost * init_copy() { return new CellHeapCost(crit,ind_crit); };
 };
