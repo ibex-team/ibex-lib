@@ -99,12 +99,8 @@ Affine2Main<AF_fAF1>::Affine2Main(const double d) :
 		_elt._err = 0.0; //abs(d)*AF_EE();
 		_elt._val[0] = d;
 	} else {
-		if (d>0) {
-			_n = -3;
-		} else {
-			_n = -4;
-		}
-		_elt._err = Interval(d);
+        _n=-1;
+         _elt._err = Interval(d);
 	}
 }
 
@@ -157,7 +153,7 @@ double Affine2Main<AF_fAF1>::val(int i) const{
 
 template<>
 double Affine2Main<AF_fAF1>::err() const{
-	return _elt._err.ub();
+	return (fabs(_elt._err.lb())>fabs(_elt._err.ub()))? fabs(_elt._err.lb()) : fabs(_elt._err.ub());
 }
 
 template<>

@@ -98,11 +98,7 @@ Affine2Main<AF_fAF2>::Affine2Main(const double d) :
 		_elt._err = 0.0; //abs(d)*AF_EE();
 		_elt._val[0] = d;
 	} else {
-		if (d>0) {
-			_n = -3;
-		} else {
-			_n = -4;
-		}
+		_n=-1;
 		_elt._err = d;
 	}
 }
