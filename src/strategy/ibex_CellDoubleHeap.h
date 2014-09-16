@@ -1,7 +1,7 @@
 //============================================================================
 //                                  I B E X                                   
 // File        : ibex_CellDoubleHeap.h
-// Author      : Gilles Chabert
+// Author      : Gilles Chabert, Jordan Ninin
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Sep 12, 2014
@@ -16,7 +16,7 @@ namespace ibex {
 
 class CellDoubleHeap : public CellBuffer {
 public:
-	CellDoubleHeap(CellHeap_2& heap1, CellHeap_2& heap2, int critpr=50);
+	CellDoubleHeap(int ind_var, int critpr=50, CellHeap_2::criterion crit_2=CellHeap_2::UB);
 
 	/** Flush the buffer.
 	 * All the remaining cells will be *deleted* */
@@ -45,8 +45,11 @@ public:
 
 	virtual ~CellDoubleHeap();
 
-	CellHeap_2& heap1;
-	CellHeap_2& heap2;
+private:
+	CellHeapVarLB heap1;
+	CellHeap_2 *heap2;
+
+	CellHeap_2::criterion crit_2;
 
 	int critpr;
 
@@ -55,7 +58,10 @@ public:
 	 */
 	mutable int indbuf;
 
+	int ind_var;
 
+	void contract_tmp(double new_loup, HeapNode * node, CellHeapVarLB & heap);
+	void eraseDoubleHeap( HeapNode * node);
 };
 
 } // namespace ibex

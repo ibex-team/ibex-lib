@@ -13,9 +13,9 @@
 namespace ibex {
 
 
-CellHeapVarLB::CellHeapVarLB(int ind_var, int ind_crit) : CellHeap_2(CellHeap_2::LB, ind_var, ind_crit) { };
+CellHeapVarLB::CellHeapVarLB(int ind_var, int ind_crit) : CellHeap_2(LB, ind_var, ind_crit) { };
 
-CellHeapVarUB::CellHeapVarUB(int ind_var, int ind_crit) : CellHeap_2(CellHeap_2::UB, ind_var, ind_crit) { };
+CellHeapVarUB::CellHeapVarUB(int ind_var, int ind_crit) : CellHeap_2(UB, ind_var, ind_crit) { };
 
 
 CellHeapCost::CellHeapCost(criterion crit, int ind_crit) : CellHeap_2(crit, -1, ind_crit) {

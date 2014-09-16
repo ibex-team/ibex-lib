@@ -1,7 +1,7 @@
 //============================================================================
 //                                  I B E X                                   
 // File        : ibex_CellHeap.h
-// Author      : Gilles Chabert
+// Author      : Jordan Ninin
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : May 12, 2012
@@ -53,7 +53,7 @@ class HeapNode {
 
 private:
 	friend class CellHeap_2;
-	friend class CelDoublelHeap;
+	friend class CellDoubleHeap;
 
 	/** create an empty node */
 //	HeapNode();
