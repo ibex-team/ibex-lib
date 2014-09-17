@@ -27,6 +27,8 @@ private:
 
 	/** create an Elt with a cell and its criterion */
 	HeapElt(int nb_crit,Cell* elt, double *crit);
+	HeapElt(Cell* cell, double crit_1);
+	HeapElt(Cell* cell, double crit_1, double crit_2);
 
 	/** Delete the node and all its sons */
 	~HeapElt() ;
@@ -59,7 +61,7 @@ private:
 //	HeapNode();
 
 	/** create an node with a cell and its criterion */
-	HeapNode(HeapElt* elt);
+	HeapNode(HeapElt* elt, HeapNode * father=NULL);
 
 	/** Delete the node and all its sons */
 	~HeapNode() ;

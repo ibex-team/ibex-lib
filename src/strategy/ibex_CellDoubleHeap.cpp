@@ -114,10 +114,7 @@ bool CellDoubleHeap::empty() const {
 void CellDoubleHeap::push(Cell* cell) {
 	HeapElt * elt;
 	if (critpr > 0) {
-		double * crit= new double[2];
-		crit[0] = heap1.cost(*cell);
-		crit[1] = heap2->cost(*cell);
-		elt = new HeapElt(2,cell,crit);
+		elt = new HeapElt(cell, heap1.cost(*cell), heap2->cost(*cell));
 	} else {
 		double * crit= new double[1];
 		crit[0] = heap1.cost(*cell);
