@@ -17,6 +17,7 @@
 #include "TestString.h"
 #include "TestBitSet.h"
 #include "TestSymbolMap.h"
+#include "TestCellHeap.h"
 
 // ================ arithmetic ===============
 #include "TestInterval.h"
@@ -63,7 +64,6 @@
 #include "TestCtcForAll.h"
 #include "TestCtcPolytopeHull.h"
 
-#include "TestAffine2.h"
 
 
 using namespace std;
@@ -80,6 +80,8 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestString()));
     ts.add(auto_ptr<Test::Suite>(new TestBitSet()));
     ts.add(auto_ptr<Test::Suite>(new TestSymbolMap()));
+    ts.add(auto_ptr<Test::Suite>(new TestCellHeap()));
+
 
     ts.add(auto_ptr<Test::Suite>(new TestInterval()));
     ts.add(auto_ptr<Test::Suite>(new TestIntervalVector()));

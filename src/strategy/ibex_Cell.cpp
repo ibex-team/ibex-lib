@@ -39,4 +39,9 @@ Cell::~Cell() {
 }
 
 
+std::ostream& operator<<(std::ostream& os, const Cell& c){
+	os << c.box;
+	return os;
+}
+
 } // end namespace ibex

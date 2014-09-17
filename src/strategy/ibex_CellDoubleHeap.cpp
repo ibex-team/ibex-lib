@@ -12,7 +12,7 @@
 namespace ibex {
 
 CellDoubleHeap::CellDoubleHeap(int ind_var, int critpr, CellHeap_2::criterion crit_2) :
-						heap1(ind_var,0), critpr(critpr), crit_2(crit_2), indbuf(0) , ind_var(ind_var){
+						heap1(ind_var,0), crit_2(crit_2), critpr(critpr), indbuf(0) , ind_var(ind_var){
 	if (critpr>0) {
 		switch (crit_2) {
 		case CellHeap_2::LB :

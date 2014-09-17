@@ -37,6 +37,8 @@ double CellHeapCost::cost(const Cell& c) const {
 double CellHeapCost::cost(const OptimCell& c) const {
 
 		switch (crit)	{
+		case LB : ibex_error("CellHeapCost::CellHeapCost : invalid flag, that must be C3,C5,C7,PU or PF"); return POS_INFINITY;
+		case UB : ibex_error("CellHeapCost::CellHeapCost : invalid flag, that must be C3,C5,C7,PU or PF"); return POS_INFINITY;
 		case C3 : return -((loup - c.pf.lb()) / c.pf.diam() );
 		case C5 : return -(c.pu * (loup - c.pf.lb()) / c.pf.diam());
 		case C7 : return c.box[ind_var].lb()/(c.pu*(c.loup-c.pf.lb())/c.pf.diam());
@@ -50,7 +52,7 @@ double CellHeapCost::cost(const OptimCell& c) const {
 //////////////////////////////////////////////////////////////////////////////////////
 
 CellHeap_2::CellHeap_2(criterion crit, int ind_var, int ind_crit) :
-		nb_cells(0), root(NULL), ind_crit(ind_crit), crit(crit), ind_var(ind_var), loup(POS_INFINITY) {
+		ind_crit(ind_crit), crit(crit), ind_var(ind_var), loup(POS_INFINITY), root(NULL) {
 	if (((crit==LB)||(crit==UB))&&(ind_var<0)) {
 		ibex_error("CellHeap_2: you need to indicate the indice of the variable which strae the objective function");
 	}
@@ -214,8 +216,8 @@ void CellHeap_2::push(HeapElt* cell) {
 	}
 }
 
-HeapNode * CellHeap_2::getNode(int i) const {
-	assert((i>-1)&&(i<nb_cells));
+HeapNode * CellHeap_2::getNode(unsigned long i) const {
+	assert(i<nb_cells);
 	assert(nb_cells>0);
 	// RECUPERATION DU DERNIER ELEMENT et suppression du noeud associe
 	// calcul de la hauteur
@@ -237,8 +239,8 @@ HeapNode * CellHeap_2::getNode(int i) const {
 	return pt;
 }
 
-Cell * CellHeap_2::getCell(int i) const {
-	assert((i>-1)&&(i<nb_cells));
+Cell * CellHeap_2::getCell(unsigned long i ) const {
+	assert(i<nb_cells);
 	assert(nb_cells>0);
 	return getNode(i)->elt->cell;
 }
@@ -260,20 +262,20 @@ HeapElt* CellHeap_2::pop_elt() {
 }
 
 // erase a node and update the order
-void CellHeap_2::eraseNode(int i) {
-	assert((i>-1)&&(i<nb_cells));
+void CellHeap_2::eraseNode(unsigned long i) {
+	assert(i<nb_cells);
 	assert(nb_cells>0);
 
 	updateOrder(eraseNode_noUpdate(i));
 }
 
 // erase a node and update the order
-HeapNode * CellHeap_2::eraseNode_noUpdate(int i) {
+HeapNode * CellHeap_2::eraseNode_noUpdate(unsigned long i) {
 	HeapNode * pt_root;
 	if (nb_cells==1) {
 		root->elt=NULL;
 		delete root;
-	} else if (i==nb_cells-1) {
+	} else if (i==(nb_cells-1)) {
 		// RECUPERATION DU DERNIER ELEMENT et suppression du noeud associe sans detruire le HeapElt
 		HeapNode * pt= getNode(nb_cells-1);
 		if (nb_cells%2==0)	{ pt->father->left =NULL; }
@@ -340,7 +342,7 @@ void CellHeap_2::updateOrder(HeapNode *pt) {
 //////////////////////////////////////////////////////////////////////////////////////
 //HeapNode::HeapNode(): elt(NULL), right(NULL), left(NULL), father(NULL) { }
 
-HeapNode::HeapNode(HeapElt* elt): elt(elt), father(NULL), right(NULL), left(NULL) { }
+HeapNode::HeapNode(HeapElt* elt): elt(elt), right(NULL), left(NULL), father(NULL) { }
 
 HeapNode::~HeapNode() {
 	// attention le delete supprime tous les noeuds d'en dessous
@@ -403,7 +405,7 @@ std::ostream& operator<<(std::ostream& os, const HeapNode& node) {
 
 std::ostream& operator<<(std::ostream& os, const CellHeap_2& heap) {
 	os << "[ ";
-	os << heap.root << " ";
+	os << *(heap.root) << " ";
 	return os << "]";
 }
 

@@ -155,7 +155,7 @@ public:
 	/** access to the ith Cell rank by largest-first order
 	 *  complexity: o(log(nb_cells))
 	 */
-	Cell * getCell(int i) const;
+	Cell * getCell(unsigned long i) const;
 
 	/**
 	 * Removes (and deletes) from the heap all the cells
@@ -186,9 +186,6 @@ protected:
 private:
 	friend class CellDoubleHeap;
 
-	/** Count the number of cells pushed since
-	 * the object is created. */
-	unsigned long nb_cells;
 
 	/** the root of the heap */
 	HeapNode * root;
@@ -199,24 +196,26 @@ private:
 	virtual CellHeap_2 * init_copy()=0;
 
 	/** access to the ith node rank by largest-first order */
-	HeapNode * getNode(int i) const;
+	HeapNode * getNode(unsigned long i) const;
 
 	/** update the heap to reorder the elements from the node \var node to the down */
 	void updateOrder(HeapNode *node);
 
 	/** erase only this HeapNope without touch the element */
-	void eraseNode(int i);
+	void eraseNode(unsigned long i);
 
 	/** remove the last node and put its element at the ith position */
-	HeapNode * eraseNode_noUpdate(int i);
+	HeapNode * eraseNode_noUpdate(unsigned long i);
 
 	/** use in the contract_heap function by recursivity */
 	void contract_tmp(double new_loup, HeapNode * node, CellHeap_2 & heap);
 
-	friend std::ostream& operator<<(std::ostream&, const CellHeap_2&);
 
 	/** use in the sort function by recursivity */
 	void sort_tmp(HeapNode * node, CellHeap_2 & heap);
+
+
+	friend std::ostream& operator<<(std::ostream& os, const CellHeap_2& h);
 };
 
 
