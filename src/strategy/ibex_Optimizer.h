@@ -533,6 +533,14 @@ protected:
 
 	bool loup_changed;
 
+	/**
+	 * \brief The bound on the objective given by the user, +oo otherwise.
+	 *
+	 * Used to see if at least a loup-point has been found.
+	 *
+	 */
+	double initial_loup;
+
 	Ctc3BCid* objshaver;
 
     void compute_pf(OptimCell& c);

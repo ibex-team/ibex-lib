@@ -69,7 +69,7 @@ Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, double prec,
                 				critpr(critpr), timeout(1e08),
                 				loup(POS_INFINITY), pseudo_loup(POS_INFINITY),uplo(NEG_INFINITY),
                 				loup_point(n), loup_box(n), nb_cells(0),
-                				df(*user_sys.goal,Function::DIFF), loup_changed(false),	rigor(rigor),
+                				df(*user_sys.goal,Function::DIFF), loup_changed(false),	initial_loup(POS_INFINITY), rigor(rigor),
                 				uplo_of_epsboxes(POS_INFINITY) {
 
 	// ==== build the system of equalities only ====
@@ -447,6 +447,7 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 	entailed->init_root(user_sys,sys);
 
 	loup_changed=false;
+	initial_loup=obj_init_bound;
 	loup_point=init_box.mid();
 	time=0;
 	Timer::start();
@@ -542,9 +543,9 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 	Timer::stop();
 	time+= Timer::VIRTUAL_TIMELAPSE();
 
-	if (uplo_of_epsboxes == POS_INFINITY)
+	if (uplo_of_epsboxes == POS_INFINITY && loup==initial_loup)
 		return INFEASIBLE;
-	else if (loup==POS_INFINITY)
+	else if (loup==initial_loup)
 		return NO_FEASIBLE_FOUND;
 	else if (uplo_of_epsboxes == NEG_INFINITY)
 		return UNBOUNDED_OBJ;
@@ -576,7 +577,7 @@ void Optimizer::report() {
 		cout << "time limit " << timeout << "s. reached " << endl;
 	}
 	// No solution found and optimization stopped with empty buffer  before the required precision is reached => means infeasible problem
-	if (buffer.empty() && uplo_of_epsboxes == POS_INFINITY /* && loup==POS_INFINITY*/) {
+	if (buffer.empty() && uplo_of_epsboxes == POS_INFINITY && loup==initial_loup) {
 		cout << " infeasible problem " << endl;
 		cout << " cpu time used " << time << "s." << endl;
 		cout << " number of cells " << nb_cells << endl;
