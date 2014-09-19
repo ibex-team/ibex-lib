@@ -46,7 +46,7 @@ public:
 	virtual ~CellDoubleHeap();
 
 private:
-	CellHeapVarLB heap1;
+	CellHeap_2 *heap1;
 
 	CellHeap_2 *heap2;
 
@@ -61,7 +61,7 @@ private:
 
 	const int ind_var;
 
-	void contract_tmp(double new_loup, HeapNode * node, CellHeapVarLB & heap);
+	void contract_tmp(double new_loup, HeapNode * node, CellHeap_2 & heap);
 	void eraseOtherHeaps( HeapNode * node);
 };
 

@@ -103,7 +103,6 @@ void CellHeap_2::contract_heap(double new_loup) {
 
 	contract_tmp(new_loup, root, *heap_tmp);
 
-	if (root) delete root;
 	root = heap_tmp->root;
 	nb_cells = heap_tmp->size();
 	heap_tmp->root = NULL;
@@ -113,19 +112,22 @@ void CellHeap_2::contract_heap(double new_loup) {
 
 
 void CellHeap_2::contract_tmp(double new_loup, HeapNode * node, CellHeap_2 & heap) {
-	double new_cost;
+
 	switch (crit)	{
 	case C3 :  case C5 :  case C7 :
 		node->elt->crit[ind_crit] = cost(*(node->elt->cell)); break;
 	default: break;
 	}
-	if (node->isSup(new_loup, ind_crit)) {
-		delete node;
-	} else {
+	if (!(node->isSup(new_loup, ind_crit))) {
 		heap.push(node->elt);
 		if (node->left)	 contract_tmp(new_loup, node->left, heap);
 		if (node->right) contract_tmp(new_loup, node->right, heap);
+		node->left=NULL;
+		node->right=NULL;
+		node->elt=NULL;
 	}
+	delete node;
+	node= NULL;
 }
 
 
@@ -140,7 +142,6 @@ void CellHeap_2::sort() {
 	sort_tmp(root, *heap_tmp);
 
 	// attention le delete supprime tous les noeuds d'en dessous
-	if (root) delete root;
 	root = heap_tmp->root;
 	nb_cells = heap_tmp->size();
 
@@ -153,19 +154,21 @@ void CellHeap_2::sort() {
 
 void CellHeap_2::sort_tmp(HeapNode * node, CellHeap_2 & heap) {
 
-	if (node->left)	 sort_tmp(node->left, heap);
-	if (node->right) sort_tmp(node->right, heap);
-
 	switch (crit)	{
 	case C3 :  case C5 :  case C7 :
 		node->elt->crit[ind_crit] = cost(*node->elt->cell); break;
 	default: break;
 	}
 	heap.push(node->elt);
-	node->elt = NULL;
+	if (node->left)	 sort_tmp(node->left, heap);
+	if (node->right) sort_tmp(node->right, heap);
 
 	// attention le delete supprime tous les noeuds d'en dessous
+	node->left=NULL;
+	node->right=NULL;
+	node->elt = NULL;
 	delete node;
+	node = NULL;
 }
 
 
@@ -178,7 +181,7 @@ void CellHeap_2::push(Cell* cell) {
 void CellHeap_2::push(HeapElt* cell) {
 
 	if (nb_cells==0) {
-		root = new HeapNode(cell);
+		root = new HeapNode(cell,NULL);
 		root->elt->indice[ind_crit] = 0;
 		nb_cells++;
 	} else {
@@ -254,6 +257,7 @@ Cell* CellHeap_2::pop() {
 	Cell * c = tmp->cell;
 	tmp->cell = NULL;
 	delete tmp;
+	tmp=NULL;
 	return c;
 }
 
@@ -288,15 +292,18 @@ HeapNode * CellHeap_2::eraseNode_noUpdate(unsigned long i) {
 		else 				{ pt->father->right=NULL; }
 		pt->elt = NULL;
 		delete pt;
+		pt = NULL;
 	} else {
 		// RECUPERATION DU DERNIER ELEMENT et suppression du noeud associe sans detruire le HeapElt
 		HeapNode * pt= getNode(nb_cells-1);
+		pt_root= getNode(i);
 		HeapElt* cell = pt->elt;
 //std::cout << cell->indice[ind_crit] << std::endl;
 		if (nb_cells%2==0)	{ pt->father->left =NULL; }
 		else 				{ pt->father->right=NULL; }
 		pt->elt = NULL;
 		delete pt;
+		pt = NULL;
 		// CEL pointe vers l element que l on remet à la place du noeud supprime
 		pt_root= getNode(i);
 		pt_root->elt = cell;
@@ -369,12 +376,13 @@ bool HeapNode::isSup(double d, int ind_crit) const {
 void HeapNode::switchElt(HeapNode *pt, int ind_crit) {
 	//ne pas oublier la permutation des indices
 	HeapElt * elt_tmp = elt;
+	unsigned long ind_tmp = elt->indice[ind_crit];
 
-	pt->elt->indice[ind_crit] = elt->indice[ind_crit];
 	elt = pt->elt;
+	elt->indice[ind_crit] = pt->elt->indice[ind_crit];
 
-	elt_tmp->indice[ind_crit] = pt->elt->indice[ind_crit];
 	pt->elt = elt_tmp;
+	pt->elt->indice[ind_crit] = ind_tmp;
 
 }
 
@@ -407,7 +415,7 @@ HeapElt::~HeapElt() {
 }
 
 bool HeapElt::isSup(double d, int ind_crit) const {
-	return (crit[ind_crit] > d);
+	return (crit[ind_crit] >= d);
 }
 
 
@@ -420,14 +428,15 @@ std::ostream& operator<<(std::ostream& os, const HeapElt& node) {
 
 std::ostream& operator<<(std::ostream& os, const HeapNode& node) {
 	os << *(node.elt) << " ";
-	os <<  *(node.right) << *(node.left);
+	if (node.right) os <<  *(node.right);
+	if (node.left)  os <<  *(node.left);
 	return os;
 }
 
 
 std::ostream& operator<<(std::ostream& os, const CellHeap_2& heap) {
 	os << "[ ";
-	os << *(heap.root) << " ";
+	if (heap.root) 	os << *(heap.root) << " ";
 	return os << "]";
 }
 

@@ -173,6 +173,9 @@ public:
 
 	void setLoup(double loup);
 
+	/** The "cost" of a cell.	 */
+	virtual double cost(const Cell&) const=0;
+
 protected:
 
 	/** the indice of the criterion selected for this heap */
@@ -188,12 +191,9 @@ protected:
 private:
 	friend class CellDoubleHeap;
 
-
 	/** the root of the heap */
 	HeapNode * root;
 
-	/** The "cost" of a cell.	 */
-	virtual double cost(const Cell&) const=0;
 
 	virtual CellHeap_2 * init_copy()=0;
 
@@ -215,7 +215,6 @@ private:
 
 	/** use in the sort function by recursivity */
 	void sort_tmp(HeapNode * node, CellHeap_2 & heap);
-
 
 	friend std::ostream& operator<<(std::ostream& os, const CellHeap_2& h);
 };

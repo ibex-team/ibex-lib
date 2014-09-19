@@ -27,13 +27,15 @@ public:
 		TEST_ADD(TestCellHeap::test01);
 		TEST_ADD(TestCellHeap::test02);
 		TEST_ADD(TestCellHeap::test03);
-		//TEST_ADD(TestCellHeap::test04);
+		TEST_ADD(TestCellHeap::test04);
+		TEST_ADD(TestCellHeap::test05);
 	}
 
 	void test01();
 	void test02();
 	void test03();
-	//void test04();
+	void test04();
+	void test05();
 };
 
 } // namespace ibex
