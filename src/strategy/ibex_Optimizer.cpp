@@ -454,6 +454,8 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 	handle_cell(*root,init_box);
 	int indbuf=0;
 
+	update_uplo();
+
 	try {
 		while (!buffer.empty()) {
 			if (trace >= 2) cout << " buffer " << ((CellBuffer&) buffer) << endl;
@@ -464,8 +466,6 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 				buffer.cleantop();
 				buffer2.cleantop();
 			}
-
-			update_uplo();
 
 			if (buffer.empty() || (critpr > 0 && buffer2.empty())) {
 				//cout << " buffer empty " << buffer.empty() << " " << buffer2.empty() << endl;
@@ -532,6 +532,7 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 					buffer2.pop();
 				if (c->heap_present==0) delete c;
 
+				update_uplo(); // the heap has changed -> recalculate the uplo
 
 			}
 		}
