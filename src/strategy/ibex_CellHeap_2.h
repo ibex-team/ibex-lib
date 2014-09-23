@@ -39,7 +39,7 @@ private:
 	// the criterion of the stored cell
 	double *crit;
 
-	unsigned long *indice;
+	unsigned int *indice;
 
 	/** The way to compare two pairs (cells,crit). */
 	bool isSup(double d, int ind_crit) const ;
@@ -157,7 +157,7 @@ public:
 	/** access to the ith Cell rank by largest-first order
 	 *  complexity: o(log(nb_cells))
 	 */
-	Cell * getCell(unsigned long i) const;
+	Cell * getCell(unsigned int i) const;
 
 	/**
 	 * Removes (and deletes) from the heap all the cells
@@ -198,16 +198,16 @@ private:
 	virtual CellHeap_2 * init_copy()=0;
 
 	/** access to the ith node rank by largest-first order */
-	HeapNode * getNode(unsigned long i) const;
+	HeapNode * getNode(unsigned int i) const;
 
 	/** update the heap to reorder the elements from the node \var node to the down */
 	void updateOrder(HeapNode *node);
 
 	/** erase only this HeapNope without touch the element */
-	void eraseNode(unsigned long i);
+	void eraseNode(unsigned int i);
 
 	/** remove the last node and put its element at the ith position */
-	HeapNode * eraseNode_noUpdate(unsigned long i);
+	HeapNode * eraseNode_noUpdate(unsigned int i);
 
 	/** use in the contract_heap function by recursivity */
 	void contract_tmp(double new_loup, HeapNode * node, CellHeap_2 & heap);

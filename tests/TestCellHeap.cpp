@@ -39,7 +39,7 @@ void TestCellHeap::test01() {
 
 void TestCellHeap::test02() {
 
-	int nb= 1.e2;
+	int nb= 10;
 	CellHeapOptim h1(1,CellHeapOptim::UB);
 	CellHeapVarUB h2(1);
 
@@ -91,7 +91,7 @@ void TestCellHeap::test03() {
 
 void TestCellHeap::test04() {
 
-	int nb= 1.e3;
+	int nb= 10;
 	CellHeapOptim h1(1,CellHeapOptim::LB);
 	CellHeapVarLB h2(1);
 
@@ -122,7 +122,7 @@ void TestCellHeap::test04() {
 
 void TestCellHeap::test05() {
 
-	int nb= 1000;
+	int nb= 10;
 
 	CellHeapCost h1(CellHeap_2::C5);
 	CellHeapCost h2(CellHeap_2::C5);

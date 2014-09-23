@@ -222,13 +222,13 @@ void CellHeap_2::push(HeapElt* cell) {
 	}
 }
 
-HeapNode * CellHeap_2::getNode(unsigned long i) const {
+HeapNode * CellHeap_2::getNode(unsigned int i) const {
 	assert(i<nb_cells);
 	assert(nb_cells>0);
 	// RECUPERATION DU DERNIER ELEMENT et suppression du noeud associe
 	// calcul de la hauteur
 	int hauteur = 0;
-	unsigned long aux = i+1;
+	unsigned int aux = i+1;
 	while(aux>1) { aux /= 2; hauteur++; }
 	//std::cout << "hauteur de "<<i<<"  = " << hauteur<<std::endl;
 	// pt = pointeur sur l element courant
@@ -245,7 +245,7 @@ HeapNode * CellHeap_2::getNode(unsigned long i) const {
 	return pt;
 }
 
-Cell * CellHeap_2::getCell(unsigned long i ) const {
+Cell * CellHeap_2::getCell(unsigned int i ) const {
 	assert(i<nb_cells);
 	assert(nb_cells>0);
 	return getNode(i)->elt->cell;
@@ -269,7 +269,7 @@ HeapElt* CellHeap_2::pop_elt() {
 }
 
 // erase a node and update the order
-void CellHeap_2::eraseNode(unsigned long i) {
+void CellHeap_2::eraseNode(unsigned int i) {
 	assert(i<nb_cells);
 	assert(nb_cells>0);
 
@@ -277,10 +277,10 @@ void CellHeap_2::eraseNode(unsigned long i) {
 }
 
 // erase a node and update the order
-HeapNode * CellHeap_2::eraseNode_noUpdate(unsigned long i) {
+HeapNode * CellHeap_2::eraseNode_noUpdate(unsigned int i) {
 	assert(i<nb_cells);
 	assert(nb_cells>0);
-	HeapNode * pt_root;
+	HeapNode * pt_root=NULL;
 	if (nb_cells==1) {
 		root->elt=NULL;
 		delete root;
@@ -317,35 +317,37 @@ HeapNode * CellHeap_2::eraseNode_noUpdate(unsigned long i) {
 
 void CellHeap_2::updateOrder(HeapNode *pt) {
 	// PERMUTATION pour maintenir l'ordre dans le tas en descendant
-	bool b=true;
-	while (b && (pt->left)) {
-		if (pt->right) {
-			if (pt->isSup(pt->left,ind_crit)) {
-				if (pt->right->isSup(pt->left,ind_crit)) {
+	if (pt) {
+		bool b=true;
+		while (b && (pt->left)) {
+			if (pt->right) {
+				if (pt->isSup(pt->left,ind_crit)) {
+					if (pt->right->isSup(pt->left,ind_crit)) {
+						// le gauche est le plus petit
+						pt->switchElt(pt->left,ind_crit);
+						pt = pt->left;  // au suivant
+					} else {
+						// le droit est le plus petit
+						pt->switchElt(pt->right,ind_crit);
+						pt = pt->right;  // au suivant
+					}
+				} else {
+					if (pt->isSup(pt->right,ind_crit)) {
+						// le droit est le plus petit
+						pt->switchElt(pt->right,ind_crit);
+						pt = pt->right;  // au suivant
+					} else {// le noeud courant est le plus petit des 3 donc on arrete
+						b=false;
+					}
+				}
+			} else { // il n'y a plus de fils droit mais il y a un fils gauche
+				if (pt->isSup(pt->left,ind_crit)) {
 					// le gauche est le plus petit
 					pt->switchElt(pt->left,ind_crit);
 					pt = pt->left;  // au suivant
-				} else {
-					// le droit est le plus petit
-					pt->switchElt(pt->right,ind_crit);
-					pt = pt->right;  // au suivant
-				}
-			} else {
-				if (pt->isSup(pt->right,ind_crit)) {
-					// le droit est le plus petit
-					pt->switchElt(pt->right,ind_crit);
-					pt = pt->right;  // au suivant
-				} else {// le noeud courant est le plus petit des 3 donc on arrete
+				} else { // le noeud courant est le plus petit des 3 donc on arrete , on doit meme avoir touche le fond ;-)
 					b=false;
 				}
-			}
-		} else { // il n'y a plus de fils droit mais il y a un fils gauche
-			if (pt->isSup(pt->left,ind_crit)) {
-				// le gauche est le plus petit
-				pt->switchElt(pt->left,ind_crit);
-				pt = pt->left;  // au suivant
-			} else { // le noeud courant est le plus petit des 3 donc on arrete , on doit meme avoir touche le fond ;-)
-				b=false;
 			}
 		}
 	}
@@ -376,7 +378,7 @@ bool HeapNode::isSup(double d, int ind_crit) const {
 void HeapNode::switchElt(HeapNode *pt, int ind_crit) {
 	//ne pas oublier la permutation des indices
 	HeapElt * elt_tmp = elt;
-	unsigned long ind_tmp = elt->indice[ind_crit];
+	unsigned int ind_tmp = elt->indice[ind_crit];
 
 	elt = pt->elt;
 	elt->indice[ind_crit] = pt->elt->indice[ind_crit];
@@ -388,18 +390,18 @@ void HeapNode::switchElt(HeapNode *pt, int ind_crit) {
 
 //////////////////////////////////////////////////////////////////////////////////////
 /** create an node with a cell and its criterion */
-HeapElt::HeapElt(int nb_crit,Cell* cell, double *crit_in) : cell(cell), crit(new double[nb_crit]), indice(new unsigned long[nb_crit]){
+HeapElt::HeapElt(int nb_crit,Cell* cell, double *crit_in) : cell(cell), crit(new double[nb_crit]), indice(new unsigned int[nb_crit]){
 	for (int i=0;i<nb_crit;i++) {
 		crit[i] = crit_in[i];
 		indice[i] = 0;
 	}
 }
 
-HeapElt::HeapElt(Cell* cell, double crit_1) : cell(cell), crit(new double[1]), indice(new unsigned long[1]){
+HeapElt::HeapElt(Cell* cell, double crit_1) : cell(cell), crit(new double[1]), indice(new unsigned int[1]){
 		crit[0] = crit_1;
 		indice[0] = 0;
 }
-HeapElt::HeapElt(Cell* cell, double crit_1, double crit_2) : cell(cell), crit(new double[2]), indice(new unsigned long[2]){
+HeapElt::HeapElt(Cell* cell, double crit_1, double crit_2) : cell(cell), crit(new double[2]), indice(new unsigned int[2]){
 		crit[0] = crit_1;
 		crit[1] = crit_2;
 		indice[0] = 0;
@@ -409,9 +411,9 @@ HeapElt::HeapElt(Cell* cell, double crit_1, double crit_2) : cell(cell), crit(ne
 
 /** Delete the node and all its sons */
 HeapElt::~HeapElt() {
-	delete crit;
-	delete indice;
 	if (cell) 	delete cell;
+	delete [] crit;
+	delete [] indice;
 }
 
 bool HeapElt::isSup(double d, int ind_crit) const {

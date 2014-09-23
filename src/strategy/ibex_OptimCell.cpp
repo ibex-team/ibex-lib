@@ -12,7 +12,7 @@
 
 namespace ibex {
 
-  OptimCell::OptimCell(const IntervalVector& box) : Cell(box),heap_present(0),loup(0) {
+  OptimCell::OptimCell(const IntervalVector& box) : Cell(box),heap_present(0), pu(0), pf(0), loup(0) {
 
 }
 
