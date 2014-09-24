@@ -24,6 +24,7 @@ class TestCellHeap : public TestIbex {
 public:
 	TestCellHeap() {
 
+		TEST_ADD(TestCellHeap::test00);
 		TEST_ADD(TestCellHeap::test01);
 		TEST_ADD(TestCellHeap::test02);
 		TEST_ADD(TestCellHeap::test03);
@@ -31,6 +32,7 @@ public:
 		TEST_ADD(TestCellHeap::test05);
 	}
 
+	void test00();
 	void test01();
 	void test02();
 	void test03();

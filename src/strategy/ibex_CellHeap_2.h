@@ -181,19 +181,21 @@ protected:
 	/** the indice of the criterion selected for this heap */
 	const int ind_crit;
 
+    /** The criterion used for the heap. */
 	const criterion crit;
 
+	/** Index of the criterion variable. */
 	const int ind_var;
 
 	/** current value of the loup */
 	double loup;
+
 
 private:
 	friend class CellDoubleHeap;
 
 	/** the root of the heap */
 	HeapNode * root;
-
 
 	virtual CellHeap_2 * init_copy()=0;
 
@@ -229,6 +231,7 @@ public:
 	inline double cost(const Cell& c) const {return c.box[ind_var].lb();};
 
 	inline CellHeapVarLB * init_copy() { return new CellHeapVarLB(ind_var,ind_crit); };
+
 };
 
 
@@ -239,6 +242,8 @@ public:
 	inline double cost(const Cell& c) const {return c.box[ind_var].ub();};
 
 	inline CellHeapVarUB * init_copy() { return new CellHeapVarUB(ind_var,ind_crit); };
+
+
 };
 
 
@@ -246,12 +251,13 @@ public:
 class CellHeapCost: public CellHeap_2 {
 public:
 
-	CellHeapCost(criterion crit, int ind_crit=0) ;
+	CellHeapCost(criterion crit, int ind_var=0, int ind_crit=0) ;
 
 	double cost(const Cell& c) const;
 	double cost(const OptimCell& c) const ;
 
 	inline CellHeapCost * init_copy() { return new CellHeapCost(crit,ind_crit); };
+
 };
 
 

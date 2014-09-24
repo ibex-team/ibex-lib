@@ -54,12 +54,15 @@ private:
 
 	const int critpr;
 
+
+	/** Index of the criterion variable. */
+	const int ind_var;
+
 	/**
 	 * Current selected buffer.
 	 */
 	mutable int indbuf;
 
-	const int ind_var;
 
 	void contract_tmp(double new_loup, HeapNode * node, CellHeap_2 & heap);
 	void eraseOtherHeaps( HeapNode * node);

@@ -18,7 +18,7 @@ CellHeapVarLB::CellHeapVarLB(int ind_var, int ind_crit) : CellHeap_2(LB, ind_var
 CellHeapVarUB::CellHeapVarUB(int ind_var, int ind_crit) : CellHeap_2(UB, ind_var, ind_crit) { };
 
 
-CellHeapCost::CellHeapCost(criterion crit, int ind_crit) : CellHeap_2(crit, -1, ind_crit) {
+CellHeapCost::CellHeapCost(criterion crit, int ind_var, int ind_crit) : CellHeap_2(crit, ind_var, ind_crit) {
 	if (crit==LB) {
 		ibex_error("CellHeapCost::CellHeapCost : invalid flag, that must be C3,C5,C7,PU or PF");
 	} else if (crit==UB) {
@@ -377,14 +377,13 @@ bool HeapNode::isSup(double d, int ind_crit) const {
 
 void HeapNode::switchElt(HeapNode *pt, int ind_crit) {
 	//ne pas oublier la permutation des indices
-	HeapElt * elt_tmp = elt;
 	unsigned int ind_tmp = elt->indice[ind_crit];
-
-	elt = pt->elt;
 	elt->indice[ind_crit] = pt->elt->indice[ind_crit];
-
-	pt->elt = elt_tmp;
 	pt->elt->indice[ind_crit] = ind_tmp;
+
+	HeapElt * elt_tmp = elt;
+	elt = pt->elt;
+	pt->elt = elt_tmp;
 
 }
 
@@ -424,14 +423,14 @@ bool HeapElt::isSup(double d, int ind_crit) const {
 
 //////////////////////////////////////////////////////////////////////////////////////
 std::ostream& operator<<(std::ostream& os, const HeapElt& node) {
-	os << *(node.cell);
+	os << "n°"<<node.indice[0]<< *(node.cell);
 	return os;
 }
 
 std::ostream& operator<<(std::ostream& os, const HeapNode& node) {
-	os << *(node.elt) << " ";
-	if (node.right) os <<  *(node.right);
+	os  <<*(node.elt) << " ";
 	if (node.left)  os <<  *(node.left);
+	if (node.right) os <<  *(node.right);
 	return os;
 }
 

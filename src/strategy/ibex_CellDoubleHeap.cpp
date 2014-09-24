@@ -12,7 +12,7 @@
 namespace ibex {
 
 CellDoubleHeap::CellDoubleHeap(int ind_var, int critpr_in, CellHeap_2::criterion crit_2) :
-						crit_2(crit_2), critpr(critpr_in), indbuf(0) , ind_var(ind_var){
+						crit_2(crit_2), critpr(critpr_in) , ind_var(ind_var), indbuf(0){
 	if (critpr>0) {
 		switch (crit_2) {
 		case CellHeap_2::LB :
@@ -32,6 +32,9 @@ CellDoubleHeap::CellDoubleHeap(int ind_var, int critpr_in, CellHeap_2::criterion
 		default :
 			ibex_error("CellDoubleHeap: you must specify another criterion"); break;
 		}
+	} else {
+		heap1 = new CellHeapVarLB(ind_var,0);
+		heap2 = NULL;
 	}
 }
 
@@ -48,14 +51,11 @@ void CellDoubleHeap::flush() {
 }
 
 int CellDoubleHeap::size() const {
-	//  Because of the zombie cells in each heap, this
-	// number does not match heap1->size() or heap2.size().
+	assert(heap1->size()==heap2->size());
 	return nb_cells;
 }
 
-// E.g.: called by manage_buffer in Optimizer in case of a new upper bound
-// on the objective ("loup"). This function then removes (and deletes) from
-// the heap all the cells with a cost greater than loup.
+
 void CellDoubleHeap::contract_heap(double new_loup) {
 	heap1->setLoup(new_loup);
 	if (critpr>0) heap2->setLoup(new_loup);
@@ -107,6 +107,8 @@ void CellDoubleHeap::contract_tmp(double new_loup, HeapNode * node, CellHeap_2 &
 void CellDoubleHeap::eraseOtherHeaps( HeapNode * node) {
 	if (node->left)	 eraseOtherHeaps(node->left);
 	if (node->right) eraseOtherHeaps(node->right);
+	node->right=NULL;
+	node->left=NULL;
 
 	switch (crit_2) {
 	case CellHeap_2::UB : case CellHeap_2::PU : case CellHeap_2::PF_UB : case CellHeap_2::PF_LB :
@@ -132,16 +134,13 @@ void CellDoubleHeap::push(Cell* cell) {
 	if (critpr > 0) {
 		elt = new HeapElt(cell, heap1->cost(*cell), heap2->cost(*cell));
 	} else {
-		double * crit= new double[1];
-		crit[0] = heap1->cost(*cell);
-		elt = new HeapElt(1,cell,crit);
+		elt = new HeapElt(cell,heap1->cost(*cell));
 	}
 
 	// the cell is put into the first heap
 	heap1->push(elt);
-	if (critpr > 0) {
-		heap2->push(elt);
-	}
+	if (critpr > 0) heap2->push(elt);
+
 	nb_cells++;
 }
 
@@ -158,7 +157,9 @@ Cell* CellDoubleHeap::pop() {
 	Cell* cell = elt->cell;
 	elt->cell=NULL;
 	delete elt;
+
 	nb_cells--;
+
 	return cell;
 }
 
