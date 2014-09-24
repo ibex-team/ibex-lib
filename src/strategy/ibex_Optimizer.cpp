@@ -69,7 +69,7 @@ Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, double prec,
                 				critpr(critpr), timeout(1e08),
                 				loup(POS_INFINITY), pseudo_loup(POS_INFINITY),uplo(NEG_INFINITY),
                 				loup_point(n), loup_box(n), nb_cells(0),
-                				df(*user_sys.goal,Function::DIFF), loup_changed(false),	rigor(rigor),
+                				df(*user_sys.goal,Function::DIFF), loup_changed(false),	initial_loup(POS_INFINITY), rigor(rigor),
                 				uplo_of_epsboxes(POS_INFINITY) {
 
 	// ==== build the system of equalities only ====
@@ -417,7 +417,7 @@ void Optimizer::contract ( IntervalVector& box, const IntervalVector& init_box) 
 	ctc.contract(box);
 }
 
-void Optimizer::optimize(const IntervalVector& init_box, double obj_init_bound) {
+Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj_init_bound) {
 	loup=obj_init_bound;
 	pseudo_loup=obj_init_bound;
 
@@ -447,11 +447,14 @@ void Optimizer::optimize(const IntervalVector& init_box, double obj_init_bound) 
 	entailed->init_root(user_sys,sys);
 
 	loup_changed=false;
+	initial_loup=obj_init_bound;
 	loup_point=init_box.mid();
 	time=0;
 	Timer::start();
 	handle_cell(*root,init_box);
 	int indbuf=0;
+
+	update_uplo();
 
 	try {
 		while (!buffer.empty()) {
@@ -463,8 +466,6 @@ void Optimizer::optimize(const IntervalVector& init_box, double obj_init_bound) 
 				buffer.cleantop();
 				buffer2.cleantop();
 			}
-
-			update_uplo();
 
 			if (buffer.empty() || (critpr > 0 && buffer2.empty())) {
 				//cout << " buffer empty " << buffer.empty() << " " << buffer2.empty() << endl;
@@ -531,16 +532,26 @@ void Optimizer::optimize(const IntervalVector& init_box, double obj_init_bound) 
 					buffer2.pop();
 				if (c->heap_present==0) delete c;
 
+				update_uplo(); // the heap has changed -> recalculate the uplo
 
 			}
 		}
 	}
 	catch (TimeOutException& ) {
-		return;
+		return TIME_OUT;
 	}
 
 	Timer::stop();
 	time+= Timer::VIRTUAL_TIMELAPSE();
+
+	if (uplo_of_epsboxes == POS_INFINITY && loup==initial_loup)
+		return INFEASIBLE;
+	else if (loup==initial_loup)
+		return NO_FEASIBLE_FOUND;
+	else if (uplo_of_epsboxes == NEG_INFINITY)
+		return UNBOUNDED_OBJ;
+	else
+		return SUCCESS;
 }
 
 void Optimizer::update_uplo_of_epsboxes(double ymin) {
@@ -567,7 +578,7 @@ void Optimizer::report() {
 		cout << "time limit " << timeout << "s. reached " << endl;
 	}
 	// No solution found and optimization stopped with empty buffer  before the required precision is reached => means infeasible problem
-	if (buffer.empty() && uplo_of_epsboxes == POS_INFINITY && loup==POS_INFINITY) {
+	if (buffer.empty() && uplo_of_epsboxes == POS_INFINITY && loup==initial_loup) {
 		cout << " infeasible problem " << endl;
 		cout << " cpu time used " << time << "s." << endl;
 		cout << " number of cells " << nb_cells << endl;
