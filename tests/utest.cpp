@@ -17,6 +17,7 @@
 #include "TestString.h"
 #include "TestBitSet.h"
 #include "TestSymbolMap.h"
+#include "TestCellHeap.h"
 
 // ================ arithmetic ===============
 #include "TestInterval.h"
@@ -63,8 +64,8 @@
 #include "TestCtcForAll.h"
 #include "TestCtcPolytopeHull.h"
 
-#include "TestAffine2.h"
-
+// ================ strategy ===============
+#include "TestOptimizer.h"
 
 using namespace std;
 using std::auto_ptr;
@@ -80,6 +81,8 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestString()));
     ts.add(auto_ptr<Test::Suite>(new TestBitSet()));
     ts.add(auto_ptr<Test::Suite>(new TestSymbolMap()));
+    ts.add(auto_ptr<Test::Suite>(new TestCellHeap()));
+
 
     ts.add(auto_ptr<Test::Suite>(new TestInterval()));
     ts.add(auto_ptr<Test::Suite>(new TestIntervalVector()));
@@ -120,6 +123,8 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestCtcPolytopeHull()));
 
     ts.add(auto_ptr<Test::Suite>(new TestFritzJohn()));
+
+    ts.add(auto_ptr<Test::Suite>(new TestOptimizer()));
 
     return ts.run(output,false) ? EXIT_SUCCESS : EXIT_FAILURE;
 
