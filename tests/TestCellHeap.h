@@ -30,6 +30,11 @@ public:
 		TEST_ADD(TestCellHeap::test03);
 		TEST_ADD(TestCellHeap::test04);
 		TEST_ADD(TestCellHeap::test05);
+		TEST_ADD(TestCellHeap::test_D00);
+		TEST_ADD(TestCellHeap::test_D01);
+		TEST_ADD(TestCellHeap::test_D03);
+		TEST_ADD(TestCellHeap::test_D04);
+		TEST_ADD(TestCellHeap::test_D05);
 	}
 
 	void test00();
@@ -38,6 +43,11 @@ public:
 	void test03();
 	void test04();
 	void test05();
+	void test_D00();
+	void test_D01();
+	void test_D03();
+	void test_D04();
+	void test_D05();
 };
 
 } // namespace ibex

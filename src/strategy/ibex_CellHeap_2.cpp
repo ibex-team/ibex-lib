@@ -156,7 +156,7 @@ void CellHeap_2::sort_tmp(HeapNode * node, CellHeap_2 & heap) {
 
 	switch (crit)	{
 	case C3 :  case C5 :  case C7 :
-		node->elt->crit[ind_crit] = cost(*node->elt->cell); break;
+		node->elt->crit[ind_crit] = cost(*(node->elt->cell)); break;
 	default: break;
 	}
 	heap.push(node->elt);

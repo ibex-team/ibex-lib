@@ -25,9 +25,14 @@ private:
 	friend class CellHeap_2;
 	friend class CellDoubleHeap;
 
-	/** create an Elt with a cell and its criterion */
+	/** create an HeapElt with a cell and its criteria */
 	HeapElt(int nb_crit,Cell* elt, double *crit);
+
+
+	/** create an HeapElt with a cell with one criterion */
 	HeapElt(Cell* cell, double crit_1);
+
+	/** create an HeapElt with a cell with two criteria */
 	HeapElt(Cell* cell, double crit_1, double crit_2);
 
 	/** Delete the node and all its sons */
@@ -57,9 +62,6 @@ private:
 	friend class CellHeap_2;
 	friend class CellDoubleHeap;
 
-	/** create an empty node */
-//	HeapNode();
-
 	/** create an node with a cell and its criterion */
 	HeapNode(HeapElt* elt, HeapNode * father=NULL);
 
@@ -77,10 +79,11 @@ private:
 	HeapNode * father;
 
 	/** The way to compare two pairs (cells,crit). */
-	bool isSup(HeapNode *n, int ind_crit) const;
+	bool isSup(HeapNode *node, int ind_crit) const;
 	bool isSup(double d, int ind_crit) const ;
 
-	void switchElt(HeapNode *n, int ind_crit);
+	/** Switch the HeapElt between *this and node */
+	void switchElt(HeapNode *node, int ind_crit);
 
 	friend std::ostream& operator<<(std::ostream& os, const HeapNode& node) ;
 
@@ -106,7 +109,7 @@ private:
  *  <li> #push() is also in logarithmic time.</li>
  *  </ul>
  *
- * \see #CellBuffer, #CellHeapBySize
+ * \see #CellBuffer,
  */
 class CellHeap_2 : public CellBuffer {
 
@@ -117,7 +120,7 @@ public:
 
 	CellHeap_2(criterion crit, int ind_var, int ind_crit);
 
-	virtual ~CellHeap_2();
+	~CellHeap_2();
 
 	/** Flush the buffer.
 	 * All the remaining cells will be *deleted* */
@@ -134,23 +137,20 @@ public:
 	 */
 	void push(Cell* cell);
 
-	/** usefull only for CellDoubleHeap */
-	void push(HeapElt* elt);
-
 	/** Pop a cell from the stack and return it.
 	 *  complexity: o(log(nb_cells))
 	 */
 	Cell* pop();
-	HeapElt* pop_elt();
 
 	/** Return the next box (but does not pop it).
 	 *  complexity: o(1)
 	 */
 	Cell* top() const;
 
-
-	/** Return the minimum (the criterion for the first cell) */
-	double minimum() const {
+	/** Return the minimum (the criterion for the first cell)
+	 *  complexity: o(1)
+	 */
+	inline double minimum() const {
 		return root->elt->crit[ind_crit];
 	}
 
@@ -164,13 +164,14 @@ public:
 	 * with a cost greater than \a loup.
 	 * complexity in worst case: o(nb_cells*log(nb_cells))
 	 */
-	virtual void contract_heap(double new_loup);
+	void contract_heap(double new_loup);
 
 	/** update the cost and sort all the heap
 	 * complexity: o(nb_cells*log(nb_cells))
 	 */
-	virtual void sort();
+	void sort();
 
+	/** set the local value of the lower uper bound (loup) */
 	void setLoup(double loup);
 
 	/** The "cost" of a cell.	 */
@@ -201,6 +202,16 @@ private:
 
 	/** access to the ith node rank by largest-first order */
 	HeapNode * getNode(unsigned int i) const;
+
+	/** Pop a HeapElt from the stack and return it.
+	 *  complexity: o(log(nb_cells))
+	 */
+	HeapElt* pop_elt();
+
+	/** usefull only for CellDoubleHeap
+	 *  complexity: o(log(nb_cells))
+	 */
+	void push(HeapElt* elt);
 
 	/** update the heap to reorder the elements from the node \var node to the down */
 	void updateOrder(HeapNode *node);
@@ -256,7 +267,7 @@ public:
 	double cost(const Cell& c) const;
 	double cost(const OptimCell& c) const ;
 
-	inline CellHeapCost * init_copy() { return new CellHeapCost(crit,ind_crit); };
+	inline CellHeapCost * init_copy() { return new CellHeapCost(crit,ind_var,ind_crit); };
 
 };
 

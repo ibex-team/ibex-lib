@@ -15,12 +15,14 @@ using namespace ibex;
 
 int main(int argc, char** argv) {
 
-	{
-		double nb=1.e6;
+	/*	{
+		double nb=10;
 		CellHeapOptim old_LB(1,CellHeapOptim::LB);
 		CellHeapOptim old_C3(1,CellHeapOptim::C3);
 		CellHeapVarLB LB(1);
 		CellHeapCost C3(CellHeap_2::C3);
+
+		CellDoubleHeap dd(1,0);
 
 		cout << "Init" <<endl;
 		double _box[][2] = {{5,15},  {15,25}};
@@ -61,7 +63,35 @@ int main(int argc, char** argv) {
 		time += Timer::VIRTUAL_TIMELAPSE();
 		cout << "contract LB= "<<time <<endl;
 
+		Timer::start();
+		 time =0;
+		for (int i=0; i<nb ;i++) {dd.push(new OptimCell((pow(-1,i)*i)*box));}
+		for (int i=0; i<nb ;i++) { delete dd.pop();}
+		Timer::stop();
+		time += Timer::VIRTUAL_TIMELAPSE();
+		cout << "Double= "<<time <<endl;
 
+
+
+
+	}*/
+
+	{
+		double nb=10;
+		CellDoubleHeap dd2(1);
+		double time =0;
+
+		cout << "Init" <<endl;
+		double _box[][2] = {{5,15},  {15,25}};
+		IntervalVector box(2,_box);
+
+		Timer::start();
+		 time =0;
+		for (int i=0; i<nb ;i++) {dd2.push(new OptimCell((pow(-1,i)*i)*box));}
+		for (int i=0; i<nb ;i++) { delete dd2.pop();}
+		Timer::stop();
+		time += Timer::VIRTUAL_TIMELAPSE();
+		cout << "Double 2= "<<time <<endl;
 
 	}
 

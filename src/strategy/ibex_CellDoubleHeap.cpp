@@ -40,9 +40,23 @@ CellDoubleHeap::CellDoubleHeap(int ind_var, int critpr_in, CellHeap_2::criterion
 
 CellDoubleHeap::~CellDoubleHeap() {
 	if (heap1) delete heap1;
-	if (heap2) delete heap2;
+	if (heap2) {
+		if (heap2->root) deleteOtherHeaps(heap2->root);
+		heap2->root =NULL;
+		delete heap2;
+	}
 }
 
+
+void CellDoubleHeap::deleteOtherHeaps( HeapNode * node) {
+	if (node->left)	 deleteOtherHeaps(node->left);
+	if (node->right) deleteOtherHeaps(node->right);
+	node->elt=NULL;
+	node->left=NULL;
+	node->right=NULL;
+	delete node;
+	node=NULL;
+}
 
 void CellDoubleHeap::flush() {
 	heap1->flush();
@@ -98,8 +112,6 @@ void CellDoubleHeap::contract_tmp(double new_loup, HeapNode * node, CellHeap_2 &
 		node->elt=NULL;
 		node->right=NULL;
 	}
-	delete node;
-	node= NULL;
 }
 
 
@@ -119,6 +131,7 @@ void CellDoubleHeap::eraseOtherHeaps( HeapNode * node) {
 		ibex_error("CellDoubleHeap::eraseDoubleHeap: you must specify another criterion"); break;
 	}
 	// attention le delete supprime tous les noeuds d'en dessous
+
 	delete node;
 	node =NULL;
 }
@@ -179,5 +192,29 @@ Cell* CellDoubleHeap::top() const {
 		return heap2->top();
 	}
 }
+
+
+void CellDoubleHeap::sort() {
+	switch (crit_2) {
+	case CellHeap_2::C3 : case CellHeap_2::C5 : case CellHeap_2::C7 :
+		heap2->sort(); break;
+	default: break;
+	}
+}
+
+
+void CellDoubleHeap::setLoup( double new_loup) {
+	heap1->setLoup(new_loup);
+	heap2->setLoup(new_loup);
+}
+
+
+std::ostream& operator<<(std::ostream& os, const CellDoubleHeap& heap){
+	os << "First Heap:  "<< *(heap.heap1) <<std::endl;
+	os << "Second Heap: "<< *(heap.heap2) <<std::endl;
+	return os;
+
+}
+
 
 } // namespace ibex

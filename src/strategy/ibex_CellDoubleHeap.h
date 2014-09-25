@@ -37,6 +37,14 @@ public:
 	/** Return the next box (but does not pop it).*/
 	Cell* top() const;
 
+	/** set the local value of the lower uper bound (loup) */
+	void setLoup(double loup);
+
+	/** update the cost and sort all the heap
+	 * complexity: o(nb_cells*log(nb_cells))
+	 */
+	void sort();
+
 	/**
 	 * Removes (and deletes) from the heap all the cells
 	 * with a cost greater than \a loup.
@@ -46,27 +54,45 @@ public:
 	virtual ~CellDoubleHeap();
 
 private:
+	/** the first heap */
 	CellHeap_2 *heap1;
 
+	/** the second heap */
 	CellHeap_2 *heap2;
 
+	/** the criterion of the second heap */
 	const CellHeap_2::criterion crit_2;
 
+	/** Probability to choose the second criterion in node selection in percentage
+	 * integer in [0,100] default value 50
+	 * the value 0 corresponds to use a single criterion for node selection (the classical one : minimizing the lower bound of the estimate of the objective)
+	 * the value 100 corresponds to use a single criterion for node selection (the second one used in buffer2) */
 	const int critpr;
-
 
 	/** Index of the criterion variable. */
 	const int ind_var;
 
-	/**
-	 * Current selected buffer.
-	 */
+	/** Current selected buffer. */
 	mutable int indbuf;
 
 
+	/** use in the contract_heap function by recursivity */
 	void contract_tmp(double new_loup, HeapNode * node, CellHeap_2 & heap);
+
+	/** erase a node inthe second heap */
 	void eraseOtherHeaps( HeapNode * node);
+
+	/** delete the heap without the HEapElt */
+	void deleteOtherHeaps( HeapNode * node);
+
+	friend std::ostream& operator<<(std::ostream& os, const CellDoubleHeap& h);
 };
+
+
+
+/** Display the buffer */
+std::ostream& operator<<(std::ostream&, const CellDoubleHeap& heap);
+
 
 } // namespace ibex
 
