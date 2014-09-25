@@ -22,10 +22,20 @@ class TestOptimizer : public TestIbex {
 public:
 	TestOptimizer() {
 
-		TEST_ADD(TestOptimizer::issue50);
+		TEST_ADD(TestOptimizer::issue50_1);
+		TEST_ADD(TestOptimizer::issue50_2);
+		TEST_ADD(TestOptimizer::issue50_3);
+		TEST_ADD(TestOptimizer::issue50_4);
 	}
 
-	void issue50();
+	// upperbounding with goal_prec=10% will remove everything (initial loup > true minimum) --> NO_FEASIBLE_FOUND
+	void issue50_1();
+	// upperbounding with goal_prec=0 will make the optimizer succeed --> SUCCESS
+	void issue50_2();
+	// upperbounding with goal_prec=10% will make the optimizer fail (initial loup < true minimum) --> NO_FEASIBLE_FOUND
+	void issue50_3();
+	// upperbounding with goal_prec=0 will make the optimizer fail (initial loup < true minimum) --> INFEASIBLE
+	void issue50_4();
 };
 
 } // namespace ibex

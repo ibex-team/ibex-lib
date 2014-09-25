@@ -18,8 +18,8 @@ using namespace std;
 
 namespace ibex {
 
-void TestOptimizer::issue50() {
-	double prec=0.1;
+// true minimum is 0.
+Optimizer::Status issue50(double init_loup, double prec) {
 	SystemFactory f;
 	const ExprSymbol& x=ExprSymbol::new_();
 	f.add_var(x);
@@ -27,29 +27,26 @@ void TestOptimizer::issue50() {
 	f.add_goal(x);
 
 	System sys(f);
+	DefaultOptimizer o(sys,prec,prec);
 
-	{
-		DefaultOptimizer o(sys,prec,prec);
+	IntervalVector init_box(1,Interval::ALL_REALS);
+	return o.optimize(init_box,init_loup);
+}
 
-		double init_loup=1e-10; // something very close to 0
+void TestOptimizer::issue50_1() {
+	TEST_ASSERT(issue50(1e-10, 0.1)==Optimizer::NO_FEASIBLE_FOUND);
+}
 
-		IntervalVector init_box(1,Interval::ALL_REALS);
+void TestOptimizer::issue50_2() {
+	TEST_ASSERT(issue50(1e-10, 0)==Optimizer::SUCCESS);
+}
 
-		// upperbounding with goal_prec=10% will remove everything
-		TEST_ASSERT(o.optimize(init_box,init_loup)==Optimizer::NO_FEASIBLE_FOUND);
-	}
+void TestOptimizer::issue50_3() {
+	TEST_ASSERT(issue50(-1e-10, 0.1)==Optimizer::NO_FEASIBLE_FOUND);
+}
 
-	{
-		DefaultOptimizer o(sys,prec,0);
-
-		double init_loup=1e-10; // something very close to 0
-
-		IntervalVector init_box(1,Interval::ALL_REALS);
-
-		// upperbounding with goal_prec=0 will make the optimizer succeed
-		TEST_ASSERT(o.optimize(init_box,init_loup)==Optimizer::SUCCESS);
-	}
-
+void TestOptimizer::issue50_4() {
+	TEST_ASSERT(issue50(-1e-10, 0)==Optimizer::INFEASIBLE);
 }
 
 
