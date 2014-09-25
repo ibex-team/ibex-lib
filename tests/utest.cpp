@@ -63,8 +63,8 @@
 #include "TestCtcForAll.h"
 #include "TestCtcPolytopeHull.h"
 
-#include "TestAffine2.h"
-
+// ================ strategy ===============
+#include "TestOptimizer.h"
 
 using namespace std;
 using std::auto_ptr;
@@ -120,6 +120,8 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestCtcPolytopeHull()));
 
     ts.add(auto_ptr<Test::Suite>(new TestFritzJohn()));
+
+    ts.add(auto_ptr<Test::Suite>(new TestOptimizer()));
 
     return ts.run(output,false) ? EXIT_SUCCESS : EXIT_FAILURE;
 
