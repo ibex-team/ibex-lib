@@ -23,11 +23,11 @@ CellDoubleHeap::CellDoubleHeap(int ind_var, int critpr_in, CellHeap_2::criterion
 			break;
 		case CellHeap_2::C3 : case CellHeap_2::C5 : case CellHeap_2::C7 :  case CellHeap_2::PU :
 			heap1 = new CellHeapVarLB(ind_var,0);
-			heap2 = new CellHeapCost(crit_2,1);
+			heap2 = new CellHeapCost(crit_2,ind_var,1);
 			break;
 		case CellHeap_2::PF_LB :  case CellHeap_2::PF_UB :
-			heap1 = new CellHeapCost(CellHeap_2::PF_LB,0);
-			heap2 = new CellHeapCost(CellHeap_2::PF_UB,1);
+			heap1 = new CellHeapCost(CellHeap_2::PF_LB,ind_var,0);
+			heap2 = new CellHeapCost(CellHeap_2::PF_UB,ind_var,1);
 			break;
 		default :
 			ibex_error("CellDoubleHeap: you must specify another criterion"); break;
@@ -60,7 +60,11 @@ void CellDoubleHeap::deleteOtherHeaps( HeapNode * node) {
 
 void CellDoubleHeap::flush() {
 	heap1->flush();
-	if (critpr>0) heap2->flush();
+	if (critpr>0) {
+		if (heap2->root) deleteOtherHeaps(heap2->root);
+		heap2->root =NULL;
+		heap2->nb_cells=0;
+	}
 	nb_cells=0;
 }
 
@@ -82,6 +86,7 @@ void CellDoubleHeap::contract_heap(double new_loup) {
 	contract_tmp(new_loup, heap1->root, *heap_tmp);
 
 	heap1->root = heap_tmp->root;
+	heap1->nb_cells = heap_tmp->size();
 	nb_cells = heap_tmp->size();
 	heap_tmp->root = NULL;
 	delete heap_tmp;

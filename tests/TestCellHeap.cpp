@@ -256,8 +256,8 @@ void TestCellHeap::test_D04() {
 	CellDoubleHeap h1(1,100,CellHeap_2::C5);
 	h1.setLoup(10);
 
-	double _box[][2] = {{5,15},  {15,25},  {25,35},  {35,45}};
-	IntervalVector box(4,_box);
+	double _box[][2] = {{5,15},  {15,25}};
+	IntervalVector box(2,_box);
 	OptimCell *cell1 ;
 	for (int i=0; i<nb ;i++) {
 		cell1 = new OptimCell((pow(-1,i)*i)*box);
@@ -266,9 +266,11 @@ void TestCellHeap::test_D04() {
 		cell1->loup = 10;
 		h1.push(cell1);
 	}
-	delete h1.pop(); delete h1.pop();
+	delete h1.pop();
+	delete h1.pop();
 	h1.contract_heap(100);
-	delete h1.pop(); delete h1.pop();
+	delete h1.pop();
+	delete h1.pop();
 	cout<< h1<<endl;
 	h1.flush();
 }
