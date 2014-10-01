@@ -44,7 +44,7 @@ int main() {
     }
 
     // q-intersection with 2 variables only
-    CtcQInter* q=new CtcQInter(2,cdist,N-NB_OUTLIERS);
+    CtcQInter* q=new CtcQInter(cdist,N-NB_OUTLIERS);
     // Push in the main vector "ctc" the application
     // of the latter contractor to x[t]
     ctc.push_back(new CtcInverse(*q,*new Function(x,x[t])));
