@@ -39,6 +39,9 @@ share
 bin
 newdoc/_build
 
+# qtcreator files
+*.user
+
 *~
 
 

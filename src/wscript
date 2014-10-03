@@ -5,7 +5,8 @@ import shutil, os
 
 def configure (conf):
 	conf.env.append_unique ("INCLUDES", ["../src/%s" % p for p in 
-		". arithmetic bisector combinatorial contractor function numeric parser set strategy symbolic system tools predicate cliquer".split()])
+		". arithmetic bisector combinatorial contractor function numeric parser set strategy symbolic system tools predicate cliquer wip".split()])
+
 
 def build (bld):
 
