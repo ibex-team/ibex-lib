@@ -184,4 +184,36 @@ void TestExprDiff::vecimg02() {
 	TEST_ASSERT(c->get_matrix_value()==mat);
 }
 
+
+void TestExprDiff::apply_mul01() {
+	Variable x,y;
+	Function f(x,y,x,"f");
+
+	Variable x3,y3;
+	Function g(x3,y3,y3,"g");
+
+	Variable x2("x"),y2("y");
+	Function h(x2,y2,f(x2,y2)*g(x2,y2));
+	Function dh(h,Function::DIFF);
+
+	TEST_ASSERT(sameExpr(dh.expr(),"(((df(x,y)[0]*g(x,y))+(dg(x,y)[0]*f(x,y))),((df(x,y)[1]*g(x,y))+(dg(x,y)[1]*f(x,y))))"));
+}
+
+void TestExprDiff::apply_mul02() {
+//	Variable x,y;
+//	Function f(x,y,x,"f");
+//
+//	Variable x3,y3;
+//	Function g(x3,y3,f(x3,y3),"g");
+//
+//	Variable x2("x"),y2("y");
+//	Function h(x2,y2,g(x2,y2)g(x2,y2));
+//
+//	Function dg(g,Function::DIFF);
+//
+//	cout << "DG=" << dg << endl;
+//	TEST_ASSERT(sameExpr(dh.expr(),"(((df(x,y)[0]*g(x,y))+(dg(x,y)[0]*f(x,y))),((df(x,y)[1]*g(x,y))+(dg(x,y)[1]*f(x,y))))"));
+}
+
 } // end namespace
+

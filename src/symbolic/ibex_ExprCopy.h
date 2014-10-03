@@ -55,6 +55,13 @@ public:
 	 *      required to be the same size to allow the use of extra variables (that do not occurr in the expression).
 	 *      This is used, e.g., in ibex_Optimizer to transform a function x->g(x) into (x,y)->g(x).
 	 */
+	const ExprNode& copy(const Array<const ExprSymbol>& old_x, const Array<const ExprNode>& new_x, const ExprNode& y, bool fold_cst=false);
+
+	/*
+	 * \brief Duplicate an expression (with new symbols).
+	 *
+	 * \see copy(const Array<const ExprSymbol>& old_x, const Array<const ExprNode>& new_x, const ExprNode& y, bool fold_cst=false).
+	 */
 	const ExprNode& copy(const Array<const ExprSymbol>& old_x, const Array<const ExprSymbol>& new_x, const ExprNode& y, bool fold_cst=false);
 
 	/**
@@ -62,6 +69,13 @@ public:
 	 *
 	 * If \a y is a vector, the ith argument of y is copied, i.e., copy-of(y[i])
 	 * instead of returning (copy-of(y))[i].
+	 */
+	const ExprNode& index_copy(const Array<const ExprSymbol>& old_x, const Array<const ExprNode>& new_x, const ExprNode& y, int i, bool fold_cst=false);
+
+	/**
+	 * \brief Duplicate y[i], where y is an expression.
+	 *
+	 * \see index_copy(const Array<const ExprSymbol>& old_x, const Array<const ExprNode>& new_x, const ExprNode& y, int i, bool fold_cst=false).
 	 */
 	const ExprNode& index_copy(const Array<const ExprSymbol>& old_x, const Array<const ExprSymbol>& new_x, const ExprNode& y, int i, bool fold_cst=false);
 
@@ -71,6 +85,13 @@ public:
 	 * If \a y is a matrix, a copy of the (i,j) entry of y is returned, i.e., copy-of(y[i][j]).
 	 * Else if \a y is a vector, a copy-of(y[i])[j] is returned.
 	 * Otherwise, the returned expression is (copy-of(y))[i][j].
+	 */
+	const ExprNode& index_copy(const Array<const ExprSymbol>& old_x, const Array<const ExprNode>& new_x, const ExprNode& y, int i, int j, bool fold_cst=false);
+
+	/**
+	 * \brief Duplicate y[i][j], where y is an expression.
+	 *
+	 * \see index_copy(const Array<const ExprSymbol>& old_x, const Array<const ExprNode>& new_x, const ExprNode& y, int i, int j, bool fold_cst=false).
 	 */
 	const ExprNode& index_copy(const Array<const ExprSymbol>& old_x, const Array<const ExprSymbol>& new_x, const ExprNode& y, int i, int j, bool fold_cst=false);
 
@@ -135,6 +156,25 @@ protected:
 	bool unary_copy(const ExprUnaryOp& e, Domain (*fcst)(const Domain&));
 	bool binary_copy(const ExprBinaryOp& e, Domain (*fcst)(const Domain&, const Domain&));
 };
+
+
+/* ============================================================================
+ 	 	 	 	 	 	 	 inline implementation
+  ============================================================================*/
+
+inline const ExprNode& ExprCopy::index_copy(const Array<const ExprSymbol>& old_x, const Array<const ExprSymbol>& new_x, const ExprNode& y, int i, bool fold_cst) {
+	return index_copy(old_x, (const Array<const ExprNode>&) new_x, y, i, fold_cst);
+}
+
+
+inline const ExprNode& ExprCopy::index_copy(const Array<const ExprSymbol>& old_x, const Array<const ExprSymbol>& new_x, const ExprNode& y, int i, int j, bool fold_cst) {
+	return index_copy(old_x, (const Array<const ExprNode>&) new_x, y, i, j, fold_cst);
+}
+
+inline const ExprNode& ExprCopy::copy(const Array<const ExprSymbol>& old_x, const Array<const ExprSymbol>& new_x, const ExprNode& y, bool fold_cst) {
+	return this->copy(old_x, (const Array<const ExprNode>&) new_x, y, fold_cst);
+}
+
 
 } // end namespace ibex
 

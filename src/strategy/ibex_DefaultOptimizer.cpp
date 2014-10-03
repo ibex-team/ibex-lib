@@ -78,7 +78,7 @@ Ctc&  DefaultOptimizer::ctc(System& sys, System& ext_sys, double prec) {
 	if (sys.nb_ctr > 0) {
 		ctc_list.set_ref(2,rec(new CtcFixPoint
 				(rec(new CtcCompo(
-						rec(new CtcPolytopeHull(rec(new LinearRelaxCombo (ext_sys,LinearRelaxCombo::COMPO)),
+						rec(new CtcPolytopeHull(rec(new LinearRelaxCombo (ext_sys,LinearRelaxCombo::XNEWTON)),
 								CtcPolytopeHull::ALL_BOX)),
 								rec(new CtcHC4(ext_sys.ctrs,0.01)))), default_relax_ratio)));
 		index++;
