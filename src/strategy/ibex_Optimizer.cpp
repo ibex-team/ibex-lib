@@ -544,7 +544,7 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 	Timer::stop();
 	time+= Timer::VIRTUAL_TIMELAPSE();
 
-	if (uplo_of_epsboxes == POS_INFINITY && loup==initial_loup)
+	if (uplo_of_epsboxes == POS_INFINITY && (loup==POS_INFINITY || (loup==initial_loup && goal_abs_prec==0 && goal_rel_prec==0)))
 		return INFEASIBLE;
 	else if (loup==initial_loup)
 		return NO_FEASIBLE_FOUND;
@@ -578,7 +578,7 @@ void Optimizer::report() {
 		cout << "time limit " << timeout << "s. reached " << endl;
 	}
 	// No solution found and optimization stopped with empty buffer  before the required precision is reached => means infeasible problem
-	if (buffer.empty() && uplo_of_epsboxes == POS_INFINITY && loup==initial_loup) {
+	if (buffer.empty() && uplo_of_epsboxes == POS_INFINITY && (loup==POS_INFINITY || (loup==initial_loup && goal_abs_prec==0 && goal_rel_prec==0))) {
 		cout << " infeasible problem " << endl;
 		cout << " cpu time used " << time << "s." << endl;
 		cout << " number of cells " << nb_cells << endl;
@@ -605,7 +605,7 @@ void Optimizer::report() {
 			cout << " precision on variable domains obtained " << prec << " "   << " uplo_of_epsboxes " << uplo_of_epsboxes << endl;
 		else if (uplo_of_epsboxes == NEG_INFINITY)
 			cout << " small boxes with negative infinity objective :  objective not bound " << endl;
-		if (loup==POS_INFINITY)
+		if (loup==initial_loup)
 			cout << " no feasible point found " << endl;
 		else
 			cout << " best feasible point " << loup_point << endl;

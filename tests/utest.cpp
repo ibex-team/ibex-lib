@@ -65,6 +65,8 @@
 #include "TestCtcPolytopeHull.h"
 
 
+// ================ strategy ===============
+#include "TestOptimizer.h"
 
 using namespace std;
 using std::auto_ptr;
