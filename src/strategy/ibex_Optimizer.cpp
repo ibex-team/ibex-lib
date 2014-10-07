@@ -58,12 +58,12 @@ void Optimizer::read_ext_box(const IntervalVector& ext_box, IntervalVector& box)
 
 Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, double prec,
 		double goal_rel_prec, double goal_abs_prec, int sample_size, double equ_eps,
-		bool rigor,  int critpr,CellHeapOptim::criterion crit) :
+		bool rigor,  int critpr,CellHeap_2::criterion crit) :
                 				user_sys(user_sys), sys(user_sys,equ_eps),
                 				n(user_sys.nb_var), m(sys.nb_ctr) /* (warning: not user_sys.nb_ctr) */,
                 				ext_sys(user_sys,equ_eps),
                 				ctc(ctc),bsc(bsc),
-                				buffer(n),buffer2(n,crit),  // first buffer with LB, second buffer with ct (default UB))
+                				buffer(n,critpr,crit),  // first buffer with LB, second buffer with ct (default UB))
                 				prec(prec), goal_rel_prec(goal_rel_prec), goal_abs_prec(goal_abs_prec),
                 				sample_size(sample_size), mono_analysis_flag(true), in_HC4_flag(true), trace(false),
                 				critpr(critpr), timeout(1e08),
@@ -113,7 +113,6 @@ Optimizer::~Optimizer() {
 		delete is_inside;
 	}
 	buffer.flush();
-	if (critpr > 0) buffer2.flush();
 
 	delete mylp;
 	//	delete &(objshaver->ctc);
@@ -249,39 +248,37 @@ void Optimizer::update_uplo() {
      push the cell  in the 2 heaps or if the contraction makes the box empty, delete the cell. For diversification, rebuild the 2 heaps
  */
 
-void Optimizer::handle_cell(OptimCell& c, const IntervalVector& init_box ){
+void Optimizer::handle_cell(Cell& c, const IntervalVector& init_box ){
 	try {
 		contract_and_bound(c, init_box);  // may throw EmptyBoxException
 		//       objshaver->contract(c.box);
 
-
 		// Computations for the Casado C3, C5, C7 criteria
-
-		if ((buffer2.crit==CellHeapOptim::C3)||(buffer2.crit==CellHeapOptim::C5)||(buffer2.crit==CellHeapOptim::C7)) {
-
+		switch (buffer.crit) {
+		case CellHeap_2::C3 :
 			compute_pf(c);
-
-			if (loup < 1.e8)
-				c.loup=loup;
-			else
-				c.loup=1.e8;
-		}
-
-		// computations for C5, C7 and PU criteria
-		if ((buffer2.crit==CellHeapOptim::C5)||(buffer2.crit==CellHeapOptim::C7)||(buffer2.crit==CellHeapOptim::PU))
+			break;
+		case CellHeap_2::C5 : case CellHeap_2::C7 :
 			compute_pu(c);
+			compute_pf(c);
+			break;
+		case CellHeap_2::PU:
+			compute_pu(c);
+			break;
+		default :
+			break;
+		}
 
 		// the cell is put into the 2 heaps
 		buffer.push(&c);
-		if (critpr > 0)      buffer2.push(&c);
 
 		nb_cells++;
-		// reconstruction of the 2 heaps every heap_build_period nodes
+/*		// reconstruction of the 2 heaps every heap_build_period nodes
 		int heap_build_period=100;
 		if (nb_cells% heap_build_period ==0) {
-			buffer.makeheap();
-			if (critpr > 0) buffer2.makeheap();
+			buffer.sort();
 		}
+*/
 
 	}
 	catch(EmptyBoxException&) {
@@ -289,11 +286,11 @@ void Optimizer::handle_cell(OptimCell& c, const IntervalVector& init_box ){
 	}
 }
 
-void Optimizer::compute_pf(OptimCell& c) {
-	c.pf=(sys.goal)->eval(c.box);
+void Optimizer::compute_pf(Cell& c) {
+	c.get<OptimData>().pf=(sys.goal)->eval(c.box);
 }
 
-void Optimizer::compute_pu(OptimCell& c) {
+void Optimizer::compute_pu(Cell& c) {
 	double pu=1;
 
 	for (int j=1; j<m;j++) {
@@ -304,10 +301,10 @@ void Optimizer::compute_pu(OptimCell& c) {
 			pui= -eval.lb()/eval.diam();
 		pu=pu*pui;
 	}
-	c.pu=pu;
+	c.get<OptimData>().pu=pu;
 }
 
-void Optimizer::contract_and_bound(OptimCell& c, const IntervalVector& init_box) {
+void Optimizer::contract_and_bound(Cell& c, const IntervalVector& init_box) {
 
 	/*======================== contract y with y<=loup ========================*/
 	Interval& y=c.box[ext_sys.goal_var()];
@@ -420,6 +417,7 @@ void Optimizer::contract ( IntervalVector& box, const IntervalVector& init_box) 
 Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj_init_bound) {
 	loup=obj_init_bound;
 	pseudo_loup=obj_init_bound;
+	buffer.setLoup(loup);
 
 	uplo=NEG_INFINITY;
 	uplo_of_epsboxes=POS_INFINITY;
@@ -431,14 +429,14 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 	diam_rand=0;
 
 	buffer.flush();
-	if (critpr > 0) buffer2.flush();
 
-	OptimCell* root=new OptimCell(IntervalVector(n+1));
+	Cell* root=new Cell(IntervalVector(n+1));
 
 	write_ext_box(init_box,root->box);
 
 	// add data required by the bisector
 	bsc.add_backtrackable(*root);
+
 
 	// add data required by optimizer + Fritz John contractor
 	root->add<EntailedCtr>();
@@ -446,11 +444,19 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 	entailed=&root->get<EntailedCtr>();
 	entailed->init_root(user_sys,sys);
 
+	// add data pu and pf for
+	switch (buffer.crit) {
+	case CellHeap_2::C3 : case CellHeap_2::C5 : case CellHeap_2::C7 : case CellHeap_2::PU:
+		root->add<OptimData>();	break;
+	default :	break;
+	}
+
 	loup_changed=false;
 	initial_loup=obj_init_bound;
 	loup_point=init_box.mid();
 	time=0;
 	Timer::start();
+
 	handle_cell(*root,init_box);
 	int indbuf=0;
 
@@ -458,41 +464,30 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 
 	try {
 		while (!buffer.empty()) {
-			if (trace >= 2) cout << " buffer " << ((CellBuffer&) buffer) << endl;
-			if (critpr > 0 && trace >= 2) cout << "  buffer2 " << ((CellBuffer&) buffer2) << endl;
+			if (trace >= 2) cout << " buffer " << buffer << endl;
 			//		  cout << "buffer size "  << buffer.size() << " " << buffer2.size() << endl;
 			// removes from the heap buffer, the cells already chosen in the other buffer
-			if (critpr > 0) {
-				buffer.cleantop();
-				buffer2.cleantop();
-			}
 
-			if (buffer.empty() || (critpr > 0 && buffer2.empty())) {
+
+			if (buffer.empty()) {
 				//cout << " buffer empty " << buffer.empty() << " " << buffer2.empty() << endl;
 				break;
 			}
 
 			loup_changed=false;
-			OptimCell *c;
+			Cell *c;
+
 			// random choice between the 2 buffers corresponding to two criteria implemented in two heaps)
 			// critpr chances over 100 to choose the second heap
-			if (rand() % 100 >=critpr) {
-				indbuf=0;
-				c=buffer.top();  // the first heap is used
-			} else {
-				indbuf=1;
-				c=buffer2.top();  // the second heap is used
-			}
+			c=buffer.top();
 
 			try {
 				pair<IntervalVector,IntervalVector> boxes=bsc.bisect(*c);
 
-				pair<OptimCell*,OptimCell*> new_cells=c->bisect(boxes.first,boxes.second);
-				if (indbuf ==0) 
-					buffer.pop();
-				else  
-					buffer2.pop();
-				if (c->heap_present==0) delete c; // deletes the cell if it is no more present in a heap.
+				pair<Cell*,Cell*> new_cells=c->bisect(boxes.first,boxes.second);
+
+				buffer.pop();
+				delete c; // deletes the cell.
 
 				handle_cell(*new_cells.first, init_box);
 				handle_cell(*new_cells.second, init_box);
@@ -512,7 +507,7 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 
 					buffer.contract_heap(ymax);
 					//cout << " now buffer is contracted and min=" << buffer.minimum() << endl;
-					if (critpr > 0) buffer2.contract_heap(ymax);
+
 
 					if (ymax <=NEG_INFINITY) {
 						if (trace) cout << " infinite value for the minimum " << endl;
@@ -526,11 +521,8 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 			}
 			catch (NoBisectableVariableException& ) {
 				update_uplo_of_epsboxes ((c->box)[ext_sys.goal_var()].lb());
-				if (indbuf ==0)
-					buffer.pop();
-				else  
-					buffer2.pop();
-				if (c->heap_present==0) delete c;
+				buffer.pop();
+				delete c; // deletes the cell.
 
 				update_uplo(); // the heap has changed -> recalculate the uplo
 

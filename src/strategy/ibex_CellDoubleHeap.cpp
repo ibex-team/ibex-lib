@@ -12,7 +12,7 @@
 namespace ibex {
 
 CellDoubleHeap::CellDoubleHeap(int ind_var, int critpr_in, CellHeap_2::criterion crit_2) :
-						crit_2(crit_2), critpr(critpr_in) , ind_var(ind_var), indbuf(0){
+						crit(crit_2), critpr(critpr_in) , ind_var(ind_var), indbuf(0){
 	if (critpr>0) {
 		switch (crit_2) {
 		case CellHeap_2::LB :
@@ -94,7 +94,7 @@ void CellDoubleHeap::contract_heap(double new_loup) {
 	assert((int)nb_cells==heap2->size());
 
 	if (critpr>0){
-		switch (crit_2) {
+		switch (crit) {
 		case CellHeap_2::C3 : case CellHeap_2::C5 : case CellHeap_2::C7 :
 			heap2->sort(); break;
 		default: break;
@@ -127,7 +127,7 @@ void CellDoubleHeap::eraseOtherHeaps( HeapNode * node) {
 	node->right=NULL;
 	node->left=NULL;
 
-	switch (crit_2) {
+	switch (crit) {
 	case CellHeap_2::UB : case CellHeap_2::PU : case CellHeap_2::PF_UB : case CellHeap_2::PF_LB :
 		heap2->eraseNode(node->elt->indice[1]); break;
 	case CellHeap_2::C3 : case CellHeap_2::C5 : case CellHeap_2::C7 :
@@ -200,7 +200,7 @@ Cell* CellDoubleHeap::top() const {
 
 
 void CellDoubleHeap::sort() {
-	switch (crit_2) {
+	switch (crit) {
 	case CellHeap_2::C3 : case CellHeap_2::C5 : case CellHeap_2::C7 :
 		heap2->sort(); break;
 	default: break;

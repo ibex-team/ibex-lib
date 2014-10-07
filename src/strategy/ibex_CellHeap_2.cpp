@@ -28,27 +28,20 @@ CellHeapCost::CellHeapCost(criterion crit, int ind_var, int ind_crit) : CellHeap
 };
 
 
-double CellHeapCost::cost(const Cell& c) const {
-	const OptimCell * t = dynamic_cast<const OptimCell *>(&c);
-	if (t) return cost(*t);
-	else {
-		ibex_error("CellHeapCost::cost: that must be a OptimCell and not just a Cell");
-		return POS_INFINITY;
-	}
-}
 
 // TODO heu.. là il faudrait avoir le type de Cell
-double CellHeapCost::cost(const OptimCell& c) const {
+double CellHeapCost::cost(const Cell& c) const {
 
+		const OptimData *data = &(c.get<OptimData>());
 		switch (crit)	{
 		case LB : ibex_error("CellHeapCost::CellHeapCost : invalid flag, that must be C3,C5,C7,PU or PF"); return POS_INFINITY;
 		case UB : ibex_error("CellHeapCost::CellHeapCost : invalid flag, that must be C3,C5,C7,PU or PF"); return POS_INFINITY;
-		case C3 : return -((loup - c.pf.lb()) / c.pf.diam() );
-		case C5 : return -(c.pu * (loup - c.pf.lb()) / c.pf.diam());
-		case C7 : return c.box[ind_var].lb()/(c.pu*(c.loup-c.pf.lb())/c.pf.diam());
-		case PU : return -c.pu	;
-		case PF_LB : return c.pf.lb();
-		case PF_UB : return c.pf.ub();
+		case C3 : return -((loup - data->pf.lb()) / data->pf.diam() );
+		case C5 : return -(data->pu * (loup - data->pf.lb()) / data->pf.diam());
+		case C7 : return c.box[ind_var].lb()/(data->pu*(loup-data->pf.lb())/data->pf.diam());
+		case PU : return -data->pu	;
+		case PF_LB : return data->pf.lb();
+		case PF_UB : return data->pf.ub();
 		default : ibex_error("CellHeapCost::CellHeapCost : invalid flag, that must be C3,C5,C7,PU or PF"); return POS_INFINITY;
 		}
 }
@@ -56,7 +49,7 @@ double CellHeapCost::cost(const OptimCell& c) const {
 //////////////////////////////////////////////////////////////////////////////////////
 
 CellHeap_2::CellHeap_2(criterion crit, int ind_var, int ind_crit) :
-		ind_crit(ind_crit), crit(crit), ind_var(ind_var), loup(POS_INFINITY), root(NULL) {
+		crit(crit), ind_crit(ind_crit),  ind_var(ind_var), loup(POS_INFINITY), root(NULL) {
 	if (((crit==LB)||(crit==UB))&&(ind_var<0)) {
 		ibex_error("CellHeap_2: you need to indicate the indice of the variable which strae the objective function");
 	}

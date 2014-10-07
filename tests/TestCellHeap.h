@@ -13,7 +13,6 @@
 #define __TEST_CTC_CELLHEAP_H__
 
 #include "cpptest.h"
-#include "ibex_CellHeapOptim.h"
 #include "ibex_CellHeap_2.h"
 #include "utils.h"
 
@@ -24,7 +23,6 @@ class TestCellHeap : public TestIbex {
 public:
 	TestCellHeap() {
 
-		TEST_ADD(TestCellHeap::test00);
 		TEST_ADD(TestCellHeap::test01);
 		TEST_ADD(TestCellHeap::test02);
 		TEST_ADD(TestCellHeap::test03);
@@ -37,7 +35,7 @@ public:
 		TEST_ADD(TestCellHeap::test_D05);
 	}
 
-	void test00();
+
 	void test01();
 	void test02();
 	void test03();

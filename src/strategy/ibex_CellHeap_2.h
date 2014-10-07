@@ -12,10 +12,14 @@
 #define __IBEX_CELL_HEAP_2_H__
 
 #include "ibex_CellBuffer.h"
-#include "ibex_OptimCell.h"
+#include "ibex_Cell.h"
 #include "ibex_Interval.h"
+#include "ibex_OptimData.h"
 
 namespace ibex {
+
+
+
 
 
 class HeapElt {
@@ -177,13 +181,14 @@ public:
 	/** The "cost" of a cell.	 */
 	virtual double cost(const Cell&) const=0;
 
+    /** The criterion used for the heap. */
+	const criterion crit;
+
 protected:
 
 	/** the indice of the criterion selected for this heap */
 	const int ind_crit;
 
-    /** The criterion used for the heap. */
-	const criterion crit;
 
 	/** Index of the criterion variable. */
 	const int ind_var;
@@ -265,11 +270,11 @@ public:
 	CellHeapCost(criterion crit, int ind_var=0, int ind_crit=0) ;
 
 	double cost(const Cell& c) const;
-	double cost(const OptimCell& c) const ;
 
 	inline CellHeapCost * init_copy() { return new CellHeapCost(crit,ind_var,ind_crit); };
 
 };
+
 
 
 

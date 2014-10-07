@@ -45,6 +45,13 @@ public:
 	 */
 	void sort();
 
+	/** Return the minimum (the criterion for the first cell)
+	 *  complexity: o(1)
+	 */
+	inline double minimum() const {
+		return heap1->minimum();
+	}
+
 	/**
 	 * Removes (and deletes) from the heap all the cells
 	 * with a cost greater than \a loup.
@@ -53,6 +60,10 @@ public:
 
 	virtual ~CellDoubleHeap();
 
+
+	/** the criterion of the second heap */
+	const CellHeap_2::criterion crit;
+
 private:
 	/** the first heap */
 	CellHeap_2 *heap1;
@@ -60,8 +71,6 @@ private:
 	/** the second heap */
 	CellHeap_2 *heap2;
 
-	/** the criterion of the second heap */
-	const CellHeap_2::criterion crit_2;
 
 	/** Probability to choose the second criterion in node selection in percentage
 	 * integer in [0,100] default value 50
