@@ -10,7 +10,7 @@
 #define __IBEX_OPTIMDATA_H__
 
 #include "ibex_Backtrackable.h"
-#include "ibex_IntervalVector.h"
+#include "ibex_Interval.h"
 
 namespace ibex {
 

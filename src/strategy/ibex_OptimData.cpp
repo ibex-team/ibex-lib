@@ -7,7 +7,6 @@
 //============================================================================
 
 #include "ibex_OptimData.h"
-#include <stdlib.h>
 
 namespace ibex {
 

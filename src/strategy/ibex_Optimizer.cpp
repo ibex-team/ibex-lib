@@ -448,7 +448,8 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 	switch (buffer.crit) {
 	case CellHeap_2::C3 : case CellHeap_2::C5 : case CellHeap_2::C7 : case CellHeap_2::PU:
 		root->add<OptimData>();	break;
-	default :	break;
+	default :
+		break;
 	}
 
 	loup_changed=false;
@@ -458,7 +459,6 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 	Timer::start();
 
 	handle_cell(*root,init_box);
-	int indbuf=0;
 
 	update_uplo();
 
