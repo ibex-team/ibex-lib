@@ -19,6 +19,8 @@ namespace ibex {
 /**
  * \ingroup contractor wrt f(x) not-in [y]
  *
+ * TODO: this class should become obsolete with the addition
+ *       of disjunctions in the language.
  */
 class CtcNotIn : public Ctc {
 public:
