@@ -16,16 +16,11 @@
 #define __IBEX_SEPARATOR_H__
 
 #include "ibex_IntervalVector.h"
-#include "ibex_EmptyBoxException.h"
 
 namespace ibex {
 
 /**
- * \defgroup separator Separator
- */
-
-/**
- * \ingroup separator
+ * \ingroup iset
  *
  * \brief Separator interface.
  *
@@ -46,19 +41,27 @@ namespace ibex {
  * two input-output arguments, x_in and x_out, each containing
  * initially a copy of the box [x].
  *
+ * A separator can also be viewed a as pair of contractors.
+ * See ibex::SepCtcPair.
+ *
+ * See L. Jaulin and B. Desrochers (2014). "Introduction to the
+ * Algebra of Separators with Application to Path Planning".
+ * Engineering Applications of Artificial Intelligence volume 33, pp. 141-147.
+ *
+ *
  */
 class Sep {
 
 public:
 	/**
-     * \brief Separate a box in two subboxes.
+     * \brief Separate a box in two sub-boxes.
      *
-     * \param Xin  - As input: the initial box. As output:
-     *               result of the first ("inner") contraction
-     * \param Xout - As input: the initial box. As output:
-     *               the result of the second ("outer") contraction
+     * \param x_in  - As input: the initial box. As output:
+     *                result of the first ("inner") contraction
+     * \param x_out - As input: the initial box. As output:
+     *                the result of the second ("outer") contraction
      *
-     * Precondition: Xin and Xout must be the same boxes.
+     * Precondition: x_in and x_out must be the same boxes.
 	 */
     virtual void separate(IntervalVector& x_in, IntervalVector& x_out) = 0;
 

@@ -57,6 +57,6 @@ protected:
     CtcFwdBwd *ctc_f, *ctc_g;
 };
 
+} // end namespace
 
-}
 #endif // __IBEX_CTC_POINT_IN_SEGMENT_H__

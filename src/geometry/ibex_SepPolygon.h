@@ -12,6 +12,7 @@
 #define __IBEX_SEP_POINT_IN_POLYGON_H__
 
 #include "ibex_Sep.h"
+#include "ibex_CtcUnion.h"
 
 using namespace std;
 
@@ -69,6 +70,6 @@ private:
     int pnpoly(double testx, double testy);
 };
 
-}
+} // end namespace
 
 #endif // __IBEX_SEP_POINT_IN_POLYGON_H__

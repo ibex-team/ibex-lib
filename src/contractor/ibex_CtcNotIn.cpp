@@ -13,8 +13,20 @@
 
 namespace ibex {
 
-CtcNotIn::CtcNotIn(Function& f, const Interval& y) : Ctc(f.nb_var()), f(f), d1(Dim()), d2(Dim()) {
+CtcNotIn::CtcNotIn(Function& f, const Interval& y) : Ctc(f.nb_var()), f(f), d1(f.expr().dim), d2(f.expr().dim) {
 	assert(f.expr().dim.is_scalar());
+	d1.i()=Interval(NEG_INFINITY,y.lb());
+	d2.i()=Interval(y.ub(),POS_INFINITY);
+}
+
+CtcNotIn::CtcNotIn(Function& f, const IntervalVector& y) : Ctc(f.nb_var()), f(f), d1(f.expr().dim), d2(f.expr().dim) {
+	assert(f.expr().dim.is_vector());
+	d1.i()=Interval(NEG_INFINITY,y.lb());
+	d2.i()=Interval(y.ub(),POS_INFINITY);
+}
+
+CtcNotIn::CtcNotIn(Function& f, const IntervalMatrix& y) : Ctc(f.nb_var()), f(f), d1(f.expr().dim), d2(f.expr().dim) {
+	assert(f.expr().dim.is_matrix());
 	d1.i()=Interval(NEG_INFINITY,y.lb());
 	d2.i()=Interval(y.ub(),POS_INFINITY);
 }

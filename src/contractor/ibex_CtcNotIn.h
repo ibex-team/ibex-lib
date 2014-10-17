@@ -19,8 +19,8 @@ namespace ibex {
 /**
  * \ingroup contractor wrt f(x) not-in [y]
  *
- * TODO: this class should become obsolete with the addition
- *       of disjunctions in the language.
+ * TODO: should this class become obsolete with the addition
+ *       of disjunctions in the language?
  */
 class CtcNotIn : public Ctc {
 public:
@@ -28,6 +28,16 @@ public:
 	 * \brief Build the contractor for "f(x) not-in [y]".
 	 */
 	CtcNotIn(Function& f, const Interval& y);
+
+	/**
+	 * \brief Build the contractor for "f(x) not-in [y]".
+	 */
+	CtcNotIn(Function& f, const IntervalVector& y);
+
+	/**
+	 * \brief Build the contractor for "f(x) not-in [y]".
+	 */
+	CtcNotIn(Function& f, const IntervalMatrix& y);
 
 	/**
 	 * \brief Contract the box.
@@ -41,4 +51,5 @@ protected:
 };
 
 } // end namespace ibex
+
 #endif // __IBEX_CTC_NOT_IN_H__

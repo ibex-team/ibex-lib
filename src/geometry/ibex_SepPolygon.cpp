@@ -8,10 +8,11 @@
 // Last Update : Apr 25, 2012
 //============================================================================
 
-#include "ibex_SepPointInPolygon.h"
+#include "ibex_SepPolygon.h"
 #include "ibex_Ctc.h"
 #include "ibex_CtcSegment.h"
 #include "ibex_Array.h"
+#include "ibex_BoolInterval.h"
 
 #include <cmath>
 
@@ -72,7 +73,8 @@ SepPolygon::SepPolygon(vector<double> &_ax, vector<double> &_ay, vector<double> 
 
 SepPolygon::~SepPolygon() {
 	for(uint i=0; i<cseg.list.size(); i++) {
-		delete &cseg[i];
+		delete &cseg.list[i];
+	}
 }
 
 

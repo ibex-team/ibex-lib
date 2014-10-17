@@ -7,11 +7,11 @@
 // Last Update : Mar 24, 2014
 //============================================================================
 
-#include "ibex_CtcPointInSegment.h"
+#include "ibex_CtcSegment.h"
 
 namespace ibex {
 
-CtcPointInSegment::CtcPointInSegment(double ax, double ay, double bx, double by) : Ctc(2),
+CtcSegment::CtcSegment(double ax, double ay, double bx, double by) : Ctc(2),
     X_with_params(2+4) {
 
     Variable x(2),a(2),b(2);
@@ -36,12 +36,12 @@ CtcPointInSegment::CtcPointInSegment(double ax, double ay, double bx, double by)
     X_with_params[5] = Interval(by);
 }
 
-CtcPointInSegment::~CtcPointInSegment() {
+CtcSegment::~CtcSegment() {
     delete ncf; delete ncg;
     delete ctc_f; delete ctc_g;
 }
 
-void CtcPointInSegment::contract(IntervalVector &box, double ax, double ay, double bx, double by) {
+void CtcSegment::contract(IntervalVector &box, double ax, double ay, double bx, double by) {
 
     X_with_params[2] = Interval(ax);
     X_with_params[3] = Interval(ay);
@@ -51,7 +51,7 @@ void CtcPointInSegment::contract(IntervalVector &box, double ax, double ay, doub
     contract(box);
 }
 
-void CtcPointInSegment::contract(IntervalVector &box) {
+void CtcSegment::contract(IntervalVector &box) {
     try {
         X_with_params[0] = box[0];
         X_with_params[1] = box[1];

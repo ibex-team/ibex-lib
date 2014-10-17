@@ -9,6 +9,8 @@
 //============================================================================
 
 #include "ibex_SepInter.h"
+#include "ibex_EmptyBoxException.h"
+
 #include <cassert>
 
 namespace ibex {
