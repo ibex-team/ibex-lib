@@ -70,7 +70,7 @@ SetNode* SetLeaf::sync(const IntervalVector& nodebox, const IntervalVector& x, N
 	}
 }
 
-SetNode* SetLeaf::sync_rec(const IntervalVector& nodebox, Separator& sep, double eps) {
+SetNode* SetLeaf::sync_rec(const IntervalVector& nodebox, Sep& sep, double eps) {
 
 	if (status<UNK || nodebox.max_diam()<=eps) {
 		return this;
@@ -111,7 +111,7 @@ SetNode* SetLeaf::inter(const IntervalVector& nodebox, const IntervalVector& x, 
 	}
 }
 
-SetNode* SetLeaf::inter_rec(const IntervalVector& nodebox, Separator& sep, double eps) {
+SetNode* SetLeaf::inter_rec(const IntervalVector& nodebox, Sep& sep, double eps) {
 
 	if (status<UNK)
 		return this;

@@ -40,13 +40,13 @@ public:
 	virtual SetNode* sync(const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps);
 
 	/** \see SetNode */
-	virtual SetNode* sync_rec(const IntervalVector& nodebox, Separator& sep, double eps);
+	virtual SetNode* sync_rec(const IntervalVector& nodebox, Sep& sep, double eps);
 
 	/** \see SetNode */
 	virtual SetNode* inter(const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps);
 
 	/** \see SetNode */
-	virtual SetNode* inter_rec(const IntervalVector& nodebox, Separator& sep, double eps);
+	virtual SetNode* inter_rec(const IntervalVector& nodebox, Sep& sep, double eps);
 
 	/** \see SetNode */
 	virtual SetNode* union_(const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps);

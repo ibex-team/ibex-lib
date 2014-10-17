@@ -10,10 +10,10 @@
 #ifndef __IBEX_SEP_CTC_PAIR_H__
 #define __IBEX_SEP_CTC_PAIR_H__
 
-namespace ibex {
-
 #include "ibex_Sep.h"
 #include "ibex_Ctc.h"
+
+namespace ibex {
 
 /**
  * \ingroup set

@@ -21,14 +21,14 @@ CtcNotIn::CtcNotIn(Function& f, const Interval& y) : Ctc(f.nb_var()), f(f), d1(f
 
 CtcNotIn::CtcNotIn(Function& f, const IntervalVector& y) : Ctc(f.nb_var()), f(f), d1(f.expr().dim), d2(f.expr().dim) {
 	assert(f.expr().dim.is_vector());
-	d1.i()=Interval(NEG_INFINITY,y.lb());
-	d2.i()=Interval(y.ub(),POS_INFINITY);
+	d1.v()=y.lb()+IntervalVector(y.size(),Interval::NEG_REALS);
+	d2.v()=y.ub()+IntervalVector(y.size(),Interval::POS_REALS);
 }
 
 CtcNotIn::CtcNotIn(Function& f, const IntervalMatrix& y) : Ctc(f.nb_var()), f(f), d1(f.expr().dim), d2(f.expr().dim) {
 	assert(f.expr().dim.is_matrix());
-	d1.i()=Interval(NEG_INFINITY,y.lb());
-	d2.i()=Interval(y.ub(),POS_INFINITY);
+	d1.m()=y.lb()+IntervalMatrix(y.nb_rows(),y.nb_cols(),Interval::NEG_REALS);
+	d2.m()=y.ub()+IntervalMatrix(y.nb_rows(),y.nb_cols(),Interval::POS_REALS);
 }
 
 

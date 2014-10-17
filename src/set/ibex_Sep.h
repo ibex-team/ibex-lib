@@ -76,7 +76,7 @@ public:
  	 	 	 	 	 	 	 inline implementation
   ============================================================================*/
 
-Sep::~Sep() { }
+inline Sep::~Sep() { }
 
 
 } // namespace ibex

@@ -15,7 +15,6 @@
 #include "ibex_Function.h"
 #include "ibex_NumConstraint.h"
 #include "ibex_CtcFwdBwd.h"
-#include "ibex_CtcIn.h"
 #include "ibex_CtcNotIn.h"
 
 namespace ibex {
@@ -75,28 +74,21 @@ public:
      */
     ~SepFwdBwd();
 
-    /**
-     * \brief Separate a box in two sub-boxes.
-     *
-     * \see ibex::Sep::separate(IntervalVector&, IntervalVector&).
-     */
-    void separate(IntervalVector &x_in, IntervalVector &x_out);
-
 };
 
 /* ============================================================================
  	 	 	 	 	 	 	 inline implementation
   ============================================================================*/
 
-SepFwdBwd::SepFwdBwd(Function &f, CmpOp op) : SepCtcPair(*new CtcFwdBwd(f,!op), *new CtcFwdBwd(f,op)) { }
+inline SepFwdBwd::SepFwdBwd(Function &f, CmpOp op) : SepCtcPair(*new CtcFwdBwd(f,!op), *new CtcFwdBwd(f,op)) { }
 
-SepFwdBwd::SepFwdBwd(Function &f, const Interval &y): SepCtcPair(*new CtcNotIn(f,y), *new CtcFwdBwd(f,y)) { }
+inline SepFwdBwd::SepFwdBwd(Function &f, const Interval &y): SepCtcPair(*new CtcNotIn(f,y), *new CtcFwdBwd(f,y)) { }
 
-SepFwdBwd::SepFwdBwd(Function &f, const IntervalVector &y): SepCtcPair(*new CtcNotIn(f,y), *new CtcFwdBwd(f,y)) { }
+inline SepFwdBwd::SepFwdBwd(Function &f, const IntervalVector &y): SepCtcPair(*new CtcNotIn(f,y), *new CtcFwdBwd(f,y)) { }
 
-SepFwdBwd::SepFwdBwd(Function &f, const IntervalMatrix &y): SepCtcPair(*new CtcNotIn(f,y), *new CtcFwdBwd(f,y)) { }
+inline SepFwdBwd::SepFwdBwd(Function &f, const IntervalMatrix &y): SepCtcPair(*new CtcNotIn(f,y), *new CtcFwdBwd(f,y)) { }
 
-SepFwdBwd::~SepFwdBwd(){
+inline SepFwdBwd::~SepFwdBwd(){
 	delete &ctc_out;
 	delete &ctc_in;
 }
