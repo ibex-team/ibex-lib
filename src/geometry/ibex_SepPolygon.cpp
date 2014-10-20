@@ -120,43 +120,6 @@ void SepPolygon::precalc_values() {
 	}
 }
 
-bool SepPolygon::pointInPolygon(double x, double y) {
-
-	int j=ax.size()-1;
-	bool  oddNodes=true;
-
-	for (uint i=0; i<ax.size(); i++) {
-		if (((ay[i]< y && ay[j]>=y)
-				||
-			 (ay[j]< y && ay[i]>=y))) {
-			oddNodes^=(y*multiple[i]+constant[i]<x);
-		}
-		j=i;
-	}
-
-	return oddNodes;
-}
-
-
-bool SepPolygon::pointInPolygon2(double x, double y) {
-
-	int   i, j=ay.size()-1;
-	bool  oddNodes=NO;
-
-	for (i=0; i<ay.size(); i++) {
-		if ((ay[i]<y && ay[j]>=y)
-				||
-			(ay[j]<y && ay[i]>=y)) {
-			if (ax[i]+(y-ay[i])/(ay[j]-ay[i])*(ax[j]-ax[i])<x) {
-				oddNodes=!oddNodes;
-			}
-		}
-		j=i;
-	}
-
-	return oddNodes;
-}
-
 void SepPolygon::inv() {
 	//    std::cout << inverse << std::endl;
 	inverse = (inverse == true) ? false: true;
