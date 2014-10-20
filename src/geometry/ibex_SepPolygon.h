@@ -28,7 +28,14 @@ class SepPolygon : public Sep {
 public:
 
 	/**
-	 * TODO: add comment
+	 * Create a Separator with the polygone passed as argument.
+     * 
+     * polygon is defined as an union of segments given in a clockwise order.
+     * Si unit test for an example of usage
+     * \param _ax list of x coordinate of the first point of each segment
+     * \param _ay list of y coordinate of the first point of each segment
+     * \param _bx list of x coordinate of the second point of each segment
+     * \param _by list of y coordinate of the second point of each segment
 	 */
     SepPolygon(vector<double>& _ax, vector<double>& _ay, vector<double>& _bx, vector<double>& _by);
 
