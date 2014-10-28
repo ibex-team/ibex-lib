@@ -8,8 +8,8 @@
 // Last Update : Mar 24, 2014
 //============================================================================
 
-#ifndef __IBEX_SEP_POINT_IN_POLYGON_H__
-#define __IBEX_SEP_POINT_IN_POLYGON_H__
+#ifndef __IBEX_SEP_POLYGON_H__
+#define __IBEX_SEP_POLYGON_H__
 
 #include "ibex_Sep.h"
 #include "ibex_CtcUnion.h"
@@ -50,12 +50,12 @@ namespace ibex {
  *
  * Principle
  *
- * To our knowledge, no explicit contractor for the contraint
+ * To our knowledge, no explicit contractor for the constraint
  * "Point in inside the polygon" exists when the polygon is non convex. Only a contractor
- * for the border is avaiable.
+ * for the border is available.
  * To solve this issue, with an inner an outer set,
- * the separator approach need to be used.
- * From an inital box, the minimal contractor on the border of the polygon is called
+ * the separator approach needs to be used.
+ * From an initial box, the minimal contractor on the border of the polygon is called
  * and a test is used to classify each removed part into x_in and x_out.
  *
  *
@@ -65,7 +65,7 @@ class SepPolygon : public Sep {
 public:
 
 	/**
-	 * Create a Separator with the polygone passed as argument.
+	 * Create a Separator with the polygon passed as argument.
      * 
      * A polygon is defined as an union of segments given in a counter-clockwise order.
      * See unit test for an example of usage
@@ -103,8 +103,8 @@ public:
 private:
     /**
      * @brief cseg Contractor on the border of the polygon.
-     * conposed of an union of segments.
-     * This contractor is minimal  as an union of minimal contractors.
+     * Composed of an union of segments.
+     * This contractor is minimal as an union of minimal contractors.
      */
     CtcUnion cseg;
 
@@ -125,4 +125,4 @@ private:
 
 } // end namespace
 
-#endif // __IBEX_SEP_POINT_IN_POLYGON_H__
+#endif // __IBEX_SEP_POLYGON_H__
