@@ -29,20 +29,13 @@ double argument(double mx, double my, double xa, double ya, double xb, double yb
 	double norm_ma = hypot(ma_x, ma_y);
 	double norm_mb = hypot(mb_x, mb_y);
 
-	//    ma_x /= norm_ma;
-	//    ma_y /= norm_ma;
-
-	//    mb_x /= norm_mb;
-	//    mb_y /= norm_mb;
-
 	double cos_theta = (ma_x*mb_x + ma_y*mb_y) / (norm_ma*norm_mb);
 	double sin_theta = (ma_x*mb_y - ma_y*mb_x) / (norm_ma*norm_mb);
-	//double mod = (sin_theta >= 0 ) ? 1 : -1;
-	return atan2(sin_theta,cos_theta);//mod *acos(cos_theta);
+
+	return atan2(sin_theta,cos_theta);
 }
 
 
-// TODO: Benoit, check this.
 Array<Ctc> segment_ctc_list(vector<double>& ax, vector<double>& ay, vector<double>& bx, vector<double>& by) {
 	Array<Ctc> l(ax.size());
 
@@ -125,20 +118,20 @@ void SepPolygon::inv() {
 	inverse = (inverse == true) ? false: true;
 }
 
-int SepPolygon::pnpoly(double testx, double testy) {
+int SepPolygon::pnpoly(double x, double y) {
 
 	int i, j, c = 0;
 	int nvert = ay.size();
 	for (i = 0, j = nvert-1; i < nvert; j = i++) {
-		if ( ((ay[i]>testy) != (ay[j]>testy)) &&
-				(testx < (ax[j]-ax[i]) * (testy-ay[i]) / (ay[j]-ay[i]) + ax[i]) )
+        if ( ((ay[i]>y) != (ay[j]>y)) &&
+                (x < (ax[j]-ax[i]) * (y-ay[i]) / (ay[j]-ay[i]) + ax[i]) )
 			c = !c;
 	}
 	return c;
 }
 
 //===================================================================
-bool SepPolygon::check(IntervalVector& X) {
+bool SepPolygon::PointInPoly(IntervalVector& X) {
 	double mx = X[0].mid();
 	double my = X[1].mid();
 

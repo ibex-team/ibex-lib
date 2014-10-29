@@ -110,4 +110,3 @@ clean: $(SUBDIRS)
 	rm -f $(IBEX_INC_DIR)/ibex_$(SUBLIB)_Interval.h_; \
 	rm -f $(DISTRIB).tar.gz
 	
-	
