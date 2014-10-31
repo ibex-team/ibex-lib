@@ -21,13 +21,15 @@ namespace ibex {
 /**
  * \ingroup geometry
  *
- * TODO: add comment
- */
+ * Minimal contractor for a segment */
 class CtcSegment : public Ctc {
 
 public:
 	/**
-	 * \brief TODO: add comment
+	 * \brief create the contracteur for the segment [a, b] where
+	 *	a = (ax, ay) and b = (bx, by)
+	 *	This contractor is associated with the set of all point which
+	 *	are on the segment.
 	 */
     CtcSegment(double ax, double ay, double bx, double by);
 
@@ -37,7 +39,7 @@ public:
     virtual void contract(IntervalVector& box);
 
 	/**
-	 * \brief TODO: add comment
+	 * \brief Contracts the input box on the segment [a, b] passed as parameters
 	 */
     void contract(IntervalVector &box, double ax, double ay, double bx, double by);
 
@@ -47,10 +49,11 @@ public:
     ~CtcSegment();
 
 protected:
-    /** TODO: add comment */
+    /** Box which containts the box to be contracted and the segment parameters  */
     IntervalVector X_with_params;
 
-    /** TODO: add comment */
+    /** Constraint used by the contractor : the point must belong the the line and 
+    	to the box which encloses the segment */
     NumConstraint *ncf, *ncg;
 
     /** Contractors associated to ncf and ncg. */

@@ -15,7 +15,8 @@
 #include "ibex_CtcUnion.h"
 
 using namespace std;
-
+// TODO  : Remove proprietary code and add option to choose the test
+// TODO Write tests.
 namespace ibex {
 
 /**
@@ -117,10 +118,17 @@ private:
     bool inverse;
 
     vector<double> multiple, constant;
+    /**
+     * @brief check if the middle of the the box X is inside the polygon
+     * @param X Box to test
+     * @return true
+     */
     bool check(IntervalVector &X);
+
     void precalc_values();
     bool pointInPolygon(double x, double y);
-    int pnpoly(double testx, double testy);
+
+    int pnpoly(double x, double y);
 };
 
 } // end namespace
