@@ -11,8 +11,9 @@
 #ifndef __IBEX_SEP_POLYGON_H__
 #define __IBEX_SEP_POLYGON_H__
 
-#include "ibex_Sep.h"
+#include "ibex_SepBoundaryCtc.h"
 #include "ibex_CtcUnion.h"
+#include "ibex_PdcInPolygon.h"
 
 using namespace std;
 // TODO  : Remove proprietary code and add option to choose the test
@@ -61,7 +62,7 @@ namespace ibex {
  *
  *
  */
-class SepPolygon : public Sep {
+class SepPolygon : public SepBoundaryCtc {
 
 public:
 
@@ -70,6 +71,11 @@ public:
      * 
      * A polygon is defined as an union of segments given in a counter-clockwise order.
      * See unit test for an example of usage
+     *
+     * The polygon boundary contractor is composed of a union of
+     * contractor on segments (CtcSegment).
+     * This contractor is minimal as an union of minimal contractors.
+     * See #ibex::SepBoundaryCtc.
      *
      * \param _ax list of x coordinate of the first point of each segment
      * \param _ay list of y coordinate of the first point of each segment
@@ -83,52 +89,6 @@ public:
 	 */
    ~SepPolygon();
 
-	/**
-	 * \brief Separate the box.
-	 */
-    virtual void separate(IntervalVector& x_in, IntervalVector& x_out);
-
-    /**
-     * @brief Check if a point is inside the polygon
-     * @param x coordinate of the point
-     * @param y coordinate of the point
-     * @return true of the point is inside the polygon, false otherwise
-     */
-    bool pointInPolygon2(double x, double y);
-
-	/**
-     * Inverse the inner and outer part of the polygon.
-	 */
-    void inv();
-
-private:
-    /**
-     * @brief cseg Contractor on the border of the polygon.
-     * Composed of an union of segments.
-     * This contractor is minimal as an union of minimal contractors.
-     */
-    CtcUnion cseg;
-
-    /** Definition of the segment of the polygon */
-    vector<double>& ax;
-    vector<double>& ay;
-    vector<double>& bx;
-    vector<double>& by;
-
-    bool inverse;
-
-    vector<double> multiple, constant;
-    /**
-     * @brief check if the middle of the the box X is inside the polygon
-     * @param X Box to test
-     * @return true
-     */
-    bool check(IntervalVector &X);
-
-    void precalc_values();
-    bool pointInPolygon(double x, double y);
-
-    int pnpoly(double x, double y);
 };
 
 } // end namespace
