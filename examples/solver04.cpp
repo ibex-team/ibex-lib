@@ -39,7 +39,7 @@ int main(int argc, char** argv) {
 	// The ACID contractor (component of the contractor  when filtering == "acidhc4" or "acidhc4n")
 	CtcAcid acid(sys,hc44cid);
 	// The 3BCID contractor (3bcid component of the contractor when filtering == "3bcidhc4") on all variables
-	Ctc3BCid c3bcid(sys.nb_var, hc44cid);
+	Ctc3BCid c3bcid(hc44cid);
 
 
 	// Build contractor #2:
@@ -163,8 +163,8 @@ int main(int argc, char** argv) {
 	// Display the cpu time used
 	cout << "cpu time used=" << s.time << "s."<< endl;
 
-	//	if (filtering == "acidhc4" || filtering=="acidhc4n" )
-	//	  cout    << " nbcidvar " <<  acid.nbvar_stat() << endl;
+	if (filtering == "acidhc4" || filtering=="acidhc4n" )
+	  cout    << " nbcidvar " <<  acid.nbvar_stat() << endl;
 	delete bs;
 	delete ctc;
 	if (linearrelaxation=="xn" ||linearrelaxation=="compo" || linearrelaxation=="art" )
