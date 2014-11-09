@@ -572,9 +572,163 @@ So let us take the same linear system as above and replace the ``LinearRelaxFixe
 
 Replacing the ``LinearRelaxFixed`` instance by an instance of ``MyLinearRelax`` gives exactly the same result.
 
+.. _ctc-quantif:
+
 ------------------------------
 Exists and ForAll
 ------------------------------
 
-*(to be completed)*
+The ``CtcExist`` and ``CtcForAll`` contractors allow to deal with quantifiers in constraints, in a generic way.
+
+Assume we have built a contractor C w.r.t. a constraint c(x,y) (note that we have deliberatly split here the variables of c into two sub-sets: :math:`x=(x_1,\ldots)` and :math:`y=(y_1,\ldots)`). 
+
+The ``CtcExist`` operator produces from C a contractor with respect to the constraint c where the variable y has
+been *existantially quantified*. More precsiely, the result is a contractor w.r.t. to the constraint c' defined as follows:
+
+.. math::
+   c'(x) \iff \exists y\in[y], \ c(x,y).
+
+where [y] is a a user-defined box.
+
+Similarly, ``CtcForAll`` produces a contractor w.r.t.:
+
+.. math::
+   \forall y\in[y], \ c(x,y).
+
+It is important to notice that the contractor ``CtcExist``/``CtcForAll`` expects as input two boxes, each playing a different role:
+
+- a box that represents **the domain of y**. This box is read or written in a specific field of ``CtcExist``/``CtcForAll`` called ``y_init``.
+  The domain of y is a parameter that must be initialized priori to contractions. It can also be dynamically updated between two contractions
+  but it is considered as fixed during one contraction.
+- a box that represents **the domain of x**: this is the box that ``CtcExist``/``CtcForAll`` waits as a contractor. This box 
+  is the one in argument of the ``contract(...)`` function.
+  
+The contractors work as depicted on the following pictures (which illustrate the principles of the algorithms, but the actual implementation is a little more clever).
+
++-----------------------------------------+-----------------------------------------------+
+| .. image:: ctcquantif1.png              |  .. image:: ctcquantif3.png                   |
+|    :width: 350 px                       |     :width: 350 px                            |
+|                                         |                                               |
+| **CtcExist. (a)** The domain of y is    | **CtcExist. (b)** each box is contracted with |
+| split until a precision of              | the sub-contractor and projected onto x.      |
+| :math:`\varepsilon` is reached.         | The result is the union (hull) of all these   |
+|                                         | projections (the interval in green).          |
++-----------------------------------------+-----------------------------------------------+
+
++------------------------------------------+------------------------------------------------+
+| .. image:: ctcquantif4.png               |  .. image:: ctcquantif5.png                    |
+|    :width: 350 px                        |     :width: 350 px                             |
+|                                          |                                                |
+| **CtcForAll. (a)** The domain of y is    | **CtcForAll. (b)** each box is contracted with |
+| split until a precision of               | the sub-contractor and projected onto x.       |
+| :math:`\varepsilon` is reached. A box is | The result is the intersection of all these    |
+| then formed by taking the midpoint for y.| projections (the interval in green).           |
++------------------------------------------+------------------------------------------------+
+
+Here is a first example. We consider the constraint :math:`c(x,y)\iff x^2+y^2\le 1`.
+When a constraint is given directly to a ``CtCExist``/``CtcForAll`` operator, this constraint
+is automatically transformed to a ``CtcFwdBwd`` contractor.
+
+If the domain for y is set to [-1,1], the set of all x such that it exists y in [-1,1] with
+(x,y) satisfying the constraint is also [-1,1]. This can be observed in the following program:
+
+.. literalinclude:: ../examples/doc-contractor.cpp
+   :language: cpp
+   :start-after: ctc-exist-1-C
+   :end-before:  ctc-exist-1-C
+
+The output is:
+
+.. literalinclude:: ../examples/doc-contractor.txt
+   :start-after: ctc-exist-1-O
+   :end-before:  ctc-exist-1-O
+
+
+In this example, we have set the value of :math:`\varepsilon` to 1.0 which is a very crude precision.
+In fact, the result would have been the same with an arbitrarly large precision, simply because the contraction of
+the full box [-10,10]x[-1,1] is optimal in this case. In other words, splitting y (i.e., using the ``CtcExist`` operator)
+is so far totally superfluous.
+
+To create a more interesting example (where optimiality of a single contraction is lost) we consider two constraints:
+
+.. math::
+   x^2+y^2\le 1 \ \wedge \ x=y.
+
+The set of solutions is the segment depicted in the figure below.
+
+.. figure:: ctcquantif6.png
+   :width: 200 px
+   :align: center
+
+Now the value of :math:`\varepsilon` has an impact on the accuracy of the result, as the next program illustrates:
+
+**Note**: to create a conjunction of two constraints, we introduce a vector-valued function because the current 
+          constructor of ``CtCExist`` does not accept a ``System`` (this shall be fixed in a future release).
+          You may also consider in this situation building ``CtcExist`` directly :ref:`from a contractor <ctc-quantif-generic>`.
+
+.. literalinclude:: ../examples/doc-contractor.cpp
+   :language: cpp
+   :start-after: ctc-exist-2-C
+   :end-before:  ctc-exist-2-C
+
+The output is:
+
+.. literalinclude:: ../examples/doc-contractor.txt
+   :start-after: ctc-exist-2-O
+   :end-before:  ctc-exist-2-O
+
+**Warning:** As we have explained, both ``CtcExist`` and ``CtcForAll`` deploy internally a search tree on the variables y until some precision 
+:math:`\varepsilon` is reached (the precision is uniform so far).
+The complexity of ``CtcExist`` and ``CtcForAll`` are therefore exponential in the number :math:`n_y` of variables y
+and with potentially a ``big constant''. Roughly, the complexity is in :math:`O\Bigl(\Bigl[\frac{max_i \ rad(y_i)}{\varepsilon}\Bigr]^{n_y}\Bigr)`. A good way to alleviate this high complexity is to use a :ref:`adaptative precision <ctc-quantif-adapt>`. 
+but it is anyway strongly recommended to limit the number of quantified parameters.
+
+.. _ctc-quantif-generic:
+
+^^^^^^^^^^^^^^^^^^^^^^^^
+The generic constructor
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+If you want to use a specific contractor (either because forward-backward is not appropriate or because your constraint is something more exotic), you can resort to the generic constructor. This constructor simply takes a contractor C in argument instead of a constraint. There is however another slight difference. Since there is no constraint aynmore, you cannot directly specify the parameters with variable symbols directly: ``CtcExist`` cannot map itself these symbols to components of boxes contracted by C (remember that contractors are pure numerical functions). So you need to explicitly state the indices of variables that are transformed into parameters. This indices are given in a bitset structure. Here is a "generic variant" of the last example. Note that we take benefit of this generic constructor to give a :ref:`ctc-hc4`  contractor instead of a simple forward-backward, whence a slightly better contraction.
+
+.. literalinclude:: ../examples/doc-contractor.cpp
+   :language: cpp
+   :start-after: ctc-exist-3-C
+   :end-before:  ctc-exist-3-C
+
+The output is:
+
+.. literalinclude:: ../examples/doc-contractor.txt
+   :start-after: ctc-exist-3-O
+   :end-before:  ctc-exist-3-O
+
+.. _ctc-quantif-adapt:
+
+^^^^^^^^^^^^^^^^^^^^^^^^
+Adaptative precision
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+When a ``CtcExist`` contractor is embedded in a search, one naturally asks for an adptative precision.
+Indeed, when the domain of [x] is large, it is counter-productive to split [y] downto maximal precision.
+More generally, the idea of adptative precision is to dynamically set the precision :math:`\varepsilon` 
+accordingly to the size of the contracted box [x].
+
+You may find suprising that such adptative precision is not part of the ``CtcExist``/``CtcForAll`` interface.
+This is because the adptative behavior can be easily produced thanks to the contractor paradigm. The idea is to
+create a contractor that wraps ``CtcExist`` and simply update the precision. Next program illustrates the concept.
+
+.. literalinclude:: ../examples/doc-contractor.cpp
+   :language: cpp
+   :start-after: ctc-exist-4-C
+   :end-before:  ctc-exist-4-C
+
+It suffices now to replace a ``CtcExist`` object by a ``MyCtcExist`` one.
+
+
+
+
+
+
+
+
 
