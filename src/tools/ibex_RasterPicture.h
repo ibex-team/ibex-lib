@@ -20,8 +20,8 @@ namespace ibex {
  * \brief Raster 2D/3D picture image.
  *
  * It stores occupancy grid and integral image.
- * data are stored in a big array and offsets described by divb_mul_
- * is used to ... ? TODO: complete comments.
+ * data are stored in a linear big array and offsets described by divb_mul_
+ * are used to select element.
  *
  */
 class RasterPicture {
@@ -78,6 +78,9 @@ inline RasterPicture::DATA_TYPE& RasterPicture::operator[](int idx) {
  */
 class RasterPicture2D : public RasterPicture {
 public:
+
+    RasterPicture2D() : RasterPicture(2) {};
+
 	virtual void computeIntegralImage();
 
     void setOrigin(double ox, double oy);
@@ -96,6 +99,9 @@ public:
  */
 class RasterPicture3D : public RasterPicture {
 public:
+
+    RasterPicture3D(): RasterPicture(3) {};
+
 	virtual void computeIntegralImage();
 
 	void setOrigin(double ox, double oy, double oz);

@@ -42,8 +42,11 @@ RasterPicture::~RasterPicture() {
 
 void RasterPicture::init() {
 
+
 	int size = grid_size_[0];
-	for(uint i=1; i<ndim; i++) size*=grid_size_[i];
+	for(uint i=1; i<ndim; i++){
+		size*=grid_size_[i];
+	} 
 	assert(size > 0);
 	data.resize(size);
 	std::fill(data.begin(),data.end(),0);
@@ -55,12 +58,9 @@ void RasterPicture::init() {
 	memset(&zero,0,sizeof(DATA_TYPE));
 }
 
-void RasterPicture::init(const RasterPicture& array) {
-	leaf_size_= array.leaf_size_;
-	origin_ = array.origin_;
-	grid_size_ = array.grid_size_;
-	init();
-}
+void RasterPicture::init(const RasterPicture& array) {     leaf_size_=
+array.leaf_size_;     origin_ = array.origin_;     grid_size_ =
+array.grid_size_;     init(); }
 
 int RasterPicture::save(const char *filename)
 {
@@ -220,6 +220,7 @@ int RasterPicture::load(const char *filename)
 		std::cerr  << "[NDArray::loadFromFile]: error loading data array" << e.what() << std::endl;
 	}
 	in_file.close();
+	return 0;
 	//    std::cerr  << " read " << output.data.size() << " cubes\n";
 }
 
@@ -229,9 +230,9 @@ int RasterPicture::writeHeader(ofstream& out_file, const RasterPicture& input) {
 
 	oss << "VERSION " << FORMAT_VERSION;
 	oss << "\nTYPE " << FF_DATA_IMAGE_ND << " " << ndim << " " << sizeof(DATA_TYPE);
-	oss << "\nLEAF_SIZE"; for(const auto& val: input.leaf_size_) oss << " " << val;
-	oss << "\nORIGIN"; for(const auto& val: input.origin_) oss << " " << val;
-	oss << "\nGRID_SIZE"; for(const auto& val: input.grid_size_) oss << " " << val;
+	oss << "\nLEAF_SIZE"; for(int i =0; i < ndim;  i++) oss << " " << input.leaf_size_[i];
+	oss << "\nORIGIN"; for(int i =0; i < ndim;  i++) oss << " " << input.origin_[i];
+	oss << "\nGRID_SIZE"; for(int i =0; i < ndim;  i++) oss << " " << input.grid_size_[i];
 	oss << "\nEND_HEADER\n";
 	try {
 		out_file << oss.str();
