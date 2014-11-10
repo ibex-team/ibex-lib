@@ -39,6 +39,7 @@ public:
      */
     CtcRasterPicture(RasterPicture &data);
 
+    ~CtcRasterPicture();
     /**
      * @brief Contract a box
      * @param box  box to be contracted
@@ -51,7 +52,7 @@ private:
     /**
      * @brief I 2D array used for storing the integral image of the occupancy grid
      */
-    RasterPicture I;
+    RasterPicture &I;
 
     /**
      * Array storing pixel coordinate. this array is allocated ones at the creation of the object.
