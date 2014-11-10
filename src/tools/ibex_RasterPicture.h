@@ -71,7 +71,7 @@ public:
     // The computation is done in place.
     virtual void computeIntegralImage();
 
-    virtual DATA_TYPE& operator()(uint i, uint j,...); 
+    virtual DATA_TYPE& operator()(int i, int j,...); 
 };
 
 inline RasterPicture::DATA_TYPE& RasterPicture::operator[](int idx) {
@@ -94,7 +94,7 @@ public:
 
     void setGridSize(uint ni, uint nj);
 
-    DATA_TYPE& operator()(uint i, uint j);
+    DATA_TYPE& operator()(int i, int j);
 
 };
 
@@ -115,7 +115,7 @@ public:
 
 	void setGridSize(uint ni, uint nj, uint nk);
 
-	DATA_TYPE& operator()(uint i, uint j, uint k);
+	DATA_TYPE& operator()(int i, int j, int k);
 };
 
 

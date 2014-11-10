@@ -59,6 +59,14 @@ void RasterPicture::init(const RasterPicture& array) {     leaf_size_=
 array.leaf_size_;     origin_ = array.origin_;     grid_size_ =
 array.grid_size_;     init(); }
 
+void RasterPicture::computeIntegralImage(){
+
+}
+
+RasterPicture::DATA_TYPE& RasterPicture::operator()(int i, int j,...){
+	return zero;
+}
+
 int RasterPicture::save(const char *filename)
 {
 	ofstream out_file;
@@ -257,10 +265,14 @@ void RasterPicture2D::setGridSize(uint ni, uint nj) {
 }
 
 // [gch]: Benoit, please check this part of the code
-RasterPicture::DATA_TYPE& RasterPicture2D::operator()(uint i, uint j) {
+RasterPicture::DATA_TYPE& RasterPicture2D::operator()(int i, int j) {
 	int idx = 0;
 	if (i<0 || j<0) return zero;
 	idx = divb_mul_[0]*i  + divb_mul_[1]*j;
+	if(idx >= data.size()){
+		cout << idx << " " << data.size() << " " << i << " " << j << "\n";
+		cout.flush();
+	}
 	assert(idx < data.size());
 	return data.at(idx);
 }
@@ -297,7 +309,7 @@ void RasterPicture3D::setGridSize(uint ni, uint nj, uint nk) {
 }
 
 // [gch]: Benoit, please check this part of the code
-RasterPicture::DATA_TYPE& RasterPicture3D::operator()(uint i, uint j, uint k) {
+RasterPicture::DATA_TYPE& RasterPicture3D::operator()(int i, int j, int k) {
 	int idx = 0;
 	if (i<0 || j<0 || k<0) return zero;
 	idx = divb_mul_[0]*i  + divb_mul_[1]*j + divb_mul_[2]*k;
