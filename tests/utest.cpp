@@ -63,8 +63,8 @@
 #include "TestCtcExist.h"
 #include "TestCtcForAll.h"
 #include "TestCtcPolytopeHull.h"
-// #include "TestCtcImage.h"
-// #include "TestCtcVoxelGrid.h"
+#include "TestCtcRasterPicture.h"
+
 
 
 // ================ strategy ===============
@@ -123,8 +123,7 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestCtcExist()));
     ts.add(auto_ptr<Test::Suite>(new TestCtcForAll()));
     ts.add(auto_ptr<Test::Suite>(new TestCtcPolytopeHull()));
-    // ts.add(auto_ptr<Test::Suite>(new TestCtcImage_1pixel()));
-    // ts.add(auto_ptr<Test::Suite>(new TestCtcVoxelGrid()));
+    ts.add(auto_ptr<Test::Suite>(new TestCtcRasterPicture()));
 
     ts.add(auto_ptr<Test::Suite>(new TestFritzJohn()));
 
