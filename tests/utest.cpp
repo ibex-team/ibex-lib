@@ -62,6 +62,7 @@
 #include "TestCtcExist.h"
 #include "TestCtcForAll.h"
 #include "TestCtcPolytopeHull.h"
+#include "TestCtcSegment.h"
 
 // ================ strategy ===============
 #include "TestOptimizer.h"
@@ -118,6 +119,7 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestCtcExist()));
     ts.add(auto_ptr<Test::Suite>(new TestCtcForAll()));
     ts.add(auto_ptr<Test::Suite>(new TestCtcPolytopeHull()));
+    ts.add(auto_ptr<Test::Suite>(new TestCtcSegment()));
 
     ts.add(auto_ptr<Test::Suite>(new TestFritzJohn()));
 
