@@ -19,6 +19,8 @@ namespace ibex {
  * \ingroup geometry
  *
  * \brief Tests if a box is inside a polygon.
+ * The test is based on the Winding Number (see .http://en.wikipedia.org/wiki/Winding_number)
+ * But fastest method can be found in http://alienryderflex.com/polygon
  *
  * The polygon is not necessarily convex.
  *
@@ -82,19 +84,7 @@ protected:
     std::vector<double>& by;
 
 private:
-    //    /**
-    //     * @brief Check if a point is inside the polygon
-    //     * @param x coordinate of the point
-    //     * @param y coordinate of the point
-    //     * @return true of the point is inside the polygon, false otherwise
-    //     */
-    //    bool pointInPolygon2(double x, double y);
-    void precalc_values();
-
-    int pnpoly(double x, double y);
-
-    std::vector<double> multiple, constant;
-
+   
     bool inverse;
 
 };
