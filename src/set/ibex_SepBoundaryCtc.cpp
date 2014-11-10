@@ -57,7 +57,7 @@ void SepBoundaryCtc::separate(IntervalVector& x_in, IntervalVector& x_out) {
 		Vector candidate_pt=rest[i].mid();
 
 		// or using random points NB_SAMPLES times
-		for (uint k=0; k<NB_SAMPLES-1; k++) {
+        for (uint k=0; k<NB_SAMPLES; k++) {
 
 			res = is_inside.test(candidate_pt);
 

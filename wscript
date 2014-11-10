@@ -171,7 +171,7 @@ def configure (conf):
 	
 ##################################################################################################
 def build (bld):
-	bld.recurse ("src examples 3rd")
+	bld.recurse ("src 3rd")
 
 def distclean (ctx):
 	Scripting.distclean (ctx)

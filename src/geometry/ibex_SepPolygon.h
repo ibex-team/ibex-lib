@@ -16,8 +16,9 @@
 #include "ibex_PdcInPolygon.h"
 
 using namespace std;
-// TODO  : Remove proprietary code and add option to choose the test
-// TODO Write tests.
+
+
+
 namespace ibex {
 
 /**
