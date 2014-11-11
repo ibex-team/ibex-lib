@@ -60,9 +60,9 @@ BoolInterval PdcInPolygon::test(const IntervalVector& x) {
 
 	if(theta.contains(2*M_PI) && !theta.contains(0))
 	{
-		return inverse ? NO : YES;	
+		return inverse ? YES : NO;	
 	} else if (!theta.contains(2*M_PI) && theta.contains(0) ){
-		return inverse ? YES : NO;
+		return inverse ? NO : YES;
 	}
 	// Undetermined case
 	return MAYBE;
