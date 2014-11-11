@@ -680,7 +680,7 @@ The output is:
 **Warning:** As we have explained, both ``CtcExist`` and ``CtcForAll`` deploy internally a search tree on the variables y until some precision 
 :math:`\varepsilon` is reached (the precision is uniform so far).
 The complexity of ``CtcExist`` and ``CtcForAll`` are therefore exponential in the number :math:`n_y` of variables y
-and with potentially a ``big constant''. Roughly, the complexity is in :math:`O\Bigl(\Bigl[\frac{max_i \ rad(y_i)}{\varepsilon}\Bigr]^{n_y}\Bigr)`. A good way to alleviate this high complexity is to use a :ref:`adaptative precision <ctc-quantif-adapt>`. 
+and with potentially a ``big constant''. Roughly, the complexity is in :math:`O\Bigl(\Bigl[\frac{max_i \ rad(y_i)}{\varepsilon}\Bigr]^{n_y}\Bigr)`. A good way to alleviate this high complexity is to use an :ref:`adaptative precision <ctc-quantif-adapt>`. 
 but it is anyway strongly recommended to limit the number of quantified parameters.
 
 .. _ctc-quantif-generic:
@@ -689,7 +689,7 @@ but it is anyway strongly recommended to limit the number of quantified paramete
 The generic constructor
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-If you want to use a specific contractor (either because forward-backward is not appropriate or because your constraint is something more exotic), you can resort to the generic constructor. This constructor simply takes a contractor C in argument instead of a constraint. There is however another slight difference. Since there is no constraint aynmore, you cannot directly specify the parameters with variable symbols directly: ``CtcExist`` cannot map itself these symbols to components of boxes contracted by C (remember that contractors are pure numerical functions). So you need to explicitly state the indices of variables that are transformed into parameters. This indices are given in a bitset structure. Here is a "generic variant" of the last example. Note that we take benefit of this generic constructor to give a :ref:`ctc-hc4`  contractor instead of a simple forward-backward, whence a slightly better contraction.
+If you want to use a specific contractor (either because forward-backward is not appropriate or because your constraint is something more exotic), you can resort to the generic constructor. This constructor simply takes a contractor C in argument instead of a constraint. There is however another slight difference. Since there is no constraint aynmore, you cannot directly specify the parameters as symbols directly: ``CtcExist`` cannot map itself these symbols to components of boxes contracted by C (remember that contractors are pure numerical functions). So you need to explicitly state the indices of variables that are transformed into parameters. This indices are given in a bitset structure. Here is a "generic variant" of the last example. Note that we take benefit of this generic constructor to give a :ref:`ctc-hc4`  contractor instead of a simple forward-backward, whence a slightly better contraction.
 
 .. literalinclude:: ../examples/doc-contractor.cpp
    :language: cpp
