@@ -1,7 +1,7 @@
 //============================================================================
 //                                  I B E X                                   
 // File        : ibex_PdcInPolygon.cpp
-// Author      : Gilles Chabert
+// Author      : Benoit Desrochers, Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Oct 31, 2014
@@ -17,9 +17,7 @@ PdcInPolygon::PdcInPolygon(vector<double> &_ax, vector<double> &_ay, vector<doub
     		ax(_ax),
     		ay(_ay),
     		bx(_bx),
-    		by(_by),
-    		inverse(true) {
-
+    		by(_by) {
 }
 
 namespace {
@@ -37,40 +35,31 @@ Interval argument(Interval mx, Interval my, double xa, double ya, double xb, dou
 	Interval cos_theta = (ma_x*mb_x + ma_y*mb_y) / (norm_ma*norm_mb);
 	Interval sin_theta = (ma_x*mb_y - ma_y*mb_x) / (norm_ma*norm_mb);
 
-	return atan2(sin_theta,cos_theta); // remove "::" (should be intervalized)
+	return atan2(sin_theta,cos_theta);
 }
 
 } // end anonymous namespace
 
 
-
-
-
 BoolInterval PdcInPolygon::test(const IntervalVector& x) {
-
 	
-	Interval mx = Interval(x[0].mid() ); 
-	Interval my = Interval(x[1].mid() ); 
+	Interval mx = Interval(x[0].mid());
+	Interval my = Interval(x[1].mid());
 
 	//Interval cos_theta = 0;
 	Interval theta = Interval(0);
-	for(uint i = 0; i < ax.size(); i++){
+	for(uint i = 0; i < ax.size(); i++) {
 		theta += argument(mx,my,ax[i],ay[i],bx[i],by[i]);
 	}
 
-	if(theta.contains(2*M_PI) && !theta.contains(0))
-	{
-		return inverse ? YES : NO;	
-	} else if (!theta.contains(2*M_PI) && theta.contains(0) ){
-		return inverse ? NO : YES;
+	if(theta.contains(2*M_PI) && !theta.contains(0)) {
+		return NO;
+	} else if (!theta.contains(2*M_PI) && theta.contains(0)) {
+		return YES;
+	} else {
+		// Undetermined case
+		return MAYBE;
 	}
-	// Undetermined case
-	return MAYBE;
-}
-
-
-void PdcInPolygon::inv(){
-	inverse = !inverse;
 }
 
 } // namespace ibex

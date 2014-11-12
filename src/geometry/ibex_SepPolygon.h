@@ -1,7 +1,7 @@
 //============================================================================
 //                                  I B E X
-// File        : Separator for the constraint : Point inside a ppolygon
-// Author      : Benoit Desrochers
+// File        : Separator for the constraint : Point inside a polygon
+// Author      : Benoit Desrochers, Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Mar 24, 2014
@@ -16,8 +16,6 @@
 #include "ibex_PdcInPolygon.h"
 
 using namespace std;
-
-
 
 namespace ibex {
 
@@ -78,12 +76,12 @@ public:
      * This contractor is minimal as an union of minimal contractors.
      * See #ibex::SepBoundaryCtc.
      *
-     * \param _ax list of x coordinate of the first point of each segment
-     * \param _ay list of y coordinate of the first point of each segment
-     * \param _bx list of x coordinate of the second point of each segment
-     * \param _by list of y coordinate of the second point of each segment
+     * \param ax list of x coordinate of the first point of each segment
+     * \param ay list of y coordinate of the first point of each segment
+     * \param bx list of x coordinate of the second point of each segment
+     * \param by list of y coordinate of the second point of each segment
 	 */
-    SepPolygon(vector<double>& _ax, vector<double>& _ay, vector<double>& _bx, vector<double>& _by);
+    SepPolygon(vector<double>& ax, vector<double>& ay, vector<double>& bx, vector<double>& by);
 
 	/**
 	 * \brief Delete this.

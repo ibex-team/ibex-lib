@@ -19,6 +19,7 @@ namespace ibex {
  * \ingroup geometry
  *
  * \brief Tests if a box is inside a polygon.
+ *
  * The test is based on the Winding Number (see .http://en.wikipedia.org/wiki/Winding_number)
  * But fastest method can be found in http://alienryderflex.com/polygon
  *
@@ -55,14 +56,14 @@ public:
 	 * \brief Create the predicate with the list of segments passed as argument.
      *
      * A polygon is defined as an union of segments given in a counter-clockwise order.
-     * See unit test for an example of usage
+     * See the documentation for an example of usage.
      *
-     * \param _ax list of x coordinate of the first point of each segment
-     * \param _ay list of y coordinate of the first point of each segment
-     * \param _bx list of x coordinate of the second point of each segment
-     * \param _by list of y coordinate of the second point of each segment
+     * \param ax list of x coordinate of the first point of each segment
+     * \param ay list of y coordinate of the first point of each segment
+     * \param bx list of x coordinate of the second point of each segment
+     * \param by list of y coordinate of the second point of each segment
 	 */
-	PdcInPolygon(std::vector<double>& _ax, std::vector<double>& _ay, std::vector<double>& _bx, std::vector<double>& _by);
+	PdcInPolygon(std::vector<double>& ax, std::vector<double>& ay, std::vector<double>& bx, std::vector<double>& by);
 
 	/**
 	 * \brief Test the box.
@@ -70,11 +71,6 @@ public:
 	virtual BoolInterval test(const IntervalVector& box);
 
 protected:
-	/**
-     * Inverse the inner and outer part of the polygon.
-	 */
-    void inv();
-
     /**
      * Definition of the segment of the polygon
      */
@@ -82,11 +78,6 @@ protected:
     std::vector<double>& ay;
     std::vector<double>& bx;
     std::vector<double>& by;
-
-private:
-   
-    bool inverse;
-
 };
 
 } // namespace ibex

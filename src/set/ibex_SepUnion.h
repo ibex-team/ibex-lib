@@ -71,7 +71,7 @@ public:
     /**
      * \brief Separate a box.
      */
-   virtual void separate(IntervalVector &Xin, IntervalVector &Xout) = 0;
+   virtual void separate(IntervalVector &x_in, IntervalVector &x_out);
 
     /**
      * \brief The list of sub-separators.
