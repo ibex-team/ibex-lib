@@ -28,7 +28,6 @@ using namespace std;
 namespace {
 
 const double default_relax_ratio = 0.2;
-const double default_eq_eps = 1.e-8;
 
 // This function is necessary because we need
 // the extended system "ext_sys" to build
@@ -45,9 +44,9 @@ ExtendedSystem& get_ext_sys(System& sys, double eq_prec) {
 // the equality constraints are relaxed with goal_prec
 DefaultOptimizer::DefaultOptimizer(System& _sys, double prec, double goal_prec) :
 		Optimizer(_sys,
-			  ctc(_sys,get_ext_sys(_sys,default_eq_eps),prec), // warning: we don't know which argument is evaluated first
-			  rec(new SmearSumRelative(get_ext_sys(_sys,default_eq_eps),prec)),
-			  prec, goal_prec, goal_prec, 1, default_eq_eps) {
+			  ctc(_sys,get_ext_sys(_sys,default_equ_eps),prec), // warning: we don't know which argument is evaluated first
+			  rec(new SmearSumRelative(get_ext_sys(_sys,default_equ_eps),prec)),
+			  prec, goal_prec, goal_prec, 1, default_equ_eps) {
   
 	srand(1);
 
