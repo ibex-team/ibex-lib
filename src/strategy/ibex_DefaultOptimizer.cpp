@@ -34,9 +34,9 @@ const double default_eq_eps = 1.e-8;
 // the extended system "ext_sys" to build
 // two arguments of the base class constructor (ctc and bsc)
 // and we don't know which argument is evaluated first
-ExtendedSystem& get_ext_sys(System& sys, double goal_prec) {
+ExtendedSystem& get_ext_sys(System& sys, double eq_prec) {
 	if ((*memory())->sys) return *((*memory())->sys); // already built and recorded
-	else return rec(new ExtendedSystem(sys,default_eq_eps));
+	else return rec(new ExtendedSystem(sys,eq_prec));
 }
 
 }
@@ -47,7 +47,7 @@ DefaultOptimizer::DefaultOptimizer(System& _sys, double prec, double goal_prec) 
 		Optimizer(_sys,
 			  ctc(_sys,get_ext_sys(_sys,default_eq_eps),prec), // warning: we don't know which argument is evaluated first
 			  rec(new SmearSumRelative(get_ext_sys(_sys,default_eq_eps),prec)),
-				  prec, goal_prec, goal_prec, 1) {
+			  prec, goal_prec, goal_prec, 1, default_eq_eps) {
   
 	srand(1);
 
