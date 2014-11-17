@@ -12,7 +12,7 @@
 
 namespace ibex {
 
-Multipliers::Multipliers() {
+Multipliers::Multipliers(): lambda(1) {
 
 }
 

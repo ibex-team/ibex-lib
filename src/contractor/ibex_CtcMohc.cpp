@@ -41,26 +41,27 @@ namespace ibex {
   /*****************************/
 
 CtcMohcRevise::CtcMohcRevise(const NumConstraint& c, double epsilon, double univ_newton_min_width,
-		double tau_mohc, bool amohc) :
-		Ctc(c.f.nb_var()), ctr(c.f,c.op), fog(c.f), active_mono_proc(1), box(c.f.nb_var()),
-		tau_mohc(tau_mohc), epsilon(epsilon),
-		univ_newton_min_width(univ_newton_min_width), amohc(amohc) {
+	  double tau_mohc, bool amohc) :
+	   Ctc(c.f.nb_var()), ctr(c.f,c.op), fog(c.f), active_mono_proc(1),
+	   LB(1), RB(1), box(c.f.nb_var()),
+	   tau_mohc(tau_mohc), epsilon(epsilon),
+	   univ_newton_min_width(univ_newton_min_width), amohc(amohc)	{
 
-	LB.resize(ctr.f.nb_var());
-	RB.resize(ctr.f.nb_var());
+  LB.resize(ctr.f.nb_var());
+  RB.resize(ctr.f.nb_var());
 
-	input = new BitSet(0,nb_var-1,BitSet::empt);
-	output = new BitSet(0,nb_var-1,BitSet::empt);
+  input = new BitSet(0,nb_var-1,BitSet::empt);
+  output = new BitSet(0,nb_var-1,BitSet::empt);
 
-	for (int v=0; v<ctr.f.nb_var(); v++) {
-		if (ctr.f.used(v)) {
-			output->add(v);
-			input->add(v);
-		}
-	}
+  for (int v=0; v<ctr.f.nb_var(); v++) {
+	  if (ctr.f.used(v)) {
+		  output->add(v);
+		  input->add(v);
+	  }
+  }
 
-	ApplyFmin=new _3vl[nb_var];
-	ApplyFmax=new _3vl[nb_var];
+  ApplyFmin=new _3vl[nb_var];
+  ApplyFmax=new _3vl[nb_var];
 
 }
 
@@ -1017,39 +1018,30 @@ Interval Function_OG::revise(IntervalVector& box, bool minrevise){
    return ev;
 }
 
-   Function_OG::Function_OG(const Function& ff) :  eso(ff.args(),ff.expr()), _f(eso.get_x(),eso.get_y()) {
+	Function_OG::Function_OG(const Function& ff) :
+				 eso(ff.args(),ff.expr()), _f(eso.get_x(),eso.get_y()),
+				 r_a(_f.nb_var()), r_b(_f.nb_var()), r_c(_f.nb_var()),
+				 _box(_f.nb_var()), _g(_f.nb_var()), g(_f.nb_var()), ga(_f.nb_var()),
+				 gb(_f.nb_var()), aux(_f.nb_var())	{
 
+		for(int o=0; o<_f.nb_var(); o++)
+			r_c[o]=1.0;
 
-       r_a.resize(_f.nb_var());
-       r_b.resize(_f.nb_var());
-       r_c.resize(_f.nb_var());
+		occ = new vector<int>[ff.nb_var()];
+		//occ[i][j] -> var in _f
 
-       for(int o=0; o<_f.nb_var(); o++)
-            r_c[o]=1.0;
+		int* var;
+		eso.var_map(var);
 
-       _box.resize(_f.nb_var());
-       _g.resize(_f.nb_var());
-       aux.resize(_f.nb_var());
-       g.resize(ff.nb_var());
-       ga.resize(ff.nb_var());
-       gb.resize(ff.nb_var());
+		for(int o=0; o<_f.nb_var(); o++){
+			if(ff.used(var[o]))
+				occ[var[o]].push_back(o);
 
+		}
 
-      occ = new vector<int>[ff.nb_var()];
-      //occ[i][j] -> var in _f
+		delete[] var;
 
-      int* var;
-      eso.var_map(var);
-
-      for(int o=0; o<_f.nb_var(); o++){
-        if(ff.used(var[o]))
-			occ[var[o]].push_back(o);
-
-      }
-
-      delete[] var;
-
-   }
+	}
 
 
    void Function_OG::set_ra(int i, Interval val){
