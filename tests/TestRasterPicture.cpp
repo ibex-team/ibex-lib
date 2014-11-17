@@ -23,9 +23,9 @@ void TestRasterPicture::test_init2DRasterPicture(){
     double origin[] = {0,2};
     int grid_size[] = {10,20};
       
-    raster.setOrigin(origin[0],origin[1]);
-    raster.setLeafSize(leaf_size[0],leaf_size[1]);
-    raster.setGridSize(grid_size[0],grid_size[1]);
+    raster.set_origin(origin[0],origin[1]);
+    raster.set_leaf_size(leaf_size[0],leaf_size[1]);
+    raster.set_grid_size(grid_size[0],grid_size[1]);
     
     raster.init();
 
@@ -64,9 +64,9 @@ void TestRasterPicture::test_init3DRasterPicture(){
     double origin[] = {0,2,-1.632};
     int grid_size[] = {10,20,100};
 
-    raster.setOrigin(origin[0],origin[1],origin[2]);
-    raster.setLeafSize(leaf_size[0],leaf_size[1],leaf_size[2]);
-    raster.setGridSize(grid_size[0],grid_size[1],grid_size[2]);
+    raster.set_origin(origin[0],origin[1],origin[2]);
+    raster.set_leaf_size(leaf_size[0],leaf_size[1],leaf_size[2]);
+    raster.set_grid_size(grid_size[0],grid_size[1],grid_size[2]);
 
     raster.init();
 
@@ -99,7 +99,8 @@ void TestRasterPicture::test_init3DRasterPicture(){
 
 void TestRasterPicture::test_readMissingFile(){
     RasterPicture3D array3d;
-    TEST_ASSERT(array3d.load("missing.array3D")!= 0);
+    array3d.load("missing.array3D"); // exit in case of problem (test thread is killed --> reported as fail)
+    TEST_ASSERT(true);
 }
 
 void TestRasterPicture::test_readWrongFileFormat_1(){
@@ -110,8 +111,8 @@ void TestRasterPicture::test_readWrongFileFormat_1(){
     std::ostringstream oss;
     oss.imbue (std::locale::classic ());
 
-    oss << "VERSION " << FORMAT_VERSION;
-    oss << "\nTYPE " << FF_DATA_IMAGE_ND << " " << 2 << " " << sizeof(unsigned char);
+    oss << "VERSION " << RasterPicture::FORMAT_VERSION;
+    oss << "\nTYPE " << RasterPicture::FF_DATA_IMAGE_ND << " " << 2 << " " << sizeof(unsigned char);
     oss << "\nLEAF_SIZE"; for(int i =0; i < 2;  i++) oss << " " << 0;
     oss << "\nORIGIN"; for(int i =0; i < 2;  i++) oss << " " << 0;
     oss << "\nEND_HEADER\n";
@@ -122,7 +123,8 @@ void TestRasterPicture::test_readWrongFileFormat_1(){
     }
     out_file.close();
     RasterPicture2D array2d;
-    TEST_ASSERT(array2d.load("wrong.array2D")!= 0);
+    array2d.load("wrong.array2D"); // exit in case of problem (test thread is killed --> reported as fail)
+    TEST_ASSERT(true);
 }
 
 void TestRasterPicture::test_readWrongFileFormat_2(){
@@ -133,8 +135,9 @@ void TestRasterPicture::test_readWrongFileFormat_2(){
 
 void TestRasterPicture::test_ImageIntegral2D(){
     RasterPicture2D raster;
-    TEST_ASSERT(raster.load("test.array2D")==0);
-    raster.computeIntegralImage();
+    raster.load("test.array2D"); // exit in case of problem (test thread is killed --> reported as fail)
+    TEST_ASSERT(true);
+    raster.compute_integral_image();
 }
 
 
