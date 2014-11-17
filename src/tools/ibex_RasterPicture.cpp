@@ -1,14 +1,14 @@
 //============================================================================
 //                                  I B E X                                   
 // File        : ibex_RasterPicture.cpp
-// Author      : ????, Gilles Chabert
+// Author      : Benoit Desrochers, Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Oct 31, 2014
 //============================================================================
 
 #include "ibex_RasterPicture.h"
-
+#include "ibex_Exception.h"
 
 #include <iostream>
 #include <fcntl.h>
@@ -22,6 +22,10 @@
 using namespace std;
 
 namespace ibex {
+
+
+const char* RasterPicture::FORMAT_VERSION="1.0.0";
+const char* RasterPicture::FF_DATA_IMAGE_ND="DATA_IMD_ND";
 
 RasterPicture::RasterPicture(int ndim) : ndim(ndim), zero(0) {
 	leaf_size_ = new double[ndim];
@@ -39,7 +43,6 @@ RasterPicture::~RasterPicture() {
 
 void RasterPicture::init() {
 
-
 	int size = grid_size_[0];
 	for(uint i=1; i<ndim; i++){
 		size*=grid_size_[i];
@@ -55,211 +58,194 @@ void RasterPicture::init() {
 	memset(&zero,0,sizeof(DATA_TYPE));
 }
 
-void RasterPicture::init(const RasterPicture& array) {     leaf_size_=
-array.leaf_size_;     origin_ = array.origin_;     grid_size_ =
-array.grid_size_;     init(); }
+void RasterPicture::init(const RasterPicture& array) {
+	leaf_size_ = array.leaf_size_;
+	origin_    = array.origin_;
+	grid_size_ = array.grid_size_;
 
-void RasterPicture::computeIntegralImage(){
-
+	init();
 }
 
-RasterPicture::DATA_TYPE& RasterPicture::operator()(int i, int j,...){
-	return zero;
-}
-
-int RasterPicture::save(const char *filename)
-{
+void RasterPicture::save(const char *filename) {
 	ofstream out_file;
 	out_file.open(filename, ios::out | ios::trunc | ios::binary);
-	if(out_file.fail())
-	{
-		std::cerr << "\n[NDArray::loadFromFile] Cannot open file " << filename << "for dumping data \n";
-		return -1;
-	}
 
-	if(writeHeader(out_file, *this) == -1) {
-		//        std::cerr << "[NDArray::saveNDArray]: fail to write header !\n";
-		return -1;
+	if(out_file.fail()) {
+		std::stringstream s;
+		s << "RasterPicture [save]: cannot open file " << filename << "for dumping data";
+		ibex_error(s.str().c_str());
 	}
 
 	try {
 		// write data
 		out_file.write((char*)&data[0],data.size()*sizeof(DATA_TYPE));
-	} catch (std::exception& e){
-		std::cerr  << "[NDArray::loadFromFile] writing error " << e.what() << std::endl;
+	} catch (std::exception& e) {
+		std::stringstream s;
+		s << "RasterPicture [save]: writing error " << e.what() << std::endl;
+		ibex_error(s.str().c_str());
 	}
-	//    std::cerr  << "write II3D data into " << filename << "done \n";
+
 	out_file.close();
-	return 0;
 }
 
 // read header
-int RasterPicture::readHeader(ifstream &in_file, RasterPicture& output){
+void RasterPicture::read_header(ifstream &in_file, RasterPicture& output) {
 
 	std::string line;
 	bool leaf_size_is_set = false, origin_is_set = false, grid_size_is_set  = false;
+
 	// Read the header and fill it in with wonderful values
-	try
-	{
-		while (!in_file.eof ())
-		{
-			getline (in_file, line);
-			// Ignore empty lines
-			if (line == "")
-				continue;
+	while (!in_file.eof()) {
 
-			std::stringstream sstream (line);
-			sstream.imbue (std::locale::classic ());
+		getline (in_file, line);
+		// Ignore empty lines
+		if (line == "")
+			continue;
 
-			std::string line_type;
-			sstream >> line_type;
+		std::stringstream sstream(line);
+		sstream.imbue (std::locale::classic());
 
-			// Ignore comments
-			if (line_type.substr (0, 1) == "#")
-				continue;
+		std::string line_type;
+		sstream >> line_type;
 
-			// Version numbers are not needed for now, but we are checking to see if they're there
-			if (line_type.substr (0, 7) == "VERSION")
-				continue;
+		// Ignore comments
+		if (line_type.substr(0, 1) == "#")
+			continue;
 
-			// Get the file format tag
-			if ( (line_type.substr (0, 4) == "TYPE" ) )
-			{
-				std::string tag;
-				sstream >> tag;
-				if( tag.compare(FF_DATA_IMAGE_ND) != 0)
-					throw "File format does not match the required file format" ;
-				int dim; sstream >> dim;
-				if(dim != ndim){
-					char buf[128];
-					sprintf(buf,"Array dimension of the file does not match the dimension of the array %d != %d",dim,ndim );
-					throw buf;
-				}
-				//                    assert(dim == ndim);
-				continue;
+		// Version numbers are not needed for now, but we are checking to see if they're there
+		if (line_type.substr(0, 7) == "VERSION")
+			continue;
+
+		// Get the file format tag
+		if (line_type.substr(0, 4) == "TYPE") {
+
+			std::string tag;
+			sstream >> tag;
+
+			if (tag.compare(FF_DATA_IMAGE_ND) != 0) {
+				in_file.close ();
+				ibex_error("RasterPicture [read_header]: file format does not match the required file format");
 			}
 
-			// Get the acquisition viewpoint
-			if (line_type.substr (0, 9) == "LEAF_SIZE")
-			{
-				// [gch]: Benoit, please check this part of the code
-				sstream >> leaf_size_[0];
-				sstream >> leaf_size_[1];
-				if (ndim==3) sstream >> leaf_size_[2];
+			int dim; sstream >> dim;
 
-				leaf_size_is_set = true;
-				continue;
+			if (dim != ndim) {
+				in_file.close ();
+				std::stringstream s;
+				s << "RasterPicture [read_header]: array dimension of the file (" << dim << ") ";
+				s << "does not match the dimension of the array (" << ndim << ")";
+				ibex_error(s.str().c_str());
 			}
-
-			// Get the acquisition viewpoint
-			if (line_type.substr (0, 6) == "ORIGIN")
-			{
-				// [gch]: Benoit, please check this part of the code
-				sstream >> origin_[0];
-				sstream >> origin_[1];
-				if (ndim==3) sstream >> origin_[2];
-
-				origin_is_set = true;
-				continue;
-			}
-
-			// Get the acquisition viewpoint
-			if (line_type.substr (0, 9) == "GRID_SIZE")
-			{
-				// [gch]: Benoit, please check this part of the code
-				sstream >> grid_size_[0];
-				sstream >> grid_size_[1];
-				if (ndim==3) sstream >> grid_size_[2];
-
-				grid_size_is_set = true;
-				continue;
-			}
-			if (line_type.substr(0,10) == "END_HEADER")
-				break;
-
+			continue;
 		}
-	} catch (const char *exception)
-	{
-		std::cerr << "[NDArray::readHeader] "  <<  exception << "\n";
-		in_file.close ();
-		return (-1);
+
+		// Get the acquisition viewpoint
+		if (line_type.substr(0, 9) == "LEAF_SIZE") {
+			// [gch]: Benoit, please check this part of the code
+			sstream >> leaf_size_[0];
+			sstream >> leaf_size_[1];
+			if (ndim==3) sstream >> leaf_size_[2];
+
+			leaf_size_is_set = true;
+			continue;
+		}
+
+		// Get the acquisition viewpoint
+		if (line_type.substr (0, 6) == "ORIGIN") {
+			// [gch]: Benoit, please check this part of the code
+			sstream >> origin_[0];
+			sstream >> origin_[1];
+			if (ndim==3) sstream >> origin_[2];
+
+			origin_is_set = true;
+			continue;
+		}
+
+		// Get the acquisition viewpoint
+		if (line_type.substr (0, 9) == "GRID_SIZE") {
+			// [gch]: Benoit, please check this part of the code
+			sstream >> grid_size_[0];
+			sstream >> grid_size_[1];
+			if (ndim==3) sstream >> grid_size_[2];
+
+			grid_size_is_set = true;
+			continue;
+		}
+		if (line_type.substr(0,10) == "END_HEADER")
+			break;
+
 	}
 
-	if(leaf_size_is_set && grid_size_is_set && origin_is_set){
+	if(leaf_size_is_set && grid_size_is_set && origin_is_set) {
 		output.init();
 	} else {
-		std::cerr << "[NDArray::readHeader] FIELD ";
-		if(!leaf_size_is_set) std::cerr << "LEAF_SIZE ";
-		if(!grid_size_is_set) std::cerr << "GRID_SIZE ";
-		if(!origin_is_set) std::cerr << "ORIGIN ";
-		std::cerr << "is missing\n";
-		return -1;
-	}
-	return 0;
+		std::stringstream s;
+		s << "RasterPicture [read_header]: field ";
+		if(!leaf_size_is_set) s << "LEAF_SIZE ";
+		if(!grid_size_is_set) s << "GRID_SIZE ";
+		if(!origin_is_set) s << "ORIGIN ";
+		s << "is missing\n";
 
+		ibex_error(s.str().c_str());
+	}
 }
 
 
-int RasterPicture::load(const char *filename)
-{
+void RasterPicture::load(const char *filename) {
 	std::ifstream in_file;
 	in_file.open(filename, ios::in | ios::binary);
-	if(in_file.fail())
-	{
-		std::cerr  << "\n[NDArray::loadFromFile]: Cannot open file " << filename << " for reading data \n";
-		return -1;
+	if(in_file.fail()) {
+		std::stringstream s;
+		s << "RasterPicture [load]: cannot open file " << filename << "for reading data";
+		ibex_error(s.str().c_str());
 	}
 
-	if(readHeader(in_file, *this) == -1){
-		//        std::cerr << "[NDArray::loadFromFile]: fail to read header !\n";
-		return -1;
-	}
-	try{
-		for(uint i = 0; i < data.size(); i++){
+	try {
+		for(uint i = 0; i < data.size(); i++) {
 			DATA_TYPE tmp = 0;
 			in_file.read((char*)&tmp,sizeof(DATA_TYPE));
 			this->data[i] = tmp;
 
 		}
-	} catch (std::exception &e){
-		std::cerr  << "[NDArray::loadFromFile]: error loading data array" << e.what() << std::endl;
+	} catch (std::exception& e) {
+		std::stringstream s;
+		s << "RasterPicture [load]: reading error " << e.what() << std::endl;
+		ibex_error(s.str().c_str());
 	}
 	in_file.close();
-	return 0;
 	//    std::cerr  << " read " << output.data.size() << " cubes\n";
 }
 
-int RasterPicture::writeHeader(ofstream& out_file, const RasterPicture& input) {
+void RasterPicture::write_header(ofstream& out_file, const RasterPicture& input) {
 	std::ostringstream oss;
 	oss.imbue (std::locale::classic ());
 
 	oss << "VERSION " << FORMAT_VERSION;
 	oss << "\nTYPE " << FF_DATA_IMAGE_ND << " " << ndim << " " << sizeof(DATA_TYPE);
 	oss << "\nLEAF_SIZE"; for(int i =0; i < ndim;  i++) oss << " " << input.leaf_size_[i];
-	oss << "\nORIGIN"; for(int i =0; i < ndim;  i++) oss << " " << input.origin_[i];
+	oss << "\nORIGIN";    for(int i =0; i < ndim;  i++) oss << " " << input.origin_[i];
 	oss << "\nGRID_SIZE"; for(int i =0; i < ndim;  i++) oss << " " << input.grid_size_[i];
 	oss << "\nEND_HEADER\n";
 	try {
 		out_file << oss.str();
 	} catch (std::exception& e) {
-		return -1;
+		ibex_error("RasterPicture [write_header]: fail to write");
 	}
-	return 0;
 }
 
 // ==========================================================================================================
 
-void RasterPicture2D::setOrigin(double ox, double oy) {
+void RasterPicture2D::set_origin(double ox, double oy) {
 	origin_[0] = ox;
 	origin_[1] = oy;
 }
 
-void RasterPicture2D::setLeafSize(double lx, double ly) {
+void RasterPicture2D::set_leaf_size(double lx, double ly) {
 	leaf_size_[0] = lx;
 	leaf_size_[1] = ly;
 }
 
-void RasterPicture2D::setGridSize(uint ni, uint nj) {
+void RasterPicture2D::set_grid_size(uint ni, uint nj) {
 	grid_size_[0] = ni;
 	grid_size_[1] = nj;
 }
@@ -277,7 +263,7 @@ RasterPicture::DATA_TYPE& RasterPicture2D::operator()(int i, int j) {
 	return data.at(idx);
 }
 
-void RasterPicture2D::computeIntegralImage() {
+void RasterPicture2D::compute_integral_image() {
 	assert(data.size()>0);
 
 	for(int i=0; i<grid_size_[0]; i++) {
@@ -290,19 +276,19 @@ void RasterPicture2D::computeIntegralImage() {
 
 // ==========================================================================================================
 
-void RasterPicture3D::setOrigin(double ox, double oy, double oz) {
+void RasterPicture3D::set_origin(double ox, double oy, double oz) {
 	origin_[0] = ox;
 	origin_[1] = oy;
 	origin_[2] = oz;
 }
 
-void RasterPicture3D::setLeafSize(double lx, double ly, double lz) {
+void RasterPicture3D::set_leaf_size(double lx, double ly, double lz) {
 	leaf_size_[0] = lx;
 	leaf_size_[1] = ly;
 	leaf_size_[2] = lz;
 }
 
-void RasterPicture3D::setGridSize(uint ni, uint nj, uint nk) {
+void RasterPicture3D::set_grid_size(uint ni, uint nj, uint nk) {
 	grid_size_[0] = ni;
 	grid_size_[1] = nj;
 	grid_size_[2] = nk;
@@ -317,12 +303,12 @@ RasterPicture::DATA_TYPE& RasterPicture3D::operator()(int i, int j, int k) {
 	return data.at(idx);
 }
 
-void RasterPicture3D::computeIntegralImage() {
+void RasterPicture3D::compute_integral_image() {
 	assert(data.size()>0);
 
-	for(int i=0; i<grid_size_[0]; i++){
-		for(int j=0; j<grid_size_[1]; j++){
-			for(int k=0; k<grid_size_[2]; k++){
+	for(int i=0; i<grid_size_[0]; i++) {
+		for(int j=0; j<grid_size_[1]; j++) {
+			for(int k=0; k<grid_size_[2]; k++) {
 				uint& val = (*this)(i,j,k);
 				val = (*this)(i-1,j,k) + (*this)(i,j-1,k) + (*this)(i,j,k-1) + (*this)(i-1, j-1, k-1) + (*this)(i,j,k)
 		            - (*this)(i-1,j,k-1) - (*this)(i,j-1,k-1) - (*this)(i-1,j-1,k);
@@ -330,6 +316,27 @@ void RasterPicture3D::computeIntegralImage() {
 			}
 		}
 	}
+
+//  // generic code in RasterPicture?
+//	int index[ndim]; // pixel counter (with ndim digits). Starts from (0,0,0) until (n0-1,n1-1,n2-1) with ni=grid_size[i].
+//	for (int d=0; d<ndim-1; d++) {
+//		index[d]=0;
+//	}
+
+//	do {
+//      // compute
+	    // ...
+//		// increment the counter
+//		for (int d=0; d<ndim-1; d++) {
+//			// find the next digit to increment
+//			if (index[d]<grid_size_[d]) { index[d]++; break; }
+//			else index[d]=0; // all the smaller digits are reset to 0.
+//		}
+//
+//
+//	} while (index[ndim-1]!=grid_size_[ndim-1]); // quit the loop when (0,0,0) is reached again.
+
+
 }
 
 } // namespace ibex
