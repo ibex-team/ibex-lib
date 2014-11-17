@@ -468,11 +468,14 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 			//		  cout << "buffer size "  << buffer.size() << " " << buffer2.size() << endl;
 			// removes from the heap buffer, the cells already chosen in the other buffer
 
-
 			if (buffer.empty()) {
 				//cout << " buffer empty " << buffer.empty() << " " << buffer2.empty() << endl;
+				// this update is only necessary when buffer was not
+				// initially empty
+				update_uplo();
 				break;
 			}
+
 
 			loup_changed=false;
 			Cell *c;
