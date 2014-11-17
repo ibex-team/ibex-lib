@@ -15,8 +15,8 @@
 
 #ifdef _IBEX_WITH_AMPL_
 
-#include "ibex_System.h"
 #include "ibex_SystemFactory.h"
+#include "ibex_System.h"
 #include "ibex_Expr.h"
 
 struct ASL;
@@ -26,7 +26,9 @@ namespace ibex {
 
 class AmplInterface  {
 private:
-	SystemFactory* 	_problem;
+	friend class System;
+
+	SystemFactory 	_problem;
 	IntervalVector 	_bound_init;
 	ASL*     asl;
 	std::string _nlfile;
@@ -41,8 +43,6 @@ public:
 	AmplInterface(std::string nlfile);
 
 	virtual ~AmplInterface();
-
-	System* getSystem() const;
 
 	bool writeSolution(double* sol, bool found);
 
