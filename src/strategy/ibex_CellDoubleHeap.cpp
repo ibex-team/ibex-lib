@@ -68,7 +68,7 @@ void CellDoubleHeap::flush() {
 	nb_cells=0;
 }
 
-int CellDoubleHeap::size() const {
+unsigned int CellDoubleHeap::size() const {
 	assert(heap1->size()==heap2->size());
 	return nb_cells;
 }
@@ -91,7 +91,8 @@ void CellDoubleHeap::contract_heap(double new_loup) {
 	heap_tmp->root = NULL;
 	delete heap_tmp;
 
-	assert((int)nb_cells==heap2->size());
+	assert(nb_cells==heap2->size());
+	assert(nb_cells==heap1->size());
 
 	if (critpr>0){
 		switch (crit) {

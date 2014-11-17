@@ -158,7 +158,7 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 	}
 	if (trace) {
 		if(stat == LinearSolver::TIME_OUT) std::cout << "Simplex spent too much time" << std::endl;
-		if(stat == LinearSolver::MAX_ITER) std::cout << "Simplex spent too many iterations" << std::endl;
+		if(stat == LinearSolver::MAX_ITER) std::cout << "Simplex spent too many iterations" << std::endl<< box << std::endl;
 	}
 	return false;
 }

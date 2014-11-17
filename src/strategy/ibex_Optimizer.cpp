@@ -255,30 +255,34 @@ void Optimizer::handle_cell(Cell& c, const IntervalVector& init_box ){
 
 		// Computations for the Casado C3, C5, C7 criteria
 		switch (buffer.crit) {
-		case CellHeap_2::C3 :
+		case CellHeap_2::C3 : {
 			compute_pf(c);
 			break;
-		case CellHeap_2::C5 : case CellHeap_2::C7 :
+			}
+		case CellHeap_2::C5 : case CellHeap_2::C7 : {
 			compute_pu(c);
 			compute_pf(c);
 			break;
-		case CellHeap_2::PU:
+			}
+		case CellHeap_2::PU: {
 			compute_pu(c);
 			break;
-		default :
+			}
+		default : {
 			break;
+			}
 		}
 
 		// the cell is put into the 2 heaps
 		buffer.push(&c);
 
 		nb_cells++;
-/*		// reconstruction of the 2 heaps every heap_build_period nodes
+		// reconstruction of the 2 heaps every heap_build_period nodes
 		int heap_build_period=100;
 		if (nb_cells% heap_build_period ==0) {
 			buffer.sort();
 		}
-*/
+
 
 	}
 	catch(EmptyBoxException&) {
@@ -446,8 +450,10 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 
 	// add data pu and pf for
 	switch (buffer.crit) {
-	case CellHeap_2::C3 : case CellHeap_2::C5 : case CellHeap_2::C7 : case CellHeap_2::PU:
-		root->add<OptimData>();	break;
+	case CellHeap_2::C3 : case CellHeap_2::C5 : case CellHeap_2::C7 : case CellHeap_2::PU: {
+		root->add<OptimData>();	
+		break;
+		}
 	default :
 		break;
 	}

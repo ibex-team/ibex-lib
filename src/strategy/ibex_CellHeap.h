@@ -44,7 +44,7 @@ class CellHeap : public CellBuffer {
   void flush();
 
   /** Return the size of the buffer. */
-  int size() const;
+  unsigned int size() const;
 
   /** Return true if the buffer is empty. */
   bool empty() const;

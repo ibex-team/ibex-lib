@@ -68,7 +68,7 @@ void CellHeap_2::flush() {
 	root = NULL;
 }
 
-int CellHeap_2::size() const {
+unsigned int CellHeap_2::size() const {
 	return nb_cells;
 }
 
