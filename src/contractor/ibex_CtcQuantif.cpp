@@ -16,7 +16,7 @@ namespace ibex {
 
 
 CtcQuantif::CtcQuantif(const NumConstraint& ctr, const Array<const ExprSymbol>& y, const IntervalVector& init_box, double prec)
- : Ctc(ctr.f.nb_arg()-y.size()) {
+ : Ctc(ctr.f.nb_arg()-y.size()), y_init(y.size())  {
 	init(ctr, y, init_box, prec);
 }
 
