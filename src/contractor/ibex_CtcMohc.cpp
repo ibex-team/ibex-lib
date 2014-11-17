@@ -43,12 +43,9 @@ namespace ibex {
 CtcMohcRevise::CtcMohcRevise(const NumConstraint& c, double epsilon, double univ_newton_min_width,
 	  double tau_mohc, bool amohc) :
 	   Ctc(c.f.nb_var()), ctr(c.f,c.op), fog(c.f), active_mono_proc(1),
-	   LB(1), RB(1), box(c.f.nb_var()),
+	   LB(c.f.nb_var()), RB(c.f.nb_var()), box(c.f.nb_var()),
 	   tau_mohc(tau_mohc), epsilon(epsilon),
 	   univ_newton_min_width(univ_newton_min_width), amohc(amohc)	{
-
-  LB.resize(ctr.f.nb_var());
-  RB.resize(ctr.f.nb_var());
 
   input = new BitSet(0,nb_var-1,BitSet::empt);
   output = new BitSet(0,nb_var-1,BitSet::empt);

@@ -32,14 +32,11 @@ CtcQuantif::~CtcQuantif(){
 	if (_own_ctc) delete ctc;
 	delete bsc;
 }
-
 void CtcQuantif::init(const NumConstraint& ctr, const Array<const ExprSymbol>& y, const IntervalVector& init_box, double prec) {
 
 	assert(y.size()>0);
 	assert(ctr.f.nb_arg()>y.size());
 	assert(init_box.size()==y.size());
-
-	y_init.resize(y.size());
 
 	y_init = init_box;
 
