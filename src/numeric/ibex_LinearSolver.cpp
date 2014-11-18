@@ -55,6 +55,17 @@ std::ostream& operator<<(std::ostream& os, const LinearSolver::Status_Sol x){
 }
 
 
+int LinearSolver::getNbRows() const {
+	return nb_rows;
+}
+
+double LinearSolver::getObjValue() const {
+	return obj_value;
+}
+
+double LinearSolver::getEpsilon() const {
+	return epsilon;
+}
 
 
 #ifdef _IBEX_WITH_SOPLEX_
@@ -158,18 +169,6 @@ LinearSolver::Status LinearSolver::writeFile(const char* name) {
 	return res;
 }
 
-int LinearSolver::getNbRows() const {
-	return nb_rows;
-}
-
-double LinearSolver::getObjValue() const {
-	return obj_value;
-}
-
-
-double LinearSolver::getEpsilon() const {
-	return epsilon;
-}
 
 LinearSolver::Status LinearSolver::getCoefConstraint(Matrix &A) {
 	LinearSolver::Status res= FAIL;
@@ -495,7 +494,7 @@ LinearSolver::LinearSolver(int nb_vars1, int nb_ctr1, int max_iter,
 		CPXgeterrorstring(envcplex, status, errmsg);
 		std::cerr << errmsg << std::endl;
 		delete[] errmsg;
-		return;
+		throw LPException();
 	}
 
 	if (epsilon <1.e-9) epsilon=1.e-9;
@@ -509,7 +508,7 @@ LinearSolver::LinearSolver(int nb_vars1, int nb_ctr1, int max_iter,
 		CPXgeterrorstring(envcplex, status, errmsg);
 		std::cerr << errmsg << std::endl;
 		delete[] errmsg;
-		return;
+		throw LPException();
 	}
 
 
@@ -520,7 +519,7 @@ LinearSolver::LinearSolver(int nb_vars1, int nb_ctr1, int max_iter,
 		CPXgeterrorstring(envcplex, status, errmsg);
 		std::cerr << errmsg << std::endl;
 		delete[] errmsg;
-		return;
+		throw LPException();
 	}
 
 	status = CPXsetdblparam(envcplex, CPX_PARAM_TILIM, max_time_out);
@@ -530,7 +529,7 @@ LinearSolver::LinearSolver(int nb_vars1, int nb_ctr1, int max_iter,
 		CPXgeterrorstring(envcplex, status, errmsg);
 		std::cerr << errmsg << std::endl;
 		delete[] errmsg;
-		return;
+		throw LPException();
 	}
 
 	status = CPXsetintparam(envcplex, CPX_PARAM_PREDUAL, -1);
@@ -540,7 +539,7 @@ LinearSolver::LinearSolver(int nb_vars1, int nb_ctr1, int max_iter,
 		CPXgeterrorstring(envcplex, status, errmsg);
 		std::cerr << errmsg << std::endl;
 		delete[] errmsg;
-		return;
+		throw LPException();
 	}
 
 	CPXchgobjsen(envcplex, lpcplex, CPX_MIN);
@@ -558,7 +557,7 @@ LinearSolver::LinearSolver(int nb_vars1, int nb_ctr1, int max_iter,
 
 	if (lpcplex == NULL) {
 		std::cerr << "Error CPLEX: Failed to create LP." << std::endl;
-		return;
+		throw LPException();
 	}
 
 	// Creation des variables
@@ -610,7 +609,7 @@ LinearSolver::LinearSolver(int nb_vars1, int nb_ctr1, int max_iter,
 	if (status != 0) {
 		std::cerr << "Error CPLEX: Could not add a new column, error " << status
 				<< std::endl;
-		return;
+		throw LPException();
 	}
 
 	status = CPXaddrows(envcplex, lpcplex, 0, nb_vars*2, nb_vars * 2, rhs, sense,
@@ -618,7 +617,7 @@ LinearSolver::LinearSolver(int nb_vars1, int nb_ctr1, int max_iter,
 
 	if (status != 0) {
 		std::cerr << "Error CPLEX: Could not add a new constraint, error "<< status << std::endl;
-		return;
+		throw LPException();
 	}
 
 	// creation d'un tableau d'indice pour l'initialisation des bornes des variables
@@ -729,36 +728,22 @@ LinearSolver::Status_Sol LinearSolver::solve() {
 
 }
 
-LinearSolver::Status LinearSolver::writeFile(const char* name) {
-	LinearSolver::Status res = FAIL;
-
+void LinearSolver::writeFile(const char* name) {
 	try {
 		int status = CPXwriteprob(envcplex, lpcplex, name, NULL);
 		if (status != 0) {
 			std::cerr << "Failed to write LP to disk." << std::endl;
-			res = FAIL;
-		} else
-			res = OK;
+			throw LPException();
+		}
 	} catch (Exception&) {
-		res = FAIL;
+		throw LPException();
 	}
-	return res;
+	return ;
 }
 
-int LinearSolver::getNbRows() const {
-	return nb_rows;
-}
 
-double LinearSolver::getObjValue() const {
-	return obj_value;
-}
 
-double LinearSolver::getEpsilon() const {
-	return epsilon;
-}
-
-LinearSolver::Status LinearSolver::getCoefConstraint(Matrix &A) {
-	LinearSolver::Status res = FAIL;
+void LinearSolver::getCoefConstraint(Matrix &A) {
 	try {
 		int surplus = 0, nzcnt = 0;
 		int * t_Rmatbeg = new int[nb_rows];
@@ -783,23 +768,21 @@ LinearSolver::Status LinearSolver::getCoefConstraint(Matrix &A) {
 			for (int j = t_Rmatbeg[nb_rows - 1]; j < nzcnt; j++) {
 				A[nb_rows-1][t_Rmatind[j]] = t_Rmatval[j];
 			}
-
-			res = OK;
-		} else
-			res = FAIL;
-
+		}
 		delete[] t_Rmatbeg;
 		delete[] t_Rmatind;
 		delete[] t_Rmatval;
 
+		if (status != 0) throw LPException();
+
 	} catch (Exception&) {
-		res = FAIL;
+		throw LPException();
 	}
-	return res;
+	return;
 }
 
-LinearSolver::Status LinearSolver::getCoefConstraint_trans(Matrix &A_trans) {
-	LinearSolver::Status res = FAIL;
+void LinearSolver::getCoefConstraint_trans(Matrix &A_trans) {
+
 	try {
 		int surplus = 0, nzcnt = 0;
 		int * t_cmatbeg = new int[nb_vars];
@@ -826,22 +809,21 @@ LinearSolver::Status LinearSolver::getCoefConstraint_trans(Matrix &A_trans) {
 				A_trans[nb_vars-1][t_cmatind[j]] = t_cmatval[j];
 			}
 			//std::cout<<A_trans<<std::endl;
-			res = OK;
-		} else
-			res = FAIL;
+		}
 
 		delete[] t_cmatbeg;
 		delete[] t_cmatind;
 		delete[] t_cmatval;
 
+		if (status != 0) throw LPException();
+
 	} catch (Exception&) {
-		res = FAIL;
+		throw LPException();
 	}
-	return res;
+	return ;
 }
 
-LinearSolver::Status LinearSolver::getB(IntervalVector& B) {
-	LinearSolver::Status res = FAIL;
+void LinearSolver::getB(IntervalVector& B) {
 	try {
 		// Get the bounds of the variables
 		double * rhs = new double[nb_rows];
@@ -850,64 +832,52 @@ LinearSolver::Status LinearSolver::getB(IntervalVector& B) {
 			for (int i = 0; i < nb_rows; i++) {
 				B[i] = Interval(-default_max_bound, rhs[i]);
 			}
-			res = OK;
-		} else
-			res = FAIL;
-
+		}
 		delete[] rhs;
+
+		if (status != 0) throw LPException();
 	} catch (Exception&) {
-		res = FAIL;
+		throw LPException();
 	}
-	return res;
+	return ;
 }
 
-LinearSolver::Status LinearSolver::getPrimalSol(Vector & primal) {
-	// In this modelization, the dual is directly stored in CPLEX
-	// So the Primal solution could not be return
-	LinearSolver::Status res = FAIL;
+void LinearSolver::getPrimalSol(Vector & primal) {
+
 	try {
 		if (status_prim == 0) {
 			for (int i = 0; i < nb_vars; i++) {
 				primal[i] = primal_solution[i];
 			}
-			res = OK;
-		} else {
-			res = FAIL;
-		}
+		} else
+			throw LPException();
 
 	} catch (Exception&) {
-		res = FAIL;
+		throw LPException();
 	}
-	return res;
+	return;
 }
 
-LinearSolver::Status LinearSolver::getDualSol(Vector & dual) {
-	// In this modelization, the dual is directly stored in CPLEX
-	// So the Dual solution is the primal solution of the problem in cplex
-	LinearSolver::Status res = FAIL;
+void LinearSolver::getDualSol(Vector & dual) {
+
 	try {
 		// the dual solution ; used by Neumaier Shcherbina test
-
 		if (status_dual == 0) {
-
 			for (int i = 0; i < nb_rows; i++) {
 				dual[i] = (dual_solution[i]< 0) ? dual_solution[i] : 0.0;
 				//dual[i] = dual_solution[i];
 			}
-
-			res = OK;
 		} else
-			res = FAIL;
+			throw LPException();
 
 	} catch (Exception&) {
-		res = FAIL;
+		throw LPException();
 	}
-	return res;
+	return ;
 }
 
-LinearSolver::Status LinearSolver::getInfeasibleDir(Vector & sol) {
-	// In this modelization, the dual is directly stored in CPLEX
-	LinearSolver::Status res = FAIL;
+void LinearSolver::getInfeasibleDir(Vector & sol) {
+
 	try {
 		double * solution_found = new double[nb_rows];
 
@@ -916,124 +886,116 @@ LinearSolver::Status LinearSolver::getInfeasibleDir(Vector & sol) {
 			for (int i = 0; i < nb_rows; i++) {
 				sol[i] = (solution_found[i]< 0) ? solution_found[i] : 0.0;
 			}
-			res = OK;
-		} else
-			res = FAIL;
-
+		}
 		delete[] solution_found;
 
+		if (status!=0) 	throw LPException();
+
 	} catch (Exception&) {
-		res = FAIL;
+		throw LPException();
 	}
 
-	return res;
+	return;
 }
 
-LinearSolver::Status LinearSolver::cleanConst() {
-	LinearSolver::Status res = FAIL;
+void LinearSolver::cleanConst() {
+
 	try {
 		if (dual_solution!=NULL) delete[] dual_solution;
 		dual_solution=NULL;
 		int status = CPXdelrows (envcplex, lpcplex, 2*nb_vars,  nb_rows - 1);
 		nb_rows = 2*nb_vars;
 		obj_value = POS_INFINITY;
-		if (status==0) res = OK;
+		if (status!=0) throw LPException();
+
 	} catch (Exception&) {
-		res = FAIL;
+		throw LPException();
 	}
-	return res;
+	return ;
 
 }
-LinearSolver::Status LinearSolver::cleanAll() {
-	LinearSolver::Status res = FAIL;
+void LinearSolver::cleanAll() {
+
 	try {
 		if (dual_solution!=NULL) delete[] dual_solution;
 		dual_solution=NULL;
 		int status = CPXdelrows (envcplex, lpcplex, 0,  nb_rows - 1);
 		nb_rows = 0;
 		obj_value = POS_INFINITY;
-		 if (status==0) res = OK;
+		if (status!=0) throw LPException();
+
 	} catch (Exception&) {
-		res = FAIL;
+		throw LPException();
 	}
-	return res;
+	return ;
 }
 
-LinearSolver::Status LinearSolver::setMaxIter(int max) {
-	LinearSolver::Status res = FAIL;
-	try {
+void LinearSolver::setMaxIter(int max) {
 
+	try {
 		int status = CPXsetintparam(envcplex, CPX_PARAM_ITLIM, max);
 		if (status != 0) {
 			//std::cerr<< "Error CPLEX: Could not change the maximal number of iteration, error "<< status << std::endl;
-			res = FAIL;
-		} else
-			res = OK;
+			throw LPException();
+		}
 	} catch (Exception&) {
-		res = FAIL;
+		throw LPException();
 	}
-	return res;
+	return ;
 }
 
-LinearSolver::Status LinearSolver::setMaxTimeOut(int time) {
-	LinearSolver::Status res = FAIL;
+void LinearSolver::setMaxTimeOut(int time) {
+
 	try {
 		double t = time;
 		int status = CPXsetdblparam(envcplex, CPX_PARAM_TILIM, t);
 		if (status != 0) {
 			//std::cerr<< "Error CPLEX: Could not change the maximal number of iteration "<< status << std::endl;
-			res = FAIL;
-		} else
-			res = OK;
+			throw LPException();
+		}
 	} catch (Exception&) {
-		res = FAIL;
+		throw LPException();
 	}
-	return res;
+	return ;
 }
 
-LinearSolver::Status LinearSolver::setSense(Sense s) {
-	LinearSolver::Status res = FAIL;
+void LinearSolver::setSense(Sense s) {
+
 	try {
 
 		if (s == LinearSolver::MINIMIZE) {
 			CPXchgobjsen(envcplex, lpcplex, CPX_MIN); // Problem is minimization
-			res = OK;
 		} else if (s == LinearSolver::MAXIMIZE) {
 			CPXchgobjsen(envcplex, lpcplex, CPX_MAX); //Problem is maximisation
-			res = OK;
 		} else
-			res = FAIL;
+			throw LPException();
 
 	} catch (Exception&) {
-		res = FAIL;
+		throw LPException();
 	}
-	return res;
+	return ;
 }
 
-LinearSolver::Status LinearSolver::setVarObj(int var, double coef) {
-	// In this modelization, the dual is directly stored in CPLEX
-	// So the objectif is in the RHS
-	LinearSolver::Status res = FAIL;
+void LinearSolver::setVarObj(int var, double coef) {
+
 	try {
 
-		/* Changement du rhs du dual = objectif du primal (car on est en formulation dual) */
 		int status = CPXchgobj(envcplex, lpcplex, 1, &var, &coef);
 		if (status != 0) {
 			std::cerr
 					<< "Error CPLEX: Could not change the objectif function, error "
 					<< status << std::endl;
-			res = FAIL;
-		} else
-			res = OK;
+			throw LPException();
+		}
 
 	} catch (Exception&) {
-		res = FAIL;
+		throw LPException();
 	}
-	return res;
+	return ;
 }
 
-LinearSolver::Status LinearSolver::initBoundVar(IntervalVector bounds) {
-	LinearSolver::Status res = FAIL;
+void LinearSolver::initBoundVar(IntervalVector bounds) {
+
 	try {
 		// Changement de la fonction objective = rhs du primal (car on est en formulation dual)
 		// Change the LHS and RHS of each constraint associated to the bounds of the variable
@@ -1048,17 +1010,17 @@ LinearSolver::Status LinearSolver::initBoundVar(IntervalVector bounds) {
 			std::cerr
 					<< "Error CPLEX: Could not change the LHS and RHS of each constraint associated to the bounds of the variable, error "
 					<< status << std::endl;
-			res = FAIL;
-		} else
-			res = OK;
+			throw LPException();
+		}
+
 	} catch (Exception&) {
-		res = FAIL;
+		throw LPException();
 	}
-	return res;
+	return ;
 }
 
-LinearSolver::Status LinearSolver::setBoundVar(int var, Interval bound) {
-	LinearSolver::Status res = FAIL;
+void LinearSolver::setBoundVar(int var, Interval bound) {
+
 	try {
 		int * ind = new int[2];
 		ind[0] = var;
@@ -1066,23 +1028,20 @@ LinearSolver::Status LinearSolver::setBoundVar(int var, Interval bound) {
 		tmp[0] = -bound.lb();
 		tmp[1] = bound.ub();
 		int status = CPXchgrhs(envcplex, lpcplex, 2, ind, tmp);
+		delete[] ind;
 
 		if (status != 0) {
 			//std::cerr<< "Error CPLEX: Could not change the bound of a variable, error "<< status << std::endl;
-			res = FAIL;
-		} else
-			res = OK;
-
-		delete[] ind;
-
+			throw LPException();
+		}
 	} catch (Exception&) {
-		res = FAIL;
+		throw LPException();
 	}
-	return res;
+	return ;
 }
 
-LinearSolver::Status LinearSolver::setEpsilon(double eps) {
-	LinearSolver::Status res = FAIL;
+void LinearSolver::setEpsilon(double eps) {
+
 	try {
 
 		if (eps <1.e-9) eps=1.e-9;
@@ -1091,25 +1050,24 @@ LinearSolver::Status LinearSolver::setEpsilon(double eps) {
 		int status = CPXsetdblparam(envcplex, CPX_PARAM_EPOPT, epsilon);
 		if (status != 0) {
 			//std::cerr << "Error CPLEX: Could not change the precision, error "<< status << std::endl;
-			res = FAIL;
+			throw LPException();
 		} else {
 			epsilon = eps;
-			res = OK;
 		}
 	} catch (Exception&) {
-		res = FAIL;
+		throw LPException();
 	}
-	return res;
+	return ;
 
 }
 
-LinearSolver::Status LinearSolver::addConstraint(ibex::Vector& row, CmpOp sign, double rhs) {
-	LinearSolver::Status res = FAIL;
+void LinearSolver::addConstraint(ibex::Vector& row, CmpOp sign, double rhs) {
+
 	try {
-		double * pt_rhs= new double[1];
 		char cc = 'L';
 		if (sign == LEQ || sign == LT || sign == GEQ || sign == GT) {
 
+			double * pt_rhs= new double[1];
 			if (sign == LEQ || sign == LT) {
 				pt_rhs[0] = rhs;
 				for (int i = 0; i < nb_vars; i++)
@@ -1122,20 +1080,20 @@ LinearSolver::Status LinearSolver::addConstraint(ibex::Vector& row, CmpOp sign, 
 
 			int status = CPXaddrows(envcplex, lpcplex, 0, 1, nb_vars, pt_rhs, &cc, r_matbeg,
 					r_matind, r_matval, NULL, NULL);
+			delete[] pt_rhs;
+
 			if (status==0) {
 				nb_rows++;
-				res = OK;
-			} else {
-				res = FAIL;
-			}
-		} else
-			res = FAIL;
+			} else
+				throw LPException();
 
-	delete[] pt_rhs;
+		} else
+			throw LPException();
+
 	} catch (Exception&) {
-		res = FAIL;
+		throw LPException();
 	}
-	return res;
+	return ;
 }
 
 #endif  // END DEF with CPLEX
@@ -1278,18 +1236,7 @@ LinearSolver::Status LinearSolver::writeFile(const char* name) {
 	return res;
 }
 
-int LinearSolver::getNbRows() const {
-	return nb_rows;
-}
 
-double LinearSolver::getObjValue() const {
-	return obj_value;
-}
-
-
-double LinearSolver::getEpsilon() const {
-	return epsilon;
-}
 
 LinearSolver::Status LinearSolver::getCoefConstraint(Matrix &A) {
 	LinearSolver::Status res= FAIL;
@@ -1618,7 +1565,7 @@ LinearSolver::Status LinearSolver::addConstraint(ibex::Vector& row, CmpOp sign, 
 
 
 
-
+/*
 ////////////////////////////////////////////////////////////////////////////////////////////////////////// TODO
 #ifdef _IBEX_WITH_ILOCPLEX_
 
@@ -1733,17 +1680,6 @@ LinearSolver::Status LinearSolver::writeFile(std::string name) {
 	return res;
 }
 
-int LinearSolver::getNbRows() const {
-	return nb_rows;
-}
-
-double LinearSolver::getObjValue() const {
-	return obj_value;
-}
-
-double LinearSolver::getEpsilon() const {
-	return epsilon;
-}
 
 LinearSolver::Status LinearSolver::getCoefConstraint(Matrix &A) {
 	LinearSolver::Status res = FAIL;
@@ -1997,7 +1933,7 @@ LinearSolver::Status LinearSolver::setVarObj(int var, double coef) {
 	// So the objectif is in the RHS
 	LinearSolver::Status res = FAIL;
 	try {
-		/* Changement du rhs du dual = objectif du primal (car on est en formulation dual) */
+		// Changement du rhs du dual = objectif du primal (car on est en formulation dual)
 		int status = CPXchgrhs(envcplex, lpcplex, 1, &var, &coef);
 		if (status != 0) {
 			std::cerr
@@ -2115,7 +2051,7 @@ LinearSolver::Status LinearSolver::addConstraint(ibex::Vector& row, CmpOp sign, 
 }
 
 #endif  // END DEF with ILOCPLEX
-
+*/
 
 
 
