@@ -1183,6 +1183,9 @@ LinearSolver::LinearSolver(int nb_vars1, int nb_ctr, int max_iter, int max_time_
 		myclp->addRow(1, row2Index, row2Value, NEG_INFINITY, POS_INFINITY);
 	}
 
+	delete[] row2Index;
+	delete[] row2Value;
+
 	nb_rows = nb_vars;
 
 	_which =new int[10*nb_ctrs];

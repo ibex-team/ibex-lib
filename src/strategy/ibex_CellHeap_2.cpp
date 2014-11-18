@@ -118,6 +118,7 @@ void CellHeap_2::contract_tmp(double new_loup, HeapNode * node, CellHeap_2 & hea
 		node->left=NULL;
 		node->right=NULL;
 		node->elt=NULL;
+		delete node;
 	}
 	delete node;
 	node= NULL;
