@@ -67,7 +67,6 @@ Ctc*  DefaultSolver::ctc (System& sys, double prec) {
 	// if the system is a sqare system of equations, the third contractor is Newton
 	System* eqs=square_eq_sys(sys);
 	if (eqs) {
-		cout << "NEWTON!" << endl;
 		ctc_list.set_ref(index,rec(new CtcNewton(eqs->f,5e8,prec,1.e-4)));
 		index++;
 	}
