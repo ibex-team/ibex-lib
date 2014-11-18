@@ -3,8 +3,8 @@ python:
   - "2.7"
 # 
 before_install:
-  - sudo apt-get update -qq
-  - sudo apt-get install -y python2.7 flex bison gcc g++ coinor-clp 
+  - sudo apt-get update -q
+  - sudo apt-get install -y --force-yes python2.7 flex bison gcc g++ coinor-clp coinor-libclp-dev 
 # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install: ./waf configure && ./waf 
 # command to run tests, e.g. python setup.py test
