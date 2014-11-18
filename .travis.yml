@@ -1,13 +1,10 @@
 language: python
 python:
   - "2.7"
-#
-virtualenv:
-  system_site_packages: true
 # 
 before_install:
   - sudo apt-get update -q
-  - sudo apt-get install -y --force-yes python2.7 flex bison gcc g++ coinor-clp coinor-libclp-dev 
+  - sudo apt-get install -y --force-yes python2.7 flex bison gcc g++ coinor-libclp-dev 
 # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install: ./waf configure && ./waf 
 # command to run tests, e.g. python setup.py test
