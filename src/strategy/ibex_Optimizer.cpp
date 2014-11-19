@@ -114,7 +114,7 @@ Optimizer::~Optimizer() {
 	}
 	buffer.flush();
 	if (critpr > 0) buffer2.flush();
-
+	if (equs) delete equs;
 	delete mylp;
 	//	delete &(objshaver->ctc);
 	//	delete objshaver;
