@@ -478,9 +478,9 @@ LinearSolver::Status LinearSolver::addConstraint(ibex::Vector& row, CmpOp sign, 
 LinearSolver::LinearSolver(int nb_vars1, int nb_ctr1, int max_iter,
 		int max_time_out, double eps) :
 		nb_ctrs(nb_ctr1), nb_vars(nb_vars1), nb_rows(0), obj_value(0.0),
-		epsilon(eps), envcplex(NULL), lpcplex(NULL),
+		epsilon(eps),
 		primal_solution(new double[nb_vars1]), dual_solution(NULL),
-		status_prim(0), status_dual(0) {
+		status_prim(0), status_dual(0), envcplex(NULL), lpcplex(NULL) {
 
 	int status;
 	envcplex = CPXopenCPLEX(&status);
@@ -1182,6 +1182,9 @@ LinearSolver::LinearSolver(int nb_vars1, int nb_ctr, int max_iter, int max_time_
 		row2Index[0]=j;
 		myclp->addRow(1, row2Index, row2Value, NEG_INFINITY, POS_INFINITY);
 	}
+
+	delete[] row2Index;
+	delete[] row2Value;
 
 	nb_rows = nb_vars;
 

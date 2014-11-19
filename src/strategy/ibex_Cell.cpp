@@ -9,10 +9,17 @@
 //============================================================================
 
 #include "ibex_Cell.h"
+#include <limits.h>
 
 namespace ibex {
- Cell::Cell(const IntervalVector& box) : box(box){
 
+namespace {
+
+int id_count=0;
+}
+
+ Cell::Cell(const IntervalVector& box) : box(box), id(id_count++) {
+	 assert(id_count<ULONG_MAX);
 }
 
 std::pair<Cell*,Cell*> Cell::bisect(const IntervalVector& left, const IntervalVector& right) {
@@ -31,5 +38,10 @@ Cell::~Cell() {
 		delete it->second;
 }
 
+
+std::ostream& operator<<(std::ostream& os, const Cell& c){
+	os << c.box;
+	return os;
+}
 
 } // end namespace ibex

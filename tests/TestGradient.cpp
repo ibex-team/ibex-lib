@@ -557,7 +557,7 @@ void TestGradient::hansen01() {
 	TEST_ASSERT(almost_eq(H[28][28],Interval(1,1),error));
 	TEST_ASSERT(almost_eq(H[29][29],Interval(1,1),error));
 
-};
+}
 
 } // end namespace
 

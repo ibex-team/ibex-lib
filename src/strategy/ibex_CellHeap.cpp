@@ -38,7 +38,7 @@ void CellHeap::flush() {
 	l.clear();
 }
 
-int CellHeap::size() const {
+unsigned int CellHeap::size() const {
 	return l.size();
 }
 

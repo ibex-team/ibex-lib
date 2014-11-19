@@ -16,13 +16,13 @@
 #include "ibex_Ctc3BCid.h"
 #include "ibex_CtcUnion.h"
 #include "ibex_Backtrackable.h"
-#include "ibex_CellHeapOptim.h"
+#include "ibex_CellDoubleHeap.h"
 #include "ibex_NormalizedSystem.h"
 #include "ibex_ExtendedSystem.h"
 #include "ibex_EntailedCtr.h"
 #include "ibex_LinearSolver.h"
 #include "ibex_PdcHansenFeasibility.h"
-#include "ibex_OptimCell.h"
+#include "ibex_Cell.h"
 
 namespace ibex {
 
@@ -70,7 +70,7 @@ public:
 
 	Optimizer(System& sys, Ctc& ctc, Bsc& bsc, double prec=default_prec,
 			double goal_rel_prec=default_goal_rel_prec, double goal_abs_prec=default_goal_abs_prec,
-			  int sample_size=default_sample_size, double equ_eps=default_equ_eps, bool rigor=false, int critpr=50,CellHeapOptim::criterion crit= CellHeapOptim::UB);
+			  int sample_size=default_sample_size, double equ_eps=default_equ_eps, bool rigor=false, int critpr=50,CellHeap_2::criterion crit= CellHeap_2::UB);
 	/**
 	 * \brief Delete *this.
 	 */
@@ -195,8 +195,7 @@ public:
 	the second one to minimize another criterion (by default the maximum of the objective estimate).
 	The second one is chosen at each node with a probability critpr/100 (default value critpr=50)
 	 */
-	CellHeapOptim buffer;
-	CellHeapOptim buffer2;
+	CellDoubleHeap buffer;
 
 	/**
 	 * \brief Index of the goal variable y in the extended box.
@@ -323,7 +322,7 @@ protected:
 	 * </ul>
 	 *
 	 */
-	void handle_cell(OptimCell& c, const IntervalVector& init_box);
+	void handle_cell(Cell& c, const IntervalVector& init_box);
 
 	/**
 	 * \brief Contract and bound procedure for processing a box.
@@ -336,7 +335,7 @@ protected:
 	 * </ul>
 	 *
 	 */
-	void contract_and_bound(OptimCell& c, const IntervalVector& init_box);
+	void contract_and_bound(Cell& c, const IntervalVector& init_box);
 
 	/**
 	 * \brief Contraction procedure for processing a box.
@@ -545,9 +544,9 @@ protected:
 
 	Ctc3BCid* objshaver;
 
-    void compute_pf(OptimCell& c);
+    void compute_pf(Cell& c);
 	
-	void compute_pu (OptimCell& c);
+	void compute_pu (Cell& c);
 	
 private:
 

@@ -14,7 +14,7 @@ using namespace std;
 
 namespace ibex {
 
-CellBuffer::CellBuffer() : capacity(-1), screen(1) { }
+CellBuffer::CellBuffer() : capacity(-1), nb_cells(0), screen(1) { }
 
 CellBuffer::~CellBuffer() { }
 

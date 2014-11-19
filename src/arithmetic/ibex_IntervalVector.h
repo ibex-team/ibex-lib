@@ -539,12 +539,12 @@ public:
      */
 	operator const ExprConstant&() const;
 
+
 private:
 	friend class IntervalMatrix;
 	friend class Affine2Vector;
 
 	IntervalVector() : n(0), vec(NULL) { } // for IntervalMatrix & complementary()
-
 
 	int n;             // dimension (size of vec)
 	Interval *vec;	   // vector of elements

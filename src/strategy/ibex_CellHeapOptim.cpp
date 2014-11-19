@@ -240,7 +240,7 @@ struct CellComparatorub {
 	return lopt.front().second->lb();
   }
 
-int CellHeapOptim::size() const {
+unsigned int CellHeapOptim::size() const {
 	return lopt.size();
 }
 bool CellHeapOptim::empty() const {

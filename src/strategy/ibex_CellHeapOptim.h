@@ -52,9 +52,9 @@ public:
 	 * \param y - the index of the variable "y" that contains the criterion (typically, f(x)) in each cell's box.
 	 */
 
-	
-	
-	
+
+
+
 
 	CellHeapOptim(const int y, criterion crit=LB);
 
@@ -96,7 +96,7 @@ public:
   void flush();
   
    /** Return the size of the buffer. */
-  int size() const;
+  unsigned int size() const;
 
   /** Return true if the buffer is empty. */
   bool empty() const;
