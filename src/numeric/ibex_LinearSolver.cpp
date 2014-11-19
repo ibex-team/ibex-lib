@@ -1522,7 +1522,6 @@ void LinearSolver::addConstraint(ibex::Vector& row, CmpOp sign, double rhs) {
 		}
 		else
 			throw LPException();
-
 	}
 	catch(Exception& ) {
 		throw LPException();
