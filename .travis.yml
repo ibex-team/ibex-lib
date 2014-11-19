@@ -8,12 +8,11 @@ before_install:
 # command to install dependencies
 install: 
   - ./waf configure
-  - ./waf
   - sudo ./waf install
   - export PKG_CONFIG_PATH=/usr/local/share/pkgconfig/
-  - cd test/ && make && cd ../
+  - cd /home/travis/build/ibex-team/ibex-lib/test/ && make && cd /home/travis/build/ibex-team/ibex-lib/
 # command to run tests
 script:  
   - __build__/examples/optimizer04 benchs/benchs-optim/coconutbenchmark-library1/ex2_1_9.bch acidhc4 compo smearsumrel 1.e-8 1.e-8 10 1
-  - test/utest
+  - ./test/utest
 
