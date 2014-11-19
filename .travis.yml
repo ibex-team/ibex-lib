@@ -7,8 +7,9 @@ before_install:
   - sudo apt-get install -y --force-yes python2.7 flex bison gcc g++ coinor-libclp-dev libcpptest-dev pkg-config
 # command to install dependencies
 install: 
-  - ./waf configure && ./waf
-  - ./waf install
+  - ./waf configure
+  - ./waf
+  - sudo ./waf install
   - export PKG_CONFIG_PATH=/usr/local/share/pkgconfig/
   - cd test/ && make && cd ../
 # command to run tests
