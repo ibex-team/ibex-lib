@@ -107,8 +107,9 @@ void CellHeap_2::contract_heap(double new_loup) {
 void CellHeap_2::contract_tmp(double new_loup, HeapNode * node, CellHeap_2 & heap) {
 
 	switch (crit)	{
-	case C3 :  case C5 :  case C7 :
+	case C3 :  case C5 :  case C7 : {
 		node->elt->crit[ind_crit] = cost(*(node->elt->cell)); break;
+	}
 	default: break;
 	}
 	if (!(node->isSup(new_loup, ind_crit))) {
@@ -118,7 +119,6 @@ void CellHeap_2::contract_tmp(double new_loup, HeapNode * node, CellHeap_2 & hea
 		node->left=NULL;
 		node->right=NULL;
 		node->elt=NULL;
-		delete node;
 	}
 	delete node;
 	node= NULL;
