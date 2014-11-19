@@ -32,7 +32,11 @@ namespace {
 class Memory {
 public:
 	std::vector<Ctc*> ctc;
-	ExtendedSystem* sys;
+
+	// The recorded system can correspond to different things:
+	// - default optimizer: the extended system as expected by Optimizer
+	// - default solver: the sub-system of equations for Newton contractor
+	System* sys;
 	Bsc* bsc;
 	CellBuffer* buffer;
 	LinearRelax* relax;
@@ -66,7 +70,8 @@ Ctc& rec(Ctc* ptr) {
 	return *ptr;
 }
 
-ExtendedSystem& rec(ExtendedSystem* ptr) { return *((*memory())->sys = ptr); }
+ExtendedSystem& rec(ExtendedSystem* ptr) { return (ExtendedSystem&) *((*memory())->sys = ptr); }
+System& rec(System* ptr)                 { return *((*memory())->sys = ptr); }
 LinearRelax& rec(LinearRelax* ptr)       { return *((*memory())->relax = ptr); }
 Bsc& rec(Bsc* ptr)                       { return *((*memory())->bsc = ptr); }
 CellBuffer& rec(CellBuffer* ptr)         { return *((*memory())->buffer = ptr); }
