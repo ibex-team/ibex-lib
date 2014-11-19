@@ -25,13 +25,28 @@ using namespace std;
 
 namespace ibex {
 
-/* patch */
-bool square_eq_sys(const System& sys) {
-	if (sys.nb_var!=sys.nb_ctr) return false;
-	for (int i=0; i<sys.nb_ctr; i++)
-		if (sys.ctrs[i].op!=EQ) return false;
-	return true;
+namespace {
+
+System* square_eq_sys(System& sys) {
+
+	int nb_eq=0;
+
+	// count the number of equalities
+ 	for (int i=0; i<sys.nb_ctr; i++)
+
+		if (sys.ctrs[i].op==EQ) nb_eq+=sys.ctrs[i].f.image_dim();
+
+	if (sys.nb_var==nb_eq)
+		if (nb_eq==sys.f.image_dim())
+			return &sys; // useless to create a new one
+		else {
+			return &rec(new System(sys,System::EQ_ONLY));
+		}
+	else
+		return NULL; // not square
 }
+
+ }
 
 // the corners for  Xnewton
 /*std::vector<CtcXNewton::corner_point>*  DefaultSolver::default_corners () {
@@ -50,9 +65,11 @@ Ctc*  DefaultSolver::ctc (System& sys, double prec) {
 	// second contractor : acid (hc4)
 	ctc_list.set_ref(1, rec(new CtcAcid (sys, rec(new CtcHC4 (sys.ctrs,0.1,true)))));
 	int index=2;
-	// if the system is a square system of equations, the third contractor is Newton
-	if (square_eq_sys(sys)) {
-		ctc_list.set_ref(index,rec(new CtcNewton(sys.f,5e8,prec,1.e-4)));
+	// if the system is a sqare system of equations, the third contractor is Newton
+	System* eqs=square_eq_sys(sys);
+	if (eqs) {
+		ctc_list.set_ref(index,rec(new CtcNewton(eqs->f,5e8,prec,1.e-4)));
+
 		index++;
 	}
 	// the last contractor is XNewton

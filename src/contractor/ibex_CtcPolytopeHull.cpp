@@ -106,6 +106,8 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 			//cout << "[polytope-hull]->[optimize] simplex for left bound returns stat:" << stat <<  " opt: " << opt << endl;
 			if (stat == LinearSolver::OPTIMAL) {
 				if(opt.lb()>box[i].ub()) {
+					delete[] inf_bound;
+					delete[] sup_bound;
 					throw EmptyBoxException();
 				}
 
@@ -120,6 +122,8 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 			}
 			else if (stat == LinearSolver::INFEASIBLE) {
 				// the infeasibility is proved, the EmptyBox exception is raised
+				delete[] inf_bound;
+				delete[] sup_bound;
 				throw EmptyBoxException();
 			}
 
@@ -150,6 +154,8 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 			//cout << "[polytope-hull]->[optimize] simplex for right bound returns stat=" << stat << " opt=" << opt << endl;
 			if( stat == LinearSolver::OPTIMAL) {
 				if(opt.ub() <box[i].lb()) {
+					delete[] inf_bound;
+					delete[] sup_bound;
 					throw EmptyBoxException();
 				}
 
