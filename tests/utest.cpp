@@ -84,7 +84,7 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestString()));
     ts.add(auto_ptr<Test::Suite>(new TestBitSet()));
     ts.add(auto_ptr<Test::Suite>(new TestSymbolMap()));
-    ts.add(auto_ptr<Test::Suite>(new TestRasterPicture()));
+    // ts.add(auto_ptr<Test::Suite>(new TestRasterPicture()));
 
     ts.add(auto_ptr<Test::Suite>(new TestInterval()));
     ts.add(auto_ptr<Test::Suite>(new TestIntervalVector()));
