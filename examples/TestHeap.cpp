@@ -77,7 +77,7 @@ int main(int argc, char** argv) {
 	}*/
 
 	{
-		double nb=10;
+		double nb=100000;
 		CellDoubleHeap dd2(1);
 		double time =0;
 
@@ -87,7 +87,7 @@ int main(int argc, char** argv) {
 
 		Timer::start();
 		 time =0;
-		for (int i=0; i<nb ;i++) {dd2.push(new OptimCell((pow(-1,i)*i)*box));}
+		for (int i=0; i<nb ;i++) {dd2.push(new Cell((pow(-1,i)*i)*box));}
 		for (int i=0; i<nb ;i++) { delete dd2.pop();}
 		Timer::stop();
 		time += Timer::VIRTUAL_TIMELAPSE();

@@ -335,26 +335,25 @@ int LinearRelaxXTaylor::X_Linearization(const IntervalVector& savebox,
 	for(int j=0;j<n;j++)
 		tot_ev+=row1[j]*savebox[j]; //natural evaluation of the left side of the linear constraint
 
-
-
 	bool added=false;
-	if (op == LEQ || op == LT) {
-		//g(xb) + a1' x1 + ... + an xn <= 0
-		if(tot_ev.lb()>(-ev).ub())
-			throw EmptyBoxException();  // the constraint is not satisfied
-		if((-ev).ub()<tot_ev.ub()) {    // otherwise the constraint is satisfied for any point in the box
-			lp_solver.addConstraint( row1, LEQ, (-ev).ub());
-			added=true;
+	try {
+		if (op == LEQ || op == LT) {
+			//g(xb) + a1' x1 + ... + an xn <= 0
+			if(tot_ev.lb()>(-ev).ub())
+				throw EmptyBoxException();  // the constraint is not satisfied
+			if((-ev).ub()<tot_ev.ub()) {    // otherwise the constraint is satisfied for any point in the box
+				lp_solver.addConstraint( row1, LEQ, (-ev).ub());
+				added=true;
+			}
+		} else {
+			if(tot_ev.ub()<(-ev).lb())
+				throw EmptyBoxException();
+			if ((-ev).lb()>tot_ev.lb()) {
+				lp_solver.addConstraint( row1, GEQ, (-ev).lb() );
+				added=true;
+			}
 		}
-	} else {
-		if(tot_ev.ub()<(-ev).lb())
-			throw EmptyBoxException();
-		if ((-ev).lb()>tot_ev.lb()) {
-			lp_solver.addConstraint( row1, GEQ, (-ev).lb() );
-			added=true;
-		}
-	}
-
+	} catch (LPException&) { }
 	//box=savebox;
 
 	return (added)? 1:0;

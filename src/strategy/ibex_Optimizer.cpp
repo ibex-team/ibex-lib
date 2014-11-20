@@ -113,7 +113,7 @@ Optimizer::~Optimizer() {
 		delete is_inside;
 	}
 	buffer.flush();
-
+	if (equs) delete equs;
 	delete mylp;
 	//	delete &(objshaver->ctc);
 	//	delete objshaver;
