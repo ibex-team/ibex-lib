@@ -16,7 +16,7 @@ namespace ibex {
 const double LinearSolver::default_eps = 1e-10;
 const double LinearSolver::default_max_bound = 1e20;
 const int LinearSolver::default_max_time_out=100;
-const int LinearSolver::default_max_iter=1000;
+const int LinearSolver::default_max_iter=100;
 const Interval LinearSolver::default_limit_diam_box = Interval(1.e-14,1.e6);
 
 
@@ -286,7 +286,10 @@ void LinearSolver::cleanConst() {
 		dual_solution=NULL;
 		status_prim = soplex::SPxSolver::UNKNOWN;
 		status_dual = soplex::SPxSolver::UNKNOWN;
-		mysoplex->removeRowRange(nb_vars, nb_rows-1);
+		int status=0;
+		if ((nb_vars)<=  (nb_rows - 1))  {
+			mysoplex->removeRowRange(nb_vars, nb_rows-1);
+		}
 		nb_rows = nb_vars;
 		obj_value = POS_INFINITY;
 	}
@@ -879,7 +882,10 @@ void LinearSolver::cleanConst() {
 		dual_solution=NULL;
 		status_prim = -1;
 		status_dual = -1;
-		int status = CPXdelrows (envcplex, lpcplex, 2*nb_vars,  nb_rows - 1);
+		int status=0;
+		if ((2*nb_vars)<=  (nb_rows - 1))  {
+			status = CPXdelrows (envcplex, lpcplex, 2*nb_vars,  nb_rows - 1);
+		}
 		nb_rows = 2*nb_vars;
 		obj_value = POS_INFINITY;
 		if (status!=0) throw LPException();
@@ -1366,7 +1372,10 @@ void LinearSolver::cleanConst() {
 		dual_solution=NULL;
 		status_prim = 0;
 		status_dual = 0;
-		myclp->deleteRows(nb_rows -nb_vars,_which);
+		int status=0;
+		if (nb_vars<=(nb_rows - 1))  {
+			myclp->deleteRows(nb_rows -nb_vars,_which);
+		}
 		nb_rows = nb_vars;
 		obj_value = POS_INFINITY;
 	}
@@ -1805,7 +1814,10 @@ LinearSolver::Status LinearSolver::getInfeasibleDir(Vector & sol) {
 LinearSolver::Status LinearSolver::cleanConst() {
 	LinearSolver::Status res = FAIL;
 	try {
-		int status = CPXdelcols (envcplex, lpcplex, nb_vars,  nb_rows - 1);
+		int status=0;
+		if ((2*nb_vars)<=  (nb_rows - 1))  {
+			status = CPXdelcols (envcplex, lpcplex, nb_vars,  nb_rows - 1);
+		}
 		nb_rows = nb_vars;
 		obj_value = POS_INFINITY;
 		 if (status==0) res = OK;
