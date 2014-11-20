@@ -32,8 +32,7 @@ System* square_eq_sys(System& sys) {
 	int nb_eq=0;
 
 	// count the number of equalities
- 	for (int i=0; i<sys.nb_ctr; i++)
-
+	for (int i=0; i<sys.nb_ctr; i++)
 		if (sys.ctrs[i].op==EQ) nb_eq+=sys.ctrs[i].f.image_dim();
 
 	if (sys.nb_var==nb_eq)
@@ -46,7 +45,7 @@ System* square_eq_sys(System& sys) {
 		return NULL; // not square
 }
 
- }
+}
 
 // the corners for  Xnewton
 /*std::vector<CtcXNewton::corner_point>*  DefaultSolver::default_corners () {
@@ -69,7 +68,6 @@ Ctc*  DefaultSolver::ctc (System& sys, double prec) {
 	System* eqs=square_eq_sys(sys);
 	if (eqs) {
 		ctc_list.set_ref(index,rec(new CtcNewton(eqs->f,5e8,prec,1.e-4)));
-
 		index++;
 	}
 	// the last contractor is XNewton
