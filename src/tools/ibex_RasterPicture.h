@@ -38,6 +38,11 @@ public:
 	RasterPicture(int ndim);
 
 	/**
+	 * \brief Copy constructor.
+	 */
+	RasterPicture(const RasterPicture& src);
+
+	/**
 	 * \brief Delete this.
 	 */
 	virtual ~RasterPicture();
@@ -46,11 +51,6 @@ public:
 	 * \brief TODO: add comment
 	 */
     void init();
-
-	/**
-	 * \brief TODO: add comment
-	 */
-    void init(const RasterPicture& pic);
 
 	/**
 	 * \brief TODO: add comment
@@ -104,6 +104,11 @@ private:
 
     static const char* FORMAT_VERSION;
     static const char* FF_DATA_IMAGE_ND;
+
+	/**
+	 * \brief TODO: add comment
+	 */
+    void init(const RasterPicture& pic);
 
 	/*
 	 * Read the header from a file.

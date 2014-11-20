@@ -34,6 +34,23 @@ RasterPicture::RasterPicture(int ndim) : ndim(ndim), zero(0) {
 	divb_mul_ = new int[ndim];
 }
 
+RasterPicture::RasterPicture(const RasterPicture& src): ndim(src.ndim), zero(0){
+	leaf_size_ = new double[ndim];
+	origin_ = new double[ndim];
+	grid_size_ = new int[ndim];
+	divb_mul_ = new int[ndim];
+	for(uint i = 0; i < ndim; i++){
+		leaf_size_[i] = src.leaf_size_[i];
+		origin_[i] = src.origin_[i];
+		grid_size_[i] = src.grid_size_[i];	
+	}
+	init();
+
+	// copy image datas
+	data = src.data;
+
+}
+
 RasterPicture::~RasterPicture() {
 	delete[] leaf_size_;
 	delete[] origin_;
@@ -58,14 +75,6 @@ void RasterPicture::init() {
 	memset(&zero,0,sizeof(DATA_TYPE));
 }
 
-void RasterPicture::init(const RasterPicture& array) {
-	leaf_size_ = array.leaf_size_;
-	origin_    = array.origin_;
-	grid_size_ = array.grid_size_;
-
-	init();
-}
-
 void RasterPicture::save(const char *filename) {
 	ofstream out_file;
 	out_file.open(filename, ios::out | ios::trunc | ios::binary);
@@ -77,6 +86,7 @@ void RasterPicture::save(const char *filename) {
 	}
 
 	try {
+        write_header(out_file, *this);
 		// write data
 		out_file.write((char*)&data[0],data.size()*sizeof(DATA_TYPE));
 	} catch (std::exception& e) {
@@ -198,9 +208,11 @@ void RasterPicture::load(const char *filename) {
 		std::stringstream s;
 		s << "RasterPicture [load]: cannot open file " << filename << "for reading data";
 		ibex_error(s.str().c_str());
-	}
+
+    }
 
 	try {
+        read_header(in_file, *this);
 		for(uint i = 0; i < data.size(); i++) {
 			DATA_TYPE tmp = 0;
 			in_file.read((char*)&tmp,sizeof(DATA_TYPE));
