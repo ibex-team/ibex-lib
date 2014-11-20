@@ -146,7 +146,7 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 
 		if (ret) {
 		  if (trace)
-		    {   int prec=cout.precision();
+		    {   int prec=std::cout.precision();
 		    std::cout.precision(12);
 			std::cout << "[simplex1]"  << " loup update " << pseudo_loup  << " loup point  " << loup_point << std::endl;
 			std::cout.precision(prec);
