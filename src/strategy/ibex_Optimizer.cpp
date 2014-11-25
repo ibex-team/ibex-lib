@@ -100,7 +100,7 @@ Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, double prec,
 	if (niter < 3*n) niter=3*n;
 
 	//====================================
-	mylp = new LinearSolver(n+1,m,niter );
+	mylp = new LinearSolver(n+1,m+1,niter );
 	lr = new LinearRelaxCombo(ext_sys);
 	//	cout << "sys " << sys << endl;
 }

@@ -28,18 +28,20 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 	//cout << "[polytope-hull] box before LR (linear relaxation): " << box << endl;
 
 	try {
+		IntervalVector ext_box(box.size()+1);
+		write_ext_box(box, ext_box);
 		// Update the bounds the variables
-		mylp->initBoundVar(box);
+		mylp->initBoundVar(ext_box);
 
 		//returns the number of constraints in the linearized system
-		int cont = lr->linearization(box, *mylp);
+		int cont = lr->linearization(ext_box, *mylp);
 		//cout << "[polytope-hull] end of LR" << endl;
 		if(cont<1)  return false;
 
 		Interval opt(0.0);
 		int i = lr->goal_var();
 
-		LinearSolver::Status_Sol stat = mylp->run_simplex(box, LinearSolver::MINIMIZE, i, opt,box[i].lb());
+		LinearSolver::Status_Sol stat = mylp->run_simplex(ext_box, LinearSolver::MINIMIZE, i, opt,ext_box[i].lb());
 
 		mylp->cleanConst();
 		//	std::cout << " stat " << stat << std::endl;
@@ -49,7 +51,13 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 			mylp->getPrimalSol(prim);
 
 			//		std::cout << " simplex result " << tmpbox << std::endl;
-			bool ret= box.contains(prim) && check_candidate(prim,false); //  [gch] do we know here that the point is inner??
+			Vector prim_int(box.size());
+			int i2=0;
+			for (int i=0; i<n; i++,i2++) {
+				if (i2==lr->goal_var()) i2++; // skip goal variable
+				prim_int[i]=prim[i2];
+			}
+			bool ret= ext_box.contains(prim_int) && check_candidate(prim_int,false); //  [gch] do we know here that the point is inner??
 
 			if (ret) {
 				if (trace) {
