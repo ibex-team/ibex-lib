@@ -35,7 +35,7 @@ void CtcAcid::contract(IntervalVector& box) {
 	int nb_CID_var=cid_vars.size();                    // [gch]
 	impact.clear();                                    // [gch]
 	int nbvarmax=5*nb_CID_var;                         //  au plus 5*nbvar
-	double ctstat[nbvarmax];
+	double *ctstat = new double[nbvarmax];
 
 	int nbinitcalls=50;                                // longueur du réglage
 	int factor = 20;                                   // détermine la période entre les débuts de 2 régalages  successifs : factor*nbinitcalls
@@ -104,6 +104,7 @@ void CtcAcid::contract(IntervalVector& box) {
 		nbvarstat = (nbvarstat * (nbtuning-1) + nbcidvar) / nbtuning;
 	}
 
+	delete [] ctstat;
 }
 
 // en optim, l'objectif est placé en 1er

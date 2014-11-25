@@ -23,16 +23,15 @@ namespace ibex {
 #ifdef _MSC_VER
 // To get struct timeval.
 #include <winsock2.h>
+#include <sys/time.h>
 
 //#define DELTA_EPOCH_IN_MICROSECS 11644473600000000ui64
 //#define DELTA_EPOCH_IN_MICROSECS 11644473600000000ULL
 #define DELTA_EPOCH_IN_MICROSECS_LOW 1216757760
 #define DELTA_EPOCH_IN_MICROSECS_HIGH 2711190
 
-#ifdef _MSC_VER
 // Disable Visual Studio warnings about timezone declaration.
 #pragma warning(disable : 6244) 
-#endif // _MSC_VER
 
 // Local declaration of timezone hides previous declaration in time.h.
 struct timezone 
@@ -41,10 +40,9 @@ struct timezone
 	int tz_dsttime; // Type of DST correction.
 };
 
-#ifdef _MSC_VER
 // Restore the Visual Studio warnings previously disabled.
 #pragma warning(default : 6244) 
-#endif // _MSC_VER
+
 
 /*
 Obtain the current time, expressed as seconds and microseconds since the Epoch, 
@@ -57,6 +55,7 @@ struct timezone* tz : (INOUT) Usually set to NULL.
 
 Return : EXIT_SUCCESS or EXIT_FAILURE if there is an error.
 */
+/*
 int gettimeofday(struct timeval* tv, struct timezone* tz)
 {
 	FILETIME ft; // Will contain a 64-bit value representing the number of 100-nanosecond 
@@ -111,6 +110,7 @@ int gettimeofday(struct timeval* tv, struct timezone* tz)
 
 	return EXIT_SUCCESS;
 }
+*/
 //inline int gettimeofday(struct timeval* tp, void* tz)
 //{
 //	struct _timeb timebuffer;

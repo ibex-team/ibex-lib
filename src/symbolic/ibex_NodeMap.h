@@ -25,12 +25,18 @@
 #define HASH std::tr1::hash
 #define IBEX_NODE_MAP(T) std::tr1::unordered_map<const ExprNode*,T,hash_node,same_node>
 #endif
-
 #else
+#if (_MSC_VER >= 1600)
 #include <unordered_map>
 #define HASH std::hash
 #define IBEX_NODE_MAP(T) std::unordered_map<const ExprNode*,T,hash_node,same_node>
+#else
+#include <unordered_map>
+#define HASH std::tr1::hash
+#define IBEX_NODE_MAP(T) std::tr1::unordered_map<const ExprNode*,T,hash_node,same_node>
+#endif // (_MSC_VER >= 1600)
 #endif
+
 
 namespace ibex {
 

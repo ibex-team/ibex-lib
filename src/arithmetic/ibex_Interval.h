@@ -66,6 +66,13 @@
 #endif
 #endif
 
+#ifdef _MSC_VER
+#include <intrin.h>
+#define __builtin_popcount __popcnt
+#define __builtin_powi(__x,__n) ((double)::pow((double)(__x),(int)(__n)))
+#endif // _MSC_VER
+
+
 namespace ibex {
 
 template <class T>  class Affine2Main;
