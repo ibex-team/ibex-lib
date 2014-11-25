@@ -135,6 +135,33 @@ void TestInHC4Revise::bugr900() {
 	TEST_ASSERT(!box.is_empty());
 }
 
+void TestInHC4Revise::issue70() {
+
+	Function f("x","x*0.99");
+	IntervalVector area(1,Interval(-10,10));
+	Vector pt(1);
+	pt[0]=2;
+
+	f.ibwd(Interval::POS_REALS,area,pt);
+	// we don't test exactly [0,10] because the result is actually [-0,10]
+	TEST_ASSERT(area[0].lb()>=0);
+
+	//	//Function f("ox","oy","oalpha","x","y","(-(((x-ox)*sin((-oalpha)))+((y-oy)*cos(oalpha))))");
+	//	Function f("ox","oy","oalpha","x","y","y*0.99");
+	//	double _area[5][2]={{0, 0} , {0, 0} , {0, 0} , {-0.566920214114, -0.52921419164},{-0.3829882276, 0.394692807304}};
+	//	double _pt[5]={0,0,0,-0.548067202877,0.00585228985246};
+	//	IntervalVector area(5,_area);
+	//	Vector pt(5,_pt);
+	//
+	//
+	//	cout << "area=" << area << endl;
+	//	f.ibwd(Interval::POS_REALS,area,pt);
+	//	cout << "area=" << area << endl;
+
+
+
+}
+
 
 } // end namespace
 
