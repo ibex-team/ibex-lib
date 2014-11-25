@@ -1125,9 +1125,6 @@ LinearSolver::LinearSolver(int nb_vars1, int nb_ctr, int max_iter, int max_time_
 	delete[] row2Index;
 	delete[] row2Value;
 
-	delete[] row2Index;
-	delete[] row2Value;
-
 	nb_rows = nb_vars;
 
 	_which =new int[10*nb_ctrs];
