@@ -116,9 +116,26 @@ public:
 
 	~LinearSolver();
 
+// RUN
+
 	Status_Sol solve();
 
 	void writeFile(const char* name="save_LP.lp");
+
+	/**
+	 * Call to linear solver
+	 */
+	Status_Sol run_simplex(IntervalVector &box, LinearSolver::Sense sense, int var, Interval & obj, double bound);
+
+	/**
+	 * Neumaier Shcherbina postprocessing in case of optimal solution found : the result obj is made reliable
+	 */
+	void NeumaierShcherbina_postprocessing(int nr, int var, Interval & obj, IntervalVector& box, Matrix & As, IntervalVector& B,  Vector &dual_solution, bool minimization);
+
+	/**
+	 *  Neumaier Shcherbina postprocessing in case of infeasibilty found by LP  returns true if the infeasibility is proved
+	 */
+	bool NeumaierShcherbina_infeasibilitytest(int nr, IntervalVector& box, Matrix & As, IntervalVector& B, Vector & infeasible_dir);
 
 
 // GET

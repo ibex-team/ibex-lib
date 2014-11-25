@@ -78,8 +78,6 @@ LinearRelaxCombo::~LinearRelaxCombo() {
 int LinearRelaxCombo::linearization(const IntervalVector& box, LinearSolver& lp_solver) {
 
 	int cont = 0;
-	// Update the bounds the variables
-	lp_solver.initBoundVar(box);
 
 	switch (lmode) {
 	case ART:

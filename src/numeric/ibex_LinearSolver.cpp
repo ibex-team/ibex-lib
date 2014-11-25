@@ -68,6 +68,142 @@ double LinearSolver::getEpsilon() const {
 }
 
 
+LinearSolver::Status_Sol LinearSolver::run_simplex(IntervalVector& box, LinearSolver::Sense sense, int var, Interval& obj, double bound) {
+
+	int nvar=nb_vars;
+	int nctr=nb_rows;
+	// the linear solver is always called in a minimization mode : in case of maximization of var , the opposite of var is minimized
+	if(sense==LinearSolver::MINIMIZE)
+		setVarObj(var, 1.0);
+	else
+		setVarObj(var, -1.0);
+
+	LinearSolver::Status_Sol stat = LinearSolver::UNKNOWN;
+	try {
+		//	mylinearsolver->writeFile("coucou.lp");
+		//	system("cat coucou.lp");
+		stat = solve();
+		//cout << "[polytope-hull]->[run_simplex] solver returns " << stat << endl;
+
+		if(stat == LinearSolver::OPTIMAL) {
+			if( ((sense==LinearSolver::MINIMIZE) && (  obj_value <=bound)) ||
+					((sense==LinearSolver::MAXIMIZE) && ((-obj_value)>=bound))) {
+				stat = LinearSolver::UNKNOWN;
+			}
+		}
+
+		// Neumaier - Shcherbina postprocessing
+		if(stat == LinearSolver::OPTIMAL) {
+
+			// the dual solution : used to compute the bound
+			Vector dual_solution(nb_rows);
+			getDualSol(dual_solution);
+
+			Matrix A_trans (nb_vars,nb_rows) ;
+			getCoefConstraint_trans(A_trans);
+
+			/*	IntervalMatrix IA_trans (nb_var,mylinearsolver->getNbRows());
+			for (int i=0;i<nvar; i++){
+			  for(int j=0; j<nctr; j++)
+				IA_trans[i][j]= A_trans[i][j];
+			}*/
+			IntervalVector B(nb_rows);
+			getB(B);
+
+			bool minimization=false;
+			if (sense==LinearSolver::MINIMIZE)	minimization=true;
+
+			//	  cout << "B " << B << endl;
+			//	  cout << "A_trans " << IA_trans << endl;
+			NeumaierShcherbina_postprocessing( nb_rows, var, obj, box, A_trans, B, dual_solution, minimization);
+		}
+
+		// infeasibility test  cf Neumaier Shcherbina paper
+		if(stat == LinearSolver::INFEASIBLE_NOTPROVED) {
+
+			Vector infeasible_dir(nb_rows);
+			getInfeasibleDir(infeasible_dir);
+
+			Matrix A_trans (nb_vars,nb_rows) ;
+			getCoefConstraint_trans(A_trans);
+
+			IntervalVector B(nb_rows);
+			getB(B);
+
+			if (NeumaierShcherbina_infeasibilitytest (nb_rows, box, A_trans, B, infeasible_dir)) {
+				stat = LinearSolver::INFEASIBLE;
+			}
+		}
+	}
+	catch (LPException&) {
+		stat = LinearSolver::UNKNOWN;
+	}
+	// Reset the objective of the LP solver
+	setVarObj(var, 0.0);
+
+	return stat;
+
+}
+
+void LinearSolver::NeumaierShcherbina_postprocessing ( int nr, int var, Interval & obj, IntervalVector& box,
+		Matrix & A_trans, IntervalVector& B, Vector & dual_solution, bool minimization) {
+
+	//cout <<" BOUND_test "<< endl;
+	IntervalVector Rest(nb_vars);
+
+	IntervalVector Lambda(nr);
+
+	for (int i=0; i<nr; i++) {
+		Lambda[i]=dual_solution[i];
+	}
+
+	Rest = A_trans * Lambda ;   // Rest = Transpose(As) * Lambda
+	if (minimization==true)
+		Rest[var] -=1; // because C is a vector of zero except for the coef "var"
+	else
+		Rest[var] +=1;
+
+	//cout << " Rest " << Rest << endl;
+	//cout << " dual " << Lambda << endl;
+	//cout << " dual B " << Lambda * B << endl;
+	//cout << " rest box " << Rest * box  << endl;
+	if(minimization==true)
+		obj = Lambda * B - Rest * box;
+	else
+		obj = -(Lambda * B - Rest * box);
+}
+
+bool LinearSolver::NeumaierShcherbina_infeasibilitytest(int nr, IntervalVector& box,
+		Matrix& A_trans, IntervalVector& B, Vector& infeasible_dir) {
+
+	IntervalVector Lambda(nr);
+
+	for (int i =0; i<nr; i++) {
+		Lambda[i]=infeasible_dir[i];
+	}
+
+	IntervalVector Rest(nb_vars);
+	Rest = A_trans * Lambda ;
+	Interval d= Rest *box - Lambda * B;
+
+	// if 0 does not belong to d, the infeasibility is proved
+
+	if (d.contains(0.0))
+		return false;
+	else
+		return true;
+
+}
+
+
+
+
+
+
+
+
+
+
 #ifdef _IBEX_WITH_SOPLEX_
 
 

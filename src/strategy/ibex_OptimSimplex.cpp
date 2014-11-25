@@ -13,8 +13,6 @@
 #include <stdlib.h>
 
 
-
-
 namespace ibex {
 
 
@@ -25,6 +23,53 @@ namespace ibex {
 
 bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 
+	if (!(Interval(1.e-14,1.e6).contains(box.max_diam()))) return false;  // A extraire
+	// is it necessary?  YES (BNE) Soplex can give false infeasible results with large numbers
+	//cout << "[polytope-hull] box before LR (linear relaxation): " << box << endl;
+
+	try {
+		mylp->cleanConst();
+		// Update the bounds the variables
+		mylp->initBoundVar(box);
+
+		//returns the number of constraints in the linearized system
+		int cont = lr->linearization(box, *mylp);
+		//cout << "[polytope-hull] end of LR" << endl;
+		if(cont<1)  return false;
+
+		Interval opt(0.0);
+		int i = lr->goal_var();
+
+		LinearSolver::Status_Sol stat = mylp->run_simplex(box, LinearSolver::MINIMIZE, i, opt,box[i].lb());
+		//cout << "[polytope-hull]->[optimize] simplex for left bound returns stat:" << stat <<  " opt: " << opt << endl;
+		if (stat == LinearSolver::OPTIMAL) {
+			if(opt.lb()>box[i].ub()) {
+				return false;
+			}
+
+			if(opt.lb() > box[i].lb()) {
+				box[i]=Interval(opt.lb(),box[i].ub());
+				mylp->setBoundVar(i,box[i]);
+			}
+		}
+		else if (stat == LinearSolver::INFEASIBLE) {
+			// the infeasibility is proved, the EmptyBox exception is raised
+			return false;
+		}
+
+		else if(stat == LinearSolver::TIME_OUT) {
+			if (trace) std::cout << "Simplex spent too much time" << std::endl;
+		}
+		else if(stat == LinearSolver::MAX_ITER) {
+			if (trace) std::cout << "Simplex spent too many iterations" << std::endl;
+		}
+	}
+	catch(LPException&) {
+		return false;
+	}
+	return false;
+
+}
   //  cout << " box simplex " << box << endl;
 	IntervalVector G(n); // vector to be used by the partial derivatives
 

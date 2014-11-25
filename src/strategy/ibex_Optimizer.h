@@ -257,11 +257,6 @@ public:
 	static const double default_goal_rel_prec;
 
 
-
-
-
-
-
 	/** Default goal absolute precision */
 	static const double default_goal_abs_prec;
 
@@ -556,6 +551,7 @@ private:
 
 	/** linear solver used in ibex_OptimSimplex.cpp_ */
 	LinearSolver *mylp;
+	LinearRelaxCombo *lr;
 
 	/** Inner contractor (for the negation of g) */
 	CtcUnion* is_inside;
