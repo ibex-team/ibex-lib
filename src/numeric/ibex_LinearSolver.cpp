@@ -68,7 +68,8 @@ double LinearSolver::getEpsilon() const {
 }
 
 
-LinearSolver::Status_Sol LinearSolver::run_simplex(IntervalVector& box, LinearSolver::Sense sense, int var, Interval& obj, double bound) {
+LinearSolver::Status_Sol LinearSolver::run_simplex(const IntervalVector& box, LinearSolver::Sense sense, int var, Interval& obj, double bound) {
+	assert(var<=nb_vars);
 
 	int nvar=nb_vars;
 	int nctr=nb_rows;
@@ -145,8 +146,8 @@ LinearSolver::Status_Sol LinearSolver::run_simplex(IntervalVector& box, LinearSo
 
 }
 
-void LinearSolver::NeumaierShcherbina_postprocessing ( int nr, int var, Interval & obj, IntervalVector& box,
-		Matrix & A_trans, IntervalVector& B, Vector & dual_solution, bool minimization) {
+void LinearSolver::NeumaierShcherbina_postprocessing ( int nr, int var, Interval & obj, const IntervalVector& box,
+		const Matrix & A_trans, const IntervalVector& B, const Vector & dual_solution, bool minimization) {
 
 	//cout <<" BOUND_test "<< endl;
 	IntervalVector Rest(nb_vars);
@@ -173,8 +174,8 @@ void LinearSolver::NeumaierShcherbina_postprocessing ( int nr, int var, Interval
 		obj = -(Lambda * B - Rest * box);
 }
 
-bool LinearSolver::NeumaierShcherbina_infeasibilitytest(int nr, IntervalVector& box,
-		Matrix& A_trans, IntervalVector& B, Vector& infeasible_dir) {
+bool LinearSolver::NeumaierShcherbina_infeasibilitytest(int nr, const IntervalVector& box,
+		const Matrix& A_trans, const IntervalVector& B, const Vector& infeasible_dir) {
 
 	IntervalVector Lambda(nr);
 

@@ -19,6 +19,7 @@
 #include "ibex_Vector.h"
 #include "ibex_Matrix.h"
 #include "ibex_IntervalVector.h"
+#include "ibex_IntervalMatrix.h"
 #include "ibex_Interval.h"
 #include "ibex_CmpOp.h"
 #include "ibex_Exception.h"
@@ -125,17 +126,17 @@ public:
 	/**
 	 * Call to linear solver
 	 */
-	Status_Sol run_simplex(IntervalVector &box, LinearSolver::Sense sense, int var, Interval & obj, double bound);
+	Status_Sol run_simplex(const IntervalVector &box, Sense sense, int var, Interval & obj, double bound);
 
 	/**
 	 * Neumaier Shcherbina postprocessing in case of optimal solution found : the result obj is made reliable
 	 */
-	void NeumaierShcherbina_postprocessing(int nr, int var, Interval & obj, IntervalVector& box, Matrix & As, IntervalVector& B,  Vector &dual_solution, bool minimization);
+	void NeumaierShcherbina_postprocessing(int nr, int var, Interval & obj, const IntervalVector& box, const Matrix & As, const IntervalVector& B,  const Vector &dual_solution, bool minimization);
 
 	/**
 	 *  Neumaier Shcherbina postprocessing in case of infeasibilty found by LP  returns true if the infeasibility is proved
 	 */
-	bool NeumaierShcherbina_infeasibilitytest(int nr, IntervalVector& box, Matrix & As, IntervalVector& B, Vector & infeasible_dir);
+	bool NeumaierShcherbina_infeasibilitytest(int nr, const IntervalVector& box, const Matrix & As, const IntervalVector& B, const Vector & infeasible_dir);
 
 
 // GET

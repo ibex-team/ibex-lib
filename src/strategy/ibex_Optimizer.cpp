@@ -12,7 +12,7 @@
 #include "ibex_EmptySystemException.h"
 #include "ibex_Timer.h"
 #include "ibex_OptimProbing.cpp_"
-#include "ibex_OptimSimplex.cpp"
+#include "ibex_OptimSimplex.cpp_"
 #include "ibex_CtcFwdBwd.h"
 #include "ibex_CtcOptimShaving.h"
 #include "ibex_CtcHC4.h"

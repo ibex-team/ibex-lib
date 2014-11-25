@@ -1,0 +1,81 @@
+//============================================================================
+//                                  I B E X                                   
+// File        : ibex_OptimSimplex.cpp_
+// Author      : Ignacio Araya  Bertrand Neveu
+// Copyright   : Ecole des Mines de Nantes (France)
+// License     : See the LICENSE file
+// Created     : Jul 12, 2012
+// Last Update : May 07, 2013
+//============================================================================
+
+
+#include "ibex_Optimizer.h"
+#include <stdlib.h>
+
+
+namespace ibex {
+
+
+
+//The system is overconstrained by using the Taylor extension in one corner randomly chosen
+//Then the simplex algorithm is applied to obtain a new upper bound loup
+//If a new loup is found the method returns true
+
+bool Optimizer::update_loup_simplex(const IntervalVector& box) {
+
+	if (!(Interval(1.e-14,1.e6).contains(box.max_diam()))) return false;  // A extraire
+	// is it necessary?  YES (BNE) Soplex can give false infeasible results with large numbers
+	//cout << "[polytope-hull] box before LR (linear relaxation): " << box << endl;
+
+	try {
+		// Update the bounds the variables
+		mylp->initBoundVar(box);
+
+		//returns the number of constraints in the linearized system
+		int cont = lr->linearization(box, *mylp);
+		//cout << "[polytope-hull] end of LR" << endl;
+		if(cont<1)  return false;
+
+		Interval opt(0.0);
+		int i = lr->goal_var();
+
+		LinearSolver::Status_Sol stat = mylp->run_simplex(box, LinearSolver::MINIMIZE, i, opt,box[i].lb());
+
+		mylp->cleanConst();
+		//	std::cout << " stat " << stat << std::endl;
+		if (stat == LinearSolver::OPTIMAL) {
+			//the linear solution is mapped to intervals and evaluated
+			Vector prim(n+1);
+			mylp->getPrimalSol(prim);
+
+			//		std::cout << " simplex result " << tmpbox << std::endl;
+			bool ret= box.contains(prim) && check_candidate(prim,false); //  [gch] do we know here that the point is inner??
+
+			if (ret) {
+				if (trace) {
+					int prec=std::cout.precision();
+					std::cout.precision(12);
+					std::cout << "[simplex1]"  << " loup update " << pseudo_loup  << " loup point  " << loup_point << std::endl;
+					std::cout.precision(prec);
+				}
+				nb_simplex++;
+				diam_simplex= ((nb_simplex-1) * diam_simplex + box.max_diam()) / nb_simplex;
+			}
+
+			return ret;
+		}
+		if (trace) {
+			if(stat == LinearSolver::TIME_OUT) std::cout << "Simplex spent too much time" << std::endl;
+			if(stat == LinearSolver::MAX_ITER) std::cout << "Simplex spent too many iterations" << std::endl;
+		}
+		return false;
+
+	}
+	catch(LPException&) {
+		return false;
+	}
+	return false;
+
+}
+
+} // end namespace ibex

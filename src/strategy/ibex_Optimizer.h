@@ -23,6 +23,7 @@
 #include "ibex_LinearSolver.h"
 #include "ibex_PdcHansenFeasibility.h"
 #include "ibex_OptimCell.h"
+#include "ibex_LinearRelaxCombo.h"
 
 namespace ibex {
 
