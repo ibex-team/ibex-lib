@@ -28,7 +28,7 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 	//cout << "[polytope-hull] box before LR (linear relaxation): " << box << endl;
 
 	try {
-		IntervalVector ext_box(box.size()+1);
+		IntervalVector ext_box(box.size()+1,Interval(-1.e100,1.e100));
 		write_ext_box(box, ext_box);
 		// Update the bounds the variables
 		mylp->initBoundVar(ext_box);
@@ -43,7 +43,6 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 
 		LinearSolver::Status_Sol stat = mylp->run_simplex(ext_box, LinearSolver::MINIMIZE, i, opt,ext_box[i].lb());
 
-		mylp->cleanConst();
 		//	std::cout << " stat " << stat << std::endl;
 		if (stat == LinearSolver::OPTIMAL) {
 			//the linear solution is mapped to intervals and evaluated
@@ -57,7 +56,7 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 				if (i2==lr->goal_var()) i2++; // skip goal variable
 				prim_int[i]=prim[i2];
 			}
-			bool ret= ext_box.contains(prim_int) && check_candidate(prim_int,false); //  [gch] do we know here that the point is inner??
+			bool ret= box.contains(prim_int) && check_candidate(prim_int,false); //  [gch] do we know here that the point is inner??
 
 			if (ret) {
 				if (trace) {
@@ -70,16 +69,20 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 				diam_simplex= ((nb_simplex-1) * diam_simplex + box.max_diam()) / nb_simplex;
 			}
 
+			mylp->cleanConst();
 			return ret;
 		}
 		if (trace) {
 			if(stat == LinearSolver::TIME_OUT) std::cout << "Simplex spent too much time" << std::endl;
 			if(stat == LinearSolver::MAX_ITER) std::cout << "Simplex spent too many iterations" << std::endl;
 		}
+
+		mylp->cleanConst();
 		return false;
 
 	}
 	catch(LPException&) {
+		mylp->cleanConst();
 		return false;
 	}
 	return false;
