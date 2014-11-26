@@ -12,7 +12,7 @@
 #include "ibex_EmptySystemException.h"
 #include "ibex_Timer.h"
 #include "ibex_OptimProbing.cpp_"
-#include "ibex_OptimSimplex.cpp_"
+//#include "ibex_OptimSimplex.cpp"
 #include "ibex_CtcFwdBwd.h"
 #include "ibex_CtcOptimShaving.h"
 #include "ibex_CtcHC4.h"
@@ -100,8 +100,9 @@ Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, double prec,
 	if (niter < 3*n) niter=3*n;
 
 	//====================================
-	mylp = new LinearSolver(n+1,m+1,niter );
+	mylp = new LinearSolver(n+1,m,niter );
 	lr = new LinearRelaxCombo(ext_sys);
+
 	//	cout << "sys " << sys << endl;
 }
 
@@ -117,6 +118,7 @@ Optimizer::~Optimizer() {
 	if (critpr > 0) buffer2.flush();
 	if (equs) delete equs;
 	delete mylp;
+	delete lr;
 	//	delete &(objshaver->ctc);
 	//	delete objshaver;
 }
@@ -200,6 +202,98 @@ bool Optimizer::update_loup(const IntervalVector& box) {
 	return loup_change;
 
 }
+
+
+
+//The system is overconstrained by using the combosition of the Taylor extension in two corner randomly chosen and the Affine Reformulation Technique
+//Then the simplex algorithm is applied to obtain a new upper bound loup
+//If a new loup is found the method returns true
+
+bool Optimizer::update_loup_simplex(const IntervalVector& box) {
+
+	if (!(Interval(1.e-14,1.e6).contains(box.max_diam()))) return false;  // A extraire
+	// is it necessary?  YES (BNE) Soplex can give false infeasible results with large numbers
+	//cout << "[polytope-hull] box before LR (linear relaxation): " << box << endl;
+
+	try {
+		IntervalVector ext_box(box.size()+1);
+		write_ext_box(box, ext_box);
+		ext_box[ext_sys.goal_var()] = Interval(uplo,pseudo_loup);
+
+		// Update the bounds the variables
+		mylp->initBoundVar(ext_box);
+
+		//returns the number of constraints in the linearized system
+		int cont = lr->linearization(ext_box, *mylp);
+		//cout << "[polytope-hull] end of LR" << endl;
+		if(cont<1)  return false;
+
+		Interval opt(0.0);
+// TODO FIXME Je ne comprends pas pourquoi en mettant 0 à la place de lr->goal_var() ou ext_sys.goal_var()  , ca marche ??
+		LinearSolver::Status_Sol stat = mylp->run_simplex(ext_box, LinearSolver::MINIMIZE,  ext_sys.goal_var(), opt,uplo);
+//		LinearSolver::Status_Sol stat = mylp->run_simplex(ext_box, LinearSolver::MINIMIZE,  0, opt,NEG_INFINITY);
+
+		//	std::cout << " stat " << stat << std::endl;
+		switch (stat) {
+		case (LinearSolver::OPTIMAL) :{
+			//the linear solution is mapped to intervals and evaluated
+			Vector prim(n+1);
+			mylp->getPrimalSol(prim);
+
+			//		std::cout << " simplex result " << tmpbox << std::endl;
+			Vector prim_int(box.size());
+			int i2=0;
+			for (int i=0; i<n; i++,i2++) {
+				if (i2==lr->goal_var()) i2++; // skip goal variable
+				prim_int[i]=prim[i2];
+			}
+			bool ret= box.contains(prim_int) && check_candidate(prim_int,false); //  [gch] do we know here that the point is inner??
+
+//			if ( is_inner(prim_int)) std::cout << "[test]--------"  << " loup " << pseudo_loup <<" eval "<< goal(prim_int) << " opt linear "<<opt<< std::endl;
+
+			if (ret) {
+				if (trace) {
+					int prec=std::cout.precision();
+					std::cout.precision(12);
+					std::cout << "[simplex1]"  << " loup update " << pseudo_loup  << " loup point  " << loup_point << std::endl;
+					std::cout.precision(prec);
+				}
+				nb_simplex++;
+				diam_simplex= ((nb_simplex-1) * diam_simplex + box.max_diam()) / nb_simplex;
+			}
+			mylp->cleanConst();
+			return ret;
+		}
+		case (LinearSolver::TIME_OUT) : {
+				if (trace>2) std::cout << "Simplex spent too much time" << std::endl;
+				break;
+		}
+		case (LinearSolver::MAX_ITER) :{
+			if (trace>2) std::cout << "Simplex spent too many iterations" << std::endl;
+			break;
+		}
+		}
+
+		mylp->cleanConst();
+		return false;
+
+	}
+	catch(LPException&) {
+		std::cout << "FAIL" << std::endl;
+		mylp->cleanConst();
+		return false;
+	}
+	return false;
+
+}
+
+
+
+
+
+
+
+
 
 void Optimizer::update_entailed_ctr(const IntervalVector& box) {
 	for (int j=0; j<m; j++) {

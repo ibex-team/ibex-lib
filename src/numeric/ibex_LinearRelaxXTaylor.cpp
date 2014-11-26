@@ -314,10 +314,28 @@ int LinearRelaxXTaylor::X_Linearization(const IntervalVector& savebox,
 
 		}
 
-		//      cout << " j " << j <<  " " << savebox[j] << G[j] << endl;
-	  box[j]=inf_x? savebox[j].lb():savebox[j].ub();
-	  Interval a = ((inf_x && (op == LEQ || op== LT)) ||
-			(!inf_x && (op == GEQ || op== GT)))	? G[j].lb() : G[j].ub();
+	  //      cout << " j " << j <<  " " << savebox[j] << G[j] << endl;
+	  //	box[j]=inf_x? savebox[j].lb():savebox[j].ub();
+	  if (inf_x) {
+		  if (savebox[j].lb()>NEG_INFINITY)
+			  box[j]=savebox[j].lb() ;
+		  else if  (savebox[j].ub()<POS_INFINITY)
+			  box[j]=savebox[j].ub() ;
+		  else
+			  return 0;
+	  }
+	  else {
+		  if (savebox[j].ub()<POS_INFINITY)
+			  box[j]=savebox[j].ub() ;
+		  else if  (savebox[j].lb()>NEG_INFINITY)
+			  box[j]=savebox[j].lb() ;
+		  else
+			  return 0;
+	  }
+
+	  Interval a =
+			((inf_x && (op == LEQ || op== LT)) ||
+			(!inf_x && (op == GEQ || op== GT)))	  ? G[j].lb() : G[j].ub();
 	  row1[j] =  a.mid();
 	  ev -= a*box[j];
 
@@ -353,7 +371,8 @@ int LinearRelaxXTaylor::X_Linearization(const IntervalVector& savebox,
 				added=true;
 			}
 		}
-	} catch (LPException&) { }
+	} 	catch (LPException&) { }
+		catch (EmptyBoxException& e) { throw e;}
 	//box=savebox;
 
 	return (added)? 1:0;

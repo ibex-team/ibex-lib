@@ -131,12 +131,12 @@ public:
 	/**
 	 * Neumaier Shcherbina postprocessing in case of optimal solution found : the result obj is made reliable
 	 */
-	void NeumaierShcherbina_postprocessing(int nr, int var, Interval & obj, const IntervalVector& box, const Matrix & As, const IntervalVector& B,  const Vector &dual_solution, bool minimization);
+	void NeumaierShcherbina_postprocessing(int var, Interval & obj, const IntervalVector& box, Sense sense);
 
 	/**
 	 *  Neumaier Shcherbina postprocessing in case of infeasibilty found by LP  returns true if the infeasibility is proved
 	 */
-	bool NeumaierShcherbina_infeasibilitytest(int nr, const IntervalVector& box, const Matrix & As, const IntervalVector& B, const Vector & infeasible_dir);
+	bool NeumaierShcherbina_infeasibilitytest( const IntervalVector& box);
 
 
 // GET
