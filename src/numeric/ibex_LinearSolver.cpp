@@ -16,7 +16,7 @@ namespace ibex {
 const double LinearSolver::default_eps = 1e-10;
 const double LinearSolver::default_max_bound = 1e20;
 const int LinearSolver::default_max_time_out=100;
-const int LinearSolver::default_max_iter=1000;
+const int LinearSolver::default_max_iter=100;
 const Interval LinearSolver::default_limit_diam_box = Interval(1.e-14,1.e6);
 
 
@@ -84,7 +84,7 @@ LinearSolver::Status_Sol LinearSolver::run_simplex(const IntervalVector& box, Li
 		//	mylinearsolver->writeFile("coucou.lp");
 		//	system("cat coucou.lp");
 		stat = solve();
-		//cout << "[polytope-hull]->[run_simplex] solver returns " << stat << endl;
+		// std::cout << "[polytope-hull]->[run_simplex] solver returns " << stat << std::endl;
 
 		switch (stat) {
 		case LinearSolver::OPTIMAL : {

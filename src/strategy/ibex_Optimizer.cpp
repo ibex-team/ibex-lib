@@ -100,7 +100,7 @@ Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, double prec,
 	if (niter < 3*n) niter=3*n;
 
 	//====================================
-	mylp = new LinearSolver(n+1,m,niter );
+	mylp = new LinearSolver(n+1,m+1,niter );
 	lr = new LinearRelaxCombo(ext_sys);
 
 	//	cout << "sys " << sys << endl;
@@ -220,6 +220,8 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 		write_ext_box(box, ext_box);
 		ext_box[ext_sys.goal_var()] = Interval(uplo,pseudo_loup);
 
+		mylp->cleanConst();
+
 		// Update the bounds the variables
 		mylp->initBoundVar(ext_box);
 
@@ -233,14 +235,16 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 		LinearSolver::Status_Sol stat = mylp->run_simplex(ext_box, LinearSolver::MINIMIZE,  ext_sys.goal_var(), opt,uplo);
 //		LinearSolver::Status_Sol stat = mylp->run_simplex(ext_box, LinearSolver::MINIMIZE,  0, opt,NEG_INFINITY);
 
+		//mylp->writeFile("coucou.lp");
+		//system("cat coucou.lp");
 		//	std::cout << " stat " << stat << std::endl;
+
 		switch (stat) {
 		case (LinearSolver::OPTIMAL) :{
 			//the linear solution is mapped to intervals and evaluated
 			Vector prim(n+1);
 			mylp->getPrimalSol(prim);
 
-			//		std::cout << " simplex result " << tmpbox << std::endl;
 			Vector prim_int(box.size());
 			int i2=0;
 			for (int i=0; i<n; i++,i2++) {
@@ -261,34 +265,29 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 				nb_simplex++;
 				diam_simplex= ((nb_simplex-1) * diam_simplex + box.max_diam()) / nb_simplex;
 			}
-			mylp->cleanConst();
 			return ret;
 		}
 		case (LinearSolver::TIME_OUT) : {
-				if (trace>2) std::cout << "Simplex spent too much time" << std::endl;
-				break;
-		}
-		case (LinearSolver::MAX_ITER) :{
-			if (trace>2) std::cout << "Simplex spent too many iterations" << std::endl;
+			if (trace) { std::cout << "Simplex spent too much time" << std::endl; }
 			break;
 		}
+		case (LinearSolver::MAX_ITER) :{
+			if (trace) { std::cout << "Simplex spent too many iterations" << std::endl; }
+			break;
+		}
+		default:
+			break;
 		}
 
-		mylp->cleanConst();
 		return false;
-
 	}
 	catch(LPException&) {
 		std::cout << "FAIL" << std::endl;
-		mylp->cleanConst();
 		return false;
 	}
 	return false;
 
 }
-
-
-
 
 
 
