@@ -28,7 +28,7 @@ def options (opt):
 			help = "build ibex as a shared lib")
 
 	opt.add_option ("--disable-sse2", action="store_true", dest="DISABLE_SSE2",
-			help = "do not use SSE2 optimisations")
+			help = "do not use SSE2 optimizations")
 
 	opt.add_option ("--with-debug",  action="store_true", dest="DEBUG",
 			help = "enable debugging")
