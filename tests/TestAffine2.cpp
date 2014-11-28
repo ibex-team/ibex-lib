@@ -19,7 +19,7 @@
 
 #include "ibex_Solver.h"
 
-//using namespace std;
+using namespace std;
 
 void TestAffine2::test01() {
 	Variable x(2);
@@ -1090,8 +1090,19 @@ void TestAffine2::test_tanh() {
 
 bool TestAffine2::check_af2 (Function& f, Interval& I){
 	Affine2 faa;
-	Interval itv =f.eval_affine2(IntervalVector(1,I), faa);
-	Interval itv2 =f.eval(IntervalVector(1,I));
+	Interval itv2;
+	Interval itv;
+	try {
+		itv2 =f.eval(IntervalVector(1,I));
+	} catch (EmptyBoxException& ) {
+		itv2.set_empty();
+	}
+
+	try {
+	 itv =f.eval_affine2(IntervalVector(1,I), faa);
+	} catch (EmptyBoxException& ) {
+		itv.set_empty();
+	}
 
 	if (!(itv2.is_subset(faa.itv())))
 	{
@@ -1137,8 +1148,20 @@ bool TestAffine2::check_af2 (Function& f, IntervalVector& I){
 
 
 	Affine2 faa;
-	Interval itv =f.eval_affine2(I, faa);
-	Interval itv2 =f.eval(I);
+	Interval itv;
+	Interval itv2;
+	try {
+		itv2 =f.eval(I);
+	} catch (EmptyBoxException& ) {
+		itv2.set_empty();
+	}
+
+	try {
+	 itv =f.eval_affine2(I, faa);
+	} catch (EmptyBoxException& ) {
+		itv.set_empty();
+	}
+
 	if (!(itv2.is_subset(faa.itv()))) {
 //		std::cout  << " DEP = "<< I<< "  "  << f<<std::endl;
 //		std::cout  << " RES = "<< itv2 << " /// "<< itv << " ///// " << faa << std::endl;

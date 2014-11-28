@@ -22,7 +22,7 @@ class TestAffine2 : public TestIbex {
 public:
 	TestAffine2() {
 		TEST_ADD(TestAffine2::test_sqrt);
-		TEST_ADD(TestAffine2::test_exp);
+/*		TEST_ADD(TestAffine2::test_exp);
 		TEST_ADD(TestAffine2::test_log);
 		TEST_ADD(TestAffine2::test_inv);
 		TEST_ADD(TestAffine2::test_cos);
@@ -35,7 +35,7 @@ public:
 		TEST_ADD(TestAffine2::test_cosh);
 		TEST_ADD(TestAffine2::test_sinh);
 		TEST_ADD(TestAffine2::test_tanh);
-
+*/
 
 
 	}
