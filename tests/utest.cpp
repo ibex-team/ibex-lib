@@ -77,7 +77,7 @@ int main() {
 
     Test::Suite ts;
 
-/*    ts.add(auto_ptr<Test::Suite>(new TestString()));
+    ts.add(auto_ptr<Test::Suite>(new TestString()));
     ts.add(auto_ptr<Test::Suite>(new TestBitSet()));
     ts.add(auto_ptr<Test::Suite>(new TestSymbolMap()));
 
@@ -88,9 +88,9 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestArith()));
     ts.add(auto_ptr<Test::Suite>(new TestInnerArith()));
     //ts.add(auto_ptr<Test::Suite>(new TestDomain()));
-*/
+
     ts.add(auto_ptr<Test::Suite>(new TestAffine2()));
-/*
+
     ts.add(auto_ptr<Test::Suite>(new TestExpr()));
     ts.add(auto_ptr<Test::Suite>(new TestExprCopy()));
     ts.add(auto_ptr<Test::Suite>(new TestExprDiff()));
@@ -122,7 +122,7 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestFritzJohn()));
 
     ts.add(auto_ptr<Test::Suite>(new TestOptimizer()));
-*/
+
     return ts.run(output,false) ? EXIT_SUCCESS : EXIT_FAILURE;
 
 }

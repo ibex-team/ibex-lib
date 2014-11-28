@@ -19,7 +19,7 @@
 
 #include "ibex_Solver.h"
 
-using namespace std;
+//using namespace std;
 
 void TestAffine2::test01() {
 	Variable x(2);
