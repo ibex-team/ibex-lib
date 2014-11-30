@@ -22,13 +22,16 @@ namespace ibex {
  * It stores occupancy grid and integral image.
  * Data is stored in a linear big array.
  *
- * TODO: add comment: what is a "leaf"??
+ * with the data, the PixelMap also stores :
+ *	- the size of the grid ( leaf_size_)
+ *	- the origin (origin_)
+ * 	- the number of cells (grid_size_)
  *
  */
 class RasterPicture {
 public:
 	/**
-	 * \brief TODO: add comment
+	 * \brief type of data stored in the grid
 	 */
 	typedef unsigned int DATA_TYPE;
 
@@ -48,17 +51,12 @@ public:
 	virtual ~RasterPicture();
 
 	/**
-	 * \brief TODO: add comment
-	 */
-    void init();
-
-	/**
-	 * \brief TODO: add comment
+	 * \brief Save the RasterPicture into a file given by filename. 
 	 */
     void save(const char* filename);
 
 	/**
-	 * \brief TODO: add comment
+	 * \brief Save the RasterPicture from a file given by filename.
 	 */
     void load(const char* filename);
 
@@ -106,7 +104,8 @@ private:
     static const char* FF_DATA_IMAGE_ND;
 
 	/**
-	 * \brief TODO: add comment
+	 * \brief After setting parameters of the RasterPicture( grid_size, leaf_size and origin)
+	 * This function initialiez the array which stores pixel data.
 	 */
     void init(const RasterPicture& pic);
 
