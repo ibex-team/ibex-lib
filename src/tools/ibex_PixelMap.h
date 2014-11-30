@@ -1,14 +1,14 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_RasterPicture.h
+// File        : ibex_PixelMap.h
 // Author      : Benoit Desrochers, Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Oct 31, 2014
 //============================================================================
 
-#ifndef __IBEX_RASTER_PICTURE_H__
-#define __IBEX_RASTER_PICTURE_H__
+#ifndef __IBEX_PIXEL_MAP_H__
+#define __IBEX_PIXEL_MAP_H__
 
 #include <fstream>
 #include <vector>
@@ -28,7 +28,7 @@ namespace ibex {
  * 	- the number of cells (grid_size_)
  *
  */
-class RasterPicture {
+class PixelMap {
 public:
 	/**
 	 * \brief type of data stored in the grid
@@ -38,25 +38,31 @@ public:
 	/**
 	 * \brief Create a n-dimensional image.
 	 */
-	RasterPicture(int ndim);
+	PixelMap(int ndim);
 
 	/**
 	 * \brief Copy constructor.
 	 */
-	RasterPicture(const RasterPicture& src);
+	PixelMap(const PixelMap& src);
 
 	/**
 	 * \brief Delete this.
 	 */
-	virtual ~RasterPicture();
+	virtual ~PixelMap();
 
 	/**
-	 * \brief Save the RasterPicture into a file given by filename. 
+	 *	\brief Initialize the PixelMap. 
+	 *		field <leaf_size_> needs to be setted before.
+	 */
+	void init();
+
+	/**
+	 * \brief Save the PixelMap into a file given by filename. 
 	 */
     void save(const char* filename);
 
 	/**
-	 * \brief Save the RasterPicture from a file given by filename.
+	 * \brief Save the PixelMap from a file given by filename.
 	 */
     void load(const char* filename);
 
@@ -81,10 +87,10 @@ public:
     int *grid_size_;
 
 protected:
-    friend class TestRasterPicture;
+    friend class TestPixelMap;
 
 	/**
-	 * \brief TODO: add comment
+	 * \brief return the value of the element idx in the array data
 	 */
     DATA_TYPE& operator[](int idx);
 
@@ -104,31 +110,31 @@ private:
     static const char* FF_DATA_IMAGE_ND;
 
 	/**
-	 * \brief After setting parameters of the RasterPicture( grid_size, leaf_size and origin)
+	 * \brief After setting parameters of the PixelMap( grid_size, leaf_size and origin)
 	 * This function initialiez the array which stores pixel data.
 	 */
-    void init(const RasterPicture& pic);
+    void init(const PixelMap& pic);
 
 	/*
 	 * Read the header from a file.
 	 *  (used by load)
 	 */
-    void read_header(std::ifstream& in_file, RasterPicture& output);
+    void read_header(std::ifstream& in_file, PixelMap& output);
 
     /*
      * Write the header in a file.
 	 *  (used by save)
 	 */
-    void write_header(std::ofstream& out_file, const RasterPicture& input);
+    void write_header(std::ofstream& out_file, const PixelMap& input);
 };
 
 /**
  * \brief Raster 2D picture image.
  */
-class RasterPicture2D : public RasterPicture {
+class PixelMap2D : public PixelMap {
 public:
 
-    RasterPicture2D() : RasterPicture(2) {};
+    PixelMap2D() : PixelMap(2) {};
 
 	virtual void compute_integral_image();
 
@@ -146,10 +152,10 @@ public:
 /**
  * \brief Raster 3D picture image.
  */
-class RasterPicture3D : public RasterPicture {
+class PixelMap3D : public PixelMap {
 public:
 
-    RasterPicture3D(): RasterPicture(3) {};
+    PixelMap3D(): PixelMap(3) {};
 
 	virtual void compute_integral_image();
 
@@ -165,10 +171,10 @@ public:
 
 /*================================== inline implementations ========================================*/
 
-inline RasterPicture::DATA_TYPE& RasterPicture::operator[](int idx) {
+inline PixelMap::DATA_TYPE& PixelMap::operator[](int idx) {
 	return data.at(idx);
 }
 
 } // namespace ibex
 
-#endif // __IBEX_RASTER_PICTURE_H__
+#endif // __IBEX_PIXEL_MAP_H__

@@ -1,9 +1,9 @@
-#include "TestCtcRasterPicture.h"
+#include "TestCtcPixelMap.h"
 
 
 namespace ibex {
 
-void TestCtcRasterPicture::initRaster3D(RasterPicture3D& raster){
+void TestCtcPixelMap::initRaster3D(PixelMap3D& raster){
     raster.set_leaf_size(0.1,0.1,0.05);
     raster.set_origin(-2,1,0);
     raster.set_grid_size(20,20,20);
@@ -13,10 +13,10 @@ void TestCtcRasterPicture::initRaster3D(RasterPicture3D& raster){
     raster.compute_integral_image();
 }
 
-void TestCtcRasterPicture::test3d_emptyBox(){
-    RasterPicture3D raster;
+void TestCtcPixelMap::test3d_emptyBox(){
+    PixelMap3D raster;
     initRaster3D(raster);
-    CtcRasterPicture ctc(raster);
+    CtcPixelMap ctc(raster);
 
     IntervalVector v1(3,Interval::EMPTY_SET);
 
@@ -24,10 +24,10 @@ void TestCtcRasterPicture::test3d_emptyBox(){
     TEST_ASSERT(v1.is_empty());
 }
 
-void TestCtcRasterPicture::test3d_contractEmpty(){
-    RasterPicture3D raster;
+void TestCtcPixelMap::test3d_contractEmpty(){
+    PixelMap3D raster;
     initRaster3D(raster);
-    CtcRasterPicture ctc(raster);
+    CtcPixelMap ctc(raster);
 
 
     double v1_[3][2] = {{1,0},{2,3},{0,1}};
@@ -37,10 +37,10 @@ void TestCtcRasterPicture::test3d_contractEmpty(){
     TEST_ASSERT(v1.is_empty());
 
 }
-void TestCtcRasterPicture::test3d_allReal(){
-    RasterPicture3D raster;
+void TestCtcPixelMap::test3d_allReal(){
+    PixelMap3D raster;
     initRaster3D(raster);
-    CtcRasterPicture ctc(raster);
+    CtcPixelMap ctc(raster);
     IntervalVector v1(3,Interval::ALL_REALS);
 
     ctc.contract(v1);
@@ -52,10 +52,10 @@ void TestCtcRasterPicture::test3d_allReal(){
     TEST_ASSERT_DELTA(0.45,v1[2].ub(),std::numeric_limits<double>::epsilon());
 }
 
-void TestCtcRasterPicture::test3d_fullImage(){
-    RasterPicture3D raster;
+void TestCtcPixelMap::test3d_fullImage(){
+    PixelMap3D raster;
     initRaster3D(raster);
-    CtcRasterPicture ctc(raster);
+    CtcPixelMap ctc(raster);
 
     double v1_[3][2] = {{-2,0},{1,3},{0,1}};
     IntervalVector v1(3,v1_);
@@ -69,10 +69,10 @@ void TestCtcRasterPicture::test3d_fullImage(){
     TEST_ASSERT_DELTA(0.45,v1[2].ub(),std::numeric_limits<double>::epsilon());
 }
 
-void TestCtcRasterPicture::test3d_corner(){
-    RasterPicture3D raster;
+void TestCtcPixelMap::test3d_corner(){
+    PixelMap3D raster;
     initRaster3D(raster);
-    CtcRasterPicture ctc(raster);
+    CtcPixelMap ctc(raster);
 
     double v1_[3][2] = {{-2,-0.95},{1,1.55},{0,0.45}};
     IntervalVector v1(3,v1_);
@@ -92,7 +92,7 @@ void TestCtcRasterPicture::test3d_corner(){
 // ---------------------- 2D Test ------------------------------------------------------
 // -------------------------------------------------------------------------------------
 
-void TestCtcRasterPicture::initRaster2D(RasterPicture2D& raster){
+void TestCtcPixelMap::initRaster2D(PixelMap2D& raster){
     raster.set_leaf_size(0.1,0.1);
     raster.set_origin(-2,1);
     raster.set_grid_size(20,20);
@@ -102,10 +102,10 @@ void TestCtcRasterPicture::initRaster2D(RasterPicture2D& raster){
     raster.compute_integral_image();
 }
 
-void TestCtcRasterPicture::test2d_emptyBox(){
-    RasterPicture2D raster;
+void TestCtcPixelMap::test2d_emptyBox(){
+    PixelMap2D raster;
     initRaster2D(raster);
-    CtcRasterPicture ctc(raster);
+    CtcPixelMap ctc(raster);
 
     IntervalVector v1(2,Interval::EMPTY_SET);
 
@@ -113,10 +113,10 @@ void TestCtcRasterPicture::test2d_emptyBox(){
     TEST_ASSERT(v1.is_empty());
 }
 
-void TestCtcRasterPicture::test2d_contractEmpty(){
-    RasterPicture2D raster;
+void TestCtcPixelMap::test2d_contractEmpty(){
+    PixelMap2D raster;
     initRaster2D(raster);
-    CtcRasterPicture ctc(raster);
+    CtcPixelMap ctc(raster);
 
 
     double v1_[2][2] = {{1,0},{2,3}};
@@ -126,10 +126,10 @@ void TestCtcRasterPicture::test2d_contractEmpty(){
     TEST_ASSERT(v1.is_empty());
 
 }
-void TestCtcRasterPicture::test2d_allReal(){
-    RasterPicture2D raster;
+void TestCtcPixelMap::test2d_allReal(){
+    PixelMap2D raster;
     initRaster2D(raster);
-    CtcRasterPicture ctc(raster);
+    CtcPixelMap ctc(raster);
     IntervalVector v1(2,Interval::ALL_REALS);
 
     ctc.contract(v1);
@@ -139,10 +139,10 @@ void TestCtcRasterPicture::test2d_allReal(){
     TEST_ASSERT_DELTA(1.6,v1[1].ub(),std::numeric_limits<double>::epsilon());
 }
 
-void TestCtcRasterPicture::test2d_fullImage(){
-    RasterPicture2D raster;
+void TestCtcPixelMap::test2d_fullImage(){
+    PixelMap2D raster;
     initRaster2D(raster);
-    CtcRasterPicture ctc(raster);
+    CtcPixelMap ctc(raster);
 
     double v1_[2][2] = {{-2,0},{1,3}};
     IntervalVector v1(2,v1_);
@@ -154,10 +154,10 @@ void TestCtcRasterPicture::test2d_fullImage(){
     TEST_ASSERT_DELTA(1.6,v1[1].ub(),std::numeric_limits<double>::epsilon());
 }
 
-void TestCtcRasterPicture::test2d_corner(){
-    RasterPicture2D raster;
+void TestCtcPixelMap::test2d_corner(){
+    PixelMap2D raster;
     initRaster2D(raster);
-    CtcRasterPicture ctc(raster);
+    CtcPixelMap ctc(raster);
 
     double v1_[2][2] = {{-2,-0.95},{1,1.55}};
     IntervalVector v1(2,v1_);
@@ -170,7 +170,7 @@ void TestCtcRasterPicture::test2d_corner(){
 }
 
 
-//void TestCtcRasterPicture::add_cross(int3 center, int length, Array2d &I){
+//void TestCtcPixelMap::add_cross(int3 center, int length, Array2d &I){
 //    for(int  i = -length ; i <= length; i++){
 //        I({{center[0] + i, center[1], center[2] }}) = 1;
 //        I({{center[0], center[1] +i , center[2] }}) = 1;
@@ -178,7 +178,7 @@ void TestCtcRasterPicture::test2d_corner(){
 //    }
 //}
 
-//void TestCtcRasterPicture::add_emptyCubes(int3 center, int width, Array3D &I){
+//void TestCtcPixelMap::add_emptyCubes(int3 center, int width, Array3D &I){
 
 //    for(int i = -width; i <= width; i++ ){
 //        for(int j = -width; j <= width; j++ ){
@@ -190,7 +190,7 @@ void TestCtcRasterPicture::test2d_corner(){
 
 //}
 
-//void TestCtcRasterPicture::setup(){
+//void TestCtcPixelMap::setup(){
 //    // Generate test shapes :
 //    // define leaf size
 //    leaf_size = {{1,1,1}};
@@ -211,7 +211,7 @@ void TestCtcRasterPicture::test2d_corner(){
 //}
 
 
-//void TestCtcRasterPicture::contractCross(){
+//void TestCtcPixelMap::contractCross(){
 //    IntervalVector box(3), res(3);
 //    box[0] = Interval(50).inflate(20);
 //    box[1] = Interval(50).inflate(20);
@@ -222,7 +222,7 @@ void TestCtcRasterPicture::test2d_corner(){
 //    res[2] = Interval(20).inflate(10);
 
 //    computeIntegralImage(array);
-//    CtcRasterPicture ctc(array);
+//    CtcPixelMap ctc(array);
 //    ctc.contract(box);
 //    for(uint i = 0; i < box.size(); i++){
 //        TEST_ASSERT_EQUALS(res[i].lb(),box[i].lb());
@@ -232,12 +232,12 @@ void TestCtcRasterPicture::test2d_corner(){
 
 //}
 
-//void TestCtcRasterPicture::tear_down(){
+//void TestCtcPixelMap::tear_down(){
 
 //}
 
 
-//void TestCtcRasterPicture::testContractExternal(){
+//void TestCtcPixelMap::testContractExternal(){
 
 //    leaf_size = {{1,1,1}};
 //    origin = {{0,0,0}};
@@ -273,7 +273,7 @@ void TestCtcRasterPicture::test2d_corner(){
 
 //}
 
-//void TestCtcRasterPicture::testContractThin(){
+//void TestCtcPixelMap::testContractThin(){
 //    leaf_size = {{0.1,0.1,0.05}};
 //    origin = {{-2,1,0}};
 //    grid_size = {{20,20,20}};

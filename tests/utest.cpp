@@ -17,7 +17,7 @@
 #include "TestString.h"
 #include "TestBitSet.h"
 #include "TestSymbolMap.h"
-#include "TestRasterPicture.h"
+#include "TestPixelMap.h"
 
 // ================ arithmetic ===============
 #include "TestInterval.h"
@@ -63,7 +63,7 @@
 #include "TestCtcExist.h"
 #include "TestCtcForAll.h"
 #include "TestCtcPolytopeHull.h"
-#include "TestCtcRasterPicture.h"
+#include "TestCtcPixelMap.h"
 
 
 
@@ -84,7 +84,7 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestString()));
     ts.add(auto_ptr<Test::Suite>(new TestBitSet()));
     ts.add(auto_ptr<Test::Suite>(new TestSymbolMap()));
-    ts.add(auto_ptr<Test::Suite>(new TestRasterPicture()));
+    ts.add(auto_ptr<Test::Suite>(new TestPixelMap()));
 
     ts.add(auto_ptr<Test::Suite>(new TestInterval()));
     ts.add(auto_ptr<Test::Suite>(new TestIntervalVector()));
@@ -123,7 +123,7 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestCtcExist()));
     ts.add(auto_ptr<Test::Suite>(new TestCtcForAll()));
     ts.add(auto_ptr<Test::Suite>(new TestCtcPolytopeHull()));
-    ts.add(auto_ptr<Test::Suite>(new TestCtcRasterPicture()));
+    ts.add(auto_ptr<Test::Suite>(new TestCtcPixelMap()));
 
     ts.add(auto_ptr<Test::Suite>(new TestFritzJohn()));
 

@@ -1,9 +1,9 @@
-#include "TestRasterPicture.h"
+#include "TestPixelMap.h"
 
 namespace ibex {
 
 
-void TestRasterPicture::setup(){
+void TestPixelMap::setup(){
 
     //        leaf_size = {{0.1,0.3}};
     //        origin = {{0,2}};
@@ -16,9 +16,9 @@ void TestRasterPicture::setup(){
     //        array.init();
 }
 
-void TestRasterPicture::test_init2DRasterPicture(){
+void TestPixelMap::test_init2DPixelMap(){
 
-    RasterPicture2D raster;
+    PixelMap2D raster;
     double leaf_size[] = {0.1,0.3};
     double origin[] = {0,2};
     int grid_size[] = {10,20};
@@ -57,9 +57,9 @@ void TestRasterPicture::test_init2DRasterPicture(){
 }
 
 
-void TestRasterPicture::test_init3DRasterPicture(){
+void TestPixelMap::test_init3DPixelMap(){
 
-    RasterPicture3D raster;
+    PixelMap3D raster;
     double leaf_size[] = {0.1,0.3,0.5};
     double origin[] = {0,2,-1.632};
     int grid_size[] = {10,20,100};
@@ -97,15 +97,15 @@ void TestRasterPicture::test_init3DRasterPicture(){
     }
 }
 
-void TestRasterPicture::test_readMissingFile(){
-    RasterPicture3D array3d;
+void TestPixelMap::test_readMissingFile(){
+    PixelMap3D array3d;
     // try{
     //     array3d.load("missing.array3D"); // exit in case of problem (test thread is killed --> reported as fail)
     // } catch(std::exception& e) {}
     TEST_ASSERT(true);
 }
 
-void TestRasterPicture::test_readWrongFileFormat_1(){
+void TestPixelMap::test_readWrongFileFormat_1(){
     // Generate wrong file Header
     // std::ofstream out_file;
     // out_file.open("wrong.array2D", std::ios::out | std::ios::trunc | std::ios::binary);
@@ -113,8 +113,8 @@ void TestRasterPicture::test_readWrongFileFormat_1(){
     // std::ostringstream oss;
     // oss.imbue (std::locale::classic ());
 
-    // oss << "VERSION " << RasterPicture::FORMAT_VERSION;
-    // oss << "\nTYPE " << RasterPicture::FF_DATA_IMAGE_ND << " " << 2 << " " << sizeof(unsigned char);
+    // oss << "VERSION " << PixelMap::FORMAT_VERSION;
+    // oss << "\nTYPE " << PixelMap::FF_DATA_IMAGE_ND << " " << 2 << " " << sizeof(unsigned char);
     // oss << "\nLEAF_SIZE"; for(int i =0; i < 2;  i++) oss << " " << 0;
     // oss << "\nORIGIN"; for(int i =0; i < 2;  i++) oss << " " << 0;
     // oss << "\nEND_HEADER\n";
@@ -124,19 +124,19 @@ void TestRasterPicture::test_readWrongFileFormat_1(){
     //     std::cerr << "error writting wrong file header";
     // }
     // out_file.close();
-    // RasterPicture2D array2d;
+    // PixelMap2D array2d;
     // array2d.load("wrong.array2D"); // exit in case of problem (test thread is killed --> reported as fail)
     TEST_ASSERT(true);
 }
 
-void TestRasterPicture::test_readWrongFileFormat_2(){
+void TestPixelMap::test_readWrongFileFormat_2(){
     // Array2D array2d;
     // TEST_ASSERT(array2d.loadFromFile("test.array3D")!=0);
 }
 
 
-void TestRasterPicture::test_ImageIntegral2D(){
-    RasterPicture2D raster;
+void TestPixelMap::test_ImageIntegral2D(){
+    PixelMap2D raster;
     raster.load("test.array2D"); // exit in case of problem (test thread is killed --> reported as fail)
     TEST_ASSERT(true);
     raster.compute_integral_image();

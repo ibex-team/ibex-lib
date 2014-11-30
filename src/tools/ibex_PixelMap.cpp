@@ -1,13 +1,13 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_RasterPicture.cpp
+// File        : ibex_PixelMap.cpp
 // Author      : Benoit Desrochers, Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Oct 31, 2014
 //============================================================================
 
-#include "ibex_RasterPicture.h"
+#include "ibex_PixelMap.h"
 #include "ibex_Exception.h"
 
 #include <iostream>
@@ -24,17 +24,17 @@ using namespace std;
 namespace ibex {
 
 
-const char* RasterPicture::FORMAT_VERSION="1.0.0";
-const char* RasterPicture::FF_DATA_IMAGE_ND="DATA_IMD_ND";
+const char* PixelMap::FORMAT_VERSION="1.0.0";
+const char* PixelMap::FF_DATA_IMAGE_ND="DATA_IMD_ND";
 
-RasterPicture::RasterPicture(int ndim) : ndim(ndim), zero(0) {
+PixelMap::PixelMap(int ndim) : ndim(ndim), zero(0) {
 	leaf_size_ = new double[ndim];
 	origin_ = new double[ndim];
 	grid_size_ = new int[ndim];
 	divb_mul_ = new int[ndim];
 }
 
-RasterPicture::RasterPicture(const RasterPicture& src): ndim(src.ndim), zero(0){
+PixelMap::PixelMap(const PixelMap& src): ndim(src.ndim), zero(0){
 	leaf_size_ = new double[ndim];
 	origin_ = new double[ndim];
 	grid_size_ = new int[ndim];
@@ -51,14 +51,14 @@ RasterPicture::RasterPicture(const RasterPicture& src): ndim(src.ndim), zero(0){
 
 }
 
-RasterPicture::~RasterPicture() {
+PixelMap::~PixelMap() {
 	delete[] leaf_size_;
 	delete[] origin_;
 	delete[] grid_size_;
 	delete[] divb_mul_;
 }
 
-void RasterPicture::init() {
+void PixelMap::init() {
 
 	int size = grid_size_[0];
 	for(uint i=1; i<ndim; i++){
@@ -75,13 +75,13 @@ void RasterPicture::init() {
 	memset(&zero,0,sizeof(DATA_TYPE));
 }
 
-void RasterPicture::save(const char *filename) {
+void PixelMap::save(const char *filename) {
 	ofstream out_file;
 	out_file.open(filename, ios::out | ios::trunc | ios::binary);
 
 	if(out_file.fail()) {
 		std::stringstream s;
-		s << "RasterPicture [save]: cannot open file " << filename << "for dumping data";
+		s << "PixelMap [save]: cannot open file " << filename << "for dumping data";
 		ibex_error(s.str().c_str());
 	}
 
@@ -91,7 +91,7 @@ void RasterPicture::save(const char *filename) {
 		out_file.write((char*)&data[0],data.size()*sizeof(DATA_TYPE));
 	} catch (std::exception& e) {
 		std::stringstream s;
-		s << "RasterPicture [save]: writing error " << e.what() << std::endl;
+		s << "PixelMap [save]: writing error " << e.what() << std::endl;
 		ibex_error(s.str().c_str());
 	}
 
@@ -99,7 +99,7 @@ void RasterPicture::save(const char *filename) {
 }
 
 // read header
-void RasterPicture::read_header(ifstream &in_file, RasterPicture& output) {
+void PixelMap::read_header(ifstream &in_file, PixelMap& output) {
 
 	std::string line;
 	bool leaf_size_is_set = false, origin_is_set = false, grid_size_is_set  = false;
@@ -134,7 +134,7 @@ void RasterPicture::read_header(ifstream &in_file, RasterPicture& output) {
 
 			if (tag.compare(FF_DATA_IMAGE_ND) != 0) {
 				in_file.close ();
-				ibex_error("RasterPicture [read_header]: file format does not match the required file format");
+				ibex_error("PixelMap [read_header]: file format does not match the required file format");
 			}
 
 			int dim; sstream >> dim;
@@ -142,7 +142,7 @@ void RasterPicture::read_header(ifstream &in_file, RasterPicture& output) {
 			if (dim != ndim) {
 				in_file.close ();
 				std::stringstream s;
-				s << "RasterPicture [read_header]: array dimension of the file (" << dim << ") ";
+				s << "PixelMap [read_header]: array dimension of the file (" << dim << ") ";
 				s << "does not match the dimension of the array (" << ndim << ")";
 				ibex_error(s.str().c_str());
 			}
@@ -190,7 +190,7 @@ void RasterPicture::read_header(ifstream &in_file, RasterPicture& output) {
 		output.init();
 	} else {
 		std::stringstream s;
-		s << "RasterPicture [read_header]: field ";
+		s << "PixelMap [read_header]: field ";
 		if(!leaf_size_is_set) s << "LEAF_SIZE ";
 		if(!grid_size_is_set) s << "GRID_SIZE ";
 		if(!origin_is_set) s << "ORIGIN ";
@@ -201,12 +201,12 @@ void RasterPicture::read_header(ifstream &in_file, RasterPicture& output) {
 }
 
 
-void RasterPicture::load(const char *filename) {
+void PixelMap::load(const char *filename) {
 	std::ifstream in_file;
 	in_file.open(filename, ios::in | ios::binary);
 	if(in_file.fail()) {
 		std::stringstream s;
-		s << "RasterPicture [load]: cannot open file " << filename << "for reading data";
+		s << "PixelMap [load]: cannot open file " << filename << "for reading data";
 		ibex_error(s.str().c_str());
 
     }
@@ -221,14 +221,14 @@ void RasterPicture::load(const char *filename) {
 		}
 	} catch (std::exception& e) {
 		std::stringstream s;
-		s << "RasterPicture [load]: reading error " << e.what() << std::endl;
+		s << "PixelMap [load]: reading error " << e.what() << std::endl;
 		ibex_error(s.str().c_str());
 	}
 	in_file.close();
 	//    std::cerr  << " read " << output.data.size() << " cubes\n";
 }
 
-void RasterPicture::write_header(ofstream& out_file, const RasterPicture& input) {
+void PixelMap::write_header(ofstream& out_file, const PixelMap& input) {
 	std::ostringstream oss;
 	oss.imbue (std::locale::classic ());
 
@@ -241,29 +241,29 @@ void RasterPicture::write_header(ofstream& out_file, const RasterPicture& input)
 	try {
 		out_file << oss.str();
 	} catch (std::exception& e) {
-		ibex_error("RasterPicture [write_header]: fail to write");
+		ibex_error("PixelMap [write_header]: fail to write");
 	}
 }
 
 // ==========================================================================================================
 
-void RasterPicture2D::set_origin(double ox, double oy) {
+void PixelMap2D::set_origin(double ox, double oy) {
 	origin_[0] = ox;
 	origin_[1] = oy;
 }
 
-void RasterPicture2D::set_leaf_size(double lx, double ly) {
+void PixelMap2D::set_leaf_size(double lx, double ly) {
 	leaf_size_[0] = lx;
 	leaf_size_[1] = ly;
 }
 
-void RasterPicture2D::set_grid_size(uint ni, uint nj) {
+void PixelMap2D::set_grid_size(uint ni, uint nj) {
 	grid_size_[0] = ni;
 	grid_size_[1] = nj;
 }
 
 // [gch]: Benoit, please check this part of the code
-RasterPicture::DATA_TYPE& RasterPicture2D::operator()(int i, int j) {
+PixelMap::DATA_TYPE& PixelMap2D::operator()(int i, int j) {
 	int idx = 0;
 	if (i<0 || j<0) return zero;
 	idx = divb_mul_[0]*i  + divb_mul_[1]*j;
@@ -275,7 +275,7 @@ RasterPicture::DATA_TYPE& RasterPicture2D::operator()(int i, int j) {
 	return data.at(idx);
 }
 
-void RasterPicture2D::compute_integral_image() {
+void PixelMap2D::compute_integral_image() {
 	assert(data.size()>0);
 
 	for(int i=0; i<grid_size_[0]; i++) {
@@ -288,26 +288,26 @@ void RasterPicture2D::compute_integral_image() {
 
 // ==========================================================================================================
 
-void RasterPicture3D::set_origin(double ox, double oy, double oz) {
+void PixelMap3D::set_origin(double ox, double oy, double oz) {
 	origin_[0] = ox;
 	origin_[1] = oy;
 	origin_[2] = oz;
 }
 
-void RasterPicture3D::set_leaf_size(double lx, double ly, double lz) {
+void PixelMap3D::set_leaf_size(double lx, double ly, double lz) {
 	leaf_size_[0] = lx;
 	leaf_size_[1] = ly;
 	leaf_size_[2] = lz;
 }
 
-void RasterPicture3D::set_grid_size(uint ni, uint nj, uint nk) {
+void PixelMap3D::set_grid_size(uint ni, uint nj, uint nk) {
 	grid_size_[0] = ni;
 	grid_size_[1] = nj;
 	grid_size_[2] = nk;
 }
 
 // [gch]: Benoit, please check this part of the code
-RasterPicture::DATA_TYPE& RasterPicture3D::operator()(int i, int j, int k) {
+PixelMap::DATA_TYPE& PixelMap3D::operator()(int i, int j, int k) {
 	int idx = 0;
 	if (i<0 || j<0 || k<0) return zero;
 	idx = divb_mul_[0]*i  + divb_mul_[1]*j + divb_mul_[2]*k;
@@ -315,7 +315,7 @@ RasterPicture::DATA_TYPE& RasterPicture3D::operator()(int i, int j, int k) {
 	return data.at(idx);
 }
 
-void RasterPicture3D::compute_integral_image() {
+void PixelMap3D::compute_integral_image() {
 	assert(data.size()>0);
 
 	for(int i=0; i<grid_size_[0]; i++) {
@@ -329,7 +329,7 @@ void RasterPicture3D::compute_integral_image() {
 		}
 	}
 
-//  // generic code in RasterPicture?
+//  // generic code in PixelMap?
 //	int index[ndim]; // pixel counter (with ndim digits). Starts from (0,0,0) until (n0-1,n1-1,n2-1) with ni=grid_size[i].
 //	for (int d=0; d<ndim-1; d++) {
 //		index[d]=0;

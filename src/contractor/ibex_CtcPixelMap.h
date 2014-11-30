@@ -7,13 +7,13 @@
 // Created     : Sep 04, 2014
 //============================================================================
 
-#ifndef IBEX_CTCRASTERPICTURE
-#define IBEX_CTCRASTERPICTURE
+#ifndef IBEX_CTC_PIXEL_MAP_H__
+#define IBEX_CTC_PIXEL_MAP_H__
 
 #include <iostream>
 #include <ibex_Ctc.h>
 #include <ibex_IntervalVector.h>
-#include <ibex_RasterPicture.h>
+#include <ibex_PixelMap.h>
 
 // #include <ibex_IntInterval.h>
 namespace ibex {
@@ -28,18 +28,18 @@ namespace ibex {
  *
  */
 
-class CtcRasterPicture : public Ctc
+class CtcPixelMap : public Ctc
 {
 public:
     /**
-     * @brief CtcRasterPicture
+     * @brief CtcPixelMap
      * @param data : array containing the integral image of the occupancy grid which describes the map.
      *  1-valued pixels are said to be occuped while 0-valued are not.
      *
      */
-    CtcRasterPicture(RasterPicture &data);
+    CtcPixelMap(PixelMap &data);
 
-    ~CtcRasterPicture();
+    ~CtcPixelMap();
     /**
      * @brief Contract a box
      * @param box  box to be contracted
@@ -52,7 +52,7 @@ private:
     /**
      * @brief I 2D array used for storing the integral image of the occupancy grid
      */
-    RasterPicture &I;
+    PixelMap &I;
 
     /**
      * Array storing pixel coordinate. this array is allocated ones at the creation of the object.
@@ -103,4 +103,4 @@ private:
 
 
 } // end namespace ibex
-#endif // IBEX_CTCRASTERPICTURE
+#endif // IBEX_CTC_PIXEL_MAP_H__

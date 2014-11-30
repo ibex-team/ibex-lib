@@ -1,21 +1,21 @@
-#include "ibex_CtcRasterPicture.h"
+#include "ibex_CtcPixelMap.h"
 
 namespace ibex{
 
-CtcRasterPicture::CtcRasterPicture(RasterPicture &data): Ctc(data.ndim), I(data)
+CtcPixelMap::CtcPixelMap(PixelMap &data): Ctc(data.ndim), I(data)
 {
     pixelCoords = new int[I.ndim];
 }
 
 //-------------------------------------------------------------------------------------------------------------
-CtcRasterPicture::~CtcRasterPicture()
+CtcPixelMap::~CtcPixelMap()
 {
     delete[] pixelCoords;
 }
 
 
 //-------------------------------------------------------------------------------------------------------------
-void CtcRasterPicture::worldToGrid(IntervalVector box, int *pixel_coord)
+void CtcPixelMap::worldToGrid(IntervalVector box, int *pixel_coord)
 {
     for( int i = 0; i < box.size(); i++){
         box[i] = (box[i] - I.origin_[i]) / I.leaf_size_[i];
@@ -30,7 +30,7 @@ void CtcRasterPicture::worldToGrid(IntervalVector box, int *pixel_coord)
 }
 
 //-------------------------------------------------------------------------------------------------------------
-void CtcRasterPicture::gridToWorld(int* pixel_coord, IntervalVector &box)
+void CtcPixelMap::gridToWorld(int* pixel_coord, IntervalVector &box)
 {
     for( int i = 0; i < I.ndim; i++){
         box[i] &= Interval(pixel_coord[2*i], pixel_coord[2*i+1]+1) * I.leaf_size_[i] + I.origin_[i];     
@@ -42,7 +42,7 @@ void CtcRasterPicture::gridToWorld(int* pixel_coord, IntervalVector &box)
 }
 
 //----------------------------------------------------------------------------------------------------------------
-void CtcRasterPicture::contract(IntervalVector &box){
+void CtcPixelMap::contract(IntervalVector &box){
 
     assert(box.size() == I.ndim);
     if(box.is_empty()) return;
@@ -68,7 +68,7 @@ void CtcRasterPicture::contract(IntervalVector &box){
 
 //------------------------------------------------------------------------------
 //psi contraction
-void CtcRasterPicture::contract(int &cxmin, int &cxmax, int &cymin, int &cymax){
+void CtcPixelMap::contract(int &cxmin, int &cxmax, int &cymin, int &cymax){
 
     //compute enclosed pixels on consecutive lines from all dimensions of the box
 
@@ -118,7 +118,7 @@ void CtcRasterPicture::contract(int &cxmin, int &cxmax, int &cymin, int &cymax){
 }
 //////////////////////////////////////////////////////////////////////
 
-void CtcRasterPicture::contract(int &cxmin, int& cxmax, int& cymin,int& cymax, int& czmin, int& czmax){
+void CtcPixelMap::contract(int &cxmin, int& cxmax, int& cymin,int& cymax, int& czmin, int& czmax){
 
     cxmax = std::max(0,std::min(I.grid_size_[0]-1,cxmax));
     cxmin = std::min(I.grid_size_[0]-1,std::max(0,cxmin));
@@ -184,10 +184,10 @@ void CtcRasterPicture::contract(int &cxmin, int& cxmax, int& cymin,int& cymax, i
     }
 }
 
-unsigned int CtcRasterPicture::enclosed_pixels(int xmin,int xmax,int ymin,int ymax){
+unsigned int CtcPixelMap::enclosed_pixels(int xmin,int xmax,int ymin,int ymax){
 
-    // The raster picture is Casted into a 2D rasterPicture to acces its element
-    RasterPicture2D& I_tmp = (RasterPicture2D&) I;
+    // The raster picture is Casted into a 2D PixelMap to acces its element
+    PixelMap2D& I_tmp = (PixelMap2D&) I;
     int b1 = I_tmp(xmax,ymax);
     int b2 = I_tmp(xmax,ymin-1);
     int b3 = I_tmp(xmin-1,ymax);
@@ -196,10 +196,10 @@ unsigned int CtcRasterPicture::enclosed_pixels(int xmin,int xmax,int ymin,int ym
     
 }
 
-unsigned int CtcRasterPicture::enclosed_pixels(int xmin, int xmax, int ymin, int ymax, int zmin, int zmax)
+unsigned int CtcPixelMap::enclosed_pixels(int xmin, int xmax, int ymin, int ymax, int zmin, int zmax)
 {
-    // The raster picture is Casted into a 3D rasterPicture to acces its element
-    RasterPicture3D &I_tmp = (RasterPicture3D&) I;
+    // The raster picture is Casted into a 3D PixelMap to acces its element
+    PixelMap3D &I_tmp = (PixelMap3D&) I;
     unsigned int L8 = I_tmp(xmax, ymax,zmax);
     unsigned int L5 = I_tmp(xmin-1, ymin-1, zmax);
     unsigned int L6 = I_tmp(xmin-1, ymax,zmax) ;
