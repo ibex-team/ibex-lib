@@ -7,7 +7,7 @@ void TestCtcPixelMap::initRaster3D(PixelMap3D& raster){
     raster.set_leaf_size(0.1,0.1,0.05);
     raster.set_origin(-2,1,0);
     raster.set_grid_size(20,20,20);
-    raster.init();
+    // raster.init();
 
     raster(10,5,8) = 1;
     raster.compute_integral_image();
@@ -96,7 +96,7 @@ void TestCtcPixelMap::initRaster2D(PixelMap2D& raster){
     raster.set_leaf_size(0.1,0.1);
     raster.set_origin(-2,1);
     raster.set_grid_size(20,20);
-    raster.init();
+    // raster.init();
 
     raster(10,5) = 1;
     raster.compute_integral_image();

@@ -27,7 +27,7 @@ void TestPixelMap::test_init2DPixelMap(){
     raster.set_leaf_size(leaf_size[0],leaf_size[1]);
     raster.set_grid_size(grid_size[0],grid_size[1]);
     
-    raster.init();
+    // raster.init();
 
     for(uint i = 0; i < raster.data.size(); i++){
         TEST_ASSERT(raster.data[i] == 0);

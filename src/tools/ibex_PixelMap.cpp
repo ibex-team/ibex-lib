@@ -260,6 +260,7 @@ void PixelMap2D::set_leaf_size(double lx, double ly) {
 void PixelMap2D::set_grid_size(uint ni, uint nj) {
 	grid_size_[0] = ni;
 	grid_size_[1] = nj;
+	init();
 }
 
 // [gch]: Benoit, please check this part of the code
@@ -304,6 +305,7 @@ void PixelMap3D::set_grid_size(uint ni, uint nj, uint nk) {
 	grid_size_[0] = ni;
 	grid_size_[1] = nj;
 	grid_size_[2] = nk;
+	init();
 }
 
 // [gch]: Benoit, please check this part of the code

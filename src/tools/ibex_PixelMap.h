@@ -51,12 +51,6 @@ public:
 	virtual ~PixelMap();
 
 	/**
-	 *	\brief Initialize the PixelMap. 
-	 *		field <leaf_size_> needs to be setted before.
-	 */
-	void init();
-
-	/**
 	 * \brief Save the PixelMap into a file given by filename. 
 	 */
     void save(const char* filename);
@@ -102,18 +96,28 @@ protected:
      * Offsets described by divb_mul_ are used to select element. */
     int *divb_mul_;
 
+    /**
+     *	\brief internal zero value returned when a pixel is acceded with negatif indice.
+     *	see operator() for more details.
+     */
     DATA_TYPE zero;
 
-private:
-
-    static const char* FORMAT_VERSION;
-    static const char* FF_DATA_IMAGE_ND;
-
+    /**
+	 *	\brief Initialize the PixelMap. 
+	 *		field <leaf_size_> needs to be setted before.
+	 */
+	void init();
+	
 	/**
 	 * \brief After setting parameters of the PixelMap( grid_size, leaf_size and origin)
 	 * This function initialiez the array which stores pixel data.
 	 */
     void init(const PixelMap& pic);
+
+private:
+
+    static const char* FORMAT_VERSION;
+    static const char* FF_DATA_IMAGE_ND;
 
 	/*
 	 * Read the header from a file.
