@@ -19,9 +19,6 @@
 #include <assert.h>
 #include <sstream>
 
-#define FORMAT_VERSION "1.0.0"
-#define FF_DATA_IMAGE_ND "DATA_IMD_ND"
-
 using namespace std;
 
 namespace ibex {
