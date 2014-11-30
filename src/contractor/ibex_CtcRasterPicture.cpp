@@ -7,6 +7,12 @@ CtcRasterPicture::CtcRasterPicture(RasterPicture &data): Ctc(data.ndim), I(data)
     pixelCoords = new int[I.ndim];
 }
 
+//-------------------------------------------------------------------------------------------------------------
+CtcRasterPicture::~CtcRasterPicture()
+{
+    delete[] pixelCoords;
+}
+
 
 //-------------------------------------------------------------------------------------------------------------
 void CtcRasterPicture::worldToGrid(IntervalVector box, int *pixel_coord)
@@ -180,31 +186,30 @@ void CtcRasterPicture::contract(int &cxmin, int& cxmax, int& cymin,int& cymax, i
 
 unsigned int CtcRasterPicture::enclosed_pixels(int xmin,int xmax,int ymin,int ymax){
 
-    int b1 = I(xmax,ymax);
-    int b2 = I(xmax,ymin-1);
-    int b3 = I(xmin-1,ymax);
-    int b4 = I(xmin-1,ymin-1);
+    // The raster picture is Casted into a 2D rasterPicture to acces its element
+    RasterPicture2D& I_tmp = (RasterPicture2D&) I;
+    int b1 = I_tmp(xmax,ymax);
+    int b2 = I_tmp(xmax,ymin-1);
+    int b3 = I_tmp(xmin-1,ymax);
+    int b4 = I_tmp(xmin-1,ymin-1);
     return b1 - b2 - b3 + b4;
     
 }
 
 unsigned int CtcRasterPicture::enclosed_pixels(int xmin, int xmax, int ymin, int ymax, int zmin, int zmax)
 {
-    unsigned int L8 = I(xmax, ymax,zmax);
-    unsigned int L5 = I(xmin-1, ymin-1, zmax);
-    unsigned int L6 = I(xmin-1, ymax,zmax) ;
-    unsigned int L7 = I(xmax, ymin-1,zmax);
-    unsigned int L4 = I(xmax, ymax,zmin-1);
-    unsigned int L1 = I(xmin-1, ymin-1, zmin-1);
-    unsigned int L2 = I(xmin-1, ymax,zmin-1);
-    unsigned int L3 = I(xmax, ymin-1,zmin-1);
+    // The raster picture is Casted into a 3D rasterPicture to acces its element
+    RasterPicture3D &I_tmp = (RasterPicture3D&) I;
+    unsigned int L8 = I_tmp(xmax, ymax,zmax);
+    unsigned int L5 = I_tmp(xmin-1, ymin-1, zmax);
+    unsigned int L6 = I_tmp(xmin-1, ymax,zmax) ;
+    unsigned int L7 = I_tmp(xmax, ymin-1,zmax);
+    unsigned int L4 = I_tmp(xmax, ymax,zmin-1);
+    unsigned int L1 = I_tmp(xmin-1, ymin-1, zmin-1);
+    unsigned int L2 = I_tmp(xmin-1, ymax,zmin-1);
+    unsigned int L3 = I_tmp(xmax, ymin-1,zmin-1);
     unsigned int L = (L8 + L5 - L6  - L7) -(L4 + L1 - L2 - L3);
     return L;
 }
-
-
-
-
-
 
 } // end namespace ibex
