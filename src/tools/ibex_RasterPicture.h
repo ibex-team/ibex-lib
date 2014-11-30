@@ -69,7 +69,9 @@ public:
 
     // Compute the integral image of the array passed as argument.
     // The computation is done in place.
-    virtual void computeIntegralImage()=0;
+    virtual void computeIntegralImage();
+
+    virtual DATA_TYPE& operator()(uint i, uint j,...); 
 };
 
 inline RasterPicture::DATA_TYPE& RasterPicture::operator[](int idx) {
