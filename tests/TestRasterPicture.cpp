@@ -132,9 +132,9 @@ void TestRasterPicture::test_readWrongFileFormat_2(){
 
 
 void TestRasterPicture::test_ImageIntegral2D(){
-    // Array2D array2d;
-    // TEST_ASSERT(array2d.loadFromFile("test.array2D")==0);
-    // computeIntegralImage(array2d);
+    RasterPicture2D raster;
+    TEST_ASSERT(raster.load("test.array2D")==0);
+    raster.computeIntegralImage();
 }
 
 

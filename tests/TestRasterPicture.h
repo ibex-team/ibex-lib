@@ -13,7 +13,7 @@ public:
         TEST_ADD(TestRasterPicture::test_readMissingFile);
         TEST_ADD(TestRasterPicture::test_readWrongFileFormat_1);
         TEST_ADD(TestRasterPicture::test_readWrongFileFormat_2);
-//        TEST_ADD(TestRasterPicture::testIntegralImage);
+        TEST_ADD(TestRasterPicture::test_ImageIntegral2D);
     }
 
     void setup();    
