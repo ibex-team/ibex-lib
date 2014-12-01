@@ -34,6 +34,8 @@ public:
 		TEST_ADD(TestFunction::from_string02);
 		TEST_ADD(TestFunction::from_string03);
 		TEST_ADD(TestFunction::from_string04);
+		TEST_ADD(TestFunction::issue43);
+		TEST_ADD(TestFunction::issue43_bis);
 	}
 
 	// an uninitialized function must be deletable
@@ -59,6 +61,9 @@ public:
 	void from_string02();
 	void from_string03();
 	void from_string04();
+
+	void issue43();
+	void issue43_bis();
 };
 
 } // end namespace
