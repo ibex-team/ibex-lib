@@ -11,8 +11,12 @@
 #ifndef __IBEX_SYSTEM_H__
 #define __IBEX_SYSTEM_H__
 
+
+#include "ibex_Setting.h"
+
 #include <vector>
 #include "ibex_NumConstraint.h"
+
 
 namespace ibex {
 
@@ -21,6 +25,7 @@ class MainGenerator;
 }
 
 class SystemFactory;
+class AmplInterface;
 
 /**
  * \defgroup system Systems
@@ -39,6 +44,12 @@ class SystemFactory;
  */
 class System {
 public:
+
+	/**
+	 * \brief Build a system with a AMPL model.
+	*/
+	System(const AmplInterface& ampl);
+
 	/**
 	 * \brief Build a system with a factory.
 	*/

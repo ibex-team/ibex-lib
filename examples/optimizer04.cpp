@@ -75,7 +75,7 @@ int main(int argc, char** argv){
 	CtcHC4 hc44xn (ext_sys.ctrs,0.01,false);
 
 	// The 3BCID contractor on all variables (component of the contractor when filtering == "3bcidhc4") 
-	Ctc3BCid c3bcidhc4(ext_sys.nb_var, hc44cid);
+	Ctc3BCid c3bcidhc4(hc44cid);
 	// hc4 followed by 3bcidhc4 : the actual contractor used when filtering == "3bcidhc4" 
 	CtcCompo hc43bcidhc4 (hc4, c3bcidhc4);
 
@@ -113,9 +113,13 @@ int main(int argc, char** argv){
 	//	else {cout << linearrelaxation  <<  " is not an implemented  linear relaxation mode "  << endl; return -1;}
 	// fixpoint linear relaxation , hc4  with default fix point ratio 0.2
 	CtcFixPoint* cxn;
+	CtcPolytopeHull* cxn_poly;
+	CtcCompo* cxn_compo;
 	if (linearrelaxation=="compo" || linearrelaxation=="art"|| linearrelaxation=="xn")
 	  //cxn = new CtcLinearRelaxation (*lr, hc44xn);
-		cxn = new CtcFixPoint (*new CtcCompo(*new CtcPolytopeHull(*lr, CtcPolytopeHull::ALL_BOX), hc44xn), default_relax_ratio);
+		cxn_poly = new CtcPolytopeHull(*lr, CtcPolytopeHull::ALL_BOX);
+		cxn_compo =new CtcCompo(*cxn_poly, hc44xn);
+		cxn = new CtcFixPoint (*cxn_compo, default_relax_ratio);
 	//  the actual contractor  ctc + linear relaxation 
 	Ctc* ctcxn;
 	if (linearrelaxation=="compo" || linearrelaxation=="art"|| linearrelaxation=="xn")
@@ -147,10 +151,13 @@ int main(int argc, char** argv){
 	//cout    << " nbcidvar " <<  acidhc4.nbvar_stat() << endl;
 
 	delete bs;
-	if (linearrelaxation=="xn" ||linearrelaxation=="compo" || linearrelaxation=="art" )
-	  {delete lr;
+	if (linearrelaxation=="compo" || linearrelaxation=="art"|| linearrelaxation=="xn") {
+		delete lr;
 	    delete ctcxn;
-	    delete cxn;}
+	    delete cxn;
+	    delete cxn_poly;
+	    delete cxn_compo;
+	}
 
 
 

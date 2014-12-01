@@ -186,11 +186,25 @@ without calling a contractor when it is unecessary (as it is explained in the :r
 
 Let us first introduce for a contractor C two sets of indices: the *input* and *output* dimensions of C:
 
+If:
+
 .. math::
 
-  \exists [x]\in\mathbb{IR}^n,\ [y]\in\mathbb{IR}^n \ (\forall j\!\neq\!i \ [x]_j\!=\![y]_j) \wedge C([x])\!\neq\!C([y]) \Longrightarrow i\in input(C);
+  \exists [x]\in\mathbb{IR}^n,\exists [y]\in\mathbb{IR}^n, \quad \forall j\!\neq\!i \ [x]_j=[y]_j \wedge
+  \left\{\begin{array}{l}
+  C([x])_i\neq[x]_i \vee\\
+  C([y])_i\neq[y]_j \vee\\
+  \exists j\!\neq\!i \ C([x])_j\neq C([y])_j
+  \end{array}\right.
 
-  \exists [x]\in\mathbb{IR}^n,\ C([x])_i\neq [x]_i \Longrightarrow i\in output(C).
+Then i is in the **input** of C.
+
+If:
+
+.. math::
+   \exists [x]\in\mathbb{IR}^n,\ C([x])_i\neq [x]_i
+
+Then i is in the **output** of C.
 
 Basically, *input(C)* contains the variables that **potentially impacts** the result of the contractor while *ouput(C)*
 contains the variables that are **potentially impacted by** the contractor.

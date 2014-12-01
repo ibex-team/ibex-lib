@@ -139,7 +139,8 @@ def configure (conf):
 			conf.env.BUILD_FILIB = True
 
 		if conf.env.COMPILER_CXX == "g++":
-			conf.env.append_unique ("CXXFLAGS_IBEX_DEPS", "-frounding-math")
+			conf.env.append_unique ("CXXFLAGS_IBEX_DEPS", ["-frounding-math","-ffloat-store"])
+
 
 			if conf.env.DEST_CPU == "x86" and not conf.options.DISABLE_SSE2:
 				conf.env.append_unique ("CXXFLAGS_IBEX_DEPS", ["-msse2", "-mfpmath=sse"])

@@ -114,7 +114,7 @@ Optimizer::~Optimizer() {
 	}
 	buffer.flush();
 	if (critpr > 0) buffer2.flush();
-
+	if (equs) delete equs;
 	delete mylp;
 	//	delete &(objshaver->ctc);
 	//	delete objshaver;
@@ -465,11 +465,15 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 			if (critpr > 0) {
 				buffer.cleantop();
 				buffer2.cleantop();
-			}
-
-			if (buffer.empty() || (critpr > 0 && buffer2.empty())) {
-				//cout << " buffer empty " << buffer.empty() << " " << buffer2.empty() << endl;
-				break;
+				// note if one buffer is empty, both are empty
+				// the condition could be replaced by buffer2.empty()
+				if (buffer.empty()) {
+					// this update is only necessary when buffer was not
+					// initially empty
+					update_uplo();
+					break;
+				}
+				assert(!buffer2.empty());
 			}
 
 			loup_changed=false;
