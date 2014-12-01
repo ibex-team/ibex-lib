@@ -53,8 +53,8 @@ void CtcPolytopeHull::contract(IntervalVector& box) {
 
 		optimizer(box);
 
-		//	mylinearsolver->writeFile("LP.lp");
-		//		system ("cat LP.lp");
+		//mylinearsolver->writeFile("LP.lp");
+		//system ("cat LP.lp");
 		//cout << "[polytope-hull] box after LR: " << box << endl;
 		mylinearsolver->cleanConst();
 	}
