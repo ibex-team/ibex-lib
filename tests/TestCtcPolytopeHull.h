@@ -19,9 +19,12 @@ class TestCtcPolytopeHull : public TestIbex {
 public:
 	TestCtcPolytopeHull() {
 		TEST_ADD(TestCtcPolytopeHull::lp01);
+		TEST_ADD(TestCtcPolytopeHull::fixbug01);
 	}
 
 	void lp01();
+
+	void fixbug01();
 };
 
 } // end namespace ibex
