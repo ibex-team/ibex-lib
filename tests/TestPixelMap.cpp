@@ -43,7 +43,7 @@ void TestPixelMap::test_init2DPixelMap(){
 
 
 
-    for(int i = 0; i < raster.ndim; i++){
+    for(uint i = 0; i < raster.ndim; i++){
         TEST_ASSERT( (raster.leaf_size_[i] == leaf_size[i]) );
         TEST_ASSERT( (raster.origin_[i] == origin[i]) );
         TEST_ASSERT( (raster.grid_size_[i] == grid_size[i]) ); 
@@ -81,7 +81,7 @@ void TestPixelMap::test_init3DPixelMap(){
     raster.save("test.array3D");
     raster.load("test.array3D");
 
-    for(int i = 0; i < raster.ndim; i++){
+    for(uint i = 0; i < raster.ndim; i++){
         TEST_ASSERT( (raster.leaf_size_[i] == leaf_size[i]) );
         TEST_ASSERT( (raster.origin_[i] == origin[i]) );
         TEST_ASSERT( (raster.grid_size_[i] == grid_size[i]) ); 

@@ -44,6 +44,7 @@ void TestCtcPixelMap::test3d_allReal(){
     IntervalVector v1(3,Interval::ALL_REALS);
 
     ctc.contract(v1);
+
     TEST_ASSERT_DELTA(-1,v1[0].lb(),std::numeric_limits<double>::epsilon());
     TEST_ASSERT_DELTA(-0.9,v1[0].ub() ,std::numeric_limits<double>::epsilon());
     TEST_ASSERT_DELTA(1.5,v1[1].lb(),std::numeric_limits<double>::epsilon());

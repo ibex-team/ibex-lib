@@ -30,15 +30,11 @@ namespace ibex {
  */
 class PixelMap {
 public:
-	/**
-	 * \brief type of data stored in the grid
-	 */
-	typedef unsigned int DATA_TYPE;
 
-	/**
+    /**
 	 * \brief Create a n-dimensional image.
 	 */
-	PixelMap(int ndim);
+	PixelMap(uint ndim);
 
 	/**
 	 * \brief Copy constructor.
@@ -49,6 +45,11 @@ public:
 	 * \brief Delete this.
 	 */
 	virtual ~PixelMap();
+
+	/**
+	 * \brief type of data stored in the grid
+	 */
+	typedef unsigned int DATA_TYPE;
 
 	/**
 	 * \brief Save the PixelMap into a file given by filename. 
@@ -69,7 +70,7 @@ public:
     virtual void compute_integral_image()=0;
 
     /** \brief Either 2 or 3 */
-    const int ndim;
+    const uint ndim;
 
     /** \brief The size of a leaf. */
     double *leaf_size_;
@@ -81,7 +82,8 @@ public:
     int *grid_size_;
 
 protected:
-    friend class TestPixelMap;
+
+	friend class TestPixelMap;
 
 	/**
 	 * \brief return the value of the element idx in the array data
@@ -138,7 +140,7 @@ private:
 class PixelMap2D : public PixelMap {
 public:
 
-    PixelMap2D() : PixelMap(2) {};
+    PixelMap2D();
 
 	virtual void compute_integral_image();
 
@@ -159,7 +161,7 @@ public:
 class PixelMap3D : public PixelMap {
 public:
 
-    PixelMap3D(): PixelMap(3) {};
+    PixelMap3D();
 
 	virtual void compute_integral_image();
 

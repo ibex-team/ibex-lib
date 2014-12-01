@@ -27,14 +27,14 @@ namespace ibex {
 const char* PixelMap::FORMAT_VERSION="1.0.0";
 const char* PixelMap::FF_DATA_IMAGE_ND="DATA_IMD_ND";
 
-PixelMap::PixelMap(int ndim) : ndim(ndim), zero(0) {
+PixelMap::PixelMap(uint ndim) : ndim(ndim), zero(0) {
 	leaf_size_ = new double[ndim];
 	origin_ = new double[ndim];
 	grid_size_ = new int[ndim];
 	divb_mul_ = new int[ndim];
 }
 
-PixelMap::PixelMap(const PixelMap& src): ndim(src.ndim), zero(0){
+PixelMap::PixelMap(const PixelMap& src): ndim(src.ndim), zero(0) {
 	leaf_size_ = new double[ndim];
 	origin_ = new double[ndim];
 	grid_size_ = new int[ndim];
@@ -46,7 +46,7 @@ PixelMap::PixelMap(const PixelMap& src): ndim(src.ndim), zero(0){
 	}
 	init();
 
-	// copy image datas
+	// copy image data
 	data = src.data;
 
 }
@@ -137,7 +137,7 @@ void PixelMap::read_header(ifstream &in_file, PixelMap& output) {
 				ibex_error("PixelMap [read_header]: file format does not match the required file format");
 			}
 
-			int dim; sstream >> dim;
+			uint dim; sstream >> dim;
 
 			if (dim != ndim) {
 				in_file.close ();
@@ -234,9 +234,9 @@ void PixelMap::write_header(ofstream& out_file, const PixelMap& input) {
 
 	oss << "VERSION " << FORMAT_VERSION;
 	oss << "\nTYPE " << FF_DATA_IMAGE_ND << " " << ndim << " " << sizeof(DATA_TYPE);
-	oss << "\nLEAF_SIZE"; for(int i =0; i < ndim;  i++) oss << " " << input.leaf_size_[i];
-	oss << "\nORIGIN";    for(int i =0; i < ndim;  i++) oss << " " << input.origin_[i];
-	oss << "\nGRID_SIZE"; for(int i =0; i < ndim;  i++) oss << " " << input.grid_size_[i];
+	oss << "\nLEAF_SIZE"; for(uint i =0; i < ndim;  i++) oss << " " << input.leaf_size_[i];
+	oss << "\nORIGIN";    for(uint i =0; i < ndim;  i++) oss << " " << input.origin_[i];
+	oss << "\nGRID_SIZE"; for(uint i =0; i < ndim;  i++) oss << " " << input.grid_size_[i];
 	oss << "\nEND_HEADER\n";
 	try {
 		out_file << oss.str();
@@ -246,6 +246,9 @@ void PixelMap::write_header(ofstream& out_file, const PixelMap& input) {
 }
 
 // ==========================================================================================================
+PixelMap2D::PixelMap2D() : PixelMap(2) {
+
+}
 
 void PixelMap2D::set_origin(double ox, double oy) {
 	origin_[0] = ox;
@@ -265,13 +268,16 @@ void PixelMap2D::set_grid_size(uint ni, uint nj) {
 
 // [gch]: Benoit, please check this part of the code
 PixelMap::DATA_TYPE& PixelMap2D::operator()(int i, int j) {
-	int idx = 0;
+	uint idx = 0;
 	if (i<0 || j<0) return zero;
+
 	idx = divb_mul_[0]*i  + divb_mul_[1]*j;
-	if(idx >= data.size()){
+
+	if(idx >= data.size()) {
 		cout << idx << " " << data.size() << " " << i << " " << j << "\n";
 		cout.flush();
 	}
+
 	assert(idx < data.size());
 	return data.at(idx);
 }
@@ -288,6 +294,10 @@ void PixelMap2D::compute_integral_image() {
 }
 
 // ==========================================================================================================
+
+PixelMap3D::PixelMap3D() : PixelMap(3) {
+
+}
 
 void PixelMap3D::set_origin(double ox, double oy, double oz) {
 	origin_[0] = ox;
@@ -310,9 +320,11 @@ void PixelMap3D::set_grid_size(uint ni, uint nj, uint nk) {
 
 // [gch]: Benoit, please check this part of the code
 PixelMap::DATA_TYPE& PixelMap3D::operator()(int i, int j, int k) {
-	int idx = 0;
+	uint idx = 0;
 	if (i<0 || j<0 || k<0) return zero;
+
 	idx = divb_mul_[0]*i  + divb_mul_[1]*j + divb_mul_[2]*k;
+
 	assert(idx < data.size());
 	return data.at(idx);
 }
