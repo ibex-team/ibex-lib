@@ -89,9 +89,46 @@ def configure (conf):
 
 
 	if not with_any:
+		# try to find FILIB
+		has_h = conf.check_cxx (header_name	= "interval/interval.hpp",mandatory=False)
+		has_l = conf.check_cxx (lib = ["prim"],	uselib_store = "IBEX_DEPS",mandatory=False)
+		
+		if (has_h and has_l):
+			with_any = True
+			conf.env.INTERVAL_LIB = "FILIB"
+			if conf.env.COMPILER_CXX == "g++":
+				conf.env.append_unique ("CXXFLAGS_IBEX_DEPS", ["-frounding-math","-ffloat-store"])
+				
+			if conf.env.DEST_CPU == "x86" and not conf.options.DISABLE_SSE2:
+				conf.env.append_unique ("CXXFLAGS_IBEX_DEPS", ["-msse2", "-mfpmath=sse"])
+				
+			Logs.pprint ("BLUE","The Interval arithmetic is the installed version of FILIP")
+
+	if not with_any:
+		# try to find GAOL
+		has_h = conf.check_cxx (header_name = ["gaol/gaol.h", "gaol/gaol_interval.h"],mandatory=False)
+		has_l = conf.check_cxx (lib=["gaol", "ultim", "gdtoa"], uselib_store="IBEX_DEPS",mandatory=False)
+		
+		if (has_h and has_l):
+			with_any = True
+			conf.switch_to_32bits()
+			conf.env.INTERVAL_LIB = "GAOL"
+			Logs.pprint ("BLUE","The Interval arithmetic is the installed version of GAOL")
+			
+
+	if not with_any:
+		# try to find Profil/BIAS
+		has_h = conf.check_cxx (header_name	= "BIAS/BiasF.h",mandatory=False)
+		has_l = conf.check_cxx (lib = ["Profil", "Bias", "lr"],	uselib_store = "IBEX_DEPS",mandatory=False)
+		
+		if (has_h and has_l):
+			with_any = True
+			conf.env.INTERVAL_LIB = "BIAS"
+			Logs.pprint ("BLUE","The Interval arithmetic is the installed version of Profil/BIAS")
+
+	if not with_any:
 		# no lib selected
 		# -> will build one if needed
-
 		if (conf.env.DEST_CPU == "x86_64") or (conf.env.DEST_OS=="win32"):
 			# gaol not working on 64 bit cpu -> use filib instead
 			Logs.pprint ("BLUE","By Default, the Interval arithmetic is FILIP")
@@ -99,7 +136,8 @@ def configure (conf):
 		else:
 			Logs.pprint ("BLUE","By Default, the Interval arithmetic is GOAL")
 			with_gaol = ''
-
+	##########################
+	
 	if with_bias is not None:
 		# build with bias
 
@@ -144,15 +182,16 @@ def configure (conf):
 
 			if conf.env.DEST_CPU == "x86" and not conf.options.DISABLE_SSE2:
 				conf.env.append_unique ("CXXFLAGS_IBEX_DEPS", ["-msse2", "-mfpmath=sse"])
-	else:
+				
+	elif with_gaol is not None:
 		# build with gaol
 		conf.env.INTERVAL_LIB = "GAOL"
 
 		mandatory = bool (with_gaol)
-		
 		conf.switch_to_32bits()
 		if with_gaol:
 			conf.env.append_unique ("INCLUDES", join (with_gaol, "include"))
+			
 		mandatory = bool (with_gaol)
 
 		has_h = conf.check_cxx (
@@ -174,13 +213,100 @@ def configure (conf):
 			if with_any_solver:
 				conf.fatal ("cannot use --with-cplex/--with-soplex/--with-clp together")
 			with_any_solver = True
-	
-	if not with_any_solver: 
-		Logs.pprint ("BLUE","By Default, the Linear Solver is Clp-1.15.6")
-		with_clp =''
+			
 
+	# check if SOPLEX is installed		
+	if not with_any_solver: 
+		has_Soplex_h = conf.check_cxx (header_name	= "soplex.h",mandatory = False)
+		has_Soplexlib =  conf.check_cxx (lib = "soplex", uselib_store = "IBEX_DEPS",
+					libpath = [],
+					mandatory = False,
+					fragment = """
+						#include <soplex.h>
+						int main (int argc, char* argv[]) {
+							soplex::SPxLP lp;
+							lp.read(std::cin);
+							return 0;
+						}
+					""")
+		if not has_Soplexlib:
+			has_Soplexlib = conf.check_cxx (lib = ["soplex", "z"], uselib_store = "IBEX_DEPS",
+					libpath = [],
+					mandatory = False,
+					fragment = """
+						#include <soplex.h>
+						int main (int argc, char* argv[]) {
+							soplex::SPxLP lp;
+							lp.read(std::cin);
+							return 0;
+						}
+					""")
+			
+		if (has_Soplex_h and has_Soplexlib):
+			conf.env.LP_LIB = "SOPLEX"
+			with_any_solver = True
+			Logs.pprint ("BLUE","The Linear Solver is the installed version of SOPLEX")
+		
+		
+	# check if CPLEX is installed		
+	if not with_any_solver: 			
+		has_Cplex_h = conf.check_cxx (header_name	= "ilcplex/cplex.h",mandatory = False)
+		has_Cplexlib =  conf.check_cxx (lib = ["cplex", "pthread"], uselib_store = "IBEX_DEPS",
+						libpath = [],  
+						mandatory = False,
+						fragment = """
+							#include "ilcplex/cplex.h"
+							int main (int argc, char* argv[]) {
+								CPXENVptr  envcplex;
+								CPXLPptr lpcplex;
+								return 0;
+							}
+						""")
+			
+		if (has_Cplex_h and has_Cplexlib):
+			conf.env.LP_LIB = "CPLEX"
+			with_any_solver = True
+			Logs.pprint ("BLUE","The Linear Solver is the installed version of CPLEX")
+			
+	################################		
+	# check if CLP is installed	
+	if not with_any_solver: 
+		has_Clp_h = conf.check_cxx (header_name	= "coin/ClpSimplex.hpp",mandatory = False)
+		has_Clplib = conf.check_cxx (lib = ["Clp","CoinUtils","z","m"], uselib_store = "IBEX_DEPS",
+									libpath = [],
+									fragment = """
+						#include "coin/ClpSimplex.hpp"
+						int main (int argc, char* argv[]) {
+							ClpSimplex 	myclp;
+							myclp.resize(2,2);
+							return 0;
+						} """, mandatory = False)	
+		if not has_Clplib:
+			has_Clplib = conf.check_cxx (lib = ["Clp","CoinUtils","m"], uselib_store = "IBEX_DEPS",
+										libpath = [],
+										fragment = """
+							#include "coin/ClpSimplex.hpp"
+							int main (int argc, char* argv[]) {
+								ClpSimplex 	myclp;
+								myclp.resize(2,2);
+								return 0;
+							} """, mandatory = False)	
+			
+		if (has_Clp_h and has_Clplib):
+			conf.env.LP_LIB = "CLP"
+			with_any_solver = True
+			Logs.pprint ("BLUE","The Linear Solver is the installed version of CLP")
+		
+	# no Linear Solver is install
+	if not with_any_solver: 
+		Logs.pprint ("BLUE","By Default, we install the Linear Solver Clp-1.15.6 from COIN-OR project")
+		conf.env.LP_LIB = "CLP"
+		conf.env.BUILD_CLP = True
+		
+	################################
+	# build with cplex
 	if with_cplex is not None:
-		# build with cplex
+		
 		conf.env.LP_LIB = "CPLEX"
 		conf.msg ("Candidate directory for lib Cplex", with_cplex)
 
@@ -629,10 +755,10 @@ def configure (conf):
 			conf.find_program ("sh")
 
 			cmd = [conf.env.SH, "-c",
-				"./configure -C --disable-zlib  --disable-bzlib --prefix=%r %s"
+				"./configure --quiet --disable-zlib  --disable-bzlib --prefix=%r %s"
 				% (convert_path_win2msys (conf.env.PREFIX), shared)]
 		else:
-			cmd =	"./configure -C --disable-zlib --disable-bzlib --prefix=%r %s" % (os.path.abspath (conf.env.PREFIX), shared)
+			cmd =	"./configure --quiet --disable-zlib --disable-bzlib --prefix=%r %s" % (os.path.abspath (conf.env.PREFIX), shared)
 
 		if conf.exec_command (cmd, cwd=clp_dir.abspath(), stdout=None, stderr=None):
 			conf.fatal ("failed to configure CLP (%s)" % cmd)

@@ -63,7 +63,7 @@ def configure (conf):
 		if env.DEST_CPU == "x86_64":
 			if env.COMPILER_CC == "gcc" and env.COMPILER_CXX == "g++":
 				# fall-back to 32bits
-				Logs.pprint ("YELLOW", "Warning: x86_64 is not supported, will build for i386 instead")
+				Logs.pprint ("YELLOW", "Warning: x86_64 is not supported with GAOL, we will build IBEX for i386 instead")
 				
 				for var in ("CFLAGS", "LINKFLAGS", "CXXFLAGS"):
 					env.append_unique (var, "-m32")
