@@ -11,6 +11,8 @@
 #include "TestCtcPolytopeHull.h"
 #include "Ponts30.h"
 #include "ibex_CtcFwdBwd.h"
+#include "ibex_SystemFactory.h"
+#include "ibex_System.h"
 #include "ibex_CtcPolytopeHull.h"
 #include "ibex_LinearRelaxCombo.h"
 #include "ibex_Array.h"
