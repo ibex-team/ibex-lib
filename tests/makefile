@@ -7,9 +7,9 @@ CXXFLAGS := $(shell pkg-config --cflags ibex)
 LIBS	 := $(shell pkg-config --libs ibex libcpptest)
 
 ifeq ($(DEBUG), yes)
-CXXFLAGS := $(CXXFLAGS) -O0 -g -pg -Wall -frounding-math -ffloat-store -std=c++11
+CXXFLAGS := $(CXXFLAGS) -O0 -g -pg -Wall -frounding-math -ffloat-store -std=c++0x
 else
-CXXFLAGS := $(CXXFLAGS) -O3 -DNDEBUG -Wno-unused-variable -frounding-math  -std=c++11
+CXXFLAGS := $(CXXFLAGS) -O3 -DNDEBUG -Wno-unused-variable -frounding-math  -std=c++0x
 endif
 
 $(TARGET):	$(OBJS) 
