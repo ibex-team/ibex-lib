@@ -43,6 +43,9 @@ def options (opt):
 	opt.add_option ("--with-filib",   action="store", type="string", dest="FILIB_PATH",
 			help = "location of the filib lib")
 	
+	opt.add_option ("--without-lp", action="store_true", dest="WITHOUT_LP",
+			help = "do not use any Linear Solver")
+	
 	opt.add_option ("--with-soplex", action="store", type="string", dest="SOPLEX_PATH",
 			help = "location of Soplex")
 	opt.add_option ("--with-cplex", action="store", type="string", dest="CPLEX_PATH",
@@ -133,7 +136,12 @@ def configure (conf):
 		conf.env.WITH_AMPL =False 
 	elif (conf.options.WITH_AMPL):
 		conf.env.WITH_AMPL =True 
-		
+	
+	##################################################################################################
+	# Disable Linear Solver
+	if (conf.options.WITHOUT_LP):
+		conf.env.WITHOUT_LP =True 
+			
 	##################################################################################################
 	# JNI
 	env.WITH_JNI = conf.options.WITH_JNI

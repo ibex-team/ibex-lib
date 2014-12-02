@@ -87,7 +87,6 @@ def configure (conf):
 				conf.fatal ("cannot use --with-gaol/--with-bias/--with-filib together")
 			with_any = True
 
-
 	if not with_any:
 		# try to find FILIB
 		has_h = conf.check_cxx (header_name	= "interval/interval.hpp",mandatory=False)
@@ -214,75 +213,70 @@ def configure (conf):
 				conf.fatal ("cannot use --with-cplex/--with-soplex/--with-clp together")
 			with_any_solver = True
 			
-
-	# check if SOPLEX is installed		
-	if not with_any_solver: 
-		has_Soplex_h = conf.check_cxx (header_name	= "soplex.h",mandatory = False)
-		has_Soplexlib =  conf.check_cxx (lib = "soplex", uselib_store = "IBEX_DEPS",
-					libpath = [],
-					mandatory = False,
-					fragment = """
-						#include <soplex.h>
-						int main (int argc, char* argv[]) {
-							soplex::SPxLP lp;
-							lp.read(std::cin);
-							return 0;
-						}
-					""")
-		if not has_Soplexlib:
-			has_Soplexlib = conf.check_cxx (lib = ["soplex", "z"], uselib_store = "IBEX_DEPS",
-					libpath = [],
-					mandatory = False,
-					fragment = """
-						#include <soplex.h>
-						int main (int argc, char* argv[]) {
-							soplex::SPxLP lp;
-							lp.read(std::cin);
-							return 0;
-						}
-					""")
-			
-		if (has_Soplex_h and has_Soplexlib):
-			conf.env.LP_LIB = "SOPLEX"
-			with_any_solver = True
-			Logs.pprint ("BLUE","The Linear Solver is the installed version of SOPLEX")
-		
-		
-	# check if CPLEX is installed		
-	if not with_any_solver: 			
-		has_Cplex_h = conf.check_cxx (header_name	= "ilcplex/cplex.h",mandatory = False)
-		has_Cplexlib =  conf.check_cxx (lib = ["cplex", "pthread"], uselib_store = "IBEX_DEPS",
-						libpath = [],  
+	if (with_any_solver and  conf.env.WITHOUT_LP):
+		conf.fatal ("cannot use --without-lp and  (--with-cplex/--with-soplex/--with-clp) option")
+	
+	if 	conf.env.WITHOUT_LP:
+		conf.env.LP_LIB = "NOLP"
+	else:	
+		# check if SOPLEX is installed		
+		if not with_any_solver: 
+			has_Soplex_h = conf.check_cxx (header_name	= "soplex.h",mandatory = False)
+			has_Soplexlib =  conf.check_cxx (lib = "soplex", uselib_store = "IBEX_DEPS",
+						libpath = [],
 						mandatory = False,
 						fragment = """
-							#include "ilcplex/cplex.h"
+							#include <soplex.h>
 							int main (int argc, char* argv[]) {
-								CPXENVptr  envcplex;
-								CPXLPptr lpcplex;
+								soplex::SPxLP lp;
+								lp.read(std::cin);
 								return 0;
 							}
 						""")
+			if not has_Soplexlib:
+				has_Soplexlib = conf.check_cxx (lib = ["soplex", "z"], uselib_store = "IBEX_DEPS",
+						libpath = [],
+						mandatory = False,
+						fragment = """
+							#include <soplex.h>
+							int main (int argc, char* argv[]) {
+								soplex::SPxLP lp;
+								lp.read(std::cin);
+								return 0;
+							}
+						""")
+				
+			if (has_Soplex_h and has_Soplexlib):
+				conf.env.LP_LIB = "SOPLEX"
+				with_any_solver = True
+				Logs.pprint ("BLUE","The Linear Solver is the installed version of SOPLEX")
 			
-		if (has_Cplex_h and has_Cplexlib):
-			conf.env.LP_LIB = "CPLEX"
-			with_any_solver = True
-			Logs.pprint ("BLUE","The Linear Solver is the installed version of CPLEX")
 			
-	################################		
-	# check if CLP is installed	
-	if not with_any_solver: 
-		has_Clp_h = conf.check_cxx (header_name	= "coin/ClpSimplex.hpp",mandatory = False)
-		has_Clplib = conf.check_cxx (lib = ["Clp","CoinUtils","z","m"], uselib_store = "IBEX_DEPS",
-									libpath = [],
-									fragment = """
-						#include "coin/ClpSimplex.hpp"
-						int main (int argc, char* argv[]) {
-							ClpSimplex 	myclp;
-							myclp.resize(2,2);
-							return 0;
-						} """, mandatory = False)	
-		if not has_Clplib:
-			has_Clplib = conf.check_cxx (lib = ["Clp","CoinUtils","m"], uselib_store = "IBEX_DEPS",
+		# check if CPLEX is installed		
+		if not with_any_solver: 			
+			has_Cplex_h = conf.check_cxx (header_name	= "ilcplex/cplex.h",mandatory = False)
+			has_Cplexlib =  conf.check_cxx (lib = ["cplex", "pthread"], uselib_store = "IBEX_DEPS",
+							libpath = [],  
+							mandatory = False,
+							fragment = """
+								#include "ilcplex/cplex.h"
+								int main (int argc, char* argv[]) {
+									CPXENVptr  envcplex;
+									CPXLPptr lpcplex;
+									return 0;
+								}
+							""")
+				
+			if (has_Cplex_h and has_Cplexlib):
+				conf.env.LP_LIB = "CPLEX"
+				with_any_solver = True
+				Logs.pprint ("BLUE","The Linear Solver is the installed version of CPLEX")
+				
+		################################		
+		# check if CLP is installed	
+		if not with_any_solver: 
+			has_Clp_h = conf.check_cxx (header_name	= "coin/ClpSimplex.hpp",mandatory = False)
+			has_Clplib = conf.check_cxx (lib = ["Clp","CoinUtils","z","m"], uselib_store = "IBEX_DEPS",
 										libpath = [],
 										fragment = """
 							#include "coin/ClpSimplex.hpp"
@@ -291,102 +285,102 @@ def configure (conf):
 								myclp.resize(2,2);
 								return 0;
 							} """, mandatory = False)	
+			if not has_Clplib:
+				has_Clplib = conf.check_cxx (lib = ["Clp","CoinUtils","m"], uselib_store = "IBEX_DEPS",
+											libpath = [],
+											fragment = """
+								#include "coin/ClpSimplex.hpp"
+								int main (int argc, char* argv[]) {
+									ClpSimplex 	myclp;
+									myclp.resize(2,2);
+									return 0;
+								} """, mandatory = False)	
+				
+			if (has_Clp_h and has_Clplib):
+				conf.env.LP_LIB = "CLP"
+				with_any_solver = True
+				Logs.pprint ("BLUE","The Linear Solver is the installed version of CLP")
 			
-		if (has_Clp_h and has_Clplib):
+		# no Linear Solver is install
+		if not with_any_solver: 
+			Logs.pprint ("BLUE","By Default, we install the Linear Solver Clp-1.15.6 from COIN-OR project")
 			conf.env.LP_LIB = "CLP"
-			with_any_solver = True
-			Logs.pprint ("BLUE","The Linear Solver is the installed version of CLP")
-		
-	# no Linear Solver is install
-	if not with_any_solver: 
-		Logs.pprint ("BLUE","By Default, we install the Linear Solver Clp-1.15.6 from COIN-OR project")
-		conf.env.LP_LIB = "CLP"
-		conf.env.BUILD_CLP = True
-		
-	################################
-	# build with cplex
-	if with_cplex is not None:
-		
-		conf.env.LP_LIB = "CPLEX"
-		conf.msg ("Candidate directory for lib Cplex", with_cplex)
-
-		conf.env.append_unique ("INCLUDES",  os.path.join (with_cplex, "cplex/include/"))
-		conf.check_cxx (header_name	= "ilcplex/cplex.h")
-		
-		dirtmp1 = os.path.join(with_cplex, "cplex/lib/")
-		for pp in os.listdir(dirtmp1) :
-			dirtmp2= os.path.join (dirtmp1,pp)
-			if (os.path.isdir(dirtmp2)):
-				if (not(conf.check_cxx (lib = ["cplex", "pthread"], uselib_store = "IBEX_DEPS",
-						libpath = [os.path.join(dirtmp2, "static_pic/")],  
+			conf.env.BUILD_CLP = True
+			
+		################################
+		# build with cplex
+		if with_cplex is not None:
+			
+			conf.env.LP_LIB = "CPLEX"
+			conf.msg ("Candidate directory for lib Cplex", with_cplex)
+	
+			conf.env.append_unique ("INCLUDES",  os.path.join (with_cplex, "cplex/include/"))
+			conf.check_cxx (header_name	= "ilcplex/cplex.h")
+			
+			dirtmp1 = os.path.join(with_cplex, "cplex/lib/")
+			for pp in os.listdir(dirtmp1) :
+				dirtmp2= os.path.join (dirtmp1,pp)
+				if (os.path.isdir(dirtmp2)):
+					if (not(conf.check_cxx (lib = ["cplex", "pthread"], uselib_store = "IBEX_DEPS",
+							libpath = [os.path.join(dirtmp2, "static_pic/")],  
+							mandatory = False,
+							fragment = """
+								#include "ilcplex/cplex.h"
+								int main (int argc, char* argv[]) {
+									CPXENVptr  envcplex;
+									CPXLPptr lpcplex;
+									return 0;
+								}
+							"""))):
+						conf.fatal ("cannot link with the Cplex library")			
+			
+			
+			
+		elif with_soplex is not None :
+			# build with soplex
+			conf.env.LP_LIB = "SOPLEX"
+			conf.msg ("Candidate directory for lib Soplex", with_soplex)
+	
+			conf.env.append_unique ("INCLUDES",  os.path.join (with_soplex, "src"))
+			conf.check_cxx (header_name	= "soplex.h")
+	
+			# Try without and with -lz (soplex may be built without zlib)
+			for l in ("soplex", ["soplex", "z"]):
+				if (conf.check_cxx (lib = l, uselib_store = "IBEX_DEPS",
+						libpath = [os.path.join (with_soplex, "lib")],
 						mandatory = False,
 						fragment = """
-							#include "ilcplex/cplex.h"
+							#include <soplex.h>
 							int main (int argc, char* argv[]) {
-								CPXENVptr  envcplex;
-								CPXLPptr lpcplex;
+								soplex::SPxLP lp;
+								lp.read(std::cin);
 								return 0;
 							}
-						"""))):
-					conf.fatal ("cannot link with the Cplex library")			
-		
-		
-		
-	elif with_soplex is not None :
-		# build with soplex
-		conf.env.LP_LIB = "SOPLEX"
-		conf.msg ("Candidate directory for lib Soplex", with_soplex)
-
-		conf.env.append_unique ("INCLUDES",  os.path.join (with_soplex, "src"))
-		conf.check_cxx (header_name	= "soplex.h")
-
-		# Try without and with -lz (soplex may be built without zlib)
-		for l in ("soplex", ["soplex", "z"]):
-			if (conf.check_cxx (lib = l, uselib_store = "IBEX_DEPS",
-					libpath = [os.path.join (with_soplex, "lib")],
-					mandatory = False,
-					fragment = """
-						#include <soplex.h>
-						int main (int argc, char* argv[]) {
-							soplex::SPxLP lp;
-							lp.read(std::cin);
-							return 0;
-						}
-					""")):
-				break
-		else:
-			conf.fatal ("cannot link with the Soplex library")
-		
-		
-	elif with_clp is not None :
-		
-		if ((conf.env["INTERVAL_LIB"] is "GAOL") and (conf.env.DEST_CPU == "x86_64")):
-			conf.fatal ("cannot use the Clp linear solver with Gaol on x86_64 processor, please install Soplex or Cplex, or use another Interval library (Filib or Profil/Bias).")
+						""")):
+					break
+			else:
+				conf.fatal ("cannot link with the Soplex library")
 			
-		# build with Clp
-		conf.env.LP_LIB = "CLP"
-		conf.msg ("Candidate directory for lib Clp", with_clp)
-		mandatory = bool (with_clp)
-		
-		if with_clp:
-			conf.env.append_unique ("INCLUDES", os.path.join (with_clp, "include"))
 			
-		
-		has_Clp = conf.check_cxx (
-				header_name	= "coin/ClpSimplex.hpp",
-				mandatory	= mandatory)
-
-		has_Clplib_z = conf.check_cxx (lib = ["Clp","CoinUtils","z","m"], uselib_store = "IBEX_DEPS",
-									libpath = [os.path.join (with_clp, "lib")],
-									fragment = """
-						#include "coin/ClpSimplex.hpp"
-						int main (int argc, char* argv[]) {
-							ClpSimplex 	myclp;
-							myclp.resize(2,2);
-							return 0;
-						} """, mandatory = False)	
-		if not has_Clplib_z:
-			has_Clplib = conf.check_cxx (lib = ["Clp","CoinUtils","m"], uselib_store = "IBEX_DEPS",
+		elif with_clp is not None :
+			
+			if ((conf.env["INTERVAL_LIB"] is "GAOL") and (conf.env.DEST_CPU == "x86_64")):
+				conf.fatal ("cannot use the Clp linear solver with Gaol on x86_64 processor, please install Soplex or Cplex, or use another Interval library (Filib or Profil/Bias).")
+				
+			# build with Clp
+			conf.env.LP_LIB = "CLP"
+			conf.msg ("Candidate directory for lib Clp", with_clp)
+			mandatory = bool (with_clp)
+			
+			if with_clp:
+				conf.env.append_unique ("INCLUDES", os.path.join (with_clp, "include"))
+				
+			
+			has_Clp = conf.check_cxx (
+					header_name	= "coin/ClpSimplex.hpp",
+					mandatory	= mandatory)
+	
+			has_Clplib_z = conf.check_cxx (lib = ["Clp","CoinUtils","z","m"], uselib_store = "IBEX_DEPS",
 										libpath = [os.path.join (with_clp, "lib")],
 										fragment = """
 							#include "coin/ClpSimplex.hpp"
@@ -395,14 +389,24 @@ def configure (conf):
 								myclp.resize(2,2);
 								return 0;
 							} """, mandatory = False)	
-		else:
-			has_Clplib = True
-			
-		if mandatory and (not (has_Clplib or has_Clplib_z)):
-			conf.fatal ("cannot link with the Clp library")
-			
-		if not (has_Clp and (has_Clplib or has_Clplib_z)):
-			conf.env.BUILD_CLP = True
+			if not has_Clplib_z:
+				has_Clplib = conf.check_cxx (lib = ["Clp","CoinUtils","m"], uselib_store = "IBEX_DEPS",
+											libpath = [os.path.join (with_clp, "lib")],
+											fragment = """
+								#include "coin/ClpSimplex.hpp"
+								int main (int argc, char* argv[]) {
+									ClpSimplex 	myclp;
+									myclp.resize(2,2);
+									return 0;
+								} """, mandatory = False)	
+			else:
+				has_Clplib = True
+				
+			if mandatory and (not (has_Clplib or has_Clplib_z)):
+				conf.fatal ("cannot link with the Clp library")
+				
+			if not (has_Clp and (has_Clplib or has_Clplib_z)):
+				conf.env.BUILD_CLP = True
 
 
 	#####################################################################################################
