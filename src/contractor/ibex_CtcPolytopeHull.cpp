@@ -36,6 +36,8 @@ CtcPolytopeHull::~CtcPolytopeHull() {
 	if (own_lr) delete &lr;
 }
 
+#ifndef  _IBEX_WITH_NOLP_
+
 void CtcPolytopeHull::contract(IntervalVector& box) {
 
 	if (!(limit_diam_box.contains(box.max_diam()))) return;
@@ -53,8 +55,8 @@ void CtcPolytopeHull::contract(IntervalVector& box) {
 
 		optimizer(box);
 
-		//	mylinearsolver->writeFile("LP.lp");
-		//		system ("cat LP.lp");
+		//mylinearsolver->writeFile("LP.lp");
+		//system ("cat LP.lp");
 		//cout << "[polytope-hull] box after LR: " << box << endl;
 		mylinearsolver->cleanConst();
 	}
@@ -393,5 +395,16 @@ bool CtcPolytopeHull::choose_next_variable(IntervalVector & box, int & nexti, in
 	return found;
 
 }
+
+#else /// end _IBEX_WITH_NOLP_
+
+
+void CtcPolytopeHull::contract(IntervalVector& box) { }
+
+
+#endif /// end _IBEX_WITH_NOLP_
+
+
+
 
 } // end namespace ibex

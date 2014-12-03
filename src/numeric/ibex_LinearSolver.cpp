@@ -67,6 +67,7 @@ double LinearSolver::getEpsilon() const {
 	return epsilon;
 }
 
+///////////////////////////////////////////////////////////////////////////////////
 
 #ifdef _IBEX_WITH_SOPLEX_
 
@@ -2021,9 +2022,103 @@ LinearSolver::Status LinearSolver::addConstraint(ibex::Vector& row, CmpOp sign, 
 */
 
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#ifdef _IBEX_WITH_NOLP_
 
 
 
-} // end namespace ibex
+LinearSolver::LinearSolver(int nb_vars, int nb_ctr, int max_iter,
+	int max_time_out, double eps):
+	nb_ctrs(0), nb_vars(0), nb_rows(0), obj_value(0.0), epsilon(0),
+	primal_solution(NULL), dual_solution(NULL),
+	status_prim(0), status_dual(0)
+{
+	ibex_warning("No Linear Solver available.");
+}
 
+LinearSolver::~LinearSolver() {
+}
+
+LinearSolver::Status_Sol LinearSolver::solve() {
+	return LinearSolver::UNKNOWN;
+}
+
+void LinearSolver::writeFile(const char* name) {
+	throw LPException();
+}
+
+void LinearSolver::getCoefConstraint(Matrix& A) {
+	throw LPException();
+}
+
+void LinearSolver::getCoefConstraint_trans(Matrix& A_trans) {
+	throw LPException();
+}
+
+void LinearSolver::getB(IntervalVector& B) {
+	throw LPException();
+}
+
+void LinearSolver::getPrimalSol(Vector& prim) {
+	throw LPException();
+}
+
+void LinearSolver::getDualSol(Vector& dual) {
+	throw LPException();
+}
+
+void LinearSolver::getInfeasibleDir(Vector& sol) {
+	throw LPException();
+}
+
+void LinearSolver::cleanConst() {
+	throw LPException();
+}
+
+void LinearSolver::cleanAll() {
+	throw LPException();
+}
+
+void LinearSolver::setMaxIter(int max) {
+	throw LPException();
+}
+
+void LinearSolver::setMaxTimeOut(int time) {
+	throw LPException();
+}
+
+void LinearSolver::setSense(Sense s) {
+	throw LPException();
+}
+
+void LinearSolver::setVarObj(int var, double coef) {
+	throw LPException();
+}
+
+void LinearSolver::initBoundVar(IntervalVector bounds) {
+	throw LPException();
+}
+
+void LinearSolver::setBoundVar(int var, Interval bound) {
+	throw LPException();
+}
+
+void LinearSolver::setEpsilon(double eps) {
+	throw LPException();
+}
+
+void LinearSolver::addConstraint(Vector& row, CmpOp sign, double rhs) {
+	throw LPException();
+}
+
+
+#endif //
+
+
+
+
+
+
+}
+ // end namespace ibex
 
