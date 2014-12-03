@@ -47,8 +47,24 @@ uint32_t RNG::x = 123456789;
 uint32_t RNG::y = 362436069;
 uint32_t RNG::z = 521288629;
 
+bool RNG::srand()
+{
+	/** This function sets the seed for random number generation \c
+	 \return A boolean if the seed is acceptable, that is in [0,UINT32_MAX].
+	 */
 
-bool RNG::set_seed(unsigned long s)
+	if(x<UINT32_MAX)
+	{
+		x++;
+		return true;
+	}
+	else {
+		x  = 123456789; // the default value
+		return false;
+	}
+}
+
+bool RNG::srand(unsigned long s)
 {
 	/** This function sets the seed for random number generation \c 
 	 \return A boolean if the seed is acceptable, that is in [0,UINT32_MAX].

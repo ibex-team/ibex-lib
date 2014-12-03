@@ -38,7 +38,7 @@ int main(int argc, char** argv){
 	double timelimit = atof(argv[7]);
 	double eqeps= 1.e-8;
 
-	srand(1);
+	RNG::srand(1);
 
 	// the extended system 
 	ExtendedSystem ext_sys(sys,eqeps);

@@ -54,9 +54,10 @@ namespace ibex {
 		
 	public:
 
-		static bool set_seed(unsigned long s);
+		static bool srand();
+		static bool srand(unsigned long s);
 		static uint32_t rand();
-		static double rand(double a, double b){return a+((b-a)*rand())/UINT32_MAX;}
+		static double rand(double a, double b){return a+((b-a)*RNG::rand())/UINT32_MAX;}
 		
 	private:
 		static uint32_t x,y,z;

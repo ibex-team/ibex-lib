@@ -21,16 +21,16 @@ double DIST_ERROR=0.1;   	  // the uncertainty on the distance
 
 // init data (simulate measurements)
 void init_data() {
-	srand(1111);
+	ibex::RNG::srand(1111);
 
 	double center[N];
-	for (int j=0; j<N; j++) center[j] = ((double) rand()/RAND_MAX)*L;
+	for (int j=0; j<N; j++) center[j] = ibex::RNG::rand(0,L);
 
-	rand();
+	ibex::RNG::rand();
 
 	double sum;
 	for (int i=0; i<P; i++) {
-		for (int j=0; j<N; j++) beacons[i][j] = ((double) rand()/RAND_MAX)*L;
+		for (int j=0; j<N; j++) beacons[i][j] = ibex::RNG::rand(0,L);
 		sum = 0;
 		for (int j=0; j<N; j++) sum += pow(beacons[i][j]-center[j],2);
 		dist[i]=sqrt(sum);
