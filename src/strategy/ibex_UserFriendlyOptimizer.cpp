@@ -62,7 +62,6 @@ double _2dbl(const char* argname, const char* arg) {
 
 System& get_sys(const char* args[10]) {
 	if (!(*memory())->sys.empty()) {
-		cout << "sys box=" << (*memory())->sys.front()->box << endl;
 		return *((*memory())->sys.front()); // already built and recorded
 	}
 	else return rec(new System(args[FILENAME]));
