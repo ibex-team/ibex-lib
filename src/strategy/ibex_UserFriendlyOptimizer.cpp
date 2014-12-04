@@ -32,6 +32,9 @@ namespace {
 
 enum { FILENAME, CTC, LIN_RELAX, BSC, PREC, REL_PREC, ABS_PREC, SAMPLE_SIZE, TIME_LIMIT, EQ_EPS };
 
+/*
+ * Convert char* --> int
+ */
 int _2int(const char* argname, const char* arg) {
 	char* endptr;
 	int val = strtol(arg,&endptr,10);
@@ -43,6 +46,9 @@ int _2int(const char* argname, const char* arg) {
 	return val;
 }
 
+/*
+ * Convert char* --> double
+ */
 double _2dbl(const char* argname, const char* arg) {
 	char* endptr;
 	double val = strtod(arg,&endptr);
@@ -54,14 +60,26 @@ double _2dbl(const char* argname, const char* arg) {
 	return val;
 }
 
-ExtendedSystem& get_ext_sys(char* args[10]) {
-	if (!(*memory())->sys.empty()) return (ExtendedSystem&) *((*memory())->sys.back()); // already built and recorded
-	else return rec(new ExtendedSystem(rec(new System(args[FILENAME])),_2dbl("equation thickness",args[EQ_EPS])));
+System& get_sys(const char* args[10]) {
+	if (!(*memory())->sys.empty()) {
+		cout << "sys box=" << (*memory())->sys.front()->box << endl;
+		return *((*memory())->sys.front()); // already built and recorded
+	}
+	else return rec(new System(args[FILENAME]));
+}
+
+ExtendedSystem& get_ext_sys(const char* args[10]) {
+	if ((*memory())->sys.size()==2) {
+		return (ExtendedSystem&) *((*memory())->sys.back()); // already built and recorded
+	}
+	else return rec(new ExtendedSystem(get_sys(args),_2dbl("equation thickness",args[EQ_EPS])));
 }
 
 
-// The contractors
-Ctc& get_ctc(char* args[10]) {
+/*
+ *  Build the contractors
+ */
+Ctc& get_ctc(const char* args[10]) {
 
 	Ctc* ctc;
 
@@ -145,7 +163,10 @@ Ctc& get_ctc(char* args[10]) {
 
 }
 
-Bsc& get_bsc(char* args[10]) {
+/*
+ * Build the bisector
+ */
+Bsc& get_bsc(const char* args[10]) {
 	Bsc* bsc;
 
 	ExtendedSystem& ext_sys = get_ext_sys(args);
@@ -172,7 +193,7 @@ Bsc& get_bsc(char* args[10]) {
 
 } // end anonymous namespace
 
-UserFriendlyOptimizer::UserFriendlyOptimizer(char* args[10]) : Optimizer(get_ext_sys(args),get_ctc(args),get_bsc(args),
+UserFriendlyOptimizer::UserFriendlyOptimizer(const char* args[10]) : Optimizer(get_sys(args),get_ctc(args),get_bsc(args),
 		_2dbl("precision",args[PREC]),
 		_2dbl("goal relative precision",args[REL_PREC]),
 		_2dbl("goal absolute precision",args[ABS_PREC]),
@@ -186,11 +207,24 @@ UserFriendlyOptimizer::UserFriendlyOptimizer(char* args[10]) : Optimizer(get_ext
 	timeout = _2dbl("time limit",args[TIME_LIMIT]);
 
 	*memory() = NULL; // reset (for next DefaultOptimizer to be created)
+
+//	cout << "system                   " << get_sys(args) << endl;
+//	cout << "precision:               " << prec << endl;
+//	cout << "goal relative precision: " << goal_rel_prec << endl;
+//	cout << "goal absolute precision: " << goal_abs_prec << endl;
+//	cout << "sample size:             "  << sample_size << endl;
+//	cout << "equation thickness:      " << args[EQ_EPS] << endl;
+//	cout << "time out:                " << timeout << endl;
+
 }
 
 UserFriendlyOptimizer::~UserFriendlyOptimizer() {
 	// delete all objects dynamically created in the constructor
 	delete (Memory*) data;
+}
+
+Optimizer::Status UserFriendlyOptimizer::optimize() {
+	return Optimizer::optimize(user_sys.box);
 }
 
 } // end namespace ibex

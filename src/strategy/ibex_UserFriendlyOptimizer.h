@@ -38,9 +38,20 @@ public:
 	 * \param args[8] - time limit
 	 * \param args[9] - thickness of equations (non-rigor mode)
 	 */
-	UserFriendlyOptimizer(char* args[10]);
+	UserFriendlyOptimizer(const char* args[10]);
 
+
+	/**
+	 * \brief Delete this.
+	 */
 	virtual ~UserFriendlyOptimizer();
+
+	/**
+	 * \brief Run the optimization on the system initial box.
+	 *
+	 * \see ibex::Optimizer::optimize(const IntervalVector&, double);
+	 */
+	Status optimize();
 
 private:
 
