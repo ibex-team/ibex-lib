@@ -68,6 +68,7 @@ public:
 
 protected:
 
+#ifndef _IBEX_WITH_NOLP_
 	/**
 	 * Achterberg heuristic for choosing the next variable  and which bound to optimize
 	 */
@@ -77,6 +78,9 @@ protected:
 	 * TODO: add comment
 	 */
 	void optimizer(IntervalVector &box);
+
+
+#endif /// end _IBEX_WITH_NOLP_
 
 	/**
 	 * \brief The linearization technique
@@ -99,6 +103,7 @@ protected:
 	 * TODO: add comment
 	 */
 	const Interval limit_diam_box;
+
 
 	/**
 	 * \brief  The linear solver that will be use

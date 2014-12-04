@@ -39,6 +39,10 @@
 #ifdef _IBEX_WITH_ILOCPLEX_
 #include <ilcplex/ilocplex.h>
 // TODO not finish yet
+#else
+#ifdef _IBEX_WITH_NOLP_
+// nothing
+#endif
 #endif
 #endif
 #endif

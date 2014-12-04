@@ -21,14 +21,16 @@ class TestInHC4Revise : public TestIbex {
 
 public:
 	TestInHC4Revise() {
-		TEST_ADD(TestInHC4Revise::add01);
-		TEST_ADD(TestInHC4Revise::add02);
-		TEST_ADD(TestInHC4Revise::dist01);
-		TEST_ADD(TestInHC4Revise::dist02);
-		TEST_ADD(TestInHC4Revise::apply01);
-		TEST_ADD(TestInHC4Revise::apply02);
-		TEST_ADD(TestInHC4Revise::add_mult01);
-		TEST_ADD(TestInHC4Revise::bugr900);
+//		TEST_ADD(TestInHC4Revise::add01);
+//		TEST_ADD(TestInHC4Revise::add02);
+//		TEST_ADD(TestInHC4Revise::dist01);
+//		TEST_ADD(TestInHC4Revise::dist02);
+//		TEST_ADD(TestInHC4Revise::apply01);
+//		TEST_ADD(TestInHC4Revise::apply02);
+//		TEST_ADD(TestInHC4Revise::add_mult01);
+//		TEST_ADD(TestInHC4Revise::bugr900);
+//		TEST_ADD(TestInHC4Revise::issue69);
+		TEST_ADD(TestInHC4Revise::issue70);
 	}
 
 	void add01();
@@ -40,6 +42,7 @@ public:
 	// z=x+0*y
 	void add_mult01();
 	void bugr900();
+	void issue70();
 };
 
 } // end namespace
