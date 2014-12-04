@@ -74,7 +74,7 @@ void CtcPixelMap::contract(IntervalVector& box) {
 
 //------------------------------------------------------------------------------
 //psi contraction
-void CtcPixelMap::contract(int cxmin, int cxmax, int cymin, int cymax) {
+void CtcPixelMap::contract(int& cxmin, int& cxmax, int& cymin, int& cymax) {
 
     //compute enclosed pixels on consecutive lines from all dimensions of the box
 
@@ -123,7 +123,7 @@ void CtcPixelMap::contract(int cxmin, int cxmax, int cymin, int cymax) {
 }
 //////////////////////////////////////////////////////////////////////
 
-void CtcPixelMap::contract(int cxmin, int cxmax, int cymin,int cymax, int czmin, int czmax) {
+void CtcPixelMap::contract(int& cxmin, int& cxmax, int& cymin,int& cymax, int& czmin, int& czmax) {
 
     cxmax = std::max(0,std::min(I.grid_size_[0]-1,cxmax));
     cxmin = std::min(I.grid_size_[0]-1,std::max(0,cxmin));

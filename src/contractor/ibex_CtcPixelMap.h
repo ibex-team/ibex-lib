@@ -86,12 +86,12 @@ private:
     /**
      * \brief contract the box defined by [cxmin, cxmax]x[cymin, cymax] w.r.t the integral image.
      */
-    void contract(int cxmin, int cxmax, int cymin, int cymax);
+    void contract(int &cxmin, int &cxmax, int &cymin, int &cymax);
 
     /**
      * \brief contract the box defined by [cxmin, cxmax]x[cymin, cymax]x[zmin, zmax] w.r.t the integral image.
      */
-    void contract(int cxmin, int cxmax, int cymin, int cymax, int czmin, int czmax);
+    void contract(int &cxmin, int &cxmax, int &cymin, int &cymax, int &czmin, int &czmax);
     
     /**
      * \brief Return the number of 1-valued pixels in the box [xmin,xmax] x [ymin, ymax].
