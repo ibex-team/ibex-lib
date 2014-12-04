@@ -1,48 +1,48 @@
 ../benchs/benchs-optim/coconutbenchmark-library1/ex2_1_9.bch acidhc4 compo smearsumrel 1.e-8 1.e-8
--0.375000016905  -0.375000006905  5.91 1805
+-0.37500001627 -0.37500000627 5.87 1825
 ../benchs/benchs-optim/coconutbenchmark-library1/ex6_1_1.bch acidhc4 compo smearsumrel 1.e-8 1.e-8
--0.0201983805462 -0.0201983705462 12.54 2375
+-0.0201983805461 -0.0201983705461 12.45 2375
 ../benchs/benchs-optim/coconutbenchmark-library1/ex6_1_3.bch acidhc4 compo smearsumrel 1.e-8 1.e-8
--0.352497955935 -0.352497945935 82.06 7409
+-0.352497955935 -0.352497945935 79.28 7409
 ../benchs/benchs-optim/coconutbenchmark-library1/ex6_2_6.bch acidhc4 compo smearsumrel 1.e-8 1.e-8
--2.61251922906e-06 -2.60251922906e-06 22.52 19943
+-2.61251922906e-06 -2.60251922906e-06 22.72 19943
 ../benchs/benchs-optim/coconutbenchmark-library1/ex6_2_8.bch acidhc4 compo smearsumrel 1.e-8 1.e-8
--0.0270063591134 -0.0270063491134 15.97 13232
+-0.0270063591134 -0.0270063491134 15.99 13232
 ../benchs/benchs-optim/coconutbenchmark-library1/ex6_2_9.bch acidhc4 compo smearsumrel 1.e-8 1.e-8
--0.0340661947794 -0.0340661847794 8.96 6438
+-0.0340661947794 -0.0340661847794 9.10 6438
 ../benchs/benchs-optim/coconutbenchmark-library1/ex6_2_11.bch acidhc4 compo smearsumrel 1.e-8 1.e-8
--2.68239845493e-06 -2.67239845493e-06 7.81 6836
+-2.68239845493e-06 -2.67239845493e-06 7.91 6836
 ../benchs/benchs-optim/coconutbenchmark-library1/ex6_2_12.bch acidhc4 compo smearsumrel 1.e-8 1.e-8
 0.289194729252 0.289194739252 6.78 4869
 ../benchs/benchs-optim/coconutbenchmark-library1/ex7_2_3.bch acidhc4 compo smearsumrel 1.e-8 1.e-8
-7049.24798216 7049.24805265  6.81 2715
+7049.24797788 7049.24804837 7.52 2520
 ../benchs/benchs-optim/coconutbenchmark-library1/ex7_2_4.bch acidhc4 compo largestfirst 1.e-8 1.e-8
-3.91801019874 3.91801023792 7.69 1692
+3.91801020804 3.918010247223 7.50 1759
 ../benchs/benchs-optim/coconutbenchmark-library1/ex7_2_8.bch acidhc4 compo largestfirst 1.e-8 1.e-8
--6.08198980174 -6.08198974092 6.12 1394
+-6.08198981365 -6.08198975283 6.42 1507
 ../benchs/benchs-optim/coconutbenchmark-library1/ex7_2_9.bch acidhc4 compo largestfirst 1.e-8 1.e-8
-1.14362315552 1.14362316696 19.47 4528
+1.14362315626 1.1436231677 20.51 4738
 ../benchs/benchs-optim/coconutbenchmark-library1/ex7_3_4.bch acidhc4 compo smearsumrel 1.e-8 1.e-8
-6.2746343361 6.274634336696.27463  2.98 474
+6.2746343361 6.27463433669  2.98 474
 ../benchs/benchs-optim/coconutbenchmark-library1/ex7_3_5.bch acidhc4 compo smearsumrel 1.e-8 1.e-8
 1.20671698522 1.20671699729 2.79 349
 ../benchs/benchs-optim/coconutbenchmark-library1/ex8_4_4.bch acidhc4 compo smearsumrel 1.e-8 1.e-8
-0.212459810319 0.212459820319 54.54 1707
+0.212459810319 0.212459820319 54.78 1707
 ../benchs/benchs-optim/coconutbenchmark-library1/ex8_4_5.bch acidhc4 compo largestfirst 1.e-8 1.e-8
-0.000307479122481 0.000307489122481 40.80 1645
+0.000307479122481 0.000307489122481 45.63 1875
 ../benchs/benchs-optim/coconutbenchmark-library1/ex8_5_1.bch acidhc4 compo smearsumrel 1.e-8 1.e-8
--5.02940061047e-07 -4.92940061047e-07 3.68 1215
+-5.0321006873e-07 -4.9321006873e-07 3.78 1166
 ../benchs/benchs-optim/coconutbenchmark-library1/ex8_5_2.bch acidhc4 compo smearsumrel 1.e-8 1.e-8
--2.76647223856e-07 -2.66647223856e-07 13.23 3510
+-2.76647223856e-07 -2.66647223856e-07 13.29 3510
 ../benchs/benchs-optim/coconutbenchmark-library1/ex8_5_6.bch acidhc4 compo smearsumrel 1.e-8 1.e-8
 -0.00116749324773 -0.00116748324773 6.77 2306
 ../benchs/benchs-optim/coconutbenchmark-library1/ex14_2_7.bch acidhc4 compo smearsumrel 1.e-8 1.e-8
-0 2.25907986807e-09 4.45 1021
+0 1.64435708719e-10 10.54 2147
 ../benchs/benchs-optim/coconutbenchmark-library1/hydro.bch acidhc4 compo smearsumrel 1.e-8 1.e-8
-4366944.1412 4366944.18487 57.62 2862
+4366944.1458 4366944.1841 72.93 3714
 ../benchs/benchs-optim/coconutbenchmark-library1/immun.bch acidhc4 compo roundrobin 1.e-8 1.e-8
-0 3.54650360331e-09 6.18 2551
+0 6.96646732884e-09 4.93 1932
 ../benchs/benchs-optim/coconutbenchmark-library1/ramsey.bch acidhc4 compo largestfirst 1.e-8 1.e-8
--2.48746888628 -2.48746886141 37.23 1381
+-2.48746888628 -2.48746886141 37.32 1381
 ../benchs/benchs-optim/coconutbenchmark-library1/srcpm.bch acidhc4 compo smearmax 1.e-8 1.e-8
-2109.78182098,2109.78184207 64.05 3086
+2109.78181648 2109.78183757 37.86 1121
