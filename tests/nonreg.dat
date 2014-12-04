@@ -1,48 +1,48 @@
-../benchs/benchs-optim/coconutbenchmark-library1/ex2_1_9.bch acidhc4 compo smearsumrel 1.e-8 1.e-8 
--0.375 -0.375 5.74
+../benchs/benchs-optim/coconutbenchmark-library1/ex2_1_9.bch acidhc4 compo smearsumrel 1.e-8 1.e-8
+-0.375000016905  -0.375000006905  5.91 1805
 ../benchs/benchs-optim/coconutbenchmark-library1/ex6_1_1.bch acidhc4 compo smearsumrel 1.e-8 1.e-8
--0.0201984 -0.0201984 13.10
+-0.0201983805462 -0.0201983705462 12.54 2375
 ../benchs/benchs-optim/coconutbenchmark-library1/ex6_1_3.bch acidhc4 compo smearsumrel 1.e-8 1.e-8
--0.352498 -0.352498 77.62
+-0.352497955935 -0.352497945935 82.06 7409
 ../benchs/benchs-optim/coconutbenchmark-library1/ex6_2_6.bch acidhc4 compo smearsumrel 1.e-8 1.e-8
--2.61252e-06 -2.60252e-06 23.06
+-2.61251922906e-06 -2.60251922906e-06 22.52 19943
 ../benchs/benchs-optim/coconutbenchmark-library1/ex6_2_8.bch acidhc4 compo smearsumrel 1.e-8 1.e-8
--0.0270064 -0.0270063 15.96
+-0.0270063591134 -0.0270063491134 15.97 13232
 ../benchs/benchs-optim/coconutbenchmark-library1/ex6_2_9.bch acidhc4 compo smearsumrel 1.e-8 1.e-8
--0.0340662 -0.0340662 9.40
+-0.0340661947794 -0.0340661847794 8.96 6438
 ../benchs/benchs-optim/coconutbenchmark-library1/ex6_2_11.bch acidhc4 compo smearsumrel 1.e-8 1.e-8
--2.68235e-06 -2.68235e-06 7.95
+-2.68239845493e-06 -2.67239845493e-06 7.81 6836
 ../benchs/benchs-optim/coconutbenchmark-library1/ex6_2_12.bch acidhc4 compo smearsumrel 1.e-8 1.e-8
-0.289195 0.289195 6.63
+0.289194729252 0.289194739252 6.78 4869
 ../benchs/benchs-optim/coconutbenchmark-library1/ex7_2_3.bch acidhc4 compo smearsumrel 1.e-8 1.e-8
-7049.25 7049.25 6.81
+7049.24798216 7049.24805265  6.81 2715
 ../benchs/benchs-optim/coconutbenchmark-library1/ex7_2_4.bch acidhc4 compo largestfirst 1.e-8 1.e-8
-3.91801 3.91801 7.13
+3.91801019874 3.91801023792 7.69 1692
 ../benchs/benchs-optim/coconutbenchmark-library1/ex7_2_8.bch acidhc4 compo largestfirst 1.e-8 1.e-8
--6.08199 -6.08199 6.62
+-6.08198980174 -6.08198974092 6.12 1394
 ../benchs/benchs-optim/coconutbenchmark-library1/ex7_2_9.bch acidhc4 compo largestfirst 1.e-8 1.e-8
-1.14362 1.14362 21.37
+1.14362315552 1.14362316696 19.47 4528
 ../benchs/benchs-optim/coconutbenchmark-library1/ex7_3_4.bch acidhc4 compo smearsumrel 1.e-8 1.e-8
-6.27463 6.27463 2.89
+6.2746343361 6.274634336696.27463  2.98 474
 ../benchs/benchs-optim/coconutbenchmark-library1/ex7_3_5.bch acidhc4 compo smearsumrel 1.e-8 1.e-8
-1.20672 1.20672 4.65
+1.20671698522 1.20671699729 2.79 349
 ../benchs/benchs-optim/coconutbenchmark-library1/ex8_4_4.bch acidhc4 compo smearsumrel 1.e-8 1.e-8
-0.21246 0.21246 54.91
+0.212459810319 0.212459820319 54.54 1707
 ../benchs/benchs-optim/coconutbenchmark-library1/ex8_4_5.bch acidhc4 compo largestfirst 1.e-8 1.e-8
-0.000307479 0.000307489 45.77
+0.000307479122481 0.000307489122481 40.80 1645
 ../benchs/benchs-optim/coconutbenchmark-library1/ex8_5_1.bch acidhc4 compo smearsumrel 1.e-8 1.e-8
-0 -2.7001e-07 3.85
+-5.02940061047e-07 -4.92940061047e-07 3.68 1215
 ../benchs/benchs-optim/coconutbenchmark-library1/ex8_5_2.bch acidhc4 compo smearsumrel 1.e-8 1.e-8
--2.77192e-07 -2.67192e-07 14.05
+-2.76647223856e-07 -2.66647223856e-07 13.23 3510
 ../benchs/benchs-optim/coconutbenchmark-library1/ex8_5_6.bch acidhc4 compo smearsumrel 1.e-8 1.e-8
--0.00116749 -0.00116748 6.52
+-0.00116749324773 -0.00116748324773 6.77 2306
 ../benchs/benchs-optim/coconutbenchmark-library1/ex14_2_7.bch acidhc4 compo smearsumrel 1.e-8 1.e-8
-0 1.46571e-10 9.89
+0 2.25907986807e-09 4.45 1021
 ../benchs/benchs-optim/coconutbenchmark-library1/hydro.bch acidhc4 compo smearsumrel 1.e-8 1.e-8
-4.36694e+06 4.36694e+06 87.16
+4366944.1412 4366944.18487 57.62 2862
 ../benchs/benchs-optim/coconutbenchmark-library1/immun.bch acidhc4 compo roundrobin 1.e-8 1.e-8
-0 7.48695e-09 3.62
+0 3.54650360331e-09 6.18 2551
 ../benchs/benchs-optim/coconutbenchmark-library1/ramsey.bch acidhc4 compo largestfirst 1.e-8 1.e-8
--2.48747 -2.48747 37.05
+-2.48746888628 -2.48746886141 37.23 1381
 ../benchs/benchs-optim/coconutbenchmark-library1/srcpm.bch acidhc4 compo smearmax 1.e-8 1.e-8
-2109.78 2109.78 38.43
+2109.78182098,2109.78184207 64.05 3086
