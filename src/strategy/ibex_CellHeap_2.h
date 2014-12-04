@@ -18,102 +18,106 @@
 
 namespace ibex {
 
-
-
-
-
-class HeapElt {
+/**
+ * \ingroup strategy
+ *
+ * \brief Element of the Heap (internal)
+ *
+ * To be used by HeapNode.
+ */
+class CellHeapElt {
 
 private:
-	friend class HeapNode;
+	friend class CellHeapNode;
 	friend class CellHeap_2;
 	friend class CellDoubleHeap;
 
-	/** create an HeapElt with a cell and its criteria */
-	HeapElt(int nb_crit,Cell* elt, double *crit);
+	/** Create an HeapElt with a cell and its criteria */
+	CellHeapElt(int nb_crit, Cell* elt, double *crit);
 
+	/** Create an HeapElt with a cell and one criterion */
+	CellHeapElt(Cell* cell, double crit_1);
 
-	/** create an HeapElt with a cell with one criterion */
-	HeapElt(Cell* cell, double crit_1);
+	/** Create an HeapElt with a cell and two criteria */
+	CellHeapElt(Cell* cell, double crit_1, double crit_2);
 
-	/** create an HeapElt with a cell with two criteria */
-	HeapElt(Cell* cell, double crit_1, double crit_2);
+	/** Delete the element */
+	~CellHeapElt() ;
 
-	/** Delete the node and all its sons */
-	~HeapElt() ;
-
-	// the stored Cell
+	/** the stored Cell */
 	Cell* cell;
 
-	// the criterion of the stored cell
+	/** the criterion of the stored cell */
 	double *crit;
 
+	/** TODO: complete comment. */
 	unsigned int *indice;
 
 	/** The way to compare two pairs (cells,crit). */
 	bool isSup(double d, int ind_crit) const ;
 
-	friend std::ostream& operator<<(std::ostream& os, const HeapElt& node) ;
-
-
+	friend std::ostream& operator<<(std::ostream& os, const CellHeapElt& node) ;
 };
 
 
-
-class HeapNode {
+/**
+ * \ingroup strategy
+ *
+ * \brief Heap node
+ *
+ */
+class CellHeapNode {
 
 private:
 	friend class CellHeap_2;
 	friend class CellDoubleHeap;
 
-	/** create an node with a cell and its criterion */
-	HeapNode(HeapElt* elt, HeapNode * father=NULL);
+	/** Create a node from an element and the father node. */
+	CellHeapNode(CellHeapElt* elt, CellHeapNode* father=NULL);
 
 	/** Delete the node and all its sons */
-	~HeapNode() ;
+	~CellHeapNode() ;
 
-	// the stored Cell
+	/** the stored element. */
 	HeapElt* elt;
 
-	// the sons of the node
-	HeapNode * right;
-	HeapNode * left;
+	/** Right sub-node */
+	CellHeapNode* right;
 
-	// the father of the ode in the heap
-	HeapNode * father;
+	/** Left sub-node */
+	CellHeapNode* left;
+
+	/** Father node. */
+	CellHeapNode * father;
 
 	/** The way to compare two pairs (cells,crit). */
-	bool isSup(HeapNode *node, int ind_crit) const;
+	bool isSup(CellHeapNode* node, int ind_crit) const;
 	bool isSup(double d, int ind_crit) const ;
 
-	/** Switch the HeapElt between *this and node */
-	void switchElt(HeapNode *node, int ind_crit);
+	/** Switch the CellHeapElt between *this and node */
+	void switchElt(CellHeapNode* node, int ind_crit);
 
-	friend std::ostream& operator<<(std::ostream& os, const HeapNode& node) ;
-
+	friend std::ostream& operator<<(std::ostream& os, const CellHeapNode& node) ;
 
 };
-
-
 
 /** \ingroup strategy
  *
  * \brief Heap-organized buffer of cells
  *
  * Allows to organize the cell buffer as a heap.
- * In this way, the next cell is always the one that minimizes
- * some "cost" (size, evaluation of a function, etc.).
  *
- * The criterion used to order the cells is the one defined by #cost(const Cell*).
+ * See comments in #ibex::CellHeap for generalities
+ * about cell heaps.
  *
- * The heap is built so that:
- *  <ul>
- *  <li> #pop() returns in logarithmic time
- *    the cell with the minimal criterion.
- *  <li> #push() is also in logarithmic time.</li>
- *  </ul>
+ * The difference between CellHeap2 and CellHeap is that
+ * CellHeap is based on the STL heap class while CellHeap2 implements
+ * its own data structure. This structure allows to remove an
+ * element inside the heap (and not necessarily the top one).
+ * This feature is necessary to manage two heaps in parallel
+ * like in the #ibex::CellDoubleHeap class.
  *
- * \see #CellBuffer,
+ * \see #ibex::CellBuffer, #ibex::CellHeap, #ibex::CellDoubleHeap.
  */
 class CellHeap_2 : public CellBuffer {
 
@@ -121,13 +125,15 @@ public:
     /* the different criteria implemented for a heap : in optimization : LB for the first one, another for the second one */
 	typedef enum {LB,UB,C3,C5,C7,PU,PF_LB, PF_UB} criterion;
 
-
 	CellHeap_2(criterion crit, int ind_var, int ind_crit);
 
+	/**
+	 * Delete this.
+	 */
 	~CellHeap_2();
 
 	/** Flush the buffer.
-	 * All the remaining cells will be *deleted* */
+	 * All the remaining cells will be *deleted*. */
 	void flush();
 
 	/** Return the size of the buffer. */
@@ -146,22 +152,28 @@ public:
 	 */
 	Cell* pop();
 
-	/** Return the next box (but does not pop it).
-	 *  complexity: o(1)
+	/**
+	 * Return the next box (but does not pop it).
+	 *
+	 * Complexity: o(1)
 	 */
 	Cell* top() const;
 
-	/** Return the minimum (the criterion for the first cell)
-	 *  complexity: o(1)
+	/**
+	 * Return the minimum (the criterion for the first cell)
+	 *
+	 * Complexity: o(1)
 	 */
 	inline double minimum() const {
 		return root->elt->crit[ind_crit];
 	}
 
-	/** access to the ith Cell rank by largest-first order
-	 *  complexity: o(log(nb_cells))
+	/**
+	 * Access to the ith Cell rank by largest-first order
+	 *
+	 * Complexity: o(log(nb_cells))
 	 */
-	Cell * getCell(unsigned int i) const;
+	Cell* getCell(unsigned int i) const;
 
 	/**
 	 * Removes (and deletes) from the heap all the cells
@@ -189,57 +201,60 @@ protected:
 	/** the indice of the criterion selected for this heap */
 	const int ind_crit;
 
-
 	/** Index of the criterion variable. */
 	const int ind_var;
 
 	/** current value of the loup */
 	double loup;
 
-
 private:
 	friend class CellDoubleHeap;
 
-	/** the root of the heap */
-	HeapNode * root;
+	/** The root of the heap */
+	CellHeapNode* root;
 
 	virtual CellHeap_2 * init_copy()=0;
 
-	/** access to the ith node rank by largest-first order */
-	HeapNode * getNode(unsigned int i) const;
+	/** Access to the ith node rank by largest-first order */
+	CellHeapNode* get_node(unsigned int i) const;
 
-	/** Pop a HeapElt from the stack and return it.
-	 *  complexity: o(log(nb_cells))
+	/**
+	 * Pop a HeapElt from the stack and return it.
+	 *
+	 * Complexity: o(log(nb_cells))
 	 */
 	HeapElt* pop_elt();
 
-	/** usefull only for CellDoubleHeap
-	 *  complexity: o(log(nb_cells))
+	/**
+	 * Useful only for CellDoubleHeap
+	 *
+	 * Complexity: o(log(nb_cells))
 	 */
 	void push(HeapElt* elt);
 
-	/** update the heap to reorder the elements from the node \var node to the down */
-	void updateOrder(HeapNode *node);
+	/** Update the heap to reorder the elements from the node \var node to the down */
+	void update_order(CellHeapNode *node);
 
-	/** erase only this HeapNope without touch the element */
-	void eraseNode(unsigned int i);
+	/** Erase only this HeapNope without touch the element */
+	void erase_node(unsigned int i);
 
-	/** remove the last node and put its element at the ith position */
-	HeapNode * eraseNode_noUpdate(unsigned int i);
+	/** Remove the last node and put its element at the ith position */
+	CellHeapNode* erase_node_no_update(unsigned int i);
 
-	/** use in the contract_heap function by recursivity */
-	void contract_tmp(double new_loup, HeapNode * node, CellHeap_2 & heap);
+	/** Use in the contract_heap function by recursivity */
+	void contract_tmp(double new_loup, CellHeapNode * node, CellHeap_2 & heap);
 
-
-	/** use in the sort function by recursivity */
-	void sort_tmp(HeapNode * node, CellHeap_2 & heap);
+	/** Use in the sort function by recursivity */
+	void sort_tmp(CellHeapNode * node, CellHeap_2 & heap);
 
 	friend std::ostream& operator<<(std::ostream& os, const CellHeap_2& h);
 };
 
-
-
-
+/**
+ * \ingroup strategy
+ *
+ * \brief Cell Heap based on lower bound criterion
+ */
 class CellHeapVarLB: public CellHeap_2 {
 public:
 	CellHeapVarLB(int ind_var, int ind_crit=0) ;
@@ -250,7 +265,11 @@ public:
 
 };
 
-
+/**
+ * \ingroup strategy
+ *
+ * \brief Cell Heap based on upper bound criterion
+ */
 class CellHeapVarUB: public CellHeap_2 {
 public:
 	CellHeapVarUB(int ind_var, int ind_crit=0) ;
@@ -262,8 +281,11 @@ public:
 
 };
 
-
-
+/**
+ * \ingroup strategy
+ *
+ * \brief Cost-based Cell Heap
+ */
 class CellHeapCost: public CellHeap_2 {
 public:
 
@@ -275,17 +297,14 @@ public:
 
 };
 
-
-
+/** Display the element */
+std::ostream& operator<<(std::ostream& os, const CellHeapElt& node) ;
 
 /** Display the node */
-std::ostream& operator<<(std::ostream& os, const HeapElt& node) ;
-std::ostream& operator<<(std::ostream& os, const HeapNode& node) ;
+std::ostream& operator<<(std::ostream& os, const CellHeapNode& node) ;
 
 /** Display the buffer */
 std::ostream& operator<<(std::ostream&, const CellHeap_2& heap);
-
-
 
 
 } // end namespace ibex

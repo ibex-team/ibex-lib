@@ -14,8 +14,25 @@
 
 namespace ibex {
 
+/**
+ * \brief Double-heap buffer (for global optimization)
+ *
+ * See "A new multisection technique in interval methods for global optimization", L.G. Casado, Computing, 2000
+ * (TODO: check ref)
+ */
 class CellDoubleHeap : public CellBuffer {
 public:
+	/**
+	 *
+	 * \param ind_var - Index of the criterion variable
+	 * \param critpr  - Probability to choose the second criterion in node selection in percentage
+	 *                  integer in [0,100] (default value is 50). The value 0 corresponds to use a
+	 *                  single criterion for node selection (the classical one : minimizing the lower
+	 *                  bound of the estimate of the objective). The value 100 corresponds to use a
+	 *                  single criterion for node selection (the second one used in buffer2)
+	 * \param crit_2  - The second criterion used (the first is TODO: complete
+	 */
+
 	CellDoubleHeap(int ind_var, int critpr=50, CellHeap_2::criterion crit_2=CellHeap_2::UB);
 
 	/** Flush the buffer.
@@ -40,13 +57,17 @@ public:
 	/** set the local value of the lower uper bound (loup) */
 	void setLoup(double loup);
 
-	/** update the cost and sort all the heap
-	 * complexity: o(nb_cells*log(nb_cells))
+	/**
+	 * Update the cost and sort all the heaps
+	 *
+	 * Complexity: o(nb_cells*log(nb_cells))
 	 */
 	void sort();
 
-	/** Return the minimum (the criterion for the first cell)
-	 *  complexity: o(1)
+	/**
+	 * Return the minimum (the criterion for the first cell)
+	 *
+	 * Complexity: o(1)
 	 */
 	inline double minimum() const {
 		return heap1->minimum();
@@ -58,8 +79,10 @@ public:
 	 */
 	void contract_heap(double loup);
 
+	/**
+	 * Delete this
+	 */
 	virtual ~CellDoubleHeap();
-
 
 	/** the criterion of the second heap */
 	const CellHeap_2::criterion crit;
@@ -71,11 +94,8 @@ private:
 	/** the second heap */
 	CellHeap_2 *heap2;
 
-
-	/** Probability to choose the second criterion in node selection in percentage
-	 * integer in [0,100] default value 50
-	 * the value 0 corresponds to use a single criterion for node selection (the classical one : minimizing the lower bound of the estimate of the objective)
-	 * the value 100 corresponds to use a single criterion for node selection (the second one used in buffer2) */
+	/** Probability to choose the second
+	 * (see details in the constructor) */
 	const int critpr;
 
 	/** Index of the criterion variable. */
@@ -84,19 +104,17 @@ private:
 	/** Current selected buffer. */
 	mutable int indbuf;
 
-
 	/** use in the contract_heap function by recursivity */
-	void contract_tmp(double new_loup, HeapNode * node, CellHeap_2 & heap);
+	void contract_tmp(double new_loup, CellHeapNode * node, CellHeap_2 & heap);
 
-	/** erase a node inthe second heap */
-	void eraseOtherHeaps( HeapNode * node);
+	/** erase a node in the second heap */
+	void erase_other_heaps( CellHeapNode * node);
 
 	/** delete the heap without the HEapElt */
-	void deleteOtherHeaps( HeapNode * node);
+	void delete_other_heaps( CellHeapNode * node);
 
 	friend std::ostream& operator<<(std::ostream& os, const CellDoubleHeap& h);
 };
-
 
 
 /** Display the buffer */

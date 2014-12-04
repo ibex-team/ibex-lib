@@ -104,7 +104,7 @@ void CellHeap_2::contract_heap(double new_loup) {
 }
 
 
-void CellHeap_2::contract_tmp(double new_loup, HeapNode * node, CellHeap_2 & heap) {
+void CellHeap_2::contract_tmp(double new_loup, CellHeapNode * node, CellHeap_2 & heap) {
 
 	switch (crit)	{
 	case C3 :  case C5 :  case C7 : {
@@ -146,7 +146,7 @@ void CellHeap_2::sort() {
 }
 
 
-void CellHeap_2::sort_tmp(HeapNode * node, CellHeap_2 & heap) {
+void CellHeap_2::sort_tmp(CellHeapNode * node, CellHeap_2 & heap) {
 
 	switch (crit)	{
 	case C3 :  case C5 :  case C7 :
@@ -168,14 +168,14 @@ void CellHeap_2::sort_tmp(HeapNode * node, CellHeap_2 & heap) {
 
 
 void CellHeap_2::push(Cell* cell) {
-	push(new HeapElt(cell,cost(*cell)));
+	push(new CellHeapElt(cell,cost(*cell)));
 }
 
 
-void CellHeap_2::push(HeapElt* cell) {
+void CellHeap_2::push(CellHeapElt* cell) {
 
 	if (nb_cells==0) {
-		root = new HeapNode(cell,NULL);
+		root = new CellHeapNode(cell,NULL);
 		root->elt->indice[ind_crit] = 0;
 		nb_cells++;
 	} else {
@@ -186,7 +186,7 @@ void CellHeap_2::push(HeapElt* cell) {
 		while(aux>1) { aux /= 2; hauteur++;	}
 
 		// pt = pointeur sur l element courant
-		HeapNode * pt = root;
+		CellHeapNode * pt = root;
 		for (int pos=hauteur-1; pos>0; pos--) {
 			if ( nb_cells & (1 << pos)) {  // test the "pos"th bit of the integer nb_cells
 				//	   print *,  "DROITE"
@@ -195,7 +195,7 @@ void CellHeap_2::push(HeapElt* cell) {
 				pt = pt->left;
 			}
 		}
-		HeapNode * tmp= new HeapNode(cell,pt);
+		CellHeapNode * tmp= new CellHeapNode(cell,pt);
 		tmp->elt->indice[ind_crit] = nb_cells-1;
 		if (nb_cells%2==0)	{ pt->left =tmp; }
 		else 				{ pt->right=tmp; }
@@ -216,7 +216,7 @@ void CellHeap_2::push(HeapElt* cell) {
 	}
 }
 
-HeapNode * CellHeap_2::getNode(unsigned int i) const {
+CellHeapNode * CellHeap_2::get_node(unsigned int i) const {
 	assert(i<nb_cells);
 	assert(nb_cells>0);
 	// RECUPERATION DU DERNIER ELEMENT et suppression du noeud associe
@@ -226,7 +226,7 @@ HeapNode * CellHeap_2::getNode(unsigned int i) const {
 	while(aux>1) { aux /= 2; hauteur++; }
 	//std::cout << "hauteur de "<<i<<"  = " << hauteur<<std::endl;
 	// pt = pointeur sur l element courant
-	HeapNode * pt = root;
+	CellHeapNode * pt = root;
 	for (int pos=hauteur-1; pos>=0; pos--) {
 		if ( (i+1) & (1 << pos)) {  // test the "pos"th bit of the integer nb_cells
 			//std::cout << "Droit ";
@@ -242,12 +242,12 @@ HeapNode * CellHeap_2::getNode(unsigned int i) const {
 Cell * CellHeap_2::getCell(unsigned int i ) const {
 	assert(i<nb_cells);
 	assert(nb_cells>0);
-	return getNode(i)->elt->cell;
+	return get_node(i)->elt->cell;
 }
 
 Cell* CellHeap_2::pop() {
 	assert(nb_cells>0);
-	HeapElt* tmp =pop_elt();
+	CellHeapElt* tmp =pop_elt();
 	Cell * c = tmp->cell;
 	tmp->cell = NULL;
 	delete tmp;
@@ -255,33 +255,33 @@ Cell* CellHeap_2::pop() {
 	return c;
 }
 
-HeapElt* CellHeap_2::pop_elt() {
+CellHeapElt* CellHeap_2::pop_elt() {
 	assert(nb_cells>0);
-	HeapElt* c_return = root->elt;
-	eraseNode(0);
+	CellHeapElt* c_return = root->elt;
+	erase_node(0);
 	return c_return;
 }
 
 // erase a node and update the order
-void CellHeap_2::eraseNode(unsigned int i) {
+void CellHeap_2::erase_node(unsigned int i) {
 	assert(i<nb_cells);
 	assert(nb_cells>0);
 
-	updateOrder(eraseNode_noUpdate(i));
+	update_order(erase_node_no_update(i));
 }
 
 // erase a node and update the order
-HeapNode * CellHeap_2::eraseNode_noUpdate(unsigned int i) {
+CellHeapNode * CellHeap_2::erase_node_no_update(unsigned int i) {
 	assert(i<nb_cells);
 	assert(nb_cells>0);
-	HeapNode * pt_root=NULL;
+	CellHeapNode * pt_root=NULL;
 	if (nb_cells==1) {
 		root->elt=NULL;
 		delete root;
 		root = NULL;
 	} else if (i==(nb_cells-1)) {
 		// RECUPERATION DU DERNIER ELEMENT et suppression du noeud associe sans detruire le HeapElt
-		HeapNode * pt= getNode(nb_cells-1);
+		CellHeapNode * pt= get_node(nb_cells-1);
 		if (nb_cells%2==0)	{ pt->father->left =NULL; }
 		else 				{ pt->father->right=NULL; }
 		pt->elt = NULL;
@@ -289,9 +289,9 @@ HeapNode * CellHeap_2::eraseNode_noUpdate(unsigned int i) {
 		pt = NULL;
 	} else {
 		// RECUPERATION DU DERNIER ELEMENT et suppression du noeud associe sans detruire le HeapElt
-		HeapNode * pt= getNode(nb_cells-1);
-		pt_root= getNode(i);
-		HeapElt* cell = pt->elt;
+		CellHeapNode * pt= get_node(nb_cells-1);
+		pt_root= get_node(i);
+		CellHeapElt* cell = pt->elt;
 //std::cout << cell->indice[ind_crit] << std::endl;
 		if (nb_cells%2==0)	{ pt->father->left =NULL; }
 		else 				{ pt->father->right=NULL; }
@@ -299,7 +299,7 @@ HeapNode * CellHeap_2::eraseNode_noUpdate(unsigned int i) {
 		delete pt;
 		pt = NULL;
 		// CEL pointe vers l element que l on remet à la place du noeud supprime
-		pt_root= getNode(i);
+		pt_root= get_node(i);
 		pt_root->elt = cell;
 		pt_root->elt->indice[ind_crit] = i;
 	}
@@ -309,7 +309,7 @@ HeapNode * CellHeap_2::eraseNode_noUpdate(unsigned int i) {
 
 
 
-void CellHeap_2::updateOrder(HeapNode *pt) {
+void CellHeap_2::update_order(CellHeapNode *pt) {
 	// PERMUTATION pour maintenir l'ordre dans le tas en descendant
 	if (pt) {
 		bool b=true;
@@ -352,30 +352,30 @@ void CellHeap_2::updateOrder(HeapNode *pt) {
 //////////////////////////////////////////////////////////////////////////////////////
 //HeapNode::HeapNode(): elt(NULL), right(NULL), left(NULL), father(NULL) { }
 
-HeapNode::HeapNode(HeapElt* elt, HeapNode * father): elt(elt), right(NULL), left(NULL), father(father) { }
+CellHeapNode::CellHeapNode(CellHeapElt* elt, CellHeapNode * father): elt(elt), right(NULL), left(NULL), father(father) { }
 
-HeapNode::~HeapNode() {
+CellHeapNode::~CellHeapNode() {
 	// attention le delete supprime tous les noeuds d'en dessous
 	if (elt) 	delete elt;
 	if (right) 	delete right;
 	if (left)  	delete left;
 }
 
-bool HeapNode::isSup(HeapNode *n, int ind_crit) const {
+bool CellHeapNode::isSup(CellHeapNode *n, int ind_crit) const {
 	return elt->isSup(n->elt->crit[ind_crit],ind_crit);
 }
 
-bool HeapNode::isSup(double d, int ind_crit) const {
+bool CellHeapNode::isSup(double d, int ind_crit) const {
 	return elt->isSup(d,ind_crit);
 }
 
-void HeapNode::switchElt(HeapNode *pt, int ind_crit) {
+void CellHeapNode::switchElt(CellHeapNode *pt, int ind_crit) {
 	//ne pas oublier la permutation des indices
 	unsigned int ind_tmp = elt->indice[ind_crit];
 	elt->indice[ind_crit] = pt->elt->indice[ind_crit];
 	pt->elt->indice[ind_crit] = ind_tmp;
 
-	HeapElt * elt_tmp = elt;
+	CellHeapElt * elt_tmp = elt;
 	elt = pt->elt;
 	pt->elt = elt_tmp;
 
@@ -383,18 +383,18 @@ void HeapNode::switchElt(HeapNode *pt, int ind_crit) {
 
 //////////////////////////////////////////////////////////////////////////////////////
 /** create an node with a cell and its criterion */
-HeapElt::HeapElt(int nb_crit,Cell* cell, double *crit_in) : cell(cell), crit(new double[nb_crit]), indice(new unsigned int[nb_crit]){
+CellHeapElt::CellHeapElt(int nb_crit,Cell* cell, double *crit_in) : cell(cell), crit(new double[nb_crit]), indice(new unsigned int[nb_crit]){
 	for (int i=0;i<nb_crit;i++) {
 		crit[i] = crit_in[i];
 		indice[i] = 0;
 	}
 }
 
-HeapElt::HeapElt(Cell* cell, double crit_1) : cell(cell), crit(new double[1]), indice(new unsigned int[1]){
+CellHeapElt::CellHeapElt(Cell* cell, double crit_1) : cell(cell), crit(new double[1]), indice(new unsigned int[1]){
 		crit[0] = crit_1;
 		indice[0] = 0;
 }
-HeapElt::HeapElt(Cell* cell, double crit_1, double crit_2) : cell(cell), crit(new double[2]), indice(new unsigned int[2]){
+CellHeapElt::CellHeapElt(Cell* cell, double crit_1, double crit_2) : cell(cell), crit(new double[2]), indice(new unsigned int[2]){
 		crit[0] = crit_1;
 		crit[1] = crit_2;
 		indice[0] = 0;
@@ -403,25 +403,25 @@ HeapElt::HeapElt(Cell* cell, double crit_1, double crit_2) : cell(cell), crit(ne
 
 
 /** Delete the node and all its sons */
-HeapElt::~HeapElt() {
+CellHeapElt::~CellHeapElt() {
 	if (cell) 	delete cell;
 	delete [] crit;
 	delete [] indice;
 }
 
-bool HeapElt::isSup(double d, int ind_crit) const {
+bool CellHeapElt::isSup(double d, int ind_crit) const {
 	return (crit[ind_crit] >= d);
 }
 
 
 
 //////////////////////////////////////////////////////////////////////////////////////
-std::ostream& operator<<(std::ostream& os, const HeapElt& node) {
+std::ostream& operator<<(std::ostream& os, const CellHeapElt& node) {
 	os << "n°"<<node.indice[0]<< *(node.cell);
 	return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const HeapNode& node) {
+std::ostream& operator<<(std::ostream& os, const CellHeapNode& node) {
 	os  <<*(node.elt) << " ";
 	if (node.left)  os <<  *(node.left);
 	if (node.right) os <<  *(node.right);
