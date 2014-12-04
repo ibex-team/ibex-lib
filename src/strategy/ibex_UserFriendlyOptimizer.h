@@ -10,6 +10,8 @@
 #ifndef __IBEX_USER_FRIENDLY_OPTIMIZER_H__
 #define __IBEX_USER_FRIENDLY_OPTIMIZER_H__
 
+#include "ibex_Optimizer.h"
+
 namespace ibex {
 
 /**

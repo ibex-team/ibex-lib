@@ -8,11 +8,23 @@
 //============================================================================
 
 #include "ibex_UserFriendlyOptimizer.h"
-
-#include "ibex_Optimizer.h"
 #include "ibex_DefaultStrategy.cpp_"
+#include "ibex_CtcAcid.h"
+#include "ibex_Ctc3BCid.h"
+#include "ibex_CtcPolytopeHull.h"
+#include "ibex_CtcCompo.h"
+#include "ibex_CtcFixPoint.h"
+#include "ibex_LinearRelaxXTaylor.h"
+#include "ibex_LinearRelaxCombo.h"
+#include "ibex_SmearFunction.h"
+#include "ibex_LargestFirst.h"
+
+#include <sstream>
+#include <vector>
 
 using namespace std;
+
+const double default_relax_ratio = 0.2;
 
 namespace ibex {
 
@@ -43,7 +55,7 @@ double _2dbl(const char* argname, const char* arg) {
 }
 
 ExtendedSystem& get_ext_sys(char* args[10]) {
-	if ((*memory())->sys) return (ExtendedSystem&) *((*memory())->sys); // already built and recorded
+	if (!(*memory())->sys.empty()) return (ExtendedSystem&) *((*memory())->sys.back()); // already built and recorded
 	else return rec(new ExtendedSystem(rec(new System(args[FILENAME])),_2dbl("equation thickness",args[EQ_EPS])));
 }
 
@@ -58,30 +70,30 @@ Ctc& get_ctc(char* args[10]) {
 	string filtering = args[CTC];
 
 	// the first contractor called
-	CtcHC4& hc4=rec(new CtcHC4(ext_sys,0.01,true));
+	Ctc& hc4=rec(new CtcHC4(ext_sys,0.01,true));
 
 	if (filtering=="hc4") {
 		ctc=&hc4;
 	} else {
 
 		// hc4 inside acid and 3bcid : incremental propagation beginning with the shaved variable
-		CtcHC4& hc44cid=rec(new CtcHC4(ext_sys.ctrs,0.1,true));
+		Ctc& hc44cid=rec(new CtcHC4(ext_sys.ctrs,0.1,true));
 
 		if (filtering=="acidhc4") {
 			// The ACID contractor (component of the contractor  when filtering == "acidhc4")
-			CtcAcid& acidhc4=rec(new CtcAcid(ext_sys,hc44cid,true));
+			Ctc& acidhc4=rec(new CtcAcid(ext_sys,hc44cid,true));
 
 			// hc4 followed by acidhc4 : the actual contractor used when filtering == "acidhc4"
-			CtcCompo& hc4acidhc4=rec(new CtcCompo(hc4, acidhc4));
+			Ctc& hc4acidhc4=rec(new CtcCompo(hc4, acidhc4));
 
 			ctc=&hc4acidhc4;
 		}
 
 		else if (filtering =="3bcidhc4") {
 			// The 3BCID contractor on all variables (component of the contractor when filtering == "3bcidhc4")
-			Ctc3BCid& c3bcidhc4=rec(new Ctc3BCid(hc44cid));
+			Ctc& c3bcidhc4=rec(new Ctc3BCid(hc44cid));
 			// hc4 followed by 3bcidhc4 : the actual contractor used when filtering == "3bcidhc4"
-			CtcCompo& hc43bcidhc4=rec(new CtcCompo(hc4, c3bcidhc4));
+			Ctc& hc43bcidhc4=rec(new CtcCompo(hc4, c3bcidhc4));
 
 			ctc=&hc43bcidhc4;
 		}
@@ -115,21 +127,21 @@ Ctc& get_ctc(char* args[10]) {
 	if (linearrelaxation=="compo" || linearrelaxation=="art"|| linearrelaxation=="xn") {
 
 		//cxn = new CtcLinearRelaxation (*lr, hc44xn);
-		CtcPolytopeHull& cxn_poly = rec(new CtcPolytopeHull(*lr, CtcPolytopeHull::ALL_BOX));
+		Ctc& cxn_poly = rec(new CtcPolytopeHull(*lr, CtcPolytopeHull::ALL_BOX));
 
 		// hc4 inside xnewton loop
-		CtcHC4& hc44xn = rec(new CtcHC4(ext_sys.ctrs,0.01,false));
+		Ctc& hc44xn = rec(new CtcHC4(ext_sys.ctrs,0.01,false));
 
-		CtcCompo& cxn_compo = rec(new CtcCompo(cxn_poly, hc44xn));
+		Ctc& cxn_compo = rec(new CtcCompo(cxn_poly, hc44xn));
 
-		CtcFixPoint& cxn = rec(new CtcFixPoint (*cxn_compo, default_relax_ratio));
+		Ctc& cxn = rec(new CtcFixPoint (cxn_compo, default_relax_ratio));
 
 		//  the actual contractor  ctc + linear relaxation
-		return rec(new CtcCompo  (*ctc, *cxn));
+		return rec(new CtcCompo  (*ctc, cxn));
 
 	}
 	else
-		return ctc;
+		return *ctc;
 
 }
 
@@ -155,7 +167,7 @@ Bsc& get_bsc(char* args[10]) {
 	else
 		ibex_error("UserFriendlyOptimizer unknown bisection mode");
 
-	return bsc;
+	return *bsc;
 }
 
 } // end anonymous namespace
