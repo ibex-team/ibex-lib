@@ -1,5 +1,5 @@
 #include "TestCtcPixelMap.h"
-
+#include "utils.h"
 
 namespace ibex {
 
@@ -45,12 +45,12 @@ void TestCtcPixelMap::test3d_allReal(){
 
     ctc.contract(v1);
 
-    TEST_ASSERT_DELTA(-1,v1[0].lb(),std::numeric_limits<double>::epsilon());
-    TEST_ASSERT_DELTA(-0.9,v1[0].ub() ,std::numeric_limits<double>::epsilon());
-    TEST_ASSERT_DELTA(1.5,v1[1].lb(),std::numeric_limits<double>::epsilon());
-    TEST_ASSERT_DELTA(1.6,v1[1].ub(),std::numeric_limits<double>::epsilon());
-    TEST_ASSERT_DELTA(0.4,v1[2].lb(),std::numeric_limits<double>::epsilon());
-    TEST_ASSERT_DELTA(0.45,v1[2].ub(),std::numeric_limits<double>::epsilon());
+    TEST_ASSERT_DELTA(-1,v1[0].lb(),ERROR);
+    TEST_ASSERT_DELTA(-0.9,v1[0].ub() ,ERROR);
+    TEST_ASSERT_DELTA(1.5,v1[1].lb(),ERROR);
+    TEST_ASSERT_DELTA(1.6,v1[1].ub(),ERROR);
+    TEST_ASSERT_DELTA(0.4,v1[2].lb(),ERROR);
+    TEST_ASSERT_DELTA(0.45,v1[2].ub(),ERROR);
 }
 
 void TestCtcPixelMap::test3d_fullImage(){
@@ -62,12 +62,12 @@ void TestCtcPixelMap::test3d_fullImage(){
     IntervalVector v1(3,v1_);
 
     ctc.contract(v1);
-    TEST_ASSERT_DELTA(-1,v1[0].lb(),std::numeric_limits<double>::epsilon());
-    TEST_ASSERT_DELTA(-0.9,v1[0].ub() ,std::numeric_limits<double>::epsilon());
-    TEST_ASSERT_DELTA(1.5,v1[1].lb(),std::numeric_limits<double>::epsilon());
-    TEST_ASSERT_DELTA(1.6,v1[1].ub(),std::numeric_limits<double>::epsilon());
-    TEST_ASSERT_DELTA(0.4,v1[2].lb(),std::numeric_limits<double>::epsilon());
-    TEST_ASSERT_DELTA(0.45,v1[2].ub(),std::numeric_limits<double>::epsilon());
+    TEST_ASSERT_DELTA(-1,v1[0].lb(),ERROR);
+    TEST_ASSERT_DELTA(-0.9,v1[0].ub() ,ERROR);
+    TEST_ASSERT_DELTA(1.5,v1[1].lb(),ERROR);
+    TEST_ASSERT_DELTA(1.6,v1[1].ub(),ERROR);
+    TEST_ASSERT_DELTA(0.4,v1[2].lb(),ERROR);
+    TEST_ASSERT_DELTA(0.45,v1[2].ub(),ERROR);
 }
 
 void TestCtcPixelMap::test3d_corner(){
@@ -79,12 +79,12 @@ void TestCtcPixelMap::test3d_corner(){
     IntervalVector v1(3,v1_);
 
     ctc.contract(v1);
-    TEST_ASSERT_DELTA(-1,v1[0].lb(),std::numeric_limits<double>::epsilon());
-    TEST_ASSERT_DELTA(-0.95,v1[0].ub() ,std::numeric_limits<double>::epsilon());
-    TEST_ASSERT_DELTA(1.5,v1[1].lb(),std::numeric_limits<double>::epsilon());
-    TEST_ASSERT_DELTA(1.55,v1[1].ub(),std::numeric_limits<double>::epsilon());
-    TEST_ASSERT_DELTA(0.4,v1[2].lb(),std::numeric_limits<double>::epsilon());
-    TEST_ASSERT_DELTA(0.45,v1[2].ub(),std::numeric_limits<double>::epsilon());
+    TEST_ASSERT_DELTA(-1,v1[0].lb(),ERROR);
+    TEST_ASSERT_DELTA(-0.95,v1[0].ub() ,ERROR);
+    TEST_ASSERT_DELTA(1.5,v1[1].lb(),ERROR);
+    TEST_ASSERT_DELTA(1.55,v1[1].ub(),ERROR);
+    TEST_ASSERT_DELTA(0.4,v1[2].lb(),ERROR);
+    TEST_ASSERT_DELTA(0.45,v1[2].ub(),ERROR);
 
 }
 
@@ -134,10 +134,10 @@ void TestCtcPixelMap::test2d_allReal(){
     IntervalVector v1(2,Interval::ALL_REALS);
 
     ctc.contract(v1);
-    TEST_ASSERT_DELTA(-1,v1[0].lb(),std::numeric_limits<double>::epsilon());
-    TEST_ASSERT_DELTA(-0.9,v1[0].ub() ,std::numeric_limits<double>::epsilon());
-    TEST_ASSERT_DELTA(1.5,v1[1].lb(),std::numeric_limits<double>::epsilon());
-    TEST_ASSERT_DELTA(1.6,v1[1].ub(),std::numeric_limits<double>::epsilon());
+    TEST_ASSERT_DELTA(-1,v1[0].lb(),ERROR);
+    TEST_ASSERT_DELTA(-0.9,v1[0].ub() ,ERROR);
+    TEST_ASSERT_DELTA(1.5,v1[1].lb(),ERROR);
+    TEST_ASSERT_DELTA(1.6,v1[1].ub(),ERROR);
 }
 
 void TestCtcPixelMap::test2d_fullImage(){
@@ -149,10 +149,10 @@ void TestCtcPixelMap::test2d_fullImage(){
     IntervalVector v1(2,v1_);
 
     ctc.contract(v1);
-    TEST_ASSERT_DELTA(-1,v1[0].lb(),std::numeric_limits<double>::epsilon());
-    TEST_ASSERT_DELTA(-0.9,v1[0].ub() ,std::numeric_limits<double>::epsilon());
-    TEST_ASSERT_DELTA(1.5,v1[1].lb(),std::numeric_limits<double>::epsilon());
-    TEST_ASSERT_DELTA(1.6,v1[1].ub(),std::numeric_limits<double>::epsilon());
+    TEST_ASSERT_DELTA(-1,v1[0].lb(),ERROR);
+    TEST_ASSERT_DELTA(-0.9,v1[0].ub() ,ERROR);
+    TEST_ASSERT_DELTA(1.5,v1[1].lb(),ERROR);
+    TEST_ASSERT_DELTA(1.6,v1[1].ub(),ERROR);
 }
 
 void TestCtcPixelMap::test2d_corner(){
@@ -164,10 +164,10 @@ void TestCtcPixelMap::test2d_corner(){
     IntervalVector v1(2,v1_);
 
     ctc.contract(v1);
-    TEST_ASSERT_DELTA(-1,v1[0].lb(),std::numeric_limits<double>::epsilon());
-    TEST_ASSERT_DELTA(-0.95,v1[0].ub() ,std::numeric_limits<double>::epsilon());
-    TEST_ASSERT_DELTA(1.5,v1[1].lb(),std::numeric_limits<double>::epsilon());
-    TEST_ASSERT_DELTA(1.55,v1[1].ub(),std::numeric_limits<double>::epsilon());
+    TEST_ASSERT_DELTA(-1,v1[0].lb(),ERROR);
+    TEST_ASSERT_DELTA(-0.95,v1[0].ub() ,ERROR);
+    TEST_ASSERT_DELTA(1.5,v1[1].lb(),ERROR);
+    TEST_ASSERT_DELTA(1.55,v1[1].ub(),ERROR);
 }
 
 

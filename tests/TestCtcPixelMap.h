@@ -1,10 +1,10 @@
 #include "ibex_CtcPixelMap.h"
 #include "cpptest.h"
-
+#include "utils.h"
 
 namespace ibex {
 
-class TestCtcPixelMap : public Test::Suite {
+class TestCtcPixelMap : public TestIbex {
 
 public:
     TestCtcPixelMap(){
