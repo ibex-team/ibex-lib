@@ -11,6 +11,7 @@
 #include "ibex_SetLeaf.h"
 #include "ibex_SetBisect.h"
 #include "ibex_CellHeap.h"
+#include "ibex_CellStack.h"
 
 using namespace std;
 
@@ -69,7 +70,7 @@ class NodeAndDist : public Backtrackable {
 public:
 	NodeAndDist() : node(NULL), dist(-1) { }
 
-	NodeAndDist(SetNode* node) : node(node), dist(-1) { }
+	NodeAndDist(SetNode* _node) : node(_node), dist(-1) { }
 
 	/**
 	 * calculate the square of the distance to pt
@@ -112,39 +113,52 @@ public:
 double SetInterval::dist(const Vector& pt, bool inside) const {
 	CellHeapDist heap;
 
+	int count=0; // for stats
+
 	Cell* root_cell =new Cell(bounding_box);
 	root_cell->add<NodeAndDist>();
 	root_cell->get<NodeAndDist>().node = root;
 	root_cell->get<NodeAndDist>().set_dist(bounding_box,pt);
+	count++;
 
 	heap.push(root_cell);
 
 	double lb = POS_INFINITY;
 
 	while (!heap.empty()) {
+
 		Cell* c = heap.pop();
+
 		SetNode* node = c->get<NodeAndDist>().node;
-		if (node->status==__IBEX_OUT__) {
-			double d=root_cell->get<NodeAndDist>().dist;
+
+		assert(node!=NULL);
+
+		if (node->status==(inside? __IBEX_IN__ : __IBEX_OUT__)) {
+			double d=c->get<NodeAndDist>().dist;
 			if (d<lb) {
 				lb=d;
 				heap.contract_heap(lb);
 			}
 		} else if (!node->is_leaf() && possibly_contains_out(node->status)) {
-			SetBisect b= *((SetBisect*) node);
+			SetBisect& b= *((SetBisect*) node);
+
 			IntervalVector left=b.left_box(c->box);
 			IntervalVector right=b.right_box(c->box);
 
 			std::pair<Cell*,Cell*> p=c->bisect(left,right);
 
 			p.first->get<NodeAndDist>().set_dist(left,pt);
+			count++;
 			if (p.first->get<NodeAndDist>().dist<=lb) heap.push(p.first);
 
 			p.second->get<NodeAndDist>().set_dist(right,pt);
+			count++;
 			if (p.second->get<NodeAndDist>().dist<=lb) heap.push(p.second);
 		}
+		delete c;
 	}
-	return lb;
+	cout << " number of times a distance to a box has been computed: " << count << endl;
+	return ::sqrt(lb);
 }
 
 SetInterval::~SetInterval() {

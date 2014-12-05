@@ -78,6 +78,9 @@ public:
 	double pt;
 	SetNode* left;
 	SetNode* right;
+
+private:
+	SetBisect(const SetBisect&); // forbidden
 };
 
 } // namespace ibex

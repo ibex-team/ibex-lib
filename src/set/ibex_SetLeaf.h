@@ -63,6 +63,9 @@ public:
 	/** \see SetNode */
 	virtual void unset_in_tmp();
 
+private:
+	SetLeaf(const SetLeaf&); // forbidden
+
 };
 
 } // namespace ibex
