@@ -1,4 +1,4 @@
-SRCS=$(wildcard *.cpp)
+SRCS=$(wildcard Test*.cpp) ExFunction.cpp Ponts30.cpp utils.cpp
 HEADERS=$(SRCS:.cpp=.h)
 OBJS=$(SRCS:.cpp=.o)
 TARGET=utest
@@ -12,7 +12,7 @@ else
 CXXFLAGS := $(CXXFLAGS) -O3 -DNDEBUG -Wno-unused-variable -frounding-math 
 endif
 
-$(TARGET):	$(OBJS) 
+$(TARGET):	$(OBJS) 	
 	$(CXX) -o $(TARGET) $(CXXFLAGS) $(OBJS) $(LIBS)
 
 
