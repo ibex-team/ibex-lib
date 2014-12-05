@@ -69,7 +69,7 @@ public:
 
 	IntervalVector right_box(const IntervalVector& nodebox) const;
 
-protected:
+//protected:
 	friend class SetNode;
 
 	SetNode* try_merge();

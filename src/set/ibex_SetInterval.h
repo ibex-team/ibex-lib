@@ -83,6 +83,8 @@ public:
 
 	void visit_leaves(SetNode::leaf_func func) const;
 
+	double dist(const Vector& pt, bool inside) const;
+
 protected:
 	friend std::ostream& operator<<(std::ostream& os, const SetInterval& set);
 
