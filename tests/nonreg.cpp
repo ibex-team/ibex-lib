@@ -34,6 +34,17 @@ double _2dbl(const char* argname, const char* arg) {
 	return val;
 }
 
+int _2int(const char* argname, const char* arg) {
+	char* endptr;
+	int val = strtol(arg,&endptr,10);
+	if (endptr!=arg+strlen(arg)*sizeof(char)) {
+		stringstream s;
+		s << "UserFriendlyOptimizer: " << argname << " must be an integer";
+		ibex_error(s.str().c_str());
+	}
+	return val;
+}
+
 int main () {
 
 	ifstream data;
@@ -65,6 +76,8 @@ int main () {
 		double ub=_2dbl("objective ub",word.c_str());
 		data >> word;
 		double time=_2dbl("time",word.c_str());
+		data >> word;
+		int nb_cells=_2int("nb cells", word.c_str());
 
 		if (time > TIME_LIMIT) { // too long... skip this bench
 			for (int i=0; i<6; i++) free((char*) args[i]);
@@ -83,10 +96,11 @@ int main () {
 		case Optimizer::TIME_OUT :           cerr << "FAILED: timeout"; break;
 		case Optimizer::SUCCESS : {
 
-			if (o.loup < lb)            {  cerr << "FAILED: upper bound (loup) is wrong"; }
-			else if (o.uplo > ub)       {  cerr << "FAILED: lower bound (uplo) is wrong"; }
-			else if (o.time > 1.1*time) {  cerr << "FAILED: time exceeds by more than 10% the reference time"; }
-			else                        {  ok=true; cout << "SUCCESS"; }
+			if (o.loup < lb)                   {  cerr << "FAILED: upper bound (loup) is wrong"; }
+			else if (o.uplo > ub)              {  cerr << "FAILED: lower bound (uplo) is wrong"; }
+			else if (o.time > 1.1*time)        {  cerr << "FAILED: time exceeds by more than 10% the reference time"; }
+			else if (o.nb_cells> 1.1*nb_cells) {  cerr << "FAILED: number of cells exceeds by more than 10% the reference value"; }
+			else                               {  ok=true; cout << "SUCCESS"; }
 		}
 		}
 
