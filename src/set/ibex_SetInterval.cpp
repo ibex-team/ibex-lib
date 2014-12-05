@@ -139,7 +139,8 @@ double SetInterval::dist(const Vector& pt, bool inside) const {
 				lb=d;
 				heap.contract_heap(lb);
 			}
-		} else if (!node->is_leaf() && possibly_contains_out(node->status)) {
+		} else if (!node->is_leaf() && (    (inside && possibly_contains_in(node->status))
+		                                || (!inside && possibly_contains_out(node->status)))) {
 			SetBisect& b= *((SetBisect*) node);
 
 			IntervalVector left=b.left_box(c->box);
