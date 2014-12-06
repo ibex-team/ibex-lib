@@ -1,4 +1,4 @@
-SRCS=$(wildcard Test*.cpp) ExFunction.cpp Ponts30.cpp utils.cpp
+SRCS=$(wildcard Test*.cpp) ExFunction.cpp Ponts30.cpp utils.cpp utest.cpp
 HEADERS=$(SRCS:.cpp=.h)
 OBJS=$(SRCS:.cpp=.o)
 TARGET=utest
