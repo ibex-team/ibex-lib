@@ -24,7 +24,9 @@ LinearRelax::LinearRelax(int nb_ctr, int nb_var, int goal_var) : _nb_ctr(nb_ctr)
 
 }
 
-LinearRelax::~LinearRelax() { }
+LinearRelax::~LinearRelax() {
+
+}
 
 bool LinearRelax::isInner(const IntervalVector & box, const System& sys, int j) {
 	Interval eval=sys.ctrs[j].f.eval(box);

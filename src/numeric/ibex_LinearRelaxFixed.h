@@ -28,7 +28,14 @@ public:
 	/**
 	 * \brief Add the inequalities in the solver
 	 */
-	virtual int linearization(const IntervalVector& box, LinearSolver& lp_solver);
+	int linearization(const IntervalVector& box, LinearSolver& lp_solver);
+
+	/**
+	 * \brief Generation of a linear approximation of the inner region
+	 *
+	 */
+	int inlinearization(const IntervalVector& box, LinearSolver& lp_solver);
+
 
 	/** The matrix */
 	Matrix A;

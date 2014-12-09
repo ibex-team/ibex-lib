@@ -61,12 +61,6 @@ public:
 	 */
 	~LinearRelaxXTaylor();
 
-	/**
-	 * \brief The vector of corner selection in linearization
-	 *
-	 * Can be either X_INF, X_SUP, RANDOM, or RANDOM_INV.
-	 */
-	std::vector<corner_point>& cpoints;
 
 	/**
 	 * \brief Generation of the linearized system
@@ -76,8 +70,21 @@ public:
 	 */
 	int linearization(const IntervalVector& box, LinearSolver& lp_solver);
 
+	/**
+	 * \brief Generation of a linear approximation of the inner region
+	 *
+	 */
+	int inlinearization(const IntervalVector& box, LinearSolver& lp_solver);
+
 
 private:
+
+	/**
+	 * \brief The vector of corner selection in linearization
+	 *
+	 * Can be either X_INF, X_SUP, RANDOM, or RANDOM_INV.
+	 */
+	std::vector<corner_point>& cpoints;
 
 	/**
 	 * \brief The system

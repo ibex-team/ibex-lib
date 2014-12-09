@@ -111,8 +111,6 @@ LinearSolver::Status_Sol LinearSolver::run_simplex(const IntervalVector& box, Li
 	}
 	catch (LPException&) {
 		stat = LinearSolver::UNKNOWN;
-		std::cout<<"erroorr"<<std::endl;
-
 		// Reset the objective of the LP solver
 		setVarObj(var, 0.0);
 	}

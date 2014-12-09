@@ -38,54 +38,13 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 
 	try {
 		mylp->cleanConst();
-
-		//IntervalVector ext_box(box.size()+1);
-		//write_ext_box(box, ext_box);
-		//ext_box[ext_sys.goal_var()] = opt;
-
-		// Update the bounds the variables
-		//mylp->initBoundVar(ext_box);
 		mylp->initBoundVar(box);
 
 		//returns the number of constraints in the linearized system
-		//int cont = lr->linearization(ext_box, *mylp);
-		int cont = lr->linearization(box, *mylp);
+		int cont = lr->inlinearization(box, *mylp);
+		if (cont <0) return false;
 		
-		// Linearization of the objective function by AF2
-		Affine2 af2;
-		try {
-			sys.goal->eval_affine2(box,af2);
-		} catch (EmptyBoxException&) {
-			return false;
-		}
-
-		if (af2.size() == sys.nb_var) { // if the affine2 form is valid
-			bool b_abort=false;
-			// convert the epsilon variables to the original box
-			double tmp=0;
-			for (int i =0;(!b_abort) &&(i <sys.nb_var); i++) {
-				tmp = box[i].rad();
-				if (tmp==0) { // sensible case to avoid rowconst[i]=NaN
-					if (af2.val(i+1)==0)
-						mylp->setVarObj(i, 0);
-					else {
-						return false; // sensible case to avoid
-					}
-				} else {
-					mylp->setVarObj(i, af2.val(i+1) / tmp);
-				}
-			}
-		}
-		else {
-			return false;
-		}
-
 		LinearSolver::Status_Sol stat = mylp->solve();
-
-
-		//  Je ne comprends pas pourquoi en mettant 0 à la place de lr->goal_var() ou ext_sys.goal_var()  , ca marche ??
-		//LinearSolver::Status_Sol stat = mylp->run_simplex(ext_box, LinearSolver::MINIMIZE,  ext_sys.goal_var(), opt, uplo);
-		//LinearSolver::Status_Sol stat = mylp->run_simplex(ext_box, LinearSolver::MINIMIZE,  0, opt,NEG_INFINITY);
 
 		//mylp->writeFile("coucou.lp");
 		//system("cat coucou.lp");
@@ -134,7 +93,6 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 	return false;
 
 }
-
 
 
 
@@ -235,7 +193,7 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 				}
 
 			//The contraints i is generated:
-			// c_i:  inf([g_i]([x]) + sup(dg_i/dx_1) * xl_1 + ... + sup(dg_i/dx_n) + xl_n  <= -eps_error
+			// c_i:  inf([g_i]([x])) + sup(dg_i/dx_1) * xl_1 + ... + sup(dg_i/dx_n) * xl_n  <= -eps_error
 			for (int j=0; j<n; j++) {
 
 				if (corner[j])
@@ -286,7 +244,7 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 	}
 	return false;
 }
-*/
 
+*/
 #endif //_IBEX_WITH_NOLP_
 } // end namespace ibex

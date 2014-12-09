@@ -24,6 +24,43 @@ LinearRelaxAffine2::~LinearRelaxAffine2() {
 }
 
 
+int LinearRelaxAffine2::inlinearization(const IntervalVector& box, LinearSolver& lp_solver) {
+	// TODO FIXME
+	/*
+	 *
+		// Linearization of the objective function by AF2
+		Affine2 af2;
+		try {
+			sys.goal->eval_affine2(box,af2);
+		} catch (EmptyBoxException&) {
+			return false;
+		}
+
+		if (af2.size() == sys.nb_var) { // if the affine2 form is valid
+			bool b_abort=false;
+			// convert the epsilon variables to the original box
+			double tmp=0;
+			for (int i =0;(!b_abort) &&(i <sys.nb_var); i++) {
+				tmp = box[i].rad();
+				if (tmp==0) { // sensible case to avoid rowconst[i]=NaN
+					if (af2.val(i+1)==0)
+						mylp->setVarObj(i, 0);
+					else {
+						return false; // sensible case to avoid
+					}
+				} else {
+					mylp->setVarObj(i, af2.val(i+1) / tmp);
+				}
+			}
+		}
+		else {
+			return false;
+		}
+	 */
+	return -1;
+}
+
+
 /*********generation of the linearized system*********/
 int LinearRelaxAffine2::linearization(const IntervalVector& box, LinearSolver& lp_solver) {
 
