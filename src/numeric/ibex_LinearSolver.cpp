@@ -70,18 +70,16 @@ double LinearSolver::getEpsilon() const {
 ///////////////////////////////////////////////////////////////////////////////////
 
 LinearSolver::Status_Sol LinearSolver::run_simplex(const IntervalVector& box, LinearSolver::Sense sense, int var, Interval& obj, double bound) {
-	assert(var<=nb_vars);
-
-	int nvar=nb_vars;
-	int nctr=nb_rows;
-	// the linear solver is always called in a minimization mode : in case of maximization of var , the opposite of var is minimized
-	if(sense==LinearSolver::MINIMIZE)
-		setVarObj(var, 1.0);
-	else
-		setVarObj(var, -1.0);
+	assert((0<=var)&&(var<=nb_vars));
 
 	LinearSolver::Status_Sol stat = LinearSolver::UNKNOWN;
+
 	try {
+		// the linear solver is always called in a minimization mode : in case of maximization of var , the opposite of var is minimized
+		if(sense==LinearSolver::MINIMIZE)
+			setVarObj(var, 1.0);
+		else
+			setVarObj(var, -1.0);
 		//	mylinearsolver->writeFile("coucou.lp");
 		//	system("cat coucou.lp");
 		stat = solve();
@@ -108,12 +106,16 @@ LinearSolver::Status_Sol LinearSolver::run_simplex(const IntervalVector& box, Li
 		default:
 			break;
 		}
+		// Reset the objective of the LP solver
+		setVarObj(var, 0.0);
 	}
 	catch (LPException&) {
 		stat = LinearSolver::UNKNOWN;
+		std::cout<<"erroorr"<<std::endl;
+
+		// Reset the objective of the LP solver
+		setVarObj(var, 0.0);
 	}
-	// Reset the objective of the LP solver
-	setVarObj(var, 0.0);
 
 	return stat;
 
@@ -1270,9 +1272,9 @@ LinearSolver::Status_Sol LinearSolver::solve() {
 	LinearSolver::Status_Sol res= UNKNOWN;
 
 	try{
-		myclp->primal();
+		myclp->dual();
 		//stat = myclp->status();
-		myclp->status();
+		//myclp->status();
 
     	     /** Status of problem:
     	         -1 - unknown e.g. before solve or if postSolve says not optimal
@@ -1327,7 +1329,8 @@ LinearSolver::Status_Sol LinearSolver::solve() {
 
 void LinearSolver::writeFile(const char* name) {
 	try {
-		myclp->writeBasis(name);
+		myclp->writeMps(name);
+		//myclp->writeBasis(name);
 	}
 	catch(CoinError& ) {
 		throw LPException();
