@@ -36,7 +36,7 @@ LinearRelaxXTaylor::LinearRelaxXTaylor(const System& sys1, std::vector<corner_po
 void LinearRelaxXTaylor::init_linear_coeffs() {
 
 	last_rnd = new int[sys.nb_var];
-	base_coin = new int[sys.nb_var];
+	base_coin = new bool[sys.nb_var];
 	linear = new bool*[sys.nb_ctr];
 	linear_ctr = new bool[sys.nb_ctr];
 

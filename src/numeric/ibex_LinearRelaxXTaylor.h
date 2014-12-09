@@ -108,7 +108,7 @@ private:
 	/* For implementing RANDOM_INV one needs to store the last random corners */
 	int* last_rnd;
 
-	int* base_coin;
+	bool* base_coin;
 
 	/** Indicates if the constraint is linear wrt to each variable */
 	bool** linear;

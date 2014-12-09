@@ -1270,9 +1270,9 @@ LinearSolver::Status_Sol LinearSolver::solve() {
 	LinearSolver::Status_Sol res= UNKNOWN;
 
 	try{
-		myclp->dual();
+		myclp->primal();
 		//stat = myclp->status();
-		//myclp->status();
+		myclp->status();
 
     	     /** Status of problem:
     	         -1 - unknown e.g. before solve or if postSolve says not optimal

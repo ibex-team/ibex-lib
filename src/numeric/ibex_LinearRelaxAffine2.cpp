@@ -25,38 +25,99 @@ LinearRelaxAffine2::~LinearRelaxAffine2() {
 
 
 int LinearRelaxAffine2::inlinearization(const IntervalVector& box, LinearSolver& lp_solver) {
-	// TODO FIXME
-	/*
-	 *
-		// Linearization of the objective function by AF2
-		Affine2 af2;
-		try {
-			sys.goal->eval_affine2(box,af2);
-		} catch (EmptyBoxException&) {
-			return false;
+	// TODO a verifier et finir
+	// Linearization of the objective function by AF2
+	Affine2 af2;
+	try {
+		sys.goal->eval_affine2(box,af2);
+	} catch (EmptyBoxException&) {
+		return false;
+	}
+
+	if (af2.size() == sys.nb_var) { // if the affine2 form is valid
+		// convert the epsilon variables to the original box
+		double tmp=0;
+		for (int i =0; i <sys.nb_var; i++) {
+			tmp = box[i].rad();
+			if (tmp==0) { // sensible case to avoid rowconst[i]=NaN
+				if (af2.val(i+1)==0)
+					lp_solver.setVarObj(i, 0);
+				else {
+					return -1; // sensible case to avoid
+				}
+			} else {
+				lp_solver.setVarObj(i, af2.val(i+1) / tmp);
+			}
 		}
+	}
+	else {
+		return false;
+	}
+
+
+	int cont=0;
+	Interval ev(0), center(0), err(0);
+	Vector rowconst(sys.nb_var);
+
+	// Create the linear relaxation of each constraint
+	for (int ctr = 0; ctr < sys.nb_ctr; ctr++) {
+		af2 = 0.0;
+		CmpOp op = sys.ctrs[ctr].op;
+		try {
+			ev = sys.ctrs[ctr].f.eval_affine2(box, af2);
+		} catch (EmptyBoxException&) {
+			af2.set_empty();
+		}
+		//std::cout <<ev<<":::"<< af2<<"  "<<af2.size()<<"  " <<sys.nb_var<< std::endl;
 
 		if (af2.size() == sys.nb_var) { // if the affine2 form is valid
 			bool b_abort=false;
 			// convert the epsilon variables to the original box
 			double tmp=0;
+			center =0;
+			err =0;
 			for (int i =0;(!b_abort) &&(i <sys.nb_var); i++) {
 				tmp = box[i].rad();
 				if (tmp==0) { // sensible case to avoid rowconst[i]=NaN
 					if (af2.val(i+1)==0)
-						mylp->setVarObj(i, 0);
+						rowconst[i]=0;
 					else {
-						return false; // sensible case to avoid
+						b_abort =true;
 					}
 				} else {
-					mylp->setVarObj(i, af2.val(i+1) / tmp);
+					rowconst[i] =af2.val(i+1) / tmp;
+					center += rowconst[i]*box[i].mid();
+					err += fabs(rowconst[i])*  pow(2,-50);
+				}
+			}
+			if (!b_abort) {
+				switch (op) {
+				case LEQ:
+				case LT: {
+					if (0.0 < ev.ub()) {
+						try {// TODO TO CHECK
+							lp_solver.addConstraint(rowconst, LEQ,	(-(af2.err()+err) - (af2.val(0)-center)).lb());
+							cont++;
+						} catch (LPException&) { }
+					}
+					break;
+				}
+				case GEQ:
+				case GT: {
+					if (ev.lb() < 0.0) {
+						try {// TODO TO CHECK
+							lp_solver.addConstraint(rowconst, GEQ,	((af2.err()+err) - (af2.val(0)-center)).ub());
+							cont++;
+						} catch (LPException&) { }
+					}
+					break;
+				}
 				}
 			}
 		}
-		else {
-			return false;
-		}
-	 */
+
+	}
+
 	return -1;
 }
 
