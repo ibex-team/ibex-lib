@@ -17,7 +17,7 @@ using namespace ibex;
 
 const int NB_TESTS = 24;
 
-const double TIME_LIMIT = 20;
+const double TIME_LIMIT = 100;
 const char* time_limit = "100";
 
 const char* sample_size = "1";
@@ -98,7 +98,7 @@ int main () {
 
 			if (o.loup < lb)                   {  cerr << "FAILED: upper bound (loup) is wrong"; }
 			else if (o.uplo > ub)              {  cerr << "FAILED: lower bound (uplo) is wrong"; }
-			else if (o.time > 1.1*time)        {  cerr << "FAILED: time (" << o.time << "s) exceeds by more than 10% the reference time"; }
+			else if (o.time > 1.5*time)        {  cerr << "FAILED: time (" << o.time << "s) exceeds by more than 50% the reference time"; }
 			else if (o.nb_cells> 1.1*nb_cells) {  cerr << "FAILED: number of cells (" << o.nb_cells << ") exceeds by more than 10% the reference value"; }
 			else                               {  ok=true; cout << "SUCCESS"; }
 		}
