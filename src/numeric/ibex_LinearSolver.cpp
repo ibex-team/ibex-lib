@@ -120,59 +120,68 @@ LinearSolver::Status_Sol LinearSolver::run_simplex(const IntervalVector& box, Li
 }
 
 void LinearSolver::NeumaierShcherbina_postprocessing (int var, Interval & obj, const IntervalVector& box, LinearSolver::Sense sense) {
-	// the dual solution : used to compute the bound
-	Vector dual_solution(nb_rows);
-	getDualSol(dual_solution);
+	try {
+		// the dual solution : used to compute the bound
+		Vector dual_solution(nb_rows);
+		getDualSol(dual_solution);
 
-	Matrix A_trans (nb_vars,nb_rows) ;
-	getCoefConstraint_trans(A_trans);
+		Matrix A_trans (nb_vars,nb_rows) ;
+		getCoefConstraint_trans(A_trans);
 
-	IntervalVector B(nb_rows);
-	getB(B);
+		IntervalVector B(nb_rows);
+		getB(B);
 
-	//cout <<" BOUND_test "<< endl;
-	IntervalVector Rest(nb_vars);
-	IntervalVector Lambda(dual_solution);
+		//cout <<" BOUND_test "<< endl;
+		IntervalVector Rest(nb_vars);
+		IntervalVector Lambda(dual_solution);
 
-	Rest = A_trans * Lambda ;   // Rest = Transpose(As) * Lambda
-	if (sense==LinearSolver::MINIMIZE)
-		Rest[var] -=1; // because C is a vector of zero except for the coef "var"
-	else
-		Rest[var] +=1;
+		Rest = A_trans * Lambda ;   // Rest = Transpose(As) * Lambda
+		if (sense==LinearSolver::MINIMIZE)
+			Rest[var] -=1; // because C is a vector of zero except for the coef "var"
+		else
+			Rest[var] +=1;
 
-	//cout << " Rest " << Rest << endl;
-	//cout << " dual " << Lambda << endl;
-	//cout << " dual B " << Lambda * B << endl;
-	//cout << " rest box " << Rest * box  << endl;
-	if (sense==LinearSolver::MINIMIZE)
-		obj = Lambda * B - Rest * box;
-	else
-		obj = -(Lambda * B - Rest * box);
+		//cout << " Rest " << Rest << endl;
+		//cout << " dual " << Lambda << endl;
+		//cout << " dual B " << Lambda * B << endl;
+		//cout << " rest box " << Rest * box  << endl;
+		if (sense==LinearSolver::MINIMIZE)
+			obj = Lambda * B - Rest * box;
+		else
+			obj = -(Lambda * B - Rest * box);
+
+	} catch (LPException& e) {
+		throw e;
+	}
 }
 
 bool LinearSolver::NeumaierShcherbina_infeasibilitytest(const IntervalVector& box) {
+	try {
+		Vector infeasible_dir(nb_rows);
+		getInfeasibleDir(infeasible_dir);
 
-	Vector infeasible_dir(nb_rows);
-	getInfeasibleDir(infeasible_dir);
+		Matrix A_trans (nb_vars,nb_rows) ;
+		getCoefConstraint_trans(A_trans);
 
-	Matrix A_trans (nb_vars,nb_rows) ;
-	getCoefConstraint_trans(A_trans);
+		IntervalVector B(nb_rows);
+		getB(B);
 
-	IntervalVector B(nb_rows);
-	getB(B);
+		IntervalVector Lambda(infeasible_dir);
 
-	IntervalVector Lambda(infeasible_dir);
+		IntervalVector Rest(nb_vars);
+		Rest = A_trans * Lambda ;
+		Interval d= Rest *box - Lambda * B;
 
-	IntervalVector Rest(nb_vars);
-	Rest = A_trans * Lambda ;
-	Interval d= Rest *box - Lambda * B;
+		// if 0 does not belong to d, the infeasibility is proved
 
-	// if 0 does not belong to d, the infeasibility is proved
+		if (d.contains(0.0))
+			return false;
+		else
+			return true;
 
-	if (d.contains(0.0))
+	} catch (LPException&) {
 		return false;
-	else
-		return true;
+	}
 
 }
 
@@ -228,49 +237,51 @@ LinearSolver::~LinearSolver() {
 LinearSolver::Status_Sol LinearSolver::solve() {
 
 	soplex::SPxSolver::Status stat = soplex::SPxSolver::UNKNOWN;
-	LinearSolver::Status_Sol res= UNKNOWN;
 
 	try{
-	    stat = mysoplex->solve();
-		if (stat==soplex::SPxSolver::OPTIMAL) {
-		  obj_value = mysoplex->objValue();
+		stat = mysoplex->solve();
+		switch (stat) {
+		case (soplex::SPxSolver::OPTIMAL) : {
+			obj_value = mysoplex->objValue();
 
-		  // the primal solution : used by choose_next_variable
-		  soplex::DVector primal(nb_vars);
-		  status_prim = mysoplex->getPrimal(primal);
-		  for (int i=0; i< nb_vars ; i++) {
-			  primal_solution[i]=primal[i];
-		  }
-		  // the dual solution ; used by Neumaier Shcherbina test
-		  soplex::DVector dual(nb_rows);
-		  if (dual_solution != NULL) delete [] dual_solution;
-		  dual_solution = new double[nb_rows];
-		  status_dual = mysoplex->getDual(dual);
-		  for (int i=0; i<nb_rows; i++) {
-			  if 	( ((mysoplex->rhs(i) >=  default_max_bound) && (dual[i]<=0)) ||
-					  ((mysoplex->lhs(i) <= -default_max_bound) && (dual[i]>=0))   ) {
-				  dual_solution[i]=0;
-			  }
-			  else {
-				  dual_solution[i]=dual[i];
-			  }
-		  }
-		  res= OPTIMAL;
+			// the primal solution : used by choose_next_variable
+			soplex::DVector primal(nb_vars);
+			status_prim = mysoplex->getPrimal(primal);
+			for (int i=0; i< nb_vars ; i++) {
+				primal_solution[i]=primal[i];
+			}
+			// the dual solution ; used by Neumaier Shcherbina test
+			soplex::DVector dual(nb_rows);
+			if (dual_solution != NULL) delete [] dual_solution;
+			dual_solution = new double[nb_rows];
+			status_dual = mysoplex->getDual(dual);
+			for (int i=0; i<nb_rows; i++) {
+				if 	( ((mysoplex->rhs(i) >=  default_max_bound) && (dual[i]<=0)) ||
+						((mysoplex->lhs(i) <= -default_max_bound) && (dual[i]>=0))   ) {
+					dual_solution[i]=0;
+				}
+				else {
+					dual_solution[i]=dual[i];
+				}
+			}
+			return OPTIMAL;
 		}
-		else if (stat==soplex::SPxSolver::ABORT_TIME)
-			res = TIME_OUT;
-		else if (stat==soplex::SPxSolver::ABORT_ITER)
-			res = MAX_ITER;
-		else if (stat==soplex::SPxSolver::INFEASIBLE)
-			res = INFEASIBLE_NOTPROVED;
-		else
-			res = UNKNOWN;
-
+	    case(soplex::SPxSolver::ABORT_TIME): {
+	    	return TIME_OUT;
+	    }
+	    case (soplex::SPxSolver::ABORT_ITER):{
+	    	return MAX_ITER;
+	    }
+	    case (soplex::SPxSolver::INFEASIBLE):{
+	    	return INFEASIBLE_NOTPROVED;
+	    }
+	    default : {
+	    	return UNKNOWN;
+	    }
+	    }
 	}catch(soplex::SPxException&){
-		res = UNKNOWN;
+		return UNKNOWN;
 	}
-	//	std::cout <<"	stat soplex  "<<stat<<"   "<<res << std::endl;
-	return res;
 
 }
 
@@ -786,39 +797,40 @@ LinearSolver::~LinearSolver() {
 
 LinearSolver::Status_Sol LinearSolver::solve() {
 
-	LinearSolver::Status_Sol res = UNKNOWN;
 	try {
 		// Optimize the problem and obtain solution.
 
-		int status = CPXlpopt(envcplex, lpcplex);
+		int status = CPXdualopt(envcplex, lpcplex);
 
 		if (status == 0) {
+
 			int solstat = CPXgetstat(envcplex, lpcplex);
 
-			if (solstat == CPX_STAT_ABORT_IT_LIM) {
-				res = MAX_ITER;
-			} else if (solstat == CPX_STAT_ABORT_TIME_LIM) {
-				res = TIME_OUT;
-			} else if (solstat == CPX_STAT_OPTIMAL) {
+			switch (solstat) {
+			case (CPX_STAT_OPTIMAL): {
 				CPXgetobjval(envcplex, lpcplex, &obj_value);
 				status_prim =CPXgetx(envcplex, lpcplex, primal_solution, 0, nb_vars - 1);
 				if (dual_solution) delete [] dual_solution;
 				dual_solution = new double[nb_rows];
 				status_dual = CPXgetpi(envcplex, lpcplex, dual_solution, 0, nb_rows - 1);
-				res = OPTIMAL;
-			} else if ((solstat == CPX_STAT_INFEASIBLE)
-					|| (solstat == CPX_STAT_UNBOUNDED)
-					|| (solstat == CPX_STAT_OPTIMAL_INFEAS)) {
-				res = INFEASIBLE_NOTPROVED;
-			} else
-				res = UNKNOWN;
-		}
+				return OPTIMAL;
+			}
+			case (CPX_STAT_INFEASIBLE):
+				return INFEASIBLE_NOTPROVED;
+			case (CPX_STAT_ABORT_IT_LIM):
+				return MAX_ITER;
+			case (CPX_STAT_ABORT_TIME_LIM):
+				return TIME_OUT;
+			default :
+				return UNKNOWN;
+			}
+
+		} else
+			return UNKNOWN;
 
 	} catch (Exception&) {
-		res = UNKNOWN;
+		return UNKNOWN;
 	}
-	//std::cout <<"	stat cplex  "<<stat<<"   "<<res << std::endl;
-	return res;
 
 }
 
@@ -1267,14 +1279,13 @@ LinearSolver::~LinearSolver() {
 LinearSolver::Status_Sol LinearSolver::solve() {
 
 	//int stat = -1;
-	LinearSolver::Status_Sol res= UNKNOWN;
 
 	try{
 		myclp->primal();
 		//stat = myclp->status();
 		myclp->status();
 
-    	     /** Status of problem:
+		/** Status of problem:
     	         -1 - unknown e.g. before solve or if postSolve says not optimal
     	         0 - optimal
     	         1 - primal infeasible
@@ -1282,46 +1293,44 @@ LinearSolver::Status_Sol LinearSolver::solve() {
     	         3 - stopped on iterations or time
     	         4 - stopped due to errors
     	         5 - stopped by event handler (virtual int ClpEventHandler::event())
-    	     */
+		 */
 		if (myclp->isProvenOptimal()) {
-		  obj_value = myclp->getObjValue();
+			obj_value = myclp->getObjValue();
 
-		  // the primal solution : used by choose_next_variable
-		  double * primal= myclp->primalColumnSolution();
-		  for (int i=0; i< nb_vars ; i++) {
-			  primal_solution[i]=primal[i];
-		  }
-		  status_prim = 1;
+			// the primal solution : used by choose_next_variable
+			double * primal= myclp->primalColumnSolution();
+			for (int i=0; i< nb_vars ; i++) {
+				primal_solution[i]=primal[i];
+			}
+			status_prim = 1;
 
-		  // the dual solution ; used by Neumaier Shcherbina test
-		  double * dual = myclp->dualRowSolution();
-		  if (dual_solution) delete [] dual_solution;
-		  dual_solution = new double[nb_rows];
+			// the dual solution ; used by Neumaier Shcherbina test
+			double * dual = myclp->dualRowSolution();
+			if (dual_solution) delete [] dual_solution;
+			dual_solution = new double[nb_rows];
 
-		  for (int i=0; i<nb_rows; i++) {
-			  if 	( ((myclp->getRowUpper()[i] >=  default_max_bound) && (dual[i]<=0)) ||
-					  ((myclp->getRowLower()[i] <= -default_max_bound) && (dual[i]>=0))   ) {
-				  dual_solution[i]=0;
-			  }
-			  else {
-				  dual_solution[i]=dual[i];
-			  }
-		  }
-		  status_dual = 1;
-		  res= OPTIMAL;
+			for (int i=0; i<nb_rows; i++) {
+				if 	( ((myclp->getRowUpper()[i] >=  default_max_bound) && (dual[i]<=0)) ||
+						((myclp->getRowLower()[i] <= -default_max_bound) && (dual[i]>=0))   ) {
+					dual_solution[i]=0;
+				}
+				else {
+					dual_solution[i]=dual[i];
+				}
+			}
+			status_dual = 1;
+			return OPTIMAL;
 		}
-		else if (myclp->isIterationLimitReached())
-			res = MAX_ITER;
 		else if (myclp->isProvenPrimalInfeasible())
-			res = INFEASIBLE_NOTPROVED;
+			return INFEASIBLE_NOTPROVED;
+		else if (myclp->isIterationLimitReached())
+			return MAX_ITER;
 		else
-			res = UNKNOWN;
+			return UNKNOWN;
 
 	}catch(CoinError&){
-		res = UNKNOWN;
+		return UNKNOWN;
 	}
-	//	std::cout <<"	stat Clp  "<<stat<<"   "<<res << std::endl;
-	return res;
 
 }
 
@@ -1733,8 +1742,7 @@ LinearSolver::Status_Sol LinearSolver::solve() {
 				res = OPTIMAL;
 			} else if ((solstat == IloCplex::Infeasible )
 					|| (solstat == IloCplex::Unbounded )
-					|| (solstat == IloCplex::InfOrUnbd )
-					|| (solstat == IloCplex::OptimalInfeas)) {
+					|| (solstat == IloCplex::InfOrUnbd )) {
 				res = INFEASIBLE_NOTPROVED;
 			} else
 				res = UNKNOWN;
