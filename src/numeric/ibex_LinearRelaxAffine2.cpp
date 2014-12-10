@@ -112,6 +112,8 @@ int LinearRelaxAffine2::inlinearization(const IntervalVector& box, LinearSolver&
 					}
 					break;
 				}
+				default:
+					break;
 				}
 			}
 		}
