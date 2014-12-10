@@ -17,8 +17,8 @@ using namespace ibex;
 
 const int NB_TESTS = 24;
 
-const double TIME_LIMIT = 100;
-const char* time_limit = "100";
+const double TIME_LIMIT = 540; //9 min
+const char* time_limit = "540";
 
 const char* sample_size = "1";
 const char* eq_eps      = "1e-08";
