@@ -23,9 +23,7 @@ LinearRelaxAffine2::~LinearRelaxAffine2() {
 
 }
 
-
-int LinearRelaxAffine2::inlinearization(const IntervalVector& box, LinearSolver& lp_solver) {
-	// TODO a verifier et finir
+bool LinearRelaxAffine2::goal_linearization(const IntervalVector& box, LinearSolver& lp_solver) {
 	// Linearization of the objective function by AF2
 	Affine2 af2;
 	try {
@@ -33,27 +31,38 @@ int LinearRelaxAffine2::inlinearization(const IntervalVector& box, LinearSolver&
 	} catch (EmptyBoxException&) {
 		return false;
 	}
-
-	if (af2.size() == sys.nb_var) { // if the affine2 form is valid
-		// convert the epsilon variables to the original box
-		double tmp=0;
-		for (int i =0; i <sys.nb_var; i++) {
-			tmp = box[i].rad();
-			if (tmp==0) { // sensible case to avoid rowconst[i]=NaN
-				if (af2.val(i+1)==0)
-					lp_solver.setVarObj(i, 0);
-				else {
-					return -1; // sensible case to avoid
+	try {
+		if (af2.size() == sys.nb_var) { // if the affine2 form is valid
+			// convert the epsilon variables to the original box
+			double tmp=0;
+			for (int i =0; i <sys.nb_var; i++) {
+				tmp = box[i].rad();
+				if (tmp==0) { // sensible case to avoid rowconst[i]=NaN
+					if (af2.val(i+1)==0)
+						lp_solver.setVarObj(i, 0);
+					else {
+						return false; // sensible case to avoid
+					}
+				} else {
+					lp_solver.setVarObj(i, af2.val(i+1) / tmp);
 				}
-			} else {
-				lp_solver.setVarObj(i, af2.val(i+1) / tmp);
 			}
 		}
-	}
-	else {
+		else {
+			return false;
+		}
+		return true;
+
+	} catch (LPException&) {
 		return false;
 	}
+}
 
+
+int LinearRelaxAffine2::inlinearization(const IntervalVector& box, LinearSolver& lp_solver) {
+	// TODO a verifier et finir
+
+	Affine2 af2;
 
 	int cont=0;
 	Interval ev(0), center(0), err(0);

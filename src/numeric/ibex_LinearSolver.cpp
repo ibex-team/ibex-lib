@@ -13,7 +13,12 @@
 
 namespace ibex {
 
-const double LinearSolver::default_eps = 1e-10;
+#ifdef _IBEX_WITH_CPLEX_
+	const double LinearSolver::default_eps = 1e-9;
+#else
+	const double LinearSolver::default_eps = 1e-10;
+#endif
+
 const double LinearSolver::default_max_bound = 1e20;
 const int LinearSolver::default_max_time_out=100;
 const int LinearSolver::default_max_iter=100;
@@ -98,12 +103,13 @@ LinearSolver::Status_Sol LinearSolver::run_simplex(const IntervalVector& box, Li
 		}
 		case  LinearSolver::INFEASIBLE_NOTPROVED: {
 			// infeasibility test  cf Neumaier Shcherbina paper
-			if (NeumaierShcherbina_infeasibilitytest ( box)) {
+			if (NeumaierShcherbina_infeasibilitytest(box)) {
 				stat = LinearSolver::INFEASIBLE;
 			}
 			break;
 		}
 		default:
+			stat = LinearSolver::UNKNOWN;
 			break;
 		}
 		// Reset the objective of the LP solver
@@ -616,7 +622,6 @@ LinearSolver::LinearSolver(int nb_vars1, int nb_ctr1, int max_iter,
 		throw LPException();
 	}
 
-
 	status = CPXsetintparam(envcplex, CPX_PARAM_ITLIM, max_iter);
 	if (status != 0) {
 		char* errmsg = new char[1024];
@@ -630,7 +635,7 @@ LinearSolver::LinearSolver(int nb_vars1, int nb_ctr1, int max_iter,
 	status = CPXsetdblparam(envcplex, CPX_PARAM_TILIM, max_time_out);
 	if (status != 0) {
 		char* errmsg = new char[1024];
-		std::cerr<< "Error CPLEX: Could not change the maximal number of iteration "<< status << std::endl;
+		std::cerr<< "Error CPLEX: Could not change the time limit "<< status << std::endl;
 		CPXgeterrorstring(envcplex, status, errmsg);
 		std::cerr << errmsg << std::endl;
 		delete[] errmsg;
@@ -641,6 +646,16 @@ LinearSolver::LinearSolver(int nb_vars1, int nb_ctr1, int max_iter,
 	if (status != 0) {
 		char* errmsg = new char[1024];
 		std::cerr<< "Error CPLEX: Could not impose the preprocessing dual, error "<< status << std::endl;
+		CPXgeterrorstring(envcplex, status, errmsg);
+		std::cerr << errmsg << std::endl;
+		delete[] errmsg;
+		throw LPException();
+	}
+
+	status = CPXsetdblparam(envcplex, CPX_PARAM_EPRELAX, epsilon);
+	if (status != 0) {
+		char* errmsg = new char[1024];
+		std::cerr<< "Error CPLEX: Could not change the precision on the feasible set "<< status << std::endl;
 		CPXgeterrorstring(envcplex, status, errmsg);
 		std::cerr << errmsg << std::endl;
 		delete[] errmsg;
@@ -800,7 +815,7 @@ LinearSolver::Status_Sol LinearSolver::solve() {
 	try {
 		// Optimize the problem and obtain solution.
 
-		int status = CPXdualopt(envcplex, lpcplex);
+		int status = CPXlpopt(envcplex, lpcplex);
 
 		if (status == 0) {
 
@@ -1023,8 +1038,8 @@ void LinearSolver::cleanConst() {
 		throw LPException();
 	}
 	return ;
-
 }
+
 void LinearSolver::cleanAll() {
 
 	try {
@@ -1224,11 +1239,20 @@ LinearSolver::LinearSolver(int nb_vars1, int nb_ctr, int max_iter, int max_time_
 
 	myclp= new ClpSimplex();
 
+    //myclp->scaling(0);
+    //ClpSolve options;
+    //options.setSolveType(ClpSolve::useDual);
+    //options.setDoDual(true);
+    //options.setPresolveType(ClpSolve::presolveOn);
+    //options.setSpecialOption(1,3,30);
+    //myclp->initialSolve(options);
+
 	/// Direction of optimization (1 - minimize, -1 - maximize, 0 - ignore
 	myclp->setOptimizationDirection(1);
 	myclp->setMaximumIterations(max_iter);
 	myclp->setMaximumSeconds(max_time_out);
 	myclp->setPrimalTolerance(epsilon);
+    myclp->setDualTolerance(epsilon);
 
 	// no log
 	myclp->setLogLevel(0);
@@ -1237,8 +1261,8 @@ LinearSolver::LinearSolver(int nb_vars1, int nb_ctr, int max_iter, int max_time_
 	// initialize the number of variables of the LP
 	myclp->resize(0,nb_vars);
 	for (int i = 0; i < nb_vars; i++) {
-		myclp->setColumnLower(i, NEG_INFINITY);
-		myclp->setColumnUpper(i, POS_INFINITY);
+		myclp->setColumnLower(i, -DBL_MAX);
+		myclp->setColumnUpper(i, DBL_MAX);
    }
 
 	// initialize the constraint of the bound of the variable
@@ -1248,7 +1272,7 @@ LinearSolver::LinearSolver(int nb_vars1, int nb_ctr, int max_iter, int max_time_
     row2Value[0]=1.0;
 	for (int j=0; j<nb_vars; j++){
 		row2Index[0]=j;
-		myclp->addRow(1, row2Index, row2Value, NEG_INFINITY, POS_INFINITY);
+		myclp->addRow(1, row2Index, row2Value, -DBL_MAX, DBL_MAX);
 	}
 
 	delete[] row2Index;
@@ -1281,7 +1305,8 @@ LinearSolver::Status_Sol LinearSolver::solve() {
 	//int stat = -1;
 
 	try{
-		myclp->primal();
+		//myclp->initialDualSolve();
+		myclp->dual();
 		//stat = myclp->status();
 		myclp->status();
 
@@ -1337,7 +1362,6 @@ LinearSolver::Status_Sol LinearSolver::solve() {
 void LinearSolver::writeFile(const char* name) {
 	try {
 		myclp->writeMps(name);
-		//myclp->writeBasis(name);
 	}
 	catch(CoinError& ) {
 		throw LPException();

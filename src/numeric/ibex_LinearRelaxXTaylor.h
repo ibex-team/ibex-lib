@@ -76,6 +76,11 @@ public:
 	 */
 	int inlinearization(const IntervalVector& box, LinearSolver& lp_solver);
 
+	/**
+	 * \brief Generation of a linear approximation of the linear objective function
+	 *
+	 */
+	bool goal_linearization(const IntervalVector& box, LinearSolver& lp_solver);
 
 private:
 
@@ -131,6 +136,11 @@ private:
 
 	int X_Linearization(const IntervalVector& box, int ctr, corner_point cpoint, CmpOp op,
 			IntervalVector &G, int id_point, int& non_linear_vars, LinearSolver& lp_solver);
+
+	/**
+	 * \brief Random hoice of a corner
+	 */
+	bool choose_corner(const IntervalVector& box, IntervalVector& x_corner,	bool* corner);
 
 	/**
 	 * \brief Symbolic Jacobian

@@ -8,16 +8,20 @@
 //============================================================================
 
 #include "ibex_LinearRelaxFixed.h"
-
+#include "ibex_Exception.h"
 namespace ibex {
 
 LinearRelaxFixed::LinearRelaxFixed(const Matrix& A, const Vector& b) : LinearRelax(A.nb_rows(),A.nb_cols()), A(A), b(b) { }
 
 
+bool LinearRelaxFixed::goal_linearization(const IntervalVector& box, LinearSolver& lp_solver){
+	not_implemented(" LinearRelaxFixed::goal_linearization not yet implemented");
+	return false;
+}
+
 
 int LinearRelaxFixed::inlinearization(const IntervalVector& box, LinearSolver& lp_solver){
-	//return linearization(box,lp_solver);
-	return -1;
+	return linearization(box,lp_solver);
 }
 
 

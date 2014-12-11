@@ -43,7 +43,10 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 		//returns the number of constraints in the linearized system
 		int cont = lr->inlinearization(box, *mylp);
 		if (cont <0) return false;
-		
+		bool res = lr->goal_linearization(box, *mylp);
+		if (!res) return false;
+
+
 		LinearSolver::Status_Sol stat = mylp->solve();
 
 		//mylp->writeFile("coucou.lp");
@@ -73,11 +76,15 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 			return ret;
 		}
 		case (LinearSolver::TIME_OUT) : {
-			if (trace>2) { std::cout << "Simplex spent too much time" << std::endl; }
+			if (trace) { std::cout << "Simplex spent too much time" << std::endl; }
 			break;
 		}
 		case (LinearSolver::MAX_ITER) :{
-			if (trace>2) { std::cout << "Simplex spent too many iterations" << std::endl; }
+			if (trace) {
+				//mylp->writeFile("coucou.lp");
+				//system("cat coucou.lp");
+				std::cout << "Simplex spent too many iterations" << std::endl;
+			}
 			break;
 		}
 		default:

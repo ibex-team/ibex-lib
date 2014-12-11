@@ -74,28 +74,46 @@ LinearRelaxCombo::~LinearRelaxCombo() {
 
 int LinearRelaxCombo::inlinearization(const IntervalVector& box, LinearSolver& lp_solver) {
 
-	int cont = 0;
-
 	switch (lmode) {
 	case ART:
 	case AFFINE2: {
-		cont = myart->inlinearization(box,lp_solver);
-		break;
+		return myart->inlinearization(box,lp_solver);
 	}
 	case XNEWTON:
 	case TAYLOR:
 	case HANSEN: {
-		cont = myxnewton->inlinearization(box,lp_solver);
-		break;
+		return myxnewton->inlinearization(box,lp_solver);
 	}
 	case COMPO: {
-		cont = myxnewton->inlinearization(box,lp_solver);
-		if (cont<0) cont = myart->inlinearization(box,lp_solver);
-		break;
+		int cont = myxnewton->inlinearization(box,lp_solver);
+		if (cont<0) 	cont = myart->inlinearization(box,lp_solver);
+
+		return cont;
 	}
 	}
-	return cont;
 }
+
+bool LinearRelaxCombo::goal_linearization(const IntervalVector& box, LinearSolver& lp_solver) {
+
+	switch (lmode) {
+	case ART:
+	case AFFINE2: {
+		return myart->goal_linearization(box,lp_solver);
+	}
+	case XNEWTON:
+	case TAYLOR:
+	case HANSEN: {
+		return myxnewton->goal_linearization(box,lp_solver);
+	}
+	case COMPO: {
+		bool cont = myxnewton->goal_linearization(box,lp_solver);
+		if (!cont)	cont = myart->goal_linearization(box,lp_solver);
+
+		return cont;
+	}
+	}
+}
+
 
 /*********generation of the linearized system*********/
 int LinearRelaxCombo::linearization(const IntervalVector& box, LinearSolver& lp_solver) {

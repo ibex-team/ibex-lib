@@ -69,8 +69,6 @@ LinearRelaxXTaylor::~LinearRelaxXTaylor() {
 	delete[] linear_ctr;
 }
 
-
-
 int LinearRelaxXTaylor::inlinearization(const IntervalVector& box, LinearSolver& lp_solver)  {
 
 	int nb_add=0;
@@ -81,61 +79,16 @@ int LinearRelaxXTaylor::inlinearization(const IntervalVector& box, LinearSolver&
 	// the corner used
 	IntervalVector x_corner(n);
 
-	for (int i=0 ; i< n ; i++)	  {
-		// random corner choice
-		if (rand()%2) {
-			if (box[i].lb()>NEG_INFINITY) {
-				corner[i]=true;
-				x_corner[i]=box[i].lb() ;
-			}
-			else if  (box[i].ub()<POS_INFINITY) {
-				corner[i]=false;
-				x_corner[i]=box[i].ub() ;
-			}
-			else {
-				delete [] corner;
-				return -1; // infinity box
-			}
-		}
-		else {
-			if (box[i].ub()<POS_INFINITY) {
-				corner[i]=false;
-				x_corner[i]=box[i].ub() ;
-			}
-			else if  (box[i].lb()>NEG_INFINITY) {
-				corner[i]=true;
-				x_corner[i]=box[i].lb() ;
-			}
-			else {
-				delete [] corner;
-				return -1; // infinity box
-			}
-		}
-	}
-
-	IntervalVector G(n); // vector to be used by the partial derivatives
-
-	sys.goal->gradient(box.mid(),G);
-	for (int i =0; i< n ; i++)
-	  if (G[i].diam() > 1e8) return -1;   //to avoid problems with the Linear Solver
-
-	// ============================================================
-	//   linearize the objective
-	// ============================================================
-	try {
-		for (int j=0; j<n; j++){
-			if (corner[j])
-				lp_solver.setVarObj(j,G[j].ub());
-			else
-				lp_solver.setVarObj(j,G[j].lb());
-		}
-	} catch (LPException&) {
+	// random corner choice
+	if (!choose_corner(box, x_corner, corner)) {
 		delete [] corner;
 		return -1;
 	}
+
 	// ============================================================
 	//   linearize the constraint
 	// ============================================================
+	IntervalVector G(n); // vector to be used by the partial derivatives
 	Vector row(n);
 	//The linear system is generated
 	if (sys.nb_ctr>0)
@@ -146,7 +99,7 @@ int LinearRelaxXTaylor::inlinearization(const IntervalVector& box, LinearSolver&
 		for (int ctr=0; ctr<sys.nb_ctr; ctr++) {
 
 			CmpOp op= sys.ctrs[ctr].op;
-			if(op==EQ || isInner(box, sys, ctr)) continue; //the constraint is satisfied
+			if(op!=EQ && isInner(box, sys, ctr)) continue; //the constraint is satisfied
 
 			sys.ctrs[ctr].f.gradient(box,G);               // gradient calculation
 
@@ -171,6 +124,7 @@ int LinearRelaxXTaylor::inlinearization(const IntervalVector& box, LinearSolver&
 			}
 			try {
 				//TODO TO CHECK
+				//lp_solver.addConstraint(row,op, -ev.lb());  //  1e-10 ???  BNE  JN CA NE MARCHE PAS AVEC SOPLEX SANS LA PRECISION
 				lp_solver.addConstraint(row,op, -ev.lb()-lp_solver.getEpsilon());  //  1e-10 ???  BNE
 				nb_add++;
 				//mysoplex.addRow(LPRow(-infinity, row1, (-g_corner)[i].lb()-1e-10));    //  1e-10 ???  BNE
@@ -181,6 +135,69 @@ int LinearRelaxXTaylor::inlinearization(const IntervalVector& box, LinearSolver&
 	return nb_add;
 }
 
+
+
+bool LinearRelaxXTaylor::goal_linearization(const IntervalVector& box, LinearSolver& lp_solver)  {
+
+	int n =box.size();
+	IntervalVector G(n); // vector to be used by the partial derivatives
+
+	sys.goal->gradient(box.mid(),G);
+	for (int i =0; i< n ; i++)
+	  if (G[i].diam() > 1e8) return false;   //to avoid problems with the Linear Solver
+
+	// ============================================================
+	//   linearize the objective
+	// ============================================================
+	try {
+		for (int j=0; j<n; j++){
+			if (rand()%2)
+				lp_solver.setVarObj(j,G[j].ub());
+			else
+				lp_solver.setVarObj(j,G[j].lb());
+		}
+		return true;
+	} catch (LPException&) {
+		return false;
+	}
+
+}
+
+bool LinearRelaxXTaylor::choose_corner(const IntervalVector& box, IntervalVector& x_corner,	bool* corner)  {
+	int n =box.size();
+	// the corner used
+
+	for (int i=0 ; i< n ; i++)	  {
+		// random corner choice
+		if (rand()%2) {
+			if (box[i].lb()>NEG_INFINITY) {
+				corner[i]=true;
+				x_corner[i]=box[i].lb() ;
+			}
+			else if  (box[i].ub()<POS_INFINITY) {
+				corner[i]=false;
+				x_corner[i]=box[i].ub() ;
+			}
+			else {
+				return false; // infinity box
+			}
+		}
+		else {
+			if (box[i].ub()<POS_INFINITY) {
+				corner[i]=false;
+				x_corner[i]=box[i].ub() ;
+			}
+			else if  (box[i].lb()>NEG_INFINITY) {
+				corner[i]=true;
+				x_corner[i]=box[i].lb() ;
+			}
+			else {
+				return false; // infinity box
+			}
+		}
+	}
+	return true;
+}
 
 
 
