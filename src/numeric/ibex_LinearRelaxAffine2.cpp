@@ -34,6 +34,8 @@ int LinearRelaxAffine2::linearization(const IntervalVector& box, LinearSolver& l
 	Interval err(0.0);
 	CmpOp op;
 	int cont = 0;
+	LinearSolver::Status stat = LinearSolver::FAIL;
+
 
 	// Create the linear relaxation of each constraint
 	for (int ctr = 0; ctr < sys.nb_ctr; ctr++) {
@@ -68,26 +70,29 @@ int LinearRelaxAffine2::linearization(const IntervalVector& box, LinearSolver& l
 				}
 			}
 			if (!b_abort) {
+
 				switch (op) {
-				case LEQ: if (ev.lb() == 0.0)	throw EmptyBoxException();
+				case LEQ:
+					if (0.0 == ev.lb())
+						throw EmptyBoxException();
 				case LT: {
-					if (0.0 < ev.lb())	throw EmptyBoxException();
+					if (0.0 < ev.lb())
+						throw EmptyBoxException();
 					else if (0.0 < ev.ub()) {
-						try {
-							lp_solver.addConstraint(rowconst, LEQ,	((af2.err()+err) - (af2.val(0)-center)).ub());
-							cont++;
-						} catch (LPException&) { }
+						stat = lp_solver.addConstraint(rowconst, LEQ,	((af2.err()+err) - (af2.val(0)-center)).ub());
+						if (stat == LinearSolver::OK)	cont++;
 					}
 					break;
 				}
-				case GEQ: if (ev.ub() == 0.0)	throw EmptyBoxException();
+				case GEQ:
+					if (ev.ub() == 0.0)
+						throw EmptyBoxException();
 				case GT: {
-					if (ev.ub() < 0.0)	throw EmptyBoxException();
+					if (ev.ub() < 0.0)
+						throw EmptyBoxException();
 					else if (ev.lb() < 0.0) {
-						try {
-							lp_solver.addConstraint(rowconst, GEQ,	(-(af2.err()+err) - (af2.val(0)-center)).lb());
-							cont++;
-						} catch (LPException&) { }
+						stat = lp_solver.addConstraint(rowconst, GEQ,	(-(af2.err()+err) - (af2.val(0)-center)).lb());
+						if (stat == LinearSolver::OK)	cont++;
 					}
 					break;
 				}
@@ -97,12 +102,10 @@ int LinearRelaxAffine2::linearization(const IntervalVector& box, LinearSolver& l
 					}
 					else {
 						if (ev.diam()>2*lp_solver.getEpsilon()) {
-							try {
-								lp_solver.addConstraint(rowconst, GEQ,	(-(af2.err()+err) - (af2.val(0)-center)).lb());
-								cont++;
-								lp_solver.addConstraint(rowconst, LEQ,	((af2.err()+err) - (af2.val(0)-center)).ub());
-								cont++;
-							} catch (LPException&) { }
+							stat = lp_solver.addConstraint(rowconst, GEQ,	(-(af2.err()+err) - (af2.val(0)-center)).lb());
+							if (stat == LinearSolver::OK)	cont++;
+							stat = lp_solver.addConstraint(rowconst, LEQ,	((af2.err()+err) - (af2.val(0)-center)).ub());
+							if (stat == LinearSolver::OK)	cont++;
 						}
 					}
 					break;
