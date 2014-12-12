@@ -65,26 +65,31 @@ void SetInterval::save(const char* filename) {
 	fstream os;
 	os.open(filename, ios::out | ios::trunc | ios::binary);
 
-	os << eps;
+	os.write((char*) &eps, sizeof(double));
 
-	os << (unsigned int) bounding_box.size();
+	int n=bounding_box.size();
+	os.write((char*) &n, sizeof(int));
 
 	for (int i=0; i<bounding_box.size(); i++) {
-		os << bounding_box[i].lb();
-		os << bounding_box[i].ub();
+		double d; // to store double values
+		d=bounding_box[i].lb();
+		os.write((char*) &d,sizeof(double));
+		d=bounding_box[i].ub();
+		os.write((char*) &d,sizeof(double));
 	}
 
 	while (!s.empty()) {
 		SetNode* node=s.top();
 		s.pop();
 		if (node->is_leaf()) {
-			os << -1; // means: leaf
-			os << (unsigned int&) node->status;
+			int no_var=-1; // to store "-1" (means: leaf)
+			os.write((char*) &no_var, sizeof(int));
+			os.write((char*) &node->status, sizeof(NodeType));
 		}
 		else {
 			SetBisect* b=(SetBisect*) node;
-			os << b->var;
-			os << b->pt;
+			os.write((char*) &b->var, sizeof(int));
+			os.write((char*) &b->pt, sizeof(double));
 			s.push(b->right);
 			s.push(b->left);
 		}
@@ -97,39 +102,39 @@ void SetInterval::load(const char* filename) {
 	std::ifstream is;
 	is.open(filename, ios::in | ios::binary);
 
-	is >> eps;
-	cout << "eps=" << eps << endl;
+	is.read((char*) &eps, sizeof(double));
+	//cout << "eps=" << eps << endl;
 
 	unsigned int n;
-	is >> n;
-	cout << "n=" << n << endl;
+	is.read((char*) &n, sizeof(int));
+	//cout << "n=" << n << endl;
 
 	bounding_box.resize(n);
 
 	for (int i=0; i<bounding_box.size(); i++) {
 		double lb,ub;
-		is >> lb;
-		is >> ub;
+		is.read((char*) &lb, sizeof(double));
+		is.read((char*) &ub, sizeof(double));
 		bounding_box[i]=Interval(lb,ub);
 	}
-	cout << "bounding box=" << bounding_box << endl;
+	//cout << "bounding box=" << bounding_box << endl;
 
 	int var;
-	is >> var;
+	is.read((char*) &var, sizeof(int));
 
 	double pt;
-	unsigned int status;
+	NodeType status;
 
 	if (var==-1) {
-		is >> status;
-		root = new SetLeaf((NodeType&) status);
+		is.read((char*) &status, sizeof(NodeType));
+		root = new SetLeaf(status);
 		is.close();
 		return;
 	}
 
-	is >> pt;
+	is.read((char*) &pt, sizeof(double));
 	std::stack<SetNode*> s;
-	root = new SetBisect(var, pt, NULL /* tmp */, NULL /* tmp */);
+	root = new SetBisect(var, pt); // left and right are both set to NULL temporarily
 	s.push(root);
 
 	SetBisect *node;
@@ -147,15 +152,14 @@ void SetInterval::load(const char* filename) {
 			continue;
 		}
 
-		is >> var;
+		is.read((char*) &var, sizeof(int));
 
 		if (var==-1) {
-			is >> status;
-			subnode = new SetLeaf((NodeType&) status);
+			is.read((char*) &status, sizeof(NodeType));
+			subnode = new SetLeaf(status);
 		} else {
-			is >> pt;
-			subnode  =new SetBisect(var,pt,NULL,NULL);
-
+			is.read((char*) &pt, sizeof(double));
+			subnode  =new SetBisect(var,pt); // left and right are both set to NULL temporarily
 		}
 
 		if (node->left==NULL) node->left=subnode;
