@@ -10,9 +10,11 @@ install:
   - ./waf configure
   - sudo ./waf install
   - export PKG_CONFIG_PATH=/usr/local/share/pkgconfig/
-  - cd tests/ && make && cd ..
+#  - cd tests/ && make utest && cd ..
+  - cd tests/ && make utest && make nonreg && cd ..
 # command to run tests
 script:  
   - __build__/examples/optimizer04 benchs/benchs-optim/coconutbenchmark-library1/ex2_1_9.bch acidhc4 compo smearsumrel 1.e-8 1.e-8 10 1
-  - cd tests/ && ./utest
+  - cd tests/ && ./utest && cd ..
+  #- cd tests/ && ./nonreg 
 

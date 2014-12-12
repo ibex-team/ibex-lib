@@ -82,14 +82,17 @@ BoolInterval PdcHansenFeasibility::test(const IntervalVector& box) {
 	// ==============================================================
 	Matrix A=f.jacobian(mid).mid();
 	Matrix LU(m,n);
-	int pr[m];
-	int pc[n]; // the interesting output: the variables permutation
+	int *pr = new int[m];
+	int *pc = new int[n]; // the interesting output: the variables permutation
+	BoolInterval res=MAYBE;
 
 	try {
 		real_LU(A,LU,pr,pc);
 	} catch(SingularMatrixException&) {
 		// means in particular that we could not extract an
 		// invertible m*m submatrix
+		delete [] pr;
+		delete [] pc;
 		return MAYBE;
 	}
 	// ==============================================================
@@ -103,7 +106,7 @@ BoolInterval PdcHansenFeasibility::test(const IntervalVector& box) {
 	if (inflating) {
 		if (inflating_newton(pf,box2)) {
 			_solution = pf.extend(box2);
-			return YES;
+			res = YES;
 		}
 	}
 	else {
@@ -111,13 +114,15 @@ BoolInterval PdcHansenFeasibility::test(const IntervalVector& box) {
 			newton(pf,box2);
 			if (box2.is_strict_subset(savebox)) {
 				_solution = pf.extend(box2);
-				return YES;
+				res = YES;
 			}
 		} catch (EmptyBoxException& ) {	}
 	}
 
 	_solution.set_empty();
-	return MAYBE;
+	delete [] pr;
+	delete [] pc;
+	return res;
 
 }
 

@@ -47,7 +47,7 @@ void UnconstrainedLocalSearch::update_B_SR1(Matrix& Bk, const Vector& sk, const 
 UnconstrainedLocalSearch::ReturnCode UnconstrainedLocalSearch::minimize(const Vector& x0, Vector& xk, double eps, int max_iter) {
 	// parameter for the stopping criterion
 	this->eps = eps;
-	this->sigma=eps/::sqrt(n+1);
+	this->sigma=eps/::sqrt((double)(n+1));
 
 	// parameter to update the trust region radius
 	double gamma00 = 0.05;
