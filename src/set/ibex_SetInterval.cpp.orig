@@ -10,10 +10,13 @@
 #include "ibex_SetInterval.h"
 #include "ibex_SetLeaf.h"
 #include "ibex_SetBisect.h"
+<<<<<<< HEAD
 #include "ibex_CellHeap.h"
 #include "ibex_CellStack.h"
+=======
 #include <stack>
 #include <fstream>
+>>>>>>> develop
 
 using namespace std;
 
@@ -236,13 +239,13 @@ public:
 double SetInterval::dist(const Vector& pt, bool inside) const {
 	CellHeapDist heap;
 
-	//int count=0; // for stats
+	int count=0; // for stats
 
 	Cell* root_cell =new Cell(bounding_box);
 	root_cell->add<NodeAndDist>();
 	root_cell->get<NodeAndDist>().node = root;
 	root_cell->get<NodeAndDist>().set_dist(bounding_box,pt);
-	//count++;
+	count++;
 
 	heap.push(root_cell);
 
@@ -272,16 +275,16 @@ double SetInterval::dist(const Vector& pt, bool inside) const {
 			std::pair<Cell*,Cell*> p=c->bisect(left,right);
 
 			p.first->get<NodeAndDist>().set_dist(left,pt);
-			//count++;
+			count++;
 			if (p.first->get<NodeAndDist>().dist<=lb) heap.push(p.first);
 
 			p.second->get<NodeAndDist>().set_dist(right,pt);
-			//count++;
+			count++;
 			if (p.second->get<NodeAndDist>().dist<=lb) heap.push(p.second);
 		}
 		delete c;
 	}
-	//cout << " number of times a distance to a box has been computed: " << count << endl;
+	cout << " number of times a distance to a box has been computed: " << count << endl;
 	return ::sqrt(lb);
 }
 

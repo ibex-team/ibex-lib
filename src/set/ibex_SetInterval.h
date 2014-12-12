@@ -96,6 +96,12 @@ public:
 
 	void visit_leaves(SetNode::leaf_func func) const;
 
+	/**
+	 * \brief Distance of the point "pt" wrt the set (if inside is true)
+	 * of the complementary of the set (if inside is false).
+	 */
+	double dist(const Vector& pt, bool inside) const;
+
 protected:
 
 	/**
