@@ -100,8 +100,12 @@ Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, double prec,
 	if (niter < 3*n) niter=3*n;
 
 	//====================================
+#ifdef _IBEX_WITH_NOLP_
+	mylp = NULL;
+#else
 	mylp = new LinearSolver(n+1,m,niter );
 	//	cout << "sys " << sys << endl;
+#endif // _IBEX_WITH_NOLP_
 }
 
 Optimizer::~Optimizer() {
@@ -114,7 +118,7 @@ Optimizer::~Optimizer() {
 	}
 	buffer.flush();
 	if (critpr > 0) buffer2.flush();
-
+	if (equs) delete equs;
 	delete mylp;
 	//	delete &(objshaver->ctc);
 	//	delete objshaver;

@@ -32,6 +32,11 @@ public:
 	CtcFixPoint(Ctc& ctc, double ratio=default_ratio);
 
 	/**
+	 * \brief Delete *this.
+	 */
+	virtual ~CtcFixPoint();
+
+	/**
 	 * \brief Contract a box.
 	 */
 	virtual void contract(IntervalVector& box);

@@ -44,6 +44,40 @@ public:
 };
 //! [ctc-polytope-2-C]
 
+
+//! [ctc-exist-4-C]
+class MyCtcExist : public Ctc {
+public:
+
+	/*
+	 * Create MyCtcExist. The number of variables
+	 * is the number of bits set to "true" in the
+	 * "vars" structure; this number is obtained
+	 *  via vars.size().
+	 */
+	MyCtcExist(Ctc& c, const BitSet& vars, const IntervalVector& box_y) :
+		Ctc(vars.size()), c(c), vars(vars), box_y(box_y) { }
+
+	void contract(IntervalVector& box_x) {
+		// Create a CtcExist contractor on-the-fly
+		// and set the splitting precision on y
+		// to one tenth of the maximal diameter of x.
+		// The box_x is then contracted
+		CtcExist(c,vars,box_y,box_x.max_diam()/10).contract(box_x);
+	}
+
+
+	// The sub-contractor
+	Ctc& c;
+	// The variables indices
+	const BitSet& vars;
+	// The parameters domain
+	const IntervalVector& box_y;
+};
+
+//! [ctc-exist-4-C]
+
+
 //! [ctc-propag-1-C]
 class Count : public CtcFwdBwd {
 public:
@@ -288,4 +322,116 @@ int main() {
 	//! [ctc-polytope-1-C]
 	output << "! [ctc-polytope-1-O]" << endl;
 	}
+
+	{
+		output << "! [ctc-exist-1-O]" << endl;
+		//! [ctc-exist-1-C]
+
+		// create a constraint on (x,y)
+		Variable x,y;
+		NumConstraint c(x,y,sqr(x)+sqr(y)<=1);
+
+		// create domains for x and y
+		IntervalVector box_x(1, Interval(-10,10));
+		IntervalVector box_y(1, Interval(-1,1));
+
+		// set the precision that controls how much y will be bisected
+		double epsilon=1.0;
+
+		// create a contractor on x by transforming y into an
+		// existentially-quantified parameter.
+		CtcExist exist_y(c,y,box_y,epsilon);
+
+		// contract the domain of x
+		output << "box before contraction=" << box_x << endl;
+		exist_y.contract(box_x);
+		output << "box after contraction=" << box_x << endl;
+
+		//! [ctc-exist-1-C]
+		output << "! [ctc-exist-1-O]" << endl;
+	}
+
+	{
+		output << "! [ctc-exist-2-O]" << endl;
+		//! [ctc-exist-2-C]
+
+		// create a conjunction of two constraint on (x,y)
+		Variable x,y;
+		Function f(x,y,Return(sqr(x)+sqr(2*y-y),y-x));
+		IntervalVector z(2);
+		z[0]=Interval(0,1);
+		z[1]=Interval::ZERO;
+		NumConstraint c(x,y,f(x,y)=z);
+
+		// create domains for y
+		IntervalVector box_y(1, Interval(-1,1));
+
+		// observe the result of the contraction for
+		// different precision epsilon=10^{-_log}
+		for (int _log=0; _log<=8; _log++) {
+			// create the domain for x
+			IntervalVector box_x(1, Interval(-10,10));
+
+			// create the exist-contractor with the new precision
+			CtcExist exist_y(c,y,box_y,::pow(10,-_log));
+
+			// contract the box
+			exist_y.contract(box_x);
+
+			output << "epsilon=1e-" << _log << " box after contraction=" << box_x << endl;
+		}
+		//! [ctc-exist-2-C]
+		output << "! [ctc-exist-2-O]" << endl;
+	}
+
+	{
+		output << "! [ctc-exist-3-O]" << endl;
+		//! [ctc-exist-3-C]
+
+		// create a system
+		Variable x,y;
+		SystemFactory fac;
+		fac.add_var(x);
+		fac.add_var(y);
+		fac.add_ctr(sqr(x)+sqr(2*y-y)<=1);
+		fac.add_ctr(x=y);
+
+		System sys(fac);
+
+		CtcHC4 hc4(sys);
+
+		// create domains for y
+		IntervalVector box_y(1, Interval(-1,1));
+
+		// Creates the bitset structure that indicates which
+		// component are "quantified". The indices vary
+		// from 0 to 1 (2 variables only). These are the
+		// two first arguments. The bitset is initially empty
+		// which means that, by default, all the variables
+		// are parameters.
+		BitSet vars(0,1,BitSet::empt);
+
+		// Add "x" as variable.
+		vars.add(0);
+
+		// observe the result of the contraction for
+		// different precision epsilon=10^{-_log}
+		for (int _log=0; _log<=8; _log++) {
+			// create the domain for x
+			IntervalVector box_x(1, Interval(-10,10));
+
+			// create the exist-contractor with the new precision
+			CtcExist exist_y(hc4,vars,box_y,::pow(10,-_log));
+
+			// contract the box
+			exist_y.contract(box_x);
+
+			output << "epsilon=1e-" << _log << " box after contraction=" << box_x << endl;
+		}
+		//! [ctc-exist-3-C]
+		output << "! [ctc-exist-3-O]" << endl;
+	}
+
+
+
 }
