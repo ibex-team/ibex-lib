@@ -37,6 +37,14 @@ public:
 	 */
 	SetInterval(const IntervalVector& bounding_box, double eps, bool inner=true);
 
+
+	/**
+	 * \brief Loads a set from a data file.
+	 *
+	 * \see #save().
+	 */
+	SetInterval(const char* filename);
+
 	/*
 	 * \brief Delete this
 	 */
@@ -81,9 +89,20 @@ public:
 
 	void contract(Separator& sep);
 
+	/**
+	 * \brief Serialize the set and save it into a file
+	 */
+	void save(const char* filename);
+
 	void visit_leaves(SetNode::leaf_func func) const;
 
 protected:
+
+	/**
+	 * \brief Load the set from a file
+	 */
+	void load(const char* filename);
+
 	friend std::ostream& operator<<(std::ostream& os, const SetInterval& set);
 
 	SetNode* root; // NULL means no existing set (warning: different from empty set!)

@@ -71,6 +71,10 @@ public:
 
 protected:
 	friend class SetNode;
+	friend class SetInterval;
+
+	// partial initialization used by SetInterval::load only
+	SetBisect(int var, double pt);
 
 	SetNode* try_merge();
 

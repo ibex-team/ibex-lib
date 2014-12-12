@@ -9,6 +9,9 @@
 
 #include "ibex_SetInterval.h"
 #include "ibex_SetLeaf.h"
+#include "ibex_SetBisect.h"
+#include <stack>
+#include <fstream>
 
 using namespace std;
 
@@ -16,6 +19,10 @@ namespace ibex {
 
 SetInterval::SetInterval(const IntervalVector& bounding_box, double eps, bool inner) : root(new SetLeaf(inner? __IBEX_IN__: __IBEX_UNK__)), eps(eps), bounding_box(bounding_box) {
 
+}
+
+SetInterval::SetInterval(const char* filename) : root(NULL), eps(-1), bounding_box(1) {
+	load(filename);
 }
 
 bool SetInterval::is_empty() const {
@@ -50,6 +57,123 @@ SetInterval& SetInterval::operator|=(const SetInterval& set) {
 	return *this;
 }
 
+void SetInterval::save(const char* filename) {
+	std::stack<SetNode*> s;
+
+	s.push(root);
+
+	fstream os;
+	os.open(filename, ios::out | ios::trunc | ios::binary);
+
+	os.write((char*) &eps, sizeof(double));
+
+	int n=bounding_box.size();
+	os.write((char*) &n, sizeof(int));
+
+	for (int i=0; i<bounding_box.size(); i++) {
+		double d; // to store double values
+		d=bounding_box[i].lb();
+		os.write((char*) &d,sizeof(double));
+		d=bounding_box[i].ub();
+		os.write((char*) &d,sizeof(double));
+	}
+
+	while (!s.empty()) {
+		SetNode* node=s.top();
+		s.pop();
+		if (node->is_leaf()) {
+			int no_var=-1; // to store "-1" (means: leaf)
+			os.write((char*) &no_var, sizeof(int));
+			os.write((char*) &node->status, sizeof(NodeType));
+		}
+		else {
+			SetBisect* b=(SetBisect*) node;
+			os.write((char*) &b->var, sizeof(int));
+			os.write((char*) &b->pt, sizeof(double));
+			s.push(b->right);
+			s.push(b->left);
+		}
+	}
+	os.close();
+}
+
+void SetInterval::load(const char* filename) {
+
+	std::ifstream is;
+	is.open(filename, ios::in | ios::binary);
+
+	is.read((char*) &eps, sizeof(double));
+	//cout << "eps=" << eps << endl;
+
+	unsigned int n;
+	is.read((char*) &n, sizeof(int));
+	//cout << "n=" << n << endl;
+
+	bounding_box.resize(n);
+
+	for (int i=0; i<bounding_box.size(); i++) {
+		double lb,ub;
+		is.read((char*) &lb, sizeof(double));
+		is.read((char*) &ub, sizeof(double));
+		bounding_box[i]=Interval(lb,ub);
+	}
+	//cout << "bounding box=" << bounding_box << endl;
+
+	int var;
+	is.read((char*) &var, sizeof(int));
+
+	double pt;
+	NodeType status;
+
+	if (var==-1) {
+		is.read((char*) &status, sizeof(NodeType));
+		root = new SetLeaf(status);
+		is.close();
+		return;
+	}
+
+	is.read((char*) &pt, sizeof(double));
+	std::stack<SetNode*> s;
+	root = new SetBisect(var, pt); // left and right are both set to NULL temporarily
+	s.push(root);
+
+	SetBisect *node;
+	SetNode* subnode;
+
+	while (!s.empty()) {
+
+		assert(!s.top()->is_leaf());
+
+		node = (SetBisect*) s.top();
+
+		// =============== backtrack ======================
+		if (node->left && node->right) {
+			s.pop();
+			continue;
+		}
+
+		is.read((char*) &var, sizeof(int));
+
+		if (var==-1) {
+			is.read((char*) &status, sizeof(NodeType));
+			subnode = new SetLeaf(status);
+		} else {
+			is.read((char*) &pt, sizeof(double));
+			subnode  =new SetBisect(var,pt); // left and right are both set to NULL temporarily
+		}
+
+		if (node->left==NULL) node->left=subnode;
+		else {
+			assert(node->right==NULL);
+			node->right=subnode;
+		}
+
+		if (var!=-1)
+			s.push(subnode);
+	}
+
+	is.close();
+}
 
 void SetInterval::visit_leaves(SetNode::leaf_func func) const {
 	root->visit_leaves(func, bounding_box);
