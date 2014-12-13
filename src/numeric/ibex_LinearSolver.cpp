@@ -622,6 +622,7 @@ LinearSolver::LinearSolver(int nb_vars1, int nb_ctr1, int max_iter,
 		throw LPException();
 	}
 
+
 	status = CPXsetintparam(envcplex, CPX_PARAM_ITLIM, max_iter);
 	if (status != 0) {
 		char* errmsg = new char[1024];
@@ -818,7 +819,6 @@ LinearSolver::Status_Sol LinearSolver::solve() {
 		int status = CPXlpopt(envcplex, lpcplex);
 
 		if (status == 0) {
-
 			int solstat = CPXgetstat(envcplex, lpcplex);
 
 			switch (solstat) {
@@ -1038,8 +1038,8 @@ void LinearSolver::cleanConst() {
 		throw LPException();
 	}
 	return ;
-}
 
+}
 void LinearSolver::cleanAll() {
 
 	try {
@@ -1305,12 +1305,11 @@ LinearSolver::Status_Sol LinearSolver::solve() {
 	//int stat = -1;
 
 	try{
-		//myclp->initialDualSolve();
 		myclp->dual();
 		//stat = myclp->status();
 		myclp->status();
 
-		/** Status of problem:
+    	     /** Status of problem:
     	         -1 - unknown e.g. before solve or if postSolve says not optimal
     	         0 - optimal
     	         1 - primal infeasible

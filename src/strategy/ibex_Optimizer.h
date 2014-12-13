@@ -259,6 +259,11 @@ public:
 	static const double default_goal_rel_prec;
 
 
+
+
+
+
+
 	/** Default goal absolute precision */
 	static const double default_goal_abs_prec;
 

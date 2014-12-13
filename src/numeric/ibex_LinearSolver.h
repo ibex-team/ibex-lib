@@ -121,8 +121,6 @@ public:
 
 	~LinearSolver();
 
-// RUN
-
 	Status_Sol solve();
 
 	void writeFile(const char* name="save_LP.lp");
