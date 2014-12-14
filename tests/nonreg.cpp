@@ -17,8 +17,8 @@ using namespace ibex;
 
 const int NB_TESTS = 24;
 
-const double TIME_LIMIT = 10;
-const char* time_limit = "10";
+const double TIME_LIMIT = 500;
+const char* time_limit = "500";
 
 const char* sample_size = "1";
 const char* eq_eps      = "1e-08";
@@ -104,10 +104,10 @@ int main (int argc, char** argv) {
 		case Optimizer::UNBOUNDED_OBJ :      cerr << "FAILED: unbounded objective"; break;
 		case Optimizer::TIME_OUT :           cerr << "FAILED: timeout"; break;
 		case Optimizer::SUCCESS : {
-			if (o.loup < lb)                   {  cerr << "FAILED: upper bound (loup) is wrong"; }
-			else if (o.uplo > ub)              {  cerr << "FAILED: lower bound (uplo) is wrong"; }
+			if (o.loup < lb)                   {  cerr.precision(20); cerr << "FAILED: upper bound (loup=" << o.loup << ") is wrong"; }
+			else if (o.uplo > ub)              {  cerr.precision(20); cerr << "FAILED: lower bound (uplo=" << o.uplo << ") is wrong"; }
 			else if (o.time > REGRESSION_RATIO*time)
-			                                   {  cerr << "FAILED: time (" << o.time << "s) exceeds by more than 50% the reference time"; }
+			                                   {  cerr << "FAILED: time (" << o.time << "s) exceeds by more than 10% the reference time"; }
 			else if (o.nb_cells> REGRESSION_RATIO*nb_cells)
 			                                   {  cerr << "FAILED: number of cells (" << o.nb_cells << ") exceeds by more than 10% the reference value"; }
 			else                               {  ok=true; cout << "SUCCESS"; }
