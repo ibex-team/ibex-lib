@@ -231,6 +231,8 @@ public:
 //		TEST_ADD(TestArith::bwd_pow15);
 //		TEST_ADD(TestArith::bwd_pow16);
 		TEST_ADD(TestArith::bwd_pow17);
+
+		TEST_ADD(TestArith::bwd_atan2_01);
 	}
 private:
 
@@ -488,6 +490,8 @@ private:
 	void bwd_pow16();
 	void bwd_pow17();
 
+	void bwd_atan2_01();
+
 	void check_add_scal(const Interval& x, double z, const Interval& y_expected);
 	void check_add(const Interval& x, const Interval& z, const Interval& y_expected);
 	void check_mul_scal(const Interval& x, double z, const Interval& y_expected);
@@ -503,6 +507,8 @@ private:
 	void checkbwd_div(const Interval& y, const Interval& x1_before, const Interval& x2_before, const Interval& x1_after, const Interval& x2_after);
 	void checkbwd_trigo(const Interval& y, const Interval& xbefore, const Interval& xafter);
 	void checkbwd_pow(const Interval& y, const Interval& xbefore, const Interval& xafter, int p);
+	bool checkbwd_atan2(const Interval& a, const Interval& y_bef, const Interval& x_bef,
+								const Interval& y_aft, const Interval& x_aft);
 };
 
 #endif // __TEST_ARITH__

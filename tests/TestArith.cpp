@@ -588,3 +588,23 @@ void TestArith::div2_10() { check_div2(Interval(2,3),   Interval::NEG_REALS,    
 void TestArith::div2_11() { check_div2(Interval(2,3),   Interval::POS_REALS,       Interval::POS_REALS,       Interval::EMPTY_SET); }
 void TestArith::div2_12() { check_div2(Interval(-3,-2), Interval::NEG_REALS,       Interval::POS_REALS,       Interval::EMPTY_SET); }
 void TestArith::div2_13() { check_div2(Interval(-3,-2), Interval::POS_REALS,       Interval::NEG_REALS,       Interval::EMPTY_SET); }
+
+bool TestArith::checkbwd_atan2(const Interval& a, const Interval& y_bef, const Interval& x_bef,
+								const Interval& y_aft, const Interval& x_aft) {
+	bool res=true;
+	Interval y;
+	Interval x;
+
+	y=y_bef;
+	x=x_bef;
+	bwd_atan2(a,y,x);
+	//cout << "x1=" << x1 << " x2=" << x2 << endl;
+	res &= almost_eq(x,x_aft,ERROR) && almost_eq(y,y_aft,ERROR);
+
+	return res;
+}
+
+void TestArith::bwd_atan2_01() {
+	TEST_ASSERT(checkbwd_atan2(Interval(M_PI/6.,M_PI/3.),Interval(.5,10),Interval(.5,2),Interval(0.5,sqrt(3.)/2.),Interval(0.5,sqrt(3.)/2.)));
+}
+
