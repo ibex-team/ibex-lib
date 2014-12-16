@@ -8,8 +8,8 @@
 //============================================================================
 
 #include "ibex_StrategyParam.h"
-#include "ibex_UserFriendlyOptimizer.h"
 #include "ibex_DefaultStrategy.cpp_"
+#include "ibex_CtcHC4.h"
 #include "ibex_CtcAcid.h"
 #include "ibex_Ctc3BCid.h"
 #include "ibex_CtcPolytopeHull.h"
