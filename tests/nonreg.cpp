@@ -11,7 +11,6 @@
 #include <fstream>
 #include <sstream>
 #include <stdlib.h>
-#include "flops.cpp"
 
 using namespace std;
 using namespace ibex;

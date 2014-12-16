@@ -107,6 +107,8 @@ BoolInterval PdcHansenFeasibility::test(const IntervalVector& box) {
 		if (inflating_newton(pf,box2)) {
 			_solution = pf.extend(box2);
 			res = YES;
+		} else {
+			_solution.set_empty();
 		}
 	}
 	else {
@@ -116,10 +118,12 @@ BoolInterval PdcHansenFeasibility::test(const IntervalVector& box) {
 				_solution = pf.extend(box2);
 				res = YES;
 			}
-		} catch (EmptyBoxException& ) {	}
+		} catch (EmptyBoxException& ) {
+			_solution.set_empty();
+		}
 	}
 
-	_solution.set_empty();
+
 	delete [] pr;
 	delete [] pc;
 	return res;
