@@ -607,6 +607,9 @@ bool TestArith::checkbwd_atan2(const Interval& a, const Interval& y_bef, const I
 void TestArith::bwd_atan2_01() {
 	TEST_ASSERT(checkbwd_atan2(Interval(M_PI/6.,M_PI/3.),Interval(.5,10),Interval(.5,2),Interval(0.5,sqrt(3.)/2.),Interval(0.5,sqrt(3.)/2.)));
 }
+void TestArith::bwd_atan2_02() {
+	TEST_ASSERT(checkbwd_atan2(Interval(M_PI/4.,3*M_PI/4.),Interval(-100.,100.),Interval(1.,2.),Interval(-1,1),Interval(1.,2.)));
+}
 
 void TestArith::bwd_sqrt01() { checkproj(sqrt, Interval(1,3),				Interval(0,15),		Interval(1,9)); }
 void TestArith::bwd_sqrt02() { checkproj(sqrt, Interval(1,3),				Interval(0,2),			Interval(1,2)); }
