@@ -11,6 +11,7 @@
 #include <fstream>
 #include <sstream>
 #include <stdlib.h>
+#include "flops.cpp"
 
 using namespace std;
 using namespace ibex;
@@ -58,6 +59,19 @@ int main (int argc, char** argv) {
 		ibex_error("usage: nonreg [file containing expected results ]");
 	}
 
+	// ==================================================================================
+	cout << "measuring machine performance..." << endl;
+	srand(1);
+	volatile double a=rand();
+	volatile double b=rand();
+	Timer::start();
+	for (int i=0; i<100000000; i++) {
+		a *= b;
+	}
+	Timer::stop();
+	cout << "calibration time=" << Timer::VIRTUAL_TIMELAPSE() << endl;
+	// ==================================================================================
+
 	data.open("nonreg.dat");
 	res.open(argv[1]);
 
@@ -98,21 +112,22 @@ int main (int argc, char** argv) {
 
 		Optimizer::Status status=o.optimize();
 
-		switch (status) {
-		case Optimizer::INFEASIBLE :         cerr << "FAILED: infeasible"; break;
-		case Optimizer::NO_FEASIBLE_FOUND :  cerr << "FAILED: no feasible point found"; break;
-		case Optimizer::UNBOUNDED_OBJ :      cerr << "FAILED: unbounded objective"; break;
-		case Optimizer::TIME_OUT :           cerr << "FAILED: timeout"; break;
-		case Optimizer::SUCCESS : {
-			if (o.loup < lb)                   {  cerr.precision(20); cerr << "FAILED: upper bound (loup=" << o.loup << ") is wrong"; }
-			else if (o.uplo > ub)              {  cerr.precision(20); cerr << "FAILED: lower bound (uplo=" << o.uplo << ") is wrong"; }
-			else if (o.time > REGRESSION_RATIO*time)
-			                                   {  cerr << "FAILED: time (" << o.time << "s) exceeds by more than 10% the reference time"; }
-			else if (o.nb_cells> REGRESSION_RATIO*nb_cells)
-			                                   {  cerr << "FAILED: number of cells (" << o.nb_cells << ") exceeds by more than 10% the reference value"; }
-			else                               {  ok=true; cout << "SUCCESS"; }
-		}
-		}
+		cerr << "number of cells=" << o.nb_cells << " time=" << o.time << endl;
+//		switch (status) {
+//		case Optimizer::INFEASIBLE :         cerr << "FAILED: infeasible"; break;
+//		case Optimizer::NO_FEASIBLE_FOUND :  cerr << "FAILED: no feasible point found"; break;
+//		case Optimizer::UNBOUNDED_OBJ :      cerr << "FAILED: unbounded objective"; break;
+//		case Optimizer::TIME_OUT :           cerr << "FAILED: timeout"; break;
+//		case Optimizer::SUCCESS : {
+//			if (o.loup < lb)                   {  cerr.precision(20); cerr << "FAILED: upper bound (loup=" << o.loup << ") is wrong"; }
+//			else if (o.uplo > ub)              {  cerr.precision(20); cerr << "FAILED: lower bound (uplo=" << o.uplo << ") is wrong"; }
+//			else if (o.time > REGRESSION_RATIO*time)
+//			                                   {  cerr << "FAILED: time (" << o.time << "s) exceeds by more than 10% the reference time"; }
+//			else if (o.nb_cells> REGRESSION_RATIO*nb_cells)
+//			                                   {  cerr << "FAILED: number of cells (" << o.nb_cells << ") exceeds by more than 10% the reference value"; }
+//			else                               {  ok=true; cout << "SUCCESS"; }
+//		}
+//      }
 
 		cout << endl;
 
