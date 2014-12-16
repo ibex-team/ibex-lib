@@ -1046,7 +1046,18 @@ inline bool bwd_div(const Interval& y, Interval& x1, Interval& x2) {
 }
 
 inline bool bwd_sqrt(const Interval& y, Interval& x) {
-	x &= sqr(y);
+    if (y.ub()<0)
+    {
+    	x.set_empty();
+    } 
+   	else if (y.lb()<0) 
+   	{
+		x &= sqr(Interval(0,y.ub()));
+    } 
+    else 
+    {
+    	x &= sqr(y);
+    }
 	return !x.is_empty();
 }
 
