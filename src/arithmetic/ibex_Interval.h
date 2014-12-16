@@ -1169,7 +1169,7 @@ inline bool bwd_atan2(const Interval& theta, Interval& y, Interval& x) {
         b &= bwd_sqrt(s4,s3);
         b &= bwd_add(s3,s1,s2);
         b &= bwd_sqr(s2,y);
-        b &= bwd_sqr(s1,y);
+        b &= bwd_sqr(s1,x);
     } else {
         not_implemented("bwd_atan2 when x contains 0 and y contains 0");
     }
