@@ -13,12 +13,45 @@
 using namespace std;
 using namespace ibex;
 
+/*
+ * Convert char* --> int
+ */
+int _2int(const char* argname, const char* arg) {
+	char* endptr;
+	int val = strtol(arg,&endptr,10);
+	if (endptr!=arg+strlen(arg)*sizeof(char)) {
+		stringstream s;
+		s << "optimizer: " << argname << " must be an integer";
+		ibex_error(s.str().c_str());
+	}
+	return val;
+}
+
+/*
+ * Convert char* --> double
+ */
+double _2dbl(const char* argname, const char* arg) {
+	char* endptr;
+	double val = strtod(arg,&endptr);
+	if (endptr!=arg+strlen(arg)*sizeof(char)) {
+		stringstream s;
+		s << "optimizer: " << argname << " must be a real number";
+		ibex_error(s.str().c_str());
+	}
+	return val;
+}
+
 // ----------------------------------------------------------------------------
 // Parameterized Optimizer (with a system loaded from a file, and choice of
 //  contractor, linearization  and bisector)
 // ----------------------------------------------------------------------------
 
-double eqeps= 1.e-8;
+// Some parameters are chosen to be not configurable for the moment
+const bool HC4_INCREMENTAL = true;
+const double PROPAG_RATIO = 0.01;
+const double FIXPOINT_RATIO = 0.2;
+const int SAMPLE_SIZE = 1;
+const double EQ_EPS= 1.e-8;
 
 int main(int argc, char** argv) {
 
@@ -27,23 +60,32 @@ int main(int argc, char** argv) {
 		exit(1);
 	}
 
-	 // we build the following array because some parameters are chosen to be not configurable
-	 // for the moment
-	const char* args[10] = { argv[1], argv[2], argv[3], argv[4], argv[5], argv[6],
-			/* relative=absolute precision! */ argv[6],
-			/* sample size=1 */ "1",
-			/* time limit */ argv[7],
-			/* thickness of equation=1e-08 */ "1e-08"
-	};
-
 	try {
-		UserFriendlyOptimizer o(args);
+		OptimizerParam p(
+				argv[1],                     // filename
+				argv[2],                     // contractor
+				argv[3],                     // linear_relaxation
+				argv[4],                     // bisector
+				_2dbl("prec",argv[5]),       // precision
+				_2int("timelimit", argv[7]), // time limit
+				HC4_INCREMENTAL,             // hc4 incremental?
+				PROPAG_RATIO,                // propagation ratio
+				FIXPOINT_RATIO,              // fixpoint ratio
+				_2dbl("rel_prec", argv[6]),  // goal relative precision
+				_2dbl("rel_prec", argv[6]),  // goal absolute precision (= relative)
+				SAMPLE_SIZE,                 // sample size
+				EQ_EPS                       // thickness of equation
+				);
+
+		Optimizer o(p.get_sys(), p.get_ctc(), p.get_bsc(), p.prec, p.goal_rel_prec, p.goal_abs_prec, p.sample_size, p.eq_eps);
+
+		o.timeout = p.time_limit;
 
 		// the trace
 		o.trace=1;
 
 		// the search itself
-		Optimizer::Status result=o.optimize();
+		Optimizer::Status result=o.optimize(p.get_sys().box);
 
 		// printing the results
 		o.report();
