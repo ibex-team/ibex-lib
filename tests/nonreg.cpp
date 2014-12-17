@@ -20,17 +20,22 @@ const int NB_TESTS = 24;
 const double TIME_LIMIT = 500;
 const char* time_limit = "500";
 
-const char* sample_size = "1";
-const char* eq_eps      = "1e-08";
-
 const double REGRESSION_RATIO = 1.1;
+
+// Some parameters are chosen to be not configurable for the moment
+const bool HC4_INCREMENTAL = true;
+const double PROPAG_RATIO = 0.01;
+const double FIXPOINT_RATIO = 0.2;
+const int SAMPLE_SIZE = 1;
+const double EQ_EPS= 1.e-8;
+
 
 double _2dbl(const char* argname, const char* arg) {
 	char* endptr;
 	double val = strtod(arg,&endptr);
 	if (endptr!=arg+strlen(arg)*sizeof(char)) {
 		stringstream s;
-		s << "error: " << argname << " must be a real number";
+		s << "nonreg: " << argname << " must be a real number";
 		ibex_error(s.str().c_str());
 	}
 	return val;
@@ -41,17 +46,20 @@ int _2int(const char* argname, const char* arg) {
 	int val = strtol(arg,&endptr,10);
 	if (endptr!=arg+strlen(arg)*sizeof(char)) {
 		stringstream s;
-		s << "UserFriendlyOptimizer: " << argname << " must be an integer";
+		s << "nonreg: " << argname << " must be an integer";
 		ibex_error(s.str().c_str());
 	}
 	return val;
 }
+
 
 int main (int argc, char** argv) {
 
 	ifstream data;
 	ifstream res;
 	string word;
+	string filename, contractor, linear_relax, bisector;
+	double prec, goal_prec;
 
 	// check the number of arguments
 	if (argc<2) {
@@ -74,21 +82,24 @@ int main (int argc, char** argv) {
 	data.open("nonreg.dat");
 	res.open(argv[1]);
 
-	const char* args[10];
-
 	bool all_success=true;
 
 	for (int n=0; n<NB_TESTS; n++) {
-		for (int i=0; i<6; i++) {
-			data >> word;
-			args[i]=strdup(word.c_str());
-		}
-		cout << args[0] << "\t";
 
-		args[6]=args[5];
-		args[7]=sample_size;
-		args[8]=time_limit;
-		args[9]=eq_eps;
+		data >> filename;
+		data >> contractor;
+		data >> linear_relax;
+		data >> bisector;
+		data >> word; prec=_2dbl("prec",word.c_str());
+		data >> word; goal_prec=_2dbl("goal_prec",word.c_str());
+
+		OptimizerParam p(
+					filename.c_str(), contractor.c_str(), linear_relax.c_str(), bisector.c_str(), prec,
+					TIME_LIMIT, HC4_INCREMENTAL, PROPAG_RATIO, FIXPOINT_RATIO, goal_prec, goal_prec,
+					SAMPLE_SIZE, EQ_EPS
+					);
+
+		cout << filename << "\t";
 
 		bool ok=false;
 
@@ -102,14 +113,13 @@ int main (int argc, char** argv) {
 		int nb_cells=_2int("nb cells", word.c_str());
 
 		if (time > TIME_LIMIT) { // too long... skip this bench
-			for (int i=0; i<6; i++) free((char*) args[i]);
 			cout << " (skip)" << endl;
 			continue;
 		}
 
-		UserFriendlyOptimizer o(args);
+		Optimizer o(p.get_sys(), p.get_ctc(), p.get_bsc(), p.prec, p.goal_rel_prec, p.goal_abs_prec, p.sample_size, p.eq_eps);
 
-		Optimizer::Status status=o.optimize();
+		Optimizer::Status status=o.optimize(p.get_sys().box);
 
 		cerr << "number of cells=" << o.nb_cells << " time=" << o.time << endl;
 //		switch (status) {
@@ -131,9 +141,6 @@ int main (int argc, char** argv) {
 		cout << endl;
 
 		all_success &= ok;
-
-		for (int i=0; i<6; i++)
-			free((char*) args[i]);
 	}
 
 	return all_success ? 0 : -1;
