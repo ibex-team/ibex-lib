@@ -91,7 +91,7 @@ public:
 	bool operator!=(const Dim& d) const;
 
 	/**
-	 * \brief Add an index to *this
+	 * \brief Transpose *this.
 	 *
 	 * Compute the dimension of an expression obtained
 	 * by indexing an expression whose dimension is *this.
@@ -99,7 +99,7 @@ public:
 	Dim transpose_dim() const;
 
 	/**
-	 * \brief Transpose *this.
+	 * \brief Add an index to *this
 	 *
 	 * Compute the dimension of the transpose expression obtained
 	 * by indexing an expression whose dimension is *this.
