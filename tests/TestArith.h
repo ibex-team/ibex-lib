@@ -231,6 +231,35 @@ public:
 //		TEST_ADD(TestArith::bwd_pow15);
 //		TEST_ADD(TestArith::bwd_pow16);
 		TEST_ADD(TestArith::bwd_pow17);
+
+		TEST_ADD(TestArith::bwd_atan2_01);
+		TEST_ADD(TestArith::bwd_atan2_02);
+
+		TEST_ADD(TestArith::bwd_sqrt01);
+		TEST_ADD(TestArith::bwd_sqrt02);
+		TEST_ADD(TestArith::bwd_sqrt03);
+		TEST_ADD(TestArith::bwd_sqrt04);
+		TEST_ADD(TestArith::bwd_sqrt05);
+		TEST_ADD(TestArith::bwd_sqrt06);
+		TEST_ADD(TestArith::bwd_sqrt07);
+
+		TEST_ADD(TestArith::bwd_atan01);
+		TEST_ADD(TestArith::bwd_atan02);
+		TEST_ADD(TestArith::bwd_atan03);
+		TEST_ADD(TestArith::bwd_atan04);
+		TEST_ADD(TestArith::bwd_atan05);
+
+		TEST_ADD(TestArith::bwd_add01);
+		TEST_ADD(TestArith::bwd_add02);
+		TEST_ADD(TestArith::bwd_add03);
+		TEST_ADD(TestArith::bwd_add04);
+		TEST_ADD(TestArith::bwd_add05);
+
+		TEST_ADD(TestArith::bwd_sub01);
+		TEST_ADD(TestArith::bwd_sub02);
+		TEST_ADD(TestArith::bwd_sub03);
+		TEST_ADD(TestArith::bwd_sub04);
+		TEST_ADD(TestArith::bwd_sub05);
 	}
 private:
 
@@ -488,6 +517,35 @@ private:
 	void bwd_pow16();
 	void bwd_pow17();
 
+	void bwd_atan2_01();
+	void bwd_atan2_02();
+
+	void bwd_sqrt01();
+	void bwd_sqrt02();
+	void bwd_sqrt03();
+	void bwd_sqrt04();
+	void bwd_sqrt05();
+	void bwd_sqrt06();
+	void bwd_sqrt07();
+
+	void bwd_atan01();
+	void bwd_atan02();
+	void bwd_atan03();
+	void bwd_atan04();
+	void bwd_atan05();
+
+	void bwd_add01();
+	void bwd_add02();
+	void bwd_add03();
+	void bwd_add04();
+	void bwd_add05();
+
+	void bwd_sub01();
+	void bwd_sub02();
+	void bwd_sub03();
+	void bwd_sub04();
+	void bwd_sub05();
+
 	void check_add_scal(const Interval& x, double z, const Interval& y_expected);
 	void check_add(const Interval& x, const Interval& z, const Interval& y_expected);
 	void check_mul_scal(const Interval& x, double z, const Interval& y_expected);
@@ -503,6 +561,13 @@ private:
 	void checkbwd_div(const Interval& y, const Interval& x1_before, const Interval& x2_before, const Interval& x1_after, const Interval& x2_after);
 	void checkbwd_trigo(const Interval& y, const Interval& xbefore, const Interval& xafter);
 	void checkbwd_pow(const Interval& y, const Interval& xbefore, const Interval& xafter, int p);
+	bool checkbwd_atan2(const Interval& a, const Interval& y_bef, const Interval& x_bef,
+								const Interval& y_aft, const Interval& x_aft);
+	bool checkbwd_atan(const Interval& y, const Interval& xbefore, const Interval& xafter);
+	bool checkbwd_add(const Interval& y, const Interval& x1_before, const Interval& x2_before, const Interval& x1_after, const Interval& x2_after);
+	bool checkbwd_sub(const Interval& y, const Interval& x1_before, const Interval& x2_before, const Interval& x1_after, const Interval& x2_after);
+
+
 };
 
 #endif // __TEST_ARITH__
