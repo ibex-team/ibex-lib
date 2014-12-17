@@ -514,5 +514,11 @@ void TestExpr::subnodes01() {
 			    (&nodes[5]==&y && &nodes[6]==&x));
 }
 
+void TestExpr::bug81() {
+	const ExprSymbol& x=ExprSymbol::new_("x",Dim::row_vec(3));
+	IntervalVector y(3);
+	const ExprNode& z=x+y;
+	TEST_ASSERT(z.dim == x.dim);
+}
 
 } // end namespace

@@ -14,7 +14,7 @@ using namespace std;
 
 /*======================================= data ========================================*/
 const int N=10;                // number of beacons
-const int T=200000;            // number of time steps
+const int T=3;                 // number of time steps
 const double L=10;             // limit of the environment (the robot is in the area [0,L]x[0,L])
 const double BEACON_ERROR=0.1; // the uncertainty on each beacon position
 const double DIST_ERROR=0.1;   // the uncertainty on each measured distance
@@ -37,7 +37,7 @@ void init_data() {
 		// need the exact values to calculate the distances.
 		beacons[b][0]=((double) rand()/RAND_MAX)*L;
 		beacons[b][1]=((double) rand()/RAND_MAX)*L;
-		//cout << "beacon n°" << b <<  " x=" << beacons[b][0] << " y=" << beacons[b][1] << endl;
+		cout << "beacon n°" << b <<  " x=" << beacons[b][0] << " y=" << beacons[b][1] << endl;
 	}
 	cout << endl;
 
@@ -50,7 +50,7 @@ void init_data() {
 
 	for (int t=0; t<T; t++) {
 
-		//cout << "x[" << t << "]=" << x1 << " y[" << t << "]=" << y1 << endl ;
+		cout << "x[" << t << "]=" << x1 << " y[" << t << "]=" << y1 << endl ;
 
 		// for each beacon, a measurement is generated from the position
 		// of the robot at time t

@@ -166,11 +166,15 @@ ExprConstant::ExprConstant(const IntervalVector& v, bool in_row)
 }
 
 Vector::operator const ExprConstant&() const {
-	return ExprConstant::new_vector(*this,false);
+	const ExprConstant& e=ExprConstant::new_vector(*this,false);
+	((Dim&) e.dim).cst_vec = true;
+	return e;
 }
 
 IntervalVector::operator const ExprConstant&() const {
-	return ExprConstant::new_vector(*this,false);
+	const ExprConstant& e=ExprConstant::new_vector(*this,false);
+	((Dim&) e.dim).cst_vec = true;
+	return e;
 }
 
 ExprConstant::ExprConstant(const IntervalMatrix& m)
@@ -223,8 +227,8 @@ ExprBinaryOp::ExprBinaryOp(const ExprNode& left, const ExprNode& right, const Di
 }
 
 ExprAdd::ExprAdd(const ExprNode& left, const ExprNode& right) :
-				ExprBinaryOp(left,right,left.dim) {
-	if (!(left.dim == right.dim)) throw DimException("mismatched dimensions in addition");
+				ExprBinaryOp(left,right,add_dim((Dim&) left.dim, (Dim&) right.dim)) {
+
 }
 
 ExprMul::ExprMul(const ExprNode& left, const ExprNode& right) :
@@ -232,8 +236,7 @@ ExprMul::ExprMul(const ExprNode& left, const ExprNode& right) :
 }
 
 ExprSub::ExprSub(const ExprNode& left, const ExprNode& right) :
-				ExprBinaryOp(left,right,left.dim) {
-	if (!(left.dim == right.dim)) throw DimException("mismatched dimensions in subtraction");
+				ExprBinaryOp(left,right,add_dim((Dim&) left.dim, (Dim&) right.dim)) {
 }
 
 ExprDiv::ExprDiv(const ExprNode& left, const ExprNode& right) :
