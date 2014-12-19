@@ -6,15 +6,16 @@
 // Created     : Oct 18, 2014
 //============================================================================
 
-#ifndef __IBEX_OPTIMDATA_H__
-#define __IBEX_OPTIMDATA_H__
+#ifndef __IBEX_OPTIM_DATA_H__
+#define __IBEX_OPTIM_DATA_H__
 
 #include "ibex_Backtrackable.h"
 #include "ibex_Interval.h"
 
 namespace ibex {
 
-/** \ingroup strategy
+/**
+ * \ingroup strategy
  *
  * \brief Data required for the Optimizer
  */
@@ -35,10 +36,18 @@ public:
 	 */
 	std::pair<Backtrackable*,Backtrackable*> down();
 
-	/** for the Casado criteria */
-	/** the image of the objective on the current box */
+	/**
+	 * \brief Casado criterion
+	 *
+	 * Image of the objective on the current box
+	 */
 	Interval pf;
-	/** the constraint factor of the current box : between 0 infeasible and 1 for all constraints satisfied */
+
+	/**
+	 * \brief Casado criterion
+	 *
+	 * Constraint factor of the current box : between 0 infeasible and 1 for all constraints satisfied.
+	 */
 	double pu;
 
 protected:
@@ -47,4 +56,4 @@ protected:
 };
 
 } // end namespace ibex
-#endif // __IBEX_OPTIMDATA_H__
+#endif // __IBEX_OPTIM_DATA_H__

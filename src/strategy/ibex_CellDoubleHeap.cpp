@@ -77,13 +77,13 @@ unsigned int CellDoubleHeap::size() const {
 }
 
 void CellDoubleHeap::contract_heap(double new_loup) {
-	heap1->setLoup(new_loup);
-	if (critpr>0) heap2->setLoup(new_loup);
+	heap1->set_loup(new_loup);
+	if (critpr>0) heap2->set_loup(new_loup);
 
 	if (nb_cells==0) return;
 
 	CellHeap_2 *heap_tmp = heap1->init_copy();
-	heap_tmp->setLoup(new_loup);
+	heap_tmp->set_loup(new_loup);
 
 	contract_tmp(new_loup, heap1->root, *heap_tmp);
 
@@ -149,7 +149,7 @@ bool CellDoubleHeap::empty() const {
 }
 
 void CellDoubleHeap::push(Cell* cell) {
-	CellHeapElt * elt;
+	CellHeapElt* elt;
 	if (critpr > 0) {
 		elt = new CellHeapElt(cell, heap1->cost(*cell), heap2->cost(*cell));
 	} else {
@@ -212,8 +212,8 @@ void CellDoubleHeap::sort() {
 
 
 void CellDoubleHeap::setLoup( double new_loup) {
-	heap1->setLoup(new_loup);
-	heap2->setLoup(new_loup);
+	heap1->set_loup(new_loup);
+	heap2->set_loup(new_loup);
 }
 
 
