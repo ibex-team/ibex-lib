@@ -1,6 +1,4 @@
 
-constants
- 
 
 variables
 x1 in [0.001, 1.e8];
