@@ -9,8 +9,8 @@
  * Created     : Dec 13, 2011
  * ---------------------------------------------------------------------------- */
 
-#ifndef _IBEX_DIM_H_
-#define _IBEX_DIM_H_
+#ifndef __IBEX_DIM_H__
+#define __IBEX_DIM_H__
 
 #include <iostream> // for ostream
 #include <utility>  // for pair
@@ -91,7 +91,7 @@ public:
 	bool operator!=(const Dim& d) const;
 
 	/**
-	 * \brief Add an index to *this
+	 * \brief Transpose *this.
 	 *
 	 * Compute the dimension of an expression obtained
 	 * by indexing an expression whose dimension is *this.
@@ -99,7 +99,7 @@ public:
 	Dim transpose_dim() const;
 
 	/**
-	 * \brief Transpose *this.
+	 * \brief Add an index to *this
 	 *
 	 * Compute the dimension of the transpose expression obtained
 	 * by indexing an expression whose dimension is *this.
@@ -140,11 +140,37 @@ public:
 	/** \brief Build the three-dimensional structure. */
 	Dim(int dim1, int dim2, int dim3);
 
+	/**
+	 * \brief True if this is the dimension of a constant vector.
+	 *
+	 * The dimension of a constant vector (IntervalVector) is a column
+	 * vector by default. This means that it may be automatically
+	 * transposed to a row vector if necessary.
+	 *
+	 * This field is always set to false by default.
+	 */
+	bool cst_vec;
+
 };
 
 
 /** \ingroup arithmetic */
 /*@{*/
+
+/**
+ * Return the dimension of a sum
+ *
+ * This is not as simple as "l" or "r" because
+ * constant vectors (IntervalVector) are always
+ * column vector by default. So they have to be
+ * transformed into row vectors when added to row
+ * vectors (so this function can modify "cst_vec" in
+ * l or r).
+ *
+ * If l and r are both cst_vec (possible with expressions built from the parser)
+ * then the result is also a cst_vec.
+ */
+Dim add_dim(Dim& l, Dim& r);
 
 /**
  * Return the dimension of a product (left*right)
@@ -160,7 +186,7 @@ Dim vec_dim(const Array<const Dim>& comp, bool in_a_row);
 
 /*================================== inline implementations ========================================*/
 
-inline Dim::Dim() : dim1(1), dim2(1), dim3(1) {
+inline Dim::Dim() : dim1(1), dim2(1), dim3(1), cst_vec(false) {
 
 }
 
@@ -238,4 +264,4 @@ std::ostream& operator<<(std::ostream&, const Dim&);
 
 } // namespace ibex
 
-#endif // _IBEX_DIM_H_
+#endif // __IBEX_DIM_H__

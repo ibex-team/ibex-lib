@@ -60,6 +60,8 @@ public:
 		TEST_ADD(TestExpr::apply03);
 
 		TEST_ADD(TestExpr::subnodes01);
+
+		TEST_ADD(TestExpr::bug81);
 	}
 
 	void symbol();
@@ -101,6 +103,9 @@ public:
 	void apply03();
 
 	void subnodes01();
+
+	// row vector variable + (column) vector constant
+	void bug81();
 };
 
 } // end namespace

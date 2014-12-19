@@ -12,6 +12,8 @@
 #include "ibex_Affine2.h"
 
 
+#ifdef IBEX_FMA
+
 namespace ibex {
 
 
@@ -734,6 +736,6 @@ Affine2Main<AF_fAF2_fma>& Affine2Main<AF_fAF2_fma>::sqr(const Interval itv) {
 
 }// end namespace ibex
 
-
+#endif // IBEX_FMA
 
 
