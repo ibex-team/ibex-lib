@@ -24,7 +24,8 @@
 #include "ibex_PdcFirstOrder.h"
 
 #include <float.h>
-#include <stdlib.h>
+//#include <stdlib.h>
+#include "ibex_Random.h"
 
 using namespace std;
 
@@ -484,7 +485,7 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 			OptimCell *c;
 			// random choice between the 2 buffers corresponding to two criteria implemented in two heaps)
 			// critpr chances over 100 to choose the second heap
-			if (rand() % 100 >=critpr) {
+			if (RNG::rand(0,100) >=critpr) {
 				indbuf=0;
 				c=buffer.top();  // the first heap is used
 			} else {

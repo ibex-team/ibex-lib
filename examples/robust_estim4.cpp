@@ -32,18 +32,18 @@ const double eps = 0.001;	  // Maximum diameter of the outputted boxes
 
 // init data (simulate measurements)
 void init_data() {
-	srand(seed);
+	ibex::RNG::srand(seed);
 
 	double center[N];
-	for (int j=0; j<N; j++) center[j] = ((double) rand()/RAND_MAX)*L;
+	for (int j=0; j<N; j++) center[j] = ibex::RNG::rand(0,L);
 
-	rand();
+	ibex::RNG::rand();
 
 	/* Generate q+3 consistent measures */
 	
 	double sum;
 	for (int i=0; i<Q+3; i++) {
-		for (int j=0; j<N; j++) beacons[i][j] = ((double) rand()/RAND_MAX)*L;
+		for (int j=0; j<N; j++) beacons[i][j] = ibex::RNG::rand(0,L);
 		sum = 0;
 		for (int j=0; j<N; j++) sum += pow(beacons[i][j]-center[j],2);
 		dist[i]=sqrt(sum);
@@ -52,10 +52,10 @@ void init_data() {
 	/* Generate p-q-3 outliers */
 	
 	for (int i=Q+3; i<P; i++) {
-		for (int j=0; j<N; j++) beacons[i][j] = ((double) rand()/RAND_MAX)*L;
+		for (int j=0; j<N; j++) beacons[i][j] = ibex::RNG::rand(0,L);
 		sum = 0;	
 		for (int j=0; j<N; j++) sum += pow(beacons[i][j]-center[j],2);
-		dist[i]=sqrt(sum)+((double) rand()/RAND_MAX)*OUTLIERS_ERROR;
+		dist[i]=sqrt(sum)+ibex::RNG::rand(0,OUTLIERS_ERROR);
 	}
 }
 

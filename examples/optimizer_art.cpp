@@ -30,7 +30,7 @@ int main(int argc, char** argv){
 		double goalprec= 1.e-8;
 		double timelimit = 3600;
 
-		srand(1);
+		RNG::srand(1);
 
 		// the extended system
 		ExtendedSystem ext_sys(sys);

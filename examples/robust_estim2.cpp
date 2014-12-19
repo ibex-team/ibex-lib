@@ -47,7 +47,7 @@ const double widthFactor=4.3;			// The sides of our boxes are picked at random i
 
 int main() {
 	
-	srand(seed);
+	RNG::srand(seed);
 	
 	Array<IntervalVector> boxes(P);
 	
@@ -60,8 +60,8 @@ int main() {
 		
 		/* Randomize the box center */
 		for (int j=0; j<N; j++) {
-			c = ((double) rand()/RAND_MAX)*L;
-			ext = ((double) rand()/RAND_MAX)*widthFactor*L;
+			c = RNG::rand(0,L);
+			ext = RNG::rand(0,L);
 			(*b)[j] = c + ext*Interval(-0.5,0.5);
 		}
 		

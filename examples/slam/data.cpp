@@ -9,6 +9,7 @@
 //============================================================================
 
 #include "data.h"
+#include "ibex_Random.h"
 
 using namespace std;
 
@@ -28,23 +29,23 @@ IntervalMatrix v(T-1,2);       // v(t)=(dx,dy), the difference vector between th
 // init data (simulate measurements)
 void init_data() {
 
-	srand(1111);
+	RNG::srand(1111);
 
 	cout << "************** beacons **************" << endl;
 	for (int b=0; b<N; b++) {
 		// set beacons exact positions
 		// remark: we don't put uncertainty right now because we
 		// need the exact values to calculate the distances.
-		beacons[b][0]=((double) rand()/RAND_MAX)*L;
-		beacons[b][1]=((double) rand()/RAND_MAX)*L;
+		beacons[b][0]=RNG::rand(0,L);
+		beacons[b][1]=RNG::rand(0,L);
 		cout << "beacon n°" << b <<  " x=" << beacons[b][0] << " y=" << beacons[b][1] << endl;
 	}
 	cout << endl;
 
 	// generate the initial position
 	// of the robot randomly
-	double x1=((double) rand()/RAND_MAX)*L;
-	double y1=((double) rand()/RAND_MAX)*L;
+	double x1=RNG::rand(0,L);
+	double y1=RNG::rand(0,L);
 
 	cout << "************** robot **************" << endl;
 
@@ -64,7 +65,7 @@ void init_data() {
 
 		// generate a movement of length 1
 		// we take randomly an angle between 0 and 2*pi
-		double alpha=((double) rand()/RAND_MAX)*2*3.14159265359;
+		double alpha=RNG::rand(0,2*3.14159265359);
 
 		if (t<T-1) {
 			v[t][0]=cos(alpha);

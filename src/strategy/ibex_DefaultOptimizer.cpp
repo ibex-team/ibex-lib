@@ -20,6 +20,7 @@
 #include "ibex_Array.h"
 #include <vector>
 #include "ibex_DefaultStrategy.cpp_"
+#include "ibex_Random.h"
 
 namespace ibex {
 
@@ -48,7 +49,7 @@ DefaultOptimizer::DefaultOptimizer(System& _sys, double prec, double goal_prec) 
 			  rec(new SmearSumRelative(get_ext_sys(_sys,default_equ_eps),prec)),
 			  prec, goal_prec, goal_prec, 1, default_equ_eps) {
   
-	srand(1);
+	RNG::srand(1);
 
 	data = *memory(); // keep track of my data
 
