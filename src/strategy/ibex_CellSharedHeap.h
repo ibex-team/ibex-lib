@@ -8,8 +8,8 @@
 // Last Update : May 12, 2012
 //============================================================================
 
-#ifndef __IBEX_CELL_HEAP_2_H__
-#define __IBEX_CELL_HEAP_2_H__
+#ifndef __IBEX_CELL_SHARED_HEAP_H__
+#define __IBEX_CELL_SHARED_HEAP_H__
 
 #include "ibex_CellBuffer.h"
 #include "ibex_Cell.h"
@@ -30,7 +30,7 @@ class CellHeapElt {
 
 private:
 	friend class CellHeapNode;
-	friend class CellHeap_2;
+	friend class CellSharedHeap;
 	friend class CellDoubleHeap;
 
 	/** Create an CellHeapElt with a cell and its criteria */
@@ -74,7 +74,7 @@ private:
 class CellHeapNode {
 
 private:
-	friend class CellHeap_2;
+	friend class CellSharedHeap;
 	friend class CellDoubleHeap;
 
 	/** Create a node from an element and the father node. */
@@ -125,7 +125,7 @@ private:
  *
  * \see #ibex::CellBuffer, #ibex::CellHeap, #ibex::CellDoubleHeap.
  */
-class CellHeap_2 : public CellBuffer {
+class CellSharedHeap : public CellBuffer {
 
 public:
     /**
@@ -143,12 +143,12 @@ public:
 	 * \param goal_var - index of the variable where the criterion is calculated
 	 * \param heap_id  - id number of this heap (e.g.: 0 or 1 in case of DoubleHeap)
 	 */
-	CellHeap_2(criterion crit, int goal_var, int heap_id);
+	CellSharedHeap(criterion crit, int goal_var, int heap_id);
 
 	/**
 	 * \brief Delete this.
 	 */
-	~CellHeap_2();
+	~CellSharedHeap();
 
 	/**
 	 * \brief Flush the buffer.
@@ -247,7 +247,7 @@ private:
 	/** The root of the heap */
 	CellHeapNode* root;
 
-	virtual CellHeap_2* init_copy()=0;
+	virtual CellSharedHeap* init_copy()=0;
 
 	/**
 	 * Access to the ith node rank by largest-first order
@@ -280,12 +280,12 @@ private:
 	CellHeapNode* erase_node_no_update(unsigned int i);
 
 	/** Used in the contract_heap function (proceed by recursivity) */
-	void contract_rec(double new_loup, CellHeapNode* node, CellHeap_2& heap);
+	void contract_rec(double new_loup, CellHeapNode* node, CellSharedHeap& heap);
 
 	/** Used in the sort function (proceed by recursivity) */
-	void sort_rec(CellHeapNode* node, CellHeap_2& heap);
+	void sort_rec(CellHeapNode* node, CellSharedHeap& heap);
 
-	friend std::ostream& operator<<(std::ostream& os, const CellHeap_2& h);
+	friend std::ostream& operator<<(std::ostream& os, const CellSharedHeap& h);
 };
 
 /**
@@ -293,7 +293,7 @@ private:
  *
  * \brief Cell Heap based on lower bound criterion
  */
-class CellHeapVarLB: public CellHeap_2 {
+class CellHeapVarLB: public CellSharedHeap {
 public:
 	CellHeapVarLB(int ind_var, int ind_crit=0) ;
 
@@ -308,7 +308,7 @@ public:
  *
  * \brief Cell Heap based on upper bound criterion
  */
-class CellHeapVarUB: public CellHeap_2 {
+class CellHeapVarUB: public CellSharedHeap {
 public:
 	CellHeapVarUB(int ind_var, int ind_crit=0) ;
 
@@ -322,7 +322,7 @@ public:
  *
  * \brief Cost-based Cell Heap
  */
-class CellHeapCost: public CellHeap_2 {
+class CellHeapCost: public CellSharedHeap {
 public:
 
 	CellHeapCost(criterion crit, int ind_var=0, int ind_crit=0) ;
@@ -340,8 +340,8 @@ std::ostream& operator<<(std::ostream& os, const CellHeapElt& node) ;
 std::ostream& operator<<(std::ostream& os, const CellHeapNode& node) ;
 
 /** Display the buffer */
-std::ostream& operator<<(std::ostream&, const CellHeap_2& heap);
+std::ostream& operator<<(std::ostream&, const CellSharedHeap& heap);
 
 
 } // end namespace ibex
-#endif // __IBEX_CELL_HEAP_2_H__
+#endif // __IBEX_CELL_SHARED_HEAP_H__

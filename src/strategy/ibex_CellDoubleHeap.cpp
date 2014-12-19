@@ -11,27 +11,27 @@
 
 namespace ibex {
 
-CellDoubleHeap::CellDoubleHeap(int ind_var, int critpr_in, CellHeap_2::criterion crit_2) :
+CellDoubleHeap::CellDoubleHeap(int ind_var, int critpr_in, CellSharedHeap::criterion crit_2) :
 								crit(crit_2), critpr(critpr_in) , ind_var(ind_var), indbuf(0) {
 	if (critpr>0) {
 		switch (crit_2) {
-		case CellHeap_2::LB :
+		case CellSharedHeap::LB :
 			ibex_error("CellDoubleHeap: you must specify another criterion"); break;
-		case CellHeap_2::UB :
+		case CellSharedHeap::UB :
 			heap1 = new CellHeapVarLB(ind_var,0);
 			heap2 = new CellHeapVarUB(ind_var,1);
 			break;
-		case CellHeap_2::C3 :
-		case CellHeap_2::C5 :
-		case CellHeap_2::C7 :
-		case CellHeap_2::PU :
+		case CellSharedHeap::C3 :
+		case CellSharedHeap::C5 :
+		case CellSharedHeap::C7 :
+		case CellSharedHeap::PU :
 			heap1 = new CellHeapVarLB(ind_var,0);
 			heap2 = new CellHeapCost(crit_2,ind_var,1);
 			break;
-		case CellHeap_2::PF_LB :
-		case CellHeap_2::PF_UB :
-			heap1 = new CellHeapCost(CellHeap_2::PF_LB,ind_var,0);
-			heap2 = new CellHeapCost(CellHeap_2::PF_UB,ind_var,1);
+		case CellSharedHeap::PF_LB :
+		case CellSharedHeap::PF_UB :
+			heap1 = new CellHeapCost(CellSharedHeap::PF_LB,ind_var,0);
+			heap2 = new CellHeapCost(CellSharedHeap::PF_UB,ind_var,1);
 			break;
 		default :
 			ibex_error("CellDoubleHeap: you must specify another criterion"); break;
@@ -82,7 +82,7 @@ void CellDoubleHeap::contract_heap(double new_loup) {
 
 	if (nb_cells==0) return;
 
-	CellHeap_2 *heap_tmp = heap1->init_copy();
+	CellSharedHeap *heap_tmp = heap1->init_copy();
 	heap_tmp->set_loup(new_loup);
 
 	contract_tmp(new_loup, heap1->root, *heap_tmp);
@@ -98,7 +98,7 @@ void CellDoubleHeap::contract_heap(double new_loup) {
 
 	if (critpr>0){
 		switch (crit) {
-		case CellHeap_2::C3 : case CellHeap_2::C5 : case CellHeap_2::C7 :
+		case CellSharedHeap::C3 : case CellSharedHeap::C5 : case CellSharedHeap::C7 :
 			heap2->sort(); break;
 		default: break;
 		}
@@ -106,7 +106,7 @@ void CellDoubleHeap::contract_heap(double new_loup) {
 
 }
 
-void CellDoubleHeap::contract_tmp(double new_loup, CellHeapNode* node, CellHeap_2& heap) {
+void CellDoubleHeap::contract_tmp(double new_loup, CellHeapNode* node, CellSharedHeap& heap) {
 
 	if (node->isSup(new_loup, 0)) {
 		// we must remove from the other CellHeap all the sub-nodes
@@ -130,9 +130,9 @@ void CellDoubleHeap::erase_other_heaps(CellHeapNode* node) {
 	node->left=NULL;
 
 	switch (crit) {
-	case CellHeap_2::UB : case CellHeap_2::PU : case CellHeap_2::PF_UB : case CellHeap_2::PF_LB :
+	case CellSharedHeap::UB : case CellSharedHeap::PU : case CellSharedHeap::PF_UB : case CellSharedHeap::PF_LB :
 		heap2->erase_node(node->elt->indice[1]); break;
-	case CellHeap_2::C3 : case CellHeap_2::C5 : case CellHeap_2::C7 :
+	case CellSharedHeap::C3 : case CellSharedHeap::C5 : case CellSharedHeap::C7 :
 		heap2->erase_node_no_update(node->elt->indice[1]); break;
 	default :
 		ibex_error("CellDoubleHeap::erase_other_heaps: you must specify another criterion"); break;
@@ -201,9 +201,9 @@ Cell* CellDoubleHeap::top() const {
 
 void CellDoubleHeap::sort() {
 	switch (crit) {
-	case CellHeap_2::C3 :
-	case CellHeap_2::C5 :
-	case CellHeap_2::C7 :
+	case CellSharedHeap::C3 :
+	case CellSharedHeap::C5 :
+	case CellSharedHeap::C7 :
 		heap2->sort();
 		break;
 	default: break;

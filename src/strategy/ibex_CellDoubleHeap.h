@@ -10,7 +10,7 @@
 #ifndef __IBEX_CELL_DOUBLE_HEAP_H__
 #define __IBEX_CELL_DOUBLE_HEAP_H__
 
-#include "ibex_CellHeap_2.h"
+#include "ibex_CellSharedHeap.h"
 
 namespace ibex {
 
@@ -33,7 +33,7 @@ public:
 	 * \param crit_2  - The second criterion used (the first is TODO: complete
 	 */
 
-	CellDoubleHeap(int ind_var, int critpr=50, CellHeap_2::criterion crit_2=CellHeap_2::UB);
+	CellDoubleHeap(int ind_var, int critpr=50, CellSharedHeap::criterion crit_2=CellSharedHeap::UB);
 
 	/** Flush the buffer.
 	 * All the remaining cells will be *deleted* */
@@ -85,14 +85,14 @@ public:
 	virtual ~CellDoubleHeap();
 
 	/** the criterion of the second heap */
-	const CellHeap_2::criterion crit;
+	const CellSharedHeap::criterion crit;
 
 private:
 	/** the first heap */
-	CellHeap_2 *heap1;
+	CellSharedHeap *heap1;
 
 	/** the second heap */
-	CellHeap_2 *heap2;
+	CellSharedHeap *heap2;
 
 	/** Probability to choose the second
 	 * (see details in the constructor) */
@@ -105,7 +105,7 @@ private:
 	mutable int indbuf;
 
 	/** use in the contract_heap function by recursivity */
-	void contract_tmp(double new_loup, CellHeapNode * node, CellHeap_2 & heap);
+	void contract_tmp(double new_loup, CellHeapNode * node, CellSharedHeap & heap);
 
 	/** erase a node in the second heap */
 	void erase_other_heaps( CellHeapNode * node);

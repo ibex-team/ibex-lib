@@ -58,7 +58,7 @@ void Optimizer::read_ext_box(const IntervalVector& ext_box, IntervalVector& box)
 
 Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, double prec,
 		double goal_rel_prec, double goal_abs_prec, int sample_size, double equ_eps,
-		bool rigor,  int critpr,CellHeap_2::criterion crit) :
+		bool rigor,  int critpr,CellSharedHeap::criterion crit) :
                 				user_sys(user_sys), sys(user_sys,equ_eps),
                 				n(user_sys.nb_var), m(sys.nb_ctr) /* (warning: not user_sys.nb_ctr) */,
                 				ext_sys(user_sys,equ_eps),
@@ -255,16 +255,16 @@ void Optimizer::handle_cell(Cell& c, const IntervalVector& init_box ){
 
 		// Computations for the Casado C3, C5, C7 criteria
 		switch (buffer.crit) {
-		case CellHeap_2::C3 : {
+		case CellSharedHeap::C3 : {
 			compute_pf(c);
 			break;
 			}
-		case CellHeap_2::C5 : case CellHeap_2::C7 : {
+		case CellSharedHeap::C5 : case CellSharedHeap::C7 : {
 			compute_pu(c);
 			compute_pf(c);
 			break;
 			}
-		case CellHeap_2::PU: {
+		case CellSharedHeap::PU: {
 			compute_pu(c);
 			break;
 			}
@@ -450,7 +450,7 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 
 	// add data pu and pf for
 	switch (buffer.crit) {
-	case CellHeap_2::C3 : case CellHeap_2::C5 : case CellHeap_2::C7 : case CellHeap_2::PU: {
+	case CellSharedHeap::C3 : case CellSharedHeap::C5 : case CellSharedHeap::C7 : case CellSharedHeap::PU: {
 		root->add<OptimData>();	
 		break;
 		}

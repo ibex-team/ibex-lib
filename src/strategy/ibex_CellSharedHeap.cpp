@@ -7,7 +7,7 @@
 // Last Update : Sept 11, 2014
 //============================================================================
 
-#include "ibex_CellHeap_2.h"
+#include "ibex_CellSharedHeap.h"
 
 
 namespace ibex {
@@ -15,7 +15,7 @@ namespace ibex {
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
-CellHeapVarLB::CellHeapVarLB(int ind_var, int ind_crit) : CellHeap_2(LB, ind_var, ind_crit) { };
+CellHeapVarLB::CellHeapVarLB(int ind_var, int ind_crit) : CellSharedHeap(LB, ind_var, ind_crit) { };
 
 double CellHeapVarLB::cost(const Cell& c) const { return c.box[goal_var].lb(); }
 
@@ -23,7 +23,7 @@ CellHeapVarLB* CellHeapVarLB::init_copy() { return new CellHeapVarLB(goal_var,he
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
-CellHeapVarUB::CellHeapVarUB(int ind_var, int ind_crit) : CellHeap_2(UB, ind_var, ind_crit) { };
+CellHeapVarUB::CellHeapVarUB(int ind_var, int ind_crit) : CellSharedHeap(UB, ind_var, ind_crit) { };
 
 double CellHeapVarUB::cost(const Cell& c) const { return c.box[goal_var].ub(); }
 
@@ -31,7 +31,7 @@ CellHeapVarUB* CellHeapVarUB::init_copy() { return new CellHeapVarUB(goal_var,he
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
-CellHeapCost::CellHeapCost(criterion crit, int ind_var, int ind_crit) : CellHeap_2(crit, ind_var, ind_crit) {
+CellHeapCost::CellHeapCost(criterion crit, int ind_var, int ind_crit) : CellSharedHeap(crit, ind_var, ind_crit) {
 	if (crit==LB) {
 		ibex_error("CellHeapCost::CellHeapCost : invalid flag, that must be C3,C5,C7,PU or PF");
 	} else if (crit==UB) {
@@ -61,48 +61,48 @@ CellHeapCost* CellHeapCost::init_copy() { return new CellHeapCost(crit,goal_var,
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
-CellHeap_2::CellHeap_2(criterion crit, int ind_var, int ind_crit) :
+CellSharedHeap::CellSharedHeap(criterion crit, int ind_var, int ind_crit) :
 		crit(crit), heap_id(ind_crit),  goal_var(ind_var), loup(POS_INFINITY), root(NULL) {
 	if (((crit==LB)||(crit==UB))&&(ind_var<0)) {
 		ibex_error("CellHeap_2: you need to indicate the index of the variable which contains the objective function");
 	}
 }
 
-CellHeap_2::~CellHeap_2() {
+CellSharedHeap::~CellSharedHeap() {
 	if (root) delete root; 	// warning: delete all sub-nodes
 	root = NULL;
 }
 
-void CellHeap_2::flush() {
+void CellSharedHeap::flush() {
 	if (root) delete root; 	// warning: delete all sub-nodes
 	nb_cells =0;
 	root = NULL;
 }
 
-unsigned int CellHeap_2::size() const {
+unsigned int CellSharedHeap::size() const {
 	return nb_cells;
 }
 
-bool CellHeap_2::empty() const {
+bool CellSharedHeap::empty() const {
 	return (nb_cells==0);
 }
 
-Cell* CellHeap_2::top() const {
+Cell* CellSharedHeap::top() const {
 	return root->elt->cell;
 }
 
-void CellHeap_2::set_loup( double new_loup) {
+void CellSharedHeap::set_loup( double new_loup) {
 	loup = new_loup;
 }
 
 // E.g.: called by manage_buffer in Optimizer in case of a new upper bound
 // on the objective ("loup"). This function then removes (and deletes) from
 // the heap all the cells with a cost greater than loup.
-void CellHeap_2::contract_heap(double new_loup) {
+void CellSharedHeap::contract_heap(double new_loup) {
 	loup = new_loup;
 	if (nb_cells==0) return;
 
-	CellHeap_2 * heap_tmp = init_copy();
+	CellSharedHeap * heap_tmp = init_copy();
 	heap_tmp->set_loup(loup);
 
 	contract_rec(new_loup, root, *heap_tmp);
@@ -115,7 +115,7 @@ void CellHeap_2::contract_heap(double new_loup) {
 }
 
 
-void CellHeap_2::contract_rec(double new_loup, CellHeapNode* node, CellHeap_2& heap) {
+void CellSharedHeap::contract_rec(double new_loup, CellHeapNode* node, CellSharedHeap& heap) {
 
 	switch (crit)	{
 	case C3 :  case C5 :  case C7 : {
@@ -135,10 +135,10 @@ void CellHeap_2::contract_rec(double new_loup, CellHeapNode* node, CellHeap_2& h
 	node= NULL;
 }
 
-void CellHeap_2::sort() {
+void CellSharedHeap::sort() {
 	if (nb_cells==0) return;
 
-	CellHeap_2* heap_tmp = init_copy();
+	CellSharedHeap* heap_tmp = init_copy();
 	heap_tmp->set_loup(loup);
 
 	// recursive sort : o(n*log(n))
@@ -152,7 +152,7 @@ void CellHeap_2::sort() {
 
 }
 
-void CellHeap_2::sort_rec(CellHeapNode * node, CellHeap_2 & heap) {
+void CellSharedHeap::sort_rec(CellHeapNode * node, CellSharedHeap & heap) {
 
 	switch (crit)	{
 	case C3 :  case C5 :  case C7 :
@@ -171,12 +171,12 @@ void CellHeap_2::sort_rec(CellHeapNode * node, CellHeap_2 & heap) {
 }
 
 
-void CellHeap_2::push(Cell* cell) {
+void CellSharedHeap::push(Cell* cell) {
 	push(new CellHeapElt(cell,cost(*cell)));
 }
 
 
-void CellHeap_2::push(CellHeapElt* cell) {
+void CellSharedHeap::push(CellHeapElt* cell) {
 
 	if (nb_cells==0) {
 		root = new CellHeapNode(cell,NULL);
@@ -219,7 +219,7 @@ void CellHeap_2::push(CellHeapElt* cell) {
 	}
 }
 
-CellHeapNode * CellHeap_2::get_node(unsigned int i) const {
+CellHeapNode * CellSharedHeap::get_node(unsigned int i) const {
 	assert(i<nb_cells);
 	assert(nb_cells>0);
 
@@ -243,13 +243,13 @@ CellHeapNode * CellHeap_2::get_node(unsigned int i) const {
 	return pt;
 }
 
-Cell* CellHeap_2::get_cell(unsigned int i ) const {
+Cell* CellSharedHeap::get_cell(unsigned int i ) const {
 	assert(i<nb_cells);
 	assert(nb_cells>0);
 	return get_node(i)->elt->cell;
 }
 
-Cell* CellHeap_2::pop() {
+Cell* CellSharedHeap::pop() {
 	assert(nb_cells>0);
 	CellHeapElt* tmp =pop_elt();
 	Cell * c = tmp->cell;
@@ -259,7 +259,7 @@ Cell* CellHeap_2::pop() {
 	return c;
 }
 
-CellHeapElt* CellHeap_2::pop_elt() {
+CellHeapElt* CellSharedHeap::pop_elt() {
 	assert(nb_cells>0);
 	CellHeapElt* c_return = root->elt;
 	erase_node(0);
@@ -267,7 +267,7 @@ CellHeapElt* CellHeap_2::pop_elt() {
 }
 
 // erase a node and update the order
-void CellHeap_2::erase_node(unsigned int i) {
+void CellSharedHeap::erase_node(unsigned int i) {
 	assert(i<nb_cells);
 	assert(nb_cells>0);
 
@@ -275,7 +275,7 @@ void CellHeap_2::erase_node(unsigned int i) {
 }
 
 // erase a node and update the order
-CellHeapNode * CellHeap_2::erase_node_no_update(unsigned int i) {
+CellHeapNode * CellSharedHeap::erase_node_no_update(unsigned int i) {
 	assert(i<nb_cells);
 	assert(nb_cells>0);
 
@@ -315,7 +315,7 @@ CellHeapNode * CellHeap_2::erase_node_no_update(unsigned int i) {
 
 
 
-void CellHeap_2::update_order(CellHeapNode *pt) {
+void CellSharedHeap::update_order(CellHeapNode *pt) {
 	// PERMUTATION to maintain the order in the heap when going down
 	if (pt) {
 		bool b=true;
@@ -435,7 +435,7 @@ std::ostream& operator<<(std::ostream& os, const CellHeapNode& node) {
 }
 
 
-std::ostream& operator<<(std::ostream& os, const CellHeap_2& heap) {
+std::ostream& operator<<(std::ostream& os, const CellSharedHeap& heap) {
 	os << "[ ";
 	if (heap.root) 	os << *(heap.root) << " ";
 	return os << "]";
