@@ -19,9 +19,43 @@ using std::stringstream;
 namespace ibex {
 
 /** Build the three-dimensional structure. */
-Dim::Dim(int dim1_, int dim2_, int dim3_) : dim1(dim1_), dim2(dim2_), dim3(dim3_) {
+Dim::Dim(int dim1_, int dim2_, int dim3_) : dim1(dim1_), dim2(dim2_), dim3(dim3_), cst_vec(false) {
 
 	assert(dim1_>0 && dim2_>0 && dim3_>0);
+}
+
+Dim add_dim(Dim& l, Dim& r) {
+	if (l.dim1!=1 || r.dim1!=1)
+		throw DimException("cannot add/subtract a matrix array");
+
+	if (l==r) {
+		if (!l.cst_vec || !r.cst_vec) { // either l or r "fixes" the dimension of the other
+			l.cst_vec=false;
+			r.cst_vec=false;
+		}
+
+		return l; // so the result has cst_vec==true if l and r are cst_vec.
+	}
+
+	if (l.is_scalar())
+		throw DimException("cannot add a scalar to a vector/matrix");
+	else if (l.is_vector()) {
+		if (l.dim2==1 && r.cst_vec && l.dim3==r.dim2) {  // row vector + constant vector
+			assert(r.is_vector());
+			r = l;                     // transpose
+			r.cst_vec=false;
+			return l;
+		} else if (r.dim2==1 && l.cst_vec && r.dim3==l.dim2) {
+			assert(l.is_vector());
+			l = r;                     // transpose
+			r.cst_vec=false;
+			return l;
+		} else
+			throw DimException("mismatched dimensions in vector addition/subtraction");
+	} else {
+		assert(l.is_matrix());
+		throw DimException("mismatched dimensions in matrix addition/subtraction");
+	}
 }
 
 Dim mul_dim(const Dim& l, const Dim& r) {
@@ -29,7 +63,7 @@ Dim mul_dim(const Dim& l, const Dim& r) {
 		throw DimException("cannot multiply a matrix array");
 
 	if (l.type()==Dim::SCALAR) // scalar multiplication.
-		return r;
+		return r; // cst_vec is maintained.
 	else {
 		if (l.dim3!=r.dim2) {
 			if (l.dim2==r.dim2) {
