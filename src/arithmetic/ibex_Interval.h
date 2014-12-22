@@ -66,6 +66,13 @@
 #endif
 #endif
 
+#ifdef _MSC_VER
+#include <intrin.h>
+#define __builtin_popcount __popcnt
+#define __builtin_powi(__x,__n) ((double)::pow((double)(__x),(int)(__n)))
+#endif // _MSC_VER
+
+
 namespace ibex {
 
 template <class T>  class Affine2Main;
@@ -1046,7 +1053,18 @@ inline bool bwd_div(const Interval& y, Interval& x1, Interval& x2) {
 }
 
 inline bool bwd_sqrt(const Interval& y, Interval& x) {
-	x &= sqr(y);
+    if (y.ub()<0)
+    {
+    	x.set_empty();
+    } 
+   	else if (y.lb()<0) 
+   	{
+		x &= sqr(Interval(0,y.ub()));
+    } 
+    else 
+    {
+    	x &= sqr(y);
+    }
 	return !x.is_empty();
 }
 
@@ -1151,8 +1169,30 @@ inline bool bwd_atan2(const Interval& theta, Interval& y, Interval& x) {
 		x.set_empty(); y.set_empty();
 		b=false;
 	}
-	not_implemented("bwd_atan2 non implemented yet");
-	//  <=> cos(Theta)*X - sin(Theta)*Y > 0;
+	// not_implemented("bwd_atan2 non implemented yet");
+	
+    if(x.ub()>0 || !y.contains(0.0)) {
+        Interval s1,s2,s3,s4,s5,s6,s7;
+        s1 = sqr(x);
+        s2 = sqr(y);
+        s3 = s1 + s2;
+        s4 = sqrt(s3);
+        s5 = s4 - x;
+        s6 = s5/y;
+        s7 = atan(s6);
+        s7 &= 2*theta;
+        b &= bwd_atan(s7,s6);
+        b &= bwd_div(s6,s5,y);
+        b &= bwd_sub(s5,s4,x);
+        b &= bwd_sqrt(s4,s3);
+        b &= bwd_add(s3,s1,s2);
+        b &= bwd_sqr(s2,y);
+        b &= bwd_sqr(s1,x);
+    } else {
+        not_implemented("bwd_atan2 when x contains 0 and y contains 0");
+    }
+
+    //  <=> cos(Theta)*X - sin(Theta)*Y > 0;
 	//      sin(Theta)*X + cos(Theta)*Y = 0
 /*
 	Interval costheta, sintheta, xcostheta, xsintheta, ycostheta, ysintheta, equ1, equ2;

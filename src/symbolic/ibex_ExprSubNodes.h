@@ -90,7 +90,6 @@ public:
 	bool found(const ExprNode& e) const;
 
 private:
-	friend class ExprNodes;
 	const ExprNode** tab;
 	int _size;
 	// map a node to its index in the array

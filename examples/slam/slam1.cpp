@@ -60,9 +60,9 @@ int main() {
   // the initial box [0,L]x[0,L]x[0,L]x[0,L]
   IntervalVector box(T*2,Interval(0,L));
 
-  cout << "  initial box =" << box << endl << endl;
+  cout << endl << "  initial box =" << box << endl;
   fix.contract(box);
-  cout << "  final box =" << box << endl << endl << endl;
+  cout << endl << "  final box =" << box << endl << endl << endl;
   // ![ctc-contract]
 
   return 0;

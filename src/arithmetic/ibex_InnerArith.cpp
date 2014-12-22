@@ -387,6 +387,9 @@ bool ibwd_leq_mul(double z_sup, Interval& x, Interval& y, const Interval &xin, c
 			double surf_xpos_yneg = -x.ub()*y.lb();
 			double surf_xneg_ypos = -x.lb()*y.ub();
 
+			assert(surf_xpos_yneg>=0);
+			assert(surf_xneg_ypos>=0);
+
 			if (surf_xneg_ypos > surf_xpos_yneg) {
 				x&=Interval::NEG_REALS;
 				y&=Interval::POS_REALS;
@@ -394,6 +397,7 @@ bool ibwd_leq_mul(double z_sup, Interval& x, Interval& y, const Interval &xin, c
 				x&=Interval::POS_REALS;
 				y&=Interval::NEG_REALS;
 			}
+			return true;
 		}
 
 	} else { // z_sup<0

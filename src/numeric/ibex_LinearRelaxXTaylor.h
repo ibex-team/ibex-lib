@@ -66,7 +66,7 @@ public:
 	 *
 	 * Can be either X_INF, X_SUP, RANDOM, or RANDOM_INV.
 	 */
-	std::vector<corner_point>& cpoints;
+	std::vector<corner_point> cpoints;
 
 	/**
 	 * \brief Generation of the linearized system

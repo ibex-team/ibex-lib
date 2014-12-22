@@ -18,6 +18,7 @@
 #include "TestBitSet.h"
 #include "TestSymbolMap.h"
 #include "TestCellHeap.h"
+#include "TestPixelMap.h"
 
 // ================ arithmetic ===============
 #include "TestInterval.h"
@@ -63,6 +64,9 @@
 #include "TestCtcExist.h"
 #include "TestCtcForAll.h"
 #include "TestCtcPolytopeHull.h"
+#include "TestCtcPixelMap.h"
+
+
 
 
 // ================ strategy ===============
@@ -83,7 +87,7 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestBitSet()));
     ts.add(auto_ptr<Test::Suite>(new TestSymbolMap()));
     ts.add(auto_ptr<Test::Suite>(new TestCellHeap()));
-
+    ts.add(auto_ptr<Test::Suite>(new TestPixelMap()));
 
     ts.add(auto_ptr<Test::Suite>(new TestInterval()));
     ts.add(auto_ptr<Test::Suite>(new TestIntervalVector()));
@@ -122,6 +126,7 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestCtcExist()));
     ts.add(auto_ptr<Test::Suite>(new TestCtcForAll()));
     ts.add(auto_ptr<Test::Suite>(new TestCtcPolytopeHull()));
+    ts.add(auto_ptr<Test::Suite>(new TestCtcPixelMap()));
 
     ts.add(auto_ptr<Test::Suite>(new TestFritzJohn()));
 

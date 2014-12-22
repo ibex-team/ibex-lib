@@ -51,7 +51,7 @@ public :
 	 * like (cf bisector) criterion : in case of optimization, it should be the extended constraint system (see ibex_Optimizer)
 	 *
 	 */
-    CtcAcid(const System& sys, const BitSet& cid_vars, Ctc& ctc, bool optim=0, int s3b=default_s3b, int scid=default_scid,
+    CtcAcid(const System& sys, const BitSet& cid_vars, Ctc& ctc, bool optim=false, int s3b=default_s3b, int scid=default_scid,
 	    double var_min_width=default_var_min_width, double ct_ratio=default_ctratio);
     /**
     * \brief ACID constructor
@@ -59,7 +59,7 @@ public :
          *  ACID constructor on all variables : no need to give the cid_vars parameter 
 	 */
 
-    CtcAcid(const System& sys, Ctc& ctc, bool optim=0, int s3b=default_s3b, int scid=default_scid,
+    CtcAcid(const System& sys, Ctc& ctc, bool optim=false, int s3b=default_s3b, int scid=default_scid,
 	    double var_min_width=default_var_min_width, double ct_ratio=default_ctratio);
 
 	/**
