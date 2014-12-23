@@ -80,8 +80,8 @@ BoolInterval PdcFirstOrder::test(const IntervalVector& box) {
 	}
 
 	// check for invertibility
-	int p[M+1]; // will not be used
-	int q[n];   // will not be used
+	int *p=new int[M+1]; // will not be used
+	int *q=new int[n];   // will not be used
 	IntervalMatrix LU(M+1,N); // will not be used
 	try {
 		// note: seems worse with complete pivoting
@@ -92,6 +92,8 @@ BoolInterval PdcFirstOrder::test(const IntervalVector& box) {
 		res = MAYBE;
 	}
 	delete J2;
+	delete [] p;
+	delete [] q;
 	return res;
 }
 

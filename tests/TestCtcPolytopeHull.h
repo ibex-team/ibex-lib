@@ -18,10 +18,19 @@ namespace ibex {
 class TestCtcPolytopeHull : public TestIbex {
 public:
 	TestCtcPolytopeHull() {
+
+#ifndef _IBEX_WITH_NOLP_
+
 		TEST_ADD(TestCtcPolytopeHull::lp01);
+		TEST_ADD(TestCtcPolytopeHull::fixbug01);
+
+#endif //_IBEX_WITH_NOLP_
+
 	}
 
 	void lp01();
+
+	void fixbug01();
 };
 
 } // end namespace ibex

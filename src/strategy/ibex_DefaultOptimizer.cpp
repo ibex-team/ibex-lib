@@ -34,7 +34,7 @@ const double default_relax_ratio = 0.2;
 // two arguments of the base class constructor (ctc and bsc)
 // and we don't know which argument is evaluated first
 ExtendedSystem& get_ext_sys(System& sys, double eq_prec) {
-	if ((*memory())->sys) return (ExtendedSystem&) *((*memory())->sys); // already built and recorded
+	if (!(*memory())->sys.empty()) return (ExtendedSystem&) *((*memory())->sys.back()); // already built and recorded
 	else return rec(new ExtendedSystem(sys,eq_prec));
 }
 

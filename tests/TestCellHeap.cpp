@@ -11,7 +11,7 @@
 
 #include "TestCellHeap.h"
 #include "ibex_OptimData.h"
-#include "ibex_CellHeap_2.h"
+#include "ibex_CellSharedHeap.h"
 #include "ibex_CellDoubleHeap.h"
 
 using namespace std;
@@ -63,7 +63,7 @@ void TestCellHeap::test03() {
 
 	int nb= 10;
 	CellHeapCost h2(CellSharedHeap::C3);
-	h2.setLoup(100);
+	h2.set_loup(100);
 
 	double _box[][2] = {{5,15},  {15,25},  {25,35},  {35,45}};
 	IntervalVector box(4,_box);

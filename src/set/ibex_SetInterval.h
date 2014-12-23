@@ -37,6 +37,14 @@ public:
 	 */
 	SetInterval(const IntervalVector& bounding_box, double eps, bool inner=true);
 
+
+	/**
+	 * \brief Loads a set from a data file.
+	 *
+	 * \see #save().
+	 */
+	SetInterval(const char* filename);
+
 	/*
 	 * \brief Delete this
 	 */
@@ -81,9 +89,26 @@ public:
 
 	void contract(Separator& sep);
 
+	/**
+	 * \brief Serialize the set and save it into a file
+	 */
+	void save(const char* filename);
+
 	void visit_leaves(SetNode::leaf_func func) const;
 
+	/**
+	 * \brief Distance of the point "pt" wrt the set (if inside is true)
+	 * of the complementary of the set (if inside is false).
+	 */
+	double dist(const Vector& pt, bool inside) const;
+
 protected:
+
+	/**
+	 * \brief Load the set from a file
+	 */
+	void load(const char* filename);
+
 	friend std::ostream& operator<<(std::ostream& os, const SetInterval& set);
 
 	SetNode* root; // NULL means no existing set (warning: different from empty set!)
