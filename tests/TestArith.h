@@ -113,6 +113,12 @@ public:
 		TEST_ADD(TestArith::sin12);
 		TEST_ADD(TestArith::sin13);
 
+		TEST_ADD(TestArith::tan01);
+		TEST_ADD(TestArith::tan02);
+		TEST_ADD(TestArith::tan03);
+		TEST_ADD(TestArith::tan04);
+		TEST_ADD(TestArith::tan05);
+
 		TEST_ADD(TestArith::pow01);
 		TEST_ADD(TestArith::pow02);
 		TEST_ADD(TestArith::pow03);
@@ -394,6 +400,14 @@ private:
 	void sin12();
 	void sin13();
 
+	void tan01();
+	void tan02();
+	void tan03();
+	void tan04();
+	void tan05();
+	void tan06();
+	void tan07();
+
 	void pow01();
 	void pow02();
 	void pow03();
@@ -556,6 +570,7 @@ private:
 	void check_sinh(const Interval& x);
 	void check_cosh(const Interval& x);
 	void check_trigo(const Interval& x, const Interval& y);
+
 	void check_pow(const Interval& x, int p, const Interval& y_expected);
 	bool checkbwd_mul(const Interval& y, const Interval& x1_before, const Interval& x2_before, const Interval& x1_after, const Interval& x2_after);
 	void checkbwd_div(const Interval& y, const Interval& x1_before, const Interval& x2_before, const Interval& x1_after, const Interval& x2_after);

@@ -265,6 +265,23 @@ void TestArith::sin11() { check_trigo(Interval(3,2*piU+1.5), Interval(-1,sin(1.5
 void TestArith::sin12() { check_trigo(Interval(5,2*piU+1.5), Interval(sin(5),sin(1.5))); }
 void TestArith::sin13() { check_trigo(Interval(5,2*piU+3), Interval(sin(5),1)); }
 
+void TestArith::tan01() { check(tan(Interval::ALL_REALS), Interval::ALL_REALS); }
+void TestArith::tan02() { check(tan(-Interval::PI/4.0 | Interval::PI/4.0), Interval(-1,1)); }
+void TestArith::tan03() {	// tan(pi/4,pi/2)=[1,+oo)
+	Interval x=Interval(piL/4.0,(1-1e-10)*piL/2.0); // upper bound of x is close to pi/2
+	Interval y=tan(x);
+	check(y.lb(),1.0);
+	TEST_ASSERT(y.ub()>1000); // upper bound of tan(x) is close to +oo
+}
+void TestArith::tan04() {	// tan(-pi/2,pi/4)=(-oo,1]
+	Interval y=tan(Interval(-(1-1e-10)*piL/2.0,piL/4.0));
+	TEST_ASSERT(y.lb()<-1000); // lower bound is close to -oo
+	check(y.ub(),1.0);
+}
+void TestArith::tan05() { check(tan(Interval::PI/2.0),Interval::ALL_REALS); }
+void TestArith::tan06() { check(tan(-Interval::PI),Interval::ALL_REALS); }
+void TestArith::tan07() { check(tan(3*Interval::PI/4.0 | 5*Interval::PI/4.0), Interval(-1,1)); }
+
 void TestArith::check_pow(const Interval& x, int p, const Interval& y_expected) {
 	check(pow(x,p),y_expected);
 	check(pow(-x,p),(p%2==0)? y_expected : -y_expected);
