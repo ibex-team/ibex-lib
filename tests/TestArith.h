@@ -254,6 +254,9 @@ public:
 		TEST_ADD(TestArith::bwd_atan03);
 		TEST_ADD(TestArith::bwd_atan04);
 		TEST_ADD(TestArith::bwd_atan05);
+		TEST_ADD(TestArith::bwd_atan06);
+		TEST_ADD(TestArith::bwd_atan07);
+		TEST_ADD(TestArith::bwd_atan08);
 
 		TEST_ADD(TestArith::bwd_add01);
 		TEST_ADD(TestArith::bwd_add02);
@@ -547,6 +550,9 @@ private:
 	void bwd_atan03();
 	void bwd_atan04();
 	void bwd_atan05();
+	void bwd_atan06();
+	void bwd_atan07();
+	void bwd_atan08();
 
 	void bwd_add01();
 	void bwd_add02();

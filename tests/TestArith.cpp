@@ -643,32 +643,39 @@ bool TestArith::checkbwd_atan(const Interval& y, const Interval& xbefore, const 
 	// tan(y)=x
 	x=xbefore;
 	bwd_atan(y,x);
+	//cout << "xbefore= " << xbefore << " y=" << y << " x=" << x << " versus " << xafter << endl;
 	res &= almost_eq(x,xafter,ERROR);
 
 	// tan(-y)=-x
 	x=-xbefore;
 	bwd_atan(-y,x);
-	res &= almost_eq(-x,xafter,ERROR);
-
-	// // tan(y+PI)=x
-	x=xbefore;
-	bwd_atan(y+Interval::PI,x);
-	res &= almost_eq(x,xafter,ERROR);
-
-	// // tan(PI-y)=-x
-	x=-xbefore;
-	bwd_atan(-y+Interval::PI,x);
+	//cout << "xbefore= " << (-xbefore) << " y=" << (-y) << " x=" << x << " versus " << (-xafter) << endl;
 	res &= almost_eq(-x,xafter,ERROR);
 
 	return res;
 }
 
+void TestArith::bwd_atan01() { TEST_ASSERT(checkbwd_atan(Interval(0.,M_PI/6.),		  Interval(-1.,3.),			tan(Interval(0.,M_PI/6.)))); }
+void TestArith::bwd_atan02() { TEST_ASSERT(checkbwd_atan(Interval(-M_PI,1.5), 		  Interval(0,5*M_PI/2.0),	Interval(0,5*M_PI/2.0))); }
+void TestArith::bwd_atan03() { TEST_ASSERT(checkbwd_atan(Interval(0.,M_PI/6.),		  Interval(.2,.5),			Interval(.2,.5))); }
+void TestArith::bwd_atan04() { TEST_ASSERT(checkbwd_atan(Interval(-M_PI/2-0.1,M_PI/2+0.1), Interval(-100,100),	Interval(-100,100))); }
+void TestArith::bwd_atan05() { TEST_ASSERT(checkbwd_atan(Interval(M_PI/2+0.1,M_PI),	       Interval(-100,100),	Interval::EMPTY_SET)); }
+void TestArith::bwd_atan06() { TEST_ASSERT(checkbwd_atan(Interval(-M_PI,-M_PI/2-0.1),      Interval(-100,100),	Interval::EMPTY_SET)); }
 
-void TestArith::bwd_atan01() { TEST_ASSERT(checkbwd_atan(Interval(0.,M_PI/6.),		Interval(-1.,3.),			tan(Interval(0.,M_PI/6.)))); }
-void TestArith::bwd_atan02() { TEST_ASSERT(checkbwd_atan(Interval(-M_PI,1.5), 		Interval(0,5*M_PI/2.0),		Interval(0,5*M_PI/2.0))); }
-void TestArith::bwd_atan03() { TEST_ASSERT(checkbwd_atan(Interval(0.,M_PI/6.),		Interval(.2,.5),			Interval(.2,.5))); }
-void TestArith::bwd_atan04() { TEST_ASSERT(checkbwd_atan(Interval(-M_PI/4,M_PI/2.),	Interval::ALL_REALS,		Interval::ALL_REALS)); }
-void TestArith::bwd_atan05() { TEST_ASSERT(checkbwd_atan(Interval(-M_PI,-M_PI/2.),	Interval(-100,100),			Interval(-100,100))); }
+void TestArith::bwd_atan07() {
+	Interval x=Interval::ALL_REALS;
+	bwd_atan(Interval(-M_PI/4,M_PI/2.), x);
+	check(x.lb(), -1);
+	TEST_ASSERT(x.ub() > 1000); // upper bound is close to +oo
+}
+
+void TestArith::bwd_atan08() {
+	Interval x=Interval::ALL_REALS;
+	bwd_atan(Interval(-M_PI/2,M_PI/4.), x);
+	check(x.ub(), +1);
+	TEST_ASSERT(x.lb() < -1000); // lower bound is close to -oo
+}
+
 
 bool TestArith::checkbwd_add(const Interval& y, const Interval& x1_bef, const Interval& x2_bef,
 								const Interval& x1_aft, const Interval& x2_aft) {
