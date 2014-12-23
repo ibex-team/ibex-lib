@@ -38,6 +38,9 @@ void InHC4Revise::ibwd(const Function& f, const Domain& y, IntervalVector& x, co
 
 	if (!xin.is_empty()) {
 		e.eval(f,xin);
+
+		assert(!f.expr().deco.d->is_empty());
+
 		for (int i=0; i<f.nb_nodes(); i++)
 			*f.node(i).deco.p = *f.node(i).deco.d;
 	}
@@ -47,6 +50,8 @@ void InHC4Revise::ibwd(const Function& f, const Domain& y, IntervalVector& x, co
 	}
 
 	e.eval(f,x);
+
+	assert(!f.expr().deco.d->is_empty());
 
 	*f.expr().deco.d = y;
 
@@ -74,6 +79,9 @@ bool InHC4Revise::ibwd(const Function& f, const Domain& y, ExprLabel** x) {
 
 	if (!argP[0].is_empty()) { // if the first domain is empty, so they all are
 		e.eval(f,argP);
+
+		assert(!f.expr().deco.d->is_empty());
+
 		for (int i=0; i<f.nb_nodes(); i++)
 			*f.node(i).deco.p = *f.node(i).deco.d;
 	}
@@ -83,6 +91,8 @@ bool InHC4Revise::ibwd(const Function& f, const Domain& y, ExprLabel** x) {
 	}
 
 	e.eval(f,x);
+
+	assert(!f.expr().deco.d->is_empty());
 
 	*f.expr().deco.d = y;
 
