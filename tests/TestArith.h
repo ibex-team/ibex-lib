@@ -220,26 +220,27 @@ public:
 		TEST_ADD(TestArith::bwd_sin23);
 		TEST_ADD(TestArith::bwd_sin24);
 
-//		TEST_ADD(TestArith::bwd_pow01);
-//		TEST_ADD(TestArith::bwd_pow02);
-//		TEST_ADD(TestArith::bwd_pow03);
-//		TEST_ADD(TestArith::bwd_pow04);
-//		TEST_ADD(TestArith::bwd_pow05);
-//		TEST_ADD(TestArith::bwd_pow06);
-//		TEST_ADD(TestArith::bwd_pow07);
-//		TEST_ADD(TestArith::bwd_pow08);
-//		TEST_ADD(TestArith::bwd_pow09);
-//		TEST_ADD(TestArith::bwd_pow10);
-//		TEST_ADD(TestArith::bwd_pow11);
-//		TEST_ADD(TestArith::bwd_pow12);
-//		TEST_ADD(TestArith::bwd_pow13);
-//		TEST_ADD(TestArith::bwd_pow14);
-//		TEST_ADD(TestArith::bwd_pow15);
-//		TEST_ADD(TestArith::bwd_pow16);
+		TEST_ADD(TestArith::bwd_pow01);
+		TEST_ADD(TestArith::bwd_pow02);
+		TEST_ADD(TestArith::bwd_pow03);
+		TEST_ADD(TestArith::bwd_pow04);
+		TEST_ADD(TestArith::bwd_pow05);
+		TEST_ADD(TestArith::bwd_pow06);
+		TEST_ADD(TestArith::bwd_pow07);
+		TEST_ADD(TestArith::bwd_pow08);
+		TEST_ADD(TestArith::bwd_pow09);
+		TEST_ADD(TestArith::bwd_pow10);
+		TEST_ADD(TestArith::bwd_pow11);
+		TEST_ADD(TestArith::bwd_pow12);
+		TEST_ADD(TestArith::bwd_pow13);
+		TEST_ADD(TestArith::bwd_pow14);
+		TEST_ADD(TestArith::bwd_pow15);
+		TEST_ADD(TestArith::bwd_pow16);
 		TEST_ADD(TestArith::bwd_pow17);
 
-		TEST_ADD(TestArith::bwd_atan2_01);
-		TEST_ADD(TestArith::bwd_atan2_02);
+		// ===== temporarily commented ===============
+//		TEST_ADD(TestArith::bwd_atan2_01);
+//		TEST_ADD(TestArith::bwd_atan2_02);
 
 		TEST_ADD(TestArith::bwd_sqrt01);
 		TEST_ADD(TestArith::bwd_sqrt02);
