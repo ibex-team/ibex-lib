@@ -12,6 +12,7 @@
 #define __IBEX_CELL_HEAP_H__
 
 #include "ibex_CellBuffer.h"
+#include "ibex_Heap.h"
 #include <utility>
 #include <vector>
 
@@ -36,7 +37,7 @@ namespace ibex {
  *
  * \see #CellBuffer, #CellHeapBySize
  */
-class CellHeap : public CellBuffer {
+class CellHeap : public CellBuffer, public Heap<Cell> {
 
  public:
   /** Flush the buffer.
