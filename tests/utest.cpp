@@ -71,6 +71,10 @@
 // ================ strategy ===============
 #include "TestOptimizer.h"
 
+// ================ set ===============
+#include "TestSeparator.h"
+
+
 using namespace std;
 using std::auto_ptr;
 
@@ -130,6 +134,7 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestFritzJohn()));
 
     ts.add(auto_ptr<Test::Suite>(new TestOptimizer()));
+      ts.add(auto_ptr<Test::Suite>(new TestOptimizer()));
 
     return ts.run(output,false) ? EXIT_SUCCESS : EXIT_FAILURE;
 
