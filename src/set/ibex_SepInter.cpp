@@ -59,6 +59,7 @@ void SepInter::separate(IntervalVector &x_in, IntervalVector &x_out){
     for (int i=0; i<list.size(); i++) {
         if (i>0) x_in=savebox;
         try {
+            x_in &= x_out;
             list[i].separate(x_in,x_out);
             result_x_in |= x_in;
         } catch(EmptyBoxException&) { }
