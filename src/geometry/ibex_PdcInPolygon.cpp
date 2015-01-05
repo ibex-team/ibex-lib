@@ -52,10 +52,10 @@ BoolInterval PdcInPolygon::test(const IntervalVector& x) {
 		theta += argument(mx,my,ax[i],ay[i],bx[i],by[i]);
 	}
 
-	if(theta.contains(2*M_PI) && !theta.contains(0)) {
-		return NO;
-	} else if (!theta.contains(2*M_PI) && theta.contains(0)) {
+	if(!theta.contains(0)) {
 		return YES;
+	} else if (!theta.contains(2*M_PI) && theta.contains(0)) {
+		return NO;
 	} else {
 		// Undetermined case
 		return MAYBE;
