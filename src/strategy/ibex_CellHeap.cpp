@@ -15,27 +15,6 @@ using namespace std;
 
 namespace ibex {
 
-void CellHeap::flush() { Heap<Cell>::flush(); }
-
-int CellHeap::size() const { return Heap<Cell>::size(); }
-
-bool CellHeap::empty() const {
-	return l.empty();
-}
-
-void CellHeap::push(Cell* cell) {
-	Heap<Cell>::push(cell);
-	if (capacity>0 && size()==capacity) throw CellBufferOverflow();
-}
-
-Cell* CellHeap::pop() {
-	return Heap<Cell>::pop();
-}
-
-Cell* CellHeap::top() const {
-	return Heap<Cell>::top();
-}
-
 ostream& operator<<(ostream& os, const CellHeap& heap) {
 	os << "[ ";
 	for (vector<pair<Cell*,double> >::const_iterator it=heap.l.begin(); it!=heap.l.end(); it++)
@@ -43,4 +22,4 @@ ostream& operator<<(ostream& os, const CellHeap& heap) {
 	return os << "]";
 }
 
-}  // end namespace ibex
+} // end namespace

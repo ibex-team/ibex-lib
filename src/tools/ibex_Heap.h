@@ -69,9 +69,7 @@ public:
 
 	/** Return the minimum (the criterion for
 	 * the first element) */
-	double minimum() const {
-		return l.begin()->second;
-	}
+	double minimum() const;
 
 protected:
 	/** The "cost" of a element. */
@@ -87,7 +85,7 @@ protected:
 	friend std::ostream& operator<<(std::ostream&, const Heap<U>&);
 };
 
-/** Display the buffer */
+/** Display the heap */
 template<class T>
 std::ostream& operator<<(std::ostream&, const Heap<T>&);
 
@@ -177,6 +175,11 @@ T* Heap<T>::pop() {
 template<class T>
 T* Heap<T>::top() const {
 	return l.front().first;
+}
+
+template<class T>
+double Heap<T>::minimum() const {
+	return l.begin()->second;
 }
 
 template<class T>
