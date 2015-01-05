@@ -30,9 +30,15 @@
 #define IBEX_INT_MAP(T) std::tr1::unordered_map<int,T>
 #endif
 #else
+#if (_MSC_VER >= 1600)
 #include <unordered_map>
 #define HASH std::hash
 #define IBEX_INT_MAP(T) std::unordered_map<int,T>
+#else
+#include <unordered_map>
+#define HASH std::tr1::hash
+#define IBEX_INT_MAP(T) std::tr1::unordered_map<int,T>
+#endif // (_MSC_VER >= 1600)
 #endif
 
 namespace ibex {

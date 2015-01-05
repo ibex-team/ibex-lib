@@ -131,24 +131,29 @@ namespace ibex {
 const double AmplInterface::default_max_bound= 1.e20;
 
 
+// create an AMPL problem by using ASL interface to the .nl file
+System::System(const AmplInterface& ampl): nb_var(0), nb_ctr(0), box(ampl._bound_init.size()){
+	init(ampl._problem);
+	box = ampl._bound_init;
+}
+
+
+
+
 AmplInterface::AmplInterface(std::string nlfile) :
-	_problem(NULL),	_bound_init(1), asl(NULL), _nlfile(nlfile), _x(NULL){
+		_bound_init(1), asl(NULL), _nlfile(nlfile), _x(NULL){
 
-	if (!readASLfg())
+	if (!readASLfg()) {
 		ibex_error("Fail to read the ampl file.\n");
-
-	_problem = new SystemFactory();
+	}
 
 	if (!readnl()) {
-		delete _problem;
-		_problem = NULL;
 		ibex_error("Fail to read the nl file.\n");
 	}
 
 }
 
 AmplInterface::~AmplInterface() {
-	delete _problem;
 	delete _x;
 
 	if (asl) {
@@ -171,16 +176,6 @@ bool AmplInterface::writeSolution(double * sol, bool found) {
 	return true;
 }
 
-// create an AMPL problem by using ASL interface to the .nl file
-System* AmplInterface::getSystem() const{
-	System *sys;
-	if (_problem)
-		sys= new System(*_problem);
-	else
-		sys= new System(SystemFactory());
-	sys->box = _bound_init;
-	return sys;
-}
 
 
 
@@ -227,13 +222,12 @@ bool AmplInterface::readASLfg() {
 // Reads a NLP from an AMPL .nl file through the ASL methods
 bool AmplInterface::readnl() {
 
-	if (!_problem) {return false;}
 
 	// the variable /////////////////////////////////////////////////////////////
 	// TODO only continuous variables for the moment
 	_x =new Variable(n_var,"x");
 	_bound_init.resize(n_var);
-	_problem->add_var(*_x);
+	_problem.add_var(*_x);
 
 		// Each has a linear and a nonlinear part
 		// thanks to Dominique Orban:
@@ -287,9 +281,9 @@ bool AmplInterface::readnl() {
 			// Max or Min
 			// 3rd/ASL/solvers/asl.h, line 336: 0 is minimization, 1 is maximization
 			if (OBJ_sense [i] == 0) {
-				_problem->add_goal(*body);
+				_problem.add_goal(*body);
 			} else {
-				_problem->add_goal(-(*body));
+				_problem.add_goal(-(*body));
 			}
 		}
 
@@ -391,34 +385,34 @@ bool AmplInterface::readnl() {
 			case  1:  {
 				if (lb==ub) {
 					if (lb==0) {
-						_problem->add_ctr_eq((*(body_con[i])));
+						_problem.add_ctr_eq((*(body_con[i])));
 					} else if (lb<0) {
-						_problem->add_ctr_eq((*(body_con[i])+(-lb)));
+						_problem.add_ctr_eq((*(body_con[i])+(-lb)));
 					} else {
-						_problem->add_ctr_eq((*(body_con[i])-lb));
+						_problem.add_ctr_eq((*(body_con[i])-lb));
 					}
 				} else  {
-					 _problem->add_ctr_eq((*(body_con[i])-Interval(lb,ub)));
+					 _problem.add_ctr_eq((*(body_con[i])-Interval(lb,ub)));
 				}
 				break;
 			}
 			case  2:  {
 				if (lb==0) {
-					_problem->add_ctr(ExprCtr(*(body_con[i]),GEQ));
+					_problem.add_ctr(ExprCtr(*(body_con[i]),GEQ));
 				} else if (lb<0) {
-					_problem->add_ctr(ExprCtr(*(body_con[i])+(-lb),GEQ));
+					_problem.add_ctr(ExprCtr(*(body_con[i])+(-lb),GEQ));
 				} else {
-					_problem->add_ctr(ExprCtr(*(body_con[i])-lb,GEQ));
+					_problem.add_ctr(ExprCtr(*(body_con[i])-lb,GEQ));
 				}
 				break;
 			}
 			case  3: {
 				if (ub==0) {
-					_problem->add_ctr(ExprCtr(*(body_con[i]),LEQ));
+					_problem.add_ctr(ExprCtr(*(body_con[i]),LEQ));
 				} else if (ub<0) {
-					 _problem->add_ctr(ExprCtr(*(body_con[i])+(-ub),LEQ));
+					 _problem.add_ctr(ExprCtr(*(body_con[i])+(-ub),LEQ));
 				} else {
-					 _problem->add_ctr(ExprCtr(*(body_con[i])-ub,LEQ));
+					 _problem.add_ctr(ExprCtr(*(body_con[i])-ub,LEQ));
 				}
 				break;
 			}

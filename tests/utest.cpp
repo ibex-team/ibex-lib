@@ -17,6 +17,7 @@
 #include "TestString.h"
 #include "TestBitSet.h"
 #include "TestSymbolMap.h"
+#include "TestPixelMap.h"
 
 // ================ arithmetic ===============
 #include "TestInterval.h"
@@ -63,6 +64,9 @@
 #include "TestCtcForAll.h"
 #include "TestCtcPolytopeHull.h"
 #include "TestCtcSegment.h"
+#include "TestCtcPixelMap.h"
+
+
 
 // ================ strategy ===============
 #include "TestOptimizer.h"
@@ -81,6 +85,7 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestString()));
     ts.add(auto_ptr<Test::Suite>(new TestBitSet()));
     ts.add(auto_ptr<Test::Suite>(new TestSymbolMap()));
+    ts.add(auto_ptr<Test::Suite>(new TestPixelMap()));
 
     ts.add(auto_ptr<Test::Suite>(new TestInterval()));
     ts.add(auto_ptr<Test::Suite>(new TestIntervalVector()));
@@ -120,6 +125,7 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestCtcForAll()));
     ts.add(auto_ptr<Test::Suite>(new TestCtcPolytopeHull()));
     ts.add(auto_ptr<Test::Suite>(new TestCtcSegment()));
+    ts.add(auto_ptr<Test::Suite>(new TestCtcPixelMap()));
 
     ts.add(auto_ptr<Test::Suite>(new TestFritzJohn()));
 

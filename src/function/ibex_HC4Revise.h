@@ -40,6 +40,10 @@ public:
 	 * \brief Project f(x)=y onto x (backward algorithm)
 	 *
 	 * \brief true if f(x) is included in y (inactive constraint)
+	 *
+	 * \note if x is outside the definition domain of f, then
+	 *       x is set to the empty set (+EmptyBoxException)
+	 *       although f([x])\subseteq [y].
 	 */
 	bool proj(const Function& f, const Domain& y, IntervalVector& x);
 

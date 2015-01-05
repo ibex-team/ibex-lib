@@ -223,5 +223,16 @@ void TestFunction::from_string04() {
 	}
 }
 
+void TestFunction::issue43() {
+	Variable x("x"),y("y");
+	Function f(x,y,x);
+	Function g(x,y,y);
+}
+
+void TestFunction::issue43_bis() {
+	Variable x,y;
+	Function f(x,y,x);
+	Function g(x,y,f(x,y));
+}
 
 } // end namespace

@@ -22,6 +22,7 @@
 #include "ibex_Interval.h"
 #include "ibex_CmpOp.h"
 #include "ibex_Exception.h"
+#include "ibex_LPException.h"
 
 #ifdef _IBEX_WITH_SOPLEX_
 #include "soplex.h"
@@ -37,6 +38,10 @@
 #ifdef _IBEX_WITH_ILOCPLEX_
 #include <ilcplex/ilocplex.h>
 // TODO not finish yet
+#else
+#ifdef _IBEX_WITH_NOLP_
+// nothing
+#endif
 #endif
 #endif
 #endif
@@ -106,23 +111,18 @@ public:
 	/** Default max_diam_deriv value, set to 1e6  **/
 	static const Interval default_limit_diam_box;
 
-
-
 	typedef enum  {OPTIMAL=1, INFEASIBLE=2, INFEASIBLE_NOTPROVED=3, UNKNOWN=0, TIME_OUT=-1, MAX_ITER=-2} Status_Sol;
 
 	typedef enum  {MINIMIZE, MAXIMIZE} Sense;
-
-	typedef enum {OK=1, FAIL=0} Status;
 
 	LinearSolver(int nb_vars, int nb_ctr, int max_iter= default_max_iter,
 			int max_time_out= default_max_time_out, double eps=default_eps);
 
 	~LinearSolver();
 
-
 	Status_Sol solve();
 
-	Status writeFile(const char* name="save_LP.lp");
+	void writeFile(const char* name="save_LP.lp");
 
 
 // GET
@@ -130,42 +130,42 @@ public:
 
 	double getObjValue() const;
 
-	Status getCoefConstraint(Matrix& A);
+	void getCoefConstraint(Matrix& A);
 
-	Status getCoefConstraint_trans(Matrix& A_trans);
+	void getCoefConstraint_trans(Matrix& A_trans);
 
-	Status getB(IntervalVector& B);
+	void getB(IntervalVector& B);
 
-	Status getPrimalSol(Vector & prim);
+	void getPrimalSol(Vector & prim);
 
-	Status getDualSol(Vector & dual);
+	void getDualSol(Vector & dual);
 
-	Status getInfeasibleDir(Vector & sol);
+	void getInfeasibleDir(Vector & sol);
 
 	double getEpsilon() const;
 
 
 // SET
 
-	Status cleanConst();
+	void cleanConst();
 
-	Status cleanAll();
+	void cleanAll();
 
-	Status setMaxIter(int max);
+	void setMaxIter(int max);
 
-	Status setMaxTimeOut(int time);
+	void setMaxTimeOut(int time);
 
-	Status setSense(Sense s);
+	void setSense(Sense s);
 
-	Status setVarObj(int var, double coef);
+	void setVarObj(int var, double coef);
 
-	Status initBoundVar(IntervalVector bounds);
+	void initBoundVar(IntervalVector bounds);
 
-	Status setBoundVar(int var, Interval bound);
+	void setBoundVar(int var, Interval bound);
 
-	Status setEpsilon(double eps);
+	void setEpsilon(double eps);
 
-	Status addConstraint(Vector & row, CmpOp sign, double rhs );
+	void addConstraint(Vector & row, CmpOp sign, double rhs );
 
 
 

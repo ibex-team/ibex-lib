@@ -39,8 +39,7 @@ bool HC4Revise::proj(const Function& f, const Domain& y, IntervalVector& x) {
 
 	Domain& root=*f.expr().deco.d;
 
-	// at this point y cannot be empty because the "forward" functions that
-	// may return an empty set (sqrt, tan) throws an exception in this case
+	if (root.is_empty()) { x.set_empty(); throw EmptyBoxException(); }
 
 	switch(y.dim.type()) {
 	case Dim::SCALAR:       if (root.i().is_subset(y.i())) return true; break;
@@ -64,6 +63,9 @@ bool HC4Revise::proj(const Function& f, const Domain& y, IntervalVector& x) {
 void HC4Revise::proj(const Function& f, const Domain& y, ExprLabel** x) {
 	EVAL(f,x);
 	*f.expr().deco.d &= y;
+
+	// if next instruction throws an EmptyBoxException,
+	// it will be caught by proj(...,IntervalVector& x).
 	f.backward<HC4Revise>(*this);
 
 	Array<Domain> argD(f.nb_arg());

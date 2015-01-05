@@ -36,6 +36,8 @@ CtcPolytopeHull::~CtcPolytopeHull() {
 	if (own_lr) delete &lr;
 }
 
+#ifndef  _IBEX_WITH_NOLP_
+
 void CtcPolytopeHull::contract(IntervalVector& box) {
 
 	if (!(limit_diam_box.contains(box.max_diam()))) return;
@@ -53,8 +55,8 @@ void CtcPolytopeHull::contract(IntervalVector& box) {
 
 		optimizer(box);
 
-		//	mylinearsolver->writeFile("LP.lp");
-		//		system ("cat LP.lp");
+		//mylinearsolver->writeFile("LP.lp");
+		//system ("cat LP.lp");
 		//cout << "[polytope-hull] box after LR: " << box << endl;
 		mylinearsolver->cleanConst();
 	}
@@ -106,6 +108,8 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 			//cout << "[polytope-hull]->[optimize] simplex for left bound returns stat:" << stat <<  " opt: " << opt << endl;
 			if (stat == LinearSolver::OPTIMAL) {
 				if(opt.lb()>box[i].ub()) {
+					delete[] inf_bound;
+					delete[] sup_bound;
 					throw EmptyBoxException();
 				}
 
@@ -120,6 +124,8 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 			}
 			else if (stat == LinearSolver::INFEASIBLE) {
 				// the infeasibility is proved, the EmptyBox exception is raised
+				delete[] inf_bound;
+				delete[] sup_bound;
 				throw EmptyBoxException();
 			}
 
@@ -150,6 +156,8 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 			//cout << "[polytope-hull]->[optimize] simplex for right bound returns stat=" << stat << " opt=" << opt << endl;
 			if( stat == LinearSolver::OPTIMAL) {
 				if(opt.ub() <box[i].lb()) {
+					delete[] inf_bound;
+					delete[] sup_bound;
 					throw EmptyBoxException();
 				}
 
@@ -164,6 +172,8 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 			}
 			else if(stat == LinearSolver::INFEASIBLE) {
 				// the infeasibility is proved,  the EmptyBox exception is raised
+				delete[] inf_bound;
+				delete[] sup_bound;
 				throw EmptyBoxException();
 			}
 			else if (stat == LinearSolver::INFEASIBLE_NOTPROVED) {
@@ -194,8 +204,8 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 
 }
 
-LinearSolver::Status_Sol CtcPolytopeHull::run_simplex(IntervalVector& box,
-		LinearSolver::Sense sense, int var, Interval& obj, double bound) {
+LinearSolver::Status_Sol CtcPolytopeHull::run_simplex(IntervalVector& box, LinearSolver::Sense sense, int var, Interval& obj, double bound) {
+
 	int nvar=nb_var;
 	int nctr=mylinearsolver->getNbRows();
 	// the linear solver is always called in a minimization mode : in case of maximization of var , the opposite of var is minimized
@@ -204,67 +214,66 @@ LinearSolver::Status_Sol CtcPolytopeHull::run_simplex(IntervalVector& box,
 	else
 		mylinearsolver->setVarObj(var, -1.0);
 
-	//	mylinearsolver->writeFile("coucou.lp");
-	//	system("cat coucou.lp");
-	LinearSolver::Status_Sol stat = mylinearsolver->solve();
-	//cout << "[polytope-hull]->[run_simplex] solver returns " << stat << endl;
+	LinearSolver::Status_Sol stat = LinearSolver::UNKNOWN;
+	try {
+		//	mylinearsolver->writeFile("coucou.lp");
+		//	system("cat coucou.lp");
+		stat = mylinearsolver->solve();
+		//cout << "[polytope-hull]->[run_simplex] solver returns " << stat << endl;
 
-	if(stat == LinearSolver::OPTIMAL) {
-		if( ((sense==LinearSolver::MINIMIZE) && (  mylinearsolver->getObjValue() <=bound)) ||
-				((sense==LinearSolver::MAXIMIZE) && ((-mylinearsolver->getObjValue())>=bound))) {
-			stat = LinearSolver::UNKNOWN;
+		if(stat == LinearSolver::OPTIMAL) {
+			if( ((sense==LinearSolver::MINIMIZE) && (  mylinearsolver->getObjValue() <=bound)) ||
+					((sense==LinearSolver::MAXIMIZE) && ((-mylinearsolver->getObjValue())>=bound))) {
+				stat = LinearSolver::UNKNOWN;
+			}
 		}
-	}
 
-	// Neumaier - Shcherbina postprocessing
-	if(stat == LinearSolver::OPTIMAL) {
+		// Neumaier - Shcherbina postprocessing
+		if(stat == LinearSolver::OPTIMAL) {
 
-		// the dual solution : used to compute the bound
-		Vector dual_solution(mylinearsolver->getNbRows());
-		LinearSolver::Status stat_dual = mylinearsolver->getDualSol(dual_solution);
+			// the dual solution : used to compute the bound
+			Vector dual_solution(mylinearsolver->getNbRows());
+			mylinearsolver->getDualSol(dual_solution);
 
-		Matrix A_trans (nb_var,mylinearsolver->getNbRows()) ;
-		LinearSolver::Status stat_A = mylinearsolver->getCoefConstraint_trans(A_trans);
+			Matrix A_trans (nb_var,mylinearsolver->getNbRows()) ;
+			mylinearsolver->getCoefConstraint_trans(A_trans);
 
-		/*	IntervalMatrix IA_trans (nb_var,mylinearsolver->getNbRows());
-		for (int i=0;i<nvar; i++){
-		  for(int j=0; j<nctr; j++)
-		    IA_trans[i][j]= A_trans[i][j];
-		}*/
-		IntervalVector B(mylinearsolver->getNbRows());
-		LinearSolver::Status stat_B = mylinearsolver->getB(B);
+			/*	IntervalMatrix IA_trans (nb_var,mylinearsolver->getNbRows());
+			for (int i=0;i<nvar; i++){
+			  for(int j=0; j<nctr; j++)
+				IA_trans[i][j]= A_trans[i][j];
+			}*/
+			IntervalVector B(mylinearsolver->getNbRows());
+			mylinearsolver->getB(B);
 
-		bool minimization=false;
-		if (sense==LinearSolver::MINIMIZE)
-			minimization=true;
-		//	  cout << "B " << B << endl;
-		//	  cout << "A_trans " << IA_trans << endl;
+			bool minimization=false;
+			if (sense==LinearSolver::MINIMIZE)	minimization=true;
 
-		if ((stat_dual==LinearSolver::OK) && (stat_A==LinearSolver::OK) && (stat_B==LinearSolver::OK))
+			//	  cout << "B " << B << endl;
+			//	  cout << "A_trans " << IA_trans << endl;
 			NeumaierShcherbina_postprocessing( mylinearsolver->getNbRows(), var, obj, box, A_trans, B, dual_solution, minimization);
-		else
-			stat = LinearSolver::UNKNOWN;
+		}
 
-	}
+		// infeasibility test  cf Neumaier Shcherbina paper
+		if(stat == LinearSolver::INFEASIBLE_NOTPROVED) {
 
-	// infeasibility test  cf Neumaier Shcherbina paper
-	if(stat == LinearSolver::INFEASIBLE_NOTPROVED) {
+			Vector infeasible_dir(mylinearsolver->getNbRows());
+			mylinearsolver->getInfeasibleDir(infeasible_dir);
 
-		Vector infeasible_dir(mylinearsolver->getNbRows());
-		LinearSolver::Status stat1 = mylinearsolver->getInfeasibleDir(infeasible_dir);
+			Matrix A_trans (nb_var,mylinearsolver->getNbRows()) ;
+			mylinearsolver->getCoefConstraint_trans(A_trans);
 
-		Matrix A_trans (nb_var,mylinearsolver->getNbRows()) ;
-		LinearSolver::Status stat2 = mylinearsolver->getCoefConstraint_trans(A_trans);
+			IntervalVector B(mylinearsolver->getNbRows());
+			mylinearsolver->getB(B);
 
-		IntervalVector B(mylinearsolver->getNbRows());
-		LinearSolver::Status stat3 = mylinearsolver->getB(B);
-
-		if ((stat1==LinearSolver::OK) && (stat2==LinearSolver::OK) && (stat3==LinearSolver::OK) &&
-				(NeumaierShcherbina_infeasibilitytest (mylinearsolver->getNbRows(), box, A_trans, B, infeasible_dir))) {
-			stat = LinearSolver::INFEASIBLE;
+			if (NeumaierShcherbina_infeasibilitytest (mylinearsolver->getNbRows(), box, A_trans, B, infeasible_dir)) {
+				stat = LinearSolver::INFEASIBLE;
+			}
 		}
 	}
-
+	catch (LPException&) {
+		stat = LinearSolver::UNKNOWN;
+	}
 	// Reset the objective of the LP solver
 	mylinearsolver->setVarObj(var, 0.0);
 
@@ -322,16 +331,16 @@ bool CtcPolytopeHull::NeumaierShcherbina_infeasibilitytest(int nr, IntervalVecto
 
 }
 
-bool CtcPolytopeHull::choose_next_variable(IntervalVector & box,
-		int & nexti, int & infnexti, int* inf_bound, int* sup_bound) {
+bool CtcPolytopeHull::choose_next_variable(IntervalVector & box, int & nexti, int & infnexti, int* inf_bound, int* sup_bound) {
 
 	bool found = false;
 
-	// the primal solution : used by choose_next_variable
-	Vector primal_solution(nb_var);
-	LinearSolver::Status stat_prim = mylinearsolver->getPrimalSol(primal_solution);
-	//cout << " primal " << primal_solution << endl;
-	if (stat_prim==LinearSolver::OK) {
+	try {
+		// the primal solution : used by choose_next_variable
+		Vector primal_solution(nb_var);
+		mylinearsolver->getPrimalSol(primal_solution);
+		//cout << " primal " << primal_solution << endl;
+
 		// The Achterberg heuristic for choosing the next variable (nexti) and its bound (infnexti) to be contracted (cf Baharev paper)
 		// and updating the indicators if a bound has been found feasible (with the precision prec_bound)
 		// called only when a primal solution is found by the LP solver (use of primal_solution)
@@ -370,8 +379,7 @@ bool CtcPolytopeHull::choose_next_variable(IntervalVector & box,
 
 
 		}
-	}
-	else {
+	} catch (LPException& ) {
 		// Default if the primal solution is not available.
 		for (int j=0; j<nb_var; j++) {
 			if (inf_bound[j]==0) {
@@ -387,5 +395,16 @@ bool CtcPolytopeHull::choose_next_variable(IntervalVector & box,
 	return found;
 
 }
+
+#else /// end _IBEX_WITH_NOLP_
+
+
+void CtcPolytopeHull::contract(IntervalVector& box) { }
+
+
+#endif /// end _IBEX_WITH_NOLP_
+
+
+
 
 } // end namespace ibex

@@ -122,7 +122,7 @@ const char* duplicate_or_generate(const char* name) {
 
 }
 
-Function::Function() : name(strdup(next_generated_func_name())), comp(NULL), df(NULL), zero(NULL) {
+Function::Function() : name(NULL), comp(NULL), df(NULL), zero(NULL) {
 	// root==NULL <=> the function is not initialized yet
 }
 
@@ -453,6 +453,11 @@ void Function::decorate(const Array<const ExprSymbol>& x, const ExprNode& y) con
 	// warning: to place after "compile" if compile modifies deco.d...
 	for (int i=0; i<nb_arg(); i++) {
 		assert(arg(i).deco.d);
+
+		// the following line is useful for symbols that do not appear in the expression y
+		// (not handled in the previous loop)
+		arg(i).deco.f=(Function*) this;
+
 		arg_domains.set_ref(i,*arg(i).deco.d);
 		arg_deriv.set_ref(i,*arg(i).deco.g);
 		arg_af2.set_ref(i,*arg(i).deco.af2);

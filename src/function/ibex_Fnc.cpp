@@ -47,14 +47,17 @@ void Fnc::hansen_matrix(const IntervalVector& box, IntervalMatrix& H) const {
 
 Interval Fnc::eval(const IntervalVector& box) const {
 	not_implemented("eval");
+	return Interval();
 }
 
 IntervalVector Fnc::eval_vector(const IntervalVector& box) const {
 	not_implemented("eval_vector");
+	return IntervalVector(0);
 }
 
 IntervalMatrix Fnc::eval_matrix(const IntervalVector& x) const {
 	not_implemented("eval_matrix");
+	return IntervalMatrix(0,0);
 }
 
 void Fnc::gradient(const IntervalVector& x, IntervalVector& g) const {

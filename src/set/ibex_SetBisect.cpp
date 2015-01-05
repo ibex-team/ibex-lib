@@ -33,6 +33,10 @@ SetBisect::SetBisect(int var, double pt, SetNode* left, SetNode* right) : SetNod
 	assert(left->status>=UNK || left->status!=right->status);
 }
 
+SetBisect::SetBisect(int var, double pt) : SetNode(UNK), var(var), pt(pt), left(NULL), right(NULL) {
+
+}
+
 SetBisect::~SetBisect() {
 	delete left;
 	delete right;

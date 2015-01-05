@@ -28,15 +28,14 @@ using namespace std;
 namespace {
 
 const double default_relax_ratio = 0.2;
-const double default_eq_eps = 1.e-8;
 
 // This function is necessary because we need
 // the extended system "ext_sys" to build
 // two arguments of the base class constructor (ctc and bsc)
 // and we don't know which argument is evaluated first
-ExtendedSystem& get_ext_sys(System& sys, double goal_prec) {
-	if ((*memory())->sys) return *((*memory())->sys); // already built and recorded
-	else return rec(new ExtendedSystem(sys,default_eq_eps));
+ExtendedSystem& get_ext_sys(System& sys, double eq_prec) {
+	if (!(*memory())->sys.empty()) return (ExtendedSystem&) *((*memory())->sys.back()); // already built and recorded
+	else return rec(new ExtendedSystem(sys,eq_prec));
 }
 
 }
@@ -45,9 +44,9 @@ ExtendedSystem& get_ext_sys(System& sys, double goal_prec) {
 // the equality constraints are relaxed with goal_prec
 DefaultOptimizer::DefaultOptimizer(System& _sys, double prec, double goal_prec) :
 		Optimizer(_sys,
-			  ctc(_sys,get_ext_sys(_sys,default_eq_eps),prec), // warning: we don't know which argument is evaluated first
-			  rec(new SmearSumRelative(get_ext_sys(_sys,default_eq_eps),prec)),
-				  prec, goal_prec, goal_prec, 1) {
+			  ctc(_sys,get_ext_sys(_sys,default_equ_eps),prec), // warning: we don't know which argument is evaluated first
+			  rec(new SmearSumRelative(get_ext_sys(_sys,default_equ_eps),prec)),
+			  prec, goal_prec, goal_prec, 1, default_equ_eps) {
   
 	srand(1);
 
