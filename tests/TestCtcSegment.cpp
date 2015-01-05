@@ -1,12 +1,12 @@
 /* ============================================================================
- * I B E X - CtcInteger Tests
+ * I B E X - CtcSegment Tests
  * ============================================================================
  * Copyright   : Ecole des Mines de Nantes (FRANCE)
  * License     : This program can be distributed under the terms of the GNU LGPL.
  *               See the file COPYING.LESSER.
  *
- * Author(s)   : Gilles Chabert
- * Created     : Mar 2, 2012
+ * Author(s)   : Benoit Desrochers, Gilles Chabert
+ * Created     : Jan 06, 2014
  * ---------------------------------------------------------------------------- */
 
 #include "TestCtcSegment.h"
@@ -65,10 +65,10 @@ void TestCtcSegment::test_contract_empty()
     double _box[][2] = {{-5,-2},  {-5,50}};
     IntervalVector box = IntervalVector::empty(2);
 
-    c.contract(box);
-    TEST_ASSERT(box.is_empty());
+//    c.contract(box);
+//    TEST_ASSERT(box.is_empty());
 
-//    TEST_THROWS(c.contract(box), EmptyBoxException);
+    TEST_THROWS(c.contract(box), EmptyBoxException);
 }
 
 
@@ -78,9 +78,9 @@ void ibex::TestCtcSegment::test_call_with_empty_box()
     double _box[][2] = {{-5,50},  {-5,50}};
     IntervalVector box = IntervalVector::empty(2);
 
-    c.contract(box);
-    TEST_ASSERT(box.is_empty());
-//    TEST_THROWS(c.contract(box), EmptyBoxException);
+//    c.contract(box);
+//    TEST_ASSERT(box.is_empty());
+    TEST_THROWS(c.contract(box), EmptyBoxException);
 }
 
 void ibex::TestCtcSegment::test_call_with_all_real()

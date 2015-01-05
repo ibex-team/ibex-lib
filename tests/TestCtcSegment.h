@@ -24,11 +24,11 @@ public:
 	TestCtcSegment() {
 
 		TEST_ADD(TestCtcSegment::test_contract_segment);
-		TEST_ADD(TestCtcSegment::test_contract_border);
-		TEST_ADD(TestCtcSegment::test_contract_empty);
+        TEST_ADD(TestCtcSegment::test_contract_border);
+        TEST_ADD(TestCtcSegment::test_contract_empty);
         TEST_ADD(TestCtcSegment::test_contract_degenerate);
-		TEST_ADD(TestCtcSegment::test_call_with_empty_box);
-		TEST_ADD(TestCtcSegment::test_call_with_all_real);
+        TEST_ADD(TestCtcSegment::test_call_with_empty_box);
+        TEST_ADD(TestCtcSegment::test_call_with_all_real);
 	}
 
 	void test_contract_segment();
