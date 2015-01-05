@@ -65,21 +65,15 @@ class CellHeap : public CellBuffer, public Heap<Cell> {
    */
   void contract_heap(double loup);
 
-  /** Return the minimum (the criterion for
-   * the first cell) */
-  double minimum() const {
-    return l.begin()->second;
-  }
+  /**
+   * Return the minimum (the criterion for
+   * the first cell)
+   */
+  double minimum() const;
 
  protected:
   /** The "cost" of a cell. */
   virtual double cost(const Cell&) const=0;
-
-  /** The way to compare two pairs (cells,crit). */
-  bool operator()(const std::pair<Cell*,double>& c1, const std::pair<Cell*,double>& c2) const;
-
-  // cells and associated "costs"
-  std::vector<std::pair<Cell*,double> > l;
 
   friend std::ostream& operator<<(std::ostream&, const CellHeap&);
 
@@ -88,6 +82,26 @@ class CellHeap : public CellBuffer, public Heap<Cell> {
 
 /** Display the buffer */
 std::ostream& operator<<(std::ostream&, const CellHeap&);
+
+/*============================================ inline implementation ============================================ */
+
+inline void CellHeap::flush()                    { Heap<Cell>::flush(); }
+
+inline int CellHeap::size() const                { return Heap<Cell>::size(); }
+
+inline bool CellHeap::empty() const              { return l.empty(); }
+
+inline void CellHeap::push(Cell* cell)           { Heap<Cell>::push(cell);
+                                                   if (capacity>0 && size()==capacity) throw CellBufferOverflow(); }
+
+inline Cell* CellHeap::pop()                     { return Heap<Cell>::pop(); }
+
+inline Cell* CellHeap::top() const               { return Heap<Cell>::top(); }
+
+inline void CellHeap::contract_heap(double loup) { Heap<Cell>::contract(loup); }
+
+inline double CellHeap::minimum() const          { return Heap<Cell>::minimum(); }
+
 
 } // end namespace ibex
 #endif // __IBEX_CELL_HEAP_H__
