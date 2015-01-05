@@ -73,6 +73,7 @@
 
 // ================ set ===============
 #include "TestSeparator.h"
+#include "TestSepPolygon.h"
 
 
 using namespace std;
@@ -134,7 +135,10 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestFritzJohn()));
 
     ts.add(auto_ptr<Test::Suite>(new TestOptimizer()));
-      ts.add(auto_ptr<Test::Suite>(new TestOptimizer()));
+    ts.add(auto_ptr<Test::Suite>(new TestSeparator()));
+    ts.add(auto_ptr<Test::Suite>(new TestSepPolygon()));
+
+
 
     return ts.run(output,false) ? EXIT_SUCCESS : EXIT_FAILURE;
 

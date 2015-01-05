@@ -12,13 +12,13 @@
 #define __TEST_SEPARATOR_H__
 
 #include "cpptest.h"
-//#include "ibex_Separator.h"
-#include "ibex.h"
-//#include "ibex_SepFwdBwd.h"
-//#include "ibex_SepCtcPair.h"
-//#include "ibex_SepInter.h"
-//#include "ibex_SepUnion.h"
-//#include "ibex_SepNot.h"
+#include "ibex_SepFwdBwd.h"
+#include "ibex_SepCtcPair.h"
+#include "ibex_SepInter.h"
+#include "ibex_SepUnion.h"
+#include "ibex_SepNot.h"
+#include "ibex_CtcEmpty.h"
+#include "ibex_CtcIdentity.h"
 #include "utils.h"
 
 namespace ibex {
@@ -31,18 +31,14 @@ public:
         TEST_ADD(TestSeparator::SepFwdBwd_GT_GEQ);
         TEST_ADD(TestSeparator::test_SepCtcPair);
         TEST_ADD(TestSeparator::test_SepUnionInter);
-//		TEST_ADD(TestSeparator::SepUnion);
-//		TEST_ADD(TestSeparator::SepNot);
-
-
+		TEST_ADD(TestSeparator::test_SepNot);
 	}
 
     void SepFwdBwd_LT_LEQ();
     void SepFwdBwd_GT_GEQ();
     void test_SepCtcPair();
     void test_SepUnionInter();
-//	void SepUnion();
-//	void SepNot();
+	void test_SepNot();
 
 private:
     Variable x, y;

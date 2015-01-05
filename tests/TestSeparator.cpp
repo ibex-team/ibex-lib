@@ -45,6 +45,13 @@ void TestSeparator::test_SepCtcPair(){
 	
 }
 
+void TestSeparator::test_SepNot(){
+    CtcEmpty cempty(2);
+    CtcIdentity ctcId(2);
+    SepCtcPair S(cempty, ctcId);
+    SepNot S_not(S);
+}
+
  void TestSeparator::test_SepUnionInter() {
 
     // define the center of circle
@@ -65,6 +72,8 @@ void TestSeparator::test_SepCtcPair(){
      Function f3(x,y,sqrt(sqr(x-ax[2]) + sqr(y-ay[2])));
      SepFwdBwd S3(f3,dist[2]);
 
+     SepNot S4(S3);
+
      // union of separators
      Array<Sep> AS(S1,S2,S3);
      SepUnion SUL = SepUnion(AS);
@@ -75,7 +84,7 @@ void TestSeparator::test_SepCtcPair(){
      // intersection of separators
      SepInter SIL = SepInter(AS);
      SepInter SI2 = SepInter(S1,S2);
-     SepInter SI3 = SepInter(S1,S2,S3);
+     SepInter SI3 = SepInter(S1,S2,S4);
 
      Array<Sep>arraySep (SUL,SU2,SU3,SIL,SI2,SI3);
 
