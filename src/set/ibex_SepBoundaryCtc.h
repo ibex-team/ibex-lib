@@ -7,8 +7,8 @@
 // Created     : Oct 31, 2014
 //============================================================================
 
-#ifndef __IBEX_SEP_CTC_BOUNDARY_CTC_H__
-#define __IBEX_SEP_CTC_BOUNDARY_CTC_H__
+#ifndef __IBEX_SEP_BOUNDARY_CTC_H__
+#define __IBEX_SEP_BOUNDARY_CTC_H__
 
 #include "ibex_Sep.h"
 #include "ibex_Ctc.h"
@@ -73,4 +73,4 @@ protected:
 
 } // namespace ibex
 
-#endif // __IBEX_SEP_CTC_BOUNDARY_CTC_H__
+#endif // __IBEX_SEP_BOUNDARY_CTC_H__

@@ -70,9 +70,6 @@ public:
 	/**
 	 * \brief Synchronization with an i-set reduced to a single box "x" of status "x_status".
 	 *
-	 * skip_other_maybe: don't consider UNK box of the other set. This is important
-	 *                   because the other set may be a temporary set produced by
-	 *                   the contract function (and the UNK box will be refined later)
 	 */
 	virtual SetNode* sync(const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps)=0;
 

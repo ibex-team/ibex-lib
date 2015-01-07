@@ -45,6 +45,8 @@ void SepBoundaryCtc::separate(IntervalVector& x_in, IntervalVector& x_out) {
 	BoolInterval res;
 
 	/**
+	 * TODO
+	 *
 	 * [gch] I think the following loop could be improved by
 	 * taking benefit of the continuity of the set boundary:
 	 * all contiguous boxes in the difference are on the same
