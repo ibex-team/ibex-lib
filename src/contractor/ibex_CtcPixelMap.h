@@ -11,9 +11,9 @@
 #define __IBEX_CTC_PIXEL_MAP_H__
 
 #include <iostream>
-#include <ibex_Ctc.h>
-#include <ibex_IntervalVector.h>
-#include <ibex_PixelMap.h>
+#include "ibex_Ctc.h"
+#include "ibex_IntervalVector.h"
+#include "ibex_PixelMap.h"
 
 namespace ibex {
 
