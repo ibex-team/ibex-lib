@@ -1164,27 +1164,53 @@ inline bool bwd_atan2(const Interval& theta, Interval& y, Interval& x) {
 	}
 	// not_implemented("bwd_atan2 non implemented yet");
 	
-    if(x.ub()>0 || !y.contains(0.0)) {
-        Interval s1,s2,s3,s4,s5,s6,s7;
-        s1 = sqr(x);
-        s2 = sqr(y);
-        s3 = s1 + s2;
-        s4 = sqrt(s3);
-        s5 = s4 - x;
-        s6 = s5/y;
-        s7 = atan(s6);
-        s7 &= 2*theta;
-        b &= bwd_atan(s7,s6);
-        b &= bwd_div(s6,s5,y);
-        b &= bwd_sub(s5,s4,x);
-        b &= bwd_sqrt(s4,s3);
-        b &= bwd_add(s3,s1,s2);
-        b &= bwd_sqr(s2,y);
-        b &= bwd_sqr(s1,x);
-    } else {
-        not_implemented("bwd_atan2 when x contains 0 and y contains 0");
-    }
+    // if(x.ub()>0 || !y.contains(0.0)) {
+    //     Interval s1,s2,s3,s4,s5,s6,s7;
+    //     s1 = sqr(x);
+    //     s2 = sqr(y);
+    //     s3 = s1 + s2;
+    //     s4 = sqrt(s3);
+    //     s5 = s4 - x;
+    //     s6 = s5/y;
+    //     s7 = atan(s6);
+    //     s7 &= 2*theta;
+    //     b &= bwd_atan(s7,s6);
+    //     b &= bwd_div(s6,s5,y);
+    //     b &= bwd_sub(s5,s4,x);
+    //     b &= bwd_sqrt(s4,s3);
+    //     b &= bwd_add(s3,s1,s2);
+    //     b &= bwd_sqr(s2,y);
+    //     b &= bwd_sqr(s1,x);
+    // } else {
+    //     not_implemented("bwd_atan2 when x contains 0 and y contains 0");
+    // }
 
+    if (x.is_subset(Interval::POS_REALS) && y.is_subset(Interval::POS_REALS) && theta.is_subset(Interval(0,M_PI/2.)))
+    {
+        x &= Interval::POS_REALS;
+        y &= Interval::POS_REALS;
+        x &= y/(tan(theta & Interval(0,M_PI/2.)));
+        y &= x*(tan(theta & Interval(0,M_PI/2.)));
+    }
+    else if (x.is_subset(Interval::POS_REALS) && y.is_subset(Interval::ALL_REALS) && theta.is_subset(Interval(-M_PI/2.,M_PI/2.)))
+    {
+        Interval y2 = -y;
+        Interval theta2 = -theta;
+        bwd_atan2(theta2,x,y2);
+        y = -y2;
+    }
+    else if (x.is_subset(Interval::ALL_REALS) && y.is_subset(Interval::ALL_REALS) && theta.is_subset(Interval(-M_PI,M_PI)))
+    {
+        Interval x2 = -x;
+        Interval theta2 = Interval::PI-theta;
+        bwd_atan2(theta2,y,x2);
+        x = -x2;
+        /* code */
+    } 
+    else 
+    {
+        not_implemented("bwd_atan2 when theta is not a subset of [-M_PI,M_PI].");
+    }
     //  <=> cos(Theta)*X - sin(Theta)*Y > 0;
 	//      sin(Theta)*X + cos(Theta)*Y = 0
 /*
