@@ -239,8 +239,8 @@ public:
 		TEST_ADD(TestArith::bwd_pow17);
 
 		// ===== temporarily commented ===============
-//		TEST_ADD(TestArith::bwd_atan2_01);
-//		TEST_ADD(TestArith::bwd_atan2_02);
+		TEST_ADD(TestArith::bwd_atan2_01);
+		TEST_ADD(TestArith::bwd_atan2_02);
 
 		TEST_ADD(TestArith::bwd_sqrt01);
 		TEST_ADD(TestArith::bwd_sqrt02);
