@@ -24,7 +24,7 @@ namespace {
 Array<Ctc> segment_ctc_list(vector<double>& ax, vector<double>& ay, vector<double>& bx, vector<double>& by) {
 	Array<Ctc> l(ax.size());
 
-	for(uint i=0; i<ax.size(); i++) {
+	for(unsigned int i=0; i<ax.size(); i++) {
 		l.set_ref(i, *new CtcSegment(ax[i],ay[i],bx[i],by[i]));
 	}
 	return l;
@@ -41,7 +41,7 @@ SepPolygon::SepPolygon(vector<double> &_ax, vector<double> &_ay, vector<double> 
 }
 
 SepPolygon::~SepPolygon() {
-	for(uint i=0; i<((CtcUnion&) ctc_boundary).list.size(); i++) {
+	for(unsigned int i=0; i<((CtcUnion&) ctc_boundary).list.size(); i++) {
 		delete & (((CtcUnion&) ctc_boundary).list[i]);
 	}
 	delete &ctc_boundary;
