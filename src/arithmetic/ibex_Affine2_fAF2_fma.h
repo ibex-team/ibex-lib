@@ -12,6 +12,16 @@
 #ifndef IBEX_AFFINE2_FAF2_FMA_H_
 #define IBEX_AFFINE2_FAF2_FMA_H_
 
+#ifndef _MSC_VER
+	#define IBEX_FMA
+#else
+#if (_MSC_VER >= 1800)
+	#define IBEX_FMA
+#endif
+#endif
+
+#ifdef IBEX_FMA
+
 #include "ibex_Interval.h"
 
 
@@ -95,4 +105,5 @@ inline double AF_fAF2_fma::twoSum(double a, double b, double *res) {
 
 }
 
-#endif /* IBEX_Affine2_H_ */
+#endif // IBEX_Affine2_H_
+#endif //  IBEX_FMA

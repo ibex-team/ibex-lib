@@ -228,7 +228,7 @@ void Ponts30::build_equ() {
 	equ.set_ref(i++,(	sqr(L_x - M_x) + sqr(L_y - M_y) - 0.0625 ));
 	equ.set_ref(i++,(	sqr(K_x - M_x) + sqr(K_y - M_y) - 0.0625 ));
 	equ.set_ref(i++,(	sqr(G_x - L_x) + sqr(G_y - L_y) - 0.0625 ));
-	equ.set_ref(i++,(	sqr(K_x - L_x) + sqr(K_y - L_y) - 0.089999999999999997 ));
+	equ.set_ref(i++,(	sqr(K_x - L_x) + sqr(K_y - L_y) - 0.089999999999997 ));
 	equ.set_ref(i++,(	sqr(J_x - K_x) + sqr(J_y - K_y) - 0.0625 ));
 	equ.set_ref(i++,(	sqr(K_x - N_x) + sqr(K_y - N_y) - 0.0625 ));
 	equ.set_ref(i++,(	sqr(I_x - J_x) + sqr(I_y - J_y) - 9 ));

@@ -11,7 +11,7 @@
 #define __IBEX_SET_H__
 
 #include "ibex_SetNode.h"
-#include "ibex_Separator.h"
+#include "ibex_Sep.h"
 
 namespace ibex {
 
@@ -36,6 +36,14 @@ public:
 	 * [empty, x] if inner==false or [x,x] if inner==false.
 	 */
 	SetInterval(const IntervalVector& bounding_box, double eps, bool inner=true);
+
+
+	/**
+	 * \brief Loads a set from a data file.
+	 *
+	 * \see #save().
+	 */
+	SetInterval(const char* filename);
 
 	/*
 	 * \brief Delete this
@@ -70,7 +78,7 @@ public:
 	 * If [x] designates this i-set and [y] the i-set in argument, then this will be replace by
 	 *  { x, x\in[x] and x\in[y] }.
 	 */
-	void sync(Separator& sep);
+	void sync(Sep& sep);
 
 	/**
 	 * \brief True if this i-set is empty
@@ -79,11 +87,28 @@ public:
 	 */
 	bool is_empty() const;
 
-	void contract(Separator& sep);
+	void contract(Sep& sep);
+
+	/**
+	 * \brief Serialize the set and save it into a file
+	 */
+	void save(const char* filename);
 
 	void visit_leaves(SetNode::leaf_func func) const;
 
+	/**
+	 * \brief Distance of the point "pt" wrt the set (if inside is true)
+	 * of the complementary of the set (if inside is false).
+	 */
+	double dist(const Vector& pt, bool inside) const;
+
 protected:
+
+	/**
+	 * \brief Load the set from a file
+	 */
+	void load(const char* filename);
+
 	friend std::ostream& operator<<(std::ostream& os, const SetInterval& set);
 
 	SetNode* root; // NULL means no existing set (warning: different from empty set!)

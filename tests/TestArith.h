@@ -113,6 +113,12 @@ public:
 		TEST_ADD(TestArith::sin12);
 		TEST_ADD(TestArith::sin13);
 
+		TEST_ADD(TestArith::tan01);
+		TEST_ADD(TestArith::tan02);
+		TEST_ADD(TestArith::tan03);
+		TEST_ADD(TestArith::tan04);
+		TEST_ADD(TestArith::tan05);
+
 		TEST_ADD(TestArith::pow01);
 		TEST_ADD(TestArith::pow02);
 		TEST_ADD(TestArith::pow03);
@@ -214,26 +220,27 @@ public:
 		TEST_ADD(TestArith::bwd_sin23);
 		TEST_ADD(TestArith::bwd_sin24);
 
-//		TEST_ADD(TestArith::bwd_pow01);
-//		TEST_ADD(TestArith::bwd_pow02);
-//		TEST_ADD(TestArith::bwd_pow03);
-//		TEST_ADD(TestArith::bwd_pow04);
-//		TEST_ADD(TestArith::bwd_pow05);
-//		TEST_ADD(TestArith::bwd_pow06);
-//		TEST_ADD(TestArith::bwd_pow07);
-//		TEST_ADD(TestArith::bwd_pow08);
-//		TEST_ADD(TestArith::bwd_pow09);
-//		TEST_ADD(TestArith::bwd_pow10);
-//		TEST_ADD(TestArith::bwd_pow11);
-//		TEST_ADD(TestArith::bwd_pow12);
-//		TEST_ADD(TestArith::bwd_pow13);
-//		TEST_ADD(TestArith::bwd_pow14);
-//		TEST_ADD(TestArith::bwd_pow15);
-//		TEST_ADD(TestArith::bwd_pow16);
+		TEST_ADD(TestArith::bwd_pow01);
+		TEST_ADD(TestArith::bwd_pow02);
+		TEST_ADD(TestArith::bwd_pow03);
+		TEST_ADD(TestArith::bwd_pow04);
+		TEST_ADD(TestArith::bwd_pow05);
+		TEST_ADD(TestArith::bwd_pow06);
+		TEST_ADD(TestArith::bwd_pow07);
+		TEST_ADD(TestArith::bwd_pow08);
+		TEST_ADD(TestArith::bwd_pow09);
+		TEST_ADD(TestArith::bwd_pow10);
+		TEST_ADD(TestArith::bwd_pow11);
+		TEST_ADD(TestArith::bwd_pow12);
+		TEST_ADD(TestArith::bwd_pow13);
+		TEST_ADD(TestArith::bwd_pow14);
+		TEST_ADD(TestArith::bwd_pow15);
+		TEST_ADD(TestArith::bwd_pow16);
 		TEST_ADD(TestArith::bwd_pow17);
 
-		TEST_ADD(TestArith::bwd_atan2_01);
-		TEST_ADD(TestArith::bwd_atan2_02);
+		// ===== temporarily commented ===============
+//		TEST_ADD(TestArith::bwd_atan2_01);
+//		TEST_ADD(TestArith::bwd_atan2_02);
 
 		TEST_ADD(TestArith::bwd_sqrt01);
 		TEST_ADD(TestArith::bwd_sqrt02);
@@ -248,6 +255,9 @@ public:
 		TEST_ADD(TestArith::bwd_atan03);
 		TEST_ADD(TestArith::bwd_atan04);
 		TEST_ADD(TestArith::bwd_atan05);
+		TEST_ADD(TestArith::bwd_atan06);
+		TEST_ADD(TestArith::bwd_atan07);
+		TEST_ADD(TestArith::bwd_atan08);
 
 		TEST_ADD(TestArith::bwd_add01);
 		TEST_ADD(TestArith::bwd_add02);
@@ -394,6 +404,14 @@ private:
 	void sin12();
 	void sin13();
 
+	void tan01();
+	void tan02();
+	void tan03();
+	void tan04();
+	void tan05();
+	void tan06();
+	void tan07();
+
 	void pow01();
 	void pow02();
 	void pow03();
@@ -533,6 +551,9 @@ private:
 	void bwd_atan03();
 	void bwd_atan04();
 	void bwd_atan05();
+	void bwd_atan06();
+	void bwd_atan07();
+	void bwd_atan08();
 
 	void bwd_add01();
 	void bwd_add02();
@@ -556,6 +577,7 @@ private:
 	void check_sinh(const Interval& x);
 	void check_cosh(const Interval& x);
 	void check_trigo(const Interval& x, const Interval& y);
+
 	void check_pow(const Interval& x, int p, const Interval& y_expected);
 	bool checkbwd_mul(const Interval& y, const Interval& x1_before, const Interval& x2_before, const Interval& x1_after, const Interval& x2_after);
 	void checkbwd_div(const Interval& y, const Interval& x1_before, const Interval& x2_before, const Interval& x1_after, const Interval& x2_after);

@@ -115,21 +115,27 @@ SetNode* diff(const IntervalVector& x, const IntervalVector& y, NodeType x_statu
 }
 
 // result of a contraction represented as a SetNode
-SetNode* contract_set(const IntervalVector& box1, Ctc& c, NodeType x_status, NodeType y_status, double eps) {
-	if (x_status==y_status) return new SetLeaf(x_status);
+SetNode* contract_set(const IntervalVector& box, Sep& sep, double eps) {
 
-	SetNode* root2;
-	IntervalVector box2(box1);
+	IntervalVector box1(box);
+	IntervalVector box2(box);
 
-	try {
-		c.contract(box2);
-		root2 = diff(box1, box2, x_status, y_status, eps);
-	} catch(EmptyBoxException&) {
-		root2 = new SetLeaf(x_status);
-	}
-	//cout << "contract set:" << endl; root2->print(cout,box1,0);
+	sep.separate(box1,box2);
 
-	return root2;
+	SetNode* root1 = diff(box, box1, IN, UNK, eps);
+	//cout << "set obtained with inner contraction:" << endl; root1->print(cout,box,0);
+	SetNode* root2 = diff(box, box2, OUT, UNK, eps);
+	//cout << "set obtained with outer contraction:" << endl;	root2->print(cout,box,0);
+
+	// TODO: pb: sync fails
+	// check "false" (skip_other_maybe is an old parameter not used anymore)
+	root1->inter(box,root2,box,eps); //,false);
+
+	delete root2;
+
+	//cout << "final set:" << endl; root1->print(cout,box,0);
+
+	return root1;
 }
 
 char to_string(const NodeType& status) {
@@ -148,26 +154,22 @@ SetNode::~SetNode() {
 
 }
 
-SetNode* SetNode::sync(const IntervalVector& nodebox, Separator& sep, double eps) {
+SetNode* SetNode::sync(const IntervalVector& nodebox, Sep& sep, double eps) {
 	// perform contraction
 	//cout << "=== contract with ctc_in  =======" << endl;
 
 	// we skip other UNK-box if this node is not a leaf. This makes no difference
 	// if we are in SYNC mode but if we are in INTER mode, this prevents from
 	// this node to be "absorbed" by a temporary UNK box resulting from contraction.
-	SetNode* this2 = this->sync(nodebox, contract_set(nodebox, sep.ctc_in, IN, UNK, eps), nodebox, eps, !is_leaf());
+	SetNode* this2 = this->sync(nodebox, contract_set(nodebox, sep, eps), nodebox, eps, !is_leaf());
 
-	//cout << " ctc_in gives: "; this2->print(cout,nodebox,0);
+	//cout << " sep gives: "; this2->print(cout,nodebox,0);
 	//cout << endl;
 
-	//cout << "=== contract with ctc_out =======" << endl;
-	SetNode* this3 = this2->sync(nodebox, contract_set(nodebox, sep.ctc_out, OUT, UNK, eps), nodebox, eps, !this2->is_leaf());
-	//cout << " ctc_out gives: "; this3->print(cout,nodebox,0);
-	//cout << endl;
 
-	SetNode* this4 = this3->sync_rec(nodebox, sep, eps);
+	SetNode* this3 = this2->sync_rec(nodebox, sep, eps);
 
-	return this4;
+	return this3;
 }
 
 SetNode* SetNode::sync(const IntervalVector& nodebox, const SetNode* other, const IntervalVector& otherbox, double eps, bool skip_other_maybe) {
@@ -188,15 +190,14 @@ SetNode* SetNode::sync(const IntervalVector& nodebox, const SetNode* other, cons
 	}
 }
 
-SetNode* SetNode::inter(const IntervalVector& nodebox, Separator& sep, double eps) {
+SetNode* SetNode::inter(const IntervalVector& nodebox, Sep& sep, double eps) {
 	// we skip other UNK-box if this node is not a leaf. This makes no difference
 	// if we are in SYNC mode but if we are in INTER mode, this prevents from
 	// this node to be "absorbed" by a temporary UNK box resulting from contraction.
-	SetNode* this2 = this->inter(nodebox, contract_set(nodebox, sep.ctc_in, IN, UNK, eps), nodebox, eps);
-	//cout << " ctc_in gives: "; this2->print(cout,nodebox,0);
-	SetNode* this3 = this2->inter(nodebox, contract_set(nodebox, sep.ctc_out, OUT, UNK, eps), nodebox, eps);
+	SetNode* this2 = this->inter(nodebox, contract_set(nodebox, sep, eps), nodebox, eps);
+	//cout << " sep gives: "; this2->print(cout,nodebox,0);
 
-	SetNode* this4 = this3->inter_rec(nodebox, sep, eps);
+	SetNode* this4 = this2->inter_rec(nodebox, sep, eps);
 
 	return this4;
 }

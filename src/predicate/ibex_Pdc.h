@@ -63,7 +63,7 @@ protected:
 	 * \brief Check if the size of all the predicate of the list is the same.
 	 */
 	static bool check_nb_var_pdc_list (const Array<Pdc>& l) {
-		int i=1, n=l[0].nb_var;
+		int i=1;
 		while ((l[i].nb_var==l[0].nb_var)&&(i<l.size())) {
 			i++;
 		}

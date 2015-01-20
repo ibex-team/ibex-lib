@@ -45,10 +45,10 @@ public:
 	virtual SetNode* inter(const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps);
 
 	/** \see SetNode */
-	virtual SetNode* sync_rec(const IntervalVector& nodebox, Separator& sep, double eps);
+	virtual SetNode* sync_rec(const IntervalVector& nodebox, Sep& sep, double eps);
 
 	/** \see SetNode */
-	virtual SetNode* inter_rec(const IntervalVector& nodebox, Separator& sep, double eps);
+	virtual SetNode* inter_rec(const IntervalVector& nodebox, Sep& sep, double eps);
 
 	/** \see SetNode */
 	virtual SetNode* union_(const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps);
@@ -69,8 +69,12 @@ public:
 
 	IntervalVector right_box(const IntervalVector& nodebox) const;
 
-protected:
+//protected:
 	friend class SetNode;
+	friend class SetInterval;
+
+	// partial initialization used by SetInterval::load only
+	SetBisect(int var, double pt);
 
 	SetNode* try_merge();
 
@@ -78,6 +82,9 @@ protected:
 	double pt;
 	SetNode* left;
 	SetNode* right;
+
+private:
+	SetBisect(const SetBisect&); // forbidden
 };
 
 } // namespace ibex

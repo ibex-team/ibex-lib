@@ -100,8 +100,12 @@ Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, double prec,
 	if (niter < 3*n) niter=3*n;
 
 	//====================================
+#ifdef _IBEX_WITH_NOLP_
+	mylp = NULL;
+#else
 	mylp = new LinearSolver(n+1,m,niter );
 	//	cout << "sys " << sys << endl;
+#endif // _IBEX_WITH_NOLP_
 }
 
 Optimizer::~Optimizer() {
@@ -114,7 +118,7 @@ Optimizer::~Optimizer() {
 	}
 	buffer.flush();
 	if (critpr > 0) buffer2.flush();
-
+	if (equs) delete equs;
 	delete mylp;
 	//	delete &(objshaver->ctc);
 	//	delete objshaver;
@@ -245,8 +249,8 @@ void Optimizer::update_uplo() {
 
 
 
-/* contract the box of the cell c , try to find a new loup :;
-     push the cell  in the 2 heaps or if the contraction makes the box empty, delete the cell. For diversification, rebuild the 2 heaps
+/* contract the box of the cell c , try to find a new loup ;
+     push the cell  in the 2 heaps or if the contraction makes the box empty, delete the cell.
  */
 
 void Optimizer::handle_cell(OptimCell& c, const IntervalVector& init_box ){
@@ -276,13 +280,6 @@ void Optimizer::handle_cell(OptimCell& c, const IntervalVector& init_box ){
 		if (critpr > 0)      buffer2.push(&c);
 
 		nb_cells++;
-		// reconstruction of the 2 heaps every heap_build_period nodes
-		int heap_build_period=100;
-		if (nb_cells% heap_build_period ==0) {
-			buffer.makeheap();
-			if (critpr > 0) buffer2.makeheap();
-		}
-
 	}
 	catch(EmptyBoxException&) {
 		delete &c;

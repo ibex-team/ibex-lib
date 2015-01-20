@@ -164,7 +164,7 @@ void System::init_f_from_ctrs() {
 }
 
 
-System::System(const SystemFactory& fac) : nb_var(0), nb_ctr(0) {
+System::System(const SystemFactory& fac) : nb_var(0), nb_ctr(0), box(1) {
 	init(fac);
 }
 

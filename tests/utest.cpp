@@ -17,6 +17,7 @@
 #include "TestString.h"
 #include "TestBitSet.h"
 #include "TestSymbolMap.h"
+#include "TestPixelMap.h"
 
 // ================ arithmetic ===============
 #include "TestInterval.h"
@@ -62,9 +63,18 @@
 #include "TestCtcExist.h"
 #include "TestCtcForAll.h"
 #include "TestCtcPolytopeHull.h"
+#include "TestCtcSegment.h"
+#include "TestCtcPixelMap.h"
+
+
 
 // ================ strategy ===============
 #include "TestOptimizer.h"
+
+// ================ set ===============
+#include "TestSeparator.h"
+#include "TestSepPolygon.h"
+
 
 using namespace std;
 using std::auto_ptr;
@@ -80,6 +90,7 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestString()));
     ts.add(auto_ptr<Test::Suite>(new TestBitSet()));
     ts.add(auto_ptr<Test::Suite>(new TestSymbolMap()));
+    ts.add(auto_ptr<Test::Suite>(new TestPixelMap()));
 
     ts.add(auto_ptr<Test::Suite>(new TestInterval()));
     ts.add(auto_ptr<Test::Suite>(new TestIntervalVector()));
@@ -118,10 +129,16 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestCtcExist()));
     ts.add(auto_ptr<Test::Suite>(new TestCtcForAll()));
     ts.add(auto_ptr<Test::Suite>(new TestCtcPolytopeHull()));
+    ts.add(auto_ptr<Test::Suite>(new TestCtcSegment()));
+    ts.add(auto_ptr<Test::Suite>(new TestCtcPixelMap()));
 
     ts.add(auto_ptr<Test::Suite>(new TestFritzJohn()));
 
     ts.add(auto_ptr<Test::Suite>(new TestOptimizer()));
+    ts.add(auto_ptr<Test::Suite>(new TestSeparator()));
+    ts.add(auto_ptr<Test::Suite>(new TestSepPolygon()));
+
+
 
     return ts.run(output,false) ? EXIT_SUCCESS : EXIT_FAILURE;
 
