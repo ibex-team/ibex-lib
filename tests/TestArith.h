@@ -270,6 +270,10 @@ public:
 		TEST_ADD(TestArith::bwd_sub03);
 		TEST_ADD(TestArith::bwd_sub04);
 		TEST_ADD(TestArith::bwd_sub05);
+
+		TEST_ADD(TestArith::bwd_imod_01);
+		TEST_ADD(TestArith::bwd_imod_02);
+		TEST_ADD(TestArith::bwd_imod_03);
 	}
 private:
 
@@ -567,6 +571,11 @@ private:
 	void bwd_sub04();
 	void bwd_sub05();
 
+	void bwd_imod_01();
+	void bwd_imod_02();
+	void bwd_imod_03();
+
+
 	void check_add_scal(const Interval& x, double z, const Interval& y_expected);
 	void check_add(const Interval& x, const Interval& z, const Interval& y_expected);
 	void check_mul_scal(const Interval& x, double z, const Interval& y_expected);
@@ -588,7 +597,8 @@ private:
 	bool checkbwd_atan(const Interval& y, const Interval& xbefore, const Interval& xafter);
 	bool checkbwd_add(const Interval& y, const Interval& x1_before, const Interval& x2_before, const Interval& x1_after, const Interval& x2_after);
 	bool checkbwd_sub(const Interval& y, const Interval& x1_before, const Interval& x2_before, const Interval& x1_after, const Interval& x2_after);
-
+	bool checkbwd_imod(const double& period, const Interval& x_bef, const Interval& y_bef,
+								const Interval& x_aft, const Interval& y_aft);
 
 };
 

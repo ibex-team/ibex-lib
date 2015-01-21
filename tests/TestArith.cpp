@@ -783,3 +783,30 @@ void TestArith::bwd_sub04() {
 void TestArith::bwd_sub05() {
 	TEST_ASSERT(checkbwd_sub(Interval(-1,1),Interval(1,2),Interval(-10,5),Interval(1,2),Interval(0,3)));
 }
+
+bool TestArith::checkbwd_imod(const double& period, const Interval& x_bef, const Interval& y_bef,
+								const Interval& x_aft, const Interval& y_aft) {
+	bool res=true;
+	Interval y;
+	Interval x;
+
+	y=y_bef;
+	x=x_bef;
+	bwd_imod(x,y,period);
+
+	res &= almost_eq(x,x_aft,ERROR) && almost_eq(y,y_aft,ERROR);
+
+	return res;
+}
+
+void TestArith::bwd_imod_01() {
+	TEST_ASSERT(checkbwd_imod(3.,Interval(3.,5.),Interval(1.,2.),Interval(4.,5.),Interval(1.,2.)));
+}
+
+void TestArith::bwd_imod_02() {
+	TEST_ASSERT(checkbwd_imod(2.,Interval(7.,8.),Interval(.5,2.),Interval(7.,8.),Interval(1.,2.)));
+}
+
+void TestArith::bwd_imod_03() {
+	TEST_ASSERT(checkbwd_imod(2.,Interval(7.,8.),Interval(0.,2.),Interval(7.,8.),Interval(0.,2.)));
+}

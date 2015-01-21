@@ -1325,6 +1325,41 @@ inline bool bwd_integer(Interval& x) {
 	return !(x = integer(x)).is_empty();
 }
 
+// Implements interval modulo with double period:  x = y mod(p)
+inline bool bwd_imod(Interval& x, Interval& y, const double& p) {
+    if (p <= 0.)
+    {
+        ibex_error("Modulo needs a strictly positive period p.");
+        return false;
+    }
+    if (y.diam()>p || x.diam()>p)
+        return false;
+    Interval r = (x-y)/p;
+    Interval ir = integer(r);
+    if (ir.is_empty()) // additional protection because an empty interval is considered degenerated.
+        return false;
+    if (ir.is_degenerated())
+        bwd_sub(ir*p,x,y);
+    else if (ir.diam()==1)
+    {
+        double ir1 = ir.lb();
+        double ir2 = ir.ub();
+        Interval x1 = x; Interval x2 = x;
+        Interval y1 = y; Interval y2 = y;
+        bwd_sub(Interval(ir1*p),x1,y1);
+        bwd_sub(Interval(ir2*p),x2,y2);
+        x = x1 | x2;
+        y = y1 | y2;
+    }
+    else
+    {
+        ibex_error("Modulo diameter error.");
+        return false;
+    }
+
+    return true;
+}
+
 } // end namespace ibex
 
 #endif // _IBEX_INTERVAL_H_
