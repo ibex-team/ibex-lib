@@ -810,3 +810,23 @@ void TestArith::bwd_imod_02() {
 void TestArith::bwd_imod_03() {
 	TEST_ASSERT(checkbwd_imod(2.,Interval(7.,8.),Interval(0.,2.),Interval(7.,8.),Interval(0.,2.)));
 }
+
+void TestArith::bwd_imod_04() {
+	TEST_ASSERT(checkbwd_imod(2.*M_PI,Interval(2.*M_PI,3.*M_PI),Interval(M_PI/6,M_PI/2.),Interval(13.*M_PI/6.,5.*M_PI/2.),Interval(M_PI/6,M_PI/2.)));
+}
+
+void TestArith::bwd_imod_05() {
+	TEST_ASSERT(checkbwd_imod(2.*M_PI,Interval(3.*M_PI,4.*M_PI),Interval(M_PI/3,M_PI/2.),Interval::EMPTY_SET,Interval::EMPTY_SET));
+}
+
+void TestArith::bwd_imod_06() {
+	TEST_ASSERT(checkbwd_imod(2.*M_PI,Interval(3.*M_PI,4.*M_PI),Interval(0.,M_PI/2.),Interval(4*M_PI),Interval(0.)));
+}
+
+void TestArith::bwd_imod_07() {
+	TEST_ASSERT(checkbwd_imod(2.*M_PI,Interval(2.*M_PI,4.*M_PI),Interval(-M_PI/6,M_PI/2.),Interval(2.*M_PI,4.*M_PI),Interval(-M_PI/6,M_PI/2.)));
+}
+
+void TestArith::bwd_imod_08() {
+	TEST_ASSERT(checkbwd_imod(2.*M_PI,Interval(7.*M_PI/4.,8.*M_PI/3),Interval(-M_PI/2,M_PI/2.),Interval(7.*M_PI/4.,5.*M_PI/2.),Interval(-M_PI/4,M_PI/2.)));
+}

@@ -274,6 +274,11 @@ public:
 		TEST_ADD(TestArith::bwd_imod_01);
 		TEST_ADD(TestArith::bwd_imod_02);
 		TEST_ADD(TestArith::bwd_imod_03);
+		TEST_ADD(TestArith::bwd_imod_04);
+		TEST_ADD(TestArith::bwd_imod_05);
+		TEST_ADD(TestArith::bwd_imod_06);
+		TEST_ADD(TestArith::bwd_imod_07);
+		TEST_ADD(TestArith::bwd_imod_08);
 	}
 private:
 
@@ -574,6 +579,11 @@ private:
 	void bwd_imod_01();
 	void bwd_imod_02();
 	void bwd_imod_03();
+	void bwd_imod_04();
+	void bwd_imod_05();
+	void bwd_imod_06();
+	void bwd_imod_07();
+	void bwd_imod_08();
 
 
 	void check_add_scal(const Interval& x, double z, const Interval& y_expected);
