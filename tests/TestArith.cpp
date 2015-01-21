@@ -621,12 +621,37 @@ bool TestArith::checkbwd_atan2(const Interval& a, const Interval& y_bef, const I
 	return res;
 }
 
-void TestArith::bwd_atan2_01() {
+void TestArith::bwd_atan2_01() { //first quadrant
 	TEST_ASSERT(checkbwd_atan2(Interval(M_PI/6.,M_PI/3.),Interval(.5,10.),Interval(.5,2.),Interval(.5,2.*sqrt(3.)),Interval(.5,2.)));
 }
-void TestArith::bwd_atan2_02() {
+void TestArith::bwd_atan2_02() { // first quadrant
 	TEST_ASSERT(checkbwd_atan2(Interval(M_PI/6.,M_PI/3.),Interval(.5,2.),Interval(.5,10.),Interval(.5,2.),Interval(.5,2.*sqrt(3.))));
 }
+void TestArith::bwd_atan2_03() { // left half
+	TEST_ASSERT(checkbwd_atan2(Interval(-M_PI/4.,M_PI/4.),Interval(1.,2.),Interval(.5,2.),Interval(1.,2.),Interval(1.,2.)));
+}
+void TestArith::bwd_atan2_04() { //fourth quadrant
+	TEST_ASSERT(checkbwd_atan2(Interval(-M_PI/2.,0.),Interval(.5,2.),Interval(.5,10.),Interval::EMPTY_SET,Interval::EMPTY_SET));
+}
+void TestArith::bwd_atan2_05() { //upper half
+	TEST_ASSERT(checkbwd_atan2(Interval(2.*M_PI,3.*M_PI),Interval(-.5,2.),Interval(.5,10.),Interval(0. ,2.),Interval(.5,10.)));
+}
+void TestArith::bwd_atan2_06() { //second quadrant
+	TEST_ASSERT(checkbwd_atan2(Interval(2*M_PI/3.,5.*M_PI/6.),Interval(0.,100.),Interval(-20.,-sqrt(3.)/2.),Interval(.5,20.*sqrt(3.)),Interval(-20.,-sqrt(3.)/2)));
+}
+void TestArith::bwd_atan2_07() { //third quadrant
+	TEST_ASSERT(checkbwd_atan2(Interval(-3*M_PI/4.,-2*M_PI/3.),Interval(-sqrt(3.)/2.,2.),Interval(-sqrt(2.)/2.,0.),Interval(-sqrt(3.)/2.,0.),Interval(-sqrt(2.)/2.,0.)));
+}
+void TestArith::bwd_atan2_08() { //third quadrant
+	TEST_ASSERT(checkbwd_atan2(Interval(-3*M_PI/4.,-2*M_PI/3.),Interval(-sqrt(3.)/2.,2.),Interval(-1.,-.5),Interval(-sqrt(3.)/2.,-.5),Interval(-sqrt(3.)/2.,-.5)));
+}
+void TestArith::bwd_atan2_09() { //lower half
+	TEST_ASSERT(checkbwd_atan2(Interval(-3*M_PI/4.,-M_PI/4.),Interval(-5.,-.5),Interval::ALL_REALS,Interval(0. ,2.),Interval(-5.,5.)));
+}
+void TestArith::bwd_atan2_10() { //right half
+	TEST_ASSERT(checkbwd_atan2(Interval(-M_PI/3.,M_PI/4.),Interval::ALL_REALS,Interval(sqrt(3.)/2.),Interval(-1.5,sqrt(3.)/2.),Interval(sqrt(3.)/2.)));
+}
+
 
 //void TestArith::bwd_atan2_02() {
 //	TEST_ASSERT(checkbwd_atan2(Interval(M_PI/4.,3*M_PI/4.),Interval(-100.,100.),Interval(1.,2.),Interval(-1,1),Interval(1.,2.)));

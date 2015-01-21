@@ -1287,16 +1287,25 @@ inline bool bwd_atan2(const Interval& theta, Interval& y, Interval& x) {
     // Modulo
     else
     {
-        // We separate the intervals into two cases as imod does not support union.
-        Interval theta1(0,M_PI), theta2(M_PI, 2*M_PI);
+        // We separate the intervals into 4 cases as imod does not support union.
+        Interval theta1(0,M_PI/2.), theta2(M_PI/2., M_PI), theta3(M_PI, 3*M_PI/2.), theta4(3*M_PI/2., 2*M_PI);
         Interval thetaTmp(theta);
         bwd_imod(thetaTmp,theta1,2*M_PI);
         thetaTmp=theta;
         bwd_imod(thetaTmp,theta2,2*M_PI);
-        Interval x1=x; Interval y1=y; Interval x2=x; Interval y2=y;
-        bwd_atan2(theta1,y1,x1);
-        bwd_atan2(theta2,y2,x2);
-        x=x1|x2; y=y1|y2;
+        thetaTmp=theta;
+        bwd_imod(thetaTmp,theta3,2*M_PI);
+        thetaTmp=theta;
+        bwd_imod(thetaTmp,theta4,2*M_PI);
+        Interval x1=x; Interval y1=y; 
+        bwd_atan2(theta1,y1,x1); // first quadrant
+        Interval x2=x; Interval y2=y;
+        bwd_atan2(theta2,y2,x2); // second quadrant
+        Interval x3=x; Interval y3=y;
+        bwd_atan2(theta3,y3,x3); // third quadrant
+        Interval x4=x; Interval y4=y;
+        bwd_atan2(theta4,y4,x4); // fourth quadrant
+        x=(x1|x2)|(x3|x4); y=(y1|y2)|(y3|y4);
         // not_implemented("bwd_atan2 not implemented yet for theta outside [0,2*PI].");
     }
 
