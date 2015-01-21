@@ -1214,11 +1214,27 @@ inline bool bwd_atan2(const Interval& theta, Interval& y, Interval& x) {
 		return false;
 	}
 
-    //Upper right quadrant
-    if(theta.is_subset(Interval(0,M_PI/2))) 
+    //Lower half of upper right quadrant
+    if(theta.is_subset(Interval(0,M_PI/4.)))
     {
-        x = (x&Interval::POS_REALS) & ( (y&Interval::POS_REALS) * (1/tan(theta&Interval(0,M_PI/2))) );
-        y = (y&Interval::POS_REALS) & ( (x&Interval::POS_REALS) * (tan(theta&Interval(0,M_PI/2))) );
+        x = (x&Interval::POS_REALS) & ( (y&Interval::POS_REALS) * (1/tan(theta&Interval(0,M_PI/4.))) );
+        y = (y&Interval::POS_REALS) & ( (x&Interval::POS_REALS) * (tan(theta&Interval(0,M_PI/4.))) );
+    }
+
+    //Upper half of upper right quadrant
+    else if(theta.is_subset(Interval(M_PI/4.,M_PI/2.)))
+    {
+        bwd_atan2(M_PI/2.-theta,x,y); 
+    }
+
+    //Upper right quadrant
+    else if(theta.is_subset(Interval(0,M_PI/2))) 
+    {
+        Interval x1=x; Interval y1=y; Interval x2=x; Interval y2=y;
+        Interval theta1(theta.lb(),M_PI/4.), theta2(M_PI/4., theta.ub());
+        bwd_atan2(theta1,y1,x1);
+        bwd_atan2(theta2,y2,x2);
+        x=x1|x2; y=y1|y2; 
     }
 
     //Upper left quadrant

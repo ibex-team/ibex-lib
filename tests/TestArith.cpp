@@ -645,9 +645,9 @@ void TestArith::bwd_atan2_07() { //third quadrant
 void TestArith::bwd_atan2_08() { //third quadrant
 	TEST_ASSERT(checkbwd_atan2(Interval(-3*M_PI/4.,-2*M_PI/3.),Interval(-sqrt(3.)/2.,2.),Interval(-1.,-.5),Interval(-sqrt(3.)/2.,-.5),Interval(-sqrt(3.)/2.,-.5)));
 }
-// void TestArith::bwd_atan2_09() { //lower half
-// 	TEST_ASSERT(checkbwd_atan2(Interval(-3*M_PI/4.,-M_PI/4.),Interval(-5.,-.5),Interval::ALL_REALS,Interval(0. ,2.),Interval(-5.,5.)));
-// }
+void TestArith::bwd_atan2_09() { //lower half
+	TEST_ASSERT(checkbwd_atan2(Interval(-3*M_PI/4.,-M_PI/4.),Interval(-5.,-.5),Interval::ALL_REALS,Interval(-5.,-.5),Interval(-5.,5.)));
+}
 void TestArith::bwd_atan2_10() { //right half
 	TEST_ASSERT(checkbwd_atan2(Interval(-M_PI/3.,M_PI/4.),Interval::ALL_REALS,Interval(sqrt(3.)/2.),Interval(-1.5,sqrt(3.)/2.),Interval(sqrt(3.)/2.)));
 }

@@ -247,7 +247,7 @@ public:
 		TEST_ADD(TestArith::bwd_atan2_06);
 		TEST_ADD(TestArith::bwd_atan2_07);
 		TEST_ADD(TestArith::bwd_atan2_08);
-		// TEST_ADD(TestArith::bwd_atan2_09); // commented waiting for an optimal contractor.
+		TEST_ADD(TestArith::bwd_atan2_09); // commented waiting for an optimal contractor.
 		TEST_ADD(TestArith::bwd_atan2_10);
 
 		TEST_ADD(TestArith::bwd_sqrt01);
@@ -560,7 +560,7 @@ private:
 	void bwd_atan2_06();
 	void bwd_atan2_07();
 	void bwd_atan2_08();
-	// void bwd_atan2_09();
+	void bwd_atan2_09();
 	void bwd_atan2_10();
 
 	void bwd_sqrt01();
