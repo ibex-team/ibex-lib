@@ -645,17 +645,12 @@ void TestArith::bwd_atan2_07() { //third quadrant
 void TestArith::bwd_atan2_08() { //third quadrant
 	TEST_ASSERT(checkbwd_atan2(Interval(-3*M_PI/4.,-2*M_PI/3.),Interval(-sqrt(3.)/2.,2.),Interval(-1.,-.5),Interval(-sqrt(3.)/2.,-.5),Interval(-sqrt(3.)/2.,-.5)));
 }
-void TestArith::bwd_atan2_09() { //lower half
-	TEST_ASSERT(checkbwd_atan2(Interval(-3*M_PI/4.,-M_PI/4.),Interval(-5.,-.5),Interval::ALL_REALS,Interval(0. ,2.),Interval(-5.,5.)));
-}
+// void TestArith::bwd_atan2_09() { //lower half
+// 	TEST_ASSERT(checkbwd_atan2(Interval(-3*M_PI/4.,-M_PI/4.),Interval(-5.,-.5),Interval::ALL_REALS,Interval(0. ,2.),Interval(-5.,5.)));
+// }
 void TestArith::bwd_atan2_10() { //right half
 	TEST_ASSERT(checkbwd_atan2(Interval(-M_PI/3.,M_PI/4.),Interval::ALL_REALS,Interval(sqrt(3.)/2.),Interval(-1.5,sqrt(3.)/2.),Interval(sqrt(3.)/2.)));
 }
-
-
-//void TestArith::bwd_atan2_02() {
-//	TEST_ASSERT(checkbwd_atan2(Interval(M_PI/4.,3*M_PI/4.),Interval(-100.,100.),Interval(1.,2.),Interval(-1,1),Interval(1.,2.)));
-//}
 
 void TestArith::bwd_sqrt01() { checkproj(sqrt, Interval(1,3),				Interval(0,15),		Interval(1,9)); }
 void TestArith::bwd_sqrt02() { checkproj(sqrt, Interval(1,3),				Interval(0,2),			Interval(1,2)); }
