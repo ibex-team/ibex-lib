@@ -62,6 +62,33 @@
 //	#define POS_INFINITY filib::primitive::compose(0,0x7FE,(1 << 21)-1,0xffffffff)
 	/** \brief IBEX_NAN: <double> representation of NaN */
 	#define IBEX_NAN filib::primitive::compose(0,0x7FF,1 << 19,0)
+#else
+#ifdef _IBEX_WITH_DIRECT_
+	/** \brief NEG_INFINITY: double representation of -oo */
+	#define NEG_INFINITY (-(1/0.0))
+	/** \brief POS_INFINITY: double representation of +oo */
+	#define POS_INFINITY  (1/0.0)
+
+	class DIRECT_INTERVAL {
+	public:
+	    double inf;
+	    double sup;
+	    bool isEmpty;
+
+		DIRECT_INTERVAL(void) : inf(NEG_INFINITY), sup(POS_INFINITY), isEmpty(false) {}
+		DIRECT_INTERVAL(double a, double b) : inf(a), sup(b), isEmpty(false) {}
+		DIRECT_INTERVAL(double a) : inf(a), sup(a), isEmpty(false) {}
+
+		/** assignment operator */
+		inline DIRECT_INTERVAL & operator= (DIRECT_INTERVAL const & o) {
+			this->inf = o.inf;
+			this->sup = o.sup;
+			this->isEmpty = o.isEmpty;
+			return *this;
+		}
+	};
+
+#endif
 #endif
 #endif
 #endif
@@ -502,16 +529,16 @@ class Interval {
      */
     operator const ExprConstant&() const;
 
-    //private:
+//private:
 #ifdef _IBEX_WITH_GAOL_
-	/* \brief Wrap the gaol-interval [x]. */
+    /* \brief Wrap the gaol-interval [x]. */
     Interval(const gaol::interval& x);
     /* \brief Assign this to the gaol-interval [x]. */
     Interval& operator=(const gaol::interval& x);
-	gaol::interval itv;
+    gaol::interval itv;
 #else
 #ifdef _IBEX_WITH_BIAS_
-	/* \brief Wrap the bias-interval [x]. */
+    /* \brief Wrap the bias-interval [x]. */
     Interval(const INTERVAL& x);
     /* \brief Assign this to the bias-interval [x]. */
     Interval& operator=(const INTERVAL& x);
@@ -521,13 +548,22 @@ class Interval {
 #ifdef _IBEX_WITH_FILIB_
     //typedef filib::interval<double, filib::native_switched,filib::i_mode_extended_flag> INTERVAL;
     typedef filib::interval<FI_BASE,FI_ROUNDING,FI_MODE> FI_INTERVAL;
-	/* \brief Wrap the filib-interval [x]. */
+    /* \brief Wrap the filib-interval [x]. */
     Interval(const FI_INTERVAL& x);
     /* \brief Assign this to the filib-interval [x]. */
     Interval& operator=(const FI_INTERVAL& x);
 
     FI_INTERVAL itv;
+#else
+#ifdef _IBEX_WITH_DIRECT_
 
+    /* \brief Wrap the direct-interval [x]. */
+    Interval(const DIRECT_INTERVAL& x);
+    /* \brief Assign this to the direct-interval [x]. */
+    Interval& operator=(const DIRECT_INTERVAL& x);
+
+    DIRECT_INTERVAL itv;
+#endif
 #endif
 #endif
 #endif
@@ -847,6 +883,10 @@ bool bwd_integer(Interval& x);
 #else
 #ifdef _IBEX_WITH_FILIB_
 #include "ibex_filib_Interval.h_"
+#else
+#ifdef _IBEX_WITH_DIRECT_
+#include "ibex_direct_Interval.h_"
+#endif
 #endif
 #endif
 #endif
@@ -955,6 +995,10 @@ inline double distance(const Interval &x1, const Interval &x2) {
 #else
 #ifdef _IBEX_WITH_FILIB_
     	return x1.itv.dist(x2.itv);
+#else
+#ifdef _IBEX_WITH_DIRECT_
+    	not_implemented("TO DO");
+#endif
 #endif
 #endif
 #endif
