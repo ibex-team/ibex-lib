@@ -519,6 +519,27 @@ inline Interval tan(const Interval& x) {
 	if (x.is_empty()) return Interval::EMPTY_SET;
 	else return sin(x)/cos(x);
 }
+
+
+inline Interval cosh(const Interval& x) {
+	if (x.is_empty()) return Interval::EMPTY_SET;
+	else if (x.ub()==POS_INFINITY) {
+		if (x.lb()<=0) return Interval(1,POS_INFINITY);
+		else return Interval((::cosh(x.lb())),POS_INFINITY);
+	}
+	else if (x.lb()==NEG_INFINITY) {
+		if (x.ub()>=0) return Interval(1,POS_INFINITY);
+		else return Interval((::cosh(x.ub())),POS_INFINITY);
+	}
+	else if (x.lb()>=0)
+		return Interval((::cosh(x.lb())),(::cosh(x.ub())));
+	else if (x.ub()<=0)
+		return Interval((::cosh(x.ub())),(::cosh(x.lb())));
+	else
+		return ((fabs(x.lb())> fabs(x.ub())) ? Interval(1,(::cosh(x.lb()))) :Interval(1,(::cosh(x.ub()))));
+}
+
+/*
 //TODO
 inline Interval acos(const Interval& x) {
 	if (x.is_empty()) return Interval::EMPTY_SET;
@@ -556,24 +577,6 @@ inline Interval asin(const Interval& x) {
 inline Interval atan(const Interval& x) {
 	if (x.is_empty()) return Interval::EMPTY_SET;
 	else return ArcTan(x.itv);
-}
-
-inline Interval cosh(const Interval& x) {
-	if (x.is_empty()) return Interval::EMPTY_SET;
-	else if (x.ub()==POS_INFINITY) {
-		if (x.lb()<=0) return Interval(1,POS_INFINITY);
-		else return Interval((::cosh(x.lb())),POS_INFINITY);
-	}
-	else if (x.lb()==NEG_INFINITY) {
-		if (x.ub()>=0) return Interval(1,POS_INFINITY);
-		else return Interval((::cosh(x.ub())),POS_INFINITY);
-	}
-	else if (x.lb()>=0)
-		return Interval((::cosh(x.lb())),(::cosh(x.ub())));
-	else if (x.ub()<=0)
-		return Interval((::cosh(x.ub())),(::cosh(x.lb())));
-	else
-		return ((fabs(x.lb())> fabs(x.ub())) ? Interval(1,(::cosh(x.lb()))) :Interval(1,(::cosh(x.ub()))));
 }
 
 //TODO
@@ -673,7 +676,7 @@ inline Interval atanh(const Interval& x) {
 	BiasArTanh (Bias(r), Bias(x.itv));
 	return r;
 }
-
+*/
 inline Interval abs(const Interval &x) {
 	if (x.is_empty()) return Interval::EMPTY_SET;
 	else {
