@@ -75,8 +75,12 @@
 	    double sup;
 	    bool isEmpty;
 
-		DIRECT_INTERVAL(void) : inf(NEG_INFINITY), sup(POS_INFINITY), isEmpty(false) {}
-		DIRECT_INTERVAL(double a, double b) : inf(a), sup(b), isEmpty(false) {}
+		DIRECT_INTERVAL(void) : inf(0), sup(0), isEmpty(true) {}
+		DIRECT_INTERVAL(double a, double b) {
+			if  (a>=b)  {inf = b ; sup = a;}
+			else        {inf = a ; sup = b;}
+			isEmpty=false;
+		}
 		DIRECT_INTERVAL(double a) : inf(a), sup(a), isEmpty(false) {}
 
 		/** assignment operator */
@@ -86,7 +90,7 @@
 			this->isEmpty = o.isEmpty;
 			return *this;
 		}
-	};
+			};
 
 #endif
 #endif
