@@ -65,9 +65,9 @@
 #else
 #ifdef _IBEX_WITH_DIRECT_
 	/** \brief NEG_INFINITY: double representation of -oo */
-	#define NEG_INFINITY (-(1/0.0))
+	#define NEG_INFINITY (-(1.0/0.0))
 	/** \brief POS_INFINITY: double representation of +oo */
-	#define POS_INFINITY  (1/0.0)
+	#define POS_INFINITY  (1.0/0.0)
 
 	class DIRECT_INTERVAL {
 	public:
@@ -75,7 +75,7 @@
 	    double sup;
 	    bool isEmpty;
 
-		DIRECT_INTERVAL(void) : inf(0), sup(0), isEmpty(true) {}
+		DIRECT_INTERVAL() : inf(0), sup(0), isEmpty(true) {}
 		DIRECT_INTERVAL(double a, double b) {
 			if  (a>=b)  {inf = b ; sup = a;}
 			else        {inf = a ; sup = b;}
