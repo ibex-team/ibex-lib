@@ -12,7 +12,11 @@
 #ifndef _IBEX_DIRECT_INTERVAL_H_
 #define _IBEX_DIRECT_INTERVAL_H_
 
+
+#include "ibex_Exception.h"
 #include <cassert>
+#include <float.h>
+#include <iostream>
 #include <cmath>
 
 namespace ibex {
@@ -448,18 +452,12 @@ inline Interval root(const Interval& x, int den) {
 		} else {
 			a1 = x.lb() ; a2 = x.ub();
 		}
-		double n=1, m=den;
-		if (n%2==0)
-		{ if ((a1>=0)||(a1*a2<=0))
-			return Interval(DIRECT_INTERVAL(-::pow(a2,n/m),::pow(a2,n/m)));
-		else return Interval::EMPTY_SET;
-		}
-		else
-		{ if (a1*a2<=0)
-			return Interval(DIRECT_INTERVAL(-::pow(fabs(a1),n/m),::pow(a2,n/m)));
-		if (a1>0) return Interval(DIRECT_INTERVAL(::pow(a1,n/m),::pow(a2,n/m)));
-		else return Interval(DIRECT_INTERVAL(-::pow(fabs(a1),n/m),-::pow(fabs(a2),n/m)));
-		}
+		double m=den;
+		if (a1*a2<=0)
+			return Interval(DIRECT_INTERVAL(-::pow(fabs(a1),1/m),::pow(a2,1/m)));
+		if (a1>0) return Interval(DIRECT_INTERVAL(::pow(a1,1/m),::pow(a2,1/m)));
+		else return Interval(DIRECT_INTERVAL(-::pow(fabs(a1),1/m),-::pow(fabs(a2),1/m)));
+
 	}
 	else return Interval(1.0)/root(x,-den);
 }

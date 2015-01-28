@@ -75,7 +75,7 @@
 	    double sup;
 	    bool isEmpty;
 
-		DIRECT_INTERVAL() : inf(0), sup(0), isEmpty(true) {}
+		DIRECT_INTERVAL(void) : inf(0), sup(0), isEmpty(true) {}
 		DIRECT_INTERVAL(double a, double b) {
 			if  (a>=b)  {inf = b ; sup = a;}
 			else        {inf = a ; sup = b;}

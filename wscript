@@ -46,6 +46,13 @@ def options (opt):
 	opt.add_option ("--without-lp", action="store_true", dest="WITHOUT_LP",
 			help = "do not use any Linear Solver")
 	
+	opt.add_option ("--without-rounding", action="store_true", dest="WITHOUT_ROUNDING",
+			help = "do not use a reliable interval")
+	
+	opt.add_option ("--standalone", action="store_true", dest="WITH_STANDALONE",
+			help = "do not use any external library (excepted standard C++ library)")	
+	
+	
 	opt.add_option ("--with-soplex", action="store", type="string", dest="SOPLEX_PATH",
 			help = "location of Soplex")
 	opt.add_option ("--with-cplex", action="store", type="string", dest="CPLEX_PATH",
@@ -141,7 +148,18 @@ def configure (conf):
 	# Disable Linear Solver
 	if (conf.options.WITHOUT_LP):
 		conf.env.WITHOUT_LP =True 
+
+	##################################################################################################
+	# Disable Rounding interval
+	if (conf.options.WITHOUT_ROUNDING):
+		conf.env.WITHOUT_ROUNDING =True 
 			
+	##################################################################################################
+	# Disable Linear Solver and rounding interval
+	if (conf.options.WITH_STANDALONE):
+		conf.env.WITHOUT_LP =True 
+		conf.env.WITHOUT_ROUNDING =True 
+					
 	##################################################################################################
 	# JNI
 	env.WITH_JNI = conf.options.WITH_JNI
