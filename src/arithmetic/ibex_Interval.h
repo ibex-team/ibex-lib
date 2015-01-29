@@ -1001,7 +1001,7 @@ inline double distance(const Interval &x1, const Interval &x2) {
     	return x1.itv.dist(x2.itv);
 #else
 #ifdef _IBEX_WITH_DIRECT_
-    	not_implemented("TO DO");
+    	return fabs(x1.lb()-x2.lb()) <fabs(x1.ub()-x2.ub()) ? fabs(x1.ub()-x2.ub()) : fabs(x1.lb()-x2.lb()) ;
 #endif
 #endif
 #endif
