@@ -17,7 +17,7 @@ using namespace std;
 namespace ibex {
 
 #define ERROR 1e-10
-
+/*
 static IntervalVector v0() {
 	double vec0[][2] = { {0,3}, {0,4}, {0,5} };
 	return IntervalVector(3,vec0);
@@ -51,6 +51,8 @@ static IntervalMatrix M3() {
 	               {-2,-1},{-2,-1},{-4,-2}};
 	return IntervalMatrix(2,3,m);
 }
+
+*/
 /*
 
 void TestDomain::cons01() {

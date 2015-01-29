@@ -31,11 +31,13 @@ inline void fpu_round_near() {
 }
 
 inline double previous_float(double x) {
-	return x;
+	if (x==0) return -DBL_MIN;
+	else return (1.0-DBL_EPSILON)*x;
 }
 
 inline double next_float(double x) {
-	return x;
+	if (x==0) return DBL_MIN;
+	else return (1.0+DBL_EPSILON)*x;
 }
 
 inline Interval::Interval(const DIRECT_INTERVAL& x) : itv(x) {
@@ -109,69 +111,162 @@ inline Interval& Interval::operator-=(const Interval& x) {
  *  </ul> */
 inline Interval& Interval::operator*=(const Interval& y) {
 
-	if (this->is_empty()||y.is_empty()) {
-		set_empty();
-	} else {
 
-		double x1=this->lb(),y1=y.lb(),x2=this->ub(),y2=y.ub();
-		if (x1>=0)	{
-			if  (y1>=0) {
-				*this= Interval(DIRECT_INTERVAL(x1*y1,x2*y2));
-			}
-			else {
-				if  (y2<=0) *this=Interval(DIRECT_INTERVAL(x2*y1,x1*y2));
-				else *this=  Interval(DIRECT_INTERVAL(x2*y1,x2*y2));
-			}
+	if (is_empty()) return *this;
+	if (y.is_empty()) { *this=Interval::EMPTY_SET; return *this; }
+
+	const double& a(lb());
+	const double& b(ub());
+	const double& c(y.lb());
+	const double& d(y.ub());
+
+	if ((a==0 && b==0) || (c==0 && d==0)) { *this=Interval(0.0); return *this; }
+
+	if (((a<0) && (b>0)) && (c==NEG_INFINITY || d==POS_INFINITY)) { *this=Interval(NEG_INFINITY, POS_INFINITY); return *this; }
+
+	if (((c<0) && (d>0)) && (a==NEG_INFINITY || b==POS_INFINITY)) { *this=Interval(NEG_INFINITY, POS_INFINITY); return *this; }
+
+	// [-inf, _] x [_ 0] ou [0,_] x [_, +inf]
+	if (((a==NEG_INFINITY) && (d==0)) || ((d==POS_INFINITY) && (a==0))) {
+		if ((b<=0) || (c>=0)) { *this=Interval(0.0, POS_INFINITY); return *this; }
+		else {
+			*this=Interval(b*c, POS_INFINITY);
+			return *this;
+		}
+	}
+
+	// [-inf, _] x [0, _] ou [0, _] x [-inf, _]
+	if (((a==NEG_INFINITY) && (c==0)) || ((c==NEG_INFINITY) && (a==0))) {
+		if ((b<=0) || (d<=0)) { *this=Interval(NEG_INFINITY, 0.0); return *this; }
+		else {
+			*this=Interval(NEG_INFINITY, b*d);
+			return *this;
+		}
+	}
+
+	// [_,0] x [-inf, _] ou [_, +inf] x [0,_]
+	if (((c==NEG_INFINITY) && (b==0)) || ((b==POS_INFINITY) && (c==0))) {
+		if ((d<=0) || (a>=0)) { *this=Interval(0.0, POS_INFINITY); return *this; }
+		else {
+			*this=Interval(a*d, POS_INFINITY);
+			return *this;
+		}
+	}
+
+	// [_, +inf] x [_,0] ou [_,0] x [_, +inf]
+	if (((b==POS_INFINITY) && (d==0)) || ((d==POS_INFINITY) && (b==0))) {
+		if ((a>=0) || (c>=0)) { *this=Interval(NEG_INFINITY, 0.0); return *this; }
+		else {
+			*this=Interval(NEG_INFINITY, a*c);
+			return *this;
+		}
+	}
+
+	if (a>=0)	{
+		if  (c>=0) {
+			*this= Interval(DIRECT_INTERVAL(a*c,b*d));
+		}
+		else {
+			if  (d<=0) *this=Interval(DIRECT_INTERVAL(b*c,a*d));
+			else *this=  Interval(DIRECT_INTERVAL(b*c,b*d));
+		}
+	} else {
+		if (b<=0)	{
+			if  (c>=0) *this=Interval(DIRECT_INTERVAL(a*d,b*c));
+			else if (d<=0) *this=Interval(DIRECT_INTERVAL(b*d,a*c));
+			else *this=Interval(DIRECT_INTERVAL(a*d,a*c));
 		} else {
-			if (x2<=0)	{
-				if  (y1>=0) *this=Interval(DIRECT_INTERVAL(x1*y2,x2*y1));
-				else if (y2<=0) *this=Interval(DIRECT_INTERVAL(x2*y2,x1*y1));
-				else *this=Interval(DIRECT_INTERVAL(x1*y2,x1*y1));
-			} else {
-				if (y1>=0) *this=Interval(DIRECT_INTERVAL(x1*y2,x2*y2));
-				else if (y2<=0) *this=Interval(DIRECT_INTERVAL(x2*y1,x1*y1));
-				else {
-					*this=Interval( DIRECT_INTERVAL(
-							(x1*y2<x2*y1) ? x1*y2 : x2*y1 ,
-							(x1*y1<x2*y2) ? x2*y2 : x1*y1));
-				}
+			if (c>=0) *this=Interval(DIRECT_INTERVAL(a*d,b*d));
+			else if (d<=0) *this=Interval(DIRECT_INTERVAL(b*c,a*c));
+			else {
+				*this=Interval( DIRECT_INTERVAL(
+						(a*d<b*c) ? a*d : b*c ,
+						(a*c<b*d) ? b*d : a*c));
 			}
 		}
+
 	}
 	return *this;
 }
 
-inline Interval& Interval::operator/=(const Interval& b) {
+inline Interval& Interval::operator/=(const Interval& y) {
 
 	if (is_empty()) return *this;
-	if (b.is_empty()) { set_empty(); return *this; }
+	if (y.is_empty()) { *this=Interval::EMPTY_SET; return *this; }
 
-	if (b.lb()> 0)	{
-		if    (this->lb()>=0)  {
-			*this= Interval(DIRECT_INTERVAL(this->lb()/b.ub(), this->ub()/b.lb()));
+	const double& a(lb());
+	const double& b(ub());
+	const double& c(y.lb());
+	const double& d(y.ub());
+
+
+	if (c==0 && d==0) {
+		*this=Interval::EMPTY_SET;
+		return *this;
+	}
+
+	if (a==0 && b==0) {
+		// TODO: 0/0 can also be 1...
+		return *this;
+	}
+
+	if (c> 0)	{
+		if    (a>=0)  {
+			*this= Interval(DIRECT_INTERVAL(a/d, b/c));
 		}
-		else if (this->ub()<0)  {
-			*this= Interval(DIRECT_INTERVAL(this->lb()/b.lb(), this->ub()/b.ub()));
+		else if (b<0)  {
+			*this= Interval(DIRECT_INTERVAL(a/c, b/d));
 		}
 		else  {
-			*this= Interval(DIRECT_INTERVAL(this->lb()/b.lb(), this->ub()/b.lb()));
+			*this= Interval(DIRECT_INTERVAL(a/c, b/c));
 		}
-	}
-	else if (b.ub()<0)	{
-		if (this->lb()>=0) {
-			*this= Interval(DIRECT_INTERVAL(this->ub()/b.ub(), this->lb()/b.lb()));
-		}
-		else if (this->ub()<0)  {
-			*this= Interval(DIRECT_INTERVAL(this->ub()/b.lb(), this->lb()/b.ub()));
-		}
-		else {
-			*this= Interval(DIRECT_INTERVAL(this->ub()/b.ub(), this->lb()/b.ub()));
-		}
-	}
-	else {
-		*this= Interval::ALL_REALS;
+		return *this;
 	}
 
+	if (d<0)	{
+		if (a>=0) {
+			*this= Interval(DIRECT_INTERVAL(b/d, a/c));
+		}
+		else if (b<0)  {
+			*this= Interval(DIRECT_INTERVAL(b/c, a/d));
+		}
+		else {
+			*this= Interval(DIRECT_INTERVAL(b/d, a/d));
+		}
+		return *this;
+	}
+
+	if ((b<=0) && d==0) {
+		*this=Interval(b/c, POS_INFINITY);
+		return *this;
+	}
+
+	if (b<=0 && c<0 && d<0) {
+		*this=Interval(NEG_INFINITY, POS_INFINITY);
+		return *this;
+	}
+
+	if (b<=0 && c==0) {
+		*this=Interval(NEG_INFINITY, b/d);
+		return *this;
+	}
+
+	if (a>=0 && d==0) {
+		*this=Interval(NEG_INFINITY, a/c);
+		return *this;
+	}
+
+	if (a>=0 && c<0 && d>0) {
+		*this=Interval(NEG_INFINITY, POS_INFINITY);
+		return *this;
+	}
+
+	if (a>=0 && c==0) {
+		*this=Interval(a/d, POS_INFINITY);
+		return *this;
+	}
+
+	*this=Interval(NEG_INFINITY, POS_INFINITY); // a<0<b et c<=0<=d
 	return *this;
 }
 
@@ -195,14 +290,15 @@ inline Interval& Interval::operator&=(const Interval& x) {
 
 	if (is_empty()) return *this;
 	if (x.is_empty()) { set_empty(); return *this; }
-	Interval r(0,0);
+
 	if ((this->lb()>x.ub())||(x.lb()>this->ub())) {
 		set_empty();
 		return *this;
 	}
-	if (this->lb()<=x.lb()) r.itv.inf=x.lb(); else r.itv.inf=this->lb();
-	if (this->ub()>=x.ub()) r.itv.sup=x.ub(); else r.itv.sup=this->ub();
-	*this=r;
+	DIRECT_INTERVAL r(0);
+	if (this->lb()<=x.lb()) r.inf=x.lb(); else r.inf=this->lb();
+	if (this->ub()>=x.ub()) r.sup=x.ub(); else r.sup=this->ub();
+	this->itv=r;
 
 	return *this;
 
@@ -213,10 +309,10 @@ inline Interval& Interval::operator|=(const Interval& x) {
 	if (is_empty()) { *this=x;	return *this; }
 	if (x.is_empty()) return *this;
 
-	Interval r(0,0);
-	if (this->lb()<=x.lb()) r.itv.inf=this->lb(); else r.itv.inf=x.lb();
-	if (this->ub()>=x.ub()) r.itv.sup=this->ub(); else r.itv.sup=x.ub();
-	*this=r;
+	DIRECT_INTERVAL r(0);
+	if (this->lb()<=x.lb()) r.inf=this->lb(); else r.inf=x.lb();
+	if (this->ub()>=x.ub()) r.sup=this->ub(); else r.sup=x.ub();
+	this->itv=r;
 
 	return *this;
 }
@@ -277,7 +373,7 @@ inline Interval operator&(const Interval& x1, const Interval& x2) {
 
 inline Interval operator|(const Interval& x1, const Interval& x2) {
 	Interval res(x1);
-	res &= x2;
+	res |= x2;
 	return res;
 }
 
@@ -400,9 +496,9 @@ inline Interval sqr(const Interval& x) {
 
 inline Interval sqrt(const Interval& x) {
 	if (x.is_empty()) return Interval::EMPTY_SET;
-	double a1=x.lb(), a2=x.ub();
-	if (a1>=0)  return (Interval(::sqrt(a1),::sqrt(a2)));
-	else return (Interval(0,::sqrt(a2)));
+	if (x.ub()<0) return Interval::EMPTY_SET;
+	if (x.lb()>=0)  return (Interval(::sqrt(x.lb()),::sqrt(x.ub())));
+	else return (Interval(0,::sqrt(x.ub())));
 }
 
 inline Interval pow(const Interval& x, int n) {
@@ -410,20 +506,25 @@ inline Interval pow(const Interval& x, int n) {
 	else if (n==0)	  return Interval::ONE;
 	else if (n<0)	  return 1.0/pow(x,-n);
 	else if (n==1)	  return x;
+	else if (n%2!=0) {
+	// there are bugs with negative x
+	// such as Power([-2,3],3)->[-18,27])
+		if (x.ub()<0)
+			return -pow(-x,n);
+		else if (x.lb()<0)
+			return Interval(DIRECT_INTERVAL(-(::pow(-x.lb(),n)),(::pow(x.ub(),n))));
+		else
+			return Interval(DIRECT_INTERVAL((::pow(x.lb(),n)),(::pow(x.ub(),n))));
+	}
 	else {
 		double a1, a2;
-		if (x.lb()> x.ub()) {
+		if (fabs(x.lb())> fabs(x.ub())) {
 			a1 = x.ub() ; a2 = x.lb();
 		} else {
 			a1 = x.lb() ; a2 = x.ub();
 		}
-		if (n%2==0)	{
-			if (a1*a2<0) return Interval(0,::pow(a2,n));
-			else return Interval(DIRECT_INTERVAL(::pow(a1,n),::pow(a2,n)));
-		}
-		else {
-			return Interval(DIRECT_INTERVAL(::pow(a1,n),::pow(a2,n)));
-		}
+		if (a1*a2<0) return Interval(0,::pow(a2,n));
+		else return Interval(DIRECT_INTERVAL(::pow(a1,n),::pow(a2,n)));
 	}
 }
 
@@ -487,8 +588,8 @@ inline Interval cos(const Interval& x) {
 inline Interval sin(const Interval& x) {
 	if (x.is_empty()) return Interval::EMPTY_SET;
     if (x.ub()==x.lb()) return Interval(::sin(x.lb()));
+    if (x.diam()>Interval::TWO_PI.lb()) return (Interval(-1,1));
 
-    double sin1,sin2,r1,r2;
     Interval b;
     //  b = Modulo(x,Interval::TWO_PI.lb());
     if ((x.lb()>=0)&&(x.lb()<Interval::TWO_PI.ub())) {
@@ -499,7 +600,7 @@ inline Interval sin(const Interval& x) {
     	b =Interval(x.lb()-offset,x.ub()-offset);
     }
 
-    if (x.diam()>Interval::TWO_PI.lb()) return (Interval(-1,1));
+    double sin1,sin2,r1,r2;
     sin1=::sin(b.lb());   sin2=::sin(b.ub());
     if ((b.lb() < 3*Interval::HALF_PI.ub())&&(b.ub() > 3*Interval::HALF_PI.ub())) r1=-1.0;
     else if ((b.lb() < 7*Interval::HALF_PI.ub())&&(b.ub() > 7*Interval::HALF_PI.ub())) r1=-1.0;
@@ -512,7 +613,41 @@ inline Interval sin(const Interval& x) {
 
 inline Interval tan(const Interval& x) {
 	if (x.is_empty()) return Interval::EMPTY_SET;
-	else return sin(x)/cos(x);
+
+    if (x.ub()==x.lb()) {
+    	if (x.lb()==Interval::HALF_PI.ub()||x.lb()==-Interval::HALF_PI.ub()) {
+    		return Interval::ALL_REALS;
+    	}
+    	return Interval(::tan(x.lb()));
+    }
+    if (x.diam()>Interval::PI.lb()) return Interval::ALL_REALS;
+
+    Interval b;
+    //  b = Modulo(x,Interval::PI.lb());
+    if ((x.lb()>=0)&&(x.lb()<Interval::PI.ub())) {
+    	b= x;
+    } else {
+    	int k = (long)floorl((x.lb()/Interval::PI.ub()));
+    	double offset = Interval::PI.ub() * k;
+    	b =Interval(x.lb()-offset,x.ub()-offset);
+    }
+
+    // degenerated case
+    if (b.ub()==b.lb()) {
+    	if (b.lb()==Interval::HALF_PI.ub()||b.lb()==-Interval::HALF_PI.ub()) {
+    		return Interval::ALL_REALS;
+    	}
+    	else return Interval(::tan(b.lb()));
+    }
+    // particular case
+    if (b.lb()<=Interval::HALF_PI.ub() && Interval::HALF_PI.ub()<=b.ub() )
+    	return Interval::ALL_REALS;
+    if (b.lb()<=-Interval::HALF_PI.lb() && -Interval::HALF_PI.lb()<=b.ub() )
+    	return Interval::ALL_REALS;
+
+    // general case
+    return Interval(DIRECT_INTERVAL(::tan(b.lb()), ::tan(b.ub())));
+
 }
 
 inline Interval cosh(const Interval& x) {

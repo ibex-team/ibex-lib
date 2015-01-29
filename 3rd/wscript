@@ -87,6 +87,7 @@ def configure (conf):
 			if w is not None:
 					conf.fatal ("cannot use --with-gaol/--with-bias/--with-filib with the option --without-rounding")
 		conf.env.INTERVAL_LIB = "DIRECT"
+		conf.env.append_unique ("CXXFLAGS_IBEX_DEPS", ["-frounding-math","-ffloat-store"])
 		Logs.pprint ("BLUE","The rounding mode of the Interval arithmetic is disable.")
 		
 	else :

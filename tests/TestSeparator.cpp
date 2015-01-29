@@ -89,7 +89,7 @@ void TestSeparator::test_SepNot(){
      Array<Sep>arraySep (SUL,SU2,SU3,SIL,SI2,SI3);
 
     IntervalVector box(2,Interval(-10,10));
-    for(unsigned int i = 0; i < arraySep.size(); i++){
+    for(int i = 0; i < arraySep.size(); i++){
         IntervalVector box_in(box), box_out(box);
         arraySep[i].separate(box_in, box_out);
     }
