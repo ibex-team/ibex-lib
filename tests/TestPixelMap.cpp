@@ -51,7 +51,7 @@ void TestPixelMap::test_init2DPixelMap(){
 
     for(int i = 0; i < grid_size[0]; i++){
         for(int j = 0; j < grid_size[1]; j++){
-            TEST_ASSERT(i + raster.divb_mul_[1]*j == raster(i,j));
+            TEST_ASSERT(i + raster.divb_mul_[1]*j == (int)raster(i,j));
         }
     }
 }
@@ -91,7 +91,7 @@ void TestPixelMap::test_init3DPixelMap(){
     for(int i = 0; i < grid_size[0]; i++){
         for(int j = 0; j < grid_size[1]; j++){
             for(int k = 0; k < grid_size[2];k++){
-                TEST_ASSERT(i + raster.divb_mul_[1]*j+raster.divb_mul_[2]*k == raster(i,j,k));
+                TEST_ASSERT(i + raster.divb_mul_[1]*j+raster.divb_mul_[2]*k == (int)raster(i,j,k));
             }
         }
     }
