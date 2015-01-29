@@ -27,7 +27,7 @@ namespace ibex {
 const char* PixelMap::FORMAT_VERSION="1.0.0";
 const char* PixelMap::FF_DATA_IMAGE_ND="DATA_IMD_ND";
 
-PixelMap::PixelMap(uint ndim) : ndim(ndim), zero(0) {
+PixelMap::PixelMap(unsigned int ndim) : ndim(ndim), zero(0) {
 	leaf_size_ = new double[ndim];
 	origin_ = new double[ndim];
 	grid_size_ = new int[ndim];
@@ -39,7 +39,7 @@ PixelMap::PixelMap(const PixelMap& src): ndim(src.ndim), zero(0) {
 	origin_ = new double[ndim];
 	grid_size_ = new int[ndim];
 	divb_mul_ = new int[ndim];
-	for(uint i = 0; i < ndim; i++){
+	for(unsigned int i = 0; i < ndim; i++){
 		leaf_size_[i] = src.leaf_size_[i];
 		origin_[i] = src.origin_[i];
 		grid_size_[i] = src.grid_size_[i];	
@@ -61,7 +61,7 @@ PixelMap::~PixelMap() {
 void PixelMap::init() {
 
 	int size = grid_size_[0];
-	for(uint i=1; i<ndim; i++){
+	for(unsigned int i=1; i<ndim; i++){
 		size*=grid_size_[i];
 	} 
 	assert(size > 0);
@@ -69,7 +69,7 @@ void PixelMap::init() {
 	std::fill(data.begin(),data.end(),0);
 	// Compute offsets
 	divb_mul_[0] = 1;
-	for(uint i=1; i<ndim; i++) {
+	for(unsigned int i=1; i<ndim; i++) {
 		divb_mul_[i] = divb_mul_[i-1]*grid_size_[i-1];
 	}
 	memset(&zero,0,sizeof(DATA_TYPE));
@@ -137,7 +137,7 @@ void PixelMap::read_header(ifstream &in_file, PixelMap& output) {
 				ibex_error("PixelMap [read_header]: file format does not match the required file format");
 			}
 
-			uint dim; sstream >> dim;
+			unsigned int dim; sstream >> dim;
 
 			if (dim != ndim) {
 				in_file.close ();
@@ -213,7 +213,7 @@ void PixelMap::load(const char *filename) {
 
 	try {
         read_header(in_file, *this);
-		for(uint i = 0; i < data.size(); i++) {
+		for(unsigned int i = 0; i < data.size(); i++) {
 			DATA_TYPE tmp = 0;
 			in_file.read((char*)&tmp,sizeof(DATA_TYPE));
 			this->data[i] = tmp;
@@ -234,9 +234,9 @@ void PixelMap::write_header(ofstream& out_file, const PixelMap& input) {
 
 	oss << "VERSION " << FORMAT_VERSION;
 	oss << "\nTYPE " << FF_DATA_IMAGE_ND << " " << ndim << " " << sizeof(DATA_TYPE);
-	oss << "\nLEAF_SIZE"; for(uint i =0; i < ndim;  i++) oss << " " << input.leaf_size_[i];
-	oss << "\nORIGIN";    for(uint i =0; i < ndim;  i++) oss << " " << input.origin_[i];
-	oss << "\nGRID_SIZE"; for(uint i =0; i < ndim;  i++) oss << " " << input.grid_size_[i];
+	oss << "\nLEAF_SIZE"; for(unsigned int i =0; i < ndim;  i++) oss << " " << input.leaf_size_[i];
+	oss << "\nORIGIN";    for(unsigned int i =0; i < ndim;  i++) oss << " " << input.origin_[i];
+	oss << "\nGRID_SIZE"; for(unsigned int i =0; i < ndim;  i++) oss << " " << input.grid_size_[i];
 	oss << "\nEND_HEADER\n";
 	try {
 		out_file << oss.str();
@@ -260,7 +260,7 @@ void PixelMap2D::set_leaf_size(double lx, double ly) {
 	leaf_size_[1] = ly;
 }
 
-void PixelMap2D::set_grid_size(uint ni, uint nj) {
+void PixelMap2D::set_grid_size(unsigned int ni, unsigned int nj) {
 	grid_size_[0] = ni;
 	grid_size_[1] = nj;
 	init();
@@ -268,7 +268,7 @@ void PixelMap2D::set_grid_size(uint ni, uint nj) {
 
 // [gch]: Benoit, please check this part of the code
 PixelMap::DATA_TYPE& PixelMap2D::operator()(int i, int j) {
-	uint idx = 0;
+	unsigned int idx = 0;
 	if (i<0 || j<0) return zero;
 
 	idx = divb_mul_[0]*i  + divb_mul_[1]*j;
@@ -287,7 +287,7 @@ void PixelMap2D::compute_integral_image() {
 
 	for(int i=0; i<grid_size_[0]; i++) {
 		for(int j=0; j<grid_size_[1]; j++) {
-			uint& val = (*this)(i,j);
+			unsigned int& val = (*this)(i,j);
 			val = (*this)(i-1,j) + (*this)(i,j-1) + (*this)(i,j) - (*this)(i-1,j-1);
 		}
 	}
@@ -311,7 +311,7 @@ void PixelMap3D::set_leaf_size(double lx, double ly, double lz) {
 	leaf_size_[2] = lz;
 }
 
-void PixelMap3D::set_grid_size(uint ni, uint nj, uint nk) {
+void PixelMap3D::set_grid_size(unsigned int ni, unsigned int nj, unsigned int nk) {
 	grid_size_[0] = ni;
 	grid_size_[1] = nj;
 	grid_size_[2] = nk;
@@ -320,7 +320,7 @@ void PixelMap3D::set_grid_size(uint ni, uint nj, uint nk) {
 
 // [gch]: Benoit, please check this part of the code
 PixelMap::DATA_TYPE& PixelMap3D::operator()(int i, int j, int k) {
-	uint idx = 0;
+	unsigned int idx = 0;
 	if (i<0 || j<0 || k<0) return zero;
 
 	idx = divb_mul_[0]*i  + divb_mul_[1]*j + divb_mul_[2]*k;
@@ -335,7 +335,7 @@ void PixelMap3D::compute_integral_image() {
 	for(int i=0; i<grid_size_[0]; i++) {
 		for(int j=0; j<grid_size_[1]; j++) {
 			for(int k=0; k<grid_size_[2]; k++) {
-				uint& val = (*this)(i,j,k);
+				unsigned int& val = (*this)(i,j,k);
 				val = (*this)(i-1,j,k) + (*this)(i,j-1,k) + (*this)(i,j,k-1) + (*this)(i-1, j-1, k-1) + (*this)(i,j,k)
 		            - (*this)(i-1,j,k-1) - (*this)(i,j-1,k-1) - (*this)(i-1,j-1,k);
 
