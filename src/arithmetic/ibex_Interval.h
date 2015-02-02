@@ -64,6 +64,7 @@
 	#define IBEX_NAN filib::primitive::compose(0,0x7FF,1 << 19,0)
 #else
 #ifdef _IBEX_WITH_DIRECT_
+
 	/** \brief NEG_INFINITY: double representation of -oo */
 	#define NEG_INFINITY (-(1.0/0.0))
 	/** \brief POS_INFINITY: double representation of +oo */
@@ -77,10 +78,12 @@
 
 		DIRECT_INTERVAL(void) : inf(0), sup(0), isEmpty(true) {}
 		DIRECT_INTERVAL(double a, double b) {
-			if  (a>=b)  {inf = b ; sup = a;}
-			else        {inf = a ; sup = b;}
-			isEmpty=false;
+			if (a==POS_INFINITY || b==NEG_INFINITY)
+			                 {inf = 0; sup = 0; isEmpty=true; }
+			else if  (a>=b)  {inf = b; sup = a; isEmpty=false;}
+			else             {inf = a; sup = b; isEmpty=false;}
 		}
+
 		DIRECT_INTERVAL(double a) : inf(a), sup(a), isEmpty(false) {}
 
 		/** assignment operator */
@@ -90,7 +93,7 @@
 			this->isEmpty = o.isEmpty;
 			return *this;
 		}
-			};
+	};
 
 #endif
 #endif

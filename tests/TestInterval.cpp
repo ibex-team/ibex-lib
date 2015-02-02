@@ -239,6 +239,8 @@ void TestInterval::is_bisectable05()      {	TEST_ASSERT(Interval(0,ibex::next_fl
 void TestInterval::is_bisectable06()      {TEST_ASSERT(Interval(10,ibex::next_float(ibex::next_float(10))).is_bisectable());}
 void TestInterval::is_bisectable07()      {TEST_ASSERT(Interval(ibex::previous_float(ibex::previous_float(0)),0).is_bisectable());}
 void TestInterval::is_bisectable08()      {TEST_ASSERT(Interval(ibex::previous_float(ibex::previous_float(10)),10).is_bisectable());}
+void TestInterval::is_bisectable09()      {TEST_ASSERT(!Interval(10,ibex::next_float(10)).is_bisectable()); }
+void TestInterval::is_bisectable10()      {TEST_ASSERT(!Interval(ibex::previous_float(0),0).is_bisectable()); }
 
 void TestInterval::integer01() {
 	Interval x=Interval::EMPTY_SET; bwd_integer(x); check(x,Interval::EMPTY_SET);

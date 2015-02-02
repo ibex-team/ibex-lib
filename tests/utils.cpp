@@ -21,11 +21,11 @@ bool TestIbex::sameExpr(const ExprNode& node, const char* expr) {
 	if (strcmp(s.str().c_str(),expr)==0)
 		return true;
 	else  {
-		std::cout<< "Expr tested : " << std::endl;
+	/*	std::cout<< "Expr tested : " << std::endl;
 		std::cout<< s.str().c_str() << std::endl;
 		std::cout<< "Expr wanted : " << std::endl;
 		std::cout<< expr << std::endl;
-		return false;
+	*/	return false;
 	}
 }
 
@@ -36,11 +36,11 @@ bool TestIbex::sameExpr(const ExprNode& node, const ExprNode& node2) {
 	if (strcmp(s.str().c_str(),s2.str().c_str())==0)
 		return true;
 	else  {
-		std::cout<< "Expr tested : " << std::endl;
+	/*	std::cout<< "Expr tested : " << std::endl;
 		std::cout<< s.str().c_str() << std::endl;
 		std::cout<< "Expr wanted : " << std::endl;
 		std::cout<< s2.str().c_str() << std::endl;
-		return false;
+	*/	return false;
 	}
 }
 
@@ -56,7 +56,7 @@ void TestIbex::check(double y_actual, double y_expected) {
 }
 
 void TestIbex::check(const Interval& y_actual, const Interval& y_expected) {
-	//cout << "TestIbex::check:    " << y_expected << " (expected)        " << y_actual << " (actual)"<< endl;
+	//std::cout << "TestIbex::check:    " << y_expected << " (expected)        " << y_actual << " (actual)"<< std::endl;
 	if (y_expected.is_empty()) { TEST_ASSERT(y_actual.is_empty()); return; }
 
 	TEST_ASSERT(!y_actual.is_empty());
