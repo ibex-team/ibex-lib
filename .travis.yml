@@ -4,7 +4,7 @@ python:
 # 
 before_install:
   - sudo apt-get update -q
-  - sudo apt-get install -y --force-yes python2.7 flex bison gcc g++ libcpptest-dev pkg-config
+  - sudo apt-get install -y --force-yes python2.7 flex bison gcc g++ libcpptest-dev pkg-config coinor-libclp-dev 
 # command to install dependencies
 install: 
   - ./waf configure --without-rounding
