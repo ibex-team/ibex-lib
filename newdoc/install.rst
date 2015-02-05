@@ -39,12 +39,12 @@ The installation assumes your system meets the `requirements`_
 Fast install (experimental)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Save the archive ``ibex-2.1.10.tar.gz`` in some ``Ibex`` folder and::
+Save the archive ``ibex-2.1.12.tar.gz`` in some ``Ibex`` folder and::
 
-  ~/Ibex/$ tar xvfz ibex-2.1.10.tar.gz 
-  ~/Ibex/$ cd ibex-2.1.10 
-  ~/Ibex/ibex-2.1.10/$ ./waf configure
-  ~/Ibex/ibex-2.1.10/$ sudo ./waf install
+  ~/Ibex/$ tar xvfz ibex-2.1.12.tar.gz 
+  ~/Ibex/$ cd ibex-2.1.12 
+  ~/Ibex/ibex-2.1.12/$ ./waf configure
+  ~/Ibex/ibex-2.1.12/$ sudo ./waf install
 
 **Note:** the fast install automatically extracts and install CLP from the bundle. However, the compilation of CLP is not working on all platforms.
 If it fails, try to install the ubuntu package for Clp (see the `requirements`_) or try the procedure below with Soplex.
@@ -67,18 +67,18 @@ Standard install (stable)
   ~/Ibex/soplex-1.7.2$ cd ..
 
 
-- Save the archive ``ibex-2.1.10.tar.gz`` in ``Ibex``
+- Save the archive ``ibex-2.1.12.tar.gz`` in ``Ibex``
 - Install and configure Ibex::
 
-  ~/Ibex/$ tar xvfz ibex-2.1.10.tar.gz 
-  ~/Ibex/$ cd ibex-2.1.10 
-  ~/Ibex/ibex-2.1.10/$ ./waf configure --with-soplex=[soplex-path]
+  ~/Ibex/$ tar xvfz ibex-2.1.12.tar.gz 
+  ~/Ibex/$ cd ibex-2.1.12 
+  ~/Ibex/ibex-2.1.12/$ ./waf configure --with-soplex=[soplex-path]
 
   where *[soplex-path]* is the absolute path where soplex is installed (don't use the relative path ``--with-soplex=../soplex-1.7.2``).
 
 - Compile Ibex::
 
-  ~/Ibex/ibex-2.1.10/$ sudo ./waf install
+  ~/Ibex/ibex-2.1.12/$ sudo ./waf install
 
 
 ^^^^^^^^^^^^ 
@@ -113,10 +113,6 @@ Windows
 
 .. _MinGW+Msys: https://sourceforge.net/projects/mingw/files/Installer/mingw-get-inst/
 .. _Python2: https://www.python.org/download/releases/2.7.3/
-
-
-**Warning:** it seems, unfortunately, that the installation procedure below fails on some recent versions of Windows. The Python script freezes for no apparent reason.
-We are working on that.
 
 - Install `MinGW+Msys`_. 
    Select the following components to be installed:
@@ -153,24 +149,26 @@ We are working on that.
 
   **Note:** if g++ is not found, it probably means that you have not run the "postinstall" script of MinGW (see above).
   
-- Save the archive ``ibex-2.1.10.tar.gz`` in ``C:\MinGW\msys\1.0\home\[user]\Ibex``
+- Save the archive ``ibex-2.1.12.tar.gz`` in ``C:\MinGW\msys\1.0\home\[user]\Ibex``
 - Configure Ibex (still in the shell of MinGW)::
 
   ~/Ibex/$ export PATH="$PATH:/c/Python27" 
-  ~/Ibex/$ tar xvfz ibex-2.1.10.tar.gz 
-  ~/Ibex/$ cd ibex-2.1.10 
-  ~/Ibex/ibex-2.1.10/$ ./waf configure --prefix=C:\\MinGW\\msys\\1.0\\home\\[user]\\Ibex\\ibex-2.1.10 --with-soplex=C:\\MinGW\\msys\\1.0\\home\\[user]\\Ibex\\soplex-1.7.2
+  ~/Ibex/$ tar xvfz ibex-2.1.12.tar.gz 
+  ~/Ibex/$ cd ibex-2.1.12 
+  ~/Ibex/ibex-2.1.12/$ ./waf configure --prefix=C:\\MinGW\\msys\\1.0\\home\\[user]\\Ibex\\ibex-2.1.12 --with-soplex=C:\\MinGW\\msys\\1.0\\home\\[user]\\Ibex\\soplex-1.7.2
 
   **Note:** the paths must be entered in Windows-style and with double backslash ("\\") as separator.
   
   **Note:** if you have any trouble to install a linear solver (Clp, Soplex or Cplex), you can install Ibex without linear solver by added the option ``--without-lp``::
   
-      ~/Ibex/ibex-2.1.10/$ ./waf configure --without-lp --prefix=C:\\MinGW\\msys\\1.0\\home\\[user]\\Ibex\\ibex-2.1.10 
+      ~/Ibex/ibex-2.1.12/$ ./waf configure --without-lp --prefix=C:\\MinGW\\msys\\1.0\\home\\[user]\\Ibex\\ibex-2.1.12 
   
 
 - Install Ibex::
 
-    ~/Ibex/ibex-2.1.10/$ ./waf install
+  ~/Ibex/ibex-2.1.12/$ ./waf install
+
+  **Warning:** for mysterious reasons, the command sometimes gets frozen (this was observed while compiling Filib). Use Control-C to interrupt the command and run it again. Do this several times until compilation is over.
 
 .. _install-custom:
 
@@ -286,13 +284,13 @@ There are only a few differences with the standard installation:
 
   Compile Soplex as follows::
   
-    ~/Ibex/ibex-2.1.10/soplex-1.7.2$ make SHARED=true ZLIB=false
+    ~/Ibex/ibex-2.1.12/soplex-1.7.2$ make SHARED=true ZLIB=false
 
 - **Windows**
 
   Compile Soplex as follows::
   
-    ~/Ibex/ibex-2.1.10/soplex-1.7.2$  make ZLIB=false SHARED=true SHAREDLIBEXT=dll
+    ~/Ibex/ibex-2.1.12/soplex-1.7.2$  make ZLIB=false SHARED=true SHAREDLIBEXT=dll
 
 Then, you can run ``waf`` ``configure`` with either ``--enable-shared`` or ``--with-jni``.
 
@@ -351,15 +349,15 @@ you may consider using the `basic command line`_ instead.
 **Note:** it may be necessary to set the ``PKG_CONFIG_PATH`` to *PREFIX*\ ``/share/pkgconfig`` where *PREFIX* is 
 ``/usr/local`` by default or whatever path specified via ``--prefix``::
 
-  ~/Ibex/ibex-2.1.10/$ export PKG_CONFIG_PATH=/usr/local/share/pkgconfig/ 
+  ~/Ibex/ibex-2.1.12/$ export PKG_CONFIG_PATH=/usr/local/share/pkgconfig/ 
 
 **Note:** if some libraries are linked dynamically (like libultim), it may be necessary to set the ``LD_LIBRARY_PATH`` accordingly.
 
 Here is an example::
 
-  ~/Ibex/ibex-2.1.10/$ cd examples 
-  ~/Ibex/ibex-2.1.10/$ make defaultsolver 
-  ~/Ibex/ibex-2.1.10/$ ./defaultsolver ../benchs/cyclohexan3D.bch 1e-05 10 
+  ~/Ibex/ibex-2.1.12/$ cd examples 
+  ~/Ibex/ibex-2.1.12/$ make defaultsolver 
+  ~/Ibex/ibex-2.1.12/$ ./defaultsolver ../benchs/cyclohexan3D.bch 1e-05 10 
 
 The default solver solves the systems of equations in argument (cyclohexan3D) with a precision less than 1e-05 and
 within a time limit of 10 seconds.
@@ -412,13 +410,13 @@ If you have installed Ibex with the ``--with-jni`` option, you can run a java te
 
   where *PREFIX* is ``/usr/local`` by default or whatever path specified via ``--prefix``. Then::
     
-    ~$ cd Ibex/ibex-2.1.10/__build__/src/java 
-    ~/Ibex/ibex-2.1.10/__build__/src/java$ $JAVA_HOME/bin/java Test   
+    ~$ cd Ibex/ibex-2.1.12/__build__/src/java 
+    ~/Ibex/ibex-2.1.12/__build__/src/java$ $JAVA_HOME/bin/java Test   
 
   Alternatively, you can give the library path directly in argument of the ``java`` command instead of using an environment variable::
 
-    ~$ cd Ibex/ibex-2.1.10/__build__/src/java 
-    ~/Ibex/ibex-2.1.10/__build__/src/java$ $JAVA_HOME/bin/java -Djava.library.path=PREFIX/lib Test   
+    ~$ cd Ibex/ibex-2.1.12/__build__/src/java 
+    ~/Ibex/ibex-2.1.12/__build__/src/java$ $JAVA_HOME/bin/java -Djava.library.path=PREFIX/lib Test   
 
 - **MacOS**::
 
@@ -426,24 +424,24 @@ If you have installed Ibex with the ``--with-jni`` option, you can run a java te
 
   where *PREFIX* is ``/usr/local`` by default or whatever path specified via ``--prefix``. Then::
  
-    ~$ cd Ibex/ibex-2.1.10/__build__/src/java 
-    ~/Ibex/ibex-2.1.10/__build__/src/java$    
+    ~$ cd Ibex/ibex-2.1.12/__build__/src/java 
+    ~/Ibex/ibex-2.1.12/__build__/src/java$    
 
   Alternatively, you can give the library path directly in argument of the ``java`` command instead of using an environment variable::
 
-    ~$ cd Ibex/ibex-2.1.10/__build__/src/java 
-    ~/Ibex/ibex-2.1.10/__build__/src/java$ $JAVA_HOME/bin/java -Djava.library.path=PREFIX/lib Test   
+    ~$ cd Ibex/ibex-2.1.12/__build__/src/java 
+    ~/Ibex/ibex-2.1.12/__build__/src/java$ $JAVA_HOME/bin/java -Djava.library.path=PREFIX/lib Test   
 
 - **Windows**
 
-  We assume here that MinGW has been installed in ``C:\`` and Ibex in ``C:\MinGW\msys\1.0\home\[user]\Ibex\ibex-2.1.10``.
+  We assume here that MinGW has been installed in ``C:\`` and Ibex in ``C:\MinGW\msys\1.0\home\[user]\Ibex\ibex-2.1.12``.
 
 
   Open a command window (not the shell of MinGW) and type::
 
-    C:\Documents and Settings\[user]> cd C:\MinGW\msys\1.0\home\[user]\Ibex\ibex-2.1.10\__build__\src\java 
-    C:\MinGW\msys\1.0\home\[user]\Ibex\ibex-2.1.10\__build__\src\java>set PATH=%PATH%;PREFIX/bin;C:\MinGW\bin
-    C:\MinGW\msys\1.0\home\[user]\Ibex\ibex-2.1.10\__build__\src\java>java Test
+    C:\Documents and Settings\[user]> cd C:\MinGW\msys\1.0\home\[user]\Ibex\ibex-2.1.12\__build__\src\java 
+    C:\MinGW\msys\1.0\home\[user]\Ibex\ibex-2.1.12\__build__\src\java>set PATH=%PATH%;PREFIX/bin;C:\MinGW\bin
+    C:\MinGW\msys\1.0\home\[user]\Ibex\ibex-2.1.12\__build__\src\java>java Test
          
   
 Notice: ``$JAVA_HOME`` ensures the JVM is compatible with the version of Java you have compiled Ibex with.
@@ -454,8 +452,8 @@ Uninstall
 
 Simply type in the path of IBEX (under the shell of MinGW for Windows)::
 
-  ~/Ibex/ibex-2.1.10$ sudo ./waf uninstall  
-  ~/Ibex/ibex-2.1.10$ ./waf distclean  
+  ~/Ibex/ibex-2.1.12$ sudo ./waf uninstall  
+  ~/Ibex/ibex-2.1.12$ ./waf distclean  
 
 **Note:** sudo is useless if Ibex is installed in a local folder.
 
@@ -507,8 +505,8 @@ If you have any trouble to install a linear solver (Clp, Soplex or Cplex), you c
 
 This option will disable the contractor ``CtcPolytopeHull``.::
 
-      ~/Ibex/ibex-2.1.10/$ ./waf configure  [...] --without-lp 
-      ~/Ibex/ibex-2.1.10/$ ./waf install
+      ~/Ibex/ibex-2.1.12/$ ./waf configure  [...] --without-lp 
+      ~/Ibex/ibex-2.1.12/$ ./waf install
   
 
 
