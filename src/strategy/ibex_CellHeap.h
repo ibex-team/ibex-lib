@@ -59,17 +59,6 @@ class CellHeap : public CellBuffer, public Heap<Cell> {
   /** Return the next box (but does not pop it).*/
   Cell* top() const;
 
-  /**
-   * Removes (and deletes) from the heap all the cells
-   * with a cost greater than \a loup.
-   */
-  void contract_heap(double loup);
-
-  /**
-   * Return the minimum (the criterion for
-   * the first cell)
-   */
-  double minimum() const;
 
  protected:
   friend class CellDoubleHeap;
@@ -83,15 +72,15 @@ class CellHeap : public CellBuffer, public Heap<Cell> {
 };
 
 /** Display the buffer */
-std::ostream& operator<<(std::ostream&, const CellHeap&);
+std::ostream& operator<<(std::ostream& os, const CellHeap& h) { return (os << ((Heap<Cell>)h)) ; }
 
 /*============================================ inline implementation ============================================ */
 
 inline void CellHeap::flush()                    { Heap<Cell>::flush(); }
 
-inline unsigned int CellHeap::size() const                { return Heap<Cell>::size(); }
+inline unsigned int CellHeap::size() const       { return Heap<Cell>::size(); }
 
-inline bool CellHeap::empty() const              { return l.empty(); }
+inline bool CellHeap::empty() const              { return Heap<Cell>::empty(); }
 
 inline void CellHeap::push(Cell* cell)           { Heap<Cell>::push(cell);
                                                    if (capacity>0 && size()==capacity) throw CellBufferOverflow(); }
@@ -99,10 +88,6 @@ inline void CellHeap::push(Cell* cell)           { Heap<Cell>::push(cell);
 inline Cell* CellHeap::pop()                     { return Heap<Cell>::pop(); }
 
 inline Cell* CellHeap::top() const               { return Heap<Cell>::top(); }
-
-inline void CellHeap::contract_heap(double loup) { Heap<Cell>::contract(loup); }
-
-inline double CellHeap::minimum() const          { return Heap<Cell>::minimum(); }
 
 
 } // end namespace ibex

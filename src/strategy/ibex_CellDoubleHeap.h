@@ -30,10 +30,12 @@ public:
 	 *                  single criterion for node selection (the classical one : minimizing the lower
 	 *                  bound of the estimate of the objective). The value 100 corresponds to use a
 	 *                  single criterion for node selection (the second one used in buffer2)
-	 * \param crit_2  - The second criterion used (the first is TODO: complete
+	 * \param crit_2  - The second criterion used (the first is LB) TODO: complete
 	 */
 
-	CellDoubleHeap(int ind_var, int critpr=50, CellSharedHeap::criterion crit_2=CellSharedHeap::UB);
+	CellDoubleHeap(CellHeap *heap1, CellHeap *heap2, int critpr=50);
+
+	CellDoubleHeap(CellHeap *heap1);
 
 	/** Flush the buffer.
 	 * All the remaining cells will be *deleted* */
@@ -51,67 +53,81 @@ public:
 	/** Pop a cell from the stack and return it.*/
 	Cell* pop();
 
+	/** Pop a cell from the first heap and return it.*/
+	Cell* pop1();
+
+	/** Pop a cell from the second heap and return it.*/
+	Cell* pop2();
+
+
 	/** Return the next box (but does not pop it).*/
 	Cell* top() const;
 
-	/** set the local value of the lower uper bound (loup) */
-	void setLoup(double loup);
+	/** Return the next box of the first heap (but does not pop it).*/
+	Cell* top1() const;
+
+	/** Return the next box of the second heap  (but does not pop it).*/
+	Cell* top2() const;
 
 	/**
-	 * Update the cost and sort all the heaps
-	 *
-	 * Complexity: o(nb_cells*log(nb_cells))
-	 */
-	void sort();
-
-	/**
-	 * Return the minimum (the criterion for the first cell)
+	 * Return the minimum (the criterion for the first heap)
 	 *
 	 * Complexity: o(1)
 	 */
-	inline double minimum() const {
-		return heap1->minimum();
-	}
+	inline double minimum() const {	return heap1->minimum(); }
+
+	/**
+	 * Return the first minimum (the criterion for the first heap)
+	 *
+	 * Complexity: o(1)
+	 */
+	inline double minimum1() const {	return heap1->minimum(); }
+
+	/**
+	 * Return the second minimum (the criterion for the second heap)
+	 *
+	 * Complexity: o(1)
+	 */
+	inline double minimum2() const {	return heap2->minimum(); }
 
 	/**
 	 * Removes (and deletes) from the heap all the cells
 	 * with a cost greater than \a loup.
 	 */
-	void contract_heap(double loup);
+	void contractHeap(double loup);
 
 	/**
 	 * Delete this
 	 */
 	virtual ~CellDoubleHeap();
 
-	/** the criterion of the second heap */
-	const CellSharedHeap::criterion crit;
 
 private:
+	/** Count the number of cells pushed since
+	 * the object is created. */
+	unsigned int nb_cells;
+
 	/** the first heap */
-	CellSharedHeap *heap1;
+	CellHeapVarLB *heap1;
 
 	/** the second heap */
-	CellSharedHeap *heap2;
+	Heap<Cell> *heap2;
 
 	/** Probability to choose the second
 	 * (see details in the constructor) */
 	const int critpr;
 
-	/** Index of the criterion variable. */
-	const int ind_var;
-
 	/** Current selected buffer. */
 	mutable int indbuf;
 
 	/** use in the contract_heap function by recursivity */
-	void contract_tmp(double new_loup, CellHeapNode * node, CellSharedHeap & heap);
+	void contractRec(double new_loup, HeapNode<Cell> * node, Heap<Cell> & heap);
 
 	/** erase a node in the second heap */
-	void erase_other_heaps( CellHeapNode * node);
+	void eraseOtherHeaps( HeapNode<Cell> * node);
 
 	/** delete the heap without the HEapElt */
-	void delete_other_heaps( CellHeapNode * node);
+	void deleteOtherHeaps( HeapNode<Cell> * node);
 
 	friend std::ostream& operator<<(std::ostream& os, const CellDoubleHeap& h);
 };

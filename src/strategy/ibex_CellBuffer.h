@@ -75,7 +75,7 @@ class CellBuffer {
 
 	/** Count the number of cells pushed since
 	 * the object is created. */
-	unsigned int nb_cells;
+	//unsigned int nb_cells;
 
  private:
 	friend std::ostream& operator<<(std::ostream& os, const CellBuffer&);
