@@ -31,7 +31,7 @@ bool SetInterval::is_empty() const {
 	return root==NULL;
 }
 
-void SetInterval::sync(Separator& sep) {
+void SetInterval::sync(Sep& sep) {
 	try {
 		root = root->sync(bounding_box, sep, eps);
 	} catch(NoSet& e) {
@@ -41,7 +41,7 @@ void SetInterval::sync(Separator& sep) {
 	}
 }
 
-void SetInterval::contract(Separator& sep) {
+void SetInterval::contract(Sep& sep) {
 	root->set_in_tmp();
 	root = root->inter(bounding_box, sep, eps);
 	root->unset_in_tmp();

@@ -248,8 +248,8 @@ void Optimizer::update_uplo() {
 
 
 
-/* contract the box of the cell c , try to find a new loup :;
-     push the cell  in the 2 heaps or if the contraction makes the box empty, delete the cell. For diversification, rebuild the 2 heaps
+/* contract the box of the cell c , try to find a new loup ;
+     push the cell  in the 2 heaps or if the contraction makes the box empty, delete the cell.
  */
 
 void Optimizer::handle_cell(Cell& c, const IntervalVector& init_box ){
@@ -281,13 +281,6 @@ void Optimizer::handle_cell(Cell& c, const IntervalVector& init_box ){
 		buffer.push(&c);
 
 		nb_cells++;
-/*		// reconstruction of the 2 heaps every heap_build_period nodes
-		int heap_build_period=100;
-		if (nb_cells% heap_build_period ==0) {
-			buffer.sort();
-		}
-*/
-
 	}
 	catch(EmptyBoxException&) {
 		delete &c;

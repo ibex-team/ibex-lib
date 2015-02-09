@@ -5,7 +5,7 @@
  * License     : This program can be distributed under the terms of the GNU LGPL.
  *               See the file COPYING.LESSER.
  *
- * Author(s)   : Gilles Chabert
+ * Author(s)   : Gilles Chabert, Jordan Ninin
  * Created     : Feb 27, 2012
  * ---------------------------------------------------------------------------- */
 
@@ -27,13 +27,33 @@ class CtcFwdBwd: public Ctc {
 
 public:
 	/**
-	 * \brief HC4Revise on f(x)=0 or f(x)<=0.
+	 * \brief Build the contractor for "f(x)=0" or "f(x)<=0".
 	 *
-	 * \param op: by default: true.
+	 * \param op: by default: EQ.
 	 * \param mode see #ibex::HC4Revise::HC4Revise(FwdMode).
 	 *
 	 */
 	CtcFwdBwd(Function& f, CmpOp op=EQ, FwdMode mode=INTERVAL_MODE);
+
+	/**
+	 * \brief Build the contractor for "f(x) in [y]".
+	 */
+	CtcFwdBwd(Function& f, const Domain& y, FwdMode mode=INTERVAL_MODE);
+
+	/**
+	 * \brief Build the contractor for "f(x) in [y]".
+	 */
+	CtcFwdBwd(Function& f, const Interval& y, FwdMode mode=INTERVAL_MODE);
+
+	/**
+	 * \brief Build the contractor for "f(x) in [y]".
+	 */
+	CtcFwdBwd(Function& f, const IntervalVector& y, FwdMode mode=INTERVAL_MODE);
+
+	/**
+	 * \brief Build the contractor for "f(x) in [y]".
+	 */
+	CtcFwdBwd(Function& f, const IntervalMatrix& y, FwdMode mode=INTERVAL_MODE);
 
 	/**
 	 * \remark ctr is not kept by reference.
@@ -57,11 +77,16 @@ public:
 	// bool idempotent();
 	//
 
-	/** The constraint. */
-	const NumConstraint ctr;
+	/** The function "f". */
+	const Function& f;
+
+	/** The domain "y". */
+	Domain d;
 
 protected:
 	HC4Revise hc4r;
+
+	void init();
 };
 
 } // namespace ibex

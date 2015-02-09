@@ -1,33 +1,22 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_StcEqual.h
+// File        : ibex_SepNot.cpp
 // Author      : Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
-// Created     : Jul 15, 2014
+// Created     : Nov 12, 2014
 //============================================================================
 
-#ifndef __IBEX_STC_EQUAL_H__
-#define __IBEX_STC_EQUAL_H__
-
-#include "ibex_Stc.h"
-#include "ibex_Ctc.h"
+#include "ibex_SepNot.h"
 
 namespace ibex {
 
-class StcEqual : public Stc {
-public:
-	StcEqual(Ctc& c_in, Ctc& c_out, double eps);
+SepNot::SepNot(Sep& sep) : sep(sep) {
 
-	void contract(SetInterval& set);
+}
 
-	virtual ~StcEqual();
-
-	Ctc& c_in;
-	Ctc& c_out;
-	double eps;
-};
+void SepNot::separate(IntervalVector& x_in, IntervalVector& x_out) {
+	sep.separate(x_out,x_in);
+}
 
 } // namespace ibex
-
-#endif // __IBEX_STC_EQUAL_H__
