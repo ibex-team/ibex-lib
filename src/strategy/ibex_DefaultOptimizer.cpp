@@ -18,6 +18,7 @@
 #include "ibex_LinearRelaxCombo.h"
 #include "ibex_CellStack.h"
 #include "ibex_Array.h"
+#include "ibex_Random.h"
 #include <vector>
 #include "ibex_DefaultStrategy.cpp_"
 

@@ -20,6 +20,7 @@
 #include "ibex_LinearRelaxCombo.h"
 #include "ibex_SmearFunction.h"
 #include "ibex_LargestFirst.h"
+#include "ibex_Random.h"
 
 #include <sstream>
 #include <vector>

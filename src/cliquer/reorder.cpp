@@ -409,7 +409,7 @@ int *reorder_by_degree(graph_t *g, boolean weighted) {
  *       is called using the system time.
  */
 int *reorder_by_random(graph_t *g, boolean weighted) {
-	struct tms t;
+	//struct tms t;
 	int i,r;
 	int *newt;
 	boolean *used;

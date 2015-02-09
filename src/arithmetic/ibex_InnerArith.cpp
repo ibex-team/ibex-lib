@@ -9,8 +9,9 @@
 //============================================================================
 
 #include "ibex_InnerArith.h"
+#include "ibex_Random.h"
 
-#include <stdlib.h>
+//#include <stdlib.h>
 #include <cassert>
 
 using namespace std;

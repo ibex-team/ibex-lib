@@ -20,6 +20,7 @@
 #include "ibex_LinearRelaxCombo.h"
 #include "ibex_Array.h"
 #include "ibex_DefaultStrategy.cpp_"
+#include "ibex_Random.h"
 
 using namespace std;
 

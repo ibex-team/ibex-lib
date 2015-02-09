@@ -16,6 +16,7 @@
 #include "ibex_CtcFwdBwd.h"
 #include "ibex_CtcOptimShaving.h"
 #include "ibex_CtcHC4.h"
+#include "ibex_Random.h"
 
 #include "ibex_ExprCopy.h"
 #include "ibex_Function.h"

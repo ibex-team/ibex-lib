@@ -11,6 +11,7 @@
 #include "ibex_LinearRelaxXTaylor.h"
 #include "ibex_ExtendedSystem.h"
 #include "ibex_EmptyBoxException.h"
+#include "ibex_Random.h"
 
 using namespace std;
 
