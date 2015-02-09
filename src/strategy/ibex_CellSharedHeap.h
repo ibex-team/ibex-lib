@@ -26,6 +26,7 @@ namespace ibex {
  * Contains the data stored by a HeapNode. This data is
  * shared by nodes which belong to different heaps.
  */
+
 class CellHeapElt {
 
 private:

@@ -53,6 +53,9 @@ public:
 	/** push a new element on the stack. */
 	void push(T* el);
 
+	/** push a new element on the stack with the corresponding cost. */
+	void push(T* el, double val);
+
 	/** Pop a element from the stack and return it.*/
 	T* pop();
 
@@ -88,6 +91,95 @@ protected:
 /** Display the heap */
 template<class T>
 std::ostream& operator<<(std::ostream&, const Heap<T>&);
+
+
+/**
+ * \ingroup strategy
+ *
+ * \brief Heap node
+ *
+ */
+template<class T>
+class HeapNode {
+
+private:
+	friend class Heap<T>;
+	//friend class DoubleHeap<T>;
+
+	/** Create a node from an element and the father node. */
+	HeapNode(CellHeapElt* elt, CellHeapNode* father=NULL);
+
+	/** Delete the node and all its sons */
+	~HeapNode() ;
+
+	/** the stored element. */
+	CellHeapElt* elt;
+
+	/** Right sub-node */
+	CellHeapNode* right;
+
+	/** Left sub-node */
+	CellHeapNode* left;
+
+	/** Father node. */
+	CellHeapNode* father;
+
+	/** The way to compare two pairs (cells,crit). */
+	bool isSup(CellHeapNode* node, int ind_crit) const;
+	bool isSup(double d, int ind_crit) const ;
+
+	/** Switch the CellHeapElt between *this and node */
+	void switch_elt(CellHeapNode* node, int ind_crit);
+
+	friend std::ostream& operator<<(std::ostream& os, const CellHeapNode& node) ;
+
+};
+
+
+
+
+
+template<class T>
+class HeapElt {
+
+private:
+	friend class HeapNode<T>;
+	friend class Heap<T>;
+	//friend class DoubleHeap<T>;
+
+	/** Create an CellHeapElt with a cell and its criteria */
+	//CellHeapElt(int nb_crit, Cell* elt, double *crit);
+
+	/** Create an HeapElt with a cell and one criterion */
+	HeapElt(Cell* cell, double crit_1);
+
+	/** Create an HeapElt with a cell and two criteria */
+	HeapElt(Cell* cell, double crit_1, double crit_2);
+
+	/** Delete the element */
+	~HeapElt() ;
+
+	/**
+	 * Compare the criterion of a given heap with the value d.
+	 * Return true if the criterion is greater.
+	 */
+	bool isSup(double d, int heap_id) const ;
+
+	/** the stored Cell */
+	Cell* cell;
+
+	/** the criteria of the stored cell (one for each heap it
+	 * belongs to). */
+	double *crit;
+
+	/** The index of this element in each heap it belongs to. */
+	unsigned int *indice;
+
+	friend std::ostream& operator<<(std::ostream& os, const CellHeapElt& node) ;
+};
+
+
+
 
 
 /*================================== inline implementations ========================================*/
@@ -159,10 +251,16 @@ bool Heap<T>::empty() const {
 }
 
 template<class T>
-void Heap<T>::push(T* el) {
-	l.push_back(std::pair<T*,double>(el,cost(*el)));
+void Heap<T>::push(T* el,double val) {
+	l.push_back(std::pair<T*,double>(el,val));
 	push_heap(l.begin(), l.end(), HeapComparator<T>());
 }
+
+template<class T>
+void Heap<T>::push(T* el) {
+	push(el,cost(*el));
+}
+
 
 template<class T>
 T* Heap<T>::pop() {
