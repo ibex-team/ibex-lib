@@ -37,7 +37,7 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
     bool * corner = new bool[n]; 
 	// random corner choice
 	for (int i=0; i<n ; i++)
-	  {if (rand()%2)
+	  {if (RNG::rand()%2)
 	      corner[i]=false;
 	    else
 	      corner[i]=true;}  

@@ -281,7 +281,7 @@ std::pair<IntervalVector,IntervalVector> _bisect(const V& v, int i, double ratio
 template<class V,class T>
 Vector _random(const V& v,int seed) {
 	assert(!v.is_empty());
-	srand(seed);
+	RNG::srand(seed);
 	Vector b(v.size());
 	for (int i=0; i<v.size(); i++) {
 		const T& xi=v[i];
@@ -290,15 +290,16 @@ Vector _random(const V& v,int seed) {
 		// pick a point in the domain of the ith variable
 		if (xi.lb()==NEG_INFINITY)
 			if (xi.ub()==POS_INFINITY)
-				p=rand();
+				p=RNG::rand();
 			else
-				p=xi.ub()-rand();
+				p=xi.ub()-RNG::rand();
 		else
 			if (xi.ub()==POS_INFINITY)
-				p=xi.lb()+rand();
+				p=xi.lb()+RNG::rand();
 			else {
-				double r=(rand()/(double)RAND_MAX) -0.5;
-				p = xi.mid() + r*xi.diam();
+				//double r=(rand()/(double)RAND_MAX) -0.5;
+				// p = xi.mid() + r*xi.diam();
+				p = RNG::rand(xi.lb(), xi.ub());
 			}
 
 		// watch dog
@@ -321,15 +322,16 @@ Vector _random(const V& v) {
 		// pick a point in the domain of the ith variable
 		if (xi.lb()==NEG_INFINITY)
 			if (xi.ub()==POS_INFINITY)
-				p=rand();
+				p=RNG::rand();
 			else
-				p=xi.ub()-rand();
+				p=xi.ub()-RNG::rand();
 		else
 			if (xi.ub()==POS_INFINITY)
-				p=xi.lb()+rand();
+				p=xi.lb()+RNG::rand();
 			else {
-				double r=(rand()/(double)RAND_MAX) -0.5;
-				p = xi.mid() + r*xi.diam();
+				//double r=(rand()/(double)RAND_MAX) -0.5;
+				// p = xi.mid() + r*xi.diam();
+				p = RNG::rand(xi.lb(), xi.ub());
 			}
 
 		// watch dog

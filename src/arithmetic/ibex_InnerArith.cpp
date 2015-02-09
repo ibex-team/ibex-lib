@@ -231,7 +231,10 @@ bool ibwd_cmp_mono_op(bool geq, double z, Interval& x, Interval& y, const Interv
 		}
 		//cout << "  xmin=" << xmin << " xmax=" << xmax << endl;
 		Interval xx= x & Interval(xmin,xmax);
-		x0= xx.lb() + (double)rand()/(double)RAND_MAX*xx.diam();
+
+		//x0= xx.lb() + (double)RNG::rand()/(double)RAND_MAX*xx.diam();
+		x0= RNG::rand(xx.lb(),xx.ub());
+
 		//cout << "  x0 (random) =" << x0 << endl;
 		if (!xx.contains(x0)) x0= (x0 < xx.lb())? xx.lb():xx.ub();
 	}
@@ -431,7 +434,7 @@ bool ibwd_leq_mul(double z_sup, Interval& x, Interval& y, const Interval &xin, c
 		Interval xsave=x; // for the 2nd quadrant
 		Interval ysave=y;
 
-		bool q=(rand()%2==1); // q==1 : we take first Q.
+		bool q=(RNG::rand()%2==1); // q==1 : we take first Q.
 		x &= q? Interval::POS_REALS : Interval::NEG_REALS;
 		y &= q? Interval::NEG_REALS : Interval::POS_REALS;
 
@@ -503,7 +506,7 @@ bool ibwd_leq_div(double z_sup, Interval& x, Interval& y, const Interval &xin, c
 		// Otherwise, we try to build an inner box in one of the half-planes
 		// (chosen randomly) and, if it fails, we try with the other one.
 
-		bool r=((rand()%2)==1); // r==1 : we take first y>0.
+		bool r=((RNG::rand()%2)==1); // r==1 : we take first y>0.
 
 		for (int i=0; i<2; i++) {
 			if ((i+r)%2==1) {
@@ -561,7 +564,7 @@ bool ibwd_leq_div(double z_sup, Interval& x, Interval& y, const Interval &xin, c
 			return true;
 		}
 
-		int r=rand()%2; // r==1 : we take first y>0.
+		int r=RNG::rand()%2; // r==1 : we take first y>0.
 
 		for (int i=0; i<2; i++) {
 			if ((i+r)%2==1) {
@@ -661,7 +664,7 @@ bool ibwd_abs(const Interval& y, Interval& x, const Interval& xin) {
 		}
 		else {
 			Interval xtmp=x;
-			bool q=(rand()%2==1); // q==1 : we first consider x>0.
+			bool q=(RNG::rand()%2==1); // q==1 : we first consider x>0.
 
 			x &= (q? Interval(lo,up) : Interval(-up,-lo));
 			if (!x.is_empty()) return true;
@@ -727,7 +730,7 @@ bool ibwd_pow(const Interval& y, Interval& x, int p, const Interval &xin) {
 					// First alternative: choose randomly a side
 					// ============================================================
 					Interval xtmp=x;
-					bool q=(rand()%2==1); // q==1 : we first consider x>0.
+					bool q=(RNG::rand()%2==1); // q==1 : we first consider x>0.
 
 					x &= (q? Interval(lo,up) : Interval(-up,-lo));
 					if (!x.is_empty()) return true;
@@ -876,7 +879,7 @@ static bool ibwd_trigo(const Interval& y, Interval& x, const Interval& xin, int 
 		// choose randomly the period on which we project
 		int i;
 		if (i1==i2) i = i1; // no choice
-		else i = i1+ (rand() % (i2-i1+1));
+		else i = i1+ (RNG::rand() % (i2-i1+1));
 
 		switch(ftype) {
 		case COS :

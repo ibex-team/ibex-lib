@@ -188,13 +188,13 @@ int LinearRelaxXTaylor::X_Linearization(const IntervalVector& savebox,
 			inf_x = false;
 			break;
 		case RANDOM:
-			last_rnd[j] = rand();
+			last_rnd[j] = RNG::rand();
 			inf_x = (last_rnd[j] % 2 == 0);
 			break;
 		case K4:
 
 			if (id_point == 0) {
-				inf_x = (rand() % 2 == 0);
+				inf_x = (RNG::rand() % 2 == 0);
 				base_coin[j] = inf_x;
 			} else if (nb_nonlinear_vars < 3) {
 				if (id_point == 1)
@@ -202,7 +202,7 @@ int LinearRelaxXTaylor::X_Linearization(const IntervalVector& savebox,
 				else
 					return 0;
 			} else if (G[j].diam() <= 1e-10) {
-				inf_x = (rand() % 2 == 0);
+				inf_x = (RNG::rand() % 2 == 0);
 			} else if (id_point == 1) {
 				if (((double) nonlinear_var) <= (((double) nb_nonlinear_vars)/ 3.0))
 					inf_x = base_coin[j];
@@ -243,7 +243,7 @@ int LinearRelaxXTaylor::X_Linearization(const IntervalVector& savebox,
 	      ((Sup(G(j+1)) <0 && (op == LEQ || op== LT)) || 
 	       (Inf(G(j+1)) > 0 && (op == GEQ || op== GT))))
 	      inf_x=false;
-	    else inf_x = (rand()%2==0);
+	    else inf_x = (RNG::rand()%2==0);
 	    last_rnd[j]=inf_x? 0:1;
 	    break;
 	  case NEGMONO:
@@ -254,7 +254,7 @@ int LinearRelaxXTaylor::X_Linearization(const IntervalVector& savebox,
 	      ((Sup(G(j+1)) <0 && (op == LEQ || op== LT)) || 
 	       (Inf(G(j+1)) > 0 && (op == GEQ || op== GT)))
 	      inf_x=true;
-	    else inf_x = (rand()%2==0);
+	    else inf_x = (RNG::rand()%2==0);
 	    last_rnd[j]=inf_x? 0:1;
 	    break;
 
@@ -269,7 +269,7 @@ int LinearRelaxXTaylor::X_Linearization(const IntervalVector& savebox,
                     inf_x=(abs(Optimizer::global_optimizer()(j+1)-Inf(savebox(j+1))) <
                       abs(Optimizer::global_optimizer()(j+1)-Sup(savebox(j+1))))? true:false;
                  }else{ 
-                   inf_x=(rand()%2==0);
+                   inf_x=(RNG::rand()%2==0);
 		   }
                  break;
 			 */
@@ -308,7 +308,7 @@ int LinearRelaxXTaylor::X_Linearization(const IntervalVector& savebox,
               break;
 			 */
 		default:
-			last_rnd[j] = rand();
+			last_rnd[j] = RNG::rand();
 			inf_x = (last_rnd[j] % 2 == 0);
 			break;
 

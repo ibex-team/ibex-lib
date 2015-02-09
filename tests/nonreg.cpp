@@ -77,9 +77,9 @@ int main (int argc, char** argv) {
 	cout << "measuring machine performance..." << endl;
 	cout << "\treference time=" << ref_perf << endl;
 
-	srand(1);
-	volatile double a=rand();
-	volatile double b=rand();
+	RNG::srand(1);
+	volatile double a=RNG::rand();
+	volatile double b=RNG::rand();
 	Timer::start();
 	for (int i=0; i<100000000; i++) {
 		a *= b;

@@ -207,7 +207,7 @@ OptimizerParam::OptimizerParam(const char* filename, const char* filtering, cons
 						goal_rel_prec(goal_rel_prec), goal_abs_prec(goal_abs_prec), sample_size(sample_size), eq_eps(eq_eps) {
 
 
-	srand(1);
+	RNG::srand(1);
 
 }
 
