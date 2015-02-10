@@ -121,6 +121,9 @@ int LinearRelaxAffine2::inlinearization(const IntervalVector& box, LinearSolver&
 					}
 					break;
 				}
+				case EQ: {
+					not_implemented("LinearRelaxAffine2::inlinearization not implemented for equality constrains");
+				}
 				default:
 					break;
 				}
