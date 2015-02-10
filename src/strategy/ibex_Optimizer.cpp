@@ -58,12 +58,12 @@ void Optimizer::read_ext_box(const IntervalVector& ext_box, IntervalVector& box)
 
 Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, double prec,
 		double goal_rel_prec, double goal_abs_prec, int sample_size, double equ_eps,
-		bool rigor,  int critpr,CellSharedHeap::criterion crit) :
+		bool rigor,  int critpr,CellDoubleHeap::criterion crit) :
                 				user_sys(user_sys), sys(user_sys,equ_eps),
                 				n(user_sys.nb_var), m(sys.nb_ctr) /* (warning: not user_sys.nb_ctr) */,
                 				ext_sys(user_sys,equ_eps),
                 				ctc(ctc),bsc(bsc),
-                				buffer(n,critpr,crit),  // first buffer with LB, second buffer with ct (default UB))
+                				buffer(n,crit,critpr),  // first buffer with LB, second buffer with ct (default UB))
                 				prec(prec), goal_rel_prec(goal_rel_prec), goal_abs_prec(goal_abs_prec),
                 				sample_size(sample_size), mono_analysis_flag(true), in_HC4_flag(true), trace(false),
                 				critpr(critpr), timeout(1e08),
@@ -259,16 +259,16 @@ void Optimizer::handle_cell(Cell& c, const IntervalVector& init_box ){
 
 		// Computations for the Casado C3, C5, C7 criteria
 		switch (buffer.crit) {
-		case CellSharedHeap::C3 : {
+		case CellDoubleHeap::C3 : {
 			compute_pf(c);
 			break;
 			}
-		case CellSharedHeap::C5 : case CellSharedHeap::C7 : {
+		case CellDoubleHeap::C5 : case CellDoubleHeap::C7 : {
 			compute_pu(c);
 			compute_pf(c);
 			break;
 			}
-		case CellSharedHeap::PU: {
+		case CellDoubleHeap::PU: {
 			compute_pu(c);
 			break;
 			}
@@ -418,7 +418,7 @@ void Optimizer::contract ( IntervalVector& box, const IntervalVector& init_box) 
 Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj_init_bound) {
 	loup=obj_init_bound;
 	pseudo_loup=obj_init_bound;
-	buffer.setLoup(loup);
+	buffer.contractHeap(loup);
 
 	uplo=NEG_INFINITY;
 	uplo_of_epsboxes=POS_INFINITY;
@@ -447,7 +447,12 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 
 	// add data pu and pf for
 	switch (buffer.crit) {
-	case CellSharedHeap::C3 : case CellSharedHeap::C5 : case CellSharedHeap::C7 : case CellSharedHeap::PU: {
+	case CellDoubleHeap::C3 :
+	case CellDoubleHeap::C5 :
+	case CellDoubleHeap::C7 :
+	case CellDoubleHeap::PU :
+	case CellDoubleHeap::PF_LB:
+	case CellDoubleHeap::PF_UB:  {
 		root->add<OptimData>();	
 		break;
 		}
@@ -506,12 +511,12 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 					// In case of a new upper bound (loup_changed == true), all the boxes
 					// with a lower bound greater than (loup - goal_prec) are removed and deleted.
 					// Note: if contraction was before bisection, we could have the problem
-					// that the current cell is removed by contract_heap. See comments in
+					// that the current cell is removed by contractHeap. See comments in
 					// older version of the code (before revision 284).
 
 					double ymax= compute_ymax();
 
-					buffer.contract_heap(ymax);
+					buffer.contractHeap(ymax);
 					//cout << " now buffer is contracted and min=" << buffer.minimum() << endl;
 
 

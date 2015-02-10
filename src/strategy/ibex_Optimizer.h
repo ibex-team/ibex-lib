@@ -70,7 +70,7 @@ public:
 
 	Optimizer(System& sys, Ctc& ctc, Bsc& bsc, double prec=default_prec,
 			double goal_rel_prec=default_goal_rel_prec, double goal_abs_prec=default_goal_abs_prec,
-			  int sample_size=default_sample_size, double equ_eps=default_equ_eps, bool rigor=false, int critpr=50,CellSharedHeap::criterion crit= CellSharedHeap::UB);
+			  int sample_size=default_sample_size, double equ_eps=default_equ_eps, bool rigor=false, int critpr=50,CellDoubleHeap::criterion crit= CellDoubleHeap::UB);
 	/**
 	 * \brief Delete *this.
 	 */

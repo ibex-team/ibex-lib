@@ -11,12 +11,22 @@
 
 namespace ibex {
 
-CellDoubleHeap::CellDoubleHeap(CellHeap *heap1, CellHeap *heap2, int critpr_in) :
-		nb_cells(0), heap1(heap1), heap2(heap2),critpr(critpr_in) ,indbuf(0) {
-}
 
-CellDoubleHeap::CellDoubleHeap(CellHeap *heap1) :
-		nb_cells(0), heap1(heap1), heap2(NULL),critpr(0) ,indbuf(0) {
+
+CellDoubleHeap::CellDoubleHeap(int ind_var, criterion crit_2,  int critpr) :
+		goal_var(ind_var), nb_cells(0), heap1(new CellHeapVarLB(ind_var,0)), heap2(NULL),critpr(critpr) ,indbuf(0) , crit(crit_2){
+
+	switch (crit_2) {
+	case UB : {heap2 = new CellHeapVarUB(ind_var,2); break; }
+	case C3 : {heap2 = new CellHeapC3(1) ; break;}
+	case C5 : {heap2 = new CellHeapC5(1) ; break;}
+	case C7 : {heap2 = new CellHeapC7(1) ; break;}
+	case PU : {heap2 = new CellHeapPU(1) ; break;}
+	case PF_LB : {heap2 = new CellHeapPFlb(1) ; break;}
+	case PF_UB : {heap2 = new CellHeapPFub(1) ; break;}
+	default:
+		ibex_error("CellDoubleHeap::CellDoubleHeap : error  wrong criterion.");
+	}
 }
 
 
@@ -59,7 +69,7 @@ void CellDoubleHeap::contractHeap(double new_loup) {
 
 	if (nb_cells==0) return;
 
-	CellHeapVarLB *copy1 = heap1->init_copy();
+	CellHeapVarLB *copy1 = new CellHeapVarLB( goal_var,0);
 
 	contractRec(new_loup, heap1->root, *copy1);
 
@@ -78,7 +88,7 @@ void CellDoubleHeap::contractHeap(double new_loup) {
 	heap2->nb_cells =0;
 	heap2->contractHeap(new_loup);
 
-	if (copy2->needUpdate())  { //update the order if necessary
+	if (copy2->updateCost)  { //update the order if necessary
 		copy2->sort();
 	}
 	heap2->nb_cells = copy2->nb_cells;
@@ -114,7 +124,7 @@ void CellDoubleHeap::eraseOtherHeaps(HeapNode<Cell>* node) {
 	node->right=NULL;
 	node->left=NULL;
 
-	if (heap2->needUpdate())
+	if (heap2->updateCost)
 		heap2->eraseNode_noUpdate(node->elt->indice[1]);
 	else
 		heap2->eraseNode(node->elt->indice[1]);
@@ -196,8 +206,8 @@ Cell* CellDoubleHeap::top2() const {
 
 
 std::ostream& operator<<(std::ostream& os, const CellDoubleHeap& heap){
-	os << "First Heap:  "<< *(heap.heap1) <<std::endl;
-	os << "Second Heap: "<< *(heap.heap2) <<std::endl;
+	os << "First Heap:  "<< heap.heap1 <<std::endl;
+	os << "Second Heap: "<< heap.heap2 <<std::endl;
 	return os;
 
 }

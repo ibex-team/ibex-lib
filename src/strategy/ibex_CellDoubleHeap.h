@@ -11,6 +11,7 @@
 #define __IBEX_CELL_DOUBLE_HEAP_H__
 
 #include "ibex_CellSharedHeap.h"
+#include "ibex_CellHeap.h"
 
 namespace ibex {
 
@@ -22,6 +23,16 @@ namespace ibex {
  */
 class CellDoubleHeap : public CellBuffer {
 public:
+
+
+	/**
+	* \brief Criteria implemented for a heap in optimization
+	*
+	* - LB for the first one
+	* - another for the second one among UB, C3, etc.
+	*/
+	typedef enum {UB,C3,C5,C7,PU,PF_LB, PF_UB} criterion;
+
 	/**
 	 *
 	 * \param ind_var - Index of the criterion variable
@@ -30,12 +41,10 @@ public:
 	 *                  single criterion for node selection (the classical one : minimizing the lower
 	 *                  bound of the estimate of the objective). The value 100 corresponds to use a
 	 *                  single criterion for node selection (the second one used in buffer2)
-	 * \param crit_2  - The second criterion used (the first is LB) TODO: complete
+	 * \param crit_2  - The second criterion used (the first is LB)
 	 */
 
-	CellDoubleHeap(CellHeap *heap1, CellHeap *heap2, int critpr=50);
-
-	CellDoubleHeap(CellHeap *heap1);
+	CellDoubleHeap(int ind_var, criterion crit_2, int critpr=50);
 
 	/** Flush the buffer.
 	 * All the remaining cells will be *deleted* */
@@ -101,8 +110,13 @@ public:
 	 */
 	virtual ~CellDoubleHeap();
 
+	criterion crit;
 
 private:
+
+	/** Index of the objective variable. */
+	const int goal_var;
+
 	/** Count the number of cells pushed since
 	 * the object is created. */
 	unsigned int nb_cells;
@@ -111,7 +125,7 @@ private:
 	CellHeapVarLB *heap1;
 
 	/** the second heap */
-	Heap<Cell> *heap2;
+	CellHeap *heap2;
 
 	/** Probability to choose the second
 	 * (see details in the constructor) */
@@ -120,7 +134,7 @@ private:
 	/** Current selected buffer. */
 	mutable int indbuf;
 
-	/** use in the contract_heap function by recursivity */
+	/** use in the contractHeap function by recursivity */
 	void contractRec(double new_loup, HeapNode<Cell> * node, Heap<Cell> & heap);
 
 	/** erase a node in the second heap */

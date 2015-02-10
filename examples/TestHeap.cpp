@@ -49,7 +49,7 @@ int main(int argc, char** argv) {
 		Timer::start();
 		time =0;
 		for (int i=0; i<nb ;i++) {old_LB.push(new OptimCell((pow(-1,i)*i)*box));}
-		old_LB.contract_heap(50);
+		old_LB.contractHeap(50);
 		Timer::stop();
 		time += Timer::VIRTUAL_TIMELAPSE();
 
@@ -58,7 +58,7 @@ int main(int argc, char** argv) {
 		Timer::start();
 		 time =0;
 		for (int i=0; i<nb ;i++) {LB.push(new OptimCell((pow(-1,i)*i)*box));}
-		LB.contract_heap(50);
+		LB.contractHeap(50);
 		Timer::stop();
 		time += Timer::VIRTUAL_TIMELAPSE();
 		cout << "contract LB= "<<time <<endl;

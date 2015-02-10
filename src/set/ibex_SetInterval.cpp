@@ -186,7 +186,7 @@ std::ostream& operator<<(std::ostream& os, const SetInterval& set) {
 	return os;
 }
 
-namespace {
+//namespace {
 
 
 class NodeAndDist : public Backtrackable {
@@ -225,13 +225,19 @@ public:
  * Cell heap where the criterion is the distance to "pt"
  */
 class CellHeapDist : public CellHeap {
-public:
 
-	virtual double cost(const Cell& c) const {
-		return c.get<NodeAndDist>().dist;
-	}
+public:
+	CellHeapDist() : CellHeap() { };
+
+	/** The "cost" of a element. */
+	virtual	double cost(const Cell& c) const { return c.get<NodeAndDist>().dist; }
+
+private:
+
+	virtual	CellHeapDist* init_copy() const { return new CellHeapDist();}
+
 };
-}
+
 
 double SetInterval::dist(const Vector& pt, bool inside) const {
 	CellHeapDist heap;
@@ -260,7 +266,7 @@ double SetInterval::dist(const Vector& pt, bool inside) const {
 			double d=c->get<NodeAndDist>().dist;
 			if (d<lb) {
 				lb=d;
-				heap.contract_heap(lb);
+				heap.contractHeap(lb);
 			}
 		} else if (!node->is_leaf() && (    (inside && possibly_contains_in(node->status))
 		                                || (!inside && possibly_contains_out(node->status)))) {

@@ -62,8 +62,7 @@ void TestCellHeap::test02() {
 void TestCellHeap::test03() {
 
 	int nb= 10;
-	CellHeapCost h2(CellSharedHeap::C3);
-	h2.set_loup(100);
+	CellHeapC5 h2(0,100);
 
 	double _box[][2] = {{5,15},  {15,25},  {25,35},  {35,45}};
 	IntervalVector box(4,_box);
@@ -99,7 +98,7 @@ void TestCellHeap::test04() {
 		h2.push(cell1);
 	}
 	delete h2.pop(); delete h2.pop();
-	h2.contract_heap(50);
+	h2.contractHeap(50);
 	delete h2.pop(); delete h2.pop();
 
 }
@@ -109,8 +108,10 @@ void TestCellHeap::test05() {
 
 	int nb= 10;
 
-	CellHeapCost h1(CellSharedHeap::C5);
-	CellHeapCost h2(CellSharedHeap::C5);
+	CellHeapC5 h1(0);
+	CellHeapC5 h2(0);
+	h1.contractHeap(100);
+	h2.contractHeap(100);
 
 	double _box[][2] = {{5,15},  {15,25},  {25,35},  {35,45}};
 	IntervalVector box(4,_box);
@@ -129,8 +130,8 @@ void TestCellHeap::test05() {
 	}
 	delete h1.pop(); delete h1.pop();
 	delete h2.pop(); delete h2.pop();
-	h1.sort();
-	h2.sort();
+//	h1.sort();
+//	h2.sort();
 	delete h1.pop(); delete h1.pop();
 	delete h2.pop(); delete h2.pop();
 
@@ -150,7 +151,7 @@ void TestCellHeap::test05() {
 void TestCellHeap::test_D00() {
 
 	int nb= 10;
-	CellDoubleHeap h1(0);
+	CellDoubleHeap h1(0, CellDoubleHeap::UB);
 
 	double _box[][2] = {{5,15},  {15,25}};
 	IntervalVector box(2,_box);
@@ -170,8 +171,8 @@ void TestCellHeap::test_D00() {
 void TestCellHeap::test_D01() {
 
 	int nb= 10;
-	CellDoubleHeap h1(1,50,CellSharedHeap::C5);
-	h1.setLoup(100);
+	CellDoubleHeap h1(1,CellDoubleHeap::C5,50);
+	h1.contractHeap(100);
 
 
 	double _box[][2] = {{5,15},  {15,25}};
@@ -196,8 +197,8 @@ void TestCellHeap::test_D01() {
 void TestCellHeap::test_D03() {
 
 	int nb= 10;
-	CellDoubleHeap h1(1,100,CellSharedHeap::C5);
-	h1.setLoup(100);
+	CellDoubleHeap h1(1,CellDoubleHeap::C5,50);
+	h1.contractHeap(100);
 
 	double _box[][2] = {{5,15},  {15,25},  {25,35},  {35,45}};
 	IntervalVector box(4,_box);
@@ -219,8 +220,8 @@ void TestCellHeap::test_D04() {
 
 
 	int nb= 10;
-	CellDoubleHeap h1(1,100,CellSharedHeap::C5);
-	h1.setLoup(10);
+	CellDoubleHeap h1(1,CellDoubleHeap::C5,50);
+	h1.contractHeap(10);
 
 	double _box[][2] = {{5,15},  {15,25}};
 	IntervalVector box(2,_box);
@@ -234,7 +235,7 @@ void TestCellHeap::test_D04() {
 	}
 	delete h1.pop();
 	delete h1.pop();
-	h1.contract_heap(100);
+	h1.contractHeap(100);
 	delete h1.pop();
 	delete h1.pop();
 
@@ -246,10 +247,10 @@ void TestCellHeap::test_D05() {
 
 	int nb= 10;
 
-	CellDoubleHeap h1(CellSharedHeap::C5);
-	CellDoubleHeap h2(CellSharedHeap::C5);
-	h1.setLoup(100);
-	h2.setLoup(100);
+	CellDoubleHeap h1(0,CellDoubleHeap::C5);
+	CellDoubleHeap h2(0,CellDoubleHeap::C5);
+	h1.contractHeap(100);
+	h2.contractHeap(100);
 
 	double _box[][2] = {{5,15},  {15,25},  {25,35},  {35,45}};
 	IntervalVector box(4,_box);
@@ -268,8 +269,8 @@ void TestCellHeap::test_D05() {
 	}
 	delete h1.pop(); delete h1.pop();
 	delete h2.pop(); delete h2.pop();
-	h1.sort();
-	h2.sort();
+//	h1.sort();
+//	h2.sort();
 	delete h1.pop(); delete h1.pop();
 	delete h2.pop(); delete h2.pop();
 

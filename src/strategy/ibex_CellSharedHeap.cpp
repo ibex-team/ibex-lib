@@ -15,19 +15,27 @@ namespace ibex {
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
-CellHeapVarLB::CellHeapVarLB(int ind_var, int ind_crit) : Heap<Cell>(ind_crit, false), goal_var(ind_var) { };
+CellHeapVarLB::CellHeapVarLB(int ind_var, int ind_crit) : CellHeap(ind_crit, false), goal_var(ind_var) { };
 
 double CellHeapVarLB::cost(const Cell& c) const { return c.box[goal_var].lb(); }
 
+CellHeapVarLB* CellHeapVarLB::init_copy() const {
+	return new CellHeapVarLB(goal_var, getId());
+}
+
 // -----------------------------------------------------------------------------------------------------------------------------------
 
-CellHeapVarUB::CellHeapVarUB(int ind_var, int ind_crit) : Heap<Cell>(ind_crit), goal_var(ind_var)  { };
+CellHeapVarUB::CellHeapVarUB(int ind_var, int ind_crit) : CellHeap(ind_crit,false), goal_var(ind_var)  { };
 
 double CellHeapVarUB::cost(const Cell& c) const { return c.box[goal_var].ub(); }
 
+CellHeapVarUB* CellHeapVarUB::init_copy() const {
+	return new CellHeapVarUB(goal_var, getId());
+}
+
 // -----------------------------------------------------------------------------------------------------------------------------------
 
-CellHeapC3::CellHeapC3( int ind_crit, double lb) : Heap<Cell>(ind_crit, true), loup(lb) { };
+CellHeapC3::CellHeapC3( int ind_crit, double lb) : CellHeap(ind_crit, true), loup(lb) { };
 
 double CellHeapC3::cost(const Cell& c) const {
 	const OptimData *data = &(c.get<OptimData>());
@@ -38,13 +46,13 @@ double CellHeapC3::cost(const Cell& c) const {
 	}
 }
 
-CellHeapC3* CellHeapC3::init_copy() {
-	return new CellHeapC3(heap_id, loup);
+CellHeapC3* CellHeapC3::init_copy() const {
+	return new CellHeapC3(getId(), loup);
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
-CellHeapC5::CellHeapC5( int ind_crit, double lb) : Heap<Cell>(ind_crit, true), loup(lb) { };
+CellHeapC5::CellHeapC5( int ind_crit, double lb) : CellHeap(ind_crit, true), loup(lb) { };
 
 double CellHeapC5::cost(const Cell& c) const {
 	const OptimData *data = &(c.get<OptimData>());
@@ -55,13 +63,13 @@ double CellHeapC5::cost(const Cell& c) const {
 	}
 }
 
-CellHeapC5* CellHeapC5::init_copy() {
-	return new CellHeapC5(heap_id,loup);
+CellHeapC5* CellHeapC5::init_copy() const {
+	return new CellHeapC5(getId(),loup);
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
-CellHeapC7::CellHeapC7(int ind_var,  int ind_crit, double lb) : Heap<Cell>(ind_crit, true), loup(lb), goal_var(ind_var) {};
+CellHeapC7::CellHeapC7(int ind_var,  int ind_crit, double lb) : CellHeap(ind_crit, true), loup(lb), goal_var(ind_var) {};
 
 double CellHeapC7::cost(const Cell& c) const {
 	const OptimData *data = &(c.get<OptimData>());
@@ -72,27 +80,28 @@ double CellHeapC7::cost(const Cell& c) const {
 	}
 }
 
-CellHeapC7* CellHeapC7::init_copy() {
-	return  new CellHeapC7(goal_var,heap_id, loup);
+CellHeapC7* CellHeapC7::init_copy() const {
+	return  new CellHeapC7(goal_var,getId(), loup);
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
-CellHeapPU::CellHeapPU(int ind_crit) : Heap<Cell>(ind_crit, false) { };
+CellHeapPU::CellHeapPU(int ind_crit) : CellHeap(ind_crit, false) { };
 
-double CellHeapC7::cost(const Cell& c) const {
+double CellHeapPU::cost(const Cell& c) const {
 	const OptimData *data = &(c.get<OptimData>());
 	if (data) {
 		return  -data->pu;
 	} else {
-		ibex_error("CellHeapC7::cost : invalid cost"); return POS_INFINITY;
+		ibex_error("CellHeapPU::cost : invalid cost"); return POS_INFINITY;
 	}
 }
 
+CellHeapPU* CellHeapPU::init_copy() const {	return new CellHeapPU( getId());}
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
-CellHeapPFlb::CellHeapPFlb(int ind_crit) : Heap<Cell>(ind_crit, false) { };
+CellHeapPFlb::CellHeapPFlb(int ind_crit) : CellHeap(ind_crit, false) { };
 
 double CellHeapPFlb::cost(const Cell& c) const {
 	const OptimData *data = &(c.get<OptimData>());
@@ -103,9 +112,11 @@ double CellHeapPFlb::cost(const Cell& c) const {
 	}
 }
 
+CellHeapPFlb* CellHeapPFlb::init_copy() const {	return new CellHeapPFlb( getId());}
+
 // -----------------------------------------------------------------------------------------------------------------------------------
 
-CellHeapPFub::CellHeapPFub(int ind_crit) : Heap<Cell>(ind_crit, false) { };
+CellHeapPFub::CellHeapPFub(int ind_crit) : CellHeap(ind_crit, false) { };
 
 double CellHeapPFub::cost(const Cell& c) const {
 	const OptimData *data = &(c.get<OptimData>());
@@ -115,5 +126,7 @@ double CellHeapPFub::cost(const Cell& c) const {
 		ibex_error("CellHeapPFub::cost : invalid cost"); return POS_INFINITY;
 	}
 }
+
+CellHeapPFub* CellHeapPFub::init_copy() const {	return new CellHeapPFub( getId());}
 
 }  // end namespace ibex

@@ -26,6 +26,9 @@ namespace ibex {
  *  </ul>
  *
  */
+template<class T> class HeapNode;
+template<class T> class HeapElt;
+
 template<class T>
 class Heap  {
 
@@ -35,7 +38,7 @@ public:
 	Heap(int ind_crit= 0, bool updateCost=false);
 
 	/** Delete this. */
-	~Heap();
+	virtual  ~Heap();
 
 	/**
 	 * \brief Flush the buffer.
@@ -43,28 +46,28 @@ public:
 	 * All the remaining elements will be *deleted*
 	 * (with a call to the destructor of class T).
 	 */
-	void flush();
+	virtual void flush();
 
 	/** Return the size of the buffer. */
-	unsigned int size() const;
+	virtual unsigned int size() const;
 
 	/** Return true if the buffer is empty. */
-	bool empty() const;
+	virtual bool empty() const;
 
 	/** push a new element on the stack.
 	 * Complexity: o(log(nb_cells))
 	 */
-	void push(T* el);
+	virtual void push(T* el);
 
 	/** Pop a element from the stack and return it.
 	 * Complexity: o(log(nb_cells))
 	 */
-	T* pop();
+	virtual T* pop();
 
 	/** Return the next box (but does not pop it).
 	 * Complexity: o(1)
 	 */
-	T* top() const;
+	virtual T* top() const;
 
 	/**
 	 * \brief Contracts the heap.
@@ -76,9 +79,7 @@ public:
 
 	/** Return the minimum (the criterion for
 	 * the first element) */
-	double minimum() const{
-		return root->elt->crit[heap_id];
-	}
+	inline double minimum() const{	return root->elt->crit[heap_id];	}
 
 	/**
 	 * \brief Access to the ith Cell rank by largest-first order
@@ -96,22 +97,21 @@ public:
 	 * the object is created. */
 	unsigned int nb_cells;
 
-	inline bool needUpdate() {return updateCost;}
+//	inline bool needUpdate() const {return updateCost;}
+
+	inline int getId() const {return heap_id;}
+
+
+	virtual std::ostream& print(std::ostream& os) const;
 
 protected:
-	//friend class DoubleHeap<T>;
+	friend class CellDoubleHeap;
 
 	/** The "cost" of a element. */
 	virtual double cost(const T&) const=0;
 
-	/** Index of the criterion selected for this heap */
-	const int heap_id;
 
-	virtual Heap<T>* init_copy() {
-		return new Heap<T>(heap_id,updateCost) ;
-	}
-
-private:
+	virtual Heap<T>* init_copy() const =0;
 
 	/** A boolean which indicate if all the cost must be update at each contract and sort
 	 *
@@ -119,8 +119,32 @@ private:
 	const bool updateCost;
 
 
+	/** Index of the criterion selected for this heap */
+	const int heap_id;
+
 	/** The root of the heap */
 	HeapNode<T>* root;
+
+	/**
+	 * Pop a CellHeapElt from the stack and return it.
+	 * Complexity: o(log(nb_cells))
+	 */
+	virtual HeapElt<T>* popElt();
+
+	/**
+	 * Useful only for CellDoubleHeap
+	 * Complexity: o(log(nb_cells))
+	 */
+	virtual void push(HeapElt<T>* elt);
+
+	/** Update the heap to reorder the elements from the node \var node to the down */
+	virtual void updateOrder(HeapNode<T>* node);
+
+	/** Erase only this HeapNope without touch the element */
+	virtual void eraseNode(unsigned int i);
+
+	/** Remove the last node and put its element at the ith position */
+	virtual HeapNode<T>* eraseNode_noUpdate(unsigned int i);
 
 	/**
 	 * Access to the ith node rank by largest-first order
@@ -129,40 +153,15 @@ private:
 	 */
 	HeapNode<T>* getNode(unsigned int i) const;
 
-	/**
-	 * Pop a CellHeapElt from the stack and return it.
-	 * Complexity: o(log(nb_cells))
-	 */
-	HeapElt<T>* popElt();
-
-	/**
-	 * Useful only for CellDoubleHeap
-	 * Complexity: o(log(nb_cells))
-	 */
-	void push(HeapElt<T>* elt);
-
-	/** Update the heap to reorder the elements from the node \var node to the down */
-	void updateOrder(HeapNode<T>* node);
-
-	/** Erase only this HeapNope without touch the element */
-	void eraseNode(unsigned int i);
-
-	/** Remove the last node and put its element at the ith position */
-	HeapNode<T>* eraseNode_noUpdate(unsigned int i);
-
-	/** Used in the contract_heap function (proceed by recursivity) */
+private:
+	/** Used in the contractHeap function (proceed by recursivity) */
 	void contractRec(double new_loup, HeapNode<T>* node, Heap<T>& heap);
 
 	/** Used in the sort function (proceed by recursivity) */
 	void sortRec(HeapNode<T>* node, Heap<T>& heap);
 
-	template<class U>
-	friend std::ostream& operator<<(std::ostream&, const Heap<U>&);
 };
 
-/** Display the heap */
-template<class T>
-std::ostream& operator<<(std::ostream& os, const Heap<T>& h);
 
 
 /**
@@ -176,10 +175,10 @@ class HeapNode {
 
 private:
 	friend class Heap<T>;
-	//friend class DoubleHeap<T>;
+	friend class CellDoubleHeap;
 
 	/** Create a node from an element and the father node. */
-	HeapNode(HeapElt<T>* elt, HeapNode<T>* father=NULL);
+	explicit HeapNode(HeapElt<T>* elt, HeapNode<T>* father=NULL);
 
 	/** Delete the node and all its sons */
 	~HeapNode() ;
@@ -218,16 +217,16 @@ class HeapElt {
 private:
 	friend class HeapNode<T>;
 	friend class Heap<T>;
-	//friend class DoubleHeap<T>;
+	friend class CellDoubleHeap;
 
 	/** Create an CellHeapElt with a cell and its criteria */
 	//CellHeapElt(int nb_crit, T* elt, double *crit);
 
 	/** Create an HeapElt with a cell and one criterion */
-	HeapElt(T* cell, double crit_1);
+	explicit HeapElt(T* cell, double crit_1);
 
 	/** Create an HeapElt with a cell and two criteria */
-	HeapElt(T* cell, double crit_1, double crit_2);
+	explicit HeapElt(T* cell, double crit_1, double crit_2);
 
 	/** Delete the element */
 	~HeapElt() ;
@@ -407,7 +406,7 @@ void Heap<T>::push(HeapElt<T>* cell) {
 		// we have now to perform an update upto the root
 		bool b = true;
 		while (b&&(pt->father)) {
-			if (pt->father->is_sup(pt,heap_id)) {
+			if (pt->father->isSup(pt,heap_id)) {
 				pt->switchElt(pt->father,heap_id);
 				pt = pt->father;
 			} else {
@@ -527,8 +526,8 @@ void Heap<T>::updateOrder(HeapNode<T> *pt) {
 		bool b=true;
 		while (b && (pt->left)) {
 			if (pt->right) {
-				if (pt->is_sup(pt->left,heap_id)) {
-					if (pt->right->is_sup(pt->left,heap_id)) {
+				if (pt->isSup(pt->left,heap_id)) {
+					if (pt->right->isSup(pt->left,heap_id)) {
 						// left is the smallest
 						pt->switchElt(pt->left,heap_id);
 						pt = pt->left;  // next
@@ -538,7 +537,7 @@ void Heap<T>::updateOrder(HeapNode<T> *pt) {
 						pt = pt->right;  // next
 					}
 				} else {
-					if (pt->is_sup(pt->right,heap_id)) {
+					if (pt->isSup(pt->right,heap_id)) {
 						// right is the smallest
 						pt->switchElt(pt->right,heap_id);
 						pt = pt->right;  // next
@@ -547,7 +546,7 @@ void Heap<T>::updateOrder(HeapNode<T> *pt) {
 					}
 				}
 			} else { // no more right child but there is a left child
-				if (pt->is_sup(pt->left,heap_id)) {
+				if (pt->isSup(pt->left,heap_id)) {
 					// left is the smallest
 					pt->switchElt(pt->left,heap_id);
 					pt = pt->left;  // next
@@ -651,15 +650,12 @@ std::ostream& operator<<(std::ostream& os, const HeapNode<T>& node) {
 	return os;
 }
 
-
 template<class T>
-std::ostream& operator<<(std::ostream& os, const Heap<T>& heap) {
+std::ostream& Heap<T>::print(std::ostream& os) const{
 	os << "[ ";
-	if (heap.root) 	os << *(heap.root) << " ";
+	if (root) 	os << *(root) << " ";
 	return os << "]";
 }
-
-
 
 
 
