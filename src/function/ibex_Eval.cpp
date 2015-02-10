@@ -32,7 +32,12 @@ Domain& Eval::eval(const Function& f, ExprLabel** args) const {
 	//		cout << "arg[" << i << "]=" << f.arg_domains[i] << endl;
 	//	}
 
-	return *f.forward<Eval>(*this).d;
+	try {
+		f.forward<Eval>(*this);
+	} catch(EmptyBoxException&) {
+		f.expr().deco.d->set_empty();
+	}
+	return *f.expr().deco.d;
 }
 
 Domain& Eval::eval(const Function& f, const Array<const Domain>& d) const {
@@ -40,7 +45,12 @@ Domain& Eval::eval(const Function& f, const Array<const Domain>& d) const {
 
 	f.write_arg_domains(d);
 
-	return *f.forward<Eval>(*this).d;
+	try {
+		f.forward<Eval>(*this);
+	} catch(EmptyBoxException&) {
+		f.expr().deco.d->set_empty();
+	}
+	return *f.expr().deco.d;
 }
 
 Domain& Eval::eval(const Function& f, const Array<Domain>& d) const {
@@ -48,7 +58,12 @@ Domain& Eval::eval(const Function& f, const Array<Domain>& d) const {
 
 	f.write_arg_domains(d);
 
-	return *f.forward<Eval>(*this).d;
+	try {
+		f.forward<Eval>(*this);
+	} catch(EmptyBoxException&) {
+		f.expr().deco.d->set_empty();
+	}
+	return *f.expr().deco.d;
 }
 
 Domain& Eval::eval(const Function &f, const IntervalVector& box) const {
@@ -56,7 +71,12 @@ Domain& Eval::eval(const Function &f, const IntervalVector& box) const {
 
 	f.write_arg_domains(box);
 
-	return *f.forward<Eval>(*this).d;
+	try {
+		f.forward<Eval>(*this);
+	} catch(EmptyBoxException&) {
+		f.expr().deco.d->set_empty();
+	}
+	return *f.expr().deco.d;
 }
 
 void Eval::vector_fwd(const ExprVector& v, const ExprLabel** compL, ExprLabel& y) {

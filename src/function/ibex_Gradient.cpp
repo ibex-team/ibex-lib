@@ -25,7 +25,12 @@ void Gradient::gradient(const Function& f, const Array<Domain>& d, IntervalVecto
 
 	f.write_arg_domains(g,true);
 
-	f.forward<Gradient>(*this);
+	try {
+		f.forward<Gradient>(*this);
+	} catch(EmptyBoxException&) {
+		g.set_empty();
+		return;
+	}
 
 	f.expr().deco.g->i()=1.0;
 
@@ -45,7 +50,12 @@ void Gradient::gradient(const Function& f, const IntervalVector& box, IntervalVe
 
 	f.write_arg_domains(g,true);
 
-	f.forward<Gradient>(*this);
+	try {
+		f.forward<Gradient>(*this);
+	} catch(EmptyBoxException&) {
+		g.set_empty();
+		return;
+	}
 
 	f.expr().deco.g->i()=1.0;
 

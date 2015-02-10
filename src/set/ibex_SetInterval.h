@@ -11,7 +11,7 @@
 #define __IBEX_SET_H__
 
 #include "ibex_SetNode.h"
-#include "ibex_Separator.h"
+#include "ibex_Sep.h"
 
 namespace ibex {
 
@@ -78,7 +78,7 @@ public:
 	 * If [x] designates this i-set and [y] the i-set in argument, then this will be replace by
 	 *  { x, x\in[x] and x\in[y] }.
 	 */
-	void sync(Separator& sep);
+	void sync(Sep& sep);
 
 	/**
 	 * \brief True if this i-set is empty
@@ -87,7 +87,7 @@ public:
 	 */
 	bool is_empty() const;
 
-	void contract(Separator& sep);
+	void contract(Sep& sep);
 
 	/**
 	 * \brief Serialize the set and save it into a file

@@ -15,7 +15,7 @@ install:
   - cd tests/ && make utest && make nonreg && cd ..
 # command to run tests
 script:  
-#  - __build__/examples/optimizer04 benchs/benchs-optim/coconutbenchmark-library1/ex2_1_9.bch acidhc4 compo smearsumrel 1.e-8 1.e-8 10 1
+#  - __build__/examples/optimizer04 benchs/benchs-optim/coconutbenchmark-library1/ex8_5_2.bch acidhc4 compo smearsumrel 1.e-8 1.e-8 100 1
   - cd tests/ &&./utest 
   - cd ..
   - cd tests/ && ./nonreg nonreg-travis-soplex-filib.res && cd ..

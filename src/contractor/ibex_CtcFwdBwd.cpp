@@ -14,7 +14,80 @@
 
 namespace ibex {
 
-CtcFwdBwd::CtcFwdBwd(Function& f, CmpOp op, FwdMode mode) : Ctc(f.nb_var()), ctr(f,op), hc4r(mode)  {
+namespace {
+
+/**
+ * Initialize the domain "d" such that a constraint "f op 0" is equivalent to "f in d".
+ */
+void int_ctr_domain(Domain& d, CmpOp op) {
+
+	Interval right_cst;
+
+	switch (op) {
+	case LT :
+	case LEQ : right_cst=Interval::NEG_REALS; break;
+	case EQ  : right_cst=Interval::ZERO;      break;
+	case GEQ :
+	case GT : right_cst=Interval::POS_REALS;  break;
+	}
+
+	switch(d.dim.type()) {
+	case Dim::SCALAR:       d.i()=right_cst; break;
+	case Dim::ROW_VECTOR:   d.v()=IntervalVector(d.dim.dim3,right_cst); break;
+	case Dim::COL_VECTOR:   d.v()=IntervalVector(d.dim.dim2,right_cst); break;
+	case Dim::MATRIX:       d.m()=IntervalMatrix(d.dim.dim2,d.dim.dim3,right_cst); break;
+	case Dim::MATRIX_ARRAY: assert(false); /* impossible */ break;
+	}
+}
+
+} // end anonymous namespace
+
+CtcFwdBwd::CtcFwdBwd(Function& f, const Domain& y, FwdMode mode) : Ctc(f.nb_var()), f(f), d(f.expr().dim), hc4r(mode) {
+	assert(f.expr().dim==y.dim);
+	d = y;
+
+	init();
+}
+
+CtcFwdBwd::CtcFwdBwd(Function& f, const Interval& y, FwdMode mode) : Ctc(f.nb_var()), f(f), d(Dim()), hc4r(mode) {
+	assert(f.expr().dim==d.dim);
+	d.i() = y;
+
+	init();
+}
+
+CtcFwdBwd::CtcFwdBwd(Function& f, const IntervalVector& y, FwdMode mode) : Ctc(f.nb_var()), f(f), d(f.expr().dim), hc4r(mode) {
+	assert(f.expr().dim.is_vector() && f.expr().dim.vec_size()==y.size());
+	d.v() = y;
+
+	init();
+}
+
+CtcFwdBwd::CtcFwdBwd(Function& f, const IntervalMatrix& y, FwdMode mode) : Ctc(f.nb_var()), f(f), d(f.expr().dim), hc4r(mode) {
+	assert(f.expr().dim==Dim::matrix(y.nb_rows(),y.nb_cols()));
+	d.m() = y;
+
+	init();
+}
+
+CtcFwdBwd::CtcFwdBwd(Function& f, CmpOp op, FwdMode mode) : Ctc(f.nb_var()), f(f), d(f.expr().dim), hc4r(mode)  {
+	int_ctr_domain(d,op);
+
+	init();
+}
+
+CtcFwdBwd::CtcFwdBwd(const NumConstraint& ctr, FwdMode mode) : Ctc(ctr.f.nb_var()), f(ctr.f), d(ctr.f.expr().dim), hc4r(mode) {
+	int_ctr_domain(d,ctr.op);
+
+	init();
+}
+
+CtcFwdBwd::~CtcFwdBwd() {
+	delete input;
+	delete output;
+}
+
+void CtcFwdBwd::init() {
 
 	input = new BitSet(0,nb_var-1,BitSet::empt);
 	output = new BitSet(0,nb_var-1,BitSet::empt);
@@ -27,51 +100,12 @@ CtcFwdBwd::CtcFwdBwd(Function& f, CmpOp op, FwdMode mode) : Ctc(f.nb_var()), ctr
 	}
 }
 
-CtcFwdBwd::CtcFwdBwd(const NumConstraint& ctr, FwdMode mode) : Ctc(ctr.f.nb_var()), ctr(ctr.f,ctr.op), hc4r(mode) {
-
-
-	input = new BitSet(0,nb_var-1,BitSet::empt);
-	output = new BitSet(0,nb_var-1,BitSet::empt);
-
-	int v;
-	for (int i=0; i<ctr.f.nb_used_vars(); i++) {
-		v=ctr.f.used_var(i);
-		output->add(v);
-		input->add(v);
-	}
-}
-
-CtcFwdBwd::~CtcFwdBwd() {
-	delete input;
-	delete output;
-}
-
 void CtcFwdBwd::contract(IntervalVector& box) {
 
-	assert(box.size()==ctr.f.nb_var());
-
-	const Dim& d=ctr.f.expr().dim;
-	Domain root_label(d);
-	Interval right_cst;
-
-	switch (ctr.op) {
-	case LT :
-	case LEQ : right_cst=Interval(NEG_INFINITY, 0); break;
-	case EQ  : right_cst=Interval(0,0); break;
-	case GEQ :
-	case GT : right_cst=Interval(0,POS_INFINITY); break;
-	}
-
-	switch(d.type()) {
-	case Dim::SCALAR:       root_label.i()=right_cst; break;
-	case Dim::ROW_VECTOR:   root_label.v()=IntervalVector(d.dim3,right_cst); break;
-	case Dim::COL_VECTOR:   root_label.v()=IntervalVector(d.dim2,right_cst); break;
-	case Dim::MATRIX:       root_label.m()=IntervalMatrix(d.dim2,d.dim3,right_cst); break;
-	case Dim::MATRIX_ARRAY: assert(false); /* impossible */ break;
-	}
+	assert(box.size()==f.nb_var());
 
 	try {
-		if (hc4r.proj(ctr.f,root_label,box)) {
+		if (hc4r.proj(f,d,box)) {
 			set_flag(INACTIVE); // TODO: incorrect in general
 			set_flag(FIXPOINT); // TODO: incorrect if multiple occurrences
 		}
