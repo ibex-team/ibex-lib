@@ -60,10 +60,13 @@ void CtcPolytopeHull::contract(IntervalVector& box) {
 		//cout << "[polytope-hull] box after LR: " << box << endl;
 		mylinearsolver->cleanConst();
 	}
-	catch(EmptyBoxException&) {
+	catch(LPException&) {
+		mylinearsolver->cleanConst();
+	}
+	catch(EmptyBoxException& e) {
 		box.set_empty(); // empty the box before exiting in case of EmptyBoxException
 		mylinearsolver->cleanConst();
-		throw EmptyBoxException();
+		throw e;
 	}
 
 }
