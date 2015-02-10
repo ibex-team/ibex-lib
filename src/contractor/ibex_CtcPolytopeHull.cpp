@@ -60,10 +60,13 @@ void CtcPolytopeHull::contract(IntervalVector& box) {
 		//cout << "[polytope-hull] box after LR: " << box << endl;
 		mylinearsolver->cleanConst();
 	}
-	catch(EmptyBoxException&) {
+	catch(LPException&) {
+		mylinearsolver->cleanConst();
+	}
+	catch(EmptyBoxException& e) {
 		box.set_empty(); // empty the box before exiting in case of EmptyBoxException
 		mylinearsolver->cleanConst();
-		throw EmptyBoxException();
+		throw e;
 	}
 
 }
@@ -126,8 +129,6 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 				delete[] inf_bound;
 				delete[] sup_bound;
 				// the infeasibility is proved, the EmptyBox exception is raised
-				delete[] inf_bound;
-				delete[] sup_bound;
 				throw EmptyBoxException();
 			}
 
@@ -176,8 +177,6 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 				delete[] inf_bound;
 				delete[] sup_bound;
 				// the infeasibility is proved,  the EmptyBox exception is raised
-				delete[] inf_bound;
-				delete[] sup_bound;
 				throw EmptyBoxException();
 			}
 			else if (stat == LinearSolver::INFEASIBLE_NOTPROVED) {
