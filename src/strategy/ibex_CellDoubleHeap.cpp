@@ -14,10 +14,11 @@ namespace ibex {
 
 
 CellDoubleHeap::CellDoubleHeap(int ind_var, criterion crit_2,  int critpr) :
-		goal_var(ind_var), nb_cells(0), heap1(new CellHeapVarLB(ind_var,0)), heap2(NULL),critpr(critpr) ,indbuf(0) , crit(crit_2){
+		 crit(crit_2), goal_var(ind_var), nb_cells(0), heap1(new CellHeapVarLB(ind_var,0)),
+		heap2(NULL),critpr(critpr) , indbuf(0){
 
 	switch (crit_2) {
-	case UB : {heap2 = new CellHeapVarUB(ind_var,2); break; }
+	case UB : {heap2 = new CellHeapVarUB(ind_var,1); break; }
 	case C3 : {heap2 = new CellHeapC3(1) ; break;}
 	case C5 : {heap2 = new CellHeapC5(1) ; break;}
 	case C7 : {heap2 = new CellHeapC7(1) ; break;}

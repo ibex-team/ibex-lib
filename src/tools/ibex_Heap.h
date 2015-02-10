@@ -105,6 +105,7 @@ public:
 	virtual std::ostream& print(std::ostream& os) const;
 
 protected:
+
 	friend class CellDoubleHeap;
 
 	/** The "cost" of a element. */
@@ -261,7 +262,8 @@ private:
 
 
 template<class T>
-Heap<T>::Heap(int ind_crit,bool updateCost) : heap_id(ind_crit), updateCost(updateCost), nb_cells(0), root(NULL) {
+Heap<T>::Heap(int ind_crit,bool updateCost) :
+  nb_cells(0), updateCost(updateCost),  heap_id(ind_crit), root(NULL) {
 
 }
 template<class T>

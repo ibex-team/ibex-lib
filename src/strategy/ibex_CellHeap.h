@@ -35,7 +35,7 @@ namespace ibex {
  *
  * \see #CellBuffer, #CellHeapBySize
  */
-class CellHeap :  Heap<Cell>, public CellBuffer {
+class CellHeap : public CellBuffer,  Heap<Cell> {
 
 public:
 

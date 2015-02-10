@@ -144,11 +144,12 @@ public:
 
 
 private:
-	/** Index of the objective variable. */
-	const int goal_var;
 
 	/** the lower upper bound. */
 	double loup;
+
+	/** Index of the objective variable. */
+	const int goal_var;
 
 	virtual	CellHeapC7* init_copy() const;
 };
