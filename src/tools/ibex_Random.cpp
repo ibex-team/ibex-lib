@@ -33,7 +33,7 @@
 /**
  \file   RNG.cpp
  \brief  Custom class for random number generator (implementation)
- \author Christophe Tribes and Sebastien Le Digabel
+ \author Christophe Tribes and Sebastien Le Digabel and Jordan Ninin
  \date   2011-09-28
  \see    rng.hpp
  */
@@ -41,6 +41,8 @@
 #include "ibex_Random.h"
 
 namespace ibex {
+
+#ifdef  _IBEX_WITH_DIRECT_
 
 //** Default values for the random number seed  */
 uint32_t RNG::x = 123456789;
@@ -96,4 +98,16 @@ uint32_t RNG::rand () { //period 2^96-1
 	return z;
 }
 
+
+#else
+
+
+bool RNG::srand(){ ::srand(::rand()+10);  return true; }
+
+bool RNG::srand(unsigned long s){  ::srand(s); return true; }
+
+uint32_t RNG::rand () { return ::rand(); }
+
+
+#endif
 } // end namespace ibex
