@@ -206,9 +206,9 @@ Cell* CellDoubleHeap::top2() const {
 }
 
 
-std::ostream& operator<<(std::ostream& os, const CellDoubleHeap& heap){
-	os << "First Heap:  "<< heap.heap1 <<std::endl;
-	os << "Second Heap: "<< heap.heap2 <<std::endl;
+std::ostream& CellDoubleHeap::print(std::ostream& os) const{
+	os << "First Heap:  "<< heap1 <<std::endl;
+	os << "Second Heap: "<< heap2 <<std::endl;
 	return os;
 
 }

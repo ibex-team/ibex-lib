@@ -18,13 +18,18 @@ CellBuffer::CellBuffer() : capacity(-1), screen(1) { }
 
 CellBuffer::~CellBuffer() { }
 
-std::ostream& operator<<(std::ostream& os, const CellBuffer& buffer) {
+std::ostream& CellBuffer::print(std::ostream& os) const{
 	os << "==============================================================================\n";
-	os << "[" << buffer.screen++ << "] buffer size=" << buffer.size() << " . Cell on the top :\n\n ";
+	os << "[" << screen++ << "] buffer size=" << size() << " . Cell on the top :\n\n ";
 
-	os << buffer.top()->box;
+	os << top()->box;
 
 	return os << endl;
 }
+
+std::ostream& operator<<(std::ostream& os, const CellBuffer& h) {
+	return  h.print(os);
+}
+
 
 }  // end namespace ibex

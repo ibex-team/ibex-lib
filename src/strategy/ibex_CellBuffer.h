@@ -76,14 +76,18 @@ class CellBuffer {
 	/** Count the number of cells pushed since
 	 * the object is created. */
 	//unsigned int nb_cells;
-
- private:
+protected:
 	friend std::ostream& operator<<(std::ostream& os, const CellBuffer&);
 
+	virtual std::ostream& print(std::ostream& os) const;
+
+ private:
+
 	mutable int screen; // only for display (debug)
+
 };
 
-std::ostream& operator<<(std::ostream& os, const CellBuffer&);
+std::ostream& operator<<(std::ostream& os, const CellBuffer& h);
 
 } // end namespace ibex
 #endif // __IBEX_CELL_BUFFER_H__

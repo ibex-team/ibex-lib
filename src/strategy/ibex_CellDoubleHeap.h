@@ -143,12 +143,8 @@ private:
 	/** delete the heap without the HEapElt */
 	void deleteOtherHeaps( HeapNode<Cell> * node);
 
-	friend std::ostream& operator<<(std::ostream& os, const CellDoubleHeap& h);
+	std::ostream& print(std::ostream& os) const;
 };
-
-
-/** Display the buffer */
-std::ostream& operator<<(std::ostream&, const CellDoubleHeap& heap);
 
 
 } // namespace ibex

@@ -102,8 +102,6 @@ public:
 	inline int getId() const {return heap_id;}
 
 
-	virtual std::ostream& print(std::ostream& os) const;
-
 protected:
 
 	friend class CellDoubleHeap;
@@ -153,6 +151,9 @@ protected:
 	 * \param i - the cell number
 	 */
 	HeapNode<T>* getNode(unsigned int i) const;
+
+
+	virtual std::ostream& print(std::ostream& os) const;
 
 private:
 	/** Used in the contractHeap function (proceed by recursivity) */

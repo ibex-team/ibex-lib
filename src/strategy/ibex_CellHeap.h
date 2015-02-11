@@ -73,7 +73,6 @@ public:
 
 	virtual int getId() const;
 
-	virtual std::ostream& print(std::ostream& os) const;
 
 protected:
 
@@ -104,9 +103,9 @@ protected:
 	virtual HeapNode<Cell>* eraseNode_noUpdate(unsigned int i);
 
 
-	//friend std::ostream& operator<<(std::ostream&, const CellHeap&);
-
 private:
+
+	virtual std::ostream& print(std::ostream& os) const;
 
 	CellHeap(const CellHeap& h); // forbidden
 
@@ -130,7 +129,6 @@ inline void CellHeap::push(Cell* cell)           { Heap<Cell>::push(cell);
 inline Cell* CellHeap::pop()                     { return Heap<Cell>::pop(); }
 
 inline Cell* CellHeap::top() const               { return Heap<Cell>::top(); }
-
 
 inline void CellHeap::contractHeap(double lb) { Heap<Cell>::contractHeap(lb);  }
 
