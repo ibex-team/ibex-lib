@@ -40,10 +40,10 @@
 
 #include "ibex_Random.h"
 
-namespace ibex {
 
 #ifdef  _IBEX_WITH_DIRECT_
 
+namespace ibex {
 //** Default values for the random number seed  */
 uint32_t RNG::x = 123456789;
 uint32_t RNG::y = 362436069;
@@ -99,15 +99,15 @@ uint32_t RNG::rand () { //period 2^96-1
 }
 
 
+} // end namespace ibex
 #else
+#include <stdlib.h>
 
+bool ibex::RNG::srand(){ ::srand(::rand()+10);  return true; }
 
-bool RNG::srand(){ ::srand(::rand()+10);  return true; }
+bool ibex::RNG::srand(unsigned long s){  ::srand(s); return true; }
 
-bool RNG::srand(unsigned long s){  ::srand(s); return true; }
-
-uint32_t RNG::rand () { return ::rand(); }
+uint32_t ibex::RNG::rand () { return ::rand(); }
 
 
 #endif
-} // end namespace ibex
