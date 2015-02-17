@@ -10,7 +10,6 @@
 
 // Implementation with 2 heaps : the first one with Comparatorlb, the second with another comparator 
 
-#include "vibes.h"
 #include "ibex_CellHeapOptim.h"
 #include "ibex_Optimizer.h"
 #include <algorithm>
@@ -164,7 +163,7 @@ struct CellComparatorub {
 	//	cout << " i " << " heap_present " << (lopt[i].first)->heap_present << endl;
 	  (lopt[i].first)->heap_present--;
 	  if ((lopt[i].first)->heap_present==0) {
-vibes::drawBox(lopt[i].first->box[0].lb(),lopt[i].first->box[0].ub(),lopt[i].first->box[1].lb(),lopt[i].first->box[1].ub(),"g");  ///////////////////////// VIBES
+//vibes::drawBox(lopt[i].first->box[0].lb(),lopt[i].first->box[0].ub(),lopt[i].first->box[1].lb(),lopt[i].first->box[1].ub(),"g");  ///////////////////////// VIBES
 		  delete lopt[i].first;
 	  }
 	  delete lopt[i].second; 

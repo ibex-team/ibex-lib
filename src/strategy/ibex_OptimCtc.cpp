@@ -460,7 +460,7 @@ void OptimCtc::optimize(const IntervalVector& init_box, double obj_init_bound) {
 					// Note: if contraction was before bisection, we could have the problem
 					// that the current cell is removed by contract_heap. See comments in
 					// older version of the code (before revision 284).
-vibes::drawBox(loup_point[0]-0.1,loup_point[0]+0.1,loup_point[1]-0.1,loup_point[1]+0.1,"[magenta]");
+//vibes::drawBox(loup_point[0]-0.1,loup_point[0]+0.1,loup_point[1]-0.1,loup_point[1]+0.1,"[magenta]");
 					double ymax= compute_ymax();
 
 					buffer.contract_heap(ymax);
@@ -603,14 +603,14 @@ void OptimCtc::time_limit_check () {
 
 void OptimCtc::draw_vibes( const IntervalVector& X0, const IntervalVector& X,const string color) {
 	if (X.is_empty()) {
-		vibes::drawBox(X0,color);
+//		vibes::drawBox(X0,color);
 		return;
 	}
 	if (X==X0) return;     // nothing to draw.
 	IntervalVector* rest;
 	int n=X0.diff(X,rest); // calculate the set difference
 	for (int i=0; i<n; i++) {     // display the boxes
-		vibes::drawBox(rest[i],color);
+//		vibes::drawBox(rest[i],color);
 	}
 	delete[] rest;
 	return;

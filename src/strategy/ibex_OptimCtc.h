@@ -18,7 +18,6 @@
 #include "ibex_OptimCell.h"
 #include "ibex_Function.h"
 #include "ibex_UnconstrainedLocalSearch.h"
-#include "vibes.h"
 #include <string>
 namespace ibex {
 
