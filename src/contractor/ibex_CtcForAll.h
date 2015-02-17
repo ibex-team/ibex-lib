@@ -142,7 +142,7 @@ private:
 	 * \param x:   the current box "x". Corresponds, at the end, to the result of the contraction
 	 * \param y:   the current box "y"
 	 */
-	void proceed(IntervalVector& x, const IntervalVector& y);
+	void proceed(IntervalVector& x, const IntervalVector& y, bool is_inactive);
 
 	/**
 	 * Stack of y

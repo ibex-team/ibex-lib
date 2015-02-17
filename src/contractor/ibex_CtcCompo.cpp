@@ -201,9 +201,9 @@ void CtcCompo::contract(IntervalVector& box) {
 	for (int i=0; i<list.size(); i++) {
 		if (inactive) {
 			flags.clear();
-			impact.clear();
+			impact.fill();
 			list[i].contract(box,impact,flags);
-			if (!flags[INACTIVE]) inactive=false;
+			if (flags[INACTIVE]) inactive=false;
 		} else {
 			list[i].contract(box);
 		}

@@ -129,16 +129,19 @@ CtcUnion::CtcUnion(Ctc& c1, Ctc& c2, Ctc& c3, Ctc& c4, Ctc& c5, Ctc& c6, Ctc& c7
 void CtcUnion::contract(IntervalVector& box) {
 	IntervalVector savebox(box);
 	IntervalVector result(IntervalVector::empty(box.size()));
+	BitSet flags(BitSet::empty(Ctc::NB_OUTPUT_FLAGS));
 
-	for (int i=0; i<list.size(); i++) {
+	for (int i=0; ((!flags[INACTIVE])&& i<list.size()); i++) {
 		if (i>0) box=savebox;
 		try {
-			list[i].contract(box);
+			list[i].contract(box,(*impact()),flags);
 			result |= box;
 		}
 		catch(EmptyBoxException&) {
 		}
 	}
+	if (flags[INACTIVE])	set_flag(INACTIVE);
+
 	box = result;
 	if (box.is_empty()) throw EmptyBoxException();
 } // end namespace ibex

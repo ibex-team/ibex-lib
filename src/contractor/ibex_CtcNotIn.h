@@ -48,6 +48,8 @@ protected:
 	Function& f;
 	Domain d1; // (-oo, lb(y))
 	Domain d2; // (ub(y), +oo)
+	HC4Revise hc4r;
+
 };
 
 } // end namespace ibex

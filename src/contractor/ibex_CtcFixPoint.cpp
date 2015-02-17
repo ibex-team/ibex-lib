@@ -24,11 +24,16 @@ CtcFixPoint::~CtcFixPoint(){
 void CtcFixPoint::contract(IntervalVector& box) {
 
 	IntervalVector old_box(box);
+	BitSet flags(BitSet::empty(Ctc::NB_OUTPUT_FLAGS));
+	BitSet impact(BitSet::all(nb_var));
+
 	do {
 		old_box=box;
-		ctc.contract(box,*_impact,*_output_flags);
-	} while ((!(*_output_flags)[FIXPOINT])&&(!(*_output_flags)[INACTIVE])&&(old_box.rel_distance(box)>ratio));
+		ctc.contract(box,impact,flags);
+	} while ((!flags[FIXPOINT])&&(!flags[INACTIVE])&&(old_box.rel_distance(box)>ratio));
 
+	if (flags[FIXPOINT]) set_flag(FIXPOINT);
+	if (flags[INACTIVE]) set_flag(INACTIVE);
 }
 
 } // end namespace ibex

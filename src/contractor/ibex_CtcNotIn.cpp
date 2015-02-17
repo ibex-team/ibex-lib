@@ -13,19 +13,19 @@
 
 namespace ibex {
 
-CtcNotIn::CtcNotIn(Function& f, const Interval& y) : Ctc(f.nb_var()), f(f), d1(f.expr().dim), d2(f.expr().dim) {
+CtcNotIn::CtcNotIn(Function& f, const Interval& y) : Ctc(f.nb_var()), f(f), d1(f.expr().dim), d2(f.expr().dim), hc4r() {
 	assert(f.expr().dim.is_scalar());
 	d1.i()=Interval(NEG_INFINITY,y.lb());
 	d2.i()=Interval(y.ub(),POS_INFINITY);
 }
 
-CtcNotIn::CtcNotIn(Function& f, const IntervalVector& y) : Ctc(f.nb_var()), f(f), d1(f.expr().dim), d2(f.expr().dim) {
+CtcNotIn::CtcNotIn(Function& f, const IntervalVector& y) : Ctc(f.nb_var()), f(f), d1(f.expr().dim), d2(f.expr().dim), hc4r() {
 	assert(f.expr().dim.is_vector());
 	d1.v()=y.lb()+IntervalVector(y.size(),Interval::NEG_REALS);
 	d2.v()=y.ub()+IntervalVector(y.size(),Interval::POS_REALS);
 }
 
-CtcNotIn::CtcNotIn(Function& f, const IntervalMatrix& y) : Ctc(f.nb_var()), f(f), d1(f.expr().dim), d2(f.expr().dim) {
+CtcNotIn::CtcNotIn(Function& f, const IntervalMatrix& y) : Ctc(f.nb_var()), f(f), d1(f.expr().dim), d2(f.expr().dim), hc4r() {
 	assert(f.expr().dim.is_matrix());
 	d1.m()=y.lb()+IntervalMatrix(y.nb_rows(),y.nb_cols(),Interval::NEG_REALS);
 	d2.m()=y.ub()+IntervalMatrix(y.nb_rows(),y.nb_cols(),Interval::POS_REALS);
@@ -38,15 +38,31 @@ void CtcNotIn::contract(IntervalVector& box) {
 	// we could also have used CtCunion of two CtcFwdBwd
 
 	IntervalVector savebox(box);
+	bool is_inactive=false;
 	try {
-		HC4Revise().proj(f,d1,box);
-	} catch (EmptyBoxException& ) {box.set_empty(); }
-	try {
-		HC4Revise().proj(f,d2,savebox);
-	} catch (EmptyBoxException& ) {savebox.set_empty(); }
+		if (hc4r.proj(f,d1,box)) {
+			set_flag(INACTIVE); // TODO: incorrect in general
+			set_flag(FIXPOINT); // TODO: incorrect if multiple occurrences
+			is_inactive =true;
 
-	box |= savebox;
-	if (box.is_empty()) throw EmptyBoxException();
+		}
+	} catch (EmptyBoxException& ) {box.set_empty(); }
+
+	if (is_inactive) {
+		try {
+			if (hc4r.proj(f,d2,savebox)){
+				set_flag(INACTIVE); // TODO: incorrect in general
+				set_flag(FIXPOINT); // TODO: incorrect if multiple occurrences
+			}
+		} catch (EmptyBoxException& ) {savebox.set_empty(); }
+
+		if (is_inactive()) {
+			box = savebox;
+		} else {
+			box |= savebox;
+			if (box.is_empty()) throw EmptyBoxException();
+		}
+	}
 
 }
 
