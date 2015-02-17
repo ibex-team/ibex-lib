@@ -32,7 +32,7 @@ void CtcInteger::contract(IntervalVector& box) {
 	assert(box.size()==nb_var);
 
 	for (int i=0; i<nb_var; i++) {
-		if (is_int[i] && (*impact())[i]) {
+		if (is_int[i] && (!impact() || (*impact())[i])) {
 			bwd_integer(box[i]);
 			if (box[i].is_empty()) {
 				box.set_empty();

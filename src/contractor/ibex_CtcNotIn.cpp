@@ -43,10 +43,11 @@ void CtcNotIn::contract(IntervalVector& box) {
 			set_flag(INACTIVE); // TODO: incorrect in general
 			set_flag(FIXPOINT); // TODO: incorrect if multiple occurrences
 			is_inactive =true;
+
 		}
 	} catch (EmptyBoxException& ) {box.set_empty(); }
 
-	if (is_inactive) {
+	if (!is_inactive) {
 		try {
 			if (hc4r.proj(f,d2,savebox)){
 				set_flag(INACTIVE); // TODO: incorrect in general
@@ -55,12 +56,8 @@ void CtcNotIn::contract(IntervalVector& box) {
 			}
 		} catch (EmptyBoxException& ) {savebox.set_empty(); }
 
-		if (is_inactive) {
-			box = savebox;
-		} else {
-			box |= savebox;
-			if (box.is_empty()) throw EmptyBoxException();
-		}
+		box |= savebox;
+		if (box.is_empty()) throw EmptyBoxException();
 	}
 
 }

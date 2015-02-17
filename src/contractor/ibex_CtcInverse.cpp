@@ -30,19 +30,24 @@ void CtcInverse::contract(IntervalVector& box) {
 	y.init(Interval::ALL_REALS);
 	id->backward(fx,y);
 
+	BitSet flags(BitSet::empty(Ctc::NB_OUTPUT_FLAGS));
 	try {
-	//	BitSet flags(BitSet::empty(Ctc::NB_OUTPUT_FLAGS));
-	//	BitSet impact(BitSet::all(nb_var));
-	//	c.contract(y,impact,flags);
-		c.contract(y);
+		BitSet impact(BitSet::all(nb_var));
+		c.contract(y,impact,flags);
+	//	c.contract(y);
 
 	} catch(EmptyBoxException& e) {
 		box.set_empty();
 		throw e;
 	}
-	//	if (c.is_inactive()) set_flag(INACTIVE);
-	fx=id->eval_domain(y);
-	f.backward(fx,box);
+	if (flags[INACTIVE]) {
+		set_flag(INACTIVE);
+
+	} else {
+		fx=id->eval_domain(y);
+		f.backward(fx,box);
+	}
+
 }
 
 } // end namespace ibex
