@@ -9,7 +9,6 @@
 //============================================================================
 
 #include "ibex_CtcNotIn.h"
-#include "ibex_HC4Revise.h"
 
 namespace ibex {
 
@@ -44,7 +43,6 @@ void CtcNotIn::contract(IntervalVector& box) {
 			set_flag(INACTIVE); // TODO: incorrect in general
 			set_flag(FIXPOINT); // TODO: incorrect if multiple occurrences
 			is_inactive =true;
-
 		}
 	} catch (EmptyBoxException& ) {box.set_empty(); }
 
@@ -53,10 +51,11 @@ void CtcNotIn::contract(IntervalVector& box) {
 			if (hc4r.proj(f,d2,savebox)){
 				set_flag(INACTIVE); // TODO: incorrect in general
 				set_flag(FIXPOINT); // TODO: incorrect if multiple occurrences
+				is_inactive =true;
 			}
 		} catch (EmptyBoxException& ) {savebox.set_empty(); }
 
-		if (is_inactive()) {
+		if (is_inactive) {
 			box = savebox;
 		} else {
 			box |= savebox;

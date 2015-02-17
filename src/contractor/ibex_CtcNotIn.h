@@ -13,6 +13,7 @@
 
 #include "ibex_Ctc.h"
 #include "ibex_Function.h"
+#include "ibex_HC4Revise.h"
 
 namespace ibex {
 

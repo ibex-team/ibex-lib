@@ -134,6 +134,7 @@ void CtcUnion::contract(IntervalVector& box) {
 	for (int i=0; ((!flags[INACTIVE])&& i<list.size()); i++) {
 		if (i>0) box=savebox;
 		try {
+			flags.clear();
 			list[i].contract(box,(*impact()),flags);
 			result |= box;
 		}

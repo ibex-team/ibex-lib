@@ -78,6 +78,7 @@ bool CtcExist::proceed(const IntervalVector& x_init, const IntervalVector& x_cur
 	} catch (EmptyBoxException&) {
 		return false;
 	}
+
 	if (flags[INACTIVE]) {
 		if (x==x_init) {
 			x_res =x_init;
@@ -85,14 +86,14 @@ bool CtcExist::proceed(const IntervalVector& x_init, const IntervalVector& x_cur
 			return true;
 		} else {
 			x_res |= x;
+			return false;
 		}
-		return false;
 	}
 
 	if (!x.is_subset(x_res)) {
-
 		if (y.max_diam()<=prec) {
 			x_res |= x;
+			if (x_res==x_init) return true;
 		}
 		else {
 
@@ -112,7 +113,7 @@ bool CtcExist::proceed(const IntervalVector& x_init, const IntervalVector& x_cur
 					return true;
 				}
 
-				if (x_res==x_init) return false;
+				if (x_res==x_init) return true;
 			} catch (EmptyBoxException&) {
 				// do nothing
 			}
@@ -138,9 +139,9 @@ void CtcExist::contract(IntervalVector& box) {
 	IntervalVector y(nb_param);
 	IntervalVector y_mid(nb_param); // for sampling
 
-	bool is_inactive=false;
+	bool stop=false;
 
-	while ((!is_inactive)&&(!l.empty())) {
+	while ((!stop)&&(!l.empty())) {
 
 		// get the domain of variables
 		x_save = l.top().first;
@@ -150,10 +151,11 @@ void CtcExist::contract(IntervalVector& box) {
 		l.pop();
 
 		// proceed with the two sub-boxes for y
-		is_inactive=proceed(box, x_save, res, cut.first);
-		if (!is_inactive)
-			is_inactive=proceed(box, x_save, res, cut.second);
+		stop=proceed(box, x_save, res, cut.first);
+		if (!stop) 	stop=proceed(box, x_save, res, cut.second);
 	}
+
+	while (!l.empty()) l.pop();
 
 	box &= res;
 	if (box.is_empty()) throw EmptyBoxException();
