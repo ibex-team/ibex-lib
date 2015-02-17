@@ -342,32 +342,65 @@ bool ibwd_leq_mul(double z_sup, Interval& x, Interval& y, const Interval &xin, c
 	}
 
 	else if (z_sup==0) {
-
-		if (x.lb()>0 || (inflate && xin.lb()>0))
+		//cout << "z_sup=0 x=" << x <<" xin=" << xin " y=" << y << endl;
+		if (x.lb()>0) {
+			assert(yin.is_subset(Interval::NEG_REALS));
 			return !(y&=Interval::NEG_REALS).is_empty();
-		else if (x.ub()<0 || (inflate && xin.ub()<0))
+		}
+		else if (x.ub()<0) {
+			assert(yin.is_subset(Interval::POS_REALS));
 			return !(y&=Interval::POS_REALS).is_empty();
-		else if (y.lb()>0 || (inflate && yin.lb()>0))
+		} else if (y.lb()>0) {
+			assert(xin.is_subset(Interval::NEG_REALS));
 			return !(x&=Interval::NEG_REALS).is_empty();
-		else if (y.ub()<0 || (inflate && yin.ub()<0))
+		}
+		else if (y.ub()<0) {
+			assert(xin.is_subset(Interval::POS_REALS));
 			return !(x&=Interval::POS_REALS).is_empty();
-		else {
+		} else if ((x.lb()==0 && x.ub()==0) || (y.lb()==0 && y.ub()==0)) {
+			return true;
+		} else {
 			if (inflate) {
-				if (xin.lb()<0 || xin.ub()>0) // xin<>0
+				if ((xin.lb()>=0 && xin.ub()>0) || (yin.ub()<=0 && yin.lb()<0)) {
+					assert(xin.is_subset(Interval::POS_REALS));
+					assert(yin.is_subset(Interval::NEG_REALS));
+					return (!(x&=Interval::POS_REALS).is_empty()) &&
+						   (!(y&=Interval::NEG_REALS).is_empty());
+				}
+				else if ((xin.ub()<=0 && xin.lb()<0) || (yin.lb()>=0 && yin.ub()>0)) {
+					assert(xin.is_subset(Interval::NEG_REALS));
+					assert(yin.is_subset(Interval::POS_REALS));
+					return (!(x&=Interval::NEG_REALS).is_empty()) &&
+						   (!(y&=Interval::POS_REALS).is_empty());
+				} else if (xin.lb()<0 && xin.ub()>0) {
+					// x does not change
+					assert(yin==Interval::ZERO);
 					return !(y&=Interval::ZERO).is_empty();
-				else if (yin.lb()<0 || yin.ub()>0) // yin<>0
+				} else if (yin.lb()<0 && yin.ub()>0) { // we have here xin==[0,0]
+					assert(xin==Interval::ZERO);
 					return !(x&=Interval::ZERO).is_empty();
+				}
 			}
 
 			// (x,y) strictly contains 0, and either inflate==false or (xin,yin)==(0,0)
-			// chose to fix to 0 the interval with minimal diameter
-			if (!x.is_unbounded() && (y.is_unbounded() || x.diam()<y.diam()))
-				return !(x&=Interval::ZERO).is_empty();
-			else
-				return !(y&=Interval::ZERO).is_empty();
+			// chose the quadrant where the surface is maximal
+			double surf_xpos_yneg = -x.ub()*y.lb();
+			double surf_xneg_ypos = -x.lb()*y.ub();
+
+			assert(surf_xpos_yneg>=0);
+			assert(surf_xneg_ypos>=0);
+
+			if (surf_xneg_ypos > surf_xpos_yneg) {
+				x&=Interval::NEG_REALS;
+				y&=Interval::POS_REALS;
+			} else {
+				x&=Interval::POS_REALS;
+				y&=Interval::NEG_REALS;
+			}
+			return true;
 		}
 
-	} else { // z_sup<=0
+	} else { // z_sup<0
 		if (inflate) {
 			// in this case, we directly know in which quadrant
 			// an inner box has to be found
@@ -584,6 +617,8 @@ bool ibwd_geq_mul(double z_inf, Interval& x, Interval& y, const Interval &xin, c
 bool ibwd_geq_div(double z_inf, Interval& x, Interval& y, const Interval &xin, const Interval& yin) {
 	Interval x2(-x);
  	bool res=ibwd_leq_div(-z_inf,x2,y,-xin,yin);
+
+ 	// note: may result in spurious negative 0 sign (ex: [-0,1])
 	x=-x2;
 	return res;
 }

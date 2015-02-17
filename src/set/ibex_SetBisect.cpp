@@ -33,6 +33,10 @@ SetBisect::SetBisect(int var, double pt, SetNode* left, SetNode* right) : SetNod
 	assert(left->status>=UNK || left->status!=right->status);
 }
 
+SetBisect::SetBisect(int var, double pt) : SetNode(UNK), var(var), pt(pt), left(NULL), right(NULL) {
+
+}
+
 SetBisect::~SetBisect() {
 	delete left;
 	delete right;
@@ -62,7 +66,7 @@ SetNode* SetBisect::sync(const IntervalVector& nodebox, const IntervalVector& x,
 	}
 }
 
-SetNode* SetBisect::sync_rec(const IntervalVector& nodebox, Separator& sep, double eps) {
+SetNode* SetBisect::sync_rec(const IntervalVector& nodebox, Sep& sep, double eps) {
 	left = left->sync(left_box(nodebox), sep, eps);
 	right = right->sync(right_box(nodebox), sep, eps);
 	// status of children may have changed --> try merge
@@ -95,7 +99,7 @@ SetNode* SetBisect::inter(const IntervalVector& nodebox, const IntervalVector& x
 	}
 }
 
-SetNode* SetBisect::inter_rec(const IntervalVector& nodebox, Separator& sep, double eps) {
+SetNode* SetBisect::inter_rec(const IntervalVector& nodebox, Sep& sep, double eps) {
 	left = left->inter(left_box(nodebox), sep, eps);
 	right = right->inter(right_box(nodebox), sep, eps);
 	// status of children may have changed --> try merge

@@ -100,8 +100,12 @@ Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, double prec,
 	if (niter < 3*n) niter=3*n;
 
 	//====================================
+#ifdef _IBEX_WITH_NOLP_
+	mylp = NULL;
+#else
 	mylp = new LinearSolver(n+1,m,niter );
 	//	cout << "sys " << sys << endl;
+#endif // _IBEX_WITH_NOLP_
 }
 
 Optimizer::~Optimizer() {
@@ -114,7 +118,7 @@ Optimizer::~Optimizer() {
 	}
 	buffer.flush();
 	if (critpr > 0) buffer2.flush();
-
+	if (equs) delete equs;
 	delete mylp;
 	//	delete &(objshaver->ctc);
 	//	delete objshaver;
@@ -245,8 +249,8 @@ void Optimizer::update_uplo() {
 
 
 
-/* contract the box of the cell c , try to find a new loup :;
-     push the cell  in the 2 heaps or if the contraction makes the box empty, delete the cell. For diversification, rebuild the 2 heaps
+/* contract the box of the cell c , try to find a new loup ;
+     push the cell  in the 2 heaps or if the contraction makes the box empty, delete the cell.
  */
 
 void Optimizer::handle_cell(OptimCell& c, const IntervalVector& init_box ){
@@ -276,13 +280,6 @@ void Optimizer::handle_cell(OptimCell& c, const IntervalVector& init_box ){
 		if (critpr > 0)      buffer2.push(&c);
 
 		nb_cells++;
-		// reconstruction of the 2 heaps every heap_build_period nodes
-		int heap_build_period=100;
-		if (nb_cells% heap_build_period ==0) {
-			buffer.makeheap();
-			if (critpr > 0) buffer2.makeheap();
-		}
-
 	}
 	catch(EmptyBoxException&) {
 		delete &c;
@@ -454,6 +451,8 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 	handle_cell(*root,init_box);
 	int indbuf=0;
 
+	update_uplo();
+
 	try {
 		while (!buffer.empty()) {
 			if (trace >= 2) cout << " buffer " << ((CellBuffer&) buffer) << endl;
@@ -463,13 +462,15 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 			if (critpr > 0) {
 				buffer.cleantop();
 				buffer2.cleantop();
-			}
-
-			update_uplo();
-
-			if (buffer.empty() || (critpr > 0 && buffer2.empty())) {
-				//cout << " buffer empty " << buffer.empty() << " " << buffer2.empty() << endl;
-				break;
+				// note if one buffer is empty, both are empty
+				// the condition could be replaced by buffer2.empty()
+				if (buffer.empty()) {
+					// this update is only necessary when buffer was not
+					// initially empty
+					update_uplo();
+					break;
+				}
+				assert(!buffer2.empty());
 			}
 
 			loup_changed=false;
@@ -532,6 +533,7 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 					buffer2.pop();
 				if (c->heap_present==0) delete c;
 
+				update_uplo(); // the heap has changed -> recalculate the uplo
 
 			}
 		}
@@ -543,7 +545,7 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 	Timer::stop();
 	time+= Timer::VIRTUAL_TIMELAPSE();
 
-	if (uplo_of_epsboxes == POS_INFINITY && loup==initial_loup)
+	if (uplo_of_epsboxes == POS_INFINITY && (loup==POS_INFINITY || (loup==initial_loup && goal_abs_prec==0 && goal_rel_prec==0)))
 		return INFEASIBLE;
 	else if (loup==initial_loup)
 		return NO_FEASIBLE_FOUND;
@@ -577,7 +579,7 @@ void Optimizer::report() {
 		cout << "time limit " << timeout << "s. reached " << endl;
 	}
 	// No solution found and optimization stopped with empty buffer  before the required precision is reached => means infeasible problem
-	if (buffer.empty() && uplo_of_epsboxes == POS_INFINITY && loup==initial_loup) {
+	if (buffer.empty() && uplo_of_epsboxes == POS_INFINITY && (loup==POS_INFINITY || (loup==initial_loup && goal_abs_prec==0 && goal_rel_prec==0))) {
 		cout << " infeasible problem " << endl;
 		cout << " cpu time used " << time << "s." << endl;
 		cout << " number of cells " << nb_cells << endl;
@@ -604,7 +606,7 @@ void Optimizer::report() {
 			cout << " precision on variable domains obtained " << prec << " "   << " uplo_of_epsboxes " << uplo_of_epsboxes << endl;
 		else if (uplo_of_epsboxes == NEG_INFINITY)
 			cout << " small boxes with negative infinity objective :  objective not bound " << endl;
-		if (loup==POS_INFINITY)
+		if (loup==initial_loup)
 			cout << " no feasible point found " << endl;
 		else
 			cout << " best feasible point " << loup_point << endl;

@@ -32,12 +32,18 @@ namespace {
 class Memory {
 public:
 	std::vector<Ctc*> ctc;
-	ExtendedSystem* sys;
+
+	// The recorded systems can correspond to different things:
+	// - default optimizer: the extended system as expected by Optimizer
+	// - default solver: the sub-system of equations for Newton contractor
+	// - optimizer (constructor with string[]) : system and extended system
+	std::vector<System*> sys;
+
 	Bsc* bsc;
 	CellBuffer* buffer;
 	LinearRelax* relax;
 
-	Memory() : sys(NULL), bsc(NULL), buffer(NULL), relax(NULL) {
+	Memory() : bsc(NULL), buffer(NULL), relax(NULL) {
 		// A NULL pointer corresponds to unused data
 	}
 
@@ -47,7 +53,11 @@ public:
 		}
 		ctc.clear();
 
-		if (sys) delete sys;
+		for (vector<System*>::iterator it=sys.begin(); it!=sys.end(); it++) {
+			delete *it;
+		}
+		sys.clear();
+
 		if (bsc) delete bsc;
 		if (buffer) delete buffer;
 		//if (relax) delete relax;
@@ -66,7 +76,16 @@ Ctc& rec(Ctc* ptr) {
 	return *ptr;
 }
 
-ExtendedSystem& rec(ExtendedSystem* ptr) { return *((*memory())->sys = ptr); }
+ExtendedSystem& rec(ExtendedSystem* ptr) {
+	(*memory())->sys.push_back(ptr);
+	return *ptr;
+}
+
+System& rec(System* ptr) {
+	(*memory())->sys.push_back(ptr);
+	return *ptr;
+}
+
 LinearRelax& rec(LinearRelax* ptr)       { return *((*memory())->relax = ptr); }
 Bsc& rec(Bsc* ptr)                       { return *((*memory())->bsc = ptr); }
 CellBuffer& rec(CellBuffer* ptr)         { return *((*memory())->buffer = ptr); }

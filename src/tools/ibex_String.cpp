@@ -43,7 +43,7 @@ char* append_index(const char* buff, char lbracket, char rbracket, int index) {
 
 static char* next_generated_name(const char* base, int num) {
 	static char generated_name_buff[MAX_NAME_SIZE];
-	sprintf(generated_name_buff, base);
+	sprintf(generated_name_buff,"%s", base);
 	SNPRINTF(&generated_name_buff[strlen(base)], MAX_NAME_SIZE-strlen(base), "%d", num);
 	return generated_name_buff;
 }

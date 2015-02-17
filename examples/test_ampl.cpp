@@ -19,10 +19,10 @@ int main(int argc, char** argv) {
 	cout<<"begin"<< endl;
 	AmplInterface interface(argv[1]);
 	cout<<"creation ok"<< endl;
-	System *sys = interface.getSystem();
+	System sys(interface);
 	cout<<"Bound_sys"<< endl;
-	cout<<sys->box<<endl;
-	cout<<*sys<<endl;
+	cout<<sys.box<<endl;
+	cout<<sys<<endl;
 
 /*
 	ExtendedSystem ext_sys(*sys,1.e-6);

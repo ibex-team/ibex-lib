@@ -11,7 +11,7 @@
 #define __IBEX_SET_NODE_H__
 
 #include "ibex_IntervalVector.h"
-#include "ibex_Separator.h"
+#include "ibex_Sep.h"
 #include "ibex_NodeType.h"
 #include "ibex_BoolInterval.h"
 
@@ -54,9 +54,9 @@ public:
 	virtual bool is_leaf() const=0;
 
 	/**
-	 * \brief Synchronization with an i-set represented implicitly by a separator
+	 * \brief Synchronization with an i-set represented implicitly by a Sep
 	 */
-	SetNode* sync(const IntervalVector& nodebox, Separator& sep, double eps);
+	SetNode* sync(const IntervalVector& nodebox, Sep& sep, double eps);
 
 	/**
 	 * \brief Synchronization with an explicit i-set "other"
@@ -70,26 +70,23 @@ public:
 	/**
 	 * \brief Synchronization with an i-set reduced to a single box "x" of status "x_status".
 	 *
-	 * skip_other_maybe: don't consider UNK box of the other set. This is important
-	 *                   because the other set may be a temporary set produced by
-	 *                   the contract function (and the UNK box will be refined later)
 	 */
 	virtual SetNode* sync(const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps)=0;
 
 	/**
-	 * \brief Synchronization with a separator (recursive call)
+	 * \brief Synchronization with a Sep (recursive call)
 	 *
 	 * Once the current "nodebox" has been synchronized with the two sets obtained by applying the inner and
-	 * outer contraction, a recursive call is performed (where the separator is applied on the sub-boxes).
+	 * outer contraction, a recursive call is performed (where the Sep is applied on the sub-boxes).
 	 *
 	 * If this node is a leaf, it means it has to be bisected.
 	 */
-	virtual SetNode* sync_rec(const IntervalVector& nodebox, Separator& sep, double eps)=0;
+	virtual SetNode* sync_rec(const IntervalVector& nodebox, Sep& sep, double eps)=0;
 
 	/**
-	 * \brief Intersection with an i-set represented implicitly by a separator
+	 * \brief Intersection with an i-set represented implicitly by a Sep
 	 */
-	SetNode* inter(const IntervalVector& nodebox, Separator& sep, double eps);
+	SetNode* inter(const IntervalVector& nodebox, Sep& sep, double eps);
 
 	/**
 	 * \brief Intersection with an explicit i-set "other"
@@ -102,14 +99,14 @@ public:
 	virtual SetNode* inter(const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps)=0;
 
 	/**
-	 * \brief Intersection with a separator (recursive call)
+	 * \brief Intersection with a Sep (recursive call)
 	 *
 	 * Once the current "nodebox" has been intersected with the two sets obtained by applying the inner and
-	 * outer contraction, a recursive call is performed (where the separator is applied on the sub-boxes).
+	 * outer contraction, a recursive call is performed (where the Sep is applied on the sub-boxes).
 	 *
 	 * If this node is a leaf, it means it has to be bisected.
 	 */
-	virtual SetNode* inter_rec(const IntervalVector& nodebox, Separator& sep, double eps)=0;
+	virtual SetNode* inter_rec(const IntervalVector& nodebox, Sep& sep, double eps)=0;
 
 	/**
 	 * \brief Union with an explicit i-set "other"
@@ -160,7 +157,7 @@ public:
 
 SetNode* diff(const IntervalVector& x, const IntervalVector& y, NodeType x_status, NodeType y_status, double eps);
 
-SetNode* contract_set(const IntervalVector& x, Ctc& c, NodeType x_status, NodeType y_status, double eps);
+SetNode* contract_set(const IntervalVector& x, Sep& sep, double eps);
 
 } // namespace ibex
 

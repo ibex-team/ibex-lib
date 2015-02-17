@@ -18,14 +18,30 @@ const double TestIbex::ERROR = 1e-10;
 bool TestIbex::sameExpr(const ExprNode& node, const char* expr) {
 	std::stringstream s;
 	s << node;
-	return strcmp(s.str().c_str(),expr)==0;
+	if (strcmp(s.str().c_str(),expr)==0)
+		return true;
+	else  {
+		std::cout<< "Expr tested : " << std::endl;
+		std::cout<< s.str().c_str() << std::endl;
+		std::cout<< "Expr wanted : " << std::endl;
+		std::cout<< expr << std::endl;
+		return false;
+	}
 }
 
 bool TestIbex::sameExpr(const ExprNode& node, const ExprNode& node2) {
 	std::stringstream s,s2;
 	s << node;
 	s2 << node2;
-	return strcmp(s.str().c_str(),s2.str().c_str())==0;
+	if (strcmp(s.str().c_str(),s2.str().c_str())==0)
+		return true;
+	else  {
+		std::cout<< "Expr tested : " << std::endl;
+		std::cout<< s.str().c_str() << std::endl;
+		std::cout<< "Expr wanted : " << std::endl;
+		std::cout<< s2.str().c_str() << std::endl;
+		return false;
+	}
 }
 
 void TestIbex::check(double y_actual, double y_expected) {

@@ -1,26 +1,26 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_Stc.h
+// File        : ibex_PdcNot.cpp
 // Author      : Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
-// Created     : 13 juil. 2014
+// Created     : Nov 12, 2014
 //============================================================================
 
-#ifndef __IBEX_STC_H__
-#define __IBEX_STC_H__
-
-#include "ibex_SetInterval.h"
+#include "ibex_PdcNot.h"
 
 namespace ibex {
 
-class Stc {
-public:
-	Stc();
-	virtual void contract(SetInterval& set)=0;
-	virtual ~Stc();
-};
+PdcNot::PdcNot(Pdc& p) : Pdc(p.nb_var), p(p) {
+}
 
-} // namespace ibex
+BoolInterval PdcNot::test(const IntervalVector& box) {
+	switch(p.test(box)) {
+	case YES: return NO;
+	case NO: return YES;
+	default: return MAYBE;
+	}
+}
 
-#endif // __IBEX_STC_H__
+} // end namespace ibex
+

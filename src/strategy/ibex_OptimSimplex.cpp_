@@ -17,8 +17,13 @@
 
 namespace ibex {
 
+#ifdef _IBEX_WITH_NOLP_
 
+bool Optimizer::update_loup_simplex(const IntervalVector& box) {
+	return false;
+}
 
+#else
 //The system is overconstrained by using the Taylor extension in one corner randomly chosen
 //Then the simplex algorithm is applied to obtain a new upper bound loup
 //If a new loup is found the method returns true
@@ -29,7 +34,7 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 	IntervalVector G(n); // vector to be used by the partial derivatives
 
 	// boolean indicating which corner in direction i is used : true for inferior corner, false for superior one.
-        bool corner[n]; 
+    bool * corner = new bool[n]; 
 	// random corner choice
 	for (int i=0; i<n ; i++)
 	  {if (rand()%2)
@@ -108,6 +113,7 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 
 			for (int ii =0; ii< n ; ii++)
 				if (G[ii].diam() > 1e8) {
+					mylp->cleanConst();
 					return false; //to avoid problems with SoPleX
 				}
 
@@ -130,7 +136,8 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 	//		system ("cat dump.lp");
 
 	LinearSolver::Status_Sol stat = mylp->solve();
-
+	
+	delete [] corner;
 	//	std::cout << " stat " << stat << std::endl;
 	if (stat == LinearSolver::OPTIMAL) {
 		//the linear solution is mapped to intervals and evaluated
@@ -146,7 +153,7 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 
 		if (ret) {
 		  if (trace)
-		    {   int prec=cout.precision();
+		    {   int prec=std::cout.precision();
 		    std::cout.precision(12);
 			std::cout << "[simplex1]"  << " loup update " << pseudo_loup  << " loup point  " << loup_point << std::endl;
 			std::cout.precision(prec);
@@ -154,6 +161,7 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 			nb_simplex++;
 			diam_simplex= ((nb_simplex-1) * diam_simplex + box.max_diam()) / nb_simplex;
 		}
+
 		return ret;
 	}
 	if (trace) {
@@ -163,4 +171,6 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 	return false;
 }
 
+
+#endif //_IBEX_WITH_NOLP_
 } // end namespace ibex

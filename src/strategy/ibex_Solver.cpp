@@ -43,8 +43,6 @@ void Solver::start(const IntervalVector& init_box) {
 
 	IntervalVector tmpbox(ctc.nb_var);
 
-	impact.fill(0,ctc.nb_var-1);
-
 	Timer::start();
 
 }
@@ -57,14 +55,21 @@ bool Solver::next(std::vector<IntervalVector>& sols) {
 
 			Cell* c=buffer.top();
 
+			int v=c->get<BisectedVar>().var;      // last bisected var.
 			try {
-				int v=c->get<BisectedVar>().var;      // last bisected var.
 
-				if (v!=-1) impact.add(v);
+				if (v!=-1)                          // no root node :  impact set to 1 for last bisected var only
+                               	  impact.add(v);
+				else                                // root node : impact set to 1 for all variables
+				  impact.fill(0,ctc.nb_var-1);
 
 				ctc.contract(c->box,impact);
 
-				if (v!=-1) impact.remove(v);
+				if (v!=-1)
+				  impact.remove(v);
+				else                              // root node : impact set to 0 for all variables after contraction
+	    			  impact.clear();
+			
 				try {
 
 					pair<IntervalVector,IntervalVector> boxes=bsc.bisect(*c);
@@ -79,7 +84,6 @@ bool Solver::next(std::vector<IntervalVector>& sols) {
 				catch (NoBisectableVariableException&) {
 					new_sol(sols, c->box);
 					delete buffer.pop();
-					impact.fill(0,ctc.nb_var-1);
 					return !buffer.empty();
 					// note that we skip time_limit_check() here.
 					// In the case where "next" is called by "solve",
@@ -94,7 +98,10 @@ bool Solver::next(std::vector<IntervalVector>& sols) {
 			} catch(EmptyBoxException&) {
 				assert(c->box.is_empty());
 				delete buffer.pop();
-				impact.fill(0,ctc.nb_var-1);
+				impact.remove(v); // note: in case of the root node, we should clear the bitset
+				                  // instead but since the search is over, the impact is not used anymore.
+
+
 			}
 		}
 	}

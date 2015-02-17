@@ -11,7 +11,10 @@
 #include "TestCtcPolytopeHull.h"
 #include "Ponts30.h"
 #include "ibex_CtcFwdBwd.h"
+#include "ibex_SystemFactory.h"
+#include "ibex_System.h"
 #include "ibex_CtcPolytopeHull.h"
+#include "ibex_LinearRelaxCombo.h"
 #include "ibex_Array.h"
 
 using namespace std;
@@ -39,5 +42,26 @@ void TestCtcPolytopeHull::lp01() {
 	TEST_ASSERT(box[0]==Interval(-1,0));
 	TEST_ASSERT(box[1]==Interval(-1,1));
 }
+
+
+void TestCtcPolytopeHull::fixbug01() {
+
+	SystemFactory f;
+	Variable x,extra;
+	f.add_var(x); f.add_var(extra); f.add_ctr(x<=0);
+	System sys(f);
+	// if I replace the domain of "extra" by [1,1.1]
+	// there is no more problem.
+	double _box[][2] = {{-100,100},{1,1}};
+	IntervalVector box(2,_box);
+	LinearRelaxCombo linear_relax(sys,LinearRelaxCombo::AFFINE2);
+	CtcPolytopeHull polytope(linear_relax,CtcPolytopeHull::ALL_BOX);
+	polytope.contract(box);
+
+	double _box2[][2] = {{-100,0},{1,1}};
+	IntervalVector box2(2,_box2);
+	check(box,box2);
+}
+
 
 } // end namespace ibex

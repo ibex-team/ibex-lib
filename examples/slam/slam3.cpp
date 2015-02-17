@@ -29,7 +29,7 @@ public:
 	 * The contractor is for a specific beacon "b" which
 	 * is specified in argument of the constructor.
 	 */
-	Detection(int b) : b(b) {
+	Detection(int b) : Ctc(2), b(b) {
 		Variable x(2);
 		// This function will be created once for the T time steps!
 		dist = new Function(x,sqrt(sqr(x[0]-beacons[b][0])+sqr(x[1]-beacons[b][1])));
@@ -66,7 +66,7 @@ protected:
  */
 class Speed : public Ctc {
 public:
-	Speed() {
+	Speed() : Ctc(2) {
 		Variable a(2);
 		Variable b(2);
 		delta = new Function(a,b,b-a);
@@ -94,7 +94,7 @@ protected:
  */
 class Scan : public Ctc {
 public:
-	Scan() {
+	Scan() : Ctc(2) {
 
 		// The N detections
 		detect = new Detection*[N];
@@ -105,7 +105,7 @@ public:
 		for (int b=0; b<N; b++) {
 			cdist.push_back(detect[b]=new Detection(b));
 		}
-		qinter = new CtcQInter(2,cdist,N-NB_OUTLIERS);
+		qinter = new CtcQInter(cdist,N-NB_OUTLIERS);
 	}
 
 	void contract(IntervalVector& x) {
@@ -135,7 +135,7 @@ protected:
  */
 class Trajectory : public Ctc {
 public:
-	Trajectory() { }
+	Trajectory() : Ctc(2*T) { }
 
 	void contract(IntervalVector& x) {
 		for (int t=0; t<T; t++) {

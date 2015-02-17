@@ -265,6 +265,23 @@ void TestArith::sin11() { check_trigo(Interval(3,2*piU+1.5), Interval(-1,sin(1.5
 void TestArith::sin12() { check_trigo(Interval(5,2*piU+1.5), Interval(sin(5),sin(1.5))); }
 void TestArith::sin13() { check_trigo(Interval(5,2*piU+3), Interval(sin(5),1)); }
 
+void TestArith::tan01() { check(tan(Interval::ALL_REALS), Interval::ALL_REALS); }
+void TestArith::tan02() { check(tan(-Interval::PI/4.0 | Interval::PI/4.0), Interval(-1,1)); }
+void TestArith::tan03() {	// tan(pi/4,pi/2)=[1,+oo)
+	Interval x=Interval(piL/4.0,(1-1e-10)*piL/2.0); // upper bound of x is close to pi/2
+	Interval y=tan(x);
+	check(y.lb(),1.0);
+	TEST_ASSERT(y.ub()>1000); // upper bound of tan(x) is close to +oo
+}
+void TestArith::tan04() {	// tan(-pi/2,pi/4)=(-oo,1]
+	Interval y=tan(Interval(-(1-1e-10)*piL/2.0,piL/4.0));
+	TEST_ASSERT(y.lb()<-1000); // lower bound is close to -oo
+	check(y.ub(),1.0);
+}
+void TestArith::tan05() { check(tan(Interval::PI/2.0),Interval::ALL_REALS); }
+void TestArith::tan06() { check(tan(-Interval::PI),Interval::ALL_REALS); }
+void TestArith::tan07() { check(tan(3*Interval::PI/4.0 | 5*Interval::PI/4.0), Interval(-1,1)); }
+
 void TestArith::check_pow(const Interval& x, int p, const Interval& y_expected) {
 	check(pow(x,p),y_expected);
 	check(pow(-x,p),(p%2==0)? y_expected : -y_expected);
@@ -588,3 +605,177 @@ void TestArith::div2_10() { check_div2(Interval(2,3),   Interval::NEG_REALS,    
 void TestArith::div2_11() { check_div2(Interval(2,3),   Interval::POS_REALS,       Interval::POS_REALS,       Interval::EMPTY_SET); }
 void TestArith::div2_12() { check_div2(Interval(-3,-2), Interval::NEG_REALS,       Interval::POS_REALS,       Interval::EMPTY_SET); }
 void TestArith::div2_13() { check_div2(Interval(-3,-2), Interval::POS_REALS,       Interval::NEG_REALS,       Interval::EMPTY_SET); }
+
+bool TestArith::checkbwd_atan2(const Interval& a, const Interval& y_bef, const Interval& x_bef,
+								const Interval& y_aft, const Interval& x_aft) {
+	bool res=true;
+	Interval y;
+	Interval x;
+
+	y=y_bef;
+	x=x_bef;
+	bwd_atan2(a,y,x);
+	//cout << "x1=" << x1 << " x2=" << x2 << endl;
+	res &= almost_eq(x,x_aft,ERROR) && almost_eq(y,y_aft,ERROR);
+
+	return res;
+}
+
+void TestArith::bwd_atan2_01() {
+	TEST_ASSERT(checkbwd_atan2(Interval(M_PI/6.,M_PI/3.),Interval(.5,10),Interval(.5,2),Interval(0.5,sqrt(3.)/2.),Interval(0.5,sqrt(3.)/2.)));
+}
+void TestArith::bwd_atan2_02() {
+	TEST_ASSERT(checkbwd_atan2(Interval(M_PI/4.,3*M_PI/4.),Interval(-100.,100.),Interval(1.,2.),Interval(-1,1),Interval(1.,2.)));
+}
+
+void TestArith::bwd_sqrt01() { checkproj(sqrt, Interval(1,3),				Interval(0,15),		Interval(1,9)); }
+void TestArith::bwd_sqrt02() { checkproj(sqrt, Interval(1,3),				Interval(0,2),			Interval(1,2)); }
+void TestArith::bwd_sqrt03() { checkproj(sqrt, Interval(1,3),				Interval(-4,2),		Interval(1,2)); }
+void TestArith::bwd_sqrt04() { checkproj(sqrt, Interval(1,3),				Interval(-4,-3),		Interval::EMPTY_SET); }
+void TestArith::bwd_sqrt05() { checkproj(sqrt, Interval(NEG_INFINITY,9),	Interval(-4,1),		Interval(0,1)); }
+void TestArith::bwd_sqrt06() { checkproj(sqrt, Interval(2,5),				Interval(-1,5),		Interval(4,5)); }
+void TestArith::bwd_sqrt07() { checkproj(sqrt, Interval(-4,-2),				Interval::ALL_REALS,	Interval::EMPTY_SET); }
+
+bool TestArith::checkbwd_atan(const Interval& y, const Interval& xbefore, const Interval& xafter) {
+	bool res=true;
+	Interval x;
+
+	// tan(y)=x
+	x=xbefore;
+	bwd_atan(y,x);
+	//cout << "xbefore= " << xbefore << " y=" << y << " x=" << x << " versus " << xafter << endl;
+	res &= almost_eq(x,xafter,ERROR);
+
+	// tan(-y)=-x
+	x=-xbefore;
+	bwd_atan(-y,x);
+	//cout << "xbefore= " << (-xbefore) << " y=" << (-y) << " x=" << x << " versus " << (-xafter) << endl;
+	res &= almost_eq(-x,xafter,ERROR);
+
+	return res;
+}
+
+void TestArith::bwd_atan01() { TEST_ASSERT(checkbwd_atan(Interval(0.,M_PI/6.),		  Interval(-1.,3.),			tan(Interval(0.,M_PI/6.)))); }
+void TestArith::bwd_atan02() { TEST_ASSERT(checkbwd_atan(Interval(-M_PI,1.5), 		  Interval(0,5*M_PI/2.0),	Interval(0,5*M_PI/2.0))); }
+void TestArith::bwd_atan03() { TEST_ASSERT(checkbwd_atan(Interval(0.,M_PI/6.),		  Interval(.2,.5),			Interval(.2,.5))); }
+void TestArith::bwd_atan04() { TEST_ASSERT(checkbwd_atan(Interval(-M_PI/2-0.1,M_PI/2+0.1), Interval(-100,100),	Interval(-100,100))); }
+void TestArith::bwd_atan05() { TEST_ASSERT(checkbwd_atan(Interval(M_PI/2+0.1,M_PI),	       Interval(-100,100),	Interval::EMPTY_SET)); }
+void TestArith::bwd_atan06() { TEST_ASSERT(checkbwd_atan(Interval(-M_PI,-M_PI/2-0.1),      Interval(-100,100),	Interval::EMPTY_SET)); }
+
+void TestArith::bwd_atan07() {
+	Interval x=Interval::ALL_REALS;
+	bwd_atan(Interval(-M_PI/4,M_PI/2.), x);
+	check(x.lb(), -1);
+	TEST_ASSERT(x.ub() > 1000); // upper bound is close to +oo
+}
+
+void TestArith::bwd_atan08() {
+	Interval x=Interval::ALL_REALS;
+	bwd_atan(Interval(-M_PI/2,M_PI/4.), x);
+	check(x.ub(), +1);
+	TEST_ASSERT(x.lb() < -1000); // lower bound is close to -oo
+}
+
+
+bool TestArith::checkbwd_add(const Interval& y, const Interval& x1_bef, const Interval& x2_bef,
+								const Interval& x1_aft, const Interval& x2_aft) {
+	bool res=true;
+	Interval x1;
+	Interval x2;
+
+	x1=x1_bef;
+	x2=x2_bef;
+	bwd_add(y,x1,x2);
+	//cout << "x1=" << x1 << " x2=" << x2 << endl;
+	res &= almost_eq(x1,x1_aft,ERROR) && almost_eq(x2,x2_aft,ERROR);
+
+	x1=x1_bef;
+	x2=x2_bef;
+	bwd_add(y,x2,x1);
+	res &= almost_eq(x1,x1_aft,ERROR) && almost_eq(x2,x2_aft,ERROR);
+
+	x1=-x1_bef;
+	x2=-x2_bef;
+	bwd_add(-y,x1,x2);
+	res &= almost_eq(x1,-x1_aft,ERROR) && almost_eq(x2,-x2_aft,ERROR);
+
+	x1=-x1_bef;
+	x2=-x2_bef;
+	bwd_add(-y,x2,x1);
+	res &= almost_eq(x1,-x1_aft,ERROR) && almost_eq(x2,-x2_aft,ERROR);
+
+	return res;
+}
+
+void TestArith::bwd_add01() {
+	TEST_ASSERT(checkbwd_add(Interval(1,3),Interval(1,2),Interval(-10,5),Interval(1,2),Interval(-1,2)));
+}
+
+void TestArith::bwd_add02() {
+	TEST_ASSERT(checkbwd_add(Interval::EMPTY_SET,Interval(0.1,2.0),Interval(-10,2),Interval::EMPTY_SET,Interval::EMPTY_SET));
+}
+
+void TestArith::bwd_add03() {
+	TEST_ASSERT(checkbwd_add(Interval(0,0),Interval(0,0),Interval(.1,5),Interval::EMPTY_SET,Interval::EMPTY_SET));
+}
+
+void TestArith::bwd_add04() {
+	TEST_ASSERT(checkbwd_add(Interval(0,0),Interval(-1,1),Interval(-1,1),Interval(-1,1),Interval(-1,1)));
+}
+
+void TestArith::bwd_add05() {
+	TEST_ASSERT(checkbwd_add(Interval(-1,1),Interval(1,2),Interval(-10,5),Interval(1,2),Interval(-3,0)));
+}
+
+bool TestArith::checkbwd_sub(const Interval& y, const Interval& x1_bef, const Interval& x2_bef,
+								const Interval& x1_aft, const Interval& x2_aft) {
+	bool res=true;
+	Interval x1;
+	Interval x2;
+
+	// y = x1 - x2
+	x1=x1_bef;
+	x2=x2_bef;
+	bwd_sub(y,x1,x2);
+	res &= almost_eq(x1,x1_aft,ERROR) && almost_eq(x2,x2_aft,ERROR);
+
+	// -y = -x1 - -x2
+	x1=-x1_bef;
+	x2=-x2_bef;
+	bwd_sub(-y,x1,x2);
+	res &= almost_eq(x1,-x1_aft,ERROR) && almost_eq(x2,-x2_aft,ERROR);
+
+	// -y = x2 - x1
+	x1=x1_bef;
+	x2=x2_bef;
+	bwd_sub(-y,x2,x1);
+	res &= almost_eq(x1,x1_aft,ERROR) && almost_eq(x2,x2_aft,ERROR);
+
+	// y = -x2 - -x1
+	x1=-x1_bef;
+	x2=-x2_bef;
+	bwd_sub(y,x2,x1);
+	res &= almost_eq(x1,-x1_aft,ERROR) && almost_eq(x2,-x2_aft,ERROR);
+
+	return res;
+}
+
+void TestArith::bwd_sub01() {
+	TEST_ASSERT(checkbwd_sub(Interval(1,3),Interval(1,2),Interval(-10,5),Interval(1,2),Interval(-2,1)));
+}
+
+void TestArith::bwd_sub02() {
+	TEST_ASSERT(checkbwd_sub(Interval::EMPTY_SET,Interval(0.1,2.0),Interval(-10,2),Interval::EMPTY_SET,Interval::EMPTY_SET));
+}
+
+void TestArith::bwd_sub03() {
+	TEST_ASSERT(checkbwd_sub(Interval(0,0),Interval(0,0),Interval(.1,5),Interval::EMPTY_SET,Interval::EMPTY_SET));
+}
+
+void TestArith::bwd_sub04() {
+	TEST_ASSERT(checkbwd_sub(Interval(0,0),Interval(-1,1),Interval(-1,1),Interval(-1,1),Interval(-1,1)));
+}
+
+void TestArith::bwd_sub05() {
+	TEST_ASSERT(checkbwd_sub(Interval(-1,1),Interval(1,2),Interval(-10,5),Interval(1,2),Interval(0,3)));
+}

@@ -10,7 +10,7 @@ DYNAMIC_TARGET:=$(IBEX_LIB_DIR)/libibex.dylib
 endif
 
 ARITH:=arithmetic
-SUBDIRS:=tools $(ARITH) numeric symbolic function combinatorial contractor bisector strategy parser java predicate
+SUBDIRS:=tools $(ARITH) numeric symbolic function geometry combinatorial contractor bisector strategy parser java predicate
 SUBLIB_DEF:=_IBEX_WITH_`echo $(SUBLIB) | tr '[:lower:]' '[:upper:]'`_
 DISTRIB=ibex-$(RELEASE)-$(KERNEL)
  
@@ -20,6 +20,7 @@ OBJS  =$(wildcard $(IBEX_SRC_DIR)/tools/*.o) \
        $(wildcard $(IBEX_SRC_DIR)/arithmetic/*.o) \
        $(wildcard $(IBEX_SRC_DIR)/numeric/*.o) \
        $(wildcard $(IBEX_SRC_DIR)/symbolic/*.o) \
+        $(wildcard $(IBEX_SRC_DIR)/geometry/*.o) \
        $(wildcard $(IBEX_SRC_DIR)/function/*.o) \
        $(wildcard $(IBEX_SRC_DIR)/combinatorial/*.o) \
        $(wildcard $(IBEX_SRC_DIR)/contractor/*.o) \
@@ -108,5 +109,4 @@ clean: $(SUBDIRS)
 	rm -f $(IBEX_INC_DIR)/*.h; \
 	rm -f $(IBEX_INC_DIR)/ibex_$(SUBLIB)_Interval.h_; \
 	rm -f $(DISTRIB).tar.gz
-	
 	

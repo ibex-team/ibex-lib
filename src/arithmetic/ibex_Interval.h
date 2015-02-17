@@ -66,6 +66,13 @@
 #endif
 #endif
 
+#ifdef _MSC_VER
+#include <intrin.h>
+#define __builtin_popcount __popcnt
+#define __builtin_powi(__x,__n) ((double)::pow((double)(__x),(int)(__n)))
+#endif // _MSC_VER
+
+
 namespace ibex {
 
 template <class T>  class Affine2Main;
@@ -1046,7 +1053,18 @@ inline bool bwd_div(const Interval& y, Interval& x1, Interval& x2) {
 }
 
 inline bool bwd_sqrt(const Interval& y, Interval& x) {
-	x &= sqr(y);
+    if (y.ub()<0)
+    {
+    	x.set_empty();
+    } 
+   	else if (y.lb()<0) 
+   	{
+		x &= sqr(Interval(0,y.ub()));
+    } 
+    else 
+    {
+    	x &= sqr(y);
+    }
 	return !x.is_empty();
 }
 
@@ -1076,9 +1094,48 @@ inline bool bwd_asin(const Interval& y,  Interval& x) {
 }
 
 inline bool bwd_atan(const Interval& y,  Interval& x) {
-	x &= tan(y);
+
+	// Note: if y.ub>pi/2 or y.lb<-pi/2, tan(y) gives (-oo,oo).
+	// so the implementation is not as simple as x &= tan(y).
+
+	Interval z=y;
+	double pi2l=(Interval::PI/2).lb();
+	double pi2u=(Interval::PI/2).ub();
+
+	if (z.ub()>=pi2l) // not pi2u. See comments below.
+		if (z.lb()>=pi2u)
+			x.set_empty();
+		else {
+			if (z.lb()>-pi2l) {
+				// note 1: tan(z^-) can give an interval (-oo,+oo) if
+				// z^- is close to -pi/2. Even in this case we keep the
+				// lower bound -oo.
+				//
+				// note 2: if we had used z.lb()<-pi2u (with pi2u>pi/2)
+				// instead of z.lb()<-pi2l, it may be possible, in theory,
+				// that the calculated lower bound is a high value close to +oo, which would be incorrect.
+				//
+				// note 3: if z.lb() is close to pi/2, the lower bound of tan(z.lb()) can be -oo. There
+				// is nothing we can do about it (the lower bound cannot be evaluated in this case)
+				//
+				// note 4: tan(z.lb()) cannot be an empty set since z.lb() cannot be exactly pi/2.
+				x &= Interval(tan(Interval(z.lb())).lb(),POS_INFINITY);
+			}
+			// else do nothing
+		}
+	else
+		if (z.ub()<=-pi2u)
+			x.set_empty();
+		else if (z.lb()<-pi2l)
+			// Same comments as above.
+			x &= Interval(NEG_INFINITY,tan(Interval(z.ub())).ub());
+		else
+			x &= Interval(tan(Interval(z.lb())).lb(),
+					tan(Interval(z.ub())).ub());
+
 	return !x.is_empty();
 }
+
 
 inline bool bwd_acosh(const Interval& y,  Interval& x) {
 	if (y.ub()<0.0) {
@@ -1151,8 +1208,30 @@ inline bool bwd_atan2(const Interval& theta, Interval& y, Interval& x) {
 		x.set_empty(); y.set_empty();
 		b=false;
 	}
-	not_implemented("bwd_atan2 non implemented yet");
-	//  <=> cos(Theta)*X - sin(Theta)*Y > 0;
+	// not_implemented("bwd_atan2 non implemented yet");
+	
+    if(x.ub()>0 || !y.contains(0.0)) {
+        Interval s1,s2,s3,s4,s5,s6,s7;
+        s1 = sqr(x);
+        s2 = sqr(y);
+        s3 = s1 + s2;
+        s4 = sqrt(s3);
+        s5 = s4 - x;
+        s6 = s5/y;
+        s7 = atan(s6);
+        s7 &= 2*theta;
+        b &= bwd_atan(s7,s6);
+        b &= bwd_div(s6,s5,y);
+        b &= bwd_sub(s5,s4,x);
+        b &= bwd_sqrt(s4,s3);
+        b &= bwd_add(s3,s1,s2);
+        b &= bwd_sqr(s2,y);
+        b &= bwd_sqr(s1,x);
+    } else {
+        not_implemented("bwd_atan2 when x contains 0 and y contains 0");
+    }
+
+    //  <=> cos(Theta)*X - sin(Theta)*Y > 0;
 	//      sin(Theta)*X + cos(Theta)*Y = 0
 /*
 	Interval costheta, sintheta, xcostheta, xsintheta, ycostheta, ysintheta, equ1, equ2;
