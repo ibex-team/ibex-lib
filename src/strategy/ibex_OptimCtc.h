@@ -19,6 +19,7 @@
 #include "ibex_Function.h"
 #include "ibex_UnconstrainedLocalSearch.h"
 #include <string>
+#include "ibex_BitSet.h"
 namespace ibex {
 
 /**
@@ -52,8 +53,7 @@ public:
 
 	OptimCtc(Ctc& ctc_out, Ctc& ctc_in, Function& f_cost, Bsc& bsc,
 			double prec = default_prec, double goal_rel_prec = default_goal_rel_prec,
-			double goal_abs_prec =	default_goal_abs_prec,
-			int critpr=50,CellHeapOptim::criterion crit= CellHeapOptim::UB);
+			double goal_abs_prec =	default_goal_abs_prec);
 	/**
 	 * \brief Delete *this.
 	 */
@@ -109,7 +109,7 @@ public:
 	 /**   the contractor which remove the domain that does not contain any feasible solution */
 	Ctc& _ctc_out;
 
-	 /**   the contractor which remove the domain that are entirly feasible */
+	 /**   the contractor which remove the domain that are entirely feasible */
 	Ctc& _ctc_in;
 
 	 /**  the objective function  */
@@ -121,14 +121,7 @@ public:
 	/** Bisector. */
 	Bsc& bsc;
 
-
-	/** Cell buffers.
-	Two buffers are used for node selection. the first one corresponds to minimize  the minimum of the objective estimate,
-	the second one to minimize another criterion (by default the maximum of the objective estimate).
-	The second one is chosen at each node with a probability critpr/100 (default value critpr=50)
-	 */
 	CellHeapOptim buffer;
-	CellHeapOptim buffer2;
 
 	/**
 	 * \brief Index of the goal variable y in the extended box.
