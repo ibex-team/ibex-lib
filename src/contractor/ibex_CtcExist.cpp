@@ -70,20 +70,30 @@ CtcExist::CtcExist(const NumConstraint& c, const Array<const ExprSymbol>& y, con
 	CtcQuantif(c, y, y_init, prec) {
 }
 
-void CtcExist::proceed(const IntervalVector& x_init, const IntervalVector& x_current, IntervalVector& x_res, IntervalVector& y) {
+bool CtcExist::proceed(const IntervalVector& x_init, const IntervalVector& x_current, IntervalVector& x_res, IntervalVector& y) {
 	IntervalVector x = x_current;
 
 	try {
 		CtcQuantif::contract(x, y);
 	} catch (EmptyBoxException&) {
-		return;
+		return false;
+	}
+
+	if (flags[INACTIVE]) {
+		if (x==x_init) {
+			x_res =x_init;
+			set_flag(INACTIVE);
+			return true;
+		} else {
+			x_res |= x;
+			return false;
+		}
 	}
 
 	if (!x.is_subset(x_res)) {
-
 		if (y.max_diam()<=prec) {
 			x_res |= x;
-			if (x_res==x_init) return;
+			if (x_res==x_init) return true;
 		}
 		else {
 
@@ -97,14 +107,20 @@ void CtcExist::proceed(const IntervalVector& x_init, const IntervalVector& x_cur
 				IntervalVector y_mid = y.mid();
 				CtcQuantif::contract(x,y_mid);  // x may be contracted here; that's why we pushed it on the stack *before* sampling.
 				x_res |= x;
-				if (x_res==x_init) return;
+
+				if ((flags[INACTIVE])&&(x==x_init) ) {
+					set_flag(INACTIVE);
+					return true;
+				}
+
+				if (x_res==x_init) return true;
 			} catch (EmptyBoxException&) {
 				// do nothing
 			}
 			// =======================================================================
 		}
 	}
-
+	return false;
 }
 
 void CtcExist::contract(IntervalVector& box) {
@@ -123,7 +139,9 @@ void CtcExist::contract(IntervalVector& box) {
 	IntervalVector y(nb_param);
 	IntervalVector y_mid(nb_param); // for sampling
 
-	while (!l.empty()) {
+	bool stop=false;
+
+	while ((!stop)&&(!l.empty())) {
 
 		// get the domain of variables
 		x_save = l.top().first;
@@ -133,9 +151,11 @@ void CtcExist::contract(IntervalVector& box) {
 		l.pop();
 
 		// proceed with the two sub-boxes for y
-		proceed(box, x_save, res, cut.first);
-		proceed(box, x_save, res, cut.second);
+		stop=proceed(box, x_save, res, cut.first);
+		if (!stop) 	stop=proceed(box, x_save, res, cut.second);
 	}
+
+	while (!l.empty()) l.pop();
 
 	box &= res;
 	if (box.is_empty()) throw EmptyBoxException();

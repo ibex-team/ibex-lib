@@ -29,11 +29,11 @@ void TestPixelMap::test_init2DPixelMap(){
     
     // raster.init();
 
-    for(uint i = 0; i < raster.data.size(); i++){
+    for(unsigned int i = 0; i < raster.data.size(); i++){
         TEST_ASSERT(raster.data[i] == 0);
     }
 
-    for(uint i = 0; i < raster.data.size(); i++){
+    for(unsigned int i = 0; i < raster.data.size(); i++){
         raster[i] = i;
     }
 
@@ -43,7 +43,7 @@ void TestPixelMap::test_init2DPixelMap(){
 
 
 
-    for(uint i = 0; i < raster.ndim; i++){
+    for(unsigned int i = 0; i < raster.ndim; i++){
         TEST_ASSERT( (raster.leaf_size_[i] == leaf_size[i]) );
         TEST_ASSERT( (raster.origin_[i] == origin[i]) );
         TEST_ASSERT( (raster.grid_size_[i] == grid_size[i]) ); 
@@ -70,18 +70,18 @@ void TestPixelMap::test_init3DPixelMap(){
 
     raster.init();
 
-    for(uint i = 0; i < raster.data.size(); i++){
+    for(unsigned int i = 0; i < raster.data.size(); i++){
         TEST_ASSERT(raster[i] == 0);
     }
 
-    for(uint i = 0; i < raster.data.size(); i++){
+    for(unsigned int i = 0; i < raster.data.size(); i++){
         raster[i] = i;
     }
 
     raster.save("test.array3D");
     raster.load("test.array3D");
 
-    for(uint i = 0; i < raster.ndim; i++){
+    for(unsigned int i = 0; i < raster.ndim; i++){
         TEST_ASSERT( (raster.leaf_size_[i] == leaf_size[i]) );
         TEST_ASSERT( (raster.origin_[i] == origin[i]) );
         TEST_ASSERT( (raster.grid_size_[i] == grid_size[i]) ); 

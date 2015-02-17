@@ -48,7 +48,7 @@ BoolInterval PdcInPolygon::test(const IntervalVector& x) {
 
 	//Interval cos_theta = 0;
 	Interval theta = Interval(0);
-	for(uint i = 0; i < ax.size(); i++) {
+	for(unsigned int i = 0; i < ax.size(); i++) {
 		theta += argument(mx,my,ax[i],ay[i],bx[i],by[i]);
 	}
 

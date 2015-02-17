@@ -24,13 +24,13 @@ CtcPixelMap::~CtcPixelMap() {
 //-------------------------------------------------------------------------------------------------------------
 void CtcPixelMap::world_to_grid(IntervalVector box) {
 
-    for(uint i = 0; i < box.size(); i++) {
+    for(int i = 0; i < box.size(); i++) {
         box[i] = (box[i] - I.origin_[i]) / I.leaf_size_[i];
         // Limit range to image size on pixel_coord
         box[i] &= Interval(0,I.grid_size_[i]);
     }
     
-    for (uint i = 0; i < I.ndim; i++) {
+    for (unsigned int i = 0; i < I.ndim; i++) {
         pixel_coords[2*i]   = floor(box[i].lb());
         pixel_coords[2*i+1] = ceil(box[i].ub()-1);
     }
@@ -38,7 +38,7 @@ void CtcPixelMap::world_to_grid(IntervalVector box) {
 
 //-------------------------------------------------------------------------------------------------------------
 void CtcPixelMap::grid_to_world(IntervalVector& box) {
-    for(uint i = 0; i < I.ndim; i++) {
+    for(unsigned int i = 0; i < I.ndim; i++) {
         box[i] &= Interval(pixel_coords[2*i], pixel_coords[2*i+1]+1) * I.leaf_size_[i] + I.origin_[i];
         if(box[i].is_empty()){
             box.set_empty();
@@ -50,8 +50,8 @@ void CtcPixelMap::grid_to_world(IntervalVector& box) {
 //----------------------------------------------------------------------------------------------------------------
 void CtcPixelMap::contract(IntervalVector& box) {
 
-    assert(box.size() == I.ndim);
-    if(box.is_empty()) return;
+    assert(box.size() == (int)I.ndim);
+    if(box.is_empty())  throw EmptyBoxException();
 
     // Convert world coordinates into pixel coordinates
     world_to_grid(box);
@@ -65,7 +65,7 @@ void CtcPixelMap::contract(IntervalVector& box) {
     // Check the result
     if(pixel_coords[0] == -1) {
         box.set_empty();
-        return;
+        throw EmptyBoxException();
     }
 
     // Convert pixel coordinates into world coordinates

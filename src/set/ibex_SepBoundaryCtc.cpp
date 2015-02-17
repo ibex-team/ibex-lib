@@ -54,12 +54,12 @@ void SepBoundaryCtc::separate(IntervalVector& x_in, IntervalVector& x_out) {
 	 * for every one the is_inside test.
 	 *
 	 */
-	for(uint i = 0; i < n; i++) {
+	for(unsigned int i = 0; i < n; i++) {
 		// try to classify the box using first the midpoint:
 		Vector candidate_pt=rest[i].mid();
 
 		// or using random points NB_SAMPLES times
-        for (uint k=0; k<NB_SAMPLES; k++) {
+        for (unsigned int k=0; k<NB_SAMPLES; k++) {
 
 			res = is_inside.test(candidate_pt);
 

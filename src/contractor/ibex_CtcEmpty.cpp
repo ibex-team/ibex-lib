@@ -18,9 +18,16 @@ CtcEmpty::CtcEmpty(int n) : Ctc(n), pdc(*new PdcYes(n)), own_pdc(true) { }
 CtcEmpty::CtcEmpty(Pdc& pdc, bool own) : Ctc(pdc.nb_var), pdc(pdc), own_pdc(own){ }
 
 void CtcEmpty::contract(IntervalVector& box) {
-	if (pdc.test(box)==YES) {
+	BoolInterval t= pdc.test(box);
+	switch (t) {
+	case YES: {
 		box.set_empty();
-		throw EmptyBoxException();
+		throw EmptyBoxException();	break;
+	}
+	case NO:{
+		set_flag(INACTIVE); 	break;
+	}
+	default: break;
 	}
 }
 
