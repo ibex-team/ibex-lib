@@ -26,8 +26,9 @@ void CtcFixPoint::contract(IntervalVector& box) {
 	IntervalVector old_box(box);
 	do {
 		old_box=box;
-		ctc.contract(box);
-	} while (old_box.rel_distance(box)>ratio);
+		ctc.contract(box,*_impact,*_output_flags);
+	} while ((!(*_output_flags)[FIXPOINT])&&(!(*_output_flags)[INACTIVE])&&(old_box.rel_distance(box)>ratio));
+
 }
 
 } // end namespace ibex
