@@ -225,7 +225,7 @@ void TestCtcPixelMap::test2d_corner(){
 //    computeIntegralImage(array);
 //    CtcPixelMap ctc(array);
 //    ctc.contract(box);
-//    for(uint i = 0; i < box.size(); i++){
+//    for(unsigned int i = 0; i < box.size(); i++){
 //        TEST_ASSERT_EQUALS(res[i].lb(),box[i].lb());
 //        TEST_ASSERT_EQUALS(res[i].ub(),box[i].ub());
 //    }
@@ -250,9 +250,9 @@ void TestCtcPixelMap::test2d_corner(){
 
 //    // Generate shape
 //    int x0 = 2, y0 = 2, z0 = 2;
-//    for(uint i = x0; i < x0+5; i++){
-//        for(uint j = y0; j < y0+5; j++){
-//            for(uint k = z0; k < z0+5; k++){
+//    for(unsigned int i = x0; i < x0+5; i++){
+//        for(unsigned int j = y0; j < y0+5; j++){
+//            for(unsigned int k = z0; k < z0+5; k++){
 //                array({{i,j,k}}) = 1;
 //            }
 //        }
@@ -266,7 +266,7 @@ void TestCtcPixelMap::test2d_corner(){
 //    IntervalVector v(3,v_);
 //    IntervalVector res(3,res_);
 //    ctc.contract(v);
-//    for(uint i = 0; i < v.size(); i++){
+//    for(unsigned int i = 0; i < v.size(); i++){
 //        TEST_ASSERT_EQUALS(res[i].lb(),v[i].lb());
 //        TEST_ASSERT_EQUALS(res[i].ub(),v[i].ub());
 //    }
@@ -293,7 +293,7 @@ void TestCtcPixelMap::test2d_corner(){
 //    IntervalVector v(3,v_);
 //    IntervalVector res(3,res_);
 //    ctc.contract(v);
-//    for(uint i = 0; i < v.size(); i++){
+//    for(unsigned int i = 0; i < v.size(); i++){
 //        TEST_ASSERT_DELTA(res[i].lb(),v[i].lb(), std::numeric_limits<double>::epsilon());
 //        TEST_ASSERT_DELTA(res[i].ub(),v[i].ub(), std::numeric_limits<double>::epsilon());
 //    }
