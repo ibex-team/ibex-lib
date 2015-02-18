@@ -70,7 +70,7 @@ CtcForAll::CtcForAll(const NumConstraint& c, const Array<const ExprSymbol>& y, c
 	CtcQuantif(c, y, y_init, prec) {
 }
 
-void CtcForAll::proceed(IntervalVector& x, const IntervalVector& y, bool is_inactive) {
+void CtcForAll::proceed(IntervalVector& x, const IntervalVector& y, bool& is_inactive) {
 
 	IntervalVector y_mid = y.mid();
 	try {
