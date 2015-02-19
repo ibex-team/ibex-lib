@@ -10,7 +10,7 @@
 #ifndef __IBEX_SEP_NOT_H__
 #define __IBEX_SEP_NOT_H__
 
-#include <ibex_Sep.h>
+#include "ibex_Sep.h"
 
 namespace ibex {
 
