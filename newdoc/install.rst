@@ -307,6 +307,7 @@ Important notice:
 - As for ``--enable-shared``, we recommend you to use the interval libraries supplied with Ibex.
   Furthermore, some configurations (Ibex+Gaol under 64 bits) yield a 32-bit library although the platform is 64 bits. Hence, 
   Java will fail in loading Ibex (unless you have a 32-bits JVM of course).
+- To link with Choco, use ``--with-java-package=org.chocosolver.solver.constraints.real``.
 
 The only additional requirement is that the environment variable ``JAVA_HOME`` must be set. 
 
@@ -471,17 +472,17 @@ UnsatisfiedLinkError with Choco
 
 When running the "CycloHexan" example from Choco using Ibex, the following error appears::
 
-  Exception in thread "main" java.lang.UnsatisfiedLinkError: solver.constraints.real.Ibex.add_ctr(ILjava/lang/String;I)V 
-        at solver.constraints.real.Ibex.add_ctr(Native Method) 
-        at solver.constraints.propagators.real.RealPropagator.&lt;init&gt;(RealPropagator.java:77) 
-        at solver.constraints.real.RealConstraint.addFunction(RealConstraint.java:82) 
+  Exception in thread "main" java.lang.UnsatisfiedLinkError: org.chocosolver.solver.constraints.real.Ibex.add_ctr(ILjava/lang/String;I)V 
+        at org.chocosolver.solver.constraints.real.Ibex.add_ctr(Native Method) 
+        at org.chocosolver.solver.constraint.propagators.real.RealPropagator.&lt;init&gt;(RealPropagator.java:77) 
+        at org.chocosolver.solver.constraints.real.RealConstraint.addFunction(RealConstraint.java:82) 
         at samples.real.CycloHexan.buildModel(CycloHexan.java:87) 
         at samples.AbstractProblem.execute(AbstractProblem.java:130) 
         at samples.real.CycloHexan.main(CycloHexan.java:134) 
 
-**Solution:** You probably did not set the Java package properly. The java package of the Ibex class in Choco is ``solver.constraints.real``, try::
+**Solution:** You probably did not set the Java package properly. The java package of the Ibex class in Choco is ``org.chocosolver.solver.constraints.real``, try::
 
-        ./waf configure [....] --with-java-package=solver.constraints.real 
+        ./waf configure [....] --with-java-package=org.chocosolver.solver.constraints.real 
         
 
 -------------------------
