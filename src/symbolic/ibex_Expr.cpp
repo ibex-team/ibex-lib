@@ -15,6 +15,7 @@
 #include "ibex_ExprPrinter.h"
 #include "ibex_ExprSubNodes.h"
 #include "ibex_ExprSize.h"
+#include "ibex_ExprCmp.h"
 #include "ibex_String.h"
 #include <sstream>
 #include <limits.h>
@@ -47,6 +48,11 @@ ExprNode::ExprNode(int height, int size, const Dim& dim) :
   height(height), size(size), id(id_count++), dim(dim) {
 
 }
+
+bool ExprNode::operator==(const ExprNode& e) const {
+	return ExprCmp().compare(*this, e);
+}
+
 
 void cleanup(const Array<const ExprNode>& expr, bool delete_symbols) {
 	ExprSubNodes nodes(expr);
