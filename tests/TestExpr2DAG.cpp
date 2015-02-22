@@ -34,11 +34,18 @@ void TestExpr2DAG::test01() {
 }
 
 void TestExpr2DAG::test02() {
+	const ExprSymbol& x1=ExprSymbol::new_(Dim::scalar());
+	const ExprSymbol& x2=ExprSymbol::new_(Dim::scalar());
+
+	Array<const ExprSymbol> old_x(x1,x2);
+	Array<const ExprSymbol> new_x(2);
+	varcopy(old_x,new_x);
+
+	const ExprNode& e1=(exp(x1)-(x1+x2))*exp(x1) + (exp(x1)-(x1+x2));
+	const ExprNode& e2 = Expr2DAG().transform(old_x,(Array<const ExprNode> const&) new_x,e1);
+
+	TEST_ASSERT(e2.size==7);
 
 }
-
-void TestExpr2DAG::test03() {
-}
-
 
 } // end namespace

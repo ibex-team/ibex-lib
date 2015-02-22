@@ -23,12 +23,10 @@ public:
 	TestExpr2DAG() {
 		TEST_ADD(TestExpr2DAG::test01);
 		TEST_ADD(TestExpr2DAG::test02);
-		TEST_ADD(TestExpr2DAG::test03);
 	}
 
 	void test01();
 	void test02();
-	void test03();
 };
 
 
