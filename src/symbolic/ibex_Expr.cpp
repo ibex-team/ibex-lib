@@ -53,6 +53,9 @@ bool ExprNode::operator==(const ExprNode& e) const {
 	return ExprCmp().compare(*this, e);
 }
 
+bool ExprNode::operator!=(const ExprNode& e) const {
+	return !(*this==e);
+}
 
 void cleanup(const Array<const ExprNode>& expr, bool delete_symbols) {
 	ExprSubNodes nodes(expr);

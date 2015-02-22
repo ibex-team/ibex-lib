@@ -10,6 +10,8 @@
 #include "ibex_Expr2DAG.h"
 #include "ibex_ExprSubNodes.h"
 
+using namespace std;
+
 namespace ibex {
 
 const ExprNode& Expr2DAG::transform(const Array<const ExprSymbol>& old_x, const Array<const ExprNode>& new_x, const ExprNode& y) {
@@ -23,6 +25,7 @@ const ExprNode& Expr2DAG::transform(const Array<const ExprSymbol>& old_x, const 
 
 	// we first copy the leaves (constants & symbols)
 	while (nodes[i].height==h) {
+		cout << "i=" << i << " : " << nodes[i] << endl;
 		const ExprConstant* c=dynamic_cast<const ExprConstant*>(&nodes[i]);
 
 		peer.insert(nodes[i], c? (const ExprNode*) &c->copy() : &new_x[j--]);
@@ -36,26 +39,38 @@ const ExprNode& Expr2DAG::transform(const Array<const ExprSymbol>& old_x, const 
 	// - i is the index of to the first node in the level
 	// - i2 is the index of the current node in the level
 
-	for (; h>0; h--) {
+	while (i>0) {
+		int h=nodes[i].height;
+
 		// we first temporarily build all the peer nodes
 		// from the new nodes of the sub-level
 		int i2=i;
+		cout << "---- level h=" << h << "----" << endl;
+		cout << "---- copy ----" << endl;
 		while (nodes[i2].height==h) {
-			assert(!nodes.found(nodes[i2]));
+			cout << "i2=" << i2 << " : " << nodes[i2] << endl;
+			assert(!peer.found(nodes[i2]));
 			visit(nodes[i2]);
 			i2--;
 		}
-
+		cout << "---- merge ----" << endl;
 		// then we look for equivalent nodes (at the same level)
 		i2=i;
 		while (nodes[i2].height==h) {
+			cout << "i2=" << i2 << " : " << nodes[i2];
 			// find the same node among the nodes already visited
-			for (int i3=i; i<i2; i++) {
+			for (int i3=i; i3>i2; i3--) {
 				// then replace the peer node.
-				if (*peer[nodes[i3]]==*peer[nodes[i2]])
+				if (*peer[nodes[i3]]==*peer[nodes[i2]]) {
+					cout << "... merge!";
 					peer[nodes[i2]]=peer[nodes[i3]];
+					break;
+				}
 			}
+			cout << endl;
+			i2--;
 		}
+		cout << "-------------" << endl;
 
 		i=i2; // jump to the next level
 	}
@@ -75,12 +90,12 @@ Array<const ExprNode> Expr2DAG::comps(const ExprNAryOp& e) {
 }
 
 template<class T>
-bool Expr2DAG::visit_binary(const T& e) {
+void Expr2DAG::visit_binary(const T& e) {
 	peer[e]=&T::new_(*peer[e.left],*peer[e.right]);
 }
 
 template<class T>
-bool Expr2DAG::visit_unary(const T& e) {
+void Expr2DAG::visit_unary(const T& e) {
 	peer[e]=&T::new_(*peer[e.expr]);
 }
 

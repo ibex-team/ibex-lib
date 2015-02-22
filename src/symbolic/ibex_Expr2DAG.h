@@ -29,11 +29,6 @@ public:
 	/**
 	 * \brief Transform e to a DAG
 	 */
-	Expr2DAG();
-
-	/**
-	 * \brief Transform e to a DAG
-	 */
 	const ExprNode& transform(const Array<const ExprSymbol>& old_x, const Array<const ExprNode>& new_x, const ExprNode& y);
 
 protected:
@@ -82,10 +77,10 @@ protected:
 	Array<const ExprNode> comps(const ExprNAryOp& e);
 
 	template<class T>
-	bool visit_unary(const T& e);
+	void visit_unary(const T& e);
 
 	template<class T>
-	bool visit_binary(const T& e);
+	void visit_binary(const T& e);
 };
 
 } // namespace ibex
