@@ -12,7 +12,6 @@
 
 #include <fstream>
 #include <vector>
-#include <sys/types.h>
 
 namespace ibex {
 
@@ -34,7 +33,7 @@ public:
     /**
 	 * \brief Create a n-dimensional image.
 	 */
-	PixelMap(uint ndim);
+	PixelMap(unsigned int ndim);
 
 	/**
 	 * \brief Copy constructor.
@@ -70,7 +69,7 @@ public:
     virtual void compute_integral_image()=0;
 
     /** \brief Either 2 or 3 */
-    const uint ndim;
+    const unsigned int ndim;
 
     /** \brief The size of a leaf. */
     double *leaf_size_;
@@ -148,7 +147,7 @@ public:
 
     void set_leaf_size(double nx, double ny);
 
-    void set_grid_size(uint ni, uint nj);
+    void set_grid_size(unsigned int ni, unsigned int nj);
 
     DATA_TYPE& operator()(int i, int j);
 
@@ -169,7 +168,7 @@ public:
 
 	void set_leaf_size(double nx, double ny, double nz);
 
-	void set_grid_size(uint ni, uint nj, uint nk);
+	void set_grid_size(unsigned int ni, unsigned int nj, unsigned int nk);
 
 	DATA_TYPE& operator()(int i, int j, int k);
 };
