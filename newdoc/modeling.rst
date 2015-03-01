@@ -298,9 +298,25 @@ Various operations can be performed with a function. We detail below the main on
 Evaluation (forward computation)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-See the :ref:`tutorial <tuto-func-eval>`.
+Take a look first at the :ref:`tutorial <tuto-func-eval>` for introductory examples.
 
 .. _mod-func-op-bwd:
+
+Since function overloading does not work for return types in C++, you have to either
+call ``eval``, ``eval_vector`` or ``eval_matrix`` depending if your function
+respectively returns a scalar, a vector or a matrix. See 
+
+All ``eval_XXX`` functions expects a single box in argument that represents all the arguments (scalars, vectors, matrices) stored in a single flat array (see :ref:`mod-func-arg-dim`).
+
+To build this vector, the best is to use *backward projection functions*. 
+
+Here is an example with f(A,B,C)=A+B-C where A, B and C are matrices.
+
+.. literalinclude:: ../examples/doc-modeling.cpp
+   :language: cpp
+   :start-after: func-eval-C
+   :end-before: func-eval-C
+
 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Backward
