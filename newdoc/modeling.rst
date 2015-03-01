@@ -304,7 +304,7 @@ Take a look first at the :ref:`tutorial <tuto-func-eval>` for introductory examp
 
 Since function overloading does not work for return types in C++, you have to either
 call ``eval``, ``eval_vector`` or ``eval_matrix`` depending if your function
-respectively returns a scalar, a vector or a matrix. See 
+respectively returns a scalar, a vector or a matrix.
 
 All ``eval_XXX`` functions expects a single box in argument that represents all the arguments (scalars, vectors, matrices) stored in a single flat array (see :ref:`mod-func-arg-dim`).
 
