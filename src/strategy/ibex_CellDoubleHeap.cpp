@@ -34,29 +34,13 @@ CellDoubleHeap::CellDoubleHeap(int ind_var, criterion crit_2,  int critpr) :
 
 CellDoubleHeap::~CellDoubleHeap() {
 	if (heap1) delete heap1;
-	if (heap2) {
-		if (heap2->root) deleteOtherHeaps(heap2->root);
-		heap2->root =NULL;
-		delete heap2;
-	}
-}
-
-void CellDoubleHeap::deleteOtherHeaps(HeapNode<Cell>* node) {
-	if (node->left)	 deleteOtherHeaps(node->left);
-	if (node->right) deleteOtherHeaps(node->right);
-	node->elt=NULL;
-	node->left=NULL;
-	node->right=NULL;
-	delete node;
-	node=NULL;
+	if (heap2) delete heap2;
 }
 
 void CellDoubleHeap::flush() {
 	heap1->flush();
 	if (critpr>0) {
-		if (heap2->root) deleteOtherHeaps(heap2->root);
-		heap2->root =NULL;
-		heap2->nb_cells=0;
+		heap2->flush();
 	}
 	nb_cells=0;
 }

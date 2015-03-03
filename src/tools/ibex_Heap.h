@@ -11,6 +11,7 @@
 #define __IBEX_HEAP_H__
 
 #include <iostream>
+#include <cassert>
 
 namespace ibex {
 

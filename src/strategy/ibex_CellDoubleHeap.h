@@ -140,9 +140,6 @@ private:
 	/** erase a node in the second heap */
 	void eraseOtherHeaps( HeapNode<Cell> * node);
 
-	/** delete the heap without the HEapElt */
-	void deleteOtherHeaps( HeapNode<Cell> * node);
-
 	std::ostream& print(std::ostream& os) const;
 };
 
