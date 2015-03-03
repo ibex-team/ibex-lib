@@ -35,11 +35,11 @@ namespace ibex {
  *
  * \see #CellBuffer, #CellHeapBySize
  */
-class CellHeap : public CellBuffer,  public Heap<Cell> {
+class CellHeap : public CellBuffer,  public SharedHeap<Cell> {
 
 public:
 
-	CellHeap(int ind_crit=0, bool b=false): CellBuffer(), Heap<Cell>(ind_crit, b) { }
+	CellHeap(int ind_crit=0, bool b=false): CellBuffer(), SharedHeap<Cell>(ind_crit, b) { }
 
 	/** Flush the buffer.
 	 * All the remaining cells will be *deleted* */
@@ -64,18 +64,18 @@ public:
 
 /*============================================ inline implementation ============================================ */
 
-inline void CellHeap::flush()                    { Heap<Cell>::flush(); }
+inline void CellHeap::flush()                    { SharedHeap<Cell>::flush(); }
 
-inline unsigned int CellHeap::size() const       { return Heap<Cell>::size(); }
+inline unsigned int CellHeap::size() const       { return SharedHeap<Cell>::size(); }
 
-inline bool CellHeap::empty() const              { return Heap<Cell>::empty(); }
+inline bool CellHeap::empty() const              { return SharedHeap<Cell>::empty(); }
 
-inline void CellHeap::push(Cell* cell)           { Heap<Cell>::push(cell);
+inline void CellHeap::push(Cell* cell)           { SharedHeap<Cell>::push(cell);
                                                    if (capacity>0 && size()==capacity) throw CellBufferOverflow(); }
 
-inline Cell* CellHeap::pop()                     { return Heap<Cell>::pop(); }
+inline Cell* CellHeap::pop()                     { return SharedHeap<Cell>::pop(); }
 
-inline Cell* CellHeap::top() const               { return Heap<Cell>::top(); }
+inline Cell* CellHeap::top() const               { return SharedHeap<Cell>::top(); }
 
 } // end namespace ibex
 #endif // __IBEX_CELL_HEAP_H__

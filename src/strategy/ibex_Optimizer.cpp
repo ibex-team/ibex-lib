@@ -418,7 +418,7 @@ void Optimizer::contract ( IntervalVector& box, const IntervalVector& init_box) 
 Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj_init_bound) {
 	loup=obj_init_bound;
 	pseudo_loup=obj_init_bound;
-	buffer.contractHeap(loup);
+	buffer.contract(loup);
 
 	uplo=NEG_INFINITY;
 	uplo_of_epsboxes=POS_INFINITY;
@@ -516,7 +516,7 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 
 					double ymax= compute_ymax();
 
-					buffer.contractHeap(ymax);
+					buffer.contract(ymax);
 					//cout << " now buffer is contracted and min=" << buffer.minimum() << endl;
 
 

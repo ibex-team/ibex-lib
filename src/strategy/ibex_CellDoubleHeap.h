@@ -18,7 +18,7 @@ namespace ibex {
 /**
  * \brief Double-heap buffer (for global optimization)
  *
- * See "A new multisection technique in interval methods for global optimization", L.G. Casado, Computing, 2000
+ * See "A new multi-selection technique in interval methods for global optimization", L.G. Casado, Computing, 2000
  * (TODO: check ref)
  */
 class CellDoubleHeap : public CellBuffer {
@@ -68,7 +68,6 @@ public:
 	/** Pop a cell from the second heap and return it.*/
 	Cell* pop2();
 
-
 	/** Return the next box (but does not pop it).*/
 	Cell* top() const;
 
@@ -103,7 +102,7 @@ public:
 	 * Removes (and deletes) from the heap all the cells
 	 * with a cost greater than \a loup.
 	 */
-	void contractHeap(double loup);
+	void contract(double loup);
 
 	/**
 	 * Delete this
@@ -135,10 +134,10 @@ private:
 	mutable int indbuf;
 
 	/** use in the contractHeap function by recursivity */
-	void contractRec(double new_loup, HeapNode<Cell> * node, Heap<Cell> & heap);
+	void contract_rec(double new_loup, HeapNode<Cell>* node, SharedHeap<Cell>& heap);
 
 	/** erase a node in the second heap */
-	void eraseOtherHeaps( HeapNode<Cell> * node);
+	void erase_subnodes(HeapNode<Cell>* node, bool percolate);
 
 	std::ostream& print(std::ostream& os) const;
 };

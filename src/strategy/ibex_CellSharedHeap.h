@@ -39,7 +39,7 @@ private:
 	/** Index of the objective variable. */
 	const int goal_var;
 
-	virtual CellHeapVarLB* init_copy() const;
+	virtual CellHeapVarLB* copy() const;
 
 };
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -62,7 +62,7 @@ private:
 	/** Index of the objective variable. */
 	const int goal_var;
 
-	virtual CellHeapVarUB* init_copy() const;
+	virtual CellHeapVarUB* copy() const;
 
 };
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -93,7 +93,7 @@ private:
 	/** the lower upper bound. */
 	double loup;
 
-	virtual CellHeapC3* init_copy() const;
+	virtual CellHeapC3* copy() const;
 
 };
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -121,7 +121,7 @@ private:
 	/** the lower upper bound. */
 	double loup;
 
-	virtual CellHeapC5* init_copy() const;
+	virtual CellHeapC5* copy() const;
 };
 // -----------------------------------------------------------------------------------------------------------------------------------
 
@@ -151,7 +151,7 @@ private:
 	/** Index of the objective variable. */
 	const int goal_var;
 
-	virtual	CellHeapC7* init_copy() const;
+	virtual	CellHeapC7* copy() const;
 };
 
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -165,7 +165,7 @@ public:
 
 private:
 
-	virtual	CellHeapPU* init_copy() const;
+	virtual	CellHeapPU* copy() const;
 
 };
 
@@ -179,7 +179,7 @@ public:
 
 private:
 
-	virtual	CellHeapPFlb* init_copy() const;
+	virtual	CellHeapPFlb* copy() const;
 
 };
 
@@ -195,7 +195,7 @@ public:
 
 private:
 
-	virtual	CellHeapPFub* init_copy() const;
+	virtual	CellHeapPFub* copy() const;
 
 };
 

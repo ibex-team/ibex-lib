@@ -234,7 +234,7 @@ public:
 
 private:
 
-	virtual	CellHeapDist* init_copy() const { return new CellHeapDist();}
+	virtual	CellHeapDist* copy() const { return new CellHeapDist();}
 
 };
 
