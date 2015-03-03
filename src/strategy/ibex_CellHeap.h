@@ -60,29 +60,7 @@ public:
 	/** Return the next box (but does not pop it).*/
 	Cell* top() const;
 
-	/**
-	 * \brief Contracts the heap.
-	 *
-	 * Removes (and deletes) from the heap all the elements
-	 * with a cost greater than \a lb.
-	 */
-	void contract(double lb);
-
-protected:
-
-	friend class CellDoubleHeap;
-
-private:
-
-	virtual std::ostream& print(std::ostream& os) const;
-
-	CellHeap(const CellHeap& h); // forbidden
-
 };
-
-
-/** Display the buffer */
-//std::ostream& operator<<(std::ostream& os, const CellHeap& h) { return h.print(os); }
 
 /*============================================ inline implementation ============================================ */
 
@@ -98,10 +76,6 @@ inline void CellHeap::push(Cell* cell)           { Heap<Cell>::push(cell);
 inline Cell* CellHeap::pop()                     { return Heap<Cell>::pop(); }
 
 inline Cell* CellHeap::top() const               { return Heap<Cell>::top(); }
-
-inline void CellHeap::contract(double lb) { Heap<Cell>::contract(lb);  }
-
-inline std::ostream& CellHeap::print(std::ostream& os) const { return Heap<Cell>::print(os); }
 
 } // end namespace ibex
 #endif // __IBEX_CELL_HEAP_H__

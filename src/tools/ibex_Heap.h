@@ -154,7 +154,7 @@ public:
 	HeapNode<T>* get_node(unsigned int i) const;
 
 
-	virtual std::ostream& print(std::ostream& os) const;
+	std::ostream& print(std::ostream& os) const;
 
 private:
 	/** Used in the contract function (proceed by recursivity) */
