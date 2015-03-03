@@ -93,7 +93,7 @@ void CellDoubleHeap::contractRec(double new_loup, HeapNode<Cell>* node, Heap<Cel
 		if (heap2) eraseOtherHeaps(node);
 		delete node; // caution! removes all the sub-nodes
 	} else {
-		heap.push(node->elt);
+		heap.push_elt(node->elt);
 		if (node->left)	 contractRec(new_loup, node->left, heap);
 		if (node->right) contractRec(new_loup, node->right, heap);
 		node->elt=NULL;
@@ -133,8 +133,8 @@ void CellDoubleHeap::push(Cell* cell) {
 	}
 
 	// the cell is put into the first heap
-	heap1->push(elt);
-	if (heap2) heap2->push(elt);
+	heap1->push_elt(elt);
+	if (heap2) heap2->push_elt(elt);
 
 	nb_cells++;
 }

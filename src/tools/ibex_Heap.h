@@ -47,28 +47,28 @@ public:
 	 * All the remaining elements will be *deleted*
 	 * (with a call to the destructor of class T).
 	 */
-	virtual void flush();
+	void flush();
 
 	/** Return the size of the buffer. */
-	virtual unsigned int size() const;
+	unsigned int size() const;
 
 	/** Return true if the buffer is empty. */
-	virtual bool empty() const;
+	bool empty() const;
 
 	/** push a new element on the stack.
 	 * Complexity: o(log(nb_cells))
 	 */
-	virtual void push(T* el);
+	void push(T* el);
 
 	/** Pop a element from the stack and return it.
 	 * Complexity: o(log(nb_cells))
 	 */
-	virtual T* pop();
+	T* pop();
 
 	/** Return the next box (but does not pop it).
 	 * Complexity: o(1)
 	 */
-	virtual T* top() const;
+	T* top() const;
 
 	/**
 	 * \brief Contracts the heap.
@@ -76,7 +76,7 @@ public:
 	 * Removes (and deletes) from the heap all the elements
 	 * with a cost greater than \a lb.
 	 */
-	virtual void contract(double lb);
+	void contract(double lb);
 
 	/** Return the minimum (the criterion for
 	 * the first element) */
@@ -103,7 +103,7 @@ public:
 	inline int get_id() const {return heap_id;}
 
 
-protected:
+//protected:
 
 	friend class CellDoubleHeap;
 
@@ -129,22 +129,22 @@ protected:
 	 * Pop a CellHeapElt from the stack and return it.
 	 * Complexity: o(log(nb_cells))
 	 */
-	virtual HeapElt<T>* pop_elt();
+	HeapElt<T>* pop_elt();
 
 	/**
 	 * Useful only for CellDoubleHeap
 	 * Complexity: o(log(nb_cells))
 	 */
-	virtual void push(HeapElt<T>* elt);
+	void push_elt(HeapElt<T>* elt);
 
 	/** Update the heap to reorder the elements from the node \var node to the down */
-	virtual void percolate(HeapNode<T>* node);
+	void percolate(HeapNode<T>* node);
 
 	/** Erase only this HeapNope without touch the element */
-	virtual void erase_node(unsigned int i);
+	void erase_node(unsigned int i);
 
 	/** Remove the last node and put its element at the ith position */
-	virtual HeapNode<T>* erase_node_no_percolate(unsigned int i);
+	HeapNode<T>* erase_node_no_percolate(unsigned int i);
 
 	/**
 	 * Access to the ith node rank by largest-first order
@@ -324,7 +324,7 @@ void Heap<T>::contract_rec(double new_loup, HeapNode<T>* node, Heap<T>& heap) {
 		node->elt->crit[heap_id] = cost(*(node->elt->cell));
 
 	if (!(node->isSup(new_loup, heap_id))) {
-		heap.push(node->elt);
+		heap.push_elt(node->elt);
 		if (node->left)	 contract_rec(new_loup, node->left, heap);
 		if (node->right) contract_rec(new_loup, node->right, heap);
 		node->left=NULL;
@@ -358,7 +358,7 @@ void Heap<T>::sort_rec(HeapNode<T> * node, Heap<T> & heap) {
 	if (updateCost)
 		node->elt->crit[heap_id] = cost(*(node->elt->cell));
 
-	heap.push(node->elt);
+	heap.push_elt(node->elt);
 	if (node->left)	 sort_rec(node->left, heap);
 	if (node->right) sort_rec(node->right, heap);
 
@@ -372,13 +372,13 @@ void Heap<T>::sort_rec(HeapNode<T> * node, Heap<T> & heap) {
 
 template<class T>
 void Heap<T>::push(T* cell) {
-	push(new HeapElt<T>(cell,cost(*cell)));
+	push_elt(new HeapElt<T>(cell,cost(*cell)));
 }
 
 
 
 template<class T>
-void Heap<T>::push(HeapElt<T>* cell) {
+void Heap<T>::push_elt(HeapElt<T>* cell) {
 
 	if (nb_cells==0) {
 		root = new HeapNode<T>(cell,NULL);
