@@ -266,7 +266,7 @@ double SetInterval::dist(const Vector& pt, bool inside) const {
 			double d=c->get<NodeAndDist>().dist;
 			if (d<lb) {
 				lb=d;
-				heap.contractHeap(lb);
+				heap.contract(lb);
 			}
 		} else if (!node->is_leaf() && (    (inside && possibly_contains_in(node->status))
 		                                || (!inside && possibly_contains_out(node->status)))) {

@@ -66,12 +66,12 @@ public:
 	 * Removes (and deletes) from the heap all the elements
 	 * with a cost greater than \a lb.
 	 */
-	virtual void contractHeap(double lb);
+	virtual void contract(double lb);
 
 	/** The "cost" of a cell. */
 	virtual double cost(const Cell&) const=0;
 
-	virtual int getId() const;
+	virtual int get_id() const;
 
 
 protected:
@@ -85,7 +85,7 @@ protected:
 	 * Pop a CellHeapElt from the stack and return it.
 	 * Complexity: o(log(nb_cells))
 	 */
-	virtual HeapElt<Cell>* popElt();
+	virtual HeapElt<Cell>* pop_elt();
 
 	/**
 	 * Useful only for CellDoubleHeap
@@ -94,13 +94,13 @@ protected:
 	virtual void push(HeapElt<Cell>* elt);
 
 	/** Update the heap to reorder the elements from the node \var node to the down */
-	virtual void updateOrder(HeapNode<Cell>* node);
+	virtual void percolate(HeapNode<Cell>* node);
 
 	/** Erase only this HeapNope without touch the element */
-	virtual void eraseNode(unsigned int i);
+	virtual void erase_node(unsigned int i);
 
 	/** Remove the last node and put its element at the ith position */
-	virtual HeapNode<Cell>* eraseNode_noUpdate(unsigned int i);
+	virtual HeapNode<Cell>* erase_node_no_percolate(unsigned int i);
 
 
 private:
@@ -130,19 +130,19 @@ inline Cell* CellHeap::pop()                     { return Heap<Cell>::pop(); }
 
 inline Cell* CellHeap::top() const               { return Heap<Cell>::top(); }
 
-inline void CellHeap::contractHeap(double lb) { Heap<Cell>::contractHeap(lb);  }
+inline void CellHeap::contract(double lb) { Heap<Cell>::contract(lb);  }
 
-inline HeapElt<Cell>* CellHeap::popElt() {return Heap<Cell>::popElt(); }
+inline HeapElt<Cell>* CellHeap::pop_elt() {return Heap<Cell>::pop_elt(); }
 
 inline void CellHeap::push(HeapElt<Cell>* elt) { Heap<Cell>::push(elt); }
 
-inline void CellHeap::updateOrder(HeapNode<Cell>* node) {  Heap<Cell>::updateOrder(node); }
+inline void CellHeap::percolate(HeapNode<Cell>* node) {  Heap<Cell>::percolate(node); }
 
-inline void CellHeap::eraseNode(unsigned int i) {  Heap<Cell>::eraseNode(i); }
+inline void CellHeap::erase_node(unsigned int i) {  Heap<Cell>::erase_node(i); }
 
-inline HeapNode<Cell>* CellHeap::eraseNode_noUpdate(unsigned int i) {  return Heap<Cell>::eraseNode_noUpdate(i); }
+inline HeapNode<Cell>* CellHeap::erase_node_no_percolate(unsigned int i) {  return Heap<Cell>::erase_node_no_percolate(i); }
 
-inline  int CellHeap::getId() const { return Heap<Cell>::getId(); }
+inline  int CellHeap::get_id() const { return Heap<Cell>::get_id(); }
 
 inline std::ostream& CellHeap::print(std::ostream& os) const { return Heap<Cell>::print(os); }
 

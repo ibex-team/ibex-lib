@@ -76,7 +76,7 @@ public:
 	 * Removes (and deletes) from the heap all the elements
 	 * with a cost greater than \a lb.
 	 */
-	virtual void contractHeap(double lb);
+	virtual void contract(double lb);
 
 	/** Return the minimum (the criterion for
 	 * the first element) */
@@ -98,9 +98,9 @@ public:
 	 * the object is created. */
 	unsigned int nb_cells;
 
-//	inline bool needUpdate() const {return updateCost;}
+	//	inline bool needUpdate() const {return updateCost;}
 
-	inline int getId() const {return heap_id;}
+	inline int get_id() const {return heap_id;}
 
 
 protected:
@@ -129,7 +129,7 @@ protected:
 	 * Pop a CellHeapElt from the stack and return it.
 	 * Complexity: o(log(nb_cells))
 	 */
-	virtual HeapElt<T>* popElt();
+	virtual HeapElt<T>* pop_elt();
 
 	/**
 	 * Useful only for CellDoubleHeap
@@ -138,30 +138,30 @@ protected:
 	virtual void push(HeapElt<T>* elt);
 
 	/** Update the heap to reorder the elements from the node \var node to the down */
-	virtual void updateOrder(HeapNode<T>* node);
+	virtual void percolate(HeapNode<T>* node);
 
 	/** Erase only this HeapNope without touch the element */
-	virtual void eraseNode(unsigned int i);
+	virtual void erase_node(unsigned int i);
 
 	/** Remove the last node and put its element at the ith position */
-	virtual HeapNode<T>* eraseNode_noUpdate(unsigned int i);
+	virtual HeapNode<T>* erase_node_no_percolate(unsigned int i);
 
 	/**
 	 * Access to the ith node rank by largest-first order
 	 *
 	 * \param i - the cell number
 	 */
-	HeapNode<T>* getNode(unsigned int i) const;
+	HeapNode<T>* get_node(unsigned int i) const;
 
 
 	virtual std::ostream& print(std::ostream& os) const;
 
 private:
-	/** Used in the contractHeap function (proceed by recursivity) */
-	void contractRec(double new_loup, HeapNode<T>* node, Heap<T>& heap);
+	/** Used in the contract function (proceed by recursivity) */
+	void contract_rec(double new_loup, HeapNode<T>* node, Heap<T>& heap);
 
 	/** Used in the sort function (proceed by recursivity) */
-	void sortRec(HeapNode<T>* node, Heap<T>& heap);
+	void sort_rec(HeapNode<T>* node, Heap<T>& heap);
 
 };
 
@@ -265,7 +265,7 @@ private:
 
 template<class T>
 Heap<T>::Heap(int ind_crit,bool updateCost) :
-  nb_cells(0), updateCost(updateCost),  heap_id(ind_crit), root(NULL) {
+nb_cells(0), updateCost(updateCost),  heap_id(ind_crit), root(NULL) {
 
 }
 template<class T>
@@ -302,12 +302,12 @@ T* Heap<T>::top() const {
 // on the objective ("loup"). This function then removes (and deletes) from
 // the heap all the cells with a cost greater than loup.
 template<class T>
-void Heap<T>::contractHeap(double new_loup) {
+void Heap<T>::contract(double new_loup) {
 	if (nb_cells==0) return;
 
 	Heap<T> * heap_tmp = init_copy();
 
-	contractRec(new_loup, root, *heap_tmp);
+	contract_rec(new_loup, root, *heap_tmp);
 
 	root = heap_tmp->root;
 	nb_cells = heap_tmp->size();
@@ -318,15 +318,15 @@ void Heap<T>::contractHeap(double new_loup) {
 
 
 template<class T>
-void Heap<T>::contractRec(double new_loup, HeapNode<T>* node, Heap<T>& heap) {
+void Heap<T>::contract_rec(double new_loup, HeapNode<T>* node, Heap<T>& heap) {
 
 	if(updateCost)
 		node->elt->crit[heap_id] = cost(*(node->elt->cell));
 
 	if (!(node->isSup(new_loup, heap_id))) {
 		heap.push(node->elt);
-		if (node->left)	 contractRec(new_loup, node->left, heap);
-		if (node->right) contractRec(new_loup, node->right, heap);
+		if (node->left)	 contract_rec(new_loup, node->left, heap);
+		if (node->right) contract_rec(new_loup, node->right, heap);
 		node->left=NULL;
 		node->right=NULL;
 		node->elt=NULL;
@@ -342,7 +342,7 @@ void Heap<T>::sort() {
 	Heap<T>* heap_tmp = init_copy();
 
 	// recursive sort : o(n*log(n))
-	sortRec(root, *heap_tmp);
+	sort_rec(root, *heap_tmp);
 
 	root = heap_tmp->root;
 	nb_cells = heap_tmp->size();
@@ -353,14 +353,14 @@ void Heap<T>::sort() {
 }
 
 template<class T>
-void Heap<T>::sortRec(HeapNode<T> * node, Heap<T> & heap) {
+void Heap<T>::sort_rec(HeapNode<T> * node, Heap<T> & heap) {
 
 	if (updateCost)
 		node->elt->crit[heap_id] = cost(*(node->elt->cell));
 
 	heap.push(node->elt);
-	if (node->left)	 sortRec(node->left, heap);
-	if (node->right) sortRec(node->right, heap);
+	if (node->left)	 sort_rec(node->left, heap);
+	if (node->right) sort_rec(node->right, heap);
 
 	node->left=NULL;
 	node->right=NULL;
@@ -422,7 +422,7 @@ void Heap<T>::push(HeapElt<T>* cell) {
 }
 
 template<class T>
-HeapNode<T> * Heap<T>::getNode(unsigned int i) const {
+HeapNode<T> * Heap<T>::get_node(unsigned int i) const {
 	assert(i<nb_cells);
 	assert(nb_cells>0);
 
@@ -450,13 +450,13 @@ template<class T>
 T* Heap<T>::get(unsigned int i ) const {
 	assert(i<nb_cells);
 	assert(nb_cells>0);
-	return getNode(i)->elt->cell;
+	return get_node(i)->elt->cell;
 }
 
 template<class T>
 T* Heap<T>::pop() {
 	assert(nb_cells>0);
-	HeapElt<T>* tmp =popElt();
+	HeapElt<T>* tmp =pop_elt();
 	T * c = tmp->cell;
 	tmp->cell = NULL;
 	delete tmp;
@@ -465,25 +465,25 @@ T* Heap<T>::pop() {
 }
 
 template<class T>
-HeapElt<T>* Heap<T>::popElt() {
+HeapElt<T>* Heap<T>::pop_elt() {
 	assert(nb_cells>0);
 	HeapElt<T>* c_return = root->elt;
-	eraseNode(0);
+	erase_node(0);
 	return c_return;
 }
 
 // erase a node and update the order
 template<class T>
-void Heap<T>::eraseNode(unsigned int i) {
+void Heap<T>::erase_node(unsigned int i) {
 	assert(i<nb_cells);
 	assert(nb_cells>0);
 
-	updateOrder(eraseNode_noUpdate(i));
+	percolate(erase_node_no_percolate(i));
 }
 
 // erase a node and update the order
 template<class T>
-HeapNode<T> * Heap<T>::eraseNode_noUpdate(unsigned int i) {
+HeapNode<T> * Heap<T>::erase_node_no_percolate(unsigned int i) {
 	assert(i<nb_cells);
 	assert(nb_cells>0);
 
@@ -495,7 +495,7 @@ HeapNode<T> * Heap<T>::eraseNode_noUpdate(unsigned int i) {
 		root = NULL;
 	} else if (i==(nb_cells-1)) {
 		// GET THE LAST ELEMENT and delete the associated node without destroying the HeapElt
-		HeapNode<T>* pt= getNode(nb_cells-1);
+		HeapNode<T>* pt= get_node(nb_cells-1);
 		if (nb_cells%2==0)	{ pt->father->left =NULL; }
 		else 				{ pt->father->right=NULL; }
 		pt->elt = NULL;
@@ -503,17 +503,17 @@ HeapNode<T> * Heap<T>::eraseNode_noUpdate(unsigned int i) {
 		pt = NULL;
 	} else {
 		// GET THE LAST ELEMENT and delete the associated node without destroying the HeapElt
-		HeapNode<T> * pt= getNode(nb_cells-1);
-		pt_root= getNode(i);
+		HeapNode<T> * pt= get_node(nb_cells-1);
+		pt_root= get_node(i);
 		HeapElt<T>* cell = pt->elt;
-//std::cout << cell->indice[ind_crit] << std::endl;
+		//std::cout << cell->indice[ind_crit] << std::endl;
 		if (nb_cells%2==0)	{ pt->father->left =NULL; }
 		else 				{ pt->father->right=NULL; }
 		pt->elt = NULL;
 		delete pt;
 		pt = NULL;
 		// cell points on the element we put in place of the deleted node
-		pt_root= getNode(i);
+		pt_root= get_node(i);
 		pt_root->elt = cell;
 		pt_root->elt->indice[heap_id] = i;
 	}
@@ -524,7 +524,7 @@ HeapNode<T> * Heap<T>::eraseNode_noUpdate(unsigned int i) {
 
 
 template<class T>
-void Heap<T>::updateOrder(HeapNode<T> *pt) {
+void Heap<T>::percolate(HeapNode<T> *pt) {
 	// PERMUTATION to maintain the order in the heap when going down
 	if (pt) {
 		bool b=true;
@@ -612,15 +612,15 @@ void HeapNode<T>::switchElt(HeapNode<T> *pt, int ind_crit) {
 
 template<class T>
 HeapElt<T>::HeapElt(T* cell, double crit_1) : cell(cell), crit(new double[1]), indice(new unsigned int[1]){
-		crit[0] = crit_1;
-		indice[0] = 0;
+	crit[0] = crit_1;
+	indice[0] = 0;
 }
 template<class T>
 HeapElt<T>::HeapElt(T* cell, double crit_1, double crit_2) : cell(cell), crit(new double[2]), indice(new unsigned int[2]){
-		crit[0] = crit_1;
-		crit[1] = crit_2;
-		indice[0] = 0;
-		indice[1] = 0;
+	crit[0] = crit_1;
+	crit[1] = crit_2;
+	indice[0] = 0;
+	indice[1] = 0;
 }
 
 

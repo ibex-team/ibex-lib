@@ -39,7 +39,7 @@ CellDoubleHeap::~CellDoubleHeap() {
 
 void CellDoubleHeap::flush() {
 	heap1->flush();
-	if (critpr>0) {
+	if (heap2) {
 		heap2->flush();
 	}
 	nb_cells=0;
@@ -66,12 +66,12 @@ void CellDoubleHeap::contractHeap(double new_loup) {
 
 
 	Heap<Cell> *copy2 = heap2->init_copy();
-	copy2->contractHeap(new_loup); // it is necessary to update the loup.
+	copy2->contract(new_loup); // it is necessary to update the loup.
 	copy2->root = heap2->root;
 	copy2->nb_cells =heap2->nb_cells;
 	heap2->root = NULL;
 	heap2->nb_cells =0;
-	heap2->contractHeap(new_loup);
+	heap2->contract(new_loup);
 
 	if (copy2->updateCost)  { //update the order if necessary
 		copy2->sort();
@@ -90,7 +90,8 @@ void CellDoubleHeap::contractRec(double new_loup, HeapNode<Cell>* node, Heap<Cel
 
 	if (node->isSup(new_loup, 0)) {
 		// we must remove from the other CellHeap all the sub-nodes
-		if (critpr>0) eraseOtherHeaps(node);
+		if (heap2) eraseOtherHeaps(node);
+		delete node; // caution! removes all the sub-nodes
 	} else {
 		heap.push(node->elt);
 		if (node->left)	 contractRec(new_loup, node->left, heap);
@@ -99,7 +100,6 @@ void CellDoubleHeap::contractRec(double new_loup, HeapNode<Cell>* node, Heap<Cel
 		node->left=NULL;
 		node->right=NULL;
 		delete node;
-		node =NULL;
 	}
 }
 
@@ -110,12 +110,12 @@ void CellDoubleHeap::eraseOtherHeaps(HeapNode<Cell>* node) {
 	node->left=NULL;
 
 	if (heap2->updateCost)
-		heap2->eraseNode_noUpdate(node->elt->indice[1]);
+		// there is no need to update the order now in the second heap
+		// since all costs will have to be recalculated.
+		// The heap2 will be sorted at the end (see contract)
+		heap2->erase_node_no_percolate(node->elt->indice[1]);
 	else
-		heap2->eraseNode(node->elt->indice[1]);
-
-	delete node; // caution! removes all the sub-nodes
-	node =NULL;
+		heap2->erase_node(node->elt->indice[1]);
 }
 
 bool CellDoubleHeap::empty() const {
@@ -126,7 +126,7 @@ bool CellDoubleHeap::empty() const {
 
 void CellDoubleHeap::push(Cell* cell) {
 	HeapElt<Cell>* elt;
-	if (critpr > 0) {
+	if (heap2) {
 		elt = new HeapElt<Cell>(cell, heap1->cost(*cell), heap2->cost(*cell));
 	} else {
 		elt = new HeapElt<Cell>(cell,heap1->cost(*cell));
@@ -134,7 +134,7 @@ void CellDoubleHeap::push(Cell* cell) {
 
 	// the cell is put into the first heap
 	heap1->push(elt);
-	if (critpr > 0) heap2->push(elt);
+	if (heap2) heap2->push(elt);
 
 	nb_cells++;
 }
@@ -143,11 +143,11 @@ Cell* CellDoubleHeap::pop() {
 	// Select the heap
 	HeapElt<Cell>* elt;
 	if (indbuf ==0) {
-		elt = heap1->popElt();
-		if (critpr > 0) heap2->eraseNode(elt->indice[1]);
+		elt = heap1->pop_elt();
+		if (heap2) heap2->erase_node(elt->indice[1]);
 	} else {
-		elt = heap2->popElt();
-		heap1->eraseNode(elt->indice[0]);
+		elt = heap2->pop_elt();
+		heap1->erase_node(elt->indice[0]);
 	}
 	Cell* cell = elt->cell;
 	elt->cell=NULL;

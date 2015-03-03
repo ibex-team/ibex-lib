@@ -83,7 +83,7 @@ public:
 	 * Removes (and deletes) from the heap all the elements
 	 * with a cost greater than \a lb.
 	 */
-	virtual inline void contractHeap(double lb) { loup = lb; CellHeap::contractHeap(lb);}
+	virtual inline void contract(double lb) { loup = lb; CellHeap::contract(lb);}
 
 	/** The "cost" of a element. */
 	virtual double cost(const Cell& c) const;
@@ -110,7 +110,7 @@ public:
 	 * Removes (and deletes) from the heap all the elements
 	 * with a cost greater than \a lb.
 	 */
-	virtual inline void contractHeap(double lb) { loup = lb; CellHeap::contractHeap(lb);}
+	virtual inline void contract(double lb) { loup = lb; CellHeap::contract(lb);}
 
 	/** The "cost" of a element. */
 	virtual double cost(const Cell& c) const;
@@ -137,7 +137,7 @@ public:
 	 * Removes (and deletes) from the heap all the elements
 	 * with a cost greater than \a lb.
 	 */
-	virtual inline void contractHeap(double lb) { loup = lb; CellHeap::contractHeap(lb);}
+	virtual inline void contract(double lb) { loup = lb; CellHeap::contract(lb);}
 
 	/** The "cost" of a element. */
 	virtual	double cost(const Cell& c) const;

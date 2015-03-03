@@ -20,7 +20,7 @@ CellHeapVarLB::CellHeapVarLB(int ind_var, int ind_crit) : CellHeap(ind_crit, fal
 double CellHeapVarLB::cost(const Cell& c) const { return c.box[goal_var].lb(); }
 
 CellHeapVarLB* CellHeapVarLB::init_copy() const {
-	return new CellHeapVarLB(goal_var, getId());
+	return new CellHeapVarLB(goal_var, get_id());
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -30,7 +30,7 @@ CellHeapVarUB::CellHeapVarUB(int ind_var, int ind_crit) : CellHeap(ind_crit,fals
 double CellHeapVarUB::cost(const Cell& c) const { return c.box[goal_var].ub(); }
 
 CellHeapVarUB* CellHeapVarUB::init_copy() const {
-	return new CellHeapVarUB(goal_var, getId());
+	return new CellHeapVarUB(goal_var, get_id());
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -47,7 +47,7 @@ double CellHeapC3::cost(const Cell& c) const {
 }
 
 CellHeapC3* CellHeapC3::init_copy() const {
-	return new CellHeapC3(getId(), loup);
+	return new CellHeapC3(get_id(), loup);
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -64,7 +64,7 @@ double CellHeapC5::cost(const Cell& c) const {
 }
 
 CellHeapC5* CellHeapC5::init_copy() const {
-	return new CellHeapC5(getId(),loup);
+	return new CellHeapC5(get_id(),loup);
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -81,7 +81,7 @@ double CellHeapC7::cost(const Cell& c) const {
 }
 
 CellHeapC7* CellHeapC7::init_copy() const {
-	return  new CellHeapC7(goal_var,getId(), loup);
+	return  new CellHeapC7(goal_var,get_id(), loup);
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -97,7 +97,7 @@ double CellHeapPU::cost(const Cell& c) const {
 	}
 }
 
-CellHeapPU* CellHeapPU::init_copy() const {	return new CellHeapPU( getId());}
+CellHeapPU* CellHeapPU::init_copy() const {	return new CellHeapPU( get_id());}
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
@@ -112,7 +112,7 @@ double CellHeapPFlb::cost(const Cell& c) const {
 	}
 }
 
-CellHeapPFlb* CellHeapPFlb::init_copy() const {	return new CellHeapPFlb( getId());}
+CellHeapPFlb* CellHeapPFlb::init_copy() const {	return new CellHeapPFlb( get_id());}
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
@@ -127,6 +127,6 @@ double CellHeapPFub::cost(const Cell& c) const {
 	}
 }
 
-CellHeapPFub* CellHeapPFub::init_copy() const {	return new CellHeapPFub( getId());}
+CellHeapPFub* CellHeapPFub::init_copy() const {	return new CellHeapPFub( get_id());}
 
 }  // end namespace ibex
