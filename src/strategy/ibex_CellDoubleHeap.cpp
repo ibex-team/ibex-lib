@@ -27,31 +27,10 @@ void CellDoubleHeap::contract(double new_loup) {
 
 	CellCostFunc& cost2=((CellCostFunc&) heap2->costf);
 
-	DoubleHeap<Cell>::contract(new_loup, cost2.depends_on_loup);
-
-	SharedHeap<Cell> *copy2 = new SharedHeap<Cell>(cost2, 1);
-
 	// it is necessary to update the loup.
 	cost2.set_loup(new_loup);
 
-	copy2->root = heap2->root;
-	copy2->nb_nodes =heap2->nb_nodes;
-	heap2->root = NULL;
-	heap2->nb_nodes =0;
-
-	// why again??
-	cost2.set_loup(new_loup);
-
-	copy2->sort(cost2.depends_on_loup ); //update the order if necessary
-
-	heap2->nb_nodes = copy2->nb_nodes;
-	heap2->root = copy2->root;
-	copy2->root = NULL; // avoid to delete heap2 with copy2
-	delete copy2;
-
-	assert(nb_nodes==heap2->size());
-	assert(nb_nodes==heap1->size());
-
+	DoubleHeap<Cell>::contract(new_loup, cost2.depends_on_loup);
 }
 
 } // namespace ibex

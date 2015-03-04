@@ -77,10 +77,15 @@ public:
 	double minimum2() const;
 
 	/**
-	 * Removes (and deletes) from the heap all the datas
+	 * Removes (and deletes) from the heap all the data
 	 * with a cost greater than \a loup.
+	 *
+	 * The costs of the first heap are assumed to be up-to-date.
+	 *
+	 * \param update_cost_heap2 - if true, the costs are
+	 *                            recalculated for the second heap
 	 */
-	void contract(double loup, bool percolate);
+	void contract(double loup, bool update_cost_heap2);
 
 	/**
 	 * Delete this
@@ -105,11 +110,11 @@ protected:
 	 * (see details in the constructor) */
 	const int critpr;
 
-	/** Current selected buffer. */
-	mutable int indbuf;
+	/** Current selected heap. */
+	mutable int current_heap_id;
 
 	/** use in the contract function by recursivity */
-	void contract_rec(double new_loup, HeapNode<T>* node, SharedHeap<T>& heap, bool percolate);
+	void contract_rec(double new_loup, HeapNode<T>* node, SharedHeap<T>& heap, bool update_cost_heap2);
 
 	/**
 	 * Erase all the subnodes of node (including itself) in the first heap
@@ -133,7 +138,7 @@ protected:
 template<class T>
 DoubleHeap<T>::DoubleHeap(CostFunc<T>& cost1, CostFunc<T>& cost2, int critpr) :
 		 nb_nodes(0), heap1(new SharedHeap<T>(cost1,0)),
-		              heap2(new SharedHeap<T>(cost2,1)), critpr(critpr), indbuf(0) {
+		              heap2(new SharedHeap<T>(cost2,1)), critpr(critpr), current_heap_id(0) {
 
 }
 
@@ -160,19 +165,21 @@ unsigned int DoubleHeap<T>::size() const {
 }
 
 template<class T>
-void DoubleHeap<T>::contract(double new_loup, bool percolate) {
+void DoubleHeap<T>::contract(double new_loup, bool update_cost_heap2) {
 
 	if (nb_nodes==0) return;
 
 	SharedHeap<T>* copy1 = new SharedHeap<T>(heap1->costf, 0);
 
-	contract_rec(new_loup, heap1->root, *copy1, percolate);
+	contract_rec(new_loup, heap1->root, *copy1, update_cost_heap2);
 
 	heap1->root = copy1->root;
 	heap1->nb_nodes = copy1->size();
 	nb_nodes = copy1->size();
 	copy1->root = NULL; // avoid to delete heap1 with copy1
 	delete copy1;
+
+	if (update_cost_heap2) heap2->sort(true);
 
 	assert(nb_nodes==heap2->size());
 	assert(nb_nodes==heap1->size());
@@ -183,6 +190,7 @@ void DoubleHeap<T>::contract(double new_loup, bool percolate) {
 template<class T>
 void DoubleHeap<T>::contract_rec(double new_loup, HeapNode<T>* node, SharedHeap<T>& heap, bool percolate) {
 
+	// the cost are assumed to be up-to-date for the 1st heap
 	if (node->is_sup(new_loup, 0)) {
 		// we must remove from the other heap all the sub-nodes
 		if (heap2) erase_subnodes(node, percolate);
@@ -237,7 +245,7 @@ template<class T>
 T* DoubleHeap<T>::pop() {
 	// Select the heap
 	HeapElt<T>* elt;
-	if (indbuf==0) {
+	if (current_heap_id==0) {
 		elt = heap1->pop_elt();
 		if (heap2) heap2->erase_node(elt->holder[1]);
 	} else {
@@ -256,15 +264,15 @@ T* DoubleHeap<T>::pop() {
 template<class T>
 T* DoubleHeap<T>::top() const {
 
-	// Select the heap
+	// select the heap
 	if (rand() % 100 >=critpr) {
 		// the first heap is used
-		indbuf=0;
+		current_heap_id=0;
 		return heap1->top();
 	}
 	else {
 		// the second heap is used
-		indbuf=1;
+		current_heap_id=1;
 		return heap2->top();
 	}
 }
@@ -272,14 +280,14 @@ T* DoubleHeap<T>::top() const {
 template<class T>
 T* DoubleHeap<T>::top1() const {
 	// the first heap is used
-	indbuf=0;
+	current_heap_id=0;
 	return heap1->top();
 }
 
 template<class T>
 T* DoubleHeap<T>::top2() const {
 	// the second heap is used
-	indbuf=1;
+	current_heap_id=1;
 	return heap2->top();
 
 }

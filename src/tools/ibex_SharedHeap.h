@@ -447,7 +447,7 @@ HeapNode<T>* SharedHeap<T>::erase_node_no_percolate(HeapNode<T>* pt_root) {
 }
 
 template<class T>
-void SharedHeap<T>::percolate(HeapNode<T> *node) {
+void SharedHeap<T>::percolate(HeapNode<T>* node) {
 	assert(node);
 
 	// PERMUTATION to maintain the order in the heap when going down
@@ -488,7 +488,7 @@ void SharedHeap<T>::percolate(HeapNode<T> *node) {
 }
 
 template<class T>
-HeapNode<T>::HeapNode(HeapElt<T>* elt, HeapNode<T> * father): elt(elt), right(NULL), left(NULL), father(father) { }
+HeapNode<T>::HeapNode(HeapElt<T>* elt, HeapNode<T>* father): elt(elt), right(NULL), left(NULL), father(father) { }
 
 //template<class T>
 //HeapNode<T>::~HeapNode() {
