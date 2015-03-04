@@ -11,7 +11,7 @@
 #define __IBEX_CELL_COST_FUNC__
 
 #include "ibex_Interval.h"
-#include "ibex_Heap.h"
+#include "ibex_SharedHeap.h"
 #include "ibex_Cell.h"
 
 namespace ibex {

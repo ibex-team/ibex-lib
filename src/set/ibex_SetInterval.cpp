@@ -10,7 +10,7 @@
 #include "ibex_SetInterval.h"
 #include "ibex_SetLeaf.h"
 #include "ibex_SetBisect.h"
-#include "ibex_SingleHeap.h"
+#include "ibex_Heap.h"
 #include "ibex_CellStack.h"
 #include <stack>
 #include <fstream>
@@ -224,17 +224,17 @@ public:
 /**
  * Cell heap where the criterion is the distance to "pt"
  */
-class CellHeapDist : public SingleHeap<Cell> {
+class CellHeapDist : public CostFunc<Cell> {
 
 public:
-
 	/** The "cost" of a element. */
 	virtual	double cost(const Cell& c) const { return c.get<NodeAndDist>().dist; }
 };
 
 
 double SetInterval::dist(const Vector& pt, bool inside) const {
-	CellHeapDist heap;
+	CellHeapDist costf;
+	Heap<Cell> heap(costf);
 
 	//int count=0; // for stats
 

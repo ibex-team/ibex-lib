@@ -10,7 +10,7 @@
 #ifndef __IBEX_DOUBLE_HEAP_H__
 #define __IBEX_DOUBLE_HEAP_H__
 
-#include "ibex_Heap.h"
+#include "ibex_SharedHeap.h"
 #include <stdlib.h> // for rand()
 
 namespace ibex {
