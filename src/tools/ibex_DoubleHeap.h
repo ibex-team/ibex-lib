@@ -25,7 +25,7 @@ public:
 	DoubleHeap(CostFunc<T>& cost1, CostFunc<T>& cost2, int critpr);
 
 	/** Flush the buffer.
-	 * All the remaining cells will be *deleted* */
+	 * All the remaining data will be *deleted* */
 	void flush();
 
 	/** Return the size of the buffer. */
@@ -34,25 +34,25 @@ public:
 	/** Return true if the buffer is empty. */
 	bool empty() const;
 
-	/** push a new cell on the stack. */
-	void push(T* cell);
+	/** push new data on the heap. */
+	void push(T* data);
 
-	/** Pop a cell from the stack and return it.*/
+	/** Pop data from the stack and return it.*/
 	T* pop();
 
-	/** Pop a cell from the first heap and return it.*/
+	/** Pop data from the first heap and return it.*/
 	T* pop1();
 
-	/** Pop a cell from the second heap and return it.*/
+	/** Pop data from the second heap and return it.*/
 	T* pop2();
 
-	/** Return the next box (but does not pop it).*/
+	/** Return next data (but does not pop it).*/
 	T* top() const;
 
-	/** Return the next box of the first heap (but does not pop it).*/
+	/** Return next data of the first heap (but does not pop it).*/
 	T* top1() const;
 
-	/** Return the next box of the second heap  (but does not pop it).*/
+	/** Return next data of the second heap  (but does not pop it).*/
 	T* top2() const;
 
 	/**
@@ -60,24 +60,24 @@ public:
 	 *
 	 * Complexity: o(1)
 	 */
-	inline double minimum() const {	return heap1->minimum(); }
+	double minimum() const;
 
 	/**
 	 * Return the first minimum (the criterion for the first heap)
 	 *
 	 * Complexity: o(1)
 	 */
-	inline double minimum1() const {	return heap1->minimum(); }
+	double minimum1() const;
 
 	/**
 	 * Return the second minimum (the criterion for the second heap)
 	 *
 	 * Complexity: o(1)
 	 */
-	inline double minimum2() const {	return heap2->minimum(); }
+	double minimum2() const;
 
 	/**
-	 * Removes (and deletes) from the heap all the cells
+	 * Removes (and deletes) from the heap all the datas
 	 * with a cost greater than \a loup.
 	 */
 	void contract(double loup);
@@ -90,10 +90,10 @@ public:
 	template<class U>
 	friend std::ostream& operator<<(std::ostream& os, const DoubleHeap<U>& heap);
 
-//protected:
-	/** Count the number of cells pushed since
+protected:
+	/** Count the number of nodes pushed since
 	 * the object is created. */
-	unsigned int nb_cells;
+	unsigned int nb_nodes;
 
 	/** the first heap */
 	SharedHeap<T> *heap1;
@@ -132,7 +132,7 @@ public:
 
 template<class T>
 DoubleHeap<T>::DoubleHeap(CostFunc<T>& cost1, CostFunc<T>& cost2, int critpr) :
-		 nb_cells(0), heap1(new SharedHeap<T>(cost1,0,false)),
+		 nb_nodes(0), heap1(new SharedHeap<T>(cost1,0,false)),
 		heap2(new SharedHeap<T>(cost2,1)), critpr(critpr), indbuf(0) {
 
 }
@@ -145,37 +145,37 @@ DoubleHeap<T>::~DoubleHeap() {
 
 template<class T>
 void DoubleHeap<T>::flush() {
-	if (nb_cells>0) {
+	if (nb_nodes>0) {
 		erase_subnodes(heap1->root,false);
-		heap1->nb_cells=0;
+		heap1->nb_nodes=0;
 		heap1->root=NULL;
-		nb_cells=0;
+		nb_nodes=0;
 	}
 }
 
 template<class T>
 unsigned int DoubleHeap<T>::size() const {
 	assert(heap1->size()==heap2->size());
-	return nb_cells;
+	return nb_nodes;
 }
 
 template<class T>
 void DoubleHeap<T>::contract(double new_loup) {
 
-	if (nb_cells==0) return;
+	if (nb_nodes==0) return;
 
 	SharedHeap<T>* copy1 = new SharedHeap<T>(heap1->costf, 0, heap1->updateCost);
 
 	contract_rec(new_loup, heap1->root, *copy1);
 
 	heap1->root = copy1->root;
-	heap1->nb_cells = copy1->size();
-	nb_cells = copy1->size();
+	heap1->nb_nodes = copy1->size();
+	nb_nodes = copy1->size();
 	copy1->root = NULL; // avoid to delete heap1 with copy1
 	delete copy1;
 
-	assert(nb_cells==heap2->size());
-	assert(nb_cells==heap1->size());
+	assert(nb_nodes==heap2->size());
+	assert(nb_nodes==heap1->size());
 
 }
 
@@ -214,23 +214,23 @@ void DoubleHeap<T>::erase_subnodes(HeapNode<T>* node, bool percolate) {
 template<class T>
 bool DoubleHeap<T>::empty() const {
 	// if one buffer is empty, the other is also empty
-	return (nb_cells==0);
+	return (nb_nodes==0);
 }
 
 template<class T>
-void DoubleHeap<T>::push(T* cell) {
+void DoubleHeap<T>::push(T* data) {
 	HeapElt<T>* elt;
 	if (heap2) {
-		elt = new HeapElt<T>(cell, heap1->cost(*cell), heap2->cost(*cell));
+		elt = new HeapElt<T>(data, heap1->cost(*data), heap2->cost(*data));
 	} else {
-		elt = new HeapElt<T>(cell, heap1->cost(*cell));
+		elt = new HeapElt<T>(data, heap1->cost(*data));
 	}
 
-	// the cell is put into the first heap
+	// the data is put into the first heap
 	heap1->push_elt(elt);
 	if (heap2) heap2->push_elt(elt);
 
-	nb_cells++;
+	nb_nodes++;
 }
 
 template<class T>
@@ -244,16 +244,15 @@ T* DoubleHeap<T>::pop() {
 		elt = heap2->pop_elt();
 		heap1->erase_node(elt->holder[0]);
 	}
-	T* cell = elt->cell;
-	elt->cell=NULL; // avoid the cell to be deleted with the element
+	T* data = elt->data;
+	elt->data=NULL; // avoid the data to be deleted with the element
 	delete elt;
 
-	nb_cells--;
+	nb_nodes--;
 
-	return cell;
+	return data;
 }
 
-// Invariant: the top of each heaps is an alive cell
 template<class T>
 T* DoubleHeap<T>::top() const {
 
@@ -270,7 +269,6 @@ T* DoubleHeap<T>::top() const {
 	}
 }
 
-// Invariant: the top of each heaps is an alive cell
 template<class T>
 T* DoubleHeap<T>::top1() const {
 	// the first heap is used
@@ -278,7 +276,6 @@ T* DoubleHeap<T>::top1() const {
 	return heap1->top();
 }
 
-// Invariant: the top of each heaps is an alive cell
 template<class T>
 T* DoubleHeap<T>::top2() const {
 	// the second heap is used
@@ -286,6 +283,15 @@ T* DoubleHeap<T>::top2() const {
 	return heap2->top();
 
 }
+
+template<class T>
+inline double DoubleHeap<T>::minimum() const {	return heap1->minimum(); }
+
+template<class T>
+inline double DoubleHeap<T>::minimum1() const { return heap1->minimum(); }
+
+template<class T>
+inline double DoubleHeap<T>::minimum2() const { return heap2->minimum(); }
 
 template<class T>
 std::ostream& DoubleHeap<T>::print(std::ostream& os) const{

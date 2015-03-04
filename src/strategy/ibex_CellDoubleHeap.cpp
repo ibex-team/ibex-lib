@@ -33,9 +33,9 @@ void CellDoubleHeap::contract(double new_loup) {
 	((CellCostFunc&) copy2->costf).set_loup(new_loup);
 
 	copy2->root = heap2->root;
-	copy2->nb_cells =heap2->nb_cells;
+	copy2->nb_nodes =heap2->nb_nodes;
 	heap2->root = NULL;
-	heap2->nb_cells =0;
+	heap2->nb_nodes =0;
 
 	// why again??
 	((CellCostFunc&) copy2->costf).set_loup(new_loup);
@@ -43,13 +43,13 @@ void CellDoubleHeap::contract(double new_loup) {
 	if (copy2->updateCost)  { //update the order if necessary
 		copy2->sort();
 	}
-	heap2->nb_cells = copy2->nb_cells;
+	heap2->nb_nodes = copy2->nb_nodes;
 	heap2->root = copy2->root;
 	copy2->root = NULL; // avoid to delete heap2 with copy2
 	delete copy2;
 
-	assert(nb_cells==heap2->size());
-	assert(nb_cells==heap1->size());
+	assert(nb_nodes==heap2->size());
+	assert(nb_nodes==heap1->size());
 
 }
 
