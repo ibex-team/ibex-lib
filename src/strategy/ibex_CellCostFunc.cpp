@@ -7,8 +7,8 @@
 // Last Update : Sept 11, 2014
 //============================================================================
 
-#include "ibex_CellSharedHeap.h"
-
+#include "ibex_CellCostFunc.h"
+#include "ibex_OptimData.h"
 
 namespace ibex {
 

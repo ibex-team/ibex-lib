@@ -13,7 +13,6 @@
 #define __TEST_CTC_CELLHEAP_H__
 
 #include "cpptest.h"
-#include "ibex_CellSharedHeap.h"
 #include "utils.h"
 
 namespace ibex {

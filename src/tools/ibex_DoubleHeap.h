@@ -90,7 +90,7 @@ public:
 	template<class U>
 	friend std::ostream& operator<<(std::ostream& os, const DoubleHeap<U>& heap);
 
-protected:
+//protected:
 	/** Count the number of cells pushed since
 	 * the object is created. */
 	unsigned int nb_cells;

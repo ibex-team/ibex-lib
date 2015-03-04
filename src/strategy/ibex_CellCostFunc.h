@@ -11,11 +11,9 @@
 #ifndef __IBEX_CELL_SHARED_HEAP_H__
 #define __IBEX_CELL_SHARED_HEAP_H__
 
-#include "ibex_CellBuffer.h"
-#include "ibex_CellHeap.h"
 #include "ibex_Interval.h"
-#include "ibex_OptimData.h"
-#include "ibex_Exception.h"
+#include "ibex_Heap.h"
+#include "ibex_Cell.h"
 
 namespace ibex {
 

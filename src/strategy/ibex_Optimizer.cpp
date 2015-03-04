@@ -22,6 +22,7 @@
 #include "ibex_NoBisectableVariableException.h"
 //#include "ibex_Multipliers.h"
 #include "ibex_PdcFirstOrder.h"
+#include "ibex_OptimData.h"
 
 #include <float.h>
 #include <stdlib.h>
@@ -258,7 +259,7 @@ void Optimizer::handle_cell(Cell& c, const IntervalVector& init_box ){
 		//       objshaver->contract(c.box);
 
 		// Computations for the Casado C3, C5, C7 criteria
-		switch (buffer.crit) {
+		switch (buffer.crit2) {
 		case CellDoubleHeap::C3 : {
 			compute_pf(c);
 			break;
@@ -446,7 +447,7 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 	entailed->init_root(user_sys,sys);
 
 	// add data pu and pf for
-	switch (buffer.crit) {
+	switch (buffer.crit2) {
 	case CellDoubleHeap::C3 :
 	case CellDoubleHeap::C5 :
 	case CellDoubleHeap::C7 :
