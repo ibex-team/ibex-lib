@@ -1,23 +1,16 @@
 //============================================================================
 //                                  I B E X                                   
 // File        : ibex_DoubleHeap.cpp
-// Author      : Gilles Chabert
+// Author      : Gilles Chabert, Jordan Ninin
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
-// Created     : Mar 3, 2015
+// Created     : Sep 12, 2014
 //============================================================================
 
 #include "ibex_DoubleHeap.h"
 
+using namespace std;
+
 namespace ibex {
-
-DoubleHeap::DoubleHeap() {
-	// TODO Auto-generated constructor stub
-
-}
-
-DoubleHeap::~DoubleHeap() {
-	// TODO Auto-generated destructor stub
-}
 
 } // namespace ibex

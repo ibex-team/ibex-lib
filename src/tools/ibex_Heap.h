@@ -29,6 +29,7 @@ namespace ibex {
  */
 template<class T> class HeapNode;
 template<class T> class HeapElt;
+template<class T> class DoubleHeap;
 
 template<class T>
 class CostFunc {
@@ -119,9 +120,9 @@ public:
 	 */
 	const bool updateCost;
 
-protected:
+//protected:
 
-	friend class CellDoubleHeap;
+	friend class DoubleHeap<T>;
 
 	/** The "cost" of an element. */
 	double cost(const T& data) const { return costf.cost(data); }
@@ -201,9 +202,9 @@ private:
 template<class T>
 class HeapNode {
 
-private:
+//private:
 	friend class SharedHeap<T>;
-	friend class CellDoubleHeap;
+	friend class DoubleHeap<T>;
 
 	/** Create a node from an element and the father node. */
 	explicit HeapNode(HeapElt<T>* elt, HeapNode<T>* father=NULL);
@@ -242,10 +243,10 @@ private:
 template<class T>
 class HeapElt {
 
-private:
+//private:
 	friend class HeapNode<T>;
 	friend class SharedHeap<T>;
-	friend class CellDoubleHeap;
+	friend class DoubleHeap<T>;
 
 	/** Create an CellHeapElt with a cell and its criteria */
 	//CellHeapElt(int nb_crit, T* elt, double *crit);

@@ -11,6 +11,7 @@
 #define __IBEX_CELL_DOUBLE_HEAP_H__
 
 #include "ibex_CellSharedHeap.h"
+#include "ibex_DoubleHeap.h"
 #include "ibex_CellHeap.h"
 
 namespace ibex {
@@ -21,7 +22,7 @@ namespace ibex {
  * See "A new multi-selection technique in interval methods for global optimization", L.G. Casado, Computing, 2000
  * (TODO: check ref)
  */
-class CellDoubleHeap : public CellBuffer {
+class CellDoubleHeap : public DoubleHeap<Cell>, public CellBuffer {
 public:
 
 
@@ -62,42 +63,42 @@ public:
 	/** Pop a cell from the stack and return it.*/
 	Cell* pop();
 
-	/** Pop a cell from the first heap and return it.*/
-	Cell* pop1();
-
-	/** Pop a cell from the second heap and return it.*/
-	Cell* pop2();
-
+//	/** Pop a cell from the first heap and return it.*/
+//	Cell* pop1();
+//
+//	/** Pop a cell from the second heap and return it.*/
+//	Cell* pop2();
+//
 	/** Return the next box (but does not pop it).*/
 	Cell* top() const;
-
-	/** Return the next box of the first heap (but does not pop it).*/
-	Cell* top1() const;
-
-	/** Return the next box of the second heap  (but does not pop it).*/
-	Cell* top2() const;
-
-	/**
-	 * Return the minimum (the criterion for the first heap)
-	 *
-	 * Complexity: o(1)
-	 */
-	inline double minimum() const {	return heap1->minimum(); }
-
-	/**
-	 * Return the first minimum (the criterion for the first heap)
-	 *
-	 * Complexity: o(1)
-	 */
-	inline double minimum1() const {	return heap1->minimum(); }
-
-	/**
-	 * Return the second minimum (the criterion for the second heap)
-	 *
-	 * Complexity: o(1)
-	 */
-	inline double minimum2() const {	return heap2->minimum(); }
-
+//
+//	/** Return the next box of the first heap (but does not pop it).*/
+//	Cell* top1() const;
+//
+//	/** Return the next box of the second heap  (but does not pop it).*/
+//	Cell* top2() const;
+//
+//	/**
+//	 * Return the minimum (the criterion for the first heap)
+//	 *
+//	 * Complexity: o(1)
+//	 */
+//	inline double minimum() const {	return heap1->minimum(); }
+//
+//	/**
+//	 * Return the first minimum (the criterion for the first heap)
+//	 *
+//	 * Complexity: o(1)
+//	 */
+//	inline double minimum1() const {	return heap1->minimum(); }
+//
+//	/**
+//	 * Return the second minimum (the criterion for the second heap)
+//	 *
+//	 * Complexity: o(1)
+//	 */
+//	inline double minimum2() const {	return heap2->minimum(); }
+//
 	/**
 	 * Removes (and deletes) from the heap all the cells
 	 * with a cost greater than \a loup.
@@ -116,31 +117,42 @@ private:
 	/** Index of the objective variable. */
 	const int goal_var;
 
-	/** Count the number of cells pushed since
-	 * the object is created. */
-	unsigned int nb_cells;
+//	/** Count the number of cells pushed since
+//	 * the object is created. */
+//	unsigned int nb_cells;
+//
+//	/** the first heap */
+//	SharedHeap<Cell> *heap1;
+//
+//	/** the second heap */
+//	SharedHeap<Cell> *heap2;
+//
+//	/** Probability to choose the second
+//	 * (see details in the constructor) */
+//	const int critpr;
 
-	/** the first heap */
-	SharedHeap<Cell> *heap1;
+//	/** Current selected buffer. */
+//	mutable int indbuf;
 
-	/** the second heap */
-	SharedHeap<Cell> *heap2;
-
-	/** Probability to choose the second
-	 * (see details in the constructor) */
-	const int critpr;
-
-	/** Current selected buffer. */
-	mutable int indbuf;
-
-	/** use in the contractHeap function by recursivity */
-	void contract_rec(double new_loup, HeapNode<Cell>* node, SharedHeap<Cell>& heap);
-
-	/** erase a node in the second heap */
-	void erase_subnodes(HeapNode<Cell>* node, bool percolate);
-
-	std::ostream& print(std::ostream& os) const;
+//	/** use in the contractHeap function by recursivity */
+//	void contract_rec(double new_loup, HeapNode<Cell>* node, SharedHeap<Cell>& heap);
+//
+//	/** erase a node in the second heap */
+//	void erase_subnodes(HeapNode<Cell>* node, bool percolate);
+//
+//	std::ostream& print(std::ostream& os) const;
 };
+
+
+
+/*================================== inline implementations ========================================*/
+
+inline void CellDoubleHeap::flush()               { DoubleHeap<Cell>::flush(); }
+inline unsigned int CellDoubleHeap::size() const  { return DoubleHeap<Cell>::size(); }
+inline bool CellDoubleHeap::empty() const         { return DoubleHeap<Cell>::empty(); }
+inline void CellDoubleHeap::push(Cell* cell)      { DoubleHeap<Cell>::push(cell); }
+inline Cell* CellDoubleHeap::pop()                { return DoubleHeap<Cell>::pop(); }
+inline Cell* CellDoubleHeap::top() const          { return DoubleHeap<Cell>::top(); }
 
 
 } // namespace ibex
