@@ -4,7 +4,7 @@
 // Author      : Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
-// Created     : Mar 3, 2015
+// Created     : Dec 23, 2014
 //============================================================================
 
 #ifndef __IBEX_SINGLE_HEAP_H__
@@ -19,21 +19,23 @@ namespace ibex {
 
 /** \ingroup strategy
  *
- * \brief Heap
+ * \brief SingleHeap
  *
  * The heap is built so that:
- * <ul>
- * <li> #pop() returns in logarithmic time
- * the element with the minimal "cost" (criterion).</li>
- * <li> #push() is also in logarithmic time.</li>
- * </ul>
+ *  <ul>
+ *  <li> #pop() returns in logarithmic time
+ *       the element with the minimal "cost" (criterion).</li>
+ *  <li> #push() is also in logarithmic time.</li>
+ *  </ul>
  *
  */
 template<class T>
-class Heap {
+class SingleHeap  {
+
 public:
 	/** Delete this. */
-	virtual ~Heap();
+	virtual ~SingleHeap();
+
 	/**
 	 * \brief Flush the buffer.
 	 *
@@ -41,16 +43,22 @@ public:
 	 * (with a call to the destructor of class T).
 	 */
 	void flush();
+
 	/** Return the size of the buffer. */
 	int size() const;
+
 	/** Return true if the buffer is empty. */
 	bool empty() const;
+
 	/** push a new element on the stack. */
 	void push(T* el);
+
 	/** Pop a element from the stack and return it.*/
 	T* pop();
+
 	/** Return the next box (but does not pop it).*/
 	T* top() const;
+
 	/**
 	 * \brief Contracts the heap.
 	 *
@@ -58,23 +66,33 @@ public:
 	 * with a cost greater than \a lb.
 	 */
 	void contract(double lb);
+
 	/** Return the minimum (the criterion for
 	 * the first element) */
 	double minimum() const;
+
 protected:
 	/** The "cost" of a element. */
 	virtual double cost(const T&) const=0;
+
 	/** The way to compare two pairs (element,crit). */
 	bool operator()(const std::pair<T*,double>& c1, const std::pair<T*,double>& c2) const;
+
 	// elements and associated "costs"
 	std::vector<std::pair<T*,double> > l;
+
 	template<class U>
-	friend std::ostream& operator<<(std::ostream&, const Heap<U>&);
+	friend std::ostream& operator<<(std::ostream&, const SingleHeap<U>&);
 };
+
 /** Display the heap */
 template<class T>
-std::ostream& operator<<(std::ostream&, const Heap<T>&);
+std::ostream& operator<<(std::ostream&, const SingleHeap<T>&);
+
+
 /*================================== inline implementations ========================================*/
+
+
 /* we need this dummy class just because
  * the xxx_heap functions take the comparator
  * argument by copy (hence, we cannot give
@@ -85,71 +103,92 @@ struct HeapComparator {
 		return c1.second >= c2.second;
 	}
 };
+
+
 template<class T>
-Heap<T>::~Heap() {
+SingleHeap<T>::~SingleHeap() {
+
 }
+
 template<class T>
-bool Heap<T>::operator()(const std::pair<T*,double>& c1, const std::pair<T*,double>& c2) const {
+bool SingleHeap<T>::operator()(const std::pair<T*,double>& c1, const std::pair<T*,double>& c2) const {
 	return c1.second >= c2.second;
 }
+
 template<class T>
-void Heap<T>::flush() {
+void SingleHeap<T>::flush() {
 	for (typename std::vector<std::pair<T*,double> >::iterator it=l.begin(); it!=l.end(); it++)
 		delete it->first;
+
 	l.clear();
 }
+
 template<class T>
-int Heap<T>::size() const {
+int SingleHeap<T>::size() const {
 	return l.size();
 }
+
 // E.g.: called by manage_buffer in Optimizer in case of a new upper bound
 // on the objective ("loup"). This function then removes (and deletes) from
-// the heap all the cells with a cost greater than loup.
+// the heap all the elements with a cost greater than loup.
 template<class T>
-void Heap<T>::contract(double loup) {
-	//cout << " before contract heap " << l.size() << endl;
+void SingleHeap<T>::contract(double loup) {
+	//cout << " before contract heap  " << l.size() << endl;
+
 	sort_heap(l.begin(),l.end(),HeapComparator<T>());
-	std::vector<std::pair<Cell*,double> >::iterator it0=l.begin();
+	typename std::vector<std::pair<T*,double> >::iterator it0=l.begin();
+
 	int k=0;
 	while (it0!=l.end() && it0->second > loup) { it0++; k++; }
+
 	for (int i=0;i<k;i++) {
 		delete l[i].first;
 	}
+
 	if (k>0) l.erase(l.begin(),it0);
+
 	make_heap(l.begin(), l.end() ,HeapComparator<T>());
+
 	//cout << " after contract heap " << l.size() << endl;
+
 }
+
 template<class T>
-bool Heap<T>::empty() const {
+bool SingleHeap<T>::empty() const {
 	return l.empty();
 }
+
 template<class T>
-void Heap<T>::push(T* el) {
+void SingleHeap<T>::push(T* el) {
 	l.push_back(std::pair<T*,double>(el,cost(*el)));
 	push_heap(l.begin(), l.end(), HeapComparator<T>());
 }
+
 template<class T>
-T* Heap<T>::pop() {
-	Cell* c = l.front().first;
+T* SingleHeap<T>::pop() {
+	T* c = l.front().first;
 	pop_heap(l.begin(),l.end(), HeapComparator<T>()); // put the "best" at the end
 	l.pop_back(); // removes the "best"
-	return c; // and return it
+	return c;     // and return it
 }
+
 template<class T>
-T* Heap<T>::top() const {
+T* SingleHeap<T>::top() const {
 	return l.front().first;
 }
+
 template<class T>
-double Heap<T>::minimum() const {
+double SingleHeap<T>::minimum() const {
 	return l.begin()->second;
 }
+
 template<class T>
-std::ostream& operator<<(std::ostream& os, const Heap<T>& heap) {
+std::ostream& operator<<(std::ostream& os, const SingleHeap<T>& heap) {
 	os << "[ ";
 	for (typename std::vector<std::pair<T*,double> >::const_iterator it=heap.l.begin(); it!=heap.l.end(); it++)
 		os << (*it->first) << " ";
 	return os << "]";
 }
-} // end namespace ibex
 
-#endif // __IBEX_SINGLE_HEAP_H__
+} // end namespace ibex
+#endif // __IBEX_HEAP_H__

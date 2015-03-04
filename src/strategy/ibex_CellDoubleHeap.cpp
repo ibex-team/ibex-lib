@@ -9,20 +9,22 @@
 
 #include "ibex_CellDoubleHeap.h"
 
+using namespace std;
+
 namespace ibex {
 
-CellDoubleHeap::CellDoubleHeap(int ind_var, criterion crit_2,  int critpr) :
-		 crit(crit_2), goal_var(ind_var), nb_cells(0), heap1(new CellHeapVarLB(ind_var,0)),
+CellDoubleHeap::CellDoubleHeap(int goal_var, criterion crit_2,  int critpr) :
+		 crit(crit_2), goal_var(goal_var), nb_cells(0), heap1(new SharedHeap<Cell>(*new CellHeapVarLB(goal_var),0,false)),
 		heap2(NULL),critpr(critpr) , indbuf(0){
 
 	switch (crit_2) {
-	case UB :    heap2 = new CellHeapVarUB(ind_var,1); break;
-	case C3 :    heap2 = new CellHeapC3(1) ;           break;
-	case C5 :    heap2 = new CellHeapC5(1) ;           break;
-	case C7 :    heap2 = new CellHeapC7(1) ;           break;
-	case PU :    heap2 = new CellHeapPU(1) ;           break;
-	case PF_LB : heap2 = new CellHeapPFlb(1) ;         break;
-	case PF_UB : heap2 = new CellHeapPFub(1) ;         break;
+	case UB :    heap2 = new SharedHeap<Cell>(*new CellHeapVarUB(goal_var),1); break;
+	case C3 :    heap2 = new SharedHeap<Cell>(*new CellHeapC3(),1);            break;
+	case C5 :    heap2 = new SharedHeap<Cell>(*new CellHeapC5(),1);            break;
+	case C7 :    heap2 = new SharedHeap<Cell>(*new CellHeapC7(goal_var),1);    break;
+	case PU :    heap2 = new SharedHeap<Cell>(*new CellHeapPU(),1);            break;
+	case PF_LB : heap2 = new SharedHeap<Cell>(*new CellHeapPFlb(),1);          break;
+	case PF_UB : heap2 = new SharedHeap<Cell>(*new CellHeapPFub(),1);          break;
 	default:     ibex_error("CellDoubleHeap::CellDoubleHeap : error  wrong criterion.");
 	}
 }
@@ -34,10 +36,12 @@ CellDoubleHeap::~CellDoubleHeap() {
 
 void CellDoubleHeap::flush() {
 	heap1->flush();
-	if (heap2) {
-		heap2->flush();
-	}
-	nb_cells=0;
+	heap2->flush();
+//	if (nb_cells>0) {
+//		erase_subnodes(heap1->root,false);
+//		heap1->nb_cells=0;
+//		nb_cells=0;
+//	}
 }
 
 unsigned int CellDoubleHeap::size() const {
@@ -49,7 +53,7 @@ void CellDoubleHeap::contract(double new_loup) {
 
 	if (nb_cells==0) return;
 
-	CellHeapVarLB *copy1 = new CellHeapVarLB( goal_var,0);
+	SharedHeap<Cell>* copy1 = new SharedHeap<Cell>(heap1->costf, 0, heap1->updateCost);
 
 	contract_rec(new_loup, heap1->root, *copy1);
 
@@ -60,13 +64,28 @@ void CellDoubleHeap::contract(double new_loup) {
 	delete copy1;
 
 
-	SharedHeap<Cell> *copy2 = heap2->copy();
-	copy2->contract(new_loup); // it is necessary to update the loup.
+	SharedHeap<Cell> *copy2 = new SharedHeap<Cell>(heap2->costf, 1, heap2->updateCost);
+
+	// it is necessary to update the loup.
+	switch (crit) {
+	case C3 :    ((CellHeapC3*) copy2)->set_loup(new_loup); break;
+	case C5 :    ((CellHeapC5*) copy2)->set_loup(new_loup); break;
+	case C7 :    ((CellHeapC7*) copy2)->set_loup(new_loup); break;
+	default: break;
+	}
+
 	copy2->root = heap2->root;
 	copy2->nb_cells =heap2->nb_cells;
 	heap2->root = NULL;
 	heap2->nb_cells =0;
-	heap2->contract(new_loup);
+
+	// why again??
+	switch (crit) {
+	case C3 :    ((CellHeapC3*) heap2)->set_loup(new_loup); break;
+	case C5 :    ((CellHeapC5*) heap2)->set_loup(new_loup); break;
+	case C7 :    ((CellHeapC7*) heap2)->set_loup(new_loup); break;
+	default: break;
+	}
 
 	if (copy2->updateCost)  { //update the order if necessary
 		copy2->sort();
@@ -113,7 +132,6 @@ void CellDoubleHeap::erase_subnodes(HeapNode<Cell>* node, bool percolate) {
 
 bool CellDoubleHeap::empty() const {
 	// if one buffer is empty, the other is also empty
-	// or only contains zombie cells
 	return (nb_cells==0);
 }
 

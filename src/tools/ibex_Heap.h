@@ -43,7 +43,7 @@ class SharedHeap  {
 public:
 
 	/** create this with a specific identifier, and if you need to update the cost a each contract of sort. */
-	SharedHeap(int id=0, bool updateCost=false);
+	SharedHeap(CostFunc<T>& cost, int id=0, bool updateCost=false);
 
 	/** Delete this. */
 	virtual  ~SharedHeap();
@@ -77,13 +77,13 @@ public:
 	 */
 	T* top() const;
 
-	/**
-	 * \brief Contracts the heap.
-	 *
-	 * Removes (and deletes) from the heap all the elements
-	 * with a cost greater than \a lb.
-	 */
-	void contract(double lb);
+//	/**
+//	 * \brief Contracts the heap.
+//	 *
+//	 * Removes (and deletes) from the heap all the elements
+//	 * with a cost greater than \a lb.
+//	 */
+//	void contract(double lb);
 
 	/** Return the minimum (the criterion for
 	 * the first element) */
@@ -109,28 +109,23 @@ public:
 
 	inline int get_id() const {return heap_id;}
 
+	CostFunc<T>& costf;
 
-protected:
-
-	friend class CellDoubleHeap;
-
-	/** The "cost" of an element. */
-	virtual double cost(const T&) const=0;
-
-	/**
-	 * \brief virtual copy constructor
-	 *
-	 * Return A copy of this.
-	 */
-	virtual SharedHeap<T>* copy() const =0;
+	/** Identifier of this heap */
+	const int heap_id;
 
 	/**
 	 * A boolean which indicate if all the cost must be update at each contract and sort
 	 */
 	const bool updateCost;
 
-	/** Identifier of this heap */
-	const int heap_id;
+protected:
+
+	friend class CellDoubleHeap;
+
+	/** The "cost" of an element. */
+	double cost(const T& data) const { return costf.cost(data); }
+
 
 	/** The root of the heap */
 	HeapNode<T>* root;
@@ -298,8 +293,8 @@ private:
 
 
 template<class T>
-SharedHeap<T>::SharedHeap(int id,bool updateCost) :
-nb_cells(0), updateCost(updateCost),  heap_id(id), root(NULL) {
+SharedHeap<T>::SharedHeap(CostFunc<T>& cost, int id,bool updateCost) :
+nb_cells(0), costf(cost), heap_id(id), updateCost(updateCost),  root(NULL) {
 
 }
 template<class T>
@@ -332,23 +327,23 @@ T* SharedHeap<T>::top() const {
 
 
 
-// E.g.: called by manage_buffer in Optimizer in case of a new upper bound
-// on the objective ("loup"). This function then removes (and deletes) from
-// the heap all the cells with a cost greater than loup.
-template<class T>
-void SharedHeap<T>::contract(double new_loup) {
-	if (nb_cells==0) return;
-
-	SharedHeap<T> * heap_tmp = copy();
-
-	contract_rec(new_loup, root, *heap_tmp);
-
-	root = heap_tmp->root;
-	nb_cells = heap_tmp->size();
-	heap_tmp->root = NULL;
-	delete heap_tmp;
-
-}
+//// E.g.: called by manage_buffer in Optimizer in case of a new upper bound
+//// on the objective ("loup"). This function then removes (and deletes) from
+//// the heap all the cells with a cost greater than loup.
+//template<class T>
+//void SharedHeap<T>::contract(double new_loup) {
+//	if (nb_cells==0) return;
+//
+//	SharedHeap<T> * heap_tmp = new SharedHeap<T>(costf, heap_id, updateCost);
+//
+//	contract_rec(new_loup, root, *heap_tmp);
+//
+//	root = heap_tmp->root;
+//	nb_cells = heap_tmp->size();
+//	heap_tmp->root = NULL;
+//	delete heap_tmp;
+//
+//}
 
 
 template<class T>
@@ -373,7 +368,7 @@ template<class T>
 void SharedHeap<T>::sort() {
 	if (nb_cells==0) return;
 
-	SharedHeap<T>* heap_tmp = copy();
+	SharedHeap<T>* heap_tmp = new SharedHeap<T>(costf, heap_id, updateCost);
 
 	// recursive sort : o(n*log(n))
 	sort_rec(root, *heap_tmp);
@@ -412,10 +407,10 @@ void SharedHeap<T>::push(T* cell) {
 
 
 template<class T>
-void SharedHeap<T>::push_elt(HeapElt<T>* cell) {
+void SharedHeap<T>::push_elt(HeapElt<T>* elt) {
 
 	if (nb_cells==0) {
-		root = new HeapNode<T>(cell,NULL);
+		root = new HeapNode<T>(elt,NULL);
 		root->elt->holder[heap_id] = root;
 		nb_cells++;
 	} else {
@@ -434,7 +429,7 @@ void SharedHeap<T>::push_elt(HeapElt<T>* cell) {
 				pt = pt->left;
 			}
 		}
-		HeapNode<T>* tmp= new HeapNode<T>(cell,pt);
+		HeapNode<T>* tmp= new HeapNode<T>(elt,pt);
 		tmp->elt->holder[heap_id] = tmp;
 		if (nb_cells%2==0)	{ pt->left =tmp; }
 		else 				{ pt->right=tmp; }

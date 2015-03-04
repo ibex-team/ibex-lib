@@ -26,10 +26,10 @@ namespace ibex {
  *
  * \brief Cell Heap based on lower bound criterion
  */
-class CellHeapVarLB: public CellHeap  {
+class CellHeapVarLB: public CostFunc<Cell>  {
 public:
 
-	CellHeapVarLB(int goal_var, int ind_crit=0) ;
+	CellHeapVarLB(int goal_var) ;
 
 	/** The "cost" of a element. */
 	virtual double cost(const Cell& c) const;
@@ -38,9 +38,6 @@ public:
 private:
 	/** Index of the objective variable. */
 	const int goal_var;
-
-	virtual CellHeapVarLB* copy() const;
-
 };
 // -----------------------------------------------------------------------------------------------------------------------------------
 
@@ -49,10 +46,10 @@ private:
  *
  * \brief Cell Heap based on upper bound criterion
  */
-class CellHeapVarUB: public CellHeap  {
+class CellHeapVarUB: public CostFunc<Cell>  {
 public:
 
-	CellHeapVarUB(int ind_var, int ind_crit=0) ;
+	CellHeapVarUB(int ind_var) ;
 
 	/** The "cost" of a element. */
 	virtual double cost(const Cell& c) const;
@@ -61,9 +58,6 @@ public:
 private:
 	/** Index of the objective variable. */
 	const int goal_var;
-
-	virtual CellHeapVarUB* copy() const;
-
 };
 // -----------------------------------------------------------------------------------------------------------------------------------
 
@@ -72,10 +66,10 @@ private:
  *
  * \brief Cost-based Cell Heap
  */
-class CellHeapC3: public CellHeap {
+class CellHeapC3: public CostFunc<Cell> {
 public:
 
-	CellHeapC3(int ind_crit=0, double lb= NEG_INFINITY) ;
+	CellHeapC3(double lb= NEG_INFINITY) ;
 
 	/**
 	 * \brief Contracts the heap.
@@ -83,7 +77,7 @@ public:
 	 * Removes (and deletes) from the heap all the elements
 	 * with a cost greater than \a lb.
 	 */
-	virtual inline void contract(double lb) { loup = lb; CellHeap::contract(lb);}
+	inline void set_loup(double lb) { loup = lb; }
 
 	/** The "cost" of a element. */
 	virtual double cost(const Cell& c) const;
@@ -93,16 +87,14 @@ private:
 	/** the lower upper bound. */
 	double loup;
 
-	virtual CellHeapC3* copy() const;
-
 };
 // -----------------------------------------------------------------------------------------------------------------------------------
 
 
-class CellHeapC5: public CellHeap {
+class CellHeapC5: public CostFunc<Cell> {
 public:
 
-	CellHeapC5(int ind_crit=0, double lb= NEG_INFINITY) ;
+	CellHeapC5(double lb= NEG_INFINITY) ;
 
 	/**
 	 * \brief Contracts the heap.
@@ -110,7 +102,7 @@ public:
 	 * Removes (and deletes) from the heap all the elements
 	 * with a cost greater than \a lb.
 	 */
-	virtual inline void contract(double lb) { loup = lb; CellHeap::contract(lb);}
+	inline void set_loup(double lb) { loup = lb; }
 
 	/** The "cost" of a element. */
 	virtual double cost(const Cell& c) const;
@@ -120,16 +112,13 @@ private:
 
 	/** the lower upper bound. */
 	double loup;
-
-	virtual CellHeapC5* copy() const;
 };
 // -----------------------------------------------------------------------------------------------------------------------------------
 
-class CellHeapC7: public CellHeap {
+class CellHeapC7: public CostFunc<Cell> {
 public:
 
-
-	CellHeapC7(int ind_var, int ind_crit=0, double lb=NEG_INFINITY) ;
+	CellHeapC7(int ind_var, double lb=NEG_INFINITY) ;
 
 	/**
 	 * \brief Contracts the heap.
@@ -137,7 +126,7 @@ public:
 	 * Removes (and deletes) from the heap all the elements
 	 * with a cost greater than \a lb.
 	 */
-	virtual inline void contract(double lb) { loup = lb; CellHeap::contract(lb);}
+	inline void set_loup(double lb) { loup = lb; }
 
 	/** The "cost" of a element. */
 	virtual	double cost(const Cell& c) const;
@@ -150,52 +139,32 @@ private:
 
 	/** Index of the objective variable. */
 	const int goal_var;
-
-	virtual	CellHeapC7* copy() const;
 };
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
-class CellHeapPU: public CellHeap {
+class CellHeapPU: public CostFunc<Cell> {
 public:
-	CellHeapPU(int ind_crit=0) ;
-
 	/** The "cost" of a element. */
 	virtual	double cost(const Cell& c) const;
-
-private:
-
-	virtual	CellHeapPU* copy() const;
 
 };
 
 
-class CellHeapPFlb: public CellHeap {
+class CellHeapPFlb: public CostFunc<Cell> {
 public:
-	CellHeapPFlb(int ind_crit=0) ;
-
 	/** The "cost" of a element. */
 	virtual	double cost(const Cell& c) const;
-
-private:
-
-	virtual	CellHeapPFlb* copy() const;
 
 };
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
 
-class CellHeapPFub: public CellHeap {
+class CellHeapPFub: public CostFunc<Cell> {
 public:
-	CellHeapPFub(int ind_crit=0) ;
-
 	/** The "cost" of a element. */
 	virtual	double cost(const Cell& c) const;
-
-private:
-
-	virtual	CellHeapPFub* copy() const;
 
 };
 

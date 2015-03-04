@@ -121,10 +121,10 @@ private:
 	unsigned int nb_cells;
 
 	/** the first heap */
-	CellHeapVarLB *heap1;
+	SharedHeap<Cell> *heap1;
 
 	/** the second heap */
-	CellHeap *heap2;
+	SharedHeap<Cell> *heap2;
 
 	/** Probability to choose the second
 	 * (see details in the constructor) */
