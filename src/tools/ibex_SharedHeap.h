@@ -77,6 +77,9 @@ public:
 	 * the object is created. */
 	unsigned int nb_nodes;
 
+	/**
+	 * Cost function associated to this heap
+	 */
 	CostFunc<T>& costf;
 
 	/** Identifier of this heap */
@@ -239,15 +242,14 @@ private:
 	/** the stored data. */
 	T* data;
 
-	/** The number of different heaps this element belongs to */
-	int nb_heaps;
+//	/** The number of different heaps this element belongs to */
+//	int nb_heaps;
 
-	/** the criteria of the stored data (one for each heap it
-	 * belongs to). */
+	/** the criteria of the stored data (one for each heap this
+	 * element belongs to). */
 	double *crit;
 
-	/** The index of this element in each heap it belongs to. */
-	//unsigned int *indice;
+	/** The node that holds this element, for each heap. */
 	HeapNode<T>** holder;
 
 	template<class U>
@@ -321,7 +323,7 @@ void SharedHeap<T>::sort_rec(HeapNode<T> * node, SharedHeap<T> & heap) {
 	node->left=NULL;
 	node->right=NULL;
 	node->elt = NULL;
-	delete node;	// warning: delete all sub-nodes
+	delete node;
 	node = NULL;
 }
 
@@ -542,13 +544,13 @@ void HeapNode<T>::switch_elt(HeapNode<T>* node, int heap_id) {
 //}
 
 template<class T>
-HeapElt<T>::HeapElt(T* data, double crit_1) : data(data), nb_heaps(1), crit(new double[1]), holder(new HeapNode<T>*[1]){
+HeapElt<T>::HeapElt(T* data, double crit_1) : data(data), /*nb_heaps(1),*/ crit(new double[1]), holder(new HeapNode<T>*[1]){
 	crit[0] = crit_1;
 	holder[0] = NULL;
 }
 
 template<class T>
-HeapElt<T>::HeapElt(T* data, double crit_1, double crit_2) : data(data), nb_heaps(2), crit(new double[2]), holder(new HeapNode<T>*[2]){
+HeapElt<T>::HeapElt(T* data, double crit_1, double crit_2) : data(data), /*nb_heaps(2),*/ crit(new double[2]), holder(new HeapNode<T>*[2]){
 	crit[0] = crit_1;
 	crit[1] = crit_2;
 	holder[0] = NULL;
