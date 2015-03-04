@@ -59,7 +59,7 @@ void Optimizer::read_ext_box(const IntervalVector& ext_box, IntervalVector& box)
 
 Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, double prec,
 		double goal_rel_prec, double goal_abs_prec, int sample_size, double equ_eps,
-		bool rigor,  int critpr,CellDoubleHeap::criterion crit) :
+		bool rigor,  int critpr,CellCostFunc::criterion crit) :
                 				user_sys(user_sys), sys(user_sys,equ_eps),
                 				n(user_sys.nb_var), m(sys.nb_ctr) /* (warning: not user_sys.nb_ctr) */,
                 				ext_sys(user_sys,equ_eps),
@@ -260,16 +260,16 @@ void Optimizer::handle_cell(Cell& c, const IntervalVector& init_box ){
 
 		// Computations for the Casado C3, C5, C7 criteria
 		switch (buffer.crit2) {
-		case CellDoubleHeap::C3 : {
+		case CellCostFunc::C3 : {
 			compute_pf(c);
 			break;
 			}
-		case CellDoubleHeap::C5 : case CellDoubleHeap::C7 : {
+		case CellCostFunc::C5 : case CellCostFunc::C7 : {
 			compute_pu(c);
 			compute_pf(c);
 			break;
 			}
-		case CellDoubleHeap::PU: {
+		case CellCostFunc::PU: {
 			compute_pu(c);
 			break;
 			}
@@ -448,12 +448,12 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 
 	// add data pu and pf for
 	switch (buffer.crit2) {
-	case CellDoubleHeap::C3 :
-	case CellDoubleHeap::C5 :
-	case CellDoubleHeap::C7 :
-	case CellDoubleHeap::PU :
-	case CellDoubleHeap::PF_LB:
-	case CellDoubleHeap::PF_UB:  {
+	case CellCostFunc::C3 :
+	case CellCostFunc::C5 :
+	case CellCostFunc::C7 :
+	case CellCostFunc::PU :
+	case CellCostFunc::PF_LB:
+	case CellCostFunc::PF_UB:  {
 		root->add<OptimData>();	
 		break;
 		}

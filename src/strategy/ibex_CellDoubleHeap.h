@@ -23,28 +23,20 @@ namespace ibex {
  * (TODO: check ref)
  */
 class CellDoubleHeap : public DoubleHeap<Cell>, public CellBuffer {
+
 public:
-
-
-	/**
-	* \brief Criteria implemented for a heap in optimization
-	*
-	* - LB for the first one
-	* - another for the second one among UB, C3, C5, C7, PU, PF, PF_LB, PF_UB.
-	*/
-	typedef enum {LB,UB,C3,C5,C7,PU,PF_LB, PF_UB} criterion;
 
 	/**
 	 *
-	 * \param ind_var - Index of the criterion variable
-	 * \param crit_2  - The second criterion used (the first is LB)
-	 * \param critpr  - Probability to choose the second criterion in node selection in percentage
-	 *                  integer in [0,100] (default value is 50). The value 0 corresponds to use a
-	 *                  single criterion for node selection (the classical one : minimizing the lower
-	 *                  bound of the estimate of the objective). The value 100 corresponds to use a
-	 *                  single criterion for node selection (the second one used in buffer2)
+	 * \param goal_var - Index of the criterion variable
+	 * \param crit_2   - The second criterion used (the first is LB)
+	 * \param critpr   - Probability to choose the second criterion in node selection in percentage
+	 *                   integer in [0,100] (default value is 50). The value 0 corresponds to use a
+	 *                   single criterion for node selection (the classical one : minimizing the lower
+	 *                   bound of the estimate of the objective). The value 100 corresponds to use a
+	 *                   single criterion for node selection (the second one used in buffer2)
 	 */
-	CellDoubleHeap(int ind_var, criterion crit_2, int critpr=50);
+	CellDoubleHeap(int goal_var, CellCostFunc::criterion crit_2, int critpr=50);
 
 	/** Flush the buffer.
 	 * All the remaining cells will be *deleted* */
@@ -78,16 +70,11 @@ public:
 
 	/** The criterion for the second heap.
 	 * \see #criterion. */
-	const criterion crit2;
+	const CellCostFunc::criterion crit2;
 
 	/** Index of the objective variable. */
 	const int goal_var;
 
-//private:
-	/**
-	 * Get the cost function from a criterion.
-	 */
-	static CostFunc<Cell>* get_cost(criterion crit, int goal_var);
 };
 
 /*================================== inline implementations ========================================*/

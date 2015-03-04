@@ -1,15 +1,14 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_CellHeap.h
-// Author      : Jordan Ninin
+// File        : ibex_CellCostFunc.h
+// Author      : Jordan Ninin, Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
-// Created     : May 12, 2012
-// Last Update : May 12, 2012
+// Last Update : Mar 04, 2015
 //============================================================================
 
-#ifndef __IBEX_CELL_SHARED_HEAP_H__
-#define __IBEX_CELL_SHARED_HEAP_H__
+#ifndef __IBEX_CELL_COST_FUNC__
+#define __IBEX_CELL_COST_FUNC__
 
 #include "ibex_Interval.h"
 #include "ibex_Heap.h"
@@ -22,12 +21,39 @@ namespace ibex {
 /**
  * \ingroup strategy
  *
+ * \brief Root class of cell cost functions
+ */
+class CellCostFunc : public CostFunc<Cell> {
+
+public:
+	/**
+	 * \brief Criteria implemented for a heap in optimization
+	 *
+	 * - LB for the first one
+	 * - another for the second one among UB, C3, C5, C7, PU, PF, PF_LB, PF_UB.
+	 */
+	typedef enum {LB,UB,C3,C5,C7,PU,PF_LB, PF_UB} criterion;
+
+	/**
+	 * Get the cost function from a criterion.
+	 */
+	static CellCostFunc* get_cost(criterion crit, int goal_var);
+
+	/**
+	 * Does nothing (by default)
+	 */
+	virtual void set_loup(double lb) { }
+};
+
+/**
+ * \ingroup strategy
+ *
  * \brief Cell Heap based on lower bound criterion
  */
-class CellHeapVarLB: public CostFunc<Cell>  {
+class CellCostVarLB: public CellCostFunc  {
 public:
 
-	CellHeapVarLB(int goal_var) ;
+	CellCostVarLB(int goal_var) ;
 
 	/** The "cost" of a element. */
 	virtual double cost(const Cell& c) const;
@@ -44,10 +70,10 @@ private:
  *
  * \brief Cell Heap based on upper bound criterion
  */
-class CellHeapVarUB: public CostFunc<Cell>  {
+class CellCostVarUB: public CellCostFunc  {
 public:
 
-	CellHeapVarUB(int ind_var) ;
+	CellCostVarUB(int ind_var) ;
 
 	/** The "cost" of a element. */
 	virtual double cost(const Cell& c) const;
@@ -64,10 +90,10 @@ private:
  *
  * \brief Cost-based Cell Heap
  */
-class CellHeapC3: public CostFunc<Cell> {
+class CellCostC3: public CellCostFunc {
 public:
 
-	CellHeapC3(double lb= NEG_INFINITY) ;
+	CellCostC3(double lb= NEG_INFINITY) ;
 
 	/**
 	 * \brief Contracts the heap.
@@ -75,7 +101,7 @@ public:
 	 * Removes (and deletes) from the heap all the elements
 	 * with a cost greater than \a lb.
 	 */
-	inline void set_loup(double lb) { loup = lb; }
+	virtual void set_loup(double lb) { loup = lb; }
 
 	/** The "cost" of a element. */
 	virtual double cost(const Cell& c) const;
@@ -89,10 +115,10 @@ private:
 // -----------------------------------------------------------------------------------------------------------------------------------
 
 
-class CellHeapC5: public CostFunc<Cell> {
+class CellCostC5: public CellCostFunc {
 public:
 
-	CellHeapC5(double lb= NEG_INFINITY) ;
+	CellCostC5(double lb= NEG_INFINITY) ;
 
 	/**
 	 * \brief Contracts the heap.
@@ -100,7 +126,7 @@ public:
 	 * Removes (and deletes) from the heap all the elements
 	 * with a cost greater than \a lb.
 	 */
-	inline void set_loup(double lb) { loup = lb; }
+	virtual void set_loup(double lb) { loup = lb; }
 
 	/** The "cost" of a element. */
 	virtual double cost(const Cell& c) const;
@@ -113,10 +139,10 @@ private:
 };
 // -----------------------------------------------------------------------------------------------------------------------------------
 
-class CellHeapC7: public CostFunc<Cell> {
+class CellCostC7: public CellCostFunc {
 public:
 
-	CellHeapC7(int ind_var, double lb=NEG_INFINITY) ;
+	CellCostC7(int ind_var, double lb=NEG_INFINITY) ;
 
 	/**
 	 * \brief Contracts the heap.
@@ -124,7 +150,7 @@ public:
 	 * Removes (and deletes) from the heap all the elements
 	 * with a cost greater than \a lb.
 	 */
-	inline void set_loup(double lb) { loup = lb; }
+	virtual void set_loup(double lb) { loup = lb; }
 
 	/** The "cost" of a element. */
 	virtual	double cost(const Cell& c) const;
@@ -141,7 +167,7 @@ private:
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
-class CellHeapPU: public CostFunc<Cell> {
+class CellCostPU: public CellCostFunc {
 public:
 	/** The "cost" of a element. */
 	virtual	double cost(const Cell& c) const;
@@ -149,7 +175,7 @@ public:
 };
 
 
-class CellHeapPFlb: public CostFunc<Cell> {
+class CellCostPFlb: public CellCostFunc {
 public:
 	/** The "cost" of a element. */
 	virtual	double cost(const Cell& c) const;
@@ -159,7 +185,7 @@ public:
 // -----------------------------------------------------------------------------------------------------------------------------------
 
 
-class CellHeapPFub: public CostFunc<Cell> {
+class CellCostPFub: public CellCostFunc {
 public:
 	/** The "cost" of a element. */
 	virtual	double cost(const Cell& c) const;
@@ -167,4 +193,4 @@ public:
 };
 
 } // end namespace ibex
-#endif // __IBEX_CELL_SHARED_HEAP_H__
+#endif // __IBEX_CELL_COST_FUNC__

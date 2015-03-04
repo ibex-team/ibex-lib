@@ -16,6 +16,7 @@
 #include "ibex_Ctc3BCid.h"
 #include "ibex_CtcUnion.h"
 #include "ibex_Backtrackable.h"
+#include "ibex_CellCostFunc.h"
 #include "ibex_CellDoubleHeap.h"
 #include "ibex_NormalizedSystem.h"
 #include "ibex_ExtendedSystem.h"
@@ -70,7 +71,7 @@ public:
 
 	Optimizer(System& sys, Ctc& ctc, Bsc& bsc, double prec=default_prec,
 			double goal_rel_prec=default_goal_rel_prec, double goal_abs_prec=default_goal_abs_prec,
-			  int sample_size=default_sample_size, double equ_eps=default_equ_eps, bool rigor=false, int critpr=50,CellDoubleHeap::criterion crit= CellDoubleHeap::UB);
+			  int sample_size=default_sample_size, double equ_eps=default_equ_eps, bool rigor=false, int critpr=50,CellCostFunc::criterion crit= CellCostFunc::UB);
 	/**
 	 * \brief Delete *this.
 	 */

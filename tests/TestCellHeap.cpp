@@ -21,7 +21,7 @@ namespace ibex {
 void TestCellHeap::test01() {
 
 //	int nb= 10;
-//	CellHeapVarLB h1(1);
+//	CellCostVarLB h1(1);
 //
 //	double _box[][2] = {{5,15},  {15,25}};
 //	IntervalVector box(2,_box);
@@ -42,7 +42,7 @@ void TestCellHeap::test01() {
 void TestCellHeap::test02() {
 
 //	int nb= 10;
-//	CellHeapVarUB h2(1);
+//	CellCostVarUB h2(1);
 //
 //	double _box[][2] = {{5,15},  {15,25},  {25,35},  {35,45}};
 //	IntervalVector box(4,_box);
@@ -61,7 +61,7 @@ void TestCellHeap::test02() {
 void TestCellHeap::test03() {
 
 //	int nb= 10;
-//	CellHeapC5 h2(0,100);
+//	CellCostC5 h2(0,100);
 //
 //	double _box[][2] = {{5,15},  {15,25},  {25,35},  {35,45}};
 //	IntervalVector box(4,_box);
@@ -83,7 +83,7 @@ void TestCellHeap::test03() {
 void TestCellHeap::test04() {
 
 //	int nb= 10;
-//	CellHeapVarLB h2(1);
+//	CellCostVarLB h2(1);
 //
 //	double _box[][2] = {{5,15},  {15,25},  {25,35},  {35,45}};
 //	IntervalVector box(4,_box);
@@ -107,8 +107,8 @@ void TestCellHeap::test05() {
 
 //	int nb= 10;
 //
-//	CellHeapC5 h1(0);
-//	CellHeapC5 h2(0);
+//	CellCostC5 h1(0);
+//	CellCostC5 h2(0);
 //	h1.contract(100);
 //	h2.contract(100);
 //
@@ -150,7 +150,7 @@ void TestCellHeap::test05() {
 void TestCellHeap::test_D00() {
 
 	int nb= 10;
-	CellDoubleHeap h1(0, CellDoubleHeap::UB);
+	CellDoubleHeap h1(0, CellCostFunc::UB);
 
 	double _box[][2] = {{5,15},  {15,25}};
 	IntervalVector box(2,_box);
@@ -170,7 +170,7 @@ void TestCellHeap::test_D00() {
 void TestCellHeap::test_D01() {
 
 	int nb= 10;
-	CellDoubleHeap h1(1,CellDoubleHeap::C5,50);
+	CellDoubleHeap h1(1,CellCostFunc::C5,50);
 	h1.contract(100);
 
 
@@ -196,7 +196,7 @@ void TestCellHeap::test_D01() {
 void TestCellHeap::test_D03() {
 
 	int nb= 10;
-	CellDoubleHeap h1(1,CellDoubleHeap::C5,50);
+	CellDoubleHeap h1(1,CellCostFunc::C5,50);
 	h1.contract(100);
 
 	double _box[][2] = {{5,15},  {15,25},  {25,35},  {35,45}};
@@ -219,7 +219,7 @@ void TestCellHeap::test_D04() {
 
 
 	int nb= 10;
-	CellDoubleHeap h1(1,CellDoubleHeap::C5,50);
+	CellDoubleHeap h1(1,CellCostFunc::C5,50);
 	h1.contract(10);
 
 	double _box[][2] = {{5,15},  {15,25}};
@@ -246,8 +246,8 @@ void TestCellHeap::test_D05() {
 
 	int nb= 10;
 
-	CellDoubleHeap h1(0,CellDoubleHeap::C5);
-	CellDoubleHeap h2(0,CellDoubleHeap::C5);
+	CellDoubleHeap h1(0,CellCostFunc::C5);
+	CellDoubleHeap h2(0,CellCostFunc::C5);
 	h1.contract(100);
 	h2.contract(100);
 

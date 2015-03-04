@@ -1,6 +1,6 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_CellHeap_2.cpp
+// File        : ibex_CellCost_2.cpp
 // Author      : Jordan Ninin
 // License     : See the LICENSE file
 // Created     : Sept 11, 2014
@@ -12,85 +12,98 @@
 
 namespace ibex {
 
+CellCostFunc* CellCostFunc::get_cost(criterion crit, int goal_var) {
+	switch (crit) {
+	case LB :    return new CellCostVarLB(goal_var); break;
+	case UB :    return new CellCostVarUB(goal_var); break;
+	case C3 :    return new CellCostC3();            break;
+	case C5 :    return new CellCostC5();            break;
+	case C7 :    return new CellCostC7(goal_var);    break;
+	case PU :    return new CellCostPU();            break;
+	case PF_LB : return new CellCostPFlb();          break;
+	case PF_UB : return new CellCostPFub();          break;
+	default:     ibex_error("CellCostFunc::get_cost : error  wrong criterion.");
+	             return NULL;
+	}
+}
+// -----------------------------------------------------------------------------------------------------------------------------------
+
+CellCostVarLB::CellCostVarLB(int ind_var) : goal_var(ind_var) { };
+
+double CellCostVarLB::cost(const Cell& c) const { return c.box[goal_var].lb(); }
+
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
-CellHeapVarLB::CellHeapVarLB(int ind_var) : goal_var(ind_var) { };
+CellCostVarUB::CellCostVarUB(int ind_var) : goal_var(ind_var)  { };
 
-double CellHeapVarLB::cost(const Cell& c) const { return c.box[goal_var].lb(); }
-
-
-// -----------------------------------------------------------------------------------------------------------------------------------
-
-CellHeapVarUB::CellHeapVarUB(int ind_var) : goal_var(ind_var)  { };
-
-double CellHeapVarUB::cost(const Cell& c) const { return c.box[goal_var].ub(); }
+double CellCostVarUB::cost(const Cell& c) const { return c.box[goal_var].ub(); }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
-CellHeapC3::CellHeapC3(double lb) : loup(lb) { };
+CellCostC3::CellCostC3(double lb) : loup(lb) { };
 
-double CellHeapC3::cost(const Cell& c) const {
+double CellCostC3::cost(const Cell& c) const {
 	const OptimData *data = &(c.get<OptimData>());
 	if (data) {
 		return -((loup - data->pf.lb()) / data->pf.diam() );
 	} else {
-		ibex_error("CellHeapC3::cost : invalid cost"); return POS_INFINITY;
+		ibex_error("CellCostC3::cost : invalid cost"); return POS_INFINITY;
 	}
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
-CellHeapC5::CellHeapC5(double lb) : loup(lb) { };
+CellCostC5::CellCostC5(double lb) : loup(lb) { };
 
-double CellHeapC5::cost(const Cell& c) const {
+double CellCostC5::cost(const Cell& c) const {
 	const OptimData *data = &(c.get<OptimData>());
 	if (data) {
 		return (-(data->pu * (loup - data->pf.lb()) / data->pf.diam()));
 	} else {
-		ibex_error("CellHeapC5::cost : invalid cost"); return POS_INFINITY;
+		ibex_error("CellCostC5::cost : invalid cost"); return POS_INFINITY;
 	}
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
-CellHeapC7::CellHeapC7(int ind_var, double lb) : loup(lb), goal_var(ind_var) {};
+CellCostC7::CellCostC7(int ind_var, double lb) : loup(lb), goal_var(ind_var) {};
 
-double CellHeapC7::cost(const Cell& c) const {
+double CellCostC7::cost(const Cell& c) const {
 	const OptimData *data = &(c.get<OptimData>());
 	if (data) {
 		return c.box[goal_var].lb()/(data->pu*(loup-data->pf.lb())/data->pf.diam());
 	} else {
-		ibex_error("CellHeapC7::cost : invalid cost"); return POS_INFINITY;
+		ibex_error("CellCostC7::cost : invalid cost"); return POS_INFINITY;
 	}
 }
 
-double CellHeapPU::cost(const Cell& c) const {
+double CellCostPU::cost(const Cell& c) const {
 	const OptimData *data = &(c.get<OptimData>());
 	if (data) {
 		return  -data->pu;
 	} else {
-		ibex_error("CellHeapPU::cost : invalid cost"); return POS_INFINITY;
+		ibex_error("CellCostPU::cost : invalid cost"); return POS_INFINITY;
 	}
 }
 
-double CellHeapPFlb::cost(const Cell& c) const {
+double CellCostPFlb::cost(const Cell& c) const {
 	const OptimData *data = &(c.get<OptimData>());
 	if (data) {
 		return  data->pf.lb();
 	} else {
-		ibex_error("CellHeapPFlb::cost : invalid cost"); return POS_INFINITY;
+		ibex_error("CellCostPFlb::cost : invalid cost"); return POS_INFINITY;
 	}
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
-double CellHeapPFub::cost(const Cell& c) const {
+double CellCostPFub::cost(const Cell& c) const {
 	const OptimData *data = &(c.get<OptimData>());
 	if (data) {
 		return  data->pf.ub();
 	} else {
-		ibex_error("CellHeapPFub::cost : invalid cost"); return POS_INFINITY;
+		ibex_error("CellCostPFub::cost : invalid cost"); return POS_INFINITY;
 	}
 }
 
