@@ -38,6 +38,19 @@ public:
 	virtual double cost(const T&) const=0;
 };
 
+/**
+ * \brief Shared heap (internal)
+ *
+ * Class to be used by DoubleHeap only.
+ *
+ * Important remark: no function of this class creates or
+ * destroy an element (HeapElt). Therefore, there is no
+ * impact on the other shared heaps.
+ *
+ * It is the role of DoubleHeap to manage shared heap
+ * synchronization.
+ *
+ */
 template<class T>
 class SharedHeap  {
 
@@ -49,52 +62,20 @@ public:
 	/** Delete this. */
 	virtual  ~SharedHeap();
 
-	/**
-	 * \brief Flush the buffer.
-	 *
-	 * All the remaining elements will be *deleted*
-	 * (with a call to the destructor of class T).
-	 */
-	void flush();
-
 	/** Return the size of the buffer. */
 	unsigned int size() const;
 
 	/** Return true if the buffer is empty. */
 	bool empty() const;
 
-	/** push a new element on the stack.
-	 * Complexity: o(log(nb_cells))
-	 */
-	void push(T* el);
-
-	/** Pop a element from the stack and return it.
-	 * Complexity: o(log(nb_cells))
-	 */
-	T* pop();
-
 	/** Return the next box (but does not pop it).
 	 * Complexity: o(1)
 	 */
 	T* top() const;
 
-//	/**
-//	 * \brief Contracts the heap.
-//	 *
-//	 * Removes (and deletes) from the heap all the elements
-//	 * with a cost greater than \a lb.
-//	 */
-//	void contract(double lb);
-
 	/** Return the minimum (the criterion for
 	 * the first element) */
-	inline double minimum() const{	return root->elt->crit[heap_id];	}
-
-//	/**
-//	 * \brief Access to the ith Cell rank by largest-first order
-//	 * Complexity: o(log(nb_cells))
-//	 */
-//	T* get(unsigned int i) const;
+	double minimum() const;
 
 	/**
 	 * \brief update the cost and sort all the heap
@@ -105,10 +86,6 @@ public:
 	/** Count the number of cells pushed since
 	 * the object is created. */
 	unsigned int nb_cells;
-
-	//	inline bool needUpdate() const {return updateCost;}
-
-	inline int get_id() const {return heap_id;}
 
 	CostFunc<T>& costf;
 
@@ -126,7 +103,6 @@ public:
 
 	/** The "cost" of an element. */
 	double cost(const T& data) const { return costf.cost(data); }
-
 
 	/** The root of the heap */
 	HeapNode<T>* root;
@@ -183,8 +159,6 @@ public:
 	std::ostream& print(std::ostream& os) const;
 
 private:
-	/** Used in the contract function (proceed by recursivity) */
-	void contract_rec(double new_loup, HeapNode<T>* node, SharedHeap<T>& heap);
 
 	/** Used in the sort function (proceed by recursivity) */
 	void sort_rec(HeapNode<T>* node, SharedHeap<T>& heap);
@@ -225,20 +199,16 @@ class HeapNode {
 	HeapNode<T>* father;
 
 	/** The way to compare two pairs (cells,crit). */
-	bool isSup(HeapNode<T>* node, int heap_id) const;
-	bool isSup(double d, int heap_id) const ;
+	bool is_sup(HeapNode<T>* node, int heap_id) const;
+	bool is_sup(double d, int heap_id) const ;
 
 	/** Switch the CellHeapElt between *this and node */
-	void switchElt(HeapNode<T>* node, int heap_id);
+	void switch_elt(HeapNode<T>* node, int heap_id);
 
 	template<class U>
 	friend std::ostream& operator<<(std::ostream& os, const HeapNode<U>& node) ;
 
 };
-
-
-
-
 
 template<class T>
 class HeapElt {
@@ -264,7 +234,7 @@ class HeapElt {
 	 * Compare the criterion of a given heap with the value d.
 	 * Return true if the criterion is greater.
 	 */
-	bool isSup(double d, int heap_id) const ;
+	bool is_sup(double d, int heap_id) const ;
 
 	/** the stored Cell */
 	T* cell;
@@ -305,10 +275,8 @@ SharedHeap<T>::~SharedHeap() {
 }
 
 template<class T>
-void SharedHeap<T>::flush() {
-	if (root) delete root; 	// warning: delete all sub-nodes
-	nb_cells =0;
-	root = NULL;
+inline double SharedHeap<T>::minimum() const {
+	return root->elt->crit[heap_id];
 }
 
 template<class T>
@@ -326,44 +294,6 @@ T* SharedHeap<T>::top() const {
 	return root->elt->cell;
 }
 
-
-
-//// E.g.: called by manage_buffer in Optimizer in case of a new upper bound
-//// on the objective ("loup"). This function then removes (and deletes) from
-//// the heap all the cells with a cost greater than loup.
-//template<class T>
-//void SharedHeap<T>::contract(double new_loup) {
-//	if (nb_cells==0) return;
-//
-//	SharedHeap<T> * heap_tmp = new SharedHeap<T>(costf, heap_id, updateCost);
-//
-//	contract_rec(new_loup, root, *heap_tmp);
-//
-//	root = heap_tmp->root;
-//	nb_cells = heap_tmp->size();
-//	heap_tmp->root = NULL;
-//	delete heap_tmp;
-//
-//}
-
-
-template<class T>
-void SharedHeap<T>::contract_rec(double new_loup, HeapNode<T>* node, SharedHeap<T>& heap) {
-
-	if(updateCost)
-		node->elt->crit[heap_id] = cost(*(node->elt->cell));
-
-	if (!(node->isSup(new_loup, heap_id))) {
-		heap.push_elt(node->elt);
-		if (node->left)	 contract_rec(new_loup, node->left, heap);
-		if (node->right) contract_rec(new_loup, node->right, heap);
-		node->left=NULL;
-		node->right=NULL;
-		node->elt=NULL;
-	}
-	delete node;
-	node= NULL;
-}
 
 template<class T>
 void SharedHeap<T>::sort() {
@@ -399,14 +329,6 @@ void SharedHeap<T>::sort_rec(HeapNode<T> * node, SharedHeap<T> & heap) {
 	node = NULL;
 }
 
-
-template<class T>
-void SharedHeap<T>::push(T* cell) {
-	push_elt(new HeapElt<T>(cell,cost(*cell)));
-}
-
-
-
 template<class T>
 void SharedHeap<T>::push_elt(HeapElt<T>* elt) {
 
@@ -440,8 +362,8 @@ void SharedHeap<T>::push_elt(HeapElt<T>* elt) {
 		// we have now to perform an update upto the root
 		bool b = true;
 		while (b&&(pt->father)) {
-			if (pt->father->isSup(pt,heap_id)) {
-				pt->switchElt(pt->father,heap_id);
+			if (pt->father->is_sup(pt,heap_id)) {
+				pt->switch_elt(pt->father,heap_id);
 				pt = pt->father;
 			} else {
 				b= false;
@@ -474,24 +396,6 @@ HeapNode<T> * SharedHeap<T>::get_node(unsigned int i) const {
 		}
 	}
 	return pt;
-}
-
-//template<class T>
-//T* SharedHeap<T>::get(unsigned int i) const {
-//	assert(i<nb_cells);
-//	assert(nb_cells>0);
-//	return get_node(i)->elt->cell;
-//}
-
-template<class T>
-T* SharedHeap<T>::pop() {
-	assert(nb_cells>0);
-	HeapElt<T>* tmp =pop_elt();
-	T * c = tmp->cell;
-	tmp->cell = NULL;
-	delete tmp;
-	tmp=NULL;
-	return c;
 }
 
 template<class T>
@@ -558,29 +462,29 @@ void SharedHeap<T>::percolate(HeapNode<T> *node) {
 		bool b=true;
 		while (b && (node->left)) {
 			if (node->right) {
-				if (node->isSup(node->left,heap_id)) {
-					if (node->right->isSup(node->left,heap_id)) {
+				if (node->is_sup(node->left,heap_id)) {
+					if (node->right->is_sup(node->left,heap_id)) {
 						// left is the smallest
-						node->switchElt(node->left,heap_id);
+						node->switch_elt(node->left,heap_id);
 						node = node->left;  // next
 					} else {
 						// right is the smallest
-						node->switchElt(node->right,heap_id);
+						node->switch_elt(node->right,heap_id);
 						node = node->right;  // next
 					}
 				} else {
-					if (node->isSup(node->right,heap_id)) {
+					if (node->is_sup(node->right,heap_id)) {
 						// right is the smallest
-						node->switchElt(node->right,heap_id);
+						node->switch_elt(node->right,heap_id);
 						node = node->right;  // next
 					} else { // current node is the smallest among the 3: stop
 						b=false;
 					}
 				}
 			} else { // no more right child but there is a left child
-				if (node->isSup(node->left,heap_id)) {
+				if (node->is_sup(node->left,heap_id)) {
 					// left is the smallest
-					node->switchElt(node->left,heap_id);
+					node->switch_elt(node->left,heap_id);
 					node = node->left;  // next
 				} else { // current node is the smallest among the 3: stop (and we must have reached the bottom of the heap)
 					b=false;
@@ -618,17 +522,17 @@ HeapNode<T>::~HeapNode() {
 }
 
 template<class T>
-bool HeapNode<T>::isSup(HeapNode<T>* node, int heap_id) const {
-	return elt->isSup(node->elt->crit[heap_id],heap_id);
+bool HeapNode<T>::is_sup(HeapNode<T>* node, int heap_id) const {
+	return elt->is_sup(node->elt->crit[heap_id],heap_id);
 }
 
 template<class T>
-bool HeapNode<T>::isSup(double d, int heap_id) const {
-	return elt->isSup(d,heap_id);
+bool HeapNode<T>::is_sup(double d, int heap_id) const {
+	return elt->is_sup(d,heap_id);
 }
 
 template<class T>
-void HeapNode<T>::switchElt(HeapNode<T>* node, int heap_id) {
+void HeapNode<T>::switch_elt(HeapNode<T>* node, int heap_id) {
 
 	elt->holder[heap_id] = node;
 	node->elt->holder[heap_id] = this;
@@ -671,7 +575,7 @@ HeapElt<T>::~HeapElt() {
 }
 
 template<class T>
-bool HeapElt<T>::isSup(double d, int ind_crit) const {
+bool HeapElt<T>::is_sup(double d, int ind_crit) const {
 	return (crit[ind_crit] >= d);
 }
 

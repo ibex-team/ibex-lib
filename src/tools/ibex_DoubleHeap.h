@@ -108,10 +108,20 @@ public:
 	/** Current selected buffer. */
 	mutable int indbuf;
 
-	/** use in the contractHeap function by recursivity */
+	/** use in the contract function by recursivity */
 	void contract_rec(double new_loup, HeapNode<T>* node, SharedHeap<T>& heap);
 
-	/** erase a node in the second heap */
+	/**
+	 * Erase all the subnodes of node (including itself) in the first heap
+	 * and manage the impact on the second heap.
+	 * If "percolate" is true, the second heap is left in a correct state.
+	 * Otherwise, the second heap has a binary tree structure but not sorted
+	 * anymore. Therefore, "sort" should be called on the second heap.
+	 *
+	 * So the heap structure is maintained for the second heap
+	 * but not the first one. The reason is that this function is called
+	 * either by "contract" or "flush". "contract" will build a new heap from scratch.
+	 */
 	void erase_subnodes(HeapNode<T>* node, bool percolate);
 
 	std::ostream& print(std::ostream& os) const;
@@ -135,13 +145,12 @@ DoubleHeap<T>::~DoubleHeap() {
 
 template<class T>
 void DoubleHeap<T>::flush() {
-	heap1->flush();
-	heap2->flush();
-//	if (nb_cells>0) {
-//		erase_subnodes(heap1->root,false);
-//		heap1->nb_cells=0;
-//		nb_cells=0;
-//	}
+	if (nb_cells>0) {
+		erase_subnodes(heap1->root,false);
+		heap1->nb_cells=0;
+		heap1->root=NULL;
+		nb_cells=0;
+	}
 }
 
 template<class T>
@@ -174,7 +183,7 @@ void DoubleHeap<T>::contract(double new_loup) {
 template<class T>
 void DoubleHeap<T>::contract_rec(double new_loup, HeapNode<T>* node, SharedHeap<T>& heap) {
 
-	if (node->isSup(new_loup, 0)) {
+	if (node->is_sup(new_loup, 0)) {
 		// we must remove from the other heap all the sub-nodes
 		if (heap2) erase_subnodes(node, heap2->updateCost);
 	} else {
@@ -201,11 +210,13 @@ void DoubleHeap<T>::erase_subnodes(HeapNode<T>* node, bool percolate) {
 	delete node->elt;
 	delete node;
 }
+
 template<class T>
 bool DoubleHeap<T>::empty() const {
 	// if one buffer is empty, the other is also empty
 	return (nb_cells==0);
 }
+
 template<class T>
 void DoubleHeap<T>::push(T* cell) {
 	HeapElt<T>* elt;
@@ -221,6 +232,7 @@ void DoubleHeap<T>::push(T* cell) {
 
 	nb_cells++;
 }
+
 template<class T>
 T* DoubleHeap<T>::pop() {
 	// Select the heap
