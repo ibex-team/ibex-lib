@@ -26,6 +26,9 @@ namespace ibex {
 class CellCostFunc : public CostFunc<Cell> {
 
 public:
+
+	CellCostFunc(bool depends_on_loup);
+
 	/**
 	 * \brief Criteria implemented for a heap in optimization
 	 *
@@ -43,6 +46,11 @@ public:
 	 * Does nothing (by default)
 	 */
 	virtual void set_loup(double lb) { }
+
+	/**
+	 * A boolean which indicate if the cost depends on the loup
+	 */
+	const bool depends_on_loup;
 };
 
 /**
@@ -169,6 +177,8 @@ private:
 
 class CellCostPU: public CellCostFunc {
 public:
+	CellCostPU();
+
 	/** The "cost" of a element. */
 	virtual	double cost(const Cell& c) const;
 
@@ -177,6 +187,8 @@ public:
 
 class CellCostPFlb: public CellCostFunc {
 public:
+	CellCostPFlb();
+
 	/** The "cost" of a element. */
 	virtual	double cost(const Cell& c) const;
 
@@ -187,6 +199,8 @@ public:
 
 class CellCostPFub: public CellCostFunc {
 public:
+	CellCostPFub();
+
 	/** The "cost" of a element. */
 	virtual	double cost(const Cell& c) const;
 

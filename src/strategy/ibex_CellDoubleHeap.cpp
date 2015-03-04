@@ -25,12 +25,14 @@ CellDoubleHeap::~CellDoubleHeap() {
 
 void CellDoubleHeap::contract(double new_loup) {
 
-	DoubleHeap<Cell>::contract(new_loup);
+	CellCostFunc& cost2=((CellCostFunc&) heap2->costf);
 
-	SharedHeap<Cell> *copy2 = new SharedHeap<Cell>(heap2->costf, 1, heap2->updateCost);
+	DoubleHeap<Cell>::contract(new_loup, cost2.depends_on_loup);
+
+	SharedHeap<Cell> *copy2 = new SharedHeap<Cell>(cost2, 1);
 
 	// it is necessary to update the loup.
-	((CellCostFunc&) copy2->costf).set_loup(new_loup);
+	cost2.set_loup(new_loup);
 
 	copy2->root = heap2->root;
 	copy2->nb_nodes =heap2->nb_nodes;
@@ -38,11 +40,10 @@ void CellDoubleHeap::contract(double new_loup) {
 	heap2->nb_nodes =0;
 
 	// why again??
-	((CellCostFunc&) copy2->costf).set_loup(new_loup);
+	cost2.set_loup(new_loup);
 
-	if (copy2->updateCost)  { //update the order if necessary
-		copy2->sort();
-	}
+	copy2->sort(cost2.depends_on_loup ); //update the order if necessary
+
 	heap2->nb_nodes = copy2->nb_nodes;
 	heap2->root = copy2->root;
 	copy2->root = NULL; // avoid to delete heap2 with copy2

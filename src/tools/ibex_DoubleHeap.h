@@ -80,7 +80,7 @@ public:
 	 * Removes (and deletes) from the heap all the datas
 	 * with a cost greater than \a loup.
 	 */
-	void contract(double loup);
+	void contract(double loup, bool percolate);
 
 	/**
 	 * Delete this
@@ -109,7 +109,7 @@ protected:
 	mutable int indbuf;
 
 	/** use in the contract function by recursivity */
-	void contract_rec(double new_loup, HeapNode<T>* node, SharedHeap<T>& heap);
+	void contract_rec(double new_loup, HeapNode<T>* node, SharedHeap<T>& heap, bool percolate);
 
 	/**
 	 * Erase all the subnodes of node (including itself) in the first heap
@@ -132,8 +132,8 @@ protected:
 
 template<class T>
 DoubleHeap<T>::DoubleHeap(CostFunc<T>& cost1, CostFunc<T>& cost2, int critpr) :
-		 nb_nodes(0), heap1(new SharedHeap<T>(cost1,0,false)),
-		heap2(new SharedHeap<T>(cost2,1)), critpr(critpr), indbuf(0) {
+		 nb_nodes(0), heap1(new SharedHeap<T>(cost1,0)),
+		              heap2(new SharedHeap<T>(cost2,1)), critpr(critpr), indbuf(0) {
 
 }
 
@@ -160,13 +160,13 @@ unsigned int DoubleHeap<T>::size() const {
 }
 
 template<class T>
-void DoubleHeap<T>::contract(double new_loup) {
+void DoubleHeap<T>::contract(double new_loup, bool percolate) {
 
 	if (nb_nodes==0) return;
 
-	SharedHeap<T>* copy1 = new SharedHeap<T>(heap1->costf, 0, heap1->updateCost);
+	SharedHeap<T>* copy1 = new SharedHeap<T>(heap1->costf, 0);
 
-	contract_rec(new_loup, heap1->root, *copy1);
+	contract_rec(new_loup, heap1->root, *copy1, percolate);
 
 	heap1->root = copy1->root;
 	heap1->nb_nodes = copy1->size();
@@ -181,15 +181,15 @@ void DoubleHeap<T>::contract(double new_loup) {
 
 
 template<class T>
-void DoubleHeap<T>::contract_rec(double new_loup, HeapNode<T>* node, SharedHeap<T>& heap) {
+void DoubleHeap<T>::contract_rec(double new_loup, HeapNode<T>* node, SharedHeap<T>& heap, bool percolate) {
 
 	if (node->is_sup(new_loup, 0)) {
 		// we must remove from the other heap all the sub-nodes
-		if (heap2) erase_subnodes(node, heap2->updateCost);
+		if (heap2) erase_subnodes(node, percolate);
 	} else {
 		heap.push_elt(node->elt);
-		if (node->left)	 contract_rec(new_loup, node->left, heap);
-		if (node->right) contract_rec(new_loup, node->right, heap);
+		if (node->left)	 contract_rec(new_loup, node->left, heap, percolate);
+		if (node->right) contract_rec(new_loup, node->right, heap, percolate);
 
 		delete node;
 	}

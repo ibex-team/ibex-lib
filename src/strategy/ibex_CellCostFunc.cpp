@@ -12,6 +12,10 @@
 
 namespace ibex {
 
+CellCostFunc::CellCostFunc(bool depends_on_loup) : depends_on_loup(depends_on_loup) {
+
+}
+
 CellCostFunc* CellCostFunc::get_cost(criterion crit, int goal_var) {
 	switch (crit) {
 	case LB :    return new CellCostVarLB(goal_var); break;
@@ -28,20 +32,30 @@ CellCostFunc* CellCostFunc::get_cost(criterion crit, int goal_var) {
 }
 // -----------------------------------------------------------------------------------------------------------------------------------
 
-CellCostVarLB::CellCostVarLB(int ind_var) : goal_var(ind_var) { };
+CellCostVarLB::CellCostVarLB(int ind_var) : CellCostFunc(false), goal_var(ind_var) {
 
-double CellCostVarLB::cost(const Cell& c) const { return c.box[goal_var].lb(); }
+}
 
+double CellCostVarLB::cost(const Cell& c) const {
+	return c.box[goal_var].lb();
+}
 
-// -----------------------------------------------------------------------------------------------------------------------------------
-
-CellCostVarUB::CellCostVarUB(int ind_var) : goal_var(ind_var)  { };
-
-double CellCostVarUB::cost(const Cell& c) const { return c.box[goal_var].ub(); }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
-CellCostC3::CellCostC3(double lb) : loup(lb) { };
+CellCostVarUB::CellCostVarUB(int ind_var) : CellCostFunc(false), goal_var(ind_var) {
+
+}
+
+double CellCostVarUB::cost(const Cell& c) const {
+	return c.box[goal_var].ub();
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
+CellCostC3::CellCostC3(double lb) : CellCostFunc(true), loup(lb) {
+
+}
 
 double CellCostC3::cost(const Cell& c) const {
 	const OptimData *data = &(c.get<OptimData>());
@@ -54,7 +68,9 @@ double CellCostC3::cost(const Cell& c) const {
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
-CellCostC5::CellCostC5(double lb) : loup(lb) { };
+CellCostC5::CellCostC5(double lb) : CellCostFunc(true), loup(lb) {
+
+}
 
 double CellCostC5::cost(const Cell& c) const {
 	const OptimData *data = &(c.get<OptimData>());
@@ -67,7 +83,9 @@ double CellCostC5::cost(const Cell& c) const {
 
 // -----------------------------------------------------------------------------------------------------------------------------------
 
-CellCostC7::CellCostC7(int ind_var, double lb) : loup(lb), goal_var(ind_var) {};
+CellCostC7::CellCostC7(int ind_var, double lb) : CellCostFunc(true), loup(lb), goal_var(ind_var) {
+
+}
 
 double CellCostC7::cost(const Cell& c) const {
 	const OptimData *data = &(c.get<OptimData>());
@@ -76,6 +94,10 @@ double CellCostC7::cost(const Cell& c) const {
 	} else {
 		ibex_error("CellCostC7::cost : invalid cost"); return POS_INFINITY;
 	}
+}
+
+CellCostPU::CellCostPU() :  CellCostFunc(false) {
+
 }
 
 double CellCostPU::cost(const Cell& c) const {
@@ -87,6 +109,10 @@ double CellCostPU::cost(const Cell& c) const {
 	}
 }
 
+
+CellCostPFlb::CellCostPFlb() :  CellCostFunc(false) {
+
+}
 double CellCostPFlb::cost(const Cell& c) const {
 	const OptimData *data = &(c.get<OptimData>());
 	if (data) {
@@ -97,6 +123,10 @@ double CellCostPFlb::cost(const Cell& c) const {
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
+
+CellCostPFub::CellCostPFub() :  CellCostFunc(false) {
+
+}
 
 double CellCostPFub::cost(const Cell& c) const {
 	const OptimData *data = &(c.get<OptimData>());

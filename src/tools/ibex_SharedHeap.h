@@ -47,7 +47,7 @@ class SharedHeap  {
 public:
 
 	/** create this with a specific identifier, and if you need to update the cost a each contract of sort. */
-	SharedHeap(CostFunc<T>& cost, int id=0, bool updateCost=false);
+	SharedHeap(CostFunc<T>& cost, int id=0);
 
 	/** Delete this. */
 	virtual  ~SharedHeap();
@@ -70,8 +70,10 @@ public:
 	/**
 	 * \brief update the cost and sort all the heap
 	 * complexity: o(nb_nodes*log(nb_nodes))
+	 *
+	 * \param update_cost: if true, costs are all recalculated
 	 */
-	void sort();
+	void sort(bool update_cost);
 
 	/** Count the number of nodes pushed since
 	 * the object is created. */
@@ -84,11 +86,6 @@ public:
 
 	/** Identifier of this heap */
 	const int heap_id;
-
-	/**
-	 * A boolean which indicate if all the cost must be update at each contract and sort
-	 */
-	const bool updateCost;
 
 //protected:
 
@@ -154,7 +151,7 @@ public:
 private:
 
 	/** Used in the sort function (proceed by recursivity) */
-	void sort_rec(HeapNode<T>* node, SharedHeap<T>& heap);
+	void sort_rec(HeapNode<T>* node, SharedHeap<T>& heap, bool update_cost);
 
 };
 
@@ -262,10 +259,10 @@ private:
 
 
 template<class T>
-SharedHeap<T>::SharedHeap(CostFunc<T>& cost, int id,bool updateCost) :
-nb_nodes(0), costf(cost), heap_id(id), updateCost(updateCost),  root(NULL) {
+SharedHeap<T>::SharedHeap(CostFunc<T>& cost, int id) : nb_nodes(0), costf(cost), heap_id(id), root(NULL) {
 
 }
+
 template<class T>
 SharedHeap<T>::~SharedHeap() {
 	if (root) delete root; 	// warning: delete all sub-nodes
@@ -294,13 +291,13 @@ T* SharedHeap<T>::top() const {
 
 
 template<class T>
-void SharedHeap<T>::sort() {
+void SharedHeap<T>::sort(bool update_cost) {
 	if (nb_nodes==0) return;
 
-	SharedHeap<T>* heap_tmp = new SharedHeap<T>(costf, heap_id, updateCost);
+	SharedHeap<T>* heap_tmp = new SharedHeap<T>(costf, heap_id);
 
 	// recursive sort : o(n*log(n))
-	sort_rec(root, *heap_tmp);
+	sort_rec(root, *heap_tmp, update_cost);
 
 	root = heap_tmp->root;
 	nb_nodes = heap_tmp->size();
@@ -311,14 +308,14 @@ void SharedHeap<T>::sort() {
 }
 
 template<class T>
-void SharedHeap<T>::sort_rec(HeapNode<T> * node, SharedHeap<T> & heap) {
+void SharedHeap<T>::sort_rec(HeapNode<T> * node, SharedHeap<T> & heap, bool update_cost) {
 
-	if (updateCost)
+	if (update_cost)
 		node->elt->crit[heap_id] = cost(*(node->elt->data));
 
 	heap.push_elt(node->elt);
-	if (node->left)	 sort_rec(node->left, heap);
-	if (node->right) sort_rec(node->right, heap);
+	if (node->left)	 sort_rec(node->left, heap, update_cost);
+	if (node->right) sort_rec(node->right, heap, update_cost);
 
 	node->left=NULL;
 	node->right=NULL;
