@@ -205,30 +205,77 @@ SetNode * SetBisect::fakeLeaf(const IntervalVector& box,const IntervalVector& su
 	else
 		return new SetLeaf(status);
 }
-void SetBisect::cleave(const IntervalVector& box, Sep& sep, double eps) {
+void SetBisect::cleave(const IntervalVector& box, Sep& sep, const double eps) {
 
-	IntervalVector box1(box);
+	/*IntervalVector box1(box);
 	IntervalVector box2(box);
 
 	sep.separate(box1,box2);
-	if(box1.is_disjoint(box2)) // in and out are disjoint, can contract on box1 and box2
-	{
-		if(!box1.is_empty())
-			this->operator_ir(box,box1,IN,true,eps);
-		if(!box2.is_empty())
-			this->operator_ir(box,box2,OUT,true,eps);
-	}
+	if(box1.is_empty())
+		this->inter(OUT);
+	else if(box2.is_empty())
+		this->_union(IN);
 	else // continu until box1 and box2 are disjoint
 	{
 		left->cleave(left_box(box),sep,eps);
 		right->cleave(right_box(box),sep,eps);
+	}*/
+	
+	status = UNK_IN_OUT;
+	IntervalVector box1(box);
+	IntervalVector box2(box);
+
+	sep.separate(box1,box2);
+	if(box1.is_empty()) // all the box can be set to OUT
+	{
+		this->inter(OUT);
 	}
+	else if(box2.is_empty())// all the box can be set to IN
+	{
+		this->_union(IN);
+	}
+	else
+	{
+
+		IntervalVector* restout;
+    	int n=0;
+    	if(box1!=box)
+    		box.diff(box1,restout);
+    	for(int i = 0;i<n;i++)
+    		this->operator_ir(box,restout[i],OUT,true,eps); // add in box
+    	IntervalVector* restin;
+    	n = 0;
+    	if(box2!= box)
+    		n=box.diff(box2,restin);
+    	for(int i = 0;i<n;i++)
+    		this->operator_ir(box,restin[i],IN,false,eps); // add out box
+    	this->gatherTo(false,this);
+    	if(!left->is_leaf() || left->status == UNK )//&& left_box(box).max_diam()>eps)
+    		left->cleave(left_box(box),sep,eps);
+    	if(!right->is_leaf() || right->status == UNK )//&& right_box(box).max_diam()>eps)
+    		right->cleave(right_box(box),sep,eps);
+	}
+	
 }
 void SetBisect::gather(bool go_up) {
 		if(((left->is_leaf()&&right->is_leaf()) || go_up)&&left->status==right->status) // leaves are reached, or climbing up the tree toward the root
 		{
 			status = left->status;  // this bisect get a leaf status IN OUT or UNK
 			if(father != NULL) // check if father is not the root of SetInterval
+				father->gather(true);
+		}
+		else if(!go_up) // go down the tree to reach the leaves
+		{
+			left->gather(false);
+			right->gather(false);
+		}
+}
+
+void SetBisect::gatherTo(bool go_up, SetNode * branch) {
+		if(((left->is_leaf()&&right->is_leaf()) || go_up)&&left->status==right->status) // leaves are reached, or climbing up the tree toward the root
+		{
+			status = left->status;  // this bisect get a leaf status IN OUT or UNK
+			if(father != branch) // check if father is not the root of SetInterval
 				father->gather(true);
 		}
 		else if(!go_up) // go down the tree to reach the leaves
@@ -298,3 +345,4 @@ IntervalVector SetBisect::right_box(const IntervalVector& nodebox) const {
 
 
 } // namespace ibex
+
