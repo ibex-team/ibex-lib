@@ -213,19 +213,15 @@ SetNode * SetLeaf::fakeLeaf(const IntervalVector& box,const IntervalVector& subb
 	return NULL;
 }
 
-void SetLeaf::cleave(const IntervalVector& box, Sep& sep,double eps) {
+void SetLeaf::cleave(const IntervalVector& box, Sep& sep, const double eps) {
 
-	IntervalVector box1(box);
+	/*IntervalVector box1(box);
 	IntervalVector box2(box);
 	sep.separate(box1,box2);
-	if(box1.is_disjoint(box2)) // if box are disjoint, contract on box1 and box2
-	{
-		if(!box1.is_empty())
-			this->operator_ir(box,box1,IN,true,eps);
-		if(!box2.is_empty())
-			this->operator_ir(box,box2,OUT,true,eps);
-		
-	}
+	if(box1.is_empty())
+		this->inter(OUT);
+	else if(box2.is_empty())
+		this->_union(IN);
 	else if(box.max_diam()>eps)
 	{
 		SetBisect * bfather = (SetBisect*) father;
@@ -250,11 +246,66 @@ void SetLeaf::cleave(const IntervalVector& box, Sep& sep,double eps) {
 		delete this; // delete former father->left or father->right
 	}
 	else
+		status = inte(status,UNK);*/
+
+	assert(status == UNK);
+	IntervalVector box1(box);
+	IntervalVector box2(box);
+	sep.separate(box1,box2);
+	if(box1.is_empty()) // all the box can be set to OUT
+	{
+		this->inter(OUT);
+		return;
+	}
+	else if(box2.is_empty())// all the box can be set to IN
+	{
+		this->_union(IN);
+		return;
+	}
+	else if(box.max_diam()>eps)
+	{
+		SetBisect * bfather = (SetBisect*) father;
+		IntervalVector* restout;
+		int nout = 0;
+		if(box1!=box)
+    		nout=box.diff(box1,restout);
+    	IntervalVector* restin;
+    	int nin = 0;
+    	if(box2!=box)
+    		nin=box.diff(box2,restin); 	
+    	
+        if(bfather->left == this) // this is father->left
+		{
+			for(int i = 0;i<nout;i++)
+    			bfather->left->operator_ir(box,restout[i],OUT,true,eps); // add in box
+    		for(int i = 0;i<nin;i++)
+    			bfather->left->operator_ir(box,restin[i],IN,false,eps); // add out box
+    		bfather->left->gatherTo(false,bfather->left);
+    		if(!bfather->left->is_leaf())
+    			bfather->left->cleave(box,sep,eps);
+		}
+		else // this is father->right
+		{
+			for(int i = 0;i<nout;i++)
+    			bfather->right->operator_ir(box,restout[i],OUT,true,eps); // add in box
+    		for(int i = 0;i<nin;i++)
+    			bfather->right->operator_ir(box,restin[i],IN,false,eps); // add out box
+    		bfather->right->gatherTo(false,bfather->right);
+    		if(!bfather->right->is_leaf())
+    			bfather->right->cleave(box,sep,eps);
+		}
+	}
+	else
 		status = inte(status,UNK);
+	
 
 }
 
 void SetLeaf::gather(bool go_up) {
+	return; // nothing to do
+}
+
+void SetLeaf::gatherTo(bool go_up,SetNode * branch) {
 	return; // nothing to do
 }
 
@@ -280,3 +331,4 @@ void SetLeaf::setFathers() {
 	return; // nothing to do here
 }
 } // namespace ibex
+
