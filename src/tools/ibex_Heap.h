@@ -130,13 +130,13 @@ int Heap<T>::size() const {
 
 // E.g.: called by manage_buffer in Optimizer in case of a new upper bound
 // on the objective ("loup"). This function then removes (and deletes) from
-// the heap all the cells with a cost greater than loup.
+// the heap all the elements with a cost greater than loup.
 template<class T>
 void Heap<T>::contract(double loup) {
 	//cout << " before contract heap  " << l.size() << endl;
 
 	sort_heap(l.begin(),l.end(),HeapComparator<T>());
-	std::vector<std::pair<Cell*,double> >::iterator it0=l.begin();
+	typename std::vector<std::pair<T*,double> >::iterator it0=l.begin();
 
 	int k=0;
 	while (it0!=l.end() && it0->second > loup) { it0++; k++; }
@@ -166,7 +166,7 @@ void Heap<T>::push(T* el) {
 
 template<class T>
 T* Heap<T>::pop() {
-	Cell* c = l.front().first;
+	T* c = l.front().first;
 	pop_heap(l.begin(),l.end(), HeapComparator<T>()); // put the "best" at the end
 	l.pop_back(); // removes the "best"
 	return c;     // and return it
