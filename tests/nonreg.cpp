@@ -20,8 +20,8 @@ const int NB_TESTS = 24;
 const double TIME_LIMIT = 500;
 const char* time_limit = "500";
 
-const double REGRESSION_CELLS_RATIO = 1.1;
-const double REGRESSION_TIME_RATIO = 1.4;
+const double REGRESSION_CELLS_RATIO = 2.0;
+const double REGRESSION_TIME_RATIO = 1.3;
 
 // Some parameters are chosen to be not configurable for the moment
 const bool HC4_INCREMENTAL = true;
@@ -144,9 +144,9 @@ int main (int argc, char** argv) {
 			if (o.loup < lb)                   {  cerr.precision(20); cerr << "FAILED: upper bound (loup=" << o.loup << ") is wrong"; }
 			else if (o.uplo > ub)              {  cerr.precision(20); cerr << "FAILED: lower bound (uplo=" << o.uplo << ") is wrong"; }
 			else if (o.time > REGRESSION_TIME_RATIO*time)
-			                                   {  cerr << "FAILED: time (" << o.time << "s) exceeds by more than 10% the reference time"; }
+			                                   {  cerr << "FAILED: time (" << o.time << "s) exceeds by more than 30% the reference time"; }
 			else if (o.nb_cells> REGRESSION_CELLS_RATIO*nb_cells)
-			                                   {  cerr << "FAILED: number of cells (" << o.nb_cells << ") exceeds by more than 10% the reference value"; }
+			                                   {  cerr << "FAILED: number of cells (" << o.nb_cells << ") exceeds by more than 100% the reference value"; }
 			else                               {  ok=true; cout << "SUCCESS (time=" << o.time << " nb cells=" << o.nb_cells << ")"; }
 		}
       }
