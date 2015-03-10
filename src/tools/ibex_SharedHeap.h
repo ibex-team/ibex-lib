@@ -87,7 +87,7 @@ public:
 	/** Identifier of this heap */
 	const int heap_id;
 
-//protected:
+protected:
 
 	friend class DoubleHeap<T>;
 

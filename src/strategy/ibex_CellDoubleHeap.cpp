@@ -30,7 +30,7 @@ void CellDoubleHeap::contract(double new_loup) {
 	// it is necessary to update the loup.
 	cost2.set_loup(new_loup);
 
-	DoubleHeap<Cell>::contract(new_loup, cost2.depends_on_loup);
+	DoubleHeap<Cell>::contract(new_loup);
 }
 
 } // namespace ibex

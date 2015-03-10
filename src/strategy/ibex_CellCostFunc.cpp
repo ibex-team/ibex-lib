@@ -12,7 +12,7 @@
 
 namespace ibex {
 
-CellCostFunc::CellCostFunc(bool depends_on_loup) : depends_on_loup(depends_on_loup) {
+CellCostFunc::CellCostFunc(bool depends_on_loup) : CostFunc<Cell>(depends_on_loup) {
 
 }
 

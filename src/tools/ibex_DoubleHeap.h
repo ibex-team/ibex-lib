@@ -82,10 +82,8 @@ public:
 	 *
 	 * The costs of the first heap are assumed to be up-to-date.
 	 *
-	 * \param update_cost_heap2 - if true, the costs are
-	 *                            recalculated for the second heap
 	 */
-	void contract(double loup, bool update_cost_heap2);
+	void contract(double loup);
 
 	/**
 	 * Delete this
@@ -114,7 +112,7 @@ protected:
 	mutable int current_heap_id;
 
 	/** use in the contract function by recursivity */
-	void contract_rec(double new_loup, HeapNode<T>* node, SharedHeap<T>& heap, bool update_cost_heap2);
+	void contract_rec(double new_loup, HeapNode<T>* node, SharedHeap<T>& heap, bool percolate);
 
 	/**
 	 * Erase all the subnodes of node (including itself) in the first heap
@@ -165,13 +163,13 @@ unsigned int DoubleHeap<T>::size() const {
 }
 
 template<class T>
-void DoubleHeap<T>::contract(double new_loup, bool update_cost_heap2) {
+void DoubleHeap<T>::contract(double new_loup) {
 
 	if (nb_nodes==0) return;
 
 	SharedHeap<T>* copy1 = new SharedHeap<T>(heap1->costf, 0);
 
-	contract_rec(new_loup, heap1->root, *copy1, update_cost_heap2);
+	contract_rec(new_loup, heap1->root, *copy1, !(heap2->costf.depends_on_global));
 
 	heap1->root = copy1->root;
 	heap1->nb_nodes = copy1->size();
@@ -179,7 +177,7 @@ void DoubleHeap<T>::contract(double new_loup, bool update_cost_heap2) {
 	copy1->root = NULL; // avoid to delete heap1 with copy1
 	delete copy1;
 
-	if (update_cost_heap2) heap2->sort(true);
+	if (heap2->costf.depends_on_global) heap2->sort(true);
 
 	assert(nb_nodes==heap2->size());
 	assert(nb_nodes==heap1->size());
