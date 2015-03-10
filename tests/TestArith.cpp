@@ -106,7 +106,6 @@ void TestArith::check_div_scal(const Interval& x, double z, const Interval& y_ex
 	check(y_actual, y_expected);
 }
 
-
 void TestArith::minus01() { check(-Interval(0,1), Interval(-1,0)); }
 void TestArith::minus02() { check(-Interval::ALL_REALS, Interval::ALL_REALS); }
 void TestArith::minus03() { check(-Interval::NEG_REALS, Interval::POS_REALS); }
@@ -459,6 +458,46 @@ void TestArith::bwd_div07() { checkbwd_div(Interval::POS_REALS, Interval(0,1),  
 // note: 0/0 can be any number.
 void TestArith::bwd_div08() { checkbwd_div(Interval(ibex::next_float(0),POS_INFINITY), Interval(0,1), Interval(-1,0), Interval::ZERO, Interval::ZERO); }
 void TestArith::bwd_div09() { checkbwd_div(Interval::POS_REALS, Interval(ibex::next_float(0),1),  Interval(-1,0),  Interval::EMPTY_SET, Interval::EMPTY_SET); }
+
+
+void TestArith::checkbwd_max(const Interval& z,  const Interval& x, const Interval& y, const Interval& x_expected, const Interval& y_expected) {
+
+	Interval _x=x;
+	Interval _y=y;
+	bwd_max(z,_x,_y);
+
+	TEST_ASSERT(x_expected==_x);
+	TEST_ASSERT(y_expected==_y);
+
+	// swap the inputs
+	_x=x;
+	_y=y;
+	bwd_max(z,_y,_x);
+
+	TEST_ASSERT(x_expected==_x);
+	TEST_ASSERT(y_expected==_y);
+
+	_x=-x;
+	_y=-y;
+	bwd_min(-z,_x,_y);
+
+	TEST_ASSERT(x_expected==-_x);
+	TEST_ASSERT(y_expected==-_y);
+
+	// swap the inputs
+	_x=-x;
+	_y=-y;
+	bwd_min(-z,_y,_x);
+
+	TEST_ASSERT(x_expected==-_x);
+	TEST_ASSERT(y_expected==-_y);
+}
+
+void TestArith::bwd_maxmin01() { checkbwd_max(Interval::EMPTY_SET, Interval(-2,-1),Interval(-2,3),Interval::EMPTY_SET,Interval::EMPTY_SET); }
+void TestArith::bwd_maxmin02() { checkbwd_max(Interval(0,1),       Interval(-2,-1),Interval(-2,3),Interval(-2,-1),    Interval(0,1)); }
+void TestArith::bwd_maxmin03() { checkbwd_max(Interval(0,1),       Interval(-2,-1),Interval(2,3), Interval::EMPTY_SET,Interval::EMPTY_SET); }
+void TestArith::bwd_maxmin04() { checkbwd_max(Interval(0,1),       Interval(-2,0), Interval(-2,3),Interval(-2,0),    Interval(-2,1)); }
+void TestArith::bwd_maxmin05() { checkbwd_max(Interval(0,1),       Interval(-2,2), Interval(-2,3),Interval(-2,1),    Interval(-2,1)); }
 
 void TestArith::bwd_sqr01() { checkproj(sqr, Interval(1,9),            Interval(0,4),       Interval(1,3)); }
 void TestArith::bwd_sqr02() { checkproj(sqr, Interval(1,9),            Interval(0,2),       Interval(1,2)); }

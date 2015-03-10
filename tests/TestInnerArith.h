@@ -104,6 +104,14 @@ public:
 		TEST_ADD(TestInnerArith::div09_1);
 		TEST_ADD(TestInnerArith::div09_2);
 
+		TEST_ADD(TestInnerArith::maxmin01);
+		TEST_ADD(TestInnerArith::maxmin02);
+		TEST_ADD(TestInnerArith::maxmin03);
+		TEST_ADD(TestInnerArith::maxmin04);
+		TEST_ADD(TestInnerArith::maxmin05);
+		TEST_ADD(TestInnerArith::maxmin06);
+		TEST_ADD(TestInnerArith::maxmin07);
+
 		TEST_ADD(TestInnerArith::abs01);
 		TEST_ADD(TestInnerArith::abs02);
 		TEST_ADD(TestInnerArith::abs03);
@@ -283,6 +291,14 @@ public:
 	// x/y<=z with z<0 non inflating,with only possible negative half-plane
 	void div09_2();
 
+	void maxmin01();
+	void maxmin02();
+	void maxmin03();
+	void maxmin04();
+	void maxmin05();
+	void maxmin06();
+	void maxmin07();
+
 	void abs01();
 	void abs02();
 	void abs03();
@@ -309,6 +325,9 @@ private:
 	void check_add_sub(const Interval& z, const Interval& xin, const Interval& yin, bool lb, bool ub);
 	void check_mul_div_mono(const Interval& z, const Interval& xin, const Interval& yin, bool lb, bool ub);
 	void check_mul_div(const Interval& z, const Interval& xin, const Interval& yin, bool ll, bool lr, bool ul, bool ur);
+
+	// check also wrt min(-x,-y)=-z, max(y,x)=z and min(-y,-x)=-z
+	void check_max_min(const Interval& z,  const Interval& x, const Interval& y, const Interval& xin, const Interval& yin, const Interval& x_expected, const Interval& y_expected);
 };
 
 } // namespace ibex

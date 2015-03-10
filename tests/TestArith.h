@@ -178,6 +178,12 @@ public:
 		TEST_ADD(TestArith::bwd_div08);
 		TEST_ADD(TestArith::bwd_div09);
 
+		TEST_ADD(TestArith::bwd_maxmin01);
+		TEST_ADD(TestArith::bwd_maxmin02);
+		TEST_ADD(TestArith::bwd_maxmin03);
+		TEST_ADD(TestArith::bwd_maxmin04);
+		TEST_ADD(TestArith::bwd_maxmin05);
+
 		TEST_ADD(TestArith::bwd_sqr01);
 		TEST_ADD(TestArith::bwd_sqr02);
 		TEST_ADD(TestArith::bwd_sqr03);
@@ -473,6 +479,12 @@ private:
 	void bwd_div08();
 	void bwd_div09();
 
+	void bwd_maxmin01();
+	void bwd_maxmin02();
+	void bwd_maxmin03();
+	void bwd_maxmin04();
+	void bwd_maxmin05();
+
 	/* test: bwd_sqrt(const Interval& y, Interval& x) */
 	void bwd_sqr01();
 	void bwd_sqr02();
@@ -581,6 +593,7 @@ private:
 	void check_pow(const Interval& x, int p, const Interval& y_expected);
 	bool checkbwd_mul(const Interval& y, const Interval& x1_before, const Interval& x2_before, const Interval& x1_after, const Interval& x2_after);
 	void checkbwd_div(const Interval& y, const Interval& x1_before, const Interval& x2_before, const Interval& x1_after, const Interval& x2_after);
+	void checkbwd_max(const Interval& z,  const Interval& x, const Interval& y, const Interval& x_expected, const Interval& y_expected);
 	void checkbwd_trigo(const Interval& y, const Interval& xbefore, const Interval& xafter);
 	void checkbwd_pow(const Interval& y, const Interval& xbefore, const Interval& xafter, int p);
 	bool checkbwd_atan2(const Interval& a, const Interval& y_bef, const Interval& x_bef,

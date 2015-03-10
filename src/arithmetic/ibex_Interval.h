@@ -1053,18 +1053,13 @@ inline bool bwd_div(const Interval& y, Interval& x1, Interval& x2) {
 }
 
 inline bool bwd_sqrt(const Interval& y, Interval& x) {
-    if (y.ub()<0)
-    {
-    	x.set_empty();
-    } 
-   	else if (y.lb()<0) 
-   	{
+	if (y.is_empty() || y.ub()<0) {
+		x.set_empty();
+	} else if (y.lb()<0) {
 		x &= sqr(Interval(0,y.ub()));
-    } 
-    else 
-    {
-    	x &= sqr(y);
-    }
+	} else  {
+		x &= sqr(y);
+	}
 	return !x.is_empty();
 }
 
@@ -1094,6 +1089,11 @@ inline bool bwd_asin(const Interval& y,  Interval& x) {
 }
 
 inline bool bwd_atan(const Interval& y,  Interval& x) {
+
+	if (y.is_empty()) {
+		x.set_empty();
+		return false;
+	}
 
 	// Note: if y.ub>pi/2 or y.lb<-pi/2, tan(y) gives (-oo,oo).
 	// so the implementation is not as simple as x &= tan(y).
@@ -1138,7 +1138,7 @@ inline bool bwd_atan(const Interval& y,  Interval& x) {
 
 
 inline bool bwd_acosh(const Interval& y,  Interval& x) {
-	if (y.ub()<0.0) {
+	if (y.is_empty() || y.ub()<0.0) {
 		x.set_empty(); return false;
 	}
 	else {
@@ -1159,20 +1159,30 @@ inline bool bwd_atanh(const Interval& y,  Interval& x) {
 
 inline bool bwd_max(const Interval& y, Interval& x1, Interval& x2) {
 
+	if (y.is_empty()) {
+		x1.set_empty();
+		x2.set_empty();
+		return false;
+	}
+
 	/* ---- Disjoint intervals ---- */
 	if (x2.lb()>x1.ub() || y.lb()>x1.ub()) {
 		/* then, max(x,x2) is necessarily x2 */
-		x2 &= y; return !x2.is_empty();
+		if ((x2 &= y).is_empty()) { x1.set_empty(); return false;}
+		else return true;
 	} else if (x1.lb()>x2.ub() || y.lb()>x2.ub()) {
-		x1 &= y; return !x1.is_empty();
+		if ((x1 &= y).is_empty()) { x2.set_empty(); return false;}
+		else return true;
 	}
 	/*------------------------------*/
 
 	if (y.ub()<x1.lb() || y.ub()<x2.lb()) {
+		x1.set_empty();
+		x2.set_empty();
 		return false; // inconsistency
 	}
 
-	/* At this point, x, y and y all mutually intersect. */
+	/* At this point, x1, x2 and y all mutually intersect. */
 	if (x1.ub()>y.ub())
 		x1=Interval(x1.lb(),y.ub());
 	if (x2.ub()>y.ub())
@@ -1186,7 +1196,11 @@ inline bool bwd_min(const Interval& y, Interval& x1, Interval& x2) {
 	Interval mx1=-x1;
 	Interval mx2=-x2;
 
-	if (!bwd_max(-y,mx1,mx2)) return false;
+	if (!bwd_max(-y,mx1,mx2)) {
+		x1.set_empty();
+		x2.set_empty();
+		return false;
+	}
 
 	x1=-mx1;
 	x2=-mx2;
@@ -1194,6 +1208,12 @@ inline bool bwd_min(const Interval& y, Interval& x1, Interval& x2) {
 }
 
 inline bool bwd_sign(const Interval& y,  Interval& x) {
+
+	if (y.is_empty()) {
+		x.set_empty();
+		return false;
+	}
+
 	if(y.lb()>0)
 		x &= Interval::POS_REALS;
 	else if(y.ub()<0)
