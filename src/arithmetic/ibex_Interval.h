@@ -837,6 +837,11 @@ bool bwd_chi(const Interval& f, Interval& a, Interval& b, Interval& c);
  */
 bool bwd_integer(Interval& x);
 
+/** \brief Contract x and y w.r.t. the fact that they are equivalent modulo the period p.
+ *
+ */
+bool bwd_imod(Interval& x, Interval& y, const double& p);
+
 } // end namespace ibex
 
 #ifdef _IBEX_WITH_GAOL_
@@ -1223,59 +1228,126 @@ inline bool bwd_sign(const Interval& y,  Interval& x) {
 
 
 inline bool bwd_atan2(const Interval& theta, Interval& y, Interval& x) {
-	bool b=true;
+	
 	if (theta.is_empty()) {
 		x.set_empty(); y.set_empty();
-		b=false;
+		return false;
 	}
-	// not_implemented("bwd_atan2 non implemented yet");
-	
-    if(x.ub()>0 || !y.contains(0.0)) {
-        Interval s1,s2,s3,s4,s5,s6,s7;
-        s1 = sqr(x);
-        s2 = sqr(y);
-        s3 = s1 + s2;
-        s4 = sqrt(s3);
-        s5 = s4 - x;
-        s6 = s5/y;
-        s7 = atan(s6);
-        s7 &= 2*theta;
-        b &= bwd_atan(s7,s6);
-        b &= bwd_div(s6,s5,y);
-        b &= bwd_sub(s5,s4,x);
-        b &= bwd_sqrt(s4,s3);
-        b &= bwd_add(s3,s1,s2);
-        b &= bwd_sqr(s2,y);
-        b &= bwd_sqr(s1,x);
-    } else {
-        not_implemented("bwd_atan2 when x contains 0 and y contains 0");
+
+    //Lower half of upper right quadrant
+    if(theta.is_subset(Interval(0,M_PI/4.)))
+    {
+        x = (x&Interval::POS_REALS) & ( (y&Interval::POS_REALS) * (1/tan(theta&Interval(0,M_PI/4.))) );
+        y = (y&Interval::POS_REALS) & ( (x&Interval::POS_REALS) * (tan(theta&Interval(0,M_PI/4.))) );
     }
 
-    //  <=> cos(Theta)*X - sin(Theta)*Y > 0;
-	//      sin(Theta)*X + cos(Theta)*Y = 0
-/*
-	Interval costheta, sintheta, xcostheta, xsintheta, ycostheta, ysintheta, equ1, equ2;
-	costheta = cos(theta);
-	sintheta = sin(theta);
-	for (int i=0; b && (i<1);i++) {
-		xcostheta = x*costheta;
-		xsintheta = x*sintheta;
-		ycostheta = y*costheta;
-		ysintheta = y*sintheta;
-		equ1 = (xcostheta - ysintheta)& Interval::POS_REALS;
-		equ2 = (xsintheta + ycostheta)& Interval::ZERO;
-		b= b && (!equ1.is_empty()||!equ2.is_empty());
-		b= b && bwd_sub(equ1, xcostheta, ysintheta);
-		b= b && bwd_add(equ2, xsintheta, ycostheta);
-		b= b && bwd_mul(xcostheta, x, costheta);
-		b= b && bwd_mul(xsintheta, x, sintheta);
-		b= b && bwd_mul(ysintheta, y, sintheta);
-		b= b && bwd_mul(ycostheta, y, costheta);
-	}
-*/
-	return b;
-}
+    //Upper half of upper right quadrant
+    else if(theta.is_subset(Interval(M_PI/4.,M_PI/2.)))
+    {
+        bwd_atan2(M_PI/2.-theta,x,y); 
+    }
 
+    //Upper right quadrant
+    else if(theta.is_subset(Interval(0,M_PI/2))) 
+    {
+        Interval x1=x; Interval y1=y; Interval x2=x; Interval y2=y;
+        Interval theta1(theta.lb(),M_PI/4.), theta2(M_PI/4., theta.ub());
+        bwd_atan2(theta1,y1,x1);
+        bwd_atan2(theta2,y2,x2);
+        x=x1|x2; y=y1|y2; 
+    }
+
+    //Upper left quadrant
+    else if(theta.is_subset(Interval(M_PI/2,M_PI))) 
+    {
+        Interval x2=-x;
+        Interval theta2=M_PI-theta;
+        bwd_atan2(theta2,y,x2);
+        x=-x2;
+    }
+
+    //Lower left quadrant
+    else if(theta.is_subset(Interval(M_PI,3*M_PI/2))) 
+    {
+        Interval y2=-y;
+        Interval x2=-x;
+        Interval theta2=theta-M_PI;
+        bwd_atan2(theta2,y2,x2);
+        x=-x2; y=-y2;
+    }
+
+    //Lower right quadrant
+    else if(theta.is_subset(Interval(3*M_PI/2,2*M_PI)))
+    {
+        Interval x2=x;
+        Interval y2=-y;
+        Interval theta2=2*M_PI-theta;
+        bwd_atan2(theta2,y2,x2);
+        x=x2; y=-y2; 
+    }
+
+    //Upper bissection
+    else if(theta.is_subset(Interval(0,M_PI))) {
+        Interval theta1(theta.lb(),M_PI/2), theta2(M_PI/2, theta.ub());
+        Interval x1=x; Interval y1=y; Interval x2=x; Interval y2=y;
+        if(theta.lb() != M_PI/2) bwd_atan2(theta1,y1,x1);
+        if(theta.ub() != M_PI/2) bwd_atan2(theta2,y2,x2);
+        x=x1|x2; y=y1|y2; 
+    }
+
+    //Left bissection
+    else if(theta.is_subset(Interval(0,3*M_PI/2))) {
+        Interval theta1(theta.lb(),M_PI), theta2(M_PI, theta.ub());
+        Interval x1=x; Interval y1=y; Interval x2=x; Interval y2=y;
+        if(theta.lb() != M_PI) bwd_atan2(theta1,y1,x1);
+        if(theta.ub() != M_PI) bwd_atan2(theta2,y2,x2);
+        x=x1|x2; y=y1|y2; 
+    }
+
+    //Lower bissection
+    else if(theta.is_subset(Interval(0,2*M_PI))) {
+        Interval theta1(theta.lb(),3*M_PI/2), theta2(3*M_PI/2, theta.ub());
+        Interval x1=x; Interval y1=y; Interval x2=x; Interval y2=y;
+        if(theta.lb() != 3*M_PI/2) bwd_atan2(theta1,y1,x1);
+        if(theta.ub() != 3*M_PI/2) bwd_atan2(theta2,y2,x2);
+        x=x1|x2; y=y1|y2; 
+    }
+
+    //Theta diameter greater than 2PI then theta will be considered as [0,2PI]
+    else if (theta.diam() > 2*M_PI)
+    {
+        Interval theta1(0,2*M_PI);
+        bwd_atan2(theta1,x,y);
+    }
+
+    // Modulo
+    else
+    {
+        // We separate the intervals into 4 cases as imod does not support union.
+        Interval theta1(0,M_PI/2.), theta2(M_PI/2., M_PI), theta3(M_PI, 3*M_PI/2.), theta4(3*M_PI/2., 2*M_PI);
+        Interval thetaTmp(theta);
+        bwd_imod(thetaTmp,theta1,2*M_PI);
+        thetaTmp=theta;
+        bwd_imod(thetaTmp,theta2,2*M_PI);
+        thetaTmp=theta;
+        bwd_imod(thetaTmp,theta3,2*M_PI);
+        thetaTmp=theta;
+        bwd_imod(thetaTmp,theta4,2*M_PI);
+        Interval x1=x; Interval y1=y; 
+        bwd_atan2(theta1,y1,x1); // first quadrant
+        Interval x2=x; Interval y2=y;
+        bwd_atan2(theta2,y2,x2); // second quadrant
+        Interval x3=x; Interval y3=y;
+        bwd_atan2(theta3,y3,x3); // third quadrant
+        Interval x4=x; Interval y4=y;
+        bwd_atan2(theta4,y4,x4); // fourth quadrant
+        x=(x1|x2)|(x3|x4); y=(y1|y2)|(y3|y4);
+        // not_implemented("bwd_atan2 not implemented yet for theta outside [0,2*PI].");
+    }
+
+
+    return !x.is_empty() || !y.is_empty();
+}
 
 inline bool bwd_chi(const Interval& f, Interval& a, Interval& b, Interval& c){
 	if      (a.ub()<=0) {if ((b &= f).is_empty()) { a.set_empty(); c.set_empty(); return false; } }
@@ -1295,6 +1367,44 @@ inline bool bwd_chi(const Interval& f, Interval& a, Interval& b, Interval& c){
 
 inline bool bwd_integer(Interval& x) {
 	return !(x = integer(x)).is_empty();
+}
+
+// Implements interval modulo with double period:  x = y mod(p)
+inline bool bwd_imod(Interval& x, Interval& y, const double& p) {
+    if (p <= 0.)
+    {
+        ibex_error("Modulo needs a strictly positive period p.");
+        return false;
+    }
+    if (y.diam()>p || x.diam()>p)
+        return false;
+    Interval r = (x-y)/p;
+    Interval ir = integer(r);
+    if (ir.is_empty()) // additional protection because an empty interval is considered degenerated.
+    {
+        x.set_empty(); y.set_empty();
+        return false;
+    }    
+    if (ir.is_degenerated())
+        bwd_sub(ir*p,x,y);
+    else if (ir.diam()==1.)
+    {
+        double ir1 = ir.lb();
+        double ir2 = ir.ub();
+        Interval x1 = x; Interval x2 = x;
+        Interval y1 = y; Interval y2 = y;
+        bwd_sub(Interval(ir1*p),x1,y1);
+        bwd_sub(Interval(ir2*p),x2,y2);
+        x = x1 | x2;
+        y = y1 | y2;
+    }
+    else
+    {
+        ibex_error("Modulo diameter error.");
+        return false;
+    }
+
+    return true;
 }
 
 } // end namespace ibex
