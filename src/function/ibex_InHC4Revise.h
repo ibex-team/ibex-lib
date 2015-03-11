@@ -45,8 +45,8 @@ public:
 	inline void sub_V_bwd (const ExprSub&,     ExprLabel& , ExprLabel& , const ExprLabel& ) { not_implemented("Inner projection of \"sub_V\""); }
 	inline void sub_M_bwd (const ExprSub&,     ExprLabel& , ExprLabel& , const ExprLabel& ) { not_implemented("Inner projection of \"sub_M\""); }
 	inline void div_bwd   (const ExprDiv&,     ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) { if (!ibwd_div(y.d->i(),x1.d->i(),x2.d->i(),x1.p->i(),x2.p->i())) throw EmptyBoxException(); }
-	inline void max_bwd   (const ExprMax&,     ExprLabel& , ExprLabel& , const ExprLabel& ) { not_implemented("Inner projection of \"max\""); }
-	inline void min_bwd   (const ExprMin&,     ExprLabel& , ExprLabel& , const ExprLabel& ) { not_implemented("Inner projection of \"min\""); }
+	inline void max_bwd   (const ExprMax&,     ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) { if (!ibwd_max(y.d->i(),x1.d->i(),x2.d->i(),x1.p->i(),x2.p->i())) throw EmptyBoxException(); }
+	inline void min_bwd   (const ExprMin&,     ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) { if (!ibwd_min(y.d->i(),x1.d->i(),x2.d->i(),x1.p->i(),x2.p->i())) throw EmptyBoxException(); }
 	inline void atan2_bwd (const ExprAtan2&,   ExprLabel& , ExprLabel& , const ExprLabel& ) { not_implemented("Inner projection of \"atan2\""); }
 	inline void minus_bwd (const ExprMinus& , ExprLabel& x, const ExprLabel& y)                 { if (!ibwd_minus(y.d->i(),x.d->i())) throw EmptyBoxException(); }
     inline void trans_V_bwd(const ExprTrans& ,ExprLabel& , const ExprLabel& )                 { not_implemented("Inner projection of \"transpose\""); }

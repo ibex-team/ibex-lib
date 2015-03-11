@@ -24,7 +24,7 @@ CtcPixelMap::~CtcPixelMap() {
 //-------------------------------------------------------------------------------------------------------------
 void CtcPixelMap::world_to_grid(IntervalVector box) {
 
-    for(int i = 0; i < box.size(); i++) {
+    for(unsigned int i = 0; i < box.size(); i++) {
         box[i] = (box[i] - I.origin_[i]) / I.leaf_size_[i];
         // Limit range to image size on pixel_coord
         box[i] &= Interval(0,I.grid_size_[i]);

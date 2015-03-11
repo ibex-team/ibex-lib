@@ -1,40 +1,35 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : ibex_ExprDiff.h
+// File        : ibex_Expr2DAG.h
 // Author      : Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
-// Created     : Feb 25, 2013
-// Last Update : Feb 25, 2013
+// Created     : Feb 22, 2015
 //============================================================================
 
-#ifndef __IBEX_EXPR_DIFF_H__
-#define __IBEX_EXPR_DIFF_H__
+#ifndef __IBEX_EXPR_2_DAG_H__
+#define __IBEX_EXPR_2_DAG_H__
 
 #include "ibex_ExprVisitor.h"
 #include "ibex_NodeMap.h"
-#include "ibex_Function.h"
 
 namespace ibex {
 
+
 /**
- * \ingroup symbolic
+ *  \ingroup symbolic
  *
- * \brief Differentiate an expression.
+ * \brief Transform an expression to a minimal-size DAG
+ *
+ * The expression can be a tree or, partially, a DAG.
  *
  */
-class ExprDiff : public virtual ExprVisitor {
+class Expr2DAG : public virtual ExprVisitor {
 public:
-
 	/**
-	 * \brief Return the differential
-	 *
-	 * The differential is either a row vector for a real-valued function (the gradient)
-	 * or a matrix (the Jacobian matrix) for a vector-valued function.
-	 *
-	 * The node in return may either be an #ExprVector or a #ExprConstant.
+	 * \brief Transform e to a DAG
 	 */
-	const ExprNode& diff(const Array<const ExprSymbol>& old_x, const Array<const ExprSymbol>& new_x, const ExprNode& y);
+	const ExprNode& transform(const Array<const ExprSymbol>& old_x, const Array<const ExprNode>& new_x, const ExprNode& y);
 
 protected:
 	void visit(const ExprNode& e);
@@ -77,18 +72,17 @@ protected:
 	void visit(const ExprAsinh& e);
 	void visit(const ExprAtanh& e);
 
-	const ExprNode& gradient(const Array<const ExprSymbol>& old_x, const Array<const ExprSymbol>& new_x, const ExprNode& y);
+	NodeMap<const ExprNode*> peer;
 
-	void add_grad_expr(const ExprNode& node, const ExprNode& expr);
+	Array<const ExprNode> comps(const ExprNAryOp& e);
 
-	NodeMap<const ExprNode*> grad;
+	template<class T>
+	void visit_unary(const T& e);
 
-	// Leaves of this expression including symbols with respect
-	// to which we are calculating derivative and that do not appear
-	// in the expression (assimilated to "leaves" here, although they
-	// are not part of the DAG). Information for cleanup only.
-	std::vector<const ExprNode*> leaves;
+	template<class T>
+	void visit_binary(const T& e);
 };
 
-} // end namespace ibex
-#endif // __IBEX_EXPR_DIFF_H__
+} // namespace ibex
+
+#endif // __IBEX_EXPR_2_DAG_H__
