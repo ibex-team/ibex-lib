@@ -79,7 +79,9 @@ bool CtcExist::proceed(const IntervalVector& x_init, const IntervalVector& x_cur
 		return false;
 	}
 
+	// if the contractor for c(x,y) is inactive on [x]*[y]
 	if (flags[INACTIVE]) {
+		// ... the contractor for \exists y\in[yinit] c(x) is inactive on [x]
 		if (x==x_init) {
 			x_res =x_init;
 			set_flag(INACTIVE);
@@ -108,7 +110,7 @@ bool CtcExist::proceed(const IntervalVector& x_init, const IntervalVector& x_cur
 				CtcQuantif::contract(x,y_mid);  // x may be contracted here; that's why we pushed it on the stack *before* sampling.
 				x_res |= x;
 
-				if ((flags[INACTIVE])&&(x==x_init) ) {
+				if ((flags[INACTIVE]) && (x==x_init)) {
 					set_flag(INACTIVE);
 					return true;
 				}
@@ -141,7 +143,7 @@ void CtcExist::contract(IntervalVector& box) {
 
 	bool stop=false;
 
-	while ((!stop)&&(!l.empty())) {
+	while ((!stop) && (!l.empty())) {
 
 		// get the domain of variables
 		x_save = l.top().first;

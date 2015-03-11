@@ -83,9 +83,10 @@ void CtcForAll::proceed(IntervalVector& x, const IntervalVector& y, bool& is_ina
 		l.push(y);
 	} else {
 
-		if (is_inactive && flags[INACTIVE]){
-			IntervalVector y_mid = y;
-			CtcQuantif::contract(x, y_mid);
+		if (is_inactive && flags[INACTIVE]) {
+			// try to prove the constraint is inactive for all y in [y]
+			IntervalVector y_copy = y;
+			CtcQuantif::contract(x, y_copy);
 			is_inactive = flags[INACTIVE];
 		} else {
 			is_inactive = false;
@@ -100,7 +101,7 @@ void CtcForAll::contract(IntervalVector& box) {
 
 	l.push(y_init);
 
-	bool is_inactive =true;
+	bool is_inactive = true;
 	while (!l.empty()) {
 
 		// get and immediately bisect the domain of parameters (strategy inspired by Optimizer)

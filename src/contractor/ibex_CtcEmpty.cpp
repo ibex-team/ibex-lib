@@ -22,10 +22,14 @@ void CtcEmpty::contract(IntervalVector& box) {
 	switch (t) {
 	case YES: {
 		box.set_empty();
-		throw EmptyBoxException();	break;
+		throw EmptyBoxException();
+		break;
 	}
 	case NO:{
-		set_flag(INACTIVE); 	break;
+		// The constraint is inactive only if
+		// the test is monotonous w.r.t. inclusion
+		//	set_flag(INACTIVE);
+		break;
 	}
 	default: break;
 	}

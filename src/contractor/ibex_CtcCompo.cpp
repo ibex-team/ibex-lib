@@ -198,10 +198,12 @@ void CtcCompo::contract(IntervalVector& box) {
 	bool inactive= true;
 	BitSet flags(BitSet::empty(Ctc::NB_OUTPUT_FLAGS));
 
+	BitSet impact(BitSet::all(nb_var)); // always set to "all" for the moment (to be improved later)
+
 	for (int i=0; i<list.size(); i++) {
 		if (inactive) {
 			flags.clear();
-			list[i].contract(box,(*impact()),flags);
+			list[i].contract(box,impact,flags);
 			if (!flags[INACTIVE]) inactive=false;
 		} else {
 			list[i].contract(box);
