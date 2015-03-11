@@ -19,6 +19,7 @@
 #include "TestSymbolMap.h"
 #include "TestCellHeap.h"
 #include "TestPixelMap.h"
+#include "TestDoubleHeap.h"
 
 // ================ arithmetic ===============
 #include "TestInterval.h"
@@ -95,6 +96,7 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestBitSet()));
     ts.add(auto_ptr<Test::Suite>(new TestSymbolMap()));
     ts.add(auto_ptr<Test::Suite>(new TestCellHeap()));
+    ts.add(auto_ptr<Test::Suite>(new TestDoubleHeap()));
     ts.add(auto_ptr<Test::Suite>(new TestPixelMap()));
 
     ts.add(auto_ptr<Test::Suite>(new TestInterval()));

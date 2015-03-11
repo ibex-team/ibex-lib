@@ -177,7 +177,7 @@ void DoubleHeap<T>::contract(double new_loup) {
 	copy1->root = NULL; // avoid to delete heap1 with copy1
 	delete copy1;
 
-	if (heap2->costf.depends_on_global) heap2->sort(true);
+	if (heap2->costf.depends_on_global) heap2->sort();
 
 	assert(nb_nodes==heap2->size());
 	assert(nb_nodes==heap1->size());
@@ -239,8 +239,13 @@ void DoubleHeap<T>::push(T* data) {
 	nb_nodes++;
 }
 
+
+
+
 template<class T>
 T* DoubleHeap<T>::pop() {
+	assert(size()>0);
+
 	// Select the heap
 	HeapElt<T>* elt;
 	if (current_heap_id==0) {
@@ -260,7 +265,23 @@ T* DoubleHeap<T>::pop() {
 }
 
 template<class T>
+T* DoubleHeap<T>::pop1()  {
+	// the first heap is used
+	current_heap_id=0;
+	return pop();
+}
+
+template<class T>
+T* DoubleHeap<T>::pop2()  {
+	// the second heap is used
+	current_heap_id=1;
+	return pop();
+
+}
+
+template<class T>
 T* DoubleHeap<T>::top() const {
+	assert(size()>0);
 
 	// select the heap
 	if (rand() % 100 >=critpr) {
@@ -301,9 +322,19 @@ inline double DoubleHeap<T>::minimum2() const { return heap2->minimum(); }
 
 template<class T>
 std::ostream& DoubleHeap<T>::print(std::ostream& os) const{
-	os << "First Heap:  "<< heap1 <<std::endl;
-	os << "Second Heap: "<< heap2 <<std::endl;
+	if (this->empty())  {
+		os << " EMPTY ";
+		os<<std::endl;
+	} else {
+		os << "First Heap:  "<<std::endl;
+		heap1->print(os);
+		os<<std::endl;
+		os << "Second Heap: "<<std::endl;
+		heap2->print(os);
+		os<<std::endl;
+	}
 	return os;
+
 
 }
 

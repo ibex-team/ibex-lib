@@ -143,6 +143,6 @@ void TestPixelMap::test_ImageIntegral2D(){
 }
 
 
-};
+}
 
 

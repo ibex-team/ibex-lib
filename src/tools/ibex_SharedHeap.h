@@ -73,7 +73,7 @@ public:
 	 *
 	 * \param update_cost: if true, costs are all recalculated
 	 */
-	void sort(bool update_cost);
+	void sort();
 
 	/** Count the number of nodes pushed since
 	 * the object is created. */
@@ -291,13 +291,13 @@ T* SharedHeap<T>::top() const {
 
 
 template<class T>
-void SharedHeap<T>::sort(bool update_cost) {
+void SharedHeap<T>::sort() {
 	if (nb_nodes==0) return;
 
 	SharedHeap<T>* heap_tmp = new SharedHeap<T>(costf, heap_id);
 
 	// recursive sort : o(n*log(n))
-	sort_rec(root, *heap_tmp, update_cost);
+	sort_rec(root, *heap_tmp, costf.depends_on_global);
 
 	root = heap_tmp->root;
 	nb_nodes = heap_tmp->size();
@@ -568,7 +568,7 @@ bool HeapElt<T>::is_sup(double d, int ind_crit) const {
 
 template<class T>
 std::ostream& operator<<(std::ostream& os, const HeapElt<T>& elt) {
-	os << "n°" << elt.indice[0]<< *(elt.data);
+	os << "{ crit[0]= " << (elt.crit[0]) << ": "<< *(elt.data)<<" } ";
 	return os;
 }
 
