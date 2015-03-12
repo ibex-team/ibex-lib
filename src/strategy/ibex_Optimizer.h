@@ -441,6 +441,7 @@ protected:
 	 * \return true in case of success, i.e., if the loup has been decreased.
 	 */
 	bool check_candidate(const Vector& pt, bool is_inner);
+	bool check_candidate_extended(const Vector& pt, bool is_inner);
 
 	/**
 	 * Look for a loup box (in rigor mode) starting from a pseudo-loup.

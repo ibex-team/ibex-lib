@@ -30,12 +30,15 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 //Then the simplex algorithm is applied to obtain a new upper bound loup
 //If a new loup is found the method returns true
 
-bool Optimizer::update_loup_simplex(const IntervalVector& box) {
+bool Optimizer::update_loup_simplex(const IntervalVector& box_in) {
 
-	if (!(Interval(1.e-14,1.e6).contains(box.max_diam()))) return false;  // A extraire
+	if (!(Interval(1.e-14,1.e6).contains(box_in.max_diam()))) return false;  // A extraire
 	// is it necessary?  YES (BNE) Soplex can give false infeasible results with large numbers
 	//cout << "[polytope-hull] box before LR (linear relaxation): " << box << endl;
 
+	IntervalVector box(box_in.size()+1);
+	write_ext_box(box_in,box);
+	box[ext_sys.goal_var()] = Interval(uplo,loup);
 	try {
 		mylp->cleanConst();
 		mylp->initBoundVar(box);
@@ -43,8 +46,9 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 		//returns the number of constraints in the linearized system
 		int cont = lr->inlinearization(box, *mylp);
 		if (cont <0) return false;
-		bool res = lr->goal_linearization(box, *mylp);
-		if (!res) return false;
+		mylp->setVarObj(ext_sys.goal_var(),1);
+		//bool res = lr->goal_linearization(box, *mylp);
+		//if (!res) return false;
 
 
 		LinearSolver::Status_Sol stat = mylp->solve();
@@ -56,10 +60,10 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 		switch (stat) {
 		case (LinearSolver::OPTIMAL) :{
 			//the linear solution is mapped to intervals and evaluated
-			Vector prim(n);
+			Vector prim(n+1);
 			mylp->getPrimalSol(prim);
 
-			bool ret= box.contains(prim) && check_candidate(prim,false); //  [gch] do we know here that the point is inner??
+			bool ret= box.contains(prim) && check_candidate_extended(prim,false); //  [gch] do we know here that the point is inner??
 
 		//	if ( is_inner(prim_int)) std::cout << "[test]--------"  << " loup " << pseudo_loup <<" eval "<< goal(prim_int) << " opt linear "<<opt<< std::endl;
 
