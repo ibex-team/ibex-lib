@@ -13,6 +13,7 @@
 
 #include "ibex_Ctc.h"
 #include "ibex_Function.h"
+#include "ibex_HC4Revise.h"
 
 namespace ibex {
 
@@ -48,6 +49,8 @@ protected:
 	Function& f;
 	Domain d1; // (-oo, lb(y))
 	Domain d2; // (ub(y), +oo)
+	HC4Revise hc4r;
+
 };
 
 } // end namespace ibex
