@@ -41,6 +41,7 @@ void CtcNotIn::contract(IntervalVector& box) {
 	try {
 		if (hc4r.proj(f,d1,box)) {
 			set_flag(INACTIVE);
+			set_flag(FIXPOINT);
 			is_inactive =true;
 
 		}
@@ -50,6 +51,7 @@ void CtcNotIn::contract(IntervalVector& box) {
 		try {
 			if (hc4r.proj(f,d2,savebox)){
 				set_flag(INACTIVE);
+				set_flag(FIXPOINT);
 				is_inactive =true;
 			}
 		} catch (EmptyBoxException& ) {savebox.set_empty(); }

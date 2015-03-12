@@ -107,13 +107,13 @@ void CtcFwdBwd::contract(IntervalVector& box) {
 	try {
 		if (hc4r.proj(f,d,box)) {
 			set_flag(INACTIVE);
-
-			// setting the FIXPOINT flag is incorrect even if there
-			// is no multiple occurrence because some operators
-			// may be non-optimal in backward mode.
-
-			// set_flag(FIXPOINT);
+			set_flag(FIXPOINT);
 		}
+
+		// Note: setting the FIXPOINT flag is incorrect when there
+		// is no multiple occurrence because some operators
+		// may be non-optimal in backward mode.
+
 	} catch (EmptyBoxException& e) {
 		box.set_empty();
 		throw e;
