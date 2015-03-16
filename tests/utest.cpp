@@ -33,6 +33,8 @@
 #include "TestExpr.h"
 #include "TestExprCopy.h"
 #include "TestExprDiff.h"
+#include "TestExprCmp.h"
+#include "TestExpr2DAG.h"
 #include "TestExprSplitOcc.h"
 #include "TestFunction.h"
 #include "TestNumConstraint.h"
@@ -105,6 +107,8 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestExpr()));
     ts.add(auto_ptr<Test::Suite>(new TestExprCopy()));
     ts.add(auto_ptr<Test::Suite>(new TestExprDiff()));
+    ts.add(auto_ptr<Test::Suite>(new TestExprCmp()));
+    ts.add(auto_ptr<Test::Suite>(new TestExpr2DAG()));
     ts.add(auto_ptr<Test::Suite>(new TestExprSplitOcc()));
     ts.add(auto_ptr<Test::Suite>(new TestFunction()));
     ts.add(auto_ptr<Test::Suite>(new TestNumConstraint()));

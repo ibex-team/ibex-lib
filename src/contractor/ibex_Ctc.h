@@ -116,7 +116,6 @@ protected:
 	 */
 	void set_flag(unsigned int);
 
-
 protected:
 	/**
 	 * \brief Check if the size of all the contractor of the list is the same.

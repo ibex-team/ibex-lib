@@ -178,6 +178,12 @@ public:
 		TEST_ADD(TestArith::bwd_div08);
 		TEST_ADD(TestArith::bwd_div09);
 
+		TEST_ADD(TestArith::bwd_maxmin01);
+		TEST_ADD(TestArith::bwd_maxmin02);
+		TEST_ADD(TestArith::bwd_maxmin03);
+		TEST_ADD(TestArith::bwd_maxmin04);
+		TEST_ADD(TestArith::bwd_maxmin05);
+
 		TEST_ADD(TestArith::bwd_sqr01);
 		TEST_ADD(TestArith::bwd_sqr02);
 		TEST_ADD(TestArith::bwd_sqr03);
@@ -239,8 +245,16 @@ public:
 		TEST_ADD(TestArith::bwd_pow17);
 
 		// ===== temporarily commented ===============
-//		TEST_ADD(TestArith::bwd_atan2_01);
-//		TEST_ADD(TestArith::bwd_atan2_02);
+		TEST_ADD(TestArith::bwd_atan2_01);
+		TEST_ADD(TestArith::bwd_atan2_02);
+		TEST_ADD(TestArith::bwd_atan2_03);
+		TEST_ADD(TestArith::bwd_atan2_04);
+		TEST_ADD(TestArith::bwd_atan2_05);
+		TEST_ADD(TestArith::bwd_atan2_06);
+		TEST_ADD(TestArith::bwd_atan2_07);
+		TEST_ADD(TestArith::bwd_atan2_08);
+		TEST_ADD(TestArith::bwd_atan2_09); // commented waiting for an optimal contractor.
+		TEST_ADD(TestArith::bwd_atan2_10);
 
 		TEST_ADD(TestArith::bwd_sqrt01);
 		TEST_ADD(TestArith::bwd_sqrt02);
@@ -270,6 +284,15 @@ public:
 		TEST_ADD(TestArith::bwd_sub03);
 		TEST_ADD(TestArith::bwd_sub04);
 		TEST_ADD(TestArith::bwd_sub05);
+
+		TEST_ADD(TestArith::bwd_imod_01);
+		TEST_ADD(TestArith::bwd_imod_02);
+		TEST_ADD(TestArith::bwd_imod_03);
+		TEST_ADD(TestArith::bwd_imod_04);
+		TEST_ADD(TestArith::bwd_imod_05);
+		TEST_ADD(TestArith::bwd_imod_06);
+		TEST_ADD(TestArith::bwd_imod_07);
+		TEST_ADD(TestArith::bwd_imod_08);
 	}
 private:
 
@@ -473,6 +496,12 @@ private:
 	void bwd_div08();
 	void bwd_div09();
 
+	void bwd_maxmin01();
+	void bwd_maxmin02();
+	void bwd_maxmin03();
+	void bwd_maxmin04();
+	void bwd_maxmin05();
+
 	/* test: bwd_sqrt(const Interval& y, Interval& x) */
 	void bwd_sqr01();
 	void bwd_sqr02();
@@ -537,6 +566,14 @@ private:
 
 	void bwd_atan2_01();
 	void bwd_atan2_02();
+	void bwd_atan2_03();
+	void bwd_atan2_04();
+	void bwd_atan2_05();
+	void bwd_atan2_06();
+	void bwd_atan2_07();
+	void bwd_atan2_08();
+	void bwd_atan2_09();
+	void bwd_atan2_10();
 
 	void bwd_sqrt01();
 	void bwd_sqrt02();
@@ -567,6 +604,16 @@ private:
 	void bwd_sub04();
 	void bwd_sub05();
 
+	void bwd_imod_01();
+	void bwd_imod_02();
+	void bwd_imod_03();
+	void bwd_imod_04();
+	void bwd_imod_05();
+	void bwd_imod_06();
+	void bwd_imod_07();
+	void bwd_imod_08();
+
+
 	void check_add_scal(const Interval& x, double z, const Interval& y_expected);
 	void check_add(const Interval& x, const Interval& z, const Interval& y_expected);
 	void check_mul_scal(const Interval& x, double z, const Interval& y_expected);
@@ -581,6 +628,7 @@ private:
 	void check_pow(const Interval& x, int p, const Interval& y_expected);
 	bool checkbwd_mul(const Interval& y, const Interval& x1_before, const Interval& x2_before, const Interval& x1_after, const Interval& x2_after);
 	void checkbwd_div(const Interval& y, const Interval& x1_before, const Interval& x2_before, const Interval& x1_after, const Interval& x2_after);
+	void checkbwd_max(const Interval& z,  const Interval& x, const Interval& y, const Interval& x_expected, const Interval& y_expected);
 	void checkbwd_trigo(const Interval& y, const Interval& xbefore, const Interval& xafter);
 	void checkbwd_pow(const Interval& y, const Interval& xbefore, const Interval& xafter, int p);
 	bool checkbwd_atan2(const Interval& a, const Interval& y_bef, const Interval& x_bef,
@@ -588,7 +636,8 @@ private:
 	bool checkbwd_atan(const Interval& y, const Interval& xbefore, const Interval& xafter);
 	bool checkbwd_add(const Interval& y, const Interval& x1_before, const Interval& x2_before, const Interval& x1_after, const Interval& x2_after);
 	bool checkbwd_sub(const Interval& y, const Interval& x1_before, const Interval& x2_before, const Interval& x1_after, const Interval& x2_after);
-
+	bool checkbwd_imod(const double& period, const Interval& x_bef, const Interval& y_bef,
+								const Interval& x_aft, const Interval& y_aft);
 
 };
 

@@ -207,6 +207,39 @@ void TestInnerArith::check_mul_div(const Interval& z, const Interval& xin, const
 }
 
 
+void TestInnerArith::check_max_min(const Interval& z,  const Interval& x, const Interval& y, const Interval& xin, const Interval& yin, const Interval& x_expected, const Interval& y_expected) {
+
+	Interval _x=x;
+	Interval _y=y;
+	ibwd_max(z,_x,_y,xin,yin);
+
+	TEST_ASSERT(x_expected==_x);
+	TEST_ASSERT(y_expected==_y);
+
+	// swap the inputs
+	_x=x;
+	_y=y;
+	ibwd_max(z,_y,_x,yin,xin);
+
+	TEST_ASSERT(x_expected==_x);
+	TEST_ASSERT(y_expected==_y);
+
+	_x=-x;
+	_y=-y;
+	ibwd_min(-z,_x,_y,-xin,-yin);
+
+	TEST_ASSERT(x_expected==-_x);
+	TEST_ASSERT(y_expected==-_y);
+
+	// swap the inputs
+	_x=-x;
+	_y=-y;
+	ibwd_min(-z,_y,_x,-yin,-xin);
+
+	TEST_ASSERT(x_expected==-_x);
+	TEST_ASSERT(y_expected==-_y);
+}
+
 void TestInnerArith::add_sub01() {
 	check_add_sub(Interval(NEG_INFINITY,1.0),Interval::EMPTY_SET,Interval::EMPTY_SET,false,true);
 }
@@ -595,6 +628,14 @@ void TestInnerArith::abs05() {
 	TEST_ASSERT(f);
 	check(x,Interval(1,2));
 }
+
+void TestInnerArith::maxmin01() { check_max_min(Interval::EMPTY_SET, Interval(-2,-1),Interval(-2,3), Interval::EMPTY_SET,Interval::EMPTY_SET,Interval::EMPTY_SET,Interval::EMPTY_SET); }
+void TestInnerArith::maxmin02() { check_max_min(Interval(0,1),       Interval(-2,-1),Interval(-2,3), Interval::EMPTY_SET,Interval::EMPTY_SET,Interval(-2,-1),    Interval(0,1)); }
+void TestInnerArith::maxmin03() { check_max_min(Interval(0,1),       Interval(-2,-1),Interval(2,3),  Interval::EMPTY_SET,Interval::EMPTY_SET,Interval::EMPTY_SET,Interval::EMPTY_SET); }
+void TestInnerArith::maxmin04() { check_max_min(Interval(0,1),       Interval(-2,-1),Interval(-2,-1),Interval::EMPTY_SET,Interval::EMPTY_SET,Interval::EMPTY_SET,Interval::EMPTY_SET); }
+void TestInnerArith::maxmin05() { check_max_min(Interval(0,1),       Interval(-2,3), Interval(-2,3), -1,                 1,                  Interval(-2,1),     Interval(0,1)); }
+void TestInnerArith::maxmin06() { check_max_min(Interval(0,1),       Interval(-2,0), Interval(-2,3), -1,                 1,                  Interval(-2,0),     Interval(0,1)); }
+void TestInnerArith::maxmin07() { check_max_min(Interval(0,1),       Interval(-3,3), Interval(-2,3), Interval::EMPTY_SET,Interval::EMPTY_SET,Interval(-3,1),     Interval(0,1)); }
 
 void TestInnerArith::sqrt01() {
 	Interval x;

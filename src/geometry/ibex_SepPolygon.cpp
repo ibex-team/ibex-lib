@@ -41,7 +41,7 @@ SepPolygon::SepPolygon(vector<double> &_ax, vector<double> &_ay, vector<double> 
 }
 
 SepPolygon::~SepPolygon() {
-	for(int i=0; i<((CtcUnion&) ctc_boundary).list.size(); i++) {
+	for(unsigned int i=0; i<((CtcUnion&) ctc_boundary).list.size(); i++) {
 		delete & (((CtcUnion&) ctc_boundary).list[i]);
 	}
 	delete &ctc_boundary;
