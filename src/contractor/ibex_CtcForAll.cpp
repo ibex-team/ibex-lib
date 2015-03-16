@@ -70,18 +70,27 @@ CtcForAll::CtcForAll(const NumConstraint& c, const Array<const ExprSymbol>& y, c
 	CtcQuantif(c, y, y_init, prec) {
 }
 
-void CtcForAll::proceed(IntervalVector& x, const IntervalVector& y) {
+void CtcForAll::proceed(IntervalVector& x, const IntervalVector& y, bool& is_inactive) {
 
+	IntervalVector y_mid = y.mid();
 	try {
-		IntervalVector y_mid = y.mid();
 		CtcQuantif::contract(x, y_mid);
 	} catch (EmptyBoxException& e) {
 		while (!l.empty()) l.pop();
 		throw e;
 	}
-
 	if (y.max_diam()>prec) {
 		l.push(y);
+	} else {
+
+		if (is_inactive && flags[INACTIVE]) {
+			// try to prove the constraint is inactive for all y in [y]
+			IntervalVector y_copy = y;
+			CtcQuantif::contract(x, y_copy);
+			is_inactive = flags[INACTIVE];
+		} else {
+			is_inactive = false;
+		}
 	}
 }
 
@@ -92,6 +101,7 @@ void CtcForAll::contract(IntervalVector& box) {
 
 	l.push(y_init);
 
+	bool is_inactive = true;
 	while (!l.empty()) {
 
 		// get and immediately bisect the domain of parameters (strategy inspired by Optimizer)
@@ -100,9 +110,11 @@ void CtcForAll::contract(IntervalVector& box) {
 		l.pop();
 
 		// proceed with the two sub-boxes for y
-		proceed(box, cut.first);
-		proceed(box, cut.second);
+		proceed(box, cut.first, is_inactive);
+		proceed(box, cut.second, is_inactive);
 	}
+
+	if (is_inactive) set_flag(INACTIVE);
 
 }
 

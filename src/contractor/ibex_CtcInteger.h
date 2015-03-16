@@ -37,7 +37,7 @@ public:
 
 	virtual void contract(IntervalVector& box);
 
-	virtual void contract(IntervalVector& box, const BitSet& impact);
+//	virtual void contract(IntervalVector& box, const BitSet& impact);
 
 	virtual bool idempotent();
 

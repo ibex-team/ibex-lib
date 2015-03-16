@@ -61,11 +61,24 @@ public:
 	/**
 	 * \brief Deletes this instance.
 	 *
-	 * Need to be virtual (see Function::~Function()) */
+	 * Need to be virtual (see Function::~Function())
+	 */
 	virtual ~ExprNode();
 
 	/** Streams out this expression. */
 	friend std::ostream& operator<<(std::ostream&, const ExprNode&);
+
+	/**
+	 * \brief Compare two expressions
+	 *
+	 * Two expressions are equal if they are exactly the same DAGs
+	 */
+	bool operator==(const ExprNode&) const;
+
+	/**
+	 * \brief Compare two expressions
+	 */
+	bool operator!=(const ExprNode&) const;
 
 	/** height (following topological order) of this node in the DAG.
 	 *  A leaf is at height 0. */
@@ -146,7 +159,6 @@ public:
 
 	/** Create an inequality constraint expr>value. */
 	const ExprCtr& operator>(const Interval& value) const;
-
 };
 
 /**

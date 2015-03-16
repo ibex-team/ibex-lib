@@ -21,10 +21,52 @@ using namespace ibex;
 
 int main() {
 
-	 ofstream output;
-	 output.open ("doc-modeling.txt");
+	ofstream output;
+	output.open ("doc-modeling.txt");
 
-	 output << "================= this file is generated ==============" << endl;
+	output << "================= this file is generated ==============" << endl;
+
+	{
+	output << "! [func-eval-O]" << endl;
+	//! [func-eval-C]
+	const int nb_rows=2;
+	const int nb_cols=2;
+
+	Variable a(nb_rows,nb_cols),b(nb_rows,nb_cols),c(nb_rows,nb_cols);
+
+	Function pA(a,b,c,a);
+	Function pB(a,b,c,b);
+	Function pC(a,b,c,c);
+
+	Function f(a,b,c, (a+b-c));
+
+	double _A[nb_rows*nb_cols][2]={{2,2},{-1,-1},{-1,-1},{2,2}};
+	IntervalMatrix MA(2,2,_A);
+
+	double _B[nb_rows*nb_cols][2]={{1,1},{-1,-1},{1,1},{1,1}};
+	IntervalMatrix MB(2,2,_B);
+
+	double _C[nb_rows*nb_cols][2]={{1,1},{0,0},{0,0},{1,1}};
+	IntervalMatrix MC(2,2,_C);
+
+	IntervalVector box(3*nb_rows*nb_cols);
+
+	// the backward call on pA will force the sub-vector of
+	// "box" that represents the domain of "a" to contain the
+	// interval matrix "MA".
+	pA.backward(MA,box);
+
+	// idem
+	pB.backward(MB,box);
+	pC.backward(MC,box);
+
+	IntervalMatrix M = f.eval_matrix(box);
+
+	output << "A+B-C=" << M << endl;
+	//! [func-eval-C]
+	output << "! [func-eval-O]" << endl;
+	}
+
 
 	{
 	output << "! [func-hansen-O]" << endl;
@@ -64,7 +106,7 @@ int main() {
 	Array<const ExprSymbol> vars(7);
 
 	for (int i=0; i<7; i++)
-		vars.set_ref(i,x[i]);
+	vars.set_ref(i,x[i]);
 
 	Function f(vars, x[0]+x[1]+x[2]+x[3]+x[4]+x[5]+x[6]);
 	output << f << endl;
@@ -120,7 +162,7 @@ int main() {
 
 	const ExprNode* e=&(sqr(x[0]));
 	for (int i=1; i<N; i++)
-		e = & (*e + sqr(x[i]));
+	e = & (*e + sqr(x[i]));
 
 	Function f(x,*e,"f");
 

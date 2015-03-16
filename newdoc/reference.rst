@@ -6,7 +6,8 @@
 Articles in Journal and Conferences
 -------------------------------------
 
-
+.. |Jaulin14-pdf| replace:: PDF
+.. _Jaulin14-pdf: https://www.ensta-bretagne.fr/jaulin/paper_seppath.pdf
 .. |Araya14-pdf| replace:: PDF
 .. _Araya14-pdf: http://www.lirmm.fr/~trombetton/publis/innerregions_jogo_2014.pdf
 .. |Araya12-pdf| replace:: PDF
@@ -31,6 +32,11 @@ Articles in Journal and Conferences
 +--------------------+------------------------------+---------------------------------+-------------------------+------+---------------------+
 |                    | Author(s)                    | Title                           | Journal/Conference      | Year | Link                |
 +====================+==============================+=================================+=========================+======+=====================+
+|                    |                              |                                 |                         |      |                     |
+| .. _Jaulin14:      | **L. Jauin, B. Desrochers**  | *Introduction to the Algebra of | Engineering Applications| 2014 | |Jaulin14-pdf|_     |
+|[Jaulin & Desrochers|                              | Separators with Application to  | of Artificial           |      |                     |
+|2014]               |                              | Path Planning*                  | Intelligence            |      |                     |
++--------------------+------------------------------+---------------------------------+-------------------------+------+---------------------+
 |                    |                              |                                 |                         |      |                     |
 | .. _Araya14:       | **I. Araya, G. Trombettoni,  | *Upper Bounding in Inner        | Journal of Global       | 2014 | |Araya14-pdf|_      |
 |                    | B. Neveu and G. Chabert**    | Regions for Global Optimization | Optimization            |      |                     |

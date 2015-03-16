@@ -195,11 +195,22 @@ void CtcCompo::contract(IntervalVector& box) {
 //		}
 //		return;
 //	}
+	bool inactive= true;
+	BitSet flags(BitSet::empty(Ctc::NB_OUTPUT_FLAGS));
+
+	BitSet impact(BitSet::all(nb_var)); // always set to "all" for the moment (to be improved later)
 
 	for (int i=0; i<list.size(); i++) {
-		list[i].contract(box);
+		if (inactive) {
+			flags.clear();
+			list[i].contract(box,impact,flags);
+			if (!flags[INACTIVE]) inactive=false;
+		} else {
+			list[i].contract(box);
+		}
 	}
 
+	if (inactive) set_flag(INACTIVE);
 }
 
 } // end namespace ibex
