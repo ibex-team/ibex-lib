@@ -21,14 +21,20 @@ namespace {
 class ExprNodes : public virtual ExprVisitor {
 public:
 	vector<const ExprNode*> nodes;
-	NodeMap<const ExprNode*> map;
+	NodeMap<bool> visited;
 
 	ExprNodes(const Array<const ExprSymbol>* args) {
-		//map.clean();
+		//visited.clean();
 		if (args)
+			// We want to keep the control on the insertion order
+			// of arguments so we set the arguments as "visited"
 			for (int i=0; i<args->size(); i++) {
-				nodes.push_back(&(*args)[i]);
-				map.insert((*args)[i],&(*args)[i]);
+				visited.insert((*args)[i],true);
+				// We don't insert the arguments right now in "nodes"
+				// just to let constants be placed before in the vector
+				// (so that constants will appear before variables in
+				// the final ordering).
+
 			}
 	}
 
@@ -39,10 +45,10 @@ public:
 	void visit(const ExprUnaryOp& u)  {	visit(u.expr); }
 
 	void visit(const ExprNode& e)     {
-		if (!map.found(e)) {
+		if (!visited.found(e)) {
 			e.acceptVisitor(*this);
 			nodes.push_back(&e);
-			map.insert(e,&e);
+			visited.insert(e,true);
 		}
 	}
 };
@@ -74,6 +80,10 @@ void ExprSubNodes::init(const Array<const ExprSymbol>* args, const Array<const E
 	for (int i=0; i<e.size(); i++)
 		en.visit(e[i]);
 
+	if (args)
+		for (int i=0; i<args->size(); i++)
+			en.nodes.push_back(&(*args)[i]);
+
 	_size=en.nodes.size();
 
 	// only true for a single expr:
@@ -98,7 +108,8 @@ void ExprSubNodes::init(const Array<const ExprSymbol>* args, const Array<const E
 	}
 
 	// Sort the nodes by decreasing height
-	std::sort(tab,tab+_size,compare);
+	// stable_sort (versus sort) will maintain current ordering between elements of equal height
+	std::stable_sort(tab,tab+_size,compare);
 
 	for (int i=0; i<_size; i++) {
 		map.insert(*tab[i],i);
