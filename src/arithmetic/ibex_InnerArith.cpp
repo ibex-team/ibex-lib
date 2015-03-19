@@ -1025,60 +1025,45 @@ Interval isub(const Interval& x, const Interval& y) {
 }
 
 Interval imul(const Interval& x, const Interval& y) {
+
 	if (x.is_empty() || y.is_empty())
 			return Interval::EMPTY_SET;
+
+	if (x==Interval::ZERO || y==Interval::ZERO)
+		return Interval::ZERO;
 
 	double lx=x.lb();
 	double ux=x.ub();
 	double ly=y.lb();
 	double uy=y.ub();
 
-	if (lx==0 && ux==0)
-		return Interval(0,0); // so, for us, 0/0==1
-	else if	(ly==0 && uy==0)
-		return Interval::EMPTY_SET; // so, for us, 0/0==1
-	else if ((lx<0 && ux>0) && (ly==NEG_INFINITY || uy==POS_INFINITY))
-		return Interval::ALL_REALS;
-	else if ((ly<0 && uy>0) && (lx==NEG_INFINITY || ux==POS_INFINITY))
-		return Interval::ALL_REALS;
-	else if ((lx==NEG_INFINITY && uy==0) || (uy==POS_INFINITY && lx==0))
-		if (ux<=0 || ly>=0)
-			return Interval::POS_REALS;
-		else
-			return Interval(UP2(operator*,ux,ly), POS_INFINITY);
-	else if ((lx==NEG_INFINITY && ly==0) || (ly==NEG_INFINITY && lx==0))
-		if (ux<=0 || uy<=0)
-			return Interval::NEG_REALS;
-		else
-			return Interval(NEG_INFINITY, LO2(operator*,ux,uy));
-	else if ((ly==NEG_INFINITY && ux==0) || (ux==POS_INFINITY && ly==0))
-		if (uy<=0 || lx>=0)
-			return Interval::ALL_REALS;
-		else
-			return Interval(UP2(operator*,uy,lx), POS_INFINITY);
-	else if ((ux==POS_INFINITY && uy==0) || (uy==POS_INFINITY && ux==0))
-		if (lx>=0 || ly>=0)
-			return Interval::NEG_REALS;
-		else
-			return Interval(NEG_INFINITY, LO2(operator*,lx,ly));
-	else
-		if (uy<0)
-			if (ux<0)
-				return Interval(UP2(operator*,ux,uy),LO2(operator*,lx,ly));
-			else if (lx<0)
-				return Interval(UP2(operator*,ux,ly),LO2(operator*,lx,ly));
-			else return Interval(UP2(operator*,ux,ly),LO2(operator*,lx,uy));
-		else
-			if (ux<0)
-				return Interval(UP2(operator*,lx,uy),LO2(operator*,lx,ly));
-			else if (lx<0) {
-				double l1=UP2(operator*,lx,uy);
-				double l2=UP2(operator*,ux,ly);
-				double u1=LO2(operator*,lx,ly);
-				double u2=LO2(operator*,ux,uy);
-				return Interval(l1<l2?l1:l2,u1>u2?u1:u2);
+	double l,u;
+
+	if (lx>=0) {
+		if (ly>=0)      { l =                                                       UP2(operator*, lx,ly);
+		                  u = ux==POS_INFINITY || uy==POS_INFINITY ? POS_INFINITY : LO2(operator*, ux,uy); }
+		else if (uy<=0) { l = ux==POS_INFINITY || ly==NEG_INFINITY ? NEG_INFINITY : UP2(operator*, ux,ly);
+		                  u =                                                       LO2(operator*, lx,uy); }
+		else            { l = ux==POS_INFINITY || ly==NEG_INFINITY ? NEG_INFINITY : UP2(operator*, ux,ly);
+		                  u = ux==POS_INFINITY || uy==POS_INFINITY ? POS_INFINITY : LO2(operator*, ux,uy); }
+	} else if (ux<=0) {
+		return -imul(-x,y);
+	} else {
+		if (ly>=0)      { l = lx==NEG_INFINITY || uy==POS_INFINITY ? NEG_INFINITY : UP2(operator*, lx,uy);
+						  u = ux==POS_INFINITY || uy==POS_INFINITY ? POS_INFINITY : LO2(operator*, ux,uy); }
+		else if (uy<=0) { l = ux==POS_INFINITY || ly==NEG_INFINITY ? NEG_INFINITY : UP2(operator*, ux,ly);
+						  u = lx==NEG_INFINITY || ly==NEG_INFINITY ? POS_INFINITY : LO2(operator*, lx,ly); }
+		else {
+			if (x.is_unbounded() || y.is_unbounded()) {
+				l = NEG_INFINITY;
+				u = POS_INFINITY;
+			} else {
+				l = std::min(UP2(operator*,lx,uy), UP2(operator*,ux,ly));
+				u = std::max(LO2(operator*,ux,uy), LO2(operator*,lx,ly));
 			}
-			else return Interval(UP2(operator*,ux,ly),LO2(operator*,ux,uy));
+		}
+	}
+	return Interval(l,u);
 }
 
 Interval idiv(const Interval& x, const Interval& y) {

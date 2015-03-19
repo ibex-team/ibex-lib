@@ -130,6 +130,17 @@ public:
 		TEST_ADD(TestInnerArith::bugr894);
 		TEST_ADD(TestInnerArith::bugr899);
 		TEST_ADD(TestInnerArith::bugr902);
+
+		TEST_ADD(TestInnerArith::imul01);
+		TEST_ADD(TestInnerArith::imul02);
+		TEST_ADD(TestInnerArith::imul03);
+		TEST_ADD(TestInnerArith::imul04);
+		TEST_ADD(TestInnerArith::imul05);
+		TEST_ADD(TestInnerArith::imul06);
+		TEST_ADD(TestInnerArith::imul07);
+		TEST_ADD(TestInnerArith::imul08);
+		TEST_ADD(TestInnerArith::imul09);
+		TEST_ADD(TestInnerArith::imul10);
 	}
 
 	// x+y<=z with contraction (no inflation)
@@ -321,6 +332,17 @@ public:
 	// bug in release r902 (fixed in r903).
 	void bugr902();
 
+	void imul01();
+	void imul02();
+	void imul03();
+	void imul04();
+	void imul05();
+	void imul06();
+	void imul07();
+	void imul08();
+	void imul09();
+	void imul10();
+
 private:
 	void check_add_sub(const Interval& z, const Interval& xin, const Interval& yin, bool lb, bool ub);
 	void check_mul_div_mono(const Interval& z, const Interval& xin, const Interval& yin, bool lb, bool ub);
@@ -328,6 +350,8 @@ private:
 
 	// check also wrt min(-x,-y)=-z, max(y,x)=z and min(-y,-x)=-z
 	void check_max_min(const Interval& z,  const Interval& x, const Interval& y, const Interval& xin, const Interval& yin, const Interval& x_expected, const Interval& y_expected);
+
+	void check_imul(const Interval& x,  const Interval& y, const Interval& z);
 };
 
 } // namespace ibex

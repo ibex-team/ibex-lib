@@ -36,7 +36,7 @@ Interval isub(const Interval& x, const Interval& y);
 /**
  * \brief Inner image of the multiplication.
  *
- * Return z such that z ⊆ (x-y).
+ * Return z such that z ⊆ (x*y).
  */
 Interval imul(const Interval& x, const Interval& y);
 

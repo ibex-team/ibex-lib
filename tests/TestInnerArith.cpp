@@ -11,6 +11,8 @@
 #include "TestInnerArith.h"
 #include "ibex_InnerArith.h"
 #include "ibex_Function.h"
+#include <iostream>
+#include <iomanip>
 
 using namespace std;
 
@@ -713,5 +715,47 @@ void TestInnerArith::bugr902() {
 	TEST_ASSERT(!x.is_empty());
 	TEST_ASSERT(!y.is_empty());
 }
+
+void TestInnerArith::check_imul(const Interval& x, const Interval& y,const Interval& z_expected) {
+	Interval z_actual=imul(x,y);
+	check(z_actual,z_expected);
+	TEST_ASSERT(z_actual.is_subset(z_expected));
+
+	z_actual=imul(y,x);
+	check(z_actual,z_expected);
+	TEST_ASSERT(z_actual.is_subset(z_expected));
+
+	z_actual=imul(y,-x);
+	check(z_actual,-z_expected);
+	TEST_ASSERT(z_actual.is_subset(-z_expected));
+
+	z_actual=imul(-y,x);
+	check(z_actual,-z_expected);
+	TEST_ASSERT(z_actual.is_subset(-z_expected));
+
+	z_actual=imul(-y,-x);
+	check(z_actual,z_expected);
+	TEST_ASSERT(z_actual.is_subset(z_expected));
+}
+
+void TestInnerArith::imul01() { check_imul(Interval::EMPTY_SET, Interval::ZERO, Interval::EMPTY_SET); }
+
+void TestInnerArith::imul02() { check_imul(Interval(-1,1), Interval::ZERO, Interval::ZERO); }
+
+void TestInnerArith::imul03() { check_imul(Interval::NEG_REALS, Interval::ZERO, Interval::ZERO); }
+
+void TestInnerArith::imul04() { check_imul(Interval::ALL_REALS, Interval::ZERO, Interval::ZERO); }
+
+void TestInnerArith::imul05() { check_imul(Interval(0,1), Interval(1,2), Interval(0,2)); }
+
+void TestInnerArith::imul06() { check_imul(Interval(-2,-1), Interval(1,2), Interval(-4,-1)); }
+
+void TestInnerArith::imul07() { check_imul(Interval(NEG_INFINITY,0), Interval(1,2), Interval::NEG_REALS); }
+
+void TestInnerArith::imul08() { check_imul(Interval(NEG_INFINITY,0), Interval(-1,2), Interval::ALL_REALS); }
+
+void TestInnerArith::imul09() { check_imul(Interval(NEG_INFINITY,1), Interval(2,2), Interval(NEG_INFINITY,2)); }
+
+void TestInnerArith::imul10() { check_imul(Interval(NEG_INFINITY,-1), Interval(1,2), Interval(NEG_INFINITY,-1)); }
 
 } // end namespace
