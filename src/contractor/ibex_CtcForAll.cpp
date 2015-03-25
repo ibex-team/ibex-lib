@@ -8,6 +8,7 @@
 //============================================================================
 
 #include "ibex_CtcForAll.h"
+#include "ibex_NoBisectableVariableException.h"
 #include <cassert>
 
 using namespace std;
@@ -72,21 +73,19 @@ CtcForAll::CtcForAll(const NumConstraint& c, const Array<const ExprSymbol>& y, c
 
 void CtcForAll::proceed(IntervalVector& x, const IntervalVector& y, bool& is_inactive) {
 
-	IntervalVector y_mid = y.mid();
-	try {
-		CtcQuantif::contract(x, y_mid);
-	} catch (EmptyBoxException& e) {
-		while (!l.empty()) l.pop();
-		throw e;
-	}
+	IntervalVector y_tmp = y.mid();
+
+	CtcQuantif::contract(x, y_tmp);
+
 	if (y.max_diam()>prec) {
+		assert(y.is_bisectable());
 		l.push(y);
 	} else {
 
 		if (is_inactive && flags[INACTIVE]) {
 			// try to prove the constraint is inactive for all y in [y]
-			IntervalVector y_copy = y;
-			CtcQuantif::contract(x, y_copy);
+			y_tmp = y;
+			CtcQuantif::contract(x, y_tmp);
 			is_inactive = flags[INACTIVE];
 		} else {
 			is_inactive = false;
@@ -102,16 +101,27 @@ void CtcForAll::contract(IntervalVector& box) {
 	l.push(y_init);
 
 	bool is_inactive = true;
-	while (!l.empty()) {
+	try {
+		while (!l.empty()) {
 
-		// get and immediately bisect the domain of parameters (strategy inspired by Optimizer)
-		pair<IntervalVector,IntervalVector> cut = bsc->bisect(l.top());
+			// get and immediately bisect the domain of parameters (strategy inspired by Optimizer)
+			try {
+				pair<IntervalVector,IntervalVector> cut = bsc->bisect(l.top());
 
-		l.pop();
+				l.pop();
 
-		// proceed with the two sub-boxes for y
-		proceed(box, cut.first, is_inactive);
-		proceed(box, cut.second, is_inactive);
+				// proceed with the two sub-boxes for y
+				proceed(box, cut.first, is_inactive);
+				proceed(box, cut.second, is_inactive);
+			} catch(NoBisectableVariableException& e) { // e.g.: if y_init is degenerated
+				proceed(box, l.top(), is_inactive); // nothing should be pushed in the queue
+				l.pop();
+			}
+		}
+	} catch (EmptyBoxException& e) {
+		while (!l.empty()) l.pop();
+		box.set_empty();
+		throw e;
 	}
 
 	if (is_inactive) set_flag(INACTIVE);
