@@ -33,8 +33,10 @@ void TestGradient::add01() {
 
 	IntervalVector g(2);
 	f.gradient(box,g);
-	TEST_ASSERT(g[0]==Interval(1,1));
-	TEST_ASSERT(g[1]==Interval(1,1));
+	check(g[0],Interval(1,1));
+	check(g[1],Interval(1,1));
+	TEST_ASSERT(g[0].is_superset(Interval(1,1)));
+	TEST_ASSERT(g[1].is_superset(Interval(1,1)));
 }
 
 void TestGradient::add02() {
@@ -47,10 +49,14 @@ void TestGradient::add02() {
 
 	IntervalMatrix J(2,2);
 	f.jacobian(box,J);
-	TEST_ASSERT(J[0][0]==Interval(2,4));
-	TEST_ASSERT(J[0][1]==Interval(-1,-1));
-	TEST_ASSERT(J[1][0]==Interval(3,4));
-	TEST_ASSERT(J[1][1]==Interval(1,2));
+	check(J[0][0],Interval(2,4));
+	check(J[0][1],Interval(-1,-1));
+	check(J[1][0],Interval(3,4));
+	check(J[1][1],Interval(1,2));
+	TEST_ASSERT(J[0][0].is_superset(Interval(2,4)));
+	TEST_ASSERT(J[0][1].is_superset(Interval(-1,-1)));
+	TEST_ASSERT(J[1][0].is_superset(Interval(3,4)));
+	TEST_ASSERT(J[1][1].is_superset(Interval(1,2)));
 
 }
 
@@ -64,7 +70,8 @@ void TestGradient::mulVV() {
 	double _xy[]={1,2,3,4,5,6};
 	IntervalVector xy(Vector(6,_xy));
 	double _g[]={4,5,6,1,2,3};
-	TEST_ASSERT(f.gradient(xy)==IntervalVector(Vector(6,_g)));
+	check(f.gradient(xy),IntervalVector(Vector(6,_g)));
+	TEST_ASSERT(f.gradient(xy).is_superset(IntervalVector(Vector(6,_g))));
 }
 
 void TestGradient::transpose01() {
@@ -74,7 +81,8 @@ void TestGradient::transpose01() {
 	double _xy[]={1,2,3,4,5,6};
 	IntervalVector xy(Vector(6,_xy));
 	double _g[]={4,5,6,1,2,3};
-	TEST_ASSERT(f.gradient(xy)==IntervalVector(Vector(6,_g)));
+	check(f.gradient(xy),IntervalVector(Vector(6,_g)));
+	TEST_ASSERT(f.gradient(xy).is_superset(IntervalVector(Vector(6,_g))));
 }
 
 void TestGradient::mulMV01() {
@@ -84,8 +92,10 @@ void TestGradient::mulMV01() {
 	Function f(x,transpose(x)*(M*x)); // the gradient is 2*M*x
 	IntervalVector box(2,Interval(1.0));
 	IntervalVector g=f.gradient(box);
-	TEST_ASSERT(g[0]==Interval(6));
-	TEST_ASSERT(g[1]==Interval(10));
+	check(g[0],Interval(6));
+	check(g[1],Interval(10));
+	TEST_ASSERT(g[0].is_superset(Interval(6)));
+	TEST_ASSERT(g[1].is_superset(Interval(10)));
 }
 
 void TestGradient::mulVM01() {
@@ -95,8 +105,10 @@ void TestGradient::mulVM01() {
 	Function f(x,(x*M)*x); // the gradient is 2*M*x
 	IntervalVector box(2,Interval(1.0));
 	IntervalVector g=f.gradient(box);
-	TEST_ASSERT(g[0]==Interval(6));
-	TEST_ASSERT(g[1]==Interval(10));
+	check(g[0],Interval(6));
+	check(g[1],Interval(10));
+	TEST_ASSERT(g[0].is_superset(Interval(6)));
+	TEST_ASSERT(g[1].is_superset(Interval(10)));
 }
 
 void TestGradient::mulVM02() {
@@ -115,8 +127,10 @@ void TestGradient::mulVM02() {
 	IntervalVector box(1,Interval(3.0));
 	IntervalMatrix J=f.jacobian(box);
 
-	TEST_ASSERT(J[0][0]==Interval(6));
-	TEST_ASSERT(J[1][0]==Interval(-5));
+	check(J[0][0],Interval(6));
+	check(J[1][0],Interval(-5));
+	TEST_ASSERT(J[0][0].is_superset(Interval(6)));
+	TEST_ASSERT(J[1][0].is_superset(Interval(-5)));
 }
 
 void TestGradient::dist() {
@@ -132,10 +146,14 @@ void TestGradient::dist() {
 	IntervalVector g(4);
 	dist.gradient(box,g);
 
-	TEST_ASSERT(g[0]==Interval(-2,-2));
-	TEST_ASSERT(g[1]==Interval(2,2));
-	TEST_ASSERT(g[2]==Interval(-4,-4));
-	TEST_ASSERT(g[3]==Interval(4,4));
+	check(g[0],Interval(-2,-2));
+	check(g[1],Interval(2,2));
+	check(g[2],Interval(-4,-4));
+	check(g[3],Interval(4,4));
+	TEST_ASSERT(g[0].is_superset(Interval(-2,-2)));
+	TEST_ASSERT(g[1].is_superset(Interval(2,2)));
+	TEST_ASSERT(g[2].is_superset(Interval(-4,-4)));
+	TEST_ASSERT(g[3].is_superset(Interval(4,4)));
 }
 
 static double BOX1[30][2]={

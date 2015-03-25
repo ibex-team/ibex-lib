@@ -146,7 +146,7 @@ private:
 	 *                   of the contraction
 	 * \param y:         the current box "y"
 	 */
-	void proceed(const IntervalVector& x_init, const IntervalVector& x_current, IntervalVector& x_res, IntervalVector& y);
+	bool proceed(const IntervalVector& x_init, const IntervalVector& x_current, IntervalVector& x_res, IntervalVector& y);
 
 	/**
 	 * Stack of pairs (x,y)

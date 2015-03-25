@@ -23,7 +23,7 @@
 #include "ibex_EntailedCtr.h"
 #include "ibex_LinearSolver.h"
 #include "ibex_PdcHansenFeasibility.h"
-#include "ibex_Cell.h"
+#include "ibex_Random.h"
 
 namespace ibex {
 
@@ -395,7 +395,7 @@ protected:
 	 * When f is increasing (resp. decreasing) w.r.t. variable x_i, the interval [x_i]
 	 * is replaced by the lower bound (resp. upper bound) of [x_i].
 	 */
-	void monotonicity_analysis(IntervalVector& box);
+	void monotonicity_analysis(IntervalVector& box, bool inner_found);
 
 	/**
 	 * \brief Quick check that the box is not infeasible.

@@ -11,6 +11,8 @@
 #include "TestInnerArith.h"
 #include "ibex_InnerArith.h"
 #include "ibex_Function.h"
+#include <iostream>
+#include <iomanip>
 
 using namespace std;
 
@@ -125,7 +127,7 @@ void TestInnerArith::check_mul_div_mono(const Interval& z, const Interval& xin, 
 		xin2=Interval::EMPTY_SET;
 	else {
 		xin2=1/xin; // we must have xin2 \superset 1/xin
-		assert((xin2/yin).is_subset(z2)); // and, at the same time, xin2/yin \subset 1/z
+		TEST_ASSERT((xin2/yin).is_subset(z2)); // and, at the same time, xin2/yin \subset 1/z
 	}
 	x=Interval(L,U);
 	y=Interval(L,U);
@@ -206,6 +208,39 @@ void TestInnerArith::check_mul_div(const Interval& z, const Interval& xin, const
 	TEST_ASSERT(yin.is_subset(y));
 }
 
+
+void TestInnerArith::check_max_min(const Interval& z,  const Interval& x, const Interval& y, const Interval& xin, const Interval& yin, const Interval& x_expected, const Interval& y_expected) {
+
+	Interval _x=x;
+	Interval _y=y;
+	ibwd_max(z,_x,_y,xin,yin);
+
+	TEST_ASSERT(x_expected==_x);
+	TEST_ASSERT(y_expected==_y);
+
+	// swap the inputs
+	_x=x;
+	_y=y;
+	ibwd_max(z,_y,_x,yin,xin);
+
+	TEST_ASSERT(x_expected==_x);
+	TEST_ASSERT(y_expected==_y);
+
+	_x=-x;
+	_y=-y;
+	ibwd_min(-z,_x,_y,-xin,-yin);
+
+	TEST_ASSERT(x_expected==-_x);
+	TEST_ASSERT(y_expected==-_y);
+
+	// swap the inputs
+	_x=-x;
+	_y=-y;
+	ibwd_min(-z,_y,_x,-yin,-xin);
+
+	TEST_ASSERT(x_expected==-_x);
+	TEST_ASSERT(y_expected==-_y);
+}
 
 void TestInnerArith::add_sub01() {
 	check_add_sub(Interval(NEG_INFINITY,1.0),Interval::EMPTY_SET,Interval::EMPTY_SET,false,true);
@@ -443,7 +478,9 @@ void TestInnerArith::mul09() {
 	ibwd_mul(Interval(1,2),x,y);
 	TEST_ASSERT_DELTA(x.lb()*y.lb(),1.0,error);
 	TEST_ASSERT_DELTA(x.ub()*y.ub(),2.0,error);
-	TEST_ASSERT((x*y).is_subset(Interval(1,2)));
+	//TEST_ASSERT((x*y).is_subset(Interval(1,2)));
+	TEST_ASSERT(x.lb()*y.lb()>=1);
+	TEST_ASSERT(x.ub()*y.ub()<=2);
 }
 
 void TestInnerArith::mul10() {
@@ -452,7 +489,9 @@ void TestInnerArith::mul10() {
 	ibwd_mul(Interval(1,2),x,y);
 	TEST_ASSERT_DELTA(x.lb()*y.lb(),2.0,error);
 	TEST_ASSERT_DELTA(x.ub()*y.ub(),1.0,error);
-	TEST_ASSERT((x*y).is_subset(Interval(1,2)));
+	//TEST_ASSERT((x*y).is_subset(Interval(1,2)));
+	TEST_ASSERT(x.lb()*y.lb()>=1);
+	TEST_ASSERT(x.ub()*y.ub()<=2);
 }
 
 void TestInnerArith::mul11() {
@@ -460,7 +499,9 @@ void TestInnerArith::mul11() {
 	Interval y(-2,2);
 	ibwd_mul(Interval(1,2),x,y);
 	TEST_ASSERT(fabs(x.lb()*y.lb()-1.0)<error || fabs(x.ub()*y.ub()-1.0)<error);
-	TEST_ASSERT((x*y).is_subset(Interval(1,2)));
+	//TEST_ASSERT((x*y).is_subset(Interval(1,2)));
+	TEST_ASSERT(x.lb()*y.lb()>=1);
+	TEST_ASSERT(x.ub()*y.ub()<=2);
 }
 
 void TestInnerArith::mul12_1() {
@@ -590,6 +631,14 @@ void TestInnerArith::abs05() {
 	check(x,Interval(1,2));
 }
 
+void TestInnerArith::maxmin01() { check_max_min(Interval::EMPTY_SET, Interval(-2,-1),Interval(-2,3), Interval::EMPTY_SET,Interval::EMPTY_SET,Interval::EMPTY_SET,Interval::EMPTY_SET); }
+void TestInnerArith::maxmin02() { check_max_min(Interval(0,1),       Interval(-2,-1),Interval(-2,3), Interval::EMPTY_SET,Interval::EMPTY_SET,Interval(-2,-1),    Interval(0,1)); }
+void TestInnerArith::maxmin03() { check_max_min(Interval(0,1),       Interval(-2,-1),Interval(2,3),  Interval::EMPTY_SET,Interval::EMPTY_SET,Interval::EMPTY_SET,Interval::EMPTY_SET); }
+void TestInnerArith::maxmin04() { check_max_min(Interval(0,1),       Interval(-2,-1),Interval(-2,-1),Interval::EMPTY_SET,Interval::EMPTY_SET,Interval::EMPTY_SET,Interval::EMPTY_SET); }
+void TestInnerArith::maxmin05() { check_max_min(Interval(0,1),       Interval(-2,3), Interval(-2,3), -1,                 1,                  Interval(-2,1),     Interval(0,1)); }
+void TestInnerArith::maxmin06() { check_max_min(Interval(0,1),       Interval(-2,0), Interval(-2,3), -1,                 1,                  Interval(-2,0),     Interval(0,1)); }
+void TestInnerArith::maxmin07() { check_max_min(Interval(0,1),       Interval(-3,3), Interval(-2,3), Interval::EMPTY_SET,Interval::EMPTY_SET,Interval(-3,1),     Interval(0,1)); }
+
 void TestInnerArith::sqrt01() {
 	Interval x;
 	bool f=ibwd_sqrt(Interval::EMPTY_SET,x);
@@ -666,5 +715,47 @@ void TestInnerArith::bugr902() {
 	TEST_ASSERT(!x.is_empty());
 	TEST_ASSERT(!y.is_empty());
 }
+
+void TestInnerArith::check_imul(const Interval& x, const Interval& y,const Interval& z_expected) {
+	Interval z_actual=imul(x,y);
+	check(z_actual,z_expected);
+	TEST_ASSERT(z_actual.is_subset(z_expected));
+
+	z_actual=imul(y,x);
+	check(z_actual,z_expected);
+	TEST_ASSERT(z_actual.is_subset(z_expected));
+
+	z_actual=imul(y,-x);
+	check(z_actual,-z_expected);
+	TEST_ASSERT(z_actual.is_subset(-z_expected));
+
+	z_actual=imul(-y,x);
+	check(z_actual,-z_expected);
+	TEST_ASSERT(z_actual.is_subset(-z_expected));
+
+	z_actual=imul(-y,-x);
+	check(z_actual,z_expected);
+	TEST_ASSERT(z_actual.is_subset(z_expected));
+}
+
+void TestInnerArith::imul01() { check_imul(Interval::EMPTY_SET, Interval::ZERO, Interval::EMPTY_SET); }
+
+void TestInnerArith::imul02() { check_imul(Interval(-1,1), Interval::ZERO, Interval::ZERO); }
+
+void TestInnerArith::imul03() { check_imul(Interval::NEG_REALS, Interval::ZERO, Interval::ZERO); }
+
+void TestInnerArith::imul04() { check_imul(Interval::ALL_REALS, Interval::ZERO, Interval::ZERO); }
+
+void TestInnerArith::imul05() { check_imul(Interval(0,1), Interval(1,2), Interval(0,2)); }
+
+void TestInnerArith::imul06() { check_imul(Interval(-2,-1), Interval(1,2), Interval(-4,-1)); }
+
+void TestInnerArith::imul07() { check_imul(Interval(NEG_INFINITY,0), Interval(1,2), Interval::NEG_REALS); }
+
+void TestInnerArith::imul08() { check_imul(Interval(NEG_INFINITY,0), Interval(-1,2), Interval::ALL_REALS); }
+
+void TestInnerArith::imul09() { check_imul(Interval(NEG_INFINITY,1), Interval(2,2), Interval(NEG_INFINITY,2)); }
+
+void TestInnerArith::imul10() { check_imul(Interval(NEG_INFINITY,-1), Interval(1,2), Interval(NEG_INFINITY,-1)); }
 
 } // end namespace

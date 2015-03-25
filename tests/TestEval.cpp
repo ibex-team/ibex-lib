@@ -133,7 +133,8 @@ void TestEval::add01() {
 	Interval res=f.eval(box);
 	//e.f.cf.print<Domain>();
 	//cout << "res=" << res << endl;
-	TEST_ASSERT(res==Interval(4,6));
+	check(res,Interval(4,6));
+	TEST_ASSERT(res.is_superset(Interval(4,6)));
 }
 
 void TestEval::add02() {
@@ -151,7 +152,8 @@ void TestEval::add02() {
 
 	IntervalVector res=f.eval_vector(xy);
 	//cout << e.f << endl;
-	TEST_ASSERT(res==z);
+	check(res,z);
+	TEST_ASSERT(res.is_superset(z));
 }
 
 void TestEval::add03() {
@@ -169,7 +171,8 @@ void TestEval::add03() {
 
 	IntervalVector res=f.eval_vector(xy);
 	//cout << e.f << endl;
-	TEST_ASSERT(res==z);
+	check(res,z);
+	TEST_ASSERT(res.is_superset(z));
 }
 
 void TestEval::add04() {
@@ -190,7 +193,9 @@ void TestEval::add04() {
 
 	IntervalMatrix res=f.eval_matrix(xy);
 	//cout << e.f << endl;
-	TEST_ASSERT(res==z);
+	check(res[0],z[0]);
+	check(res[1],z[1]);
+	TEST_ASSERT(res.is_superset(z));
 }
 
 void TestEval::mul01() {
@@ -209,7 +214,9 @@ void TestEval::mul01() {
 
 	IntervalMatrix res=f.eval_matrix(xy);
 	//cout << e.f << endl;
-	TEST_ASSERT(res==mz);
+	check(res[0],mz[0]);
+	check(res[1],mz[1]);
+	TEST_ASSERT(res.is_superset(mz));
 }
 
 
@@ -230,6 +237,7 @@ void TestEval::dist01() {
 	Interval res=f.eval(box);
 	//cout << e.f << endl;
 	check(res,Interval(::sqrt(2),::sqrt(2)));
+	TEST_ASSERT(res.is_superset(Interval(::sqrt(2),::sqrt(2))));
 }
 
 void TestEval::apply01() {
@@ -243,6 +251,7 @@ void TestEval::apply01() {
 
 	IntervalVector _x2(1,Interval(2,2));
 	check(f2.eval(_x2), Interval(2,2));
+	TEST_ASSERT((f2.eval(_x2)).is_superset(Interval(2,2)));
 }
 
 void TestEval::apply02() {
@@ -264,6 +273,7 @@ void TestEval::apply02() {
 	x[1]=Interval(3,3);
 
 	check(f2.eval_domain(x).i(), Interval(10,10));
+	TEST_ASSERT((f2.eval_domain(x).i()).is_superset(Interval(10,10)));
 }
 
 void TestEval::apply03() {
@@ -294,6 +304,7 @@ void TestEval::apply03() {
 	*/
 
 	check(f3.eval_domain(_x3).i(), Interval(-3,-3));
+	TEST_ASSERT((f3.eval_domain(_x3).i()).is_superset(Interval(-3,-3)));
 }
 
 void TestEval::apply04() {
@@ -309,6 +320,7 @@ void TestEval::apply04() {
 	IntervalVector _x3(1,Interval(3,3));
 
 	check(f3.eval_domain(_x3).i(), Interval(10,10));
+	TEST_ASSERT((f3.eval_domain(_x3).i()).is_superset(Interval(10,10)));
 }
 
 }

@@ -9,8 +9,15 @@
  * Created     : Jan 9, 2013
  * ---------------------------------------------------------------------------- */
 
+static void init() {
+	filib::fp_traits<FI_BASE>::setup();
+}
+
+
 namespace ibex {
 
+
+static int ___IGNORE__ = (init(), 0);
 
 /**
  * IMPORTANT:

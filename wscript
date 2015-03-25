@@ -7,7 +7,7 @@ from distutils.version import LooseVersion
 from waflib import Logs, Scripting
 
 # the following two variables are used by the target "waf dist"
-VERSION="2.0.10alpha"
+VERSION="2.1.12"
 APPNAME='ibex-lib'
 
 top = '.'
@@ -45,6 +45,13 @@ def options (opt):
 	
 	opt.add_option ("--without-lp", action="store_true", dest="WITHOUT_LP",
 			help = "do not use any Linear Solver")
+	
+	opt.add_option ("--without-rounding", action="store_true", dest="WITHOUT_ROUNDING",
+			help = "do not use a reliable interval")
+	
+	opt.add_option ("--standalone", action="store_true", dest="WITH_STANDALONE",
+			help = "do not use any external library (excepted standard C++ library)")	
+	
 	
 	opt.add_option ("--with-soplex", action="store", type="string", dest="SOPLEX_PATH",
 			help = "location of Soplex")
@@ -141,7 +148,18 @@ def configure (conf):
 	# Disable Linear Solver
 	if (conf.options.WITHOUT_LP):
 		conf.env.WITHOUT_LP =True 
+
+	##################################################################################################
+	# Disable Rounding interval
+	if (conf.options.WITHOUT_ROUNDING):
+		conf.env.WITHOUT_ROUNDING =True 
 			
+	##################################################################################################
+	# Disable Linear Solver and rounding interval
+	if (conf.options.WITH_STANDALONE):
+		conf.env.WITHOUT_LP =True 
+		conf.env.WITHOUT_ROUNDING =True 
+					
 	##################################################################################################
 	# JNI
 	env.WITH_JNI = conf.options.WITH_JNI

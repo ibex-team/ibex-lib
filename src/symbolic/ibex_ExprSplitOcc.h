@@ -196,7 +196,7 @@ protected:
 	NodeMap<const ExprNode*> clone;
 
 	// Origin varaibles
-	const Array<const ExprSymbol>& old_x;
+	const Array<const ExprSymbol> old_x;
 
 	// Origin expression
 	const ExprNode& old_y;

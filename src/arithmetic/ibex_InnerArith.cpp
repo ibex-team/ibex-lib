@@ -9,8 +9,9 @@
 //============================================================================
 
 #include "ibex_InnerArith.h"
+#include "ibex_Random.h"
 
-#include <stdlib.h>
+//#include <stdlib.h>
 #include <cassert>
 
 using namespace std;
@@ -231,7 +232,10 @@ bool ibwd_cmp_mono_op(bool geq, double z, Interval& x, Interval& y, const Interv
 		}
 		//cout << "  xmin=" << xmin << " xmax=" << xmax << endl;
 		Interval xx= x & Interval(xmin,xmax);
-		x0= xx.lb() + (double)rand()/(double)RAND_MAX*xx.diam();
+
+		//x0= xx.lb() + (double)RNG::rand()/(double)RAND_MAX*xx.diam();
+		x0= RNG::rand(xx.lb(),xx.ub());
+
 		//cout << "  x0 (random) =" << x0 << endl;
 		if (!xx.contains(x0)) x0= (x0 < xx.lb())? xx.lb():xx.ub();
 	}
@@ -431,7 +435,7 @@ bool ibwd_leq_mul(double z_sup, Interval& x, Interval& y, const Interval &xin, c
 		Interval xsave=x; // for the 2nd quadrant
 		Interval ysave=y;
 
-		bool q=(rand()%2==1); // q==1 : we take first Q.
+		bool q=(RNG::rand()%2==1); // q==1 : we take first Q.
 		x &= q? Interval::POS_REALS : Interval::NEG_REALS;
 		y &= q? Interval::NEG_REALS : Interval::POS_REALS;
 
@@ -503,7 +507,7 @@ bool ibwd_leq_div(double z_sup, Interval& x, Interval& y, const Interval &xin, c
 		// Otherwise, we try to build an inner box in one of the half-planes
 		// (chosen randomly) and, if it fails, we try with the other one.
 
-		bool r=((rand()%2)==1); // r==1 : we take first y>0.
+		bool r=((RNG::rand()%2)==1); // r==1 : we take first y>0.
 
 		for (int i=0; i<2; i++) {
 			if ((i+r)%2==1) {
@@ -561,7 +565,7 @@ bool ibwd_leq_div(double z_sup, Interval& x, Interval& y, const Interval &xin, c
 			return true;
 		}
 
-		int r=rand()%2; // r==1 : we take first y>0.
+		int r=RNG::rand()%2; // r==1 : we take first y>0.
 
 		for (int i=0; i<2; i++) {
 			if ((i+r)%2==1) {
@@ -661,7 +665,7 @@ bool ibwd_abs(const Interval& y, Interval& x, const Interval& xin) {
 		}
 		else {
 			Interval xtmp=x;
-			bool q=(rand()%2==1); // q==1 : we first consider x>0.
+			bool q=(RNG::rand()%2==1); // q==1 : we first consider x>0.
 
 			x &= (q? Interval(lo,up) : Interval(-up,-lo));
 			if (!x.is_empty()) return true;
@@ -680,6 +684,97 @@ bool ibwd_div(const Interval& z, Interval& x, Interval& y, const Interval &xin, 
 	return ibwd_leq_div(z.ub(),x,y,xin,yin) && ibwd_geq_div(z.lb(),x,y,xin,yin);
 }
 
+
+bool ibwd_max(const Interval& z, Interval& x, Interval& y, const Interval &xin, const Interval& yin) {
+
+	assert((xin.is_empty() && yin.is_empty()) || (!xin.is_empty() && !yin.is_empty()));
+
+	if (z.is_empty()) {
+		x.set_empty();
+		y.set_empty();
+	}
+
+	if (x.is_empty() || y.is_empty()) return false;
+
+	// the first part is the same as bwd_max:
+	/* ---- Disjoint intervals ---- */
+	if (y.lb()>x.ub() || z.lb()>x.ub()) {
+		/* then, max(x,y) is necessarily y */
+		if ((y &= z).is_empty()) {
+			assert(xin.is_empty() && yin.is_empty());
+			x.set_empty();
+			return false;
+		}
+		else return true;
+	} else if (x.lb()>y.ub() || z.lb()>y.ub()) {
+		if ((x &= z).is_empty()) {
+			assert(xin.is_empty() && yin.is_empty());
+			y.set_empty();
+			return false;
+		}
+		else return true;
+	}
+	/*------------------------------*/
+
+	if (z.ub()<x.lb() || z.ub()<y.lb()) {
+		assert(xin.is_empty() && yin.is_empty());
+		x.set_empty();
+		y.set_empty();
+		return false; // inconsistency
+	}
+
+	/* At this point, x, y and z all mutually intersect. */
+	double u1 = x.ub()>z.ub() ? z.ub() : x.ub();
+	double u2 = y.ub()>z.ub() ? z.ub() : y.ub();
+
+	assert(xin.is_empty() || xin.lb()<=u1);
+	assert(yin.is_empty() || yin.lb()<=u2);
+
+	if (x.lb() >= z.lb() || y.lb() >= z.lb()) {
+		x = Interval(x.lb(), u1);
+		y = Interval(y.lb(), u2);
+		return true;
+	}
+
+	// the second part is specific to inner projection:
+	// We have to chose which interval is contracted to the lower bound of z
+
+	bool x_contracted=true; // is the lower bound of x to be contracted?
+
+	if (!xin.is_empty() && xin.lb()<z.lb()) x_contracted=false;
+	else if (!yin.is_empty() && yin.lb()<z.lb()) x_contracted=true;
+	else if (x.lb()<y.lb()) x_contracted=false; // try to get the inner box of maximal size
+	else x_contracted=true;
+
+	if (x_contracted) {
+		x = Interval(z.lb(), u1); // lower bound of x contracted
+		y = Interval(y.lb(), u2);
+	} else {
+		x = Interval(x.lb(), u1);
+		y = Interval(z.lb(), u2); // lower bound of y contracted
+	}
+	return true;
+}
+
+
+bool ibwd_min(const Interval& z, Interval& x, Interval& y, const Interval &xin, const Interval& yin) {
+
+	Interval mx=-x;
+	Interval my=-y;
+	Interval mxin=-xin;
+	Interval myin=-yin;
+
+	if (!ibwd_max(-z,mx,my,mxin,myin)) {
+		x.set_empty();
+		y.set_empty();
+		return false;
+	}
+
+	x=-mx;
+	y=-my;
+	return true;
+}
+
 // [gch]
 bool ibwd_sqr(const Interval& y, Interval& x, const Interval& xin) {
 	return ibwd_pow(y,x,2,xin);
@@ -692,7 +787,7 @@ bool ibwd_pow(const Interval& y, Interval& x, int p, const Interval &xin) {
 	assert(xin.is_subset(x));
 	assert(!inflate || (p==2 && sqr(xin).is_subset(y)) || (p!=2 && pow(xin,p).is_subset(y)));
 
-        if (pow(x,p).is_subset(y)) return true;
+	if (pow(x,p).is_subset(y)) return true;
 
 	/* volatile */double lo;
 	if (y.lb()==NEG_INFINITY)
@@ -727,7 +822,7 @@ bool ibwd_pow(const Interval& y, Interval& x, int p, const Interval &xin) {
 					// First alternative: choose randomly a side
 					// ============================================================
 					Interval xtmp=x;
-					bool q=(rand()%2==1); // q==1 : we first consider x>0.
+					bool q=(RNG::rand()%2==1); // q==1 : we first consider x>0.
 
 					x &= (q? Interval(lo,up) : Interval(-up,-lo));
 					if (!x.is_empty()) return true;
@@ -876,7 +971,7 @@ static bool ibwd_trigo(const Interval& y, Interval& x, const Interval& xin, int 
 		// choose randomly the period on which we project
 		int i;
 		if (i1==i2) i = i1; // no choice
-		else i = i1+ (rand() % (i2-i1+1));
+		else i = i1+ (RNG::rand() % (i2-i1+1));
 
 		switch(ftype) {
 		case COS :
@@ -930,60 +1025,45 @@ Interval isub(const Interval& x, const Interval& y) {
 }
 
 Interval imul(const Interval& x, const Interval& y) {
+
 	if (x.is_empty() || y.is_empty())
 			return Interval::EMPTY_SET;
+
+	if (x==Interval::ZERO || y==Interval::ZERO)
+		return Interval::ZERO;
 
 	double lx=x.lb();
 	double ux=x.ub();
 	double ly=y.lb();
 	double uy=y.ub();
 
-	if (lx==0 && ux==0)
-		return Interval(0,0); // so, for us, 0/0==1
-	else if	(ly==0 && uy==0)
-		return Interval::EMPTY_SET; // so, for us, 0/0==1
-	else if ((lx<0 && ux>0) && (ly==NEG_INFINITY || uy==POS_INFINITY))
-		return Interval::ALL_REALS;
-	else if ((ly<0 && uy>0) && (lx==NEG_INFINITY || ux==POS_INFINITY))
-		return Interval::ALL_REALS;
-	else if ((lx==NEG_INFINITY && uy==0) || (uy==POS_INFINITY && lx==0))
-		if (ux<=0 || ly>=0)
-			return Interval::POS_REALS;
-		else
-			return Interval(UP2(operator*,ux,ly), POS_INFINITY);
-	else if ((lx==NEG_INFINITY && ly==0) || (ly==NEG_INFINITY && lx==0))
-		if (ux<=0 || uy<=0)
-			return Interval::NEG_REALS;
-		else
-			return Interval(NEG_INFINITY, LO2(operator*,ux,uy));
-	else if ((ly==NEG_INFINITY && ux==0) || (ux==POS_INFINITY && ly==0))
-		if (uy<=0 || lx>=0)
-			return Interval::ALL_REALS;
-		else
-			return Interval(UP2(operator*,uy,lx), POS_INFINITY);
-	else if ((ux==POS_INFINITY && uy==0) || (uy==POS_INFINITY && ux==0))
-		if (lx>=0 || ly>=0)
-			return Interval::NEG_REALS;
-		else
-			return Interval(NEG_INFINITY, LO2(operator*,lx,ly));
-	else
-		if (uy<0)
-			if (ux<0)
-				return Interval(UP2(operator*,ux,uy),LO2(operator*,lx,ly));
-			else if (lx<0)
-				return Interval(UP2(operator*,ux,ly),LO2(operator*,lx,ly));
-			else return Interval(UP2(operator*,ux,ly),LO2(operator*,lx,uy));
-		else
-			if (ux<0)
-				return Interval(UP2(operator*,lx,uy),LO2(operator*,lx,ly));
-			else if (lx<0) {
-				double l1=UP2(operator*,lx,uy);
-				double l2=UP2(operator*,ux,ly);
-				double u1=LO2(operator*,lx,ly);
-				double u2=LO2(operator*,ux,uy);
-				return Interval(l1<l2?l1:l2,u1>u2?u1:u2);
+	double l,u;
+
+	if (lx>=0) {
+		if (ly>=0)      { l =                                                       UP2(operator*, lx,ly);
+		                  u = ux==POS_INFINITY || uy==POS_INFINITY ? POS_INFINITY : LO2(operator*, ux,uy); }
+		else if (uy<=0) { l = ux==POS_INFINITY || ly==NEG_INFINITY ? NEG_INFINITY : UP2(operator*, ux,ly);
+		                  u =                                                       LO2(operator*, lx,uy); }
+		else            { l = ux==POS_INFINITY || ly==NEG_INFINITY ? NEG_INFINITY : UP2(operator*, ux,ly);
+		                  u = ux==POS_INFINITY || uy==POS_INFINITY ? POS_INFINITY : LO2(operator*, ux,uy); }
+	} else if (ux<=0) {
+		return -imul(-x,y);
+	} else {
+		if (ly>=0)      { l = lx==NEG_INFINITY || uy==POS_INFINITY ? NEG_INFINITY : UP2(operator*, lx,uy);
+						  u = ux==POS_INFINITY || uy==POS_INFINITY ? POS_INFINITY : LO2(operator*, ux,uy); }
+		else if (uy<=0) { l = ux==POS_INFINITY || ly==NEG_INFINITY ? NEG_INFINITY : UP2(operator*, ux,ly);
+						  u = lx==NEG_INFINITY || ly==NEG_INFINITY ? POS_INFINITY : LO2(operator*, lx,ly); }
+		else {
+			if (x.is_unbounded() || y.is_unbounded()) {
+				l = NEG_INFINITY;
+				u = POS_INFINITY;
+			} else {
+				l = std::min(UP2(operator*,lx,uy), UP2(operator*,ux,ly));
+				u = std::max(LO2(operator*,ux,uy), LO2(operator*,lx,ly));
 			}
-			else return Interval(UP2(operator*,ux,ly),LO2(operator*,ux,uy));
+		}
+	}
+	return Interval(l,u);
 }
 
 Interval idiv(const Interval& x, const Interval& y) {

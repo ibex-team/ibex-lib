@@ -26,7 +26,7 @@ void TestExprDiff::linear01() {
 	TEST_ASSERT(c->dim.type()==Dim::ROW_VECTOR);
 	double _grad[][2] = {{2,2},{3,3}};
 	IntervalVector grad(2,_grad);
-	TEST_ASSERT(c->get_vector_value()==grad);
+	check(c->get_vector_value(),grad);
 }
 
 void TestExprDiff::poly01() {
@@ -38,8 +38,17 @@ void TestExprDiff::poly01() {
 	TEST_ASSERT(v);
 	TEST_ASSERT(v->dim.type()==Dim::ROW_VECTOR);
 	TEST_ASSERT(sameExpr(v->arg(0),"((2*x)+(2*y))")
-			|| sameExpr(v->arg(0),"((2*y)+(2*x))"));
-	TEST_ASSERT(sameExpr(v->arg(1),"((2*x)+(3*y^2))"));
+			|| sameExpr(v->arg(0),"((2*y)+(2*x))")
+			||sameExpr(v->arg(0),"(([2,2]*x)+(2*y))")
+			|| sameExpr(v->arg(0),"((2*y)+([2,2]*x))")
+			|| sameExpr(v->arg(0),"(([2,2]*y)+([2,2]*x))")
+			||sameExpr(v->arg(0),"(([2,2]*y)+(2*x))")
+			|| sameExpr(v->arg(0),"((2*x)+([2,2]*y))")
+			|| sameExpr(v->arg(0),"(([2,2]*x)+([2,2]*y))"));
+	TEST_ASSERT(sameExpr(v->arg(1),"((2*x)+(3*y^2))")
+			||sameExpr(v->arg(1),"(([2,2]*x)+([3,3]*y^2))")
+			||sameExpr(v->arg(1),"((2*x)+([3,3]*y^2))")
+			||sameExpr(v->arg(1),"(([2,2]*x)+(3*y^2))"));
 }
 
 void TestExprDiff::one_var_one_func() {
@@ -47,7 +56,8 @@ void TestExprDiff::one_var_one_func() {
 	Function f(x,sqr(x)+1);
 	Function df(f,Function::DIFF);
 	TEST_ASSERT(df.expr().dim.type()==Dim::SCALAR);
-	TEST_ASSERT(sameExpr(df.expr(),"(2*x)"));
+	TEST_ASSERT(sameExpr(df.expr(),"(2*x)")
+			||sameExpr(df.expr(),"([2,2]*x)"));
 }
 
 void TestExprDiff::vec01() {
@@ -118,8 +128,10 @@ void TestExprDiff::apply01() {
 	Function f(x,sqr(x),"f");
 	Function g(x,f(3*x));
 	Function dg(g,Function::DIFF);
-	TEST_ASSERT(sameExpr(f.diff().expr(),"(2*x)"));
-	TEST_ASSERT(sameExpr(dg.expr(),"(3*df((3*x)))"));
+	TEST_ASSERT(sameExpr(f.diff().expr(),"(2*x)")
+			||sameExpr(f.diff().expr(),"([2,2]*x)"));
+	TEST_ASSERT(sameExpr(dg.expr(),"(3*df((3*x)))")
+			||sameExpr(dg.expr(),"([3,3]*df((3*x)))"));
 }
 
 void TestExprDiff::apply02() {
@@ -127,7 +139,8 @@ void TestExprDiff::apply02() {
 	Function f(x,sqr(x),"f");
 	Function g(x,3*f(x));
 	Function dg(g,Function::DIFF);
-	TEST_ASSERT(sameExpr(dg.expr(),"(df(x)*3)"));
+	TEST_ASSERT(sameExpr(dg.expr(),"(df(x)*3)")
+			||sameExpr(dg.expr(),"(df(x)*[3,3])"));
 }
 
 void TestExprDiff::apply03() {
@@ -139,7 +152,9 @@ void TestExprDiff::apply03() {
 	double _box[][2]={{1,1},{2,2}};
 	double _dg_box[][2]={{12,12},{6,6}};
 	IntervalVector dg_box(dg.eval_vector(IntervalVector(2,_box)));
-	TEST_ASSERT(dg_box==IntervalVector(2,_dg_box));
+	//TEST_ASSERT(dg_box==IntervalVector(2,_dg_box));
+	check(dg_box,IntervalVector(2,_dg_box));
+	TEST_ASSERT(dg_box.is_superset(IntervalVector(2,_dg_box)));
 }
 
 void TestExprDiff::cst_grad() {
@@ -154,7 +169,8 @@ void TestExprDiff::cst_grad() {
 	v[0]=Interval(10,10);
 	v[1]=Interval(-10,-10);
 	v[2]=Interval(0,0);
-	TEST_ASSERT(c->get_vector_value()==v);
+	check(c->get_vector_value(),v);
+	TEST_ASSERT((c->get_vector_value()).is_superset(v));
 }
 
 
@@ -167,7 +183,8 @@ void TestExprDiff::vecimg01() {
 	TEST_ASSERT(c);
 	TEST_ASSERT(c->dim.is_vector());
 	IntervalVector v(3,Interval(1.0));
-	TEST_ASSERT(c->get_vector_value()==v);
+	check(c->get_vector_value(),v);
+	TEST_ASSERT((c->get_vector_value()).is_superset(v));
 }
 
 void TestExprDiff::vecimg02() {

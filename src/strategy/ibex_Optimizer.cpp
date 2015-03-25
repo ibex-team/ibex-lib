@@ -16,6 +16,7 @@
 #include "ibex_CtcFwdBwd.h"
 #include "ibex_CtcOptimShaving.h"
 #include "ibex_CtcHC4.h"
+#include "ibex_Random.h"
 
 #include "ibex_ExprCopy.h"
 #include "ibex_Function.h"
@@ -439,7 +440,6 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 	// add data required by the bisector
 	bsc.add_backtrackable(*root);
 
-
 	// add data required by optimizer + Fritz John contractor
 	root->add<EntailedCtr>();
 	//root->add<Multipliers>();
@@ -466,7 +466,6 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 	loup_point=init_box.mid();
 	time=0;
 	Timer::start();
-
 	handle_cell(*root,init_box);
 
 	update_uplo();
@@ -484,7 +483,6 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 				update_uplo();
 				break;
 			}
-
 
 			loup_changed=false;
 			Cell *c;

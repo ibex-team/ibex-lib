@@ -15,14 +15,17 @@
 namespace ibex {
 
 
-CtcQuantif::CtcQuantif(const NumConstraint& ctr, const Array<const ExprSymbol>& y, const IntervalVector& init_box, double prec)
- : Ctc(ctr.f.nb_arg()-y.size()), y_init(y.size())  {
+CtcQuantif::CtcQuantif(const NumConstraint& ctr, const Array<const ExprSymbol>& y, const IntervalVector& init_box, double prec) :
+				Ctc(ctr.f.nb_arg()-y.size()), y_init(y.size()),
+				flags(BitSet::empty(Ctc::NB_OUTPUT_FLAGS)), impact(BitSet::all(nb_var+init_box.size()))  {
 	init(ctr, y, init_box, prec);
 }
 
 CtcQuantif::CtcQuantif(Ctc& ctc, const BitSet& vars, const IntervalVector& init_box, double prec, bool own_ctc) :
-	Ctc(vars.size()), y_init(init_box), nb_param(init_box.size()), ctc(&ctc), bsc(new LargestFirst(prec)),
-	 vars(vars), prec(prec), _own_ctc(own_ctc) {
+			   Ctc(vars.size()), y_init(init_box),
+			   flags(BitSet::empty(Ctc::NB_OUTPUT_FLAGS)), impact(BitSet::all(nb_var+init_box.size())),
+			   nb_param(init_box.size()), ctc(&ctc), bsc(new LargestFirst(prec)),
+			   vars(vars), prec(prec), _own_ctc(own_ctc) {
 
 	assert(ctc.nb_var==(int)vars.size()+init_box.size());
 
@@ -61,6 +64,9 @@ void CtcQuantif::init(const NumConstraint& ctr, const Array<const ExprSymbol>& y
 	this->prec = prec;
 
 	this->_own_ctc = true;
+
+
+
 }
 
 
@@ -74,12 +80,19 @@ void CtcQuantif::contract(IntervalVector& x, IntervalVector& y) {
 		if (vars[i]) fullbox[i]=x[jx++];
 		else         fullbox[i]=y[jy++];
 	}
-	ctc->contract(fullbox);
+	flags.clear();
+	try {
+		ctc->contract(fullbox, impact, flags);
 
-	jx=jy=0;
-	for (int i=0; i<nb_var+nb_param; i++) {
-		if (vars[i]) x[jx++]=fullbox[i];
-		else         y[jy++]=fullbox[i];
+		jx=jy=0;
+		for (int i=0; i<nb_var+nb_param; i++) {
+			if (vars[i]) x[jx++]=fullbox[i];
+			else         y[jy++]=fullbox[i];
+		}
+	} catch(EmptyBoxException& e) {
+		x.set_empty();
+		y.set_empty();
+		throw e;
 	}
 }
 

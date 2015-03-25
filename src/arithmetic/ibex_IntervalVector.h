@@ -539,7 +539,6 @@ public:
      */
 	operator const ExprConstant&() const;
 
-
 private:
 	friend class IntervalMatrix;
 	friend class Affine2Vector;

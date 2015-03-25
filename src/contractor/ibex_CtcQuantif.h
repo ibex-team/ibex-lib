@@ -74,6 +74,12 @@ protected:
 	void contract(IntervalVector& x, IntervalVector& y);
 
 	/**
+	 * \brief temporary variable to detect inactivity
+	 */
+	BitSet flags;
+	const BitSet impact;
+
+	/**
 	 * \brief Number of parameters
 	 */
 	int nb_param;

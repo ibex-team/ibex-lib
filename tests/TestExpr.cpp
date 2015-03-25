@@ -488,7 +488,6 @@ void TestExpr::apply03() {
 	TEST_ASSERT(checkExpr(e,"(f1(x3,x3)-f2(x3,x3))"));
 }
 
-// same expr as in dag01
 void TestExpr::subnodes01() {
 	const ExprSymbol& x=ExprSymbol::new_("x",Dim::scalar());
 	const ExprSymbol& __z__=ExprSymbol::new_("z",Dim::scalar());
@@ -513,6 +512,77 @@ void TestExpr::subnodes01() {
 	TEST_ASSERT((&nodes[5]==&x && &nodes[6]==&y) ||
 			    (&nodes[5]==&y && &nodes[6]==&x));
 }
+
+void TestExpr::subnodes02() {
+	const ExprSymbol& x1=ExprSymbol::new_("x",Dim::scalar());
+	const ExprSymbol& x2=ExprSymbol::new_("y",Dim::scalar());
+
+	Array<const ExprSymbol> vars(x1,x2);
+	const ExprNode& y=x1+x2;
+
+	ExprSubNodes nodes(vars, y);
+
+	TEST_ASSERT(nodes.size()==3)
+	TEST_ASSERT(&nodes[0]==&y);
+	TEST_ASSERT(&nodes[1]==&x1);
+	TEST_ASSERT(&nodes[2]==&x2);
+
+	const ExprNode& e2=x2+x1;
+
+	ExprSubNodes nodes2(vars, e2);
+
+	TEST_ASSERT(nodes2.size()==3)
+	TEST_ASSERT(&nodes2[0]==&e2);
+	TEST_ASSERT(&nodes2[1]==&x1);
+	TEST_ASSERT(&nodes2[2]==&x2);
+
+}
+
+void TestExpr::subnodes03() {
+	const ExprSymbol& x1=ExprSymbol::new_();
+	const ExprSymbol& x2=ExprSymbol::new_();
+	const ExprSymbol& x3=ExprSymbol::new_();
+	const ExprSymbol& x4=ExprSymbol::new_();
+	const ExprSymbol& x5=ExprSymbol::new_();
+
+	Array<const ExprSymbol> vars(x1,x2,x3,x4,x5);
+	const ExprNode& y=x3*(x4-((x2+x5)/x1));
+
+	ExprSubNodes nodes(vars, y);
+
+	TEST_ASSERT(nodes.size()==9)
+	TEST_ASSERT(&nodes[0]==&y);
+
+	TEST_ASSERT(&nodes[4]==&x1);
+	TEST_ASSERT(&nodes[5]==&x2);
+	TEST_ASSERT(&nodes[6]==&x3);
+	TEST_ASSERT(&nodes[7]==&x4);
+	TEST_ASSERT(&nodes[8]==&x5);
+}
+
+void TestExpr::subnodes04() {
+	const ExprSymbol& x1=ExprSymbol::new_("x",Dim::scalar());
+	const ExprSymbol& x2=ExprSymbol::new_("y",Dim::scalar());
+
+	Array<const ExprSymbol> vars(x1,x2);
+
+	const ExprConstant& one=ExprConstant::new_scalar(1.0);
+	const ExprConstant& two=ExprConstant::new_scalar(2.0);
+
+	const ExprNode& y=((one+x2)+x1)+two;
+
+	ExprSubNodes nodes(vars, y);
+
+	TEST_ASSERT(nodes.size()==7)
+
+	TEST_ASSERT(&nodes[0]==&y);
+
+	TEST_ASSERT(&nodes[3]==&one);
+	TEST_ASSERT(&nodes[4]==&two);
+	TEST_ASSERT(&nodes[5]==&x1);
+	TEST_ASSERT(&nodes[6]==&x2);
+}
+
 
 void TestExpr::bug81() {
 	const ExprSymbol& x=ExprSymbol::new_("x",Dim::row_vec(3));

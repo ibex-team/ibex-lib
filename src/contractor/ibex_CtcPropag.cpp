@@ -156,6 +156,8 @@ void  CtcPropag::contract(IntervalVector& box) {
 	 * small w.r.t the ratio here. */
 	//   if (!reducted) box = propbox; // restore domains
 
+	if (active.empty()) set_flag(INACTIVE);
+
 }
 
 const double CtcPropag::default_ratio = __IBEX_DEFAULT_RATIO_PROPAG;
