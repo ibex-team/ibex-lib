@@ -9,57 +9,96 @@
 //============================================================================
 
 #include "ibex_CtcNotIn.h"
+#include "ibex_CtcEmpty.h"
+#include "ibex_CtcFwdBwd.h"
+#include "ibex_CtcUnion.h"
 
 namespace ibex {
 
-CtcNotIn::CtcNotIn(Function& f, const Interval& y) : Ctc(f.nb_var()), f(f), d1(f.expr().dim), d2(f.expr().dim), hc4r() {
+CtcNotIn::CtcNotIn(Function& f, const Domain& y) : Ctc(f.nb_var()), f(f) {
+	switch(y.dim.type()) {
+	case Dim::SCALAR:       init(y.i()); break;
+	case Dim::ROW_VECTOR:
+	case Dim::COL_VECTOR:   init (y.v()); break;
+	case Dim::MATRIX:       init(y.m()); break;
+	case Dim::MATRIX_ARRAY: assert(false); /* not allowed */ break;
+	}
+}
+
+CtcNotIn::CtcNotIn(Function& f, const Interval& y) : Ctc(f.nb_var()), f(f) {
+	init(y);
+}
+
+CtcNotIn::CtcNotIn(Function& f, const IntervalVector& y) : Ctc(f.nb_var()), f(f) {
+	init(y);
+}
+
+CtcNotIn::CtcNotIn(Function& f, const IntervalMatrix& y) : Ctc(f.nb_var()), f(f) {
+	init(y);
+}
+
+void CtcNotIn::init(const Interval& y) {
 	assert(f.expr().dim.is_scalar());
-	d1.i()=Interval(NEG_INFINITY,y.lb());
-	d2.i()=Interval(y.ub(),POS_INFINITY);
+
+	Interval c1,c2;
+	y.complementary(c1,c2);
+
+	if (c1.is_empty()) {
+		diff_size=0;
+		_union = new CtcEmpty(f.nb_var());
+	} else {
+		if (c2.is_empty()) {
+			diff_size=1;
+			_union = new CtcFwdBwd(f,c1);
+		} else {
+			diff_size=2;
+			_union = new CtcUnion(*new CtcFwdBwd(f,c1), *new CtcFwdBwd(f,c2));
+		}
+	}
 }
 
-CtcNotIn::CtcNotIn(Function& f, const IntervalVector& y) : Ctc(f.nb_var()), f(f), d1(f.expr().dim), d2(f.expr().dim), hc4r() {
+void CtcNotIn::init(const IntervalVector& y) {
+
 	assert(f.expr().dim.is_vector());
-	d1.v()=y.lb()+IntervalVector(y.size(),Interval::NEG_REALS);
-	d2.v()=y.ub()+IntervalVector(y.size(),Interval::POS_REALS);
+
+	IntervalVector* result;
+	diff_size = y.complementary(result);
+
+	if (diff_size==0) {
+		_union = new CtcEmpty(f.nb_var());
+	} else {
+		if (diff_size==1) {
+			_union = new CtcFwdBwd(f,result[0]);
+		} else {
+			Array<Ctc> ctc(diff_size);
+			for (int i=0; i<diff_size; i++) {
+				ctc.set_ref(i,*new CtcFwdBwd(f,result[i]));
+			}
+			_union = new CtcUnion(ctc);
+		}
+	}
+	delete[] result;
 }
 
-CtcNotIn::CtcNotIn(Function& f, const IntervalMatrix& y) : Ctc(f.nb_var()), f(f), d1(f.expr().dim), d2(f.expr().dim), hc4r() {
+void CtcNotIn::init(const IntervalMatrix& y) {
 	assert(f.expr().dim.is_matrix());
-	d1.m()=y.lb()+IntervalMatrix(y.nb_rows(),y.nb_cols(),Interval::NEG_REALS);
-	d2.m()=y.ub()+IntervalMatrix(y.nb_rows(),y.nb_cols(),Interval::POS_REALS);
+	_union = NULL;
+	diff_size=0;
+	// TODO: requires third-order tensor "diff"
+	not_implemented("CtcNotIn with matrix-valued functions");
 }
 
+
+CtcNotIn::~CtcNotIn() {
+	if (diff_size>1) {
+		for (int i=0; i<diff_size; i++)
+			delete &((CtcUnion*) _union)->list[i];
+	}
+	delete _union;
+}
 
 void CtcNotIn::contract(IntervalVector& box) {
-
-	// it's simpler here to use direct computation, but
-	// we could also have used CtCunion of two CtcFwdBwd
-
-	IntervalVector savebox(box);
-	bool is_inactive=false;
-	try {
-		if (hc4r.proj(f,d1,box)) {
-			set_flag(INACTIVE);
-			set_flag(FIXPOINT);
-			is_inactive =true;
-
-		}
-	} catch (EmptyBoxException& ) {box.set_empty(); }
-
-	if (!is_inactive) {
-		try {
-			if (hc4r.proj(f,d2,savebox)){
-				set_flag(INACTIVE);
-				set_flag(FIXPOINT);
-				is_inactive =true;
-			}
-		} catch (EmptyBoxException& ) {savebox.set_empty(); }
-
-		box |= savebox;
-		if (box.is_empty()) throw EmptyBoxException();
-	}
-
+	_union->contract(box);
 }
 
 } // end namespace ibex
