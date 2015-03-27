@@ -20,7 +20,7 @@ namespace ibex {
 
 void TestCellHeap::test01() {
 
-	int nb= 10;
+	int nb=10;
 	CellCostVarLB costf(1);
 	Heap<Cell> h1(costf);
 
@@ -42,7 +42,7 @@ void TestCellHeap::test01() {
 
 void TestCellHeap::test02() {
 
-	int nb= 10;
+	int nb=10;
 	CellCostVarUB costf(1);
 	Heap<Cell> h2(costf);
 
@@ -62,7 +62,7 @@ void TestCellHeap::test02() {
 
 void TestCellHeap::test03() {
 
-	int nb= 10;
+	int nb=10;
 	CellCostC5 costf(100);
 	Heap<Cell> h2(costf);
 
@@ -85,7 +85,7 @@ void TestCellHeap::test03() {
 
 void TestCellHeap::test04() {
 
-	int nb= 10;
+	int nb=10;
 	CellCostVarLB costf(1);
 	Heap<Cell> h2(costf);
 
@@ -109,7 +109,7 @@ void TestCellHeap::test04() {
 
 void TestCellHeap::test05() {
 
-	int nb= 10;
+	int nb=10;
 
 	CellCostC5 cost1(0);
 	CellCostC5 cost2(0);
@@ -150,8 +150,10 @@ void TestCellHeap::test05() {
 
 void TestCellHeap::test_D00() {
 
-	int nb= 10;
-	CellDoubleHeap h1(0, CellCostFunc::UB);
+	int nb=10;
+	CellCostVarLB cost_lb(0);
+	CellCostVarUB cost_ub(0);
+	CellDoubleHeap h1(cost_lb, cost_ub);
 
 	double _box[][2] = {{5,15},  {15,25}};
 	IntervalVector box(2,_box);
@@ -170,8 +172,10 @@ void TestCellHeap::test_D00() {
 
 void TestCellHeap::test_D01() {
 
-	int nb= 10;
-	CellDoubleHeap h1(1,CellCostFunc::C5,50);
+	int nb=10;
+	CellCostVarLB cost_lb(1);
+	CellCostC5 cost_c5;
+	CellDoubleHeap h1(cost_lb,cost_c5,50);
 	h1.contract(100);
 
 
@@ -196,8 +200,11 @@ void TestCellHeap::test_D01() {
 
 void TestCellHeap::test_D03() {
 
-	int nb= 10;
-	CellDoubleHeap h1(1,CellCostFunc::C5,50);
+	int nb=10;
+	CellCostVarLB cost_lb(1);
+	CellCostC5 cost_c5;
+	CellDoubleHeap h1(cost_lb,cost_c5,50);
+
 	h1.contract(100);
 
 	double _box[][2] = {{5,15},  {15,25},  {25,35},  {35,45}};
@@ -219,8 +226,11 @@ void TestCellHeap::test_D03() {
 void TestCellHeap::test_D04() {
 
 
-	int nb= 10;
-	CellDoubleHeap h1(1,CellCostFunc::C5,50);
+	int nb=10;
+	CellCostVarLB cost_lb(1);
+	CellCostC5 cost_c5;
+	CellDoubleHeap h1(cost_lb,cost_c5,50);
+
 	h1.contract(10);
 
 	double _box[][2] = {{5,15},  {15,25}};
@@ -245,10 +255,13 @@ void TestCellHeap::test_D04() {
 
 void TestCellHeap::test_D05() {
 
-	int nb= 10;
+	int nb=10;
 
-	CellDoubleHeap h1(0,CellCostFunc::C5);
-	CellDoubleHeap h2(0,CellCostFunc::C5);
+	CellCostVarLB cost_lb(0);
+	CellCostC5 cost_c5;
+	CellDoubleHeap h1(cost_lb,cost_c5,50);
+	CellDoubleHeap h2(cost_lb,cost_c5,50);
+
 	h1.contract(100);
 	h2.contract(100);
 

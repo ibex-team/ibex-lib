@@ -32,7 +32,7 @@ public:
 
 class TestCostFunc3 : public  CostFunc<Interval> {
 public:
-	TestCostFunc3(): CostFunc<Interval>(true), loup(10) { } ;
+	TestCostFunc3(): loup(10) { } ;
 	double cost(const Interval& c) const { return c.ub()*loup;};
 	void set_loup(double lb) { loup = lb; }
 
@@ -47,7 +47,7 @@ void TestDoubleHeap::test01() {
 	TestCostFunc1 costf1;
 	TestCostFunc2 costf2;
 
-	DoubleHeap<Interval> h(costf1,costf2,50);
+	DoubleHeap<Interval> h(costf1,false,costf2,false,50);
 
 	for (int i=1; i<=nb ;i++) {
 		if ((i%2)==1) h.push(new Interval(i,2*i));
@@ -107,7 +107,7 @@ void TestDoubleHeap::test02() {
 	TestCostFunc2 costf2;
 	TestCostFunc3 costf3;
 
-	DoubleHeap<Interval> h(costf2,costf3,50);
+	DoubleHeap<Interval> h(costf2,false,costf3,true,50);
 
 	for (int i=1; i<=nb ;i++) {
 		if ((i%2)==1) h.push(new Interval(i,2*i));
