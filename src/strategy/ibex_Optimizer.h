@@ -56,7 +56,7 @@ public:
 	 *   \param equ_eps       - thickness of equations when relaxed to inequalities
 	 *   \param rigor         - look for points that strictly satisfy equalities. By default: false
 	 *   \param critpr        - probability to choose the second criterion in node selection; integer in [0,100]. By default 50
-	 *  \param crit           - second criterion in node selection (the first criterion is the minimum of the objective estimate). default value CellHeapOPtim::UB
+	 *   \param crit          - second criterion in node selection (the first criterion is the minimum of the objective estimate). default value CellHeapOPtim::UB
 	 *
 	 * <ul> The extended system (see ExtendedSystem constructor) contains:
 	 * <li> (n+1) variables, x_1,...x_n,y. The index of y is #goal_var (==n).
@@ -68,10 +68,10 @@ public:
 	 * If this contractor never contracts this goal variable, the optimizer will only rely on the evaluation of f  and will be very slow.
 	 *
 	 */
-
 	Optimizer(System& sys, Ctc& ctc, Bsc& bsc, double prec=default_prec,
 			double goal_rel_prec=default_goal_rel_prec, double goal_abs_prec=default_goal_abs_prec,
 			  int sample_size=default_sample_size, double equ_eps=default_equ_eps, bool rigor=false, int critpr=50,CellCostFunc::criterion crit= CellCostFunc::UB);
+
 	/**
 	 * \brief Delete *this.
 	 */
@@ -84,7 +84,7 @@ public:
 
 	/**
 	 * \brief Run the optimization.
-
+	 *
 	 * \param init_box             The initial box
 	 * \param obj_init_bound       (optional) can be set when an initial upper bound of the objective minimum is known a priori.
 	 *                             This bound can be obtained, e.g., by a local solver. This is equivalent to (but more practical
@@ -230,11 +230,7 @@ public:
 	  2 for printing each handled node */
 	int trace;
 
-	/** Probability to choose the second criterion in node selection in percentage
-	 * integer in [0,100] default value 50
-	 * the value 0 corresponds to use a single criterion for node selection (the classical one : minimizing the lower bound of the estimate of the objective) 
-	 * the value 100 corresponds to use a single criterion for node selection (the second one used in buffer2) */
-	 int critpr;
+	CellCostFunc::criterion crit2;
 	
 	/**
 	 * \brief Time limit.

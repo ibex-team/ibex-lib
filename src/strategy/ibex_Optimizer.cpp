@@ -55,20 +55,17 @@ void Optimizer::read_ext_box(const IntervalVector& ext_box, IntervalVector& box)
 	}
 }
 
-
-
-
 Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, double prec,
 		double goal_rel_prec, double goal_abs_prec, int sample_size, double equ_eps,
-		bool rigor,  int critpr,CellCostFunc::criterion crit) :
+		bool rigor,  int critpr,CellCostFunc::criterion crit2) :
                 				user_sys(user_sys), sys(user_sys,equ_eps),
                 				n(user_sys.nb_var), m(sys.nb_ctr) /* (warning: not user_sys.nb_ctr) */,
                 				ext_sys(user_sys,equ_eps),
                 				ctc(ctc),bsc(bsc),
-                				buffer(n,crit,critpr),  // first buffer with LB, second buffer with ct (default UB))
+                				buffer(*new CellCostVarLB(n), *CellCostFunc::get_cost(crit2, n), critpr),  // first buffer with LB, second buffer with ct (default UB))
                 				prec(prec), goal_rel_prec(goal_rel_prec), goal_abs_prec(goal_abs_prec),
                 				sample_size(sample_size), mono_analysis_flag(true), in_HC4_flag(true), trace(false),
-                				critpr(critpr), timeout(1e08),
+                				crit2(crit2), timeout(1e08),
                 				loup(POS_INFINITY), pseudo_loup(POS_INFINITY),uplo(NEG_INFINITY),
                 				loup_point(n), loup_box(n), nb_cells(0),
                 				df(*user_sys.goal,Function::DIFF), loup_changed(false),	initial_loup(POS_INFINITY), rigor(rigor),
@@ -121,6 +118,8 @@ Optimizer::~Optimizer() {
 	buffer.flush();
 	if (equs) delete equs;
 	delete mylp;
+	delete &buffer.cost1();
+	delete &buffer.cost2();
 	//	delete &(objshaver->ctc);
 	//	delete objshaver;
 }
@@ -260,7 +259,7 @@ void Optimizer::handle_cell(Cell& c, const IntervalVector& init_box ){
 		//       objshaver->contract(c.box);
 
 		// Computations for the Casado C3, C5, C7 criteria
-		switch (buffer.crit2) {
+		switch (crit2) {
 		case CellCostFunc::C3 : {
 			compute_pf(c);
 			break;
@@ -447,7 +446,7 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 	entailed->init_root(user_sys,sys);
 
 	// add data pu and pf for
-	switch (buffer.crit2) {
+	switch (crit2) {
 	case CellCostFunc::C3 :
 	case CellCostFunc::C5 :
 	case CellCostFunc::C7 :
@@ -488,7 +487,7 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 			Cell *c;
 
 			// random choice between the 2 buffers corresponding to two criteria implemented in two heaps)
-			// critpr chances over 100 to choose the second heap
+			// critpr chances over 100 to choose the second heap (see CellDoubleHeap)
 			c=buffer.top();
 
 			try {

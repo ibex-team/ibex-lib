@@ -46,25 +46,35 @@ class SharedHeap  {
 
 public:
 
-	/** create this with a specific identifier, and if you need to update the cost a each contract of sort. */
-	SharedHeap(CostFunc<T>& cost, int id=0);
+	/**
+	 * \brief Create a shared heap.
+	 *
+	 * \param cost                     - the cost function for each element
+	 * \param update_cost_when_sorting - whether the cost is recalculated or not, when the heap is sorted
+	 * \param id                       - the identifier of this heap.
+	 */
+	SharedHeap(CostFunc<T>& cost, bool update_cost_when_sorting, int id);
 
-	/** Delete this. */
+	/** \brief Delete this. */
 	virtual  ~SharedHeap();
 
-	/** Return the size of the buffer. */
+	/** \brief Return the size of the buffer. */
 	unsigned int size() const;
 
-	/** Return true if the buffer is empty. */
+	/** \brief Return true if the buffer is empty. */
 	bool empty() const;
 
-	/** Return the next box (but does not pop it).
+	/**
+	 * \brief Return the next box (but does not pop it).
+	 *
 	 * Complexity: o(1)
 	 */
 	T* top() const;
 
-	/** Return the minimum (the criterion for
-	 * the first element) */
+	/**
+	 * \brief Return the minimum (the criterion for
+	 *        the first element)
+	 */
 	double minimum() const;
 
 	/**
@@ -75,16 +85,17 @@ public:
 	 */
 	void sort();
 
-	/** Count the number of nodes pushed since
-	 * the object is created. */
+	/**
+	 * \brief Count the number of nodes pushed since
+	 *         the object is created. */
 	unsigned int nb_nodes;
 
 	/**
-	 * Cost function associated to this heap
+	 * \brief Cost function associated to this heap
 	 */
 	CostFunc<T>& costf;
 
-	/** Identifier of this heap */
+	/**  \brief Identifier of this heap */
 	const int heap_id;
 
 protected:
@@ -92,10 +103,13 @@ protected:
 	friend class DoubleHeap<T>;
 
 	/** The "cost" of an element. */
-	double cost(const T& data) const { return costf.cost(data); }
+	double cost(const T& data) const;
 
 	/** The root of the heap */
 	HeapNode<T>* root;
+
+	/** Whether the cost function is called again inside sort. */
+	bool update_cost_when_sorting;
 
 	/**
 	 * Pop an element and return it.
@@ -151,7 +165,7 @@ protected:
 private:
 
 	/** Used in the sort function (proceed by recursivity) */
-	void sort_rec(HeapNode<T>* node, SharedHeap<T>& heap, bool update_cost);
+	void sort_rec(HeapNode<T>* node, SharedHeap<T>& heap);
 
 };
 
@@ -259,7 +273,7 @@ private:
 
 
 template<class T>
-SharedHeap<T>::SharedHeap(CostFunc<T>& cost, int id) : nb_nodes(0), costf(cost), heap_id(id), root(NULL) {
+SharedHeap<T>::SharedHeap(CostFunc<T>& cost, bool update_cost, int id) : nb_nodes(0), costf(cost), heap_id(id), root(NULL), update_cost_when_sorting(update_cost) {
 
 }
 
@@ -294,10 +308,10 @@ template<class T>
 void SharedHeap<T>::sort() {
 	if (nb_nodes==0) return;
 
-	SharedHeap<T>* heap_tmp = new SharedHeap<T>(costf, heap_id);
+	SharedHeap<T>* heap_tmp = new SharedHeap<T>(costf, update_cost_when_sorting, heap_id);
 
 	// recursive sort : o(n*log(n))
-	sort_rec(root, *heap_tmp, costf.depends_on_global);
+	sort_rec(root, *heap_tmp);
 
 	root = heap_tmp->root;
 	nb_nodes = heap_tmp->size();
@@ -308,14 +322,19 @@ void SharedHeap<T>::sort() {
 }
 
 template<class T>
-void SharedHeap<T>::sort_rec(HeapNode<T> * node, SharedHeap<T> & heap, bool update_cost) {
+inline double SharedHeap<T>::cost(const T& data) const {
+	return costf.cost(data);
+}
 
-	if (update_cost)
+template<class T>
+void SharedHeap<T>::sort_rec(HeapNode<T> * node, SharedHeap<T> & heap) {
+
+	if (update_cost_when_sorting)
 		node->elt->crit[heap_id] = cost(*(node->elt->data));
 
 	heap.push_elt(node->elt);
-	if (node->left)	 sort_rec(node->left, heap, update_cost);
-	if (node->right) sort_rec(node->right, heap, update_cost);
+	if (node->left)	 sort_rec(node->left, heap);
+	if (node->right) sort_rec(node->right, heap);
 
 	node->left=NULL;
 	node->right=NULL;

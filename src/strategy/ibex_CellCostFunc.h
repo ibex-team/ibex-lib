@@ -47,6 +47,11 @@ public:
 	 */
 	virtual void set_loup(double lb) { }
 
+	/**
+	 * If the cost depends on the loup.
+	 */
+	bool depends_on_loup;
+
 };
 
 /**

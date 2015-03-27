@@ -28,20 +28,12 @@ template<class T>
 class CostFunc {
 public:
 
-	CostFunc(const bool depends_on_global_var=false): depends_on_global(depends_on_global_var) { }
-
 	virtual ~CostFunc() { }
 
 	/**
 	 * \brief Return the cost associated to "data"
 	 */
 	virtual double cost(const T& data) const=0;
-
-
-	/**
-	 * A boolean which indicate if the cost depends on a global variable
-	 */
-	const bool depends_on_global;
 };
 
 
@@ -103,7 +95,7 @@ public:
 
 protected:
 	/** The "cost" of a element. */
-	double cost(const T& data) const { return costf.cost(data); }
+	double cost(const T& data) const;
 
 	/** The way to compare two pairs (element,crit). */
 	bool operator()(const std::pair<T*,double>& c1, const std::pair<T*,double>& c2) const;
@@ -209,6 +201,11 @@ T* Heap<T>::top() const {
 template<class T>
 double Heap<T>::minimum() const {
 	return l.begin()->second;
+}
+
+template<class T>
+double Heap<T>::cost(const T& data) const {
+	return costf.cost(data);
 }
 
 template<class T>
