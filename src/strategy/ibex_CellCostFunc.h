@@ -43,9 +43,20 @@ public:
 	static CellCostFunc* get_cost(criterion crit, int goal_var);
 
 	/**
-	 * Does nothing (by default)
+	 * Store the new "loup" obtained by the optimizer, if used.
+	 *
+	 * Does nothing (by default).
 	 */
 	virtual void set_loup(double lb) { }
+
+
+	/**
+	 * Set data in OptimData right after the call
+	 * to "contract_and_bound" in the Optimizer.
+	 *
+	 * Does nothing (by default).
+	 */
+//	virtual void set_optim_data(Cell& c, Function& goal, EntailedCtr& entailed) { }
 
 	/**
 	 * If the cost depends on the loup.

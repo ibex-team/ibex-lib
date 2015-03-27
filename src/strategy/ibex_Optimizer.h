@@ -540,10 +540,6 @@ protected:
 	double initial_loup;
 
 	Ctc3BCid* objshaver;
-
-    void compute_pf(Cell& c);
-	
-	void compute_pu (Cell& c);
 	
 private:
 
@@ -558,8 +554,6 @@ private:
 
 	/** Lower bound of the small boxes taken by the precision */
 	double uplo_of_epsboxes;
-
-
 
 	/** Currently entailed constraints */
 	EntailedCtr* entailed;

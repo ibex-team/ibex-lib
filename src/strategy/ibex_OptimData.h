@@ -11,6 +11,8 @@
 
 #include "ibex_Backtrackable.h"
 #include "ibex_Interval.h"
+#include "ibex_EntailedCtr.h"
+#include "ibex_System.h"
 
 namespace ibex {
 
@@ -35,6 +37,20 @@ public:
 	 * \brief Duplicate the structure into the left/right nodes
 	 */
 	std::pair<Backtrackable*,Backtrackable*> down();
+
+	/**
+	 * \brief Initialize the value of "pf"
+	 *
+	 * \see #pf
+	 */
+	void compute_pf(Function& goal, const IntervalVector& box);
+
+	/**
+	 * \brief Initialize the value of "pu"
+	 *
+	 * \see #pu
+	 */
+	void compute_pu(System& sys, const IntervalVector& box, const EntailedCtr& entailed);
 
 	/**
 	 * \brief Casado criterion

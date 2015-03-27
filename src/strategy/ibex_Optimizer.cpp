@@ -260,22 +260,19 @@ void Optimizer::handle_cell(Cell& c, const IntervalVector& init_box ){
 
 		// Computations for the Casado C3, C5, C7 criteria
 		switch (crit2) {
-		case CellCostFunc::C3 : {
-			compute_pf(c);
+		case CellCostFunc::C3 :
+			c.get<OptimData>().compute_pf(*sys.goal,c.box);
 			break;
-			}
-		case CellCostFunc::C5 : case CellCostFunc::C7 : {
-			compute_pu(c);
-			compute_pf(c);
+		case CellCostFunc::C5 :
+		case CellCostFunc::C7 :
+			c.get<OptimData>().compute_pu(sys,c.box,*entailed);
+			c.get<OptimData>().compute_pf(*sys.goal,c.box);
 			break;
-			}
-		case CellCostFunc::PU: {
-			compute_pu(c);
+		case CellCostFunc::PU:
+			c.get<OptimData>().compute_pu(sys,c.box,*entailed);
 			break;
-			}
-		default : {
+		default :
 			break;
-			}
 		}
 
 		// the cell is put into the 2 heaps
@@ -286,24 +283,6 @@ void Optimizer::handle_cell(Cell& c, const IntervalVector& init_box ){
 	catch(EmptyBoxException&) {
 		delete &c;
 	}
-}
-
-void Optimizer::compute_pf(Cell& c) {
-	c.get<OptimData>().pf=(sys.goal)->eval(c.box);
-}
-
-void Optimizer::compute_pu(Cell& c) {
-	double pu=1;
-
-	for (int j=1; j<m;j++) {
-		if (entailed->normalized(j)) continue;
-		Interval eval=sys.f[j].eval(c.box);
-		double pui=1;
-		if (eval.diam()>0)
-			pui= -eval.lb()/eval.diam();
-		pu=pu*pui;
-	}
-	c.get<OptimData>().pu=pu;
 }
 
 void Optimizer::contract_and_bound(Cell& c, const IntervalVector& init_box) {
