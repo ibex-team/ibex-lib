@@ -1,7 +1,7 @@
 //============================================================================
 //                                  I B E X                                   
 // File        : ibex_OptimData.h
-// Author      : Jordan Ninin
+// Author      : Jordan Ninin, Gilles Chabert
 // License     : See the LICENSE file
 // Created     : Oct 18, 2014
 //============================================================================

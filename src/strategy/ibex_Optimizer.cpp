@@ -258,22 +258,8 @@ void Optimizer::handle_cell(Cell& c, const IntervalVector& init_box ){
 		contract_and_bound(c, init_box);  // may throw EmptyBoxException
 		//       objshaver->contract(c.box);
 
-		// Computations for the Casado C3, C5, C7 criteria
-		switch (crit2) {
-		case CellCostFunc::C3 :
-			c.get<OptimData>().compute_pf(*sys.goal,c.box);
-			break;
-		case CellCostFunc::C5 :
-		case CellCostFunc::C7 :
-			c.get<OptimData>().compute_pu(sys,c.box,*entailed);
-			c.get<OptimData>().compute_pf(*sys.goal,c.box);
-			break;
-		case CellCostFunc::PU:
-			c.get<OptimData>().compute_pu(sys,c.box,*entailed);
-			break;
-		default :
-			break;
-		}
+		// we know cost1() does not require OptimData
+		buffer.cost2().set_optim_data(c,sys);
 
 		// the cell is put into the 2 heaps
 		buffer.push(&c);

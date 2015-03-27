@@ -62,8 +62,13 @@ double CellCostC3::cost(const Cell& c) const {
 	if (data) {
 		return -((loup - data->pf.lb()) / data->pf.diam() );
 	} else {
-		ibex_error("CellCostC3::cost : invalid cost"); return POS_INFINITY;
+		ibex_error("CellCostC3::cost : invalid cost");
+		return POS_INFINITY;
 	}
+}
+
+void CellCostC3::set_optim_data(Cell& c, System& sys) {
+	c.get<OptimData>().compute_pf(*sys.goal,c.box);
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------
@@ -81,6 +86,12 @@ double CellCostC5::cost(const Cell& c) const {
 	}
 }
 
+void CellCostC5::set_optim_data(Cell& c, System& sys) {
+	OptimData& data=c.get<OptimData>();
+	data.compute_pu(sys,c.box,c.get<EntailedCtr>());
+	data.compute_pf(*sys.goal,c.box);
+}
+
 // -----------------------------------------------------------------------------------------------------------------------------------
 
 CellCostC7::CellCostC7(int ind_var, double lb) : CellCostFunc(true), loup(lb), goal_var(ind_var) {
@@ -96,6 +107,14 @@ double CellCostC7::cost(const Cell& c) const {
 	}
 }
 
+void CellCostC7::set_optim_data(Cell& c, System& sys) {
+	OptimData& data=c.get<OptimData>();
+	data.compute_pu(sys,c.box,c.get<EntailedCtr>());
+	data.compute_pf(*sys.goal,c.box);
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------
+
 CellCostPU::CellCostPU() :  CellCostFunc(false) {
 
 }
@@ -109,10 +128,17 @@ double CellCostPU::cost(const Cell& c) const {
 	}
 }
 
+void CellCostPU::set_optim_data(Cell& c, System& sys) {
+
+	c.get<OptimData>().compute_pu(sys,c.box,c.get<EntailedCtr>());
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------
 
 CellCostPFlb::CellCostPFlb() :  CellCostFunc(false) {
 
 }
+
 double CellCostPFlb::cost(const Cell& c) const {
 	const OptimData *data = &(c.get<OptimData>());
 	if (data) {

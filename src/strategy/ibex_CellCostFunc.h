@@ -10,7 +10,7 @@
 #ifndef __IBEX_CELL_COST_FUNC__
 #define __IBEX_CELL_COST_FUNC__
 
-#include "ibex_Interval.h"
+#include "ibex_System.h"
 #include "ibex_SharedHeap.h"
 #include "ibex_Cell.h"
 
@@ -38,12 +38,12 @@ public:
 	typedef enum {LB,UB,C3,C5,C7,PU,PF_LB, PF_UB} criterion;
 
 	/**
-	 * Get the cost function from a criterion.
+	 * \brief Get the cost function from a criterion.
 	 */
 	static CellCostFunc* get_cost(criterion crit, int goal_var);
 
 	/**
-	 * Store the new "loup" obtained by the optimizer, if used.
+	 * \brief Store the new "loup" obtained by the optimizer, if used.
 	 *
 	 * Does nothing (by default).
 	 */
@@ -51,12 +51,15 @@ public:
 
 
 	/**
-	 * Set data in OptimData right after the call
-	 * to "contract_and_bound" in the Optimizer.
+	 * \brief Set data in OptimData in the cell
+	 *
+	 * This function is right after "contract_and_bound" in the Optimizer.
+	 *
+	 * The data required depends on the cost function.
 	 *
 	 * Does nothing (by default).
 	 */
-//	virtual void set_optim_data(Cell& c, Function& goal, EntailedCtr& entailed) { }
+	virtual void set_optim_data(Cell& c, System& sys) { }
 
 	/**
 	 * If the cost depends on the loup.
@@ -113,6 +116,9 @@ private:
 class CellCostC3: public CellCostFunc {
 public:
 
+	/**
+	 * TODO: what is this "lb" for?
+	 */
 	CellCostC3(double lb= NEG_INFINITY) ;
 
 	/**
@@ -126,6 +132,10 @@ public:
 	/** The "cost" of a element. */
 	virtual double cost(const Cell& c) const;
 
+	/**
+	 * \brief Set "pf" in OptimData in the cell
+	 */
+	virtual void set_optim_data(Cell& c, System& sys);
 private:
 
 	/** the lower upper bound. */
@@ -138,6 +148,9 @@ private:
 class CellCostC5: public CellCostFunc {
 public:
 
+	/**
+	 * TODO: what is this "lb" for?
+	 */
 	CellCostC5(double lb= NEG_INFINITY) ;
 
 	/**
@@ -151,7 +164,10 @@ public:
 	/** The "cost" of a element. */
 	virtual double cost(const Cell& c) const;
 
-
+	/**
+	 * \brief Set "pf" and "pu" in OptimData in the cell
+	 */
+	virtual void set_optim_data(Cell& c, System& sys);
 private:
 
 	/** the lower upper bound. */
@@ -162,6 +178,9 @@ private:
 class CellCostC7: public CellCostFunc {
 public:
 
+	/**
+	 * TODO: what is this "lb" for?
+	 */
 	CellCostC7(int ind_var, double lb=NEG_INFINITY) ;
 
 	/**
@@ -175,7 +194,10 @@ public:
 	/** The "cost" of a element. */
 	virtual	double cost(const Cell& c) const;
 
-
+	/**
+	 * \brief Set "pf" and "pu" in OptimData in the cell
+	 */
+	virtual void set_optim_data(Cell& c, System& sys);
 private:
 
 	/** the lower upper bound. */
@@ -194,6 +216,10 @@ public:
 	/** The "cost" of a element. */
 	virtual	double cost(const Cell& c) const;
 
+	/**
+	 * \brief Set "pf" in OptimData in the cell
+	 */
+	virtual void set_optim_data(Cell& c, System& sys);
 };
 
 
