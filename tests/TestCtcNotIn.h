@@ -27,14 +27,22 @@ public:
 		TEST_ADD(TestCtcNotIn::contract02);
 		TEST_ADD(TestCtcNotIn::contract03);
 		TEST_ADD(TestCtcNotIn::contract04);
+		TEST_ADD(TestCtcNotIn::vector01);
+		TEST_ADD(TestCtcNotIn::vector02);
+		TEST_ADD(TestCtcNotIn::vector03);
 	}
 
 	void contract01();
 	void contract02();
 	void contract03();
 	void contract04();
+	void vector01();
+	void vector02();
+	void vector03();
 
 	void check_not_in(const Interval& x_input, const Interval& x_expected);
+
+	void check_not_in(int dim, const IntervalVector& x_input, const IntervalVector& x_expected);
 };
 
 } // namespace ibex

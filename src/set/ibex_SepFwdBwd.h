@@ -5,7 +5,7 @@
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : May 01, 2014
-// Last Update : May 01, 2014
+// Last Update : Mar 26, 2015
 //============================================================================
 
 #ifndef __IBEX_SEP_FWD_BWD_H__
@@ -79,8 +79,6 @@ public:
 /* ============================================================================
  	 	 	 	 	 	 	 inline implementation
   ============================================================================*/
-
-inline SepFwdBwd::SepFwdBwd(Function &f, CmpOp op) : SepCtcPair(*new CtcFwdBwd(f,!op), *new CtcFwdBwd(f,op)) { }
 
 inline SepFwdBwd::SepFwdBwd(Function &f, const Interval &y): SepCtcPair(*new CtcNotIn(f,y), *new CtcFwdBwd(f,y)) { }
 
