@@ -67,6 +67,10 @@ double CellCostC3::cost(const Cell& c) const {
 	}
 }
 
+void CellCostC3::add_backtrackable(Cell& root) {
+	root.add<OptimData>();
+}
+
 void CellCostC3::set_optim_data(Cell& c, System& sys) {
 	c.get<OptimData>().compute_pf(*sys.goal,c.box);
 }
@@ -84,6 +88,10 @@ double CellCostC5::cost(const Cell& c) const {
 	} else {
 		ibex_error("CellCostC5::cost : invalid cost"); return POS_INFINITY;
 	}
+}
+
+void CellCostC5::add_backtrackable(Cell& root) {
+	root.add<OptimData>();
 }
 
 void CellCostC5::set_optim_data(Cell& c, System& sys) {
@@ -107,6 +115,10 @@ double CellCostC7::cost(const Cell& c) const {
 	}
 }
 
+void CellCostC7::add_backtrackable(Cell& root) {
+	root.add<OptimData>();
+}
+
 void CellCostC7::set_optim_data(Cell& c, System& sys) {
 	OptimData& data=c.get<OptimData>();
 	data.compute_pu(sys,c.box,c.get<EntailedCtr>());
@@ -126,6 +138,10 @@ double CellCostPU::cost(const Cell& c) const {
 	} else {
 		ibex_error("CellCostPU::cost : invalid cost"); return POS_INFINITY;
 	}
+}
+
+void CellCostPU::add_backtrackable(Cell& root) {
+	root.add<OptimData>();
 }
 
 void CellCostPU::set_optim_data(Cell& c, System& sys) {

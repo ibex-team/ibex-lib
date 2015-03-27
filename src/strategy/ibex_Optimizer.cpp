@@ -65,7 +65,7 @@ Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, double prec,
                 				buffer(*new CellCostVarLB(n), *CellCostFunc::get_cost(crit2, n), critpr),  // first buffer with LB, second buffer with ct (default UB))
                 				prec(prec), goal_rel_prec(goal_rel_prec), goal_abs_prec(goal_abs_prec),
                 				sample_size(sample_size), mono_analysis_flag(true), in_HC4_flag(true), trace(false),
-                				crit2(crit2), timeout(1e08),
+                				timeout(1e08),
                 				loup(POS_INFINITY), pseudo_loup(POS_INFINITY),uplo(NEG_INFINITY),
                 				loup_point(n), loup_box(n), nb_cells(0),
                 				df(*user_sys.goal,Function::DIFF), loup_changed(false),	initial_loup(POS_INFINITY), rigor(rigor),
@@ -404,26 +404,14 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 	// add data required by the bisector
 	bsc.add_backtrackable(*root);
 
+	// add data "pu" and "pf" (if required)
+	buffer.cost2().add_backtrackable(*root);
+
 	// add data required by optimizer + Fritz John contractor
 	root->add<EntailedCtr>();
 	//root->add<Multipliers>();
 	entailed=&root->get<EntailedCtr>();
 	entailed->init_root(user_sys,sys);
-
-	// add data pu and pf for
-	switch (crit2) {
-	case CellCostFunc::C3 :
-	case CellCostFunc::C5 :
-	case CellCostFunc::C7 :
-	case CellCostFunc::PU :
-	case CellCostFunc::PF_LB:
-	case CellCostFunc::PF_UB:  {
-		root->add<OptimData>();	
-		break;
-		}
-	default :
-		break;
-	}
 
 	loup_changed=false;
 	initial_loup=obj_init_bound;

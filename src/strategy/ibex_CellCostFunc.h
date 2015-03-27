@@ -49,11 +49,20 @@ public:
 	 */
 	virtual void set_loup(double lb) { }
 
+	/**
+	 * \brief Add backtrackable data required by this cost function
+	 *
+	 * This function is called for the root cell (before a
+	 * strategy is executed).
+	 *
+	 * Does nothing by default.
+	 */
+	virtual void add_backtrackable(Cell& root) { }
 
 	/**
 	 * \brief Set data in OptimData in the cell
 	 *
-	 * This function is right after "contract_and_bound" in the Optimizer.
+	 * This function is called right after "contract_and_bound" in the Optimizer.
 	 *
 	 * The data required depends on the cost function.
 	 *
@@ -132,6 +141,8 @@ public:
 	/** The "cost" of a element. */
 	virtual double cost(const Cell& c) const;
 
+	virtual void add_backtrackable(Cell& root);
+
 	/**
 	 * \brief Set "pf" in OptimData in the cell
 	 */
@@ -164,6 +175,8 @@ public:
 	/** The "cost" of a element. */
 	virtual double cost(const Cell& c) const;
 
+	virtual void add_backtrackable(Cell& root);
+
 	/**
 	 * \brief Set "pf" and "pu" in OptimData in the cell
 	 */
@@ -194,6 +207,8 @@ public:
 	/** The "cost" of a element. */
 	virtual	double cost(const Cell& c) const;
 
+	virtual void add_backtrackable(Cell& root);
+
 	/**
 	 * \brief Set "pf" and "pu" in OptimData in the cell
 	 */
@@ -215,6 +230,8 @@ public:
 
 	/** The "cost" of a element. */
 	virtual	double cost(const Cell& c) const;
+
+	virtual void add_backtrackable(Cell& root);
 
 	/**
 	 * \brief Set "pf" in OptimData in the cell

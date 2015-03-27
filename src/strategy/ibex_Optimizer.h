@@ -230,8 +230,6 @@ public:
 	  2 for printing each handled node */
 	int trace;
 
-	CellCostFunc::criterion crit2;
-	
 	/**
 	 * \brief Time limit.
 	 *
