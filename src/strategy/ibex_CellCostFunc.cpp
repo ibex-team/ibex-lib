@@ -155,6 +155,14 @@ CellCostPFlb::CellCostPFlb() :  CellCostFunc(false) {
 
 }
 
+void CellCostPFlb::add_backtrackable(Cell& root) {
+	root.add<OptimData>();
+}
+
+void CellCostPFlb::set_optim_data(Cell& c, System& sys) {
+	c.get<OptimData>().compute_pf(*sys.goal,c.box);
+}
+
 double CellCostPFlb::cost(const Cell& c) const {
 	const OptimData *data = &(c.get<OptimData>());
 	if (data) {
@@ -168,6 +176,14 @@ double CellCostPFlb::cost(const Cell& c) const {
 
 CellCostPFub::CellCostPFub() :  CellCostFunc(false) {
 
+}
+
+void CellCostPFub::add_backtrackable(Cell& root) {
+	root.add<OptimData>();
+}
+
+void CellCostPFub::set_optim_data(Cell& c, System& sys) {
+	c.get<OptimData>().compute_pf(*sys.goal,c.box);
 }
 
 double CellCostPFub::cost(const Cell& c) const {

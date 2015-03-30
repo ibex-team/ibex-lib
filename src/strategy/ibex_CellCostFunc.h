@@ -141,6 +141,9 @@ public:
 	/** The "cost" of a element. */
 	virtual double cost(const Cell& c) const;
 
+	/**
+	 * \brief Add OptimData
+	 */
 	virtual void add_backtrackable(Cell& root);
 
 	/**
@@ -175,6 +178,9 @@ public:
 	/** The "cost" of a element. */
 	virtual double cost(const Cell& c) const;
 
+	/**
+	 * \brief Add OptimData
+	 */
 	virtual void add_backtrackable(Cell& root);
 
 	/**
@@ -207,6 +213,9 @@ public:
 	/** The "cost" of a element. */
 	virtual	double cost(const Cell& c) const;
 
+	/**
+	 * \brief Add OptimData
+	 */
 	virtual void add_backtrackable(Cell& root);
 
 	/**
@@ -231,6 +240,9 @@ public:
 	/** The "cost" of a element. */
 	virtual	double cost(const Cell& c) const;
 
+	/**
+	 * \brief Add OptimData
+	 */
 	virtual void add_backtrackable(Cell& root);
 
 	/**
@@ -244,6 +256,16 @@ class CellCostPFlb: public CellCostFunc {
 public:
 	CellCostPFlb();
 
+	/**
+	 * \brief Add OptimData
+	 */
+	virtual void add_backtrackable(Cell& root);
+
+	/**
+	 * \brief Set "pf" in OptimData in the cell
+	 */
+	virtual void set_optim_data(Cell& c, System& sys);
+
 	/** The "cost" of a element. */
 	virtual	double cost(const Cell& c) const;
 
@@ -255,6 +277,16 @@ public:
 class CellCostPFub: public CellCostFunc {
 public:
 	CellCostPFub();
+
+	/**
+	 * \brief Add OptimData
+	 */
+	virtual void add_backtrackable(Cell& root);
+
+	/**
+	 * \brief Set "pf" in OptimData in the cell
+	 */
+	virtual void set_optim_data(Cell& c, System& sys);
 
 	/** The "cost" of a element. */
 	virtual	double cost(const Cell& c) const;
