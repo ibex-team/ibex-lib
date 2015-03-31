@@ -37,6 +37,8 @@ public:
 		TEST_ADD(TestParser::func02);
 		TEST_ADD(TestParser::func03);
 		TEST_ADD(TestParser::loop01);
+
+		TEST_ADD(TestParser::nary_max);
 		//		TEST_ADD(TestParser::error01);
 	}
 
@@ -57,6 +59,8 @@ public:
 	void choco01();
 	void error01();
 	void loop01();
+
+	void nary_max();
 
 };
 

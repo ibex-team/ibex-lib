@@ -19,7 +19,7 @@ void CellStack::flush() {
 	}
 }
 
-int CellStack::size() const {
+unsigned int CellStack::size() const {
 	return cstack.size();
 }
 

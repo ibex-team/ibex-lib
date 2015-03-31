@@ -10,7 +10,7 @@
 #include "ibex_SetInterval.h"
 #include "ibex_SetLeaf.h"
 #include "ibex_SetBisect.h"
-#include "ibex_CellHeap.h"
+#include "ibex_Heap.h"
 #include "ibex_CellStack.h"
 #include <stack>
 #include <fstream>
@@ -186,7 +186,7 @@ std::ostream& operator<<(std::ostream& os, const SetInterval& set) {
 	return os;
 }
 
-namespace {
+//namespace {
 
 
 class NodeAndDist : public Backtrackable {
@@ -224,17 +224,17 @@ public:
 /**
  * Cell heap where the criterion is the distance to "pt"
  */
-class CellHeapDist : public CellHeap {
-public:
+class CellHeapDist : public CostFunc<Cell> {
 
-	virtual double cost(const Cell& c) const {
-		return c.get<NodeAndDist>().dist;
-	}
+public:
+	/** The "cost" of a element. */
+	virtual	double cost(const Cell& c) const { return c.get<NodeAndDist>().dist; }
 };
-}
+
 
 double SetInterval::dist(const Vector& pt, bool inside) const {
-	CellHeapDist heap;
+	CellHeapDist costf;
+	Heap<Cell> heap(costf);
 
 	//int count=0; // for stats
 
@@ -260,7 +260,7 @@ double SetInterval::dist(const Vector& pt, bool inside) const {
 			double d=c->get<NodeAndDist>().dist;
 			if (d<lb) {
 				lb=d;
-				heap.contract_heap(lb);
+				heap.contract(lb);
 			}
 		} else if (!node->is_leaf() && (    (inside && possibly_contains_in(node->status))
 		                                || (!inside && possibly_contains_out(node->status)))) {

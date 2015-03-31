@@ -64,7 +64,7 @@ public:
 	/**
 	 * \brief Delete *this.
 	 */
-	~Cell();
+	virtual ~Cell();
 
 	/**
 	 * \brief Return true if this cell is the root cell.
@@ -113,6 +113,11 @@ public:
 	 * \brief Other data.
 	 */
 	SymbolMap<Backtrackable*> data;
+
+	/**
+	 * Cell unique identifier
+	 */
+	unsigned long id;
 
 private:
 	/* A constant to be used when no variable has been split yet (root cell). */

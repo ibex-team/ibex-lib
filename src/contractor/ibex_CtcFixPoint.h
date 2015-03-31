@@ -38,6 +38,9 @@ public:
 
 	/**
 	 * \brief Contract a box.
+	 *
+	 * \note When the FIXPOINT output flag is set, this means a stronger
+	 *       property (the fixpoint is reached for a null ratio).
 	 */
 	virtual void contract(IntervalVector& box);
 

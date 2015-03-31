@@ -21,12 +21,12 @@ int main(int argc, char** argv) {
 	double ratio_propag= atof(argv[2]); // the contraction ratio used as stopping criterion for the hc4 propagation loop
 	string filtering= argv[3];   // the main contractor (hc4|acidhc4|3bcidhc4|hc4n|acidhc4n|3bcidhc4n)
 	string linearrelaxation = argv[4];    // the linearrelaxation contractor
-        string bisection= argv[5];   // the bisection heuristics
+    string bisection= argv[5];   // the bisection heuristics
 	double prec= atof(argv[6]);  // the required precision
-        double time_limit=atof(argv[7]); // the time limit
+    double time_limit=atof(argv[7]); // the time limit
 
 
-	srand(1); // random used in corner choice in X_Newton
+    RNG::srand(1); // random used in corner choice in X_Newton
 	// Build contractor #1:   hc4 acidhc4 or 3bcidhc4
 	// --------------------------
 	// A "constraint propagation" loop.

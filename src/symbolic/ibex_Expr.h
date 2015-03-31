@@ -1477,9 +1477,27 @@ inline const ExprDiv& operator/(const ExprNode& left, const ExprNode& right) {
 inline const ExprMax& max(const ExprNode& left, const ExprNode& right) {
 	return ExprMax::new_(left, right); }
 
+/** Maximum */
+inline const ExprMax& max(const Array<const ExprNode> args) {
+	assert(args.size()>1);
+	const ExprMax* _max=&max(args[0],args[1]);
+	for (int i=2; i<args.size(); i++)
+		_max = & max(*_max, args[i]);
+	return *_max;
+}
+
 /** Minimum */
 inline const ExprMin& min(const ExprNode& left, const ExprNode& right) {
 	return ExprMin::new_(left, right); }
+
+/** Minimum */
+inline const ExprMin& min(const Array<const ExprNode> args) {
+	assert(args.size()>1);
+	const ExprMin* _min=&min(args[0],args[1]);
+	for (int i=2; i<args.size(); i++)
+		_min = & min(*_min, args[i]);
+	return *_min;
+}
 
 /** Arctangent2 of two expressions */
 inline const ExprAtan2& atan2(const ExprNode& exp1, const ExprNode& exp2) {

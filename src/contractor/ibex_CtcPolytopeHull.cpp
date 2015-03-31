@@ -126,9 +126,9 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 				}
 			}
 			else if (stat == LinearSolver::INFEASIBLE) {
-				// the infeasibility is proved, the EmptyBox exception is raised
 				delete[] inf_bound;
 				delete[] sup_bound;
+				// the infeasibility is proved, the EmptyBox exception is raised
 				throw EmptyBoxException();
 			}
 
@@ -174,9 +174,9 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 				}
 			}
 			else if(stat == LinearSolver::INFEASIBLE) {
-				// the infeasibility is proved,  the EmptyBox exception is raised
 				delete[] inf_bound;
 				delete[] sup_bound;
+				// the infeasibility is proved,  the EmptyBox exception is raised
 				throw EmptyBoxException();
 			}
 			else if (stat == LinearSolver::INFEASIBLE_NOTPROVED) {

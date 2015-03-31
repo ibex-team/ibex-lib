@@ -751,7 +751,7 @@ inline bool bwd_pow(const Interval& y, int expon, Interval& x) {
 }
 
 inline bool bwd_pow(const Interval& , Interval& , Interval& ) {
-	cerr << "warning: bwd_power(y,x1,x2) (with x1 and x2 intervals) not implemented yet with BIAS" << endl;
+	not_implemented("warning: bwd_power(y,x1,x2) (with x1 and x2 intervals) not implemented yet with BIAS");
 	return true;
 }
 

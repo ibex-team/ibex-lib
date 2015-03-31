@@ -20,13 +20,21 @@ using namespace std;
 
 namespace ibex {
 
-void Optimizer::monotonicity_analysis(IntervalVector& box) {
+void Optimizer::monotonicity_analysis(IntervalVector& box, bool inner_found) {
+
+	if (!inner_found && sys.f.nb_used_vars()==n)
+		// if there is no inner box and all the variables appear
+		// in the constraints, nothing can be done
+		return;
+
 	IntervalVector g(n);
 	sys.goal->gradient(box,g);
 	for (int j=0; j<n; j++) {
 		//TODO: if box is unbounded, we have a problem here.
-		if (g[j].lb()>=0) box[j]=box[j].lb();
-		if (g[j].ub()<=0) box[j]=box[j].ub();
+		if (inner_found || !sys.f.used(j)) {
+			if (g[j].lb()>=0) box[j]=box[j].lb();
+			if (g[j].ub()<=0) box[j]=box[j].ub();
+		}
 	}
 }
 
@@ -295,8 +303,8 @@ bool Optimizer::update_loup_probing(const IntervalVector& box) {
 		}
 	}
 
-	if (inner_found && mono_analysis_flag)
-		monotonicity_analysis(inbox);
+	if (mono_analysis_flag)
+		monotonicity_analysis(inbox, inner_found);
 
 	bool loup_changed; // return value
 	//	cout <<  " inner ? " << inner_found << " box " << box << " inbox " << inbox << endl;

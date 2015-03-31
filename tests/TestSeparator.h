@@ -40,8 +40,6 @@ public:
     void test_SepUnionInter();
 	void test_SepNot();
 
-private:
-    Variable x, y;
 };
 
 } // end namespace ibex

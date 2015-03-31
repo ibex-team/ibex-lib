@@ -29,11 +29,11 @@ void TestPixelMap::test_init2DPixelMap(){
     
     // raster.init();
 
-    for(uint i = 0; i < raster.data.size(); i++){
+    for(unsigned int i = 0; i < raster.data.size(); i++){
         TEST_ASSERT(raster.data[i] == 0);
     }
 
-    for(uint i = 0; i < raster.data.size(); i++){
+    for(unsigned int i = 0; i < raster.data.size(); i++){
         raster[i] = i;
     }
 
@@ -43,7 +43,7 @@ void TestPixelMap::test_init2DPixelMap(){
 
 
 
-    for(uint i = 0; i < raster.ndim; i++){
+    for(unsigned int i = 0; i < raster.ndim; i++){
         TEST_ASSERT( (raster.leaf_size_[i] == leaf_size[i]) );
         TEST_ASSERT( (raster.origin_[i] == origin[i]) );
         TEST_ASSERT( (raster.grid_size_[i] == grid_size[i]) ); 
@@ -51,7 +51,7 @@ void TestPixelMap::test_init2DPixelMap(){
 
     for(int i = 0; i < grid_size[0]; i++){
         for(int j = 0; j < grid_size[1]; j++){
-            TEST_ASSERT(i + raster.divb_mul_[1]*j == raster(i,j));
+            TEST_ASSERT(i + raster.divb_mul_[1]*j == (int)raster(i,j));
         }
     }
 }
@@ -70,18 +70,18 @@ void TestPixelMap::test_init3DPixelMap(){
 
     raster.init();
 
-    for(uint i = 0; i < raster.data.size(); i++){
+    for(unsigned int i = 0; i < raster.data.size(); i++){
         TEST_ASSERT(raster[i] == 0);
     }
 
-    for(uint i = 0; i < raster.data.size(); i++){
+    for(unsigned int i = 0; i < raster.data.size(); i++){
         raster[i] = i;
     }
 
     raster.save("test.array3D");
     raster.load("test.array3D");
 
-    for(uint i = 0; i < raster.ndim; i++){
+    for(unsigned int i = 0; i < raster.ndim; i++){
         TEST_ASSERT( (raster.leaf_size_[i] == leaf_size[i]) );
         TEST_ASSERT( (raster.origin_[i] == origin[i]) );
         TEST_ASSERT( (raster.grid_size_[i] == grid_size[i]) ); 
@@ -91,7 +91,7 @@ void TestPixelMap::test_init3DPixelMap(){
     for(int i = 0; i < grid_size[0]; i++){
         for(int j = 0; j < grid_size[1]; j++){
             for(int k = 0; k < grid_size[2];k++){
-                TEST_ASSERT(i + raster.divb_mul_[1]*j+raster.divb_mul_[2]*k == raster(i,j,k));
+                TEST_ASSERT(i + raster.divb_mul_[1]*j+raster.divb_mul_[2]*k == (int)raster(i,j,k));
             }
         }
     }
@@ -143,6 +143,6 @@ void TestPixelMap::test_ImageIntegral2D(){
 }
 
 
-};
+}
 
 

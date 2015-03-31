@@ -60,6 +60,9 @@ public:
 		TEST_ADD(TestExpr::apply03);
 
 		TEST_ADD(TestExpr::subnodes01);
+		TEST_ADD(TestExpr::subnodes02);
+		TEST_ADD(TestExpr::subnodes03);
+		TEST_ADD(TestExpr::subnodes04);
 
 		TEST_ADD(TestExpr::bug81);
 	}
@@ -103,6 +106,16 @@ public:
 	void apply03();
 
 	void subnodes01();
+
+	// variant with 2 arguments: check that variables appear in the declaration order
+	// test with x+y and y+x
+	void subnodes02();
+
+	// same thing with 5 variables
+	void subnodes03();
+
+	// with constants
+	void subnodes04();
 
 	// row vector variable + (column) vector constant
 	void bug81();

@@ -123,7 +123,7 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
     bool * corner = new bool[n]; 
 	// random corner choice
 	for (int i=0; i<n ; i++)
-	  {if (rand()%2)
+	  {if (RNG::rand()%2)
 	      corner[i]=false;
 	    else
 	      corner[i]=true;}  
@@ -252,7 +252,7 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 	}
 	if (trace) {
 		if(stat == LinearSolver::TIME_OUT) std::cout << "Simplex spent too much time" << std::endl;
-		if(stat == LinearSolver::MAX_ITER) std::cout << "Simplex spent too many iterations" << std::endl;
+		if(stat == LinearSolver::MAX_ITER) std::cout << "Simplex spent too many iterations" << std::endl<< box << std::endl;
 	}
 	return false;
 }

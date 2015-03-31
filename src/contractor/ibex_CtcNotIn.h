@@ -27,6 +27,11 @@ public:
 	/**
 	 * \brief Build the contractor for "f(x) not-in [y]".
 	 */
+	CtcNotIn(Function& f, const Domain& y);
+
+	/**
+	 * \brief Build the contractor for "f(x) not-in [y]".
+	 */
 	CtcNotIn(Function& f, const Interval& y);
 
 	/**
@@ -40,14 +45,32 @@ public:
 	CtcNotIn(Function& f, const IntervalMatrix& y);
 
 	/**
+	 * \brief Delete this.
+	 */
+	~CtcNotIn();
+
+	/**
 	 * \brief Contract the box.
 	 */
 	virtual void contract(IntervalVector& box);
 
 protected:
 	Function& f;
-	Domain d1; // (-oo, lb(y))
-	Domain d2; // (ub(y), +oo)
+
+	/**
+	 * The size of the complementary of y
+	 *
+	 * Example if the complementary is (-oo, lb(y)) \cup (ub(y), +oo), the size is 2.
+	 */
+	int diff_size;
+
+	Ctc* _union;
+
+	void init(const Interval& y);
+
+	void init(const IntervalVector& y);
+
+	void init(const IntervalMatrix& y);
 };
 
 } // end namespace ibex

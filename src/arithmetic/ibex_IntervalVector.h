@@ -545,7 +545,6 @@ private:
 
 	IntervalVector() : n(0), vec(NULL) { } // for IntervalMatrix & complementary()
 
-
 	int n;             // dimension (size of vec)
 	Interval *vec;	   // vector of elements
 };

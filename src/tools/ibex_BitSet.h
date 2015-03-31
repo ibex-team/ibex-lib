@@ -8,6 +8,16 @@
 
 namespace ibex {
 
+template <class WORD_TYPE>
+void showUint(WORD_TYPE n, std::ostream& os) {
+WORD_TYPE mask=1;
+while(mask){
+if(mask & n) os<<1;
+else os<<0;
+mask = mask << 1;
+}
+}
+
 const int getlast[256] = {-1, 0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3,
 		4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
 		5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,

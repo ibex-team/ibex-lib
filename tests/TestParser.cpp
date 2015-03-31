@@ -309,6 +309,21 @@ void TestParser::error01() {
 	TEST_THROWS(System("quimper/error01.qpr"),SyntaxError&);
 }
 
+void TestParser::nary_max() {
+	Function f("x","y","z","max(x,y,z)");
+
+	double _v[3] = {1,3,2};
+	Vector v(3,_v);
+	check(f.eval(v),3.0);
+
+	v[2]=4;
+	check(f.eval(v),4.0);
+
+	v[0]=5;
+	check(f.eval(v),5.0);
+
+}
+
 } // end namespace
 
 

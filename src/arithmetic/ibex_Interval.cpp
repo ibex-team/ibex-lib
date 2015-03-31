@@ -21,6 +21,10 @@
 #else
 #ifdef _IBEX_WITH_FILIB_
 #include "ibex_filib_Interval.cpp_"
+#else
+#ifdef _IBEX_WITH_DIRECT_
+#include "ibex_direct_Interval.cpp_"
+#endif
 #endif
 #endif
 #endif

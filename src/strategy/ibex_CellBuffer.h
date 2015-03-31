@@ -44,7 +44,7 @@ class CellBuffer {
 	 * a #ibex::CellBufferOverflow exception must be raised.
 	 * Special value "-1" means no limit. By default, it is -1.
 	 */
-	int capacity;
+	unsigned int capacity;
 
 	/**
 	 * \brief Create a buffer
@@ -59,7 +59,7 @@ class CellBuffer {
 	virtual void flush()=0;
 
 	/** Return the size of the buffer. */
-	virtual int size() const=0;
+	virtual unsigned int size() const=0;
 
 	/** Return true if the buffer is empty. */
 	virtual bool empty() const=0;
@@ -75,15 +75,19 @@ class CellBuffer {
 
 	/** Count the number of cells pushed since
 	 * the object is created. */
-	int nb_cells;
-
- private:
+	//unsigned int nb_cells;
+protected:
 	friend std::ostream& operator<<(std::ostream& os, const CellBuffer&);
 
+	virtual std::ostream& print(std::ostream& os) const;
+
+ private:
+
 	mutable int screen; // only for display (debug)
+
 };
 
-std::ostream& operator<<(std::ostream& os, const CellBuffer&);
+std::ostream& operator<<(std::ostream& os, const CellBuffer& h);
 
 } // end namespace ibex
 #endif // __IBEX_CELL_BUFFER_H__

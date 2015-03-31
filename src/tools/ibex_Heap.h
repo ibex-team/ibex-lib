@@ -19,6 +19,26 @@ namespace ibex {
 
 /** \ingroup strategy
  *
+ * \brief Cost function (for Heap/DoubleHeap)
+ *
+ * Allows to give a cost to data of a given type T.
+ *
+ */
+template<class T>
+class CostFunc {
+public:
+
+	virtual ~CostFunc() { }
+
+	/**
+	 * \brief Return the cost associated to "data"
+	 */
+	virtual double cost(const T& data) const=0;
+};
+
+
+/** \ingroup strategy
+ *
  * \brief Heap
  *
  * The heap is built so that:
@@ -31,10 +51,9 @@ namespace ibex {
  */
 template<class T>
 class Heap  {
-
 public:
-	/** Delete this. */
-	virtual ~Heap();
+
+	Heap(CostFunc<T>& costf);
 
 	/**
 	 * \brief Flush the buffer.
@@ -71,9 +90,12 @@ public:
 	 * the first element) */
 	double minimum() const;
 
+	/** The cost function */
+	CostFunc<T>& costf;
+
 protected:
 	/** The "cost" of a element. */
-	virtual double cost(const T&) const=0;
+	double cost(const T& data) const;
 
 	/** The way to compare two pairs (element,crit). */
 	bool operator()(const std::pair<T*,double>& c1, const std::pair<T*,double>& c2) const;
@@ -104,9 +126,8 @@ struct HeapComparator {
 	}
 };
 
-
 template<class T>
-Heap<T>::~Heap() {
+Heap<T>::Heap(CostFunc<T>& costf) : costf(costf) {
 
 }
 
@@ -180,6 +201,11 @@ T* Heap<T>::top() const {
 template<class T>
 double Heap<T>::minimum() const {
 	return l.begin()->second;
+}
+
+template<class T>
+double Heap<T>::cost(const T& data) const {
+	return costf.cost(data);
 }
 
 template<class T>
