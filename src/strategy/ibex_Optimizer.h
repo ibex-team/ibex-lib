@@ -24,6 +24,7 @@
 #include "ibex_LinearSolver.h"
 #include "ibex_PdcHansenFeasibility.h"
 #include "ibex_Random.h"
+#include "ibex_LinearRelaxCombo.h"
 
 namespace ibex {
 

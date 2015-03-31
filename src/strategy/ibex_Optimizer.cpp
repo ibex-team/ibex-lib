@@ -99,7 +99,6 @@ Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, double prec,
 	if (niter < 3*n) niter=3*n;
 
 	//====================================
-
 #ifdef _IBEX_WITH_NOLP_
 	mylp = NULL;
 #else
@@ -207,11 +206,6 @@ bool Optimizer::update_loup(const IntervalVector& box) {
 	return loup_change;
 
 }
-
-
-
-
-
 
 void Optimizer::update_entailed_ctr(const IntervalVector& box) {
 	for (int j=0; j<m; j++) {
