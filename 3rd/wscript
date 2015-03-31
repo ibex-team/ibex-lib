@@ -946,18 +946,20 @@ def build (bld):
 
 		with subdir (path):
 			if bld.cmd=="install":
-				cmd = ["install"]
+				cmd = [["install"]]
 			elif bld.cmd in ("uninstall", "clean"): 	
-				cmd = ["uninstall"]
+				cmd = [["uninstall"],["distclean"]]
 			else :
 				cmd = []
-			if bld.exec_command (
-				[bld.env.MAKE, "-j", str(bld.options.jobs)] + cmd,
-				cwd	= path,
-				stdout	= None,
-				stderr	= None,
-			):
-				bld.fatal ("failed to build filib")
+			# Try without and with -lz (soplex may be built without zlib)
+			for l in cmd:
+				if bld.exec_command (
+					[bld.env.MAKE, "-j", str(bld.options.jobs)] + l,
+					cwd	= path,
+					stdout	= None,
+					stderr	= None,
+				):
+					bld.fatal ("failed to build filib")
 	
 		bld.variant = ""
 	##################################
@@ -1026,10 +1028,10 @@ def distclean (ctx):
 	filib_dir = ctx.path.find_dir ("filibsrc")
 	if filib_dir and os.path.exists (os.path.join (filib_dir.abspath(), "Makefile")):
 		with subdir (filib_dir):
-			ctx.exec_command ("make uninstall", cwd = filib_dir.abspath())
+			ctx.exec_command ("make clean && make distclean", cwd = filib_dir.abspath())
 
 	ampl_dir = ctx.path.find_dir ("solvers")
 	if ampl_dir and os.path.exists (os.path.join (ampl_dir.abspath(), "Makefile")):
 		with subdir (ampl_dir):
-			ctx.exec_command ("make clean", cwd = ampl_dir.abspath())
+			ctx.exec_command ("make clean && make distclean", cwd = ampl_dir.abspath())
 

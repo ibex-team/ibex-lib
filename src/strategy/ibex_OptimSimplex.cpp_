@@ -25,7 +25,7 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 
 #else
 
-/*
+
 //The system is overconstrained by using the combosition of the Taylor extension in two corner randomly chosen and the Affine Reformulation Technique
 //Then the simplex algorithm is applied to obtain a new upper bound loup
 //If a new loup is found the method returns true
@@ -105,10 +105,10 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box_in) {
 
 }
 
-*/
 
 
 
+/*
 
 //The system is overconstrained by using the Taylor extension in one corner randomly chosen
 //Then the simplex algorithm is applied to obtain a new upper bound loup
@@ -257,7 +257,7 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 	return false;
 }
 
-
+*/
 
 #endif //_IBEX_WITH_NOLP_
 } // end namespace ibex
