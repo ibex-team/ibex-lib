@@ -1,21 +1,64 @@
-
+﻿
 /*
  * This file contains the clique searching routines.
  *
  * Copyright (C) 2002 Sampo Niskanen, Patric �sterg�rd.
  * Licensed under the GNU GPL, read the file LICENSE for details.
  */
+#include <time.h>
 
-// TODO: this code is not portable to Win32
-// (calls to functions of sys/times.h and sysconf)
-#ifndef _WIN32
+#ifdef _WIN32
+#include <sys/timeb.h>
+#include <sys/types.h>
+#include <winsock2.h>
+#define __need_clock_t
+
+namespace {
+
+/* Structure describing CPU time used by a process and its children.  */
+struct tms
+{
+	clock_t tms_utime;          /* User CPU time.  */
+	clock_t tms_stime;          /* System CPU time.  */
+
+	clock_t tms_cutime;         /* User CPU time of dead children.  */
+	clock_t tms_cstime;         /* System CPU time of dead children.  */
+};
+
+typedef long long suseconds_t ;
+
+/*
+int gettimeofday(struct timeval* t,void* timezone)
+{       struct _timeb timebuffer;
+        _ftime( &timebuffer );
+        t->tv_sec=timebuffer.time;
+        t->tv_usec=1000*timebuffer.millitm;
+                return 0;
+}*/
+
+/* Store the CPU time used by this process and all its
+   dead children (and their dead children) in BUFFER.
+   Return the elapsed real time, or (clock_t) -1 for errors.
+   All times are in CLK_TCKths of a second.  */
+clock_t times (struct tms *__buffer) {
+
+	__buffer->tms_utime = clock();
+	__buffer->tms_stime = 0;
+	__buffer->tms_cstime = 0;
+	__buffer->tms_cutime = 0;
+	return __buffer->tms_utime;
+}
+
+} // end anonymous namespace
+#else
+#include <sys/times.h>
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
 #include <unistd.h>
 #include <sys/time.h>
-#include <sys/times.h>
 
 
 #include "cliquer.h"
@@ -25,7 +68,7 @@
 
 /* Default cliquer options */
 static clique_options clique_default_options_struct = {
-	reorder_by_default, NULL, NULL, NULL, NULL, NULL, NULL, 0
+		reorder_by_default, NULL, NULL, NULL, NULL, NULL, NULL, 0
 };
 clique_options *clique_default_options=&clique_default_options_struct;
 
@@ -44,7 +87,7 @@ static struct tms cputimer;      /* Timer for opts->time_function() */
 static struct timeval realtimer; /* Timer for opts->time_function() */
 static int clique_list_count=0;  /* No. of cliques in opts->clique_list[] */
 static int weight_multiplier=1;  /* Weights multiplied by this when passing
-				  * to time_function(). */
+ * to time_function(). */
 
 /* List cache (contains memory blocks of size g->n * sizeof(int)) */
 static int **temp_list=NULL;
@@ -60,28 +103,28 @@ static int temp_count=0;
 static int entrance_level=0;  /* How many levels for entrance have occurred? */
 
 #define ENTRANCE_SAVE() \
-int *old_clique_size = clique_size;                     \
-set_t old_current_clique = current_clique;              \
-set_t old_best_clique = best_clique;                    \
-int old_clique_list_count = clique_list_count;          \
-int old_weight_multiplier = weight_multiplier;          \
-int **old_temp_list = temp_list;                        \
-int old_temp_count = temp_count;                        \
-struct tms old_cputimer;                                \
-struct timeval old_realtimer;                           \
-memcpy(&old_cputimer,&cputimer,sizeof(struct tms));       \
-memcpy(&old_realtimer,&realtimer,sizeof(struct timeval));
+		int *old_clique_size = clique_size;                     \
+		set_t old_current_clique = current_clique;              \
+		set_t old_best_clique = best_clique;                    \
+		int old_clique_list_count = clique_list_count;          \
+		int old_weight_multiplier = weight_multiplier;          \
+		int **old_temp_list = temp_list;                        \
+		int old_temp_count = temp_count;                        \
+		struct tms old_cputimer;                                \
+		struct timeval old_realtimer;                           \
+		memcpy(&old_cputimer,&cputimer,sizeof(struct tms));       \
+		memcpy(&old_realtimer,&realtimer,sizeof(struct timeval));
 
 #define ENTRANCE_RESTORE() \
-clique_size = old_clique_size;                          \
-current_clique = old_current_clique;                    \
-best_clique = old_best_clique;                          \
-clique_list_count = old_clique_list_count;              \
-weight_multiplier = old_weight_multiplier;              \
-temp_list = old_temp_list;                              \
-temp_count = old_temp_count;                            \
-memcpy(&cputimer,&old_cputimer,sizeof(struct tms));       \
-memcpy(&realtimer,&old_realtimer,sizeof(struct timeval));
+		clique_size = old_clique_size;                          \
+		current_clique = old_current_clique;                    \
+		best_clique = old_best_clique;                          \
+		clique_list_count = old_clique_list_count;              \
+		weight_multiplier = old_weight_multiplier;              \
+		temp_list = old_temp_list;                              \
+		temp_count = old_temp_count;                            \
+		memcpy(&cputimer,&old_cputimer,sizeof(struct tms));       \
+		memcpy(&realtimer,&old_realtimer,sizeof(struct timeval));
 
 
 /* Number of clock ticks per second (as returned by sysconf(_SC_CLK_TCK)) */
@@ -92,14 +135,14 @@ static int clocks_per_sec=0;
 
 /* Recursion and helper functions */
 static boolean sub_unweighted_single(int *table, int size, int min_size,
-				     graph_t *g);
+		graph_t *g);
 static int sub_unweighted_all(int *table, int size, int min_size, int max_size,
-			      boolean maximal, graph_t *g,
-			      clique_options *opts);
+		boolean maximal, graph_t *g,
+		clique_options *opts);
 static int sub_weighted_all(int *table, int size, int weight,
-			    int current_weight, int prune_low, int prune_high,
-			    int min_weight, int max_weight, boolean maximal,
-			    graph_t *g, clique_options *opts);
+		int current_weight, int prune_low, int prune_high,
+		int min_weight, int max_weight, boolean maximal,
+		graph_t *g, clique_options *opts);
 
 
 static boolean store_clique(set_t clique, graph_t *g, clique_options *opts);
@@ -144,7 +187,7 @@ static boolean false_function(set_t clique,graph_t *g,clique_options *opts);
  * Note: Does NOT use opts->user_function of opts->clique_list.
  */
 static int unweighted_clique_search_single(int *table, int min_size,
-					   graph_t *g, clique_options *opts) {
+		graph_t *g, clique_options *opts) {
 	struct tms tms;
 	struct timeval timeval;
 	int i,j;
@@ -188,16 +231,16 @@ static int unweighted_clique_search_single(int *table, int min_size,
 			gettimeofday(&timeval,NULL);
 			times(&tms);
 			if (!opts->time_function(entrance_level,
-						 i+1,g->n,clique_size[v] *
-						 weight_multiplier,
-						 (double)(tms.tms_utime-
-							  cputimer.tms_utime)/
-						 clocks_per_sec,
-						 timeval.tv_sec-
-						 realtimer.tv_sec+
-						 (double)(timeval.tv_usec-
-							  realtimer.tv_usec)/
-						 1000000,opts)) {
+					i+1,g->n,clique_size[v] *
+					weight_multiplier,
+					(double)(tms.tms_utime-
+							cputimer.tms_utime)/
+							clocks_per_sec,
+							timeval.tv_sec-
+							realtimer.tv_sec+
+							(double)(timeval.tv_usec-
+									realtimer.tv_usec)/
+									1000000,opts)) {
 				temp_list[temp_count++]=newtable;
 				return 0;
 			}
@@ -240,7 +283,7 @@ static int unweighted_clique_search_single(int *table, int min_size,
  * otherwise inaccurate results may occur.
  */
 static boolean sub_unweighted_single(int *table, int size, int min_size,
-				     graph_t *g) {
+		graph_t *g) {
 	int i;
 	int v;
 	int *newtable;
@@ -299,7 +342,7 @@ static boolean sub_unweighted_single(int *table, int size, int min_size,
 			continue;
 
 		if (sub_unweighted_single(newtable,p1-newtable,
-					  min_size-1,g)) {
+				min_size-1,g)) {
 			/* Clique found. */
 			SET_ADD_ELEMENT(current_clique,v);
 			temp_list[temp_count++]=newtable;
@@ -338,9 +381,9 @@ static boolean sub_unweighted_single(int *table, int size, int min_size,
  * in graph, if user/time_function aborts).
  */
 static int unweighted_clique_search_all(int *table, int start,
-					int min_size, int max_size,
-					boolean maximal, graph_t *g,
-					clique_options *opts) {
+		int min_size, int max_size,
+		boolean maximal, graph_t *g,
+		clique_options *opts) {
 	struct timeval timeval;
 	struct tms tms;
 	int i,j;
@@ -372,7 +415,7 @@ static int unweighted_clique_search_all(int *table, int start,
 
 		SET_ADD_ELEMENT(current_clique,v);
 		j=sub_unweighted_all(newtable,newsize,min_size-1,max_size-1,
-				     maximal,g,opts);
+				maximal,g,opts);
 		SET_DEL_ELEMENT(current_clique,v);
 		if (j<0) {
 			/* Abort. */
@@ -385,16 +428,16 @@ static int unweighted_clique_search_all(int *table, int start,
 			gettimeofday(&timeval,NULL);
 			times(&tms);
 			if (!opts->time_function(entrance_level,
-						 i+1,g->n,min_size *
-						 weight_multiplier,
-						 (double)(tms.tms_utime-
-							  cputimer.tms_utime)/
-						 clocks_per_sec,
-						 timeval.tv_sec-
-						 realtimer.tv_sec+
-						 (double)(timeval.tv_usec-
-							  realtimer.tv_usec)/
-						 1000000,opts)) {
+					i+1,g->n,min_size *
+					weight_multiplier,
+					(double)(tms.tms_utime-
+							cputimer.tms_utime)/
+							clocks_per_sec,
+							timeval.tv_sec-
+							realtimer.tv_sec+
+							(double)(timeval.tv_usec-
+									realtimer.tv_usec)/
+									1000000,opts)) {
 				/* Abort. */
 				break;
 			}
@@ -430,8 +473,8 @@ static int unweighted_clique_search_all(int *table, int start,
  * otherwise inaccurate results may occur.
  */
 static int sub_unweighted_all(int *table, int size, int min_size, int max_size,
-			      boolean maximal, graph_t *g,
-			      clique_options *opts) {
+		boolean maximal, graph_t *g,
+		clique_options *opts) {
 	int i;
 	int v;
 	int n;
@@ -491,7 +534,7 @@ static int sub_unweighted_all(int *table, int size, int min_size, int max_size,
 
 		SET_ADD_ELEMENT(current_clique,v);
 		n=sub_unweighted_all(newtable,p1-newtable,
-				     min_size-1,max_size-1,maximal,g,opts);
+				min_size-1,max_size-1,maximal,g,opts);
 		SET_DEL_ELEMENT(current_clique,v);
 		if (n < 0) {
 			/* Abort. */
@@ -543,8 +586,8 @@ static int sub_unweighted_all(int *table, int size, int min_size, int max_size,
  * Note: Does NOT use opts->user_function of opts->clique_list.
  */
 static int weighted_clique_search_single(int *table, int min_weight,
-					 int max_weight, graph_t *g,
-					 clique_options *opts) {
+		int max_weight, graph_t *g,
+		clique_options *opts) {
 	struct timeval timeval;
 	struct tms tms;
 	int i,j;
@@ -575,7 +618,7 @@ static int weighted_clique_search_single(int *table, int min_weight,
 		}
 		return 0;
 	}
-	
+
 	localopts.time_function=NULL;
 	localopts.reorder_function=NULL;
 	localopts.reorder_map=NULL;
@@ -622,11 +665,11 @@ static int weighted_clique_search_single(int *table, int min_weight,
 
 		SET_ADD_ELEMENT(current_clique,v);
 		search_weight=sub_weighted_all(newtable,newsize,newweight,
-					       g->weights[v],search_weight,
-					       clique_size[table[i-1]] +
-					       g->weights[v],
-					       min_w,max_weight,FALSE,
-					       g,&localopts);
+				g->weights[v],search_weight,
+				clique_size[table[i-1]] +
+				g->weights[v],
+				min_w,max_weight,FALSE,
+				g,&localopts);
 		SET_DEL_ELEMENT(current_clique,v);
 		if (search_weight < 0) {
 			break;
@@ -638,16 +681,16 @@ static int weighted_clique_search_single(int *table, int min_weight,
 			gettimeofday(&timeval,NULL);
 			times(&tms);
 			if (!opts->time_function(entrance_level,
-						 i+1,g->n,clique_size[v] *
-						 weight_multiplier,
-						 (double)(tms.tms_utime-
-							  cputimer.tms_utime)/
-						 clocks_per_sec,
-						 timeval.tv_sec-
-						 realtimer.tv_sec+
-						 (double)(timeval.tv_usec-
-							  realtimer.tv_usec)/
-						 1000000,opts)) {
+					i+1,g->n,clique_size[v] *
+					weight_multiplier,
+					(double)(tms.tms_utime-
+							cputimer.tms_utime)/
+							clocks_per_sec,
+							timeval.tv_sec-
+							realtimer.tv_sec+
+							(double)(timeval.tv_usec-
+									realtimer.tv_usec)/
+									1000000,opts)) {
 				set_free(current_clique);
 				current_clique=NULL;
 				break;
@@ -690,9 +733,9 @@ static int weighted_clique_search_single(int *table, int min_weight,
  * in graph, if user/time_function aborts).
  */
 static int weighted_clique_search_all(int *table, int start,
-				      int min_weight, int max_weight,
-				      boolean maximal, graph_t *g,
-				      clique_options *opts) {
+		int min_weight, int max_weight,
+		boolean maximal, graph_t *g,
+		clique_options *opts) {
 	struct timeval timeval;
 	struct tms tms;
 	int i,j;
@@ -726,8 +769,8 @@ static int weighted_clique_search_all(int *table, int start,
 
 		SET_ADD_ELEMENT(current_clique,v);
 		j=sub_weighted_all(newtable,newsize,newweight,
-				   g->weights[v],min_weight-1,INT_MAX,
-				   min_weight,max_weight,maximal,g,opts);
+				g->weights[v],min_weight-1,INT_MAX,
+				min_weight,max_weight,maximal,g,opts);
 		SET_DEL_ELEMENT(current_clique,v);
 
 		if (j<0) {
@@ -739,16 +782,16 @@ static int weighted_clique_search_all(int *table, int start,
 			gettimeofday(&timeval,NULL);
 			times(&tms);
 			if (!opts->time_function(entrance_level,
-						 i+1,g->n,clique_size[v] *
-						 weight_multiplier,
-						 (double)(tms.tms_utime-
-							  cputimer.tms_utime)/
-						 clocks_per_sec,
-						 timeval.tv_sec-
-						 realtimer.tv_sec+
-						 (double)(timeval.tv_usec-
-							  realtimer.tv_usec)/
-						 1000000,opts)) {
+					i+1,g->n,clique_size[v] *
+					weight_multiplier,
+					(double)(tms.tms_utime-
+							cputimer.tms_utime)/
+							clocks_per_sec,
+							timeval.tv_sec-
+							realtimer.tv_sec+
+							(double)(timeval.tv_usec-
+									realtimer.tv_usec)/
+									1000000,opts)) {
 				set_free(current_clique);
 				current_clique=NULL;
 				break;
@@ -801,9 +844,9 @@ static int weighted_clique_search_all(int *table, int start,
  * desired.
  */
 static int sub_weighted_all(int *table, int size, int weight,
-			    int current_weight, int prune_low, int prune_high,
-			    int min_weight, int max_weight, boolean maximal,
-			    graph_t *g, clique_options *opts) {
+		int current_weight, int prune_low, int prune_high,
+		int min_weight, int max_weight, boolean maximal,
+		graph_t *g, clique_options *opts) {
 	int i;
 	int v,w;
 	int *newtable;
@@ -812,7 +855,7 @@ static int sub_weighted_all(int *table, int size, int weight,
 
 	if (current_weight >= min_weight) {
 		if ((current_weight <= max_weight) &&
-		    ((!maximal) || is_maximal(current_clique,g))) {
+				((!maximal) || is_maximal(current_clique,g))) {
 			/* We've found one.  Store it. */
 			if (!store_clique(current_clique,g,opts)) {
 				return -1;
@@ -878,11 +921,11 @@ static int sub_weighted_all(int *table, int size, int weight,
 
 		SET_ADD_ELEMENT(current_clique,v);
 		prune_low=sub_weighted_all(newtable,p1-newtable,
-					   newweight,
-					   current_weight+w,
-					   prune_low,prune_high,
-					   min_weight,max_weight,maximal,
-					   g,opts);
+				newweight,
+				current_weight+w,
+				prune_low,prune_high,
+				min_weight,max_weight,maximal,
+				g,opts);
 		SET_DEL_ELEMENT(current_clique,v);
 		if ((prune_low<0) || (prune_low>=prune_high)) {
 			/* Impossible to find larger clique. */
@@ -923,13 +966,13 @@ static boolean store_clique(set_t clique, graph_t *g, clique_options *opts) {
 		 */
 		if (clique_list_count <= 0) {
 			fprintf(stderr,"CLIQUER INTERNAL ERROR: "
-				"clique_list_count has negative value!\n");
+					"clique_list_count has negative value!\n");
 			fprintf(stderr,"Please report as a bug.\n");
 			abort();
 		}
 		if (clique_list_count <= opts->clique_list_length)
 			opts->clique_list[clique_list_count-1] =
-				set_duplicate(clique);
+					set_duplicate(clique);
 	}
 
 	/* user_function() */
@@ -1088,7 +1131,7 @@ int clique_unweighted_max_weight(graph_t *g, clique_options *opts) {
  * Note: Does NOT use opts->user_function() or opts->clique_list[].
  */
 set_t clique_unweighted_find_single(graph_t *g,int min_size,int max_size,
-				    boolean maximal, clique_options *opts) {
+		boolean maximal, clique_options *opts) {
 	int i;
 	int *table;
 	set_t s;
@@ -1113,8 +1156,14 @@ set_t clique_unweighted_find_single(graph_t *g,int min_size,int max_size,
 		return NULL;
 	}
 
-	if (clocks_per_sec==0)
+	if (clocks_per_sec==0) {
+#ifdef _WIN32
+		clocks_per_sec=CLOCKS_PER_SEC;
+#else
 		clocks_per_sec=sysconf(_SC_CLK_TCK);
+#endif
+	}
+
 	ASSERT(clocks_per_sec>0);
 
 	/* Dynamic allocation */
@@ -1161,8 +1210,8 @@ set_t clique_unweighted_find_single(graph_t *g,int min_size,int max_size,
 				if (clique_size[table[i]]>=min_size)
 					break;
 			if (unweighted_clique_search_all(table,i,min_size,
-							 max_size,maximal,
-							 g,&localopts)) {
+					max_size,maximal,
+					g,&localopts)) {
 				set_free(current_clique);
 				current_clique=s;
 			} else {
@@ -1171,8 +1220,8 @@ set_t clique_unweighted_find_single(graph_t *g,int min_size,int max_size,
 			}
 		}
 	}
-	
-    cleanreturn:
+
+	cleanreturn:
 	s=current_clique;
 
 	/* Free resources */
@@ -1212,7 +1261,7 @@ set_t clique_unweighted_find_single(graph_t *g,int min_size,int max_size,
  * by set_free().
  */
 int clique_unweighted_find_all(graph_t *g, int min_size, int max_size,
-			       boolean maximal, clique_options *opts) {
+		boolean maximal, clique_options *opts) {
 	int i;
 	int *table;
 	int count;
@@ -1237,8 +1286,14 @@ int clique_unweighted_find_all(graph_t *g, int min_size, int max_size,
 		return 0;
 	}
 
-	if (clocks_per_sec==0)
+	if (clocks_per_sec==0) {
+#ifdef _WIN32
+		clocks_per_sec=CLOCKS_PER_SEC;
+#else
 		clocks_per_sec=sysconf(_SC_CLK_TCK);
+#endif
+	}
+
 	ASSERT(clocks_per_sec>0);
 
 	/* Dynamic allocation */
@@ -1276,7 +1331,7 @@ int clique_unweighted_find_all(graph_t *g, int min_size, int max_size,
 	if (min_size==0 && max_size==0) {
 		min_size=max_size=clique_size[table[g->n-1]];
 		maximal=FALSE;  /* No need to test, since we're searching
-				 * for maximum cliques. */
+		 * for maximum cliques. */
 	}
 	if (max_size==0) {
 		max_size=INT_MAX;
@@ -1286,9 +1341,9 @@ int clique_unweighted_find_all(graph_t *g, int min_size, int max_size,
 		if (clique_size[table[i]] >= min_size)
 			break;
 	count=unweighted_clique_search_all(table,i,min_size,max_size,
-					   maximal,g,opts);
+			maximal,g,opts);
 
-  cleanreturn:
+	cleanreturn:
 	/* Free resources */
 	for (i=0; i<temp_count; i++)
 		free(temp_list[i]);
@@ -1362,7 +1417,7 @@ int clique_max_weight(graph_t *g,clique_options *opts) {
  *       weights are the same.
  */
 set_t clique_find_single(graph_t *g,int min_weight,int max_weight,
-			 boolean maximal, clique_options *opts) {
+		boolean maximal, clique_options *opts) {
 	int i;
 	int *table;
 	set_t s;
@@ -1387,8 +1442,14 @@ set_t clique_find_single(graph_t *g,int min_weight,int max_weight,
 		return NULL;
 	}
 
-	if (clocks_per_sec==0)
+	if (clocks_per_sec==0) {
+#ifdef _WIN32
+		clocks_per_sec=CLOCKS_PER_SEC;
+#else
 		clocks_per_sec=sysconf(_SC_CLK_TCK);
+#endif
+	}
+
 	ASSERT(clocks_per_sec>0);
 
 	/* Check whether we can use unweighted routines. */
@@ -1406,7 +1467,7 @@ set_t clique_find_single(graph_t *g,int min_weight,int max_weight,
 		weight_multiplier = g->weights[0];
 		entrance_level--;
 		s=clique_unweighted_find_single(g,min_weight,max_weight,
-						maximal,opts);
+				maximal,opts);
 		ENTRANCE_RESTORE();
 		return s;
 	}
@@ -1440,7 +1501,7 @@ set_t clique_find_single(graph_t *g,int min_weight,int max_weight,
 		max_weight=INT_MAX;
 
 	if (weighted_clique_search_single(table,min_weight,max_weight,
-					  g,opts)==0) {
+			g,opts)==0) {
 		/* Requested clique has not been found. */
 		set_free(best_clique);
 		best_clique=NULL;
@@ -1459,18 +1520,18 @@ set_t clique_find_single(graph_t *g,int min_weight,int max_weight,
 
 			for (i=0; i < g->n-1; i++)
 				if ((clique_size[table[i]] >= min_weight) ||
-				    (clique_size[table[i]] == 0))
+						(clique_size[table[i]] == 0))
 					break;
 			if (!weighted_clique_search_all(table,i,min_weight,
-							max_weight,maximal,
-							g,&localopts)) {
+					max_weight,maximal,
+					g,&localopts)) {
 				set_free(best_clique);
 				best_clique=NULL;
 			}
 		}
 	}
 
- cleanreturn:
+	cleanreturn:
 	s=best_clique;
 
 	/* Free resources */
@@ -1522,7 +1583,7 @@ set_t clique_find_single(graph_t *g,int min_weight,int max_weight,
  *       weights are the same.
  */
 int clique_find_all(graph_t *g, int min_weight, int max_weight,
-		    boolean maximal, clique_options *opts) {
+		boolean maximal, clique_options *opts) {
 	int i,n;
 	int *table;
 
@@ -1546,8 +1607,14 @@ int clique_find_all(graph_t *g, int min_weight, int max_weight,
 		return 0;
 	}
 
-	if (clocks_per_sec==0)
+	if (clocks_per_sec==0) {
+#ifdef _WIN32
+		clocks_per_sec=CLOCKS_PER_SEC;
+#else
 		clocks_per_sec=sysconf(_SC_CLK_TCK);
+#endif
+	}
+
 	ASSERT(clocks_per_sec>0);
 
 	if (!graph_weighted(g)) {
@@ -1560,11 +1627,11 @@ int clique_find_all(graph_t *g, int min_weight, int max_weight,
 				return 0;
 			}
 		}
-		
+
 		weight_multiplier = g->weights[0];
 		entrance_level--;
 		i=clique_unweighted_find_all(g,min_weight,max_weight,maximal,
-					     opts);
+				opts);
 		ENTRANCE_RESTORE();
 		return i;
 	}
@@ -1609,14 +1676,14 @@ int clique_find_all(graph_t *g, int min_weight, int max_weight,
 
 	for (i=0; i < g->n; i++)
 		if ((clique_size[table[i]] >= min_weight) ||
-		    (clique_size[table[i]] == 0))
+				(clique_size[table[i]] == 0))
 			break;
 
 	/* Second phase */
 	n=weighted_clique_search_all(table,i,min_weight,max_weight,maximal,
-				     g,opts);
+			g,opts);
 
-      cleanreturn:
+	cleanreturn:
 	/* Free resources */
 	for (i=0; i < temp_count; i++)
 		free(temp_list[i]);
@@ -1631,22 +1698,6 @@ int clique_find_all(graph_t *g, int min_weight, int max_weight,
 
 	return n;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /*
  * clique_print_time()
@@ -1665,8 +1716,8 @@ int clique_find_all(graph_t *g, int min_weight, int max_weight,
  * Returns always TRUE  (ie. never requests abort).
  */
 boolean clique_print_time(int level, int i, int n, int max,
-			  double cputime, double realtime,
-			  clique_options *opts) {
+		double cputime, double realtime,
+		clique_options *opts) {
 	static float prev_time=100;
 	static int prev_i=100;
 	static int prev_max=100;
@@ -1678,18 +1729,18 @@ boolean clique_print_time(int level, int i, int n, int max,
 		fp=stdout;
 
 	if (ABS(prev_time-realtime)>0.1 || i==n || i<prev_i || max!=prev_max ||
-	    level!=prev_level) {
+			level!=prev_level) {
 		for (j=1; j<level; j++)
 			fprintf(fp,"  ");
 		if (realtime-prev_time < 0.01 || i<=prev_i)
 			fprintf(fp,"%3d/%d (max %2d)  %2.2f s  "
-				"(0.00 s/round)\n",i,n,max,
-				realtime);
+					"(0.00 s/round)\n",i,n,max,
+					realtime);
 		else
 			fprintf(fp,"%3d/%d (max %2d)  %2.2f s  "
-				"(%2.2f s/round)\n",
-				i,n,max,realtime,
-				(realtime-prev_time)/(i-prev_i));
+					"(%2.2f s/round)\n",
+					i,n,max,realtime,
+					(realtime-prev_time)/(i-prev_i));
 		prev_time=realtime;
 		prev_i=i;
 		prev_max=max;
@@ -1714,8 +1765,8 @@ boolean clique_print_time(int level, int i, int n, int max,
  * Returns always TRUE  (ie. never requests abort).
  */
 boolean clique_print_time_always(int level, int i, int n, int max,
-				 double cputime, double realtime,
-				 clique_options *opts) {
+		double cputime, double realtime,
+		clique_options *opts) {
 	static float prev_time=100;
 	static int prev_i=100;
 	FILE *fp=opts->output;
@@ -1729,10 +1780,10 @@ boolean clique_print_time_always(int level, int i, int n, int max,
 
 	if (realtime-prev_time < 0.01 || i<=prev_i)
 		fprintf(fp,"%3d/%d (max %2d)  %2.2f s  (0.00 s/round)\n",
-			i,n,max,realtime);
+				i,n,max,realtime);
 	else
 		fprintf(fp,"%3d/%d (max %2d)  %2.2f s  (%2.2f s/round)\n",
-			i,n,max,realtime,(realtime-prev_time)/(i-prev_i));
+				i,n,max,realtime,(realtime-prev_time)/(i-prev_i));
 	prev_time=realtime;
 	prev_i=i;
 
@@ -1743,4 +1794,3 @@ boolean clique_print_time_always(int level, int i, int n, int max,
 
 // Restore warning : comparison between signed and unsigned integer expressions in this file
 #pragma GCC diagnostic pop
-#endif // !_WIN32

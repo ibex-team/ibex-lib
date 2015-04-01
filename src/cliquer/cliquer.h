@@ -1,7 +1,3 @@
-// TODO: this code is not portable to Win32
-// (calls to functions of sys/times.h and sysconf)
-#ifndef _WIN32
-
 #ifndef CLIQUER_H
 #define CLIQUER_H
 
@@ -66,5 +62,3 @@ extern boolean clique_print_time_always(int level, int i, int n, int max,
 #pragma GCC diagnostic pop
 
 #endif /* !CLIQUER_H */
-
-#endif // !_WIN32
