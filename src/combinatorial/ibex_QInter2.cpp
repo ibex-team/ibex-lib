@@ -10,6 +10,7 @@
 
 #include "ibex_QInter.h"
 #include "ibex_BitSet.h"
+#include "ibex_Exception.h"
 
 #include <algorithm>
 
@@ -113,6 +114,8 @@ void propagate_no_ub(const Array<IntervalVector>& boxes, IntStack ***dirboxes, i
  */
 IntervalVector qinter2(const Array<IntervalVector>& _boxes, int q) {
 	
+
+#ifndef _WIN32
 	assert(q>0);
 	assert(_boxes.size()>0);
 	int n = _boxes[0].size();
@@ -339,6 +342,11 @@ IntervalVector qinter2(const Array<IntervalVector>& _boxes, int q) {
 	for (unsigned int i=0; i<nogoods.size(); i++) delete(nogoods.at(i));
 	
 	return hull_qinter;
+#else
+	not_implemented("Cliquer-based q-intersection under Windows");
+	return IntervalVector::empty(_boxes[0].size());
+#endif
+
 }
 
 } ; // end namespace ibex

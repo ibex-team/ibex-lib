@@ -6,6 +6,10 @@
  * Licensed under the GNU GPL, read the file LICENSE for details.
  */
 
+// TODO: this code is not portable to Win32
+// (calls to functions of sys/times.h and sysconf)
+#ifndef _WIN32
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
@@ -1739,3 +1743,4 @@ boolean clique_print_time_always(int level, int i, int n, int max,
 
 // Restore warning : comparison between signed and unsigned integer expressions in this file
 #pragma GCC diagnostic pop
+#endif // !_WIN32
