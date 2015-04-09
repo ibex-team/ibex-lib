@@ -233,6 +233,9 @@ public:
 
 
 double SetInterval::dist(const Vector& pt, bool inside) const {
+
+    if (!inside && !bounding_box.contains(pt)) return 0;
+
 	CellHeapDist costf;
 	Heap<Cell> heap(costf);
 
