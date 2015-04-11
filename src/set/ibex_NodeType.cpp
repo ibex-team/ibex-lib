@@ -20,7 +20,7 @@
 // ========================================
 
 namespace ibex {
-
+// relic from irregular set, need for SetBisect constructor
 NodeType operator|(NodeType x, NodeType y) {
 	switch (x) {
 	case IN : {
@@ -48,6 +48,219 @@ NodeType operator|(NodeType x, NodeType y) {
 		case IN :
 		case UNK_IN:  return UNK_IN;
 		case OUT :
+		case UNK_OUT: return UNK_OUT;
+		case UNK:     return UNK;
+		default:      return UNK_IN_OUT;
+		}
+	}
+	break;
+	case UNK_IN : {
+		switch(y) {
+		case IN :
+		case UNK_IN:
+		case UNK :    return UNK_IN;
+		default:      return UNK_IN_OUT;
+		}
+	}
+	break;
+	case UNK_OUT : {
+		switch(y) {
+		case OUT :
+		case UNK_OUT:
+		case UNK :    return UNK_OUT;
+		default:      return UNK_IN_OUT;
+		}
+	}
+	break;
+	default :
+		//Warning: IN_TMP not considered here.
+		return UNK_IN_OUT;
+	}
+}
+
+
+
+// define operator or between two nodetype, assuming the two boxes associated are equal
+NodeType uni(NodeType x,NodeType y) {
+	switch (x) {
+	case IN : {
+		return IN;
+		
+		}
+	break;
+	case OUT : {
+		return y;
+		}
+	break;
+	case UNK : {
+		switch(y) {
+		case IN :     return IN;
+		case UNK_IN:  return UNK_IN;
+		case OUT :    return UNK;
+		case UNK :	  return UNK;
+		case UNK_OUT: return UNK_OUT;
+		default:      return UNK_IN_OUT;
+		}
+	}
+	break;
+	case UNK_IN : {
+		switch(y) {
+		case IN :
+		case UNK_IN:
+		case UNK :    return UNK_IN;
+		default:      return UNK_IN_OUT;
+		}
+	}
+	break;
+	case UNK_OUT : {
+		switch(y) {
+		case OUT :
+		case UNK_OUT:
+		case UNK :    return UNK_OUT;
+		default:      return UNK_IN_OUT;
+		}
+	}
+	break;
+	default :
+		//Warning: IN_TMP not considered here.
+		return UNK_IN_OUT;
+	}
+
+}
+
+// define operator or between two nodetype, assuming box of nodetype y is subset of box of nodetype x;
+NodeType uni_in(NodeType x, NodeType y) {
+	switch (x) {
+	case IN : {
+		switch(y) {
+		case IN :        return IN;
+		case OUT :		 return IN;
+		case UNK :		 return IN;
+		case UNK_OUT:
+		case UNK_IN_OUT: return UNK_IN_OUT;
+		default :        return UNK_IN;
+		}
+	}
+	break;
+	case OUT : {
+		switch(y) {
+		case OUT :       return OUT;
+		case IN :		 return UNK;
+		case UNK :		 return UNK;
+		case UNK_IN:
+		case UNK_IN_OUT: return UNK_IN_OUT;
+		default :        return UNK_OUT;
+		}
+	}
+	break;
+	case UNK : {
+		switch(y) {
+		return UNK;
+		}
+	}
+	break;
+	/*case UNK_IN : {
+		switch(y) {
+		case IN :
+		case UNK_IN:
+		case UNK :    return UNK_IN;
+		default:      return UNK_IN_OUT;
+		}
+	}
+	break;
+	case UNK_OUT : {
+		switch(y) {
+		case OUT :
+		case UNK_OUT:
+		case UNK :    return UNK_OUT;
+		default:      return UNK_IN_OUT;
+		}
+	}
+	break;*/
+	default :
+		//Warning: IN_TMP not considered here.
+		return UNK_IN_OUT;
+		
+	}
+}
+
+// define operator and between two nodetype, assuming the two boxes associated are equal
+NodeType inte(NodeType x, NodeType y) {
+	switch (x) {
+	case IN : {
+		return y;
+		}
+	break;
+	case OUT : {
+		return OUT;
+		}
+	break;
+	case UNK : {
+		switch(y) {
+		case IN :     return UNK;
+		case UNK_IN:  return UNK_IN;
+		case OUT :    return OUT;
+		case UNK :	  return UNK;
+		case UNK_OUT: return UNK_OUT;
+		default:      return UNK_IN_OUT;
+		}
+	}
+	break;
+	case UNK_IN : {
+		switch(y) {
+		case IN :
+		case UNK_IN:
+		case UNK :    return UNK_IN;
+		default:      return UNK_IN_OUT;
+		}
+	}
+	break;
+	case UNK_OUT : {
+		switch(y) {
+		case OUT :
+		case UNK_OUT:
+		case UNK :    return UNK_OUT;
+		default:      return UNK_IN_OUT;
+		}
+	}
+	break;
+	default :
+		//Warning: IN_TMP not considered here.
+		return UNK_IN_OUT;
+	}
+}
+
+
+// define operator and between two nodetype, assuming box of nodetype y is subset of box of nodetype x;
+NodeType inte_in(NodeType x, NodeType y) {
+	switch (x) {
+	case IN : {
+		switch(y) {
+		case IN :        return IN;
+		case OUT :		 return UNK;
+		case UNK :		 return UNK;
+		case UNK_OUT:
+		case UNK_IN_OUT: return UNK_IN_OUT;
+		default :        return UNK_IN;
+		}
+	}
+	break;
+	case OUT : {
+		switch(y) {
+		case OUT :       return OUT;
+		case IN :		 return OUT;
+		case UNK :		 return OUT;
+		case UNK_IN:
+		case UNK_IN_OUT: return UNK_IN_OUT;
+		default :        return UNK_OUT;
+		}
+	}
+	break;
+	case UNK : {
+		switch(y) {
+		case IN :	  return UNK;
+		case UNK_IN:  return UNK_IN;
+		case OUT :	  return UNK;
 		case UNK_OUT: return UNK_OUT;
 		case UNK:     return UNK;
 		default:      return UNK_IN_OUT;

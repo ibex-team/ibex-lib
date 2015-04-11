@@ -44,9 +44,24 @@ typedef enum { __IBEX_IN__,
  * \see SetBisect constructor.
  */
 NodeType operator|(NodeType x, NodeType y);
-
 /**
- * \brief False only if the subtree contains no inner point
+ * \brief return value of union of two equal boxes
+ */
+NodeType uni(NodeType x,NodeType y);
+/**
+ * \brief return value of union of two boxes, assuming the on associated to y is include in the one associated to x
+ */
+NodeType uni_in(NodeType x, NodeType y);
+/**
+ * \brief return value of inter of two equal boxes
+ */
+NodeType inte(NodeType x, NodeType y);
+/**
+ * \brief return value of inter of two boxes, assuming the on associated to y is include in the one associated to x
+ */
+NodeType inte_in(NodeType x, NodeType y);
+/**
+ * \brief return value of inter of two boxes, assuming the on associated to y is include in the one associated to x
  */
 bool possibly_contains_in(NodeType x);
 

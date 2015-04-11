@@ -29,6 +29,11 @@ SetLeaf::SetLeaf(NodeType status) : SetNode(status) {
 		ibex_error("cannot set multiple status to SetLeaf");
 	}
 }
+
+SetLeaf::SetLeaf(NodeType status,SetNode* father): SetNode(status,father) {
+
+} 
+
 SetLeaf::~SetLeaf() {
 
 }
@@ -37,116 +42,281 @@ bool SetLeaf::is_leaf() const {
 	return true;
 }
 
-//SetNode* SetLeaf::sync(const IntervalVector& nodebox, const IntervalVector& x, NodeType xstatus, double eps, Mode mode) {
-//	switch (mode) {
-//	case SYNC: return sync(nodebox, x, xstatus, eps);
-//	case INTER: return inter(nodebox, x, xstatus, eps);
-//	case UNION: not_implemented("SetLeaf::sync with union"); return this; break;
-//	default : ibex_error("SetLeaf::sync: unknown mode"); return this;
-//	}
-//}
+ SetNode * SetLeaf::copy() const {
+	return new SetLeaf(this->status); 
+}
 
-SetNode* SetLeaf::sync(const IntervalVector& nodebox, const IntervalVector& x, NodeType xstatus, double eps) {
-	//cout << nodebox << " " << to_string(status)  << " sync " << x << " ";
-	assert(xstatus<=UNK);
+void SetLeaf::inter(NodeType x_status) {
+	status = inte(status,x_status); 
+}
 
-	if (xstatus==UNK || status==xstatus) {
-		//cout << "this\n";
-		return this;
-	} else if (nodebox.is_subset(x)) {
-		if (status!=UNK) throw NoSet();
-		status=xstatus;
-		//cout << "this\n";
-		return this;
-	} else {
-		if ((nodebox & x).is_flat()) {
-			//cout << "this\n";
-			return this;
+void SetLeaf::_union(NodeType x) {
+	status = uni(status,x);
+}
+
+void SetLeaf::oper(SetNode * node,bool op) {
+	if(node->is_leaf()) // if node is leaf, apply its value to leaves of this
+	{
+		if(op)
+			status = inte(status,node->status);
+		else
+			status = uni(status,node->status);
+	}
+	else{ // if this is leaf and node isn't
+		SetBisect * bfather = (SetBisect*) father;
+		if(bfather->left == this)
+		{
+			bfather->left = node->copy(); // copy the structure of node
+			bfather->left->father = father;
+			if(op && status != IN)
+				bfather->left->inter(status);  // apply status to leaves
+			else if(!op && status!= OUT)
+				bfather->left->_union(status);
 		}
-		SetNode* new_node=diff(nodebox, x, status, xstatus, eps);
-		delete this; // warning: suicide, don't move it before previous line
-		//cout << "gives "; new_node->print(cout,nodebox,0);
-		return new_node;
+		else
+		{
+			bfather->right = node->copy();
+			bfather->right->father = father;
+			if(op && status != IN)
+				bfather->right->inter(status);
+			else if(!op && status!= OUT)
+				bfather->right->_union(status);
+		}
+		delete this; // delete this as it is now a setBisect and no more a leaf
+
 	}
 }
 
-SetNode* SetLeaf::sync_rec(const IntervalVector& nodebox, Sep& sep, double eps) {
-
-	if (status<UNK || nodebox.max_diam()<=eps) {
-		return this;
-	} else {
-		int var=nodebox.extr_diam_index(false);
-		pair<IntervalVector,IntervalVector> p=nodebox.bisect(var);
-		double pt=p.first[var].ub();
-		assert(nodebox[var].interior_contains(pt));
-		SetBisect* bis = new SetBisect(var, pt, new SetLeaf(UNK), new SetLeaf(UNK));
-		delete this;
-		return bis->sync_rec(nodebox, sep, eps);
+void SetLeaf::operator_ir(const IntervalVector& box,const IntervalVector& subbox, NodeType val, bool op,double eps) {
+    if(box.is_subset(subbox))
+	{
+		if(op && val != IN)
+			status = inte(status,val);
+		else if(!op && val!=OUT)
+			status = uni(status,val);
 	}
+	else if(box.max_diam()>eps)
+	{
+		SetBisect * bfather = (SetBisect*) father;
+		int var = box.extr_diam_index(false); // indice of the maximal diameter
+		double pt = box[var].mid();
+		SetLeaf * lnode = new SetLeaf(status,NULL); // create future right node
+		SetLeaf * rnode = new SetLeaf(status,NULL); // create future left node
+        if(bfather->left == this) // this is father->left
+		{
+			bfather->left = new SetBisect(var,pt,lnode,rnode,father); // create SetBisect to replace leaf
+			lnode->father = bfather->left;  // set fathers
+			rnode->father = bfather->left;
+            bfather->left->operator_ir(box,subbox,val,op,eps);
+		}
+		else // this is father->right
+		{
+			bfather->right = new SetBisect(var,pt,lnode,rnode,father);
+			lnode->father = bfather->right;
+			rnode->father = bfather->right;
+            bfather->right->operator_ir(box,subbox,val,op,eps);
+		}
+		delete this; // delete former father->left or father->right
+	}
+	else // if leaf reach minimum precision, compute partial intersection or union
+	{
+		if(op)
+			status = inte_in(status,val);
+		else
+			status = uni_in(status,val);
+    }
 }
 
-
-
-SetNode* SetLeaf::inter(const IntervalVector& nodebox, const IntervalVector& x, NodeType xstatus, double eps) {
-	//cout << nodebox << " " << to_string(status)  << " inter " << x << " ";
-	assert(xstatus<=UNK);
-
-	if (status<UNK || xstatus==UNK) {
-		//cout << "this\n";
-		return this;
-	} else if (nodebox.is_subset(x)) {
-		if (xstatus==IN && status==IN_TMP) status=IN; // if status==UNK, it remains UNK.
-		else if (xstatus==OUT ) status=OUT;
-		 //cout << "this\n";
-		return this;
-	} else if (status==UNK) {
-		 //cout << "this\n";
-		return this;
-	} else {
-		// status=(IN_TMP), xstatus=(IN | OUT).
-		SetNode* new_node=diff(nodebox, x, status, xstatus==OUT? OUT : IN, eps);
-		delete this; // warning: suicide, don't move it before previous line
-		//cout << "gives "; new_node->print(cout,nodebox,0);
-		return new_node;
+// Uncomment this function and comment the one above to use fakeBranch method
+/*void SetLeaf::operator_ir(const IntervalVector& box,const IntervalVector& subbox, NodeType val, bool op,bool is_left,double eps) {
+	if(box.is_subset(subbox))
+	{
+		if(op)
+			status = inte(status,val);
+		else
+			status = uni(status,val);
 	}
+	else if(box.overlaps(subbox))
+	{
+		if(box.max_diam()>eps)
+		{
+			SetBisect * bfather = (SetBisect*) father;
+			int var = box.extr_diam_index(false); // indice of the maximal diameter
+			double pt = box[var].mid();
+			if(bfather->left == this)
+			{
+				bfather->left = new SetBisect(var,pt,NULL,NULL,father);
+				bfather->left->status = status; // create new set bissect with nodetype IN OUT or UNK, that it will transmit this value to its left and right
+				bfather->left->operator_ir(box,subbox,val,op,eps);
+			}
+			else
+			{
+				bfather->right = new SetBisect(var,pt,NULL,NULL,father);
+				bfather->right->status = status; // create new set bissect with nodetype IN OUT or UNK, that it will transmit this value to its left and right
+				bfather->right->operator_ir(box,subbox,val,op,eps);
+			}
+			delete this;
+		}
+		else
+			if(op)
+				status = inte_in(status,val);
+			else
+				status = uni_in(status,val);
+	}
+	else
+		return;
+
+}*/
+
+void SetLeaf::operator_ir(const IntervalVector& box,const IntervalVector& subbox, NodeType valin,NodeType valout, bool op,double eps) {
+    if(box.is_subset(subbox))
+	{
+		if(op && valin!=IN)
+			status = inte(status,valin);
+		else if(!op && valin!=OUT)
+			status = uni(status,valin);
+	}
+	else if(box.max_diam()>eps)
+	{
+		SetBisect * bfather = (SetBisect*) father;
+		int var = box.extr_diam_index(false); // indice of the maximal diameter
+		double pt = box[var].mid();
+		SetLeaf * lnode = new SetLeaf(status,NULL); // create future right node
+		SetLeaf * rnode = new SetLeaf(status,NULL); // create future left node
+        if(bfather->left == this) // this is father->left
+		{
+			bfather->left = new SetBisect(var,pt,lnode,rnode,father); // create SetBisect to replace leaf
+			lnode->father = bfather->left;  // set fathers
+			rnode->father = bfather->left;
+            bfather->left->operator_ir(box,subbox,valin,valout,op,eps);
+		}
+		else // this is father->right
+		{
+			bfather->right = new SetBisect(var,pt,lnode,rnode,father);
+			lnode->father = bfather->right;
+			rnode->father = bfather->right;
+            bfather->right->operator_ir(box,subbox,valin,valout,op,eps);
+		}
+		delete this; // delete former father->left or father->right
+	}
+	else // if leaf reach minimum precision, compute partial intersection or union
+	{
+		if(op)
+			status = inte_in(status,UNK);
+		else
+			status = uni_in(status,UNK);
+    }
 }
 
-SetNode* SetLeaf::inter_rec(const IntervalVector& nodebox, Sep& sep, double eps) {
-
-	if (status<UNK)
-		return this;
-	else if (nodebox.max_diam()<=eps) {
-		return this;  // status is IN_TMP and stays like this.
-	} else {
-		int var=nodebox.extr_diam_index(false);
-		pair<IntervalVector,IntervalVector> p=nodebox.bisect(var);
-		double pt=p.first[var].ub();
-		assert(nodebox[var].interior_contains(pt));
-		SetBisect* bis = new SetBisect(var, pt, new SetLeaf(status), new SetLeaf(status));
-		delete this;
-		return bis->inter_rec(nodebox, sep, eps);
-	}
+SetNode * SetLeaf::fakeLeaf(const IntervalVector& box,const IntervalVector& subbox,NodeType val,bool op, double eps) {
+	assert(!this->is_leaf());
+	return NULL;
 }
 
-SetNode* SetLeaf::union_(const IntervalVector& nodebox, const IntervalVector& x, NodeType xstatus, double eps) {
-	//cout << nodebox << " " << to_string(status)  << " union << x << " ";
-	assert(xstatus<=UNK);
+void SetLeaf::cleave(const IntervalVector& box, Sep& sep, const double eps) {
 
-	if (status==IN || xstatus>IN) {
-		//cout << "this\n";
-		return this;
-	} else if (nodebox.is_subset(x)) {
-		status=IN;
-		 //cout << "this\n";
-		return this;
-	} else {
-		// status=(UNK | OUT), xstatus=(IN).
-		SetNode* new_node=diff(nodebox, x, status, IN, eps);
-		delete this; // warning: suicide, don't move it before previous line
-		//cout << "gives "; new_node->print(cout,nodebox,0);
-		return new_node;
+	/*IntervalVector box1(box);
+	IntervalVector box2(box);
+	sep.separate(box1,box2);
+	if(box1.is_empty())
+		this->inter(OUT);
+	else if(box2.is_empty())
+		this->_union(IN);
+	else if(box.max_diam()>eps)
+	{
+		SetBisect * bfather = (SetBisect*) father;
+		int var = box.extr_diam_index(false); // indice of the maximal diameter
+		double pt = box[var].mid();
+		SetLeaf * lnode = new SetLeaf(status,NULL); // create future right node
+		SetLeaf * rnode = new SetLeaf(status,NULL); // create future left node
+        if(bfather->left == this) // this is father->left
+		{
+			bfather->left = new SetBisect(var,pt,lnode,rnode,father); // create SetBisect to replace leaf
+			lnode->father = bfather->left;  // set fathers
+			rnode->father = bfather->left;
+            bfather->left->cleave(box,sep,eps);
+		}
+		else // this is father->right
+		{
+			bfather->right = new SetBisect(var,pt,lnode,rnode,father);
+			lnode->father = bfather->right;
+			rnode->father = bfather->right;
+            bfather->right->cleave(box,sep,eps);
+		}
+		delete this; // delete former father->left or father->right
 	}
+	else
+		status = inte(status,UNK);*/
+
+	assert(status == UNK);
+	IntervalVector box1(box);
+	IntervalVector box2(box);
+	sep.separate(box1,box2);
+	if(box1.is_empty()) // all the box can be set to OUT
+	{
+		this->inter(OUT);
+		return;
+	}
+	else if(box2.is_empty())// all the box can be set to IN
+	{
+		this->_union(IN);
+		return;
+	}
+	else if(box.max_diam()>eps)
+	{
+		SetBisect * bfather = (SetBisect*) father;
+		IntervalVector* restout;
+		int nout = 0;
+		if(box1!=box)
+    		nout=box.diff(box1,restout);
+    	IntervalVector* restin;
+    	int nin = 0;
+    	if(box2!=box)
+    		nin=box.diff(box2,restin); 	
+    	
+        if(bfather->left == this) // this is father->left
+		{
+			for(int i = 0;i<nout;i++)
+    			bfather->left->operator_ir(box,restout[i],OUT,true,eps); // add in box
+    		for(int i = 0;i<nin;i++)
+    			bfather->left->operator_ir(box,restin[i],IN,false,eps); // add out box
+    		bfather->left->gatherTo(false,bfather->left);
+    		if(!bfather->left->is_leaf())
+    			bfather->left->cleave(box,sep,eps);
+		}
+		else // this is father->right
+		{
+			for(int i = 0;i<nout;i++)
+    			bfather->right->operator_ir(box,restout[i],OUT,true,eps); // add in box
+    		for(int i = 0;i<nin;i++)
+    			bfather->right->operator_ir(box,restin[i],IN,false,eps); // add out box
+    		bfather->right->gatherTo(false,bfather->right);
+    		if(!bfather->right->is_leaf())
+    			bfather->right->cleave(box,sep,eps);
+		}
+	}
+	else
+		status = inte(status,UNK);
+	
+
 }
+
+void SetLeaf::gather(bool go_up) {
+	return; // nothing to do
+}
+
+void SetLeaf::gatherTo(bool go_up,SetNode * branch) {
+	return; // nothing to do
+}
+
+void SetLeaf::cutDeadBranch() {
+	return; // nothing to do
+}
+void SetLeaf::checkFat() {
+	if (father == NULL)
+		cout<<"issue, invalid father"<<endl;
+}
+
 
 void SetLeaf::visit_leaves(leaf_func func, const IntervalVector& nodebox) const {
 	func(nodebox, status==IN? YES : (status==OUT? NO : MAYBE));
@@ -157,12 +327,8 @@ void SetLeaf::print(ostream& os, const IntervalVector& nodebox, int shift) const
 	os  << nodebox << " " << to_string(status) << endl;
 }
 
-void SetLeaf::set_in_tmp() {
-	if (status==IN) status=IN_TMP;
+void SetLeaf::setFathers() {
+	return; // nothing to do here
 }
-
-void SetLeaf::unset_in_tmp() {
-	if (status==IN_TMP) status=UNK;
-}
-
 } // namespace ibex
+

@@ -37,6 +37,12 @@ public:
 	 */
 	SetInterval(const IntervalVector& bounding_box, double eps, bool inner=true);
 
+	/**
+	 * \brief Creates a copy of an existing setInterval
+	 *
+	 */
+	SetInterval(const SetInterval& set);
+
 
 	/**
 	 * \brief Loads a set from a data file.
@@ -50,6 +56,12 @@ public:
 	 */
 	~SetInterval();
 
+
+	/*
+	 * \brief Replace the current root by a setbisect pointing on 2 leaves with the root status
+	 */	
+	void cutRoot();
+
 	/**
 	 * \brief i-Set Intersection
 	 *
@@ -59,6 +71,24 @@ public:
 	 *  { x \cap y, x\in[x] and y\in[y] }.
 	 */
 	SetInterval& operator&=(const SetInterval& set);
+
+	/**
+	 * \brief i-Set Intersection
+	 *
+	 * Intersection of a setInterval with a box of interior value valin and exterior value valout. 
+	 * Computation is more efficient than create a setInterval contracted on the box, and then
+	 * compute intersection of the two setInterval. 
+	 */
+	SetInterval& interBox(const IntervalVector& box,NodeType valin,NodeType valout);
+
+	/**
+	 * \brief i-Set Intersection
+	 *
+	 * Union of a setInterval with a box of interior value valin and exterior value valout. 
+	 * Computation is more efficient than create a setInterval contracted on the box, and then
+	 * compute intersection of the two setInterval. 
+	 */
+	SetInterval& unionBox(const IntervalVector& box,NodeType valin,NodeType valout);
 
 	/**
 	 * \brief i-Set Union
@@ -71,14 +101,14 @@ public:
 	SetInterval& operator|=(const SetInterval& set);
 
 	/**
-	 * \brief i-Set synchronization
-	 *
-	 * In Jaulin's terminology, this operator is the "intersection of i-sets" (squared symbol)
-	 *
-	 * If [x] designates this i-set and [y] the i-set in argument, then this will be replace by
-	 *  { x, x\in[x] and x\in[y] }.
+	 * \brief gather leaves that have the same value
 	 */
-	void sync(Sep& sep);
+	void gather();
+
+	/**
+	 * \brief Check if fathers are initialized
+	 */
+	void checkFat();
 
 	/**
 	 * \brief True if this i-set is empty
@@ -87,6 +117,9 @@ public:
 	 */
 	bool is_empty() const;
 
+	/**
+	 * \brief Contrat i-set w.r.t a separator sep
+	 */
 	void contract(Sep& sep);
 
 	/**
@@ -101,6 +134,10 @@ public:
 	 * of the complementary of the set (if inside is false).
 	 */
 	double dist(const Vector& pt, bool inside) const;
+
+	
+
+	
 
 protected:
 

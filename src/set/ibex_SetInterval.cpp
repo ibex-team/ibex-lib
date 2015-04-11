@@ -27,36 +27,91 @@ SetInterval::SetInterval(const char* filename) : root(NULL), eps(-1), bounding_b
 	load(filename);
 }
 
+SetInterval::SetInterval(const SetInterval& set) : eps(set.eps), bounding_box(set.bounding_box)
+{
+	root = set.root->copy();
+	root->father = NULL;
+}
+
+
 bool SetInterval::is_empty() const {
 	return root==NULL;
 }
 
-void SetInterval::sync(Sep& sep) {
-	try {
-		root = root->sync(bounding_box, sep, eps);
-	} catch(NoSet& e) {
-		delete root;
-		root = NULL;
-		throw e;
-	}
-}
+void SetInterval::cutRoot()
+{
+	NodeType stat = root->status;
+	delete root;
+	int var = bounding_box.extr_diam_index(false);
+	double pt = bounding_box[var].mid();
+	SetBisect * broot = new SetBisect(var,pt,new SetLeaf(stat),new SetLeaf(stat));
+	broot->left->father = broot;
+	broot->right->father = broot;
+	root = broot;
 
+}
 void SetInterval::contract(Sep& sep) {
-	root->set_in_tmp();
-	root = root->inter(bounding_box, sep, eps);
-	root->unset_in_tmp();
+	// case root is leaf create issue for SetLeaf recursive function that need the father
+	// root is redefined as SetBisect pointing on two leaves with value of the root
+	if(root->is_leaf())
+		this->cutRoot();
+	root->cleave(bounding_box, sep,eps);
+	this->gather();
+	root->father = NULL;
 }
 
 SetInterval& SetInterval::operator&=(const SetInterval& set) {
-	root->set_in_tmp();
-	root = root->inter(bounding_box, set.root, set.bounding_box, eps);
-	root->unset_in_tmp();
+	assert(bounding_box== set.bounding_box); // root must be the same as set interval are regular
+	// case root is leaf create issue for SetLeaf recursive function that need the father
+	// root is redefined as SetBisect pointing on two leaves with value of the root
+	if(root->is_leaf())
+		this->cutRoot();
+	root->oper(set.root,true);
+	this->gather();
 	return *this;
 }
 
-SetInterval& SetInterval::operator|=(const SetInterval& set) {
-	root = root->union_(bounding_box, set.root, set.bounding_box, eps);
+SetInterval& SetInterval::interBox(const IntervalVector& box,NodeType valin,NodeType valout) {
+
+	// case root is leaf create issue for SetLeaf recursive function that need the father
+	// root is redefined as SetBisect pointing on two leaves with value of the root
+	if(root->is_leaf())
+		this->cutRoot();
+	cout<<"status of root: "<<root->status<<endl;
+	root->operator_ir(bounding_box,box,valin,valout,true,eps);
+	this->gather();
 	return *this;
+}
+
+SetInterval& SetInterval::unionBox(const IntervalVector& box,NodeType valin,NodeType valout) {
+	// case root is leaf create issue for SetLeaf recursive function that need the father
+	// root is redefined as SetBisect pointing on two leaves with value of the root
+	if(root->is_leaf())
+		this->cutRoot();
+	root->operator_ir(bounding_box,box,valin,valout,false,eps);
+	this->gather();
+	return *this;
+}
+
+
+SetInterval& SetInterval::operator|=(const SetInterval& set) {
+	assert(bounding_box== set.bounding_box); // root must be the same as set interval are regular
+	// case root is leaf create issue for SetLeaf recursive function that need the father
+	// root is redefined as SetBisect pointing on two leaves with value of the root
+	if(root->is_leaf())
+		this->cutRoot();
+	root->oper(set.root,false);
+	this->gather();
+	return *this;
+}
+
+void SetInterval::gather() {
+	root->gather(false);
+	root->cutDeadBranch();
+}
+
+void SetInterval::checkFat() {
+	root->checkFat();
 }
 
 void SetInterval::save(const char* filename) {
@@ -175,6 +230,7 @@ void SetInterval::load(const char* filename) {
 	}
 
 	is.close();
+	root->setFathers();
 }
 
 void SetInterval::visit_leaves(SetNode::leaf_func func) const {

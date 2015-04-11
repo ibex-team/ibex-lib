@@ -26,14 +26,15 @@ using namespace std;
 
 namespace ibex {
 
-SetBisect::SetBisect(int var, double pt, SetNode* left, SetNode* right) : SetNode(left->status | right->status), var(var), pt(pt), left(left), right(right) {
-	// a bisectNode with two subnodes of same status IN or OUT should not exist
-	// (automatically compacted as a leaf node) but two subnodes IN_TMP can be
-	// created by a leaf with IN_TMP status (when it auto-splits in inter function)
-	assert(left->status>=UNK || left->status!=right->status);
+SetBisect::SetBisect(int var, double pt, SetNode* left, SetNode* right) : SetNode(UNK_IN_OUT,NULL), var(var), pt(pt), left(left), right(right) {
+	
 }
 
-SetBisect::SetBisect(int var, double pt) : SetNode(UNK), var(var), pt(pt), left(NULL), right(NULL) {
+SetBisect::SetBisect(int var, double pt, SetNode* left, SetNode* right,SetNode* father) : SetNode(UNK_IN_OUT,father), var(var), pt(pt), left(left), right(right) {
+	
+}
+
+SetBisect::SetBisect(int var, double pt) : SetNode(UNK_IN_OUT), var(var), pt(pt), left(NULL), right(NULL) {
 
 }
 
@@ -43,87 +44,271 @@ SetBisect::~SetBisect() {
 }
 
 bool SetBisect::is_leaf() const {
-	return false;
+    return false;
 }
 
-SetNode* SetBisect::sync(const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps) {
-	assert(x_status<=UNK);
+SetNode * SetBisect::copy() const {
+	SetBisect * n = new SetBisect(this->var,this->pt,this->left->copy(),this->right->copy());
+	n->left->father = n;
+	n->right->father = n;
+	return n;
+}
 
-	if (x_status==UNK) {
-		return this;
+
+void SetBisect::inter(NodeType x) {
+
+	left->inter(x); // apply inter to left and right until reach the leaves
+	right->inter(x);
+}
+
+void SetBisect::_union(NodeType x) {
+	left->_union(x);
+	right->_union(x);
+}
+
+void SetBisect::oper(SetNode * node,bool op) {
+	if(node->is_leaf()) // apply status to leaves of the subtree which have this as root
+	{
+		if(op && node->status != IN) 
+		{
+			left->inter(node->status);
+			right->inter(node->status);
+		}
+		else if(!op && node->status!= OUT)
+		{
+			left->_union(node->status);
+			right->_union(node->status);
+		}
 	}
-	else if (nodebox.is_subset(x)) {
-		if (x_status==IN && !possibly_contains_in(status)) throw NoSet();
-		if (x_status==OUT && !possibly_contains_out(status)) throw NoSet();
-
-		delete this; // warning: suicide
-		return new SetLeaf(x_status);
-	} else {
-		left = left->sync(left_box(nodebox), x, x_status, eps);
-		right = right->sync(right_box(nodebox), x, x_status, eps);
-		// status of children may have changed --> try merge
-		return try_merge();
-	}
-}
-
-SetNode* SetBisect::sync_rec(const IntervalVector& nodebox, Sep& sep, double eps) {
-	left = left->sync(left_box(nodebox), sep, eps);
-	right = right->sync(right_box(nodebox), sep, eps);
-	// status of children may have changed --> try merge
-	return try_merge();
-}
-
-
-SetNode* SetBisect::inter(const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps) {
-	assert(x_status<=UNK);
-
-	// no: keep subnodes informed that x_status is IN (their status can changed from IN_TMP to IN)
-	//	if (x_status==IN) {
-	//		return this;
-	//	}
-
-	// in comment because certainly_contains_in does not take into account IN_TMP
-//	if (x_status==UNK && !certainly_contains_in(status)) {
-//		return this;
-//	}
-
-	// certainly_contains_out in comment because does not take into account IN_TMP
-    if ((x_status==OUT /*|| !certainly_contains_out(status)*/) && nodebox.is_subset(x)) {
-		delete this; // warning: suicide
-		return new SetLeaf(x_status); // either OUT or UNK
-	} else {
-		left = left->inter(left_box(nodebox), x, x_status, eps);
-		right = right->inter(right_box(nodebox), x, x_status, eps);
-		// status of children may have changed --> try merge
-		return try_merge();
+	else
+	{
+		SetBisect * other = (SetBisect*) node;  // node is assume to be either a leaf or a bisect, able to cast node in bisect as it ain't a leaf
+		left->oper(other->left,op);
+		right->oper(other->right,op);
 	}
 }
 
-SetNode* SetBisect::inter_rec(const IntervalVector& nodebox, Sep& sep, double eps) {
-	left = left->inter(left_box(nodebox), sep, eps);
-	right = right->inter(right_box(nodebox), sep, eps);
-	// status of children may have changed --> try merge
-	return try_merge();
-}
+void SetBisect::operator_ir(const IntervalVector& box,const IntervalVector& subbox, NodeType val,bool op, double eps)
+{
 
-SetNode* SetBisect::union_(const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps) {
-	assert(x_status<=UNK);
-
-	if (x_status>IN) {
-		return this;
+	if(box.is_subset(subbox)) // compute intersection of leaves of this root with val
+	{
+		if(op && val != IN)
+			this->inter(val);
+		else if(!op && val != OUT)
+			this->_union(val);
 	}
-
-    if (nodebox.is_subset(x)) {
-		delete this; // warning: suicide
-		return new SetLeaf(IN);
-	} else {
-		left = left->union_(left_box(nodebox), x, x_status, eps);
-		right = right->union_(right_box(nodebox), x, x_status, eps);
-		// status of children may have changed --> try merge
-		return try_merge();
+	else
+	{
+		if(this->left_box(box).overlaps(subbox)) //  need to apply function on left only if leftbox ovelaps subbox
+			left->operator_ir(this->left_box(box),subbox,val,op,eps);
+		if(this->right_box(box).overlaps(subbox)) //  need to apply function on right only if rightbox overlaps subbox
+			right->operator_ir(this->right_box(box),subbox,val,op,eps);
 	}
 }
 
+void SetBisect::operator_ir(const IntervalVector& box,const IntervalVector& subbox, NodeType valin,NodeType valout,bool op, double eps)
+{
+
+	if(box.is_subset(subbox)) // apply valin on the leaves of this root
+	{
+		if(op && valin != IN)
+			this->inter(valin);
+		else if(!op && valin != OUT)
+			this->_union(valin);
+	}
+	else if(box.overlaps(subbox))
+	{
+		if(this->left_box(box).overlaps(subbox))
+			left->operator_ir(this->left_box(box),subbox,valin,valout,op,eps);
+		else {								// leftbox is disjoint of subbox, apply valout on the leaves of this->left root
+			if(op && valout != IN)
+				left->inter(valout);
+			else if (!op && valout != OUT)
+				left->_union(valout);}
+		if(this->right_box(box).overlaps(subbox))
+			right->operator_ir(this->right_box(box),subbox,valin,valout,op,eps);
+		else{								// rightbox is disjoint of subbox, apply valout on the leaves of this->right root
+			if(op && valout != IN)
+				right->inter(valout);
+			else if (!op && valout != OUT)
+				right->_union(valout);}
+	}
+	else{   								// this is disjoint of subbox, apply valout on the leaves of this root
+		if(op && valout != IN)
+			this->inter(valout);
+		else if (!op && valout != OUT)
+			this->_union(valout);}
+}
+
+// Uncomment this function and comment the one above to use fakeBranch method
+/*void SetBisect::operator_ir(const IntervalVector& box,const IntervalVector& subbox, NodeType val,bool op, double eps)
+{
+
+	if(left == NULL)
+	{
+		assert(right == NULL);
+		left = this->fakeLeaf(left_box(box),subbox,val,op,eps);
+		left->father = this;
+		right = this->fakeLeaf(right_box(box),subbox,val,op,eps);
+		right->father = this;
+		status = UNK_IN_OUT;
+	}
+	else
+	{
+		if(box.is_subset(subbox))
+		{
+			if(op)
+				this->inter(val);
+			else
+				this->_union(val);
+		}
+		else
+		{
+			if(this->left_box(box).overlaps(subbox))
+				left->operator_ir(this->left_box(box),subbox,val,op,eps);
+			else
+				return;
+			if(this->right_box(box).overlaps(subbox))
+				right->operator_ir(this->right_box(box),subbox,val,op,eps);
+			else
+				return;
+		}
+	}
+}*/
+
+SetNode * SetBisect::fakeLeaf(const IntervalVector& box,const IntervalVector& subbox,NodeType val,bool op, double eps) {
+    //assert(left == NULL && right == NULL);
+	if(box.is_subset(subbox))
+		if(op)
+			return new SetLeaf(inte(status,val));
+		else
+			return new SetLeaf(uni(status,val));
+	else if(box.overlaps(subbox))
+	{
+		if(box.max_diam()<=eps)
+			return new SetLeaf(inte_in(status,val));
+		else
+		{
+			int var = box.extr_diam_index(false); 
+			double pt = box[var].mid();
+			SetBisect * node = new SetBisect(var,pt,NULL,NULL);
+			node->status  = status;
+			node->left = node->fakeLeaf(node->left_box(box),subbox,val,op,eps);
+			node->right = node->fakeLeaf(node->right_box(box),subbox,val,op,eps);
+			node->left->father = node;
+			node->right->father = node;
+			node->status = UNK_IN_OUT;
+			return node;
+		}
+	}
+	else
+		return new SetLeaf(status);
+}
+void SetBisect::cleave(const IntervalVector& box, Sep& sep, const double eps) {
+
+	/*IntervalVector box1(box);
+	IntervalVector box2(box);
+
+	sep.separate(box1,box2);
+	if(box1.is_empty())
+		this->inter(OUT);
+	else if(box2.is_empty())
+		this->_union(IN);
+	else // continu until box1 and box2 are disjoint
+	{
+		left->cleave(left_box(box),sep,eps);
+		right->cleave(right_box(box),sep,eps);
+	}*/
+	
+	status = UNK_IN_OUT;
+	IntervalVector box1(box);
+	IntervalVector box2(box);
+
+	sep.separate(box1,box2);
+	if(box1.is_empty()) // all the box can be set to OUT
+	{
+		this->inter(OUT);
+	}
+	else if(box2.is_empty())// all the box can be set to IN
+	{
+		this->_union(IN);
+	}
+	else
+	{
+
+		IntervalVector* restout;
+    	int n=0;
+    	if(box1!=box)
+    		box.diff(box1,restout);
+    	for(int i = 0;i<n;i++)
+    		this->operator_ir(box,restout[i],OUT,true,eps); // add in box
+    	IntervalVector* restin;
+    	n = 0;
+    	if(box2!= box)
+    		n=box.diff(box2,restin);
+    	for(int i = 0;i<n;i++)
+    		this->operator_ir(box,restin[i],IN,false,eps); // add out box
+    	this->gatherTo(false,this);
+    	if(!left->is_leaf() || left->status == UNK )//&& left_box(box).max_diam()>eps)
+    		left->cleave(left_box(box),sep,eps);
+    	if(!right->is_leaf() || right->status == UNK )//&& right_box(box).max_diam()>eps)
+    		right->cleave(right_box(box),sep,eps);
+	}
+	
+}
+void SetBisect::gather(bool go_up) {
+		if(((left->is_leaf()&&right->is_leaf()) || go_up)&&left->status==right->status) // leaves are reached, or climbing up the tree toward the root
+		{
+			status = left->status;  // this bisect get a leaf status IN OUT or UNK
+			if(father != NULL) // check if father is not the root of SetInterval
+				father->gather(true);
+		}
+		else if(!go_up) // go down the tree to reach the leaves
+		{
+			left->gather(false);
+			right->gather(false);
+		}
+}
+
+void SetBisect::gatherTo(bool go_up, SetNode * branch) {
+		if(((left->is_leaf()&&right->is_leaf()) || go_up)&&left->status==right->status) // leaves are reached, or climbing up the tree toward the root
+		{
+			status = left->status;  // this bisect get a leaf status IN OUT or UNK
+			if(father != branch) // check if father is not the root of SetInterval
+				father->gather(true);
+		}
+		else if(!go_up) // go down the tree to reach the leaves
+		{
+			left->gather(false);
+			right->gather(false);
+		}
+}
+
+void SetBisect::cutDeadBranch() {
+	if(left->status ==right->status && left->status < 3) // if status of left and right are equal and has got a leaf status, meaning all leaves have the same status
+	{
+		SetBisect* bfather = (SetBisect*) father;
+		if(bfather->left == this)
+			bfather->left = new SetLeaf(status,father); // this is now a leaf
+		else
+			bfather->right = new SetLeaf(status,father); // this is now a leaf
+		delete this;  // delete former this which was a bisect
+	}
+	else // go down the tree until reach leaves or bisect that can be set a leaf
+	{
+		left->cutDeadBranch();
+		right->cutDeadBranch();
+	}
+}
+
+
+void SetBisect::checkFat() {
+	if(father == NULL)
+		cout<<"issue, invalid father"<<endl;
+	left->checkFat();
+	right->checkFat();
+}
 void SetBisect::visit_leaves(leaf_func func, const IntervalVector& nodebox) const {
 	left->visit_leaves(func, left_box(nodebox));
 	right->visit_leaves(func, right_box(nodebox));
@@ -136,15 +321,13 @@ void SetBisect::print(ostream& os, const IntervalVector& nodebox, int shift) con
 	right->print(os, right_box(nodebox), shift+2);
 }
 
-void SetBisect::set_in_tmp() {
-	left->set_in_tmp();
-	right->set_in_tmp();
+void SetBisect::setFathers() {
+	left->father = this;
+	right->father = this;
+	left->setFathers();
+	right->setFathers();
 }
 
-void SetBisect::unset_in_tmp() {
-	left->unset_in_tmp();
-	right->unset_in_tmp();
-}
 
 IntervalVector SetBisect::left_box(const IntervalVector& nodebox) const {
 	IntervalVector leftbox(nodebox);
@@ -160,14 +343,6 @@ IntervalVector SetBisect::right_box(const IntervalVector& nodebox) const {
 	return rightbox;
 }
 
-SetNode* SetBisect::try_merge() {
-	// the case left=right=UNK may happen.
-	if (left->status<=UNK && left->status==right->status) {
-		NodeType s=left->status;
-		delete this;
-		return new SetLeaf(s);
-	} else
-		return this;
-}
 
 } // namespace ibex
+

@@ -26,6 +26,16 @@ namespace ibex {
 class NoSet {
 
 };
+/**
+ * \ingroup iset
+ * \brief Exception thrown by sync function.
+ *
+ * use to compute regular cutting of a interval
+ */
+class vcut{
+	int var;
+	double pt;
+};
 
 /**
  * \brief Set node.
@@ -44,6 +54,12 @@ public:
 	SetNode(NodeType status);
 
 	/**
+	 * \brief Creates a node of given status and father
+	 */
+	 SetNode(NodeType status,SetNode *father);
+
+
+	/**
 	 * \brief Delete this.
 	 */
 	virtual ~SetNode();
@@ -54,69 +70,64 @@ public:
 	virtual bool is_leaf() const=0;
 
 	/**
-	 * \brief Synchronization with an i-set represented implicitly by a Sep
+	 * \brief Return a copy of the node.
 	 */
-	SetNode* sync(const IntervalVector& nodebox, Sep& sep, double eps);
+	virtual SetNode * copy() const=0;
+
 
 	/**
-	 * \brief Synchronization with an explicit i-set "other"
-	 *
-	 * skip_other_maybe: don't consider UNK box of the other set. This is important
-	 *                   because the other set may be a temporary set produced by
-	 *                   the contract function (and the UNK box will be refined later)
+	 * \brief Intersection or Union between a box of NodeType val and a regular setInterval.
+	 * Box may not respect the regularity of the regular setInterval.
+	 * The part of the set that intersect nodebox only is modify.
 	 */
-	SetNode* sync(const IntervalVector& nodebox, const SetNode* other, const IntervalVector& otherbox, double eps, bool skip_other_maybe);
+	virtual void operator_ir(const IntervalVector& box,const IntervalVector& nodebox, NodeType val, bool op, double eps)=0;
 
 	/**
-	 * \brief Synchronization with an i-set reduced to a single box "x" of status "x_status".
-	 *
+	 * \brief Call by operator_ir, create a subtree from a leaf with "fake leves" that are setbisect with left and right set to null
+	 * should avoid to create leaf and eventually destruct it if it need to be cut i.e replace by a setbisect
+	 * method abandonned, oddly slower than creating leaves and replace them by setbisect.
 	 */
-	virtual SetNode* sync(const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps)=0;
+	virtual SetNode * fakeLeaf(const IntervalVector& box,const IntervalVector& subbox,NodeType val,bool op, double eps)=0;
 
 	/**
-	 * \brief Synchronization with a Sep (recursive call)
-	 *
-	 * Once the current "nodebox" has been synchronized with the two sets obtained by applying the inner and
-	 * outer contraction, a recursive call is performed (where the Sep is applied on the sub-boxes).
-	 *
-	 * If this node is a leaf, it means it has to be bisected.
+	 * \brief Overloaded function, apply valout to the set outside of the box and valin to the inside, thus modify the whole set.
 	 */
-	virtual SetNode* sync_rec(const IntervalVector& nodebox, Sep& sep, double eps)=0;
+	virtual void operator_ir(const IntervalVector& box,const IntervalVector& subbox, NodeType valin,NodeType valout, bool op,double eps)=0;
 
 	/**
-	 * \brief Intersection with an i-set represented implicitly by a Sep
+	 * \brief Intersection between two setNode.
 	 */
-	SetNode* inter(const IntervalVector& nodebox, Sep& sep, double eps);
+	virtual void oper(SetNode* other,bool op)=0;
 
 	/**
-	 * \brief Intersection with an explicit i-set "other"
+	 * \brief Intersection between setnode and a status.
 	 */
-	SetNode* inter(const IntervalVector& nodebox, const SetNode* other, const IntervalVector& otherbox, double eps);
+	virtual void inter(NodeType x_status)=0;
 
 	/**
-	 * \brief Intersection with an i-set reduced to a single box "x" of status "x_status".
+	 * \brief Union between setnode and a status.
 	 */
-	virtual SetNode* inter(const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps)=0;
+	virtual void _union(NodeType x)=0;
 
 	/**
-	 * \brief Intersection with a Sep (recursive call)
-	 *
-	 * Once the current "nodebox" has been intersected with the two sets obtained by applying the inner and
-	 * outer contraction, a recursive call is performed (where the Sep is applied on the sub-boxes).
-	 *
-	 * If this node is a leaf, it means it has to be bisected.
+	 * \brief Change value of branch if right and left got the same value IN, OUT or UNK.
 	 */
-	virtual SetNode* inter_rec(const IntervalVector& nodebox, Sep& sep, double eps)=0;
+	virtual void gather(bool go_up)=0;
+	/**
+	 * \brief Delete the branch if left and right got the same value IN, OUT or UNK.
+	 */
+	virtual void cutDeadBranch()=0;
 
 	/**
-	 * \brief Union with an explicit i-set "other"
+	 * \brief Check if fathers are initialized.
 	 */
-	SetNode* union_(const IntervalVector& nodebox, const SetNode* other, const IntervalVector& otherbox, double eps);
+	virtual void checkFat()=0;
 
 	/**
-	 * \brief Union with an i-set reduced to a single box "x" of status "x_status".
-	 */
-	virtual SetNode* union_(const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps)=0;
+	 * \brief Contrat i-set w.r.t separator sep, split leaves until boxin and boxout returned by sep are disjoints, 
+	 * and then call operator_ir to contract on them
+	 */	
+	virtual void cleave(const IntervalVector& box, Sep& sep,double eps)=0;
 
 	/**
 	 * \brief Visit the leaves of a tree with a callback "func"
@@ -129,35 +140,19 @@ public:
 	virtual void print(std::ostream& os, const IntervalVector& nodebox, int shift) const=0;
 
 	/**
-	 * Set all "IN" leaves to "IN_TMP".
-	 *
-	 * This function is useful for calculating set intersection only.
-	 * It sets all the inner nodes of the original set to IN_TMP before.
-	 * This allows to distinguish a node that is inside the original set (IN_TMP)
-	 * from a node that is proven to be inside the intersection (IN).
+	 * \brief Set fathers of the nodes
 	 */
-	virtual void set_in_tmp()=0;
+	virtual void setFathers()=0;
 
-	/**
-	 * Set all "IN_TMP" leaves to "UNK"
-	 *
-	 * This function is useful for calculating set intersection only.
-	 * Once the intersection is calculated, the nodes that was in the original
-	 * set but that could not be proven to be inside the intersection
-	 * have "UNK" status.
-	 */
-	virtual void unset_in_tmp()=0;
+
 
 	/**
 	 * \brief The status of the node
 	 */
 	NodeType status;
+	SetNode * father;
 };
 
-
-SetNode* diff(const IntervalVector& x, const IntervalVector& y, NodeType x_status, NodeType y_status, double eps);
-
-SetNode* contract_set(const IntervalVector& x, Sep& sep, double eps);
 
 } // namespace ibex
 
