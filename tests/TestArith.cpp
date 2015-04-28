@@ -149,6 +149,17 @@ void TestArith::mul17() { check_mul_scal(Interval(1,2),          NEG_INFINITY, 	
 void TestArith::mul18() { check_mul_scal(Interval(1,2),          POS_INFINITY, 	        	 Interval::EMPTY_SET); }
 void TestArith::mul19() { check_mul_scal(Interval(1,2),          -1, 	        	         Interval(-2,-1)); }
 
+void TestArith::mulMM01() {
+	double _tab[] = { 1, 2, 3, 4, 5, 6 };
+	Matrix M(3,2,_tab);
+	M*=M.transpose();
+	double _res[] = {5, 11 , 17,
+			11 , 25 , 39,
+			17 , 39 , 61 };
+	Matrix M_expected(3,3,_res);
+	TEST_ASSERT(M==M_expected);
+}
+
 void TestArith::div01() { check_div(Interval::EMPTY_SET,         Interval(0,1),               Interval::EMPTY_SET); }
 void TestArith::div02() { check_div(Interval::ZERO,              Interval::ZERO,              Interval::EMPTY_SET); }
 void TestArith::div03() { check_div(Interval(1,2),               Interval::ZERO,              Interval::EMPTY_SET); }

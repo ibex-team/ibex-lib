@@ -60,6 +60,8 @@ public:
 		TEST_ADD(TestArith::mul18);
 		TEST_ADD(TestArith::mul19);
 
+		TEST_ADD(TestArith::mulMM01);
+
 		TEST_ADD(TestArith::div01);
 		TEST_ADD(TestArith::div02);
 		TEST_ADD(TestArith::div03);
@@ -354,6 +356,8 @@ private:
 	void mul17();
 	void mul18();
 	void mul19();
+
+	void mulMM01();
 
 	/* test:
 	 * =======
