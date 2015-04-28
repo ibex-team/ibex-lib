@@ -424,7 +424,8 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 
 	try {
 		while (!buffer.empty()) {
-			if (trace >= 2) cout << " buffer " << buffer << endl;
+		  //			if (trace >= 2) cout << " buffer " << buffer << endl;
+		  if (trace >= 2) buffer.print(cout);
 			//		  cout << "buffer size "  << buffer.size() << " " << buffer2.size() << endl;
 			// removes from the heap buffer, the cells already chosen in the other buffer
 

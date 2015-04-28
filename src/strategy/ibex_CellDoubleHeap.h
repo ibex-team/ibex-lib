@@ -1,4 +1,4 @@
-//============================================================================
+ //============================================================================
 //                                  I B E X                                   
 // File        : ibex_CellDoubleHeap.h
 // Author      : Gilles Chabert, Jordan Ninin
@@ -61,6 +61,10 @@ public:
 	/** \brief Return the next box (but does not pop it).*/
 	Cell* top() const;
 
+
+	std::ostream& print(std::ostream& os) const;
+
+
 	/**
 	 * \brief Contract the heap
 	 *
@@ -97,6 +101,15 @@ inline void CellDoubleHeap::push(Cell* cell)      { DoubleHeap<Cell>::push(cell)
 inline Cell* CellDoubleHeap::pop()                { return DoubleHeap<Cell>::pop(); }
 
 inline Cell* CellDoubleHeap::top() const          { return DoubleHeap<Cell>::top(); }
+
+ inline std::ostream& CellDoubleHeap::print(std::ostream& os) const
+ {	os << "==============================================================================\n";
+   os << " first heap " << " size " << heap1->size() << " top " << heap1->top()->box << std::endl;
+     os << " second heap " << " size " << heap2->size() << " top " << heap2->top()->box ;
+     return  os << std::endl;
+ }
+
+ //{return DoubleHeap<Cell>::print( os);}
 
 inline void CellDoubleHeap::contract(double new_loup) {
 
