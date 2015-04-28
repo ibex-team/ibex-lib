@@ -64,6 +64,7 @@ clock_t times (struct tms *__buffer) {
 #include "cliquer.h"
 
 // ignored warning : comparison between signed and unsigned integer expressions in this file
+#pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-compare"
 
 /* Default cliquer options */
