@@ -16,7 +16,7 @@ using std::pair;
 
 namespace ibex {
 
-const double Bsc::default_ratio() {
+double Bsc::default_ratio() {
 	return 0.45;
 }
 
