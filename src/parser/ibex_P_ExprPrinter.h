@@ -19,6 +19,11 @@ namespace ibex {
 
 namespace parser {
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Woverloaded-virtual"
+#endif
+
 class P_ExprPrinter : private ExprPrinter, public virtual P_ExprVisitor {
 public:
 	void print(std::ostream& os, const ExprNode& e);
@@ -31,6 +36,10 @@ protected:
 	void visit(const ExprIter&);
 	void visit(const ExprInfinity&);
 };
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 
 } // end namespace parser
 } // end namespace ibex
