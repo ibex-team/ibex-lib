@@ -101,9 +101,9 @@ public:
 	       void min_bwd   (const ExprMin&,    ExprLabel& ,   ExprLabel& ,   const ExprLabel& );
 	inline void atan2_bwd (const ExprAtan2& , ExprLabel& ,   ExprLabel& ,   const ExprLabel& )  { /* not implemented yet */ assert(false); }
 	inline void minus_bwd (const ExprMinus& , ExprLabel& x,                 const ExprLabel& y) { x.g->i() += -1.0*y.g->i(); }
-    inline void trans_V_bwd(const ExprTrans&, ExprLabel& x,                 const ExprLabel& y) { /* nothing to do because x.g->v() is a reference to y.g->v()
+        inline void trans_V_bwd(const ExprTrans&, ExprLabel& /*x*/,             const ExprLabel& /*y*/) { /* nothing to do because x.g->v() is a reference to y.g->v()
                                                                                                      see Decorator */ }
-    inline void trans_M_bwd(const ExprTrans&, ExprLabel& x,                 const ExprLabel& y) { x.g->m() += y.g->m().transpose(); }
+        inline void trans_M_bwd(const ExprTrans&, ExprLabel& x,                 const ExprLabel& y) { x.g->m() += y.g->m().transpose(); }
 	       void sign_bwd  (const ExprSign&,   ExprLabel& x,                 const ExprLabel& y);
 	       void abs_bwd   (const ExprAbs&,    ExprLabel& x,                 const ExprLabel& y);
 	inline void power_bwd(const ExprPower& e, ExprLabel& x,                 const ExprLabel& y) { x.g->i() += y.g->i() * e.expon * pow(x.d->i(), e.expon-1); }

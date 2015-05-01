@@ -96,7 +96,7 @@ public:
 	/**
 	 * \brief Default ratio (0.45)
 	 */
-	static const double default_ratio();
+	static double default_ratio();
 
 	/**
 	 * \brief Return true if the precision is the same for all variables.

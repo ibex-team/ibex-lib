@@ -9,8 +9,9 @@
  * also.  AFAIK, there is no way to check for an existing typedef, and
  * re-typedefing is illegal (even when using exactly the same datatype!).
  */
-#ifndef boolean
-#define boolean int
+#ifndef boolean_def
+typedef int boolean;
+#define boolean_def
 #endif
 
 
