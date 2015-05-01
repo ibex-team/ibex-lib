@@ -303,7 +303,7 @@ T* DoubleHeap<T>::top() const {
 	assert(size()>0);
 
 	// select the heap
-	if (RNG::rand() % 100 >=critpr) {
+	if (RNG::rand() % 100 >= static_cast<unsigned>(critpr)) {
 		// the first heap is used
 		current_heap_id=0;
 		return heap1->top();

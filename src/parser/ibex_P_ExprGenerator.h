@@ -18,6 +18,11 @@
 namespace ibex {
 namespace parser {
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Woverloaded-virtual"
+#endif
+
 class ExprGenerator : private ExprCopy, public virtual P_ExprVisitor {
 public:
 	ExprGenerator(const Scope& scope);
@@ -35,6 +40,10 @@ protected:
 
 	const Scope& scope;
 };
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 
 } // end namespace parser
 } // end namespace ibex
