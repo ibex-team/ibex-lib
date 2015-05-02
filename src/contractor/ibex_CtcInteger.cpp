@@ -25,18 +25,17 @@ CtcInteger::CtcInteger(int nb_var, const BitSet& is_int) : Ctc(nb_var), is_int(i
 	output = new BitSet(is_int);
 }
 
-
-
 void CtcInteger::contract(IntervalVector& box) {
 
 	assert(box.size()==nb_var);
 
 	for (int i=0; i<nb_var; i++) {
 		if (is_int[i] && (!impact() || (*impact())[i])) {
-			bwd_integer(box[i]);
-			if (box[i].is_empty()) {
+			if (!bwd_integer(box[i])) {
+				set_flag(INACTIVE);
+				set_flag(FIXPOINT);
 				box.set_empty();
-				throw EmptyBoxException();
+				return;
 			}
 		}
 	}

@@ -67,7 +67,11 @@ void Ctc3BCid::contract(IntervalVector& box) {
 		var3BCID(box,var);
 		impact.remove(var);                           // [gch]
 
-		if(box.is_empty()) throw EmptyBoxException();
+		if(box.is_empty()) {
+			set_flag(FIXPOINT);
+			set_flag(INACTIVE);
+			return;
+		}
 	}
 
 	//	start_var=(start_var+vhandled)%nb_var;             //  en contradiction avec le patch pour l'optim
@@ -111,12 +115,12 @@ bool Ctc3BCid::var3BCID_dicho(IntervalVector& box, int var, double w3b) {
 	box=initbox;
 	box[var]= Interval(leftbox[var].lb(),initbox[var].ub());
 	bool r1=false;
-	try {
-		r1= shave_bound_dicho (box, var,  w3b, false); // may throw EmptyBoxException
-	}
-	catch (EmptyBoxException& e) {
-		box=leftbox; return true;                      // in case of EmptyBoxException of the right shaving,
-		// the contracted box becomes the left box
+
+	r1= shave_bound_dicho (box, var,  w3b, false); // may result in an empty box
+
+	if (box.is_empty()) {                 // in case of empty box in the right shaving,
+		box=leftbox;                      // the contracted box becomes the left box
+		return true;
 	}
 
 	IntervalVector rightbox=box;
@@ -159,8 +163,9 @@ bool Ctc3BCid::shave_bound_dicho(IntervalVector& box, int var,  double wv, bool 
 			//      cout << "  inf=" << inf << " lb=" << lb << " rb=" << rb << " sup=" << sup << endl;
 			box[var] = Interval(inf,lb);
 
-			try {
-				ctc.contract(box,impact);              // [gch] only "var" is set in "impact".
+			ctc.contract(box,impact);              // [gch] only "var" is set in "impact".
+
+			if (!box.is_empty()) {
 				inf=box[var].lb();
 				volatile double mid = (inf+lb)/2;      // we must subdivide the current slice (declared volatile to prevent
 				//   the compiler from expanding mid in the next line and using higher
@@ -168,12 +173,11 @@ bool Ctc3BCid::shave_bound_dicho(IntervalVector& box, int var,  double wv, bool 
 				if (lb-inf<=wv || inf>=mid || lb<=mid) // the two last conditions prevent from splitting a float in half
 					break;
 				else lb=mid;                           // useless to restore domains (we divide the same slice)
-
-			} catch(EmptyBoxException& e) {            // the current slice has been cut off
+			} else {                                   // the current slice has been cut off
 				//	cout << "      slice removed.\n";
 				if (inf==lb) {                         // border is degenerated and current=border
 					if (inf==sup)                      // current=border=the whole interval itself:
-						throw e;                       //   in this case the box must remain entirely emptied
+						return true;                   //   in this case the box must remain entirely emptied
 					else break;                        // return anyway (no more to do).
 				}
 				tmp = inf;                             // current value of inf is used two lines below, save it
@@ -193,8 +197,9 @@ bool Ctc3BCid::shave_bound_dicho(IntervalVector& box, int var,  double wv, bool 
 			//      cout << "  inf=" << inf << " lb=" << lb << " rb=" << rb << " sup=" << sup << endl;
 			box[var] = Interval(rb,sup);
 
-			try {
-				ctc.contract(box,impact);              // [gch] only "var" is set in "impact".
+			ctc.contract(box,impact);              // [gch] only "var" is set in "impact".
+
+			if (!box.is_empty()) {
 				sup=box[var].ub();
 				volatile double mid = (rb+sup)/2;      // we must subdivide the current interval (declared volatile to prevent
 				//   the compiler from expanding mid in the next line and using higher
@@ -202,12 +207,11 @@ bool Ctc3BCid::shave_bound_dicho(IntervalVector& box, int var,  double wv, bool 
 				if (sup-rb<=wv || rb>=mid || sup<=mid) // the two last conditions prevent from splitting a float in half
 					break;
 				else rb=mid;                           // useless to restore domains (we divide the same slice)
-
-			} catch(EmptyBoxException& e) {            // the current slice has been cut off
+			} else {                                   // the current slice has been cut off
 				//cout << "      slice removed.\n";
 				if (sup==rb) {                         // border is degenerated and current=border
 					if (inf==sup)                      // current=border=the whole interval itself:
-						throw e;                       //   in this case the box must remain entirely emptied
+						return true;                   //   in this case the box must remain entirely emptied
 					else break;                        // return anyway (no more to do).
 				}
 				tmp = sup;                             // current value of sup is used two lines below, save it
@@ -246,9 +250,10 @@ bool Ctc3BCid::var3BCID_slices(IntervalVector& box, int var, int locs3b, double 
 		dom = Interval(inf_k, sup_k);
 
 		// Try to refute this slice
-		try {
-			ctc.contract(box,impact);                  // [gch] only "var" is set in "impact".
-		} catch(EmptyBoxException& e) {
+
+		ctc.contract(box,impact);                  // [gch] only "var" is set in "impact".
+
+		if (box.is_empty()) {
 			leftBound = sup_k;
 			k++;
 			continue;
@@ -262,7 +267,7 @@ bool Ctc3BCid::var3BCID_slices(IntervalVector& box, int var, int locs3b, double 
 
 	if (!stopLeft) {                                   // all slices give an empty box
 		box.set_empty();
-		throw EmptyBoxException();
+		return true;                                   // TODO: check return value
 	} else if (k == locs3b) {
 		// Only the last slice gives a non-empty box : box is reduced to this last slice
 		return true;
@@ -288,9 +293,10 @@ bool Ctc3BCid::var3BCID_slices(IntervalVector& box, int var, int locs3b, double 
 			dom = Interval(inf_k, sup_k);
 
 			// Try to refute the slice
-			try {
-				ctc.contract(box,impact);                  // [gch] only "var" is set in "impact".
-			} catch(EmptyBoxException& e) {
+
+			ctc.contract(box,impact);                  // [gch] only "var" is set in "impact".
+
+			if (box.is_empty()) {
 				rightBound = sup_k;
 				k2--;
 				continue;
@@ -351,10 +357,9 @@ bool Ctc3BCid::varCID(int var, IntervalVector &varcid_box, IntervalVector &var3B
 		if (sup_k > dom.ub() || (k == scid-1 && sup_k < dom.ub())) sup_k = dom.ub();
 		dom = Interval(inf_k, sup_k);
 
-		try {
-			ctc.contract(box,impact);                  // [gch] only "var" is set in "impact".
-		}
-		catch(EmptyBoxException& e) {
+		ctc.contract(box,impact);                  // [gch] only "var" is set in "impact".
+
+		if (box.is_empty()) {
 			continue;                                  // the current slice is infeasible : nothing to add to the hull
 		}
 

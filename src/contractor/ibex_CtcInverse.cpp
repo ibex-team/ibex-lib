@@ -31,21 +31,30 @@ void CtcInverse::contract(IntervalVector& box) {
 	id->backward(fx,y);
 
 	BitSet flags(BitSet::empty(Ctc::NB_OUTPUT_FLAGS));
-	try {
-		BitSet impact(BitSet::all(nb_var));
-		c.contract(y,impact,flags);
+
+	BitSet impact(BitSet::all(nb_var));
+
+	c.contract(y,impact,flags);
 	//	c.contract(y);
 
-	} catch(EmptyBoxException& e) {
+	if (y.is_empty()) {
+		set_flag(INACTIVE);
+		set_flag(FIXPOINT);
 		box.set_empty();
-		throw e;
+		return;
 	}
+
 	if (flags[INACTIVE]) {
 		set_flag(INACTIVE);
-
 	} else {
 		fx=id->eval_domain(y);
+
 		f.backward(fx,box);
+
+		if (box.is_empty()) {
+			set_flag(INACTIVE);
+			set_flag(FIXPOINT);
+		}
 	}
 
 }

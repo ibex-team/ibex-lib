@@ -208,6 +208,12 @@ void CtcCompo::contract(IntervalVector& box) {
 		} else {
 			list[i].contract(box);
 		}
+
+		if (box.is_empty()) {
+			set_flag(INACTIVE);
+			set_flag(FIXPOINT);
+			return;
+		}
 	}
 
 	if (inactive) set_flag(INACTIVE);

@@ -13,7 +13,6 @@
 #define __IBEX_CONTRACTOR_H__
 
 #include "ibex_IntervalVector.h"
-#include "ibex_EmptyBoxException.h"
 #include "ibex_BitSet.h"
 #include "ibex_Array.h"
 
