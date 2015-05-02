@@ -354,7 +354,7 @@ void Optimizer::contract_and_bound(Cell& c, const IntervalVector& init_box) {
 void Optimizer::firstorder_contract(  IntervalVector& box, const  IntervalVector& init_box) {
 	if (m==0) {
 		// for unconstrained optimization  contraction with gradient=0
-		if (box.is_strict_subset(init_box)) {
+		if (box.is_strict_interior_subset(init_box)) {
 			// may throw an EmptyBoxException:
 			if (n==1)
 				df.backward(Interval::ZERO,box);
