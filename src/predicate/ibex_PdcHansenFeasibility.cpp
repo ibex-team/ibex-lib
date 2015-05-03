@@ -11,7 +11,6 @@
 #include "ibex_PdcHansenFeasibility.h"
 #include "ibex_Newton.h"
 #include "ibex_Linear.h"
-#include "ibex_EmptyBoxException.h"
 
 namespace ibex {
 
@@ -112,17 +111,16 @@ BoolInterval PdcHansenFeasibility::test(const IntervalVector& box) {
 		}
 	}
 	else {
-		try {
+
 			newton(pf,box2);
-			if (box2.is_strict_subset(savebox)) {
+
+			if (box2.is_empty()) {
+				_solution.set_empty();
+			} else if (box2.is_strict_subset(savebox)) {
 				_solution = pf.extend(box2);
 				res = YES;
 			}
-		} catch (EmptyBoxException& ) {
-			_solution.set_empty();
-		}
 	}
-
 
 	delete [] pr;
 	delete [] pc;
