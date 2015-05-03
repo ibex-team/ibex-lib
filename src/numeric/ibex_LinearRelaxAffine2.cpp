@@ -40,9 +40,10 @@ int LinearRelaxAffine2::linearization(const IntervalVector& box, LinearSolver& l
 
 		af2 = 0.0;
 		op = sys.ctrs[ctr].op;
-		try {
-			ev = sys.ctrs[ctr].f.eval_affine2(box, af2);
-		} catch (EmptyBoxException&) {
+
+		ev = sys.ctrs[ctr].f.eval_affine2(box, af2);
+
+		if (ev.is_empty()) {
 			af2.set_empty();
 		}
 		//std::cout <<ev<<":::"<< af2<<"  "<<af2.size()<<"  " <<sys.nb_var<< std::endl;

@@ -21,16 +21,14 @@ void Gradient::gradient(const Function& f, const Array<Domain>& d, IntervalVecto
 
 	Eval().eval(f,d);
 
+	// outside definition domain -> empty gradient
+	if (f.expr().deco.d->is_empty()) { g.set_empty(); return; }
+
 	g.clear();
 
 	f.write_arg_domains(g,true);
 
-	try {
-		f.forward<Gradient>(*this);
-	} catch(EmptyBoxException&) {
-		g.set_empty();
-		return;
-	}
+	f.forward<Gradient>(*this);
 
 	f.expr().deco.g->i()=1.0;
 
@@ -44,18 +42,16 @@ void Gradient::gradient(const Function& f, const IntervalVector& box, IntervalVe
 	assert(f.expr().deco.d);
 	assert(f.expr().deco.g);
 
-	f.eval_domain(box);
+	if (f.eval_domain(box).is_empty()) {
+		// outside definition domain -> empty gradient
+		g.set_empty(); return;
+	}
 
 	g.clear();
 
 	f.write_arg_domains(g,true);
 
-	try {
-		f.forward<Gradient>(*this);
-	} catch(EmptyBoxException&) {
-		g.set_empty();
-		return;
-	}
+	f.forward<Gradient>(*this);
 
 	f.expr().deco.g->i()=1.0;
 
@@ -88,6 +84,7 @@ void Gradient::jacobian(const Function& f, const Array<Domain>& d, IntervalMatri
 			IntervalVector box(f.nb_var());
 			load(box,d);
 			f[i].gradient(box,J[i]);
+			if (J[i].is_empty()) { J.set_empty(); return; }
 		}
 	}
 }

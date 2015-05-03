@@ -99,7 +99,7 @@ public:
 	inline void div_bwd   (const ExprDiv&,    ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) { x1.g->i() += y.g->i() / x2.d->i(); x2.g->i() += y.g->i()*(-x1.d->i())/sqr(x2.d->i()); }
 	       void max_bwd   (const ExprMax&,    ExprLabel& ,   ExprLabel& ,   const ExprLabel& );
 	       void min_bwd   (const ExprMin&,    ExprLabel& ,   ExprLabel& ,   const ExprLabel& );
-	inline void atan2_bwd (const ExprAtan2& , ExprLabel& ,   ExprLabel& ,   const ExprLabel& )  { /* not implemented yet */ assert(false); }
+	inline void atan2_bwd (const ExprAtan2& , ExprLabel& ,   ExprLabel& ,   const ExprLabel& )  { not_implemented("gradient of atan2"); }
 	inline void minus_bwd (const ExprMinus& , ExprLabel& x,                 const ExprLabel& y) { x.g->i() += -1.0*y.g->i(); }
         inline void trans_V_bwd(const ExprTrans&, ExprLabel& /*x*/,             const ExprLabel& /*y*/) { /* nothing to do because x.g->v() is a reference to y.g->v()
                                                                                                      see Decorator */ }

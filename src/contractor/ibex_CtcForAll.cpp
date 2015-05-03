@@ -17,7 +17,7 @@ namespace {
 
 // as soon as the box is emptied for one value of the parameter
 // the whole contraction gives an empty box.
-class EmptyBox { };
+class ForAllEmptyBox { };
 
 }
 
@@ -85,7 +85,7 @@ void CtcForAll::proceed(IntervalVector& x, const IntervalVector& y, bool& is_ina
 
 	CtcQuantif::contract(x, y_tmp);
 
-	if (x.is_empty()) throw EmptyBox();
+	if (x.is_empty()) throw ForAllEmptyBox();
 
 	if (y.max_diam()>prec) {
 		assert(y.is_bisectable());
@@ -128,7 +128,7 @@ void CtcForAll::contract(IntervalVector& box) {
 				l.pop();
 			}
 		}
-	} catch (EmptyBox& e) {
+	} catch (ForAllEmptyBox& e) {
 		assert(box.is_empty);
 
 		while (!l.empty()) l.pop();

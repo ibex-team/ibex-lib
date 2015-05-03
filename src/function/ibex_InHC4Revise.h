@@ -24,6 +24,13 @@ public:
 
 	void ibwd(const Function& f, const Domain& y, IntervalVector& x, const IntervalVector& xin);
 
+protected:
+	/**
+	 * Class used internally to interrupt the
+	 * backward procedure when an empty domain occurs.
+	 */
+	class EmptyBoxException { };
+
 	inline void index_bwd (const ExprIndex&,   ExprLabel& , const ExprLabel& )        { /* nothing to do */ }
 	void vector_bwd(const ExprVector&,  ExprLabel** , const ExprLabel& )       { not_implemented("Inner projection of \"vector\""); }
 //	       void vector_bwd(const ExprVector&,  ExprLabel** compL, const ExprLabel& result)       { not_implemented("Inner projection of \"vector\""); }

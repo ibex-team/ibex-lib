@@ -134,19 +134,15 @@ void CtcUnion::contract(IntervalVector& box) {
 
 	for (int i=0; i<list.size(); i++) {
 		if (i>0) box=savebox;
-		try {
-			flags.clear();
-			list[i].contract(box,impact,flags);
-			result |= box;
-		}
-		catch(EmptyBoxException&) {
-		}
+
+		flags.clear();
+		list[i].contract(box,impact,flags);
+		result |= box;
 
 		if (flags[INACTIVE]) { set_flag(INACTIVE); break; }
 	}
 
 	box = result;
-	if (box.is_empty()) throw EmptyBoxException();
 } // end namespace ibex
 
 }

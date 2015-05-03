@@ -31,6 +31,8 @@ public:
 	 *
 	 * \param mode  the arithmetic for forward evaluation. By default: interval arithmetic.
 	 * Accepted values are: INTERVAL_MODE or AFFINE2_MODE.
+	 *
+	 * \warning Throws an #EmptyBoxException if the contraction gives an empty set.
 	 */
 	HC4Revise(FwdMode mode=INTERVAL_MODE);
 
@@ -42,8 +44,8 @@ public:
 	 * \brief true if f(x) is included in y (inactive constraint)
 	 *
 	 * \note if x is outside the definition domain of f, then
-	 *       x is set to the empty set (+EmptyBoxException)
-	 *       although f([x])\subseteq [y].
+	 *       x is set to the empty set although f([x])\subseteq [y]
+	 *       and the return value is "false".
 	 */
 	bool proj(const Function& f, const Domain& y, IntervalVector& x);
 
@@ -53,6 +55,13 @@ public:
 	 * Set to 0.1.
 	 */
 	static const double RATIO;
+
+protected:
+	/**
+	 * Class used internally to interrupt the
+	 * backward procedure when an empty domain occurs.
+	 */
+	class EmptyBoxException { };
 
 	inline void index_bwd (const ExprIndex&,   ExprLabel& , const ExprLabel& )            { /* nothing to do */ }
 	       void vector_bwd(const ExprVector&,  ExprLabel** compL, const ExprLabel& result);

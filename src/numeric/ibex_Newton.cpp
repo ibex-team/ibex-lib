@@ -79,14 +79,14 @@ bool newton(const Fnc& f, IntervalVector& box, double prec, double ratio_gauss_s
 
 			gauss_seidel(J, Fmid, y, ratio_gauss_seidel);
 
-			if (y.is_empty()) { box.set_empty(); throw EmptyBoxException(); }
+			if (y.is_empty()) { box.set_empty(); return true; }
 		} catch (LinearException& ) {
 			return reducted; // should be false
 		}
 
 		IntervalVector box2=mid-y;
 
-		if ((box2 &= box).is_empty()) { box.set_empty(); throw EmptyBoxException(); }
+		if ((box2 &= box).is_empty()) { box.set_empty(); return true; }
 
 		gain = box.maxdelta(box2);
 
