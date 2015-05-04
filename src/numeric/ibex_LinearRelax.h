@@ -43,6 +43,9 @@ public:
 	 * \brief The linearization technique.
 	 *
 	 * It must be implemented in the subclasses.
+	 *
+	 * \return the number of constraints (possibly 0) or -1 if the system is
+	 *         infeasible.
 	 */
 	virtual int linearization(const IntervalVector& box, LinearSolver& lp_solver)=0;
 

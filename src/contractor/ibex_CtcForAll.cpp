@@ -13,6 +13,8 @@
 
 using namespace std;
 
+namespace ibex {
+
 namespace {
 
 // as soon as the box is emptied for one value of the parameter
@@ -20,9 +22,6 @@ namespace {
 class ForAllEmptyBox { };
 
 }
-
-namespace ibex {
-
 CtcForAll::CtcForAll(const NumConstraint& ctr,  const ExprSymbol& y1, const IntervalVector& init_box, double prec)
  : CtcQuantif(ctr, Array<const ExprSymbol>(y1), init_box, prec) {
 }

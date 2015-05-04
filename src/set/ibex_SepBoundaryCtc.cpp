@@ -24,18 +24,14 @@ void SepBoundaryCtc::separate(IntervalVector& x_in, IntervalVector& x_out) {
 
 	IntervalVector box = x_in;
 	IntervalVector box0 = box;
-	try {
-		ctc_boundary.contract(box);
 
-		// [gch] not sure the following line is necessary.
-		// If  box==box0 the diff will simply return a
-		// zero-sized array
+	ctc_boundary.contract(box);
 
-		if (box==box0) return;     // nothing contracted.
+	// [gch] not sure the following line is necessary.
+	// If  box==box0 the diff will simply return a
+	// zero-sized array
 
-	} catch(EmptyBoxException& e) {
-
-	}
+	if (box==box0) return;     // nothing contracted.
 
 	x_in = box; x_out = box;
 
