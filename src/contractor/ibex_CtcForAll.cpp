@@ -128,7 +128,7 @@ void CtcForAll::contract(IntervalVector& box) {
 			}
 		}
 	} catch (ForAllEmptyBox& e) {
-		assert(box.is_empty);
+		assert(box.is_empty());
 
 		while (!l.empty()) l.pop();
 
