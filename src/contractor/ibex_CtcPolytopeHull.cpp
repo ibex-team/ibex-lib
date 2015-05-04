@@ -54,8 +54,12 @@ void CtcPolytopeHull::contract(IntervalVector& box) {
 
 		//returns the number of constraints in the linearized system
 		int cont = lr.linearization(box, *mylinearsolver);
+
 		//cout << "[polytope-hull] end of LR" << endl;
-		if(cont<1)  return;
+
+		if (cont==-1) throw PolytopeHullEmptyBoxException();
+
+		if (cont==0) return;
 
 		optimizer(box);
 
