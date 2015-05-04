@@ -29,7 +29,14 @@ void CtcFixPoint::contract(IntervalVector& box) {
 
 	do {
 		old_box=box;
+
 		ctc.contract(box,impact,flags);
+
+		if (box.is_empty()) {
+			set_flag(FIXPOINT);
+			return;
+		}
+
 	} while (!flags[FIXPOINT] && !flags[INACTIVE] && old_box.rel_distance(box)>ratio);
 
 	if (flags[FIXPOINT]) set_flag(FIXPOINT);

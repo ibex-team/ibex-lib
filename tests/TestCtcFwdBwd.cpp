@@ -20,7 +20,10 @@ void TestCtcFwdBwd::sqrt_issue28() {
 	CtcFwdBwd ctc(c);
 
 	IntervalVector box(1,Interval(-2,-1));
-	TEST_THROWS_ANYTHING(ctc.contract(box)); // should raise EmptyBoxException
+
+	ctc.contract(box);
+
+	TEST_ASSERT(box.is_empty());
 }
 
 } // namespace ibex

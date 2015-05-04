@@ -12,9 +12,6 @@
 #include "ibex_Optimizer.h"
 #include <stdlib.h>
 
-
-
-
 namespace ibex {
 
 #ifdef _IBEX_WITH_NOLP_

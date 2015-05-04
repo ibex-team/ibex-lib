@@ -51,7 +51,7 @@ void CtcPixelMap::grid_to_world(IntervalVector& box) {
 void CtcPixelMap::contract(IntervalVector& box) {
 
     assert(box.size() == (int)I.ndim);
-    if(box.is_empty())  throw EmptyBoxException();
+    if(box.is_empty()) return;
 
     // Convert world coordinates into pixel coordinates
     world_to_grid(box);
@@ -65,7 +65,7 @@ void CtcPixelMap::contract(IntervalVector& box) {
     // Check the result
     if(pixel_coords[0] == -1) {
         box.set_empty();
-        throw EmptyBoxException();
+        return;
     }
 
     // Convert pixel coordinates into world coordinates

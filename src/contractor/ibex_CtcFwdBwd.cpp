@@ -104,20 +104,20 @@ void CtcFwdBwd::contract(IntervalVector& box) {
 
 	assert(box.size()==f.nb_var());
 
-	try {
-		if (hc4r.proj(f,d,box)) {
-			set_flag(INACTIVE);
-			set_flag(FIXPOINT);
-		}
-
-		// Note: setting the FIXPOINT flag is incorrect when there
-		// is no multiple occurrence because some operators
-		// may be non-optimal in backward mode.
-
-	} catch (EmptyBoxException& e) {
-		box.set_empty();
-		throw e;
+	//std::cout << " hc4 of " << f << "=" << d << " with box=" << box << std::endl;
+	if (hc4r.proj(f,d,box)) {
+		set_flag(INACTIVE);
+		set_flag(FIXPOINT);
 	}
+	//std::cout << " ---> " << box << std::endl;
+
+	if (box.is_empty()) {
+		set_flag(FIXPOINT);
+	}
+
+	// Note: setting the FIXPOINT flag is incorrect when there
+	// is no multiple occurrence because some operators
+	// may be non-optimal in backward mode.
 }
 
 } // namespace ibex

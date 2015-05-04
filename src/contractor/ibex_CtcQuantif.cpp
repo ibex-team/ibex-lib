@@ -81,18 +81,18 @@ void CtcQuantif::contract(IntervalVector& x, IntervalVector& y) {
 		else         fullbox[i]=y[jy++];
 	}
 	flags.clear();
-	try {
-		ctc->contract(fullbox, impact, flags);
 
+	ctc->contract(fullbox, impact, flags);
+
+	if (!fullbox.is_empty()) {
 		jx=jy=0;
 		for (int i=0; i<nb_var+nb_param; i++) {
 			if (vars[i]) x[jx++]=fullbox[i];
 			else         y[jy++]=fullbox[i];
 		}
-	} catch(EmptyBoxException& e) {
+	} else {
 		x.set_empty();
 		y.set_empty();
-		throw e;
 	}
 }
 

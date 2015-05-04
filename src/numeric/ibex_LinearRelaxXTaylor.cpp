@@ -10,12 +10,17 @@
 
 #include "ibex_LinearRelaxXTaylor.h"
 #include "ibex_ExtendedSystem.h"
-#include "ibex_EmptyBoxException.h"
 #include "ibex_Random.h"
 
 using namespace std;
 
 namespace ibex {
+
+namespace {
+
+class LinearRelaxXTaylorUnsatisfiability { };
+
+}
 
 const double LinearRelaxXTaylor::default_max_diam_deriv =1e6;
 
@@ -88,19 +93,24 @@ int LinearRelaxXTaylor::linearization(const IntervalVector& box, LinearSolver& l
 			G=linear_coef.row(ctr);
 		}
 		int nb_nonlinear_vars;
-		if(cpoints[0]==K4) {
-			for(int j=0; j<4; j++)
-				cont += X_Linearization(box, ctr, K4, G, j, nb_nonlinear_vars,lp_solver);
-		} else  //  linearizations k corners per constraint
-			for(unsigned int k=0; k<(cpoints.size()); k++) {
-				cont += X_Linearization(box, ctr, cpoints[k],  G, k, nb_nonlinear_vars,lp_solver);
+
+		try {
+			if(cpoints[0]==K4) {
+				for(int j=0; j<4; j++)
+					cont += X_Linearization(box, ctr, K4, G, j, nb_nonlinear_vars,lp_solver);
+			} else { //  linearizations k corners per constraint
+				for(unsigned int k=0; k<cpoints.size(); k++)
+					cont += X_Linearization(box, ctr, cpoints[k],  G, k, nb_nonlinear_vars,lp_solver);
 			}
+		} catch(LinearRelaxXTaylorUnsatisfiability&) {
+			return -1;
+		}
 	}
 	return cont;
 }
 
 
-// TODO A quoi sert "nb_nonlinear_vars" ?
+// TODO add comment: what "nb_nonlinear_vars" is used for?
 int LinearRelaxXTaylor::X_Linearization(const IntervalVector& box, int ctr, corner_point cpoint,
 		IntervalVector& G, int id_point, int& nb_nonlinear_vars, LinearSolver& lp_solver) {
 
@@ -341,14 +351,14 @@ int LinearRelaxXTaylor::X_Linearization(const IntervalVector& savebox,
 		if (op == LEQ || op == LT) {
 			//g(xb) + a1' x1 + ... + an xn <= 0
 			if(tot_ev.lb()>(-ev).ub())
-				throw EmptyBoxException();  // the constraint is not satisfied
+				throw LinearRelaxXTaylorUnsatisfiability();  // the constraint is not satisfied
 			if((-ev).ub()<tot_ev.ub()) {    // otherwise the constraint is satisfied for any point in the box
 				lp_solver.addConstraint( row1, LEQ, (-ev).ub());
 				added=true;
 			}
 		} else {
 			if(tot_ev.ub()<(-ev).lb())
-				throw EmptyBoxException();
+				throw LinearRelaxXTaylorUnsatisfiability();
 			if ((-ev).lb()>tot_ev.lb()) {
 				lp_solver.addConstraint( row1, GEQ, (-ev).lb() );
 				added=true;

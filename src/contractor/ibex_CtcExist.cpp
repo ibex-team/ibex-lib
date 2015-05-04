@@ -73,9 +73,9 @@ CtcExist::CtcExist(const NumConstraint& c, const Array<const ExprSymbol>& y, con
 bool CtcExist::proceed(const IntervalVector& x_init, const IntervalVector& x_current, IntervalVector& x_res, IntervalVector& y) {
 	IntervalVector x = x_current;
 
-	try {
-		CtcQuantif::contract(x, y);
-	} catch (EmptyBoxException&) {
+	CtcQuantif::contract(x, y);
+
+	if (x.is_empty()) {
 		return false;
 	}
 
@@ -105,9 +105,12 @@ bool CtcExist::proceed(const IntervalVector& x_init, const IntervalVector& x_cur
 			// To converge faster to the result, we contract with the mid-vector of y.
 			// This allows to get an estimate of "res" without waiting for epsilon-sized
 			// parameter boxes (getting quickly some estimate is important for pruning).
-			try {
-				IntervalVector y_mid = y.mid();
-				CtcQuantif::contract(x,y_mid);  // x may be contracted here; that's why we pushed it on the stack *before* sampling.
+
+			IntervalVector y_mid = y.mid();
+			CtcQuantif::contract(x,y_mid);  // x may be contracted here; that's why we pushed it on the stack *before* sampling.
+
+			if (!x.is_empty()) {
+
 				x_res |= x;
 
 				if ((flags[INACTIVE]) && (x==x_init)) {
@@ -116,7 +119,7 @@ bool CtcExist::proceed(const IntervalVector& x_init, const IntervalVector& x_cur
 				}
 
 				if (x_res==x_init) return true;
-			} catch (EmptyBoxException&) {
+			} else {
 				// do nothing
 			}
 			// =======================================================================
@@ -131,7 +134,7 @@ void CtcExist::contract(IntervalVector& box) {
 	// the returned box, initially empty
 	IntervalVector res=IntervalVector::empty(Ctc::nb_var);
 
-	assert(l.empty()); // even when an exception is thrown by this function, l is empty.
+	assert(l.empty()); // old?--> even when an exception is thrown by this function, l is empty.
 
 	l.push(pair<IntervalVector,IntervalVector>(box, y_init));
 	
@@ -154,13 +157,16 @@ void CtcExist::contract(IntervalVector& box) {
 
 		// proceed with the two sub-boxes for y
 		stop=proceed(box, x_save, res, cut.first);
-		if (!stop) 	stop=proceed(box, x_save, res, cut.second);
+		if (!stop) stop=proceed(box, x_save, res, cut.second);
 	}
 
 	while (!l.empty()) l.pop();
 
 	box &= res;
-	if (box.is_empty()) throw EmptyBoxException();
+
+	if (box.is_empty()) {
+		set_flag(FIXPOINT);
+	}
 
 }
 

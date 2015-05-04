@@ -19,9 +19,11 @@ class TestSetInterval : public TestIbex {
 public:
 	TestSetInterval() {
 		TEST_ADD(TestSetInterval::diff01);
+		TEST_ADD(TestSetInterval::diff02);
 	}
 
 	void diff01();
+	void diff02();
 };
 
 } // end namespace ibex

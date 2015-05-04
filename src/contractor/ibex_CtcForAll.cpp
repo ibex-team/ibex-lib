@@ -15,6 +15,13 @@ using namespace std;
 
 namespace ibex {
 
+namespace {
+
+// as soon as the box is emptied for one value of the parameter
+// the whole contraction gives an empty box.
+class ForAllEmptyBox { };
+
+}
 CtcForAll::CtcForAll(const NumConstraint& ctr,  const ExprSymbol& y1, const IntervalVector& init_box, double prec)
  : CtcQuantif(ctr, Array<const ExprSymbol>(y1), init_box, prec) {
 }
@@ -77,6 +84,8 @@ void CtcForAll::proceed(IntervalVector& x, const IntervalVector& y, bool& is_ina
 
 	CtcQuantif::contract(x, y_tmp);
 
+	if (x.is_empty()) throw ForAllEmptyBox();
+
 	if (y.max_diam()>prec) {
 		assert(y.is_bisectable());
 		l.push(y);
@@ -96,7 +105,7 @@ void CtcForAll::proceed(IntervalVector& x, const IntervalVector& y, bool& is_ina
 void CtcForAll::contract(IntervalVector& box) {
 	assert(box.size()==Ctc::nb_var);
 
-	assert(l.empty()); // when an exception is thrown by this function, l is flushed.
+	assert(l.empty()); // old?--> when an exception is thrown by this function, l is flushed.
 
 	l.push(y_init);
 
@@ -118,10 +127,13 @@ void CtcForAll::contract(IntervalVector& box) {
 				l.pop();
 			}
 		}
-	} catch (EmptyBoxException& e) {
+	} catch (ForAllEmptyBox& e) {
+		assert(box.is_empty);
+
 		while (!l.empty()) l.pop();
-		box.set_empty();
-		throw e;
+
+		set_flag(FIXPOINT);
+		return;
 	}
 
 	if (is_inactive) set_flag(INACTIVE);
