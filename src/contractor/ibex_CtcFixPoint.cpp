@@ -34,7 +34,6 @@ void CtcFixPoint::contract(IntervalVector& box) {
 
 		if (box.is_empty()) {
 			set_flag(FIXPOINT);
-			set_flag(INACTIVE);
 			return;
 		}
 

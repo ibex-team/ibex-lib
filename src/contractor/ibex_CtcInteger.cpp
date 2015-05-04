@@ -32,9 +32,8 @@ void CtcInteger::contract(IntervalVector& box) {
 	for (int i=0; i<nb_var; i++) {
 		if (is_int[i] && (!impact() || (*impact())[i])) {
 			if (!bwd_integer(box[i])) {
-				set_flag(INACTIVE);
-				set_flag(FIXPOINT);
 				box.set_empty();
+				set_flag(FIXPOINT);
 				return;
 			}
 		}

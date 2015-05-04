@@ -42,7 +42,9 @@ void TestCtcInteger::test02() {
 	double _box[][2] = {{0.01,0.99},  {0.01,0.99}};
 	IntervalVector box(2,_box);
 
-	TEST_THROWS(c.contract(box), EmptyBoxException);
+	c.contract(box);
+
+	TEST_ASSERT(box.is_empty());
 }
 
 } // end namespace

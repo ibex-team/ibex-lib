@@ -21,9 +21,8 @@ void CtcEmpty::contract(IntervalVector& box) {
 	BoolInterval t= pdc.test(box);
 	switch (t) {
 	case YES:
-		set_flag(INACTIVE);
-		set_flag(FIXPOINT);
 		box.set_empty();
+		set_flag(FIXPOINT);
 		break;
 	case NO:
 		// The constraint is inactive only if

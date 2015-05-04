@@ -29,9 +29,7 @@ void TestCtcNotIn::check_not_in(int dim, const IntervalVector& x_input, const In
 
 	IntervalVector x(x_input);
 
-	try {
-		c->contract(x);
-	} catch(EmptyBoxException&) { }
+	c->contract(x);
 
 	check(x,x_expected);
 

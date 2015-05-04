@@ -132,7 +132,6 @@ void CtcForAll::contract(IntervalVector& box) {
 
 		while (!l.empty()) l.pop();
 
-		set_flag(INACTIVE);
 		set_flag(FIXPOINT);
 		return;
 	}

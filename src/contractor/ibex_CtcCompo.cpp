@@ -210,7 +210,6 @@ void CtcCompo::contract(IntervalVector& box) {
 		}
 
 		if (box.is_empty()) {
-			set_flag(INACTIVE);
 			set_flag(FIXPOINT);
 			return;
 		}

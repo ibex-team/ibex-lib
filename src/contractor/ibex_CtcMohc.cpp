@@ -138,7 +138,6 @@ void CtcMohcRevise::contract(IntervalVector& b) {
 	ctr.f.backward(root_label,b);
 
 	if (b.is_empty()) {
-		set_flag(INACTIVE);
 		set_flag(FIXPOINT);
 		active_mono_proc=0;
 		return;
@@ -216,9 +215,8 @@ void CtcMohcRevise::contract(IntervalVector& b) {
 				MonoBoxNarrow();
 
 		}
-	}catch (MohcEmptyBoxException& e) {
+	} catch (MohcEmptyBoxException& e) {
 		b.set_empty();
-		set_flag(INACTIVE);
 		set_flag(FIXPOINT);
 		return;
 	}

@@ -38,9 +38,8 @@ void CtcInverse::contract(IntervalVector& box) {
 	//	c.contract(y);
 
 	if (y.is_empty()) {
-		set_flag(INACTIVE);
-		set_flag(FIXPOINT);
 		box.set_empty();
+		set_flag(FIXPOINT);
 		return;
 	}
 
@@ -52,7 +51,6 @@ void CtcInverse::contract(IntervalVector& box) {
 		f.backward(fx,box);
 
 		if (box.is_empty()) {
-			set_flag(INACTIVE);
 			set_flag(FIXPOINT);
 		}
 	}

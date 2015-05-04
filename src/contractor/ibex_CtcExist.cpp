@@ -157,7 +157,7 @@ void CtcExist::contract(IntervalVector& box) {
 
 		// proceed with the two sub-boxes for y
 		stop=proceed(box, x_save, res, cut.first);
-		if (!stop) 	stop=proceed(box, x_save, res, cut.second);
+		if (!stop) stop=proceed(box, x_save, res, cut.second);
 	}
 
 	while (!l.empty()) l.pop();
@@ -166,7 +166,6 @@ void CtcExist::contract(IntervalVector& box) {
 
 	if (box.is_empty()) {
 		set_flag(FIXPOINT);
-		set_flag(INACTIVE);
 	}
 
 }
