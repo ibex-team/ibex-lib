@@ -9,7 +9,6 @@
 //============================================================================
 
 #include "ibex_Paver.h"
-#include "ibex_EmptyBoxException.h"
 #include "ibex_Timer.h"
 
 using namespace std;
@@ -36,42 +35,40 @@ void Paver::contract(Cell& cell, SubPaving* paving) {
 	// used to compare boxes before and after contraction
 	IntervalVector tmpbox(cell.box.size());
 
-	try {
-		while (fix_count<n && i<ctc.size()) {
+	while (fix_count<n && i<ctc.size()) {
 
-			//cout << "[contractor " << i << "] box=" << endl;
+		//cout << "[contractor " << i << "] box=" << endl;
 
-			// 	  for (int j=1; j<=box.size(); j++) {
-			// 	    cout.precision(17);
-			// 	    cout << "box[" << j << "]=" << box[j] << endl;
-			// 	  }
-			if (trace)  cout << "    ctc " << i;
-			tmpbox=cell.box;
+		// 	  for (int j=1; j<=box.size(); j++) {
+		// 	    cout.precision(17);
+		// 	    cout << "box[" << j << "]=" << box[j] << endl;
+		// 	  }
+		if (trace)  cout << "    ctc " << i;
+		tmpbox=cell.box;
 
-			ctc[i].contract(cell.box);
+		ctc[i].contract(cell.box);
 
-			if (tmpbox.rel_distance(cell.box)>0) {
-				fix_count=0;
-
-				paving[i].add(tmpbox,cell.box);
-
-				if (trace) cout << " -> contracts" << endl;
-
-			} else {
-				fix_count++;
-				if (trace) cout << " -> nothing" << endl;
-			}
-
-			i = ctc_loop? (i+1)%ctc.size() : i+1;
-
+		if (cell.box.is_empty()) {
+			if (trace) cout << " -> empty set" << endl;
+			paving[i].add(tmpbox);
+			return;
 		}
-	} catch(EmptyBoxException&) {
-		assert(cell.box.is_empty());
-		if (trace) cout << " -> empty set" << endl;
 
-		paving[i].add(tmpbox);
+		if (tmpbox.rel_distance(cell.box)>0) {
+			fix_count=0;
+
+			paving[i].add(tmpbox,cell.box);
+
+			if (trace) cout << " -> contracts" << endl;
+
+		} else {
+			fix_count++;
+			if (trace) cout << " -> nothing" << endl;
+		}
+
+		i = ctc_loop? (i+1)%ctc.size() : i+1;
+
 	}
-
 }
 
 void Paver::bisect(Cell& c) {

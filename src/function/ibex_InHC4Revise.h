@@ -14,7 +14,6 @@
 #include "ibex_Function.h"
 #include "ibex_Exception.h"
 #include "ibex_InnerArith.h"
-#include "ibex_EmptyBoxException.h"
 
 namespace ibex {
 
@@ -31,6 +30,7 @@ protected:
 	 */
 	class EmptyBoxException { };
 
+public: // because called from CompiledFunction
 	inline void index_bwd (const ExprIndex&,   ExprLabel& , const ExprLabel& )        { /* nothing to do */ }
 	void vector_bwd(const ExprVector&,  ExprLabel** , const ExprLabel& )       { not_implemented("Inner projection of \"vector\""); }
 //	       void vector_bwd(const ExprVector&,  ExprLabel** compL, const ExprLabel& result)       { not_implemented("Inner projection of \"vector\""); }

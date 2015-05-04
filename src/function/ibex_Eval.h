@@ -13,7 +13,6 @@
 #define _IBEX_EVAL_H_
 
 #include "ibex_Function.h"
-#include "ibex_EmptyBoxException.h"
 #include <iostream>
 
 namespace ibex {
@@ -57,6 +56,7 @@ protected:
 	 */
 	class EmptyBoxException { };
 
+public: // because called from CompiledFunction
 	inline void index_fwd(const ExprIndex&, const ExprLabel& x, ExprLabel& y);
 	       void vector_fwd(const ExprVector&, const ExprLabel** compL, ExprLabel& y);
 	inline void cst_fwd(const ExprConstant&, ExprLabel& y);

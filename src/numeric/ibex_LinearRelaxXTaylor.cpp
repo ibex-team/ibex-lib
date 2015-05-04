@@ -18,7 +18,7 @@ namespace ibex {
 
 namespace {
 
-class LinearRelaxXTaylorInsatisfiability { };
+class LinearRelaxXTaylorUnsatisfiability { };
 
 }
 
@@ -102,7 +102,7 @@ int LinearRelaxXTaylor::linearization(const IntervalVector& box, LinearSolver& l
 				for(unsigned int k=0; k<cpoints.size(); k++)
 					cont += X_Linearization(box, ctr, cpoints[k],  G, k, nb_nonlinear_vars,lp_solver);
 			}
-		} catch(LinearRelaxXTaylorInsatisfiability&) {
+		} catch(LinearRelaxXTaylorUnsatisfiability&) {
 			return -1;
 		}
 	}
@@ -351,14 +351,14 @@ int LinearRelaxXTaylor::X_Linearization(const IntervalVector& savebox,
 		if (op == LEQ || op == LT) {
 			//g(xb) + a1' x1 + ... + an xn <= 0
 			if(tot_ev.lb()>(-ev).ub())
-				throw LinearRelaxXTaylorInsatisfiability();  // the constraint is not satisfied
+				throw LinearRelaxXTaylorUnsatisfiability();  // the constraint is not satisfied
 			if((-ev).ub()<tot_ev.ub()) {    // otherwise the constraint is satisfied for any point in the box
 				lp_solver.addConstraint( row1, LEQ, (-ev).ub());
 				added=true;
 			}
 		} else {
 			if(tot_ev.ub()<(-ev).lb())
-				throw LinearRelaxXTaylorInsatisfiability();
+				throw LinearRelaxXTaylorUnsatisfiability();
 			if ((-ev).lb()>tot_ev.lb()) {
 				lp_solver.addConstraint( row1, GEQ, (-ev).lb() );
 				added=true;

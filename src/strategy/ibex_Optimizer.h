@@ -333,17 +333,6 @@ protected:
 	void contract_and_bound(Cell& c, const IntervalVector& init_box);
 
 	/**
-	 * \brief Contraction procedure for processing a box.
-	 *
-	 * <ul>
-	 * <li> contract with the contractor ctc,
-	 * </ul>
-	 *
-	 */
-	 virtual void contract(IntervalVector& box, const IntervalVector& init_box );
-
-
-	/**
 	 * \brief First order contraction procedure for processing a box.
 	 *
 	 * <ul>
@@ -355,12 +344,12 @@ protected:
 
 	virtual void firstorder_contract ( IntervalVector& box, const IntervalVector& init_box);
 
-
 	/**
 	 * \brief Update the entailed constraint for the current box
+	 *
+	 * \return false if unsatisfiability is detected, true otherwise.
 	 */
-	void update_entailed_ctr(const IntervalVector& box);
-
+	bool update_entailed_ctr(const IntervalVector& box);
 
 	/**
 	 * \brief Update the uplo of non bisectable boxes

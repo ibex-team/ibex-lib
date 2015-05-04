@@ -9,7 +9,6 @@
 //============================================================================
 
 #include "ibex_Solver.h"
-#include "ibex_EmptyBoxException.h"
 #include "ibex_NoBisectableVariableException.h"
 #include <cassert>
 
@@ -56,53 +55,50 @@ bool Solver::next(std::vector<IntervalVector>& sols) {
 			Cell* c=buffer.top();
 
 			int v=c->get<BisectedVar>().var;      // last bisected var.
-			try {
 
-				if (v!=-1)                          // no root node :  impact set to 1 for last bisected var only
-                               	  impact.add(v);
-				else                                // root node : impact set to 1 for all variables
-				  impact.fill(0,ctc.nb_var-1);
+			if (v!=-1)                          // no root node :  impact set to 1 for last bisected var only
+				impact.add(v);
+			else                                // root node : impact set to 1 for all variables
+				impact.fill(0,ctc.nb_var-1);
 
-				ctc.contract(c->box,impact);
+			ctc.contract(c->box,impact);
 
-				if (v!=-1)
-				  impact.remove(v);
-				else                              // root node : impact set to 0 for all variables after contraction
-	    			  impact.clear();
-			
-				try {
-
-					pair<IntervalVector,IntervalVector> boxes=bsc.bisect(*c);
-					pair<Cell*,Cell*> new_cells=c->bisect(boxes.first,boxes.second);
-
-					delete buffer.pop();
-					buffer.push(new_cells.first);
-					buffer.push(new_cells.second);
-					nb_cells+=2;
-					if (cell_limit >=0 && nb_cells>=cell_limit) throw CellLimitException();}
-
-				catch (NoBisectableVariableException&) {
-					new_sol(sols, c->box);
-					delete buffer.pop();
-					return !buffer.empty();
-					// note that we skip time_limit_check() here.
-					// In the case where "next" is called by "solve",
-					// and if time has exceeded, the exception will be raised by the
-					// very next call to "next" anyway. This holds, unless "next" finds
-					// new solutions again and again endlessly. So there is a little risk
-					// of uncaught timeout in this case (but this case is probably already
-					// an error case).
-				}
-				time_limit_check();
-
-			} catch(EmptyBoxException&) {
-				assert(c->box.is_empty());
+			if (c->box.is_empty()) {
 				delete buffer.pop();
 				impact.remove(v); // note: in case of the root node, we should clear the bitset
-				                  // instead but since the search is over, the impact is not used anymore.
-
-
+				// instead but since the search is over, the impact is not used anymore.
+				continue;
 			}
+
+			if (v!=-1)
+				impact.remove(v);
+			else                              // root node : impact set to 0 for all variables after contraction
+				impact.clear();
+
+			try {
+
+				pair<IntervalVector,IntervalVector> boxes=bsc.bisect(*c);
+				pair<Cell*,Cell*> new_cells=c->bisect(boxes.first,boxes.second);
+
+				delete buffer.pop();
+				buffer.push(new_cells.first);
+				buffer.push(new_cells.second);
+				nb_cells+=2;
+				if (cell_limit >=0 && nb_cells>=cell_limit) throw CellLimitException();}
+
+			catch (NoBisectableVariableException&) {
+				new_sol(sols, c->box);
+				delete buffer.pop();
+				return !buffer.empty();
+				// note that we skip time_limit_check() here.
+				// In the case where "next" is called by "solve",
+				// and if time has exceeded, the exception will be raised by the
+				// very next call to "next" anyway. This holds, unless "next" finds
+				// new solutions again and again endlessly. So there is a little risk
+				// of uncaught timeout in this case (but this case is probably already
+				// an error case).
+			}
+			time_limit_check();
 		}
 	}
 	catch (TimeOutException&) {

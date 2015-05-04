@@ -135,14 +135,16 @@ void CtcMohcRevise::contract(IntervalVector& b) {
 	root_label.i()=right_cst;
 	Interval z;
 
-	if (ctr.f.backward(root_label,b)) {
-		//box is feasible
+	ctr.f.backward(root_label,b);
+
+	if (b.is_empty()) {
 		set_flag(INACTIVE);
 		set_flag(FIXPOINT);
 		active_mono_proc=0;
 		return;
 	}
 
+	//box is feasible
 	z=ctr.f.expr().deco.d->i();
 
 	if (b.is_empty()) return;

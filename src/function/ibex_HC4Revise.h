@@ -11,7 +11,6 @@
 #ifndef __IBEX_HC4_REVISE_H__
 #define __IBEX_HC4_REVISE_H__
 
-#include "ibex_EmptyBoxException.h"
 #include "ibex_Function.h"
 
 namespace ibex {
@@ -63,6 +62,7 @@ protected:
 	 */
 	class EmptyBoxException { };
 
+public: // because called from CompiledFunction
 	inline void index_bwd (const ExprIndex&,   ExprLabel& , const ExprLabel& )            { /* nothing to do */ }
 	       void vector_bwd(const ExprVector&,  ExprLabel** compL, const ExprLabel& result);
 	inline void symbol_bwd(const ExprSymbol& , const ExprLabel& )                             { /* nothing to do */ }
