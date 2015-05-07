@@ -210,5 +210,8 @@ void Gradient::abs_bwd (const ExprAbs& e, ExprLabel& exprL, const ExprLabel& res
 	else if (exprL.d->i().ub()<=0) exprL.g->i() += -1.0*result.g->i();
 	else exprL.g->i() += Interval(-1,1)*result.g->i();
 }
-
+void Gradient::atan2_bwd(const ExprAtan2& , ExprLabel& x1,   ExprLabel& x2,   const ExprLabel& y) {
+    x1.g->i() += y.g->i() * x2.d->i() / (sqr(x2.d->i()) + sqr(x1.d->i()));
+    x2.g->i() += y.g->i() * - x1.d->i() / (sqr(x2.d->i()) + sqr(x1.d->i()));
+}
 } // namespace ibex
