@@ -19,16 +19,12 @@ using namespace std;
 #define UNK_IN     __IBEX_UNK_IN__
 #define UNK_OUT    __IBEX_UNK_OUT__
 #define UNK_IN_OUT __IBEX_UNK_IN_OUT__
-#define IN_TMP     __IBEX_IN_TMP__
 // ========================================
 
 namespace ibex {
 
-SetLeaf::SetLeaf(NodeType status) : SetNode(status) {
-	if (status>UNK && status!=IN_TMP) {
-		ibex_error("cannot set multiple status to SetLeaf");
-	}
-}
+SetLeaf::SetLeaf(NodeType status) : SetNode(status) { }
+
 SetLeaf::~SetLeaf() {
 
 }
@@ -89,21 +85,20 @@ SetNode* SetLeaf::sync_rec(const IntervalVector& nodebox, Sep& sep, double eps) 
 
 SetNode* SetLeaf::inter(const IntervalVector& nodebox, const IntervalVector& x, NodeType xstatus, double eps) {
 	//cout << nodebox << " " << to_string(status)  << " inter " << x << " ";
-	assert(xstatus<=UNK);
 
-	if (status<UNK || xstatus==UNK) {
+	if (status==OUT || xstatus==IN || xstatus==UNK_IN_OUT) {
 		//cout << "this\n";
 		return this;
 	} else if (nodebox.is_subset(x)) {
-		if (xstatus==IN && status==IN_TMP) status=IN; // if status==UNK, it remains UNK.
-		else if (xstatus==OUT ) status=OUT;
+		status=xstatus; // status is either IN or UNK, xstatus is either OUT or UNK
 		 //cout << "this\n";
 		return this;
-	} else if (status==UNK && xstatus==IN) {
+	} else if (status==UNK && xstatus==UNK) {
 		 //cout << "this\n";
 		return this;
 	} else {
-		// (status,xstatus)=(IN_TMP, IN), (IN_TMP, OUT) or (UNK, OUT).
+		// (status,xstatus)=(IN, OUT) or (IN, UNK) or (UNK, OUT).
+		// note: (IN,OUT) should not occur if there is a boundary
 		SetNode* new_node=diff(nodebox, x, status, xstatus, eps);
 		delete this; // warning: suicide, don't move it before previous line
 		//cout << "gives "; new_node->print(cout,nodebox,0);
@@ -155,14 +150,6 @@ void SetLeaf::visit_leaves(leaf_func func, const IntervalVector& nodebox) const 
 void SetLeaf::print(ostream& os, const IntervalVector& nodebox, int shift) const {
 	for (int i=0; i<shift; i++) os << ' ';
 	os  << nodebox << " " << to_string(status) << endl;
-}
-
-void SetLeaf::set_in_tmp() {
-	if (status==IN) status=IN_TMP;
-}
-
-void SetLeaf::unset_in_tmp() {
-	if (status==IN_TMP) status=UNK;
 }
 
 } // namespace ibex

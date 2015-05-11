@@ -136,16 +136,6 @@ void SetBisect::print(ostream& os, const IntervalVector& nodebox, int shift) con
 	right->print(os, right_box(nodebox), shift+2);
 }
 
-void SetBisect::set_in_tmp() {
-	left->set_in_tmp();
-	right->set_in_tmp();
-}
-
-void SetBisect::unset_in_tmp() {
-	left->unset_in_tmp();
-	right->unset_in_tmp();
-}
-
 IntervalVector SetBisect::left_box(const IntervalVector& nodebox) const {
 	IntervalVector leftbox(nodebox);
 	assert (nodebox[var].contains(pt));

@@ -23,16 +23,14 @@ namespace ibex {
  * __IBEX_UNK__      : the node is of unknown status (typically, corresponds to a boundary box)
  * __IBEX_UNK_IN     : the subtree contains IN and UNK leaves
  * __IBEX_UNK_OUT    : the subtree contains OUT and UNK leaves
- * __IBEX_UNK_IN_OUT : the subtree contains IN, OUT and UNK leaves
- * __IBEX_IN_TMP__   : used by "inter" functions only. Means "inside the original set" (but not necessarily inside the intersection)
+ * __IBEX_UNK_IN_OUT : the subtree contains IN, OUT and UNK leaves. Used also for a temporary leaf (too large to be considered as boundary).
  */
 typedef enum { __IBEX_IN__,
 	           __IBEX_OUT__,
 	           __IBEX_UNK__,
 	           __IBEX_UNK_IN__,
 	           __IBEX_UNK_OUT__,
-	           __IBEX_UNK_IN_OUT__,
-	           __IBEX_IN_TMP__ } NodeType;
+	           __IBEX_UNK_IN_OUT__ } NodeType;
 
 /**
  * \brief Status of a union of two nodes.

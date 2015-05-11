@@ -129,26 +129,6 @@ public:
 	virtual void print(std::ostream& os, const IntervalVector& nodebox, int shift) const=0;
 
 	/**
-	 * Set all "IN" leaves to "IN_TMP".
-	 *
-	 * This function is useful for calculating set intersection only.
-	 * It sets all the inner nodes of the original set to IN_TMP before.
-	 * This allows to distinguish a node that is inside the original set (IN_TMP)
-	 * from a node that is proven to be inside the intersection (IN).
-	 */
-	virtual void set_in_tmp()=0;
-
-	/**
-	 * Set all "IN_TMP" leaves to "UNK"
-	 *
-	 * This function is useful for calculating set intersection only.
-	 * Once the intersection is calculated, the nodes that was in the original
-	 * set but that could not be proven to be inside the intersection
-	 * have "UNK" status.
-	 */
-	virtual void unset_in_tmp()=0;
-
-	/**
 	 * \brief The status of the node
 	 */
 	NodeType status;
