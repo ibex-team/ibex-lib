@@ -57,12 +57,6 @@ public:
 	/** \see SetNode */
 	virtual void print(std::ostream& os, const IntervalVector& nodebox, int shift) const;
 
-	/** \see SetNode */
-	virtual void set_in_tmp();
-
-	/** \see SetNode */
-	virtual void unset_in_tmp();
-
 private:
 	SetLeaf(const SetLeaf&); // forbidden
 

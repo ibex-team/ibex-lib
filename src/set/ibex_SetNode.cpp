@@ -122,9 +122,9 @@ SetNode* contract_set(const IntervalVector& box, Sep& sep, double eps) {
 
 	sep.separate(box1,box2);
 
-	SetNode* root1 = diff(box, box1, IN, UNK_IN_OUT, eps);
+	SetNode* root1 = diff(box, box1, IN, box1.max_diam()<=eps? UNK : UNK_IN_OUT, eps);
 	//cout << "set obtained with inner contraction:" << endl; root1->print(cout,box,0);
-	SetNode* root2 = diff(box, box2, OUT, UNK_IN_OUT, eps);
+	SetNode* root2 = diff(box, box2, OUT, box2.max_diam()<=eps? UNK : UNK_IN_OUT, eps);
 	//cout << "set obtained with outer contraction:" << endl;	root2->print(cout,box,0);
 
 	// TODO: pb: sync fails

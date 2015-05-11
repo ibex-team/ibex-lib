@@ -75,8 +75,6 @@ SetNode* SetBisect::sync_rec(const IntervalVector& nodebox, Sep& sep, double eps
 
 
 SetNode* SetBisect::inter(const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps) {
-	assert(x_status<=UNK);
-
 	// no: keep subnodes informed that x_status is IN (their status can changed from IN_TMP to IN)
 	//	if (x_status==IN) {
 	//		return this;
