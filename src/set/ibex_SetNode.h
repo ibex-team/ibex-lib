@@ -95,6 +95,8 @@ public:
 
 	/**
 	 * \brief Intersection with an i-set reduced to a single box "x" of status "x_status".
+	 *
+	 * \warning !Important! what is outside of x is considered to be "IN" (not "OUT")
 	 */
 	virtual SetNode* inter(const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps)=0;
 

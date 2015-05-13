@@ -86,19 +86,28 @@ SetNode* SetLeaf::sync_rec(const IntervalVector& nodebox, Sep& sep, double eps) 
 SetNode* SetLeaf::inter(const IntervalVector& nodebox, const IntervalVector& x, NodeType xstatus, double eps) {
 	//cout << nodebox << " " << to_string(status)  << " inter " << x << " ";
 
-	if (status==OUT || xstatus==IN || xstatus==UNK_IN_OUT) {
+	if (status==OUT || xstatus==IN) {
 		//cout << "this\n";
 		return this;
 	} else if (nodebox.is_subset(x)) {
-		status=xstatus; // status is either IN or UNK, xstatus is either OUT or UNK
-		 //cout << "this\n";
+		if (xstatus==OUT) status=OUT;
+		else { // xstatus>=UNK
+			if (certainly_contains_out(xstatus) && nodebox.is_superset(x)) status=UNK_OUT; // not very useful...
+			else status=UNK;
+		}
+		//cout << "this\n";
 		return this;
-	} else if (status==UNK && xstatus==UNK) {
+	} else if (status>=UNK && xstatus>=UNK) {
 		 //cout << "this\n";
-		return this;
+		status = UNK; // we don't know where the "IN" or the "OUT" part is -> useless to split the box
+		return this; // there may be no more IN or OUT anymore.
 	} else {
-		// (status,xstatus)=(IN, OUT) or (IN, UNK) or (UNK, OUT).
-		// note: (IN,OUT) should not occur if there is a boundary
+
+		// at this point (status,xstatus) = (>=UNK, OUT) or (IN, >=UNK)
+
+		if (xstatus>=UNK && !nodebox.is_superset(x)) xstatus=UNK; // we "lose" the IN/OUT part of x
+
+		// note: what is outside of x is considered to be "IN" (not "OUT")
 		SetNode* new_node=diff(nodebox, x, status, xstatus, eps);
 		delete this; // warning: suicide, don't move it before previous line
 		//cout << "gives "; new_node->print(cout,nodebox,0);
@@ -108,10 +117,8 @@ SetNode* SetLeaf::inter(const IntervalVector& nodebox, const IntervalVector& x, 
 
 SetNode* SetLeaf::inter_rec(const IntervalVector& nodebox, Sep& sep, double eps) {
 
-	if (status<UNK)
+	if (status==OUT || nodebox.max_diam()<=eps) {
 		return this;
-	else if (nodebox.max_diam()<=eps) {
-		return this;  // status is IN_TMP and stays like this.
 	} else {
 		int var=nodebox.extr_diam_index(false);
 		pair<IntervalVector,IntervalVector> p=nodebox.bisect(var);

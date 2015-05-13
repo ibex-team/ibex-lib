@@ -28,89 +28,141 @@ namespace ibex {
 
 SetNode* diff(const IntervalVector& x, const IntervalVector& y, NodeType x_status, NodeType y_status, double eps) {
 
+	assert(!x.is_empty());
+
 	if (y.is_empty()) {
 		return new SetLeaf(x_status);
 	}
+
+	if (y_status>=UNK && !x.is_superset(y)) y_status = UNK; // we don't know if the IN/OUT part of y is inside x...
 
 	const int nn=x.size();
 
 	typedef struct {
 		int var;
 		double pt;
-		bool y_left; // is the part that belongs to y on the left (=true) or right (=false) side?
+		bool x_left;      // is the part that belongs to x is on the left (=true) or right (=false) side?
+		bool x_enlarged;  // the x-part is enlarged by eps and therefore has both x_status and y_status
 	} bisection;
 
+	// used to determine the status of the final box once the "slices" has been cut off.
+	// It may either be y_status or (x_status | y_status) if at some point
+	// the y-part has been enlarged.
+	bool y_enlarged=false; // false by default
+
 	bisection *tmp = new bisection[2*nn]; // in the worst case, there is 2n bisections
-	Interval c1, c2;
-	int b=0;
+
+	int b=0; // count bisections
+
+	Interval* c = new Interval[2];
 
 	for (int var=0; var<nn; var++) {
 
-		x[var].diff(y[var],c1,c2);
-		//cout << "x[" << var << "]=" << x[var] << " y[" << var << "]=" << y[var] << " c1=" << c1 << " c2=" << c2 << endl;
+		x[var].diff(y[var],c[0],c[1]);
+		//cout << "x[" << var << "]=" << x[var] << " y[" << var << "]=" << y[var] << " c1=" << c[0] << " c2=" << c[1] << endl;
 
-		if (c1.is_empty()) continue;
+		for (int i=0; i<2; i++) {
 
-		// we discard the x-part if it is not significant
-		// but this is safe only if the status of y is UNK.
-		if (y_status==UNK && c1.diam()<eps) continue;
+			// x-part is empty: no bisection on this variable
+			if (c[i].is_empty()) continue;
 
-		// when the set difference is close to x itself
-		// we return x. But this is safe only if the
-		// status of x is UNK.
-		if (x[var]==c1 || (x_status==UNK && x[var].delta(c1)<eps)) {
-			// no (significant) difference at all
-			delete[] tmp;
-			return new SetLeaf(x_status);
-		}
-
-		tmp[b].var = var;
-		if (c1.lb()==x[var].lb()) {
-			tmp[b].pt = c1.ub();
-			assert(x[var].interior_contains(tmp[b].pt));
-			tmp[b].y_left = false;
-		} else {
-			tmp[b].pt = c1.lb();
-			assert(x[var].interior_contains(tmp[b].pt));
-			tmp[b].y_left = true;
-		}
-		b++;
-
-		if (c2.is_empty()) continue;
-		if (y_status==UNK && c2.diam()<eps)  continue;
-		if (x[var]==c2 || (x_status==UNK && x[var].delta(c2)<eps)) {
-			// no (significant) difference at all
-			delete[] tmp;
-			return new SetLeaf(x_status);
-		}
-
-		tmp[b].var = var;
-		tmp[b].pt = c2.lb();
-		assert(x[var].interior_contains(tmp[b].pt));
-		tmp[b].y_left = true;
-		b++;
-	}
-
-	SetNode* root;
-
-	if (b==0) {
-		root = new SetLeaf(y_status);
-	} else {
-		SetNode* bisect=new SetLeaf(y_status);
-
-		for (int i=b-1; i>=0; i--) {
-			if (tmp[i].y_left) {
-				assert(x[tmp[i].var].interior_contains(tmp[i].pt));
-				bisect=new SetBisect(tmp[i].var,tmp[i].pt, bisect, new SetLeaf(x_status));
-			} else {
-				assert(x[tmp[i].var].interior_contains(tmp[i].pt));
-				bisect=new SetBisect(tmp[i].var,tmp[i].pt, new SetLeaf(x_status), bisect);
+			// y-part is empty: no bisection at all
+			if (c[i]==x[var]) {
+				delete[] tmp;
+				delete[] c;
+				return new SetLeaf(x_status);
 			}
-		}
-		root = bisect;
-	}
-	delete[] tmp;
 
+			// x is too small
+			if (x[var].ub() < x[var].lb()+eps) {
+				y_enlarged = true;
+				continue;
+			}
+
+			tmp[b].var = var;
+			tmp[b].x_enlarged = false; // by default
+
+			// c[i] is on the left side
+			if (c[i].lb()==x[var].lb()) {
+
+				tmp[b].x_left = true;
+
+				// we enlarge the x-part if it is too small
+				if (c[i].diam()<eps) {
+					c[i] = Interval(x[var].lb(), x[var].lb()+eps);
+					tmp[b].x_enlarged = true;
+				}
+				// we enlarge the y-part if it is too small
+				else if (x[var].delta(c[i])<eps) {
+					c[i] = Interval(x[var].lb(), x[var].ub()-eps);
+					y_enlarged = true;
+				}
+
+				tmp[b].pt = c[i].ub();
+				assert(x[var].interior_contains(tmp[b].pt));
+			}
+
+			// c[i] is on the right side
+			else  {
+
+				tmp[b].x_left = false;
+
+				// we enlarge the x-part if it is too small
+				if (c[i].diam()<eps) {
+					c[i] = Interval(x[var].ub()-eps, x[var].ub());
+					tmp[b].x_enlarged = true;
+				}
+				// enlarge the y-part if it is too small
+				else if (x[var].delta(c[i])<eps) {
+					c[i] = Interval(x[var].lb()+eps, x[var].ub());
+					y_enlarged = true;
+				}
+
+				tmp[b].pt = c[i].lb();
+				assert(x[var].interior_contains(tmp[b].pt));
+			}
+
+			b++;
+		}
+	}
+
+	delete[] c;
+
+	SetNode* root = new SetLeaf(y_enlarged? x_status | y_status : y_status);
+
+	SetNode* bisect=root;
+
+	// we first proceed with the eps-enlarged slices (this order
+	// corresponds to the reverse order of the bisection
+	//
+	for (int i=b-1; i>=0; i--) {
+		if (!tmp[i].x_enlarged) continue; // postponed
+
+		if (tmp[i].x_left) {
+			assert(x[tmp[i].var].interior_contains(tmp[i].pt));
+			bisect=new SetBisect(tmp[i].var,tmp[i].pt, new SetLeaf(x_status | y_status), bisect);
+		} else {
+			assert(x[tmp[i].var].interior_contains(tmp[i].pt));
+			bisect=new SetBisect(tmp[i].var,tmp[i].pt, bisect, new SetLeaf(x_status | y_status));
+		}
+
+	}
+
+	// we then proceed with the exact bisections (x_status is not lost for the slices)
+	for (int i=b-1; i>=0; i--) {
+		if (tmp[i].x_enlarged) continue; // already done
+
+		if (tmp[i].x_left) {
+			assert(x[tmp[i].var].interior_contains(tmp[i].pt));
+			bisect=new SetBisect(tmp[i].var,tmp[i].pt, new SetLeaf(x_status), bisect);
+		} else {
+			assert(x[tmp[i].var].interior_contains(tmp[i].pt));
+			bisect=new SetBisect(tmp[i].var,tmp[i].pt, bisect, new SetLeaf(x_status));
+		}
+	}
+
+	root = bisect;
+	delete[] tmp;
 	return root;
 }
 
@@ -122,9 +174,9 @@ SetNode* contract_set(const IntervalVector& box, Sep& sep, double eps) {
 
 	sep.separate(box1,box2);
 
-	SetNode* root1 = diff(box, box1, IN, box1.max_diam()<=eps? UNK : UNK_IN_OUT, eps);
+	SetNode* root1 = diff(box, box1, IN, UNK, eps);
 	//cout << "set obtained with inner contraction:" << endl; root1->print(cout,box,0);
-	SetNode* root2 = diff(box, box2, OUT, box2.max_diam()<=eps? UNK : UNK_IN_OUT, eps);
+	SetNode* root2 = diff(box, box2, OUT, UNK, eps);
 	//cout << "set obtained with outer contraction:" << endl;	root2->print(cout,box,0);
 
 	// TODO: pb: sync fails

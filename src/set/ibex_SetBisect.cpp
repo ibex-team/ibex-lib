@@ -21,7 +21,6 @@ using namespace std;
 #define UNK_IN     __IBEX_UNK_IN__
 #define UNK_OUT    __IBEX_UNK_OUT__
 #define UNK_IN_OUT __IBEX_UNK_IN_OUT__
-#define IN_TMP     __IBEX_IN_TMP__
 // ========================================
 
 namespace ibex {
@@ -150,7 +149,7 @@ IntervalVector SetBisect::right_box(const IntervalVector& nodebox) const {
 
 SetNode* SetBisect::try_merge() {
 	// the case left=right=UNK may happen.
-	if (left->status<=UNK && left->status==right->status) {
+	if (left->status==right->status) {
 		NodeType s=left->status;
 		delete this;
 		return new SetLeaf(s);

@@ -16,7 +16,6 @@
 #define UNK_IN     __IBEX_UNK_IN__
 #define UNK_OUT    __IBEX_UNK_OUT__
 #define UNK_IN_OUT __IBEX_UNK_IN_OUT__
-#define IN_TMP     __IBEX_IN_TMP__
 // ========================================
 
 namespace ibex {

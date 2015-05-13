@@ -33,15 +33,29 @@ typedef enum { __IBEX_IN__,
 	           __IBEX_UNK_IN_OUT__ } NodeType;
 
 /**
- * \brief Status of a union of two nodes.
+ * \brief Status of a union of two nodes **in the sync sense**.
  *
- * \note Status only useful for "sync" functions. So the IN_TMP status is ignored (and this makes no problem so far).
+ * \warning The sync sense means that __IBEX_IN__ | __IBEX_OUT__ gives __IBEX_UNK_IN_OUT__ and
+ * not __IBEX_IN__ !
  *
  * Ex: __IBEX_IN__ | __IBEX_UNK__ gives __IBEX_IN_UNK__.
  *
  * \see SetBisect constructor.
  */
 NodeType operator|(NodeType x, NodeType y);
+
+/**
+ * \brief Status of an intersection of two nodes **in the sync sense**
+ *
+ * \warning The sync sense means that __IBEX_IN__ & __IBEX_OUT__ is impossible and
+ * not __IBEX_OUT__ !
+ *
+ * Ex: __IBEX_IN__ & __IBEX_UNK__ gives __IBEX_IN__.
+ *
+ * \see SetBisect constructor.
+ */
+NodeType operator|(NodeType x, NodeType y);
+
 
 /**
  * \brief False only if the subtree contains no inner point
