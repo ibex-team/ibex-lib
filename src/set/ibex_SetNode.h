@@ -86,7 +86,7 @@ public:
 	/**
 	 * \brief Intersection with an i-set represented implicitly by a Sep
 	 */
-	SetNode* inter(const IntervalVector& nodebox, Sep& sep, double eps);
+	SetNode* inter(const IntervalVector& nodebox, Sep& sep, const IntervalVector& targetbox, double eps);
 
 	/**
 	 * \brief Intersection with an explicit i-set "other"
@@ -108,7 +108,7 @@ public:
 	 *
 	 * If this node is a leaf, it means it has to be bisected.
 	 */
-	virtual SetNode* inter_rec(const IntervalVector& nodebox, Sep& sep, double eps)=0;
+	virtual SetNode* inter_rec(const IntervalVector& nodebox, Sep& sep, const IntervalVector& targetbox, double eps)=0;
 
 	/**
 	 * \brief Union with an explicit i-set "other"

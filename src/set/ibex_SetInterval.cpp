@@ -42,7 +42,7 @@ void SetInterval::sync(Sep& sep) {
 }
 
 void SetInterval::contract(Sep& sep) {
-	root = root->inter(bounding_box, sep, eps);
+	root = root->inter(bounding_box, sep, bounding_box, eps);
 }
 
 SetInterval& SetInterval::operator&=(const SetInterval& set) {

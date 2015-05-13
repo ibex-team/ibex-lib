@@ -74,7 +74,7 @@ SetNode* diff(const IntervalVector& x, const IntervalVector& y, NodeType x_statu
 			}
 
 			// x is too small
-			if (x[var].ub() < x[var].lb()+eps) {
+			if (x[var].ub() <= x[var].lb()+eps) {
 				y_enlarged = true;
 				continue;
 			}
@@ -242,16 +242,30 @@ SetNode* SetNode::sync(const IntervalVector& nodebox, const SetNode* other, cons
 	}
 }
 
-SetNode* SetNode::inter(const IntervalVector& nodebox, Sep& sep, double eps) {
-	// we skip other UNK-box if this node is not a leaf. This makes no difference
-	// if we are in SYNC mode but if we are in INTER mode, this prevents from
-	// this node to be "absorbed" by a temporary UNK box resulting from contraction.
-	SetNode* this2 = this->inter(nodebox, contract_set(nodebox, sep, eps), nodebox, eps);
+SetNode* SetNode::inter(const IntervalVector& nodebox, Sep& sep, const IntervalVector& targetbox, double eps) {
+
+	IntervalVector box=targetbox & nodebox;
+
+	if (box.is_empty()) return this;
+
+	IntervalVector box1(box);
+	IntervalVector box2(box);
+
+	sep.separate(box1,box2);
+
+	SetNode* root1 = diff(box, box2, OUT, IN, eps);
+
+	SetNode* this2 = this->inter(nodebox, root1, box, eps);
 	//cout << " sep gives: "; this2->print(cout,nodebox,0);
 
-	SetNode* this4 = this2->inter_rec(nodebox, sep, eps);
+	if (box1.is_empty())
+		return this2;
+	else {
+		SetNode* this4 = this2->inter_rec(nodebox, sep, box1, eps);
+		//cout << " inter rec gives: "; this4->print(cout,nodebox,0);
 
-	return this4;
+		return this4;
+	}
 }
 
 

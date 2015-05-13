@@ -104,9 +104,6 @@ SetNode* SetLeaf::inter(const IntervalVector& nodebox, const IntervalVector& x, 
 	} else {
 
 		// at this point (status,xstatus) = (>=UNK, OUT) or (IN, >=UNK)
-
-		if (xstatus>=UNK && !nodebox.is_superset(x)) xstatus=UNK; // we "lose" the IN/OUT part of x
-
 		// note: what is outside of x is considered to be "IN" (not "OUT")
 		SetNode* new_node=diff(nodebox, x, status, xstatus, eps);
 		delete this; // warning: suicide, don't move it before previous line
@@ -115,9 +112,13 @@ SetNode* SetLeaf::inter(const IntervalVector& nodebox, const IntervalVector& x, 
 	}
 }
 
-SetNode* SetLeaf::inter_rec(const IntervalVector& nodebox, Sep& sep, double eps) {
+SetNode* SetLeaf::inter_rec(const IntervalVector& nodebox, Sep& sep, const IntervalVector& targetbox, double eps) {
 
-	if (status==OUT || nodebox.max_diam()<=eps) {
+	if (status==OUT)
+		return this;
+	else if (nodebox.max_diam()<=eps) {
+		// we know that targetbox is inside nodebox (see SetNode::inter(,...,Sep&,...)
+		status = UNK;
 		return this;
 	} else {
 		int var=nodebox.extr_diam_index(false);
@@ -126,7 +127,7 @@ SetNode* SetLeaf::inter_rec(const IntervalVector& nodebox, Sep& sep, double eps)
 		assert(nodebox[var].interior_contains(pt));
 		SetBisect* bis = new SetBisect(var, pt, new SetLeaf(status), new SetLeaf(status));
 		delete this;
-		return bis->inter_rec(nodebox, sep, eps);
+		return bis->inter_rec(nodebox, sep, targetbox, eps);
 	}
 }
 

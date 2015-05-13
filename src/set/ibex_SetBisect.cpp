@@ -29,7 +29,7 @@ SetBisect::SetBisect(int var, double pt, SetNode* left, SetNode* right) : SetNod
 	// a bisectNode with two subnodes of same status IN or OUT should not exist
 	// (automatically compacted as a leaf node) but two subnodes IN_TMP can be
 	// created by a leaf with IN_TMP status (when it auto-splits in inter function)
-	assert(left->status>=UNK || left->status!=right->status);
+	//assert(left->status>=UNK || left->status!=right->status);
 }
 
 SetBisect::SetBisect(int var, double pt) : SetNode(UNK), var(var), pt(pt), left(NULL), right(NULL) {
@@ -87,7 +87,7 @@ SetNode* SetBisect::inter(const IntervalVector& nodebox, const IntervalVector& x
 	// certainly_contains_out in comment because does not take into account IN_TMP
     if ((x_status==OUT /*|| !certainly_contains_out(status)*/) && nodebox.is_subset(x)) {
 		delete this; // warning: suicide
-		return new SetLeaf(x_status); // either OUT or UNK
+		return new SetLeaf(x_status);
 	} else {
 		left = left->inter(left_box(nodebox), x, x_status, eps);
 		right = right->inter(right_box(nodebox), x, x_status, eps);
@@ -96,10 +96,10 @@ SetNode* SetBisect::inter(const IntervalVector& nodebox, const IntervalVector& x
 	}
 }
 
-SetNode* SetBisect::inter_rec(const IntervalVector& nodebox, Sep& sep, double eps) {
-	left = left->inter(left_box(nodebox), sep, eps);
-	right = right->inter(right_box(nodebox), sep, eps);
-	// status of children may have changed --> try merge
+SetNode* SetBisect::inter_rec(const IntervalVector& nodebox, Sep& sep, const IntervalVector& targetbox, double eps) {
+	left = left->inter(left_box(nodebox), sep, targetbox, eps);
+	right = right->inter(right_box(nodebox), sep, targetbox, eps);
+	// status of children may have changed --> try merge or update status
 	return try_merge();
 }
 
@@ -148,13 +148,16 @@ IntervalVector SetBisect::right_box(const IntervalVector& nodebox) const {
 }
 
 SetNode* SetBisect::try_merge() {
-	// the case left=right=UNK may happen.
-	if (left->status==right->status) {
-		NodeType s=left->status;
-		delete this;
-		return new SetLeaf(s);
-	} else
+	// note: we cannot merge nodes with status like UNK_IN
+	// because we would lose all the information of the subtree!
+//	if (left->status<=UNK && left->status==right->status) {
+//		NodeType s=left->status;
+//		delete this;
+//		return new SetLeaf(s);
+//	} else {
+		status = left->status | right->status;
 		return this;
+//	}
 }
 
 } // namespace ibex
