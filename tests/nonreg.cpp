@@ -9,6 +9,7 @@
 
 #include "ibex.h"
 #include <fstream>
+#include <iomanip>
 #include <sstream>
 #include <stdlib.h>
 
