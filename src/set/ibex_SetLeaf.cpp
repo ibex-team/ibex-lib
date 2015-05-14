@@ -44,35 +44,47 @@ bool SetLeaf::is_leaf() const {
 
 SetNode* SetLeaf::sync(const IntervalVector& nodebox, const IntervalVector& x, NodeType xstatus, double eps) {
 	//cout << nodebox << " " << to_string(status)  << " sync " << x << " ";
+	NodeType sub_xstatus=subset(xstatus);
 
-	if (!nodebox.intersects(x) || status<UNK) {
-		//cout << "this\n";
+	if(status<UNK) {
+		status = status & xstatus; // just to throw an EmptySet exception if xstatus is not compatible.
 		return this;
-	} else if (nodebox.is_subset(x)) {
-		if (xstatus<UNK || nodebox==x) status=status & xstatus; // may throw Noset.
-		//cout << "this\n";
-		return this;
-	} else {
-		// if x is not included in nodebox, the "IN" or the "OUT"
-		// part of x may be outside or inside this.
-		if (xstatus>UNK && !nodebox.is_superset(x))
-			xstatus = UNK;
-
-		if (xstatus==UNK) { // => useles to go further
-			//cout << "this\n";
-			return this; // there may be no more IN or OUT anymore.
-		}
-
-		// nodebox is not included in x so the "IN" or the "OUT" part of this node may be outside or inside x.
-		// => We set status to "UNK" before calculating the diff.
-		if (status>=UNK)
-			status = UNK;
-
-		SetNode* new_node=diff(nodebox, x, UNK, xstatus, eps);
-		delete this; // warning: suicide, don't move it before previous line
-		//cout << "gives "; new_node->print(cout,nodebox,0);
-		return new_node;
 	}
+
+	if (xstatus==UNK || !nodebox.intersects(x)) {
+		return this;
+	}
+
+	if (nodebox.is_subset(x)) {
+		if (sub_xstatus!=xstatus && nodebox==x) status=status & xstatus; // may throw EmptySet
+		else status=status & sub_xstatus; // may throw EmptySet
+		return this;
+	}
+
+
+	// if x is not included in nodebox, the "IN" or the "OUT"
+	// part of x may be outside or inside this.
+	if (sub_xstatus!=xstatus && !nodebox.is_superset(x))
+		xstatus = sub_xstatus;
+
+	NodeType sub_status=subset(status);
+
+	xstatus = sub_status & xstatus; // synchronization
+
+	// ex: status==UNK_OUT and xstatus==UNK
+	// in this case there is no need calculating the diff
+	// and then merging the result (we would lose the OUT information)
+	if (sub_status==xstatus) {
+		// ex: status=UNK_IN and xstatus=UNK
+		// then status at the end is UNK.
+		status = ibex::inter(status, ibex::_union(sub_status,xstatus));
+		return this;
+	}
+
+	SetNode* new_node=diff(nodebox, x, UNK, xstatus, eps);
+	delete this; // warning: suicide, don't move it before previous line
+	//cout << "gives "; new_node->print(cout,nodebox,0);
+	return new_node;
 }
 
 SetNode* SetLeaf::sync_rec(const IntervalVector& nodebox, Sep& sep, const IntervalVector& targetbox, double eps) {
@@ -148,7 +160,7 @@ SetNode* SetLeaf::inter_rec(const IntervalVector& nodebox, Sep& sep, const Inter
 		pair<IntervalVector,IntervalVector> p=nodebox.bisect(var);
 		double pt=p.first[var].ub();
 		assert(nodebox[var].interior_contains(pt));
-		SetBisect* bis = new SetBisect(var, pt, new SetLeaf(status), new SetLeaf(status));
+		SetBisect* bis = new SetBisect(var, pt, new SetLeaf(subset(status)), new SetLeaf(subset(status)));
 		delete this;
 		return bis->inter_rec(nodebox, sep, targetbox, eps);
 	}

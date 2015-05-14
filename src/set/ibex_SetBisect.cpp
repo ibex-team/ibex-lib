@@ -46,15 +46,28 @@ bool SetBisect::is_leaf() const {
 }
 
 SetNode* SetBisect::sync(const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps) {
-	if (x_status==UNK) {
+	if (x_status==UNK || !nodebox.intersects(x)) {
 		return this;
 	}
 	else if (nodebox.is_subset(x)) {
-		if (x_status==IN && !possibly_contains_in(status)) throw NoSet();
-		if (x_status==OUT && !possibly_contains_out(status)) throw NoSet();
-
-		delete this; // warning: suicide
-		return new SetLeaf(x_status);
+		if (x_status==IN) {
+			if (!possibly_contains_in(status)) throw NoSet();
+			else {
+				delete this; // warning: suicide
+				return new SetLeaf(IN);
+			}
+		}
+		else if (x_status==OUT) {
+			if (!possibly_contains_out(status)) throw NoSet();
+			else {
+				delete this; // warning: suicide
+				return new SetLeaf(OUT);
+			}
+		}
+		else if (certainly_contains_in(x_status) && !possibly_contains_in(status) && nodebox==x) throw NoSet();
+		else if (certainly_contains_out(x_status) && !possibly_contains_out(status) && nodebox==x) throw NoSet();
+		else // x_status >= UNK
+			return this;
 	} else {
 		left = left->sync(left_box(nodebox), x, x_status, eps);
 		right = right->sync(right_box(nodebox), x, x_status, eps);
