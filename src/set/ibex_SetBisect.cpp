@@ -46,8 +46,6 @@ bool SetBisect::is_leaf() const {
 }
 
 SetNode* SetBisect::sync(const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps) {
-	assert(x_status<=UNK);
-
 	if (x_status==UNK) {
 		return this;
 	}
@@ -65,29 +63,21 @@ SetNode* SetBisect::sync(const IntervalVector& nodebox, const IntervalVector& x,
 	}
 }
 
-SetNode* SetBisect::sync_rec(const IntervalVector& nodebox, Sep& sep, double eps) {
-	left = left->sync(left_box(nodebox), sep, eps);
-	right = right->sync(right_box(nodebox), sep, eps);
+SetNode* SetBisect::sync_rec(const IntervalVector& nodebox, Sep& sep, const IntervalVector& targetbox, double eps) {
+	left = left->sync(left_box(nodebox), sep, targetbox, eps);
+	right = right->sync(right_box(nodebox), sep, targetbox, eps);
 	// status of children may have changed --> try merge
 	return try_merge();
 }
 
 
 SetNode* SetBisect::inter(const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps) {
-	// no: keep subnodes informed that x_status is IN (their status can changed from IN_TMP to IN)
-	//	if (x_status==IN) {
-	//		return this;
-	//	}
-
-	// in comment because certainly_contains_in does not take into account IN_TMP
-//	if (x_status==UNK && !certainly_contains_in(status)) {
-//		return this;
-//	}
-
 	// certainly_contains_out in comment because does not take into account IN_TMP
-    if ((x_status==OUT /*|| !certainly_contains_out(status)*/) && nodebox.is_subset(x)) {
+	if (x_status==IN)
+		return this;
+	else if ((x_status==OUT /*|| !certainly_contains_out(status)*/) && nodebox.is_subset(x)) {
 		delete this; // warning: suicide
-		return new SetLeaf(x_status);
+		return new SetLeaf(OUT);
 	} else {
 		left = left->inter(left_box(nodebox), x, x_status, eps);
 		right = right->inter(right_box(nodebox), x, x_status, eps);
@@ -150,14 +140,14 @@ IntervalVector SetBisect::right_box(const IntervalVector& nodebox) const {
 SetNode* SetBisect::try_merge() {
 	// note: we cannot merge nodes with status like UNK_IN
 	// because we would lose all the information of the subtree!
-//	if (left->status<=UNK && left->status==right->status) {
-//		NodeType s=left->status;
-//		delete this;
-//		return new SetLeaf(s);
-//	} else {
+	if (left->status<=UNK && left->status==right->status) {
+		NodeType s=left->status;
+		delete this;
+		return new SetLeaf(s);
+	} else {
 		status = left->status | right->status;
 		return this;
-//	}
+	}
 }
 
 } // namespace ibex

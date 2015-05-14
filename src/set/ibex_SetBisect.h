@@ -45,7 +45,7 @@ public:
 	virtual SetNode* inter(const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps);
 
 	/** \see SetNode */
-	virtual SetNode* sync_rec(const IntervalVector& nodebox, Sep& sep, double eps);
+	virtual SetNode* sync_rec(const IntervalVector& nodebox, Sep& sep, const IntervalVector& targetbox, double eps);
 
 	/** \see SetNode */
 	virtual SetNode* inter_rec(const IntervalVector& nodebox, Sep& sep, const IntervalVector& targetbox, double eps);

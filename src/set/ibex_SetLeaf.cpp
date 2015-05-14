@@ -44,29 +44,38 @@ bool SetLeaf::is_leaf() const {
 
 SetNode* SetLeaf::sync(const IntervalVector& nodebox, const IntervalVector& x, NodeType xstatus, double eps) {
 	//cout << nodebox << " " << to_string(status)  << " sync " << x << " ";
-	assert(xstatus<=UNK);
 
-	if (xstatus==UNK || status==xstatus) {
+	if (!nodebox.intersects(x) || status<UNK) {
 		//cout << "this\n";
 		return this;
 	} else if (nodebox.is_subset(x)) {
-		if (status!=UNK) throw NoSet();
-		status=xstatus;
+		if (xstatus<UNK || nodebox==x) status=status & xstatus; // may throw Noset.
 		//cout << "this\n";
 		return this;
 	} else {
-		if ((nodebox & x).is_flat()) {
+		// if x is not included in nodebox, the "IN" or the "OUT"
+		// part of x may be outside or inside this.
+		if (xstatus>UNK && !nodebox.is_superset(x))
+			xstatus = UNK;
+
+		if (xstatus==UNK) { // => useles to go further
 			//cout << "this\n";
-			return this;
+			return this; // there may be no more IN or OUT anymore.
 		}
-		SetNode* new_node=diff(nodebox, x, status, xstatus, eps);
+
+		// nodebox is not included in x so the "IN" or the "OUT" part of this node may be outside or inside x.
+		// => We set status to "UNK" before calculating the diff.
+		if (status>=UNK)
+			status = UNK;
+
+		SetNode* new_node=diff(nodebox, x, UNK, xstatus, eps);
 		delete this; // warning: suicide, don't move it before previous line
 		//cout << "gives "; new_node->print(cout,nodebox,0);
 		return new_node;
 	}
 }
 
-SetNode* SetLeaf::sync_rec(const IntervalVector& nodebox, Sep& sep, double eps) {
+SetNode* SetLeaf::sync_rec(const IntervalVector& nodebox, Sep& sep, const IntervalVector& targetbox, double eps) {
 
 	if (status<UNK || nodebox.max_diam()<=eps) {
 		return this;
@@ -77,7 +86,7 @@ SetNode* SetLeaf::sync_rec(const IntervalVector& nodebox, Sep& sep, double eps) 
 		assert(nodebox[var].interior_contains(pt));
 		SetBisect* bis = new SetBisect(var, pt, new SetLeaf(UNK), new SetLeaf(UNK));
 		delete this;
-		return bis->sync_rec(nodebox, sep, eps);
+		return bis->sync_rec(nodebox, sep, targetbox, eps);
 	}
 }
 
@@ -86,26 +95,40 @@ SetNode* SetLeaf::sync_rec(const IntervalVector& nodebox, Sep& sep, double eps) 
 SetNode* SetLeaf::inter(const IntervalVector& nodebox, const IntervalVector& x, NodeType xstatus, double eps) {
 	//cout << nodebox << " " << to_string(status)  << " inter " << x << " ";
 
-	if (status==OUT || xstatus==IN) {
+	NodeType sub_xstatus=subset(xstatus);
+
+	if (status==OUT || xstatus==IN || !nodebox.intersects(x)) {
 		//cout << "this\n";
 		return this;
 	} else if (nodebox.is_subset(x)) {
-		if (xstatus==OUT) status=OUT;
-		else { // xstatus>=UNK
-			if (certainly_contains_out(xstatus) && nodebox.is_superset(x)) status=UNK_OUT; // not very useful...
-			else status=UNK;
-		}
-		//cout << "this\n";
+		if (sub_xstatus!=xstatus && nodebox==x) status=ibex::inter(status,xstatus);
+		else status=ibex::inter(status,sub_xstatus);
 		return this;
-	} else if (status>=UNK && xstatus>=UNK) {
-		 //cout << "this\n";
-		status = UNK; // we don't know where the "IN" or the "OUT" part is -> useless to split the box
-		return this; // there may be no more IN or OUT anymore.
 	} else {
+		// if x is not included in nodebox, the "IN" or the "OUT"
+		// part of x may be outside or inside this.
+		if (sub_xstatus!=xstatus && !nodebox.is_superset(x))
+			xstatus = sub_xstatus;
 
-		// at this point (status,xstatus) = (>=UNK, OUT) or (IN, >=UNK)
+		NodeType sub_status=subset(status);
+
+		// nodebox is not included in x so the "IN" or the "OUT" part of this node may be outside or inside x.
+		xstatus = ibex::inter(sub_status,xstatus);
+
+		// ex: status==UNK_OUT and xstatus==UNK
+		// in this case there is no need calculating the diff
+		// and then merging the result (we would lose the OUT information)
+		if (sub_status==xstatus) {
+			// ex: status=UNK_IN and xstatus=UNK
+			// then status at the end is UNK.
+			status = ibex::inter(status, ibex::_union(sub_status,xstatus));
+			return this;
+		}
+
+		// at this point (sub_status,xstatus) can be:
+		// (UNK, OUT), (UNK,UNK_OUT), (IN,>=UNK) or (IN, OUT) (the last should not happen in practice)
 		// note: what is outside of x is considered to be "IN" (not "OUT")
-		SetNode* new_node=diff(nodebox, x, status, xstatus, eps);
+		SetNode* new_node=diff(nodebox, x, sub_status, xstatus, eps);
 		delete this; // warning: suicide, don't move it before previous line
 		//cout << "gives "; new_node->print(cout,nodebox,0);
 		return new_node;

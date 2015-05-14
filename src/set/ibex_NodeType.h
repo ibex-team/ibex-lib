@@ -47,14 +47,45 @@ NodeType operator|(NodeType x, NodeType y);
 /**
  * \brief Status of an intersection of two nodes **in the sync sense**
  *
- * \warning The sync sense means that __IBEX_IN__ & __IBEX_OUT__ is impossible and
+ * \warning The sync sense means that __IBEX_IN__ & __IBEX_OUT__ is impossible (throw NoSet) and
  * not __IBEX_OUT__ !
  *
  * Ex: __IBEX_IN__ & __IBEX_UNK__ gives __IBEX_IN__.
  *
  * \see SetBisect constructor.
  */
-NodeType operator|(NodeType x, NodeType y);
+NodeType operator&(NodeType x, NodeType y);
+
+/**
+ * \brief Status of an intersection of two nodes
+ *
+ *
+ * Ex: __IBEX_IN__ & __IBEX_UNK__ gives __IBEX_UNK__.
+ *     __IBEX_UNK_OUT__ & __IBEX_UNK__ gives __IBEX_UNK_OUT__.
+ *
+ * \see SetBisect constructor.
+ */
+NodeType inter(NodeType x, NodeType y);
+
+/**
+ * \brief Status of an union of two nodes
+ *
+ *
+ * Ex: __IBEX_IN__ & __IBEX_OUT__ gives __IBEX_UNK_IN_OUT__.
+
+ *
+ * \see SetBisect constructor.
+ */
+NodeType _union(NodeType x, NodeType y);
+
+/**
+ * \brief Status of the subset of a node
+ *
+ * Ex: subset(__IBEX_UNK_IN__) = __IBEX_UNK__
+ *
+ * \see SetBisect constructor.
+ */
+NodeType subset(NodeType x);
 
 
 /**

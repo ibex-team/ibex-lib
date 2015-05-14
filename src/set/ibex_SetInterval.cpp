@@ -33,7 +33,7 @@ bool SetInterval::is_empty() const {
 
 void SetInterval::sync(Sep& sep) {
 	try {
-		root = root->sync(bounding_box, sep, eps);
+		root = root->sync(bounding_box, sep, bounding_box, eps);
 	} catch(NoSet& e) {
 		delete root;
 		root = NULL;

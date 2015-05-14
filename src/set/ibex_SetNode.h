@@ -56,20 +56,19 @@ public:
 	/**
 	 * \brief Synchronization with an i-set represented implicitly by a Sep
 	 */
-	SetNode* sync(const IntervalVector& nodebox, Sep& sep, double eps);
+	SetNode* sync(const IntervalVector& nodebox, Sep& sep, const IntervalVector& targetbox, double eps);
 
 	/**
 	 * \brief Synchronization with an explicit i-set "other"
 	 *
-	 * skip_other_maybe: don't consider UNK box of the other set. This is important
-	 *                   because the other set may be a temporary set produced by
-	 *                   the contract function (and the UNK box will be refined later)
+	 * Important:  what is outside of "other" is considered to be "UNK"
 	 */
-	SetNode* sync(const IntervalVector& nodebox, const SetNode* other, const IntervalVector& otherbox, double eps, bool skip_other_maybe);
+	SetNode* sync(const IntervalVector& nodebox, const SetNode* other, const IntervalVector& otherbox, double eps);
 
 	/**
 	 * \brief Synchronization with an i-set reduced to a single box "x" of status "x_status".
 	 *
+	 * Important:  what is outside of x is considered to be "UNK"
 	 */
 	virtual SetNode* sync(const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps)=0;
 
@@ -81,7 +80,7 @@ public:
 	 *
 	 * If this node is a leaf, it means it has to be bisected.
 	 */
-	virtual SetNode* sync_rec(const IntervalVector& nodebox, Sep& sep, double eps)=0;
+	virtual SetNode* sync_rec(const IntervalVector& nodebox, Sep& sep, const IntervalVector& targetbox, double eps)=0;
 
 	/**
 	 * \brief Intersection with an i-set represented implicitly by a Sep
@@ -90,13 +89,15 @@ public:
 
 	/**
 	 * \brief Intersection with an explicit i-set "other"
+	 *
+	 * Important: what is outside of "other" is considered to be "IN"
 	 */
 	SetNode* inter(const IntervalVector& nodebox, const SetNode* other, const IntervalVector& otherbox, double eps);
 
 	/**
 	 * \brief Intersection with an i-set reduced to a single box "x" of status "x_status".
 	 *
-	 * \warning !Important! what is outside of x is considered to be "IN" (not "OUT")
+	 * Important: what is outside of x is considered to be "IN"
 	 */
 	virtual SetNode* inter(const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps)=0;
 
@@ -112,11 +113,16 @@ public:
 
 	/**
 	 * \brief Union with an explicit i-set "other"
+	 *
+	 * Important:  what is outside of "other" is considered to be "OUT"
 	 */
 	SetNode* union_(const IntervalVector& nodebox, const SetNode* other, const IntervalVector& otherbox, double eps);
 
 	/**
 	 * \brief Union with an i-set reduced to a single box "x" of status "x_status".
+	 *
+	 * Important:  what is outside of x is considered to be "OUT"
+	 *
 	 */
 	virtual SetNode* union_(const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps)=0;
 
@@ -138,8 +144,6 @@ public:
 
 
 SetNode* diff(const IntervalVector& x, const IntervalVector& y, NodeType x_status, NodeType y_status, double eps);
-
-SetNode* contract_set(const IntervalVector& x, Sep& sep, double eps);
 
 } // namespace ibex
 
