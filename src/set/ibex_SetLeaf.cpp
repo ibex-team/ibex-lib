@@ -140,16 +140,17 @@ SetNode* SetLeaf::inter(const IntervalVector& nodebox, const IntervalVector& x, 
 		// at this point (sub_status,xstatus) can be:
 		// (UNK, OUT), (UNK,UNK_OUT), (IN,>=UNK) or (IN, OUT) (the last should not happen in practice)
 		// note: what is outside of x is considered to be "IN" (not "OUT")
+
 		SetNode* new_node=diff(nodebox, x, sub_status, xstatus, eps);
 		delete this; // warning: suicide, don't move it before previous line
-		//cout << "gives "; new_node->print(cout,nodebox,0);
+
 		return new_node;
 	}
 }
 
 SetNode* SetLeaf::inter_rec(const IntervalVector& nodebox, Sep& sep, const IntervalVector& targetbox, double eps) {
 
-	if (status==OUT)
+	if (status==OUT || !nodebox.intersects(targetbox))
 		return this;
 	else if (nodebox.max_diam()<=eps) {
 		// we know that targetbox is inside nodebox (see SetNode::inter(,...,Sep&,...)

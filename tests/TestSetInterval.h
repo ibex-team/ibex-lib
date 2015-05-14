@@ -18,20 +18,21 @@ namespace ibex {
 class TestSetInterval : public TestIbex {
 public:
 	TestSetInterval() {
-		TEST_ADD(TestSetInterval::diff01);
-		TEST_ADD(TestSetInterval::diff02);
-		TEST_ADD(TestSetInterval::diff03);
-		TEST_ADD(TestSetInterval::diff04);
-		TEST_ADD(TestSetInterval::diff05);
-		TEST_ADD(TestSetInterval::diff06);
-		TEST_ADD(TestSetInterval::diff07);
-		TEST_ADD(TestSetInterval::diff08);
-		TEST_ADD(TestSetInterval::diff09);
-		TEST_ADD(TestSetInterval::diff10);
-		TEST_ADD(TestSetInterval::diff11);
-		TEST_ADD(TestSetInterval::diff12);
-		TEST_ADD(TestSetInterval::diff13);
-		TEST_ADD(TestSetInterval::diff14);
+//		TEST_ADD(TestSetInterval::diff01);
+//		TEST_ADD(TestSetInterval::diff02);
+//		TEST_ADD(TestSetInterval::diff03);
+//		TEST_ADD(TestSetInterval::diff04);
+//		TEST_ADD(TestSetInterval::diff05);
+//		TEST_ADD(TestSetInterval::diff06);
+//		TEST_ADD(TestSetInterval::diff07);
+//		TEST_ADD(TestSetInterval::diff08);
+//		TEST_ADD(TestSetInterval::diff09);
+//		TEST_ADD(TestSetInterval::diff10);
+//		TEST_ADD(TestSetInterval::diff11);
+//		TEST_ADD(TestSetInterval::diff12);
+//		TEST_ADD(TestSetInterval::diff13);
+//		TEST_ADD(TestSetInterval::diff14);
+		TEST_ADD(TestSetInterval::diff15);
 	}
 
 	void diff01();
@@ -48,6 +49,7 @@ public:
 	void diff12();
 	void diff13();
 	void diff14();
+	void diff15();
 
 };
 

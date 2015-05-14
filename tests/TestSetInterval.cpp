@@ -420,8 +420,38 @@ void TestSetInterval::diff14() {
 
 	SetLeaf* leaf=dynamic_cast<SetLeaf*>(node);
 	TEST_ASSERT(leaf);
-	cout << leaf->status << endl;
 	TEST_ASSERT(leaf->status==__IBEX_UNK_IN__);
 }
 
+
+void TestSetInterval::diff15() {
+
+	IntervalVector x(2);
+	x[0]=Interval(-2.5,0);
+	x[1]=Interval(-5,0);
+	IntervalVector y(2);
+	y[0]=Interval(-2.5,0);
+	y[1]=Interval(-4,-1);
+
+	double eps=3.0;
+
+	SetNode* node=diff(x,y,__IBEX_IN__,__IBEX_OUT__,eps);
+
+	node->print(cout,x,0);
+
+	SetBisect* biss=dynamic_cast<SetBisect*>(node);
+	TEST_ASSERT(biss);
+	TEST_ASSERT(biss->status==__IBEX_UNK_IN_OUT__);
+	TEST_ASSERT(biss->var == 1);
+	TEST_ASSERT(biss->pt == -2);
+
+	SetLeaf* leaf=dynamic_cast<SetLeaf*>(biss->left);
+	TEST_ASSERT(leaf);
+	TEST_ASSERT(leaf->status==__IBEX_UNK_IN_OUT__);
+
+	leaf=dynamic_cast<SetLeaf*>(biss->right);
+	TEST_ASSERT(leaf);
+	TEST_ASSERT(leaf->status==__IBEX_UNK_IN_OUT__);
+
+}
 } // end namespace ibex

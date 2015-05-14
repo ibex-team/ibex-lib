@@ -58,8 +58,16 @@ SetNode* diff(const IntervalVector& x, const IntervalVector& y, NodeType x_statu
 
 	for (int var=0; var<nn; var++) {
 
-		x[var].diff(y[var],c[0],c[1]);
-		//cout << "x[" << var << "]=" << x[var] << " y[" << var << "]=" << y[var] << " c1=" << c[0] << " c2=" << c[1] << endl;
+		Interval _y = y[var]; // copy that may be modified
+
+		// x is too small
+		if (x[var].ub() <= x[var].lb()+eps) {
+			y_enlarged = true;
+			continue;
+		}
+
+		x[var].diff(_y,c[0],c[1]);
+		//cout << "x[" << var << "]=" << x[var] << " y[" << var << "]=" << _y << " c1=" << c[0] << " c2=" << c[1] << endl;
 
 		for (int i=0; i<2; i++) {
 
@@ -73,12 +81,6 @@ SetNode* diff(const IntervalVector& x, const IntervalVector& y, NodeType x_statu
 				return new SetLeaf(x_status);
 			}
 
-			// x is too small
-			if (x[var].ub() <= x[var].lb()+eps) {
-				y_enlarged = true;
-				continue;
-			}
-
 			tmp[b].var = var;
 			tmp[b].x_enlarged = false; // by default
 
@@ -89,12 +91,29 @@ SetNode* diff(const IntervalVector& x, const IntervalVector& y, NodeType x_statu
 
 				// we enlarge the x-part if it is too small
 				if (c[i].diam()<eps) {
-					c[i] = Interval(x[var].lb(), x[var].lb()+eps);
-					tmp[b].x_enlarged = true;
+					if (_y.ub() <= x[var].lb()+eps) {
+						// In this case the y part is entirely absorbed
+						// by the x part. We switch the role and exit
+						// the loop (no more bisection)
+						c[i] = Interval(x[var].lb(), _y.ub());
+						y_enlarged = true;
+						tmp[b].x_left = false;
+						break;
+					} else {
+						c[i] = Interval(x[var].lb(), x[var].lb()+eps);
+						tmp[b].x_enlarged = true;
+
+						// if x is enlarged, y is narrowed. So we update y.
+						// This is useful to avoid crossings if the
+						// x-part is also enlarged for i=1 (when diameter of y is < eps).
+						_y=Interval(x[var].lb()+eps,_y.ub());
+
+					}
 				}
 				// we enlarge the y-part if it is too small
 				else if (x[var].delta(c[i])<eps) {
 					c[i] = Interval(x[var].lb(), x[var].ub()-eps);
+					_y=Interval(x[var].ub()-eps,_y.ub());
 					y_enlarged = true;
 				}
 
@@ -109,8 +128,15 @@ SetNode* diff(const IntervalVector& x, const IntervalVector& y, NodeType x_statu
 
 				// we enlarge the x-part if it is too small
 				if (c[i].diam()<eps) {
-					c[i] = Interval(x[var].ub()-eps, x[var].ub());
-					tmp[b].x_enlarged = true;
+					if (x[var].ub()-eps <= _y.lb()) {
+						assert(i==1);
+						y_enlarged = true; // the y-part is absorbed by the x-part.
+						break;             // no more bisection
+					}
+					else {
+						c[i] = Interval(x[var].ub()-eps, x[var].ub());
+						tmp[b].x_enlarged = true;
+					}
 				}
 				// enlarge the y-part if it is too small
 				else if (x[var].delta(c[i])<eps) {
@@ -122,14 +148,14 @@ SetNode* diff(const IntervalVector& x, const IntervalVector& y, NodeType x_statu
 				assert(x[var].interior_contains(tmp[b].pt));
 			}
 
+			//cout << "var=" << tmp[b].var << " pt=" << tmp[b].pt << " left?=" << tmp[b].x_left << " x_enlarged?=" << tmp[b].x_enlarged << endl;
 			b++;
 		}
 	}
 
 	delete[] c;
 
-	SetNode* root = new SetLeaf(y_enlarged? x_status | y_status : y_status);
-
+	SetNode* root = new SetLeaf(y_enlarged? (x_status | y_status) : y_status);
 	SetNode* bisect=root;
 
 	// we first proceed with the eps-enlarged slices (this order
@@ -140,9 +166,11 @@ SetNode* diff(const IntervalVector& x, const IntervalVector& y, NodeType x_statu
 		if (tmp[i].x_left) {
 			assert(x[tmp[i].var].interior_contains(tmp[i].pt));
 			bisect=new SetBisect(tmp[i].var,tmp[i].pt, new SetLeaf(x_status | y_status), bisect);
+
 		} else {
 			assert(x[tmp[i].var].interior_contains(tmp[i].pt));
 			bisect=new SetBisect(tmp[i].var,tmp[i].pt, bisect, new SetLeaf(x_status | y_status));
+
 		}
 
 	}
@@ -214,7 +242,16 @@ SetNode* SetNode::inter(const IntervalVector& nodebox, Sep& sep, const IntervalV
 
 	SetNode* root1 = diff(box, box2, OUT, IN, eps);
 
+	//cout << " before contraction % OUT gives: "; this->print(cout,nodebox,0);
+	//cout << "     root1="; root1->print(cout,box,0);
+
 	SetNode* this2 = this->inter(nodebox, root1, box, eps);
+	//cout << " after contraction % OUT gives: "; this2->print(cout,nodebox,0);
+
+	SetBisect* bis=dynamic_cast<SetBisect*>(this2);
+	if (bis) {
+		assert(nodebox[bis->var].contains(bis->pt));
+	}
 	//cout << " sep gives: "; this2->print(cout,nodebox,0);
 
 	if (box1.is_empty())
@@ -222,7 +259,10 @@ SetNode* SetNode::inter(const IntervalVector& nodebox, Sep& sep, const IntervalV
 	else {
 		SetNode* this3 = this2->inter_rec(nodebox, sep, box1, eps);
 		//cout << " inter rec gives: "; this4->print(cout,nodebox,0);
-
+		SetBisect* bis=dynamic_cast<SetBisect*>(this3);
+		if (bis) {
+			assert(nodebox[bis->var].contains(bis->pt));
+		}
 		return this3;
 	}
 }
@@ -247,7 +287,8 @@ SetNode* SetNode::inter(const IntervalVector& nodebox, const SetNode* other, con
 	if (nodebox.is_disjoint(otherbox))
 		return this;
 	else if (other->is_leaf()) {
-		return inter(nodebox, otherbox, other->status, eps);
+		SetNode* this1=inter(nodebox, otherbox, other->status, eps);
+		return this1;
 	} else {
 		SetBisect* bisect_node = (SetBisect*) other;
 		SetNode* this2 = inter(nodebox, bisect_node->left, bisect_node->left_box(otherbox), eps);
