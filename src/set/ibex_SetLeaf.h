@@ -24,7 +24,7 @@ public:
 	/**
 	 * \brief Creates a leaf of the given status
 	 */
-	SetLeaf(NodeType status);
+	SetLeaf(BoolInterval status);
 
 	/**
 	 * \brief Delete this.
@@ -35,13 +35,13 @@ public:
 	virtual bool is_leaf() const;
 
 		/** \see SetNode */
-	virtual SetNode* inter(bool sync, const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps);
+	virtual SetNode* inter(bool sync, const IntervalVector& nodebox, const IntervalVector& x, BoolInterval x_status, double eps);
 
 	/** \see SetNode */
 	virtual SetNode* inter_rec(bool sync, const IntervalVector& nodebox, Sep& sep, const IntervalVector& targetbox, double eps);
 
 	/** \see SetNode */
-	virtual SetNode* union_(const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps);
+	virtual SetNode* union_(const IntervalVector& nodebox, const IntervalVector& x, BoolInterval x_status, double eps);
 
 	/** \see SetNode */
 	virtual void visit_leaves(leaf_func func, const IntervalVector& nodebox) const;
@@ -49,17 +49,16 @@ public:
 	/** \see SetNode */
 	virtual void print(std::ostream& os, const IntervalVector& nodebox, int shift) const;
 
+	/**
+	 * \brief The status of the node
+	 */
+	BoolInterval status;
+
 private:
-	NodeType inter(bool sync, SetRelation rel, NodeType x, NodeType y);
 
 	SetLeaf(const SetLeaf&); // forbidden
 
 };
-
-inline NodeType SetLeaf::inter(bool sync, SetRelation rel, NodeType x, NodeType y) {
-	return sync? ibex::sync(rel,x,y) : ibex::inter(rel,x,y);
-}
-
 
 
 } // namespace ibex

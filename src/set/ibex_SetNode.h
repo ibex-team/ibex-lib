@@ -12,7 +12,7 @@
 
 #include "ibex_IntervalVector.h"
 #include "ibex_Sep.h"
-#include "ibex_NodeType.h"
+#include "ibex_BoolInterval.h"
 #include "ibex_BoolInterval.h"
 
 namespace ibex {
@@ -39,11 +39,6 @@ public:
 	typedef void (*leaf_func) (const IntervalVector&, BoolInterval);
 
 	/**
-	 * \brief Creates a node of given status
-	 */
-	SetNode(NodeType status);
-
-	/**
 	 * \brief Delete this.
 	 */
 	virtual ~SetNode();
@@ -52,11 +47,6 @@ public:
 	 * \brief True iff this node is a leaf.
 	 */
 	virtual bool is_leaf() const=0;
-
-	/**
-	 * \brief Synchronization with an i-set represented implicitly by a Sep
-	 */
-	SetNode* sync(const IntervalVector& nodebox, Sep& sep, const IntervalVector& targetbox, double eps);
 
 	/**
 	 * \brief Synchronization with an explicit i-set "other"
@@ -68,7 +58,7 @@ public:
 	/**
 	 * \brief Intersection with an i-set represented implicitly by a Sep
 	 */
-	SetNode* inter(const IntervalVector& nodebox, Sep& sep, const IntervalVector& targetbox, double eps);
+	SetNode* inter(bool sync, const IntervalVector& nodebox, Sep& sep, const IntervalVector& targetbox, double eps);
 
 	/**
 	 * \brief Intersection with an explicit i-set "other"
@@ -84,7 +74,7 @@ public:
 	 *              If sync==true, what is outside of x is considered to be "UNK"
 	 *              If sync==false, what is outside of x is considered to be "IN"
 	 */
-	virtual SetNode* inter(bool sync, const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps)=0;
+	virtual SetNode* inter(bool sync, const IntervalVector& nodebox, const IntervalVector& x, BoolInterval x_status, double eps)=0;
 
 	/**
 	 * \brief Intersection with a Sep (recursive call)
@@ -113,7 +103,7 @@ public:
 	 * Important:  what is outside of x is considered to be "OUT"
 	 *
 	 */
-	virtual SetNode* union_(const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps)=0;
+	virtual SetNode* union_(const IntervalVector& nodebox, const IntervalVector& x, BoolInterval x_status, double eps)=0;
 
 	/**
 	 * \brief Visit the leaves of a tree with a callback "func"
@@ -125,14 +115,10 @@ public:
 	 */
 	virtual void print(std::ostream& os, const IntervalVector& nodebox, int shift) const=0;
 
-	/**
-	 * \brief The status of the node
-	 */
-	NodeType status;
 };
 
 
-SetNode* diff(const IntervalVector& x, const IntervalVector& y, NodeType x_status, NodeType y_status, double eps);
+SetNode* diff(const IntervalVector& x, const IntervalVector& y, BoolInterval x_status, BoolInterval y_status, double eps);
 
 } // namespace ibex
 

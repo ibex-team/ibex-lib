@@ -21,10 +21,10 @@ void TestSetInterval::diff01() {
 	IntervalVector x(2,Interval(0,1));
 	IntervalVector y=x;
 
-	SetNode* node=diff(x,y,__IBEX_IN__,__IBEX_OUT__,0.1);
+	SetNode* node=diff(x,y,YES,NO,0.1);
 
 	SetLeaf* leaf=dynamic_cast<SetLeaf*>(node);
-	TEST_ASSERT(leaf && leaf->status==__IBEX_OUT__);
+	TEST_ASSERT(leaf && leaf->status==NO);
 }
 
 void TestSetInterval::diff02() {
@@ -33,61 +33,57 @@ void TestSetInterval::diff02() {
 	y[0]=Interval(0,1);
 	y[1]=Interval(1,2);
 
-	SetNode* node=diff(x,y,__IBEX_IN__,__IBEX_OUT__,0.1);
+	SetNode* node=diff(x,y,YES,NO,0.1);
 
 	SetLeaf* leaf=dynamic_cast<SetLeaf*>(node);
-	TEST_ASSERT(leaf && leaf->status==__IBEX_IN__);
+	TEST_ASSERT(leaf && leaf->status==YES);
 }
 
 void TestSetInterval::diff03() {
 	IntervalVector x(2,Interval(0,1));
 	IntervalVector y(2,Interval(0.3,0.7));
 
-	SetNode* node=diff(x,y,__IBEX_IN__,__IBEX_OUT__,0.1);
+	SetNode* node=diff(x,y,YES,NO,0.1);
 
 	SetBisect* biss=dynamic_cast<SetBisect*>(node);
 	TEST_ASSERT(biss);
-	TEST_ASSERT(biss->status==__IBEX_UNK_IN_OUT__);
 	TEST_ASSERT(biss->var == 0);
 	TEST_ASSERT(biss->pt == 0.3);
 
 	SetLeaf* leaf=dynamic_cast<SetLeaf*>(biss->left);
 	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==__IBEX_IN__);
+	TEST_ASSERT(leaf->status==YES);
 
 	biss=dynamic_cast<SetBisect*>(biss->right);
 	TEST_ASSERT(biss);
-	TEST_ASSERT(biss->status==__IBEX_UNK_IN_OUT__);
 	TEST_ASSERT(biss->var == 0);
 	TEST_ASSERT(biss->pt == 0.7);
 
 	leaf=dynamic_cast<SetLeaf*>(biss->right);
 	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==__IBEX_IN__);
+	TEST_ASSERT(leaf->status==YES);
 
 	biss=dynamic_cast<SetBisect*>(biss->left);
 	TEST_ASSERT(biss);
-	TEST_ASSERT(biss->status==__IBEX_UNK_IN_OUT__);
 	TEST_ASSERT(biss->var == 1);
 	TEST_ASSERT(biss->pt == 0.3);
 
 	leaf=dynamic_cast<SetLeaf*>(biss->left);
 	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==__IBEX_IN__);
+	TEST_ASSERT(leaf->status==YES);
 
 	biss=dynamic_cast<SetBisect*>(biss->right);
 	TEST_ASSERT(biss);
-	TEST_ASSERT(biss->status==__IBEX_UNK_IN_OUT__);
 	TEST_ASSERT(biss->var == 1);
 	TEST_ASSERT(biss->pt == 0.7);
 
 	leaf=dynamic_cast<SetLeaf*>(biss->right);
 	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==__IBEX_IN__);
+	TEST_ASSERT(leaf->status==YES);
 
 	leaf=dynamic_cast<SetLeaf*>(biss->left);
 	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==__IBEX_OUT__);
+	TEST_ASSERT(leaf->status==NO);
 
 }
 
@@ -96,31 +92,29 @@ void TestSetInterval::diff04() {
 	IntervalVector x(2,Interval(0,1));
 	IntervalVector y(2,Interval(0.3,1));
 
-	SetNode* node=diff(x,y,__IBEX_IN__,__IBEX_OUT__,0.1);
+	SetNode* node=diff(x,y,YES,NO,0.1);
 
 	SetBisect* biss=dynamic_cast<SetBisect*>(node);
 	TEST_ASSERT(biss);
-	TEST_ASSERT(biss->status==__IBEX_UNK_IN_OUT__);
 	TEST_ASSERT(biss->var == 0);
 	TEST_ASSERT(biss->pt == 0.3);
 
 	SetLeaf* leaf=dynamic_cast<SetLeaf*>(biss->left);
 	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==__IBEX_IN__);
+	TEST_ASSERT(leaf->status==YES);
 
 	biss=dynamic_cast<SetBisect*>(biss->right);
 	TEST_ASSERT(biss);
-	TEST_ASSERT(biss->status==__IBEX_UNK_IN_OUT__);
 	TEST_ASSERT(biss->var == 1);
 	TEST_ASSERT(biss->pt == 0.3);
 
 	leaf=dynamic_cast<SetLeaf*>(biss->left);
 	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==__IBEX_IN__);
+	TEST_ASSERT(leaf->status==YES);
 
 	leaf=dynamic_cast<SetLeaf*>(biss->right);
 	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==__IBEX_OUT__);
+	TEST_ASSERT(leaf->status==NO);
 }
 
 void TestSetInterval::diff05() {
@@ -129,21 +123,20 @@ void TestSetInterval::diff05() {
 	y[0]=Interval(0,1);
 	y[1]=Interval(0.3,1);
 
-	SetNode* node=diff(x,y,__IBEX_IN__,__IBEX_OUT__,0.1);
+	SetNode* node=diff(x,y,YES,NO,0.1);
 
 	SetBisect* biss=dynamic_cast<SetBisect*>(node);
 	TEST_ASSERT(biss);
-	TEST_ASSERT(biss->status==__IBEX_UNK_IN_OUT__);
 	TEST_ASSERT(biss->var == 1);
 	TEST_ASSERT(biss->pt == 0.3);
 
 	SetLeaf* leaf=dynamic_cast<SetLeaf*>(biss->left);
 	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==__IBEX_IN__);
+	TEST_ASSERT(leaf->status==YES);
 
 	leaf=dynamic_cast<SetLeaf*>(biss->right);
 	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==__IBEX_OUT__);
+	TEST_ASSERT(leaf->status==NO);
 }
 
 void TestSetInterval::diff06() {
@@ -151,51 +144,47 @@ void TestSetInterval::diff06() {
 	IntervalVector y(2,Interval(0.001,0.999));
 
 	double eps=::pow(2,-4);
-	SetNode* node=diff(x,y,__IBEX_IN__,__IBEX_OUT__,eps);
+	SetNode* node=diff(x,y,YES,NO,eps);
 
 	SetBisect* biss=dynamic_cast<SetBisect*>(node);
 	TEST_ASSERT(biss);
-	TEST_ASSERT(biss->status==__IBEX_UNK_IN_OUT__);
 	TEST_ASSERT(biss->var == 0);
 	TEST_ASSERT(biss->pt == eps);
 
 	SetLeaf* leaf=dynamic_cast<SetLeaf*>(biss->left);
 	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==__IBEX_UNK_IN_OUT__);
+	TEST_ASSERT(leaf->status==MAYBE);
 
 	biss=dynamic_cast<SetBisect*>(biss->right);
 	TEST_ASSERT(biss);
-	TEST_ASSERT(biss->status==__IBEX_UNK_IN_OUT__);
 	TEST_ASSERT(biss->var == 0);
 	TEST_ASSERT(biss->pt == 1-eps);
 
 	leaf=dynamic_cast<SetLeaf*>(biss->right);
 	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==__IBEX_UNK_IN_OUT__);
+	TEST_ASSERT(leaf->status==MAYBE);
 
 	biss=dynamic_cast<SetBisect*>(biss->left);
 	TEST_ASSERT(biss);
-	TEST_ASSERT(biss->status==__IBEX_UNK_IN_OUT__);
 	TEST_ASSERT(biss->var == 1);
 	TEST_ASSERT(biss->pt == eps);
 
 	leaf=dynamic_cast<SetLeaf*>(biss->left);
 	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==__IBEX_UNK_IN_OUT__);
+	TEST_ASSERT(leaf->status==MAYBE);
 
 	biss=dynamic_cast<SetBisect*>(biss->right);
 	TEST_ASSERT(biss);
-	TEST_ASSERT(biss->status==__IBEX_UNK_IN_OUT__);
 	TEST_ASSERT(biss->var == 1);
 	TEST_ASSERT(biss->pt == 1-eps);
 
 	leaf=dynamic_cast<SetLeaf*>(biss->right);
 	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==__IBEX_UNK_IN_OUT__);
+	TEST_ASSERT(leaf->status==MAYBE);
 
 	leaf=dynamic_cast<SetLeaf*>(biss->left);
 	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==__IBEX_OUT__);
+	TEST_ASSERT(leaf->status==NO);
 
 }
 
@@ -205,31 +194,29 @@ void TestSetInterval::diff07() {
 	IntervalVector y(2,Interval(0.001,1));
 
 	double eps=::pow(2,-4);
-	SetNode* node=diff(x,y,__IBEX_IN__,__IBEX_OUT__,eps);
+	SetNode* node=diff(x,y,YES,NO,eps);
 
 	SetBisect* biss=dynamic_cast<SetBisect*>(node);
 	TEST_ASSERT(biss);
-	TEST_ASSERT(biss->status==__IBEX_UNK_IN_OUT__);
 	TEST_ASSERT(biss->var == 0);
 	TEST_ASSERT(biss->pt == eps);
 
 	SetLeaf* leaf=dynamic_cast<SetLeaf*>(biss->left);
 	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==__IBEX_UNK_IN_OUT__);
+	TEST_ASSERT(leaf->status==MAYBE);
 
 	biss=dynamic_cast<SetBisect*>(biss->right);
 	TEST_ASSERT(biss);
-	TEST_ASSERT(biss->status==__IBEX_UNK_IN_OUT__);
 	TEST_ASSERT(biss->var == 1);
 	TEST_ASSERT(biss->pt == eps);
 
 	leaf=dynamic_cast<SetLeaf*>(biss->left);
 	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==__IBEX_UNK_IN_OUT__);
+	TEST_ASSERT(leaf->status==MAYBE);
 
 	leaf=dynamic_cast<SetLeaf*>(biss->right);
 	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==__IBEX_OUT__);
+	TEST_ASSERT(leaf->status==NO);
 }
 
 void TestSetInterval::diff08() {
@@ -240,21 +227,20 @@ void TestSetInterval::diff08() {
 
 	double eps=::pow(2,-4);
 
-	SetNode* node=diff(x,y,__IBEX_IN__,__IBEX_OUT__,eps);
+	SetNode* node=diff(x,y,YES,NO,eps);
 
 	SetBisect* biss=dynamic_cast<SetBisect*>(node);
 	TEST_ASSERT(biss);
-	TEST_ASSERT(biss->status==__IBEX_UNK_IN_OUT__);
 	TEST_ASSERT(biss->var == 1);
 	TEST_ASSERT(biss->pt == eps);
 
 	SetLeaf* leaf=dynamic_cast<SetLeaf*>(biss->left);
 	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==__IBEX_UNK_IN_OUT__);
+	TEST_ASSERT(leaf->status==MAYBE);
 
 	leaf=dynamic_cast<SetLeaf*>(biss->right);
 	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==__IBEX_OUT__);
+	TEST_ASSERT(leaf->status==NO);
 }
 
 
@@ -265,31 +251,29 @@ void TestSetInterval::diff09() {
 	y[1]=Interval(0.001,1);
 
 	double eps=::pow(2,-4);
-	SetNode* node=diff(x,y,__IBEX_IN__,__IBEX_OUT__,eps);
+	SetNode* node=diff(x,y,YES,NO,eps);
 
 	SetBisect* biss=dynamic_cast<SetBisect*>(node);
 	TEST_ASSERT(biss);
-	TEST_ASSERT(biss->status==__IBEX_UNK_IN_OUT__);
 	TEST_ASSERT(biss->var == 0);
 	TEST_ASSERT(biss->pt == 0.3);
 
 	SetLeaf* leaf=dynamic_cast<SetLeaf*>(biss->left);
 	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==__IBEX_IN__);
+	TEST_ASSERT(leaf->status==YES);
 
 	biss=dynamic_cast<SetBisect*>(biss->right);
 	TEST_ASSERT(biss);
-	TEST_ASSERT(biss->status==__IBEX_UNK_IN_OUT__);
 	TEST_ASSERT(biss->var == 1);
 	TEST_ASSERT(biss->pt == eps);
 
 	leaf=dynamic_cast<SetLeaf*>(biss->left);
 	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==__IBEX_UNK_IN_OUT__);
+	TEST_ASSERT(leaf->status==MAYBE);
 
 	leaf=dynamic_cast<SetLeaf*>(biss->right);
 	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==__IBEX_OUT__);
+	TEST_ASSERT(leaf->status==NO);
 }
 
 
@@ -300,31 +284,29 @@ void TestSetInterval::diff10() {
 	y[1]=Interval(0.3,1);
 
 	double eps=::pow(2,-4);
-	SetNode* node=diff(x,y,__IBEX_IN__,__IBEX_OUT__,eps);
+	SetNode* node=diff(x,y,YES,NO,eps);
 
 	SetBisect* biss=dynamic_cast<SetBisect*>(node);
 	TEST_ASSERT(biss);
-	TEST_ASSERT(biss->status==__IBEX_UNK_IN_OUT__);
 	TEST_ASSERT(biss->var == 1);
 	TEST_ASSERT(biss->pt == 0.3);
 
 	SetLeaf* leaf=dynamic_cast<SetLeaf*>(biss->left);
 	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==__IBEX_IN__);
+	TEST_ASSERT(leaf->status==YES);
 
 	biss=dynamic_cast<SetBisect*>(biss->right);
 	TEST_ASSERT(biss);
-	TEST_ASSERT(biss->status==__IBEX_UNK_IN_OUT__);
 	TEST_ASSERT(biss->var == 0);
 	TEST_ASSERT(biss->pt == eps);
 
 	leaf=dynamic_cast<SetLeaf*>(biss->left);
 	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==__IBEX_UNK_IN_OUT__);
+	TEST_ASSERT(leaf->status==MAYBE);
 
 	leaf=dynamic_cast<SetLeaf*>(biss->right);
 	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==__IBEX_OUT__);
+	TEST_ASSERT(leaf->status==NO);
 }
 
 
@@ -335,31 +317,29 @@ void TestSetInterval::diff11() {
 	y[1]=Interval(0.3,1);
 
 	double eps=::pow(2,-4);
-	SetNode* node=diff(x,y,__IBEX_IN__,__IBEX_OUT__,eps);
+	SetNode* node=diff(x,y,YES,NO,eps);
 
 	SetBisect* biss=dynamic_cast<SetBisect*>(node);
 	TEST_ASSERT(biss);
-	TEST_ASSERT(biss->status==__IBEX_UNK_IN_OUT__);
 	TEST_ASSERT(biss->var == 0);
 	TEST_ASSERT(biss->pt == 1-eps);
 
 	SetLeaf* leaf=dynamic_cast<SetLeaf*>(biss->left);
 	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==__IBEX_IN__);
+	TEST_ASSERT(leaf->status==YES);
 
 	biss=dynamic_cast<SetBisect*>(biss->right);
 	TEST_ASSERT(biss);
-	TEST_ASSERT(biss->status==__IBEX_UNK_IN_OUT__);
 	TEST_ASSERT(biss->var == 1);
 	TEST_ASSERT(biss->pt == 0.3);
 
 	leaf=dynamic_cast<SetLeaf*>(biss->left);
 	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==__IBEX_IN__);
+	TEST_ASSERT(leaf->status==YES);
 
 	leaf=dynamic_cast<SetLeaf*>(biss->right);
 	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==__IBEX_UNK_IN_OUT__);
+	TEST_ASSERT(leaf->status==MAYBE);
 }
 
 
@@ -370,31 +350,29 @@ void TestSetInterval::diff12() {
 	y[1]=Interval(0.999,1);
 
 	double eps=::pow(2,-4);
-	SetNode* node=diff(x,y,__IBEX_IN__,__IBEX_OUT__,eps);
+	SetNode* node=diff(x,y,YES,NO,eps);
 
 	SetBisect* biss=dynamic_cast<SetBisect*>(node);
 	TEST_ASSERT(biss);
-	TEST_ASSERT(biss->status==__IBEX_UNK_IN_OUT__);
 	TEST_ASSERT(biss->var == 0);
 	TEST_ASSERT(biss->pt == 1-eps);
 
 	SetLeaf* leaf=dynamic_cast<SetLeaf*>(biss->left);
 	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==__IBEX_IN__);
+	TEST_ASSERT(leaf->status==YES);
 
 	biss=dynamic_cast<SetBisect*>(biss->right);
 	TEST_ASSERT(biss);
-	TEST_ASSERT(biss->status==__IBEX_UNK_IN_OUT__);
 	TEST_ASSERT(biss->var == 1);
 	TEST_ASSERT(biss->pt == 1-eps);
 
 	leaf=dynamic_cast<SetLeaf*>(biss->left);
 	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==__IBEX_IN__);
+	TEST_ASSERT(leaf->status==YES);
 
 	leaf=dynamic_cast<SetLeaf*>(biss->right);
 	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==__IBEX_UNK_IN_OUT__);
+	TEST_ASSERT(leaf->status==MAYBE);
 }
 
 void TestSetInterval::diff13() {
@@ -403,11 +381,11 @@ void TestSetInterval::diff13() {
 	IntervalVector y(2,Interval(0.3,0.7));
 
 	double eps=2.0;
-	SetNode* node=diff(x,y,__IBEX_IN__,__IBEX_OUT__,eps);
+	SetNode* node=diff(x,y,YES,NO,eps);
 
 	SetLeaf* leaf=dynamic_cast<SetLeaf*>(node);
 	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==__IBEX_UNK_IN_OUT__);
+	TEST_ASSERT(leaf->status==MAYBE);
 }
 
 void TestSetInterval::diff14() {
@@ -416,11 +394,11 @@ void TestSetInterval::diff14() {
 	IntervalVector y(2,Interval(0.3,2));
 
 	double eps=2.0;
-	SetNode* node=diff(x,y,__IBEX_IN__,__IBEX_UNK_OUT__,eps);
+	SetNode* node=diff(x,y,YES,MAYBE,eps);
 
 	SetLeaf* leaf=dynamic_cast<SetLeaf*>(node);
 	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==__IBEX_UNK_IN__);
+	TEST_ASSERT(leaf->status==MAYBE);
 }
 
 
@@ -435,23 +413,11 @@ void TestSetInterval::diff15() {
 
 	double eps=3.0;
 
-	SetNode* node=diff(x,y,__IBEX_IN__,__IBEX_OUT__,eps);
+	SetNode* node=diff(x,y,YES,NO,eps);
 
-	node->print(cout,x,0);
-
-	SetBisect* biss=dynamic_cast<SetBisect*>(node);
-	TEST_ASSERT(biss);
-	TEST_ASSERT(biss->status==__IBEX_UNK_IN_OUT__);
-	TEST_ASSERT(biss->var == 1);
-	TEST_ASSERT(biss->pt == -2);
-
-	SetLeaf* leaf=dynamic_cast<SetLeaf*>(biss->left);
+	SetLeaf* leaf=dynamic_cast<SetLeaf*>(node);
 	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==__IBEX_UNK_IN_OUT__);
-
-	leaf=dynamic_cast<SetLeaf*>(biss->right);
-	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==__IBEX_UNK_IN_OUT__);
+	TEST_ASSERT(leaf->status==MAYBE);
 
 }
 } // end namespace ibex

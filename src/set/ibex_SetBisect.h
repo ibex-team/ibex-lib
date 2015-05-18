@@ -39,13 +39,13 @@ public:
 	virtual bool is_leaf() const;
 
 	/** \see SetNode */
-	virtual SetNode* inter(bool sync, const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps);
+	virtual SetNode* inter(bool sync, const IntervalVector& nodebox, const IntervalVector& x, BoolInterval x_status, double eps);
 
 	/** \see SetNode */
 	virtual SetNode* inter_rec(bool sync, const IntervalVector& nodebox, Sep& sep, const IntervalVector& targetbox, double eps);
 
 	/** \see SetNode */
-	virtual SetNode* union_(const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps);
+	virtual SetNode* union_(const IntervalVector& nodebox, const IntervalVector& x, BoolInterval x_status, double eps);
 
 	/** \see SetNode */
 	virtual void visit_leaves(leaf_func func, const IntervalVector& nodebox) const;
@@ -62,6 +62,7 @@ public:
 	friend class SetInterval;
 
 	// partial initialization used by SetInterval::load only
+	// and diff
 	SetBisect(int var, double pt);
 
 	SetNode* try_merge();

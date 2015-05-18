@@ -19,7 +19,7 @@ using namespace std;
 
 namespace ibex {
 
-SetInterval::SetInterval(const IntervalVector& bounding_box, double eps, bool inner) : root(new SetLeaf(inner? __IBEX_IN__: __IBEX_UNK__)), eps(eps), bounding_box(bounding_box) {
+SetInterval::SetInterval(const IntervalVector& bounding_box, double eps, bool inner) : root(new SetLeaf(inner? YES: MAYBE)), eps(eps), bounding_box(bounding_box) {
 
 }
 
@@ -33,7 +33,7 @@ bool SetInterval::is_empty() const {
 
 void SetInterval::sync(Sep& sep) {
 	try {
-		root = root->sync(bounding_box, sep, bounding_box, eps);
+		root = root->inter(true, bounding_box, sep, bounding_box, eps);
 	} catch(NoSet& e) {
 		delete root;
 		root = NULL;
@@ -42,7 +42,7 @@ void SetInterval::sync(Sep& sep) {
 }
 
 void SetInterval::contract(Sep& sep) {
-	root = root->inter(bounding_box, sep, bounding_box, eps);
+	root = root->inter(false, bounding_box, sep, bounding_box, eps);
 }
 
 SetInterval& SetInterval::operator&=(const SetInterval& set) {
@@ -82,7 +82,7 @@ void SetInterval::save(const char* filename) {
 		if (node->is_leaf()) {
 			int no_var=-1; // to store "-1" (means: leaf)
 			os.write((char*) &no_var, sizeof(int));
-			os.write((char*) &node->status, sizeof(NodeType));
+			os.write((char*) &((SetLeaf*) node)->status, sizeof(BoolInterval));
 		}
 		else {
 			SetBisect* b=(SetBisect*) node;
@@ -121,10 +121,10 @@ void SetInterval::load(const char* filename) {
 	is.read((char*) &var, sizeof(int));
 
 	double pt;
-	NodeType status;
+	BoolInterval status;
 
 	if (var==-1) {
-		is.read((char*) &status, sizeof(NodeType));
+		is.read((char*) &status, sizeof(BoolInterval));
 		root = new SetLeaf(status);
 		is.close();
 		return;
@@ -153,7 +153,7 @@ void SetInterval::load(const char* filename) {
 		is.read((char*) &var, sizeof(int));
 
 		if (var==-1) {
-			is.read((char*) &status, sizeof(NodeType));
+			is.read((char*) &status, sizeof(BoolInterval));
 			subnode = new SetLeaf(status);
 		} else {
 			is.read((char*) &pt, sizeof(double));
@@ -255,14 +255,13 @@ double SetInterval::dist(const Vector& pt, bool inside) const {
 
 		assert(node!=NULL);
 
-		if (node->status==(inside? __IBEX_IN__ : __IBEX_OUT__)) {
+		if (node->is_leaf() && ((SetLeaf*) node)->status==(inside? YES : NO)) {
 			double d=c->get<NodeAndDist>().dist;
 			if (d<lb) {
 				lb=d;
 				heap.contract(lb);
 			}
-		} else if (!node->is_leaf() && (    (inside && possibly_contains_in(node->status))
-		                                || (!inside && possibly_contains_out(node->status)))) {
+		} else if (!node->is_leaf()) {
 			SetBisect& b= *((SetBisect*) node);
 
 			IntervalVector left=b.left_box(c->box);
