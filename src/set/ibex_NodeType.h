@@ -18,12 +18,12 @@ namespace ibex {
 /**
  * \brief Status of a node in the representation of an i-set.
  *
- * __IBEX_IN__       : the node box is inside the set
- * __IBEX_OUT__      : the node box is outside the set
+ * __IBEX_IN__       : the node is inside the set
+ * __IBEX_OUT__      : the node is outside the set
  * __IBEX_UNK__      : the node is of unknown status (typically, corresponds to a boundary box)
- * __IBEX_UNK_IN     : the subtree contains IN and UNK leaves
- * __IBEX_UNK_OUT    : the subtree contains OUT and UNK leaves
- * __IBEX_UNK_IN_OUT : the subtree contains IN, OUT and UNK leaves. Used also for a temporary leaf (too large to be considered as boundary).
+ * __IBEX_UNK_IN     : the node intersects the set
+ * __IBEX_UNK_OUT    : the node intersects the complementary of the set
+ * __IBEX_UNK_IN_OUT : the node intersects the set and its complementary
  */
 typedef enum { __IBEX_IN__,
 	           __IBEX_OUT__,
@@ -32,51 +32,71 @@ typedef enum { __IBEX_IN__,
 	           __IBEX_UNK_OUT__,
 	           __IBEX_UNK_IN_OUT__ } NodeType;
 
+
 /**
- * \brief Status of a union of two nodes **in the sync sense**.
+ * \brief Relation between two equi-dimensional sets
+ */
+typedef enum { __IBEX_DISJOINT__,
+		       __IBEX_OVERLAP__,
+               __IBEX_SUPSET__,
+               __IBEX_SUBSET__,
+               __IBEX_SET_EQ__ } SetRelation;
+
+/**
+ * \brief Status of the union of two nodes.
  *
- * \warning The sync sense means that __IBEX_IN__ | __IBEX_OUT__ gives __IBEX_UNK_IN_OUT__ and
- * not __IBEX_IN__ !
+ * Given two nodes n1 and n2 of status s1 and s2 w.r.t. the set S,
+ * the result is the status of (n1 union n2) w.r.t. S.
  *
- * Ex: __IBEX_IN__ | __IBEX_UNK__ gives __IBEX_IN_UNK__.
+ * Note.
+ * 1/ This function assumes the sets n1 and n2 are associated to the
+ * the same. The result is not the status of (n1 union n2) w.r.t. (S1 union S2)
+ * where S1 (resp. S2) is the set n1 (resp. n2) is associated to.
+ * E.g.: n1=[0,1] is associated to S1=[0,3] and n2=[0,1] to [2,3].
+ * If s1=IN and s2=OUT, the result is UNK_IN_OUT which is wrong because (n1 union n2)=[0,1]
+ * does not intersect the complementary of [0,3].
+ *
+ * 2/ The result is the status of the union and not the disjunction of the status.
+ *
+ *    status(n1) v status(n2) <> status(n1 union n2)
+ *
+ * E.g., if s1=IN and s2=OUT, the disjunction of the status is "either IN or OUT" (the node is
+ * either fully inside or outside) but the result will be UNK_IN_OUT (contain both points inside
+ * and outside) which is not an over-approximation but a wrong result.
+ *
+ * 3/ If we have a particular set relation between n1 and n2, like n1\subset n2 or n1=n2, this
+ * results give an overestimation of the true result. See sync.
  *
  * \see SetBisect constructor.
  */
 NodeType operator|(NodeType x, NodeType y);
+//NodeType _union(SetRelation rel, NodeType x, NodeType y);
 
 /**
- * \brief Status of an intersection of two nodes **in the sync sense**
+ * \brief Status of the intersection of two nodes.
  *
- * \warning The sync sense means that __IBEX_IN__ & __IBEX_OUT__ is impossible (throw NoSet) and
- * not __IBEX_OUT__ !
+ * Given two nodes n1 and n2 of status s1 and s2 w.r.t. the sets S1
+ * and S2, the result is the status of (n1 inter n2) w.r.t. (S1 inter S2).
  *
- * Ex: __IBEX_IN__ & __IBEX_UNK__ gives __IBEX_IN__.
+ * Ex: __IBEX_IN__ & __IBEX_UNK_OUT__ gives __IBEX_UNK_OUT__ if n2 \subset n1
+ *     or __UNK__ otherwise.
  *
  * \see SetBisect constructor.
  */
-NodeType operator&(NodeType x, NodeType y);
+NodeType inter(SetRelation rel, NodeType x, NodeType y);
 
 /**
- * \brief Status of an intersection of two nodes
+ * \brief Status of the intersection of two nodes.
  *
- *
- * Ex: __IBEX_IN__ & __IBEX_UNK__ gives __IBEX_UNK__.
- *     __IBEX_UNK_OUT__ & __IBEX_UNK__ gives __IBEX_UNK_OUT__.
- *
- * \see SetBisect constructor.
- */
-NodeType inter(NodeType x, NodeType y);
+ * Given two nodes n1 and n2 of status s1 and s2 w.r.t. the set S
+ * and S2, the result is the status of (n1 inter n2) w.r.t. S
 
-/**
- * \brief Status of an union of two nodes
+ * Ex: __IBEX_IN__ & __IBEX_UNK_OUT__ gives __IBEX_IN__.
+ *     __IBEX_IN__ & __IBEX_OUT__ throws NoSet.
  *
- *
- * Ex: __IBEX_IN__ & __IBEX_OUT__ gives __IBEX_UNK_IN_OUT__.
-
- *
- * \see SetBisect constructor.
  */
-NodeType _union(NodeType x, NodeType y);
+NodeType sync(SetRelation rel, NodeType x, NodeType y);
+
 
 /**
  * \brief Status of the subset of a node

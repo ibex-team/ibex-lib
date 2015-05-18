@@ -39,16 +39,10 @@ public:
 	virtual bool is_leaf() const;
 
 	/** \see SetNode */
-	virtual SetNode* sync(const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps);
+	virtual SetNode* inter(bool sync, const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps);
 
 	/** \see SetNode */
-	virtual SetNode* inter(const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps);
-
-	/** \see SetNode */
-	virtual SetNode* sync_rec(const IntervalVector& nodebox, Sep& sep, const IntervalVector& targetbox, double eps);
-
-	/** \see SetNode */
-	virtual SetNode* inter_rec(const IntervalVector& nodebox, Sep& sep, const IntervalVector& targetbox, double eps);
+	virtual SetNode* inter_rec(bool sync, const IntervalVector& nodebox, Sep& sep, const IntervalVector& targetbox, double eps);
 
 	/** \see SetNode */
 	virtual SetNode* union_(const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps);

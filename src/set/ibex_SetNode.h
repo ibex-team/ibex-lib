@@ -66,23 +66,6 @@ public:
 	SetNode* sync(const IntervalVector& nodebox, const SetNode* other, const IntervalVector& otherbox, double eps);
 
 	/**
-	 * \brief Synchronization with an i-set reduced to a single box "x" of status "x_status".
-	 *
-	 * Important:  what is outside of x is considered to be "UNK"
-	 */
-	virtual SetNode* sync(const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps)=0;
-
-	/**
-	 * \brief Synchronization with a Sep (recursive call)
-	 *
-	 * Once the current "nodebox" has been synchronized with the two sets obtained by applying the inner and
-	 * outer contraction, a recursive call is performed (where the Sep is applied on the sub-boxes).
-	 *
-	 * If this node is a leaf, it means it has to be bisected.
-	 */
-	virtual SetNode* sync_rec(const IntervalVector& nodebox, Sep& sep, const IntervalVector& targetbox, double eps)=0;
-
-	/**
 	 * \brief Intersection with an i-set represented implicitly by a Sep
 	 */
 	SetNode* inter(const IntervalVector& nodebox, Sep& sep, const IntervalVector& targetbox, double eps);
@@ -97,9 +80,11 @@ public:
 	/**
 	 * \brief Intersection with an i-set reduced to a single box "x" of status "x_status".
 	 *
-	 * Important: what is outside of x is considered to be "IN"
+	 * \param sync: whether we synchronize the two sets or calculate their intersection.
+	 *              If sync==true, what is outside of x is considered to be "UNK"
+	 *              If sync==false, what is outside of x is considered to be "IN"
 	 */
-	virtual SetNode* inter(const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps)=0;
+	virtual SetNode* inter(bool sync, const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps)=0;
 
 	/**
 	 * \brief Intersection with a Sep (recursive call)
@@ -108,8 +93,12 @@ public:
 	 * outer contraction, a recursive call is performed (where the Sep is applied on the sub-boxes).
 	 *
 	 * If this node is a leaf, it means it has to be bisected.
+	 *
+	 * \param sync: whether we synchronize the two sets or calculate their intersection.
+	 *              If sync==true, what is outside of x is considered to be "UNK"
+	 *              If sync==false, what is outside of x is considered to be "IN"
 	 */
-	virtual SetNode* inter_rec(const IntervalVector& nodebox, Sep& sep, const IntervalVector& targetbox, double eps)=0;
+	virtual SetNode* inter_rec(bool sync, const IntervalVector& nodebox, Sep& sep, const IntervalVector& targetbox, double eps)=0;
 
 	/**
 	 * \brief Union with an explicit i-set "other"

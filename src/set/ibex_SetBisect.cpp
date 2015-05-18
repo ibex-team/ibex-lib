@@ -45,63 +45,52 @@ bool SetBisect::is_leaf() const {
 	return false;
 }
 
-SetNode* SetBisect::sync(const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps) {
-	if (x_status==UNK || !nodebox.intersects(x)) {
-		return this;
-	}
-	else if (nodebox.is_subset(x)) {
-		if (x_status==IN) {
-			if (!possibly_contains_in(status)) throw NoSet();
-			else {
-				delete this; // warning: suicide
-				return new SetLeaf(IN);
-			}
-		}
-		else if (x_status==OUT) {
-			if (!possibly_contains_out(status)) throw NoSet();
-			else {
-				delete this; // warning: suicide
-				return new SetLeaf(OUT);
-			}
-		}
-		else if (certainly_contains_in(x_status) && !possibly_contains_in(status) && nodebox==x) throw NoSet();
-		else if (certainly_contains_out(x_status) && !possibly_contains_out(status) && nodebox==x) throw NoSet();
-		else // x_status >= UNK
-			return this;
-	} else {
-		left = left->sync(left_box(nodebox), x, x_status, eps);
-		right = right->sync(right_box(nodebox), x, x_status, eps);
-		// status of children may have changed --> try merge
-		return try_merge();
-	}
-}
+SetNode* SetBisect::inter(bool sync, const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps) {
 
-SetNode* SetBisect::sync_rec(const IntervalVector& nodebox, Sep& sep, const IntervalVector& targetbox, double eps) {
-	left = left->sync(left_box(nodebox), sep, targetbox, eps);
-	right = right->sync(right_box(nodebox), sep, targetbox, eps);
+	if (sync) {
+		if (x_status==UNK || !nodebox.intersects(x)) {
+			return this;
+		}
+		else if (nodebox.is_subset(x)) {
+			if (x_status==IN) {
+				if (!possibly_contains_in(status)) throw NoSet();
+				else {
+					delete this; // warning: suicide
+					return new SetLeaf(IN);
+				}
+			}
+			else if (x_status==OUT) {
+				if (!possibly_contains_out(status)) throw NoSet();
+				else {
+					delete this; // warning: suicide
+					return new SetLeaf(OUT);
+				}
+			}
+			else if (certainly_contains_in(x_status) && !possibly_contains_in(status) && nodebox==x) throw NoSet();
+			else if (certainly_contains_out(x_status) && !possibly_contains_out(status) && nodebox==x) throw NoSet();
+			else // x_status >= UNK
+				return this;
+		}
+	} else {
+		// certainly_contains_out in comment because does not take into account IN_TMP
+		if (x_status==IN)
+			return this;
+		else if ((x_status==OUT /*|| !certainly_contains_out(status)*/) && nodebox.is_subset(x)) {
+			delete this; // warning: suicide
+			return new SetLeaf(OUT);
+		}
+	}
+
+	left = left->inter(sync, left_box(nodebox), x, x_status, eps);
+	right = right->inter(sync, right_box(nodebox), x, x_status, eps);
 	// status of children may have changed --> try merge
 	return try_merge();
+
 }
 
-
-SetNode* SetBisect::inter(const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps) {
-	// certainly_contains_out in comment because does not take into account IN_TMP
-	if (x_status==IN)
-		return this;
-	else if ((x_status==OUT /*|| !certainly_contains_out(status)*/) && nodebox.is_subset(x)) {
-		delete this; // warning: suicide
-		return new SetLeaf(OUT);
-	} else {
-		left = left->inter(left_box(nodebox), x, x_status, eps);
-		right = right->inter(right_box(nodebox), x, x_status, eps);
-		// status of children may have changed --> try merge
-		return try_merge();
-	}
-}
-
-SetNode* SetBisect::inter_rec(const IntervalVector& nodebox, Sep& sep, const IntervalVector& targetbox, double eps) {
-	left = left->inter(left_box(nodebox), sep, targetbox, eps);
-	right = right->inter(right_box(nodebox), sep, targetbox, eps);
+SetNode* SetBisect::inter_rec(bool sync, const IntervalVector& nodebox, Sep& sep, const IntervalVector& targetbox, double eps) {
+	left = sync? left->sync(left_box(nodebox), sep, targetbox, eps) : left->inter(left_box(nodebox), sep, targetbox, eps);
+	right = sync? right->sync(right_box(nodebox), sep, targetbox, eps) : right->inter(right_box(nodebox), sep, targetbox, eps);
 	// status of children may have changed --> try merge or update status
 	return try_merge();
 }

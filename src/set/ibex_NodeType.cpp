@@ -17,6 +17,12 @@
 #define UNK_IN     __IBEX_UNK_IN__
 #define UNK_OUT    __IBEX_UNK_OUT__
 #define UNK_IN_OUT __IBEX_UNK_IN_OUT__
+
+#define DISJOINT   __IBEX_DISJOINT__
+#define OVERLAP    __IBEX_OVERLAP__
+#define SUPSET     __IBEX_SUPSET__
+#define SUBSET     __IBEX_SUBSET__
+#define SET_EQ      __IBEX_SET_EQ__
 // ========================================
 
 namespace ibex {
@@ -29,190 +35,8 @@ char to_string(const NodeType& status) {
 	}
 }
 
+//NodeType _union(SetRelation rel, NodeType x, NodeType y) {
 NodeType operator|(NodeType x, NodeType y) {
-	switch (x) {
-	case IN : {
-		switch(y) {
-		case IN :        return IN;
-		case OUT :
-		case UNK_OUT:
-		case UNK_IN_OUT: return UNK_IN_OUT;
-		default :        return UNK_IN;
-		}
-	}
-	break;
-	case OUT : {
-		switch(y) {
-		case OUT :       return OUT;
-		case IN :
-		case UNK_IN:
-		case UNK_IN_OUT: return UNK_IN_OUT;
-		default :        return UNK_OUT;
-		}
-	}
-	break;
-	case UNK : {
-		switch(y) {
-		case IN :
-		case UNK_IN:  return UNK_IN;
-		case OUT :
-		case UNK_OUT: return UNK_OUT;
-		case UNK:     return UNK;
-		default:      return UNK_IN_OUT;
-		}
-	}
-	break;
-	case UNK_IN : {
-		switch(y) {
-		case IN :
-		case UNK_IN:
-		case UNK :    return UNK_IN;
-		default:      return UNK_IN_OUT;
-		}
-	}
-	break;
-	case UNK_OUT : {
-		switch(y) {
-		case OUT :
-		case UNK_OUT:
-		case UNK :    return UNK_OUT;
-		default:      return UNK_IN_OUT;
-		}
-	}
-	break;
-	default :
-		//Warning: IN_TMP not considered here.
-		return UNK_IN_OUT;
-	}
-}
-
-NodeType operator&(NodeType x, NodeType y) {
-	switch (x) {
-	case IN : {
-		switch(y) {
-		case IN :        return IN;
-		case OUT :       throw NoSet();
-		case UNK :
-		case UNK_IN :    return IN;
-		case UNK_OUT:
-		case UNK_IN_OUT: throw NoSet();
-		}
-	}
-	break;
-	case OUT : {
-		switch(y) {
-		case IN :        throw NoSet();
-		case OUT :
-		case UNK :       return OUT;
-		case UNK_IN :    throw NoSet();
-		case UNK_OUT:    return OUT;
-		case UNK_IN_OUT: throw NoSet();
-		}
-	}
-	break;
-	case UNK : {
-		return y;
-	}
-	break;
-	case UNK_IN : {
-		switch(y) {
-		case IN :        return IN;
-		case OUT :       throw NoSet();
-		case UNK :
-		case UNK_IN :    return UNK_IN;
-		case UNK_OUT:
-		case UNK_IN_OUT: return UNK_IN_OUT;
-		}
-	}
-	break;
-	case UNK_OUT : {
-		switch(y) {
-		case IN :        throw NoSet();
-		case OUT :       return OUT;
-		case UNK :		 return UNK_OUT;
-		case UNK_IN :    return UNK_IN_OUT;
-		case UNK_OUT:    return UNK_OUT;
-		case UNK_IN_OUT: return UNK_IN_OUT;
-		}
-	}
-	break;
-	default /* UNK_IN_OUT */ : {
-		switch(y) {
-		case IN :
-		case OUT :       throw NoSet();
-		case UNK :
-		case UNK_IN :
-		case UNK_OUT:
-		case UNK_IN_OUT: ;
-		}
-		return UNK_IN_OUT;
-	}
-	}
-}
-
-
-NodeType inter(NodeType x, NodeType y) {
-	switch (x) {
-	case IN : {
-		switch(y) {
-		case IN :        return IN;
-		case OUT :       return OUT;
-		case UNK :		 return UNK;
-		case UNK_IN :    return UNK_IN;
-		case UNK_OUT:    return UNK_OUT;
-		case UNK_IN_OUT: return UNK_IN_OUT;
-		}
-	}
-	break;
-	case OUT : {
-		return OUT;
-	}
-	break;
-	case UNK : {
-		switch(y) {
-		case IN :        return UNK;
-		case OUT :       return OUT;
-		case UNK :
-		case UNK_IN :    return UNK;
-		case UNK_OUT:
-		case UNK_IN_OUT: return UNK_OUT;
-		}
-	}
-	break;
-	case UNK_IN : {
-		switch(y) {
-		case IN :        return UNK_IN;
-		case OUT :       return OUT;
-		case UNK :
-		case UNK_IN :    return UNK;
-		case UNK_OUT:
-		case UNK_IN_OUT: return UNK_OUT;
-		}
-	}
-	break;
-	case UNK_OUT : {
-		switch(y) {
-		case IN :        return UNK_OUT;
-		case OUT :       return OUT;
-		case UNK :
-		case UNK_IN :
-		case UNK_OUT:
-		case UNK_IN_OUT: return UNK_OUT;
-		}
-	}
-	break;
-	default /* UNK_IN_OUT */ : {
-		switch(y) {
-		case IN :		 return UNK_IN_OUT;
-		case OUT :       return OUT;
-		}
-		return UNK_OUT;
-	}
-	}
-}
-
-
-NodeType _union(NodeType x, NodeType y) {
 	switch (x) {
 	case IN : {
 		switch(y) {
@@ -269,9 +93,179 @@ NodeType _union(NodeType x, NodeType y) {
 		}
 	}
 	break;
-	default /* UNK_IN_OUT */ : {
+	default :
 		return UNK_IN_OUT;
 	}
+}
+
+NodeType sync(SetRelation rel, NodeType x, NodeType y) {
+
+	if (rel==DISJOINT) return UNK; // convention: empty set is UNK.
+
+	switch (x) {
+	case IN : {
+		switch(y) {
+		case IN :        return IN;
+		case OUT :       throw NoSet();
+		case UNK :
+		case UNK_IN :    return IN;
+		case UNK_OUT:
+		case UNK_IN_OUT: if (rel==SUPSET || rel==SET_EQ) throw NoSet();
+			             else return IN;
+		}
+	}
+	break;
+	case OUT : {
+		switch(y) {
+		case IN :        throw NoSet();
+		case OUT :
+		case UNK :       return OUT;
+		case UNK_IN :    if (rel==SUPSET || rel==SET_EQ) throw NoSet();
+		                 else return OUT;
+		case UNK_OUT:    return OUT;
+		case UNK_IN_OUT: if (rel==SUPSET || rel==SET_EQ) throw NoSet();
+			             else return OUT;
+		}
+	}
+	break;
+	case UNK : {
+		switch(y) {
+		case IN :        return IN;
+		case OUT :       return OUT;
+		case UNK :       return UNK;
+		case UNK_IN :    if (rel==SUPSET || rel==SET_EQ) return UNK_IN;
+		                 else return UNK;;
+		case UNK_OUT:    if (rel==SUPSET || rel==SET_EQ) return UNK_OUT;
+                         else return UNK;;
+		case UNK_IN_OUT: if (rel==SUPSET || rel==SET_EQ) return UNK_IN_OUT;
+			             else return UNK;
+		}
+	}
+	break;
+	case UNK_IN : {
+		switch(y) {
+		case IN :        return IN;
+		case OUT :       if (rel==SUBSET || rel==SET_EQ) throw NoSet();
+                         else return OUT;
+		case UNK :       if (rel==SUBSET || rel==SET_EQ) return UNK_IN;
+			             else return UNK;
+		case UNK_IN :    if (rel!=OVERLAP) return UNK_IN;
+			             else return UNK;
+		case UNK_OUT:    if (rel==SUBSET) return UNK_IN;
+		                 else if (rel==SUPSET) return UNK_OUT;
+		                 else if (rel==SET_EQ) return UNK_IN_OUT;
+		                 else return UNK;
+		case UNK_IN_OUT: if (rel==SUBSET) return UNK_IN;
+                         else if (rel==SUPSET || rel==SET_EQ) return UNK_IN_OUT;
+                         else return UNK;
+		}
+	}
+	break;
+	case UNK_OUT : {
+		switch(y) {
+		case IN :        if (rel==SUBSET || rel==SET_EQ) throw NoSet();
+                         else return IN;
+		case OUT :       return OUT;
+		case UNK :       if (rel==SUBSET || rel==SET_EQ) return UNK_OUT;
+			             else return UNK;
+		case UNK_IN:     if (rel==SUBSET) return UNK_OUT;
+		                 else if (rel==SUPSET) return UNK_IN;
+		                 else if (rel==SET_EQ) return UNK_IN_OUT;
+		                 else return UNK;
+		case UNK_OUT :   if (rel!=OVERLAP) return UNK_OUT;
+			             else return UNK;
+		case UNK_IN_OUT: if (rel==SUBSET) return UNK_OUT;
+                         else if (rel==SUPSET || rel==SET_EQ) return UNK_IN_OUT;
+                         else return UNK;
+		}
+	}
+	break;
+	default /* UNK_IN_OUT */ : {
+		switch(y) {
+		case IN :        if (rel==SUBSET || rel==SET_EQ) throw NoSet();
+                         else return IN;
+		case OUT :       if (rel==SUBSET || rel==SET_EQ) throw NoSet();
+		                 else return OUT;
+		case UNK :       if (rel==SUBSET || rel==SET_EQ) return UNK_IN_OUT;
+		                 else return UNK;
+		case UNK_IN :    if (rel==SUBSET || rel==SET_EQ) return UNK_IN_OUT;
+		                 else if (rel==SUPSET) return UNK_IN;
+		                 else return UNK;
+		case UNK_OUT:    if (rel==SUBSET || rel==SET_EQ) return UNK_IN_OUT;
+                         else if (rel==SUPSET) return UNK_OUT;
+                         else return UNK;
+		case UNK_IN_OUT: if (rel!=OVERLAP) return UNK_IN_OUT;
+                         else return UNK;
+		}
+	}
+	}
+}
+
+
+NodeType inter(SetRelation rel, NodeType x, NodeType y) {
+
+	if (rel==DISJOINT) return UNK; // convention: empty set is UNK.
+
+	switch (x) {
+	case IN : {
+		switch(y) {
+		case IN :        return IN;
+		case OUT :       return OUT;
+		case UNK :		 return UNK;
+		case UNK_IN :    if (rel==SUPSET || rel==SET_EQ) return UNK_IN; else return UNK;
+		case UNK_OUT:    if (rel==SUPSET || rel==SET_EQ) return UNK_OUT; else return UNK;
+		case UNK_IN_OUT: if (rel==SUPSET || rel==SET_EQ) return UNK_IN_OUT; else return UNK;
+		}
+	}
+	break;
+	case OUT : {
+		return OUT;
+	}
+	break;
+	case UNK : {
+		switch(y) {
+		case IN :        return UNK;
+		case OUT :       return OUT;
+		case UNK :
+		case UNK_IN :    return UNK;
+		case UNK_OUT:
+		case UNK_IN_OUT: if (rel==SUPSET || rel==SET_EQ) return UNK_OUT; else return UNK;
+		}
+	}
+	break;
+	case UNK_IN : {
+		switch(y) {
+		case IN :        if (rel==SUBSET || rel==SET_EQ) return UNK_IN; else return UNK;
+		case OUT :       return OUT;
+		case UNK :
+		case UNK_IN :    return UNK;
+		case UNK_OUT:
+		case UNK_IN_OUT: if (rel==SUPSET || rel==SET_EQ) return UNK_OUT; else return UNK;
+		}
+	}
+	break;
+	case UNK_OUT : {
+		switch(y) {
+		case IN :        if (rel==SUBSET || rel==SET_EQ) return UNK_OUT; else return UNK;
+		case OUT :       return OUT;
+		case UNK :
+		case UNK_IN :    if (rel==SUBSET || rel==SET_EQ) return UNK_OUT; else return UNK;
+		case UNK_OUT:
+		case UNK_IN_OUT: if (rel!=OVERLAP) return UNK_OUT; else return UNK;
+		}
+	}
+	break;
+	default /* UNK_IN_OUT */ : {
+		switch(y) {
+		case IN :		 if (rel==SUBSET || rel==SET_EQ) return UNK_IN_OUT; else return UNK;
+		case OUT :       return OUT;
+		case UNK :
+		case UNK_IN :    if (rel==SUBSET || rel==SET_EQ) return UNK_OUT; else return UNK;
+		case UNK_OUT:
+		case UNK_IN_OUT: if (rel!=OVERLAP) return UNK_OUT; else return UNK;
+		}
+	}
+	return UNK_OUT;
 	}
 }
 

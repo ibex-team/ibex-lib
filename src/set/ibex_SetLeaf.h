@@ -34,19 +34,11 @@ public:
 	/** \see SetNode */
 	virtual bool is_leaf() const;
 
-	//virtual SetNode* sync(const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps, Mode mode);
+		/** \see SetNode */
+	virtual SetNode* inter(bool sync, const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps);
 
 	/** \see SetNode */
-	virtual SetNode* sync(const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps);
-
-	/** \see SetNode */
-	virtual SetNode* sync_rec(const IntervalVector& nodebox, Sep& sep, const IntervalVector& targetbox, double eps);
-
-	/** \see SetNode */
-	virtual SetNode* inter(const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps);
-
-	/** \see SetNode */
-	virtual SetNode* inter_rec(const IntervalVector& nodebox, Sep& sep, const IntervalVector& targetbox, double eps);
+	virtual SetNode* inter_rec(bool sync, const IntervalVector& nodebox, Sep& sep, const IntervalVector& targetbox, double eps);
 
 	/** \see SetNode */
 	virtual SetNode* union_(const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps);
@@ -58,9 +50,17 @@ public:
 	virtual void print(std::ostream& os, const IntervalVector& nodebox, int shift) const;
 
 private:
+	NodeType inter(bool sync, SetRelation rel, NodeType x, NodeType y);
+
 	SetLeaf(const SetLeaf&); // forbidden
 
 };
+
+inline NodeType SetLeaf::inter(bool sync, SetRelation rel, NodeType x, NodeType y) {
+	return sync? ibex::sync(rel,x,y) : ibex::inter(rel,x,y);
+}
+
+
 
 } // namespace ibex
 

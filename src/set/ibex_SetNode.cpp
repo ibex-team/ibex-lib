@@ -223,7 +223,7 @@ SetNode* SetNode::sync(const IntervalVector& nodebox, Sep& sep, const IntervalVe
 
 	SetNode* this2 = this->sync(nodebox, root3, targetbox, eps);
 
-	SetNode* this3 = this2->sync_rec(nodebox, sep, targetbox, eps);
+	SetNode* this3 = this2->inter_rec(true, nodebox, sep, targetbox, eps);
 	//cout << " inter rec gives: "; this3->print(cout,nodebox,0);
 
 	return this3;
@@ -257,7 +257,7 @@ SetNode* SetNode::inter(const IntervalVector& nodebox, Sep& sep, const IntervalV
 	if (box1.is_empty())
 		return this2;
 	else {
-		SetNode* this3 = this2->inter_rec(nodebox, sep, box1, eps);
+		SetNode* this3 = this2->inter_rec(false, nodebox, sep, box1, eps);
 		//cout << " inter rec gives: "; this4->print(cout,nodebox,0);
 		SetBisect* bis=dynamic_cast<SetBisect*>(this3);
 		if (bis) {
@@ -272,7 +272,7 @@ SetNode* SetNode::sync(const IntervalVector& nodebox, const SetNode* other, cons
 	if (nodebox.is_disjoint(otherbox))
 		return this;
 	else if (other->is_leaf()) {
-		return sync(nodebox, otherbox, other->status, eps);
+		return inter(true, nodebox, otherbox, other->status, eps);
 	} else {
 
 		SetBisect* bisect_node = (SetBisect*) other;
@@ -287,7 +287,7 @@ SetNode* SetNode::inter(const IntervalVector& nodebox, const SetNode* other, con
 	if (nodebox.is_disjoint(otherbox))
 		return this;
 	else if (other->is_leaf()) {
-		SetNode* this1=inter(nodebox, otherbox, other->status, eps);
+		SetNode* this1=inter(false, nodebox, otherbox, other->status, eps);
 		return this1;
 	} else {
 		SetBisect* bisect_node = (SetBisect*) other;
