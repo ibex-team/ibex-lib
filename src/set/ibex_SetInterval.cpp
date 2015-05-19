@@ -46,7 +46,7 @@ void SetInterval::contract(Sep& sep) {
 }
 
 SetInterval& SetInterval::operator&=(const SetInterval& set) {
-	root = root->inter(bounding_box, set.root, set.bounding_box, eps);
+	root = root->inter(false, bounding_box, set.root, set.bounding_box, eps);
 	return *this;
 }
 

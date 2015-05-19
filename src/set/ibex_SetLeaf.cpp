@@ -59,7 +59,8 @@ SetNode* SetLeaf::inter(bool sync, const IntervalVector& nodebox, const Interval
 			return this;
 
 		// TODO assert((xstatus==NO && !contains_in) || (xstatus==YES && !contains_out));
-		assert((xstatus==NO && status!=YES) || (xstatus==YES && status!=NO));
+		if ((xstatus==NO && status==YES) || (xstatus==NO && status==YES))
+			throw NoSet();
 
 		// xstatus is either YES or NO
 		if (nodebox.is_subset(x)) {

@@ -34,7 +34,7 @@ public:
 	/** \see SetNode */
 	virtual bool is_leaf() const;
 
-		/** \see SetNode */
+	/** \see SetNode */
 	virtual SetNode* inter(bool sync, const IntervalVector& nodebox, const IntervalVector& x, BoolInterval x_status, double eps);
 
 	/** \see SetNode */

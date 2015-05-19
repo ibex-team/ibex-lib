@@ -49,13 +49,6 @@ public:
 	virtual bool is_leaf() const=0;
 
 	/**
-	 * \brief Synchronization with an explicit i-set "other"
-	 *
-	 * Important:  what is outside of "other" is considered to be "UNK"
-	 */
-	SetNode* sync(const IntervalVector& nodebox, const SetNode* other, const IntervalVector& otherbox, double eps);
-
-	/**
 	 * \brief Intersection with an i-set represented implicitly by a Sep
 	 */
 	SetNode* inter(bool sync, const IntervalVector& nodebox, Sep& sep, const IntervalVector& targetbox, double eps);
@@ -65,7 +58,7 @@ public:
 	 *
 	 * Important: what is outside of "other" is considered to be "IN"
 	 */
-	SetNode* inter(const IntervalVector& nodebox, const SetNode* other, const IntervalVector& otherbox, double eps);
+	SetNode* inter(bool sync, const IntervalVector& nodebox, const SetNode* other, const IntervalVector& otherbox, double eps);
 
 	/**
 	 * \brief Intersection with an i-set reduced to a single box "x" of status "x_status".

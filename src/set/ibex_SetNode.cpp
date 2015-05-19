@@ -202,100 +202,69 @@ SetNode::~SetNode() {
 
 SetNode* SetNode::inter(bool sync, const IntervalVector& nodebox, Sep& sep, const IntervalVector& targetbox, double eps) {
 
+	IntervalVector box=targetbox & nodebox;
+
+	if (box.is_empty()) return this;
+
+	IntervalVector box1(box);
+	IntervalVector box2(box);
+
+	sep.separate(box1,box2);
+
+	SetNode* root3;
+
 	if (sync)  {
-		IntervalVector box=targetbox & nodebox;
 
-			if (box.is_empty()) return this;
+		SetNode* root1 = diff(box, box1, YES, MAYBE, eps);
+		//cout << "set obtained with inner contraction:" << endl; root1->print(cout,box,0);
+		SetNode* root2 = diff(box, box2, NO, MAYBE, eps);
+		//cout << "set obtained with outer contraction:" << endl; root2->print(cout,box,0);
+
+		root3 = root1->inter(true, box, root2, box, eps);
+		delete root2;
 
 
-			IntervalVector box1(box);
-			IntervalVector box2(box);
-
-			sep.separate(box1,box2);
-
-			SetNode* root1 = diff(box, box1, YES, MAYBE, eps);
-			//cout << "set obtained with inner contraction:" << endl; root1->print(cout,box,0);
-			SetNode* root2 = diff(box, box2, NO, MAYBE, eps);
-			//cout << "set obtained with outer contraction:" << endl; root2->print(cout,box,0);
-
-			SetNode* root3 = root1->sync(box,root2,box,eps);
-			delete root2;
-
-			SetNode* this2 = this->sync(nodebox, root3, targetbox, eps);
-
-			SetNode* this3 = this2->inter_rec(true, nodebox, sep, targetbox, eps);
-			//cout << " inter rec gives: "; this3->print(cout,nodebox,0);
-
-			return this3;
-	} else {
-		IntervalVector box=targetbox & nodebox;
-
-		if (box.is_empty()) return this;
-
-		IntervalVector box1(box);
-		IntervalVector box2(box);
-
-		sep.separate(box1,box2);
-
-		SetNode* root1 = diff(box, box2, NO, YES, eps);
-
-//		cout << " before contraction % NO gives: "; this->print(cout,nodebox,0);
-//		cout << "     root1="; root1->print(cout,box,0);
-//
-		SetNode* this2 = this->inter(nodebox, root1, box, eps);
-//		cout << " after contraction % NO gives: "; this2->print(cout,nodebox,0);
-
-		SetBisect* bis=dynamic_cast<SetBisect*>(this2);
-		if (bis) {
-			assert(nodebox[bis->var].contains(bis->pt));
-		}
-		//cout << " sep gives: "; this2->print(cout,nodebox,0);
-
-		if (box1.is_empty())
-			return this2;
-		else {
-			SetNode* this3 = this2->inter_rec(false, nodebox, sep, box1, eps);
-			//cout << " inter rec gives: "; this4->print(cout,nodebox,0);
-			SetBisect* bis=dynamic_cast<SetBisect*>(this3);
-			if (bis) {
-				assert(nodebox[bis->var].contains(bis->pt));
-			}
-			return this3;
-		}
-	}
-}
-
-SetNode* SetNode::sync(const IntervalVector& nodebox, const SetNode* other, const IntervalVector& otherbox, double eps) {
-
-	if (nodebox.is_disjoint(otherbox))
-		return this;
-	else if (other->is_leaf()) {
-		return inter(true, nodebox, otherbox, ((SetLeaf*) other)->status, eps);
 	} else {
 
-		SetBisect* bisect_node = (SetBisect*) other;
-		SetNode* this2 = sync(nodebox, bisect_node->left, bisect_node->left_box(otherbox), eps);
-		// warning: cannot use this anymore (use this2 instead)
-		return this2->sync(nodebox, bisect_node->right, bisect_node->right_box(otherbox), eps);
+		root3 = diff(box, box2, NO, YES, eps);
+
+		//		cout << " before contraction % NO gives: "; this->print(cout,nodebox,0);
+		//		cout << "     root3="; root3->print(cout,box,0);
+		//
+
 	}
+
+	SetNode* this2 = this->inter(sync, nodebox, root3, box, eps);
+	delete root3;
+	//		cout << " after contraction % NO gives: "; this2->print(cout,nodebox,0);
+
+	//cout << " sep gives: "; this2->print(cout,nodebox,0);
+
+	box1 &= box2;
+	if (box1.is_empty()) return this2;
+
+	SetNode* this3 = this2->inter_rec(sync, nodebox, sep, box1, eps);
+	//cout << " inter rec gives: "; this3->print(cout,nodebox,0);
+
+	return this3;
 }
 
-SetNode* SetNode::inter(const IntervalVector& nodebox, const SetNode* other, const IntervalVector& otherbox, double eps) {
+SetNode* SetNode::inter(bool sync, const IntervalVector& nodebox, const SetNode* other, const IntervalVector& otherbox, double eps) {
 
 	if (nodebox.is_disjoint(otherbox))
 		return this;
 	else if (other->is_leaf()) {
 		//cout << "this1 bef="; this->print(cout,nodebox,0);
 		//cout << "otherbox=" << otherbox << " status=" << ((SetLeaf*) other)->status << endl;
-		SetNode* this1=inter(false, nodebox, otherbox, ((SetLeaf*) other)->status, eps);
+		SetNode* this1=inter(sync, nodebox, otherbox, ((SetLeaf*) other)->status, eps);
 		//cout << "this1: "; this1->print(cout,nodebox,0);
 		return this1;
 	} else {
 		SetBisect* bisect_node = (SetBisect*) other;
-		SetNode* this2 = inter(nodebox, bisect_node->left, bisect_node->left_box(otherbox), eps);
+		SetNode* this2 = inter(sync, nodebox, bisect_node->left, bisect_node->left_box(otherbox), eps);
 		//cout << "this2: "; this2->print(cout,nodebox,0);
 		// warning: cannot use this anymore (use this2 instead)
-		SetNode* this3 = this2->inter(nodebox, bisect_node->right, bisect_node->right_box(otherbox), eps);
+		SetNode* this3 = this2->inter(sync, nodebox, bisect_node->right, bisect_node->right_box(otherbox), eps);
 		//cout << "this3: "; this3->print(cout,nodebox,0);
 		return this3;
 	}
