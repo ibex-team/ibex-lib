@@ -1031,62 +1031,38 @@ inline Interval chi(const Interval& a, const Interval& b, const Interval& c){
 	}
 }
 
-// ArcTan2 by Jordan Ninin (Sept 2013) car ni Gaol, ni Profil/Bias ni Filib n'implemente atan2
 inline Interval atan2(const Interval& y, const Interval& x) {
+
 	if (y.is_empty() || x.is_empty()) return Interval::EMPTY_SET;
 
-	if ( x.lb()> 0) {
-		return atan(y/x);
+	// we handle the special case x=[0,0] separately
+	else if (x==Interval::ZERO) {
+		if (y.lb()>=0)
+			if (y.ub()==0) return Interval::EMPTY_SET; // atan2(0,0) is undefined.
+			else return Interval::HALF_PI;
+		else if (y.ub()<=0) return -Interval::HALF_PI;
+		else return Interval(-1,1)*Interval::HALF_PI;
 	}
-	else if  (x.ub()< 0 && y.lb()>= 0) {
-		return atan(y/x)+Interval::PI;
+
+	else if (x.lb()>=0) {
+		return atan(y/x); // now, x.ub()>0 -> atan does not give an empty set
 	}
-	else if (x.ub() < 0 && y.ub()< 0) {
-		return atan(y/x)-Interval::PI;
-	}
-	else if (x.ub() < 0) {
-		return Interval(-1,1)*Interval::PI;
-	}
-	else if (x.contains(0.0) && y.contains(0.0) ) {
-		return Interval(-1,1)*Interval::PI;
-	}
-	else {
-		return 2*atan((sqrt(sqr(x)+sqr(y))-x)/y);
-	}
-}
-
-/*
-// ArcTan2 by Firas Khemane (feb 2010)
-inline Interval atan2(const Interval& b, const Interval& a) {
-	if (a.is_empty() || b.is_empty()) return Interval::EMPTY_SET;
-
-	if (( a.lb() > 0 && b.lb() > 0) || (  a.lb() > 0 &&   b.ub() < 0 )  || ( b.lb() < 0 && b.ub()> 0  && a.lb() > 0 ) )
-
-		return atan(b/a);
-
-	else if  ( a.lb()<=0  &&  a.ub()>0 )
-
-		return 2*atan(b/a);
-
-	else if  (a.ub()< 0 && b.lb()> 0)
-
-		return atan(b/a)+Interval::PI;
-
-	else if (a.ub() < 0 && b.ub()< 0)
-
-		return atan(b/a)-Interval::PI;
-
-	else if (b.lb() < 0 && b.ub() > 0 && a.ub()< 0 ) {
-
-		if (  (atan(b/a)+Interval::PI).lb() <= (atan(b/a)-Interval::PI).ub() )
-
-			return 2*INTERVAL((atan(b/a)+Interval::PI).lb(), (atan(b/a)-Interval::PI).ub());
-
+	else if (x.ub()<=0) {
+		if (y.lb()>=0)
+			return atan(y/x)+Interval::PI; // x.lb()<0
+		else if (y.ub()<0)
+			return atan(y/x)-Interval::PI;
 		else
-			return 2*INTERVAL((atan(b/a)-Interval::PI).lb() , (atan(b/a)+Interval::PI).ub() );
+			return Interval(-1,1)*Interval::PI;
+	} else {
+		if (y.lb()>=0)
+			return atan(y/x.ub()) | (atan(y/x.lb()) + Interval::PI);
+		else if (y.ub()<=0)
+			return (atan(y/x.lb())-Interval::PI) | atan(y/x.ub());
+		else
+			return Interval(-1,1)*Interval::PI;
 	}
 }
-*/
 
 inline bool bwd_add(const Interval& y, Interval& x1, Interval& x2) {
 	if ((x1 &= y-x2).is_empty()) { x2.set_empty(); return false; }

@@ -160,6 +160,22 @@ public:
 		TEST_ADD(TestArith::cosh06);
 		TEST_ADD(TestArith::cosh07);
 
+		TEST_ADD(TestArith::atan2_01);
+		TEST_ADD(TestArith::atan2_02);
+		TEST_ADD(TestArith::atan2_03);
+		TEST_ADD(TestArith::atan2_04);
+		TEST_ADD(TestArith::atan2_05);
+		TEST_ADD(TestArith::atan2_06);
+		TEST_ADD(TestArith::atan2_07);
+		TEST_ADD(TestArith::atan2_08);
+		TEST_ADD(TestArith::atan2_09);
+		TEST_ADD(TestArith::atan2_10);
+		TEST_ADD(TestArith::atan2_11);
+		TEST_ADD(TestArith::atan2_12);
+		TEST_ADD(TestArith::atan2_13);
+		TEST_ADD(TestArith::atan2_14);
+		TEST_ADD(TestArith::atan2_15);
+
 		TEST_ADD(TestArith::bwd_mul01);
 		TEST_ADD(TestArith::bwd_mul02);
 		TEST_ADD(TestArith::bwd_mul03);
@@ -478,6 +494,22 @@ private:
 	void cosh05();
 	void cosh06();
 	void cosh07();
+
+	void atan2_01();
+	void atan2_02();
+	void atan2_03();
+	void atan2_04();
+	void atan2_05();
+	void atan2_06();
+	void atan2_07();
+	void atan2_08();
+	void atan2_09();
+	void atan2_10();
+	void atan2_11();
+	void atan2_12();
+	void atan2_13();
+	void atan2_14();
+	void atan2_15();
 
 	/* test: bwd_mul */
 	void bwd_mul01();
