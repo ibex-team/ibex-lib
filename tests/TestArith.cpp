@@ -700,7 +700,9 @@ void TestArith::bwd_atan2_04() { //fourth quadrant
 	TEST_ASSERT(checkbwd_atan2(Interval(-M_PI/2.,0.),Interval(.5,2.),Interval(.5,10.),Interval::EMPTY_SET,Interval::EMPTY_SET));
 }
 void TestArith::bwd_atan2_05() { //upper half
-	TEST_ASSERT(checkbwd_atan2(Interval(2.*M_PI,3.*M_PI),Interval(-.5,2.),Interval(.5,10.),Interval(0. ,2.),Interval(.5,10.)));
+	// ** confusion with angle constraint **
+	//TEST_ASSERT(checkbwd_atan2(Interval(2.*M_PI,3.*M_PI),Interval(-.5,2.),Interval(.5,10.),Interval(0. ,2.),Interval(.5,10.)));
+	TEST_ASSERT(checkbwd_atan2(Interval(2.*M_PI,3.*M_PI),Interval(-.5,2.),Interval(.5,10.),Interval::EMPTY_SET, Interval::EMPTY_SET));
 }
 void TestArith::bwd_atan2_06() { //second quadrant
 	TEST_ASSERT(checkbwd_atan2(Interval(2*M_PI/3.,5.*M_PI/6.),Interval(0.,100.),Interval(-20.,-sqrt(3.)/2.),Interval(.5,20.*sqrt(3.)),Interval(-20.,-sqrt(3.)/2)));
@@ -716,6 +718,10 @@ void TestArith::bwd_atan2_09() { //lower half
 }
 void TestArith::bwd_atan2_10() { //right half
 	TEST_ASSERT(checkbwd_atan2(Interval(-M_PI/3.,M_PI/4.),Interval::ALL_REALS,Interval(sqrt(3.)/2.),Interval(-1.5,sqrt(3.)/2.),Interval(sqrt(3.)/2.)));
+}
+
+void TestArith::bwd_atan2_issue134() {
+	TEST_ASSERT(checkbwd_atan2(Interval::HALF_PI,Interval::ONE, Interval::ZERO, Interval::ONE, Interval::ZERO));
 }
 
 void TestArith::bwd_sqrt01() { checkproj(sqrt, Interval(1,3),				Interval(0,15),		Interval(1,9)); }
