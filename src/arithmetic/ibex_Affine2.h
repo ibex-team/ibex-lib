@@ -28,8 +28,8 @@
 
 namespace ibex {
 
-
-class Affine2Vector;
+template<class T>
+class Affine2MainVector<T>;
 class Affine2Matrix;
 class Affine2MatrixArray;
 
@@ -298,7 +298,7 @@ public:
 	Affine2Main& operator/=(const Affine2Main& x);
 
 	typedef Affine2Main<T> SCALAR;
-	typedef Affine2Vector VECTOR;
+	typedef Affine2MainVector<T> VECTOR;
 	typedef Affine2Matrix MATRIX;
 	typedef Affine2MatrixArray MATRIX_ARRAY;
 

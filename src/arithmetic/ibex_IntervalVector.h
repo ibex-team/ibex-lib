@@ -23,7 +23,8 @@
 namespace ibex {
 
 class IntervalMatrix; // declared only for friendship
-class Affine2Vector;
+template<class T>
+class Affine2MainVector<T>;
 
 /**
  * \ingroup arithmetic
@@ -58,7 +59,8 @@ public:
 	 * \brief Create a copy of \a x.
 	 */
 	IntervalVector(const IntervalVector& x);
-	explicit IntervalVector(const Affine2Vector& x);
+	template<class T>
+	explicit IntervalVector(const Affine2MainVector<T>& x);
 
 	/**
 	 * \brief Create the IntervalVector [bounds[0][0],bounds[0][1]]x...x[bounds[n-1][0],bounds[n-1][1]]
@@ -169,7 +171,8 @@ public:
 	 */
 	IntervalVector& operator=(const IntervalVector& x);
 
-	IntervalVector& operator=(const Affine2Vector& x);
+	template<class T>
+	IntervalVector& operator=(const Affine2MainVector<T>& x);
 
 	/**
 	 * \brief Set *this to its intersection with x
@@ -541,7 +544,8 @@ public:
 
 private:
 	friend class IntervalMatrix;
-	friend class Affine2Vector;
+	template<class T>
+	friend class Affine2MainVector<T>;;
 
 	IntervalVector() : n(0), vec(NULL) { } // for IntervalMatrix & complementary()
 
