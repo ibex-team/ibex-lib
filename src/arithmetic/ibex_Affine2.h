@@ -23,6 +23,7 @@
 #include "ibex_Affine2_fAF2_fma.h"
 #include "ibex_Affine2_sAF.h"
 #include "ibex_Affine2_No.h"
+#include "ibex_Affine2_fAFFullI.h"
 
 
 namespace ibex {
@@ -41,12 +42,12 @@ class Affine2MatrixArray;
 
 
 //typedef AF_fAF1  AF_Default;
-typedef AF_fAF2  AF_Default;
+//typedef AF_fAF2  AF_Default;
 //typedef AF_fAF2_fma  AF_Default;
 //typedef AF_iAF  AF_Default;
 //typedef AF_sAF  AF_Default;
 //typedef AF_No  AF_Default;
-
+typedef AF_fAFFullI AF_Default;
 
 
 
@@ -58,6 +59,8 @@ template<class T=AF_Default>
 class Affine2Main {
 
 private:
+
+	static const double AF_COMPAC_Tol = 1.e-6;
 	/**
 	 * Code for the particular case:
 	 * if the affine form is actif, _n>1  and _n is the size of the affine form
@@ -91,6 +94,7 @@ private:
 	 */
 	Affine2Main& saxpy(double alpha, const Affine2Main& y, double beta, double delta,
 			bool B1, bool B2, bool B3, bool B4);
+
 
 public:
 
@@ -245,6 +249,12 @@ public:
 	 * \brief the middle of *this
 	 */
 	double mid() const;
+
+	/**
+	 * \brief reduce the number of noise variable if the value is inferior to \param tol
+	 */
+	void compact(double tol);
+	void compact();
 
 	/** \brief Add \a d to *this and return the result.  */
 	Affine2Main& operator+=(double d);
@@ -595,6 +605,10 @@ Affine2Main<T> chi(const Affine2Main<T>&  a,const Affine2Main<T>&  b,const Inter
 
 
 namespace ibex {
+
+
+template<class T>
+inline void Affine2Main<T>::compact(){ compact(AF_COMPAC_Tol); }
 
 
 template<class T>

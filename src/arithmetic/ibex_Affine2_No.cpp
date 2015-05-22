@@ -851,7 +851,7 @@ Affine2Main<AF_No>& Affine2Main<AF_No>::linChebyshev(Affine2_expr num, const Int
 		case AF_ASIN :
 			// additional particular case
 			if ((itv.lb() < (-1))||(itv.ub() > 1)) {
-				linChebyshev(num,(itv & Interval(-1,1)));
+				Affine2Main<AF_No>::linChebyshev(num,(itv & Interval(-1,1)));
 				break;
 			}
 		case AF_TANH :
@@ -1128,7 +1128,15 @@ Affine2Main<AF_No>& Affine2Main<AF_No>::power(int n, const Interval itv) {
 	return *this;
 }
 
-
+template<>
+void Affine2Main<AF_No>::compact(double tol){
+	for (int i=1;i<=_n;i++) {
+		if (fabs(_elt._val[i])<tol) {
+			_elt._err += fabs(_elt._val[i]);
+			_elt._val[i] =0;
+		}
+	}
+}
 
 
 }// end namespace ibex

@@ -144,6 +144,12 @@ public:
 	void clear();
 
 	/**
+	 * \brief reduce the number of noise variable if the value is inferior to \param tol
+	 */
+	void compact(double tol);
+	void compact();
+
+	/**
 	 * \brief Set all the elements to
 	 *  if !(\a b) Affine2(x)
 	 *  else Affine2(n,i+1,x)
@@ -442,6 +448,17 @@ inline Affine2Vector cart_prod(const Affine2Vector& x, const Affine2Vector& y) {
 	z.put(0,x);
 	z.put(x.size(),y);
 	return z;
+}
+
+
+inline void Affine2Vector::compact(double tol) {
+	assert(!is_empty());
+	for (int i = 0; i < _n; i++) { 	_vec[i].compact(tol);	}
+}
+
+inline void Affine2Vector::compact() {
+	assert(!is_empty());
+	for (int i = 0; i < _n; i++) { 	_vec[i].compact();	}
 }
 
 

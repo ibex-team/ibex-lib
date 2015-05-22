@@ -700,6 +700,30 @@ Affine2Main<AF_fAF2>& Affine2Main<AF_fAF2>::sqr(const Interval itv) {
 }
 
 
+template<>
+void Affine2Main<AF_fAF2>::compact(double tol){
+	for (int i=1;i<=_n;i++) {
+		if (fabs(_elt._val[i])<tol) {
+			double temp=0.0;
+			double sss=0.0;
+			double eee = _elt.twoSum(_elt._err,fabs(_elt._val[i]), &temp);
+			double ttt = (1+2*AF_EM())*(fabs(eee));
+			if (fabs(temp)<AF_EC()) {
+				sss = (1+2*AF_EM())*(fabs(temp));
+				temp =0;
+			}
+//			_elt._err = (1+2*AF_EM())*(temp+ (AF_EE()*(AF_EM()*ttt)));;
+			_elt._err = (1+2*AF_EM())*(
+					temp +
+					(AF_EE()*(ttt) +
+							AF_EE()*sss)
+			);
+
+			_elt._val[i] =0;
+		}
+	}
+}
+
 
 
 }// end namespace ibex
