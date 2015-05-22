@@ -42,12 +42,12 @@ class Affine2MatrixArray;
 
 
 //typedef AF_fAF1  AF_Default;
-//typedef AF_fAF2  AF_Default;
+typedef AF_fAF2  AF_Default;
 //typedef AF_fAF2_fma  AF_Default;
 //typedef AF_iAF  AF_Default;
 //typedef AF_sAF  AF_Default;
 //typedef AF_No  AF_Default;
-typedef AF_fAFFullI AF_Default;
+//typedef AF_fAFFullI AF_Default;
 
 
 
@@ -60,7 +60,12 @@ class Affine2Main {
 
 private:
 
+	/**
+	 * \brief tolerance for default compact procedure
+	 */
 	static const double AF_COMPAC_Tol = 1.e-6;
+
+
 	/**
 	 * Code for the particular case:
 	 * if the affine form is actif, _n>1  and _n is the size of the affine form
