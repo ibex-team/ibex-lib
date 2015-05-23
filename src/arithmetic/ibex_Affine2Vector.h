@@ -20,6 +20,8 @@
 
 namespace ibex {
 
+template<class T> class Affine2MainMatrix;
+
 /**
  * \ingroup arithmetic
  *
@@ -37,7 +39,7 @@ class Affine2MainVector {
 
 
 private:
-	friend class Affine2Matrix;
+	friend class Affine2MainMatrix<T>;
 
 	Affine2MainVector() : _n(0), _vec(NULL) { }
 

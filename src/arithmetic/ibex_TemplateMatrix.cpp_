@@ -20,11 +20,13 @@ namespace { // to create anonymous functions
 
 inline bool is_empty(const Matrix& m)         { return false; }
 inline bool is_empty(const IntervalMatrix& m) { return m.is_empty(); }
-inline bool is_empty(const Affine2Matrix& m)  { return m.is_empty(); }
+template<class T>
+inline bool is_empty(const Affine2MainMatrix<T>& m)  { return m.is_empty(); }
 
 inline void set_empty(Matrix& m)         { }
 inline void set_empty(IntervalMatrix& m) { m.set_empty(); }
-inline void set_empty(Affine2Matrix& m)  { m.set_empty(); }
+template<class T>
+inline void set_empty(Affine2MainMatrix<T>& m)  { m.set_empty(); }
 
 
 

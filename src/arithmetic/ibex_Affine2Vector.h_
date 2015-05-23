@@ -9,6 +9,9 @@
  * ---------------------------------------------------------------------------- */
 
 
+#ifndef IBEX_AFFINE2_VECTOR_H2_
+#define IBEX_AFFINE2_VECTOR_H2_
+
 
 namespace ibex {
 
@@ -30,25 +33,25 @@ IntervalVector::IntervalVector(const Affine2MainVector<T>& x) : n(x.size()), vec
 template<class T>
 Affine2MainVector<T>::Affine2MainVector(int n) :
 		_n(n),
-		_vec(new Affine2[n]) {
+		_vec(new Affine2Main<T>[n]) {
 	assert(n>=1);
 	for (int i = 0; i < n; i++){
-		_vec[i] = Affine2();
+		_vec[i] = Affine2Main<T>();
 	}
 }
 
 template<class T>
 Affine2MainVector<T>::Affine2MainVector(int n, const Interval& x, bool b) :
 		_n(n),
-		_vec(new Affine2[n]) {
+		_vec(new Affine2Main<T>[n]) {
 	assert(n>=1);
 	if (!b) {
 		for (int i = 0; i < n; i++) {
-			_vec[i] = Affine2(x);
+			_vec[i] = Affine2Main<T>(x);
 		}
 	} else {
 		for (int i = 0; i < n; i++) {
-			_vec[i] = Affine2(n, i + 1, x);
+			_vec[i] = Affine2Main<T>(n, i + 1, x);
 		}
 	}
 }
@@ -56,7 +59,7 @@ Affine2MainVector<T>::Affine2MainVector(int n, const Interval& x, bool b) :
 template<class T>
 Affine2MainVector<T>::Affine2MainVector(int n, const Affine2Main<T>& x) :
 		_n(n),
-		_vec(new Affine2[n]) {
+		_vec(new Affine2Main<T>[n]) {
 	assert(n>=1);
 	for (int i = 0; i < n; i++) {
 		_vec[i] = x;
@@ -67,10 +70,10 @@ Affine2MainVector<T>::Affine2MainVector(int n, const Affine2Main<T>& x) :
 template<class T>
 Affine2MainVector<T>::Affine2MainVector(const Affine2MainVector<T>& x) :
 		_n(x.size()),
-		_vec(new Affine2[x.size()]) {
+		_vec(new Affine2Main<T>[x.size()]) {
 
 	for (int i = 0; i < _n; i++){
-		_vec[i] = Affine2(x[i]);
+		_vec[i] = Affine2Main<T>(x[i]);
 	}
 
 }
@@ -78,20 +81,20 @@ Affine2MainVector<T>::Affine2MainVector(const Affine2MainVector<T>& x) :
 template<class T>
 Affine2MainVector<T>::Affine2MainVector(int n, double bounds[][2], bool b) :
 		_n(n),
-		_vec(new Affine2[n]) {
+		_vec(new Affine2Main<T>[n]) {
 	if (bounds == 0){ // probably, the user called Affine2MainVector<T>(n,0) and 0 is interpreted as NULL!
 		for (int i = 0; i < n; i++){
-			_vec[i] = Affine2( 0.0); // Affine2(n, i + 1, 0.0);
+			_vec[i] = Affine2Main<T>( 0.0); // Affine2Main<T>(n, i + 1, 0.0);
 		}
 	}
 	else {
 		if (!b) {
 			for (int i = 0; i < n; i++){
-				_vec[i] =  Affine2(Interval(bounds[i][0], bounds[i][1]));
+				_vec[i] =  Affine2Main<T>(Interval(bounds[i][0], bounds[i][1]));
 			}
 		} else {
 			for (int i = 0; i < n; i++){
-				_vec[i] =  Affine2(n, i + 1, Interval(bounds[i][0], bounds[i][1]));
+				_vec[i] =  Affine2Main<T>(n, i + 1, Interval(bounds[i][0], bounds[i][1]));
 			}
 		}
 	}
@@ -101,14 +104,14 @@ Affine2MainVector<T>::Affine2MainVector(int n, double bounds[][2], bool b) :
 template<class T>
 Affine2MainVector<T>::Affine2MainVector(const IntervalVector& x, bool b) :
 		_n(x.size()),
-		_vec(new Affine2[x.size()]) {
+		_vec(new Affine2Main<T>[x.size()]) {
 	if (!b) {
 		for (int i = 0; i < x.size(); i++) {
-			_vec[i] = Affine2(x[i]);
+			_vec[i] = Affine2Main<T>(x[i]);
 		}
 	} else {
 		for (int i = 0; i < x.size(); i++) {
-			_vec[i] = Affine2(x.size(), i + 1, x[i]);
+			_vec[i] = Affine2Main<T>(x.size(), i + 1, x[i]);
 		}
 	}
 }
@@ -116,9 +119,9 @@ Affine2MainVector<T>::Affine2MainVector(const IntervalVector& x, bool b) :
 template<class T>
 Affine2MainVector<T>::Affine2MainVector(const Vector& x) :
 		_n(x.size()),
-		_vec(new Affine2[x.size()]) {
+		_vec(new Affine2Main<T>[x.size()]) {
 	for (int i = 0; i < _n; i++){
-		_vec[i] = Affine2(x[i]);
+		_vec[i] = Affine2Main<T>(x[i]);
 	}
 }
 
@@ -126,11 +129,11 @@ template<class T>
 void Affine2MainVector<T>::init(const Interval& x, bool b) {
 	if (!b) {
 		for (int i = 0; i < size(); i++) {
-			(*this)[i] = Affine2(x);
+			(*this)[i] = Affine2Main<T>(x);
 		}
 	} else {
 		for (int i = 0; i < size(); i++) {
-			(*this)[i] = Affine2(size(),i+1,x);
+			(*this)[i] = Affine2Main<T>(size(),i+1,x);
 		}
 	}
 }
@@ -148,13 +151,13 @@ void Affine2MainVector<T>::resize(int n) {
 
 	if (n==size()) return;
 
-	Affine2* newVec=new Affine2[n];
+	Affine2Main<T>* newVec=new Affine2Main<T>[n];
 	int i=0;
 	for (; i<size() && i<n; i++){
 		newVec[i]=_vec[i];
 	}
 	for (; i<n; i++){
-		newVec[i]= Affine2();
+		newVec[i]= Affine2Main<T>();
 	}
 	if (_vec!=NULL) { // vec==NULL happens when default constructor is used (n==0)
 		delete[] _vec;
@@ -377,3 +380,5 @@ std::ostream& operator<<(std::ostream& os, const Affine2MainVector<T>& x)       
 
 
 }// end namespace ibex
+
+#endif // IBEX_AFFINE2_VECTOR_H2_

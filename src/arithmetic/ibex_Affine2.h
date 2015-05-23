@@ -28,10 +28,9 @@
 
 namespace ibex {
 
-template<class T>
-class Affine2MainVector<T>;
-class Affine2Matrix;
-class Affine2MatrixArray;
+template<class T> class Affine2MainVector;
+template<class T> class Affine2MainMatrix;
+template<class T> class Affine2MainMatrixArray;
 
 /**
  * \ingroup arithmetic
@@ -49,9 +48,6 @@ typedef AF_fAF2  AF_Default;
 //typedef AF_No  AF_Default;
 //typedef AF_fAFFullI AF_Default;
 
-
-
-
 typedef Affine2Main<AF_Default> Affine2;
 
 
@@ -59,10 +55,7 @@ template<class T=AF_Default>
 class Affine2Main {
 
 private:
-
-	/**
-	 * \brief tolerance for default compact procedure
-	 */
+	/** \brief tolerance for default compact procedure  */
 	static const double AF_COMPAC_Tol = 1.e-6;
 
 
@@ -299,8 +292,8 @@ public:
 
 	typedef Affine2Main<T> SCALAR;
 	typedef Affine2MainVector<T> VECTOR;
-	typedef Affine2Matrix MATRIX;
-	typedef Affine2MatrixArray MATRIX_ARRAY;
+	typedef Affine2MainMatrix<T> MATRIX;
+	typedef Affine2MainMatrixArray<T> MATRIX_ARRAY;
 
 };
 

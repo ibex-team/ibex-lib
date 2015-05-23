@@ -22,49 +22,52 @@ namespace ibex {
  *
  * \brief Array of Affine2 matrices.
  */
-class Affine2MatrixArray {
+typedef Affine2MainMatrixArray<AF_Default> Affine2MatrixArray;
+
+template<class T=AF_Default>
+class Affine2MainMatrixArray {
 
 
 private:
-	Affine2Matrix* _array;
+	Affine2MainMatrix<T>* _array;
 	int _n;
 
 public:
 	/**
 	 * \brief Create an array of n (nb_rowsxnb_cols) Affine2 matrices.
 	 */
-	Affine2MatrixArray(int n, int nb_rows, int nb_cols);
+	Affine2MainMatrixArray(int n, int nb_rows, int nb_cols);
 
 	/**
 	 * \brief Copy a.
 	 */
-	Affine2MatrixArray(const Affine2MatrixArray& a);
+	Affine2MainMatrixArray(const Affine2MainMatrixArray<T>& a);
 
 	//It is too difficult to know the size of each AF2. So we let the user do what exactly he want to do.
-	// Affine2MatrixArray(const IntervalMatrixArray& a, int sizeAF2);
+	// Affine2MainMatrixArray<T>(const IntervalMatrixArray& a, int sizeAF2);
 
 	/**
 	 * \brief Assign a to *this.
 	 */
-	Affine2MatrixArray& operator=(const Affine2MatrixArray& a);
-	Affine2MatrixArray& operator=(const IntervalMatrixArray& a);
+	Affine2MainMatrixArray<T>& operator=(const Affine2MainMatrixArray<T>& a);
+	Affine2MainMatrixArray<T>& operator=(const IntervalMatrixArray& a);
 
 
 	/**
 	 * \brief Check equality
 	 */
-	bool operator==(const Affine2MatrixArray& m) const;
+	bool operator==(const Affine2MainMatrixArray<T>& m) const;
 	bool operator==(const IntervalMatrixArray& m) const;
 
 	/**
 	 * \brief Set all the elements to x.
 	 *
 	 */
-	void init(const Affine2& x);
+	void init(const Affine2Main<T>& x);
 	void init(const Interval& x);
 
 	/**
-	 * \brief Set this Affine2MatrixArray to the empty Affine2MatrixArray
+	 * \brief Set this Affine2MainMatrixArray<T> to the empty Affine2MainMatrixArray<T>
 	 *
 	 * The dimensions remain the same.
 	 */
@@ -73,7 +76,7 @@ public:
 	/**
 	 * \brief Delete this.
 	 */
-	~Affine2MatrixArray();
+	~Affine2MainMatrixArray();
 
 	/**
 	 * \brief return a IntervalMatrixArray compose by the Interval of each Affine2 forms.
@@ -96,7 +99,7 @@ public:
 	int nb_cols() const;
 
 	/**
-	 * \brief Return true iff this Affine2MatrixArray is empty
+	 * \brief Return true iff this Affine2MainMatrixArray<T> is empty
 	 */
 	bool is_empty() const;
 
@@ -104,12 +107,12 @@ public:
 	 * \brief Return the ith matrix.
 	 *
 	 */
-	Affine2Matrix& operator[](int i);
+	Affine2MainMatrix<T>& operator[](int i);
 
 	/**
 	 * \brief Return a const reference to the ith matrix.
 	 */
-	const Affine2Matrix& operator[](int i) const;
+	const Affine2MainMatrix<T>& operator[](int i) const;
 
 };
 
@@ -122,51 +125,67 @@ public:
  *
  * \return a reference to this.
  */
-IntervalMatrixArray operator&(const Affine2MatrixArray& x1, const Affine2MatrixArray& x2);
-IntervalMatrixArray operator&(const Affine2MatrixArray& x1, const IntervalMatrixArray& x2);
-IntervalMatrixArray operator&(const IntervalMatrixArray& x1, const Affine2MatrixArray& x2);
+template<class T>
+IntervalMatrixArray operator&(const Affine2MainMatrixArray<T>& x1, const Affine2MainMatrixArray<T>& x2);
+template<class T>
+IntervalMatrixArray operator&(const Affine2MainMatrixArray<T>& x1, const IntervalMatrixArray& x2);
+template<class T>
+IntervalMatrixArray operator&(const IntervalMatrixArray& x1, const Affine2MainMatrixArray<T>& x2);
 
 /**
  * \brief Output an array of Affine2 matrices.
  */
-std::ostream& operator<<(std::ostream& os, const Affine2MatrixArray&);
+template<class T>
+std::ostream& operator<<(std::ostream& os, const Affine2MainMatrixArray<T>&);
 
 /*@}*/
+}
+#include "ibex_Affine2MatrixArray.h_"
 
 /*================================== inline implementations ========================================*/
 
-inline int Affine2MatrixArray::size() const {
+namespace ibex {
+
+template<class T>
+inline int Affine2MainMatrixArray<T>::size() const {
 	return _n;
 }
 
-inline int Affine2MatrixArray::nb_rows() const {
+template<class T>
+inline int Affine2MainMatrixArray<T>::nb_rows() const {
 	assert(_n>0);
 	return _array[0].nb_rows();
 }
 
-inline int Affine2MatrixArray::nb_cols() const {
+template<class T>
+inline int Affine2MainMatrixArray<T>::nb_cols() const {
 	assert(_n>0);
 	return _array[0].nb_cols();
 }
 
-inline Affine2Matrix& Affine2MatrixArray::operator[](int i) {
+template<class T>
+inline Affine2MainMatrix<T>& Affine2MainMatrixArray<T>::operator[](int i) {
 	return _array[i];
 }
 
 
-inline const Affine2Matrix& Affine2MatrixArray::operator[](int i) const {
+template<class T>
+inline const Affine2MainMatrix<T>& Affine2MainMatrixArray<T>::operator[](int i) const {
 	return _array[i];
 }
 
-inline void Affine2MatrixArray::set_empty() {
+template<class T>
+inline void Affine2MainMatrixArray<T>::set_empty() {
 	(*this)[0].set_empty();
 }
 
-inline bool Affine2MatrixArray::is_empty() const {
+template<class T>
+inline bool Affine2MainMatrixArray<T>::is_empty() const {
 	return (*this)[0].is_empty();
 }
 
-inline IntervalMatrixArray operator&(const IntervalMatrixArray& x1, const Affine2MatrixArray& x2) {
+template<class T>
+inline IntervalMatrixArray operator&(const IntervalMatrixArray& x1, const Affine2MainMatrixArray<T>& x2) {
 	return (x2 & x1);
 }
 

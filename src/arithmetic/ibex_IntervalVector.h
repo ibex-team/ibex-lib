@@ -23,8 +23,7 @@
 namespace ibex {
 
 class IntervalMatrix; // declared only for friendship
-template<class T>
-class Affine2MainVector<T>;
+template<class T> class Affine2MainVector;
 
 /**
  * \ingroup arithmetic
@@ -544,8 +543,7 @@ public:
 
 private:
 	friend class IntervalMatrix;
-	template<class T>
-	friend class Affine2MainVector<T>;;
+	template<class T> friend class Affine2MainVector;
 
 	IntervalVector() : n(0), vec(NULL) { } // for IntervalMatrix & complementary()
 

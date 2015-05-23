@@ -28,7 +28,8 @@ template<class T>
 inline bool is_empty(const Affine2Main<T>& x)       { return x.is_empty(); }
 template<class T>
 inline bool is_empty(const Affine2MainVector<T>& v) { return v.is_empty(); }
-inline bool is_empty(const Affine2Matrix& m) { return m.is_empty(); }
+template<class T>
+inline bool is_empty(const Affine2MainMatrix<T>& m) { return m.is_empty(); }
 
 
 
@@ -42,7 +43,8 @@ template<class T>
 inline void set_empty(Affine2Main<T>& x)       { x.set_empty(); }
 template<class T>
 inline void set_empty(Affine2MainVector<T>& v) { v.set_empty(); }
-inline void set_empty(Affine2Matrix& m) { m.set_empty(); }
+template<class T>
+inline void set_empty(Affine2MainMatrix<T>& m) { m.set_empty(); }
 
 inline double abs(const double& x) { return fabs(x); }
 
@@ -595,7 +597,8 @@ Affine2MainVector<T> operator-(const Affine2MainVector<T>& x) {
 	return minusV(x);
 }
 
-Affine2Matrix operator-(const Affine2Matrix& m) {
+template<class T>
+Affine2MainMatrix<T> operator-(const Affine2MainMatrix<T>& m) {
 	return minusM(m);
 }
 
@@ -611,7 +614,7 @@ Affine2MainVector<T>& Affine2MainVector<T>::operator+=(const IntervalVector& x2)
 
 template<class T>
 Affine2MainVector<T>& Affine2MainVector<T>::operator+=(const Affine2MainVector<T>& x2) {
-	return set_addV<Affine2MainVector<T>,Affine2MainVector<T>>(*this,x2);
+	return set_addV<Affine2MainVector<T>,Affine2MainVector<T> >(*this,x2);
 }
 
 template<class T>
@@ -626,22 +629,22 @@ Affine2MainVector<T>& Affine2MainVector<T>::operator-=(const IntervalVector& x2)
 
 template<class T>
 Affine2MainVector<T>& Affine2MainVector<T>::operator-=(const Affine2MainVector<T>& x2) {
-	return set_subV<Affine2MainVector<T>,Affine2MainVector<T>>(*this,x2);
+	return set_subV<Affine2MainVector<T>,Affine2MainVector<T> >(*this,x2);
 }
 
 template<class T>
 Affine2MainVector<T>& Affine2MainVector<T>::operator*=(double d) {
-	return set_mulSV<double,Affine2MainVector<T>>(d,*this);
+	return set_mulSV<double,Affine2MainVector<T> >(d,*this);
 }
 
 template<class T>
 Affine2MainVector<T>& Affine2MainVector<T>::operator*=(const Interval& x1) {
-	return set_mulSV<Interval,Affine2MainVector<T>>(x1,*this);
+	return set_mulSV<Interval,Affine2MainVector<T> >(x1,*this);
 }
 
 template<class T>
 Affine2MainVector<T>& Affine2MainVector<T>::operator*=(const Affine2Main<T>& x1) {
-	return set_mulSV<Affine2,Affine2MainVector<T>>(x1,*this);
+	return set_mulSV<Affine2Main<T>,Affine2MainVector<T> >(x1,*this);
 }
 
 template<class T>
@@ -649,41 +652,49 @@ Affine2MainVector<T> abs( const Affine2MainVector<T>& x) {
 	return absV(x);
 }
 
-Affine2Matrix& Affine2Matrix::operator+=(const Matrix& m) {
-	return set_addM<Affine2Matrix,Matrix>(*this,m);
-}
-
-Affine2Matrix& Affine2Matrix::operator+=(const Affine2Matrix& m) {
-	return set_addM<Affine2Matrix,Affine2Matrix>(*this,m);
-}
-
-Affine2Matrix& Affine2Matrix::operator+=(const IntervalMatrix& m) {
-	return set_addM<Affine2Matrix,IntervalMatrix>(*this,m);
-}
-
-Affine2Matrix& Affine2Matrix::operator-=(const Matrix& m) {
-	return set_subM<Affine2Matrix,Matrix>(*this,m);
-}
-
-Affine2Matrix& Affine2Matrix::operator-=(const Affine2Matrix& m) {
-	return set_subM<Affine2Matrix,Affine2Matrix>(*this,m);
-}
-
-Affine2Matrix& Affine2Matrix::operator-=(const IntervalMatrix& m) {
-	return set_subM<Affine2Matrix,IntervalMatrix>(*this,m);
-}
-
-Affine2Matrix& Affine2Matrix::operator*=(double x) {
-	return set_mulSM<double,Affine2Matrix>(x,*this);
+template<class T>
+Affine2MainMatrix<T>& Affine2MainMatrix<T>::operator+=(const Matrix& m) {
+	return set_addM<Affine2MainMatrix<T>,Matrix>(*this,m);
 }
 
 template<class T>
-Affine2Matrix& Affine2Matrix::operator*=(const Affine2Main<T>& x) {
-	return set_mulSM<Affine2,Affine2Matrix>(x,*this);
+Affine2MainMatrix<T>& Affine2MainMatrix<T>::operator+=(const Affine2MainMatrix<T>& m) {
+	return set_addM<Affine2MainMatrix<T>,Affine2MainMatrix<T> >(*this,m);
 }
 
-Affine2Matrix& Affine2Matrix::operator*=(const Interval& x) {
-	return set_mulSM<Interval,Affine2Matrix>(x,*this);
+template<class T>
+Affine2MainMatrix<T>& Affine2MainMatrix<T>::operator+=(const IntervalMatrix& m) {
+	return set_addM<Affine2MainMatrix<T>,IntervalMatrix>(*this,m);
+}
+
+template<class T>
+Affine2MainMatrix<T>& Affine2MainMatrix<T>::operator-=(const Matrix& m) {
+	return set_subM<Affine2MainMatrix<T>,Matrix>(*this,m);
+}
+
+template<class T>
+Affine2MainMatrix<T>& Affine2MainMatrix<T>::operator-=(const Affine2MainMatrix<T>& m) {
+	return set_subM<Affine2MainMatrix<T>,Affine2MainMatrix<T> >(*this,m);
+}
+
+template<class T>
+Affine2MainMatrix<T>& Affine2MainMatrix<T>::operator-=(const IntervalMatrix& m) {
+	return set_subM<Affine2MainMatrix<T>,IntervalMatrix>(*this,m);
+}
+
+template<class T>
+Affine2MainMatrix<T>& Affine2MainMatrix<T>::operator*=(double x) {
+	return set_mulSM<double,Affine2MainMatrix<T> >(x,*this);
+}
+
+template<class T>
+Affine2MainMatrix<T>& Affine2MainMatrix<T>::operator*=(const Affine2Main<T>& x) {
+	return set_mulSM<Affine2Main<T>,Affine2MainMatrix<T> >(x,*this);
+}
+
+template<class T>
+Affine2MainMatrix<T>& Affine2MainMatrix<T>::operator*=(const Interval& x) {
+	return set_mulSM<Interval,Affine2MainMatrix<T> >(x,*this);
 }
 
 template<class T>
@@ -756,102 +767,107 @@ Affine2MainVector<T> operator*(const Interval& x1, const Affine2MainVector<T>& x
 }
 
 template<class T>
-Affine2MainVector<T> operator*(const Affine2Matrix& m, const Vector& x) {
-	return mulMV<Affine2Matrix,Vector,Affine2MainVector<T>>(m,x);
+Affine2MainVector<T> operator*(const Affine2MainMatrix<T>& m, const Vector& x) {
+	return mulMV<Affine2MainMatrix<T>,Vector,Affine2MainVector<T>>(m,x);
 }
 
 template<class T>
 Affine2MainVector<T> operator*(const Matrix& m, const Affine2MainVector<T>& x) {
-	return mulMV<Matrix,Affine2MainVector<T>,Affine2MainVector<T>>(m,x);
+	return mulMV<Matrix,Affine2MainVector<T>,Affine2MainVector<T> >(m,x);
 }
 
 template<class T>
-Affine2MainVector<T> operator*(const Affine2Matrix& m, const Affine2MainVector<T>& x) {
-	return mulMV<Affine2Matrix,Affine2MainVector<T>,Affine2MainVector<T>>(m,x);
+Affine2MainVector<T> operator*(const Affine2MainMatrix<T>& m, const Affine2MainVector<T>& x) {
+	return mulMV<Affine2MainMatrix<T>,Affine2MainVector<T>,Affine2MainVector<T> >(m,x);
 }
 
 template<class T>
-Affine2MainVector<T> operator*(const Affine2Matrix& m, const IntervalVector& x) {
-	return mulMV<Affine2Matrix,IntervalVector,Affine2MainVector<T>>(m,x);
+Affine2MainVector<T> operator*(const Affine2MainMatrix<T>& m, const IntervalVector& x) {
+	return mulMV<Affine2MainMatrix<T>,IntervalVector,Affine2MainVector<T> >(m,x);
 }
 
 template<class T>
 Affine2MainVector<T> operator*(const IntervalMatrix& m, const Affine2MainVector<T>& x) {
-	return mulMV<IntervalMatrix,Affine2MainVector<T>,Affine2MainVector<T>>(m,x);
+	return mulMV<IntervalMatrix,Affine2MainVector<T>,Affine2MainVector<T> >(m,x);
 }
 
 template<class T>
-Affine2MainVector<T> operator*(const Vector& x, const Affine2Matrix& m) {
-	return mulVM<Vector,Affine2Matrix,Affine2MainVector<T>>(x,m);
+Affine2MainVector<T> operator*(const Vector& x, const Affine2MainMatrix<T>& m) {
+	return mulVM<Vector,Affine2MainMatrix<T>,Affine2MainVector<T> >(x,m);
 }
 
 template<class T>
 Affine2MainVector<T> operator*(const Affine2MainVector<T>& x, const Matrix& m) {
-	return mulVM<Affine2MainVector<T>,Matrix,Affine2MainVector<T>>(x,m);
+	return mulVM<Affine2MainVector<T>,Matrix,Affine2MainVector<T> >(x,m);
 }
 
 template<class T>
-Affine2MainVector<T> operator*(const Affine2MainVector<T>& x, const Affine2Matrix& m) {
-	return mulVM<Affine2MainVector<T>,Affine2Matrix,Affine2MainVector<T>>(x,m);
+Affine2MainVector<T> operator*(const Affine2MainVector<T>& x, const Affine2MainMatrix<T>& m) {
+	return mulVM<Affine2MainVector<T>,Affine2MainMatrix<T>,Affine2MainVector<T> >(x,m);
 }
 
 template<class T>
 Affine2MainVector<T> operator*(const Affine2MainVector<T>& x, const IntervalMatrix& m) {
-	return mulVM<Affine2MainVector<T>,IntervalMatrix,Affine2MainVector<T>>(x,m);
+	return mulVM<Affine2MainVector<T>,IntervalMatrix,Affine2MainVector<T> >(x,m);
 }
 
 template<class T>
-Affine2MainVector<T> operator*(const IntervalVector& x, const Affine2Matrix& m) {
-	return mulVM<IntervalVector,Affine2Matrix,Affine2MainVector<T>>(x,m);
-}
-
-Affine2Matrix operator*(const Affine2Matrix& m1, const Matrix& m2) {
-	return mulMM<Affine2Matrix,Matrix,Affine2Matrix>(m1,m2);
-}
-
-Affine2Matrix operator*(const Matrix& m1, const Affine2Matrix& m2) {
-	return mulMM<Matrix,Affine2Matrix,Affine2Matrix>(m1,m2);
-}
-
-Affine2Matrix operator*(const Affine2Matrix& m1, const Affine2Matrix& m2) {
-	return mulMM<Affine2Matrix,Affine2Matrix,Affine2Matrix>(m1,m2);
-}
-
-Affine2Matrix operator*(const Affine2Matrix& m1, const IntervalMatrix& m2) {
-	return mulMM<Affine2Matrix,IntervalMatrix,Affine2Matrix>(m1,m2);
-}
-
-Affine2Matrix operator*(const IntervalMatrix& m1, const Affine2Matrix& m2) {
-	return mulMM<IntervalMatrix,Affine2Matrix,Affine2Matrix>(m1,m2);
+Affine2MainVector<T> operator*(const IntervalVector& x, const Affine2MainMatrix<T>& m) {
+	return mulVM<IntervalVector,Affine2MainMatrix<T>,Affine2MainVector<T> >(x,m);
 }
 
 template<class T>
-Affine2Matrix outer_product(const Affine2MainVector<T>& x1, const Vector& x2) {
-	return outer_prod<Affine2MainVector<T>,Vector,Affine2Matrix>(x1,x2);
+Affine2MainMatrix<T> operator*(const Affine2MainMatrix<T>& m1, const Matrix& m2) {
+	return mulMM<Affine2MainMatrix<T>,Matrix,Affine2MainMatrix<T> >(m1,m2);
 }
 
 template<class T>
-Affine2Matrix outer_product(const Vector& x1, const Affine2MainVector<T>& x2) {
-	return outer_prod<Vector,Affine2MainVector<T>,Affine2Matrix>(x1,x2);
+Affine2MainMatrix<T> operator*(const Matrix& m1, const Affine2MainMatrix<T>& m2) {
+	return mulMM<Matrix,Affine2MainMatrix<T>,Affine2MainMatrix<T> >(m1,m2);
 }
 
 template<class T>
-Affine2Matrix outer_product(const Affine2MainVector<T>& x1, const Affine2MainVector<T>& x2) {
-	return outer_prod<Affine2MainVector<T>,Affine2MainVector<T>,Affine2Matrix>(x1,x2);
+Affine2MainMatrix<T> operator*(const Affine2MainMatrix<T>& m1, const Affine2MainMatrix<T>& m2) {
+	return mulMM<Affine2MainMatrix<T>,Affine2MainMatrix<T>,Affine2MainMatrix<T> >(m1,m2);
 }
 
 template<class T>
-Affine2Matrix outer_product(const Affine2MainVector<T>& x1, const IntervalVector& x2) {
-	return outer_prod<Affine2MainVector<T>,IntervalVector,Affine2Matrix>(x1,x2);
+Affine2MainMatrix<T> operator*(const Affine2MainMatrix<T>& m1, const IntervalMatrix& m2) {
+	return mulMM<Affine2MainMatrix<T>,IntervalMatrix,Affine2MainMatrix<T> >(m1,m2);
 }
 
 template<class T>
-Affine2Matrix outer_product(const IntervalVector& x1, const Affine2MainVector<T>& x2) {
-	return outer_prod<IntervalVector,Affine2MainVector<T>,Affine2Matrix>(x1,x2);
+Affine2MainMatrix<T> operator*(const IntervalMatrix& m1, const Affine2MainMatrix<T>& m2) {
+	return mulMM<IntervalMatrix,Affine2MainMatrix<T>,Affine2MainMatrix<T> >(m1,m2);
 }
 
 template<class T>
-Affine2Matrix abs(const Affine2Matrix& m) {
+Affine2MainMatrix<T> outer_product(const Affine2MainVector<T>& x1, const Vector& x2) {
+	return outer_prod<Affine2MainVector<T>,Vector,Affine2MainMatrix<T> >(x1,x2);
+}
+
+template<class T>
+Affine2MainMatrix<T> outer_product(const Vector& x1, const Affine2MainVector<T>& x2) {
+	return outer_prod<Vector,Affine2MainVector<T>,Affine2MainMatrix<T> >(x1,x2);
+}
+
+template<class T>
+Affine2MainMatrix<T> outer_product(const Affine2MainVector<T>& x1, const Affine2MainVector<T>& x2) {
+	return outer_prod<Affine2MainVector<T>,Affine2MainVector<T>,Affine2MainMatrix<T> >(x1,x2);
+}
+
+template<class T>
+Affine2MainMatrix<T> outer_product(const Affine2MainVector<T>& x1, const IntervalVector& x2) {
+	return outer_prod<Affine2MainVector<T>,IntervalVector,Affine2MainMatrix<T> >(x1,x2);
+}
+
+template<class T>
+Affine2MainMatrix<T> outer_product(const IntervalVector& x1, const Affine2MainVector<T>& x2) {
+	return outer_prod<IntervalVector,Affine2MainVector<T>,Affine2MainMatrix<T> >(x1,x2);
+}
+
+template<class T>
+Affine2MainMatrix<T> abs(const Affine2MainMatrix<T>& m) {
 	return absM(m);
 }
 

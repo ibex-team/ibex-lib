@@ -43,7 +43,8 @@ public:
 	/**
 	 * \brief Run the forward algorithm on the box \a box and return the root node label.
 	 */
-	ExprLabel& eval_label(const Function& f, const Affine2Vector& box) const;
+	template<class T>
+	ExprLabel& eval_label(const Function& f, const Affine2MainVector<T>& box) const;
 
 	/**
 	 * \brief Run the forward algorithm with input node labels and return the result as an interval domain.

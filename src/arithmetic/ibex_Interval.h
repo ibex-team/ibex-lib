@@ -109,7 +109,7 @@
 
 namespace ibex {
 
-template <class T>  class Affine2Main;
+template<class T>  class Affine2Main;
 
 class IntervalVector;
 class IntervalMatrix;
