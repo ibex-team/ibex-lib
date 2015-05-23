@@ -23,10 +23,12 @@ public:
 	TestQInter() {
         TEST_ADD(TestQInter::test_projF_1);
         TEST_ADD(TestQInter::test_projF_2);
+        TEST_ADD(TestQInter::test_projF_3);
 	}
 
     void test_projF_1();
     void test_projF_2();
+    void test_projF_3();
 };
 
 } // end namespace ibex

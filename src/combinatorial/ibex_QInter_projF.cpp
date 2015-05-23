@@ -16,7 +16,7 @@ using namespace std;
 #define PROJ_LEFT_BOUND 0
 #define PROJ_RIGHT_BOUND 1
 
-bool paircomp (const pair<double,int>& i, const pair<double,int>& j) { return (i.first<j.first); }
+bool paircomp (const pair<double,int>& i, const pair<double,int>& j) { return (i.first<j.first || (i.first==j.first && i.second < j.second)); }
 
 namespace ibex {
 
@@ -51,17 +51,10 @@ IntervalVector qinter_projf(const Array<IntervalVector>& _boxes, int q) {
 		
 		/* Solve the q-inter for dimension i */
 		
-		/* Fix : Special case when all intervals are singleton and equal */
-        bool same_singleton = true;
-        for (int j=0; j<p; j++) {
-            x[2*j]   = make_pair(boxes[j][i].lb(),PROJ_LEFT_BOUND);
-            x[2*j+1] = make_pair(boxes[j][i].ub(),PROJ_RIGHT_BOUND);
-            same_singleton &= (boxes[j][i].is_degenerated() && boxes[j][i] == boxes[std::max(0, j-1)][i]);
-        }
-        if(same_singleton == true){
-            res[i] = boxes[0][i];
-            continue;
-        }
+		for (int j=0; j<p; j++) {
+			x[2*j]   = make_pair(boxes[j][i].lb(),PROJ_LEFT_BOUND);
+			x[2*j+1] = make_pair(boxes[j][i].ub(),PROJ_RIGHT_BOUND);
+		}
 		
 		sort(x,x+2*p,paircomp);
 		
