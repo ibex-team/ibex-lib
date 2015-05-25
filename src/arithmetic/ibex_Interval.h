@@ -1357,7 +1357,7 @@ inline bool bwd_angle(const Interval& theta, Interval& y, Interval& x) {
    //Upper half of upper right quadrant
    else if(theta.is_subset(iPIo4_PIo2))
    {
-       bwd_atan2(dPIo2-theta,x,y);
+       bwd_angle(dPIo2-theta,x,y);
    }
 
    //Upper right quadrant
@@ -1365,8 +1365,8 @@ inline bool bwd_angle(const Interval& theta, Interval& y, Interval& x) {
    {
        Interval x1=x; Interval y1=y; Interval x2=x; Interval y2=y;
        Interval theta1(theta.lb(),dPIo4), theta2(dPIo4, theta.ub());
-       bwd_atan2(theta1,y1,x1);
-       bwd_atan2(theta2,y2,x2);
+       bwd_angle(theta1,y1,x1);
+       bwd_angle(theta2,y2,x2);
        x=x1|x2; y=y1|y2;
    }
 
@@ -1375,7 +1375,7 @@ inline bool bwd_angle(const Interval& theta, Interval& y, Interval& x) {
    {
        Interval x2=-x;
        Interval theta2=dPI-theta;
-       bwd_atan2(theta2,y,x2);
+       bwd_angle(theta2,y,x2);
        x=-x2;
    }
 
@@ -1385,7 +1385,7 @@ inline bool bwd_angle(const Interval& theta, Interval& y, Interval& x) {
        Interval y2=-y;
        Interval x2=-x;
        Interval theta2=theta-dPI;
-       bwd_atan2(theta2,y2,x2);
+       bwd_angle(theta2,y2,x2);
        x=-x2; y=-y2;
    }
 
@@ -1395,7 +1395,7 @@ inline bool bwd_angle(const Interval& theta, Interval& y, Interval& x) {
        Interval x2=x;
        Interval y2=-y;
        Interval theta2=d2PI-theta;
-       bwd_atan2(theta2,y2,x2);
+       bwd_angle(theta2,y2,x2);
        x=x2; y=-y2;
    }
 
@@ -1403,8 +1403,8 @@ inline bool bwd_angle(const Interval& theta, Interval& y, Interval& x) {
    else if(theta.is_subset(iZero_PI)) {
        Interval theta1(theta.lb(),dPIo2), theta2(dPIo2, theta.ub());
        Interval x1=x; Interval y1=y; Interval x2=x; Interval y2=y;
-       if(theta.lb() != dPIo2) bwd_atan2(theta1,y1,x1);
-       if(theta.ub() != dPIo2) bwd_atan2(theta2,y2,x2);
+       if(theta.lb() != dPIo2) bwd_angle(theta1,y1,x1);
+       if(theta.ub() != dPIo2) bwd_angle(theta2,y2,x2);
        x=x1|x2; y=y1|y2;
    }
 
@@ -1412,8 +1412,8 @@ inline bool bwd_angle(const Interval& theta, Interval& y, Interval& x) {
    else if(theta.is_subset(iZero_3PIo2)) {
        Interval theta1(theta.lb(),dPI), theta2(dPI, theta.ub());
        Interval x1=x; Interval y1=y; Interval x2=x; Interval y2=y;
-       if(theta.lb() != dPI) bwd_atan2(theta1,y1,x1);
-       if(theta.ub() != dPI) bwd_atan2(theta2,y2,x2);
+       if(theta.lb() != dPI) bwd_angle(theta1,y1,x1);
+       if(theta.ub() != dPI) bwd_angle(theta2,y2,x2);
        x=x1|x2; y=y1|y2;
    }
 
@@ -1421,8 +1421,8 @@ inline bool bwd_angle(const Interval& theta, Interval& y, Interval& x) {
    else if(theta.is_subset(iZero_2PI)) {
        Interval theta1(theta.lb(),3*dPIo2), theta2(3*dPIo2, theta.ub());
        Interval x1=x; Interval y1=y; Interval x2=x; Interval y2=y;
-       if(theta.lb() != 3*dPIo2) bwd_atan2(theta1,y1,x1);
-       if(theta.ub() != 3*dPIo2) bwd_atan2(theta2,y2,x2);
+       if(theta.lb() != 3*dPIo2) bwd_angle(theta1,y1,x1);
+       if(theta.ub() != 3*dPIo2) bwd_angle(theta2,y2,x2);
        x=x1|x2; y=y1|y2;
    }
 
@@ -1430,7 +1430,7 @@ inline bool bwd_angle(const Interval& theta, Interval& y, Interval& x) {
    else if (theta.diam() > d2PI)
    {
        Interval theta1(0,d2PI);
-       bwd_atan2(theta1,x,y);
+       bwd_angle(theta1,x,y);
    }
 
    // Modulo
@@ -1447,13 +1447,13 @@ inline bool bwd_angle(const Interval& theta, Interval& y, Interval& x) {
        thetaTmp=theta;
        bwd_imod(thetaTmp,theta4,d2PI);
        Interval x1=x; Interval y1=y;
-       bwd_atan2(theta1,y1,x1); // first quadrant
+       bwd_angle(theta1,y1,x1); // first quadrant
        Interval x2=x; Interval y2=y;
-       bwd_atan2(theta2,y2,x2); // second quadrant
+       bwd_angle(theta2,y2,x2); // second quadrant
        Interval x3=x; Interval y3=y;
-       bwd_atan2(theta3,y3,x3); // third quadrant
+       bwd_angle(theta3,y3,x3); // third quadrant
        Interval x4=x; Interval y4=y;
-       bwd_atan2(theta4,y4,x4); // fourth quadrant
+       bwd_angle(theta4,y4,x4); // fourth quadrant
        x=(x1|x2)|(x3|x4); y=(y1|y2)|(y3|y4);
        // not_implemented("bwd_atan2 not implemented yet for theta outside [0,2*PI].");
    }
