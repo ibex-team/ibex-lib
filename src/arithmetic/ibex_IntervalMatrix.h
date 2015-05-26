@@ -636,6 +636,40 @@ std::ostream& operator<<(std::ostream& os, const IntervalMatrix&);
 
 /*================================== inline implementations ========================================*/
 
+namespace {
+
+// the following functions are
+// introduced to allow genericity
+//inline bool is_empty(double x)                { return false; }
+//inline bool is_empty(const Interval& x)       { return x.is_empty(); }
+//inline bool is_empty(const Vector& v)         { return false; }
+//inline bool is_empty(const IntervalVector& v) { return v.is_empty(); }
+//inline bool is_empty(const Matrix& m)         { return false; }
+inline bool is_empty(const IntervalMatrix& m) { return m.is_empty(); }
+//template<class T> inline bool is_empty(const Affine2Main<T>& x)       { return x.is_empty(); }
+//template<class T> inline bool is_empty(const Affine2MainVector<T>& v) { return v.is_empty(); }
+//template<class T> inline bool is_empty(const Affine2MainMatrix<T>& m) { return m.is_empty(); }
+
+
+
+//inline void set_empty(double x)          { }
+//inline void set_empty(Interval& x)       { x.set_empty(); }
+//inline void set_empty(Vector& v)         { }
+//inline void set_empty(IntervalVector& v) { v.set_empty(); }
+//inline void set_empty(Matrix& m)         { }
+inline void set_empty(IntervalMatrix& m) { m.set_empty(); }
+//template<class T> inline void set_empty(Affine2Main<T>& x)       { x.set_empty(); }
+//template<class T> inline void set_empty(Affine2MainVector<T>& v) { v.set_empty(); }
+//template<class T> inline void set_empty(Affine2MainMatrix<T>& m) { m.set_empty(); }
+
+} // end namespace anonymous
+
+} // end namespace ibex
+
+#include "ibex_LinearArith.h_"
+
+namespace ibex {
+
 inline IntervalMatrix IntervalMatrix::empty(int m, int n) {
 	return IntervalMatrix(m, n, Interval::EMPTY_SET);
 }
@@ -697,6 +731,127 @@ inline void IntervalMatrix::set_row(int row1, const IntervalVector& v1) {
 inline bool IntervalMatrix::is_empty() const {
 	return (*this)[0].is_empty();
 }
+
+inline IntervalMatrix& IntervalMatrix::operator+=(const Matrix& m) {
+	return set_addM<IntervalMatrix,Matrix>(*this,m);
+}
+
+inline IntervalMatrix& IntervalMatrix::operator+=(const IntervalMatrix& m) {
+	return set_addM<IntervalMatrix,IntervalMatrix>(*this,m);
+}
+
+inline IntervalMatrix& IntervalMatrix::operator-=(const Matrix& m) {
+	return set_subM<IntervalMatrix,Matrix>(*this,m);
+}
+
+inline IntervalMatrix& IntervalMatrix::operator-=(const IntervalMatrix& m) {
+	return set_subM<IntervalMatrix,IntervalMatrix>(*this,m);
+}
+
+inline IntervalMatrix& IntervalMatrix::operator*=(double x) {
+	return set_mulSM<double,IntervalMatrix>(x,*this);
+}
+
+inline IntervalMatrix& IntervalMatrix::operator*=(const Interval& x) {
+	return set_mulSM<Interval,IntervalMatrix>(x,*this);
+}
+
+inline IntervalMatrix& IntervalMatrix::operator*=(const Matrix& m) {
+	return *this=(*this*m);
+}
+
+inline IntervalMatrix& IntervalMatrix::operator*=(const IntervalMatrix& m) {
+	return *this=(*this*m);
+}
+
+inline IntervalMatrix operator-(const IntervalMatrix& m) {
+	return minusM(m);
+}
+
+inline IntervalMatrix operator+(const IntervalMatrix& m1, const Matrix& m2) {
+	return IntervalMatrix(m1)+=m2;
+}
+
+inline IntervalMatrix operator+(const Matrix& m1, const IntervalMatrix& m2) {
+	return IntervalMatrix(m1)+=m2;
+}
+
+inline IntervalMatrix operator+(const IntervalMatrix& m1, const IntervalMatrix& m2) {
+	return IntervalMatrix(m1)+=m2;
+}
+
+inline IntervalMatrix operator-(const IntervalMatrix& m1, const Matrix& m2) {
+	return IntervalMatrix(m1)-=m2;
+}
+
+inline IntervalMatrix operator-(const Matrix& m1, const IntervalMatrix& m2) {
+	return IntervalMatrix(m1)-=m2;
+}
+
+inline IntervalMatrix operator-(const IntervalMatrix& m1, const IntervalMatrix& m2) {
+	return IntervalMatrix(m1)-=m2;
+}
+
+inline IntervalMatrix operator*(double x, const IntervalMatrix& m) {
+	return IntervalMatrix(m)*=x;
+}
+
+inline IntervalMatrix operator*(const Interval& x, const Matrix& m) {
+	return IntervalMatrix(m)*=x;
+}
+
+inline IntervalMatrix operator*(const Interval& x, const IntervalMatrix& m) {
+	return IntervalMatrix(m)*=x;
+}
+
+inline IntervalMatrix outer_product(const Vector& v1, const IntervalVector& v2) {
+	return outer_prod<Vector,IntervalVector,IntervalMatrix>(v1,v2);
+}
+
+inline IntervalMatrix outer_product(const IntervalVector& v1, const Vector& v2) {
+	return outer_prod<IntervalVector,Vector,IntervalMatrix>(v1,v2);
+}
+
+inline IntervalMatrix outer_product(const IntervalVector& v1, const IntervalVector& v2) {
+	return outer_prod<IntervalVector,IntervalVector,IntervalMatrix>(v1,v2);
+}
+
+inline IntervalVector operator*(const IntervalMatrix& m, const Vector& v) {
+	return mulMV<IntervalMatrix,Vector,IntervalVector>(m,v);
+}
+
+inline IntervalVector operator*(const IntervalMatrix& m, const IntervalVector& v) {
+	return mulMV<IntervalMatrix,IntervalVector,IntervalVector>(m,v);
+}
+
+inline IntervalVector operator*(const Vector& v, const IntervalMatrix& m) {
+	return mulVM<Vector,IntervalMatrix,IntervalVector>(v,m);
+}
+
+inline IntervalVector operator*(const IntervalVector& v, const IntervalMatrix& m) {
+	return mulVM<IntervalVector,IntervalMatrix,IntervalVector>(v,m);
+}
+
+inline IntervalMatrix operator*(const Matrix& m1, const IntervalMatrix& m2) {
+	return mulMM<Matrix,IntervalMatrix,IntervalMatrix>(m1,m2);
+}
+
+inline IntervalMatrix operator*(const IntervalMatrix& m1, const Matrix& m2) {
+	return mulMM<IntervalMatrix,Matrix,IntervalMatrix>(m1,m2);
+}
+
+inline IntervalMatrix operator*(const IntervalMatrix& m1, const IntervalMatrix& m2) {
+	return mulMM<IntervalMatrix,IntervalMatrix,IntervalMatrix>(m1,m2);
+}
+
+inline IntervalMatrix abs(const IntervalMatrix& m) {
+	return absM(m);
+}
+
+
+
+
+
 
 } // namespace ibex
 #endif // __IBEX_INTERVAL_MATRIX_H__

@@ -28,16 +28,6 @@ namespace ibex {
 
 namespace { // to create anonymous functions
 
-//inline bool is_empty(double x)                { return false; }
-inline bool is_empty(const Vector& v)         { return false; }
-inline bool is_empty(const IntervalVector& v) { return v.is_empty(); }
-template<class T>
-inline bool is_empty(const Affine2MainVector<T>& v)  { return v.is_empty(); }
-
-inline void set_empty(Vector& v)         { }
-inline void set_empty(IntervalVector& v) { v.set_empty(); }
-template<class T>
-inline void set_empty(Affine2MainVector<T>& v) { v.set_empty(); }
 
 template<class V>
 inline V& _inflate(V& v, double rad1) {

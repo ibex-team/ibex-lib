@@ -58,8 +58,7 @@ ExprLabel& Affine2Eval::eval_label(const Function& f, const IntervalVector& box)
 
 }
 
-template<class T>
-ExprLabel& Affine2Eval::eval_label(const Function& f, const Affine2MainVector<T>& box) const {
+ExprLabel& Affine2Eval::eval_label(const Function& f, const Affine2Vector& box) const {
 	assert(f.expr().deco.af2);
 	assert(f.expr().deco.d);
 

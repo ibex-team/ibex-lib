@@ -9,8 +9,8 @@
  * ---------------------------------------------------------------------------- */
 
 
-#ifndef IBEX_AFFINE2_VECTOR_H2_
-#define IBEX_AFFINE2_VECTOR_H2_
+#ifndef __IBEX_AFFINE2_VECTOR_H2__
+#define __IBEX_AFFINE2_VECTOR_H2__
 
 #include "ibex_TemplateVector.h_"
 

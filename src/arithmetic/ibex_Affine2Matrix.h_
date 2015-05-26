@@ -8,13 +8,14 @@
  * Created     : March 16, 2013
  * ---------------------------------------------------------------------------- */
 
-#ifndef IBEX_AFFINE2_MATRIX_H2_
-#define IBEX_AFFINE2_MATRIX_H2_
+#ifndef __IBEX_AFFINE2_MATRIX_H2__
+#define __IBEX_AFFINE2_MATRIX_H2__
 
 
 #include "ibex_TemplateMatrix.h_"
 
 namespace ibex {
+
 
 template<class T>
 IntervalMatrix& IntervalMatrix::operator=(const Affine2MainMatrix<T>& x) {

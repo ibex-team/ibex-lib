@@ -694,7 +694,7 @@ Affine2Main<AF_No>& Affine2Main<AF_No>::linChebyshev(Affine2_expr num, const Int
 			}
 			else {
 				dmm = res_itv;
-				alpha = ((abs((itv.ub()))-abs((itv.lb())))/itv.diam()).ub();
+				alpha = ((abs((itv.ub()))-abs((itv.lb())))/itv.diam());
 
 				TEMP1 = dmm.lb()-alpha*(itv.lb());
 				TEMP2 = dmm.ub()-alpha*(itv.ub());

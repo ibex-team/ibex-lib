@@ -18,6 +18,7 @@
 #include "ibex_Interval.h"
 #include "ibex_InvalidIntervalVectorOp.h"
 #include "ibex_Vector.h"
+#include "ibex_Matrix.h"
 #include "ibex_Array.h"
 
 namespace ibex {
@@ -703,6 +704,42 @@ IntervalVector cart_prod(const IntervalVector& x, const IntervalVector& y);
 
 /*============================================ inline implementation ============================================ */
 
+
+
+namespace {
+
+// the following functions are
+// introduced to allow genericity
+//inline bool is_empty(double x)                { return false; }
+//inline bool is_empty(const Interval& x)       { return x.is_empty(); }
+//inline bool is_empty(const Vector& v)         { return false; }
+inline bool is_empty(const IntervalVector& v) { return v.is_empty(); }
+//inline bool is_empty(const Matrix& m)         { return false; }
+//inline bool is_empty(const IntervalMatrix& m) { return m.is_empty(); }
+//template<class T> inline bool is_empty(const Affine2Main<T>& x)       { return x.is_empty(); }
+//template<class T> inline bool is_empty(const Affine2MainVector<T>& v) { return v.is_empty(); }
+//template<class T> inline bool is_empty(const Affine2MainMatrix<T>& m) { return m.is_empty(); }
+
+
+
+//inline void set_empty(double x)          { }
+//inline void set_empty(Interval& x)       { x.set_empty(); }
+//inline void set_empty(Vector& v)         { }
+inline void set_empty(IntervalVector& v) { v.set_empty(); }
+//inline void set_empty(Matrix& m)         { }
+//inline void set_empty(IntervalMatrix& m) { m.set_empty(); }
+//template<class T> inline void set_empty(Affine2Main<T>& x)       { x.set_empty(); }
+//template<class T> inline void set_empty(Affine2MainVector<T>& v) { v.set_empty(); }
+//template<class T> inline void set_empty(Affine2MainMatrix<T>& m) { m.set_empty(); }
+
+} // end namespace anonymous
+
+} // end namespace ibex
+
+#include "ibex_LinearArith.h_"
+
+namespace ibex {
+
 inline IntervalVector IntervalVector::empty(int n) {
 	return IntervalVector(n, Interval::EMPTY_SET);
 }
@@ -776,6 +813,107 @@ inline IntervalVector cart_prod(const IntervalVector& x, const IntervalVector& y
 	z.put(x.size(),y);
 	return z;
 }
+
+inline IntervalVector& IntervalVector::operator+=(const Vector& x) {
+	return set_addV<IntervalVector,Vector>(*this,x);
+}
+
+inline IntervalVector& IntervalVector::operator+=(const IntervalVector& x) {
+	return set_addV<IntervalVector,IntervalVector>(*this,x);
+}
+
+inline IntervalVector& IntervalVector::operator-=(const Vector& x) {
+	return set_subV<IntervalVector,Vector>(*this,x);
+}
+
+inline IntervalVector& IntervalVector::operator-=(const IntervalVector& x) {
+	return set_subV<IntervalVector,IntervalVector>(*this,x);
+}
+
+inline IntervalVector& IntervalVector::operator*=(double x) {
+	return set_mulSV<double,IntervalVector>(x,*this);
+}
+
+inline IntervalVector& IntervalVector::operator*=(const Interval& x) {
+	return set_mulSV<Interval,IntervalVector>(x,*this);
+}
+
+inline IntervalVector operator-(const IntervalVector& x) {
+	return minusV(x);
+}
+
+inline IntervalVector operator+(const IntervalVector& m1, const Vector& m2) {
+	return IntervalVector(m1)+=m2;
+}
+
+inline IntervalVector operator+(const Vector& m1, const IntervalVector& m2) {
+	return IntervalVector(m1)+=m2;
+}
+
+inline IntervalVector operator+(const IntervalVector& m1, const IntervalVector& m2) {
+	return IntervalVector(m1)+=m2;
+}
+
+inline IntervalVector operator-(const IntervalVector& m1, const Vector& m2) {
+	return IntervalVector(m1)-=m2;
+}
+
+inline IntervalVector operator-(const Vector& m1, const IntervalVector& m2) {
+	return IntervalVector(m1)-=m2;
+}
+
+inline IntervalVector operator-(const IntervalVector& m1, const IntervalVector& m2) {
+	return IntervalVector(m1)-=m2;
+}
+
+inline IntervalVector operator*(double x, const IntervalVector& v) {
+	return IntervalVector(v)*=x;
+}
+
+inline IntervalVector operator*(const Interval& x, const Vector& v) {
+	return IntervalVector(v)*=x;
+}
+
+inline IntervalVector operator*(const Interval& x, const IntervalVector& v) {
+	return IntervalVector(v)*=x;
+}
+
+inline Interval operator*(const Vector& v1, const IntervalVector& v2) {
+	return mulVV<Vector,IntervalVector,Interval>(v1,v2);
+}
+
+inline Interval operator*(const IntervalVector& v1, const Vector& v2) {
+	return mulVV<IntervalVector,Vector,Interval>(v1,v2);
+}
+
+inline Interval operator*(const IntervalVector& v1, const IntervalVector& v2) {
+	return mulVV<IntervalVector,IntervalVector,Interval>(v1,v2);
+}
+
+inline IntervalVector hadamard_product(const Vector& v1, const IntervalVector& v2) {
+	return hadamard_prod<Vector,IntervalVector,IntervalVector>(v1,v2);
+}
+
+inline IntervalVector hadamard_product(const IntervalVector& v1, const Vector& v2) {
+	return hadamard_prod<IntervalVector,Vector,IntervalVector>(v1,v2);
+}
+
+inline IntervalVector hadamard_product(const IntervalVector& v1, const IntervalVector& v2) {
+	return hadamard_prod<IntervalVector,IntervalVector,IntervalVector>(v1,v2);
+}
+
+inline IntervalVector operator*(const Matrix& m, const IntervalVector& v) {
+	return mulMV<Matrix,IntervalVector,IntervalVector>(m,v);
+}
+
+inline IntervalVector operator*(const IntervalVector& v, const Matrix& m) {
+	return mulVM<IntervalVector,Matrix,IntervalVector>(v,m);
+}
+
+inline IntervalVector abs(const IntervalVector& v) {
+	return absV(v);
+}
+
 
 } // end namespace
 
