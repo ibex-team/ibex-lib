@@ -18,23 +18,24 @@
 
 using namespace ibex;
 
+template<class T>
 class TestAffine2 : public TestIbex {
 public:
 	TestAffine2() {
-		TEST_ADD(TestAffine2::test_sqrt);
-		TEST_ADD(TestAffine2::test_exp);
-		TEST_ADD(TestAffine2::test_log);
-		TEST_ADD(TestAffine2::test_inv);
-		TEST_ADD(TestAffine2::test_cos);
-		TEST_ADD(TestAffine2::test_sin);
-		TEST_ADD(TestAffine2::test_tan);
-		TEST_ADD(TestAffine2::test_abs);
-		TEST_ADD(TestAffine2::test_acos);
-		TEST_ADD(TestAffine2::test_asin);
-		TEST_ADD(TestAffine2::test_atan);
-		TEST_ADD(TestAffine2::test_cosh);
-		TEST_ADD(TestAffine2::test_sinh);
-		TEST_ADD(TestAffine2::test_tanh);
+		TEST_ADD(TestAffine2<T>::test_sqrt);
+		TEST_ADD(TestAffine2<T>::test_exp);
+		TEST_ADD(TestAffine2<T>::test_log);
+		TEST_ADD(TestAffine2<T>::test_inv);
+		TEST_ADD(TestAffine2<T>::test_cos);
+		TEST_ADD(TestAffine2<T>::test_sin);
+		TEST_ADD(TestAffine2<T>::test_tan);
+		TEST_ADD(TestAffine2<T>::test_abs);
+		TEST_ADD(TestAffine2<T>::test_acos);
+		TEST_ADD(TestAffine2<T>::test_asin);
+		TEST_ADD(TestAffine2<T>::test_atan);
+		TEST_ADD(TestAffine2<T>::test_cosh);
+		TEST_ADD(TestAffine2<T>::test_sinh);
+		TEST_ADD(TestAffine2<T>::test_tanh);
 
 
 
@@ -74,5 +75,6 @@ public:
 
 };
 
+#include "TestAffine2.h_"
 
 #endif

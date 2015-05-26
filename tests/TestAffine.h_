@@ -13,8 +13,8 @@
 #include "TestAffine.h"
 
 
-
-bool TestAffine::compare_results (comp_t c, Interval r, Affine2  a) {
+template<class T>
+bool TestAffine<T>::compare_results (comp_t c, Interval r, Affine2Main<T>  a) {
 	Interval ra = a.itv();
 	Interval tmp;
 	switch (c) {
@@ -64,66 +64,75 @@ bool TestAffine::compare_results (comp_t c, Interval r, Affine2  a) {
 
 
 
-void TestAffine::test01(){
+template<class T>
+void TestAffine<T>::test01(){
 	Interval x(-1, 1);
-	Affine2 ax (x);
+	Affine2Main<T> ax (x);
 	compare_results (EQUALITY, x, ax);
 }
 
-void TestAffine::test02() {
+template<class T>
+void TestAffine<T>::test02() {
 	Interval x(-1, 2.13);
-	Affine2 ax (x);
+	Affine2Main<T> ax (x);
 	compare_results (INCLUSION, x, ax);
 }
 
-void TestAffine::test03()  {
+template<class T>
+void TestAffine<T>::test03()  {
 	Interval x(5, 7.43);
-	Affine2 ax (x);
+	Affine2Main<T> ax (x);
 	compare_results (INCLUSION, x, ax);
 }
 
-void TestAffine::test04()  {
+template<class T>
+void TestAffine<T>::test04()  {
 	Interval x(-15, -7.45);
-	Affine2 ax (x);
+	Affine2Main<T> ax (x);
 	compare_results (INCLUSION, x, ax);
 }
 
 // Float addition
-void TestAffine::test05()  {
+template<class T>
+void TestAffine<T>::test05()  {
 	Interval x(1, 2);
-	Affine2 ax (x);
+	Affine2Main<T> ax (x);
 	x = x + 1.0;
 	ax = ax + 1.0;
 	compare_results (EQUALITY, x, ax);
 }
 
-void TestAffine::test06()  {
+template<class T>
+void TestAffine<T>::test06()  {
 	Interval x(1, 2);
-	Affine2 ax (x);
+	Affine2Main<T> ax (x);
 	x = x + 0.0;
 	ax = ax + 0.0;
 	compare_results (EQUALITY, x, ax);
 }
 
-void TestAffine::test07()  {
+template<class T>
+void TestAffine<T>::test07()  {
 	Interval x(1, 2);
-	Affine2 ax (x);
+	Affine2Main<T> ax (x);
 	x = x + 3.14;
 	ax = ax + 3.14;
 	compare_results (INCLUSION, x, ax);
 }
 
-void TestAffine::test08()  {
+template<class T>
+void TestAffine<T>::test08()  {
 	Interval x(-5, -2);
-	Affine2 ax (x);
+	Affine2Main<T> ax (x);
 	x = x + 3.14;
 	ax = ax + 3.14;
 	compare_results (INCLUSION, x, ax);
 }
 
-void TestAffine::test09()  {
+template<class T>
+void TestAffine<T>::test09()  {
 	Interval x(-5, 4);
-	Affine2 ax (x);
+	Affine2Main<T> ax (x);
 	x = x + 3.14;
 	ax = ax + 3.14;
 	compare_results (INCLUSION, x, ax);
@@ -131,41 +140,46 @@ void TestAffine::test09()  {
 
 // Float subtraction
 
-void TestAffine::test10()  {
+template<class T>
+void TestAffine<T>::test10()  {
 	Interval x(1, 2);
-	Affine2 ax (x);
+	Affine2Main<T> ax (x);
 	x = x - 1.0;
 	ax = ax - 1.0;
 	compare_results (INCLUSION, x, ax);
 }
 
-void TestAffine::test11()   {
+template<class T>
+void TestAffine<T>::test11()   {
 	Interval x(1, 2);
-	Affine2 ax (x);
+	Affine2Main<T> ax (x);
 	x = x - 0.0;
 	ax = ax - 0.0;
 	compare_results (EQUALITY, x, ax);
 }
 
-void TestAffine::test12()   {
+template<class T>
+void TestAffine<T>::test12()   {
 	Interval x(1, 2);
-	Affine2 ax (x);
+	Affine2Main<T> ax (x);
 	x = x - 3.14;
 	ax = ax - 3.14;
 	compare_results (INCLUSION, x, ax);
 }
 
-void TestAffine::test13() {
+template<class T>
+void TestAffine<T>::test13() {
 	Interval x(-5, -2);
-	Affine2 ax (x);
+	Affine2Main<T> ax (x);
 	x = x - 3.14;
 	ax = ax - 3.14;
 	compare_results (INCLUSION, x, ax);
 }
 
-void TestAffine::test14() {
+template<class T>
+void TestAffine<T>::test14() {
 	Interval x(-5, 4);
-	Affine2 ax (x);
+	Affine2Main<T> ax (x);
 	x = x - 3.14;
 	ax = ax - 3.14;
 	compare_results (INCLUSION, x, ax);
@@ -174,42 +188,47 @@ void TestAffine::test14() {
 
 // Scalar multiplication
 
-void TestAffine::test15()  {
+template<class T>
+void TestAffine<T>::test15()  {
 	Interval x(1, 2);
-	Affine2 ax (x);
+	Affine2Main<T> ax (x);
 	x = x * 1.0;
 	ax = ax * 1.0;
 	compare_results (EQUALITY, x, ax);
 }
 
-void TestAffine::test16()   {
+template<class T>
+void TestAffine<T>::test16()   {
 	Interval x(1, 2);
-	Affine2 ax (x);
+	Affine2Main<T> ax (x);
 	x = x * 0.0;
 	ax = ax * 0.0;
 	compare_results (EQUALITY, x, ax);
 }
 
 
-void TestAffine::test17()   {
+template<class T>
+void TestAffine<T>::test17()   {
 	Interval x(1, 2);
-	Affine2 ax (x);
+	Affine2Main<T> ax (x);
 	x = x * 3.14;
 	ax = ax * 3.14;
 	compare_results (INCLUSION, x, ax);
 }
 
-void TestAffine::test18()   {
+template<class T>
+void TestAffine<T>::test18()   {
 	Interval x(-5, -2);
-	Affine2 ax (x);
+	Affine2Main<T> ax (x);
 	x = x * 3.14;
 	ax = ax * 3.14;
 	compare_results (INCLUSION, x, ax);
 }
 
-void TestAffine::test19()   {
+template<class T>
+void TestAffine<T>::test19()   {
 	Interval x(-5, 4);
-	Affine2 ax (x);
+	Affine2Main<T> ax (x);
 	x = x * 3.14;
 	ax = ax * 3.14;
 	compare_results (INCLUSION, x, ax);
@@ -217,33 +236,37 @@ void TestAffine::test19()   {
 
 // Float division
 
-void TestAffine::test20()   {
+template<class T>
+void TestAffine<T>::test20()   {
 	Interval x(1, 2);
-	Affine2 ax (x);
+	Affine2Main<T> ax (x);
 	x = x / 1.0;
 	ax = ax / 1.0;
 	compare_results (EQUALITY, x, ax);
 }
 
-void TestAffine::test21()   {
+template<class T>
+void TestAffine<T>::test21()   {
 	Interval x(1, 2);
-	Affine2 ax (x);
+	Affine2Main<T> ax (x);
 	x = x / 3.14;
 	ax = ax / 3.14;
 	compare_results (INCLUSION, x, ax);
 }
 
-void TestAffine::test22()   {
+template<class T>
+void TestAffine<T>::test22()   {
 	Interval x(-5, -2);
-	Affine2 ax (x);
+	Affine2Main<T> ax (x);
 	x = x / 3.14;
 	ax = ax / 3.14;
 	compare_results (INCLUSION, x, ax);
 }
 
-void TestAffine::test23()  {
+template<class T>
+void TestAffine<T>::test23()  {
 	Interval x(-5, 4);
-	Affine2 ax (x);
+	Affine2Main<T> ax (x);
 	x = x / 3.14;
 	ax = ax / 3.14;
 	compare_results (INCLUSION, x, ax);
@@ -253,45 +276,50 @@ void TestAffine::test23()  {
 
 // Interval addition
 
-void TestAffine::test24()  {
+template<class T>
+void TestAffine<T>::test24()  {
 	Interval x(1, 2);
-	Affine2 ax (x);
+	Affine2Main<T> ax (x);
 	Interval prod(1.0, 1.0);
 	x = x + prod;
 	ax = ax + prod;
 	compare_results (EQUALITY, x, ax);
 }
 
-void TestAffine::test25()  {
+template<class T>
+void TestAffine<T>::test25()  {
 	Interval x(1, 2);
-	Affine2 ax (x);
+	Affine2Main<T> ax (x);
 	Interval prod(0.0, 0.0);
 	x = x + prod;
 	ax = ax + prod;
 	compare_results (EQUALITY, x, ax);
 }
 
-void TestAffine::test26()   {
+template<class T>
+void TestAffine<T>::test26()   {
 	Interval x(1, 2);
-	Affine2 ax (x);
+	Affine2Main<T> ax (x);
 	Interval prod(-1.0, 1.0);
 	x = x + prod;
 	ax = ax + prod;
 	compare_results (EQUALITY, x, ax);
 }
 
-void TestAffine::test27()  {
+template<class T>
+void TestAffine<T>::test27()  {
 	Interval x(1, 2);
-	Affine2 ax (x);
+	Affine2Main<T> ax (x);
 	Interval prod(-1.7, 1.7);
 	x = x + prod;
 	ax = ax + prod;
 	compare_results (INCLUSION, x, ax);
 }
 
-void TestAffine::test28()  {
+template<class T>
+void TestAffine<T>::test28()  {
 	Interval x(1, 2);
-	Affine2 ax (x);
+	Affine2Main<T> ax (x);
 	Interval prod(-1.08, 1.7);
 	x = x + prod;
 	ax = ax + prod;
@@ -301,45 +329,50 @@ void TestAffine::test28()  {
 
 // Interval multiplication
 
-void TestAffine::test29()   {
+template<class T>
+void TestAffine<T>::test29()   {
 	Interval x(1, 2);
-	Affine2 ax (x);
+	Affine2Main<T> ax (x);
 	Interval prod(1.0, 1.0);
 	x = x * prod;
 	ax = ax * prod;
 	compare_results (INCLUSION, x, ax);
 }
 
-void TestAffine::test30()  {
+template<class T>
+void TestAffine<T>::test30()  {
 	Interval x(1, 2);
-	Affine2 ax (x);
+	Affine2Main<T> ax (x);
 	Interval prod(0.0, 0.0);
 	x = x * prod;
 	ax = ax * prod;
 	compare_results (INCLUSION, x, ax);
 }
 
-void TestAffine::test31()  {
+template<class T>
+void TestAffine<T>::test31()  {
 	Interval x(1, 2);
-	Affine2 ax (x);
+	Affine2Main<T> ax (x);
 	Interval prod(-1.0, 1.0);
 	x = x * prod;
 	ax = ax * prod;
 	compare_results (EQUALITY, x, ax);
 }
 
-void TestAffine::test32()   {
+template<class T>
+void TestAffine<T>::test32()   {
 	Interval x(1, 2);
-	Affine2 ax (x);
+	Affine2Main<T> ax (x);
 	Interval prod(-1.7, 1.7);
 	x = x * prod;
 	ax = ax * prod;
 	compare_results (INCLUSION, x, ax);
 }
 
-void TestAffine::test33()   {
+template<class T>
+void TestAffine<T>::test33()   {
 	Interval x(1, 2);
-	Affine2 ax (x);
+	Affine2Main<T> ax (x);
 	Interval prod(-1.08, 1.7);
 	x = x * prod;
 	ax = ax * prod;
@@ -348,100 +381,112 @@ void TestAffine::test33()   {
 
 
 /* ********************************************** */
-void TestAffine::test34()   {
+template<class T>
+void TestAffine<T>::test34()   {
 	Interval x(1, 2);
-	Affine2 ax (x);
-	Affine2 ay = ax;
+	Affine2Main<T> ax (x);
+	Affine2Main<T> ay = ax;
 	compare_results (EQUALITY, x, ax);
 }
 
 
-void TestAffine::test35()   {
+template<class T>
+void TestAffine<T>::test35()   {
 	Interval x(-11.3, -4.3);
-	Affine2 ax (x);
-	Affine2 ay = ax;
+	Affine2Main<T> ax (x);
+	Affine2Main<T> ay = ax;
 	compare_results (EQUALITY, x, ax);
 }
 
-void TestAffine::test36()   {
+template<class T>
+void TestAffine<T>::test36()   {
 	Interval x(-11.3, 4.3);
-	Affine2 ax (x);
-	Affine2 ay = ax;
+	Affine2Main<T> ax (x);
+	Affine2Main<T> ay = ax;
 	compare_results (INCLUSION, x, ax);
 }
 
-void TestAffine::test37()   {
+template<class T>
+void TestAffine<T>::test37()   {
 	Interval x(0, 4.3);
-	Affine2 ax (x);
-	Affine2 ay = ax;
+	Affine2Main<T> ax (x);
+	Affine2Main<T> ay = ax;
 	compare_results (INCLUSION, x, ax);
 }
 
 /* ********************************************** */
 
 // Assign-addition with interval
-void TestAffine::test38()   {
+template<class T>
+void TestAffine<T>::test38()   {
 	Interval x(1.57, 2.23);
-	Affine2 ax (x);
+	Affine2Main<T> ax (x);
 	ax += x;
 	x += x;
 	compare_results (INCLUSION, x, ax);
 }
 
 
-void TestAffine::test39()  {
+template<class T>
+void TestAffine<T>::test39()  {
 	Interval x(-11.3, -4.3);
-	Affine2 ax(x);
+	Affine2Main<T> ax(x);
 	ax += x;
 	x += x;
 	compare_results (INCLUSION, x, ax);
 }
 
-void TestAffine::test49()  {
+template<class T>
+void TestAffine<T>::test49()  {
 	Interval x(-11.3, 4.3);
-	Affine2 ax (x);
+	Affine2Main<T> ax (x);
 	ax += x;
 	x += x;
 	compare_results (INCLUSION, x, ax);
 }
 
-void TestAffine::test50()  {
+template<class T>
+void TestAffine<T>::test50()  {
 	Interval x(0, 4.3);
-	Affine2 ax (x);
+	Affine2Main<T> ax (x);
 	ax += x;
 	x += x;
 	compare_results (INCLUSION, x, ax);
 }
 
 // Assign-multiplication with interval
-void TestAffine::test51()   {
+template<class T>
+void TestAffine<T>::test51()   {
 	Interval x(1.57, 2.23);
-	Affine2 ax (x);
+	Affine2Main<T> ax (x);
 	ax *= x;
 	x *= x;
 	compare_results (INCLUSION, x, ax);
 }
 
 
-void TestAffine::test52()  {
+template<class T>
+void TestAffine<T>::test52()  {
 	Interval x(-11.3, -4.3);
-	Affine2 ax(x);
+	Affine2Main<T> ax(x);
 	ax *= x;
 	x *= x;
 	compare_results (INCLUSION, x, ax);
 }
 
-void TestAffine::test53()  {
+template<class T>
+void TestAffine<T>::test53()  {
 	Interval x(-11.3, 4.3);
-	Affine2 ax (x);
+	Affine2Main<T> ax (x);
 	ax *= x;
 	x *= x;
 	compare_results (INCLUSION, x, ax);
 }
 
-void TestAffine::test54()  {
+template<class T>
+void TestAffine<T>::test54()  {
 	Interval x(0, 4.3);
-	Affine2 ax (x);
+	Affine2Main<T> ax (x);
 	ax *= x;
 	x *= x;
 	compare_results (INCLUSION, x, ax);
@@ -451,92 +496,103 @@ void TestAffine::test54()  {
 
 
 // Assign-addition with float
-void TestAffine::test55()  {
+template<class T>
+void TestAffine<T>::test55()  {
 	Interval x(1,2);
-	Affine2 ax (x);
+	Affine2Main<T> ax (x);
 	ax += 3.14159;
 	x += 3.14159;
 	compare_results (INCLUSION, x, ax);
 }
 
 
-void TestAffine::test56()  {
+template<class T>
+void TestAffine<T>::test56()  {
 	Interval x(-11.3, -4.3);
-	Affine2 ax(x);
+	Affine2Main<T> ax(x);
 	ax += 3.14159;
 	x += 3.14159;
 	compare_results (INCLUSION, x, ax);
 }
 
-void TestAffine::test57()   {
+template<class T>
+void TestAffine<T>::test57()   {
 	Interval x(-11.3, 4.3);
-	Affine2 ax (x);
+	Affine2Main<T> ax (x);
 	ax += 3.14159;
 	x += 3.14159;
 	compare_results (INCLUSION, x, ax);
 }
 
-void TestAffine::test58()  {
+template<class T>
+void TestAffine<T>::test58()  {
 	Interval x(0, 4.3);
-	Affine2 ax (x);
+	Affine2Main<T> ax (x);
 	ax += 3.14159;
 	x += 3.14159;
 	compare_results (INCLUSION, x, ax);
 }
 
-void TestAffine::test59()  {
+template<class T>
+void TestAffine<T>::test59()  {
 	Interval x(0, 4.31);
-	Affine2 ax (x);
+	Affine2Main<T> ax (x);
 	ax += 0.;
 	x += 0.;
 	compare_results (INCLUSION, x, ax);
 }
 
 // Assign-multiplication with float
-void TestAffine::test60()  {
+template<class T>
+void TestAffine<T>::test60()  {
 	Interval x(1.57, 2.23);
-	Affine2 ax (x);
+	Affine2Main<T> ax (x);
 	ax *= 1.;
 	x *= 1.;
 	compare_results (EQUALITY, x, ax);
 }
 
-void TestAffine::test61()  {
+template<class T>
+void TestAffine<T>::test61()  {
 	Interval x(1.57, 2.23);
-	Affine2 ax (x);
+	Affine2Main<T> ax (x);
 	ax *= 0.;
 	x *= 0.;
 	compare_results (EQUALITY, x, ax);
 }
 
-void TestAffine::test62()  {
+template<class T>
+void TestAffine<T>::test62()  {
 	Interval x(1.57, 2.23);
-	Affine2 ax (x);
+	Affine2Main<T> ax (x);
 	ax *= 3.14159;
 	x *= 3.14159;
 	compare_results (INCLUSION, x, ax);
 }
 
 
-void TestAffine::test63()  {
+template<class T>
+void TestAffine<T>::test63()  {
 	Interval x(-11.3, -4.3);
-	Affine2 ax(x);
+	Affine2Main<T> ax(x);
 	ax *= 3.14159;
 	x *= 3.14159;
 	compare_results (INCLUSION, x, ax);
 }
 
-void TestAffine::test64()   {
+template<class T>
+void TestAffine<T>::test64()   {
 	Interval x(-11.3, 4.3);
-	Affine2 ax (x);
+	Affine2Main<T> ax (x);
 	ax *= 3.14159;
 	x *= 3.14159;
 	compare_results (INCLUSION, x, ax);
 }
 
-void TestAffine::test65()   {
+template<class T>
+void TestAffine<T>::test65()   {
 	Interval x(0, 4.3);
-	Affine2 ax (x);
+	Affine2Main<T> ax (x);
 	ax *= 3.14159;
 	x *= 3.14159;
 	compare_results (INCLUSION, x, ax);
@@ -545,275 +601,305 @@ void TestAffine::test65()   {
 /* ****************************************** */
 
 // Addition
-void TestAffine::test66() {
+template<class T>
+void TestAffine<T>::test66() {
 	Interval x(1.2,4.5);
-	Affine2 ax(x);
+	Affine2Main<T> ax(x);
 	Interval y(3.77,7.2);
-	Affine2 ay(y);
+	Affine2Main<T> ay(y);
 	compare_results (INCLUSION, x+y, ax+ay);
 }
 
-void TestAffine::test67()  {
+template<class T>
+void TestAffine<T>::test67()  {
 	Interval x(1.2,4.5);
-	Affine2 ax(x);
+	Affine2Main<T> ax(x);
 	Interval y(-7.2,-3.77);
-	Affine2 ay(y);
+	Affine2Main<T> ay(y);
 	compare_results (INCLUSION, x+y, ax+ay);
 }
 
-void TestAffine::test68()   {
+template<class T>
+void TestAffine<T>::test68()   {
 	Interval x(1.2,4.5);
-	Affine2 ax(x);
+	Affine2Main<T> ax(x);
 	Interval y(-3.77,7.2);
-	Affine2 ay(y);
+	Affine2Main<T> ay(y);
 	compare_results (INCLUSION, x+y, ax+ay);
 }
 
-void TestAffine::test69()  {
+template<class T>
+void TestAffine<T>::test69()  {
 	Interval x(1.2,4.5);
-	Affine2 ax(x);
+	Affine2Main<T> ax(x);
 	Interval y(0,7.2);
-	Affine2 ay(y);
+	Affine2Main<T> ay(y);
 	compare_results (INCLUSION, x+y, ax+ay);
 }
 
 // Subtraction
 
-void TestAffine::test70()   {
+template<class T>
+void TestAffine<T>::test70()   {
 	Interval x(1.2,4.5);
-	Affine2 ax(x);
+	Affine2Main<T> ax(x);
 	Interval y(3.77,7.2);
-	Affine2 ay(y);
+	Affine2Main<T> ay(y);
 	compare_results (INCLUSION, x-y, ax-ay);
 }
 
-void TestAffine::test71()   {
+template<class T>
+void TestAffine<T>::test71()   {
 	Interval x(1.2,4.5);
-	Affine2 ax(x);
+	Affine2Main<T> ax(x);
 	Interval y(-7.2,-3.77);
-	Affine2 ay(y);
+	Affine2Main<T> ay(y);
 	compare_results (INCLUSION, x-y, ax-ay);
 }
 
-void TestAffine::test72()  {
+template<class T>
+void TestAffine<T>::test72()  {
 	Interval x(1.2,4.5);
-	Affine2 ax(x);
+	Affine2Main<T> ax(x);
 	Interval y(-3.77,7.2);
-	Affine2 ay(y);
+	Affine2Main<T> ay(y);
 	compare_results (INCLUSION, x-y, ax-ay);
 }
 
-void TestAffine::test73()  {
+template<class T>
+void TestAffine<T>::test73()  {
 	Interval x(1.2,4.5);
-	Affine2 ax(x);
+	Affine2Main<T> ax(x);
 	Interval y(0,7.2);
-	Affine2 ay(y);
+	Affine2Main<T> ay(y);
 	compare_results (INCLUSION, x-y, ax-ay);
 }
 
 // Multiplication
 
 
-void TestAffine::test74()   {
+template<class T>
+void TestAffine<T>::test74()   {
 	Interval x(1.2,4.5);
-	Affine2 ax(x);
+	Affine2Main<T> ax(x);
 	Interval y(3.77,7.2);
-	Affine2 ay(y);
+	Affine2Main<T> ay(y);
 	compare_results (INCLUSION, x*y, ax*ay);
 }
 
-void TestAffine::test75()  {
+template<class T>
+void TestAffine<T>::test75()  {
 	Interval x(1.2,4.5);
-	Affine2 ax(x);
+	Affine2Main<T> ax(x);
 	Interval y(-7.2,-3.77);
-	Affine2 ay(y);
+	Affine2Main<T> ay(y);
 	compare_results (INCLUSION, x*y, ax*ay);
 }
 
-void TestAffine::test76()  {
+template<class T>
+void TestAffine<T>::test76()  {
 	Interval x(1.2,4.5);
-	Affine2 ax(x);
+	Affine2Main<T> ax(x);
 	Interval y(-3.77,7.2);
-	Affine2 ay(y);
+	Affine2Main<T> ay(y);
 	compare_results (INCLUSION, x*y, ax*ay);
 }
 
-void TestAffine::test77()  {
+template<class T>
+void TestAffine<T>::test77()  {
 	Interval x(1.2,4.5);
-	Affine2 ax(x);
+	Affine2Main<T> ax(x);
 	Interval y(0,7.2);
-	Affine2 ay(y);
+	Affine2Main<T> ay(y);
 	compare_results (INCLUSION, x*y, ax*ay);
 }
 
 // Division
 
-void TestAffine::test78()  {
+template<class T>
+void TestAffine<T>::test78()  {
 	Interval x(1.2,4.5);
-	Affine2 ax(x);
+	Affine2Main<T> ax(x);
 	Interval y(3.77,7.2);
-	Affine2 ay(y);
+	Affine2Main<T> ay(y);
 	compare_results (INCLUSION, x/y, ax/ay);
 }
 
-void TestAffine::test79()  {
+template<class T>
+void TestAffine<T>::test79()  {
 	Interval x(1.2,4.5);
-	Affine2 ax(x);
+	Affine2Main<T> ax(x);
 	Interval y(-7.2,-3.77);
-	Affine2 ay(y);
+	Affine2Main<T> ay(y);
 	compare_results (INCLUSION, x/y, ax/ay);
 }
 
-void TestAffine::test80()   {
+template<class T>
+void TestAffine<T>::test80()   {
 	Interval x(1.2,4.5);
-	Affine2 ax(x);
+	Affine2Main<T> ax(x);
 	Interval y(-3.77,7.2);
-	Affine2 ay(y);
+	Affine2Main<T> ay(y);
 	compare_results (INCLUSION, x/y, ax/ay);
 }
 
-void TestAffine::test81()  {
+template<class T>
+void TestAffine<T>::test81()  {
 	Interval x(1.2,4.5);
-	Affine2 ax(x);
+	Affine2Main<T> ax(x);
 	Interval y(0,7.2);
-	Affine2 ay(y);
+	Affine2Main<T> ay(y);
 	compare_results (INCLUSION, x/y, ax/ay);
 }
 
 /* ********************************************** */
 
 // Assign-addition with affine forms
-void TestAffine::test82()  {
+template<class T>
+void TestAffine<T>::test82()  {
 	Interval x(1.2,4.5);
-	Affine2 ax(x);
+	Affine2Main<T> ax(x);
 	Interval y(3.77,7.2);
-	Affine2 ay(y);
+	Affine2Main<T> ay(y);
 	ax += ay;
 	x += y;
 	compare_results (INCLUSION,  x, ax);
 }
 
-void TestAffine::test83()  {
+template<class T>
+void TestAffine<T>::test83()  {
 	Interval x(1.2,4.5);
-	Affine2 ax(x);
+	Affine2Main<T> ax(x);
 	Interval y(-7.2,-3.77);
-	Affine2 ay(y);
+	Affine2Main<T> ay(y);
 	ax += ay;
 	x += y;
 	compare_results (INCLUSION,  x, ax);
 }
 
-void TestAffine::test84()  {
+template<class T>
+void TestAffine<T>::test84()  {
 	Interval x(1.2,4.5);
-	Affine2 ax(x);
+	Affine2Main<T> ax(x);
 	Interval y(-3.77,7.2);
-	Affine2 ay(y);
+	Affine2Main<T> ay(y);
 	ax += ay;
 	x += y;
 	compare_results (INCLUSION,  x, ax);
 }
 
-void TestAffine::test85()   {
+template<class T>
+void TestAffine<T>::test85()   {
 	Interval x(1.2,4.5);
-	Affine2 ax(x);
+	Affine2Main<T> ax(x);
 	Interval y(0,7.2);
-	Affine2 ay(y);
+	Affine2Main<T> ay(y);
 	ax += ay;
 	x += y;
 	compare_results (INCLUSION,  x, ax);
 }
 
 // Assign-multiplication with affine forms
-void TestAffine::test86() {
+template<class T>
+void TestAffine<T>::test86() {
 	Interval x(1.2,4.5);
-	Affine2 ax(x);
+	Affine2Main<T> ax(x);
 	Interval y(3.77,7.2);
-	Affine2 ay(y);
+	Affine2Main<T> ay(y);
 	ax *= ay;
 	x *= y;
 	compare_results (INCLUSION,  x, ax);
 }
 
-void TestAffine::test87() {
+template<class T>
+void TestAffine<T>::test87() {
 	Interval x(1.2,4.5);
-	Affine2 ax(x);
+	Affine2Main<T> ax(x);
 	Interval y(-7.2,-3.77);
-	Affine2 ay(y);
+	Affine2Main<T> ay(y);
 	ax *= ay;
 	x *= y;
 	compare_results (INCLUSION,  x, ax);
 }
 
-void TestAffine::test88() {
+template<class T>
+void TestAffine<T>::test88() {
 	Interval x(1.2,4.5);
-	Affine2 ax(x);
+	Affine2Main<T> ax(x);
 	Interval y(-3.77,7.2);
-	Affine2 ay(y);
+	Affine2Main<T> ay(y);
 	ax *= ay;
 	x *= y;
 	compare_results (INCLUSION,  x, ax);
 }
 
-void TestAffine::test89() {
+template<class T>
+void TestAffine<T>::test89() {
 	Interval x(1.2,4.5);
-	Affine2 ax(x);
+	Affine2Main<T> ax(x);
 	Interval y(0,7.2);
-	Affine2 ay(y);
+	Affine2Main<T> ay(y);
 	ax *= ay;
 	x *= y;
 	compare_results (INCLUSION,  x, ax);
 }
 
 /* **************************** */
-void TestAffine::test90() {
+template<class T>
+void TestAffine<T>::test90() {
 	Interval x(92.4,1909.3);
-	Affine2 ax(x);
+	Affine2Main<T> ax(x);
 	Interval y(92.4,1909.3);
-	Affine2 ay(y);
+	Affine2Main<T> ay(y);
 	Interval res = x - y;
-	Affine2 resa = ax - ay;
+	Affine2Main<T> resa = ax - ay;
 	compare_results (INCLUSION, res, resa);
 }
 
 
-void TestAffine::test91() {
+template<class T>
+void TestAffine<T>::test91() {
 	Interval x(92.4,1909.3);
-	Affine2 ax(x);
+	Affine2Main<T> ax(x);
 	Interval res = x - x;
-	Affine2 resa = ax - ax;
+	Affine2Main<T> resa = ax - ax;
 	compare_results (INCLUSION_TIGHT, res, resa);
 }
 
-void TestAffine::test92() {
+template<class T>
+void TestAffine<T>::test92() {
 	Interval x(-92.4,-10.3);
-	Affine2 ax(x);
+	Affine2Main<T> ax(x);
 	Interval res = x - x;
-	Affine2 resa = ax - ax;
+	Affine2Main<T> resa = ax - ax;
 	compare_results (INCLUSION_TIGHT, res, resa);
 }
 
-void TestAffine::test93() {
+template<class T>
+void TestAffine<T>::test93() {
 	Interval x(-92.4, 10.3);
-	Affine2 ax(x);
+	Affine2Main<T> ax(x);
 	Interval res = x - x;
-	Affine2 resa = ax - ax;
+	Affine2Main<T> resa = ax - ax;
 	compare_results (INCLUSION_TIGHT, res, resa);
 }
 
-void TestAffine::test94() {
+template<class T>
+void TestAffine<T>::test94() {
 	Interval x(0.0, 10.3);
-	Affine2 ax(x);
+	Affine2Main<T> ax(x);
 	Interval res = x - x;
-	Affine2 resa = ax - ax;
+	Affine2Main<T> resa = ax - ax;
 	compare_results (INCLUSION_TIGHT, res, resa);
 }
 
 /* **************************** */
-void TestAffine::test95() {
+template<class T>
+void TestAffine<T>::test95() {
 
 	int iter = 1000;
 	Interval x(1.3,78.4);
-	Affine2 ax(x);
+	Affine2Main<T> ax(x);
 	for (int i=0; i < iter; i++)
 	{
 		//cout << "ax : "<< ax << endl;
@@ -824,10 +910,11 @@ void TestAffine::test95() {
 
 }
 
-void TestAffine::test96()  {
+template<class T>
+void TestAffine<T>::test96()  {
 	int iter = 1000;
 	Interval x(-78.4,-1.3);
-	Affine2 ax(x);
+	Affine2Main<T> ax(x);
 	for (int i=0;i < iter;i++)
 	{
 		//cout << "ax : "<< ax << endl;
@@ -837,10 +924,11 @@ void TestAffine::test96()  {
 	compare_results (INCLUSION_TIGHT, x, ax);
 }
 
-void TestAffine::test97() {
+template<class T>
+void TestAffine<T>::test97() {
 	int iter = 1000;
 	Interval x(-1.3,78.4);
-	Affine2 ax(x);
+	Affine2Main<T> ax(x);
 	for (int i=0;i < iter; i++)
 	{
 		//cout << "ax : "<< ax << endl;
@@ -850,10 +938,11 @@ void TestAffine::test97() {
 	compare_results (INCLUSION_TIGHT, x, ax);
 }
 
-void TestAffine::test98()   {
+template<class T>
+void TestAffine<T>::test98()   {
 	int iter = 1000;
 	Interval x(0.,78.4);
-	Affine2 ax(x);
+	Affine2Main<T> ax(x);
 	for (int i=0;i < iter;i++)
 	{
 		//cout << "ax : "<< ax << endl;
@@ -867,9 +956,10 @@ void TestAffine::test98()   {
 
 /* ********************* */
 //test of sqrt
-void TestAffine::test99()   {
+template<class T>
+void TestAffine<T>::test99()   {
 	Interval x(10,11);
-	Affine2 ax(x);
+	Affine2Main<T> ax(x);
 	for (int i=0;i < 1;i++)
 	{
 		ax = sqrt(ax);
@@ -882,9 +972,10 @@ void TestAffine::test99()   {
 
 /* ********************* */
 //test of 1/x
-void TestAffine::test100()   {
+template<class T>
+void TestAffine<T>::test100()   {
 	Interval x(3,21);
-	Affine2 ax(x);
+	Affine2Main<T> ax(x);
 	for (int i=0;i < 1;i++)
 	{
 		ax = 1/ax;
@@ -897,7 +988,8 @@ void TestAffine::test100()   {
 
 
 /* ********************* */
-void TestAffine::test101()   {
+template<class T>
+void TestAffine<T>::test101()   {
 	Variable yd(3);
 	Interval sigma(10.0);
 	Interval rho(28.0);
@@ -911,10 +1003,10 @@ void TestAffine::test101()   {
 	v[0] = Interval(-1, 1);
 	v[1] = Interval(2, 3);
 	v[2] = Interval(-4,-4);
-	Affine2Vector va(v,true);
+	Affine2MainVector<T> va(v,true);
 
 	IntervalVector res = ydot.eval_vector(v);
-	Affine2Vector resa = ydot.eval_affine2_vector(va);
+	Affine2MainVector<T> resa = ydot.eval_affine2_vector(va);
 
 	for (int j = 0; j < 3; ++j) {
 		compare_results (INCLUSION, res[j], resa[j]);
