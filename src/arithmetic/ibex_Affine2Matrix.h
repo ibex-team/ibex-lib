@@ -28,6 +28,7 @@ template<class T> class Affine2MainMatrixArray;
 
 
 typedef Affine2MainMatrix<AF_Default> Affine2Matrix;
+typedef Affine2MainMatrix<AF_Linear> AffineLinMatrix;
 
 template<class T=AF_Default>
 class Affine2MainMatrix {

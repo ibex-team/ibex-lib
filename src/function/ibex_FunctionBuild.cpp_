@@ -489,6 +489,7 @@ void Function::decorate(const Array<const ExprSymbol>& x, const ExprNode& y) con
 	arg_domains.resize(nb_arg());
 	arg_deriv.resize(nb_arg());
 	arg_af2.resize(nb_arg());
+	arg_af_lin.resize(nb_arg());
 
 	((CompiledFunction&) cf).compile(y); // now that it is decorated, it can be "compiled"
 
@@ -509,6 +510,7 @@ void Function::decorate(const Array<const ExprSymbol>& x, const ExprNode& y) con
 		arg_domains.set_ref(i,*arg(i).deco.d);
 		arg_deriv.set_ref(i,*arg(i).deco.g);
 		arg_af2.set_ref(i,*arg(i).deco.af2);
+		arg_af_lin.set_ref(i,*arg(i).deco.af_lin);
 	}
 }
 

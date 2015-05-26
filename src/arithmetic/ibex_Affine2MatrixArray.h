@@ -23,6 +23,7 @@ namespace ibex {
  * \brief Array of Affine2 matrices.
  */
 typedef Affine2MainMatrixArray<AF_Default> Affine2MatrixArray;
+typedef Affine2MainMatrixArray<AF_Linear> AffineLinMatrixArray;
 
 template<class T=AF_Default>
 class Affine2MainMatrixArray {

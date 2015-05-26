@@ -39,16 +39,19 @@ template<class T> class Affine2MainMatrixArray;
  *
  */
 
+//typedef AF_iAF  AF_Linear;
+typedef AF_fAF2  AF_Linear;
 
 //typedef AF_fAF1  AF_Default;
-typedef AF_fAF2  AF_Default;
+//typedef AF_fAF2  AF_Default;
 //typedef AF_fAF2_fma  AF_Default;
 //typedef AF_iAF  AF_Default;
 //typedef AF_sAF  AF_Default;
 //typedef AF_No  AF_Default;
-//typedef AF_fAFFullI AF_Default;
+typedef AF_fAFFullI AF_Default;
 
 typedef Affine2Main<AF_Default> Affine2;
+typedef Affine2Main<AF_Linear>  AffineLin;
 
 
 template<class T=AF_Default>
@@ -132,7 +135,7 @@ public:
 	Affine2Main(const Affine2Main& x);
 
 	/** \brief  Delete the affine form */
-	virtual ~Affine2Main() {};
+	virtual ~Affine2Main() { };
 
 	/**
 	 *\brief compute the min-range linearization of an unary operator

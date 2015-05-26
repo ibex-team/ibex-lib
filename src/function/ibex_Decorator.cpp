@@ -36,7 +36,8 @@ void Decorator::decorate(const Array<const ExprSymbol>& x, const ExprNode& y) {
 		x[i].deco.d = new Domain(x[i].dim);
 		x[i].deco.g = new Domain(x[i].dim);
 		x[i].deco.p = new Domain(x[i].dim);
-		x[i].deco.af2 = new Affine2Domain(x[i].dim);
+		x[i].deco.af2    = new Affine2Domain(x[i].dim);
+		x[i].deco.af_lin = new AffineLinDomain(x[i].dim);
 	}
 
 	visit(y); // cast -> we know *this will not be modified
@@ -57,6 +58,7 @@ void Decorator::visit(const ExprIndex& idx) {
 	Domain& g=(Domain&) *idx.expr.deco.g;
 	Domain& di=(Domain&) *idx.expr.deco.p;
 	Affine2Domain& af2=(Affine2Domain&) *idx.expr.deco.af2;
+	AffineLinDomain& af_lin=(AffineLinDomain&) *idx.expr.deco.af_lin;
 
 	switch (idx.expr.type()) {
 	case Dim::SCALAR:
@@ -64,6 +66,7 @@ void Decorator::visit(const ExprIndex& idx) {
 		idx.deco.g = new Domain(g.i());
 		idx.deco.p = new Domain(di.i());
 		idx.deco.af2 = new Affine2Domain(af2.i());
+		idx.deco.af_lin = new AffineLinDomain(af_lin.i());
 		break;
 	case Dim::ROW_VECTOR:
 	case Dim::COL_VECTOR:
@@ -71,18 +74,21 @@ void Decorator::visit(const ExprIndex& idx) {
 		idx.deco.g = new Domain(g.v()[idx.index]);
 		idx.deco.p = new Domain(di.v()[idx.index]);
 		idx.deco.af2 = new Affine2Domain(af2.v()[idx.index]);
+		idx.deco.af_lin = new AffineLinDomain(af_lin.v()[idx.index]);
 		break;
 	case Dim::MATRIX:
 		idx.deco.d = new Domain(d.m()[idx.index],true);
 		idx.deco.g = new Domain(g.m()[idx.index],true);
 		idx.deco.p = new Domain(di.m()[idx.index],true);
 		idx.deco.af2 = new Affine2Domain(af2.m()[idx.index],true);
+		idx.deco.af_lin = new AffineLinDomain(af_lin.m()[idx.index],true);
 		break;
 	case Dim::MATRIX_ARRAY:
 		idx.deco.d = new Domain(d.ma()[idx.index]);
 		idx.deco.g = new Domain(g.ma()[idx.index]);
 		idx.deco.p = new Domain(di.ma()[idx.index]);
 		idx.deco.af2 = new Affine2Domain(af2.ma()[idx.index]);
+		idx.deco.af_lin = new AffineLinDomain(af_lin.ma()[idx.index]);
 		break;
 	}
 
@@ -97,6 +103,7 @@ void Decorator::visit(const ExprConstant& e) {
 	e.deco.g = new Domain(e.dim);
 	e.deco.p = new Domain(e.dim);
 	e.deco.af2 = new Affine2Domain(e.dim);
+	e.deco.af_lin = new AffineLinDomain(e.dim);
 }
 
 void Decorator::visit(const ExprSymbol& e) {
@@ -112,6 +119,7 @@ void Decorator::visit(const ExprBinaryOp& b) {
 	b.deco.g = new Domain(b.dim);
 	b.deco.p = new Domain(b.dim);
 	b.deco.af2 = new Affine2Domain(b.dim);
+	b.deco.af_lin = new AffineLinDomain(b.dim);
 }
 
 void Decorator::visit(const ExprUnaryOp& u) {
@@ -123,6 +131,7 @@ void Decorator::visit(const ExprUnaryOp& u) {
 		u.deco.g = new Domain(*u.expr.deco.g,true);
 		u.deco.p = new Domain(*u.expr.deco.p,true);
 		u.deco.af2 = new Affine2Domain(*u.expr.deco.af2,true);
+		u.deco.af_lin = new AffineLinDomain(*u.expr.deco.af_lin,true);
 	} else {
 		/* TODO: seems impossible to have references
 		 in case of matrices... */
@@ -130,6 +139,7 @@ void Decorator::visit(const ExprUnaryOp& u) {
 		u.deco.g = new Domain(u.dim);
 		u.deco.p = new Domain(u.dim);
 		u.deco.af2 = new Affine2Domain(u.dim);
+		u.deco.af_lin = new AffineLinDomain(u.dim);
 	}
 }
 
@@ -140,6 +150,7 @@ void Decorator::visit(const ExprNAryOp& a) {
 	a.deco.g = new Domain(a.dim);
 	a.deco.p = new Domain(a.dim);
 	a.deco.af2 = new Affine2Domain(a.dim);
+	a.deco.af_lin = new AffineLinDomain(a.dim);
 
 	/* we could also be more efficient by making symbolLabels of a.deco->fevl
 		 * direct references to the arguments' domain.

@@ -35,6 +35,7 @@ template<class T> class Affine2MainMatrix;
  */
 
 typedef Affine2MainVector<AF_Default> Affine2Vector;
+typedef Affine2MainVector<AF_Linear> AffineLinVector;
 
 template<class T=AF_Default>
 class Affine2MainVector {
