@@ -12,6 +12,8 @@
 #define IBEX_AFFINE2_MATRIX_H2_
 
 
+#include "ibex_TemplateMatrix.h_"
+
 namespace ibex {
 
 template<class T>
@@ -112,13 +114,13 @@ Affine2MainMatrix<T>::~Affine2MainMatrix() {
 template<class T>
 Affine2MainMatrix<T>& Affine2MainMatrix<T>::operator=(const Affine2MainMatrix<T>& x) {
 	//resize(x.nb_rows(), x.nb_cols());
-	return _assign(*this,x);
+	return _assignM(*this,x);
 }
 
 template<class T>
 Affine2MainMatrix<T>& Affine2MainMatrix<T>::operator=(const IntervalMatrix& x) {
 	//resize(x.nb_rows(), x.nb_cols());
-	return _assign(*this,x);
+	return _assignM(*this,x);
 }
 
 template<class T>
@@ -151,12 +153,12 @@ void Affine2MainMatrix<T>::init(const Interval& x) {
 
 template<class T>
 bool Affine2MainMatrix<T>::operator==(const Affine2MainMatrix<T>& m) const {
-	return _equals(*this,m);
+	return _equalsM(*this,m);
 }
 
 template<class T>
 bool Affine2MainMatrix<T>::operator==(const IntervalMatrix& m) const {
-	return _equals(*this,m);
+	return _equalsM(*this,m);
 }
 
 template<class T>
@@ -202,7 +204,16 @@ Affine2MainMatrix<T> Affine2MainMatrix<T>::transpose() const {
 
 template<class T>
 Affine2MainVector<T> Affine2MainMatrix<T>::col(int j) const {
-	return _col<Affine2MainMatrix<T>,Affine2MainVector<T> >(*this,j);
+//	return _col<Affine2MainMatrix<T>,Affine2MainVector<T> >(*this,j);
+	{
+		assert(!is_empty());
+		assert(j>=0 && j<nb_cols());
+
+		Affine2MainVector<T> res(nb_rows());
+		for (int i=0; i<nb_rows(); i++)
+			res[i]=_M[i][j];
+		return res;
+	}
 }
 
 template<class T>
@@ -330,7 +341,7 @@ Affine2MainMatrix<T> operator*(const Affine2Main<T>& x, const IntervalMatrix& m)
 
 template<class T>
 std::ostream& operator<<(std::ostream& os, const Affine2MainMatrix<T>& m) {
-	return display(os, m);
+	return _displayM(os, m);
 }
 
 

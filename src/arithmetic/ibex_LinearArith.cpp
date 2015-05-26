@@ -8,7 +8,7 @@
 // Last Update : Apr 18, 2012
 //============================================================================
 
-
+#include "ibex_Interval.h"
 #include "ibex_Affine2Matrix.h"
 #include "ibex_IntervalMatrix.h"
 
@@ -19,32 +19,26 @@ namespace {
 // the following functions are
 // introduced to allow genericity
 inline bool is_empty(double x)                { return false; }
-inline bool is_empty(const Interval& x)       { return x.is_empty(); }
-inline bool is_empty(const Vector& v)         { return false; }
-inline bool is_empty(const IntervalVector& v) { return v.is_empty(); }
-inline bool is_empty(const Matrix& m)         { return false; }
-inline bool is_empty(const IntervalMatrix& m) { return m.is_empty(); }
-template<class T>
-inline bool is_empty(const Affine2Main<T>& x)       { return x.is_empty(); }
-template<class T>
-inline bool is_empty(const Affine2MainVector<T>& v) { return v.is_empty(); }
-template<class T>
-inline bool is_empty(const Affine2MainMatrix<T>& m) { return m.is_empty(); }
+//inline bool is_empty(const Interval& x)       { return x.is_empty(); }
+//inline bool is_empty(const Vector& v)         { return false; }
+//inline bool is_empty(const IntervalVector& v) { return v.is_empty(); }
+//inline bool is_empty(const Matrix& m)         { return false; }
+//inline bool is_empty(const IntervalMatrix& m) { return m.is_empty(); }
+//template<class T> inline bool is_empty(const Affine2Main<T>& x)       { return x.is_empty(); }
+//template<class T> inline bool is_empty(const Affine2MainVector<T>& v) { return v.is_empty(); }
+//template<class T> inline bool is_empty(const Affine2MainMatrix<T>& m) { return m.is_empty(); }
 
 
 
 inline void set_empty(double x)          { }
-inline void set_empty(Interval& x)       { x.set_empty(); }
-inline void set_empty(Vector& v)         { }
-inline void set_empty(IntervalVector& v) { v.set_empty(); }
-inline void set_empty(Matrix& m)         { }
-inline void set_empty(IntervalMatrix& m) { m.set_empty(); }
-template<class T>
-inline void set_empty(Affine2Main<T>& x)       { x.set_empty(); }
-template<class T>
-inline void set_empty(Affine2MainVector<T>& v) { v.set_empty(); }
-template<class T>
-inline void set_empty(Affine2MainMatrix<T>& m) { m.set_empty(); }
+//inline void set_empty(Interval& x)       { x.set_empty(); }
+//inline void set_empty(Vector& v)         { }
+//inline void set_empty(IntervalVector& v) { v.set_empty(); }
+//inline void set_empty(Matrix& m)         { }
+//inline void set_empty(IntervalMatrix& m) { m.set_empty(); }
+//template<class T> inline void set_empty(Affine2Main<T>& x)       { x.set_empty(); }
+//template<class T> inline void set_empty(Affine2MainVector<T>& v) { v.set_empty(); }
+//template<class T> inline void set_empty(Affine2MainMatrix<T>& m) { m.set_empty(); }
 
 inline double abs(const double& x) { return fabs(x); }
 
@@ -768,7 +762,7 @@ Affine2MainVector<T> operator*(const Interval& x1, const Affine2MainVector<T>& x
 
 template<class T>
 Affine2MainVector<T> operator*(const Affine2MainMatrix<T>& m, const Vector& x) {
-	return mulMV<Affine2MainMatrix<T>,Vector,Affine2MainVector<T>>(m,x);
+	return mulMV<Affine2MainMatrix<T>,Vector,Affine2MainVector<T> >(m,x);
 }
 
 template<class T>

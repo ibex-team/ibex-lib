@@ -108,9 +108,9 @@ IntervalVector Function::eval_affine2_vector(const IntervalVector& box, Affine2V
 Affine2Vector Function::eval_affine2_vector(const Affine2Vector& box) const {
 	const ExprLabel& res = Affine2Eval().eval_label(*this,box);
 	if (expr().dim.is_scalar() ) {
-		return IntervalVector(1,res.d->i());
+		return Affine2Vector(1, res.af2->i());
 	} else {
-		return res.d->v();
+		return res.af2->v();
 	}
 }
 

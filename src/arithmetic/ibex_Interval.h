@@ -909,6 +909,10 @@ bool bwd_imod(Interval& x, Interval& y, const double& p);
 
 namespace ibex {
 
+inline bool is_empty(const Interval& x)       { return x.is_empty(); }
+inline void set_empty(Interval& x)       { x.set_empty(); }
+
+
 inline Interval::Interval() : itv(NEG_INFINITY, POS_INFINITY) {
 
 }

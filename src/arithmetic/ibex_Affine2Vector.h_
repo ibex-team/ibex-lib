@@ -12,6 +12,7 @@
 #ifndef IBEX_AFFINE2_VECTOR_H2_
 #define IBEX_AFFINE2_VECTOR_H2_
 
+#include "ibex_TemplateVector.h_"
 
 namespace ibex {
 
@@ -340,13 +341,13 @@ template<class T>
 void           Affine2MainVector<T>::put(int start_index, const Affine2MainVector<T>& subvec) { _put(*this, start_index, subvec); }
 template<class T>
 Affine2MainVector<T>& Affine2MainVector<T>::operator=(const Affine2MainVector<T>& x)                 { resize(x.size()); // see issue #10
-                                                                                  return _assign(*this,x); }
+                                                                                  return _assignV(*this,x); }
 template<class T>
-Affine2MainVector<T>& Affine2MainVector<T>::operator=(const IntervalVector& x)                { return _assign(*this,x); }
+Affine2MainVector<T>& Affine2MainVector<T>::operator=(const IntervalVector& x)                { return _assignV(*this,x); }
 template<class T>
-bool           Affine2MainVector<T>::operator==(const Affine2MainVector<T>& x) const          { return _equals(*this,x); }
+bool           Affine2MainVector<T>::operator==(const Affine2MainVector<T>& x) const          { return _equalsV(*this,x); }
 template<class T>
-bool           Affine2MainVector<T>::operator==(const IntervalVector& x) const         { return _equals(*this,x); }
+bool           Affine2MainVector<T>::operator==(const IntervalVector& x) const         { return _equalsV(*this,x); }
 //Vector         Affine2MainVector<T>::lb() const                                        { return _lb(*this); }
 //Vector         Affine2MainVector<T>::ub() const                                        { return _ub(*this); }
 //Vector         Affine2MainVector<T>::mid() const                                       { return _mid(*this); }
@@ -366,7 +367,7 @@ bool           Affine2MainVector<T>::is_unbounded() const                       
 //Vector         Affine2MainVector<T>::diam() const                                      { return _diam(*this); }
 //int            Affine2MainVector<T>::extr_diam_index(bool min) const                   { return _extr_diam_index(*this,min); }
 template<class T>
-std::ostream& operator<<(std::ostream& os, const Affine2MainVector<T>& x)              { return _display(os,x); }
+std::ostream& operator<<(std::ostream& os, const Affine2MainVector<T>& x)              { return _displayV(os,x); }
 //double         Affine2MainVector<T>::volume() const                                    { return _volume(*this); }
 //double         Affine2MainVector<T>::perimeter() const                                 { return _perimeter(*this); }
 //double         Affine2MainVector<T>::rel_distance(const Affine2MainVector<T>& x) const        { return _rel_distance(*this,x); }

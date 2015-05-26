@@ -9,6 +9,10 @@
  * Created     : Jan 28, 2014
  * ---------------------------------------------------------------------------- */
 
+
+#ifndef __IBEX_TEMPLATE_MATRIX_H__
+#define __IBEX_TEMPLATE_MATRIX_H__
+
 #include "ibex_IntervalMatrix.h"
 #include "ibex_Affine2Matrix.h"
 
@@ -143,7 +147,7 @@ inline void _set_col(M& m, int col1, const V& v) {
 
 
 template<class M1,class M2>
-M1& _assign(M1& m1, const M2& m2) {
+M1& _assignM(M1& m1, const M2& m2) {
 	assert(m1.nb_rows()==m2.nb_rows() && m1.nb_cols()==m2.nb_cols());
 	// or implement "resize"
 	//resize(x.nb_rows(), x.nb_cols());
@@ -157,7 +161,7 @@ M1& _assign(M1& m1, const M2& m2) {
 }
 
 template<class M1,class M2>
-bool _equals(M1& m1, const M2& m2) {
+bool _equalsM(M1& m1, const M2& m2) {
 	if (m1.nb_rows()!=m2.nb_rows()) return false;
 	if (m1.nb_cols()!=m2.nb_cols()) return false;
 
@@ -171,7 +175,7 @@ bool _equals(M1& m1, const M2& m2) {
 }
 
 template<class M>
-inline std::ostream& display(std::ostream& os, const M& m) {
+inline std::ostream& _displayM(std::ostream& os, const M& m) {
 	if (is_empty(m)) { return os << "empty matrix"; }
 	os << "(";
 	for (int i=0; i<m.nb_rows(); i++) {
@@ -214,3 +218,5 @@ Matrix _randomM(const M& m, int seed) {
 } // end anonymous namespace
 
 } // end namespace ibex
+
+#endif //__IBEX_TEMPLATE_MATRIX_H__
