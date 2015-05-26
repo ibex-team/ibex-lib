@@ -50,8 +50,6 @@ typedef unsigned int uint32_t;
 #define UINT32_MAX	0xffffffff
 #endif
 
-
-
 namespace ibex {
 
 	class RNG {

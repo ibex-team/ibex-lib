@@ -18,7 +18,6 @@
 
 namespace ibex {
 
-
 template<class T> class Affine2MainMatrixArray;
 
 /**

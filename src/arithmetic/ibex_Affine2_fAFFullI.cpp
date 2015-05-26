@@ -127,7 +127,7 @@ _elt	(x._elt._center, std::list<std::pair<int,double> >(),x._elt._garbage) {
 
 template<>
 double Affine2Main<AF_fAFFullI>::val(int i) const{
-	assert((0<=i) && (i<=AF_fAFFullI::_counter));
+	assert((0<=i) && (((unsigned int)i)<=AF_fAFFullI::_counter));
 	if (i == 0) return _elt._center;
 	if (!_elt._rays.empty()) {
 		std::list<std::pair<int,double> >::const_iterator iter = _elt._rays.begin();
