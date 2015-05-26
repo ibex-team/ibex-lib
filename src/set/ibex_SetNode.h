@@ -60,6 +60,19 @@ public:
 	 */
 	SetNode* inter(bool sync, const IntervalVector& nodebox, const SetNode* other, const IntervalVector& otherbox, double eps);
 
+
+	/**
+	 * \brief Intersection with an explicit i-set "other"
+	 *
+	 * Important: what is outside of "other" is considered to be "IN"
+	 */
+	virtual SetNode* inter2(bool sync, const IntervalVector& nodebox, const std::pair<SetNode*,IntervalVector>& other, double eps)=0;
+
+	/**
+	 * \brief Return the smallest subset of this, enclosing "box"
+	 */
+	virtual std::pair<SetNode*,IntervalVector> subset(const IntervalVector& nodebox, const IntervalVector& box)=0;
+
 	/**
 	 * \brief Intersection with an i-set reduced to a single box "x" of status "x_status".
 	 *

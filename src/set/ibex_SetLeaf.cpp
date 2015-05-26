@@ -100,6 +100,46 @@ SetNode* SetLeaf::inter(bool sync, const IntervalVector& nodebox, const Interval
 	}
 }
 
+
+SetNode* SetLeaf::inter2(bool sync, const IntervalVector& nodebox, const pair<SetNode*,IntervalVector>& other, double eps) {
+	if (status==NO || (sync && status==YES) || !nodebox.intersects(other.second))
+		return this;
+
+	else if (other.first->is_leaf())
+		return inter(sync, nodebox, other.second, ((SetLeaf*) other.first)->status, eps);
+
+	else if (nodebox.max_diam()<=eps) {
+		SetBisect* bis=(SetBisect*) other.first;
+		SetNode* this1=inter2(sync,nodebox,pair<SetNode*,IntervalVector>(bis->left,bis->left_box(other.second)),eps);
+		BoolInterval status1=status;
+		//if (status1==MAYBE) return this1;
+		SetNode* this2=this1->inter2(sync,nodebox,pair<SetNode*,IntervalVector>(bis->right,bis->right_box(other.second)),eps);
+		return this2;
+	} else {
+		int var=nodebox.extr_diam_index(false);
+		pair<IntervalVector,IntervalVector> p=nodebox.bisect(var);
+		double pt=p.first[var].ub();
+		assert(nodebox[var].interior_contains(pt));
+
+		SetBisect* bis = new SetBisect(var, pt);
+		bis->left = new SetLeaf(status);
+		bis->right = new SetLeaf(status);
+
+		if (p.first.intersects(other.second))
+			bis->left = bis->left->inter2(sync, p.first, other.first->subset(other.second,p.first), eps);
+		if (p.second.intersects(other.second))
+			bis->right = bis->right->inter2(sync, p.second, other.first->subset(other.second,p.second), eps);
+
+		delete this;
+		return bis->try_merge();
+	}
+}
+
+std::pair<SetNode*,IntervalVector> SetLeaf::subset(const IntervalVector& nodebox, const IntervalVector& box) {
+	assert(nodebox.intersects(box));
+	return pair<SetNode*,IntervalVector>(this,nodebox);
+}
+
 SetNode* SetLeaf::union_(const IntervalVector& nodebox, const IntervalVector& x, BoolInterval xstatus, double eps) {
 	//cout << nodebox << " " << to_string(status)  << " union << x << " ";
 

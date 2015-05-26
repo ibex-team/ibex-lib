@@ -206,6 +206,8 @@ SetNode* SetNode::inter(bool sync, const IntervalVector& nodebox, Sep& sep, cons
 
 	if (box.is_empty()) return this;
 
+	//if (box==targetbox) return inter_rec(sync, nodebox, sep, targetbox, eps);
+
 	IntervalVector box1(box);
 	IntervalVector box2(box);
 
@@ -221,6 +223,7 @@ SetNode* SetNode::inter(bool sync, const IntervalVector& nodebox, Sep& sep, cons
 		//cout << "set obtained with outer contraction:" << endl; root2->print(cout,box,0);
 
 		root3 = root1->inter(true, box, root2, box, eps);
+		//root3 = root1->inter2(true, box, pair<SetNode*,IntervalVector>(root2, box), eps);
 		delete root2;
 
 
@@ -235,6 +238,7 @@ SetNode* SetNode::inter(bool sync, const IntervalVector& nodebox, Sep& sep, cons
 	}
 
 	SetNode* this2 = this->inter(sync, nodebox, root3, box, eps);
+	//SetNode* this2 = this->inter2(sync, nodebox, pair<SetNode*,IntervalVector>(root3, box), eps);
 	delete root3;
 	//		cout << " after contraction % NO gives: "; this2->print(cout,nodebox,0);
 

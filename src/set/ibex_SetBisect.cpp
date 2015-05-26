@@ -72,6 +72,34 @@ SetNode* SetBisect::inter(bool sync, const IntervalVector& nodebox, const Interv
 
 }
 
+SetNode* SetBisect::inter2(bool sync, const IntervalVector& nodebox, const pair<SetNode*,IntervalVector>& other, double eps) {
+	if (!nodebox.intersects(other.second)) return this;
+
+	if (other.first->is_leaf()) return inter(sync, nodebox, other.second, ((SetLeaf*) other.first)->status, eps);
+
+	const IntervalVector lbox=left_box(nodebox);
+	const IntervalVector rbox=right_box(nodebox);
+
+	if (lbox.intersects(other.second))
+		left = left->inter2(sync, lbox, other.first->subset(other.second,lbox), eps);
+	if (rbox.intersects(other.second))
+		right = right->inter2(sync, rbox, other.first->subset(other.second,rbox), eps);
+
+	return try_merge();
+}
+
+pair<SetNode*,IntervalVector> SetBisect::subset(const IntervalVector& nodebox, const IntervalVector& box) {
+	const IntervalVector lbox=left_box(nodebox);
+	const IntervalVector rbox=right_box(nodebox);
+
+	if (lbox.intersects(box))
+		if (rbox.intersects(box)) return pair<SetNode*,IntervalVector>(this,nodebox);
+		else return left->subset(lbox,box);
+
+	assert(rbox.intersects(box));
+	return right->subset(rbox,box);
+}
+
 SetNode* SetBisect::inter_rec(bool sync, const IntervalVector& nodebox, Sep& sep, const IntervalVector& targetbox, double eps) {
 	left = left->inter(sync, left_box(nodebox), sep, targetbox, eps);
 	right = right->inter(sync,right_box(nodebox), sep, targetbox, eps);
