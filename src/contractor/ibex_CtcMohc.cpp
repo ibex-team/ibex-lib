@@ -994,7 +994,7 @@ Interval Function_OG::revise(IntervalVector& box, bool minrevise) {
 Function_OG::Function_OG(const Function& ff) :
 						 eso(ff.args(),ff.expr()), _f(eso.get_x(),eso.get_y()),
 						 r_a(_f.nb_var()), r_b(_f.nb_var()), r_c(_f.nb_var()),
-						 _box(_f.nb_var()), _g(_f.nb_var()), g(_f.nb_var()), ga(_f.nb_var()),
+						 _box(_f.nb_var()), _g(_f.nb_var()), g(ff.nb_var()), ga(_f.nb_var()),
 						 gb(_f.nb_var()), aux(_f.nb_var())	{
 
 	for(int o=0; o<_f.nb_var(); o++)
@@ -1038,7 +1038,7 @@ void Function_OG::set_rc(int i, Interval val) {
 //initialize the occurrence-based box using a normal box variable-based
 void Function_OG::_setbox(IntervalVector& box) {
 	int j=0;
-	for(int i=0; i<g.size();i++) {
+	for(int i=0; i<box.size();i++) {
 		if (occ[i].size()!=0) // _box[first_occ[i]]=box[i];
 			//else
 			for(unsigned int j=0; j<occ[i].size(); j++)
