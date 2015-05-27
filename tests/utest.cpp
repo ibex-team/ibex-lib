@@ -70,9 +70,6 @@
 #include "TestCtcSegment.h"
 #include "TestCtcPixelMap.h"
 
-
-
-
 // ================ strategy ===============
 #include "TestOptimizer.h"
 
@@ -80,6 +77,8 @@
 #include "TestSeparator.h"
 #include "TestSepPolygon.h"
 
+// ============= Conbinatorial ============
+#include "TestQInter.h"
 
 using namespace std;
 using std::auto_ptr;
@@ -140,6 +139,7 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestCtcPolytopeHull()));
     ts.add(auto_ptr<Test::Suite>(new TestCtcSegment()));
     ts.add(auto_ptr<Test::Suite>(new TestCtcPixelMap()));
+    ts.add(auto_ptr<Test::Suite>(new TestQInter()));
 
     ts.add(auto_ptr<Test::Suite>(new TestFritzJohn()));
 

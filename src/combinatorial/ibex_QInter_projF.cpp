@@ -16,7 +16,7 @@ using namespace std;
 #define PROJ_LEFT_BOUND 0
 #define PROJ_RIGHT_BOUND 1
 
-bool paircomp (const pair<double,int>& i, const pair<double,int>& j) { return (i.first<j.first); }
+bool paircomp (const pair<double,int>& i, const pair<double,int>& j) { return (i.first<j.first || (i.first==j.first && i.second < j.second)); }
 
 namespace ibex {
 
