@@ -118,12 +118,12 @@ public:
 	 */
 	std::vector<std::vector<SetLeaf*> > connected_components();
 
+	/**
+	 * \brief Box corresponding to a node
+	 */
+	IntervalVector node_box(const SetNode* node) const;
 
 protected:
-
-	SetNode* root; // NULL means no existing set (warning: different from empty set!)
-
-	IntervalVector bounding_box; // not sure it is really necessary
 
 	/**
 	 * \brief Load the set from a file
@@ -132,7 +132,11 @@ protected:
 
 	friend std::ostream& operator<<(std::ostream& os, const SetInterval& set);
 
+	SetNode* root; // NULL means no existing set (warning: different from empty set!)
+
 	double eps;
+
+	IntervalVector bounding_box; // not sure it is really necessary
 
 };
 

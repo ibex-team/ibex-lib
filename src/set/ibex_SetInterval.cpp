@@ -285,6 +285,25 @@ double SetInterval::dist(const Vector& pt, bool inside) const {
 	return ::sqrt(lb);
 }
 
+
+IntervalVector SetInterval::node_box(const SetNode* node) const {
+
+	// the first field is an ancestor
+	// the second field is whether we are in the left or right branch of this ancestor
+	list<pair<const SetBisect*,bool> > ancestors;
+
+	// we go upward in the tree and record the side of each bisection
+	for (const SetNode* ancestor=node; ancestor->father!=NULL; ancestor=ancestor->father) {
+		ancestors.push_front(pair<const SetBisect*,bool>(ancestor->father, ancestor==ancestor->father->left));  // "true" means "left"
+	}
+	IntervalVector box=bounding_box;
+	// we go backward and apply the bisections recursively from the initial bounding box
+	for (list<pair<const SetBisect*,bool> >::const_iterator it=ancestors.begin(); it!=ancestors.end(); it++) {
+		box = it->second ? it->first->left_box(box) : it->first->right_box(box);
+	}
+	return box;
+}
+
 SetInterval::~SetInterval() {
 	delete root;
 }

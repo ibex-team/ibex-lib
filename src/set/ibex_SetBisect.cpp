@@ -21,6 +21,9 @@ SetBisect::SetBisect(int var, double pt, SetNode* left, SetNode* right) : var(va
 	assert(!dynamic_cast<SetLeaf*>(left) ||
 			!dynamic_cast<SetLeaf*>(right) ||
 			dynamic_cast<SetLeaf*>(left)->status !=dynamic_cast<SetLeaf*>(right)->status);
+
+	left->father = this;
+	right->father = this;
 }
 
 SetBisect::SetBisect(int var, double pt) : var(var), pt(pt), left(NULL), right(NULL) {
@@ -65,7 +68,9 @@ SetNode* SetBisect::inter(bool sync, const IntervalVector& nodebox, const Interv
 		return this;
 	else {
 		left = left->inter(sync, left_box(nodebox), x, xstatus, eps);
+		left->father = this;
 		right = right->inter(sync, right_box(nodebox), x, xstatus, eps);
+		right->father = this;
 		// status of children may have changed --> try merge
 		return try_merge();
 	}
@@ -80,11 +85,14 @@ SetNode* SetBisect::inter2(bool sync, const IntervalVector& nodebox, const pair<
 	const IntervalVector lbox=left_box(nodebox);
 	const IntervalVector rbox=right_box(nodebox);
 
-	if (lbox.intersects(other.second))
+	if (lbox.intersects(other.second)) {
 		left = left->inter2(sync, lbox, other.first->subset(other.second,lbox), eps);
-	if (rbox.intersects(other.second))
+		left->father = this;
+	}
+	if (rbox.intersects(other.second)) {
 		right = right->inter2(sync, rbox, other.first->subset(other.second,rbox), eps);
-
+		right->father = this;
+	}
 	return try_merge();
 }
 
@@ -92,9 +100,10 @@ pair<SetNode*,IntervalVector> SetBisect::subset(const IntervalVector& nodebox, c
 	const IntervalVector lbox=left_box(nodebox);
 	const IntervalVector rbox=right_box(nodebox);
 
-	if (lbox.intersects(box))
+	if (lbox.intersects(box)) {
 		if (rbox.intersects(box)) return pair<SetNode*,IntervalVector>(this,nodebox);
 		else return left->subset(lbox,box);
+	}
 
 	assert(rbox.intersects(box));
 	return right->subset(rbox,box);
@@ -102,7 +111,10 @@ pair<SetNode*,IntervalVector> SetBisect::subset(const IntervalVector& nodebox, c
 
 SetNode* SetBisect::inter_rec(bool sync, const IntervalVector& nodebox, Sep& sep, const IntervalVector& targetbox, double eps) {
 	left = left->inter(sync, left_box(nodebox), sep, targetbox, eps);
+	left->father = this;
 	right = right->inter(sync,right_box(nodebox), sep, targetbox, eps);
+	right->father = this;
+
 	//cout << "left="; left->print(cout,left_box(nodebox),0);
 	//cout << "right="; right->print(cout,right_box(nodebox),0);
 	// status of children may have changed --> try merge or update status
@@ -121,7 +133,9 @@ SetNode* SetBisect::union_(const IntervalVector& nodebox, const IntervalVector& 
 		return new SetLeaf(YES);
 	} else {
 		left = left->union_(left_box(nodebox), x, x_status, eps);
+		left->father = this;
 		right = right->union_(right_box(nodebox), x, x_status, eps);
+		right->father = this;
 		// status of children may have changed --> try merge
 		return try_merge();
 	}
@@ -154,8 +168,6 @@ IntervalVector SetBisect::right_box(const IntervalVector& nodebox) const {
 }
 
 SetNode* SetBisect::try_merge() {
-	// note: we cannot merge nodes with status like UNK_IN
-	// because we would lose all the information of the subtree!
 	if (left->is_leaf() && right->is_leaf()) {
 		BoolInterval left_status=((SetLeaf*) left)->status;
 		if (left_status == ((SetLeaf*) right)->status) {

@@ -195,6 +195,10 @@ SetNode* diff(const IntervalVector& x, const IntervalVector& y, BoolInterval x_s
 	return root;
 }
 
+SetNode::SetNode() : father(NULL) {
+
+}
+
 SetNode::~SetNode() {
 
 }

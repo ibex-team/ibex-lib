@@ -45,7 +45,9 @@ SetNode* SetLeaf::inter_rec(bool sync, const IntervalVector& nodebox, Sep& sep, 
 
 		SetBisect* bis = new SetBisect(var, pt);
 		bis->left = left->inter(sync, p.first, sep, p.first & targetbox, eps);
+		bis->left->father = bis;
 		bis->right = right->inter(sync, p.second, sep, p.second & targetbox, eps);
+		bis->right->father = bis;
 		delete this;
 		return bis->try_merge();
 	}
@@ -129,6 +131,9 @@ SetNode* SetLeaf::inter2(bool sync, const IntervalVector& nodebox, const pair<Se
 			bis->left = bis->left->inter2(sync, p.first, other.first->subset(other.second,p.first), eps);
 		if (p.second.intersects(other.second))
 			bis->right = bis->right->inter2(sync, p.second, other.first->subset(other.second,p.second), eps);
+
+		bis->left->father = bis;
+		bis->right->father = bis;
 
 		delete this;
 		return bis->try_merge();

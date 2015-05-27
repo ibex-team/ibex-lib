@@ -27,12 +27,21 @@ class NoSet {
 
 };
 
+class SetBisect;
+
 /**
  * \brief Set node.
  */
 class SetNode {
 
 public:
+	SetNode();
+
+	/**
+	 * \brief Father node (NULL by default)
+	 */
+	SetBisect* father;
+
 	/**
 	 * \brief Callback for "visit_leaves"
 	 */
