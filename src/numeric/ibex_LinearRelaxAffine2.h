@@ -36,11 +36,26 @@ public:
 
 	~LinearRelaxAffine2 ();
 
-	/** ART iteration.
-  Linearize the system and performs 2n calls to Simplex in order to reduce
-  the 2 bounds of each variable */
+	/**
+	 * \biref  ART iteration.
+	 *
+	 *  Linearize the system and performs 2n calls to Simplex in order to reduce the 2 bounds of each variable
+	 */
 	int linearization(const IntervalVector& box, LinearSolver& lp_solver);
 
+	/**
+	 * \brief Generation of a linear approximation of the inner region
+	 *
+	 */
+	int inlinearization(const IntervalVector& box, LinearSolver& lp_solver);
+
+	/**
+	 * \brief Generation of a linear approximation of the linear objective function
+	 *
+	 */
+	bool goal_linearization(const IntervalVector& box, LinearSolver& lp_solver);
+
+private:
 	/**
 	 * \brief The system
 	 */

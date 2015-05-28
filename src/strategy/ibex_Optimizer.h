@@ -24,6 +24,7 @@
 #include "ibex_LinearSolver.h"
 #include "ibex_PdcHansenFeasibility.h"
 #include "ibex_Random.h"
+#include "ibex_LinearRelaxCombo.h"
 
 namespace ibex {
 
@@ -422,6 +423,7 @@ protected:
 	 * \return true in case of success, i.e., if the loup has been decreased.
 	 */
 	bool check_candidate(const Vector& pt, bool is_inner);
+	bool check_candidate_extended(const Vector& pt, bool is_inner);
 
 	/**
 	 * Look for a loup box (in rigor mode) starting from a pseudo-loup.
@@ -535,6 +537,7 @@ private:
 
 	/** linear solver used in ibex_OptimSimplex.cpp_ */
 	LinearSolver *mylp;
+	LinearRelaxCombo *lr;
 
 	/** Inner contractor (for the negation of g) */
 	CtcUnion* is_inside;

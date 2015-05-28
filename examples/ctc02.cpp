@@ -3,7 +3,6 @@
 #include "ibex_CtcCompo.h"
 #include "ibex_CtcQInter.h"
 #include "ibex_CtcFixPoint.h"
-#include "ibex_EmptyBoxException.h"
 #include "ibex_Array.h"
 
 #include <iostream>

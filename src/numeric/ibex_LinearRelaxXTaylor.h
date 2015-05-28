@@ -61,12 +61,6 @@ public:
 	 */
 	~LinearRelaxXTaylor();
 
-	/**
-	 * \brief The vector of corner selection in linearization
-	 *
-	 * Can be either X_INF, X_SUP, RANDOM, or RANDOM_INV.
-	 */
-	std::vector<corner_point> cpoints;
 
 	/**
 	 * \brief Generation of the linearized system
@@ -76,8 +70,26 @@ public:
 	 */
 	int linearization(const IntervalVector& box, LinearSolver& lp_solver);
 
+	/**
+	 * \brief Generation of a linear approximation of the inner region
+	 *
+	 */
+	int inlinearization(const IntervalVector& box, LinearSolver& lp_solver);
+
+	/**
+	 * \brief Generation of a linear approximation of the linear objective function
+	 *
+	 */
+	bool goal_linearization(const IntervalVector& box, LinearSolver& lp_solver);
 
 private:
+
+	/**
+	 * \brief The vector of corner selection in linearization
+	 *
+	 * Can be either X_INF, X_SUP, RANDOM, or RANDOM_INV.
+	 */
+	std::vector<corner_point>& cpoints;
 
 	/**
 	 * \brief The system
@@ -101,7 +113,7 @@ private:
 	/* For implementing RANDOM_INV one needs to store the last random corners */
 	int* last_rnd;
 
-	int* base_coin;
+	bool* base_coin;
 
 	/** Indicates if the constraint is linear wrt to each variable */
 	bool** linear;
@@ -124,6 +136,11 @@ private:
 
 	int X_Linearization(const IntervalVector& box, int ctr, corner_point cpoint, CmpOp op,
 			IntervalVector &G, int id_point, int& non_linear_vars, LinearSolver& lp_solver);
+
+	/**
+	 * \brief Random hoice of a corner
+	 */
+	bool choose_corner(const IntervalVector& box, IntervalVector& x_corner,	bool* corner);
 
 	/**
 	 * \brief Symbolic Jacobian

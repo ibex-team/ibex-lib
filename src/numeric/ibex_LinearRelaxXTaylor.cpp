@@ -42,7 +42,7 @@ LinearRelaxXTaylor::LinearRelaxXTaylor(const System& sys1, std::vector<corner_po
 void LinearRelaxXTaylor::init_linear_coeffs() {
 
 	last_rnd = new int[sys.nb_var];
-	base_coin = new int[sys.nb_var];
+	base_coin = new bool[sys.nb_var];
 	linear = new bool*[sys.nb_ctr];
 	linear_ctr = new bool[sys.nb_ctr];
 
@@ -74,6 +74,138 @@ LinearRelaxXTaylor::~LinearRelaxXTaylor() {
 	delete[] linear;
 	delete[] linear_ctr;
 }
+
+int LinearRelaxXTaylor::inlinearization(const IntervalVector& box, LinearSolver& lp_solver)  {
+
+	int nb_add=0;
+	int n =box.size();
+
+	// boolean indicating which corner in direction i is used : true for inferior corner, false for superior one.
+	bool* corner = new bool[n];
+	// the corner used
+	IntervalVector x_corner(n);
+
+	// random corner choice
+	if (!choose_corner(box, x_corner, corner)) {
+		delete [] corner;
+		return -1;
+	}
+
+	// ============================================================
+	//   linearize the constraint
+	// ============================================================
+	IntervalVector G(n); // vector to be used by the partial derivatives
+	Vector row(n);
+	//The linear system is generated
+	if (sys.nb_ctr>0)
+	{
+		// the evaluation of the constraints in the corner x_corner
+		IntervalVector g_corner(sys.f.eval_vector(x_corner));
+
+		for (int ctr=0; ctr<sys.nb_ctr; ctr++) {
+
+			CmpOp op= sys.ctrs[ctr].op;
+			if(op!=EQ && isInner(box, sys, ctr)) continue; //the constraint is satisfied
+
+			sys.ctrs[ctr].f.gradient(box,G);               // gradient calculation
+
+			for (int ii =0; ii< n ; ii++) {
+				if (G[ii].diam() > 1e8) {
+					delete [] corner;
+					return -1; //to avoid problems with LP solver
+				}
+			}
+
+			Interval  ev(g_corner[ctr]);
+			//The contraints i is generated:
+			// c_i:  inf([g_i]([x]) + sup(dg_i/dx_1) * xl_1 + ... + sup(dg_i/dx_n) + xl_n  <= -eps_error
+			for (int j=0; j<n; j++) {
+				if ((corner[j] && (op == LEQ || op== LT)) ||
+				   (!corner[j] && (op == GEQ || op== GT)))	 {
+					row[j]=G[j].ub();
+				}	else {
+					row[j]=G[j].lb();
+				}
+				ev -= row[j]*x_corner[j];
+			}
+			try {
+				//TODO TO CHECK
+				//lp_solver.addConstraint(row,op, -ev.lb());  //  1e-10 ???  BNE  JN CA NE MARCHE PAS AVEC SOPLEX SANS LA PRECISION
+				lp_solver.addConstraint(row,op, -ev.lb()-lp_solver.getEpsilon());  //  1e-10 ???  BNE
+				nb_add++;
+				//mysoplex.addRow(LPRow(-infinity, row1, (-g_corner)[i].lb()-1e-10));    //  1e-10 ???  BNE
+			} catch (LPException&) { }
+		}
+	}
+	delete [] corner;
+	return nb_add;
+}
+
+
+
+bool LinearRelaxXTaylor::goal_linearization(const IntervalVector& box, LinearSolver& lp_solver)  {
+
+	int n =box.size();
+	IntervalVector G(n); // vector to be used by the partial derivatives
+
+	sys.goal->gradient(box.mid(),G);
+	for (int i =0; i< n ; i++)
+	  if (G[i].diam() > 1e8) return false;   //to avoid problems with the Linear Solver
+
+	// ============================================================
+	//   linearize the objective
+	// ============================================================
+	try {
+		for (int j=0; j<n; j++){
+			if (rand()%2)
+				lp_solver.setVarObj(j,G[j].ub());
+			else
+				lp_solver.setVarObj(j,G[j].lb());
+		}
+		return true;
+	} catch (LPException&) {
+		return false;
+	}
+
+}
+
+bool LinearRelaxXTaylor::choose_corner(const IntervalVector& box, IntervalVector& x_corner,	bool* corner)  {
+	int n =box.size();
+	// the corner used
+
+	for (int i=0 ; i< n ; i++)	  {
+		// random corner choice
+		if (rand()%2) {
+			if (box[i].lb()>NEG_INFINITY) {
+				corner[i]=true;
+				x_corner[i]=box[i].lb() ;
+			}
+			else if  (box[i].ub()<POS_INFINITY) {
+				corner[i]=false;
+				x_corner[i]=box[i].ub() ;
+			}
+			else {
+				return false; // infinity box
+			}
+		}
+		else {
+			if (box[i].ub()<POS_INFINITY) {
+				corner[i]=false;
+				x_corner[i]=box[i].ub() ;
+			}
+			else if  (box[i].lb()>NEG_INFINITY) {
+				corner[i]=true;
+				x_corner[i]=box[i].lb() ;
+			}
+			else {
+				return false; // infinity box
+			}
+		}
+	}
+	return true;
+}
+
+
 
 int LinearRelaxXTaylor::linearization(const IntervalVector& box, LinearSolver& lp_solver)  {
 
@@ -328,10 +460,28 @@ int LinearRelaxXTaylor::X_Linearization(const IntervalVector& savebox,
 
 		}
 
-		//      cout << " j " << j <<  " " << savebox[j] << G[j] << endl;
-	  box[j]=inf_x? savebox[j].lb():savebox[j].ub();
-	  Interval a = ((inf_x && (op == LEQ || op== LT)) ||
-			(!inf_x && (op == GEQ || op== GT)))	? G[j].lb() : G[j].ub();
+	  //      cout << " j " << j <<  " " << savebox[j] << G[j] << endl;
+	  //	box[j]=inf_x? savebox[j].lb():savebox[j].ub();
+	  if (inf_x) {
+		  if (savebox[j].lb()>NEG_INFINITY)
+			  box[j]=savebox[j].lb() ;
+		  else if  (savebox[j].ub()<POS_INFINITY)
+			  box[j]=savebox[j].ub() ;
+		  else
+			  return 0;
+	  }
+	  else {
+		  if (savebox[j].ub()<POS_INFINITY)
+			  box[j]=savebox[j].ub() ;
+		  else if  (savebox[j].lb()>NEG_INFINITY)
+			  box[j]=savebox[j].lb() ;
+		  else
+			  return 0;
+	  }
+
+	  Interval a =	((inf_x && (op == LEQ || op== LT)) ||
+			  	  	(!inf_x && (op == GEQ || op== GT)))	  ? G[j].lb() : G[j].ub();
+
 	  row1[j] =  a.mid();
 	  ev -= a*box[j];
 
@@ -367,7 +517,7 @@ int LinearRelaxXTaylor::X_Linearization(const IntervalVector& savebox,
 				added=true;
 			}
 		}
-	} catch (LPException&) { }
+	} 	catch (LPException&) { }
 	//box=savebox;
 
 	return (added)? 1:0;

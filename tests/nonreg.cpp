@@ -21,6 +21,7 @@ const int NB_TESTS = 24;
 const double TIME_LIMIT = 500;
 const char* time_limit = "500";
 
+
 const double REGRESSION_CELLS = 100; // 100%
 const double REGRESSION_TIME  = 30;  // 30%
 
