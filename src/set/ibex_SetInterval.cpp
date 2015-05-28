@@ -162,10 +162,14 @@ void SetInterval::load(const char* filename) {
 			subnode  =new SetBisect(var,pt); // left and right are both set to NULL temporarily
 		}
 
-		if (node->left==NULL) node->left=subnode;
+		if (node->left==NULL) {
+			node->left=subnode;
+			subnode->father = node;
+		}
 		else {
 			assert(node->right==NULL);
 			node->right=subnode;
+			subnode->father = node;
 		}
 
 		if (var!=-1)
