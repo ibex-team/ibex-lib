@@ -161,9 +161,12 @@ int LinearRelaxXTaylor::X_Linearization(const IntervalVector& savebox,
 	for (int j=0; j< n; j++) {
 		//cout << "[LinearRelaxXTaylor] variable n°" << j << endl;
 	  if (sys.ctrs[ctr].f.used(j)) {
-		  if (lmode == HANSEN && !linear[ctr][j])
+		  if (lmode == HANSEN && !linear[ctr][j]) {
 			  // get the partial derivative of ctr w.r.t. var n°j
 	    	  G[j]=df[ctr*n+j].eval(box);
+	    	  //other alternative (numeric):
+	    	  //G[j]=sys.f[ctr*n+j].gradient(box)[j];
+		  }
 	  }
 	  else
 		  continue;
