@@ -25,9 +25,9 @@ LinearRelaxAffine2::~LinearRelaxAffine2() {
 bool LinearRelaxAffine2::goal_linearization(const IntervalVector& box, LinearSolver& lp_solver) {
 	// Linearization of the objective function by AF2
 	Affine2 af2;
-	try {
+
 		sys.goal->eval_affine2(box,af2);
-	} catch (EmptyBoxException&) {
+	if (af2.is_empty()) {
 		return false;
 	}
 	try {
@@ -71,11 +71,7 @@ int LinearRelaxAffine2::inlinearization(const IntervalVector& box, LinearSolver&
 	for (int ctr = 0; ctr < sys.nb_ctr; ctr++) {
 		af2 = 0.0;
 		CmpOp op = sys.ctrs[ctr].op;
-		try {
-			ev = sys.ctrs[ctr].f.eval_affine2(box, af2);
-		} catch (EmptyBoxException&) {
-			af2.set_empty();
-		}
+		ev = sys.ctrs[ctr].f.eval_affine2(box, af2);
 		//std::cout <<ev<<":::"<< af2<<"  "<<af2.size()<<"  " <<sys.nb_var<< std::endl;
 
 		if (af2.size() == sys.nb_var) { // if the affine2 form is valid

@@ -518,7 +518,6 @@ int LinearRelaxXTaylor::X_Linearization(const IntervalVector& savebox,
 			}
 		}
 	} 	catch (LPException&) { }
-		catch (EmptyBoxException& e) { throw e;}
 	//box=savebox;
 
 	return (added)? 1:0;
