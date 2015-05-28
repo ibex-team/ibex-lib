@@ -54,22 +54,23 @@ void CtcSegment::contract(IntervalVector &box) {
 
 	if (nb_var==6) {
 		ctc_f->contract(box);
+		if (box.is_empty()) return;
 		ctc_g->contract(box);
 	}
 	else {
-		try {
-			X_with_params[0] = box[0];
-			X_with_params[1] = box[1];
-			//        X_with_params=cart_prod(box,)
-			ctc_f->contract(X_with_params);
-			ctc_g->contract(X_with_params);
-			//        box = X_with_params.subvector(0,1);
-			box[0] = X_with_params[0];
-			box[1] = X_with_params[1];
-		} catch(EmptyBoxException& e) {
-			box.set_empty();
-			throw e;
-		}
+		X_with_params[0] = box[0];
+		X_with_params[1] = box[1];
+		//        X_with_params=cart_prod(box,)
+
+		ctc_f->contract(X_with_params);
+		if (X_with_params.is_empty()) { box.set_empty(); return; }
+
+		ctc_g->contract(X_with_params);
+		if (X_with_params.is_empty()) { box.set_empty(); return; }
+
+		//        box = X_with_params.subvector(0,1);
+		box[0] = X_with_params[0];
+		box[1] = X_with_params[1];
 	}
 }
 

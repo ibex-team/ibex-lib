@@ -1,11 +1,13 @@
 
 #include "ibex.h"
+#include "ibex_Random.h"
 
 #include <iostream>
 #include <stdlib.h>
 #include <ctime>
 
 using namespace std;
+using ibex::RNG;
 
 /*================== data =================*/
 const bool qinteronly=false;  // do we use q-intersection alone, or fixedpoint ?

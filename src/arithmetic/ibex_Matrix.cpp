@@ -69,6 +69,7 @@ Matrix::~Matrix() {
 }
 
 Matrix& Matrix::operator=(const Matrix& x) {
+	resize(x.nb_rows(), x.nb_cols());
 	return _assign(*this,x);
 }
 

@@ -14,6 +14,7 @@
 
 
 // ignored warning : comparison between signed and unsigned integer expressions in this file
+#pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-compare"
 
 static graph_t *graph_read_dimacs_binary(FILE *fp,char *firstline);

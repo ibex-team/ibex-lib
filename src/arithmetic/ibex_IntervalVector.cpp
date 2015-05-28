@@ -261,7 +261,8 @@ bool bwd_mul(const Interval& z, IntervalVector& x, IntervalVector& y) {
 IntervalVector& IntervalVector::inflate(double rad1)                              { return _inflate(*this,rad1); }
 IntervalVector  IntervalVector::subvector(int start_index, int end_index) const   { return _subvector(*this,start_index,end_index); }
 void            IntervalVector::put(int start_index, const IntervalVector& x)     { _put(*this, start_index, x); }
-IntervalVector& IntervalVector::operator=(const IntervalVector& x)                { return _assign(*this,x); }
+IntervalVector& IntervalVector::operator=(const IntervalVector& x)                { resize(x.size()); // see issue #10
+                                                                                    return _assign(*this,x); }
 bool            IntervalVector::operator==(const IntervalVector& x) const         { return _equals(*this,x); }
 Vector          IntervalVector::lb() const                                        { return _lb(*this); }
 Vector          IntervalVector::ub() const                                        { return _ub(*this); }

@@ -9,7 +9,6 @@
 //============================================================================
 
 #include "ibex_Optimizer.h"
-#include "ibex_EmptyBoxException.h"
 #include "ibex_BoolInterval.h"
 
 #include <stdlib.h>
@@ -292,13 +291,15 @@ bool Optimizer::update_loup_probing(const IntervalVector& box) {
 			//		cout << "inner_found ? " << inner_found << " inbox=" << inbox << endl;
 		}
 		else {
-			try {
-				is_inside->contract(inbox); // compared to in_HC4, works the other way around: if inbox is inner, it is emptied.
-				inner_found=false;
-				inbox.set_empty();
-			} catch(EmptyBoxException&) {
+
+			is_inside->contract(inbox); // compared to in_HC4, works the other way around: if inbox is inner, it is emptied.
+
+			if (inbox.is_empty()) {
 				inbox = box;
 				inner_found=true;
+			} else {
+				inner_found=false;
+				inbox.set_empty();
 			}
 		}
 	}

@@ -15,6 +15,10 @@ using namespace std;
 
 namespace ibex {
 
+namespace {
+class PolytopeHullEmptyBoxException { };
+}
+
 CtcPolytopeHull::CtcPolytopeHull(LinearRelax& lr, ctc_mode cmode, int max_iter, int time_out, double eps, Interval limit_diam) :
 		Ctc(lr.nb_var()), lr(lr), goal_var(lr.goal_var()), cmode(cmode),
 		limit_diam_box(eps>limit_diam.lb()? eps : limit_diam.lb(), limit_diam.ub()), own_lr(false) {
@@ -50,8 +54,12 @@ void CtcPolytopeHull::contract(IntervalVector& box) {
 
 		//returns the number of constraints in the linearized system
 		int cont = lr.linearization(box, *mylinearsolver);
+
 		//cout << "[polytope-hull] end of LR" << endl;
-		if(cont<1)  return;
+
+		if (cont==-1) throw PolytopeHullEmptyBoxException();
+
+		if (cont==0) return;
 
 		optimizer(box);
 
@@ -63,10 +71,9 @@ void CtcPolytopeHull::contract(IntervalVector& box) {
 	catch(LPException&) {
 		mylinearsolver->cleanConst();
 	}
-	catch(EmptyBoxException& e) {
-		box.set_empty(); // empty the box before exiting in case of EmptyBoxException
+	catch(PolytopeHullEmptyBoxException& e) {
+		box.set_empty(); // empty the box before exiting
 		mylinearsolver->cleanConst();
-		throw e;
 	}
 
 }
@@ -113,7 +120,7 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 				if(opt.lb()>box[i].ub()) {
 					delete[] inf_bound;
 					delete[] sup_bound;
-					throw EmptyBoxException();
+					throw PolytopeHullEmptyBoxException();
 				}
 
 				if(opt.lb() > box[i].lb()) {
@@ -129,7 +136,7 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 				delete[] inf_bound;
 				delete[] sup_bound;
 				// the infeasibility is proved, the EmptyBox exception is raised
-				throw EmptyBoxException();
+				throw PolytopeHullEmptyBoxException();
 			}
 
 			else if (stat == LinearSolver::INFEASIBLE_NOTPROVED) {
@@ -161,7 +168,7 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 				if(opt.ub() <box[i].lb()) {
 					delete[] inf_bound;
 					delete[] sup_bound;
-					throw EmptyBoxException();
+					throw PolytopeHullEmptyBoxException();
 				}
 
 				if (opt.ub() < box[i].ub()) {
@@ -177,7 +184,7 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 				delete[] inf_bound;
 				delete[] sup_bound;
 				// the infeasibility is proved,  the EmptyBox exception is raised
-				throw EmptyBoxException();
+				throw PolytopeHullEmptyBoxException();
 			}
 			else if (stat == LinearSolver::INFEASIBLE_NOTPROVED) {
 				// the infeasibility is found but not proved, no other call is needed

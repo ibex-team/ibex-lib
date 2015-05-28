@@ -99,12 +99,12 @@ SetNode* SetLeaf::inter(const IntervalVector& nodebox, const IntervalVector& x, 
 		else if (xstatus==OUT ) status=OUT;
 		 //cout << "this\n";
 		return this;
-	} else if (status==UNK) {
+	} else if (status==UNK && xstatus==IN) {
 		 //cout << "this\n";
 		return this;
 	} else {
-		// status=(IN_TMP), xstatus=(IN | OUT).
-		SetNode* new_node=diff(nodebox, x, status, xstatus==OUT? OUT : IN, eps);
+		// (status,xstatus)=(IN_TMP, IN), (IN_TMP, OUT) or (UNK, OUT).
+		SetNode* new_node=diff(nodebox, x, status, xstatus, eps);
 		delete this; // warning: suicide, don't move it before previous line
 		//cout << "gives "; new_node->print(cout,nodebox,0);
 		return new_node;

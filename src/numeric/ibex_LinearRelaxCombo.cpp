@@ -122,20 +122,21 @@ int LinearRelaxCombo::linearization(const IntervalVector& box, LinearSolver& lp_
 
 	switch (lmode) {
 	case ART:
-	case AFFINE2: {
+	case AFFINE2:
 		cont = myart->linearization(box,lp_solver);
 		break;
-	}
 	case XNEWTON:
 	case TAYLOR:
-	case HANSEN: {
+	case HANSEN:
 		cont = myxnewton->linearization(box,lp_solver);
 		break;
-	}
 	case COMPO: {
-		cont  = myxnewton->linearization(box,lp_solver);
-		cont += myart->linearization(box,lp_solver);
-		break;
+		cont = myxnewton->linearization(box,lp_solver);
+		if (cont!=-1) {
+			int cont2 = myart->linearization(box,lp_solver);
+			if (cont2==-1) cont=-1;
+			else cont+=cont2;
+		}
 	}
 	}
 	return cont;

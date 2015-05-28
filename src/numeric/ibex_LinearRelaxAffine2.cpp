@@ -9,7 +9,6 @@
 //============================================================================
 
 #include "ibex_LinearRelaxAffine2.h"
-#include "ibex_EmptyBoxException.h"
 
 namespace ibex {
 
@@ -152,9 +151,10 @@ int LinearRelaxAffine2::linearization(const IntervalVector& box, LinearSolver& l
 
 		af2 = 0.0;
 		op = sys.ctrs[ctr].op;
-		try {
-			ev = sys.ctrs[ctr].f.eval_affine2(box, af2);
-		} catch (EmptyBoxException&) {
+
+		ev = sys.ctrs[ctr].f.eval_affine2(box, af2);
+
+		if (ev.is_empty()) {
 			af2.set_empty();
 		}
 		//std::cout <<ev<<":::"<< af2<<"  "<<af2.size()<<"  " <<sys.nb_var<< std::endl;
@@ -181,9 +181,10 @@ int LinearRelaxAffine2::linearization(const IntervalVector& box, LinearSolver& l
 			}
 			if (!b_abort) {
 				switch (op) {
-				case LEQ: if (ev.lb() == 0.0)	throw EmptyBoxException();
-				case LT: {
-					if (0.0 < ev.lb())	throw EmptyBoxException();
+				case LT:
+					if (ev.lb() == 0.0) return -1;
+				case LEQ:
+					if (0.0 < ev.lb()) return -1;
 					else if (0.0 < ev.ub()) {
 						try {
 							lp_solver.addConstraint(rowconst, LEQ,	((af2.err()+err) - (af2.val(0)-center)).ub());
@@ -191,10 +192,10 @@ int LinearRelaxAffine2::linearization(const IntervalVector& box, LinearSolver& l
 						} catch (LPException&) { }
 					}
 					break;
-				}
-				case GEQ: if (ev.ub() == 0.0)	throw EmptyBoxException();
-				case GT: {
-					if (ev.ub() < 0.0)	throw EmptyBoxException();
+				case GT:
+					if (ev.ub() == 0.0) return -1;
+				case GEQ:
+					if (ev.ub() < 0.0) return -1;
 					else if (ev.lb() < 0.0) {
 						try {
 							lp_solver.addConstraint(rowconst, GEQ,	(-(af2.err()+err) - (af2.val(0)-center)).lb());
@@ -202,11 +203,8 @@ int LinearRelaxAffine2::linearization(const IntervalVector& box, LinearSolver& l
 						} catch (LPException&) { }
 					}
 					break;
-				}
-				case EQ: {
-					if (!ev.contains(0.0)) {
-						throw EmptyBoxException();
-					}
+				case EQ:
+					if (!ev.contains(0.0)) return -1;
 					else {
 						if (ev.diam()>2*lp_solver.getEpsilon()) {
 							try {
@@ -218,7 +216,6 @@ int LinearRelaxAffine2::linearization(const IntervalVector& box, LinearSolver& l
 						}
 					}
 					break;
-				}
 				}
 			}
 		}

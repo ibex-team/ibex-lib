@@ -60,6 +60,8 @@ public:
 		TEST_ADD(TestArith::mul18);
 		TEST_ADD(TestArith::mul19);
 
+		TEST_ADD(TestArith::mulMM01);
+
 		TEST_ADD(TestArith::div01);
 		TEST_ADD(TestArith::div02);
 		TEST_ADD(TestArith::div03);
@@ -158,6 +160,22 @@ public:
 		TEST_ADD(TestArith::cosh06);
 		TEST_ADD(TestArith::cosh07);
 
+		TEST_ADD(TestArith::atan2_01);
+		TEST_ADD(TestArith::atan2_02);
+		TEST_ADD(TestArith::atan2_03);
+		TEST_ADD(TestArith::atan2_04);
+		TEST_ADD(TestArith::atan2_05);
+		TEST_ADD(TestArith::atan2_06);
+		TEST_ADD(TestArith::atan2_07);
+		TEST_ADD(TestArith::atan2_08);
+		TEST_ADD(TestArith::atan2_09);
+		TEST_ADD(TestArith::atan2_10);
+		TEST_ADD(TestArith::atan2_11);
+		TEST_ADD(TestArith::atan2_12);
+		TEST_ADD(TestArith::atan2_13);
+		TEST_ADD(TestArith::atan2_14);
+		TEST_ADD(TestArith::atan2_15);
+
 		TEST_ADD(TestArith::bwd_mul01);
 		TEST_ADD(TestArith::bwd_mul02);
 		TEST_ADD(TestArith::bwd_mul03);
@@ -255,6 +273,7 @@ public:
 		TEST_ADD(TestArith::bwd_atan2_08);
 		TEST_ADD(TestArith::bwd_atan2_09); // commented waiting for an optimal contractor.
 		TEST_ADD(TestArith::bwd_atan2_10);
+		TEST_ADD(TestArith::bwd_atan2_issue134);
 
 		TEST_ADD(TestArith::bwd_sqrt01);
 		TEST_ADD(TestArith::bwd_sqrt02);
@@ -354,6 +373,8 @@ private:
 	void mul17();
 	void mul18();
 	void mul19();
+
+	void mulMM01();
 
 	/* test:
 	 * =======
@@ -475,6 +496,22 @@ private:
 	void cosh06();
 	void cosh07();
 
+	void atan2_01();
+	void atan2_02();
+	void atan2_03();
+	void atan2_04();
+	void atan2_05();
+	void atan2_06();
+	void atan2_07();
+	void atan2_08();
+	void atan2_09();
+	void atan2_10();
+	void atan2_11();
+	void atan2_12();
+	void atan2_13();
+	void atan2_14();
+	void atan2_15();
+
 	/* test: bwd_mul */
 	void bwd_mul01();
 	void bwd_mul02();
@@ -574,6 +611,7 @@ private:
 	void bwd_atan2_08();
 	void bwd_atan2_09();
 	void bwd_atan2_10();
+	void bwd_atan2_issue134();
 
 	void bwd_sqrt01();
 	void bwd_sqrt02();

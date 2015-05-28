@@ -99,7 +99,10 @@ public:
 	/**
 	 * \brief Distance of the point "pt" wrt the set (if inside is true)
 	 * of the complementary of the set (if inside is false).
-	 */
+	 *
+	 * \note If inside==false and the pt is outside the bounding box,
+     *       the distance is 0.
+ 	 */
 	double dist(const Vector& pt, bool inside) const;
 
 protected:

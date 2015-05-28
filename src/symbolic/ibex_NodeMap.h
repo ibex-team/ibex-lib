@@ -77,6 +77,14 @@ public:
 	}
 
 	/**
+	 * \brief Remove a pair <e,value>.
+	 *
+	 */
+	void erase(const ExprNode& e) {
+		map.erase(&e);
+	}
+
+	/**
 	 * \brief Return the value associated to \a e.
 	 *
 	 * Return a non-const reference.

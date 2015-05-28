@@ -148,7 +148,7 @@ class Ctc3BCid : public Ctc {
 	 * Call the right, left (3B) and central (CID) contractions, the right and left
 	 * shavings being done in a dichotomic way : returns true if a contraction is done
 	 */
-  virtual	bool var3BCID_dicho(IntervalVector& box, int var, double wv);
+  virtual bool var3BCID_dicho(IntervalVector& box, int var, double wv);
 
 	/**
 	 * Applies 3BCID contraction on the variable var with a linear 3B algorithm
@@ -181,7 +181,7 @@ class Ctc3BCid : public Ctc {
 	 * 3B dicho applies 3B left or right contraction
 	 * returns in box  the left or right non empty slide.
 	 *
-	 * \throw EmptyBoxException.
+	 * \return what?? TODO
 	 */
 	bool shave_bound_dicho(IntervalVector& box, int var, double wv, bool left);
 

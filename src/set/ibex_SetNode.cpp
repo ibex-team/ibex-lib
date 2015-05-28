@@ -129,13 +129,13 @@ SetNode* contract_set(const IntervalVector& box, Sep& sep, double eps) {
 
 	// TODO: pb: sync fails
 	// check "false" (skip_other_maybe is an old parameter not used anymore)
-	root1->inter(box,root2,box,eps); //,false);
+	SetNode* root3 = root1->inter(box,root2,box,eps); //,false);
 
 	delete root2;
 
-	//cout << "final set:" << endl; root1->print(cout,box,0);
+	//cout << "final set:" << endl; root3->print(cout,box,0);
 
-	return root1;
+	return root3;
 }
 
 char to_string(const NodeType& status) {

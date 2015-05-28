@@ -9,6 +9,7 @@
 //============================================================================
 
 #include "ibex.h"
+#include <sstream>
 
 using namespace std;
 using namespace ibex;

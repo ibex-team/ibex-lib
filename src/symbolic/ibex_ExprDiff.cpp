@@ -402,7 +402,10 @@ void ExprDiff::visit(const ExprMax& e)   { add_grad_expr(e.left, (*grad[e])*chi(
 										   add_grad_expr(e.right,(*grad[e])*chi(e.left-e.right, ONE, ZERO)); }
 void ExprDiff::visit(const ExprMin& e)   { add_grad_expr(e.left, (*grad[e])*chi(e.left-e.right, ONE, ZERO));
                                            add_grad_expr(e.right,(*grad[e])*chi(e.right-e.left, ONE, ZERO)); }
-void ExprDiff::visit(const ExprAtan2& e) { not_implemented("diff with atan2"); }
+void ExprDiff::visit(const ExprAtan2& e) {
+    add_grad_expr(e.left,  e.right / (sqr(e.left) + sqr(e.right)) * *grad[e]);
+    add_grad_expr(e.right, - e.left / (sqr(e.left) + sqr(e.right)) * *grad[e]);
+}
 
 
 void ExprDiff::visit(const ExprPower& e) {

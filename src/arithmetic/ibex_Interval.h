@@ -1031,62 +1031,38 @@ inline Interval chi(const Interval& a, const Interval& b, const Interval& c){
 	}
 }
 
-// ArcTan2 by Jordan Ninin (Sept 2013) car ni Gaol, ni Profil/Bias ni Filib n'implemente atan2
 inline Interval atan2(const Interval& y, const Interval& x) {
+
 	if (y.is_empty() || x.is_empty()) return Interval::EMPTY_SET;
 
-	if ( x.lb()> 0) {
-		return atan(y/x);
+	// we handle the special case x=[0,0] separately
+	else if (x==Interval::ZERO) {
+		if (y.lb()>=0)
+			if (y.ub()==0) return Interval::EMPTY_SET; // atan2(0,0) is undefined.
+			else return Interval::HALF_PI;
+		else if (y.ub()<=0) return -Interval::HALF_PI;
+		else return Interval(-1,1)*Interval::HALF_PI;
 	}
-	else if  (x.ub()< 0 && y.lb()>= 0) {
-		return atan(y/x)+Interval::PI;
+
+	else if (x.lb()>=0) {
+		return atan(y/x); // now, x.ub()>0 -> atan does not give an empty set
 	}
-	else if (x.ub() < 0 && y.ub()< 0) {
-		return atan(y/x)-Interval::PI;
-	}
-	else if (x.ub() < 0) {
-		return Interval(-1,1)*Interval::PI;
-	}
-	else if (x.contains(0.0) && y.contains(0.0) ) {
-		return Interval(-1,1)*Interval::PI;
-	}
-	else {
-		return 2*atan((sqrt(sqr(x)+sqr(y))-x)/y);
-	}
-}
-
-/*
-// ArcTan2 by Firas Khemane (feb 2010)
-inline Interval atan2(const Interval& b, const Interval& a) {
-	if (a.is_empty() || b.is_empty()) return Interval::EMPTY_SET;
-
-	if (( a.lb() > 0 && b.lb() > 0) || (  a.lb() > 0 &&   b.ub() < 0 )  || ( b.lb() < 0 && b.ub()> 0  && a.lb() > 0 ) )
-
-		return atan(b/a);
-
-	else if  ( a.lb()<=0  &&  a.ub()>0 )
-
-		return 2*atan(b/a);
-
-	else if  (a.ub()< 0 && b.lb()> 0)
-
-		return atan(b/a)+Interval::PI;
-
-	else if (a.ub() < 0 && b.ub()< 0)
-
-		return atan(b/a)-Interval::PI;
-
-	else if (b.lb() < 0 && b.ub() > 0 && a.ub()< 0 ) {
-
-		if (  (atan(b/a)+Interval::PI).lb() <= (atan(b/a)-Interval::PI).ub() )
-
-			return 2*INTERVAL((atan(b/a)+Interval::PI).lb(), (atan(b/a)-Interval::PI).ub());
-
+	else if (x.ub()<=0) {
+		if (y.lb()>=0)
+			return atan(y/x)+Interval::PI; // x.lb()<0
+		else if (y.ub()<0)
+			return atan(y/x)-Interval::PI;
 		else
-			return 2*INTERVAL((atan(b/a)-Interval::PI).lb() , (atan(b/a)+Interval::PI).ub() );
+			return Interval(-1,1)*Interval::PI;
+	} else {
+		if (y.lb()>=0)
+			return atan(y/x.ub()) | (atan(y/x.lb()) + Interval::PI);
+		else if (y.ub()<=0)
+			return (atan(y/x.lb())-Interval::PI) | atan(y/x.ub());
+		else
+			return Interval(-1,1)*Interval::PI;
 	}
 }
-*/
 
 inline bool bwd_add(const Interval& y, Interval& x1, Interval& x2) {
 	if ((x1 &= y-x2).is_empty()) { x2.set_empty(); return false; }
@@ -1278,127 +1254,190 @@ inline bool bwd_sign(const Interval& y,  Interval& x) {
 }
 
 
+// probably not the most efficient implementation ever...
 inline bool bwd_atan2(const Interval& theta, Interval& y, Interval& x) {
-	
-	if (theta.is_empty()) {
-		x.set_empty(); y.set_empty();
-		return false;
+
+	// half-plane x>0
+	Interval theta_xpos = theta  & Interval(-1,1)*Interval::HALF_PI;
+	// upper left quadrant
+	Interval theta_xneg_ypos = theta  & (Interval::HALF_PI | Interval::PI);
+	// lower left quadrant
+	Interval theta_xneg_yneg = theta  & -(Interval::HALF_PI | Interval::PI);
+
+	Interval xres= Interval::EMPTY_SET;
+	Interval yres= Interval::EMPTY_SET;
+
+	if (!theta_xpos.is_empty()) {
+
+		Interval xpos=x & Interval::POS_REALS;
+		Interval yall=y;
+
+		if (theta_xneg_ypos.is_empty() || theta_xneg_yneg.is_empty()) { // otherwise, all is valid (useless to contract)
+			Interval z=yall/xpos;
+			bwd_atan(theta_xpos,z);
+			bwd_div(z,yall,xpos);
+
+		}
+		xres |= xpos;
+		yres |= yall;
+
+		// because atan is not defined for pi/2 and -pi/2
+		if (theta_xpos.lb()>=Interval::HALF_PI.lb()) {
+			xres |= (x & Interval::ZERO);
+			yres |= (y & Interval::POS_REALS);
+		} else if (theta_xpos.ub()<=-Interval::HALF_PI.lb()) {
+			xres |= (x & Interval::ZERO);
+			yres |= (y & Interval::NEG_REALS);
+		}
 	}
 
-    //Lower half of upper right quadrant
-    if(theta.is_subset(Interval(0,M_PI/4.)))
-    {
-        x = (x&Interval::POS_REALS) & ( (y&Interval::POS_REALS) * (1/tan(theta&Interval(0,M_PI/4.))) );
-        y = (y&Interval::POS_REALS) & ( (x&Interval::POS_REALS) * (tan(theta&Interval(0,M_PI/4.))) );
-    }
+	if (!theta_xneg_ypos.is_empty()) {
+		Interval xneg=x & Interval::NEG_REALS;
+		Interval ypos=y & Interval::POS_REALS;
+		Interval z=ypos/xneg;
+		bwd_atan(theta_xneg_ypos - Interval::PI,z);
+		bwd_div(z,ypos,xneg);
+		xres |= xneg;
+		yres |= ypos;	}
 
-    //Upper half of upper right quadrant
-    else if(theta.is_subset(Interval(M_PI/4.,M_PI/2.)))
-    {
-        bwd_atan2(M_PI/2.-theta,x,y); 
-    }
+	if (!theta_xneg_yneg.is_empty()) {
+		Interval xneg=x & Interval::NEG_REALS;
+		Interval yneg=y & Interval::NEG_REALS;
+		Interval z=yneg/xneg;
+		bwd_atan(theta_xneg_yneg + Interval::PI,z);
+		bwd_div(z,yneg,xneg);
+		xres |= xneg;
+		yres |= yneg;
+	}
 
-    //Upper right quadrant
-    else if(theta.is_subset(Interval(0,M_PI/2))) 
-    {
-        Interval x1=x; Interval y1=y; Interval x2=x; Interval y2=y;
-        Interval theta1(theta.lb(),M_PI/4.), theta2(M_PI/4., theta.ub());
-        bwd_atan2(theta1,y1,x1);
-        bwd_atan2(theta2,y2,x2);
-        x=x1|x2; y=y1|y2; 
-    }
+	x=xres;
+	y=yres;
 
-    //Upper left quadrant
-    else if(theta.is_subset(Interval(M_PI/2,M_PI))) 
-    {
-        Interval x2=-x;
-        Interval theta2=M_PI-theta;
-        bwd_atan2(theta2,y,x2);
-        x=-x2;
-    }
-
-    //Lower left quadrant
-    else if(theta.is_subset(Interval(M_PI,3*M_PI/2))) 
-    {
-        Interval y2=-y;
-        Interval x2=-x;
-        Interval theta2=theta-M_PI;
-        bwd_atan2(theta2,y2,x2);
-        x=-x2; y=-y2;
-    }
-
-    //Lower right quadrant
-    else if(theta.is_subset(Interval(3*M_PI/2,2*M_PI)))
-    {
-        Interval x2=x;
-        Interval y2=-y;
-        Interval theta2=2*M_PI-theta;
-        bwd_atan2(theta2,y2,x2);
-        x=x2; y=-y2; 
-    }
-
-    //Upper bissection
-    else if(theta.is_subset(Interval(0,M_PI))) {
-        Interval theta1(theta.lb(),M_PI/2), theta2(M_PI/2, theta.ub());
-        Interval x1=x; Interval y1=y; Interval x2=x; Interval y2=y;
-        if(theta.lb() != M_PI/2) bwd_atan2(theta1,y1,x1);
-        if(theta.ub() != M_PI/2) bwd_atan2(theta2,y2,x2);
-        x=x1|x2; y=y1|y2; 
-    }
-
-    //Left bissection
-    else if(theta.is_subset(Interval(0,3*M_PI/2))) {
-        Interval theta1(theta.lb(),M_PI), theta2(M_PI, theta.ub());
-        Interval x1=x; Interval y1=y; Interval x2=x; Interval y2=y;
-        if(theta.lb() != M_PI) bwd_atan2(theta1,y1,x1);
-        if(theta.ub() != M_PI) bwd_atan2(theta2,y2,x2);
-        x=x1|x2; y=y1|y2; 
-    }
-
-    //Lower bissection
-    else if(theta.is_subset(Interval(0,2*M_PI))) {
-        Interval theta1(theta.lb(),3*M_PI/2), theta2(3*M_PI/2, theta.ub());
-        Interval x1=x; Interval y1=y; Interval x2=x; Interval y2=y;
-        if(theta.lb() != 3*M_PI/2) bwd_atan2(theta1,y1,x1);
-        if(theta.ub() != 3*M_PI/2) bwd_atan2(theta2,y2,x2);
-        x=x1|x2; y=y1|y2; 
-    }
-
-    //Theta diameter greater than 2PI then theta will be considered as [0,2PI]
-    else if (theta.diam() > 2*M_PI)
-    {
-        Interval theta1(0,2*M_PI);
-        bwd_atan2(theta1,x,y);
-    }
-
-    // Modulo
-    else
-    {
-        // We separate the intervals into 4 cases as imod does not support union.
-        Interval theta1(0,M_PI/2.), theta2(M_PI/2., M_PI), theta3(M_PI, 3*M_PI/2.), theta4(3*M_PI/2., 2*M_PI);
-        Interval thetaTmp(theta);
-        bwd_imod(thetaTmp,theta1,2*M_PI);
-        thetaTmp=theta;
-        bwd_imod(thetaTmp,theta2,2*M_PI);
-        thetaTmp=theta;
-        bwd_imod(thetaTmp,theta3,2*M_PI);
-        thetaTmp=theta;
-        bwd_imod(thetaTmp,theta4,2*M_PI);
-        Interval x1=x; Interval y1=y; 
-        bwd_atan2(theta1,y1,x1); // first quadrant
-        Interval x2=x; Interval y2=y;
-        bwd_atan2(theta2,y2,x2); // second quadrant
-        Interval x3=x; Interval y3=y;
-        bwd_atan2(theta3,y3,x3); // third quadrant
-        Interval x4=x; Interval y4=y;
-        bwd_atan2(theta4,y4,x4); // fourth quadrant
-        x=(x1|x2)|(x3|x4); y=(y1|y2)|(y3|y4);
-        // not_implemented("bwd_atan2 not implemented yet for theta outside [0,2*PI].");
-    }
-
-
-    return !x.is_empty() || !y.is_empty();
+	return !x.is_empty();
 }
+
+
+//inline bool bwd_atan2(const Interval& theta, Interval& y, Interval& x) {
+//
+//	if (theta.is_empty()) {
+//		x.set_empty(); y.set_empty();
+//		return false;
+//	}
+//
+//    //Lower half of upper right quadrant
+//    if(theta.is_subset(Interval(0,M_PI/4.)))
+//    {
+//        x = (x&Interval::POS_REALS) & ( (y&Interval::POS_REALS) * (1/tan(theta&Interval(0,M_PI/4.))) );
+//        y = (y&Interval::POS_REALS) & ( (x&Interval::POS_REALS) * (tan(theta&Interval(0,M_PI/4.))) );
+//    }
+//
+//    //Upper half of upper right quadrant
+//    else if(theta.is_subset(Interval(M_PI/4.,M_PI/2.)))
+//    {
+//        bwd_atan2(M_PI/2.-theta,x,y);
+//    }
+//
+//    //Upper right quadrant
+//    else if(theta.is_subset(Interval(0,M_PI/2)))
+//    {
+//        Interval x1=x; Interval y1=y; Interval x2=x; Interval y2=y;
+//        Interval theta1(theta.lb(),M_PI/4.), theta2(M_PI/4., theta.ub());
+//        bwd_atan2(theta1,y1,x1);
+//        bwd_atan2(theta2,y2,x2);
+//        x=x1|x2; y=y1|y2;
+//    }
+//
+//    //Upper left quadrant
+//    else if(theta.is_subset(Interval(M_PI/2,M_PI)))
+//    {
+//        Interval x2=-x;
+//        Interval theta2=M_PI-theta;
+//        bwd_atan2(theta2,y,x2);
+//        x=-x2;
+//    }
+//
+//    //Lower left quadrant
+//    else if(theta.is_subset(Interval(M_PI,3*M_PI/2)))
+//    {
+//        Interval y2=-y;
+//        Interval x2=-x;
+//        Interval theta2=theta-M_PI;
+//        bwd_atan2(theta2,y2,x2);
+//        x=-x2; y=-y2;
+//    }
+//
+//    //Lower right quadrant
+//    else if(theta.is_subset(Interval(3*M_PI/2,2*M_PI)))
+//    {
+//        Interval x2=x;
+//        Interval y2=-y;
+//        Interval theta2=2*M_PI-theta;
+//        bwd_atan2(theta2,y2,x2);
+//        x=x2; y=-y2;
+//    }
+//
+//    //Upper bissection
+//    else if(theta.is_subset(Interval(0,M_PI))) {
+//        Interval theta1(theta.lb(),M_PI/2), theta2(M_PI/2, theta.ub());
+//        Interval x1=x; Interval y1=y; Interval x2=x; Interval y2=y;
+//        if(theta.lb() != M_PI/2) bwd_atan2(theta1,y1,x1);
+//        if(theta.ub() != M_PI/2) bwd_atan2(theta2,y2,x2);
+//        x=x1|x2; y=y1|y2;
+//    }
+//
+//    //Left bissection
+//    else if(theta.is_subset(Interval(0,3*M_PI/2))) {
+//        Interval theta1(theta.lb(),M_PI), theta2(M_PI, theta.ub());
+//        Interval x1=x; Interval y1=y; Interval x2=x; Interval y2=y;
+//        if(theta.lb() != M_PI) bwd_atan2(theta1,y1,x1);
+//        if(theta.ub() != M_PI) bwd_atan2(theta2,y2,x2);
+//        x=x1|x2; y=y1|y2;
+//    }
+//
+//    //Lower bissection
+//    else if(theta.is_subset(Interval(0,2*M_PI))) {
+//        Interval theta1(theta.lb(),3*M_PI/2), theta2(3*M_PI/2, theta.ub());
+//        Interval x1=x; Interval y1=y; Interval x2=x; Interval y2=y;
+//        if(theta.lb() != 3*M_PI/2) bwd_atan2(theta1,y1,x1);
+//        if(theta.ub() != 3*M_PI/2) bwd_atan2(theta2,y2,x2);
+//        x=x1|x2; y=y1|y2;
+//    }
+//
+//    //Theta diameter greater than 2PI then theta will be considered as [0,2PI]
+//    else if (theta.diam() > 2*M_PI)
+//    {
+//        Interval theta1(0,2*M_PI);
+//        bwd_atan2(theta1,x,y);
+//    }
+//
+//    // Modulo
+//    else
+//    {
+//        // We separate the intervals into 4 cases as imod does not support union.
+//        Interval theta1(0,M_PI/2.), theta2(M_PI/2., M_PI), theta3(M_PI, 3*M_PI/2.), theta4(3*M_PI/2., 2*M_PI);
+//        Interval thetaTmp(theta);
+//        bwd_imod(thetaTmp,theta1,2*M_PI);
+//        thetaTmp=theta;
+//        bwd_imod(thetaTmp,theta2,2*M_PI);
+//        thetaTmp=theta;
+//        bwd_imod(thetaTmp,theta3,2*M_PI);
+//        thetaTmp=theta;
+//        bwd_imod(thetaTmp,theta4,2*M_PI);
+//        Interval x1=x; Interval y1=y;
+//        bwd_atan2(theta1,y1,x1); // first quadrant
+//        Interval x2=x; Interval y2=y;
+//        bwd_atan2(theta2,y2,x2); // second quadrant
+//        Interval x3=x; Interval y3=y;
+//        bwd_atan2(theta3,y3,x3); // third quadrant
+//        Interval x4=x; Interval y4=y;
+//        bwd_atan2(theta4,y4,x4); // fourth quadrant
+//        x=(x1|x2)|(x3|x4); y=(y1|y2)|(y3|y4);
+//        // not_implemented("bwd_atan2 not implemented yet for theta outside [0,2*PI].");
+//    }
+//
+//
+//    return !x.is_empty() || !y.is_empty();
+//}
 
 inline bool bwd_chi(const Interval& f, Interval& a, Interval& b, Interval& c){
 	if      (a.ub()<=0) {if ((b &= f).is_empty()) { a.set_empty(); c.set_empty(); return false; } }

@@ -135,6 +135,7 @@ void TestParser::const06() {
 void TestParser::const07() {
 	try {
 		System sys("quimper/const07.qpr");
+
 		double _m1[6][2]={{0,0},{1,1},{2,2},
 				{3,3},{4,4},{5,5}};
 		IntervalVector box1(6,_m1);
@@ -147,28 +148,30 @@ void TestParser::const07() {
 
 		CtcFwdBwd c0(sys.ctrs[0]);
 		c0.contract(sys.box);
+		TEST_ASSERT(!sys.box.is_empty());
 		IntervalVector zero(6);
 		zero.init(0);
 
 		CtcFwdBwd c1(sys.ctrs[1]);
 		sys.box[5]=Interval::ALL_REALS;
 		c1.contract(sys.box);
+		TEST_ASSERT(!sys.box.is_empty());
 		check(sys.box[5],Interval(1,1));
 
 		CtcFwdBwd c2(sys.ctrs[2]);
 		sys.box.init(Interval::ALL_REALS);
 		c2.contract(sys.box);
+		TEST_ASSERT(!sys.box.is_empty());
 		check(sys.box[5],Interval(1,1));
 
 		CtcFwdBwd c3(sys.ctrs[3]);
 		sys.box.init(Interval::ALL_REALS);
 		c3.contract(sys.box);
+		TEST_ASSERT(!sys.box.is_empty());
 		double _c21[][2]={{6,6},{7,7},{8,8}};
 		IntervalVector c21(3,_c21);
 		check(sys.box.subvector(3,5),c21);
 
-	} catch(EmptyBoxException& e) {
-		TEST_ASSERT(false);
 	} catch(SyntaxError& e) {
 		cout << e << endl;
 		TEST_ASSERT(false);
@@ -207,11 +210,10 @@ void TestParser::func02() {
 			IntervalVector box(8);
 			box.put(1,subbox); // load x1[1] and x1[2]
 			box.put(4,subbox); // load z1[1] and z1[2]
-			try {
-				c[i]->contract(box);
-			} catch(EmptyBoxException&) {
-				TEST_ASSERT(false);
-			}
+
+			c[i]->contract(box);
+
+			TEST_ASSERT(!box.is_empty());
 			check(box.subvector(6,7),subbox); // check x2
 		}
 

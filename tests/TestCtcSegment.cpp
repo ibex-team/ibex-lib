@@ -65,10 +65,9 @@ void TestCtcSegment::test_contract_empty()
     //double _box[][2] = {{-5,-2},  {-5,50}};
     IntervalVector box = IntervalVector::empty(2);
 
-//    c.contract(box);
-//    TEST_ASSERT(box.is_empty());
+    c.contract(box);
 
-    TEST_THROWS(c.contract(box), EmptyBoxException);
+	TEST_ASSERT(box.is_empty());
 }
 
 
@@ -78,9 +77,9 @@ void ibex::TestCtcSegment::test_call_with_empty_box()
     //double _box[][2] = {{-5,50},  {-5,50}};
     IntervalVector box = IntervalVector::empty(2);
 
-//    c.contract(box);
-//    TEST_ASSERT(box.is_empty());
-    TEST_THROWS(c.contract(box), EmptyBoxException);
+	c.contract(box);
+
+	TEST_ASSERT(box.is_empty());
 }
 
 void ibex::TestCtcSegment::test_call_with_all_real()

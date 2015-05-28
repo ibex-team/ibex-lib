@@ -27,6 +27,9 @@ void CtcNewton::contract(IntervalVector& box) {
 	if (!(box.max_diam()<=ceil)) return;
 	else newton(f,box,prec,gauss_seidel_ratio);
 
+	if (box.is_empty()) {
+		set_flag(FIXPOINT);
+	}
 }
 
 } // end namespace ibex
