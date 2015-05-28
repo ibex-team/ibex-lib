@@ -30,7 +30,8 @@ OptimCtc::OptimCtc( Ctc& ctc_out, Ctc&  ctc_in, Function& f_cost, Bsc& bsc, doub
 			n(f_cost.nb_var()),
 			_ctc_out(ctc_out), _ctc_in(ctc_in), _f_cost(f_cost),
 			_localopti(f_cost, IntervalVector(f_cost.nb_var())),
-			bsc(bsc), buffer(n),  // first buffer with LB, second buffer with crit (default UB))
+			bsc(bsc),
+			buffer(*new CellCostPFlb(), *new CellCostPFub()),
 			prec(prec), goal_rel_prec(goal_rel_prec), goal_abs_prec(goal_abs_prec),
 			trace(false),
 			critpr(critpr), timeout(1e08), time(0), nb_cells(0),
@@ -98,10 +99,9 @@ bool OptimCtc::direct_try( const Vector point) {
 	Interval tmp = _f_cost.eval(point);
 	if (tmp.ub()<loup) {
 		BitSet flags(BitSet::empty(Ctc::NB_OUTPUT_FLAGS));
-		try {
-			IntervalVector tmpv(point);
-			_ctc_out.contract(tmpv, BitSet::all(_ctc_in.nb_var),flags);  //  <---
-		} catch (EmptyBoxException &) { 	}  //  <---
+
+		IntervalVector tmpv(point);
+		_ctc_out.contract(tmpv, BitSet::all(_ctc_in.nb_var),flags);  //  <---
 
 		if (flags[Ctc::INACTIVE]) {
 			//update the loup
@@ -114,11 +114,10 @@ bool OptimCtc::direct_try( const Vector point) {
 			cout << "[direct]"  << " loup update " << loup  << " loup point  " << loup_point << endl;
 			cout.precision(prec);
 		} else {
-			try {
-				IntervalVector tmpv(point);
-				_ctc_in.contract(tmpv);  //  <---
+			IntervalVector tmpv(point);
+			_ctc_in.contract(tmpv);  //  <---
 
-			} catch (EmptyBoxException &) {
+			if (tmpv.is_empty()) {
 				//update the loup
 				loup = tmp.ub();
 				loup_point = point;
@@ -128,8 +127,6 @@ bool OptimCtc::direct_try( const Vector point) {
 				cout.precision(12);
 				cout << "[direct]"  << " loup update " << loup  << " loup point  " << loup_point << endl;
 				cout.precision(prec);
-
-
 			}  //  <---
 		}
 	}
@@ -171,8 +168,9 @@ void OptimCtc::update_uplo() {
      push the cell  in the 2 heaps or if the contraction makes the box empty, delete the cell. For diversification, rebuild the 2 heaps
  */
 
-void OptimCtc::handle_cell(OptimCell& c, const IntervalVector& init_box ){
+void OptimCtc::handle_cell(Cell& c, const IntervalVector& init_box ){
 	try{
+		c.
 		compute_pf(c);
 		contract_and_bound(c, init_box);  // may throw EmptyBoxException
 
@@ -182,13 +180,13 @@ void OptimCtc::handle_cell(OptimCell& c, const IntervalVector& init_box ){
 			c.loup=1.e8;
 
 		// the cell is put into the 2 heaps
-		buffer.push_costpf(&c);
+		buffer.push(&c);
 
 		nb_cells++;
 
 	}
 	catch(EmptyBoxException&) {
-		draw_vibes(c.box,IntervalVector(1,Interval::EMPTY_SET),"r");
+		//draw_vibes(c.box,IntervalVector(1,Interval::EMPTY_SET),"r");
 		delete &c;
 	}
 }
@@ -390,13 +388,14 @@ void OptimCtc::optimize(const IntervalVector& init_box, double obj_init_bound) {
 
 	buffer.flush();
 
-	OptimCell* root=new OptimCell(init_box);
-	root->pu = 0;
-	root->pf = _f_cost.eval_affine2(init_box);
-	root->loup=loup;
+	Cell* root=new Cell(init_box);
 
 	// add data required by the bisector
 	bsc.add_backtrackable(*root);
+
+	// add data "pu" and "pf" (if required)
+	buffer.cost1().add_backtrackable(*root);
+
 
 	loup_changed=false;
 	loup_point=init_box.mid();

@@ -121,7 +121,7 @@ public:
 	/** Bisector. */
 	Bsc& bsc;
 
-	CellHeapOptim buffer;
+	CellDoubleHeap buffer;
 
 	/**
 	 * \brief Index of the goal variable y in the extended box.
@@ -211,7 +211,7 @@ protected:
 		 * </ul>
 		 *
 		 */
-		void handle_cell(OptimCell& c, const IntervalVector& init_box);
+		void handle_cell(Cell& c, const IntervalVector& init_box);
 
 		/**
 		 * \brief Contract and bound procedure for processing a box.
@@ -224,7 +224,7 @@ protected:
 		 * </ul>
 		 *
 		 */
-		void contract_and_bound(OptimCell& c, const IntervalVector& init_box);
+		void contract_and_bound(Cell& c, const IntervalVector& init_box);
 
 		/**
 		 * \brief Contraction procedure for processing a box.
@@ -268,7 +268,7 @@ protected:
 		double compute_ymax ();
 	
 
-		void compute_pf(OptimCell& c);
+		void compute_pf(Cell& c);
 
 		/**
 		 * \brief add the entire list of intervalVector in the buffer
