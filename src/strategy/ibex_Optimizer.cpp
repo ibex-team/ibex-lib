@@ -120,6 +120,7 @@ Optimizer::~Optimizer() {
 	buffer.flush();
 	if (equs) delete equs;
 	delete mylp;
+	delete lr;
 	delete &buffer.cost1();
 	delete &buffer.cost2();
 	//	delete &(objshaver->ctc);

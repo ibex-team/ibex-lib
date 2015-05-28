@@ -12,6 +12,8 @@
 #include "ibex_Gradient.h"
 #include "ibex_Eval.h"
 
+using namespace std;
+
 namespace ibex {
 
 void Gradient::gradient(const Function& f, const Array<Domain>& d, IntervalVector& g) const {
