@@ -418,54 +418,6 @@ Affine2Main<AF_fAF2_fma>& Affine2Main<AF_fAF2_fma>::saxpy(double alpha, const Af
 }
 
 
-template<>
-Affine2Main<AF_fAF2_fma>& Affine2Main<AF_fAF2_fma>::operator*=(const Interval& y) {
-	if (	(!is_actif())||
-			y.is_empty()||
-			y.is_unbounded() ) {
-		*this = itv()*y;
-
-	} else {
-		double  ttt, sss,  yVal0, eee, temp;
-		int i;
-//std::cout << "in *  "<<y<<std::endl;
-//saxpy(y.mid(), Affine2Main<AF_fAF2_fma>(), 0.0, y.rad(), true, false, false, true);
-
-		ttt=0.0; sss=0.0;  yVal0=0.0; eee=0.0;
-		yVal0 = y.mid();
-		// RES = X%(0) * res
-		for (i=0; i<=_n;i++) {
-			eee = _elt.twoProd(_elt._val[i], yVal0, &temp);
-			_elt._val[i] = temp;
-			ttt = (1+2*AF_EM())*(ttt+fabs(eee));
-			if (fabs(_elt._val[i])<AF_EC()) {
-				sss = (1+2*AF_EM())*(sss+ fabs(_elt._val[i]));
-				_elt._val[i] = 0.0;
-			}
-		}
-
-		//_elt._err *= (fabs(yVal0)+Interval(y.rad()));
-		_elt._err = (1+2*AF_EM())*(
-				(1+2*AF_EM())*(abs(y).ub())*_elt._err +
-//				AF_EE()*AF_EM()*ttt +
-				((AF_EE()*ttt) +
-				(AF_EE()*sss))
-				);
-
-		{
-			bool b = (_elt._err<POS_INFINITY);
-			for (i=0;i<=_n;i++) {
-				b &= (fabs(_elt._val[i])<POS_INFINITY);
-			}
-			if (!b) {
-				*this = Interval::ALL_REALS;
-			}
-		}
-
-	}
-	return *this;
-}
-
 
 
 template<>
@@ -606,11 +558,11 @@ Affine2Main<AF_fAF2_fma>& Affine2Main<AF_fAF2_fma>::operator*=(const Affine2Main
 
 		} else {
 			if (_n>y.size()) {
-				*this *= y.itv();
+				*this *= Affine2Main<AF_fAF2_fma>(size(),0,y.itv());
 			} else {
 				Interval tmp1 = this->itv();
 				*this = y;
-				*this *= tmp1;
+				*this *= Affine2Main<AF_fAF2_fma>(size(),0,tmp1);
 			}
 		}
 
@@ -622,6 +574,22 @@ Affine2Main<AF_fAF2_fma>& Affine2Main<AF_fAF2_fma>::operator*=(const Affine2Main
 
 	return *this;
 }
+
+
+
+template<>
+Affine2Main<AF_fAF2_fma>& Affine2Main<AF_fAF2_fma>::operator*=(const Interval& y) {
+	if (	(!is_actif())||
+			y.is_empty()||
+			y.is_unbounded() ) {
+		*this = itv()*y;
+
+	} else {
+		*this *= Affine2Main<AF_fAF2_fma>(size(),0,y);
+	}
+	return *this;
+}
+
 
 
 template<>

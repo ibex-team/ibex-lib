@@ -1,4 +1,3 @@
-
 #ifndef CLIQUER_H
 #define CLIQUER_H
 
@@ -9,6 +8,7 @@
 #include "reorder.h"
 
 // ignored warning : comparison between signed and unsigned integer expressions in this file
+#pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-compare"
 
 typedef struct _clique_options clique_options;

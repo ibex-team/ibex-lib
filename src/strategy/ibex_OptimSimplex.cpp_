@@ -12,9 +12,6 @@
 #include "ibex_Optimizer.h"
 #include <stdlib.h>
 
-
-
-
 namespace ibex {
 
 #ifdef _IBEX_WITH_NOLP_
@@ -24,6 +21,93 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 }
 
 #else
+
+/*
+
+//The system is overconstrained by using the combosition of the Taylor extension in two corner randomly chosen and the Affine Reformulation Technique
+//Then the simplex algorithm is applied to obtain a new upper bound loup
+//If a new loup is found the method returns true
+
+bool Optimizer::update_loup_simplex(const IntervalVector& box_in) {
+
+	if (!(Interval(1.e-14,1.e6).contains(box_in.max_diam()))) return false;  // A extraire
+	// is it necessary?  YES (BNE) Soplex can give false infeasible results with large numbers
+	//cout << "[polytope-hull] box before LR (linear relaxation): " << box << endl;
+
+	IntervalVector box(box_in.size()+1);
+	write_ext_box(box_in,box);
+	box[ext_sys.goal_var()] = Interval(uplo,loup);
+	try {
+		mylp->cleanConst();
+		mylp->initBoundVar(box);
+
+		//returns the number of constraints in the linearized system
+		int cont = lr->inlinearization(box, *mylp);
+		if (cont <0) return false;
+		mylp->setVarObj(ext_sys.goal_var(),1);
+		//bool res = lr->goal_linearization(box, *mylp);
+		//if (!res) return false;
+
+
+		LinearSolver::Status_Sol stat = mylp->solve();
+
+		//mylp->writeFile("coucou.lp");
+		//system("cat coucou.lp");
+		//std::cout << " stat " << stat << std::endl;
+
+		switch (stat) {
+		case (LinearSolver::OPTIMAL) :{
+			//the linear solution is mapped to intervals and evaluated
+			Vector prim(n+1);
+			mylp->getPrimalSol(prim);
+
+			bool ret= box.contains(prim) && check_candidate_extended(prim,false); //  [gch] do we know here that the point is inner??
+
+		//	if ( is_inner(prim_int)) std::cout << "[test]--------"  << " loup " << pseudo_loup <<" eval "<< goal(prim_int) << " opt linear "<<opt<< std::endl;
+
+			if (ret) {
+				if (trace) {
+					int prec=std::cout.precision();
+					std::cout.precision(12);
+					std::cout << "[simplex1]"  << " loup update " << pseudo_loup  << " loup point  " << loup_point << std::endl;
+					std::cout.precision(prec);
+				}
+				nb_simplex++;
+				diam_simplex= ((nb_simplex-1) * diam_simplex + box.max_diam()) / nb_simplex;
+			}
+			return ret;
+		}
+		case (LinearSolver::TIME_OUT) : {
+			if (trace) { std::cout << "Simplex spent too much time" << std::endl; }
+			break;
+		}
+		case (LinearSolver::MAX_ITER) :{
+			if (trace) {
+				//mylp->writeFile("coucou.lp");
+				//system("cat coucou.lp");
+				std::cout << "Simplex spent too many iterations" << std::endl;
+			}
+			break;
+		}
+		default:
+			break;
+		}
+
+		return false;
+	}
+	catch(LPException&) {
+		std::cout << "FAIL" << std::endl;
+		return false;
+	}
+	return false;
+
+}
+
+
+
+
+*/
+
 //The system is overconstrained by using the Taylor extension in one corner randomly chosen
 //Then the simplex algorithm is applied to obtain a new upper bound loup
 //If a new loup is found the method returns true
@@ -37,7 +121,7 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
     bool * corner = new bool[n]; 
 	// random corner choice
 	for (int i=0; i<n ; i++)
-	  {if (rand()%2)
+	  {if (RNG::rand()%2)
 	      corner[i]=false;
 	    else
 	      corner[i]=true;}  
@@ -118,7 +202,7 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 				}
 
 			//The contraints i is generated:
-			// c_i:  inf([g_i]([x]) + sup(dg_i/dx_1) * xl_1 + ... + sup(dg_i/dx_n) + xl_n  <= -eps_error
+			// c_i:  inf([g_i]([x])) + sup(dg_i/dx_1) * xl_1 + ... + sup(dg_i/dx_n) * xl_n  <= -eps_error
 			for (int j=0; j<n; j++) {
 
 				if (corner[j])
@@ -166,10 +250,11 @@ bool Optimizer::update_loup_simplex(const IntervalVector& box) {
 	}
 	if (trace) {
 		if(stat == LinearSolver::TIME_OUT) std::cout << "Simplex spent too much time" << std::endl;
-		if(stat == LinearSolver::MAX_ITER) std::cout << "Simplex spent too many iterations" << std::endl;
+		if(stat == LinearSolver::MAX_ITER) std::cout << "Simplex spent too many iterations" << std::endl<< box << std::endl;
 	}
 	return false;
 }
+
 
 
 #endif //_IBEX_WITH_NOLP_

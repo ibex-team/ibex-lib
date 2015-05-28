@@ -10,7 +10,6 @@
  * ---------------------------------------------------------------------------- */
 
 #include "ibex_CtcPropag.h"
-#include "ibex_EmptyBoxException.h"
 #include "ibex_Cell.h"
 #include "ibex_Bsc.h"
 
@@ -39,7 +38,7 @@ CtcPropag::CtcPropag(const Array<Ctc>& cl, double ratio, bool incremental) :
 }
 
 
-void  CtcPropag::contract(IntervalVector& box) {
+void CtcPropag::contract(IntervalVector& box) {
 
 	assert(box.size()==nb_var);
 
@@ -113,17 +112,18 @@ void  CtcPropag::contract(IntervalVector& box) {
 
 		//cout << "Contraction with " << c << endl;
 
-		try {
-			list[c].contract(box, _impact, flags);
-			if (flags[INACTIVE]) {
-				active.remove(c);
-			}
-		}
-		catch (EmptyBoxException& e) {
+
+		list[c].contract(box, _impact, flags);
+
+		if (box.is_empty()) {
 			agenda.flush();
 			//cout << "=========== End propagation ==========" << endl;
 			//cout << "   empty!" << endl;
-			throw e;
+			return;
+		}
+
+		if (flags[INACTIVE]) {
+			active.remove(c);
 		}
 
 		for (set<int>::iterator it=vars.begin(); it!=vars.end(); it++) {

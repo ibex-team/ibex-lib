@@ -134,6 +134,11 @@ public:
 		TEST_ADD(TestInterval::is_bisectable03);
 		TEST_ADD(TestInterval::is_bisectable04);
 		TEST_ADD(TestInterval::is_bisectable05);
+		TEST_ADD(TestInterval::is_bisectable06);
+		TEST_ADD(TestInterval::is_bisectable07);
+		TEST_ADD(TestInterval::is_bisectable08);
+		TEST_ADD(TestInterval::is_bisectable09);
+		TEST_ADD(TestInterval::is_bisectable10);
 
 		TEST_ADD(TestInterval::integer01);
 		TEST_ADD(TestInterval::integer02);
@@ -279,6 +284,11 @@ private:
     void is_bisectable03();
     void is_bisectable04();
     void is_bisectable05();
+    void is_bisectable06();
+    void is_bisectable07();
+    void is_bisectable08();
+    void is_bisectable09();
+    void is_bisectable10();
 
 	/* test: rel_distance(const Interval& x) const */
 	void rel_distance01();

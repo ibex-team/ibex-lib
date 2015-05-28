@@ -1,11 +1,13 @@
 
 #include "ibex.h"
+#include "ibex_Random.h"
 
 #include <iostream>
 #include <stdlib.h>
 #include <ctime>
 
 using namespace std;
+using ibex::RNG;
 
 /*================== data =================*/
 const bool qinteronly=false;  // do we use q-intersection alone, or fixedpoint ?
@@ -21,16 +23,16 @@ double DIST_ERROR=0.1;   	  // the uncertainty on the distance
 
 // init data (simulate measurements)
 void init_data() {
-	srand(1111);
+	RNG::srand(1111);
 
 	double center[N];
-	for (int j=0; j<N; j++) center[j] = ((double) rand()/RAND_MAX)*L;
+	for (int j=0; j<N; j++) center[j] = RNG::rand(0,L); //((double) rand()/RAND_MAX)*L;
 
-	rand();
+	RNG::rand();
 
 	double sum;
 	for (int i=0; i<P; i++) {
-		for (int j=0; j<N; j++) beacons[i][j] = ((double) rand()/RAND_MAX)*L;
+		for (int j=0; j<N; j++) beacons[i][j] = RNG::rand(0,L); //((double) rand()/RAND_MAX)*L;
 		sum = 0;
 		for (int j=0; j<N; j++) sum += pow(beacons[i][j]-center[j],2);
 		dist[i]=sqrt(sum);

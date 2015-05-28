@@ -36,7 +36,7 @@ Interval isub(const Interval& x, const Interval& y);
 /**
  * \brief Inner image of the multiplication.
  *
- * Return z such that z ⊆ (x-y).
+ * Return z such that z ⊆ (x*y).
  */
 Interval imul(const Interval& x, const Interval& y);
 
@@ -46,6 +46,20 @@ Interval imul(const Interval& x, const Interval& y);
  * Return z such that z ⊆ (x-y).
  */
 Interval idiv(const Interval& x, const Interval& y);
+
+/**
+ * \brief Inner image of the maximum.
+ *
+ * Return z such that z ⊆ max(x,y).
+ */
+Interval imax(const Interval& x, const Interval& y);
+
+/**
+ * \brief Inner image of the minimum.
+ *
+ * Return z such that z ⊆ min(x,y).
+ */
+Interval imin(const Interval& x, const Interval& y);
 
 /**
  * \brief Inner image of sqr.
@@ -148,6 +162,20 @@ bool ibwd_mul(const Interval& z, Interval& x, Interval& y, const Interval &xin=I
 bool ibwd_div(const Interval& z, Interval& x, Interval& y, const Interval &xin=Interval::EMPTY_SET, const Interval& yin=Interval::EMPTY_SET);
 
 /**
+ * \brief Inner projection of the division (inflating version)
+ *
+ * \see comments in #ibex::ibwd_add(const Interval&, Interval&, Interval&, const Interval, const Interval&).
+ */
+bool ibwd_max(const Interval& z, Interval& x, Interval& y, const Interval &xin=Interval::EMPTY_SET, const Interval& yin=Interval::EMPTY_SET);
+
+/**
+ * \brief Inner projection of the division (inflating version)
+ *
+ * \see comments in #ibex::ibwd_add(const Interval&, Interval&, Interval&, const Interval, const Interval&).
+ */
+bool ibwd_min(const Interval& z, Interval& x, Interval& y, const Interval &xin=Interval::EMPTY_SET, const Interval& yin=Interval::EMPTY_SET);
+
+/**
  * \brief Inner projection of the square function (inflating version)
  *
  * Inner projections for unary operators "f" act the following way.<br>
@@ -246,6 +274,17 @@ bool ibwd_sqrt(const Interval& y, Interval& x);
 
 inline Interval iminus(const Interval& x) {
 	return -x;
+}
+
+
+inline Interval imax(const Interval& x, const Interval& y) {
+// there should not be rounding with max
+	return max(x,y);
+}
+
+inline Interval imin(const Interval& x, const Interval& y) {
+	// there should not be rounding with min
+	return min(x,y);
 }
 
 inline bool ibwd_minus(const Interval& y, Interval& x) {

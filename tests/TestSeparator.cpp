@@ -15,7 +15,7 @@ using namespace std;
 namespace ibex {
 
 void TestSeparator::SepFwdBwd_LT_LEQ(){
-
+    Variable x, y;
 	Function f(x,y, x-y);
     SepFwdBwd S1(f,LEQ );
     SepFwdBwd S2(f,LT );
@@ -27,7 +27,7 @@ void TestSeparator::SepFwdBwd_LT_LEQ(){
 
 }
 void TestSeparator::SepFwdBwd_GT_GEQ(){
-
+    Variable x, y;
 	Function f(x,y, x-y);
     SepFwdBwd S1(f,GEQ );
     SepFwdBwd S2(f,GT );
@@ -53,8 +53,7 @@ void TestSeparator::test_SepNot(){
 }
 
  void TestSeparator::test_SepUnionInter() {
-
-    // define the center of circle
+	 // define the center of circle
      double ax[] = {3,7,-3};
      double ay[] = {4,3,7};
      double dist[] = {3,6,6};

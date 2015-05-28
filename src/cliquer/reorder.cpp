@@ -8,13 +8,14 @@
 
 #include "reorder.h"
 
-#include <time.h>
-#include <sys/times.h>
-#include <stdlib.h>
+//#include <time.h>
+//#include <sys/times.h>
+//#include <stdlib.h>
 
 #include <limits.h>
 
 // ignored warning : comparison between signed and unsigned integer expressions in this file
+#pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-compare"
 
 
@@ -409,18 +410,19 @@ int *reorder_by_degree(graph_t *g, boolean weighted) {
  *       is called using the system time.
  */
 int *reorder_by_random(graph_t *g, boolean weighted) {
-	struct tms t;
+	//struct tms t;
 	int i,r;
 	int *newt;
 	boolean *used;
 
-	srand(times(&t)+time(NULL));
+	//srand(times(&t)+time(NULL));
+	ibex::RNG::srand();
 
 	newt=(int *)calloc(g->n, sizeof(int));
 	used=(boolean *)calloc(g->n, sizeof(boolean));
 	for (i=0; i < g->n; i++) {
 		do {
-			r=rand() % g->n;
+			r=ibex::RNG::rand() % g->n;
 		} while (used[r]);
 		newt[i]=r;
 		used[r]=TRUE;

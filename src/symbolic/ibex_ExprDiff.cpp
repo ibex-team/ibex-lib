@@ -18,7 +18,8 @@ using namespace std;
 namespace ibex {
 
 #define ONE          ExprConstant::new_scalar(1.0)
-
+#define ZERO         ExprConstant::new_scalar(0.0)
+#define ALL_REALS    ExprConstant::new_scalar(Interval::ALL_REALS)
 
 const ExprVector& zeros(int n, bool in_row) {
 	Array<const ExprNode> zeros(n);
@@ -397,9 +398,14 @@ void ExprDiff::visit(const ExprSub& e)   { add_grad_expr(e.left,  *grad[e]);
 										   add_grad_expr(e.right, -*grad[e]); }
 void ExprDiff::visit(const ExprDiv& e)   { add_grad_expr(e.left,  *grad[e]/e.right);
 		                                   add_grad_expr(e.right, -(e.left*(*grad[e])/sqr(e.right))); }
-void ExprDiff::visit(const ExprMax& e)   { not_implemented("diff with max");; }
-void ExprDiff::visit(const ExprMin& e)   { not_implemented("diff with min"); }
-void ExprDiff::visit(const ExprAtan2& e) { not_implemented("diff with atan2"); }
+void ExprDiff::visit(const ExprMax& e)   { add_grad_expr(e.left, (*grad[e])*chi(e.right-e.left, ONE, ZERO));
+										   add_grad_expr(e.right,(*grad[e])*chi(e.left-e.right, ONE, ZERO)); }
+void ExprDiff::visit(const ExprMin& e)   { add_grad_expr(e.left, (*grad[e])*chi(e.left-e.right, ONE, ZERO));
+                                           add_grad_expr(e.right,(*grad[e])*chi(e.right-e.left, ONE, ZERO)); }
+void ExprDiff::visit(const ExprAtan2& e) {
+    add_grad_expr(e.left,  e.right / (sqr(e.left) + sqr(e.right)) * *grad[e]);
+    add_grad_expr(e.right, - e.left / (sqr(e.left) + sqr(e.right)) * *grad[e]);
+}
 
 
 void ExprDiff::visit(const ExprPower& e) {
@@ -408,7 +414,7 @@ void ExprDiff::visit(const ExprPower& e) {
 
 void ExprDiff::visit(const ExprMinus& e) { add_grad_expr(e.expr, -*grad[e]); }
 void ExprDiff::visit(const ExprTrans& e) { not_implemented("diff with transpose"); } //TODO
-void ExprDiff::visit(const ExprSign& e)  { not_implemented("diff with sign"); }      //TODO
+void ExprDiff::visit(const ExprSign& e)  { add_grad_expr(e.expr, (*grad[e])*chi(abs(e.expr),ALL_REALS,ZERO)); }
 void ExprDiff::visit(const ExprAbs& e)   { add_grad_expr(e.expr, (*grad[e])*sign(e.expr)); }
 void ExprDiff::visit(const ExprSqr& e)   { add_grad_expr(e.expr, (*grad[e])*Interval(2.0)*e.expr); }
 void ExprDiff::visit(const ExprSqrt& e)  { add_grad_expr(e.expr, (*grad[e])*Interval(0.5)/sqrt(e.expr)); }

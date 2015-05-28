@@ -9,6 +9,7 @@
 
 #include "ibex.h"
 #include <fstream>
+#include <iomanip>
 #include <sstream>
 #include <stdlib.h>
 
@@ -20,8 +21,12 @@ const int NB_TESTS = 24;
 const double TIME_LIMIT = 500;
 const char* time_limit = "500";
 
-const double REGRESSION_CELLS_RATIO = 1.1;
-const double REGRESSION_TIME_RATIO = 1.4;
+
+const double REGRESSION_CELLS = 100; // 100%
+const double REGRESSION_TIME  = 30;  // 30%
+
+const double REGRESSION_CELLS_RATIO = 1.0 + (REGRESSION_CELLS/100.0);
+const double REGRESSION_TIME_RATIO = 1.0 + (REGRESSION_TIME/100.0);
 
 // Some parameters are chosen to be not configurable for the moment
 const bool HC4_INCREMENTAL = true;
@@ -134,6 +139,10 @@ int main (int argc, char** argv) {
 
 		Optimizer::Status status=o.optimize(p.get_sys().box);
 
+		double scaled_time = ratio_perf*time;
+		double time_gain_ratio = (o.time-scaled_time)/scaled_time;
+		double nb_cells_gain_ratio = (o.nb_cells-nb_cells)/((double) nb_cells);
+
 		//cerr << "number of cells=" << o.nb_cells << " time=" << o.time << endl;
 		switch (status) {
 		case Optimizer::INFEASIBLE :         cerr << "FAILED: infeasible"; break;
@@ -143,12 +152,42 @@ int main (int argc, char** argv) {
 		case Optimizer::SUCCESS : {
 			if (o.loup < lb)                   {  cerr.precision(20); cerr << "FAILED: upper bound (loup=" << o.loup << ") is wrong"; }
 			else if (o.uplo > ub)              {  cerr.precision(20); cerr << "FAILED: lower bound (uplo=" << o.uplo << ") is wrong"; }
-			else if (o.time > REGRESSION_TIME_RATIO*time)
-			                                   {  cerr << "FAILED: time (" << o.time << "s) exceeds by more than 10% the reference time"; }
-			else if (o.nb_cells> REGRESSION_CELLS_RATIO*nb_cells)
-			                                   {  cerr << "FAILED: number of cells (" << o.nb_cells << ") exceeds by more than 10% the reference value"; }
-			else                               {  ok=true; cout << "SUCCESS (time=" << o.time << " nb cells=" << o.nb_cells << ")"; }
+			else {
+				if (o.time > REGRESSION_TIME_RATIO*scaled_time || o.nb_cells> REGRESSION_CELLS_RATIO*nb_cells) {
+					cerr << "FAILED: ";
+				} else {
+					cerr << "SUCCESS: ";
+					ok = true;
+				}
+
+				cerr << "time=" << o.time << "s [";
+
+				if (o.time < scaled_time) {
+					cerr << "\033[32m"; // green
+				} else if (o.time > REGRESSION_TIME_RATIO*scaled_time) {
+					cerr << "\033[31m"; // red // ;31m
+				} else {
+					cerr << "\033[33m"; // yellow
+				}
+
+				//bold red text;
+				cerr << setprecision(4) << (time_gain_ratio>0? "+":"") << (time_gain_ratio*100.) << "%\033[0m]  ";
+
+				cerr << "nb_cells=" << o.nb_cells << " [";
+
+				if (o.nb_cells < nb_cells) {
+					cerr << "\033[32m"; // green
+				} else if (o.nb_cells > REGRESSION_CELLS_RATIO*nb_cells) {
+					cerr << "\033[31m"; // red // ;31m
+				} else {
+					cerr << "\033[33m"; // yellow
+				}
+
+				cerr << setprecision(4) << (nb_cells_gain_ratio>0? "+":"") << (nb_cells_gain_ratio*100.) << "%\033[0m]";
+
+			}
 		}
+
       }
 
 		cout << endl;

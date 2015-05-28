@@ -211,7 +211,7 @@ inline Vout mulMV(const M& m, const Vin& v) {
 
 template<class Vin, class M, class Vout>
 inline Vout mulVM(const Vin& v, const M& m) {
-	assert(m.nb_cols()==v.size());
+	assert(m.nb_rows()==v.size());
 
 	if (is_empty(m) || is_empty(v)) {
 		Vout res(m.nb_cols());
@@ -337,6 +337,10 @@ IntervalVector& IntervalVector::operator*=(const Interval& x) {
 
 Matrix& Matrix::operator*=(double x) {
 	return set_mulSM<double,Matrix>(x,*this);
+}
+
+Matrix& Matrix::operator*=(const Matrix& m) {
+	return *this=(*this*m);
 }
 
 IntervalMatrix& IntervalMatrix::operator*=(double x) {

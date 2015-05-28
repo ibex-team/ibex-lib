@@ -20,16 +20,10 @@ void SepCtcPair::separate(IntervalVector& x_in, IntervalVector& x_out) {
 
 	assert(x_in==x_out);
 
-	try {
-		ctc_out.contract(x_out);
-	} catch (EmptyBoxException&) {
+	ctc_out.contract(x_out);
 
-	}
-	try {
-		ctc_in.contract(x_in);
-	} catch (EmptyBoxException&) {
+	ctc_in.contract(x_in);
 
-	}
 }
 
 } // namespace ibex

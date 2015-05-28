@@ -15,6 +15,7 @@
 #include "ibex_ExprPrinter.h"
 #include "ibex_ExprSubNodes.h"
 #include "ibex_ExprSize.h"
+#include "ibex_ExprCmp.h"
 #include "ibex_String.h"
 #include <sstream>
 #include <limits.h>
@@ -46,6 +47,14 @@ int max_height(const Array<const ExprNode>& args) {
 ExprNode::ExprNode(int height, int size, const Dim& dim) :
   height(height), size(size), id(id_count++), dim(dim) {
 
+}
+
+bool ExprNode::operator==(const ExprNode& e) const {
+	return ExprCmp().compare(*this, e);
+}
+
+bool ExprNode::operator!=(const ExprNode& e) const {
+	return !(*this==e);
 }
 
 void cleanup(const Array<const ExprNode>& expr, bool delete_symbols) {
@@ -138,6 +147,13 @@ ExprApply::ExprApply(const Function& f, const Array<const ExprNode>& args) :
 	}
 }
 
+namespace {
+
+// to store the link between a symbol and its "creator"
+NodeMap<const Variable*> variables;
+
+}
+
 ExprSymbol::ExprSymbol(const Dim& dim) : ExprLeaf(dim),
 		name(strdup(next_generated_var_name())), key(-1) {
 }
@@ -145,6 +161,56 @@ ExprSymbol::ExprSymbol(const Dim& dim) : ExprLeaf(dim),
 const ExprSymbol& ExprSymbol::new_(const Dim& dim) {
 	return new_(next_generated_var_name(), dim);
 	//return new_(generated_name_buff, dim);
+}
+
+inline ExprSymbol::~ExprSymbol() {
+	if (variables.found(*this)) {
+		// before deleting me, associate the Variable
+		// with a new symbol.
+		const Variable* var = variables[*this];
+		variables.erase(*this);
+
+		var->symbol = new ExprSymbol(name,dim);
+		variables.insert(*var->symbol, var);
+	}
+	free((char*) name);
+}
+
+Variable::Variable(const Dim& dim) : symbol(new ExprSymbol(dim))                                                   { variables.insert(*symbol,this); }
+Variable::Variable(const char* name) : symbol(new ExprSymbol(name,Dim::scalar()))                                  { variables.insert(*symbol,this); }
+Variable::Variable(const Dim& dim, const char* name) : symbol(new ExprSymbol(name, dim))                           { variables.insert(*symbol,this); }
+Variable::Variable(int n) : symbol(new ExprSymbol(Dim::col_vec(n)))                                                { variables.insert(*symbol,this); }
+Variable::Variable(int n, const char* name) : symbol(new ExprSymbol(name, Dim::col_vec(n)))                        { variables.insert(*symbol,this); }
+Variable::Variable(int m, int n) : symbol(new ExprSymbol(Dim::matrix(m,n)))                                        { variables.insert(*symbol,this); }
+Variable::Variable(int m, int n, const char* name) : symbol(new ExprSymbol(name, Dim::matrix(m,n)))                { variables.insert(*symbol,this); }
+Variable::Variable(int k, int m, int n) : symbol(new ExprSymbol(Dim::matrix_array(k,m,n)))                         { variables.insert(*symbol,this); }
+Variable::Variable(int k, int m, int n, const char* name) : symbol(new ExprSymbol(name, Dim::matrix_array(k,m,n))) { variables.insert(*symbol,this); }
+
+Variable::~Variable()                                                                                              {
+	variables.erase(*symbol);
+
+	// no: don't delete the symbol that can live after the Variable.
+	// This is the case in particular with SystemFactory, where symbols
+	// are registered but functions not created (deco.f==NULL).
+
+	//	if (!symbol->deco.f) // unused variable
+	//		delete symbol;
+
+	// Consequence: there are memory leaks with "Variable" :(
+}
+
+Variable::operator const ExprSymbol&() const {
+	if (symbol->deco.f) { // already used build new one.
+		// Note: it is Function's responsibility to delete the old symbol
+		variables.erase(*symbol);
+		symbol=new ExprSymbol(symbol->name, symbol->dim);
+		variables.insert(*symbol, this);
+	}
+	return *symbol;
+}
+
+Variable::operator const ExprNode&() const {
+	return this->operator const ExprSymbol&();
 }
 
 ExprConstant::ExprConstant(const Interval& x)

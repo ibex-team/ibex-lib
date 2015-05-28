@@ -13,7 +13,6 @@
 #define _IBEX_EVAL_H_
 
 #include "ibex_Function.h"
-#include "ibex_EmptyBoxException.h"
 #include <iostream>
 
 namespace ibex {
@@ -44,6 +43,20 @@ public:
 	 */
 	Domain& eval(const Function&, const IntervalVector& box) const;
 
+	/**
+	 * \brief Run the forward algorithm with input domains.
+	 */
+	Domain& eval(const Function&, ExprLabel** d) const;
+
+protected:
+	/**
+	 * Class used internally to interrupt the forward procedure
+	 * when an empty domain occurs (<=> the input box is outside
+	 * the definition domain of the function).
+	 */
+	class EmptyBoxException { };
+
+public: // because called from CompiledFunction
 	inline void index_fwd(const ExprIndex&, const ExprLabel& x, ExprLabel& y);
 	       void vector_fwd(const ExprVector&, const ExprLabel** compL, ExprLabel& y);
 	inline void cst_fwd(const ExprConstant&, ExprLabel& y);
@@ -91,11 +104,6 @@ public:
 	inline void sub_V_fwd(const ExprSub&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y);
 	inline void sub_M_fwd(const ExprSub&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y);
 
-//protected:
-	/**
-	 * \brief Run the forward algorithm with input domains.
-	 */
-	Domain& eval(const Function&, ExprLabel** d) const;
 };
 
 /* ============================================================================

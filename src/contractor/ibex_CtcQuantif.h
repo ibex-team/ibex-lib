@@ -21,6 +21,10 @@ namespace ibex {
 /**
  * \brief Abstract contractor for quantified constraints (proj-union/proj-inter)
  */
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Woverloaded-virtual"
+#endif
 class CtcQuantif : public Ctc {
 
 public:
@@ -115,6 +119,8 @@ private:
 	bool _own_ctc;
 };
 
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 } // namespace ibex
-
 #endif // __IBEX_CTC_QUANTIF_H__

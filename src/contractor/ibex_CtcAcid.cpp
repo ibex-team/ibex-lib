@@ -67,8 +67,9 @@ void CtcAcid::contract(IntervalVector& box) {
 		impact.add(v2);
 		var3BCID(box, v2);                             // appel 3BCID sur la variable v2
 		impact.remove(v2);
-		if(box.is_empty())
-			throw EmptyBoxException();
+
+		if(box.is_empty()) return;
+
 		if (nbcall1 < nbinitcalls) {                   // on fait des stats pour le réglage courant
 			for (int i=0; i<initbox.size(); i++)
 			{//cout << i << " initbox " << initbox[i].diam() << " box " << box[i].diam() << endl;

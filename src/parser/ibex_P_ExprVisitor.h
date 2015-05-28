@@ -23,6 +23,11 @@ class ExprConstantRef;
 class ExprIter;
 class ExprInfinity;
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Woverloaded-virtual"
+#endif
+
 class P_ExprVisitor : public virtual ExprVisitor {
 public:
 	virtual ~P_ExprVisitor() { }
@@ -42,6 +47,10 @@ public:
 	/** Visit +/-oo. */
 	virtual void visit(const ExprInfinity&)=0;
 };
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 
 } // end namespace parser
 } // end namespace ibex

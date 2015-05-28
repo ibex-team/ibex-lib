@@ -61,11 +61,24 @@ public:
 	/**
 	 * \brief Deletes this instance.
 	 *
-	 * Need to be virtual (see Function::~Function()) */
+	 * Need to be virtual (see Function::~Function())
+	 */
 	virtual ~ExprNode();
 
 	/** Streams out this expression. */
 	friend std::ostream& operator<<(std::ostream&, const ExprNode&);
+
+	/**
+	 * \brief Compare two expressions
+	 *
+	 * Two expressions are equal if they are exactly the same DAGs
+	 */
+	bool operator==(const ExprNode&) const;
+
+	/**
+	 * \brief Compare two expressions
+	 */
+	bool operator!=(const ExprNode&) const;
 
 	/** height (following topological order) of this node in the DAG.
 	 *  A leaf is at height 0. */
@@ -146,7 +159,6 @@ public:
 
 	/** Create an inequality constraint expr>value. */
 	const ExprCtr& operator>(const Interval& value) const;
-
 };
 
 /**
@@ -474,43 +486,40 @@ private:
 class Variable {
 public:
 	/** Create a variable of dimension \a dim (by default: scalar). */
-	explicit Variable(const Dim& dim=Dim::scalar()) : symbol(new ExprSymbol(dim)) { }
+	explicit Variable(const Dim& dim=Dim::scalar());
 
 	/** Create a scalar variable named \a name. */
-	explicit Variable(const char* name) : symbol(new ExprSymbol(name,Dim::scalar())) { }
+	explicit Variable(const char* name);
 
 	/** Create a variable of dimension \a dim named \a name. */
-	Variable(const Dim& dim, const char* name) : symbol(new ExprSymbol(name, dim)) { }
+	Variable(const Dim& dim, const char* name);
 
 	/** Create a vector variable of \a n components. */
-	explicit Variable(int n) : symbol(new ExprSymbol(Dim::col_vec(n))) { }
+	explicit Variable(int n);
 
 	/** Create a vector variable of \a n components named \a name. */
-	Variable(int n, const char* name) : symbol(new ExprSymbol(name, Dim::col_vec(n))) { }
+	Variable(int n, const char* name);
 
 	/** Create a \a m x \a n matrix variable. */
-	Variable(int m, int n) : symbol(new ExprSymbol(Dim::matrix(m,n))) { }
+	Variable(int m, int n);
 
 	/** Create a \a m x \a n matrix variable named \a name. */
-	Variable(int m, int n, const char* name) : symbol(new ExprSymbol(name, Dim::matrix(m,n))) { }
+	Variable(int m, int n, const char* name);
 
 	/** Create a (\a k-sized array of \a m x \a n matrices) variable. */
-	Variable(int k, int m, int n) : symbol(new ExprSymbol(Dim::matrix_array(k,m,n))) { }
+	Variable(int k, int m, int n);
 
 	/** Create a (\a k-sized array of \a m x \a n matrices) variable named \a name. */
-	Variable(int k, int m, int n, const char* name) : symbol(new ExprSymbol(name, Dim::matrix_array(k,m,n))) { }
+	Variable(int k, int m, int n, const char* name);
 
-	operator const ExprSymbol&() const {
-		if (symbol->deco.f) // already used build new one.
-			symbol=new ExprSymbol(symbol->name, symbol->dim);
-		return *symbol;
-	}
+	/** Delete this. */
+	~Variable();
 
-	operator const ExprNode&() const {
-		if (symbol->deco.f) // already used build new one.
-			symbol=new ExprSymbol(symbol->name, symbol->dim);
-		return *symbol;
-	}
+	/** Return the symbol attached to this variable */
+	operator const ExprSymbol&() const;
+
+	/** Return the symbol attached to this variable */
+	operator const ExprNode&() const;
 
 	/** Create the expression x[index]. */
 	const ExprIndex& operator[](int index) { return ((const ExprNode&) *this)[index]; }
@@ -1406,9 +1415,6 @@ inline bool ExprVector::row_vector() const {
 
 inline ExprLeaf::ExprLeaf(const Dim& dim) : ExprNode(0,1,dim) { }
 
-inline ExprSymbol::~ExprSymbol() {
-	free((char*) name); }
-
 inline const ExprSymbol& ExprSymbol::new_(const char* name, const Dim& dim) {
 	return *new ExprSymbol(name,dim); }
 
@@ -1465,9 +1471,27 @@ inline const ExprDiv& operator/(const ExprNode& left, const ExprNode& right) {
 inline const ExprMax& max(const ExprNode& left, const ExprNode& right) {
 	return ExprMax::new_(left, right); }
 
+/** Maximum */
+inline const ExprMax& max(const Array<const ExprNode> args) {
+	assert(args.size()>1);
+	const ExprMax* _max=&max(args[0],args[1]);
+	for (int i=2; i<args.size(); i++)
+		_max = & max(*_max, args[i]);
+	return *_max;
+}
+
 /** Minimum */
 inline const ExprMin& min(const ExprNode& left, const ExprNode& right) {
 	return ExprMin::new_(left, right); }
+
+/** Minimum */
+inline const ExprMin& min(const Array<const ExprNode> args) {
+	assert(args.size()>1);
+	const ExprMin* _min=&min(args[0],args[1]);
+	for (int i=2; i<args.size(); i++)
+		_min = & min(*_min, args[i]);
+	return *_min;
+}
 
 /** Arctangent2 of two expressions */
 inline const ExprAtan2& atan2(const ExprNode& exp1, const ExprNode& exp2) {

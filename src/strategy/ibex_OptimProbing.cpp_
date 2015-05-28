@@ -9,7 +9,6 @@
 //============================================================================
 
 #include "ibex_Optimizer.h"
-#include "ibex_EmptyBoxException.h"
 #include "ibex_BoolInterval.h"
 
 #include <stdlib.h>
@@ -20,13 +19,21 @@ using namespace std;
 
 namespace ibex {
 
-void Optimizer::monotonicity_analysis(IntervalVector& box) {
+void Optimizer::monotonicity_analysis(IntervalVector& box, bool inner_found) {
+
+	if (!inner_found && sys.f.nb_used_vars()==n)
+		// if there is no inner box and all the variables appear
+		// in the constraints, nothing can be done
+		return;
+
 	IntervalVector g(n);
 	sys.goal->gradient(box,g);
 	for (int j=0; j<n; j++) {
 		//TODO: if box is unbounded, we have a problem here.
-		if (g[j].lb()>=0) box[j]=box[j].lb();
-		if (g[j].ub()<=0) box[j]=box[j].ub();
+		if (inner_found || !sys.f.used(j)) {
+			if (g[j].lb()>=0) box[j]=box[j].lb();
+			if (g[j].ub()<=0) box[j]=box[j].ub();
+		}
 	}
 }
 
@@ -63,6 +70,17 @@ bool Optimizer::in_HC4(IntervalVector& box) {
 		if (box.is_empty()) return false;
 	}
 	return true;
+}
+
+
+bool Optimizer::check_candidate_extended(const Vector& pt_ext, bool _is_inner) {
+	Vector pt(pt_ext.size()-1);
+	int i2=0;
+	for (int i=0; i<n; i++,i2++) {
+		if (i2==ext_sys.goal_var()) i2++; // skip goal variable
+		pt[i]=pt_ext[i2];
+	}
+	return check_candidate(pt, _is_inner);
 }
 
 /* last update: GCH  */
@@ -273,19 +291,21 @@ bool Optimizer::update_loup_probing(const IntervalVector& box) {
 			//		cout << "inner_found ? " << inner_found << " inbox=" << inbox << endl;
 		}
 		else {
-			try {
-				is_inside->contract(inbox); // compared to in_HC4, works the other way around: if inbox is inner, it is emptied.
-				inner_found=false;
-				inbox.set_empty();
-			} catch(EmptyBoxException&) {
+
+			is_inside->contract(inbox); // compared to in_HC4, works the other way around: if inbox is inner, it is emptied.
+
+			if (inbox.is_empty()) {
 				inbox = box;
 				inner_found=true;
+			} else {
+				inner_found=false;
+				inbox.set_empty();
 			}
 		}
 	}
 
-	if (inner_found && mono_analysis_flag)
-		monotonicity_analysis(inbox);
+	if (mono_analysis_flag)
+		monotonicity_analysis(inbox, inner_found);
 
 	bool loup_changed; // return value
 	//	cout <<  " inner ? " << inner_found << " box " << box << " inbox " << inbox << endl;

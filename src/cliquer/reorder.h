@@ -4,6 +4,7 @@
 
 #include "set.h"
 #include "graph.h"
+#include "ibex_Random.h"
 
 extern void reorder_set(set_t s,int *order);
 extern void reorder_graph(graph_t *g, int *order);

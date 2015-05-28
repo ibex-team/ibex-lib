@@ -14,8 +14,8 @@
 #include "ibex_Ctc.h"
 #include "ibex_HC4Revise.h"
 #include "ibex_Backtrackable.h"
-#include "ibex_CellHeapOptim.h"
-#include "ibex_OptimCell.h"
+#include "ibex_CellCostFunc.h"
+#include "ibex_CellDoubleHeap.h"
 #include "ibex_Function.h"
 #include "ibex_UnconstrainedLocalSearch.h"
 #include <string>

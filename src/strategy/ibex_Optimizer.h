@@ -16,13 +16,15 @@
 #include "ibex_Ctc3BCid.h"
 #include "ibex_CtcUnion.h"
 #include "ibex_Backtrackable.h"
-#include "ibex_CellHeapOptim.h"
+#include "ibex_CellCostFunc.h"
+#include "ibex_CellDoubleHeap.h"
 #include "ibex_NormalizedSystem.h"
 #include "ibex_ExtendedSystem.h"
 #include "ibex_EntailedCtr.h"
 #include "ibex_LinearSolver.h"
 #include "ibex_PdcHansenFeasibility.h"
-#include "ibex_OptimCell.h"
+#include "ibex_Random.h"
+#include "ibex_LinearRelaxCombo.h"
 
 namespace ibex {
 
@@ -55,7 +57,7 @@ public:
 	 *   \param equ_eps       - thickness of equations when relaxed to inequalities
 	 *   \param rigor         - look for points that strictly satisfy equalities. By default: false
 	 *   \param critpr        - probability to choose the second criterion in node selection; integer in [0,100]. By default 50
-	 *  \param crit           - second criterion in node selection (the first criterion is the minimum of the objective estimate). default value CellHeapOPtim::UB
+	 *   \param crit          - second criterion in node selection (the first criterion is the minimum of the objective estimate). default value CellHeapOPtim::UB
 	 *
 	 * <ul> The extended system (see ExtendedSystem constructor) contains:
 	 * <li> (n+1) variables, x_1,...x_n,y. The index of y is #goal_var (==n).
@@ -67,10 +69,10 @@ public:
 	 * If this contractor never contracts this goal variable, the optimizer will only rely on the evaluation of f  and will be very slow.
 	 *
 	 */
-
 	Optimizer(System& sys, Ctc& ctc, Bsc& bsc, double prec=default_prec,
 			double goal_rel_prec=default_goal_rel_prec, double goal_abs_prec=default_goal_abs_prec,
-			  int sample_size=default_sample_size, double equ_eps=default_equ_eps, bool rigor=false, int critpr=50,CellHeapOptim::criterion crit= CellHeapOptim::UB);
+			  int sample_size=default_sample_size, double equ_eps=default_equ_eps, bool rigor=false, int critpr=50,CellCostFunc::criterion crit= CellCostFunc::UB);
+
 	/**
 	 * \brief Delete *this.
 	 */
@@ -83,7 +85,7 @@ public:
 
 	/**
 	 * \brief Run the optimization.
-
+	 *
 	 * \param init_box             The initial box
 	 * \param obj_init_bound       (optional) can be set when an initial upper bound of the objective minimum is known a priori.
 	 *                             This bound can be obtained, e.g., by a local solver. This is equivalent to (but more practical
@@ -195,8 +197,7 @@ public:
 	the second one to minimize another criterion (by default the maximum of the objective estimate).
 	The second one is chosen at each node with a probability critpr/100 (default value critpr=50)
 	 */
-	CellHeapOptim buffer;
-	CellHeapOptim buffer2;
+	CellDoubleHeap buffer;
 
 	/**
 	 * \brief Index of the goal variable y in the extended box.
@@ -230,12 +231,6 @@ public:
 	  2 for printing each handled node */
 	int trace;
 
-	/** Probability to choose the second criterion in node selection in percentage
-	 * integer in [0,100] default value 50
-	 * the value 0 corresponds to use a single criterion for node selection (the classical one : minimizing the lower bound of the estimate of the objective) 
-	 * the value 100 corresponds to use a single criterion for node selection (the second one used in buffer2) */
-	 int critpr;
-	
 	/**
 	 * \brief Time limit.
 	 *
@@ -323,7 +318,7 @@ protected:
 	 * </ul>
 	 *
 	 */
-	void handle_cell(OptimCell& c, const IntervalVector& init_box);
+	void handle_cell(Cell& c, const IntervalVector& init_box);
 
 	/**
 	 * \brief Contract and bound procedure for processing a box.
@@ -336,18 +331,7 @@ protected:
 	 * </ul>
 	 *
 	 */
-	void contract_and_bound(OptimCell& c, const IntervalVector& init_box);
-
-	/**
-	 * \brief Contraction procedure for processing a box.
-	 *
-	 * <ul>
-	 * <li> contract with the contractor ctc,
-	 * </ul>
-	 *
-	 */
-	 virtual void contract(IntervalVector& box, const IntervalVector& init_box );
-
+	void contract_and_bound(Cell& c, const IntervalVector& init_box);
 
 	/**
 	 * \brief First order contraction procedure for processing a box.
@@ -361,12 +345,12 @@ protected:
 
 	virtual void firstorder_contract ( IntervalVector& box, const IntervalVector& init_box);
 
-
 	/**
 	 * \brief Update the entailed constraint for the current box
+	 *
+	 * \return false if unsatisfiability is detected, true otherwise.
 	 */
-	void update_entailed_ctr(const IntervalVector& box);
-
+	bool update_entailed_ctr(const IntervalVector& box);
 
 	/**
 	 * \brief Update the uplo of non bisectable boxes
@@ -395,7 +379,7 @@ protected:
 	 * When f is increasing (resp. decreasing) w.r.t. variable x_i, the interval [x_i]
 	 * is replaced by the lower bound (resp. upper bound) of [x_i].
 	 */
-	void monotonicity_analysis(IntervalVector& box);
+	void monotonicity_analysis(IntervalVector& box, bool inner_found);
 
 	/**
 	 * \brief Quick check that the box is not infeasible.
@@ -439,6 +423,7 @@ protected:
 	 * \return true in case of success, i.e., if the loup has been decreased.
 	 */
 	bool check_candidate(const Vector& pt, bool is_inner);
+	bool check_candidate_extended(const Vector& pt, bool is_inner);
 
 	/**
 	 * Look for a loup box (in rigor mode) starting from a pseudo-loup.
@@ -544,10 +529,6 @@ protected:
 	double initial_loup;
 
 	Ctc3BCid* objshaver;
-
-    void compute_pf(OptimCell& c);
-	
-	void compute_pu (OptimCell& c);
 	
 private:
 
@@ -556,14 +537,13 @@ private:
 
 	/** linear solver used in ibex_OptimSimplex.cpp_ */
 	LinearSolver *mylp;
+	LinearRelaxCombo *lr;
 
 	/** Inner contractor (for the negation of g) */
 	CtcUnion* is_inside;
 
 	/** Lower bound of the small boxes taken by the precision */
 	double uplo_of_epsboxes;
-
-
 
 	/** Currently entailed constraints */
 	EntailedCtr* entailed;

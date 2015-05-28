@@ -1018,7 +1018,7 @@ inline IntervalMatrix Function::eval_matrix(const IntervalVector& box) const {
 	}
 	case Dim::MATRIX: return eval_domain(box).m();
 	default : {
-		assert(false);
+                throw std::logic_error("should not reach");
 	}
 	}
 }

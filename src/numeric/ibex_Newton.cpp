@@ -11,7 +11,6 @@
 #include "ibex_Newton.h"
 #include "ibex_Linear.h"
 #include "ibex_LinearException.h"
-#include "ibex_EmptyBoxException.h"
 
 #include <cassert>
 
@@ -28,7 +27,7 @@ namespace {
 //inline bool newton_step(const Fnc& f, IntervalVector& box,
 //		IntervalVector& mid, IntervalVector& Fmid, IntervalMatrix& J) {
 //
-//	f.hansen_matrix(box,J); //may throw EmptyBoxException?
+//	f.hansen_matrix(box,J);
 //	if (J.is_empty()) { return false; }
 //	mid = box.mid();
 //	Fmid=f.eval_vector(mid);
@@ -52,8 +51,8 @@ bool newton(const Fnc& f, IntervalVector& box, double prec, double ratio_gauss_s
 	do {
 //		cout.precision(20);
 //		cout << box << endl << endl << endl;
-		f.hansen_matrix(box,J); //may throw EmptyBoxException?
-//		f.jacobian(box,J); //may throw EmptyBoxException
+		f.hansen_matrix(box,J);
+//		f.jacobian(box,J);
 		if (J.is_empty()) { return false; }
 //		for (int i=0; i<m; i++)
 //			for (int j=0; j<n; j++)
@@ -79,14 +78,14 @@ bool newton(const Fnc& f, IntervalVector& box, double prec, double ratio_gauss_s
 
 			gauss_seidel(J, Fmid, y, ratio_gauss_seidel);
 
-			if (y.is_empty()) { box.set_empty(); throw EmptyBoxException(); }
+			if (y.is_empty()) { box.set_empty(); return true; }
 		} catch (LinearException& ) {
 			return reducted; // should be false
 		}
 
 		IntervalVector box2=mid-y;
 
-		if ((box2 &= box).is_empty()) { box.set_empty(); throw EmptyBoxException(); }
+		if ((box2 &= box).is_empty()) { box.set_empty(); return true; }
 
 		gain = box.maxdelta(box2);
 

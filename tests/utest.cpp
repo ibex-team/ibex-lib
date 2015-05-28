@@ -17,7 +17,9 @@
 #include "TestString.h"
 #include "TestBitSet.h"
 #include "TestSymbolMap.h"
+#include "TestCellHeap.h"
 #include "TestPixelMap.h"
+#include "TestDoubleHeap.h"
 
 // ================ arithmetic ===============
 #include "TestInterval.h"
@@ -33,6 +35,8 @@
 #include "TestExpr.h"
 #include "TestExprCopy.h"
 #include "TestExprDiff.h"
+#include "TestExprCmp.h"
+#include "TestExpr2DAG.h"
 #include "TestExprSplitOcc.h"
 #include "TestFunction.h"
 #include "TestNumConstraint.h"
@@ -66,8 +70,6 @@
 #include "TestCtcSegment.h"
 #include "TestCtcPixelMap.h"
 
-
-
 // ================ strategy ===============
 #include "TestOptimizer.h"
 
@@ -75,6 +77,8 @@
 #include "TestSeparator.h"
 #include "TestSepPolygon.h"
 
+// ============= Conbinatorial ============
+#include "TestQInter.h"
 
 using namespace std;
 using std::auto_ptr;
@@ -90,6 +94,8 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestString()));
     ts.add(auto_ptr<Test::Suite>(new TestBitSet()));
     ts.add(auto_ptr<Test::Suite>(new TestSymbolMap()));
+    ts.add(auto_ptr<Test::Suite>(new TestCellHeap()));
+    ts.add(auto_ptr<Test::Suite>(new TestDoubleHeap()));
     ts.add(auto_ptr<Test::Suite>(new TestPixelMap()));
 
     ts.add(auto_ptr<Test::Suite>(new TestInterval()));
@@ -105,6 +111,8 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestExpr()));
     ts.add(auto_ptr<Test::Suite>(new TestExprCopy()));
     ts.add(auto_ptr<Test::Suite>(new TestExprDiff()));
+    ts.add(auto_ptr<Test::Suite>(new TestExprCmp()));
+    ts.add(auto_ptr<Test::Suite>(new TestExpr2DAG()));
     ts.add(auto_ptr<Test::Suite>(new TestExprSplitOcc()));
     ts.add(auto_ptr<Test::Suite>(new TestFunction()));
     ts.add(auto_ptr<Test::Suite>(new TestNumConstraint()));
@@ -131,8 +139,10 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestCtcPolytopeHull()));
     ts.add(auto_ptr<Test::Suite>(new TestCtcSegment()));
     ts.add(auto_ptr<Test::Suite>(new TestCtcPixelMap()));
+    ts.add(auto_ptr<Test::Suite>(new TestQInter()));
 
     ts.add(auto_ptr<Test::Suite>(new TestFritzJohn()));
+
 
     ts.add(auto_ptr<Test::Suite>(new TestOptimizer()));
     ts.add(auto_ptr<Test::Suite>(new TestSeparator()));

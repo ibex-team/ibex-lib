@@ -367,43 +367,6 @@ Affine2Main<AF_sAF>& Affine2Main<AF_sAF>::saxpy(double alpha, const Affine2Main<
 }
 
 
-template<>
-Affine2Main<AF_sAF>& Affine2Main<AF_sAF>::operator*=(const Interval& y) {
-	if (	(!is_actif())||
-			y.is_empty()||
-			y.is_unbounded() ) {
-		*this = itv()*y;
-
-	} else {
-		double  ttt, yVal0, temp;
-		int i;
-//std::cout << "in *  "<<y<<std::endl;
-//saxpy(y.mid(), Affine2Main<AF_sAF>(), 0.0, y.rad(), true, false, false, true);
-
-		ttt=0.0;   yVal0=0.0;
-		yVal0 = y.mid();
-		// RES = X%(0) * res
-		for (i=0; i<=_n;i++) {
-			temp = _elt._val[i] * yVal0;
-			ttt = nextafter( ttt+ std::max(nextafter(temp,POS_INFINITY)-temp, temp - nextafter(temp,NEG_INFINITY) ), POS_INFINITY);
-			_elt._val[i]=temp;
-		}
-		_elt._err = nextafter( ttt+ nextafter(abs(y).ub()*_elt._err,POS_INFINITY),POS_INFINITY);
-
-		{
-			bool b = (_elt._err<POS_INFINITY);
-			for (i=0;i<=_n;i++) {
-				b &= (fabs(_elt._val[i])<POS_INFINITY);
-			}
-			if (!b) {
-				*this = Interval::ALL_REALS;
-			}
-		}
-
-	}
-	return *this;
-}
-
 
 
 template<>
@@ -498,11 +461,11 @@ Affine2Main<AF_sAF>& Affine2Main<AF_sAF>::operator*=(const Affine2Main<AF_sAF>& 
 
 		} else {
 			if (_n>y.size()) {
-				*this *= y.itv();
+				*this *= Affine2Main<AF_sAF>(size(),0,y.itv());
 			} else {
 				Interval tmp1 = this->itv();
 				*this = y;
-				*this *= tmp1;
+				*this *=  Affine2Main<AF_sAF>(size(),0,tmp1);
 			}
 		}
 
@@ -512,6 +475,21 @@ Affine2Main<AF_sAF>& Affine2Main<AF_sAF>::operator*=(const Affine2Main<AF_sAF>& 
 	}
 //	std::cout << "out *= "<< *this<<std::endl;
 
+	return *this;
+}
+
+
+
+template<>
+Affine2Main<AF_sAF>& Affine2Main<AF_sAF>::operator*=(const Interval& y) {
+	if (	(!is_actif())||
+			y.is_empty()||
+			y.is_unbounded() ) {
+		*this = itv()*y;
+
+	} else {
+		*this *= Affine2Main<AF_sAF>(size(),0,y);
+	}
 	return *this;
 }
 

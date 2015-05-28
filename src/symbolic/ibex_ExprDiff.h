@@ -18,6 +18,8 @@
 namespace ibex {
 
 /**
+ * \ingroup symbolic
+ *
  * \brief Differentiate an expression.
  *
  */

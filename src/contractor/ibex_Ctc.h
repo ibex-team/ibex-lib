@@ -13,7 +13,6 @@
 #define __IBEX_CONTRACTOR_H__
 
 #include "ibex_IntervalVector.h"
-#include "ibex_EmptyBoxException.h"
 #include "ibex_BitSet.h"
 #include "ibex_Array.h"
 
@@ -92,14 +91,19 @@ public:
 	 *
 	 * After a call to #contract(IntervalVector& box, const BoolMask& impact, BoolMask& flags):
 	 * <ul>
-	 * <li> if (flags[FIXPOINT]==true) then the fixpoint was reached by this contractor on the
-	 * box which means: \f[C(C(box)) = C(box)\f].
+	 * <li> if (flags[FIXPOINT]==true) then the fixpoint is reached by this contractor on the
+	 * box which means: \f[C(C(box)) = C(box)\f]. Note that the box may have been modified
+	 * by the contractor and the fixpoint property is valid for the resulting box (after
+	 * contraction).
+	 *
 	 * <li> if (flags[INACTIVE]==true) then the fixpoint was reached and this contractor cannot
-	 * contract any subbox: \f[\forall [x]\subseteq {\tt box}, \quad C([x])=[x].\f].
+	 * contract any subbox: \f[\forall [x]\subseteq {\tt box}, \quad C([x])=[x].\f]. Note that
+	 * this property is valid for the box *before* contraction. Even if the contractor turns
+	 * to be inactive on the resulting box (typically, in the case of an empty set) this flag
+	 * is not set.
 	 * </ul>
 	 */
 	enum {FIXPOINT, INACTIVE, NB_OUTPUT_FLAGS};
-
 
 
 protected:
@@ -151,8 +155,6 @@ inline void Ctc::set_flag(unsigned int f) {
 	assert(f<NB_OUTPUT_FLAGS);
 	if (_output_flags) _output_flags->add(f);
 }
-
-
 
 
 } // namespace ibex

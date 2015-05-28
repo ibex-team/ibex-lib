@@ -11,7 +11,6 @@
 #ifndef __IBEX_HC4_REVISE_H__
 #define __IBEX_HC4_REVISE_H__
 
-#include "ibex_EmptyBoxException.h"
 #include "ibex_Function.h"
 
 namespace ibex {
@@ -31,6 +30,8 @@ public:
 	 *
 	 * \param mode  the arithmetic for forward evaluation. By default: interval arithmetic.
 	 * Accepted values are: INTERVAL_MODE or AFFINE2_MODE.
+	 *
+	 * \warning Throws an #EmptyBoxException if the contraction gives an empty set.
 	 */
 	HC4Revise(FwdMode mode=INTERVAL_MODE);
 
@@ -42,8 +43,8 @@ public:
 	 * \brief true if f(x) is included in y (inactive constraint)
 	 *
 	 * \note if x is outside the definition domain of f, then
-	 *       x is set to the empty set (+EmptyBoxException)
-	 *       although f([x])\subseteq [y].
+	 *       x is set to the empty set although f([x])\subseteq [y]
+	 *       and the return value is "false".
 	 */
 	bool proj(const Function& f, const Domain& y, IntervalVector& x);
 
@@ -54,6 +55,14 @@ public:
 	 */
 	static const double RATIO;
 
+protected:
+	/**
+	 * Class used internally to interrupt the
+	 * backward procedure when an empty domain occurs.
+	 */
+	class EmptyBoxException { };
+
+public: // because called from CompiledFunction
 	inline void index_bwd (const ExprIndex&,   ExprLabel& , const ExprLabel& )            { /* nothing to do */ }
 	       void vector_bwd(const ExprVector&,  ExprLabel** compL, const ExprLabel& result);
 	inline void symbol_bwd(const ExprSymbol& , const ExprLabel& )                             { /* nothing to do */ }

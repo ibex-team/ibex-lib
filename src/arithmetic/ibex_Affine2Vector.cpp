@@ -18,7 +18,7 @@ namespace ibex {
 
 
 IntervalVector& IntervalVector::operator=(const Affine2Vector& x) {
-	assert(size()==x.size());
+	resize(x.size()); // see issue #10
 	for (int i = 0; i < size(); i++){
 		vec[i] = x[i].itv();
 	}
@@ -316,7 +316,8 @@ Affine2Vector operator*(const Affine2& x1, const Vector& x2) {
 Affine2Vector& Affine2Vector::inflate(double rad1)                              { return _inflate(*this,rad1); }
 Affine2Vector  Affine2Vector::subvector(int start_index, int end_index) const   { return _subvector(*this,start_index,end_index); }
 void           Affine2Vector::put(int start_index, const Affine2Vector& subvec) { _put(*this, start_index, subvec); }
-Affine2Vector& Affine2Vector::operator=(const Affine2Vector& x)                 { return _assign(*this,x); }
+Affine2Vector& Affine2Vector::operator=(const Affine2Vector& x)                 { resize(x.size()); // see issue #10
+                                                                                  return _assign(*this,x); }
 Affine2Vector& Affine2Vector::operator=(const IntervalVector& x)                { return _assign(*this,x); }
 bool           Affine2Vector::operator==(const Affine2Vector& x) const          { return _equals(*this,x); }
 bool           Affine2Vector::operator==(const IntervalVector& x) const         { return _equals(*this,x); }

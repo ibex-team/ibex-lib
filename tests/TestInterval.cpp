@@ -115,6 +115,7 @@ void TestInterval::rel_distance20() { check(Interval(1,4).rel_distance(Interval(
 void TestInterval::rel_distance21() { check(Interval(0,10).rel_distance(Interval(0,5)), 0.5); }
 
 void TestInterval::check_hull(const Interval& x, const Interval& z, const Interval& y_expected) {
+	//std::cout << x<< "  " << z<< "  "<<  (x | z) << std::endl;
 	check(x|z, y_expected);
 	check(z|x, y_expected);
     check((Interval(x)|=z), y_expected);
@@ -234,8 +235,12 @@ void TestInterval::is_bisectable01()      { TEST_ASSERT(!Interval::EMPTY_SET.is_
 void TestInterval::is_bisectable02()      { TEST_ASSERT(!Interval(DBL_MAX,POS_INFINITY).is_bisectable()); }
 void TestInterval::is_bisectable03()      { TEST_ASSERT(!Interval(NEG_INFINITY,-DBL_MAX).is_bisectable()); }
 void TestInterval::is_bisectable04()      { TEST_ASSERT(!Interval(0,ibex::next_float(0)).is_bisectable()); }
-void TestInterval::is_bisectable05()      { TEST_ASSERT(Interval(0,ibex::next_float(ibex::next_float(0))).is_bisectable()); }
-
+void TestInterval::is_bisectable05()      {	TEST_ASSERT(Interval(0,ibex::next_float(ibex::next_float(0))).is_bisectable());}
+void TestInterval::is_bisectable06()      {TEST_ASSERT(Interval(10,ibex::next_float(ibex::next_float(10))).is_bisectable());}
+void TestInterval::is_bisectable07()      {TEST_ASSERT(Interval(ibex::previous_float(ibex::previous_float(0)),0).is_bisectable());}
+void TestInterval::is_bisectable08()      {TEST_ASSERT(Interval(ibex::previous_float(ibex::previous_float(10)),10).is_bisectable());}
+void TestInterval::is_bisectable09()      {TEST_ASSERT(!Interval(10,ibex::next_float(10)).is_bisectable()); }
+void TestInterval::is_bisectable10()      {TEST_ASSERT(!Interval(ibex::previous_float(0),0).is_bisectable()); }
 
 void TestInterval::integer01() {
 	Interval x=Interval::EMPTY_SET; bwd_integer(x); check(x,Interval::EMPTY_SET);
@@ -294,6 +299,7 @@ void TestInterval::mid06() {
 void TestInterval::mid07() {
 	Interval x(2.7629416257693772963,2.7629416257693835135);
 	Interval y=x;
+	//cout.precision(15);
 	//cout << "x=" << y << endl;
 	static double m=x.mid();
 	//cout << "milieu = " << m << endl;

@@ -24,18 +24,14 @@ void SepBoundaryCtc::separate(IntervalVector& x_in, IntervalVector& x_out) {
 
 	IntervalVector box = x_in;
 	IntervalVector box0 = box;
-	try {
-		ctc_boundary.contract(box);
 
-		// [gch] not sure the following line is necessary.
-		// If  box==box0 the diff will simply return a
-		// zero-sized array
+	ctc_boundary.contract(box);
 
-		if (box==box0) return;     // nothing contracted.
+	// [gch] not sure the following line is necessary.
+	// If  box==box0 the diff will simply return a
+	// zero-sized array
 
-	} catch(EmptyBoxException& e) {
-
-	}
+	if (box==box0) return;     // nothing contracted.
 
 	x_in = box; x_out = box;
 
@@ -54,12 +50,12 @@ void SepBoundaryCtc::separate(IntervalVector& x_in, IntervalVector& x_out) {
 	 * for every one the is_inside test.
 	 *
 	 */
-	for(unsigned int i = 0; i < n; i++) {
+	for(int i = 0; i < n; i++) {
 		// try to classify the box using first the midpoint:
 		Vector candidate_pt=rest[i].mid();
 
 		// or using random points NB_SAMPLES times
-        for (unsigned int k=0; k<NB_SAMPLES; k++) {
+        for (int k=0; k<NB_SAMPLES; k++) {
 
 			res = is_inside.test(candidate_pt);
 

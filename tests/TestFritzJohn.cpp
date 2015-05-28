@@ -35,15 +35,14 @@ void TestFritzJohn::test01() {
 	FritzJohnCond fj(sys);
 
 	CtcHC4 hc4(fj.ctrs);
-	double s=::sqrt(2)/2.0;
+	//double s=::sqrt(2)/2.0;
 	double _box[][2] = {{0.7,0.8},{0.7,0.8},{0,1},{NEG_INFINITY,POS_INFINITY}};
 
 	IntervalVector box(4,_box);
-	try {
-		hc4.contract(box);
-	} catch(EmptyBoxException& e) {
-		TEST_ASSERT(false);
-	}
+
+	hc4.contract(box);
+
+	TEST_ASSERT(!box.is_empty());
 
 	Interval& u=box[2];
 	Interval& l=box[3];

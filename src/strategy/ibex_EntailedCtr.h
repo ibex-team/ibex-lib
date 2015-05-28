@@ -91,7 +91,7 @@ protected:
 	const NormalizedSystem* norm_sys;
 
 	/*
-	 * xxx_entailed[i]=true => the ith constriant is entailed
+	 * xxx_entailed[i]=true => the ith constraint is entailed
 	 * for either the normalized/original system.
 	 */
 	bool *orig_entailed;

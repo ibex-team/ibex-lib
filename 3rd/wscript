@@ -80,62 +80,73 @@ def configure (conf):
 
 	#####################################################################################################
 	# allow only one interval lib
-	with_any = False
-	for w in with_bias, with_gaol, with_filib:
-		if w is not None:
-			if with_any:
-				conf.fatal ("cannot use --with-gaol/--with-bias/--with-filib together")
-			with_any = True
-
-	if not with_any:
-		# try to find FILIB
-		has_h = conf.check_cxx (header_name	= "interval/interval.hpp",mandatory=False)
-		has_l = conf.check_cxx (lib = ["prim"],	uselib_store = "IBEX_DEPS",mandatory=False)
+	
+	if conf.env.WITHOUT_ROUNDING:
+		with_any = False
+		for w in with_bias, with_gaol, with_filib:
+			if w is not None:
+					conf.fatal ("cannot use --with-gaol/--with-bias/--with-filib with the option --without-rounding")
+		conf.env.INTERVAL_LIB = "DIRECT"
+		conf.env.append_unique ("CXXFLAGS_IBEX_DEPS", ["-frounding-math","-ffloat-store"])
+		Logs.pprint ("BLUE","The rounding mode of the Interval arithmetic is disable.")
 		
-		if (has_h and has_l):
-			with_any = True
-			conf.env.INTERVAL_LIB = "FILIB"
-			if conf.env.COMPILER_CXX == "g++":
-				conf.env.append_unique ("CXXFLAGS_IBEX_DEPS", ["-frounding-math","-ffloat-store"])
-				
-			if conf.env.DEST_CPU == "x86" and not conf.options.DISABLE_SSE2:
-				conf.env.append_unique ("CXXFLAGS_IBEX_DEPS", ["-msse2", "-mfpmath=sse"])
-				
-			Logs.pprint ("BLUE","The Interval arithmetic is the installed version of FILIP")
-
-	if not with_any:
-		# try to find GAOL
-		has_h = conf.check_cxx (header_name = ["gaol/gaol.h", "gaol/gaol_interval.h"],mandatory=False)
-		has_l = conf.check_cxx (lib=["gaol", "ultim", "gdtoa"], uselib_store="IBEX_DEPS",mandatory=False)
-		
-		if (has_h and has_l):
-			with_any = True
-			conf.switch_to_32bits()
-			conf.env.INTERVAL_LIB = "GAOL"
-			Logs.pprint ("BLUE","The Interval arithmetic is the installed version of GAOL")
+	else :
+		with_any = False
+		for w in with_bias, with_gaol, with_filib:
+			if w is not None:
+				if with_any:
+					conf.fatal ("cannot use --with-gaol/--with-bias/--with-filib together")
+				with_any = True
+	
+		if not with_any:
+			# try to find FILIB
+			has_h = conf.check_cxx (header_name	= "interval/interval.hpp",mandatory=False)
+			has_l = conf.check_cxx (lib = ["prim"],	uselib_store = "IBEX_DEPS",mandatory=False)
 			
-
-	if not with_any:
-		# try to find Profil/BIAS
-		has_h = conf.check_cxx (header_name	= "BIAS/BiasF.h",mandatory=False)
-		has_l = conf.check_cxx (lib = ["Profil", "Bias", "lr"],	uselib_store = "IBEX_DEPS",mandatory=False)
-		
-		if (has_h and has_l):
-			with_any = True
-			conf.env.INTERVAL_LIB = "BIAS"
-			Logs.pprint ("BLUE","The Interval arithmetic is the installed version of Profil/BIAS")
-
-	if not with_any:
-		# no lib selected
-		# -> will build one if needed
-		if (conf.env.DEST_CPU == "x86_64") or (conf.env.DEST_OS=="win32"):
-			# gaol not working on 64 bit cpu -> use filib instead
-			Logs.pprint ("BLUE","By Default, the Interval arithmetic is FILIP")
-			with_filib = ''
-		else:
-			Logs.pprint ("BLUE","By Default, the Interval arithmetic is GOAL")
-			with_gaol = ''
-	##########################
+			if (has_h and has_l):
+				with_any = True
+				conf.env.INTERVAL_LIB = "FILIB"
+				if conf.env.COMPILER_CXX == "g++":
+					conf.env.append_unique ("CXXFLAGS_IBEX_DEPS", ["-frounding-math","-ffloat-store"])
+					
+				if conf.env.DEST_CPU == "x86" and not conf.options.DISABLE_SSE2:
+					conf.env.append_unique ("CXXFLAGS_IBEX_DEPS", ["-msse2", "-mfpmath=sse"])
+					
+				Logs.pprint ("BLUE","The Interval arithmetic is the installed version of FILIP")
+	
+		if not with_any:
+			# try to find GAOL
+			has_h = conf.check_cxx (header_name = ["gaol/gaol.h", "gaol/gaol_interval.h"],mandatory=False)
+			has_l = conf.check_cxx (lib=["gaol", "ultim", "gdtoa"], uselib_store="IBEX_DEPS",mandatory=False)
+			
+			if (has_h and has_l):
+				with_any = True
+				conf.switch_to_32bits()
+				conf.env.INTERVAL_LIB = "GAOL"
+				Logs.pprint ("BLUE","The Interval arithmetic is the installed version of GAOL")
+				
+	
+		if not with_any:
+			# try to find Profil/BIAS
+			has_h = conf.check_cxx (header_name	= "BIAS/BiasF.h",mandatory=False)
+			has_l = conf.check_cxx (lib = ["Profil", "Bias", "lr"],	uselib_store = "IBEX_DEPS",mandatory=False)
+			
+			if (has_h and has_l):
+				with_any = True
+				conf.env.INTERVAL_LIB = "BIAS"
+				Logs.pprint ("BLUE","The Interval arithmetic is the installed version of Profil/BIAS")
+	
+		if not with_any:
+			# no lib selected
+			# -> will build one if needed
+			if (conf.env.DEST_CPU == "x86_64") or (conf.env.DEST_OS=="win32"):
+				# gaol not working on 64 bit cpu -> use filib instead
+				Logs.pprint ("BLUE","By Default, the Interval arithmetic is FILIP")
+				with_filib = ''
+			else:
+				Logs.pprint ("BLUE","By Default, the Interval arithmetic is GOAL")
+				with_gaol = ''
+		##########################
 	
 	if with_bias is not None:
 		# build with bias
@@ -693,7 +704,7 @@ def configure (conf):
 	if conf.env.BUILD_FILIB:
 		log_start ("filib")
 		conf.env.FILIB = "filibsrc"
-		filib_dir = extract (conf.env.FILIB, "filibsrc-3.0.2.tar.gz")
+		filib_dir = extract (conf.env.FILIB, "filibsrc-3.0.2.2.tar.gz")
 
 		ibex_append_path ("INCLUDES", conf.env.FILIB)
 		ibex_append_path ("LIBPATH", os.path.join (filib_dir.abspath(), "libprim", ".libs"))
@@ -935,18 +946,20 @@ def build (bld):
 
 		with subdir (path):
 			if bld.cmd=="install":
-				cmd = ["install"]
+				cmd = [["install"]]
 			elif bld.cmd in ("uninstall", "clean"): 	
-				cmd = ["uninstall"]
+				cmd = [["uninstall"],["distclean"]]
 			else :
 				cmd = []
-			if bld.exec_command (
-				[bld.env.MAKE, "-j", str(bld.options.jobs)] + cmd,
-				cwd	= path,
-				stdout	= None,
-				stderr	= None,
-			):
-				bld.fatal ("failed to build filib")
+			# Try without and with -lz (soplex may be built without zlib)
+			for l in cmd:
+				if bld.exec_command (
+					[bld.env.MAKE, "-j", str(bld.options.jobs)] + l,
+					cwd	= path,
+					stdout	= None,
+					stderr	= None,
+				):
+					bld.fatal ("failed to build filib")
 	
 		bld.variant = ""
 	##################################
@@ -1015,10 +1028,10 @@ def distclean (ctx):
 	filib_dir = ctx.path.find_dir ("filibsrc")
 	if filib_dir and os.path.exists (os.path.join (filib_dir.abspath(), "Makefile")):
 		with subdir (filib_dir):
-			ctx.exec_command ("make uninstall", cwd = filib_dir.abspath())
+			ctx.exec_command ("make clean && make distclean", cwd = filib_dir.abspath())
 
 	ampl_dir = ctx.path.find_dir ("solvers")
 	if ampl_dir and os.path.exists (os.path.join (ampl_dir.abspath(), "Makefile")):
 		with subdir (ampl_dir):
-			ctx.exec_command ("make clean", cwd = ampl_dir.abspath())
+			ctx.exec_command ("make clean && make distclean", cwd = ampl_dir.abspath())
 

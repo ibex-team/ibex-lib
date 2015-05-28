@@ -62,6 +62,40 @@
 //	#define POS_INFINITY filib::primitive::compose(0,0x7FE,(1 << 21)-1,0xffffffff)
 	/** \brief IBEX_NAN: <double> representation of NaN */
 	#define IBEX_NAN filib::primitive::compose(0,0x7FF,1 << 19,0)
+#else
+#ifdef _IBEX_WITH_DIRECT_
+
+	/** \brief NEG_INFINITY: double representation of -oo */
+	#define NEG_INFINITY (-(1.0/0.0))
+	/** \brief POS_INFINITY: double representation of +oo */
+	#define POS_INFINITY  (1.0/0.0)
+
+	class DIRECT_INTERVAL {
+	public:
+	    double inf;
+	    double sup;
+	    bool isEmpty;
+
+		DIRECT_INTERVAL(void) : inf(0), sup(0), isEmpty(true) {}
+		DIRECT_INTERVAL(double a, double b) {
+			if (a==POS_INFINITY || b==NEG_INFINITY)
+			                 {inf = 0; sup = 0; isEmpty=true; }
+			else if  (a>=b)  {inf = b; sup = a; isEmpty=false;}
+			else             {inf = a; sup = b; isEmpty=false;}
+		}
+
+		DIRECT_INTERVAL(double a) : inf(a), sup(a), isEmpty(false) {}
+
+		/** assignment operator */
+		inline DIRECT_INTERVAL & operator= (DIRECT_INTERVAL const & o) {
+			this->inf = o.inf;
+			this->sup = o.sup;
+			this->isEmpty = o.isEmpty;
+			return *this;
+		}
+	};
+
+#endif
 #endif
 #endif
 #endif
@@ -502,16 +536,16 @@ class Interval {
      */
     operator const ExprConstant&() const;
 
-    //private:
+//private:
 #ifdef _IBEX_WITH_GAOL_
-	/* \brief Wrap the gaol-interval [x]. */
+    /* \brief Wrap the gaol-interval [x]. */
     Interval(const gaol::interval& x);
     /* \brief Assign this to the gaol-interval [x]. */
     Interval& operator=(const gaol::interval& x);
-	gaol::interval itv;
+    gaol::interval itv;
 #else
 #ifdef _IBEX_WITH_BIAS_
-	/* \brief Wrap the bias-interval [x]. */
+    /* \brief Wrap the bias-interval [x]. */
     Interval(const INTERVAL& x);
     /* \brief Assign this to the bias-interval [x]. */
     Interval& operator=(const INTERVAL& x);
@@ -521,13 +555,22 @@ class Interval {
 #ifdef _IBEX_WITH_FILIB_
     //typedef filib::interval<double, filib::native_switched,filib::i_mode_extended_flag> INTERVAL;
     typedef filib::interval<FI_BASE,FI_ROUNDING,FI_MODE> FI_INTERVAL;
-	/* \brief Wrap the filib-interval [x]. */
+    /* \brief Wrap the filib-interval [x]. */
     Interval(const FI_INTERVAL& x);
     /* \brief Assign this to the filib-interval [x]. */
     Interval& operator=(const FI_INTERVAL& x);
 
     FI_INTERVAL itv;
+#else
+#ifdef _IBEX_WITH_DIRECT_
 
+    /* \brief Wrap the direct-interval [x]. */
+    Interval(const DIRECT_INTERVAL& x);
+    /* \brief Assign this to the direct-interval [x]. */
+    Interval& operator=(const DIRECT_INTERVAL& x);
+
+    DIRECT_INTERVAL itv;
+#endif
 #endif
 #endif
 #endif
@@ -837,6 +880,11 @@ bool bwd_chi(const Interval& f, Interval& a, Interval& b, Interval& c);
  */
 bool bwd_integer(Interval& x);
 
+/** \brief Contract x and y w.r.t. the fact that they are equivalent modulo the period p.
+ *
+ */
+bool bwd_imod(Interval& x, Interval& y, const double& p);
+
 } // end namespace ibex
 
 #ifdef _IBEX_WITH_GAOL_
@@ -847,6 +895,10 @@ bool bwd_integer(Interval& x);
 #else
 #ifdef _IBEX_WITH_FILIB_
 #include "ibex_filib_Interval.h_"
+#else
+#ifdef _IBEX_WITH_DIRECT_
+#include "ibex_direct_Interval.h_"
+#endif
 #endif
 #endif
 #endif
@@ -955,6 +1007,10 @@ inline double distance(const Interval &x1, const Interval &x2) {
 #else
 #ifdef _IBEX_WITH_FILIB_
     	return x1.itv.dist(x2.itv);
+#else
+#ifdef _IBEX_WITH_DIRECT_
+    	return fabs(x1.lb()-x2.lb()) <fabs(x1.ub()-x2.ub()) ? fabs(x1.ub()-x2.ub()) : fabs(x1.lb()-x2.lb()) ;
+#endif
 #endif
 #endif
 #endif
@@ -975,62 +1031,38 @@ inline Interval chi(const Interval& a, const Interval& b, const Interval& c){
 	}
 }
 
-// ArcTan2 by Jordan Ninin (Sept 2013) car ni Gaol, ni Profil/Bias ni Filib n'implemente atan2
 inline Interval atan2(const Interval& y, const Interval& x) {
+
 	if (y.is_empty() || x.is_empty()) return Interval::EMPTY_SET;
 
-	if ( x.lb()> 0) {
-		return atan(y/x);
+	// we handle the special case x=[0,0] separately
+	else if (x==Interval::ZERO) {
+		if (y.lb()>=0)
+			if (y.ub()==0) return Interval::EMPTY_SET; // atan2(0,0) is undefined.
+			else return Interval::HALF_PI;
+		else if (y.ub()<=0) return -Interval::HALF_PI;
+		else return Interval(-1,1)*Interval::HALF_PI;
 	}
-	else if  (x.ub()< 0 && y.lb()>= 0) {
-		return atan(y/x)+Interval::PI;
+
+	else if (x.lb()>=0) {
+		return atan(y/x); // now, x.ub()>0 -> atan does not give an empty set
 	}
-	else if (x.ub() < 0 && y.ub()< 0) {
-		return atan(y/x)-Interval::PI;
-	}
-	else if (x.ub() < 0) {
-		return Interval(-1,1)*Interval::PI;
-	}
-	else if (x.contains(0.0) && y.contains(0.0) ) {
-		return Interval(-1,1)*Interval::PI;
-	}
-	else {
-		return 2*atan((sqrt(sqr(x)+sqr(y))-x)/y);
-	}
-}
-
-/*
-// ArcTan2 by Firas Khemane (feb 2010)
-inline Interval atan2(const Interval& b, const Interval& a) {
-	if (a.is_empty() || b.is_empty()) return Interval::EMPTY_SET;
-
-	if (( a.lb() > 0 && b.lb() > 0) || (  a.lb() > 0 &&   b.ub() < 0 )  || ( b.lb() < 0 && b.ub()> 0  && a.lb() > 0 ) )
-
-		return atan(b/a);
-
-	else if  ( a.lb()<=0  &&  a.ub()>0 )
-
-		return 2*atan(b/a);
-
-	else if  (a.ub()< 0 && b.lb()> 0)
-
-		return atan(b/a)+Interval::PI;
-
-	else if (a.ub() < 0 && b.ub()< 0)
-
-		return atan(b/a)-Interval::PI;
-
-	else if (b.lb() < 0 && b.ub() > 0 && a.ub()< 0 ) {
-
-		if (  (atan(b/a)+Interval::PI).lb() <= (atan(b/a)-Interval::PI).ub() )
-
-			return 2*INTERVAL((atan(b/a)+Interval::PI).lb(), (atan(b/a)-Interval::PI).ub());
-
+	else if (x.ub()<=0) {
+		if (y.lb()>=0)
+			return atan(y/x)+Interval::PI; // x.lb()<0
+		else if (y.ub()<0)
+			return atan(y/x)-Interval::PI;
 		else
-			return 2*INTERVAL((atan(b/a)-Interval::PI).lb() , (atan(b/a)+Interval::PI).ub() );
+			return Interval(-1,1)*Interval::PI;
+	} else {
+		if (y.lb()>=0)
+			return atan(y/x.ub()) | (atan(y/x.lb()) + Interval::PI);
+		else if (y.ub()<=0)
+			return (atan(y/x.lb())-Interval::PI) | atan(y/x.ub());
+		else
+			return Interval(-1,1)*Interval::PI;
 	}
 }
-*/
 
 inline bool bwd_add(const Interval& y, Interval& x1, Interval& x2) {
 	if ((x1 &= y-x2).is_empty()) { x2.set_empty(); return false; }
@@ -1053,18 +1085,13 @@ inline bool bwd_div(const Interval& y, Interval& x1, Interval& x2) {
 }
 
 inline bool bwd_sqrt(const Interval& y, Interval& x) {
-    if (y.ub()<0)
-    {
-    	x.set_empty();
-    } 
-   	else if (y.lb()<0) 
-   	{
+	if (y.is_empty() || y.ub()<0) {
+		x.set_empty();
+	} else if (y.lb()<0) {
 		x &= sqr(Interval(0,y.ub()));
-    } 
-    else 
-    {
-    	x &= sqr(y);
-    }
+	} else  {
+		x &= sqr(y);
+	}
 	return !x.is_empty();
 }
 
@@ -1094,6 +1121,11 @@ inline bool bwd_asin(const Interval& y,  Interval& x) {
 }
 
 inline bool bwd_atan(const Interval& y,  Interval& x) {
+
+	if (y.is_empty()) {
+		x.set_empty();
+		return false;
+	}
 
 	// Note: if y.ub>pi/2 or y.lb<-pi/2, tan(y) gives (-oo,oo).
 	// so the implementation is not as simple as x &= tan(y).
@@ -1138,7 +1170,7 @@ inline bool bwd_atan(const Interval& y,  Interval& x) {
 
 
 inline bool bwd_acosh(const Interval& y,  Interval& x) {
-	if (y.ub()<0.0) {
+	if (y.is_empty() || y.ub()<0.0) {
 		x.set_empty(); return false;
 	}
 	else {
@@ -1159,20 +1191,30 @@ inline bool bwd_atanh(const Interval& y,  Interval& x) {
 
 inline bool bwd_max(const Interval& y, Interval& x1, Interval& x2) {
 
+	if (y.is_empty()) {
+		x1.set_empty();
+		x2.set_empty();
+		return false;
+	}
+
 	/* ---- Disjoint intervals ---- */
 	if (x2.lb()>x1.ub() || y.lb()>x1.ub()) {
 		/* then, max(x,x2) is necessarily x2 */
-		x2 &= y; return !x2.is_empty();
+		if ((x2 &= y).is_empty()) { x1.set_empty(); return false;}
+		else return true;
 	} else if (x1.lb()>x2.ub() || y.lb()>x2.ub()) {
-		x1 &= y; return !x1.is_empty();
+		if ((x1 &= y).is_empty()) { x2.set_empty(); return false;}
+		else return true;
 	}
 	/*------------------------------*/
 
 	if (y.ub()<x1.lb() || y.ub()<x2.lb()) {
+		x1.set_empty();
+		x2.set_empty();
 		return false; // inconsistency
 	}
 
-	/* At this point, x, y and y all mutually intersect. */
+	/* At this point, x1, x2 and y all mutually intersect. */
 	if (x1.ub()>y.ub())
 		x1=Interval(x1.lb(),y.ub());
 	if (x2.ub()>y.ub())
@@ -1186,7 +1228,11 @@ inline bool bwd_min(const Interval& y, Interval& x1, Interval& x2) {
 	Interval mx1=-x1;
 	Interval mx2=-x2;
 
-	if (!bwd_max(-y,mx1,mx2)) return false;
+	if (!bwd_max(-y,mx1,mx2)) {
+		x1.set_empty();
+		x2.set_empty();
+		return false;
+	}
 
 	x1=-mx1;
 	x2=-mx2;
@@ -1194,6 +1240,12 @@ inline bool bwd_min(const Interval& y, Interval& x1, Interval& x2) {
 }
 
 inline bool bwd_sign(const Interval& y,  Interval& x) {
+
+	if (y.is_empty()) {
+		x.set_empty();
+		return false;
+	}
+
 	if(y.lb()>0)
 		x &= Interval::POS_REALS;
 	else if(y.ub()<0)
@@ -1202,60 +1254,190 @@ inline bool bwd_sign(const Interval& y,  Interval& x) {
 }
 
 
+// probably not the most efficient implementation ever...
 inline bool bwd_atan2(const Interval& theta, Interval& y, Interval& x) {
-	bool b=true;
-	if (theta.is_empty()) {
-		x.set_empty(); y.set_empty();
-		b=false;
-	}
-	// not_implemented("bwd_atan2 non implemented yet");
-	
-    if(x.ub()>0 || !y.contains(0.0)) {
-        Interval s1,s2,s3,s4,s5,s6,s7;
-        s1 = sqr(x);
-        s2 = sqr(y);
-        s3 = s1 + s2;
-        s4 = sqrt(s3);
-        s5 = s4 - x;
-        s6 = s5/y;
-        s7 = atan(s6);
-        s7 &= 2*theta;
-        b &= bwd_atan(s7,s6);
-        b &= bwd_div(s6,s5,y);
-        b &= bwd_sub(s5,s4,x);
-        b &= bwd_sqrt(s4,s3);
-        b &= bwd_add(s3,s1,s2);
-        b &= bwd_sqr(s2,y);
-        b &= bwd_sqr(s1,x);
-    } else {
-        not_implemented("bwd_atan2 when x contains 0 and y contains 0");
-    }
 
-    //  <=> cos(Theta)*X - sin(Theta)*Y > 0;
-	//      sin(Theta)*X + cos(Theta)*Y = 0
-/*
-	Interval costheta, sintheta, xcostheta, xsintheta, ycostheta, ysintheta, equ1, equ2;
-	costheta = cos(theta);
-	sintheta = sin(theta);
-	for (int i=0; b && (i<1);i++) {
-		xcostheta = x*costheta;
-		xsintheta = x*sintheta;
-		ycostheta = y*costheta;
-		ysintheta = y*sintheta;
-		equ1 = (xcostheta - ysintheta)& Interval::POS_REALS;
-		equ2 = (xsintheta + ycostheta)& Interval::ZERO;
-		b= b && (!equ1.is_empty()||!equ2.is_empty());
-		b= b && bwd_sub(equ1, xcostheta, ysintheta);
-		b= b && bwd_add(equ2, xsintheta, ycostheta);
-		b= b && bwd_mul(xcostheta, x, costheta);
-		b= b && bwd_mul(xsintheta, x, sintheta);
-		b= b && bwd_mul(ysintheta, y, sintheta);
-		b= b && bwd_mul(ycostheta, y, costheta);
+	// half-plane x>0
+	Interval theta_xpos = theta  & Interval(-1,1)*Interval::HALF_PI;
+	// upper left quadrant
+	Interval theta_xneg_ypos = theta  & (Interval::HALF_PI | Interval::PI);
+	// lower left quadrant
+	Interval theta_xneg_yneg = theta  & -(Interval::HALF_PI | Interval::PI);
+
+	Interval xres= Interval::EMPTY_SET;
+	Interval yres= Interval::EMPTY_SET;
+
+	if (!theta_xpos.is_empty()) {
+
+		Interval xpos=x & Interval::POS_REALS;
+		Interval yall=y;
+
+		if (theta_xneg_ypos.is_empty() || theta_xneg_yneg.is_empty()) { // otherwise, all is valid (useless to contract)
+			Interval z=yall/xpos;
+			bwd_atan(theta_xpos,z);
+			bwd_div(z,yall,xpos);
+
+		}
+		xres |= xpos;
+		yres |= yall;
+
+		// because atan is not defined for pi/2 and -pi/2
+		if (theta_xpos.lb()>=Interval::HALF_PI.lb()) {
+			xres |= (x & Interval::ZERO);
+			yres |= (y & Interval::POS_REALS);
+		} else if (theta_xpos.ub()<=-Interval::HALF_PI.lb()) {
+			xres |= (x & Interval::ZERO);
+			yres |= (y & Interval::NEG_REALS);
+		}
 	}
-*/
-	return b;
+
+	if (!theta_xneg_ypos.is_empty()) {
+		Interval xneg=x & Interval::NEG_REALS;
+		Interval ypos=y & Interval::POS_REALS;
+		Interval z=ypos/xneg;
+		bwd_atan(theta_xneg_ypos - Interval::PI,z);
+		bwd_div(z,ypos,xneg);
+		xres |= xneg;
+		yres |= ypos;	}
+
+	if (!theta_xneg_yneg.is_empty()) {
+		Interval xneg=x & Interval::NEG_REALS;
+		Interval yneg=y & Interval::NEG_REALS;
+		Interval z=yneg/xneg;
+		bwd_atan(theta_xneg_yneg + Interval::PI,z);
+		bwd_div(z,yneg,xneg);
+		xres |= xneg;
+		yres |= yneg;
+	}
+
+	x=xres;
+	y=yres;
+
+	return !x.is_empty();
 }
 
+
+//inline bool bwd_atan2(const Interval& theta, Interval& y, Interval& x) {
+//
+//	if (theta.is_empty()) {
+//		x.set_empty(); y.set_empty();
+//		return false;
+//	}
+//
+//    //Lower half of upper right quadrant
+//    if(theta.is_subset(Interval(0,M_PI/4.)))
+//    {
+//        x = (x&Interval::POS_REALS) & ( (y&Interval::POS_REALS) * (1/tan(theta&Interval(0,M_PI/4.))) );
+//        y = (y&Interval::POS_REALS) & ( (x&Interval::POS_REALS) * (tan(theta&Interval(0,M_PI/4.))) );
+//    }
+//
+//    //Upper half of upper right quadrant
+//    else if(theta.is_subset(Interval(M_PI/4.,M_PI/2.)))
+//    {
+//        bwd_atan2(M_PI/2.-theta,x,y);
+//    }
+//
+//    //Upper right quadrant
+//    else if(theta.is_subset(Interval(0,M_PI/2)))
+//    {
+//        Interval x1=x; Interval y1=y; Interval x2=x; Interval y2=y;
+//        Interval theta1(theta.lb(),M_PI/4.), theta2(M_PI/4., theta.ub());
+//        bwd_atan2(theta1,y1,x1);
+//        bwd_atan2(theta2,y2,x2);
+//        x=x1|x2; y=y1|y2;
+//    }
+//
+//    //Upper left quadrant
+//    else if(theta.is_subset(Interval(M_PI/2,M_PI)))
+//    {
+//        Interval x2=-x;
+//        Interval theta2=M_PI-theta;
+//        bwd_atan2(theta2,y,x2);
+//        x=-x2;
+//    }
+//
+//    //Lower left quadrant
+//    else if(theta.is_subset(Interval(M_PI,3*M_PI/2)))
+//    {
+//        Interval y2=-y;
+//        Interval x2=-x;
+//        Interval theta2=theta-M_PI;
+//        bwd_atan2(theta2,y2,x2);
+//        x=-x2; y=-y2;
+//    }
+//
+//    //Lower right quadrant
+//    else if(theta.is_subset(Interval(3*M_PI/2,2*M_PI)))
+//    {
+//        Interval x2=x;
+//        Interval y2=-y;
+//        Interval theta2=2*M_PI-theta;
+//        bwd_atan2(theta2,y2,x2);
+//        x=x2; y=-y2;
+//    }
+//
+//    //Upper bissection
+//    else if(theta.is_subset(Interval(0,M_PI))) {
+//        Interval theta1(theta.lb(),M_PI/2), theta2(M_PI/2, theta.ub());
+//        Interval x1=x; Interval y1=y; Interval x2=x; Interval y2=y;
+//        if(theta.lb() != M_PI/2) bwd_atan2(theta1,y1,x1);
+//        if(theta.ub() != M_PI/2) bwd_atan2(theta2,y2,x2);
+//        x=x1|x2; y=y1|y2;
+//    }
+//
+//    //Left bissection
+//    else if(theta.is_subset(Interval(0,3*M_PI/2))) {
+//        Interval theta1(theta.lb(),M_PI), theta2(M_PI, theta.ub());
+//        Interval x1=x; Interval y1=y; Interval x2=x; Interval y2=y;
+//        if(theta.lb() != M_PI) bwd_atan2(theta1,y1,x1);
+//        if(theta.ub() != M_PI) bwd_atan2(theta2,y2,x2);
+//        x=x1|x2; y=y1|y2;
+//    }
+//
+//    //Lower bissection
+//    else if(theta.is_subset(Interval(0,2*M_PI))) {
+//        Interval theta1(theta.lb(),3*M_PI/2), theta2(3*M_PI/2, theta.ub());
+//        Interval x1=x; Interval y1=y; Interval x2=x; Interval y2=y;
+//        if(theta.lb() != 3*M_PI/2) bwd_atan2(theta1,y1,x1);
+//        if(theta.ub() != 3*M_PI/2) bwd_atan2(theta2,y2,x2);
+//        x=x1|x2; y=y1|y2;
+//    }
+//
+//    //Theta diameter greater than 2PI then theta will be considered as [0,2PI]
+//    else if (theta.diam() > 2*M_PI)
+//    {
+//        Interval theta1(0,2*M_PI);
+//        bwd_atan2(theta1,x,y);
+//    }
+//
+//    // Modulo
+//    else
+//    {
+//        // We separate the intervals into 4 cases as imod does not support union.
+//        Interval theta1(0,M_PI/2.), theta2(M_PI/2., M_PI), theta3(M_PI, 3*M_PI/2.), theta4(3*M_PI/2., 2*M_PI);
+//        Interval thetaTmp(theta);
+//        bwd_imod(thetaTmp,theta1,2*M_PI);
+//        thetaTmp=theta;
+//        bwd_imod(thetaTmp,theta2,2*M_PI);
+//        thetaTmp=theta;
+//        bwd_imod(thetaTmp,theta3,2*M_PI);
+//        thetaTmp=theta;
+//        bwd_imod(thetaTmp,theta4,2*M_PI);
+//        Interval x1=x; Interval y1=y;
+//        bwd_atan2(theta1,y1,x1); // first quadrant
+//        Interval x2=x; Interval y2=y;
+//        bwd_atan2(theta2,y2,x2); // second quadrant
+//        Interval x3=x; Interval y3=y;
+//        bwd_atan2(theta3,y3,x3); // third quadrant
+//        Interval x4=x; Interval y4=y;
+//        bwd_atan2(theta4,y4,x4); // fourth quadrant
+//        x=(x1|x2)|(x3|x4); y=(y1|y2)|(y3|y4);
+//        // not_implemented("bwd_atan2 not implemented yet for theta outside [0,2*PI].");
+//    }
+//
+//
+//    return !x.is_empty() || !y.is_empty();
+//}
 
 inline bool bwd_chi(const Interval& f, Interval& a, Interval& b, Interval& c){
 	if      (a.ub()<=0) {if ((b &= f).is_empty()) { a.set_empty(); c.set_empty(); return false; } }
@@ -1275,6 +1457,44 @@ inline bool bwd_chi(const Interval& f, Interval& a, Interval& b, Interval& c){
 
 inline bool bwd_integer(Interval& x) {
 	return !(x = integer(x)).is_empty();
+}
+
+// Implements interval modulo with double period:  x = y mod(p)
+inline bool bwd_imod(Interval& x, Interval& y, const double& p) {
+    if (p <= 0.)
+    {
+        ibex_error("Modulo needs a strictly positive period p.");
+        return false;
+    }
+    if (y.diam()>p || x.diam()>p)
+        return false;
+    Interval r = (x-y)/p;
+    Interval ir = integer(r);
+    if (ir.is_empty()) // additional protection because an empty interval is considered degenerated.
+    {
+        x.set_empty(); y.set_empty();
+        return false;
+    }    
+    if (ir.is_degenerated())
+        bwd_sub(ir*p,x,y);
+    else if (ir.diam()==1.)
+    {
+        double ir1 = ir.lb();
+        double ir2 = ir.ub();
+        Interval x1 = x; Interval x2 = x;
+        Interval y1 = y; Interval y2 = y;
+        bwd_sub(Interval(ir1*p),x1,y1);
+        bwd_sub(Interval(ir2*p),x2,y2);
+        x = x1 | x2;
+        y = y1 | y2;
+    }
+    else
+    {
+        ibex_error("Modulo diameter error.");
+        return false;
+    }
+
+    return true;
 }
 
 } // end namespace ibex

@@ -20,13 +20,15 @@ CtcEmpty::CtcEmpty(Pdc& pdc, bool own) : Ctc(pdc.nb_var), pdc(pdc), own_pdc(own)
 void CtcEmpty::contract(IntervalVector& box) {
 	BoolInterval t= pdc.test(box);
 	switch (t) {
-	case YES: {
+	case YES:
 		box.set_empty();
-		throw EmptyBoxException();	break;
-	}
-	case NO:{
-		set_flag(INACTIVE); 	break;
-	}
+		set_flag(FIXPOINT);
+		break;
+	case NO:
+		// The constraint is inactive only if
+		// the test is monotonous w.r.t. inclusion
+		//	set_flag(INACTIVE);
+		break;
 	default: break;
 	}
 }

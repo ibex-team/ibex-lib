@@ -20,6 +20,7 @@
 #include "ibex_LinearRelaxCombo.h"
 #include "ibex_Array.h"
 #include "ibex_DefaultStrategy.cpp_"
+#include "ibex_Random.h"
 
 using namespace std;
 
@@ -90,7 +91,7 @@ DefaultSolver::DefaultSolver(System& sys, double prec) : Solver(rec(ctc(sys,prec
 		rec(new CellStack())),
 		sys(sys) {
 
-	srand(1);
+	RNG::srand(1);
 
 	data = *memory(); // keep track of my data
 
@@ -103,7 +104,7 @@ DefaultSolver::DefaultSolver(System& sys, const Vector& prec) : Solver(rec(ctc(s
 		rec(new CellStack())),
 		sys(sys) {
 
-	srand(1);
+	RNG::srand(1);
 
 	data = *memory(); // keep track of my data
 

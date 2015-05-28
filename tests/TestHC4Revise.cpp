@@ -47,7 +47,8 @@ void TestHC4Revise::add01() {
 	IntervalVector box1(2,res_xy);
 
 	//cout << hc4r.eval.f << endl;
-	TEST_ASSERT(box==box1);
+	check(box,box1);
+	TEST_ASSERT(box.is_superset(box1));
 }
 
 void TestHC4Revise::add02() {

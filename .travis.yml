@@ -4,7 +4,7 @@ python:
 # 
 before_install:
   - sudo apt-get update -q
-  - sudo apt-get install -y --force-yes python2.7 flex bison gcc g++ coinor-libclp-dev libcpptest-dev pkg-config
+  - sudo apt-get install -y --force-yes python2.7 flex bison gcc g++ libcpptest-dev pkg-config coinor-libclp-dev 
 # command to install dependencies
 install: 
   - cd 3rd && tar xvf soplex-1.7.1.tar && cd soplex-1.7.1 && make install && cd ../..
