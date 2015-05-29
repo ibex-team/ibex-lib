@@ -4,7 +4,7 @@
 // Author      : Jordan Ninin, Gilles Chabert
 // License     : See the LICENSE file
 // Created     : May 14, 2014
-// Last Update : May 14, 2014
+// Last Update : May 14, 2015
 //============================================================================
 
 #ifndef __IBEX_OPTIMCTC_H__
@@ -12,9 +12,6 @@
 
 #include "ibex_Bsc.h"
 #include "ibex_Ctc.h"
-#include "ibex_HC4Revise.h"
-#include "ibex_Backtrackable.h"
-#include "ibex_CellCostFunc.h"
 #include "ibex_CellDoubleHeap.h"
 #include "ibex_Function.h"
 #include "ibex_UnconstrainedLocalSearch.h"
@@ -60,14 +57,35 @@ public:
 	virtual ~OptimCtc();
 
 	/**
-	 * \brief Run the optimization.
-
-	 * \param init_box       -  the initial box
-	 * \param obj_init_bound - (optional) can be set when an initial upper
-	 *                         bound of the objective minimum is known a priori.
-	 *                         (this bound can be obtained, e.g., by a local solver).
+	 * \brief Return status of the optimizer
 	 */
-	void optimize(const IntervalVector& init_box, double obj_init_bound =POS_INFINITY);
+	typedef enum {SUCCESS, INFEASIBLE, NO_FEASIBLE_FOUND, UNBOUNDED_OBJ, TIME_OUT} Status;
+
+	/**
+	 * \brief Run the optimization.
+	 *
+	 * \param init_box             The initial box
+	 * \param obj_init_bound       (optional) can be set when an initial upper bound of the objective minimum is known a priori.
+	 *                             This bound can be obtained, e.g., by a local solver. This is equivalent to (but more practical
+	 *                             than) adding a constraint f(x)<=obj_init_bound.
+	 *
+	 * \return SUCCESS             If the global minimum (with respect to the precision required) has been found.
+	 *                             In particular, at least one feasible point has been found, less than obj_init_bound, and in the time limit.
+	 *
+	 *         INFEASIBLE          if no feasible point exist less than obj_init_bound. In particular, the function returns INFEASIBLE
+	 *                             if the initial bound "obj_init_bound" is LESS than the true minimum (this case is only possible if
+	 *                             goal_abs_prec and goal_rel_prec are 0). In the latter case, there may exist feasible points.
+	 *
+	 *         NO_FEASIBLE_FOUND   if no feasible point could be found less than obj_init_bound. Contrary to INFEASIBLE,
+	 *                             infeasibility is not proven here. Warning: this return value is sensitive to the goal_abs_prec and
+	 *                             goal_rel_prec parameters. The upperbounding makes the optimizer only looking for points less than
+	 *                             min { (1-goal_rel_prec)*obj_init_bound, obj_init_bound - goal_abs_prec }.
+	 *
+	 *         UNBOUNDED_OBJ       the objective function seems unbounded (tends to -oo).
+	 *
+	 *         TIMEOUT             time is out.
+	 */
+	Status optimize(const IntervalVector& init_box, double obj_init_bound=POS_INFINITY);
 
 	/**
 	 * \brief Displays on standard output a report of the last call to #optimize(const IntervalVector&).
@@ -143,12 +161,6 @@ public:
 	 2 for printing each handled node */
 	int trace;
 
-	/** Probability to choose the second criterion in node selection in percentage
-	 * integer in [0,100] default value 50
-	 * the value 0 corresponds to use a single criterion for node selection (the classical one : minimizing the lower bound of the estimate of the objective)
-	 * the value 100 corresponds to use a single criterion for node selection (the second one used in buffer2) */
-	 int critpr;
-
 	/**
 	 * \brief Time limit.
 	 *
@@ -187,6 +199,13 @@ public:
 	/** The point satisfying the constraints corresponding to the loup */
 	Vector loup_point;
 
+	/**
+	 * \brief The bound on the objective given by the user, +oo otherwise.
+	 *
+	 * Used to see if at least a loup-point has been found.
+	 *
+	 */
+	double initial_loup;
 
 protected:
 		/**
@@ -211,7 +230,7 @@ protected:
 		 * </ul>
 		 *
 		 */
-		void handle_cell(Cell& c, const IntervalVector& init_box);
+		void handle_cell(Cell& c);
 
 		/**
 		 * \brief Contract and bound procedure for processing a box.
@@ -224,17 +243,8 @@ protected:
 		 * </ul>
 		 *
 		 */
-		void contract_and_bound(Cell& c, const IntervalVector& init_box);
+		void contract_and_bound(Cell& c);
 
-		/**
-		 * \brief Contraction procedure for processing a box.
-		 *
-		 * <ul>
-		 * <li> contract with the contractor ctc,
-		 * </ul>
-		 *
-		 */
-		 void contract(IntervalVector& box);
 
 		/**
 		 * \brief Update the uplo of non bisectable boxes
@@ -273,7 +283,7 @@ protected:
 		/**
 		 * \brief add the entire list of intervalVector in the buffer
 		 */
-		void add_buffer_pf(IntervalVector* list, int size);
+		void add_buffer(IntervalVector* list, int size);
 
 	
 private:
@@ -282,7 +292,7 @@ private:
 	/** Lower bound of the small boxes taken by the precision */
 	double uplo_of_epsboxes;
 
-	void draw_vibes( const IntervalVector& X0, const IntervalVector& X,const std::string color);
+	//void draw_vibes( const IntervalVector& X0, const IntervalVector& X,const std::string color);
 
 };
 
