@@ -285,10 +285,47 @@ SetNode* SetNode::union_(const IntervalVector& nodebox, const SetNode* other, co
 	else if (other->is_leaf()) {
 		return union_(nodebox, otherbox, ((SetLeaf*) other)->status, eps);
 	} else {
-		SetBisect* bisect_node = (SetBisect*) other;
-		SetNode* this2 = union_(nodebox, bisect_node->left, bisect_node->left_box(otherbox), eps);
-		// warning: cannot use this anymore (use this2 instead)
-		return this2->union_(nodebox, bisect_node->right, bisect_node->right_box(otherbox), eps);
+
+		// ******************************** balancing **************************************************
+		if (nodebox.max_diam()>otherbox.max_diam()) {
+
+			SetBisect* bis;
+
+			if (is_leaf()) {
+				int var=nodebox.extr_diam_index(false);
+				pair<IntervalVector,IntervalVector> p=nodebox.bisect(var);
+				double pt=p.first[var].ub();
+				assert(nodebox[var].interior_contains(pt));
+
+				bis = new SetBisect(var, pt);
+				bis->left  = new SetLeaf(((SetLeaf *) this)->status);
+				bis->right = new SetLeaf(((SetLeaf *) this)->status);
+				bis->left  = bis->left->union_(p.first, other, otherbox, eps);
+				bis->right = bis->right->union_(p.second, other, otherbox, eps);
+				delete this;
+			}
+			else {
+				bis = (SetBisect*) this;
+				bis->left  = bis->left->union_(bis->left_box(nodebox), other, otherbox, eps);
+				bis->right = bis->right->union_(bis->right_box(nodebox), other, otherbox, eps);
+			}
+
+			bis->left->father = bis;
+			bis->right->father = bis;
+			return bis->try_merge();
+
+		} else {
+			SetBisect* bisect_node = (SetBisect*) other;
+			SetNode* this2 = this->union_(nodebox, bisect_node->left, bisect_node->left_box(otherbox), eps);
+			// warning: cannot use this anymore (use this2 instead)
+			return this2->union_(nodebox, bisect_node->right, bisect_node->right_box(otherbox), eps);
+		}
+
+		// *********************************************************************************************
+
+//		SetBisect* bisect_node = (SetBisect*) other;
+//		SetNode* this2 = this->union_(nodebox, bisect_node->left, bisect_node->left_box(otherbox), eps);
+//		return this2->union_(nodebox, bisect_node->right, bisect_node->right_box(otherbox), eps);
 	}
 }
 

@@ -148,16 +148,18 @@ std::pair<SetNode*,IntervalVector> SetLeaf::subset(const IntervalVector& nodebox
 SetNode* SetLeaf::union_(const IntervalVector& nodebox, const IntervalVector& x, BoolInterval xstatus, double eps) {
 	//cout << nodebox << " " << to_string(status)  << " union << x << " ";
 
-	if (status==YES || xstatus>YES) {
+	if (status==YES || xstatus==NO || status==xstatus) {
 		//cout << "this\n";
 		return this;
 	} else if (nodebox.is_subset(x)) {
-		status=YES;
+		status=xstatus; // NO -> MAYBE or MAYBE -> IN
 		 //cout << "this\n";
 		return this;
-	} else {
+	} else if (!nodebox.intersects(x))
+		return this;
+	else {
 		// status=(MAYBE | NO), xstatus=(YES).
-		SetNode* new_node=diff(nodebox, x, status, YES, eps);
+		SetNode* new_node=diff(nodebox, x, status, xstatus, 0); //eps);
 		delete this; // warning: suicide, don't move it before previous line
 		//cout << "gives "; new_node->print(cout,nodebox,0);
 		return new_node;

@@ -122,13 +122,10 @@ SetNode* SetBisect::inter_rec(bool sync, const IntervalVector& nodebox, Sep& sep
 }
 
 SetNode* SetBisect::union_(const IntervalVector& nodebox, const IntervalVector& x, BoolInterval x_status, double eps) {
-	assert(x_status<=MAYBE);
-
-	if (x_status>YES) {
+	if (x_status==NO) {
 		return this;
 	}
-
-    if (nodebox.is_subset(x)) {
+    if (x_status==YES && nodebox.is_subset(x)) {
 		delete this; // warning: suicide
 		return new SetLeaf(YES);
 	} else {
