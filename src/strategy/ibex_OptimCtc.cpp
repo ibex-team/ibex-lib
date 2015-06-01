@@ -28,15 +28,15 @@ const double OptimCtc::default_goal_abs_prec = 1e-07;
 
 OptimCtc::OptimCtc( Ctc& ctc_out, Ctc&  ctc_in, Function& f_cost, Bsc& bsc, double prec,
 		double goal_rel_prec, double goal_abs_prec) :
-					n(f_cost.nb_var()),
-					_ctc_out(ctc_out), _ctc_in(ctc_in), _f_cost(f_cost),
-					_localopti(f_cost, IntervalVector(f_cost.nb_var())),
-					bsc(bsc),
-					buffer(*new CellCostPFlb(), *new CellCostPFub()),
-					prec(prec), goal_rel_prec(goal_rel_prec), goal_abs_prec(goal_abs_prec),
-					trace(false), timeout(1e08), time(0), nb_cells(0),
-					loup(POS_INFINITY), uplo(NEG_INFINITY),	loup_point(n),initial_loup(POS_INFINITY),
-					loup_changed(false),  uplo_of_epsboxes(POS_INFINITY) {
+							n(f_cost.nb_var()),
+							_ctc_out(ctc_out), _ctc_in(ctc_in), _f_cost(f_cost),
+							_localopti(f_cost, IntervalVector(f_cost.nb_var())),
+							bsc(bsc),
+							buffer(*new CellCostPFlb(), *new CellCostPFub()),
+							prec(prec), goal_rel_prec(goal_rel_prec), goal_abs_prec(goal_abs_prec),
+							trace(false), timeout(1e08), time(0), nb_cells(0),
+							loup(POS_INFINITY), uplo(NEG_INFINITY),	loup_point(n),initial_loup(POS_INFINITY),
+							loup_changed(false),  uplo_of_epsboxes(POS_INFINITY) {
 
 
 	// =============================================================
@@ -96,7 +96,7 @@ bool OptimCtc::localsearch(const IntervalVector* box, int nb) {
 // a feasible point is a point contracted by ctc_in or a point INACTIVE with ctc_out
 bool OptimCtc::direct_try( const Vector point) {
 	bool loup_change=false;
-	Interval tmp = _f_cost.eval(point);
+	Interval tmp = _f_cost.eval(IntervalVector(point));
 	if (tmp.ub()<loup) {
 		BitSet flags(BitSet::empty(Ctc::NB_OUTPUT_FLAGS));
 
@@ -231,26 +231,10 @@ void OptimCtc::add_buffer(IntervalVector* list, int size) {
 
 void OptimCtc::contract_and_bound(Cell& c) {
 
-	/*======================== contract y with y<=loup ========================*/
 
-	double ymax;
-	if (loup==POS_INFINITY) ymax=POS_INFINITY;
-	else ymax= compute_ymax()+1.e-15;
 
 	OptimData *celldata = &(c.get<OptimData>());
 
-	// Contract with  f_cost(c.box) <= loup
-	if (ymax <=celldata->pf.ub()) {
-
-		IntervalVector save_box(c.box);
-		celldata->pf &= Interval(NEG_INFINITY,ymax);
-		HC4Revise(AFFINE_MODE).proj(_f_cost,Domain(celldata->pf),c.box); /// equivalent to :_f_cost.backward(c.pf,c.box);
-		//draw_vibes(save_box,c.box,"[g]");
-		if (c.box.is_empty()) {
-			//draw_vibes(c.box,IntervalVector(1,Interval::EMPTY_SET),"[g]");
-			return;
-		}
-	}
 
 	/*================ contract x with Ctc_out ================*/
 	//cout << " [contract_out]  x before=" << c.box << endl;
@@ -267,7 +251,6 @@ void OptimCtc::contract_and_bound(Cell& c) {
 			celldata->pu =1;
 		}
 		if (c.box.is_empty()) return;
-
 	}
 	//cout << " [contract_out]  x after=" << c.box << endl;
 	//cout << " [contract_out]  y after=" << y << endl;
@@ -278,9 +261,8 @@ void OptimCtc::contract_and_bound(Cell& c) {
 	//cout << " [contract_in]  x before=" << c.box << endl;
 	//cout << " [contract_in]  y before=" << y << endl;
 
-	IntervalVector * box_ok;
-	int size_box_ok = 0;
 
+	bool loup_ch = false;
 	// Contract only if all the constraint are not satisfied
 	if (celldata->pu <1)	{
 
@@ -292,57 +274,74 @@ void OptimCtc::contract_and_bound(Cell& c) {
 			if (flags[Ctc::INACTIVE]) {
 				// all the constraint are active ( = the entire box is unfeasible)
 				c.box.set_empty();
+				return;
 			}
 		} else {
+			IntervalVector * box_ok;
+			int size_box_ok = 0;
 			size_box_ok = c.box.diff(tmp,box_ok);
 			if ((size_box_ok==1)&&(box_ok[0].is_empty())) {
-				size_box_ok=0;
 				delete[] box_ok;
 			}
 			else {
 				c.box = tmp;
+				// Local Optimization on all the feasible box stored in box_ok
+				loup_ch = localsearch(box_ok,size_box_ok);
+				/*=====================add box_ok in the buffer=======================*/
+				add_buffer(box_ok,size_box_ok);
+				delete [] box_ok;
 			}
-		}
-
-		if (c.box.is_empty()) {
-			//draw_vibes(c.box,IntervalVector(1,Interval::EMPTY_SET),"b");
-			return;
 		}
 	}
 
 	//cout << " [contract_in]  x after=" << c.box << endl;
 	//cout << " [contract_in]  y after=" << y << endl;
-	/*====================================================================*/
+
 
 	/*========================= update loup =============================*/
-	// Local Optimization on all the feasible box stored in box_ok
-	bool loup_ch = localsearch(box_ok,size_box_ok);
 
-	// c.box is feasible
+	// necessary after the local search
+	if (c.box.is_empty()) 	return;
+
 	if (celldata->pu==1) {
+		// c.box is feasible
 		// Local Optimization
 		loup_ch = (loup_ch || localsearch(&c.box,1));
 	}
 	else  {
+		// c.box is not entirely feasible
 		// try on the middle point
 		loup_ch = (loup_ch || direct_try(c.box.mid()));
 	}
 
-	// update of the upper bound of y in case of a new loup found
-	if (loup_ch && (compute_ymax() <= celldata->pf.lb()))  {
+
+	/*======================== contract box with f_cost<=loup ========================*/
+	double ymax;
+	if (loup==POS_INFINITY) ymax=POS_INFINITY;
+	else ymax= compute_ymax()+1.e-15;
+
+	// Contract with  f_cost(c.box) <= loup
+	celldata->compute_pf(_f_cost, c.box);
+	if (ymax <= celldata->pf.lb())  {
 		c.box.set_empty();
+		return;
+	}
+	else if (ymax <=celldata->pf.ub()) {
+		IntervalVector save_box(c.box);
+		celldata->pf &= Interval(NEG_INFINITY,ymax);
+		HC4Revise(AFFINE_MODE).proj(_f_cost,Domain(celldata->pf),c.box); /// equivalent to :_f_cost.backward(c.pf,c.box);
+		//draw_vibes(save_box,c.box,"[g]");
+		if (c.box.is_empty()) {
+			//draw_vibes(c.box,IntervalVector(1,Interval::EMPTY_SET),"[g]");
+			return;
+		}
 	}
 
 	loup_changed |= loup_ch;
 
 	/*====================================================================*/
 
-	/*=====================add box_ok in the buffer=======================*/
-	if (size_box_ok>0) {
-		add_buffer(box_ok,size_box_ok);
-		delete [] box_ok;
-		size_box_ok=0;
-	}
+
 	/*====================================================================*/
 	/*====================================================================*/
 	// [gch] The case (!c.box.is_bisectable()) seems redundant
@@ -353,6 +352,7 @@ void OptimCtc::contract_and_bound(Cell& c) {
 		// rem2: do not use a precision contractor here since it would make the box empty (and y==(-inf,-inf)!!)
 		// rem 3 : the boxes with no bisectable  domains  should be catched for avoiding infinite bisections
 		direct_try(c.box.mid());
+		celldata->compute_pf(_f_cost, c.box);
 		update_uplo_of_epsboxes(celldata->pf.lb());
 		c.box.set_empty();
 		return;
@@ -609,6 +609,6 @@ void OptimCtc::draw_vibes( const IntervalVector& X0, const IntervalVector& X,con
 	delete[] rest;
 	return;
 }
-*/
+ */
 
 } // end namespace ibex
