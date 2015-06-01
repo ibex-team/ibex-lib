@@ -119,6 +119,11 @@ public:
 	std::vector<std::vector<SetLeaf*> > connected_components();
 
 	/**
+	 * \brief YES if this set is a superset of the box
+	 */
+	BoolInterval is_superset(const IntervalVector& box) const;
+
+	/**
 	 * \brief Box corresponding to a node
 	 */
 	IntervalVector node_box(const SetNode* node) const;

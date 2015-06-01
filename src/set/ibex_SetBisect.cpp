@@ -138,6 +138,17 @@ SetNode* SetBisect::union_(const IntervalVector& nodebox, const IntervalVector& 
 	}
 }
 
+BoolInterval SetBisect::is_superset(const IntervalVector& nodebox, const IntervalVector& box) const {
+	if (!nodebox.intersects(box)) return YES;
+	else {
+		// maybe compilers do the following optimization (avoiding to call
+		// superset on the right side if the answer with the left side is "NO")
+		BoolInterval l_res=left->is_superset(left_box(nodebox),box);
+		if (l_res==NO) return NO;
+		else return l_res & right->is_superset(right_box(nodebox),box);
+	}
+}
+
 void SetBisect::visit_leaves(leaf_func func, const IntervalVector& nodebox) const {
 	left->visit_leaves(func, left_box(nodebox));
 	right->visit_leaves(func, right_box(nodebox));
@@ -174,5 +185,7 @@ SetNode* SetBisect::try_merge() {
 	}
 	return this;
 }
+
+
 
 } // namespace ibex

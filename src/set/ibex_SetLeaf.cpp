@@ -166,6 +166,12 @@ SetNode* SetLeaf::union_(const IntervalVector& nodebox, const IntervalVector& x,
 	}
 }
 
+BoolInterval SetLeaf::is_superset(const IntervalVector& nodebox, const IntervalVector& box) const {
+	if (!nodebox.intersects(box)) return YES;
+	else return status;
+}
+
+
 void SetLeaf::visit_leaves(leaf_func func, const IntervalVector& nodebox) const {
 	func(nodebox, status);
 }

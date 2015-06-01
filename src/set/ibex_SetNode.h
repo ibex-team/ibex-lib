@@ -130,6 +130,10 @@ public:
 	 */
 	virtual void print(std::ostream& os, const IntervalVector& nodebox, int shift) const=0;
 
+	/**
+	 * \brief True if this node is a superset of the box
+	 */
+	virtual BoolInterval is_superset(const IntervalVector& nodebox, const IntervalVector& box) const=0;
 };
 
 

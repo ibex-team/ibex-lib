@@ -56,6 +56,9 @@ public:
 	/** \see SetNode */
 	virtual void print(std::ostream& os, const IntervalVector& nodebox, int shift) const;
 
+	/** \see SetNode */
+	virtual BoolInterval is_superset(const IntervalVector& nodebox, const IntervalVector& box) const;
+
 	IntervalVector left_box(const IntervalVector& nodebox) const;
 
 	IntervalVector right_box(const IntervalVector& nodebox) const;

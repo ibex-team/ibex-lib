@@ -57,6 +57,11 @@ SetInterval& SetInterval::operator|=(const SetInterval& set) {
 	return *this;
 }
 
+BoolInterval SetInterval::is_superset(const IntervalVector& box) const {
+	if (!bounding_box.is_superset(box)) return NO;
+	else return root->is_superset(bounding_box,box);
+}
+
 void SetInterval::save(const char* filename) {
 	std::stack<SetNode*> s;
 
