@@ -21,6 +21,7 @@ Contents:
    strategy
    example
    reference
+   lab
 
 
 Indices and tables
