@@ -562,6 +562,16 @@ Affine2Main<AF_fAF1>& Affine2Main<AF_fAF1>::sqr(const Interval itv) {
 }
 
 
+template<>
+void Affine2Main<AF_fAF1>::compact(double tol){
+	for (int i=1;i<=_n;i++) {
+		if (fabs(_elt._val[i])<tol) {
+			_elt._err += fabs(_elt._val[i]);
+			_elt._val[i] =0;
+		}
+	}
+}
+
 
 
 }// end namespace ibex

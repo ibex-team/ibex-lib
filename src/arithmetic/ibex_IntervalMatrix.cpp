@@ -11,7 +11,7 @@
 
 #include "ibex_IntervalMatrix.h"
 #include "ibex_Agenda.h"
-#include "ibex_TemplateMatrix.cpp_"
+#include "ibex_TemplateMatrix.h_"
 
 namespace ibex {
 
@@ -79,7 +79,7 @@ IntervalMatrix::~IntervalMatrix() {
 IntervalMatrix& IntervalMatrix::operator=(const IntervalMatrix& x) {
 	resize(x.nb_rows(), x.nb_cols());
 	// need to be resized when called from operator*= (dimension can change)
-	return _assign(*this,x);
+	return _assignM(*this,x);
 }
 
 IntervalMatrix& IntervalMatrix::operator&=(const IntervalMatrix& m) {
@@ -101,7 +101,7 @@ void IntervalMatrix::init(const Interval& x) {
 }
 
 bool IntervalMatrix::operator==(const IntervalMatrix& m) const {
-	return _equals(*this,m);
+	return _equalsM(*this,m);
 }
 
 Matrix IntervalMatrix::lb() const {
@@ -235,7 +235,7 @@ IntervalMatrix& IntervalMatrix::inflate(double rad) {
 }
 
 std::ostream& operator<<(std::ostream& os, const IntervalMatrix& m) {
-	return display(os,m);
+	return _displayM(os,m);
 }
 
 bool bwd_add(const IntervalMatrix& y, IntervalMatrix& x1, IntervalMatrix& x2) {

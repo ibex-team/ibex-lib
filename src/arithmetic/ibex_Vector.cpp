@@ -11,7 +11,7 @@
 #include "ibex_Vector.h"
 #include <float.h>
 #include <math.h>
-#include "ibex_TemplateVector.cpp_"
+#include "ibex_TemplateVector.h_"
 
 namespace ibex {
 
@@ -82,8 +82,8 @@ double Vector::norm() const {
 Vector  Vector::subvector(int start_index, int end_index) const   { return _subvector(*this,start_index,end_index); }
 void    Vector::put(int start_index, const Vector& x)             { _put(*this, start_index, x); }
 Vector& Vector::operator=(const Vector& x)                        { resize(x.size()); // see issue #10
-                                                                    return _assign(*this,x); }
-bool    Vector::operator==(const Vector& x) const                 { return _equals(*this,x); }
-std::ostream&   operator<<(std::ostream& os, const Vector& x)     { return _display(os,x); }
+                                                                    return _assignV(*this,x); }
+bool    Vector::operator==(const Vector& x) const                 { return _equalsV(*this,x); }
+std::ostream&   operator<<(std::ostream& os, const Vector& x)     { return _displayV(os,x); }
 
 } // end namespace ibex

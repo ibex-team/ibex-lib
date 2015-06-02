@@ -270,6 +270,41 @@ std::ostream& operator<<(std::ostream& os, const Matrix&);
 /*================================== inline implementations ========================================*/
 
 
+namespace {
+
+// the following functions are
+// introduced to allow genericity
+//inline bool is_empty(double x)                { return false; }
+//inline bool is_empty(const Interval& x)       { return x.is_empty(); }
+//inline bool is_empty(const Vector& v)         { return false; }
+//inline bool is_empty(const IntervalVector& v) { return v.is_empty(); }
+inline bool is_empty(const Matrix& m)         { return false; }
+//inline bool is_empty(const IntervalMatrix& m) { return m.is_empty(); }
+//template<class T> inline bool is_empty(const Affine2Main<T>& x)       { return x.is_empty(); }
+//template<class T> inline bool is_empty(const Affine2MainVector<T>& v) { return v.is_empty(); }
+//template<class T> inline bool is_empty(const Affine2MainMatrix<T>& m) { return m.is_empty(); }
+
+
+
+//inline void set_empty(double x)          { }
+//inline void set_empty(Interval& x)       { x.set_empty(); }
+//inline void set_empty(Vector& v)         { }
+//inline void set_empty(IntervalVector& v) { v.set_empty(); }
+inline void set_empty(Matrix& m)         { }
+//inline void set_empty(IntervalMatrix& m) { m.set_empty(); }
+//template<class T> inline void set_empty(Affine2Main<T>& x)       { x.set_empty(); }
+//template<class T> inline void set_empty(Affine2MainVector<T>& v) { v.set_empty(); }
+//template<class T> inline void set_empty(Affine2MainMatrix<T>& m) { m.set_empty(); }
+
+} // end namespace anonymous
+
+} // end namespace ibex
+
+#include "ibex_LinearArith.h_"
+
+namespace ibex {
+
+
 inline bool Matrix::operator!=(const Matrix& m) const {
 	return !(*this==m);
 }
@@ -330,6 +365,58 @@ inline Matrix Matrix::ones(int n){
 
 inline Matrix Matrix::ones(int m, int n) {
 	return Matrix(m,n,1.0);
+}
+
+inline Matrix outer_product(const Vector& v1, const Vector& v2) {
+	return outer_prod<Vector,Vector,Matrix>(v1,v2);
+}
+
+inline Matrix& Matrix::operator+=(const Matrix& m) {
+	return set_addM<Matrix,Matrix>(*this,m);
+}
+
+inline Matrix& Matrix::operator-=(const Matrix& m) {
+	return set_subM<Matrix,Matrix>(*this,m);
+}
+
+inline Matrix& Matrix::operator*=(double x) {
+	return set_mulSM<double,Matrix>(x,*this);
+}
+
+inline Matrix& Matrix::operator*=(const Matrix& m) {
+	return *this=(*this*m);
+}
+
+inline Matrix operator+(const Matrix& m1, const Matrix& m2) {
+	return Matrix(m1)+=m2;
+}
+
+inline Matrix operator-(const Matrix& m) {
+	return minusM(m);
+}
+
+inline Matrix operator-(const Matrix& m1, const Matrix& m2) {
+	return Matrix(m1)-=m2;
+}
+
+inline Matrix operator*(double x, const Matrix& m) {
+	return Matrix(m)*=x;
+}
+
+inline Matrix operator*(const Matrix& m1, const Matrix& m2) {
+	return mulMM<Matrix,Matrix,Matrix>(m1,m2);
+}
+
+inline Vector operator*(const Matrix& m, const Vector& v) {
+	return mulMV<Matrix,Vector,Vector>(m,v);
+}
+
+inline Vector operator*(const Vector& v, const Matrix& m) {
+	return mulVM<Vector,Matrix,Vector>(v,m);
+}
+
+inline Matrix abs(const Matrix& m) {
+	return absM(m);
 }
 
 } // namespace ibex
