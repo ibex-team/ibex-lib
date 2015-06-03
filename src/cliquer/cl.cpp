@@ -20,23 +20,23 @@
 void printhelp(char *prog);
 void read_options(int argc, char **argv);
 void print_search(graph_t *g);
-boolean record_clique_func(set_t s,graph_t *g,clique_options *opts);
-boolean print_clique_func(set_t s,graph_t *g,clique_options *opts);
+cliquer_boolean record_clique_func(set_t s,graph_t *g,clique_options *opts);
+cliquer_boolean print_clique_func(set_t s,graph_t *g,clique_options *opts);
 void print_clique(set_t s,graph_t *g);
 
 
 /* Options, changed by command-line arguments. */
-static boolean find_all=FALSE;
+static cliquer_boolean find_all=FALSE;
 static int min_weight=0;
-static boolean min_weight_set=FALSE;
+static cliquer_boolean min_weight_set=FALSE;
 static int max_weight=0;
-static boolean max_weight_set=FALSE;
-static boolean maximal=FALSE;
-static boolean unweighted=FALSE;
-static boolean number1=TRUE;
+static cliquer_boolean max_weight_set=FALSE;
+static cliquer_boolean maximal=FALSE;
+static cliquer_boolean unweighted=FALSE;
+static cliquer_boolean number1=TRUE;
 static int quiet=0;
-static boolean only_weight=FALSE;
-static int *(*reorder)(graph_t *, boolean)=reorder_by_default;
+static cliquer_boolean only_weight=FALSE;
+static int *(*reorder)(graph_t *, cliquer_boolean)=reorder_by_default;
 static char *file;
 
 /* Dynamically allocated storage for cliques. */
@@ -387,7 +387,7 @@ void print_clique(set_t s,graph_t *g) {
  * Records a clique into the clique list using dynamic allocation.
  * Used as opts->user_function.
  */
-boolean record_clique_func(set_t s,graph_t *g,clique_options *opts) {
+cliquer_boolean record_clique_func(set_t s,graph_t *g,clique_options *opts) {
 	if (clique_count>=clique_list_size) {
 		clique_list=(set_t *)realloc(clique_list,(clique_list_size+512) * 
 				    sizeof(set_t));
@@ -401,7 +401,7 @@ boolean record_clique_func(set_t s,graph_t *g,clique_options *opts) {
 /*
  * Prints a clique.  Used as opts->user_function.
  */
-boolean print_clique_func(set_t s,graph_t *g,clique_options *opts) {
+cliquer_boolean print_clique_func(set_t s,graph_t *g,clique_options *opts) {
 	print_clique(s,g);
 	return TRUE;
 }

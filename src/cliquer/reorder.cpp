@@ -148,11 +148,11 @@ void reorder_reverse(int *order,int n) {
  *
  * Returns TRUE if it is a bijection, FALSE otherwise.
  */
-boolean reorder_is_bijection(int *order,int n) {
-	boolean *used;
+cliquer_boolean reorder_is_bijection(int *order,int n) {
+	cliquer_boolean *used;
 	int i;
 
-	used=(int *)calloc(n,sizeof(boolean));
+	used=(int *)calloc(n,sizeof(cliquer_boolean));
 	for (i=0; i<n; i++) {
 		if (order[i]<0 || order[i]>=n) {
 			free(used);
@@ -198,7 +198,7 @@ int *reorder_ident(int n) {
  *
  * Returns an identity ordering.
  */
-int *reorder_by_ident(graph_t *g,boolean weighted) {
+int *reorder_by_ident(graph_t *g,cliquer_boolean weighted) {
 	return reorder_ident(g->n);
 }
 
@@ -207,7 +207,7 @@ int *reorder_by_ident(graph_t *g,boolean weighted) {
  *
  * Returns a reverse identity ordering.
  */
-int *reorder_by_reverse(graph_t *g,boolean weighted) {
+int *reorder_by_reverse(graph_t *g,cliquer_boolean weighted) {
 	int i;
 	int *order;
 
@@ -223,7 +223,7 @@ int *reorder_by_reverse(graph_t *g,boolean weighted) {
  * Equivalent to reorder_by_weighted_greedy_coloring or
  * reorder_by_unweighted_greedy_coloring according to the value of weighted.
  */
-int *reorder_by_greedy_coloring(graph_t *g,boolean weighted) {
+int *reorder_by_greedy_coloring(graph_t *g,cliquer_boolean weighted) {
 	if (weighted)
 		return reorder_by_weighted_greedy_coloring(g,weighted);
 	else
@@ -240,15 +240,15 @@ int *reorder_by_greedy_coloring(graph_t *g,boolean weighted) {
  *
  * Experimentally efficient for use with unweighted graphs.
  */
-int *reorder_by_unweighted_greedy_coloring(graph_t *g,boolean weighted) {
+int *reorder_by_unweighted_greedy_coloring(graph_t *g,cliquer_boolean weighted) {
 	int i,j,v;
-	boolean *tmp_used;
+	cliquer_boolean *tmp_used;
 	int *degree;   /* -1 for used vertices */
 	int *order;
 	int maxdegree,maxvertex=0;
-	boolean samecolor;
+	cliquer_boolean samecolor;
 
-	tmp_used=(boolean *)calloc(g->n,sizeof(boolean));
+	tmp_used=(cliquer_boolean *)calloc(g->n,sizeof(cliquer_boolean));
 	degree=(int *)calloc(g->n,sizeof(int));
 	order=(int *)calloc(g->n,sizeof(int));
 
@@ -263,7 +263,7 @@ int *reorder_by_unweighted_greedy_coloring(graph_t *g,boolean weighted) {
 	v=0;
 	while (v < g->n) {
 		/* Reset tmp_used. */
-		memset(tmp_used,0,g->n * sizeof(boolean));
+		memset(tmp_used,0,g->n * sizeof(cliquer_boolean));
 
 		do {
 			/* Find vertex to be colored. */
@@ -308,17 +308,17 @@ int *reorder_by_unweighted_greedy_coloring(graph_t *g,boolean weighted) {
  *
  * Experimentally efficient for use with weighted graphs.
  */
-int *reorder_by_weighted_greedy_coloring(graph_t *g, boolean weighted) {
+int *reorder_by_weighted_greedy_coloring(graph_t *g, cliquer_boolean weighted) {
 	int i,j,p=0;
 	int cnt;
 	int *nwt;    /* Sum of surrounding vertices' weights */
 	int min_wt,max_nwt;
-	boolean *used;
+	cliquer_boolean *used;
 	int *order;
 	
 	nwt=(int *)malloc(g->n * sizeof(int));
 	order=(int *)malloc(g->n * sizeof(int));
-	used=(boolean *)calloc(g->n,sizeof(boolean));
+	used=(cliquer_boolean *)calloc(g->n,sizeof(cliquer_boolean));
 	
 	for (i=0; i < g->n; i++) {
 		nwt[i]=0;
@@ -362,7 +362,7 @@ int *reorder_by_weighted_greedy_coloring(graph_t *g, boolean weighted) {
  * Returns a reordering of the graph g so that the vertices with largest
  * degrees (most neighbors) are first.
  */
-int *reorder_by_degree(graph_t *g, boolean weighted) {
+int *reorder_by_degree(graph_t *g, cliquer_boolean weighted) {
 	int i,j,v;
 	int *degree;
 	int *order;
@@ -409,17 +409,17 @@ int *reorder_by_degree(graph_t *g, boolean weighted) {
  *       numbers.  srand() is re-initialized every time reorder_by_random()
  *       is called using the system time.
  */
-int *reorder_by_random(graph_t *g, boolean weighted) {
+int *reorder_by_random(graph_t *g, cliquer_boolean weighted) {
 	//struct tms t;
 	int i,r;
 	int *newt;
-	boolean *used;
+	cliquer_boolean *used;
 
 	//srand(times(&t)+time(NULL));
 	ibex::RNG::srand();
 
 	newt=(int *)calloc(g->n, sizeof(int));
-	used=(boolean *)calloc(g->n, sizeof(boolean));
+	used=(cliquer_boolean *)calloc(g->n, sizeof(cliquer_boolean));
 	for (i=0; i < g->n; i++) {
 		do {
 			r=ibex::RNG::rand() % g->n;
