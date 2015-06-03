@@ -357,42 +357,6 @@ Affine2Main<AF_No>& Affine2Main<AF_No>::saxpy(double alpha, const Affine2Main<AF
 }
 
 
-template<>
-Affine2Main<AF_No>& Affine2Main<AF_No>::operator*=(const Interval& y) {
-	if (	(!is_actif())||
-			y.is_empty()||
-			y.is_unbounded() ) {
-		*this = itv()*y;
-
-	} else {
-		double   yVal0;
-		int i;
-//std::cout << "in *  "<<y<<std::endl;
-//saxpy(y.mid(), Affine2Main<AF_No>(), 0.0, y.rad(), true, false, false, true);
-
-		yVal0 = y.mid();
-		// RES = X%(0) * res
-		for (i=0; i<=_n;i++) {
-			_elt._val[i] *=yVal0;
-		}
-
-		//_elt._err *= (fabs(yVal0)+Interval(y.rad()));
-		_elt._err *= (abs(y).ub());
-
-		{
-			bool b = (_elt._err<POS_INFINITY);
-			for (i=0;i<=_n;i++) {
-				b &= (fabs(_elt._val[i])<POS_INFINITY);
-			}
-			if (!b) {
-				*this = Interval::ALL_REALS;
-			}
-		}
-
-	}
-	return *this;
-}
-
 
 template<>
 Affine2Main<AF_No>& Affine2Main<AF_No>::operator*=(const Affine2Main<AF_No>& y) {
@@ -452,11 +416,11 @@ Affine2Main<AF_No>& Affine2Main<AF_No>::operator*=(const Affine2Main<AF_No>& y) 
 
 		} else {
 			if (_n>y.size()) {
-				*this *= y.itv();
+				*this *=  Affine2Main<AF_No>(size(),0,y.itv());
 			} else {
 				Interval tmp1 = this->itv();
 				*this = y;
-				*this *= tmp1;
+				*this *=Affine2Main<AF_No>(size(),0,tmp1);
 			}
 		}
 
@@ -469,6 +433,20 @@ Affine2Main<AF_No>& Affine2Main<AF_No>::operator*=(const Affine2Main<AF_No>& y) 
 	return *this;
 }
 
+
+
+template<>
+Affine2Main<AF_No>& Affine2Main<AF_No>::operator*=(const Interval& y) {
+	if (	(!is_actif())||
+			y.is_empty()||
+			y.is_unbounded() ) {
+		*this = itv()*y;
+
+	} else {
+		*this *= Affine2Main<AF_No>(size(),0,y);
+	}
+	return *this;
+}
 
 
 template<>
@@ -716,7 +694,7 @@ Affine2Main<AF_No>& Affine2Main<AF_No>::linChebyshev(Affine2_expr num, const Int
 			}
 			else {
 				dmm = res_itv;
-				alpha = ((abs((itv.ub()))-abs((itv.lb())))/itv.diam()).ub();
+				alpha = ((abs((itv.ub()))-abs((itv.lb())))/itv.diam());
 
 				TEMP1 = dmm.lb()-alpha*(itv.lb());
 				TEMP2 = dmm.ub()-alpha*(itv.ub());
@@ -873,7 +851,7 @@ Affine2Main<AF_No>& Affine2Main<AF_No>::linChebyshev(Affine2_expr num, const Int
 		case AF_ASIN :
 			// additional particular case
 			if ((itv.lb() < (-1))||(itv.ub() > 1)) {
-				linChebyshev(num,(itv & Interval(-1,1)));
+				Affine2Main<AF_No>::linChebyshev(num,(itv & Interval(-1,1)));
 				break;
 			}
 		case AF_TANH :
@@ -1150,7 +1128,15 @@ Affine2Main<AF_No>& Affine2Main<AF_No>::power(int n, const Interval itv) {
 	return *this;
 }
 
-
+template<>
+void Affine2Main<AF_No>::compact(double tol){
+	for (int i=1;i<=_n;i++) {
+		if (fabs(_elt._val[i])<tol) {
+			_elt._err += fabs(_elt._val[i]);
+			_elt._val[i] =0;
+		}
+	}
+}
 
 
 }// end namespace ibex

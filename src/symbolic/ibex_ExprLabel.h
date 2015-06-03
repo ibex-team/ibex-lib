@@ -45,6 +45,7 @@ public:
 	 * \brief The affine2 form (evaluation)
 	 */
 	Affine2Domain *af2;
+	AffineLinDomain *af_lin;
 
 	/**
 	 * \brief The interval domain (evaluation and backward)

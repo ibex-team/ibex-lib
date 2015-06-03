@@ -292,6 +292,22 @@ void TestArith::tan05() { check(tan(Interval::PI/2.0),Interval::ALL_REALS); }
 void TestArith::tan06() { check(tan(-Interval::PI),Interval::ALL_REALS); }
 void TestArith::tan07() { check(tan(3*Interval::PI/4.0 | 5*Interval::PI/4.0), Interval(-1,1)); }
 
+void TestArith::atan2_01() { check(atan2(Interval::ALL_REALS,Interval::EMPTY_SET),Interval::EMPTY_SET); }
+void TestArith::atan2_02() { check(atan2(Interval::ONE,Interval::ONE),     Interval::PI/4.0); }
+void TestArith::atan2_03() { check(atan2(-Interval::ONE,-Interval::ONE),-3*Interval::PI/4.0); }
+void TestArith::atan2_04() { check(atan2(-Interval::ONE,Interval::ONE),   -Interval::PI/4.0); }
+void TestArith::atan2_05() { check(atan2(Interval::ONE,-Interval::ONE),  3*Interval::PI/4.0); }
+void TestArith::atan2_06() { check(atan2(Interval::POS_REALS,Interval::POS_REALS), Interval(0,1)*Interval::HALF_PI); }
+void TestArith::atan2_07() { check(atan2(Interval(NEG_INFINITY,ibex::previous_float(0.0)),Interval::NEG_REALS), -(Interval::HALF_PI | Interval::PI)); }
+void TestArith::atan2_08() { check(atan2(Interval::NEG_REALS,Interval::POS_REALS), Interval(-1,0)*Interval::HALF_PI); }
+void TestArith::atan2_09() { check(atan2(Interval::POS_REALS,Interval::NEG_REALS), (Interval::HALF_PI | Interval::PI)); }
+void TestArith::atan2_10() { check(atan2(Interval(1,POS_INFINITY),Interval(-1,1)), Interval::PI/4.0 | 3*Interval::PI/4.0); }
+void TestArith::atan2_11() { check(atan2(Interval(NEG_INFINITY,-1),Interval(-1,1)), -(Interval::PI/4.0 | 3*Interval::PI/4.0)); }
+void TestArith::atan2_12() { check(atan2(Interval(-1,1),Interval(1,POS_INFINITY)), Interval(-1,1)*Interval::PI/4.0); }
+void TestArith::atan2_13() { check(atan2(Interval(-1,1),Interval(NEG_INFINITY,-1)), Interval(-1,1)*Interval::PI); }
+void TestArith::atan2_14() { check(atan2(Interval::ALL_REALS,Interval::ALL_REALS),Interval(-1,1)*Interval::PI); }
+void TestArith::atan2_15() { check(atan2(Interval::ZERO,Interval::ZERO),Interval::EMPTY_SET); }
+
 void TestArith::check_pow(const Interval& x, int p, const Interval& y_expected) {
 	check(pow(x,p),y_expected);
 	check(pow(-x,p),(p%2==0)? y_expected : -y_expected);
@@ -684,7 +700,9 @@ void TestArith::bwd_atan2_04() { //fourth quadrant
 	TEST_ASSERT(checkbwd_atan2(Interval(-M_PI/2.,0.),Interval(.5,2.),Interval(.5,10.),Interval::EMPTY_SET,Interval::EMPTY_SET));
 }
 void TestArith::bwd_atan2_05() { //upper half
-	TEST_ASSERT(checkbwd_atan2(Interval(2.*M_PI,3.*M_PI),Interval(-.5,2.),Interval(.5,10.),Interval(0. ,2.),Interval(.5,10.)));
+	// ** confusion with angle constraint **
+	//TEST_ASSERT(checkbwd_atan2(Interval(2.*M_PI,3.*M_PI),Interval(-.5,2.),Interval(.5,10.),Interval(0. ,2.),Interval(.5,10.)));
+	TEST_ASSERT(checkbwd_atan2(Interval(2.*M_PI,3.*M_PI),Interval(-.5,2.),Interval(.5,10.),Interval::EMPTY_SET, Interval::EMPTY_SET));
 }
 void TestArith::bwd_atan2_06() { //second quadrant
 	TEST_ASSERT(checkbwd_atan2(Interval(2*M_PI/3.,5.*M_PI/6.),Interval(0.,100.),Interval(-20.,-sqrt(3.)/2.),Interval(.5,20.*sqrt(3.)),Interval(-20.,-sqrt(3.)/2)));
@@ -700,6 +718,10 @@ void TestArith::bwd_atan2_09() { //lower half
 }
 void TestArith::bwd_atan2_10() { //right half
 	TEST_ASSERT(checkbwd_atan2(Interval(-M_PI/3.,M_PI/4.),Interval::ALL_REALS,Interval(sqrt(3.)/2.),Interval(-1.5,sqrt(3.)/2.),Interval(sqrt(3.)/2.)));
+}
+
+void TestArith::bwd_atan2_issue134() {
+	TEST_ASSERT(checkbwd_atan2(Interval::HALF_PI,Interval::ONE, Interval::ZERO, Interval::ONE, Interval::ZERO));
 }
 
 void TestArith::bwd_sqrt01() { checkproj(sqrt, Interval(1,3),				Interval(0,15),		Interval(1,9)); }

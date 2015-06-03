@@ -50,6 +50,20 @@ public:
 	virtual int linearization(const IntervalVector& box, LinearSolver& lp_solver)=0;
 
 	/**
+	 * \brief Generation of a linear approximation of the inner region and add it in the Linear Program
+	 *
+	 * It must be implemented in the subclasses.
+	 */
+	virtual int inlinearization(const IntervalVector& box, LinearSolver& lp_solver)=0;
+
+	/**
+	 * \brief Generation of a linear approximation of the linear objective function
+	 *
+	 * It must be implemented in the subclasses.
+	 */
+	virtual bool goal_linearization(const IntervalVector& box, LinearSolver& lp_solver)=0;
+
+	/**
 	 * Check if the constraint is satisfied in the box : in this case, no linear relaxation is made.
 	 *
 	 * TODO: is this function redundant?
@@ -75,6 +89,7 @@ private:
 	int _nb_ctr;
 	int _nb_var;
 	int _goal_var;
+
 };
 
 

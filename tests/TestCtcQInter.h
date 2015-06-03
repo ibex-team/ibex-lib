@@ -1,34 +1,31 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : TestCtcFwdBwd.h
-// Author      : Gilles Chabert
+// File        : TestCtcQInter.h
+// Author      : Benoit Desrochers
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
-// Created     : Aug 21, 2014
+// Created     : Jan 02, 2015
+// Last Update : Jan 02, 2015
 //============================================================================
 
-#ifndef __TEST_CTC_FWD_BWD_H__
-#define __TEST_CTC_FWD_BWD_H__
+#ifndef __TEST_CTC_Q_INTER__
+#define __TEST_CTC_Q_INTER__
 
 #include "cpptest.h"
+#include "ibex_QInter.h"
 #include "utils.h"
 
 namespace ibex {
 
-class TestCtcFwdBwd : public TestIbex {
+class TestCtcQInter : public TestIbex {
 
 public:
-
-	TestCtcFwdBwd() {
-		TEST_ADD(TestCtcFwdBwd::sqrt_issue28);
-		TEST_ADD(TestCtcFwdBwd::atan2_issue134);
+	TestCtcQInter() {
+        TEST_ADD(TestCtcQInter::test_projF);
 	}
 
-	void sqrt_issue28();
-	void atan2_issue134();
-
+    void test_projF();
 };
 
-} // namespace ibex
-
-#endif // __TEST_CTC_FWD_BWD_H__
+} // end namespace ibex
+#endif // __TEST_CTC_Q_INTER__
