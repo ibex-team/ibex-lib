@@ -142,7 +142,11 @@ BoolInterval SetBisect::is_superset(const IntervalVector& nodebox, const Interva
 	if (!nodebox.intersects(box)) return YES;
 	else {
 		// maybe compilers do the following optimization (avoiding to call
-		// superset on the right side if the answer with the left side is "NO")
+		// superset on the right side if the answer with the left side is "NO") when
+		// we write:
+		//
+		// left->is_superset(left_box(nodebox),box) & right->is_superset(right_box(nodebox),box);
+
 		BoolInterval l_res=left->is_superset(left_box(nodebox),box);
 		if (l_res==NO) return NO;
 		else return l_res & right->is_superset(right_box(nodebox),box);
@@ -185,7 +189,6 @@ SetNode* SetBisect::try_merge() {
 	}
 	return this;
 }
-
 
 
 } // namespace ibex

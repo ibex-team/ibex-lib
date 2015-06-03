@@ -257,6 +257,8 @@ SetNode* SetNode::inter(bool sync, const IntervalVector& nodebox, Sep& sep, cons
 	return this3;
 }
 
+// TODO: merge this code with union_
+
 SetNode* SetNode::inter(bool sync, const IntervalVector& nodebox, const SetNode* other, const IntervalVector& otherbox, double eps) {
 
 	if (nodebox.is_disjoint(otherbox))
@@ -268,13 +270,43 @@ SetNode* SetNode::inter(bool sync, const IntervalVector& nodebox, const SetNode*
 		//cout << "this1: "; this1->print(cout,nodebox,0);
 		return this1;
 	} else {
-		SetBisect* bisect_node = (SetBisect*) other;
-		SetNode* this2 = inter(sync, nodebox, bisect_node->left, bisect_node->left_box(otherbox), eps);
-		//cout << "this2: "; this2->print(cout,nodebox,0);
-		// warning: cannot use this anymore (use this2 instead)
-		SetNode* this3 = this2->inter(sync, nodebox, bisect_node->right, bisect_node->right_box(otherbox), eps);
-		//cout << "this3: "; this3->print(cout,nodebox,0);
-		return this3;
+		// ******************************** balancing **************************************************
+		if (nodebox.max_diam()>otherbox.max_diam()) {
+
+			SetBisect* bis;
+
+			if (is_leaf()) {
+				int var=nodebox.extr_diam_index(false);
+				pair<IntervalVector,IntervalVector> p=nodebox.bisect(var);
+				double pt=p.first[var].ub();
+				assert(nodebox[var].interior_contains(pt));
+
+				bis = new SetBisect(var, pt);
+				bis->left  = new SetLeaf(((SetLeaf *) this)->status);
+				bis->right = new SetLeaf(((SetLeaf *) this)->status);
+				bis->left  = bis->left->inter(sync, p.first, other, otherbox, eps);
+				bis->right = bis->right->inter(sync, p.second, other, otherbox, eps);
+				delete this;
+			}
+			else {
+				bis = (SetBisect*) this;
+				bis->left  = bis->left->inter(sync,bis->left_box(nodebox), other, otherbox, eps);
+				bis->right = bis->right->inter(sync,bis->right_box(nodebox), other, otherbox, eps);
+			}
+
+			bis->left->father = bis;
+			bis->right->father = bis;
+			return bis->try_merge();
+
+		} else {
+			SetBisect* bisect_node = (SetBisect*) other;
+			SetNode* this2 = inter(sync, nodebox, bisect_node->left, bisect_node->left_box(otherbox), eps);
+			//cout << "this2: "; this2->print(cout,nodebox,0);
+			// warning: cannot use this anymore (use this2 instead)
+			SetNode* this3 = this2->inter(sync, nodebox, bisect_node->right, bisect_node->right_box(otherbox), eps);
+			//cout << "this3: "; this3->print(cout,nodebox,0);
+			return this3;
+		}
 	}
 }
 

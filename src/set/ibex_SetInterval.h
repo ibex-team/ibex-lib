@@ -114,12 +114,12 @@ public:
 	 * "inside" of the set (if the leaves have status YES), the "outside"
 	 * (if the status is NO) or the "boundary".
 	 *
-	 * THe number of connected components is the size of the returned vector.
+	 * The number of connected components is the size of the returned vector.
 	 */
 	std::vector<std::vector<SetLeaf*> > connected_components();
 
 	/**
-	 * \brief YES if this set is a superset of the box
+	 * \brief YES only if this set is a superset of the box
 	 */
 	BoolInterval is_superset(const IntervalVector& box) const;
 
