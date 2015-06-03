@@ -8,7 +8,6 @@
 //============================================================================
 
 #include "ibex_Optimizer.h"
-#include "ibex_EmptyBoxException.h"
 #include "ibex_EmptySystemException.h"
 #include "ibex_Timer.h"
 #include "ibex_OptimProbing.cpp_"
@@ -102,7 +101,10 @@ Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, double prec,
 #ifdef _IBEX_WITH_NOLP_
 	mylp = NULL;
 #else
-	mylp = new LinearSolver(n+1,m,niter );
+	//lr = new LinearRelaxCombo(sys, LinearRelaxCombo::XNEWTON);
+	//mylp = new LinearSolver(sys.nb_var,sys.nb_ctr,niter);
+	lr = new LinearRelaxCombo(ext_sys, LinearRelaxCombo::XNEWTON);
+	mylp = new LinearSolver(ext_sys.nb_var,ext_sys.nb_ctr,niter);
 	//	cout << "sys " << sys << endl;
 #endif // _IBEX_WITH_NOLP_
 }
@@ -118,6 +120,7 @@ Optimizer::~Optimizer() {
 	buffer.flush();
 	if (equs) delete equs;
 	delete mylp;
+	delete lr;
 	delete &buffer.cost1();
 	delete &buffer.cost2();
 	//	delete &(objshaver->ctc);
@@ -204,17 +207,18 @@ bool Optimizer::update_loup(const IntervalVector& box) {
 
 }
 
-void Optimizer::update_entailed_ctr(const IntervalVector& box) {
+bool Optimizer::update_entailed_ctr(const IntervalVector& box) {
 	for (int j=0; j<m; j++) {
 		if (entailed->normalized(j)) {
 			continue;
 		}
 		Interval y=sys.ctrs[j].f.eval(box);
-		if (y.lb()>0) throw EmptyBoxException();
+		if (y.lb()>0) return false;
 		else if (y.ub()<=0) {
 			entailed->set_normalized_entailed(j);
 		}
 	}
+	return true;
 }
 
 double minimum (double a, double b) {
@@ -254,8 +258,12 @@ void Optimizer::update_uplo() {
  */
 
 void Optimizer::handle_cell(Cell& c, const IntervalVector& init_box ){
-	try {
-		contract_and_bound(c, init_box);  // may throw EmptyBoxException
+
+	contract_and_bound(c, init_box);
+
+	if (c.box.is_empty()) {
+		delete &c;
+	} else {
 		//       objshaver->contract(c.box);
 
 		// we know cost1() does not require OptimData
@@ -265,9 +273,6 @@ void Optimizer::handle_cell(Cell& c, const IntervalVector& init_box ){
 		buffer.push(&c);
 
 		nb_cells++;
-	}
-	catch(EmptyBoxException&) {
-		delete &c;
 	}
 }
 
@@ -292,20 +297,21 @@ void Optimizer::contract_and_bound(Cell& c, const IntervalVector& init_box) {
 	y &= Interval(NEG_INFINITY,ymax);
 	if (y.is_empty()) {
 		c.box.set_empty();
-		throw EmptyBoxException();
+		return;
 	}
 
 	/*================ contract x with f(x)=y and g(x)<=0 ================*/
 	//cout << " [contract]  x before=" << c.box << endl;
 	//cout << " [contract]  y before=" << y << endl;
 
-	contract(c.box, init_box);
+	ctc.contract(c.box);
+
+	if (c.box.is_empty()) return;
 
 	//cout << " [contract]  x after=" << c.box << endl;
 	//cout << " [contract]  y after=" << y << endl;
 	// TODO: no more cell in argument here (just a box). Does it matter?
 	/*====================================================================*/
-
 
 	/*========================= update loup =============================*/
 
@@ -313,7 +319,10 @@ void Optimizer::contract_and_bound(Cell& c, const IntervalVector& init_box) {
 	read_ext_box(c.box,tmp_box);
 
 	entailed = &c.get<EntailedCtr>();
-	update_entailed_ctr(tmp_box);
+	if (!update_entailed_ctr(tmp_box)) {
+		c.box.set_empty();
+		return;
+	}
 
 	bool loup_ch=update_loup(tmp_box);
 
@@ -323,39 +332,43 @@ void Optimizer::contract_and_bound(Cell& c, const IntervalVector& init_box) {
 	loup_changed |= loup_ch;
 
 	if (y.is_empty()) { // fix issue #44
-		throw EmptyBoxException();
+		c.box.set_empty();
+		return;
 	}
 
 	/*====================================================================*/
-	// [gch] TODO: the case (!c.box.is_bisectable()) seems redundant
+	// [gch] The case (!c.box.is_bisectable()) seems redundant
 	// with the case of a NoBisectableVariableException in
 	// optimize(). Is update_uplo_of_epsboxes called twice in this case?
 	// (bn] NO , the NoBisectableVariableException is raised by the bisector, there are 2 different cases of a non bisected box that may cause an update of uplo_of_epsboxes
 	if ((tmp_box.max_diam()<=prec && y.diam() <=goal_abs_prec) || !c.box.is_bisectable()) {
 		// rem1: tmp_box and not c.box because y is handled with goal_rel_prec and goal_abs_prec
 		// rem2: do not use a precision contractor here since it would make the box empty (and y==(-inf,-inf)!!)
-		// rem 3 : the extended  boxes with no bisectable  domains  should be catched for avoiding infinite bisections
+		// rem 3 : the extended  boxes with no bisectable domains should be caught for avoiding infinite bisections
 		update_uplo_of_epsboxes(y.lb());
-		throw EmptyBoxException();
+		c.box.set_empty();
+		return;
 	}
 
 	//gradient=0 contraction for unconstrained optimization ; 
 	//first order test for constrained optimization (useful only when there are no equations replaced by inequalities) 
 	//works with the box without the objective (tmp_box)
 	firstorder_contract(tmp_box,init_box);
-	// the current extended box in the cell is updated
-	write_ext_box(tmp_box,c.box);
 
-
+	if (tmp_box.is_empty()) {
+		c.box.set_empty();
+	} else {
+		// the current extended box in the cell is updated
+		write_ext_box(tmp_box,c.box);
+	}
 }
 
 
 // called with the box without the objective
-void Optimizer::firstorder_contract(  IntervalVector& box, const  IntervalVector& init_box) {
+void Optimizer::firstorder_contract(IntervalVector& box, const IntervalVector& init_box) {
 	if (m==0) {
 		// for unconstrained optimization  contraction with gradient=0
-		if (box.is_strict_subset(init_box)) {
-			// may throw an EmptyBoxException:
+		if (box.is_strict_interior_subset(init_box)) {
 			if (n==1)
 				df.backward(Interval::ZERO,box);
 			else
@@ -363,22 +376,15 @@ void Optimizer::firstorder_contract(  IntervalVector& box, const  IntervalVector
 		}
 	}
 
-
-
-	//	else if (equs==NULL)	  {
-	//	else {
-	//
-	//		PdcFirstOrder p(user_sys,init_box);
-	//
-	//		p.set_entailed(entailed);
-	//		if (p.test(box)==NO) throw EmptyBoxException();
-	//	  }
-
-
-}
-
-void Optimizer::contract ( IntervalVector& box, const IntervalVector& init_box) {
-	ctc.contract(box);
+//	else {
+//
+//		PdcFirstOrder p(user_sys,init_box);
+//
+//		p.set_entailed(entailed);
+//		if (p.test(box)==NO) {
+//			box.set_empty();
+//		}
+//	}
 }
 
 Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj_init_bound) {
@@ -424,7 +430,8 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 
 	try {
 		while (!buffer.empty()) {
-			if (trace >= 2) cout << " buffer " << buffer << endl;
+		  //			if (trace >= 2) cout << " buffer " << buffer << endl;
+		  if (trace >= 2) buffer.print(cout);
 			//		  cout << "buffer size "  << buffer.size() << " " << buffer2.size() << endl;
 			// removes from the heap buffer, the cells already chosen in the other buffer
 
@@ -465,13 +472,13 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 					// that the current cell is removed by contractHeap. See comments in
 					// older version of the code (before revision 284).
 
-					double ymax= compute_ymax();
+					double ymax=compute_ymax();
 
 					buffer.contract(ymax);
 					//cout << " now buffer is contracted and min=" << buffer.minimum() << endl;
 
 
-					if (ymax <=NEG_INFINITY) {
+					if (ymax <= NEG_INFINITY) {
 						if (trace) cout << " infinite value for the minimum " << endl;
 						break;
 					}
@@ -482,7 +489,7 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 
 			}
 			catch (NoBisectableVariableException& ) {
-				update_uplo_of_epsboxes ((c->box)[ext_sys.goal_var()].lb());
+				update_uplo_of_epsboxes((c->box)[ext_sys.goal_var()].lb());
 				buffer.pop();
 				delete c; // deletes the cell.
 

@@ -11,7 +11,7 @@
 
 #include "ibex_Matrix.h"
 #include "ibex_Agenda.h"
-#include "ibex_TemplateMatrix.cpp_"
+#include "ibex_TemplateMatrix.h_"
 
 namespace ibex {
 
@@ -69,11 +69,12 @@ Matrix::~Matrix() {
 }
 
 Matrix& Matrix::operator=(const Matrix& x) {
-	return _assign(*this,x);
+	resize(x.nb_rows(), x.nb_cols());
+	return _assignM(*this,x);
 }
 
 bool Matrix::operator==(const Matrix& m) const {
-	return _equals(*this,m);
+	return _equalsM(*this,m);
 }
 
 void Matrix::resize(int nb_rows1, int nb_cols1) {
@@ -130,7 +131,7 @@ void Matrix::set_col(int col1, const Vector& v) {
 }
 
 std::ostream& operator<<(std::ostream& os, const Matrix& m) {
-	return display(os,m);
+	return _displayM(os,m);
 }
 
 } // namespace ibex

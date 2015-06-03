@@ -72,31 +72,75 @@ LinearRelaxCombo::~LinearRelaxCombo() {
 	if (myxnewton!=NULL) delete myxnewton;
 }
 
+int LinearRelaxCombo::inlinearization(const IntervalVector& box, LinearSolver& lp_solver) {
+	int cont=0;
+	switch (lmode) {
+	case ART:
+	case AFFINE2: {
+		cont = myart->inlinearization(box,lp_solver);
+		break;
+	}
+	case XNEWTON:
+	case TAYLOR:
+	case HANSEN: {
+		cont= myxnewton->inlinearization(box,lp_solver);
+		break;
+	}
+	case COMPO: {
+		cont = myxnewton->inlinearization(box,lp_solver);
+		if (cont<0) 	cont = myart->inlinearization(box,lp_solver);
+		break;
+	}
+	}
+	return cont;
+}
+
+bool LinearRelaxCombo::goal_linearization(const IntervalVector& box, LinearSolver& lp_solver) {
+	bool cont=false;
+	switch (lmode) {
+	case ART:
+	case AFFINE2: {
+		cont= myart->goal_linearization(box,lp_solver);
+		break;
+	}
+	case XNEWTON:
+	case TAYLOR:
+	case HANSEN: {
+		cont= myxnewton->goal_linearization(box,lp_solver);
+		break;
+	}
+	case COMPO: {
+		cont = myxnewton->goal_linearization(box,lp_solver);
+		if (!cont)	cont = myart->goal_linearization(box,lp_solver);
+		break;
+	}
+	}
+	return cont;
+}
 
 
 /*********generation of the linearized system*********/
 int LinearRelaxCombo::linearization(const IntervalVector& box, LinearSolver& lp_solver) {
 
 	int cont = 0;
-	// Update the bounds the variables
-	lp_solver.initBoundVar(box);
 
 	switch (lmode) {
 	case ART:
-	case AFFINE2: {
+	case AFFINE2:
 		cont = myart->linearization(box,lp_solver);
 		break;
-	}
 	case XNEWTON:
 	case TAYLOR:
-	case HANSEN: {
+	case HANSEN:
 		cont = myxnewton->linearization(box,lp_solver);
 		break;
-	}
 	case COMPO: {
-		cont  = myxnewton->linearization(box,lp_solver);
-		cont += myart->linearization(box,lp_solver);
-		break;
+		cont = myxnewton->linearization(box,lp_solver);
+		if (cont!=-1) {
+			int cont2 = myart->linearization(box,lp_solver);
+			if (cont2==-1) cont=-1;
+			else cont+=cont2;
+		}
 	}
 	}
 	return cont;

@@ -20,9 +20,16 @@ void Ctc::contract(IntervalVector& box, const BitSet& impact) {
 	try {
 		contract(box);
 	}
-	catch(EmptyBoxException& e) {
+	catch(Exception& e) { // ibex exceptions
 		_impact = NULL;
 		throw e;
+	}
+	catch (std::exception& e) { // other exceptions
+		_impact = NULL;
+		throw e;
+	}
+	catch (...) {
+		ibex_error("contract: cannot handle exception");
 	}
 
 	_impact = NULL;
@@ -38,10 +45,18 @@ void Ctc::contract(IntervalVector& box, const BitSet& impact, BitSet& flags) {
 	try {
 		contract(box);
 	}
-	catch(EmptyBoxException& e) {
+	catch(Exception& e) { // ibex exceptions
 		_impact = NULL;
 		_output_flags = NULL;
 		throw e;
+	}
+	catch (std::exception& e) { // other exceptions
+		_impact = NULL;
+		_output_flags = NULL;
+		throw e;
+	}
+	catch (...) {
+		ibex_error("contract: cannot handle exception");
 	}
 
 	_impact = NULL;

@@ -23,14 +23,14 @@
 #include "ibex_Affine2_fAF2_fma.h"
 #include "ibex_Affine2_sAF.h"
 #include "ibex_Affine2_No.h"
+#include "ibex_Affine2_fAFFullI.h"
 
 
 namespace ibex {
 
-
-class Affine2Vector;
-class Affine2Matrix;
-class Affine2MatrixArray;
+template<class T> class Affine2MainVector;
+template<class T> class Affine2MainMatrix;
+template<class T> class Affine2MainMatrixArray;
 
 /**
  * \ingroup arithmetic
@@ -39,25 +39,29 @@ class Affine2MatrixArray;
  *
  */
 
+//typedef AF_iAF  AF_Linear;
+typedef AF_fAF2  AF_Linear;
 
 //typedef AF_fAF1  AF_Default;
-typedef AF_fAF2  AF_Default;
+//typedef AF_fAF2  AF_Default;
 //typedef AF_fAF2_fma  AF_Default;
 //typedef AF_iAF  AF_Default;
 //typedef AF_sAF  AF_Default;
 //typedef AF_No  AF_Default;
-
-
-
-
+typedef AF_fAFFullI AF_Default;
 
 typedef Affine2Main<AF_Default> Affine2;
+typedef Affine2Main<AF_Linear>  AffineLin;
 
 
 template<class T=AF_Default>
 class Affine2Main {
 
 private:
+	/** \brief tolerance for default compact procedure  */
+	static const double AF_COMPAC_Tol = 1.e-6;
+
+
 	/**
 	 * Code for the particular case:
 	 * if the affine form is actif, _n>1  and _n is the size of the affine form
@@ -91,6 +95,7 @@ private:
 	 */
 	Affine2Main& saxpy(double alpha, const Affine2Main& y, double beta, double delta,
 			bool B1, bool B2, bool B3, bool B4);
+
 
 public:
 
@@ -130,7 +135,7 @@ public:
 	Affine2Main(const Affine2Main& x);
 
 	/** \brief  Delete the affine form */
-	virtual ~Affine2Main() {};
+	virtual ~Affine2Main() { };
 
 	/**
 	 *\brief compute the min-range linearization of an unary operator
@@ -246,6 +251,12 @@ public:
 	 */
 	double mid() const;
 
+	/**
+	 * \brief reduce the number of noise variable if the value is inferior to \param tol
+	 */
+	void compact(double tol);
+	void compact();
+
 	/** \brief Add \a d to *this and return the result.  */
 	Affine2Main& operator+=(double d);
 
@@ -283,9 +294,9 @@ public:
 	Affine2Main& operator/=(const Affine2Main& x);
 
 	typedef Affine2Main<T> SCALAR;
-	typedef Affine2Vector VECTOR;
-	typedef Affine2Matrix MATRIX;
-	typedef Affine2MatrixArray MATRIX_ARRAY;
+	typedef Affine2MainVector<T> VECTOR;
+	typedef Affine2MainMatrix<T> MATRIX;
+	typedef Affine2MainMatrixArray<T> MATRIX_ARRAY;
 
 };
 
@@ -595,6 +606,10 @@ Affine2Main<T> chi(const Affine2Main<T>&  a,const Affine2Main<T>&  b,const Inter
 
 
 namespace ibex {
+
+
+template<class T>
+inline void Affine2Main<T>::compact(){ compact(AF_COMPAC_Tol); }
 
 
 template<class T>

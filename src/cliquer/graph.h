@@ -6,6 +6,7 @@
 #include "set.h"
 
 // ignored warning : comparison between signed and unsigned integer expressions in this file
+#pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-compare"
 
 typedef struct _graph_t graph_t;

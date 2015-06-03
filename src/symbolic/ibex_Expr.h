@@ -486,43 +486,40 @@ private:
 class Variable {
 public:
 	/** Create a variable of dimension \a dim (by default: scalar). */
-	explicit Variable(const Dim& dim=Dim::scalar()) : symbol(new ExprSymbol(dim)) { }
+	explicit Variable(const Dim& dim=Dim::scalar());
 
 	/** Create a scalar variable named \a name. */
-	explicit Variable(const char* name) : symbol(new ExprSymbol(name,Dim::scalar())) { }
+	explicit Variable(const char* name);
 
 	/** Create a variable of dimension \a dim named \a name. */
-	Variable(const Dim& dim, const char* name) : symbol(new ExprSymbol(name, dim)) { }
+	Variable(const Dim& dim, const char* name);
 
 	/** Create a vector variable of \a n components. */
-	explicit Variable(int n) : symbol(new ExprSymbol(Dim::col_vec(n))) { }
+	explicit Variable(int n);
 
 	/** Create a vector variable of \a n components named \a name. */
-	Variable(int n, const char* name) : symbol(new ExprSymbol(name, Dim::col_vec(n))) { }
+	Variable(int n, const char* name);
 
 	/** Create a \a m x \a n matrix variable. */
-	Variable(int m, int n) : symbol(new ExprSymbol(Dim::matrix(m,n))) { }
+	Variable(int m, int n);
 
 	/** Create a \a m x \a n matrix variable named \a name. */
-	Variable(int m, int n, const char* name) : symbol(new ExprSymbol(name, Dim::matrix(m,n))) { }
+	Variable(int m, int n, const char* name);
 
 	/** Create a (\a k-sized array of \a m x \a n matrices) variable. */
-	Variable(int k, int m, int n) : symbol(new ExprSymbol(Dim::matrix_array(k,m,n))) { }
+	Variable(int k, int m, int n);
 
 	/** Create a (\a k-sized array of \a m x \a n matrices) variable named \a name. */
-	Variable(int k, int m, int n, const char* name) : symbol(new ExprSymbol(name, Dim::matrix_array(k,m,n))) { }
+	Variable(int k, int m, int n, const char* name);
 
-	operator const ExprSymbol&() const {
-		if (symbol->deco.f) // already used build new one.
-			symbol=new ExprSymbol(symbol->name, symbol->dim);
-		return *symbol;
-	}
+	/** Delete this. */
+	~Variable();
 
-	operator const ExprNode&() const {
-		if (symbol->deco.f) // already used build new one.
-			symbol=new ExprSymbol(symbol->name, symbol->dim);
-		return *symbol;
-	}
+	/** Return the symbol attached to this variable */
+	operator const ExprSymbol&() const;
+
+	/** Return the symbol attached to this variable */
+	operator const ExprNode&() const;
 
 	/** Create the expression x[index]. */
 	const ExprIndex& operator[](int index) { return ((const ExprNode&) *this)[index]; }
@@ -1417,9 +1414,6 @@ inline bool ExprVector::row_vector() const {
 	return (dim.type()==Dim::ROW_VECTOR || get(0).type()==Dim::COL_VECTOR); /* last case occurs if *this is a matrix */ }
 
 inline ExprLeaf::ExprLeaf(const Dim& dim) : ExprNode(0,1,dim) { }
-
-inline ExprSymbol::~ExprSymbol() {
-	free((char*) name); }
 
 inline const ExprSymbol& ExprSymbol::new_(const char* name, const Dim& dim) {
 	return *new ExprSymbol(name,dim); }

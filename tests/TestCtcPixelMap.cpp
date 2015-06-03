@@ -19,9 +19,9 @@ void TestCtcPixelMap::test3d_emptyBox(){
     CtcPixelMap ctc(raster);
 
     IntervalVector v1(3,Interval::EMPTY_SET);
-    try {
-    	ctc.contract(v1);
-    }catch (EmptyBoxException& ) { v1.set_empty();}
+
+    ctc.contract(v1);
+
     TEST_ASSERT(v1.is_empty());
 }
 
@@ -34,9 +34,8 @@ void TestCtcPixelMap::test3d_contractEmpty(){
     double v1_[3][2] = {{1,0},{2,3},{0,1}};
     IntervalVector v1(3,v1_);
 
-    try {
-    	ctc.contract(v1);
-    } catch (EmptyBoxException& ) { v1.set_empty();}
+    ctc.contract(v1);
+
     TEST_ASSERT(v1.is_empty());
 
 }
@@ -45,9 +44,8 @@ void TestCtcPixelMap::test3d_allReal(){
     initRaster3D(raster);
     CtcPixelMap ctc(raster);
     IntervalVector v1(3,Interval::ALL_REALS);
-    try {
-    	 ctc.contract(v1);
-    } catch (EmptyBoxException& ) { v1.set_empty();}
+
+    ctc.contract(v1);
 
     TEST_ASSERT_DELTA(-1,v1[0].lb(),ERROR);
     TEST_ASSERT_DELTA(-0.9,v1[0].ub() ,ERROR);
@@ -65,9 +63,8 @@ void TestCtcPixelMap::test3d_fullImage(){
     double v1_[3][2] = {{-2,0},{1,3},{0,1}};
     IntervalVector v1(3,v1_);
 
-    try {
-    	 ctc.contract(v1);
-    } catch (EmptyBoxException& ) { v1.set_empty();}
+    ctc.contract(v1);
+
     TEST_ASSERT_DELTA(-1,v1[0].lb(),ERROR);
     TEST_ASSERT_DELTA(-0.9,v1[0].ub() ,ERROR);
     TEST_ASSERT_DELTA(1.5,v1[1].lb(),ERROR);
@@ -84,9 +81,8 @@ void TestCtcPixelMap::test3d_corner(){
     double v1_[3][2] = {{-2,-0.95},{1,1.55},{0,0.45}};
     IntervalVector v1(3,v1_);
 
-    try {
-    	ctc.contract(v1);
-    } catch (EmptyBoxException& ) { v1.set_empty();}
+    ctc.contract(v1);
+
     TEST_ASSERT_DELTA(-1,v1[0].lb(),ERROR);
     TEST_ASSERT_DELTA(-0.95,v1[0].ub() ,ERROR);
     TEST_ASSERT_DELTA(1.5,v1[1].lb(),ERROR);
@@ -118,9 +114,8 @@ void TestCtcPixelMap::test2d_emptyBox(){
 
     IntervalVector v1(2,Interval::EMPTY_SET);
 
-    try {
-    	ctc.contract(v1);
-    }catch (EmptyBoxException& ) { v1.set_empty();}
+    ctc.contract(v1);
+
     TEST_ASSERT(v1.is_empty());
 }
 
@@ -133,9 +128,8 @@ void TestCtcPixelMap::test2d_contractEmpty(){
     double v1_[2][2] = {{1,0},{2,3}};
     IntervalVector v1(2,v1_);
 
-    try {
-    	ctc.contract(v1);
-    }catch (EmptyBoxException& ) { v1.set_empty();}
+    ctc.contract(v1);
+
     TEST_ASSERT(v1.is_empty());
 
 }
@@ -145,9 +139,8 @@ void TestCtcPixelMap::test2d_allReal(){
     CtcPixelMap ctc(raster);
     IntervalVector v1(2,Interval::ALL_REALS);
 
-    try {
-    	ctc.contract(v1);
-    }catch (EmptyBoxException& ) { v1.set_empty();}
+    ctc.contract(v1);
+
     TEST_ASSERT_DELTA(-1,v1[0].lb(),ERROR);
     TEST_ASSERT_DELTA(-0.9,v1[0].ub() ,ERROR);
     TEST_ASSERT_DELTA(1.5,v1[1].lb(),ERROR);
@@ -162,9 +155,8 @@ void TestCtcPixelMap::test2d_fullImage(){
     double v1_[2][2] = {{-2,0},{1,3}};
     IntervalVector v1(2,v1_);
 
-    try {
-    	ctc.contract(v1);
-    }catch (EmptyBoxException& ) { v1.set_empty();}
+    ctc.contract(v1);
+
     TEST_ASSERT_DELTA(-1,v1[0].lb(),ERROR);
     TEST_ASSERT_DELTA(-0.9,v1[0].ub() ,ERROR);
     TEST_ASSERT_DELTA(1.5,v1[1].lb(),ERROR);
@@ -178,9 +170,9 @@ void TestCtcPixelMap::test2d_corner(){
 
     double v1_[2][2] = {{-2,-0.95},{1,1.55}};
     IntervalVector v1(2,v1_);
-    try {
-    	ctc.contract(v1);
-    }catch (EmptyBoxException& ) { v1.set_empty();}
+
+    ctc.contract(v1);
+
     TEST_ASSERT_DELTA(-1,v1[0].lb(),ERROR);
     TEST_ASSERT_DELTA(-0.95,v1[0].ub() ,ERROR);
     TEST_ASSERT_DELTA(1.5,v1[1].lb(),ERROR);

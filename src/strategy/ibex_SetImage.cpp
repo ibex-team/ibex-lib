@@ -26,8 +26,8 @@ public:
 
 	void contract(IntervalVector& box) {
 		box &= x;
-		if (box.is_empty()) throw EmptyBoxException();
 	}
+
 	const IntervalVector& x;
 };
 
@@ -71,9 +71,10 @@ void SetImage::pave(const IntervalVector& x, double epsilon) {
 	while (! Ldomain.empty()) {
 		xtilde = Ldomain.top();
 		Ldomain.pop();
-		try {
-			c_out.contract(xtilde);
-		} catch(EmptyBoxException &) {
+
+		c_out.contract(xtilde);
+
+		if (xtilde.is_empty()) {
 			continue;
 		}
 

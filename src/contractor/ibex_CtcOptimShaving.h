@@ -14,7 +14,9 @@
 
 #include "ibex_Ctc3BCid.h"
 
-
+/**
+ * TODO: ADD COMMENTS.
+ */
 namespace ibex {
 
   class CtcOptimShaving: public Ctc3BCid {

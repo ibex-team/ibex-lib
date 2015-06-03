@@ -39,11 +39,10 @@ void TestFritzJohn::test01() {
 	double _box[][2] = {{0.7,0.8},{0.7,0.8},{0,1},{NEG_INFINITY,POS_INFINITY}};
 
 	IntervalVector box(4,_box);
-	try {
-		hc4.contract(box);
-	} catch(EmptyBoxException& e) {
-		TEST_ASSERT(false);
-	}
+
+	hc4.contract(box);
+
+	TEST_ASSERT(!box.is_empty());
 
 	Interval& u=box[2];
 	Interval& l=box[3];

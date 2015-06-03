@@ -11,7 +11,6 @@
 #include "TestNewton.h"
 #include "Ponts30.h"
 #include "ibex_Newton.h"
-#include "ibex_EmptyBoxException.h"
 #include "ibex_LinearException.h"
 
 using namespace std;
@@ -88,9 +87,7 @@ void TestNewton::newton01() {
 	IntervalVector box(30,BOX1);
 	try {
 		newton(*p30.f,box);
-	} catch (EmptyBoxException& e) {
-		//cout << "empty box" << endl;
-		TEST_ASSERT(false);
+		TEST_ASSERT(!box.is_empty());
 	} catch (LinearException& e) {
 		//cout << "linear exception" << endl;
 		TEST_ASSERT(false);

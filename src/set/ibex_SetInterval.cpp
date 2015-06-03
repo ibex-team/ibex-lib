@@ -12,6 +12,7 @@
 #include "ibex_SetBisect.h"
 #include "ibex_Heap.h"
 #include "ibex_CellStack.h"
+#include "ibex_SetConnectedComponents.cpp_"
 #include <stack>
 #include <fstream>
 
@@ -19,7 +20,7 @@ using namespace std;
 
 namespace ibex {
 
-SetInterval::SetInterval(const IntervalVector& bounding_box, double eps, bool inner) : root(new SetLeaf(inner? __IBEX_IN__: __IBEX_UNK__)), eps(eps), bounding_box(bounding_box) {
+SetInterval::SetInterval(const IntervalVector& bounding_box, double eps, bool inner) : root(new SetLeaf(inner? YES: MAYBE)), eps(eps), bounding_box(bounding_box) {
 
 }
 
@@ -33,7 +34,7 @@ bool SetInterval::is_empty() const {
 
 void SetInterval::sync(Sep& sep) {
 	try {
-		root = root->sync(bounding_box, sep, eps);
+		root = root->inter(true, bounding_box, sep, IntervalVector(bounding_box.size()), eps);
 	} catch(NoSet& e) {
 		delete root;
 		root = NULL;
@@ -42,21 +43,23 @@ void SetInterval::sync(Sep& sep) {
 }
 
 void SetInterval::contract(Sep& sep) {
-	root->set_in_tmp();
-	root = root->inter(bounding_box, sep, eps);
-	root->unset_in_tmp();
+	root = root->inter(false, bounding_box, sep, IntervalVector(bounding_box.size()), eps);
 }
 
 SetInterval& SetInterval::operator&=(const SetInterval& set) {
-	root->set_in_tmp();
-	root = root->inter(bounding_box, set.root, set.bounding_box, eps);
-	root->unset_in_tmp();
+	root = root->inter(false, bounding_box, set.root, set.bounding_box, eps);
+	//root = root->inter2(false, bounding_box, pair<SetNode*,IntervalVector>(set.root, set.bounding_box), eps);
 	return *this;
 }
 
 SetInterval& SetInterval::operator|=(const SetInterval& set) {
 	root = root->union_(bounding_box, set.root, set.bounding_box, eps);
 	return *this;
+}
+
+BoolInterval SetInterval::is_superset(const IntervalVector& box) const {
+	if (!bounding_box.is_superset(box)) return NO;
+	else return root->is_superset(bounding_box,box);
 }
 
 void SetInterval::save(const char* filename) {
@@ -86,7 +89,7 @@ void SetInterval::save(const char* filename) {
 		if (node->is_leaf()) {
 			int no_var=-1; // to store "-1" (means: leaf)
 			os.write((char*) &no_var, sizeof(int));
-			os.write((char*) &node->status, sizeof(NodeType));
+			os.write((char*) &((SetLeaf*) node)->status, sizeof(BoolInterval));
 		}
 		else {
 			SetBisect* b=(SetBisect*) node;
@@ -125,10 +128,10 @@ void SetInterval::load(const char* filename) {
 	is.read((char*) &var, sizeof(int));
 
 	double pt;
-	NodeType status;
+	BoolInterval status;
 
 	if (var==-1) {
-		is.read((char*) &status, sizeof(NodeType));
+		is.read((char*) &status, sizeof(BoolInterval));
 		root = new SetLeaf(status);
 		is.close();
 		return;
@@ -157,17 +160,21 @@ void SetInterval::load(const char* filename) {
 		is.read((char*) &var, sizeof(int));
 
 		if (var==-1) {
-			is.read((char*) &status, sizeof(NodeType));
+			is.read((char*) &status, sizeof(BoolInterval));
 			subnode = new SetLeaf(status);
 		} else {
 			is.read((char*) &pt, sizeof(double));
 			subnode  =new SetBisect(var,pt); // left and right are both set to NULL temporarily
 		}
 
-		if (node->left==NULL) node->left=subnode;
+		if (node->left==NULL) {
+			node->left=subnode;
+			subnode->father = node;
+		}
 		else {
 			assert(node->right==NULL);
 			node->right=subnode;
+			subnode->father = node;
 		}
 
 		if (var!=-1)
@@ -233,6 +240,9 @@ public:
 
 
 double SetInterval::dist(const Vector& pt, bool inside) const {
+
+    if (!inside && !bounding_box.contains(pt)) return 0;
+
 	CellHeapDist costf;
 	Heap<Cell> heap(costf);
 
@@ -256,14 +266,13 @@ double SetInterval::dist(const Vector& pt, bool inside) const {
 
 		assert(node!=NULL);
 
-		if (node->status==(inside? __IBEX_IN__ : __IBEX_OUT__)) {
+		if (node->is_leaf() && ((SetLeaf*) node)->status==(inside? YES : NO)) {
 			double d=c->get<NodeAndDist>().dist;
 			if (d<lb) {
 				lb=d;
 				heap.contract(lb);
 			}
-		} else if (!node->is_leaf() && (    (inside && possibly_contains_in(node->status))
-		                                || (!inside && possibly_contains_out(node->status)))) {
+		} else if (!node->is_leaf()) {
 			SetBisect& b= *((SetBisect*) node);
 
 			IntervalVector left=b.left_box(c->box);
@@ -283,6 +292,25 @@ double SetInterval::dist(const Vector& pt, bool inside) const {
 	}
 	//cout << " number of times a distance to a box has been computed: " << count << endl;
 	return ::sqrt(lb);
+}
+
+
+IntervalVector SetInterval::node_box(const SetNode* node) const {
+
+	// the first field is an ancestor
+	// the second field is whether we are in the left or right branch of this ancestor
+	list<pair<const SetBisect*,bool> > ancestors;
+
+	// we go upward in the tree and record the side of each bisection
+	for (const SetNode* ancestor=node; ancestor->father!=NULL; ancestor=ancestor->father) {
+		ancestors.push_front(pair<const SetBisect*,bool>(ancestor->father, ancestor==ancestor->father->left));  // "true" means "left"
+	}
+	IntervalVector box=bounding_box;
+	// we go backward and apply the bisections recursively from the initial bounding box
+	for (list<pair<const SetBisect*,bool> >::const_iterator it=ancestors.begin(); it!=ancestors.end(); it++) {
+		box = it->second ? it->first->left_box(box) : it->first->right_box(box);
+	}
+	return box;
 }
 
 SetInterval::~SetInterval() {

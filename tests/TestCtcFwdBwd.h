@@ -21,9 +21,12 @@ public:
 
 	TestCtcFwdBwd() {
 		TEST_ADD(TestCtcFwdBwd::sqrt_issue28);
+		TEST_ADD(TestCtcFwdBwd::atan2_issue134);
 	}
 
 	void sqrt_issue28();
+	void atan2_issue134();
+
 };
 
 } // namespace ibex

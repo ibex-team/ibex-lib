@@ -24,6 +24,7 @@
 #include "ibex_LinearSolver.h"
 #include "ibex_PdcHansenFeasibility.h"
 #include "ibex_Random.h"
+#include "ibex_LinearRelaxCombo.h"
 
 namespace ibex {
 
@@ -333,17 +334,6 @@ protected:
 	void contract_and_bound(Cell& c, const IntervalVector& init_box);
 
 	/**
-	 * \brief Contraction procedure for processing a box.
-	 *
-	 * <ul>
-	 * <li> contract with the contractor ctc,
-	 * </ul>
-	 *
-	 */
-	 virtual void contract(IntervalVector& box, const IntervalVector& init_box );
-
-
-	/**
 	 * \brief First order contraction procedure for processing a box.
 	 *
 	 * <ul>
@@ -355,12 +345,12 @@ protected:
 
 	virtual void firstorder_contract ( IntervalVector& box, const IntervalVector& init_box);
 
-
 	/**
 	 * \brief Update the entailed constraint for the current box
+	 *
+	 * \return false if unsatisfiability is detected, true otherwise.
 	 */
-	void update_entailed_ctr(const IntervalVector& box);
-
+	bool update_entailed_ctr(const IntervalVector& box);
 
 	/**
 	 * \brief Update the uplo of non bisectable boxes
@@ -433,6 +423,7 @@ protected:
 	 * \return true in case of success, i.e., if the loup has been decreased.
 	 */
 	bool check_candidate(const Vector& pt, bool is_inner);
+	bool check_candidate_extended(const Vector& pt, bool is_inner);
 
 	/**
 	 * Look for a loup box (in rigor mode) starting from a pseudo-loup.
@@ -546,6 +537,7 @@ private:
 
 	/** linear solver used in ibex_OptimSimplex.cpp_ */
 	LinearSolver *mylp;
+	LinearRelaxCombo *lr;
 
 	/** Inner contractor (for the negation of g) */
 	CtcUnion* is_inside;

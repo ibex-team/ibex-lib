@@ -9,8 +9,6 @@
 //============================================================================
 
 #include "ibex_SepInter.h"
-#include "ibex_EmptyBoxException.h"
-
 #include <cassert>
 
 namespace ibex {
@@ -57,12 +55,10 @@ void SepInter::separate(IntervalVector &x_in, IntervalVector &x_out){
     IntervalVector savebox(x_in);
 
     for (int i=0; i<list.size(); i++) {
-        if (i>0) x_in=savebox;
-        try {
-            x_in &= x_out;
-            list[i].separate(x_in,x_out);
-            result_x_in |= x_in;
-        } catch(EmptyBoxException&) { }
+    	if (i>0) x_in=savebox;
+    	x_in &= x_out;
+    	list[i].separate(x_in,x_out);
+    	result_x_in |= x_in;
     }
     x_in = result_x_in;
 

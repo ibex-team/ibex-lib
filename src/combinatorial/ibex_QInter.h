@@ -14,6 +14,7 @@
 #include "ibex_IntervalVector.h"
 
 // ignored warning : comparison between signed and unsigned integer expressions in this file
+#pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-compare"
 
 #include "ibex_KCoreGraph.h"

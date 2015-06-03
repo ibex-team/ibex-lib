@@ -18,7 +18,7 @@
 #include <algorithm>
 
 
-#include "ibex_TemplateVector.cpp_"
+#include "ibex_TemplateVector.h_"
 
 namespace ibex {
 
@@ -261,8 +261,9 @@ bool bwd_mul(const Interval& z, IntervalVector& x, IntervalVector& y) {
 IntervalVector& IntervalVector::inflate(double rad1)                              { return _inflate(*this,rad1); }
 IntervalVector  IntervalVector::subvector(int start_index, int end_index) const   { return _subvector(*this,start_index,end_index); }
 void            IntervalVector::put(int start_index, const IntervalVector& x)     { _put(*this, start_index, x); }
-IntervalVector& IntervalVector::operator=(const IntervalVector& x)                { return _assign(*this,x); }
-bool            IntervalVector::operator==(const IntervalVector& x) const         { return _equals(*this,x); }
+IntervalVector& IntervalVector::operator=(const IntervalVector& x)                { resize(x.size()); // see issue #10
+                                                                                    return _assignV(*this,x); }
+bool            IntervalVector::operator==(const IntervalVector& x) const         { return _equalsV(*this,x); }
 Vector          IntervalVector::lb() const                                        { return _lb(*this); }
 Vector          IntervalVector::ub() const                                        { return _ub(*this); }
 Vector          IntervalVector::mid() const                                       { return _mid(*this); }
@@ -275,7 +276,7 @@ bool            IntervalVector::is_bisectable() const                           
 Vector          IntervalVector::rad() const                                       { return _rad(*this); }
 Vector          IntervalVector::diam() const                                      { return _diam(*this); }
 int             IntervalVector::extr_diam_index(bool min) const                   { return _extr_diam_index(*this,min); }
-std::ostream&   operator<<(std::ostream& os, const IntervalVector& x)             { return _display(os,x); }
+std::ostream&   operator<<(std::ostream& os, const IntervalVector& x)             { return _displayV(os,x); }
 double          IntervalVector::volume() const                                    { return _volume(*this); }
 double          IntervalVector::perimeter() const                                 { return _perimeter(*this); }
 double          IntervalVector::rel_distance(const IntervalVector& x) const       { return _rel_distance(*this,x); }

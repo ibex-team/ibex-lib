@@ -18,14 +18,9 @@ PdcCleared::PdcCleared(Ctc& c) : Pdc(c.nb_var), ctc(c) {
 }
 
 BoolInterval PdcCleared::test(const IntervalVector& box) {
-	try {
-		IntervalVector tmpbox(box);
-		ctc.contract(tmpbox);
-		assert(!tmpbox.is_empty());
-		return MAYBE;
-	} catch(EmptyBoxException& ) {
-		return YES;
-	}
+	IntervalVector tmpbox(box);
+	ctc.contract(tmpbox);
+	return tmpbox.is_empty() ? YES : MAYBE;
 }
 
 } // end namespace ibex

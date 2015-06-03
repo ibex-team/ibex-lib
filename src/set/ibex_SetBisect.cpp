@@ -14,26 +14,19 @@
 
 using namespace std;
 
-// =========== shortcuts ==================
-#define IN         __IBEX_IN__
-#define OUT        __IBEX_OUT__
-#define UNK        __IBEX_UNK__
-#define UNK_IN     __IBEX_UNK_IN__
-#define UNK_OUT    __IBEX_UNK_OUT__
-#define UNK_IN_OUT __IBEX_UNK_IN_OUT__
-#define IN_TMP     __IBEX_IN_TMP__
-// ========================================
-
 namespace ibex {
 
-SetBisect::SetBisect(int var, double pt, SetNode* left, SetNode* right) : SetNode(left->status | right->status), var(var), pt(pt), left(left), right(right) {
+SetBisect::SetBisect(int var, double pt, SetNode* left, SetNode* right) : var(var), pt(pt), left(left), right(right) {
 	// a bisectNode with two subnodes of same status IN or OUT should not exist
-	// (automatically compacted as a leaf node) but two subnodes IN_TMP can be
-	// created by a leaf with IN_TMP status (when it auto-splits in inter function)
-	assert(left->status>=UNK || left->status!=right->status);
+	assert(!dynamic_cast<SetLeaf*>(left) ||
+			!dynamic_cast<SetLeaf*>(right) ||
+			dynamic_cast<SetLeaf*>(left)->status !=dynamic_cast<SetLeaf*>(right)->status);
+
+	left->father = this;
+	right->father = this;
 }
 
-SetBisect::SetBisect(int var, double pt) : SetNode(UNK), var(var), pt(pt), left(NULL), right(NULL) {
+SetBisect::SetBisect(int var, double pt) : var(var), pt(pt), left(NULL), right(NULL) {
 
 }
 
@@ -46,81 +39,117 @@ bool SetBisect::is_leaf() const {
 	return false;
 }
 
-SetNode* SetBisect::sync(const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps) {
-	assert(x_status<=UNK);
+SetNode* SetBisect::inter(bool sync, const IntervalVector& nodebox, const IntervalVector& x, BoolInterval xstatus, double eps) {
 
-	if (x_status==UNK) {
-		return this;
-	}
-	else if (nodebox.is_subset(x)) {
-		if (x_status==IN && !possibly_contains_in(status)) throw NoSet();
-		if (x_status==OUT && !possibly_contains_out(status)) throw NoSet();
+	if (sync) {
+		if (xstatus==MAYBE)
+			return this;
 
-		delete this; // warning: suicide
-		return new SetLeaf(x_status);
+		// TODO assert((xstatus==NO && !contains_in) || (xstatus==YES && !contains_out));
+
+		// xstatus is either YES or NO
+		if (nodebox.is_subset(x)) {
+			delete this;
+			return new SetLeaf(xstatus);
+		}
 	} else {
-		left = left->sync(left_box(nodebox), x, x_status, eps);
-		right = right->sync(right_box(nodebox), x, x_status, eps);
+		if (xstatus==YES)
+			return this;
+
+		// if xstatus is MAYBE we don't replace
+		// this node by a leaf MAYBE (we lose information)
+		if (xstatus==NO && nodebox.is_subset(x)) {
+			delete this;
+			return new SetLeaf(xstatus);
+		}
+	}
+
+	if (!nodebox.intersects(x))
+		return this;
+	else {
+		left = left->inter(sync, left_box(nodebox), x, xstatus, eps);
+		left->father = this;
+		right = right->inter(sync, right_box(nodebox), x, xstatus, eps);
+		right->father = this;
 		// status of children may have changed --> try merge
 		return try_merge();
 	}
+
 }
 
-SetNode* SetBisect::sync_rec(const IntervalVector& nodebox, Sep& sep, double eps) {
-	left = left->sync(left_box(nodebox), sep, eps);
-	right = right->sync(right_box(nodebox), sep, eps);
-	// status of children may have changed --> try merge
-	return try_merge();
-}
+SetNode* SetBisect::inter2(bool sync, const IntervalVector& nodebox, const pair<SetNode*,IntervalVector>& other, double eps) {
+	if (!nodebox.intersects(other.second)) return this;
 
+	if (other.first->is_leaf()) return inter(sync, nodebox, other.second, ((SetLeaf*) other.first)->status, eps);
 
-SetNode* SetBisect::inter(const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps) {
-	assert(x_status<=UNK);
+	const IntervalVector lbox=left_box(nodebox);
+	const IntervalVector rbox=right_box(nodebox);
 
-	// no: keep subnodes informed that x_status is IN (their status can changed from IN_TMP to IN)
-	//	if (x_status==IN) {
-	//		return this;
-	//	}
-
-	// in comment because certainly_contains_in does not take into account IN_TMP
-//	if (x_status==UNK && !certainly_contains_in(status)) {
-//		return this;
-//	}
-
-	// certainly_contains_out in comment because does not take into account IN_TMP
-    if ((x_status==OUT /*|| !certainly_contains_out(status)*/) && nodebox.is_subset(x)) {
-		delete this; // warning: suicide
-		return new SetLeaf(x_status); // either OUT or UNK
-	} else {
-		left = left->inter(left_box(nodebox), x, x_status, eps);
-		right = right->inter(right_box(nodebox), x, x_status, eps);
-		// status of children may have changed --> try merge
-		return try_merge();
+	if (lbox.intersects(other.second)) {
+		left = left->inter2(sync, lbox, other.first->subset(other.second,lbox), eps);
+		left->father = this;
 	}
-}
-
-SetNode* SetBisect::inter_rec(const IntervalVector& nodebox, Sep& sep, double eps) {
-	left = left->inter(left_box(nodebox), sep, eps);
-	right = right->inter(right_box(nodebox), sep, eps);
-	// status of children may have changed --> try merge
+	if (rbox.intersects(other.second)) {
+		right = right->inter2(sync, rbox, other.first->subset(other.second,rbox), eps);
+		right->father = this;
+	}
 	return try_merge();
 }
 
-SetNode* SetBisect::union_(const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps) {
-	assert(x_status<=UNK);
+pair<SetNode*,IntervalVector> SetBisect::subset(const IntervalVector& nodebox, const IntervalVector& box) {
+	const IntervalVector lbox=left_box(nodebox);
+	const IntervalVector rbox=right_box(nodebox);
 
-	if (x_status>IN) {
+	if (lbox.intersects(box)) {
+		if (rbox.intersects(box)) return pair<SetNode*,IntervalVector>(this,nodebox);
+		else return left->subset(lbox,box);
+	}
+
+	assert(rbox.intersects(box));
+	return right->subset(rbox,box);
+}
+
+SetNode* SetBisect::inter_rec(bool sync, const IntervalVector& nodebox, Sep& sep, const IntervalVector& targetbox, double eps) {
+	left = left->inter(sync, left_box(nodebox), sep, targetbox, eps);
+	left->father = this;
+	right = right->inter(sync,right_box(nodebox), sep, targetbox, eps);
+	right->father = this;
+
+	//cout << "left="; left->print(cout,left_box(nodebox),0);
+	//cout << "right="; right->print(cout,right_box(nodebox),0);
+	// status of children may have changed --> try merge or update status
+	return try_merge();
+}
+
+SetNode* SetBisect::union_(const IntervalVector& nodebox, const IntervalVector& x, BoolInterval x_status, double eps) {
+	if (x_status==NO) {
 		return this;
 	}
-
-    if (nodebox.is_subset(x)) {
+    if (x_status==YES && nodebox.is_subset(x)) {
 		delete this; // warning: suicide
-		return new SetLeaf(IN);
+		return new SetLeaf(YES);
 	} else {
 		left = left->union_(left_box(nodebox), x, x_status, eps);
+		left->father = this;
 		right = right->union_(right_box(nodebox), x, x_status, eps);
+		right->father = this;
 		// status of children may have changed --> try merge
 		return try_merge();
+	}
+}
+
+BoolInterval SetBisect::is_superset(const IntervalVector& nodebox, const IntervalVector& box) const {
+	if (!nodebox.intersects(box)) return YES;
+	else {
+		// maybe compilers do the following optimization (avoiding to call
+		// superset on the right side if the answer with the left side is "NO") when
+		// we write:
+		//
+		// left->is_superset(left_box(nodebox),box) & right->is_superset(right_box(nodebox),box);
+
+		BoolInterval l_res=left->is_superset(left_box(nodebox),box);
+		if (l_res==NO) return NO;
+		else return l_res & right->is_superset(right_box(nodebox),box);
 	}
 }
 
@@ -134,16 +163,6 @@ void SetBisect::print(ostream& os, const IntervalVector& nodebox, int shift) con
 	os << "* " << nodebox << endl;
 	left->print(os, left_box(nodebox), shift+2);
 	right->print(os, right_box(nodebox), shift+2);
-}
-
-void SetBisect::set_in_tmp() {
-	left->set_in_tmp();
-	right->set_in_tmp();
-}
-
-void SetBisect::unset_in_tmp() {
-	left->unset_in_tmp();
-	right->unset_in_tmp();
 }
 
 IntervalVector SetBisect::left_box(const IntervalVector& nodebox) const {
@@ -161,13 +180,15 @@ IntervalVector SetBisect::right_box(const IntervalVector& nodebox) const {
 }
 
 SetNode* SetBisect::try_merge() {
-	// the case left=right=UNK may happen.
-	if (left->status<=UNK && left->status==right->status) {
-		NodeType s=left->status;
-		delete this;
-		return new SetLeaf(s);
-	} else
-		return this;
+	if (left->is_leaf() && right->is_leaf()) {
+		BoolInterval left_status=((SetLeaf*) left)->status;
+		if (left_status == ((SetLeaf*) right)->status) {
+			delete this; // warning: left does not exist anymore
+			return new SetLeaf(left_status);
+		}
+	}
+	return this;
 }
+
 
 } // namespace ibex
