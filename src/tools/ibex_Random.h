@@ -42,6 +42,8 @@
 #ifndef __IBEX_RNG__
 #define __IBEX_RNG__
 
+#include "stdint.h"
+
 // Max uint32 for random number generator
 #if !defined(UINT32_MAX)
 typedef unsigned int uint32_t;

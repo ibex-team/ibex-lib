@@ -28,6 +28,7 @@
 #include "TestDim.h"
 #include "TestArith.h"
 #include "TestInnerArith.h"
+#include "TestAffine.h"
 #include "TestAffine2.h"
 //#include "TestDomain.h"
 
@@ -106,7 +107,10 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestInnerArith()));
     //ts.add(auto_ptr<Test::Suite>(new TestDomain()));
 
-    ts.add(auto_ptr<Test::Suite>(new TestAffine2()));
+    ts.add(auto_ptr<Test::Suite>(new TestAffine<AF_Linear>()));
+    ts.add(auto_ptr<Test::Suite>(new TestAffine<AF_Default>()));
+    ts.add(auto_ptr<Test::Suite>(new TestAffine2<AF_Linear>()));
+    ts.add(auto_ptr<Test::Suite>(new TestAffine2<AF_Default>()));
 
     ts.add(auto_ptr<Test::Suite>(new TestExpr()));
     ts.add(auto_ptr<Test::Suite>(new TestExprCopy()));

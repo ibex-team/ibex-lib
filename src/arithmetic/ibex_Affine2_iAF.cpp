@@ -496,6 +496,15 @@ Affine2Main<AF_iAF>& Affine2Main<AF_iAF>::sqr(const Interval itv) {
 	return *this;
 }
 
+template<>
+void Affine2Main<AF_iAF>::compact(double tol){
+	for (int i=1;i<=_n;i++) {
+		if (abs(_elt._val[i]).ub()<tol) {
+			_elt._err += abs(_elt._val[i]).ub();
+			_elt._val[i] =0;
+		}
+	}
+}
 
 
 

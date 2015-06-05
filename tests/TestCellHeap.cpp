@@ -219,7 +219,7 @@ void TestCellHeap::test_D03() {
 	}
 	delete h1.pop(); delete h1.pop();
 
-	TEST_ASSERT(h1.size()==nb-2);
+	TEST_ASSERT(h1.size()==((unsigned int)(nb-2)));
 }
 
 

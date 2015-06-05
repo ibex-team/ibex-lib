@@ -12,6 +12,7 @@
 
 #include "ibex_SetNode.h"
 #include "ibex_Sep.h"
+#include "ibex_SetLeaf.h"
 
 namespace ibex {
 
@@ -105,6 +106,28 @@ public:
  	 */
 	double dist(const Vector& pt, bool inside) const;
 
+	/**
+	 * \brief The leaves organized by connected components.
+	 *
+	 * Two leaves belong to the same connected component if there exists
+	 * a path between the two boxes that either entirely belong to the
+	 * "inside" of the set (if the leaves have status YES), the "outside"
+	 * (if the status is NO) or the "boundary".
+	 *
+	 * The number of connected components is the size of the returned vector.
+	 */
+	std::vector<std::vector<SetLeaf*> > connected_components();
+
+	/**
+	 * \brief YES only if this set is a superset of the box
+	 */
+	BoolInterval is_superset(const IntervalVector& box) const;
+
+	/**
+	 * \brief Box corresponding to a node
+	 */
+	IntervalVector node_box(const SetNode* node) const;
+
 protected:
 
 	/**
@@ -119,6 +142,7 @@ protected:
 	double eps;
 
 	IntervalVector bounding_box; // not sure it is really necessary
+
 };
 
 std::ostream& operator<<(std::ostream& os, const SetInterval& set);

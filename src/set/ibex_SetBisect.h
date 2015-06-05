@@ -39,19 +39,16 @@ public:
 	virtual bool is_leaf() const;
 
 	/** \see SetNode */
-	virtual SetNode* sync(const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps);
+	virtual SetNode* inter(bool sync, const IntervalVector& nodebox, const IntervalVector& x, BoolInterval x_status, double eps);
+
+	virtual SetNode* inter2(bool sync, const IntervalVector& nodebox, const std::pair<SetNode*,IntervalVector>& other, double eps);
+	virtual std::pair<SetNode*,IntervalVector> subset(const IntervalVector& nodebox, const IntervalVector& box);
 
 	/** \see SetNode */
-	virtual SetNode* inter(const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps);
+	virtual SetNode* inter_rec(bool sync, const IntervalVector& nodebox, Sep& sep, const IntervalVector& targetbox, double eps);
 
 	/** \see SetNode */
-	virtual SetNode* sync_rec(const IntervalVector& nodebox, Sep& sep, double eps);
-
-	/** \see SetNode */
-	virtual SetNode* inter_rec(const IntervalVector& nodebox, Sep& sep, double eps);
-
-	/** \see SetNode */
-	virtual SetNode* union_(const IntervalVector& nodebox, const IntervalVector& x, NodeType x_status, double eps);
+	virtual SetNode* union_(const IntervalVector& nodebox, const IntervalVector& x, BoolInterval x_status, double eps);
 
 	/** \see SetNode */
 	virtual void visit_leaves(leaf_func func, const IntervalVector& nodebox) const;
@@ -60,10 +57,7 @@ public:
 	virtual void print(std::ostream& os, const IntervalVector& nodebox, int shift) const;
 
 	/** \see SetNode */
-	virtual void set_in_tmp();
-
-	/** \see SetNode */
-	virtual void unset_in_tmp();
+	virtual BoolInterval is_superset(const IntervalVector& nodebox, const IntervalVector& box) const;
 
 	IntervalVector left_box(const IntervalVector& nodebox) const;
 
@@ -74,6 +68,7 @@ public:
 	friend class SetInterval;
 
 	// partial initialization used by SetInterval::load only
+	// and diff
 	SetBisect(int var, double pt);
 
 	SetNode* try_merge();
