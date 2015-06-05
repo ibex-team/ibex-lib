@@ -137,6 +137,8 @@ int main (int argc, char** argv) {
 
 		Optimizer o(p.get_sys(), p.get_ctc(), p.get_bsc(), p.prec, p.goal_rel_prec, p.goal_abs_prec, p.sample_size, p.eq_eps);
 
+		o.timeout=time_limit;
+
 		Optimizer::Status status=o.optimize(p.get_sys().box);
 
 		double scaled_time = ratio_perf*time;
