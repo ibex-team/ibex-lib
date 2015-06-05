@@ -19,4 +19,5 @@ script:
   - cd tests/ &&./utest 
   - cd ..
   - cd tests/ && ./nonreg nonreg-travis-soplex-filib.res && cd ..
-  - cd tests/ && ./nonreg_optimctc nonreg-travis-soplex-filib.res && cd ..
+  - cd tests/ && ./nonreg_optimctc nonreg-travis-soplex-filib.res  && cd ..
+  
