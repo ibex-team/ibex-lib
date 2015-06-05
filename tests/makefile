@@ -24,6 +24,9 @@ utest.o : $(SRCS) $(HEADERS)
 
 nonreg : nonreg.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $< $(LIBS)
+	
+nonreg_optimctc : nonreg_optimctc.cpp
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $< $(LIBS)
 
 clean:
 	rm -f $(OBJS) $(TARGET)

@@ -17,6 +17,7 @@
 #include "ibex_UnconstrainedLocalSearch.h"
 #include <string>
 #include "ibex_BitSet.h"
+#include "ibex_Optimizer.h"
 namespace ibex {
 
 /**
@@ -59,7 +60,7 @@ public:
 	/**
 	 * \brief Return status of the optimizer
 	 */
-	typedef enum {SUCCESS, INFEASIBLE, NO_FEASIBLE_FOUND, UNBOUNDED_OBJ, TIME_OUT} Status;
+	//typedef enum {SUCCESS, INFEASIBLE, NO_FEASIBLE_FOUND, UNBOUNDED_OBJ, TIME_OUT} Status;
 
 	/**
 	 * \brief Run the optimization.
@@ -85,7 +86,7 @@ public:
 	 *
 	 *         TIMEOUT             time is out.
 	 */
-	Status optimize(const IntervalVector& init_box, double obj_init_bound=POS_INFINITY);
+	Optimizer::Status optimize(const IntervalVector& init_box, double obj_init_bound=POS_INFINITY);
 
 	/**
 	 * \brief Displays on standard output a report of the last call to #optimize(const IntervalVector&).

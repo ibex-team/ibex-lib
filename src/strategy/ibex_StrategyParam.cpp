@@ -21,6 +21,11 @@
 #include "ibex_SmearFunction.h"
 #include "ibex_LargestFirst.h"
 #include "ibex_Random.h"
+#include "ibex_NormalizedSystem.h"
+#include "ibex_ExtendedSystem.h"
+#include "ibex_CtcUnion.h"
+#include "ibex_CtcFwdBwd.h"
+
 
 #include <sstream>
 #include <vector>
@@ -42,12 +47,26 @@ System& StrategyParam::get_sys() {
 System& StrategyParam::get_ext_sys() {
 	return get_sys();
 }
+System& StrategyParam::get_norm_sys() {
+	return get_sys();
+}
+
+System& OptimizerParam::get_norm_sys() {
+	if ((*memory())->sys.size()==2) {
+		return (NormalizedSystem&) *((*memory())->sys.back()); // already built and recorded
+	}
+	else return rec(new NormalizedSystem(get_sys(),eq_eps));
+}
 
 System& OptimizerParam::get_ext_sys() {
-	if ((*memory())->sys.size()==2) {
+	if ((*memory())->sys.size()==3) {
 		return (ExtendedSystem&) *((*memory())->sys.back()); // already built and recorded
 	}
-	else return rec(new ExtendedSystem(get_sys(),eq_eps));
+	else return rec(new ExtendedSystem(get_norm_sys(),eq_eps));
+}
+
+System& OptimCtcParam::get_ext_sys() {
+	return get_norm_sys();
 }
 
 /*
@@ -210,6 +229,37 @@ OptimizerParam::OptimizerParam(const char* filename, const char* filtering, cons
 
 	RNG::srand(1);
 
+}
+
+
+OptimCtcParam::OptimCtcParam(const char* filename, const char* filtering, const char* lin_relax,
+		const char* bisection, double prec, double time_limit, bool hc4_incremental, double ratio_propag,
+		double fixpoint_ratio, double goal_rel_prec, double goal_abs_prec, int sample_size, double eq_eps) :
+
+		OptimizerParam(filename, filtering, lin_relax,bisection,prec,time_limit,hc4_incremental,ratio_propag,
+				fixpoint_ratio,goal_rel_prec,goal_abs_prec,sample_size,eq_eps) {
+
+}
+
+Ctc& OptimCtcParam::get_ctc_out() {
+	return get_ctc();
+}
+
+Ctc& OptimCtcParam::get_ctc_in() {
+	System& sys_norm = get_norm_sys(); // <=> original normalized system
+
+	vector<Ctc*> array_in;
+	for (int i=0;i<sys_norm.nb_ctr;i++) {
+		array_in.push_back(&rec(new CtcFwdBwd(sys_norm.ctrs[i].f,GT)));
+	}
+
+	return rec(new CtcUnion(Array<Ctc>(array_in)));
+}
+
+
+Function& OptimCtcParam::get_goal() {
+	System& sys_norm = get_norm_sys(); // <=> original normalized system
+	return  *sys_norm.goal;
 }
 
 } // namespace ibex

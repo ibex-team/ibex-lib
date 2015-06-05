@@ -13,7 +13,6 @@
 #include "ibex_Ctc.h"
 #include "ibex_Bsc.h"
 #include "ibex_System.h"
-#include "ibex_ExtendedSystem.h"
 
 namespace ibex {
 
@@ -56,6 +55,7 @@ protected:
 	 * With optimizer: extended system
 	 */
 	virtual System& get_ext_sys();
+	virtual System& get_norm_sys();
 
 private:
 	void* data;
@@ -77,7 +77,26 @@ public:
 protected:
 
 	virtual System& get_ext_sys();
+	virtual System& get_norm_sys();
 };
+
+class OptimCtcParam : public OptimizerParam {
+
+public:
+	OptimCtcParam(const char* filename, const char* ctc, const char* lin_relax,
+			const char* bsc, double prec, double time_limit, bool hc4_incremental,
+			double ratio_propag, double fixpoint_ratio,
+			double goal_rel_prec, double goal_abs_prec, int sample_size, double eq_eps);
+
+	Ctc& get_ctc_out();
+	Ctc& get_ctc_in();
+	Function& get_goal();
+
+protected:
+	virtual System& get_ext_sys();
+
+};
+
 
 } // namespace ibex
 

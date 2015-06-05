@@ -373,7 +373,7 @@ void OptimCtc::contract_and_bound(Cell& c) {
 }
 
 
-OptimCtc::Status OptimCtc::optimize(const IntervalVector& init_box, double obj_init_bound) {
+Optimizer::Status OptimCtc::optimize(const IntervalVector& init_box, double obj_init_bound) {
 	loup=obj_init_bound;
 
 	uplo=NEG_INFINITY;
@@ -471,20 +471,20 @@ OptimCtc::Status OptimCtc::optimize(const IntervalVector& init_box, double obj_i
 		}
 	}
 	catch (TimeOutException& ) {
-		return TIME_OUT;
+		return Optimizer::TIME_OUT;
 	}
 
 	Timer::stop();
 	time+= Timer::VIRTUAL_TIMELAPSE();
 
 	if (uplo_of_epsboxes == POS_INFINITY && (loup==POS_INFINITY || (loup==initial_loup && goal_abs_prec==0 && goal_rel_prec==0)))
-		return INFEASIBLE;
+		return Optimizer::INFEASIBLE;
 	else if (loup==initial_loup)
-		return NO_FEASIBLE_FOUND;
+		return Optimizer::NO_FEASIBLE_FOUND;
 	else if (uplo_of_epsboxes == NEG_INFINITY)
-		return UNBOUNDED_OBJ;
+		return Optimizer::UNBOUNDED_OBJ;
 	else
-		return SUCCESS;
+		return Optimizer::SUCCESS;
 }
 
 void OptimCtc::update_uplo_of_epsboxes(double ymin) {
