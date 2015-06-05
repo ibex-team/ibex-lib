@@ -47,26 +47,45 @@ System& StrategyParam::get_sys() {
 System& StrategyParam::get_ext_sys() {
 	return get_sys();
 }
+
+System& OptimizerParam::get_ext_sys() {
+
+	switch ((*memory())->sys.size()) {
+		case 0:
+		case 1: {
+			return rec(new ExtendedSystem(get_sys(),eq_eps));
+		}
+		case 2: {
+			return (ExtendedSystem&) *((*memory())->sys.back()); // already built and recorded
+		}
+		case 3: {
+			return (ExtendedSystem&) *((*memory())->sys[1]); // already built and recorded
+		}
+	}
+}
+
+System& OptimCtcParam::get_ext_sys() {
+	return get_sys();
+}
+
 System& StrategyParam::get_norm_sys() {
 	return get_sys();
 }
 
 System& OptimizerParam::get_norm_sys() {
-	if ((*memory())->sys.size()==2) {
-		return (NormalizedSystem&) *((*memory())->sys.back()); // already built and recorded
+	switch ((*memory())->sys.size()) {
+		case 0:
+		case 1: {
+			rec(new ExtendedSystem(get_sys(),eq_eps));
+			return rec(new NormalizedSystem(get_sys(),eq_eps));
+		}
+		case 2: {
+			return rec(new NormalizedSystem(get_sys(),eq_eps));
+		}
+		case 3: {
+			return (NormalizedSystem&) *((*memory())->sys.back()); // already built and recorded
+		}
 	}
-	else return rec(new NormalizedSystem(get_sys(),eq_eps));
-}
-
-System& OptimizerParam::get_ext_sys() {
-	if ((*memory())->sys.size()==3) {
-		return (ExtendedSystem&) *((*memory())->sys.back()); // already built and recorded
-	}
-	else return rec(new ExtendedSystem(get_norm_sys(),eq_eps));
-}
-
-System& OptimCtcParam::get_ext_sys() {
-	return get_norm_sys();
 }
 
 /*
