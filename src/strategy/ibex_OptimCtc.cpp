@@ -79,15 +79,15 @@ bool OptimCtc::localsearch(const IntervalVector* box, int nb) {
 					loup = tmp.ub();
 					loup_point = v_tmp;
 					loup_change = true;
-					{
-						int prec1=cout.precision();
-						cout.precision(12);
-						cout << "[localsearch]"  << " loup update " << loup  << " loup point  " << loup_point << endl;
-						cout.precision(prec1);
-					}
 				}
 			}
 		}
+	}
+	if (trace && loup_change) {
+		int prec1=cout.precision();
+		cout.precision(12);
+		cout << "[localsearch]"  << " loup update " << loup  << " loup point  " << loup_point << endl;
+		cout.precision(prec1);
 	}
 	return loup_change;
 
@@ -146,6 +146,7 @@ void OptimCtc::update_uplo() {
 		new_uplo= buffer.minimum1();
 
 		if (new_uplo > loup) {
+			cout.precision(12);
 			cout << " loup = " << loup << " new_uplo=" << new_uplo << endl;
 			ibex_error("optimizer: new_uplo>loup (please report bug)");
 		}
@@ -184,10 +185,17 @@ void OptimCtc::handle_cell(Cell& c){
 		// we know cost1() does not require OptimData
 		c.get<OptimData>().compute_pf(_f_cost, c.box);
 
-		// the cell is put into the 2 heaps
-		buffer.push(&c);
+		double ymax;
+		if (loup==POS_INFINITY) ymax=POS_INFINITY;
+		else ymax= compute_ymax();
 
-		nb_cells++;
+		if (c.get<OptimData>().pf.lb()<ymax) {
+			// the cell is put into the 2 heaps
+			buffer.push(&c);
+			nb_cells++;
+		} else {
+			delete &c;
+		}
 	}
 }
 
@@ -219,9 +227,10 @@ void OptimCtc::add_buffer(IntervalVector* list, int size) {
 
 			cell->get<OptimData>().compute_pf(_f_cost, cell->box);
 			cell->get<OptimData>().pu =1;
-
-			// the cell is put into the 2 heaps with the cost stored in pf
-			buffer.push(cell);
+			if (cell->get<OptimData>().pf.lb()<ymax) {
+				// the cell is put into the 2 heaps with the cost stored in pf
+				buffer.push(cell);
+			}
 		}
 	}
 
@@ -231,10 +240,7 @@ void OptimCtc::add_buffer(IntervalVector* list, int size) {
 
 void OptimCtc::contract_and_bound(Cell& c) {
 
-
-
 	OptimData *celldata = &(c.get<OptimData>());
-
 
 	/*================ contract x with Ctc_out ================*/
 	//cout << " [contract_out]  x before=" << c.box << endl;
@@ -262,7 +268,6 @@ void OptimCtc::contract_and_bound(Cell& c) {
 	//cout << " [contract_in]  y before=" << y << endl;
 
 
-	bool loup_ch = false;
 	// Contract only if all the constraint are not satisfied
 	if (celldata->pu <1)	{
 
@@ -286,7 +291,7 @@ void OptimCtc::contract_and_bound(Cell& c) {
 			else {
 				c.box = tmp;
 				// Local Optimization on all the feasible box stored in box_ok
-				loup_ch = localsearch(box_ok,size_box_ok);
+				loup_changed |= localsearch(box_ok,size_box_ok);
 				/*=====================add box_ok in the buffer=======================*/
 				add_buffer(box_ok,size_box_ok);
 				delete [] box_ok;
@@ -299,19 +304,18 @@ void OptimCtc::contract_and_bound(Cell& c) {
 
 
 	/*========================= update loup =============================*/
-
 	// necessary after the local search
 	if (c.box.is_empty()) 	return;
 
 	if (celldata->pu==1) {
 		// c.box is feasible
 		// Local Optimization
-		loup_ch = (loup_ch || localsearch(&c.box,1));
+		loup_changed |= localsearch(&c.box,1);
 	}
 	else  {
 		// c.box is not entirely feasible
 		// try on the middle point
-		loup_ch = (loup_ch || direct_try(c.box.mid()));
+		loup_changed |= direct_try(c.box.mid());
 	}
 
 
@@ -337,8 +341,6 @@ void OptimCtc::contract_and_bound(Cell& c) {
 		}
 	}
 
-	loup_changed |= loup_ch;
-
 	/*====================================================================*/
 
 
@@ -351,8 +353,7 @@ void OptimCtc::contract_and_bound(Cell& c) {
 	if ((c.box.max_diam()<=prec && celldata->pf.diam() <=goal_abs_prec) || !c.box.is_bisectable()) {
 		// rem2: do not use a precision contractor here since it would make the box empty (and y==(-inf,-inf)!!)
 		// rem 3 : the boxes with no bisectable  domains  should be catched for avoiding infinite bisections
-		direct_try(c.box.mid());
-		celldata->compute_pf(_f_cost, c.box);
+		loup_changed |= direct_try(c.box.mid());
 		update_uplo_of_epsboxes(celldata->pf.lb());
 		c.box.set_empty();
 		return;
@@ -366,7 +367,6 @@ void OptimCtc::contract_and_bound(Cell& c) {
 			if      ((g[j].lb()>=0)&&(c.box[j].lb()!=NEG_INFINITY)) c.box[j]=c.box[j].lb();
 			else if ((g[j].ub()<=0)&&(c.box[j].ub()!=POS_INFINITY)) c.box[j]=c.box[j].ub();
 		}
-
 	}
 	return;
 
@@ -399,6 +399,10 @@ Optimizer::Status OptimCtc::optimize(const IntervalVector& init_box, double obj_
 	Timer::start();
 	handle_cell(*root);
 
+	if (loup_changed) {
+		loup_changed=false;
+		buffer.contract(compute_ymax());
+	}
 	update_uplo();
 
 	try {

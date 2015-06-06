@@ -227,14 +227,15 @@ void DoubleHeap<T>::erase_subnodes(HeapNode<T>* node, bool percolate) {
 	if (node->left)	erase_subnodes(node->left, percolate);
 	if (node->right) erase_subnodes(node->right, percolate);
 
-	if (!percolate)
+	if (!percolate) {
 		// there is no need to update the order now in the second heap
 		// since all costs will have to be recalculated.
 		// The heap2 will be sorted at the end (see contract)
 		heap2->erase_node_no_percolate(node->elt->holder[1]);
-	else
+	}
+	else {
 		heap2->erase_node(node->elt->holder[1]);
-
+	}
 	delete node->elt;
 	delete node;
 }
