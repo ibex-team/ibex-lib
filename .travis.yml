@@ -7,12 +7,12 @@ before_install:
   - sudo apt-get install -y --force-yes python2.7 flex bison gcc g++ libcpptest-dev pkg-config coinor-libclp-dev 
 # command to install dependencies
 install: 
-  - cd 3rd && tar xvf soplex-1.7.1.tar && cd soplex-1.7.1 && make install && cd ../..
+  - cd 3rd && tar xvf soplex-1.7.1.tar && cd soplex-1.7.1 && make install -j4 && cd ../..
   - ./waf configure --with-soplex=$PWD/3rd/soplex-1.7.1
   - sudo ./waf install
   - export PKG_CONFIG_PATH=/usr/local/share/pkgconfig/
 #  - cd tests/ && make utest && cd ..
-  - cd tests/ && make utest && make nonreg && make nonreg_optimctc && cd ..
+  - cd tests/ && make utest -j4 && make nonreg && make nonreg_optimctc && cd ..
 # command to run tests
 script:  
 #  - __build__/examples/optimizer04 benchs/benchs-optim/coconutbenchmark-library1/ex8_5_2.bch acidhc4 compo smearsumrel 1.e-8 1.e-8 100 1

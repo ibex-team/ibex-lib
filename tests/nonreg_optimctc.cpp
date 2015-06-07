@@ -18,12 +18,12 @@ using namespace ibex;
 
 const int NB_TESTS = 24;
 
-const double TIME_LIMIT = 500;
-const char* time_limit = "500";
+const double TIME_LIMIT = 120;
+const char* time_limit = "120";
 
 
-const double REGRESSION_CELLS = 100; // 100%
-const double REGRESSION_TIME  = 30;  // 30%
+const double REGRESSION_CELLS = 200; // 100%
+const double REGRESSION_TIME  = 200;  // 30%
 
 const double REGRESSION_CELLS_RATIO = 1.0 + (REGRESSION_CELLS/100.0);
 const double REGRESSION_TIME_RATIO = 1.0 + (REGRESSION_TIME/100.0);
