@@ -1,6 +1,6 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : doc-lab1.cpp
+// File        : lab1.cpp
 // Author      : Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
@@ -9,8 +9,6 @@
 
 #include "ibex.h"
 #include "vibes.cpp"
-
-#include <fstream>
 
 using namespace std;
 using namespace ibex;
