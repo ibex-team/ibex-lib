@@ -182,7 +182,6 @@ int IntervalVector::diff(const IntervalVector& y, IntervalVector*& result) const
 		result = new IntervalVector[1];
 		result[0].resize(nn);
 		result[0].set_empty();
-		b=1;
 	} else {
 		result=new IntervalVector[b];
 		for (int i=0; i<b; i++) {

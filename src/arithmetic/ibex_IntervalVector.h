@@ -464,8 +464,10 @@ public:
 	 * into \a result, and return the size of the union.
 	 *
 	 * <p>
-	 * If the difference is empty, \a result is an array of one element set to the empty box.
-	 * It is <b>not</b> a zero-sized array containing no element.
+	 * If the difference is empty, the returned value is 0 but \a result is an array of one
+	 * element set to the empty box. It is <b>not</b> a zero-sized array containing no element
+	 * (a zero-sized array is illegal in ISO C++). In particular, you can used delete[] whatever
+	 * is the result of diff.
 	 */
 	int diff(const IntervalVector& y, IntervalVector*& result) const;
 
