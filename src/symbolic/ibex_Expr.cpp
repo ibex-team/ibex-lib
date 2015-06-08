@@ -150,7 +150,10 @@ ExprApply::ExprApply(const Function& f, const Array<const ExprNode>& args) :
 namespace {
 
 // to store the link between a symbol and its "creator"
-NodeMap<const Variable*> variables;
+NodeMap<const Variable*>& variables() {
+	static NodeMap<const Variable*> _variables;
+	return _variables;
+}
 
 }
 
@@ -164,30 +167,30 @@ const ExprSymbol& ExprSymbol::new_(const Dim& dim) {
 }
 
 inline ExprSymbol::~ExprSymbol() {
-	if (variables.found(*this)) {
+	if (variables().found(*this)) {
 		// before deleting me, associate the Variable
 		// with a new symbol.
-		const Variable* var = variables[*this];
-		variables.erase(*this);
+		const Variable* var = variables()[*this];
+		variables().erase(*this);
 
 		var->symbol = new ExprSymbol(name,dim);
-		variables.insert(*var->symbol, var);
+		variables().insert(*var->symbol, var);
 	}
 	free((char*) name);
 }
 
-Variable::Variable(const Dim& dim) : symbol(new ExprSymbol(dim))                                                   { variables.insert(*symbol,this); }
-Variable::Variable(const char* name) : symbol(new ExprSymbol(name,Dim::scalar()))                                  { variables.insert(*symbol,this); }
-Variable::Variable(const Dim& dim, const char* name) : symbol(new ExprSymbol(name, dim))                           { variables.insert(*symbol,this); }
-Variable::Variable(int n) : symbol(new ExprSymbol(Dim::col_vec(n)))                                                { variables.insert(*symbol,this); }
-Variable::Variable(int n, const char* name) : symbol(new ExprSymbol(name, Dim::col_vec(n)))                        { variables.insert(*symbol,this); }
-Variable::Variable(int m, int n) : symbol(new ExprSymbol(Dim::matrix(m,n)))                                        { variables.insert(*symbol,this); }
-Variable::Variable(int m, int n, const char* name) : symbol(new ExprSymbol(name, Dim::matrix(m,n)))                { variables.insert(*symbol,this); }
-Variable::Variable(int k, int m, int n) : symbol(new ExprSymbol(Dim::matrix_array(k,m,n)))                         { variables.insert(*symbol,this); }
-Variable::Variable(int k, int m, int n, const char* name) : symbol(new ExprSymbol(name, Dim::matrix_array(k,m,n))) { variables.insert(*symbol,this); }
+Variable::Variable(const Dim& dim) : symbol(new ExprSymbol(dim))                                                   { variables().insert(*symbol,this); }
+Variable::Variable(const char* name) : symbol(new ExprSymbol(name,Dim::scalar()))                                  { variables().insert(*symbol,this); }
+Variable::Variable(const Dim& dim, const char* name) : symbol(new ExprSymbol(name, dim))                           { variables().insert(*symbol,this); }
+Variable::Variable(int n) : symbol(new ExprSymbol(Dim::col_vec(n)))                                                { variables().insert(*symbol,this); }
+Variable::Variable(int n, const char* name) : symbol(new ExprSymbol(name, Dim::col_vec(n)))                        { variables().insert(*symbol,this); }
+Variable::Variable(int m, int n) : symbol(new ExprSymbol(Dim::matrix(m,n)))                                        { variables().insert(*symbol,this); }
+Variable::Variable(int m, int n, const char* name) : symbol(new ExprSymbol(name, Dim::matrix(m,n)))                { variables().insert(*symbol,this); }
+Variable::Variable(int k, int m, int n) : symbol(new ExprSymbol(Dim::matrix_array(k,m,n)))                         { variables().insert(*symbol,this); }
+Variable::Variable(int k, int m, int n, const char* name) : symbol(new ExprSymbol(name, Dim::matrix_array(k,m,n))) { variables().insert(*symbol,this); }
 
 Variable::~Variable()                                                                                              {
-	variables.erase(*symbol);
+	variables().erase(*symbol);
 
 	// no: don't delete the symbol that can live after the Variable.
 	// This is the case in particular with SystemFactory, where symbols
@@ -202,9 +205,9 @@ Variable::~Variable()                                                           
 Variable::operator const ExprSymbol&() const {
 	if (symbol->deco.f) { // already used build new one.
 		// Note: it is Function's responsibility to delete the old symbol
-		variables.erase(*symbol);
+		variables().erase(*symbol);
 		symbol=new ExprSymbol(symbol->name, symbol->dim);
-		variables.insert(*symbol, this);
+		variables().insert(*symbol, this);
 	}
 	return *symbol;
 }
