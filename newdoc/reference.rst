@@ -26,6 +26,8 @@ Articles in Journal and Conferences
 .. _Trombettoni07-pdf: http://www.lirmm.fr/~trombetton/publis/cid_cp_2007.pdf
 .. |Bessiere04-pdf| replace:: PDF
 .. _Bessiere04-pdf: http://www.emn.fr/z-info/rdebruyn/ecai04ws.pdf
+.. |Jaulin13-pdf| replace:: PDF
+.. _Jaulin13-pdf: https://www.ensta-bretagne.fr/jaulin/paper_automatica93.pdf
 
 **This page is under construction**
 
@@ -116,6 +118,12 @@ Articles in Journal and Conferences
 | .. _Lhomme93:      | **O. Lhomme**                | *Consistency Techniques for     | IJCAI                   | 1993 |                     |
 |                    |                              | Numeric CSPs*                   |                         |      |                     |
 | [Lhomme 1993]      |                              |                                 |                         |      |                     |
++--------------------+------------------------------+---------------------------------+-------------------------+------+---------------------+
+|                    |                              |                                 |                         |      |                     |
+| .. _Jaulin93:      | **L. Jaulin and E. Walter**  | *Set inversion via interval     | Automatica              | 1993 | |Jaulin13-pdf|_     |
+|                    |                              | analysis for nonlinear          |                         |      |                     |
+| [Jaulin & Walter,  |                              | bounded-error estimation*       |                         |      |                     |
+| 1993]              |                              |                                 |                         |      |                     |
 +--------------------+------------------------------+---------------------------------+-------------------------+------+---------------------+
 |                    |                              |                                 |                         |      |                     |
 | .. _Hansen80:      | **E.R. Hansen and            | *Bounding Solutions of Systems  | BIT Numerical           | 1980 |                     |
