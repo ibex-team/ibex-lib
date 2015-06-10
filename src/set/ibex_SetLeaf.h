@@ -37,11 +37,8 @@ public:
 	/** \see SetNode */
 	virtual SetNode* inter(bool sync, const IntervalVector& nodebox, const IntervalVector& x, BoolInterval x_status, double eps);
 
-	virtual SetNode* inter2(bool sync, const IntervalVector& nodebox, const std::pair<SetNode*,IntervalVector>& other, double eps);
-	virtual std::pair<SetNode*,IntervalVector> subset(const IntervalVector& nodebox, const IntervalVector& box);
-
 	/** \see SetNode */
-	virtual SetNode* inter_rec(bool sync, const IntervalVector& nodebox, Sep& sep, const IntervalVector& targetbox, double eps);
+	virtual SetNode* inter_rec(bool sync, const IntervalVector& nodebox, Sep& sep, double eps);
 
 	/** \see SetNode */
 	virtual SetNode* union_(const IntervalVector& nodebox, const IntervalVector& x, BoolInterval x_status, double eps);
@@ -54,6 +51,14 @@ public:
 
 	/** \see SetNode */
 	virtual BoolInterval is_superset(const IntervalVector& nodebox, const IntervalVector& box) const;
+
+	/** \see SetNode */
+	virtual SetNode* contract_no_diff(const IntervalVector& nodebox, const IntervalVector& box);
+
+	/**
+	 * \brief Contract the leaf to the box "box" with, possibly a "diff".
+	 */
+	virtual SetNode* contract_diff(const IntervalVector& nodebox, const IntervalVector& box);
 
 	/**
 	 * \brief The status of the node

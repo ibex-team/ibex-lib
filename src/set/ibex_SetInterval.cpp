@@ -34,7 +34,7 @@ bool SetInterval::is_empty() const {
 
 void SetInterval::sync(Sep& sep) {
 	try {
-		root = root->inter(true, bounding_box, sep, IntervalVector(bounding_box.size()), eps);
+		root = root->inter(true, bounding_box, sep, eps);
 	} catch(NoSet& e) {
 		delete root;
 		root = NULL;
@@ -43,12 +43,11 @@ void SetInterval::sync(Sep& sep) {
 }
 
 void SetInterval::contract(Sep& sep) {
-	root = root->inter(false, bounding_box, sep, IntervalVector(bounding_box.size()), eps);
+	root = root->inter(false, bounding_box, sep, eps);
 }
 
 SetInterval& SetInterval::operator&=(const SetInterval& set) {
 	root = root->inter(false, bounding_box, set.root, set.bounding_box, eps);
-	//root = root->inter2(false, bounding_box, pair<SetNode*,IntervalVector>(set.root, set.bounding_box), eps);
 	return *this;
 }
 

@@ -203,55 +203,88 @@ SetNode::~SetNode() {
 
 }
 
+/**
+ * It is not a good idea to keep track of the result of a contraction at one node
+ * for processing the subnodes. First, if we mix box1 and box2 (the result of the
+ * inner and outer contraction) then, by default, what is outside (box1 & box2) is
+ * supposed to be "IN" and we lose the "OUT" information.
+ * If we keep only "box2" and replace nodebox by "nodebox & box2", the result of
+ * the contraction is not better in general because contractors are monotonous.
+ * Furthermore, trying to abort contraction in the case where nodebox is a superset
+ * of box2 is not a good idea because
+ *    C(x) \subseteq y \subseteq x does not imply C(x) \subseteq C(y)
+ */
+SetNode* SetNode::inter(bool sync, const IntervalVector& nodebox, Sep& sep, double eps) {
 
-SetNode* SetNode::inter(bool sync, const IntervalVector& nodebox, Sep& sep, const IntervalVector& targetbox, double eps) {
-
-	IntervalVector box=targetbox & nodebox;
-
-	if (box.is_empty()) return this;
-
-	//if (box==targetbox) return inter_rec(sync, nodebox, sep, targetbox, eps);
-
-	IntervalVector box1(box);
-	IntervalVector box2(box);
+	IntervalVector box1(nodebox);
+	IntervalVector box2(nodebox);
 
 	sep.separate(box1,box2);
 
-	SetNode* root3;
+	SetNode* this2;
 
 	if (sync)  {
 
-		SetNode* root1 = diff(box, box1, YES, MAYBE, eps);
-		//cout << "set obtained with inner contraction:" << endl; root1->print(cout,box,0);
-		SetNode* root2 = diff(box, box2, NO, MAYBE, eps);
-		//cout << "set obtained with outer contraction:" << endl; root2->print(cout,box,0);
+		SetNode* root1 = diff(nodebox, box1, YES, MAYBE, 0); //eps);
+		//cout << "set obtained with inner contraction:" << endl; root1->print(cout,nodebox,0);
+		SetNode* root2 = diff(nodebox, box2, NO, MAYBE, 0); //eps);
+		//cout << "set obtained with outer contraction:" << endl; root2->print(cout,nodebox,0);
 
-		root3 = root1->inter(true, box, root2, box, eps);
-		//root3 = root1->inter2(true, box, pair<SetNode*,IntervalVector>(root2, box), eps);
+		SetNode* root3 = root1->inter(true, nodebox, root2, nodebox, eps);
+		//root3 = root1->inter2(true, box, pair<SetNode*,IntervalVector>(root2, nodebox), eps);
 		delete root2;
 
+		this2 = this->inter(sync, nodebox, root3, nodebox, eps);
+		delete root3;
 
 	} else {
 
-		root3 = diff(box, box2, NO, YES, eps);
+		/* =========================== first variant ====================================
+		 *
+		 * In this variant, we build for each node a temporary set that corresponds to the
+		 * contraction (with "diff") of the node box, and recursively performs and intersection
+		 * between this node and this temporary set, which may cause some part of the set
+		 * to be destroyed (which is good) but other part to be restructured (some leaves
+		 * may be split by the effect of the "diff").
+		 */
 
-		//		cout << " before contraction % NO gives: "; this->print(cout,nodebox,0);
-		//		cout << "     root3="; root3->print(cout,box,0);
-		//
+//		SetNode* root3 = diff(nodebox, box2, NO, YES, 0); //eps);
+//
+////		cout << " before contraction % NO gives: "; this->print(cout,nodebox,0);
+////		cout << "     root3="; root3->print(cout,nodebox,0);
+//
+//		this2 = this->inter(sync, nodebox, root3, nodebox, eps);
+//		delete root3;
+
+
+		/* =========================== second variant (faster) ==========================
+		 *
+		 * This variant is faster because:
+		 * - We don't create a temporary set.
+		 * - We directly call a "contract" function on this node with the box that results
+		 *   from the outer contraction.
+		 * - This contract function can only destroy node, not create new ones (whence the
+		 *   "_no_diff"), except if this node is a leaf and if we are in "irregular" mode.
+		 * - The approach allows to manage the "regular" mode easily.
+		 */
+
+		if (is_leaf()) {
+			this2=((SetLeaf*) this)->contract_diff(nodebox,box2);
+		} else {
+			this2=this->contract_no_diff(nodebox,box2);
+		}
 
 	}
 
-	SetNode* this2 = this->inter(sync, nodebox, root3, box, eps);
-	//SetNode* this2 = this->inter2(sync, nodebox, pair<SetNode*,IntervalVector>(root3, box), eps);
-	delete root3;
+
 	//		cout << " after contraction % NO gives: "; this2->print(cout,nodebox,0);
 
 	//cout << " sep gives: "; this2->print(cout,nodebox,0);
 
-	box1 &= box2;
-	if (box1.is_empty()) return this2;
+	//box1 &= box2;
+	if (box1.is_empty() || box2.is_empty()) return this2;
 
-	SetNode* this3 = this2->inter_rec(sync, nodebox, sep, box1, eps);
+	SetNode* this3 = this2->inter_rec(sync, nodebox, sep, eps);
 	//cout << " inter rec gives: "; this3->print(cout,nodebox,0);
 
 	return this3;

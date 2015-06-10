@@ -77,42 +77,10 @@ SetNode* SetBisect::inter(bool sync, const IntervalVector& nodebox, const Interv
 
 }
 
-SetNode* SetBisect::inter2(bool sync, const IntervalVector& nodebox, const pair<SetNode*,IntervalVector>& other, double eps) {
-	if (!nodebox.intersects(other.second)) return this;
-
-	if (other.first->is_leaf()) return inter(sync, nodebox, other.second, ((SetLeaf*) other.first)->status, eps);
-
-	const IntervalVector lbox=left_box(nodebox);
-	const IntervalVector rbox=right_box(nodebox);
-
-	if (lbox.intersects(other.second)) {
-		left = left->inter2(sync, lbox, other.first->subset(other.second,lbox), eps);
-		left->father = this;
-	}
-	if (rbox.intersects(other.second)) {
-		right = right->inter2(sync, rbox, other.first->subset(other.second,rbox), eps);
-		right->father = this;
-	}
-	return try_merge();
-}
-
-pair<SetNode*,IntervalVector> SetBisect::subset(const IntervalVector& nodebox, const IntervalVector& box) {
-	const IntervalVector lbox=left_box(nodebox);
-	const IntervalVector rbox=right_box(nodebox);
-
-	if (lbox.intersects(box)) {
-		if (rbox.intersects(box)) return pair<SetNode*,IntervalVector>(this,nodebox);
-		else return left->subset(lbox,box);
-	}
-
-	assert(rbox.intersects(box));
-	return right->subset(rbox,box);
-}
-
-SetNode* SetBisect::inter_rec(bool sync, const IntervalVector& nodebox, Sep& sep, const IntervalVector& targetbox, double eps) {
-	left = left->inter(sync, left_box(nodebox), sep, targetbox, eps);
+SetNode* SetBisect::inter_rec(bool sync, const IntervalVector& nodebox, Sep& sep, double eps) {
+	left = left->inter(sync, left_box(nodebox), sep, eps);
 	left->father = this;
-	right = right->inter(sync,right_box(nodebox), sep, targetbox, eps);
+	right = right->inter(sync,right_box(nodebox), sep, eps);
 	right->father = this;
 
 	//cout << "left="; left->print(cout,left_box(nodebox),0);
@@ -150,6 +118,19 @@ BoolInterval SetBisect::is_superset(const IntervalVector& nodebox, const Interva
 		BoolInterval l_res=left->is_superset(left_box(nodebox),box);
 		if (l_res==NO) return NO;
 		else return l_res & right->is_superset(right_box(nodebox),box);
+	}
+}
+
+SetNode* SetBisect::contract_no_diff(const IntervalVector& nodebox, const IntervalVector& box) {
+	if (nodebox.is_subset(box)) {
+		return this;
+	} else {
+		left = left->contract_no_diff(left_box(nodebox), box);
+		left->father = this;
+		right = right->contract_no_diff(right_box(nodebox), box);
+		right->father = this;
+		// status of children may have changed --> try merge
+		return try_merge();
 	}
 }
 

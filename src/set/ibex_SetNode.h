@@ -60,7 +60,7 @@ public:
 	/**
 	 * \brief Intersection with an i-set represented implicitly by a Sep
 	 */
-	SetNode* inter(bool sync, const IntervalVector& nodebox, Sep& sep, const IntervalVector& targetbox, double eps);
+	SetNode* inter(bool sync, const IntervalVector& nodebox, Sep& sep, double eps);
 
 	/**
 	 * \brief Intersection with an explicit i-set "other"
@@ -68,19 +68,6 @@ public:
 	 * Important: what is outside of "other" is considered to be "IN"
 	 */
 	SetNode* inter(bool sync, const IntervalVector& nodebox, const SetNode* other, const IntervalVector& otherbox, double eps);
-
-
-	/**
-	 * \brief Intersection with an explicit i-set "other"
-	 *
-	 * Important: what is outside of "other" is considered to be "IN"
-	 */
-	virtual SetNode* inter2(bool sync, const IntervalVector& nodebox, const std::pair<SetNode*,IntervalVector>& other, double eps)=0;
-
-	/**
-	 * \brief Return the smallest subset of this, enclosing "box"
-	 */
-	virtual std::pair<SetNode*,IntervalVector> subset(const IntervalVector& nodebox, const IntervalVector& box)=0;
 
 	/**
 	 * \brief Intersection with an i-set reduced to a single box "x" of status "x_status".
@@ -103,7 +90,7 @@ public:
 	 *              If sync==true, what is outside of x is considered to be "UNK"
 	 *              If sync==false, what is outside of x is considered to be "IN"
 	 */
-	virtual SetNode* inter_rec(bool sync, const IntervalVector& nodebox, Sep& sep, const IntervalVector& targetbox, double eps)=0;
+	virtual SetNode* inter_rec(bool sync, const IntervalVector& nodebox, Sep& sep, double eps)=0;
 
 	/**
 	 * \brief Union with an explicit i-set "other"
@@ -134,6 +121,18 @@ public:
 	 * \brief True if this node is a superset of the box
 	 */
 	virtual BoolInterval is_superset(const IntervalVector& nodebox, const IntervalVector& box) const=0;
+
+	/**
+	 * \brief Fast contraction.
+	 *
+	 * Contracts this set to the box but (for efficiency reasons) performs no "diff".
+	 * So the contraction can actually only merge leaves (recursively).
+	 *
+	 * The box is "IN" and the rest is "OUT".
+	 *
+	 * The resulting set is an enclosure of "box".
+	 */
+	virtual SetNode* contract_no_diff(const IntervalVector& nodebox, const IntervalVector& box)=0;
 };
 
 
