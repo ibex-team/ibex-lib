@@ -16,7 +16,7 @@ namespace ibex {
 
 /**
  * \ingroup iset
- * \brief Bisection node (i-set representation)
+ * \brief Bisection node (internal class used for set representation)
  */
 class SetBisect : public SetNode {
 
@@ -39,13 +39,13 @@ public:
 	virtual bool is_leaf() const;
 
 	/** \see SetNode */
-	virtual SetNode* inter(bool sync, const IntervalVector& nodebox, const IntervalVector& x, BoolInterval x_status, double eps);
+	virtual SetNode* inter(bool iset, const IntervalVector& nodebox, const IntervalVector& x, BoolInterval x_status);
 
 	/** \see SetNode */
-	virtual SetNode* inter_rec(bool sync, const IntervalVector& nodebox, Sep& sep, double eps);
+	virtual SetNode* inter(bool iset, const IntervalVector& nodebox, Sep& sep, double eps);
 
 	/** \see SetNode */
-	virtual SetNode* union_(const IntervalVector& nodebox, const IntervalVector& x, BoolInterval x_status, double eps);
+	virtual SetNode* union_(const IntervalVector& nodebox, const IntervalVector& x, BoolInterval x_status);
 
 	/** \see SetNode */
 	virtual void visit_leaves(leaf_func func, const IntervalVector& nodebox) const;
@@ -57,7 +57,7 @@ public:
 	virtual BoolInterval is_superset(const IntervalVector& nodebox, const IntervalVector& box) const;
 
 	/** \see SetNode */
-	virtual SetNode* contract_no_diff(const IntervalVector& nodebox, const IntervalVector& box);
+	virtual SetNode* contract_no_diff(BoolInterval status, const IntervalVector& nodebox, const IntervalVector& box);
 
 	IntervalVector left_box(const IntervalVector& nodebox) const;
 
@@ -65,7 +65,7 @@ public:
 
 //protected:
 	friend class SetNode;
-	friend class SetInterval;
+	friend class Set;
 
 	// partial initialization used by SetInterval::load only
 	// and diff
