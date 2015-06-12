@@ -13,6 +13,7 @@
 #include "ibex_Heap.h"
 #include "ibex_CellStack.h"
 #include "ibex_SetConnectedComponents.cpp_"
+#include "ibex_SepFwdBwd.h"
 #include <stack>
 #include <fstream>
 
@@ -26,6 +27,19 @@ Set::Set(int n, BoolInterval status) : root(new SetLeaf(status)), bounding_box(I
 
 Set::Set(const IntervalVector& bounding_box, BoolInterval status) : root(new SetLeaf(status)), bounding_box(bounding_box) {
 
+}
+
+Set::Set(Function& f, CmpOp op, double eps) : root(new SetLeaf(YES)), bounding_box(IntervalVector(f.nb_var())) {
+	NumConstraint ctr(f,op);
+	SepFwdBwd sep(ctr);
+	sep.ctc_out.contract(bounding_box);
+	inter(sep,eps);
+}
+
+Set::Set(NumConstraint& ctr, double eps) : root(new SetLeaf(YES)), bounding_box(IntervalVector(ctr.f.nb_var())) {
+	SepFwdBwd sep(ctr);
+	sep.ctc_out.contract(bounding_box);
+	inter(sep,eps);
 }
 
 Set::Set(const char* filename) : root(NULL), bounding_box(1) {

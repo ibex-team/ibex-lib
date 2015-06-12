@@ -14,6 +14,7 @@
 #include "ibex_SetLeaf.h"
 #include "ibex_BoolInterval.h"
 #include "ibex_SetVisitor.h"
+#include "ibex_NumConstraint.h"
 
 namespace ibex {
 
@@ -47,6 +48,16 @@ public:
 	 * \see #save().
 	 */
 	Set(const char* filename);
+
+	/**
+	 * \brief Build the set (f(x) op 0).
+	 */
+	Set(Function& f, CmpOp op, double eps);
+
+	/**
+	 * \brief Build the set from a constraint.
+	 */
+	Set(NumConstraint& ctr, double eps);
 
 	/*
 	 * \brief Delete this
