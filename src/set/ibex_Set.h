@@ -22,7 +22,7 @@ namespace ibex {
  * \defgroup iset Set
  */
 
-class Sep; // for friendship
+//class Sep;
 
 /**
  * \ingroup iset
@@ -76,14 +76,6 @@ public:
 	Set& operator&=(const Set& set);
 
 	/**
-	 * \brief Intersect this set with a set implicitly represented by a separator
-	 *
-	 * \param eps - The separator is applied recursively on this set. This parameter
-	 *              is a precision for controlling the recursivity.
-	 */
-	Set& inter(Sep& sep, double eps);
-
-	/**
 	 * \brief i-Set Union
 	 *
 	 * If [x] designates this set and [y] the set in argument, then this set
@@ -114,9 +106,7 @@ public:
 	 * \brief Distance of the point "pt" wrt the set (if inside is true)
 	 * of the complementary of the set (if inside is false).
 	 *
-	 * \note If inside==false and the pt is outside the bounding box,
-     *       the distance is 0.
- 	 */
+	 */
 	double dist(const Vector& pt, bool inside) const;
 
 	/**
@@ -142,6 +132,17 @@ public:
 	IntervalVector node_box(const SetNode* node) const;
 
 protected:
+	friend class Sep;
+
+	/**
+	 * \brief Inflate a box by one float.
+	 */
+	static IntervalVector inflate_one_float(const IntervalVector& box);
+
+	/**
+	 * (-oo,oo)x..x(-oo,oo)
+	 */
+	IntervalVector Rn;
 
 	/**
 	 * \brief Load the set from a file
@@ -151,11 +152,6 @@ protected:
 	friend std::ostream& operator<<(std::ostream& os, const Set& set);
 
 	SetNode* root; // NULL means no existing set (warning: different from empty set!)
-
-	// Box that represents the root
-	// (note: not really necessary so may disappear in future release)
-	IntervalVector bounding_box;
-
 };
 
 std::ostream& operator<<(std::ostream& os, const Set& set);

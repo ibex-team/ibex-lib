@@ -15,6 +15,7 @@
 #include "ibex_IntervalVector.h"
 #include "ibex_BitSet.h"
 #include "ibex_Array.h"
+#include "ibex_Set.h"
 
 namespace ibex {
 
@@ -45,6 +46,14 @@ public:
 	 * \brief Contraction.
 	 */
 	virtual void contract(IntervalVector& box)=0;
+
+	/**
+	 * \brief Contract a set with this contractor.
+	 *
+	 * \param eps - The contractor is applied recursively on the set. This parameter
+	 *              is a precision for controlling the recursivity.
+	 */
+	void contract(Set& set, double eps);
 
 	/**
 	 * \brief Delete *this.

@@ -13,11 +13,11 @@
 #include "ibex_IntervalVector.h"
 #include "ibex_BoolInterval.h"
 #include "ibex_BoolInterval.h"
-#include "ibex_Sep.h"
 #include "ibex_SetVisitor.h"
 
 namespace ibex {
 
+class Sep;
 class SetBisect;
 
 /**

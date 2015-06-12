@@ -61,16 +61,16 @@ public:
 	 */
 	BoolInterval status;
 
-private:
-
-	SetLeaf(const SetLeaf&); // forbidden
-
 	/**
 	 * \brief Replace this node with "node" and update the tree structure.
 	 *
 	 * \warning The current node is deleted.
 	 */
 	void replace_with(SetNode* node);
+
+private:
+
+	SetLeaf(const SetLeaf&); // forbidden
 };
 
 /**

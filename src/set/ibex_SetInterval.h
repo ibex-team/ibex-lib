@@ -51,19 +51,6 @@ public:
 	~SetInterval();
 
 	/**
-	 * \brief i-Set intersection with a set interval implicitly represented by a separator
-	 *
-	 * In Jaulin's terminology, this operator is the "intersection of i-sets" (squared symbol)
-	 *
-	 * If [x] designates this i-set and [y] the i-set in argument, then this will be replace by
-	 *  { x, x\in[x] and x\in[y] }.
-	 *
-	 * \param eps - The separator is applied recursively on this i-set. This parameter
-	 *              is a precision for controlling the recursivity.
-	 */
-	SetInterval&  inter(Sep& sep, double eps);
-
-	/**
 	 * \brief True if this i-set is empty
 	 *
 	 * \warning: an empty i-set is different from a i-set containing (and possibly only containing) the empty set.
@@ -89,6 +76,8 @@ public:
 	class NoSet {
 
 	};
+
+	friend class Sep;
 };
 
 std::ostream& operator<<(std::ostream& os, const Set& set);

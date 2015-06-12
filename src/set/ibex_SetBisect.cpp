@@ -9,6 +9,7 @@
 
 #include "ibex_SetBisect.h"
 #include "ibex_SetLeaf.h"
+#include "ibex_Sep.h"
 #include <stack>
 #include <utility>
 

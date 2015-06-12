@@ -24,16 +24,6 @@ SetInterval::~SetInterval() {
 
 }
 
-SetInterval&  SetInterval::inter(Sep& sep, double eps) {
-	try {
-		root = root->inter(true, bounding_box, sep, eps);
-	} catch(NoSet& e) {
-		delete root;
-		root = NULL;
-	}
-	return *this;
-}
-
 bool SetInterval::is_empty() const {
 	return root==NULL;
 }

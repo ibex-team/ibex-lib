@@ -21,28 +21,46 @@ using namespace std;
 
 namespace ibex {
 
-Set::Set(int n, BoolInterval status) : root(new SetLeaf(status)), bounding_box(IntervalVector(n)) {
+
+IntervalVector Set::inflate_one_float(const IntervalVector& box) {
+	IntervalVector inflated=box;
+	for (int i=0;i<box.size();i++) {
+		double lb=box[i].lb();
+		double ub=box[i].ub();
+		inflated[i]=Interval(lb==NEG_INFINITY? lb : previous_float(lb), ub==POS_INFINITY? ub : next_float(ub));
+	}
+	return inflated;
+}
+
+Set::Set(int n, BoolInterval status) : root(new SetLeaf(status)), Rn(n) {
 
 }
 
-Set::Set(const IntervalVector& bounding_box, BoolInterval status) : root(new SetLeaf(status)), bounding_box(bounding_box) {
+Set::Set(const IntervalVector& box, BoolInterval status) : root(new SetLeaf(status)), Rn(box.size()) {
 
+	IntervalVector inflated=inflate_one_float(box);
+
+	// create the complementary of the box
+	pair<SetNode*,SetLeaf*> p=diff(Rn, inflated, NO, MAYBE, 0);
+
+	// create the boundary around the box
+	p.second->replace_with(diff(inflated, box, MAYBE, YES, 0).first);
+
+	root = root->inter(false, Rn, p.first, Rn);
 }
 
-Set::Set(Function& f, CmpOp op, double eps) : root(new SetLeaf(YES)), bounding_box(IntervalVector(f.nb_var())) {
+Set::Set(Function& f, CmpOp op, double eps) : root(new SetLeaf(YES)), Rn(f.nb_var()) {
 	NumConstraint ctr(f,op);
 	SepFwdBwd sep(ctr);
-	sep.ctc_out.contract(bounding_box);
-	inter(sep,eps);
+	sep.contract(*this,eps);
 }
 
-Set::Set(NumConstraint& ctr, double eps) : root(new SetLeaf(YES)), bounding_box(IntervalVector(ctr.f.nb_var())) {
+Set::Set(NumConstraint& ctr, double eps) : root(new SetLeaf(YES)), Rn(ctr.f.nb_var()) {
 	SepFwdBwd sep(ctr);
-	sep.ctc_out.contract(bounding_box);
-	inter(sep,eps);
+	sep.contract(*this,eps);
 }
 
-Set::Set(const char* filename) : root(NULL), bounding_box(1) {
+Set::Set(const char* filename) : root(NULL), Rn(1) {
 	load(filename);
 }
 
@@ -51,48 +69,18 @@ bool Set::is_empty() const {
 }
 
 Set& Set::operator&=(const Set& set) {
-	root = root->inter(false, bounding_box, set.root, set.bounding_box);
-
-	if (bounding_box!=set.bounding_box) {
-
-		// create a boundary around the other set box
-		IntervalVector inflated=set.bounding_box;
-		for (int i=0;i<inflated.size();i++) {
-			double lb=inflated[i].lb();
-			double ub=inflated[i].ub();
-			inflated[i]=Interval(lb==NEG_INFINITY? lb : previous_float(lb), ub==POS_INFINITY? ub : next_float(ub));
-		}
-
-		// intersect the set with the boundary
-		IntervalVector* result;
-		int n=inflated.diff(set.bounding_box,result);
-		for (int i=0; i<n; i++)
-			root = root->inter(false, bounding_box, result[i], MAYBE);
-		delete[] result;
-
-		// intersect the set with the complementary of the other set
-		n=bounding_box.diff(inflated,result);
-		for (int i=0; i<n; i++)
-			root = root->inter(false, bounding_box, result[i], NO);
-		delete[] result;
-	}
-
-	return *this;
-}
-
-Set& Set::inter(Sep& sep, double eps) {
-	root = root->inter(false, bounding_box, sep, eps);
+	assert(set.Rn.size()==Rn.size());
+	root = root->inter(false, Rn, set.root, Rn);
 	return *this;
 }
 
 Set& Set::operator|=(const Set& set) {
-	root = root->union_(bounding_box, set.root, set.bounding_box);
+	root = root->union_(Rn, set.root, Rn);
 	return *this;
 }
 
 BoolInterval Set::is_superset(const IntervalVector& box) const {
-	if (!bounding_box.is_superset(box)) return NO;
-	else return root->is_superset(bounding_box,box);
+	return root->is_superset(Rn,box);
 }
 
 void Set::save(const char* filename) {
@@ -105,16 +93,16 @@ void Set::save(const char* filename) {
 
 //	os.write((char*) &eps, sizeof(double));
 
-	int n=bounding_box.size();
+	int n=Rn.size();
 	os.write((char*) &n, sizeof(int));
 
-	for (int i=0; i<bounding_box.size(); i++) {
-		double d; // to store double values
-		d=bounding_box[i].lb();
-		os.write((char*) &d,sizeof(double));
-		d=bounding_box[i].ub();
-		os.write((char*) &d,sizeof(double));
-	}
+//	for (int i=0; i<bounding_box.size(); i++) {
+//		double d; // to store double values
+//		d=bounding_box[i].lb();
+//		os.write((char*) &d,sizeof(double));
+//		d=bounding_box[i].ub();
+//		os.write((char*) &d,sizeof(double));
+//	}
 
 	while (!s.empty()) {
 		SetNode* node=s.top();
@@ -147,14 +135,14 @@ void Set::load(const char* filename) {
 	is.read((char*) &n, sizeof(int));
 	//cout << "n=" << n << endl;
 
-	bounding_box.resize(n);
+	Rn.resize(n);
 
-	for (int i=0; i<bounding_box.size(); i++) {
-		double lb,ub;
-		is.read((char*) &lb, sizeof(double));
-		is.read((char*) &ub, sizeof(double));
-		bounding_box[i]=Interval(lb,ub);
-	}
+//	for (int i=0; i<bounding_box.size(); i++) {
+//		double lb,ub;
+//		is.read((char*) &lb, sizeof(double));
+//		is.read((char*) &ub, sizeof(double));
+//		bounding_box[i]=Interval(lb,ub);
+//	}
 	//cout << "bounding box=" << bounding_box << endl;
 
 	int var;
@@ -218,11 +206,11 @@ void Set::load(const char* filename) {
 }
 
 void Set::visit(SetVisitor& visitor) const {
-	root->visit(bounding_box,visitor);
+	root->visit(Rn,visitor);
 }
 
 std::ostream& operator<<(std::ostream& os, const Set& set) {
-	set.root->print(os,set.bounding_box, 0);
+	set.root->print(os,set.Rn, 0);
 	return os;
 }
 
@@ -274,17 +262,15 @@ public:
 
 double Set::dist(const Vector& pt, bool inside) const {
 
-    if (!inside && !bounding_box.contains(pt)) return 0;
-
-	CellHeapDist costf;
+ 	CellHeapDist costf;
 	Heap<Cell> heap(costf);
 
 	//int count=0; // for stats
 
-	Cell* root_cell =new Cell(bounding_box);
+	Cell* root_cell =new Cell(Rn);
 	root_cell->add<NodeAndDist>();
 	root_cell->get<NodeAndDist>().node = root;
-	root_cell->get<NodeAndDist>().set_dist(bounding_box,pt);
+	root_cell->get<NodeAndDist>().set_dist(Rn,pt);
 	//count++;
 
 	heap.push(root_cell);
@@ -338,7 +324,7 @@ IntervalVector Set::node_box(const SetNode* node) const {
 	for (const SetNode* ancestor=node; ancestor->father!=NULL; ancestor=ancestor->father) {
 		ancestors.push_front(pair<const SetBisect*,bool>(ancestor->father, ancestor==ancestor->father->left));  // "true" means "left"
 	}
-	IntervalVector box=bounding_box;
+	IntervalVector box=Rn;
 	// we go backward and apply the bisections recursively from the initial bounding box
 	for (list<pair<const SetBisect*,bool> >::const_iterator it=ancestors.begin(); it!=ancestors.end(); it++) {
 		box = it->second ? it->first->left_box(box) : it->first->right_box(box);

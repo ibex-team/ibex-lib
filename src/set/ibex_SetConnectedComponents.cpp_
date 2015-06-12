@@ -126,7 +126,7 @@ void fill_connected_component(vector<SetLeaf*>& comp, ExtSetNode* n, int num) {
 vector<vector<SetLeaf*> > Set::connected_components() {
 	vector<vector<SetLeaf*> > result;
 
-	ExtSetNode* ext_root = new ExtSetNode(root,bounding_box);
+	ExtSetNode* ext_root = new ExtSetNode(root,Rn);
 	init(ext_root);
 
 	stack<ExtSetNode*> s;
