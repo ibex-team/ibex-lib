@@ -76,9 +76,9 @@ public:
 	void save(const char* filename);
 
 	/**
-	 * \brief Apply a function to all the leaves
+	 * \brief Apply a visitor
 	 */
-	void visit_leaves(SetNode::leaf_func func) const;
+	void visit(SetVisitor& visitor) const;
 
 	/**
 	 * \ingroup iset

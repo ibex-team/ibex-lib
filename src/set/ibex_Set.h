@@ -13,6 +13,7 @@
 #include "ibex_SetNode.h"
 #include "ibex_SetLeaf.h"
 #include "ibex_BoolInterval.h"
+#include "ibex_SetVisitor.h"
 
 namespace ibex {
 
@@ -94,9 +95,9 @@ public:
 	void save(const char* filename);
 
 	/**
-	 * \brief Apply a function to all the leaves
+	 * \brief Visit the set
 	 */
-	void visit_leaves(SetNode::leaf_func func) const;
+	void visit(SetVisitor& visitor) const;
 
 	/**
 	 * \brief Distance of the point "pt" wrt the set (if inside is true)

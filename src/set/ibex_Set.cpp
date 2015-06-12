@@ -38,6 +38,31 @@ bool Set::is_empty() const {
 
 Set& Set::operator&=(const Set& set) {
 	root = root->inter(false, bounding_box, set.root, set.bounding_box);
+
+	if (bounding_box!=set.bounding_box) {
+
+		// create a boundary around the other set box
+		IntervalVector inflated=set.bounding_box;
+		for (int i=0;i<inflated.size();i++) {
+			double lb=inflated[i].lb();
+			double ub=inflated[i].ub();
+			inflated[i]=Interval(lb==NEG_INFINITY? lb : previous_float(lb), ub==POS_INFINITY? ub : next_float(ub));
+		}
+
+		// intersect the set with the boundary
+		IntervalVector* result;
+		int n=inflated.diff(set.bounding_box,result);
+		for (int i=0; i<n; i++)
+			root = root->inter(false, bounding_box, result[i], MAYBE);
+		delete[] result;
+
+		// intersect the set with the complementary of the other set
+		n=bounding_box.diff(inflated,result);
+		for (int i=0; i<n; i++)
+			root = root->inter(false, bounding_box, result[i], NO);
+		delete[] result;
+	}
+
 	return *this;
 }
 
@@ -178,8 +203,8 @@ void Set::load(const char* filename) {
 	is.close();
 }
 
-void Set::visit_leaves(SetNode::leaf_func func) const {
-	root->visit_leaves(func, bounding_box);
+void Set::visit(SetVisitor& visitor) const {
+	root->visit(bounding_box,visitor);
 }
 
 std::ostream& operator<<(std::ostream& os, const Set& set) {

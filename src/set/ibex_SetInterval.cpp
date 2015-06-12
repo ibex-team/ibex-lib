@@ -42,8 +42,8 @@ void SetInterval::save(const char* filename) {
 	Set::save(filename);
 }
 
-void SetInterval::visit_leaves(SetNode::leaf_func func) const {
-	Set::visit_leaves(func);
+void SetInterval::visit(SetVisitor& visitor) const {
+	Set::visit(visitor);
 }
 
 } // namespace ibex

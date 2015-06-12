@@ -24,6 +24,41 @@ SetNode::~SetNode() {
 
 }
 
+
+namespace {
+
+// determine if box1 has a larger diameter than box2
+// return the index of the box largest dimension (either an index for box1 or box2)
+pair<bool,int> largest_diameter(const IntervalVector& box1, const IntervalVector& box2) {
+
+	int i1=box1.extr_diam_index(false);
+	int i2=box2.extr_diam_index(false);
+
+	if (box1[i1].is_unbounded()) {
+		if (!box2[i2].is_unbounded())
+			return pair<bool,int>(true,i1);
+		else {
+			double pt1=box1[i1].lb()==POS_INFINITY ? box1[i1].lb() : -box1[i1].ub();
+			double pt2=box2[i2].lb()==POS_INFINITY ? box2[i2].lb() : -box2[i2].ub();
+
+			if (pt1<pt2)
+				return pair<bool,int>(true,i1);
+			else
+				return pair<bool,int>(false,i2);
+		}
+	} else {
+		if (box2[i2].is_unbounded())
+			return pair<bool,int>(false,i2);
+		else {
+			if (box1[i1].diam()>box2[i2].diam())
+				return pair<bool,int>(true,i1);
+			else
+				return pair<bool,int>(false,i2);
+		}
+	}
+}
+}
+
 // TODO: merge this code with union_
 
 SetNode* SetNode::inter(bool iset, const IntervalVector& nodebox, const SetNode* other, const IntervalVector& otherbox) {
@@ -38,12 +73,15 @@ SetNode* SetNode::inter(bool iset, const IntervalVector& nodebox, const SetNode*
 		return this1;
 	} else {
 		// ******************************** balancing **************************************************
-		if (nodebox.max_diam()>otherbox.max_diam()) {
+
+		pair<bool,int> ld=largest_diameter(nodebox,otherbox);
+
+		if (ld.first) {
 
 			SetBisect* bis;
 
 			if (is_leaf()) {
-				int var=nodebox.extr_diam_index(false);
+				int var = ld.second;
 				pair<IntervalVector,IntervalVector> p=nodebox.bisect(var);
 				double pt=p.first[var].ub();
 				assert(nodebox[var].interior_contains(pt));
@@ -86,12 +124,15 @@ SetNode* SetNode::union_(const IntervalVector& nodebox, const SetNode* other, co
 	} else {
 
 		// ******************************** balancing **************************************************
-		if (nodebox.max_diam()>otherbox.max_diam()) {
+
+		pair<bool,int> ld=largest_diameter(nodebox,otherbox);
+
+		if (ld.first) {
 
 			SetBisect* bis;
 
 			if (is_leaf()) {
-				int var=nodebox.extr_diam_index(false);
+				int var=ld.second;
 				pair<IntervalVector,IntervalVector> p=nodebox.bisect(var);
 				double pt=p.first[var].ub();
 				assert(nodebox[var].interior_contains(pt));

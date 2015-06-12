@@ -357,8 +357,8 @@ BoolInterval SetLeaf::is_superset(const IntervalVector& nodebox, const IntervalV
 }
 
 
-void SetLeaf::visit_leaves(leaf_func func, const IntervalVector& nodebox) const {
-	func(nodebox, status);
+void SetLeaf::visit(const IntervalVector& nodebox, SetVisitor& visitor) const {
+	visitor.visit_leaf(nodebox, status);
 }
 
 void SetLeaf::print(ostream& os, const IntervalVector& nodebox, int shift) const {

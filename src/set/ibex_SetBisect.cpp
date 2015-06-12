@@ -177,9 +177,10 @@ SetNode* SetBisect::contract_no_diff(BoolInterval status, const IntervalVector& 
 	}
 }
 
-void SetBisect::visit_leaves(leaf_func func, const IntervalVector& nodebox) const {
-	left->visit_leaves(func, left_box(nodebox));
-	right->visit_leaves(func, right_box(nodebox));
+void SetBisect::visit(const IntervalVector& nodebox, SetVisitor& visitor) const {
+	visitor.visit_node(nodebox);
+	left->visit(left_box(nodebox),visitor);
+	right->visit(right_box(nodebox),visitor);
 }
 
 void SetBisect::print(ostream& os, const IntervalVector& nodebox, int shift) const {

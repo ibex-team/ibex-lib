@@ -14,6 +14,7 @@
 #include "ibex_BoolInterval.h"
 #include "ibex_BoolInterval.h"
 #include "ibex_Sep.h"
+#include "ibex_SetVisitor.h"
 
 namespace ibex {
 
@@ -84,9 +85,9 @@ public:
 	virtual SetNode* union_(const IntervalVector& nodebox, const IntervalVector& x, BoolInterval x_status)=0;
 
 	/**
-	 * \brief Visit the leaves of a tree with a callback "func"
+	 * \brief Visit the tree
 	 */
-	virtual void visit_leaves(leaf_func func, const IntervalVector& nodebox) const=0;
+	virtual void visit(const IntervalVector& nodebox, SetVisitor& visitor) const=0;
 
 	/**
 	 * \brief Display the structure on output stream "os"

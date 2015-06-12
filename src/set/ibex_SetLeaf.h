@@ -51,7 +51,7 @@ public:
 	virtual SetNode* contract_no_diff(BoolInterval status, const IntervalVector& nodebox, const IntervalVector& box);
 
 	/** \see SetNode */
-	virtual void visit_leaves(leaf_func func, const IntervalVector& nodebox) const;
+	virtual void visit(const IntervalVector& nodebox, SetVisitor& visitor) const;
 
 	/** \see SetNode */
 	virtual void print(std::ostream& os, const IntervalVector& nodebox, int shift) const;
