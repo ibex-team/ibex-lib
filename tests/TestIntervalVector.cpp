@@ -602,7 +602,7 @@ void TestIntervalVector::diff01() {
 	IntervalVector* c;
 	int n=b.diff(b,c);
 
-	TEST_ASSERT(n==1);
+	TEST_ASSERT(n==0);
 
 	TEST_ASSERT(c[0].size()==2);
 	TEST_ASSERT(c[0].is_empty());
@@ -676,6 +676,19 @@ void TestIntervalVector::diff04() {
 	IntervalVector b3(2,_b3);
 
 	TEST_ASSERT(c[0]==b3);
+
+	delete[] c;
+
+}
+
+void TestIntervalVector::diff05() {
+	double _b[][2]={{0,1},{0,1}};
+	IntervalVector b(2,_b);
+	IntervalVector* c;
+
+	int n=IntervalVector::empty(2).diff(b,c);
+
+	TEST_ASSERT(n==0);
 
 	delete[] c;
 
