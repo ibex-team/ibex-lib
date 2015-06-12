@@ -19,6 +19,7 @@ Contents:
    contractor
    separator
    strategy
+   set
    example
    reference
    lab
