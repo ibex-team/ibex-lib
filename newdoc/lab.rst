@@ -1,6 +1,13 @@
 
+================================
 Do it Yourself!
 ================================
+
+.. _lab_vibes:
+
+---------------------------
+A graphical tool: Vibes
+---------------------------
 
 .. _Vibes: http://enstabretagnerobotics.github.io/VIBES/
 
@@ -63,8 +70,11 @@ Finally, to plot a box ([a,b],[c,d]) just call:
 
 What is between the double quotes is the color code of the box. For instance, "b[r]" will paint the box in red and the contour in blue.
 
+To plot a :ref:`set <set>` calculated by Ibex, use the code give :ref:`here <set-plot>`.
+
+--------------------
 Lab n°1: Set image
-------------------
+--------------------
 
 The complete code can be found here: ``examples/lab/lab1.cpp``.
 
@@ -164,7 +174,7 @@ You should obtain the following pictures:
    | n=15                     | n=80                   | n=500                    |
    +--------------------------+------------------------+--------------------------+
    
-
+----------------------------------
 Lab n°2: Set inversion (basic)
 ----------------------------------
 
@@ -314,6 +324,7 @@ Finally, the two subboxes are pushed on the stack.
      }    
    }
 
+-------------------------------------------
 Lab n°3: Set inversion (with contractors)
 -------------------------------------------
 
@@ -468,5 +479,30 @@ Replace in the loop the inner/outer tests by contractions.
      	s.push(p.second);
      }
    }
+
+
+--------------------
+Lab n°3: Stability
+--------------------
+ 
+**Introduction**
+
+The goal of this lab is to cast a classical problem in control theory into a set inversion problem.
+
+We have a dynamical system y(t) governed by the following linear differential equation:
+
+.. math::
+   y^{(4)}(t)+a y^{(3)}(t)+b y^{(2)}(t)+(1-b) y'(t) + a y(t)=0.
+
+where a and b are two unknown parameters.
+
+Our goal is to find the set of couples (a,b) that makes the origin y=0 stable. It is depicted in the figure:
+
+.. figure:: stability.png
+   :width: 300 px
+   :align: center
+   
+*Hint: apply the Routh-Hurwitz criterion to the caracteristic polynomial of the system.*
+
 
    
