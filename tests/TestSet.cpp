@@ -1,14 +1,14 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : TestSetInterval.cpp
+// File        : TestSet.cpp
 // Author      : Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
 // Created     : Aug 18, 2014
 //============================================================================
 
-#include "TestSetInterval.h"
-#include "ibex_SetInterval.h"
+#include "TestSet.h"
+#include "ibex_Set.h"
 #include "ibex_SetLeaf.h"
 #include "ibex_SetBisect.h"
 
@@ -17,33 +17,33 @@ using namespace std;
 namespace ibex {
 
 
-void TestSetInterval::diff01() {
+void TestSet::diff01() {
 	IntervalVector x(2,Interval(0,1));
 	IntervalVector y=x;
 
-	SetNode* node=diff(x,y,YES,NO,0.1);
+	SetNode* node=diff(x,y,YES,NO,0.1).first;
 
 	SetLeaf* leaf=dynamic_cast<SetLeaf*>(node);
 	TEST_ASSERT(leaf && leaf->status==NO);
 }
 
-void TestSetInterval::diff02() {
+void TestSet::diff02() {
 	IntervalVector x(2,Interval(0,1));
 	IntervalVector y(2);
 	y[0]=Interval(0,1);
 	y[1]=Interval(1,2);
 
-	SetNode* node=diff(x,y,YES,NO,0.1);
+	SetNode* node=diff(x,y,YES,NO,0.1).first;
 
 	SetLeaf* leaf=dynamic_cast<SetLeaf*>(node);
 	TEST_ASSERT(leaf && leaf->status==YES);
 }
 
-void TestSetInterval::diff03() {
+void TestSet::diff03() {
 	IntervalVector x(2,Interval(0,1));
 	IntervalVector y(2,Interval(0.3,0.7));
 
-	SetNode* node=diff(x,y,YES,NO,0.1);
+	SetNode* node=diff(x,y,YES,NO,0.1).first;
 
 	SetBisect* biss=dynamic_cast<SetBisect*>(node);
 	TEST_ASSERT(biss);
@@ -88,11 +88,11 @@ void TestSetInterval::diff03() {
 }
 
 
-void TestSetInterval::diff04() {
+void TestSet::diff04() {
 	IntervalVector x(2,Interval(0,1));
 	IntervalVector y(2,Interval(0.3,1));
 
-	SetNode* node=diff(x,y,YES,NO,0.1);
+	SetNode* node=diff(x,y,YES,NO,0.1).first;
 
 	SetBisect* biss=dynamic_cast<SetBisect*>(node);
 	TEST_ASSERT(biss);
@@ -117,13 +117,13 @@ void TestSetInterval::diff04() {
 	TEST_ASSERT(leaf->status==NO);
 }
 
-void TestSetInterval::diff05() {
+void TestSet::diff05() {
 	IntervalVector x(2,Interval(0,1));
 	IntervalVector y(2);
 	y[0]=Interval(0,1);
 	y[1]=Interval(0.3,1);
 
-	SetNode* node=diff(x,y,YES,NO,0.1);
+	SetNode* node=diff(x,y,YES,NO,0.1).first;
 
 	SetBisect* biss=dynamic_cast<SetBisect*>(node);
 	TEST_ASSERT(biss);
@@ -139,12 +139,12 @@ void TestSetInterval::diff05() {
 	TEST_ASSERT(leaf->status==NO);
 }
 
-void TestSetInterval::diff06() {
+void TestSet::diff06() {
 	IntervalVector x(2,Interval(0,1));
 	IntervalVector y(2,Interval(0.001,0.999));
 
 	double eps=::pow(2,-4);
-	SetNode* node=diff(x,y,YES,NO,eps);
+	SetNode* node=diff(x,y,YES,NO,eps).first;
 
 	SetBisect* biss=dynamic_cast<SetBisect*>(node);
 	TEST_ASSERT(biss);
@@ -189,12 +189,12 @@ void TestSetInterval::diff06() {
 }
 
 
-void TestSetInterval::diff07() {
+void TestSet::diff07() {
 	IntervalVector x(2,Interval(0,1));
 	IntervalVector y(2,Interval(0.001,1));
 
 	double eps=::pow(2,-4);
-	SetNode* node=diff(x,y,YES,NO,eps);
+	SetNode* node=diff(x,y,YES,NO,eps).first;
 
 	SetBisect* biss=dynamic_cast<SetBisect*>(node);
 	TEST_ASSERT(biss);
@@ -219,7 +219,7 @@ void TestSetInterval::diff07() {
 	TEST_ASSERT(leaf->status==NO);
 }
 
-void TestSetInterval::diff08() {
+void TestSet::diff08() {
 	IntervalVector x(2,Interval(0,1));
 	IntervalVector y(2);
 	y[0]=Interval(0,1);
@@ -227,7 +227,7 @@ void TestSetInterval::diff08() {
 
 	double eps=::pow(2,-4);
 
-	SetNode* node=diff(x,y,YES,NO,eps);
+	SetNode* node=diff(x,y,YES,NO,eps).first;
 
 	SetBisect* biss=dynamic_cast<SetBisect*>(node);
 	TEST_ASSERT(biss);
@@ -244,14 +244,14 @@ void TestSetInterval::diff08() {
 }
 
 
-void TestSetInterval::diff09() {
+void TestSet::diff09() {
 	IntervalVector x(2,Interval(0,1));
 	IntervalVector y(2);
 	y[0]=Interval(0.3,1);
 	y[1]=Interval(0.001,1);
 
 	double eps=::pow(2,-4);
-	SetNode* node=diff(x,y,YES,NO,eps);
+	SetNode* node=diff(x,y,YES,NO,eps).first;
 
 	SetBisect* biss=dynamic_cast<SetBisect*>(node);
 	TEST_ASSERT(biss);
@@ -277,14 +277,14 @@ void TestSetInterval::diff09() {
 }
 
 
-void TestSetInterval::diff10() {
+void TestSet::diff10() {
 	IntervalVector x(2,Interval(0,1));
 	IntervalVector y(2);
 	y[0]=Interval(0.001,1);
 	y[1]=Interval(0.3,1);
 
 	double eps=::pow(2,-4);
-	SetNode* node=diff(x,y,YES,NO,eps);
+	SetNode* node=diff(x,y,YES,NO,eps).first;
 
 	SetBisect* biss=dynamic_cast<SetBisect*>(node);
 	TEST_ASSERT(biss);
@@ -310,14 +310,14 @@ void TestSetInterval::diff10() {
 }
 
 
-void TestSetInterval::diff11() {
+void TestSet::diff11() {
 	IntervalVector x(2,Interval(0,1));
 	IntervalVector y(2);
 	y[0]=Interval(0.999,1);
 	y[1]=Interval(0.3,1);
 
 	double eps=::pow(2,-4);
-	SetNode* node=diff(x,y,YES,NO,eps);
+	SetNode* node=diff(x,y,YES,NO,eps).first;
 
 	SetBisect* biss=dynamic_cast<SetBisect*>(node);
 	TEST_ASSERT(biss);
@@ -343,14 +343,14 @@ void TestSetInterval::diff11() {
 }
 
 
-void TestSetInterval::diff12() {
+void TestSet::diff12() {
 	IntervalVector x(2,Interval(0,1));
 	IntervalVector y(2);
 	y[0]=Interval(0.999,1);
 	y[1]=Interval(0.999,1);
 
 	double eps=::pow(2,-4);
-	SetNode* node=diff(x,y,YES,NO,eps);
+	SetNode* node=diff(x,y,YES,NO,eps).first;
 
 	SetBisect* biss=dynamic_cast<SetBisect*>(node);
 	TEST_ASSERT(biss);
@@ -375,26 +375,26 @@ void TestSetInterval::diff12() {
 	TEST_ASSERT(leaf->status==MAYBE);
 }
 
-void TestSetInterval::diff13() {
+void TestSet::diff13() {
 
 	IntervalVector x(2,Interval(0,1));
 	IntervalVector y(2,Interval(0.3,0.7));
 
 	double eps=2.0;
-	SetNode* node=diff(x,y,YES,NO,eps);
+	SetNode* node=diff(x,y,YES,NO,eps).first;
 
 	SetLeaf* leaf=dynamic_cast<SetLeaf*>(node);
 	TEST_ASSERT(leaf);
 	TEST_ASSERT(leaf->status==MAYBE);
 }
 
-void TestSetInterval::diff14() {
+void TestSet::diff14() {
 
 	IntervalVector x(2,Interval(0,1));
 	IntervalVector y(2,Interval(0.3,2));
 
 	double eps=2.0;
-	SetNode* node=diff(x,y,YES,MAYBE,eps);
+	SetNode* node=diff(x,y,YES,MAYBE,eps).first;
 
 	SetLeaf* leaf=dynamic_cast<SetLeaf*>(node);
 	TEST_ASSERT(leaf);
@@ -402,7 +402,7 @@ void TestSetInterval::diff14() {
 }
 
 
-void TestSetInterval::diff15() {
+void TestSet::diff15() {
 
 	IntervalVector x(2);
 	x[0]=Interval(-2.5,0);
@@ -413,7 +413,7 @@ void TestSetInterval::diff15() {
 
 	double eps=3.0;
 
-	SetNode* node=diff(x,y,YES,NO,eps);
+	SetNode* node=diff(x,y,YES,NO,eps).first;
 
 	SetLeaf* leaf=dynamic_cast<SetLeaf*>(node);
 	TEST_ASSERT(leaf);
