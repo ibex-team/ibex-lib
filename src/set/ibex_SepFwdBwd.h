@@ -98,8 +98,6 @@ inline SepFwdBwd::SepFwdBwd(Function &f, const IntervalMatrix &y): SepCtcPair(*n
 
 inline SepFwdBwd::SepFwdBwd(NumConstraint& c) : SepCtcPair(*new CtcFwdBwd(c.f,!c.op), *new CtcFwdBwd(c)) { }
 
-inline SepFwdBwd::SepFwdBwd(const System& sys) : SepCtcPair(*new CtcUnion(sys),*new CtcHC4(sys)) { }
-
 inline SepFwdBwd::~SepFwdBwd() {
 	delete &ctc_out;
 	delete &ctc_in;

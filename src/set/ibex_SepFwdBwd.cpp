@@ -45,5 +45,6 @@ Ctc* _neg(Function& f, CmpOp& op) {
 
 SepFwdBwd::SepFwdBwd(Function& f, CmpOp op) : SepCtcPair(*_neg(f,op), *new CtcFwdBwd(f,op)) { }
 
+SepFwdBwd::SepFwdBwd(const System& sys) : SepCtcPair(*new CtcUnion(sys),*new CtcHC4(sys)) { }
 
 } // end namespace
