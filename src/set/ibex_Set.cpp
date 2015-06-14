@@ -46,7 +46,7 @@ Set::Set(const IntervalVector& box, BoolInterval status) : root(new SetLeaf(stat
 	// create the boundary around the box
 	p.second->replace_with(diff(inflated, box, MAYBE, YES, 0).first);
 
-	root = root->inter(false, Rn, p.first, Rn);
+	root = p.first;
 }
 
 Set::Set(Function& f, CmpOp op, double eps) : root(new SetLeaf(YES)), Rn(f.nb_var()) {
@@ -57,6 +57,11 @@ Set::Set(Function& f, CmpOp op, double eps) : root(new SetLeaf(YES)), Rn(f.nb_va
 
 Set::Set(NumConstraint& ctr, double eps) : root(new SetLeaf(YES)), Rn(ctr.f.nb_var()) {
 	SepFwdBwd sep(ctr);
+	sep.contract(*this,eps);
+}
+
+Set::Set(const System& sys, double eps) : root(new SetLeaf(YES)), Rn(sys.nb_var) {
+	SepFwdBwd sep(sys);
 	sep.contract(*this,eps);
 }
 

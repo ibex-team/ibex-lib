@@ -78,15 +78,7 @@ Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, double prec,
 	}
 
 	// ====== build the reversed inequalities g_i(x)>0 ===============
-	if(m>0) {
-		Array<Ctc> ng(m);
-		for (int i=0; i<m; i++) {
-			ng.set_ref(i, *new CtcFwdBwd(sys.ctrs[i].f,GT));
-		}
-		is_inside=new CtcUnion(ng);
-	}
-	else
-		is_inside=NULL;
+	is_inside=m>0? new CtcUnion(sys) : NULL;
 	// =============================================================
 
 	if (trace) cout.precision(12);

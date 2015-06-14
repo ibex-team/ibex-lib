@@ -9,7 +9,8 @@
 //============================================================================
 
 #include "ibex_SepFwdBwd.h"
-
+#include "ibex_CtcHC4.h"
+#include "ibex_CtcUnion.h"
 #include "ibex_CtcIdentity.h"
 
 namespace ibex {

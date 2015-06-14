@@ -14,15 +14,13 @@
 #include "ibex_SetLeaf.h"
 #include "ibex_BoolInterval.h"
 #include "ibex_SetVisitor.h"
-#include "ibex_NumConstraint.h"
+#include "ibex_System.h"
 
 namespace ibex {
 
 /**
  * \defgroup iset Set
  */
-
-//class Sep;
 
 /**
  * \ingroup iset
@@ -58,6 +56,11 @@ public:
 	 * \brief Build the set from a constraint.
 	 */
 	Set(NumConstraint& ctr, double eps);
+
+	/**
+	 * \brief Build the set from a system of constraints.
+	 */
+	Set(const System& sys, double eps);
 
 	/*
 	 * \brief Delete this
@@ -140,18 +143,23 @@ protected:
 	static IntervalVector inflate_one_float(const IntervalVector& box);
 
 	/**
-	 * (-oo,oo)x..x(-oo,oo)
-	 */
-	IntervalVector Rn;
-
-	/**
 	 * \brief Load the set from a file
 	 */
 	void load(const char* filename);
 
 	friend std::ostream& operator<<(std::ostream& os, const Set& set);
 
-	SetNode* root; // NULL means no existing set (warning: different from empty set!)
+	/**
+	 * Root node.
+	 *
+	 * NULL means no existing set (warning: different from empty set!)
+	 */
+	SetNode* root;
+
+	/**
+	 * (-oo,oo)x..x(-oo,oo)
+	 */
+	IntervalVector Rn;
 };
 
 std::ostream& operator<<(std::ostream& os, const Set& set);
