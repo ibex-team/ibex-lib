@@ -3,8 +3,10 @@
 Do it Yourself!
 ================================
 
+In this lab, we use Vibes to plot boxes but you can easily adapt the code to
+use your own graphical tool.
 
-To plot a :ref:`set <set>` calculated by Ibex, use the code give :ref:`here <set-plot>`.
+Fast instructions for installing and using Vibes are given :ref:`here <set-explore>`.
 
 --------------------
 Lab n°1: Set image
@@ -415,8 +417,186 @@ Replace in the loop the inner/outer tests by contractions.
    }
 
 
+.. _lab_set_inversion_sets:
+
+-------------------------------------
+Lab n°4: Set Inversion (using "Sets")
+-------------------------------------
+
+The complete code can be found here: ``examples/lab/lab4.cpp``.
+
+**Introduction**
+
+The purpose of this exercice is just to get familiar with the structure proposed in Ibex
+for representing sets (or pavings).
+
+The set inversion is naturally one of the main features proposed in this part of the library.
+We will solve the same problem as before but this time with the ``Set`` class directly.
+This will take only a few lines of code.
+
+Give first a look at the :ref:`documentation on sets <set>`.
+
+**Question 1**
+
+Create the function :math:`(x,y)\mapsto \sin(x+y)-0.1\times x\times y` and
+:ref:`forward-backward separator <sep-ctr>` associated to the constraint
+
+.. math::
+   0\le f(x,y) \le 2.
+   
+.. hidden-code-block:: cpp
+   :label: show/hide solution
+   
+   	Function f("x","y","sin(x+y)-0.1*x*y");
+
+	// Create a separator for 0<=f(x,y)<=2
+	SepFwdBwd sep(f,Interval(0,2));
+	
+   
+**Question 2**
+
+Build the initial set [-10,10]x[-10,10] and contract it with the separator.
+
+.. hidden-code-block:: cpp
+   :label: show/hide solution
+
+	// Build the initial set [-10,10]x[-10,10]
+	Set set(IntervalVector(2,Interval(-10,10)));
+
+	// Contract the set with the separator
+	sep.contract(set,0.1);
+   
+**Question 3**
+
+Plot the set with Vibes using a ``SetVisitor``.
+
+Solution: copy-paste the code given :ref:`here <set-plot>`.
+
+------------------------------
+Lab n°5: Parameter Estimation
+------------------------------
+
+The complete code can be found here: ``examples/lab/lab5.cpp``.
+
+**Introduction**
+
+This exercice is inspired by this `video`_.
+
+.. _video: https://www.youtube.com/watch?v=Uq3VGMmRSXk&index=5&list=PLWjVweRFajXvmhiKdQKosUlqn9xLMx2YA
+
+The problem is to find the values of two parameters :math:`(p_1,p_2)` of a physical process that are consistent with some measurements.
+Measurements are subject to error and we want a garanteed enclosure of all the feasible parameters values.
+
+The physical process is modeled by a function :math:`f_{p_1,p_2}:t\mapsto y` and a measurement is a couple of input-ouput :math:`(t_i,y_i)`.
+We assume the input has no error. The error on the output is represented by an interval. 
+
+The model is:
+
+.. math::
+  
+   f_{p_1,p_2}:t \mapsto 20\exp(-p_1t)-8\exp(-p_2t).
+
+
+We have the following series of measurements:
+
++---+--------------+
+| t | y            |
++===+==============+
+|1  | [4.5,7.5]    |
++---+--------------+
+|2  | [0.67,4.6]   |
++---+--------------+
+|3  | [-1,2.8]     |
++---+--------------+
+|4  | [-1.7,1.7]   |
++---+--------------+
+|5  | [-1.9,0.93]  |
++---+--------------+
+|6  | [-1.8,0.5]   |
++---+--------------+
+|7  | [-1.6,0.24]  |
++---+--------------+
+|8  | [-1.4,0.09]  |
++---+--------------+
+|9  | [-1.2,0.0089]|
++---+--------------+
+|10 | [-1,-0.031]  |
++---+--------------+
+
+**Question 1**
+
+Build the function f as a mapping of 3 variables, p1, p2 and t.
+
+.. hidden-code-block:: cpp
+   :label: show/hide solution
+   
+   Function f("p1","p2","t","20*exp(-p_1*t)-8*exp(-p_2*t)");
+
+**Question 2**
+
+Build two interval vectors ``t`` and ``y`` of size 10 that contain the measurements data (even if the input has no error, we will enter times as 
+degenerated intervals).
+
+*Hint:* build interval vectors :ref:`from array of double <itv-vector-boxes>`.
+
+.. hidden-code-block:: cpp
+   :label: show/hide solution
+   
+   const int n=10;
+
+   double _t[n][2] = {{1,1}, {2,2}, {3,3}, {4,4}, {5,5}, {6,6}, {7,7}, {8,8}, {9,9}, {10,10}};
+   double _y[n][2] = {{4.5,7.5}, {0.67,4.6}, {-1,2.8}, {-1.7,1.7}, {-1.9,0.93}, {-1.8,0.5}, {-1.6,0.24}, {-1.4,0.09}, {-1.2,0.0089}, {-1,-0.031}};
+
+   IntervalVector t(n,_t);
+   IntervalVector y(n,_y);
+	
+**Question 3**
+
+Build a system using a :ref:`system factory <mod-sys-cpp>`.
+The system must contain the 10 constraints that represent each measurements and the additional bound constraints on the parameters:
+
+.. math::
+
+   0\le p_1\le 1, \quad 0\le p_2\le 1.
+   
+   
+.. hidden-code-block:: cpp
+   :label: show/hide solution
+   
+   	Variable p1,p2;
+	SystemFactory fac;
+	fac.add_var(p1);
+	fac.add_var(p2);
+	for (int i=0; i<n; i++)
+		fac.add_ctr(f(p1,p2,t[i])=y[i]);
+
+	// add bound constraints
+	fac.add_ctr(p1>=0);
+	fac.add_ctr(p1<=1);
+	fac.add_ctr(p2>=0);
+	fac.add_ctr(p2<=1);
+
+	System sys(fac);
+
+**Question 4**
+
+Calculate the parameter values using set inversion (see :ref:`lab n°4 <lab_set_inversion_sets>`).
+You should obtain the following picture:
+
+.. figure:: param-estim.png
+   :width: 300 px
+   :align: center
+
+.. hidden-code-block:: cpp
+   :label: show/hide solution
+   
+   Set set(sys,0.001);
+
+   ToVibes to_vibes(1);
+   set.visit(to_vibes);
+
 --------------------
-Lab n°3: Stability
+Lab n°6: Stability
 --------------------
  
 **Introduction**

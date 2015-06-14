@@ -18,8 +18,8 @@ Contents:
    modeling
    contractor
    separator
-   strategy
    set
+   strategy
    example
    reference
    lab

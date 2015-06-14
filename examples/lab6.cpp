@@ -15,31 +15,63 @@ using namespace ibex;
 
 class ToVibes : public SetVisitor {
 
+public:
+
+  /**
+   * Plot a  box within the frame [-max,max]x[-max,max]
+   *
+   * The frame avoids, in particular, to plot unbounded OUT boxes.
+   */
+  ToVibes(double max) : frame(2,max*Interval(-1,1)) {  }
+
   /**
    * Function that will be called automatically on every boxes (leaves) of the set.
    */
   void visit_leaf(const IntervalVector& box, BoolInterval status) {
 
-    // we skip unbounded OUT boxes (to obtain a bounded frame)
-    if (box.mag().max()<=2) {
+    // Intersect the box with the frame
+    IntervalVector framebox=box & frame;
 
-      //  Associate a color to the box.
-      //  - YES (means "inside") is in green
-      //  - NO (means "outside") is in red
-      //  - MAYBE (means "boundary") is in blue.
-      const char* color;
+    //  Associate a color to the box.
+    //  - YES (means "inside") is in green
+    //  - NO (means "outside") is in red
+    //  - MAYBE (means "boundary") is in blue.
+    const char* color;
 
-      switch (status) {
-        case YES:    color="g"; break;
-        case NO:     color="r"; break;
-        case MAYBE : color="b"; break;
-      }
-
-      // Plot the box with Vibes
-      vibes::drawBox(box[0].lb(), box[0].ub(), box[1].lb(), box[1].ub(), color);
+    switch (status) {
+    case YES:  color="g"; break;
+    case NO:   color="r"; break;
+    case MAYBE : color="b"; break;
     }
+
+    // Plot the box with Vibes
+    vibes::drawBox(framebox[0].lb(), framebox[0].ub(), framebox[1].lb(), framebox[1].ub(), color);
   }
+
+   IntervalVector frame;
 };
+
+/*
+Function (p1,p2,)
+
+class CtcOut : public Ctc {
+
+	public:
+
+	CtcOut()
+
+	void contract(IntervalVector& box) {
+		IntervalVector box2(3);
+		for (int i=0; i<n; i++) {
+			box2.put(0,box);
+			box2[2]=t[i];
+
+		}
+
+	}
+
+	CtcCompo compo;
+}; */
 
 
 int main() {

@@ -1,10 +1,10 @@
 //============================================================================
-//                  I B E X
-// File    : lab4.cpp
-// Author    : Gilles Chabert
+//                                  I B E X                                   
+// File        : lab4.cpp
+// Author      : Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
-// License   : See the LICENSE file
-// Created   : Jun 8, 2015
+// License     : See the LICENSE file
+// Created     : Jun 8, 2015
 //============================================================================
 
 #include "ibex.h"
@@ -53,26 +53,28 @@ public:
 
 int main() {
 	vibes::beginDrawing ();
-	vibes::newFigure("lab4");
+	vibes::newFigure("lab5");
 
+	double eps=0.001;
 
-    //! [doc-lab-4-C]
+	Variable p,q;
 
-	Function f("x","y","sin(x+y)-0.1*x*y");
+	Function f(p,q,Return(p*q-(1-q),(p*q-(1-q))*(1-q)-pow(p,3)));
 
-	// Create a separator for 0<=f(x,y)<=2
-	SepFwdBwd sep(f,Interval(0,2));
+	SepFwdBwd sep(f,IntervalVector(2,Interval::POS_REALS));
 
-	// Build the initial set [-10,10]x[-10,10]
-	Set set(IntervalVector(2,Interval(-10,10)));
+	// Build the initial box
+	IntervalVector box(2);
+	box[0]=Interval(0,2);
+	box[1]=Interval(0,2);
 
-	// Contract the set with the separator
-	sep.contract(set,0.1);
+	Set set(box);
 
-	ToVibes to_vibes(10);
+	sep.contract(set,eps);
+
+	ToVibes to_vibes;
 	set.visit(to_vibes);
 
-	//! [doc-lab-4-C]
-
 	vibes::endDrawing();
+
 }
