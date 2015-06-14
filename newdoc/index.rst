@@ -20,8 +20,8 @@ Contents:
    separator
    set
    strategy
-   example
    reference
+   example-slam
    lab
 
 

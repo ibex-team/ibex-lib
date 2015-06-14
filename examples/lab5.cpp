@@ -1,6 +1,6 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : lab4.cpp
+// File        : lab5.cpp
 // Author      : Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
@@ -22,7 +22,7 @@ public:
    *
    * The frame avoids, in particular, to plot unbounded OUT boxes.
    */
-  ToVibes(double max) : frame(2,max*Interval(-1,1)) {  }
+  ToVibes(double max) : frame(2,max*Interval(0,1)) {  }
 
   /**
    * Function that will be called automatically on every boxes (leaves) of the set.
@@ -58,7 +58,6 @@ int main() {
 	double eps=0.001;
 
 	Function f("p1","p2","t","20*exp(-p1*t)-8*exp(-p2*t)");
-
 
 	const int n=10;
 

@@ -191,13 +191,6 @@ that does not resort to the simplex, ex:
    :start-after: solver-parallel-C-2
    :end-before:  solver-parallel-C-2
 
-==========================
-Implementing SIVIA
-==========================
-
-
-.. literalinclude:: ../examples/doc-sivia.cpp 
-   :language: cpp
    
 
 

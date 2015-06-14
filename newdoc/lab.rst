@@ -1,16 +1,20 @@
 
-================================
+********************************
 Do it Yourself!
-================================
+********************************
 
-In this lab, we use Vibes to plot boxes but you can easily adapt the code to
+The examples in this page are presented under the form of "labs" so that you can use them for practicing.
+
+The complete source codes are available under the ``examples/`` folder.
+
+In these labs, we use Vibes to plot boxes but you can easily adapt the code to
 use your own graphical tool.
 
 Fast instructions for installing and using Vibes are given :ref:`here <set-explore>`.
 
---------------------
-Lab n°1: Set image
---------------------
+=====================
+Set image
+=====================
 
 The complete code can be found here: ``examples/lab/lab1.cpp``.
 
@@ -110,9 +114,10 @@ You should obtain the following pictures:
    | n=15                     | n=80                   | n=500                    |
    +--------------------------+------------------------+--------------------------+
    
-----------------------------------
-Lab n°2: Set inversion (basic)
-----------------------------------
+=====================
+Set inversion (basic)
+=====================
+
 
 The complete code can be found here: ``examples/lab/lab2.cpp``.
 
@@ -260,9 +265,9 @@ Finally, the two subboxes are pushed on the stack.
      }    
    }
 
--------------------------------------------
-Lab n°3: Set inversion (with contractors)
--------------------------------------------
+==========================================
+Set inversion (with contractors)
+==========================================
 
 The complete code can be found here: ``examples/lab/lab3.cpp``.
 
@@ -419,9 +424,9 @@ Replace in the loop the inner/outer tests by contractions.
 
 .. _lab_set_inversion_sets:
 
--------------------------------------
-Lab n°4: Set Inversion (using "Sets")
--------------------------------------
+==========================================
+Set Inversion (using "Sets")
+==========================================
 
 The complete code can be found here: ``examples/lab/lab4.cpp``.
 
@@ -438,7 +443,7 @@ Give first a look at the :ref:`documentation on sets <set>`.
 
 **Question 1**
 
-Create the function :math:`(x,y)\mapsto \sin(x+y)-0.1\times x\times y` and
+Create the function :math:`(x,y)\mapsto \sin(x+y)-0.1\times x\times y` and the
 :ref:`forward-backward separator <sep-ctr>` associated to the constraint
 
 .. math::
@@ -455,7 +460,8 @@ Create the function :math:`(x,y)\mapsto \sin(x+y)-0.1\times x\times y` and
    
 **Question 2**
 
-Build the initial set [-10,10]x[-10,10] and contract it with the separator.
+Build the initial set [-10,10]x[-10,10] and contract it with the separator
+with a precision of 0.1.
 
 .. hidden-code-block:: cpp
    :label: show/hide solution
@@ -472,9 +478,9 @@ Plot the set with Vibes using a ``SetVisitor``.
 
 Solution: copy-paste the code given :ref:`here <set-plot>`.
 
-------------------------------
-Lab n°5: Parameter Estimation
-------------------------------
+==========================================
+Parameter Estimation
+==========================================
 
 The complete code can be found here: ``examples/lab/lab5.cpp``.
 
@@ -595,9 +601,123 @@ You should obtain the following picture:
    ToVibes to_vibes(1);
    set.visit(to_vibes);
 
---------------------
-Lab n°6: Stability
---------------------
+
+==========================================
+Parameter Estimation (advanced)
+==========================================
+
+The complete code can be found here: ``examples/lab/lab6.cpp``.
+
+**Introduction**
+
+This lab is a follow-up of the previous one.
+
+We now introduce uncertainty on the input variable t. However, we will try somehow to make our parameter
+estimation *robust* with respect to this uncertainty. This means that the values of our parameters should
+be consistent with our output whatever is the actual value of the input. Mathematically, we require 
+p1 and p2 to respect the following constraints.
+
+.. math::
+   \forall i, \quad  \forall t\in[t_i], \quad f(p_1,p_2, t) \in [y_i].
+   
+As a contractor-oriented library, Ibex does not provide quantifiers at the modeling stage. This means that
+you cannot write directly a constraint like this one. You have to build contractors and apply "quantifiers"
+on contractors. Read the documentation about :ref:`contractors and quantifiers <ctc-quantif>`.
+
+**Question 1**
+
+Like in the previous lab, create the function and the vector of measurements.
+
+.. hidden-code-block:: cpp
+   :label: show/hide solution
+
+   Function f("p1","p2","t","20*exp(-p1*t)-8*exp(-p2*t)");
+   
+   const int n=10;
+
+   double _t[n][2] = {{1,1}, {2,2}, {3,3}, {4,4}, {5,5}, {6,6}, {7,7}, {8,8}, {9,9}, {10,10}};
+   double _y[n][2] = {{4.5,7.5}, {0.67,4.6}, {-1,2.8}, {-1.7,1.7}, {-1.9,0.93}, {-1.8,0.5}, {-1.6,0.24}, {-1.4,0.09}, {-1.2,0.0089}, {-1,-0.031}};
+
+   IntervalVector t(n,_t);
+   IntervalVector y(n,_y);
+
+Then, define a constant ``delta_t`` (the uncertainty on time) and :ref:`inflate <itv-geom>` the
+vector of representing input times by this constant:
+
+.. hidden-code-block:: cpp
+   :label: show/hide solution
+
+   double tdelta=0.1;
+   t.inflate(tdelta);
+
+**Question 2**
+
+We will use the :ref:`generic constructor <ctc-quantif-generic>` of ``CtcForAll``.
+Create a bitset that will indicate among the arguments of the function f which ones will be treated as variables
+and which ones will be treated as quantified parameters.
+
+.. hidden-code-block:: cpp
+   :label: show/hide solution
+   
+   // Used to represent which variables are "quantified"
+   BitSet vars(0,2,BitSet::empt);
+   // add "p1" as variable
+   vars.add(0);
+   // add "p2" as variable
+   vars.add(1);
+
+**Question 3**
+
+Create the inner and outer contractor for the "robust" parameter estimation problem.
+
+*Hints*: follow the same idea as in the contractor variant of set inversion (see :ref:`lab n°3 <lab_set_inversion_sets>`).
+
+**(to be completed soon)**
+
+.. hidden-code-block:: cpp
+   :label: show/hide solution
+   
+   Array<Ctc> _c_out(n);
+   Array<Ctc> _c_in(n);
+   
+   for (int i=0; i<n; i++) {
+     IntervalVector ti(1,t[i]);
+     c_out.set_ref(i,*new CtcForAll(*new CtcFwdBwd(f,y[i]),vars,ti,tdelta/5));
+     c_in.set_ref(i,*new CtcExist(*new CtcNotIn(f,y[i]),vars,ti,tdelta/5));
+   }
+
+**Question 4**
+
+**(to be completed soon)**
+
+.. hidden-code-block:: cpp
+   :label: show/hide solution
+   
+   CtcCompo c_out(_c_out);
+   CtcUnion c_in(_c_in);
+
+**Question 5**
+
+**(to be completed soon)**
+
++-------------------------------+-------------------------------+-------------------------------+-------------------------------+
+| .. figure:: param-estim-1.png | .. figure:: param-estim-2.png | .. figure:: param-estim-3.png | .. figure:: param-estim-4.png |
+|   :width: 200 px              |   :width: 200 px              |   :width: 200 px              |   :width: 200 px              |
+|   :align: center              |   :align: center              |   :align: center              |   :align: center              |
++-------------------------------+-------------------------------+-------------------------------+-------------------------------+
+| deltat=0                      | deltat=0.1                    | deltat=0.2                    | deltat=0.3                    |
++-------------------------------+-------------------------------+-------------------------------+-------------------------------+
+   
+.. hidden-code-block:: cpp
+   :label: show/hide solution
+   
+   SepCtcPair sep(c_in,c_out);
+   Set set(IntervalVector(2,Interval(0,1)));
+   sep.contract(set,eps);
+   
+==========================================
+Stability
+==========================================
  
 **Introduction**
 
@@ -617,6 +737,4 @@ Our goal is to find the set of couples (a,b) that makes the origin y=0 stable. I
    :align: center
    
 *Hint: apply the Routh-Hurwitz criterion to the caracteristic polynomial of the system.*
-
-
    

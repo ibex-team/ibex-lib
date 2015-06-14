@@ -1,6 +1,8 @@
 **************************************************
-              References (*under construction*)
+              References
 **************************************************
+
+**NOTE:** This page is *under construction* and a lot of references are still missing.
 
 -------------------------------------
 Articles in Journal and Conferences
