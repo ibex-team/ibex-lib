@@ -36,8 +36,9 @@ Articles in Journal and Conferences
 +====================+==============================+=================================+=========================+======+=====================+
 |                    |                              |                                 |                         |      |                     |
 | .. _Jaulin14:      | **L. Jauin, B. Desrochers**  | *Introduction to the Algebra of | Engineering Applications| 2014 | |Jaulin14-pdf|_     |
-|[Jaulin & Desrochers|                              | Separators with Application to  | of Artificial           |      |                     |
-|2014]               |                              | Path Planning*                  | Intelligence            |      |                     |
+|                    |                              | Separators with Application to  | of Artificial           |      |                     |
+| [Jaulin &          |                              | Path Planning*                  | Intelligence            |      |                     |
+| Desrochers 2014]   |                              |                                 |                         |      |                     |
 +--------------------+------------------------------+---------------------------------+-------------------------+------+---------------------+
 |                    |                              |                                 |                         |      |                     |
 | .. _Araya14:       | **I. Araya, G. Trombettoni,  | *Upper Bounding in Inner        | Journal of Global       | 2014 | |Araya14-pdf|_      |

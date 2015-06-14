@@ -101,6 +101,7 @@ The output is:
    :start-after: itv-constants-O
    :end-before: itv-constants-O
 
+.. _itv-vector-boxes:
 
 ----------------------------
 Vectors or Boxes

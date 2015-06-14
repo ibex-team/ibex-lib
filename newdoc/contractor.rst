@@ -694,7 +694,7 @@ The output is:
    :start-after: ctc-exist-2-O
    :end-before:  ctc-exist-2-O
 
-**Warning:** As we have explained, both ``CtcExist`` and ``CtcForAll`` deploy internally a search tree on the variables y until some precision 
+**Warning**: As we have explained, both ``CtcExist`` and ``CtcForAll`` deploy internally a search tree on the variables y until some precision 
 :math:`\varepsilon` is reached (the precision is uniform so far).
 The complexity of ``CtcExist`` and ``CtcForAll`` are therefore exponential in the number :math:`n_y` of variables y
 and with potentially a ``big constant''. Roughly, the complexity is in :math:`O\Bigl(\Bigl[\frac{max_i \ rad(y_i)}{\varepsilon}\Bigr]^{n_y}\Bigr)`. A good way to alleviate this high complexity is to use an :ref:`adaptative precision <ctc-quantif-adapt>`. 
