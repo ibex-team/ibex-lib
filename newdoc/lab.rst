@@ -669,10 +669,11 @@ and which ones will be treated as quantified parameters.
 **Question 3**
 
 Create the inner and outer contractor for the "robust" parameter estimation problem.
+Set the splitting precision :math:`\varepsilon` of the parameter to ``tdelta``/5.
 
-*Hints*: follow the same idea as in the contractor variant of set inversion (see :ref:`lab n°3 <lab_set_inversion_sets>`).
-
-**(to be completed soon)**
+*Hints: follow the same idea as in the contractor variant of set inversion* (see :ref:`lab n°3 <lab_set_inversion_sets>`).
+*Also, we need here to deal with n inner/outer contractors. To perform the composition/union of several
+contractors, see* :ref:`here <ctc-compo>`. 
 
 .. hidden-code-block:: cpp
    :label: show/hide solution
@@ -686,19 +687,19 @@ Create the inner and outer contractor for the "robust" parameter estimation prob
      c_in.set_ref(i,*new CtcExist(*new CtcNotIn(f,y[i]),vars,ti,tdelta/5));
    }
 
-**Question 4**
-
-**(to be completed soon)**
-
-.. hidden-code-block:: cpp
-   :label: show/hide solution
-   
    CtcCompo c_out(_c_out);
    CtcUnion c_in(_c_in);
 
-**Question 5**
+**Question 4**
 
-**(to be completed soon)**
+- Create a :ref:`separator from the two contractors <sep-ctc-pair>`;
+- Create a :ref:`set from the box <set-creation>` [0,1]x[0,1];
+- :ref:`Contract the set <set-contract>` with the separator.
+
+The pictures below show the results obtained for increasing values of ``deltat``
+(0,0.1,0.2 and 0.3).
+As expected, the larger the error on input, the smaller the set of feasible
+parameters.
 
 +-------------------------------+-------------------------------+-------------------------------+-------------------------------+
 | .. figure:: param-estim-1.png | .. figure:: param-estim-2.png | .. figure:: param-estim-3.png | .. figure:: param-estim-4.png |
@@ -708,17 +709,22 @@ Create the inner and outer contractor for the "robust" parameter estimation prob
 | deltat=0                      | deltat=0.1                    | deltat=0.2                    | deltat=0.3                    |
 +-------------------------------+-------------------------------+-------------------------------+-------------------------------+
    
+
 .. hidden-code-block:: cpp
    :label: show/hide solution
-   
+
    SepCtcPair sep(c_in,c_out);
+   
    Set set(IntervalVector(2,Interval(0,1)));
+   
    sep.contract(set,eps);
    
 ==========================================
 Stability
 ==========================================
  
+The complete code can be found here: ``examples/lab/lab7.cpp``.
+
 **Introduction**
 
 The goal of this lab is to cast a classical problem in control theory into a set inversion problem.
@@ -737,4 +743,29 @@ Our goal is to find the set of couples (a,b) that makes the origin y=0 stable. I
    :align: center
    
 *Hint: apply the Routh-Hurwitz criterion to the caracteristic polynomial of the system.*
+   
+   
+.. hidden-code-block:: cpp
+   :label: show/hide solution
+
+   double eps=0.001;
+
+   Variable p,q;
+
+   // The following function returns the first column
+   // of the Routh table
+   Function f(p,q,Return(p*q-(1-q),(p*q-(1-q))*(1-q)-pow(p,3)));
+
+   // We require these coefficients to be all positive,
+   // i.e., the image of f to be in [0,+oo)x[0,+oo)
+   SepFwdBwd sep(f,IntervalVector(2,Interval::POS_REALS));
+
+   // Build the initial box
+   IntervalVector box(2);
+   box[0]=Interval(0,2);
+   box[1]=Interval(0,2);
+
+   Set set(box);
+
+   sep.contract(set,eps);
    

@@ -93,6 +93,8 @@ Finally, to plot a box ([a,b],[c,d]) just call:
 
 What is between the double quotes is the color code of the box. For instance, "b[r]" will paint the box in red and the contour in blue.
 
+.. _set-creation:
+
 ----------------
 Set Creation
 ----------------

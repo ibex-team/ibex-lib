@@ -10,6 +10,7 @@
 
 
 #include "ibex.h"
+#include "vibes.cpp"
 #include <fstream>
 
 using namespace std;
@@ -18,6 +19,45 @@ using namespace ibex;
 /**
  * This file contains examples of the documentation.
  */
+
+class ToVibes : public SetVisitor {
+
+public:
+
+  /**
+   * Plot a  box within the frame [-max,max]x[-max,max]
+   *
+   * The frame avoids, in particular, to plot unbounded OUT boxes.
+   */
+  ToVibes(double max) : frame(2,max*Interval(-1,1)) {  }
+
+  /**
+   * Function that will be called automatically on every boxes (leaves) of the set.
+   */
+  void visit_leaf(const IntervalVector& box, BoolInterval status) {
+
+    // Intersect the box with the frame
+    IntervalVector framebox=box & frame;
+
+    //  Associate a color to the box.
+    //  - YES (means "inside") is in green
+    //  - NO (means "outside") is in red
+    //  - MAYBE (means "boundary") is in blue.
+    const char* color;
+
+    switch (status) {
+    case YES:  color="g"; break;
+    case NO:   color="r"; break;
+    case MAYBE : color="b"; break;
+    }
+
+    // Plot the box with Vibes
+    vibes::drawBox(framebox[0].lb(), framebox[0].ub(), framebox[1].lb(), framebox[1].ub(), color);
+  }
+
+   IntervalVector frame;
+};
+
 
 //! [ctc-polytope-2-C]
 /**
@@ -152,6 +192,66 @@ int main() {
 	output.open ("doc-contractor.txt");
 
 	output << "================= this file is generated ==============" << endl;
+
+
+	{
+	vibes::beginDrawing ();
+	vibes::newFigure("ctc-compo");
+
+	//! [ctc-compo-1-C]
+
+	// Create the function corresponding to an
+	// hyperplane of angle alpha
+	Variable x,y,alpha;
+	Function f(x,y,alpha,cos(alpha)*x+sin(alpha)*y);
+
+	// Size of the polygon
+	int n=7;
+
+	// Array to store constraints (for cleanup)
+	Array<NumConstraint> ctrs(2*n);
+
+	// Arrays to store contractors
+	Array<Ctc> ctc_out(n), ctc_in(n);
+
+	for (int i=0; i<n; i++) {
+		// create the constraints of the two half-spaces
+		// delimited by f(x,y,i*2pi/n)=0
+		// and store them in the array
+		ctrs.set_ref(2*i,  *new NumConstraint(x,y,f(x,y,i*2*Interval::PI/n)<=1));
+		ctrs.set_ref(2*i+1,*new NumConstraint(x,y,f(x,y,i*2*Interval::PI/n)>1));
+
+		// create the contractors for these constraints
+		// and place them in the arrays
+		ctc_out.set_ref(i,*new CtcFwdBwd(ctrs[2*i]));
+		ctc_in.set_ref(i, *new CtcFwdBwd(ctrs[2*i+1]));
+	}
+
+	// Composition of the "outer" contractors
+	CtcCompo ctc_polygon_out(ctc_out);
+	// Union of the "inner" contractors
+	CtcUnion ctc_polygon_in(ctc_in);
+	//! [ctc-compo-1-C]
+
+	SepCtcPair sep(ctc_polygon_in,ctc_polygon_out);
+	Set set(2);
+	sep.contract(set,0.01);
+	ToVibes to_vibes(2);
+	set.visit(to_vibes);
+	vibes::endDrawing();
+
+	//! [ctc-compo-2-C]
+	// ************ cleanup ***************
+	for (int i=0; i<n; i++) {
+		delete &ctc_in[i];
+		delete &ctc_out[i];
+	}
+	for (int i=0; i<2*n; i++) {
+		delete &ctrs[i];
+	}
+	//! [ctc-compo-2-C]
+
+	}
 
 	{
 	output << "! [ctc-propag-O]" << endl;

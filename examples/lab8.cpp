@@ -1,6 +1,6 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : lab4.cpp
+// File        : lab8.cpp
 // Author      : Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
@@ -57,26 +57,33 @@ int main() {
 
 	double eps=0.001;
 
-	Variable p,q;
-
-	// The following function returns the first column
-	// of the Routh table
-	Function f(p,q,Return(p*q-(1-q),(p*q-(1-q))*(1-q)-pow(p,3)));
-
-	// We require these coefficients to be all positive,
-	// i.e., the image of f to be in [0,+oo)
-	SepFwdBwd sep(f,IntervalVector(2,Interval::POS_REALS));
+	// Create the function corresponding to an
+	// hyperplane of angle alpha
+	Variable x,y,alpha;
+	Function f(x,y,alpha,sqr(x-cos(alpha))+sqr(y-sin(alpha)));
 
 	// Build the initial box
 	IntervalVector box(2);
-	box[0]=Interval(0,2);
-	box[1]=Interval(0,2);
+	box[0]=Interval(-2,2);
+	box[1]=Interval(-2,2);
 
-	Set set(box);
+	Set set(box,MAYBE);
 
+	int n=8;
+
+	NumConstraint ctr(x,y,sqr(x)+sqr(y)<=4);
+	SepFwdBwd sep(ctr);
+	sep.status1=MAYBE;
 	sep.contract(set,eps);
 
-	ToVibes to_vibes;
+	for (int i=0; i<n; i++) {
+		NumConstraint ctr(x,y,f(x,y,i*2*Interval::PI/n)<=0.04);
+		SepFwdBwd sep(ctr);
+		sep.status2=MAYBE;
+		sep.contract(set,eps);
+	}
+
+	ToVibes to_vibes(2);
 	set.visit(to_vibes);
 
 	vibes::endDrawing();

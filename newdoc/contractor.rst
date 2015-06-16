@@ -120,7 +120,7 @@ We present in this chapter the basic or "numerical" contractors (built from a co
 Forward-Backward
 ------------------------------
 
-Forward-backward (also known as HC4Revise) is a classical algorithm in constraint programming for 
+Forward-	backward (also known as HC4Revise) is a classical algorithm in constraint programming for 
 contracting quickly with respect to an equality or inequality. See, e.g.,
 :ref:`[Benhamou & Granvilliers 2006] <Benhamou06>`, :ref:`[Benhamou et al. 1999] <Benhamou99>`,
 :ref:`[Collavizza 1998] <Collavizza98>`. However, the more occurrences of variables in the expression
@@ -152,6 +152,8 @@ This contractor can either be built with a :ref:`NumConstraint <mod-sys-ctrs>` o
 
 See **examples in the** :ref:`tutorial <tuto-fwd-bwd>`.
 
+.. _ctc-compo:
+
 ------------------------------
 Intersection, Union, etc.
 ------------------------------
@@ -170,7 +172,30 @@ Basic operators on contractors are :
 |CtcFixpoint | 1     |:math:`[x]\mapsto C^\infty([x])`                          |
 +------------+-------+----------------------------------------------------------+
 
-Examples are given in the tutorial.
+Basic examples are given in the :ref:`tutorial <tuto-inter-union-compo>`.
+
+To create a union or a composition of an arbitrary number of contractors, you
+need first to store all the contractors references into an ``Array``.
+This is illustrated in the next example where we create a contractor for the intersection
+of n half-spaces (delimiting a polygon) and its complementary (see the picture below where the
+two contractors are used to build a :ref:`set <set>`).
+
+.. literalinclude:: ../examples/doc-contractor.cpp
+   :language: cpp
+   :start-after: ctc-compo-1-C
+   :end-before:  ctc-compo-1-C
+
+.. figure:: ctc-compo.png
+   :width: 400 px
+   :align: center
+   
+**Note**: in this example, we have created constraints and contractors dynamically. We have to delete
+all these pointers after usage:
+
+.. literalinclude:: ../examples/doc-contractor.cpp
+   :language: cpp
+   :start-after: ctc-compo-2-C
+   :end-before:  ctc-compo-2-C
 
 .. _ctc-propag:
 

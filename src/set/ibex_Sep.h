@@ -55,6 +55,9 @@ namespace ibex {
 class Sep {
 
 public:
+
+	Sep();
+
 	/**
      * \brief Separate a box in two sub-boxes.
      *
@@ -95,12 +98,25 @@ public:
 	 * \param eps - The separator is applied recursively on the i-set. This parameter
 	 *              is a precision for controlling the recursivity.
 	 */
-	void contract(SetInterval& iset, double eps);
+	void contract(SetInterval& iset, double eps, BoolInterval status1=YES, BoolInterval status2=NO);
 
 	/**
 	 * \brief Delete *this.
 	 */
     virtual ~Sep();
+
+    // Get current status of the 1st contraction
+    // (Used by SetBisect & SetLeaf)
+    BoolInterval status1() const;
+
+    // Get current status of the 2nd contraction
+    // (Used by SetBisect & SetLeaf)
+    BoolInterval status2() const;
+
+private:
+
+    BoolInterval _status1;
+    BoolInterval _status2;
 };
 
 /* ============================================================================
@@ -109,6 +125,9 @@ public:
 
 inline Sep::~Sep() { }
 
+inline BoolInterval Sep::status1() const { return _status1; }
+
+inline BoolInterval Sep::status2() const { return _status2; }
 
 } // namespace ibex
 
