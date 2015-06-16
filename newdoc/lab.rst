@@ -780,13 +780,12 @@ The complete code can be found here: ``examples/lab/lab8.cpp``.
 A robot is moving in a rectangular area [-L,L]x[-L,L] (with L=2) and tries to build a map
 while avoiding obstacles. The map is precisely the shape of obstacles inside the area.
 
-The robot knows its position (named ``x_rob`` and ``y_rob`` in the code)
-and moves randomly. Each time its distance to an obstacle
-get smaller than 0.9, it receives an alert and moves in another direction.
-The alert also contain the position of the detected obstacle point
-(named ``x_obs`` and ``y_obs`` in the code). The sensitivity of the sensor
-gives also another information: all the points that are less distanted than 0.1 
-from the detected point also belong to the obstacle.
+The only information we have is when its euclidian distance to an obstacle
+get smaller than 0.9. It receives an alert, a vector of measurements which contain 
+its own position (named ``x_rob`` and ``y_rob`` in the code)
+and the position of the detected obstacle point
+(named ``x_obs`` and ``y_obs`` in the code). We also know that 
+all the points that are less distant than 0.1 from the detected point belong to the obstacle.
 
 The robot has a series of n=10 measurements. The goal is to build an approximation
 of the map using :ref:`set intervals <set-interval>`.
@@ -816,7 +815,7 @@ You can first copy-paste the data:
    IntervalVector box(2,Interval(-L,L));
 
    // Create the initial i-set [emptyset,[box]]
-   SetInterval set(box,MAYBE);
+   SetInterval set(box);
 
    for (int i=0; i<n; i++) {
       NumConstraint ctr1(x,y,sqr(x-x_rob[i])+sqr(y-y_rob[i])>=0.81);

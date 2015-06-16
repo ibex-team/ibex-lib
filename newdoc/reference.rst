@@ -12,8 +12,8 @@ Articles in Journal and Conferences
 .. _Jaulin14-pdf: https://www.ensta-bretagne.fr/jaulin/paper_seppath.pdf
 .. |Araya14-pdf| replace:: PDF
 .. _Araya14-pdf: http://www.lirmm.fr/~trombetton/publis/innerregions_jogo_2014.pdf
-.. |Jaulin13-pdf| replace:: PDF
-.. _Jaulin13-pdf: https://www.ensta-bretagne.fr/jaulin/paper_seppath.pdf
+.. |Jaulin12-pdf| replace:: PDF
+.. _Jaulin12-pdf: https://www.ensta-bretagne.fr/jaulin/paper_computing2011.pdf
 .. |Araya12-pdf| replace:: PDF
 .. _Araya12-pdf: http://www.lirmm.fr/~trombetton/publis/xnewton_cpaior_2012.pdf
 .. |Trombettoni11-pdf| replace:: PDF
@@ -51,9 +51,9 @@ Articles in Journal and Conferences
 |                    |                              |                                 |                         |      |                     |
 +--------------------+------------------------------+---------------------------------+-------------------------+------+---------------------+
 |                    |                              |                                 |                         |      |                     |
-| .. _Jaulin13:      | **L. Jaulin**                | *Solving set-valued constraint  | Computing               | 2013 | |Jaulin13-pdf|_     |
+| .. _Jaulin12:      | **L. Jaulin**                | *Solving set-valued constraint  | Computing               | 2012 | |Jaulin12-pdf|_     |
 |                    |                              | satisfaction problem*           |                         |      |                     |
-| [Jaulin 2013]      |                              |                                 |                         |      |                     |
+| [Jaulin 2012]      |                              |                                 |                         |      |                     |
 +--------------------+------------------------------+---------------------------------+-------------------------+------+---------------------+
 |                    |                              |                                 |                         |      |                     |
 | .. _Araya12:       | **I. Araya, G. Trombettoni,  | *A Contractor Based on Convex   | CPAIOR                  | 2012 | |Araya12-pdf|_      |

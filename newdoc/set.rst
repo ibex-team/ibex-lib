@@ -291,7 +291,7 @@ We now create a set for one of the constraint and then contracts this set with t
 Set Intervals
 -----------------
 
-A set interval [S] (or i-set) :ref:`[Jaulin 2013] <Jaulin13>` is the given of two sets :math:`(S_1,S_2)` 
+A set interval [S] (or i-set) :ref:`[Jaulin 2012] <Jaulin12>` is the given of two sets :math:`(S_1,S_2)` 
 that represent a lower and upper bound (with respect to the inclusion order)
 of an unkown set S:
 
@@ -299,33 +299,35 @@ of an unkown set S:
 
    S_1 \subseteq S \subseteq S_2.
 
-A notation (we use in the code below) for the set interval [S] is: :math:`[S_1,S_2]`.
+A possible notation (that we use in the code below) for the set interval [S] is: :math:`[S_1,S_2]`.
   
 A set interval can be explicitly represented by an instance of the ``SetInterval`` class.
 It can also be implicitly represented by a separator. Let us explain how.
 A separator S have been used so far to represent a "simple" set (not a set interval)
-by two complementary contractions C1 and C2, C1 being for the inner part and C2 for the outer part.
+by two complementary contractions :math:`C_1` and :math:`C_1`, being respectively for the inner and outer part.
 This means that the set associated to the separator can be seen as the following
 degenerated set interval:
 
 .. math::
 
-   set(S) = [set(C_1),.~^c{\set(C_2)}].
+   set(S) = [set(C_1),~^c{set(C_2)}].
+
+where set(C) designates the set associated to C (the insensitive points).
 
 Now, it is possible to change the status of either the inner or outer contraction to
 the special value ``MAYBE``. This means that the contracted part is not inside or
 outside the set but potentially inside either one. If we change this way the
-status of C1, the separator is now associated to the set interval:
+status of :math:`C_1`, the separator is now associated to the set interval:
 
 .. math::
 
-   set(S) = [\emptyset,~^c{\set(C_2)}].
+   set(S) = [\emptyset,~^c{set(C_2)}].
    
-If we change the status of C2, we obtain:
+If we change the status of :math:`C_2`, we obtain:
 
 .. math::
 
-   set(S) = [set(C1),\mathbb{R}^n].
+   set(S) = [set(C_1),\mathbb{R}^n].
 
 The next example illustrates the use of separators to contract a set interval with the
 following information:
