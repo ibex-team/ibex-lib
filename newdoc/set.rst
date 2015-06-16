@@ -291,7 +291,7 @@ We now create a set for one of the constraint and then contracts this set with t
 Set Intervals
 -----------------
 
-A set interval (or i-set) :ref:`[Jaulin 2013] <Jaulin13>` is the given of two sets :math:`(S_1,S_2)` 
+A set interval [S] (or i-set) :ref:`[Jaulin 2013] <Jaulin13>` is the given of two sets :math:`(S_1,S_2)` 
 that represent a lower and upper bound (with respect to the inclusion order)
 of an unkown set S:
 
@@ -299,7 +299,7 @@ of an unkown set S:
 
    S_1 \subseteq S \subseteq S_2.
 
-If S_1 and S_2 are two boxes [x1] and [x2], we shall write [[x1],[x2]].
+A notation (we use in the code below) for the set interval [S] is: :math:`[S_1,S_2]`.
   
 A set interval can be explicitly represented by an instance of the ``SetInterval`` class.
 It can also be implicitly represented by a separator. Let us explain how.
@@ -310,7 +310,7 @@ degenerated set interval:
 
 .. math::
 
-   set(S) = [set(C1),.\compl{\set(C2)}].
+   set(S) = [set(C_1),.~^c{\set(C_2)}].
 
 Now, it is possible to change the status of either the inner or outer contraction to
 the special value ``MAYBE``. This means that the contracted part is not inside or
@@ -319,7 +319,7 @@ status of C1, the separator is now associated to the set interval:
 
 .. math::
 
-   set(S) = [\emptyset,.\compl{\set(C2)}].
+   set(S) = [\emptyset,~^c{\set(C_2)}].
    
 If we change the status of C2, we obtain:
 

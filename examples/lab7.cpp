@@ -22,7 +22,7 @@ public:
    *
    * The frame avoids, in particular, to plot unbounded OUT boxes.
    */
-  ToVibes(double max) : frame(2,max*Interval(-1,1)) {  }
+  ToVibes(double max) : frame(2,max*Interval(0,1)) {  }
 
   /**
    * Function that will be called automatically on every boxes (leaves) of the set.
@@ -76,7 +76,7 @@ int main() {
 
 	sep.contract(set,eps);
 
-	ToVibes to_vibes;
+	ToVibes to_vibes(1);
 	set.visit(to_vibes);
 
 	vibes::endDrawing();

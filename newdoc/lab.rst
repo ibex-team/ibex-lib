@@ -776,3 +776,54 @@ Unstructured Mapping
 The complete code can be found here: ``examples/lab/lab8.cpp``.
 
 **Introduction**
+
+A robot is moving in a rectangular area [-L,L]x[-L,L] (with L=2) and tries to build a map
+while avoiding obstacles. The map is precisely the shape of obstacles inside the area.
+
+The robot knows its position (named ``x_rob`` and ``y_rob`` in the code)
+and moves randomly. Each time its distance to an obstacle
+get smaller than 0.9, it receives an alert and moves in another direction.
+The alert also contain the position of the detected obstacle point
+(named ``x_obs`` and ``y_obs`` in the code). The sensitivity of the sensor
+gives also another information: all the points that are less distanted than 0.1 
+from the detected point also belong to the obstacle.
+
+The robot has a series of n=10 measurements. The goal is to build an approximation
+of the map using :ref:`set intervals <set-interval>`.
+
+You can first copy-paste the data:
+
+.. literalinclude:: ../examples/lab8.cpp
+   :language: cpp
+   :start-after: lab8-data
+   :end-before:  lab8-data
+
+.. figure:: mapping.png
+   :width: 300 px
+   :align: center
+   
+.. hidden-code-block:: cpp
+   :label: show/hide solution
+
+   double eps=0.01;
+   double L=2;
+
+   // Distance function
+   Variable x,y;
+   Function dist(x,y,sqr(x)+sqr(y));
+
+   // Build the initial box
+   IntervalVector box(2,Interval(-L,L));
+
+   // Create the initial i-set [emptyset,[box]]
+   SetInterval set(box,MAYBE);
+
+   for (int i=0; i<n; i++) {
+      NumConstraint ctr1(x,y,sqr(x-x_rob[i])+sqr(y-y_rob[i])>=0.81);
+      SepFwdBwd sep1(ctr1);
+      sep1.contract(set,eps,MAYBE,NO);
+
+      NumConstraint ctr2(x,y,sqr(x-x_obs[i])+sqr(y-y_obs[i])<=0.01);
+      SepFwdBwd sep2(ctr2);
+      sep2.contract(set,eps,YES,MAYBE);
+   }
