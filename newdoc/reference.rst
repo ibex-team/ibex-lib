@@ -12,6 +12,8 @@ Articles in Journal and Conferences
 .. _Jaulin14-pdf: https://www.ensta-bretagne.fr/jaulin/paper_seppath.pdf
 .. |Araya14-pdf| replace:: PDF
 .. _Araya14-pdf: http://www.lirmm.fr/~trombetton/publis/innerregions_jogo_2014.pdf
+.. |Jaulin13-pdf| replace:: PDF
+.. _Jaulin13-pdf: https://www.ensta-bretagne.fr/jaulin/paper_seppath.pdf
 .. |Araya12-pdf| replace:: PDF
 .. _Araya12-pdf: http://www.lirmm.fr/~trombetton/publis/xnewton_cpaior_2012.pdf
 .. |Trombettoni11-pdf| replace:: PDF
@@ -28,8 +30,8 @@ Articles in Journal and Conferences
 .. _Trombettoni07-pdf: http://www.lirmm.fr/~trombetton/publis/cid_cp_2007.pdf
 .. |Bessiere04-pdf| replace:: PDF
 .. _Bessiere04-pdf: http://www.emn.fr/z-info/rdebruyn/ecai04ws.pdf
-.. |Jaulin13-pdf| replace:: PDF
-.. _Jaulin13-pdf: https://www.ensta-bretagne.fr/jaulin/paper_automatica93.pdf
+.. |Jaulin93-pdf| replace:: PDF
+.. _Jaulin93-pdf: https://www.ensta-bretagne.fr/jaulin/paper_automatica93.pdf
 
 **This page is under construction**
 
@@ -37,7 +39,7 @@ Articles in Journal and Conferences
 |                    | Author(s)                    | Title                           | Journal/Conference      | Year | Link                |
 +====================+==============================+=================================+=========================+======+=====================+
 |                    |                              |                                 |                         |      |                     |
-| .. _Jaulin14:      | **L. Jauin, B. Desrochers**  | *Introduction to the Algebra of | Engineering Applications| 2014 | |Jaulin14-pdf|_     |
+| .. _Jaulin14:      | **L. Jaulin, B. Desrochers** | *Introduction to the Algebra of | Engineering Applications| 2014 | |Jaulin14-pdf|_     |
 |                    |                              | Separators with Application to  | of Artificial           |      |                     |
 | [Jaulin &          |                              | Path Planning*                  | Intelligence            |      |                     |
 | Desrochers 2014]   |                              |                                 |                         |      |                     |
@@ -46,6 +48,12 @@ Articles in Journal and Conferences
 | .. _Araya14:       | **I. Araya, G. Trombettoni,  | *Upper Bounding in Inner        | Journal of Global       | 2014 | |Araya14-pdf|_      |
 |                    | B. Neveu and G. Chabert**    | Regions for Global Optimization | Optimization            |      |                     |
 |[Araya et al. 2014] |                              | under Inequality Constraints*   |                         |      |                     |
+|                    |                              |                                 |                         |      |                     |
++--------------------+------------------------------+---------------------------------+-------------------------+------+---------------------+
+|                    |                              |                                 |                         |      |                     |
+| .. _Jaulin13:      | **L. Jaulin**                | *Solving set-valued constraint  | Computing               | 2013 | |Jaulin13-pdf|_     |
+|                    |                              | satisfaction problem*           |                         |      |                     |
+| [Jaulin 2013]      |                              |                                 |                         |      |                     |
 +--------------------+------------------------------+---------------------------------+-------------------------+------+---------------------+
 |                    |                              |                                 |                         |      |                     |
 | .. _Araya12:       | **I. Araya, G. Trombettoni,  | *A Contractor Based on Convex   | CPAIOR                  | 2012 | |Araya12-pdf|_      |
@@ -123,7 +131,7 @@ Articles in Journal and Conferences
 | [Lhomme 1993]      |                              |                                 |                         |      |                     |
 +--------------------+------------------------------+---------------------------------+-------------------------+------+---------------------+
 |                    |                              |                                 |                         |      |                     |
-| .. _Jaulin93:      | **L. Jaulin and E. Walter**  | *Set inversion via interval     | Automatica              | 1993 | |Jaulin13-pdf|_     |
+| .. _Jaulin93:      | **L. Jaulin and E. Walter**  | *Set inversion via interval     | Automatica              | 1993 | |Jaulin93-pdf|_     |
 |                    |                              | analysis for nonlinear          |                         |      |                     |
 | [Jaulin & Walter,  |                              | bounded-error estimation*       |                         |      |                     |
 | 1993]              |                              |                                 |                         |      |                     |

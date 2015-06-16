@@ -52,40 +52,41 @@ public:
 };
 
 int main() {
+
 	vibes::beginDrawing ();
-	vibes::newFigure("lab5");
+	vibes::newFigure("lab8");
 
 	double eps=0.001;
+	int n=10;
+	double L=2;
 
-	// Create the function corresponding to an
-	// hyperplane of angle alpha
-	Variable x,y,alpha;
-	Function f(x,y,alpha,sqr(x-cos(alpha))+sqr(y-sin(alpha)));
+	Variable x,y;
+	Function dist(x,y,sqr(x)+sqr(y));
 
 	// Build the initial box
 	IntervalVector box(2);
-	box[0]=Interval(-2,2);
-	box[1]=Interval(-2,2);
+	box[0]=Interval(-L,L);
+	box[1]=Interval(-L,L);
 
-	Set set(box,MAYBE);
+	// Create the initial i-set [emptyset,[box]]
+	SetInterval set(box,MAYBE);
 
-	int n=8;
-
-	NumConstraint ctr(x,y,sqr(x)+sqr(y)<=4);
-	SepFwdBwd sep(ctr);
-	sep.status1=MAYBE;
-	sep.contract(set,eps);
-
+	double pi=Interval::PI.lb();
 	for (int i=0; i<n; i++) {
-		NumConstraint ctr(x,y,f(x,y,i*2*Interval::PI/n)<=0.04);
-		SepFwdBwd sep(ctr);
-		sep.status2=MAYBE;
-		sep.contract(set,eps);
+		double x0=cos(i*2*pi/n);
+		double y0=sin(i*2*pi/n);
+		NumConstraint ctr1(x,y,sqr(x-2*x0)+sqr(y-2*y0)>=0.9);
+		SepFwdBwd sep1(ctr1);
+		sep1.contract(set,eps,MAYBE,NO);
+
+		NumConstraint ctr2(x,y,sqr(x-0.9*x0)+sqr(y-0.9*y0)<=0.01);
+		SepFwdBwd sep2(ctr2);
+		sep2.contract(set,eps,YES,MAYBE);
+		//cout << x << " " << y << endl;
 	}
 
-	ToVibes to_vibes(2);
+	ToVibes to_vibes(3);
 	set.visit(to_vibes);
 
 	vibes::endDrawing();
-
 }

@@ -1,6 +1,6 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : lab4.cpp
+// File        : lab7.cpp
 // Author      : Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
@@ -64,7 +64,7 @@ int main() {
 	Function f(p,q,Return(p*q-(1-q),(p*q-(1-q))*(1-q)-pow(p,3)));
 
 	// We require these coefficients to be all positive,
-	// i.e., the image of f to be in [0,+oo)
+	// i.e., the image of f to be in [0,+oo)x[0,+oo)
 	SepFwdBwd sep(f,IntervalVector(2,Interval::POS_REALS));
 
 	// Build the initial box

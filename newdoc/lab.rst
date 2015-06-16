@@ -769,3 +769,10 @@ Our goal is to find the set of couples (a,b) that makes the origin y=0 stable. I
 
    sep.contract(set,eps);
    
+==========================================
+Unstructured Mapping
+==========================================
+
+The complete code can be found here: ``examples/lab/lab8.cpp``.
+
+**Introduction**
