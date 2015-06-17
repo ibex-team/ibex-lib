@@ -559,7 +559,7 @@ inline Affine2MainVector<T> operator-(const Affine2MainVector<T>& x) {
 
 
 template<class T>
-Affine2MainVector<T>& Affine2MainVector<T>::operator+=(const Vector& x2) {
+inline Affine2MainVector<T>& Affine2MainVector<T>::operator+=(const Vector& x2) {
 	return set_addV<Affine2MainVector<T>,Vector>(*this,x2);
 }
 
@@ -630,7 +630,7 @@ inline Affine2MainVector<T> operator+(const Affine2MainVector<T>& x1, const Inte
 }
 
 template<class T>
-Affine2MainVector<T> operator+(const Affine2MainVector<T>& x1, const Affine2MainVector<T>& x2) {
+inline Affine2MainVector<T> operator+(const Affine2MainVector<T>& x1, const Affine2MainVector<T>& x2) {
 	return Affine2MainVector<T>(x1)+=x2;
 }
 

@@ -21,18 +21,20 @@ namespace ibex {
 
 void Optimizer::monotonicity_analysis(IntervalVector& box, bool inner_found) {
 
-	if (!inner_found && sys.f.nb_used_vars()==n)
+	if (!inner_found && sys.f.nb_used_vars()==n) {
 		// if there is no inner box and all the variables appear
 		// in the constraints, nothing can be done
 		return;
+	}
 
 	IntervalVector g(n);
 	sys.goal->gradient(box,g);
 	for (int j=0; j<n; j++) {
-		//TODO: if box is unbounded, we have a problem here.
+		//if box is unbounded, we have a problem here. DONE by JN
 		if (inner_found || !sys.f.used(j)) {
-			if (g[j].lb()>=0) box[j]=box[j].lb();
-			if (g[j].ub()<=0) box[j]=box[j].ub();
+			if ((g[j].lb()>=0)&&(box[j].lb()!=NEG_INFINITY)) box[j]=box[j].lb();
+			if ((g[j].ub()<=0)&&(box[j].ub()!=POS_INFINITY)) box[j]=box[j].ub();
+
 		}
 	}
 }
@@ -83,30 +85,6 @@ bool Optimizer::check_candidate_extended(const Vector& pt_ext, bool _is_inner) {
 	return check_candidate(pt, _is_inner);
 }
 
-/* last update: GCH  */
-bool Optimizer::check_candidate(const Vector& pt, bool _is_inner) {
-
-	// "res" will contain an upper bound of the criterion
-	double res = goal(pt);
-
-	// check if f(x) is below the "loup" (the current upper bound).
-	//
-	// The "loup" and the corresponding "loup_point" (the current minimizer)
-	// will be updated if the constraints are satisfied.
-	// The test of the constraints is done only when the evaluation of the criterion
-	// is better than the loup (a cheaper test).
-
-	//        cout << " res " <<  res << " loup " <<  pseudo_loup <<  " is_inner " << _is_inner << endl;
-	if (res<loup) {
-		if (_is_inner || is_inner(pt)) {
-			pseudo_loup = res;
-			loup_point = pt;
-			return true;
-		}
-	}
-
-	return false;
-}
 
 bool Optimizer::random_probing (const IntervalVector& box, const IntervalVector & fullbox, bool is_inner) {
 	Vector pt(n);

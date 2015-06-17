@@ -11,6 +11,7 @@
 #ifndef __IBEX_OPTIMIZER_H__
 #define __IBEX_OPTIMIZER_H__
 
+#include "ibex_MainOpti.h"
 #include "ibex_Bsc.h"
 #include "ibex_CtcHC4.h"
 #include "ibex_Ctc3BCid.h"
@@ -40,7 +41,7 @@ namespace ibex {
  * \remark In all the comments of this class, "loup" means "lowest upper bound" of the criterion f
  * and "uplo" means "uppermost lower bound" of the criterion.
  */
-class Optimizer {
+class Optimizer : MainOpti {
 public:
 	/**
 	 *  \brief Create an optimizer.
@@ -71,17 +72,12 @@ public:
 	 */
 	Optimizer(System& sys, Ctc& ctc, Bsc& bsc, double prec=default_prec,
 			double goal_rel_prec=default_goal_rel_prec, double goal_abs_prec=default_goal_abs_prec,
-			  int sample_size=default_sample_size, double equ_eps=default_equ_eps, bool rigor=false, int critpr=50,CellCostFunc::criterion crit= CellCostFunc::UB);
+			int sample_size=default_sample_size, double equ_eps=default_equ_eps, bool rigor=false, int critpr=50,CellCostFunc::criterion crit= CellCostFunc::UB);
 
 	/**
 	 * \brief Delete *this.
 	 */
 	virtual ~Optimizer();
-
-	/**
-	 * \brief Return status of the optimizer
-	 */
-	typedef enum {SUCCESS, INFEASIBLE, NO_FEASIBLE_FOUND, UNBOUNDED_OBJ, TIME_OUT} Status;
 
 	/**
 	 * \brief Run the optimization.
@@ -107,41 +103,8 @@ public:
 	 *
 	 *         TIMEOUT             time is out.
 	 */
-	Status optimize(const IntervalVector& init_box, double obj_init_bound=POS_INFINITY);
+	Status_Opti optimize(const IntervalVector& init_box, double obj_init_bound=POS_INFINITY);
 
-	/**
-	 * \brief Displays on standard output a report of the last call to #optimize(const IntervalVector&).
-	 *
-	 * Information provided:
-	 * <ul><li> interval of the cost  [uplo,loup]
-	 *     <li> the best feasible point found
-	 *     <li>total running time
-	 *     <li>total number of cells created during the exploration
-	 * </ul>
-	 */
-	void report();
-
-	/**
-	 * \brief Displays on standard output a report of the last call to #optimize(const IntervalVector&).
-	 *
-	 * Information provided:
-	 * <ul><li> interval of the cost  [uplo,loup] in case of termination due to timelimit
-	 *     <li>total running time
-	 *     <li>total number of cells created during the exploration
-	 * </ul>
-	 */
-	
-	void time_cells_report();
-	
-	/**
-	 * \brief Displays on standard output a report of the last call to #optimize(const IntervalVector&).
-	 *
-	 * Information provided:
-	 * <ul><li> interval of the cost  [uplo,loup]
-	 *     <li>total running time
-	 * </ul>
-	 */
-	void report_perf();
 
 	/**
 	 * \brief The original system
@@ -157,9 +120,6 @@ public:
 	 * under the form g_i(x)<=0.
 	 */
 	NormalizedSystem sys;
-
-	/** Number of variables. */
-	const int n;
 
 	/** Number of constraints. */
 	const int m;
@@ -189,30 +149,6 @@ public:
 	 * (y=f(x), g_1(x)<=0,...,g_m(x)<=0). */
 	Ctc& ctc;
 
-	/** Bisector. */
-	Bsc& bsc;
-
-	/** Cell buffers.
-	Two buffers are used for node selection. the first one corresponds to minimize  the minimum of the objective estimate,
-	the second one to minimize another criterion (by default the maximum of the objective estimate).
-	The second one is chosen at each node with a probability critpr/100 (default value critpr=50)
-	 */
-	CellDoubleHeap buffer;
-
-	/**
-	 * \brief Index of the goal variable y in the extended box.
-	 *
-	 */
-
-	/** Precision (bisection control) */
-	const double prec;
-
-	/** Relative precision on the objective */
-	const double goal_rel_prec;
-
-	/** Absolute precision on the objective */
-	const double goal_abs_prec;
-
 	/** Number of samples used to update the loup */
 	const int sample_size;
 
@@ -225,89 +161,14 @@ public:
 	 * The value can be fixed by the user. By default: true. */
 	bool in_HC4_flag;
 
-	/** Trace activation flag.
-	 * The value can be fixed by the user. By default: 0  nothing is printed
-	 1 for printing each better found feasible point
-	  2 for printing each handled node */
-	int trace;
-
-	/**
-	 * \brief Time limit.
-	 *
-	 * Maximum CPU time used by the strategy.
-	 * This parameter allows to bound time consumption.
-	 * The value can be fixed by the user.
-	 */
-	double timeout;
-
-	/* Remember running time of the last exploration */
-	double time;
-
-	void time_limit_check();
-
-	/** Default bisection precision: 1e-07 */
-	static const double default_prec;
-
-	/** Default goal relative precision */
-	static const double default_goal_rel_prec;
-
-
-
-
-
-
-
-	/** Default goal absolute precision */
-	static const double default_goal_abs_prec;
-
 	/** Default sample size */
 	static const int default_sample_size;
 
 	/** Default epsilon applied to equations */
 	static const double default_equ_eps;
 
-	/** Default tolerance increase ratio for the pseudo-loup. */
-	static const double default_loup_tolerance;
-	/**
-	 * \brief The "loup" (lowest upper bound of the criterion)
-	 *
-	 * In rigor mode, represents the real-loup (not the pseudo-loup).
-	 */
-	double loup;
-
-	/**
-	 * \brief The pseudo-loup.
-	 *
-	 * Represents, in rigor mode only, the loup for the relaxed problem.
-	 */
-	double pseudo_loup;
-
-	/** The "uplo" (uppermost lower bound of the criterion) */
-	double uplo;
-
-	/** The point satisfying the constraints corresponding to the loup */
-	Vector loup_point;
-
-	/** Rigor mode: the box satisfying the constraints corresponding to the loup */
-	IntervalVector loup_box;
-	
-	/** Number of cells put into the heap (which passed through the contractors)  */
-	int nb_cells;
-
 protected:
-	/**
-	 * \brief Return an upper bound of f(x).
-	 *
-	 * Return +oo if x is outside the definition domain of f.
-	 */
-	inline double goal(const Vector& x) const {
-		Interval fx=sys.goal->eval(x);
-		if (fx.is_empty())  // means: outside of the definition domain of the function
-			return POS_INFINITY;
-		else
-			return fx.ub();
-		
-	}
+
 
 	/**
 	 * \brief Main procedure for processing a box.
@@ -351,16 +212,6 @@ protected:
 	 * \return false if unsatisfiability is detected, true otherwise.
 	 */
 	bool update_entailed_ctr(const IntervalVector& box);
-
-	/**
-	 * \brief Update the uplo of non bisectable boxes
-	 */
-	void update_uplo_of_epsboxes(double ymin);
-
-	/**
-	 * \brief Update the uplo
-	 */
-	void update_uplo();
 
 
 	/**
@@ -422,7 +273,6 @@ protected:
 	 *		 procedure used to check satisfiability
 	 * \return true in case of success, i.e., if the loup has been decreased.
 	 */
-	bool check_candidate(const Vector& pt, bool is_inner);
 	bool check_candidate_extended(const Vector& pt, bool is_inner);
 
 	/**
@@ -511,25 +361,9 @@ protected:
 	 */
 	Function df;
 
-	/**
-	 * \brief Computes and returns  the value ymax (the loup decreased with the precision)
-	 * the heap and the current box are actually contracted with y <= ymax
-	 *
-	 */
-	double compute_ymax ();
-
-	bool loup_changed;
-
-	/**
-	 * \brief The bound on the objective given by the user, +oo otherwise.
-	 *
-	 * Used to see if at least a loup-point has been found.
-	 *
-	 */
-	double initial_loup;
 
 	Ctc3BCid* objshaver;
-	
+
 private:
 
 	/** Rigor mode (eps_equ==0) */
@@ -541,9 +375,6 @@ private:
 
 	/** Inner contractor (for the negation of g) */
 	CtcUnion* is_inside;
-
-	/** Lower bound of the small boxes taken by the precision */
-	double uplo_of_epsboxes;
 
 	/** Currently entailed constraints */
 	EntailedCtr* entailed;
