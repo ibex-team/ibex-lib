@@ -41,7 +41,7 @@ namespace ibex {
  * \remark In all the comments of this class, "loup" means "lowest upper bound" of the criterion f
  * and "uplo" means "uppermost lower bound" of the criterion.
  */
-class Optimizer : MainOpti {
+class Optimizer : public MainOpti {
 public:
 	/**
 	 *  \brief Create an optimizer.

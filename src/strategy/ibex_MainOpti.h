@@ -40,25 +40,15 @@ public:
 	/**
 	 *  \brief Create an MainOpti.
 	 *
-	 *   \param sys   - the system to optimize
-	 *   \param bsc   - bisector for extended boxes
-	 *   \param ctc   - contractor for the <b>extended system</b> (see below)
+	 *	 \param f_cost - the objective function
+	 *   \param bsc    - bisector for extended boxes
+	 *   \param buffer - THe dynamic list to store elements
 	 *
 	 * And optionally:
 	 *   \param prec          - absolute precision for the boxes (bisection control)
 	 *   \param goal_rel_prec - relative precision of the objective (the MainOpti stops once reached).
 	 *   \pram  goal_abs_prec - absolute precision of the objective (the MainOpti stops once reached).
-	 *   \param sample_size   - number of samples taken when looking for a "loup"
-	 *   \param equ_eps       - thickness of equations when relaxed to inequalities
-	 *   \param rigor         - look for points that strictly satisfy equalities. By default: false
-	 *   \param critpr        - probability to choose the second criterion in node selection; integer in [0,100]. By default 50
-	 *   \param crit          - second criterion in node selection (the first criterion is the minimum of the objective estimate). default value CellHeapOPtim::UB
 	 *
-	 * <ul> The extended system (see ExtendedSystem constructor) contains:
-	 * <li> (n+1) variables, x_1,...x_n,y. The index of y is #goal_var (==n).
-	 * <li> A (m+1)-valued function f:(x,y)->(y-f(x),g_0(x),...,g_m(x))
-	 * <li> (m+1) constraints: y-f(x)=0, g_1(x)<=0, ..., g_m(x)<=0.
-	 * </ul>
 	 *
 	 * \warning The MainOpti relies on the contractor \a ctc to contract the domain of the goal variable and increase the uplo.
 	 * If this contractor never contracts this goal variable, the MainOpti will only rely on the evaluation of f  and will be very slow.
@@ -104,8 +94,8 @@ public:
 	 * Information provided:
 	 * <ul><li> interval of the cost  [uplo,loup]
 	 *     <li> the best feasible point found
-	 *     <li>total running time
-	 *     <li>total number of cells created during the exploration
+	 *     <li> total running time
+	 *     <li> total number of cells created during the exploration
 	 * </ul>
 	 */
 	void report() const;
@@ -115,11 +105,10 @@ public:
 	 *
 	 * Information provided:
 	 * <ul><li> interval of the cost  [uplo,loup] in case of termination due to timelimit
-	 *     <li>total running time
-	 *     <li>total number of cells created during the exploration
+	 *     <li> total running time
+	 *     <li> total number of cells created during the exploration
 	 * </ul>
 	 */
-	
 	void time_cells_report() const;
 	
 	/**
@@ -135,7 +124,6 @@ public:
 
 	/** Number of variables. */
 	const int n;
-
 
 	/** Bisector. */
 	Bsc& bsc;
@@ -160,8 +148,8 @@ public:
 
 	/** Trace activation flag.
 	 * The value can be fixed by the user. By default: 0  nothing is printed
-	 1 for printing each better found feasible point
-	  2 for printing each handled node */
+      1 for printing each better found feasible point
+      2 for printing each handled node */
 	int trace;
 
 	/**
@@ -236,7 +224,6 @@ protected:
 			return POS_INFINITY;
 		else
 			return fx.ub();
-
 	}
 
 	/**
@@ -249,7 +236,6 @@ protected:
 	 *
 	 */
 	virtual void handle_cell(Cell& c, const IntervalVector& init_box)=0;
-
 
 	/**
 	 * \brief Contract and bound procedure for processing a box.
@@ -265,14 +251,11 @@ protected:
 	virtual void contract_and_bound(Cell& c, const IntervalVector& init_box)=0;
 
 
-
 	/**
 	 * \brief Procedure for updating the loup with a local optimizer on each box of \a list_box.
 	 */
 	bool localsearch(const IntervalVector* list_box, int nb);
 	bool localsearch(const IntervalVector list_box);
-
-
 
 	/**
 	 * \brief Update the uplo of non bisectable boxes

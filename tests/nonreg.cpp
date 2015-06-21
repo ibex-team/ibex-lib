@@ -140,7 +140,7 @@ int main (int argc, char** argv) {
 		o.timeout=TIME_LIMIT;
 		o.trace=0;
 
-		Optimizer::Status status=o.optimize(p.get_sys().box);
+		Status_Opti status=o.optimize(p.get_sys().box);
 
 		double scaled_time = ratio_perf*time;
 		double time_gain_ratio = (o.time-scaled_time)/scaled_time;
@@ -148,11 +148,11 @@ int main (int argc, char** argv) {
 
 		//cerr << "number of cells=" << o.nb_cells << " time=" << o.time << endl;
 		switch (status) {
-		case Optimizer::INFEASIBLE :         cerr << "FAILED: infeasible"; break;
-		case Optimizer::NO_FEASIBLE_FOUND :  cerr << "FAILED: no feasible point found"; break;
-		case Optimizer::UNBOUNDED_OBJ :      cerr << "FAILED: unbounded objective"; break;
-		case Optimizer::TIME_OUT :           cerr << "FAILED: timeout"; break;
-		case Optimizer::SUCCESS : {
+		case INFEASIBLE :         cerr << "FAILED: infeasible"; break;
+		case NO_FEASIBLE_FOUND :  cerr << "FAILED: no feasible point found"; break;
+		case UNBOUNDED_OBJ :      cerr << "FAILED: unbounded objective"; break;
+		case TIME_OUT :           cerr << "FAILED: timeout"; break;
+		case SUCCESS : {
 			if (o.loup < lb)                   {  cerr.precision(20); cerr << "FAILED: upper bound (loup=" << o.loup << ") is wrong"; }
 			else if (o.uplo > ub)              {  cerr.precision(20); cerr << "FAILED: lower bound (uplo=" << o.uplo << ") is wrong"; }
 			else {

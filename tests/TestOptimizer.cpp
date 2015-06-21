@@ -19,7 +19,7 @@ using namespace std;
 namespace ibex {
 
 // true minimum is 0.
-Optimizer::Status issue50(double init_loup, double prec) {
+Status_Opti issue50(double init_loup, double prec) {
 	SystemFactory f;
 	const ExprSymbol& x=ExprSymbol::new_();
 	f.add_var(x);
@@ -34,19 +34,19 @@ Optimizer::Status issue50(double init_loup, double prec) {
 }
 
 void TestOptimizer::issue50_1() {
-	TEST_ASSERT(issue50(1e-10, 0.1)==Optimizer::NO_FEASIBLE_FOUND);
+	TEST_ASSERT(issue50(1e-10, 0.1)==NO_FEASIBLE_FOUND);
 }
 
 void TestOptimizer::issue50_2() {
-	TEST_ASSERT(issue50(1e-10, 0)==Optimizer::SUCCESS);
+	TEST_ASSERT(issue50(1e-10, 0)==SUCCESS);
 }
 
 void TestOptimizer::issue50_3() {
-	TEST_ASSERT(issue50(-1e-10, 0.1)==Optimizer::NO_FEASIBLE_FOUND);
+	TEST_ASSERT(issue50(-1e-10, 0.1)==NO_FEASIBLE_FOUND);
 }
 
 void TestOptimizer::issue50_4() {
-	TEST_ASSERT(issue50(-1e-10, 0)==Optimizer::INFEASIBLE);
+	TEST_ASSERT(issue50(-1e-10, 0)==INFEASIBLE);
 }
 
 
