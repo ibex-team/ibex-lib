@@ -119,7 +119,7 @@ protected:
 	 * </ul>
 	 *
 	 */
-	void contract_and_bound(Cell& c);
+	void contract_and_bound(Cell& c );
 
 	/**
 	 * \brief Monotonicity analysis.

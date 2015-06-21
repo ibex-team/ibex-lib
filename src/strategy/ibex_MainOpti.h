@@ -235,7 +235,7 @@ protected:
 	 * </ul>
 	 *
 	 */
-	virtual void handle_cell(Cell& c, const IntervalVector& init_box)=0;
+	virtual void handle_cell(Cell& c)=0;
 
 	/**
 	 * \brief Contract and bound procedure for processing a box.
@@ -248,7 +248,7 @@ protected:
 	 * </ul>
 	 *
 	 */
-	virtual void contract_and_bound(Cell& c, const IntervalVector& init_box)=0;
+	virtual void contract_and_bound(Cell& c)=0;
 
 
 	/**
@@ -336,6 +336,8 @@ protected:
 	/** a local minimizer to perform optimization on the feasible domain. */
 	UnconstrainedLocalSearch localopti;
 
+	/** the initial box of the optimization */
+	IntervalVector start_box;
 
 };
 

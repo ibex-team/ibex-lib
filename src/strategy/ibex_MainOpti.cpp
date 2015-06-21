@@ -32,7 +32,8 @@ MainOpti::MainOpti( Function& f_cost, Bsc& bsc, CellDoubleHeap& buffer, double p
                 				loup_point(n), loup_box(n), nb_cells(0),
                 				loup_changed(false),initial_loup(POS_INFINITY),
                 				f_cost(f_cost), uplo_of_epsboxes(POS_INFINITY),
-                				localopti(f_cost, IntervalVector(f_cost.nb_var())){
+                				localopti(f_cost, IntervalVector(f_cost.nb_var())),
+                				start_box(n) {
 
 }
 

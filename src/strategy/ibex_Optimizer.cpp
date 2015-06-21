@@ -204,9 +204,9 @@ bool Optimizer::update_entailed_ctr(const IntervalVector& box) {
      push the cell  in the 2 heaps or if the contraction makes the box empty, delete the cell.
  */
 
-void Optimizer::handle_cell(Cell& c, const IntervalVector& init_box ){
+void Optimizer::handle_cell(Cell& c ){
 
-	contract_and_bound(c, init_box);
+	contract_and_bound(c);
 
 	if (c.box.is_empty()) {
 		delete &c;
@@ -223,7 +223,7 @@ void Optimizer::handle_cell(Cell& c, const IntervalVector& init_box ){
 	}
 }
 
-void Optimizer::contract_and_bound(Cell& c, const IntervalVector& init_box) {
+void Optimizer::contract_and_bound(Cell& c) {
 
 	/*======================== contract y with y<=loup ========================*/
 	Interval& y=c.box[ext_sys.goal_var()];
@@ -300,7 +300,7 @@ void Optimizer::contract_and_bound(Cell& c, const IntervalVector& init_box) {
 	//gradient=0 contraction for unconstrained optimization ; 
 	//first order test for constrained optimization (useful only when there are no equations replaced by inequalities) 
 	//works with the box without the objective (tmp_box)
-	firstorder_contract(tmp_box,init_box);
+	firstorder_contract(tmp_box);
 
 	if (tmp_box.is_empty()) {
 		c.box.set_empty();
@@ -312,10 +312,10 @@ void Optimizer::contract_and_bound(Cell& c, const IntervalVector& init_box) {
 
 
 // called with the box without the objective
-void Optimizer::firstorder_contract(IntervalVector& box, const IntervalVector& init_box) {
+void Optimizer::firstorder_contract(IntervalVector& box) {
 	if (m==0) {
 		// for unconstrained optimization  contraction with gradient=0
-		if (box.is_strict_interior_subset(init_box)) {
+		if (box.is_strict_interior_subset(start_box)) {
 			if (n==1)
 				df.backward(Interval::ZERO,box);
 			else
@@ -335,6 +335,9 @@ void Optimizer::firstorder_contract(IntervalVector& box, const IntervalVector& i
 }
 
 Status_Opti Optimizer::optimize(const IntervalVector& init_box, double obj_init_bound) {
+
+	start_box = init_box;
+
 	loup=obj_init_bound;
 	pseudo_loup=obj_init_bound;
 	buffer.contract(loup);
@@ -371,7 +374,7 @@ Status_Opti Optimizer::optimize(const IntervalVector& init_box, double obj_init_
 	loup_point=init_box.mid();
 	time=0;
 	Timer::start();
-	handle_cell(*root,init_box);
+	handle_cell(*root);
 
 	update_uplo();
 
@@ -405,8 +408,8 @@ Status_Opti Optimizer::optimize(const IntervalVector& init_box, double obj_init_
 				buffer.pop();
 				delete c; // deletes the cell.
 
-				handle_cell(*new_cells.first, init_box);
-				handle_cell(*new_cells.second, init_box);
+				handle_cell(*new_cells.first);
+				handle_cell(*new_cells.second);
 
 				if (uplo_of_epsboxes == NEG_INFINITY) {
 					cout << " possible infinite minimum " << endl;

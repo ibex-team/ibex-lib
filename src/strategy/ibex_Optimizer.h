@@ -179,7 +179,7 @@ protected:
 	 * </ul>
 	 *
 	 */
-	void handle_cell(Cell& c, const IntervalVector& init_box);
+	void handle_cell(Cell& c);
 
 	/**
 	 * \brief Contract and bound procedure for processing a box.
@@ -192,7 +192,7 @@ protected:
 	 * </ul>
 	 *
 	 */
-	void contract_and_bound(Cell& c, const IntervalVector& init_box);
+	void contract_and_bound(Cell& c);
 
 	/**
 	 * \brief First order contraction procedure for processing a box.
@@ -204,7 +204,7 @@ protected:
 	 *
 	 */
 
-	virtual void firstorder_contract ( IntervalVector& box, const IntervalVector& init_box);
+	virtual void firstorder_contract ( IntervalVector& box);
 
 	/**
 	 * \brief Update the entailed constraint for the current box

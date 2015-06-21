@@ -293,6 +293,8 @@ void OptimCtc::contract_and_bound(Cell& c) {
 
 
 Status_Opti OptimCtc::optimize(const IntervalVector& init_box, double obj_init_bound) {
+	start_box = init_box;
+
 	loup=obj_init_bound;
 	pseudo_loup=loup;
 
