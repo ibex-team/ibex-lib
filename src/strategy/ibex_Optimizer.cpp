@@ -53,7 +53,7 @@ void Optimizer::read_ext_box(const IntervalVector& ext_box, IntervalVector& box)
 Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, double prec,
 		double goal_rel_prec, double goal_abs_prec, int sample_size, double equ_eps,
 		bool rigor,  int critpr,CellCostFunc::criterion crit2) :
-				MainOpti( *(user_sys.goal), bsc, new CellDoubleHeap(*new CellCostVarLB(n), *CellCostFunc::get_cost(crit2, n), critpr), prec, goal_rel_prec,  goal_abs_prec),
+				MainOpti( *(user_sys.goal), bsc, *new CellDoubleHeap(*new CellCostVarLB(user_sys.nb_var), *CellCostFunc::get_cost(crit2, user_sys.nb_var), critpr), prec, goal_rel_prec,  goal_abs_prec),
 				// first buffer with LB, second buffer with ct (default UB))
 				user_sys(user_sys), sys(user_sys,equ_eps),
 				m(sys.nb_ctr) /* (warning: not user_sys.nb_ctr) */,
@@ -214,10 +214,10 @@ void Optimizer::handle_cell(Cell& c, const IntervalVector& init_box ){
 		//       objshaver->contract(c.box);
 
 		// we know cost1() does not require OptimData
-		buffer->cost2().set_optim_data(c,sys);
+		buffer.cost2().set_optim_data(c,sys);
 
 		// the cell is put into the 2 heaps
-		buffer->push(&c);
+		buffer.push(&c);
 
 		nb_cells++;
 	}
@@ -337,7 +337,7 @@ void Optimizer::firstorder_contract(IntervalVector& box, const IntervalVector& i
 Status_Opti Optimizer::optimize(const IntervalVector& init_box, double obj_init_bound) {
 	loup=obj_init_bound;
 	pseudo_loup=obj_init_bound;
-	buffer->contract(loup);
+	buffer.contract(loup);
 
 	uplo=NEG_INFINITY;
 	uplo_of_epsboxes=POS_INFINITY;
@@ -348,7 +348,7 @@ Status_Opti Optimizer::optimize(const IntervalVector& init_box, double obj_init_
 	nb_rand=0;
 	diam_rand=0;
 
-	buffer->flush();
+	buffer.flush();
 
 	Cell* root=new Cell(IntervalVector(n+1));
 
@@ -358,7 +358,7 @@ Status_Opti Optimizer::optimize(const IntervalVector& init_box, double obj_init_
 	bsc.add_backtrackable(*root);
 
 	// add data "pu" and "pf" (if required)
-	buffer->cost2().add_backtrackable(*root);
+	buffer.cost2().add_backtrackable(*root);
 
 	// add data required by optimizer + Fritz John contractor
 	root->add<EntailedCtr>();
@@ -376,14 +376,14 @@ Status_Opti Optimizer::optimize(const IntervalVector& init_box, double obj_init_
 	update_uplo();
 
 	try {
-		while (!buffer->empty()) {
+		while (!buffer.empty()) {
 		  //			if (trace >= 2) cout << " buffer " << buffer << endl;
-		  if (trace >= 2) buffer->print(cout);
-			//		  cout << "buffer size "  << buffer->size() << " " << buffer2.size() << endl;
+		  if (trace >= 2) buffer.print(cout);
+			//		  cout << "buffer size "  << buffer.size() << " " << buffer2.size() << endl;
 			// removes from the heap buffer, the cells already chosen in the other buffer
 
-			if (buffer->empty()) {
-				//cout << " buffer empty " << buffer->empty() << " " << buffer2.empty() << endl;
+			if (buffer.empty()) {
+				//cout << " buffer empty " << buffer.empty() << " " << buffer2.empty() << endl;
 				// this update is only necessary when buffer was not
 				// initially empty
 				update_uplo();
@@ -395,14 +395,14 @@ Status_Opti Optimizer::optimize(const IntervalVector& init_box, double obj_init_
 
 			// random choice between the 2 buffers corresponding to two criteria implemented in two heaps)
 			// critpr chances over 100 to choose the second heap (see CellDoubleHeap)
-			c=buffer->top();
+			c=buffer.top();
 
 			try {
 				pair<IntervalVector,IntervalVector> boxes=bsc.bisect(*c);
 
 				pair<Cell*,Cell*> new_cells=c->bisect(boxes.first,boxes.second);
 
-				buffer->pop();
+				buffer.pop();
 				delete c; // deletes the cell.
 
 				handle_cell(*new_cells.first, init_box);
@@ -421,7 +421,7 @@ Status_Opti Optimizer::optimize(const IntervalVector& init_box, double obj_init_
 
 					double ymax=compute_ymax();
 
-					buffer->contract(ymax);
+					buffer.contract(ymax);
 					//cout << " now buffer is contracted and min=" << buffer->minimum() << endl;
 
 
@@ -437,7 +437,7 @@ Status_Opti Optimizer::optimize(const IntervalVector& init_box, double obj_init_
 			}
 			catch (NoBisectableVariableException& ) {
 				update_uplo_of_epsboxes((c->box)[ext_sys.goal_var()].lb());
-				buffer->pop();
+				buffer.pop();
 				delete c; // deletes the cell.
 
 				update_uplo(); // the heap has changed -> recalculate the uplo

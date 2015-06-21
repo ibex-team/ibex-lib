@@ -26,7 +26,7 @@ namespace ibex {
 
 OptimCtc::OptimCtc( Ctc& ctc_out, Ctc&  ctc_in, Function& f_cost, Bsc& bsc, double prec,
 		double goal_rel_prec, double goal_abs_prec) :
-				MainOpti( f_cost, bsc, new CellDoubleHeap(*new CellCostPFlb(), *new CellCostPFub()), prec, goal_rel_prec,  goal_abs_prec),
+				MainOpti( f_cost, bsc, *new CellDoubleHeap(*new CellCostPFlb(), *new CellCostPFub()), prec, goal_rel_prec,  goal_abs_prec),
 				_ctc_out(ctc_out), _ctc_in(ctc_in) {
 
 }
@@ -96,7 +96,7 @@ void OptimCtc::handle_cell(Cell& c){
 
 		if (c.get<OptimData>().pf.lb()<ymax) {
 			// the cell is put into the 2 heaps
-			buffer->push(&c);
+			buffer.push(&c);
 			nb_cells++;
 		} else {
 			delete &c;
@@ -128,13 +128,13 @@ void OptimCtc::add_buffer(IntervalVector* list, int size) {
 			bsc.add_backtrackable(*cell);
 
 			// add data "pu" and "pf"
-			buffer->cost1().add_backtrackable(*cell);
+			buffer.cost1().add_backtrackable(*cell);
 
 			cell->get<OptimData>().compute_pf(f_cost, cell->box);
 			cell->get<OptimData>().pu =1;
 			if (cell->get<OptimData>().pf.lb()<ymax) {
 				// the cell is put into the 2 heaps with the cost stored in pf
-				buffer->push(cell);
+				buffer.push(cell);
 			}
 		}
 	}
@@ -301,7 +301,7 @@ Status_Opti OptimCtc::optimize(const IntervalVector& init_box, double obj_init_b
 
 	nb_cells=0;
 
-	buffer->flush();
+	buffer.flush();
 
 	Cell* root=new Cell(init_box);
 
@@ -309,7 +309,7 @@ Status_Opti OptimCtc::optimize(const IntervalVector& init_box, double obj_init_b
 	bsc.add_backtrackable(*root);
 
 	// add data "pu" and "pf" (if required)
-	buffer->cost1().add_backtrackable(*root);
+	buffer.cost1().add_backtrackable(*root);
 
 
 	loup_changed=false;
@@ -321,18 +321,18 @@ Status_Opti OptimCtc::optimize(const IntervalVector& init_box, double obj_init_b
 
 	if (loup_changed) {
 		loup_changed=false;
-		buffer->contract(compute_ymax());
+		buffer.contract(compute_ymax());
 	}
 	update_uplo();
 
 	try {
-		while (!buffer->empty()) {
+		while (!buffer.empty()) {
 			//			if (trace >= 2) cout << " buffer " << buffer << endl;
-			if (trace >= 2) buffer->print(cout);
+			if (trace >= 2) buffer.print(cout);
 			//		  cout << "buffer size "  << buffer.size() << " " << buffer2.size() << endl;
 			// removes from the heap buffer, the cells already chosen in the other buffer
 
-			if (buffer->empty()) {
+			if (buffer.empty()) {
 				//cout << " buffer empty " << buffer.empty() << " " << buffer2.empty() << endl;
 				// this update is only necessary when buffer was not
 				// initially empty
@@ -345,14 +345,14 @@ Status_Opti OptimCtc::optimize(const IntervalVector& init_box, double obj_init_b
 
 			// random choice between the 2 buffers corresponding to two criteria implemented in two heaps)
 			// critpr chances over 100 to choose the second heap (see CellDoubleHeap)
-			c=buffer->top();
+			c=buffer.top();
 
 
 			try {
 				pair<IntervalVector,IntervalVector> boxes=bsc.bisect(*c);
 				pair<Cell*,Cell*> new_cells=c->bisect(boxes.first,boxes.second);
 
-				buffer->pop();
+				buffer.pop();
 				delete c; // deletes the cell.
 
 				handle_cell(*new_cells.first);
@@ -370,7 +370,7 @@ Status_Opti OptimCtc::optimize(const IntervalVector& init_box, double obj_init_b
 					// older version of the code (before revision 284).
 					double ymax= compute_ymax();
 
-					buffer->contract(ymax);
+					buffer.contract(ymax);
 
 					if (ymax <=NEG_INFINITY) {
 						if (trace) cout << " infinite value for the minimum " << endl;
@@ -386,7 +386,7 @@ Status_Opti OptimCtc::optimize(const IntervalVector& init_box, double obj_init_b
 			}
 			catch (NoBisectableVariableException& ) {
 				update_uplo_of_epsboxes(c->get<OptimData>().pf.lb());
-				buffer->pop();
+				buffer.pop();
 				delete c; // deletes the cell.
 
 				update_uplo(); // the heap has changed -> recalculate the uplo

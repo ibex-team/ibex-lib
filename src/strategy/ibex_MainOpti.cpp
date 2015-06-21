@@ -23,7 +23,7 @@ const double MainOpti::default_goal_rel_prec = 1e-07;
 const double MainOpti::default_goal_abs_prec = 1e-07;
 const double MainOpti::default_loup_tolerance = 0.1;
 
-MainOpti::MainOpti( Function& f_cost, Bsc& bsc, CellDoubleHeap* buffer, double prec, double goal_rel_prec, double goal_abs_prec):
+MainOpti::MainOpti( Function& f_cost, Bsc& bsc, CellDoubleHeap& buffer, double prec, double goal_rel_prec, double goal_abs_prec):
                 				n(f_cost.nb_var()),bsc(bsc),
                 				buffer(buffer),  // first buffer with LB, second buffer with ct (default UB))
                 				prec(prec), goal_rel_prec(goal_rel_prec), goal_abs_prec(goal_abs_prec),
@@ -38,10 +38,10 @@ MainOpti::MainOpti( Function& f_cost, Bsc& bsc, CellDoubleHeap* buffer, double p
 
 MainOpti::~MainOpti() {
 
-	buffer->flush();
-	delete &buffer->cost1();
-	delete &buffer->cost2();
-	delete buffer;
+	buffer.flush();
+	delete &buffer.cost1();
+	delete &buffer.cost2();
+	delete &buffer;
 	//	delete &(objshaver->ctc);
 	//	delete objshaver;
 }
@@ -88,16 +88,18 @@ bool MainOpti::check_candidate(const Vector& pt, bool _is_inner) {
 void MainOpti::update_uplo() {
 	double new_uplo=POS_INFINITY;
 
-	if (! buffer->empty()) {
-		new_uplo= buffer->minimum();
+	if (! buffer.empty()) {
+		new_uplo= buffer.minimum1();
 		if (new_uplo > loup) {
-			cout << " loup = " << loup << " new_uplo=" << new_uplo << endl;
+			cout.precision(12);
+			cout << " nb_iter = " << nb_cells <<" loup = " << loup << " new_uplo=" << new_uplo << endl;
+			buffer.print(cout);
 			ibex_error("MainOpti: new_uplo>loup (please report bug)");
 		}
 		if (new_uplo < uplo_of_epsboxes) uplo = new_uplo;
 		else uplo= uplo_of_epsboxes;
 	}
-	else if (buffer->empty() && loup != POS_INFINITY) {
+	else if (buffer.empty() && loup != POS_INFINITY) {
 		// empty buffer : new uplo is set to ymax (loup - precision) if a loup has been found
 		new_uplo=compute_ymax(); // not new_uplo=loup, because constraint y <= ymax was enforced
 		//    cout << " new uplo buffer empty " << new_uplo << " uplo " << uplo << endl;
@@ -108,24 +110,6 @@ void MainOpti::update_uplo() {
 		// ymax is strictly lower than the loup.
 	}
 
-}
-
-
-void MainOpti::update_uplo_of_epsboxes(double ymin) {
-
-	// the current box cannot be bisected.  ymin is a lower bound of the objective on this box
-	// uplo of epsboxes can only go down, but not under uplo : it is an upperbound for uplo,
-	//that indicates a lowerbound for the objective in all the small boxes
-	// found by the precision criterion
-	assert (uplo_of_epsboxes >= uplo);
-	assert(ymin >= uplo);
-	if (uplo_of_epsboxes > ymin) {
-		uplo_of_epsboxes = ymin;
-		if (trace) {
-			// it is hard to prove the feasability of a point. So there a lot of small boxes.
-			cout << "uplo_of_epsboxes: " <<  uplo_of_epsboxes << " | uplo: " << uplo << " | loup: " << loup << " |"<< endl;
-		}
-	}
 }
 
 
@@ -167,13 +151,34 @@ bool MainOpti::localsearch(const IntervalVector box) {
 	return localsearch(&box,1);
 }
 
+
+
+void MainOpti::update_uplo_of_epsboxes(double ymin) {
+
+	// the current box cannot be bisected.  ymin is a lower bound of the objective on this box
+	// uplo of epsboxes can only go down, but not under uplo : it is an upperbound for uplo,
+	//that indicates a lowerbound for the objective in all the small boxes
+	// found by the precision criterion
+	assert (uplo_of_epsboxes >= uplo);
+	assert(ymin >= uplo);
+	if (uplo_of_epsboxes > ymin) {
+		uplo_of_epsboxes = ymin;
+		if (trace) {
+			// it is hard to prove the feasability of a point. So there a lot of small boxes.
+			cout << "uplo_of_epsboxes: " <<  uplo_of_epsboxes << " | uplo: " << uplo << " | loup: " << loup << " |"<< endl;
+		}
+	}
+}
+
+
+
 void MainOpti::report() const {
 
 	if (timeout >0 &&  time >=timeout ) {
 		cout << "time limit " << timeout << "s. reached " << endl;
 	}
 	// No solution found and optimization stopped with empty buffer  before the required precision is reached => means infeasible problem
-	if (buffer->empty() && uplo_of_epsboxes == POS_INFINITY && (loup==POS_INFINITY || (loup==initial_loup && goal_abs_prec==0 && goal_rel_prec==0))) {
+	if (buffer.empty() && uplo_of_epsboxes == POS_INFINITY && (loup==POS_INFINITY || (loup==initial_loup && goal_abs_prec==0 && goal_rel_prec==0))) {
 		cout << " infeasible problem " << endl;
 		cout << " cpu time used " << time << "s." << endl;
 		cout << " number of cells " << nb_cells << endl;
@@ -239,7 +244,7 @@ void MainOpti::report_perf()  const{
 
 	cout << (	((rel_prec <= goal_rel_prec)||
 			(abs_prec <= goal_abs_prec)||
-			((buffer->empty() && uplo_of_epsboxes == POS_INFINITY && loup==POS_INFINITY))||
+			((buffer.empty() && uplo_of_epsboxes == POS_INFINITY && loup==POS_INFINITY))||
 			(uplo<-1.e300)
 	)? " T & " : " F & " );
 

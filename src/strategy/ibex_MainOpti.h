@@ -54,7 +54,7 @@ public:
 	 * If this contractor never contracts this goal variable, the MainOpti will only rely on the evaluation of f  and will be very slow.
 	 *
 	 */
-	MainOpti(Function& f_cost, Bsc& bsc, CellDoubleHeap* buffer, double prec=default_prec, double goal_rel_prec=default_goal_rel_prec, double goal_abs_prec=default_goal_abs_prec);
+	MainOpti(Function& f_cost, Bsc& bsc, CellDoubleHeap& buffer, double prec=default_prec, double goal_rel_prec=default_goal_rel_prec, double goal_abs_prec=default_goal_abs_prec);
 
 	/**
 	 * \brief Delete *this.
@@ -134,7 +134,7 @@ public:
 	the second one to minimize another criterion (by default the maximum of the objective estimate).
 	The second one is chosen at each node with a probability critpr/100 (default value critpr=50)
 	 */
-	CellDoubleHeap* buffer;
+	CellDoubleHeap& buffer;
 
 
 	/** Precision (bisection control) */
