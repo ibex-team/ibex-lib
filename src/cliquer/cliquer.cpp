@@ -135,20 +135,20 @@ static int clocks_per_sec=0;
 
 
 /* Recursion and helper functions */
-static boolean sub_unweighted_single(int *table, int size, int min_size,
+static cliquer_boolean sub_unweighted_single(int *table, int size, int min_size,
 		graph_t *g);
 static int sub_unweighted_all(int *table, int size, int min_size, int max_size,
-		boolean maximal, graph_t *g,
+		cliquer_boolean maximal, graph_t *g,
 		clique_options *opts);
 static int sub_weighted_all(int *table, int size, int weight,
 		int current_weight, int prune_low, int prune_high,
-		int min_weight, int max_weight, boolean maximal,
+		int min_weight, int max_weight, cliquer_boolean maximal,
 		graph_t *g, clique_options *opts);
 
 
-static boolean store_clique(set_t clique, graph_t *g, clique_options *opts);
-static boolean is_maximal(set_t clique, graph_t *g);
-static boolean false_function(set_t clique,graph_t *g,clique_options *opts);
+static cliquer_boolean store_clique(set_t clique, graph_t *g, clique_options *opts);
+static cliquer_boolean is_maximal(set_t clique, graph_t *g);
+static cliquer_boolean false_function(set_t clique,graph_t *g,clique_options *opts);
 
 
 
@@ -283,7 +283,7 @@ static int unweighted_clique_search_single(int *table, int min_size,
  * clique_size[] for all values in table must be defined and correct,
  * otherwise inaccurate results may occur.
  */
-static boolean sub_unweighted_single(int *table, int size, int min_size,
+static cliquer_boolean sub_unweighted_single(int *table, int size, int min_size,
 		graph_t *g) {
 	int i;
 	int v;
@@ -383,7 +383,7 @@ static boolean sub_unweighted_single(int *table, int size, int min_size,
  */
 static int unweighted_clique_search_all(int *table, int start,
 		int min_size, int max_size,
-		boolean maximal, graph_t *g,
+		cliquer_boolean maximal, graph_t *g,
 		clique_options *opts) {
 	struct timeval timeval;
 	struct tms tms;
@@ -474,7 +474,7 @@ static int unweighted_clique_search_all(int *table, int start,
  * otherwise inaccurate results may occur.
  */
 static int sub_unweighted_all(int *table, int size, int min_size, int max_size,
-		boolean maximal, graph_t *g,
+		cliquer_boolean maximal, graph_t *g,
 		clique_options *opts) {
 	int i;
 	int v;
@@ -735,7 +735,7 @@ static int weighted_clique_search_single(int *table, int min_weight,
  */
 static int weighted_clique_search_all(int *table, int start,
 		int min_weight, int max_weight,
-		boolean maximal, graph_t *g,
+		cliquer_boolean maximal, graph_t *g,
 		clique_options *opts) {
 	struct timeval timeval;
 	struct tms tms;
@@ -846,7 +846,7 @@ static int weighted_clique_search_all(int *table, int start,
  */
 static int sub_weighted_all(int *table, int size, int weight,
 		int current_weight, int prune_low, int prune_high,
-		int min_weight, int max_weight, boolean maximal,
+		int min_weight, int max_weight, cliquer_boolean maximal,
 		graph_t *g, clique_options *opts) {
 	int i;
 	int v,w;
@@ -954,7 +954,7 @@ static int sub_weighted_all(int *table, int size, int weight,
  * Returns FALSE if opts->user_function() returned FALSE; otherwise
  * returns TRUE.
  */
-static boolean store_clique(set_t clique, graph_t *g, clique_options *opts) {
+static cliquer_boolean store_clique(set_t clique, graph_t *g, clique_options *opts) {
 
 	clique_list_count++;
 
@@ -1001,7 +1001,7 @@ static boolean store_clique(set_t clique, graph_t *g, clique_options *opts) {
  */
 static void maximalize_clique(set_t s,graph_t *g) {
 	int i,j;
-	boolean add;
+	cliquer_boolean add;
 
 	for (i=0; i < g->n; i++) {
 		add=TRUE;
@@ -1029,11 +1029,11 @@ static void maximalize_clique(set_t s,graph_t *g) {
  *
  * Returns TRUE is clique is a maximal clique of g, otherwise FALSE.
  */
-static boolean is_maximal(set_t clique, graph_t *g) {
+static cliquer_boolean is_maximal(set_t clique, graph_t *g) {
 	int i,j;
 	int *table;
 	int len;
-	boolean addable;
+	cliquer_boolean addable;
 
 	if (temp_count) {
 		temp_count--;
@@ -1070,7 +1070,7 @@ static boolean is_maximal(set_t clique, graph_t *g) {
  *
  * Returns FALSE.  Can be used as user_function.
  */
-static boolean false_function(set_t clique,graph_t *g,clique_options *opts) {
+static cliquer_boolean false_function(set_t clique,graph_t *g,clique_options *opts) {
 	return FALSE;
 }
 
@@ -1132,7 +1132,7 @@ int clique_unweighted_max_weight(graph_t *g, clique_options *opts) {
  * Note: Does NOT use opts->user_function() or opts->clique_list[].
  */
 set_t clique_unweighted_find_single(graph_t *g,int min_size,int max_size,
-		boolean maximal, clique_options *opts) {
+		cliquer_boolean maximal, clique_options *opts) {
 	int i;
 	int *table;
 	set_t s;
@@ -1262,7 +1262,7 @@ set_t clique_unweighted_find_single(graph_t *g,int min_size,int max_size,
  * by set_free().
  */
 int clique_unweighted_find_all(graph_t *g, int min_size, int max_size,
-		boolean maximal, clique_options *opts) {
+		cliquer_boolean maximal, clique_options *opts) {
 	int i;
 	int *table;
 	int count;
@@ -1418,7 +1418,7 @@ int clique_max_weight(graph_t *g,clique_options *opts) {
  *       weights are the same.
  */
 set_t clique_find_single(graph_t *g,int min_weight,int max_weight,
-		boolean maximal, clique_options *opts) {
+		cliquer_boolean maximal, clique_options *opts) {
 	int i;
 	int *table;
 	set_t s;
@@ -1584,7 +1584,7 @@ set_t clique_find_single(graph_t *g,int min_weight,int max_weight,
  *       weights are the same.
  */
 int clique_find_all(graph_t *g, int min_weight, int max_weight,
-		boolean maximal, clique_options *opts) {
+		cliquer_boolean maximal, clique_options *opts) {
 	int i,n;
 	int *table;
 
@@ -1716,7 +1716,7 @@ int clique_find_all(graph_t *g, int min_weight, int max_weight,
  *
  * Returns always TRUE  (ie. never requests abort).
  */
-boolean clique_print_time(int level, int i, int n, int max,
+cliquer_boolean clique_print_time(int level, int i, int n, int max,
 		double cputime, double realtime,
 		clique_options *opts) {
 	static float prev_time=100;
@@ -1765,7 +1765,7 @@ boolean clique_print_time(int level, int i, int n, int max,
  *
  * Returns always TRUE  (ie. never requests abort).
  */
-boolean clique_print_time_always(int level, int i, int n, int max,
+cliquer_boolean clique_print_time_always(int level, int i, int n, int max,
 		double cputime, double realtime,
 		clique_options *opts) {
 	static float prev_time=100;

@@ -145,12 +145,10 @@ int main() {
 		counter++;
 		b = pendingList.front();
 		pendingList.pop_front();
-	
-		try {
-			ctcf.contract(b);
-		} catch (EmptyBoxException&) {
-			continue;
-		}
+
+
+		ctcf.contract(b);
+		if (b.is_empty()) continue;
 		
 		if (b.max_diam() > eps) {
 			assert(b.is_bisectable());

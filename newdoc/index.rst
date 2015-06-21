@@ -18,9 +18,11 @@ Contents:
    modeling
    contractor
    separator
+   set
    strategy
-   example
    reference
+   example-slam
+   lab
 
 
 Indices and tables

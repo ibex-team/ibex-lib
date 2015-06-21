@@ -1,3 +1,6 @@
+
+.. _sep:
+
 **************************************************
              Separators
 **************************************************
@@ -114,6 +117,7 @@ The result is:
 .. literalinclude:: ../examples/doc-separator.txt
    :start-after:  sep-boundary-O
    :end-before:   sep-boundary-O
+
 ---------------------------------
 Separator Algebra
 ---------------------------------

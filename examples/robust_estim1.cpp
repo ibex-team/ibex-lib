@@ -90,13 +90,13 @@ int main() {
 	cout << "before =" << box << endl;
 	
 	start = clock();
-	try {
-		if (qinteronly) {
-			ctcq.contract(box);
-		} else {
-			fix.contract(box);
-		}
-	} catch (EmptyBoxException&) { }
+
+	if (qinteronly) {
+		ctcq.contract(box);
+	} else {
+		fix.contract(box);
+	}
+
 	end = clock();
 	cout << "Result = " << box << endl;
 	cout << "Time : " << ((double)(end)-(double)(start))/CLOCKS_PER_SEC << " seconds" << endl;

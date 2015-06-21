@@ -101,6 +101,7 @@ The output is:
    :start-after: itv-constants-O
    :end-before: itv-constants-O
 
+.. _itv-vector-boxes:
 
 ----------------------------
 Vectors or Boxes
@@ -284,6 +285,7 @@ to the API.
    |                  | *(Interval& y)*               |                                                       |
    +------------------+-------------------------------+-------------------------------------------------------+
 
+.. _itv-set-membership:
 
 ============================
 Set-membership operations
@@ -358,6 +360,8 @@ Finally, given two interval vectors [x] and [y] one can call::
 
 to create the Cartesian product.
 
+.. _itv-diff:
+
 ---------------------------------
 Complementary and set difference
 ---------------------------------
@@ -392,7 +396,8 @@ To illustrate this, let us first build a function that prints the complementary 
 
 We can call it now with different vectors. Note that when the vector is the empty set with n components, the complementary is
 a n-dimensional box: :math:`(-\infty,\infty)\times\ldots\times(-\infty,\infty)`.
-Note also that if the difference is empty, ``result`` is an array of one element set to the empty box. It is *not* a zero-sized array containing no element.
+Note also that if the difference is empty, ``result`` is an array of one element set to the empty box. It is *not* a zero-sized array containing no element
+(this is illegal in ISO C++). However the returned number is 0 (not 1). The interesting point is that you can call ``delete[]`` safely, in all cases.
 
 .. literalinclude:: ../examples/doc-arithmetic.cpp 
    :language: cpp
@@ -429,6 +434,8 @@ Example with interval vectors:
 .. literalinclude:: ../examples/doc-arithmetic.txt
    :start-after: itv-diff-vec-O
    :end-before: itv-diff-vec-O
+
+.. _itv-geom:
 
 ============================
 Geometric operations
@@ -522,6 +529,8 @@ Here are the functions that can be applied to an **interval vector [x]**, seen a
 +------------------+-------------------------+----------------------------------------------------------------------+
 | bool             | x.is_bisectable()       |  true iff at least one component of [x] is bisectable (see above).   |
 +------------------+-------------------------+----------------------------------------------------------------------+
+
+.. _itv-bisect:
 
 -----------------
 Bisection

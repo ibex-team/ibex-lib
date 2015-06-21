@@ -16,7 +16,8 @@ namespace ibex {
 
 /**
  * \ingroup iset
- * \brief Leaf node (i-set representation)
+ *
+ * \brief Leaf node (internal class used for set representation)
  */
 class SetLeaf : public SetNode {
 
@@ -35,36 +36,55 @@ public:
 	virtual bool is_leaf() const;
 
 	/** \see SetNode */
-	virtual SetNode* inter(bool sync, const IntervalVector& nodebox, const IntervalVector& x, BoolInterval x_status, double eps);
-
-	virtual SetNode* inter2(bool sync, const IntervalVector& nodebox, const std::pair<SetNode*,IntervalVector>& other, double eps);
-	virtual std::pair<SetNode*,IntervalVector> subset(const IntervalVector& nodebox, const IntervalVector& box);
+	virtual SetNode* inter(bool iset, const IntervalVector& nodebox, const IntervalVector& x, BoolInterval x_status);
 
 	/** \see SetNode */
-	virtual SetNode* inter_rec(bool sync, const IntervalVector& nodebox, Sep& sep, const IntervalVector& targetbox, double eps);
+	virtual SetNode* inter(bool iset, const IntervalVector& nodebox, Sep& sep, double eps);
 
 	/** \see SetNode */
-	virtual SetNode* union_(const IntervalVector& nodebox, const IntervalVector& x, BoolInterval x_status, double eps);
-
-	/** \see SetNode */
-	virtual void visit_leaves(leaf_func func, const IntervalVector& nodebox) const;
-
-	/** \see SetNode */
-	virtual void print(std::ostream& os, const IntervalVector& nodebox, int shift) const;
+	virtual SetNode* union_(const IntervalVector& nodebox, const IntervalVector& x, BoolInterval x_status);
 
 	/** \see SetNode */
 	virtual BoolInterval is_superset(const IntervalVector& nodebox, const IntervalVector& box) const;
+
+	/** \see SetNode */
+	virtual SetNode* contract_no_diff(BoolInterval status, const IntervalVector& nodebox, const IntervalVector& box);
+
+	/** \see SetNode */
+	virtual void visit(const IntervalVector& nodebox, SetVisitor& visitor) const;
+
+	/** \see SetNode */
+	virtual void print(std::ostream& os, const IntervalVector& nodebox, int shift) const;
 
 	/**
 	 * \brief The status of the node
 	 */
 	BoolInterval status;
 
+	/**
+	 * \brief Replace this node with "node" and update the tree structure.
+	 *
+	 * \warning The current node is deleted.
+	 */
+	void replace_with(SetNode* node);
+
 private:
 
 	SetLeaf(const SetLeaf&); // forbidden
-
 };
+
+/**
+ * Calculate the set difference between x and y under the form of
+ * a set (SetNode). Returns a pair containing the root of this
+ * set (first) and the leaf corresponding to the box y (last).
+ *
+ * If eps is >0, no boxes larger than epsilon are created.
+ * When a box is enlarged, its status becomes MAYBE.
+ *
+ * Note that this may result in a leaf that does not correspond to y
+ * but to an enlargement of it.
+ */
+std::pair<SetNode*,SetLeaf*> diff(const IntervalVector& x, const IntervalVector& y, BoolInterval x_status, BoolInterval y_status, double eps);
 
 
 } // namespace ibex

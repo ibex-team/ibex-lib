@@ -171,31 +171,32 @@ JNIEXPORT jint JNICALL Java_Ibex_contract__I_3DI(JNIEnv *env, jobject, jint n, j
 	//cout << " [ibex] contract n°" << n << " with box=" << box << endl;
 	if (reif==TRUE_ || reif==FALSE_OR_TRUE) {
 
-		try {
-			ctc[n]->contract(box);
+		ctc[n]->contract(box);
 
+		if (box.is_empty()) {
+			//cout << " [ibex] emtpybox --> FAILED\n";
+			result=FAIL;
+		}
+
+		else {
 			if (reif==TRUE_ && savebox.rel_distance(box) >= EPS_CONTRACT) {
+
 				//cout << " [ibex] --> CONTRACT to " << box << "\n";
 				savebox = box;
 				result=CONTRACT; // temporary assignment (final result may be ENTAILED)
 			}
 
-			try {
-				//cout << " [ibex] try negation.\n";
-				neg[n]->contract(box);
+			//cout << " [ibex] try negation.\n";
+			neg[n]->contract(box);
 
-				if (result==CONTRACT) {
-					//cout << " [ibex] nothing --> CONTRACT to " << savebox << "\n";
-					write_box(env,savebox,d);
-				}
-
-			} catch(EmptyBoxException&) {
+			if (box.is_empty()) {
 				//cout << " [ibex] emtpybox --> ENTAILED\n";
 				result=ENTAILED;
 			}
-		} catch(EmptyBoxException&) {
-				//cout << " [ibex] emtpybox --> FAILED\n";
-				result=FAIL;
+			else if (result==CONTRACT) {
+				//cout << " [ibex] nothing --> CONTRACT to " << savebox << "\n";
+				write_box(env,savebox,d);
+			}
 		}
 	}
 
@@ -203,26 +204,24 @@ JNIEXPORT jint JNICALL Java_Ibex_contract__I_3DI(JNIEnv *env, jobject, jint n, j
 
 	if (reif==FALSE_ || reif==FALSE_OR_TRUE) {
 
-		try {
-			neg[n]->contract(box);
+		neg[n]->contract(box);
+
+		if (box.is_empty()) {
+			result=ENTAILED;
+		} else {
 
 			if (reif==FALSE_ && savebox.rel_distance(box) >= EPS_CONTRACT) {
 				savebox = box;
 				result=CONTRACT; // temporary assignment (final result may be FAIL)
 			}
 
-			try {
-				ctc[n]->contract(box);
+			ctc[n]->contract(box);
 
-				if (result==CONTRACT) {
-					write_box(env,savebox,d);
-				}
-
-			} catch(EmptyBoxException&) {
+			if (box.is_empty()) {
 				result=FAIL;
+			} else if (result==CONTRACT) {
+				write_box(env,savebox,d);
 			}
-		} catch(EmptyBoxException&) {
-			result=ENTAILED;
 		}
 	}
 
@@ -293,14 +292,12 @@ JNIEXPORT jint JNICALL Java_Ibex_inflate(JNIEnv *env, jobject, jint n, jdoubleAr
 		// (because of inner rounding, the inflation may
 		// fail in entirely proving x is inner so we use
 		// the contractor instead)
-		try {
-			neg[n]->contract(x);
+		neg[n]->contract(x);
 
-			result=INFLATE; // by default
-		} catch(EmptyBoxException&) {
-
+		if (x.is_empty())
 			result=FULL_INFLATE;
-		}
+		else
+			result=INFLATE; // by default
 
 		x=savebox; // result==FULL_INFLATE => savebox is entirely "inside" this constraint
 
@@ -319,12 +316,12 @@ JNIEXPORT jint JNICALL Java_Ibex_inflate(JNIEnv *env, jobject, jint n, jdoubleAr
 	} else {
 
 		// same comments as above
-		try {
-			ctc[n]->contract(x);
-			result=BAD_POINT; // by default
-		} catch(EmptyBoxException&) {
+		ctc[n]->contract(x);
+
+		if (x.is_empty())
 			result=FULL_INFLATE;
-		}
+		else
+			result=BAD_POINT; // by default
 
 		x=savebox;
 

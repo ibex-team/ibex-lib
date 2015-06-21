@@ -10,7 +10,9 @@
  * re-typedefing is illegal (even when using exactly the same datatype!).
  */
 #ifndef boolean_def
-typedef int boolean;
+// [gch] "boolean" comes into conflict under MinGW
+// with a "typedef unsigned char boolean" in include/rpcndr.h
+typedef int cliquer_boolean;
 #define boolean_def
 #endif
 

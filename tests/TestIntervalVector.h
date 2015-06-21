@@ -114,6 +114,7 @@ public:
 		TEST_ADD(TestIntervalVector::diff02);
 		TEST_ADD(TestIntervalVector::diff03);
 		TEST_ADD(TestIntervalVector::diff04);
+		TEST_ADD(TestIntervalVector::diff05);
 
 		TEST_ADD(TestIntervalVector::random01);
 		TEST_ADD(TestIntervalVector::random02);
@@ -259,6 +260,7 @@ public:
 	void diff02();
 	void diff03();
 	void diff04();
+	void diff05();
 
 	// test: random() const
 	void random01();

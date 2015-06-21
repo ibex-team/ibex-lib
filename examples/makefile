@@ -14,7 +14,6 @@ endif
 all: $(BINS)
 
 % :	%.cpp
-	echo $(BINS) $(OBJS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $< $(LIBS)
 
 clean:

@@ -128,7 +128,7 @@ void graph_crop(graph_t *g) {
  *
  * Note: Does NOT require weights to be 1.
  */
-boolean graph_weighted(graph_t *g) {
+cliquer_boolean graph_weighted(graph_t *g) {
 	int i,w;
 
 	w=g->weights[0];
@@ -162,7 +162,7 @@ int graph_edge_count(graph_t *g) {
  *
  * Returns TRUE if successful, FALSE if an error occurred.
  */
-boolean graph_write_dimacs_ascii_file(graph_t *g, char *comment, char *file) {
+cliquer_boolean graph_write_dimacs_ascii_file(graph_t *g, char *comment, char *file) {
 	FILE *fp;
 
 	ASSERT((sizeof(setelement)*8)==ELEMENTSIZE);
@@ -186,7 +186,7 @@ boolean graph_write_dimacs_ascii_file(graph_t *g, char *comment, char *file) {
  *
  * Returns TRUE if successful, FALSE if an error occurred.
  */
-boolean graph_write_dimacs_ascii(graph_t *g, char *comment, FILE *fp) {
+cliquer_boolean graph_write_dimacs_ascii(graph_t *g, char *comment, FILE *fp) {
 	int i,j;
 
 	ASSERT((sizeof(setelement)*8)==ELEMENTSIZE);
@@ -214,7 +214,7 @@ boolean graph_write_dimacs_ascii(graph_t *g, char *comment, FILE *fp) {
  *
  * Returns TRUE if successful, FALSE if an error occurred.
  */
-boolean graph_write_dimacs_binary_file(graph_t *g, char *comment, char *file) {
+cliquer_boolean graph_write_dimacs_binary_file(graph_t *g, char *comment, char *file) {
 	FILE *fp;
 
 	ASSERT((sizeof(setelement)*8)==ELEMENTSIZE);
@@ -247,7 +247,7 @@ if (headerlength+strlen(s) >= headersize) {  \
 strncat(header,s,1000);                      \
 headerlength+=strlen(s);
 
-boolean graph_write_dimacs_binary(graph_t *g, char *comment,FILE *fp) {
+cliquer_boolean graph_write_dimacs_binary(graph_t *g, char *comment,FILE *fp) {
 	char *buf;
 	char *header=NULL;
 	unsigned int headersize=0;
@@ -363,7 +363,7 @@ graph_t *graph_read_dimacs(FILE *fp) {
  *       (mainly generator-specific information) are ignored silently,
  *       for all others a warning message is printed to stderr.
  */
-static boolean parse_input(char *str,graph_t *g) {
+static cliquer_boolean parse_input(char *str,graph_t *g) {
 	int i,j,w;
 	char tmp[16];
 
@@ -565,7 +565,7 @@ void graph_print(graph_t *g) {
 	int nonpos=0;
 	int extra=0;
 	unsigned int weight=0;
-	boolean weighted;
+	cliquer_boolean weighted;
 	
 	ASSERT((sizeof(setelement)*8)==ELEMENTSIZE);
 
@@ -650,7 +650,7 @@ void graph_print(graph_t *g) {
  * 
  * Returns TRUE if the graph is valid, FALSE otherwise.
  */
-boolean graph_test(graph_t *g,FILE *output) {
+cliquer_boolean graph_test(graph_t *g,FILE *output) {
 	int i,j;
 	int edges=0;
 	int asymm=0;
@@ -658,7 +658,7 @@ boolean graph_test(graph_t *g,FILE *output) {
 	int refl=0;
 	int extra=0;
 	unsigned int weight=0;
-	boolean weighted;
+	cliquer_boolean weighted;
 
 	ASSERT((sizeof(setelement)*8)==ELEMENTSIZE);
 

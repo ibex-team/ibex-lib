@@ -77,6 +77,7 @@
 // ================ set ===============
 #include "TestSeparator.h"
 #include "TestSepPolygon.h"
+#include "TestSet.h"
 
 // ============= Conbinatorial ============
 #include "TestQInter.h"
@@ -152,7 +153,7 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestSeparator()));
     ts.add(auto_ptr<Test::Suite>(new TestSepPolygon()));
 
-
+    ts.add(auto_ptr<Test::Suite>(new TestSet()));
 
     return ts.run(output,false) ? EXIT_SUCCESS : EXIT_FAILURE;
 
