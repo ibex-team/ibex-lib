@@ -201,14 +201,40 @@ template<class V>
 int _extr_diam_index(const V& v, bool min) {
 	double d=v[0].diam();
 	int selectedIndex=0;
+	bool unbounded=false;
 	if (v.is_empty()) throw InvalidIntervalVectorOp("Diameter of an empty IntervalVector is undefined");
-	for (int i=1; i<v.size(); i++) {
+	int i;
+	for (i=1; i<v.size(); i++) {
+		if (v[i].is_unbounded()) { unbounded=true; break; }
 		double w=v[i].diam();
 		if (min? w<d : w>d) {
 			selectedIndex=i;
 			d=w;
 		}
 	}
+
+	if (unbounded) {
+		double pt; // keep the point most distant from +oo (we normalize if the lower bound is -oo)
+		selectedIndex=i;
+		for (; i<v.size(); i++) {
+			if (v[i].lb()==NEG_INFINITY) {
+				if (v[i].ub()==POS_INFINITY) {
+					selectedIndex=i;
+					break;
+				}
+				if (-v[i].ub() < pt) {
+					selectedIndex=i;
+					pt=-v[i].ub();
+				}
+			} else if (v[i].ub()==POS_INFINITY) {
+				if (v[i].lb() < pt) {
+					selectedIndex=i;
+					pt=v[i].lb();
+				}
+			}
+		}
+	}
+
 	return selectedIndex;
 }
 

@@ -1,6 +1,8 @@
 **************************************************
-              References (*under construction*)
+              References
 **************************************************
+
+**NOTE:** This page is *under construction* and a lot of references are still missing.
 
 -------------------------------------
 Articles in Journal and Conferences
@@ -26,6 +28,8 @@ Articles in Journal and Conferences
 .. _Trombettoni07-pdf: http://www.lirmm.fr/~trombetton/publis/cid_cp_2007.pdf
 .. |Bessiere04-pdf| replace:: PDF
 .. _Bessiere04-pdf: http://www.emn.fr/z-info/rdebruyn/ecai04ws.pdf
+.. |Jaulin13-pdf| replace:: PDF
+.. _Jaulin13-pdf: https://www.ensta-bretagne.fr/jaulin/paper_automatica93.pdf
 
 **This page is under construction**
 
@@ -34,8 +38,9 @@ Articles in Journal and Conferences
 +====================+==============================+=================================+=========================+======+=====================+
 |                    |                              |                                 |                         |      |                     |
 | .. _Jaulin14:      | **L. Jauin, B. Desrochers**  | *Introduction to the Algebra of | Engineering Applications| 2014 | |Jaulin14-pdf|_     |
-|[Jaulin & Desrochers|                              | Separators with Application to  | of Artificial           |      |                     |
-|2014]               |                              | Path Planning*                  | Intelligence            |      |                     |
+|                    |                              | Separators with Application to  | of Artificial           |      |                     |
+| [Jaulin &          |                              | Path Planning*                  | Intelligence            |      |                     |
+| Desrochers 2014]   |                              |                                 |                         |      |                     |
 +--------------------+------------------------------+---------------------------------+-------------------------+------+---------------------+
 |                    |                              |                                 |                         |      |                     |
 | .. _Araya14:       | **I. Araya, G. Trombettoni,  | *Upper Bounding in Inner        | Journal of Global       | 2014 | |Araya14-pdf|_      |
@@ -116,6 +121,12 @@ Articles in Journal and Conferences
 | .. _Lhomme93:      | **O. Lhomme**                | *Consistency Techniques for     | IJCAI                   | 1993 |                     |
 |                    |                              | Numeric CSPs*                   |                         |      |                     |
 | [Lhomme 1993]      |                              |                                 |                         |      |                     |
++--------------------+------------------------------+---------------------------------+-------------------------+------+---------------------+
+|                    |                              |                                 |                         |      |                     |
+| .. _Jaulin93:      | **L. Jaulin and E. Walter**  | *Set inversion via interval     | Automatica              | 1993 | |Jaulin13-pdf|_     |
+|                    |                              | analysis for nonlinear          |                         |      |                     |
+| [Jaulin & Walter,  |                              | bounded-error estimation*       |                         |      |                     |
+| 1993]              |                              |                                 |                         |      |                     |
 +--------------------+------------------------------+---------------------------------+-------------------------+------+---------------------+
 |                    |                              |                                 |                         |      |                     |
 | .. _Hansen80:      | **E.R. Hansen and            | *Bounding Solutions of Systems  | BIT Numerical           | 1980 |                     |

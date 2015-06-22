@@ -16,7 +16,7 @@ namespace ibex {
 
 /**
  * \ingroup iset
- * \brief Bisection node (i-set representation)
+ * \brief Bisection node (internal class used for set representation)
  */
 class SetBisect : public SetNode {
 
@@ -39,19 +39,16 @@ public:
 	virtual bool is_leaf() const;
 
 	/** \see SetNode */
-	virtual SetNode* inter(bool sync, const IntervalVector& nodebox, const IntervalVector& x, BoolInterval x_status, double eps);
-
-	virtual SetNode* inter2(bool sync, const IntervalVector& nodebox, const std::pair<SetNode*,IntervalVector>& other, double eps);
-	virtual std::pair<SetNode*,IntervalVector> subset(const IntervalVector& nodebox, const IntervalVector& box);
+	virtual SetNode* inter(bool iset, const IntervalVector& nodebox, const IntervalVector& x, BoolInterval x_status);
 
 	/** \see SetNode */
-	virtual SetNode* inter_rec(bool sync, const IntervalVector& nodebox, Sep& sep, const IntervalVector& targetbox, double eps);
+	virtual SetNode* inter(bool iset, const IntervalVector& nodebox, Sep& sep, double eps);
 
 	/** \see SetNode */
-	virtual SetNode* union_(const IntervalVector& nodebox, const IntervalVector& x, BoolInterval x_status, double eps);
+	virtual SetNode* union_(const IntervalVector& nodebox, const IntervalVector& x, BoolInterval x_status);
 
 	/** \see SetNode */
-	virtual void visit_leaves(leaf_func func, const IntervalVector& nodebox) const;
+	virtual void visit(const IntervalVector& nodebox, SetVisitor& visitor) const;
 
 	/** \see SetNode */
 	virtual void print(std::ostream& os, const IntervalVector& nodebox, int shift) const;
@@ -59,13 +56,16 @@ public:
 	/** \see SetNode */
 	virtual BoolInterval is_superset(const IntervalVector& nodebox, const IntervalVector& box) const;
 
+	/** \see SetNode */
+	virtual SetNode* contract_no_diff(BoolInterval status, const IntervalVector& nodebox, const IntervalVector& box);
+
 	IntervalVector left_box(const IntervalVector& nodebox) const;
 
 	IntervalVector right_box(const IntervalVector& nodebox) const;
 
 //protected:
 	friend class SetNode;
-	friend class SetInterval;
+	friend class Set;
 
 	// partial initialization used by SetInterval::load only
 	// and diff

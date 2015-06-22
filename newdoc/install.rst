@@ -6,7 +6,7 @@ Installation
 .. _Filib: http://www2.math.uni-wuppertal.de/~xsc/software/filib.html
 .. _Profil/Bias: http://www.ti3.tu-harburg.de/keil/profil/index_e.html
 .. _Cplex: http://www.ibm.com/software/commerce/optimization/cplex-optimizer
-.. _Soplex 1.7.2: http://soplex.zib.de
+.. _Soplex 1.7.x: http://soplex.zib.de
 .. _CLP: https://projects.coin-or.org/Clp
 .. _Choco: http://www.emn.fr/z-info/choco-solver
 
@@ -15,7 +15,7 @@ Standard installation (recommended)
 ===================================
 
 Ibex can either be compiled with `Gaol`_, `Filib`_ or `Profil/Bias`_. 
-Ibex also relies on a LP solver that can either be `Cplex`_, `Soplex`_ or `CLP`_.
+Ibex also relies on a LP solver that can either be `Cplex`_, `Soplex 1.7.x`_ or `CLP`_.
 
 If your platform is 32 bits, the standard installation will automatically extract and build the Gaol library (and its dependencies) from the bundle, because Gaol is the fastest one. However, if your platform is 64 bits, it will extract and install Filib instead because the current release of Gaol does not support 64 bit platform. 
 Note that it is still possible to compile Ibex with Gaol under 64 bits platform
@@ -57,7 +57,7 @@ Standard install (stable)
 
   ~$ mkdir Ibex
 
-- Download `Soplex 1.7.2`_ and save the archive in ``Ibex``. **Warning:** The current release of Ibex is not compatible with Soplex 2.0.
+- Download `Soplex 1.7.x`_ and save the archive in ``Ibex``. **Warning:** The current release of Ibex is not compatible with Soplex 2.0.
 - Compile Soplex::
 
   ~$ cd Ibex 
@@ -135,7 +135,7 @@ Windows
 
   We will assume now that this folder is the root folder of ibex.
 
-- Download `Soplex 1.7.2`_ and save the archive in  ``C:\MinGW\msys\1.0\home\[user]\Ibex``. 
+- Download `Soplex 1.7.x`_ and save the archive in  ``C:\MinGW\msys\1.0\home\[user]\Ibex``. 
 
   **Warning:** The current release of Ibex is not compatible with Soplex 2.0.
 

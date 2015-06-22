@@ -70,6 +70,16 @@ public:
     SepFwdBwd(Function &f, const IntervalMatrix& y);
 
     /**
+     * \brief Build the separator for a system
+     */
+    SepFwdBwd(const System& sys);
+
+    /**
+     * \brief Build the separator from a constraint
+     */
+    SepFwdBwd(NumConstraint& c);
+
+    /**
      *  Destructor
      */
     ~SepFwdBwd();
@@ -86,7 +96,9 @@ inline SepFwdBwd::SepFwdBwd(Function &f, const IntervalVector &y): SepCtcPair(*n
 
 inline SepFwdBwd::SepFwdBwd(Function &f, const IntervalMatrix &y): SepCtcPair(*new CtcNotIn(f,y), *new CtcFwdBwd(f,y)) { }
 
-inline SepFwdBwd::~SepFwdBwd(){
+inline SepFwdBwd::SepFwdBwd(NumConstraint& c) : SepCtcPair(*new CtcFwdBwd(c.f,!c.op), *new CtcFwdBwd(c)) { }
+
+inline SepFwdBwd::~SepFwdBwd() {
 	delete &ctc_out;
 	delete &ctc_in;
 }

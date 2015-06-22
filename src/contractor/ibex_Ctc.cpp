@@ -10,7 +10,8 @@
  * ---------------------------------------------------------------------------- */
 
 #include "ibex_Ctc.h"
-
+#include "ibex_SepCtcPair.h"
+#include "ibex_CtcIdentity.h"
 
 namespace ibex {
 
@@ -70,5 +71,12 @@ bool Ctc::check_nb_var_ctc_list (const Array<Ctc>& l)  {
 	}
 	return (i==l.size());
 }
+
+void Ctc::contract(Set& set, double eps) {
+	CtcIdentity id(nb_var);
+	SepCtcPair sep(id,*this);
+	sep.contract(set,eps);
+}
+
 
 } // namespace ibex

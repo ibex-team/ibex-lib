@@ -18,7 +18,7 @@
 namespace ibex {
 
 template<class T>
-std::ostream& operator<<(std::ostream& os, const Affine2Main<T>& x) {
+inline std::ostream& operator<<(std::ostream& os, const Affine2Main<T>& x) {
 	{
 		os << x.itv() << " : ";
 		if (x.is_actif()) {
@@ -38,7 +38,7 @@ std::ostream& operator<<(std::ostream& os, const Affine2Main<T>& x) {
 
 // debut linChebyshev
 template<class T>
-Affine2Main<T>& Affine2Main<T>::linChebyshev(Affine2_expr num, const Interval itv) {
+inline Affine2Main<T>& Affine2Main<T>::linChebyshev(Affine2_expr num, const Interval itv) {
 	//  std::cout << "linChebyshev IN itv= "<<itv << " x =  "<< *this << num<< std::endl;
 
 	Interval res_itv;
@@ -584,7 +584,7 @@ Affine2Main<T>& Affine2Main<T>::linChebyshev(Affine2_expr num, const Interval it
 
 
 template<class T>
-Affine2Main<T>& Affine2Main<T>::power(int n, const Interval itv) {
+inline Affine2Main<T>& Affine2Main<T>::power(int n, const Interval itv) {
 	//	std::cout << "in power "<<std::endl;
 
 	// Particular case
@@ -700,7 +700,7 @@ Affine2Main<T>& Affine2Main<T>::power(int n, const Interval itv) {
 }
 
 template<class T>
-Affine2Main<T> pow(const Affine2Main<T>& x, int n, const Interval itv) { 	// std::cout << "in pow "<<std::endl;
+inline Affine2Main<T> pow(const Affine2Main<T>& x, int n, const Interval itv) { 	// std::cout << "in pow "<<std::endl;
 	if (n == 0)
 		return Affine2Main<T>(1.0);
 	else if (n == 1)
@@ -715,7 +715,7 @@ Affine2Main<T> pow(const Affine2Main<T>& x, int n, const Interval itv) { 	// std
 
 
 template<class T>
-Affine2Main<T> pow(const Affine2Main<T>& x, double d, const Interval itv) {
+inline Affine2Main<T> pow(const Affine2Main<T>& x, double d, const Interval itv) {
 	if ( ((int) (d)) == d) {
 		return pow(x, (int) (d),itv);
 	} else if (d<0) {
@@ -727,7 +727,7 @@ Affine2Main<T> pow(const Affine2Main<T>& x, double d, const Interval itv) {
 
 
 template<class T>
-Affine2Main<T> root(const Affine2Main<T>& x, int n, const Interval itv) {
+inline Affine2Main<T> root(const Affine2Main<T>& x, int n, const Interval itv) {
 
 	if (x.is_empty()) return Affine2Main<T>(Interval::EMPTY_SET);
 	else if (n==0) return Affine2Main<T>(Interval::ONE);
@@ -750,7 +750,7 @@ Affine2Main<T> root(const Affine2Main<T>& x, int n, const Interval itv) {
 
 
 template<class T>
-Affine2Main<T> sign(const Affine2Main<T>&, const Interval itv) {
+inline Affine2Main<T> sign(const Affine2Main<T>&, const Interval itv) {
 	if (itv.lb() > 0) {
 		return Affine2Main<T>(1.0);
 	} else if (itv.ub() < 0) {
@@ -766,10 +766,10 @@ Affine2Main<T> sign(const Affine2Main<T>&, const Interval itv) {
 
 
 template<>
-Affine2Main<AF_No>& Affine2Main<AF_No>::linChebyshev(Affine2_expr num, const Interval itv);
+inline Affine2Main<AF_No>& Affine2Main<AF_No>::linChebyshev(Affine2_expr num, const Interval itv);
 
 template<>
-Affine2Main<AF_No>& Affine2Main<AF_No>::power(int n, const Interval itv);
+inline Affine2Main<AF_No>& Affine2Main<AF_No>::power(int n, const Interval itv);
 
 
 

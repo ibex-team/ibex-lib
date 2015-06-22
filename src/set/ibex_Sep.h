@@ -6,8 +6,8 @@
  * License     : This program can be distributed under the terms of the GNU LGPL.
  *               See the file COPYING.LESSER.
  *
- * Author(s)   : Benoit Desrochers, ENSTA Bretagne (France)
- *               Gilles Chabert, Mines de Nantes (France)
+ * Author(s)   : Gilles Chabert, Mines de Nantes (France)
+ *               Benoit Desrochers, ENSTA Bretagne (France)
  *
  * Created     : Mar 24, 2014
  * ---------------------------------------------------------------------------- */
@@ -16,6 +16,8 @@
 #define __IBEX_SEPARATOR_H__
 
 #include "ibex_IntervalVector.h"
+#include "ibex_Set.h"
+#include "ibex_SetInterval.h"
 
 namespace ibex {
 
@@ -65,6 +67,35 @@ public:
 	 */
     virtual void separate(IntervalVector& x_in, IntervalVector& x_out) = 0;
 
+	/**
+	 * \brief Contract a set with this separator.
+	 *
+	 * If [x] designates the set in argument and [y] the set implicitly represented by this separator,
+	 * then [x] will be replaced by :
+	 *
+	 * { x \cap y, x\in[x] and y\in[y] }.
+	 *
+	 * Note: In Jaulin's terminology, this operator is the "i-set extension of the intersection".
+	 *
+	 * \param eps - The separator is applied recursively on the set. This parameter
+	 *              is a precision for controlling the recursivity.
+	 */
+	void contract(Set& set, double eps);
+
+	/**
+	 * \brief Contract an i-set with this separator.
+	 *
+	 * In Jaulin's terminology, this operator is the "intersection of i-sets" (squared symbol)
+	 *
+	 * If [x] designates the i-set in argument and [y] the i-set implicitly represented by this separator,
+	 * then [x] will be replaced by
+	 *
+	 *  { x, x\in[x] and x\in[y] }.
+	 *
+	 * \param eps - The separator is applied recursively on the i-set. This parameter
+	 *              is a precision for controlling the recursivity.
+	 */
+	void contract(SetInterval& iset, double eps);
 
 	/**
 	 * \brief Delete *this.
