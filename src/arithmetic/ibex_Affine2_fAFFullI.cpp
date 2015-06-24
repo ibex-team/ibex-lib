@@ -510,7 +510,7 @@ Affine2Main<AF_fAFFullI>& Affine2Main<AF_fAFFullI>::operator+=(const Interval& y
 }
 
 template<>
-Affine2Main<AF_fAFFullI>& Affine2Main<AF_fAFFullI>::sqr(const Interval itv) {
+Affine2Main<AF_fAFFullI>& Affine2Main<AF_fAFFullI>::sqrA(const Interval& itv) {
 
 	if (	(!is_actif())||
 			itv.is_empty()||
@@ -521,7 +521,7 @@ Affine2Main<AF_fAFFullI>& Affine2Main<AF_fAFFullI>::sqr(const Interval itv) {
 	} else  {
 		Affine2Main<AF_fAFFullI> ax(*this);
 		//std::cout << "sqr of " << itv << std::endl;
-		*this = pow(ax,Interval(2),itv);
+		*this = ax.powerA(Interval(2),itv);
 	}
 
 	//	std::cout << "out sqr "<<std::endl;

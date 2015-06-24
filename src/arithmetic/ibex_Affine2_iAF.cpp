@@ -326,7 +326,7 @@ Affine2Main<AF_iAF>& Affine2Main<AF_iAF>::saxpy(double alpha, const Affine2Main<
 		if (_elt._val != NULL) {
 			bool b = (_elt._err.ub()<POS_INFINITY);
 			for (i=0;i<=_n;i++) {
-				b &= (abs(_elt._val[i]).ub()<POS_INFINITY);
+				b &= ((abs(_elt._val[i])).ub()<POS_INFINITY);
 			}
 			if (!b) {
 				*this = Interval::ALL_REALS;
@@ -447,7 +447,7 @@ Affine2Main<AF_iAF>& Affine2Main<AF_iAF>::operator*=(const Interval& y) {
 }
 
 template<>
-Affine2Main<AF_iAF>& Affine2Main<AF_iAF>::sqr(const Interval itv) {
+Affine2Main<AF_iAF>& Affine2Main<AF_iAF>::sqrA(const Interval& itv) {
 //	std::cout << "in sqr "<<std::endl;
 
 	bool b = (!(itv.is_empty()||itv.is_unbounded()));

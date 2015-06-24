@@ -151,8 +151,8 @@ inline void AffineLinEval::cst_fwd(const ExprConstant& c, ExprLabel& y) {
 
 inline void AffineLinEval::apply_fwd(const ExprApply& a, ExprLabel** x, ExprLabel& y)                          {
 	ExprLabel& tmp = eval_label(a.func,x);
-	*y.af_lin = *tmp.af_lin;
-	*y.d = *tmp.d;
+	*y.af_lin = (*tmp.af_lin);
+	*y.d = (*tmp.d);
 }
 inline void AffineLinEval::chi_fwd(const ExprChi&,  const ExprLabel& x1, const ExprLabel& x2, const ExprLabel& x3, ExprLabel& y)                         {
 	y.af_lin->i()=chi(x1.d->i(),x2.af_lin->i(),x3.af_lin->i());
@@ -171,7 +171,9 @@ inline void AffineLinEval::sub_fwd(const ExprSub&, const ExprLabel& x1, const Ex
 	y.d->i()=(y.af_lin->i().itv() & (x1.d->i()-x2.d->i()));
 }
 inline void AffineLinEval::div_fwd(const ExprDiv&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)     {
-	y.af_lin->i()=x1.af_lin->i()*inv(x2.af_lin->i(),x2.d->i());
+	y.af_lin->i()=x2.af_lin->i();
+	y.af_lin->i().invA(x2.d->i());
+	y.af_lin->i()*=x1.af_lin->i();
 	y.d->i()=(y.af_lin->i().itv() & (x1.d->i()/x2.d->i()));
 }
 inline void AffineLinEval::max_fwd(const ExprMax&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)     {
@@ -191,67 +193,83 @@ inline void AffineLinEval::minus_fwd(const ExprMinus&, const ExprLabel& x, ExprL
 	y.d->i()=(y.af_lin->i().itv() & (-x.d->i()));
 }
 inline void AffineLinEval::sign_fwd(const ExprSign&, const ExprLabel& x, ExprLabel& y)                         {
-	y.af_lin->i()=sign(x.af_lin->i(),x.d->i());
+	y.af_lin->i()=sign(x.af_lin->i());
+	y.af_lin->i().signA(x.d->i());
 	y.d->i()=(y.af_lin->i().itv() & sign(x.d->i()));
 }
 inline void AffineLinEval::abs_fwd(const ExprAbs&, const ExprLabel& x, ExprLabel& y)                           {
-	y.af_lin->i()=abs(x.af_lin->i(),x.d->i());
+	y.af_lin->i()=x.af_lin->i();
+	y.af_lin->i().absA(x.d->i());
 	y.d->i()=(y.af_lin->i().itv() & abs(x.d->i()));
 }
 inline void AffineLinEval::power_fwd(const ExprPower& p, const ExprLabel& x, ExprLabel& y)                     {
-	y.af_lin->i()=pow(x.af_lin->i(),p.expon,x.d->i());
+	y.af_lin->i()=x.af_lin->i();
+	y.af_lin->i().powerA(p.expon,x.d->i());
 	y.d->i()=(y.af_lin->i().itv() & pow(x.d->i(),p.expon));
 }
 inline void AffineLinEval::sqr_fwd(const ExprSqr&, const ExprLabel& x, ExprLabel& y)                           {
-	y.af_lin->i()=sqr(x.af_lin->i(),x.d->i());
+	y.af_lin->i()=x.af_lin->i();
+	y.af_lin->i().sqrA(x.d->i());
 	y.d->i()=(y.af_lin->i().itv() & sqr(x.d->i()));
 }
 inline void AffineLinEval::sqrt_fwd(const ExprSqrt&, const ExprLabel& x, ExprLabel& y)                         {
-	y.af_lin->i()=sqrt(x.af_lin->i(),x.d->i());
+	y.af_lin->i()=x.af_lin->i();
+	y.af_lin->i().sqrtA(x.d->i());
 	y.d->i()=(y.af_lin->i().itv() & sqrt(x.d->i()));
 }
 inline void AffineLinEval::exp_fwd(const ExprExp&, const ExprLabel& x, ExprLabel& y)                           {
-	y.af_lin->i()=exp(x.af_lin->i(),x.d->i());
+	y.af_lin->i()=x.af_lin->i();
+	y.af_lin->i().expA(x.d->i());
 	y.d->i()=(y.af_lin->i().itv() & exp(x.d->i()));
 }
 inline void AffineLinEval::log_fwd(const ExprLog&, const ExprLabel& x, ExprLabel& y)                           {
-	y.af_lin->i()=log(x.af_lin->i(),x.d->i());
+	y.af_lin->i()=x.af_lin->i();
+	y.af_lin->i().logA(x.d->i());
 	y.d->i()=(y.af_lin->i().itv() & log(x.d->i()));
 }
 inline void AffineLinEval::cos_fwd(const ExprCos&, const ExprLabel& x, ExprLabel& y)                           {
-	y.af_lin->i()=cos(x.af_lin->i(),x.d->i());
+	y.af_lin->i()=x.af_lin->i();
+	y.af_lin->i().cosA(x.d->i());
 	y.d->i()=(y.af_lin->i().itv() & cos(x.d->i()));
 }
 inline void AffineLinEval::sin_fwd(const ExprSin&, const ExprLabel& x, ExprLabel& y)                           {
-	y.af_lin->i()=sin(x.af_lin->i(),x.d->i());
+	y.af_lin->i()=x.af_lin->i();
+	y.af_lin->i().sinA(x.d->i());
 	y.d->i()=(y.af_lin->i().itv() & sin(x.d->i()));
 }
 inline void AffineLinEval::tan_fwd(const ExprTan&, const ExprLabel& x, ExprLabel& y)                           {
-	y.af_lin->i()=tan(x.af_lin->i(),x.d->i());
+	y.af_lin->i()=x.af_lin->i();
+	y.af_lin->i().tanA(x.d->i());
 	y.d->i()=(y.af_lin->i().itv() & tan(x.d->i()));
 }
 inline void AffineLinEval::cosh_fwd(const ExprCosh&, const ExprLabel& x, ExprLabel& y)                         {
-	y.af_lin->i()=cosh(x.af_lin->i(),x.d->i());
+	y.af_lin->i()=x.af_lin->i();
+	y.af_lin->i().coshA(x.d->i());
 	y.d->i()=(y.af_lin->i().itv() & cosh(x.d->i()));
 }
 inline void AffineLinEval::sinh_fwd(const ExprSinh&, const ExprLabel& x, ExprLabel& y)                         {
-	y.af_lin->i()=sinh(x.af_lin->i(),x.d->i());
+	y.af_lin->i()=x.af_lin->i();
+	y.af_lin->i().sinhA(x.d->i());
 	y.d->i()=(y.af_lin->i().itv() & sinh(x.d->i()));
 }
 inline void AffineLinEval::tanh_fwd(const ExprTanh&, const ExprLabel& x, ExprLabel& y)                         {
-	y.af_lin->i()=tanh(x.af_lin->i(),x.d->i());
+	y.af_lin->i()=x.af_lin->i();
+	y.af_lin->i().tanhA(x.d->i());
 	y.d->i()=(y.af_lin->i().itv() & tanh(x.d->i()));
 }
 inline void AffineLinEval::acos_fwd(const ExprAcos&, const ExprLabel& x, ExprLabel& y)                         {
-	y.af_lin->i()=acos(x.af_lin->i(),x.d->i());
+	y.af_lin->i()=x.af_lin->i();
+	y.af_lin->i().acosA(x.d->i());
 	y.d->i()=(y.af_lin->i().itv() & acos(x.d->i()));
 }
 inline void AffineLinEval::asin_fwd(const ExprAsin&, const ExprLabel& x, ExprLabel& y)                         {
-	y.af_lin->i()=asin(x.af_lin->i(),x.d->i());
+	y.af_lin->i()=x.af_lin->i();
+	y.af_lin->i().asinA(x.d->i());
 	y.d->i()=(y.af_lin->i().itv() & asin(x.d->i()));
 }
 inline void AffineLinEval::atan_fwd(const ExprAtan&, const ExprLabel& x, ExprLabel& y)                         {
-	y.af_lin->i()=atan(x.af_lin->i(),x.d->i());
+	y.af_lin->i()=x.af_lin->i();
+	y.af_lin->i().atanA(x.d->i());
 	y.d->i()=(y.af_lin->i().itv() & atan(x.d->i()));
 }
 inline void AffineLinEval::acosh_fwd(const ExprAcosh&, const ExprLabel& x, ExprLabel& y)                       {

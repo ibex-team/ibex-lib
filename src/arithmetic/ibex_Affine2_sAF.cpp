@@ -495,7 +495,7 @@ Affine2Main<AF_sAF>& Affine2Main<AF_sAF>::operator*=(const Interval& y) {
 
 
 template<>
-Affine2Main<AF_sAF>& Affine2Main<AF_sAF>::sqr(const Interval itv) {
+Affine2Main<AF_sAF>& Affine2Main<AF_sAF>::sqrA(const Interval& itv) {
 //	std::cout << "in sqr "<<std::endl;
 
 	bool b = (!(itv.is_empty()||itv.is_unbounded()));

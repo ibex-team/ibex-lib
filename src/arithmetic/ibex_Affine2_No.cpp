@@ -450,7 +450,7 @@ Affine2Main<AF_No>& Affine2Main<AF_No>::operator*=(const Interval& y) {
 
 
 template<>
-Affine2Main<AF_No>& Affine2Main<AF_No>::sqr(const Interval itv) {
+Affine2Main<AF_No>& Affine2Main<AF_No>::sqrA(const Interval& itv) {
 //	std::cout << "in sqr "<<std::endl;
 
 	bool b = (!(itv.is_empty()||itv.is_unbounded()));
@@ -506,7 +506,7 @@ Affine2Main<AF_No>& Affine2Main<AF_No>::sqr(const Interval itv) {
 
 // debut linChebyshev
 template<>
-Affine2Main<AF_No>& Affine2Main<AF_No>::linChebyshev(Affine2_expr num, const Interval itv) {
+Affine2Main<AF_No>& Affine2Main<AF_No>::linChebyshev(Affine2_expr num, const Interval& itv) {
 	//  std::cout << "linChebyshev IN itv= "<<itv << " x =  "<< *this << num<< std::endl;
 
 	Interval res_itv;
@@ -1024,7 +1024,7 @@ Affine2Main<AF_No>& Affine2Main<AF_No>::linChebyshev(Affine2_expr num, const Int
 
 
 template<>
-Affine2Main<AF_No>& Affine2Main<AF_No>::power(int n, const Interval itv) {
+Affine2Main<AF_No>& Affine2Main<AF_No>::powerA(int n, const Interval& itv) {
 	//	std::cout << "in power "<<std::endl;
 
 	// Particular case

@@ -151,8 +151,8 @@ inline void Affine2Eval::cst_fwd(const ExprConstant& c, ExprLabel& y) {
 
 inline void Affine2Eval::apply_fwd(const ExprApply& a, ExprLabel** x, ExprLabel& y)                          {
 	ExprLabel& tmp = eval_label(a.func,x);
-	*y.af2 = *tmp.af2;
-	*y.d = *tmp.d;
+	*y.af2 = (*tmp.af2);
+	*y.d = (*tmp.d);
 }
 inline void Affine2Eval::chi_fwd(const ExprChi&,  const ExprLabel& x1, const ExprLabel& x2, const ExprLabel& x3, ExprLabel& y)                         {
 	y.af2->i()=chi(x1.d->i(),x2.af2->i(),x3.af2->i());
@@ -171,7 +171,9 @@ inline void Affine2Eval::sub_fwd(const ExprSub&, const ExprLabel& x1, const Expr
 	y.d->i()=(y.af2->i().itv() & (x1.d->i()-x2.d->i()));
 }
 inline void Affine2Eval::div_fwd(const ExprDiv&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)     {
-	y.af2->i()=x1.af2->i()*inv(x2.af2->i(),x2.d->i());
+	y.af2->i()=x2.af2->i();
+	y.af2->i().invA(x2.d->i());
+	y.af2->i()*=x1.af2->i();
 	y.d->i()=(y.af2->i().itv() & (x1.d->i()/x2.d->i()));
 }
 inline void Affine2Eval::max_fwd(const ExprMax&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)     {
@@ -191,67 +193,83 @@ inline void Affine2Eval::minus_fwd(const ExprMinus&, const ExprLabel& x, ExprLab
 	y.d->i()=(y.af2->i().itv() & (-x.d->i()));
 }
 inline void Affine2Eval::sign_fwd(const ExprSign&, const ExprLabel& x, ExprLabel& y)                         {
-	y.af2->i()=sign(x.af2->i(),x.d->i());
+	y.af2->i()=sign(x.af2->i());
+	y.af2->i().signA(x.d->i());
 	y.d->i()=(y.af2->i().itv() & sign(x.d->i()));
 }
 inline void Affine2Eval::abs_fwd(const ExprAbs&, const ExprLabel& x, ExprLabel& y)                           {
-	y.af2->i()=abs(x.af2->i(),x.d->i());
+	y.af2->i()=x.af2->i();
+	y.af2->i().absA(x.d->i());
 	y.d->i()=(y.af2->i().itv() & abs(x.d->i()));
 }
 inline void Affine2Eval::power_fwd(const ExprPower& p, const ExprLabel& x, ExprLabel& y)                     {
-	y.af2->i()=pow(x.af2->i(),p.expon,x.d->i());
+	y.af2->i()=x.af2->i();
+	y.af2->i().powerA(p.expon,x.d->i());
 	y.d->i()=(y.af2->i().itv() & pow(x.d->i(),p.expon));
 }
 inline void Affine2Eval::sqr_fwd(const ExprSqr&, const ExprLabel& x, ExprLabel& y)                           {
-	y.af2->i()=sqr(x.af2->i(),x.d->i());
+	y.af2->i()=x.af2->i();
+	y.af2->i().sqrA(x.d->i());
 	y.d->i()=(y.af2->i().itv() & sqr(x.d->i()));
 }
 inline void Affine2Eval::sqrt_fwd(const ExprSqrt&, const ExprLabel& x, ExprLabel& y)                         {
-	y.af2->i()=sqrt(x.af2->i(),x.d->i());
+	y.af2->i()=x.af2->i();
+	y.af2->i().sqrtA(x.d->i());
 	y.d->i()=(y.af2->i().itv() & sqrt(x.d->i()));
 }
 inline void Affine2Eval::exp_fwd(const ExprExp&, const ExprLabel& x, ExprLabel& y)                           {
-	y.af2->i()=exp(x.af2->i(),x.d->i());
+	y.af2->i()=x.af2->i();
+	y.af2->i().expA(x.d->i());
 	y.d->i()=(y.af2->i().itv() & exp(x.d->i()));
 }
 inline void Affine2Eval::log_fwd(const ExprLog&, const ExprLabel& x, ExprLabel& y)                           {
-	y.af2->i()=log(x.af2->i(),x.d->i());
+	y.af2->i()=x.af2->i();
+	y.af2->i().logA(x.d->i());
 	y.d->i()=(y.af2->i().itv() & log(x.d->i()));
 }
 inline void Affine2Eval::cos_fwd(const ExprCos&, const ExprLabel& x, ExprLabel& y)                           {
-	y.af2->i()=cos(x.af2->i(),x.d->i());
+	y.af2->i()=x.af2->i();
+	y.af2->i().cosA(x.d->i());
 	y.d->i()=(y.af2->i().itv() & cos(x.d->i()));
 }
 inline void Affine2Eval::sin_fwd(const ExprSin&, const ExprLabel& x, ExprLabel& y)                           {
-	y.af2->i()=sin(x.af2->i(),x.d->i());
+	y.af2->i()=x.af2->i();
+	y.af2->i().sinA(x.d->i());
 	y.d->i()=(y.af2->i().itv() & sin(x.d->i()));
 }
 inline void Affine2Eval::tan_fwd(const ExprTan&, const ExprLabel& x, ExprLabel& y)                           {
-	y.af2->i()=tan(x.af2->i(),x.d->i());
+	y.af2->i()=x.af2->i();
+	y.af2->i().tanA(x.d->i());
 	y.d->i()=(y.af2->i().itv() & tan(x.d->i()));
 }
 inline void Affine2Eval::cosh_fwd(const ExprCosh&, const ExprLabel& x, ExprLabel& y)                         {
-	y.af2->i()=cosh(x.af2->i(),x.d->i());
+	y.af2->i()=x.af2->i();
+	y.af2->i().coshA(x.d->i());
 	y.d->i()=(y.af2->i().itv() & cosh(x.d->i()));
 }
 inline void Affine2Eval::sinh_fwd(const ExprSinh&, const ExprLabel& x, ExprLabel& y)                         {
-	y.af2->i()=sinh(x.af2->i(),x.d->i());
+	y.af2->i()=x.af2->i();
+	y.af2->i().sinhA(x.d->i());
 	y.d->i()=(y.af2->i().itv() & sinh(x.d->i()));
 }
 inline void Affine2Eval::tanh_fwd(const ExprTanh&, const ExprLabel& x, ExprLabel& y)                         {
-	y.af2->i()=tanh(x.af2->i(),x.d->i());
+	y.af2->i()=x.af2->i();
+	y.af2->i().tanhA(x.d->i());
 	y.d->i()=(y.af2->i().itv() & tanh(x.d->i()));
 }
 inline void Affine2Eval::acos_fwd(const ExprAcos&, const ExprLabel& x, ExprLabel& y)                         {
-	y.af2->i()=acos(x.af2->i(),x.d->i());
+	y.af2->i()=x.af2->i();
+	y.af2->i().acosA(x.d->i());
 	y.d->i()=(y.af2->i().itv() & acos(x.d->i()));
 }
 inline void Affine2Eval::asin_fwd(const ExprAsin&, const ExprLabel& x, ExprLabel& y)                         {
-	y.af2->i()=asin(x.af2->i(),x.d->i());
+	y.af2->i()=x.af2->i();
+	y.af2->i().asinA(x.d->i());
 	y.d->i()=(y.af2->i().itv() & asin(x.d->i()));
 }
 inline void Affine2Eval::atan_fwd(const ExprAtan&, const ExprLabel& x, ExprLabel& y)                         {
-	y.af2->i()=atan(x.af2->i(),x.d->i());
+	y.af2->i()=x.af2->i();
+	y.af2->i().atanA(x.d->i());
 	y.d->i()=(y.af2->i().itv() & atan(x.d->i()));
 }
 inline void Affine2Eval::acosh_fwd(const ExprAcosh&, const ExprLabel& x, ExprLabel& y)                       {

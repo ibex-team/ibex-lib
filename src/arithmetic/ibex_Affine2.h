@@ -31,6 +31,8 @@ namespace ibex {
 template<class T> class Affine2MainVector;
 template<class T> class Affine2MainMatrix;
 template<class T> class Affine2MainMatrixArray;
+class Affine2Eval;
+class AffineLinEval;
 
 /**
  * \ingroup arithmetic
@@ -58,8 +60,16 @@ template<class T=AF_Default>
 class Affine2Main {
 
 private:
+	friend class Affine2Eval;
+	friend class AffineLinEval;
+
 	/** \brief tolerance for default compact procedure  */
 	static const double AF_COMPAC_Tol = 1.e-6;
+
+
+	typedef enum {
+		AF_SQRT, AF_EXP, AF_LOG, AF_INV, AF_COS, AF_SIN, AF_TAN, AF_ABS,AF_ACOS, AF_ASIN, AF_ATAN, AF_COSH, AF_SINH, AF_TANH
+	} Affine2_expr; // ...etc...
 
 
 	/**
@@ -78,13 +88,13 @@ private:
 	T _elt;			// core of the affine2 form
 
 
-	static double AF_EM() {
+	static double AF_EM()  {
 		return __builtin_powi(2.0, -51);
 	}
-	static double AF_EC() {
+	static double AF_EC()   {
 		return __builtin_powi(2.0, -55);
 	}
-	static double AF_EE() {
+	static double AF_EE()   {
 		return 2.0;
 	}
 
@@ -92,69 +102,86 @@ private:
 	 * \brief  Compute x = alpha*x+y+beta
 	 * The boolean indicate which operation need to be done.
 	 *  ! Boolean: scalar, add, constant, error
+	 * TO WRITE in your Affine implementation
 	 */
 	Affine2Main& saxpy(double alpha, const Affine2Main& y, double beta, double delta,
 			bool B1, bool B2, bool B3, bool B4);
 
 
-public:
-
-
-	typedef enum {
-		AF_SQRT,
-		AF_EXP,
-		AF_LOG,
-		AF_INV,
-		AF_COS,
-		AF_SIN,
-		AF_TAN,
-		AF_ABS,
-		AF_ACOS,
-		AF_ASIN,
-		AF_ATAN,
-		AF_COSH,
-		AF_SINH,
-		AF_TANH
-	} Affine2_expr; // ...etc...
-
-
-
-	/** \brief Create an empty affine form. */
-	Affine2Main();
-
-	/** \brief Create an affine form with n variables and  initialized val[0] with d. */
-	explicit Affine2Main(const double d);
-
-	/** \brief Create an affine form with n variables and  initialized val[0] with  itv. */
-	explicit Affine2Main(const Interval& itv);
-
-	/** \brief Create an affine form with n variables and  initialized the m^th variable with  itv. */
-	Affine2Main(int n, int m, const Interval& itv);
-
-	/** \brief Create an affine form with n variables, initialized with x  */
-	Affine2Main(const Affine2Main& x);
-
-	/** \brief  Delete the affine form */
-	virtual ~Affine2Main() { };
-
 	/**
 	 *\brief compute the min-range linearization of an unary operator
 	 */
-	//Affine2Main& linMinRange(Affine2_expr num, const Interval itv);
+	Affine2Main& linMinRange(Affine2_expr num, const Interval& itv);
 
 	/**
 	 *\brief compute the chebyshev linearization of an unary operator
 	 */
-	Affine2Main& linChebyshev(Affine2_expr num, const Interval itv);
+	Affine2Main& linChebyshev(Affine2_expr num, const Interval& itv);
 
-	/** \brief Return -*this. */
+	/**
+	 * TO WRITE in your Affine implementation
+	 */
+	Affine2Main&  sqrA(const Interval& itv);
+
+
+	Affine2Main&  powerA(int n, const Interval& itv);
+	Affine2Main&  invA(const Interval& itv);
+	Affine2Main&  sqrtA(const Interval& itv);
+	Affine2Main&  expA(const Interval& itv);
+	Affine2Main&  logA(const Interval& itv);
+	Affine2Main&  powerA(double d, const Interval& itv);
+	Affine2Main&  powerA(const Interval &y, const Interval& itvx);
+	Affine2Main&  rootA(int n, const Interval& itv);
+	Affine2Main&  cosA(const Interval& itv);
+	Affine2Main&  sinA(const Interval& itv);
+	Affine2Main&  tanA(const Interval& itv);
+	Affine2Main&  acosA(const Interval& itv);
+	Affine2Main&  asinA(const Interval& itv);
+	Affine2Main&  atanA(const Interval& itv);
+	Affine2Main&  coshA(const Interval& itv);
+	Affine2Main&  sinhA(const Interval& itv);
+	Affine2Main&  tanhA(const Interval& itv);
+	Affine2Main&  absA(const Interval& itv);
+	Affine2Main&  signA(const Interval& itv);
+
+
+
+public:
+
+	/** \brief Create an empty affine form.
+	 * TO WRITE in your Affine implementation
+	 */
+	Affine2Main();
+
+	/** \brief Create an affine form with n variables and  initialized val[0] with d.
+	 * TO WRITE in your Affine implementation
+	 */
+	explicit Affine2Main(const double d);
+
+	/** \brief Create an affine form with n variables and  initialized val[0] with  itv.
+	 * TO WRITE in your Affine implementation
+	 */
+	explicit Affine2Main(const Interval& itv);
+
+	/** \brief Create an affine form with n variables and  initialized the m^th variable with  itv.
+	 * TO WRITE in your Affine implementation
+	 */
+	Affine2Main(int n, int m, const Interval& itv);
+
+	/** \brief Create an affine form with n variables, initialized with x
+	 * TO WRITE in your Affine implementation
+	 */
+	Affine2Main(const Affine2Main& x);
+
+	/** \brief  Delete the affine form
+	 * TO WRITE in your Affine implementation
+	 */
+	virtual ~Affine2Main() { };
+
+	/** \brief Return -*this.
+	 * TO WRITE in your Affine implementation
+	 */
 	Affine2Main operator-() const;
-
-	/** \brief Return sqr(*this) */
-	Affine2Main& sqr(const Interval itv);
-
-	/** \brief Return pow(*this,n) */
-	Affine2Main& power(int n, const Interval itv);
 
 	/** \brief True iff *this and x are exactly the same intervals. */
 	bool operator==(const Affine2Main& x) const;
@@ -172,14 +199,17 @@ public:
 	void set_empty();
 
 	/** \brief Set *this to x.
+	 * TO WRITE in your Affine implementation
 	 */
 	Affine2Main& operator=(const Affine2Main& x);
 
 	/** \brief Set *this to d.
+	 * TO WRITE in your Affine implementation
 	 */
 	Affine2Main& operator=(double x);
 
 	/** \brief Set *this to itv.
+	 * TO WRITE in your Affine implementation
 	 */
 	Affine2Main& operator=(const Interval& itv);
 
@@ -212,16 +242,19 @@ public:
 
 	/**
 	 * \brief Range of the affine form
+	 * TO WRITE in your Affine implementation
 	 */
 	const Interval itv() const ;
 
 	/**
 	 * \brief return _val[i]
+	 * TO WRITE in your Affine implementation
 	 */
 	double val(int i) const;
 
 	/**
 	 * \brief return _err
+	 * TO WRITE in your Affine implementation
 	 */
 	double err() const;
 	/**
@@ -253,6 +286,7 @@ public:
 
 	/**
 	 * \brief reduce the number of noise variable if the value is inferior to \param tol
+	 * TO WRITE in your Affine implementation
 	 */
 	void compact(double tol);
 	void compact();
@@ -275,7 +309,9 @@ public:
 	/** \brief Subtract \a x to *this and return the result. */
 	Affine2Main& operator-=(const Interval& x);
 
-	/** \brief Multiply *this by \a x and return the result. */
+	/** \brief Multiply *this by \a x and return the result.
+	 * TO WRITE in your Affine implementation
+	 */
 	Affine2Main& operator*=(const Interval& x);
 
 	/** \brief Divide *this by \a x and return the result.*/
@@ -287,7 +323,9 @@ public:
 	/** \brief Subtract \a x to *this and return the result. */
 	Affine2Main& operator-=(const Affine2Main& x);
 
-	/** \brief Multiply *this by \a x and return the result. */
+	/** \brief Multiply *this by \a x and return the result.
+	 * TO WRITE in your Affine implementation
+	 */
 	Affine2Main& operator*=(const Affine2Main& x);
 
 	/** \brief Divide *this by \a x and return the result. */
@@ -298,9 +336,73 @@ public:
 	typedef Affine2MainMatrix<T> MATRIX;
 	typedef Affine2MainMatrixArray<T> MATRIX_ARRAY;
 
+
+
+	/** Friend function */
+
+	/** \brief 1/AF[x] */
+	template<class U>
+	friend  Affine2Main<U> inv(const Affine2Main<U>&  x);
+	/** \brief AF[x]^2 */
+	template<class U>
+	friend  Affine2Main<U> sqr(const Affine2Main<U>&  x);
+	/** \brief sqrt{AF[x]} */
+	template<class U>
+	friend  Affine2Main<U> sqrt(const Affine2Main<U>&  x);
+	/** \brief exp(AF[x]). */
+	template<class U>
+	friend  Affine2Main<U> exp(const Affine2Main<U>&  x);
+	/** \brief log(AF[x]). */
+	template<class U>
+	friend  Affine2Main<U> log(const Affine2Main<U>&  x);
+	/** \brief AF[x]^n. */
+	template<class U>
+	friend  Affine2Main<U> pow(const Affine2Main<U>&  x, int n);
+	/** \brief AF[x]^d. */
+	template<class U>
+	friend  Affine2Main<U> pow(const Affine2Main<U>&  x, double d);
+	/** \brief AF[x]^[y]. */
+	template<class U>
+	friend  Affine2Main<U> pow(const Affine2Main<U>& x, const Interval &y);
+	/** \brief AF[x]^AF[y]. */
+	template<class U>
+	friend  Affine2Main<U> pow(const Affine2Main<U>& x, const Affine2Main<U>& y);
+	/** \brief nth root of AF[x]. */
+	template<class U>
+	friend  Affine2Main<U> root(const Affine2Main<U>&  x, int n);
+	/** \brief cos(AF[x]). */
+	template<class U>
+	friend  Affine2Main<U> cos(const Affine2Main<U>&  x);
+	/** \brief sin(AF[x]). */
+	template<class U>
+	friend  Affine2Main<U> sin(const Affine2Main<U>&  x);
+	/** \brief tan(AF[x]). */
+	template<class U>
+	friend  Affine2Main<U> tan(const Affine2Main<U>&  x);
+	/** \brief acos(AF[x]). */
+	template<class U>
+	friend  Affine2Main<U> acos(const Affine2Main<U>&  x);
+	/** \brief asin(AF[x]). */
+	template<class U>
+	friend  Affine2Main<U> asin(const Affine2Main<U>&  x);
+	/** \brief atan(AF[x]). */
+	template<class U>
+	friend  Affine2Main<U> atan(const Affine2Main<U>&  x);
+	/** \brief cosh(AF[x]). */
+	template<class U>
+	friend  Affine2Main<U> cosh(const Affine2Main<U>&  x);
+	/** \brief sinh(AF[x]). */
+	template<class U>
+	friend  Affine2Main<U> sinh(const Affine2Main<U>&  x);
+	/** \brief tanh(AF[x]). */
+	template<class U>
+	friend  Affine2Main<U> tanh(const Affine2Main<U>&  x);
+	/** \brief abs(AF[x]) = sqrt(sqr(AF[x])). */
+	template<class U>
+	friend  Affine2Main<U> abs(const Affine2Main<U>& x);
+
+
 };
-
-
 
 
 /** \ingroup arithmetic */
@@ -404,127 +506,6 @@ double distance(const Interval &x1, const Affine2Main<T>& x2);
 template<class T>
 double distance(const Affine2Main<T>& x1, const Interval &x2);
 
-
-/** \brief 1/AF[x] */
-template<class T>
-Affine2Main<T> inv(const Affine2Main<T>&  x);
-template<class T>
-Affine2Main<T> inv(const Affine2Main<T>&  x, const Interval itv);
-
-/** \brief AF[x]^2 */
-template<class T>
-Affine2Main<T> sqr(const Affine2Main<T>&  x);
-template<class T>
-Affine2Main<T> sqr(const Affine2Main<T>&  x, const Interval itv);
-
-/** \brief sqrt{AF[x]} */
-template<class T>
-Affine2Main<T> sqrt(const Affine2Main<T>&  x);
-template<class T>
-Affine2Main<T> sqrt(const Affine2Main<T>&  x, const Interval itv);
-
-/** \brief exp(AF[x]). */
-template<class T>
-Affine2Main<T> exp(const Affine2Main<T>&  x);
-template<class T>
-Affine2Main<T> exp(const Affine2Main<T>&  x, const Interval itv);
-
-/** \brief log(AF[x]). */
-template<class T>
-Affine2Main<T> log(const Affine2Main<T>&  x);
-template<class T>
-Affine2Main<T> log(const Affine2Main<T>&  x, const Interval itv);
-
-/** \brief AF[x]^n. */
-template<class T>
-Affine2Main<T> pow(const Affine2Main<T>&  x, int n);
-template<class T>
-Affine2Main<T> pow(const Affine2Main<T>&  x, int n, const Interval itv);
-
-/** \brief AF[x]^d. */
-template<class T>
-Affine2Main<T> pow(const Affine2Main<T>&  x, double d);
-template<class T>
-Affine2Main<T> pow(const Affine2Main<T>&  x, double d, const Interval itv);
-
-/** \brief AF[x]^[y]. */
-template<class T>
-Affine2Main<T> pow(const Affine2Main<T>& x, const Interval &y);
-template<class T>
-Affine2Main<T> pow(const Affine2Main<T>& x, const Interval &y, const Interval itvx);
-
-/** \brief AF[x]^AF[y]. */
-template<class T>
-Affine2Main<T> pow(const Affine2Main<T>& x, const Affine2Main<T>& y);
-
-/** \brief nth root of AF[x]. */
-template<class T>
-Affine2Main<T> root(const Affine2Main<T>&  x, int n);
-template<class T>
-Affine2Main<T> root(const Affine2Main<T>&  x, int n, const Interval itv);
-
-/** \brief cos(AF[x]). */
-template<class T>
-Affine2Main<T> cos(const Affine2Main<T>&  x);
-template<class T>
-Affine2Main<T> cos(const Affine2Main<T>&  x, const Interval itv);
-
-/** \brief sin(AF[x]). */
-template<class T>
-Affine2Main<T> sin(const Affine2Main<T>&  x);
-template<class T>
-Affine2Main<T> sin(const Affine2Main<T>&  x, const Interval itv);
-
-/** \brief tan(AF[x]). */
-template<class T>
-Affine2Main<T> tan(const Affine2Main<T>&  x);
-template<class T>
-Affine2Main<T> tan(const Affine2Main<T>&  x, const Interval itv);
-
-/** \brief acos(AF[x]). */
-template<class T>
-Affine2Main<T> acos(const Affine2Main<T>&  x);
-template<class T>
-Affine2Main<T> acos(const Affine2Main<T>&  x, const Interval itv);
-
-/** \brief asin(AF[x]). */
-template<class T>
-Affine2Main<T> asin(const Affine2Main<T>&  x);
-template<class T>
-Affine2Main<T> asin(const Affine2Main<T>&  x, const Interval itv);
-
-/** \brief atan(AF[x]). */
-template<class T>
-Affine2Main<T> atan(const Affine2Main<T>&  x);
-template<class T>
-Affine2Main<T> atan(const Affine2Main<T>&  x, const Interval itv);
-
-/** \brief cosh(AF[x]). */
-template<class T>
-Affine2Main<T> cosh(const Affine2Main<T>&  x);
-template<class T>
-Affine2Main<T> cosh(const Affine2Main<T>&  x, const Interval itv);
-
-/** \brief sinh(AF[x]). */
-template<class T>
-Affine2Main<T> sinh(const Affine2Main<T>&  x);
-template<class T>
-Affine2Main<T> sinh(const Affine2Main<T>&  x, const Interval itv);
-
-/** \brief tanh(AF[x]). */
-template<class T>
-Affine2Main<T> tanh(const Affine2Main<T>&  x);
-
-template<class T>
-Affine2Main<T> tanh(const Affine2Main<T>&  x, const Interval itv);
-
-/** \brief abs(AF[x]) = sqrt(sqr(AF[x])). */
-template<class T>
-Affine2Main<T> abs(const Affine2Main<T>& x);
-
-template<class T>
-Affine2Main<T> abs(const Affine2Main<T>& x, const Interval itv);
-
 template<class T>
 Interval max(const Affine2Main<T>&  x, const Affine2Main<T>&  y);
 template<class T>
@@ -572,8 +553,6 @@ Affine2Main<T> integer(const Affine2Main<T>&  x);
  * \remark By convention, \f$ 0\inAF[x] \Longrightarrow sign(AF[x])=[-1,1]\f$. */
 template<class T>
 Affine2Main<T> sign(const Affine2Main<T>&  x);
-template<class T>
-Affine2Main<T> sign(const Affine2Main<T>&  x, const Interval itv);
 
 
 
@@ -858,7 +837,7 @@ inline Affine2Main<T> operator/(const Affine2Main<T>& x, double d){
 
 template<class T>
 inline Affine2Main<T> operator/(double d, const Affine2Main<T>& x){
-	return Affine2Main<T>(d) *= (Affine2Main<T>(x).linChebyshev(Affine2Main<T>::AF_INV,x.itv()));
+	return Affine2Main<T>(d) *= inv(x);
 }
 
 template<class T>
@@ -868,7 +847,7 @@ inline Affine2Main<T> operator/(const Affine2Main<T>& x1, const Interval& x2){
 
 template<class T>
 inline Affine2Main<T> operator/(const Interval& x1, const Affine2Main<T>& x2){
-	return Affine2Main<T>(x1) *= (Affine2Main<T>(x2).linChebyshev(Affine2Main<T>::AF_INV,x2.itv()));
+	return Affine2Main<T>(x1) *= inv(x2);
 }
 
 template<class T>
@@ -888,184 +867,194 @@ inline double distance(const Affine2Main<T> &x1, const Interval &x2){
 
 template<class T>
 inline Affine2Main<T> inv(const Affine2Main<T>& x){
-	return inv(x,x.itv());
+	return Affine2Main<T>(x).invA(x.itv());
 }
 
 template<class T>
-inline Affine2Main<T> inv(const Affine2Main<T>& x, const Interval itv){
-	return Affine2Main<T>(x).linChebyshev(Affine2Main<T>::AF_INV, itv);
+inline Affine2Main<T>& Affine2Main<T>::invA(const Interval& itv){
+	return (*this).linChebyshev(Affine2Main<T>::AF_INV, itv);
 }
 
 template<class T>
 inline Affine2Main<T> sqr(const Affine2Main<T>& x){
-	return Affine2Main<T>(x).sqr(x.itv());
+	return Affine2Main<T>(x).sqrA(x.itv());
 }
-template<class T>
-inline Affine2Main<T> sqr(const Affine2Main<T>& x, const Interval itv){
-	return Affine2Main<T>(x).sqr(itv);
-}
+
+// TO WRITE IN your implementation of affine
+//template<class T>
+//inline Affine2Main<T>& Affine2Main<T>::sqrA(const Interval& itv);
 
 template<class T>
 inline Affine2Main<T> sqrt(const Affine2Main<T>& x){
-	return sqrt(x,x.itv());
+	return Affine2Main<T>(x).sqrtA(x.itv());
 }
 
 template<class T>
-inline Affine2Main<T> sqrt(const Affine2Main<T>& x, const Interval itv){
-	return Affine2Main<T>(x).linChebyshev(Affine2Main<T>::AF_SQRT,itv);
+inline Affine2Main<T>& Affine2Main<T>::sqrtA(const Interval& itv){
+	return (*this).linChebyshev(Affine2Main<T>::AF_SQRT,itv);
 }
 
 template<class T>
 inline Affine2Main<T> exp(const Affine2Main<T>& x){
-	return exp(x,x.itv());
+	return Affine2Main<T>(x).expA(x.itv());
 }
 
 template<class T>
-inline Affine2Main<T> exp(const Affine2Main<T>& x, const Interval itv){
-	return Affine2Main<T>(x).linChebyshev(Affine2Main<T>::AF_EXP,itv);
+inline Affine2Main<T>& Affine2Main<T>::expA(const Interval& itv){
+	return (*this).linChebyshev(Affine2Main<T>::AF_EXP,itv);
 }
 
 template<class T>
 inline Affine2Main<T> log(const Affine2Main<T>& x){
-	return log(x,x.itv());
+	return Affine2Main<T>(x).logA(x.itv());
 }
 
 template<class T>
-inline Affine2Main<T> log(const Affine2Main<T>& x, const Interval itv){
-	return Affine2Main<T>(x).linChebyshev(Affine2Main<T>::AF_LOG,itv);
+inline Affine2Main<T>& Affine2Main<T>::logA(const Interval& itv){
+	return (*this).linChebyshev(Affine2Main<T>::AF_LOG,itv);
 }
 
 template<class T>
 inline Affine2Main<T> pow(const Affine2Main<T>& x, int n) {
-	return pow(x,n,x.itv());
+	if (n == 0)
+		return Affine2Main<T>(1.0);
+	else if (n == 1)
+		return Affine2Main<T>(x);
+	else if (n == 2)
+		return Affine2Main<T>(x).sqr(x.itv());
+	else if (n<0)
+		return (Affine2Main<T>(x).power(-n,x.itv())).inv(pow(x.itv(),-n));
+	else
+		return Affine2Main<T>(x).power(n,x.itv());
 }
 
 template<class T>
 inline Affine2Main<T> pow(const Affine2Main<T>& x, double d){
-	return pow(x,d,x.itv());
+	return Affine2Main<T>(x).powerA(d,x.itv());
 }
 
 template<class T>
 inline Affine2Main<T> pow(const Affine2Main<T> &x, const Interval &y){
 	// return exp(y * log(x));
-	return pow(x,y,x.itv());
+	return Affine2Main<T>(x).powerA(y,x.itv());
 }
 
 template<class T>
-inline Affine2Main<T> pow(const Affine2Main<T> &x, const Interval &y, const Interval itvx){
+inline Affine2Main<T>& Affine2Main<T>::powerA(const Interval &y, const Interval& itvx){
 	// return exp(y * log(x));
-	return (y * Affine2Main<T>(x).linChebyshev(Affine2Main<T>::AF_LOG, itvx)).linChebyshev(Affine2Main<T>::AF_EXP, (y*log(itvx)));
+	return (y * ((*this).linChebyshev(Affine2Main<T>::AF_LOG, itvx))).linChebyshev(Affine2Main<T>::AF_EXP, (y*log(itvx)));
 }
 
 template<class T>
 inline Affine2Main<T> pow(const Affine2Main<T> &x, const Affine2Main<T> &y){
-	return pow(x, y.itv());
+	return Affine2Main<T>(x).powerA(y.itv(),x.itv());
 }
 
 template<class T>
 inline Affine2Main<T> root(const Affine2Main<T>& x, int n) {
-	return root(x,n,x.itv());
+	return Affine2Main<T>(x).rootA(n,x.itv());
 }
 
 template<class T>
 inline Affine2Main<T> cos(const Affine2Main<T>& x){
-	return cos(x,x.itv());
+	return Affine2Main<T>(x).cosA(x.itv());
 }
 
 template<class T>
-inline Affine2Main<T> cos(const Affine2Main<T>& x, const Interval itv){
-	return Affine2Main<T>(x).linChebyshev(Affine2Main<T>::AF_COS, itv);
+inline Affine2Main<T>& Affine2Main<T>::cosA(const Interval& itv){
+	return (*this).linChebyshev(Affine2Main<T>::AF_COS, itv);
 }
 
 template<class T>
 inline Affine2Main<T> sin(const Affine2Main<T>& x){
-	return sin(x,x.itv());
+	return Affine2Main<T>(x).sinA(x.itv());
 }
 
 template<class T>
-inline Affine2Main<T> sin(const Affine2Main<T>& x, const Interval itv){
-	return Affine2Main<T>(x).linChebyshev(Affine2Main<T>::AF_SIN,itv);
+inline Affine2Main<T>& Affine2Main<T>::sinA(const Interval& itv){
+	return (*this).linChebyshev(Affine2Main<T>::AF_SIN, itv);
 }
 
 template<class T>
 inline Affine2Main<T> tan(const Affine2Main<T>& x){
-	return tan(x,x.itv());
+	return Affine2Main<T>(x).tanA(x.itv());
 }
 
 template<class T>
-inline Affine2Main<T> tan(const Affine2Main<T>& x, const Interval itv){
-	return Affine2Main<T>(x).linChebyshev(Affine2Main<T>::AF_TAN,itv);
+inline Affine2Main<T>& Affine2Main<T>::tanA(const Interval& itv){
+	return (*this).linChebyshev(Affine2Main<T>::AF_TAN, itv);
 }
 
 template<class T>
 inline Affine2Main<T> acos(const Affine2Main<T>& x){
-	return acos(x,x.itv());
+	return Affine2Main<T>(x).acosA(x.itv());
 }
 
 template<class T>
-inline Affine2Main<T> acos(const Affine2Main<T>& x, const Interval itv){
-	return Affine2Main<T>(x).linChebyshev(Affine2Main<T>::AF_ACOS, itv);
+inline Affine2Main<T>& Affine2Main<T>::acosA(const Interval& itv){
+	return (*this).linChebyshev(Affine2Main<T>::AF_ACOS, itv);
 }
 
 template<class T>
 inline Affine2Main<T> asin(const Affine2Main<T>& x){
-	return asin(x,x.itv());
+	return Affine2Main<T>(x).asinA(x.itv());
 }
 
 template<class T>
-inline Affine2Main<T> asin(const Affine2Main<T>& x, const Interval itv){
-	return Affine2Main<T>(x).linChebyshev(Affine2Main<T>::AF_ASIN, itv);
+inline Affine2Main<T>& Affine2Main<T>::asinA(const Interval& itv){
+	return (*this).linChebyshev(Affine2Main<T>::AF_ASIN, itv);
 }
 
 template<class T>
 inline Affine2Main<T> atan(const Affine2Main<T>& x){
-	return atan(x,x.itv());
+	return Affine2Main<T>(x).atanA(x.itv());
 }
 
 template<class T>
-inline Affine2Main<T> atan(const Affine2Main<T>& x, const Interval itv){
-	return Affine2Main<T>(x).linChebyshev(Affine2Main<T>::AF_ATAN, itv);
+inline Affine2Main<T>& Affine2Main<T>::atanA(const Interval& itv){
+	return (*this).linChebyshev(Affine2Main<T>::AF_ATAN, itv);
 }
 
 template<class T>
 inline Affine2Main<T> cosh(const Affine2Main<T>& x){
-	return cosh(x,x.itv());
+	return Affine2Main<T>(x).coshA(x.itv());
 }
 
 template<class T>
-inline Affine2Main<T> cosh(const Affine2Main<T>& x, const Interval itv){
-	return Affine2Main<T>(x).linChebyshev(Affine2Main<T>::AF_COSH, itv);
+inline Affine2Main<T>& Affine2Main<T>::coshA(const Interval& itv){
+	return (*this).linChebyshev(Affine2Main<T>::AF_COSH, itv);
 }
 
 template<class T>
 inline Affine2Main<T> sinh(const Affine2Main<T>& x){
-	return sinh(x,x.itv());
+	return Affine2Main<T>(x).sinhA(x.itv());
 }
 
 template<class T>
-inline Affine2Main<T> sinh(const Affine2Main<T>& x, const Interval itv){
-	return Affine2Main<T>(x).linChebyshev(Affine2Main<T>::AF_SINH, itv);
+inline Affine2Main<T>& Affine2Main<T>::sinhA(const Interval& itv){
+	return (*this).linChebyshev(Affine2Main<T>::AF_SINH, itv);
 }
 
 template<class T>
 inline Affine2Main<T> tanh(const Affine2Main<T>& x){
-	return tanh(x,x.itv());
+	return Affine2Main<T>(x).tanhA(x.itv());
 }
 
 template<class T>
-inline Affine2Main<T> tanh(const Affine2Main<T>& x, const Interval itv){
-	return Affine2Main<T>(x).linChebyshev(Affine2Main<T>::AF_TANH, itv);
+inline Affine2Main<T>& Affine2Main<T>::tanhA(const Interval& itv){
+	return (*this).linChebyshev(Affine2Main<T>::AF_TANH, itv);
 }
 
 template<class T>
-inline Affine2Main<T> abs(const Affine2Main<T> &x){
-	return abs(x,x.itv());
+inline Affine2Main<T> abs(const Affine2Main<T>& x){
+	return Affine2Main<T>(x).absA(x.itv());
 }
 
 template<class T>
-inline Affine2Main<T> abs(const Affine2Main<T> &x, const Interval itv){
-	return Affine2Main<T>(x).linChebyshev(Affine2Main<T>::AF_ABS, itv);
+inline Affine2Main<T>& Affine2Main<T>::absA(const Interval& itv){
+	return (*this).linChebyshev(Affine2Main<T>::AF_ABS, itv);
 }
+
 
 template<class T>
 inline Interval max(const Affine2Main<T>& x, const Affine2Main<T>& y) {
@@ -1109,7 +1098,25 @@ inline Affine2Main<T> integer(const Affine2Main<T>& x){
 
 template<class T>
 inline Affine2Main<T> sign(const Affine2Main<T>& x) {
-	return sign(x, x.itv());
+	Interval itv=x.itv();
+	if (itv.lb() > 0) {
+		return Affine2Main<T>(1.0);
+	} else if (itv.ub() < 0) {
+		return Affine2Main<T>(-1.0);
+	} else {
+		return Affine2Main<T>(Interval(-1.0, 1.0));
+	}
+}
+
+template<class T>
+inline Affine2Main<T>& Affine2Main<T>::signA(const Interval& itv) {
+	if (itv.lb() > 0) {
+		return *this=Affine2Main<T>(1.0);
+	} else if (itv.ub() < 0) {
+		return *this=Affine2Main<T>(-1.0);
+	} else {
+		return *this=Affine2Main<T>(Interval(-1.0, 1.0));
+	}
 }
 
 
@@ -1152,11 +1159,3 @@ inline Affine2Main<T> chi(const Interval&  a,const Affine2Main<T>&  b,const Affi
 
 #endif /* IBEX_Affine2_H_ */
 
-
-/** \brief atan2(AF[x],AF[y]). */
-//Affine2 atan2(const Affine2& x, const Affine2& y);
-/** \brief atan2([x],AF[y]). */
-//Affine2 atan2(const Interval& x, const Affine2& y);
-/** \brief atan2(AF[x],[y]). */
-//Affine2 atan2(const Affine2& x, const Interval& y);
-/** \brief cosh(AF[x]). */
