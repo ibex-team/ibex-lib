@@ -963,11 +963,7 @@ inline Affine2Main<T>& Affine2Main<T>::rootA( int n, const Interval& itv) {
 	else if (this->is_degenerated()) return Affine2Main<T>(pow(Interval(this->val(0)),1.0/n));
 	else if (n % 2 == 0) return (*this).powerA(Interval::ONE/n,itv & Interval::POS_REALS); // the negative part of x should be removed
 	else if (0 <= itv.lb()) return  (*this).powerA(Interval::ONE/n,itv);
-	else if (itv.ub() <= 0) {
-		Affine2Main<T> copy(-(*this));
-		*this=  -(copy.powerA(Interval::ONE/n,-itv));
-		return *this;
-	}
+	else if (itv.ub() <= 0) return  *this=(-((-(*this)).powerA(Interval::ONE/n,-itv)));
 	else {
 		// TODO do the root when x contains ZERO more properly
 		//ibex_error("warning: Affine2Main ROOT non completely well implemented yet");
