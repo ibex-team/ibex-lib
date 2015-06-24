@@ -199,42 +199,65 @@ Vector _diam(const V& v) {
 
 template<class V>
 int _extr_diam_index(const V& v, bool min) {
-	double d=v[0].diam();
-	int selectedIndex=0;
-	bool unbounded=false;
 	if (v.is_empty()) throw InvalidIntervalVectorOp("Diameter of an empty IntervalVector is undefined");
-	int i;
-	for (i=1; i<v.size(); i++) {
-		if (v[i].is_unbounded()) { unbounded=true; break; }
-		double w=v[i].diam();
-		if (min? w<d : w>d) {
-			selectedIndex=i;
-			d=w;
-		}
-	}
 
-	if (unbounded) {
-		double pt; // keep the point most distant from +oo (we normalize if the lower bound is -oo)
-		selectedIndex=i;
-		for (; i<v.size(); i++) {
+	// keep minimal diameter (for bounded intervals)
+	double d=min? POS_INFINITY : 0;
+
+	// keep the point less/most distant from +oo (we normalize if the lower bound is -oo)
+	// (for unbounded intervals)
+	double pt=min? NEG_INFINITY : POS_INFINITY;
+
+	int selectedIndex=-1;
+
+	// do we have unbounded intervals?
+	bool unbounded=min? true : false;
+
+	for (int i=0; i<v.size(); i++) {
+
+		if (v[i].is_unbounded()) {
+
+			if (min && !unbounded) continue; // we already have bounded intervals
+
+			if (!min) unbounded=true;        // now we have unbounded intervals
+
 			if (v[i].lb()==NEG_INFINITY) {
 				if (v[i].ub()==POS_INFINITY) {
-					selectedIndex=i;
-					break;
+					if (!min) {
+						return i;
+					} else {
+						continue;
+					}
 				}
-				if (-v[i].ub() < pt) {
+				if ((min && -v[i].ub() > pt) || (!min && -v[i].ub() < pt)) {
 					selectedIndex=i;
 					pt=-v[i].ub();
 				}
 			} else if (v[i].ub()==POS_INFINITY) {
-				if (v[i].lb() < pt) {
+				if ((min && v[i].lb() > pt) || (!min && v[i].lb() < pt)) {
 					selectedIndex=i;
 					pt=v[i].lb();
 				}
 			}
+		} else {
+
+			if (!min && unbounded) continue;
+
+			if (min) unbounded=false;
+
+			double w=v[i].diam();
+			if (min? w<d : w>d) {
+				selectedIndex=i;
+				d=w;
+			}
 		}
 	}
 
+	if (selectedIndex==-1) {
+		// either min==true and the box is (-oo,oo)x..;x(-oo,oo)
+		// or min==false and the box is degenerated.
+		selectedIndex=0;
+	}
 	return selectedIndex;
 }
 
