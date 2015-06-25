@@ -69,6 +69,10 @@ private:
 	int status_prim; //= 1 if OK
 	int status_dual; //= 1 if OK
 
+	IntervalVector init_bound;
+
+
+
 #ifdef _IBEX_WITH_SOPLEX_
 	soplex::SoPlex *mysoplex;
 #endif
@@ -128,17 +132,7 @@ public:
 	/**
 	 * Call to linear solver
 	 */
-	Status_Sol run_simplex(const IntervalVector &box, Sense sense, int var, Interval & obj, double bound);
-
-	/**
-	 * Neumaier Shcherbina postprocessing in case of optimal solution found : the result obj is made reliable
-	 */
-	void NeumaierShcherbina_postprocessing(int var, Interval & obj, const IntervalVector& box, Sense sense);
-
-	/**
-	 *  Neumaier Shcherbina postprocessing in case of infeasibilty found by LP  returns true if the infeasibility is proved
-	 */
-	bool NeumaierShcherbina_infeasibilitytest( const IntervalVector& box);
+	Status_Sol run_simplex(Sense sense, int var, Interval & obj, double bound);
 
 
 // GET
@@ -183,7 +177,17 @@ public:
 
 	void addConstraint(Vector & row, CmpOp sign, double rhs );
 
+private:
 
+	/**
+	 * Neumaier Shcherbina postprocessing in case of optimal solution found : the result obj is made reliable
+	 */
+	Interval NeumaierShcherbina_postprocessing(int var, Sense sense);
+
+	/**
+	 *  Neumaier Shcherbina postprocessing in case of infeasibilty found by LP  returns true if the infeasibility is proved
+	 */
+	bool NeumaierShcherbina_infeasibilitytest();
 
 };
 

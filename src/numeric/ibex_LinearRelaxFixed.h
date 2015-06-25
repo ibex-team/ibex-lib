@@ -31,6 +31,11 @@ public:
 	int linearization(const IntervalVector& box, LinearSolver& lp_solver);
 
 	/**
+	 * \brief Add the inequalities in the solver
+	 */
+	int linearizationOne(const IntervalVector& box, LinearSolver& lp_solver);
+
+	/**
 	 * \brief Generation of a linear approximation of the inner region
 	 *
 	 */

@@ -148,5 +148,34 @@ int LinearRelaxCombo::linearization(const IntervalVector& box, LinearSolver& lp_
 
 
 
+/*********generation of the linearized system*********/
+int LinearRelaxCombo::linearizationOne(const IntervalVector& box, LinearSolver& lp_solver) {
+
+	int cont = 0;
+
+	switch (lmode) {
+	case ART:
+	case AFFINE2:
+		cont = myart->linearizationOne(box,lp_solver);
+		break;
+	case XNEWTON:
+	case TAYLOR:
+	case HANSEN:
+		cont = myxnewton->linearizationOne(box,lp_solver);
+		break;
+	case COMPO: {
+		cont = myxnewton->linearizationOne(box,lp_solver);
+		if (cont!=-1) {
+			int cont2 = myart->linearizationOne(box,lp_solver);
+			if (cont2==-1) cont=-1;
+			else cont+=cont2;
+		}
+	}
+	}
+	return cont;
+}
+
+
+
 
 }

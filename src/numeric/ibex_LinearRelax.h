@@ -50,6 +50,16 @@ public:
 	virtual int linearization(const IntervalVector& box, LinearSolver& lp_solver)=0;
 
 	/**
+	 * \brief The linearization technique with a translation between [-1,1]
+	 *
+	 * It must be implemented in the subclasses.
+	 *
+	 * \return the number of constraints (possibly 0) or -1 if the system is
+	 *         infeasible.
+	 */
+	virtual int linearizationOne(const IntervalVector& box, LinearSolver& lp_solver)=0;
+
+	/**
 	 * \brief Generation of a linear approximation of the inner region and add it in the Linear Program
 	 *
 	 * It must be implemented in the subclasses.

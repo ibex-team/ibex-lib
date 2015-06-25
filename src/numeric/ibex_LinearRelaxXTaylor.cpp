@@ -207,6 +207,13 @@ bool LinearRelaxXTaylor::choose_corner(const IntervalVector& box, IntervalVector
 
 
 
+
+int LinearRelaxXTaylor::linearizationOne(const IntervalVector& box, LinearSolver& lp_solver)  {
+	not_implemented("TODO");
+	return 0;
+}
+
+
 int LinearRelaxXTaylor::linearization(const IntervalVector& box, LinearSolver& lp_solver)  {
 
 	int cont =0;

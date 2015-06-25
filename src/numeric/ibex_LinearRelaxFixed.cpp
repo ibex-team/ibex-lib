@@ -37,5 +37,9 @@ int LinearRelaxFixed::linearization(const IntervalVector& box, LinearSolver& lp_
 	return num;
 }
 
+int LinearRelaxFixed::linearizationOne(const IntervalVector& box, LinearSolver& lp_solver)  {
+	not_implemented("TODO");
+	return 0;
+}
 
 } // namespace ibex

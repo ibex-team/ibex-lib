@@ -114,7 +114,7 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 		if (infnexti==0 && inf_bound[i]==0)  // computing the left bound : minimizing x_i
 		{
 			inf_bound[i]=1;
-			stat = mylinearsolver->run_simplex(box, LinearSolver::MINIMIZE, i, opt,box[i].lb());
+			stat = mylinearsolver->run_simplex(LinearSolver::MINIMIZE, i, opt,box[i].lb());
 			//cout << "[polytope-hull]->[optimize] simplex for left bound returns stat:" << stat <<  " opt: " << opt << endl;
 			if (stat == LinearSolver::OPTIMAL) {
 				if(opt.lb()>box[i].ub()) {
@@ -162,7 +162,7 @@ void CtcPolytopeHull::optimizer(IntervalVector& box) {
 		}
 		else if (infnexti==1 && sup_bound[i]==0) { // computing the right bound :  maximizing x_i
 			sup_bound[i]=1;
-			stat= mylinearsolver->run_simplex(box, LinearSolver::MAXIMIZE, i, opt, box[i].ub());
+			stat= mylinearsolver->run_simplex(LinearSolver::MAXIMIZE, i, opt, box[i].ub());
 			//cout << "[polytope-hull]->[optimize] simplex for right bound returns stat=" << stat << " opt=" << opt << endl;
 			if( stat == LinearSolver::OPTIMAL) {
 				if(opt.ub() <box[i].lb()) {

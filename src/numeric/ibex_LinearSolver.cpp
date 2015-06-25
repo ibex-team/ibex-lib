@@ -74,7 +74,7 @@ double LinearSolver::getEpsilon() const {
 
 ///////////////////////////////////////////////////////////////////////////////////
 
-LinearSolver::Status_Sol LinearSolver::run_simplex(const IntervalVector& box, LinearSolver::Sense sense, int var, Interval& obj, double bound) {
+LinearSolver::Status_Sol LinearSolver::run_simplex(LinearSolver::Sense sense, int var, Interval& obj, double bound) {
 	assert((0<=var)&&(var<=nb_vars));
 
 	LinearSolver::Status_Sol stat = LinearSolver::UNKNOWN;
@@ -98,12 +98,12 @@ LinearSolver::Status_Sol LinearSolver::run_simplex(const IntervalVector& box, Li
 				break;
 			}
 			// Neumaier - Shcherbina postprocessing
-			NeumaierShcherbina_postprocessing( var, obj, box, sense);
+			obj= NeumaierShcherbina_postprocessing( var, sense);
 			break;
 		}
 		case  LinearSolver::INFEASIBLE_NOTPROVED: {
 			// infeasibility test  cf Neumaier Shcherbina paper
-			if (NeumaierShcherbina_infeasibilitytest(box)) {
+			if (NeumaierShcherbina_infeasibilitytest()) {
 				stat = LinearSolver::INFEASIBLE;
 			}
 			break;
@@ -125,7 +125,7 @@ LinearSolver::Status_Sol LinearSolver::run_simplex(const IntervalVector& box, Li
 
 }
 
-void LinearSolver::NeumaierShcherbina_postprocessing (int var, Interval & obj, const IntervalVector& box, LinearSolver::Sense sense) {
+Interval  LinearSolver::NeumaierShcherbina_postprocessing (int var, LinearSolver::Sense sense) {
 	try {
 		// the dual solution : used to compute the bound
 		Vector dual_solution(nb_rows);
@@ -152,16 +152,16 @@ void LinearSolver::NeumaierShcherbina_postprocessing (int var, Interval & obj, c
 		//cout << " dual B " << Lambda * B << endl;
 		//cout << " rest box " << Rest * box  << endl;
 		if (sense==LinearSolver::MINIMIZE)
-			obj = Lambda * B - Rest * box;
+			return (Lambda * B - Rest * init_bound);
 		else
-			obj = -(Lambda * B - Rest * box);
+			return ( -(Lambda * B - Rest * init_bound));
 
 	} catch (LPException& e) {
 		throw e;
 	}
 }
 
-bool LinearSolver::NeumaierShcherbina_infeasibilitytest(const IntervalVector& box) {
+bool LinearSolver::NeumaierShcherbina_infeasibilitytest() {
 	try {
 		Vector infeasible_dir(nb_rows);
 		getInfeasibleDir(infeasible_dir);
@@ -176,7 +176,7 @@ bool LinearSolver::NeumaierShcherbina_infeasibilitytest(const IntervalVector& bo
 
 		IntervalVector Rest(nb_vars);
 		Rest = A_trans * Lambda ;
-		Interval d= Rest *box - Lambda * B;
+		Interval d= Rest *init_bound - Lambda * B;
 
 		// if 0 does not belong to d, the infeasibility is proved
 
@@ -206,7 +206,8 @@ bool LinearSolver::NeumaierShcherbina_infeasibilitytest(const IntervalVector& bo
 LinearSolver::LinearSolver(int nb_vars1, int nb_ctr, int max_iter, int max_time_out, double eps) :
 			nb_ctrs(nb_ctr), nb_vars(nb_vars1), nb_rows(0), obj_value(0.0), epsilon(eps),
 			primal_solution(new double[nb_vars1]), dual_solution(NULL),
-			status_prim(soplex::SPxSolver::UNKNOWN), status_dual(soplex::SPxSolver::UNKNOWN)  {
+			status_prim(soplex::SPxSolver::UNKNOWN), status_dual(soplex::SPxSolver::UNKNOWN),
+			init_bound(nb_vars1){
 
 
 	mysoplex= new soplex::SoPlex();
@@ -509,6 +510,7 @@ void LinearSolver::setVarObj(int var, double coef) {
 void LinearSolver::initBoundVar(IntervalVector bounds) {
 
 	try {
+		init_bound=bounds;
 		for (int j=0; j<nb_vars; j++){
 			// Change the LHS and RHS of each constraint associated to the bounds of the variable
 			mysoplex->changeRange(j ,bounds[j].lb(),bounds[j].ub());
@@ -523,6 +525,7 @@ void LinearSolver::initBoundVar(IntervalVector bounds) {
 void LinearSolver::setBoundVar(int var, Interval bound) {
 
 	try {
+		init_bound[var]=bound;
 		mysoplex->changeRange(var ,bound.lb(),bound.ub());
 		//std::cout << "improve bound var "<<var<< std::endl;
 	}
@@ -1123,6 +1126,8 @@ void LinearSolver::setVarObj(int var, double coef) {
 void LinearSolver::initBoundVar(IntervalVector bounds) {
 
 	try {
+
+		init_bound=bounds;
 		// Changement de la fonction objective = rhs du primal (car on est en formulation dual)
 		// Change the LHS and RHS of each constraint associated to the bounds of the variable
 		for (int i = 0; i < nb_vars; i++)
@@ -1147,6 +1152,7 @@ void LinearSolver::initBoundVar(IntervalVector bounds) {
 void LinearSolver::setBoundVar(int var, Interval bound) {
 
 	try {
+		init_bound[var]=bound;
 		int * ind = new int[2];
 		ind[0] = var;
 		ind[1] = var + nb_vars;
@@ -1611,6 +1617,7 @@ void LinearSolver::setVarObj(int var, double coef) {
 
 void LinearSolver::initBoundVar(IntervalVector bounds) {
 	try {
+		init_bound=bounds;
 		for (int j=0; j<nb_vars; j++){
 			// Change the LHS and RHS of each constraint associated to the bounds of the variable
 			myclp->setRowBounds(j,bounds[j].lb(),bounds[j].ub());
@@ -1625,6 +1632,7 @@ void LinearSolver::initBoundVar(IntervalVector bounds) {
 void LinearSolver::setBoundVar(int var, Interval bound) {
 
 	try {
+		init_bound[var]=bound;
 		myclp->setRowBounds(var,bound.lb(),bound.ub());
 		//std::cout << "improve bound var "<<var<< std::endl;
 	}
@@ -2067,6 +2075,7 @@ LinearSolver::Status LinearSolver::setVarObj(int var, double coef) {
 LinearSolver::Status LinearSolver::initBoundVar(IntervalVector bounds) {
 	LinearSolver::Status res = FAIL;
 	try {
+		init_bound=bounds;
 		// Changement de la fonction objective = rhs du primal (car on est en formulation dual)
 		// Change the LHS and RHS of each constraint associated to the bounds of the variable
 		for (int i = 0; i < nb_vars; i++)
@@ -2092,6 +2101,7 @@ LinearSolver::Status LinearSolver::initBoundVar(IntervalVector bounds) {
 LinearSolver::Status LinearSolver::setBoundVar(int var, Interval bound) {
 	LinearSolver::Status res = FAIL;
 	try {
+		init_bound[var]=bound;
 		int * ind = new int[2];
 		ind[0] = var;
 		ind[1] = var + nb_vars;

@@ -14,7 +14,7 @@ namespace ibex {
 
 // the constructor
 LinearRelaxAffine2::LinearRelaxAffine2(const System& sys1) :
-				LinearRelax(sys1), sys(sys1) {
+						LinearRelax(sys1), sys(sys1) {
 
 }
 
@@ -26,7 +26,7 @@ bool LinearRelaxAffine2::goal_linearization(const IntervalVector& box, LinearSol
 	// Linearization of the objective function by AF2
 	Affine2 af2;
 
-		sys.goal->eval_affine2(box,af2);
+	sys.goal->eval_affine2(box,af2);
 	if (af2.is_empty()) {
 		return false;
 	}
@@ -220,6 +220,96 @@ int LinearRelaxAffine2::linearization(const IntervalVector& box, LinearSolver& l
 	return cont;
 
 }
+
+
+
+
+/*********generation of the linearized system*********/
+int LinearRelaxAffine2::linearizationOne(const IntervalVector& box, LinearSolver& lp_solver) {
+
+	AffineLin af2;
+	Vector rowconst(sys.nb_var);
+	Interval ev(0.0);
+	Interval center(0.0);
+	Interval err(0.0);
+	CmpOp op;
+	int cont = 0;
+
+	// Create the linear relaxation of each constraint
+	for (int ctr = 0; ctr < sys.nb_ctr; ctr++) {
+
+		af2 = 0.0;
+		op = sys.ctrs[ctr].op;
+
+		ev = sys.ctrs[ctr].f.eval_affine2(box, af2);
+
+		if (ev.is_empty()) {
+			af2.set_empty();
+		}
+		//std::cout <<ev<<":::"<< af2<<"  "<<af2.size()<<"  " <<sys.nb_var<< std::endl;
+
+		if (af2.size() == sys.nb_var) { // if the affine2 form is valid
+
+			for (int i =0; i <sys.nb_var; i++) {
+				rowconst[i] =af2.val(i+1);
+			}
+			switch (op) {
+			case LT:
+				if (ev.lb() == 0.0) return -1;
+			case LEQ:
+				if (0.0 < ev.lb()) return -1;
+				else if (0.0 < ev.ub()) {
+					try {
+						lp_solver.addConstraint(rowconst, LEQ,	af2.err()-af2.val(0));
+						cont++;
+					} catch (LPException&) { }
+				}
+				break;
+			case GT:
+				if (ev.ub() == 0.0) return -1;
+			case GEQ:
+				if (ev.ub() < 0.0) return -1;
+				else if (ev.lb() < 0.0) {
+					try {
+						lp_solver.addConstraint(rowconst, GEQ,	-af2.err()-af2.val(0));
+						cont++;
+					} catch (LPException&) { }
+				}
+				break;
+			case EQ:
+				if (!ev.contains(0.0)) return -1;
+				else {
+					if (ev.diam()>2*lp_solver.getEpsilon()) {
+						try {
+							lp_solver.addConstraint(rowconst, GEQ, -af2.err()-af2.val(0));
+							cont++;
+							lp_solver.addConstraint(rowconst, LEQ,  af2.err()-af2.val(0));
+							cont++;
+						} catch (LPException&) { }
+					}
+				}
+				break;
+			}
+
+		}
+
+	}
+	return cont;
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //void CtcART::convert_back(IntervalVector & box, IntervalVector & epsilon) {
 //

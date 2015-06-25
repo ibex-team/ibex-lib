@@ -71,6 +71,13 @@ public:
 	int linearization(const IntervalVector& box, LinearSolver& lp_solver);
 
 	/**
+	 * \brief The Taylor linearization technique with a translation between [-1,1]
+	 *
+	 *  Linearize the system and performs 2n calls to Simplex in order to reduce the 2 bounds of each variable
+	 */
+	int linearizationOne(const IntervalVector& box, LinearSolver& lp_solver);
+
+	/**
 	 * \brief Generation of a linear approximation of the inner region
 	 *
 	 */
