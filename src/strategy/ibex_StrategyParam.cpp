@@ -12,7 +12,7 @@
 #include "ibex_CtcHC4.h"
 #include "ibex_CtcAcid.h"
 #include "ibex_Ctc3BCid.h"
-#include "ibex_CtcPolytopeHull.h"
+#include "ibex_CtcPolytopeHullOne.h"
 #include "ibex_CtcCompo.h"
 #include "ibex_CtcNewton.h"
 #include "ibex_CtcFixPoint.h"

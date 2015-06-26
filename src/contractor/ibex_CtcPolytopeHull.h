@@ -17,6 +17,11 @@
 
 namespace ibex {
 
+
+
+class PolytopeHullEmptyBoxException { };
+
+
 /**
  * \brief Contract the bounds of a box with respect to a polytope.
  *

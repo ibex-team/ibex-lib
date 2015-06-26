@@ -1,0 +1,8 @@
+benchs/benchs-optim/coconutbenchmark-library1/ex2_1_9.bch acidhc4 art smearsumrel 1.e-8 1.e-8
+-0.37500001627 -0.37500000627
+benchs/benchs-optim/coconutbenchmark-library1/immun.bch acidhc4 art roundrobin 1.e-8 1.e-8
+0 6.96646732884e-09
+benchs/benchs-optim/coconutbenchmark-library1/ramsey.bch acidhc4 art largestfirst 1.e-8 1.e-8
+-2.48746888628 -2.48746886141
+benchs/benchs-optim/coconutbenchmark-library1/srcpm.bch acidhc4 art smearmax 1.e-8 1.e-8
+2109.78181648 2109.78183757

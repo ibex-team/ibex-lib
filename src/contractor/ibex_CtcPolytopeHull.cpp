@@ -15,9 +15,6 @@ using namespace std;
 
 namespace ibex {
 
-namespace {
-class PolytopeHullEmptyBoxException { };
-}
 
 CtcPolytopeHull::CtcPolytopeHull(LinearRelax& lr, ctc_mode cmode, int max_iter, int time_out, double eps, Interval limit_diam) :
 		Ctc(lr.nb_var()), lr(lr), goal_var(lr.goal_var()), cmode(cmode),
