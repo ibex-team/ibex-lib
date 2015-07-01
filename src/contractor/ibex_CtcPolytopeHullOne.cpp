@@ -65,10 +65,6 @@ void CtcPolytopeHullOne::contract(IntervalVector& box) {
 		box.set_empty(); // empty the box before exiting
 		mylinearsolver->cleanConst();
 	}
-	catch(PolytopeHullEmptyBoxException& ) {
-
-		mylinearsolver->cleanConst();
-	}
 }
 
 

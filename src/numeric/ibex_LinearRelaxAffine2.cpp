@@ -149,6 +149,7 @@ int LinearRelaxAffine2::linearization(const IntervalVector& box, LinearSolver& l
 		op = sys.ctrs[ctr].op;
 
 		ev = sys.ctrs[ctr].f.eval_affine2(box, af2);
+		af2.compact(1.e-8);
 
 		if (ev.is_empty()) {
 			af2.set_empty();
@@ -163,7 +164,9 @@ int LinearRelaxAffine2::linearization(const IntervalVector& box, LinearSolver& l
 			err =0;
 			for (int i =0;(!b_abort) &&(i <sys.nb_var); i++) {
 				tmp = box[i].rad();
-				if (tmp==0) { // sensible case to avoid rowconst[i]=NaN
+				if (af2.val(i+1)==0) {
+					rowconst[i] =0;
+				} else if (tmp==0) { // sensible case to avoid rowconst[i]=NaN
 					if (af2.val(i+1)==0)
 						rowconst[i]=0;
 					else {

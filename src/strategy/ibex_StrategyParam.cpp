@@ -129,7 +129,7 @@ Ctc& StrategyParam::get_ctc() {
 	if (lin_relax=="compo" || lin_relax=="art"|| lin_relax=="xn") {
 
 		//cxn = new CtcLinearRelaxation (*lr, hc44xn);
-		Ctc& cxn_poly = rec(new CtcPolytopeHullOne(*lr, CtcPolytopeHull::ALL_BOX));
+		Ctc& cxn_poly = rec(new CtcPolytopeHull(*lr, CtcPolytopeHull::ALL_BOX));
 
 		// hc4 inside xnewton loop
 		Ctc& hc44xn = rec(new CtcHC4(ext_sys.ctrs,ratio_propag,false));
