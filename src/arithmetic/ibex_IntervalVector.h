@@ -62,6 +62,13 @@ public:
 	 */
 	IntervalVector(const IntervalVector& x);
 
+#if defined __cplusplus && __cplusplus >= 201103L
+	/**
+	 * \brief Move constructor
+	 */
+	IntervalVector(IntervalVector&& x) noexcept;
+#endif
+
 	/**
 	 * \brief Create the IntervalVector [bounds[0][0],bounds[0][1]]x...x[bounds[n-1][0],bounds[n-1][1]]
 	 *
