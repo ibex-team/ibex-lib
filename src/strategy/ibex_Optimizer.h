@@ -105,7 +105,7 @@ public:
 	 *
 	 *         TIMEOUT             time is out.
 	 */
-	Status optimize(const IntervalVector& init_box, double obj_init_bound=POS_INFINITY);
+        virtual	Status optimize(const IntervalVector& init_box, double obj_init_bound=POS_INFINITY);
 
 	/**
 	 * \brief Displays on standard output a report of the last call to #optimize(const IntervalVector&).
@@ -298,6 +298,11 @@ public:
 	
 	/** Number of cells put into the heap (which passed through the contractors)  */
 	int nb_cells;
+
+
+	/** Lower bound of the small boxes taken by the precision */
+	double uplo_of_epsboxes;
+
 
 protected:
 	/**
@@ -531,9 +536,9 @@ protected:
 	 * the heap and the current box are actually contracted with y <= ymax
 	 *
 	 */
-	double compute_ymax ();
+	double compute_ymax (double ratio);
 
-	bool loup_changed;
+
 
 	/**
 	 * \brief The bound on the objective given by the user, +oo otherwise.
@@ -545,11 +550,18 @@ protected:
 
 	Ctc3BCid* objshaver;
 
-    void compute_pf(OptimCell& c);
+        void compute_pf(OptimCell& c);
 	
 	void compute_pu (OptimCell& c);
+
+
+	bool loup_changed;
+	/** Inner contractor (for the negation of g) */
+	CtcUnion* is_inside;
+
+
 	
-private:
+	//private:
 
 	/** Rigor mode (eps_equ==0) */
 	const bool rigor;
@@ -557,11 +569,6 @@ private:
 	/** linear solver used in ibex_OptimSimplex.cpp_ */
 	LinearSolver *mylp;
 
-	/** Inner contractor (for the negation of g) */
-	CtcUnion* is_inside;
-
-	/** Lower bound of the small boxes taken by the precision */
-	double uplo_of_epsboxes;
 
 
 

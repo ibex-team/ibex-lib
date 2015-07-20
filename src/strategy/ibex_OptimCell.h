@@ -39,6 +39,9 @@ public:
 	double pu;
 	/** the current loup : updated by contract_heap  */
 	double loup;
+	/** the value of the objective in the middle of the box */
+	double midboxobj;
+        int loup_found;
 	};
 
   } // end namespace ibex

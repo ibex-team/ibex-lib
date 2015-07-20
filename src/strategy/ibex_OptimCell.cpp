@@ -12,7 +12,7 @@
 
 namespace ibex {
 
-  OptimCell::OptimCell(const IntervalVector& box) : Cell(box),heap_present(0),loup(0) {
+  OptimCell::OptimCell(const IntervalVector& box) : Cell(box),heap_present(0),loup(0),loup_found(0) {
 
 }
 
@@ -25,6 +25,9 @@ std::pair<OptimCell*,OptimCell*> OptimCell::bisect(const IntervalVector& left, c
 		cleft->data.insert_new(it->first,child_data.first);
 		cright->data.insert_new(it->first,child_data.second);
 	}
+
+	cleft->loup_found=loup_found;
+	cright->loup_found=loup_found;
 	return std::pair<OptimCell*,OptimCell*>(cleft,cright);
 }
 

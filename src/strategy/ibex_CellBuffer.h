@@ -73,6 +73,12 @@ class CellBuffer {
 	/** Return the next box (but does not pop it).*/
 	virtual Cell* top() const=0;
 
+	/**
+	* Removes (and deletes) all the cells
+	* with a cost greater than \a loup. y is the variable related to the objective function
+	*/
+	virtual void contract(double loup, int y, bool remove=false) {};
+
 	/** Count the number of cells pushed since
 	 * the object is created. */
 	int nb_cells;

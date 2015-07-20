@@ -124,13 +124,29 @@ Optimizer::~Optimizer() {
 	//	delete objshaver;
 }
 
+  double maxval(double x, double y)
+  {    if (x < y)
+      return y;
+    else
+      return x;
+  }
+	
+
+
 // compute the value ymax (decreasing the loup with the precision)
 // the heap and the current box are contracted with y <= ymax
+
+/*
 double Optimizer::compute_ymax() {
 	double ymax= loup - goal_rel_prec*fabs(loup);
 	if (loup - goal_abs_prec < ymax)
 		ymax = loup - goal_abs_prec;
 	return ymax;}
+*/
+
+double Optimizer::compute_ymax(double ratio) {
+  return (loup - ratio* maxval ( goal_abs_prec,  goal_rel_prec*fabs(loup)));
+}
 
 
 // launch Hansen test
@@ -200,6 +216,7 @@ bool Optimizer::update_loup(const IntervalVector& box) {
 		loup_change |= update_loup_simplex(box);  // update pseudo_loup
 		loup = pseudo_loup;
 	}
+
 	return loup_change;
 
 }
@@ -236,7 +253,7 @@ void Optimizer::update_uplo() {
 	}
 	else if (buffer.empty() && loup != POS_INFINITY) {
 		// empty buffer : new uplo is set to ymax (loup - precision) if a loup has been found
-		new_uplo=compute_ymax(); // not new_uplo=loup, because constraint y <= ymax was enforced
+		new_uplo=compute_ymax(1.0); // not new_uplo=loup, because constraint y <= ymax was enforced
 		//    cout << " new uplo buffer empty " << new_uplo << " uplo " << uplo << endl;
 
 		double m = minimum(new_uplo, uplo_of_epsboxes);
@@ -261,16 +278,19 @@ void Optimizer::handle_cell(OptimCell& c, const IntervalVector& init_box ){
 
 		// Computations for the Casado C3, C5, C7 criteria
 
-		if ((buffer2.crit==CellHeapOptim::C3)||(buffer2.crit==CellHeapOptim::C5)||(buffer2.crit==CellHeapOptim::C7)) {
+		if (
+                    //(buffer2.crit==CellHeapOptim::UB) || 
+		    (buffer2.crit==CellHeapOptim::C3)||(buffer2.crit==CellHeapOptim::C5)||(buffer2.crit==CellHeapOptim::C7)) {
 
-			compute_pf(c);
+		  compute_pf(c);
 
-			if (loup < 1.e8)
-				c.loup=loup;
-			else
-				c.loup=1.e8;
+		  if (loup < 1.e8)
+		    c.loup=loup;
+		  else
+		    c.loup=1.e8;
 		}
-
+		if (buffer2.crit==CellHeapOptim::MID) c.midboxobj=((sys.goal)->eval(c.box.mid())).mid();
+ 
 		// computations for C5, C7 and PU criteria
 		if ((buffer2.crit==CellHeapOptim::C5)||(buffer2.crit==CellHeapOptim::C7)||(buffer2.crit==CellHeapOptim::PU))
 			compute_pu(c);
@@ -287,7 +307,14 @@ void Optimizer::handle_cell(OptimCell& c, const IntervalVector& init_box ){
 }
 
 void Optimizer::compute_pf(OptimCell& c) {
-	c.pf=(sys.goal)->eval(c.box);
+        Interval obj = (sys.goal)->eval(c.box);
+	/*
+// variant with an lower upperbound for the descendants of a cell where the last loup was found or y.ub was contracted
+	double y = compute_ymax(0.9);
+	if (c.box[ext_sys.goal_var()].ub() < y  )  // descendant du dernier loup ou ymax contracté.
+	  obj &= Interval(obj.lb(),y);
+	*/
+	c.pf=obj;
 }
 
 void Optimizer::compute_pu(OptimCell& c) {
@@ -314,8 +341,9 @@ void Optimizer::contract_and_bound(OptimCell& c, const IntervalVector& init_box)
 
 	double ymax;
 	if (loup==POS_INFINITY) ymax=POS_INFINITY;
-	else ymax= compute_ymax()+1.e-15;
-	//	else ymax= compute_ymax();
+	//	else ymax= compute_ymax(0.9);  //bias in favor of descendants of cell where the last loup was found
+	else ymax= compute_ymax(1.0);
+	//	else ymax= compute_ymax(1.0)+ 1.e-15;
 	/*
 	if (!(y.ub() == ymax))
 		  y &= Interval(NEG_INFINITY,ymax+1.e-15);
@@ -336,6 +364,7 @@ void Optimizer::contract_and_bound(OptimCell& c, const IntervalVector& init_box)
 
 	//cout << " [contract]  x after=" << c.box << endl;
 	//cout << " [contract]  y after=" << y << endl;
+
 	// TODO: no more cell in argument here (just a box). Does it matter?
 	/*====================================================================*/
 
@@ -351,8 +380,10 @@ void Optimizer::contract_and_bound(OptimCell& c, const IntervalVector& init_box)
 	bool loup_ch=update_loup(tmp_box);
 
 	// update of the upper bound of y in case of a new loup found
-	if (loup_ch) y &= Interval(NEG_INFINITY,compute_ymax());
-
+	if (loup_ch) 
+	  { c.loup_found=1;
+            y &= Interval(NEG_INFINITY,compute_ymax(1.0));
+	  }
 	loup_changed |= loup_ch;
 
 	if (y.is_empty()) { // fix issue #44
@@ -509,7 +540,7 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 					// that the current cell is removed by contract_heap. See comments in
 					// older version of the code (before revision 284).
 
-					double ymax= compute_ymax();
+					double ymax= compute_ymax(1.0);
 
 					buffer.contract_heap(ymax);
 					//cout << " now buffer is contracted and min=" << buffer.minimum() << endl;

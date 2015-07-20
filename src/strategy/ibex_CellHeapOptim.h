@@ -31,7 +31,7 @@ namespace ibex {
 class CellHeapOptim : public CellBuffer {
 public:
     /* the different criteria implemented for a heap : in optimization : LB for the first one, another for the second one */
-	typedef enum {LB,UB,C3,C5,C7,PU} criterion;
+  typedef enum {LB,UB,C3,C5,C7,PU,MID} criterion;
 	
 	/**
 	 * \brief Build a cell heap for optimization.

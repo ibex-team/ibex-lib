@@ -35,20 +35,61 @@ struct CellComparatorlb {
 	    return c1.second->lb() >= c2.second->lb();
 	  else  
 	    return c1.second->ub() >= c2.second->ub();
+	    //   return ((c1.first)->pf.ub() >= (c2.first)->pf.ub());
 	}
 };
 
 
   // the other comparators  used in the second heap  (buffer2  of Optimizer)
   // crit==UB
+
+  /*
 struct CellComparatorub {
 	bool operator()(const pair<OptimCell*,Interval*>& c1, const pair<OptimCell*,Interval*>& c2) {
 	  if( c1.second->ub() !=  c2.second->ub())
 	    return c1.second->ub() >= c2.second->ub();
+	  else  
+	    return c1.second->lb() >= c2.second->lb();
+	}
+};
+  */
+
+  /*  the criterion ub+lb  */
+struct CellComparatorub {
+	bool operator()(const pair<OptimCell*,Interval*>& c1, const pair<OptimCell*,Interval*>& c2) {
+	  return c1.second->ub() + c1.second->lb() >= c2.second->ub() +c2.second->lb();}
+} ;
+
+
+  
+		  /*  variant using pf.ub() instead of second->ub() : pf based on objective evaluation
+struct CellComparatorub {
+	bool operator()(const pair<OptimCell*,Interval*>& c1, const pair<OptimCell*,Interval*>& c2) {
+	  if((c1.first)->pf.ub() != (c2.first)->pf.ub())
+	     return ((c1.first)->pf.ub() >= (c2.first)->pf.ub());
 	  else 
 	    return c1.second->lb() >= c2.second->lb();
 	}
 };
+    
+		  */
+
+  /*
+  //  variant with  priority given to descendants of a cell where a loup has been found.
+struct CellComparatorub {
+	bool operator()(const pair<OptimCell*,Interval*>& c1, const pair<OptimCell*,Interval*>& c2) {
+	  if ((c1.first)->loup_found > (c2.first)->loup_found)
+	    return ((c1.first)->loup_found < (c2.first)->loup_found);
+	else
+	  if( c1.second->ub() !=  c2.second->ub())
+	    return c1.second->ub() >= c2.second->ub();
+	  else  return c1.second->lb() >= c2.second->lb();
+	    
+	}
+};
+
+  */	
+
 
   /* comparator based on the feasibility mesure of a box : crit==PU */
   struct CellComparatorpu {
@@ -58,22 +99,50 @@ struct CellComparatorub {
 	
 };
 
-  /* comparator C3 (cf Markot Casado) */
+  /* comparator based on  the value of the objective at the middle point of the box */
+struct CellComparatormidbox {
+	bool operator()(const pair<OptimCell*,Interval*>& c1, const pair<OptimCell*,Interval*>& c2) {
+	  return c1.first->midboxobj >= c2.first->midboxobj;
+	}
+	
+};
+
+  /* comparator C3 (cf Markot Casado) */  
+  /* version soumise JOGO */
+  /*
      struct CellComparatorC3 {
   	bool operator()(const pair<OptimCell*,Interval*>& c1, const pair<OptimCell*,Interval*>& c2) {
 	  return(((c1.first)->loup - (c1.first)->pf.lb()) / (c1.first)->pf.diam()  <=  ((c2.first)->loup - (c2.first)->pf.lb()) / (c2.first)->pf.diam());
 	}
 };
+  */
+
+struct CellComparatorC3 {
+  	bool operator()(const pair<OptimCell*,Interval*>& c1, const pair<OptimCell*,Interval*>& c2) {
+	  return(((c1.first)->loup - (c1.second)->lb()) / ((c1.first)->pf.diam())  <=  ((c2.first)->loup - (c2.second->lb())) / ((c2.first)->pf.diam()));
+	}
+};
+
 
   /* comparator C5 (cf Markot Casado) */
+  /*
     struct CellComparatorC5 {
 	bool operator()(const pair<OptimCell*,Interval*>& c1, const pair<OptimCell*,Interval*>& c2) {
 	  return((c1.first)->pu * ((c1.first)->loup - (c1.first)->pf.lb()) / (c1.first)->pf.diam()  <=
 			 (c2.first)->pu *((c2.first)->loup - (c2.first)->pf.lb()) / (c2.first)->pf.diam());
 	}
 };
+  */
+
+struct CellComparatorC5 {
+  	bool operator()(const pair<OptimCell*,Interval*>& c1, const pair<OptimCell*,Interval*>& c2) {
+	  return(((c1.first)->pu *(c1.first)->loup - (c1.second)->lb()) / ((c1.second)->diam())  <=  ((c2.first)->pu *(c2.first)->loup - (c2.second->lb())) / ((c2.second)->diam()));
+	}
+};
+
 
     /* comparator C7 (cf Markot Casado) */
+  /*
    struct CellComparatorC7 {
 	bool operator()(const pair<OptimCell*,Interval*>& c1, const pair<OptimCell*,Interval*>& c2) {
 	  return(c1.second->lb() /((c1.first)->pu * ((c1.first)->loup - (c1.first)->pf.lb()) / (c1.first)->pf.diam())  >=
@@ -81,10 +150,16 @@ struct CellComparatorub {
 	}
 };
 
-}
-  
 
-  
+  */
+ struct CellComparatorC7 {
+	bool operator()(const pair<OptimCell*,Interval*>& c1, const pair<OptimCell*,Interval*>& c2) {
+	  return(c1.second->lb() /((c1.first)->pu * ((c1.first)->loup - (c1.second)->lb()) / (c1.second)->diam())  >=
+		 c2.second->lb() /((c2.first)->pu *((c2.first)->loup - (c2.second)->lb()) / (c2.second)->diam()));
+	}
+};
+
+}  
   CellHeapOptim::CellHeapOptim(const int y, criterion crit) : y(y) , crit(crit){;}
   
 
@@ -130,6 +205,7 @@ struct CellComparatorub {
 		case C5 : 	make_heap(lopt.begin(), lopt.end(), CellComparatorC5()); break;
 		case C7: 	make_heap(lopt.begin(), lopt.end(), CellComparatorC7()); break;
 		case PU: 	make_heap(lopt.begin(), lopt.end(), CellComparatorpu()); break;
+		case MID: 	make_heap(lopt.begin(), lopt.end(), CellComparatormidbox()); break;
 		default: ibex_error("CellHeapOptim::makeheap : case impossible");
 		}
 	  }
@@ -179,6 +255,7 @@ struct CellComparatorub {
 		case C5 : 	make_heap(lopt.begin(), lopt.end(), CellComparatorC5()); break;
 		case C7: 	make_heap(lopt.begin(), lopt.end(), CellComparatorC7()); break;
 		case PU: 	make_heap(lopt.begin(), lopt.end(), CellComparatorpu()); break;
+		case MID:       make_heap(lopt.begin(), lopt.end(), CellComparatormidbox()); break;
 		}
   }
 
@@ -194,6 +271,7 @@ struct CellComparatorub {
 		case C5 : 	pop_heap(lopt.begin(), lopt.end(), CellComparatorC5()); break;
 		case C7: 	pop_heap(lopt.begin(), lopt.end(), CellComparatorC7()); break;
 		case PU: 	pop_heap(lopt.begin(), lopt.end(), CellComparatorpu()); break;
+		case MID: 	pop_heap(lopt.begin(), lopt.end(), CellComparatormidbox()); break;
 		}
     delete lopt.back().second;
     lopt.pop_back(); // removes the "best"
@@ -210,6 +288,7 @@ struct CellComparatorub {
 		case C5 : 	push_heap(lopt.begin(), lopt.end(), CellComparatorC5()); break;
 		case C7: 	push_heap(lopt.begin(), lopt.end(), CellComparatorC7()); break;
 		case PU: 	push_heap(lopt.begin(), lopt.end(), CellComparatorpu()); break;
+		case MID: 	push_heap(lopt.begin(), lopt.end(), CellComparatormidbox()); break;
 		}
 	cell->heap_present++;
 	
@@ -226,6 +305,7 @@ struct CellComparatorub {
 		case C5 : 	push_heap(lopt.begin(), lopt.end(), CellComparatorC5()); break;
 		case C7 : 	push_heap(lopt.begin(), lopt.end(), CellComparatorC7()); break;
 		case PU : 	push_heap(lopt.begin(), lopt.end(), CellComparatorpu()); break;
+		case MID : 	push_heap(lopt.begin(), lopt.end(), CellComparatormidbox()); break;
 		}
 	cell->heap_present++;
 
