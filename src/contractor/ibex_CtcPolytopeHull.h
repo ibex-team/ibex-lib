@@ -77,7 +77,7 @@ protected:
 	/**
 	 * Achterberg heuristic for choosing the next variable  and which bound to optimize
 	 */
-	bool choose_next_variable(IntervalVector &box,  int & nexti, int & infnexti, int* inf_bound, int* sup_bound);
+	bool choose_next_variable(IntervalVector &box,  int & nexti, int & infnexti);
 
 	/**
 	 * TODO: add comment
@@ -117,6 +117,9 @@ protected:
 
 private:
 	bool own_lr;
+	int* inf_bound;  // indicator inf_bound = 1 means the inf bound is feasible or already contracted, call to simplex useless (cf Baharev)
+	int* sup_bound;  // indicator sup_bound = 1 means the sup bound is feasible or already contracted, call to simplex useless
+
 
 };
 

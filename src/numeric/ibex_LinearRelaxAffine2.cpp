@@ -61,6 +61,9 @@ bool LinearRelaxAffine2::goal_linearization(const IntervalVector& box, LinearSol
 int LinearRelaxAffine2::inlinearization(const IntervalVector& box, LinearSolver& lp_solver) {
 	// TODO a verifier et finir
 
+	not_implemented("LinearRelaxAffine2: inlinearization not yet finish");
+	return -1;
+	/*
 	Affine2 af2;
 
 	int cont=0;
@@ -128,6 +131,7 @@ int LinearRelaxAffine2::inlinearization(const IntervalVector& box, LinearSolver&
 	}
 
 	return -1;
+	*/
 }
 
 
@@ -142,6 +146,48 @@ int LinearRelaxAffine2::linearization(const IntervalVector& box, LinearSolver& l
 	CmpOp op;
 	int cont = 0;
 
+	if (this->goal_var()>-1) {
+		// Create the linear relaxation of the objective function
+
+		sys.goal->eval_affine2(box,af2);
+
+		if (af2.size() >0) { // if the affine2 form is valid
+			bool b_abort=false;
+			// convert the epsilon variables to the original box
+			double tmp=0;
+			center =0;
+			err =0;
+			int k=1; // the affine form begins with 1
+			for (int i =0;(!b_abort) &&(i <sys.nb_var); i++) {
+				tmp = box[i].rad();
+				if (i==this->goal_var()) {
+					rowconst[i] =-1;
+				} else if (af2.val(k)==0) {
+					rowconst[i] =0;
+					k++;
+				} else if (tmp==0) { // sensible case to avoid rowconst[i]=NaN
+					if (af2.val(k)==0) {
+						rowconst[i]=0;
+						k++;
+					} else {
+						b_abort =true;
+					}
+				} else {
+					rowconst[i] =af2.val(k) / tmp;
+					center += rowconst[i]*box[i].mid();
+					err += fabs(rowconst[i])*  pow(2,-50);
+					k++;
+				}
+			}
+			if (!b_abort) {
+
+				try {
+					lp_solver.addConstraint(rowconst, LEQ,	((af2.err()+err) - (af2.val(0)-center)).ub());
+					cont++;
+				} catch (LPException&) { }
+			}
+		}
+	}
 	// Create the linear relaxation of each constraint
 	for (int ctr = 0; ctr < sys.nb_ctr; ctr++) {
 
