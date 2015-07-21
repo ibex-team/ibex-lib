@@ -341,8 +341,8 @@ void Optimizer::contract_and_bound(OptimCell& c, const IntervalVector& init_box)
 
 	double ymax;
 	if (loup==POS_INFINITY) ymax=POS_INFINITY;
-	//	else ymax= compute_ymax(0.9);  //bias in favor of descendants of cell where the last loup was found
-	else ymax= compute_ymax(1.0);
+	else ymax= compute_ymax(0.9);  //bias in favor of descendants of the cell where the last loup was found
+	//else ymax= compute_ymax(1.0);
 	//	else ymax= compute_ymax(1.0)+ 1.e-15;
 	/*
 	if (!(y.ub() == ymax))

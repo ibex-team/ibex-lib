@@ -43,7 +43,7 @@ struct CellComparatorlb {
   // the other comparators  used in the second heap  (buffer2  of Optimizer)
   // crit==UB
 
-  
+
 struct CellComparatorub {
 	bool operator()(const pair<OptimCell*,Interval*>& c1, const pair<OptimCell*,Interval*>& c2) {
 	  if( c1.second->ub() !=  c2.second->ub())
@@ -52,10 +52,10 @@ struct CellComparatorub {
 	    return c1.second->lb() >= c2.second->lb();
 	}
 };
-  
 
-  /*  the criterion ub+lb  replacing ub ib the second criterion (for JOGO tests) */
-  /*
+
+  /*  the criterion ub+lb  replacing ub in the second criterion (for JOGO tests) */
+  /*  
 struct CellComparatorub {
 	bool operator()(const pair<OptimCell*,Interval*>& c1, const pair<OptimCell*,Interval*>& c2) {
 	  return c1.second->ub() + c1.second->lb() >= c2.second->ub() +c2.second->lb();}
@@ -137,7 +137,7 @@ struct CellComparatorC3 {
 
 struct CellComparatorC5 {
   	bool operator()(const pair<OptimCell*,Interval*>& c1, const pair<OptimCell*,Interval*>& c2) {
-	  return(((c1.first)->pu *(c1.first)->loup - (c1.second)->lb()) / ((c1.second)->diam())  <=  ((c2.first)->pu *(c2.first)->loup - (c2.second->lb())) / ((c2.second)->diam()));
+	  return(((c1.first)->pu *(c1.first)->loup - (c1.second)->lb()) / ((c1.first)->pf.diam())  <=  ((c2.first)->pu *(c2.first)->loup - (c2.second->lb())) / ((c2.first)->pf.diam()));
 	}
 };
 
@@ -155,8 +155,8 @@ struct CellComparatorC5 {
   */
  struct CellComparatorC7 {
 	bool operator()(const pair<OptimCell*,Interval*>& c1, const pair<OptimCell*,Interval*>& c2) {
-	  return(c1.second->lb() /((c1.first)->pu * ((c1.first)->loup - (c1.second)->lb()) / (c1.second)->diam())  >=
-		 c2.second->lb() /((c2.first)->pu *((c2.first)->loup - (c2.second)->lb()) / (c2.second)->diam()));
+	  return(c1.second->lb() /((c1.first)->pu * ((c1.first)->loup - (c1.second)->lb()) / (c1.first)->pf.diam())  >=
+		 c2.second->lb() /((c2.first)->pu *((c2.first)->loup - (c2.second)->lb()) / (c2.first)->pf.diam()));
 	}
 };
 
