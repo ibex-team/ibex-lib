@@ -94,7 +94,7 @@ inline Affine2Main<T>& Affine2Main<T>::linChebyshev(Affine2_expr num, const Inte
 	// Particular case
 	if (res_itv.is_empty() || res_itv.is_unbounded()) {
 		*this = res_itv;
-	} else if ((!is_actif())||(itv.diam()<AF_EC())) {
+	} else if ((!is_actif())||(itv.diam()<AF_EC)) {
 		*this = res_itv;
 	}  else  {
 
@@ -592,7 +592,7 @@ inline Affine2Main<T>& Affine2Main<T>::power(int n, const Interval itv) {
 		*this = pow(itv,n);
 	} else if (!is_actif()) {
 		*this = pow(itv,n);
-	} else if (itv.diam()< AF_EC()) {
+	} else if (itv.diam()< AF_EC) {
 		*this = pow(itv,n);
 	} else {
 
@@ -867,7 +867,7 @@ Affine2Main<T>& Affine2Main<T>::linMinRange(Affine2_expr num, const Interval itv
 				}
 
 				dmm = sqrt(itv2);
-				if (itv2.diam()< AF_EC()) {
+				if (itv2.diam()< AF_EC) {
 					alpha = 0.0;
 					band =dmm;
 				}
@@ -907,7 +907,7 @@ Affine2Main<T>& Affine2Main<T>::linMinRange(Affine2_expr num, const Interval itv
 			}
 			else {
 				dmm = res_itv;
-				if (itv.diam()< AF_EC()) {
+				if (itv.diam()< AF_EC) {
 					alpha = 0.0;
 					band =dmm;
 				}
@@ -951,7 +951,7 @@ Affine2Main<T>& Affine2Main<T>::linMinRange(Affine2_expr num, const Interval itv
 			//else {
 
 				dmm = res_itv;
-				if (itv.diam()< AF_EC()) {
+				if (itv.diam()< AF_EC) {
 					alpha = 0.0;
 					band =dmm;
 				}
@@ -993,7 +993,7 @@ Affine2Main<T>& Affine2Main<T>::linMinRange(Affine2_expr num, const Interval itv
 			else {
 
 				dmm = (1.0/abs(itv));
-				if (itv.diam()< AF_EC()) {
+				if (itv.diam()< AF_EC) {
 					alpha = 0.0;
 					band = dmm;
 				}
