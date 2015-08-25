@@ -11,6 +11,7 @@
 #include "ibex_MainGenerator.h"
 #include "ibex_CtrGenerator.h"
 #include "ibex_P_ExprGenerator.h"
+#include "ibex_Expr2DAG.h"
 
 #include <utility>
 
@@ -69,7 +70,18 @@ void MainGenerator::generate(const P_Source& source, System& result) {
 
 		varcopy(result.args, objvars); // TODO: should we remove eprs and sybs from the objective variables?
 		const ExprNode& goal=ExprGenerator(Scope()).generate(srcvars, objvars, *source.goal);
-		result.goal = new Function(objvars, goal, "goal");
+
+		// without DAGification:
+//		result.goal = new Function(objvars, goal, "goal");
+
+		// with DAGification:
+		Array<const ExprSymbol> objvars2(n);
+		varcopy(objvars, objvars2);
+		const ExprNode& goal2=Expr2DAG().transform(objvars,(const Array<const ExprNode>&) objvars2,goal);
+
+		cout << "dagification : " << goal.size << " " << goal2.size << endl;
+		result.goal = new Function(objvars2, goal2, "goal");
+
 	}
 
 	// ============== case of unconstrained optimization ===========
