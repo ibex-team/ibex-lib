@@ -227,7 +227,17 @@ void Optimizer::update_uplo() {
 			cout << " loup = " << loup << " new_uplo=" << new_uplo << endl;
 			ibex_error("optimizer: new_uplo>loup (please report bug)");
 		}
-		if (new_uplo < uplo_of_epsboxes) uplo = new_uplo;
+		if (new_uplo < uplo) {
+			cout << "uplo= " << uplo << " new_uplo=" << new_uplo << endl;
+			ibex_error("optimizer: new_uplo<uplo (please report bug)");
+		}
+
+		if (new_uplo < uplo_of_epsboxes) {
+			if (new_uplo > uplo) {
+				//cout << "uplo update=" << uplo << endl;
+				uplo = new_uplo;
+			}
+		}
 		else uplo= uplo_of_epsboxes;
 	}
 	else if (buffer.empty() && loup != POS_INFINITY) {
@@ -425,22 +435,10 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 		  //			if (trace >= 2) cout << " buffer " << buffer << endl;
 		  if (trace >= 2) buffer.print(cout);
 			//		  cout << "buffer size "  << buffer.size() << " " << buffer2.size() << endl;
-			// removes from the heap buffer, the cells already chosen in the other buffer
-
-			if (buffer.empty()) {
-				//cout << " buffer empty " << buffer.empty() << " " << buffer2.empty() << endl;
-				// this update is only necessary when buffer was not
-				// initially empty
-				update_uplo();
-				break;
-			}
 
 			loup_changed=false;
-			Cell *c;
 
-			// random choice between the 2 buffers corresponding to two criteria implemented in two heaps)
-			// critpr chances over 100 to choose the second heap (see CellDoubleHeap)
-			c=buffer.top();
+			Cell *c = buffer.top();
 
 			try {
 				pair<IntervalVector,IntervalVector> boxes=bsc.bisect(*c);
@@ -484,7 +482,7 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 				update_uplo_of_epsboxes((c->box)[ext_sys.goal_var()].lb());
 				buffer.pop();
 				delete c; // deletes the cell.
-
+				//if (trace>=1) cout << "epsilon-box found: uplo cannot exceed " << uplo_of_epsboxes << endl;
 				update_uplo(); // the heap has changed -> recalculate the uplo
 
 			}

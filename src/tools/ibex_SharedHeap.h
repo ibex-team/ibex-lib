@@ -128,22 +128,27 @@ protected:
 	/**
 	 * Percolate (or "heapify") from the node \var node downto the bottom.
 	 */
-	void percolate(HeapNode<T>* node);
+	void percolate_down(HeapNode<T>* node);
 
 	/**
-	 * \brief Remove the ith element and update the heap in consequence.
+	 * Percolate (or "heapify") from the node \var node upto the root.
+	 */
+	void percolate_up(HeapNode<T>* node);
+
+	/**
+	 * \brief Remove a node and update the heap in consequence.
 	 *
-	 * (call percolate).
+	 * (call percolate_down and percolate_up).
 	 */
 	void erase_node(HeapNode<T>* node);
 
 	/**
-	 * \brief Remove the ith element.
+	 * \brief Remove a node.
 	 *
 	 * The last node is actually removed and its element is put in place
-	 * of the ith position element.
+	 * of the node element, except if the node is the last.
 	 *
-	 * The heap is not updated after (the new ith node is not at its right place
+	 * The heap is not updated after (the new node is not at its right place
 	 * anymore and the heap is in undefined state).
 	 *
 	 * Complexity: O(1)
@@ -159,14 +164,21 @@ protected:
 
 	/**
 	 * \brief Streams out the heap
+	 *
+	 * Shows the tree-structure with only the cost of each node (not all data).
 	 */
-	std::ostream& print(std::ostream& os) const;
+	template<class U>
+	friend std::ostream& operator<<(std::ostream& os, const SharedHeap<U>& heap);
+
+	/**
+	 * \brief Check if the heap is well-formed
+	 */
+	bool heap_state();
 
 private:
 
 	/** Used in the sort function (proceed by recursivity) */
 	void sort_rec(HeapNode<T>* node, SharedHeap<T>& heap);
-
 };
 
 
@@ -213,7 +225,10 @@ private:
 	void switch_elt(HeapNode<T>* node, int heap_id);
 
 	template<class U>
-	friend std::ostream& operator<<(std::ostream& os, const HeapNode<U>& node) ;
+	friend std::ostream& operator<<(std::ostream& os, const HeapNode<U>& node);
+
+	template<class U>
+	friend std::ostream& operator<<(std::ostream& os, const SharedHeap<U>& heap);
 
 };
 
@@ -265,6 +280,9 @@ private:
 
 	template<class U>
 	friend std::ostream& operator<<(std::ostream& os, const HeapElt<U>& node) ;
+
+	template<class U>
+	friend std::ostream& operator<<(std::ostream& os, const SharedHeap<U>& heap);
 };
 
 
@@ -327,7 +345,7 @@ inline double SharedHeap<T>::cost(const T& data) const {
 }
 
 template<class T>
-void SharedHeap<T>::sort_rec(HeapNode<T> * node, SharedHeap<T> & heap) {
+void SharedHeap<T>::sort_rec(HeapNode<T>* node, SharedHeap<T>& heap) {
 
 	if (update_cost_when_sorting)
 		node->elt->crit[heap_id] = cost(*(node->elt->data));
@@ -336,11 +354,7 @@ void SharedHeap<T>::sort_rec(HeapNode<T> * node, SharedHeap<T> & heap) {
 	if (node->left)	 sort_rec(node->left, heap);
 	if (node->right) sort_rec(node->right, heap);
 
-	node->left=NULL;
-	node->right=NULL;
-	node->elt = NULL;
 	delete node;
-	node = NULL;
 }
 
 template<class T>
@@ -370,20 +384,8 @@ void SharedHeap<T>::push_elt(HeapElt<T>* elt) {
 		tmp->elt->holder[heap_id] = tmp;
 		if (nb_nodes%2==0)	{ pt->left =tmp; }
 		else 				{ pt->right=tmp; }
-		pt = tmp;
 
-		// PT indicates the added element
-		// we have now to perform an update upto the root
-		bool b = true;
-		while (b&&(pt->father)) {
-			if (pt->father->is_sup(pt,heap_id)) {
-				pt->switch_elt(pt->father,heap_id);
-				pt = pt->father;
-			} else {
-				b= false;
-			}
-		}
-
+		percolate_up(tmp);
 	}
 }
 
@@ -426,22 +428,25 @@ void SharedHeap<T>::erase_node(HeapNode<T>* node) {
 	assert(node);
 	assert(nb_nodes>0);
 
-	if (erase_node_no_percolate(node)) percolate(node);
+	if (erase_node_no_percolate(node)) {
+		percolate_down(node);
+		percolate_up(node);
+	}
 }
 
 // erase a node and update the order
 template<class T>
-HeapNode<T>* SharedHeap<T>::erase_node_no_percolate(HeapNode<T>* pt_root) {
+HeapNode<T>* SharedHeap<T>::erase_node_no_percolate(HeapNode<T>* node) {
 	assert(nb_nodes>0);
 
 	if (nb_nodes==1) {
-		assert(pt_root==root);
+		assert(node==root);
 		root->elt=NULL;
 		delete root;
 		root = NULL;
-		pt_root = NULL; // return NULL
+		node = NULL; // return NULL
 	} else {
-		// GET THE LAST ELEMENT and delete the associated node without destroying the HeapElt
+		// Get the last element and delete the associated node without destroying the HeapElt
 		HeapNode<T>* last = get_node(nb_nodes-1);
 
 		// elt points on the last node data, that we will put in place of the deleted node
@@ -453,57 +458,97 @@ HeapNode<T>* SharedHeap<T>::erase_node_no_percolate(HeapNode<T>* pt_root) {
 		// to avoid the element to be deleted with the node pt
 		last->elt = NULL;
 
-		if (pt_root!=last) { // if the node to be deleted is not the last
-			pt_root->elt = elt;
-			pt_root->elt->holder[heap_id] = pt_root;
+		if (node!=last) { // if the node to be deleted is not the last
+			node->elt = elt;
+			node->elt->holder[heap_id] = node;
 		} else {
-			pt_root = NULL; // return NULL
+			node = NULL; // return NULL
 		}
 		delete last;
 	}
 	nb_nodes--;
-	return pt_root;
+	return node;
 }
 
 template<class T>
-void SharedHeap<T>::percolate(HeapNode<T>* node) {
+void SharedHeap<T>::percolate_up(HeapNode<T>* node) {
+	assert(node);
+
+	while (node->father && node->father->is_sup(node,heap_id)) {
+		node->switch_elt(node->father,heap_id);
+		node = node->father;
+	}
+}
+
+template<class T>
+void SharedHeap<T>::percolate_down(HeapNode<T>* node) {
 	assert(node);
 
 	// PERMUTATION to maintain the order in the heap when going down
-	if (node) {
-		bool b=true;
-		while (b && (node->left)) {
-			if (node->right) {
-				if (node->is_sup(node->left,heap_id)) {
-					if (node->right->is_sup(node->left,heap_id)) {
-						// left is the smallest
-						node->switch_elt(node->left,heap_id);
-						node = node->left;  // next
-					} else {
-						// right is the smallest
-						node->switch_elt(node->right,heap_id);
-						node = node->right;  // next
-					}
-				} else {
-					if (node->is_sup(node->right,heap_id)) {
-						// right is the smallest
-						node->switch_elt(node->right,heap_id);
-						node = node->right;  // next
-					} else { // current node is the smallest among the 3: stop
-						b=false;
-					}
-				}
-			} else { // no more right child but there is a left child
-				if (node->is_sup(node->left,heap_id)) {
+	bool b=true;
+	while (b && (node->left)) {
+		if (node->right) {
+			if (node->is_sup(node->left,heap_id)) {
+				if (node->right->is_sup(node->left,heap_id)) {
 					// left is the smallest
 					node->switch_elt(node->left,heap_id);
 					node = node->left;  // next
-				} else { // current node is the smallest among the 3: stop (and we must have reached the bottom of the heap)
+				} else {
+					// right is the smallest
+					node->switch_elt(node->right,heap_id);
+					node = node->right;  // next
+				}
+			} else {
+				if (node->is_sup(node->right,heap_id)) {
+					// right is the smallest
+					node->switch_elt(node->right,heap_id);
+					node = node->right;  // next
+				} else { // current node is the smallest among the 3: stop
 					b=false;
 				}
 			}
+		} else { // no more right child but there is a left child
+			if (node->is_sup(node->left,heap_id)) {
+				// left is the smallest
+				node->switch_elt(node->left,heap_id);
+				node = node->left;  // next
+			} else { // current node is the smallest among the 3: stop (and we must have reached the bottom of the heap)
+				b=false;
+			}
 		}
 	}
+}
+
+template<class T>
+bool SharedHeap<T>::heap_state() {
+
+	if (empty()) return true;
+
+	std::stack<HeapNode<T>* > s;
+	s.push(root);
+	while (!s.empty()) {
+		HeapNode<T>* node=s.top();
+		s.pop();
+		if (node->right && (!node->left)) {
+			//std::cerr << "node with only right child" << std::endl;
+			return false;
+		}
+		if (node->left) {
+			if (node->is_sup(node->left,heap_id)) {
+				//std::cerr << "node elt:" << node->elt->crit[heap_id] << " node left:" <<  node->left->elt->crit[heap_id] << std::endl;
+				return false;
+			}
+			else s.push(node->left);
+		}
+		if (node->right) {
+			if (node->is_sup(node->right,heap_id)) {
+				//std::cerr << "node elt:" << node->elt->crit[heap_id] << " node left:" <<  node->right->elt->crit[heap_id] << std::endl;
+				return false;
+			}
+			else s.push(node->right);
+		}
+	}
+	return true;
 }
 
 template<class T>
@@ -582,7 +627,7 @@ HeapElt<T>::~HeapElt() {
 
 template<class T>
 bool HeapElt<T>::is_sup(double d, int ind_crit) const {
-	return (crit[ind_crit] >= d);
+	return (crit[ind_crit] > d);
 }
 
 template<class T>
@@ -600,10 +645,20 @@ std::ostream& operator<<(std::ostream& os, const HeapNode<T>& node) {
 }
 
 template<class T>
-std::ostream& SharedHeap<T>::print(std::ostream& os) const{
-	os << "[ ";
-	if (root) 	os << *(root) << " ";
-	return os << "]";
+std::ostream& operator<<(std::ostream& os, const SharedHeap<T>& heap) {
+	if (!heap.root) return os << "(empty heap)";
+	os << std::endl;
+	std::stack<std::pair<HeapNode<T>*,int> > s;
+	s.push(std::pair<HeapNode<T>*,int>(heap.root,0));
+	while (!s.empty()) {
+		std::pair<HeapNode<T>*,int> p=s.top();
+		s.pop();
+		for (int i=0; i<p.second; i++) os << "   ";
+		os  << (p.first->elt->crit[heap.heap_id]) << std::endl;
+		if (p.first->right) s.push(std::pair<HeapNode<T>*,int>(p.first->right,p.second+1));
+		if (p.first->left) s.push(std::pair<HeapNode<T>*,int>(p.first->left,p.second+1));
+	}
+	return os;
 }
 
 } // end namespace ibex
