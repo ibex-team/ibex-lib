@@ -133,7 +133,7 @@ int main() {
 	
 	pendingList.push_back(box);
 	
-	CtcQInter ctcq(m_ctc,Q);
+	CtcQInterProjF ctcq(m_ctc,Q);
 	CtcFixPoint ctcf(ctcq);
 
 	int counter = 0;
@@ -143,7 +143,6 @@ int main() {
 	start = clock();
 	while (!pendingList.empty()) {
 		counter++;
-		cout << " counter " << counter << endl;
 		b = pendingList.front();
 		pendingList.pop_front();
 	        ctcf.contract(b);
