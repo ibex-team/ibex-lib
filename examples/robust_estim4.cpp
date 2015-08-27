@@ -120,16 +120,14 @@ int main() {
 		counter++;
 		b = pendingList.front();
 		pendingList.pop_front();
-	
-		try {
-			if (!qinteronly) {
-				fix.contract(b);
-			} else {
-				ctcq.contract(b);
-			}
-		} catch (EmptyBoxException&) {
-			continue;
-		}
+		if (!qinteronly) {
+		  fix.contract(b);
+		} else {
+		  ctcq.contract(b);
+		}		  
+		if (b.is_empty())
+		  continue;
+
 		
 		if (b.max_diam() > eps) {
 			assert(b.is_bisectable());

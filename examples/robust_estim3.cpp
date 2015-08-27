@@ -133,7 +133,7 @@ int main() {
 	
 	pendingList.push_back(box);
 	
-	CtcQInterProjF ctcq(m_ctc,Q);
+	CtcQInter ctcq(m_ctc,Q);
 	CtcFixPoint ctcf(ctcq);
 
 	int counter = 0;
@@ -143,14 +143,12 @@ int main() {
 	start = clock();
 	while (!pendingList.empty()) {
 		counter++;
+		cout << " counter " << counter << endl;
 		b = pendingList.front();
 		pendingList.pop_front();
+	        ctcf.contract(b);
+		if (b.is_empty())	continue;
 	
-		try {
-			ctcf.contract(b);
-		} catch (EmptyBoxException&) {
-			continue;
-		}
 		
 		if (b.max_diam() > eps) {
 			assert(b.is_bisectable());
