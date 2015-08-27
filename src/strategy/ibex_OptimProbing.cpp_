@@ -190,6 +190,10 @@ bool Optimizer::line_probing(const IntervalVector& box) {
 	// ------------------------------------------------------------------------
 	// Calculates the gradient of f at the startpoint of the box (once for all)
 	// ------------------------------------------------------------------------
+	IntervalVector _g=sys.goal->gradient(loup_point);
+
+	if (_g.is_empty()) return false; // issue #127
+
 	Vector g = sys.goal->gradient(loup_point).lb();
 
 	// --------------------------------------------------
