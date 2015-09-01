@@ -97,7 +97,7 @@ IntervalVector qinter(const Array<IntervalVector>& _boxes, int q) {
 
 		//cout << "******* LB d=" << d << "******** " << endl;
 		while (ind[0]<size[d] && (cell[d].lb()<lb0)) {
-			cout << "cell=" << cell << endl;
+			//cout << "cell=" << cell << endl;
 			// count the number of boxes that contains mid
 			int count=0;
 			for (int j=0; count<q && j<p; j++) {
@@ -143,7 +143,7 @@ IntervalVector qinter(const Array<IntervalVector>& _boxes, int q) {
 
 		//cout << "******* UB d=" << d << "******** " << endl;
 		while (ind[0]>=0 && cell[d].ub()>ub0) {
-			cout << "cell=" << cell << endl;
+			//cout << "cell=" << cell << endl;
 			// count the number of boxes that contains mid
 			int count=0;
 			for (int j=0; count<q && j<p; j++) {
