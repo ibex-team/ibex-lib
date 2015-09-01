@@ -3,7 +3,6 @@ BINS=$(SRCS:.cpp=)
 
 CXXFLAGS := $(shell pkg-config --cflags ibex) 
 LIBS	 := $(shell pkg-config --libs  ibex)
-LIBDIR	 := $(shell pkg-config --libdir  ibex) 
 
 ifeq ($(DEBUG), yes)
 CXXFLAGS := $(CXXFLAGS) -O0 -g -pg -Wall -frounding-math  
@@ -14,7 +13,6 @@ endif
 all: $(BINS)
 
 % :	%.cpp
-	echo $(BINS) $(OBJS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $< $(LIBS)
 
 clean:
