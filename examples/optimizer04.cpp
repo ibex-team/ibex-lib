@@ -116,10 +116,11 @@ int main(int argc, char** argv){
 	CtcPolytopeHull* cxn_poly;
 	CtcCompo* cxn_compo;
 	if (linearrelaxation=="compo" || linearrelaxation=="art"|| linearrelaxation=="xn")
-	  //cxn = new CtcLinearRelaxation (*lr, hc44xn);
+          {
 		cxn_poly = new CtcPolytopeHull(*lr, CtcPolytopeHull::ALL_BOX);
 		cxn_compo =new CtcCompo(*cxn_poly, hc44xn);
 		cxn = new CtcFixPoint (*cxn_compo, default_relax_ratio);
+	  }
 	//  the actual contractor  ctc + linear relaxation 
 	Ctc* ctcxn;
 	if (linearrelaxation=="compo" || linearrelaxation=="art"|| linearrelaxation=="xn")
