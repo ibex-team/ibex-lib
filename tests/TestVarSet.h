@@ -27,6 +27,7 @@ public:
 		TEST_ADD(TestVarSet::test03);
 		TEST_ADD(TestVarSet::test04);
 		TEST_ADD(TestVarSet::test05);
+		TEST_ADD(TestVarSet::test06);
 	}
 
 	void test01();
@@ -34,6 +35,7 @@ public:
 	void test03();
 	void test04();
 	void test05();
+	void test06();
 };
 
 } // namespace ibex

@@ -13,80 +13,81 @@ using namespace std;
 
 namespace ibex {
 
-VarSet::VarSet(Function& f, const ExprNode& y1, const IntervalVector& init_box) : y_init(1) {
- init(f, Array<const ExprNode>(y1), init_box);
+VarSet::VarSet(Function& f, const ExprNode& x1) :nb_var(-1), nb_param(-1), param_box(1) {
+ init(f, Array<const ExprNode>(x1));
 }
 
-VarSet::VarSet(Function& f, const ExprNode& y1, const ExprNode& y2, const IntervalVector& init_box) : y_init(1) {
- init(f, Array<const ExprNode>(y1,y2), init_box);
+VarSet::VarSet(Function& f, const ExprNode& x1, const ExprNode& x2) : nb_var(-1), nb_param(-1), param_box(1) {
+ init(f, Array<const ExprNode>(x1,x2));
 }
 
-VarSet::VarSet(Function& f, const ExprNode& y1, const ExprNode& y2, const ExprNode& y3, const IntervalVector& init_box) : y_init(1) {
- init(f, Array<const ExprNode>(y1,y2,y3), init_box);
+VarSet::VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3) : nb_var(-1), nb_param(-1), param_box(1) {
+ init(f, Array<const ExprNode>(x1,x2,x3));
 }
 
-VarSet::VarSet(Function& f, const ExprNode& y1, const ExprNode& y2, const ExprNode& y3, const ExprNode& y4, const IntervalVector& init_box) : y_init(1) {
- init(f, Array<const ExprNode>(y1,y2,y3,y4), init_box);
+VarSet::VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4) : nb_var(-1), nb_param(-1), param_box(1) {
+ init(f, Array<const ExprNode>(x1,x2,x3,x4));
 }
 
-VarSet::VarSet(Function& f, const ExprNode& y1, const ExprNode& y2, const ExprNode& y3, const ExprNode& y4, const ExprNode& y5, const IntervalVector& init_box) : y_init(1) {
- init(f, Array<const ExprNode>(y1,y2,y3,y4,y5), init_box);
+VarSet::VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5) : nb_var(-1), nb_param(-1), param_box(1) {
+ init(f, Array<const ExprNode>(x1,x2,x3,x4,x5));
 }
 
-VarSet::VarSet(Function& f, const ExprNode& y1, const ExprNode& y2, const ExprNode& y3, const ExprNode& y4, const ExprNode& y5, const ExprNode& y6, const IntervalVector& init_box) : y_init(1) {
- init(f, Array<const ExprNode>(y1,y2,y3,y4,y5,y6), init_box);
+VarSet::VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6) : nb_var(-1), nb_param(-1), param_box(1) {
+ init(f, Array<const ExprNode>(x1,x2,x3,x4,x5,x6));
 }
 
-VarSet::VarSet(Function& f, const ExprNode& y1, const ExprNode& y2, const ExprNode& y3, const ExprNode& y4, const ExprNode& y5, const ExprNode& y6, const ExprNode& y7, const IntervalVector& init_box) : y_init(1) {
- init(f, Array<const ExprNode>(y1,y2,y3,y4,y5,y6,y7), init_box);
+VarSet::VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7) : nb_var(-1), nb_param(-1), param_box(1) {
+ init(f, Array<const ExprNode>(x1,x2,x3,x4,x5,x6,x7));
 }
 
-VarSet::VarSet(Function& f, const ExprNode& y1, const ExprNode& y2, const ExprNode& y3, const ExprNode& y4, const ExprNode& y5, const ExprNode& y6, const ExprNode& y7, const ExprNode& y8, const IntervalVector& init_box) : y_init(1) {
- init(f, Array<const ExprNode>(y1,y2,y3,y4,y5,y6,y7,y8), init_box);
+VarSet::VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, const ExprNode& x8) : nb_var(-1), nb_param(-1), param_box(1) {
+ init(f, Array<const ExprNode>(x1,x2,x3,x4,x5,x6,x7,x8));
 }
 
-VarSet::VarSet(Function& f, const ExprNode& y1, const ExprNode& y2, const ExprNode& y3, const ExprNode& y4, const ExprNode& y5, const ExprNode& y6, const ExprNode& y7, const ExprNode& y8, const ExprNode& y9, const IntervalVector& init_box) : y_init(1) {
- init(f, Array<const ExprNode>(y1,y2,y3,y4,y5,y6,y7,y8,y9), init_box);
+VarSet::VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, const ExprNode& x8, const ExprNode& x9) : nb_var(-1), nb_param(-1), param_box(1) {
+ init(f, Array<const ExprNode>(x1,x2,x3,x4,x5,x6,x7,x8,x9));
 }
 
-VarSet::VarSet(Function& f, const ExprNode& y1, const ExprNode& y2, const ExprNode& y3, const ExprNode& y4, const ExprNode& y5, const ExprNode& y6, const ExprNode& y7, const ExprNode& y8, const ExprNode& y9, const ExprNode& y10, const IntervalVector& init_box) : y_init(1) {
- init(f, Array<const ExprNode>(y1,y2,y3,y4,y5,y6,y7,y8,y9,y10), init_box);
+VarSet::VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, const ExprNode& x8, const ExprNode& x9, const ExprNode& x10) : nb_var(-1), nb_param(-1), param_box(1) {
+ init(f, Array<const ExprNode>(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10));
 }
 
-VarSet::VarSet(Function& f, const ExprNode& y1, const ExprNode& y2, const ExprNode& y3, const ExprNode& y4, const ExprNode& y5, const ExprNode& y6, const ExprNode& y7, const ExprNode& y8, const ExprNode& y9, const ExprNode& y10, const ExprNode& y11, const IntervalVector& init_box) : y_init(1) {
- init(f, Array<const ExprNode>(y1,y2,y3,y4,y5,y6,y7,y8,y9,y10,y11), init_box);
+VarSet::VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, const ExprNode& x8, const ExprNode& x9, const ExprNode& x10, const ExprNode& x11) : nb_var(-1), nb_param(-1), param_box(1) {
+ init(f, Array<const ExprNode>(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11));
 }
 
-VarSet::VarSet(Function& f, const ExprNode& y1, const ExprNode& y2, const ExprNode& y3, const ExprNode& y4, const ExprNode& y5, const ExprNode& y6, const ExprNode& y7, const ExprNode& y8, const ExprNode& y9, const ExprNode& y10, const ExprNode& y11, const ExprNode& y12, const IntervalVector& init_box) : y_init(1) {
- init(f, Array<const ExprNode>(y1,y2,y3,y4,y5,y6,y7,y8,y9,y10,y11,y12), init_box);
+VarSet::VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, const ExprNode& x8, const ExprNode& x9, const ExprNode& x10, const ExprNode& x11, const ExprNode& x12) : nb_var(-1), nb_param(-1), param_box(1) {
+ init(f, Array<const ExprNode>(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12));
 }
 
-VarSet::VarSet(Function& f, const Array<const ExprNode>& y, const IntervalVector& init_box) : y_init(1) {
-	 init(f, y, init_box);
+VarSet::VarSet(Function& f, const Array<const ExprNode>& y) : nb_var(-1), nb_param(-1), param_box(1) {
+	 init(f, y);
 }
 
-VarSet::VarSet(Function& f, const BitSet& vars, const IntervalVector& init_box) : y_init(1) {
-	//CtcQuantif(ctc, vars, init_box, prec, own_ctc);
+VarSet::VarSet(Function& f, const BitSet& vars) : nb_var(vars.size()), nb_param(f.nb_var()-vars.size()), param_box(nb_param), vars(vars) {
+
 }
 
-void VarSet::init(Function& f, const Array<const ExprNode>& y, const IntervalVector& init_box) {
-	assert(y.size()>0);
-	assert(f.nb_var()>y.size());
+void VarSet::init(Function& f, const Array<const ExprNode>& x) {
+	assert(x.size()>0);
+	assert(f.nb_var()>x.size());
 
-	nb_param = 0;
+	(int&) nb_var = 0;
 
+	// by default all are parameters
 	vars.initialise(0,f.nb_var()-1,BitSet::empt);
 
-	vars.fill(0, f.nb_var()-1); // by default all are variables
+	//vars.fill(0, f.nb_var()-1);
 
-	for (int i=0; i<y.size(); i++) {
+	for (int i=0; i<x.size(); i++) {
 		int shift;
 
-		const ExprSymbol* symbol = dynamic_cast<const ExprSymbol*>(&y[i]);
+		const ExprSymbol* symbol = dynamic_cast<const ExprSymbol*>(&x[i]);
 		if (symbol) {
 			shift = 0;
 		} else {
-			const ExprIndex* index = dynamic_cast<const ExprIndex*>(&y[i]);
+			const ExprIndex* index = dynamic_cast<const ExprIndex*>(&x[i]);
 			if (!index) ibex_error("VarSet: not a symbol");
 
 			pair<const ExprSymbol*,int> p= index->symbol_shift();
@@ -100,48 +101,45 @@ void VarSet::init(Function& f, const Array<const ExprNode>& y, const IntervalVec
 		while (j<f.nb_arg() && strcmp(f.arg(j).name,symbol->name)!=0) j++;
 
 		if (j<f.nb_arg()) {   // y[i] found in the arguments of f
-			for (int k=0; k<y[i].dim.size(); k++) {
-				vars.remove(f.symbol_index[j]+shift+k); //  --> marked as a parameter
-				nb_param++;
+			for (int k=0; k<x[i].dim.size(); k++) {
+				vars.add(f.symbol_index[j]+shift+k); //  --> marked as a variable
+				((int&) nb_var)++;
 			}
 		}
 	}
 
-	y_init.resize(nb_param);
+	(int&) nb_param = f.nb_var() - nb_var;
 
-	assert(init_box.size()==nb_param);
+	param_box.resize(nb_param);
 
-	y_init = init_box;
-
-	nb_var = f.nb_var() - nb_param;
 }
 
-IntervalVector VarSet::extend(const IntervalVector& x) const {
-	assert(x.size()==nb_var);
+IntervalVector VarSet::extend(const IntervalVector& var_box) const {
+	assert(var_box.size()==nb_var);
 
-	IntervalVector fullbox(nb_var+nb_param);
+	IntervalVector full_box(nb_var+nb_param);
 	int jx=0;
 	int jy=0;
 
-	if (x.is_empty())
-		fullbox.set_empty();
+	if (var_box.is_empty())
+		full_box.set_empty();
 	else {
 		for (int i=0; i<nb_var+nb_param; i++) {
-			if (vars[i]) fullbox[i]=x[jx++];
-			else         fullbox[i]=y_init[jy++];
+			if (vars[i]) full_box[i]=var_box[jx++];
+			else         full_box[i]=param_box[jy++];
 		}
 	}
-	return fullbox;
+	return full_box;
 }
 
-IntervalVector VarSet::chop(const IntervalVector& fullbox) const {
-	assert(fullbox.size()==nb_param+nb_var);
-	IntervalVector x(nb_var);
+IntervalVector VarSet::chop(const IntervalVector& full_box) const {
+	assert(full_box.size()==nb_param+nb_var);
+	IntervalVector var_box(nb_var);
 	int jx=0;
 	for (int i=0; i<nb_var+nb_param; i++) {
-		if (vars[i]) x[jx++]=fullbox[i];
+		if (vars[i]) var_box[jx++]=full_box[i];
 	}
-	return x;
+	return var_box;
 }
 
 } // namespace ibex

@@ -30,97 +30,97 @@ public:
 	 *
 	 * \see #CtcQuantif(const NumConstraint&, const Array<const ExprNode&>, const IntervalVector&, double).
 	 */
-	VarSet(Function& f, const ExprNode& y1, const IntervalVector& y_init);
+	VarSet(Function& f, const ExprNode& x1);
 
 	/**
 	 * \brief Create the contractor for "exists (y1,y2) in [y_init] such that c(x,y)"
 	 *
 	 * \see #CtcQuantif(const NumConstraint&, const Array<const ExprNode&>, const IntervalVector&, double).
 	 */
-	VarSet(Function& f, const ExprNode& y1, const ExprNode& y2, const IntervalVector& y_init);
+	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2);
 
 	/**
 	 * \brief Create the contractor for "exists (y1,y2,y3) in [y_init] such that c(x,y)"
 	 *
 	 * \see #CtcQuantif(const NumConstraint&, const Array<const ExprNode&>, const IntervalVector&, double).
 	 */
-	VarSet(Function& f, const ExprNode& y1, const ExprNode& y2, const ExprNode& y3, const IntervalVector& y_init);
+	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3);
 
 	/**
 	 * \brief Create the contractor for "exists (y1,...,y4) in [y_init] such that c(x,y)"
 	 *
 	 * \see #CtcQuantif(const NumConstraint&, const Array<const ExprNode&>, const IntervalVector&, double).
 	 */
-	VarSet(Function& f, const ExprNode& y1, const ExprNode& y2, const ExprNode& y3, const ExprNode& y4, const IntervalVector& y_init);
+	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4);
 
 	/**
 	 * \brief Create the contractor for "exists (y1,...,y5) in [y_init] such that c(x,y)"
 	 *
 	 * \see #CtcQuantif(const NumConstraint&, const Array<const ExprNode&>, const IntervalVector&, double).
 	 */
-	VarSet(Function& f, const ExprNode& y1, const ExprNode& y2, const ExprNode& y3, const ExprNode& y4, const ExprNode& y5, const IntervalVector& y_init);
+	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5);
 
 	/**
 	 * \brief Create the contractor for "exists (y1,...,y6) in [y_init] such that c(x,y)"
 	 *
 	 * \see #CtcQuantif(const NumConstraint&, const Array<const ExprNode&>, const IntervalVector&, double).
 	 */
-	VarSet(Function& f, const ExprNode& y1, const ExprNode& y2, const ExprNode& y3, const ExprNode& y4, const ExprNode& y5, const ExprNode& y6, const IntervalVector& y_init);
+	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6);
 
 	/**
 	 * \brief Create the contractor for "exists (y1,...,y7) in [y_init] such that c(x,y)"
 	 *
 	 * \see #CtcQuantif(const NumConstraint&, const Array<const ExprNode&>, const IntervalVector&, double).
 	 */
-	VarSet(Function& f, const ExprNode& y1, const ExprNode& y2, const ExprNode& y3, const ExprNode& y4, const ExprNode& y5, const ExprNode& y6, const ExprNode& y7, const IntervalVector& y_init);
+	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7);
 
 	/**
 	 * \brief Create the contractor for "exists (y1,...,y8) in [y_init] such that c(x,y)"
 	 *
 	 * \see #CtcQuantif(const NumConstraint&, const Array<const ExprNode&>, const IntervalVector&, double).
 	 */
-	VarSet(Function& f, const ExprNode& y1, const ExprNode& y2, const ExprNode& y3, const ExprNode& y4, const ExprNode& y5, const ExprNode& y6, const ExprNode& y7, const ExprNode& y8, const IntervalVector& y_init);
+	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, const ExprNode& x8);
 
 	/**
 	 * \brief Create the contractor for "exists (y1,...,y9) in [y_init] such that c(x,y)"
 	 *
 	 * \see #CtcQuantif(const NumConstraint&, const Array<const ExprNode&>, const IntervalVector&, double).
 	 */
-	VarSet(Function& f, const ExprNode& y1, const ExprNode& y2, const ExprNode& y3, const ExprNode& y4, const ExprNode& y5, const ExprNode& y6, const ExprNode& y7, const ExprNode& y8, const ExprNode& y9, const IntervalVector& y_init);
+	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, const ExprNode& x8, const ExprNode& x9);
 
 	/**
 	 * \brief Create the contractor for "exists (y1,...,y10) in [y_init] such that c(x,y)"
 	 *
 	 * \see #CtcQuantif(const NumConstraint&, const Array<const ExprNode&>, const IntervalVector&, double).
 	 */
-	VarSet(Function& f, const ExprNode& y1, const ExprNode& y2, const ExprNode& y3, const ExprNode& y4, const ExprNode& y5, const ExprNode& y6, const ExprNode& y7, const ExprNode& y8, const ExprNode& y9, const ExprNode& y10, const IntervalVector& y_init);
+	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, const ExprNode& x8, const ExprNode& x9, const ExprNode& x10);
 
 	/**
 	 * \brief Create the contractor for "exists (y1,...,y11) in [y_init] such that c(x,y)"
 	 *
 	 * \see #CtcQuantif(const NumConstraint&, const Array<const ExprNode&>, const IntervalVector&, double).
 	 */
-	VarSet(Function& f, const ExprNode& y1, const ExprNode& y2, const ExprNode& y3, const ExprNode& y4, const ExprNode& y5, const ExprNode& y6, const ExprNode& y7, const ExprNode& y8, const ExprNode& y9, const ExprNode& y10, const ExprNode& y11, const IntervalVector& y_init);
+	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, const ExprNode& x8, const ExprNode& x9, const ExprNode& x10, const ExprNode& x11);
 
 	/**
 	 * \brief Create the contractor for "exists (y1,...,y12) in [y_init] such that c(x,y)"
 	 *
 	 * \see #CtcQuantif(const NumConstraint&, const Array<const ExprNode&>, const IntervalVector&, double).
 	 */
-	VarSet(Function& f, const ExprNode& y1, const ExprNode& y2, const ExprNode& y3, const ExprNode& y4, const ExprNode& y5, const ExprNode& y6, const ExprNode& y7, const ExprNode& y8, const ExprNode& y9, const ExprNode& y10, const ExprNode& y11, const ExprNode& y12, const IntervalVector& y_init);
+	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, const ExprNode& x8, const ExprNode& x9, const ExprNode& x10, const ExprNode& x11, const ExprNode& x12);
 
 	/**
 	 * \brief Create the contractor for "exists y in [y_init] such that c(x,y)"
 	 *
-	 * \see #CtcQuantif::CtcQuantif(const NumConstraint& c, const Array<const ExprNode>& y, const IntervalVector& y_init);
+	 * \see #CtcQuantif::CtcQuantif(const NumConstraint& c, const Array<const ExprNode>& y);
 	 */
-	VarSet(Function& f, const Array<const ExprNode>& y, const IntervalVector& y_init);
+	VarSet(Function& f, const Array<const ExprNode>& x);
 
 	/**
 	 * \brief
 	 *
 	 */
-	VarSet(Function& f, const BitSet& vars, const IntervalVector& y_init);
+	VarSet(Function& f, const BitSet& vars);
 
 	/**
 	 * \brief Extend the box to a "full box" with the parameters
@@ -133,22 +133,22 @@ public:
 	IntervalVector chop(const IntervalVector& box) const;
 
 	/**
-	 * \brief Initial box of the parameters (can be set dynamically)
-	 */
-	IntervalVector y_init;
-
-	/**
 	 * \brief Number of variables.
 	 *
 	 * \warning: a "variable" here is a real variable (not a parameter).
 	 * Not to be confused with the number of variables of the function f.
 	 */
-	int nb_var;
+	const int nb_var;
 
 	/**
 	 * \brief Number of parameters
 	 */
-	int nb_param;
+	const int nb_param;
+
+	/**
+	 * \brief Initial box of the parameters (can be set dynamically)
+	 */
+	IntervalVector param_box;
 
 	/**
 	 * vars[i]=true <=> the ith component is a variable ("x_k")
@@ -158,8 +158,7 @@ public:
 
 protected:
 
-
-	void init(Function& f, const Array<const ExprNode>& y, const IntervalVector& y_init);
+	void init(Function& f, const Array<const ExprNode>& x);
 };
 
 } // namespace ibex
