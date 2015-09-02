@@ -123,12 +123,12 @@ public:
 	VarSet(Function& f, const BitSet& vars, const IntervalVector& y_init);
 
 	/**
-	 * \brief  Extend the m-box to an n-box by fixing the n-m "last" coordinates to their point
+	 * \brief Extend the box to a "full box" with the parameters
 	 */
 	IntervalVector extend(const IntervalVector& box) const;
 
 	/**
-	 * \brief Restrict the n-box to an m-box by removing the n-m "last" coordinates
+	 * \brief Restrict the "full box" to the sub-box containing variables only
 	 */
 	IntervalVector chop(const IntervalVector& box) const;
 

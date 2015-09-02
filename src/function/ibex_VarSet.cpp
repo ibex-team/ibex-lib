@@ -116,26 +116,30 @@ void VarSet::init(Function& f, const Array<const ExprNode>& y, const IntervalVec
 	nb_var = f.nb_var() - nb_param;
 }
 
-// Extend the m-box to an n-box by fixing the parameters
-IntervalVector VarSet::extend(const IntervalVector& box) const {
-	assert(box.size()==nb_param);
-	IntervalVector x(nb_var+nb_param);
-	int var=0;
-	int param=0;
-	for (int i=0; i<nb_var+nb_param; i++) {
-		if (vars[i]) x[i]=box[var++];
-		else x[i]=y_init[param++];
+IntervalVector VarSet::extend(const IntervalVector& x) const {
+	assert(x.size()==nb_var);
+
+	IntervalVector fullbox(nb_var+nb_param);
+	int jx=0;
+	int jy=0;
+
+	if (x.is_empty())
+		fullbox.set_empty();
+	else {
+		for (int i=0; i<nb_var+nb_param; i++) {
+			if (vars[i]) fullbox[i]=x[jx++];
+			else         fullbox[i]=y_init[jy++];
+		}
 	}
-	return x;
+	return fullbox;
 }
 
-// Restrict the n-box to an m-box by removing the parameters
-IntervalVector VarSet::chop(const IntervalVector& box) const {
-	assert(box.size()==nb_param+nb_var);
+IntervalVector VarSet::chop(const IntervalVector& fullbox) const {
+	assert(fullbox.size()==nb_param+nb_var);
 	IntervalVector x(nb_var);
-	int var=0;
+	int jx=0;
 	for (int i=0; i<nb_var+nb_param; i++) {
-		if (vars[i]) x[var++]=box[i];
+		if (vars[i]) x[jx++]=fullbox[i];
 	}
 	return x;
 }
