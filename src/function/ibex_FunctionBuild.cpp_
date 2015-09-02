@@ -40,17 +40,13 @@ const char* DIFF_PREFIX = "d"; // when the differential of a function is generat
 class FindInputsUsed: public ExprVisitor {
 public:
 	std::vector<bool>& is_used;
-	int* symbol_index; // first variable index of a symbol
-	int current_index; // idem for the subexpression. -1 when subexpression is not an index
+	int* symbol_index;
+	int current_index; // first index for a subexpression. -1 when subexpression is not a symbol or an indexed symbol.
 
-	FindInputsUsed(const Array<const ExprSymbol>& x, const ExprNode& y, std::vector<bool>& is_used) : is_used(is_used) {
-		symbol_index = new int[x.size()];
-		int index=0;
+	FindInputsUsed(const Array<const ExprSymbol>& x, const ExprNode& y, int* symbol_index, std::vector<bool>& is_used) : is_used(is_used), symbol_index(symbol_index) {
 
 		for (int i=0; i<x.size(); i++) {
-			symbol_index[i]=index;
 			for (int j=0; j<x[i].dim.size(); j++) {
-				index++;
 				is_used.push_back(false); // by default
 			}
 		}
@@ -61,7 +57,6 @@ public:
 			for (int i=0; i<y.dim.size(); i++)
 				is_used[current_index+i]=true;
 		}
-		delete[] symbol_index;
 	}
 
 	virtual void visit(const ExprNode& e)     {
@@ -461,14 +456,21 @@ void Function::init(const Array<const ExprSymbol>& x, const ExprNode& y, const c
 	__all_symbols_scalar=true; // by default
 
 	symbs.resize(x.size());
+	symbol_index = new int[x.size()];
+	int index=0;
 
 	for (int i=0; i<x.size(); i++) {
 		symbs.set_ref(i,x[i]);
 		((ExprSymbol&) x[i]).key = i;
 		__all_symbols_scalar &= x[i].dim.is_scalar();
+
+		symbol_index[i]=index;
+		for (int j=0; j<x[i].dim.size(); j++) {
+			index++;
+		}
 	}
 
-	FindInputsUsed fsu(x, y, is_used);
+	FindInputsUsed fsu(x, y, symbol_index, is_used);
 
 	(int&) Function::_nb_var = is_used.size();
 	(int&) Function::_image_dim = y.dim.size();

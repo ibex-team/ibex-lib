@@ -49,8 +49,10 @@ Function::~Function() {
 
 	if (df!=NULL) delete df;
 
-	if (name!=NULL) // name==NULL if init/build_from_string was never called.
+	if (name!=NULL) { // name==NULL if init/build_from_string was never called.
 		free((char*) name);
+		delete[] symbol_index;
+	}
 }
 
 Domain& Function::eval_domain(const IntervalVector& box) const {

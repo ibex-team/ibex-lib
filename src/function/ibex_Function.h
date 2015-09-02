@@ -895,6 +895,8 @@ protected:
 	void print_expr(std::ostream& os) const;
 
 private:
+	friend class VarSet;
+
 	/**
 	 * \brief True if all the arguments are scalar
 	 *
@@ -921,6 +923,8 @@ private:
 	Function** comp;                             // the components. ==this if output_size()==1.
 
 	bool __all_symbols_scalar;                  // true if all symbols are scalar
+
+	int* symbol_index;                          // first variable index of a symbol
 
 	// if at some point, symbolic differentiation is needed for this function,
 	// we store the resulting function for future usage.

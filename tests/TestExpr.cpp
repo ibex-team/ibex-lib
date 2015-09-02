@@ -405,6 +405,8 @@ void TestExpr::index01() {
 	TEST_ASSERT(e.type()==Dim::MATRIX);
 	TEST_ASSERT(checkExpr(e,"x[1]"));
 	TEST_ASSERT(e.indexed_symbol());
+	TEST_ASSERT(e.symbol_shift().first==&x);
+	TEST_ASSERT(e.symbol_shift().second==12);
 }
 
 void TestExpr::index02() {
@@ -421,6 +423,8 @@ void TestExpr::index02() {
 	TEST_ASSERT(e.type()==Dim::ROW_VECTOR);
 	TEST_ASSERT(checkExpr(e,"x[1][1]"));
 	TEST_ASSERT(e.indexed_symbol());
+	TEST_ASSERT(e.symbol_shift().first==&x);
+	TEST_ASSERT(e.symbol_shift().second==16);
 }
 
 void TestExpr::index03() {
@@ -435,6 +439,16 @@ void TestExpr::index03() {
 	TEST_ASSERT(e.type()==Dim::SCALAR);
 	TEST_ASSERT(checkExpr(e,"x[1][1][1]"));
 	TEST_ASSERT(e.indexed_symbol());
+	TEST_ASSERT(e.symbol_shift().first==&x);
+	TEST_ASSERT(e.symbol_shift().second==17);
+}
+
+void TestExpr::index04() {
+	const ExprSymbol& x=ExprSymbol::new_("x",Dim::matrix_array(2,3,4));
+	const ExprIndex& e=x[2][1][3];
+	TEST_ASSERT(e.indexed_symbol());
+	TEST_ASSERT(e.symbol_shift().first==&x);
+	TEST_ASSERT(e.symbol_shift().second==31);
 }
 
 void TestExpr::apply01() {

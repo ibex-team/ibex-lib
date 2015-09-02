@@ -84,6 +84,27 @@ bool ExprIndex::indexed_symbol() const {
 	return expr_index->indexed_symbol();
 }
 
+pair<const ExprSymbol*, int> ExprIndex::symbol_shift() const {
+
+	int expr_shift;
+
+	const ExprSymbol* symbol=dynamic_cast<const ExprSymbol*>(&expr);
+
+	if (symbol)
+		expr_shift=0;
+	else {
+		const ExprIndex* expr_index=dynamic_cast<const ExprIndex*>(&expr);
+		if (!expr_index) return pair<const ExprSymbol*, int>(NULL,-1);
+		else {
+			pair<const ExprSymbol*, int> p = expr_index->symbol_shift();
+			symbol=p.first;
+			expr_shift=p.second;
+		}
+	}
+
+	return pair<const ExprSymbol*, int>(symbol, expr_shift + index*dim.size());
+}
+
 ExprNAryOp::ExprNAryOp(const Array<const ExprNode>& _args, const Dim& dim) :
 		ExprNode(max_height(_args)+1, nary_size(_args), dim),
 		args(_args), nb_args(_args.size()) {
