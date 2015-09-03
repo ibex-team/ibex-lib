@@ -444,7 +444,7 @@ void TestExpr::index03() {
 }
 
 void TestExpr::index04() {
-	const ExprSymbol& x=ExprSymbol::new_("x",Dim::matrix_array(2,3,4));
+	const ExprSymbol& x=ExprSymbol::new_("x",Dim::matrix_array(3,3,4));
 	const ExprIndex& e=x[2][1][3];
 	TEST_ASSERT(e.indexed_symbol());
 	TEST_ASSERT(e.symbol_shift().first==&x);
