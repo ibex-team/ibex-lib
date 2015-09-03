@@ -117,7 +117,7 @@ const char* duplicate_or_generate(const char* name) {
 
 }
 
-Function::Function() : name(NULL), comp(NULL), df(NULL), zero(NULL) {
+Function::Function() : name(NULL), comp(NULL), df(NULL), zero(NULL), _used_var(NULL) {
 	// root==NULL <=> the function is not initialized yet
 }
 
@@ -450,6 +450,8 @@ void Function::init(const Array<const ExprSymbol>& x, const ExprNode& y, const c
 	df=NULL;
 	comp=NULL;
 	zero=NULL;
+	_used_var=NULL;
+	_nb_used_vars=-1;
 
 	this->name=duplicate_or_generate(name);
 
@@ -472,8 +474,8 @@ void Function::init(const Array<const ExprSymbol>& x, const ExprNode& y, const c
 
 	FindInputsUsed fsu(x, y, symbol_index, is_used);
 
-	(int&) Function::_nb_var = is_used.size();
-	(int&) Function::_image_dim = y.dim.size();
+	(int&) _nb_var = is_used.size();
+	(int&) _image_dim = y.dim.size();
 
 	decorate(x,y);
 

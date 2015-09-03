@@ -12,7 +12,7 @@
 #define __IBEX_PDC_HANSEN_FEASIBILITY_H__
 
 #include "ibex_Pdc.h"
-#include "ibex_Fnc.h"
+#include "ibex_Function.h"
 
 namespace ibex {
 
@@ -30,7 +30,7 @@ public:
 	 * \brief Build the predicate for f=0.
 	 * \param inflating - true means that Newton is used in "contracting" mode
 	 */
-	PdcHansenFeasibility(Fnc& f, bool inflating=false);
+	PdcHansenFeasibility(Function& f, bool inflating=false);
 
 	/**
 	 * \brief Return the enclosure of the last solution found.
@@ -43,7 +43,7 @@ public:
 	virtual BoolInterval test(const IntervalVector& box);
 
 	/** The function */
-	Fnc& f;
+	Function& f;
 
 protected:
 	IntervalVector _solution;

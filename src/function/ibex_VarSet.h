@@ -7,8 +7,8 @@
 // Created     : Sep 1, 2015
 //============================================================================
 
-#ifndef __IBEX_VARSET_H__
-#define __IBEX_VARSET_H__
+#ifndef __IBEX_VAR_SET_H__
+#define __IBEX_VAR_SET_H__
 
 #include "ibex_Function.h"
 #include "ibex_BitSet.h"
@@ -125,12 +125,28 @@ public:
 	/**
 	 * \brief Extend the box to a "full box" with the parameters
 	 */
-	IntervalVector extend(const IntervalVector& box) const;
+	IntervalVector full_box(const IntervalVector& var_box, const IntervalVector& param_box) const;
 
 	/**
-	 * \brief Restrict the "full box" to the sub-box containing variables only
+	 * \brief Extract the domain of variables from the "full box"
 	 */
-	IntervalVector chop(const IntervalVector& box) const;
+	IntervalVector var_box(const IntervalVector& full_box) const;
+
+	/**
+	 * \brief Set the domain of variables in a "full box"
+	 */
+	void set_var_box(IntervalVector& full_box, const IntervalVector& var_box) const;
+
+	/**
+	 * \brief Set the domain of parameters in a "full box"
+	 */
+	void set_param_box(IntervalVector& full_box, const IntervalVector& param_box) const;
+
+	/**
+	 * \brief Extract the domain of parameters from the "full box"
+	 */
+	IntervalVector param_box(const IntervalVector& full_box) const;
+
 
 	/**
 	 * \brief Number of variables.
@@ -146,11 +162,6 @@ public:
 	const int nb_param;
 
 	/**
-	 * \brief Initial box of the parameters (can be set dynamically)
-	 */
-	IntervalVector param_box;
-
-	/**
 	 * vars[i]=true <=> the ith component is a variable ("x_k")
 	 * Otherwise, the ith component is a parameter ("y_k")
 	 */
@@ -163,4 +174,4 @@ protected:
 
 } // namespace ibex
 
-#endif // __IBEX_VARSET_H__
+#endif // __IBEX_VAR_SET_H__

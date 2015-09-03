@@ -23,16 +23,15 @@ void TestVarSet::test01() {
 
 	IntervalVector y_box(1,Interval(1,2));
 	VarSet set(f,x,z);
-	set.param_box=y_box;
+
 	TEST_ASSERT(set.vars[0]);
 	TEST_ASSERT(!set.vars[1]);
 	TEST_ASSERT(set.vars[2]);
-	TEST_ASSERT(set.param_box.size()==1);
 	TEST_ASSERT(set.nb_param==1);
 	TEST_ASSERT(set.nb_var==2);
 
 	IntervalVector x_box(2,Interval(0,1));
-	IntervalVector fullbox=set.extend(x_box);
+	IntervalVector fullbox=set.full_box(x_box,y_box);
 	double _fullbox[][2]={{0,1},{1,2},{0,1}};
 	TEST_ASSERT(fullbox==IntervalVector(3,_fullbox));
 
@@ -46,7 +45,7 @@ void TestVarSet::test02() {
 
 	IntervalVector y_box(3,Interval(1,2));
 	VarSet set(f,x,z);
-	set.param_box=y_box;
+
 	TEST_ASSERT(set.vars[0]);
 	TEST_ASSERT(set.vars[1]);
 	TEST_ASSERT(set.vars[2]);
@@ -54,12 +53,11 @@ void TestVarSet::test02() {
 	TEST_ASSERT(!set.vars[4]);
 	TEST_ASSERT(!set.vars[5]);
 	TEST_ASSERT(set.vars[6]);
-	TEST_ASSERT(set.param_box.size()==3);
 	TEST_ASSERT(set.nb_param==3);
 	TEST_ASSERT(set.nb_var==4);
 
 	IntervalVector x_box(4,Interval(0,1));
-	IntervalVector fullbox=set.extend(x_box);
+	IntervalVector fullbox=set.full_box(x_box,y_box);
 
 	double _fullbox[][2]={{0,1},{0,1},{0,1},
 			         {1,2},{1,2},{1,2},
@@ -75,7 +73,7 @@ void TestVarSet::test03() {
 
 	IntervalVector y_box(3,Interval(1,2));
 	VarSet set(f,x[0],x[2],y[0],y[1]);
-	set.param_box=y_box;
+
 	TEST_ASSERT(set.vars[0]);
 	TEST_ASSERT(!set.vars[1]);
 	TEST_ASSERT(set.vars[2]);
@@ -83,12 +81,11 @@ void TestVarSet::test03() {
 	TEST_ASSERT(set.vars[4]);
 	TEST_ASSERT(!set.vars[5]);
 	TEST_ASSERT(!set.vars[6]);
-	TEST_ASSERT(set.param_box.size()==3);
 	TEST_ASSERT(set.nb_param==3);
 	TEST_ASSERT(set.nb_var==4);
 
 	IntervalVector x_box(4,Interval(0,1));
-	IntervalVector fullbox=set.extend(x_box);
+	IntervalVector fullbox=set.full_box(x_box,y_box);
 
 	double _fullbox[][2]={{0,1},{1,2},{0,1},
 			              {0,1},{0,1},{1,2},
@@ -105,18 +102,17 @@ void TestVarSet::test04() {
 
 	IntervalVector y_box(7,Interval(1,2));
 	VarSet set(f,x,y[1]);
-	set.param_box=y_box;
+
 	int i=0;
 	for (; i<3; i++) TEST_ASSERT(set.vars[i]);
 	for (; i<10; i++) TEST_ASSERT(!set.vars[i]);
 	TEST_ASSERT(set.vars[10]);
 
-	TEST_ASSERT(set.param_box.size()==7);
 	TEST_ASSERT(set.nb_param==7);
 	TEST_ASSERT(set.nb_var==4);
 
 	IntervalVector x_box(4,Interval(0,1));
-	IntervalVector fullbox=set.extend(x_box);
+	IntervalVector fullbox=set.full_box(x_box,y_box);
 
 	double _fullbox[][2]={{0,1},{0,1},{0,1},
 	                 {1,2},{1,2},{1,2},
@@ -134,19 +130,19 @@ void TestVarSet::test05() {
 
 	IntervalVector y_box(4,Interval(1,2));
 	VarSet set(f,A[0],B[0][0],B[0][2],B[1]);
-	set.param_box=y_box;
+
 	int i=0;
 	for (; i<3; i++) TEST_ASSERT(set.vars[i]);
 	for (; i<6; i++) TEST_ASSERT(!set.vars[i]);
 	TEST_ASSERT(set.vars[6]);
 	TEST_ASSERT(!set.vars[7]);
 	for (i=8; i<11; i++) TEST_ASSERT(set.vars[i]);
-	TEST_ASSERT(set.param_box.size()==4);
+
 	TEST_ASSERT(set.nb_param==4);
 	TEST_ASSERT(set.nb_var==8);
 
 	IntervalVector x_box(8,Interval(0,1));
-	IntervalVector fullbox=set.extend(x_box);
+	IntervalVector fullbox=set.full_box(x_box,y_box);
 
 	double _fullbox[][2]={{0,1},{0,1},{0,1},
 	                 {1,2},{1,2},{1,2},
@@ -169,16 +165,16 @@ void TestVarSet::test06() {
 	VarSet set(f,vars);
 
 	IntervalVector y_box(1,Interval(1,2));
-	set.param_box=y_box;
+
 	TEST_ASSERT(set.vars[0]);
 	TEST_ASSERT(!set.vars[1]);
 	TEST_ASSERT(set.vars[2]);
-	TEST_ASSERT(set.param_box.size()==1);
+
 	TEST_ASSERT(set.nb_param==1);
 	TEST_ASSERT(set.nb_var==2);
 
 	IntervalVector x_box(2,Interval(0,1));
-	IntervalVector fullbox=set.extend(x_box);
+	IntervalVector fullbox=set.full_box(x_box,y_box);
 	double _fullbox[][2]={{0,1},{1,2},{0,1}};
 	TEST_ASSERT(fullbox==IntervalVector(3,_fullbox));
 

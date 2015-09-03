@@ -31,7 +31,7 @@ public:
 	 *
 	 *  Default value is #default_ceil.
 	 */
-	CtcNewton(const Fnc& f,
+	CtcNewton(const Function& f,
 			double ceil=default_ceil,
 			double prec=default_newton_prec,
 			double ratio=default_gauss_seidel_ratio);
@@ -39,7 +39,7 @@ public:
 	void contract(IntervalVector& box);
 
 	/** The function. */
-	const Fnc& f;
+	const Function& f;
 	/** Newton application ceiling. */
 	const double ceil;
 	/** Precision. See #ibex::newton(const Function&, IntervalVector&, double, double);*/

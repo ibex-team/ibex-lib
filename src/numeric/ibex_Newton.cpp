@@ -24,7 +24,7 @@ double default_gauss_seidel_ratio=1e-04;
 
 namespace {
 //
-//inline bool newton_step(const Fnc& f, IntervalVector& box,
+//inline bool newton_step(const Function& f, IntervalVector& box,
 //		IntervalVector& mid, IntervalVector& Fmid, IntervalMatrix& J) {
 //
 //	f.hansen_matrix(box,J);
@@ -34,7 +34,7 @@ namespace {
 //
 }
 
-bool newton(const Fnc& f, IntervalVector& box, double prec, double ratio_gauss_seidel) {
+bool newton(const Function& f, IntervalVector& box, double prec, double ratio_gauss_seidel) {
 	int n=f.nb_var();
 	int m=f.image_dim();
 	assert(box.size()==n);
@@ -98,7 +98,7 @@ bool newton(const Fnc& f, IntervalVector& box, double prec, double ratio_gauss_s
 	return reducted;
 }
 
-bool inflating_newton(const Fnc& f, IntervalVector& box, int k_max, double mu_max, double delta, double chi) {
+bool inflating_newton(const Function& f, IntervalVector& box, int k_max, double mu_max, double delta, double chi) {
 	int n=f.nb_var();
 	int m=f.image_dim();
 	assert(box.size()==n);
@@ -147,6 +147,66 @@ bool inflating_newton(const Fnc& f, IntervalVector& box, int k_max, double mu_ma
 		}
 
 		box=box2;
+		k++;
+	}
+	return success;
+}
+
+bool inflating_newton(const Function& f, const VarSet& vars, IntervalVector& box, int k_max, double mu_max, double delta, double chi) {
+	int n=vars.nb_var;
+	assert(f.image_dim()==n);
+	assert(box.size()==f.nb_var());
+
+	int k=0;
+	bool success=false;
+
+	IntervalMatrix J2(n, n);
+	IntervalMatrix J(n, n);
+	IntervalVector y(n);
+	IntervalVector y1(n);
+	IntervalVector mid(n);
+	IntervalVector Fmid(n);
+
+	IntervalVector param_box=vars.param_box(box);
+	IntervalVector var_box=vars.var_box(box);
+
+	y1 = var_box.mid();
+
+	while (k<k_max) {
+
+		f.hansen_matrix(box, J, vars);
+
+		if (J.is_empty()) { return false; }
+
+		mid = var_box.mid();
+		Fmid=f.eval_vector(vars.full_box(mid,param_box));
+
+		y = mid-var_box;
+		if (y==y1) break;
+		y1=y;
+
+		try {
+			precond(J, Fmid);
+		} catch(LinearException&) {
+			return success; // should be false
+		}
+		// Note: giving mu_max to gauss-seidel (GS) is slightly different from checking the condition "mu<mu_max" in the
+		// Newton procedure itself. If GS transforms x0 to x1 in n iterations, and then x1 to x2 in n other iterations
+		// it is possible that each of these 2n iterations satisfies mu<mu_max, whereas the two global Newton iterations
+		// do not, i.e., d(x2,x1) > mu_max d(x1,x0).
+		if (!inflating_gauss_seidel(J, Fmid, y, 1e-12, mu_max)) // TODO: replace hardcoded value 1e-12
+			// when k~kmax, "divergence" may also mean "cannot contract more" (d/dold~1)
+			return success;
+
+		IntervalVector box2=mid-y;
+
+		if (box2.is_subset(var_box)) {
+			success=true;  // we don't return now, to let the box being contracted more
+		}
+
+		vars.set_var_box(box,box2);
+		var_box = box2;
+
 		k++;
 	}
 	return success;
