@@ -21,104 +21,92 @@ namespace ibex {
  * \brief Set of Variables
  *
  * Allows to separate "inputs" of a function into two different categories:
- * variable and parameters.
+ * variable and parameters (that is, symbols considered as interval constants by algorithms).
  */
 class VarSet {
 public:
 	/**
-	 * \brief Create the contractor for "exists y1 in [y_init] such that c(x,y)".
+	 * \brief Create the set of variables {x1}
 	 *
-	 * \see #CtcQuantif(const NumConstraint&, const Array<const ExprNode&>, const IntervalVector&, double).
 	 */
 	VarSet(Function& f, const ExprNode& x1);
 
 	/**
-	 * \brief Create the contractor for "exists (y1,y2) in [y_init] such that c(x,y)"
+	 * \brief Create the set of variables {x1,x2}
 	 *
-	 * \see #CtcQuantif(const NumConstraint&, const Array<const ExprNode&>, const IntervalVector&, double).
 	 */
 	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2);
 
 	/**
-	 * \brief Create the contractor for "exists (y1,y2,y3) in [y_init] such that c(x,y)"
+	 * \brief Create the set of variables {x1,x2,x3}
 	 *
-	 * \see #CtcQuantif(const NumConstraint&, const Array<const ExprNode&>, const IntervalVector&, double).
 	 */
 	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3);
 
 	/**
-	 * \brief Create the contractor for "exists (y1,...,y4) in [y_init] such that c(x,y)"
+	 * \brief Create the set of variables {x1,...,x4}
 	 *
-	 * \see #CtcQuantif(const NumConstraint&, const Array<const ExprNode&>, const IntervalVector&, double).
 	 */
 	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4);
 
 	/**
-	 * \brief Create the contractor for "exists (y1,...,y5) in [y_init] such that c(x,y)"
+	 * \brief Create the set of variables {x1,...,x5}
 	 *
-	 * \see #CtcQuantif(const NumConstraint&, const Array<const ExprNode&>, const IntervalVector&, double).
 	 */
 	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5);
 
 	/**
-	 * \brief Create the contractor for "exists (y1,...,y6) in [y_init] such that c(x,y)"
+	 * \brief Create the set of variables {x1,...,x6}
 	 *
-	 * \see #CtcQuantif(const NumConstraint&, const Array<const ExprNode&>, const IntervalVector&, double).
 	 */
 	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6);
 
 	/**
-	 * \brief Create the contractor for "exists (y1,...,y7) in [y_init] such that c(x,y)"
+	 * \brief Create the set of variables {x1,...,x7}
 	 *
-	 * \see #CtcQuantif(const NumConstraint&, const Array<const ExprNode&>, const IntervalVector&, double).
 	 */
 	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7);
 
 	/**
-	 * \brief Create the contractor for "exists (y1,...,y8) in [y_init] such that c(x,y)"
+	 * \brief Create the set of variables {x1,...,x8}
 	 *
-	 * \see #CtcQuantif(const NumConstraint&, const Array<const ExprNode&>, const IntervalVector&, double).
 	 */
 	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, const ExprNode& x8);
 
 	/**
-	 * \brief Create the contractor for "exists (y1,...,y9) in [y_init] such that c(x,y)"
+	 * \brief Create the set of variables {x1,...,x9}
 	 *
-	 * \see #CtcQuantif(const NumConstraint&, const Array<const ExprNode&>, const IntervalVector&, double).
 	 */
 	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, const ExprNode& x8, const ExprNode& x9);
 
 	/**
-	 * \brief Create the contractor for "exists (y1,...,y10) in [y_init] such that c(x,y)"
+	 * \brief Create the set of variables {x1,...,x10}
 	 *
-	 * \see #CtcQuantif(const NumConstraint&, const Array<const ExprNode&>, const IntervalVector&, double).
 	 */
 	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, const ExprNode& x8, const ExprNode& x9, const ExprNode& x10);
 
 	/**
-	 * \brief Create the contractor for "exists (y1,...,y11) in [y_init] such that c(x,y)"
+	 * \brief Create the set of variables {x1,...,x11}
 	 *
-	 * \see #CtcQuantif(const NumConstraint&, const Array<const ExprNode&>, const IntervalVector&, double).
 	 */
 	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, const ExprNode& x8, const ExprNode& x9, const ExprNode& x10, const ExprNode& x11);
 
 	/**
-	 * \brief Create the contractor for "exists (y1,...,y12) in [y_init] such that c(x,y)"
+	 * \brief Create the set of variables {x1,...,x12}
 	 *
-	 * \see #CtcQuantif(const NumConstraint&, const Array<const ExprNode&>, const IntervalVector&, double).
 	 */
 	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, const ExprNode& x8, const ExprNode& x9, const ExprNode& x10, const ExprNode& x11, const ExprNode& x12);
 
 	/**
-	 * \brief Create the contractor for "exists y in [y_init] such that c(x,y)"
-	 *
-	 * \see #CtcQuantif::CtcQuantif(const NumConstraint& c, const Array<const ExprNode>& y);
+	 * \brief Create the set of variables x[0],...
 	 */
 	VarSet(Function& f, const Array<const ExprNode>& x);
 
 	/**
-	 * \brief
+	 * \brief Create a set of variables from a bitset
 	 *
+	 * vars[i]==true <=> the ith component is a variable
+	 * Otherwise, the ith component is a parameter
 	 */
 	VarSet(Function& f, const BitSet& vars);
 
@@ -152,7 +140,7 @@ public:
 	 * \brief Number of variables.
 	 *
 	 * \warning: a "variable" here is a real variable (not a parameter).
-	 * Not to be confused with the number of variables of the function f.
+	 * Not to be confused with the original number of variables (of the function f).
 	 */
 	const int nb_var;
 
@@ -162,8 +150,8 @@ public:
 	const int nb_param;
 
 	/**
-	 * vars[i]=true <=> the ith component is a variable ("x_k")
-	 * Otherwise, the ith component is a parameter ("y_k")
+	 * vars[i]==true <=> the ith component is a variable
+	 * Otherwise, the ith component is a parameter
 	 */
 	BitSet vars;
 
