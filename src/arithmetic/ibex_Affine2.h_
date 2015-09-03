@@ -987,6 +987,11 @@ inline Affine2Main<AF_No>& Affine2Main<AF_No>::linChebyshev(Affine2_expr num, co
 template<>
 inline Affine2Main<AF_No>& Affine2Main<AF_No>::powerA(int n, const Interval& itv);
 
+template<>
+int Affine2Main<AF_fAFFullI>::size() const;
+
+template<>
+inline Affine2Main<AF_fAFFullI>& Affine2Main<AF_fAFFullI>::operator+=(const Interval& x);
 
 
 
