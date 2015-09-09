@@ -8,10 +8,10 @@
 // Last Update : Jul 06, 2014
 //============================================================================
 
-#ifndef __IBEX_DEFAULT_OPTIMIZER_H__
-#define __IBEX_DEFAULT_OPTIMIZER_H__
+#ifndef __IBEX_DEFAULT_OPTIMIZERBS_H__
+#define __IBEX_DEFAULT_OPTIMIZERBS_H__
 
-#include "ibex_OptimizerDH.h"
+#include "ibex_OptimizerBS.h"
 #include "ibex_CtcCompo.h"
 
 namespace ibex {
@@ -20,7 +20,7 @@ namespace ibex {
  * \ingroup strategy
  * \brief Default optimizer.
  */
-class DefaultOptimizer : public OptimizerDH {
+class DefaultOptimizerBS : public OptimizerBS {
 public:
 	/**
 	 * \brief Create a default optimizer.
@@ -29,12 +29,12 @@ public:
 	 * \param prec      - Stopping criterion for box splitting (absolute precision)
 	 * \param goal_prec - Stopping criterion for the objective (relative precision)
 	 */
-    DefaultOptimizer(System& sys, double prec, double goal_prec);
+    DefaultOptimizerBS(System& sys, double prec, double goal_prec);
 
 	/**
 	 * \brief Delete *this.
 	 */
-    ~DefaultOptimizer();
+    ~DefaultOptimizerBS();
 
 private:
     /**
@@ -47,6 +47,6 @@ private:
 	void* data;
 };
 
-} // end namespace ibex
+}// end namespace ibex
 
-#endif // __IBEX_DEFAULT_OPTIMIZER_H__
+#endif // __IBEX_DEFAULT_OPTIMIZERBS_H__

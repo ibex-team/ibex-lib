@@ -9,11 +9,13 @@
 //============================================================================
 
 #ifndef __IBEX_CELL_BUFFER_H__
-#define __IBEX_CELL_BUFFER_H__
+  #define __IBEX_CELL_BUFFER_H__
+ 
+  #include "ibex_Cell.h"
+#include "ibex_CellCostFunc.h"
+  namespace ibex {
+   
 
-#include "ibex_Cell.h"
-
-namespace ibex {
 
 /** \ingroup strategy
  *
@@ -73,13 +75,24 @@ class CellBuffer {
 	/** Return the next box (but does not pop it).*/
 	virtual Cell* top() const=0;
 
+	/**
+	 * Removes (and deletes) all the cells
+	 * with a cost greater than \a loup.
+	 */
+        virtual void contract (double loup) {};	
+        virtual void contract (double loup, int y, bool remove) {};	
+
+
 	/** Count the number of cells pushed since
 	 * the object is created. */
 	//unsigned int nb_cells;
+
+	virtual std::ostream& print(std::ostream& os) const;
+
 protected:
 	friend std::ostream& operator<<(std::ostream& os, const CellBuffer&);
 
-	virtual std::ostream& print(std::ostream& os) const;
+
 
  private:
 

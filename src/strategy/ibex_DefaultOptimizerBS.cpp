@@ -8,8 +8,7 @@
 // Last Update : Jul 06, 2014
 //============================================================================
 
-#include "ibex_DefaultOptimizer.h"
-#include "ibex_OptimizerDH.h"
+#include "ibex_DefaultOptimizerBS.h"
 #include "ibex_SmearFunction.h"
 #include "ibex_CtcHC4.h"
 #include "ibex_CtcAcid.h"
@@ -39,26 +38,26 @@ ExtendedSystem& get_ext_sys(System& sys, double eq_prec) {
 	if (!(*memory())->sys.empty()) return (ExtendedSystem&) *((*memory())->sys.back()); // already built and recorded
 	else return rec(new ExtendedSystem(sys,eq_prec));
 }
-
 }
+
 
 // the defaultoptimizer constructor  1 point for sample_size
 // the equality constraints are relaxed with goal_prec
-DefaultOptimizer::DefaultOptimizer(System& _sys, double prec, double goal_prec) :
-		OptimizerDH(_sys,
-			  ctc(_sys,get_ext_sys(_sys,default_equ_eps),prec), // warning: we don't know which argument is evaluated first
-			  rec(new SmearSumRelative(get_ext_sys(_sys,default_equ_eps),prec)),
-			  *(new CellDoubleHeap (*new CellCostVarLB(_sys.nb_var), 
-                                                *new CellCostVarUB(_sys.nb_var), 50)),
-			    //						   *CellCostFunc::get_cost(CellCostFunc::UB, _sys.nb_var))),
-			    prec, goal_prec, goal_prec, 1, default_equ_eps,0) {
+DefaultOptimizerBS::DefaultOptimizerBS(System& _sys, double prec, double goal_prec) :
+		OptimizerBS(_sys,
+			    ctc(_sys,get_ext_sys(_sys,default_equ_eps),prec), // warning: we don't know which argument is evaluated first        
+			    rec(new SmearSumRelative(get_ext_sys(_sys,default_equ_eps),prec)),
+			    *(new CellSet<minLB>),
+			    //	rec(new CellSet<minLB>),    // does not work ; bug in delete 
+			    prec, goal_prec, goal_prec, 1, default_equ_eps, false,OptimizerBS::BEAM_SEARCH,1,1.1,true ) {
   
-	RNG::srand(1);
+  RNG::srand(1);
 
-	data = *memory(); // keep track of my data
+  data = *memory(); // keep track of my data
 
-	*memory() = NULL; // reset (for next DefaultOptimizer to be created)
+  *memory() = NULL; // reset (for next DefaultOptimizer to be created)
 }
+
 
 // the corners for CtcXNewtonIter : one random orner and its opposite
 /*vector<CtcXNewton::corner_point>*  DefaultOptimizer::default_corners () {
@@ -69,7 +68,7 @@ DefaultOptimizer::DefaultOptimizer(System& _sys, double prec, double goal_prec) 
 	return x;
 }*/
 
-Ctc&  DefaultOptimizer::ctc(System& sys, System& ext_sys, double prec) {
+Ctc&  DefaultOptimizerBS::ctc(System& sys, System& ext_sys, double prec) {
 	Array<Ctc> ctc_list(3);
 
 	// first contractor on ext_sys : incremental hc4  ratio propag 0.01
@@ -93,12 +92,10 @@ Ctc&  DefaultOptimizer::ctc(System& sys, System& ext_sys, double prec) {
 
 
 // deletion of all dynamically created objects
-DefaultOptimizer::~DefaultOptimizer() {
-	// delete all objects dynamically created in the constructor  
-  delete &   (dynamic_cast<CellDoubleHeap&> (buffer)).cost1();
-  delete &   (dynamic_cast<CellDoubleHeap&> (buffer)).cost2();
-  // delete & buffer;          cause un bug ??
+DefaultOptimizerBS::~DefaultOptimizerBS() {
+	// delete all objects dynamically created in the constructor
   delete (Memory*) data;
+ 
 }
 
 } // end namespace ibex

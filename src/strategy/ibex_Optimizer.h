@@ -39,6 +39,7 @@ namespace ibex {
  *
  * \remark In all the comments of this class, "loup" means "lowest upper bound" of the criterion f
  * and "uplo" means "uppermost lower bound" of the criterion.
+ * It is an abstract class : a real optimizer will be defined as OptimizerDH or OptimizerBS, depending on the sttategy for  choosing node
  */
 class Optimizer {
 public:
@@ -69,9 +70,9 @@ public:
 	 * If this contractor never contracts this goal variable, the optimizer will only rely on the evaluation of f  and will be very slow.
 	 *
 	 */
-	Optimizer(System& sys, Ctc& ctc, Bsc& bsc, double prec=default_prec,
+  Optimizer(System& sys, Ctc& ctc, Bsc& bsc, CellBuffer& buffer, double prec=default_prec,
 			double goal_rel_prec=default_goal_rel_prec, double goal_abs_prec=default_goal_abs_prec,
-			  int sample_size=default_sample_size, double equ_eps=default_equ_eps, bool rigor=false, int critpr=50,CellCostFunc::criterion crit= CellCostFunc::UB);
+			  int sample_size=default_sample_size, double equ_eps=default_equ_eps, bool rigor=false);
 
 	/**
 	 * \brief Delete *this.
@@ -107,8 +108,10 @@ public:
 	 *
 	 *         TIMEOUT             time is out.
 	 */
-	Status optimize(const IntervalVector& init_box, double obj_init_bound=POS_INFINITY);
+        virtual	Status optimize(const IntervalVector& init_box, double obj_init_bound=POS_INFINITY) =0;
 
+        Status end_search();
+        
 	/**
 	 * \brief Displays on standard output a report of the last call to #optimize(const IntervalVector&).
 	 *
@@ -197,7 +200,7 @@ public:
 	the second one to minimize another criterion (by default the maximum of the objective estimate).
 	The second one is chosen at each node with a probability critpr/100 (default value critpr=50)
 	 */
-	CellDoubleHeap buffer;
+	CellBuffer& buffer;
 
 	/**
 	 * \brief Index of the goal variable y in the extended box.
@@ -255,8 +258,6 @@ public:
 
 
 
-
-
 	/** Default goal absolute precision */
 	static const double default_goal_abs_prec;
 
@@ -285,6 +286,9 @@ public:
 	/** The "uplo" (uppermost lower bound of the criterion) */
 	double uplo;
 
+	/** Lower bound of the small boxes taken by the precision */
+	double uplo_of_epsboxes;
+
 	/** The point satisfying the constraints corresponding to the loup */
 	Vector loup_point;
 
@@ -309,6 +313,11 @@ protected:
 		
 	}
 
+	void init_search(Cell& root, const IntervalVector& init_box, double obj_init_bound);
+
+
+        virtual double getminimum() const =0;
+
 	/**
 	 * \brief Main procedure for processing a box.
 	 *
@@ -318,8 +327,10 @@ protected:
 	 * </ul>
 	 *
 	 */
-	void handle_cell(Cell& c, const IntervalVector& init_box);
 
+	void handle_cell (Cell& cell, const IntervalVector & init_box);
+	bool handle_cell_nopush (Cell& cell,  const IntervalVector & init_box);
+	
 	/**
 	 * \brief Contract and bound procedure for processing a box.
 	 *
@@ -342,6 +353,18 @@ protected:
 	 * </ul>
 	 *
 	 */
+
+	/**
+	 * \brief Contraction procedure for processing a box.
+	 *
+	 * <ul>
+	 * <li> contract with the contractor ctc,
+	 * </ul>
+	 *
+	 */
+	 virtual void contract(IntervalVector& box, const IntervalVector& init_box );
+
+
 
 	virtual void firstorder_contract ( IntervalVector& box, const IntervalVector& init_box);
 
@@ -368,6 +391,7 @@ protected:
 	 */
 	bool update_loup(const IntervalVector& box);
 
+        virtual   void update_cell_data (Cell& c) {};
 
 	/*=======================================================================================================*/
 	/*             Functions to update the loup (see ibex_OptimProbing and ibex_OptimSimplex)                */
@@ -516,7 +540,7 @@ protected:
 	 * the heap and the current box are actually contracted with y <= ymax
 	 *
 	 */
-	double compute_ymax ();
+	double compute_ymax (double ratio);
 
 	bool loup_changed;
 
@@ -530,7 +554,7 @@ protected:
 
 	Ctc3BCid* objshaver;
 	
-private:
+	// private:
 
 	/** Rigor mode (eps_equ==0) */
 	const bool rigor;
@@ -541,9 +565,6 @@ private:
 
 	/** Inner contractor (for the negation of g) */
 	CtcUnion* is_inside;
-
-	/** Lower bound of the small boxes taken by the precision */
-	double uplo_of_epsboxes;
 
 	/** Currently entailed constraints */
 	EntailedCtr* entailed;
@@ -560,5 +581,13 @@ private:
 };
 
 
+
+
+
+
+
 } // end namespace ibex
+
+
+
 #endif // __IBEX_OPTIMIZER_H__

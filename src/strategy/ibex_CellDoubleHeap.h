@@ -55,12 +55,15 @@ public:
 	/** \brief Push a new cell on the stack. */
 	void push(Cell* cell);
 
+
+
 	/** \brief Pop a cell from the stack and return it.*/
 	Cell* pop();
 
 	/** \brief Return the next box (but does not pop it).*/
 	Cell* top() const;
 
+	double minimum() const;
 
 	std::ostream& print(std::ostream& os) const;
 
@@ -101,6 +104,8 @@ inline void CellDoubleHeap::push(Cell* cell)      { DoubleHeap<Cell>::push(cell)
 inline Cell* CellDoubleHeap::pop()                { return DoubleHeap<Cell>::pop(); }
 
 inline Cell* CellDoubleHeap::top() const          { return DoubleHeap<Cell>::top(); }
+
+inline double CellDoubleHeap::minimum() const          { return DoubleHeap<Cell>::minimum(); }
 
  inline std::ostream& CellDoubleHeap::print(std::ostream& os) const
  {	os << "==============================================================================\n";
