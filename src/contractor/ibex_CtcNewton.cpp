@@ -26,7 +26,7 @@ CtcNewton::CtcNewton(const Function& f, double ceil, double prec, double ratio) 
 CtcNewton::CtcNewton(const Function& f, const VarSet& vars, double ceil, double prec, double ratio) :
 		Ctc(f.nb_var()), f(f), vars(&vars), ceil(ceil), prec(prec), gauss_seidel_ratio(ratio) {
 
-	if (f.nb_var()!=f.image_dim()) {
+	if (vars.nb_var!=f.image_dim()) {
 		not_implemented("Newton operator with rectangular systems.");
 	}
 }
@@ -34,7 +34,7 @@ CtcNewton::CtcNewton(const Function& f, const VarSet& vars, double ceil, double 
 void CtcNewton::contract(IntervalVector& box) {
 	if (!(box.max_diam()<=ceil)) return;
 	else {
-		if (vars)
+		if (!vars)
 			newton(f,box,prec,gauss_seidel_ratio);
 		else
 			newton(f,*vars,box,prec,gauss_seidel_ratio);
