@@ -65,10 +65,10 @@ VarSet::VarSet(Function& f, const Array<const ExprNode>& y, bool var) : nb_var(-
 	 init(f, y, var);
 }
 
-VarSet::VarSet(Function& f, const BitSet& x, bool var) :
-		nb_var  (var? x.size()            : f.nb_var()-x.size()),
-		nb_param(var? f.nb_var()-x.size() : x.size()),
-		vars    (var? x                   : BitSet::all(f.nb_var())) {
+VarSet::VarSet(int total, const BitSet& x, bool var) :
+		nb_var  (var? x.size()            : total-x.size()),
+		nb_param(var? total-x.size() : x.size()),
+		vars    (var? x                   : BitSet::all(total)) {
 
 	if (!var)
 		vars.setminus_with(x);
@@ -146,9 +146,13 @@ IntervalVector VarSet::full_box(const IntervalVector& var_box, const IntervalVec
 IntervalVector VarSet::var_box(const IntervalVector& full_box) const {
 	assert(full_box.size()==nb_param+nb_var);
 	IntervalVector var_box(nb_var);
-	int j=0;
-	for (int i=0; i<nb_var+nb_param; i++) {
-		if (vars[i]) var_box[j++]=full_box[i];
+
+	if (full_box.is_empty()) var_box.set_empty();
+	else {
+		int j=0;
+		for (int i=0; i<nb_var+nb_param && j<nb_var; i++) {
+			if (vars[i]) var_box[j++]=full_box[i];
+		}
 	}
 	return var_box;
 }
@@ -156,9 +160,13 @@ IntervalVector VarSet::var_box(const IntervalVector& full_box) const {
 IntervalVector VarSet::param_box(const IntervalVector& full_box) const {
 	assert(full_box.size()==nb_param+nb_var);
 	IntervalVector param_box(nb_var);
-	int j=0;
-	for (int i=0; i<nb_var+nb_param; i++) {
-		if (!vars[i]) param_box[j++]=full_box[i];
+
+	if (full_box.is_empty()) param_box.set_empty();
+	else {
+		int j=0;
+		for (int i=0; i<nb_var+nb_param && j<nb_param; i++) {
+			if (!vars[i]) param_box[j++]=full_box[i];
+		}
 	}
 	return param_box;
 }

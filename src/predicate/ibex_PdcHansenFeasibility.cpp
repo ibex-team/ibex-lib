@@ -50,7 +50,7 @@ BoolInterval PdcHansenFeasibility::test(const IntervalVector& box) {
 
 	BitSet _vars=BitSet::empty(n);
 	for (int i=0; i<m; i++) _vars.add(pc[i]);
-	VarSet vars(f,_vars);
+	VarSet vars(f.nb_var(),_vars);
 
 	IntervalVector box2(box);
 

@@ -162,7 +162,7 @@ void TestVarSet::test06() {
 	BitSet vars=BitSet::empty(3);
 	vars.add(0);
 	vars.add(2);
-	VarSet set(f,vars);
+	VarSet set(3,vars);
 
 	IntervalVector y_box(1,Interval(1,2));
 
