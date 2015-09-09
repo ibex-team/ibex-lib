@@ -38,7 +38,7 @@ int main(int argc, char** argv){
 	double timelimit = atof(argv[7]);
 	double eqeps= 1.e-8;
 
-	RNG::srand(1);
+	RNG::srand(atoi(argv[8]));
 
 	// the extended system 
 	ExtendedSystem ext_sys(sys,eqeps);
@@ -116,10 +116,10 @@ int main(int argc, char** argv){
 	CtcPolytopeHull* cxn_poly;
 	CtcCompo* cxn_compo;
 	if (linearrelaxation=="compo" || linearrelaxation=="art"|| linearrelaxation=="xn")
-          {
-		cxn_poly = new CtcPolytopeHull(*lr, CtcPolytopeHull::ALL_BOX);
-		cxn_compo =new CtcCompo(*cxn_poly, hc44xn);
-		cxn = new CtcFixPoint (*cxn_compo, default_relax_ratio);
+	  {
+	    cxn_poly = new CtcPolytopeHull(*lr, CtcPolytopeHull::ALL_BOX);
+	    cxn_compo =new CtcCompo(*cxn_poly, hc44xn);
+	    cxn = new CtcFixPoint (*cxn_compo, default_relax_ratio);
 	  }
 	//  the actual contractor  ctc + linear relaxation 
 	Ctc* ctcxn;
@@ -129,9 +129,11 @@ int main(int argc, char** argv){
 	  ctcxn = ctc;
 	// one point probed when looking for a new feasible point (updating the loup)
 	int samplesize=1;
-
+        CellCostVarLB cvarlb (sys.nb_var);
+        CellCostVarUB cvarub (sys.nb_var);
+        CellDoubleHeap buffer(cvarlb, cvarub, 50);
 	// the optimizer : the same precision goalprec is used as relative and absolute precision
-	Optimizer o(sys,*ctcxn,*bs,prec,goalprec,goalprec,samplesize,eqeps);
+	OptimizerDH o(sys,*ctcxn,*bs,buffer,prec,goalprec,goalprec,samplesize,eqeps);
 
 	cout << " sys.box " << sys.box << endl;
 
