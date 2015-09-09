@@ -13,6 +13,7 @@
 
 #include "ibex_Ctc.h"
 #include "ibex_Newton.h"
+#include "ibex_VarSet.h"
 
 namespace ibex {
 
@@ -31,7 +32,16 @@ public:
 	 *
 	 *  Default value is #default_ceil.
 	 */
-	CtcNewton(const Fnc& f,
+	CtcNewton(const Function& f,
+			double ceil=default_ceil,
+			double prec=default_newton_prec,
+			double ratio=default_gauss_seidel_ratio);
+
+
+	/**
+	 * Variant where only a sub-set of variables is considered
+	 */
+	CtcNewton(const Function& f, const VarSet& vars,
 			double ceil=default_ceil,
 			double prec=default_newton_prec,
 			double ratio=default_gauss_seidel_ratio);
@@ -39,7 +49,16 @@ public:
 	void contract(IntervalVector& box);
 
 	/** The function. */
-	const Fnc& f;
+	const Function& f;
+
+	/**
+	 * The sub-set of variables on which Newton is applied
+	 *
+	 * The other are considered as parameters.
+	 * NULL means "all".
+	 */
+	const VarSet* vars;
+
 	/** Newton application ceiling. */
 	const double ceil;
 	/** Precision. See #ibex::newton(const Function&, IntervalVector&, double, double);*/

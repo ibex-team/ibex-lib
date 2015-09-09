@@ -20,7 +20,7 @@ void TestPdcHansenFeasibility::test01() {
 	Variable x,y;
 	Function f(x,y,y-sqr(x));
 
-	PdcHansenFeasibility p(f);
+	PdcHansenFeasibility p(f,true);
 
 	double _box[][2] = { {1,3},{1,3} };
 	IntervalVector box(2,_box);

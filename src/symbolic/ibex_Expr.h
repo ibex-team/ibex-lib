@@ -208,6 +208,13 @@ public:
 	 */
 	bool indexed_symbol() const;
 
+	/**
+	 * \brief The symbol and the shift (in the domain)
+	 *
+	 * \return <NULL,-1> if this node is not an indexed symbol.
+	 */
+	std::pair<const ExprSymbol*, int> symbol_shift() const;
+
 	static const ExprIndex& new_(const ExprNode& subexpr, int index);
 
 private:

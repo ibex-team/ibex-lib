@@ -15,19 +15,25 @@
 namespace ibex {
 
 
-CtcQuantif::CtcQuantif(const NumConstraint& ctr, const Array<const ExprSymbol>& y, const IntervalVector& init_box, double prec) :
-				Ctc(ctr.f.nb_arg()-y.size()), y_init(y.size()),
-				flags(BitSet::empty(Ctc::NB_OUTPUT_FLAGS)), impact(BitSet::all(nb_var+init_box.size()))  {
-	init(ctr, y, init_box, prec);
+CtcQuantif::CtcQuantif(const NumConstraint& ctr, const VarSet& _vars, const IntervalVector& init_box, double prec) :
+				Ctc(_vars.nb_var), y_init(init_box),
+				flags(BitSet::empty(Ctc::NB_OUTPUT_FLAGS)), impact(BitSet::all(_vars.nb_var+_vars.nb_param)),
+				ctc(new CtcFwdBwd(ctr)), bsc(new LargestFirst(prec)),
+				vars(_vars), prec(prec), _own_ctc(true) {
+
+	assert(vars.nb_var>0);
+	assert(vars.nb_param>0); // sure?
+	assert(ctr.f.nb_var()==vars.nb_var+vars.nb_param);
+	assert(y_init.size()==vars.nb_param);
 }
 
-CtcQuantif::CtcQuantif(Ctc& ctc, const BitSet& vars, const IntervalVector& init_box, double prec, bool own_ctc) :
-			   Ctc(vars.size()), y_init(init_box),
-			   flags(BitSet::empty(Ctc::NB_OUTPUT_FLAGS)), impact(BitSet::all(nb_var+init_box.size())),
-			   nb_param(init_box.size()), ctc(&ctc), bsc(new LargestFirst(prec)),
-			   vars(vars), prec(prec), _own_ctc(own_ctc) {
+CtcQuantif::CtcQuantif(Ctc& ctc, const VarSet& _vars, const IntervalVector& init_box, double prec, bool own_ctc) :
+			   Ctc(_vars.nb_var), y_init(init_box),
+			   flags(BitSet::empty(Ctc::NB_OUTPUT_FLAGS)), impact(BitSet::all(_vars.nb_var+_vars.nb_param)),
+			   ctc(&ctc), bsc(new LargestFirst(prec)),
+			   vars(_vars), prec(prec), _own_ctc(own_ctc) {
 
-	assert(ctc.nb_var==(int)vars.size()+init_box.size());
+	assert(ctc.nb_var==_vars.nb_var+_vars.nb_param);
 
 }
 
@@ -35,65 +41,18 @@ CtcQuantif::~CtcQuantif(){
 	if (_own_ctc) delete ctc;
 	delete bsc;
 }
-void CtcQuantif::init(const NumConstraint& ctr, const Array<const ExprSymbol>& y, const IntervalVector& init_box, double prec) {
-
-	assert(y.size()>0);
-	assert(ctr.f.nb_arg()>y.size());
-	assert(init_box.size()==y.size());
-
-	y_init = init_box;
-
-	nb_param = y.size();
-
-	ctc = new CtcFwdBwd(ctr);
-
-	bsc = new LargestFirst(prec);
-
-	vars.initialise(0,ctr.f.nb_arg()-1,BitSet::empt);
-
-	vars.fill(0, ctr.f.nb_arg()-1); // by default all are variables
-
-	for (int i=0; i<ctr.f.nb_arg(); i++) {
-		int j=0;
-		while (j<y.size() && strcmp(ctr.f.arg(i).name,y[j].name)!=0) j++;
-		if (j<y.size())    // ths ith argument is found in y
-			vars.remove(i); //  --> marked as a parameter
-	}
-	assert(((int)vars.size())==nb_var);
-
-	this->prec = prec;
-
-	this->_own_ctc = true;
-
-
-
-}
 
 
 void CtcQuantif::contract(IntervalVector& x, IntervalVector& y) {
 	// create the full box by concatening x and y
-	int jx=0;
-	int jy=0;
-	IntervalVector fullbox(nb_var+nb_param);
+	IntervalVector fullbox = vars.full_box(x,y);
 
-	for (int i=0; i<nb_var+nb_param; i++) {
-		if (vars[i]) fullbox[i]=x[jx++];
-		else         fullbox[i]=y[jy++];
-	}
 	flags.clear();
 
 	ctc->contract(fullbox, impact, flags);
 
-	if (!fullbox.is_empty()) {
-		jx=jy=0;
-		for (int i=0; i<nb_var+nb_param; i++) {
-			if (vars[i]) x[jx++]=fullbox[i];
-			else         y[jy++]=fullbox[i];
-		}
-	} else {
-		x.set_empty();
-		y.set_empty();
-	}
+	x=vars.var_box(fullbox);
+	y=vars.param_box(fullbox);
 }
 
 } // namespace ibex
