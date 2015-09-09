@@ -142,3 +142,25 @@ void TestBitSet::all_bits() {
 		TEST_ASSERT(b.contain(i));
 	TEST_ASSERT(!b.contain(10));
 }
+
+void TestBitSet::set_minus_with01() {
+	BitSet b(bitset1);
+	b.setminus_with(bitset2);
+	for (int i=0; i<10; i++) {
+		if (i==3 || i==9) {
+			TEST_ASSERT(b.contain(i));
+		} else
+			TEST_ASSERT(!b.contain(i));
+	}
+}
+
+void TestBitSet::set_minus_with02() {
+	BitSet b(bitset3);
+	b.setminus_with(bitset1);
+	for (int i=0; i<10; i++) {
+		if (i==4) {
+			TEST_ASSERT(b.contain(i));
+		} else
+			TEST_ASSERT(!b.contain(i));
+	}
+}

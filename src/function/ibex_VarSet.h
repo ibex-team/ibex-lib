@@ -26,89 +26,89 @@ namespace ibex {
 class VarSet {
 public:
 	/**
-	 * \brief Create the set of variables {x1}
-	 *
+	 * \brief Create the set of variables (or parameters) {x1}
+	 * \param var indicates whether x1 is a variable (and other symbols parameters)
+	 *            (case var==true) or the contrary.
 	 */
-	VarSet(Function& f, const ExprNode& x1);
+	VarSet(Function& f, const ExprNode& x1, bool var=true);
 
 	/**
-	 * \brief Create the set of variables {x1,x2}
+	 * \brief Create the set of variables (or parameters) {x1,x2}
 	 *
 	 */
-	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2);
+	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, bool var=true);
 
 	/**
-	 * \brief Create the set of variables {x1,x2,x3}
+	 * \brief Create the set of variables (or parameters) {x1,x2,x3}
 	 *
 	 */
-	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3);
+	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, bool var=true);
 
 	/**
-	 * \brief Create the set of variables {x1,...,x4}
+	 * \brief Create the set of variables (or parameters) {x1,...,x4}
 	 *
 	 */
-	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4);
+	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, bool var=true);
 
 	/**
-	 * \brief Create the set of variables {x1,...,x5}
+	 * \brief Create the set of variables (or parameters) {x1,...,x5}
 	 *
 	 */
-	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5);
+	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, bool var=true);
 
 	/**
-	 * \brief Create the set of variables {x1,...,x6}
+	 * \brief Create the set of variables (or parameters) {x1,...,x6}
 	 *
 	 */
-	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6);
+	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, bool var=true);
 
 	/**
-	 * \brief Create the set of variables {x1,...,x7}
+	 * \brief Create the set of variables (or parameters) {x1,...,x7}
 	 *
 	 */
-	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7);
+	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, bool var=true);
 
 	/**
-	 * \brief Create the set of variables {x1,...,x8}
+	 * \brief Create the set of variables (or parameters) {x1,...,x8}
 	 *
 	 */
-	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, const ExprNode& x8);
+	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, const ExprNode& x8, bool var=true);
 
 	/**
-	 * \brief Create the set of variables {x1,...,x9}
+	 * \brief Create the set of variables (or parameters) {x1,...,x9}
 	 *
 	 */
-	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, const ExprNode& x8, const ExprNode& x9);
+	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, const ExprNode& x8, const ExprNode& x9, bool var=true);
 
 	/**
-	 * \brief Create the set of variables {x1,...,x10}
+	 * \brief Create the set of variables (or parameters) {x1,...,x10}
 	 *
 	 */
-	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, const ExprNode& x8, const ExprNode& x9, const ExprNode& x10);
+	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, const ExprNode& x8, const ExprNode& x9, const ExprNode& x10, bool var=true);
 
 	/**
-	 * \brief Create the set of variables {x1,...,x11}
+	 * \brief Create the set of variables (or parameters) {x1,...,x11}
 	 *
 	 */
-	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, const ExprNode& x8, const ExprNode& x9, const ExprNode& x10, const ExprNode& x11);
+	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, const ExprNode& x8, const ExprNode& x9, const ExprNode& x10, const ExprNode& x11, bool var=true);
 
 	/**
-	 * \brief Create the set of variables {x1,...,x12}
+	 * \brief Create the set of variables (or parameters) {x1,...,x12}
 	 *
 	 */
-	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, const ExprNode& x8, const ExprNode& x9, const ExprNode& x10, const ExprNode& x11, const ExprNode& x12);
+	VarSet(Function& f, const ExprNode& x1, const ExprNode& x2, const ExprNode& x3, const ExprNode& x4, const ExprNode& x5, const ExprNode& x6, const ExprNode& x7, const ExprNode& x8, const ExprNode& x9, const ExprNode& x10, const ExprNode& x11, const ExprNode& x12, bool var=true);
 
 	/**
-	 * \brief Create the set of variables x[0],...
+	 * \brief Create the set of variables (or parameters) x[0],...
 	 */
-	VarSet(Function& f, const Array<const ExprNode>& x);
+	VarSet(Function& f, const Array<const ExprNode>& x, bool var=true);
 
 	/**
-	 * \brief Create a set of variables from a bitset
+	 * \brief Create a set of variables (or parameters) from a bitset
 	 *
-	 * vars[i]==true <=> the ith component is a variable
-	 * Otherwise, the ith component is a parameter
+	 * x[i]==true <=> the ith component is a variable (if var is "true") or a parameter (if var is "false")
 	 */
-	VarSet(Function& f, const BitSet& vars);
+	VarSet(Function& f, const BitSet& x, bool var=true);
 
 	/**
 	 * \brief Extend the box to a "full box" with the parameters
@@ -157,7 +157,7 @@ public:
 
 protected:
 
-	void init(Function& f, const Array<const ExprNode>& x);
+	void init(Function& f, const Array<const ExprNode>& x, bool var);
 };
 
 } // namespace ibex

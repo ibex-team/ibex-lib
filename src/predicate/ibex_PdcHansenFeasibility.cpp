@@ -69,8 +69,7 @@ BoolInterval PdcHansenFeasibility::test(const IntervalVector& box) {
 	}
 	else {
 		// ****** TODO **********
-		// Introcuce VarSet
-			newton(f,box2);
+			newton(f,vars,box2);
 
 			if (box2.is_empty()) {
 				_solution.set_empty();
