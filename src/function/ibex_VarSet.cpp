@@ -159,7 +159,7 @@ IntervalVector VarSet::var_box(const IntervalVector& full_box) const {
 
 IntervalVector VarSet::param_box(const IntervalVector& full_box) const {
 	assert(full_box.size()==nb_param+nb_var);
-	IntervalVector param_box(nb_var);
+	IntervalVector param_box(nb_param);
 
 	if (full_box.is_empty()) param_box.set_empty();
 	else {
