@@ -19,6 +19,13 @@
 #include "ibex_SepNot.h"
 #include "ibex_CtcEmpty.h"
 #include "ibex_CtcIdentity.h"
+
+#include "ibex_SepCtcPairProj.h"
+#include "ibex_SepFixPoint.h"
+#include "ibex_SepInverse.h"
+#include "ibex_SepQInter.h"
+#include "ibex_SepTransform.h"
+
 #include "utils.h"
 
 namespace ibex {
@@ -32,6 +39,12 @@ public:
         TEST_ADD(TestSeparator::test_SepCtcPair);
         TEST_ADD(TestSeparator::test_SepUnionInter);
 		TEST_ADD(TestSeparator::test_SepNot);
+        TEST_ADD(TestSeparator::test_SepCtcPairProj);
+        TEST_ADD(TestSeparator::test_SepFixPoint);
+        TEST_ADD(TestSeparator::test_SepQInter);
+        TEST_ADD(TestSeparator::test_SepInverse);
+        TEST_ADD(TestSeparator::test_SepTransform);
+
 	}
 
     void SepFwdBwd_LT_LEQ();
@@ -39,6 +52,12 @@ public:
     void test_SepCtcPair();
     void test_SepUnionInter();
 	void test_SepNot();
+    
+    void test_SepCtcPairProj();
+    void test_SepFixPoint();
+    void test_SepInverse();
+    void test_SepQInter();
+    void test_SepTransform();
 
 };
 
