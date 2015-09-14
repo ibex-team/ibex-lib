@@ -13,16 +13,20 @@
 
 namespace ibex {
 
-SepQInterProjF::SepQInterProjF(const Array<Sep>& list) : Sep(list[0].nb_var), list(list), q(0) { }
+SepQInterProjF::SepQInterProjF(const Array<Sep>& list, int q) : 
+	Sep(list[0].nb_var), 
+	list(list), 
+	q(q),
+	boxes_in(list.size(), list[0].nb_var),
+	boxes_out(list.size(), list[0].nb_var)
+	{ }
 
 
 void SepQInterProjF::setq(int q){ this->q = q; }
-
+ 
 int SepQInterProjF::getq(){ return q; }
 
 void SepQInterProjF::separate(IntervalVector& xin, IntervalVector& xout) {
-	IntervalMatrix boxes_in(list.size(), xin.size());
-	IntervalMatrix boxes_out(list.size(), xin.size());
 	Array<IntervalVector> refs_in(list.size());
 	Array<IntervalVector> refs_out(list.size());
 

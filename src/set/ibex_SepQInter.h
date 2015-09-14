@@ -36,7 +36,7 @@ public:
 	 *
 	 * The list itself is not kept by reference.
 	 */
-    SepQInterProjF(const Array<Sep>& list);
+    SepQInterProjF(const Array<Sep>& list, int q = 0);
 
 
     /**
@@ -57,8 +57,9 @@ public:
 	 */
 	int q;
 
-// protected:
-	// IntervalMatrix boxes; // store boxes for each contraction
+protected:
+	 IntervalMatrix boxes_in;// store boxes for each contraction
+	 IntervalMatrix boxes_out; 
 
 };
 
