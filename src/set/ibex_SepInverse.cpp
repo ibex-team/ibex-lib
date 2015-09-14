@@ -12,7 +12,7 @@
 
 namespace ibex {
 
-SepInverse::SepInverse(Sep& s, Function& f) : s(s), f(f), yin(f.image_dim()), yout(f.image_dim()) {
+SepInverse::SepInverse(Sep& s, Function& f) : Sep(f.nb_var()), s(s), f(f), yin(f.image_dim()), yout(f.image_dim()) {
 	const ExprSymbol& y=ExprSymbol::new_(f.expr().dim);
 	id = new Function(y,y);
 }

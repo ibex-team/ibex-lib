@@ -13,7 +13,7 @@
 
 namespace ibex {
 
-SepQInterProjF::SepQInterProjF(const Array<Sep>& list) : Sep(), list(list), q(0) { }
+SepQInterProjF::SepQInterProjF(const Array<Sep>& list) : Sep(list[0].nb_var), list(list), q(0) { }
 
 
 void SepQInterProjF::setq(int q){ this->q = q; }

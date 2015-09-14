@@ -11,7 +11,7 @@
 
 namespace ibex {
 
-SepNot::SepNot(Sep& sep) : sep(sep) {
+SepNot::SepNot(Sep& sep) : Sep(sep.nb_var), sep(sep) {
 
 }
 

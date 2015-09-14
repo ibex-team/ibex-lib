@@ -14,7 +14,7 @@ namespace ibex {
 
 const int SepBoundaryCtc::NB_SAMPLES = 1;
 
-SepBoundaryCtc::SepBoundaryCtc(Ctc& _ctc_boundary, Pdc& _is_inside) : ctc_boundary(_ctc_boundary), is_inside(_is_inside) {
+SepBoundaryCtc::SepBoundaryCtc(Ctc& _ctc_boundary, Pdc& _is_inside) : Sep(_ctc_boundary.nb_var), ctc_boundary(_ctc_boundary), is_inside(_is_inside) {
 
 }
 

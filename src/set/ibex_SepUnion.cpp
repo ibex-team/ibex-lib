@@ -13,15 +13,15 @@
 
 namespace ibex {
 
-SepUnion::SepUnion(const Array<Sep>& list) : Sep(), list(list) {
+SepUnion::SepUnion(const Array<Sep>& list) : Sep(list[0].nb_var), list(list) {
 
 }
 
-SepUnion::SepUnion(Sep& s1, Sep& s2) : Sep(), list(Array<Sep>(s1,s2)) {
+SepUnion::SepUnion(Sep& s1, Sep& s2) : Sep(s1.nb_var), list(Array<Sep>(s1,s2)) {
 
 }
 
-SepUnion::SepUnion(Sep& s1, Sep& s2, Sep& s3) : Sep(), list(Array<Sep>(s1,s2,s3)) {
+SepUnion::SepUnion(Sep& s1, Sep& s2, Sep& s3) : Sep(s1.nb_var), list(Array<Sep>(s1,s2,s3)) {
 
 }
 

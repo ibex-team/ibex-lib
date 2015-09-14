@@ -12,7 +12,7 @@
 
 namespace ibex {
 
-SepTransform::SepTransform(Sep& s, Function& t, Function& tinv) : s(s), t(t), tinv(tinv), yin(t.image_dim()), yout(t.image_dim()) {
+SepTransform::SepTransform(Sep& s, Function& t, Function& tinv) : Sep(s.nb_var), s(s), t(t), tinv(tinv), yin(t.image_dim()), yout(t.image_dim()) {
 }
 
 SepTransform::~SepTransform() {

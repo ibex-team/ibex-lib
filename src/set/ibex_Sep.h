@@ -56,16 +56,20 @@ class Sep {
 
 public:
 	/**
-     * \brief Separate a box in two sub-boxes.
-     *
-     * \param x_in  - As input: the initial box. As output:
-     *                result of the first ("inner") contraction
-     * \param x_out - As input: the initial box. As output:
-     *                the result of the second ("outer") contraction
-     *
-     * Precondition: x_in and x_out must be the same boxes.
+	 * \brief Build a separatot for n-dimensional boxes
 	 */
-    virtual void separate(IntervalVector& x_in, IntervalVector& x_out) = 0;
+	Sep(int nb_var);
+	/**
+   * \brief Separate a box in two sub-boxes.
+   *
+   * \param x_in  - As input: the initial box. As output:
+   *                result of the first ("inner") contraction
+   * \param x_out - As input: the initial box. As output:
+   *                the result of the second ("outer") contraction
+   *
+   * Precondition: x_in and x_out must be the same boxes.
+	 */
+  virtual void separate(IntervalVector& x_in, IntervalVector& x_out) = 0;
 
 	/**
 	 * \brief Contract a set with this separator.
@@ -101,14 +105,21 @@ public:
 	 * \brief Delete *this.
 	 */
     virtual ~Sep();
+
+   /**
+	 * \brief The number of variables this contractor works with.
+	 */
+	const int nb_var;
+
 };
 
 /* ============================================================================
  	 	 	 	 	 	 	 inline implementation
   ============================================================================*/
 
-inline Sep::~Sep() { }
+inline Sep::Sep(int n) : nb_var(n) { }
 
+inline Sep::~Sep() { }
 
 } // namespace ibex
 
