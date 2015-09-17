@@ -33,98 +33,21 @@ public:
 	/**
 	 * \brief Create the contractor for "For all y1 in [y_init], c(x,y)".
 	 *
-	 * \see #CtcQuantif(const NumConstraint&, const Array<const ExprSymbol&>, const IntervalVector&, double).
+	 * \see #CtcQuantif(const NumConstraint&, const VarSet&, const IntervalVector&, double).
 	 */
-	CtcForAll(const NumConstraint& c, const ExprSymbol& y1, const IntervalVector& y_init, double prec);
-
-	/**
-	 * \brief Create the contractor for "For all (y1,y2) in [y_init], c(x,y)"
-	 *
-	 * \see #CtcQuantif(const NumConstraint&, const Array<const ExprSymbol&>, const IntervalVector&, double).
-	 */
-	CtcForAll(const NumConstraint& c, const ExprSymbol& y1, const ExprSymbol& y2, const IntervalVector& y_init, double prec);
-
-	/**
-	 * \brief Create the contractor for "For all (y1,y2,y3) in [y_init], c(x,y)"
-	 *
-	 * \see #CtcQuantif(const NumConstraint&, const Array<const ExprSymbol&>, const IntervalVector&, double).
-	 */
-	CtcForAll(const NumConstraint& c, const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const IntervalVector& y_init, double prec);
-
-	/**
-	 * \brief Create the contractor for "For all (y1,...,y4) in [y_init], c(x,y)"
-	 *
-	 * \see #CtcQuantif(const NumConstraint&, const Array<const ExprSymbol&>, const IntervalVector&, double).
-	 */
-	CtcForAll(const NumConstraint& c, const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const IntervalVector& y_init, double prec);
-
-	/**
-	 * \brief Create the contractor for "For all (y1,...,y5) in [y_init], c(x,y)"
-	 *
-	 * \see #CtcQuantif(const NumConstraint&, const Array<const ExprSymbol&>, const IntervalVector&, double).
-	 */
-	CtcForAll(const NumConstraint& c, const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const IntervalVector& y_init, double prec);
-
-	/**
-	 * \brief Create the contractor for "For all (y1,...,y6) in [y_init], c(x,y)"
-	 *
-	 * \see #CtcQuantif(const NumConstraint&, const Array<const ExprSymbol&>, const IntervalVector&, double).
-	 */
-	CtcForAll(const NumConstraint& c, const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const ExprSymbol& y6, const IntervalVector& y_init, double prec);
-
-	/**
-	 * \brief Create the contractor for "For all (y1,...,y7) in [y_init], c(x,y)"
-	 *
-	 * \see #CtcQuantif(const NumConstraint&, const Array<const ExprSymbol&>, const IntervalVector&, double).
-	 */
-	CtcForAll(const NumConstraint& c, const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const ExprSymbol& y6, const ExprSymbol& y7, const IntervalVector& y_init, double prec);
-
-	/**
-	 * \brief Create the contractor for "For all (y1,...,y8) in [y_init], c(x,y)"
-	 *
-	 * \see #CtcQuantif(const NumConstraint&, const Array<const ExprSymbol&>, const IntervalVector&, double).
-	 */
-	CtcForAll(const NumConstraint& c, const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const ExprSymbol& y6, const ExprSymbol& y7, const ExprSymbol& y8, const IntervalVector& y_init, double prec);
-
-	/**
-	 * \brief Create the contractor for "For all (y1,...,y9) in [y_init], c(x,y)"
-	 *
-	 * \see #CtcQuantif(const NumConstraint&, const Array<const ExprSymbol&>, const IntervalVector&, double).
-	 */
-	CtcForAll(const NumConstraint& c, const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const ExprSymbol& y6, const ExprSymbol& y7, const ExprSymbol& y8, const ExprSymbol& y9, const IntervalVector& y_init, double prec);
-
-	/**
-	 * \brief Create the contractor for "For all (y1,...,y10) in [y_init], c(x,y)"
-	 *
-	 * \see #CtcQuantif(const NumConstraint&, const Array<const ExprSymbol&>, const IntervalVector&, double).
-	 */
-	CtcForAll(const NumConstraint& c, const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const ExprSymbol& y6, const ExprSymbol& y7, const ExprSymbol& y8, const ExprSymbol& y9, const ExprSymbol& y10, const IntervalVector& y_init, double prec);
-
-	/**
-	 * \brief Create the contractor for "For all (y1,...,y11) in [y_init], c(x,y)"
-	 *
-	 * \see #CtcQuantif(const NumConstraint&, const Array<const ExprSymbol&>, const IntervalVector&, double).
-	 */
-	CtcForAll(const NumConstraint& c, const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const ExprSymbol& y6, const ExprSymbol& y7, const ExprSymbol& y8, const ExprSymbol& y9, const ExprSymbol& y10, const ExprSymbol& y11, const IntervalVector& y_init, double prec);
-
-	/**
-	 * \brief Create the contractor for "For all (y1,...,y12) in [y_init], c(x,y)"
-	 *
-	 * \see #CtcQuantif(const NumConstraint&, const Array<const ExprSymbol&>, const IntervalVector&, double).
-	 */
-	CtcForAll(const NumConstraint& c, const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const ExprSymbol& y6, const ExprSymbol& y7, const ExprSymbol& y8, const ExprSymbol& y9, const ExprSymbol& y10, const ExprSymbol& y11, const ExprSymbol& y12, const IntervalVector& y_init, double prec);
+	CtcForAll(const NumConstraint& c, const ExprNode& y1, const IntervalVector& y_init, double prec);
 
 	/**
 	 * \brief Create the contractor for "For all y in [y_init], c(x,y)"
 	 *
-	 * \see #CtcQuantif::CtcQuantif(const NumConstraint& c, const Array<const ExprSymbol>& y, const IntervalVector& y_init, double prec);
+	 * \see #CtcQuantif::CtcQuantif(const NumConstraint& c, const VarSet&, const IntervalVector& y_init, double prec);
 	 */
-	CtcForAll(const NumConstraint& c, const Array<const ExprSymbol>& y, const IntervalVector& y_init, double prec);
+	CtcForAll(const NumConstraint& c, const VarSet& y, const IntervalVector& y_init, double prec);
 
 	/**
 	 * \brief Proj-union operator applied on the contractor c.
 	 *
-	 * \see #CtcQuantif::CtcQuantif(Ctc& c, const BitSet& vars, const IntervalVector& y_init, double prec, bool own_ctc=false);
+	 * \see #CtcQuantif::CtcQuantif(Ctc& c, const VarSet&, const IntervalVector& y_init, double prec, bool own_ctc=false);
 	 */
 	CtcForAll(Ctc& c, const BitSet& vars, const IntervalVector& y_init, double prec, bool own_ctc=false);
 

@@ -12,6 +12,7 @@
 
 #include <iostream>
 #include <cassert>
+#include <stack>
 #include "ibex_Heap.h" // just for the declaration of CostFunc<T>
 
 namespace ibex {

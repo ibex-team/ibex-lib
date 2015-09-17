@@ -11,6 +11,7 @@
 #include "TestNewton.h"
 #include "Ponts30.h"
 #include "ibex_Newton.h"
+#include "ibex_CtcNewton.h"
 #include "ibex_LinearException.h"
 
 using namespace std;
@@ -111,4 +112,25 @@ void TestNewton::inflating_newton01() {
 	TEST_ASSERT(almost_eq(box,expected,1e-10));
 }
 
+void TestNewton::ctc_parameter01() {
+
+	Variable x,y,z;
+	Function f(x,y,z,Return(sqr(x)+sqr(y)-1+z,x-y-z));
+
+	VarSet vars(f,x,y);
+
+	CtcNewton newton(f,vars,POS_INFINITY);
+
+	double _box[][2] = { {0,1},{0,1},{-0.01,0.01}};
+	IntervalVector box(3,_box);
+
+	newton.contract(box);
+
+	Vector sol(2,(::sqrt(2)/2));
+
+	TEST_ASSERT(box.subvector(0,1).contains(sol));
+	TEST_ASSERT(box.min_diam()>0.001);
+	TEST_ASSERT(box[0].diam()<=0.1);
+	TEST_ASSERT(box[1].diam()<=0.1);
+}
 } // end namespace ibex

@@ -34,6 +34,8 @@ public:
 		TEST_ADD(TestBitSet::remove);
 		TEST_ADD(TestBitSet::fill01);
 		TEST_ADD(TestBitSet::all_bits);
+		TEST_ADD(TestBitSet::set_minus_with01);
+		TEST_ADD(TestBitSet::set_minus_with02);
 	}
 private:
 	void initialise();
@@ -49,6 +51,8 @@ private:
 	void remove();
 	void fill01();
 	void all_bits();
+	void set_minus_with01();
+	void set_minus_with02();
 };
 
 #endif // __TEST_BITSET__

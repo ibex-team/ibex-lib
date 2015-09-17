@@ -134,7 +134,8 @@ void Gradient::apply_bwd (const ExprApply& a, ExprLabel** x, const ExprLabel& y)
 		tmp_g += old_g;      // addition to the old value of g
 		load(g,tmp_g);
 	} else {
-		assert(a.func.expr().dim.is_vector()); // matrix-valued function not implemented...
+		if (!a.func.expr().dim.is_vector())
+			not_implemented("automatic differentiation of matrix-valued function not implemented");
 		int m=a.func.expr().dim.vec_size();
 		IntervalMatrix J(m,n);
 		jacobian(a.func,d,J);
