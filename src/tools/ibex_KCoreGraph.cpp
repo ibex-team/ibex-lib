@@ -1,5 +1,7 @@
 #include "ibex_KCoreGraph.h"
 
+using namespace std;
+
 namespace ibex {
 	
 KCoreGraph::KCoreGraph(const int maxs, const int mind, bool full) {

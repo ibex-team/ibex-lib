@@ -16,8 +16,6 @@
  * 
  */
 
-using namespace std;
-
 namespace ibex {
 
 class KCoreGraph {
@@ -65,7 +63,7 @@ private:
 	IntStack *allid;
 	
 	/* Adjacency lists */
-	vector<IntStack *> neighbourhoods;
+	std::vector<IntStack *> neighbourhoods;
 	
 	/* Coloring structures */
 	int* colors;

@@ -15,8 +15,6 @@
 #include "ibex_CtcUnion.h"
 #include "ibex_PdcInPolygon.h"
 
-using namespace std;
-
 namespace ibex {
 
 /**
@@ -81,7 +79,7 @@ public:
      * \param bx list of x coordinate of the second point of each segment
      * \param by list of y coordinate of the second point of each segment
 	 */
-    SepPolygon(vector<double>& ax, vector<double>& ay, vector<double>& bx, vector<double>& by);
+    SepPolygon(std::vector<double>& ax, std::vector<double>& ay, std::vector<double>& bx, std::vector<double>& by);
 
 	/**
 	 * \brief Delete this.
