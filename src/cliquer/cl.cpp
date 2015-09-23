@@ -45,104 +45,104 @@ static int clique_count=0;
 static int clique_list_size=0;
 
 
-int main(int argc, char **argv) {
-	FILE *fp;
-	graph_t *g;
-	set_t s;
-	clique_options *opts;
-	int i,j;
-
-	if (argc<=1)
-		printhelp(argv[0]);
-	read_options(argc,argv);
-
-	if (file[0]=='-' && file[1]==0) {
-		fp=stdin;
-		if (quiet<=1)
-			fprintf(stderr,"Reading graph from stdin...");
-	} else {
-		fp=fopen(file,"rb");
-		if (fp==NULL) {
-			perror(file);
-			exit(2);
-		}
-		if (quiet<=1)
-			fprintf(stderr,"Reading graph from %s...",file);
-	}
-	g=graph_read_dimacs(fp);
-	if (g==NULL) {
-		fprintf(stderr,"Error in graph file.\n");
-		return 1;
-	}
-	if (quiet<=1)
-		fprintf(stderr,"OK\n");
-	fclose(fp);
-
-	/* Set stdout to be line-buffered even if redirected. */
-	setvbuf(stdout,(char *)NULL,_IOLBF,0);
-
-	/* Initialize out clique_options */
-	opts=(clique_options *)malloc(sizeof(clique_options));
-	if (quiet)
-		opts->time_function=NULL;
-	else
-		opts->time_function=clique_print_time;
-	opts->output=stderr;
-	opts->reorder_function=reorder;
-	opts->reorder_map=NULL;
-	if (quiet)
-		opts->user_function=print_clique_func;
-	else
-		opts->user_function=record_clique_func;
-	opts->user_data=NULL;
-	opts->clique_list=NULL;
-	opts->clique_list_length=0;
-
-	/* Report what we are doing. */
-	if (quiet<=1)
-		print_search(g);
-
-	if (only_weight) {
-		if (unweighted) {
-			j=clique_unweighted_max_weight(g,opts);
-			printf("Largest clique: %d\n",j);
-		} else {
-			j=clique_max_weight(g,opts);
-			printf("Heaviest clique: %d\n",j);
-		}
-	} else if (find_all) {
-		if (unweighted) {
-			clique_unweighted_find_all(g,min_weight,max_weight,
-						   maximal,opts);
-		} else {
-			clique_find_all(g,min_weight,max_weight,maximal,opts);
-		}
-		if (quiet<=0) {
-			fprintf(stderr,"Found %d clique%s:\n",
-				clique_count,(clique_count==1)?"":"s");
-			for (i=0; i<clique_count; i++) {
-				print_clique(clique_list[i],g);
-			}
-		}
-	} else {
-		if (unweighted) {
-			s=clique_unweighted_find_single(g,min_weight,
-							max_weight,maximal,
-							opts);
-		} else {
-			s=clique_find_single(g,min_weight,max_weight,maximal,
-					     opts);
-		}
-		if (s==NULL) {
-			if (quiet<=1)
-				fprintf(stderr,"No such clique found.\n");
-			return 0;
-		}
-		print_clique(s,g);
-	}
-
-	return 0;
-}
+//int main(int argc, char **argv) {
+//	FILE *fp;
+//	graph_t *g;
+//	set_t s;
+//	clique_options *opts;
+//	int i,j;
+//
+//	if (argc<=1)
+//		printhelp(argv[0]);
+//	read_options(argc,argv);
+//
+//	if (file[0]=='-' && file[1]==0) {
+//		fp=stdin;
+//		if (quiet<=1)
+//			fprintf(stderr,"Reading graph from stdin...");
+//	} else {
+//		fp=fopen(file,"rb");
+//		if (fp==NULL) {
+//			perror(file);
+//			exit(2);
+//		}
+//		if (quiet<=1)
+//			fprintf(stderr,"Reading graph from %s...",file);
+//	}
+//	g=graph_read_dimacs(fp);
+//	if (g==NULL) {
+//		fprintf(stderr,"Error in graph file.\n");
+//		return 1;
+//	}
+//	if (quiet<=1)
+//		fprintf(stderr,"OK\n");
+//	fclose(fp);
+//
+//	/* Set stdout to be line-buffered even if redirected. */
+//	setvbuf(stdout,(char *)NULL,_IOLBF,0);
+//
+//	/* Initialize out clique_options */
+//	opts=(clique_options *)malloc(sizeof(clique_options));
+//	if (quiet)
+//		opts->time_function=NULL;
+//	else
+//		opts->time_function=clique_print_time;
+//	opts->output=stderr;
+//	opts->reorder_function=reorder;
+//	opts->reorder_map=NULL;
+//	if (quiet)
+//		opts->user_function=print_clique_func;
+//	else
+//		opts->user_function=record_clique_func;
+//	opts->user_data=NULL;
+//	opts->clique_list=NULL;
+//	opts->clique_list_length=0;
+//
+//	/* Report what we are doing. */
+//	if (quiet<=1)
+//		print_search(g);
+//
+//	if (only_weight) {
+//		if (unweighted) {
+//			j=clique_unweighted_max_weight(g,opts);
+//			printf("Largest clique: %d\n",j);
+//		} else {
+//			j=clique_max_weight(g,opts);
+//			printf("Heaviest clique: %d\n",j);
+//		}
+//	} else if (find_all) {
+//		if (unweighted) {
+//			clique_unweighted_find_all(g,min_weight,max_weight,
+//						   maximal,opts);
+//		} else {
+//			clique_find_all(g,min_weight,max_weight,maximal,opts);
+//		}
+//		if (quiet<=0) {
+//			fprintf(stderr,"Found %d clique%s:\n",
+//				clique_count,(clique_count==1)?"":"s");
+//			for (i=0; i<clique_count; i++) {
+//				print_clique(clique_list[i],g);
+//			}
+//		}
+//	} else {
+//		if (unweighted) {
+//			s=clique_unweighted_find_single(g,min_weight,
+//							max_weight,maximal,
+//							opts);
+//		} else {
+//			s=clique_find_single(g,min_weight,max_weight,maximal,
+//					     opts);
+//		}
+//		if (s==NULL) {
+//			if (quiet<=1)
+//				fprintf(stderr,"No such clique found.\n");
+//			return 0;
+//		}
+//		print_clique(s,g);
+//	}
+//
+//	return 0;
+//}
 
 
 /*
