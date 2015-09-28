@@ -11,6 +11,7 @@
 #ifndef __TEST_SEPPOLYGON_H__
 #define __TEST_SEPPOLYGON_H__
 
+#include <vector>
 #include "cpptest.h"
 #include "ibex_SepPolygon.h"
 #include "ibex_SepNot.h"
@@ -35,8 +36,8 @@ public:
     void test_SepPolygon_03();
 
 private:
-    vector<double> murs_xa,murs_xb,murs_ya,murs_yb;
-    vector<double> murs_xa2,murs_xb2,murs_ya2,murs_yb2;
+    std::vector<double> murs_xa,murs_xb,murs_ya,murs_yb;
+    std::vector<double> murs_xa2,murs_xb2,murs_ya2,murs_yb2;
 
 };
 

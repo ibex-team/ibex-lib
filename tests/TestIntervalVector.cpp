@@ -408,6 +408,51 @@ void TestIntervalVector::extr_diam_index05() {
 	TEST_ASSERT(x1.max_diam()==POS_INFINITY);
 }
 
+void TestIntervalVector::extr_diam_index06() {
+	double _x1[][2]={{NEG_INFINITY,0},{0,1},{NEG_INFINITY,1},{1,3}};
+	IntervalVector x1(4,_x1);
+	TEST_ASSERT(x1.extr_diam_index(true)==1);
+	TEST_ASSERT(x1.extr_diam_index(false)==2);
+	TEST_ASSERT(x1.min_diam()==1);
+	TEST_ASSERT(x1.max_diam()==POS_INFINITY);
+}
+
+void TestIntervalVector::extr_diam_index07() {
+	double _x1[][2]={{NEG_INFINITY,0},{-2,POS_INFINITY},{NEG_INFINITY,1}};
+	IntervalVector x1(3,_x1);
+	TEST_ASSERT(x1.extr_diam_index(true)==0);
+	TEST_ASSERT(x1.extr_diam_index(false)==1);
+	TEST_ASSERT(x1.min_diam()==POS_INFINITY);
+	TEST_ASSERT(x1.max_diam()==POS_INFINITY);
+}
+
+void TestIntervalVector::extr_diam_index08() {
+	double _x1[][2]={{NEG_INFINITY,0},{NEG_INFINITY,1},{-2,POS_INFINITY}};
+	IntervalVector x1(3,_x1);
+	TEST_ASSERT(x1.extr_diam_index(true)==0);
+	TEST_ASSERT(x1.extr_diam_index(false)==2);
+	TEST_ASSERT(x1.min_diam()==POS_INFINITY);
+	TEST_ASSERT(x1.max_diam()==POS_INFINITY);
+}
+
+void TestIntervalVector::extr_diam_index09() {
+	double _x1[][2]={{-2,POS_INFINITY},{NEG_INFINITY,0},{NEG_INFINITY,1}};
+	IntervalVector x1(3,_x1);
+	TEST_ASSERT(x1.extr_diam_index(true)==1);
+	TEST_ASSERT(x1.extr_diam_index(false)==0);
+	TEST_ASSERT(x1.min_diam()==POS_INFINITY);
+	TEST_ASSERT(x1.max_diam()==POS_INFINITY);
+}
+
+void TestIntervalVector::extr_diam_index10() {
+	double _x1[][2]={{-2,POS_INFINITY},{NEG_INFINITY,1},{NEG_INFINITY,0}};
+	IntervalVector x1(3,_x1);
+	TEST_ASSERT(x1.extr_diam_index(true)==2);
+	TEST_ASSERT(x1.extr_diam_index(false)==0);
+	TEST_ASSERT(x1.min_diam()==POS_INFINITY);
+	TEST_ASSERT(x1.max_diam()==POS_INFINITY);
+}
+
 void TestIntervalVector::sort_indices01() {
 	double _x[][2]={{0,2},{NEG_INFINITY,0},{0,1},{3,3},{-10,10}};
 	IntervalVector x(5,_x);
