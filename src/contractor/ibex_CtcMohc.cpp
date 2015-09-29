@@ -12,6 +12,8 @@
 #include "ibex_Eval.h"
 #include "ibex_CtcFwdBwd.h"
 
+using namespace std;
+
 namespace ibex {
 
 namespace {

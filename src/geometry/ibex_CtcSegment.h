@@ -14,8 +14,6 @@
 #include "ibex_NumConstraint.h"
 #include "ibex_CtcFwdBwd.h"
 
-using namespace std;
-
 namespace ibex {
 
 /**

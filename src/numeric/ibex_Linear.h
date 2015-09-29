@@ -99,6 +99,7 @@ void real_inverse(const Matrix& A, Matrix& invA);
  * \param b (in/output)- The interval vector [b] to be replaced by \f$C^{-1}[b]\f$.
  *
  * \throw SingularMatrixException if no real matrix extracted from [A] could be inversed successfully.
+ *                                In this case, A and b are not modified.
  *
  */
 void precond(IntervalMatrix& A, IntervalVector& b);
@@ -115,7 +116,7 @@ void precond(IntervalMatrix& A, IntervalVector& b);
  * \param A (in/output)- The interval matrix [A] to be replaced by \f$C^{-1}[A]\f$.
  *
  * \throw SingularMatrixException if no real matrix extracted from [A] could be inversed successfully.
- *
+ *                                In this case, A and b are not modified.
  */
 void precond(IntervalMatrix& A);
 /**
@@ -133,7 +134,7 @@ void precond(IntervalMatrix& A);
  * \param b - The interval vector [b].
  * \param x (in/output) - The box to be contracted in return.
  * \param ratio (optional) - Stopping criterion: the iteration is stopped when each dimension of x has not been reduced by more
- * than \a ratio \%. Default value is 0.1 (10\%).
+ * than \a ratio \%. Default value is 0.1 (1\%).
  *
  */
 void gauss_seidel(const IntervalMatrix& A, const IntervalVector& b, IntervalVector& x, double ratio=0.01);

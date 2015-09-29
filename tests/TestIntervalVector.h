@@ -86,6 +86,11 @@ public:
 		TEST_ADD(TestIntervalVector::extr_diam_index03);
 		TEST_ADD(TestIntervalVector::extr_diam_index04);
 		TEST_ADD(TestIntervalVector::extr_diam_index05);
+		TEST_ADD(TestIntervalVector::extr_diam_index06);
+		TEST_ADD(TestIntervalVector::extr_diam_index07);
+		TEST_ADD(TestIntervalVector::extr_diam_index08);
+		TEST_ADD(TestIntervalVector::extr_diam_index09);
+		TEST_ADD(TestIntervalVector::extr_diam_index10);
 
 		TEST_ADD(TestIntervalVector::sort_indices01);
 		TEST_ADD(TestIntervalVector::sort_indices02);
@@ -219,7 +224,11 @@ public:
 	void extr_diam_index03();
 	void extr_diam_index04();
 	void extr_diam_index05();
-
+	void extr_diam_index06();
+	void extr_diam_index07();
+	void extr_diam_index08();
+	void extr_diam_index09();
+	void extr_diam_index10();
 
 	void sort_indices01();
 	void sort_indices02();

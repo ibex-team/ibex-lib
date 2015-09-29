@@ -21,8 +21,6 @@
 #include "ibex_Array.h"
 #include "ibex_IntStack.h"
 
-using namespace std;
-
 namespace ibex {
 
 /**
@@ -57,7 +55,7 @@ IntervalVector qinter2(const Array<IntervalVector>& _boxes, int q);
  * \ingroup combinatorial
  * \brief Checks for nonempty Q-intersection (Cliquer)
  */
-IntervalVector qinterex_cliquer(const vector<IntervalVector *>& boxes, const vector<int>& indices, int q, KCoreGraph* origin);
+IntervalVector qinterex_cliquer(const std::vector<IntervalVector *>& boxes, const std::vector<int>& indices, int q, KCoreGraph* origin);
 
 } // end namespace ibex
 

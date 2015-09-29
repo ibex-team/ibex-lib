@@ -14,6 +14,8 @@
 
 #include <algorithm>
 
+using namespace std;
+
 bool leftpaircomp (const pair<double,int>& i, const pair<double,int>& j) { return (i.first<j.first); };
 bool rightpaircomp (const pair<double,int>& i, const pair<double,int>& j) { return (i.first>j.first); };
 
