@@ -142,7 +142,7 @@ void TestSeparator::test_SepInverse(){
 void TestSeparator::test_SepTransform(){
 
     Function f1("x", "y", "(2*y, -x)");
-    Function f2("x", "y", "(y , -x/2");
+    Function f2("x", "y", "(-y , 0.5*x)");
     CtcEmpty cempty(2);
     CtcIdentity ctcId(2);
     SepCtcPair S(cempty, ctcId);
@@ -152,8 +152,9 @@ void TestSeparator::test_SepTransform(){
     IntervalVector XS_in(X0), XS_out(X0);
 
     S_inv.separate(XS_in, XS_out);
+    std::cout << XS_in << " " << XS_out << std::endl;
     TEST_ASSERT(XS_in.is_empty());
-    TEST_ASSERT(XS_out.is_empty());
+    TEST_ASSERT(XS_out == X0);
     
 }
 
