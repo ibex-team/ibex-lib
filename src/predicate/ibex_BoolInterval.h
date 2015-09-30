@@ -14,6 +14,7 @@
 /**
  * \defgroup predicate Predicates
  */
+#include <iostream>
 
 namespace ibex {
 
@@ -48,8 +49,10 @@ public:
 	// Neg
 	BoolInterval  operator!  () const; 
 	
+	
 };
 
+std::ostream& operator<< (std::ostream& os, const BoolInterval&);
 BoolInterval Inter(const BoolInterval&,const BoolInterval&);
 BoolInterval Not(const BoolInterval& x);
 BoolInterval Union(const BoolInterval&, const BoolInterval&);
@@ -104,6 +107,15 @@ inline BoolInterval BoolInterval::operator! () const {
 	if (this->value == YES) return BoolInterval(NO);
 	if (this->value == NO) return BoolInterval(YES);
 	return this;
+}
+
+
+inline std::ostream& operator<< (std::ostream& os, const BoolInterval& a)
+{
+	if      (a.value==YES)    os<<"  YES";
+	if      (a.value==NO)     os<<"   NO";
+	if      (a.value==MAYBE)  os<<"MAYBE";
+	return os;
 }
 
 inline BoolInterval Not(const BoolInterval& x){
