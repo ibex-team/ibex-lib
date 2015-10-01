@@ -104,9 +104,7 @@ inline bool BoolInterval::operator!= (const BoolInterval& y) const
 {	return (this->value!=y.value);}
 
 inline BoolInterval BoolInterval::operator! () const {
-	if (this->value == YES) return BoolInterval(NO);
-	if (this->value == NO) return BoolInterval(YES);
-	return this;
+	return Not(*this);
 }
 
 
