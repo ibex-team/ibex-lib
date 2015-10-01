@@ -10,86 +10,55 @@
 
 #ifndef __IBEX_BOOL_INTERVAL_H__
 #define __IBEX_BOOL_INTERVAL_H__
-
-/**
- * \defgroup predicate Predicates
- */
 #include <iostream>
 
 namespace ibex {
 
 /**
- * \ingroup predicate
- *
+ * \defgroup predicate Predicates
+ */
+
+/** \ingroup predicate */
+/*@{*/
+
+/**
  * \brief Boolean interval.
  */
-typedef enum { NO, MAYBE, YES, EMPTY} IBOOLEAN;
+typedef enum { EMPTY, NO, YES, MAYBE } BoolInterval;
 
-class BoolInterval {
-public:
-	IBOOLEAN value;
+/**
+ * \brief Set x to the intersection with y
+ */
+BoolInterval& operator&=(BoolInterval& x, const BoolInterval& y);
 
-	/**
-	 * \brief Create the interval MAYBE
-	 */
-	BoolInterval();
+/**
+ * \brief Set x to the union with y
+ */
+BoolInterval& operator|=(BoolInterval& x, const BoolInterval& y);
 
-	/**
-	 * \brief Create the interval YES (true) or NO (false)
-	 */
-	BoolInterval(bool);
-
-	/*
-	 * \brief Create an interval from a IBOOLEAN value
-	 */
-	BoolInterval(IBOOLEAN);
-
-	/**
-	 * \brief Copy a boolean interval
-	 */
-	BoolInterval(const BoolInterval&);
-
-	/**
-	 * \brief Equality test
-	 */
-	bool operator==(const BoolInterval&) const;
-
-	/**
-	 * \brief Non-equality test
-	 */
-	bool operator!=(const BoolInterval&) const;
-
-	/**
-	 * \brief Set this interval to the intersection with another
-	 */
-	BoolInterval& operator&=(const BoolInterval&);
-	
-	/**
-	 * \brief Set this interval to the union with another
-	 */
-	BoolInterval& operator|= (const BoolInterval&);
-	
-	/**
-	 * \brief Negation
-	 */
-	BoolInterval operator!() const;
-	
-};
-
+/**
+ * \brief Negation
+ */
+BoolInterval operator!(const BoolInterval& x);
 
 /**
  * \brief Logical AND
  *
  * \warning Not to be confused with intersection
  */
-BoolInterval operator&&(const BoolInterval&,const BoolInterval&);
+BoolInterval operator&&(const BoolInterval&, const BoolInterval&);
 
 /**
  * \brief Logical OR
  *
  * \warning Not to be confused with union
  */
-BoolInterval operator||(const BoolInterval&,const BoolInterval&);
+BoolInterval operator||(const BoolInterval&, const BoolInterval&);
+
+/**
+ * \brief Logical exclusive OR (XOR)
+ */
+BoolInterval operator^(const BoolInterval&, const BoolInterval&);
 
 /**
  * \brief Intersection
@@ -105,7 +74,7 @@ BoolInterval operator&(const BoolInterval&, const BoolInterval&);
  */
 BoolInterval operator|(const BoolInterval&, const BoolInterval&);
 
-BoolInterval Not(const BoolInterval& x);
+
 
 BoolInterval leq(const BoolInterval& x, const BoolInterval& y);
 
@@ -119,120 +88,79 @@ BoolInterval geq(const BoolInterval& x, const BoolInterval& y);
  */
 BoolInterval restrict(const BoolInterval& x, const BoolInterval& y);
 
-BoolInterval Xor(const BoolInterval& x, const BoolInterval& y);
-
+/**
+ * \brief Steams out a boolean interval
+ */
 std::ostream& operator<< (std::ostream& os, const BoolInterval&);
 
-//======================================================================
-//============== INLINE IMPLEMENTATION =================================
-//======================================================================
+/*@}*/
+
+/*================================== inline implementations ========================================*/
 
 
-inline BoolInterval::BoolInterval() {
-	value = MAYBE;
+inline BoolInterval& operator&=(BoolInterval& x, const BoolInterval& y) {
+	return (x = (x & y));
 }
 
-inline BoolInterval::BoolInterval(bool b) {
-	if (b) value=YES; else value=NO;
+inline BoolInterval& operator|=(BoolInterval& x, const BoolInterval& y) {
+	return (x = (x | y));
 }
 
-inline BoolInterval::BoolInterval(IBOOLEAN tt) {
-	value = tt;
-}
-
-inline BoolInterval::BoolInterval(const BoolInterval& t) {
-	*this = t;
-}
-
-inline BoolInterval& BoolInterval::operator&= (const BoolInterval& y) {
-	this->value = (*this & y).value;
-	return *this;
-}
-
-inline BoolInterval& BoolInterval::operator|= (const BoolInterval& y) {
-	this->value = (*this | y).value;
-	return *this;
-}
-
-inline bool BoolInterval::operator== (const BoolInterval& y) const {
-	return (this->value==y.value);
-}
-
-inline bool BoolInterval::operator!= (const BoolInterval& y) const {
-	return (this->value!=y.value);
-}
-
-inline BoolInterval BoolInterval::operator! () const {
-	if (this->value == YES) return BoolInterval(NO);
-	if (this->value == NO) return BoolInterval(YES);
-	return this;
-}
-
-inline std::ostream& operator<< (std::ostream& os, const BoolInterval& a) {
-	if      (a.value==YES)    os<<"  YES";
-	if      (a.value==NO)     os<<"   NO";
-	if      (a.value==MAYBE)  os<<"MAYBE";
-	return os;
-}
-
-inline BoolInterval Not(const BoolInterval& x) {
-	if (x == MAYBE)   return MAYBE;
-	if (x == YES)      return NO;
-	if (x == NO)     return YES;
-	return EMPTY;
+inline BoolInterval operator!(const BoolInterval& x) {
+	if (x == YES) return NO;
+	if (x == NO) return YES;
+	return x;
 }
 
 inline BoolInterval operator&&(const BoolInterval& x, const BoolInterval& y) {
-	if ((x==EMPTY)||(y==EMPTY)) return BoolInterval(EMPTY);
-	if ((x==NO)||(y==NO)) return BoolInterval(NO);
-	if ((x==MAYBE)||(y==MAYBE)) return BoolInterval(MAYBE);
-	return BoolInterval(YES);
+	if ((x == EMPTY) || (y == EMPTY)) return EMPTY;
+	if ((x == NO)    || (y == NO))    return NO;
+	if ((x == MAYBE) || (y == MAYBE)) return MAYBE;
+	return YES;
 }
 
 inline BoolInterval operator||(const BoolInterval& x, const BoolInterval& y) {
-	if ((x==EMPTY)||(y==EMPTY))     return BoolInterval(EMPTY);
-	if ( (x==YES) || (y==YES) )     return BoolInterval(YES);
-	if ( (x==MAYBE) || (y==MAYBE) ) return BoolInterval(MAYBE);
-	return BoolInterval(NO);
+	if ((x == EMPTY) || (y == EMPTY)) return EMPTY;
+	if ((x == YES)   || (y == YES))   return YES;
+	if ((x == MAYBE) || (y == MAYBE)) return MAYBE;
+	return NO;
+}
+
+inline BoolInterval operator^(const BoolInterval& x, const BoolInterval& y) {
+	if (x == EMPTY)   return EMPTY;
+	if (y == EMPTY)   return EMPTY;
+	if (x == MAYBE)   return MAYBE;
+	if (y == MAYBE)   return MAYBE;
+	if (x == y)   return NO;
+	return YES;
 }
 
 inline BoolInterval operator&(const BoolInterval& x, const BoolInterval& y) {
 	if (x == y)       return x;
 	if (x == MAYBE)   return y;
 	if (y == MAYBE)   return x;
-	return BoolInterval(EMPTY);
+	return EMPTY;
 }
 
 inline BoolInterval operator|(const BoolInterval& x, const BoolInterval& y) {
 	if (x == EMPTY)   return y;
  	if (y == EMPTY)   return x;
 	if (x == y)       return x;
-	return BoolInterval(MAYBE);
-}
-
-inline BoolInterval Xor(const BoolInterval& x,const BoolInterval& y) {
-	if (x == EMPTY)   return EMPTY;
-	if (y == EMPTY)   return EMPTY;
-	if (x == MAYBE)   return MAYBE;
-	if (y == MAYBE)   return MAYBE;
-	if (x == y)   return NO;
-	return BoolInterval(YES);
+	return MAYBE;
 }
 
 inline BoolInterval geq(const BoolInterval& x, const BoolInterval& y) {
-	BoolInterval r;
-        r=BoolInterval(MAYBE);
-        if (y==EMPTY)  r=BoolInterval(EMPTY);
-	if (y==YES) r=BoolInterval(YES);
-        return inter(x,r);
+	BoolInterval     r=MAYBE;
+	if (y == EMPTY)  r=EMPTY;
+	if (y == YES)    r=YES;
+	return x & r;
 }
 
 inline BoolInterval leq(const BoolInterval& x, const BoolInterval& y) {
-	BoolInterval r;
-        r=BoolInterval(MAYBE);
-        if (y==EMPTY)  r=BoolInterval(EMPTY);
-	if (y==NO) r=BoolInterval(NO);
-        return inter(x,r);
+	BoolInterval    r=MAYBE;
+	if (y == EMPTY) r=EMPTY;
+	if (y == NO)    r=NO;
+	return x & r;
 /*                               a     &&    (implique b)
 1*0=\EMPTY                       1     &&      0
 1*1=1                            1     &&     [0,1]
@@ -248,6 +176,13 @@ inline BoolInterval leq(const BoolInterval& x, const BoolInterval& y) {
 
 inline BoolInterval restrict(const BoolInterval& x, const BoolInterval& y) {
 	return x && (!y);
+}
+
+inline std::ostream& operator<<(std::ostream& os, const BoolInterval& x) {
+	if      (x==YES)    os << "  YES";
+	if      (x==NO)     os << "   NO";
+	if      (x==MAYBE)  os << "MAYBE";
+	return os;
 }
 
 } // namespace ibex

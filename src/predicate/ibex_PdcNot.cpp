@@ -15,10 +15,11 @@ PdcNot::PdcNot(Pdc& p) : Pdc(p.nb_var), p(p) {
 }
 
 BoolInterval PdcNot::test(const IntervalVector& box) {
-	switch(p.test(box).value) {
+	switch(p.test(box)) {
 	case YES: return NO;
 	case NO: return YES;
-	default: return MAYBE;
+	case MAYBE: return MAYBE;
+	default: return EMPTY;
 	}
 }
 

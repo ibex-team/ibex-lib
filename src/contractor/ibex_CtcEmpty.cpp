@@ -19,7 +19,7 @@ CtcEmpty::CtcEmpty(Pdc& pdc, bool own) : Ctc(pdc.nb_var), pdc(pdc), own_pdc(own)
 
 void CtcEmpty::contract(IntervalVector& box) {
 	BoolInterval t= pdc.test(box);
-	switch (t.value) {
+	switch (t) {
 	case YES:
 		box.set_empty();
 		set_flag(FIXPOINT);

@@ -73,6 +73,8 @@ protected:
 };
 
 
+/*================================== inline implementations ========================================*/
+
 inline Pdc::Pdc(int n) : nb_var(n) { }
 
 inline Pdc::Pdc(const Array<Pdc>& l) : nb_var(l[0].nb_var) { }
