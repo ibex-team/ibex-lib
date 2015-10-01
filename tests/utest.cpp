@@ -62,6 +62,7 @@
 
 // ================ predicates ===============
 #include "TestPdcHansenFeasibility.h"
+#include "TestBoolInterval.h"
 
 // ================ contractor ===============
 #include "TestCtcHC4.h"
@@ -139,6 +140,7 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestNewton()));
 
     ts.add(auto_ptr<Test::Suite>(new TestPdcHansenFeasibility()));
+    ts.add(auto_ptr<Test::Suite>(new TestBoolInterval()));
 
     ts.add(auto_ptr<Test::Suite>(new TestCtcHC4()));
     ts.add(auto_ptr<Test::Suite>(new TestCtcInteger()));
