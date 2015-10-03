@@ -31,10 +31,10 @@ void TestBoolInterval::test_constructor1(){
 
 void TestBoolInterval::test_constructor2(){
 
-	BoolInterval a(true);
-	TEST_ASSERT(a == YES );
-	BoolInterval b(false);
-	TEST_ASSERT(b == NO);
+//	BoolInterval a=true;
+//	TEST_ASSERT(a == YES );
+//	BoolInterval b=false;
+//	TEST_ASSERT(b == NO);
 	BoolInterval c;
 	TEST_ASSERT(c == MAYBE);
 }
@@ -54,8 +54,8 @@ void TestBoolInterval::test_assignement(){
 	TEST_ASSERT(a == YES);
 	a = b;
 	TEST_ASSERT(a == NO);
-	a = true;
-	TEST_ASSERT(a == YES);
+//	a = true;
+//	TEST_ASSERT(a == YES);
 
 }
 
