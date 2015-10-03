@@ -63,25 +63,29 @@ BoolInterval operator^(const BoolInterval&, const BoolInterval&);
 /**
  * \brief Intersection
  *
- * \warning Not to be confused with logical AND
+ * \warning Not to be confused with logical AND (&&)
  */
 BoolInterval operator&(const BoolInterval&, const BoolInterval&);
 
 /**
  * \brief Union
  *
- * \warning Not to be confused with logical OR
+ * \warning Not to be confused with logical OR (||)
  */
 BoolInterval operator|(const BoolInterval&, const BoolInterval&);
 
-
-
-BoolInterval leq(const BoolInterval& x, const BoolInterval& y);
-
-/**
- * \brief Project the constraint x>=y with respect to x
- */
-BoolInterval geq(const BoolInterval& x, const BoolInterval& y);
+///**
+// * \brief Project the constraint x<=y with respect to x
+//
+// [gch]: I am not sure about what it means, the set of boolean values
+//        is not supposed to be ordered.
+// */
+//BoolInterval leq(const BoolInterval& x, const BoolInterval& y);
+//
+///**
+// * \brief Project the constraint x>=y with respect to x
+// */
+//BoolInterval geq(const BoolInterval& x, const BoolInterval& y);
 
 /**
  * \brief Return x and !y
@@ -96,7 +100,6 @@ std::ostream& operator<< (std::ostream& os, const BoolInterval&);
 /*@}*/
 
 /*================================== inline implementations ========================================*/
-
 
 inline BoolInterval& operator&=(BoolInterval& x, const BoolInterval& y) {
 	return (x = (x & y));
@@ -149,18 +152,19 @@ inline BoolInterval operator|(const BoolInterval& x, const BoolInterval& y) {
 	return MAYBE;
 }
 
-inline BoolInterval geq(const BoolInterval& x, const BoolInterval& y) {
-	BoolInterval     r=MAYBE;
-	if (y == EMPTY)  r=EMPTY;
-	if (y == YES)    r=YES;
-	return x & r;
-}
+//inline BoolInterval geq(const BoolInterval& x, const BoolInterval& y) {
+//	BoolInterval     r=MAYBE;
+//	if (y == EMPTY)  r=EMPTY;
+//	if (y == YES)    r=YES;
+//	return x & r;
+//}
+//
+//inline BoolInterval leq(const BoolInterval& x, const BoolInterval& y) {
+//	BoolInterval    r=MAYBE;
+//	if (y == EMPTY) r=EMPTY;
+//	if (y == NO)    r=NO;
+//	return x & r;
 
-inline BoolInterval leq(const BoolInterval& x, const BoolInterval& y) {
-	BoolInterval    r=MAYBE;
-	if (y == EMPTY) r=EMPTY;
-	if (y == NO)    r=NO;
-	return x & r;
 /*                               a     &&    (implique b)
 1*0=\EMPTY                       1     &&      0
 1*1=1                            1     &&     [0,1]
@@ -172,7 +176,7 @@ inline BoolInterval leq(const BoolInterval& x, const BoolInterval& y) {
 [0,1]*1=[0,1]                    [0,1] &&      [0,1]
 [0,1]*[0,1]=[0,1]                [0,1] &&     [0,1]
 */
-}
+//}
 
 inline BoolInterval restrict(const BoolInterval& x, const BoolInterval& y) {
 	return x && (!y);
