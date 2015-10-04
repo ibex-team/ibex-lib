@@ -24,7 +24,7 @@ namespace ibex {
 /**
  * \brief Boolean interval.
  */
-typedef enum { EMPTY, NO, YES, MAYBE } BoolInterval;
+typedef enum { EMPTY_BOOL, NO, YES, MAYBE } BoolInterval;
 
 /**
  * \brief Set x to the intersection with y
@@ -116,22 +116,22 @@ inline BoolInterval operator!(const BoolInterval& x) {
 }
 
 inline BoolInterval operator&&(const BoolInterval& x, const BoolInterval& y) {
-	if ((x == EMPTY) || (y == EMPTY)) return EMPTY;
+	if ((x == EMPTY_BOOL) || (y == EMPTY_BOOL)) return EMPTY_BOOL;
 	if ((x == NO)    || (y == NO))    return NO;
 	if ((x == MAYBE) || (y == MAYBE)) return MAYBE;
 	return YES;
 }
 
 inline BoolInterval operator||(const BoolInterval& x, const BoolInterval& y) {
-	if ((x == EMPTY) || (y == EMPTY)) return EMPTY;
+	if ((x == EMPTY_BOOL) || (y == EMPTY_BOOL)) return EMPTY_BOOL;
 	if ((x == YES)   || (y == YES))   return YES;
 	if ((x == MAYBE) || (y == MAYBE)) return MAYBE;
 	return NO;
 }
 
 inline BoolInterval operator^(const BoolInterval& x, const BoolInterval& y) {
-	if (x == EMPTY)   return EMPTY;
-	if (y == EMPTY)   return EMPTY;
+	if (x == EMPTY_BOOL)   return EMPTY_BOOL;
+	if (y == EMPTY_BOOL)   return EMPTY_BOOL;
 	if (x == MAYBE)   return MAYBE;
 	if (y == MAYBE)   return MAYBE;
 	if (x == y)   return NO;
@@ -142,31 +142,31 @@ inline BoolInterval operator&(const BoolInterval& x, const BoolInterval& y) {
 	if (x == y)       return x;
 	if (x == MAYBE)   return y;
 	if (y == MAYBE)   return x;
-	return EMPTY;
+	return EMPTY_BOOL;
 }
 
 inline BoolInterval operator|(const BoolInterval& x, const BoolInterval& y) {
-	if (x == EMPTY)   return y;
- 	if (y == EMPTY)   return x;
+	if (x == EMPTY_BOOL)   return y;
+ 	if (y == EMPTY_BOOL)   return x;
 	if (x == y)       return x;
 	return MAYBE;
 }
 
 //inline BoolInterval geq(const BoolInterval& x, const BoolInterval& y) {
 //	BoolInterval     r=MAYBE;
-//	if (y == EMPTY)  r=EMPTY;
+//	if (y == EMPTY_BOOL)  r=EMPTY_BOOL;
 //	if (y == YES)    r=YES;
 //	return x & r;
 //}
 //
 //inline BoolInterval leq(const BoolInterval& x, const BoolInterval& y) {
 //	BoolInterval    r=MAYBE;
-//	if (y == EMPTY) r=EMPTY;
+//	if (y == EMPTY_BOOL) r=EMPTY_BOOL;
 //	if (y == NO)    r=NO;
 //	return x & r;
 
 /*                               a     &&    (implique b)
-1*0=\EMPTY                       1     &&      0
+1*0=\EMPTY_BOOL                       1     &&      0
 1*1=1                            1     &&     [0,1]
 1*[0,1]=1                        1     &&     [0,1]
 0*0=0                            0     &&      0

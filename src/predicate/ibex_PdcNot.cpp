@@ -19,7 +19,7 @@ BoolInterval PdcNot::test(const IntervalVector& box) {
 	case YES: return NO;
 	case NO: return YES;
 	case MAYBE: return MAYBE;
-	default: return EMPTY;
+	default: return EMPTY_BOOL;
 	}
 }
 
