@@ -42,7 +42,7 @@ void SepFixPoint::clearFlags(){
 
 
 
-bool SepFixPoint::setCinFlags(IntervalVector& x_in, IntervalVector& x0){
+void SepFixPoint::setCinFlags(IntervalVector& x_in, IntervalVector& x0){
     if( !impact_cin ){
         if ( ! (x_in == x0)){
             impact_cin = true;
@@ -51,7 +51,7 @@ bool SepFixPoint::setCinFlags(IntervalVector& x_in, IntervalVector& x0){
     }
 }
 
-bool SepFixPoint::setCoutFlags(IntervalVector& x_out, IntervalVector& x0){
+void SepFixPoint::setCoutFlags(IntervalVector& x_out, IntervalVector& x0){
     if(!impact_cout){
         if ( !(x_out == x0)){
             impact_cout = true;
@@ -61,36 +61,68 @@ bool SepFixPoint::setCoutFlags(IntervalVector& x_out, IntervalVector& x0){
 }
 
 /**
- * @brief SepFixPoint::reconstrut
- * @param x_in
- * @param x_out
- * @param x_old
- * @return
+ * To reconstruct x_in and x_out after two situations can appear
+ *
+ * SITUATION 1
+ * Only and inner (or outer) contraction happens.
+ * In this case x_in = x and x_out = x0
+ *
+ *  ++++++++++++++++++++++++++++++++++++
+ * |                   |               |
+ * |         x         |    x_in       |
+ * |                   |               |
+ * |-----------------------------------|
+ * |             x_in                  |
+ * |                                   |
+ *  ++++++++++++++++++++++++++++++++++++
+ *
+ * SITUATION 2
+ * Both inner and outer contraction happen
+ * in this case, n_out = n_in = 1
+ *
+ *  +++++++++++++++++++++++++++++++++++
+ * |            |           |          |
+ * |     x_in   |    x      |  x_out   |
+ * |            |           |          |
+ *  +++++++++++++++++++++++++++++++++++
+ *
  */
 bool SepFixPoint::reconstrut(IntervalVector &x_in, IntervalVector& x_out, IntervalVector& x_old){
     IntervalVector x = x_in & x_out;
     IntervalVector *rest;
 
-    if (x == x_old) return true;
+    if (x == x_old) return true; // no contraction
     if (impact_cin == true && impact_cout == false){
+        // Only an inner contraction
         x_out = x_old;
         x_in = x;
     } else if (impact_cin == false && impact_cout == true){
+        // Only an outer contraction
         x_in = x_old;
         x_out = x;
     } else if (impact_cin == true && impact_cout == true){
+
+        // Inner and outer contraction.
+        // We are in the situation 2.
+        // make the difference if x_old \ x
+        // the number of boxes of the difference must be 2
+        // and n_in + n_out == n
+
         int n = x_old.diff(x, rest);
         assert(n_in  == 1);
         assert(n_out == 1);
         assert(n     == 2);
+        // iterate over boxes in rest and affect them in x_in or x_out
         for (int i = 0; i < n; i++){
             for(int j = 0; j < n_in; j++){
+                // identify the box in rest which was removed by cin
                 if(first_cin_boxes[j].intersects(rest[i])){
                     x_out |= rest[i];
                     break;
                 }
             }
             for(int j = 0; j < n_out; j++){
+                // identify the box in rest which wa removed by cout
                 if(first_cout_boxes[j].intersects(rest[i])){
                     x_in |= rest[i];
                     break;
@@ -115,6 +147,8 @@ void SepFixPoint::separate(IntervalVector& x_in, IntervalVector& x_out){
     do {
         x_old = x;
         sep.separate(x_in, x_out);
+        setCinFlags(x_in, x_old);   // check if x_in  has been contracted
+        setCoutFlags(x_out, x_old); // check if x_out has been contracted
         x = x_in & x_out;
         if ( x.is_empty() /*|| x.max_diam() < prec*/)
             break;

@@ -21,6 +21,8 @@ namespace ibex {
 *
 * \brief Transformation of a separator with an inversible transformation
 *	T(S)(X) = { Tinv*Sin*T(X), Tinv*Sout*T(X)}
+* Using a function and its inverse is less pessimism than using
+* a forward / backward propagation (see: sepInverse)
 */
 
 class SepTransform : public Sep {

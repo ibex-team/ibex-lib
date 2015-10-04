@@ -24,11 +24,6 @@ namespace ibex {
  *
  */
 
- // NOTES : - Comme la dimension du separateur n est pas connu, les boites qui contiennent 
- //			  les resultats des appels aux separateur sont realloue a chaque appel a separate.
- //			- Pour l'interface python, la valeur de q par defaut est zero et doit etre definie par un
- // 		  appel setq.
-
 class SepQInterProjF : public Sep {
 public:
 	/**
@@ -58,8 +53,14 @@ public:
 	int q;
 
 protected:
-	 IntervalMatrix boxes_in;// store boxes for each contraction
-	 IntervalMatrix boxes_out; 
+        /**
+         * @brief boxes_in : stores in boxes for each contraction
+         */
+        IntervalMatrix boxes_in;
+         /**
+          * @brief boxes_out : stores in boxes for each contraction
+          */
+        IntervalMatrix boxes_out;
 
 };
 
