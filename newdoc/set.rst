@@ -93,6 +93,8 @@ Finally, to plot a box ([a,b],[c,d]) just call:
 
 What is between the double quotes is the color code of the box. For instance, "b[r]" will paint the box in red and the contour in blue.
 
+.. _set-creation:
+
 ----------------
 Set Creation
 ----------------
@@ -207,6 +209,8 @@ To load a set from a file, use the constructor with string argument:
    :start-after: set-load-C
    :end-before: set-load-C
 
+.. _set-inter:
+
 ------------------------------
 Set Intersection
 ------------------------------
@@ -263,9 +267,83 @@ The result is the following picture.
 Set Contraction
 ------------------------------
 
-A :ref:`contractor <ctc>` or (better) a :ref:`separator <sep>` can be used to contract a set.
+A :ref:`separator <sep>` can be used to contract a set.
 
-In both case, the operator is recursively applied on
+The operator is recursively applied on
 the set until some precision is reached (size of boundary boxes).
 
+We illustrate this by calculating again the "ring" but in a different way.
+We have already shown how to calculate a ring:
 
+- by giving a conjunction of the constraints to the :ref:`constructor of Set <set-creation>`
+- by computing two sets separately, one for each constraint, and then by performing :ref:`an intersection <set-inter>`
+
+We now create a set for one of the constraint and then contracts this set with the other constraint.
+
+.. literalinclude:: ../examples/doc-set.cpp    
+   :language: cpp
+   :start-after: set-contract-1-C
+   :end-before: set-contract-1-C
+
+.. _set-interval:
+
+-----------------
+Set Intervals
+-----------------
+
+A set interval [S] (or i-set) :ref:`[Jaulin 2012] <Jaulin12>` is the given of two sets :math:`(S_1,S_2)` 
+that represent a lower and upper bound (with respect to the inclusion order)
+of an unkown set S:
+
+.. math::
+
+   S_1 \subseteq S \subseteq S_2.
+
+A possible notation (that we use in the code below) for the set interval [S] is: :math:`[S_1,S_2]`.
+  
+A set interval can be explicitly represented by an instance of the ``SetInterval`` class.
+It can also be implicitly represented by a separator. Let us explain how.
+A separator S have been used so far to represent a "simple" set (not a set interval)
+by two complementary contractions :math:`C_1` and :math:`C_1`, being respectively for the inner and outer part.
+This means that the set associated to the separator can be seen as the following
+degenerated set interval:
+
+.. math::
+
+   set(S) = [set(C_1),~^c{set(C_2)}].
+
+where set(C) designates the set associated to C (the insensitive points).
+
+Now, it is possible to change the status of either the inner or outer contraction to
+the special value ``MAYBE``. This means that the contracted part is not inside or
+outside the set but potentially inside either one. If we change this way the
+status of :math:`C_1`, the separator is now associated to the set interval:
+
+.. math::
+
+   set(S) = [\emptyset,~^c{set(C_2)}].
+   
+If we change the status of :math:`C_2`, we obtain:
+
+.. math::
+
+   set(S) = [set(C_1),\mathbb{R}^n].
+
+The next example illustrates the use of separators to contract a set interval with the
+following information:
+
+- the set is enclosed in the circle centered on the origin and of radius 2
+- the set encloses n little circles centered on different points and or radius 1 
+
+A set interval can be visited exactly like a set and we have used the same ``ToVibes``
+class as above for producing the picture below.
+
+.. literalinclude:: ../examples/doc-set.cpp    
+   :language: cpp
+   :start-after: set-interval-C
+   :end-before: set-interval-C
+
+
+.. figure:: set-interval.png
+   :width: 300 px
+   :align: center

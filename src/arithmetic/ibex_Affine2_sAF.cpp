@@ -502,7 +502,7 @@ Affine2Main<AF_sAF>& Affine2Main<AF_sAF>::sqr(const Interval itv) {
 	if (	(!is_actif())||
 			itv.is_empty()||
 			itv.is_unbounded()||
-			(itv.diam() < AF_EC())  ) {
+			(itv.diam() < AF_EC)  ) {
 		*this = pow(itv,2);
 
 	} else  {
