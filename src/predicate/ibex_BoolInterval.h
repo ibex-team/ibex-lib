@@ -77,8 +77,7 @@ BoolInterval operator|(const BoolInterval&, const BoolInterval&);
 ///**
 // * \brief Project the constraint x<=y with respect to x
 //
-// [gch]: I am not sure about what it means, the set of boolean values
-//        is not supposed to be ordered.
+// [gch]: I don't exactly understand what these functions do
 // */
 //BoolInterval leq(const BoolInterval& x, const BoolInterval& y);
 //
