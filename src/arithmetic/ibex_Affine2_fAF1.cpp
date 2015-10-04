@@ -96,7 +96,7 @@ Affine2Main<AF_fAF1>::Affine2Main(const double d) :
 			_elt	(NULL, 0.0) {
 	if (fabs(d)<POS_INFINITY) {
 		_elt._val = new double[1];
-		_elt._err = 0.0; //abs(d)*AF_EE();
+		_elt._err = 0.0; //abs(d)*AF_EE;
 		_elt._val[0] = d;
 	} else {
         _n=-1;
@@ -214,7 +214,7 @@ Affine2Main<AF_fAF1>& Affine2Main<AF_fAF1>::operator=(double d) {
 		if (_elt._val!=NULL) { delete[] _elt._val; }
 		_n = 0;
 		_elt._val = new double[1];
-		_elt._err = 0.0; //abs(d)*AF_EE();
+		_elt._err = 0.0; //abs(d)*AF_EE;
 		_elt._val[0] = d;
 	} else {
 		_elt._err = d;
@@ -267,14 +267,14 @@ Affine2Main<AF_fAF1>& Affine2Main<AF_fAF1>::saxpy(double alpha, const Affine2Mai
 				for (i=0; i<=_n;i++) {
 					_elt._val[i] *= alpha;
 					ttt += fabs(_elt._val[i]);
-					if (fabs(_elt._val[i])<AF_EC()) {
+					if (fabs(_elt._val[i])<AF_EC) {
 						sss += fabs(_elt._val[i]);
 						_elt._val[i] = 0.0;
 					}
 				}
 				_elt._err *= fabs(alpha);
-				_elt._err +=AF_EE()*(AF_EM()*ttt);
-				_elt._err += AF_EE()*sss;
+				_elt._err +=AF_EE*(AF_EM*ttt);
+				_elt._err += AF_EE*sss;
 			}
 			else {
 				*this = itv()*alpha;
@@ -291,7 +291,7 @@ Affine2Main<AF_fAF1>& Affine2Main<AF_fAF1>::saxpy(double alpha, const Affine2Mai
 					for(i=0;i<=_n;i++) {
 						temp = _elt._val[i]+ y._elt._val[i];
 						ttt += (fabs(_elt._val[i])>fabs(y._elt._val[i]))? fabs(_elt._val[i]) :fabs(y._elt._val[i]);
-						if (fabs(temp)<AF_EC()) {
+						if (fabs(temp)<AF_EC) {
 							sss+= fabs(temp);
 							_elt._val[i] = 0.0;
 						}
@@ -300,8 +300,8 @@ Affine2Main<AF_fAF1>& Affine2Main<AF_fAF1>::saxpy(double alpha, const Affine2Mai
 						}
 					}
 					_elt._err += y._elt._err;
-					_elt._err +=AF_EE()*(AF_EM()*ttt);
-					_elt._err += AF_EE()*sss;
+					_elt._err +=AF_EE*(AF_EM*ttt);
+					_elt._err += AF_EE*sss;
 
 				} else  {
 					if (_n>y.size()) {
@@ -323,15 +323,15 @@ Affine2Main<AF_fAF1>& Affine2Main<AF_fAF1>::saxpy(double alpha, const Affine2Mai
 				sss=0.0;
 				temp = _elt._val[0]+ beta;
 				ttt = (fabs(_elt._val[0])>fabs(beta))? fabs(_elt._val[0]) :fabs(beta);
-				if (fabs(temp)<AF_EC()) {
+				if (fabs(temp)<AF_EC) {
 					sss+= fabs(temp);
 					_elt._val[0] = 0.0;
 				}
 				else {
 					_elt._val[0]=temp;
 				}
-				_elt._err +=AF_EE()*(AF_EM()*ttt);
-				_elt._err += AF_EE()*sss;
+				_elt._err +=AF_EE*(AF_EM*ttt);
+				_elt._err += AF_EE*sss;
 			}
 			else {
 				*this = itv()+beta;
@@ -415,7 +415,7 @@ Affine2Main<AF_fAF1>& Affine2Main<AF_fAF1>::operator*=(const Affine2Main<AF_fAF1
 			for (i = 0; i <= _n; i++) {
 				_elt._val[i] *= y._elt._val[0];
 				ttt += fabs(_elt._val[i]);
-				if (fabs(_elt._val[i]) < AF_EC()) {
+				if (fabs(_elt._val[i]) < AF_EC) {
 					sss += fabs(_elt._val[i]);
 					_elt._val[i] = 0.0;
 				}
@@ -425,7 +425,7 @@ Affine2Main<AF_fAF1>& Affine2Main<AF_fAF1>::operator*=(const Affine2Main<AF_fAF1
 			for (i = 1; i <= _n; i++) {
 				xTmp[i] = xVal0 * y._elt._val[i];
 				ttt += fabs(xTmp[i]);
-				if (fabs(xTmp[i]) < AF_EC()) {
+				if (fabs(xTmp[i]) < AF_EC) {
 					sss += fabs(xTmp[i]);
 					xTmp[i] = 0.0;
 				}
@@ -434,7 +434,7 @@ Affine2Main<AF_fAF1>& Affine2Main<AF_fAF1>::operator*=(const Affine2Main<AF_fAF1
 			for (i = 0; i <= _n; i++) {
 				tmp = _elt._val[i] + xTmp[i];
 				ttt += fabs(tmp);
-				if (fabs(tmp) < AF_EC()) {
+				if (fabs(tmp) < AF_EC) {
 					sss += fabs(tmp);
 					_elt._val[i] = 0.0;
 				} else
@@ -449,8 +449,8 @@ Affine2Main<AF_fAF1>& Affine2Main<AF_fAF1>::operator*=(const Affine2Main<AF_fAF1
 
 			_elt._err = (fabs(y._elt._val[0]) * _elt._err + fabs(xVal0) * y._elt._err - 0.5 * Sxy)
 						+ (_elt._err + Sx) * (y._elt._err + Sy);
-			_elt._err += AF_EE() * (AF_EM() * ttt);
-			_elt._err += AF_EE() * sss;
+			_elt._err += AF_EE * (AF_EM * ttt);
+			_elt._err += AF_EE * sss;
 
 			{
 				bool b = true;
@@ -506,7 +506,7 @@ Affine2Main<AF_fAF1>& Affine2Main<AF_fAF1>::sqr(const Interval itv) {
 		*this = pow(itv,2);
 	} else if (!is_actif()) {
 		*this = pow(itv,2);
-	} else if (itv.diam() < AF_EC()) {
+	} else if (itv.diam() < AF_EC) {
 		*this = pow(itv,2);
 	} else  {  // _actif && b
 
@@ -523,7 +523,7 @@ Affine2Main<AF_fAF1>& Affine2Main<AF_fAF1>::sqr(const Interval itv) {
 		x0 = _elt._val[0];
 		_elt._val[0] = x0 * x0;
 		ttt += fabs(_elt._val[0]);
-		if (fabs(_elt._val[0]) < AF_EC()) {
+		if (fabs(_elt._val[0]) < AF_EC) {
 			sss += fabs(_elt._val[0]);
 			_elt._val[0] = 0;
 		}
@@ -531,7 +531,7 @@ Affine2Main<AF_fAF1>& Affine2Main<AF_fAF1>::sqr(const Interval itv) {
 		for (int i = 1; i <= _n; i++) {
 			_elt._val[i] = (2 * x0) * _elt._val[i];
 			ttt += fabs(_elt._val[i]);
-			if (fabs(_elt._val[i]) < AF_EC()) {
+			if (fabs(_elt._val[i]) < AF_EC) {
 				sss += fabs(_elt._val[i]);
 				_elt._val[i] = 0;
 			}
@@ -542,8 +542,8 @@ Affine2Main<AF_fAF1>& Affine2Main<AF_fAF1>::sqr(const Interval itv) {
 		_elt._val[0] += 0.5 * Sx2;
 
 		_elt._err = (2 * fabs(x0) * _elt._err - 0.5 * Sx2) + pow((_elt._err + Sx), 2);
-		_elt._err += AF_EE() * (AF_EM() * ttt);
-		_elt._err += AF_EE() * sss;
+		_elt._err += AF_EE * (AF_EM * ttt);
+		_elt._err += AF_EE * sss;
 
 		{
 			bool b = true;

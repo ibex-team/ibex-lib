@@ -120,15 +120,15 @@ int main() {
 		counter++;
 		b = pendingList.front();
 		pendingList.pop_front();
+	
 		if (!qinteronly) {
-		  fix.contract(b);
+			fix.contract(b);
 		} else {
-		  ctcq.contract(b);
-		}		  
-		if (b.is_empty())
-		  continue;
-
+			ctcq.contract(b);
+		}
 		
+		if (b.is_empty()) continue;
+
 		if (b.max_diam() > eps) {
 			assert(b.is_bisectable());
 			pair<IntervalVector, IntervalVector> pr = b.bisect(b.extr_diam_index(false),0.5);

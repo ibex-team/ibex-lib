@@ -1,6 +1,6 @@
 //============================================================================
 //                                  I B E X                                   
-// File        : lab4.cpp
+// File        : lab7.cpp
 // Author      : Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
 // License     : See the LICENSE file
@@ -22,7 +22,7 @@ public:
    *
    * The frame avoids, in particular, to plot unbounded OUT boxes.
    */
-  ToVibes(double max) : frame(2,max*Interval(-1,1)) {  }
+  ToVibes(double max) : frame(2,max*Interval(0,1)) {  }
 
   /**
    * Function that will be called automatically on every boxes (leaves) of the set.
@@ -59,8 +59,12 @@ int main() {
 
 	Variable p,q;
 
+	// The following function returns the first column
+	// of the Routh table
 	Function f(p,q,Return(p*q-(1-q),(p*q-(1-q))*(1-q)-pow(p,3)));
 
+	// We require these coefficients to be all positive,
+	// i.e., the image of f to be in [0,+oo)x[0,+oo)
 	SepFwdBwd sep(f,IntervalVector(2,Interval::POS_REALS));
 
 	// Build the initial box
@@ -72,7 +76,7 @@ int main() {
 
 	sep.contract(set,eps);
 
-	ToVibes to_vibes;
+	ToVibes to_vibes(1);
 	set.visit(to_vibes);
 
 	vibes::endDrawing();

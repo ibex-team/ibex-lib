@@ -36,7 +36,7 @@ public:
 	 * [empty, x] if status=MAYBE
 	 * or [x,x] if status=YES.
 	 */
-	SetInterval(const IntervalVector& box, BoolInterval status=YES);
+	SetInterval(const IntervalVector& box, BoolInterval status=MAYBE);
 
 	/**
 	 * \brief Loads a i-set from a data file.

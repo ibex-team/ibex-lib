@@ -59,13 +59,15 @@ class Affine2Main {
 
 private:
 	/** \brief tolerance for default compact procedure  */
-	static const double AF_COMPAC_Tol = 1.e-6;
-
+	static const double AF_COMPAC_Tol;
+	static const double AF_EM;
+	static const double AF_EC;
+	static const double AF_EE;
 
 	/**
 	 * Code for the particular case:
 	 * if the affine form is actif, _n>1  and _n is the size of the affine form
-	 * if the set is degenerate, _n = 0 or itv().diam()< AF_EC()
+	 * if the set is degenerate, _n = 0 or itv().diam()< AF_EC
 	 * if the set is empty, _n = -1
 	 * if the set is ]-oo,+oo[, _n = -2 and _ err=]-oo,+oo[
 	 * if the set is [a, +oo[ , _n = -3 and _err = [a, +oo[
@@ -77,16 +79,6 @@ private:
 
 	T _elt;			// core of the affine2 form
 
-
-	static double AF_EM() {
-		return __builtin_powi(2.0, -51);
-	}
-	static double AF_EC() {
-		return __builtin_powi(2.0, -55);
-	}
-	static double AF_EE() {
-		return 2.0;
-	}
 
 	/**
 	 * \brief  Compute x = alpha*x+y+beta
@@ -608,6 +600,12 @@ Affine2Main<T> chi(const Affine2Main<T>&  a,const Affine2Main<T>&  b,const Inter
 namespace ibex {
 
 
+template<class T> const double Affine2Main<T>::AF_COMPAC_Tol = 1.e-6;
+template<class T> const double Affine2Main<T>::AF_EM = __builtin_powi(2.0, -51);
+template<class T> const double Affine2Main<T>::AF_EC = __builtin_powi(2.0, -55);
+template<class T> const double Affine2Main<T>::AF_EE = 2.0;
+
+
 template<class T>
 inline void Affine2Main<T>::compact(){ compact(AF_COMPAC_Tol); }
 
@@ -711,7 +709,7 @@ inline bool Affine2Main<T>::is_empty() const{
 
 template<class T>
 inline bool Affine2Main<T>::is_degenerated() const {
-	return (itv().diam() <	AF_EC());
+	return (itv().diam() <	AF_EC);
 }
 
 template<class T>
