@@ -24,11 +24,13 @@ public:
 		TEST_ADD(TestExpr2Minibex::expr01);
 		TEST_ADD(TestExpr2Minibex::expr02);
 		TEST_ADD(TestExpr2Minibex::expr03);
+		TEST_ADD(TestExpr2Minibex::expr04);
 	}
 
 	void expr01();
 	void expr02();
 	void expr03();
+	void expr04();
 
 };
 

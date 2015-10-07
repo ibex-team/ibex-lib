@@ -60,6 +60,18 @@ void TestExpr2Minibex::expr03() {
 	TEST_ASSERT(strcmp(stream.str().c_str(),"  _tmp_0_ = ([1, 2] , [1, 2] , [1, 2]);\n  return ((3*(x+_tmp_0_))-(3*_tmp_0_));")==0);
 }
 
+void TestExpr2Minibex::expr04() {
+
+	double x=0.1;
+	const ExprConstant& c=ExprConstant::new_scalar(x);
+
+	stringstream stream;
+
+	Expr2Minibex().print(stream,c,false);
+
+	TEST_ASSERT(strcmp(stream.str().c_str(),"  return #3fb999999999999a;")==0);
+
+}
 
 } // end namespace
 

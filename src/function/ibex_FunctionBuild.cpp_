@@ -535,7 +535,7 @@ void Function::decorate(const Array<const ExprSymbol>& x, const ExprNode& y) con
 	}
 }
 
-std::string Function::minibex() const {
+std::string Function::minibex(bool human) const {
 	stringstream s;
 	s << "function " << name << "(";
 	for (int i=0; i<nb_arg(); i++) {
@@ -548,7 +548,7 @@ std::string Function::minibex() const {
 	}
 	s << ")" << endl;
 
-	Expr2Minibex().print(s,expr());
+	Expr2Minibex().print(s,expr(),human);
 	s << endl << "end";
 	s.flush();
 	return s.str();

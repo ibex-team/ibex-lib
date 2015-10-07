@@ -23,8 +23,12 @@ namespace ibex {
  */
 class Expr2Minibex : private ExprPrinter {
 public:
-	/** \brief Print an expression on a given output stream. */
-	void print(std::ostream& os, const ExprNode&);
+	/**
+	 * \brief Print the Minibex code of an expression on a given output stream.
+	 *
+	 * \param human : see #ExprPrinter::print(std::ostream& os, const ExprNode&, bool).
+	 */
+	void print(std::ostream& os, const ExprNode&, bool human=true);
 
 protected:
 	void visit(const ExprNode& e);

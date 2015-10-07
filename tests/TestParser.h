@@ -30,6 +30,7 @@ public:
 		TEST_ADD(TestParser::const05);
 		TEST_ADD(TestParser::const06);
 		TEST_ADD(TestParser::const07);
+		TEST_ADD(TestParser::const08);
 
 		TEST_ADD(TestParser::ponts);
 		TEST_ADD(TestParser::choco01);
@@ -51,6 +52,8 @@ public:
 	void const05();
 	void const06();
 	void const07();
+	// test hexadecimal constant
+	void const08();
 
 	void func01();
 	void func02();

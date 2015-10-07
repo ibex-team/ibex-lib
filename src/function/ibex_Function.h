@@ -315,15 +315,27 @@ public:
 	 * \brief Build an uninitialized function.
 	 *
 	 * A call to #init(const Array<const ExprSymbol>&, const ExprNode&) must follow
-	 * to complete the intialization. This constructo+init can be
+	 * to complete the initialization. This constructor+init can be
 	 * used when a function has to be built and initialized in two distinct steps.
 	 */
 	Function();
 
 	/**
 	 * \brief Serialize the function (get the Minibex code)
+	 *
+	 * \param human: if true, numeric constant are converted to character
+	 *               in decimal format to be human-readable, but this is an
+	 *               unsafe conversion. Value by default is "true".
+	 *
+	 *               If false, all constants are converted to their exact
+	 *               hexadecimal representation, whence a safe serialization.
 	 */
-	std::string minibex() const;
+	std::string minibex(bool human=true) const;
+
+	/**
+	 * \brief Serialize the function
+	 */
+	char* serialize() const;
 
 	/**
 	 * \brief Apply this function to the argument

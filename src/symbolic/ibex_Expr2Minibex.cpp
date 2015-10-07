@@ -12,12 +12,13 @@
 
 namespace ibex {
 
-void Expr2Minibex::print(std::ostream& os, const ExprNode& e) {
+void Expr2Minibex::print(std::ostream& os, const ExprNode& e, bool human) {
 	ExprSubNodes nodes(e);
 
 	int tmp=0; // counter for the intermediate symbols
 
 	this->os = &os;
+	this->human = human;
 
 	for (int i=nodes.size()-1; i>=0; i--) {
 		const ExprNode& node=nodes[i];
