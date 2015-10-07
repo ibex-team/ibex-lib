@@ -12,14 +12,16 @@
 #ifndef __IBEX_FUNCTION_H__
 #define __IBEX_FUNCTION_H__
 
-#include <stdexcept>
 #include "ibex_Expr.h"
 #include "ibex_CompiledFunction.h"
 #include "ibex_Decorator.h"
 #include "ibex_Array.h"
 #include "ibex_SymbolMap.h"
 #include "ibex_ExprSubNodes.h"
+
+#include <stdexcept>
 #include <stdarg.h>
+#include <stdio.h>
 
 namespace ibex {
 
@@ -299,11 +301,15 @@ public:
 	 */
 	Function(const char* x1, const char* x2, const char* x3, const char* x4, const char* x5, const char* x6, const char* x7, const char* x8, const char* x9, const char* x10, const char* x11, const char* x12, const char* x13, const char* x14, const char* x15, const char* x16, const char* x17, const char* x18, const char* x19, const char* x20, const char* y);
 
-
 	/**
 	 * \brief Load a function from a file.
 	 */
 	Function(const char* filename);
+
+	/**
+	 * \brief Load a function from a file.
+	 */
+	Function(FILE* fd);
 
 	/**
 	 * \brief Build an uninitialized function.
@@ -313,6 +319,11 @@ public:
 	 * used when a function has to be built and initialized in two distinct steps.
 	 */
 	Function();
+
+	/**
+	 * \brief Serialize the function (get the Minibex code)
+	 */
+	std::string minibex() const;
 
 	/**
 	 * \brief Apply this function to the argument

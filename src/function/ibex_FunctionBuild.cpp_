@@ -16,6 +16,7 @@
 #include "ibex_Decorator.h"
 #include "ibex_ExprCopy.h"
 #include "ibex_ExprDiff.h"
+#include "ibex_Expr2Minibex.h"
 #include "ibex_Eval.h"
 #include "ibex_HC4Revise.h"
 #include "ibex_Gradient.h"
@@ -348,6 +349,22 @@ Function::Function(const char* filename) {
 	fclose(fd);
 }
 
+Function::Function(FILE* fd) {
+	ibexin = fd;
+
+	try {
+		parser::function=this;
+		ibexparse();
+		parser::function=NULL;
+	}
+	catch(SyntaxError& e) {
+		parser::function=NULL;
+		ibexrestart(ibexin);
+		throw e;
+	}
+}
+
+
 Function::Function(const Function& f, copy_mode mode) {
 
 	assert(f.cf.code!=NULL);
@@ -518,5 +535,23 @@ void Function::decorate(const Array<const ExprSymbol>& x, const ExprNode& y) con
 	}
 }
 
+std::string Function::minibex() const {
+	stringstream s;
+	s << "function " << name << "(";
+	for (int i=0; i<nb_arg(); i++) {
+		const ExprSymbol& x=arg(i);
+		s << x.name;
+		if (x.dim.dim1>1) s << '[' << x.dim.dim1 << ']';
+		if (x.dim.dim2>1) s << '[' << x.dim.dim2 << ']';
+		if (x.dim.dim3>1) s << '[' << x.dim.dim3 << ']';
+		if (i<nb_arg()-1) s << ",";
+	}
+	s << ")" << endl;
+
+	Expr2Minibex().print(s,expr());
+	s << endl << "end";
+	s.flush();
+	return s.str();
+}
 
 } // namespace ibex

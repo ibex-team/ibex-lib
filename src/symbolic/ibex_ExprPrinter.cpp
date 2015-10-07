@@ -14,6 +14,8 @@
 #include "ibex_Expr.h"
 #include "ibex_Function.h"
 
+using namespace std;
+
 namespace ibex {
 
 void ExprPrinter::print(std::ostream& os, const ExprNode& e) {
@@ -33,19 +35,58 @@ void ExprPrinter::visit(const ExprSymbol& e) {
 	(*os) << e.name;
 }
 
+namespace {
+
+void print_itv(ostream& os, const Interval& x) {
+	if (x.is_empty())
+		os << "(empty)";
+	else if (x.is_degenerated())
+		os << x.mid();
+	else if (x.lb()==NEG_INFINITY) {
+		if (x.ub()==POS_INFINITY)
+			os << "[-oo,+oo]";
+		else
+			os << "[-oo," << x.ub() << ']';
+	} else if (x.lb()==NEG_INFINITY)
+		os << '[' << x.lb() << ",+oo]";
+	else
+		os << x;
+}
+
+void print_itv_vec(ostream& os, const IntervalVector& v, bool in_row) {
+	os << '(';
+	for (int i=0; i<v.size(); i++) {
+		print_itv(os, v[i]);
+		if (i<v.size()-1) os << (in_row ? " , " : " ; ");
+	}
+	os << ')';
+}
+
+void print_itv_mat(ostream& os, const IntervalMatrix& m) {
+	os << '(';
+	for (int i=0; i<m.nb_rows(); i++) {
+		print_itv_vec(os, m.row(i), true);
+		if (i<m.nb_rows()-1) os << " ; ";
+	}
+	os << ')';
+}
+
+}
+
 void ExprPrinter::visit(const ExprConstant& e) {
 	switch (e.type()) {
-	case Dim::SCALAR: {
-		const Interval& x=e.get_value();
-		if (x.is_degenerated())
-			(*os) <<  x.mid();
-		else
-			(*os) << x;
-
-	} break;
-	case Dim::COL_VECTOR: (*os) << e.get_vector_value(); break;
-	case Dim::ROW_VECTOR: (*os) << e.get_vector_value() << "'"; break;
-	case Dim::MATRIX:     (*os) << e.get_matrix_value(); break;
+	case Dim::SCALAR:
+		print_itv(*os, e.get_value());
+		break;
+	case Dim::COL_VECTOR:
+		print_itv_vec(*os,e.get_vector_value(),false);
+		break;
+	case Dim::ROW_VECTOR:
+		print_itv_vec(*os,e.get_vector_value(),true);
+		break;
+	case Dim::MATRIX:
+		print_itv_mat(*os,e.get_matrix_value());
+		break;
 	default: assert(false); break;
 	}
 }
@@ -66,6 +107,10 @@ void ExprPrinter::visit(const ExprBinaryOp& e) {
 	assert(false);
 }
 
+/**
+ * Note: it is important to respect here the Minibex syntax
+ * for function serialization.
+ */
 void ExprPrinter::visit(const ExprVector& e) {
 	(*os) << "(";
 	for (int i=0; i<e.length(); i++) {

@@ -39,6 +39,7 @@
 #include "TestExprCmp.h"
 #include "TestExpr2DAG.h"
 #include "TestExprSplitOcc.h"
+#include "TestExpr2Minibex.h"
 #include "TestVarSet.h"
 
 // ================ function ===============
@@ -62,7 +63,6 @@
 
 // ================ predicates ===============
 #include "TestPdcHansenFeasibility.h"
-#include "TestBoolInterval.h"
 
 // ================ contractor ===============
 #include "TestCtcHC4.h"
@@ -123,6 +123,7 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestExprCmp()));
     ts.add(auto_ptr<Test::Suite>(new TestExpr2DAG()));
     ts.add(auto_ptr<Test::Suite>(new TestExprSplitOcc()));
+    ts.add(auto_ptr<Test::Suite>(new TestExpr2Minibex()));
     ts.add(auto_ptr<Test::Suite>(new TestVarSet()));
 
     ts.add(auto_ptr<Test::Suite>(new TestFunction()));
@@ -140,7 +141,6 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestNewton()));
 
     ts.add(auto_ptr<Test::Suite>(new TestPdcHansenFeasibility()));
-    ts.add(auto_ptr<Test::Suite>(new TestBoolInterval()));
 
     ts.add(auto_ptr<Test::Suite>(new TestCtcHC4()));
     ts.add(auto_ptr<Test::Suite>(new TestCtcInteger()));
