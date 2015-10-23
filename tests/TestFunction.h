@@ -36,9 +36,9 @@ public:
 		TEST_ADD(TestFunction::from_string04);
 		TEST_ADD(TestFunction::issue43);
 		TEST_ADD(TestFunction::issue43_bis);
-		TEST_ADD(TestFunction::minibex01);
-		TEST_ADD(TestFunction::minibex02);
-		TEST_ADD(TestFunction::minibex03);
+		// TEST_ADD(TestFunction::minibex01);
+		// TEST_ADD(TestFunction::minibex02);
+		// TEST_ADD(TestFunction::minibex03);
 	}
 
 	// an uninitialized function must be deletable
@@ -67,9 +67,9 @@ public:
 
 	void issue43();
 	void issue43_bis();
-	void minibex01();
-	void minibex02();
-	void minibex03();
+	// void minibex01();
+	// void minibex02();
+	// void minibex03();
 };
 
 } // end namespace

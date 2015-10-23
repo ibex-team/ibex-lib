@@ -390,6 +390,20 @@ public:
 		b = t.i >> mantissa;
 		return b - float_offset;
 	}
+#ifdef _WIN32
+#include <intrin.h>
+	static unsigned int __inline __builtin_ctz(unsigned int x){
+		unsigned long r = 0;
+		_BitScanForward(&r, x);
+		return r;
+	}
+
+	static unsigned int __inline __builtin_clz(unsigned int x){
+		unsigned long r = 0;
+		_BitScanReverse(&r, x);
+		return (32 - r);
+	}
+#endif
 	inline int lsb_gcc(const WORD_TYPE v) const {
 		return __builtin_ctz(v);
 	}

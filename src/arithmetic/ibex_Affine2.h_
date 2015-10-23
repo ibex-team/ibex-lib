@@ -766,10 +766,27 @@ inline Affine2Main<T> sign(const Affine2Main<T>&, const Interval itv) {
 
 
 template<>
-inline Affine2Main<AF_No>& Affine2Main<AF_No>::linChebyshev(Affine2_expr num, const Interval itv);
+Affine2Main<AF_No>& Affine2Main<AF_No>::linChebyshev(Affine2_expr num, const Interval itv);
 
 template<>
-inline Affine2Main<AF_No>& Affine2Main<AF_No>::power(int n, const Interval itv);
+Affine2Main<AF_No>& Affine2Main<AF_No>::power(int n, const Interval itv);
+
+//template<>
+//inline int Affine2Main<AF_fAF2>::size() const;
+
+//template<>
+//inline Affine2Main<AF_fAF2>& Affine2Main<AF_fAF2>::operator+=(const Interval& );
+
+template<>
+Affine2Main<AF_fAFFullI>& Affine2Main<AF_fAFFullI>::operator+=(const Interval& );
+
+template<>
+int Affine2Main<AF_fAFFullI>::size() const;
+
+template<>
+std::ostream& operator<<(std::ostream& os, const Affine2Main<AF_fAFFullI>& x);
+
+
 
 
 
