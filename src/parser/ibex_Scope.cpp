@@ -10,7 +10,8 @@
 
 #include "ibex_Scope.h"
 #include "ibex_P_NumConstraint.h"
-#include "parser.tab.hh"
+// #include "parser.tab.hh"
+#include "parser.hpp"
 
 /*
 extern int TK_CONSTANT;
