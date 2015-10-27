@@ -51,6 +51,8 @@ bool HC4Revise::proj(const Function& f, const Domain& y, IntervalVector& x) {
 
 	root &= y;
 
+	if (root.is_empty()) { x.set_empty(); return false; }
+
 	try {
 		f.backward<HC4Revise>(*this);
 	} catch (EmptyBoxException& e) {
@@ -66,7 +68,10 @@ bool HC4Revise::proj(const Function& f, const Domain& y, IntervalVector& x) {
 
 void HC4Revise::proj(const Function& f, const Domain& y, ExprLabel** x) {
 	EVAL(f,x);
+
 	*f.expr().deco.d &= y;
+
+	if (f.expr().deco.d->is_empty()) throw EmptyBoxException(); // see comment below
 
 	// if next instruction throws an EmptyBoxException,
 	// it will be caught by proj(...,IntervalVector& x).
