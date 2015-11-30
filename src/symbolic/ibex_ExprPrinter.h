@@ -22,11 +22,22 @@ namespace ibex {
  */
 class ExprPrinter : public virtual ExprVisitor {
 public:
-	/** Print an expression on a given output stream. */
-	void print(std::ostream& os, const ExprNode&);
+	/**
+	 * \brief Print an expression on a given output stream.
+	 *
+	 * \param human: if true, numeric constant are converted to character
+	 *               in decimal format to be human-readable, but this is an
+	 *               unsafe conversion. Value by default is "true".
+	 *
+	 *               If false, all constants are converted to their exact
+	 *               hexadecimal representation, whence a safe serialization.
+	 */
+	void print(std::ostream& os, const ExprNode&, bool human=true);
 
 protected:
 	std::ostream* os;
+	bool human;
+
 	void visit(const ExprNode& e);
 
 	void visit(const ExprIndex& e);
@@ -67,6 +78,12 @@ protected:
 	void visit(const ExprAcosh& e);
 	void visit(const ExprAsinh& e);
 	void visit(const ExprAtanh& e);
+
+private:
+	void print_dbl(double x);
+	void print_itv(const Interval& x);
+	void print_itv_vec(const IntervalVector& v, bool in_row);
+	void print_itv_mat(const IntervalMatrix& m);
 };
 
 } // end namespace ibex

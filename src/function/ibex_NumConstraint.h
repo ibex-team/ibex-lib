@@ -34,7 +34,7 @@ public:
 	/**
 	 * \brief Build a constraint.
 	 */
-	NumConstraint(Fnc& f, CmpOp op=EQ, bool own_f=false);
+	NumConstraint(Function& f, CmpOp op=EQ, bool own_f=false);
 
 	/**
 	 * \brief Build a constraint c(x).
@@ -256,10 +256,7 @@ std::ostream& operator<<(std::ostream&, const NumConstraint&);
  	 	 	 	 	 	 	 inline implementation
   ============================================================================*/
 
-inline NumConstraint::NumConstraint(Fnc& f, CmpOp op, bool own_f) : f((Function&) f), op(op), own_f(own_f) {
-	//TODO: allow Fnc
-	assert(dynamic_cast<Function*>(&f)!=NULL);
-}
+inline NumConstraint::NumConstraint(Function& f, CmpOp op, bool own_f) : f(f), op(op), own_f(own_f) { }
 
 inline NumConstraint::NumConstraint(const ExprSymbol& x1, const ExprCtr& c) : f(*new Function(x1,c.e)), op(c.op), own_f(true) { }
 inline NumConstraint::NumConstraint(const ExprSymbol& x1, const ExprSymbol& x2, const ExprCtr& c): f(*new Function(x1,x2,c.e)), op(c.op), own_f(true) { }

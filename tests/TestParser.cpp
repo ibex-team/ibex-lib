@@ -178,6 +178,17 @@ void TestParser::const07() {
 	}
 }
 
+void TestParser::const08() {
+	const char* code="function f(x)\n  return #3fb999999999999a;end";
+	FILE *fin = fmemopen((char*) code, strlen(code), "r");
+	Function f(fin);
+
+	double x=0.1;
+	const ExprConstant* c=dynamic_cast<const ExprConstant*>(&f.expr());
+	TEST_ASSERT(c!=NULL);
+	TEST_ASSERT(c->get_value().mid()==x);
+}
+
 void TestParser::func01() {
 	try {
 		Function f("quimper/func01.qpr");

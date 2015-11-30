@@ -131,7 +131,12 @@ protected:
 	/** Current selected heap. */
 	mutable int current_heap_id;
 
-	/** use in the contract function by recursivity */
+	/**
+	 * Used in the contract function by recursivity
+	 *
+	 * \param heap: the new heap1 under construction (will
+	 *        eventually replace the current heap1).
+	 */
 	void contract_rec(double new_loup, HeapNode<T>* node, SharedHeap<T>& heap, bool percolate);
 
 	/**
@@ -202,7 +207,8 @@ void DoubleHeap<T>::contract(double new_loup1) {
 
 	assert(nb_nodes==heap2->size());
 	assert(nb_nodes==heap1->size());
-
+	assert(heap1->heap_state());
+	assert(!heap2 || heap2->heap_state());
 }
 
 
@@ -265,6 +271,8 @@ template<class T>
 T* DoubleHeap<T>::pop() {
 	assert(size()>0);
 
+	//std::cout << " \n\n Heap1=" << (*heap1);
+
 	// Select the heap
 	HeapElt<T>* elt;
 	if (current_heap_id==0) {
@@ -279,6 +287,9 @@ T* DoubleHeap<T>::pop() {
 	delete elt;
 
 	nb_nodes--;
+
+	assert(heap1->heap_state());
+	assert(!heap2 || heap2->heap_state());
 
 	return data;
 }

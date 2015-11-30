@@ -10,9 +10,6 @@
 // Last Update : Jun 12, 2012
 //============================================================================	
 
-#include <stdlib.h>
-#include <stack>
-#include <vector>
 #include "ibex_Scope.h"
 #include "ibex_Interval.h"
 #include "ibex_Expr.h"
@@ -20,6 +17,12 @@
 #include "ibex_P_NumConstraint.h"
 
 #include "parser.tab.hh"
+
+#include <stdlib.h>
+#include <stack>
+#include <vector>
+#include <stdint.h>
+#include <cassert>
 
 namespace ibex {
 namespace parser {
@@ -99,6 +102,12 @@ using namespace ibex::parser;
 ([0-9]{6,10}[0-9]*|([0-9][0-9]*\.[0-9]*)|(\.[0-9]+))(e(\-|\+)?[0-9]+)?|([0-9]{1,5}e(\-|\+)?[0-9]+)  { 
                                    ibexlval.real = atof(ibextext); return TK_FLOAT; 
                                  }
+#[0-9a-fA-F]+                    { // read a double from its exact hexadecimal representation
+                                   assert(sizeof(double)==8); 
+                                   uint64_t u = strtoll(&ibextext[1],NULL,16); // note: we remove the '#' character
+                                   memcpy(&ibexlval.real, &u, 8);  
+                                   return TK_FLOAT;
+                                 }                                   
 [0-9]+                           { ibexlval.itg = atoi(ibextext); return TK_INTEGER; }
 
 "//".*                           { /* C++-like comments */ }

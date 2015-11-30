@@ -97,7 +97,7 @@ Affine2Main<AF_fAF2_fma>::Affine2Main(const double d) :
 			_elt	(NULL,0.0) {
 	if (fabs(d)<POS_INFINITY) {
 		_elt._val = new double[1];
-		_elt._err = 0.0; //abs(d)*AF_EE();
+		_elt._err = 0.0; //abs(d)*AF_EE;
 		_elt._val[0] = d;
 	} else {
 		_n=-1;
@@ -222,7 +222,7 @@ Affine2Main<AF_fAF2_fma>& Affine2Main<AF_fAF2_fma>::operator=(double d) {
 		if (_elt._val!=NULL) { delete[] _elt._val; }
 		_n = 0;
 		_elt._val = new double[1];
-		_elt._err = 0.0; //abs(d)*AF_EE();
+		_elt._err = 0.0; //abs(d)*AF_EE;
 		_elt._val[0] = d;
 	} else {
 		if (d>0) {
@@ -279,18 +279,18 @@ Affine2Main<AF_fAF2_fma>& Affine2Main<AF_fAF2_fma>::saxpy(double alpha, const Af
 				for (i=0; i<=_n;i++) {
 					eee = _elt.twoProd(_elt._val[i], alpha, &temp);
 					_elt._val[i] = temp;
-					ttt = (1+2*AF_EM())*(ttt+fabs(eee));
-					if (fabs(_elt._val[i])<AF_EC()) {
-						sss = (1+2*AF_EM())*(sss+ fabs(_elt._val[i]));
+					ttt = (1+2*AF_EM)*(ttt+fabs(eee));
+					if (fabs(_elt._val[i])<AF_EC) {
+						sss = (1+2*AF_EM)*(sss+ fabs(_elt._val[i]));
 						_elt._val[i] = 0.0;
 					}
 				}
 
-//				_elt._err = (1+2*AF_EM())*((1+2*AF_EM())*fabs(alpha)*_elt._err+AF_EE()*AF_EM()*ttt + AF_EE()*sss);
-				_elt._err = (1+2*AF_EM())*(
-						((1+2*AF_EM())*fabs(alpha)*_elt._err) +
-						((AF_EE()*ttt) +
-						(AF_EE()*sss))
+//				_elt._err = (1+2*AF_EM)*((1+2*AF_EM)*fabs(alpha)*_elt._err+AF_EE*AF_EM*ttt + AF_EE*sss);
+				_elt._err = (1+2*AF_EM)*(
+						((1+2*AF_EM)*fabs(alpha)*_elt._err) +
+						((AF_EE*ttt) +
+						(AF_EE*sss))
 						);
 
 			}
@@ -308,20 +308,20 @@ Affine2Main<AF_fAF2_fma>& Affine2Main<AF_fAF2_fma>::saxpy(double alpha, const Af
 					sss=0.0;
 					for(i=0;i<=_n;i++) {
 						eee = _elt.twoSum(_elt._val[i], y._elt._val[i], &temp);
-						ttt = (1+2*AF_EM())*(ttt+fabs(eee));
-						if (fabs(temp)<AF_EC()) {
-							sss = (1+2*AF_EM())*(sss+ fabs(temp));
+						ttt = (1+2*AF_EM)*(ttt+fabs(eee));
+						if (fabs(temp)<AF_EC) {
+							sss = (1+2*AF_EM)*(sss+ fabs(temp));
 							_elt._val[i] = 0.0;
 						}
 						else {
 							_elt._val[i]=temp;
 						}
 					}
-//					_elt._err = (1+2*AF_EM())*((_elt._err+y._elt._err+ (AF_EE()*(AF_EM()*ttt)+AF_EE()*sss));
-					_elt._err = (1+2*AF_EM())*(
+//					_elt._err = (1+2*AF_EM)*((_elt._err+y._elt._err+ (AF_EE*(AF_EM*ttt)+AF_EE*sss));
+					_elt._err = (1+2*AF_EM)*(
 							(_elt._err+y._elt._err) +
-							((AF_EE()*(ttt)) +
-							(AF_EE()*sss))
+							((AF_EE*(ttt)) +
+							(AF_EE*sss))
 							);
 
 				} else  {
@@ -343,19 +343,19 @@ Affine2Main<AF_fAF2_fma>& Affine2Main<AF_fAF2_fma>::saxpy(double alpha, const Af
 				ttt=0.0;
 				sss=0.0;
 				eee = _elt.twoSum(_elt._val[0],beta,&temp);
-				ttt = (1+2*AF_EM())*(ttt+fabs(eee));
-				if (fabs(temp)<AF_EC()) {
-					sss = (1+2*AF_EM())*(sss+fabs(temp));
+				ttt = (1+2*AF_EM)*(ttt+fabs(eee));
+				if (fabs(temp)<AF_EC) {
+					sss = (1+2*AF_EM)*(sss+fabs(temp));
 					_elt._val[0] = 0.0;
 				}
 				else {
 					_elt._val[0]=temp;
 				}
-//				_elt._err = (1+2*AF_EM())*(_elt._err+ (AF_EE()*(AF_EM()*ttt)+AF_EE()*sss));
-				_elt._err = (1+2*AF_EM())*(
+//				_elt._err = (1+2*AF_EM)*(_elt._err+ (AF_EE*(AF_EM*ttt)+AF_EE*sss));
+				_elt._err = (1+2*AF_EM)*(
 						_elt._err +
-						(AF_EE()*(ttt)+
-						AF_EE()*sss)
+						(AF_EE*(ttt)+
+						AF_EE*sss)
 						);
 
 			}
@@ -370,16 +370,16 @@ Affine2Main<AF_fAF2_fma>& Affine2Main<AF_fAF2_fma>::saxpy(double alpha, const Af
 				ttt=0.0;
 				sss=0.0;
 				eee = _elt.twoSum(_elt._err,fabs(ddelta), &temp);
-				ttt = (1+2*AF_EM())*(fabs(eee));
-				if (fabs(temp)<AF_EC()) {
-					sss = (1+2*AF_EM())*(fabs(temp));
+				ttt = (1+2*AF_EM)*(fabs(eee));
+				if (fabs(temp)<AF_EC) {
+					sss = (1+2*AF_EM)*(fabs(temp));
 					temp =0;
 				}
-//				_elt._err = (1+2*AF_EM())*(temp+ (AF_EE()*(AF_EM()*ttt)));;
-				_elt._err = (1+2*AF_EM())*(
+//				_elt._err = (1+2*AF_EM)*(temp+ (AF_EE*(AF_EM*ttt)));;
+				_elt._err = (1+2*AF_EM)*(
 						temp +
-						(AF_EE()*(ttt) +
-						AF_EE()*sss)
+						(AF_EE*(ttt) +
+						AF_EE*sss)
 						);
 
 			}
@@ -436,40 +436,40 @@ Affine2Main<AF_fAF2_fma>& Affine2Main<AF_fAF2_fma>::operator*=(const Affine2Main
 
 			for (i = 1; i <= _n; i++) {
 				eee = _elt.twoProd(_elt._val[i],y._elt._val[i], &ppp);
-				ttt = (1+2*AF_EM())*(ttt+fabs(eee));
+				ttt = (1+2*AF_EM)*(ttt+fabs(eee));
 
 				eee = _elt.twoSum(Sz,ppp, &tmp);
-				ttt = (1+2*AF_EM())*(ttt+fabs(eee));
+				ttt = (1+2*AF_EM)*(ttt+fabs(eee));
 				Sz = tmp;
 
-				if (fabs(Sz) < AF_EC()) {
-					sss = (1+2*AF_EM())*(sss+ fabs(Sz));
+				if (fabs(Sz) < AF_EC) {
+					sss = (1+2*AF_EM)*(sss+ fabs(Sz));
 					Sz = 0.0;
 				}
 
 				eee = _elt.twoSum(Sxy,fabs(ppp), &tmp);
-				ttt = (1+2*AF_EM())*(ttt+fabs(eee));
+				ttt = (1+2*AF_EM)*(ttt+fabs(eee));
 				Sxy = tmp;
 
-				if (fabs(Sxy) < AF_EC()) {
-					sss = (1+2*AF_EM())*(sss+ fabs(Sxy));
+				if (fabs(Sxy) < AF_EC) {
+					sss = (1+2*AF_EM)*(sss+ fabs(Sxy));
 					Sxy = 0.0;
 				}
 
 				eee = _elt.twoSum(Sx,fabs(_elt._val[i]), &tmp);
-				ttt = (1+2*AF_EM())*(ttt+fabs(eee));
+				ttt = (1+2*AF_EM)*(ttt+fabs(eee));
 				Sx = tmp;
 
-				if (fabs(Sx) < AF_EC()) {
-					sss = (1+2*AF_EM())*(sss+ fabs(Sx));
+				if (fabs(Sx) < AF_EC) {
+					sss = (1+2*AF_EM)*(sss+ fabs(Sx));
 					Sx = 0.0;
 				}
 				eee = _elt.twoSum(Sy,fabs(y._elt._val[i]), &tmp);
-				ttt = (1+2*AF_EM())*(ttt+fabs(eee));
+				ttt = (1+2*AF_EM)*(ttt+fabs(eee));
 				Sy = tmp;
 
-				if (fabs(Sy) < AF_EC()) {
-					sss = (1+2*AF_EM())*(sss+ fabs(Sy));
+				if (fabs(Sy) < AF_EC) {
+					sss = (1+2*AF_EM)*(sss+ fabs(Sy));
 					Sy = 0.0;
 				}
 
@@ -479,11 +479,11 @@ Affine2Main<AF_fAF2_fma>& Affine2Main<AF_fAF2_fma>::operator*=(const Affine2Main
 			// RES = X%T(0) * res
 			for (i = 0; i <= _n; i++) {
 				eee = _elt.twoProd(_elt._val[i],y._elt._val[0], &ppp);
-				ttt = (1+2*AF_EM())*(ttt+fabs(eee));
+				ttt = (1+2*AF_EM)*(ttt+fabs(eee));
 				_elt._val[i] = ppp;
 
-				if (fabs(_elt._val[i]) < AF_EC()) {
-					sss = (1+2*AF_EM())*(sss+ fabs(_elt._val[i]));
+				if (fabs(_elt._val[i]) < AF_EC) {
+					sss = (1+2*AF_EM)*(sss+ fabs(_elt._val[i]));
 					_elt._val[i] = 0.0;
 				}
 			}
@@ -492,11 +492,11 @@ Affine2Main<AF_fAF2_fma>& Affine2Main<AF_fAF2_fma>::operator*=(const Affine2Main
 			xTmp[0] = 0.0;
 			for (i = 1; i <= _n; i++) {
 				eee = _elt.twoProd(xVal0,y._elt._val[i], &ppp);
-				ttt = (1+2*AF_EM())*(ttt+fabs(eee));
+				ttt = (1+2*AF_EM)*(ttt+fabs(eee));
 				xTmp[i] = ppp;
 
-				if (fabs(xTmp[i]) < AF_EC()) {
-					sss = (1+2*AF_EM())*(sss+ fabs(xTmp[i]));
+				if (fabs(xTmp[i]) < AF_EC) {
+					sss = (1+2*AF_EM)*(sss+ fabs(xTmp[i]));
 					xTmp[i] = 0.0;
 				}
 
@@ -506,43 +506,43 @@ Affine2Main<AF_fAF2_fma>& Affine2Main<AF_fAF2_fma>::operator*=(const Affine2Main
 			for (i = 0; i <= _n; i++) {
 
 				eee = _elt.twoSum(_elt._val[i],xTmp[i], &tmp);
-				ttt = (1+2*AF_EM())*(ttt+fabs(eee));
+				ttt = (1+2*AF_EM)*(ttt+fabs(eee));
 				_elt._val[i] = tmp;
 
-				if (fabs(_elt._val[i]) < AF_EC()) {
-					sss = (1+2*AF_EM())*(sss+ fabs(_elt._val[i]));
+				if (fabs(_elt._val[i]) < AF_EC) {
+					sss = (1+2*AF_EM)*(sss+ fabs(_elt._val[i]));
 					_elt._val[i] = 0.0;
 				}
 
 			}
 
 			eee = _elt.twoProd(0.5,Sz, &ppp);
-			ttt = (1+2*AF_EM())*(ttt+fabs(eee));
+			ttt = (1+2*AF_EM)*(ttt+fabs(eee));
 
 			eee = _elt.twoSum(_elt._val[0],ppp, &tmp);
-			ttt = (1+2*AF_EM())*(ttt+fabs(eee));
+			ttt = (1+2*AF_EM)*(ttt+fabs(eee));
 			_elt._val[0] = tmp;
 
-			if (fabs(_elt._val[0]) < AF_EC()) {
-				sss = (1+2*AF_EM())*(sss+ fabs(_elt._val[0]));
+			if (fabs(_elt._val[0]) < AF_EC) {
+				sss = (1+2*AF_EM)*(sss+ fabs(_elt._val[0]));
 				_elt._val[0] = 0.0;
 			}
 
 			eee = _elt.twoSum(_elt._err,Sx, &tmp);
-			ttt = (1+2*AF_EM())*(ttt+fabs(eee));
+			ttt = (1+2*AF_EM)*(ttt+fabs(eee));
 
 			eee = _elt.twoSum(y._elt._err,Sy, &ppp);
-			ttt = (1+2*AF_EM())*(ttt+fabs(eee));
+			ttt = (1+2*AF_EM)*(ttt+fabs(eee));
 
 
-			_elt._err = (1+ 2*AF_EM()) * (
-					((1+ 2*AF_EM()) *fabs(y._elt._val[0]) * _elt._err)  +
-					((1+ 2*AF_EM()) *fabs(xVal0) * y._elt._err)  +
-					((1+ 2*AF_EM()) *(tmp * ppp)) +
-					((1- 2*AF_EM()) *(-0.5) *  Sxy)  +
-//					(AF_EE() * (AF_EM() * ttt))  +
-					(AF_EE() * (ttt))  +
-					(AF_EE() * sss)
+			_elt._err = (1+ 2*AF_EM) * (
+					((1+ 2*AF_EM) *fabs(y._elt._val[0]) * _elt._err)  +
+					((1+ 2*AF_EM) *fabs(xVal0) * y._elt._err)  +
+					((1+ 2*AF_EM) *(tmp * ppp)) +
+					((1- 2*AF_EM) *(-0.5) *  Sxy)  +
+//					(AF_EE * (AF_EM * ttt))  +
+					(AF_EE * (ttt))  +
+					(AF_EE * sss)
 					);
 
 			{
@@ -600,7 +600,7 @@ Affine2Main<AF_fAF2_fma>& Affine2Main<AF_fAF2_fma>::sqrA(const Interval& itv) {
 	if (	(!is_actif())||
 			itv.is_empty()||
 			itv.is_unbounded()||
-			(itv.diam() < AF_EC())  ) {
+			(itv.diam() < AF_EC)  ) {
 		*this = pow(itv,2);
 
 	} else  {
@@ -612,23 +612,23 @@ Affine2Main<AF_fAF2_fma>& Affine2Main<AF_fAF2_fma>::sqrA(const Interval& itv) {
 		for (int i = 1; i <= _n; i++) {
 
 			eee = _elt.twoProd(_elt._val[i],_elt._val[i], &ppp);
-			ttt = (1+2*AF_EM())*(ttt+fabs(eee));
+			ttt = (1+2*AF_EM)*(ttt+fabs(eee));
 
 			eee = _elt.twoSum(Sx2,ppp, &tmp);
-			ttt = (1+2*AF_EM())*(ttt+fabs(eee));
+			ttt = (1+2*AF_EM)*(ttt+fabs(eee));
 			Sx2 = tmp;
 
-			if (fabs(Sx2) < AF_EC()) {
-				sss = (1+2*AF_EM())*(sss+ fabs(Sx2));
+			if (fabs(Sx2) < AF_EC) {
+				sss = (1+2*AF_EM)*(sss+ fabs(Sx2));
 				Sx2 = 0.0;
 			}
 
 			eee = _elt.twoSum(Sx,fabs(_elt._val[i]), &tmp);
-			ttt = (1+2*AF_EM())*(ttt+fabs(eee));
+			ttt = (1+2*AF_EM)*(ttt+fabs(eee));
 			Sx = tmp;
 
-			if (fabs(Sx) < AF_EC()) {
-				sss = (1+2*AF_EM())*(sss+ fabs(Sx));
+			if (fabs(Sx) < AF_EC) {
+				sss = (1+2*AF_EM)*(sss+ fabs(Sx));
 				Sx = 0.0;
 			}
 
@@ -637,11 +637,11 @@ Affine2Main<AF_fAF2_fma>& Affine2Main<AF_fAF2_fma>::sqrA(const Interval& itv) {
 		x0 = _elt._val[0];
 
 		eee = _elt.twoProd(x0,x0, &ppp);
-		ttt = (1+2*AF_EM())*(ttt+fabs(eee));
+		ttt = (1+2*AF_EM)*(ttt+fabs(eee));
 		_elt._val[0] = ppp;
 
-		if (fabs(_elt._val[0]) < AF_EC()) {
-			sss = (1+2*AF_EM())*(sss+ fabs(_elt._val[0]));
+		if (fabs(_elt._val[0]) < AF_EC) {
+			sss = (1+2*AF_EM)*(sss+ fabs(_elt._val[0]));
 			_elt._val[0] = 0.0;
 		}
 
@@ -649,38 +649,38 @@ Affine2Main<AF_fAF2_fma>& Affine2Main<AF_fAF2_fma>::sqrA(const Interval& itv) {
 		for (int i = 1; i <= _n; i++) {
 
 			eee = _elt.twoProd((2*x0),_elt._val[i], &ppp);
-			ttt = (1+2*AF_EM())*(ttt+fabs(eee));
+			ttt = (1+2*AF_EM)*(ttt+fabs(eee));
 			_elt._val[i] = ppp;
 
-			if (fabs(_elt._val[i]) < AF_EC()) {
-				sss = (1+2*AF_EM())*(sss+ fabs(_elt._val[i]));
+			if (fabs(_elt._val[i]) < AF_EC) {
+				sss = (1+2*AF_EM)*(sss+ fabs(_elt._val[i]));
 				_elt._val[i] = 0.0;
 			}
 
 		}
 
 		eee = _elt.twoProd(0.5,Sx2, &ppp);
-		ttt = (1+2*AF_EM())*(ttt+fabs(eee));
+		ttt = (1+2*AF_EM)*(ttt+fabs(eee));
 
 		eee = _elt.twoSum(_elt._val[0],ppp, &tmp);
-		ttt = (1+2*AF_EM())*(ttt+fabs(eee));
+		ttt = (1+2*AF_EM)*(ttt+fabs(eee));
 		_elt._val[0] = tmp;
 
-		if (fabs(_elt._val[0]) < AF_EC()) {
-			sss = (1+2*AF_EM())*(sss+ fabs(_elt._val[0]));
+		if (fabs(_elt._val[0]) < AF_EC) {
+			sss = (1+2*AF_EM)*(sss+ fabs(_elt._val[0]));
 			_elt._val[0] = 0.0;
 		}
 
 		eee = _elt.twoSum(_elt._err,Sx, &tmp);
-		ttt = (1+2*AF_EM())*(ttt+fabs(eee));
+		ttt = (1+2*AF_EM)*(ttt+fabs(eee));
 
-		_elt._err = (1+ 2*AF_EM()) * (
-				((1+ 2*AF_EM()) *2*fabs(x0) * _elt._err)  +
-				((1+ 2*AF_EM()) *(tmp * tmp)) +
-				((1- 2*AF_EM()) *(-0.5) *  Sx2)  +
-//					(AF_EE() * (AF_EM() * ttt))  +
-				(AF_EE() * (ttt))  +
-				(AF_EE() * sss)
+		_elt._err = (1+ 2*AF_EM) * (
+				((1+ 2*AF_EM) *2*fabs(x0) * _elt._err)  +
+				((1+ 2*AF_EM) *(tmp * tmp)) +
+				((1- 2*AF_EM) *(-0.5) *  Sx2)  +
+//					(AF_EE * (AF_EM * ttt))  +
+				(AF_EE * (ttt))  +
+				(AF_EE * sss)
 				);
 
 		{
@@ -707,16 +707,16 @@ void Affine2Main<AF_fAF2_fma>::compact(double tol){
 			double temp=0.0;
 			double sss=0.0;
 			double eee = _elt.twoSum(_elt._err,fabs(_elt._val[i]), &temp);
-			double ttt = (1+2*AF_EM())*(fabs(eee));
-			if (fabs(temp)<AF_EC()) {
-				sss = (1+2*AF_EM())*(fabs(temp));
+			double ttt = (1+2*AF_EM)*(fabs(eee));
+			if (fabs(temp)<AF_EC) {
+				sss = (1+2*AF_EM)*(fabs(temp));
 				temp =0;
 			}
-//			_elt._err = (1+2*AF_EM())*(temp+ (AF_EE()*(AF_EM()*ttt)));;
-			_elt._err = (1+2*AF_EM())*(
+//			_elt._err = (1+2*AF_EM)*(temp+ (AF_EE*(AF_EM*ttt)));;
+			_elt._err = (1+2*AF_EM)*(
 					temp +
-					(AF_EE()*(ttt) +
-							AF_EE()*sss)
+					(AF_EE*(ttt) +
+							AF_EE*sss)
 			);
 
 			_elt._val[i] =0;

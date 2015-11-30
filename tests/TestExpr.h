@@ -55,6 +55,7 @@ public:
 		TEST_ADD(TestExpr::index01);
 		TEST_ADD(TestExpr::index02);
 		TEST_ADD(TestExpr::index03);
+		TEST_ADD(TestExpr::index04);
 
 		TEST_ADD(TestExpr::apply01);
 		TEST_ADD(TestExpr::apply03);
@@ -101,6 +102,7 @@ public:
 	void index01();
 	void index02();
 	void index03();
+	void index04();
 
 	void apply01();
 	void apply03();

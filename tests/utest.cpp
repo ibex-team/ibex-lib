@@ -39,6 +39,10 @@
 #include "TestExprCmp.h"
 #include "TestExpr2DAG.h"
 #include "TestExprSplitOcc.h"
+#include "TestExpr2Minibex.h"
+#include "TestVarSet.h"
+
+// ================ function ===============
 #include "TestFunction.h"
 #include "TestNumConstraint.h"
 #include "TestEval.h"
@@ -119,6 +123,9 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestExprCmp()));
     ts.add(auto_ptr<Test::Suite>(new TestExpr2DAG()));
     ts.add(auto_ptr<Test::Suite>(new TestExprSplitOcc()));
+    ts.add(auto_ptr<Test::Suite>(new TestExpr2Minibex()));
+    ts.add(auto_ptr<Test::Suite>(new TestVarSet()));
+
     ts.add(auto_ptr<Test::Suite>(new TestFunction()));
     ts.add(auto_ptr<Test::Suite>(new TestNumConstraint()));
     ts.add(auto_ptr<Test::Suite>(new TestEval()));

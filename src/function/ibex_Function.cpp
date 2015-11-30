@@ -17,6 +17,7 @@
 #include "ibex_HC4Revise.h"
 #include "ibex_InHC4Revise.h"
 #include "ibex_Gradient.h"
+#include "ibex_VarSet.h"
 #include "ibex_FunctionBuild.cpp_"
 
 using namespace std;
@@ -24,6 +25,9 @@ using namespace std;
 namespace ibex {
 
 Function::~Function() {
+	if (_used_var!=NULL)
+		delete[] _used_var;
+
 	if (comp!=NULL) {
 		/* warning... if there is only one constraint
 		 * then comp[0] is the same object as f itself!
@@ -49,8 +53,10 @@ Function::~Function() {
 
 	if (df!=NULL) delete df;
 
-	if (name!=NULL) // name==NULL if init/build_from_string was never called.
+	if (name!=NULL) { // name==NULL if init/build_from_string was never called.
 		free((char*) name);
+		delete[] symbol_index;
+	}
 }
 
 Domain& Function::eval_domain(const IntervalVector& box) const {
@@ -381,6 +387,70 @@ void Function::jacobian(const IntervalVector& x, IntervalMatrix& J) const {
 	// calculate the gradient of each component of f
 	for (int i=0; i<image_dim(); i++) {
 		(*this)[i].gradient(x,J[i]);
+	}
+}
+
+void Function::jacobian(const IntervalVector& box, IntervalMatrix& J, const VarSet& set) const {
+
+	assert(J.nb_cols()==set.nb_var);
+	assert(box.size()==nb_var());
+	assert(J.nb_rows()==image_dim());
+	assert(expr().deco.d);
+	assert(expr().deco.g);
+
+	IntervalVector g(nb_var());
+
+	// calculate the gradient of each component of f
+	for (int i=0; i<image_dim(); i++) {
+		(*this)[i].gradient(box,g);
+		J.set_row(i,set.var_box(g));
+	}
+}
+
+void Function::hansen_matrix(const IntervalVector& box, IntervalMatrix& H) const {
+	int n=nb_var();
+	int m=image_dim();
+
+	assert(H.nb_cols()==n);
+	assert(box.size()==n);
+	assert(H.nb_rows()==m);
+
+	IntervalVector x=box.mid();
+	IntervalMatrix J(m,n);
+
+	// test!
+//	int tab[box.size()];
+//	box.sort_indices(false,tab);
+//	int var;
+
+	for (int var=0; var<n; var++) {
+		//var=tab[i];
+		x[var]=box[var];
+		jacobian(x,J);
+		H.set_col(var,J.col(var));
+	}
+
+}
+
+void Function::hansen_matrix(const IntervalVector& box, IntervalMatrix& H, const VarSet& set) const {
+	int n=set.nb_var;
+	int m=image_dim();
+
+	assert(H.nb_cols()==n);
+	assert(box.size()==nb_var());
+	assert(H.nb_rows()==m);
+
+	IntervalVector var_box=set.var_box(box);
+	IntervalVector param_box=set.param_box(box);
+
+	IntervalVector x=var_box.mid();
+	IntervalMatrix J(m,n);
+
+	for (int var=0; var<n; var++) {
+		//var=tab[i];
+		x[var]=var_box[var];
+		jacobian(set.full_box(x,param_box),J,set);
+		H.set_col(var,J.col(var));
 	}
 }
 

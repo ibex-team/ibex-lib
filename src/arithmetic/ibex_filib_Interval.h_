@@ -16,7 +16,7 @@
 #include <cassert>
 #include <float.h>
 #include <iostream>
-
+#include <climits>
 
 namespace ibex {
 
@@ -609,6 +609,8 @@ inline bool bwd_trigo(const Interval& y, Interval& x, int ftype) {
 	default :
 		assert(false); break;
 	}
+
+	if (nb_period.mag() > INT_MAX) return true;
 	
 	int p1 = ((int) nb_period.lb())-1;
 	int p2 = ((int) nb_period.ub());

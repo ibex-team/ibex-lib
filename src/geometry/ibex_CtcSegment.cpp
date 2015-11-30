@@ -9,6 +9,8 @@
 
 #include "ibex_CtcSegment.h"
 
+using namespace std;
+
 namespace ibex {
 
 CtcSegment::CtcSegment(double ax, double ay, double bx, double by) : Ctc(2),

@@ -12,19 +12,21 @@
 #ifndef __IBEX_FUNCTION_H__
 #define __IBEX_FUNCTION_H__
 
-#include <stdexcept>
 #include "ibex_Expr.h"
-#include "ibex_Fnc.h"
 #include "ibex_CompiledFunction.h"
 #include "ibex_Decorator.h"
 #include "ibex_Array.h"
 #include "ibex_SymbolMap.h"
 #include "ibex_ExprSubNodes.h"
+
+#include <stdexcept>
 #include <stdarg.h>
+#include <stdio.h>
 
 namespace ibex {
 
 class System;
+class VarSet;
 
 /**
  * \ingroup function
@@ -43,13 +45,13 @@ class System;
  * is a unique output and if this output is a vector/matrix, all
  * the components have the same dimension.
  *
- * As a vector-valued function (#ibex::Fnc), if f is real-valued, the
+ * As a vector-valued function (#ibex::Function), if f is real-valued, the
  * output vector has 1 component. If f is a m*n matrix function,
  * the output vector has m*n components.
  *
  *
  */
-class Function : public Fnc {
+class Function {
 
 public:
 
@@ -242,63 +244,62 @@ public:
 	/**
 	 * \brief Creates a function y=f(x1,x2,x3,x4,x5,x6,x7,x8,x9).
 	 */
-	Function( const char*  x1,  const char*  x2,  const char*  x3,  const char*  x4,  const char*  x5,  const char*  x6,  const char*  x7,  const char*  x8,  const char*  x9,  const char* y);
+	Function(const char* x1, const char* x2, const char* x3, const char* x4, const char* x5, const char* x6, const char* x7, const char* x8, const char* x9, const char* y);
 
 	/**
 	 * \brief Creates a function y=f(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10).
 	 */
-	Function( const char*  x1,  const char*  x2,  const char*  x3,  const char*  x4,  const char*  x5,  const char*  x6,  const char*  x7,  const char*  x8,  const char*  x9,  const char*  x10,  const char* y);
+	Function(const char* x1, const char* x2, const char* x3, const char* x4, const char* x5, const char* x6, const char* x7, const char* x8, const char* x9, const char* x10, const char* y);
 
 	/**
 	 * \brief Creates a function y=f(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11).
 	 */
-	Function( const char*  x1,  const char*  x2,  const char*  x3,  const char*  x4,  const char*  x5,  const char*  x6,  const char*  x7,  const char*  x8,  const char*  x9,  const char*  x10,  const char*  x11,  const char* y);
+	Function(const char* x1, const char* x2, const char* x3, const char* x4, const char* x5, const char* x6, const char* x7, const char* x8, const char* x9, const char* x10, const char* x11, const char* y);
 
 	/**
 	 * \brief Creates a function y=f(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12).
 	 */
-	Function( const char*  x1,  const char*  x2,  const char*  x3,  const char*  x4,  const char*  x5,  const char*  x6,  const char*  x7,  const char*  x8,  const char*  x9,  const char*  x10,  const char*  x11,  const char*  x12,  const char* y);
+	Function(const char* x1, const char* x2, const char* x3, const char* x4, const char* x5, const char* x6, const char* x7, const char* x8, const char* x9, const char* x10, const char* x11, const char* x12, const char* y);
 
 	/**
 	 * \brief Creates a function y=f(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13).
 	 */
-	Function( const char*  x1,  const char*  x2,  const char*  x3,  const char*  x4,  const char*  x5,  const char*  x6,  const char*  x7,  const char*  x8,  const char*  x9,  const char*  x10,  const char*  x11,  const char*  x12,  const char*  x13,  const char* y);
+	Function(const char* x1, const char* x2, const char* x3, const char* x4, const char* x5, const char* x6, const char* x7, const char* x8, const char* x9, const char* x10, const char* x11, const char* x12, const char* x13, const char* y);
 
 	/**
 	 * \brief Creates a function y=f(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14).
 	 */
-	Function( const char*  x1,  const char*  x2,  const char*  x3,  const char*  x4,  const char*  x5,  const char*  x6,  const char*  x7,  const char*  x8,  const char*  x9,  const char*  x10,  const char*  x11,  const char*  x12,  const char*  x13,  const char*  x14,  const char* y);
+	Function(const char* x1, const char* x2, const char* x3, const char* x4, const char* x5, const char* x6, const char* x7, const char* x8, const char* x9, const char* x10, const char* x11, const char* x12, const char* x13, const char* x14, const char* y);
 
 	/**
 	 * \brief Creates a function y=f(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15).
 	 */
-	Function( const char*  x1,  const char*  x2,  const char*  x3,  const char*  x4,  const char*  x5,  const char*  x6,  const char*  x7,  const char*  x8,  const char*  x9,  const char*  x10,  const char*  x11,  const char*  x12,  const char*  x13,  const char*  x14,  const char*  x15,  const char* y);
+	Function(const char* x1, const char* x2, const char* x3, const char* x4, const char* x5, const char* x6, const char* x7, const char* x8, const char* x9, const char* x10, const char* x11, const char* x12, const char* x13, const char* x14, const char* x15, const char* y);
 
 	/**
 	 * \brief Creates a function y=f(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15,x16).
 	 */
-	Function( const char*  x1,  const char*  x2,  const char*  x3,  const char*  x4,  const char*  x5,  const char*  x6,  const char*  x7,  const char*  x8,  const char*  x9,  const char*  x10,  const char*  x11,  const char*  x12,  const char*  x13,  const char*  x14,  const char*  x15,  const char*  x16,  const char* y);
+	Function(const char* x1, const char* x2, const char* x3, const char* x4, const char* x5, const char* x6, const char* x7, const char* x8, const char* x9, const char* x10, const char* x11, const char* x12, const char* x13, const char* x14, const char* x15, const char* x16, const char* y);
 
 	/**
 	 * \brief Creates a function y=f(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15,x16,x17).
 	 */
-	Function( const char*  x1,  const char*  x2,  const char*  x3,  const char*  x4,  const char*  x5,  const char*  x6,  const char*  x7,  const char*  x8,  const char*  x9,  const char*  x10,  const char*  x11,  const char*  x12,  const char*  x13,  const char*  x14,  const char*  x15,  const char*  x16,  const char*  x17,  const char* y);
+	Function(const char* x1, const char* x2, const char* x3, const char* x4, const char* x5, const char* x6, const char* x7, const char* x8, const char* x9, const char* x10, const char* x11, const char* x12, const char* x13, const char* x14, const char* x15, const char* x16, const char* x17, const char* y);
 
 	/**
 	 * \brief Creates a function y=f(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15,x16,x17,x18).
 	 */
-	Function( const char*  x1,  const char*  x2,  const char*  x3,  const char*  x4,  const char*  x5,  const char*  x6,  const char*  x7,  const char*  x8,  const char*  x9,  const char*  x10,  const char*  x11,  const char*  x12,  const char*  x13,  const char*  x14,  const char*  x15,  const char*  x16,  const char*  x17,  const char*  x18,  const char* y);
+	Function(const char* x1, const char* x2, const char* x3, const char* x4, const char* x5, const char* x6, const char* x7, const char* x8, const char* x9, const char* x10, const char* x11, const char* x12, const char* x13, const char* x14, const char* x15, const char* x16, const char* x17, const char* x18, const char* y);
 
 	/**
 	 * \brief Creates a function y=f(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15,x16,x17,x18,x19).
 	 */
-	Function( const char*  x1,  const char*  x2,  const char*  x3,  const char*  x4,  const char*  x5,  const char*  x6,  const char*  x7,  const char*  x8,  const char*  x9,  const char*  x10,  const char*  x11,  const char*  x12,  const char*  x13,  const char*  x14,  const char*  x15,  const char*  x16,  const char*  x17,  const char*  x18,  const char*  x19,   const char* y);
+	Function(const char* x1, const char* x2, const char* x3, const char* x4, const char* x5, const char* x6, const char* x7, const char* x8, const char* x9, const char* x10, const char* x11, const char* x12, const char* x13, const char* x14, const char* x15, const char* x16, const char* x17, const char* x18, const char* x19,  const char* y);
 
 	/**
 	 * \brief Creates a function y=f(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15,x16,x17,x18,x19,x20).
 	 */
-	Function( const char*  x1,  const char*  x2,  const char*  x3,  const char*  x4,  const char*  x5,  const char*  x6,  const char*  x7,  const char*  x8,  const char*  x9,  const char*  x10,  const char*  x11,  const char*  x12,  const char*  x13,  const char*  x14,  const char*  x15,  const char*  x16,  const char*  x17,  const char*  x18,  const char*  x19,  const char*  x20,  const char* y);
-
+	Function(const char* x1, const char* x2, const char* x3, const char* x4, const char* x5, const char* x6, const char* x7, const char* x8, const char* x9, const char* x10, const char* x11, const char* x12, const char* x13, const char* x14, const char* x15, const char* x16, const char* x17, const char* x18, const char* x19, const char* x20, const char* y);
 
 	/**
 	 * \brief Load a function from a file.
@@ -306,13 +307,35 @@ public:
 	Function(const char* filename);
 
 	/**
+	 * \brief Load a function from a file.
+	 */
+	Function(FILE* fd);
+
+	/**
 	 * \brief Build an uninitialized function.
 	 *
 	 * A call to #init(const Array<const ExprSymbol>&, const ExprNode&) must follow
-	 * to complete the intialization. This constructo+init can be
+	 * to complete the initialization. This constructor+init can be
 	 * used when a function has to be built and initialized in two distinct steps.
 	 */
 	Function();
+
+	/**
+	 * \brief Serialize the function (get the Minibex code)
+	 *
+	 * \param human: if true, numeric constant are converted to character
+	 *               in decimal format to be human-readable, but this is an
+	 *               unsafe conversion. Value by default is "true".
+	 *
+	 *               If false, all constants are converted to their exact
+	 *               hexadecimal representation, whence a safe serialization.
+	 */
+	std::string minibex(bool human=true) const;
+
+	/**
+	 * \brief Serialize the function
+	 */
+	char* serialize() const;
 
 	/**
 	 * \brief Apply this function to the argument
@@ -537,6 +560,17 @@ public:
 	int nb_arg() const;
 
 	/**
+	 * \brief Return the total number of variables (n).
+	 */
+	int nb_var() const;
+
+	/**
+	 * \brief Return the number of components of f (m).
+	 *
+	 */
+	int image_dim() const;
+
+	/**
 	 * \brief Return true if the ith variable is used in the function.
 	 *
 	 * \warning The function is seen as a function from R^n to R^m. So, the
@@ -544,6 +578,18 @@ public:
 	 *
 	 */
 	bool used(int i) const;
+
+	/**
+	 * \brief Return the number of used variables
+	 */
+	int nb_used_vars() const;
+
+	/**
+	 * \brief Return the ith used variable
+	 *
+	 * \pre 0<=i<nb_used_vars().
+	 */
+	int used_var(int i) const;
 
 	/**
 	 * \brief Return the current number of nodes in the DAG.
@@ -683,25 +729,77 @@ public:
 	 * \see #ibex::ExprLabel
 	 */
 	void read_arg_domains(IntervalVector& box, bool grad=false) const;
-	// =============================================================================
 
+	/**
+	 * \brief Calculate f(box) using interval arithmetic.
+	 *
+	 * \pre f must be real-valued
+	 */
+	Interval eval(const IntervalVector& box) const;
 
-	// =========================== Overriding Fnc interface ========================
-	/** \brief Override */
-	virtual Interval eval(const IntervalVector& box) const;
+	/**
+	 * \brief Calculate f(box) using interval arithmetic.
+	 */
+	IntervalVector eval_vector(const IntervalVector& box) const;
 
-	/** \brief Override */
-	virtual IntervalVector eval_vector(const IntervalVector& box) const;
+	/**
+	 * \brief Calculate f(x) using interval arithmetic.
+	 *
+	 * \pre f must be matrix-valued
+	 */
+	IntervalMatrix eval_matrix(const IntervalVector& x) const;
 
-	/** \brief Override */
-	virtual IntervalMatrix eval_matrix(const IntervalVector& x) const;
+	/**
+	 * \brief Calculate the gradient of f.
+	 *
+	 * \param x - the input box
+	 * \param g - where the gradient has to be stored (output parameter).
+	 *
+	 * \pre f must be real-valued
+	 */
+	void gradient(const IntervalVector& x, IntervalVector& g) const;
 
-	/** \brief Override */
-	virtual void gradient(const IntervalVector& x, IntervalVector& g) const;
+	/**
+	 * \brief Calculate the gradient of f.
+	 * \pre f must be real-valued
+	 */
+	IntervalVector gradient(const IntervalVector& x) const;
 
-	/** \brief Override */
-	virtual void jacobian(const IntervalVector& x, IntervalMatrix& J) const;
-	// =============================================================================
+	/**
+	 * \brief Calculate the Jacobian matrix of f
+	 *
+	 * \param x - the input box
+	 * \param J - where the Jacobian matrix has to be stored (output parameter).
+	 *
+	 */
+	void jacobian(const IntervalVector& x, IntervalMatrix& J) const;
+
+	/**
+	 * \brief Calculate the Jacobian matrix of f
+	 * \pre f must be vector-valued
+	 */
+	IntervalMatrix jacobian(const IntervalVector& x) const;
+
+	/**
+	 * \brief Calculate the Jacobian matrix of a restriction of f
+	 *
+	 * The function is restricted to some variables, the other (parameters)
+	 * being considered as constants.
+	 */
+	void jacobian(const IntervalVector& full_box, IntervalMatrix& J, const VarSet& set) const;
+
+	/**
+	 * \brief Calculate the Hansen matrix of f
+	 */
+	void hansen_matrix(const IntervalVector& x, IntervalMatrix& h) const;
+
+	/**
+	 * \brief Calculate the Hansen matrix of a restriction of f
+	 *
+	 * The function is restricted to some variables, the other (parameters)
+	 * being considered as constants.
+	 */
+	void hansen_matrix(const IntervalVector& full_box, IntervalMatrix& h, const VarSet& set) const;
 
 	/**
 	 * \brief Calculate f(box) using interval arithmetic.
@@ -843,13 +941,8 @@ public:
 	 */
 	void ibwd(const Interval& y, IntervalVector& x, const IntervalVector& xin) const;
 
-	// ========== never understood why we have to do this in c++ =================
-	IntervalVector gradient(const IntervalVector& x) const;
-	IntervalMatrix jacobian(const IntervalVector& x) const;
-	void hansen_matrix(const IntervalVector& x, IntervalMatrix& h) const;
-	int nb_used_vars() const;
-	int used_var(int i) const;
 	// ============================================================================
+
 
 	CompiledFunction cf; // "public" just for debug
 
@@ -882,19 +975,31 @@ public:
 
 
 protected:
+	friend std::ostream& operator<<(std::ostream& os, const Function& f);
+
 	/**
 	 * \brief Generate f[0], f[1], etc. (all stored in "comp")
 	 */
 	void generate_comp();
 
-	/** \brief Override */
-	virtual void generate_used_vars() const;
-	/** \brief Override */
-	virtual void print(std::ostream& os) const;
-	/** \brief Override */
+	/**
+	 * \brief Initialize _nb_used_vars and _used_var
+	 */
+	void generate_used_vars() const;
+
+	/**
+	 * \brief Print the function "x->f(x)" (including arguments)
+	 */
+	void print(std::ostream& os) const;
+
+	/**
+	 * \brief Print the expression "f(x)"
+	 */
 	void print_expr(std::ostream& os) const;
 
 private:
+	friend class VarSet;
+
 	/**
 	 * \brief True if all the arguments are scalar
 	 *
@@ -914,6 +1019,10 @@ private:
 	 */
 	void decorate(const Array<const ExprSymbol>& x, const ExprNode& y) const;
 
+	int _nb_var;
+
+	int _image_dim;
+
 	Array<const ExprSymbol> symbs;              // to retrieve symbol (node)s by appearing order.
 	std::vector<bool> is_used;                  // tells whether the i^th component is used.
 
@@ -921,6 +1030,8 @@ private:
 	Function** comp;                             // the components. ==this if output_size()==1.
 
 	bool __all_symbols_scalar;                  // true if all symbols are scalar
+
+	int* symbol_index;                          // first variable index of a symbol
 
 	// if at some point, symbolic differentiation is needed for this function,
 	// we store the resulting function for future usage.
@@ -930,6 +1041,12 @@ private:
 	// zero functions appearing. To avoid memory blow-up, all the zero functions
 	// point to this field (instead of being a copy)
 	Function *zero;
+
+	// number of used vars (value "-1" means "not yet generated")
+	mutable int _nb_used_vars;
+
+	// only generated if required
+	mutable int* _used_var;
 };
 
 /*================================== inline implementations ========================================*/
@@ -1177,26 +1294,42 @@ inline void Function::ibwd(const Interval& y, IntervalVector& x, const IntervalV
 	ibwd(Domain((Interval&) y),x,xin);
 }
 
-// ========== never understood why we have to do this in c++ =================
+inline int Function::nb_var() const {
+	return _nb_var;
+}
+
+inline int Function::image_dim() const {
+	return _image_dim;
+}
+
 inline IntervalVector Function::gradient(const IntervalVector& x) const {
-	return Fnc::gradient(x);
+	IntervalVector g(x.size());
+	gradient(x,g);
+	return g;
 }
 
 inline IntervalMatrix Function::jacobian(const IntervalVector& x) const {
-	return Fnc::jacobian(x);
-}
-
-inline void Function::hansen_matrix(const IntervalVector& x, IntervalMatrix& h) const {
-	Fnc::hansen_matrix(x,h);
+	IntervalMatrix J(image_dim(),x.size());
+	jacobian(x,J);
+	return J;
 }
 
 inline int Function::nb_used_vars() const {
-	return Fnc::nb_used_vars();
+	if (_nb_used_vars==-1) generate_used_vars();
+	return _nb_used_vars;
 }
 
 inline int Function::used_var(int i) const {
-	return Fnc::used_var(i);
+	if (_nb_used_vars==-1) generate_used_vars();
+	return _used_var[i];
 }
+
+
+inline std::ostream& operator<<(std::ostream& os, const Function& f) {
+	f.print(os);
+	return os;
+}
+
 // ============================================================================
 
 } // namespace ibex

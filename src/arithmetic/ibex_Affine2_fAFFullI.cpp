@@ -515,7 +515,7 @@ Affine2Main<AF_fAFFullI>& Affine2Main<AF_fAFFullI>::sqrA(const Interval& itv) {
 	if (	(!is_actif())||
 			itv.is_empty()||
 			itv.is_unbounded()||
-			(itv.diam() < AF_EC())  ) {
+			(itv.diam() < AF_EC)  ) {
 		*this = pow(itv,2);
 
 	} else  {

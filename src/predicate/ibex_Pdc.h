@@ -64,7 +64,7 @@ protected:
 	 */
 	static bool check_nb_var_pdc_list (const Array<Pdc>& l) {
 		int i=1;
-		while ((l[i].nb_var==l[0].nb_var)&&(i<l.size())) {
+		while ( i<l.size() && (l[i].nb_var==l[0].nb_var)) {
 			i++;
 		}
 		return (i==l.size());
@@ -72,6 +72,8 @@ protected:
 
 };
 
+
+/*================================== inline implementations ========================================*/
 
 inline Pdc::Pdc(int n) : nb_var(n) { }
 

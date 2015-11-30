@@ -457,7 +457,7 @@ Affine2Main<AF_No>& Affine2Main<AF_No>::sqrA(const Interval& itv) {
 	if (	(!is_actif())||
 			itv.is_empty()||
 			itv.is_unbounded()||
-			(itv.diam() < AF_EC())  ) {
+			(itv.diam() < AF_EC)  ) {
 		*this = pow(itv,2);
 
 	} else  {
@@ -562,7 +562,7 @@ Affine2Main<AF_No>& Affine2Main<AF_No>::linChebyshev(Affine2_expr num, const Int
 	// Particular case
 	if (res_itv.is_empty() || res_itv.is_unbounded()) {
 		*this = res_itv;
-	} else if ((!is_actif())||(itv.diam()<AF_EC())) {
+	} else if ((!is_actif())||(itv.diam()<AF_EC)) {
 		*this = res_itv;
 	}  else  {
 
@@ -1032,7 +1032,7 @@ Affine2Main<AF_No>& Affine2Main<AF_No>::powerA(int n, const Interval& itv) {
 		*this = pow(itv,n);
 	} else if (!is_actif()) {
 		*this = pow(itv,n);
-	} else if (itv.diam()< AF_EC()) {
+	} else if (itv.diam()< AF_EC) {
 		*this = pow(itv,n);
 	} else {
 

@@ -23,10 +23,12 @@ public:
 	TestNewton() {
 		TEST_ADD(TestNewton::newton01);
 		TEST_ADD(TestNewton::inflating_newton01);
+		TEST_ADD(TestNewton::ctc_parameter01);
 	}
 
 	void newton01();
 	void inflating_newton01();
+	void ctc_parameter01();
 };
 
 } // end namespace ibex
