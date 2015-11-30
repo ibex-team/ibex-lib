@@ -19,9 +19,9 @@ class Matrix;
 class Interval;
 class IntervalVector;
 class IntervalMatrix;
-template<class T> class Affine2Main;
-template<class T> class Affine2MainVector;
-template<class T> class Affine2MainMatrix;
+template<class T> class AffineMain;
+template<class T> class AffineMainVector;
+template<class T> class AffineMainMatrix;
 
 
 
@@ -31,9 +31,9 @@ Vector abs(const Vector& v);
 IntervalVector abs(const IntervalVector& v);
 Matrix abs(const Matrix& m);
 IntervalMatrix abs(const IntervalMatrix& m);
-template<class T> inline Affine2Main<T> abs(const Affine2Main<T>& x) ;
-template<class T> inline Affine2MainVector<T> abs(const Affine2MainVector<T>& v);
-template<class T> inline Affine2MainMatrix<T> abs(const Affine2MainMatrix<T>& m);
+template<class T> inline AffineMain<T> abs(const AffineMain<T>& x) ;
+template<class T> inline AffineMainVector<T> abs(const AffineMainVector<T>& v);
+template<class T> inline AffineMainMatrix<T> abs(const AffineMainMatrix<T>& m);
 
 
 namespace {
@@ -46,9 +46,9 @@ bool is_empty(const Vector& v);
 bool is_empty(const IntervalVector& v);
 bool is_empty(const Matrix& m);
 bool is_empty(const IntervalMatrix& m);
-template<class T> inline bool is_empty(const Affine2Main<T>& x);
-template<class T> inline bool is_empty(const Affine2MainVector<T>& v);
-template<class T> inline bool is_empty(const Affine2MainMatrix<T>& m);
+template<class T> inline bool is_empty(const AffineMain<T>& x);
+template<class T> inline bool is_empty(const AffineMainVector<T>& v);
+template<class T> inline bool is_empty(const AffineMainMatrix<T>& m);
 
 
 
@@ -58,9 +58,9 @@ void set_empty(Vector& v);
 void set_empty(IntervalVector& v);
 void set_empty(Matrix& m);
 void set_empty(IntervalMatrix& m);
-template<class T> inline void set_empty(Affine2Main<T>& x) ;
-template<class T> inline void set_empty(Affine2MainVector<T>& v);
-template<class T> inline void set_empty(Affine2MainMatrix<T>& m);
+template<class T> inline void set_empty(AffineMain<T>& x) ;
+template<class T> inline void set_empty(AffineMainVector<T>& v);
+template<class T> inline void set_empty(AffineMainMatrix<T>& m);
 
 
 

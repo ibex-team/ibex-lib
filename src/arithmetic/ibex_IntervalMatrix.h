@@ -20,7 +20,7 @@
 namespace ibex {
 
 class IntervalMatrixArray; // declared only for friendship
-template <class T> class Affine2MainMatrix;
+template <class T> class AffineMainMatrix;
 
 /**
  * \ingroup arithmetic
@@ -89,7 +89,7 @@ public:
 	 * \brief Set *this to m.
 	 */
 	template<class T>
-	IntervalMatrix& operator=(const Affine2MainMatrix<T>& m);
+	IntervalMatrix& operator=(const AffineMainMatrix<T>& m);
 
 	/**
 	 * \brief Set *this to its intersection with x

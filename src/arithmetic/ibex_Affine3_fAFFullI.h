@@ -10,8 +10,8 @@
  * Sponsored   : This research benefited from the support of the "Chair Complex Systems Engineering - Ecole Polytechnique, THALES, DGA, FX, DASSAULT AVIATION, DCNS Research, ENSTA ParisTech, Telecom ParisTech, Fondation ParisTech and FDO ENSTA"
  * ---------------------------------------------------------------------------- */
 
-#ifndef IBEX_AFFINE2_FAFFULLI_H_
-#define IBEX_AFFINE2_FAFFULLI_H_
+#ifndef IBEX_AFFINE_FAFFULLI_H_
+#define IBEX_AFFINE_FAFFULLI_H_
 
 #include "ibex_Interval.h"
 
@@ -21,7 +21,7 @@ namespace ibex {
   class AF_fAFFullI {
 
 
-    friend class Affine2Main<AF_fAFFullI>;
+    friend class AffineMain<AF_fAFFullI>;
     //    friend std::ostream& operator<<(std::ostream& os, const Affine2Main<AF_fAFFullI>&  x);
 
     static unsigned long int _counter;
@@ -30,7 +30,7 @@ namespace ibex {
     /**
      * Code for the particular case:
      * if the affine form is actif, _n>1  and _n is the size of the affine form
-     * if the set is degenerate, _n = 0 or itv().diam()< AF_EC()
+     * if the set is degenerate, _n = 0 or itv().diam()< AF_EC
      * if the set is empty, _n = -1
      * if the set is ]-oo,+oo[, _n = -2
      * if the set is [a, +oo[ , _n = -3 and _err= a

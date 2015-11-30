@@ -134,7 +134,7 @@ int LinearRelaxAffine2::inlinearization(const IntervalVector& box, LinearSolver&
 /*********generation of the linearized system*********/
 int LinearRelaxAffine2::linearization(const IntervalVector& box, LinearSolver& lp_solver) {
 
-	AffineLin af2;
+	Affine2 af2;
 	Vector rowconst(sys.nb_var);
 	Interval ev(0.0);
 	Interval center(0.0);

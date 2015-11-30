@@ -13,7 +13,7 @@
 
 #include "ibex_System.h"
 #include "ibex_LinearRelax.h"
-#include "ibex_Affine2.h"
+#include "ibex_Affine.h"
 
 #include <vector>
 

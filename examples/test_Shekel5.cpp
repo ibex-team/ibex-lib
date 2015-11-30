@@ -65,12 +65,12 @@ int main() {
 	{
 		double time=0;
 		Timer::start();
-		Affine2Main<AF_No> x[4];
+		AffineMain<AF_No> x[4];
 		for (int l=0; l<4;l++){
-			x[l]= Affine2Main<AF_No>(4,l+1,Interval(4));
+			x[l]= AffineMain<AF_No>(4,l+1,Interval(4));
 		}
 
-		Affine2Main<AF_No> f, z;
+		AffineMain<AF_No> f, z;
 		for (int k =0; k<n; k++){
 			f= 0;
 			for (int i=0; i<5; i++) {
@@ -88,12 +88,12 @@ int main() {
 	{
 		double time=0;
 		Timer::start();
-		Affine2Main<AF_sAF> x[4];
+		AffineMain<AF_sAF> x[4];
 		for (int l=0; l<4;l++){
-			x[l]= Affine2Main<AF_sAF>(4,l+1,Interval(4));
+			x[l]= AffineMain<AF_sAF>(4,l+1,Interval(4));
 		}
 
-		Affine2Main<AF_sAF> f, z;
+		AffineMain<AF_sAF> f, z;
 		for (int k =0; k<n; k++){
 			f= 0;
 			for (int i=0; i<5; i++) {
@@ -111,12 +111,12 @@ int main() {
 	{
 		double time=0;
 		Timer::start();
-		Affine2Main<AF_iAF> x[4];
+		AffineMain<AF_iAF> x[4];
 		for (int l=0; l<4;l++){
-			x[l]= Affine2Main<AF_iAF>(4,l+1,Interval(4));
+			x[l]= AffineMain<AF_iAF>(4,l+1,Interval(4));
 		}
 
-		Affine2Main<AF_iAF> f, z;
+		AffineMain<AF_iAF> f, z;
 		for (int k =0; k<n; k++){
 			f= 0;
 			for (int i=0; i<5; i++) {
@@ -135,12 +135,12 @@ int main() {
 	{
 		double time=0;
 		Timer::start();
-		Affine2Main<AF_fAF1> x[4];
+		AffineMain<AF_fAF1> x[4];
 		for (int l=0; l<4;l++){
-			x[l]= Affine2Main<AF_fAF1>(4,l+1,Interval(4));
+			x[l]= AffineMain<AF_fAF1>(4,l+1,Interval(4));
 		}
 
-		Affine2Main<AF_fAF1> f, z;
+		AffineMain<AF_fAF1> f, z;
 		for (int k =0; k<n; k++){
 			f= 0;
 			for (int i=0; i<5; i++) {
@@ -159,12 +159,12 @@ int main() {
 	{
 		double time=0;
 		Timer::start();
-		Affine2Main<AF_fAF2> x[4];
+		AffineMain<AF_fAF2> x[4];
 		for (int l=0; l<4;l++){
-			x[l]= Affine2Main<AF_fAF2>(4,l+1,Interval(4));
+			x[l]= AffineMain<AF_fAF2>(4,l+1,Interval(4));
 		}
 
-		Affine2Main<AF_fAF2> f, z;
+		AffineMain<AF_fAF2> f, z;
 		for (int k =0; k<n; k++){
 			f= 0;
 			for (int i=0; i<5; i++) {
@@ -183,12 +183,12 @@ int main() {
 	{
 		double time=0;
 		Timer::start();
-		Affine2Main<AF_fAF2_fma> x[4];
+		AffineMain<AF_fAF2_fma> x[4];
 		for (int l=0; l<4;l++){
-			x[l]= Affine2Main<AF_fAF2_fma>(4,l+1,Interval(4));
+			x[l]= AffineMain<AF_fAF2_fma>(4,l+1,Interval(4));
 		}
 
-		Affine2Main<AF_fAF2_fma> f, z;
+		AffineMain<AF_fAF2_fma> f, z;
 		for (int k =0; k<n; k++){
 			f= 0;
 			for (int i=0; i<5; i++) {
@@ -229,12 +229,12 @@ int main() {
 	{
 		double time=0;
 		Timer::start();
-		Affine2Main<AF_No> x[4];
+		AffineMain<AF_No> x[4];
 		for (int l=0; l<4;l++){
-			x[l]= Affine2Main<AF_No>(4,l+1,Interval(3.9,4.1));
+			x[l]= AffineMain<AF_No>(4,l+1,Interval(3.9,4.1));
 		}
 
-		Affine2Main<AF_No> f, z;
+		AffineMain<AF_No> f, z;
 		for (int k =0; k<n; k++){
 			f= 0;
 			for (int i=0; i<5; i++) {
@@ -252,12 +252,12 @@ int main() {
 	{
 		double time=0;
 		Timer::start();
-		Affine2Main<AF_sAF> x[4];
+		AffineMain<AF_sAF> x[4];
 		for (int l=0; l<4;l++){
-			x[l]= Affine2Main<AF_sAF>(4,l+1,Interval(3.9,4.1));
+			x[l]= AffineMain<AF_sAF>(4,l+1,Interval(3.9,4.1));
 		}
 
-		Affine2Main<AF_sAF> f, z;
+		AffineMain<AF_sAF> f, z;
 		for (int k =0; k<n; k++){
 			f= 0;
 			for (int i=0; i<5; i++) {
@@ -275,12 +275,12 @@ int main() {
 	{
 		double time=0;
 		Timer::start();
-		Affine2Main<AF_iAF> x[4];
+		AffineMain<AF_iAF> x[4];
 		for (int l=0; l<4;l++){
-			x[l]= Affine2Main<AF_iAF>(4,l+1,Interval(3.9,4.1));
+			x[l]= AffineMain<AF_iAF>(4,l+1,Interval(3.9,4.1));
 		}
 
-		Affine2Main<AF_iAF> f, z;
+		AffineMain<AF_iAF> f, z;
 		for (int k =0; k<n; k++){
 			f= 0;
 			for (int i=0; i<5; i++) {
@@ -299,12 +299,12 @@ int main() {
 	{
 		double time=0;
 		Timer::start();
-		Affine2Main<AF_fAF1> x[4];
+		AffineMain<AF_fAF1> x[4];
 		for (int l=0; l<4;l++){
-			x[l]= Affine2Main<AF_fAF1>(4,l+1,Interval(3.9,4.1));
+			x[l]= AffineMain<AF_fAF1>(4,l+1,Interval(3.9,4.1));
 		}
 
-		Affine2Main<AF_fAF1> f, z;
+		AffineMain<AF_fAF1> f, z;
 		for (int k =0; k<n; k++){
 			f= 0;
 			for (int i=0; i<5; i++) {
@@ -323,12 +323,12 @@ int main() {
 	{
 		double time=0;
 		Timer::start();
-		Affine2Main<AF_fAF2> x[4];
+		AffineMain<AF_fAF2> x[4];
 		for (int l=0; l<4;l++){
-			x[l]= Affine2Main<AF_fAF2>(4,l+1,Interval(3.9,4.1));
+			x[l]= AffineMain<AF_fAF2>(4,l+1,Interval(3.9,4.1));
 		}
 
-		Affine2Main<AF_fAF2> f, z;
+		AffineMain<AF_fAF2> f, z;
 		for (int k =0; k<n; k++){
 			f= 0;
 			for (int i=0; i<5; i++) {
@@ -347,12 +347,12 @@ int main() {
 	{
 		double time=0;
 		Timer::start();
-		Affine2Main<AF_fAF2_fma> x[4];
+		AffineMain<AF_fAF2_fma> x[4];
 		for (int l=0; l<4;l++){
-			x[l]= Affine2Main<AF_fAF2_fma>(4,l+1,Interval(3.9,4.1));
+			x[l]= AffineMain<AF_fAF2_fma>(4,l+1,Interval(3.9,4.1));
 		}
 
-		Affine2Main<AF_fAF2_fma> f, z;
+		AffineMain<AF_fAF2_fma> f, z;
 		for (int k =0; k<n; k++){
 			f= 0;
 			for (int i=0; i<5; i++) {

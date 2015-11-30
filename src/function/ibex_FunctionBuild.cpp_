@@ -531,7 +531,7 @@ void Function::decorate(const Array<const ExprSymbol>& x, const ExprNode& y) con
 		arg_domains.set_ref(i,*arg(i).deco.d);
 		arg_deriv.set_ref(i,*arg(i).deco.g);
 		arg_af2.set_ref(i,*arg(i).deco.af2);
-		arg_af_lin.set_ref(i,*arg(i).deco.af_lin);
+		arg_af_lin.set_ref(i,*arg(i).deco.af3);
 	}
 }
 

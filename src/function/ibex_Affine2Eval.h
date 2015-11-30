@@ -12,7 +12,7 @@
 #define __IBEX_AFFINE2_EVAL_H__
 
 #include "ibex_Function.h"
-#include "ibex_Affine2MatrixArray.h"
+#include "ibex_AffineMatrixArray.h"
 #include "ibex_FwdAlgorithm.h"
 
 namespace ibex {

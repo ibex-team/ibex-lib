@@ -10,7 +10,7 @@
 
 #include "ibex_HC4Revise.h"
 #include "ibex_Eval.h"
-#include "ibex_AffineLinEval.h"
+#include "ibex_Affine2Eval.h"
 
 namespace ibex {
 
@@ -30,7 +30,7 @@ HC4Revise::HC4Revise(FwdMode mode) : fwd_mode(mode) {
 //	load(x,f.arg_domains,f.nb_used_vars,f.used_var);
 //}
 
-#define EVAL(f,x) if (fwd_mode==INTERVAL_MODE) Eval().eval(f,x); else AffineLinEval().eval(f,x);
+#define EVAL(f,x) if (fwd_mode==INTERVAL_MODE) Eval().eval(f,x); else Affine2Eval().eval(f,x);
 
 bool HC4Revise::proj(const Function& f, const Domain& y, IntervalVector& x) {
 	EVAL(f,x);

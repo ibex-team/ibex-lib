@@ -18,13 +18,13 @@
 namespace ibex {
 class AF_No {
 
-	friend class Affine2Main<AF_No>;
+	friend class AffineMain<AF_No>;
 
 private:
 	/**
 	 * Code for the particular case:
 	 * if the affine form is actif, _n>1  and _n is the size of the affine form
-	 * if the set is degenerate, _n = 0 or itv().diam()< AF_EC()
+	 * if the set is degenerate, _n = 0 or itv().diam()< AF_EC
 	 * if the set is empty, _n = -1
 	 * if the set is ]-oo,+oo[, _n = -2
 	 * if the set is [a, +oo[ , _n = -3 and _err= a
