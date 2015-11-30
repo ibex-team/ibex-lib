@@ -118,7 +118,8 @@ const char* duplicate_or_generate(const char* name) {
 
 }
 
-Function::Function() : name(NULL), comp(NULL), df(NULL), zero(NULL), _used_var(NULL) {
+Function::Function() : name(NULL), comp(NULL), df(NULL), zero(NULL), _used_var(NULL), _nb_used_vars(-1),
+		__all_symbols_scalar(false) ,_nb_var(0), _image_dim(0), symbol_index(NULL) {
 	// root==NULL <=> the function is not initialized yet
 }
 
@@ -510,7 +511,7 @@ void Function::decorate(const Array<const ExprSymbol>& x, const ExprNode& y) con
 	arg_domains.resize(nb_arg());
 	arg_deriv.resize(nb_arg());
 	arg_af2.resize(nb_arg());
-	arg_af_lin.resize(nb_arg());
+	arg_af3.resize(nb_arg());
 
 	((CompiledFunction&) cf).compile(y); // now that it is decorated, it can be "compiled"
 
@@ -531,7 +532,7 @@ void Function::decorate(const Array<const ExprSymbol>& x, const ExprNode& y) con
 		arg_domains.set_ref(i,*arg(i).deco.d);
 		arg_deriv.set_ref(i,*arg(i).deco.g);
 		arg_af2.set_ref(i,*arg(i).deco.af2);
-		arg_af_lin.set_ref(i,*arg(i).deco.af3);
+		arg_af3.set_ref(i,*arg(i).deco.af3);
 	}
 }
 

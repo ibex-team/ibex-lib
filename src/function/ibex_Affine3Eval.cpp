@@ -23,18 +23,18 @@ ExprLabel& Affine3Eval::eval_label(const Function& f, ExprLabel** args) const {
 	assert(f.expr().deco.af3);
 	assert(f.expr().deco.d);
 
-	Array<const Affine3Domain> argDaf_lin(f.nb_arg());
+	Array<const Affine3Domain> argDaf3(f.nb_arg());
 	Array<const Domain> argD(f.nb_arg());
 
 	for (int i=0; i<f.nb_arg(); i++) {
-		argDaf_lin.set_ref(i,*(args[i]->af3));
+		argDaf3.set_ref(i,*(args[i]->af3));
 	}
 	for (int i=0; i<f.nb_arg(); i++) {
 		argD.set_ref(i,*(args[i]->d));
 	}
 
 	f.write_arg_domains(argD);
-	f.write_arg_af3_domains(argDaf_lin);
+	f.write_arg_af3_domains(argDaf3);
 
 	//------------- for debug
 //	std::cout << "Function " << f.name << ", domains before eval:" << std::endl;

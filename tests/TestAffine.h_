@@ -988,8 +988,8 @@ void TestAffine<T>::test100()   {
 
 
 /* ********************* */
-template<class T>
-void TestAffine<T>::test101()   {
+template<>
+void TestAffine<AF_Default>::test101()   {
 	Variable yd(3);
 	Interval sigma(10.0);
 	Interval rho(28.0);
@@ -1003,15 +1003,39 @@ void TestAffine<T>::test101()   {
 	v[0] = Interval(-1, 1);
 	v[1] = Interval(2, 3);
 	v[2] = Interval(-4,-4);
-	AffineMainVector<T> va(v,true);
+	AffineMainVector<AF_Default> va(v,true);
 
 	IntervalVector res = ydot.eval_vector(v);
-	AffineMainVector<T> resa = ydot.eval_affine2_vector(va);
+	AffineMainVector<AF_Default> resa = ydot.eval_affine2_vector(va);
 
 	for (int j = 0; j < 3; ++j) {
 		compare_results (INCLUSION, res[j], resa[j]);
 	}
 }
 
+/* ********************* */
+template<>
+void TestAffine<AF_Other>::test101()   {
+	Variable yd(3);
+	Interval sigma(10.0);
+	Interval rho(28.0);
+	Interval beta = Interval(8.0)/3.0;
 
+	Function ydot = Function(yd,Return(sigma*(yd[1]-yd[0]),
+			yd[0]*(rho-yd[2])-yd[1],
+			yd[0]*yd[1]-beta*yd[2]));
+
+	IntervalVector v(3);
+	v[0] = Interval(-1, 1);
+	v[1] = Interval(2, 3);
+	v[2] = Interval(-4,-4);
+	AffineMainVector<AF_Other> va(v,true);
+
+	IntervalVector res = ydot.eval_vector(v);
+	AffineMainVector<AF_Other> resa = ydot.eval_affine3_vector(va);
+
+	for (int j = 0; j < 3; ++j) {
+		compare_results (INCLUSION, res[j], resa[j]);
+	}
+}
 

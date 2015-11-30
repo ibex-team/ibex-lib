@@ -810,7 +810,7 @@ public:
 	 * \brief Calculate f(box) using affine arithmetic.
 	 */
 	Domain& eval_affine2_domain(const IntervalVector& box) const;
-	//Domain& eval_affinelin_domain(const IntervalVector& box) const;
+	Domain& eval_affine3_domain(const IntervalVector& box) const;
 
 	/**
 	 * \brief Calculate f(box) using affine arithmetic.
@@ -818,26 +818,27 @@ public:
 	 * The resulting affine form is stored in \a result.
 	 */
 	Domain& eval_affine2_domain(const IntervalVector& box, Affine2Domain& result) const;
-	Domain& eval_affine2_domain(const IntervalVector& box, Affine3Domain& result) const;
+	Domain& eval_affine3_domain(const IntervalVector& box, Affine3Domain& result) const;
 
 	/**
 	 * \brief Calculate f(box) using only affine arithmetic.
 	 */
 	Affine2Domain& eval_affine2_affinedomain(const Affine2Vector& box) const;
-	Affine3Domain& eval_affine2_affinedomain(const Affine3Vector& box) const;
+	Affine3Domain& eval_affine3_affinedomain(const Affine3Vector& box) const;
 
 	/**
 	 * \brief Calculate f(box) using affine arithmetic.
 	 *
 	 */
 	Interval eval_affine2(const IntervalVector& box) const;
+	Interval eval_affine3(const IntervalVector& box) const;
 
 	/**
 	 * \brief Calculate f(box) using only affine arithmetic.
 	 *
 	 */
 	Affine2 eval_affine2(const Affine2Vector& box) const;
-	Affine3 eval_affine2(const Affine3Vector& box) const;
+	Affine3 eval_affine3(const Affine3Vector& box) const;
 
 	/**
 	 * \brief Calculate f(box) using affine arithmetic.
@@ -845,7 +846,7 @@ public:
 	 * The resulting affine form is stored in \a affine.
 	 */
 	Interval eval_affine2(const IntervalVector& box, Affine2& result) const;
-	Interval eval_affine2(const IntervalVector& box, Affine3& result) const;
+	Interval eval_affine3(const IntervalVector& box, Affine3& result) const;
 
 	/**
 	 * \brief Calculate f(box) using affine arithmetic.
@@ -853,7 +854,7 @@ public:
 	 * \pre f must be vector-valued
 	 */
 	IntervalVector eval_affine2_vector(const IntervalVector& box) const;
-	//IntervalVector eval_affinelin_vector(const IntervalVector& box) const;
+	IntervalVector eval_affine3_vector(const IntervalVector& box) const;
 
 	/**
 	 * \brief Calculate f(box) using affine arithmetic.
@@ -862,7 +863,7 @@ public:
 	 * \pre f must be vector-valued
 	 */
 	IntervalVector eval_affine2_vector(const IntervalVector& box, Affine2Vector& affine) const;
-	IntervalVector eval_affine2_vector(const IntervalVector& box, Affine3Vector& affine) const;
+	IntervalVector eval_affine3_vector(const IntervalVector& box, Affine3Vector& affine) const;
 
 	/**
 	 * \brief Calculate f(box) using only affine arithmetic.
@@ -870,7 +871,7 @@ public:
 	 * \pre f must be vector-valued
 	 */
 	Affine2Vector eval_affine2_vector(const Affine2Vector& affine) const;
-	Affine3Vector eval_affine2_vector(const Affine3Vector& affine) const;
+	Affine3Vector eval_affine3_vector(const Affine3Vector& affine) const;
 
 	/**
 	 * \brief Calculate f(box) using affine arithmetic.
@@ -878,7 +879,7 @@ public:
 	 * \pre f must be matrix-valued
 	 */
 	IntervalMatrix eval_affine2_matrix(const IntervalVector& box) const;
-	//IntervalMatrix eval_affinelin_matrix(const IntervalVector& box) const;
+	IntervalMatrix eval_affine3_matrix(const IntervalVector& box) const;
 
 	/**
 	 * \brief Calculate f(box) using affine arithmetic.
@@ -887,7 +888,7 @@ public:
 	 * \pre f must be matrix-valued
 	 */
 	IntervalMatrix eval_affine2_matrix(const IntervalVector& box, Affine2Matrix& affine) const;
-	IntervalMatrix eval_affine2_matrix(const IntervalVector& box, Affine3Matrix& affine) const;
+	IntervalMatrix eval_affine3_matrix(const IntervalVector& box, Affine3Matrix& affine) const;
 
 	/**
 	 * \brief Calculate f(box) using only affine arithmetic.
@@ -895,7 +896,7 @@ public:
 	 * \pre f must be matrix-valued
 	 */
 	Affine2Matrix eval_affine2_matrix(const Affine2Vector& box) const;
-	Affine3Matrix eval_affine2_matrix(const Affine3Vector& box) const;
+	Affine3Matrix eval_affine3_matrix(const Affine3Vector& box) const;
 
 	/**
 	 * \brief Contract x w.r.t. f(x)=y.
@@ -971,7 +972,7 @@ public:
 	 *
 	 */
 	mutable Array<Affine2Domain> arg_af2;
-	mutable Array<Affine3Domain> arg_af_lin;
+	mutable Array<Affine3Domain> arg_af3;
 
 
 protected:
@@ -1179,12 +1180,12 @@ inline void Function::write_arg_af2_domains(const Affine2Vector& box) const {
 
 inline void Function::write_arg_af3_domains(const Array<Affine3Domain>& d) const {
 	if (_nb_used_vars==-1) this->generate_used_vars();
-	load(arg_af_lin,d,nb_used_vars(),_used_var);
+	load(arg_af3,d,nb_used_vars(),_used_var);
 }
 
 inline void Function::write_arg_af3_domains(const Array<const Affine3Domain>& d) const {
 	if (_nb_used_vars==-1) this->generate_used_vars();
-	load(arg_af_lin,d,nb_used_vars(),_used_var);
+	load(arg_af3,d,nb_used_vars(),_used_var);
 }
 
 inline void Function::write_arg_af3_domains(const IntervalVector& box) const {
@@ -1193,11 +1194,11 @@ inline void Function::write_arg_af3_domains(const IntervalVector& box) const {
 		int j;
 		for (int i=0; i<nb_used_vars(); i++) {
 			j=used_var(i);
-			arg_af_lin[j].i()=Affine3(nb_var(),j+1,box[j]);
+			arg_af3[j].i()=Affine3(nb_var(),j+1,box[j]);
 		}
 	}
 	else
-		load(arg_af_lin,Affine3Vector(box,true),nb_used_vars(),_used_var);
+		load(arg_af3,Affine3Vector(box,true),nb_used_vars(),_used_var);
 }
 
 inline void Function::write_arg_af3_domains(const Affine3Vector& box) const {
@@ -1206,11 +1207,11 @@ inline void Function::write_arg_af3_domains(const Affine3Vector& box) const {
 		int j;
 		for (int i=0; i<nb_used_vars(); i++) {
 			j=used_var(i);
-			arg_af_lin[j].i()=box[j];
+			arg_af3[j].i()=box[j];
 		}
 	}
 	else
-		load(arg_af_lin,box,nb_used_vars(),_used_var);
+		load(arg_af3,box,nb_used_vars(),_used_var);
 }
 
 

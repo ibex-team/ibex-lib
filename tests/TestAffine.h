@@ -14,7 +14,7 @@
 
 #include "cpptest.h"
 #include "ibex_Interval.h"
-#include "ibex_Affine2.h"
+#include "ibex_Affine.h"
 #include "utils.h"
 #include <string>
 #include <iostream>

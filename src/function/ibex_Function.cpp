@@ -67,23 +67,41 @@ Domain& Function::eval_domain(const IntervalVector& box) const {
 Domain& Function::eval_affine2_domain(const IntervalVector& box) const {
 	return Affine2Eval().eval(*this,box);
 }
+Domain& Function::eval_affine3_domain(const IntervalVector& box) const {
+	return Affine3Eval().eval(*this,box);
+}
 
 Affine2Domain& Function::eval_affine2_affinedomain(const Affine2Vector& box) const {
 	return Affine2Eval().eval(*this,box);
 }
+Affine3Domain& Function::eval_affine3_affinedomain(const Affine3Vector& box) const {
+	return Affine3Eval().eval(*this,box);
+}
+
 
 Domain& Function::eval_affine2_domain(const IntervalVector& box, Affine2Domain& affine) const {
 	const ExprLabel& res = Affine2Eval().eval_label(*this,box);
 	affine = *res.af2;
 	return *res.d;
 }
+Domain& Function::eval_affine3_domain(const IntervalVector& box, Affine3Domain& affine) const {
+	const ExprLabel& res = Affine3Eval().eval_label(*this,box);
+	affine = *res.af3;
+	return *res.d;
+}
 
 Interval Function::eval_affine2(const IntervalVector& box) const {
 	return eval_affine2_domain(box).i();
 }
+Interval Function::eval_affine3(const IntervalVector& box) const {
+	return eval_affine3_domain(box).i();
+}
 
 Affine2 Function::eval_affine2(const Affine2Vector& box) const {
 	return eval_affine2_affinedomain(box).i();
+}
+Affine3 Function::eval_affine3(const Affine3Vector& box) const {
+	return eval_affine3_affinedomain(box).i();
 }
 
 Interval Function::eval_affine2(const IntervalVector& box, Affine2& affine) const {
@@ -91,9 +109,22 @@ Interval Function::eval_affine2(const IntervalVector& box, Affine2& affine) cons
 	affine = (res.af2)->i();
 	return res.d->i();
 }
+Interval Function::eval_affine3(const IntervalVector& box, Affine3& affine) const {
+	const ExprLabel& res = Affine3Eval().eval_label(*this,box);
+	affine = (res.af3)->i();
+	return res.d->i();
+}
 
 IntervalVector Function::eval_affine2_vector(const IntervalVector& box) const {
 	const ExprLabel& res = Affine2Eval().eval_label(*this,box);
+	if (expr().dim.is_scalar() ) {
+		return IntervalVector(1,res.d->i());
+	} else {
+		return res.d->v();
+	}
+}
+IntervalVector Function::eval_affine3_vector(const IntervalVector& box) const {
+	const ExprLabel& res = Affine3Eval().eval_label(*this,box);
 	if (expr().dim.is_scalar() ) {
 		return IntervalVector(1,res.d->i());
 	} else {
@@ -111,6 +142,16 @@ IntervalVector Function::eval_affine2_vector(const IntervalVector& box, Affine2V
 		return res.d->v();
 	}
 }
+IntervalVector Function::eval_affine3_vector(const IntervalVector& box, Affine3Vector& affine) const {
+	const ExprLabel& res = Affine3Eval().eval_label(*this,box);
+	if (expr().dim.is_scalar() ) {
+		affine = Affine3Vector(1,res.af3->i());
+		return IntervalVector(1,res.d->i());
+	} else {
+		affine = res.af3->v();
+		return res.d->v();
+	}
+}
 
 Affine2Vector Function::eval_affine2_vector(const Affine2Vector& box) const {
 	const ExprLabel& res = Affine2Eval().eval_label(*this,box);
@@ -120,9 +161,43 @@ Affine2Vector Function::eval_affine2_vector(const Affine2Vector& box) const {
 		return res.af2->v();
 	}
 }
+Affine3Vector Function::eval_affine3_vector(const Affine3Vector& box) const {
+	const ExprLabel& res = Affine3Eval().eval_label(*this,box);
+	if (expr().dim.is_scalar() ) {
+		return Affine3Vector(1, res.af3->i());
+	} else {
+		return res.af3->v();
+	}
+}
 
 IntervalMatrix Function::eval_affine2_matrix(const IntervalVector& box) const {
 	const ExprLabel& res = Affine2Eval().eval_label(*this,box);
+
+	switch (expr().dim.type()) {
+	case Dim::SCALAR     : {
+		return IntervalMatrix(1,1,res.d->i());
+	}
+	case Dim::ROW_VECTOR : {
+		IntervalMatrix M(image_dim(),1);
+		M.set_row(0,res.d->v());
+		return M;
+	}
+	case Dim::COL_VECTOR : {
+		IntervalMatrix M(1,image_dim());
+		M.set_col(0,res.d->v());
+		return M;
+	}
+	case Dim::MATRIX: {
+		return res.d->m();
+	}
+	default : {
+		assert(false);
+		return IntervalMatrix::empty(expr().dim.dim2, expr().dim.dim3);
+	}
+	}
+}
+IntervalMatrix Function::eval_affine3_matrix(const IntervalVector& box) const {
+	const ExprLabel& res = Affine3Eval().eval_label(*this,box);
 
 	switch (expr().dim.type()) {
 	case Dim::SCALAR     : {
@@ -179,122 +254,7 @@ IntervalMatrix Function::eval_affine2_matrix(const IntervalVector& box, Affine2M
 	}
 	}
 }
-
-
-
-Affine2Matrix Function::eval_affine2_matrix(const Affine2Vector& affine) const {
-	const ExprLabel& res = Affine2Eval().eval_label(*this,affine);
-
-	switch (expr().dim.type()) {
-	case Dim::SCALAR     : {
-		return Affine2Matrix(1,1,res.af2->i());
-	}
-	case Dim::ROW_VECTOR : {
-		Affine2Matrix M(image_dim(),1);
-		M.set_row(0,res.af2->v());
-		return M;
-	}
-	case Dim::COL_VECTOR : {
-		Affine2Matrix M(1,image_dim());
-		M.set_col(0,res.af2->v());
-		return M;
-	}
-	case Dim::MATRIX: {
-		return res.af2->m();
-	}
-	default : {
-		assert(false);
-		return Affine2Matrix::empty(expr().dim.dim2, expr().dim.dim3);
-	}
-	}
-}
-////////////////////////////////
-
-//Domain& Function::eval_affine2_domain(const IntervalVector& box) const {
-//	return AffineLinEval().eval(*this,box);
-//}
-
-AffineLinDomain& Function::eval_affine2_affinedomain(const Affine3Vector& box) const {
-	return Affine3Eval().eval(*this,box);
-}
-
-Domain& Function::eval_affine2_domain(const IntervalVector& box, AffineLinDomain& affine) const {
-	const ExprLabel& res = Affine3Eval().eval_label(*this,box);
-	affine = *res.af3;
-	return *res.d;
-}
-
-//Interval Function::eval_affine2(const IntervalVector& box) const {
-//	return eval_affine2_domain(box).i();
-//}
-
-Affine3 Function::eval_affine2(const Affine3Vector& box) const {
-	return eval_affine2_affinedomain(box).i();
-}
-
-Interval Function::eval_affine2(const IntervalVector& box, Affine3& affine) const {
-	const ExprLabel& res = Affine3Eval().eval_label(*this,box);
-	affine = res.af3->i();
-	return res.d->i();
-}
-
-//IntervalVector Function::eval_affine2_vector(const IntervalVector& box) const {
-//	const ExprLabel& res = AffineLinEval().eval_label(*this,box);
-//	if (expr().dim.is_scalar() ) {
-//		return IntervalVector(1,res.d->i());
-//	} else {
-//		return res.d->v();
-//	}
-//}
-
-IntervalVector Function::eval_affine2_vector(const IntervalVector& box, Affine3Vector& affine) const {
-	const ExprLabel& res = Affine3Eval().eval_label(*this,box);
-	if (expr().dim.is_scalar() ) {
-		affine = Affine3Vector(1,res.af3->i());
-		return IntervalVector(1,res.d->i());
-	} else {
-		affine = res.af3->v();
-		return res.d->v();
-	}
-}
-
-Affine3Vector Function::eval_affine2_vector(const Affine3Vector& box) const {
-	const ExprLabel& res = Affine3Eval().eval_label(*this,box);
-	if (expr().dim.is_scalar() ) {
-		return Affine3Vector(1, res.af3->i());
-	} else {
-		return res.af3->v();
-	}
-}
-
-//IntervalMatrix Function::eval_affine2_matrix(const IntervalVector& box) const {
-//	const ExprLabel& res = AffineLinEval().eval_label(*this,box);
-//
-//	switch (expr().dim.type()) {
-//	case Dim::SCALAR     : {
-//		return IntervalMatrix(1,1,res.d->i());
-//	}
-//	case Dim::ROW_VECTOR : {
-//		IntervalMatrix M(image_dim(),1);
-//		M.set_row(0,res.d->v());
-//		return M;
-//	}
-//	case Dim::COL_VECTOR : {
-//		IntervalMatrix M(1,image_dim());
-//		M.set_col(0,res.d->v());
-//		return M;
-//	}
-//	case Dim::MATRIX: {
-//		return res.d->m();
-//	}
-//	default : {
-//		assert(false);
-//		return IntervalMatrix::empty(expr().dim.dim2, expr().dim.dim3);
-//	}
-//	}
-//}
-
-IntervalMatrix Function::eval_affine2_matrix(const IntervalVector& box, Affine3Matrix& affine) const {
+IntervalMatrix Function::eval_affine3_matrix(const IntervalVector& box, Affine3Matrix& affine) const {
 	const ExprLabel& res = Affine3Eval().eval_label(*this,box);
 	affine = Affine3Matrix(expr().dim.dim2, expr().dim.dim3);
 
@@ -328,7 +288,33 @@ IntervalMatrix Function::eval_affine2_matrix(const IntervalVector& box, Affine3M
 
 
 
-Affine3Matrix Function::eval_affine2_matrix(const Affine3Vector& affine) const {
+Affine2Matrix Function::eval_affine2_matrix(const Affine2Vector& affine) const {
+	const ExprLabel& res = Affine2Eval().eval_label(*this,affine);
+
+	switch (expr().dim.type()) {
+	case Dim::SCALAR     : {
+		return Affine2Matrix(1,1,res.af2->i());
+	}
+	case Dim::ROW_VECTOR : {
+		Affine2Matrix M(image_dim(),1);
+		M.set_row(0,res.af2->v());
+		return M;
+	}
+	case Dim::COL_VECTOR : {
+		Affine2Matrix M(1,image_dim());
+		M.set_col(0,res.af2->v());
+		return M;
+	}
+	case Dim::MATRIX: {
+		return res.af2->m();
+	}
+	default : {
+		assert(false);
+		return Affine2Matrix::empty(expr().dim.dim2, expr().dim.dim3);
+	}
+	}
+}
+Affine3Matrix Function::eval_affine3_matrix(const Affine3Vector& affine) const {
 	const ExprLabel& res = Affine3Eval().eval_label(*this,affine);
 
 	switch (expr().dim.type()) {

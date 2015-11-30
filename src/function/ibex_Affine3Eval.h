@@ -1,5 +1,5 @@
 /* ============================================================================
- * I B E X - Evaluation of AffineLin forms
+ * I B E X - Evaluation of Affine3 forms
  * ============================================================================
  * License     : This program can be distributed under the terms of the GNU LGPL.
  *               See the file COPYING.LESSER.
@@ -8,8 +8,8 @@
  * Created     : April 08, 2013
  * ---------------------------------------------------------------------------- */
 
-#ifndef __IBEX_AffineLin_EVAL_H__
-#define __IBEX_AffineLin_EVAL_H__
+#ifndef __IBEX_Affine3_EVAL_H__
+#define __IBEX_Affine3_EVAL_H__
 
 #include "ibex_Function.h"
 #include "ibex_AffineMatrixArray.h"
@@ -31,7 +31,7 @@ public:
 	Domain& eval(const Function& f, const IntervalVector& box) const;
 
 	/**
-	 * \brief Run the forward algorithm on the box \a box and return the result as an AffineLin domain.
+	 * \brief Run the forward algorithm on the box \a box and return the result as an Affine3 domain.
 	 */
 	Affine3Domain& eval(const Function& f, const Affine3Vector& box) const;
 
@@ -343,4 +343,4 @@ inline void Affine3Eval::sub_M_fwd(const ExprSub&, const ExprLabel& x1, const Ex
 } // namespace ibex
 
 
-#endif /* __IBEX_AffineLin_EVAL_H__ */
+#endif /* __IBEX_Affine3_EVAL_H__ */

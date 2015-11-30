@@ -13,7 +13,7 @@
 #define __TEST_AFFINE2_H__
 
 #include "cpptest.h"
-#include "ibex_Affine2.h"
+#include "ibex_Affine.h"
 #include "utils.h"
 
 using namespace ibex;
