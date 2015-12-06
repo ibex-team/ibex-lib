@@ -389,7 +389,7 @@ void LinearSolver::getDualSol(Vector & solution_dual) {
 void LinearSolver::getInfeasibleDir(Vector & sol) {
 
 	try {
-		soplex::SPxSolver::Status stat1;
+		//soplex::SPxSolver::Status stat1;
 		soplex::DVector sol_found(nb_rows);
 		mysoplex->getDualfarkas(sol_found);
 		//stat1 = mysoplex->getDualfarkas(sol_found);
@@ -420,7 +420,7 @@ void LinearSolver::cleanConst() {
 		dual_solution=NULL;
 		status_prim = soplex::SPxSolver::UNKNOWN;
 		status_dual = soplex::SPxSolver::UNKNOWN;
-		int status=0;
+		//int status=0;
 		if ((nb_vars)<=  (nb_rows - 1))  {
 			mysoplex->removeRowRange(nb_vars, nb_rows-1);
 		}
@@ -1522,7 +1522,6 @@ void LinearSolver::cleanConst() {
 		dual_solution=NULL;
 		status_prim = 0;
 		status_dual = 0;
-		int status=0;
 		if (nb_vars<=(nb_rows - 1))  {
 			myclp->deleteRows(nb_rows -nb_vars,_which);
 		}

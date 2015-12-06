@@ -450,7 +450,6 @@ template<>
 AffineMain<AF_iAF>& AffineMain<AF_iAF>::sqrA(const Interval& itv) {
 //	std::cout << "in sqr "<<std::endl;
 
-	bool b = (!(itv.is_empty()||itv.is_unbounded()));
 	if (	(!is_actif())||
 			itv.is_empty()||
 			itv.is_unbounded()||

@@ -69,7 +69,9 @@ void TestBoolInterval::test_inter1(){
 void TestBoolInterval::test_inter2(){
 	BoolInterval a(MAYBE), b(YES), c(NO);
 	a &= b;
+	b &= c;
 	TEST_ASSERT(a == YES);	
+	TEST_ASSERT(b == EMPTY_BOOL);
 }
 
 void TestBoolInterval::test_union1(){
@@ -82,7 +84,9 @@ void TestBoolInterval::test_union1(){
 void TestBoolInterval::test_union2(){
 	BoolInterval a(MAYBE), b(YES), c(NO);
 	a |= b;
+	b |= c;
 	TEST_ASSERT(a == MAYBE);	
+	TEST_ASSERT(b == MAYBE);
 
 }
 

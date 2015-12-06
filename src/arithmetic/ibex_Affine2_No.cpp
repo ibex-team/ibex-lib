@@ -453,7 +453,6 @@ template<>
 AffineMain<AF_No>& AffineMain<AF_No>::sqrA(const Interval& itv) {
 //	std::cout << "in sqr "<<std::endl;
 
-	bool b = (!(itv.is_empty()||itv.is_unbounded()));
 	if (	(!is_actif())||
 			itv.is_empty()||
 			itv.is_unbounded()||
@@ -567,7 +566,7 @@ AffineMain<AF_No>& AffineMain<AF_No>::linChebyshev(Affine2_expr num, const Inter
 	}  else  {
 
 	// General case
-		double alpha, beta, ddelta, TEMP1, TEMP2, t1, t2;
+		double alpha, beta, ddelta, TEMP1, TEMP2, t1;
 		Interval dmm(0.0), band(0.0);
 
 		switch (num) {
@@ -1089,7 +1088,7 @@ AffineMain<AF_No>& AffineMain<AF_No>::powerA(int n, const Interval& itv) {
 			//  old : ddelta = (b-a)^2 * f''(_itv)/16
 			//  new : ddelta = evaluate the error at the bound and the points when f'(x)=alpha
 
-			double alpha, beta, ddelta, t1, x0, xb0, xb1, fxb0, fxb1, c0, c1, TEMP1, TEMP2;
+			double alpha, beta, ddelta, t1, x0, xb0, xb1, fxb0, fxb1, c0, c1, TEMP2;
 
 			x0  = 1.0 /  ::sqrt(2.);
 			xb0 = (0.5) * (itv.diam() * ( x0) + itv.lb() + itv.ub());

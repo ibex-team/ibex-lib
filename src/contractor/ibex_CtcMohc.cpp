@@ -159,7 +159,7 @@ void CtcMohcRevise::contract(IntervalVector& b) {
 
 	box=b;
 
-	bool flag=false;
+	//bool flag=false;
 	IntervalVector initbox=box;
 	try{
 
@@ -1039,7 +1039,7 @@ void Function_OG::set_rc(int i, Interval val) {
 
 //initialize the occurrence-based box using a normal box variable-based
 void Function_OG::_setbox(IntervalVector& box) {
-	int j=0;
+
 	for(int i=0; i<box.size();i++) {
 		if (occ[i].size()!=0) // _box[first_occ[i]]=box[i];
 			//else

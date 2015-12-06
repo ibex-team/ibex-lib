@@ -185,7 +185,7 @@ bool Optimizer::dichotomic_line_search(const Vector& end_point, bool exit_if_abo
 
 bool Optimizer::line_probing(const IntervalVector& box) {
 
-	bool loup_changed=false;
+	//bool loup_changed=false;
 
 	// ------------------------------------------------------------------------
 	// Calculates the gradient of f at the startpoint of the box (once for all)

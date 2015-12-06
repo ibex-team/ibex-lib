@@ -913,7 +913,7 @@ namespace {
 
 // the following functions are
 // introduced to allow genericity
-inline bool is_empty(double x)                { return false; }
+inline bool is_empty(double )                { return false; }
 inline bool is_empty(const Interval& x)       { return x.is_empty(); }
 //inline bool is_empty(const Vector& v)         { return false; }
 //inline bool is_empty(const IntervalVector& v) { return v.is_empty(); }
@@ -923,7 +923,7 @@ inline bool is_empty(const Interval& x)       { return x.is_empty(); }
 //template<class T> inline bool is_empty(const Affine2MainVector<T>& v) { return v.is_empty(); }
 //template<class T> inline bool is_empty(const Affine2MainMatrix<T>& m) { return m.is_empty(); }
 
-inline void set_empty(double x)          { }
+inline void set_empty(double )          { }
 inline void set_empty(Interval& x)       { x.set_empty(); }
 //inline void set_empty(Vector& v)         { }
 //inline void set_empty(IntervalVector& v) { v.set_empty(); }

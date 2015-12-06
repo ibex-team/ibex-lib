@@ -278,8 +278,8 @@ AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::saxpy(double alpha, const Affi
 	Interval roundoff_error(0.,0.);
 	Interval intermediate(0.,0.);
 
-	double temp, ttt, sss, eee;
-	int i;
+	//double temp, ttt, sss, eee;
+	//int i;
 	//	std::cout << "in saxpy alpha=" << alpha  <<  "  beta= " <<  beta <<   "  delta = " << ddelta   << std::endl;
 	if (is_actif()) {
 		if (B1) {  // multiply by a scalar alpha

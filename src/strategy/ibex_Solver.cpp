@@ -38,8 +38,6 @@ void Solver::start(const IntervalVector& init_box) {
 
 	buffer.push(root);
 
-	int nb_var=init_box.size();
-
 	IntervalVector tmpbox(ctc.nb_var);
 
 	Timer::start();
