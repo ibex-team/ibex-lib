@@ -100,9 +100,9 @@ def configure (conf):
 
 	# optimised compilation flags
 	if conf.options.DEBUG:
-		flags = "-O0 -g -pg -Wall -Wno-unknown-pragmas -Wno-unused-variable -fmessage-length=0"
+		flags = "-O0 -g -pg -Wall -Wno-unknown-pragmas -Wno-unused-variable -fmessage-length=0 -std=c++11"
 	else:
-		flags = "-O3 -Wno-deprecated"
+		flags = "-O3 -Wno-deprecated -std=c++11"
 		conf.define ("NDEBUG", 1)
 	for f in flags.split():
 		if conf.check_cxx (cxxflags = f, mandatory = False):

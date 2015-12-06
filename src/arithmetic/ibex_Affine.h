@@ -1,5 +1,5 @@
 /* ============================================================================
- * I B E X - Affine2 definition
+ * I B E X - Affine definition
  * ============================================================================
  * License     : This program can be distributed under the terms of the GNU LGPL.
  *               See the file COPYING.LESSER.
@@ -9,8 +9,8 @@
  * Created     : Nov 12, 2012
  * ---------------------------------------------------------------------------- */
 
-#ifndef IBEX_AFFINE2_H_
-#define IBEX_AFFINE2_H_
+#ifndef IBEX_AFFINE_H_
+#define IBEX_AFFINE_H_
 
 #include "ibex_Interval.h"
 #include <math.h>
@@ -1194,5 +1194,5 @@ inline AffineMain<T> chi(const Interval&  a,const AffineMain<T>&  b,const Affine
 
 
 
-#endif /* IBEX_Affine2_H_ */
+#endif /* IBEX_Affine_H_ */
 

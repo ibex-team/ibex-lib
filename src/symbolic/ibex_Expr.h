@@ -22,6 +22,7 @@
 #include "ibex_IntervalMatrix.h"
 #include "ibex_Dim.h"
 #include "ibex_Domain.h"
+#include "ibex_AffineDomain.h"
 #include "ibex_ExprLabel.h"
 
 namespace ibex {

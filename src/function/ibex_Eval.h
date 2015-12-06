@@ -13,6 +13,7 @@
 #define _IBEX_EVAL_H_
 
 #include "ibex_Function.h"
+#include "ibex_Domain.h"
 #include <iostream>
 
 namespace ibex {

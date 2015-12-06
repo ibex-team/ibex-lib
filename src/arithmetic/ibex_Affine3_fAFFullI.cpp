@@ -1,5 +1,5 @@
 /* ============================================================================
- * D Y N I B E X - Definition of the Affine2 class based on fAFFull version 1
+ * D Y N I B E X - Definition of the Affine class based on fAFFull version 1
  * ============================================================================
  * Copyright   : ENSTA ParisTech
  * License     : This program can be distributed under the terms of the GNU LGPL.

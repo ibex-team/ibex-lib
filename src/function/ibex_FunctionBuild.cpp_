@@ -119,8 +119,8 @@ const char* duplicate_or_generate(const char* name) {
 }
 
 
-Function::Function() : name(NULL), comp(NULL), df(NULL), zero(NULL), _used_var(NULL), _nb_used_vars(-1),
-		__all_symbols_scalar(false) ,_nb_var(0), _image_dim(0), symbol_index(NULL) {
+Function::Function() : name(NULL), _nb_var(0), _image_dim(0), comp(NULL),
+		__all_symbols_scalar(false), symbol_index(NULL),  df(NULL),zero(NULL), _nb_used_vars(-1) , _used_var(NULL){
 	// root==NULL <=> the function is not initialized yet
 }
 

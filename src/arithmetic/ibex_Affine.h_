@@ -1,5 +1,5 @@
 /* ============================================================================
- * I B E X - ibex_Affine2.h_
+ * I B E X - ibex_Affine.h_
  * ============================================================================
  * License     : This program can be distributed under the terms of the GNU LGPL.
  *               See the file COPYING.LESSER.
@@ -11,8 +11,8 @@
  * ---------------------------------------------------------------------------- */
 
 
-#ifndef IBEX_AFFINE2_H2_
-#define IBEX_AFFINE2_H2_
+#ifndef IBEX_AFFINE_H2_
+#define IBEX_AFFINE_H2_
 
 
 namespace ibex {
@@ -969,7 +969,7 @@ AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::operator+=(const Interval& x);
 
 
 
-#endif /* IBEX_Affine2_H2_ */
+#endif /* IBEX_Affine_H2_ */
 
 
 

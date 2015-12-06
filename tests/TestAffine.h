@@ -131,7 +131,7 @@ public:
 
 	}
 
-	typedef enum { EQUALITY, INCLUSION, INCLUSION_TIGHT, INTERSECTION } comp_t;
+	typedef enum { EQUALITY, INCLUSION, INCLUSION_TIGHT, INTERSECTION, EQUALITY_EPS } comp_t;
 
 	bool compare_results (comp_t c, Interval r, AffineMain<T>  a) ;
 

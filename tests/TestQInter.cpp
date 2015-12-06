@@ -51,10 +51,10 @@ void TestQInter::test_projF_2(){
     res[4][0] = Interval(5, 25);  res[4][1] = Interval(6, 22);
     res[5][0] = Interval(2, 29);  res[5][1] = Interval(2, 26);
 
-    for(int i = 0; i < V.size(); i++){
+    for(unsigned int i = 0; i < V.size(); i++){
         boxes.set_ref(i, V[i]);
     }
-    for(int q = 0; q < V.size(); q++){
+    for(unsigned int q = 0; q < V.size(); q++){
         // cout << "q = "<< q << " " << qinter_projf(boxes, boxes.size() - q) << "\n" << std::flush;
         TEST_ASSERT(qinter_projf(boxes, boxes.size() - q) == res[q]);
     }

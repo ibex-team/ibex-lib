@@ -13,6 +13,8 @@
 
 #include "ibex_Function.h"
 #include "ibex_AffineMatrixArray.h"
+#include "ibex_AffineDomain.h"
+#include "ibex_Domain.h"
 #include "ibex_FwdAlgorithm.h"
 
 namespace ibex {
