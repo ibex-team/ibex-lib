@@ -350,7 +350,7 @@ inline double Interval::mid() const {
 		else return lb()/2;
 	}
 	else {
-		double m=((lb()+ub())/2);
+		double m=(lb()-(lb()-ub())/2); // better way to compute the middle, reduce the number of overfloat
 		if (m<lb()) m=lb(); // watch dog
 		else if (m>ub()) m=ub();
 		return m;
