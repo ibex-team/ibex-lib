@@ -18,7 +18,7 @@
 namespace ibex {
 
 template<class T>
-inline std::ostream& operator<<(std::ostream& os, const AffineMain<T>& x) {
+std::ostream& operator<<(std::ostream& os, const AffineMain<T>& x) {
 	{
 		os << x.itv() << " : ";
 		if (x.is_actif()) {
@@ -38,7 +38,7 @@ inline std::ostream& operator<<(std::ostream& os, const AffineMain<T>& x) {
 
 // debut linChebyshev
 template<class T>
-inline AffineMain<T>& AffineMain<T>::linChebyshev(Affine2_expr num, const Interval& itv) {
+AffineMain<T>& AffineMain<T>::linChebyshev(Affine2_expr num, const Interval& itv) {
 	//  std::cout << "linChebyshev IN itv= "<<itv << " x =  "<< *this << num<< std::endl;
 
 	Interval res_itv;
@@ -584,7 +584,7 @@ inline AffineMain<T>& AffineMain<T>::linChebyshev(Affine2_expr num, const Interv
 
 
 template<class T>
-inline AffineMain<T>& AffineMain<T>::powerA(int n, const Interval& itv) {
+AffineMain<T>& AffineMain<T>::powerA(int n, const Interval& itv) {
 	//	std::cout << "in power "<<std::endl;
 
 	// Particular case
@@ -957,8 +957,8 @@ template<>
 AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::operator+=(const Interval& x);
 
 
-
-
+template<>
+std::ostream& operator<<(std::ostream& os, const AffineMain<AF_fAFFullI>& x);
 
 
 

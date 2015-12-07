@@ -10,6 +10,8 @@
 #ifndef __IBEX_PDC_IN_POLYGON_H__
 #define __IBEX_PDC_IN_POLYGON_H__
 
+#define _USE_MATH_DEFINES
+#include <cmath>
 #include "ibex_Pdc.h"
 #include <vector>
 
