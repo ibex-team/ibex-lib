@@ -1132,7 +1132,7 @@ bool TestAffine2<T>::check_af2 (Function& f, Interval& I){
 	}
 /*	if (faa.size()>0) {
 		Variable x;
-		Function lininf(x,(faa.val(0)+faa.val(1)*(2* (x)-(I.lb()+I.ub()))/(I.diam())));
+		Function lininf(x,(faa.center()+faa.val(0)*(2* (x)-(I.lb()+I.ub()))/(I.diam())));
 
 		Function linsup(x, lininf(x)+faa.err().lb());
 
@@ -1181,9 +1181,9 @@ bool TestAffine2<T>::check_af2 (Function& f, IntervalVector& I){
 /*	if (faa.size()>0) {
 		Variable x(I.size());
 
-		const ExprNode *e =& (faa.val(0)+faa.val(1)*(2* (x[0])-(I[0].lb()+I[0].ub()))/(I[0].diam()));
+		const ExprNode *e =& (faa.center()+faa.val(0)*(2* (x[0])-(I[0].lb()+I[0].ub()))/(I[0].diam()));
 		for (int i=1; i<I.size(); i++) {
-			e =& ((*e) + (faa.val(i+1)*(2*x[i]-(I[i].lb()+I[i].ub()))/(I[i].diam())));
+			e =& ((*e) + (faa.val(i)*(2*x[i]-(I[i].lb()+I[i].ub()))/(I[i].diam())));
 		}
 		Function lininf(x,*e);
 

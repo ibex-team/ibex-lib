@@ -245,8 +245,15 @@ public:
 	 */
 	const Interval itv() const ;
 
+
 	/**
-	 * \brief return _val[i]
+	 * \brief return the center of the affine form
+	 * TO WRITE in your Affine implementation
+	 */
+	double center() const;
+
+	/**
+	 * \brief return the coefficient of the ith variable
 	 * TO WRITE in your Affine implementation
 	 */
 	double val(int i) const;

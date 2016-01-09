@@ -144,9 +144,14 @@ AffineMain<AF_iAF>::AffineMain(const AffineMain<AF_iAF>& x) :
 
 
 template<>
+double AffineMain<AF_iAF>::center() const{
+	return (_elt._val[0]).mid();
+}
+
+template<>
 double AffineMain<AF_iAF>::val(int i) const{
-	assert((0<=i) && (i<=_n));
-	return (_elt._val[i]).mid();
+	assert((0<=i) && (i<_n));
+	return (_elt._val[i+1]).mid();
 }
 
 

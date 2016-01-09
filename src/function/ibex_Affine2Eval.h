@@ -129,7 +129,7 @@ inline void Affine2Eval::symbol_fwd(const ExprSymbol& , ExprLabel& ) { /* nothin
 inline void Affine2Eval::cst_fwd(const ExprConstant& c, ExprLabel& y) {
 	switch (c.type()) {
 	case Dim::SCALAR:      {
-		y.af2->i() = Affine2(c.get_value());
+		y.af2->i() = (c.get_value());
 		y.d->i() = c.get_value();
 		break;
 	}
@@ -180,15 +180,15 @@ inline void Affine2Eval::div_fwd(const ExprDiv&, const ExprLabel& x1, const Expr
 }
 inline void Affine2Eval::max_fwd(const ExprMax&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)     {
 	y.d->i()= max(x1.d->i(),x2.d->i());
-	y.af2->i() = Affine2(y.d->i());
+	y.af2->i() = (y.d->i());
 }
 inline void Affine2Eval::min_fwd(const ExprMin&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)     {
 	y.d->i() = min(x1.d->i(),x2.d->i());
-	y.af2->i()= Affine2( y.d->i());
+	y.af2->i()= ( y.d->i());
 }
 inline void Affine2Eval::atan2_fwd(const ExprAtan2&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y) {
 	y.d->i() = atan2(x1.d->i(),x2.d->i());
-	y.af2->i()= Affine2(y.d->i());
+	y.af2->i()= (y.d->i());
 }
 inline void Affine2Eval::minus_fwd(const ExprMinus&, const ExprLabel& x, ExprLabel& y)                       {
 	y.af2->i()=-x.af2->i();
@@ -276,15 +276,15 @@ inline void Affine2Eval::atan_fwd(const ExprAtan&, const ExprLabel& x, ExprLabel
 }
 inline void Affine2Eval::acosh_fwd(const ExprAcosh&, const ExprLabel& x, ExprLabel& y)                       {
 	y.d->i()=acosh(x.d->i());
-	y.af2->i()= Affine2(y.d->i());
+	y.af2->i()= (y.d->i());
 }
 inline void Affine2Eval::asinh_fwd(const ExprAsinh&, const ExprLabel& x, ExprLabel& y)                       {
 	y.d->i()=asinh(x.d->i());
-	y.af2->i()= Affine2(y.d->i());
+	y.af2->i()= (y.d->i());
 }
 inline void Affine2Eval::atanh_fwd(const ExprAtanh&, const ExprLabel& x, ExprLabel& y)                       {
 	y.d->i()=atanh(x.d->i());
-	y.af2->i()= Affine2(y.d->i());
+	y.af2->i()= (y.d->i());
 }
 
 
