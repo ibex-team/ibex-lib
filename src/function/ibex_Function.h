@@ -1162,7 +1162,7 @@ inline void Function::write_arg_af2_domains(const IntervalVector& box) const {
 		}
 	}
 	else
-		load(arg_af2,Affine2Vector(box,true),nb_used_vars(),_used_var);
+		load(arg_af2,Affine2Vector(box),nb_used_vars(),_used_var);
 }
 
 inline void Function::write_arg_af2_domains(const Affine2Vector& box) const {
@@ -1198,7 +1198,7 @@ inline void Function::write_arg_af3_domains(const IntervalVector& box) const {
 		}
 	}
 	else
-		load(arg_af3,Affine3Vector(box,true),nb_used_vars(),_used_var);
+		load(arg_af3,Affine3Vector(box),nb_used_vars(),_used_var);
 }
 
 inline void Function::write_arg_af3_domains(const Affine3Vector& box) const {

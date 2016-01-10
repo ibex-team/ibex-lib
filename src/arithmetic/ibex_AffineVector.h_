@@ -26,8 +26,11 @@ IntervalVector& IntervalVector::operator=(const AffineMainVector<T>& x) {
 }
 
 template<class T>
-IntervalVector::IntervalVector(const AffineMainVector<T>& x) : n(x.size()), vec(new Interval[x.size()]) {
-	for (int i=0; i<n; i++) vec[i]=x[i].itv();
+IntervalVector::IntervalVector(const AffineMainVector<T>& x) :
+		n(x.size()),
+		vec(new Interval[x.size()]) {
+	for (int i=0; i<n; i++)
+		vec[i]=x[i].itv();
 }
 
 
@@ -42,18 +45,12 @@ AffineMainVector<T>::AffineMainVector(int n) :
 }
 
 template<class T>
-AffineMainVector<T>::AffineMainVector(int n, const Interval& x, bool b) :
+AffineMainVector<T>::AffineMainVector(int n, const Interval& x) :
 		_n(n),
 		_vec(new AffineMain<T>[n]) {
 	assert(n>=1);
-	if (!b) {
-		for (int i = 0; i < n; i++) {
-			_vec[i] = AffineMain<T>(x);
-		}
-	} else {
-		for (int i = 0; i < n; i++) {
-			_vec[i] = AffineMain<T>(n, i + 1, x);
-		}
+	for (int i = 0; i < n; i++) {
+		_vec[i] = AffineMain<T>(n, i + 1, x);
 	}
 }
 
@@ -80,7 +77,7 @@ AffineMainVector<T>::AffineMainVector(const AffineMainVector<T>& x) :
 }
 
 template<class T>
-AffineMainVector<T>::AffineMainVector(int n, double bounds[][2], bool b) :
+AffineMainVector<T>::AffineMainVector(int n, double bounds[][2]) :
 		_n(n),
 		_vec(new AffineMain<T>[n]) {
 	if (bounds == 0){ // probably, the user called Affine2MainVector<T>(n,0) and 0 is interpreted as NULL!
@@ -89,31 +86,19 @@ AffineMainVector<T>::AffineMainVector(int n, double bounds[][2], bool b) :
 		}
 	}
 	else {
-		if (!b) {
-			for (int i = 0; i < n; i++){
-				_vec[i] =  AffineMain<T>(Interval(bounds[i][0], bounds[i][1]));
-			}
-		} else {
-			for (int i = 0; i < n; i++){
-				_vec[i] =  AffineMain<T>(n, i + 1, Interval(bounds[i][0], bounds[i][1]));
-			}
+		for (int i = 0; i < n; i++){
+			_vec[i] =  AffineMain<T>(n, i + 1, Interval(bounds[i][0], bounds[i][1]));
 		}
 	}
 }
 
 
 template<class T>
-AffineMainVector<T>::AffineMainVector(const IntervalVector& x, bool b) :
+AffineMainVector<T>::AffineMainVector(const IntervalVector& x) :
 		_n(x.size()),
 		_vec(new AffineMain<T>[x.size()]) {
-	if (!b) {
-		for (int i = 0; i < x.size(); i++) {
-			_vec[i] = AffineMain<T>(x[i]);
-		}
-	} else {
-		for (int i = 0; i < x.size(); i++) {
-			_vec[i] = AffineMain<T>(x.size(), i + 1, x[i]);
-		}
+	for (int i = 0; i < x.size(); i++) {
+		_vec[i] = AffineMain<T>(x.size(), i + 1, x[i]);
 	}
 }
 

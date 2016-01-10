@@ -135,7 +135,7 @@ inline void Affine3Eval::cst_fwd(const ExprConstant& c, ExprLabel& y) {
 	}
 	case Dim::ROW_VECTOR:
 	case Dim::COL_VECTOR: {
-		y.af3->v() = Affine3Vector(c.get_vector_value(),false);
+		y.af3->v() = c.get_vector_value();
 		y.d->v() = c.get_vector_value();
 		break;
 	}

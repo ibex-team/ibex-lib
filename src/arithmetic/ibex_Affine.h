@@ -68,7 +68,7 @@ class AffineMain {
 private:
 	friend class Affine2Eval;
 	friend class Affine3Eval;
-
+	friend class Function;
 	/** \brief tolerance for default compact procedure  */
 
 
@@ -144,6 +144,15 @@ private:
 	AffineMain&  signA(const Interval& itv);
 
 
+	/** \brief Create an affine form with n variables and  initialized the m^th variable with  itv.
+	 * TO WRITE in your Affine implementation
+	 */
+	AffineMain(int n, int m, const Interval& itv);
+
+	/** \brief resize the length of the affine form
+	 *  TO WRITE in your Affine implementation
+	 */
+	AffineMain&  resize(int n);
 
 public:
 
@@ -161,11 +170,6 @@ public:
 	 * TO WRITE in your Affine implementation
 	 */
 	explicit AffineMain(const Interval& itv);
-
-	/** \brief Create an affine form with n variables and  initialized the m^th variable with  itv.
-	 * TO WRITE in your Affine implementation
-	 */
-	AffineMain(int n, int m, const Interval& itv);
 
 	/** \brief Create an affine form with n variables, initialized with x
 	 * TO WRITE in your Affine implementation

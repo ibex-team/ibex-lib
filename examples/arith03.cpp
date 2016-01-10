@@ -269,7 +269,7 @@ int main() {
 		}
 		{
 			Affine2 f, z;
-			Affine2Vector x(4, Interval(3.9, 4.1), true );  // Initialization with x[i] = Affine2(4,i+1,Interval(3.9, 4.1));
+			Affine2Vector x(4, Interval(3.9, 4.1));  // Initialization with x[i] = Affine2(4,i+1,Interval(3.9, 4.1));
 			start = clock();
 			for (int k = 0; k < n; k++) {
 				f = 0;

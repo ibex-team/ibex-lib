@@ -59,11 +59,10 @@ public:
 	/**
 	 * \brief  Create an Affine2MainVector of dimension \a n with
 	 * all the components initialized to
-	 *  if (!b) Affine2(\a x)
-	 *  else Affine2(\a n,i+1,\a x) }.
+	 *  Affine2(\a n,i+1,\a x) }.
 	 * \pre n>0
 	 */
-	AffineMainVector(int n, const Interval& x, bool b =false);
+	AffineMainVector(int n, const Interval& x);
 
 	/**
 	 * \brief  Create \a n Affine2MainVector of dimension \a n with
@@ -85,13 +84,12 @@ public:
 
 	/**
 	 * \brief Create \a n Affine2MainVector  initialized by
-	 * if !(\a b)  Affine2(Interval(bounds[i][0],bounds[i][1]) )
-	 * else Affine2(\a n, i+1,Interval(bounds[i][0],bounds[i][1]) )
+	 * Affine2(\a n, i+1,Interval(bounds[i][0],bounds[i][1]) )
 	 *
 	 * \param bounds an nx2 array of doubles
 	 * \pre n>0
 	 */
-	AffineMainVector(int n, double  bounds[][2], bool b =false);
+	AffineMainVector(int n, double  bounds[][2]);
 
 	/**
 	 * \brief Create \a x.size Affine2MainVector of dimension \a x.size with
@@ -99,7 +97,7 @@ public:
 	 * if !(\a b) Affine2(x[i])
 	 * else  Affine2(x.size(), i+1,x[i])
 	 */
-	explicit AffineMainVector(const IntervalVector& x, bool b =false);
+	explicit AffineMainVector(const IntervalVector& x);
 
 	/**
 	 * \brief Create the degenerated Affine2MainVector x

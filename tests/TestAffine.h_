@@ -1015,7 +1015,7 @@ void TestAffine<AF_Default>::test101()   {
 	v[0] = Interval(-1, 1);
 	v[1] = Interval(2, 3);
 	v[2] = Interval(-4,-4);
-	AffineMainVector<AF_Default> va(v,true);
+	AffineMainVector<AF_Default> va(v);
 
 	IntervalVector res = ydot.eval_vector(v);
 	AffineMainVector<AF_Default> resa = ydot.eval_affine2_vector(va);
@@ -1041,7 +1041,7 @@ void TestAffine<AF_Other>::test101()   {
 	v[0] = Interval(-1, 1);
 	v[1] = Interval(2, 3);
 	v[2] = Interval(-4,-4);
-	AffineMainVector<AF_Other> va(v,true);
+	AffineMainVector<AF_Other> va(v);
 
 	IntervalVector res = ydot.eval_vector(v);
 	AffineMainVector<AF_Other> resa = ydot.eval_affine3_vector(va);
