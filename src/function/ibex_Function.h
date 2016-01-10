@@ -1158,7 +1158,7 @@ inline void Function::write_arg_af2_domains(const IntervalVector& box) const {
 		int j;
 		for (int i=0; i<nb_used_vars(); i++) {
 			j=used_var(i);
-			arg_af2[j].i()=Affine2(nb_var(),j+1,box[j]);
+			arg_af2[j].i()=Affine2(nb_var(),j,box[j]);
 		}
 	}
 	else
@@ -1194,7 +1194,7 @@ inline void Function::write_arg_af3_domains(const IntervalVector& box) const {
 		int j;
 		for (int i=0; i<nb_used_vars(); i++) {
 			j=used_var(i);
-			arg_af3[j].i()=Affine3(nb_var(),j+1,box[j]);
+			arg_af3[j].i()=Affine3(nb_var(),j,box[j]);
 		}
 	}
 	else

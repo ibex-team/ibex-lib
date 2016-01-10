@@ -80,7 +80,7 @@ AffineMain<AF_fAFFullI>::AffineMain(int n, int m, const Interval& itv) :
 _n 		(1),
 _elt	(0.0, std::list<std::pair<int,double> >(), Interval(0.0))
 {
-	assert((n>=0) && (m>=0));
+	assert((n>0) && (m>=0));
 	// std::cout << "not implemented" << std::endl;
 	*this = itv;
 }
@@ -572,6 +572,12 @@ void AffineMain<AF_fAFFullI>::compact(double tol){
 		}
 	}
 	return;
+}
+
+
+template<>
+AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::resize(int n) {
+	// Nothing to do
 }
 
 

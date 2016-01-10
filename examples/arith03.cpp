@@ -89,8 +89,8 @@ int main() {
 		i2 = Interval(1, 3);
 		fia = i1 * pow(i2, 2) - exp(i1 * i2);
 
-		a1 = Affine2(2, 1, i1);
-		a2 = Affine2(2, 2, i2);
+		a1 = Affine2(2, 0, i1);
+		a2 = Affine2(2, 1, i2);
 		faa = a1 * pow(a2, 2) - exp(a2 * a1);
 
 		cout << a1 << endl;
@@ -98,7 +98,7 @@ int main() {
 		cout << fia << endl;
 		cout << faa << endl;
 
-		Affine2 ff(1, 1, Interval(0, 1));
+		Affine2 ff(1, 0, Interval(0, 1));
 
 		cout << ff << endl;
 		cout << pow(ff, 2) << endl;
@@ -117,10 +117,10 @@ int main() {
 		faa.err() += Interval(10000);
 		cout << faa.err() << endl;
 */
-		Affine2 fff(1, 1, Interval(0.5, 1));
+		Affine2 fff(1, 0, Interval(0.5, 1));
 		cout << fff << endl;
 
-		Affine2 fff1(1, 1, Interval(2, 3));
+		Affine2 fff1(1, 0, Interval(2, 3));
 		cout << fff1 << endl;
 		cout << "test add" << endl;
 		cout << fff + fff1 << endl;
@@ -174,7 +174,7 @@ int main() {
 		cout << pow(fff1, 1) << endl;
 		cout << "==========================================" << endl;
 
-		fff1 = Affine2(2, 1, Interval(2, 3));
+		fff1 = Affine2(2, 0, Interval(2, 3));
 		cout << "test log" << endl;
 		cout << log(fff1) << endl;
 		cout << "test inv" << endl;
@@ -196,7 +196,7 @@ int main() {
 		cout << pow(fff1, 1) << endl;
 		cout << "==========================================" << endl;
 
-		fff1 = Affine2(2, 2, Interval(2, 3));
+		fff1 = Affine2(2, 1, Interval(2, 3));
 		cout << "test log" << endl;
 		cout << log(fff1) << endl;
 		cout << "test inv" << endl;

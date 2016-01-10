@@ -71,19 +71,14 @@ AffineMain<AF_fAF1>::AffineMain(int n, int m, const Interval& itv) :
 			_n 		(n),
 			_elt	(NULL, 0.0)
 {
-	assert((n>=0) && (m>=0) && (m<=n));
+	assert((n>0) && (m>=0) && (m<n));
 	if (!(itv.is_unbounded()||itv.is_empty())) {
 		_elt._val	=new double[n + 1];
 		_elt._val[0] = itv.mid();
 		for (int i = 1; i <= n; i++){
 			_elt._val[i] = 0.0;
 		}
-
-		if (m == 0) {
-			_elt._err = itv.rad();
-		} else {
-			_elt._val[m] = itv.rad();
-		}
+		_elt._val[m+1] = itv.rad();
 	} else {
 		*this = itv;
 	}
@@ -469,11 +464,17 @@ AffineMain<AF_fAF1>& AffineMain<AF_fAF1>::operator*=(const AffineMain<AF_fAF1>& 
 
 		} else {
 			if (_n>y.size()) {
-				*this *=  AffineMain<AF_fAF1>(size(),0,y.itv());
+				AffineMain<AF_fAF1> tmp;
+				tmp._elt._val	= new double[_n];
+				for (int i =0; i<= y.size(); i++) {
+					tmp._elt._val[i] = y._elt._val[i];
+				}
+				tmp._elt._err = y._elt._err;
+				tmp._n = _n;
+				*this *= tmp;
 			} else {
-				Interval tmp1 = this->itv();
-				*this = y;
-				*this *= AffineMain<AF_fAF1>(size(),0,tmp1);
+				this->resize(y.size());
+				*this *= y;
 			}
 		}
 
@@ -495,7 +496,12 @@ AffineMain<AF_fAF1>& AffineMain<AF_fAF1>::operator*=(const Interval& y) {
 		*this = itv()*y;
 
 	} else {
-		*this *= AffineMain<AF_fAF1>(size(),0,y);
+		AffineMain<AF_fAF1> tmp;
+		tmp._n = _n;
+		tmp._elt._val	= new double[_n];
+		tmp._elt._val[0] = y.mid();
+		tmp._elt._err	= y.rad();
+		*this *= tmp;
 	}
 	return *this;
 }
@@ -573,6 +579,22 @@ void AffineMain<AF_fAF1>::compact(double tol){
 			_elt._err += fabs(_elt._val[i]);
 			_elt._val[i] =0;
 		}
+	}
+}
+
+
+template<>
+AffineMain<AF_fAF1>& AffineMain<AF_fAF1>::resize(int n) {
+	if (n>_n) {
+		double * tmp	= new double[n];
+		for (int i =0; i<= _n; i++) {
+			tmp[i] = _elt._val[i];
+		}
+		delete[] _elt._val;
+		_elt._val = tmp;
+		_n = n;
+	} else if (n!=_n) {
+		ibex_error("AffineMain<AF_fAF1>::resize: the new size is less than the previous");
 	}
 }
 

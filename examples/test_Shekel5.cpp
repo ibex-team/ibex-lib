@@ -67,7 +67,7 @@ int main() {
 		Timer::start();
 		AffineMain<AF_No> x[4];
 		for (int l=0; l<4;l++){
-			x[l]= AffineMain<AF_No>(4,l+1,Interval(4));
+			x[l]= AffineMain<AF_No>(4,l,Interval(4));
 		}
 
 		AffineMain<AF_No> f, z;
@@ -90,7 +90,7 @@ int main() {
 		Timer::start();
 		AffineMain<AF_sAF> x[4];
 		for (int l=0; l<4;l++){
-			x[l]= AffineMain<AF_sAF>(4,l+1,Interval(4));
+			x[l]= AffineMain<AF_sAF>(4,l,Interval(4));
 		}
 
 		AffineMain<AF_sAF> f, z;
@@ -113,7 +113,7 @@ int main() {
 		Timer::start();
 		AffineMain<AF_iAF> x[4];
 		for (int l=0; l<4;l++){
-			x[l]= AffineMain<AF_iAF>(4,l+1,Interval(4));
+			x[l]= AffineMain<AF_iAF>(4,l,Interval(4));
 		}
 
 		AffineMain<AF_iAF> f, z;
@@ -137,7 +137,7 @@ int main() {
 		Timer::start();
 		AffineMain<AF_fAF1> x[4];
 		for (int l=0; l<4;l++){
-			x[l]= AffineMain<AF_fAF1>(4,l+1,Interval(4));
+			x[l]= AffineMain<AF_fAF1>(4,l,Interval(4));
 		}
 
 		AffineMain<AF_fAF1> f, z;
@@ -161,7 +161,7 @@ int main() {
 		Timer::start();
 		AffineMain<AF_fAF2> x[4];
 		for (int l=0; l<4;l++){
-			x[l]= AffineMain<AF_fAF2>(4,l+1,Interval(4));
+			x[l]= AffineMain<AF_fAF2>(4,l,Interval(4));
 		}
 
 		AffineMain<AF_fAF2> f, z;
@@ -185,7 +185,7 @@ int main() {
 		Timer::start();
 		AffineMain<AF_fAF2_fma> x[4];
 		for (int l=0; l<4;l++){
-			x[l]= AffineMain<AF_fAF2_fma>(4,l+1,Interval(4));
+			x[l]= AffineMain<AF_fAF2_fma>(4,l,Interval(4));
 		}
 
 		AffineMain<AF_fAF2_fma> f, z;
@@ -231,7 +231,7 @@ int main() {
 		Timer::start();
 		AffineMain<AF_No> x[4];
 		for (int l=0; l<4;l++){
-			x[l]= AffineMain<AF_No>(4,l+1,Interval(3.9,4.1));
+			x[l]= AffineMain<AF_No>(4,l,Interval(3.9,4.1));
 		}
 
 		AffineMain<AF_No> f, z;
@@ -254,7 +254,7 @@ int main() {
 		Timer::start();
 		AffineMain<AF_sAF> x[4];
 		for (int l=0; l<4;l++){
-			x[l]= AffineMain<AF_sAF>(4,l+1,Interval(3.9,4.1));
+			x[l]= AffineMain<AF_sAF>(4,l,Interval(3.9,4.1));
 		}
 
 		AffineMain<AF_sAF> f, z;
@@ -277,7 +277,7 @@ int main() {
 		Timer::start();
 		AffineMain<AF_iAF> x[4];
 		for (int l=0; l<4;l++){
-			x[l]= AffineMain<AF_iAF>(4,l+1,Interval(3.9,4.1));
+			x[l]= AffineMain<AF_iAF>(4,l,Interval(3.9,4.1));
 		}
 
 		AffineMain<AF_iAF> f, z;
@@ -301,7 +301,7 @@ int main() {
 		Timer::start();
 		AffineMain<AF_fAF1> x[4];
 		for (int l=0; l<4;l++){
-			x[l]= AffineMain<AF_fAF1>(4,l+1,Interval(3.9,4.1));
+			x[l]= AffineMain<AF_fAF1>(4,l,Interval(3.9,4.1));
 		}
 
 		AffineMain<AF_fAF1> f, z;
@@ -325,7 +325,7 @@ int main() {
 		Timer::start();
 		AffineMain<AF_fAF2> x[4];
 		for (int l=0; l<4;l++){
-			x[l]= AffineMain<AF_fAF2>(4,l+1,Interval(3.9,4.1));
+			x[l]= AffineMain<AF_fAF2>(4,l,Interval(3.9,4.1));
 		}
 
 		AffineMain<AF_fAF2> f, z;
@@ -349,7 +349,7 @@ int main() {
 		Timer::start();
 		AffineMain<AF_fAF2_fma> x[4];
 		for (int l=0; l<4;l++){
-			x[l]= AffineMain<AF_fAF2_fma>(4,l+1,Interval(3.9,4.1));
+			x[l]= AffineMain<AF_fAF2_fma>(4,l,Interval(3.9,4.1));
 		}
 
 		AffineMain<AF_fAF2_fma> f, z;
