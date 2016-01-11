@@ -1155,10 +1155,11 @@ inline void Function::write_arg_af2_domains(const Array<const Affine2Domain>& d)
 inline void Function::write_arg_af2_domains(const IntervalVector& box) const {
 	if (_nb_used_vars==-1) this->generate_used_vars();
 	if (all_args_scalar()) {
+		Affine2Vector af2box(box);
 		int j;
 		for (int i=0; i<nb_used_vars(); i++) {
 			j=used_var(i);
-			arg_af2[j].i()=Affine2(nb_var(),j,box[j]);
+			arg_af2[j].i()=af2box[j];
 		}
 	}
 	else
@@ -1191,10 +1192,11 @@ inline void Function::write_arg_af3_domains(const Array<const Affine3Domain>& d)
 inline void Function::write_arg_af3_domains(const IntervalVector& box) const {
 	if (_nb_used_vars==-1) this->generate_used_vars();
 	if (all_args_scalar()) {
+		Affine3Vector af3box(box);
 		int j;
 		for (int i=0; i<nb_used_vars(); i++) {
 			j=used_var(i);
-			arg_af3[j].i()=Affine3(nb_var(),j,box[j]);
+			arg_af3[j].i()=af3box[j];
 		}
 	}
 	else

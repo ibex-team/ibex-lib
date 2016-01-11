@@ -16,6 +16,23 @@ namespace ibex {
 
 
 template<>
+AffineMain<AF_fAF1>& AffineMain<AF_fAF1>::resize(int n){
+	if (n>_n) {
+		double * tmp	= new double[n+1];
+		for (int i =0; i<= _n; i++) {
+			tmp[i] = _elt._val[i];
+		}
+		delete[] _elt._val;
+		_elt._val = tmp;
+		_n = n;
+	} else if (n!=_n) {
+		ibex_error("AffineMain<AF_fAF1>::resize: the new size is less than the previous");
+	}
+	return *this;
+}
+
+
+template<>
 AffineMain<AF_fAF1>& AffineMain<AF_fAF1>::operator=(const Interval& x) {
 
 	if (x.is_empty()) {
@@ -304,11 +321,17 @@ AffineMain<AF_fAF1>& AffineMain<AF_fAF1>::saxpy(double alpha, const AffineMain<A
 
 				} else  {
 					if (_n>y.size()) {
-						*this += y.itv();
+						AffineMain<AF_fAF1> tmp;
+						tmp._elt._val	= new double[_n+1];
+						for (int i =0; i<= y.size(); i++) {
+							tmp._elt._val[i] = y._elt._val[i];
+						}
+						tmp._elt._err = y._elt._err;
+						tmp._n = _n;
+						*this += tmp;
 					} else {
-						Interval tmp1 = itv();
-						*this = y;
-						*this += tmp1;
+						this->resize(y.size());
+						*this += y;
 					}
 				}
 			}
@@ -465,7 +488,7 @@ AffineMain<AF_fAF1>& AffineMain<AF_fAF1>::operator*=(const AffineMain<AF_fAF1>& 
 		} else {
 			if (_n>y.size()) {
 				AffineMain<AF_fAF1> tmp;
-				tmp._elt._val	= new double[_n];
+				tmp._elt._val	= new double[_n+1];
 				for (int i =0; i<= y.size(); i++) {
 					tmp._elt._val[i] = y._elt._val[i];
 				}
@@ -498,7 +521,7 @@ AffineMain<AF_fAF1>& AffineMain<AF_fAF1>::operator*=(const Interval& y) {
 	} else {
 		AffineMain<AF_fAF1> tmp;
 		tmp._n = _n;
-		tmp._elt._val	= new double[_n];
+		tmp._elt._val	= new double[_n+1];
 		tmp._elt._val[0] = y.mid();
 		tmp._elt._err	= y.rad();
 		*this *= tmp;
@@ -579,22 +602,6 @@ void AffineMain<AF_fAF1>::compact(double tol){
 			_elt._err += fabs(_elt._val[i]);
 			_elt._val[i] =0;
 		}
-	}
-}
-
-
-template<>
-AffineMain<AF_fAF1>& AffineMain<AF_fAF1>::resize(int n) {
-	if (n>_n) {
-		double * tmp	= new double[n];
-		for (int i =0; i<= _n; i++) {
-			tmp[i] = _elt._val[i];
-		}
-		delete[] _elt._val;
-		_elt._val = tmp;
-		_n = n;
-	} else if (n!=_n) {
-		ibex_error("AffineMain<AF_fAF1>::resize: the new size is less than the previous");
 	}
 }
 

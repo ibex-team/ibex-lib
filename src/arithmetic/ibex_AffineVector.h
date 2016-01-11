@@ -163,7 +163,7 @@ public:
 	 *
 	 * \note Emptiness is "overridden".
 	 */
-	void init(const Interval& x, bool b =false);
+	void init(const Interval& x);
 
 	/**
 	 * \brief Set all the elements to x
@@ -495,7 +495,7 @@ inline AffineMain<T>& AffineMainVector<T>::operator[](int i) {
 
 template<class T>
 inline void AffineMainVector<T>::clear() {
-	init(0);
+	init(Interval(0));
 }
 
 template<class T>

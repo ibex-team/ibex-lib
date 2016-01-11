@@ -144,7 +144,7 @@ int LinearRelaxAffine2::linearization(const IntervalVector& box, LinearSolver& l
 	// Create the linear relaxation of each constraint
 	for (int ctr = 0; ctr < sys.nb_ctr; ctr++) {
 
-		Affine2 af2 = 0.0;
+		af2 = 0.0;
 		op = sys.ctrs[ctr].op;
 
 		ev = sys.ctrs[ctr].f.eval_affine2(box, af2);

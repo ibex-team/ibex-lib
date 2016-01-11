@@ -41,9 +41,9 @@ class Affine3Eval;
  *
  */
 
-
+typedef AF_fAF2_dyn AF_Default;
 //typedef AF_fAF1  AF_Default;
-typedef AF_fAF2  AF_Default;
+//typedef AF_fAF2  AF_Default;
 //typedef AF_fAF2_fma  AF_Default;
 //typedef AF_iAF  AF_Default;
 //typedef AF_sAF  AF_Default;
@@ -68,7 +68,7 @@ class AffineMain {
 private:
 	friend class Affine2Eval;
 	friend class Affine3Eval;
-	friend class Function;
+	friend class AffineMainVector<T>;
 	/** \brief tolerance for default compact procedure  */
 
 

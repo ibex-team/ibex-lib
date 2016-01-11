@@ -578,6 +578,7 @@ void AffineMain<AF_fAFFullI>::compact(double tol){
 template<>
 AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::resize(int n) {
 	// Nothing to do
+	return *this;
 }
 
 

@@ -765,7 +765,7 @@ inline Interval& IntervalVector::operator[](int i) {
 }
 
 inline void IntervalVector::clear() {
-	init(0);
+	init(Interval(0));
 }
 
 inline IntervalVector IntervalVector::operator&(const IntervalVector& x) const {

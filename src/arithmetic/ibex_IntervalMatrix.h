@@ -697,7 +697,7 @@ inline const IntervalVector& IntervalMatrix::operator[](int i) const {
 }
 
 inline void IntervalMatrix::clear() {
-	init(0);
+	init(Interval(0));
 }
 
 inline void IntervalMatrix::set_empty() {
