@@ -21,6 +21,7 @@
 #include "ibex_Affine2_fAF2.h"
 #include "ibex_Affine2_iAF.h"
 #include "ibex_Affine2_fAF2_fma.h"
+#include "ibex_Affine2_fAF2_dyn.h"
 #include "ibex_Affine2_sAF.h"
 #include "ibex_Affine2_No.h"
 #include "ibex_Affine3_fAFFullI.h"
@@ -144,10 +145,6 @@ private:
 	AffineMain&  signA(const Interval& itv);
 
 
-	/** \brief Create an affine form with n variables and  initialized the m^th variable with  itv.
-	 * TO WRITE in your Affine implementation
-	 */
-	AffineMain(int n, int m, const Interval& itv);
 
 	/** \brief resize the length of the affine form
 	 *  TO WRITE in your Affine implementation
@@ -170,6 +167,12 @@ public:
 	 * TO WRITE in your Affine implementation
 	 */
 	explicit AffineMain(const Interval& itv);
+
+
+	/** \brief Create an affine form with n variables and  initialized the m^th variable with  itv.
+	 * TO WRITE in your Affine implementation
+	 */
+	AffineMain(int n, int m, const Interval& itv);
 
 	/** \brief Create an affine form with n variables, initialized with x
 	 * TO WRITE in your Affine implementation

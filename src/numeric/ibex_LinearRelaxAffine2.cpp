@@ -60,7 +60,7 @@ bool LinearRelaxAffine2::goal_linearization(const IntervalVector& box, LinearSol
 int LinearRelaxAffine2::inlinearization(const IntervalVector& box, LinearSolver& lp_solver) {
 	// TODO a verifier et finir
 
-	Affine2 af2(0.0);
+	Affine2 af2;
 
 	int cont=0;
 	Interval ev(0), center(0), err(0);
@@ -133,7 +133,7 @@ int LinearRelaxAffine2::inlinearization(const IntervalVector& box, LinearSolver&
 /*********generation of the linearized system*********/
 int LinearRelaxAffine2::linearization(const IntervalVector& box, LinearSolver& lp_solver) {
 
-	Affine2 af2(0.0);
+	Affine2 af2;
 	Vector rowconst(sys.nb_var);
 	Interval ev(0.0);
 	Interval center(0.0);
