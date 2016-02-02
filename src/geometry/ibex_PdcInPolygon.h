@@ -74,10 +74,10 @@ protected:
     /**
      * Definition of the segment of the polygon
      */
-	std::vector<double>& ax;
-    std::vector<double>& ay;
-    std::vector<double>& bx;
-    std::vector<double>& by;
+	  std::vector<double> ax;
+    std::vector<double> ay;
+    std::vector<double> bx;
+    std::vector<double> by;
 };
 
 } // namespace ibex
