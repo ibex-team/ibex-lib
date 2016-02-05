@@ -145,7 +145,7 @@ private:
 	/**
 	 * \brief Symbolic Jacobian
 	 */
-	Function df;
+	Function* df;
 
 //	// used in greedy heuristics :  not implemented in v2.0
 //	inline double abs(double a){

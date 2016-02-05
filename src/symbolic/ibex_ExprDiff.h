@@ -20,6 +20,23 @@ namespace ibex {
 /**
  * \ingroup symbolic
  *
+ * \brief Thrown when differentiation failed.
+ *
+ * Not all expressions are currently differentiable with Ibex.
+ * This is the case for expressions with matrix/vector operations.
+ */
+class ExprDiffException : public Exception {
+public:
+	ExprDiffException(const std::string& msg);
+	std::string msg;
+};
+
+
+std::ostream& operator<< (std::ostream& os, const ExprDiffException& e);
+
+/**
+ * \ingroup symbolic
+ *
  * \brief Differentiate an expression.
  *
  */

@@ -33,6 +33,14 @@ const ExprVector& zeros(int m, int n) {
 	return ExprVector::new_(_zeros,false);
 }
 
+ExprDiffException::ExprDiffException(const std::string& msg) : msg(msg) {
+
+}
+
+std::ostream& operator<< (std::ostream& os, const ExprDiffException& e) {
+	return os << e.msg;
+}
+
 void ExprDiff::add_grad_expr(const ExprNode& node, const ExprNode& _expr_) {
 
 	if (grad.found(node))
@@ -54,7 +62,7 @@ const ExprNode& ExprDiff::diff(const Array<const ExprSymbol>& old_x, const Array
 		const ExprVector* vec=dynamic_cast<const ExprVector*>(&y); // TODO: not correct, ex: Function f("x","y","2*(x,y)");
 
 		if (!vec) {
-			not_implemented("differentation of a multivalued function involving vector/matrix operations");
+			throw ExprDiffException("differentation of a multivalued function involving vector/matrix operations");
 		}
 		int m=y.dim.vec_size();
 		int n=old_x.size();
@@ -86,7 +94,7 @@ const ExprNode& ExprDiff::diff(const Array<const ExprSymbol>& old_x, const Array
 			}
 		}
 	} else {
-		not_implemented("differentiation of matrix-valued functions");
+		throw ExprDiffException("differentiation of matrix-valued functions");
 		return y;
 	}
 }
@@ -137,7 +145,7 @@ const ExprNode& ExprDiff::gradient(const Array<const ExprSymbol>& old_x, const A
 				grad.insert(v, &zeros(v.dim.dim2,v.dim.dim3));
 				break;
 			default:
-				not_implemented("diff with matrix arrays");
+				throw ExprDiffException("diff with matrix arrays");
 				break;
 			}
 		}
@@ -177,7 +185,7 @@ const ExprNode& ExprDiff::gradient(const Array<const ExprSymbol>& old_x, const A
 			    }
 			    break;
 			default:
-				not_implemented("diff with matrix arrays");
+				throw ExprDiffException("diff with matrix arrays");
 				break;
 			}
 		}
@@ -250,7 +258,7 @@ void ExprDiff::visit(const ExprIndex& i) {
 	}
 
 	if (i.expr.dim.type()==Dim::MATRIX_ARRAY) {
-		not_implemented("diff with matrix arrays");
+		throw ExprDiffException("diff with matrix arrays");
 	}
 
 	int n = i.expr.dim.max_index()+1;
@@ -354,7 +362,7 @@ void ExprDiff::visit(const ExprApply& e) {
 		break;
 		case Dim::MATRIX:
 		{
-			not_implemented("diff with function apply and matrix arguments");
+			throw ExprDiffException("diff with function apply and matrix arguments");
 
 			// In case this argument is a ExprVector, we keep for the matrix representing the "partial gradient"
 			// wrt to this argument the same structure, that is, if this argument is a "row of column vectors"
@@ -376,7 +384,7 @@ void ExprDiff::visit(const ExprApply& e) {
 		}
 		break;
 		default:
-			not_implemented("diff with matrix arrays");
+			throw ExprDiffException("diff with matrix arrays");
 			break;
 		}
 	}
@@ -386,18 +394,18 @@ void ExprDiff::visit(const ExprApply& e) {
 void ExprDiff::visit(const ExprChi& e) {
 
 	//TODO
-	not_implemented("diff with chi");
+	throw ExprDiffException("diff with chi");
 }
 
 void ExprDiff::visit(const ExprAdd& e)   { add_grad_expr(e.left,  *grad[e]);
                                            add_grad_expr(e.right, *grad[e]); }
-void ExprDiff::visit(const ExprMul& e)   { if (!e.dim.is_scalar()) not_implemented("diff with matrix/vector multiplication"); // TODO
-                                           add_grad_expr(e.left,  e.right * (*grad[e]));
-                                           add_grad_expr(e.right, e.left * (*grad[e])); }
+void ExprDiff::visit(const ExprMul& e)   { if (!e.dim.is_scalar()) throw ExprDiffException("diff with matrix/vector multiplication"); // TODO
+                                           add_grad_expr(e.left,  (*grad[e])*e.right);
+                                           add_grad_expr(e.right, (*grad[e])*e.left); }
 void ExprDiff::visit(const ExprSub& e)   { add_grad_expr(e.left,  *grad[e]);
 										   add_grad_expr(e.right, -*grad[e]); }
 void ExprDiff::visit(const ExprDiv& e)   { add_grad_expr(e.left,  *grad[e]/e.right);
-		                                   add_grad_expr(e.right, -(e.left*(*grad[e])/sqr(e.right))); }
+		                                   add_grad_expr(e.right, -((*grad[e])*e.left/sqr(e.right))); }
 void ExprDiff::visit(const ExprMax& e)   { add_grad_expr(e.left, (*grad[e])*chi(e.right-e.left, ONE, ZERO));
 										   add_grad_expr(e.right,(*grad[e])*chi(e.left-e.right, ONE, ZERO)); }
 void ExprDiff::visit(const ExprMin& e)   { add_grad_expr(e.left, (*grad[e])*chi(e.left-e.right, ONE, ZERO));
@@ -413,7 +421,7 @@ void ExprDiff::visit(const ExprPower& e) {
 }
 
 void ExprDiff::visit(const ExprMinus& e) { add_grad_expr(e.expr, -*grad[e]); }
-void ExprDiff::visit(const ExprTrans& e) { not_implemented("diff with transpose"); } //TODO
+void ExprDiff::visit(const ExprTrans& e) { throw ExprDiffException("diff with transpose"); } //TODO
 void ExprDiff::visit(const ExprSign& e)  { add_grad_expr(e.expr, (*grad[e])*chi(abs(e.expr),ALL_REALS,ZERO)); }
 void ExprDiff::visit(const ExprAbs& e)   { add_grad_expr(e.expr, (*grad[e])*sign(e.expr)); }
 void ExprDiff::visit(const ExprSqr& e)   { add_grad_expr(e.expr, (*grad[e])*Interval(2.0)*e.expr); }
