@@ -284,7 +284,7 @@ inline double Interval::mid() const {
 }
 
 inline bool Interval::is_empty() const {
-	return ub()==NEG_INFINITY; //*this==EMPTY_SET;
+	return (ub()==NEG_INFINITY || lb()==POS_INFINITY); //*this==EMPTY_SET;
 }
 
 inline bool Interval::is_degenerated() const {

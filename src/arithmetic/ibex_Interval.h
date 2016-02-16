@@ -943,11 +943,11 @@ inline Interval::Interval() : itv(NEG_INFINITY, POS_INFINITY) {
 }
 
 inline Interval::Interval(double a, double b) : itv(a,b) {
-	if (a==POS_INFINITY || b==NEG_INFINITY || a>b) *this=EMPTY_SET;
+	if (a>=POS_INFINITY || b<=NEG_INFINITY || a>b) *this=EMPTY_SET;
 }
 
 inline Interval::Interval(double a) : itv(a,a) {
-	if (a==NEG_INFINITY || a==POS_INFINITY) *this=EMPTY_SET;
+	if (a<=NEG_INFINITY || a>=POS_INFINITY) *this=EMPTY_SET;
 }
 
 inline bool Interval::operator==(const Interval& x) const {
@@ -955,7 +955,7 @@ inline bool Interval::operator==(const Interval& x) const {
 }
 
 inline Interval& Interval::operator=(double x) {
-	if (x==NEG_INFINITY || x==POS_INFINITY)
+	if (x<=NEG_INFINITY || x>=POS_INFINITY)
 		*this=EMPTY_SET;
 	else
 		itv = x;

@@ -20,8 +20,6 @@
 #include "ibex_Affine2_fAF1.h"
 #include "ibex_Affine2_fAF2.h"
 #include "ibex_Affine2_iAF.h"
-#include "ibex_Affine2_fAF2_fma.h"
-#include "ibex_Affine2_fAF2_dyn.h"
 #include "ibex_Affine2_sAF.h"
 #include "ibex_Affine2_No.h"
 #include "ibex_Affine3_fAFFullI.h"
@@ -42,10 +40,9 @@ class Affine3Eval;
  *
  */
 
-typedef AF_fAF2_dyn AF_Default;
+//typedef AF_fAF2_dyn AF_Default;
 //typedef AF_fAF1  AF_Default;
-//typedef AF_fAF2  AF_Default;
-//typedef AF_fAF2_fma  AF_Default;
+typedef AF_fAF2  AF_Default;
 //typedef AF_iAF  AF_Default;
 //typedef AF_sAF  AF_Default;
 //typedef AF_No  AF_Default;
@@ -769,7 +766,11 @@ inline AffineMain<T>& AffineMain<T>::operator/=(const AffineMain<T>& x){
 
 template<class T>
 inline AffineMain<T> operator+(const AffineMain<T>& x1, const AffineMain<T>& x2){
-	return AffineMain<T>(x1) += x2;
+	if (x1.size()<x2.size()) {
+		return AffineMain<T>(x1) += x2;
+	} else {
+		return AffineMain<T>(x2) += x1;
+	}
 }
 
 template<class T>
@@ -794,7 +795,11 @@ inline AffineMain<T> operator+(const Interval& x1, const AffineMain<T>& x2){
 
 template<class T>
 inline AffineMain<T> operator-(const AffineMain<T>& x1, const AffineMain<T>& x2){
-	return AffineMain<T>(x1) += (-x2);
+	if (x1.size()<x2.size()) {
+		return AffineMain<T>(x1) += (-x2);
+	} else {
+		return AffineMain<T>(x2) += (-x1);
+	}
 }
 
 template<class T>
@@ -821,7 +826,11 @@ inline AffineMain<T> operator-(const Interval& x1, const AffineMain<T>& x2) {
 
 template<class T>
 inline AffineMain<T> operator*(const AffineMain<T>& x1, const AffineMain<T>& x2) {
-	return AffineMain<T>(x1) *= x2;
+	if (x1.size()<x2.size()) {
+		return AffineMain<T>(x1) *= x2;
+	} else {
+		return AffineMain<T>(x2) *= x1;
+	}
 }
 
 template<class T>
@@ -846,7 +855,11 @@ inline AffineMain<T> operator*(const Interval& x1, const AffineMain<T>& x2){
 
 template<class T>
 inline AffineMain<T> operator/(const AffineMain<T>& x1, const AffineMain<T>& x2){
-	return AffineMain<T>(x1) /= x2;
+	if (x1.size()<x2.size()) {
+		return AffineMain<T>(x1) /= x2;
+	} else {
+		return (inv(x2)) *= x1;
+	}
 }
 
 template<class T>

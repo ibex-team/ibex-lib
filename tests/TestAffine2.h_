@@ -1124,9 +1124,10 @@ bool TestAffine2<T>::check_af2 (Function& f, Interval& I){
 
 	if (!(itv2.is_subset(faa.itv())))
 	{
-//		std::cout  << " DEP = "<< I<< "  "  << f<< std::endl;
-//		std::cout  << " RES = "<< itv2 << " /// "<< itv << " ///// " << faa << std::endl;
-	//	std::cout  << " RES = "<< itv2 << " ///// " << faa << std::endl;
+		std::cout.precision(10);
+		std::cout  << " DEP = "<< I<< "  "  << f<< std::endl;
+		std::cout  << " RES (interval//af2_int//af2) = "<< itv2 << " /// "<< itv << " ///// " << faa << std::endl;
+		//std::cout  << " RES = "<< itv2 << " ///// " << faa << std::endl;
 
 		return false;
 	}

@@ -551,7 +551,7 @@ void AffineMain<AF_fAFFullI>::compact(double tol){
 		{
 
 			for (iter = _elt._rays.begin(); iter != _elt._rays.end(); ++iter) {
-				if (std::abs(iter -> second) < seuil) {
+				if (fabs(iter -> second) < seuil) {
 					cumul += (iter->second * pmOne);
 
 					iter = _elt._rays.erase(iter);

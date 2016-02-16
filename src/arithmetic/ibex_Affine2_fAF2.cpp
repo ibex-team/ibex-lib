@@ -24,6 +24,9 @@ AffineMain<AF_fAF2>& AffineMain<AF_fAF2>::resize(int n) {
 		for (int i =0; i<= _n; i++) {
 			tmp[i] = _elt._val[i];
 		}
+		for (int i =_n+1; i<= n; i++) {
+			tmp[i] = 0;
+		}
 		delete[] _elt._val;
 		_elt._val = tmp;
 		_n = n;
@@ -342,13 +345,8 @@ AffineMain<AF_fAF2>& AffineMain<AF_fAF2>::saxpy(double alpha, const AffineMain<A
 
 				} else  {
 					if (_n>y.size()) {
-						AffineMain<AF_fAF2> tmp;
-						tmp._elt._val	= new double[_n+1];
-						for (int i =0; i<= y.size(); i++) {
-							tmp._elt._val[i] = y._elt._val[i];
-						}
-						tmp._elt._err = y._elt._err;
-						tmp._n = _n;
+						AffineMain<AF_fAF2> tmp(y);
+						tmp.resize(_n);
 						*this += tmp;
 					} else {
 						this->resize(y.size());
@@ -580,14 +578,9 @@ AffineMain<AF_fAF2>& AffineMain<AF_fAF2>::operator*=(const AffineMain<AF_fAF2>& 
 
 		} else {
 			if (_n>y.size()) {
-				AffineMain<AF_fAF2> tmp;
-				tmp._elt._val	= new double[_n+1];
-				for (int i =0; i<= y.size(); i++) {
-					tmp._elt._val[i] = y._elt._val[i];
-				}
-				tmp._elt._err = y._elt._err;
-				tmp._n = _n;
-				*this *= tmp;
+				AffineMain<AF_fAF2> tmp1(y);
+				tmp1.resize(_n);
+				*this *= tmp1;
 			} else {
 				this->resize(y.size());
 				*this *= y;
@@ -613,11 +606,8 @@ AffineMain<AF_fAF2>& AffineMain<AF_fAF2>::operator*=(const Interval& y) {
 		*this = itv()*y;
 
 	} else {
-		AffineMain<AF_fAF2> tmp;
-		tmp._n = _n;
-		tmp._elt._val	= new double[_n+1];
-		tmp._elt._val[0] = y.mid();
-		tmp._elt._err	= y.rad();
+		AffineMain<AF_fAF2> tmp(y);
+		tmp.resize(_n);
 		*this *= tmp;
 	}
 	return *this;
