@@ -261,26 +261,69 @@ AffineMain<AF_fAF1> AffineMain<AF_fAF1>::operator-() const {
 }
 
 
+template<>
+AffineMain<AF_fAF1>& AffineMain<AF_fAF1>::operator+=(const AffineMain<AF_fAF1>& y) {
+
+	if (is_actif() && (y.is_actif())) {
+		if (_n==y.size()) {
+			double temp, ttt, sss;
+			ttt=0.0;
+			sss=0.0;
+			for(int i=0;i<=_n;i++) {
+				temp = _elt._val[i]+ y._elt._val[i];
+				ttt += (fabs(_elt._val[i])>fabs(y._elt._val[i]))? fabs(_elt._val[i]) :fabs(y._elt._val[i]);
+				if (fabs(temp)<AF_EC) {
+					sss+= fabs(temp);
+					_elt._val[i] = 0.0;
+				}
+				else {
+					_elt._val[i]=temp;
+				}
+			}
+			_elt._err += y._elt._err;
+			_elt._err +=AF_EE*(AF_EM*ttt);
+			_elt._err += AF_EE*sss;
+
+		} else  {
+			if (_n>y.size()) {
+				AffineMain<AF_fAF1> tmp;
+				tmp._elt._val	= new double[_n+1];
+				for (int i =0; i<= y.size(); i++) {
+					tmp._elt._val[i] = y._elt._val[i];
+				}
+				tmp._elt._err = y._elt._err;
+				tmp._n = _n;
+				*this += tmp;
+			} else {
+				this->resize(y.size());
+				*this += y;
+			}
+		}
+	}
+	else { // y is not a valid affine2 form. So we add y.itv() such as an interval
+		*this = itv()+y.itv();
+	}
+	return *this;
+}
+
 
 
 template<>
-AffineMain<AF_fAF1>& AffineMain<AF_fAF1>::saxpy(double alpha, const AffineMain<AF_fAF1>& y, double beta, double ddelta, bool B1, bool B2, bool B3, bool B4) {
-//std::cout << "saxpy IN " << alpha << " x " << *this << " + " << y << " + "<< beta << " +error " << ddelta << " / "<< B1 << B2 << B3 << B4 << std::endl;
-	double temp, ttt, sss;
-	int i;
-//	std::cout << "in saxpy alpha=" << alpha  <<  "  beta= " <<  beta <<   "  delta = " << ddelta   << std::endl;
+AffineMain<AF_fAF1>& AffineMain<AF_fAF1>::saxpy(double alpha, double beta, double ddelta, bool B1, bool B3, bool B4) {
+
 	if (is_actif()) {
 		if (B1) {  // multiply by a scalar alpha
 			if (alpha==0.0) {
-				for (i=0; i<=_n;i++) {
+				for (int i=0; i<=_n;i++) {
 					_elt._val[i]=0;
 				}
 				_elt._err = 0;
 			}
 			else if ((fabs(alpha)) < POS_INFINITY) {
+				double ttt, sss;
 				ttt= 0.0;
 				sss= 0.0;
-				for (i=0; i<=_n;i++) {
+				for (int i=0; i<=_n;i++) {
 					_elt._val[i] *= alpha;
 					ttt += fabs(_elt._val[i]);
 					if (fabs(_elt._val[i])<AF_EC) {
@@ -297,50 +340,9 @@ AffineMain<AF_fAF1>& AffineMain<AF_fAF1>::saxpy(double alpha, const AffineMain<A
 			}
 		}
 
-		if (B2) {  // add a affine2 form y
-
-			if (y.is_actif()) {
-				if (_n==y.size()) {
-
-					ttt=0.0;
-					sss=0.0;
-					for(i=0;i<=_n;i++) {
-						temp = _elt._val[i]+ y._elt._val[i];
-						ttt += (fabs(_elt._val[i])>fabs(y._elt._val[i]))? fabs(_elt._val[i]) :fabs(y._elt._val[i]);
-						if (fabs(temp)<AF_EC) {
-							sss+= fabs(temp);
-							_elt._val[i] = 0.0;
-						}
-						else {
-							_elt._val[i]=temp;
-						}
-					}
-					_elt._err += y._elt._err;
-					_elt._err +=AF_EE*(AF_EM*ttt);
-					_elt._err += AF_EE*sss;
-
-				} else  {
-					if (_n>y.size()) {
-						AffineMain<AF_fAF1> tmp;
-						tmp._elt._val	= new double[_n+1];
-						for (int i =0; i<= y.size(); i++) {
-							tmp._elt._val[i] = y._elt._val[i];
-						}
-						tmp._elt._err = y._elt._err;
-						tmp._n = _n;
-						*this += tmp;
-					} else {
-						this->resize(y.size());
-						*this += y;
-					}
-				}
-			}
-			else { // y is not a valid affine2 form. So we add y.itv() such as an interval
-				*this = itv()+y.itv();
-			}
-		}
 		if (B3) {  //add a constant beta
 			if ((fabs(beta))<POS_INFINITY) {
+				double temp, ttt, sss;
 				ttt=0.0;
 				sss=0.0;
 				temp = _elt._val[0]+ beta;
@@ -373,7 +375,7 @@ AffineMain<AF_fAF1>& AffineMain<AF_fAF1>::saxpy(double alpha, const AffineMain<A
 
 		if (_elt._val != NULL) {
 			bool b = true;
-			for (i=0;i<=_n;i++) {
+			for (int i=0;i<=_n;i++) {
 				b &= (fabs(_elt._val[i])<POS_INFINITY);
 			}
 			if (!b) {
@@ -385,9 +387,6 @@ AffineMain<AF_fAF1>& AffineMain<AF_fAF1>::saxpy(double alpha, const AffineMain<A
 		if (B1) {  //scalar alpha
 			*this = itv()* alpha;
 		}
-		if (B2) {  // add y
-			*this = itv()+ y.itv();
-		}
 		if (B3) {  //constant beta
 			*this = itv()+ beta;
 		}
@@ -395,7 +394,6 @@ AffineMain<AF_fAF1>& AffineMain<AF_fAF1>::saxpy(double alpha, const AffineMain<A
 			*this = itv()+Interval(-1,1)*ddelta;
 		}
 	}
-//	std::cout << " saxpy OUT x= "<< *this<<std::endl;
 	return *this;
 
 }

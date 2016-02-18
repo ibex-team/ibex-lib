@@ -101,8 +101,8 @@ private:
 	 *  ! Boolean: scalar, add, constant, error
 	 * TO WRITE in your Affine implementation
 	 */
-	AffineMain& saxpy(double alpha, const AffineMain& y, double beta, double delta,
-			bool B1, bool B2, bool B3, bool B4);
+	AffineMain& saxpy(double alpha, double beta, double delta,
+			bool B1, bool B3, bool B4);
 
 
 	/**
@@ -216,6 +216,13 @@ public:
 	 */
 	AffineMain& operator=(const Interval& itv);
 
+
+	/** \brief Add \a x to *this and return the result.
+	 * TO WRITE in your Affine implementation
+	 */
+	AffineMain& operator+=(const AffineMain& x);
+
+
 	/* Union and Intersection of two Affine2 form must not be implemented
 	 * That could produce to much confusion.
 	 */
@@ -326,9 +333,6 @@ public:
 
 	/** \brief Divide *this by \a x and return the result.*/
 	AffineMain& operator/=(const Interval& x);
-
-	/** \brief Add \a x to *this and return the result. */
-	AffineMain& operator+=(const AffineMain& x);
 
 	/** \brief Subtract \a x to *this and return the result. */
 	AffineMain& operator-=(const AffineMain& x);
@@ -682,7 +686,7 @@ inline AffineMain<T>& AffineMain<T>::inflate(double radd){
 	if (fabs(radd)>= POS_INFINITY) {
 		*this = Interval::ALL_REALS;
 	} else {
-		saxpy(1.0, AffineMain<T>(),0.0, radd, false, false, false, true);
+		saxpy(1.0, 0.0, radd, false,  false, true);
 	}
 	return *this;
 }
@@ -716,17 +720,17 @@ inline bool AffineMain<T>::is_unbounded() const{
 
 template<class T>
 inline AffineMain<T>& AffineMain<T>::operator+=(double d){
-	return saxpy(1.0, AffineMain<T>(), d, 0.0, false, false, true, false);
+	return saxpy(1.0,  d, 0.0, false,  true, false);
 }
 
 template<class T>
 inline AffineMain<T>& AffineMain<T>::operator-=(double d){
-	return saxpy(1.0, AffineMain<T>(), (-d), 0.0, false, false, true, false);
+	return saxpy(1.0, (-d), 0.0, false,  true, false);
 }
 
 template<class T>
 inline AffineMain<T>& AffineMain<T>::operator*=(double d){
-	return saxpy(d, AffineMain<T>(), 0.0, 0.0, true, false, false, false);
+	return saxpy(d,  0.0, 0.0, true,  false, false);
 }
 
 template<class T>
@@ -736,7 +740,7 @@ inline 	AffineMain<T>& AffineMain<T>::operator/=(double d) {
 
 template<class T>
 inline AffineMain<T>& AffineMain<T>::operator+=(const Interval& x){
-	return saxpy(1.0, AffineMain<T>(), x.mid(), x.rad(), false, false, true, true);
+	return saxpy(1.0,  x.mid(), x.rad(), false,  true, true);
 }
 
 template<class T>
@@ -747,11 +751,6 @@ inline AffineMain<T>& AffineMain<T>::operator-=(const Interval& x){
 template<class T>
 inline AffineMain<T>& AffineMain<T>::operator/=(const Interval& x){
 	return *this *= (1.0/x) ;
-}
-
-template<class T>
-inline AffineMain<T>& AffineMain<T>::operator+=(const AffineMain<T>& x){
-	return saxpy(1.0, x, 0.0, 0.0, false, true, false, false);
 }
 
 template<class T>

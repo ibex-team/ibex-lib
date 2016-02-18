@@ -271,23 +271,56 @@ AffineMain<AF_No> AffineMain<AF_No>::operator-() const {
 
 
 
+/** \brief Add \a x to *this and return the result. */
+template<>
+AffineMain<AF_No>& AffineMain<AF_No>::operator+=(const AffineMain<AF_No>& y) {
+
+	if (is_actif() && y.is_actif()) {  // add a affine2 form y
+
+		if (_n==y.size()) {
+
+			for(int i=0;i<=_n;i++) {
+				_elt._val[i] +=y._elt._val[i];
+			}
+
+			_elt._err += y._elt._err;
+
+		} else  {
+			if (_n>y.size()) {
+				AffineMain<AF_No> tmp;
+				tmp._elt._val	= new double[_n+1];
+				for (int i =0; i<= y.size(); i++) {
+					tmp._elt._val[i] = y._elt._val[i];
+				}
+				tmp._elt._err = y._elt._err;
+				tmp._n = _n;
+				*this += tmp;
+			} else {
+				this->resize(y.size());
+				*this += y;
+			}
+		}
+	}
+	else { // y is not a valid affine2 form. So we add y.itv() such as an interval
+		*this = itv()+y.itv();
+	}
+	return *this;
+}
+
 
 template<>
-AffineMain<AF_No>& AffineMain<AF_No>::saxpy(double alpha, const AffineMain<AF_No>& y, double beta, double ddelta, bool B1, bool B2, bool B3, bool B4) {
-//std::cout << "saxpy IN " << alpha << " x " << *this << " + " << y << " + "<< beta << " +error " << ddelta << " / "<< B1 << B2 << B3 << B4 << std::endl;
+AffineMain<AF_No>& AffineMain<AF_No>::saxpy(double alpha,  double beta, double ddelta, bool B1, bool B3, bool B4) {
 
-	int i;
-//	std::cout << "in saxpy alpha=" << alpha  <<  "  beta= " <<  beta <<   "  delta = " << ddelta   << std::endl;
 	if (is_actif()) {
 		if (B1) {  // multiply by a scalar alpha
 			if (alpha==0.0) {
-				for (i=0; i<=_n;i++) {
+				for (int i=0; i<=_n;i++) {
 					_elt._val[i]=0;
 				}
 				_elt._err = 0;
 			}
 			else if ((fabs(alpha)) < POS_INFINITY) {
-				for (i=0; i<=_n;i++) {
+				for (int i=0; i<=_n;i++) {
 					_elt._val[i] *= alpha;
 				}
 
@@ -299,37 +332,6 @@ AffineMain<AF_No>& AffineMain<AF_No>::saxpy(double alpha, const AffineMain<AF_No
 			}
 		}
 
-		if (B2) {  // add a affine2 form y
-
-			if (y.is_actif()) {
-				if (_n==y.size()) {
-
-					for(i=0;i<=_n;i++) {
-						_elt._val[i] +=y._elt._val[i];
-					}
-
-					_elt._err += y._elt._err;
-
-				} else  {
-					if (_n>y.size()) {
-						AffineMain<AF_No> tmp;
-						tmp._elt._val	= new double[_n+1];
-						for (int i =0; i<= y.size(); i++) {
-							tmp._elt._val[i] = y._elt._val[i];
-						}
-						tmp._elt._err = y._elt._err;
-						tmp._n = _n;
-						*this += tmp;
-					} else {
-						this->resize(y.size());
-						*this += y;
-					}
-				}
-			}
-			else { // y is not a valid affine2 form. So we add y.itv() such as an interval
-				*this = itv()+y.itv();
-			}
-		}
 		if (B3) {  //add a constant beta
 			if ((fabs(beta))<POS_INFINITY) {
 				_elt._val[0] += beta;
@@ -352,7 +354,7 @@ AffineMain<AF_No>& AffineMain<AF_No>::saxpy(double alpha, const AffineMain<AF_No
 
 		if (_elt._val != NULL) {
 			bool b = (_elt._err<POS_INFINITY);
-			for (i=0;i<=_n;i++) {
+			for (int i=0;i<=_n;i++) {
 				b &= (fabs(_elt._val[i])<POS_INFINITY);
 			}
 			if (!b) {
@@ -364,9 +366,6 @@ AffineMain<AF_No>& AffineMain<AF_No>::saxpy(double alpha, const AffineMain<AF_No
 		if (B1) {  //scalar alpha
 			*this = itv()* alpha;
 		}
-		if (B2) {  // add y
-			*this = itv()+ y.itv();
-		}
 		if (B3) {  //constant beta
 			*this = itv()+ beta;
 		}
@@ -374,7 +373,6 @@ AffineMain<AF_No>& AffineMain<AF_No>::saxpy(double alpha, const AffineMain<AF_No
 			*this = itv()+Interval(-1,1)*ddelta;
 		}
 	}
-//	std::cout << " saxpy OUT x= "<< *this<<std::endl;
 	return *this;
 
 }
@@ -632,7 +630,7 @@ AffineMain<AF_No>& AffineMain<AF_No>::linChebyshev(Affine2_expr num, const Inter
 				band = Interval(TEMP1,(1.0/(4*(alpha))));
 			}
 
-			saxpy(alpha, AffineMain<AF_No>(), band.mid(), band.diam()/2, true,false,true,true);
+			saxpy(alpha,  band.mid(), band.diam()/2, true,true,true);
 			break;
 		}
 		case AF_EXP : {
@@ -653,7 +651,7 @@ AffineMain<AF_No>& AffineMain<AF_No>::linChebyshev(Affine2_expr num, const Inter
 					band = Interval((alpha*(1- ::log((alpha)))),TEMP2);
 				}
 
-				saxpy(alpha, AffineMain<AF_No>(), band.mid(), band.diam()/2, true,false,true,true);
+				saxpy(alpha, band.mid(), band.diam()/2, true,true,true);
 			}
 
 			break;
@@ -672,7 +670,7 @@ AffineMain<AF_No>& AffineMain<AF_No>::linChebyshev(Affine2_expr num, const Inter
 				band = Interval(TEMP1,(- ::log((alpha))-1));
 			}
 
-			saxpy(alpha, AffineMain<AF_No>(), band.mid(), band.diam()/2, true,false,true,true);
+			saxpy(alpha, band.mid(), band.diam()/2, true,true,true);
 			break;
 		}
 		case AF_INV : {
@@ -696,7 +694,7 @@ AffineMain<AF_No>& AffineMain<AF_No>::linChebyshev(Affine2_expr num, const Inter
 				beta = band.mid();
 
 				if (itv.lb()<0.0) beta = -beta;
-				saxpy(alpha, AffineMain<AF_No>(), beta, band.diam()/2, true,false,true,true);
+				saxpy(alpha, beta, band.diam()/2, true,true,true);
 			}
 			break;
 		}
@@ -715,7 +713,7 @@ AffineMain<AF_No>& AffineMain<AF_No>::linChebyshev(Affine2_expr num, const Inter
 			else {
 				band = Interval(( ::sqrt( ::pow(alpha,2)+1)-alpha* ::asinh(alpha)),TEMP2);
 			}
-			saxpy(alpha, AffineMain<AF_No>(), band.mid(), band.diam()/2, true,false,true,true);
+			saxpy(alpha, band.mid(), band.diam()/2, true,true,true);
 			break;
 		}
 		case AF_ABS : {
@@ -739,7 +737,7 @@ AffineMain<AF_No>& AffineMain<AF_No>::linChebyshev(Affine2_expr num, const Inter
 					band = Interval(0.0,TEMP2);
 				}
 
-				saxpy(alpha, AffineMain<AF_No>(), band.mid(), band.diam()/2, true,false,true,true);
+				saxpy(alpha, band.mid(), band.diam()/2, true,true,true);
 			}
 			break;
 		}
@@ -874,7 +872,7 @@ AffineMain<AF_No>& AffineMain<AF_No>::linChebyshev(Affine2_expr num, const Inter
 				break;
 			}
 
-			saxpy(alpha, AffineMain<AF_No>(), beta, ddelta, true,false,true,true);
+			saxpy(alpha, beta, ddelta, true,true,true);
 			break;
 		}
 
@@ -1039,7 +1037,7 @@ AffineMain<AF_No>& AffineMain<AF_No>::linChebyshev(Affine2_expr num, const Inter
 				break;
 			}
 
-			saxpy(alpha, AffineMain<AF_No>(), beta, ddelta, true,false,true,true);
+			saxpy(alpha, beta, ddelta, true,true,true);
 			break;
 		}
 		default : {
@@ -1107,7 +1105,7 @@ AffineMain<AF_No>& AffineMain<AF_No>::powerA(int n, const Interval& itv) {
 						((1 - n) * TEMP1 * ( ::pow(TEMP1, 1.0/(n - 1)))),
 						TEMP2);
 			}
-			saxpy(alpha, AffineMain<AF_No>(), band.mid(), band.diam()/2, true,false,true,true);
+			saxpy(alpha, band.mid(), band.diam()/2, true,true,true);
 
 		} else {
 			// for _itv = [a,b]
@@ -1153,7 +1151,7 @@ AffineMain<AF_No>& AffineMain<AF_No>::powerA(int n, const Interval& itv) {
 				if (t1 > ddelta) ddelta= t1 ;
 			}
 
-			saxpy(alpha, AffineMain<AF_No>(), beta, ddelta, true, false, true, true);
+			saxpy(alpha, beta, ddelta, true, true, true);
 		}
 
 	}

@@ -136,7 +136,7 @@ AffineMain<T>& AffineMain<T>::linChebyshev(Affine2_expr num, const Interval& itv
 			t2 = (band-beta).ub();
 			ddelta = (t1>t2)? t1 : t2;
 
-			saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
+			saxpy(alpha,  beta, ddelta, true,true,true);
 			break;
 		}
 		case AF_EXP : {
@@ -162,7 +162,7 @@ AffineMain<T>& AffineMain<T>::linChebyshev(Affine2_expr num, const Interval& itv
 				t2 = (band-beta).ub();
 				ddelta = (t1>t2)? t1 : t2;
 
-				saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
+				saxpy(alpha,  beta, ddelta, true,true,true);
 			}
 
 			break;
@@ -186,7 +186,7 @@ AffineMain<T>& AffineMain<T>::linChebyshev(Affine2_expr num, const Interval& itv
 			t2 = (band -beta).ub();
 			ddelta = (t1>t2)? t1 : t2;
 
-			saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
+			saxpy(alpha,  beta, ddelta, true,true,true);
 			break;
 		}
 		case AF_INV : {
@@ -213,7 +213,7 @@ AffineMain<T>& AffineMain<T>::linChebyshev(Affine2_expr num, const Interval& itv
 				ddelta = (t1>t2)? t1 : t2;
 
 				if (itv.lb()<0.0) beta = -beta;
-				saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
+				saxpy(alpha,  beta, ddelta, true,true,true);
 			}
 			break;
 		}
@@ -238,7 +238,7 @@ AffineMain<T>& AffineMain<T>::linChebyshev(Affine2_expr num, const Interval& itv
 			t2 = (band -beta).ub();
 			ddelta = (t1>t2)? t1 : t2;
 
-			saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
+			saxpy(alpha,  beta, ddelta, true,true,true);
 			break;
 		}
 		case AF_ABS : {
@@ -267,7 +267,7 @@ AffineMain<T>& AffineMain<T>::linChebyshev(Affine2_expr num, const Interval& itv
 				t2 = (band -beta).ub();
 				ddelta = (t1>t2)? t1 : t2;
 
-				saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
+				saxpy(alpha,  beta, ddelta, true,true,true);
 			}
 			break;
 		}
@@ -401,7 +401,7 @@ AffineMain<T>& AffineMain<T>::linChebyshev(Affine2_expr num, const Interval& itv
 				break;
 			}
 
-			saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
+			saxpy(alpha,  beta, ddelta, true,true,true);
 			break;
 		}
 
@@ -566,7 +566,7 @@ AffineMain<T>& AffineMain<T>::linChebyshev(Affine2_expr num, const Interval& itv
 				break;
 			}
 
-			saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
+			saxpy(alpha,  beta, ddelta, true,true,true);
 			break;
 		}
 		default : {
@@ -640,7 +640,7 @@ AffineMain<T>& AffineMain<T>::powerA(int n, const Interval& itv) {
 			t2 = (band - beta).ub();
 			ddelta = (t1 > t2) ? t1 : t2;
 
-			saxpy(alpha, AffineMain<T>(), beta, ddelta, true, false, true, true);
+			saxpy(alpha,  beta, ddelta, true,  true, true);
 
 		} else {
 			// for _itv = [a,b]
@@ -691,7 +691,7 @@ AffineMain<T>& AffineMain<T>::powerA(int n, const Interval& itv) {
 				if (t1 > ddelta) ddelta= t1 ;
 			}
 
-			saxpy(alpha, AffineMain<T>(), beta, ddelta, true, false, true, true);
+			saxpy(alpha,  beta, ddelta, true,  true, true);
 		}
 
 	}
@@ -793,7 +793,7 @@ AffineMain<T>& AffineMain<T>::linMinRange(Affine2_expr num, const Interval& itv)
 			t2 = (band-beta).ub();
 			ddelta = (t1>t2)? t1 : t2;
 
-			saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
+			saxpy(alpha,  beta, ddelta, true,true,true);
 
 			//}
 			break;
@@ -833,7 +833,7 @@ AffineMain<T>& AffineMain<T>::linMinRange(Affine2_expr num, const Interval& itv)
 				t2 = (band-beta).ub();
 				ddelta = (t1>t2)? t1 : t2;
 
-				saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
+				saxpy(alpha,  beta, ddelta, true,true,true);
 			}
 
 			break;
@@ -877,7 +877,7 @@ AffineMain<T>& AffineMain<T>::linMinRange(Affine2_expr num, const Interval& itv)
 			t2 = (band-beta).ub();
 			ddelta = (t1>t2)? t1 : t2;
 
-			saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
+			saxpy(alpha,  beta, ddelta, true,true,true);
 
 			//}
 
@@ -921,7 +921,7 @@ AffineMain<T>& AffineMain<T>::linMinRange(Affine2_expr num, const Interval& itv)
 
 				if (itv.lb()<0.0) beta = -beta;
 
-				saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
+				saxpy(alpha,  beta, ddelta, true,true,true);
 
 			}
 			break;

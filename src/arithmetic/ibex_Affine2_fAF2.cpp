@@ -278,12 +278,56 @@ AffineMain<AF_fAF2> AffineMain<AF_fAF2>::operator-() const {
 
 
 
+/** \brief Add \a x to *this and return the result. */
 template<>
-AffineMain<AF_fAF2>& AffineMain<AF_fAF2>::saxpy(double alpha, const AffineMain<AF_fAF2>& y, double beta, double ddelta, bool B1, bool B2, bool B3, bool B4) {
-//std::cout << "saxpy IN " << alpha << " x " << *this << " + " << y << " + "<< beta << " +error " << ddelta << " / "<< B1 << B2 << B3 << B4 << std::endl;
+AffineMain<AF_fAF2>& AffineMain<AF_fAF2>::operator+=(const AffineMain<AF_fAF2>& y) {
+	if (is_actif() && (y.is_actif())) {
+		double temp, ttt, sss, eee;
+		int i;
+		if (_n==y.size()) {
+
+			ttt=0.0;
+			sss=0.0;
+			for(i=0;i<=_n;i++) {
+				eee = _elt.twoSum(_elt._val[i], y._elt._val[i], &temp);
+				ttt = (1+2*AF_EM)*(ttt+fabs(eee));
+				if (fabs(temp)<AF_EC) {
+					sss = (1+2*AF_EM)*(sss+ fabs(temp));
+					_elt._val[i] = 0.0;
+				}
+				else {
+					_elt._val[i]=temp;
+				}
+			}
+			//					_elt._err = (1+2*AF_EM)*((_elt._err+y._elt._err+ (AF_EE*(AF_EM*ttt)+AF_EE*sss));
+			_elt._err = (1+2*AF_EM)*(
+					(_elt._err+y._elt._err) +
+					((AF_EE*(ttt)) +
+							(AF_EE*sss))
+			);
+
+		} else  {
+			if (_n>y.size()) {
+				AffineMain<AF_fAF2> tmp(y);
+				tmp.resize(_n);
+				*this += tmp;
+			} else {
+				this->resize(y.size());
+				*this += y;
+			}
+		}
+	} else {  // add y
+		*this = itv()+ y.itv();
+	}
+	return *this;
+}
+
+
+
+template<>
+AffineMain<AF_fAF2>& AffineMain<AF_fAF2>::saxpy(double alpha, double beta, double ddelta, bool B1, bool B3, bool B4) {
 	double temp, ttt, sss, eee;
 	int i;
-//	std::cout << "in saxpy alpha=" << alpha  <<  "  beta= " <<  beta <<   "  delta = " << ddelta   << std::endl;
 	if (is_actif()) {
 		if (B1) {  // multiply by a scalar alpha
 			if (alpha==0.0) {
@@ -318,46 +362,6 @@ AffineMain<AF_fAF2>& AffineMain<AF_fAF2>::saxpy(double alpha, const AffineMain<A
 			}
 		}
 
-		if (B2) {  // add a affine2 form y
-
-			if (y.is_actif()) {
-				if (_n==y.size()) {
-
-					ttt=0.0;
-					sss=0.0;
-					for(i=0;i<=_n;i++) {
-						eee = _elt.twoSum(_elt._val[i], y._elt._val[i], &temp);
-						ttt = (1+2*AF_EM)*(ttt+fabs(eee));
-						if (fabs(temp)<AF_EC) {
-							sss = (1+2*AF_EM)*(sss+ fabs(temp));
-							_elt._val[i] = 0.0;
-						}
-						else {
-							_elt._val[i]=temp;
-						}
-					}
-//					_elt._err = (1+2*AF_EM)*((_elt._err+y._elt._err+ (AF_EE*(AF_EM*ttt)+AF_EE*sss));
-					_elt._err = (1+2*AF_EM)*(
-							(_elt._err+y._elt._err) +
-							((AF_EE*(ttt)) +
-							(AF_EE*sss))
-							);
-
-				} else  {
-					if (_n>y.size()) {
-						AffineMain<AF_fAF2> tmp(y);
-						tmp.resize(_n);
-						*this += tmp;
-					} else {
-						this->resize(y.size());
-						*this += y;
-					}
-				}
-			}
-			else { // y is not a valid affine2 form. So we add y.itv() such as an interval
-				*this = itv()+y.itv();
-			}
-		}
 		if (B3) {  //add a constant beta
 			if ((fabs(beta))<POS_INFINITY) {
 				ttt=0.0;
@@ -421,9 +425,6 @@ AffineMain<AF_fAF2>& AffineMain<AF_fAF2>::saxpy(double alpha, const AffineMain<A
 	} else {
 		if (B1) {  //scalar alpha
 			*this = itv()* alpha;
-		}
-		if (B2) {  // add y
-			*this = itv()+ y.itv();
 		}
 		if (B3) {  //constant beta
 			*this = itv()+ beta;

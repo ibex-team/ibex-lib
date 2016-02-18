@@ -265,11 +265,44 @@ AffineMain<AF_iAF> AffineMain<AF_iAF>::operator-() const {
 }
 
 
+template<>
+AffineMain<AF_iAF>& AffineMain<AF_iAF>::operator+=( const AffineMain<AF_iAF>& y) {
+	if (is_actif() && y.is_actif()) {
+		if (_n==y._n) {
+
+			for(int i=0;i<=_n;i++) {
+				_elt._val[i] +=y._elt._val[i];
+			}
+
+			_elt._err += y._elt._err;
+
+		} else  {
+			if (_n>y.size()) {
+				AffineMain<AF_iAF> tmp;
+				tmp._elt._val	= new Interval[_n+1];
+				for (int i =0; i<= y.size(); i++) {
+					tmp._elt._val[i] = y._elt._val[i];
+				}
+				tmp._elt._err = y._elt._err;
+				tmp._n = _n;
+				*this += tmp;
+			} else {
+				this->resize(y.size());
+				*this += y;
+			}
+		}
+	}
+	else { // y is not a valid affine2 form. So we add y.itv() such as an interval
+		*this = itv()+y.itv();
+	}
+
+	return *this;
+}
 
 
 
 template<>
-AffineMain<AF_iAF>& AffineMain<AF_iAF>::saxpy(double alpha, const AffineMain<AF_iAF>& y, double beta, double ddelta, bool B1, bool B2, bool B3, bool B4) {
+AffineMain<AF_iAF>& AffineMain<AF_iAF>::saxpy(double alpha,  double beta, double ddelta, bool B1, bool B3, bool B4) {
 //std::cout << "saxpy IN " << alpha << " x " << *this << " + " << y << " + "<< beta << " +error " << ddelta << " / "<< B1 << B2 << B3 << B4 << std::endl;
 
 	int i;
@@ -295,37 +328,7 @@ AffineMain<AF_iAF>& AffineMain<AF_iAF>::saxpy(double alpha, const AffineMain<AF_
 			}
 		}
 
-		if (B2) {  // add a affine2 form y
 
-			if (y.is_actif()) {
-				if (_n==y._n) {
-
-					for(i=0;i<=_n;i++) {
-						_elt._val[i] +=y._elt._val[i];
-					}
-
-					_elt._err += y._elt._err;
-
-				} else  {
-					if (_n>y.size()) {
-						AffineMain<AF_iAF> tmp;
-						tmp._elt._val	= new Interval[_n+1];
-						for (int i =0; i<= y.size(); i++) {
-							tmp._elt._val[i] = y._elt._val[i];
-						}
-						tmp._elt._err = y._elt._err;
-						tmp._n = _n;
-						*this += tmp;
-					} else {
-						this->resize(y.size());
-						*this += y;
-					}
-				}
-			}
-			else { // y is not a valid affine2 form. So we add y.itv() such as an interval
-				*this = itv()+y.itv();
-			}
-		}
 		if (B3) {  //add a constant beta
 			if ((fabs(beta))<POS_INFINITY) {
 				_elt._val[0] += beta;
@@ -359,9 +362,6 @@ AffineMain<AF_iAF>& AffineMain<AF_iAF>::saxpy(double alpha, const AffineMain<AF_
 	} else {
 		if (B1) {  //scalar alpha
 			*this = itv()* alpha;
-		}
-		if (B2) {  // add y
-			*this = itv()+ y.itv();
 		}
 		if (B3) {  //constant beta
 			*this = itv()+ beta;

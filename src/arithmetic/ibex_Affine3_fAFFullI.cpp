@@ -276,8 +276,82 @@ AffineMain<AF_fAFFullI> AffineMain<AF_fAFFullI>::operator-() const {
 	return res;
 }
 
+
+
 template<>
-AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::saxpy(double alpha, const AffineMain<AF_fAFFullI>& y, double beta, double ddelta, bool B1, bool B2, bool B3, bool B4) {
+AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::operator+=( const AffineMain<AF_fAFFullI>& y){
+
+	if (is_actif()&&(y.is_actif())) {
+		Interval roundoff_error(0.,0.);
+		Interval intermediate(0.,0.);
+		// Computation step for the center
+		intermediate = Interval(_elt._center) + y._elt._center;
+		_elt._center = intermediate.mid();
+		roundoff_error += intermediate.rad();
+
+		_elt._garbage += y._elt._garbage;
+
+		// Computation step for the rays
+		if (_elt._rays.empty())
+		{
+			if (!y._elt._rays.empty())
+			{
+				std::list<std::pair<int,double> >::const_iterator ity = y._elt._rays.begin();
+				for (; ity != y._elt._rays.end(); ++ity)
+				{
+					_elt._rays.push_back(std::pair<int,double>(ity->first,ity->second));
+				}
+			}
+		}
+		else if (/*!_elt._rays.empty() &&*/ !y._elt._rays.empty()) {
+			std::list<std::pair<int,double> >::iterator it =  _elt._rays.begin();
+			std::list<std::pair<int,double> >::const_iterator ity =  y._elt._rays.begin();
+
+
+			while ((ity != y._elt._rays.end()) || (it != _elt._rays.end()))
+			{
+				if (ity == y._elt._rays.end()) //y is finished : stop
+				{
+					break;
+				}
+				else if (it == _elt._rays.end()) //x is finished : we push y
+				{
+					std::pair<int,double> py(ity->first,ity->second );
+					_elt._rays.insert(it, py);
+					ity++;
+				}
+				else if (it -> first == ity -> first) //same noise term : add
+				{
+					intermediate = Interval(it -> second) + ity -> second;
+					it -> second = intermediate.ub();
+					it++;
+					ity++;
+				}
+				else if (it -> first < ity -> first)  //noise of y after current x noise : x++
+				{
+					it++;
+				}
+				else  //noise of y before current x noise : add y before x
+				{
+					std::pair<int,double> py(ity->first,ity->second );
+					_elt._rays.insert(it, py);
+					ity++;
+				}
+			}
+
+		}
+
+	}
+	else { // y is not a valid affine2 form. So we add y.itv() such as an interval
+		*this = itv()+y.itv();
+	}
+	return *this;
+	_elt._rays.remove_if(noise_null);
+
+}
+
+template<>
+AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::saxpy(double alpha,  double beta, double ddelta, bool B1, bool B3, bool B4) {
 	// std::cout << "saxpy IN " << alpha << " x " << *this << " + " << y << " + "<< beta << " +error " << ddelta << " / "<< B1 << B2 << B3 << B4 << std::endl;
 	Interval roundoff_error(0.,0.);
 	Interval intermediate(0.,0.);
@@ -313,72 +387,6 @@ AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::saxpy(double alpha, const Affi
 			}
 			else {
 				*this = itv()*alpha;
-			}
-		}
-
-		if (B2) {  // add a affine2 form y
-			//std::cout << "B2" << std::endl;
-			if (y.is_actif()) {
-				// Computation step for the center
-				intermediate = Interval(_elt._center) + y._elt._center;
-				_elt._center = intermediate.mid();
-				roundoff_error += intermediate.rad();
-
-				_elt._garbage += y._elt._garbage;
-
-				// Computation step for the rays
-				if (_elt._rays.empty())
-				{
-					if (!y._elt._rays.empty())
-					{
-						std::list<std::pair<int,double> >::const_iterator ity = y._elt._rays.begin();
-						for (; ity != y._elt._rays.end(); ++ity)
-						{
-							_elt._rays.push_back(std::pair<int,double>(ity->first,ity->second));
-						}
-					}
-				}
-				else if (/*!_elt._rays.empty() &&*/ !y._elt._rays.empty()) {
-					std::list<std::pair<int,double> >::iterator it =  _elt._rays.begin();
-					std::list<std::pair<int,double> >::const_iterator ity =  y._elt._rays.begin();
-
-
-					while ((ity != y._elt._rays.end()) || (it != _elt._rays.end()))
-					{
-						if (ity == y._elt._rays.end()) //y is finished : stop
-						{
-							break;
-						}
-						else if (it == _elt._rays.end()) //x is finished : we push y
-						{
-							std::pair<int,double> py(ity->first,ity->second );
-							_elt._rays.insert(it, py);
-							ity++;
-						}
-						else if (it -> first == ity -> first) //same noise term : add
-						{
-							intermediate = Interval(it -> second) + ity -> second;
-							it -> second = intermediate.ub();
-							it++;
-							ity++;
-						}
-						else if (it -> first < ity -> first)  //noise of y after current x noise : x++
-						{
-							it++;
-						}
-						else  //noise of y before current x noise : add y before x
-						{
-							std::pair<int,double> py(ity->first,ity->second );
-							_elt._rays.insert(it, py);
-							ity++;
-						}
-					}
-
-				}
-
-			}
-			else { // y is not a valid affine2 form. So we add y.itv() such as an interval
-				*this = itv()+y.itv();
 			}
 		}
 
@@ -423,9 +431,6 @@ AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::saxpy(double alpha, const Affi
 
 		if (B1) {  //scalar alpha
 			*this = itv()* alpha;
-		}
-		if (B2) {  // add y
-			*this = itv()+ y.itv();
 		}
 		if (B3) {  //constant beta
 			*this = itv()+ beta;
