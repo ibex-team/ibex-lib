@@ -41,36 +41,23 @@ AffineMain<AF_fAF2>& AffineMain<AF_fAF2>::resize(int n) {
 template<>
 AffineMain<AF_fAF2>& AffineMain<AF_fAF2>::operator=(const Interval& x) {
 
+	if (_elt._val != NULL) {
+		delete[] _elt._val;
+		_elt._val = NULL;
+	}
 	if (x.is_empty()) {
 		_n = -1;
 		_elt._err = 0.0;
-		if (_elt._val != NULL) {
-			delete[] _elt._val;
-			_elt._val = NULL;
-		}
 	} else if (x.ub()>= POS_INFINITY && x.lb()<= NEG_INFINITY ) {
 		_n = -2;
 		_elt._err = 0.0;
-		if (_elt._val != NULL) {
-			delete[] _elt._val;
-			_elt._val = NULL;
-		}
 	} else if (x.ub()>= POS_INFINITY ) {
 		_n = -3;
 		_elt._err = x.lb();
-		if (_elt._val != NULL) {
-			delete[] _elt._val;
-			_elt._val = NULL;
-		}
 	} else if (x.lb()<= NEG_INFINITY ) {
 		_n = -4;
 		_elt._err = x.ub();
-		if (_elt._val != NULL) {
-			delete[] _elt._val;
-			_elt._val = NULL;
-		}
 	} else  {
-		if (_elt._val!=NULL) { delete[] _elt._val; }
 		_n = 0;
 		_elt._val	= new double[1];
 		_elt._val[0] = x.mid();

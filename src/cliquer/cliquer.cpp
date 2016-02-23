@@ -1,4 +1,5 @@
-﻿/*
+﻿
+/*
  * This file contains the clique searching routines.
  *
  * Copyright (C) 2002 Sampo Niskanen, Patric �sterg�rd.

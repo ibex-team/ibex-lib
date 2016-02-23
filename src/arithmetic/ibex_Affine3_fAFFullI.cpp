@@ -198,14 +198,14 @@ double AffineMain<AF_fAFFullI>::mid() const{
 
 template<>
 std::ostream& operator<<(std::ostream& os, const AffineMain<AF_fAFFullI>& x) {
-	os << std::setprecision(15) << x.itv() << " : ";
+	os << x.itv() << " : ";
 	if (x.is_actif()) {
 		os << x.center();
 		for (int i = 0; i < x.size(); i++) {
 			double v = x.val(i);
 			if (v!=0)
 			{
-				os << std::setprecision(15) <<" + " << v << " eps_" << i;
+				os  <<" + " << v << " eps_" << i;
 			}
 		}
 		// Check that err() is a centered intervall

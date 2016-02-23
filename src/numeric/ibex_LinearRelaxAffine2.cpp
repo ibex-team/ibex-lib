@@ -24,7 +24,9 @@ LinearRelaxAffine2::~LinearRelaxAffine2() {
 
 bool LinearRelaxAffine2::goal_linearization(const IntervalVector& box, LinearSolver& lp_solver) {
 	// Linearization of the objective function by AF2
-	Affine2 af2 = sys.goal->eval_affine2(Affine2Vector(box));
+	Affine2 af2;
+	
+	sys.goal->eval_affine2(box,af2);
 
 	if (af2.is_empty()) {
 		return false;
