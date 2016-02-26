@@ -147,7 +147,7 @@ double IntervalVector::maxdelta(const IntervalVector& x) {
 
 int IntervalVector::diff(const IntervalVector& y, IntervalVector*& result) const {
 	const int nn=size();
-	const IntervalVector& x=*this;
+	IntervalVector x=*this;
 	IntervalVector *tmp = new IntervalVector[2*nn]; // in the worst case, there is 2n boxes
 	Interval c1, c2;
 	int b=0;
@@ -163,17 +163,18 @@ int IntervalVector::diff(const IntervalVector& y, IntervalVector*& result) const
 			if (!c1.is_empty()) {
 				tmp[b].resize(nn);
 				IntervalVector& v=tmp[b++];
-				for (int i=0; i<var; i++) v[i]=y[i];
+				for (int i=0; i<var; i++) v[i]=x[i];
 				v[var]=c1;
 				for (int i=var+1; i<nn; i++) v[i]=x[i];
 
 				if (!c2.is_empty()) {
 					tmp[b].resize(nn);
 					IntervalVector& v=tmp[b++];
-					for (int i=0; i<var; i++) v[i]=y[i];
+					for (int i=0; i<var; i++) v[i]=x[i];
 					v[var]=c2;
 					for (int i=var+1; i<nn; i++) v[i]=x[i];
 				}
+                                x[var] &= y[var];
 			}
 		}
 	}
