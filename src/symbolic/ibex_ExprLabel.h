@@ -13,7 +13,6 @@
 #define __IBEX_EXPR_LABEL_H__
 
 #include "ibex_Domain.h"
-#include "ibex_Affine2Domain.h"
 
 namespace ibex {
 
@@ -40,12 +39,6 @@ public:
 	 * \brief The function this node belongs to.
 	 */
 	Function* f;
-
-	/**
-	 * \brief The affine2 form (evaluation)
-	 */
-	Affine2Domain *af2;
-	AffineLinDomain *af_lin;
 
 	/**
 	 * \brief The interval domain (evaluation and backward)

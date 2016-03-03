@@ -10,15 +10,10 @@
 
 #include "ibex_HC4Revise.h"
 #include "ibex_Eval.h"
-#include "ibex_AffineLinEval.h"
 
 namespace ibex {
 
 const double HC4Revise::RATIO = 0.1;
-
-HC4Revise::HC4Revise(FwdMode mode) : fwd_mode(mode) {
-
-}
 
 //void HC4Revise::proj(const Function& f, const Domain& y, Array<Domain>& x) {
 //	Eval().eval(f,x);
@@ -30,10 +25,8 @@ HC4Revise::HC4Revise(FwdMode mode) : fwd_mode(mode) {
 //	load(x,f.arg_domains,f.nb_used_vars,f.used_var);
 //}
 
-#define EVAL(f,x) if (fwd_mode==INTERVAL_MODE) Eval().eval(f,x); else AffineLinEval().eval(f,x);
-
 bool HC4Revise::proj(const Function& f, const Domain& y, IntervalVector& x) {
-	EVAL(f,x);
+	Eval().eval(f,x);
 
 	//std::cout << "forward:" << std::endl; f.cf.print();
 
@@ -67,7 +60,7 @@ bool HC4Revise::proj(const Function& f, const Domain& y, IntervalVector& x) {
 }
 
 void HC4Revise::proj(const Function& f, const Domain& y, ExprLabel** x) {
-	EVAL(f,x);
+	Eval().eval(f,x);
 
 	*f.expr().deco.d &= y;
 

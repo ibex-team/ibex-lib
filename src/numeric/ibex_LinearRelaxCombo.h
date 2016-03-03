@@ -13,7 +13,6 @@
 #ifndef __IBEX_LINEAR_RELAX_COMBO_H__
 #define __IBEX_LINEAR_RELAX_COMBO_H__
 
-#include "ibex_LinearRelaxAffine2.h"
 #include "ibex_LinearRelaxXTaylor.h"
 
 namespace ibex {
@@ -34,16 +33,16 @@ public:
 	/**
 	 * TODO: add comment
 	 */
-	typedef enum   { ART, AFFINE2, XNEWTON, TAYLOR, HANSEN, COMPO } linear_mode;
+	typedef enum { XNEWTON, TAYLOR, HANSEN } linear_mode;
 
 	/**
 	 * \brief Creates the combination
 	 *
 	 * \param sys The system (the extended system in case of optimization)
-	 * \param lmode AFFINE2 | TAYLOR | HANSEN | COMPO: linear relaxation method.
+	 * \param lmode XNEWTON | TAYLOR | HANSEN: linear relaxation method.
 	 */
 
-	LinearRelaxCombo(const System& sys, linear_mode lmode=COMPO);
+	LinearRelaxCombo(const System& sys, linear_mode lmode=XNEWTON);
 
 	/**
 	 * \brief Deletes this instance.
@@ -71,11 +70,8 @@ public:
 
 private:
 
-	/**  AFFINE2 | TAYLOR | HANSEN | COMPO : the linear relaxation method */
+	/**  TAYLOR | HANSEN | COMPO : the linear relaxation method */
 	linear_mode lmode;
-
-	/** ART object to linearize	 */
-	LinearRelaxAffine2 *myart;
 
 	/** XNewton  object to linearize	 */
 	LinearRelaxXTaylor *myxnewton;

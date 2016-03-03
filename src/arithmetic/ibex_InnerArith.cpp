@@ -22,14 +22,14 @@ namespace {
 
 enum { ADD, SUB, MUL, DIV};
 
-std::string op_str(int i) {
-  switch(i) {
-    case ADD: return " + ";
-    case SUB: return " - ";
-    case MUL: return " * ";
-    default : return " / ";
-  }
-}
+//std::string op_str(int i) {
+//  switch(i) {
+//    case ADD: return " + ";
+//    case SUB: return " - ";
+//    case MUL: return " * ";
+//    default : return " / ";
+//  }
+//}
 
 double max(const double& x, const double& y) {
 	return x>y? x : y;
@@ -67,15 +67,6 @@ double UP_root(const double& _real_, int expon) {
 
 double LO_root(const double& _real_, int expon) {
 	return root(Interval(_real_,_real_), expon).lb();
-}
-
-Interval eval(const Interval& x, const Interval& y, int op) {
-  switch(op) {
-    case ADD: return x+y;
-    case SUB: return x-y;
-    case MUL: return x*y;
-    default:  return x/y;
-  }
 }
 
 double projx(double z, double y, int op, bool round_up) {
