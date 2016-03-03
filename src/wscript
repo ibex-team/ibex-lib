@@ -5,7 +5,7 @@ import shutil, os
 
 def configure (conf):
 	conf.env.append_unique ("INCLUDES", ["../src/%s" % p for p in 
-		". arithmetic bisector combinatorial contractor function numeric geometry parser set strategy symbolic system tools predicate  integrate cliquer".split()])
+		". arithmetic bisector combinatorial contractor function numeric geometry parser set strategy symbolic system tools predicate  integrate".split()])
 
 def build (bld):
 
@@ -16,12 +16,6 @@ def build (bld):
 
 	ibex_hdr = bld.path.ant_glob ("**/ibex_*.h")
 	ibex_hdr.append ("ibex_Setting.h")
-	ibex_hdr.append ("cliquer/cliquer.h")
-	ibex_hdr.append ("cliquer/set.h")
-	ibex_hdr.append ("cliquer/graph.h")
-	ibex_hdr.append ("cliquer/reorder.h")
-	ibex_hdr.append ("cliquer/misc.h")
-	ibex_hdr.append ("cliquer/cliquerconf.h")
 
 	if (bld.env.WITH_AMPL):
 		# headers
