@@ -303,8 +303,8 @@ Important notice:
 - This interface is **under development**
 - The Ibex-Choco interface is supported by Choco 3 (not Choco 2).
 - As for ``--enable-shared``, we recommend you to use the interval libraries supplied with Ibex.
-  Furthermore, some configurations (Ibex+Gaol under 64 bits) yield a 32-bit library although the platform is 64 bits. Hence, 
-  Java will fail in loading Ibex (unless you have a 32-bits JVM of course).
+- Some configurations (Ibex+Gaol or Ibex+MinGW under Windows) yield a **32-bit** library although the platform is 64 bits. Hence, 
+  Java will fail in loading Ibex unless you have a 32-bits JVM.
 - To link with Choco, use ``--with-java-package=org.chocosolver.solver.constraints.real``.
 
 The only additional requirement is that the environment variable ``JAVA_HOME`` must be set. 
@@ -323,6 +323,7 @@ The only additional requirement is that the environment variable ``JAVA_HOME`` m
     ~/Ibex/$ export JAVA_HOME=C:\\Java\\jdk1.7.1_17
 
   **Warning: The path must not contain white spaces!**, like "...\\Program Files\\...". Create a symbolik link of your Java directory if necessary.
+  Remember that your JDK must be 32 bits.
 
 This installation will generate, in addition to the Ibex library:
 
