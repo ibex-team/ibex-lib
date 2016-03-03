@@ -66,17 +66,14 @@ Dim mul_dim(const Dim& l, const Dim& r) {
 		return r; // cst_vec is maintained.
 	else {
 		if (l.dim3!=r.dim2) {
-			if (l.dim2==r.dim2) {
-				if (r.dim3==1) // dot product
-					return Dim::scalar();
-				else // vector-matrix product
-					return Dim::row_vec(r.dim3);
-			}
+			if (l.dim2==r.dim2 && l.dim3==1 && r.dim3==1) return Dim::scalar(); // dot product of row vectors
+			if (l.dim3==r.dim3 && l.dim2==1 && r.dim2==1) return Dim::scalar(); // dot product of column vectors
+
 			throw DimException("mismatched dimensions in matrix multiplication");
 		} else {
 			if (l.dim2==1)
 				if (r.dim3==1) return Dim::scalar();
-				else return Dim::row_vec(r.dim3);
+				else return Dim::row_vec(r.dim3); // vector-matrix product
 			else
 				if (r.dim3==1) return Dim::col_vec(l.dim2);
 				else return Dim::matrix(l.dim2,r.dim3);

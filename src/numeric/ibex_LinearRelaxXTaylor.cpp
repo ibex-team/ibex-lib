@@ -10,6 +10,7 @@
 
 #include "ibex_LinearRelaxXTaylor.h"
 #include "ibex_ExtendedSystem.h"
+#include "ibex_ExprDiff.h"
 #include "ibex_Random.h"
 
 using namespace std;
@@ -30,7 +31,14 @@ LinearRelaxXTaylor::LinearRelaxXTaylor(const System& sys1, std::vector<corner_po
 			max_diam_deriv(max_diam_deriv1),
 			lmode(lmode1),
 			linear_coef(sys1.nb_ctr, sys1.nb_var),
-			df(sys1.f,Function::DIFF) {
+			df(NULL) {
+
+	try {
+		df = new Function(sys1.f,Function::DIFF);
+	} catch(ExprDiffException&) {
+		df = NULL;
+	}
+
 
 	if (dynamic_cast<const ExtendedSystem*>(&sys)) {
 		((int&) goal_ctr)=((const ExtendedSystem&) sys).goal_ctr();
@@ -295,9 +303,9 @@ int LinearRelaxXTaylor::X_Linearization(const IntervalVector& savebox,
 	  if (sys.ctrs[ctr].f.used(j)) {
 		  if (lmode == HANSEN && !linear[ctr][j]) {
 			  // get the partial derivative of ctr w.r.t. var n°j
-	    	  G[j]=df[ctr*n+j].eval(box);
-	    	  //other alternative (numeric):
-	    	  //G[j]=sys.f[ctr*n+j].gradient(box)[j];
+	    	  G[j]= df ? (*df)[ctr*n+j].eval(box) :
+	    			  //other alternative (numeric):
+	    			  sys.f[ctr].gradient(box)[j];
 		  }
 	  }
 	  else
