@@ -1,0 +1,80 @@
+cmake_minimum_required(VERSION 2.8.3)
+
+# build type
+IF(NOT CMAKE_BUILD_TYPE)
+	SET(CMAKE_BUILD_TYPE "DEBUG")
+ENDIF()
+
+# Default values
+set(FILIB_EXTENDED 1)
+set(LT_OBJDIR \".libs\")
+set(PACKAGE \"\")
+set(PACKAGE_BUGREPORT \"\")
+set(PACKAGE_NAME \"\")
+set(PACKAGE_STRING \"filib\")
+set(PACKAGE_TARNAME \"\")
+set(PACKAGE_URL \"\")
+set(PACKAGE_VERSION \"\")
+set(VERSION \"3.0.2\")
+
+set(HAVE_SSE "1")
+message(STATUS "Checking whether system has ANSI C header files")
+include(CheckIncludeFiles)
+check_include_files("dlfcn.h;stdint.h;inttypes.h;stdlib.h;strings.h;string.h;memory.h;sys/stat.h;sys/types.h" StandardHeadersExist)
+if(StandardHeadersExist)
+	message(STATUS "ANSI C header files - found")
+	set(STDC_HEADERS 1 CACHE INTERNAL "System has ANSI C header files")
+	set( HAVE_DLFCN_H		1)
+	set( HAVE_STDINT_H		1)
+	set( HAVE_INTTYPES_H	1)
+	set( HAVE_STDLIB_H		1)
+	set( HAVE_STRINGS_H		1)
+	set( HAVE_STRING_H		1)
+	set( HAVE_MEMORY_H		1)
+	set( HAVE_SYS_STAT_H	1)
+	set( HAVE_SYS_TYPES_H	1)
+	set( HAVE_UNISTD_H		1)
+endif(StandardHeadersExist)
+if(NOT STDC_HEADERS)
+	message(STATUS "ANSI C header files - not found")
+	set(STDC_HEADERS 0 CACHE INTERNAL "System has ANSI C header files")
+endif(NOT STDC_HEADERS)
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/rounding_control/rounding_control_config.hpp.in 
+	${CMAKE_CURRENT_SOURCE_DIR}/rounding_control/rounding_control_config.hpp
+)
+
+include(CheckCXXCompilerFlag)
+check_cxx_compiler_flag(-frounding-math SUPPORT_FROUNDING_MATH)
+if(SUPPORT_FROUNDING_MATH)
+	set(CXXFLAGS ${CXXFLAGS} "-frounding-math")
+endif(SUPPORT_FROUNDING_MATH)
+
+check_cxx_compiler_flag(-ffloat-store SUPPORT_FFLOAT_STORE)
+if(SUPPORT_FFLOAT_STORE)
+	set(CXXFLAGS ${CXXFLAGS} "-ffloat-store")
+endif(SUPPORT_FFLOAT_STORE)
+
+check_cxx_compiler_flag(-fPIC SUPPORT_FPIC)
+if(SUPPORT_FPIC)
+	set(CMAKE_CXX_FLAGS ${CMAKE_CSS_FLAGS} "-fPIC")
+endif(SUPPORT_FPIC)
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+
+FILE(GLOB_RECURSE SRCS *.cpp)
+FILE(GLOB_RECURSE HEADERS *.icc *.hpp)
+
+install(DIRECTORY ieee DESTINATION include FILES_MATCHING PATTERN "*.hpp" )
+install(DIRECTORY ieee DESTINATION include FILES_MATCHING PATTERN "*.icc" )
+install(DIRECTORY fp_traits DESTINATION include FILES_MATCHING PATTERN "*.hpp" )
+install(DIRECTORY fp_traits DESTINATION include FILES_MATCHING PATTERN "*.icc" )
+install(DIRECTORY interval DESTINATION include FILES_MATCHING PATTERN "*.hpp" )
+install(DIRECTORY interval DESTINATION include FILES_MATCHING PATTERN "*.icc" )
+install(DIRECTORY rounding_control DESTINATION include FILES_MATCHING PATTERN "*.hpp" )
+install(DIRECTORY rounding_control DESTINATION include FILES_MATCHING PATTERN "*.icc" )
+
+add_library(prim ${SRCS} ${HEADERS})
+
+install(TARGETS prim DESTINATION lib)
+

@@ -7,6 +7,8 @@
 // Created     : Oct 31, 2014
 //============================================================================
 
+#define _USE_MATH_DEFINES
+#include <cmath>
 #include "ibex_PdcInPolygon.h"
 
 using namespace std;

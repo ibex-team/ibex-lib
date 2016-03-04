@@ -1,0 +1,144 @@
+/* A Bison parser, made by GNU Bison 3.0.2.  */
+
+/* Bison interface for Yacc-like parsers in C
+
+   Copyright (C) 1984, 1989-1990, 2000-2013 Free Software Foundation, Inc.
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+
+/* As a special exception, you may create a larger work that contains
+   part or all of the Bison parser skeleton and distribute that work
+   under terms of your choice, so long as that work isn't itself a
+   parser generator using the skeleton or a modified version thereof
+   as a parser skeleton.  Alternatively, if you modify or redistribute
+   the parser skeleton itself, you may (at your option) remove this
+   special exception, which will cause the skeleton and the resulting
+   Bison output files to be licensed under the GNU General Public
+   License without this special exception.
+
+   This special exception was added by the Free Software Foundation in
+   version 2.2 of Bison.  */
+
+#ifndef YY_IBEX_HOME_BIOP_DOWNLOADS_IBEX_LIB_BUILD_SRC_PARSER_HPP_INCLUDED
+# define YY_IBEX_HOME_BIOP_DOWNLOADS_IBEX_LIB_BUILD_SRC_PARSER_HPP_INCLUDED
+/* Debug traces.  */
+#ifndef YYDEBUG
+# define YYDEBUG 0
+#endif
+#if YYDEBUG
+extern int ibexdebug;
+#endif
+
+/* Token type.  */
+#ifndef YYTOKENTYPE
+# define YYTOKENTYPE
+  enum yytokentype
+  {
+    TK_CHOCO = 258,
+    TK_CONSTANT = 259,
+    TK_NEW_SYMBOL = 260,
+    TK_FUNC_SYMBOL = 261,
+    TK_FUNC_RET_SYMBOL = 262,
+    TK_FUNC_INP_SYMBOL = 263,
+    TK_FUNC_TMP_SYMBOL = 264,
+    TK_ENTITY = 265,
+    TK_ITERATOR = 266,
+    TK_STRING = 267,
+    TK_INTEGER = 268,
+    TK_FLOAT = 269,
+    TK_INFINITY = 270,
+    TK_BOOL = 271,
+    TK_PARAM = 272,
+    TK_CONST = 273,
+    TK_VARS = 274,
+    TK_FUNCTION = 275,
+    TK_MIN = 276,
+    TK_MAX = 277,
+    TK_INF = 278,
+    TK_MID = 279,
+    TK_SUP = 280,
+    TK_SIGN = 281,
+    TK_ABS = 282,
+    TK_SQRT = 283,
+    TK_EXPO = 284,
+    TK_LOG = 285,
+    TK_COS = 286,
+    TK_SIN = 287,
+    TK_TAN = 288,
+    TK_ACOS = 289,
+    TK_ASIN = 290,
+    TK_ATAN = 291,
+    TK_ATAN2 = 292,
+    TK_COSH = 293,
+    TK_SINH = 294,
+    TK_TANH = 295,
+    TK_ACOSH = 296,
+    TK_ASINH = 297,
+    TK_ATANH = 298,
+    TK_LEQ = 299,
+    TK_GEQ = 300,
+    TK_EQU = 301,
+    TK_ASSIGN = 302,
+    TK_CHI = 303,
+    TK_BEGIN = 304,
+    TK_END = 305,
+    TK_FOR = 306,
+    TK_FROM = 307,
+    TK_TO = 308,
+    TK_RETURN = 309,
+    TK_CTRS = 310,
+    TK_MINIMIZE = 311,
+    TK_IN = 312,
+    TK_UNION = 313,
+    TK_INTERSEC = 314
+  };
+#endif
+
+/* Value type.  */
+#if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
+typedef union YYSTYPE YYSTYPE;
+union YYSTYPE
+{
+
+  char*     str;
+  int       itg;
+  double    real;
+  
+  ibex::Interval* itv;
+  
+  ibex::Dim*      dim;
+  
+  const ibex::ExprSymbol*                 func_input_symbol;
+  std::vector<const ibex::ExprSymbol*>*   func_input_symbols;
+
+  ibex::parser::Entity*                   entity_symbol;
+
+  ibex::parser::P_NumConstraint*               constraint;
+  std::vector<ibex::parser::P_NumConstraint*>* constraints;
+
+  const ibex::ExprNode*                expression;
+  std::vector<const ibex::ExprNode*>*  expressions;
+
+
+};
+# define YYSTYPE_IS_TRIVIAL 1
+# define YYSTYPE_IS_DECLARED 1
+#endif
+
+
+extern YYSTYPE ibexlval;
+
+int ibexparse (void);
+
+#endif /* !YY_IBEX_HOME_BIOP_DOWNLOADS_IBEX_LIB_BUILD_SRC_PARSER_HPP_INCLUDED  */

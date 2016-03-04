@@ -223,44 +223,44 @@ void TestFunction::from_string04() {
 	}
 }
 
-void TestFunction::minibex01() {
-	Variable x("x"),y("y");
-	const ExprNode& e1=x+y;
-	const ExprNode& e=e1+e1;
-	Function f(x,y,e,"f");
-	std::string m = f.minibex();
-	char* d=strdup(m.c_str());
-	TEST_ASSERT(strcmp(m.c_str(),"function f(x,y)\n  _tmp_0_ = (x+y);\n  return (_tmp_0_+_tmp_0_);\nend")==0);
-}
+// void TestFunction::minibex01() {
+// 	Variable x("x"),y("y");
+// 	const ExprNode& e1=x+y;
+// 	const ExprNode& e=e1+e1;
+// 	Function f(x,y,e,"f");
+// 	std::string m = f.minibex();
+// 	char* d=strdup(m.c_str());
+// 	TEST_ASSERT(strcmp(m.c_str(),"function f(x,y)\n  _tmp_0_ = (x+y);\n  return (_tmp_0_+_tmp_0_);\nend")==0);
+// }
 
-void TestFunction::minibex02() {
-	Variable x("x"),y("y");
-	const ExprNode& e1=x+y;
-	const ExprNode& e=e1+e1;
-	Function f(x,y,e,"f");
-	std::string m = f.minibex();
+// void TestFunction::minibex02() {
+// 	Variable x("x"),y("y");
+// 	const ExprNode& e1=x+y;
+// 	const ExprNode& e=e1+e1;
+// 	Function f(x,y,e,"f");
+// 	std::string m = f.minibex();
 
-	FILE *fin = fmemopen((void*) m.c_str(), m.length(), "r");
-	Function f2(fin);
+// 	FILE *fin = fmemopen((void*) m.c_str(), m.length(), "r");
+// 	Function f2(fin);
 
-	m = f2.minibex();
-	TEST_ASSERT(strcmp(m.c_str(),"function f(x,y)\n  _tmp_0_ = (x+y);\n  return (_tmp_0_+_tmp_0_);\nend")==0);
-}
+// 	m = f2.minibex();
+// 	TEST_ASSERT(strcmp(m.c_str(),"function f(x,y)\n  _tmp_0_ = (x+y);\n  return (_tmp_0_+_tmp_0_);\nend")==0);
+// }
 
-void TestFunction::minibex03() {
-	Variable x(Dim::matrix(2,3),"x");
-	double _m[][2] = {{0,0},{1,1},{2,2},{3,3},{4,4},{5,5}};
-	IntervalMatrix M(2,3,_m);
-	Function f(x,x+M,"f");
-	std::string m = f.minibex();
-	TEST_ASSERT(strcmp(m.c_str(),"function f(x[2][3])\n  return (x+((0 , 1 , 2) ; (3 , 4 , 5)));\nend")==0);
+// void TestFunction::minibex03() {
+// 	Variable x(Dim::matrix(2,3),"x");
+// 	double _m[][2] = {{0,0},{1,1},{2,2},{3,3},{4,4},{5,5}};
+// 	IntervalMatrix M(2,3,_m);
+// 	Function f(x,x+M,"f");
+// 	std::string m = f.minibex();
+// 	TEST_ASSERT(strcmp(m.c_str(),"function f(x[2][3])\n  return (x+((0 , 1 , 2) ; (3 , 4 , 5)));\nend")==0);
 
-	FILE *fin = fmemopen((void*) m.c_str(), m.length(), "r");
-	Function f2(fin);
+// 	FILE *fin = fmemopen((void*) m.c_str(), m.length(), "r");
+// 	Function f2(fin);
 
-	m = f2.minibex();
-	TEST_ASSERT(strcmp(m.c_str(),"function f(x[2][3])\n  return (x+((0 , 1 , 2) ; (3 , 4 , 5)));\nend")==0);
-}
+// 	m = f2.minibex();
+// 	TEST_ASSERT(strcmp(m.c_str(),"function f(x[2][3])\n  return (x+((0 , 1 , 2) ; (3 , 4 , 5)));\nend")==0);
+// }
 
 void TestFunction::issue43() {
 	Variable x("x"),y("y");

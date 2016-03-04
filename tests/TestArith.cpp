@@ -9,6 +9,9 @@
  * Created     : Dec 07, 2011
  * ---------------------------------------------------------------------------- */
 
+#define _USE_MATH_DEFINES
+#include <cmath>
+
 #include "TestArith.h"
 #include "ibex_Linear.h"
 #include "utils.h"

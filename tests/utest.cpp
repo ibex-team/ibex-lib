@@ -39,7 +39,6 @@
 #include "TestExprCmp.h"
 #include "TestExpr2DAG.h"
 #include "TestExprSplitOcc.h"
-#include "TestExpr2Minibex.h"
 #include "TestVarSet.h"
 
 // ================ function ===============
@@ -63,6 +62,7 @@
 
 // ================ predicates ===============
 #include "TestPdcHansenFeasibility.h"
+#include "TestBoolInterval.h"
 
 // ================ contractor ===============
 #include "TestCtcHC4.h"
@@ -86,6 +86,7 @@
 // ============= Conbinatorial ============
 #include "TestQInter.h"
 
+#include "ibex_Setting.h"
 using namespace std;
 using std::auto_ptr;
 
@@ -123,7 +124,6 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestExprCmp()));
     ts.add(auto_ptr<Test::Suite>(new TestExpr2DAG()));
     ts.add(auto_ptr<Test::Suite>(new TestExprSplitOcc()));
-    ts.add(auto_ptr<Test::Suite>(new TestExpr2Minibex()));
     ts.add(auto_ptr<Test::Suite>(new TestVarSet()));
 
     ts.add(auto_ptr<Test::Suite>(new TestFunction()));
@@ -141,6 +141,7 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestNewton()));
 
     ts.add(auto_ptr<Test::Suite>(new TestPdcHansenFeasibility()));
+    ts.add(auto_ptr<Test::Suite>(new TestBoolInterval()));
 
     ts.add(auto_ptr<Test::Suite>(new TestCtcHC4()));
     ts.add(auto_ptr<Test::Suite>(new TestCtcInteger()));
@@ -148,15 +149,16 @@ int main() {
     ts.add(auto_ptr<Test::Suite>(new TestCtcNotIn()));
     ts.add(auto_ptr<Test::Suite>(new TestCtcExist()));
     ts.add(auto_ptr<Test::Suite>(new TestCtcForAll()));
-    ts.add(auto_ptr<Test::Suite>(new TestCtcPolytopeHull()));
     ts.add(auto_ptr<Test::Suite>(new TestCtcSegment()));
     ts.add(auto_ptr<Test::Suite>(new TestCtcPixelMap()));
     ts.add(auto_ptr<Test::Suite>(new TestQInter()));
 
+#ifndef _IBEX_WITH_NOLP_
+    ts.add(auto_ptr<Test::Suite>(new TestCtcPolytopeHull()));
     ts.add(auto_ptr<Test::Suite>(new TestFritzJohn()));
-
-
     ts.add(auto_ptr<Test::Suite>(new TestOptimizer()));
+#endif
+
     ts.add(auto_ptr<Test::Suite>(new TestSeparator()));
     ts.add(auto_ptr<Test::Suite>(new TestSepPolygon()));
 
