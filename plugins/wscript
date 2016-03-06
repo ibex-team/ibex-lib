@@ -1,0 +1,31 @@
+#! /usr/bin/env python
+# encoding: utf-8
+import os
+
+import importlib # see add_src(..)
+
+def configure (ctx):
+	#list all subdirectories
+	plugins=ctx.path.ant_glob('*',dir=True,src=False)
+	#function that remove the path 
+	def basename(node): return node.path_from(node.parent)
+	#store the list of plugins in the environment
+	ctx.env['plugins']=map(basename,plugins)
+	#call "configure" of each plugin
+	ctx.recurse(ctx.env['plugins'])
+	
+def options (opt):
+	#call "options" for each plugin
+	#opt.recurse(opt.env.plugins)
+	pass
+
+def build (bld):
+	#call "build" for each plugin
+	bld.recurse(bld.env['plugins'])
+
+# Add sources of each plugin
+#def add_src(bld):
+#	for plugin in bld.env['plugins']
+#		module=importlib.import_module(plugin)
+#		module.add_src(bld)
+

@@ -1,0 +1,18 @@
+#! /usr/bin/env python
+# encoding: utf-8
+from waflib import Logs
+
+def options (opt):
+	print('load the optim plugin!!')
+
+def configure (ctx):
+	ctx.env.INCLUDES.extend(["../../plugins/optim/src/%s" % p for p in 
+		"bisector contractor strategy".split()])
+
+	
+def build (bld):
+	Logs.pprint ("BLUE", "build the optim plugin")
+	bld.env.IBEX_SRC.extend(bld.path.ant_glob ("src/**/ibex_*.cpp"))
+	bld.env.IBEX_HDR.extend(bld.path.ant_glob ("src/**/ibex_*.h"))
+
+	

@@ -65,6 +65,7 @@ def options (opt):
 	opt.add_option ("--with-java-package", action="store", type="string", dest="JAVA_PACKAGE",
 			default="ibex", help="name of the java package to be build (default is ibex)")
 
+	opt.recurse("plugins")
 
 def configure (conf):
 
