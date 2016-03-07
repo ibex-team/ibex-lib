@@ -1,27 +1,59 @@
 #! /usr/bin/env python
 # encoding: utf-8
-import os
 
-import importlib # see add_src(..)
+import os, tarfile #, functools
 
-def configure (ctx):
+from waflib import Logs
+
+# a function for uncompressing files (third-party libraries)
+def unpack_archive (src_dir_node, name, filename = None):
+	src_dir = src_dir_node.abspath()
+	path = os.path.join (src_dir, name)
+
+	if not os.path.isdir (path):
+		# extract the sources
+		os.makedirs (path)
+
+		if not filename:
+			filename = "%s.tar.gz" % name
+
+		Logs.pprint ("NORMAL", "Unpacking %s" % filename)
+		t = tarfile.open (os.path.join (src_dir, filename))
+		t.extractall (src_dir)
+
+	node = src_dir_node.find_dir (name)
+	assert node
+	return node
+	
+	
+def get_plugins(path):
 	#list all subdirectories
-	plugins=ctx.path.ant_glob('*',dir=True,src=False)
+	folders=path.ant_glob('*',dir=True,src=False)
 	#function that remove the path 
 	def basename(node): return node.path_from(node.parent)
+	return map(basename,folders)
+
+def configure (conf):
 	#store the list of plugins in the environment
-	ctx.env['plugins']=map(basename,plugins)
-	#call "configure" of each plugin
-	ctx.recurse(ctx.env['plugins'])
+	#conf.env['plugins']=get_plugins(conf.path)
+	plugins=get_plugins(conf.path)
+		
+	conf.env.extract = unpack_archive #functools.partial (unpack_archive, conf.path)
 	
+	#call "configure" of each plugin
+	conf.recurse(plugins)
+		
 def options (opt):
 	#call "options" for each plugin
-	#opt.recurse(opt.env.plugins)
-	pass
+	plugins=get_plugins(opt.path)
+	opt.recurse(plugins)
 
 def build (bld):
 	#call "build" for each plugin
-	bld.recurse(bld.env['plugins'])
+	plugins=get_plugins(bld.path)
+	bld.recurse(plugins)
+
+#import importlib # see add_src(..)
 
 # Add sources of each plugin
 #def add_src(bld):

@@ -43,22 +43,11 @@ def options (opt):
 	opt.add_option ("--with-filib",   action="store", type="string", dest="FILIB_PATH",
 			help = "location of the filib lib")
 	
-	opt.add_option ("--without-lp", action="store_true", dest="WITHOUT_LP",
-			help = "do not use any Linear Solver")
-	
 	opt.add_option ("--without-rounding", action="store_true", dest="WITHOUT_ROUNDING",
 			help = "do not use a reliable interval")
 	
 	opt.add_option ("--standalone", action="store_true", dest="WITH_STANDALONE",
 			help = "do not use any external library (excepted standard C++ library)")	
-	
-	
-	opt.add_option ("--with-soplex", action="store", type="string", dest="SOPLEX_PATH",
-			help = "location of Soplex")
-	opt.add_option ("--with-cplex", action="store", type="string", dest="CPLEX_PATH",
-			help = "location of Cplex")
-	opt.add_option ("--with-clp", action="store", type="string", dest="CLP_PATH",
-			help = "location of Clp solver")
 	
 	opt.add_option ("--with-jni", action="store_true", dest="WITH_JNI",
 			help = "enable the compilation of the JNI adapter (note: your JAVA_HOME environment variable must be properly set if you want to use this option)")
@@ -144,11 +133,7 @@ def configure (conf):
 		conf.env.WITH_AMPL =False 
 	elif (conf.options.WITH_AMPL):
 		conf.env.WITH_AMPL =True 
-	
-	##################################################################################################
-	# Disable Linear Solver
-	if (conf.options.WITHOUT_LP):
-		conf.env.WITHOUT_LP =True 
+
 
 	##################################################################################################
 	# Disable Rounding interval
@@ -156,9 +141,8 @@ def configure (conf):
 		conf.env.WITHOUT_ROUNDING =True 
 			
 	##################################################################################################
-	# Disable Linear Solver and rounding interval
+	# Disable rounding interval
 	if (conf.options.WITH_STANDALONE):
-		conf.env.WITHOUT_LP =True 
 		conf.env.WITHOUT_ROUNDING =True 
 					
 	##################################################################################################
