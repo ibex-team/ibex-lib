@@ -5,27 +5,6 @@ import os, tarfile #, functools
 
 from waflib import Logs
 
-# a function for uncompressing files (third-party libraries)
-def unpack_archive (src_dir_node, name, filename = None):
-	src_dir = src_dir_node.abspath()
-	path = os.path.join (src_dir, name)
-
-	if not os.path.isdir (path):
-		# extract the sources
-		os.makedirs (path)
-
-		if not filename:
-			filename = "%s.tar.gz" % name
-
-		Logs.pprint ("NORMAL", "Unpacking %s" % filename)
-		t = tarfile.open (os.path.join (src_dir, filename))
-		t.extractall (src_dir)
-
-	node = src_dir_node.find_dir (name)
-	assert node
-	return node
-	
-	
 def get_plugins(path):
 	#list all subdirectories
 	folders=path.ant_glob('*',dir=True,src=False)
@@ -38,8 +17,6 @@ def configure (conf):
 	#conf.env['plugins']=get_plugins(conf.path)
 	plugins=get_plugins(conf.path)
 		
-	conf.env.extract = unpack_archive #functools.partial (unpack_archive, conf.path)
-	
 	#call "configure" of each plugin
 	conf.recurse(plugins)
 		

@@ -6,33 +6,18 @@ from __future__ import with_statement # needed for python 2.5
 import tarfile, os.path, os, re, patch, sys, functools, shutil
 from waflib import Utils, Errors, Logs
 
-def unpack_archive (src_dir_node, name, filename = None):
-	src_dir = src_dir_node.abspath()
-	path = os.path.join (src_dir, name)
-
-	if not os.path.isdir (path):
-		# extract the sources
-		os.makedirs (path)
-
-		if not filename:
-			filename = "%s.tar.gz" % name
-
-		Logs.pprint ("NORMAL", "Unpacking %s" % filename)
-		t = tarfile.open (os.path.join (src_dir, filename))
-		t.extractall (src_dir)
-
-	node = src_dir_node.find_dir (name)
-	assert node
-	return node
-
 def convert_path_win2msys (path):
 	path = os.path.abspath (path)
 	drv, path = os.path.splitdrive (path)
 
 	return "/%s%s" % (drv[0], path.replace("\\", "/"))
 
-
 def configure (conf):
+
+	# import utilities
+	sys.path.append(conf.srcnode.abspath())
+	import ibexutils
+	
 	conf.env.BUILD_GDTOA	= False
 	conf.env.BUILD_MATHLIB	= False
 	
@@ -42,7 +27,7 @@ def configure (conf):
 	
 	conf.env.BUILD_AMPL = False
 
-	extract = functools.partial (unpack_archive, conf.path)
+	extract = functools.partial (ibexutils.unpack_archive, conf.path)
 
 	ibex_env = conf.env
 	def ibex_append_path (var, p):
@@ -544,6 +529,11 @@ def configure (conf):
 	
 ######################################################################################################
 def build (bld):
+	
+	# import utilities
+	sys.path.append(bld.srcnode.abspath())
+	import ibexutils
+	
 	# installation paths
 	INCDIR = "${PREFIX}/include/ibex"
 	# NOTE: we do not install the 3rd static libs when ibex is built as a shared library
@@ -555,7 +545,7 @@ def build (bld):
 			os.remove (filename)
 
 	src_dir = bld.path.abspath()
-	extract = functools.partial (unpack_archive, bld.path)
+	extract = functools.partial (ibexutils.unpack_archive, bld.path)
 
 	def apply_patch (name):
 		patch_file = os.path.join (src_dir, name)
@@ -707,7 +697,7 @@ def build (bld):
 		bld.variant = "filib"
 		path = bld.path.find_dir (bld.env.FILIB).abspath()
 
-		with subdir (path):
+		with ibexutils.subdir (path):
 			if bld.cmd=="install":
 				cmd = [["install"]]
 			elif bld.cmd in ("uninstall", "clean"): 	
@@ -730,7 +720,7 @@ def build (bld):
 		bld.variant = "ampl"
 		path = bld.path.find_dir (bld.env.AMPL).abspath()
 
-		with subdir (path):
+		with ibexutils.subdir (path):
 			if  (bld.env["INTERVAL_LIB"] is "GAOL") :
 				cmd = ["clean"] if bld.cmd in ("clean", "uninstall") else ["CFLAGS=-DNo_dtoa -m32"]
 			else:
@@ -754,29 +744,14 @@ def build (bld):
 		bld.variant = ""
 		
 
-
-
-######################################################################################################
-class subdir:
-	def __init__ (self, name_or_node):
-		self.name = name_or_node.abspath() if hasattr (name_or_node, "abspath") else str (name_or_node)
-
-	def __enter__ (self):
-		Logs.pprint ("BLUE", "Entering %r" % self.name)
-
-	def __exit__ (self, a, b, c):
-		Logs.pprint ("BLUE", "Leaving %r" % self.name)
-
-
-
 def distclean (ctx):
 	filib_dir = ctx.path.find_dir ("filibsrc")
 	if filib_dir and os.path.exists (os.path.join (filib_dir.abspath(), "Makefile")):
-		with subdir (filib_dir):
+		with ibexutils.subdir (filib_dir):
 			ctx.exec_command ("make clean && make distclean", cwd = filib_dir.abspath())
 
 	ampl_dir = ctx.path.find_dir ("solvers")
 	if ampl_dir and os.path.exists (os.path.join (ampl_dir.abspath(), "Makefile")):
-		with subdir (ampl_dir):
+		with ibexutils.subdir (ampl_dir):
 			ctx.exec_command ("make clean && make distclean", cwd = ampl_dir.abspath())
 

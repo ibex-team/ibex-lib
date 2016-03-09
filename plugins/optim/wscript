@@ -19,6 +19,10 @@ def options (opt):
 def configure (conf):
 	Logs.pprint ("BLUE", "configure the optim plugin")
 	
+	# import utilities
+	sys.path.append(conf.srcnode.abspath())
+	import ibexutils
+		
 	with_soplex = conf.options.SOPLEX_PATH
 	with_cplex = conf.options.CPLEX_PATH
 	with_clp = conf.options.CLP_PATH
@@ -242,12 +246,11 @@ def configure (conf):
 
 
 	##################################
-	# CLP
-	# BUILD
+	# Configuring CLP
 	if conf.env.BUILD_CLP:
 		Logs.pprint ("BLUE", "Starting configuration for CLP")
 		conf.env.CLP="Clp-1.15.6"
-		clp_dir = conf.env.extract (conf.path, conf.env.CLP, "Clp-1.15.6.tgz")
+		clp_dir = ibexutils.unpack_archive(conf.path, conf.env.CLP, "Clp-1.15.6.tgz")
 
 		conf.env.append_unique("INCLUDES", os.path.join (conf.env.PREFIX, "include"))
 		conf.env.append_unique("LIBPATH", os.path.join (conf.env.PREFIX, "lib"))
@@ -271,8 +274,13 @@ def configure (conf):
 		if conf.exec_command (cmd, cwd=clp_dir.abspath(), stdout=None, stderr=None):
 			conf.fatal ("failed to configure CLP (%s)" % cmd)
 	
+	
 def build (bld):
 	Logs.pprint ("BLUE", "build the optim plugin")
+	
+	# import utilities
+	sys.path.append(bld.srcnode.abspath())
+	import ibexutils
 	
 	# add sources
 	bld.env.IBEX_SRC.extend(bld.path.ant_glob ("src/**/ibex_*.cpp"))
@@ -284,7 +292,7 @@ def build (bld):
 		bld.variant = "Clp"
 		path = bld.path.find_dir (bld.env.CLP).abspath()
 
-		with subdir (path):
+		with ibexutils.subdir (path):
 			if bld.cmd in ("install"):
 				cmd = [bld.cmd]
 			else :	
