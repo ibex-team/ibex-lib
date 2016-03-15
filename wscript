@@ -49,11 +49,6 @@ def options (opt):
 	opt.add_option ("--standalone", action="store_true", dest="WITH_STANDALONE",
 			help = "do not use any external library (excepted standard C++ library)")	
 	
-	opt.add_option ("--with-jni", action="store_true", dest="WITH_JNI",
-			help = "enable the compilation of the JNI adapter (note: your JAVA_HOME environment variable must be properly set if you want to use this option)")
-	opt.add_option ("--with-java-package", action="store", type="string", dest="JAVA_PACKAGE",
-			default="ibex", help="name of the java package to be build (default is ibex)")
-
 	opt.recurse("plugins")
 
 def configure (conf):
@@ -99,7 +94,7 @@ def configure (conf):
 			env.append_unique ("CXXFLAGS", f)
 
 	# build as shared lib
-	if conf.options.ENABLE_SHARED or conf.options.WITH_JNI:
+	if conf.options.ENABLE_SHARED:
 		env.ENABLE_SHARED = True
 
 	def find_lib (prefix):
@@ -144,33 +139,7 @@ def configure (conf):
 	# Disable rounding interval
 	if (conf.options.WITH_STANDALONE):
 		conf.env.WITHOUT_ROUNDING =True 
-					
-	##################################################################################################
-	# JNI
-	env.WITH_JNI = conf.options.WITH_JNI
-	if env.WITH_JNI:
-		java_home = os.environ.get("JAVA_HOME")
-		if java_home:
-			env["JAVA_HOME"] = [java_home]
-		
-		conf.load ('javaw', funs = [])
-
-		conf.check_jni_headers()
-
-		conf.msg ("Checking for java sdk", java_home)
-		del env["JAVAC"]
-		conf.find_program (os.path.join (java_home, "bin", "javac"), var = "JAVAC")
-		conf.find_program (os.path.join (java_home, "bin", "javah"), var = "JAVAH")
-		conf.find_program (os.path.join (java_home, "bin", "jar"),   var = "JAR")
-
-		conf.env.JAVA_PACKAGE = conf.options.JAVA_PACKAGE
-
-		if env.DEST_OS == "win32":
-			# fix name-mangling for linking with the JVM on windows
-			#   http://permalink.gmane.org/gmane.comp.gnu.mingw.user/6782
-			#   http://stackoverflow.com/questions/8063842/mingw32-g-and-stdcall-suffix1
-			env.append_unique ("LINKFLAGS_JAVA", "-Wl,--kill-at")
-			
+								
 	##################################################################################################
 	# Bison / Flex
 	env.append_unique ("BISONFLAGS", ["--name-prefix=ibex", "--report=all", "--file-prefix=parser"])

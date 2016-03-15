@@ -17,7 +17,7 @@ def options (opt):
 	
 
 def configure (conf):
-	Logs.pprint ("BLUE", "configure the optim plugin")
+	Logs.pprint ("BLUE", "Configure the optim plugin")
 	
 	# import utilities
 	sys.path.append(conf.srcnode.abspath())
@@ -276,7 +276,7 @@ def configure (conf):
 	
 	
 def build (bld):
-	Logs.pprint ("BLUE", "build the optim plugin")
+	Logs.pprint ("BLUE", "Build the optim plugin")
 	
 	# import utilities
 	sys.path.append(bld.srcnode.abspath())
