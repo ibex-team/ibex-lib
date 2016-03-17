@@ -25,23 +25,22 @@ def options (opt):
 	opt.load ("compiler_cxx compiler_cc javaw")
 
 	opt.add_option ("--enable-shared", action="store_true", dest="ENABLE_SHARED",
-			help = "build ibex as a shared lib")
+			help = "build ibex as a shared library")
 
 	opt.add_option ("--disable-sse2", action="store_true", dest="DISABLE_SSE2",
 			help = "do not use SSE2 optimizations")
 
 	opt.add_option ("--with-debug",  action="store_true", dest="DEBUG",
 			help = "enable debugging")
-	
-	opt.add_option ("--with-ampl", action="store_true", dest="WITH_AMPL",
-			help = "do not use AMPL")
 
 	opt.add_option ("--with-gaol",   action="store", type="string", dest="GAOL_PATH",
 			help = "location of the Gaol lib")
+
 	opt.add_option ("--with-bias",   action="store", type="string", dest="BIAS_PATH",
 			help = "location of the Profil/Bias lib")
+
 	opt.add_option ("--with-filib",   action="store", type="string", dest="FILIB_PATH",
-			help = "location of the filib lib")
+			help = "location of the Filib lib")
 	
 	opt.add_option ("--without-rounding", action="store_true", dest="WITHOUT_ROUNDING",
 			help = "do not use a reliable interval")
@@ -119,16 +118,6 @@ def configure (conf):
 		path = getattr (conf.options, opt_name)
 
 		return os.path.abspath (os.path.expanduser (path)) if path else find_lib (prefix)
-
-	##################################################################################################
-	# AMPL is disable on Window
-	if env.DEST_OS == "win32":
-		if (conf.options.WITH_AMPL):
-			Logs.pprint ("YELLOW", "Warning: AMPL is not supported on win32")
-		conf.env.WITH_AMPL =False 
-	elif (conf.options.WITH_AMPL):
-		conf.env.WITH_AMPL =True 
-
 
 	##################################################################################################
 	# Disable Rounding interval

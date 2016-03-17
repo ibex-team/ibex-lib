@@ -6,18 +6,34 @@ import os, sys
 from waflib import Logs
 
 def options (opt):
+	opt.add_option ("--with-optim", action="store_true", dest="WITH_OPTIM",
+			help = "install IbexOptim plugin")	
 	opt.add_option ("--without-lp", action="store_true", dest="WITHOUT_LP",
-			help = "do not use any Linear Solver")
+			help = "do not use any linear solver")
 	opt.add_option ("--with-soplex", action="store", type="string", dest="SOPLEX_PATH",
 			help = "location of Soplex")
 	opt.add_option ("--with-cplex", action="store", type="string", dest="CPLEX_PATH",
 			help = "location of Cplex")
 	opt.add_option ("--with-clp", action="store", type="string", dest="CLP_PATH",
-			help = "location of Clp solver")
+			help = "location of CLP solver")
 	
 
 def configure (conf):
-	Logs.pprint ("BLUE", "Configure the optim plugin")
+	
+	conf.env.WITH_OPTIM = conf.options.WITH_OPTIM
+		
+	if (not conf.env.WITH_OPTIM): 
+		if (conf.options.WITHOUT_LP is not None):
+			Logs.pprint("YELLOW", "Warning: option --without-lp ignored (requires --with-optim)")
+		if (conf.options.SOPLEX_PATH is not None):
+			Logs.pprint("YELLOW", "Warning: option --with-soplex ignored (requires --with-optim)")
+		if (conf.options.CPLEX_PATH is not None):
+			Logs.pprint("YELLOW", "Warning: option --with-cplex ignored (requires --with-optim)")
+		if (conf.options.CLP_PATH is not None):
+			Logs.pprint("YELLOW", "Warning: option --with-clp ignored (requires --with-optim)")
+		return
+		
+	Logs.pprint ("BLUE", "Configure IbexOpt plugin")
 	
 	# import utilities
 	sys.path.append(conf.srcnode.abspath())
@@ -46,11 +62,11 @@ def configure (conf):
 	for w in with_soplex, with_cplex, with_clp:
 		if w is not None:
 			if with_any_solver:
-				conf.fatal ("cannot use --with-cplex/--with-soplex/--with-clp together")
+				conf.fatal ("Cannot use --with-cplex/--with-soplex/--with-clp together")
 			with_any_solver = True
 			
 	if (with_any_solver and conf.env.WITHOUT_LP):
-		conf.fatal ("cannot use --without-lp and  (--with-cplex/--with-soplex/--with-clp) option")
+		conf.fatal ("Cannot use --without-lp and  (--with-cplex/--with-soplex/--with-clp) option")
 	
 	if 	conf.env.WITHOUT_LP:
 		conf.env.LP_LIB = "NOLP"
@@ -276,7 +292,11 @@ def configure (conf):
 	
 	
 def build (bld):
-	Logs.pprint ("BLUE", "Build the optim plugin")
+
+	if not bld.env.WITH_OPTIM: 
+		return
+		
+	Logs.pprint ("BLUE", "Build IbexOpt plugin")
 	
 	# import utilities
 	sys.path.append(bld.srcnode.abspath())
