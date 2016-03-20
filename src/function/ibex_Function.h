@@ -14,7 +14,6 @@
 
 #include "ibex_Expr.h"
 #include "ibex_CompiledFunction.h"
-#include "ibex_Decorator.h"
 #include "ibex_Array.h"
 #include "ibex_SymbolMap.h"
 #include "ibex_ExprSubNodes.h"
@@ -27,6 +26,9 @@ namespace ibex {
 
 class System;
 class VarSet;
+class Eval;
+class HC4Revise;
+class Gradient;
 
 /**
  * \ingroup function
@@ -629,14 +631,13 @@ public:
 	 * \brief Run a forward algorithm.
 	 *
 	 * Run a forward algorithm and
-	 * return a reference to the label of the root node.
 	 *
 	 * V must be a subclass of FwdAlgorithm.
 	 *
 	 * Note that the type V is just passed in order to have static linkage.
 	 */
 	template<class V>
-	ExprLabel& forward(const V& algo) const;
+	void forward(const V& algo) const;
 
 	/**
 	 * \brief Run a backward algorithm.
@@ -647,48 +648,6 @@ public:
 	 */
 	template<class V>
 	void backward(const V& algo) const;
-
-	// ======================== for Forward/Backward algorithms ====================
-
-	/**
-	 * \brief Initialize symbols domains from d
-	 *
-	 * \param grad - true<=>update "g" (gradient) false <=>update "d" (domain)
-	 * \see #ibex::ExprLabel
-	 */
-	void write_arg_domains(const Array<Domain>& d, bool grad=false) const;
-
-	/**
-	 * \brief Initialize symbols domains from d
-	 *
-	 * \param grad - true<=>update "g" (gradient) false <=>update "d" (domain)
-	 * \see #ibex::ExprLabel
-	 */
-	void write_arg_domains(const Array<const Domain>& d, bool grad=false) const;
-
-	/**
-	 * \brief Initialize symbols domains from a box
-	 *
-	 * \param grad - true<=>update "g" (gradient) false <=>update "d" (domain)
-	 * \see #ibex::ExprLabel
-	 */
-	void write_arg_domains(const IntervalVector& box, bool grad=false) const;
-
-	/**
-	 * \brief Initialize d from symbols domains
-	 *
-	 * \param grad - true<=>read "g" (gradient) false <=>read "d" (domain)
-	 * \see #ibex::ExprLabel
-	 */
-	void read_arg_domains(Array<Domain>& d, bool grad=false) const;
-
-	/**
-	 * \brief Initialize a box from symbols domains
-	 *
-	 * \param grad - true<=>read "g" (gradient) false <=>read "d" (domain)
-	 * \see #ibex::ExprLabel
-	 */
-	void read_arg_domains(IntervalVector& box, bool grad=false) const;
 
 	/**
 	 * \brief Calculate f(box) using interval arithmetic.
@@ -822,18 +781,10 @@ public:
 	 */
 	const char* name;
 
-	/*
-	 * \brief The domains of the arguments.
-	 *
+	/**
+	 * \brief Initialize _nb_used_vars and _used_var
 	 */
-	mutable Array<Domain> arg_domains;
-
-	/*
-	 * \brief The derivative label of the arguments.
-	 *
-	 * \note The structure is initialized by #ibex::GradDecorator.
-	 */
-	mutable Array<Domain> arg_deriv;
+	void generate_used_vars() const;
 
 protected:
 	friend std::ostream& operator<<(std::ostream& os, const Function& f);
@@ -842,11 +793,6 @@ protected:
 	 * \brief Generate f[0], f[1], etc. (all stored in "comp")
 	 */
 	void generate_comp();
-
-	/**
-	 * \brief Initialize _nb_used_vars and _used_var
-	 */
-	void generate_used_vars() const;
 
 	/**
 	 * \brief Print the function "x->f(x)" (including arguments)
@@ -858,8 +804,12 @@ protected:
 	 */
 	void print_expr(std::ostream& os) const;
 
+	ExprSubNodes nodes;
+
 private:
 	friend class VarSet;
+	friend class Eval;
+	friend class HC4Revise;
 
 	/**
 	 * \brief True if all the arguments are scalar
@@ -903,12 +853,23 @@ private:
 	// point to this field (instead of being a copy)
 	Function *zero;
 
+	Eval *_eval;
+	HC4Revise *_hc4revise;
+	Gradient *_grad;
+
 	// number of used vars (value "-1" means "not yet generated")
 	mutable int _nb_used_vars;
 
 	// only generated if required
 	mutable int* _used_var;
 };
+
+} // end namespace
+
+#include "ibex_Eval.h"
+#include "ibex_Gradient.h"
+
+namespace ibex {
 
 /*================================== inline implementations ========================================*/
 
@@ -947,20 +908,24 @@ inline const char* Function::arg_name(int i) const {
 }
 
 inline int Function::nb_nodes() const {
-	return cf.nodes.size();
+	return nodes.size();
 }
 
 inline const ExprNode& Function::node(int i) const {
-	return cf.nodes[i];
+	return nodes[i];
 }
 
 inline const ExprNode& Function::expr() const {
-	return cf.nodes[0];
+	return nodes[0];
+}
+
+inline bool Function::all_args_scalar() const {
+	return __all_symbols_scalar;
 }
 
 template<class V>
-inline ExprLabel& Function::forward(const V& algo) const {
-	return cf.forward<V>(algo);
+inline void Function::forward(const V& algo) const {
+	cf.forward<V>(algo);
 }
 
 template<class V>
@@ -968,63 +933,20 @@ inline void Function::backward(const V& algo) const {
 	cf.backward<V>(algo);
 }
 
-inline bool Function::all_args_scalar() const {
-	return __all_symbols_scalar;
+inline void Function::backward(const Domain& y, IntervalVector& x) const {
+	HC4Revise().proj(*this,y,x);
 }
 
-inline void Function::write_arg_domains(const Array<Domain>& d, bool grad) const {
-	if (_nb_used_vars==-1) this->generate_used_vars();
-	load(grad? arg_deriv : arg_domains,d,nb_used_vars(),_used_var);
+inline void Function::ibwd(const Domain& y, IntervalVector& x) const {
+	InHC4Revise().ibwd(*this,y,x);
 }
 
-inline void Function::write_arg_domains(const Array<const Domain>& d, bool grad) const {
-	if (_nb_used_vars==-1) this->generate_used_vars();
-	load(grad? arg_deriv : arg_domains,d,nb_used_vars(),_used_var);
+inline void Function::ibwd(const Domain& y, IntervalVector& x, const IntervalVector& xin) const {
+	InHC4Revise().ibwd(*this,y,x,xin);
 }
 
-inline void Function::write_arg_domains(const IntervalVector& box, bool grad) const {
-	if (_nb_used_vars==-1) this->generate_used_vars();
-
-	if (all_args_scalar()) {
-		int j;
-		if (grad)
-			for (int i=0; i<nb_used_vars(); i++) {
-				j=used_var(i);
-				arg_deriv[j].i()=box[j];
-			}
-		else
-			for (int i=0; i<nb_used_vars(); i++) {
-				j=used_var(i);
-				arg_domains[j].i()=box[j];
-			}
-	}
-	else
-		load(grad? arg_deriv : arg_domains, box, nb_used_vars(), _used_var);
-}
-
-inline void Function::read_arg_domains(Array<Domain>& d, bool grad) const {
-	if (_nb_used_vars==-1) this->generate_used_vars();
-	load(d,grad? arg_deriv : arg_domains,nb_used_vars(),_used_var);
-}
-
-inline void Function::read_arg_domains(IntervalVector& box, bool grad) const {
-	if (_nb_used_vars==-1) this->generate_used_vars();
-	if (all_args_scalar()) {
-		int j;
-		if (grad)
-			for (int i=0; i<nb_used_vars(); i++) {
-				j=used_var(i);
-				box[j]=arg_deriv[j].i();
-			}
-		else
-			for (int i=0; i<nb_used_vars(); i++) {
-				j=used_var(i);
-				box[j]=arg_domains[j].i();
-			}
-	}
-	else {
-		load(box,grad? arg_deriv : arg_domains, nb_used_vars(), _used_var);
-	}
+inline Domain& Function::eval_domain(const IntervalVector& box) const {
+	return _eval->eval(box);
 }
 
 inline Interval Function::eval(const IntervalVector& box) const {
@@ -1051,7 +973,7 @@ inline IntervalMatrix Function::eval_matrix(const IntervalVector& box) const {
 	}
 	case Dim::MATRIX: return eval_domain(box).m();
 	default : {
-                throw std::logic_error("should not reach");
+		throw std::logic_error("should not reach");
 	}
 	}
 }
@@ -1087,6 +1009,14 @@ inline int Function::nb_var() const {
 
 inline int Function::image_dim() const {
 	return _image_dim;
+}
+
+void Function::gradient(const IntervalVector& x, IntervalVector& g) const {
+	assert(g.size()==nb_var());
+	assert(x.size()==nb_var());
+	_grad->gradient(x,g);
+//	if (!df) ((Function*) this)->df=new Function(*this,DIFF);
+//	g=df->eval_vector(x);
 }
 
 inline IntervalVector Function::gradient(const IntervalVector& x) const {

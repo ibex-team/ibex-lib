@@ -22,7 +22,6 @@
 #include "ibex_IntervalMatrix.h"
 #include "ibex_Dim.h"
 #include "ibex_Domain.h"
-#include "ibex_ExprLabel.h"
 
 namespace ibex {
 
@@ -99,10 +98,8 @@ public:
 	/** Dimensions */
 	const Dim dim;
 
-	/** The label of this node.
-	 *
-	 * Uninitialized while this node is not part of a function expression. */
-	mutable ExprLabel deco;
+	/** Function it belongs to. */
+	const Function* f;
 
 	/**
 	 * \brief The father nodes.

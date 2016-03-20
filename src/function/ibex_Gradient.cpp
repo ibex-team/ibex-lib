@@ -16,33 +16,36 @@ using namespace std;
 
 namespace ibex {
 
-void Gradient::gradient(const Function& f, const Array<Domain>& d, IntervalVector& g) const {
-	assert(f.expr().dim.is_scalar());
-	assert(f.expr().deco.d);
-	assert(f.expr().deco.g);
+Gradient::Gradient(Eval& e): f(e.f), _eval(e), d(e.d), g(f) {
 
-	Eval().eval(f,d);
+}
+
+void Gradient::gradient(const Array<Domain>& d2, IntervalVector& gbox) const {
+	assert(f.expr().dim.is_scalar());
+
+	_eval.eval(f,d2);
 
 	// outside definition domain -> empty gradient
-	if (f.expr().deco.d->is_empty()) { g.set_empty(); return; }
+	if (d.top.is_empty()) { gbox.set_empty(); return; }
 
-	g.clear();
+	gbox.clear();
 
-	f.write_arg_domains(g,true);
+	g.write_arg_domains(gbox);
 
 	f.forward<Gradient>(*this);
 
-	f.expr().deco.g->i()=1.0;
+	g.top.i()=1.0;
 
 	f.backward<Gradient>(*this);
 
-	f.read_arg_domains(g,true);
+	g.read_arg_domains(gbox);
 }
 
-void Gradient::gradient(const Function& f, const IntervalVector& box, IntervalVector& g) const {
-	assert(f.expr().dim.is_scalar());
-	assert(f.expr().deco.d);
-	assert(f.expr().deco.g);
+void Gradient::gradient(const IntervalVector& box, IntervalVector& g) const {
+
+	if (!f.expr().dim.is_scalar()) {
+		ibex_error("Cannot called \"gradient\" on a vector-valued function");
+	}
 
 	if (f.eval_domain(box).is_empty()) {
 		// outside definition domain -> empty gradient
@@ -63,10 +66,11 @@ void Gradient::gradient(const Function& f, const IntervalVector& box, IntervalVe
 }
 
 
-void Gradient::jacobian(const Function& f, const Array<Domain>& d, IntervalMatrix& J) const {
-	assert(f.expr().dim.is_vector());
-	assert(f.expr().deco.d);
-	assert(f.expr().deco.g);
+void Gradient::jacobian(const Array<Domain>& d, IntervalMatrix& J) const {
+
+	if (!f.expr().dim.is_vector()) {
+		ibex_error("Cannot called \"jacobian\" on a real-valued function");
+	}
 
 	int m=f.expr().dim.vec_size();
 

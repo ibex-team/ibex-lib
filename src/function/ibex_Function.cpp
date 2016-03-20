@@ -57,30 +57,6 @@ Function::~Function() {
 	}
 }
 
-Domain& Function::eval_domain(const IntervalVector& box) const {
-	return Eval().eval(*this,box);
-}
-
-void Function::backward(const Domain& y, IntervalVector& x) const {
-	HC4Revise().proj(*this,y,x);
-}
-
-void Function::ibwd(const Domain& y, IntervalVector& x) const {
-	InHC4Revise().ibwd(*this,y,x);
-}
-
-void Function::ibwd(const Domain& y, IntervalVector& x, const IntervalVector& xin) const {
-	InHC4Revise().ibwd(*this,y,x,xin);
-}
-
-void Function::gradient(const IntervalVector& x, IntervalVector& g) const {
-	assert(g.size()==nb_var());
-	assert(x.size()==nb_var());
-	Gradient().gradient(*this,x,g);
-//	if (!df) ((Function*) this)->df=new Function(*this,DIFF);
-//	g=df->eval_vector(x);
-}
-
 void Function::jacobian(const IntervalVector& x, IntervalMatrix& J) const {
 	assert(J.nb_cols()==nb_var());
 	assert(x.size()==nb_var());

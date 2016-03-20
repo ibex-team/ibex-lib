@@ -45,7 +45,7 @@ int max_height(const Array<const ExprNode>& args) {
 } // end anonymous namespace
 
 ExprNode::ExprNode(int height, int size, const Dim& dim) :
-  height(height), size(size), id(id_count++), dim(dim) {
+  height(height), size(size), id(id_count++), dim(dim), f(NULL) {
 
 }
 
