@@ -78,7 +78,7 @@ protected:
 /* ============================================================================
  	 	 	 	 	 	 	 implementation
   ============================================================================*/
-inline ExprDomain::ExprDomain(Function& f) : FunctionData<Domain>(f) {
+inline ExprDomain::ExprDomain(Function& f) : ExprData<Domain>(f) {
 
 }
 

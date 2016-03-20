@@ -15,24 +15,49 @@ namespace ibex {
 
 const double HC4Revise::RATIO = 0.1;
 
-//void HC4Revise::proj(const Function& f, const Domain& y, Array<Domain>& x) {
-//	Eval().eval(f,x);
-//	*f.expr().deco.d &= y; // "&" for the case of a function x->x
-//	f.backward<HC4Revise>(*this);
-//	// note: not very clean.
-//	// the box x is not emptied if an EmptyBoxException is thrown
-//	// before (this is done by the contractor).
-//	load(x,f.arg_domains,f.nb_used_vars,f.used_var);
+HC4Revise::HC4Revise(Eval& e) : f(e.f), eval(e), d(e.d) {
+
+}
+
+bool HC4Revise::proj(const Domain& y, const Array<Domain>& x) {
+	eval.eval(x);
+
+	bool is_inner=backward(y);
+
+	d.read_arg_domains(x);
+
+	return is_inner;
+//	return proj(y,(const Array<const Domain>&) x);
+}
+
+//bool HC4Revise::proj(const Domain& y, const Array<const Domain>& x) {
 //}
 
-bool HC4Revise::proj(const Function& f, const Domain& y, IntervalVector& x) {
-	Eval().eval(f,x);
+bool HC4Revise::proj(const Domain& y, IntervalVector& x) {
+	eval.eval(x);
+	//std::cout << "forward:" << std::endl; f.cf.print(d);
 
-	//std::cout << "forward:" << std::endl; f.cf.print();
+	bool is_inner=false;
 
-	Domain& root=*f.expr().deco.d;
+	try {
+		is_inner = backward(y);
 
-	if (root.is_empty()) { x.set_empty(); return false; }
+		d.read_arg_domains(x);
+
+		return is_inner;
+
+	} catch(EmptyBoxException&) {
+		x.set_empty();
+		return false;
+	}
+}
+
+bool HC4Revise::backward(const Domain& y) {
+
+	Domain& root=d.top;
+
+	if (root.is_empty())
+		throw EmptyBoxException();
 
 	switch(y.dim.type()) {
 	case Dim::SCALAR:       if (root.i().is_subset(y.i())) return true; break;
@@ -44,56 +69,53 @@ bool HC4Revise::proj(const Function& f, const Domain& y, IntervalVector& x) {
 
 	root &= y;
 
-	if (root.is_empty()) { x.set_empty(); return false; }
+	if (root.is_empty())
+		throw EmptyBoxException();
 
-	try {
-		f.backward<HC4Revise>(*this);
-	} catch (EmptyBoxException& e) {
-		x.set_empty();
-		return false;
-	}
-	//std::cout << "backward:" << std::endl; f.cf.print();
-
-	f.read_arg_domains(x);
+	// may throw an EmptyBoxException().
+	eval.f.backward<HC4Revise>(*this);
 
 	return false;
+	//std::cout << "backward:" << std::endl; f.cf.print();
 }
 
-void HC4Revise::proj(const Function& f, const Domain& y, ExprLabel** x) {
-	Eval().eval(f,x);
+void HC4Revise::apply_bwd(int* x, int y) {
+	assert(dynamic_cast<const ExprApply*> (&f.nodes[y]));
 
-	*f.expr().deco.d &= y;
+	const ExprApply& a = (const ExprApply&) f.nodes[y];
 
-	if (f.expr().deco.d->is_empty()) throw EmptyBoxException(); // see comment below
+	assert(&a.func!=&f); // recursive calls not allowed
+
+	Array<Domain> d2(a.func.nb_arg());
+
+	for (int i=0; i<a.func.nb_arg(); i++) {
+		d2.set_ref(i,d[x[i]]);
+	}
 
 	// if next instruction throws an EmptyBoxException,
 	// it will be caught by proj(...,IntervalVector& x).
 	// (it is a protected function, not called outside of the class
 	// so there is no risk)
-	f.backward<HC4Revise>(*this);
-
-	Array<Domain> argD(f.nb_arg());
-
-	for (int i=0; i<f.nb_arg(); i++) {
-		argD.set_ref(i,*(x[i]->d));
-	}
-
-	f.read_arg_domains(argD);
+	a.func._hc4revise->proj(d[y],d2);
 }
 
-void HC4Revise::vector_bwd(const ExprVector& v, ExprLabel** compL, const ExprLabel& y) {
+void HC4Revise::vector_bwd(int* x, int y) {
+	assert(dynamic_cast<const ExprVector*>(&(f.nodes[y])));
+
+	const ExprVector& v = (const ExprVector&) f.nodes[y];
+
 	if (v.dim.is_vector()) {
 		for (int i=0; i<v.length(); i++)
-			if ((compL[i]->d->i() &= y.d->v()[i]).is_empty()) throw EmptyBoxException();
+			if ((d[x[i]].i() &= d[y].v()[i]).is_empty()) throw EmptyBoxException();
 	}
 	else {
 		if (v.row_vector())
 			for (int i=0; i<v.length(); i++) {
-				if ((compL[i]->d->v()&=y.d->m().col(i)).is_empty()) throw EmptyBoxException();
+				if ((d[x[i]].v()&=d[y].m().col(i)).is_empty()) throw EmptyBoxException();
 			}
 		else
 			for (int i=0; i<v.length(); i++) {
-				if ((compL[i]->d->v()&=y.d->m().row(i)).is_empty()) throw EmptyBoxException();
+				if ((d[x[i]].v()&=d[y].m().row(i)).is_empty()) throw EmptyBoxException();
 			}
 	}
 }

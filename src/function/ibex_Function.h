@@ -29,6 +29,9 @@ class VarSet;
 class Eval;
 class HC4Revise;
 class Gradient;
+class InHC4Revise;
+
+class ExprDomain;
 
 /**
  * \ingroup function
@@ -781,6 +784,8 @@ public:
 	 */
 	const char* name;
 
+	ExprSubNodes nodes;
+
 	/**
 	 * \brief Initialize _nb_used_vars and _used_var
 	 */
@@ -804,12 +809,11 @@ protected:
 	 */
 	void print_expr(std::ostream& os) const;
 
-	ExprSubNodes nodes;
-
 private:
 	friend class VarSet;
 	friend class Eval;
 	friend class HC4Revise;
+	friend class ExprDomain; // TODO : Change this
 
 	/**
 	 * \brief True if all the arguments are scalar
@@ -856,6 +860,7 @@ private:
 	Eval *_eval;
 	HC4Revise *_hc4revise;
 	Gradient *_grad;
+	InHC4Revise *_inhc4revise;
 
 	// number of used vars (value "-1" means "not yet generated")
 	mutable int _nb_used_vars;
@@ -868,6 +873,8 @@ private:
 
 #include "ibex_Eval.h"
 #include "ibex_Gradient.h"
+#include "ibex_HC4Revise.h"
+#include "ibex_InHC4Revise.h"
 
 namespace ibex {
 
@@ -928,23 +935,6 @@ inline void Function::forward(const V& algo) const {
 	cf.forward<V>(algo);
 }
 
-template<class V>
-inline void Function::backward(const V& algo) const {
-	cf.backward<V>(algo);
-}
-
-inline void Function::backward(const Domain& y, IntervalVector& x) const {
-	HC4Revise().proj(*this,y,x);
-}
-
-inline void Function::ibwd(const Domain& y, IntervalVector& x) const {
-	InHC4Revise().ibwd(*this,y,x);
-}
-
-inline void Function::ibwd(const Domain& y, IntervalVector& x, const IntervalVector& xin) const {
-	InHC4Revise().ibwd(*this,y,x,xin);
-}
-
 inline Domain& Function::eval_domain(const IntervalVector& box) const {
 	return _eval->eval(box);
 }
@@ -978,8 +968,14 @@ inline IntervalMatrix Function::eval_matrix(const IntervalVector& box) const {
 	}
 }
 
-inline void Function::print_expr(std::ostream& os) const {
-	os << expr();
+
+template<class V>
+inline void Function::backward(const V& algo) const {
+	cf.backward<V>(algo);
+}
+
+inline void Function::backward(const Domain& y, IntervalVector& x) const {
+	_hc4revise->proj(y,x);
 }
 
 inline void Function::backward(const Interval& y, IntervalVector& x) const {
@@ -995,12 +991,24 @@ inline void Function::backward(const IntervalMatrix& y, IntervalVector& x) const
 	backward(Domain((IntervalMatrix&) y),x); // y will not be modified
 }
 
+inline void Function::ibwd(const Domain& y, IntervalVector& x) const {
+	_inhc4revise->iproj(y,x);
+}
+
+inline void Function::ibwd(const Domain& y, IntervalVector& x, const IntervalVector& xin) const {
+	_inhc4revise->iproj(y,x,xin);
+}
+
 inline void Function::ibwd(const Interval& y, IntervalVector& x) const {
 	ibwd(Domain((Interval&) y),x);
 }
 
 inline void Function::ibwd(const Interval& y, IntervalVector& x, const IntervalVector& xin) const {
 	ibwd(Domain((Interval&) y),x,xin);
+}
+
+inline void Function::print_expr(std::ostream& os) const {
+	os << expr();
 }
 
 inline int Function::nb_var() const {

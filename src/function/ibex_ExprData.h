@@ -303,31 +303,31 @@ protected:
 private:
 
 	template<class Node>
-	void __visit_nary(const Node e) {
+	void __visit_nary(const Node& e) {
 		Array<T> args_data(e.nb_args);
 		for (int i=0; i<e.nb_args; i++)
 			args_data.set_ref(i,data[f.nodes.rank(e.arg(i))]);
 
-		data[f.nodes.rank(e)].set_ref(*init(e,args_data));
+		data.set_ref(f.nodes.rank(e), *init(e,args_data));
 	}
 
 	template<class Node>
 	void __visit_binary(const Node& e) {
-		T* left_data=data[f.nodes.rank(e.expr.left)];
-		T* right_data=data[f.nodes.rank(e.expr.right)];
+		T& left_data=data[f.nodes.rank(e.left)];
+		T& right_data=data[f.nodes.rank(e.right)];
 
-		data[f.nodes.rank(e)].set_ref(*init(e,left_data,right_data));
+		data.set_ref(f.nodes.rank(e), *init(e,left_data,right_data));
 	}
 
 	template<class Node>
 	void __visit_unary(const Node& e) {
-		T* expr_data=data[f.nodes.rank(e.expr)];
-		data[f.nodes.rank(e)].set_ref(*init(e,expr_data));
+		T& expr_data=data[f.nodes.rank(e.expr)];
+		data.set_ref(f.nodes.rank(e), *init(e,expr_data));
 	}
 
 	template<class Node>
 	void __visit_0ary(const Node& e) {
-		data[f.nodes.rank(e)]=init(e);
+		data.set_ref(f.nodes.rank(e), *init(e));
 	}
 
 	virtual void visit(const ExprIndex& e)   { __visit_unary<ExprIndex>(e); }

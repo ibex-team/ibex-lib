@@ -63,7 +63,9 @@ Domain& Eval::eval(const IntervalVector& box) const {
 }
 
 void Eval::apply_fwd(int* x, int y) {
-	const ExprApply& a = (const ExprConstant&) f.cf.nodes[y];
+	assert(dynamic_cast<const ExprApply*> (&f.nodes[y]));
+
+	const ExprApply& a = (const ExprApply&) f.nodes[y];
 
 	assert(&a.func!=&f); // recursive calls not allowed
 
@@ -73,7 +75,7 @@ void Eval::apply_fwd(int* x, int y) {
 		d2.set_ref(i,d[x[i]]);
 	}
 
-	y = a.func._eval->eval(d2);
+	d[y] = a.func._eval->eval(d2);
 }
 
 void Eval::vector_fwd(int* x, int y) {

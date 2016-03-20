@@ -22,6 +22,8 @@
 namespace ibex {
 
 class Function;
+
+template<class T>
 class ExprData;
 
 /**
