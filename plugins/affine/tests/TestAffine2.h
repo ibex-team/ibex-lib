@@ -12,30 +12,31 @@
 #ifndef __TEST_AFFINE2_H__
 #define __TEST_AFFINE2_H__
 
-#include "cpptest.h"
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensionsHelperMacros.h>
 #include "ibex_Affine2.h"
 #include "utils.h"
 
 using namespace ibex;
 
 template<class T>
-class TestAffine2 : public TestIbex {
+class TestAffine2 : public CppUnit::TestFixture {
 public:
-	TestAffine2() {
-		TEST_ADD(TestAffine2<T>::test_sqrt);
-		TEST_ADD(TestAffine2<T>::test_exp);
-		TEST_ADD(TestAffine2<T>::test_log);
-		TEST_ADD(TestAffine2<T>::test_inv);
-		TEST_ADD(TestAffine2<T>::test_cos);
-		TEST_ADD(TestAffine2<T>::test_sin);
-		TEST_ADD(TestAffine2<T>::test_tan);
-		TEST_ADD(TestAffine2<T>::test_abs);
-		TEST_ADD(TestAffine2<T>::test_acos);
-		TEST_ADD(TestAffine2<T>::test_asin);
-		TEST_ADD(TestAffine2<T>::test_atan);
-		TEST_ADD(TestAffine2<T>::test_cosh);
-		TEST_ADD(TestAffine2<T>::test_sinh);
-		TEST_ADD(TestAffine2<T>::test_tanh);
+	
+		CPPUNIT_TEST(test_sqrt);
+		CPPUNIT_TEST(test_exp);
+		CPPUNIT_TEST(test_log);
+		CPPUNIT_TEST(test_inv);
+		CPPUNIT_TEST(test_cos);
+		CPPUNIT_TEST(test_sin);
+		CPPUNIT_TEST(test_tan);
+		CPPUNIT_TEST(test_abs);
+		CPPUNIT_TEST(test_acos);
+		CPPUNIT_TEST(test_asin);
+		CPPUNIT_TEST(test_atan);
+		CPPUNIT_TEST(test_cosh);
+		CPPUNIT_TEST(test_sinh);
+		CPPUNIT_TEST(test_tanh);
 
 
 
@@ -74,6 +75,9 @@ public:
 	void test02();
 
 };
+
+CPPUNIT_TEST_SUITE_REGISTRATION(TestAffine2);
+
 
 #include "TestAffine2.h_"
 

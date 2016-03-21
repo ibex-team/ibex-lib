@@ -12,61 +12,64 @@
 #ifndef __TEST_EXPR_H__
 #define __TEST_EXPR_H__
 
-#include "cpptest.h"
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
 #include "utils.h"
 
 namespace ibex {
 
-class TestExpr : public TestIbex {
+class TestExpr : public CppUnit::TestFixture {
 
 public:
-	TestExpr() {
-		TEST_ADD(TestExpr::symbol);
-		TEST_ADD(TestExpr::addxy01);
-		TEST_ADD(TestExpr::addxy02);
-		TEST_ADD(TestExpr::addxy03);
-		TEST_ADD(TestExpr::addxy04);
 
-		TEST_ADD(TestExpr::addxx01);
+	CPPUNIT_TEST_SUITE(TestExpr);
+	
+		CPPUNIT_TEST(symbol);
+		CPPUNIT_TEST(addxy01);
+		CPPUNIT_TEST(addxy02);
+		CPPUNIT_TEST(addxy03);
+		CPPUNIT_TEST(addxy04);
 
-		TEST_ADD(TestExpr::mulxy01);
-		TEST_ADD(TestExpr::mulxy02);
-		TEST_ADD(TestExpr::mulxy03);
-		TEST_ADD(TestExpr::mulxy04);
-		TEST_ADD(TestExpr::mulxy05);
-		TEST_ADD(TestExpr::mulxy06);
-		TEST_ADD(TestExpr::mulxy07);
-		TEST_ADD(TestExpr::mulxy08);
+		CPPUNIT_TEST(addxx01);
 
-		TEST_ADD(TestExpr::dag01);
+		CPPUNIT_TEST(mulxy01);
+		CPPUNIT_TEST(mulxy02);
+		CPPUNIT_TEST(mulxy03);
+		CPPUNIT_TEST(mulxy04);
+		CPPUNIT_TEST(mulxy05);
+		CPPUNIT_TEST(mulxy06);
+		CPPUNIT_TEST(mulxy07);
+		CPPUNIT_TEST(mulxy08);
 
-		TEST_ADD(TestExpr::unaryOp);
-		TEST_ADD(TestExpr::binaryOp);
+		CPPUNIT_TEST(dag01);
 
-		TEST_ADD(TestExpr::cst01);
-		TEST_ADD(TestExpr::cst02);
-		TEST_ADD(TestExpr::cst03);
-		TEST_ADD(TestExpr::cst04);
-		TEST_ADD(TestExpr::cst05);
+		CPPUNIT_TEST(unaryOp);
+		CPPUNIT_TEST(binaryOp);
 
-		TEST_ADD(TestExpr::vector01);
-		TEST_ADD(TestExpr::vector02);
+		CPPUNIT_TEST(cst01);
+		CPPUNIT_TEST(cst02);
+		CPPUNIT_TEST(cst03);
+		CPPUNIT_TEST(cst04);
+		CPPUNIT_TEST(cst05);
 
-		TEST_ADD(TestExpr::index01);
-		TEST_ADD(TestExpr::index02);
-		TEST_ADD(TestExpr::index03);
-		TEST_ADD(TestExpr::index04);
+		CPPUNIT_TEST(vector01);
+		CPPUNIT_TEST(vector02);
 
-		TEST_ADD(TestExpr::apply01);
-		TEST_ADD(TestExpr::apply03);
+		CPPUNIT_TEST(index01);
+		CPPUNIT_TEST(index02);
+		CPPUNIT_TEST(index03);
+		CPPUNIT_TEST(index04);
 
-		TEST_ADD(TestExpr::subnodes01);
-		TEST_ADD(TestExpr::subnodes02);
-		TEST_ADD(TestExpr::subnodes03);
-		TEST_ADD(TestExpr::subnodes04);
+		CPPUNIT_TEST(apply01);
+		CPPUNIT_TEST(apply03);
 
-		TEST_ADD(TestExpr::bug81);
-	}
+		CPPUNIT_TEST(subnodes01);
+		CPPUNIT_TEST(subnodes02);
+		CPPUNIT_TEST(subnodes03);
+		CPPUNIT_TEST(subnodes04);
+
+		CPPUNIT_TEST(bug81);
+	CPPUNIT_TEST_SUITE_END();
 
 	void symbol();
 	void addxy01();
@@ -122,6 +125,9 @@ public:
 	// row vector variable + (column) vector constant
 	void bug81();
 };
+
+CPPUNIT_TEST_SUITE_REGISTRATION(TestExpr);
+
 
 } // end namespace
 

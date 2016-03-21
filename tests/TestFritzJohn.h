@@ -12,20 +12,26 @@
 #ifndef __TEST_FRITZ_JOHN_H__
 #define __TEST_FRITZ_JOHN_H__
 
-#include "cpptest.h"
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
 #include "utils.h"
 
 namespace ibex {
 
-class TestFritzJohn : public TestIbex {
+class TestFritzJohn : public CppUnit::TestFixture {
 
 public:
-	TestFritzJohn() {
-		TEST_ADD(TestFritzJohn::test01);
-	}
+
+	CPPUNIT_TEST_SUITE(TestFritzJohn);
+	
+		CPPUNIT_TEST(test01);
+	CPPUNIT_TEST_SUITE_END();
 
 	void test01();
 };
+
+CPPUNIT_TEST_SUITE_REGISTRATION(TestFritzJohn);
+
 
 } // end namespace
 

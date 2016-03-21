@@ -31,7 +31,7 @@ void TestQInter::test_projF_1(){
     result[0] = Interval(0, 4);
     result[1] = Interval(2);
     // cout << x_res << " " << result << "\n" << std::flush;
-    TEST_ASSERT(x_res == result);
+    CPPUNIT_ASSERT(x_res == result);
 }
 
 void TestQInter::test_projF_2(){
@@ -57,7 +57,7 @@ void TestQInter::test_projF_2(){
     }
     for(int q = 0; q < V.size(); q++){
         // cout << "q = "<< q << " " << qinter_projf(boxes, boxes.size() - q) << "\n" << std::flush;
-        TEST_ASSERT(qinter_projf(boxes, boxes.size() - q) == res[q]);
+        CPPUNIT_ASSERT(qinter_projf(boxes, boxes.size() - q) == res[q]);
     }
 }
 
@@ -74,7 +74,7 @@ void TestQInter::test_projF_3(){
     int q = 1;
     IntervalVector x_res(2, Interval::ALL_REALS);
     x_res = qinter_projf(boxes, boxes.size()-q);
-    TEST_ASSERT(!x_res.is_empty())
+    CPPUNIT_ASSERT(!x_res.is_empty());
 }
 
 } // end namespace

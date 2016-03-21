@@ -12,22 +12,25 @@
 #ifndef __TEST_EXPR_SPLIT_OCC_H__
 #define __TEST_EXPR_SPLIT_OCC_H__
 
-#include "cpptest.h"
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
 #include "utils.h"
 
 namespace ibex {
 
-class TestExprSplitOcc : public TestIbex {
+class TestExprSplitOcc : public CppUnit::TestFixture {
 
 public:
-	TestExprSplitOcc() {
-		TEST_ADD(TestExprSplitOcc::test01);
-		TEST_ADD(TestExprSplitOcc::test02);
-		TEST_ADD(TestExprSplitOcc::test03);
-		TEST_ADD(TestExprSplitOcc::test04);
-		TEST_ADD(TestExprSplitOcc::test05);
-		TEST_ADD(TestExprSplitOcc::test07);
-	}
+
+	CPPUNIT_TEST_SUITE(TestExprSplitOcc);
+	
+		CPPUNIT_TEST(test01);
+		CPPUNIT_TEST(test02);
+		CPPUNIT_TEST(test03);
+		CPPUNIT_TEST(test04);
+		CPPUNIT_TEST(test05);
+		CPPUNIT_TEST(test07);
+	CPPUNIT_TEST_SUITE_END();
 
 	// two occurrences of scalar var
 	void test01();
@@ -44,6 +47,9 @@ public:
 	// vector var: more complex example
 	void test07();
 };
+
+CPPUNIT_TEST_SUITE_REGISTRATION(TestExprSplitOcc);
+
 
 } // namespace ibex
 #endif // __TEST_EXPR_SPLIT_OCC_H__

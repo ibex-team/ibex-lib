@@ -12,21 +12,24 @@
 #ifndef __TEST_OPTIMIZER_H__
 #define __TEST_OPTIMIZER_H__
 
-#include "cpptest.h"
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
 #include "utils.h"
 
 namespace ibex {
 
-class TestOptimizer : public TestIbex {
+class TestOptimizer : public CppUnit::TestFixture {
 
 public:
-	TestOptimizer() {
 
-		TEST_ADD(TestOptimizer::issue50_1);
-		TEST_ADD(TestOptimizer::issue50_2);
-		TEST_ADD(TestOptimizer::issue50_3);
-		TEST_ADD(TestOptimizer::issue50_4);
-	}
+	CPPUNIT_TEST_SUITE(TestOptimizer);
+	
+
+		CPPUNIT_TEST(issue50_1);
+		CPPUNIT_TEST(issue50_2);
+		CPPUNIT_TEST(issue50_3);
+		CPPUNIT_TEST(issue50_4);
+	CPPUNIT_TEST_SUITE_END();
 
 	// upperbounding with goal_prec=10% will remove everything (initial loup > true minimum) --> NO_FEASIBLE_FOUND
 	void issue50_1();
@@ -37,6 +40,9 @@ public:
 	// upperbounding with goal_prec=0 will make the optimizer fail (initial loup < true minimum) --> INFEASIBLE
 	void issue50_4();
 };
+
+CPPUNIT_TEST_SUITE_REGISTRATION(TestOptimizer);
+
 
 } // namespace ibex
 #endif // __TEST_OPTIMIZER_H__

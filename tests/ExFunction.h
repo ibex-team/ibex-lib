@@ -18,6 +18,8 @@ namespace ibex {
 
 class ExFunction {
 public:
+
+	CPPUNIT_TEST_SUITE(ExFunction);
 	ExFunction(const ExprSymbol& in, const ExprNode& out, const IntervalVector& x, const Dim& dimY, const IntervalVector& xBwd) : f(in,out), x(x), yFwd(dimY), xBwd(xBwd) { }
 
 	Function f;
@@ -26,6 +28,9 @@ public:
 	Domain yFwd;
 	IntervalVector xBwd;
 };
+
+CPPUNIT_TEST_SUITE_REGISTRATION(ExFunction);
+
 
 void init_FUNC();
 

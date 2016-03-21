@@ -12,7 +12,8 @@
 #define __TEST_SEPPOLYGON_H__
 
 #include <vector>
-#include "cpptest.h"
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
 #include "ibex_SepPolygon.h"
 #include "ibex_SepNot.h"
 #include "ibex_SepInter.h"
@@ -21,14 +22,16 @@
 
 namespace ibex {
 
-class TestSepPolygon : public TestIbex {
+class TestSepPolygon : public CppUnit::TestFixture {
 
 public:
-	TestSepPolygon() {
-        TEST_ADD(TestSepPolygon::test_SepPolygon_01);
-        TEST_ADD(TestSepPolygon::test_SepPolygon_02);
-        TEST_ADD(TestSepPolygon::test_SepPolygon_03);
-	}
+
+	CPPUNIT_TEST_SUITE(TestSepPolygon);
+	
+        CPPUNIT_TEST(test_SepPolygon_01);
+        CPPUNIT_TEST(test_SepPolygon_02);
+        CPPUNIT_TEST(test_SepPolygon_03);
+	CPPUNIT_TEST_SUITE_END();
 
     void setup();
     void test_SepPolygon_01();
@@ -40,6 +43,9 @@ private:
     std::vector<double> murs_xa2,murs_xb2,murs_ya2,murs_yb2;
 
 };
+
+CPPUNIT_TEST_SUITE_REGISTRATION(TestSepPolygon);
+
 
 } // end namespace ibex
 #endif // __TEST_SEPPOLYGON_H__

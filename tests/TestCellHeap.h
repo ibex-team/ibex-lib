@@ -12,27 +12,30 @@
 #ifndef __TEST_CTC_CELLHEAP_H__
 #define __TEST_CTC_CELLHEAP_H__
 
-#include "cpptest.h"
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
 #include "utils.h"
 
 namespace ibex {
 
-class TestCellHeap : public TestIbex {
+class TestCellHeap : public CppUnit::TestFixture {
 
 public:
-	TestCellHeap() {
 
-		TEST_ADD(TestCellHeap::test01);
-		TEST_ADD(TestCellHeap::test02);
-		TEST_ADD(TestCellHeap::test03);
-		TEST_ADD(TestCellHeap::test04);
-		TEST_ADD(TestCellHeap::test05);
-		TEST_ADD(TestCellHeap::test_D00);
-		TEST_ADD(TestCellHeap::test_D01);
-		TEST_ADD(TestCellHeap::test_D03);
-		TEST_ADD(TestCellHeap::test_D04);
-		TEST_ADD(TestCellHeap::test_D05);
-	}
+	CPPUNIT_TEST_SUITE(TestCellHeap);
+	
+
+		CPPUNIT_TEST(test01);
+		CPPUNIT_TEST(test02);
+		CPPUNIT_TEST(test03);
+		CPPUNIT_TEST(test04);
+		CPPUNIT_TEST(test05);
+		CPPUNIT_TEST(test_D00);
+		CPPUNIT_TEST(test_D01);
+		CPPUNIT_TEST(test_D03);
+		CPPUNIT_TEST(test_D04);
+		CPPUNIT_TEST(test_D05);
+	CPPUNIT_TEST_SUITE_END();
 
 
 	void test01();
@@ -46,6 +49,9 @@ public:
 	void test_D04();
 	void test_D05();
 };
+
+CPPUNIT_TEST_SUITE_REGISTRATION(TestCellHeap);
+
 
 } // namespace ibex
 #endif // __TEST_CTC_CELLHEAP_H__

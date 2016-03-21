@@ -12,34 +12,37 @@
 #ifndef __TEST_FUNCTION_H__
 #define __TEST_FUNCTION_H__
 
-#include "cpptest.h"
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
 #include "utils.h"
 
 namespace ibex {
 
-class TestFunction : public TestIbex {
+class TestFunction : public CppUnit::TestFixture {
 
 public:
-	TestFunction() {
-		TEST_ADD(TestFunction::build01);
-		TEST_ADD(TestFunction::add_symbol);
-		TEST_ADD(TestFunction::copy);
-		TEST_ADD(TestFunction::generate_comp01);
-		TEST_ADD(TestFunction::generate_comp02);
-		TEST_ADD(TestFunction::used);
-		TEST_ADD(TestFunction::used02);
-		TEST_ADD(TestFunction::numctr01);
-		TEST_ADD(TestFunction::apply01);
-		TEST_ADD(TestFunction::from_string01);
-		TEST_ADD(TestFunction::from_string02);
-		TEST_ADD(TestFunction::from_string03);
-		TEST_ADD(TestFunction::from_string04);
-		TEST_ADD(TestFunction::issue43);
-		TEST_ADD(TestFunction::issue43_bis);
-		TEST_ADD(TestFunction::minibex01);
-		TEST_ADD(TestFunction::minibex02);
-		TEST_ADD(TestFunction::minibex03);
-	}
+
+	CPPUNIT_TEST_SUITE(TestFunction);
+	
+		CPPUNIT_TEST(build01);
+		CPPUNIT_TEST(add_symbol);
+		CPPUNIT_TEST(copy);
+		CPPUNIT_TEST(generate_comp01);
+		CPPUNIT_TEST(generate_comp02);
+		CPPUNIT_TEST(used);
+		CPPUNIT_TEST(used02);
+		CPPUNIT_TEST(numctr01);
+		CPPUNIT_TEST(apply01);
+		CPPUNIT_TEST(from_string01);
+		CPPUNIT_TEST(from_string02);
+		CPPUNIT_TEST(from_string03);
+		CPPUNIT_TEST(from_string04);
+		CPPUNIT_TEST(issue43);
+		CPPUNIT_TEST(issue43_bis);
+		CPPUNIT_TEST(minibex01);
+		CPPUNIT_TEST(minibex02);
+		CPPUNIT_TEST(minibex03);
+	CPPUNIT_TEST_SUITE_END();
 
 	// an uninitialized function must be deletable
 	// without problem (the case happens when
@@ -71,6 +74,9 @@ public:
 	void minibex02();
 	void minibex03();
 };
+
+CPPUNIT_TEST_SUITE_REGISTRATION(TestFunction);
+
 
 } // end namespace
 

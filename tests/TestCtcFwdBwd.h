@@ -10,24 +10,28 @@
 #ifndef __TEST_CTC_FWD_BWD_H__
 #define __TEST_CTC_FWD_BWD_H__
 
-#include "cpptest.h"
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
 #include "utils.h"
 
 namespace ibex {
 
-class TestCtcFwdBwd : public TestIbex {
+class TestCtcFwdBwd : public CppUnit::TestFixture {
 
 public:
 
-	TestCtcFwdBwd() {
-		TEST_ADD(TestCtcFwdBwd::sqrt_issue28);
-		TEST_ADD(TestCtcFwdBwd::atan2_issue134);
-	}
+	CPPUNIT_TEST_SUITE(TestCtcFwdBwd);
+	CPPUNIT_TEST(sqrt_issue28);
+	CPPUNIT_TEST(atan2_issue134);
+	CPPUNIT_TEST_SUITE_END();
 
 	void sqrt_issue28();
 	void atan2_issue134();
 
 };
+
+CPPUNIT_TEST_SUITE_REGISTRATION(TestCtcFwdBwd);
+
 
 } // namespace ibex
 

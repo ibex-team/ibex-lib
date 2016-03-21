@@ -11,24 +11,29 @@
 #ifndef __TEST_Q_INTER__
 #define __TEST_Q_INTER__
 
-#include "cpptest.h"
-#include "utils.h"
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
+
+#include "../../../tests/utils.h"
 
 namespace ibex {
 
-class TestQInter : public TestIbex {
+class TestQInter : public CppUnit::TestFixture {
 
 public:
-	TestQInter() {
-        TEST_ADD(TestQInter::test_projF_1);
-        TEST_ADD(TestQInter::test_projF_2);
-        TEST_ADD(TestQInter::test_projF_3);
-	}
+
+	CPPUNIT_TEST_SUITE( TestQInter );
+	CPPUNIT_TEST( test_projF_1 );
+	CPPUNIT_TEST( test_projF_2 );
+	CPPUNIT_TEST( test_projF_3 );
+	CPPUNIT_TEST_SUITE_END();
 
     void test_projF_1();
     void test_projF_2();
     void test_projF_3();
 };
+
+CPPUNIT_TEST_SUITE_REGISTRATION( TestQInter );
 
 } // end namespace ibex
 #endif // __TEST_Q_INTER__

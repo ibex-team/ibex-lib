@@ -1,24 +1,27 @@
 #include "ibex_CtcPixelMap.h"
-#include "cpptest.h"
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
 #include "utils.h"
 
 namespace ibex {
 
-class TestCtcPixelMap : public TestIbex {
+class TestCtcPixelMap : public CppUnit::TestFixture {
 
 public:
-    TestCtcPixelMap(){
-    TEST_ADD(TestCtcPixelMap::test3d_emptyBox);
-    TEST_ADD(TestCtcPixelMap::test3d_contractEmpty);
-    TEST_ADD(TestCtcPixelMap::test3d_allReal);
-    TEST_ADD(TestCtcPixelMap::test3d_fullImage);
-    TEST_ADD(TestCtcPixelMap::test3d_corner);
 
-    TEST_ADD(TestCtcPixelMap::test2d_emptyBox);
-    TEST_ADD(TestCtcPixelMap::test2d_contractEmpty);
-    TEST_ADD(TestCtcPixelMap::test2d_allReal);
-    TEST_ADD(TestCtcPixelMap::test2d_fullImage);
-    TEST_ADD(TestCtcPixelMap::test2d_corner);
+	CPPUNIT_TEST_SUITE(TestCtcPixelMap);
+    TestCtcPixelMap(){
+    CPPUNIT_TEST(test3d_emptyBox);
+    CPPUNIT_TEST(test3d_contractEmpty);
+    CPPUNIT_TEST(test3d_allReal);
+    CPPUNIT_TEST(test3d_fullImage);
+    CPPUNIT_TEST(test3d_corner);
+
+    CPPUNIT_TEST(test2d_emptyBox);
+    CPPUNIT_TEST(test2d_contractEmpty);
+    CPPUNIT_TEST(test2d_allReal);
+    CPPUNIT_TEST(test2d_fullImage);
+    CPPUNIT_TEST(test2d_corner);
 
     }
 
@@ -39,13 +42,18 @@ private:
     void test2d_corner();
     
 };
+
+CPPUNIT_TEST_SUITE_REGISTRATION(TestCtcPixelMap);
+
 //class TestCtcPixelMap : public Test::Suite {
 
 //public:
-//    TestCtcPixelMap() {
-//        TEST_ADD(TestCtcPixelMap::testContractExternal);
-//        TEST_ADD(TestCtcPixelMap::testContractThin);
-//        TEST_ADD(TestCtcPixelMap::contractCross);
+
+	CPPUNIT_TEST_SUITE(TestCtcPixelMap);
+//    
+//        CPPUNIT_TEST(testContractExternal);
+//        CPPUNIT_TEST(testContractThin);
+//        CPPUNIT_TEST(contractCross);
 //    }
 
 //    void add_cross(int3 center, int length, Array3D &I);
@@ -63,6 +71,9 @@ private:
 //    int3 grid_size;
 //};
 
-}
+CPPUNIT_TEST_SUITE_REGISTRATION(TestCtcPixelMap);
+
+
+	CPPUNIT_TEST_SUITE_END();
 
 

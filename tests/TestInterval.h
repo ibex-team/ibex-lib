@@ -12,156 +12,159 @@
 #ifndef __TEST_INTERVAL_H__
 #define __TEST_INTERVAL_H__
 
-#include "cpptest.h"
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
 #include "ibex_Interval.h"
 #include "utils.h"
 
 using namespace ibex;
 
-class TestInterval : public TestIbex {
+class TestInterval : public CppUnit::TestFixture {
 public:
-	TestInterval() {
-		TEST_ADD(TestInterval::cons01);
-		TEST_ADD(TestInterval::cons02);
-		TEST_ADD(TestInterval::cons03);
-		TEST_ADD(TestInterval::cons04);
-		TEST_ADD(TestInterval::cons05);
 
-		TEST_ADD(TestInterval::eq01);
-		TEST_ADD(TestInterval::eq02);
-		TEST_ADD(TestInterval::eq03);
-		TEST_ADD(TestInterval::eq04);
-		TEST_ADD(TestInterval::eq05);
-		TEST_ADD(TestInterval::eq06);
-		TEST_ADD(TestInterval::eq07);
-		TEST_ADD(TestInterval::eq08);
+	CPPUNIT_TEST_SUITE(TestInterval);
+	
+		CPPUNIT_TEST(cons01);
+		CPPUNIT_TEST(cons02);
+		CPPUNIT_TEST(cons03);
+		CPPUNIT_TEST(cons04);
+		CPPUNIT_TEST(cons05);
 
-		TEST_ADD(TestInterval::set_empty01);
-		TEST_ADD(TestInterval::set_empty02);
+		CPPUNIT_TEST(eq01);
+		CPPUNIT_TEST(eq02);
+		CPPUNIT_TEST(eq03);
+		CPPUNIT_TEST(eq04);
+		CPPUNIT_TEST(eq05);
+		CPPUNIT_TEST(eq06);
+		CPPUNIT_TEST(eq07);
+		CPPUNIT_TEST(eq08);
 
-		TEST_ADD(TestInterval::inter01);
-		TEST_ADD(TestInterval::inter02);
-		TEST_ADD(TestInterval::inter03);
-		TEST_ADD(TestInterval::inter04);
-		TEST_ADD(TestInterval::inter05);
-		TEST_ADD(TestInterval::inter06);
+		CPPUNIT_TEST(set_empty01);
+		CPPUNIT_TEST(set_empty02);
 
-		TEST_ADD(TestInterval::hull01);
-		TEST_ADD(TestInterval::hull02);
-		TEST_ADD(TestInterval::hull03);
+		CPPUNIT_TEST(inter01);
+		CPPUNIT_TEST(inter02);
+		CPPUNIT_TEST(inter03);
+		CPPUNIT_TEST(inter04);
+		CPPUNIT_TEST(inter05);
+		CPPUNIT_TEST(inter06);
 
-		TEST_ADD(TestInterval::getters01);
-		TEST_ADD(TestInterval::getters02);
-		TEST_ADD(TestInterval::getters03);
-		TEST_ADD(TestInterval::getters04);
-		TEST_ADD(TestInterval::getters05);
-		TEST_ADD(TestInterval::getters06);
+		CPPUNIT_TEST(hull01);
+		CPPUNIT_TEST(hull02);
+		CPPUNIT_TEST(hull03);
 
-		TEST_ADD(TestInterval::distance01);
-		TEST_ADD(TestInterval::distance02);
-		TEST_ADD(TestInterval::distance03);
-		TEST_ADD(TestInterval::distance04);
-		TEST_ADD(TestInterval::distance05);
-		TEST_ADD(TestInterval::distance06);
-		TEST_ADD(TestInterval::distance07);
-		TEST_ADD(TestInterval::distance08);
-		TEST_ADD(TestInterval::distance09);
-		TEST_ADD(TestInterval::distance10);
-		TEST_ADD(TestInterval::distance11);
-		TEST_ADD(TestInterval::distance12);
-		TEST_ADD(TestInterval::distance13);
-		TEST_ADD(TestInterval::distance14);
-		TEST_ADD(TestInterval::distance15);
-		TEST_ADD(TestInterval::distance15b);
-		TEST_ADD(TestInterval::distance16);
-		TEST_ADD(TestInterval::distance17);
-		TEST_ADD(TestInterval::distance18);
-		TEST_ADD(TestInterval::distance19);
-		TEST_ADD(TestInterval::distance20);
-		TEST_ADD(TestInterval::distance21);
-		TEST_ADD(TestInterval::distance22);
-		TEST_ADD(TestInterval::distance23);
+		CPPUNIT_TEST(getters01);
+		CPPUNIT_TEST(getters02);
+		CPPUNIT_TEST(getters03);
+		CPPUNIT_TEST(getters04);
+		CPPUNIT_TEST(getters05);
+		CPPUNIT_TEST(getters06);
 
-		TEST_ADD(TestInterval::rel_distance01);
-		TEST_ADD(TestInterval::rel_distance02);
-		TEST_ADD(TestInterval::rel_distance03);
-		TEST_ADD(TestInterval::rel_distance04);
-		TEST_ADD(TestInterval::rel_distance05);
-		TEST_ADD(TestInterval::rel_distance06);
-		TEST_ADD(TestInterval::rel_distance07);
-		TEST_ADD(TestInterval::rel_distance08);
-		TEST_ADD(TestInterval::rel_distance09);
-		TEST_ADD(TestInterval::rel_distance10);
-		TEST_ADD(TestInterval::rel_distance11);
-		TEST_ADD(TestInterval::rel_distance12);
-		TEST_ADD(TestInterval::rel_distance13);
-		TEST_ADD(TestInterval::rel_distance14);
-		TEST_ADD(TestInterval::rel_distance15);
-		TEST_ADD(TestInterval::rel_distance16);
-		TEST_ADD(TestInterval::rel_distance17);
-		TEST_ADD(TestInterval::rel_distance18);
-		TEST_ADD(TestInterval::rel_distance19);
-		TEST_ADD(TestInterval::rel_distance20);
-		TEST_ADD(TestInterval::rel_distance21);
+		CPPUNIT_TEST(distance01);
+		CPPUNIT_TEST(distance02);
+		CPPUNIT_TEST(distance03);
+		CPPUNIT_TEST(distance04);
+		CPPUNIT_TEST(distance05);
+		CPPUNIT_TEST(distance06);
+		CPPUNIT_TEST(distance07);
+		CPPUNIT_TEST(distance08);
+		CPPUNIT_TEST(distance09);
+		CPPUNIT_TEST(distance10);
+		CPPUNIT_TEST(distance11);
+		CPPUNIT_TEST(distance12);
+		CPPUNIT_TEST(distance13);
+		CPPUNIT_TEST(distance14);
+		CPPUNIT_TEST(distance15);
+		CPPUNIT_TEST(distance15b);
+		CPPUNIT_TEST(distance16);
+		CPPUNIT_TEST(distance17);
+		CPPUNIT_TEST(distance18);
+		CPPUNIT_TEST(distance19);
+		CPPUNIT_TEST(distance20);
+		CPPUNIT_TEST(distance21);
+		CPPUNIT_TEST(distance22);
+		CPPUNIT_TEST(distance23);
 
-	    TEST_ADD(TestInterval::is_subset01);
-	    TEST_ADD(TestInterval::is_subset02);
-	    TEST_ADD(TestInterval::is_strict_interior_subset01);
-	    TEST_ADD(TestInterval::is_strict_interior_subset02);
-	    TEST_ADD(TestInterval::is_strict_interior_subset03);
-	    TEST_ADD(TestInterval::is_superset01);
-	    TEST_ADD(TestInterval::is_superset02);
-	    TEST_ADD(TestInterval::is_strict_superset01);
-	    TEST_ADD(TestInterval::is_strict_superset02);
-	    TEST_ADD(TestInterval::is_strict_superset03);
-	    TEST_ADD(TestInterval::contains01);
-	    TEST_ADD(TestInterval::contains02);
-	    TEST_ADD(TestInterval::interior_contains01);
-	    TEST_ADD(TestInterval::interior_contains02);
-	    TEST_ADD(TestInterval::is_disjoint01);
-	    TEST_ADD(TestInterval::is_disjoint02);
-	    TEST_ADD(TestInterval::is_empty01);
-	    TEST_ADD(TestInterval::is_empty02);
-	    TEST_ADD(TestInterval::is_degenerated01);
-	    TEST_ADD(TestInterval::is_degenerated02);
-	    TEST_ADD(TestInterval::is_unbounded01);
-	    TEST_ADD(TestInterval::is_unbounded02);
-	    TEST_ADD(TestInterval::is_unbounded03);
-	    TEST_ADD(TestInterval::is_unbounded04);
+		CPPUNIT_TEST(rel_distance01);
+		CPPUNIT_TEST(rel_distance02);
+		CPPUNIT_TEST(rel_distance03);
+		CPPUNIT_TEST(rel_distance04);
+		CPPUNIT_TEST(rel_distance05);
+		CPPUNIT_TEST(rel_distance06);
+		CPPUNIT_TEST(rel_distance07);
+		CPPUNIT_TEST(rel_distance08);
+		CPPUNIT_TEST(rel_distance09);
+		CPPUNIT_TEST(rel_distance10);
+		CPPUNIT_TEST(rel_distance11);
+		CPPUNIT_TEST(rel_distance12);
+		CPPUNIT_TEST(rel_distance13);
+		CPPUNIT_TEST(rel_distance14);
+		CPPUNIT_TEST(rel_distance15);
+		CPPUNIT_TEST(rel_distance16);
+		CPPUNIT_TEST(rel_distance17);
+		CPPUNIT_TEST(rel_distance18);
+		CPPUNIT_TEST(rel_distance19);
+		CPPUNIT_TEST(rel_distance20);
+		CPPUNIT_TEST(rel_distance21);
 
-		TEST_ADD(TestInterval::is_bisectable01);
-		TEST_ADD(TestInterval::is_bisectable02);
-		TEST_ADD(TestInterval::is_bisectable03);
-		TEST_ADD(TestInterval::is_bisectable04);
-		TEST_ADD(TestInterval::is_bisectable05);
-		TEST_ADD(TestInterval::is_bisectable06);
-		TEST_ADD(TestInterval::is_bisectable07);
-		TEST_ADD(TestInterval::is_bisectable08);
-		TEST_ADD(TestInterval::is_bisectable09);
-		TEST_ADD(TestInterval::is_bisectable10);
+	    CPPUNIT_TEST(is_subset01);
+	    CPPUNIT_TEST(is_subset02);
+	    CPPUNIT_TEST(is_strict_interior_subset01);
+	    CPPUNIT_TEST(is_strict_interior_subset02);
+	    CPPUNIT_TEST(is_strict_interior_subset03);
+	    CPPUNIT_TEST(is_superset01);
+	    CPPUNIT_TEST(is_superset02);
+	    CPPUNIT_TEST(is_strict_superset01);
+	    CPPUNIT_TEST(is_strict_superset02);
+	    CPPUNIT_TEST(is_strict_superset03);
+	    CPPUNIT_TEST(contains01);
+	    CPPUNIT_TEST(contains02);
+	    CPPUNIT_TEST(interior_contains01);
+	    CPPUNIT_TEST(interior_contains02);
+	    CPPUNIT_TEST(is_disjoint01);
+	    CPPUNIT_TEST(is_disjoint02);
+	    CPPUNIT_TEST(is_empty01);
+	    CPPUNIT_TEST(is_empty02);
+	    CPPUNIT_TEST(is_degenerated01);
+	    CPPUNIT_TEST(is_degenerated02);
+	    CPPUNIT_TEST(is_unbounded01);
+	    CPPUNIT_TEST(is_unbounded02);
+	    CPPUNIT_TEST(is_unbounded03);
+	    CPPUNIT_TEST(is_unbounded04);
 
-		TEST_ADD(TestInterval::integer01);
-		TEST_ADD(TestInterval::integer02);
-		TEST_ADD(TestInterval::integer03);
-		TEST_ADD(TestInterval::integer04);
-		TEST_ADD(TestInterval::integer05);
-		TEST_ADD(TestInterval::integer06);
-		TEST_ADD(TestInterval::integer07);
-		TEST_ADD(TestInterval::integer08);
+		CPPUNIT_TEST(is_bisectable01);
+		CPPUNIT_TEST(is_bisectable02);
+		CPPUNIT_TEST(is_bisectable03);
+		CPPUNIT_TEST(is_bisectable04);
+		CPPUNIT_TEST(is_bisectable05);
+		CPPUNIT_TEST(is_bisectable06);
+		CPPUNIT_TEST(is_bisectable07);
+		CPPUNIT_TEST(is_bisectable08);
+		CPPUNIT_TEST(is_bisectable09);
+		CPPUNIT_TEST(is_bisectable10);
 
-		TEST_ADD(TestInterval::mid01);
-		TEST_ADD(TestInterval::mid02);
-		TEST_ADD(TestInterval::mid03);
-		TEST_ADD(TestInterval::mid04);
-		TEST_ADD(TestInterval::mid05);
-		TEST_ADD(TestInterval::mid06);
-		TEST_ADD(TestInterval::mid07);
-		TEST_ADD(TestInterval::mid08);
+		CPPUNIT_TEST(integer01);
+		CPPUNIT_TEST(integer02);
+		CPPUNIT_TEST(integer03);
+		CPPUNIT_TEST(integer04);
+		CPPUNIT_TEST(integer05);
+		CPPUNIT_TEST(integer06);
+		CPPUNIT_TEST(integer07);
+		CPPUNIT_TEST(integer08);
 
-	    TEST_ADD(TestInterval::delta01);
-	    TEST_ADD(TestInterval::delta02);
-	    TEST_ADD(TestInterval::delta03);
-	}
+		CPPUNIT_TEST(mid01);
+		CPPUNIT_TEST(mid02);
+		CPPUNIT_TEST(mid03);
+		CPPUNIT_TEST(mid04);
+		CPPUNIT_TEST(mid05);
+		CPPUNIT_TEST(mid06);
+		CPPUNIT_TEST(mid07);
+		CPPUNIT_TEST(mid08);
+
+	    CPPUNIT_TEST(delta01);
+	    CPPUNIT_TEST(delta02);
+	    CPPUNIT_TEST(delta03);
+	CPPUNIT_TEST_SUITE_END();
 private:
 
 	/* test
@@ -365,5 +368,8 @@ private:
 	void check_hull(const Interval& x, const Interval& z, const Interval& y_expected);
 	void check_inter(const Interval& x, const Interval& z, const Interval& y_expected);
 };
+
+CPPUNIT_TEST_SUITE_REGISTRATION(TestInterval);
+
 
 #endif // __TEST_INTERVAL__

@@ -12,66 +12,69 @@
 #ifndef __TEST_INTERVAL_MATRIX_H__
 #define __TEST_INTERVAL_MATRIX_H__
 
-#include "cpptest.h"
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
 #include "ibex_IntervalMatrix.h"
 #include "utils.h"
 
 using namespace ibex;
 
-class TestIntervalMatrix : public TestIbex {
+class TestIntervalMatrix : public CppUnit::TestFixture {
 
 public:
-	TestIntervalMatrix() {
 
-		TEST_ADD(TestIntervalMatrix::eq01);
-		TEST_ADD(TestIntervalMatrix::eq02);
-		TEST_ADD(TestIntervalMatrix::eq03);
-		TEST_ADD(TestIntervalMatrix::eq04);
+	CPPUNIT_TEST_SUITE(TestIntervalMatrix);
+	
 
-		TEST_ADD(TestIntervalMatrix::cons01);
-		TEST_ADD(TestIntervalMatrix::cons02);
-		TEST_ADD(TestIntervalMatrix::cons03);
-		TEST_ADD(TestIntervalMatrix::cons04);
+		CPPUNIT_TEST(eq01);
+		CPPUNIT_TEST(eq02);
+		CPPUNIT_TEST(eq03);
+		CPPUNIT_TEST(eq04);
 
-		TEST_ADD(TestIntervalMatrix::empty01);
-		TEST_ADD(TestIntervalMatrix::is_empty01);
-		TEST_ADD(TestIntervalMatrix::is_empty02);
-		TEST_ADD(TestIntervalMatrix::set_empty01);
+		CPPUNIT_TEST(cons01);
+		CPPUNIT_TEST(cons02);
+		CPPUNIT_TEST(cons03);
+		CPPUNIT_TEST(cons04);
 
-		TEST_ADD(TestIntervalMatrix::inter01);
-		TEST_ADD(TestIntervalMatrix::inter02);
-		TEST_ADD(TestIntervalMatrix::inter03);
+		CPPUNIT_TEST(empty01);
+		CPPUNIT_TEST(is_empty01);
+		CPPUNIT_TEST(is_empty02);
+		CPPUNIT_TEST(set_empty01);
 
-		TEST_ADD(TestIntervalMatrix::set_col01);
+		CPPUNIT_TEST(inter01);
+		CPPUNIT_TEST(inter02);
+		CPPUNIT_TEST(inter03);
 
-		TEST_ADD(TestIntervalMatrix::rows01);
-		TEST_ADD(TestIntervalMatrix::rows02);
-		TEST_ADD(TestIntervalMatrix::rows03);
+		CPPUNIT_TEST(set_col01);
 
-		TEST_ADD(TestIntervalMatrix::cols01);
-		TEST_ADD(TestIntervalMatrix::cols02);
-		TEST_ADD(TestIntervalMatrix::cols03);
-		TEST_ADD(TestIntervalMatrix::cols04);
-		TEST_ADD(TestIntervalMatrix::cols05);
+		CPPUNIT_TEST(rows01);
+		CPPUNIT_TEST(rows02);
+		CPPUNIT_TEST(rows03);
 
-		TEST_ADD(TestIntervalMatrix::resize01);
-		TEST_ADD(TestIntervalMatrix::resize02);
-		TEST_ADD(TestIntervalMatrix::resize03);
+		CPPUNIT_TEST(cols01);
+		CPPUNIT_TEST(cols02);
+		CPPUNIT_TEST(cols03);
+		CPPUNIT_TEST(cols04);
+		CPPUNIT_TEST(cols05);
 
-		TEST_ADD(TestIntervalMatrix::minus01);
-		TEST_ADD(TestIntervalMatrix::minus02);
+		CPPUNIT_TEST(resize01);
+		CPPUNIT_TEST(resize02);
+		CPPUNIT_TEST(resize03);
 
-		TEST_ADD(TestIntervalMatrix::add01);
-		TEST_ADD(TestIntervalMatrix::add02);
+		CPPUNIT_TEST(minus01);
+		CPPUNIT_TEST(minus02);
 
-		TEST_ADD(TestIntervalMatrix::sub01);
-		TEST_ADD(TestIntervalMatrix::sub02);
+		CPPUNIT_TEST(add01);
+		CPPUNIT_TEST(add02);
 
-		TEST_ADD(TestIntervalMatrix::mul01);
-		TEST_ADD(TestIntervalMatrix::mul02);
+		CPPUNIT_TEST(sub01);
+		CPPUNIT_TEST(sub02);
 
-		TEST_ADD(TestIntervalMatrix::put01);
-	}
+		CPPUNIT_TEST(mul01);
+		CPPUNIT_TEST(mul02);
+
+		CPPUNIT_TEST(put01);
+	CPPUNIT_TEST_SUITE_END();
 
 	// test:
 	//   operator==(const IntervalMatrix& m)
@@ -166,5 +169,8 @@ public:
 
 	void put01();
 };
+
+CPPUNIT_TEST_SUITE_REGISTRATION(TestIntervalMatrix);
+
 
 #endif // __TEST_INTERVAL_MATRIX_H__

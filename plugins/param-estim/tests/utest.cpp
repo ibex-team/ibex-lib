@@ -9,22 +9,13 @@
  * Created     : Dec 07, 2011
  * ---------------------------------------------------------------------------- */
 
-#include <stdlib.h>
-#include <cpptest.h>
-#include <memory>
-
-#include "TestQInter.h"
-
-using namespace std;
-using std::auto_ptr;
+#include <cppunit/ui/text/TestRunner.h>
+#include <cppunit/extensions/TestFactoryRegistry.h>
 
 int main() {
-    Test::TextOutput output(Test::TextOutput::Verbose);
-
-    Test::Suite ts;
-
-    ts.add(auto_ptr<Test::Suite>(new TestQInter()));
-
-    return ts.run(output,false) ? EXIT_SUCCESS : EXIT_FAILURE;
-
+	CppUnit::TextUi::TestRunner runner;
+	CppUnit::TestFactoryRegistry &registry = CppUnit::TestFactoryRegistry::getRegistry();
+	runner.addTest( registry.makeTest() );
+	bool wasSuccessful = runner.run( "", false );
+	return !wasSuccessful;
 }
