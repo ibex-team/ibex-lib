@@ -25,7 +25,7 @@ void TestHC4Revise::id01() {
 	Domain y(Dim::scalar());
 	y.i()=Interval(1,POS_INFINITY);
 	IntervalVector x(1,Interval(0,2));
-	HC4Revise().proj(f,y,x);
+	f.backward(y,x);
 	TEST_ASSERT(x[0]==Interval(1,2));
 }
 

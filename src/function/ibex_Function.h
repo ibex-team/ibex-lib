@@ -1045,7 +1045,7 @@ inline int Function::image_dim() const {
 	return _image_dim;
 }
 
-void Function::gradient(const IntervalVector& x, IntervalVector& g) const {
+inline void Function::gradient(const IntervalVector& x, IntervalVector& g) const {
 	assert(g.size()==nb_var());
 	assert(x.size()==nb_var());
 	_grad->gradient(x,g);

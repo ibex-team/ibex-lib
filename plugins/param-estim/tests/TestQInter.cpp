@@ -9,6 +9,7 @@
 
 #include "TestQInter.h"
 #include "ibex_Function.h"
+#include "ibex_QInter2.h"
 
 using namespace std;
 
