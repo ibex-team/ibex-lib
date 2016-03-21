@@ -11,7 +11,7 @@
 #ifndef __IBEX_IN_HC4_REVISE_H__
 #define __IBEX_IN_HC4_REVISE_H__
 
-#include "ibex_Function.h"
+#include "ibex_Eval.h"
 #include "ibex_Exception.h"
 #include "ibex_InnerArith.h"
 
@@ -31,7 +31,7 @@ public:
 	ExprDomain& d;
 
 	Eval p_eval;
-	ExprDomain  p;
+	ExprDomain p;
 
 protected:
 	/**
@@ -40,7 +40,7 @@ protected:
 	 */
 	class EmptyBoxException { };
 
-	void iproj(const Domain& y, const Array<Domain>& x, const Array<Domain>& xin);
+	void iproj(const Domain& y, Array<Domain>& x, const Array<Domain>& xin);
 
 public: // because called from CompiledFunction
 

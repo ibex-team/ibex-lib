@@ -72,7 +72,7 @@ protected:
 	}
 
 	/** Visit an indexed expression. */
-	virtual T* init(const ExprIndex& e, const T& expr_deco) {
+	virtual T* init(const ExprIndex& e, T& expr_deco) {
 		return init((const ExprNode&) e);
 	}
 
@@ -82,17 +82,17 @@ protected:
 	}
 
 	/** Visit a n-ary operator. */
-	virtual T* init(const ExprNAryOp& e, const Array<T>& args_deco) {
+	virtual T* init(const ExprNAryOp& e, Array<T>& args_deco) {
 		return init((const ExprNode&) e);
 	}
 
 	/** Visit a binary operator. */
-	virtual T* init(const ExprBinaryOp& e, const T& left_deco, const T& right_deco) {
+	virtual T* init(const ExprBinaryOp& e, T& left_deco, T& right_deco) {
 		return init((const ExprNode&) e);
 	}
 
 	/** Visit an unary operator. */
-	virtual T* init(const ExprUnaryOp& e, const T& expr_deco) {
+	virtual T* init(const ExprUnaryOp& e, T& expr_deco) {
 		return init((const ExprNode&) e);
 	}
 
@@ -112,62 +112,62 @@ protected:
 	/*==================== n-ary operators =========================*/
 	/** Visit a vector of expressions.
 	 * By default: call init(const ExprNAryOp& e). */
-	virtual T* init(const ExprVector& e, const Array<T>& args_deco) {
+	virtual T* init(const ExprVector& e, Array<T>& args_deco) {
 		return init((const ExprNAryOp&) e, args_deco);
 	}
 
 	/** Visit a function application.
 	 * By default: call init(const ExprNAryOp& e). */
-	virtual T* init(const ExprApply& e, const Array<T>& args_deco) {
+	virtual T* init(const ExprApply& e, Array<T>& args_deco) {
 		return init((const ExprNAryOp&) e, args_deco);
 	}
 
 	/** Visit a function Chi.
 	 * By default: call init(const ExprNAryOp& e). */
-	virtual T* init(const ExprChi& e, const Array<T>& args_deco) {
+	virtual T* init(const ExprChi& e, Array<T>& args_deco) {
 		return init((const ExprNAryOp&) e, args_deco);
 	}
 
 	/*==================== binary operators =========================*/
 	/** Visit an addition (Implementation is not mandatory).
 	 * By default: call init(const ExprBinaryOp& e). */
-	virtual T* init(const ExprAdd& e, const T& left_deco, const T& right_deco) {
+	virtual T* init(const ExprAdd& e, T& left_deco, T& right_deco) {
 		return init((const ExprBinaryOp&) e, left_deco, right_deco);
 	}
 
 	/** Visit an multiplication (Implementation is not mandatory).
 	 * By default: call init(const ExprBinaryOp& e). */
-	virtual T* init(const ExprMul& e, const T& left_deco, const T& right_deco) {
+	virtual T* init(const ExprMul& e, T& left_deco, T& right_deco) {
 		return init((const ExprBinaryOp&) e, left_deco, right_deco);
 	}
 
 	/** Visit a subtraction (Implementation is not mandatory).
 	 * By default: call init(const ExprBinaryOp& e). */
-	virtual T* init(const ExprSub& e, const T& left_deco, const T& right_deco) {
+	virtual T* init(const ExprSub& e, T& left_deco, T& right_deco) {
 		return init((const ExprBinaryOp&) e, left_deco, right_deco);
 	}
 
 	/** Visit a division (Implementation is not mandatory).
 	 * By default: call init(const ExprBinaryOp& e). */
-	virtual T* init(const ExprDiv& e, const T& left_deco, const T& right_deco) {
+	virtual T* init(const ExprDiv& e, T& left_deco, T& right_deco) {
 		return init((const ExprBinaryOp&) e, left_deco, right_deco);
 	}
 
 	/** Visit a max  (Implementation is not mandatory).
 	 * By default: call init(const ExprBinaryOp& e). */
-	virtual T* init(const ExprMax& e, const T& left_deco, const T& right_deco) {
+	virtual T* init(const ExprMax& e, T& left_deco, T& right_deco) {
 		return init((const ExprBinaryOp&) e, left_deco, right_deco);
 	}
 
 	/** Visit a min (Implementation is not mandatory).
 	 * By default: call init(const ExprBinaryOp& e). */
-	virtual T* init(const ExprMin& e, const T& left_deco, const T& right_deco) {
+	virtual T* init(const ExprMin& e, T& left_deco, T& right_deco) {
 		return init((const ExprBinaryOp&) e, left_deco, right_deco);
 	}
 
 	/** Visit a arctan2 (Implementation is not mandatory).
 	 * By default: call init(const ExprBinaryOp& e). */
-	virtual T* init(const ExprAtan2& e, const T& left_deco, const T& right_deco) {
+	virtual T* init(const ExprAtan2& e, T& left_deco, T& right_deco) {
 		return init((const ExprBinaryOp&) e, left_deco, right_deco);
 	}
 
@@ -175,128 +175,128 @@ protected:
 	/*==================== unary operators =========================*/
 	/** Visit a minus sign (Implementation is not mandatory).
 	 * By default call init(const ExprUnaryOp&). */
-	virtual T* init(const ExprMinus& e, const T& expr_deco) {
+	virtual T* init(const ExprMinus& e, T& expr_deco) {
 		return init((const ExprUnaryOp&) e, expr_deco);
 	}
 
 	/** Visit a transpose (Implementation is not mandatory).
 	 * By default call init(const ExprUnaryOp&). */
-	virtual T* init(const ExprTrans& e, const T& expr_deco) {
+	virtual T* init(const ExprTrans& e, T& expr_deco) {
 		return init((const ExprUnaryOp&) e, expr_deco);
 	}
 
 	/** Visit a sign (Implementation is not mandatory).
 	 * By default call init(const ExprUnaryOp&). */
-	virtual T* init(const ExprSign& e, const T& expr_deco) {
+	virtual T* init(const ExprSign& e, T& expr_deco) {
 		return init((const ExprUnaryOp&) e, expr_deco);
 	}
 
 	/** Visit an abs (Implementation is not mandatory).
 	 * By default call init(const ExprUnaryOp&). */
-	virtual T* init(const ExprAbs& e, const T& expr_deco) {
+	virtual T* init(const ExprAbs& e, T& expr_deco) {
 		return init((const ExprUnaryOp&) e, expr_deco);
 	}
 
 	/** Visit a power expression.
 	 * By default call init(const ExprUnaryOp&). */
-	virtual T* init(const ExprPower& e, const T& expr_deco) {
+	virtual T* init(const ExprPower& e, T& expr_deco) {
 		return init((const ExprUnaryOp&) e, expr_deco);
 	}
 
 	/** Visit a sqr (Implementation is not mandatory).
 	 * By default call init(const ExprUnaryOp&). */
-	virtual T* init(const ExprSqr& e, const T& expr_deco) {
+	virtual T* init(const ExprSqr& e, T& expr_deco) {
 		return init((const ExprUnaryOp&) e, expr_deco);
 	}
 
 	/** Visit a sqrt (Implementation is no
 	 * By default: does nothing. t mandatory).
 	 * By default call init(const ExprUnaryOp&). */
-	virtual T* init(const ExprSqrt& e, const T& expr_deco) {
+	virtual T* init(const ExprSqrt& e, T& expr_deco) {
 		return init((const ExprUnaryOp&) e, expr_deco);
 	}
 
 	/** Visit an exp (Implementation is not mandatory).
 	 * By default call init(const ExprUnaryOp&). */
-	virtual T* init(const ExprExp& e, const T& expr_deco) {
+	virtual T* init(const ExprExp& e, T& expr_deco) {
 		return init((const ExprUnaryOp&) e, expr_deco);
 	}
 
 	/** Visit a log (Implementation is not mandatory).
 	 * By default call init(const ExprUnaryOp&). */
-	virtual T* init(const ExprLog& e, const T& expr_deco) {
+	virtual T* init(const ExprLog& e, T& expr_deco) {
 		return init((const ExprUnaryOp&) e, expr_deco);
 	}
 
 	/** Visit a cos (Implementation is not mandatory).
 	 * By default call init(const ExprUnaryOp&). */
-	virtual T* init(const ExprCos& e, const T& expr_deco) {
+	virtual T* init(const ExprCos& e, T& expr_deco) {
 		return init((const ExprUnaryOp&) e, expr_deco);
 	}
 
 	/** Visit a sin (Implementation is not mandatory).
 	 * By default call init(const ExprUnaryOp&). */
-	virtual T* init(const ExprSin& e, const T& expr_deco) {
+	virtual T* init(const ExprSin& e, T& expr_deco) {
 		return init((const ExprUnaryOp&) e, expr_deco);
 	}
 
 	/** Visit a tan (Implementation is not mandatory).
 	 * By default call init(const ExprUnaryOp&). */
-	virtual T* init(const ExprTan& e, const T& expr_deco) {
+	virtual T* init(const ExprTan& e, T& expr_deco) {
 		return init((const ExprUnaryOp&) e, expr_deco);
 	}
 
 	/** Visit a cosh (Implementation is not mandatory).
 	 * By default call init(const ExprUnaryOp&). */
-	virtual T* init(const ExprCosh& e, const T& expr_deco) {
+	virtual T* init(const ExprCosh& e, T& expr_deco) {
 		return init((const ExprUnaryOp&) e, expr_deco);
 	}
 
 	/** Visit a sinh (Implementation is not mandatory).
 	 * By default call init(const ExprUnaryOp&). */
-	virtual T* init(const ExprSinh& e, const T& expr_deco) {
+	virtual T* init(const ExprSinh& e, T& expr_deco) {
 		return init((const ExprUnaryOp&) e, expr_deco);
 	}
 
 	/** Visit a tanh (Implementation is not mandatory).
 	 * By default call init(const ExprUnaryOp&). */
-	virtual T* init(const ExprTanh& e, const T& expr_deco) {
+	virtual T* init(const ExprTanh& e, T& expr_deco) {
 		return init((const ExprUnaryOp&) e, expr_deco);
 	}
 
 	/** Visit a acos (Implementation is not mandatory).
 	 * By default call init(const ExprUnaryOp&). */
-	virtual T* init(const ExprAcos& e, const T& expr_deco) {
+	virtual T* init(const ExprAcos& e, T& expr_deco) {
 		return init((const ExprUnaryOp&) e, expr_deco);
 	}
 
 	/** Visit a asin (Implementation is not mandatory).
 	 * By default call init(const ExprUnaryOp&). */
-	virtual T* init(const ExprAsin& e, const T& expr_deco) {
+	virtual T* init(const ExprAsin& e, T& expr_deco) {
 		return init((const ExprUnaryOp&) e, expr_deco);
 	}
 
 	/** Visit a atan (Implementation is not mandatory).
 	 * By default call init(const ExprUnaryOp&). */
-	virtual T* init(const ExprAtan& e, const T& expr_deco) {
+	virtual T* init(const ExprAtan& e, T& expr_deco) {
 		return init((const ExprUnaryOp&) e, expr_deco);
 	}
 
 	/** Visit a acosh (Implementation is not mandatory).
 	 * By default call init(const ExprUnaryOp&). */
-	virtual T* init(const ExprAcosh& e, const T& expr_deco) {
+	virtual T* init(const ExprAcosh& e, T& expr_deco) {
 		return init((const ExprUnaryOp&) e, expr_deco);
 	}
 
 	/** Visit a asinh (Implementation is not mandatory).
 	 * By default call init(const ExprUnaryOp&). */
-	virtual T* init(const ExprAsinh& e, const T& expr_deco) {
+	virtual T* init(const ExprAsinh& e, T& expr_deco) {
 		return init((const ExprUnaryOp&) e, expr_deco);
 	}
 
 	/** Visit a atanh (Implementation is not mandatory).
 	 * By default call init(const ExprUnaryOp&). */
-	virtual T* init(const ExprAtanh& e, const T& expr_deco) {
+	virtual T* init(const ExprAtanh& e, T& expr_deco) {
 		return init((const ExprUnaryOp&) e, expr_deco);
 	}
 
@@ -368,7 +368,7 @@ private:
 
 } // end namespace
 
-#include "ibex_Function.h"
+// #include "ibex_Function.h"
 
 namespace ibex {
 

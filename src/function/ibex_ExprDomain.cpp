@@ -5,11 +5,12 @@
  *      Author: gilles
  */
 
+#include "ibex_Function.h"
 #include "ibex_ExprDomain.h"
 
 namespace ibex {
 
-Domain* ExprDomain::init(const ExprIndex& e, const Domain& d_expr) {
+Domain* ExprDomain::init(const ExprIndex& e, Domain& d_expr) {
 	switch (e.expr.type()) {
 	case Dim::SCALAR:
 		return new Domain(d_expr.i());
@@ -35,19 +36,19 @@ Domain* ExprDomain::init(const ExprNAryOp& e, const Array<Domain>& args_deco) {
 	return new Domain(e.dim);
 }
 
-Domain* ExprDomain::init(const ExprBinaryOp& e, const Domain& left_deco, const Domain& right_deco) {
+Domain* ExprDomain::init(const ExprBinaryOp& e, Domain& left_deco, Domain& right_deco) {
 	return new Domain(e.dim);
 }
 
-Domain* ExprDomain::init(const ExprUnaryOp& e, const Domain& expr_deco) {
+Domain* ExprDomain::init(const ExprUnaryOp& e, Domain& expr_deco) {
 	return new Domain(e.dim);
 }
 
-Domain* ExprDomain::init(const ExprTrans& e, const Domain& expr_deco) {
+Domain* ExprDomain::init(const ExprTrans& e, Domain& expr_deco) {
 
 	if (e.dim.is_vector()) {
 		// share references
-		return new Domain(*expr_deco,true);
+		return new Domain(expr_deco, true);
 	} else {
 		// TODO: seems impossible to have references
 		// in case of matrices...

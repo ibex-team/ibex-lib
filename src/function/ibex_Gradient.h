@@ -12,10 +12,8 @@
 #ifndef __IBEX_GRADIENT_H__
 #define __IBEX_GRADIENT_H__
 
-#include "ibex_Function.h"
-#include "ibex_BwdAlgorithm.h"
 #include "ibex_Eval.h"
-#include "ibex_ExprDomain.h"
+#include "ibex_BwdAlgorithm.h"
 
 namespace ibex {
 
@@ -39,17 +37,17 @@ public:
 	/**
 	 * \brief Calculate the gradient of f on the domains \a d and store the result in \a g.
 	 */
-	void gradient(const Array<Domain>& d, IntervalVector& g) const;
+	void gradient(const Array<Domain>& d, IntervalVector& g);
 
 	/**
 	 * \brief Calculate the gradient of f on the box \a box and store the result in \a g.
 	 */
-	void gradient(const IntervalVector& box, IntervalVector& g) const;
+	void gradient(const IntervalVector& box, IntervalVector& g);
 
 	/**
 	 * \brief Calculate the Jacobian on the domains \a d and store the result in \a J.
 	 */
-	void jacobian(const Array<Domain>& d, IntervalMatrix& J) const;
+	void jacobian(const Array<Domain>& d, IntervalMatrix& J);
 
 	/* ====================================== Forward =================================== */
 
@@ -71,7 +69,7 @@ public:
 	inline void trans_M_fwd(int, int y)       { g[y].m().clear(); }
 	inline void sign_fwd(int, int y)          { g[y].i()=0; }
 	inline void abs_fwd(int, int y)           { g[y].i()=0; }
-	inline void power_fwd(int, int y)         { g[y].i()=0; }
+	inline void power_fwd(int, int y, int p)  { g[y].i()=0; }
 	inline void sqr_fwd(int, int y)           { g[y].i()=0; }
 	inline void sqrt_fwd(int, int y)          { g[y].i()=0; }
 	inline void exp_fwd(int, int y)           { g[y].i()=0; }
@@ -155,4 +153,5 @@ public:
 };
 
 } // namespace ibex
+
 #endif // __IBEX_GRADIENT_H__

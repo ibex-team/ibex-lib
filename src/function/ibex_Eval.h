@@ -12,11 +12,13 @@
 #ifndef __IBEX_EVAL_H__
 #define __IBEX_EVAL_H__
 
-#include "ibex_Function.h"
 #include <iostream>
+
 #include "ibex_ExprDomain.h"
 
 namespace ibex {
+
+class Function;
 
 /**
  * \ingroup symbolic
@@ -36,17 +38,17 @@ public:
 	/**
 	 * \brief Run the forward algorithm with input domains.
 	 */
-	Domain& eval(const Array<const Domain>& d) const;
+	Domain& eval(const Array<const Domain>& d);
 
 	/**
 	 * \brief Run the forward algorithm with input domains.
 	 */
-	Domain& eval(const Array<Domain>& d) const;
+	Domain& eval(const Array<Domain>& d);
 
 	/**
 	 * \brief Run the forward algorithm with an input box.
 	 */
-	Domain& eval(const IntervalVector& box) const;
+	Domain& eval(const IntervalVector& box);
 
 protected:
 	/**
@@ -117,7 +119,7 @@ inline void Eval::index_fwd(int, int) { /* nothing to do */ }
 inline void Eval::symbol_fwd(int) { /* nothing to do */ }
 
 inline void Eval::cst_fwd(int y) {
-	const ExprConstant& c = (const ExprConstant&) f.cf.nodes[y];
+	const ExprConstant& c = (const ExprConstant&) f.node(y);
 	switch (c.type()) {
 	case Dim::SCALAR:       d[y].i() = c.get_value();         break;
 	case Dim::ROW_VECTOR:
@@ -128,7 +130,7 @@ inline void Eval::cst_fwd(int y) {
 }
 
 inline void Eval::chi_fwd(int x1, int x2, int x3, int y) { d[y].i() = chi(d[x1].i(),d[x2].i(),d[x3].i()); }
-inline void Eval::add_fwd(int x1, int x2, int y)   { d[y].i()=d[x1].i()+d[x2].i()d[y].i()=d[x1].i()+d[x2].i(); }
+inline void Eval::add_fwd(int x1, int x2, int y)   { d[y].i()=d[x1].i()+d[x2].i(); }
 inline void Eval::mul_fwd(int x1, int x2, int y)   { d[y].i()=d[x1].i()*d[x2].i(); }
 inline void Eval::sub_fwd(int x1, int x2, int y)   { d[y].i()=d[x1].i()-d[x2].i(); }
 inline void Eval::div_fwd(int x1, int x2, int y)   { d[y].i()=d[x1].i()/d[x2].i(); }

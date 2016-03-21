@@ -104,7 +104,7 @@ void CtcFwdBwd::contract(IntervalVector& box) {
 	assert(box.size()==f.nb_var());
 
 	//std::cout << " hc4 of " << f << "=" << d << " with box=" << box << std::endl;
-	if (hc4r.proj(f,d,box)) {
+	if (f.backward(d,box)) {
 		set_flag(INACTIVE);
 		set_flag(FIXPOINT);
 	}

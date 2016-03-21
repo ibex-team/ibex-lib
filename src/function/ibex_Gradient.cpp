@@ -9,8 +9,8 @@
  * Created     : Jan 27, 2012
  * ---------------------------------------------------------------------------- */
 
+#include "ibex_Function.h"
 #include "ibex_Gradient.h"
-#include "ibex_Eval.h"
 
 using namespace std;
 
@@ -20,10 +20,10 @@ Gradient::Gradient(Eval& e): f(e.f), _eval(e), d(e.d), g(f) {
 
 }
 
-void Gradient::gradient(const Array<Domain>& d2, IntervalVector& gbox) const {
+void Gradient::gradient(const Array<Domain>& d2, IntervalVector& gbox) {
 	assert(f.expr().dim.is_scalar());
 
-	_eval.eval(f,d2);
+	_eval.eval(d2);
 
 	// outside definition domain -> empty gradient
 	if (d.top.is_empty()) { gbox.set_empty(); return; }
@@ -41,32 +41,32 @@ void Gradient::gradient(const Array<Domain>& d2, IntervalVector& gbox) const {
 	g.read_arg_domains(gbox);
 }
 
-void Gradient::gradient(const IntervalVector& box, IntervalVector& g) const {
+void Gradient::gradient(const IntervalVector& box, IntervalVector& gbox) {
 
 	if (!f.expr().dim.is_scalar()) {
 		ibex_error("Cannot called \"gradient\" on a vector-valued function");
 	}
 
-	if (f.eval_domain(box).is_empty()) {
+	if (_eval.eval(box).is_empty()) {
 		// outside definition domain -> empty gradient
-		g.set_empty(); return;
+		gbox.set_empty(); return;
 	}
 
-	g.clear();
+	gbox.clear();
 
-	f.write_arg_domains(g,true);
+	g.write_arg_domains(gbox);
 
 	f.forward<Gradient>(*this);
 
-	f.expr().deco.g->i()=1.0;
+	g.top.i()=1.0;
 
 	f.backward<Gradient>(*this);
 
-	f.read_arg_domains(g,true);
+	g.read_arg_domains(gbox);
 }
 
 
-void Gradient::jacobian(const Array<Domain>& d, IntervalMatrix& J) const {
+void Gradient::jacobian(const Array<Domain>& d, IntervalMatrix& J) {
 
 	if (!f.expr().dim.is_vector()) {
 		ibex_error("Cannot called \"jacobian\" on a real-valued function");
@@ -80,7 +80,7 @@ void Gradient::jacobian(const Array<Domain>& d, IntervalMatrix& J) const {
 		if (fi!=NULL) {
 			// if this is a Function object we can
 			// directly calculate the gradient with d
-			gradient(*fi,d,J[i]);
+			fi->_grad->gradient(d,J[i]);
 		} else {
 			// otherwise we must give a box in argument
 			// TODO add gradient with Array<Domain> in argument
@@ -95,80 +95,87 @@ void Gradient::jacobian(const Array<Domain>& d, IntervalMatrix& J) const {
 	}
 }
 
-void Gradient::vector_fwd(const ExprVector& v, const ExprLabel** x, ExprLabel& y) {
+void Gradient::vector_fwd(int* x, int y) {
+	const ExprVector& v = (const ExprVector&) f.node(y);
+
 	if (v.dim.is_vector())
-		y.g->v().clear();
+		g[y].v().clear();
 	else
-		y.g->m().clear();
+		g[y].m().clear();
 }
 
-void Gradient::vector_bwd(const ExprVector& v, ExprLabel** compL, const ExprLabel& y) {
+void Gradient::vector_bwd(int* x, int y) {
+	const ExprVector& v = (const ExprVector&) f.node(y);
+
 	if (v.dim.is_vector()) {
-		for (int i=0; i<v.length(); i++) compL[i]->g->i()+=y.g->v()[i];
+		for (int i=0; i<v.length(); i++) g[x[i]].i()+=g[y].v()[i];
 	}
 	else {
 		if (v.row_vector())
-			for (int i=0; i<v.length(); i++) compL[i]->g->v()+=y.g->m()[i];
+			for (int i=0; i<v.length(); i++) g[x[i]].v()+=g[y].m()[i];
 		else
-			for (int i=0; i<v.length(); i++) compL[i]->g->v()+=y.g->m().col(i);
+			for (int i=0; i<v.length(); i++) g[x[i]].v()+=g[y].m().col(i);
 	}
 }
 
-void Gradient::apply_bwd (const ExprApply& a, ExprLabel** x, const ExprLabel& y) {
+void Gradient::apply_bwd(int* x, int y) {
 
-	Array<Domain> d(a.nb_args);
-	Array<Domain> g(a.nb_args);
+	const ExprApply& a = (const ExprApply&) f.node(y);
+
+	Array<Domain> d2(a.func.nb_arg());
+	Array<Domain> g2(a.nb_args);
+
 	int n=0;
 
-	for (int i=0; i<a.nb_args; i++) {
-		d.set_ref(i,*x[i]->d);
-		g.set_ref(i,*x[i]->g);
-		n+=x[i]->d->dim.size();
+	for (int i=0; i<a.func.nb_arg(); i++) {
+		d2.set_ref(i,d[x[i]]);
+		g2.set_ref(i,g[x[i]]);
+		n+=d[x[i]].dim.size();
 	}
 
 	// we unvectorize the components of the gradient.
 	IntervalVector old_g(n);
-	load(old_g, g);
+	load(old_g, g2);
 	IntervalVector tmp_g(n);
 
 	if (a.func.expr().dim.is_scalar()) {
-		gradient(a.func,d,tmp_g);
+		a.func._grad->gradient(d2,tmp_g);
 		//cout << "tmp-g=" << tmp_g << endl;
-		tmp_g *= y.g->i();   // pre-multiplication by y.g
+		tmp_g *= g[y].i();   // pre-multiplication by y.g
 		tmp_g += old_g;      // addition to the old value of g
-		load(g,tmp_g);
+		load(g2,tmp_g);
 	} else {
 		if (!a.func.expr().dim.is_vector())
 			not_implemented("automatic differentiation of matrix-valued function");
 		int m=a.func.expr().dim.vec_size();
 		IntervalMatrix J(m,n);
-		jacobian(a.func,d,J);
-		tmp_g = y.g->v()*J; // pre-multiplication by y.g
+		a.func._grad->jacobian(d2,J);
+		tmp_g = g[y].v()*J; // pre-multiplication by y.g
 		tmp_g += old_g;
-		load(g,tmp_g);
+		load(g2,tmp_g);
 	}
 }
 
-void Gradient::chi_bwd (const ExprChi&, ExprLabel& a, ExprLabel& b, ExprLabel& c, const ExprLabel& y) {
+void Gradient::chi_bwd(int a, int b, int c, int y) {
 	Interval ga,gb,gc;
 
-	if (a.d->i().ub()<0) {
+	if (d[a].i().ub()<0) {
 		ga=Interval::ZERO;
 		gb=Interval::ONE;
 		gc=Interval::ZERO;
 	}
-	else if (a.d->i().lb()>0) {
+	else if (d[a].i().lb()>0) {
 		ga=Interval::ZERO;
 		gb=Interval::ZERO;
 		gc=Interval::ONE;
 	} else {
 
-		if (b.d->i().is_degenerated() && c.d->i().is_degenerated()) {
+		if (d[b].i().is_degenerated() && d[c].i().is_degenerated()) {
 			// this applies in particular when b and c are constants.
 			// the partial derivative wrt to a can be refined
 
-			double _b =b.d->i().ub();
-			double _c =c.d->i().ub();
+			double _b =d[b].i().ub();
+			double _c =d[c].i().ub();
 			if (_b<_c) ga=Interval::POS_REALS;
 			else if (_b>_c) ga=Interval::NEG_REALS;
 			else ga=Interval::ZERO;
@@ -180,20 +187,20 @@ void Gradient::chi_bwd (const ExprChi&, ExprLabel& a, ExprLabel& b, ExprLabel& c
 		gc=Interval(0,1);
 	}
 
-	a.g->i() += y.g->i() * ga;
-	b.g->i() += y.g->i() * gb;
-	c.g->i() += y.g->i() * gc;
+	g[a].i() += g[y].i() * ga;
+	g[b].i() += g[y].i() * gb;
+	g[c].i() += g[y].i() * gc;
 }
 
 
-void Gradient::max_bwd(const ExprMax&, ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) {
+void Gradient::max_bwd(int x1, int x2, int y) {
 	Interval gx1,gx2;
 
-	if (x1.d->i().lb() > x2.d->i().ub()) {
+	if (d[x1].i().lb() > d[x2].i().ub()) {
 		gx1=Interval::ONE;
 		gx2=Interval::ZERO;
 	}
-	else if (x2.d->i().lb() > x1.d->i().ub()) {
+	else if (d[x2].i().lb() > d[x1].i().ub()) {
 		gx1=Interval::ZERO;
 		gx2=Interval::ONE;
 	} else {
@@ -201,18 +208,18 @@ void Gradient::max_bwd(const ExprMax&, ExprLabel& x1, ExprLabel& x2, const ExprL
 		gx2=Interval(0,1);
 	}
 
-	x1.g->i() += y.g->i() * gx1;
-	x2.g->i() += y.g->i() * gx2;
+	g[x1].i() += g[y].i() * gx1;
+	g[x2].i() += g[y].i() * gx2;
 }
 
-void Gradient::min_bwd(const ExprMin&, ExprLabel& x1, ExprLabel& x2, const ExprLabel& y) {
+void Gradient::min_bwd(int x1, int x2, int y) {
 	Interval gx1,gx2;
 
-	if (x1.d->i().lb() > x2.d->i().ub()) {
+	if (d[x1].i().lb() > d[x2].i().ub()) {
 		gx1=Interval::ZERO;
 		gx2=Interval::ONE;
 	}
-	else if (x2.d->i().lb() > x1.d->i().ub()) {
+	else if (d[x2].i().lb() > d[x1].i().ub()) {
 		gx1=Interval::ONE;
 		gx2=Interval::ZERO;
 	} else {
@@ -220,22 +227,24 @@ void Gradient::min_bwd(const ExprMin&, ExprLabel& x1, ExprLabel& x2, const ExprL
 		gx2=Interval(0,1);
 	}
 
-	x1.g->i() += y.g->i() * gx1;
-	x2.g->i() += y.g->i() * gx2;
+	g[x1].i() += g[y].i() * gx1;
+	g[x2].i() += g[y].i() * gx2;
 }
 
-void Gradient::sign_bwd  (const ExprSign& e,  ExprLabel& exprL, const ExprLabel& result) {
-	if (exprL.d->i().contains(0)) exprL.g->i() += result.g->i()*Interval::POS_REALS;
+void Gradient::sign_bwd(int x, int y) {
+	if (d[x].i().contains(0)) g[x].i() += g[y].i()*Interval::POS_REALS;
 	else ; // nothing to do: derivative is zero
 }
 
-void Gradient::abs_bwd (const ExprAbs& e, ExprLabel& exprL, const ExprLabel& result) {
-	if (exprL.d->i().lb()>=0) exprL.g->i() += 1.0*result.g->i();
-	else if (exprL.d->i().ub()<=0) exprL.g->i() += -1.0*result.g->i();
-	else exprL.g->i() += Interval(-1,1)*result.g->i();
+void Gradient::abs_bwd (int x, int y) {
+	if (d[x].i().lb()>=0) g[x].i() += 1.0*g[y].i();
+	else if (d[x].i().ub()<=0) g[x].i() += -1.0*g[y].i();
+	else g[x].i() += Interval(-1,1)*g[y].i();
 }
-void Gradient::atan2_bwd(const ExprAtan2& , ExprLabel& x1,   ExprLabel& x2,   const ExprLabel& y) {
-    x1.g->i() += y.g->i() * x2.d->i() / (sqr(x2.d->i()) + sqr(x1.d->i()));
-    x2.g->i() += y.g->i() * - x1.d->i() / (sqr(x2.d->i()) + sqr(x1.d->i()));
+
+void Gradient::atan2_bwd(int x1, int x2, int y) {
+    g[x1].i() += g[y].i() * d[x2].i() / (sqr(d[x2].i()) + sqr(d[x1].i()));
+    g[x2].i() += g[y].i() * - d[x1].i() / (sqr(d[x2].i()) + sqr(d[x1].i()));
 }
+
 } // namespace ibex

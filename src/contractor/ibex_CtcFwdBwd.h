@@ -14,7 +14,6 @@
 
 #include "ibex_Ctc.h"
 #include "ibex_NumConstraint.h"
-#include "ibex_HC4Revise.h"
 
 namespace ibex {
 
@@ -83,8 +82,6 @@ public:
 	Domain d;
 
 protected:
-	HC4Revise hc4r;
-
 	void init();
 };
 

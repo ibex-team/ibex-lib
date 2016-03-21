@@ -13,7 +13,6 @@
 
 #include "ibex_Function.h"
 #include "ibex_Expr.h"
-#include "ibex_Decorator.h"
 #include "ibex_ExprCopy.h"
 #include "ibex_ExprDiff.h"
 #include "ibex_Expr2Minibex.h"
@@ -503,7 +502,7 @@ void Function::init(const Array<const ExprSymbol>& x, const ExprNode& y, const c
 	_eval = new Eval(*this);
 	_hc4revise = new HC4Revise(*_eval);
 	_grad = new Gradient(*_eval);
-	_inhc4revise = new InHC4Revise(*eval);
+	_inhc4revise = new InHC4Revise(*_eval);
 
 	// ===== display adjacency (debug) =========
 //	cout << "adjacency of function" << *this << ":" << endl;
@@ -512,9 +511,9 @@ void Function::init(const Array<const ExprSymbol>& x, const ExprNode& y, const c
 //	cout << endl;
 }
 
-void Function::decorate(const Array<const ExprSymbol>& x, const ExprNode& y) const {
+void Function::decorate(const Array<const ExprSymbol>& x, const ExprNode& y) {
 
-	((CompiledFunction&) cf).compile(y); // now that it is decorated, it can be "compiled"
+	((CompiledFunction&) cf).compile(*this);
 
 	// The following loop has two purposes:
 	// 1/ Symbols that do not appear in the expression y will not
@@ -525,7 +524,7 @@ void Function::decorate(const Array<const ExprSymbol>& x, const ExprNode& y) con
 		if (arg(i).f!=NULL)
 			ibex_error("A symbol inside the expression of a function already belongs to another function");
 		else
-			arg(i).f=this;
+			((ExprSymbol&) arg(i)).f=this;
 	}
 
 	for (int i=0; i<nb_nodes(); i++) {
@@ -541,8 +540,7 @@ void Function::decorate(const Array<const ExprSymbol>& x, const ExprNode& y) con
 		if (node(i).f!=NULL)
 			ibex_error("A sub-expression of a function already belongs to another function");
 		else
-			nodes[i].f=this;
-
+			((ExprNode&) node(i)).f=this;
 	}
 }
 

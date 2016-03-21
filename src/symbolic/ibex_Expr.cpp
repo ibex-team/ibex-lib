@@ -224,7 +224,7 @@ Variable::~Variable()                                                           
 }
 
 Variable::operator const ExprSymbol&() const {
-	if (symbol->deco.f) { // already used build new one.
+	if (symbol->f) { // already used build new one.
 		// Note: it is Function's responsibility to delete the old symbol
 		variables().erase(*symbol);
 		symbol=new ExprSymbol(symbol->name, symbol->dim);

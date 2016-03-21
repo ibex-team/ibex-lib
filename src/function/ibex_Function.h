@@ -31,8 +31,6 @@ class HC4Revise;
 class Gradient;
 class InHC4Revise;
 
-class ExprDomain;
-
 /**
  * \ingroup function
  * \brief Symbolic function (x->f(x) where f(x) is the DAG of an arithmetical expression).
@@ -585,16 +583,21 @@ public:
 	bool used(int i) const;
 
 	/**
-	 * \brief Return the number of used variables
+	 * \brief Return the number of used variables.
 	 */
 	int nb_used_vars() const;
 
 	/**
-	 * \brief Return the ith used variable
+	 * \brief Return the ith used variable.
 	 *
 	 * \pre 0<=i<nb_used_vars().
 	 */
 	int used_var(int i) const;
+
+	/**
+	 * \brief Return a pointer to the array of used variables.
+	 */
+	const int* const used_vars() const;
 
 	/**
 	 * \brief Return the current number of nodes in the DAG.
@@ -677,6 +680,20 @@ public:
 	Domain& eval_domain(const IntervalVector& box) const;
 
 	/**
+	 * \brief Calculate f(d) using interval arithmetic.
+	 *
+	 * (variant used internally)
+	 */
+	Domain& eval_domain(const Array<const Domain>& d) const;
+
+	/**
+	 * \brief Calculate f(d) using interval arithmetic.
+	 *
+	 *  (variant used internally)
+	 */
+	Domain& eval_domain(const Array<Domain>& d) const;
+
+	/**
 	 * \brief Calculate the gradient of f.
 	 *
 	 * \param x - the input box
@@ -732,25 +749,25 @@ public:
 	 * \brief Contract x w.r.t. f(x)=y.
 	 * \throw EmptyBoxException if x is empty.
 	 */
-	void backward(const Domain& y, IntervalVector& x) const;
+	bool backward(const Domain& y, IntervalVector& x) const;
 
 	/**
 	 * \brief Contract x w.r.t. f(x)=y.
 	 * \throw EmptyBoxException if x is empty.
 	 */
-	void backward(const Interval& y, IntervalVector& x) const;
+	bool backward(const Interval& y, IntervalVector& x) const;
 
 	/**
 	 * \brief Contract x w.r.t. f(x)=y.
 	 * \throw EmptyBoxException if x is empty.
 	 */
-	void backward(const IntervalVector& y, IntervalVector& x) const;
+	bool backward(const IntervalVector& y, IntervalVector& x) const;
 
 	/**
 	 * \brief Contract x w.r.t. f(x)=y.
 	 * \throw EmptyBoxException if x is empty.
 	 */
-	void backward(const IntervalMatrix& y, IntervalVector& x) const;
+	bool backward(const IntervalMatrix& y, IntervalVector& x) const;
 
 	/**
 	 * \brief Inner projection f(x)=y onto x.
@@ -791,6 +808,13 @@ public:
 	 */
 	void generate_used_vars() const;
 
+	/**
+	 * \brief True if all the arguments are scalar
+	 *
+	 * Useful for various code optimization.
+	 */
+	bool all_args_scalar() const;
+
 protected:
 	friend std::ostream& operator<<(std::ostream& os, const Function& f);
 
@@ -813,14 +837,8 @@ private:
 	friend class VarSet;
 	friend class Eval;
 	friend class HC4Revise;
-	friend class ExprDomain; // TODO : Change this
-
-	/**
-	 * \brief True if all the arguments are scalar
-	 *
-	 * Useful for various code optimization.
-	 */
-	bool all_args_scalar() const;
+	friend class Gradient;
+	friend class InHC4Revise;
 
 	void build_from_string(const Array<const char*>& x, const char* y, const char* name=NULL);
 
@@ -832,7 +850,7 @@ private:
 	 * Declared "const" because the decoration is
 	 * not considered as part of the definition of the function.
 	 */
-	void decorate(const Array<const ExprSymbol>& x, const ExprNode& y) const;
+	void decorate(const Array<const ExprSymbol>& x, const ExprNode& y);
 
 	int _nb_var;
 
@@ -936,7 +954,15 @@ inline void Function::forward(const V& algo) const {
 }
 
 inline Domain& Function::eval_domain(const IntervalVector& box) const {
-	return _eval->eval(box);
+	return ((Function*) this)->_eval->eval(box);
+}
+
+inline Domain& Function::eval_domain(const Array<const Domain>& d) const {
+	return ((Function*) this)->_eval->eval(d);
+}
+
+inline Domain& Function::eval_domain(const Array<Domain>& d) const {
+	return ((Function*) this)->_eval->eval(d);
 }
 
 inline Interval Function::eval(const IntervalVector& box) const {
@@ -974,29 +1000,29 @@ inline void Function::backward(const V& algo) const {
 	cf.backward<V>(algo);
 }
 
-inline void Function::backward(const Domain& y, IntervalVector& x) const {
-	_hc4revise->proj(y,x);
+inline bool Function::backward(const Domain& y, IntervalVector& x) const {
+	return ((Function*) this)->_hc4revise->proj(y,x);
 }
 
-inline void Function::backward(const Interval& y, IntervalVector& x) const {
-	backward(Domain((Interval&) y),x); // y will not be modified
+inline bool Function::backward(const Interval& y, IntervalVector& x) const {
+	return backward(Domain((Interval&) y),x); // y will not be modified
 }
 
-inline void Function::backward(const IntervalVector& y, IntervalVector& x) const {
+inline bool Function::backward(const IntervalVector& y, IntervalVector& x) const {
 	assert(expr().dim.is_vector());
-	backward(Domain((IntervalVector&) y, expr().dim.type()==Dim::ROW_VECTOR),x); // y will not be modified
+	return backward(Domain((IntervalVector&) y, expr().dim.type()==Dim::ROW_VECTOR),x); // y will not be modified
 }
 
-inline void Function::backward(const IntervalMatrix& y, IntervalVector& x) const {
-	backward(Domain((IntervalMatrix&) y),x); // y will not be modified
+inline bool Function::backward(const IntervalMatrix& y, IntervalVector& x) const {
+	return backward(Domain((IntervalMatrix&) y),x); // y will not be modified
 }
 
 inline void Function::ibwd(const Domain& y, IntervalVector& x) const {
-	_inhc4revise->iproj(y,x);
+	((Function*) this)->_inhc4revise->iproj(y,x);
 }
 
 inline void Function::ibwd(const Domain& y, IntervalVector& x, const IntervalVector& xin) const {
-	_inhc4revise->iproj(y,x,xin);
+	((Function*) this)->_inhc4revise->iproj(y,x,xin);
 }
 
 inline void Function::ibwd(const Interval& y, IntervalVector& x) const {
@@ -1049,6 +1075,9 @@ inline int Function::used_var(int i) const {
 	return _used_var[i];
 }
 
+inline const int* const Function::used_vars() const {
+	return _used_var;
+}
 
 inline std::ostream& operator<<(std::ostream& os, const Function& f) {
 	f.print(os);

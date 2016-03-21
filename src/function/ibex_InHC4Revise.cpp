@@ -8,8 +8,8 @@
 // Last Update : Jul 12, 2012
 //============================================================================
 
+#include "ibex_Function.h"
 #include "ibex_InHC4Revise.h"
-#include "ibex_Eval.h"
 
 namespace ibex {
 
@@ -35,7 +35,7 @@ void InHC4Revise::iproj(const Domain& y, IntervalVector& x, const IntervalVector
 
 	eval.eval(x);
 
-	if (top.is_empty()) {
+	if (d.top.is_empty()) {
 		assert(xin.is_empty());
 		x.set_empty();
 		return;
@@ -54,7 +54,7 @@ void InHC4Revise::iproj(const Domain& y, IntervalVector& x, const IntervalVector
 	}
 }
 
-void InHC4Revise::iproj(const Domain& y, const Array<Domain>& x, const Array<Domain>& argP) {
+void InHC4Revise::iproj(const Domain& y, Array<Domain>& x, const Array<Domain>& argP) {
 	if (!argP[0].is_empty()) { // if the first domain is empty, so they all are
 		p_eval.eval(argP);
 	} else {
@@ -76,9 +76,9 @@ void InHC4Revise::iproj(const Domain& y, const Array<Domain>& x, const Array<Dom
 
 void InHC4Revise::apply_bwd(int* x, int y) {
 
-	assert(dynamic_cast<const ExprApply*> (&f.nodes[y]));
+	assert(dynamic_cast<const ExprApply*> (&f.node(y)));
 
-	const ExprApply& a = (const ExprApply&) f.nodes[y];
+	const ExprApply& a = (const ExprApply&) f.node(y);
 
 	assert(&a.func!=&f); // recursive calls not allowed
 

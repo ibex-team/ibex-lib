@@ -13,18 +13,11 @@ public:
 
 	ExprDomain(Function& f);
 
-	// Why my compiler asks me to redeclare these functions?
-	inline const Domain& operator[](int i) const { return data[i]; }
-
-	inline Domain& operator[](int i)             { return data[i]; }
-
-	/**
-	 * \brief Initialize symbols domains from d
-	 *
-	 * \param grad - true<=>update "g" (gradient) false <=>update "d" (domain)
-	 * \see #ibex::ExprLabel
-	 */
-	void write_arg_domains(const Array<Domain>& d) const;
+	// Why my compiler forces me to redeclare these functions?
+	// ------------------------------------------------------
+	const Domain& operator[](int i) const;
+	Domain& operator[](int i);
+	// ------------------------------------------------------
 
 	/**
 	 * \brief Initialize symbols domains from d
@@ -32,7 +25,15 @@ public:
 	 * \param grad - true<=>update "g" (gradient) false <=>update "d" (domain)
 	 * \see #ibex::ExprLabel
 	 */
-	void write_arg_domains(const Array<const Domain>& d) const;
+	void write_arg_domains(const Array<Domain>& d);
+
+	/**
+	 * \brief Initialize symbols domains from d
+	 *
+	 * \param grad - true<=>update "g" (gradient) false <=>update "d" (domain)
+	 * \see #ibex::ExprLabel
+	 */
+	void write_arg_domains(const Array<const Domain>& d);
 
 	/**
 	 * \brief Initialize symbols domains from a box
@@ -40,7 +41,7 @@ public:
 	 * \param grad - true<=>update "g" (gradient) false <=>update "d" (domain)
 	 * \see #ibex::ExprLabel
 	 */
-	void write_arg_domains(const IntervalVector& box) const;
+	void write_arg_domains(const IntervalVector& box);
 
 	/**
 	 * \brief Initialize d from symbols domains
@@ -61,36 +62,45 @@ public:
 protected:
 
 	/** Visit an indexed expression. */
-	virtual Domain* init(const ExprIndex& e, const Domain& expr_deco);
+	virtual Domain* init(const ExprIndex& e, Domain& expr_deco);
 	/** Visit a leaf.*/
 	virtual Domain* init(const ExprLeaf& e);
 	/** Visit a n-ary operator. */
 	virtual Domain* init(const ExprNAryOp& e, const Array<Domain>& args_deco);
 	/** Visit a binary operator. */
-	virtual Domain* init(const ExprBinaryOp& e, const Domain& left_deco, const Domain& right_deco);
+	virtual Domain* init(const ExprBinaryOp& e, Domain& left_deco, Domain& right_deco);
 	/** Visit an unary operator. */
-	virtual Domain* init(const ExprUnaryOp& e, const Domain& expr_deco);
+	virtual Domain* init(const ExprUnaryOp& e, Domain& expr_deco);
 	/** Visit a transpose. */
-	virtual Domain* init(const ExprTrans& e, const Domain& expr_deco);
+	virtual Domain* init(const ExprTrans& e, Domain& expr_deco);
 
 };
 
 /* ============================================================================
- 	 	 	 	 	 	 	 implementation
+ 	 	 	 	 	 	 	 inline implementation
   ============================================================================*/
+
 inline ExprDomain::ExprDomain(Function& f) : ExprData<Domain>(f) {
 
 }
 
-inline void ExprDomain::write_arg_domains(const Array<Domain>& d) const {
-	load(args, d, f.nb_used_vars(), f._used_var);
+inline const Domain& ExprDomain::operator[](int i) const {
+	return data[i];
 }
 
-inline void ExprDomain::write_arg_domains(const Array<const Domain>& d) const {
-	load(args, d, f.nb_used_vars(), f._used_var);
+inline Domain& ExprDomain::operator[](int i) {
+	return data[i];
 }
 
-inline void ExprDomain::write_arg_domains(const IntervalVector& box) const {
+inline void ExprDomain::write_arg_domains(const Array<Domain>& d) {
+	load(args, d, f.nb_used_vars(), f.used_vars());
+}
+
+inline void ExprDomain::write_arg_domains(const Array<const Domain>& d) {
+	load(args, d, f.nb_used_vars(), f.used_vars());
+}
+
+inline void ExprDomain::write_arg_domains(const IntervalVector& box) {
 
 	if (f.all_args_scalar()) {
 		int j;
@@ -100,12 +110,12 @@ inline void ExprDomain::write_arg_domains(const IntervalVector& box) const {
 		}
 	}
 	else
-		load(args, box, f.nb_used_vars(), f._used_var);
+		load(args, box, f.nb_used_vars(), f.used_vars());
 }
 
 
 inline void ExprDomain::read_arg_domains(Array<Domain>& d) const {
-	load(d, args, f.nb_used_vars(), f._used_var);
+	load(d, args, f.nb_used_vars(), f.used_vars());
 }
 
 inline void ExprDomain::read_arg_domains(IntervalVector& box) const {
@@ -118,7 +128,7 @@ inline void ExprDomain::read_arg_domains(IntervalVector& box) const {
 		}
 	}
 	else {
-		load(box, args, f.nb_used_vars(), f._used_var);
+		load(box, args, f.nb_used_vars(), f.used_vars());
 	}
 }
 

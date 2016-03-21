@@ -9,8 +9,8 @@
  * Created     : Jan 14, 2012
  * ---------------------------------------------------------------------------- */
 
+#include "ibex_Function.h"
 #include "ibex_Eval.h"
-#include "ibex_Expr.h"
 
 #include <typeinfo>
 
@@ -20,7 +20,7 @@ Eval::Eval(Function& f) : f(f), d(f) {
 
 }
 
-Domain& Eval::eval(const Array<const Domain>& d2) const {
+Domain& Eval::eval(const Array<const Domain>& d2) {
 
 	d.write_arg_domains(d2);
 
@@ -38,7 +38,7 @@ Domain& Eval::eval(const Array<const Domain>& d2) const {
 	return d.top;
 }
 
-Domain& Eval::eval(const Array<Domain>& d2) const {
+Domain& Eval::eval(const Array<Domain>& d2) {
 
 	d.write_arg_domains(d2);
 
@@ -50,7 +50,7 @@ Domain& Eval::eval(const Array<Domain>& d2) const {
 	return d.top;
 }
 
-Domain& Eval::eval(const IntervalVector& box) const {
+Domain& Eval::eval(const IntervalVector& box) {
 
 	d.write_arg_domains(box);
 
@@ -63,9 +63,9 @@ Domain& Eval::eval(const IntervalVector& box) const {
 }
 
 void Eval::apply_fwd(int* x, int y) {
-	assert(dynamic_cast<const ExprApply*> (&f.nodes[y]));
+	assert(dynamic_cast<const ExprApply*> (&f.node(y)));
 
-	const ExprApply& a = (const ExprApply&) f.nodes[y];
+	const ExprApply& a = (const ExprApply&) f.node(y);
 
 	assert(&a.func!=&f); // recursive calls not allowed
 
@@ -79,9 +79,9 @@ void Eval::apply_fwd(int* x, int y) {
 }
 
 void Eval::vector_fwd(int* x, int y) {
-	assert(dynamic_cast<const ExprVector*>(&(f.nodes[y])));
+	assert(dynamic_cast<const ExprVector*>(&(f.node(y))));
 
-	const ExprVector& v = (const ExprVector&) f.nodes[y];
+	const ExprVector& v = (const ExprVector&) f.node(y);
 
 	assert(v.type()!=Dim::SCALAR);
 	assert(v.type()!=Dim::MATRIX_ARRAY);

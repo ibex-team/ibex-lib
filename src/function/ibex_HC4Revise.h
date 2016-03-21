@@ -69,7 +69,7 @@ protected:
 	 *
 	 * \warning: may throw EmptyBoxException
 	 */
-	bool proj(const Domain& y, const Array<Domain>& x);
+	bool proj(const Domain& y, Array<Domain>& x);
 
 	/**
 	 * Backward of f(x)=y.
@@ -130,6 +130,6 @@ public: // because called from CompiledFunction
 	inline void atanh_bwd  (int x, int y)          { if (!(bwd_atanh(d[y].i(),d[x].i()))) throw EmptyBoxException();  }
 };
 
-} /* namespace ibex */
+} // namespace ibex
 
-#endif /* __IBEX_HC4_REVISE_H__ */
+#endif // __IBEX_HC4_REVISE_H__

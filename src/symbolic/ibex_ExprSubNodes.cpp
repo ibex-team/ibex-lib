@@ -62,7 +62,7 @@ ExprSubNodes::ExprSubNodes() : tab(NULL), _size(0) {
 }
 
 ExprSubNodes::ExprSubNodes(const ExprNode& e) {
-	init(NULL, e);
+	init(NULL, e, true);
 }
 
 ExprSubNodes::ExprSubNodes(Array<const ExprNode> exprs) {

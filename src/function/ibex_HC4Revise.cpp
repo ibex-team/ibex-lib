@@ -8,8 +8,8 @@
 // Last Update : 
 //============================================================================
 
+#include "ibex_Function.h"
 #include "ibex_HC4Revise.h"
-#include "ibex_Eval.h"
 
 namespace ibex {
 
@@ -19,7 +19,7 @@ HC4Revise::HC4Revise(Eval& e) : f(e.f), eval(e), d(e.d) {
 
 }
 
-bool HC4Revise::proj(const Domain& y, const Array<Domain>& x) {
+bool HC4Revise::proj(const Domain& y, Array<Domain>& x) {
 	eval.eval(x);
 
 	bool is_inner=backward(y);
@@ -80,9 +80,9 @@ bool HC4Revise::backward(const Domain& y) {
 }
 
 void HC4Revise::apply_bwd(int* x, int y) {
-	assert(dynamic_cast<const ExprApply*> (&f.nodes[y]));
+	assert(dynamic_cast<const ExprApply*> (&f.node(y)));
 
-	const ExprApply& a = (const ExprApply&) f.nodes[y];
+	const ExprApply& a = (const ExprApply&) f.node(y);
 
 	assert(&a.func!=&f); // recursive calls not allowed
 
@@ -100,9 +100,9 @@ void HC4Revise::apply_bwd(int* x, int y) {
 }
 
 void HC4Revise::vector_bwd(int* x, int y) {
-	assert(dynamic_cast<const ExprVector*>(&(f.nodes[y])));
+	assert(dynamic_cast<const ExprVector*>(&(f.node(y))));
 
-	const ExprVector& v = (const ExprVector&) f.nodes[y];
+	const ExprVector& v = (const ExprVector&) f.node(y);
 
 	if (v.dim.is_vector()) {
 		for (int i=0; i<v.length(); i++)
