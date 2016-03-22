@@ -14,6 +14,7 @@
 
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
+#include "ibex_Function.h"
 #include "ibex_Eval.h"
 #include "utils.h"
 

@@ -80,7 +80,7 @@ void Gradient::jacobian(const Array<Domain>& d, IntervalMatrix& J) {
 		if (fi!=NULL) {
 			// if this is a Function object we can
 			// directly calculate the gradient with d
-			fi->_grad->gradient(d,J[i]);
+			fi->deriv_calculator().gradient(d,J[i]);
 		} else {
 			// otherwise we must give a box in argument
 			// TODO add gradient with Array<Domain> in argument
@@ -139,7 +139,7 @@ void Gradient::apply_bwd(int* x, int y) {
 	IntervalVector tmp_g(n);
 
 	if (a.func.expr().dim.is_scalar()) {
-		a.func._grad->gradient(d2,tmp_g);
+		a.func.deriv_calculator().gradient(d2,tmp_g);
 		//cout << "tmp-g=" << tmp_g << endl;
 		tmp_g *= g[y].i();   // pre-multiplication by y.g
 		tmp_g += old_g;      // addition to the old value of g
@@ -149,7 +149,7 @@ void Gradient::apply_bwd(int* x, int y) {
 			not_implemented("automatic differentiation of matrix-valued function");
 		int m=a.func.expr().dim.vec_size();
 		IntervalMatrix J(m,n);
-		a.func._grad->jacobian(d2,J);
+		a.func.deriv_calculator().jacobian(d2,J);
 		tmp_g = g[y].v()*J; // pre-multiplication by y.g
 		tmp_g += old_g;
 		load(g2,tmp_g);

@@ -4,7 +4,7 @@ OBJS=$(SRCS:.cpp=.o)
 TARGET=utest
 
 CXXFLAGS := $(shell pkg-config --cflags ibex) 
-LIBS	 := $(shell pkg-config --libs ibex libcpptest)
+LIBS	 := $(shell pkg-config --libs ibex cppunit)
 
 ifeq ($(DEBUG), yes)
 CXXFLAGS := $(CXXFLAGS) -O0 -g -pg -Wall -frounding-math -ffloat-store -Wno-unknown-pragmas -Wno-unused-variable

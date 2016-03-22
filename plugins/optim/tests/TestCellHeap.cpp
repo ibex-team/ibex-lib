@@ -35,7 +35,7 @@ void TestCellHeap::test01() {
 		delete h1.pop();
 	}
 
-	TEST_ASSERT(h1.size()==0);
+	CPPUNIT_ASSERT(h1.size()==0);
 }
 
 
@@ -56,7 +56,7 @@ void TestCellHeap::test02() {
 	}
 	h2.pop(); h2.pop();
 
-	TEST_ASSERT(h2.size()==nb-2);
+	CPPUNIT_ASSERT(h2.size()==nb-2);
 }
 
 
@@ -79,7 +79,7 @@ void TestCellHeap::test03() {
 	}
 	delete h2.pop(); delete h2.pop();
 
-	TEST_ASSERT(h2.size()==nb-2);
+	CPPUNIT_ASSERT(h2.size()==nb-2);
 }
 
 
@@ -145,7 +145,7 @@ void TestCellHeap::test05() {
 	check(h1.size(),h2.size());
 
 	h1.flush();
-	TEST_ASSERT(h1.size()==0);
+	CPPUNIT_ASSERT(h1.size()==0);
 }
 
 void TestCellHeap::test_D00() {
@@ -166,7 +166,7 @@ void TestCellHeap::test_D00() {
 		delete h1.pop();
 	}
 
-	TEST_ASSERT(h1.size()==0);
+	CPPUNIT_ASSERT(h1.size()==0);
 }
 
 
@@ -194,7 +194,7 @@ void TestCellHeap::test_D01() {
 	}
 
 
-	TEST_ASSERT(h1.size()==0);
+	CPPUNIT_ASSERT(h1.size()==0);
 }
 
 
@@ -219,7 +219,7 @@ void TestCellHeap::test_D03() {
 	}
 	delete h1.pop(); delete h1.pop();
 
-	TEST_ASSERT(h1.size()==((unsigned int)(nb-2)));
+	CPPUNIT_ASSERT(h1.size()==((unsigned int)(nb-2)));
 }
 
 
@@ -291,7 +291,7 @@ void TestCellHeap::test_D05() {
 	check(h1.size(),h2.size());
 
 	h1.flush();
-	TEST_ASSERT(h1.size()==0);
+	CPPUNIT_ASSERT(h1.size()==0);
 }
 
 

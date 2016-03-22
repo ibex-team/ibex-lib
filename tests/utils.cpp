@@ -10,12 +10,13 @@
  * ---------------------------------------------------------------------------- */
 
 #include "utils.h"
+#include <cppunit/TestAssert.h>
 #include <math.h>
 #include <sstream>
 
-const double TestIbex::ERROR = 1e-10;
+double ERROR = 1e-10;
 
-bool TestIbex::sameExpr(const ExprNode& node, const char* expr) {
+bool sameExpr(const ExprNode& node, const char* expr) {
 	std::stringstream s;
 	s << node;
 	if (strcmp(s.str().c_str(),expr)==0)
@@ -29,7 +30,7 @@ bool TestIbex::sameExpr(const ExprNode& node, const char* expr) {
 	}
 }
 
-bool TestIbex::sameExpr(const ExprNode& node, const ExprNode& node2) {
+bool sameExpr(const ExprNode& node, const ExprNode& node2) {
 	std::stringstream s,s2;
 	s << node;
 	s2 << node2;
@@ -44,36 +45,36 @@ bool TestIbex::sameExpr(const ExprNode& node, const ExprNode& node2) {
 	}
 }
 
-void TestIbex::check(double y_actual, double y_expected) {
-	TEST_ASSERT(!isnan(y_expected));
-	if (y_expected==POS_INFINITY) { TEST_ASSERT(y_actual==POS_INFINITY); }
-	else if (y_expected==NEG_INFINITY) { TEST_ASSERT(y_actual==NEG_INFINITY); }
+void check(double y_actual, double y_expected) {
+	CPPUNIT_ASSERT(!isnan(y_expected));
+	if (y_expected==POS_INFINITY) { CPPUNIT_ASSERT(y_actual==POS_INFINITY); }
+	else if (y_expected==NEG_INFINITY) { CPPUNIT_ASSERT(y_actual==NEG_INFINITY); }
 	else {
-		TEST_ASSERT(y_actual!=POS_INFINITY);
-		TEST_ASSERT(y_actual!=NEG_INFINITY);
-		TEST_ASSERT_DELTA(y_actual,y_expected,ERROR);
+		CPPUNIT_ASSERT(y_actual!=POS_INFINITY);
+		CPPUNIT_ASSERT(y_actual!=NEG_INFINITY);
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(y_expected,y_actual,ERROR);
 	}
 }
 
-void TestIbex::check(const Interval& y_actual, const Interval& y_expected) {
-	//std::cout << "TestIbex::check:    " << y_expected << " (expected)        " << y_actual << " (actual)"<< std::endl;
-	if (y_expected.is_empty()) { TEST_ASSERT(y_actual.is_empty()); return; }
+void check(const Interval& y_actual, const Interval& y_expected) {
+	//std::cout << "check:    " << y_expected << " (expected)        " << y_actual << " (actual)"<< std::endl;
+	if (y_expected.is_empty()) { CPPUNIT_ASSERT(y_actual.is_empty()); return; }
 
-	TEST_ASSERT(!y_actual.is_empty());
-	TEST_ASSERT(!isnan(y_actual.lb()));
-	TEST_ASSERT(!isnan(y_actual.ub()));
-	TEST_ASSERT_DELTA(y_actual.lb(),y_expected.lb(),ERROR);
-	TEST_ASSERT_DELTA(y_actual.ub(),y_expected.ub(),ERROR);
+	CPPUNIT_ASSERT(!y_actual.is_empty());
+	CPPUNIT_ASSERT(!isnan(y_actual.lb()));
+	CPPUNIT_ASSERT(!isnan(y_actual.ub()));
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(y_expected.lb(),y_actual.lb(),ERROR);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(y_expected.ub(),y_actual.ub(),ERROR);
 }
 
-void TestIbex::check(const IntervalVector& y_actual, const IntervalVector& y_expected) {
-	TEST_ASSERT(y_actual.size()==y_expected.size());
-	if (y_actual.is_empty() && y_expected.is_empty()) { TEST_ASSERT(true); return; }
+void check(const IntervalVector& y_actual, const IntervalVector& y_expected) {
+	CPPUNIT_ASSERT(y_actual.size()==y_expected.size());
+	if (y_actual.is_empty() && y_expected.is_empty()) { CPPUNIT_ASSERT(true); return; }
 	for (int i=0; i<y_actual.size(); i++)
-		TestIbex::check(y_actual[i],y_expected[i]);
+		check(y_actual[i],y_expected[i]);
 }
 
-bool TestIbex::almost_eq(const Interval& y_actual, const Interval& y_expected, double err) {
+bool almost_eq(const Interval& y_actual, const Interval& y_expected, double err) {
 	if (y_actual.is_empty() && y_expected.is_empty()) return true;
 	if (y_actual.is_empty() || y_expected.is_empty()) return false;
 
@@ -90,7 +91,7 @@ bool TestIbex::almost_eq(const Interval& y_actual, const Interval& y_expected, d
 	return true;
 }
 
-bool TestIbex::almost_eq(const IntervalVector& y_actual, const IntervalVector& y_expected, double err) {
+bool almost_eq(const IntervalVector& y_actual, const IntervalVector& y_expected, double err) {
 	if (y_actual.size()!=y_actual.size()) return false;
 	if (y_actual.is_empty() && y_expected.is_empty()) return true;
 

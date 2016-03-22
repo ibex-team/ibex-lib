@@ -75,7 +75,7 @@ void Eval::apply_fwd(int* x, int y) {
 		d2.set_ref(i,d[x[i]]);
 	}
 
-	d[y] = a.func._eval->eval(d2);
+	d[y] = a.func.basic_evaluator().eval(d2);
 }
 
 void Eval::vector_fwd(int* x, int y) {

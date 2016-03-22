@@ -22,21 +22,21 @@ namespace ibex {
 
 void TestParser::var01() {
 	System sys("quimper/var01.qpr");
-	TEST_ASSERT(sys.func.is_empty());
-	TEST_ASSERT(sys.args.size()==1);
-	TEST_ASSERT(strcmp(sys.args[0].name,"x")==0);
-	TEST_ASSERT(sys.args[0].dim.is_scalar());
-	TEST_ASSERT(sys.eprs.empty());
-	TEST_ASSERT(sys.sybs.empty());
-	TEST_ASSERT(sys.box.size()==1);
-	TEST_ASSERT(sys.box[0]==Interval::ALL_REALS);
-	TEST_ASSERT(sys.f.nb_arg()==1);
-	TEST_ASSERT(&sys.f.arg(0) == &sys.args[0]);
-	TEST_ASSERT(sameExpr(sys.f.expr(),"x"));
-	TEST_ASSERT(sys.ctrs.size()==1);
-	TEST_ASSERT(sys.ctrs[0].f.nb_arg()==1);
-	TEST_ASSERT(sameExpr(sys.ctrs[0].f.expr(),"x"));
-	TEST_ASSERT(sys.ctrs[0].op==GEQ);
+	CPPUNIT_ASSERT(sys.func.is_empty());
+	CPPUNIT_ASSERT(sys.args.size()==1);
+	CPPUNIT_ASSERT(strcmp(sys.args[0].name,"x")==0);
+	CPPUNIT_ASSERT(sys.args[0].dim.is_scalar());
+	CPPUNIT_ASSERT(sys.eprs.empty());
+	CPPUNIT_ASSERT(sys.sybs.empty());
+	CPPUNIT_ASSERT(sys.box.size()==1);
+	CPPUNIT_ASSERT(sys.box[0]==Interval::ALL_REALS);
+	CPPUNIT_ASSERT(sys.f.nb_arg()==1);
+	CPPUNIT_ASSERT(&sys.f.arg(0) == &sys.args[0]);
+	CPPUNIT_ASSERT(sameExpr(sys.f.expr(),"x"));
+	CPPUNIT_ASSERT(sys.ctrs.size()==1);
+	CPPUNIT_ASSERT(sys.ctrs[0].f.nb_arg()==1);
+	CPPUNIT_ASSERT(sameExpr(sys.ctrs[0].f.expr(),"x"));
+	CPPUNIT_ASSERT(sys.ctrs[0].op==GEQ);
 }
 
 void TestParser::const01() {
@@ -46,10 +46,10 @@ void TestParser::const01() {
 		sys.box.init(Interval::ALL_REALS);
 		CtcFwdBwd c0(sys.ctrs[0]);
 		c0.contract(sys.box);
-		TEST_ASSERT(sys.box[0]==Interval::ZERO);
+		CPPUNIT_ASSERT(sys.box[0]==Interval::ZERO);
 	} catch(SyntaxError& e) {
 		cout << e << endl;
-		TEST_ASSERT(false);
+		CPPUNIT_ASSERT(false);
 	}
 }
 
@@ -62,10 +62,10 @@ void TestParser::const02() {
 		sys.box.init(Interval::ALL_REALS);
 		CtcFwdBwd c0(sys.ctrs[0]);
 		c0.contract(sys.box);
-		TEST_ASSERT(sys.box[0]==Interval::ZERO);
+		CPPUNIT_ASSERT(sys.box[0]==Interval::ZERO);
 	} catch(SyntaxError& e) {
 		cout << e << endl;
-		TEST_ASSERT(false);
+		CPPUNIT_ASSERT(false);
 	}
 }
 
@@ -90,7 +90,7 @@ void TestParser::const03() {
 
 	} catch(SyntaxError& e) {
 		cout << e << endl;
-		TEST_ASSERT(false);
+		CPPUNIT_ASSERT(false);
 	}
 }
 
@@ -103,7 +103,7 @@ void TestParser::const04() {
 		check(sys.box,box);
 	} catch(SyntaxError& e) {
 		cout << e << endl;
-		TEST_ASSERT(false);
+		CPPUNIT_ASSERT(false);
 	}
 }
 
@@ -116,7 +116,7 @@ void TestParser::const05() {
 		check(sys.box,box.inflate(0.1));
 	} catch(SyntaxError& e) {
 		cout << e << endl;
-		TEST_ASSERT(false);
+		CPPUNIT_ASSERT(false);
 	}
 }
 
@@ -128,7 +128,7 @@ void TestParser::const06() {
 		check(sys.box[2],Interval::ALL_REALS);
 	} catch(SyntaxError& e) {
 		cout << e << endl;
-		TEST_ASSERT(false);
+		CPPUNIT_ASSERT(false);
 	}
 }
 
@@ -148,33 +148,33 @@ void TestParser::const07() {
 
 		CtcFwdBwd c0(sys.ctrs[0]);
 		c0.contract(sys.box);
-		TEST_ASSERT(!sys.box.is_empty());
+		CPPUNIT_ASSERT(!sys.box.is_empty());
 		IntervalVector zero(6);
 		zero.init(0);
 
 		CtcFwdBwd c1(sys.ctrs[1]);
 		sys.box[5]=Interval::ALL_REALS;
 		c1.contract(sys.box);
-		TEST_ASSERT(!sys.box.is_empty());
+		CPPUNIT_ASSERT(!sys.box.is_empty());
 		check(sys.box[5],Interval(1,1));
 
 		CtcFwdBwd c2(sys.ctrs[2]);
 		sys.box.init(Interval::ALL_REALS);
 		c2.contract(sys.box);
-		TEST_ASSERT(!sys.box.is_empty());
+		CPPUNIT_ASSERT(!sys.box.is_empty());
 		check(sys.box[5],Interval(1,1));
 
 		CtcFwdBwd c3(sys.ctrs[3]);
 		sys.box.init(Interval::ALL_REALS);
 		c3.contract(sys.box);
-		TEST_ASSERT(!sys.box.is_empty());
+		CPPUNIT_ASSERT(!sys.box.is_empty());
 		double _c21[][2]={{6,6},{7,7},{8,8}};
 		IntervalVector c21(3,_c21);
 		check(sys.box.subvector(3,5),c21);
 
 	} catch(SyntaxError& e) {
 		cout << e << endl;
-		TEST_ASSERT(false);
+		CPPUNIT_ASSERT(false);
 	}
 }
 
@@ -185,22 +185,22 @@ void TestParser::const08() {
 
 	double x=0.1;
 	const ExprConstant* c=dynamic_cast<const ExprConstant*>(&f.expr());
-	TEST_ASSERT(c!=NULL);
-	TEST_ASSERT(c->get_value().mid()==x);
+	CPPUNIT_ASSERT(c!=NULL);
+	CPPUNIT_ASSERT(c->get_value().mid()==x);
 }
 
 void TestParser::func01() {
 	try {
 		Function f("quimper/func01.qpr");
 
-		TEST_ASSERT(strcmp(f.name,"foo")==0);
-		TEST_ASSERT(f.nb_arg()==1);
-		TEST_ASSERT(f.arg(0).dim.is_scalar());
-		TEST_ASSERT(strcmp(f.arg(0).name,"x2")==0);
-		TEST_ASSERT(sameExpr(f.expr(),"x2"));
+		CPPUNIT_ASSERT(strcmp(f.name,"foo")==0);
+		CPPUNIT_ASSERT(f.nb_arg()==1);
+		CPPUNIT_ASSERT(f.arg(0).dim.is_scalar());
+		CPPUNIT_ASSERT(strcmp(f.arg(0).name,"x2")==0);
+		CPPUNIT_ASSERT(sameExpr(f.expr(),"x2"));
 	} catch(SyntaxError& e) {
 		cout << e << endl;
-		TEST_ASSERT(false);
+		CPPUNIT_ASSERT(false);
 	}
 }
 
@@ -209,7 +209,7 @@ void TestParser::func02() {
 		System sys("quimper/func02.qpr");
 
 		//cout << "sys nb ctr=" << sys.nb_ctr << endl;
-		//TEST_ASSERT(sys.nb_ctr==12);
+		//CPPUNIT_ASSERT(sys.nb_ctr==12);
 		CtcFwdBwd* c[24];
 		for (int i=0; i<sys.ctrs.size(); i++)
 			c[i]=new CtcFwdBwd(sys.ctrs[i]);
@@ -224,13 +224,13 @@ void TestParser::func02() {
 
 			c[i]->contract(box);
 
-			TEST_ASSERT(!box.is_empty());
+			CPPUNIT_ASSERT(!box.is_empty());
 			check(box.subvector(6,7),subbox); // check x2
 		}
 
 	} catch(SyntaxError& e) {
 		cout << e << endl;
-		TEST_ASSERT(false);
+		CPPUNIT_ASSERT(false);
 	}
 }
 
@@ -239,53 +239,53 @@ void TestParser::func03() {
 	try {
 		Function f("quimper/func03.qpr");
 
-		TEST_ASSERT(strcmp(f.name,"f")==0);
-		TEST_ASSERT(f.nb_arg()==10);
+		CPPUNIT_ASSERT(strcmp(f.name,"f")==0);
+		CPPUNIT_ASSERT(f.nb_arg()==10);
 	} catch(SyntaxError& e) {
 		cout << e << endl;
-		TEST_ASSERT(false);
+		CPPUNIT_ASSERT(false);
 	}
 }
 
 void TestParser::ponts() {
 	System sys("quimper/ponts.qpr");
 	Ponts30 sys2;
-	TEST_ASSERT(sys.func.is_empty());
-	TEST_ASSERT(sys.args.size()==30);
+	CPPUNIT_ASSERT(sys.func.is_empty());
+	CPPUNIT_ASSERT(sys.args.size()==30);
 	for (int i=0; i<30; i++) {
-		TEST_ASSERT(strcmp(sys.args[i].name,sys2.f->arg_name(i))==0);
-		TEST_ASSERT(sys.args[0].dim.is_scalar());
-		TEST_ASSERT(&sys.f.arg(i) == &sys.args[i]);
+		CPPUNIT_ASSERT(strcmp(sys.args[i].name,sys2.f->arg_name(i))==0);
+		CPPUNIT_ASSERT(sys.args[0].dim.is_scalar());
+		CPPUNIT_ASSERT(&sys.f.arg(i) == &sys.args[i]);
 	}
-	TEST_ASSERT(sys.eprs.empty());
-	TEST_ASSERT(sys.sybs.empty());
-	TEST_ASSERT(sys.box.size()==30);
-	TEST_ASSERT(almost_eq(sys.box, sys2.init_box,1e-12));
-	TEST_ASSERT(sys.f.nb_arg()==30);
-	TEST_ASSERT(sameExpr(sys.f.expr(),sys2.f->expr()));
-	TEST_ASSERT(sys.ctrs.size()==30);
+	CPPUNIT_ASSERT(sys.eprs.empty());
+	CPPUNIT_ASSERT(sys.sybs.empty());
+	CPPUNIT_ASSERT(sys.box.size()==30);
+	CPPUNIT_ASSERT(almost_eq(sys.box, sys2.init_box,1e-12));
+	CPPUNIT_ASSERT(sys.f.nb_arg()==30);
+	CPPUNIT_ASSERT(sameExpr(sys.f.expr(),sys2.f->expr()));
+	CPPUNIT_ASSERT(sys.ctrs.size()==30);
 
 	for (int i=0; i<30; i++) {
 		Function* fi=dynamic_cast<Function*>(&(sys.f[i]));
-		TEST_ASSERT(fi!=NULL);
-		TEST_ASSERT(sameExpr(sys.ctrs[i].f.expr(),fi->expr()));
-		TEST_ASSERT(sys.ctrs[i].op==EQ);
+		CPPUNIT_ASSERT(fi!=NULL);
+		CPPUNIT_ASSERT(sameExpr(sys.ctrs[i].f.expr(),fi->expr()));
+		CPPUNIT_ASSERT(sys.ctrs[i].op==EQ);
 	}
 }
 
 void TestParser::choco01() {
 	System sys(2,"{1}+{0}=0");
-	TEST_ASSERT(sys.func.is_empty());
-	TEST_ASSERT(sys.args.size()==2);
-	TEST_ASSERT(strcmp(sys.args[0].name,"{0}")==0);
-	TEST_ASSERT(strcmp(sys.args[1].name,"{1}")==0);
-	TEST_ASSERT(sys.eprs.empty());
-	TEST_ASSERT(sys.sybs.empty());
-	TEST_ASSERT(sys.box.size()==2);
-	TEST_ASSERT(sys.f.nb_arg()==2);
-	TEST_ASSERT(sameExpr(sys.f.expr(),"({1}+{0})"));
-	TEST_ASSERT(sys.ctrs.size()==1);
-	TEST_ASSERT(sameExpr(sys.ctrs[0].f.expr(),sys.f.expr()));
+	CPPUNIT_ASSERT(sys.func.is_empty());
+	CPPUNIT_ASSERT(sys.args.size()==2);
+	CPPUNIT_ASSERT(strcmp(sys.args[0].name,"{0}")==0);
+	CPPUNIT_ASSERT(strcmp(sys.args[1].name,"{1}")==0);
+	CPPUNIT_ASSERT(sys.eprs.empty());
+	CPPUNIT_ASSERT(sys.sybs.empty());
+	CPPUNIT_ASSERT(sys.box.size()==2);
+	CPPUNIT_ASSERT(sys.f.nb_arg()==2);
+	CPPUNIT_ASSERT(sameExpr(sys.f.expr(),"({1}+{0})"));
+	CPPUNIT_ASSERT(sys.ctrs.size()==1);
+	CPPUNIT_ASSERT(sameExpr(sys.ctrs[0].f.expr(),sys.f.expr()));
 }
 
 void TestParser::loop01() {
@@ -301,14 +301,14 @@ void TestParser::loop01() {
 		      for (int k=j; k<=i; k++) {
 		    	  const ExprSub& sub=(const ExprSub&) sys.ctrs[c++].f.expr();
 		    	  const ExprConstant& cst=(const ExprConstant&) sub.right;
-		    	  TEST_ASSERT_DELTA(a+i+j*k,cst.get_value().mid(),error);
+		    	  CPPUNIT_ASSERT_DOUBLES_EQUAL(a+i+j*k,cst.get_value().mid(),error);
 		      }
 		    }
 
 		    for (int j=1; j<=i; j++) {
 		    	const ExprSub& sub=(const ExprSub&) sys.ctrs[c++].f.expr();
 		    	const ExprConstant& cst=(const ExprConstant&) sub.right;
-		    	TEST_ASSERT_DELTA(i+j-b,cst.get_value().mid(),error);
+		    	CPPUNIT_ASSERT_DOUBLES_EQUAL(i+j-b,cst.get_value().mid(),error);
 
 		    }
 		}
@@ -319,7 +319,7 @@ void TestParser::loop01() {
 }
 
 void TestParser::error01() {
-	TEST_THROWS(System("quimper/error01.qpr"),SyntaxError&);
+	CPPUNIT_ASSERT_THROW(System("quimper/error01.qpr"),SyntaxError);
 }
 
 void TestParser::nary_max() {

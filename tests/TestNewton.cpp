@@ -88,16 +88,16 @@ void TestNewton::newton01() {
 	IntervalVector box(30,BOX1);
 	try {
 		newton(*p30.f,box);
-		TEST_ASSERT(!box.is_empty());
+		CPPUNIT_ASSERT(!box.is_empty());
 	} catch (LinearException& e) {
 		//cout << "linear exception" << endl;
-		TEST_ASSERT(false);
+		CPPUNIT_ASSERT(false);
 	}
 
 	IntervalVector expected(30,BOX2);
 	//cout << expected << endl << endl << endl;
 	//cout << box << endl;
-	TEST_ASSERT(almost_eq(box,expected,1e-10));
+	CPPUNIT_ASSERT(almost_eq(box,expected,1e-10));
 }
 
 void TestNewton::inflating_newton01() {
@@ -108,8 +108,8 @@ void TestNewton::inflating_newton01() {
 	box += error;
 	IntervalVector expected(30,BOX2);
 	bool ret=inflating_newton(*p30.f,box);
-	TEST_ASSERT(ret);
-	TEST_ASSERT(almost_eq(box,expected,1e-10));
+	CPPUNIT_ASSERT(ret);
+	CPPUNIT_ASSERT(almost_eq(box,expected,1e-10));
 }
 
 void TestNewton::ctc_parameter01() {
@@ -128,9 +128,9 @@ void TestNewton::ctc_parameter01() {
 
 	Vector sol(2,(::sqrt(2)/2));
 
-	TEST_ASSERT(box.subvector(0,1).contains(sol));
-	TEST_ASSERT(box.min_diam()>0.001);
-	TEST_ASSERT(box[0].diam()<=0.1);
-	TEST_ASSERT(box[1].diam()<=0.1);
+	CPPUNIT_ASSERT(box.subvector(0,1).contains(sol));
+	CPPUNIT_ASSERT(box.min_diam()>0.001);
+	CPPUNIT_ASSERT(box[0].diam()<=0.1);
+	CPPUNIT_ASSERT(box[1].diam()<=0.1);
 }
 } // end namespace ibex

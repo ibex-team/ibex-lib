@@ -61,7 +61,7 @@ public:
 	void apply04();
 
 private:
-	void check_deco(const ExprNode& e);
+	void check_deco(Function& f, const ExprNode& e);
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestEval);

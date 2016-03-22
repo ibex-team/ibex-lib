@@ -14,6 +14,7 @@
 
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
+
 #include "ibex_CtcNotIn.h"
 #include "utils.h"
 
@@ -31,6 +32,7 @@ public:
 	CPPUNIT_TEST(vector01);
 	CPPUNIT_TEST(vector02);
 	CPPUNIT_TEST(vector03);
+	CPPUNIT_TEST_SUITE_END();
 
 	void contract01();
 	void contract02();
@@ -47,6 +49,6 @@ public:
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestCtcNotIn);
 
-
 } // namespace ibex
+
 #endif // __TEST_CTC_NOT_IN_H__

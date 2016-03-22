@@ -231,7 +231,7 @@ void ExprCopy::visit(const ExprApply& e) {
 			for (i=0; i<e.nb_args; i++) {
 				d.set_ref(i,((const ExprConstant&) ARG(i)).get());
 			}
-			clone.insert(e, &ExprConstant::new_(e.func.eval_domain(d)));
+			clone.insert(e, &ExprConstant::new_(e.func.basic_evaluator().eval(d)));
 			return;
 		}
 	}

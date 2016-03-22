@@ -789,6 +789,34 @@ public:
 	 */
 	void ibwd(const Interval& y, IntervalVector& x, const IntervalVector& xin) const;
 
+	/*
+	 * \brief Get a reference to the evaluator.
+	 *
+	 * For internal purposes.
+	 */
+	Eval& basic_evaluator() const;
+
+	/*
+	 * \brief Get a reference to the evaluator.
+	 *
+	 * For internal purposes.
+	 */
+	Gradient& deriv_calculator() const;
+
+	/*
+	 * \brief Get a reference to the HC4Revise algorithm.
+	 *
+	 * For internal purposes.
+	 */
+	HC4Revise& hc4revise() const;
+
+	/*
+	 * \brief Get a reference to the InHC4Revise algorithm.
+	 *
+	 * For internal purposes.
+	 */
+	InHC4Revise& inhc4revise() const;
+
 	// ============================================================================
 
 
@@ -835,10 +863,6 @@ protected:
 
 private:
 	friend class VarSet;
-	friend class Eval;
-	friend class HC4Revise;
-	friend class Gradient;
-	friend class InHC4Revise;
 
 	void build_from_string(const Array<const char*>& x, const char* y, const char* name=NULL);
 
@@ -1063,6 +1087,22 @@ inline IntervalMatrix Function::jacobian(const IntervalVector& x) const {
 	IntervalMatrix J(image_dim(),x.size());
 	jacobian(x,J);
 	return J;
+}
+
+inline Eval& Function::basic_evaluator() const {
+	return *_eval;
+}
+
+inline Gradient& Function::deriv_calculator() const {
+	return *_grad;
+}
+
+inline HC4Revise& Function::hc4revise() const {
+	return *_hc4revise;
+}
+
+inline InHC4Revise& Function::inhc4revise() const {
+	return *_inhc4revise;
 }
 
 inline int Function::nb_used_vars() const {

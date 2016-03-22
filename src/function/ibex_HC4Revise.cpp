@@ -96,7 +96,7 @@ void HC4Revise::apply_bwd(int* x, int y) {
 	// it will be caught by proj(...,IntervalVector& x).
 	// (it is a protected function, not called outside of the class
 	// so there is no risk)
-	a.func._hc4revise->proj(d[y],d2);
+	a.func.hc4revise().proj(d[y],d2);
 }
 
 void HC4Revise::vector_bwd(int* x, int y) {

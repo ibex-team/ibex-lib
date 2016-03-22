@@ -94,7 +94,7 @@ void InHC4Revise::apply_bwd(int* x, int y) {
 	// it will be caught by iproj(...,IntervalVector& x).
 	// (it is a protected function, not called outside of the class
 	// so there is no risk)
-	a.func._inhc4revise->iproj(d[y],d2,p2);
+	a.func.inhc4revise().iproj(d[y],d2,p2);
 }
 
 } // end namespace ibex

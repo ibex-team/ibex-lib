@@ -24,12 +24,10 @@ class TestDim : public CppUnit::TestFixture {
 public:
 
 	CPPUNIT_TEST_SUITE(TestDim);
-	
-
-		CPPUNIT_TEST(test01);
-		CPPUNIT_TEST(test02);
-		CPPUNIT_TEST(test03);
-		CPPUNIT_TEST(test04);
+	CPPUNIT_TEST(test01);
+	CPPUNIT_TEST(test02);
+	CPPUNIT_TEST(test03);
+	CPPUNIT_TEST(test04);
 	CPPUNIT_TEST_SUITE_END();
 
 	void test01();
@@ -40,6 +38,6 @@ public:
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestDim);
 
-
 } // namespace ibex
+
 #endif // __TEST_DIM_H__

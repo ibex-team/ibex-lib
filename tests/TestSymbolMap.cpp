@@ -19,24 +19,24 @@ namespace ibex {
 void TestSymbolMap::test01() {
 	SymbolMap<int> map;
 	const char* x2=map.insert_new("x",1);
-	TEST_ASSERT(strcmp(x2,"x")==0);
+	CPPUNIT_ASSERT(strcmp(x2,"x")==0);
 	map.insert_new("y",2);
-	TEST_ASSERT(map.used("x"));
-	TEST_ASSERT(map.used("y"));
-	TEST_ASSERT(map.size()==2);
-	TEST_ASSERT(map["x"]==1);
-	TEST_ASSERT(map["y"]==2);
+	CPPUNIT_ASSERT(map.used("x"));
+	CPPUNIT_ASSERT(map.used("y"));
+	CPPUNIT_ASSERT(map.size()==2);
+	CPPUNIT_ASSERT(map["x"]==1);
+	CPPUNIT_ASSERT(map["y"]==2);
 
 	map.erase("x");
-	TEST_ASSERT(!map.used("x"));
-	TEST_ASSERT(map.used("y"));
-	TEST_ASSERT(map.size()==1);
-	TEST_ASSERT(map["y"]==2);
+	CPPUNIT_ASSERT(!map.used("x"));
+	CPPUNIT_ASSERT(map.used("y"));
+	CPPUNIT_ASSERT(map.size()==1);
+	CPPUNIT_ASSERT(map["y"]==2);
 
 	map.erase("y");
-	TEST_ASSERT(!map.used("x"));
-	TEST_ASSERT(!map.used("y"));
-	TEST_ASSERT(map.size()==0);
+	CPPUNIT_ASSERT(!map.used("x"));
+	CPPUNIT_ASSERT(!map.used("y"));
+	CPPUNIT_ASSERT(map.size()==0);
 
 }
 
@@ -47,16 +47,16 @@ void TestSymbolMap::test02() {
 	_map.insert_new("y",2);
 	SymbolMap<int> map(_map);
 
-	TEST_ASSERT(map.used("x"));
-	TEST_ASSERT(map.used("y"));
-	TEST_ASSERT(map.size()==2);
-	TEST_ASSERT(map["x"]==1);
-	TEST_ASSERT(map["y"]==2);
+	CPPUNIT_ASSERT(map.used("x"));
+	CPPUNIT_ASSERT(map.used("y"));
+	CPPUNIT_ASSERT(map.size()==2);
+	CPPUNIT_ASSERT(map["x"]==1);
+	CPPUNIT_ASSERT(map["y"]==2);
 
 	map.clean();
-	TEST_ASSERT(!map.used("x"));
-	TEST_ASSERT(!map.used("y"));
-	TEST_ASSERT(map.size()==0);
+	CPPUNIT_ASSERT(!map.used("x"));
+	CPPUNIT_ASSERT(!map.used("y"));
+	CPPUNIT_ASSERT(map.size()==0);
 }
 
 } // end namespace

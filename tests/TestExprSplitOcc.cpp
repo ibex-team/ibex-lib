@@ -23,20 +23,20 @@ void TestExprSplitOcc::test01() {
 	ExprSplitOcc eso(x,y);
 	const ExprNode& y2=eso.get_y();
 	const Array<const ExprSymbol>& x2=eso.get_x();
-	TEST_ASSERT(x2.size()==2);
+	CPPUNIT_ASSERT(x2.size()==2);
 	const ExprBinaryOp* sum=dynamic_cast<const ExprBinaryOp*>(&y2);
-	TEST_ASSERT(sum!=NULL);
-	TEST_ASSERT(&sum->left==&x2[0]);
-	TEST_ASSERT(&sum->right==&x2[1]);
-	TEST_ASSERT(strcmp(x2[0].name,"x_0_")==0);
-	TEST_ASSERT(strcmp(x2[1].name,"x_1_")==0);
-	TEST_ASSERT(&eso.node(x2[0])==&x);
-	TEST_ASSERT(&eso.node(x2[1])==&x);
+	CPPUNIT_ASSERT(sum!=NULL);
+	CPPUNIT_ASSERT(&sum->left==&x2[0]);
+	CPPUNIT_ASSERT(&sum->right==&x2[1]);
+	CPPUNIT_ASSERT(strcmp(x2[0].name,"x_0_")==0);
+	CPPUNIT_ASSERT(strcmp(x2[1].name,"x_1_")==0);
+	CPPUNIT_ASSERT(&eso.node(x2[0])==&x);
+	CPPUNIT_ASSERT(&eso.node(x2[1])==&x);
 	int* var;
 	int n=eso.var_map(var);
-	TEST_ASSERT(n==2);
-	TEST_ASSERT(var[0]==0);
-	TEST_ASSERT(var[1]==0);
+	CPPUNIT_ASSERT(n==2);
+	CPPUNIT_ASSERT(var[0]==0);
+	CPPUNIT_ASSERT(var[1]==0);
 }
 
 void TestExprSplitOcc::test02() {
@@ -47,21 +47,21 @@ void TestExprSplitOcc::test02() {
 	ExprSplitOcc eso(f1.args(),f1.expr());
 	const Array<const ExprSymbol>& x2=eso.get_x();
 	Function f2(x2, eso.get_y());
-	TEST_ASSERT(sameExpr(f2.expr(),"(((x_0_+y_0_)-(x_1_^2*y_1_))+y_2_)"));
-	TEST_ASSERT(x2.size()==5);
-	TEST_ASSERT(&eso.node(x2[0])==&x);
-	TEST_ASSERT(&eso.node(x2[1])==&x);
-	TEST_ASSERT(&eso.node(x2[2])==&y);
-	TEST_ASSERT(&eso.node(x2[3])==&y);
-	TEST_ASSERT(&eso.node(x2[4])==&y);
+	CPPUNIT_ASSERT(sameExpr(f2.expr(),"(((x_0_+y_0_)-(x_1_^2*y_1_))+y_2_)"));
+	CPPUNIT_ASSERT(x2.size()==5);
+	CPPUNIT_ASSERT(&eso.node(x2[0])==&x);
+	CPPUNIT_ASSERT(&eso.node(x2[1])==&x);
+	CPPUNIT_ASSERT(&eso.node(x2[2])==&y);
+	CPPUNIT_ASSERT(&eso.node(x2[3])==&y);
+	CPPUNIT_ASSERT(&eso.node(x2[4])==&y);
 	int* var;
 	int n=eso.var_map(var);
-	TEST_ASSERT(n==5);
-	TEST_ASSERT(var[0]==0);
-	TEST_ASSERT(var[1]==0);
-	TEST_ASSERT(var[2]==1);
-	TEST_ASSERT(var[3]==1);
-	TEST_ASSERT(var[4]==1);
+	CPPUNIT_ASSERT(n==5);
+	CPPUNIT_ASSERT(var[0]==0);
+	CPPUNIT_ASSERT(var[1]==0);
+	CPPUNIT_ASSERT(var[2]==1);
+	CPPUNIT_ASSERT(var[3]==1);
+	CPPUNIT_ASSERT(var[4]==1);
 }
 
 
@@ -73,19 +73,19 @@ void TestExprSplitOcc::test03() {
 
 	const Array<const ExprSymbol>& x2=eso.get_x();
 	const ExprNode& y2=eso.get_y();
-	TEST_ASSERT(x2.size()==2);
-	TEST_ASSERT(x2[0].dim==((const ExprNode&) x).dim);
-	TEST_ASSERT(x2[1].dim==((const ExprNode&) x).dim);
-	TEST_ASSERT(sameExpr(y2,"((-x_0_)[1]+x[0])"));
-	TEST_ASSERT(&eso.node(x2[0])==&x);
-	TEST_ASSERT(&eso.node(x2[1])==&x);
+	CPPUNIT_ASSERT(x2.size()==2);
+	CPPUNIT_ASSERT(x2[0].dim==((const ExprNode&) x).dim);
+	CPPUNIT_ASSERT(x2[1].dim==((const ExprNode&) x).dim);
+	CPPUNIT_ASSERT(sameExpr(y2,"((-x_0_)[1]+x[0])"));
+	CPPUNIT_ASSERT(&eso.node(x2[0])==&x);
+	CPPUNIT_ASSERT(&eso.node(x2[1])==&x);
 	int* var;
 	int n=eso.var_map(var);
-	TEST_ASSERT(n==4);
-	TEST_ASSERT(var[0]==0);
-	TEST_ASSERT(var[1]==1);
-	TEST_ASSERT(var[2]==0);
-	TEST_ASSERT(var[3]==1);
+	CPPUNIT_ASSERT(n==4);
+	CPPUNIT_ASSERT(var[0]==0);
+	CPPUNIT_ASSERT(var[1]==1);
+	CPPUNIT_ASSERT(var[2]==0);
+	CPPUNIT_ASSERT(var[3]==1);
 }
 
 void TestExprSplitOcc::test04() {
@@ -97,18 +97,18 @@ void TestExprSplitOcc::test04() {
 
 	const Array<const ExprSymbol>& x2=eso.get_x();
 	const ExprNode& y2=eso.get_y();
-	TEST_ASSERT(x2.size()==2);
-	TEST_ASSERT(x2[0].dim==((const ExprNode&) x).dim);
-	TEST_ASSERT(x2[1].dim.is_scalar());
-	TEST_ASSERT(sameExpr(y2,"(x[0]-x[0]_1_)"));
-	TEST_ASSERT(&eso.node(x2[0])==&x);
-	TEST_ASSERT(&eso.node(x2[1])==&e1);
+	CPPUNIT_ASSERT(x2.size()==2);
+	CPPUNIT_ASSERT(x2[0].dim==((const ExprNode&) x).dim);
+	CPPUNIT_ASSERT(x2[1].dim.is_scalar());
+	CPPUNIT_ASSERT(sameExpr(y2,"(x[0]-x[0]_1_)"));
+	CPPUNIT_ASSERT(&eso.node(x2[0])==&x);
+	CPPUNIT_ASSERT(&eso.node(x2[1])==&e1);
 	int* var;
 	int n=eso.var_map(var);
-	TEST_ASSERT(n==3);
-	TEST_ASSERT(var[0]==0);
-	TEST_ASSERT(var[1]==1);
-	TEST_ASSERT(var[2]==0);
+	CPPUNIT_ASSERT(n==3);
+	CPPUNIT_ASSERT(var[0]==0);
+	CPPUNIT_ASSERT(var[1]==1);
+	CPPUNIT_ASSERT(var[2]==0);
 }
 
 
@@ -122,18 +122,18 @@ void TestExprSplitOcc::test05() {
 
 	const Array<const ExprSymbol>& x2=eso.get_x();
 	const ExprNode& y2=eso.get_y();
-	TEST_ASSERT(x2.size()==2);
-	TEST_ASSERT(x2[0].dim==((const ExprNode&) x).dim);
-	TEST_ASSERT(x2[1].dim.is_scalar());
-	TEST_ASSERT(sameExpr(y2,"(x[0]-x[0]_1_)"));
-	TEST_ASSERT(&eso.node(x2[0])==&x);
-	TEST_ASSERT(&eso.node(x2[1])==&e1);
+	CPPUNIT_ASSERT(x2.size()==2);
+	CPPUNIT_ASSERT(x2[0].dim==((const ExprNode&) x).dim);
+	CPPUNIT_ASSERT(x2[1].dim.is_scalar());
+	CPPUNIT_ASSERT(sameExpr(y2,"(x[0]-x[0]_1_)"));
+	CPPUNIT_ASSERT(&eso.node(x2[0])==&x);
+	CPPUNIT_ASSERT(&eso.node(x2[1])==&e1);
 	int* var;
 	int n=eso.var_map(var);
-	TEST_ASSERT(n==3);
-	TEST_ASSERT(var[0]==0);
-	TEST_ASSERT(var[1]==1);
-	TEST_ASSERT(var[2]==0);
+	CPPUNIT_ASSERT(n==3);
+	CPPUNIT_ASSERT(var[0]==0);
+	CPPUNIT_ASSERT(var[1]==1);
+	CPPUNIT_ASSERT(var[2]==0);
 }
 
 
@@ -147,18 +147,18 @@ void TestExprSplitOcc::test06() {
 
 	const Array<const ExprSymbol>& x2=eso.get_x();
 	const ExprNode& y2=eso.get_y();
-	TEST_ASSERT(x2.size()==2);
-	TEST_ASSERT(x2[0].dim==((const ExprNode&) x).dim);
-	TEST_ASSERT(sameExpr(y2,"(((x[0]-x[1])+x[2])+x[0]_1_)"));
-	TEST_ASSERT(&eso.node(x2[0])==&x);
-	TEST_ASSERT(&eso.node(x2[1])==&e1);
+	CPPUNIT_ASSERT(x2.size()==2);
+	CPPUNIT_ASSERT(x2[0].dim==((const ExprNode&) x).dim);
+	CPPUNIT_ASSERT(sameExpr(y2,"(((x[0]-x[1])+x[2])+x[0]_1_)"));
+	CPPUNIT_ASSERT(&eso.node(x2[0])==&x);
+	CPPUNIT_ASSERT(&eso.node(x2[1])==&e1);
 	int* var;
 	int n=eso.var_map(var);
-	TEST_ASSERT(n==4);
-	TEST_ASSERT(var[0]==0);
-	TEST_ASSERT(var[1]==1);
-	TEST_ASSERT(var[2]==2);
-	TEST_ASSERT(var[3]==0);
+	CPPUNIT_ASSERT(n==4);
+	CPPUNIT_ASSERT(var[0]==0);
+	CPPUNIT_ASSERT(var[1]==1);
+	CPPUNIT_ASSERT(var[2]==2);
+	CPPUNIT_ASSERT(var[3]==0);
 }
 
 void TestExprSplitOcc::test07() {
@@ -172,23 +172,23 @@ void TestExprSplitOcc::test07() {
 
 	const Array<const ExprSymbol>& x2=eso.get_x();
 	const ExprNode& y2=eso.get_y();
-	TEST_ASSERT(x2.size()==4);
-	TEST_ASSERT(sameExpr(y2,"((((x[0]+(-x_0_)[1])+x[1])+x[0]_1_)+x[1]_1_)"));
-	TEST_ASSERT(&eso.node(x2[0])==&x); // the "special node" (which is inserted first)
-	TEST_ASSERT(&eso.node(x2[1])==&x);
-	TEST_ASSERT(&eso.node(x2[2])==&e1);
-	TEST_ASSERT(&eso.node(x2[3])==&e2);
+	CPPUNIT_ASSERT(x2.size()==4);
+	CPPUNIT_ASSERT(sameExpr(y2,"((((x[0]+(-x_0_)[1])+x[1])+x[0]_1_)+x[1]_1_)"));
+	CPPUNIT_ASSERT(&eso.node(x2[0])==&x); // the "special node" (which is inserted first)
+	CPPUNIT_ASSERT(&eso.node(x2[1])==&x);
+	CPPUNIT_ASSERT(&eso.node(x2[2])==&e1);
+	CPPUNIT_ASSERT(&eso.node(x2[3])==&e2);
 	int* var;
 	int n=eso.var_map(var);
-	TEST_ASSERT(n==8);
-	TEST_ASSERT(var[0]==0);
-	TEST_ASSERT(var[1]==1);
-	TEST_ASSERT(var[2]==2);
-	TEST_ASSERT(var[3]==0);
-	TEST_ASSERT(var[4]==1);
-	TEST_ASSERT(var[5]==2);
-	TEST_ASSERT(var[6]==0);
-	TEST_ASSERT(var[7]==1);
+	CPPUNIT_ASSERT(n==8);
+	CPPUNIT_ASSERT(var[0]==0);
+	CPPUNIT_ASSERT(var[1]==1);
+	CPPUNIT_ASSERT(var[2]==2);
+	CPPUNIT_ASSERT(var[3]==0);
+	CPPUNIT_ASSERT(var[4]==1);
+	CPPUNIT_ASSERT(var[5]==2);
+	CPPUNIT_ASSERT(var[6]==0);
+	CPPUNIT_ASSERT(var[7]==1);
 }
 
 } // end namespace

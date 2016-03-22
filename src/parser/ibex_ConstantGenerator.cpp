@@ -150,7 +150,7 @@ void ConstantGenerator::visit(const ExprApply& e) {
 		const Domain* di=map[e.arg(i)];
 		args.set_ref(i,*di);
 	}
-	*d=e.func.eval_domain(args);
+	*d=e.func.basic_evaluator().eval(args);
 	for (int i=0; i<e.nb_args; i++) {
 		delete &args[i];
 	}

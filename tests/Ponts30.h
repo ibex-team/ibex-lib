@@ -18,8 +18,6 @@ namespace ibex {
 
 class Ponts30 {
 public:
-
-	CPPUNIT_TEST_SUITE(Ponts30);
 	Ponts30();
 
 	Function* f;

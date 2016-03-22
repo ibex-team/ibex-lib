@@ -22,7 +22,7 @@ namespace ibex {
 
 void TestFunction::build01() {
 	delete new Function();
-	TEST_ASSERT(true);
+	CPPUNIT_ASSERT(true);
 }
 
 void TestFunction::add_symbol() {
@@ -31,15 +31,15 @@ void TestFunction::add_symbol() {
 
 	Function f(x,y,x);
 
-	TEST_ASSERT(f.nb_nodes()==1);
-	TEST_ASSERT(f.nb_arg()==2);
-	TEST_ASSERT(strcmp(f.arg_name(0),"x")==0);
-	TEST_ASSERT(strcmp(f.arg_name(1),"y")==0);
-	TEST_ASSERT(f.used(0));
-	TEST_ASSERT(f.used(0));
-	TEST_ASSERT(!f.used(1));
-	TEST_ASSERT(!f.used(1));
-	TEST_ASSERT(&f.node(0)==&x);
+	CPPUNIT_ASSERT(f.nb_nodes()==1);
+	CPPUNIT_ASSERT(f.nb_arg()==2);
+	CPPUNIT_ASSERT(strcmp(f.arg_name(0),"x")==0);
+	CPPUNIT_ASSERT(strcmp(f.arg_name(1),"y")==0);
+	CPPUNIT_ASSERT(f.used(0));
+	CPPUNIT_ASSERT(f.used(0));
+	CPPUNIT_ASSERT(!f.used(1));
+	CPPUNIT_ASSERT(!f.used(1));
+	CPPUNIT_ASSERT(&f.node(0)==&x);
 }
 
 void TestFunction::copy() {
@@ -49,21 +49,21 @@ void TestFunction::copy() {
 	Function f(x,A,A*x);
 
 	Function f2(f);
-	TEST_ASSERT(f2.nb_nodes()==3);
-	TEST_ASSERT(f2.nb_arg()==2);
+	CPPUNIT_ASSERT(f2.nb_nodes()==3);
+	CPPUNIT_ASSERT(f2.nb_arg()==2);
 
 	const ExprMul* e2=dynamic_cast<const ExprMul*>(&f2.node(0));
-	TEST_ASSERT(e2!=NULL);
-	TEST_ASSERT(sameExpr(f2.expr(),"(A*x)"));
+	CPPUNIT_ASSERT(e2!=NULL);
+	CPPUNIT_ASSERT(sameExpr(f2.expr(),"(A*x)"));
 
 	const ExprSymbol* A2=dynamic_cast<const ExprSymbol*>(&f2.node(1));
-	TEST_ASSERT(A2!=NULL);
-	TEST_ASSERT(strcmp(A2->name,"A")==0);
-	TEST_ASSERT(A2->dim==A.dim);
+	CPPUNIT_ASSERT(A2!=NULL);
+	CPPUNIT_ASSERT(strcmp(A2->name,"A")==0);
+	CPPUNIT_ASSERT(A2->dim==A.dim);
 
 	const ExprSymbol* x2=dynamic_cast<const ExprSymbol*>(&f2.node(2));
-	TEST_ASSERT(strcmp(x2->name,"x")==0);
-	TEST_ASSERT(x2->dim==x.dim);
+	CPPUNIT_ASSERT(strcmp(x2->name,"x")==0);
+	CPPUNIT_ASSERT(x2->dim==x.dim);
 
 }
 
@@ -81,14 +81,14 @@ void TestFunction::generate_comp01() {
 
 	Function f(x,y,z,e);
 
-	TEST_ASSERT(f[0].nb_arg()==3);
-	TEST_ASSERT(sameExpr(f[0].expr(),"((x+y)-z)"));
+	CPPUNIT_ASSERT(f[0].nb_arg()==3);
+	CPPUNIT_ASSERT(sameExpr(f[0].expr(),"((x+y)-z)"));
 
-	TEST_ASSERT(f[1].nb_arg()==3);
-	TEST_ASSERT(sameExpr(f[1].expr(),"(x*z)"));
+	CPPUNIT_ASSERT(f[1].nb_arg()==3);
+	CPPUNIT_ASSERT(sameExpr(f[1].expr(),"(x*z)"));
 
-	TEST_ASSERT(f[2].nb_arg()==3);
-	TEST_ASSERT(sameExpr(f[2].expr(),"(y-z)"));
+	CPPUNIT_ASSERT(f[2].nb_arg()==3);
+	CPPUNIT_ASSERT(sameExpr(f[2].expr(),"(y-z)"));
 }
 
 void TestFunction::generate_comp02() {
@@ -105,11 +105,11 @@ void TestFunction::generate_comp02() {
 	Function f(x,e);
 
 	const ExprConstant* c=dynamic_cast<const ExprConstant*>(&f[1].expr());
-	TEST_ASSERT(c);
-	TEST_ASSERT(c->get_value()==Interval::ZERO);
+	CPPUNIT_ASSERT(c);
+	CPPUNIT_ASSERT(c->get_value()==Interval::ZERO);
 	c=dynamic_cast<const ExprConstant*>(&f[2].expr());
-	TEST_ASSERT(c);
-	TEST_ASSERT(c->get_value()==Interval::ZERO);
+	CPPUNIT_ASSERT(c);
+	CPPUNIT_ASSERT(c->get_value()==Interval::ZERO);
 }
 
 void TestFunction::used() {
@@ -126,18 +126,18 @@ void TestFunction::used() {
 
 	Function f(x,y,z,e);
 
-	TEST_ASSERT(f[0].nb_used_vars()==3);
-	TEST_ASSERT(f[0].used_var(0)==0);
-	TEST_ASSERT(f[0].used_var(1)==1);
-	TEST_ASSERT(f[0].used_var(2)==2);
+	CPPUNIT_ASSERT(f[0].nb_used_vars()==3);
+	CPPUNIT_ASSERT(f[0].used_var(0)==0);
+	CPPUNIT_ASSERT(f[0].used_var(1)==1);
+	CPPUNIT_ASSERT(f[0].used_var(2)==2);
 
-	TEST_ASSERT(f[1].nb_used_vars()==2);
-	TEST_ASSERT(f[1].used_var(0)==0);
-	TEST_ASSERT(f[1].used_var(1)==2);
+	CPPUNIT_ASSERT(f[1].nb_used_vars()==2);
+	CPPUNIT_ASSERT(f[1].used_var(0)==0);
+	CPPUNIT_ASSERT(f[1].used_var(1)==2);
 
-	TEST_ASSERT(f[2].nb_used_vars()==2);
-	TEST_ASSERT(f[2].used_var(0)==1);
-	TEST_ASSERT(f[2].used_var(1)==2);
+	CPPUNIT_ASSERT(f[2].nb_used_vars()==2);
+	CPPUNIT_ASSERT(f[2].used_var(0)==1);
+	CPPUNIT_ASSERT(f[2].used_var(1)==2);
 }
 
 void TestFunction::used02() {
@@ -146,17 +146,17 @@ void TestFunction::used02() {
 
 	Function f(x,y,x[0]+x[2]-(y[1][1]*y[1][2]));
 
-	TEST_ASSERT(f.used(0));
-	TEST_ASSERT(!f.used(1));
-	TEST_ASSERT(f.used(2));
+	CPPUNIT_ASSERT(f.used(0));
+	CPPUNIT_ASSERT(!f.used(1));
+	CPPUNIT_ASSERT(f.used(2));
 
-	TEST_ASSERT(!f.used(3));
-	TEST_ASSERT(!f.used(4));
-	TEST_ASSERT(!f.used(5));
+	CPPUNIT_ASSERT(!f.used(3));
+	CPPUNIT_ASSERT(!f.used(4));
+	CPPUNIT_ASSERT(!f.used(5));
 
-	TEST_ASSERT(!f.used(6));
-	TEST_ASSERT(f.used(7));
-	TEST_ASSERT(f.used(8));
+	CPPUNIT_ASSERT(!f.used(6));
+	CPPUNIT_ASSERT(f.used(7));
+	CPPUNIT_ASSERT(f.used(8));
 
 }
 
@@ -165,7 +165,7 @@ void TestFunction::numctr01() {
 	Variable y("y");
 	Function f(x,y,x+y);
 	NumConstraint c(f,EQ);
-	TEST_ASSERT(true); // TO DO
+	CPPUNIT_ASSERT(true); // TO DO
 }
 
 void TestFunction::apply01() {
@@ -175,27 +175,27 @@ void TestFunction::apply01() {
 	Interval c(1,1);
 	Variable z("z");
 	Function f2(z,f(z,c));
-	TEST_ASSERT(sameExpr(f2.expr(),"f(z,1)"));
+	CPPUNIT_ASSERT(sameExpr(f2.expr(),"f(z,1)"));
 }
 
 void TestFunction::from_string01() {
 	try {
 		Function f("x","sin(x)");
-		TEST_ASSERT(f.nb_arg()==1);
-		TEST_ASSERT(sameExpr(f.expr(),"sin(x)"));
+		CPPUNIT_ASSERT(f.nb_arg()==1);
+		CPPUNIT_ASSERT(sameExpr(f.expr(),"sin(x)"));
 	}
 	catch(SyntaxError& e) {
-		TEST_ASSERT(false);
+		CPPUNIT_ASSERT(false);
 	}
 }
 void TestFunction::from_string02() {
 	try {
 		Function f("x","y","x+y");
 
-		TEST_ASSERT(f.nb_arg()==2);
-		TEST_ASSERT(sameExpr(f.expr(),"(x+y)"));
+		CPPUNIT_ASSERT(f.nb_arg()==2);
+		CPPUNIT_ASSERT(sameExpr(f.expr(),"(x+y)"));
 	} catch(SyntaxError& e) {
-		TEST_ASSERT(false);
+		CPPUNIT_ASSERT(false);
 	}
 }
 
@@ -203,12 +203,12 @@ void TestFunction::from_string03() {
 	try {
 		Function f("x[2]","y[1][3]","x(1)+y(2)");
 
-		TEST_ASSERT(f.nb_arg()==2);
-		TEST_ASSERT(f.arg(0).dim.dim2==2);
-		TEST_ASSERT(f.arg(1).dim.dim3==3);
-		TEST_ASSERT(sameExpr(f.expr(),"(x[0]+y[1])"));
+		CPPUNIT_ASSERT(f.nb_arg()==2);
+		CPPUNIT_ASSERT(f.arg(0).dim.dim2==2);
+		CPPUNIT_ASSERT(f.arg(1).dim.dim3==3);
+		CPPUNIT_ASSERT(sameExpr(f.expr(),"(x[0]+y[1])"));
 	} catch(SyntaxError& e) {
-		TEST_ASSERT(false);
+		CPPUNIT_ASSERT(false);
 	}
 }
 
@@ -216,10 +216,10 @@ void TestFunction::from_string04() {
 	try {
 		Function f("a","b","c","d","e","f","g","h","a+e");
 
-		TEST_ASSERT(f.nb_arg()==8);
-		TEST_ASSERT(sameExpr(f.expr(),"(a+e)"));
+		CPPUNIT_ASSERT(f.nb_arg()==8);
+		CPPUNIT_ASSERT(sameExpr(f.expr(),"(a+e)"));
 	} catch(SyntaxError& e) {
-		TEST_ASSERT(false);
+		CPPUNIT_ASSERT(false);
 	}
 }
 
@@ -230,7 +230,7 @@ void TestFunction::minibex01() {
 	Function f(x,y,e,"f");
 	std::string m = f.minibex();
 	char* d=strdup(m.c_str());
-	TEST_ASSERT(strcmp(m.c_str(),"function f(x,y)\n  _tmp_0_ = (x+y);\n  return (_tmp_0_+_tmp_0_);\nend")==0);
+	CPPUNIT_ASSERT(strcmp(m.c_str(),"function f(x,y)\n  _tmp_0_ = (x+y);\n  return (_tmp_0_+_tmp_0_);\nend")==0);
 }
 
 void TestFunction::minibex02() {
@@ -244,7 +244,7 @@ void TestFunction::minibex02() {
 	Function f2(fin);
 
 	m = f2.minibex();
-	TEST_ASSERT(strcmp(m.c_str(),"function f(x,y)\n  _tmp_0_ = (x+y);\n  return (_tmp_0_+_tmp_0_);\nend")==0);
+	CPPUNIT_ASSERT(strcmp(m.c_str(),"function f(x,y)\n  _tmp_0_ = (x+y);\n  return (_tmp_0_+_tmp_0_);\nend")==0);
 }
 
 void TestFunction::minibex03() {
@@ -253,13 +253,13 @@ void TestFunction::minibex03() {
 	IntervalMatrix M(2,3,_m);
 	Function f(x,x+M,"f");
 	std::string m = f.minibex();
-	TEST_ASSERT(strcmp(m.c_str(),"function f(x[2][3])\n  return (x+((0 , 1 , 2) ; (3 , 4 , 5)));\nend")==0);
+	CPPUNIT_ASSERT(strcmp(m.c_str(),"function f(x[2][3])\n  return (x+((0 , 1 , 2) ; (3 , 4 , 5)));\nend")==0);
 
 	FILE *fin = fmemopen((void*) m.c_str(), m.length(), "r");
 	Function f2(fin);
 
 	m = f2.minibex();
-	TEST_ASSERT(strcmp(m.c_str(),"function f(x[2][3])\n  return (x+((0 , 1 , 2) ; (3 , 4 , 5)));\nend")==0);
+	CPPUNIT_ASSERT(strcmp(m.c_str(),"function f(x[2][3])\n  return (x+((0 , 1 , 2) ; (3 , 4 , 5)));\nend")==0);
 }
 
 void TestFunction::issue43() {
