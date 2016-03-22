@@ -61,8 +61,6 @@ void Function::jacobian(const IntervalVector& x, IntervalMatrix& J) const {
 	assert(J.nb_cols()==nb_var());
 	assert(x.size()==nb_var());
 	assert(J.nb_rows()==image_dim());
-	assert(expr().deco.d);
-	assert(expr().deco.g);
 
 	// calculate the gradient of each component of f
 	for (int i=0; i<image_dim(); i++) {
@@ -75,8 +73,6 @@ void Function::jacobian(const IntervalVector& box, IntervalMatrix& J, const VarS
 	assert(J.nb_cols()==set.nb_var);
 	assert(box.size()==nb_var());
 	assert(J.nb_rows()==image_dim());
-	assert(expr().deco.d);
-	assert(expr().deco.g);
 
 	IntervalVector g(nb_var());
 

@@ -26,7 +26,7 @@ void Gradient::gradient(const Array<Domain>& d2, IntervalVector& gbox) {
 	_eval.eval(d2);
 
 	// outside definition domain -> empty gradient
-	if (d.top.is_empty()) { gbox.set_empty(); return; }
+	if (d.top->is_empty()) { gbox.set_empty(); return; }
 
 	gbox.clear();
 
@@ -34,7 +34,7 @@ void Gradient::gradient(const Array<Domain>& d2, IntervalVector& gbox) {
 
 	f.forward<Gradient>(*this);
 
-	g.top.i()=1.0;
+	g.top->i()=1.0;
 
 	f.backward<Gradient>(*this);
 
@@ -58,7 +58,7 @@ void Gradient::gradient(const IntervalVector& box, IntervalVector& gbox) {
 
 	f.forward<Gradient>(*this);
 
-	g.top.i()=1.0;
+	g.top->i()=1.0;
 
 	f.backward<Gradient>(*this);
 

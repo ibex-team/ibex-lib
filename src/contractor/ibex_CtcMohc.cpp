@@ -988,7 +988,7 @@ Interval Function_OG::revise(IntervalVector& box, bool minrevise) {
 
 	_proj_leaves(box);
 
-	return _f.eval(_box); //TODO: we call eval for actually nothing
+	return _f.basic_evaluator().d.top->i();
 
 }
 

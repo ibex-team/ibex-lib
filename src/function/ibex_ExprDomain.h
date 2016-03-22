@@ -7,8 +7,32 @@
 
 namespace ibex {
 
-class ExprDomain : public ExprData<Domain> {
+class ExprDomainFactory : public ExprDataFactory<Domain> {
+public:
 
+	/** Visit an indexed expression. */
+	virtual Domain* init(const ExprIndex& e, Domain& expr_deco);
+	/** Visit a leaf.*/
+	virtual Domain* init(const ExprLeaf& e);
+	/** Visit a n-ary operator. */
+	virtual Domain* init(const ExprNAryOp& e, Array<Domain>& args_deco);
+	/** Visit a binary operator. */
+	virtual Domain* init(const ExprBinaryOp& e, Domain& left_deco, Domain& right_deco);
+	/** Visit an unary operator. */
+	virtual Domain* init(const ExprUnaryOp& e, Domain& expr_deco);
+	/** Visit a transpose. */
+	virtual Domain* init(const ExprTrans& e, Domain& expr_deco);
+
+};
+
+/**
+ * \brief Domain associated to nodes of a function.
+ *
+ * These data are used by all forward/backward algorithms
+ * (Eval, Gradient, HC4Revise, etc.).
+ *
+ */
+class ExprDomain : public ExprData<Domain> {
 public:
 
 	ExprDomain(Function& f);
@@ -59,28 +83,13 @@ public:
 	 */
 	void read_arg_domains(IntervalVector& box) const;
 
-protected:
-
-	/** Visit an indexed expression. */
-	virtual Domain* init(const ExprIndex& e, Domain& expr_deco);
-	/** Visit a leaf.*/
-	virtual Domain* init(const ExprLeaf& e);
-	/** Visit a n-ary operator. */
-	virtual Domain* init(const ExprNAryOp& e, const Array<Domain>& args_deco);
-	/** Visit a binary operator. */
-	virtual Domain* init(const ExprBinaryOp& e, Domain& left_deco, Domain& right_deco);
-	/** Visit an unary operator. */
-	virtual Domain* init(const ExprUnaryOp& e, Domain& expr_deco);
-	/** Visit a transpose. */
-	virtual Domain* init(const ExprTrans& e, Domain& expr_deco);
-
 };
 
 /* ============================================================================
  	 	 	 	 	 	 	 inline implementation
   ============================================================================*/
 
-inline ExprDomain::ExprDomain(Function& f) : ExprData<Domain>(f) {
+inline ExprDomain::ExprDomain(Function& f) : ExprData<Domain>(f, ExprDomainFactory()) {
 
 }
 

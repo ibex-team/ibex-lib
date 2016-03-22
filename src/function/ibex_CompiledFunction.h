@@ -64,9 +64,6 @@ public:
 	/**
 	 * Print the structure to the standard output.
 	 */
-	template<class T>
-	void print(const ExprData<T>& data) const;
-
 	friend class Function;
 
 protected:
@@ -125,6 +122,7 @@ private:
 	void visit(const ExprAtanh& e);
 
 private:
+	friend std::ostream& operator<<(std::ostream& os, const CompiledFunction& data);
 
 	const char* op(operation o) const;
 
@@ -146,6 +144,8 @@ private:
 	// (only useful during construction)
 	mutable int ptr;
 };
+
+std::ostream& operator<<(std::ostream& os, const CompiledFunction& data);
 
 template<class V>
 void CompiledFunction::forward(const V& algo) const {

@@ -529,18 +529,22 @@ void Function::decorate(const Array<const ExprSymbol>& x, const ExprNode& y) {
 
 	for (int i=0; i<nb_nodes(); i++) {
 
-		// we check that a symbol appearing in the expression
-		// is an argument of the function
 		const ExprSymbol* symbol=dynamic_cast<const ExprSymbol*> (&node(i));
 
-		if ((*symbol).f!=this) { // can be either NULl or something else
-			ibex_error("A symbol used in the expression of a function is not an argument");
+		if (symbol) {
+			//-------------------------------------------------------
+			// we check that a symbol appearing in the expression
+			// is an argument of the function
+			if ((*symbol).f!=this) { // can be either NULl or something else
+				ibex_error("A symbol used in the expression of a function is not an argument");
+			}
+			//-------------------------------------------------------
+		} else {
+			if (node(i).f!=NULL)
+				ibex_error("A sub-expression of a function already belongs to another function");
+			else
+				((ExprNode&) node(i)).f=this;
 		}
-
-		if (node(i).f!=NULL)
-			ibex_error("A sub-expression of a function already belongs to another function");
-		else
-			((ExprNode&) node(i)).f=this;
 	}
 }
 

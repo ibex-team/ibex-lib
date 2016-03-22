@@ -54,7 +54,7 @@ bool HC4Revise::proj(const Domain& y, IntervalVector& x) {
 
 bool HC4Revise::backward(const Domain& y) {
 
-	Domain& root=d.top;
+	Domain& root=*d.top;
 
 	if (root.is_empty())
 		throw EmptyBoxException();

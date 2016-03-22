@@ -33,9 +33,9 @@ Domain& Eval::eval(const Array<const Domain>& d2) {
 	try {
 		f.forward<Eval>(*this);
 	} catch(EmptyBoxException&) {
-		d.top.set_empty();
+		d.top->set_empty();
 	}
-	return d.top;
+	return *d.top;
 }
 
 Domain& Eval::eval(const Array<Domain>& d2) {
@@ -45,9 +45,9 @@ Domain& Eval::eval(const Array<Domain>& d2) {
 	try {
 		f.forward<Eval>(*this);
 	} catch(EmptyBoxException&) {
-		d.top.set_empty();
+		d.top->set_empty();
 	}
-	return d.top;
+	return *d.top;
 }
 
 Domain& Eval::eval(const IntervalVector& box) {
@@ -57,9 +57,9 @@ Domain& Eval::eval(const IntervalVector& box) {
 	try {
 		f.forward<Eval>(*this);
 	} catch(EmptyBoxException&) {
-		d.top.set_empty();
+		d.top->set_empty();
 	}
-	return d.top;
+	return *d.top;
 }
 
 void Eval::apply_fwd(int* x, int y) {

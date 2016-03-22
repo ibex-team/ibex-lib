@@ -9,65 +9,39 @@ namespace ibex {
 
 class Function;
 
+template<class T>
+class ExprData;
+
 /**
- * \brief Data associated to a function.
+ * \brief Expression Data factory.
  *
  * Each node of the function expression is decorated
  * with an object of type "T".
  *
  */
 template<class T>
-class ExprData : private ExprVisitor {
+class ExprDataFactory : private ExprVisitor {
 public:
+	// The object to build
+	ExprData<T>* data;
 
 	/**
-	 * Initialize this data (of type T) associated to a function.
+	 * \brief Build the object "data".
 	 */
-	ExprData(Function& f);
+	void build(ExprData<T>& data) const;
 
 	/**
 	 * (Does nothing)
 	 */
-	virtual ~ExprData();
+	virtual ~ExprDataFactory();
 
-	/**
-	 * Get the data associated to the ith node (in prefix order).
-	 */
-	const T& operator[](int i) const;
-
-	/**
-	 * Get the data associated to the ith node (in prefix order).
-	 */
-	T& operator[](int i);
-
-	/**
-	 *  The function
-	 */
-	Function& f;
-
-	/**
-	 *  Data
-	 */
-	Array<T> data;
-
-	/**
-	 * Data of the arguments of the function
-	 */
-	Array<T> args;
-
-	/**
-	 * Data of the root node of the expression
-	 */
-	T& top;
-
-protected:
 	/**
 	 * Visit an expression.
 	 * Principle: Either this function is overridden or the principle
 	 * applies for all direct sub-classes of ExprUnaryOp.
 	 */
 	virtual T* init(const ExprNode& node) {
-		ibex_error("ExprAlgorithm::init: Missing implementation for some node type");
+		ibex_error("ExprData::init: Missing implementation for some node type");
 		return NULL;
 	}
 
@@ -303,32 +277,16 @@ protected:
 private:
 
 	template<class Node>
-	void __visit_nary(const Node& e) {
-		Array<T> args_data(e.nb_args);
-		for (int i=0; i<e.nb_args; i++)
-			args_data.set_ref(i,data[f.nodes.rank(e.arg(i))]);
-
-		data.set_ref(f.nodes.rank(e), *init(e,args_data));
-	}
+	void __visit_nary(const Node& e);
 
 	template<class Node>
-	void __visit_binary(const Node& e) {
-		T& left_data=data[f.nodes.rank(e.left)];
-		T& right_data=data[f.nodes.rank(e.right)];
-
-		data.set_ref(f.nodes.rank(e), *init(e,left_data,right_data));
-	}
+	void __visit_binary(const Node& e);
 
 	template<class Node>
-	void __visit_unary(const Node& e) {
-		T& expr_data=data[f.nodes.rank(e.expr)];
-		data.set_ref(f.nodes.rank(e), *init(e,expr_data));
-	}
+	void __visit_unary(const Node& e);
 
 	template<class Node>
-	void __visit_0ary(const Node& e) {
-		data.set_ref(f.nodes.rank(e), *init(e));
-	}
+	void __visit_0ary(const Node& e);
 
 	virtual void visit(const ExprIndex& e)   { __visit_unary<ExprIndex>(e); }
 	virtual void visit(const ExprVector& e)  { __visit_nary<ExprVector>(e); }
@@ -363,24 +321,123 @@ private:
 	virtual void visit(const ExprAtanh& e)   { __visit_unary<ExprAtanh>(e); }
 	virtual void visit(const ExprConstant& e){ __visit_0ary<ExprConstant>(e); }
 	virtual void visit(const ExprSymbol& e)  { __visit_0ary<ExprSymbol>(e); }
+};
+
+/**
+ * \brief Data associated to a function.
+ *
+ * Each node of the function expression is decorated
+ * with an object of type "T".
+ *
+ */
+template<class T>
+class ExprData : private ExprVisitor {
+public:
+
+	/**
+	 * Initialize this data (of type T) associated to a function.
+	 */
+	ExprData(Function& f, const ExprDataFactory<T>& factory);
+
+	/**
+	 * (Does nothing)
+	 */
+	virtual ~ExprData();
+
+	/**
+	 * Get the data associated to the ith node (in prefix order).
+	 */
+	const T& operator[](int i) const;
+
+	/**
+	 * Get the data associated to the ith node (in prefix order).
+	 */
+	T& operator[](int i);
+
+	/**
+	 *  The function
+	 */
+	Function& f;
+
+	/**
+	 *  Data
+	 */
+	Array<T> data;
+
+	/**
+	 * Data of the arguments of the function
+	 */
+	Array<T> args;
+
+	/**
+	 * Data of the root node of the expression
+	 */
+	T* const top;
+
 
 };
+
+template<class T>
+std::ostream& operator<<(std::ostream& os, const ExprData<T>&);
 
 /* ============================================================================
  	 	 	 	 	 	 	 implementation
   ============================================================================*/
+template<class T>
+ExprDataFactory<T>::~ExprDataFactory() {
+
+}
 
 template<class T>
-ExprData<T>::ExprData(Function& f) : f(f), data(f.nodes.size()), args(f.nb_arg()), top(data[0]) {
+void ExprDataFactory<T>::build(ExprData<T>& data) const {
+	if (this->data) ibex_error("ExprDataFactory: build function called twice");
 
-	int n=f.nodes.size();
+	(ExprData<T>*&) this->data = &data;
+
+	int n=data.f.nodes.size();
 	for (int ptr=n-1; ptr>=0; ptr--) {
-		f.nodes[ptr].acceptVisitor(*this);
+		data.f.nodes[ptr].acceptVisitor((ExprDataFactory<T>&) *this);
 	}
 
-	for (int i=0; i<f.nb_arg(); i++) {
-		args.set_ref(i,data[i]);
+	for (int i=0; i<data.f.nb_arg(); i++) {
+		data.args.set_ref(i,data.data[data.f.nodes.rank(data.f.arg(i))]);
 	}
+
+	((T*&) data.top)=&data.data[0];
+}
+
+
+template<class T> template<class Node>
+void ExprDataFactory<T>::__visit_nary(const Node& e) {
+	Array<T> args_data(e.nb_args);
+	for (int i=0; i<e.nb_args; i++)
+		args_data.set_ref(i,data->data[data->f.nodes.rank(e.arg(i))]);
+
+	data->data.set_ref(data->f.nodes.rank(e), *init(e,args_data));
+}
+
+template<class T> template<class Node>
+void ExprDataFactory<T>::__visit_binary(const Node& e) {
+	T& left_data=data->data[data->f.nodes.rank(e.left)];
+	T& right_data=data->data[data->f.nodes.rank(e.right)];
+
+	data->data.set_ref(data->f.nodes.rank(e), *init(e,left_data,right_data));
+}
+
+template<class T> template<class Node>
+void ExprDataFactory<T>::__visit_unary(const Node& e) {
+	T& expr_data=data->data[data->f.nodes.rank(e.expr)];
+	data->data.set_ref(data->f.nodes.rank(e), *init(e,expr_data));
+}
+
+template<class T> template<class Node>
+void ExprDataFactory<T>::__visit_0ary(const Node& e) {
+	data->data.set_ref(data->f.nodes.rank(e), *init(e));
+}
+
+template<class T>
+ExprData<T>::ExprData(Function& f, const ExprDataFactory<T>& factory) : f(f), data(f.nodes.size()), args(f.nb_arg()), top(NULL) {
+	factory.build(*this);
 }
 
 template<class T>
@@ -395,6 +452,15 @@ inline const T& ExprData<T>::operator[](int i) const {
 template<class T>
 inline T& ExprData<T>::operator[](int i) {
 	return data[i];
+}
+
+template<class T>
+std::ostream& operator<<(std::ostream& os, const ExprData<T>& data) {
+	os << "================================================" << std::endl;
+	for (int i=0; i<data.f.nb_nodes(); i++)
+		os << "  " << i << '\t' << data[i] << '\t' << data.f.node(i) << std::endl;
+	os << "================================================" << std::endl;
+	return os;
 }
 
 } /* namespace ibex */

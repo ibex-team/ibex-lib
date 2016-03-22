@@ -10,7 +10,7 @@
 
 namespace ibex {
 
-Domain* ExprDomain::init(const ExprIndex& e, Domain& d_expr) {
+Domain* ExprDomainFactory::init(const ExprIndex& e, Domain& d_expr) {
 	switch (e.expr.type()) {
 	case Dim::SCALAR:
 		return new Domain(d_expr.i());
@@ -28,23 +28,23 @@ Domain* ExprDomain::init(const ExprIndex& e, Domain& d_expr) {
 	}
 }
 
-Domain* ExprDomain::init(const ExprLeaf& e) {
+Domain* ExprDomainFactory::init(const ExprLeaf& e) {
 	return new Domain(e.dim);
 }
 
-Domain* ExprDomain::init(const ExprNAryOp& e, const Array<Domain>& args_deco) {
+Domain* ExprDomainFactory::init(const ExprNAryOp& e, Array<Domain>& args_deco) {
 	return new Domain(e.dim);
 }
 
-Domain* ExprDomain::init(const ExprBinaryOp& e, Domain& left_deco, Domain& right_deco) {
+Domain* ExprDomainFactory::init(const ExprBinaryOp& e, Domain& left_deco, Domain& right_deco) {
 	return new Domain(e.dim);
 }
 
-Domain* ExprDomain::init(const ExprUnaryOp& e, Domain& expr_deco) {
+Domain* ExprDomainFactory::init(const ExprUnaryOp& e, Domain& expr_deco) {
 	return new Domain(e.dim);
 }
 
-Domain* ExprDomain::init(const ExprTrans& e, Domain& expr_deco) {
+Domain* ExprDomainFactory::init(const ExprTrans& e, Domain& expr_deco) {
 
 	if (e.dim.is_vector()) {
 		// share references
