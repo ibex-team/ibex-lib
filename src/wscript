@@ -5,7 +5,7 @@ import shutil, os
 
 def configure (conf):
 	# add "ibex/src/* " in the includes
-	conf.env.append_unique ("INCLUDES", [os.path.join(conf.env.PREFIX,"src/%s") % p for p in 
+	conf.env.append_unique ("INCLUDES", ["../src/%s" % p for p in 
 		"arithmetic bisector combinatorial contractor function numeric geometry parser set strategy symbolic system tools predicate integrate".split()])
 	conf.recurse("../plugins")
 	
