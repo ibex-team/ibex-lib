@@ -31,7 +31,7 @@ void TestFunction::add_symbol() {
 
 	Function f(x,y,x);
 
-	CPPUNIT_ASSERT(f.nb_nodes()==1);
+	CPPUNIT_ASSERT(f.nb_nodes()==2);
 	CPPUNIT_ASSERT(f.nb_arg()==2);
 	CPPUNIT_ASSERT(strcmp(f.arg_name(0),"x")==0);
 	CPPUNIT_ASSERT(strcmp(f.arg_name(1),"y")==0);
@@ -40,6 +40,7 @@ void TestFunction::add_symbol() {
 	CPPUNIT_ASSERT(!f.used(1));
 	CPPUNIT_ASSERT(!f.used(1));
 	CPPUNIT_ASSERT(&f.node(0)==&x);
+	CPPUNIT_ASSERT(&f.node(1)==&y);
 }
 
 void TestFunction::copy() {

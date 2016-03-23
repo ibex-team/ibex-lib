@@ -107,7 +107,7 @@ public:
 	       void chi_bwd    (int x1, int x2, int x3, int y);
 	inline void add_bwd    (int x1, int x2, int y) { g[x1].i() += g[y].i();  g[x2].i() += g[y].i(); }
 	inline void mul_bwd    (int x1, int x2, int y) { g[x1].i() += g[y].i() * d[x2].i(); g[x2].i() += g[y].i() * d[x1].i(); }
-	inline void sub_bwd    (int x1, int x2, int y) { g[x1].i() += g[y].i();          g[x2].i() += -g[y].i(); }
+	inline void sub_bwd    (int x1, int x2, int y) { g[x1].i() += g[y].i();  g[x2].i() += -g[y].i(); }
 	inline void div_bwd    (int x1, int x2, int y) { g[x1].i() += g[y].i() / d[x2].i(); g[x2].i() += g[y].i()*(-d[x1].i())/sqr(d[x2].i()); }
 	       void max_bwd    (int x1, int x2, int y);
 	       void min_bwd    (int x1, int x2, int y);

@@ -102,7 +102,7 @@ void TestGradient::mulVM01() {
 	double _M[]={1,2,2,3};
 	Matrix M(2,2,_M);
 	Variable x(2);
-	Function f(x,(x*M)*x); // the gradient is 2*M*x
+	Function f(x,transpose(x)*M*x); // the gradient is 2*M*x
 	IntervalVector box(2,Interval(1.0));
 	IntervalVector g=f.gradient(box);
 	check(g[0],Interval(6));
@@ -121,7 +121,7 @@ void TestGradient::mulVM02() {
 	const ExprVector& M=ExprVector::new_(_M,false);
 
 	Array<const ExprNode> _v(x,-x);
-	const ExprVector& v=ExprVector::new_(_v,false);
+	const ExprVector& v=ExprVector::new_(_v,true);
 
 	Function f(x,v*M);
 	IntervalVector box(1,Interval(3.0));

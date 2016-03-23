@@ -29,7 +29,7 @@ void InHC4Revise::iproj(const Domain& y, IntervalVector& x, const IntervalVector
 		assert(!p.top->is_empty());
 	}
 	else {
-		for (int i=0; i<f.nb_nodes(); i++)
+		for (int i=0; i<f.expr().size; i++)
 			p[i].set_empty();
 	}
 
@@ -58,7 +58,7 @@ void InHC4Revise::iproj(const Domain& y, Array<Domain>& x, const Array<Domain>& 
 	if (!argP[0].is_empty()) { // if the first domain is empty, so they all are
 		p_eval.eval(argP);
 	} else {
-		for (int i=0; i<f.nb_nodes(); i++)
+		for (int i=0; i<f.expr().size; i++)
 			p[i].set_empty();
 	}
 

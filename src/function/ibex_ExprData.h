@@ -20,7 +20,7 @@ class ExprData;
  *
  */
 template<class T>
-class ExprDataFactory : private ExprVisitor {
+class ExprDataFactory : public ExprVisitor {
 public:
 	// The object to build
 	ExprData<T>* data;
@@ -274,7 +274,7 @@ public:
 		return init((const ExprUnaryOp&) e, expr_deco);
 	}
 
-private:
+//private:
 
 	template<class Node>
 	void __visit_nary(const Node& e);
@@ -288,6 +288,7 @@ private:
 	template<class Node>
 	void __visit_0ary(const Node& e);
 
+	virtual void visit(const ExprPower& e)   { __visit_unary<ExprPower>(e); }
 	virtual void visit(const ExprIndex& e)   { __visit_unary<ExprIndex>(e); }
 	virtual void visit(const ExprVector& e)  { __visit_nary<ExprVector>(e); }
 	virtual void visit(const ExprApply& e)   { __visit_nary<ExprApply>(e); }
@@ -331,7 +332,7 @@ private:
  *
  */
 template<class T>
-class ExprData : private ExprVisitor {
+class ExprData {
 public:
 
 	/**

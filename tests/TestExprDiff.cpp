@@ -32,7 +32,7 @@ void TestExprDiff::linear01() {
 void TestExprDiff::poly01() {
 
 	Variable x("x"),y("y");
-	Function f(x,y,((sqr(x)+2*x*y)+pow(y,3))+1);
+	Function f(x,y,((sqr(x)+2*(x*y))+pow(y,3))+1);
 	Function df(f,Function::DIFF);
 	const ExprVector* v=dynamic_cast<const ExprVector*>(&df.expr());
 	CPPUNIT_ASSERT(v);
@@ -131,7 +131,9 @@ void TestExprDiff::apply01() {
 	CPPUNIT_ASSERT(sameExpr(f.diff().expr(),"(2*x)")
 			||sameExpr(f.diff().expr(),"([2,2]*x)"));
 	CPPUNIT_ASSERT(sameExpr(dg.expr(),"(3*df((3*x)))")
-			||sameExpr(dg.expr(),"([3,3]*df((3*x)))"));
+			||sameExpr(dg.expr(),"([3,3]*df((3*x)))")
+			||sameExpr(dg.expr(),"(df((3*x))*[3,3])")
+			||sameExpr(dg.expr(),"(df((3*x))*3)"));
 }
 
 void TestExprDiff::apply02() {
@@ -140,7 +142,9 @@ void TestExprDiff::apply02() {
 	Function g(x,3*f(x));
 	Function dg(g,Function::DIFF);
 	CPPUNIT_ASSERT(sameExpr(dg.expr(),"(df(x)*3)")
-			||sameExpr(dg.expr(),"(df(x)*[3,3])"));
+			||sameExpr(dg.expr(),"(df(x)*[3,3])")
+			||sameExpr(dg.expr(),"(3*df(x))")
+			||sameExpr(dg.expr(),"([3,3]*df(x))"));
 }
 
 void TestExprDiff::apply03() {
@@ -148,7 +152,14 @@ void TestExprDiff::apply03() {
 	Function f(x,y,x*y,"f");
 	Function g(x,y,f(2*x,3*y));
 	Function dg(g,Function::DIFF);
-	CPPUNIT_ASSERT(sameExpr(dg.expr(),"((2*df((2*x),(3*y))[0]),(3*df((2*x),(3*y))[1]))"));
+
+	// TODO: there are actually many different equivalent expressions of
+	// the differential.
+	// What should we exactly test? Probably requires expression equivalence
+	// operator but this is known to be a difficult task...
+	//	CPPUNIT_ASSERT(sameExpr(dg.expr(),"((2*df((2*x),(3*y))[0]),(3*df((2*x),(3*y))[1]))"));
+	CPPUNIT_ASSERT(sameExpr(dg.expr(),"((df((2*x),(3*y))[0]*2),(df((2*x),(3*y))[1]*3))"));
+
 	double _box[][2]={{1,1},{2,2}};
 	double _dg_box[][2]={{12,12},{6,6}};
 	IntervalVector dg_box(dg.eval_vector(IntervalVector(2,_box)));
