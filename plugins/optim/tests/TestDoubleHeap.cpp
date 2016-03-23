@@ -54,50 +54,50 @@ void TestDoubleHeap::test01() {
 		else h.push(new Interval(i,20*i));
 	}
 
-	TEST_ASSERT(h.minimum1()==1);
-	TEST_ASSERT(h.minimum2()==1);
+	CPPUNIT_ASSERT(h.minimum1()==1);
+	CPPUNIT_ASSERT(h.minimum2()==1);
 
 	h.pop1();
 	h.pop1();
-	TEST_ASSERT(h.minimum1()==5);
-	TEST_ASSERT(h.minimum2()==2);
+	CPPUNIT_ASSERT(h.minimum1()==5);
+	CPPUNIT_ASSERT(h.minimum2()==2);
 
 	h.pop2();
-	TEST_ASSERT(h.minimum1()==5);
-	TEST_ASSERT(h.minimum2()==4);
+	CPPUNIT_ASSERT(h.minimum1()==5);
+	CPPUNIT_ASSERT(h.minimum2()==4);
 
 	h.contract(20);
-	TEST_ASSERT(h.minimum1()==5);
-	TEST_ASSERT(h.minimum2()==5);
+	CPPUNIT_ASSERT(h.minimum1()==5);
+	CPPUNIT_ASSERT(h.minimum2()==5);
 
 	h.pop2();
 	h.pop2();
-	TEST_ASSERT(h.minimum1()==9);
-	TEST_ASSERT(h.minimum2()==9);
+	CPPUNIT_ASSERT(h.minimum1()==9);
+	CPPUNIT_ASSERT(h.minimum2()==9);
 
-	TEST_ASSERT(h.size()==1);
+	CPPUNIT_ASSERT(h.size()==1);
 
 	h.push(new Interval(10,11));
 	h.push(new Interval(12,14));
 	h.push(new Interval(12,12));
 	h.push(new Interval(12,13.1));
 
-	TEST_ASSERT(h.minimum1()==0);
-	TEST_ASSERT(h.minimum2()==9);
-	TEST_ASSERT(h.size()==5);
+	CPPUNIT_ASSERT(h.minimum1()==0);
+	CPPUNIT_ASSERT(h.minimum2()==9);
+	CPPUNIT_ASSERT(h.size()==5);
 
 	h.pop1();
-	TEST_ASSERT(h.minimum1()==1);
-	TEST_ASSERT(h.minimum2()==9);
-	TEST_ASSERT(h.size()==4);
+	CPPUNIT_ASSERT(h.minimum1()==1);
+	CPPUNIT_ASSERT(h.minimum2()==9);
+	CPPUNIT_ASSERT(h.size()==4);
 
 	h.pop2();
-	TEST_ASSERT(h.minimum1()==1);
-	TEST_ASSERT(h.minimum2()==10);
-	TEST_ASSERT(h.size()==3);
+	CPPUNIT_ASSERT(h.minimum1()==1);
+	CPPUNIT_ASSERT(h.minimum2()==10);
+	CPPUNIT_ASSERT(h.size()==3);
 
 	h.flush();
-	TEST_ASSERT(h.size()==0);
+	CPPUNIT_ASSERT(h.size()==0);
 }
 
 
@@ -114,53 +114,53 @@ void TestDoubleHeap::test02() {
 		else h.push(new Interval(i,20*i));
 	}
 
-	TEST_ASSERT(h.minimum1()==1);
-	TEST_ASSERT(h.minimum2()==20);
+	CPPUNIT_ASSERT(h.minimum1()==1);
+	CPPUNIT_ASSERT(h.minimum2()==20);
 
 	h.pop2();
 	h.pop2();
-	TEST_ASSERT(h.minimum1()==2);
-	TEST_ASSERT(h.minimum2()==100);
+	CPPUNIT_ASSERT(h.minimum1()==2);
+	CPPUNIT_ASSERT(h.minimum2()==100);
 
 	h.pop1();
-	TEST_ASSERT(h.minimum1()==4);
-	TEST_ASSERT(h.minimum2()==100);
+	CPPUNIT_ASSERT(h.minimum1()==4);
+	CPPUNIT_ASSERT(h.minimum2()==100);
 
 	// it is necessary to update the loup.
 	costf3.set_loup(100);
 	h.contract(7.5);
-	TEST_ASSERT(h.minimum1()==4);
-	TEST_ASSERT(h.minimum2()==1000);
-	TEST_ASSERT(h.size()==4);
+	CPPUNIT_ASSERT(h.minimum1()==4);
+	CPPUNIT_ASSERT(h.minimum2()==1000);
+	CPPUNIT_ASSERT(h.size()==4);
 
 
 	h.pop2();
 	h.pop2();
-	TEST_ASSERT(h.minimum1()==4);
-	TEST_ASSERT(h.minimum2()==8000);
-	TEST_ASSERT(h.size()==2);
+	CPPUNIT_ASSERT(h.minimum1()==4);
+	CPPUNIT_ASSERT(h.minimum2()==8000);
+	CPPUNIT_ASSERT(h.size()==2);
 
 	h.push(new Interval(10,11));
 	h.push(new Interval(12,14));
 	h.push(new Interval(12,12));
 	h.push(new Interval(12,13.1));
 
-	TEST_ASSERT(h.minimum1()==4);
-	TEST_ASSERT(h.minimum2()==1100);
-	TEST_ASSERT(h.size()==6);
+	CPPUNIT_ASSERT(h.minimum1()==4);
+	CPPUNIT_ASSERT(h.minimum2()==1100);
+	CPPUNIT_ASSERT(h.size()==6);
 
 	h.pop1();
-	TEST_ASSERT(h.minimum1()==6);
-	TEST_ASSERT(h.minimum2()==1100);
-	TEST_ASSERT(h.size()==5);
+	CPPUNIT_ASSERT(h.minimum1()==6);
+	CPPUNIT_ASSERT(h.minimum2()==1100);
+	CPPUNIT_ASSERT(h.size()==5);
 
 	h.pop2();
-	TEST_ASSERT(h.minimum1()==6);
-	TEST_ASSERT(h.minimum2()==1200);
-	TEST_ASSERT(h.size()==4);
+	CPPUNIT_ASSERT(h.minimum1()==6);
+	CPPUNIT_ASSERT(h.minimum2()==1200);
+	CPPUNIT_ASSERT(h.size()==4);
 
 	h.flush();
-	TEST_ASSERT(h.size()==0);
+	CPPUNIT_ASSERT(h.size()==0);
 }
 
 

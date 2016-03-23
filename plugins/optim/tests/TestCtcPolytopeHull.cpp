@@ -41,8 +41,8 @@ void TestCtcPolytopeHull::lp01() {
 	ctc.contract(box);
 	check(box[0],Interval(-1,0));
 	check(box[1],Interval(-1,1));
-	TEST_ASSERT(box[0].is_superset(Interval(-1,0)));
-	TEST_ASSERT(box[1].is_superset(Interval(-1,1)));
+	CPPUNIT_ASSERT(box[0].is_superset(Interval(-1,0)));
+	CPPUNIT_ASSERT(box[1].is_superset(Interval(-1,1)));
 }
 
 
@@ -56,7 +56,7 @@ void TestCtcPolytopeHull::fixbug01() {
 	// there is no more problem.
 	double _box[][2] = {{-100,100},{1,1}};
 	IntervalVector box(2,_box);
-	LinearRelaxCombo linear_relax(sys,LinearRelaxCombo::AFFINE2);
+	LinearRelaxCombo linear_relax(sys,LinearRelaxCombo::XNEWTON);
 	CtcPolytopeHull polytope(linear_relax,CtcPolytopeHull::ALL_BOX);
 	polytope.contract(box);
 

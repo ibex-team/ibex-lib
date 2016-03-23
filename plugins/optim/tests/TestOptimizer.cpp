@@ -34,19 +34,19 @@ Optimizer::Status issue50(double init_loup, double prec) {
 }
 
 void TestOptimizer::issue50_1() {
-	TEST_ASSERT(issue50(1e-10, 0.1)==Optimizer::NO_FEASIBLE_FOUND);
+	CPPUNIT_ASSERT(issue50(1e-10, 0.1)==Optimizer::NO_FEASIBLE_FOUND);
 }
 
 void TestOptimizer::issue50_2() {
-	TEST_ASSERT(issue50(1e-10, 0)==Optimizer::SUCCESS);
+	CPPUNIT_ASSERT(issue50(1e-10, 0)==Optimizer::SUCCESS);
 }
 
 void TestOptimizer::issue50_3() {
-	TEST_ASSERT(issue50(-1e-10, 0.1)==Optimizer::NO_FEASIBLE_FOUND);
+	CPPUNIT_ASSERT(issue50(-1e-10, 0.1)==Optimizer::NO_FEASIBLE_FOUND);
 }
 
 void TestOptimizer::issue50_4() {
-	TEST_ASSERT(issue50(-1e-10, 0)==Optimizer::INFEASIBLE);
+	CPPUNIT_ASSERT(issue50(-1e-10, 0)==Optimizer::INFEASIBLE);
 }
 
 

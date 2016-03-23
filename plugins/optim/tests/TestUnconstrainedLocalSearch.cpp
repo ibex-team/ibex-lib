@@ -31,8 +31,8 @@ void TestUnconstrainedLocalSearch::simple01() {
 	int max_iter=10;
 	Vector xk(n);
 	UnconstrainedLocalSearch::ReturnCode ret=o.minimize(x0,xk,eps,max_iter);
-	TEST_ASSERT(ret==UnconstrainedLocalSearch::SUCCESS);
-	TEST_ASSERT(almost_eq(xk[0],Interval(-1.5),1.e-5));
+	CPPUNIT_ASSERT(ret==UnconstrainedLocalSearch::SUCCESS);
+	CPPUNIT_ASSERT(almost_eq(xk[0],Interval(-1.5),1.e-5));
 }
 
 void TestUnconstrainedLocalSearch::almost_diag() {
@@ -55,8 +55,8 @@ void TestUnconstrainedLocalSearch::almost_diag() {
 	Vector xk(n);
 	UnconstrainedLocalSearch::ReturnCode ret=o.minimize(x0,xk,eps,max_iter);
 	cout << " xk=" << xk << endl;
-	TEST_ASSERT(ret==UnconstrainedLocalSearch::SUCCESS);
-	TEST_ASSERT(almost_eq(IntervalVector(xk),IntervalVector(xsol), 1.e-9));
+	CPPUNIT_ASSERT(ret==UnconstrainedLocalSearch::SUCCESS);
+	CPPUNIT_ASSERT(almost_eq(IntervalVector(xk),IntervalVector(xsol), 1.e-9));
 
 }
 

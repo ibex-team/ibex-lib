@@ -121,7 +121,6 @@ def build (bld):
 	# Add information in ibex_Setting
 	@bld.rule (
 		target = "../../src/ibex_Setting.h",
-		vars   = ["LP_LIB","INTERVAL_LIB"],
 		after  = "ibex_Setting_h_init"
 	)
 	def _(tsk): 

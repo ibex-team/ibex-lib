@@ -122,7 +122,7 @@ Ctc& StrategyParam::get_ctc() {
 
 	// fixpoint linear relaxation , hc4  with default fix point ratio 0.2
 
-	if (lin_relax=="compo") {
+	if (lin_relax=="xn") {
 
 		//cxn = new CtcLinearRelaxation (*lr, hc44xn);
 		Ctc& cxn_poly = rec(new CtcPolytopeHull(*lr, CtcPolytopeHull::ALL_BOX));
