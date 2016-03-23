@@ -27,14 +27,14 @@ class TestSepPolygon : public CppUnit::TestFixture {
 public:
 
 	CPPUNIT_TEST_SUITE(TestSepPolygon);
-	
-        CPPUNIT_TEST(test_SepPolygon_01);
-        CPPUNIT_TEST(test_SepPolygon_02);
-        CPPUNIT_TEST(test_SepPolygon_03);
+
+	CPPUNIT_TEST(test_SepPolygon_01);
+	CPPUNIT_TEST(test_SepPolygon_02);
+	CPPUNIT_TEST(test_SepPolygon_03);
 	CPPUNIT_TEST_SUITE_END();
 
-    void setup();
-    void test_SepPolygon_01();
+	void setup();
+	void test_SepPolygon_01();
     void test_SepPolygon_02();
     void test_SepPolygon_03();
 

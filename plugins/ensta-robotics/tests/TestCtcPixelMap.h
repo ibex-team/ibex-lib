@@ -10,7 +10,6 @@ class TestCtcPixelMap : public CppUnit::TestFixture {
 public:
 
 	CPPUNIT_TEST_SUITE(TestCtcPixelMap);
-    TestCtcPixelMap(){
     CPPUNIT_TEST(test3d_emptyBox);
     CPPUNIT_TEST(test3d_contractEmpty);
     CPPUNIT_TEST(test3d_allReal);
@@ -22,8 +21,7 @@ public:
     CPPUNIT_TEST(test2d_allReal);
     CPPUNIT_TEST(test2d_fullImage);
     CPPUNIT_TEST(test2d_corner);
-
-    }
+	CPPUNIT_TEST_SUITE_END();
 
 protected:
     void initRaster3D(PixelMap3D& raster);
@@ -45,35 +43,5 @@ private:
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestCtcPixelMap);
 
-//class TestCtcPixelMap : public Test::Suite {
-
-//public:
-
-	CPPUNIT_TEST_SUITE(TestCtcPixelMap);
-//    
-//        CPPUNIT_TEST(testContractExternal);
-//        CPPUNIT_TEST(testContractThin);
-//        CPPUNIT_TEST(contractCross);
-//    }
-
-//    void add_cross(int3 center, int length, Array3D &I);
-//    void add_emptyCubes(int3 center, int width, Array3D &I);
-//    void setup();
-//    void tear_down();
-//    void contractCross();
-//    void testContractExternal();
-//    void testContractThin();
-
-//private:
-//    Array3D array;
-//    double3 leaf_size;
-//    double3 origin;
-//    int3 grid_size;
-//};
-
-CPPUNIT_TEST_SUITE_REGISTRATION(TestCtcPixelMap);
-
-
-	CPPUNIT_TEST_SUITE_END();
-
+} // end namespace
 

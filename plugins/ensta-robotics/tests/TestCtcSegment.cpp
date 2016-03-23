@@ -67,7 +67,7 @@ void TestCtcSegment::test_contract_empty()
 
     c.contract(box);
 
-	TEST_ASSERT(box.is_empty());
+	CPPUNIT_ASSERT(box.is_empty());
 }
 
 
@@ -79,7 +79,7 @@ void ibex::TestCtcSegment::test_call_with_empty_box()
 
 	c.contract(box);
 
-	TEST_ASSERT(box.is_empty());
+	CPPUNIT_ASSERT(box.is_empty());
 }
 
 void ibex::TestCtcSegment::test_call_with_all_real()

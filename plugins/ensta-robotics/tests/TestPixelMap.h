@@ -10,14 +10,13 @@ class TestPixelMap : public CppUnit::TestFixture {
 public:
 
 	CPPUNIT_TEST_SUITE(TestPixelMap);
-    
-        CPPUNIT_TEST(test_init2DPixelMap);
-        CPPUNIT_TEST(test_init3DPixelMap);
-        CPPUNIT_TEST(test_readMissingFile);
-        CPPUNIT_TEST(test_readWrongFileFormat_1);
-        CPPUNIT_TEST(test_readWrongFileFormat_2);
-        CPPUNIT_TEST(test_ImageIntegral2D);
-    }
+	CPPUNIT_TEST(test_init2DPixelMap);
+	CPPUNIT_TEST(test_init3DPixelMap);
+	CPPUNIT_TEST(test_readMissingFile);
+	CPPUNIT_TEST(test_readWrongFileFormat_1);
+	CPPUNIT_TEST(test_readWrongFileFormat_2);
+	CPPUNIT_TEST(test_ImageIntegral2D);
+	CPPUNIT_TEST_SUITE_END();
 
     void setup();    
     void test_init2DPixelMap();
@@ -32,5 +31,4 @@ public:
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestPixelMap);
 
-
-	CPPUNIT_TEST_SUITE_END();
+} // end namespace

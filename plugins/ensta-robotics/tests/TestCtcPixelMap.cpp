@@ -22,7 +22,7 @@ void TestCtcPixelMap::test3d_emptyBox(){
 
     ctc.contract(v1);
 
-    TEST_ASSERT(v1.is_empty());
+    CPPUNIT_ASSERT(v1.is_empty());
 }
 
 void TestCtcPixelMap::test3d_contractEmpty(){
@@ -36,7 +36,7 @@ void TestCtcPixelMap::test3d_contractEmpty(){
 
     ctc.contract(v1);
 
-    TEST_ASSERT(v1.is_empty());
+    CPPUNIT_ASSERT(v1.is_empty());
 
 }
 void TestCtcPixelMap::test3d_allReal(){
@@ -47,12 +47,12 @@ void TestCtcPixelMap::test3d_allReal(){
 
     ctc.contract(v1);
 
-    TEST_ASSERT_DELTA(-1,v1[0].lb(),ERROR);
-    TEST_ASSERT_DELTA(-0.9,v1[0].ub() ,ERROR);
-    TEST_ASSERT_DELTA(1.5,v1[1].lb(),ERROR);
-    TEST_ASSERT_DELTA(1.6,v1[1].ub(),ERROR);
-    TEST_ASSERT_DELTA(0.4,v1[2].lb(),ERROR);
-    TEST_ASSERT_DELTA(0.45,v1[2].ub(),ERROR);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(-1,v1[0].lb(),ERROR);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.9,v1[0].ub() ,ERROR);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(1.5,v1[1].lb(),ERROR);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(1.6,v1[1].ub(),ERROR);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(0.4,v1[2].lb(),ERROR);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(0.45,v1[2].ub(),ERROR);
 }
 
 void TestCtcPixelMap::test3d_fullImage(){
@@ -65,12 +65,12 @@ void TestCtcPixelMap::test3d_fullImage(){
 
     ctc.contract(v1);
 
-    TEST_ASSERT_DELTA(-1,v1[0].lb(),ERROR);
-    TEST_ASSERT_DELTA(-0.9,v1[0].ub() ,ERROR);
-    TEST_ASSERT_DELTA(1.5,v1[1].lb(),ERROR);
-    TEST_ASSERT_DELTA(1.6,v1[1].ub(),ERROR);
-    TEST_ASSERT_DELTA(0.4,v1[2].lb(),ERROR);
-    TEST_ASSERT_DELTA(0.45,v1[2].ub(),ERROR);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(-1,v1[0].lb(),ERROR);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.9,v1[0].ub() ,ERROR);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(1.5,v1[1].lb(),ERROR);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(1.6,v1[1].ub(),ERROR);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(0.4,v1[2].lb(),ERROR);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(0.45,v1[2].ub(),ERROR);
 }
 
 void TestCtcPixelMap::test3d_corner(){
@@ -83,12 +83,12 @@ void TestCtcPixelMap::test3d_corner(){
 
     ctc.contract(v1);
 
-    TEST_ASSERT_DELTA(-1,v1[0].lb(),ERROR);
-    TEST_ASSERT_DELTA(-0.95,v1[0].ub() ,ERROR);
-    TEST_ASSERT_DELTA(1.5,v1[1].lb(),ERROR);
-    TEST_ASSERT_DELTA(1.55,v1[1].ub(),ERROR);
-    TEST_ASSERT_DELTA(0.4,v1[2].lb(),ERROR);
-    TEST_ASSERT_DELTA(0.45,v1[2].ub(),ERROR);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(-1,v1[0].lb(),ERROR);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.95,v1[0].ub() ,ERROR);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(1.5,v1[1].lb(),ERROR);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(1.55,v1[1].ub(),ERROR);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(0.4,v1[2].lb(),ERROR);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(0.45,v1[2].ub(),ERROR);
 
 }
 
@@ -116,7 +116,7 @@ void TestCtcPixelMap::test2d_emptyBox(){
 
     ctc.contract(v1);
 
-    TEST_ASSERT(v1.is_empty());
+    CPPUNIT_ASSERT(v1.is_empty());
 }
 
 void TestCtcPixelMap::test2d_contractEmpty(){
@@ -130,7 +130,7 @@ void TestCtcPixelMap::test2d_contractEmpty(){
 
     ctc.contract(v1);
 
-    TEST_ASSERT(v1.is_empty());
+    CPPUNIT_ASSERT(v1.is_empty());
 
 }
 void TestCtcPixelMap::test2d_allReal(){
@@ -141,10 +141,10 @@ void TestCtcPixelMap::test2d_allReal(){
 
     ctc.contract(v1);
 
-    TEST_ASSERT_DELTA(-1,v1[0].lb(),ERROR);
-    TEST_ASSERT_DELTA(-0.9,v1[0].ub() ,ERROR);
-    TEST_ASSERT_DELTA(1.5,v1[1].lb(),ERROR);
-    TEST_ASSERT_DELTA(1.6,v1[1].ub(),ERROR);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(-1,v1[0].lb(),ERROR);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.9,v1[0].ub() ,ERROR);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(1.5,v1[1].lb(),ERROR);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(1.6,v1[1].ub(),ERROR);
 }
 
 void TestCtcPixelMap::test2d_fullImage(){
@@ -157,10 +157,10 @@ void TestCtcPixelMap::test2d_fullImage(){
 
     ctc.contract(v1);
 
-    TEST_ASSERT_DELTA(-1,v1[0].lb(),ERROR);
-    TEST_ASSERT_DELTA(-0.9,v1[0].ub() ,ERROR);
-    TEST_ASSERT_DELTA(1.5,v1[1].lb(),ERROR);
-    TEST_ASSERT_DELTA(1.6,v1[1].ub(),ERROR);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(-1,v1[0].lb(),ERROR);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.9,v1[0].ub() ,ERROR);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(1.5,v1[1].lb(),ERROR);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(1.6,v1[1].ub(),ERROR);
 }
 
 void TestCtcPixelMap::test2d_corner(){
@@ -173,10 +173,10 @@ void TestCtcPixelMap::test2d_corner(){
 
     ctc.contract(v1);
 
-    TEST_ASSERT_DELTA(-1,v1[0].lb(),ERROR);
-    TEST_ASSERT_DELTA(-0.95,v1[0].ub() ,ERROR);
-    TEST_ASSERT_DELTA(1.5,v1[1].lb(),ERROR);
-    TEST_ASSERT_DELTA(1.55,v1[1].ub(),ERROR);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(-1,v1[0].lb(),ERROR);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.95,v1[0].ub() ,ERROR);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(1.5,v1[1].lb(),ERROR);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(1.55,v1[1].ub(),ERROR);
 }
 
 
@@ -236,8 +236,8 @@ void TestCtcPixelMap::test2d_corner(){
 //    ctc.contract(box);
 //    }catch (EmptyBoxException& ) { box.set_empty();}
 //    for(unsigned int i = 0; i < box.size(); i++){
-//        TEST_ASSERT_EQUALS(res[i].lb(),box[i].lb());
-//        TEST_ASSERT_EQUALS(res[i].ub(),box[i].ub());
+//        CPPUNIT_ASSERT_EQUALS(res[i].lb(),box[i].lb());
+//        CPPUNIT_ASSERT_EQUALS(res[i].ub(),box[i].ub());
 //    }
 
 
@@ -278,8 +278,8 @@ void TestCtcPixelMap::test2d_corner(){
 //    ctc.contract(v);
 //    }catch (EmptyBoxException& ) { v.set_empty();}
 //    for(unsigned int i = 0; i < v.size(); i++){
-//        TEST_ASSERT_EQUALS(res[i].lb(),v[i].lb());
-//        TEST_ASSERT_EQUALS(res[i].ub(),v[i].ub());
+//        CPPUNIT_ASSERT_EQUALS(res[i].lb(),v[i].lb());
+//        CPPUNIT_ASSERT_EQUALS(res[i].ub(),v[i].ub());
 //    }
 
 
@@ -306,8 +306,8 @@ void TestCtcPixelMap::test2d_corner(){
 //    ctc.contract(v);
 //    }catch (EmptyBoxException& ) { v.set_empty();}
 //    for(unsigned int i = 0; i < v.size(); i++){
-//        TEST_ASSERT_DELTA(res[i].lb(),v[i].lb(), std::numeric_limits<double>::epsilon());
-//        TEST_ASSERT_DELTA(res[i].ub(),v[i].ub(), std::numeric_limits<double>::epsilon());
+//        CPPUNIT_ASSERT_DOUBLES_EQUAL(res[i].lb(),v[i].lb(), std::numeric_limits<double>::epsilon());
+//        CPPUNIT_ASSERT_DOUBLES_EQUAL(res[i].ub(),v[i].ub(), std::numeric_limits<double>::epsilon());
 //    }
 
 

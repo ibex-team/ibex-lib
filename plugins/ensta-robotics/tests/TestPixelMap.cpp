@@ -30,7 +30,7 @@ void TestPixelMap::test_init2DPixelMap(){
     // raster.init();
 
     for(unsigned int i = 0; i < raster.data.size(); i++){
-        TEST_ASSERT(raster.data[i] == 0);
+        CPPUNIT_ASSERT(raster.data[i] == 0);
     }
 
     for(unsigned int i = 0; i < raster.data.size(); i++){
@@ -44,14 +44,14 @@ void TestPixelMap::test_init2DPixelMap(){
 
 
     for(unsigned int i = 0; i < raster.ndim; i++){
-        TEST_ASSERT( (raster.leaf_size_[i] == leaf_size[i]) );
-        TEST_ASSERT( (raster.origin_[i] == origin[i]) );
-        TEST_ASSERT( (raster.grid_size_[i] == grid_size[i]) ); 
+        CPPUNIT_ASSERT( (raster.leaf_size_[i] == leaf_size[i]) );
+        CPPUNIT_ASSERT( (raster.origin_[i] == origin[i]) );
+        CPPUNIT_ASSERT( (raster.grid_size_[i] == grid_size[i]) ); 
     }
 
     for(int i = 0; i < grid_size[0]; i++){
         for(int j = 0; j < grid_size[1]; j++){
-            TEST_ASSERT(i + raster.divb_mul_[1]*j == (int)raster(i,j));
+            CPPUNIT_ASSERT(i + raster.divb_mul_[1]*j == (int)raster(i,j));
         }
     }
 }
@@ -71,7 +71,7 @@ void TestPixelMap::test_init3DPixelMap(){
     raster.init();
 
     for(unsigned int i = 0; i < raster.data.size(); i++){
-        TEST_ASSERT(raster[i] == 0);
+        CPPUNIT_ASSERT(raster[i] == 0);
     }
 
     for(unsigned int i = 0; i < raster.data.size(); i++){
@@ -82,16 +82,16 @@ void TestPixelMap::test_init3DPixelMap(){
     raster.load("test.array3D");
 
     for(unsigned int i = 0; i < raster.ndim; i++){
-        TEST_ASSERT( (raster.leaf_size_[i] == leaf_size[i]) );
-        TEST_ASSERT( (raster.origin_[i] == origin[i]) );
-        TEST_ASSERT( (raster.grid_size_[i] == grid_size[i]) ); 
+        CPPUNIT_ASSERT( (raster.leaf_size_[i] == leaf_size[i]) );
+        CPPUNIT_ASSERT( (raster.origin_[i] == origin[i]) );
+        CPPUNIT_ASSERT( (raster.grid_size_[i] == grid_size[i]) ); 
     }
 
 
     for(int i = 0; i < grid_size[0]; i++){
         for(int j = 0; j < grid_size[1]; j++){
             for(int k = 0; k < grid_size[2];k++){
-                TEST_ASSERT(i + raster.divb_mul_[1]*j+raster.divb_mul_[2]*k == (int)raster(i,j,k));
+                CPPUNIT_ASSERT(i + raster.divb_mul_[1]*j+raster.divb_mul_[2]*k == (int)raster(i,j,k));
             }
         }
     }
@@ -102,7 +102,7 @@ void TestPixelMap::test_readMissingFile(){
     // try{
     //     array3d.load("missing.array3D"); // exit in case of problem (test thread is killed --> reported as fail)
     // } catch(std::exception& e) {}
-    TEST_ASSERT(true);
+    CPPUNIT_ASSERT(true);
 }
 
 void TestPixelMap::test_readWrongFileFormat_1(){
@@ -126,19 +126,19 @@ void TestPixelMap::test_readWrongFileFormat_1(){
     // out_file.close();
     // PixelMap2D array2d;
     // array2d.load("wrong.array2D"); // exit in case of problem (test thread is killed --> reported as fail)
-    TEST_ASSERT(true);
+    CPPUNIT_ASSERT(true);
 }
 
 void TestPixelMap::test_readWrongFileFormat_2(){
     // Array2D array2d;
-    // TEST_ASSERT(array2d.loadFromFile("test.array3D")!=0);
+    // CPPUNIT_ASSERT(array2d.loadFromFile("test.array3D")!=0);
 }
 
 
 void TestPixelMap::test_ImageIntegral2D(){
     PixelMap2D raster;
     raster.load("test.array2D"); // exit in case of problem (test thread is killed --> reported as fail)
-    TEST_ASSERT(true);
+    CPPUNIT_ASSERT(true);
     raster.compute_integral_image();
 }
 
