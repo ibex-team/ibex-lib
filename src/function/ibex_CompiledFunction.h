@@ -126,8 +126,6 @@ private:
 
 	const char* op(operation o) const;
 
-	friend std::ostream& operator<<(std::ostream&,const CompiledFunction&);
-
 	int n; // == the size of the root expression
 
 	int n_total; // == the size of the expression, including all arguments
