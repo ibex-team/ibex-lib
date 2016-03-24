@@ -1,0 +1,385 @@
+/* ============================================================================
+ * I B E X - ibex_Affine2Vector.cpp
+ * ============================================================================
+ * License     : This program can be distributed under the terms of the GNU LGPL.
+ *               See the file COPYING.LESSER.
+ *
+ * Author(s)   : Jordan Ninin
+ * Created     : March 13, 2013
+ * ---------------------------------------------------------------------------- */
+
+
+#ifndef __IBEX_AFFINE2_VECTOR_H2__
+#define __IBEX_AFFINE2_VECTOR_H2__
+
+#include "ibex_TemplateVector.h_"
+
+namespace ibex {
+
+//template<class T>
+//IntervalVector& IntervalVector::operator=(const Affine2MainVector<T>& x) {
+//	resize(x.size()); // see issue #10
+//	for (int i = 0; i < size(); i++){
+//		vec[i] = x[i].itv();
+//	}
+//	return *this;
+//}
+//
+//template<class T>
+//IntervalVector::IntervalVector(const Affine2MainVector<T>& x) : n(x.size()), vec(new Interval[x.size()]) {
+//	for (int i=0; i<n; i++) vec[i]=x[i].itv();
+//}
+
+
+template<class T>
+Affine2MainVector<T>::Affine2MainVector(int n) :
+		_n(n),
+		_vec(new Affine2Main<T>[n]) {
+	assert(n>=1);
+	for (int i = 0; i < n; i++){
+		_vec[i] = Affine2Main<T>();
+	}
+}
+
+template<class T>
+Affine2MainVector<T>::Affine2MainVector(int n, const Interval& x, bool b) :
+		_n(n),
+		_vec(new Affine2Main<T>[n]) {
+	assert(n>=1);
+	if (!b) {
+		for (int i = 0; i < n; i++) {
+			_vec[i] = Affine2Main<T>(x);
+		}
+	} else {
+		for (int i = 0; i < n; i++) {
+			_vec[i] = Affine2Main<T>(n, i + 1, x);
+		}
+	}
+}
+
+template<class T>
+Affine2MainVector<T>::Affine2MainVector(int n, const Affine2Main<T>& x) :
+		_n(n),
+		_vec(new Affine2Main<T>[n]) {
+	assert(n>=1);
+	for (int i = 0; i < n; i++) {
+		_vec[i] = x;
+	}
+}
+
+
+template<class T>
+Affine2MainVector<T>::Affine2MainVector(const Affine2MainVector<T>& x) :
+		_n(x.size()),
+		_vec(new Affine2Main<T>[x.size()]) {
+
+	for (int i = 0; i < _n; i++){
+		_vec[i] = Affine2Main<T>(x[i]);
+	}
+
+}
+
+template<class T>
+Affine2MainVector<T>::Affine2MainVector(int n, double bounds[][2], bool b) :
+		_n(n),
+		_vec(new Affine2Main<T>[n]) {
+	if (bounds == 0){ // probably, the user called Affine2MainVector<T>(n,0) and 0 is interpreted as NULL!
+		for (int i = 0; i < n; i++){
+			_vec[i] = Affine2Main<T>( 0.0); // Affine2Main<T>(n, i + 1, 0.0);
+		}
+	}
+	else {
+		if (!b) {
+			for (int i = 0; i < n; i++){
+				_vec[i] =  Affine2Main<T>(Interval(bounds[i][0], bounds[i][1]));
+			}
+		} else {
+			for (int i = 0; i < n; i++){
+				_vec[i] =  Affine2Main<T>(n, i + 1, Interval(bounds[i][0], bounds[i][1]));
+			}
+		}
+	}
+}
+
+
+template<class T>
+Affine2MainVector<T>::Affine2MainVector(const IntervalVector& x, bool b) :
+		_n(x.size()),
+		_vec(new Affine2Main<T>[x.size()]) {
+	if (!b) {
+		for (int i = 0; i < x.size(); i++) {
+			_vec[i] = Affine2Main<T>(x[i]);
+		}
+	} else {
+		for (int i = 0; i < x.size(); i++) {
+			_vec[i] = Affine2Main<T>(x.size(), i + 1, x[i]);
+		}
+	}
+}
+
+template<class T>
+Affine2MainVector<T>::Affine2MainVector(const Vector& x) :
+		_n(x.size()),
+		_vec(new Affine2Main<T>[x.size()]) {
+	for (int i = 0; i < _n; i++){
+		_vec[i] = Affine2Main<T>(x[i]);
+	}
+}
+
+template<class T>
+void Affine2MainVector<T>::init(const Interval& x, bool b) {
+	if (!b) {
+		for (int i = 0; i < size(); i++) {
+			(*this)[i] = Affine2Main<T>(x);
+		}
+	} else {
+		for (int i = 0; i < size(); i++) {
+			(*this)[i] = Affine2Main<T>(size(),i+1,x);
+		}
+	}
+}
+template<class T>
+void Affine2MainVector<T>::init(const Affine2Main<T>& x) {
+	for (int i = 0; i < size(); i++) {
+		(*this)[i] = x;
+	}
+}
+
+template<class T>
+void Affine2MainVector<T>::resize(int n) {
+	assert(n>=1);
+	assert((_vec==NULL && _n==0) || (size()!=0 && _vec!=NULL));
+
+	if (n==size()) return;
+
+	Affine2Main<T>* newVec=new Affine2Main<T>[n];
+	int i=0;
+	for (; i<size() && i<n; i++){
+		newVec[i]=_vec[i];
+	}
+	for (; i<n; i++){
+		newVec[i]= Affine2Main<T>();
+	}
+	if (_vec!=NULL) { // vec==NULL happens when default constructor is used (n==0)
+		delete[] _vec;
+	}
+	_n   = n;
+	_vec = newVec;
+}
+
+template<class T>
+IntervalVector operator&(const Affine2MainVector<T>& y,const IntervalVector& x)  {
+	// dimensions are non zero henceforth
+	if (y.size()!=x.size()) throw InvalidIntervalVectorOp("Cannot intersect Affine2MainVector<T>es with different dimensions");
+
+	if (y.is_empty()||x.is_empty())
+		return IntervalVector::empty(y.size());
+
+	IntervalVector res(y.size());
+	for (int i=0; i<y.size(); i++) {
+		res [i] = y[i] & x[i];
+		if (res[i].is_empty()) {
+			res.set_empty();
+			return res;
+		}
+	}
+	return res;
+}
+template<class T>
+IntervalVector operator&(const Affine2MainVector<T>& y,const Affine2MainVector<T>& x)  {
+	// dimensions are non zero henceforth
+	if (y.size()!=x.size()) throw InvalidIntervalVectorOp("Cannot intersect Affine2MainVector<T>es with different dimensions");
+
+	if (y.is_empty()||x.is_empty())
+		return IntervalVector::empty(y.size());
+
+	IntervalVector res(y.size());
+	for (int i=0; i<y.size(); i++) {
+		res [i] = y[i] & x[i];
+		if (res[i].is_empty()) {
+			res.set_empty();
+			return res;
+		}
+	}
+	return res;
+}
+template<class T>
+IntervalVector operator|(const Affine2MainVector<T>& y,const IntervalVector& x)  {
+	// dimensions are non zero henceforth
+	if (y.size()!=x.size()) throw InvalidIntervalVectorOp("Cannot make the hull of Affine2MainVector<T>es with different dimensions");
+
+	if (y.is_empty()&&x.is_empty())
+		return IntervalVector::empty(y.size());
+
+	IntervalVector res(y.size());
+	for (int i=0; i<y.size(); i++) {
+		res [i] = y[i] | x[i];
+	}
+	return res;
+}
+template<class T>
+IntervalVector operator|(const Affine2MainVector<T>& y,const Affine2MainVector<T>& x)  {
+	// dimensions are non zero henceforth
+	if (y.size()!=x.size()) throw InvalidIntervalVectorOp("Cannot make the hull of Affine2MainVector<T>es with different dimensions");
+
+	if (y.is_empty()&&x.is_empty())
+		return IntervalVector::empty(y.size());
+
+	IntervalVector res(y.size());
+	for (int i=0; i<y.size(); i++) {
+		res [i] = y[i] | x[i];
+	}
+	return res;
+}
+
+
+template<class T>
+IntervalVector Affine2MainVector<T>::itv() const {
+	assert(!is_empty());
+	IntervalVector intv(_n);
+	for (int i = 0; i < _n; i++) {
+		intv[i] = (*this)[i].itv();
+	}
+	return intv;
+}
+
+
+
+template<class T>
+Affine2Main<T> operator*(const Vector& v1, const Affine2MainVector<T>& v2) {
+	assert(v1.size()==v2.size());
+
+	int n=v1.size();
+	Affine2Main<T> y(0);
+
+	if (v2.is_empty()) {
+		y.set_empty();
+		return y;
+	}
+
+	for (int i=0; i<n; i++) {
+		y+=v1[i]*v2[i];
+	}
+	return y;
+}
+
+template<class T>
+Affine2Main<T> operator*(const Affine2MainVector<T>& v1, const Vector& v2) {
+	assert(v1.size()==v2.size());
+
+	int n=v1.size();
+	Affine2Main<T> y(0);
+
+	if (v1.is_empty()) {
+		y.set_empty();
+		return y;
+	}
+
+	for (int i=0; i<n; i++) {
+		y+=v1[i]*v2[i];
+	}
+	return y;
+}
+
+
+template<class T>
+Affine2Main<T> operator*(const IntervalVector& x1, const Affine2MainVector<T>& x2){
+	return x2*x1;
+}
+
+template<class T>
+Affine2Main<T> operator*(const Affine2MainVector<T>& v1, const IntervalVector& v2) {
+	assert(v1.size()==v2.size());
+
+	int n=v1.size();
+	Affine2Main<T> y(0);
+
+	if (v1.is_empty() || v2.is_empty()) {
+		y.set_empty();
+		return y;
+	}
+
+	for (int i=0; i<n; i++) {
+		y+=v1[i] * v2[i];
+	}
+	return y;
+}
+
+template<class T>
+Affine2Main<T> operator*(const Affine2MainVector<T>& v1, const Affine2MainVector<T>& v2) {
+	assert(v1.size()==v2.size());
+	assert(v1.size()==v2.size());
+
+	int n=v1.size();
+	Affine2Main<T> y(0);
+
+	if (v1.is_empty() || v2.is_empty()) {
+		y.set_empty();
+		return y;
+	}
+
+	for (int i=0; i<n; i++) {
+		y+=v1[i] * v2[i];
+	}
+	return y;
+}
+
+template<class T>
+Affine2MainVector<T> operator*(const Affine2Main<T>& x1, const Vector& x2) {
+	Affine2MainVector<T> res(x2.size(),x1);
+	for (int i=0; i<x2.size(); i++) {
+		res[i] *= x2[i];
+	}
+	return  res;
+}
+
+template<class T>
+Affine2MainVector<T>& Affine2MainVector<T>::inflate(double rad1)                              { return _inflate(*this,rad1); }
+template<class T>
+Affine2MainVector<T>  Affine2MainVector<T>::subvector(int start_index, int end_index) const   { return _subvector(*this,start_index,end_index); }
+template<class T>
+void           Affine2MainVector<T>::put(int start_index, const Affine2MainVector<T>& subvec) { _put(*this, start_index, subvec); }
+template<class T>
+Affine2MainVector<T>& Affine2MainVector<T>::operator=(const Affine2MainVector<T>& x)                 { resize(x.size()); // see issue #10
+                                                                                  return _assignV(*this,x); }
+template<class T>
+Affine2MainVector<T>& Affine2MainVector<T>::operator=(const IntervalVector& x)                { return _assignV(*this,x); }
+template<class T>
+bool           Affine2MainVector<T>::operator==(const Affine2MainVector<T>& x) const          { return _equalsV(*this,x); }
+template<class T>
+bool           Affine2MainVector<T>::operator==(const IntervalVector& x) const         { return _equalsV(*this,x); }
+//Vector         Affine2MainVector<T>::lb() const                                        { return _lb(*this); }
+//Vector         Affine2MainVector<T>::ub() const                                        { return _ub(*this); }
+//Vector         Affine2MainVector<T>::mid() const                                       { return _mid(*this); }
+//Vector         Affine2MainVector<T>::mig() const                                       { return _mig(*this); }
+//Vector         Affine2MainVector<T>::mag() const                                       { return _mag(*this); }
+//bool           Affine2MainVector<T>::is_flat() const                                   { return _is_flat(*this); }
+//bool           Affine2MainVector<T>::contains(const Vector& x) const                   { return _contains(*this,x); }
+template<class T>
+bool           Affine2MainVector<T>::is_unbounded() const                              { return _is_unbounded(*this); }
+//bool           Affine2MainVector<T>::is_subset(const Affine2MainVector<T>& x) const           { return _is_subset(*this,x); }
+//bool           Affine2MainVector<T>::is_subset(const IntervalVector& x) const          { return _is_subset(*this,x); }
+//bool           Affine2MainVector<T>::is_strict_subset(const Affine2MainVector<T>& x) const    { return _is_strict_subset(*this,x); }
+//bool           Affine2MainVector<T>::is_strict_subset(const IntervalVector& x) const   { return _is_strict_subset(*this,x); }
+//bool           Affine2MainVector<T>::is_zero() const                                   { return _is_zero(*this); }
+//bool           Affine2MainVector<T>::is_bisectable() const                             { return _is_bisectable(*this); }
+//Vector         Affine2MainVector<T>::rad() const                                       { return _rad(*this); }
+//Vector         Affine2MainVector<T>::diam() const                                      { return _diam(*this); }
+//int            Affine2MainVector<T>::extr_diam_index(bool min) const                   { return _extr_diam_index(*this,min); }
+template<class T>
+std::ostream& operator<<(std::ostream& os, const Affine2MainVector<T>& x)              { return _displayV(os,x); }
+//double         Affine2MainVector<T>::volume() const                                    { return _volume(*this); }
+//double         Affine2MainVector<T>::perimeter() const                                 { return _perimeter(*this); }
+//double         Affine2MainVector<T>::rel_distance(const Affine2MainVector<T>& x) const        { return _rel_distance(*this,x); }
+//double         Affine2MainVector<T>::rel_distance(const IntervalVector& x) const       { return _rel_distance(*this,x); }
+//Vector         Affine2MainVector<T>::random() const                                    { return _random<Affine2MainVector<T>,Affine2>(*this); }
+
+//int          Affine2MainVector<T>::diff(const Affine2MainVector<T>& y, IntervalVector*& result) const   { return _diff(itv(), y.itv(), result); }
+//int          Affine2MainVector<T>::diff(const IntervalVector& y, IntervalVector*& result) const  { return _diff(itv(), y, result); }
+//int          Affine2MainVector<T>::complementary(IntervalVector*& result) const                  { return _complementary(itv(), result); }
+//std::pair<IntervalVector,IntervalVector> Affine2MainVector<T>::bisect(int i, double ratio) const { return _bisect(*this, i, ratio); }
+
+
+}// end namespace ibex
+
+#endif // IBEX_AFFINE2_VECTOR_H2_

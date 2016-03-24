@@ -338,7 +338,7 @@ public:
 	/**
 	 * Initialize this data (of type T) associated to a function.
 	 */
-	ExprData(Function& f, const ExprDataFactory<T>& factory);
+	ExprData(const Function& f, const ExprDataFactory<T>& factory);
 
 	/**
 	 * (Does nothing)
@@ -358,7 +358,7 @@ public:
 	/**
 	 *  The function
 	 */
-	Function& f;
+	const Function& f;
 
 	/**
 	 *  Data
@@ -437,7 +437,7 @@ void ExprDataFactory<T>::__visit_0ary(const Node& e) {
 }
 
 template<class T>
-ExprData<T>::ExprData(Function& f, const ExprDataFactory<T>& factory) : f(f), data(f.nodes.size()), args(f.nb_arg()), top(NULL) {
+ExprData<T>::ExprData(const Function& f, const ExprDataFactory<T>& factory) : f(f), data(f.nodes.size()), args(f.nb_arg()), top(NULL) {
 	factory.build(*this);
 }
 

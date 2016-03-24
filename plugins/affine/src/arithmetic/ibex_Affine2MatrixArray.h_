@@ -1,0 +1,145 @@
+/* ============================================================================
+ * I B E X - ibex_Affine2MainMatrixArray<T>.cpp
+ * ============================================================================
+ * License     : This program can be distributed under the terms of the GNU LGPL.
+ *               See the file COPYING.LESSER.
+ *
+ * Author(s)   : Jordan Ninin
+ * Created     : March 16, 2013
+ * ---------------------------------------------------------------------------- */
+
+#include <cassert>
+
+namespace ibex {
+
+template<class T>
+Affine2MainMatrixArray<T>::Affine2MainMatrixArray(int n1, int nb_rows1, int nb_cols1) : _n(n1) {
+	assert(n1>0);
+
+	_array = new Affine2MainMatrix<T>[n1];
+	for (int i=0; i<n1; i++)
+		_array[i].resize(nb_rows1,nb_cols1);
+}
+
+template<class T>
+Affine2MainMatrixArray<T>::Affine2MainMatrixArray(const Affine2MainMatrixArray<T>& a) : _n(a.size()) {
+	_array = new Affine2MainMatrix<T>[_n];
+	for (int i=0; i<_n; i++) {
+		_array[i] = Affine2MainMatrix<T>(a[i]); // array[i] will be resized
+	}
+}
+/*  It is too difficult to know the size of each AF2. So we let the user do what exactly he want to do.
+Affine2MainMatrixArray<T>::Affine2MainMatrixArray<T>(const IntervalMatrixArray& a, int sizeAF2) : _n(a.size()) {
+	_array = new Affine2MainMatrix<T>[_n];
+	for (int i=0; i<_n; i++) {
+		_array[i]=Affine2MainMatrix<T>(a[i],sizeAF2); // array[i] will be resized
+	}
+}
+*/
+
+template<class T>
+Affine2MainMatrixArray<T>& Affine2MainMatrixArray<T>::operator=(const Affine2MainMatrixArray<T>& a) {
+	if (size()!=a.size()) {
+		delete[] _array;
+		_array = new Affine2MainMatrix<T>[a.size()];
+		_n = a.size();
+	}
+
+	for (int i=0; i<a.size(); i++) {
+		_array[i]=a[i]; // array[i] will be resized
+	}
+	return *this;
+}
+template<class T>
+Affine2MainMatrixArray<T>& Affine2MainMatrixArray<T>::operator=(const IntervalMatrixArray& a) {
+	if (size()!=a.size()) {
+		delete[] _array;
+		_array = new Affine2MainMatrix<T>[a.size()];
+		_n = a.size();
+	}
+
+	for (int i=0; i<a.size(); i++) {
+		_array[i] = a[i]; // array[i] will be resized
+	}
+	return *this;
+}
+
+
+template<class T>
+bool Affine2MainMatrixArray<T>::operator==(const Affine2MainMatrixArray<T>& x) const {
+	if (_n!=x.size()) return false;
+	for (int i=0; i<_n; i++)
+		if ((*this)[i]!=(x[i])) return false;
+	return true;
+}
+
+template<class T>
+bool Affine2MainMatrixArray<T>::operator==(const IntervalMatrixArray& x) const {
+	if (_n!=x.size()) return false;
+	for (int i=0; i<_n; i++)
+		if ((*this)[i]!=(x[i])) return false;
+	return true;
+}
+
+template<class T>
+void Affine2MainMatrixArray<T>::init(const Affine2Main<T>& x) {
+	for (int i=0; i<size(); i++)
+		(*this)[i].init(x);
+}
+template<class T>
+void Affine2MainMatrixArray<T>::init(const Interval& x) {
+	for (int i=0; i<size(); i++)
+		(*this)[i].init(x);
+}
+
+
+
+template<class T>
+IntervalMatrixArray Affine2MainMatrixArray<T>::itv() const {
+	assert(!is_empty());
+	IntervalMatrixArray intm(size(),nb_rows(),nb_cols());
+	for (int k = 0; k < size();k++) {
+		for (int i = 0; i < nb_rows(); i++) {
+			for (int j =0; j < nb_cols();j++){
+				intm[k][i][j] = (*this)[k][i][j].itv();
+			}
+		}
+	}
+	return intm;
+}
+
+template<class T>
+Affine2MainMatrixArray<T>::~Affine2MainMatrixArray() {
+	delete[] _array;
+}
+
+
+template<class T>
+IntervalMatrixArray operator&(const Affine2MainMatrixArray<T>& x1, const Affine2MainMatrixArray<T>& x2) {
+	assert(x1.size()==x2.size());
+	IntervalMatrixArray res (x1.size(),x1.nb_rows(),x1.nb_cols());
+	for (int i=0; i<x1.size(); i++) {
+		res[i] = x1[i] & x2[i];
+	}
+	return res;
+}
+template<class T>
+IntervalMatrixArray operator&(const Affine2MainMatrixArray<T>& x1, const IntervalMatrixArray& x2) {
+	assert(x1.size()==x2.size());
+	IntervalMatrixArray res (x1.size(),x1.nb_rows(),x1.nb_cols());
+	for (int i=0; i<x1.size(); i++) {
+		res[i] = x1[i] & x2[i];
+	}
+	return res;
+}
+
+
+template<class T>
+std::ostream& operator<<(std::ostream& os, const Affine2MainMatrixArray<T>& a) {
+	for (int i=0; i<a.size(); i++) {
+		os << a[i] << std::endl;
+	}
+	return os;
+}
+
+} // namespace ibex

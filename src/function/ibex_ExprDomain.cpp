@@ -10,51 +10,6 @@
 
 namespace ibex {
 
-Domain* ExprDomainFactory::init(const ExprIndex& e, Domain& d_expr) {
-	switch (e.expr.type()) {
-	case Dim::SCALAR:
-		return new Domain(d_expr.i());
-		break;
-	case Dim::ROW_VECTOR:
-	case Dim::COL_VECTOR:
-		return new Domain(d_expr.v()[e.index]);
-		break;
-	case Dim::MATRIX:
-		return new Domain(d_expr.m()[e.index],true);
-		break;
-	default: // Dim::MATRIX_ARRAY:
-		return new Domain(d_expr.ma()[e.index]);
-		break;
-	}
-}
-
-Domain* ExprDomainFactory::init(const ExprLeaf& e) {
-	return new Domain(e.dim);
-}
-
-Domain* ExprDomainFactory::init(const ExprNAryOp& e, Array<Domain>& args_deco) {
-	return new Domain(e.dim);
-}
-
-Domain* ExprDomainFactory::init(const ExprBinaryOp& e, Domain& left_deco, Domain& right_deco) {
-	return new Domain(e.dim);
-}
-
-Domain* ExprDomainFactory::init(const ExprUnaryOp& e, Domain& expr_deco) {
-	return new Domain(e.dim);
-}
-
-Domain* ExprDomainFactory::init(const ExprTrans& e, Domain& expr_deco) {
-
-	if (e.dim.is_vector()) {
-		// share references
-		return new Domain(expr_deco, true);
-	} else {
-		// TODO: seems impossible to have references
-		// in case of matrices...
-		return new Domain(e.dim);
-	}
-}
 
 /* we could also be more efficient by making symbol
  * direct references to the arguments' domain.
