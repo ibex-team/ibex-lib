@@ -12,118 +12,121 @@
 #ifndef __TEST_INTERVAL_VECTOR_H__
 #define __TEST_INTERVAL_VECTOR_H__
 
-#include "cpptest.h"
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
 #include "ibex_IntervalVector.h"
 #include "utils.h"
 
 using namespace ibex;
 
-class TestIntervalVector : public TestIbex {
+class TestIntervalVector : public CppUnit::TestFixture {
 
 public:
-	TestIntervalVector() {
 
-		TEST_ADD(TestIntervalVector::cons01);
-		TEST_ADD(TestIntervalVector::cons02);
-		TEST_ADD(TestIntervalVector::cons03);
-		TEST_ADD(TestIntervalVector::cons04);
-		TEST_ADD(TestIntervalVector::cons05);
+	CPPUNIT_TEST_SUITE(TestIntervalVector);
+	
 
-		TEST_ADD(TestIntervalVector::set_empty01);
+		CPPUNIT_TEST(cons01);
+		CPPUNIT_TEST(cons02);
+		CPPUNIT_TEST(cons03);
+		CPPUNIT_TEST(cons04);
+		CPPUNIT_TEST(cons05);
 
-		TEST_ADD(TestIntervalVector::is_empty01);
-		TEST_ADD(TestIntervalVector::is_empty02);
+		CPPUNIT_TEST(set_empty01);
 
-		TEST_ADD(TestIntervalVector::resize01);
-		TEST_ADD(TestIntervalVector::resize02);
-		TEST_ADD(TestIntervalVector::resize03);
-		TEST_ADD(TestIntervalVector::resize04);
+		CPPUNIT_TEST(is_empty01);
+		CPPUNIT_TEST(is_empty02);
 
-		TEST_ADD(TestIntervalVector::subvector01);
-		TEST_ADD(TestIntervalVector::subvector02);
-		TEST_ADD(TestIntervalVector::subvector03);
-		TEST_ADD(TestIntervalVector::subvector04);
-		TEST_ADD(TestIntervalVector::subvector05);
+		CPPUNIT_TEST(resize01);
+		CPPUNIT_TEST(resize02);
+		CPPUNIT_TEST(resize03);
+		CPPUNIT_TEST(resize04);
 
-		TEST_ADD(TestIntervalVector::inter01);
-		TEST_ADD(TestIntervalVector::inter02);
-		TEST_ADD(TestIntervalVector::inter03);
-		TEST_ADD(TestIntervalVector::inter04);
+		CPPUNIT_TEST(subvector01);
+		CPPUNIT_TEST(subvector02);
+		CPPUNIT_TEST(subvector03);
+		CPPUNIT_TEST(subvector04);
+		CPPUNIT_TEST(subvector05);
 
-		TEST_ADD(TestIntervalVector::hull01);
-		TEST_ADD(TestIntervalVector::hull02);
-		TEST_ADD(TestIntervalVector::hull03);
-		TEST_ADD(TestIntervalVector::hull04);
+		CPPUNIT_TEST(inter01);
+		CPPUNIT_TEST(inter02);
+		CPPUNIT_TEST(inter03);
+		CPPUNIT_TEST(inter04);
 
-		TEST_ADD(TestIntervalVector::eq01);
-		TEST_ADD(TestIntervalVector::eq02);
-		TEST_ADD(TestIntervalVector::eq03);
-		TEST_ADD(TestIntervalVector::eq04);
+		CPPUNIT_TEST(hull01);
+		CPPUNIT_TEST(hull02);
+		CPPUNIT_TEST(hull03);
+		CPPUNIT_TEST(hull04);
 
-		TEST_ADD(TestIntervalVector::mid01);
+		CPPUNIT_TEST(eq01);
+		CPPUNIT_TEST(eq02);
+		CPPUNIT_TEST(eq03);
+		CPPUNIT_TEST(eq04);
 
-		TEST_ADD(TestIntervalVector::is_flat01);
-		TEST_ADD(TestIntervalVector::is_flat02);
-		TEST_ADD(TestIntervalVector::is_flat03);
-		TEST_ADD(TestIntervalVector::is_flat04);
-		TEST_ADD(TestIntervalVector::is_flat05);
+		CPPUNIT_TEST(mid01);
 
-		TEST_ADD(TestIntervalVector::is_unbounded01);
-		TEST_ADD(TestIntervalVector::is_unbounded02);
-		TEST_ADD(TestIntervalVector::is_unbounded03);
-		TEST_ADD(TestIntervalVector::is_unbounded04);
+		CPPUNIT_TEST(is_flat01);
+		CPPUNIT_TEST(is_flat02);
+		CPPUNIT_TEST(is_flat03);
+		CPPUNIT_TEST(is_flat04);
+		CPPUNIT_TEST(is_flat05);
 
-		TEST_ADD(TestIntervalVector::is_subset01);
-		TEST_ADD(TestIntervalVector::is_subset02);
-		TEST_ADD(TestIntervalVector::is_subset03);
-		TEST_ADD(TestIntervalVector::is_subset04);
-		TEST_ADD(TestIntervalVector::is_subset05);
-		TEST_ADD(TestIntervalVector::is_subset06);
-		TEST_ADD(TestIntervalVector::is_subset07);
+		CPPUNIT_TEST(is_unbounded01);
+		CPPUNIT_TEST(is_unbounded02);
+		CPPUNIT_TEST(is_unbounded03);
+		CPPUNIT_TEST(is_unbounded04);
 
-		TEST_ADD(TestIntervalVector::extr_diam_index01);
-		TEST_ADD(TestIntervalVector::extr_diam_index02);
-		TEST_ADD(TestIntervalVector::extr_diam_index03);
-		TEST_ADD(TestIntervalVector::extr_diam_index04);
-		TEST_ADD(TestIntervalVector::extr_diam_index05);
-		TEST_ADD(TestIntervalVector::extr_diam_index06);
-		TEST_ADD(TestIntervalVector::extr_diam_index07);
-		TEST_ADD(TestIntervalVector::extr_diam_index08);
-		TEST_ADD(TestIntervalVector::extr_diam_index09);
-		TEST_ADD(TestIntervalVector::extr_diam_index10);
+		CPPUNIT_TEST(is_subset01);
+		CPPUNIT_TEST(is_subset02);
+		CPPUNIT_TEST(is_subset03);
+		CPPUNIT_TEST(is_subset04);
+		CPPUNIT_TEST(is_subset05);
+		CPPUNIT_TEST(is_subset06);
+		CPPUNIT_TEST(is_subset07);
 
-		TEST_ADD(TestIntervalVector::sort_indices01);
-		TEST_ADD(TestIntervalVector::sort_indices02);
+		CPPUNIT_TEST(extr_diam_index01);
+		CPPUNIT_TEST(extr_diam_index02);
+		CPPUNIT_TEST(extr_diam_index03);
+		CPPUNIT_TEST(extr_diam_index04);
+		CPPUNIT_TEST(extr_diam_index05);
+		CPPUNIT_TEST(extr_diam_index06);
+		CPPUNIT_TEST(extr_diam_index07);
+		CPPUNIT_TEST(extr_diam_index08);
+		CPPUNIT_TEST(extr_diam_index09);
+		CPPUNIT_TEST(extr_diam_index10);
 
-		TEST_ADD(TestIntervalVector::perimeter01);
-		TEST_ADD(TestIntervalVector::perimeter02);
+		CPPUNIT_TEST(sort_indices01);
+		CPPUNIT_TEST(sort_indices02);
 
-		TEST_ADD(TestIntervalVector::volume01);
-		TEST_ADD(TestIntervalVector::volume02);
-		TEST_ADD(TestIntervalVector::volume03);
+		CPPUNIT_TEST(perimeter01);
+		CPPUNIT_TEST(perimeter02);
 
-		TEST_ADD(TestIntervalVector::rel_distance01);
+		CPPUNIT_TEST(volume01);
+		CPPUNIT_TEST(volume02);
+		CPPUNIT_TEST(volume03);
 
-		TEST_ADD(TestIntervalVector::minus01);
-		TEST_ADD(TestIntervalVector::minus02);
-		TEST_ADD(TestIntervalVector::minus03);
+		CPPUNIT_TEST(rel_distance01);
 
-		TEST_ADD(TestIntervalVector::add01);
+		CPPUNIT_TEST(minus01);
+		CPPUNIT_TEST(minus02);
+		CPPUNIT_TEST(minus03);
 
-		TEST_ADD(TestIntervalVector::sub01);
+		CPPUNIT_TEST(add01);
 
-		TEST_ADD(TestIntervalVector::compl01);
-		TEST_ADD(TestIntervalVector::compl02);
+		CPPUNIT_TEST(sub01);
 
-		TEST_ADD(TestIntervalVector::diff01);
-		TEST_ADD(TestIntervalVector::diff02);
-		TEST_ADD(TestIntervalVector::diff03);
-		TEST_ADD(TestIntervalVector::diff04);
-		TEST_ADD(TestIntervalVector::diff05);
+		CPPUNIT_TEST(compl01);
+		CPPUNIT_TEST(compl02);
 
-		TEST_ADD(TestIntervalVector::random01);
-		TEST_ADD(TestIntervalVector::random02);
-	}
+		CPPUNIT_TEST(diff01);
+		CPPUNIT_TEST(diff02);
+		CPPUNIT_TEST(diff03);
+		CPPUNIT_TEST(diff04);
+		CPPUNIT_TEST(diff05);
+
+		CPPUNIT_TEST(random01);
+		CPPUNIT_TEST(random02);
+	CPPUNIT_TEST_SUITE_END();
 
 	/* test:
 	 * =======
@@ -278,5 +281,8 @@ public:
 private:
 
 };
+
+CPPUNIT_TEST_SUITE_REGISTRATION(TestIntervalVector);
+
 
 #endif // __TEST_INTERVAL_VECTOR_H__

@@ -12,20 +12,26 @@
 #ifndef __TEST_HANSEN_FEASIBILITY_H__
 #define __TEST_HANSEN_FEASIBILITY_H__
 
-#include "cpptest.h"
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
 #include "utils.h"
 
 namespace ibex {
 
-class TestPdcHansenFeasibility : public TestIbex {
+class TestPdcHansenFeasibility : public CppUnit::TestFixture {
 
 public:
-	TestPdcHansenFeasibility() {
-		TEST_ADD(TestPdcHansenFeasibility::test01);
-	}
+
+	CPPUNIT_TEST_SUITE(TestPdcHansenFeasibility);
+	
+		CPPUNIT_TEST(test01);
+	CPPUNIT_TEST_SUITE_END();
 
 	void test01();
 };
+
+CPPUNIT_TEST_SUITE_REGISTRATION(TestPdcHansenFeasibility);
+
 
 } // end namespace
 

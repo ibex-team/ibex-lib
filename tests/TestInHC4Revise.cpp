@@ -27,7 +27,7 @@ void TestInHC4Revise::add01() {
 
 	f.ibwd(Interval(0,1),box);
 
-	TEST_ASSERT((box[0]+box[1]).is_subset(Interval(0,1)));
+	CPPUNIT_ASSERT((box[0]+box[1]).is_subset(Interval(0,1)));
 	check(box[0].lb()+box[1].lb(),0);
 	check(box[0].ub()+box[1].ub(),1);
 }
@@ -42,7 +42,7 @@ void TestInHC4Revise::add02() {
 
 	f.ibwd(Interval(0,1),box);
 
-	TEST_ASSERT(box.is_empty() || // TEMPORARY WRAP
+	CPPUNIT_ASSERT(box.is_empty() || // TEMPORARY WRAP
 			box[0]==Interval(1,1));
 }
 
@@ -57,8 +57,8 @@ void TestInHC4Revise::dist01() {
 	f.ibwd(Interval(0,1),box,pt);
 
 	// check the box is inside by testing two corners
-	TEST_ASSERT(f.eval(box.lb()).is_subset(Interval(0,1)));
-	TEST_ASSERT(f.eval(box.ub()).is_subset(Interval(0,1)));
+	CPPUNIT_ASSERT(f.eval(box.lb()).is_subset(Interval(0,1)));
+	CPPUNIT_ASSERT(f.eval(box.ub()).is_subset(Interval(0,1)));
 
 }
 
@@ -72,8 +72,8 @@ void TestInHC4Revise::dist02() {
 	f.ibwd(Interval(1,POS_INFINITY),box,pt);
 
 //	// check the box is inside by testing two corners
-//	TEST_ASSERT(f.eval(box.lb()).is_subset(Interval(0,1)));
-//	TEST_ASSERT(f.eval(box.ub()).is_subset(Interval(0,1)));
+//	CPPUNIT_ASSERT(f.eval(box.lb()).is_subset(Interval(0,1)));
+//	CPPUNIT_ASSERT(f.eval(box.ub()).is_subset(Interval(0,1)));
 
 }
 
@@ -88,8 +88,8 @@ void TestInHC4Revise::apply01() {
 	g.ibwd(Interval(0,1),box,pt);
 
 	// check the box is inside by testing two corners
-	TEST_ASSERT(f.eval(box.lb()).is_subset(Interval(0,1)));
-	TEST_ASSERT(f.eval(box.ub()).is_subset(Interval(0,1)));
+	CPPUNIT_ASSERT(f.eval(box.lb()).is_subset(Interval(0,1)));
+	CPPUNIT_ASSERT(f.eval(box.ub()).is_subset(Interval(0,1)));
 
 }
 
@@ -105,8 +105,8 @@ void TestInHC4Revise::apply02() {
 	g.ibwd(Interval(0,1),box,pt);
 
 	// check the box is inside by testing two corners
-	TEST_ASSERT(almost_eq(g.eval(box.lb()),Interval::ONE,1e-07));
-	TEST_ASSERT(almost_eq(g.eval(box.ub()),Interval::ONE,1e-07));
+	CPPUNIT_ASSERT(almost_eq(g.eval(box.lb()),Interval::ONE,1e-07));
+	CPPUNIT_ASSERT(almost_eq(g.eval(box.ub()),Interval::ONE,1e-07));
 }
 
 void TestInHC4Revise::add_mult01() {
@@ -132,7 +132,7 @@ void TestInHC4Revise::bugr900() {
 	IntervalVector box(1,Interval(0,ibex::next_float(0)));
 	IntervalVector pt(1,Interval::ZERO);
 	f.ibwd(f.eval(pt),box,pt);
-	TEST_ASSERT(!box.is_empty());
+	CPPUNIT_ASSERT(!box.is_empty());
 }
 
 void TestInHC4Revise::issue70() {
@@ -144,7 +144,7 @@ void TestInHC4Revise::issue70() {
 
 	f.ibwd(Interval::POS_REALS,area,pt);
 	// we don't test exactly [0,10] because the result is actually [-0,10]
-	TEST_ASSERT(area[0].lb()>=0);
+	CPPUNIT_ASSERT(area[0].lb()>=0);
 
 	//	//Function f("ox","oy","oalpha","x","y","(-(((x-ox)*sin((-oalpha)))+((y-oy)*cos(oalpha))))");
 	//	Function f("ox","oy","oalpha","x","y","y*0.99");

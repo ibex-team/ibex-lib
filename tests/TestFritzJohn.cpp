@@ -42,21 +42,21 @@ void TestFritzJohn::test01() {
 
 	hc4.contract(box);
 
-	TEST_ASSERT(!box.is_empty());
+	CPPUNIT_ASSERT(!box.is_empty());
 
 	Interval& u=box[2];
 	Interval& l=box[3];
 
-	TEST_ASSERT((u+l).contains(1));
+	CPPUNIT_ASSERT((u+l).contains(1));
 	// we have
 	//   u =1-l
 	//   u =l*sqrt(2)
 	// The solution is u=1/(1+1/sqrt(2)).
 	//                 l=1/(sqrt(2)+1)
 
-	TEST_ASSERT(u.contains(1/(1+::sqrt(2)/2)));
-	TEST_ASSERT(l.contains(1/(1+::sqrt(2))));
-	TEST_ASSERT((-u+::sqrt(2)*l).contains(0));
+	CPPUNIT_ASSERT(u.contains(1/(1+::sqrt(2)/2)));
+	CPPUNIT_ASSERT(l.contains(1/(1+::sqrt(2))));
+	CPPUNIT_ASSERT((-u+::sqrt(2)*l).contains(0));
 }
 
 //void TestCtcFritzJohn::test01() {

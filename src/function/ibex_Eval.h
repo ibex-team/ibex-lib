@@ -9,14 +9,16 @@
  * Created     : Jan 14, 2012
  * ---------------------------------------------------------------------------- */
 
-#ifndef _IBEX_EVAL_H_
-#define _IBEX_EVAL_H_
+#ifndef __IBEX_EVAL_H__
+#define __IBEX_EVAL_H__
 
-#include "ibex_Function.h"
 #include <iostream>
+
+#include "ibex_ExprDomain.h"
 
 namespace ibex {
 
+class Function;
 
 /**
  * \ingroup symbolic
@@ -29,24 +31,24 @@ class Eval : public FwdAlgorithm {
 
 public:
 	/**
-	 * \brief Run the forward algorithm with input domains.
+	 * \brief Build the evaluator for the function f.
 	 */
-	Domain& eval(const Function&, const Array<const Domain>& d) const;
+	Eval(Function &f);
 
 	/**
 	 * \brief Run the forward algorithm with input domains.
 	 */
-	Domain& eval(const Function&, const Array<Domain>& d) const;
+	Domain& eval(const Array<const Domain>& d);
+
+	/**
+	 * \brief Run the forward algorithm with input domains.
+	 */
+	Domain& eval(const Array<Domain>& d);
 
 	/**
 	 * \brief Run the forward algorithm with an input box.
 	 */
-	Domain& eval(const Function&, const IntervalVector& box) const;
-
-	/**
-	 * \brief Run the forward algorithm with input domains.
-	 */
-	Domain& eval(const Function&, ExprLabel** d) const;
+	Domain& eval(const IntervalVector& box);
 
 protected:
 	/**
@@ -57,115 +59,119 @@ protected:
 	class EmptyBoxException { };
 
 public: // because called from CompiledFunction
-	inline void index_fwd(const ExprIndex&, const ExprLabel& x, ExprLabel& y);
-	       void vector_fwd(const ExprVector&, const ExprLabel** compL, ExprLabel& y);
-	inline void cst_fwd(const ExprConstant&, ExprLabel& y);
-	inline void symbol_fwd(const ExprSymbol&, ExprLabel& y);
-	inline void apply_fwd(const ExprApply&, ExprLabel** x, ExprLabel& y);
-	inline void chi_fwd(const ExprChi&, const ExprLabel& x1, const ExprLabel& x2, const ExprLabel& x3, ExprLabel& y);
-	inline void add_fwd(const ExprAdd&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y);
-	inline void mul_fwd(const ExprMul&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y);
-	inline void sub_fwd(const ExprSub&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y);
-	inline void div_fwd(const ExprDiv&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y);
-	inline void max_fwd(const ExprMax&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y);
-	inline void min_fwd(const ExprMin&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y);
-	inline void atan2_fwd(const ExprAtan2&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y);
-	inline void minus_fwd(const ExprMinus&, const ExprLabel& x, ExprLabel& y);
-	inline void trans_V_fwd(const ExprTrans&, const ExprLabel& x, ExprLabel& y);
-	inline void trans_M_fwd(const ExprTrans&, const ExprLabel& x, ExprLabel& y);
-	inline void sign_fwd(const ExprSign&, const ExprLabel& x, ExprLabel& y);
-	inline void abs_fwd(const ExprAbs&, const ExprLabel& x, ExprLabel& y);
-	inline void power_fwd(const ExprPower& p, const ExprLabel& x, ExprLabel& y);
-	inline void sqr_fwd(const ExprSqr&, const ExprLabel& x, ExprLabel& y);
-	inline void sqrt_fwd(const ExprSqrt&, const ExprLabel& x, ExprLabel& y);
-	inline void exp_fwd(const ExprExp&, const ExprLabel& x, ExprLabel& y);
-	inline void log_fwd(const ExprLog&, const ExprLabel& x, ExprLabel& y);
-	inline void cos_fwd(const ExprCos&, const ExprLabel& x, ExprLabel& y);
-	inline void sin_fwd(const ExprSin&, const ExprLabel& x, ExprLabel& y);
-	inline void tan_fwd(const ExprTan&, const ExprLabel& x, ExprLabel& y);
-	inline void cosh_fwd(const ExprCosh&, const ExprLabel& x, ExprLabel& y);
-	inline void sinh_fwd(const ExprSinh&, const ExprLabel& x, ExprLabel& y);
-	inline void tanh_fwd(const ExprTanh&, const ExprLabel& x, ExprLabel& y);
-	inline void acos_fwd(const ExprAcos&, const ExprLabel& x, ExprLabel& y);
-	inline void asin_fwd(const ExprAsin&, const ExprLabel& x, ExprLabel& y);
-	inline void atan_fwd(const ExprAtan&, const ExprLabel& x, ExprLabel& y);
-	inline void acosh_fwd(const ExprAcosh&, const ExprLabel& x, ExprLabel& y);
-	inline void asinh_fwd(const ExprAsinh&, const ExprLabel& x, ExprLabel& y);
-	inline void atanh_fwd(const ExprAtanh&, const ExprLabel& x, ExprLabel& y);
 
-	inline void add_V_fwd(const ExprAdd&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y);
-	inline void add_M_fwd(const ExprAdd&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y);
-	inline void mul_SV_fwd(const ExprMul&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y);
-	inline void mul_SM_fwd(const ExprMul&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y);
-	inline void mul_VV_fwd(const ExprMul&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y);
-	inline void mul_MV_fwd(const ExprMul&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y);
-	inline void mul_VM_fwd(const ExprMul&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y);
-	inline void mul_MM_fwd(const ExprMul&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y);
-	inline void sub_V_fwd(const ExprSub&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y);
-	inline void sub_M_fwd(const ExprSub&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y);
+	       void vector_fwd (int* x, int y);
+	       void apply_fwd  (int* x, int y);
+	inline void index_fwd  (int x, int y);
+	inline void symbol_fwd (int y);
+	inline void cst_fwd    (int y);
+	inline void chi_fwd    (int x1, int x2, int x3, int y);
+	inline void add_fwd    (int x1, int x2, int y);
+	inline void mul_fwd    (int x1, int x2, int y);
+	inline void sub_fwd    (int x1, int x2, int y);
+	inline void div_fwd    (int x1, int x2, int y);
+	inline void max_fwd    (int x1, int x2, int y);
+	inline void min_fwd    (int x1, int x2, int y);
+	inline void atan2_fwd  (int x1, int x2, int y);
+	inline void minus_fwd  (int x, int y);
+	inline void trans_V_fwd(int x, int y);
+	inline void trans_M_fwd(int x, int y);
+	inline void sign_fwd   (int x, int y);
+	inline void abs_fwd    (int x, int y);
+	inline void power_fwd  (int x, int y, int p);
+	inline void sqr_fwd    (int x, int y);
+	inline void sqrt_fwd   (int x, int y);
+	inline void exp_fwd    (int x, int y);
+	inline void log_fwd    (int x, int y);
+	inline void cos_fwd    (int x, int y);
+	inline void sin_fwd    (int x, int y);
+	inline void tan_fwd    (int x, int y);
+	inline void cosh_fwd   (int x, int y);
+	inline void sinh_fwd   (int x, int y);
+	inline void tanh_fwd   (int x, int y);
+	inline void acos_fwd   (int x, int y);
+	inline void asin_fwd   (int x, int y);
+	inline void atan_fwd   (int x, int y);
+	inline void acosh_fwd  (int x, int y);
+	inline void asinh_fwd  (int x, int y);
+	inline void atanh_fwd  (int x, int y);
+	inline void add_V_fwd  (int x1, int x2, int y);
+	inline void add_M_fwd  (int x1, int x2, int y);
+	inline void mul_SV_fwd (int x1, int x2, int y);
+	inline void mul_SM_fwd (int x1, int x2, int y);
+	inline void mul_VV_fwd (int x1, int x2, int y);
+	inline void mul_MV_fwd (int x1, int x2, int y);
+	inline void mul_VM_fwd (int x1, int x2, int y);
+	inline void mul_MM_fwd (int x1, int x2, int y);
+	inline void sub_V_fwd  (int x1, int x2, int y);
+	inline void sub_M_fwd  (int x1, int x2, int y);
 
+	Function& f;
+	ExprDomain d;
 };
 
 /* ============================================================================
  	 	 	 	 	 	 	 implementation
   ============================================================================*/
 
-inline void Eval::index_fwd(const ExprIndex& , const ExprLabel& , ExprLabel& ) { /* nothing to do */ }
+inline void Eval::index_fwd(int, int) { /* nothing to do */ }
 
-inline void Eval::symbol_fwd(const ExprSymbol& , ExprLabel& ) { /* nothing to do */ }
+inline void Eval::symbol_fwd(int) { /* nothing to do */ }
 
-inline void Eval::cst_fwd(const ExprConstant& c, ExprLabel& y) {
+inline void Eval::cst_fwd(int y) {
+	const ExprConstant& c = (const ExprConstant&) f.node(y);
 	switch (c.type()) {
-	case Dim::SCALAR:       y.d->i() = c.get_value();         break;
+	case Dim::SCALAR:       d[y].i() = c.get_value();         break;
 	case Dim::ROW_VECTOR:
-	case Dim::COL_VECTOR:   y.d->v() = c.get_vector_value();  break;
-	case Dim::MATRIX:       y.d->m() = c.get_matrix_value();  break;
+	case Dim::COL_VECTOR:   d[y].v() = c.get_vector_value();  break;
+	case Dim::MATRIX:       d[y].m() = c.get_matrix_value();  break;
 	case Dim::MATRIX_ARRAY: assert(false); /* impossible */ break;
 	}
 }
-inline void Eval::apply_fwd(const ExprApply& a, ExprLabel** x, ExprLabel& y)                          { *y.d = eval(a.func,x); }
-inline void Eval::chi_fwd(const ExprChi&, const ExprLabel& x1, const ExprLabel& x2, const ExprLabel& x3, ExprLabel& y) { y.d->i() = chi(x1.d->i(),x2.d->i(),x3.d->i()); }
-inline void Eval::add_fwd(const ExprAdd&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)     { y.d->i()=x1.d->i()+x2.d->i(); }
-inline void Eval::mul_fwd(const ExprMul&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)     { y.d->i()=x1.d->i()*x2.d->i(); }
-inline void Eval::sub_fwd(const ExprSub&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)     { y.d->i()=x1.d->i()-x2.d->i(); }
-inline void Eval::div_fwd(const ExprDiv&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)     { y.d->i()=x1.d->i()/x2.d->i(); }
-inline void Eval::max_fwd(const ExprMax&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)     { y.d->i()=max(x1.d->i(),x2.d->i()); }
-inline void Eval::min_fwd(const ExprMin&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)     { y.d->i()=min(x1.d->i(),x2.d->i()); }
-inline void Eval::atan2_fwd(const ExprAtan2&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y) { y.d->i()=atan2(x1.d->i(),x2.d->i()); }
 
-inline void Eval::minus_fwd(const ExprMinus&, const ExprLabel& x, ExprLabel& y)                       { y.d->i()=-x.d->i(); }
-inline void Eval::sign_fwd(const ExprSign&, const ExprLabel& x, ExprLabel& y)                         { y.d->i()=sign(x.d->i()); }
-inline void Eval::abs_fwd(const ExprAbs&, const ExprLabel& x, ExprLabel& y)                           { y.d->i()=abs(x.d->i()); }
-inline void Eval::power_fwd(const ExprPower& p, const ExprLabel& x, ExprLabel& y)                     { y.d->i()=pow(x.d->i(),p.expon); }
-inline void Eval::sqr_fwd(const ExprSqr&, const ExprLabel& x, ExprLabel& y)                           { y.d->i()=sqr(x.d->i()); }
-inline void Eval::sqrt_fwd(const ExprSqrt&, const ExprLabel& x, ExprLabel& y)                         { if ((y.d->i()=sqrt(x.d->i())).is_empty()) throw EmptyBoxException(); }
-inline void Eval::exp_fwd(const ExprExp&, const ExprLabel& x, ExprLabel& y)                           { y.d->i()=exp(x.d->i()); }
-inline void Eval::log_fwd(const ExprLog&, const ExprLabel& x, ExprLabel& y)                           { if ((y.d->i()=log(x.d->i())).is_empty()) throw EmptyBoxException(); }
-inline void Eval::cos_fwd(const ExprCos&, const ExprLabel& x, ExprLabel& y)                           { y.d->i()=cos(x.d->i()); }
-inline void Eval::sin_fwd(const ExprSin&, const ExprLabel& x, ExprLabel& y)                           { y.d->i()=sin(x.d->i()); }
-inline void Eval::tan_fwd(const ExprTan&, const ExprLabel& x, ExprLabel& y)                           { if ((y.d->i()=tan(x.d->i())).is_empty()) throw EmptyBoxException(); }
-inline void Eval::cosh_fwd(const ExprCosh&, const ExprLabel& x, ExprLabel& y)                         { y.d->i()=cosh(x.d->i()); }
-inline void Eval::sinh_fwd(const ExprSinh&, const ExprLabel& x, ExprLabel& y)                         { y.d->i()=sinh(x.d->i()); }
-inline void Eval::tanh_fwd(const ExprTanh&, const ExprLabel& x, ExprLabel& y)                         { y.d->i()=tanh(x.d->i()); }
-inline void Eval::acos_fwd(const ExprAcos&, const ExprLabel& x, ExprLabel& y)                         { if ((y.d->i()=acos(x.d->i())).is_empty()) throw EmptyBoxException(); }
-inline void Eval::asin_fwd(const ExprAsin&, const ExprLabel& x, ExprLabel& y)                         { if ((y.d->i()=asin(x.d->i())).is_empty()) throw EmptyBoxException(); }
-inline void Eval::atan_fwd(const ExprAtan&, const ExprLabel& x, ExprLabel& y)                         { y.d->i()=atan(x.d->i()); }
-inline void Eval::acosh_fwd(const ExprAcosh&, const ExprLabel& x, ExprLabel& y)                       { if ((y.d->i()=acosh(x.d->i())).is_empty()) throw EmptyBoxException(); }
-inline void Eval::asinh_fwd(const ExprAsinh&, const ExprLabel& x, ExprLabel& y)                       { y.d->i()=asinh(x.d->i()); }
-inline void Eval::atanh_fwd(const ExprAtanh&, const ExprLabel& x, ExprLabel& y)                       { if ((y.d->i()=atanh(x.d->i())).is_empty()) throw EmptyBoxException(); }
+inline void Eval::chi_fwd(int x1, int x2, int x3, int y) { d[y].i() = chi(d[x1].i(),d[x2].i(),d[x3].i()); }
+inline void Eval::add_fwd(int x1, int x2, int y)   { d[y].i()=d[x1].i()+d[x2].i(); }
+inline void Eval::mul_fwd(int x1, int x2, int y)   { d[y].i()=d[x1].i()*d[x2].i(); }
+inline void Eval::sub_fwd(int x1, int x2, int y)   { d[y].i()=d[x1].i()-d[x2].i(); }
+inline void Eval::div_fwd(int x1, int x2, int y)   { d[y].i()=d[x1].i()/d[x2].i(); }
+inline void Eval::max_fwd(int x1, int x2, int y)   { d[y].i()=max(d[x1].i(),d[x2].i()); }
+inline void Eval::min_fwd(int x1, int x2, int y)   { d[y].i()=min(d[x1].i(),d[x2].i()); }
+inline void Eval::atan2_fwd(int x1, int x2, int y) { d[y].i()=atan2(d[x1].i(),d[x2].i()); }
 
-inline void Eval::trans_V_fwd(const ExprTrans&, const ExprLabel& x, ExprLabel& y)                     { y.d->v()=x.d->v(); }
-inline void Eval::trans_M_fwd(const ExprTrans&, const ExprLabel& x, ExprLabel& y)                     { y.d->m()=x.d->m().transpose(); }
-inline void Eval::add_V_fwd(const ExprAdd&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)   { y.d->v()=x1.d->v()+x2.d->v(); }
-inline void Eval::add_M_fwd(const ExprAdd&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)   { y.d->m()=x1.d->m()+x2.d->m(); }
-inline void Eval::mul_SV_fwd(const ExprMul&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)  { y.d->v()=x1.d->i()*x2.d->v(); }
-inline void Eval::mul_SM_fwd(const ExprMul&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)  { y.d->m()=x1.d->i()*x2.d->m(); }
-inline void Eval::mul_VV_fwd(const ExprMul&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)  { y.d->i()=x1.d->v()*x2.d->v(); }
-inline void Eval::mul_MV_fwd(const ExprMul&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)  { y.d->v()=x1.d->m()*x2.d->v(); }
-inline void Eval::mul_VM_fwd(const ExprMul&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)  { y.d->v()=x1.d->v()*x2.d->m(); }
-inline void Eval::mul_MM_fwd(const ExprMul&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)  { y.d->m()=x1.d->m()*x2.d->m(); }
-inline void Eval::sub_V_fwd(const ExprSub&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)   { y.d->v()=x1.d->v()-x2.d->v(); }
-inline void Eval::sub_M_fwd(const ExprSub&, const ExprLabel& x1, const ExprLabel& x2, ExprLabel& y)   { y.d->m()=x1.d->m()-x2.d->m(); }
+inline void Eval::minus_fwd(int x, int y)          { d[y].i()=-d[x].i(); }
+inline void Eval::sign_fwd(int x, int y)           { d[y].i()=sign(d[x].i()); }
+inline void Eval::abs_fwd(int x, int y)            { d[y].i()=abs(d[x].i()); }
+inline void Eval::power_fwd(int x, int y, int p)   { d[y].i()=pow(d[x].i(),p); }
+inline void Eval::sqr_fwd(int x, int y)            { d[y].i()=sqr(d[x].i()); }
+inline void Eval::sqrt_fwd(int x, int y)           { if ((d[y].i()=sqrt(d[x].i())).is_empty()) throw EmptyBoxException(); }
+inline void Eval::exp_fwd(int x, int y)            { d[y].i()=exp(d[x].i()); }
+inline void Eval::log_fwd(int x, int y)            { if ((d[y].i()=log(d[x].i())).is_empty()) throw EmptyBoxException(); }
+inline void Eval::cos_fwd(int x, int y)            { d[y].i()=cos(d[x].i()); }
+inline void Eval::sin_fwd(int x, int y)            { d[y].i()=sin(d[x].i()); }
+inline void Eval::tan_fwd(int x, int y)            { if ((d[y].i()=tan(d[x].i())).is_empty()) throw EmptyBoxException(); }
+inline void Eval::cosh_fwd(int x, int y)           { d[y].i()=cosh(d[x].i()); }
+inline void Eval::sinh_fwd(int x, int y)           { d[y].i()=sinh(d[x].i()); }
+inline void Eval::tanh_fwd(int x, int y)           { d[y].i()=tanh(d[x].i()); }
+inline void Eval::acos_fwd(int x, int y)           { if ((d[y].i()=acos(d[x].i())).is_empty()) throw EmptyBoxException(); }
+inline void Eval::asin_fwd(int x, int y)           { if ((d[y].i()=asin(d[x].i())).is_empty()) throw EmptyBoxException(); }
+inline void Eval::atan_fwd(int x, int y)           { d[y].i()=atan(d[x].i()); }
+inline void Eval::acosh_fwd(int x, int y)          { if ((d[y].i()=acosh(d[x].i())).is_empty()) throw EmptyBoxException(); }
+inline void Eval::asinh_fwd(int x, int y)          { d[y].i()=asinh(d[x].i()); }
+inline void Eval::atanh_fwd(int x, int y)          { if ((d[y].i()=atanh(d[x].i())).is_empty()) throw EmptyBoxException(); }
+
+inline void Eval::trans_V_fwd(int x, int y)        { d[y].v()=d[x].v(); }
+inline void Eval::trans_M_fwd(int x, int y)        { d[y].m()=d[x].m().transpose(); }
+inline void Eval::add_V_fwd(int x1, int x2, int y) { d[y].v()=d[x1].v()+d[x2].v(); }
+inline void Eval::add_M_fwd(int x1, int x2, int y) { d[y].m()=d[x1].m()+d[x2].m(); }
+inline void Eval::mul_SV_fwd(int x1, int x2, int y){ d[y].v()=d[x1].i()*d[x2].v(); }
+inline void Eval::mul_SM_fwd(int x1, int x2, int y){ d[y].m()=d[x1].i()*d[x2].m(); }
+inline void Eval::mul_VV_fwd(int x1, int x2, int y){ d[y].i()=d[x1].v()*d[x2].v(); }
+inline void Eval::mul_MV_fwd(int x1, int x2, int y){ d[y].v()=d[x1].m()*d[x2].v(); }
+inline void Eval::mul_VM_fwd(int x1, int x2, int y){ d[y].v()=d[x1].v()*d[x2].m(); }
+inline void Eval::mul_MM_fwd(int x1, int x2, int y){ d[y].m()=d[x1].m()*d[x2].m(); }
+inline void Eval::sub_V_fwd(int x1, int x2, int y) { d[y].v()=d[x1].v()-d[x2].v(); }
+inline void Eval::sub_M_fwd(int x1, int x2, int y) { d[y].m()=d[x1].m()-d[x2].m(); }
 
 } // namespace ibex
-#endif // IBEX_EVAL_H_
+
+#endif // __IBEX_EVAL_H__

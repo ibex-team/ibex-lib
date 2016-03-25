@@ -43,14 +43,14 @@ void TestCtcExist::test01() {
 	sx.next(sols);
 	// note: we use the fact that the solver always explores the right
 	// branch first
-	TEST_ASSERT(sols.back()[0].contains(right_bound));
+	CPPUNIT_ASSERT(sols.back()[0].contains(right_bound));
 
 	sols.clear();
 	Solver sy(exist_x,rr,stack);
 	sy.start(box);
 	sy.next(sols);
 	// note: we use the fact that the constraint is symmetric in x/y
-	TEST_ASSERT(sols.back()[0].contains(right_bound));
+	CPPUNIT_ASSERT(sols.back()[0].contains(right_bound));
 
 }
 

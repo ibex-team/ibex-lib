@@ -12,23 +12,26 @@
 #ifndef __TEST_VAR_SET_H__
 #define __TEST_VAR_SET_H__
 
-#include "cpptest.h"
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
 #include "utils.h"
 
 namespace ibex {
 
-class TestVarSet : public TestIbex {
+class TestVarSet : public CppUnit::TestFixture {
 
 public:
-	TestVarSet() {
 
-		TEST_ADD(TestVarSet::test01);
-		TEST_ADD(TestVarSet::test02);
-		TEST_ADD(TestVarSet::test03);
-		TEST_ADD(TestVarSet::test04);
-		TEST_ADD(TestVarSet::test05);
-		TEST_ADD(TestVarSet::test06);
-	}
+	CPPUNIT_TEST_SUITE(TestVarSet);
+	
+
+		CPPUNIT_TEST(test01);
+		CPPUNIT_TEST(test02);
+		CPPUNIT_TEST(test03);
+		CPPUNIT_TEST(test04);
+		CPPUNIT_TEST(test05);
+		CPPUNIT_TEST(test06);
+	CPPUNIT_TEST_SUITE_END();
 
 	void test01();
 	void test02();
@@ -37,6 +40,9 @@ public:
 	void test05();
 	void test06();
 };
+
+CPPUNIT_TEST_SUITE_REGISTRATION(TestVarSet);
+
 
 } // namespace ibex
 #endif // __TEST_VAR_SET_H__

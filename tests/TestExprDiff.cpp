@@ -22,8 +22,8 @@ void TestExprDiff::linear01() {
 	Function f(x,y,2*x+3*y);
 	Function df(f,Function::DIFF);
 	const ExprConstant* c=dynamic_cast<const ExprConstant*>(&df.expr());
-	TEST_ASSERT(c);
-	TEST_ASSERT(c->dim.type()==Dim::ROW_VECTOR);
+	CPPUNIT_ASSERT(c);
+	CPPUNIT_ASSERT(c->dim.type()==Dim::ROW_VECTOR);
 	double _grad[][2] = {{2,2},{3,3}};
 	IntervalVector grad(2,_grad);
 	check(c->get_vector_value(),grad);
@@ -32,12 +32,12 @@ void TestExprDiff::linear01() {
 void TestExprDiff::poly01() {
 
 	Variable x("x"),y("y");
-	Function f(x,y,((sqr(x)+2*x*y)+pow(y,3))+1);
+	Function f(x,y,((sqr(x)+2*(x*y))+pow(y,3))+1);
 	Function df(f,Function::DIFF);
 	const ExprVector* v=dynamic_cast<const ExprVector*>(&df.expr());
-	TEST_ASSERT(v);
-	TEST_ASSERT(v->dim.type()==Dim::ROW_VECTOR);
-	TEST_ASSERT(sameExpr(v->arg(0),"((2*x)+(2*y))")
+	CPPUNIT_ASSERT(v);
+	CPPUNIT_ASSERT(v->dim.type()==Dim::ROW_VECTOR);
+	CPPUNIT_ASSERT(sameExpr(v->arg(0),"((2*x)+(2*y))")
 			|| sameExpr(v->arg(0),"((2*y)+(2*x))")
 			||sameExpr(v->arg(0),"(([2,2]*x)+(2*y))")
 			|| sameExpr(v->arg(0),"((2*y)+([2,2]*x))")
@@ -45,7 +45,7 @@ void TestExprDiff::poly01() {
 			||sameExpr(v->arg(0),"(([2,2]*y)+(2*x))")
 			|| sameExpr(v->arg(0),"((2*x)+([2,2]*y))")
 			|| sameExpr(v->arg(0),"(([2,2]*x)+([2,2]*y))"));
-	TEST_ASSERT(sameExpr(v->arg(1),"((2*x)+(3*y^2))")
+	CPPUNIT_ASSERT(sameExpr(v->arg(1),"((2*x)+(3*y^2))")
 			||sameExpr(v->arg(1),"(([2,2]*x)+([3,3]*y^2))")
 			||sameExpr(v->arg(1),"((2*x)+([3,3]*y^2))")
 			||sameExpr(v->arg(1),"(([2,2]*x)+(3*y^2))"));
@@ -55,8 +55,8 @@ void TestExprDiff::one_var_one_func() {
 	Variable x("x");
 	Function f(x,sqr(x)+1);
 	Function df(f,Function::DIFF);
-	TEST_ASSERT(df.expr().dim.type()==Dim::SCALAR);
-	TEST_ASSERT(sameExpr(df.expr(),"(2*x)")
+	CPPUNIT_ASSERT(df.expr().dim.type()==Dim::SCALAR);
+	CPPUNIT_ASSERT(sameExpr(df.expr(),"(2*x)")
 			||sameExpr(df.expr(),"([2,2]*x)"));
 }
 
@@ -66,12 +66,12 @@ void TestExprDiff::vec01() {
 	Function f(x,x[0]+x[3]);
 	Function df(f,Function::DIFF);
 	const ExprConstant* c=dynamic_cast<const ExprConstant*>(&df.expr());
-	TEST_ASSERT(c);
-	TEST_ASSERT(c->dim.type()==Dim::ROW_VECTOR);
+	CPPUNIT_ASSERT(c);
+	CPPUNIT_ASSERT(c->dim.type()==Dim::ROW_VECTOR);
 	double _grad[][2] = {{1,1},{0,0},{0,0},{1,1}};
 	IntervalVector grad(4,_grad);
 
-	TEST_ASSERT(c->get_vector_value()==grad);
+	CPPUNIT_ASSERT(c->get_vector_value()==grad);
 }
 
 void TestExprDiff::vec02() {
@@ -79,10 +79,10 @@ void TestExprDiff::vec02() {
 	Function f(x,x[0]*x[3]);
 	Function df(f,Function::DIFF);
 	const ExprVector* v=dynamic_cast<const ExprVector*>(&df.expr());
-	TEST_ASSERT(v);
-	TEST_ASSERT(v->dim.type()==Dim::ROW_VECTOR);
-	TEST_ASSERT(sameExpr(v->arg(0),x[3]));
-	TEST_ASSERT(sameExpr(v->arg(3),x[0]));
+	CPPUNIT_ASSERT(v);
+	CPPUNIT_ASSERT(v->dim.type()==Dim::ROW_VECTOR);
+	CPPUNIT_ASSERT(sameExpr(v->arg(0),x[3]));
+	CPPUNIT_ASSERT(sameExpr(v->arg(3),x[0]));
 }
 
 void TestExprDiff::vec03() {
@@ -92,10 +92,10 @@ void TestExprDiff::vec03() {
 	Function f(x,vec1[1]);
 	Function df(f,Function::DIFF);
 	const ExprConstant* c=dynamic_cast<const ExprConstant*>(&df.expr());
-	TEST_ASSERT(c);
-	TEST_ASSERT(c->dim.type()==Dim::ROW_VECTOR);
+	CPPUNIT_ASSERT(c);
+	CPPUNIT_ASSERT(c->dim.type()==Dim::ROW_VECTOR);
 	double _v[][2]= {{0,0},{1,1}};
-	TEST_ASSERT(c->get_vector_value()==IntervalVector(2,_v));
+	CPPUNIT_ASSERT(c->get_vector_value()==IntervalVector(2,_v));
 }
 
 void TestExprDiff::mat01() {
@@ -103,11 +103,11 @@ void TestExprDiff::mat01() {
 	Function f(x,x[1][0]);
 	Function df(f,Function::DIFF);
 	const ExprConstant* c=dynamic_cast<const ExprConstant*>(&df.expr());
-	TEST_ASSERT(c!=NULL);
-	//TEST_ASSERT(c->dim.type()==Dim::MATRIX);
+	CPPUNIT_ASSERT(c!=NULL);
+	//CPPUNIT_ASSERT(c->dim.type()==Dim::MATRIX);
 	double _M[][2]= {{0,0},{0,0},{1,1},{0,0}};
-	//TEST_ASSERT(c->get_matrix_value()==IntervalMatrix(2,2,_M));
-	TEST_ASSERT(c->get_vector_value()==IntervalVector(4,_M));
+	//CPPUNIT_ASSERT(c->get_matrix_value()==IntervalMatrix(2,2,_M));
+	CPPUNIT_ASSERT(c->get_vector_value()==IntervalVector(4,_M));
 }
 
 void TestExprDiff::mat02() {
@@ -116,11 +116,11 @@ void TestExprDiff::mat02() {
 	Function f(x,vec1[1][0]);
 	Function df(f,Function::DIFF);
 	const ExprConstant* c=dynamic_cast<const ExprConstant*>(&df.expr());
-	TEST_ASSERT(c!=NULL);
-	//TEST_ASSERT(c->dim.type()==Dim::MATRIX);
+	CPPUNIT_ASSERT(c!=NULL);
+	//CPPUNIT_ASSERT(c->dim.type()==Dim::MATRIX);
 	double _M[][2]= {{0,0},{0,0},{1,1},{0,0}};
-	//TEST_ASSERT(c->get_matrix_value()==IntervalMatrix(2,2,_M));
-	TEST_ASSERT(c->get_vector_value()==IntervalVector(4,_M));
+	//CPPUNIT_ASSERT(c->get_matrix_value()==IntervalMatrix(2,2,_M));
+	CPPUNIT_ASSERT(c->get_vector_value()==IntervalVector(4,_M));
 }
 
 void TestExprDiff::apply01() {
@@ -128,10 +128,12 @@ void TestExprDiff::apply01() {
 	Function f(x,sqr(x),"f");
 	Function g(x,f(3*x));
 	Function dg(g,Function::DIFF);
-	TEST_ASSERT(sameExpr(f.diff().expr(),"(2*x)")
+	CPPUNIT_ASSERT(sameExpr(f.diff().expr(),"(2*x)")
 			||sameExpr(f.diff().expr(),"([2,2]*x)"));
-	TEST_ASSERT(sameExpr(dg.expr(),"(3*df((3*x)))")
-			||sameExpr(dg.expr(),"([3,3]*df((3*x)))"));
+	CPPUNIT_ASSERT(sameExpr(dg.expr(),"(3*df((3*x)))")
+			||sameExpr(dg.expr(),"([3,3]*df((3*x)))")
+			||sameExpr(dg.expr(),"(df((3*x))*[3,3])")
+			||sameExpr(dg.expr(),"(df((3*x))*3)"));
 }
 
 void TestExprDiff::apply02() {
@@ -139,8 +141,10 @@ void TestExprDiff::apply02() {
 	Function f(x,sqr(x),"f");
 	Function g(x,3*f(x));
 	Function dg(g,Function::DIFF);
-	TEST_ASSERT(sameExpr(dg.expr(),"(df(x)*3)")
-			||sameExpr(dg.expr(),"(df(x)*[3,3])"));
+	CPPUNIT_ASSERT(sameExpr(dg.expr(),"(df(x)*3)")
+			||sameExpr(dg.expr(),"(df(x)*[3,3])")
+			||sameExpr(dg.expr(),"(3*df(x))")
+			||sameExpr(dg.expr(),"([3,3]*df(x))"));
 }
 
 void TestExprDiff::apply03() {
@@ -148,13 +152,20 @@ void TestExprDiff::apply03() {
 	Function f(x,y,x*y,"f");
 	Function g(x,y,f(2*x,3*y));
 	Function dg(g,Function::DIFF);
-	TEST_ASSERT(sameExpr(dg.expr(),"((2*df((2*x),(3*y))[0]),(3*df((2*x),(3*y))[1]))"));
+
+	// TODO: there are actually many different equivalent expressions of
+	// the differential.
+	// What should we exactly test? Probably requires expression equivalence
+	// operator but this is known to be a difficult task...
+	//	CPPUNIT_ASSERT(sameExpr(dg.expr(),"((2*df((2*x),(3*y))[0]),(3*df((2*x),(3*y))[1]))"));
+	CPPUNIT_ASSERT(sameExpr(dg.expr(),"((df((2*x),(3*y))[0]*2),(df((2*x),(3*y))[1]*3))"));
+
 	double _box[][2]={{1,1},{2,2}};
 	double _dg_box[][2]={{12,12},{6,6}};
 	IntervalVector dg_box(dg.eval_vector(IntervalVector(2,_box)));
-	//TEST_ASSERT(dg_box==IntervalVector(2,_dg_box));
+	//CPPUNIT_ASSERT(dg_box==IntervalVector(2,_dg_box));
 	check(dg_box,IntervalVector(2,_dg_box));
-	TEST_ASSERT(dg_box.is_superset(IntervalVector(2,_dg_box)));
+	CPPUNIT_ASSERT(dg_box.is_superset(IntervalVector(2,_dg_box)));
 }
 
 void TestExprDiff::cst_grad() {
@@ -163,14 +174,14 @@ void TestExprDiff::cst_grad() {
 	const ExprNode& y=df.expr();
 	const ExprConstant* c = dynamic_cast<const ExprConstant*>(&y);
 
-	TEST_ASSERT(c);
-	TEST_ASSERT(c->dim.is_vector());
+	CPPUNIT_ASSERT(c);
+	CPPUNIT_ASSERT(c->dim.is_vector());
 	IntervalVector v(3);
 	v[0]=Interval(10,10);
 	v[1]=Interval(-10,-10);
 	v[2]=Interval(0,0);
 	check(c->get_vector_value(),v);
-	TEST_ASSERT((c->get_vector_value()).is_superset(v));
+	CPPUNIT_ASSERT((c->get_vector_value()).is_superset(v));
 }
 
 
@@ -180,11 +191,11 @@ void TestExprDiff::vecimg01() {
 	const ExprNode& y=df.expr();
 	const ExprConstant* c = dynamic_cast<const ExprConstant*>(&y);
 
-	TEST_ASSERT(c);
-	TEST_ASSERT(c->dim.is_vector());
+	CPPUNIT_ASSERT(c);
+	CPPUNIT_ASSERT(c->dim.is_vector());
 	IntervalVector v(3,Interval(1.0));
 	check(c->get_vector_value(),v);
-	TEST_ASSERT((c->get_vector_value()).is_superset(v));
+	CPPUNIT_ASSERT((c->get_vector_value()).is_superset(v));
 }
 
 void TestExprDiff::vecimg02() {
@@ -193,12 +204,12 @@ void TestExprDiff::vecimg02() {
 	const ExprNode& y=df.expr();
 
 	const ExprConstant* c = dynamic_cast<const ExprConstant*>(&y);
-	TEST_ASSERT(c);
-	TEST_ASSERT(c->dim.is_matrix());
+	CPPUNIT_ASSERT(c);
+	CPPUNIT_ASSERT(c->dim.is_matrix());
 	double _mat[3*2] = {1,0,0,1,-1,0};
 	Matrix mat(3,2,_mat);
 
-	TEST_ASSERT(c->get_matrix_value()==mat);
+	CPPUNIT_ASSERT(c->get_matrix_value()==mat);
 }
 
 
@@ -213,7 +224,7 @@ void TestExprDiff::apply_mul01() {
 	Function h(x2,y2,f(x2,y2)*g(x2,y2));
 	Function dh(h,Function::DIFF);
 
-	TEST_ASSERT(sameExpr(dh.expr(),"(((df(x,y)[0]*g(x,y))+(dg(x,y)[0]*f(x,y))),((df(x,y)[1]*g(x,y))+(dg(x,y)[1]*f(x,y))))"));
+	CPPUNIT_ASSERT(sameExpr(dh.expr(),"(((df(x,y)[0]*g(x,y))+(dg(x,y)[0]*f(x,y))),((df(x,y)[1]*g(x,y))+(dg(x,y)[1]*f(x,y))))"));
 }
 
 void TestExprDiff::apply_mul02() {
@@ -229,7 +240,7 @@ void TestExprDiff::apply_mul02() {
 //	Function dg(g,Function::DIFF);
 //
 //	cout << "DG=" << dg << endl;
-//	TEST_ASSERT(sameExpr(dh.expr(),"(((df(x,y)[0]*g(x,y))+(dg(x,y)[0]*f(x,y))),((df(x,y)[1]*g(x,y))+(dg(x,y)[1]*f(x,y))))"));
+//	CPPUNIT_ASSERT(sameExpr(dh.expr(),"(((df(x,y)[0]*g(x,y))+(dg(x,y)[0]*f(x,y))),((df(x,y)[1]*g(x,y))+(dg(x,y)[1]*f(x,y))))"));
 }
 
 } // end namespace

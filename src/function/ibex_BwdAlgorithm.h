@@ -9,8 +9,8 @@
  * Created     : Jan 22, 2012
  * ---------------------------------------------------------------------------- */
 
-#ifndef _IBEX_BWD_ALGORITHM_H_
-#define _IBEX_BWD_ALGORITHM_H_
+#ifndef __IBEX_BWD_ALGORITHM_H__
+#define __IBEX_BWD_ALGORITHM_H__
 
 #include "ibex_Expr.h"
 
@@ -24,144 +24,144 @@ class BwdAlgorithm {
 
 protected:
 	/** TO BE DEFINED (by the subclass) */
-	void index_bwd(const ExprIndex&, ExprLabel& exprL, const ExprLabel& result);
+	void index_bwd(const ExprIndex&, int x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void vector_bwd(const ExprVector&, ExprLabel** compL, const ExprLabel& result);
+	void vector_bwd(const ExprVector&, int* x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void symbol_bwd(const ExprSymbol&, const ExprLabel& result);
+	void symbol_bwd(const ExprSymbol&, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void cst_bwd(const ExprConstant&, const ExprLabel& result);
+	void cst_bwd(const ExprConstant&, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void apply_bwd(const ExprApply&, ExprLabel** argL, const ExprLabel& result);
+	void apply_bwd(const ExprApply&, int* x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void chi_bwd(const ExprChi&,  ExprLabel& a, ExprLabel& b, ExprLabel& c, const ExprLabel& result);
+	void chi_bwd(const ExprChi&,  int a, int b, int c, int y);
 
 	/*==================== binary operators =========================*/
 	/** TO BE DEFINED (by the subclass) */
-	void add_bwd(const ExprAdd&, ExprLabel& leftL, ExprLabel& rightL, const ExprLabel& result);
+	void add_bwd(const ExprAdd&, int x1, int x2, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void add_V_bwd(const ExprAdd&, ExprLabel& leftL, ExprLabel& rightL, const ExprLabel& result);
+	void add_V_bwd(const ExprAdd&, int x1, int x2, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void add_M_bwd(const ExprAdd&, ExprLabel& leftL, ExprLabel& rightL, const ExprLabel& result);
+	void add_M_bwd(const ExprAdd&, int x1, int x2, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void mul_bwd(const ExprMul&, ExprLabel& leftL, ExprLabel& rightL, const ExprLabel& result);
+	void mul_bwd(const ExprMul&, int x1, int x2, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void mul_SV_bwd(const ExprMul&, ExprLabel& leftL, ExprLabel& rightL, const ExprLabel& result);
+	void mul_SV_bwd(const ExprMul&, int x1, int x2, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void mul_SM_bwd(const ExprMul&, ExprLabel& leftL, ExprLabel& rightL, const ExprLabel& result);
+	void mul_SM_bwd(const ExprMul&, int x1, int x2, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void mul_VV_bwd(const ExprMul&, ExprLabel& leftL, ExprLabel& rightL, const ExprLabel& result);
+	void mul_VV_bwd(const ExprMul&, int x1, int x2, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void mul_MV_bwd(const ExprMul&, ExprLabel& leftL, ExprLabel& rightL, const ExprLabel& result);
+	void mul_MV_bwd(const ExprMul&, int x1, int x2, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void mul_VM_bwd(const ExprMul&, ExprLabel& leftL, ExprLabel& rightL, const ExprLabel& result);
+	void mul_VM_bwd(const ExprMul&, int x1, int x2, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void mul_MM_bwd(const ExprMul&, ExprLabel& leftL, ExprLabel& rightL, const ExprLabel& result);
+	void mul_MM_bwd(const ExprMul&, int x1, int x2, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void sub_bwd(const ExprSub&, ExprLabel& leftL, ExprLabel& rightL, const ExprLabel& result);
+	void sub_bwd(const ExprSub&, int x1, int x2, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void sub_V_bwd(const ExprSub&, ExprLabel& leftL, ExprLabel& rightL, const ExprLabel& result);
+	void sub_V_bwd(const ExprSub&, int x1, int x2, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void sub_M_bwd(const ExprSub&, ExprLabel& leftL, ExprLabel& rightL, const ExprLabel& result);
+	void sub_M_bwd(const ExprSub&, int x1, int x2, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void div_bwd(const ExprDiv&, ExprLabel& leftL, ExprLabel& rightL, const ExprLabel& result);
+	void div_bwd(const ExprDiv&, int x1, int x2, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void max_bwd(const ExprMax&, ExprLabel& leftL, ExprLabel& rightL, const ExprLabel& result);
+	void max_bwd(const ExprMax&, int x1, int x2, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void min_bwd(const ExprMin&, ExprLabel& leftL, ExprLabel& rightL, const ExprLabel& result);
+	void min_bwd(const ExprMin&, int x1, int x2, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void atan2_bwd(const ExprAtan2&, ExprLabel& leftL, ExprLabel& rightL, const ExprLabel& result);
+	void atan2_bwd(const ExprAtan2&, int x1, int x2, int y);
 
 	/*==================== unary operators =========================*/
 
 	/** TO BE DEFINED (by the subclass) */
-	void minus_bwd(const ExprMinus&, ExprLabel& exprL, const ExprLabel& result);
+	void minus_bwd(const ExprMinus&, int x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void trans_V_bwd(const ExprTrans&, ExprLabel& exprL, const ExprLabel& result);
+	void trans_V_bwd(const ExprTrans&, int x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void trans_M_bwd(const ExprTrans&, ExprLabel& exprL, const ExprLabel& result);
+	void trans_M_bwd(const ExprTrans&, int x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void sign_bwd(const ExprSign&, ExprLabel& exprL, const ExprLabel& result);
+	void sign_bwd(const ExprSign&, int x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void abs_bwd(const ExprAbs&, ExprLabel& exprL, const ExprLabel& result);
+	void abs_bwd(const ExprAbs&, int x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void power_bwd(const ExprPower&, ExprLabel& exprL, const ExprLabel& result);
+	void power_bwd(const ExprPower&, int x, int y, int p);
 
 	/** TO BE DEFINED (by the subclass) */
-	void sqr_bwd(const ExprSqr&, ExprLabel& exprL, const ExprLabel& result);
+	void sqr_bwd(const ExprSqr&, int x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void sqrt_bwd(const ExprSqrt&, ExprLabel& exprL, const ExprLabel& result);
+	void sqrt_bwd(const ExprSqrt&, int x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void exp_bwd(const ExprExp&, ExprLabel& exprL, const ExprLabel& result);
+	void exp_bwd(const ExprExp&, int x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void log_bwd(const ExprLog&, ExprLabel& exprL, const ExprLabel& result);
+	void log_bwd(const ExprLog&, int x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void cos_bwd(const ExprCos&, ExprLabel& exprL, const ExprLabel& result);
+	void cos_bwd(const ExprCos&, int x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void sin_bwd(const ExprSin&, ExprLabel& exprL, const ExprLabel& result);
+	void sin_bwd(const ExprSin&, int x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void tan_bwd(const ExprTan&, ExprLabel& exprL, const ExprLabel& result);
+	void tan_bwd(const ExprTan&, int x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void cosh_bwd(const ExprCosh&, ExprLabel& exprL, const ExprLabel& result);
+	void cosh_bwd(const ExprCosh&, int x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void sinh_bwd(const ExprSinh&, ExprLabel& exprL, const ExprLabel& result);
+	void sinh_bwd(const ExprSinh&, int x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void tanh_bwd(const ExprTanh&, ExprLabel& exprL, const ExprLabel& result);
+	void tanh_bwd(const ExprTanh&, int x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void acos_bwd(const ExprAcos&, ExprLabel& exprL, const ExprLabel& result);
+	void acos_bwd(const ExprAcos&, int x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void asin_bwd(const ExprAsin&, ExprLabel& exprL, const ExprLabel& result);
+	void asin_bwd(const ExprAsin&, int x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void atan_bwd(const ExprAtan&, ExprLabel& exprL, const ExprLabel& result);
+	void atan_bwd(const ExprAtan&, int x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void acosh_bwd(const ExprAcosh&, ExprLabel& exprL, const ExprLabel& result);
+	void acosh_bwd(const ExprAcosh&, int x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void asinh_bwd(const ExprAsinh&, ExprLabel& exprL, const ExprLabel& result);
+	void asinh_bwd(const ExprAsinh&, int x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void atanh_bwd(const ExprAtanh&, ExprLabel& exprL, const ExprLabel& result);
+	void atanh_bwd(const ExprAtanh&, int x, int y);
 };
 
-
 } // namespace ibex
-#endif // _IBEX_BWD_ALGORITHM_H_
+
+#endif // __IBEX_BWD_ALGORITHM_H__

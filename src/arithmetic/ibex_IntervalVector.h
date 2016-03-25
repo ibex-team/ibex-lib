@@ -24,7 +24,6 @@
 namespace ibex {
 
 class IntervalMatrix; // declared only for friendship
-template<class T> class Affine2MainVector;
 
 /**
  * \ingroup arithmetic
@@ -59,8 +58,6 @@ public:
 	 * \brief Create a copy of \a x.
 	 */
 	IntervalVector(const IntervalVector& x);
-	template<class T>
-	explicit IntervalVector(const Affine2MainVector<T>& x);
 
 	/**
 	 * \brief Create the IntervalVector [bounds[0][0],bounds[0][1]]x...x[bounds[n-1][0],bounds[n-1][1]]
@@ -170,9 +167,6 @@ public:
 	 * \note Emptiness is overridden.
 	 */
 	IntervalVector& operator=(const IntervalVector& x);
-
-	template<class T>
-	IntervalVector& operator=(const Affine2MainVector<T>& x);
 
 	/**
 	 * \brief Set *this to its intersection with x
@@ -546,7 +540,6 @@ public:
 
 private:
 	friend class IntervalMatrix;
-	template<class T> friend class Affine2MainVector;
 
 	IntervalVector() : n(0), vec(NULL) { } // for IntervalMatrix & complementary()
 
@@ -706,35 +699,10 @@ IntervalVector cart_prod(const IntervalVector& x, const IntervalVector& y);
 
 /*============================================ inline implementation ============================================ */
 
-
-
-namespace {
-
 // the following functions are
 // introduced to allow genericity
-//inline bool is_empty(double x)                { return false; }
-//inline bool is_empty(const Interval& x)       { return x.is_empty(); }
-//inline bool is_empty(const Vector& v)         { return false; }
-inline bool is_empty(const IntervalVector& v) { return v.is_empty(); }
-//inline bool is_empty(const Matrix& m)         { return false; }
-//inline bool is_empty(const IntervalMatrix& m) { return m.is_empty(); }
-//template<class T> inline bool is_empty(const Affine2Main<T>& x)       { return x.is_empty(); }
-//template<class T> inline bool is_empty(const Affine2MainVector<T>& v) { return v.is_empty(); }
-//template<class T> inline bool is_empty(const Affine2MainMatrix<T>& m) { return m.is_empty(); }
-
-
-
-//inline void set_empty(double x)          { }
-//inline void set_empty(Interval& x)       { x.set_empty(); }
-//inline void set_empty(Vector& v)         { }
-inline void set_empty(IntervalVector& v) { v.set_empty(); }
-//inline void set_empty(Matrix& m)         { }
-//inline void set_empty(IntervalMatrix& m) { m.set_empty(); }
-//template<class T> inline void set_empty(Affine2Main<T>& x)       { x.set_empty(); }
-//template<class T> inline void set_empty(Affine2MainVector<T>& v) { v.set_empty(); }
-//template<class T> inline void set_empty(Affine2MainMatrix<T>& m) { m.set_empty(); }
-
-} // end namespace anonymous
+inline bool ___is_empty(const IntervalVector& v) { return v.is_empty(); }
+inline void ___set_empty(IntervalVector& v) { v.set_empty(); }
 
 } // end namespace ibex
 

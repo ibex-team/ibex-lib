@@ -146,7 +146,7 @@ void CtcMohcRevise::contract(IntervalVector& b) {
 	}
 
 	//box is feasible
-	z=ctr.f.expr().deco.d->i();
+//	z=ctr.f.expr().deco.d->i();
 
 	if (b.is_empty()) return;
 
@@ -973,8 +973,7 @@ Interval Function_OG::eval(IntervalVector& box) {
 
 Interval Function_OG::eval(IntervalVector& box, bool minrevise) {
 	_eval_leaves(box, minrevise);
-	Eval().eval(_f,_box);
-	return _f.expr().deco.d->i();
+	return _f.eval(_box);
 }
 
 Interval Function_OG::revise(IntervalVector& box, bool minrevise) {
@@ -989,7 +988,7 @@ Interval Function_OG::revise(IntervalVector& box, bool minrevise) {
 
 	_proj_leaves(box);
 
-	return _f.expr().deco.d->i();
+	return _f.basic_evaluator().d.top->i();
 
 }
 

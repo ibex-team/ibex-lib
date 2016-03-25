@@ -8,113 +8,93 @@
 // Last Update : Jul 12, 2012
 //============================================================================
 
+#include "ibex_Function.h"
 #include "ibex_InHC4Revise.h"
-#include "ibex_Eval.h"
 
 namespace ibex {
 
-void InHC4Revise::ibwd(const Function& f, const Domain& y, IntervalVector& x) {
+InHC4Revise::InHC4Revise(Eval& e) : f(e.f), eval(e), d(e.d), p_eval(f), p(p_eval.d) {
 
-	for (int i=0; i<f.nb_nodes(); i++)
-		f.node(i).deco.p->set_empty();
-
-	if (f.eval_domain(x).is_empty()) { x.set_empty(); return; }
-
-	*f.expr().deco.d = y;
-
-	try {
-		f.backward<InHC4Revise>(*this);
-
-		f.read_arg_domains(x);
-
-	} catch(EmptyBoxException&) {
-		x.set_empty();
-	}
 }
 
-void InHC4Revise::ibwd(const Function& f, const Domain& y, IntervalVector& x, const IntervalVector& xin) {
+void InHC4Revise::iproj(const Domain& y, IntervalVector& x) {
+	iproj(y,x,IntervalVector::empty(x.size()));
+}
 
-	Eval e;
+void InHC4Revise::iproj(const Domain& y, IntervalVector& x, const IntervalVector& xin) {
 
 	if (!xin.is_empty()) {
-		e.eval(f,xin);
+		p_eval.eval(xin);
 
-		assert(!f.expr().deco.d->is_empty());
-
-		for (int i=0; i<f.nb_nodes(); i++)
-			*f.node(i).deco.p = *f.node(i).deco.d;
+		assert(!p.top->is_empty());
 	}
 	else {
-		for (int i=0; i<f.nb_nodes(); i++)
-			f.node(i).deco.p->set_empty();
+		for (int i=0; i<f.expr().size; i++)
+			p[i].set_empty();
 	}
 
-	e.eval(f,x);
+	eval.eval(x);
 
-	assert(!f.expr().deco.d->is_empty());
+	if (d.top->is_empty()) {
+		assert(xin.is_empty());
+		x.set_empty();
+		return;
+	}
 
-	*f.expr().deco.d = y;
+	*d.top = y;
 
 	try {
-
 		f.backward<InHC4Revise>(*this);
 
-		f.read_arg_domains(x);
+		d.read_arg_domains(x);
 
 	} catch(EmptyBoxException&) {
+		assert(xin.is_empty());
 		x.set_empty();
 	}
 }
 
-bool InHC4Revise::ibwd(const Function& f, const Domain& y, ExprLabel** x) {
-
-	Eval e;
-
-	// the box to be inflated is found
-	// in the "p" field of the x labels:
-	Array<Domain> argP(f.nb_arg());
-	for (int i=0; i<f.nb_arg(); i++) {
-		argP.set_ref(i,*x[i]->p);
-	}
-
+void InHC4Revise::iproj(const Domain& y, Array<Domain>& x, const Array<Domain>& argP) {
 	if (!argP[0].is_empty()) { // if the first domain is empty, so they all are
-		e.eval(f,argP);
-
-		assert(!f.expr().deco.d->is_empty());
-
-		for (int i=0; i<f.nb_nodes(); i++)
-			*f.node(i).deco.p = *f.node(i).deco.d;
-	}
-	else {
-		for (int i=0; i<f.nb_nodes(); i++)
-			f.node(i).deco.p->set_empty();
+		p_eval.eval(argP);
+	} else {
+		for (int i=0; i<f.expr().size; i++)
+			p[i].set_empty();
 	}
 
-	e.eval(f,x);
+	eval.eval(x);
 
-	assert(!f.expr().deco.d->is_empty());
+	assert(argP[0].is_empty() || !d.top->is_empty());
 
-	*f.expr().deco.d = y;
+	*d.top = y;
 
-	Array<Domain> argD(f.nb_arg());
+	// may throw EmptyBoxException&) {
+	f.backward<InHC4Revise>(*this);
 
-	for (int i=0; i<f.nb_arg(); i++) {
-		argD.set_ref(i,*(x[i]->d));
-	}
-
-	try {
-
-		f.backward<InHC4Revise>(*this);
-
-		f.read_arg_domains(argD);
-
-	} catch(EmptyBoxException&) {
-		// should we force argD to be the empty set here?
-		// (probably no, as long as this function is called
-		// inside InHC4Revise)
-		return false;
-	}
-
-	return true;
+	d.read_arg_domains(x);
 }
+
+void InHC4Revise::apply_bwd(int* x, int y) {
+
+	assert(dynamic_cast<const ExprApply*> (&f.node(y)));
+
+	const ExprApply& a = (const ExprApply&) f.node(y);
+
+	assert(&a.func!=&f); // recursive calls not allowed
+
+	Array<Domain> d2(a.func.nb_arg());
+	Array<Domain> p2(a.func.nb_arg());
+
+	for (int i=0; i<a.func.nb_arg(); i++) {
+		d2.set_ref(i,d[x[i]]);
+		p2.set_ref(i,p[x[i]]);
+	}
+
+	// if next instruction throws an EmptyBoxException,
+	// it will be caught by iproj(...,IntervalVector& x).
+	// (it is a protected function, not called outside of the class
+	// so there is no risk)
+	a.func.inhc4revise().iproj(d[y],d2,p2);
+}
+
 } // end namespace ibex

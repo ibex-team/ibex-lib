@@ -12,25 +12,27 @@
 #ifndef __TEST_CTC_NOT_IN_H__
 #define __TEST_CTC_NOT_IN_H__
 
-#include "cpptest.h"
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
+
 #include "ibex_CtcNotIn.h"
 #include "utils.h"
 
 namespace ibex {
 
-class TestCtcNotIn : public TestIbex {
+class TestCtcNotIn : public CppUnit::TestFixture {
 
 public:
-	TestCtcNotIn() {
 
-		TEST_ADD(TestCtcNotIn::contract01);
-		TEST_ADD(TestCtcNotIn::contract02);
-		TEST_ADD(TestCtcNotIn::contract03);
-		TEST_ADD(TestCtcNotIn::contract04);
-		TEST_ADD(TestCtcNotIn::vector01);
-		TEST_ADD(TestCtcNotIn::vector02);
-		TEST_ADD(TestCtcNotIn::vector03);
-	}
+	CPPUNIT_TEST_SUITE(TestCtcNotIn);
+	CPPUNIT_TEST(contract01);
+	CPPUNIT_TEST(contract02);
+	CPPUNIT_TEST(contract03);
+	CPPUNIT_TEST(contract04);
+	CPPUNIT_TEST(vector01);
+	CPPUNIT_TEST(vector02);
+	CPPUNIT_TEST(vector03);
+	CPPUNIT_TEST_SUITE_END();
 
 	void contract01();
 	void contract02();
@@ -45,5 +47,8 @@ public:
 	void check_not_in(int dim, const IntervalVector& x_input, const IntervalVector& x_expected);
 };
 
+CPPUNIT_TEST_SUITE_REGISTRATION(TestCtcNotIn);
+
 } // namespace ibex
+
 #endif // __TEST_CTC_NOT_IN_H__

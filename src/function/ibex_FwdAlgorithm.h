@@ -9,8 +9,8 @@
  * Created     : Jan 22, 2012
  * ---------------------------------------------------------------------------- */
 
-#ifndef _IBEX_FWD_ALGORITHM_H_
-#define _IBEX_FWD_ALGORITHM_H_
+#ifndef __IBEX_FWD_ALGORITHM_H__
+#define __IBEX_FWD_ALGORITHM_H__
 
 #include "ibex_Expr.h"
 
@@ -23,144 +23,144 @@ namespace ibex {
 class FwdAlgorithm {
 
 	/** TO BE DEFINED (by the subclass) */
-	void index_fwd(const ExprIndex&, const ExprLabel& exprL, ExprLabel& result);
+	void index_fwd(int x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void symbol_fwd(const ExprSymbol&, ExprLabel& result);
+	void symbol_fwd(int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void cst_fwd(const ExprConstant&, ExprLabel& result);
+	void cst_fwd(int y);
 
 	/*==================== n-ary operators =========================*/
 	/** TO BE DEFINED (by the subclass) */
-	void vector_fwd(const ExprVector&, const ExprLabel** compL, ExprLabel& result);
+	void vector_fwd(int* x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void apply_fwd(const ExprApply&, ExprLabel** argL, ExprLabel& result);
+	void apply_fwd(int* x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void chi_fwd(const ExprChi&,  const ExprLabel& a, const ExprLabel& b, const ExprLabel& c, ExprLabel& result);
+	void chi_fwd(int a, int b, int c, int y);
 
 	/*==================== binary operators =========================*/
 	/** TO BE DEFINED (by the subclass) */
-	void add_fwd(const ExprAdd&, const ExprLabel& leftL, const ExprLabel& rightL, ExprLabel& result);
+	void add_fwd(int x1, int x2, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void add_V_fwd(const ExprAdd&, const ExprLabel& leftL, const ExprLabel& rightL, ExprLabel& result);
+	void add_V_fwd(int x1, int x2, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void add_M_fwd(const ExprAdd&, const ExprLabel& leftL, const ExprLabel& rightL, ExprLabel& result);
+	void add_M_fwd(int x1, int x2, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void mul_fwd(const ExprMul&, const ExprLabel& leftL, const ExprLabel& rightL, ExprLabel& result);
+	void mul_fwd(int x1, int x2, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void mul_SV_fwd(const ExprMul&, const ExprLabel& leftL, const ExprLabel& rightL, ExprLabel& result);
+	void mul_SV_fwd(int x1, int x2, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void mul_SM_fwd(const ExprMul&, const ExprLabel& leftL, const ExprLabel& rightL, ExprLabel& result);
+	void mul_SM_fwd(int x1, int x2, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void mul_VV_fwd(const ExprMul&, const ExprLabel& leftL, const ExprLabel& rightL, ExprLabel& result);
+	void mul_VV_fwd(int x1, int x2, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void mul_MV_fwd(const ExprMul&, const ExprLabel& leftL, const ExprLabel& rightL, ExprLabel& result);
+	void mul_MV_fwd(int x1, int x2, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void mul_VM_fwd(const ExprMul&, const ExprLabel& leftL, const ExprLabel& rightL, ExprLabel& result);
+	void mul_VM_fwd(int x1, int x2, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void mul_MM_fwd(const ExprMul&, const ExprLabel& leftL, const ExprLabel& rightL, ExprLabel& result);
+	void mul_MM_fwd(int x1, int x2, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void sub_fwd(const ExprSub&, const ExprLabel& leftL, const ExprLabel& rightL, ExprLabel& result);
+	void sub_fwd(int x1, int x2, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void sub_V_fwd(const ExprSub&, const ExprLabel& leftL, const ExprLabel& rightL, ExprLabel& result);
+	void sub_V_fwd(int x1, int x2, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void sub_M_fwd(const ExprSub&, const ExprLabel& leftL, const ExprLabel& rightL, ExprLabel& result);
+	void sub_M_fwd(int x1, int x2, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void div_fwd(const ExprDiv&, const ExprLabel& leftL, const ExprLabel& rightL, ExprLabel& result);
+	void div_fwd(int x1, int x2, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void max_fwd(const ExprMax&, const ExprLabel& leftL, const ExprLabel& rightL, ExprLabel& result);
+	void max_fwd(int x1, int x2, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void min_fwd(const ExprMin&, const ExprLabel& leftL, const ExprLabel& rightL, ExprLabel& result);
+	void min_fwd(int x1, int x2, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void atan2_fwd(const ExprAtan2&, const ExprLabel& leftL, const ExprLabel& rightL, ExprLabel& result);
+	void atan2_fwd(int x1, int x2, int y);
 
 	/*==================== unary operators =========================*/
 	/** TO BE DEFINED (by the subclass) */
-	void minus_fwd(const ExprMinus&, const ExprLabel& exprL, ExprLabel& result);
+	void minus_fwd(int x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void trans_V_fwd(const ExprTrans&, const ExprLabel& exprL, ExprLabel& result);
+	void trans_V_fwd(int x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void trans_M_fwd(const ExprTrans&, const ExprLabel& exprL, ExprLabel& result);
+	void trans_M_fwd(int x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void sign_fwd(const ExprSign&, const ExprLabel& exprL, ExprLabel& result);
+	void sign_fwd(int x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void abs_fwd(const ExprAbs&, const ExprLabel& exprL, ExprLabel& result);
+	void abs_fwd(int x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void power_fwd(const ExprPower&, const ExprLabel& exprL, ExprLabel& result);
+	void power_fwd(int x, int y, int p);
 
 	/** TO BE DEFINED (by the subclass) */
-	void sqr_fwd(const ExprSqr&, const ExprLabel& exprL, ExprLabel& result);
+	void sqr_fwd(int x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void sqrt_fwd(const ExprSqrt&, const ExprLabel& exprL, ExprLabel& result);
+	void sqrt_fwd(int x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void exp_fwd(const ExprExp&, const ExprLabel& exprL, ExprLabel& result);
+	void exp_fwd(int x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void log_fwd(const ExprLog&, const ExprLabel& exprL, ExprLabel& result);
+	void log_fwd(int x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void cos_fwd(const ExprCos&, const ExprLabel& exprL, ExprLabel& result);
+	void cos_fwd(int x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void sin_fwd(const ExprSin&, const ExprLabel& exprL, ExprLabel& result);
+	void sin_fwd(int x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void tan_fwd(const ExprTan&, const ExprLabel& exprL, ExprLabel& result);
+	void tan_fwd(int x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void cosh_fwd(const ExprCosh&, const ExprLabel& exprL, ExprLabel& result);
+	void cosh_fwd(int x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void sinh_fwd(const ExprSinh&, const ExprLabel& exprL, ExprLabel& result);
+	void sinh_fwd(int x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void tanh_fwd(const ExprTanh&, const ExprLabel& exprL, ExprLabel& result);
+	void tanh_fwd(int x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void acos_fwd(const ExprAcos&, const ExprLabel& exprL, ExprLabel& result);
+	void acos_fwd(int x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void asin_fwd(const ExprAsin&, const ExprLabel& exprL, ExprLabel& result);
+	void asin_fwd(int x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void atan_fwd(const ExprAtan&, const ExprLabel& exprL, ExprLabel& result);
+	void atan_fwd(int x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void acosh_fwd(const ExprAcosh&, const ExprLabel& exprL, ExprLabel& result);
+	void acosh_fwd(int x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void asinh_fwd(const ExprAsinh&, const ExprLabel& exprL, ExprLabel& result);
+	void asinh_fwd(int x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
-	void atanh_fwd(const ExprAtanh&, const ExprLabel& exprL, ExprLabel& result);
+	void atanh_fwd(int x, int y);
 };
 
-
 } // namespace ibex
-#endif // _IBEX_FWD_ALGORITHM_H_
+
+#endif // __IBEX_FWD_ALGORITHM_H__

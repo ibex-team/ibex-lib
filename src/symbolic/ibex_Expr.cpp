@@ -45,7 +45,7 @@ int max_height(const Array<const ExprNode>& args) {
 } // end anonymous namespace
 
 ExprNode::ExprNode(int height, int size, const Dim& dim) :
-  height(height), size(size), id(id_count++), dim(dim) {
+  height(height), size(size), id(id_count++), dim(dim), f(NULL) {
 
 }
 
@@ -224,7 +224,7 @@ Variable::~Variable()                                                           
 }
 
 Variable::operator const ExprSymbol&() const {
-	if (symbol->deco.f) { // already used build new one.
+	if (symbol->f) { // already used build new one.
 		// Note: it is Function's responsibility to delete the old symbol
 		variables().erase(*symbol);
 		symbol=new ExprSymbol(symbol->name, symbol->dim);

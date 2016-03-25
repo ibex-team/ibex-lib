@@ -24,7 +24,7 @@ void TestSet::diff01() {
 	SetNode* node=diff(x,y,YES,NO,0.1).first;
 
 	SetLeaf* leaf=dynamic_cast<SetLeaf*>(node);
-	TEST_ASSERT(leaf && leaf->status==NO);
+	CPPUNIT_ASSERT(leaf && leaf->status==NO);
 }
 
 void TestSet::diff02() {
@@ -36,7 +36,7 @@ void TestSet::diff02() {
 	SetNode* node=diff(x,y,YES,NO,0.1).first;
 
 	SetLeaf* leaf=dynamic_cast<SetLeaf*>(node);
-	TEST_ASSERT(leaf && leaf->status==YES);
+	CPPUNIT_ASSERT(leaf && leaf->status==YES);
 }
 
 void TestSet::diff03() {
@@ -46,44 +46,44 @@ void TestSet::diff03() {
 	SetNode* node=diff(x,y,YES,NO,0.1).first;
 
 	SetBisect* biss=dynamic_cast<SetBisect*>(node);
-	TEST_ASSERT(biss);
-	TEST_ASSERT(biss->var == 0);
-	TEST_ASSERT(biss->pt == 0.3);
+	CPPUNIT_ASSERT(biss);
+	CPPUNIT_ASSERT(biss->var == 0);
+	CPPUNIT_ASSERT(biss->pt == 0.3);
 
 	SetLeaf* leaf=dynamic_cast<SetLeaf*>(biss->left);
-	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==YES);
+	CPPUNIT_ASSERT(leaf);
+	CPPUNIT_ASSERT(leaf->status==YES);
 
 	biss=dynamic_cast<SetBisect*>(biss->right);
-	TEST_ASSERT(biss);
-	TEST_ASSERT(biss->var == 0);
-	TEST_ASSERT(biss->pt == 0.7);
+	CPPUNIT_ASSERT(biss);
+	CPPUNIT_ASSERT(biss->var == 0);
+	CPPUNIT_ASSERT(biss->pt == 0.7);
 
 	leaf=dynamic_cast<SetLeaf*>(biss->right);
-	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==YES);
+	CPPUNIT_ASSERT(leaf);
+	CPPUNIT_ASSERT(leaf->status==YES);
 
 	biss=dynamic_cast<SetBisect*>(biss->left);
-	TEST_ASSERT(biss);
-	TEST_ASSERT(biss->var == 1);
-	TEST_ASSERT(biss->pt == 0.3);
+	CPPUNIT_ASSERT(biss);
+	CPPUNIT_ASSERT(biss->var == 1);
+	CPPUNIT_ASSERT(biss->pt == 0.3);
 
 	leaf=dynamic_cast<SetLeaf*>(biss->left);
-	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==YES);
+	CPPUNIT_ASSERT(leaf);
+	CPPUNIT_ASSERT(leaf->status==YES);
 
 	biss=dynamic_cast<SetBisect*>(biss->right);
-	TEST_ASSERT(biss);
-	TEST_ASSERT(biss->var == 1);
-	TEST_ASSERT(biss->pt == 0.7);
+	CPPUNIT_ASSERT(biss);
+	CPPUNIT_ASSERT(biss->var == 1);
+	CPPUNIT_ASSERT(biss->pt == 0.7);
 
 	leaf=dynamic_cast<SetLeaf*>(biss->right);
-	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==YES);
+	CPPUNIT_ASSERT(leaf);
+	CPPUNIT_ASSERT(leaf->status==YES);
 
 	leaf=dynamic_cast<SetLeaf*>(biss->left);
-	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==NO);
+	CPPUNIT_ASSERT(leaf);
+	CPPUNIT_ASSERT(leaf->status==NO);
 
 }
 
@@ -95,26 +95,26 @@ void TestSet::diff04() {
 	SetNode* node=diff(x,y,YES,NO,0.1).first;
 
 	SetBisect* biss=dynamic_cast<SetBisect*>(node);
-	TEST_ASSERT(biss);
-	TEST_ASSERT(biss->var == 0);
-	TEST_ASSERT(biss->pt == 0.3);
+	CPPUNIT_ASSERT(biss);
+	CPPUNIT_ASSERT(biss->var == 0);
+	CPPUNIT_ASSERT(biss->pt == 0.3);
 
 	SetLeaf* leaf=dynamic_cast<SetLeaf*>(biss->left);
-	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==YES);
+	CPPUNIT_ASSERT(leaf);
+	CPPUNIT_ASSERT(leaf->status==YES);
 
 	biss=dynamic_cast<SetBisect*>(biss->right);
-	TEST_ASSERT(biss);
-	TEST_ASSERT(biss->var == 1);
-	TEST_ASSERT(biss->pt == 0.3);
+	CPPUNIT_ASSERT(biss);
+	CPPUNIT_ASSERT(biss->var == 1);
+	CPPUNIT_ASSERT(biss->pt == 0.3);
 
 	leaf=dynamic_cast<SetLeaf*>(biss->left);
-	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==YES);
+	CPPUNIT_ASSERT(leaf);
+	CPPUNIT_ASSERT(leaf->status==YES);
 
 	leaf=dynamic_cast<SetLeaf*>(biss->right);
-	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==NO);
+	CPPUNIT_ASSERT(leaf);
+	CPPUNIT_ASSERT(leaf->status==NO);
 }
 
 void TestSet::diff05() {
@@ -126,17 +126,17 @@ void TestSet::diff05() {
 	SetNode* node=diff(x,y,YES,NO,0.1).first;
 
 	SetBisect* biss=dynamic_cast<SetBisect*>(node);
-	TEST_ASSERT(biss);
-	TEST_ASSERT(biss->var == 1);
-	TEST_ASSERT(biss->pt == 0.3);
+	CPPUNIT_ASSERT(biss);
+	CPPUNIT_ASSERT(biss->var == 1);
+	CPPUNIT_ASSERT(biss->pt == 0.3);
 
 	SetLeaf* leaf=dynamic_cast<SetLeaf*>(biss->left);
-	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==YES);
+	CPPUNIT_ASSERT(leaf);
+	CPPUNIT_ASSERT(leaf->status==YES);
 
 	leaf=dynamic_cast<SetLeaf*>(biss->right);
-	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==NO);
+	CPPUNIT_ASSERT(leaf);
+	CPPUNIT_ASSERT(leaf->status==NO);
 }
 
 void TestSet::diff06() {
@@ -147,44 +147,44 @@ void TestSet::diff06() {
 	SetNode* node=diff(x,y,YES,NO,eps).first;
 
 	SetBisect* biss=dynamic_cast<SetBisect*>(node);
-	TEST_ASSERT(biss);
-	TEST_ASSERT(biss->var == 0);
-	TEST_ASSERT(biss->pt == eps);
+	CPPUNIT_ASSERT(biss);
+	CPPUNIT_ASSERT(biss->var == 0);
+	CPPUNIT_ASSERT(biss->pt == eps);
 
 	SetLeaf* leaf=dynamic_cast<SetLeaf*>(biss->left);
-	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==MAYBE);
+	CPPUNIT_ASSERT(leaf);
+	CPPUNIT_ASSERT(leaf->status==MAYBE);
 
 	biss=dynamic_cast<SetBisect*>(biss->right);
-	TEST_ASSERT(biss);
-	TEST_ASSERT(biss->var == 0);
-	TEST_ASSERT(biss->pt == 1-eps);
+	CPPUNIT_ASSERT(biss);
+	CPPUNIT_ASSERT(biss->var == 0);
+	CPPUNIT_ASSERT(biss->pt == 1-eps);
 
 	leaf=dynamic_cast<SetLeaf*>(biss->right);
-	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==MAYBE);
+	CPPUNIT_ASSERT(leaf);
+	CPPUNIT_ASSERT(leaf->status==MAYBE);
 
 	biss=dynamic_cast<SetBisect*>(biss->left);
-	TEST_ASSERT(biss);
-	TEST_ASSERT(biss->var == 1);
-	TEST_ASSERT(biss->pt == eps);
+	CPPUNIT_ASSERT(biss);
+	CPPUNIT_ASSERT(biss->var == 1);
+	CPPUNIT_ASSERT(biss->pt == eps);
 
 	leaf=dynamic_cast<SetLeaf*>(biss->left);
-	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==MAYBE);
+	CPPUNIT_ASSERT(leaf);
+	CPPUNIT_ASSERT(leaf->status==MAYBE);
 
 	biss=dynamic_cast<SetBisect*>(biss->right);
-	TEST_ASSERT(biss);
-	TEST_ASSERT(biss->var == 1);
-	TEST_ASSERT(biss->pt == 1-eps);
+	CPPUNIT_ASSERT(biss);
+	CPPUNIT_ASSERT(biss->var == 1);
+	CPPUNIT_ASSERT(biss->pt == 1-eps);
 
 	leaf=dynamic_cast<SetLeaf*>(biss->right);
-	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==MAYBE);
+	CPPUNIT_ASSERT(leaf);
+	CPPUNIT_ASSERT(leaf->status==MAYBE);
 
 	leaf=dynamic_cast<SetLeaf*>(biss->left);
-	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==NO);
+	CPPUNIT_ASSERT(leaf);
+	CPPUNIT_ASSERT(leaf->status==NO);
 
 }
 
@@ -197,26 +197,26 @@ void TestSet::diff07() {
 	SetNode* node=diff(x,y,YES,NO,eps).first;
 
 	SetBisect* biss=dynamic_cast<SetBisect*>(node);
-	TEST_ASSERT(biss);
-	TEST_ASSERT(biss->var == 0);
-	TEST_ASSERT(biss->pt == eps);
+	CPPUNIT_ASSERT(biss);
+	CPPUNIT_ASSERT(biss->var == 0);
+	CPPUNIT_ASSERT(biss->pt == eps);
 
 	SetLeaf* leaf=dynamic_cast<SetLeaf*>(biss->left);
-	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==MAYBE);
+	CPPUNIT_ASSERT(leaf);
+	CPPUNIT_ASSERT(leaf->status==MAYBE);
 
 	biss=dynamic_cast<SetBisect*>(biss->right);
-	TEST_ASSERT(biss);
-	TEST_ASSERT(biss->var == 1);
-	TEST_ASSERT(biss->pt == eps);
+	CPPUNIT_ASSERT(biss);
+	CPPUNIT_ASSERT(biss->var == 1);
+	CPPUNIT_ASSERT(biss->pt == eps);
 
 	leaf=dynamic_cast<SetLeaf*>(biss->left);
-	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==MAYBE);
+	CPPUNIT_ASSERT(leaf);
+	CPPUNIT_ASSERT(leaf->status==MAYBE);
 
 	leaf=dynamic_cast<SetLeaf*>(biss->right);
-	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==NO);
+	CPPUNIT_ASSERT(leaf);
+	CPPUNIT_ASSERT(leaf->status==NO);
 }
 
 void TestSet::diff08() {
@@ -230,17 +230,17 @@ void TestSet::diff08() {
 	SetNode* node=diff(x,y,YES,NO,eps).first;
 
 	SetBisect* biss=dynamic_cast<SetBisect*>(node);
-	TEST_ASSERT(biss);
-	TEST_ASSERT(biss->var == 1);
-	TEST_ASSERT(biss->pt == eps);
+	CPPUNIT_ASSERT(biss);
+	CPPUNIT_ASSERT(biss->var == 1);
+	CPPUNIT_ASSERT(biss->pt == eps);
 
 	SetLeaf* leaf=dynamic_cast<SetLeaf*>(biss->left);
-	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==MAYBE);
+	CPPUNIT_ASSERT(leaf);
+	CPPUNIT_ASSERT(leaf->status==MAYBE);
 
 	leaf=dynamic_cast<SetLeaf*>(biss->right);
-	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==NO);
+	CPPUNIT_ASSERT(leaf);
+	CPPUNIT_ASSERT(leaf->status==NO);
 }
 
 
@@ -254,26 +254,26 @@ void TestSet::diff09() {
 	SetNode* node=diff(x,y,YES,NO,eps).first;
 
 	SetBisect* biss=dynamic_cast<SetBisect*>(node);
-	TEST_ASSERT(biss);
-	TEST_ASSERT(biss->var == 0);
-	TEST_ASSERT(biss->pt == 0.3);
+	CPPUNIT_ASSERT(biss);
+	CPPUNIT_ASSERT(biss->var == 0);
+	CPPUNIT_ASSERT(biss->pt == 0.3);
 
 	SetLeaf* leaf=dynamic_cast<SetLeaf*>(biss->left);
-	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==YES);
+	CPPUNIT_ASSERT(leaf);
+	CPPUNIT_ASSERT(leaf->status==YES);
 
 	biss=dynamic_cast<SetBisect*>(biss->right);
-	TEST_ASSERT(biss);
-	TEST_ASSERT(biss->var == 1);
-	TEST_ASSERT(biss->pt == eps);
+	CPPUNIT_ASSERT(biss);
+	CPPUNIT_ASSERT(biss->var == 1);
+	CPPUNIT_ASSERT(biss->pt == eps);
 
 	leaf=dynamic_cast<SetLeaf*>(biss->left);
-	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==MAYBE);
+	CPPUNIT_ASSERT(leaf);
+	CPPUNIT_ASSERT(leaf->status==MAYBE);
 
 	leaf=dynamic_cast<SetLeaf*>(biss->right);
-	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==NO);
+	CPPUNIT_ASSERT(leaf);
+	CPPUNIT_ASSERT(leaf->status==NO);
 }
 
 
@@ -287,26 +287,26 @@ void TestSet::diff10() {
 	SetNode* node=diff(x,y,YES,NO,eps).first;
 
 	SetBisect* biss=dynamic_cast<SetBisect*>(node);
-	TEST_ASSERT(biss);
-	TEST_ASSERT(biss->var == 1);
-	TEST_ASSERT(biss->pt == 0.3);
+	CPPUNIT_ASSERT(biss);
+	CPPUNIT_ASSERT(biss->var == 1);
+	CPPUNIT_ASSERT(biss->pt == 0.3);
 
 	SetLeaf* leaf=dynamic_cast<SetLeaf*>(biss->left);
-	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==YES);
+	CPPUNIT_ASSERT(leaf);
+	CPPUNIT_ASSERT(leaf->status==YES);
 
 	biss=dynamic_cast<SetBisect*>(biss->right);
-	TEST_ASSERT(biss);
-	TEST_ASSERT(biss->var == 0);
-	TEST_ASSERT(biss->pt == eps);
+	CPPUNIT_ASSERT(biss);
+	CPPUNIT_ASSERT(biss->var == 0);
+	CPPUNIT_ASSERT(biss->pt == eps);
 
 	leaf=dynamic_cast<SetLeaf*>(biss->left);
-	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==MAYBE);
+	CPPUNIT_ASSERT(leaf);
+	CPPUNIT_ASSERT(leaf->status==MAYBE);
 
 	leaf=dynamic_cast<SetLeaf*>(biss->right);
-	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==NO);
+	CPPUNIT_ASSERT(leaf);
+	CPPUNIT_ASSERT(leaf->status==NO);
 }
 
 
@@ -320,26 +320,26 @@ void TestSet::diff11() {
 	SetNode* node=diff(x,y,YES,NO,eps).first;
 
 	SetBisect* biss=dynamic_cast<SetBisect*>(node);
-	TEST_ASSERT(biss);
-	TEST_ASSERT(biss->var == 0);
-	TEST_ASSERT(biss->pt == 1-eps);
+	CPPUNIT_ASSERT(biss);
+	CPPUNIT_ASSERT(biss->var == 0);
+	CPPUNIT_ASSERT(biss->pt == 1-eps);
 
 	SetLeaf* leaf=dynamic_cast<SetLeaf*>(biss->left);
-	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==YES);
+	CPPUNIT_ASSERT(leaf);
+	CPPUNIT_ASSERT(leaf->status==YES);
 
 	biss=dynamic_cast<SetBisect*>(biss->right);
-	TEST_ASSERT(biss);
-	TEST_ASSERT(biss->var == 1);
-	TEST_ASSERT(biss->pt == 0.3);
+	CPPUNIT_ASSERT(biss);
+	CPPUNIT_ASSERT(biss->var == 1);
+	CPPUNIT_ASSERT(biss->pt == 0.3);
 
 	leaf=dynamic_cast<SetLeaf*>(biss->left);
-	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==YES);
+	CPPUNIT_ASSERT(leaf);
+	CPPUNIT_ASSERT(leaf->status==YES);
 
 	leaf=dynamic_cast<SetLeaf*>(biss->right);
-	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==MAYBE);
+	CPPUNIT_ASSERT(leaf);
+	CPPUNIT_ASSERT(leaf->status==MAYBE);
 }
 
 
@@ -353,26 +353,26 @@ void TestSet::diff12() {
 	SetNode* node=diff(x,y,YES,NO,eps).first;
 
 	SetBisect* biss=dynamic_cast<SetBisect*>(node);
-	TEST_ASSERT(biss);
-	TEST_ASSERT(biss->var == 0);
-	TEST_ASSERT(biss->pt == 1-eps);
+	CPPUNIT_ASSERT(biss);
+	CPPUNIT_ASSERT(biss->var == 0);
+	CPPUNIT_ASSERT(biss->pt == 1-eps);
 
 	SetLeaf* leaf=dynamic_cast<SetLeaf*>(biss->left);
-	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==YES);
+	CPPUNIT_ASSERT(leaf);
+	CPPUNIT_ASSERT(leaf->status==YES);
 
 	biss=dynamic_cast<SetBisect*>(biss->right);
-	TEST_ASSERT(biss);
-	TEST_ASSERT(biss->var == 1);
-	TEST_ASSERT(biss->pt == 1-eps);
+	CPPUNIT_ASSERT(biss);
+	CPPUNIT_ASSERT(biss->var == 1);
+	CPPUNIT_ASSERT(biss->pt == 1-eps);
 
 	leaf=dynamic_cast<SetLeaf*>(biss->left);
-	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==YES);
+	CPPUNIT_ASSERT(leaf);
+	CPPUNIT_ASSERT(leaf->status==YES);
 
 	leaf=dynamic_cast<SetLeaf*>(biss->right);
-	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==MAYBE);
+	CPPUNIT_ASSERT(leaf);
+	CPPUNIT_ASSERT(leaf->status==MAYBE);
 }
 
 void TestSet::diff13() {
@@ -384,8 +384,8 @@ void TestSet::diff13() {
 	SetNode* node=diff(x,y,YES,NO,eps).first;
 
 	SetLeaf* leaf=dynamic_cast<SetLeaf*>(node);
-	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==MAYBE);
+	CPPUNIT_ASSERT(leaf);
+	CPPUNIT_ASSERT(leaf->status==MAYBE);
 }
 
 void TestSet::diff14() {
@@ -397,8 +397,8 @@ void TestSet::diff14() {
 	SetNode* node=diff(x,y,YES,MAYBE,eps).first;
 
 	SetLeaf* leaf=dynamic_cast<SetLeaf*>(node);
-	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==MAYBE);
+	CPPUNIT_ASSERT(leaf);
+	CPPUNIT_ASSERT(leaf->status==MAYBE);
 }
 
 
@@ -416,8 +416,8 @@ void TestSet::diff15() {
 	SetNode* node=diff(x,y,YES,NO,eps).first;
 
 	SetLeaf* leaf=dynamic_cast<SetLeaf*>(node);
-	TEST_ASSERT(leaf);
-	TEST_ASSERT(leaf->status==MAYBE);
+	CPPUNIT_ASSERT(leaf);
+	CPPUNIT_ASSERT(leaf->status==MAYBE);
 
 }
 } // end namespace ibex

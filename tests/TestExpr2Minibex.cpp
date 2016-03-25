@@ -26,7 +26,7 @@ void TestExpr2Minibex::expr01() {
 	stringstream stream;
 
 	Expr2Minibex().print(stream,e);
-	TEST_ASSERT(strcmp(stream.str().c_str(),"  return (((x+1)-1)+(y*x));")==0);
+	CPPUNIT_ASSERT(strcmp(stream.str().c_str(),"  return (((x+1)-1)+(y*x));")==0);
 }
 
 void TestExpr2Minibex::expr02() {
@@ -41,7 +41,7 @@ void TestExpr2Minibex::expr02() {
 
 	Expr2Minibex().print(stream,e);
 
-	TEST_ASSERT(strcmp(stream.str().c_str(),"  _tmp_0_ = (x+1);\n  _tmp_1_ = (_tmp_0_+y);\n  return ((_tmp_0_*_tmp_0_)-(_tmp_1_+_tmp_1_));")==0);
+	CPPUNIT_ASSERT(strcmp(stream.str().c_str(),"  _tmp_0_ = (x+1);\n  _tmp_1_ = (_tmp_0_+y);\n  return ((_tmp_0_*_tmp_0_)-(_tmp_1_+_tmp_1_));")==0);
 
 }
 
@@ -57,7 +57,7 @@ void TestExpr2Minibex::expr03() {
 
 	Expr2Minibex().print(stream,e);
 
-	TEST_ASSERT(strcmp(stream.str().c_str(),"  _tmp_0_ = ([1, 2] , [1, 2] , [1, 2]);\n  return ((3*(x+_tmp_0_))-(3*_tmp_0_));")==0);
+	CPPUNIT_ASSERT(strcmp(stream.str().c_str(),"  _tmp_0_ = ([1, 2] , [1, 2] , [1, 2]);\n  return ((3*(x+_tmp_0_))-(3*_tmp_0_));")==0);
 }
 
 void TestExpr2Minibex::expr04() {
@@ -69,7 +69,7 @@ void TestExpr2Minibex::expr04() {
 
 	Expr2Minibex().print(stream,c,false);
 
-	TEST_ASSERT(strcmp(stream.str().c_str(),"  return #3fb999999999999a;")==0);
+	CPPUNIT_ASSERT(strcmp(stream.str().c_str(),"  return #3fb999999999999a;")==0);
 
 }
 

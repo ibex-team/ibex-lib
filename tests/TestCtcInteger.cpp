@@ -44,7 +44,7 @@ void TestCtcInteger::test02() {
 
 	c.contract(box);
 
-	TEST_ASSERT(box.is_empty());
+	CPPUNIT_ASSERT(box.is_empty());
 }
 
 } // end namespace

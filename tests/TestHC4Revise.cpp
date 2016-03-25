@@ -25,8 +25,8 @@ void TestHC4Revise::id01() {
 	Domain y(Dim::scalar());
 	y.i()=Interval(1,POS_INFINITY);
 	IntervalVector x(1,Interval(0,2));
-	HC4Revise().proj(f,y,x);
-	TEST_ASSERT(x[0]==Interval(1,2));
+	f.backward(y,x);
+	CPPUNIT_ASSERT(x[0]==Interval(1,2));
 }
 
 void TestHC4Revise::add01() {
@@ -48,7 +48,7 @@ void TestHC4Revise::add01() {
 
 	//cout << hc4r.eval.f << endl;
 	check(box,box1);
-	TEST_ASSERT(box.is_superset(box1));
+	CPPUNIT_ASSERT(box.is_superset(box1));
 }
 
 void TestHC4Revise::add02() {
@@ -79,7 +79,7 @@ void TestHC4Revise::min01() {
 	double res_xy[][2]= { {1,1}, {2,4} };
 	IntervalVector box1(2,res_xy);
 
-	TEST_ASSERT(box==box1);
+	CPPUNIT_ASSERT(box==box1);
 }
 
 void TestHC4Revise::mul01() {

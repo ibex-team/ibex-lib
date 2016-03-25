@@ -13,7 +13,6 @@
 
 #include "ibex_Function.h"
 #include "ibex_Expr.h"
-#include "ibex_Decorator.h"
 #include "ibex_ExprCopy.h"
 #include "ibex_ExprDiff.h"
 #include "ibex_Expr2Minibex.h"
@@ -494,7 +493,16 @@ void Function::init(const Array<const ExprSymbol>& x, const ExprNode& y, const c
 	(int&) _nb_var = is_used.size();
 	(int&) _image_dim = y.dim.size();
 
+	nodes.init(&x,y,true);
+
 	decorate(x,y);
+
+	generate_used_vars();
+
+	_eval = new Eval(*this);
+	_hc4revise = new HC4Revise(*_eval);
+	_grad = new Gradient(*_eval);
+	_inhc4revise = new InHC4Revise(*_eval);
 
 	// ===== display adjacency (debug) =========
 //	cout << "adjacency of function" << *this << ":" << endl;
@@ -503,35 +511,40 @@ void Function::init(const Array<const ExprSymbol>& x, const ExprNode& y, const c
 //	cout << endl;
 }
 
-void Function::decorate(const Array<const ExprSymbol>& x, const ExprNode& y) const {
+void Function::decorate(const Array<const ExprSymbol>& x, const ExprNode& y) {
 
-	Decorator().decorate(x,y);
+	((CompiledFunction&) cf).compile(*this);
 
-	arg_domains.resize(nb_arg());
-	arg_deriv.resize(nb_arg());
-	arg_af2.resize(nb_arg());
-	arg_af_lin.resize(nb_arg());
-
-	((CompiledFunction&) cf).compile(y); // now that it is decorated, it can be "compiled"
-
-	for (int i=0; i<nb_nodes(); i++) {
-		assert(node(i).deco.d);
-		assert(node(i).deco.f==NULL); // this node must not belong to another function!
-		cf.nodes[i].deco.f=(Function*) this;
+	// The following loop has two purposes:
+	// 1/ Symbols that do not appear in the expression y will not
+	//    be handled by the following loop
+	// 2/ Symbols that appear in y should be inside x. So we decorate
+	//    first the symbols in order to quickly check if this is the case.
+	for (int i=0; i<nb_arg(); i++) {
+		if (arg(i).f!=NULL)
+			ibex_error("A symbol inside the expression of a function already belongs to another function");
+		else
+			((ExprSymbol&) arg(i)).f=this;
 	}
 
-	// warning: to place after "compile" if compile modifies deco.d...
-	for (int i=0; i<nb_arg(); i++) {
-		assert(arg(i).deco.d);
+	for (int i=0; i<nb_nodes(); i++) {
 
-		// the following line is useful for symbols that do not appear in the expression y
-		// (not handled in the previous loop)
-		arg(i).deco.f=(Function*) this;
+		const ExprSymbol* symbol=dynamic_cast<const ExprSymbol*> (&node(i));
 
-		arg_domains.set_ref(i,*arg(i).deco.d);
-		arg_deriv.set_ref(i,*arg(i).deco.g);
-		arg_af2.set_ref(i,*arg(i).deco.af2);
-		arg_af_lin.set_ref(i,*arg(i).deco.af_lin);
+		if (symbol) {
+			//-------------------------------------------------------
+			// we check that a symbol appearing in the expression
+			// is an argument of the function
+			if ((*symbol).f!=this) { // can be either NULl or something else
+				ibex_error("A symbol used in the expression of a function is not an argument");
+			}
+			//-------------------------------------------------------
+		} else {
+			if (node(i).f!=NULL)
+				ibex_error("A sub-expression of a function already belongs to another function");
+			else
+				((ExprNode&) node(i)).f=this;
+		}
 	}
 }
 

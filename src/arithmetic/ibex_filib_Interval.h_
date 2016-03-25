@@ -516,11 +516,13 @@ inline Interval abs(const Interval &x) {
 }
 
 inline Interval max(const Interval& x, const Interval& y) {
-	return x.itv.imax(y.itv);
+	if (x.is_empty()||y.is_empty()) return Interval::EMPTY_SET;
+	else return x.itv.imax(y.itv);
 }
 
 inline Interval min(const Interval& x, const Interval& y) {
-	return x.itv.imin(y.itv);
+	if (x.is_empty()||y.is_empty()) return Interval::EMPTY_SET;
+	else return x.itv.imin(y.itv);
 }
 
 inline Interval integer(const Interval& x) {

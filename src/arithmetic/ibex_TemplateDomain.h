@@ -201,33 +201,33 @@ std::ostream& operator<<(std::ostream& os,const TemplateDomain<D>&);
  * \brief Load domains from a flat vector
  */
 template<class D>
-void load(Array<TemplateDomain<D> >& domains, const typename D::VECTOR& box, int nb_used=-1, int* used=NULL);
+void load(Array<TemplateDomain<D> >& domains, const typename D::VECTOR& box, int nb_used=-1, const int* used=NULL);
 
 /**
  * \brief Load domains into an interval vector.
  */
 template<class D>
-void load(typename D::VECTOR& box, const Array<const TemplateDomain<D> >& domains, int nb_used=-1, int* used=NULL);
-
-/**
- * \brief Load domains into an interval vector.
- */
-template<class D>
-inline void load(typename D::VECTOR& box, const Array<TemplateDomain<D> >& domains, int nb_used=-1, int* used=NULL) {
-	load(box, (const Array<const TemplateDomain<D> >&) domains, nb_used, used);
+inline void load(typename D::VECTOR& box, const Array<const TemplateDomain<D> >& domains, int nb_used=-1, const int* used=NULL) {
+	load(box, (const Array<TemplateDomain<D> >&) domains, nb_used, used);
 }
 
 /**
- * \brief x:=y
+ * \brief Load domains into an interval vector.
  */
 template<class D>
-void load(Array<TemplateDomain<D> >& x, const Array<const TemplateDomain<D> >& y, int nb_used=-1, int* used=NULL);
+void load(typename D::VECTOR& box, const Array<TemplateDomain<D> >& domains, int nb_used=-1, const int* used=NULL);
 
 /**
  * \brief x:=y
  */
 template<class D>
-void load(Array<TemplateDomain<D> >& x, const Array<TemplateDomain<D> >& y, int nb_used=-1, int* used=NULL);
+void load(Array<TemplateDomain<D> >& x, const Array<const TemplateDomain<D> >& y, int nb_used=-1, const int* used=NULL);
+
+/**
+ * \brief x:=y
+ */
+template<class D>
+void load(Array<TemplateDomain<D> >& x, const Array<TemplateDomain<D> >& y, int nb_used=-1, const int* used=NULL);
 
 /** Add two domains. */
 template<class D>
@@ -557,7 +557,7 @@ std::ostream& operator<<(std::ostream& os,const TemplateDomain<D>& d) {
 }
 
 template<class D>
-void load(Array<TemplateDomain<D> >& d, const typename D::VECTOR& x, int nb_used, int* used) {
+void load(Array<TemplateDomain<D> >& d, const typename D::VECTOR& x, int nb_used, const int* used) {
 	int i=0; // iterates over the components of box
 	int u=0; // iterates over the array "used"
 
@@ -632,7 +632,7 @@ void load(Array<TemplateDomain<D> >& d, const typename D::VECTOR& x, int nb_used
 
 
 template<class D>
-void load(typename D::VECTOR& x, const Array<const TemplateDomain<D> >& d, int nb_used, int* used) {
+void load(typename D::VECTOR& x, const Array<TemplateDomain<D> >& d, int nb_used, const int* used) {
 	int i=0; // iterates over the components of box
 	int u=0; // iterates over the array "used"
 
@@ -706,7 +706,7 @@ void load(typename D::VECTOR& x, const Array<const TemplateDomain<D> >& d, int n
 }
 
 template<class D>
-void load(Array<TemplateDomain<D> >& x, const Array<const TemplateDomain<D> >& y, int nb_used, int* used) {
+void load(Array<TemplateDomain<D> >& x, const Array<const TemplateDomain<D> >& y, int nb_used, const int* used) {
 	assert(x.size()==y.size());
 	if (nb_used==-1)
 		for (int s=0; s<x.size(); s++)
@@ -806,7 +806,7 @@ void load(Array<TemplateDomain<D> >& x, const Array<const TemplateDomain<D> >& y
 }
 
 template<class D>
-void load(Array<TemplateDomain<D> >& x, const Array<TemplateDomain<D> >& y, int nb_used, int* used) {
+void load(Array<TemplateDomain<D> >& x, const Array<TemplateDomain<D> >& y, int nb_used, const int* used) {
 	load(x,(const Array<const TemplateDomain<D> >&) y, nb_used,used);
 }
 

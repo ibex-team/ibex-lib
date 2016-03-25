@@ -48,27 +48,26 @@ IntervalMatrix M2() { // the transpose of M1
 
 namespace ibex {
 
-void TestEval::check_deco(const ExprNode& e) {
-	TEST_ASSERT(e.deco.d!=NULL);
-	Domain* dx = (Domain*) e.deco.d;
-	TEST_ASSERT(dx->dim==e.dim);
+void TestEval::check_deco(Function& f, const ExprNode& e) {
+	Domain& dx = f.basic_evaluator().d[f.nodes.rank(e)];
+	CPPUNIT_ASSERT(dx.dim==e.dim);
 	switch (e.dim.type()) {
 	case Dim::SCALAR:
-		dx->i()=Interval(1,2); // try to write
-		TEST_ASSERT(dx->i()==Interval(1,2)); // try to read
+		dx.i()=Interval(1,2); // try to write
+		CPPUNIT_ASSERT(dx.i()==Interval(1,2)); // try to read
 		break;
 	case Dim::ROW_VECTOR:
 		{ IntervalVector box(e.dim.dim3);
 		for (int i=0; i<e.dim.dim3; i++) box[i]=Interval(i,i+1);
-		dx->v()=box; // try to write
-		TEST_ASSERT(dx->v()==box); // try to read
+		dx.v()=box; // try to write
+		CPPUNIT_ASSERT(dx.v()==box); // try to read
 		}
 		break;
 	case Dim::COL_VECTOR:
 		{ IntervalVector box(e.dim.dim2);
 		for (int i=0; i<e.dim.dim2; i++) box[i]=Interval(i,i+1);
-		dx->v()=box; // try to write
-		TEST_ASSERT(dx->v()==box); // try to read
+		dx.v()=box; // try to write
+		CPPUNIT_ASSERT(dx.v()==box); // try to read
 		}
 		break;
 	case Dim::MATRIX:
@@ -76,8 +75,8 @@ void TestEval::check_deco(const ExprNode& e) {
 		for (int i=0; i<e.dim.dim2; i++)
 			for (int j=0; j<e.dim.dim3; j++)
 				m[i][j]=Interval(i,j);
-		dx->m()=m; // try to write
-		TEST_ASSERT(dx->m()==m); // try to read
+		dx.m()=m; // try to write
+		CPPUNIT_ASSERT(dx.m()==m); // try to read
 		}
 		break;
 	case Dim::MATRIX_ARRAY:
@@ -86,13 +85,13 @@ void TestEval::check_deco(const ExprNode& e) {
 			for (int i=0; i<e.dim.dim2; i++)
 				for (int j=0; j<e.dim.dim3; j++)
 					ma[k][i][j]=Interval(i,j);
-		dx->ma()=ma; // try to write
+		dx.ma()=ma; // try to write
 		for (int k=0; k<e.dim.dim1; k++)
-			TEST_ASSERT(dx->ma()[k]==ma[k]); // try to read
+			CPPUNIT_ASSERT(dx.ma()[k]==ma[k]); // try to read
 		}
 		break;
 	default:
-		TEST_ASSERT(false);
+		CPPUNIT_ASSERT(false);
 		break;
 	}
 
@@ -104,9 +103,9 @@ void TestEval::deco01() {
 	const ExprSymbol& y = ExprSymbol::new_("y");
 	const ExprNode&   e = x+y;
 	Function f(x,y,e);
-	check_deco(x);
-	check_deco(y);
-	check_deco(e);
+	check_deco(f, x);
+	check_deco(f, y);
+	check_deco(f, e);
 }
 
 void TestEval::deco02() {
@@ -115,9 +114,9 @@ void TestEval::deco02() {
 	const ExprNode&   e = x+y;
 	Function f(x,y,e);
 
-	check_deco(x);
-	check_deco(y);
-	check_deco(e);
+	check_deco(f, x);
+	check_deco(f, y);
+	check_deco(f, e);
 }
 
 void TestEval::add01() {
@@ -134,7 +133,7 @@ void TestEval::add01() {
 	//e.f.cf.print<Domain>();
 	//cout << "res=" << res << endl;
 	check(res,Interval(4,6));
-	TEST_ASSERT(res.is_superset(Interval(4,6)));
+	CPPUNIT_ASSERT(res.is_superset(Interval(4,6)));
 }
 
 void TestEval::add02() {
@@ -153,7 +152,7 @@ void TestEval::add02() {
 	IntervalVector res=f.eval_vector(xy);
 	//cout << e.f << endl;
 	check(res,z);
-	TEST_ASSERT(res.is_superset(z));
+	CPPUNIT_ASSERT(res.is_superset(z));
 }
 
 void TestEval::add03() {
@@ -172,7 +171,7 @@ void TestEval::add03() {
 	IntervalVector res=f.eval_vector(xy);
 	//cout << e.f << endl;
 	check(res,z);
-	TEST_ASSERT(res.is_superset(z));
+	CPPUNIT_ASSERT(res.is_superset(z));
 }
 
 void TestEval::add04() {
@@ -195,7 +194,7 @@ void TestEval::add04() {
 	//cout << e.f << endl;
 	check(res[0],z[0]);
 	check(res[1],z[1]);
-	TEST_ASSERT(res.is_superset(z));
+	CPPUNIT_ASSERT(res.is_superset(z));
 }
 
 void TestEval::mul01() {
@@ -216,7 +215,7 @@ void TestEval::mul01() {
 	//cout << e.f << endl;
 	check(res[0],mz[0]);
 	check(res[1],mz[1]);
-	TEST_ASSERT(res.is_superset(mz));
+	CPPUNIT_ASSERT(res.is_superset(mz));
 }
 
 
@@ -237,7 +236,7 @@ void TestEval::dist01() {
 	Interval res=f.eval(box);
 	//cout << e.f << endl;
 	check(res,Interval(::sqrt(2),::sqrt(2)));
-	TEST_ASSERT(res.is_superset(Interval(::sqrt(2),::sqrt(2))));
+	CPPUNIT_ASSERT(res.is_superset(Interval(::sqrt(2),::sqrt(2))));
 }
 
 void TestEval::apply01() {
@@ -251,7 +250,7 @@ void TestEval::apply01() {
 
 	IntervalVector _x2(1,Interval(2,2));
 	check(f2.eval(_x2), Interval(2,2));
-	TEST_ASSERT((f2.eval(_x2)).is_superset(Interval(2,2)));
+	CPPUNIT_ASSERT((f2.eval(_x2)).is_superset(Interval(2,2)));
 }
 
 void TestEval::apply02() {
@@ -273,7 +272,7 @@ void TestEval::apply02() {
 	x[1]=Interval(3,3);
 
 	check(f2.eval_domain(x).i(), Interval(10,10));
-	TEST_ASSERT((f2.eval_domain(x).i()).is_superset(Interval(10,10)));
+	CPPUNIT_ASSERT((f2.eval_domain(x).i()).is_superset(Interval(10,10)));
 }
 
 void TestEval::apply03() {
@@ -304,7 +303,7 @@ void TestEval::apply03() {
 	*/
 
 	check(f3.eval_domain(_x3).i(), Interval(-3,-3));
-	TEST_ASSERT((f3.eval_domain(_x3).i()).is_superset(Interval(-3,-3)));
+	CPPUNIT_ASSERT((f3.eval_domain(_x3).i()).is_superset(Interval(-3,-3)));
 }
 
 void TestEval::apply04() {
@@ -320,7 +319,7 @@ void TestEval::apply04() {
 	IntervalVector _x3(1,Interval(3,3));
 
 	check(f3.eval_domain(_x3).i(), Interval(10,10));
-	TEST_ASSERT((f3.eval_domain(_x3).i()).is_superset(Interval(10,10)));
+	CPPUNIT_ASSERT((f3.eval_domain(_x3).i()).is_superset(Interval(10,10)));
 }
 
 }

@@ -27,16 +27,16 @@ void TestPdcHansenFeasibility::test01() {
 
 	BoolInterval r=p.test(box);
 
-	TEST_ASSERT(r==YES);
+	CPPUNIT_ASSERT(r==YES);
 
 	IntervalVector sol=p.solution();
 
 	// test that the fixed dimension is "y"
-	TEST_ASSERT(sol[1].is_degenerated());
+	CPPUNIT_ASSERT(sol[1].is_degenerated());
 	//cout << "sol=" << sol << endl;
-	TEST_ASSERT(!(sol[0] & sqrt(sol[1])).is_empty());
+	CPPUNIT_ASSERT(!(sol[0] & sqrt(sol[1])).is_empty());
 
-	TEST_ASSERT(sol[0].diam() <=1e-08);
+	CPPUNIT_ASSERT(sol[0].diam() <=1e-08);
 
 }
 } // end namespace

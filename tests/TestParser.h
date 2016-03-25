@@ -12,36 +12,39 @@
 #ifndef __TEST_PARSER_H__
 #define __TEST_PARSER_H__
 
-#include "cpptest.h"
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
 #include "utils.h"
 
 namespace ibex {
 
-class TestParser : public TestIbex {
+class TestParser : public CppUnit::TestFixture {
 
 public:
-	TestParser() {
-		TEST_ADD(TestParser::var01);
 
-		TEST_ADD(TestParser::const01);
-		TEST_ADD(TestParser::const02);
-		TEST_ADD(TestParser::const03);
-		TEST_ADD(TestParser::const04);
-		TEST_ADD(TestParser::const05);
-		TEST_ADD(TestParser::const06);
-		TEST_ADD(TestParser::const07);
-		TEST_ADD(TestParser::const08);
+	CPPUNIT_TEST_SUITE(TestParser);
+	
+		CPPUNIT_TEST(var01);
 
-		TEST_ADD(TestParser::ponts);
-		TEST_ADD(TestParser::choco01);
-		TEST_ADD(TestParser::func01);
-		TEST_ADD(TestParser::func02);
-		TEST_ADD(TestParser::func03);
-		TEST_ADD(TestParser::loop01);
+		CPPUNIT_TEST(const01);
+		CPPUNIT_TEST(const02);
+		CPPUNIT_TEST(const03);
+		CPPUNIT_TEST(const04);
+		CPPUNIT_TEST(const05);
+		CPPUNIT_TEST(const06);
+		CPPUNIT_TEST(const07);
+		CPPUNIT_TEST(const08);
 
-		TEST_ADD(TestParser::nary_max);
-		//		TEST_ADD(TestParser::error01);
-	}
+		CPPUNIT_TEST(ponts);
+		CPPUNIT_TEST(choco01);
+		CPPUNIT_TEST(func01);
+		CPPUNIT_TEST(func02);
+		CPPUNIT_TEST(func03);
+		CPPUNIT_TEST(loop01);
+
+		CPPUNIT_TEST(nary_max);
+		//		CPPUNIT_TEST(error01);
+	CPPUNIT_TEST_SUITE_END();
 
 	void var01();
 
@@ -66,6 +69,9 @@ public:
 	void nary_max();
 
 };
+
+CPPUNIT_TEST_SUITE_REGISTRATION(TestParser);
+
 
 } // end namespace
 

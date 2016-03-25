@@ -25,7 +25,7 @@ void TestCtcFwdBwd::sqrt_issue28() {
 
 	ctc.contract(box);
 
-	TEST_ASSERT(box.is_empty());
+	CPPUNIT_ASSERT(box.is_empty());
 }
 
 void TestCtcFwdBwd::atan2_issue134() {

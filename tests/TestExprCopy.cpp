@@ -30,9 +30,9 @@ void TestExprCopy::index_copy01() {
 
 	const ExprConstant* c = dynamic_cast<const ExprConstant*>(&yi);
 
-	TEST_ASSERT(c);
-	TEST_ASSERT(c->dim.is_scalar());
-	TEST_ASSERT(c->get_value()==Interval(0,1));
+	CPPUNIT_ASSERT(c);
+	CPPUNIT_ASSERT(c->dim.is_scalar());
+	CPPUNIT_ASSERT(c->get_value()==Interval(0,1));
 }
 
 } // end namespace
