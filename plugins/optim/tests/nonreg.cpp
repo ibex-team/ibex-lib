@@ -41,7 +41,7 @@ double _2dbl(const char* argname, const char* arg) {
 	double val = strtod(arg,&endptr);
 	if (endptr!=arg+strlen(arg)*sizeof(char)) {
 		stringstream s;
-		s << "nonreg: " << argname << " must be a real number";
+		s << "nonreg: " << argname << " must be a real number (given:" << arg << ")";
 		ibex_error(s.str().c_str());
 	}
 	return val;
