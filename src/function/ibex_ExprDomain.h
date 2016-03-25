@@ -89,12 +89,6 @@ public:
 
 typedef ExprTemplateDomain<Interval> ExprDomain;
 
-template<>
-void ExprDomain::write_arg_domains(const IntervalVector& box);
-
-template<>
-void ExprDomain::read_arg_domains(IntervalVector& box) const;
-
 /* ============================================================================
  	 	 	 	 	 	 	 inline implementation
   ============================================================================*/

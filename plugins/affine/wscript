@@ -29,5 +29,5 @@ def build (bld):
 	# add AFFINE plugin sources
 	bld.env.IBEX_SRC.extend(bld.path.ant_glob ("src/**/ibex_*.cpp"))
 	# add AFFINE plugin headers
-	bld.env.IBEX_HDR.extend(bld.path.ant_glob ("src/**/ibex_*.h"))
+	bld.env.IBEX_HDR.extend(bld.path.ant_glob ("src/**/ibex_*.h*"))
 	

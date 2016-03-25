@@ -1006,8 +1006,8 @@ void TestAffine<T>::test101()   {
 	Affine2MainVector<T> va(v,true);
 
 	IntervalVector res = ydot.eval_vector(v);
-	Affine2Eval eval_af2(ydot);
-	Affine2MainVector<T> resa = eval_af2.eval(va);
+	Affine2Eval<T> eval_af2(ydot);
+	Affine2MainVector<T> resa = eval_af2.eval(va).v();
 
 	for (int j = 0; j < 3; ++j) {
 		compare_results (INCLUSION, res[j], resa[j]);

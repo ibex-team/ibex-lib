@@ -9,8 +9,8 @@
 //============================================================================
 
 
-#ifndef __IBEX_LINEAR_ARITH_H2__
-#define __IBEX_LINEAR_ARITH_H2__
+#ifndef __IBEX_LINEAR_ARITH__
+#define __IBEX_LINEAR_ARITH__
 
 namespace ibex {
 
@@ -281,4 +281,4 @@ inline M absM(const M& m) {
 
 } // namespace ibex
 
-#endif
+#endif // __IBEX_LINEAR_ARITH__
