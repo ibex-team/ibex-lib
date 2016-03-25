@@ -9,25 +9,19 @@
  * Created     : Mar 21, 2013
  * ---------------------------------------------------------------------------- */
 
-
 #ifndef __IBEX_TEMPLATE_VECTOR_H__
 #define __IBEX_TEMPLATE_VECTOR_H__
 
 #include "ibex_Interval.h"
 #include "ibex_IntervalVector.h"
-#include "ibex_Affine2Vector.h"
 #include "ibex_Random.h"
 
 #include <cassert>
 #include <sstream>
 
-
-
-
 namespace ibex {
 
 namespace { // to create anonymous functions
-
 
 template<class V>
 inline V& _inflate(V& v, double rad1) {
@@ -43,7 +37,7 @@ inline V& _inflate(V& v, double rad1) {
 
 template<class V>
 inline V _subvector(const V& v, int start_index, int end_index) {
-	assert(!is_empty(v));
+	assert(!___is_empty(v));
 	assert(end_index>=0 && start_index>=0);
 	assert(end_index<v.size() && start_index<=end_index);
 	//throw InvalidIntervalVectorOp("Invalid indices for IntervalVector::subvector");
@@ -58,8 +52,8 @@ inline V _subvector(const V& v, int start_index, int end_index) {
 
 template<class V>
 inline void _put(V& v, int start_index, const V& subvec) {
-	assert(!is_empty(v));
-	assert(!is_empty(subvec));
+	assert(!___is_empty(v));
+	assert(!___is_empty(subvec));
 	int end_index=start_index+subvec.size()-1;
 	assert(start_index>=0 && end_index<v.size());
 
@@ -73,8 +67,8 @@ template<class V1,class V2>
 V1& _assignV(V1& v, const V2& x) {
 	assert(v.size()==x.size()); // throw InvalidIntervalVectorOp("Cannot set a IntervalVector to a IntervalVector with different dimension");
 
-	if (is_empty(x))
-		set_empty(v);
+	if (___is_empty(x))
+		___set_empty(v);
 	else
 		// don't use "set(...)" because the test "is_empty()" called inside
 		// may return prematurely in case "this" is empty.
@@ -88,7 +82,7 @@ V1& _assignV(V1& v, const V2& x) {
 template<class V1,class V2>
 bool _equalsV(const V1& v, const V2& x) {
 	if (v.size()!=x.size()) return false;
-	if (is_empty(v) || is_empty(x)) return is_empty(v) && is_empty(x);
+	if (___is_empty(v) || ___is_empty(x)) return ___is_empty(v) && ___is_empty(x);
 	for (int i=0; i<v.size(); i++)
 		if (v[i]!=(x[i])) return false;
 	return true;
@@ -255,7 +249,7 @@ int _extr_diam_index(const V& v, bool min) {
 
 template<class V>
 std::ostream& _displayV(std::ostream& os, const V& x) {
-	if (is_empty(x)) return os << "empty vector";
+	if (___is_empty(x)) return os << "empty vector";
 
 	os << "(";
 	for (int i=0; i<x.size(); i++)

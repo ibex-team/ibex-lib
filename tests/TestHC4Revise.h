@@ -12,25 +12,28 @@
 #ifndef __TEST_HC4_REVISE_H__
 #define __TEST_HC4_REVISE_H__
 
-#include "cpptest.h"
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
 #include "utils.h"
 
 namespace ibex {
 
-class TestHC4Revise : public TestIbex {
+class TestHC4Revise : public CppUnit::TestFixture {
 
 public:
-	TestHC4Revise() {
-		TEST_ADD(TestHC4Revise::id01);
-		TEST_ADD(TestHC4Revise::add01);
-		TEST_ADD(TestHC4Revise::add02);
-		TEST_ADD(TestHC4Revise::add03);
-		TEST_ADD(TestHC4Revise::add04);
-		TEST_ADD(TestHC4Revise::mul01);
-		TEST_ADD(TestHC4Revise::min01);
-		TEST_ADD(TestHC4Revise::dist01);
-		TEST_ADD(TestHC4Revise::dist02);
-	}
+
+	CPPUNIT_TEST_SUITE(TestHC4Revise);
+	
+		CPPUNIT_TEST(id01);
+		CPPUNIT_TEST(add01);
+		CPPUNIT_TEST(add02);
+		CPPUNIT_TEST(add03);
+		CPPUNIT_TEST(add04);
+		CPPUNIT_TEST(mul01);
+		CPPUNIT_TEST(min01);
+		CPPUNIT_TEST(dist01);
+		CPPUNIT_TEST(dist02);
+	CPPUNIT_TEST_SUITE_END();
 	void id01();
 	void add01();
 	void add02();
@@ -43,6 +46,9 @@ public:
 	void dist01();
 	void dist02();
 };
+
+CPPUNIT_TEST_SUITE_REGISTRATION(TestHC4Revise);
+
 
 } // end namespace
 

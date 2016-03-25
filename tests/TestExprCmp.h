@@ -12,24 +12,30 @@
 #ifndef __TEST_EXPR_CMP_H__
 #define __TEST_EXPR_CMP_H__
 
-#include "cpptest.h"
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
 #include "utils.h"
 
 namespace ibex {
 
-class TestExprCmp : public TestIbex {
+class TestExprCmp : public CppUnit::TestFixture {
 
 public:
-	TestExprCmp() {
-		TEST_ADD(TestExprCmp::test01);
-		TEST_ADD(TestExprCmp::test02);
-		TEST_ADD(TestExprCmp::test03);
-	}
+
+	CPPUNIT_TEST_SUITE(TestExprCmp);
+	
+		CPPUNIT_TEST(test01);
+		CPPUNIT_TEST(test02);
+		CPPUNIT_TEST(test03);
+	CPPUNIT_TEST_SUITE_END();
 
 	void test01();
 	void test02();
 	void test03();
 };
+
+CPPUNIT_TEST_SUITE_REGISTRATION(TestExprCmp);
+
 
 
 } // namespace ibex

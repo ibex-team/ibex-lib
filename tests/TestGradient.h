@@ -12,34 +12,37 @@
 #ifndef __TEST_GRADIENT_H__
 #define __TEST_GRADIENT_H__
 
-#include "cpptest.h"
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
 #include "utils.h"
 #include "ibex_Expr.h"
 
 namespace ibex {
 
-class TestGradient : public TestIbex {
+class TestGradient : public CppUnit::TestFixture {
 
 public:
-	TestGradient() {
-		TEST_ADD(TestGradient::deco01);
-		TEST_ADD(TestGradient::deco02);
 
-		TEST_ADD(TestGradient::add01);
-		TEST_ADD(TestGradient::add02);
-		TEST_ADD(TestGradient::add03);
-		TEST_ADD(TestGradient::add04);
-		//TEST_ADD(TestGradient::add05);
-		TEST_ADD(TestGradient::dist);
-		TEST_ADD(TestGradient::jac01);
-		TEST_ADD(TestGradient::jac02);
-		TEST_ADD(TestGradient::hansen01);
-		TEST_ADD(TestGradient::mulVV);
-		TEST_ADD(TestGradient::transpose01);
-		TEST_ADD(TestGradient::mulMV01);
-		TEST_ADD(TestGradient::mulVM01);
-		TEST_ADD(TestGradient::mulVM02);
-	}
+	CPPUNIT_TEST_SUITE(TestGradient);
+	
+		CPPUNIT_TEST(deco01);
+		CPPUNIT_TEST(deco02);
+
+		CPPUNIT_TEST(add01);
+		CPPUNIT_TEST(add02);
+		CPPUNIT_TEST(add03);
+		CPPUNIT_TEST(add04);
+		//CPPUNIT_TEST(add05);
+		CPPUNIT_TEST(dist);
+		CPPUNIT_TEST(jac01);
+		CPPUNIT_TEST(jac02);
+		CPPUNIT_TEST(hansen01);
+		CPPUNIT_TEST(mulVV);
+		CPPUNIT_TEST(transpose01);
+		CPPUNIT_TEST(mulMV01);
+		CPPUNIT_TEST(mulVM01);
+		CPPUNIT_TEST(mulVM02);
+	CPPUNIT_TEST_SUITE_END();
 
 	void deco01();
 	void deco02();
@@ -63,6 +66,9 @@ public:
 private:
 	void check_deco(const ExprNode& e);
 };
+
+CPPUNIT_TEST_SUITE_REGISTRATION(TestGradient);
+
 
 } // end namespace
 

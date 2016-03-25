@@ -11,25 +11,31 @@
 #ifndef __TEST_NEWTON_H__
 #define __TEST_NEWTON_H__
 
-#include "cpptest.h"
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
 #include "ibex_Newton.h"
 #include "utils.h"
 
 namespace ibex {
 
-class TestNewton : public TestIbex {
+class TestNewton : public CppUnit::TestFixture {
 
 public:
-	TestNewton() {
-		TEST_ADD(TestNewton::newton01);
-		TEST_ADD(TestNewton::inflating_newton01);
-		TEST_ADD(TestNewton::ctc_parameter01);
-	}
+
+	CPPUNIT_TEST_SUITE(TestNewton);
+	
+		CPPUNIT_TEST(newton01);
+		CPPUNIT_TEST(inflating_newton01);
+		CPPUNIT_TEST(ctc_parameter01);
+	CPPUNIT_TEST_SUITE_END();
 
 	void newton01();
 	void inflating_newton01();
 	void ctc_parameter01();
 };
+
+CPPUNIT_TEST_SUITE_REGISTRATION(TestNewton);
+
 
 } // end namespace ibex
 #endif // __TEST_NEWTON_H__

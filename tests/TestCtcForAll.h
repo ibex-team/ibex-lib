@@ -12,21 +12,27 @@
 #ifndef __TEST_CTC_FOR_ALL_H__
 #define __TEST_CTC_FOR_ALL_H__
 
-#include "cpptest.h"
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
 #include "utils.h"
 
 namespace ibex {
 
-class TestCtcForAll : public TestIbex {
+class TestCtcForAll : public CppUnit::TestFixture {
 
 public:
-	TestCtcForAll() {
 
-		TEST_ADD(TestCtcForAll::test01);
-	}
+	CPPUNIT_TEST_SUITE(TestCtcForAll);
+	
+
+		CPPUNIT_TEST(test01);
+	CPPUNIT_TEST_SUITE_END();
 
 	void test01();
 };
+
+CPPUNIT_TEST_SUITE_REGISTRATION(TestCtcForAll);
+
 
 } // namespace ibex
 #endif // __TEST_CTC_FOR_ALL_H__

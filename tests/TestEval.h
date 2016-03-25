@@ -12,33 +12,36 @@
 #ifndef __TEST_EVAL_H__
 #define __TEST_EVAL_H__
 
-#include "cpptest.h"
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
 #include "utils.h"
 #include "ibex_Expr.h"
 
 namespace ibex {
 
-class TestEval : public TestIbex {
+class TestEval : public CppUnit::TestFixture {
 
 public:
-	TestEval() {
-		TEST_ADD(TestEval::deco01);
-		TEST_ADD(TestEval::deco02);
 
-		TEST_ADD(TestEval::add01);
-		TEST_ADD(TestEval::add02);
-		TEST_ADD(TestEval::add03);
-		TEST_ADD(TestEval::add04);
+	CPPUNIT_TEST_SUITE(TestEval);
+	
+		CPPUNIT_TEST(deco01);
+		CPPUNIT_TEST(deco02);
 
-		TEST_ADD(TestEval::mul01);
+		CPPUNIT_TEST(add01);
+		CPPUNIT_TEST(add02);
+		CPPUNIT_TEST(add03);
+		CPPUNIT_TEST(add04);
 
-		TEST_ADD(TestEval::dist01);
+		CPPUNIT_TEST(mul01);
 
-		TEST_ADD(TestEval::apply01);
-		TEST_ADD(TestEval::apply02);
-		TEST_ADD(TestEval::apply03);
-		TEST_ADD(TestEval::apply04);
-	}
+		CPPUNIT_TEST(dist01);
+
+		CPPUNIT_TEST(apply01);
+		CPPUNIT_TEST(apply02);
+		CPPUNIT_TEST(apply03);
+		CPPUNIT_TEST(apply04);
+	CPPUNIT_TEST_SUITE_END();
 
 	void deco01();
 	void deco02();
@@ -58,8 +61,11 @@ public:
 	void apply04();
 
 private:
-	void check_deco(const ExprNode& e);
+	void check_deco(Function& f, const ExprNode& e);
 };
+
+CPPUNIT_TEST_SUITE_REGISTRATION(TestEval);
+
 
 } // end namespace
 

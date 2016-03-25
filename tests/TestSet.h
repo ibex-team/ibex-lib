@@ -10,30 +10,33 @@
 #ifndef __TEST_SET_H__
 #define __TEST_SET_H__
 
-#include "cpptest.h"
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
 #include "utils.h"
 
 namespace ibex {
 
-class TestSet : public TestIbex {
+class TestSet : public CppUnit::TestFixture {
 public:
-	TestSet() {
-//		TEST_ADD(TestSet::diff01);
-//		TEST_ADD(TestSet::diff02);
-//		TEST_ADD(TestSet::diff03);
-//		TEST_ADD(TestSet::diff04);
-//		TEST_ADD(TestSet::diff05);
-//		TEST_ADD(TestSet::diff06);
-//		TEST_ADD(TestSet::diff07);
-//		TEST_ADD(TestSet::diff08);
-//		TEST_ADD(TestSet::diff09);
-//		TEST_ADD(TestSet::diff10);
-//		TEST_ADD(TestSet::diff11);
-//		TEST_ADD(TestSet::diff12);
-//		TEST_ADD(TestSet::diff13);
-//		TEST_ADD(TestSet::diff14);
-		TEST_ADD(TestSet::diff15);
-	}
+
+	CPPUNIT_TEST_SUITE(TestSet);
+	
+//		CPPUNIT_TEST(diff01);
+//		CPPUNIT_TEST(diff02);
+//		CPPUNIT_TEST(diff03);
+//		CPPUNIT_TEST(diff04);
+//		CPPUNIT_TEST(diff05);
+//		CPPUNIT_TEST(diff06);
+//		CPPUNIT_TEST(diff07);
+//		CPPUNIT_TEST(diff08);
+//		CPPUNIT_TEST(diff09);
+//		CPPUNIT_TEST(diff10);
+//		CPPUNIT_TEST(diff11);
+//		CPPUNIT_TEST(diff12);
+//		CPPUNIT_TEST(diff13);
+//		CPPUNIT_TEST(diff14);
+		CPPUNIT_TEST(diff15);
+	CPPUNIT_TEST_SUITE_END();
 
 	void diff01();
 	void diff02();
@@ -52,6 +55,9 @@ public:
 	void diff15();
 
 };
+
+CPPUNIT_TEST_SUITE_REGISTRATION(TestSet);
+
 
 } // end namespace ibex
 #endif // __TEST_SET_H__

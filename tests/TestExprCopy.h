@@ -12,23 +12,29 @@
 #ifndef __TEST_EXPR_COPY_H__
 #define __TEST_EXPR_COPY_H__
 
-#include "cpptest.h"
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
 #include "utils.h"
 
 namespace ibex {
 
-class TestExprCopy : public TestIbex {
+class TestExprCopy : public CppUnit::TestFixture {
 
 public:
-	TestExprCopy() {
 
-		TEST_ADD(TestExprCopy::index_copy01);
-	}
+	CPPUNIT_TEST_SUITE(TestExprCopy);
+	
+
+		CPPUNIT_TEST(index_copy01);
+	CPPUNIT_TEST_SUITE_END();
 
 	// case where the vector is a constant vector
 	void index_copy01();
 
 };
+
+CPPUNIT_TEST_SUITE_REGISTRATION(TestExprCopy);
+
 
 } // namespace ibex
 #endif // __TEST_EXPR_COPY_H__

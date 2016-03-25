@@ -12,22 +12,23 @@
 #ifndef __TEST_DIM_H__
 #define __TEST_DIM_H__
 
-#include "cpptest.h"
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
 #include "ibex_Dim.h"
 #include "utils.h"
 
 namespace ibex {
 
-class TestDim : public TestIbex {
+class TestDim : public CppUnit::TestFixture {
 
 public:
-	TestDim() {
 
-		TEST_ADD(TestDim::test01);
-		TEST_ADD(TestDim::test02);
-		TEST_ADD(TestDim::test03);
-		TEST_ADD(TestDim::test04);
-	}
+	CPPUNIT_TEST_SUITE(TestDim);
+	CPPUNIT_TEST(test01);
+	CPPUNIT_TEST(test02);
+	CPPUNIT_TEST(test03);
+	CPPUNIT_TEST(test04);
+	CPPUNIT_TEST_SUITE_END();
 
 	void test01();
 	void test02();
@@ -35,5 +36,8 @@ public:
 	void test04();
 };
 
+CPPUNIT_TEST_SUITE_REGISTRATION(TestDim);
+
 } // namespace ibex
+
 #endif // __TEST_DIM_H__

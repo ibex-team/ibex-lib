@@ -10,6 +10,7 @@
  * ---------------------------------------------------------------------------- */
 
 #include <cassert>
+#include <stdint.h>
 #include "ibex_ExprPrinter.h"
 #include "ibex_Expr.h"
 #include "ibex_Function.h"

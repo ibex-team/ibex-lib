@@ -11,6 +11,7 @@
 
 #include "ibex_CompiledFunction.h"
 #include "ibex_Function.h"
+#include "ibex_ExprData.h"
 #include <algorithm>
 
 using std::cout;
@@ -24,25 +25,24 @@ bool compare(const ExprNode* x, const ExprNode* y) { return (x->height>y->height
 
 }
 
-CompiledFunction::CompiledFunction() : 	n(0), code(NULL), nb_args(NULL), args(NULL) {
+CompiledFunction::CompiledFunction() : n(0), n_total(0), nodes(NULL), code(NULL), nb_args(NULL), args(NULL), ptr(-1) {
 
 }
 
-void CompiledFunction::compile(const ExprNode& y) {
+void CompiledFunction::compile(Function& f) {
 
-	n=y.size;
+	n=f.expr().size;
+	nodes = &f.nodes;
+	n_total = nodes->size();
+
 	code=new operation[n];
-	args=new ExprLabel**[n];
+	args=new int*[n];
 	nb_args=new int[n];
 
-	// Get the nodes of the DAG
-	// (the DAG may not necessarily contains all the nodes of f)
-	nodes.init(NULL, y);
-
-	// Process each node of the DAG
-	for (ptr=0; ptr<n; ptr++) {
-		visit(nodes[ptr]);
+	for (ptr=n-1; ptr>=0; ptr--) {
+		(*nodes)[ptr].acceptVisitor(*this);
 	}
+
 	//cout << f.name << " : n=" << n << " nb_args[" << 0 << "]=" << nb_args[0] << endl;
 }
 
@@ -62,66 +62,43 @@ void CompiledFunction::visit(const ExprNode& e) {
 void CompiledFunction::visit(const ExprIndex& i) {
 	code[ptr]=IDX;
 	nb_args[ptr]=1;
-	args[ptr]=new ExprLabel*[2];
-	args[ptr][0]=&i.deco;
-	args[ptr][1]=&i.expr.deco;
-}
-
-void CompiledFunction::visit(const ExprLeaf& e) {
-	e.acceptVisitor(*this);
-}
-
-void CompiledFunction::visit(const ExprNAryOp& e) {
-	e.acceptVisitor(*this);
-}
-
-void CompiledFunction::visit(const ExprBinaryOp& b) {
-	b.acceptVisitor(*this);
-}
-
-void CompiledFunction::visit(const ExprUnaryOp& u) {
-	u.acceptVisitor(*this);
+	args[ptr]=new int[1];
+	args[ptr][0]=nodes->rank(i.expr);
 }
 
 void CompiledFunction::visit(const ExprSymbol& v) {
 	code[ptr]=SYM;
 	nb_args[ptr]=0;
-	args[ptr]=new ExprLabel*[1]; // the unique argument of a Variable is the corresponding index in "csts"
-	args[ptr][0]=&v.deco;
+	args[ptr]=NULL;
 }
 
 void CompiledFunction::visit(const ExprConstant& c) {
 	code[ptr]=CST;
-
 	nb_args[ptr]=0;
-	args[ptr]=new ExprLabel*[1];
-	args[ptr][0]=&c.deco;
+	args[ptr]=NULL;
 }
 
 void CompiledFunction::visit(const ExprNAryOp& e, operation op) {
 	code[ptr]=op;
 	nb_args[ptr]=e.nb_args;
-	args[ptr]=new ExprLabel*[e.nb_args +1];
-	args[ptr][0]=&e.deco;
-	for (int i=1; i<=e.nb_args; i++)
-		args[ptr][i]=&e.arg(i-1).deco;
+	args[ptr]=new int[e.nb_args];
+	for (int i=0; i<e.nb_args; i++)
+		args[ptr][i]=nodes->rank(e.arg(i));
 }
 
 void CompiledFunction::visit(const ExprBinaryOp& b, operation op) {
 	code[ptr]=op;
 	nb_args[ptr]=2;
-	args[ptr]=new ExprLabel*[3];
-	args[ptr][0]=&b.deco;
-	args[ptr][1]=&b.left.deco;
-	args[ptr][2]=&b.right.deco;
+	args[ptr]=new int[2];
+	args[ptr][0]=nodes->rank(b.left);
+	args[ptr][1]=nodes->rank(b.right);
 }
 
 void CompiledFunction::visit(const ExprUnaryOp& u, operation op) {
 	code[ptr]=op;
 	nb_args[ptr]=1;
-	args[ptr]=new ExprLabel*[2];
-	args[ptr][0]=&u.deco;
-	args[ptr][1]=&u.expr.deco;
+	args[ptr]=new int[1];
+	args[ptr][0]=nodes->rank(u.expr);
 }
 
 void CompiledFunction::visit(const ExprVector& e) { visit(e,VEC); }
@@ -258,111 +235,20 @@ const char* CompiledFunction::op(operation o) const {
 }
 
 // for debug only
-void CompiledFunction::print() const {
-	const CompiledFunction& f=*this;
+std::ostream& operator<<(std::ostream& os, const CompiledFunction& f) {
+	os << "================================================" << std::endl;
 	for (int i=0; i<f.n; i++) {
-		switch(f.code[i]) {
-		case CompiledFunction::IDX:
-		{
-			ExprIndex& e=(ExprIndex&) f.nodes[i];
-			cout << e.id << ": [" << e.index << "]" << " " << *f.args[i][0] << " " << e.expr.id ;
+		os << "  " << i << '\t' << f.op(f.code[i]) << '\t';
+		os << "args=(";
+		for (int j=0; j<f.nb_args[i]; j++) {
+			os << f.args[i][j];
+			if (j<f.nb_args[i]-1) os << ",";
 		}
-		break;
-		case CompiledFunction::VEC:
-		{
-			ExprVector& e=(ExprVector&) f.nodes[i];
-			cout << e.id << ": vec " << " " << *f.args[i][0] << " ";
-			for (int i=0; i<e.nb_args; i++)
-				cout << (e.arg(i).id) << " ";
-		}
-		break;
-		case CompiledFunction::SYM:
-		{
-			ExprSymbol& e=(ExprSymbol&) f.nodes[i];
-			cout << e.id << ": " << e.name << " " << *f.args[i][0];
-		}
-		break;
-		case CompiledFunction::CST:
-		{
-			ExprConstant& e=(ExprConstant&) f.nodes[i];
-			cout << e.id << ": cst=";
-			if (e.dim.is_scalar()) cout << e.get_value();
-			else if (e.dim.is_vector()) cout << e.get_vector_value();
-			else e.get_matrix_value();
-			cout << " " <<  *f.args[i][0];
-		}
-		break;
-		case CompiledFunction::APPLY:
-		{
-			ExprApply& e=(ExprApply&) f.nodes[i];
-			cout << e.id << ": " << "func()" << " " << *f.args[i][0];
-			for (int j=0; j<e.nb_args; j++)
-				cout << " " << e.arg(j).id;
-		}
-		break;
-		case CompiledFunction::CHI:
-		{
-			ExprChi& e=(ExprChi&) f.nodes[i];
-			cout << e.id << ": chi " << " " << *f.args[i][0] << " ";
-			for (int i=0; i<e.nb_args; i++)
-				cout << (e.arg(i).id) << " ";
-		}
-		break;
-		case CompiledFunction::ADD:
-		case CompiledFunction::ADD_V:
-		case CompiledFunction::ADD_M:
-		case CompiledFunction::MUL:
-		case CompiledFunction::MUL_SV:
-		case CompiledFunction::MUL_SM:
-		case CompiledFunction::MUL_VV:
-		case CompiledFunction::MUL_MV:
-		case CompiledFunction::MUL_VM:
-		case CompiledFunction::MUL_MM:
-		case CompiledFunction::SUB:
-		case CompiledFunction::SUB_V:
-		case CompiledFunction::SUB_M:
-		case CompiledFunction::DIV:
-		case CompiledFunction::MAX:
-		case CompiledFunction::MIN:
-		case CompiledFunction::ATAN2:
-		{
-			ExprBinaryOp& e=(ExprBinaryOp&) f.nodes[i];
-			cout << e.id << ": " << f.op(f.code[i]) << " " << *f.args[i][0] << " ";
-			cout << e.left.id << " " << e.right.id;
-		}
-		break;
-
-		case CompiledFunction::MINUS:
-		case CompiledFunction::TRANS_V:
-		case CompiledFunction::TRANS_M:
-		case CompiledFunction::SIGN:
-		case CompiledFunction::ABS:
-		case CompiledFunction::POWER:
-		case CompiledFunction::SQR:
-		case CompiledFunction::SQRT:
-		case CompiledFunction::EXP:
-		case CompiledFunction::LOG:
-		case CompiledFunction::COS:
-		case CompiledFunction::SIN:
-		case CompiledFunction::TAN:
-		case CompiledFunction::COSH:
-		case CompiledFunction::SINH:
-		case CompiledFunction::TANH:
-		case CompiledFunction::ACOS:
-		case CompiledFunction::ASIN:
-		case CompiledFunction::ATAN:
-		case CompiledFunction::ACOSH:
-		case CompiledFunction::ASINH:
-		case CompiledFunction::ATANH:
-		{
-			ExprUnaryOp& e=(ExprUnaryOp&) f.nodes[i];
-			cout << e.id << ": " << f.op(f.code[i]) << " " << *f.args[i][0] << " ";
-			cout << e.expr.id;
-		}
-		break;
-		}
-		cout << endl;
+		os << ")\t" << (*f.nodes)[i];
+		os << endl;
 	}
+	os << "================================================" << std::endl;
+	return os;
 }
 
 } // end namespace

@@ -81,22 +81,34 @@ class ExprVisitor {
   /*============================================================== */
 
   /** Visit an expression. */
-  virtual void visit(const ExprNode&)=0;
+  virtual void visit(const ExprNode&) {
+	  ibex_error("ExprVisitor: Missing implementation for some node type");
+  }
 
   /** Visit an indexed expression. */
-  virtual void visit(const ExprIndex&)=0;
+  virtual void visit(const ExprIndex& e) {
+	  visit((const ExprNode&) e);
+  }
 
   /** Visit a leaf. */
-  virtual void visit(const ExprLeaf&)=0;
+  virtual void visit(const ExprLeaf& e) {
+	  visit((const ExprNode&) e);
+  }
 
   /** Visit a n-ary operator. */
-  virtual void visit(const ExprNAryOp&)=0;
+  virtual void visit(const ExprNAryOp& e) {
+	  visit((const ExprNode&) e);
+  }
 
   /** Visit a binary operator. */
-  virtual void visit(const ExprBinaryOp&)=0;
+  virtual void visit(const ExprBinaryOp& e) {
+	  visit((const ExprNode&) e);
+  }
 
   /** Visit an unary operator. */
-  virtual void visit(const ExprUnaryOp&)=0;
+  virtual void visit(const ExprUnaryOp& e) {
+	  visit((const ExprNode&) e);
+  }
 
   /*===============================================================*/
   /*                optional functions                             */
@@ -128,8 +140,8 @@ class ExprVisitor {
 
    /** Visit a function Chi.
    * By default: call visit(const ExprNAryOp& e). */
-   virtual void visit(const ExprChi& ee) {
-	   visit((const ExprNAryOp&) ee);
+   virtual void visit(const ExprChi& e) {
+	   visit((const ExprNAryOp&) e);
    }
 
   /*==================== binary operators =========================*/

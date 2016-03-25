@@ -14,9 +14,7 @@
 #define __IBEX_TEMPLATE_MATRIX_H__
 #include "ibex_Interval.h"
 #include "ibex_IntervalVector.h"
-#include "ibex_Affine2Vector.h"
 #include "ibex_IntervalMatrix.h"
-#include "ibex_Affine2Matrix.h"
 #include "ibex_Random.h"
 
 #include <cassert>
@@ -51,7 +49,7 @@ inline M _submatrix(const M& m, int row_start_index, int row_end_index, int col_
 	assert(col_start_index>=0 && col_start_index<m.nb_cols());
 	assert(col_end_index>=0 && col_end_index<m.nb_cols());
 	assert(col_start_index<=col_end_index);
-	assert(!is_empty(m));
+	assert(!___is_empty(m));
 
 	M sub(row_end_index-row_start_index+1, col_end_index-col_start_index+1);
 	//cout << "m=" << (row_end_index-row_start_index+1) << "n=" << (col_end_index-col_start_index+1) << endl;
@@ -72,8 +70,8 @@ inline void _put(M1& m, int row_start_index, int col_start_index, const M2& sub)
 	assert(row_start_index+sub.nb_rows()<=m.nb_rows());
 	assert(col_start_index>=0);
 	assert(col_start_index+sub.nb_cols()<=m.nb_cols());
-	assert(!is_empty(m));
-	assert(!is_empty(sub));
+	assert(!___is_empty(m));
+	assert(!___is_empty(sub));
 
 	int i=row_start_index;
 	for (int i2=0; i2<sub.nb_rows(); i++,i2++) {
@@ -89,8 +87,8 @@ inline void _put(M& m, int row_start_index, int col_start_index, const V& v, boo
 	assert(row_vec || row_start_index+v.size()<=m.nb_rows());
 	assert(col_start_index>=0);
 	assert(!row_vec || col_start_index+v.size()<=m.nb_cols());
-	assert(!is_empty(m));
-	//TODO: assert(!is_empty(v))
+	assert(!___is_empty(m));
+	//TODO: assert(!___is_empty(v))
 
 	int i=row_start_index;
 	int j=col_start_index;
@@ -104,7 +102,7 @@ inline void _put(M& m, int row_start_index, int col_start_index, const V& v, boo
 
 template<class M>
 inline M _transpose(const M& m) {
-	assert(!is_empty(m));
+	assert(!___is_empty(m));
 
 	M m2(m.nb_cols(), m.nb_rows());
 
@@ -118,7 +116,7 @@ inline M _transpose(const M& m) {
 
 template<class M,class V>
 inline V _col(const M& m, int j) {
-	assert(!is_empty(m));
+	assert(!___is_empty(m));
 	assert(j>=0 && j<m.nb_cols());
 
 	V res(m.nb_rows());
@@ -129,7 +127,7 @@ inline V _col(const M& m, int j) {
 
 template<class M,class V>
 inline void _set_col(M& m, int col1, const V& v) {
-	assert(!is_empty(m));
+	assert(!___is_empty(m));
 	assert(col1>=0 && col1<m.nb_cols());
 	assert(m.nb_rows()==v.size());
 
@@ -143,8 +141,8 @@ M1& _assignM(M1& m1, const M2& m2) {
 	assert(m1.nb_rows()==m2.nb_rows() && m1.nb_cols()==m2.nb_cols());
 	// or implement "resize"
 	//resize(x.nb_rows(), x.nb_cols());
-	if (is_empty(m2))
-		set_empty(m1);
+	if (___is_empty(m2))
+		___set_empty(m1);
 	else
 		for (int i=0; i<m1.nb_rows(); i++)
 			m1.set_row(i,m2[i]);
@@ -157,8 +155,8 @@ bool _equalsM(M1& m1, const M2& m2) {
 	if (m1.nb_rows()!=m2.nb_rows()) return false;
 	if (m1.nb_cols()!=m2.nb_cols()) return false;
 
-	if (is_empty(m1)) return is_empty(m2);
-	if (is_empty(m2)) return is_empty(m1);
+	if (___is_empty(m1)) return ___is_empty(m2);
+	if (___is_empty(m2)) return ___is_empty(m1);
 
 	for (int i=0; i<m1.nb_rows(); i++) {
 		if (m1.row(i)!=m2.row(i)) return false;
@@ -168,7 +166,7 @@ bool _equalsM(M1& m1, const M2& m2) {
 
 template<class M>
 inline std::ostream& _displayM(std::ostream& os, const M& m) {
-	if (is_empty(m)) { return os << "empty matrix"; }
+	if (___is_empty(m)) { return os << "empty matrix"; }
 	os << "(";
 	for (int i=0; i<m.nb_rows(); i++) {
 		os << "(";

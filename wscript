@@ -25,26 +25,22 @@ def options (opt):
 	opt.load ("compiler_cxx compiler_cc javaw")
 
 	opt.add_option ("--enable-shared", action="store_true", dest="ENABLE_SHARED",
-			help = "build ibex as a shared lib")
+			help = "build ibex as a shared library")
 
 	opt.add_option ("--disable-sse2", action="store_true", dest="DISABLE_SSE2",
 			help = "do not use SSE2 optimizations")
 
 	opt.add_option ("--with-debug",  action="store_true", dest="DEBUG",
 			help = "enable debugging")
-	
-	opt.add_option ("--with-ampl", action="store_true", dest="WITH_AMPL",
-			help = "do not use AMPL")
 
 	opt.add_option ("--with-gaol",   action="store", type="string", dest="GAOL_PATH",
 			help = "location of the Gaol lib")
+
 	opt.add_option ("--with-bias",   action="store", type="string", dest="BIAS_PATH",
 			help = "location of the Profil/Bias lib")
+
 	opt.add_option ("--with-filib",   action="store", type="string", dest="FILIB_PATH",
-			help = "location of the filib lib")
-	
-	opt.add_option ("--without-lp", action="store_true", dest="WITHOUT_LP",
-			help = "do not use any Linear Solver")
+			help = "location of the Filib lib")
 	
 	opt.add_option ("--without-rounding", action="store_true", dest="WITHOUT_ROUNDING",
 			help = "do not use a reliable interval")
@@ -52,19 +48,7 @@ def options (opt):
 	opt.add_option ("--standalone", action="store_true", dest="WITH_STANDALONE",
 			help = "do not use any external library (excepted standard C++ library)")	
 	
-	
-	opt.add_option ("--with-soplex", action="store", type="string", dest="SOPLEX_PATH",
-			help = "location of Soplex")
-	opt.add_option ("--with-cplex", action="store", type="string", dest="CPLEX_PATH",
-			help = "location of Cplex")
-	opt.add_option ("--with-clp", action="store", type="string", dest="CLP_PATH",
-			help = "location of Clp solver")
-	
-	opt.add_option ("--with-jni", action="store_true", dest="WITH_JNI",
-			help = "enable the compilation of the JNI adapter (note: your JAVA_HOME environment variable must be properly set if you want to use this option)")
-	opt.add_option ("--with-java-package", action="store", type="string", dest="JAVA_PACKAGE",
-			default="ibex", help="name of the java package to be build (default is ibex)")
-
+	opt.recurse("plugins")
 
 def configure (conf):
 
@@ -109,7 +93,7 @@ def configure (conf):
 			env.append_unique ("CXXFLAGS", f)
 
 	# build as shared lib
-	if conf.options.ENABLE_SHARED or conf.options.WITH_JNI:
+	if conf.options.ENABLE_SHARED:
 		env.ENABLE_SHARED = True
 
 	def find_lib (prefix):
@@ -136,56 +120,15 @@ def configure (conf):
 		return os.path.abspath (os.path.expanduser (path)) if path else find_lib (prefix)
 
 	##################################################################################################
-	# AMPL is disable on Window
-	if env.DEST_OS == "win32":
-		if (conf.options.WITH_AMPL):
-			Logs.pprint ("YELLOW", "Warning: AMPL is not supported on win32")
-		conf.env.WITH_AMPL =False 
-	elif (conf.options.WITH_AMPL):
-		conf.env.WITH_AMPL =True 
-	
-	##################################################################################################
-	# Disable Linear Solver
-	if (conf.options.WITHOUT_LP):
-		conf.env.WITHOUT_LP =True 
-
-	##################################################################################################
 	# Disable Rounding interval
 	if (conf.options.WITHOUT_ROUNDING):
 		conf.env.WITHOUT_ROUNDING =True 
 			
 	##################################################################################################
-	# Disable Linear Solver and rounding interval
+	# Disable rounding interval
 	if (conf.options.WITH_STANDALONE):
-		conf.env.WITHOUT_LP =True 
 		conf.env.WITHOUT_ROUNDING =True 
-					
-	##################################################################################################
-	# JNI
-	env.WITH_JNI = conf.options.WITH_JNI
-	if env.WITH_JNI:
-		java_home = os.environ.get("JAVA_HOME")
-		if java_home:
-			env["JAVA_HOME"] = [java_home]
-		
-		conf.load ('javaw', funs = [])
-
-		conf.check_jni_headers()
-
-		conf.msg ("Checking for java sdk", java_home)
-		del env["JAVAC"]
-		conf.find_program (os.path.join (java_home, "bin", "javac"), var = "JAVAC")
-		conf.find_program (os.path.join (java_home, "bin", "javah"), var = "JAVAH")
-		conf.find_program (os.path.join (java_home, "bin", "jar"),   var = "JAR")
-
-		conf.env.JAVA_PACKAGE = conf.options.JAVA_PACKAGE
-
-		if env.DEST_OS == "win32":
-			# fix name-mangling for linking with the JVM on windows
-			#   http://permalink.gmane.org/gmane.comp.gnu.mingw.user/6782
-			#   http://stackoverflow.com/questions/8063842/mingw32-g-and-stdcall-suffix1
-			env.append_unique ("LINKFLAGS_JAVA", "-Wl,--kill-at")
-			
+								
 	##################################################################################################
 	# Bison / Flex
 	env.append_unique ("BISONFLAGS", ["--name-prefix=ibex", "--report=all", "--file-prefix=parser"])

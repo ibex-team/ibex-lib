@@ -12,31 +12,34 @@
 #ifndef __TEST_EXPR_DIFF_H__
 #define __TEST_EXPR_DIFF_H__
 
-#include "cpptest.h"
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
+
 #include "utils.h"
 
 namespace ibex {
 
-class TestExprDiff : public TestIbex {
+class TestExprDiff : public CppUnit::TestFixture {
 
 public:
-	TestExprDiff() {
-		TEST_ADD(TestExprDiff::linear01);
-		TEST_ADD(TestExprDiff::poly01);
-		TEST_ADD(TestExprDiff::vec01);
-		TEST_ADD(TestExprDiff::vec02);
-		TEST_ADD(TestExprDiff::vec03);
-		TEST_ADD(TestExprDiff::one_var_one_func);
-		TEST_ADD(TestExprDiff::mat01);
-		TEST_ADD(TestExprDiff::mat02);
-		TEST_ADD(TestExprDiff::apply01);
-		TEST_ADD(TestExprDiff::apply02)
-		TEST_ADD(TestExprDiff::apply03);
-		TEST_ADD(TestExprDiff::cst_grad);
-		TEST_ADD(TestExprDiff::vecimg01);
-		TEST_ADD(TestExprDiff::vecimg02);
-		TEST_ADD(TestExprDiff::apply_mul01);
-	}
+
+	CPPUNIT_TEST_SUITE(TestExprDiff);
+	CPPUNIT_TEST(linear01);
+	CPPUNIT_TEST(poly01);
+	CPPUNIT_TEST(vec01);
+	CPPUNIT_TEST(vec02);
+	CPPUNIT_TEST(vec03);
+	CPPUNIT_TEST(one_var_one_func);
+	CPPUNIT_TEST(mat01);
+	CPPUNIT_TEST(mat02);
+	CPPUNIT_TEST(apply01);
+	CPPUNIT_TEST(apply02);
+	CPPUNIT_TEST(apply03);
+	CPPUNIT_TEST(cst_grad);
+	CPPUNIT_TEST(vecimg01);
+	CPPUNIT_TEST(vecimg02);
+	CPPUNIT_TEST(apply_mul01);
+	CPPUNIT_TEST_SUITE_END();
 
 	void linear01();
 
@@ -79,6 +82,8 @@ public:
 	void apply_mul02();
 };
 
+CPPUNIT_TEST_SUITE_REGISTRATION(TestExprDiff);
 
 } // namespace ibex
+
 #endif // __TEST_EXPR_DIFF_H__

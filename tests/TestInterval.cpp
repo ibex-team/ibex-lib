@@ -36,10 +36,10 @@ void TestInterval::cons05() {
 } // reverse bounds
 
 void TestInterval::check_eq(const Interval& x, const Interval& y, bool is_eq) {
-	TEST_ASSERT(is_eq? x==y : !(x==y));
-	TEST_ASSERT(is_eq? !(x!=y) : x!=y);
-	TEST_ASSERT(is_eq? y==x : !(y==x));
-	TEST_ASSERT(is_eq? !(y!=x) : y!=x);
+	CPPUNIT_ASSERT(is_eq? x==y : !(x==y));
+	CPPUNIT_ASSERT(is_eq? !(x!=y) : x!=y);
+	CPPUNIT_ASSERT(is_eq? y==x : !(y==x));
+	CPPUNIT_ASSERT(is_eq? !(y!=x) : y!=x);
 }
 
 void TestInterval::eq01() { check_eq(Interval::ALL_REALS,Interval::ALL_REALS, true); }
@@ -142,105 +142,105 @@ void TestInterval::inter06() { check_inter(Interval(0,1), Interval(1,2), Interva
 
 void TestInterval::getters01() {
 	Interval x(0,2);
-	TEST_ASSERT_DELTA_MSG(x.lb(),0,ERROR,"lb");
-	TEST_ASSERT_DELTA_MSG(x.ub(),2,ERROR,"ub");
-	TEST_ASSERT_DELTA_MSG(x.mid(),1,ERROR,"mid");
-	TEST_ASSERT_DELTA_MSG(x.rad(),1,ERROR,"rad");
-	TEST_ASSERT_DELTA_MSG(x.diam(),2,ERROR,"diam");
-	TEST_ASSERT_DELTA_MSG(x.mig(),0,ERROR,"mig");
-	TEST_ASSERT_DELTA_MSG(x.mag(),2,ERROR,"mag");
+	CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("lb",0,x.lb(), ERROR);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("ub",2,x.ub(), ERROR);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("mid",1,x.mid(), ERROR);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("rad",1,x.rad(), ERROR);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("diam",2,x.diam(), ERROR);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("mig",0,x.mig(), ERROR);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("mag",2,x.mag(), ERROR);
 }
 
 void TestInterval::getters02() {
 	Interval x(-3,-1);
-	TEST_ASSERT_DELTA_MSG(x.lb(),-3,ERROR,"lb");
-	TEST_ASSERT_DELTA_MSG(x.ub(),-1,ERROR,"ub");
-	TEST_ASSERT_DELTA_MSG(x.mid(),-2,ERROR,"mid");
-	TEST_ASSERT_DELTA_MSG(x.rad(),1,ERROR,"rad");
-	TEST_ASSERT_DELTA_MSG(x.diam(),2,ERROR,"diam");
-	TEST_ASSERT_DELTA_MSG(x.mig(),1,ERROR,"mig");
-	TEST_ASSERT_DELTA_MSG(x.mag(),3,ERROR,"mag");
+	CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("lb",-3,x.lb(), ERROR);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("ub",-1,x.ub(), ERROR);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("mid",-2,x.mid(), ERROR);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("rad",1,x.rad(), ERROR);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("diam",2,x.diam(), ERROR);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("mig",1,x.mig(), ERROR);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("mag",3,x.mag(), ERROR);
 }
 
 void TestInterval::getters03() {
 	Interval x(-3,1);
-	TEST_ASSERT_DELTA_MSG(x.lb(),-3,ERROR,"lb");
-	TEST_ASSERT_DELTA_MSG(x.ub(),1,ERROR,"ub");
-	TEST_ASSERT_DELTA_MSG(x.mid(),-1,ERROR,"mid");
-	TEST_ASSERT_DELTA_MSG(x.rad(),2,ERROR,"rad");
-	TEST_ASSERT_DELTA_MSG(x.diam(),4,ERROR,"diam");
-	TEST_ASSERT_DELTA_MSG(x.mig(),0,ERROR,"mig");
-	TEST_ASSERT_DELTA_MSG(x.mag(),3,ERROR,"mag");
+	CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("lb",-3,x.lb(), ERROR);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("ub",1,x.ub(), ERROR);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("mid",-1,x.mid(), ERROR);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("rad",2,x.rad(), ERROR);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("diam",4,x.diam(), ERROR);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("mig",0,x.mig(), ERROR);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("mag",3,x.mag(), ERROR);
 }
 
 void TestInterval::getters04() {
 	Interval x(Interval::NEG_REALS);
-	TEST_ASSERT_DELTA_MSG(x.lb(),NEG_INFINITY,ERROR,"lb");
-	TEST_ASSERT_DELTA_MSG(x.ub(),0,ERROR,"ub");
-	TEST_ASSERT_DELTA_MSG(x.mid(),-DBL_MAX,ERROR,"mid");
-	TEST_ASSERT_DELTA_MSG(x.rad(),POS_INFINITY,ERROR,"rad");
-	TEST_ASSERT_DELTA_MSG(x.diam(),POS_INFINITY,ERROR,"diam");
-	TEST_ASSERT_DELTA_MSG(x.mig(),0,ERROR,"mig");
-	TEST_ASSERT_DELTA_MSG(x.mag(),POS_INFINITY,ERROR,"mag");
+	CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("lb",NEG_INFINITY,x.lb(), ERROR);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("ub",0,x.ub(), ERROR);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("mid",-DBL_MAX,x.mid(), ERROR);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("rad",POS_INFINITY,x.rad(), ERROR);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("diam",POS_INFINITY,x.diam(), ERROR);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("mig",0,x.mig(), ERROR);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("mag",POS_INFINITY,x.mag(), ERROR);
 }
 
 void TestInterval::getters05() {
 	Interval x(Interval::ALL_REALS);
-	TEST_ASSERT_DELTA_MSG(x.lb(),NEG_INFINITY,ERROR,"lb");
-	TEST_ASSERT_DELTA_MSG(x.ub(),POS_INFINITY,ERROR,"ub");
-	TEST_ASSERT_DELTA_MSG(x.mid(),0,ERROR,"mid");
-	TEST_ASSERT_DELTA_MSG(x.rad(),POS_INFINITY,ERROR,"rad");
-	TEST_ASSERT_DELTA_MSG(x.diam(),POS_INFINITY,ERROR,"diam");
-	TEST_ASSERT_DELTA_MSG(x.mig(),0,ERROR,"mig");
-	TEST_ASSERT_DELTA_MSG(x.mag(),POS_INFINITY,ERROR,"mag");
+	CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("lb",NEG_INFINITY,x.lb(), ERROR);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("ub",POS_INFINITY,x.ub(), ERROR);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("mid",0,x.mid(), ERROR);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("rad",POS_INFINITY,x.rad(), ERROR);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("diam",POS_INFINITY,x.diam(), ERROR);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("mig",0,x.mig(), ERROR);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("mag",POS_INFINITY,x.mag(), ERROR);
 }
 
 void TestInterval::getters06() {
 	Interval x(DBL_MAX,POS_INFINITY);
-	TEST_ASSERT_DELTA_MSG(x.lb(),DBL_MAX,ERROR,"lb");
-	TEST_ASSERT_DELTA_MSG(x.ub(),POS_INFINITY,ERROR,"ub");
-	TEST_ASSERT_DELTA_MSG(x.mid(),DBL_MAX,ERROR,"mid");
-	TEST_ASSERT_DELTA_MSG(x.rad(),POS_INFINITY,ERROR,"rad");
-	TEST_ASSERT_DELTA_MSG(x.diam(),POS_INFINITY,ERROR,"diam");
-	TEST_ASSERT_DELTA_MSG(x.mig(),DBL_MAX,ERROR,"mig");
-	TEST_ASSERT_DELTA_MSG(x.mag(),POS_INFINITY,ERROR,"mag");
+	CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("lb",DBL_MAX,x.lb(), ERROR);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("ub",POS_INFINITY,x.ub(), ERROR);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("mid",DBL_MAX,x.mid(), ERROR);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("rad",POS_INFINITY,x.rad(), ERROR);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("diam",POS_INFINITY,x.diam(), ERROR);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("mig",DBL_MAX,x.mig(), ERROR);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("mag",POS_INFINITY,x.mag(), ERROR);
 }
 
 
-void TestInterval::is_subset01()          { TEST_ASSERT(Interval(0,1).is_subset(Interval(0,2))); }
-void TestInterval::is_subset02()          { TEST_ASSERT(!Interval(0,1).is_subset(Interval(1,2))); }
-void TestInterval::is_strict_interior_subset01()   { TEST_ASSERT(!Interval(0,1).is_strict_interior_subset(Interval(0,2))); }
-void TestInterval::is_strict_interior_subset02()   { TEST_ASSERT(Interval::NEG_REALS.is_strict_interior_subset(Interval::ALL_REALS)); }
-void TestInterval::is_strict_interior_subset03()   { TEST_ASSERT(Interval::EMPTY_SET.is_strict_interior_subset(Interval(0,1))); }
-void TestInterval::is_superset01()        { TEST_ASSERT(Interval(0,2).is_superset(Interval(0,1))); }
-void TestInterval::is_superset02()        { TEST_ASSERT(!Interval(1,2).is_superset(Interval(0,1))); }
-void TestInterval::is_strict_superset01() { TEST_ASSERT(!Interval(0,2).is_strict_superset(Interval(0,2))); }
-void TestInterval::is_strict_superset02() { TEST_ASSERT(Interval::ALL_REALS.is_strict_superset(Interval::NEG_REALS)); }
-void TestInterval::is_strict_superset03() { TEST_ASSERT(!Interval::EMPTY_SET.is_strict_superset(Interval::EMPTY_SET)); }
-void TestInterval::contains01()           { TEST_ASSERT(Interval(0,2).contains(0)); }
-void TestInterval::contains02()           { TEST_ASSERT(Interval::ALL_REALS.contains(POS_INFINITY)); }
-void TestInterval::interior_contains01()  { TEST_ASSERT(!Interval(0,2).interior_contains(0)); }
-void TestInterval::interior_contains02()  { TEST_ASSERT(Interval(0,2).interior_contains(1)); }
-void TestInterval::is_disjoint01()        { TEST_ASSERT(!Interval::NEG_REALS.is_disjoint(Interval::POS_REALS)); }
-void TestInterval::is_disjoint02()        { TEST_ASSERT(Interval(0,1).is_disjoint(Interval(2,3))); }
-void TestInterval::is_empty01()           { TEST_ASSERT(Interval(POS_INFINITY).is_empty()); }
-void TestInterval::is_empty02()           { TEST_ASSERT(!Interval(0,1).is_empty()); }
-void TestInterval::is_degenerated01()     { TEST_ASSERT(Interval::ZERO.is_degenerated()); }
-void TestInterval::is_degenerated02()     { TEST_ASSERT(Interval::EMPTY_SET.is_degenerated()); }
-void TestInterval::is_unbounded01()       { TEST_ASSERT(!Interval::EMPTY_SET.is_unbounded()); }
-void TestInterval::is_unbounded02()       { TEST_ASSERT(!Interval(0,1).is_unbounded()); }
-void TestInterval::is_unbounded03()       { TEST_ASSERT(Interval::NEG_REALS.is_unbounded()); }
-void TestInterval::is_unbounded04()       { TEST_ASSERT(Interval::POS_REALS.is_unbounded()); }
-void TestInterval::is_bisectable01()      { TEST_ASSERT(!Interval::EMPTY_SET.is_bisectable()); }
-void TestInterval::is_bisectable02()      { TEST_ASSERT(!Interval(DBL_MAX,POS_INFINITY).is_bisectable()); }
-void TestInterval::is_bisectable03()      { TEST_ASSERT(!Interval(NEG_INFINITY,-DBL_MAX).is_bisectable()); }
-void TestInterval::is_bisectable04()      { TEST_ASSERT(!Interval(0,ibex::next_float(0)).is_bisectable()); }
-void TestInterval::is_bisectable05()      {	TEST_ASSERT(Interval(0,ibex::next_float(ibex::next_float(0))).is_bisectable());}
-void TestInterval::is_bisectable06()      {TEST_ASSERT(Interval(10,ibex::next_float(ibex::next_float(10))).is_bisectable());}
-void TestInterval::is_bisectable07()      {TEST_ASSERT(Interval(ibex::previous_float(ibex::previous_float(0)),0).is_bisectable());}
-void TestInterval::is_bisectable08()      {TEST_ASSERT(Interval(ibex::previous_float(ibex::previous_float(10)),10).is_bisectable());}
-void TestInterval::is_bisectable09()      {TEST_ASSERT(!Interval(10,ibex::next_float(10)).is_bisectable()); }
-void TestInterval::is_bisectable10()      {TEST_ASSERT(!Interval(ibex::previous_float(0),0).is_bisectable()); }
+void TestInterval::is_subset01()          { CPPUNIT_ASSERT(Interval(0,1).is_subset(Interval(0,2))); }
+void TestInterval::is_subset02()          { CPPUNIT_ASSERT(!Interval(0,1).is_subset(Interval(1,2))); }
+void TestInterval::is_strict_interior_subset01()   { CPPUNIT_ASSERT(!Interval(0,1).is_strict_interior_subset(Interval(0,2))); }
+void TestInterval::is_strict_interior_subset02()   { CPPUNIT_ASSERT(Interval::NEG_REALS.is_strict_interior_subset(Interval::ALL_REALS)); }
+void TestInterval::is_strict_interior_subset03()   { CPPUNIT_ASSERT(Interval::EMPTY_SET.is_strict_interior_subset(Interval(0,1))); }
+void TestInterval::is_superset01()        { CPPUNIT_ASSERT(Interval(0,2).is_superset(Interval(0,1))); }
+void TestInterval::is_superset02()        { CPPUNIT_ASSERT(!Interval(1,2).is_superset(Interval(0,1))); }
+void TestInterval::is_strict_superset01() { CPPUNIT_ASSERT(!Interval(0,2).is_strict_superset(Interval(0,2))); }
+void TestInterval::is_strict_superset02() { CPPUNIT_ASSERT(Interval::ALL_REALS.is_strict_superset(Interval::NEG_REALS)); }
+void TestInterval::is_strict_superset03() { CPPUNIT_ASSERT(!Interval::EMPTY_SET.is_strict_superset(Interval::EMPTY_SET)); }
+void TestInterval::contains01()           { CPPUNIT_ASSERT(Interval(0,2).contains(0)); }
+void TestInterval::contains02()           { CPPUNIT_ASSERT(Interval::ALL_REALS.contains(POS_INFINITY)); }
+void TestInterval::interior_contains01()  { CPPUNIT_ASSERT(!Interval(0,2).interior_contains(0)); }
+void TestInterval::interior_contains02()  { CPPUNIT_ASSERT(Interval(0,2).interior_contains(1)); }
+void TestInterval::is_disjoint01()        { CPPUNIT_ASSERT(!Interval::NEG_REALS.is_disjoint(Interval::POS_REALS)); }
+void TestInterval::is_disjoint02()        { CPPUNIT_ASSERT(Interval(0,1).is_disjoint(Interval(2,3))); }
+void TestInterval::is_empty01()           { CPPUNIT_ASSERT(Interval(POS_INFINITY).is_empty()); }
+void TestInterval::is_empty02()           { CPPUNIT_ASSERT(!Interval(0,1).is_empty()); }
+void TestInterval::is_degenerated01()     { CPPUNIT_ASSERT(Interval::ZERO.is_degenerated()); }
+void TestInterval::is_degenerated02()     { CPPUNIT_ASSERT(Interval::EMPTY_SET.is_degenerated()); }
+void TestInterval::is_unbounded01()       { CPPUNIT_ASSERT(!Interval::EMPTY_SET.is_unbounded()); }
+void TestInterval::is_unbounded02()       { CPPUNIT_ASSERT(!Interval(0,1).is_unbounded()); }
+void TestInterval::is_unbounded03()       { CPPUNIT_ASSERT(Interval::NEG_REALS.is_unbounded()); }
+void TestInterval::is_unbounded04()       { CPPUNIT_ASSERT(Interval::POS_REALS.is_unbounded()); }
+void TestInterval::is_bisectable01()      { CPPUNIT_ASSERT(!Interval::EMPTY_SET.is_bisectable()); }
+void TestInterval::is_bisectable02()      { CPPUNIT_ASSERT(!Interval(DBL_MAX,POS_INFINITY).is_bisectable()); }
+void TestInterval::is_bisectable03()      { CPPUNIT_ASSERT(!Interval(NEG_INFINITY,-DBL_MAX).is_bisectable()); }
+void TestInterval::is_bisectable04()      { CPPUNIT_ASSERT(!Interval(0,ibex::next_float(0)).is_bisectable()); }
+void TestInterval::is_bisectable05()      {	CPPUNIT_ASSERT(Interval(0,ibex::next_float(ibex::next_float(0))).is_bisectable());}
+void TestInterval::is_bisectable06()      {CPPUNIT_ASSERT(Interval(10,ibex::next_float(ibex::next_float(10))).is_bisectable());}
+void TestInterval::is_bisectable07()      {CPPUNIT_ASSERT(Interval(ibex::previous_float(ibex::previous_float(0)),0).is_bisectable());}
+void TestInterval::is_bisectable08()      {CPPUNIT_ASSERT(Interval(ibex::previous_float(ibex::previous_float(10)),10).is_bisectable());}
+void TestInterval::is_bisectable09()      {CPPUNIT_ASSERT(!Interval(10,ibex::next_float(10)).is_bisectable()); }
+void TestInterval::is_bisectable10()      {CPPUNIT_ASSERT(!Interval(ibex::previous_float(0),0).is_bisectable()); }
 
 void TestInterval::integer01() {
 	Interval x=Interval::EMPTY_SET; bwd_integer(x); check(x,Interval::EMPTY_SET);
@@ -276,24 +276,24 @@ void TestInterval::mid01() {
 }
 
 void TestInterval::mid02() {
-	TEST_ASSERT(Interval(NEG_INFINITY,POS_INFINITY).mid()==0);
+	CPPUNIT_ASSERT(Interval(NEG_INFINITY,POS_INFINITY).mid()==0);
 }
 
 void TestInterval::mid03() {
-	TEST_ASSERT(Interval::POS_REALS.mid()==DBL_MAX);
+	CPPUNIT_ASSERT(Interval::POS_REALS.mid()==DBL_MAX);
 }
 
 void TestInterval::mid04() {
-	TEST_ASSERT(Interval::NEG_REALS.mid()==-DBL_MAX);
+	CPPUNIT_ASSERT(Interval::NEG_REALS.mid()==-DBL_MAX);
 }
 
 void TestInterval::mid05() {
 	double d=Interval(DBL_MAX,POS_INFINITY).mid();
-	TEST_ASSERT(d==DBL_MAX || d==-DBL_MAX);
+	CPPUNIT_ASSERT(d==DBL_MAX || d==-DBL_MAX);
 }
 
 void TestInterval::mid06() {
-	TEST_ASSERT(Interval::ZERO.mid()==0.0);
+	CPPUNIT_ASSERT(Interval::ZERO.mid()==0.0);
 }
 
 void TestInterval::mid07() {
@@ -307,7 +307,7 @@ void TestInterval::mid07() {
 	//cout << "x+m=" << x2 << endl;
 	Interval x3=x2-m;
 	//cout << "(x+m)-m" <<x3 << endl;
-	TEST_ASSERT(x3.is_superset(y));
+	CPPUNIT_ASSERT(x3.is_superset(y));
 }
 
 void TestInterval::mid08() {
@@ -344,13 +344,13 @@ void TestInterval::mid08() {
 			{-0,0} };
 
 	IntervalVector box(30,_box);
-	TEST_ASSERT((box+box.mid()-box.mid()).is_superset(box));
+	CPPUNIT_ASSERT((box+box.mid()-box.mid()).is_superset(box));
 }
 
 void TestInterval::delta01() {
 	Interval x(-1.7976931348623157081e+308,6.1000000000000005329);
 	//cout << "delta=" << x.delta(x) << " x.diam()=" << (x.diam()==POS_INFINITY) << endl;
-	TEST_ASSERT(x.delta(x)==0.0);
+	CPPUNIT_ASSERT(x.delta(x)==0.0);
 }
 
 void TestInterval::delta02() {
@@ -360,12 +360,12 @@ void TestInterval::delta02() {
 	Interval y(Interval::ALL_REALS);
 	Interval z(NEG_INFINITY,a);
 	//cout << y.delta(x) << " " << z.diam() << endl;
-	TEST_ASSERT(y.delta(x)==z.diam());
+	CPPUNIT_ASSERT(y.delta(x)==z.diam());
 }
 
 void TestInterval::delta03() {
 	Interval x(-DBL_MAX,DBL_MAX); // so that diam()>DBL_MAX
 	//cout << x.diam() << " " << x.diam() << endl;
 	//cout << "delta=" << x.delta(x) << endl;
-	TEST_ASSERT(x.delta(x)==0);
+	CPPUNIT_ASSERT(x.delta(x)==0);
 }

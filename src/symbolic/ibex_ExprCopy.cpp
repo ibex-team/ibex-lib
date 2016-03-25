@@ -12,10 +12,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <cassert>
+
 #include "ibex_ExprCopy.h"
-#include "ibex_Expr.h"
+#include "ibex_Function.h"
 #include "ibex_Domain.h"
-#include "ibex_Eval.h"
 
 namespace ibex {
 
@@ -231,7 +231,7 @@ void ExprCopy::visit(const ExprApply& e) {
 			for (i=0; i<e.nb_args; i++) {
 				d.set_ref(i,((const ExprConstant&) ARG(i)).get());
 			}
-			clone.insert(e, &ExprConstant::new_(Eval().eval(e.func,d)));
+			clone.insert(e, &ExprConstant::new_(e.func.basic_evaluator().eval(d)));
 			return;
 		}
 	}

@@ -14,7 +14,6 @@
 
 #include "ibex_Ctc.h"
 #include "ibex_NumConstraint.h"
-#include "ibex_HC4Revise.h"
 
 namespace ibex {
 
@@ -30,35 +29,34 @@ public:
 	 * \brief Build the contractor for "f(x)=0" or "f(x)<=0".
 	 *
 	 * \param op: by default: EQ.
-	 * \param mode see #ibex::HC4Revise::HC4Revise(FwdMode).
 	 *
 	 */
-	CtcFwdBwd(Function& f, CmpOp op=EQ, FwdMode mode=INTERVAL_MODE);
+	CtcFwdBwd(Function& f, CmpOp op=EQ);
 
 	/**
 	 * \brief Build the contractor for "f(x) in [y]".
 	 */
-	CtcFwdBwd(Function& f, const Domain& y, FwdMode mode=INTERVAL_MODE);
+	CtcFwdBwd(Function& f, const Domain& y);
 
 	/**
 	 * \brief Build the contractor for "f(x) in [y]".
 	 */
-	CtcFwdBwd(Function& f, const Interval& y, FwdMode mode=INTERVAL_MODE);
+	CtcFwdBwd(Function& f, const Interval& y);
 
 	/**
 	 * \brief Build the contractor for "f(x) in [y]".
 	 */
-	CtcFwdBwd(Function& f, const IntervalVector& y, FwdMode mode=INTERVAL_MODE);
+	CtcFwdBwd(Function& f, const IntervalVector& y);
 
 	/**
 	 * \brief Build the contractor for "f(x) in [y]".
 	 */
-	CtcFwdBwd(Function& f, const IntervalMatrix& y, FwdMode mode=INTERVAL_MODE);
+	CtcFwdBwd(Function& f, const IntervalMatrix& y);
 
 	/**
 	 * \remark ctr is not kept by reference.
 	 */
-	CtcFwdBwd(const NumConstraint& ctr, FwdMode mode=INTERVAL_MODE);
+	CtcFwdBwd(const NumConstraint& ctr);
 
 	/**
 	 * \brief Delete this.
@@ -84,8 +82,6 @@ public:
 	Domain d;
 
 protected:
-	HC4Revise hc4r;
-
 	void init();
 };
 

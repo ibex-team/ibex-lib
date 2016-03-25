@@ -12,24 +12,28 @@
 #ifndef __TEST_DOMAIN_H__
 #define __TEST_DOMAIN_H__
 
-#include "cpptest.h"
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
+#include "ibex_Function.h"
 #include "ibex_Eval.h"
 #include "utils.h"
 
 namespace ibex {
 
-class TestDomain : public TestIbex {
+class TestDomain : public CppUnit::TestFixture {
 
 public:
-	TestDomain() {
+
+	CPPUNIT_TEST_SUITE(TestDomain);
+	
 /*
-		TEST_ADD(TestDomain::cons01);
-		TEST_ADD(TestDomain::scal01);
-		TEST_ADD(TestDomain::vector01);
-		TEST_ADD(TestDomain::matrix01);
-		TEST_ADD(TestDomain::mix01);
+		CPPUNIT_TEST(cons01);
+		CPPUNIT_TEST(scal01);
+		CPPUNIT_TEST(vector01);
+		CPPUNIT_TEST(matrix01);
+		CPPUNIT_TEST(mix01);
 		*/
-	}
+	CPPUNIT_TEST_SUITE_END();
 
 	// test: Domain()
 /*	void cons01();
@@ -40,6 +44,9 @@ public:
 	void mix01(); */
 
 };
+
+CPPUNIT_TEST_SUITE_REGISTRATION(TestDomain);
+
 
 } // namespace ibex
 #endif // __TEST_DOMAIN_H__
