@@ -894,9 +894,9 @@ namespace ibex {
 
 // the following functions are
 // introduced to allow genericity
-inline bool ___is_empty(double x)                { return false; }
+inline bool ___is_empty(double)                  { return false; }
 inline bool ___is_empty(const Interval& x)       { return x.is_empty(); }
-inline void ___set_empty(double x)          { }
+inline void ___set_empty(double)            { }
 inline void ___set_empty(Interval& x)       { x.set_empty(); }
 
 inline double abs(double x) {return fabs(x);}

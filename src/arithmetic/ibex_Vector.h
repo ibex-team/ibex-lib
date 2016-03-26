@@ -235,8 +235,8 @@ std::ostream& operator<<(std::ostream& os, const Vector& x);
 
 // the following functions are
 // introduced to allow genericity
-inline bool ___is_empty(const Vector& v)         { return false; }
-inline void ___set_empty(Vector& v)         { }
+inline bool ___is_empty(const Vector&)         { return false; }
+inline void ___set_empty(Vector&)              { }
 
 } // end namespace ibex
 
