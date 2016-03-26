@@ -28,7 +28,7 @@ public:
 	 *
 	 * By default, does nothing.
 	 */
-	virtual void visit_node(const IntervalVector& box) { }
+	virtual void visit_node(const IntervalVector&) { }
 
 	/**
 	 * \brief Visit a leaf
