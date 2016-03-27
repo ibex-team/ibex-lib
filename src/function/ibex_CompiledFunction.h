@@ -81,9 +81,16 @@ protected:
 
 private:
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Woverloaded-virtual"
+#endif
 	void visit(const ExprNAryOp& e, operation op);
 	void visit(const ExprBinaryOp& b, operation op);
 	void visit(const ExprUnaryOp& u, operation op);
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 
 	void visit(const ExprNode& e);
 	void visit(const ExprIndex& i);

@@ -69,7 +69,7 @@ public:
 	inline void trans_M_fwd(int, int y)       { g[y].m().clear(); }
 	inline void sign_fwd(int, int y)          { g[y].i()=0; }
 	inline void abs_fwd(int, int y)           { g[y].i()=0; }
-	inline void power_fwd(int, int y, int p)  { g[y].i()=0; }
+	inline void power_fwd(int, int y, int)    { g[y].i()=0; }
 	inline void sqr_fwd(int, int y)           { g[y].i()=0; }
 	inline void sqrt_fwd(int, int y)          { g[y].i()=0; }
 	inline void exp_fwd(int, int y)           { g[y].i()=0; }
@@ -99,10 +99,10 @@ public:
 
 	/* ====================================== Backward =================================== */
 
-	       void index_bwd  (int x, int y) { }
+	       void index_bwd  (int, int) { }
 	       void vector_bwd (int* x, int y);
-	inline void symbol_bwd (int y) { /*cout << "symbol bwd=" << g[y].v() << endl;*/ /* nothing to do */ }
-	inline void cst_bwd    (int y) { /* nothing to do */ }
+	inline void symbol_bwd (int) { /*cout << "symbol bwd=" << g[y].v() << endl;*/ /* nothing to do */ }
+	inline void cst_bwd    (int) { /* nothing to do */ }
 	       void apply_bwd  (int* x, int y);
 	       void chi_bwd    (int x1, int x2, int x3, int y);
 	inline void add_bwd    (int x1, int x2, int y) { g[x1].i() += g[y].i();  g[x2].i() += g[y].i(); }
@@ -113,8 +113,8 @@ public:
 	       void min_bwd    (int x1, int x2, int y);
 	       void atan2_bwd  (int x1, int x2, int y);
 	inline void minus_bwd  (int x, int y) { g[x].i() += -1.0*g[y].i(); }
-    inline void trans_V_bwd(int x, int y) { /* nothing to do because g[x].v() is a reference to g[y].v() */ }
-    inline void trans_M_bwd(int x, int y) { g[x].m() += g[y].m().transpose(); }
+        inline void trans_V_bwd(int, int) { /* nothing to do because g[x].v() is a reference to g[y].v() */ }
+        inline void trans_M_bwd(int x, int y) { g[x].m() += g[y].m().transpose(); }
 	       void sign_bwd   (int x, int y);
 	       void abs_bwd    (int x, int y);
 	inline void power_bwd  (int x, int y, int p) { g[x].i() += g[y].i() * p * pow(d[x].i(), p-1); }

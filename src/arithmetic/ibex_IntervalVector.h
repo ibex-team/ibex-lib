@@ -13,6 +13,9 @@
 #define __IBEX_INTERVAL_VECTOR_H__
 
 #include <cassert>
+#if defined __cplusplus && __cplusplus >= 201103L
+#include <initializer_list>
+#endif
 #include <iostream>
 #include <utility>
 #include "ibex_Interval.h"
@@ -59,6 +62,13 @@ public:
 	 */
 	IntervalVector(const IntervalVector& x);
 
+#if defined __cplusplus && __cplusplus >= 201103L
+	/**
+	 * \brief Move constructor
+	 */
+	IntervalVector(IntervalVector&& x) noexcept;
+#endif
+
 	/**
 	 * \brief Create the IntervalVector [bounds[0][0],bounds[0][1]]x...x[bounds[n-1][0],bounds[n-1][1]]
 	 *
@@ -66,6 +76,16 @@ public:
 	 * \pre n>0
 	 */
 	IntervalVector(int n, double  bounds[][2]);
+
+#if defined __cplusplus && __cplusplus >= 201103L
+	/**
+	 * \brief Create the IntervalVector [bounds[0][0],bounds[0][1]]x...x[bounds[n-1][0],bounds[n-1][1]]
+	 *
+	 * \param bounds an nx2 array of doubles
+	 * \pre bounds.size() > 0
+	 */
+        IntervalVector(std::initializer_list<std::initializer_list<double>> const & bounds);
+#endif
 
 	/**
 	 * \brief Create the degenerated IntervalVector x

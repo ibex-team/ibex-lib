@@ -37,6 +37,12 @@ IntervalVector::IntervalVector(const IntervalVector& x) : n(x.n), vec(new Interv
 	for (int i=0; i<n; i++) vec[i]=x[i];
 }
 
+#if defined __cplusplus && __cplusplus >= 201103L
+IntervalVector::IntervalVector(IntervalVector&& x) noexcept : n(x.n), vec(x.vec) {
+        x.vec = nullptr;
+}
+#endif
+
 IntervalVector::IntervalVector(int n1, double bounds[][2]) : n(n1), vec(new Interval[n1]) {
 	if (bounds==0) // probably, the user called IntervalVector(n,0) and 0 is interpreted as NULL!
 		for (int i=0; i<n1; i++)
@@ -45,6 +51,19 @@ IntervalVector::IntervalVector(int n1, double bounds[][2]) : n(n1), vec(new Inte
 		for (int i=0; i<n1; i++)
 			vec[i]=Interval(bounds[i][0],bounds[i][1]);
 }
+
+#if defined __cplusplus && __cplusplus >= 201103L
+IntervalVector::IntervalVector(std::initializer_list<std::initializer_list<double>> const & bounds) : n(bounds.size()), vec(new Interval[n]) {
+        int i = 0;
+        for (auto const & bound : bounds) {
+                assert(bound.size() == 2);
+                auto it = bound.begin();
+                double const lb = *(it++);
+                double const ub = *it;
+                vec[i++] = Interval(lb, ub);
+        }
+}
+#endif
 
 IntervalVector::IntervalVector(const Vector& x) : n(x.size()), vec(new Interval[n]) {
 	for (int i=0; i<n; i++) vec[i]=x[i];

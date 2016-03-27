@@ -597,7 +597,7 @@ public:
 	/**
 	 * \brief Return a pointer to the array of used variables.
 	 */
-	const int* const used_vars() const;
+	const int* used_vars() const;
 
 	/**
 	 * \brief Return the current number of nodes in the DAG.
@@ -1115,7 +1115,7 @@ inline int Function::used_var(int i) const {
 	return _used_var[i];
 }
 
-inline const int* const Function::used_vars() const {
+inline const int* Function::used_vars() const {
 	return _used_var;
 }
 
