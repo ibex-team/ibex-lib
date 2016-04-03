@@ -18,7 +18,8 @@ def configure (conf):
 	# add AFFINE plugin include directory
 	conf.env.append_unique("INCLUDES","../../plugins/affine/src/arithmetic")
 	conf.env.append_unique("INCLUDES","../../plugins/affine/src/function")
-
+	conf.env.append_unique("INCLUDES","../../plugins/affine/src/numeric")
+	
 def build (bld):
 		
 	if not bld.env.WITH_AFFINE: 
@@ -29,5 +30,13 @@ def build (bld):
 	# add AFFINE plugin sources
 	bld.env.IBEX_SRC.extend(bld.path.ant_glob ("src/**/ibex_*.cpp"))
 	# add AFFINE plugin headers
-	bld.env.IBEX_HDR.extend(bld.path.ant_glob ("src/**/ibex_*.h*"))
+	bld.env.IBEX_HDR.extend(bld.path.ant_glob ("src/**/ibex_*.h"))
+	
+	# Add information in ibex_Setting
+	@bld.rule (
+		target = "../../src/ibex_Setting.h",
+		after  = "ibex_Setting_h_init"
+	)
+	def _(tsk): 	
+		tsk.outputs[0].write("#define _IBEX_WITH_AFFINE_ 1\n",'a')   # 'a' <=> append
 	

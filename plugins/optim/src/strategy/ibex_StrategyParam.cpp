@@ -115,14 +115,18 @@ Ctc& StrategyParam::get_ctc() {
 
 	LinearRelax* lr;
 
-	if (lin_relax=="xn")
+	if (lin_relax=="art")
+		lr = &rec(new LinearRelaxCombo(ext_sys,LinearRelaxCombo::ART));
+	else if  (lin_relax=="compo")
+		lr = &rec(new LinearRelaxCombo(ext_sys,LinearRelaxCombo::COMPO));
+	else if (lin_relax=="xn")
 		lr = &rec(new LinearRelaxXTaylor(ext_sys,cpoints));
 	else
 		ibex_error("StrategyParam: unknown liner relaxation mode");
 
 	// fixpoint linear relaxation , hc4  with default fix point ratio 0.2
 
-	if (lin_relax=="xn") {
+	if (lin_relax=="compo" || lin_relax=="art"|| lin_relax=="xn") {
 
 		//cxn = new CtcLinearRelaxation (*lr, hc44xn);
 		Ctc& cxn_poly = rec(new CtcPolytopeHull(*lr, CtcPolytopeHull::ALL_BOX));

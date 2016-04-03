@@ -481,74 +481,74 @@ int main() {
 	//! [ctc-newton]
 	}
 
-	//  {
-	//  //! [ctc-qinter1]
-	//  const int N=6;
-	//  /* The measurements (coordinates of the points and distances) */
-	//  double bx[N]={5.09392,4.51835,0.76443,7.6879,0.823486,1.70958};
-	//  double by[N]={0.640775,7.25862,0.417032,8.74453,3.48106,4.42533};
-	//  double bd[N]={5.0111,2.5197,7.5308,3.52119,5.85707,4.73568};
-	//  //! [ctc-qinter1]
-	//  //! [ctc-qinter2]
-	//  Interval bX[N];
-	//  Interval bY[N];
-	//  Interval bD[N];
-	//
-	//  /* add uncertainty on measurements */
-	//  for (int i=0; i<N; i++) {
-	//	  bX[i]=bx[i]+Interval(-0.1,0.1);
-	//       bY[i]=by[i]+Interval(-0.1,0.1);
-	//       bD[i]=bd[i]+Interval(-0.1,0.1);
-	//  }
-	//  //! [ctc-qinter2]
-	//
-	//  //! [ctc-qinter3]
-	//  bX[5]+=10;
-	//  //! [ctc-qinter3]
-	//
-	//  //! [ctc-qinter4]
-	//  Variable x(2);
-	//  Variable px,py;
-	//  Function dist(x,px,py,sqrt(sqr(x[0]-px)+sqr(x[1]-py)));
-	//
-	//  Function f0(x,dist(x,bX[0],bY[0])-bD[0]);
-	//  Function f1(x,dist(x,bX[1],bY[1])-bD[1]);
-	//  Function f2(x,dist(x,bX[2],bY[2])-bD[2]);
-	//  Function f3(x,dist(x,bX[3],bY[3])-bD[3]);
-	//  Function f4(x,dist(x,bX[4],bY[4])-bD[4]);
-	//  Function f5(x,dist(x,bX[5],bY[5])-bD[5]);
-	//
-	//  CtcFwdBwd c0(f0);
-	//  CtcFwdBwd c1(f1);
-	//  CtcFwdBwd c2(f2);
-	//  CtcFwdBwd c3(f3);
-	//  CtcFwdBwd c4(f4);
-	//  CtcFwdBwd c5(f5);
-	//  //! [ctc-qinter4]
-	//
-	//  //! [ctc-qinter5]
-	//  /* The initial box: [0,10]x[0,10] */
-	//  IntervalVector initbox(2,Interval(0,10));
-	//
-	//  /* Create the array of all the contractors */
-	//  Array<Ctc> array(c0,c1,c2,c3,c4,c5);
-	//  /* Create the q-intersection of the N contractors */
-	//  CtcQInter q(2,array,5); // 2 is the number of variables, 5 the number of correct measurement
-	//  /* Perform a first contraction */
-	//  IntervalVector box=initbox;
-	//  q.contract(box);
-	//  cout << "after q-inter =" << box << endl;
-	//  //! [ctc-qinter5]
-	//
-	//  //! [ctc-qinter6]
-	//  /* Build a Fix-point of the q-intersection */
-	//  CtcFixPoint fix(q);
-	//
-	//  /* Perform a stronger contraction with the fixpoint */
-	//  fix.contract(box);
-	//  cout << "after fix+q-inter =" << box << endl;
-	//  //! [ctc-qinter6]
-	//  }
+	  {
+	  //! [ctc-qinter1]
+	  const int N=6;
+	  /* The measurements (coordinates of the points and distances) */
+	  double bx[N]={5.09392,4.51835,0.76443,7.6879,0.823486,1.70958};
+	  double by[N]={0.640775,7.25862,0.417032,8.74453,3.48106,4.42533};
+	  double bd[N]={5.0111,2.5197,7.5308,3.52119,5.85707,4.73568};
+	  //! [ctc-qinter1]
+	  //! [ctc-qinter2]
+	  Interval bX[N];
+	  Interval bY[N];
+	  Interval bD[N];
+
+	  /* add uncertainty on measurements */
+	  for (int i=0; i<N; i++) {
+		  bX[i]=bx[i]+Interval(-0.1,0.1);
+	       bY[i]=by[i]+Interval(-0.1,0.1);
+	       bD[i]=bd[i]+Interval(-0.1,0.1);
+	  }
+	  //! [ctc-qinter2]
+
+	  //! [ctc-qinter3]
+	  bX[5]+=10;
+	  //! [ctc-qinter3]
+
+	  //! [ctc-qinter4]
+	  Variable x(2);
+	  Variable px,py;
+	  Function dist(x,px,py,sqrt(sqr(x[0]-px)+sqr(x[1]-py)));
+
+	  Function f0(x,dist(x,bX[0],bY[0])-bD[0]);
+	  Function f1(x,dist(x,bX[1],bY[1])-bD[1]);
+	  Function f2(x,dist(x,bX[2],bY[2])-bD[2]);
+	  Function f3(x,dist(x,bX[3],bY[3])-bD[3]);
+	  Function f4(x,dist(x,bX[4],bY[4])-bD[4]);
+	  Function f5(x,dist(x,bX[5],bY[5])-bD[5]);
+
+	  CtcFwdBwd c0(f0);
+	  CtcFwdBwd c1(f1);
+	  CtcFwdBwd c2(f2);
+	  CtcFwdBwd c3(f3);
+	  CtcFwdBwd c4(f4);
+	  CtcFwdBwd c5(f5);
+	  //! [ctc-qinter4]
+
+	  //! [ctc-qinter5]
+	  /* The initial box: [0,10]x[0,10] */
+	  IntervalVector initbox(2,Interval(0,10));
+
+	  /* Create the array of all the contractors */
+	  Array<Ctc> array(c0,c1,c2,c3,c4,c5);
+	  /* Create the q-intersection of the N contractors */
+	  CtcQInter q(array,5); // 2 is the number of variables, 5 the number of correct measurement
+	  /* Perform a first contraction */
+	  IntervalVector box=initbox;
+	  q.contract(box);
+	  cout << "after q-inter =" << box << endl;
+	  //! [ctc-qinter5]
+
+	  //! [ctc-qinter6]
+	  /* Build a Fix-point of the q-intersection */
+	  CtcFixPoint fix(q);
+
+	  /* Perform a stronger contraction with the fixpoint */
+	  fix.contract(box);
+	  cout << "after fix+q-inter =" << box << endl;
+	  //! [ctc-qinter6]
+	  }
 
 	{
 	//! [ctc-own1]
@@ -647,7 +647,7 @@ int main() {
 
 	CtcNewton newton(system.f, 5e+08, prec, 1e-04);
 
-	LinearRelaxCombo linear_relax(system,LinearRelaxCombo::COMPO);
+	LinearRelaxCombo linear_relax(system,LinearRelaxCombo::XNEWTON);
 
 	CtcPolytopeHull polytope(linear_relax,CtcPolytopeHull::ALL_BOX);
 
@@ -697,7 +697,7 @@ int main() {
 
 	CtcAcid acid(ext_sys, hc4_2);
 
-	LinearRelaxCombo linear_relax(ext_sys,LinearRelaxCombo::COMPO);
+	LinearRelaxCombo linear_relax(ext_sys,LinearRelaxCombo::XNEWTON);
 
 	CtcPolytopeHull polytope(linear_relax,CtcPolytopeHull::ALL_BOX);
 

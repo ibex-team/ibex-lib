@@ -103,17 +103,17 @@ public:
 protected:
 
 	/**
-	 * \brief Run the forward algorithm on the box \a box and return the root node label.
+	 * \brief Run the forward algorithm on the box \a box.
 	 */
 	void forward(const IntervalVector& box);
 
 	/**
-	 * \brief Run the forward algorithm on the box \a box and return the root node label.
+	 * \brief Run the forward algorithm on the box \a box.
 	 */
 	void forward(const Affine2MainVector<T>& box);
 
 	/**
-	 * \brief Run the forward algorithm with input node labels and return the result as an interval domain.
+	 * \brief Run the forward algorithm with input domains.
 	 */
 	void forward(const Array<const Domain>& argD, const Array<const TemplateDomain<Affine2Main<T> > >& argDAF2);
 
