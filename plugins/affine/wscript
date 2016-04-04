@@ -40,3 +40,5 @@ def build (bld):
 	def _(tsk): 	
 		tsk.outputs[0].write("#define _IBEX_WITH_AFFINE_ 1\n",'a')   # 'a' <=> append
 	
+	INCDIR  = "${PREFIX}/include/ibex"	
+	bld.install_files (INCDIR, bld.path.ant_glob ("src/**/ibex_*.h_"))
