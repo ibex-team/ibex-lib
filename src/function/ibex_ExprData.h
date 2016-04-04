@@ -40,13 +40,13 @@ public:
 	 * Principle: Either this function is overridden or the principle
 	 * applies for all direct sub-classes of ExprUnaryOp.
 	 */
-	virtual T* init(const ExprNode& node) {
+	virtual T* init(const ExprNode&) {
 		ibex_error("ExprData::init: Missing implementation for some node type");
 		return NULL;
 	}
 
 	/** Visit an indexed expression. */
-	virtual T* init(const ExprIndex& e, T& expr_deco) {
+	virtual T* init(const ExprIndex& e, T&) {
 		return init((const ExprNode&) e);
 	}
 
@@ -56,17 +56,17 @@ public:
 	}
 
 	/** Visit a n-ary operator. */
-	virtual T* init(const ExprNAryOp& e, Array<T>& args_deco) {
+	virtual T* init(const ExprNAryOp& e, Array<T>&) {
 		return init((const ExprNode&) e);
 	}
 
 	/** Visit a binary operator. */
-	virtual T* init(const ExprBinaryOp& e, T& left_deco, T& right_deco) {
+	virtual T* init(const ExprBinaryOp& e, T&, T&) {
 		return init((const ExprNode&) e);
 	}
 
 	/** Visit an unary operator. */
-	virtual T* init(const ExprUnaryOp& e, T& expr_deco) {
+	virtual T* init(const ExprUnaryOp& e, T&) {
 		return init((const ExprNode&) e);
 	}
 
