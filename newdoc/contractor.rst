@@ -719,6 +719,7 @@ The output is:
    :start-after: ctc-exist-2-O
    :end-before:  ctc-exist-2-O
 
+
 **Warning**: As we have explained, both ``CtcExist`` and ``CtcForAll`` deploy internally a search tree on the variables y until some precision 
 :math:`\varepsilon` is reached (the precision is uniform so far).
 The complexity of ``CtcExist`` and ``CtcForAll`` are therefore exponential in the number :math:`n_y` of variables y

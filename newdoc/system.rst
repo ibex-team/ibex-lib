@@ -4,7 +4,8 @@
               Systems
 *****************************************************
 
-A *system* in IBEX is a set of constraints (equalities or inequalities) with, optionnaly, a goal function to minimize
+
+A *system* in IBEX is a set of :ref:`constraints <mod-sys-ctrs>` (equalities or inequalities) with, optionnaly, a goal function to minimize
 and an initial domain for variables.
 It corresponds to the usual concept of system in mathematical programming.
 Here is an example of system:
@@ -22,133 +23,12 @@ Here is an example of system:
 
 One is usually interested in solving the system while minimizing the criterion, if any.
 
-We first present how constraints are represented.
 
-.. _mod-sys-ctrs:
-
-------------------------------
-Constraints
-------------------------------
-
-In this section, we do not present *constraints* in their full generality
-but *numerical constraints* (the ones you are the most likely interested in).
-
-A numerical constraint in IBEX is either a relation like 
-:math:`f(x)<0`, :math:`f(x)\le0`, :math:`f(x)=0`, :math:`f(x)\ge0` or :math:`f(x)>0`,
-where *f* is a function as introduced in the previous section. If *f* is vector-valued, then
-0 must be a vector.
-
-Surprisingly, constraints do not play an important role in IBEX.
-It sounds a little bit contraditory for a *constraint* programming library.
-The point is that IBEX is rather a *contractor* programming library meaning that 
-we build, apply and compose contractors rather than constraints directly.
-
-As a programer, you may actually face two different situations.
-
-Either you indeed want to use a constraint as a contractor in which case you
-build a ``Ctc`` object with this constraint (the actual class depending
-on the algorithm you chose, as explained in :ref:`the tutorial <tuto-ctc>` --by default, it is :ref:`ctc-fwd-bwd`--).
-Either you need to do something else, say, like calculating the Jacobian matrix of the
-function *f*. In this case, you just need to get a reference to this function 
-and call ``jacobian``. In fact, all the information inherent to a constraint
-(except the comparison operator of course) is contained in the underlying function so that there
-is little specific code related to the constraint itself.
-
-For these reasons, the only operations you actually do with a constraint is either
-to read its field or wrap it into a contractor.
-
-.. _mod-sys-ctrs-fields:
-
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+========================
 Class and Fields
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+========================
 
-The class for representing a numerical constraint is ``NumConstraint``.
-The first field in this class is a reference to the function:
-
-  Function& f;
-
-
-The second field is the comparison operator:
-
-  CmpOp op;
-
-
-``CmpOp`` is just an ``enum`` (integer) with the following values:
-
-=======   ============
-Op        def         
-=======   ============
-``LT``    :math:`<`   
-``LEQ``   :math:`\le`
-``EQ``    :math:`=`
-``GEQ``   :math:`\ge`
-``GT``    :math:`>`   
-=======   ============
-
-.. _mod-sys-ctrs-cpp:
-
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Creating constraints (in C++)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-To create a numerical constraint, you can build the function *f* first and
-call the constructor of ``NumConstraint`` as in the following example.
-
-
-.. code-block:: cpp
-
-   Variable x;
-   Function f(x,x+1);
-   NumConstraint c(f,LEQ); // the constraint x+1<=0
-	
-
-But you can also write directly:
-
-
-.. code-block:: cpp
-
-   Variable x;
-   NumConstraint c(x,x+1<=0);
-	
-which gives the same result. The only difference is that, in the second case,
-the object ``c.f`` is "owned" (and destroyed) by the constraint whereas 
-in the first case, ``c.f`` is only a reference to ``f``.
-
-Note that the constant 0 is automatically interpreted as a vector (resp. matrix),
-if the left-hand side expression is a vector (resp. matrix). However, it does not
-work for other constants: you have to build the constant with the proper dimension,
-e.g.,
-
-
-.. code-block:: cpp
-
-   Variable x(2);
-   NumConstraint c(x,x=IntervalVector(2,1)); // the constraint x=(1,1)
-   cout << "c=" << c << endl;
-	
-The display is::
-
-  c=(_x_0-([1,1] ; [1,1]))=0
-
-
-In case of several variables, the constructor of ``NumConstraint`` works as for functions.
-Up to 6 variables can be passed as arguments:
-
-
-.. code-block:: cpp
-
-   Variable a,b,c,d,e,f,g;
-   NumConstraint c(a,b,c,d,e,f,g,a+b+c+d+e+f+g<=1);
-	
-
-And if more variables are necessary, you need to build an ``Array<const ExprSymbol>`` first, like :ref:`here <mod-func-cpp>`.
-
-.. _mod-sys-fields:
-
-**Note:** There is currently the important restriction that inequalities can only be formed with real-valued (called "scalar") functions.
-It could be possible, in theory, to write :math:`f(x)\le0` with f vector-valued by interpreting the operator componentwise but this
-is not supporter by Ibex.
+The class for representing a system is ``System``.
 
 ------------------------------
 Systems fields
@@ -183,19 +63,65 @@ that are detailed below.
    be used as a regular C array.
 
 
-.. _mod-sys-transfo:
+.. _mod-sys-auxfunc:
 
 ------------------------------
-Transformation
+Auxiliary functions
 ------------------------------
+
+*(to be completed)*
+
+.. _mod-sys-cpp:
+
+================================================
+Creating systems (in C++)
+================================================
+
+The first alternative for creating a system is to do it programmatically, that is, directly in your C++ program.
+Creating a system in C++ resorts to a temporary object called a *system factory*. The task is done in a few simple steps:
+
+-  declare a new system factory (an object of ``SystemFactory``)
+-  add arguments in the factory using ``add_var``.
+-  (optional) add the expression of the goal function using ``add_goal``
+-  add the constraints using ``add_ctr``
+-  create the system simply by passing the factory to the constructor of ``System``
+
+
+Here is an example:
+
+
+.. code-block:: cpp
+
+   Variable x,y;
+
+   SystemFactory fac;
+   fac.add_var(x);
+   fac.add_var(y);
+   fac.add_goal(x+y);
+   fac.add_ctr(sqr(x)+sqr(y)<=1);
+
+   System sys(fac);
+
+If you compare the declaration of the constraint here with the examples given :ref:`here <mod-sys-ctrs-cpp>`,
+you notice that we do not list here the arguments before writing ``sqr(x)+sqr(y)<=1``.
+The reason is simply that, as said above, the goal function and the constraints in a system
+share all the same list of arguments. This list is defined via ``add_var`` once for all.
+
+
+.. _mod-sys-transfo:
+
+========================
+System Transformation
+========================
 
 We present in this section the different transformations that can be applied to a system.
 
 .. _mod-sys-transfo-copy:
 
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+--------------
 Copy
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+--------------
+
 
 The first transformation you can apply on a system is a simple copy. Of course, this is done via
 the copy constructor of the ``System`` class.
@@ -227,9 +153,9 @@ The display is:
 
 .. _mod-sys-transfo-normalize:
 
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+--------------
 Normalization
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+--------------
 
 It is confortable in some situations to assume that a system is made of inequalities only, and
 that each inequality is under the forme :math:`g(x)\le0`, that is, it is a "less or equal" inequality. 
@@ -276,9 +202,9 @@ We get the following display:
 
 .. _mod-sys-transfo-extend:
 
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+----------------------------
 Extended System
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+----------------------------
 
 An extended system is a system where the goal function is transformed into a constraint.
 
@@ -330,9 +256,9 @@ We get the following display:
 
 .. _mod-sys-transfo-fritz-john:
 
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+--------------------------------------------------------
 Fritz-John (Khun-Tucker) conditions
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+--------------------------------------------------------
 
 The generalized Khun-Tucker (aka Fritz-John) conditions can be obtained from a system.
 This produces a new system of **n+M+R+K+1** variables where
@@ -360,422 +286,5 @@ is the multiplier of the constraint.
 .. literalinclude:: ../examples/doc-modeling.txt
    :start-after: sys-fritz-john-O
    :end-before: sys-fritz-john-O
-
-
-.. _mod-sys-auxfunc:
-
-------------------------------
-Auxiliary functions
-------------------------------
-
-*(to be completed)*
-
-.. _mod-sys-cpp:
-
-------------------------------
-Creating systems (in C++)
-------------------------------
-
-The first alternative for creating a system is to do it programmatically, that is, directly in your C++ program.
-Creating a system in C++ resorts to a temporary object called a *system factory*. The task is done in a few simple steps:
-
--  declare a new system factory (an object of ``SystemFactory``)
--  add arguments in the factory using ``add_var``.
--  (optional) add the expression of the goal function using ``add_goal``
--  add the constraints using ``add_ctr``
--  create the system simply by passing the factory to the constructor of ``System``
-
-
-Here is an example:
-
-
-.. code-block:: cpp
-
-   Variable x,y;
-
-   SystemFactory fac;
-   fac.add_var(x);
-   fac.add_var(y);
-   fac.add_goal(x+y);
-   fac.add_ctr(sqr(x)+sqr(y)<=1);
-
-   System sys(fac);
-
-If you compare the declaration of the constraint here with the examples given :ref:`here <mod-sys-ctrs-cpp>`,
-you notice that we do not list here the arguments before writing ``sqr(x)+sqr(y)<=1``.
-The reason is simply that, as said above, the goal function and the constraints in a system
-share all the same list of arguments. This list is defined via ``add_var`` once for all.
-
-.. _mod-minibex:
-
-===================
-The Minibex syntax
-===================
-
-Entering a system programmatically is usually not very convenient.
-You may prefer to separate the model of the problem from the algorithms
-you use to solve it. In this way, you can run the same program with different
-variants of your model without recompiling it each time.
-
-IBEX provides such possibility. You can directly load a system from a (plain text) input file.
-
-You may also prefer the Minibex syntax by itself to C++ operator overloading and use this syntax inside
-your C++ code by initializing ``Function`` or ``NumConstraint`` objects with ``char*``.
-
-Here is a simple example. Copy-paste the text above in a file named, say, ``problem.txt``. 
-The syntax talks for itself::
-
-  Variables
-    x,y;
-
-  Minimize
-    x+y;
-
-  Constraints
-    x^2+y^2<=1;
-  end
-
-Then, in your C++ program, just write:
-
-
-.. code-block:: cpp
-
-   System sys("problem.txt");
-
-
-and the system you get is exactly the same as in the previous example.
-
-Next sections details the mini-language of these input files. 
-
-.. _mod-minibex-struct:
-
-------------------------------
-Overall structure
-------------------------------
-First of all, the input file is a sequence of declaration blocks that must respect the following order:
-
--  (optional) constants
--  variables
--  (optional) auxiliary functions
--  (optional) goal function
--  constraints
-
-
-Next paragraph gives the basic format of numbers and intervals.
-The subsequent paragraphs detail each declaration blocks.
-
-.. _mod-minibex-reals:
-
-------------------------------
-Real and Intervals
-------------------------------
-A real is represented with the usual English format, that is
-with a dot separating the integral from the decimal part,
-and, possibly, using scientific notation.
-
-Here are some valid examples of reals in the syntax:
-
-  0
-
-  3.14159
-
-  -0.0001
-
-  1.001e-10
-
-  +70.0000
-
-An interval are two reals separated by a comma
-and surrounded by square brackets. The special symbol
-``oo`` (two consecutive "o") represents the infinity :math:`\infty`.
-Note that, even with infinity bounds, the brackets
-must be squared (and not parenthesis as it should be since the
-bound is open). Here are some examples:
-
-  [0,1]
-
-  [0,+oo]
-
-  [-oo,oo]
-
-  [1.01e-02,1.02e-02]
-
-.. _mod-minibex-constants:
-
-------------------------------
-Constants
-------------------------------
-Constants are all defined in the same declaration block, 
-started with the ``Constants`` keyword.
-A constant value can depends on other (previously defined) constants value. Example::
-
-  Constants
-    pi=3.14159;
-    y=-1.0;
-    z=sin(pi*y);
-
-You can give a constant an interval enclosure rather than a single fixed value.
-This interval will be embedded in all subsequent computations.
-Following the previous example, we can give ``pi`` a valid enclosure as below.
-We just have to replace "=" by "in"::
-
-  Constants
-    pi in [3.14159,3.14160];
-    y=-1.0;
-    z=sin(pi*y);
-
-Constants can also be vectors, matrices or array of matrices.
-You need to specify the dimensions of the constant in square brackets.
-For instance ``x`` below is a column vector with 2 components, the first component is equal
-to 0 and the second to 1::
-
- Constants
-   x[2] = (0; 1);
-
-Writing ``x[2]`` is equivalent to ``x[2][1]`` because a column vector is also a 2x1 matrix.
-A row vector is a 1x2 matrix so a row vector has to be declared as follows. 
-On the right side, note that we use commas instead of periods::
-
-  Constants
-    x[1][2] = (0, 1);
-
-
-**important** remark. 
-The reason why the syntax for declaring row vectors differs here from Matlab is that a 2-sized row vector surrounded
-by brackets would conflict with an interval. So, do note confuse
-``[0,1]`` with ``(0,1)``:
-
--  ``(0,1)`` is a 2-dimensional row vector of two reals, namely 0 and 1.
-   This is **not** an open interval.
--  ``[0,1]`` is the 1-dimensional interval [0,1]. This is **not** a 2-dimensional row vector.
-
-Of course, you can mix vector with intervals. For instance:
-``([-oo,0];[0,+oo])`` is a column vector of 2 intervals, :math:`(-\infty,0]` and :math:`[0,+\infty)`.
-
-Here is an example of matrix constant declaration::
-
-  Constants
-    M[3][2] = ((0 , 0) ; (0 , 1) ; (1 , 0));
-
-This will create the constant matrix ``M`` with 3 rows and 2 columns equal to
-
-.. math::
-   \left(\begin{array}{cc}
-   0 & 0 \\ 
-   0 & 1 \\ 
-   1 & 0 \\
-   \end{array}\right).
-
-You can also declare array of matrices::
-
-  Constants
-   c[2][2][3]=(((0,1,2); (3,4,5)) ; ((6,7,8); (9,10,11)));
-
-It is possible to define up to three dimensional vectors, but not more.
-
-When all the components of a multi-dimensional constant share the same interval, you
-don't need to duplicate it on the right side. Here is an example of a 10x;10 matrix where all
-components are [0,0]::
-
-  Constants
-   c[10][10] in [0,0];
-
-Ibex intializes the 100 entries of the matrix ``c`` to :math:`[0,0]`.
-
-Finally, the following table summarizes the possibility for declaring constants
-through different examples.
-
-+------------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
-|``x in [-oo,0]``              | declares a constant :math:`x\in(-\infty,0]`                                                                                            |
-+------------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
-|``x in [0,1]``                | declares an constant :math:`x\in[0,1]`                                                                                                 | 
-+------------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
-|``x in [0,0]``                | declares a constant :math:`x\in[0,0]`                                                                                                  |
-+------------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
-|``x = 0``                     | declares a real constant x equal to 0                                                                                                  |
-+------------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
-|``x = 100*sin(0.1)``          | declares a constant x equal to 100*sin(0.1)                                                                                            |
-+------------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
-|``x[10] in [-oo,0]``          | declares a \10-sized constant vector x,                                                                                                |
-|                              | with each component :math:`x_i\in(-\infty,0]`                                                                                          |
-+------------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
-|``x[2] in ([-oo,0];[0,+oo])`` | declares a 2-sized constant vector x with                                                                                              |
-|                              | :math:`x_1\in(-\infty,0]` and :math:`x_2\in[0,+\infty)`                                                                                |
-+------------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
-|``x[3][3] in``                | declares a constrant matrix :math:`x\in\left(\begin{array}{ccc}[0,1] & 0 & 0 \\0 & [0,1] & 0 \\0 &  0 & [0,1] \\\end{array}\right)`.   |
-|  ``(([0,1],0,0);``           |                                                                                                                                        |
-|  ``(0,[0,1],0);``            |                                                                                                                                        |
-|  ``(0,0,[0,1]))``            |                                                                                                                                        |
-|                              |                                                                                                                                        |
-+------------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
-| ``x[10][5] in [0,1]``        | declares a matrix x with each entry :math:`x_{ij}\in[0,1]`.                                                                            |
-+------------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
-| ``x[2][10][5] in [0,1]``     | declares an array of two 10x5 matrices with each entry :math:`x_{ijk}\in[0,1]`.                                                        |
-+------------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
-
-.. _mod-minibex-func:
-
-------------------------------
-Functions
-------------------------------
-
-When the constraints involve the same expression repeatidly, it may be
-convenient for you to put this expression once for all in a separate auxiliary
-function and to call this function.
-
-Assume for instance that your constraints intensively use the following expression
-
-.. math::
-  \sqrt{(x_a-x_b)^2+(y_a-y_b)^2)}
-
-where :math:`x_a,\ldots y_b` are various sub-expressions, like in::
-
-  sqrt((xA-1.0)^2+(yA-1.0)^2<=0;
-  sqrt((xA-(xB+xC))^2+(yA-(yB+yC))^2=0;
-  ...
-
-You can declare the distance function as follows::
-
-  function distance(xa,ya,xb,yb)
-   return sqrt((xa-xb)^2+(ya-yb)^2;
-  end
-
-
-You will then be able to simplify the writing of constraints::
-
-  distance(xA,1.0,yA,1.0)<=0;
-  distance(xA,xB+xC,yA,yB+yC)=0;
-  ...
-
-As you may expect, this will result in the creation of a :ref:`Function <mod-func>` object that
-you can access from your C++ program via the ``System`` class. See :ref:`auxiliary functions  <mod-sys-auxfunc>`.
-
-A function can return a single value, a vector
-or a matrix. Similarly, it can take real, vectors or matrix arguments.
-You can also write some minimal "code" inside the function before
-returning the final expression.
-
-This code is however limited to be a sequence of assignments.
-
-Let us now illustrate all this with a more sophisticated example.
-We write below the function that calculates the rotation matrix
-from the three Euler angles, :math:`\phi, \theta` and :math:`\psi` :
-
-.. math::
-   R : (\phi,\psi,\theta) \mapsto
-   \left(\begin{array}{ccc}
-   \cos(\theta)\cos(\psi) & -\cos(\phi)\sin(\psi)+\sin(\theta)\cos(\psi)\sin(\phi) & \sin(\psi)\sin(\phi)+\sin(\theta)\cos(\psi)\cos(\phi)\\
-   \cos(\theta)\sin(\psi) & \cos(\psi)\cos(\phi)+\sin(\theta)\sin(\psi)\sin(\phi) & -\cos(\psi)\sin(\phi)+\sin(\theta)\cos(\phi)\sin(\psi)\\
-   -\sin(\theta) & \cos(\theta)\sin(\phi) & \cos(\theta)\cos(\phi)
-   \end{array}\right)
-
-As you can see, there are many occurrences of the same subexpression
-like :math:`\cos(\theta)` so a good idea for both readibility and (actually) efficiency
-is to precalculate such pattern and put the result into an intermediate variable.
-
-Here is the way we propose to define this function::
-
-
-  /* Computes the rotation matrix from the Euler angles: 
-     roll(phi), the pitch (theta) and the yaw (psi)  */
-  function euler(phi,theta,psi)
-    cphi   = cos(phi);
-    sphi   = sin(phi);
-    ctheta = cos(theta);
-    stheta = sin(theta);
-    cpsi   = cos(psi);
-    spsi   = sin(psi);
-  
-    return 
-    ( (ctheta*cpsi, -cphi*spsi+stheta*cpsi*sphi, 
-                     spsi*sphi+stheta*cpsi*cphi) ; 
-      (ctheta*spsi, cpsi*cphi+stheta*spsi*sphi, 
-                   -cpsi*sphi+stheta*cphi*spsi) ;
-      (-stheta, ctheta*sphi, ctheta*cphi) );
-  end
-
-
-**Remark.** Introducing temporary variables like ``cphi`` amouts to build a DAG instead of
-a tree for the function expression. It is also possible (and easy) to :ref:`build a DAG  <mod-func-dag>` when you directly create
-a ``Function`` object in C++.
-
-.. _mod-minibex-vars:
-
-------------------------------
-Variables (or arguments)
-------------------------------
-
-Variables are defined exactly in the same fashion as :ref:`constants <mod-minibex-constants>`.
-It is possible to define up to three dimensional vectors, with an optional domain to initialize each
-component with. The following examples are valid:
-
-``x[10][5][4];``
-
-``x[10][5][4] in [0,1];``
-
-Whenever domains are not specified, they are set by default to :math:`(-\infty,+\infty)`.
-
-.. _mod-minibex-ctrs:
-
-------------------------------
-Constraints
-------------------------------
-
-Constraints are simply written in sequence.
-The sequence starts with the keword ``constraints`` and terminates with the keyword ``end``. 
-They are a separated by semi-colon. Here is an example::
-
-
-  Variables
-    x in [0,oo];
-  Constraints
-    //you can use C++ comments
-    x+y>=-1;
-    x-y<=2;
-  end
-
-.. _mod-minibex-ctrs-index:
-
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Indexing vector or matrix variables
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Use parenthesis like in Matlab.
-Ex::
-
-  Variables
-    x[10][10] in [0,oo];
-  Constraints
-    x(1,1)=0;
-  end
-
-.. _mod-minibex-ctrs-loop:
-
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Loops
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-You can resort to loops in a Matlab-like syntax to define constraints. Example::
-
-
-  Variables
-    x[10];
-
-  Constraints
-    for i=1:10;
-      x(i) <= i;
-    end
-  end
-
-
-.. _mod-minibex-cpp:
-
-------------------------------
-Some differences with C++
-------------------------------
-
-- Vectors indices are surrounded by parenthesis (not brackets),
-- Indices start by 1 instead of 0,
-- You have to use the "^" symbol (instead of ``sqr`` or ``pow``).
 
 

@@ -12,18 +12,22 @@ Contents:
    :maxdepth: 2
    
    intro
-   install
+   install-2.1
    tutorial
    interval
    function
+   constraint
    system
+   minibex
    contractor
    separator
    set
    strategy
+   ibexopt
    reference
    example-slam
    lab
+
 
 
 Indices and tables

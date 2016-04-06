@@ -333,68 +333,23 @@ The display is:
    :start-after: func-hansen-O
    :end-before: func-hansen-O
 
-
-===================
-Creation
-===================
-
-``Function`` objects are very easy to build. You can either build them in :ref:`C++ <mod-func-cpp>`
-or in :ref:`Minibex <mod-minibex>`.
-
-
-.. _mod-into-cpp-vs-minibex:
-
-------------------------------
-C++ versus Minibex
-------------------------------
-
-There are three possible alternatives for modeling.
-You can either:
-
--  write C++ code. Variables, functions, constraints
-   and systems are C++ object that you declare yourself
-   and build by calling the constructors of the corresponding classes
--  write all these basic mathematic data in a text file, following
-   the (very intuitive) Minibex syntax. All these data are loaded
-   simultaneously and stored in a single `System` object.
--  insert a ``char*`` directly in the code instead of using a file.
-   The syntax is exactly the same (see examples in the tutorial).
-
-In all cases, you will access and use the data in the same way.
-For instance, you will calculate the interval derivative of a function
-by the same code, would it be created in your C++ program or loaded
-from a Minibex file.
-
-The chapter is organized as follows: we present
-each concept (variable, function, etc.) in turn and
-each time explain how objects are created in C++.
-
-All the Minibex syntax is given afterwards, in a separate :ref:`section <mod-minibex>`.
- 
---------------------------------------
-Using strings
---------------------------------------
-
---------------------------------------
-Using Minibex files
---------------------------------------
-
---------------------------------------
-Serialization
---------------------------------------
-
-
 .. _mod-func-cpp:
 
---------------------------------------
-Using C++ operator overloading
---------------------------------------
+===========================================
+Creating functions (in C++)
+===========================================
+
+``Function`` objects are very easy to build. 
+
+This section explains how to build them  
+using C++ operator overloading but using
+the :ref:`Minibex <mod-minibex>` syntax is even simpler.
 
 .. _mod-func-arg-cpp:
 
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+---------------------------------
 Creating arguments (in C++)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+---------------------------------
 
 The following piece of code creates an argument ``x`` and prints it:
 
@@ -418,9 +373,10 @@ It is possible to rename arguments, see below.
 
 .. _mod-func-arg-vec-cpp:
 
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+------------------------------------------------------------------
 Creating vector and matrix arguments (in C++)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+------------------------------------------------------------------
+
 
 To create a n-dimensional vector argument, just
 give the number n as a parameter to the constructor:
@@ -443,9 +399,10 @@ We can go like this up to 3 dimensional arrays:
 
 .. _mod-func-arg-rename:
 
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+---------------------------------
 Renaming arguments
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+---------------------------------
+
 
 Usually, you don't really care about the names of arguments since you handle
 program variables in your code.
@@ -466,9 +423,10 @@ Now, the display is::
 
   x y z
   
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+---------------------------------
 Examples
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+---------------------------------
+
 
 The following piece of code creates the function :math:`(x,y)\mapsto \sin(x+y)`:
 
@@ -524,9 +482,10 @@ The display is:
 
 .. _mod-func-cpp-vecargs:
 
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+---------------------------------
 Functions with vector arguments
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+---------------------------------
+
 
 If arguments are vectors, you can refer to the component
 of an argument using square brackets. Indices start by 0,
@@ -542,14 +501,17 @@ arguments ``a`` and ``b`` instead:
 
 .. _mod-func-cpp-vecvalued:
 
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+---------------------------------
 Vector-valued functions
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+---------------------------------
+
 
 To define a vector-valued function, the ``Return`` keword allows
 you to list the function's components.
 
 See the example in the :ref:`tutorial <tuto-func-vec-value>`.
+
+.. _mod-func-ex:
 
 --------------------------------------
 Advanced examples
@@ -636,6 +598,12 @@ Here is an example of the distance function between ``(xa,ya)`` and ``(xb,yb)``:
    :language: cpp
    :start-after: func-cpp-symbols-C
    :end-before: func-cpp-symbols-C
+   
+--------------------------------------
+Serialization
+--------------------------------------
+
+(to do)
 
 
 ======================================
@@ -706,7 +674,5 @@ The output is
    :start-after: func-diff-O
    :end-before: func-diff-O
 
-
-.. _mod-func-ex:
 
 
