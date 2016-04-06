@@ -12,8 +12,12 @@
 #include "TestNumConstraint.h"
 #include "ibex_NumConstraint.h"
 #include "ibex_SyntaxError.h"
+#include <iostream>
+#include <fstream>
 
 using namespace std;
+
+#define TMP_FILE_NAME "__tmp__.txt"
 
 namespace ibex {
 
@@ -39,6 +43,41 @@ void TestNumConstraint::build_from_string02() {
 	} catch(SyntaxError&) {
 		CPPUNIT_ASSERT(false);
 	}
+}
+
+void TestNumConstraint::build_from_file01() {
+	std::ofstream outfile (TMP_FILE_NAME);
+
+	outfile << "variables x,y;" << endl << endl;
+	outfile << "constraints" << endl << endl;
+	outfile << " x+y<=1;" << endl;
+	outfile << "end" << endl;
+	outfile.close();
+
+	NumConstraint c(TMP_FILE_NAME);
+
+	sameExpr(c.f.expr(), "((x+y)-1)");
+	CPPUNIT_ASSERT(c.op==LEQ);
+
+	remove(TMP_FILE_NAME);
+}
+
+void TestNumConstraint::build_from_file02() {
+	std::ofstream outfile (TMP_FILE_NAME);
+
+	outfile << "variables x,y;" << endl << endl;
+	outfile << "constraints" << endl << endl;
+	outfile << " x+y<=1;" << endl;
+	outfile << " x*y<=1;" << endl;
+	outfile << "end" << endl;
+	outfile.close();
+
+	NumConstraint c(TMP_FILE_NAME);
+
+	sameExpr(c.f.expr(), "((x+y)-1)");
+	CPPUNIT_ASSERT(c.op==LEQ);
+
+	remove(TMP_FILE_NAME);
 }
 
 void TestNumConstraint::is_thick_eq01() {

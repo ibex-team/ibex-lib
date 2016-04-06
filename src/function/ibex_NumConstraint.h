@@ -18,6 +18,8 @@
 
 namespace ibex {
 
+class System;
+
 /**
  * \ingroup symbolic
  *
@@ -144,6 +146,11 @@ public:
 	NumConstraint(const Array<const ExprSymbol>& x, const ExprCtr& c);
 
 	/**
+	 * \brief Create a constraint from a Minibex input file.
+	 */
+	NumConstraint(const char* filename);
+
+	/**
 	 * \brief Creates a constraint c(x1).
 	 *
 	 * The parameter x1 may not only contain the name
@@ -247,6 +254,8 @@ private:
 	bool own_f;
 
 	void build_from_string(const Array<const char*>& x, const char* c);
+
+	void build_from_system(const System& sys);
 };
 
 std::ostream& operator<<(std::ostream&, const NumConstraint&);
