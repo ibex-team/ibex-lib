@@ -13,6 +13,7 @@
 #ifndef _IBEX_INTERVAL_H_
 #define _IBEX_INTERVAL_H_
 
+#include <math.h>
 #include "ibex_Exception.h"
 
 /* ========================================================*/

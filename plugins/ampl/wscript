@@ -116,21 +116,14 @@ def build (bld):
 				os.remove(os.path.join(bld.env.LIBDIR,"libamplsolver.a"))
 
 		bld.variant = ""
-		
-	############################################################
-	# Add information in ibex_Setting
-	@bld.rule (
-		target = "../../src/ibex_Setting.h",
-		after  = "ibex_Setting_h_init"
-	)
-	def _(tsk): 
-		tsk.outputs[0].write("#define _IBEX_WITH_AMPL_ 1\n",'a')  # 'a' <=> append
 
 	# add AMPL plugin sources
 	bld.env.IBEX_SRC.extend(bld.path.ant_glob ("src/**/ibex_*.cpp"))
 	# add AMPL plugin headers
 	bld.env.IBEX_HDR.extend(bld.path.ant_glob ("src/**/ibex_*.h"))
 
+	# Add information in ibex_Setting
+	bld.env.settings['_IBEX_WITH_AMPL_']='1'	
 
 #def distclean (ctx):
 #	ampl_dir = ctx.path.find_dir ("solvers")
