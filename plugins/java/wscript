@@ -52,7 +52,7 @@ def configure (conf):
 	fout=open(os.path.join(conf.path.abspath(),"src","ibex_Java.cpp"), 'w')
 	fout.write(fin_cpp.read().replace ("Java_", "Java_%s_" % JAVA_SIGNATURE))
 
-	conf.env.append_unique ("INCLUDES_IBEX_DEPS", os.path.join(java_home,"include"))
+#	conf.env.append_unique ("INCLUDES_IBEX_DEPS", os.path.join(java_home,"include"))
 
 def build (bld):
 
@@ -65,6 +65,8 @@ def build (bld):
 	JAVA_PACKAGE   = bld.env.JAVA_PACKAGE
 	JAVA_SIGNATURE = JAVA_PACKAGE.replace (".", "_")
 	JAVA_PATH      = JAVA_PACKAGE.replace (".", "/")
+	
+	bld.env.GLOBAL_DEPS = bld.env.GLOBAL_DEPS + " JAVA"
 	
 #	@bld.rule (
 #		target = "src/ibex_Java.cpp",
