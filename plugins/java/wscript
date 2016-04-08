@@ -45,7 +45,14 @@ def configure (conf):
 		# fix name-mangling for linking with the JVM on windows
 		#   http://permalink.gmane.org/gmane.comp.gnu.mingw.user/6782
 		#   http://stackoverflow.com/questions/8063842/mingw32-g-and-stdcall-suffix1
-		conf.env.append_unique ("LINKFLAGS_JAVA", "-Wl,--kill-at")
+		conf.env.append_unique ("LINKFLAGS_IBEX", "-Wl,--kill-at")
+
+	JAVA_SIGNATURE = conf.env.JAVA_PACKAGE.replace (".", "_")
+	fin_cpp=open(os.path.join(conf.path.abspath(),"src","ibex_Java.cpp_"), 'r')
+	fout=open(os.path.join(conf.path.abspath(),"src","ibex_Java.cpp"), 'w')
+	fout.write(fin_cpp.read().replace ("Java_", "Java_%s_" % JAVA_SIGNATURE))
+
+	conf.env.append_unique ("INCLUDES_IBEX_DEPS", os.path.join(java_home,"include"))
 
 def build (bld):
 
@@ -59,20 +66,22 @@ def build (bld):
 	JAVA_SIGNATURE = JAVA_PACKAGE.replace (".", "_")
 	JAVA_PATH      = JAVA_PACKAGE.replace (".", "/")
 	
-	#print(os.path.join(bld.env.JAVA_HOME[0],"include"))
+#	@bld.rule (
+#		target = "src/ibex_Java.cpp",
+#		source = "src/ibex_Java.cpp_",
+#		vars = ["JAVA_PACKAGE"],
+#	)
+#	def _(tsk):
+#		tsk.outputs[0].write (
+#			"// This file is generated from %s.\n"
+#			'#include "%s_Ibex.h_"\n%s'
+#			% (tsk.inputs[0].name, JAVA_SIGNATURE, 
+#			tsk.inputs[0].read().replace ("Java_", "Java_%s_" % JAVA_SIGNATURE)
+#		))
 
-	@bld.rule (
-		target = "src/ibex_Java.cpp",
-		source = "src/ibex_Java.cpp_",
-		vars = ["JAVA_PACKAGE"],
-	)
-	def _(tsk):
-		tsk.outputs[0].write (
-			"// This file is generated from %s.\n"
-			'#include "%s_Ibex.h_"\n%s'
-			% (tsk.inputs[0].name, JAVA_SIGNATURE, 
-			tsk.inputs[0].read().replace ("Java_", "Java_%s_" % JAVA_SIGNATURE)
-		))
+
+	#add plugin sources
+	bld.env.IBEX_SRC.extend(bld.path.ant_glob ("src/ibex_Java.cpp"))
 
 	for (name, snippet) in (
 		("Ibex", "package %s;\n" % JAVA_PACKAGE),
@@ -109,13 +118,6 @@ def build (bld):
 		rule   = "${JAVAH} -jni -classpath plugins/java/src -o ${TGT} %s.Ibex" % JAVA_PACKAGE
 	)
 
-	bld.shlib (
-		target = "ibex-java",
-		source = "src/ibex_Java.cpp",
-		use = "JAVA ibex",
-		install_path = bld.env.LIBDIR,
-	)
-	
 	bld (
 		target = "%s.jar" % JAVA_PACKAGE,
 		source = "src/%s/Ibex.class" % JAVA_PATH,
@@ -123,4 +125,13 @@ def build (bld):
 		install_path = JAVADIR,
 	)
 
+
+    # --- cannot assure compilation order with "recurse" (libibex.so has to be created before
+    #     libibex-java.so)
+	#bld.shlib (
+	#	target = "ibex-java",
+	#	source = "src/ibex_Java.cpp",
+	#	use = "JAVA ibex",
+	#	install_path = bld.env.LIBDIR,
+	#)
 

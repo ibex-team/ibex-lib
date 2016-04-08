@@ -37,8 +37,6 @@ def build (bld):
 	@bld.rule (
 		target = "ibex_Setting.h",
 		vars   = ["INTERVAL_LIB"],
-		# if a plugin has to add information in this file, this must be scheduled
-		# after ibex_Setting_h_init
 		name   = "ibex_Setting_h_init"  
 	)
 	def _(tsk):
