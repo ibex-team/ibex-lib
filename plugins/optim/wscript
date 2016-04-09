@@ -194,6 +194,7 @@ def configure (conf):
 			conf.msg ("Candidate directory for lib Soplex", with_soplex)
 	
 			conf.env.append_unique ("INCLUDES",  os.path.join (with_soplex, "src"))
+			conf.env.append_unique ("INCLUDES_IBEX_DEPS",  os.path.join (with_soplex, "src"))
 			conf.check_cxx (header_name	= "soplex.h")
 	
 			# Try without and with -lz (soplex may be built without zlib)
