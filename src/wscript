@@ -68,17 +68,16 @@ def build (bld):
 	)
 
 	# pkg-config file
-	bld.env.include_pkgconfig=""
-	for p in bld.env.INCLUDES_IBEX_DEPS + bld.env.INCLUDES:
-		if p not in [os.path.join (bld.env.PREFIX, "include")]:
-			bld.env.append_unique ("include_pkgconfig",p)
-		
 	@bld.rule (
 		target = "ibex.pc",
 		vars = "PREFIX VERSION INCLUDES LIBPATH_IBEX_DEPS LIB_IBEX_DEPS".split(),
 		install_path = "${PREFIX}/share/pkgconfig",
 	)
 	def _ (tsk):
+		bld.env.include_pkgconfig=""
+		for p in bld.env.INCLUDES_IBEX_DEPS: # + bld.env.INCLUDES: --> useful?
+			if p not in [os.path.join (bld.env.PREFIX, "include")]:
+				bld.env.append_unique ("include_pkgconfig",p)
 		tsk.outputs[0].write("""
 prefix=%s
 includedir=${prefix}/include
