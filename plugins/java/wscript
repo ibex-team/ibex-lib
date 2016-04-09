@@ -50,9 +50,8 @@ def configure (conf):
 	JAVA_SIGNATURE = conf.env.JAVA_PACKAGE.replace (".", "_")
 #	fin_cpp=open(os.path.join(conf.path.abspath(),"src","ibex_Java.cpp_"), 'r')
 #	fout=open(os.path.join(conf.path.abspath(),"src","ibex_Java.cpp"), 'w')
+#	fout.write("#include <jni.h>\n")
 #	fout.write(fin_cpp.read().replace ("Java_", "Java_%s_" % JAVA_SIGNATURE))
-
-#	conf.env.append_unique ("INCLUDES_IBEX_DEPS", os.path.join(java_home,"include"))
 
 def build (bld):
 
@@ -79,11 +78,13 @@ def build (bld):
 			'#include "%s_Ibex.h_"\n%s'
 			% (tsk.inputs[0].name, JAVA_SIGNATURE, 
 			tsk.inputs[0].read().replace ("Java_", "Java_%s_" % JAVA_SIGNATURE)
-		))
+		)
+		
+		)
 
 
 	#add plugin sources
-	bld.env.IBEX_SRC.extend(bld.path.ant_glob ("src/ibex_Java.cpp"))
+#	bld.env.IBEX_SRC.extend(bld.path.ant_glob ("src/ibex_Java.cpp"))
 
 	for (name, snippet) in (
 		("Ibex", "package %s;\n" % JAVA_PACKAGE),
@@ -127,10 +128,4 @@ def build (bld):
 		install_path = JAVADIR,
 	)
 
-	bld.shlib (
-		target = "ibex-java",
-		source = "src/ibex_Java.cpp",
-		use = "JAVA ibex",
-		install_path = bld.env.LIBDIR,
-	)
 
