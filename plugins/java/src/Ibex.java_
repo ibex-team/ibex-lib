@@ -29,7 +29,7 @@ public class Ibex {
 	public static final int FALSE_OR_TRUE = 2;
 
 	static {
-		System.loadLibrary("ibex");
+		System.loadLibrary("ibex-java");
 	}
 
 	/**

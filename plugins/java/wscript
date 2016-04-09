@@ -48,9 +48,9 @@ def configure (conf):
 		conf.env.append_unique ("LINKFLAGS_IBEX", "-Wl,--kill-at")
 
 	JAVA_SIGNATURE = conf.env.JAVA_PACKAGE.replace (".", "_")
-	fin_cpp=open(os.path.join(conf.path.abspath(),"src","ibex_Java.cpp_"), 'r')
-	fout=open(os.path.join(conf.path.abspath(),"src","ibex_Java.cpp"), 'w')
-	fout.write(fin_cpp.read().replace ("Java_", "Java_%s_" % JAVA_SIGNATURE))
+#	fin_cpp=open(os.path.join(conf.path.abspath(),"src","ibex_Java.cpp_"), 'r')
+#	fout=open(os.path.join(conf.path.abspath(),"src","ibex_Java.cpp"), 'w')
+#	fout.write(fin_cpp.read().replace ("Java_", "Java_%s_" % JAVA_SIGNATURE))
 
 #	conf.env.append_unique ("INCLUDES_IBEX_DEPS", os.path.join(java_home,"include"))
 
@@ -66,20 +66,20 @@ def build (bld):
 	JAVA_SIGNATURE = JAVA_PACKAGE.replace (".", "_")
 	JAVA_PATH      = JAVA_PACKAGE.replace (".", "/")
 	
-	bld.env.GLOBAL_DEPS = bld.env.GLOBAL_DEPS + " JAVA"
+#	bld.env.GLOBAL_DEPS = bld.env.GLOBAL_DEPS + " JAVA"
 	
-#	@bld.rule (
-#		target = "src/ibex_Java.cpp",
-#		source = "src/ibex_Java.cpp_",
-#		vars = ["JAVA_PACKAGE"],
-#	)
-#	def _(tsk):
-#		tsk.outputs[0].write (
-#			"// This file is generated from %s.\n"
-#			'#include "%s_Ibex.h_"\n%s'
-#			% (tsk.inputs[0].name, JAVA_SIGNATURE, 
-#			tsk.inputs[0].read().replace ("Java_", "Java_%s_" % JAVA_SIGNATURE)
-#		))
+	@bld.rule (
+		target = "src/ibex_Java.cpp",
+		source = "src/ibex_Java.cpp_",
+		vars = ["JAVA_PACKAGE"],
+	)
+	def _(tsk):
+		tsk.outputs[0].write (
+			"// This file is generated from %s.\n"
+			'#include "%s_Ibex.h_"\n%s'
+			% (tsk.inputs[0].name, JAVA_SIGNATURE, 
+			tsk.inputs[0].read().replace ("Java_", "Java_%s_" % JAVA_SIGNATURE)
+		))
 
 
 	#add plugin sources
@@ -127,13 +127,10 @@ def build (bld):
 		install_path = JAVADIR,
 	)
 
-
-    # --- cannot assure compilation order with "recurse" (libibex.so has to be created before
-    #     libibex-java.so)
-	#bld.shlib (
-	#	target = "ibex-java",
-	#	source = "src/ibex_Java.cpp",
-	#	use = "JAVA ibex",
-	#	install_path = bld.env.LIBDIR,
-	#)
+	bld.shlib (
+		target = "ibex-java",
+		source = "src/ibex_Java.cpp",
+		use = "JAVA ibex",
+		install_path = bld.env.LIBDIR,
+	)
 
