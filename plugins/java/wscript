@@ -45,7 +45,7 @@ def configure (conf):
 		# fix name-mangling for linking with the JVM on windows
 		#   http://permalink.gmane.org/gmane.comp.gnu.mingw.user/6782
 		#   http://stackoverflow.com/questions/8063842/mingw32-g-and-stdcall-suffix1
-		conf.env.append_unique ("LINKFLAGS_IBEX", "-Wl,--kill-at")
+		conf.env.append_unique ("LINKFLAGS_JAVA", "-Wl,--kill-at")
 
 	JAVA_SIGNATURE = conf.env.JAVA_PACKAGE.replace (".", "_")
 #	fin_cpp=open(os.path.join(conf.path.abspath(),"src","ibex_Java.cpp_"), 'r')
