@@ -31,42 +31,41 @@ namespace ibex {
  * If x is a row vector of 2 components, dim1=1, dim2=1, dim3=2.
  * If x is a 2x3 matrix, dim1=1, dim2=2, dim3=3.
  * If x is a column vector of 2 elements, then dim1=1, dim2=2 and dim3=1.
- *  If x is an array of 4 matrices which are 2x3matrices then dim1=4, dim2=2 and dim3=3.
+ * If x is an array of 4 matrices which are 2x3matrices then dim1=4, dim2=2 and dim3=3.
  *
  * <p>
- * A combination like dim1=1 dim2=1 and dim3=2 is invalid (we cannot represent array of vectors. we use matrices
- * instead).
+ * A combination like dim1=2 dim2=1 and dim3=1 is invalid.
  *
  */
 class Dim {
 public:
 
-	/** \brief Build the dimension of a scalar (1,1,1) */
+	/** \brief Build the dimension of a scalar (1,1,1). */
 	Dim();
 
-	/** \brief Build the dimension of a scalar (1,1,1) */
+	/** \brief Build the dimension of a scalar (1,1,1). */
 	static Dim scalar();
 
-	/** \brief Build the dimension of a row vector (1,1,n) */
+	/** \brief Build the dimension of a row vector (1,1,n). */
 	static Dim row_vec(int n);
 
-	/** \brief Build the dimension of a col vector (1,n,1) */
+	/** \brief Build the dimension of a col vector (1,n,1). */
 	static Dim col_vec(int n);
 
-	/** \brief Build the dimension of a matrix (1,m,n) */
+	/** \brief Build the dimension of a matrix (1,m,n). */
 	static Dim matrix(int m, int n);
 
-	/** \brief Build the dimension of a matrix array (k,m,n) */
+	/** \brief Build the dimension of a matrix array (k,m,n). */
 	static Dim matrix_array(int k, int m, int n);
 
-	/** The 4 different types of "Dim" objects */
+	/** The 4 different types of "Dim" objects. */
 	typedef enum { SCALAR, ROW_VECTOR, COL_VECTOR, MATRIX, MATRIX_ARRAY } Type;
 
-	/** \brief Return the type of this object */
+	/** \brief Return the type of this object. */
 	Type type() const;
 
-	/** \brief Return the total number of components */
-	inline int size()  const;
+	/** \brief Return the total number of components. */
+	inline int size() const;
 
 	/** \brief True if this is a scalar. */
 	bool is_scalar() const;
@@ -77,31 +76,32 @@ public:
 	/** \brief True if this is either a matrix. */
 	bool is_matrix() const;
 
-	/** \brief If *this is a vector, return the dimension.
+	/**
+	 * \brief If *this is a vector, return the dimension.
 	 *
 	 * This dimension corresponds to dim2 (in case of column vector)
-	 * or dim3 (in case of row vector)
+	 * or dim3 (in case of row vector).
 	 */
 	int vec_size() const;
 
-	/** \brief True if the three dimensions match */
+	/** \brief True if the three dimensions match with d. */
 	bool operator==(const Dim& d) const;
 
-	/** \brief True if one the dimensions does not match */
+	/** \brief True if one of the dimensions does not match with d. */
 	bool operator!=(const Dim& d) const;
 
 	/**
 	 * \brief Transpose *this.
 	 *
 	 * Compute the dimension of an expression obtained
-	 * by indexing an expression whose dimension is *this.
+	 * by transposing an expression whose dimension is *this.
 	 */
 	Dim transpose_dim() const;
 
 	/**
 	 * \brief Add an index to *this
 	 *
-	 * Compute the dimension of the transpose expression obtained
+	 * Compute the dimension of the expression obtained
 	 * by indexing an expression whose dimension is *this.
 	 */
 	Dim index_dim() const;
@@ -113,7 +113,8 @@ public:
 	 */
 	int max_index() const;
 
-	/* Compute the starting position of x[i] in a flat array
+	/*
+	 * Compute the starting position of x[i] in a flat array
 	 * that starts from \a this_num, and representing all elements
 	 * x[i][j][k] (resp. x[i][j], x[i]) if *this is an array-of-matrix
 	 * (resp. matrix, vector), in lexicographic order.
@@ -123,25 +124,31 @@ public:
 
 	//std::pair<int, struct Dim> index_info(int base_num, int index1, int index2, int index3) const;
 
-	/** The number of i such that x[i][1][1] is a valid expression,
-	 * where x is an array-of-matrix expression. */
+	/**
+	 * The number of i such that x[i][0][0] is a valid expression,
+	 * where x is an array-of-matrix expression.
+	 */
 	int dim1;
 
-	/** The number of i such that x[1][i][1], x[i][1] or x[i] is a valid
+	/**
+	 * The number of i such that x[0][i][0], x[i][0] or x[i] is a valid
 	 * expression, where x is resp. an array-of-matrix, a matrix
-	 * or a column vector expression. */
+	 * or a column vector expression.
+	 */
 	int dim2;
 
-	/** The number of i such that x[1][1][i], x[1][i] or x[i] is a
+	/**
+	 * The number of i such that x[0][0][i], x[1][0] or x[0] is a
 	 * valid (scalar) expression, where x is resp. an array-of-matrix,
-	 * a matrix or a row vector expression. */
+	 * a matrix or a row vector expression.
+	 */
 	int dim3;
 
 	/** \brief Build the three-dimensional structure. */
 	Dim(int dim1, int dim2, int dim3);
 
 	/**
-	 * \brief True if this is the dimension of a constant vector.
+	 * \brief True if *this is the dimension of a constant vector.
 	 *
 	 * The dimension of a constant vector (IntervalVector) is a column
 	 * vector by default. This means that it may be automatically
@@ -150,7 +157,6 @@ public:
 	 * This field is always set to false by default.
 	 */
 	bool cst_vec;
-
 };
 
 
