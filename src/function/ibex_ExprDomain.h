@@ -122,17 +122,17 @@ TemplateDomain<D>* ExprDomainFactory<D>::init(const ExprLeaf& e) {
 }
 
 template<class D>
-TemplateDomain<D>* ExprDomainFactory<D>::init(const ExprNAryOp& e, Array<TemplateDomain<D> >& args_deco) {
+TemplateDomain<D>* ExprDomainFactory<D>::init(const ExprNAryOp& e, Array<TemplateDomain<D> >&) {
 	return new TemplateDomain<D>(e.dim);
 }
 
 template<class D>
-TemplateDomain<D>* ExprDomainFactory<D>::init(const ExprBinaryOp& e, TemplateDomain<D>& left_deco, TemplateDomain<D>& right_deco) {
+TemplateDomain<D>* ExprDomainFactory<D>::init(const ExprBinaryOp& e, TemplateDomain<D>&, TemplateDomain<D>&) {
 	return new TemplateDomain<D>(e.dim);
 }
 
 template<class D>
-TemplateDomain<D>* ExprDomainFactory<D>::init(const ExprUnaryOp& e, TemplateDomain<D>& expr_deco) {
+TemplateDomain<D>* ExprDomainFactory<D>::init(const ExprUnaryOp& e, TemplateDomain<D>&) {
 	return new TemplateDomain<D>(e.dim);
 }
 

@@ -271,8 +271,8 @@ std::ostream& operator<<(std::ostream& os, const Matrix&);
 
 // the following functions are
 // introduced to allow genericity
-inline bool ___is_empty(const Matrix& m)         { return false; }
-inline void ___set_empty(Matrix& m)         { }
+inline bool ___is_empty(const Matrix&)         { return false; }
+inline void ___set_empty(Matrix&)              { }
 
 } // end namespace ibex
 
