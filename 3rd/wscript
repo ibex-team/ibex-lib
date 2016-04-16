@@ -452,7 +452,7 @@ def configure (conf):
 		conf.env.FILIB = "filibsrc"
 		filib_dir = extract (conf.env.FILIB, "filibsrc-3.0.2.2.tar.gz")
 
-		ibex_append_path ("INCLUDES", conf.env.FILIB)
+		ibex_append_path ("INCLUDES", os.path.join(conf.srcnode.abspath(),"3rd", conf.env.FILIB))
 		ibex_append_path ("LIBPATH", os.path.join (filib_dir.abspath(), "libprim", ".libs"))
 
 		ibex_env.append_unique ("INCLUDES_IBEX_DEPS", os.path.join (conf.env.PREFIX, "include"))

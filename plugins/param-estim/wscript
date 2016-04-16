@@ -29,5 +29,6 @@ def build (bld):
 	# add PARAM_ESTIM plugin sources
 	bld.env.IBEX_SRC.extend(bld.path.ant_glob ("src/**/ibex_*.cpp"))
 	# add PARAM_ESTIM plugin headers
-	bld.env.IBEX_HDR.extend(bld.path.ant_glob ("src/**/ibex_*.h"))
+	bld.env.IBEX_HDR.extend(bld.path.ant_glob ("src/**/*.h"))
+	
 	

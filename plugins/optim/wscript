@@ -194,6 +194,7 @@ def configure (conf):
 			conf.msg ("Candidate directory for lib Soplex", with_soplex)
 	
 			conf.env.append_unique ("INCLUDES",  os.path.join (with_soplex, "src"))
+			conf.env.append_unique ("INCLUDES_IBEX_DEPS",  os.path.join (with_soplex, "src"))
 			conf.check_cxx (header_name	= "soplex.h")
 	
 			# Try without and with -lz (soplex may be built without zlib)
@@ -329,15 +330,6 @@ def build (bld):
 		
 	############################################################
 	# Add information in ibex_Setting
-	@bld.rule (
-		target = "../../src/ibex_Setting.h",
-		vars   = ["LP_LIB"],
-		after  = "ibex_Setting_h_init"
-	)
-	def _(tsk): 	
-		tsk.outputs[0].write("#define _IBEX_WITH_%s_ 1\n" % tsk.env['LP_LIB'],'a')   # 'a' <=> append
-	
-	# add AMPL plugin sources
-	bld.env.IBEX_SRC.extend(bld.path.ant_glob ("src/**/ibex_*.cpp"))
-	# add AMPL plugin headers
-	bld.env.IBEX_HDR.extend(bld.path.ant_glob ("src/**/ibex_*.h"))
+	bld.env.settings['_IBEX_WITH_%s_' % bld.env['LP_LIB']]='1'
+
+

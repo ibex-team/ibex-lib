@@ -3,16 +3,19 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+================================
 Welcome to IBEX's documentation!
 ================================
 
-Contents:
+-------------------
+The Core Library
+-------------------
 
 .. toctree::
    :maxdepth: 2
    
    intro
-   install-2.1
+   install
    tutorial
    interval
    function
@@ -23,13 +26,34 @@ Contents:
    separator
    set
    strategy
-   ibexopt
    reference
    example-slam
    lab
+   
+.. _optim-plugin:
 
+-------------------
+IbexOpt Plugin
+-------------------
 
+.. toctree::
+   :maxdepth: 2
+   
+   optim-install
+   optim-tutorial
+   
+.. _java-plugin:
 
+------------------------
+Java Plugin (for Choco)
+------------------------
+
+.. toctree::
+   :maxdepth: 2
+   
+   java-install
+
+==================
 Indices and tables
 ==================
 

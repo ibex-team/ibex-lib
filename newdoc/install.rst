@@ -1,3 +1,6 @@
+
+.. _ibex-install:
+
 ***************************
 Installation (Release 2.2)
 ***************************
@@ -31,33 +34,6 @@ Save the archive ``ibex-2.2.0.tar.gz`` in some ``Ibex`` folder and::
 **Note:** Ibex can either be compiled with `Gaol`_, `Filib`_ or `Profil/Bias`_. 
 If your platform is 32 bits, the standard installation will automatically extract and build the Gaol library (and its dependencies) from the bundle, because Gaol is the fastest one. However, if your platform is 64 bits, it will extract and install Filib instead because the current release of Gaol does not support 64 bit platform. 
 
----------------------
-Configuration options
----------------------
-
-``waf`` ``configure`` supports the following options:
-                    
---enable-shared     
-                    Compile Ibex as a dynamic library.
-
-
---prefix=PREFIX     
-                    Set the folder where Ibex must be installed (by default, ``/usr/local``).
-
-                    You can use this option to install Ibex in a local folder.
-
-
---with-debug        
-                    Compile Ibex in debug mode 
-
-                    Compiler optimizations are all discarded (``-O0``), low-level assertions in the code are activated and debug information is stored (``-g -pg``)
-
-                    Once Ibex has been compiled with this option, you should also compile your executable in debug mode. If you use the ``makefile`` of ``examples/``, simply write:: 
-
-                           make DEBUG=yes ...
-    
-   
-
 ---------------
 Requirements
 ---------------
@@ -79,27 +55,42 @@ On Ubuntu, you can install all you need with::
 .. _install-compiling-running:
 
 --------------------------------
-Compiling and running examples
+Compiling a Test Program
 --------------------------------
 
-There is a simple "makefile" in the ``examples/`` folder that you can use to compile examples as well as your own programs.
+Copy-paste the following example code in a file named ``foo.cpp`` ::
+  
+  #include "ibex.h"
+  #include <iostream>
+
+  using namespace std;
+  using namespace ibex;
+
+  int main(int argc, char** argv) {
+    Interval x(0,1);
+    cout << "My first interval: << x << endl; 
+  }
+
+There is a simple "makefile" in the ``examples`` folder that you can use to compile your own programs.
 This makefile however assumes ``pkg-config`` is installed on your system (which is done by default on many Linux distribution).
 
-**Note:** it may be necessary to set the ``PKG_CONFIG_PATH`` to *PREFIX*\ ``/share/pkgconfig`` where *PREFIX* is 
-``/usr/local`` by default or whatever path specified via ``--prefix``::
-
-  ~/Ibex/ibex-2.2.0/$ export PKG_CONFIG_PATH=/usr/local/share/pkgconfig/ 
-
-Here is an example::
+So, place the file ``foo.cpp`` in the ``examples/`` folder and::
 
   ~/Ibex/ibex-2.2.0/$ cd examples 
-  ~/Ibex/ibex-2.2.0/$ make defaultsolver 
-  ~/Ibex/ibex-2.2.0/$ ./defaultsolver ../benchs/cyclohexan3D.bch 1e-05 10 
+  ~/Ibex/ibex-2.2.0/examples$ make foo 
+  ~/Ibex/ibex-2.2.0/examples$ ./foo 
+  
+.. note::
+   
+   1. It may be necessary to set the ``PKG_CONFIG_PATH`` to *[prefix]*\ ``/share/pkgconfig`` where *[prefix]* is 
+      ``/usr/local`` by default or whatever path specified via ``--prefix``::
 
-The default solver solves the systems of equations in argument (cyclohexan3D) with a precision less than 1e-05 and
-within a time limit of 10 seconds.
+        ~/Ibex/ibex-2.2.0/$ export PKG_CONFIG_PATH=/usr/local/share/pkgconfig/ 
+ 
+   2. If Ibex is compiled as a dynamic library (with ``--enabled-shared``) set the ``LD_LIBRARY_PATH`` accordingly::
+    
+        ~/Ibex/ibex-2.2.0/$ export LD_LIBRARY_PATH=[prefix]/lib/
 
-To compile your own program, just copy-paste the makefile of ``Ibex/examples``.
 
 **Note:** this makefile uses the extended syntax of GNU make.
 
@@ -158,10 +149,63 @@ Windows
 
   ~/Ibex/ibex-2.2.0/$ ./waf install
 
-  **Warning:** for mysterious reasons, the command sometimes gets frozen (this was observed while compiling Filib). Use Control-C to interrupt the command and run it again. Do this several times until compilation is over.
+.. note:: 
 
-  **Note:** if g++ is not found, it probably means that you have not run the "postinstall" script of MinGW (see above).
+   For mysterious reasons, the command sometimes gets frozen (this was observed while compiling Filib). Use Control-C to interrupt the command and run it again. Do this several times until compilation is over.
+
+
+**Note:** if g++ is not found, it probably means that you have not run the "postinstall" script of MinGW (see above).
   
+---------------------------------------
+Compiling a Test Program
+---------------------------------------
+
+Copy-paste the following example code in a file named ``foo.cpp`` ::
+  
+  #include "ibex.h"
+  #include <iostream>
+
+  using namespace std;
+  using namespace ibex;
+
+  int main(int argc, char** argv) {
+    Interval x(0,1);
+    cout << "My first interval: << x << endl; 
+  }
+
+To compile this file, use the following instructions::
+
+  ~/Ibex/ibex-2.2.0/$ export IBEX_PATH=C:/MinGW/msys/1.0/home/[user]/Ibex/ibex-2.2.0 
+  ~/Ibex/ibex-2.2.0/$ g++ -I$IBEX_PATH/include -I$IBEX_PATH/include/ibex -L$IBEX_PATH/lib -o foo.exe foo.cpp -libex -lprim
+  ~/Ibex/ibex-2.2.0/$ ./foo.exe
+  
+
+==============================
+Configuration options
+==============================	
+
+``waf`` ``configure`` supports the following options:
+                    
+--enable-shared     
+                    Compile Ibex as a dynamic library.
+
+
+--prefix=PREFIX     
+                    Set the folder where Ibex must be installed (by default, ``/usr/local``).
+
+                    You can use this option to install Ibex in a local folder.
+
+
+--with-debug        
+                    Compile Ibex in debug mode 
+
+                    Compiler optimizations are all discarded (``-O0``), low-level assertions in the code are activated and debug information is stored (``-g -pg``)
+
+                    Once Ibex has been compiled with this option, you should also compile your executable in debug mode. If you use the ``makefile`` of ``examples/``, simply write:: 
+
+                           make DEBUG=yes ...
+    
+   
 
 ===============
 Troubleshooting

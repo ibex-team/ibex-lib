@@ -33,12 +33,7 @@ def build (bld):
 	bld.env.IBEX_HDR.extend(bld.path.ant_glob ("src/**/ibex_*.h"))
 	
 	# Add information in ibex_Setting
-	@bld.rule (
-		target = "../../src/ibex_Setting.h",
-		after  = "ibex_Setting_h_init"
-	)
-	def _(tsk): 	
-		tsk.outputs[0].write("#define _IBEX_WITH_AFFINE_ 1\n",'a')   # 'a' <=> append
+	bld.env.settings['_IBEX_WITH_AFFINE_']='1'
 	
 	INCDIR  = "${PREFIX}/include/ibex"	
 	bld.install_files (INCDIR, bld.path.ant_glob ("src/**/ibex_*.h_"))

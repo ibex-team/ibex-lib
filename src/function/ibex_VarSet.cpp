@@ -90,20 +90,19 @@ void VarSet::init(Function& f, const Array<const ExprNode>& x, bool var) {
 	}
 
 	for (int i=0; i<x.size(); i++) {
-		int shift;
+		int shift=0; // by default (if x[i] is a symbol)
 
 		const ExprSymbol* symbol = dynamic_cast<const ExprSymbol*>(&x[i]);
-		if (symbol) {
-			shift = 0;
-		} else {
+
+		if (!symbol) {
 			const ExprIndex* index = dynamic_cast<const ExprIndex*>(&x[i]);
 			if (!index) ibex_error("VarSet: not a symbol");
 
 			pair<const ExprSymbol*,int> p= index->symbol_shift();
-			if (shift==-1) ibex_error("VarSet: not a symbol");
-
 			symbol=p.first;
 			shift=p.second;
+
+			if (shift==-1) ibex_error("VarSet: not a symbol");
 		}
 
 		int j=0;
