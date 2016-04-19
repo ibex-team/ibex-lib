@@ -5,8 +5,9 @@
  * License     : This program can be distributed under the terms of the GNU LGPL.
  *               See the file COPYING.LESSER.
  *
- * Author(s)   : Gilles Chabert
+ * Author(s)   : Gilles Chabert, Simon Rohou
  * Created     : Mar 2, 2012
+ * Updated     : April 18, 2016
  * ---------------------------------------------------------------------------- */
 
 #ifndef __TEST_STRING_H__
@@ -25,13 +26,15 @@ public:
 
 	CPPUNIT_TEST_SUITE(TestString);
 	
-
 		CPPUNIT_TEST(test01);
 		CPPUNIT_TEST(test02);
+		CPPUNIT_TEST(test03);
+		
 	CPPUNIT_TEST_SUITE_END();
 
 	void test01();
 	void test02();
+	void test03();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestString);
