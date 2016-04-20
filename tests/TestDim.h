@@ -24,16 +24,20 @@ class TestDim : public CppUnit::TestFixture {
 public:
 
 	CPPUNIT_TEST_SUITE(TestDim);
-	CPPUNIT_TEST(test01);
+	CPPUNIT_TEST(scalar);
 	CPPUNIT_TEST(test02);
 	CPPUNIT_TEST(test03);
-	CPPUNIT_TEST(test04);
+	CPPUNIT_TEST(add);
+	CPPUNIT_TEST(mul);
+	CPPUNIT_TEST(vec);
 	CPPUNIT_TEST_SUITE_END();
 
-	void test01();
+	void scalar();
 	void test02();
 	void test03();
-	void test04();
+	void add();
+	void mul();
+	void vec();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestDim);

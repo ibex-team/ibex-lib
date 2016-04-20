@@ -88,51 +88,41 @@ Dim vec_dim(const Array<const Dim>& comp, bool in_a_row) {
 
 	const Dim& d=comp[0];
 
-	if (d.is_scalar()) {
-		if (in_a_row) {
-			for (int i=0; i<n; i++)
-				// we could allow concatenation of
-				// row vectors of different size
-				// in a single row vector;
-				// (but not implemented yet)
-				if (comp[i].type()!=Dim::SCALAR) goto error;
-			return Dim::row_vec(n);
+	if (d.dim1>1) {
+		not_implemented("concatenation of arrays of matrices");
+	}
+
+	if (in_a_row) {
+		int row_dim = d.dim2; // the number of rows is fixed
+		int total_cols=0;
+		for (int i=0; i<n; i++) {
+			// we can concatenate row vectors of different size
+			// in a single row vector or matrices/column vectors
+			// with the right number of rows
+			if (comp[i].dim1 > 1 || comp[i].dim2!=row_dim) goto error;
+			total_cols+=comp[i].dim3;
 		}
-		else {
-			for (int i=0; i<n; i++)
-				// we could allow concatenation of
-				// column vectors of different size
-				// in a single column vector;
-				// (but not implemented yet)
-				if (comp[i].type()!=Dim::SCALAR) goto error;
-			return Dim::col_vec(n);
+		return Dim(1,row_dim,total_cols);
+	} else {
+		int col_dim = d.dim3; // the number of columns is fixed
+		int total_rows=0;
+		for (int i=0; i<n; i++) {
+			// we can concatenate column vectors of different size
+			// in a single column vector or matrices/row vectors
+			// with the right number of columns
+			if (comp[i].dim1 > 1 || comp[i].dim3!=col_dim) goto error;
+			total_rows+=comp[i].dim2;
 		}
-	} else if (d.is_vector()) {
-		if (in_a_row) {
-			for (int i=0; i<n; i++)
-				// same comment as above: we could also
-				// put matrices with different number of columns
-				// in a row. Not implemented. Only column vectors are accepted
-				if (comp[i].type()!=Dim::COL_VECTOR || comp[i].dim2!=d.dim2) goto error;
-			return Dim::matrix(d.dim2,n);
-		} else {
-			for (int i=0; i<n; i++) {
-				// same comment as above: we could also
-				// put matrices with different number of rows
-				// in column. Not implemented. Only row vectors are accepted
-				if (comp[i].type()!=Dim::ROW_VECTOR || comp[i].dim3!=d.dim3) goto error;
-			}
-			return Dim::matrix(n,d.dim3);
-		}
+		return Dim(1,total_rows,col_dim);
 	}
 
 	// notice: array of matrix expressions are only used
 	// so far in unvectorizing (for symbols corresponding to matrix arrays)
-	else if (d.type()==Dim::MATRIX) {
-		for (int i=0; i<n; i++)
-			if (comp[i].type()!=Dim::MATRIX || comp[i].dim2!=d.dim2 || comp[i].dim3!=d.dim3) goto error;
-		return Dim::matrix_array(n,d.dim2,d.dim3);
-	}
+//	else if (d.type()==Dim::MATRIX) {
+//		for (int i=0; i<n; i++)
+//			if (comp[i].type()!=Dim::MATRIX || comp[i].dim2!=d.dim2 || comp[i].dim3!=d.dim3) goto error;
+//		return Dim::matrix_array(n,d.dim2,d.dim3);
+//	}
 
 	error:
 	throw DimException("impossible to form a vector with heterogeneous components");
