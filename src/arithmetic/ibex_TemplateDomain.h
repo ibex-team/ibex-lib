@@ -502,10 +502,9 @@ template<class D>
 void TemplateDomain<D>::build() {
 	switch(dim.type()) {
 	case Dim::SCALAR:       domain = new typename D::SCALAR(); break;
-	case Dim::ROW_VECTOR:   domain = new typename D::VECTOR(dim.dim3); break;
-	case Dim::COL_VECTOR:   domain = new typename D::VECTOR(dim.dim2); break;
-	case Dim::MATRIX:       domain = new typename D::MATRIX(dim.dim2,dim.dim3); break;
-	case Dim::MATRIX_ARRAY: domain = new typename D::MATRIX_ARRAY(dim.dim1,dim.dim2,dim.dim3); break;
+	case Dim::ROW_VECTOR:   domain = new typename D::VECTOR(dim.nb_cols()); break;
+	case Dim::COL_VECTOR:   domain = new typename D::VECTOR(dim.nb_rows()); break;
+	case Dim::MATRIX:       domain = new typename D::MATRIX(dim.nb_rows(),dim.nb_cols()); break;
 	}
 }
 
@@ -516,7 +515,6 @@ bool TemplateDomain<D>::is_empty() const {
 		case Dim::ROW_VECTOR:
 		case Dim::COL_VECTOR:   return v().is_empty(); break;
 		case Dim::MATRIX:       return m().is_empty(); break;
-		case Dim::MATRIX_ARRAY: return ma().is_empty(); break;
 		}
 	assert(false);
 	return false;
@@ -599,8 +597,8 @@ void load(Array<TemplateDomain<D> >& d, const typename D::VECTOR& x, int nb_used
 		case Dim::MATRIX:
 		{
 			typename D::MATRIX& M=d[s].m();
-			for (int k=0; k<dim.dim2; k++)
-				for (int j=0; j<dim.dim3; j++) {
+			for (int k=0; k<dim.nb_rows(); k++)
+				for (int j=0; j<dim.nb_cols(); j++) {
 					if (nb_used==-1 || i==used[u]) {
 						M[k][j]=x[i];
 						u++;
@@ -614,8 +612,8 @@ void load(Array<TemplateDomain<D> >& d, const typename D::VECTOR& x, int nb_used
 		{
 			typename D::MATRIX_ARRAY& A=d[s].ma();
 			for (int l=0; l<dim.dim1; l++)
-				for (int k=0; k<dim.dim2; k++)
-					for (int j=0; j<dim.dim3; j++) {
+				for (int k=0; k<dim.nb_rows(); k++)
+					for (int j=0; j<dim.nb_cols(); j++) {
 						if (nb_used==-1 || i==used[u]) {
 							A[l][k][j]=x[i];
 							u++;
@@ -674,8 +672,8 @@ void load(typename D::VECTOR& x, const Array<TemplateDomain<D> >& d, int nb_used
 		case Dim::MATRIX:
 		{
 			const typename D::MATRIX& M=d[s].m();
-			for (int k=0; k<dim.dim2; k++)
-				for (int j=0; j<dim.dim3; j++) {
+			for (int k=0; k<dim.nb_rows(); k++)
+				for (int j=0; j<dim.nb_cols(); j++) {
 					if (nb_used==-1 || i==used[u]) {
 						x[i]=M[k][j];
 						u++;
@@ -689,8 +687,8 @@ void load(typename D::VECTOR& x, const Array<TemplateDomain<D> >& d, int nb_used
 		{
 			const typename D::MATRIX_ARRAY& A=d[s].ma();
 			for (int l=0; l<dim.dim1; l++)
-				for (int k=0; k<dim.dim2; k++)
-					for (int j=0; j<dim.dim3; j++) {
+				for (int k=0; k<dim.nb_rows(); k++)
+					for (int j=0; j<dim.nb_cols(); j++) {
 						if (nb_used==-1 || i==used[u]) {
 							x[i]=A[l][k][j];
 							u++;
@@ -740,7 +738,7 @@ void load(Array<TemplateDomain<D> >& x, const Array<const TemplateDomain<D> >& y
 			{
 				// note that it is then possible to load a row vector
 				// into a column vector (and this flexibility is desired)
-				for (int j=0; j<dim.dim3; j++) {
+				for (int j=0; j<dim.nb_cols(); j++) {
 					if (i==used[u]) {
 						x[s][j]=y[s][j];
 						u++;
@@ -754,7 +752,7 @@ void load(Array<TemplateDomain<D> >& x, const Array<const TemplateDomain<D> >& y
 			{
 				// note that it is then possible to load a column vector
 				// into a row vector (and this flexibility is desired)
-				for (int j=0; j<dim.dim2; j++) {
+				for (int j=0; j<dim.nb_rows(); j++) {
 					if (i==used[u]) {
 						x[s][j]=y[s][j];
 						u++;
@@ -767,8 +765,8 @@ void load(Array<TemplateDomain<D> >& x, const Array<const TemplateDomain<D> >& y
 
 			case Dim::MATRIX:
 			{
-				for (int k=0; k<dim.dim2; k++)
-					for (int j=0; j<dim.dim3; j++) {
+				for (int k=0; k<dim.nb_rows(); k++)
+					for (int j=0; j<dim.nb_cols(); j++) {
 						if (i==used[u]) {
 							x[s][k][j]=y[s][k][j];
 							u++;
@@ -781,8 +779,8 @@ void load(Array<TemplateDomain<D> >& x, const Array<const TemplateDomain<D> >& y
 			case Dim::MATRIX_ARRAY:
 			{
 				for (int l=0; l<dim.dim1; l++)
-					for (int k=0; k<dim.dim2; k++)
-						for (int j=0; j<dim.dim3; j++) {
+					for (int k=0; k<dim.nb_rows(); k++)
+						for (int j=0; j<dim.nb_cols(); j++) {
 							// TODO: are all these temporary D objects
 							// created by [] really safe?
 							if (i==used[u]) {
@@ -894,7 +892,7 @@ TemplateDomain<D> operator-(const TemplateDomain<D>& d1) {
 
 template<class D>
 TemplateDomain<D> transpose(const TemplateDomain<D>& d1) {
-	TemplateDomain<D> d(Dim(d1.dim.dim1,d1.dim.dim3,d1.dim.dim2));
+	TemplateDomain<D> d(Dim(d1.dim.dim1,d1.dim.nb_cols(),d1.dim.nb_rows()));
 
 	switch(d.dim.type()) {
 	case Dim::SCALAR:       d.i()=d1.i(); break;

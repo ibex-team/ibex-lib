@@ -31,7 +31,6 @@ namespace ibex {
  * If x is a row vector of 2 components, dim1=1, dim2=1, dim3=2.
  * If x is a 2x3 matrix, dim1=1, dim2=2, dim3=3.
  * If x is a column vector of 2 elements, then dim1=1, dim2=2 and dim3=1.
- * If x is an array of 4 matrices which are 2x3matrices then dim1=4, dim2=2 and dim3=3.
  *
  * <p>
  * A combination like dim1=2 dim2=1 and dim3=1 is invalid.
@@ -84,6 +83,16 @@ public:
 	 */
 	int vec_size() const;
 
+	/**
+	 * \brief The number of rows
+	 */
+	int nb_rows() const;
+
+	/**
+	 * \brief The number of columns
+	 */
+	int nb_cols() const;
+
 	/** \brief True if the three dimensions match with d. */
 	bool operator==(const Dim& d) const;
 
@@ -124,11 +133,18 @@ public:
 
 	//std::pair<int, struct Dim> index_info(int base_num, int index1, int index2, int index3) const;
 
+
+	/** \brief Build the three-dimensional structure. */
+	Dim(int dim1, int dim2, int dim3);
+
+
 	/**
 	 * The number of i such that x[i][0][0] is a valid expression,
 	 * where x is an array-of-matrix expression.
 	 */
 	int dim1;
+
+private:
 
 	/**
 	 * The number of i such that x[0][i][0], x[i][0] or x[i] is a valid
@@ -144,9 +160,12 @@ public:
 	 */
 	int dim3;
 
-	/** \brief Build the three-dimensional structure. */
-	Dim(int dim1, int dim2, int dim3);
+	friend Dim add_dim(Dim& l, Dim& r);
+	friend Dim mul_dim(const Dim& l, const Dim& r);
+	friend Dim vec_dim(const Array<const Dim>& comp, bool in_a_row);
+	friend std::ostream& operator<<(std::ostream&, const Dim&);
 
+public:
 	/**
 	 * \brief True if *this is the dimension of a constant vector.
 	 *
@@ -164,7 +183,7 @@ public:
 /*@{*/
 
 /**
- * Return the dimension of a sum
+ * \brief Return the dimension of a sum.
  *
  * This is not as simple as "l" or "r" because
  * constant vectors (IntervalVector) are always
@@ -179,14 +198,19 @@ public:
 Dim add_dim(Dim& l, Dim& r);
 
 /**
- * Return the dimension of a product (left*right)
+ * \brief Return the dimension of a product (left*right).
  */
 Dim mul_dim(const Dim& l, const Dim& r);
 
 /**
- * Return the dimension of a vector
+ * \brief Return the dimension of a vector.
  */
 Dim vec_dim(const Array<const Dim>& comp, bool in_a_row);
+
+/**
+ * \brief Streams out a dimension.
+ */
+std::ostream& operator<<(std::ostream&, const Dim&);
 
 /*@}*/
 
@@ -252,8 +276,15 @@ inline bool Dim::is_matrix() const {
 }
 
 inline int Dim::vec_size() const {
-	assert(is_vector());
 	return dim2==1? dim3 : dim2;
+}
+
+inline int Dim::nb_rows() const {
+	return dim2;
+}
+
+inline int Dim::nb_cols() const {
+	return dim3;
 }
 
 inline bool Dim::operator==(const Dim& d) const {
@@ -264,9 +295,6 @@ inline bool Dim::operator!=(const Dim& d) const {
 	return !(*this==d);
 }
 
-/** \ingroup arithmetic
- * \brief Streams out a dimension */
-std::ostream& operator<<(std::ostream&, const Dim&);
 
 } // namespace ibex
 

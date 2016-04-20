@@ -420,8 +420,8 @@ void Function::generate_comp() {
 	}
 
 	else {
-		int n=expr().dim.dim3;
-		for (int i=0; i<expr().dim.dim2; i++) {
+		int n=expr().dim.nb_cols();
+		for (int i=0; i<expr().dim.nb_rows(); i++) {
 
 			for (int j=0; j<n; j++) {
 				Array<const ExprSymbol> x(nb_arg());
@@ -555,8 +555,8 @@ std::string Function::minibex(bool human) const {
 		const ExprSymbol& x=arg(i);
 		s << x.name;
 		if (x.dim.dim1>1) s << '[' << x.dim.dim1 << ']';
-		if (x.dim.dim2>1) s << '[' << x.dim.dim2 << ']';
-		if (x.dim.dim3>1) s << '[' << x.dim.dim3 << ']';
+		if (x.dim.nb_rows()>1) s << '[' << x.dim.nb_rows() << ']';
+		if (x.dim.nb_cols()>1) s << '[' << x.dim.nb_cols() << ']';
 		if (i<nb_arg()-1) s << ",";
 	}
 	s << ")" << endl;

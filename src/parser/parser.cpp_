@@ -244,8 +244,8 @@ Domain ball(const Domain& mid, double rad) {
 	{
 		Interval r(-rad,rad);
 		for (int k=0; k<d.dim.dim1; k++)
-			for (int i=0; i<d.dim.dim2; i++)
-				for (int j=0; j<d.dim.dim3; j++)
+			for (int i=0; i<d.dim.nb_rows(); i++)
+				for (int j=0; j<d.dim.nb_cols(); j++)
 					d.ma()[k][i][j]+=r;
 	}
 	break;
