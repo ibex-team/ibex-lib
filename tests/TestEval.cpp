@@ -57,37 +57,26 @@ void TestEval::check_deco(Function& f, const ExprNode& e) {
 		CPPUNIT_ASSERT(dx.i()==Interval(1,2)); // try to read
 		break;
 	case Dim::ROW_VECTOR:
-		{ IntervalVector box(e.dim.dim3);
-		for (int i=0; i<e.dim.dim3; i++) box[i]=Interval(i,i+1);
+		{ IntervalVector box(e.dim.nb_cols());
+		for (int i=0; i<e.dim.nb_cols(); i++) box[i]=Interval(i,i+1);
 		dx.v()=box; // try to write
 		CPPUNIT_ASSERT(dx.v()==box); // try to read
 		}
 		break;
 	case Dim::COL_VECTOR:
-		{ IntervalVector box(e.dim.dim2);
-		for (int i=0; i<e.dim.dim2; i++) box[i]=Interval(i,i+1);
+		{ IntervalVector box(e.dim.nb_rows());
+		for (int i=0; i<e.dim.nb_rows(); i++) box[i]=Interval(i,i+1);
 		dx.v()=box; // try to write
 		CPPUNIT_ASSERT(dx.v()==box); // try to read
 		}
 		break;
 	case Dim::MATRIX:
-		{ IntervalMatrix m(e.dim.dim2,e.dim.dim3);
-		for (int i=0; i<e.dim.dim2; i++)
-			for (int j=0; j<e.dim.dim3; j++)
+		{ IntervalMatrix m(e.dim.nb_rows(),e.dim.nb_cols());
+		for (int i=0; i<e.dim.nb_rows(); i++)
+			for (int j=0; j<e.dim.nb_cols(); j++)
 				m[i][j]=Interval(i,j);
 		dx.m()=m; // try to write
 		CPPUNIT_ASSERT(dx.m()==m); // try to read
-		}
-		break;
-	case Dim::MATRIX_ARRAY:
-		{ IntervalMatrixArray ma(e.dim.dim1, e.dim.dim2,e.dim.dim3);
-		for (int k=0; k<e.dim.dim1; k++)
-			for (int i=0; i<e.dim.dim2; i++)
-				for (int j=0; j<e.dim.dim3; j++)
-					ma[k][i][j]=Interval(i,j);
-		dx.ma()=ma; // try to write
-		for (int k=0; k<e.dim.dim1; k++)
-			CPPUNIT_ASSERT(dx.ma()[k]==ma[k]); // try to read
 		}
 		break;
 	default:

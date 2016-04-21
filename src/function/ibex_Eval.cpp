@@ -84,7 +84,6 @@ void Eval::vector_fwd(int* x, int y) {
 	const ExprVector& v = (const ExprVector&) f.node(y);
 
 	assert(v.type()!=Dim::SCALAR);
-	assert(v.type()!=Dim::MATRIX_ARRAY);
 
 	if (v.dim.is_vector()) {
 		for (int i=0; i<v.length(); i++) d[y].v()[i]=d[x[i]].i();

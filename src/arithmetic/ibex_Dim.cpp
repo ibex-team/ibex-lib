@@ -159,9 +159,6 @@ Dim Dim::transpose_dim() const {
 	case ROW_VECTOR:   return col_vec(vec_size());
 	case COL_VECTOR:   return row_vec(vec_size());
 	case MATRIX:       return matrix(dim3,dim2);
-	case MATRIX_ARRAY:
-	default:           throw DimException("cannot transpose an array of matrices");
-	                   return *this;
 	}
 }
 

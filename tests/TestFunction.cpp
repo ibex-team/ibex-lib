@@ -205,8 +205,8 @@ void TestFunction::from_string03() {
 		Function f("x[2]","y[1][3]","x(1)+y(2)");
 
 		CPPUNIT_ASSERT(f.nb_arg()==2);
-		CPPUNIT_ASSERT(f.arg(0).dim.dim2==2);
-		CPPUNIT_ASSERT(f.arg(1).dim.dim3==3);
+		CPPUNIT_ASSERT(f.arg(0).dim.nb_rows()==2);
+		CPPUNIT_ASSERT(f.arg(1).dim.nb_cols()==3);
 		CPPUNIT_ASSERT(sameExpr(f.expr(),"(x[0]+y[1])"));
 	} catch(SyntaxError& e) {
 		CPPUNIT_ASSERT(false);

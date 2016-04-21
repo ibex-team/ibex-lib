@@ -257,10 +257,6 @@ void ExprDiff::visit(const ExprIndex& i) {
 		return;
 	}
 
-	if (i.expr.dim.type()==Dim::MATRIX_ARRAY) {
-		throw ExprDiffException("diff with matrix arrays");
-	}
-
 	int n = i.expr.dim.max_index()+1;
 
 	// we will build a new vector from scratch

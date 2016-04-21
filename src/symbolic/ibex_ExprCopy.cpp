@@ -188,19 +188,12 @@ void ExprCopy::visit(const ExprVector& e) {
 					v[i]=((const ExprConstant&) ARG(i)).get_value();
 				}
 				clone.insert(e, &ExprConstant::new_vector(v,e.row_vector()));
-			} else if (e.dim.type()==Dim::MATRIX) {
+			} else { // e.dim.type()==Dim::MATRIX)
 				IntervalMatrix m(e.dim.nb_rows(),e.dim.nb_cols());
 				for (i=0; i<e.nb_args; i++) {
 					m.set_row(i,((const ExprConstant&) ARG(i)).get_vector_value());
 				}
 				clone.insert(e, &ExprConstant::new_matrix(m));
-			} else {
-				assert(e.dim.type()==Dim::MATRIX_ARRAY);
-				IntervalMatrixArray ma(e.dim.dim1,e.dim.nb_rows(),e.dim.nb_cols());
-				for (i=0; i<e.nb_args; i++) {
-					ma[i]=((const ExprConstant&) ARG(i)).get_matrix_value();
-				}
-				clone.insert(e, &ExprConstant::new_matrix_array(ma));
 			}
 			return;
 		}

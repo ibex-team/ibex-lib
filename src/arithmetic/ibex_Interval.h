@@ -112,7 +112,6 @@ namespace ibex {
 
 class IntervalVector;
 class IntervalMatrix;
-class IntervalMatrixArray;
 class ExprConstant;
 
 /** \defgroup arithmetic Interval Arithmetic */
@@ -513,7 +512,6 @@ class Interval {
     typedef Interval SCALAR;
     typedef IntervalVector VECTOR;
     typedef IntervalMatrix MATRIX;
-    typedef IntervalMatrixArray MATRIX_ARRAY;
 
     /**
      * \brief Cast the interval to an expression

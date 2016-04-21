@@ -110,9 +110,6 @@ TemplateDomain<D>* ExprDomainFactory<D>::init(const ExprIndex& e, TemplateDomain
 	case Dim::MATRIX:
 		return new TemplateDomain<D>(d_expr.m()[e.index],true);
 		break;
-	default: // Dim::MATRIX_ARRAY:
-		return new TemplateDomain<D>(d_expr.ma()[e.index]);
-		break;
 	}
 }
 

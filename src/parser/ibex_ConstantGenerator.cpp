@@ -131,8 +131,7 @@ void ConstantGenerator::visit(const ExprVector& e) {
 		NOT_INF;
 		const Domain* di=map[e.arg(i)];
 		if (d->dim.is_vector()) d->v()[i]=di->i();
-		else if (d->dim.type()==Dim::MATRIX) d->m()[i]=di->v();
-		else d->ma()[i]=di->m();
+		else d->m()[i]=di->v();
 		delete di;
 	}
 

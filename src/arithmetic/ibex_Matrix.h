@@ -17,8 +17,6 @@
 
 namespace ibex {
 
-class MatrixArray; // declared only for friendship
-
 /**
  * \ingroup arithmetic
  *
@@ -208,9 +206,8 @@ public:
     operator const ExprConstant&() const;
 
 private:
-	friend class MatrixArray;
 
-	Matrix(); // for MatrixArray
+	Matrix();
 
 	int _nb_rows;
 	int _nb_cols;

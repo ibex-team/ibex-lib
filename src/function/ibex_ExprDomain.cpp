@@ -20,7 +20,7 @@ namespace ibex {
  * The advantage:
  * - there would be no "args_doms" field in BasicApplyLabel
  * - there would be no copy in fwd_apply and bwd_apply.
- * The last point is crucial in case of symbols that are IntervalMatrixArray
+ * The last point is crucial in case of symbols that are IntervalMatrix
  * (i.e., that have potentially big domains w.r.t. memory).
  */
 //	for (int i=0; i<a.nb_args; i++) {

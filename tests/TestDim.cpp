@@ -20,8 +20,8 @@ namespace ibex {
 void TestDim::scalar() {
 	Dim d;
 	CPPUNIT_ASSERT(d.dim1==1);
-	CPPUNIT_ASSERT(d.dim2==1);
-	CPPUNIT_ASSERT(d.dim3==1);
+	CPPUNIT_ASSERT(d.nb_rows()==1);
+	CPPUNIT_ASSERT(d.nb_cols()==1);
 	CPPUNIT_ASSERT(d.size()==1);
 	CPPUNIT_ASSERT(d==Dim::scalar());
 	CPPUNIT_ASSERT(d.is_scalar());
@@ -36,8 +36,8 @@ void TestDim::scalar() {
 void TestDim::test02() {
 	Dim d(Dim::row_vec(3));
 	CPPUNIT_ASSERT(d.dim1==1);
-	CPPUNIT_ASSERT(d.dim2==1);
-	CPPUNIT_ASSERT(d.dim3==3);
+	CPPUNIT_ASSERT(d.nb_rows()==1);
+	CPPUNIT_ASSERT(d.nb_cols()==3);
 	CPPUNIT_ASSERT(d==Dim::row_vec(3));
 	CPPUNIT_ASSERT(!(d==Dim::col_vec(3)));
 	CPPUNIT_ASSERT(!d.is_scalar());
@@ -52,8 +52,8 @@ void TestDim::test02() {
 void TestDim::test03() {
 	Dim d(Dim::matrix(2,3));
 	CPPUNIT_ASSERT(d.dim1==1);
-	CPPUNIT_ASSERT(d.dim2==2);
-	CPPUNIT_ASSERT(d.dim3==3);
+	CPPUNIT_ASSERT(d.nb_rows()==2);
+	CPPUNIT_ASSERT(d.nb_cols()==3);
 	CPPUNIT_ASSERT(d==Dim::matrix(2,3));
 	CPPUNIT_ASSERT(!d.is_scalar());
 	CPPUNIT_ASSERT(!d.is_vector());

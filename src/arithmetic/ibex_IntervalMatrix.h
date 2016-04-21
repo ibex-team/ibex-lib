@@ -19,8 +19,6 @@
 
 namespace ibex {
 
-class IntervalMatrixArray; // declared only for friendship
-
 /**
  * \ingroup arithmetic
  *
@@ -445,9 +443,8 @@ public:
     operator const ExprConstant&() const;
 
 private:
-	friend class IntervalMatrixArray;
 
-	IntervalMatrix(); // for IntervalMatrixArray
+	IntervalMatrix();
 
 	int _nb_rows;
 	int _nb_cols;

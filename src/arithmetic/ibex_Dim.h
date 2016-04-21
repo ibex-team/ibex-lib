@@ -58,7 +58,7 @@ public:
 	static Dim matrix_array(int k, int m, int n);
 
 	/** The 4 different types of "Dim" objects. */
-	typedef enum { SCALAR, ROW_VECTOR, COL_VECTOR, MATRIX, MATRIX_ARRAY } Type;
+	typedef enum { SCALAR, ROW_VECTOR, COL_VECTOR, MATRIX } Type;
 
 	/** \brief Return the type of this object. */
 	Type type() const;
@@ -246,15 +246,12 @@ inline Dim Dim::matrix_array(int k, int m, int n) {
 }
 
 inline Dim::Type Dim::type() const {
-	if (dim1==1)
-		if (dim2==1)
-			if (dim3==1) return SCALAR;
-			else return ROW_VECTOR;
-		else
-			if (dim3==1) return COL_VECTOR;
-			else return MATRIX;
+	if (dim2==1)
+		if (dim3==1) return SCALAR;
+		else return ROW_VECTOR;
 	else
-		return MATRIX_ARRAY;
+		if (dim3==1) return COL_VECTOR;
+		else return MATRIX;
 }
 
 inline int Dim::size()  const {

@@ -64,7 +64,6 @@ bool HC4Revise::backward(const Domain& y) {
 	case Dim::ROW_VECTOR:
 	case Dim::COL_VECTOR:   if (root.v().is_subset(y.v())) return true; break;
 	case Dim::MATRIX:       if (root.m().is_subset(y.m())) return true; break;
-	case Dim::MATRIX_ARRAY: assert(false); /* impossible */ break;
 	}
 
 	root &= y;
