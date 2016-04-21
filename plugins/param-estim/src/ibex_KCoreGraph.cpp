@@ -1,4 +1,5 @@
 #include "ibex_KCoreGraph.h"
+#include "cliquer/graph.h"
 
 using namespace std;
 

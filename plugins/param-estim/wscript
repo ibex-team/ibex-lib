@@ -31,4 +31,4 @@ def build (bld):
 	# add CLIQUER sources (excluding the "cl" application)
 	bld.env.IBEX_SRC.extend(bld.path.ant_glob ("src/cliquer/*.cpp", excl="**/cl.cpp"))
 	# add PARAM_ESTIM plugin headers
-	bld.env.IBEX_HDR.extend(bld.path.ant_glob ("src/**/*.h"))
+	bld.env.IBEX_HDR.extend(bld.path.ant_glob ("src/**/ibex_*.h"))
