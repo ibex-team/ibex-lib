@@ -3,7 +3,6 @@
 
 #include "ibex_IntStack.h"
 #include "ibex_BitSet.h"
-#include "cliquer.h"
 
 #include <list>
 #include <vector>
@@ -15,6 +14,19 @@
  * Can be used like an IntStack of vertices. The edges must be added independently. 
  * 
  */
+ 
+// Forward declaration of graph_t type (quick and (very) dirty workaround to prevent 
+// "cliquer.h" inclusion).
+// \FIXME: the graph_t type should not be exposed like this in the interface, since it is
+//         polluting the global namespace (it comes from the cliquer library which is C).
+//         It is used as the return type of the "subgraph" member function.
+//        - if there is no use (neither internally nor externally) for the "subgraph" 
+//          function, just drop it from the interface;
+//        - if there is only internal use for the "subgraph" function, reimplement things 
+//          in order not to expose the graph_t type;
+//        - if there is external use for the "subgraph" function, an ibex-scoped graph 
+//          type has to be used
+typedef struct _graph_t graph_t;
 
 namespace ibex {
 
