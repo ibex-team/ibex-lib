@@ -85,15 +85,47 @@ void Eval::vector_fwd(int* x, int y) {
 
 	assert(v.type()!=Dim::SCALAR);
 
+	int j=0;
+
 	if (v.dim.is_vector()) {
-		for (int i=0; i<v.length(); i++) d[y].v()[i]=d[x[i]].i();
+		for (int i=0; i<v.length(); i++) {
+			if (v.arg(i).dim.is_vector()) {
+				d[y].v().put(j,d[x[i]].v());
+				j+=v.arg(i).dim.vec_size();
+			} else {
+				d[y].v()[j]=d[x[i]].i();
+				j++;
+			}
+		}
+
+		assert(j==v.dim.vec_size());
 	}
 	else {
-		if (v.row_vector())
-			for (int i=0; i<v.length(); i++) d[y].m().set_col(i,d[x[i]].v());
-		else
-			for (int i=0; i<v.length(); i++) d[y].m().set_row(i,d[x[i]].v());
+		if (v.row_vector()) {
+			for (int i=0; i<v.length(); i++) {
+				if (v.arg(i).dim.is_matrix()) {
+					d[y].m().put(0,j,d[x[i]].m());
+					j+=v.arg(i).dim.nb_cols();
+				} else if (v.arg(i).dim.is_vector()) {
+					d[y].m().set_col(j,d[x[i]].v());
+					j++;
+				}
+			}
+		} else {
+			for (int i=0; i<v.length(); i++) {
+				if (v.arg(i).dim.is_matrix()) {
+					d[y].m().put(j,0,d[x[i]].m());
+					j+=v.arg(i).dim.nb_rows();
+				} else if (v.arg(i).dim.is_vector()) {
+					d[y].m().set_row(j,d[x[i]].v());
+					j++;
+				}
+			}
+		}
+
+		assert((v.row_vector() && j==v.dim.nb_rows()) || (!v.row_vector() && j==v.dim.nb_cols()));
 	}
+
 }
 
 } // namespace ibex
