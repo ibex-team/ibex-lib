@@ -15,6 +15,7 @@
 #include <iostream> // for ostream
 #include <utility>  // for pair
 #include <cassert>
+
 #include "ibex_Array.h"
 
 namespace ibex {
@@ -22,36 +23,36 @@ namespace ibex {
 /**
  * \ingroup arithmetic
  *
- * \brief Dimensions (of a mathematical value)
+ * \brief Dimensions (of a mathematical value/expression)
  *
- * All mathematical expressions are considered as 3-dimensional vectors.
+ * The dimension of all mathematical expressions are 2-dimensional vectors.
  * The "value" of the ith dimension means the number of valid expressions obtained by indexing in this dimension.
- * The values of the three dimensions are represented by the fields dim1, dim2 and dim3. Let x be an expression.
- * If x is scalar, dim1=1, dim2=1, dim3=1.
- * If x is a row vector of 2 components, dim1=1, dim2=1, dim3=2.
- * If x is a 2x3 matrix, dim1=1, dim2=2, dim3=3.
- * If x is a column vector of 2 elements, then dim1=1, dim2=2 and dim3=1.
+ * The values of the two dimensions are represented by nb_rows() and nb_cols().
  *
- * <p>
- * A combination like dim1=2 dim2=1 and dim3=1 is invalid.
+ * Examples:
+ *   Let x be an expression.
+ *   If x is a scalar,                      x.nb_rows()=1, x.nb_cols()=1.
+ *   If x is a row vector of 2 elements,    x.nb_rows()=1, x.nb_cols()=2.
+ *   If x is a 2x3 matrix,                  x.nb_rows()=2, x.nb_cols()=3.
+ *   If x is a column vector of 2 elements, x.nb_rows()=2, x.nb_cols()=1.
  *
  */
 class Dim {
 public:
 
-	/** \brief Build the dimension of a scalar (1,1,1). */
+	/** \brief Build the dimension of a scalar. */
 	Dim();
 
-	/** \brief Build the dimension of a scalar (1,1,1). */
+	/** \brief Build the dimension of a scalar. */
 	static Dim scalar();
 
-	/** \brief Build the dimension of a row vector (1,1,n). */
+	/** \brief Build the dimension of a row vector of size n. */
 	static Dim row_vec(int n);
 
-	/** \brief Build the dimension of a col vector (1,n,1). */
+	/** \brief Build the dimension of a column vector of size n. */
 	static Dim col_vec(int n);
 
-	/** \brief Build the dimension of a matrix (1,m,n). */
+	/** \brief Build the dimension of a matrix m*n. */
 	static Dim matrix(int m, int n);
 
 	/** The 4 different types of "Dim" objects. */
@@ -63,13 +64,13 @@ public:
 	/** \brief Return the total number of components. */
 	inline int size() const;
 
-	/** \brief True if this is a scalar. */
+	/** \brief True if *this is a scalar. */
 	bool is_scalar() const;
 
-	/** \brief True if this is either a row or column vector. */
+	/** \brief True if *this is either a row or column vector. */
 	bool is_vector() const;
 
-	/** \brief True if this is either a matrix. */
+	/** \brief True if *this is a matrix. */
 	bool is_matrix() const;
 
 	/**
@@ -137,16 +138,16 @@ public:
 private:
 
 	/**
-	 * The number of i such that x[0][i][0], x[i][0] or x[i] is a valid
-	 * expression, where x is resp. an array-of-matrix, a matrix
+	 * The number of i such that x[i][0] or x[i] is a valid
+	 * expression, where x is resp. a matrix
 	 * or a column vector expression.
 	 */
 	int dim2;
 
 	/**
-	 * The number of i such that x[0][0][i], x[1][0] or x[0] is a
-	 * valid (scalar) expression, where x is resp. an array-of-matrix,
-	 * a matrix or a row vector expression.
+	 * The number of i such that x[i][0] or x[i] is a
+	 * valid (scalar) expression, where x is resp. a matrix
+	 * or a row vector expression.
 	 */
 	int dim3;
 
@@ -177,7 +178,8 @@ public:
  * vectors (so this function can modify "cst_vec" in
  * l or r).
  *
- * If l and r are both cst_vec (possible with expressions built from the parser)
+ * If l and r are both cst_vec (possible with expressions
+ * built from the parser)
  * then the result is also a cst_vec.
  */
 Dim add_dim(Dim& l, Dim& r);

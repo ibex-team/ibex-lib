@@ -901,6 +901,7 @@ private:
 
 	Eval *_eval;
 	HC4Revise *_hc4revise;
+	// TODO: actually never used if f is vector/matrix valued
 	Gradient *_grad;
 	InHC4Revise *_inhc4revise;
 

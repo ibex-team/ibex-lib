@@ -63,6 +63,8 @@ void Function::jacobian(const IntervalVector& x, IntervalMatrix& J) const {
 	assert(J.nb_rows()==image_dim());
 
 	// calculate the gradient of each component of f
+	// TODO: we could take advantage of the DAG structure
+	// by calling just once the forward phase on f itself
 	for (int i=0; i<image_dim(); i++) {
 		(*this)[i].gradient(x,J[i]);
 	}
