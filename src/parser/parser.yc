@@ -169,8 +169,6 @@ decl_entity   : TK_NEW_SYMBOL dimension         { $$ = new Entity($1,*$2,Interva
 dimension     :                                 { $$=new Dim(); }
               | '[' expr ']'                    { $$=new Dim(Dim::col_vec(_2int(*$2)));  }
               | '[' expr ']' '[' expr ']'       { $$=new Dim(Dim::matrix(_2int(*$2),_2int(*$5))); }
-              | '[' expr ']' '[' expr ']' '[' expr ']'                    
-                                                { $$=new Dim(Dim::matrix_array(_2int(*$2),_2int(*$5),_2int(*$8))); }
 	          ;
 
 interval      : '[' expr ',' expr ']'           { $$=new Interval(_2dbl(*$2), _2dbl(*$4)); }

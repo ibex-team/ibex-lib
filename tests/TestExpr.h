@@ -58,7 +58,6 @@ public:
 		CPPUNIT_TEST(index01);
 		CPPUNIT_TEST(index02);
 		CPPUNIT_TEST(index03);
-		CPPUNIT_TEST(index04);
 
 		CPPUNIT_TEST(apply01);
 		CPPUNIT_TEST(apply03);

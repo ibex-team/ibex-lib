@@ -19,7 +19,6 @@ namespace ibex {
 
 void TestDim::scalar() {
 	Dim d;
-	CPPUNIT_ASSERT(d.dim1==1);
 	CPPUNIT_ASSERT(d.nb_rows()==1);
 	CPPUNIT_ASSERT(d.nb_cols()==1);
 	CPPUNIT_ASSERT(d.size()==1);
@@ -35,7 +34,6 @@ void TestDim::scalar() {
 
 void TestDim::test02() {
 	Dim d(Dim::row_vec(3));
-	CPPUNIT_ASSERT(d.dim1==1);
 	CPPUNIT_ASSERT(d.nb_rows()==1);
 	CPPUNIT_ASSERT(d.nb_cols()==3);
 	CPPUNIT_ASSERT(d==Dim::row_vec(3));
@@ -51,7 +49,6 @@ void TestDim::test02() {
 
 void TestDim::test03() {
 	Dim d(Dim::matrix(2,3));
-	CPPUNIT_ASSERT(d.dim1==1);
 	CPPUNIT_ASSERT(d.nb_rows()==2);
 	CPPUNIT_ASSERT(d.nb_cols()==3);
 	CPPUNIT_ASSERT(d==Dim::matrix(2,3));
@@ -71,7 +68,6 @@ void TestDim::add() {
 	Dim row(Dim::row_vec(3));
 	Dim col(Dim::col_vec(3));
 	Dim mat(Dim::matrix(3,3));
-	Dim arr(2,3,3);
 
 	CPPUNIT_ASSERT(add_dim(sca,sca)==Dim::scalar());
 	CPPUNIT_ASSERT(add_dim(row,row)==Dim::row_vec(3));
@@ -81,28 +77,18 @@ void TestDim::add() {
 	CPPUNIT_ASSERT_THROW(add_dim(sca,col),DimException);
 	CPPUNIT_ASSERT_THROW(add_dim(sca,row),DimException);
 	CPPUNIT_ASSERT_THROW(add_dim(sca,mat),DimException);
-	CPPUNIT_ASSERT_THROW(add_dim(sca,arr),DimException);
 
 	CPPUNIT_ASSERT_THROW(add_dim(col,sca),DimException);
 	CPPUNIT_ASSERT_THROW(add_dim(col,row),DimException);
 	CPPUNIT_ASSERT_THROW(add_dim(col,mat),DimException);
-	CPPUNIT_ASSERT_THROW(add_dim(col,arr),DimException);
 
 	CPPUNIT_ASSERT_THROW(add_dim(row,sca),DimException);
 	CPPUNIT_ASSERT_THROW(add_dim(row,col),DimException);
 	CPPUNIT_ASSERT_THROW(add_dim(row,mat),DimException);
-	CPPUNIT_ASSERT_THROW(add_dim(row,arr),DimException);
 
 	CPPUNIT_ASSERT_THROW(add_dim(mat,sca),DimException);
 	CPPUNIT_ASSERT_THROW(add_dim(mat,col),DimException);
 	CPPUNIT_ASSERT_THROW(add_dim(mat,row),DimException);
-	CPPUNIT_ASSERT_THROW(add_dim(mat,arr),DimException);
-
-	CPPUNIT_ASSERT_THROW(add_dim(arr,sca),DimException);
-	CPPUNIT_ASSERT_THROW(add_dim(arr,col),DimException);
-	CPPUNIT_ASSERT_THROW(add_dim(arr,row),DimException);
-	CPPUNIT_ASSERT_THROW(add_dim(arr,mat),DimException);
-	CPPUNIT_ASSERT_THROW(add_dim(arr,arr),DimException);
 }
 
 void TestDim::mul() {
@@ -115,7 +101,6 @@ void TestDim::mul() {
 	Dim mat32(Dim::matrix(3,2));
 	Dim mat23(Dim::matrix(2,3));
 	Dim mat33(Dim::matrix(3,3));
-	Dim arr(2,3,3);
 
 	CPPUNIT_ASSERT      (mul_dim(sca,sca)==sca);
 	CPPUNIT_ASSERT      (mul_dim(sca,row2)==row2);
@@ -126,7 +111,6 @@ void TestDim::mul() {
 	CPPUNIT_ASSERT      (mul_dim(sca,mat23)==mat23);
 	CPPUNIT_ASSERT      (mul_dim(sca,mat32)==mat32);
 	CPPUNIT_ASSERT      (mul_dim(sca,mat33)==mat33);
-	CPPUNIT_ASSERT_THROW(mul_dim(sca,arr),DimException);
 
 	CPPUNIT_ASSERT_THROW(mul_dim(row2,sca),DimException);
 	CPPUNIT_ASSERT      (mul_dim(row2,row2)==sca);
@@ -137,7 +121,6 @@ void TestDim::mul() {
 	CPPUNIT_ASSERT_THROW(mul_dim(row2,mat32),DimException);
 	CPPUNIT_ASSERT      (mul_dim(row2,mat23)==row3);
 	CPPUNIT_ASSERT_THROW(mul_dim(row2,mat33),DimException);
-	CPPUNIT_ASSERT_THROW(mul_dim(row2,arr),DimException);
 
 	CPPUNIT_ASSERT_THROW(mul_dim(row3,sca),DimException);
 	CPPUNIT_ASSERT_THROW(mul_dim(row3,row2),DimException);
@@ -148,7 +131,6 @@ void TestDim::mul() {
 	CPPUNIT_ASSERT      (mul_dim(row3,mat32)==row2);
 	CPPUNIT_ASSERT_THROW(mul_dim(row3,mat23),DimException);
 	CPPUNIT_ASSERT      (mul_dim(row3,mat33)==row3);
-	CPPUNIT_ASSERT_THROW(mul_dim(row3,arr),DimException);
 
 	CPPUNIT_ASSERT      (mul_dim(col2,sca)==col2);
 	CPPUNIT_ASSERT      (mul_dim(col2,row2)==mat22);
@@ -159,7 +141,6 @@ void TestDim::mul() {
 	CPPUNIT_ASSERT_THROW(mul_dim(col2,mat32),DimException);
 	CPPUNIT_ASSERT_THROW(mul_dim(col2,mat23),DimException);
 	CPPUNIT_ASSERT_THROW(mul_dim(col2,mat33),DimException);
-	CPPUNIT_ASSERT_THROW(mul_dim(col2,arr),DimException);
 
 	CPPUNIT_ASSERT      (mul_dim(col3,sca)==col3);
 	CPPUNIT_ASSERT      (mul_dim(col3,row2)==mat32);
@@ -170,7 +151,6 @@ void TestDim::mul() {
 	CPPUNIT_ASSERT_THROW(mul_dim(col3,mat32),DimException);
 	CPPUNIT_ASSERT_THROW(mul_dim(col3,mat23),DimException);
 	CPPUNIT_ASSERT_THROW(mul_dim(col3,mat33),DimException);
-	CPPUNIT_ASSERT_THROW(mul_dim(col3,arr),DimException);
 
 	CPPUNIT_ASSERT_THROW(mul_dim(mat22,sca),DimException);
 	CPPUNIT_ASSERT_THROW(mul_dim(mat22,row2),DimException);
@@ -181,7 +161,6 @@ void TestDim::mul() {
 	CPPUNIT_ASSERT_THROW(mul_dim(mat22,mat32),DimException);
 	CPPUNIT_ASSERT      (mul_dim(mat22,mat23)==mat23);
 	CPPUNIT_ASSERT_THROW(mul_dim(mat22,mat33),DimException);
-	CPPUNIT_ASSERT_THROW(mul_dim(mat22,arr),DimException);
 
 	CPPUNIT_ASSERT_THROW(mul_dim(mat32,sca),DimException);
 	CPPUNIT_ASSERT_THROW(mul_dim(mat32,row2),DimException);
@@ -192,7 +171,6 @@ void TestDim::mul() {
 	CPPUNIT_ASSERT_THROW(mul_dim(mat32,mat32),DimException);
 	CPPUNIT_ASSERT      (mul_dim(mat32,mat23)==mat33);
 	CPPUNIT_ASSERT_THROW(mul_dim(mat32,mat33),DimException);
-	CPPUNIT_ASSERT_THROW(mul_dim(mat32,arr),DimException);
 
 	CPPUNIT_ASSERT_THROW(mul_dim(mat23,sca),DimException);
 	CPPUNIT_ASSERT_THROW(mul_dim(mat23,row2),DimException);
@@ -203,7 +181,6 @@ void TestDim::mul() {
 	CPPUNIT_ASSERT      (mul_dim(mat23,mat32)==mat22);
 	CPPUNIT_ASSERT_THROW(mul_dim(mat23,mat23),DimException);
 	CPPUNIT_ASSERT      (mul_dim(mat23,mat33)==mat23);
-	CPPUNIT_ASSERT_THROW(mul_dim(mat23,arr),DimException);
 
 	CPPUNIT_ASSERT_THROW(mul_dim(mat33,sca),DimException);
 	CPPUNIT_ASSERT_THROW(mul_dim(mat33,row2),DimException);
@@ -214,7 +191,6 @@ void TestDim::mul() {
 	CPPUNIT_ASSERT      (mul_dim(mat33,mat32)==mat32);
 	CPPUNIT_ASSERT_THROW(mul_dim(mat33,mat23),DimException);
 	CPPUNIT_ASSERT      (mul_dim(mat33,mat33)==mat33);
-	CPPUNIT_ASSERT_THROW(mul_dim(mat33,arr),DimException);
 
 }
 

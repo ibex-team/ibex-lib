@@ -349,7 +349,7 @@ TemplateDomain<D> TemplateDomain<D>::operator[](int ii) {
 	case Dim::SCALAR:       assert(ii==0); return TemplateDomain<D>(this->i());
 	case Dim::ROW_VECTOR:
 	case Dim::COL_VECTOR:   return TemplateDomain<D>(v()[ii]);
-	case Dim::MATRIX:       return TemplateDomain<D>(m()[ii],true);
+	default:                return TemplateDomain<D>(m()[ii],true);
 	}
 }
 
@@ -401,7 +401,7 @@ bool TemplateDomain<D>::operator==(const TemplateDomain<D>& d) const {
 	case Dim::SCALAR:       return i()==d.i();
 	case Dim::ROW_VECTOR:
 	case Dim::COL_VECTOR:   return v()==d.v();
-	case Dim::MATRIX:       return m()==d.m();
+	default:                return m()==d.m();
 	}
 }
 
@@ -465,11 +465,11 @@ void TemplateDomain<D>::build() {
 template<class D>
 bool TemplateDomain<D>::is_empty() const {
 	switch (dim.type()) {
-		case Dim::SCALAR:       return i().is_empty(); break;
-		case Dim::ROW_VECTOR:
-		case Dim::COL_VECTOR:   return v().is_empty(); break;
-		case Dim::MATRIX:       return m().is_empty(); break;
-		}
+	case Dim::SCALAR:       return i().is_empty(); break;
+	case Dim::ROW_VECTOR:
+	case Dim::COL_VECTOR:   return v().is_empty(); break;
+	default:                return m().is_empty(); break;
+	}
 	assert(false);
 	return false;
 }
@@ -793,7 +793,7 @@ TemplateDomain<D> operator-(const TemplateDomain<D>& d1) {
 
 template<class D>
 TemplateDomain<D> transpose(const TemplateDomain<D>& d1) {
-	TemplateDomain<D> d(Dim(d1.dim.dim1,d1.dim.nb_cols(),d1.dim.nb_rows()));
+	TemplateDomain<D> d(Dim(d1.dim.nb_cols(),d1.dim.nb_rows()));
 
 	switch(d.dim.type()) {
 	case Dim::SCALAR:       d.i()=d1.i(); break;

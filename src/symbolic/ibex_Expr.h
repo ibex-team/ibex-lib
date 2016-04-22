@@ -510,12 +510,6 @@ public:
 	/** Create a \a m x \a n matrix variable named \a name. */
 	Variable(int m, int n, const char* name);
 
-	/** Create a (\a k-sized array of \a m x \a n matrices) variable. */
-	Variable(int k, int m, int n);
-
-	/** Create a (\a k-sized array of \a m x \a n matrices) variable named \a name. */
-	Variable(int k, int m, int n, const char* name);
-
 	/** Delete this. */
 	~Variable();
 

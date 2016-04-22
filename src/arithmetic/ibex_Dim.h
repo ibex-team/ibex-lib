@@ -54,9 +54,6 @@ public:
 	/** \brief Build the dimension of a matrix (1,m,n). */
 	static Dim matrix(int m, int n);
 
-	/** \brief Build the dimension of a matrix array (k,m,n). */
-	static Dim matrix_array(int k, int m, int n);
-
 	/** The 4 different types of "Dim" objects. */
 	typedef enum { SCALAR, ROW_VECTOR, COL_VECTOR, MATRIX } Type;
 
@@ -135,14 +132,7 @@ public:
 
 
 	/** \brief Build the three-dimensional structure. */
-	Dim(int dim1, int dim2, int dim3);
-
-
-	/**
-	 * The number of i such that x[i][0][0] is a valid expression,
-	 * where x is an array-of-matrix expression.
-	 */
-	int dim1;
+	Dim(int dim2, int dim3);
 
 private:
 
@@ -159,11 +149,6 @@ private:
 	 * a matrix or a row vector expression.
 	 */
 	int dim3;
-
-	friend Dim add_dim(Dim& l, Dim& r);
-	friend Dim mul_dim(const Dim& l, const Dim& r);
-	friend Dim vec_dim(const Array<const Dim>& comp, bool in_a_row);
-	friend std::ostream& operator<<(std::ostream&, const Dim&);
 
 public:
 	/**
@@ -216,33 +201,28 @@ std::ostream& operator<<(std::ostream&, const Dim&);
 
 /*================================== inline implementations ========================================*/
 
-inline Dim::Dim() : dim1(1), dim2(1), dim3(1), cst_vec(false) {
+inline Dim::Dim() : dim2(1), dim3(1), cst_vec(false) {
 
 }
 
 inline Dim Dim::scalar() {
-	return Dim(1,1,1);
+	return Dim(1,1);
 }
 
 inline Dim Dim::row_vec(int n) {
 	if (n==1) return Dim::scalar();
-	else      return Dim(1,1,n);
+	else      return Dim(1,n);
 }
 
 inline Dim Dim::col_vec(int n) {
 	if (n==1) return Dim::scalar();
-	else      return Dim(1,n,1);
+	else      return Dim(n,1);
 }
 
 inline Dim Dim::matrix(int m, int n) {
 	if (m==1)      return Dim::row_vec(n);
 	else if (n==1) return Dim::col_vec(m);
-	else           return Dim(1,m,n);
-}
-
-inline Dim Dim::matrix_array(int k, int m, int n) {
-	if (k==1) return Dim::matrix(m,n);
-	else      return Dim(k,m,n);
+	else           return Dim(m,n);
 }
 
 inline Dim::Type Dim::type() const {
@@ -255,7 +235,7 @@ inline Dim::Type Dim::type() const {
 }
 
 inline int Dim::size()  const {
-	return dim1*dim2*dim3;
+	return dim2*dim3;
 }
 
 inline bool Dim::is_scalar() const {
@@ -285,7 +265,7 @@ inline int Dim::nb_cols() const {
 }
 
 inline bool Dim::operator==(const Dim& d) const {
-	return dim1==d.dim1 && dim2==d.dim2 && dim3==d.dim3;
+	return dim2==d.dim2 && dim3==d.dim3;
 }
 
 inline bool Dim::operator!=(const Dim& d) const {

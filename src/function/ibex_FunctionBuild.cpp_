@@ -554,7 +554,6 @@ std::string Function::minibex(bool human) const {
 	for (int i=0; i<nb_arg(); i++) {
 		const ExprSymbol& x=arg(i);
 		s << x.name;
-		if (x.dim.dim1>1) s << '[' << x.dim.dim1 << ']';
 		if (x.dim.nb_rows()>1) s << '[' << x.dim.nb_rows() << ']';
 		if (x.dim.nb_cols()>1) s << '[' << x.dim.nb_cols() << ']';
 		if (i<nb_arg()-1) s << ",";

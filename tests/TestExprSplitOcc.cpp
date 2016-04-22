@@ -66,7 +66,7 @@ void TestExprSplitOcc::test02() {
 
 
 void TestExprSplitOcc::test03() {
-	const ExprSymbol& x=ExprSymbol::new_("x",Dim(1,2,1));
+	const ExprSymbol& x=ExprSymbol::new_("x",Dim(2,1));
 	const ExprNode& e1=x[0];
 	Function f1(x,(-x)[1]+e1);
 	ExprSplitOcc eso(f1.args(),f1.expr());
@@ -89,7 +89,7 @@ void TestExprSplitOcc::test03() {
 }
 
 void TestExprSplitOcc::test04() {
-	const ExprSymbol& x=ExprSymbol::new_("x",Dim(1,2,1));
+	const ExprSymbol& x=ExprSymbol::new_("x",Dim(2,1));
 	// same index node with several fathers
 	const ExprNode& e1=x[0];
 	Function f1(x,e1-e1);
@@ -113,7 +113,7 @@ void TestExprSplitOcc::test04() {
 
 
 void TestExprSplitOcc::test05() {
-	const ExprSymbol& x=ExprSymbol::new_("x",Dim(1,2,1));
+	const ExprSymbol& x=ExprSymbol::new_("x",Dim(2,1));
 
 	// several occurrences of an index (but different nodes)
 	const ExprNode& e1=x[0];
@@ -138,7 +138,7 @@ void TestExprSplitOcc::test05() {
 
 
 void TestExprSplitOcc::test06() {
-	const ExprSymbol& x=ExprSymbol::new_("x",Dim(1,3,1));
+	const ExprSymbol& x=ExprSymbol::new_("x",Dim(3,1));
 
 	// several occurrences of an index (but different nodes)
 	const ExprNode& e1=x[0];
@@ -162,7 +162,7 @@ void TestExprSplitOcc::test06() {
 }
 
 void TestExprSplitOcc::test07() {
-	const ExprSymbol& x=ExprSymbol::new_("x",Dim(1,3,1));
+	const ExprSymbol& x=ExprSymbol::new_("x",Dim(3,1));
 
 	// several occurrences of an index (but different nodes)
 	const ExprNode& e1=x[0];

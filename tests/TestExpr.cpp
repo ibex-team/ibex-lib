@@ -392,61 +392,44 @@ void TestExpr::vector02() {
 
 void TestExpr::index01() {
 
-	const ExprSymbol& x=ExprSymbol::new_("x",Dim::matrix_array(2,3,4));
+	const ExprSymbol& x=ExprSymbol::new_("x",Dim::matrix(3,4));
 	const ExprIndex& e=x[1];
-	Function f(x,e);
-	CPPUNIT_ASSERT(e.f==&f);
-	//CPPUNIT_ASSERT(e.deco.d->dim==e.dim);
-	CPPUNIT_ASSERT(e.dim==Dim::matrix(3,4));
-	CPPUNIT_ASSERT(e.height==1);
-	CPPUNIT_ASSERT(e.size==2);
-	CPPUNIT_ASSERT(e.type()==Dim::MATRIX);
-	CPPUNIT_ASSERT(checkExpr(e,"x[1]"));
-	CPPUNIT_ASSERT(e.indexed_symbol());
-	CPPUNIT_ASSERT(e.symbol_shift().first==&x);
-	CPPUNIT_ASSERT(e.symbol_shift().second==12);
-}
-
-void TestExpr::index02() {
-
-	const ExprSymbol& x=ExprSymbol::new_("x",Dim::matrix_array(2,3,4));
-	const ExprIndex& e=x[1][1];
 	Function f(x,e);
 
 	CPPUNIT_ASSERT(e.f==&f);
 	//CPPUNIT_ASSERT(e.deco.d->dim==e.dim);
 	CPPUNIT_ASSERT(e.dim==Dim::row_vec(4));
-	CPPUNIT_ASSERT(e.height==2);
-	CPPUNIT_ASSERT(e.size==3);
+	CPPUNIT_ASSERT(e.height==1);
+	CPPUNIT_ASSERT(e.size==2);
 	CPPUNIT_ASSERT(e.type()==Dim::ROW_VECTOR);
-	CPPUNIT_ASSERT(checkExpr(e,"x[1][1]"));
+	CPPUNIT_ASSERT(checkExpr(e,"x[1]"));
 	CPPUNIT_ASSERT(e.indexed_symbol());
 	CPPUNIT_ASSERT(e.symbol_shift().first==&x);
-	CPPUNIT_ASSERT(e.symbol_shift().second==16);
+	CPPUNIT_ASSERT(e.symbol_shift().second==4);
 }
 
-void TestExpr::index03() {
-	const ExprSymbol& x=ExprSymbol::new_("x",Dim::matrix_array(2,3,4));
-	const ExprIndex& e=x[1][1][1];
+void TestExpr::index02() {
+	const ExprSymbol& x=ExprSymbol::new_("x",Dim::matrix(3,4));
+	const ExprIndex& e=x[1][1];
 	Function f(x,e);
 
 	CPPUNIT_ASSERT(e.f==&f);
 	//CPPUNIT_ASSERT(e.deco.d->dim==e.dim);
-	CPPUNIT_ASSERT(e.height==3);
-	CPPUNIT_ASSERT(e.size==4);
+	CPPUNIT_ASSERT(e.height==2);
+	CPPUNIT_ASSERT(e.size==3);
 	CPPUNIT_ASSERT(e.type()==Dim::SCALAR);
-	CPPUNIT_ASSERT(checkExpr(e,"x[1][1][1]"));
+	CPPUNIT_ASSERT(checkExpr(e,"x[1][1]"));
 	CPPUNIT_ASSERT(e.indexed_symbol());
 	CPPUNIT_ASSERT(e.symbol_shift().first==&x);
-	CPPUNIT_ASSERT(e.symbol_shift().second==17);
+	CPPUNIT_ASSERT(e.symbol_shift().second==5);
 }
 
-void TestExpr::index04() {
-	const ExprSymbol& x=ExprSymbol::new_("x",Dim::matrix_array(3,3,4));
-	const ExprIndex& e=x[2][1][3];
+void TestExpr::index03() {
+	const ExprSymbol& x=ExprSymbol::new_("x",Dim::matrix(3,4));
+	const ExprIndex& e=x[2][1];
 	CPPUNIT_ASSERT(e.indexed_symbol());
 	CPPUNIT_ASSERT(e.symbol_shift().first==&x);
-	CPPUNIT_ASSERT(e.symbol_shift().second==31);
+	CPPUNIT_ASSERT(e.symbol_shift().second==9);
 }
 
 void TestExpr::apply01() {
