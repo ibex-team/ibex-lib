@@ -239,7 +239,7 @@ public:
 	void test101();
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestAffine<AF_Linear>);
+CPPUNIT_TEST_SUITE_REGISTRATION(TestAffine<AF_fAFFullI>);
 
 //#include "TestAffine.cpp"
 
