@@ -94,9 +94,23 @@ bool almost_eq(const Interval& y_actual, const Interval& y_expected, double err)
 bool almost_eq(const IntervalVector& y_actual, const IntervalVector& y_expected, double err) {
 	if (y_actual.size()!=y_actual.size()) return false;
 	if (y_actual.is_empty() && y_expected.is_empty()) return true;
+	if (y_actual.is_empty() || y_expected.is_empty()) return false;
 
 	for (int i=0; i<y_actual.size(); i++) {
 		if (!almost_eq(y_actual[i], y_expected[i],err)) return false;
+	}
+
+	return true;
+}
+
+bool almost_eq(const IntervalMatrix& y_actual, const IntervalMatrix& y_expected, double err) {
+	if (y_actual.nb_rows()!=y_actual.nb_rows()) return false;
+	if (y_actual.nb_cols()!=y_actual.nb_cols()) return false;
+	if (y_actual.is_empty() && y_expected.is_empty()) return true;
+	if (y_actual.is_empty() || y_expected.is_empty()) return false;
+
+	for (int i=0; i<y_actual.nb_rows(); i++) {
+		if (!almost_eq(y_actual.row(i), y_expected.row(i),err)) return false;
 	}
 
 	return true;

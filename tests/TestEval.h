@@ -28,12 +28,6 @@ public:
 		CPPUNIT_TEST(deco01);
 		CPPUNIT_TEST(deco02);
 
-		CPPUNIT_TEST(add01);
-		CPPUNIT_TEST(add02);
-		CPPUNIT_TEST(add03);
-		CPPUNIT_TEST(add04);
-
-		CPPUNIT_TEST(mul01);
 
 		CPPUNIT_TEST(dist01);
 
@@ -45,13 +39,6 @@ public:
 
 	void deco01();
 	void deco02();
-
-	void add01();
-	void add02();
-	void add03();
-	void add04();
-
-	void mul01();
 
 	void dist01();
 
