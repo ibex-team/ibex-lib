@@ -52,7 +52,7 @@ public:
 	 * \param fold_cst - if true, all constant subexpressions are "folded" into a single node.
 	 *
 	 * \pre The size of \a new_x must be greater or equal to the size of \a old_x. It is not
-	 *      required to be the same size to allow the use of extra variables (that do not occurr in the expression).
+	 *      required to be the same size to allow the use of extra variables (that do not occur in the expression).
 	 *      This is used, e.g., in ibex_Optimizer to transform a function x->g(x) into (x,y)->g(x).
 	 */
 	const ExprNode& copy(const Array<const ExprSymbol>& old_x, const Array<const ExprNode>& new_x, const ExprNode& y, bool fold_cst=false);
@@ -151,6 +151,10 @@ protected:
 	//           (1*2)+(x+1)
 	// we must not delete "1" when copying (1*2).
 	NodeMap<bool> used;
+
+	// For index_copy.
+	// Equals to -1 if no index.
+	int i,j;
 
 	void mark(const ExprNode&);
 	bool unary_copy(const ExprUnaryOp& e, Domain (*fcst)(const Domain&));

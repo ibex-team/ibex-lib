@@ -91,6 +91,9 @@ const ExprNode& ExprCopy::index_copy(const Array<const ExprSymbol>& old_x, const
 
 const ExprNode& ExprCopy::copy(const Array<const ExprSymbol>& old_x, const Array<const ExprNode>& new_x, const ExprNode& y, bool fold_cst) {
 
+	this->i=-1;
+	this->j=-1;
+
 	fold = fold_cst;
 
 	clone.clean();
@@ -145,7 +148,33 @@ void ExprCopy::visit(const ExprSymbol& x) {
 }
 
 void ExprCopy::visit(const ExprConstant& c) {
-	clone.insert(c, &c.copy());
+	const ExprConstant* c2;
+
+	if (c.dim.is_matrix()) {
+		if (i!=-1)
+			if (j!=-1)
+				c2=&ExprConstant::new_scalar(c.get_matrix_value()[i][j]);
+			else
+				c2=&ExprConstant::new_vector(c.get_matrix_value()[i], true);
+		else
+			c2=&c.copy();
+	}
+	else if (c.dim.is_vector()) {
+		if (j>0)
+			ibex_error("ExprCopy: cannot use two indices with vectors");
+
+		if (i!=-1)
+			c2=&ExprConstant::new_scalar(c.get_vector_value()[i]);
+		else
+			c2=&c.copy();
+	} else {
+		if (i>0 || j>0)
+			ibex_error("ExprCopy: cannot use indices >0 with scalars");
+
+		c2=&c.copy();
+	}
+
+	clone.insert(c, c2);
 }
 
 // (useless so far)
