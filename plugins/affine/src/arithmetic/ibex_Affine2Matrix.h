@@ -18,7 +18,6 @@
 
 namespace ibex {
 
-template<class T> class Affine2MainMatrixArray;
 
 /**
  * \ingroup arithmetic
@@ -34,9 +33,8 @@ template<class T=AF_Default>
 class Affine2MainMatrix {
 
 private:
-	friend class Affine2MainMatrixArray<T>;
 
-	Affine2MainMatrix(); // for Affine2MainMatrixArray
+	Affine2MainMatrix(); // forbidden
 
 	int _nb_rows;
 	int _nb_cols;
