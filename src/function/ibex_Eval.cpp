@@ -123,7 +123,7 @@ void Eval::vector_fwd(int* x, int y) {
 			}
 		}
 
-		assert((v.row_vector() && j==v.dim.nb_rows()) || (!v.row_vector() && j==v.dim.nb_cols()));
+		assert((v.row_vector() && j==v.dim.nb_cols()) || (!v.row_vector() && j==v.dim.nb_rows()));
 	}
 
 }
