@@ -35,7 +35,9 @@ LinearRelaxXTaylor::LinearRelaxXTaylor(const System& sys1, std::vector<corner_po
 
 	try {
 		df = new Function(sys1.f,Function::DIFF);
-	} catch(ExprDiffException&) {
+	} catch(Exception&) {
+		//TODO: replace with ExprDiffException.
+		// Currently, DimException is also sometimes raised.
 		df = NULL;
 	}
 

@@ -136,7 +136,13 @@ void Function::print(std::ostream& os) const {
 	if (name!=NULL) os << name << ":";
 	os << "(";
 	for (int i=0; i<nb_arg(); i++) {
-		os << arg_name(i);
+		const ExprSymbol& x = arg(i);
+		os << x;
+		if (x.dim.nb_rows()>1) os << '[' << x.dim.nb_rows() << ']';
+		if (x.dim.nb_cols()>1) {
+			if (x.dim.nb_rows()==1) os << "[1]";
+			os << '[' << x.dim.nb_cols() << ']';
+		}
 		if (i<nb_arg()-1) os << ",";
 	}
 	os << ")->" << expr();
