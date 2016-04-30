@@ -60,10 +60,6 @@ public:
 protected:
 	void visit(const ExprNode& e);
 	void visit(const ExprIndex& i);
-	void visit(const ExprNAryOp& e);
-	void visit(const ExprLeaf& e);
-	void visit(const ExprBinaryOp& b);
-	void visit(const ExprUnaryOp& u);
 	void visit(const ExprSymbol& x);
 	void visit(const ExprConstant& c);
 	void visit(const ExprVector& e);
@@ -108,12 +104,12 @@ protected:
 		void add(const ExprNode& e);
 		void add(int i, const ExprNode& e);
 		void add(int i, int j, const ExprNode& e);
-		const ExprNode& operator();
 		bool found();
 		bool found(int i);
 		bool found(int i, int j);
-		const ExprNode& operator[](int i);
-		const ExprNode& operator[](int i, int j);
+		const ExprNode& get();
+		const ExprNode& get(int i);
+		const ExprNode& get(int i, int j);
 
 	private:
 		Dim d;  // dimension of the node itself
@@ -141,8 +137,8 @@ protected:
 	// Equals to -1 if no index.
 	int i,j;
 
-	void unary_copy(const ExprUnaryOp& e, const ExprNode& (*op)(const ExprNode&));
-	void binary_copy(const ExprBinaryOp& e, const ExprNode& (*op)(const ExprNode&, const ExprNode&));
+//	void unary_copy(const ExprUnaryOp& e, const ExprNode& (*op)(const ExprNode&));
+//	void binary_copy(const ExprBinaryOp& e, const ExprNode& (*op)(const ExprNode&, const ExprNode&));
 };
 
 } // end namespace ibex
