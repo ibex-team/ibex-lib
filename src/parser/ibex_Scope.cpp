@@ -9,6 +9,7 @@
 //============================================================================
 
 #include "ibex_Scope.h"
+#include "ibex_P_Expr.h"
 #include "ibex_P_NumConstraint.h"
 #include "parser.tab.hh"
 
@@ -47,17 +48,18 @@ public:
 class S_Cst : public Scope::S_Object {
 public:
 
-	S_Cst(const Domain& domain) : domain(domain) { }
+	S_Cst(const Domain& domain) : cst(new P_ExprConstant(domain)) { }
 
-	S_Cst(const Dim& d) : domain(d) { }
+	// Strange:
+	S_Cst(const Dim& d) : cst(new P_ExprConstant(Domain(Dim::scalar()))) { }
 
 	S_Object* copy() const { return new S_Cst(*this); }
 
 	int token() const { return TK_CONSTANT; }
 
-	void print(ostream& os) const { os << "constant " << domain; }
+	void print(ostream& os) const { os << "constant " << cst->value; }
 
-	Domain domain;
+	P_ExprConstant* cst;
 
 private:
 	/**
@@ -66,7 +68,7 @@ private:
 	 * Otherwise, in a "for" block, the ExprConstantRef inside expressions will point to domains
 	 * that will no longer exist after parsing (that is, once the scope of the "for" will be deleted).
 	 */
-	S_Cst(const S_Cst& c) : domain(c.domain,true) { }
+	S_Cst(const S_Cst& c) : cst(cst) { }
 };
 
 class S_Func : public Scope::S_Object {
@@ -112,7 +114,7 @@ public:
 class S_Entity : public Scope::S_Object {
 public:
 
-	S_Entity(const Entity* symbol) : symbol(symbol) { }
+	S_Entity(const P_ExprSymbol* symbol) : symbol(symbol) { }
 
 	S_Object* copy() const { return new S_Entity(symbol); }
 
@@ -120,7 +122,7 @@ public:
 
 	void print(ostream& os) const { os << "entity"; }
 
-	const Entity* symbol;
+	const P_ExprSymbol* symbol;
 };
 
 class S_Iterator : public Scope::S_Object {
@@ -169,7 +171,7 @@ void Scope::add_cst(const char* id, const Domain& domain) {
 void Scope::add_cst(const char* id, const Dim& d, const Domain& dom) {
 	S_Cst* c=new S_Cst(d);
 	tab.insert_new(id, c);
-	init_symbol_domain(id, c->domain, dom);
+	init_symbol_domain(id, c->cst->value, dom);
 }
 
 void Scope::rem_cst(const char* id) {
@@ -190,7 +192,7 @@ void Scope::add_func_tmp_symbol(const char* id, const ExprNode* expr) {
 	tab.insert_new(id, new S_FuncTmp(expr));
 }
 
-void Scope::add_entity(const char* id, const Entity* symbol) {
+void Scope::add_entity(const char* id, const P_ExprSymbol* symbol) {
 	tab.insert_new(id, new S_Entity(symbol));
 }
 
@@ -198,10 +200,10 @@ void Scope::add_iterator(const char* id) {
 	tab.insert_new(id, new S_Iterator(-1));
 }
 
-const Domain& Scope::get_cst(const char* id) const {
+const P_ExprConstant* Scope::get_cst(const char* id) const {
 	const S_Object& s=*tab[id];
 	assert(s.token()==TK_CONSTANT);
-	return ((const S_Cst&) s).domain;
+	return ((const S_Cst&) s).cst;
 }
 
 Function& Scope::get_func(const char* id) {
@@ -222,7 +224,7 @@ const ExprNode& Scope::get_func_tmp_expr(const char* id) const {
 	return *((const S_FuncTmp&) s).expr;
 }
 
-const Entity& Scope::get_entity(const char* id) const {
+const P_ExprSymbol& Scope::get_entity(const char* id) const {
 	const S_Object& s=*tab[id];
 	assert(s.token()==TK_ENTITY);
 	return *((const S_Entity&) s).symbol;

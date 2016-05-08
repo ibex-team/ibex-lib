@@ -18,71 +18,88 @@ using namespace std;
 namespace ibex {
 namespace parser {
 
-void p_print(const ExprNode& e) {
-	P_ExprPrinter().print(cout,e);
+void p_print(const P_ExprNode& e) {
+	P_ExprPrinter(cout,e);
 }
 
-P_ExprPower::P_ExprPower(const ExprNode& expr, const ExprNode& expon) : ExprBinaryOp(expr,expon,expr.dim) {
-	if (!expr.dim.is_scalar()) ibexerror("cannot raise a non-scalar value to some power");
-	if (!expon.dim.is_scalar()) ibexerror("cannot raise a value to a non-scalar power");
-
+P_ExprIndex::P_ExprIndex(const P_ExprNode& expr, const P_ExprNode& single_idx, bool style) :
+		P_ExprNode(EXPR_WITH_IDX,expr,single_idx), matlab_style(style) {
 }
 
-void P_ExprPower::acceptVisitor(ExprVisitor& v) const {
-	P_ExprVisitor* v2=dynamic_cast<P_ExprVisitor*>(&v);
-	if (v2) v2->visit(*this);
-	else v.visit(*this);
+P_ExprIndex::P_ExprIndex(const P_ExprNode& expr, const P_ExprNode& row, const P_ExprNode& col, bool style) :
+		P_ExprNode(EXPR_WITH_IDX,expr,row,col), matlab_style(style) {
 }
 
-P_ExprIndex::P_ExprIndex(const ExprNode& expr, const ExprNode& index, bool style) : ExprBinaryOp(expr,index,expr.dim.index_dim()),
-		matlab_style(style) {
+P_ExprIter::P_ExprIter(const char* name) : P_ExprNode(ITER), name(strdup(name)) {
 
 }
 
-void P_ExprIndex::acceptVisitor(ExprVisitor& v) const {
-	P_ExprVisitor* v2=dynamic_cast<P_ExprVisitor*>(&v);
-	if (v2) v2->visit(*this);
-	else v.visit(*this);
-}
-
-ExprIter::ExprIter(const char* name) : ExprLeaf(Dim()), name(strdup(name)) {
-
-}
-
-ExprIter::~ExprIter() {
+P_ExprIter::~P_ExprIter() {
 	free((char*) name);
 }
 
-void ExprIter::acceptVisitor(ExprVisitor& v) const {
-	P_ExprVisitor* v2=dynamic_cast<P_ExprVisitor*>(&v);
-	if (v2) v2->visit(*this);
-	else v.visit(*this); // as a leaf. May happen, e.g., with ExprReset called by bin_size
-	// (for calculating the size of the DAG x[y])
+P_ExprSymbol::P_ExprSymbol(const char* name, const Dim& dim, const Domain& d) :
+				P_ExprNode(SYMBOL), name(strdup(name)), domain(dim), type(VAR) {
+
+	init_symbol_domain(name, domain, d);
 }
 
-ExprInfinity::ExprInfinity() : ExprLeaf(Dim::scalar()) {
+
+P_ExprSymbol::P_ExprSymbol(const char* name, const Dim& dim, const Interval& x) :
+		P_ExprNode(SYMBOL), name(strdup(name)), domain(dim), type(VAR) {
+	Domain tmp(Dim::scalar());
+	tmp.i()=x;
+	init_symbol_domain(name, domain, tmp);
+}
+
+P_ExprSymbol::~P_ExprSymbol() {
+	free((char*) name);
+}
+
+P_ExprConstant::P_ExprConstant(const Domain& d) : P_ExprNode(CST), value(d) {
 
 }
 
-void ExprInfinity::acceptVisitor(ExprVisitor& v) const {
-	P_ExprVisitor* v2=dynamic_cast<P_ExprVisitor*>(&v);
-	if (v2) v2->visit(*this);
-	else v.visit(*this); // as a leaf.
-}
-
-ExprConstantRef::ExprConstantRef(const Domain& d) : ExprLeaf(d.dim), value(d,true) {
+P_ExprApply::P_ExprApply(const Function& f, const Array<const P_ExprNode>* args) :
+		P_ExprNode(APPLY,*args), f(f) {
 
 }
 
-void ExprConstantRef::acceptVisitor(ExprVisitor& v) const {
-	P_ExprVisitor* v2=dynamic_cast<P_ExprVisitor*>(&v);
-	if (v2) v2->visit(*this);
-	else v.visit(*this); // as a leaf.
+const P_ExprNode* apply(Function& f, const P_ExprNode* expr) {
+	int n=f.nb_arg();
+	if (n!=1) {
+		stringstream s;
+		s << "function " << f.name << " expects 1 argument";
+		ibexerror(s.str());
+		return expr; // just to avoid a "warning control reaches end of non-void function"
+	} else {
+		try {
+			return new P_ExprNode(P_ExprNode::APPLY,*expr);
+		} catch(DimException& e) {
+			ibexerror(e.message());
+			return expr; // just to avoid a "warning control reaches end of non-void function"
+		}
+	}
 }
 
-//ExprEntity::ExprEntity(const Entity& e, int line) : ExprNode(0,1,e.dim), entity(e), line(line) {
-//
-//}
+const P_ExprNode* apply(Function& f, const vector<const P_ExprNode*>* args) {
+	unsigned int n=f.nb_arg();
+	if (n!=args->size()) {
+		stringstream s;
+		s << "function " << f.name << " expects " << n << " argument" << (n>1? "s":"");
+		ibexerror(s.str());
+		return (*args)[0]; // just to avoid a "warning control reaches end of non-void function"
+	} else {
+		try {
+			return new P_ExprNode(P_ExprNode::APPLY,*args);
+		} catch(DimException& e) {
+			ibexerror(e.message());
+			return (*args)[0]; // just to avoid a "warning control reaches end of non-void function"
+		}
+	}
+}
+
 
 } // end namespace parser
+
 } // end namespace ibex

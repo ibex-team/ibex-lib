@@ -19,6 +19,8 @@ namespace ibex {
 
 namespace parser {
 
+class P_ExprConstant;
+
 class Scope {
 
 public:
@@ -55,15 +57,15 @@ public:
 	/** Add a local variable in a function. */
 	void add_func_tmp_symbol(const char* tmp_symbol, const ExprNode* expr);
 
-	/** Add a var, a syb or an epr */
-	void add_entity(const char* id, const Entity* e);
+	/** Add a symbol. */
+	void add_entity(const char* id, const P_ExprSymbol* e);
 
 	/** Add an (uninitialized) iterator. */
 	void add_iterator(const char* id);
 
 	/*------------- get data associated to symbols in the current scope -----------*/
 	/* Return the constant */
-	const Domain& get_cst(const char* id) const;
+	const P_ExprConstant* get_cst(const char* id) const;
 
 	/* Return the function */
 	Function& get_func(const char* id);
@@ -74,8 +76,8 @@ public:
 	/* Return the expression bound to a tmp symbol in a function */
 	const ExprNode& get_func_tmp_expr(const char* id) const;
 
-	/* Return the entity attached to a symbol */
-	const Entity& get_entity(const char* id) const;
+	/* Return the symbol attached to a string */
+	const P_ExprSymbol& get_entity(const char* id) const;
 
 	/* Return the value of the iterator */
 	int get_iter_value(const char* id) const;
