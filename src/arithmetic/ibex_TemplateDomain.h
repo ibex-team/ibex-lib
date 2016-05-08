@@ -13,6 +13,7 @@
 #define __IBEX_TENSOR_H__
 
 #include "ibex_Dim.h"
+#include "ibex_DoubleIndex.h"
 
 namespace ibex {
 
@@ -78,6 +79,12 @@ public:
 	TemplateDomain(const TemplateDomain<D>& d, bool is_reference1=false);
 
 	/**
+	 * \brief Creates a domain (by copy) as a vector of other domains.
+	 *
+	 */
+	TemplateDomain(const Array<const TemplateDomain<D> >& args, bool row_vec);
+
+	/**
 	 * \brief Return the ith component of *this.
 	 *
 	 * Creates a domain that points to the ith component of the internal domain.
@@ -90,6 +97,13 @@ public:
 	 * Creates a domain that points to the ith component of the internal domain.
 	 */
 	const TemplateDomain operator[](int index) const;
+
+	/**
+	 * \brief Return the ith component of *this.
+	 *
+	 * Creates a domain that points to the ith component of the internal domain.
+	 */
+	const TemplateDomain operator[](const DoubleIndex& index) const;
 
 	/**
 	 * \brief Delete *this.
@@ -214,87 +228,123 @@ void load(Array<TemplateDomain<D> >& x, const Array<TemplateDomain<D> >& y, int 
 /** Add two domains. */
 template<class D>
 TemplateDomain<D> operator+(const TemplateDomain<D>& d1, const TemplateDomain<D>& d2);
+
 /** Multiply two domains. */
 template<class D>
 TemplateDomain<D> operator*(const TemplateDomain<D>& d1, const TemplateDomain<D>& d2);
+
 /** Subtract two domains. */
 template<class D>
 TemplateDomain<D> operator-(const TemplateDomain<D>& d1, const TemplateDomain<D>& d2);
+
 /** Divide two domains. */
 template<class D>
 TemplateDomain<D> operator/(const TemplateDomain<D>& d1, const TemplateDomain<D>& d2);
+
 /** Max of two domains. */
 template<class D>
 TemplateDomain<D> max(const TemplateDomain<D>& d1, const TemplateDomain<D>& d2);
+
 /** Min of two domains. */
 template<class D>
 TemplateDomain<D> min(const TemplateDomain<D>& d1, const TemplateDomain<D>& d2);
+
+/** Max of n domains. */
+template<class D>
+TemplateDomain<D> max(const Array<const TemplateDomain<D> >& args);
+
+/** Min of n domains. */
+template<class D>
+TemplateDomain<D> min(const Array<const TemplateDomain<D> >& args);
+
 /** Atan2 of two domains. */
 template<class D>
 TemplateDomain<D> atan2(const TemplateDomain<D>& d1, const TemplateDomain<D>& d2);
+
 /** Opposite of a domain. */
 template<class D>
 TemplateDomain<D> operator-(const TemplateDomain<D>& d1);
+
 /** Transpose. */
 template<class D>
 TemplateDomain<D> transpose(const TemplateDomain<D>& d1);
+
 /** Sign. */
 template<class D>
 TemplateDomain<D> sign(const TemplateDomain<D>& d1);
+
 /** Absolute value. */
 template<class D>
 TemplateDomain<D> abs(const TemplateDomain<D>& d);
+
 /** Raise a domain to the power \a p. */
 template<class D>
 TemplateDomain<D> pow(const TemplateDomain<D>& d, int p);
+
 /** Raise a domain to the power \a p. */
 template<class D>
 TemplateDomain<D> pow(const TemplateDomain<D>& d, const TemplateDomain<D>& p);
+
 /** Square of a domain. */
 template<class D>
 TemplateDomain<D> sqr(const TemplateDomain<D>& d);
+
 /** Square root of a domain. */
 template<class D>
 TemplateDomain<D> sqrt(const TemplateDomain<D>& d);
+
 /** Exponential. */
 template<class D>
 TemplateDomain<D> exp(const TemplateDomain<D>& d);
+
 /** Logarithm. */
 template<class D>
 TemplateDomain<D> log(const TemplateDomain<D>& d);
+
 /** Cosine. */
 template<class D>
 TemplateDomain<D> cos(const TemplateDomain<D>& d);
+
 /** Sine. */
 template<class D>
 TemplateDomain<D> sin(const TemplateDomain<D>& d);
+
 /** Tangent. */
 template<class D>
 TemplateDomain<D> tan(const TemplateDomain<D>& d);
+
 /** Arccosine. */
 template<class D>
 TemplateDomain<D> acos(const TemplateDomain<D>& d);
+
 /** Arcsine. */
 template<class D>
 TemplateDomain<D> asin(const TemplateDomain<D>& d);
+
 /** Arctangent. */
 template<class D>
 TemplateDomain<D> atan(const TemplateDomain<D>& d);
+
 /** Hyperbolic cosine. */
 template<class D>
 TemplateDomain<D> cosh(const TemplateDomain<D>& d);
+
 /** Hyperbolic sine. */
 template<class D>
 TemplateDomain<D> sinh(const TemplateDomain<D>& d);
+
 /** Hyperbolic tangent. */
 template<class D>
 TemplateDomain<D> tanh(const TemplateDomain<D>& d);
+
 /** Hyperbolic arccosine. */
 template<class D>
 TemplateDomain<D> acosh(const TemplateDomain<D>& d);
+
 /** Hyperbolic arcsine. */
 template<class D>
 TemplateDomain<D> asinh(const TemplateDomain<D>& d);
+
 /** Hyperbolic arctangent. */
 template<class D>
 TemplateDomain<D> atanh(const TemplateDomain<D>& d);
@@ -337,6 +387,43 @@ inline TemplateDomain<D>::TemplateDomain(const TemplateDomain<D>& d, bool is_ref
 		}
 	}
 }
+
+template<class D>
+inline TemplateDomain<D>::TemplateDomain(const Array<const TemplateDomain<D> >& arg, bool row_vec) : dim(Dim::scalar() /* TMP */), is_reference(false), domain(NULL) {
+
+	Array<const Dim> dims(arg.size());
+	for (int i=0; i<arg.size(); i++) {
+		dims.set_ref(i,arg[i].dim);
+	}
+
+	(Dim&) dim = vec_dim(dims,row_vec);
+	domain = new Domain(dim);
+
+	if (dim.is_matrix()) {
+		int r=0;
+		int c=0;
+		for (int i=0; i<arg.size(); i++) {
+			if (dims[i].is_matrix())
+				m().put(r,c,arg[i].m());
+			else
+				m().put(r,c,arg[i].v(),!row_vec);
+			if (row_vec)
+				c+=dims[i].nb_cols();
+			else
+				r+=dims[i].nb_rows();
+		}
+	} else {
+		int k=0;
+		for (int i=0; i<arg.size(); i++) {
+			if (dims[i].is_vector())
+				v().put(k,arg[i].v());
+			else
+				v()[k]=arg[i].i();
+			k+=dims[i].vec_size();
+		}
+	}
+}
+
 
 template<class D>
 inline TemplateDomain<D>::TemplateDomain() : dim(), is_reference(false), domain(NULL) {
@@ -856,6 +943,24 @@ template<class D>
 TemplateDomain<D> min(const TemplateDomain<D>& d1, const TemplateDomain<D>& d2)        { binary_func(min); }
 template<class D>
 TemplateDomain<D> atan2(const TemplateDomain<D>& d1, const TemplateDomain<D>& d2)      { binary_func(atan2); }
+
+template<class D>
+TemplateDomain<D> max(const Array<const TemplateDomain<D> >& args) {
+	TemplateDomain<D> _max(Dim::scalar());
+	_max.i()=args[0].i();
+	for (int i=1; i<args.size(); i++)
+		_max.i() = max(_max.i(),args[i].i());
+	return _max;
+}
+
+template<class D>
+TemplateDomain<D> min(const Array<const TemplateDomain<D> >& args) {
+	TemplateDomain<D> _min(Dim::scalar());
+	_min.i()=args[0].i();
+	for (int i=1; i<args.size(); i++)
+		_min.i() = min(_min.i(),args[i].i());
+	return _min;
+}
 
 template<class D>
 TemplateDomain<D> sign(const TemplateDomain<D>& d)  { unary_func(sign); }
