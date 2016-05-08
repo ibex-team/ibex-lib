@@ -16,6 +16,7 @@
 #include <iostream>
 #include <string.h>
 
+#include "ibex_DoubleIndex.h"
 #include "ibex_ExprVisitor.h"
 #include "ibex_Interval.h"
 #include "ibex_IntervalVector.h"
@@ -196,7 +197,7 @@ public:
 	const ExprNode& expr;
 
 	/** The index. */
-	const int index;
+	const DoubleIndex index;
 
 	/**
 	 * \brief Return true iff this node is an indexed symbol.
@@ -212,11 +213,11 @@ public:
 	 */
 	std::pair<const ExprSymbol*, int> symbol_shift() const;
 
-	static const ExprIndex& new_(const ExprNode& subexpr, int index);
+	static const ExprIndex& new_(const ExprNode& subexpr, const DoubleIndex& index);
 
 private:
 	/** Create an indexed expression. */
-	ExprIndex(const ExprNode& subexpr, int index);
+	ExprIndex(const ExprNode& subexpr, const DoubleIndex& index);
 
 };
 
@@ -1397,7 +1398,7 @@ inline Dim::Type ExprNode::type() const {
 inline const ExprIndex& ExprNode::operator[](int index) const {
 	return ExprIndex::new_(*this, index); }
 
-inline const ExprIndex& ExprIndex::new_(const ExprNode& subexpr, int index) {
+inline const ExprIndex& ExprIndex::new_(const ExprNode& subexpr, const DoubleIndex& index) {
 	return *new ExprIndex(subexpr,index); }
 
 inline bool ExprVector::row_vector() const {

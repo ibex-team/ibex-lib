@@ -66,10 +66,8 @@ void cleanup(const Array<const ExprNode>& expr, bool delete_symbols) {
 		}
 }
 
-ExprIndex::ExprIndex(const ExprNode& subexpr, int index)
-: ExprNode(subexpr.height+1, subexpr.size+1, subexpr.dim.index_dim()), expr(subexpr), index(index) {
-	if (index<0 || index>subexpr.dim.max_index())
-		throw DimException("index out of bounds");
+ExprIndex::ExprIndex(const ExprNode& subexpr, const DoubleIndex& index)
+: ExprNode(subexpr.height+1, subexpr.size+1, subexpr.dim.index_dim(index)), expr(subexpr), index(index) {
 	((ExprNode&) (subexpr)).fathers.add(*this);
 }
 
@@ -342,6 +340,10 @@ ExprAtan2::ExprAtan2(const ExprNode& left, const ExprNode& right) :
 			ExprBinaryOp(left,right,Dim()) {
 	if (!(left.type() == Dim::SCALAR)) throw DimException("\"atan2\" expects scalar arguments");
 	if (!(right.type() == Dim::SCALAR)) throw DimException("\"atan2\" expects scalar arguments");
+}
+
+ExprPower::ExprPower(const ExprNode& expr, int expon) : ExprUnaryOp(expr,expr.dim), expon(expon) {
+	if (!expr.dim.is_scalar()) throw DimException("cannot raise a non-scalar value to some power");
 }
 
 ExprUnaryOp::ExprUnaryOp(const ExprNode& subexpr, const Dim& dim) :

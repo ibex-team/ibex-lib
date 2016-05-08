@@ -18,6 +18,8 @@
 
 #include "ibex_Array.h"
 
+class DoubleIndex;
+
 namespace ibex {
 
 /**
@@ -111,8 +113,9 @@ public:
 	 * Compute the dimension of the expression obtained
 	 * by indexing an expression whose dimension is *this.
 	 */
-	Dim index_dim() const;
+//	Dim index_dim() const;
 
+	Dim index_dim(const DoubleIndex& idx) const;
 	/**
 	 * \brief Maximal index.
 	 *
