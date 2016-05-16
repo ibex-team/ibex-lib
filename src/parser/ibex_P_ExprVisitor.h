@@ -18,8 +18,10 @@ namespace ibex {
 namespace parser {
 
 class P_ExprNode;
-class P_ExprIndex;
-class P_ExprSymbol;
+class P_ExprWithIndex;
+class P_ExprPower;
+class P_ExprVarSymbol;
+class P_ExprCstSymbol;
 class P_ExprConstant;
 class P_ExprIter;
 class P_ExprApply;
@@ -41,12 +43,22 @@ public:
 	}
 
 	/** Visit a parser indexed expression. */
-	virtual void visit(const P_ExprIndex& e) {
+	virtual void visit(const P_ExprWithIndex& e) {
+		visit((const P_ExprNode&) e);
+	}
+
+	/** Visit a parser power expression. */
+	virtual void visit(const P_ExprPower& e) {
+		visit((const P_ExprNode&) e);
+	}
+
+	/** Visit a variable symbol expression. */
+	virtual void visit(const P_ExprVarSymbol& e) {
 		visit((const P_ExprNode&) e);
 	}
 
 	/** Visit a constant symbol expression. */
-	virtual void visit(const P_ExprSymbol& e) {
+	virtual void visit(const P_ExprCstSymbol& e) {
 		visit((const P_ExprNode&) e);
 	}
 

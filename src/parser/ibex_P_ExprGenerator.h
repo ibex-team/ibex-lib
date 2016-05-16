@@ -30,13 +30,18 @@ public:
 
 	const Domain& generate_cst(const P_ExprNode& y);
 
-	const ExprNode& generate(const Array<const P_ExprSymbol>& old_x, const Array<const ExprSymbol>& new_x, const P_ExprNode& y);
+	int generate_int(const P_ExprNode& y);
+
+	double generate_dbl(const P_ExprNode& y);
+
+	const ExprNode& generate(const Array<const ExprSymbol>& x, const P_ExprNode& y);
 
 protected:
-	void visit(const P_ExprNode&);
-	void visit(const P_ExprIndex&);
+	void generate();
 
-	void visit_power(const P_ExprNode&);
+	void visit(const P_ExprNode&);
+	void visit(const P_ExprWithIndex&);
+	void visit(const P_ExprPower&);
 
 	std::pair<int,int> visit_index_tmp(const Dim& dim, const P_ExprNode& idx, bool matlab_style);
 	DoubleIndex visit_index(const Dim& dim, const P_ExprNode& idx1, bool matlab_style);

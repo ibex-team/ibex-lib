@@ -31,8 +31,9 @@ void P_ExprPrinter::print_arg_list(const P_ExprNode& e, bool in_row=true) {
 
 void P_ExprPrinter::visit(const P_ExprNode& e) {
 	switch(e.op) {
-	case P_ExprNode::INF:			os << "oo";     break;
-	case P_ExprNode::SYMBOL: 		os << ((const P_ExprSymbol&) e).name; break;
+	case P_ExprNode::INFTY:			os << "oo";     break;
+	case P_ExprNode::VAR_SYMBOL: 	os << ((const P_ExprVarSymbol&) e).name; break;
+	case P_ExprNode::CST_SYMBOL: 	os << ((const P_ExprCstSymbol&) e).name; break;
 	case P_ExprNode::CST: 			e.acceptVisitor(*this); break;
 	case P_ExprNode::ITER: 			os << ((const P_ExprIter&) e).name; break;
 	case P_ExprNode::IDX:			visit(e.arg[0]); break;
@@ -71,10 +72,13 @@ void P_ExprPrinter::visit(const P_ExprNode& e) {
 	case P_ExprNode::ACOSH:         os << "acosh"; print_arg_list(e);  break;
 	case P_ExprNode::ASINH:         os << "asinh"; print_arg_list(e);  break;
 	case P_ExprNode::ATANH:         os << "atanh"; print_arg_list(e);  break;
+	case P_ExprNode::INF:           os << "inf";   print_arg_list(e);  break;
+	case P_ExprNode::MID:           os << "mid";   print_arg_list(e);  break;
+	case P_ExprNode::SUP:           os << "sup";   print_arg_list(e);  break;
 	}
 }
 
-void P_ExprPrinter::visit(const P_ExprIndex& e) {
+void P_ExprPrinter::visit(const P_ExprWithIndex& e) {
 	visit(e.arg[0]);
 	os << (e.matlab_style? '(' : '[');
 	visit(e.arg[1]);

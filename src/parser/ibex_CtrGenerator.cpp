@@ -21,17 +21,15 @@ using namespace std;
 namespace ibex {
 namespace parser {
 
-void CtrGenerator::generate(const Array<const ExprSymbol>& _src_vars, const P_ConstraintList& src,
-		std::vector<NumConstraint*>& dest) {
-	src_vars = &_src_vars;
-	ctrs = &dest;
+void CtrGenerator::generate(std::stack<Scope>& scopes, const P_Source& source,
+		std::vector<NumConstraint*>& dest) : scopes(scopes), source(source), ctrs(dest) {
 
 	assert(dest.empty());
 
 	scopes.push(Scope()); // a fresh new scope! (needed otherwise scopes.top() is NULL -> fix issue #36)
 
-	visit(src);
-
+	visit(*source.ctrs);
+*
 	scopes.pop();
 }
 
@@ -40,23 +38,26 @@ void CtrGenerator::visit(const P_NumConstraint& c) {
 }
 
 void CtrGenerator::visit(const P_OneConstraint& c) {
-	int n=src_vars->size();
 
-	Array<const ExprSymbol> dest_vars(n);
-	varcopy(*src_vars,dest_vars);
+	// create the nodes for the variables
+	int n=source.vars.size();
+	Array<const ExprSymbol> vars(n);
+	for (int i=0; i<n; i++) {
+		vars.set_ref(i,ExprSymbol::new_(source.vars[i], scopes.top().get_var(source.vars[i]).second->dim));
+	}
 
-	const ExprNode& e=ExprGenerator(scopes.top()).generate(*src_vars, dest_vars, c.expr);
+	const ExprNode& e=ExprGenerator(scopes.top()).generate(vars, c.expr);
 
 //	Array<const ExprSymbol> dest_vars2(n);
-//	varcopy(*src_vars,dest_vars2);
+//	varcopy(vars,dest_vars2);
 //
-//	const ExprNode& e2=Expr2DAG().transform(dest_vars, (const Array<const ExprNode>&) dest_vars2, e);
+//	const ExprNode& e2=Expr2DAG().transform(vars, (const Array<const ExprNode>&) dest_vars2, e);
 //
 //	cleanup(e,true);
 
 //	ctrs->push_back(new NumConstraint(dest_vars2, ExprCtr(e2,c.op)));
 
-	ctrs->push_back(new NumConstraint(dest_vars, ExprCtr(e,c.op)));
+	ctrs.push_back(new NumConstraint(vars, ExprCtr(e,c.op)));
 }
 
 void CtrGenerator::visit(const P_ConstraintList& list) {
@@ -68,8 +69,8 @@ void CtrGenerator::visit(const P_ConstraintList& list) {
 void CtrGenerator::visit(const P_ConstraintLoop& loop) {
 	const char* name     = loop.iter;
 
-	int begin=ConstantGenerator(scopes.top()).eval_integer(loop.first_value); //scope.it_first_value(name);
-	int end=ConstantGenerator(scopes.top()).eval_integer(loop.last_value); //scope.it_last_value(name);
+	int begin=ExprGenerator(scopes.top()).generate_int(loop.first_value);
+	int end=ExprGenerator(scopes.top()).generate_int(loop.last_value);
 
 	if (!scopes.empty())
 		scopes.push(scopes.top());

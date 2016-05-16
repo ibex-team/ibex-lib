@@ -16,19 +16,19 @@ namespace ibex {
 
 namespace parser {
 
-P_OneConstraint::P_OneConstraint(const P_ExprNode& left, CmpOp op, const P_ExprNode& right) :
-		expr(right.is_zero()? left : left-right), op(op) {
+P_OneConstraint::P_OneConstraint(const P_ExprNode* left, CmpOp op, const P_ExprNode* right) :
+		expr((right->lab->is_const() && right->lab->domain().is_zero())? *left : (*left)-(*right)), op(op) {
 
-	if (right.is_zero()) {
-		delete &right;
+	if (right->lab->is_const() && right->lab->domain().is_zero()) {
+		delete right;
 	}
 }
 
 P_OneConstraint::~P_OneConstraint() {
-	cleanup(expr,false); // will not delete symbols
+	delete expr;
 }
 
-P_ConstraintList::P_ConstraintList(vector<P_NumConstraint*>& ctrs) : ctrs(ctrs) {
+P_ConstraintList::P_ConstraintList(vector<P_NumConstraint*>* _ctrs) : ctrs(*_ctrs) {
 
 }
 
@@ -39,14 +39,14 @@ P_ConstraintList::~P_ConstraintList() {
 	delete &ctrs;
 }
 
-P_ConstraintLoop::P_ConstraintLoop(const char* iter, const P_ExprNode& first_value, const P_ExprNode& last_value, vector<P_NumConstraint*>& ctrs) :
-		 iter(strdup(iter)), first_value(first_value), last_value(last_value), ctrs(ctrs) {
+P_ConstraintLoop::P_ConstraintLoop(const char* iter, const P_ExprNode* first_value, const P_ExprNode* last_value, vector<P_NumConstraint*>* ctrs) :
+		 iter(strdup(iter)), first_value(*first_value), last_value(*last_value), ctrs(*ctrs) {
 
 }
 
 P_ConstraintLoop::~P_ConstraintLoop() {
-	cleanup(first_value,true); // false or true (there is no symbols)
-	cleanup(last_value,true);
+	delete first_value;
+	delete last_value;
 }
 
 } // end namespace parser

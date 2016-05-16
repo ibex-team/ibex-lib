@@ -20,7 +20,7 @@ namespace parser {
 
 class MainGenerator {
 public:
-	void generate(const P_Source& source, System& result);
+	void generate(Scope& scope, const P_Source& source, System& result);
 };
 
 } // end namespace parser

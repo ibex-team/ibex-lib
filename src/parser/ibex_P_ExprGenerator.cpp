@@ -12,11 +12,94 @@
 #include "ibex_ConstantGenerator.h"
 #include "ibex_SyntaxError.h"
 #include "ibex_Exception.h"
+#include "ibex_Expr.h"
 
 using namespace std;
 
 namespace ibex {
+
 namespace parser {
+
+Label::~Label() { }
+
+class LabelNode : public Label {
+public:
+	LabelNode(const ExprNode* node) : _node(node) { }
+
+	virtual const ExprNode& node() const { return *_node; }
+
+	virtual bool is_const() const { return false; }
+
+	virtual const Domain& domain() const {
+		throw SyntaxError("Unexpected symbol inside constant expression");
+	}
+
+	virtual const Dim& dim() const { return _node->dim; }
+
+	const ExprNode* _node;
+};
+
+class LabelConst : public Label {
+public:
+	// do not use POS_INFINITY to avoid confusion
+	typedef enum { NEG_INF=0, POS_INF=1, OTHER=2 } number_type;
+
+	// This constant cannot be represented by a Domain
+	// object because (+oo,+oo) is automatically replaced by the empty set.
+	static LabelConst pos_infinity() {
+		return LabelConst(POS_INF);
+	}
+
+	static LabelConst neg_infinity() {
+		return LabelConst(NEG_INF);
+	}
+
+	LabelConst(int v) : _domain(Dim::scalar()), num_type(OTHER), cst(NULL) {
+		_domain.i()=Interval(v,v);
+	}
+
+	LabelConst(const Interval& itv) : _domain(Dim::scalar()), num_type(OTHER), cst(NULL) {
+		_domain.i()=itv;
+	}
+
+	LabelConst(const Domain& d, bool ref=false) : _domain(d,ref), num_type(OTHER), cst(NULL) {
+
+	}
+
+	// Label of a constant symbol.
+	LabelConst(std::pair<const ExprConstant*, const Domain*>& p) : _domain(*p.second,true), num_type(OTHER), cst(p.first) {
+
+	}
+
+	virtual const ExprNode& node() const {
+		if (!node) {
+			if (num_type!=OTHER)
+				throw SyntaxError("Unexpected infinity symbol \"oo\"");
+
+			// The final node domain is *not* a reference to
+			// the constant domain: all objects created
+			// during parsing can be safely deleted
+			node = new ExprConstant::new_(_domain, false);
+		}
+		return *node;
+	}
+
+	virtual bool is_const() const { return true; }
+
+	virtual const Domain& domain() const { return _domain; }
+
+	virtual const Dim& dim() const { return _domain.dim; }
+
+	Domain _domain;
+	number_type num_type;
+	const ExprConstant* cst; // only built if necessary
+
+private:
+	LabelConst(number_type num_type) : _domain(Dim::scalar()), num_type(num_type), cst(NULL) {
+		_domain.set_empty();
+	}
+
+};
 
 int to_integer(const Domain& d) {
 	assert(d.dim.is_scalar());
@@ -28,13 +111,6 @@ int to_integer(const Domain& d) {
 
 double to_double(const Domain& d) {
 	assert(d.dim.is_scalar());
-
-//	switch(number_type) {
-//	case NEG_INF: return NEG_INFINITY;
-//	case POS_INF: return POS_INFINITY;
-//	default:      return to_double(d); //eval(expr));
-//	}
-//
 	// WARNING: this is quite unsafe. But
 	// requiring d.i().is_degenerated() is wrong,
 	// the result of a calculus with degenerated intervals
@@ -53,12 +129,40 @@ const Domain& ExprGenerator::generate_cst(const P_ExprNode& y) {
 	return y.lab->domain();
 }
 
-const ExprNode& ExprGenerator::generate(const Array<const P_ExprSymbol>& old_x, const Array<const ExprSymbol>& new_x, const P_ExprNode& y) {
+int ExprGenerator::generate_int(const P_ExprNode& y) {
+	return to_integer(generate_cst(y));
+}
 
-	for (int i=0; i<old_x.size(); i++) {
-		old_x[i].lab = &new_x[i];
+double ExprGenerator::generate_dbl(const P_ExprNode& y) {
+	return to_double(generate_cst(y));
+}
+
+const ExprNode& ExprGenerator::generate(const Array<const ExprSymbol>& x, const P_ExprNode& y) {
+
+	for (int i=0; i<n; i++) {
+		scope.bind_var_node(scope.vars[i], x[i]);
 	}
+
+	// create the nodes for the constants symbols
+	// by default, all constants are used (see destruction below)
+	int m=scope.cst.size();
+	Array<const ExprConstant> csts(m);
+	for (int i=0; i<m; i++) {
+		const char* id=scope.cst[i];
+		// Domains passed by copy
+		csts.set_ref(i,ExprConstant::new_(*scope.get_cst(id).second));
+		scope.bind_cst_node(id, csts[i]);
+	}
+
 	visit(y);
+
+	// destroy unused constants
+	for (int i=0; i<m; i++) {
+		if (csts[i].fathers.is_empty() // no father
+				&& (&csts[i]!=&(y.lab->node())) // and not root node
+		)
+			delete &csts[i];
+	}
 
 	return y.lab->node();
 }
@@ -67,14 +171,8 @@ void ExprGenerator::visit(const P_ExprNode& e) {
 
 	if (e.lab!=NULL) return;
 
-	if (e.op==P_ExprNode::POWER) {
-		visit_power(e);
-		return;
-	}
-	if (e.op==P_ExprNode::EXPR_WITH_IDX) {
-		e.acceptVisitor(*this);
-		return;
-	} if (e.op==P_ExprNode::SYMBOL) {
+	if (e.op==P_ExprNode::POWER ||
+		e.op==P_ExprNode::EXPR_WITH_IDX) {
 		e.acceptVisitor(*this);
 		return;
 	}
@@ -84,7 +182,7 @@ void ExprGenerator::visit(const P_ExprNode& e) {
 	bool all_cst=true;
 	for (int i=0; i<e.arg.size(); i++) {
 		visit(e.arg[i]);
-		all_cst = all_cst && (e.arg[i].lab->type()==Label::CONST);
+		all_cst = all_cst && (e.arg[i].lab->is_const());
 		arg_cst.set_ref(i,e.arg[i].lab->domain());
 	}
 
@@ -102,15 +200,17 @@ void ExprGenerator::visit(const P_ExprNode& e) {
 			default:
 				e.lab = new LabelConst(-arg_cst[0]);
 			}
+			return;
 		}
 
 		try {
 			switch(e.op) {
-			case P_ExprNode::INF:    e.lab=new LabelConst::pos_infinity(); break;
-			case P_ExprNode::SYMBOL: assert(false); /* impossible */ break;
-			case P_ExprNode::CST:    e.lab=new LabelConst(((P_ExprConstant&) e).value); break; //TODO: ref??
-			case P_ExprNode::ITER:   e.lab=new LabelConst(scope.get_iter_value(((P_ExprIter&) e).name)); break;
-			case P_ExprNode::IDX:	 e.lab=new LabelConst(arg_cst[0]); break; // TODO: should be ref??
+			case P_ExprNode::INFTY:      e.lab=new LabelConst::pos_infinity(); break;
+			case P_ExprNode::VAR_SYMBOL: e.lab=new LabelNode(scope.get_entity(((P_ExprVarSymbol&) e).name).first); break;
+			case P_ExprNode::CST_SYMBOL: e.lab=new LabelConst(scope.get_cst(((P_ExprCstSymbol&) e).name),true); break;
+			case P_ExprNode::CST:        e.lab=new LabelConst(((P_ExprConstant&) e).value,true); break;
+			case P_ExprNode::ITER:       e.lab=new LabelConst(scope.get_iter_value(((P_ExprIter&) e).name)); break;
+			case P_ExprNode::IDX:
 			case P_ExprNode::IDX_RANGE:
 			case P_ExprNode::IDX_ALL:
 			case P_ExprNode::EXPR_WITH_IDX:  assert(false); /* impossible */ break;
@@ -146,6 +246,15 @@ void ExprGenerator::visit(const P_ExprNode& e) {
 			case P_ExprNode::ACOSH:   e.lab=new LabelConst(acosh(arg_cst[0])); break;
 			case P_ExprNode::ASINH:   e.lab=new LabelConst(asinh(arg_cst[0])); break;
 			case P_ExprNode::ATANH:   e.lab=new LabelConst(atanh(arg_cst[0])); break;
+			case P_ExprNode::INF:
+				if (!arg_cst[0].dim.is_scalar()) throw DimException("\"inf\" expects an interval as argument");
+				e.lab=new LabelConst(arg_cst[0].i().lb()); break;
+			case P_ExprNode::MID:
+				if (!arg_cst[0].dim.is_scalar()) throw DimException("\"mid\" expects an interval as argument");
+				e.lab=new LabelConst(arg_cst[0].i().mid()); break;
+			case P_ExprNode::SUP:
+				if (!arg_cst[0].dim.is_scalar()) throw DimException("\"sup\" expects an interval as argument");
+				e.lab=new LabelConst(arg_cst[0].i().ub()); break;
 			}
 		} catch(DimException& e) {
 			throw SyntaxError(e.message());
@@ -155,19 +264,18 @@ void ExprGenerator::visit(const P_ExprNode& e) {
 
 	Array<const ExprNode> arg_node(e.arg.size());
 
-	bool all_cst=true;
 	for (int i=0; i<e.arg.size(); i++) {
 		// may force constants to become nodes
 		arg_node.set_ref(i,e.arg[i].lab->node());
 	}
 
-	//throw SyntaxError("Unexpected infinity symbol \"oo\""); break;
-	ExprNode* node;
+	const ExprNode* node;
 
 	try {
 		switch(e.op) {
-		case P_ExprNode::INF:
-		case P_ExprNode::SYMBOL:
+		case P_ExprNode::INFTY:
+		case P_ExprNode::VAR_SYMBOL:
+		case P_ExprNode::CST_SYMBOL:
 		case P_ExprNode::CST:
 		case P_ExprNode::ITER:
 		case P_ExprNode::IDX:
@@ -206,6 +314,9 @@ void ExprGenerator::visit(const P_ExprNode& e) {
 		case P_ExprNode::ACOSH:  node=&acosh(arg_node[0]); break;
 		case P_ExprNode::ASINH:  node=&asinh(arg_node[0]); break;
 		case P_ExprNode::ATANH:  node=&atanh(arg_node[0]); break;
+		case P_ExprNode::INF:    throw SyntaxError("\"inf\" operator requires constant interval"); break;
+		case P_ExprNode::MID:    throw SyntaxError("\"mid\" operator requires constant interval"); break;
+		case P_ExprNode::SUP:    throw SyntaxError("\"sup\" operator requires constant interval"); break;
 		}
 		e.lab = new LabelNode(node);
 	} catch(DimException& e) {
@@ -213,7 +324,7 @@ void ExprGenerator::visit(const P_ExprNode& e) {
 	}
 }
 
-void ExprGenerator::visit_power(const P_ExprNode& e) {
+void ExprGenerator::visit(const P_ExprPower& e) {
 
 	visit(e.arg[0]);
 	visit(e.arg[1]);
@@ -229,7 +340,7 @@ void ExprGenerator::visit_power(const P_ExprNode& e) {
 	Interval itv_right;
 	Interval itv_left;
 
-	if (right.type()==Label::CONST) {
+	if (right.is_const()) {
 		if (!right.domain().dim.is_scalar()) throw SyntaxError("exponent must be scalar");
 
 		right_type=IBEX_INTERVAL;
@@ -252,7 +363,7 @@ void ExprGenerator::visit_power(const P_ExprNode& e) {
 		right_type=IBEX_EXPRNODE;
 
 
-	if (left.type()==Label::CONST) {
+	if (left.is_const()) {
 		left_type=IBEX_INTERVAL;
 		itv_left=left.domain().i();
 		//delete cl; // LEFT will no longer be used // not now (see comment in ExprCopy.h)
@@ -271,7 +382,7 @@ void ExprGenerator::visit_power(const P_ExprNode& e) {
 	}  else {
 		if (right_type==IBEX_INTEGER) {
 			e.lab=new LabelNode(&pow(left.node(),int_right));
-		} else if (right_type==IBEX_INTERVAL) { // do not forget this case (RIGHT does not exist anymore)
+		} else if (right_type==IBEX_INTERVAL) {
 			e.lab=new LabelNode(&exp(itv_right * log(left.node())));
 		} else {
 			e.lab=new LabelNode(&exp(right.node() * log(left.node())));
@@ -284,17 +395,23 @@ pair<int,int> ExprGenerator::visit_index_tmp(const Dim& dim, const P_ExprNode& i
 
 	switch(idx.op) {
 	case P_ExprNode::IDX_ALL :
+		assert(idx.arg.size()==0);
 		i1=i2=-1;
 		break;
 	case P_ExprNode::IDX_RANGE :
+		assert(idx.arg.size()==2);
 		visit(idx.arg[0]);
 		visit(idx.arg[1]);
+		assert(idx.arg[0].lab->is_const());
+		assert(idx.arg[1].lab->is_const());
 		i1=to_integer(idx.arg[0].lab->domain());
 		i2=to_integer(idx.arg[1].lab->domain());
 		if (matlab_style) { i1--; i2--; }
 		break;
 	case P_ExprNode::IDX :
+		assert(idx.arg.size()==1);
 		visit(idx.arg[0]);
+		assert(idx.arg[0].lab->is_const());
 		i1=i2=i1=to_integer(idx.arg[0].lab->domain());
 		if (matlab_style) { i1--; i2--; }
 		break;
@@ -319,9 +436,10 @@ DoubleIndex ExprGenerator::visit_index(const Dim& dim, const P_ExprNode& idx1, b
 	} else if (p.second==p.first) {
 		if (dim.is_matrix())
 			return DoubleIndex::one_row(dim,p.first);
-		// A single index i with a row vector
-		// gives the ith column.
+
 		else
+			// A single index i with a row vector
+			// gives the ith column.
 			return DoubleIndex::one_col(dim,p.first);
 	} else {
 		if (dim.is_matrix())
@@ -360,33 +478,23 @@ DoubleIndex ExprGenerator::visit_index(const Dim& dim, const P_ExprNode& idx1, c
 	}
 }
 
-void ExprGenerator::visit(const P_ExprIndex& e) {
+void ExprGenerator::visit(const P_ExprWithIndex& e) {
 	visit(e.arg[0]);
 
 	Label& expr=(*(e.arg[0].lab));
 
 	DoubleIndex idx=e.arg.size()==2?
-			visit_index(expr.node().dim, e.arg[1], e.matlab_style)
+			visit_index(expr.dim(), e.arg[1], e.matlab_style)
 			:
-			visit_index(expr.node().dim, e.arg[1], e.arg[2], e.matlab_style);
+			visit_index(expr.dim(), e.arg[1], e.arg[2], e.matlab_style);
 
-	if (expr.type()==Label::CONST) {
-		e.lab = new LabelConst(expr.domain()[idx]); // TODO: should be ref?
+	if (expr.is_const()) {
+		e.lab = new LabelConst(expr.domain()[idx],true);
 	} else {
 		e.lab = new LabelNode(new ExprIndex(expr.node(),idx));
 	}
 }
 
-void ConstantGenerator::visit(const P_ExprSymbol& x) {
-	if (x.type!=P_ExprSymbol::SYB) {
-		// only possible if called from generate_cst(..)
-		stringstream s;
-		s << "Cannot use symbol\"" << x.name << "\" inside a constant expression";
-		throw SyntaxError(s.str());
-	} else {
-		x.lab = new LabelConst(x.domain); // TOOD: reference
-	}
-}
 
 } // end namespace parser
 } // end namespace ibex
