@@ -10,9 +10,9 @@
  * ---------------------------------------------------------------------------- */
 
 #include <sstream>
-#include "ibex_Dim.h"
-#include "ibex_DimException.h"
 #include <cassert>
+
+#include "ibex_Dim.h"
 #include "ibex_DoubleIndex.h"
 
 using std::stringstream;

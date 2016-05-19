@@ -120,7 +120,10 @@ public:
 	Dim::Type type() const;
 
 	/** Indexing */
-	const ExprIndex& operator[](int index) const;
+	const ExprIndex& operator[](int i) const;
+
+	/** Indexing */
+	const ExprIndex& operator[](const DoubleIndex& index) const;
 
 	/** Create an equality constraint expr=expr. */
 	const ExprCtr& operator=(const ExprNode& right) const;
@@ -202,7 +205,7 @@ public:
 	/**
 	 * \brief Return true iff this node is an indexed symbol.
 	 *
-	 * E.g. x[0], x[0][1], x[0][1][0] are indexed symbols, (x+y)[0] is not.
+	 * E.g. x[0], x[0][1] are indexed symbols, (x+y)[0] is not.
 	 */
 	bool indexed_symbol() const;
 
@@ -979,7 +982,7 @@ public:
 	const int expon;
 
 private:
-	ExprPower(const ExprNode& expr, int expon) : ExprUnaryOp(expr,expr.dim), expon(expon) { }
+	ExprPower(const ExprNode& expr, int expon);
 	ExprPower(const ExprPower&); // copy constructor forbidden
 };
 
@@ -1395,7 +1398,10 @@ inline bool ExprNode::is_zero() const {
 inline Dim::Type ExprNode::type() const {
 	return dim.type(); }
 
-inline const ExprIndex& ExprNode::operator[](int index) const {
+inline const ExprIndex& ExprNode::operator[](int i) const {
+	return ExprIndex::new_(*this, DoubleIndex::one_index(dim, i)); }
+
+inline const ExprIndex& ExprNode::operator[](const DoubleIndex& index) const {
 	return ExprIndex::new_(*this, index); }
 
 inline const ExprIndex& ExprIndex::new_(const ExprNode& subexpr, const DoubleIndex& index) {

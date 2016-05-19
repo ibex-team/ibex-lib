@@ -175,6 +175,9 @@ public:
 	 */
 	void clear();
 
+	/** Return true if either 0, the null vector or the null matrix. */
+	bool is_zero() const;
+
 private:
 
 	TemplateDomain();
@@ -397,7 +400,13 @@ inline TemplateDomain<D>::TemplateDomain(const Array<const TemplateDomain<D> >& 
 	}
 
 	(Dim&) dim = vec_dim(dims,row_vec);
-	domain = new Domain(dim);
+
+	switch (dim.type()) {
+	case Dim::SCALAR:       domain = new typename D::SCALAR(); break;
+	case Dim::ROW_VECTOR:
+	case Dim::COL_VECTOR:   domain = new typename D::VECTOR(dim.vec_size()); break;
+	case Dim::MATRIX:       domain = new typename D::MATRIX(dim.nb_rows(),dim.nb_cols()); break;
+	}
 
 	if (dim.is_matrix()) {
 		int r=0;
@@ -412,7 +421,7 @@ inline TemplateDomain<D>::TemplateDomain(const Array<const TemplateDomain<D> >& 
 			else
 				r+=dims[i].nb_rows();
 		}
-	} else {
+	} else if (dim.is_vector()) {
 		int k=0;
 		for (int i=0; i<arg.size(); i++) {
 			if (dims[i].is_vector())
@@ -421,6 +430,8 @@ inline TemplateDomain<D>::TemplateDomain(const Array<const TemplateDomain<D> >& 
 				v()[k]=arg[i].i();
 			k+=dims[i].vec_size();
 		}
+	} else {
+		this->i()=arg[0].i();
 	}
 }
 
@@ -578,6 +589,16 @@ void TemplateDomain<D>::clear() {
 	case Dim::ROW_VECTOR:
 	case Dim::COL_VECTOR: v().clear(); break;
 	case Dim::MATRIX:     m().clear(); break;
+	}
+}
+
+template<class D>
+bool TemplateDomain<D>::is_zero() const {
+	switch(dim.type()) {
+	case Dim::SCALAR:     return i()==Interval::ZERO; break;
+	case Dim::ROW_VECTOR:
+	case Dim::COL_VECTOR: return v().is_zero(); break;
+	case Dim::MATRIX:     return m().is_zero(); break;
 	}
 }
 
@@ -924,13 +945,13 @@ TemplateDomain<D> pow(const TemplateDomain<D>& d1, const TemplateDomain<D>& p) {
 /* ======================== pure scalar functions ===================== */
 
 #define unary_func(f) \
-	assert(d.dim.is_scalar()); \
+	if (!d.dim.is_scalar()) throw DimException("Scalar argument expected"); \
 	TemplateDomain<D> d2(Dim::scalar()); \
 	d2.i()=f(d.i()); \
 	return d2;
 
 #define binary_func(f) \
-	assert(d1.dim.is_scalar() && d2.dim.is_scalar()); \
+	if(!d1.dim.is_scalar() || !d2.dim.is_scalar()) throw DimException("Scalar arguments expected"); \
 	TemplateDomain<D> d3(Dim::scalar()); \
 	d3.i()=f(d1.i(),d2.i()); \
 	return d3;

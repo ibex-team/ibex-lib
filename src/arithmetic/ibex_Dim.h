@@ -17,10 +17,11 @@
 #include <cassert>
 
 #include "ibex_Array.h"
-
-class DoubleIndex;
+#include "ibex_Exception.h"
 
 namespace ibex {
+
+class DoubleIndex;
 
 /**
  * \ingroup arithmetic
@@ -139,7 +140,6 @@ public:
 	Dim(int dim2, int dim3);
 
 private:
-
 	/**
 	 * The number of i such that x[i][0] or x[i] is a valid
 	 * expression, where x is resp. a matrix
@@ -167,6 +167,25 @@ public:
 	bool cst_vec;
 };
 
+/**
+ * \ingroup arithmetic
+ *
+ * \brief Thrown when dimensions in matrix/vector operations are not correct
+ *
+ */
+class DimException : public Exception {
+public:
+
+	DimException(std::string message1) : msg(message1) { }
+
+	/**
+	 * \brief Get the message of this exception
+	 */
+	std::string message() { return msg; }
+
+private:
+	std::string msg;
+};
 
 /** \ingroup arithmetic */
 /*@{*/

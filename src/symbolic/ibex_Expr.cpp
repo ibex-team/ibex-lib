@@ -10,7 +10,6 @@
  * ---------------------------------------------------------------------------- */
 
 #include "ibex_Expr.h"
-#include "ibex_DimException.h"
 #include "ibex_Function.h"
 #include "ibex_ExprPrinter.h"
 #include "ibex_ExprSubNodes.h"
@@ -100,7 +99,14 @@ pair<const ExprSymbol*, int> ExprIndex::symbol_shift() const {
 		}
 	}
 
-	return pair<const ExprSymbol*, int>(symbol, expr_shift + index*dim.size());
+	/**
+	 *
+	 * TODO
+	 * TODO
+	 * TODO
+	 *
+	 */
+	return pair<const ExprSymbol*, int>(symbol, expr_shift + 0*dim.size());
 }
 
 ExprNAryOp::ExprNAryOp(const Array<const ExprNode>& _args, const Dim& dim) :
@@ -267,7 +273,12 @@ ExprConstant::ExprConstant(const IntervalMatrix& m)
   : ExprLeaf(Dim::matrix(m.nb_rows(),m.nb_cols())),
     value(Dim::matrix(m.nb_rows(),m.nb_cols())) {
 
-	value.m() = m;
+	switch(dim.type()) { // the matrix may actually be a vector or a scalar!
+	case Dim::SCALAR:     value.i()=m[0][0]; break;
+	case Dim::ROW_VECTOR: value.v()=m.row(0); break;
+	case Dim::COL_VECTOR: value.v()=m.col(0); break;
+	default: value.m() = m;
+	}
 }
 
 Matrix::operator const ExprConstant&() const {
@@ -282,13 +293,7 @@ ExprConstant::ExprConstant(const Domain& d, bool reference) : ExprLeaf(d.dim), v
 }
 
 bool ExprConstant::is_zero() const {
-	switch(dim.type()) {
-	case Dim::SCALAR:     return value.i()==Interval::ZERO; break;
-	case Dim::ROW_VECTOR:
-	case Dim::COL_VECTOR: return value.v().is_zero(); break;
-	case Dim::MATRIX:     return value.m().is_zero(); break;
-	default:              return false;
-	}
+	return value.is_zero();
 }
 
 const ExprConstant& ExprConstant::copy() const {

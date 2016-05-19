@@ -13,12 +13,13 @@
 #define __IBEX_INDEX_H__
 
 #include <math.h>
+#include "ibex_Dim.h"
 
 namespace ibex {
 
 class DoubleIndex {
 public:
-	static DoubleIndex one_elt(const Dim& d, int j, int j);
+	static DoubleIndex one_elt(const Dim& d, int i, int j);
 	static DoubleIndex one_row(const Dim& d, int i);
 	static DoubleIndex one_col(const Dim& d, int j);
 	static DoubleIndex rows(const Dim& d, int first_row, int last_row);
@@ -27,6 +28,12 @@ public:
 	static DoubleIndex subcol(const Dim& d, int first_row, int last_row, int j);
 	static DoubleIndex submatrix(const Dim& d, int first_row, int last_row, int first_col, int last_col);
 	static DoubleIndex all(const Dim& d);
+
+	/** Basic index system "expr[i]" */
+	static DoubleIndex one_index(const Dim& d, int i);
+
+	/** \brief Uninitialized object */
+	DoubleIndex();
 
 	DoubleIndex(const DoubleIndex&);
 	long long hash() const;
@@ -42,6 +49,8 @@ public:
 	bool one_col() const;
 	bool all_rows() const;
 	bool all_cols() const;
+	bool operator==(const DoubleIndex& idx) const;
+	bool operator!=(const DoubleIndex& idx) const;
 
 private:
 	DoubleIndex(const Dim& d, int first_row, int last_row, int first_col, int last_col);
@@ -87,6 +96,18 @@ inline DoubleIndex DoubleIndex::all(const Dim& d) {
 	return rows(d,0,d.nb_rows()-1);
 }
 
+inline DoubleIndex DoubleIndex::one_index(const Dim& dim, int i) {
+	if (dim.is_matrix())
+		return one_row(dim,i);
+	else
+		// A single index i with a row vector
+		// gives the ith column.
+		return one_col(dim,i);
+}
+
+inline DoubleIndex::DoubleIndex() : r1(-1), r2(-1), c1(-1), c2(-1), _all_rows(false), _all_cols(false) {
+}
+
 inline DoubleIndex::DoubleIndex(const Dim& d, int i1, int i2, int j1, int j2) :
 	r1(i2), r2(i2), c1(j1), c2(j2),
 	_all_rows(i1==0 && i2==d.nb_rows()-1),
@@ -118,8 +139,14 @@ inline int DoubleIndex::nb_rows() const   { return r2-r1+1; }
 inline int DoubleIndex::nb_cols() const   { return c2-c1+1; }
 inline bool DoubleIndex::one_row() const  { return r1==r2; }
 inline bool DoubleIndex::one_col() const  { return c1==c2; }
+class DoubleIndex;
+
 inline bool DoubleIndex::all_rows() const { return _all_rows; }
 inline bool DoubleIndex::all_cols() const { return _all_cols; }
+inline bool DoubleIndex::operator==(const DoubleIndex& idx) const {
+	return r1==idx.r1 && r2==idx.r2 && c1==idx.c1 && c2==idx.c2;
+}
+inline bool DoubleIndex::operator!=(const DoubleIndex& idx) const { return !(*this==idx); }
 
 } /* namespace ibex */
 
