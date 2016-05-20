@@ -18,13 +18,13 @@
 #include "ibex_String.h"
 #include "ibex_DimException.h"
 #include "ibex_SyntaxError.h"
-#include "ibex_ParserSource.h"
 #include "ibex_P_Expr.h"
 #include "ibex_P_NumConstraint.h"
 #include "ibex_MainGenerator.h"
 #include "ibex_ConstantGenerator.h"
 #include "ibex_P_ExprGenerator.h"
 #include "ibex_Exception.h"
+#include "ibex_P_Source.h"
 
 using namespace std;
 

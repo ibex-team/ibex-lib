@@ -19,7 +19,7 @@
 #include "ibex_P_Expr.h"
 #include "ibex_Expr.h"
 #include "ibex_Function.h"
-#include "ibex_ParserSource.h"
+#include "ibex_P_Source.h"
 
 namespace ibex {
 

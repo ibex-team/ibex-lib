@@ -125,14 +125,7 @@ public:
 };
 
 /*
- * \brief Symbol at parse time (shared node)
- *
- * Either a "VAR" (final symbol) or "SYB" (symbolic constants).
- *
- * This node can be shared. In particular, all the occurrences
- * of a constant symbol are associated to the same P_ExprConstant
- * object. This avoids heavy duplication of domains (consider, e.g.,
- * a big interval matrix appearing in many expressions).
+ * \brief Variable Symbol at parse time
  *
  * \see Scopes::get_cst().
  */
@@ -148,6 +141,15 @@ public:
 	const char* name;
 };
 
+/**
+ * \brief Constant Symbol at parse time
+ *
+ * All the occurrences of the same constant symbol, during
+ * the generation of an expression, will be associated to the
+ * same ExprConstant object. This avoids heavy duplication of
+ * domains (consider, e.g., a big interval matrix appearing
+ * in many expressions).
+ */
 class P_ExprCstSymbol : public P_ExprNode {
 public:
 

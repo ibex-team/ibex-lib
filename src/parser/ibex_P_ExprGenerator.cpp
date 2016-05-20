@@ -434,13 +434,7 @@ DoubleIndex ExprGenerator::visit_index(const Dim& dim, const P_ExprNode& idx1, b
 	if (p.first==-1) {
 		return DoubleIndex::all(dim);
 	} else if (p.second==p.first) {
-		if (dim.is_matrix())
-			return DoubleIndex::one_row(dim,p.first);
-
-		else
-			// A single index i with a row vector
-			// gives the ith column.
-			return DoubleIndex::one_col(dim,p.first);
+		return DoubleIndex::one_index(dim,p.first);
 	} else {
 		if (dim.is_matrix())
 			return DoubleIndex::rows(dim,p.first,p.second);
