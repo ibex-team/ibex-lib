@@ -49,15 +49,20 @@ public:
 	bool one_col() const;
 	bool all_rows() const;
 	bool all_cols() const;
+	bool all() const;
 	bool operator==(const DoubleIndex& idx) const;
 	bool operator!=(const DoubleIndex& idx) const;
 
 private:
 	DoubleIndex(const Dim& d, int first_row, int last_row, int first_col, int last_col);
-	bool _all_rows, _all_cols;
+	Dim dim;
 	int r1, r2, c1, c2;
 };
 
+/**
+ * \brief Display the index, ex: "(:,1)".
+ */
+std::ostream& operator<<(std::ostream& os, const DoubleIndex idx);
 
 /*============================================ inline implementation ============================================ */
 inline DoubleIndex DoubleIndex::one_elt(const Dim& d, int i, int j) {
@@ -105,13 +110,11 @@ inline DoubleIndex DoubleIndex::one_index(const Dim& dim, int i) {
 		return one_col(dim,i);
 }
 
-inline DoubleIndex::DoubleIndex() : r1(-1), r2(-1), c1(-1), c2(-1), _all_rows(false), _all_cols(false) {
+inline DoubleIndex::DoubleIndex() : dim(Dim::scalar()), r1(-1), r2(-1), c1(-1), c2(-1) {
 }
 
 inline DoubleIndex::DoubleIndex(const Dim& d, int i1, int i2, int j1, int j2) :
-	r1(i2), r2(i2), c1(j1), c2(j2),
-	_all_rows(i1==0 && i2==d.nb_rows()-1),
-	_all_cols(j1==0 && j2==d.nb_cols()-1) {
+	dim(d), r1(i2), r2(i2), c1(j1), c2(j2) {
 
 	if (i2>=d.nb_rows() || j2>=d.nb_cols())
 		throw DimException("DoubleIndex: index out of bounds");
@@ -121,8 +124,7 @@ inline DoubleIndex::DoubleIndex(const Dim& d, int i1, int i2, int j1, int j2) :
 
 inline DoubleIndex::DoubleIndex(const DoubleIndex& idx) :
 		// note: C++ would do it implicitly.
-		r1(idx.r1), r2(idx.r2), c1(idx.c1), c2(idx.c2),
-		_all_rows(idx._all_rows), _all_cols(idx._all_cols) {
+		dim(idx.dim), r1(idx.r1), r2(idx.r2), c1(idx.c1), c2(idx.c2) {
 }
 
 inline long long DoubleIndex::hash() const {
@@ -139,14 +141,37 @@ inline int DoubleIndex::nb_rows() const   { return r2-r1+1; }
 inline int DoubleIndex::nb_cols() const   { return c2-c1+1; }
 inline bool DoubleIndex::one_row() const  { return r1==r2; }
 inline bool DoubleIndex::one_col() const  { return c1==c2; }
-class DoubleIndex;
-
-inline bool DoubleIndex::all_rows() const { return _all_rows; }
-inline bool DoubleIndex::all_cols() const { return _all_cols; }
+inline bool DoubleIndex::all_rows() const { return r1==0 && r2==dim.nb_rows()-1; }
+inline bool DoubleIndex::all_cols() const { return c1==0 && c2==dim.nb_cols()-1; }
+inline bool DoubleIndex::all() const { return all_rows() && all_cols(); }
 inline bool DoubleIndex::operator==(const DoubleIndex& idx) const {
-	return r1==idx.r1 && r2==idx.r2 && c1==idx.c1 && c2==idx.c2;
+	return dim==idx.dim && r1==idx.r1 && r2==idx.r2 && c1==idx.c1 && c2==idx.c2;
 }
 inline bool DoubleIndex::operator!=(const DoubleIndex& idx) const { return !(*this==idx); }
+
+inline std::ostream& operator<<(std::ostream& os, const DoubleIndex idx) {
+	if (idx.all()) return os;
+
+	os << "(";
+	switch (idx.dim.type) {
+	case Dim::ROW_VECTOR:
+		if (idx.one_col()) return os << idx.first_col();
+		else return os << idx.first_col() << ":" << idx.last_col();
+	case Dim::COL_VECTOR:
+		if (idx.one_row()) return os << idx.first_row();
+		else return os << idx.first_row() << ":" << idx.last_row();
+	default:
+		assert(idx.dim.is_matrix());
+		if (idx.all_rows()) os << ":";
+		else if (idx.one_row()) os << idx.first_row();
+		else os << idx.first_row() << ":" << idx.last_row();
+		os << ",";
+		if (idx.all_cols()) os << ":";
+		else if (idx.one_col()) os << idx.first_col();
+		else os << idx.first_col() << ":" << idx.last_col();
+	}
+	return os << ")";
+}
 
 } /* namespace ibex */
 
