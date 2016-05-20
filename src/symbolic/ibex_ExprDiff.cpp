@@ -344,7 +344,7 @@ void ExprDiff::visit(const ExprMul& e)   {
 		assert(e.left.dim.is_matrix());
 		add_grad_expr(e.left, *grad[e]*transpose(e.right)); // V*V' or M*M
 		add_grad_expr(e.right,transpose(e.left)*(*grad[e])); // M*V or M*M
-		}
+	}
 }
 
 void ExprDiff::visit(const ExprAdd& e)   { add_grad_expr(e.left,  *grad[e]);
@@ -376,10 +376,10 @@ void ExprDiff::visit(const ExprExp& e)   { add_grad_expr(e.expr, (*grad[e])*exp(
 void ExprDiff::visit(const ExprLog& e)   { add_grad_expr(e.expr, (*grad[e])/e.expr ); }
 void ExprDiff::visit(const ExprCos& e)   { add_grad_expr(e.expr,-(*grad[e])*sin(e.expr) ); }
 void ExprDiff::visit(const ExprSin& e)   { add_grad_expr(e.expr, (*grad[e])*cos(e.expr) ); }
-void ExprDiff::visit(const ExprTan& e)   { add_grad_expr(e.expr, (*grad[e])*(ONE+sqr(tan(e.expr)))); }
+void ExprDiff::visit(const ExprTan& e)   { add_grad_expr(e.expr, (*grad[e])*(1.0+sqr(tan(e.expr)))); }
 void ExprDiff::visit(const ExprCosh& e)  { add_grad_expr(e.expr, (*grad[e])*sinh(e.expr)); }
 void ExprDiff::visit(const ExprSinh& e)  { add_grad_expr(e.expr, (*grad[e])*cosh(e.expr)); }
-void ExprDiff::visit(const ExprTanh& e)  { add_grad_expr(e.expr, (*grad[e])*(ONE - sqr(tanh(e.expr)))); }
+void ExprDiff::visit(const ExprTanh& e)  { add_grad_expr(e.expr, (*grad[e])*(1.0-sqr(tanh(e.expr)))); }
 void ExprDiff::visit(const ExprAcos& e)  { add_grad_expr(e.expr,-(*grad[e])/sqrt(1.0-sqr(e.expr))); }
 void ExprDiff::visit(const ExprAsin& e)  { add_grad_expr(e.expr, (*grad[e])/sqrt(1.0-sqr(e.expr))); }
 void ExprDiff::visit(const ExprAtan& e)  { add_grad_expr(e.expr, (*grad[e])/(1.0+sqr(e.expr))); }

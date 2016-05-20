@@ -7,8 +7,12 @@
 
 #include "ibex_ExprSimplify.h"
 #include "ibex_Expr.h"
+#include "ibex_ExprSubNodes.h"
+#include "ibex_NodeMap.h"
 
 using namespace std;
+
+#define CLONE_VEC vector<pair<DoubleIndex, const ExprNode*> >
 
 namespace ibex {
 
@@ -42,17 +46,54 @@ bool is_identity(const ExprNode& e) {
 
 } // end anonymous namespace
 
+const ExprNode& ExprSimplify::simplify(const ExprNode& e) {
+
+	idx = DoubleIndex::all(e.dim);
+	e.acceptVisitor(*this);
+	const ExprNode& result = get(e,idx);
+
+	// If a node does not appear in the final expression
+	// AND is not a node of the original expression, it has to be freed.
+	//
+	// Note: we cannot free copies of constant nodes as we "fold" them
+	// because a constant node may be pointed to by another node than
+	// the current father (we have DAG, not a tree). Ex: assuming the
+	// node "1" is the same in both subexpressions:
+	//           (1*2)+(x+1)
+	// we must not delete "1" when copying (1*2).
+
+	ExprSubNodes old_nodes(e);
+	ExprSubNodes new_nodes(result);
+
+	for (IBEX_NODE_MAP(CLONE_VEC*)::const_iterator it=idx_clones.begin();
+			it!=idx_clones.end(); it++) {
+
+		for (CLONE_VEC::const_iterator it2=it->second->begin(); it2!=it->second->end(); it2++) {
+			if (!old_nodes.found(*it2->second) && !new_nodes.found(*it2->second))
+				delete it2->second;
+		}
+		delete it->second;
+	}
+
+	idx_clones.clean();
+	return result;
+}
+
 void ExprSimplify::insert(const ExprNode& e, const ExprNode& e2) {
+	// first time we access to node e:
+	if (!idx_clones.found(e)) {
+		idx_clones.insert(e,new CLONE_VEC());
+	}
 	idx_clones[e]->push_back(pair<DoubleIndex,const ExprNode*>(idx,e2));
 }
 
 const ExprNode& ExprSimplify::get(const ExprNode& e, const DoubleIndex& idx2) {
 	// first time we access to node e:
 	if (!idx_clones.found(e)) {
-		idx_clones.insert(e,new vector<pair<DoubleIndex,const ExprNode*> >());
+		idx_clones.insert(e,new CLONE_VEC());
 	}
 
-	vector<pair<DoubleIndex,const ExprNode*> >& v=*(idx_clones[e]);
+	CLONE_VEC& v=*(idx_clones[e]);
 	int i=0;
 	while (i<v.size() && v[i].first!=idx2)
 		i++;
@@ -264,6 +305,18 @@ void ExprSimplify::visit(const ExprChi& e) {
 
 void ExprSimplify::visit(const ExprApply& e) {
 	not_implemented("Simplify with Apply");
+}
+
+void ExprSimplify::visit(const ExprPower& e) {
+//	if (fold) {
+//			const ExprConstant* c=dynamic_cast<const ExprConstant*>(&EXPR);
+//			if (c) {
+//				/* evaluate the constant expression on-the-fly */
+//				clone.insert(e, &ExprConstant::new_(pow(c->get(),e.expon)));
+//				return;
+//			}
+//		}
+//		mark(e.expr);
 }
 
 void ExprSimplify::visit(const ExprMax& e)   { binary(max,max); }
