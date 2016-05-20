@@ -11,20 +11,19 @@
 #define __IBEX_EXPR_SIMPLIFY_H__
 
 #include "ibex_ExprVisitor.h"
+#include <vector>
+#include <utility>
 
 namespace ibex {
 
 class ExprSimplify : public ExprVisitor {
 public:
-	ExprSimplify();
+
+	const ExprNode& simplify(const ExprNode& e);
+
 	virtual ~ExprSimplify();
 protected:
-	void visit(const ExprNode& e);
 	void visit(const ExprIndex& i);
-	void visit(const ExprNAryOp& e);
-	void visit(const ExprLeaf& e);
-	void visit(const ExprBinaryOp& b);
-	void visit(const ExprUnaryOp& u);
 	void visit(const ExprSymbol& x);
 	void visit(const ExprConstant& c);
 	void visit(const ExprVector& e);
@@ -59,11 +58,19 @@ protected:
 	void visit(const ExprAsinh& e);
 	void visit(const ExprAtanh& e);
 
-	NodeMap<const ExprNode*> clone;
+	DoubleIndex idx;
+	NodeMap<std::vector<std::pair<DoubleIndex, const ExprNode*> >*> idx_clones;
 
-	void binary_copy(const ExprBinaryOp& e, const ExprNode& (*func2)(const ExprNode&, const ExprNode&));
-	bool unary_copy(const ExprUnaryOp& e, Domain (*fcst)(const Domain&));
-	bool binary_copy(const ExprBinaryOp& e, Domain (*fcst)(const Domain&, const Domain&));
+	void insert(const ExprNode& e, const ExprNode& e2);
+	const ExprNode& get(const ExprNode& e, const DoubleIndex&);
+
+	void unary(const ExprUnaryOp& e, Domain (*fcst)(const Domain&), const ExprNode& (*f)(const ExprNode&));
+	void binary(const ExprBinaryOp& e, Domain (*fcst)(const Domain&,const Domain&), const ExprNode& (*f)(const ExprNode&,const ExprNode&));
+
+//	void unary_copy(const ExprUnaryOp& e, const ExprNode& (*func)(const ExprNode&));
+//	void binary_copy(const ExprBinaryOp& e, const ExprNode& (*func2)(const ExprNode&, const ExprNode&));
+//	bool unary_eval(const ExprUnaryOp& e, Domain (*fcst)(const Domain&));
+//	bool binary_eval(const ExprBinaryOp& e, Domain (*fcst)(const Domain&, const Domain&));
 };
 
 } /* namespace ibex */
