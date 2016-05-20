@@ -11,6 +11,10 @@
 #define __IBEX_EXPR_SIMPLIFY_H__
 
 #include "ibex_ExprVisitor.h"
+#include "ibex_NodeMap.h"
+#include "ibex_DoubleIndex.h"
+#include "ibex_Domain.h"
+
 #include <vector>
 #include <utility>
 
@@ -64,8 +68,10 @@ protected:
 	void insert(const ExprNode& e, const ExprNode& e2);
 	const ExprNode& get(const ExprNode& e, const DoubleIndex&);
 
-	void unary(const ExprUnaryOp& e, Domain (*fcst)(const Domain&), const ExprNode& (*f)(const ExprNode&));
-	void binary(const ExprBinaryOp& e, Domain (*fcst)(const Domain&,const Domain&), const ExprNode& (*f)(const ExprNode&,const ExprNode&));
+	template<class N>
+	void unary(const N& e, Domain (*fcst)(const Domain&));
+	template<class N>
+	void binary(const N& e, Domain (*fcst)(const Domain&,const Domain&));
 
 //	void unary_copy(const ExprUnaryOp& e, const ExprNode& (*func)(const ExprNode&));
 //	void binary_copy(const ExprBinaryOp& e, const ExprNode& (*func2)(const ExprNode&, const ExprNode&));

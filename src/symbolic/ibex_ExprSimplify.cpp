@@ -84,7 +84,7 @@ void ExprSimplify::insert(const ExprNode& e, const ExprNode& e2) {
 	if (!idx_clones.found(e)) {
 		idx_clones.insert(e,new CLONE_VEC());
 	}
-	idx_clones[e]->push_back(pair<DoubleIndex,const ExprNode*>(idx,e2));
+	idx_clones[e]->push_back(pair<DoubleIndex,const ExprNode*>(idx,&e2));
 }
 
 const ExprNode& ExprSimplify::get(const ExprNode& e, const DoubleIndex& idx2) {
@@ -105,7 +105,7 @@ const ExprNode& ExprSimplify::get(const ExprNode& e, const DoubleIndex& idx2) {
 	}
 	assert(v.back().first==idx2);
 
-	return v[i].second;
+	return *v[i].second;
 }
 
 void ExprSimplify::visit(const ExprVector& e) {
@@ -272,8 +272,8 @@ void ExprSimplify::visit(const ExprDiv& e) {
 
 
 typedef Domain (*dom_func2)(const Domain&, const Domain&);
-typedef const ExprNode& (*func2)(const ExprNode&, const ExprNode&);
-void ExprSimplify::binary(const ExprBinaryOp& e, dom_func2 fcst, func2 f) {
+template<class N>
+void ExprSimplify::binary(const N& e, dom_func2 fcst) {
 
 	const ExprNode& l=get(e.left, idx);
 	const ExprNode& r=get(e.right, idx);
@@ -283,10 +283,11 @@ void ExprSimplify::binary(const ExprBinaryOp& e, dom_func2 fcst, func2 f) {
 	else if ((&l == &e.left) && (&r == &e.right))  // nothing changed
 		insert(e, e);
 	else
-		insert(e, f(l,r));
+		insert(e, N::new_(l,r));
 }
 
-void ExprSimplify::unary(const ExprUnaryOp& e, Domain (*fcst)(const Domain&), const ExprNode& (*f)(const ExprNode&)) {
+template<class N>
+void ExprSimplify::unary(const N& e, Domain (*fcst)(const Domain&)) {
 
 	const ExprNode& expr=get(e.expr, idx);
 
@@ -296,7 +297,7 @@ void ExprSimplify::unary(const ExprUnaryOp& e, Domain (*fcst)(const Domain&), co
 	else if (&e.expr == &expr)  // if nothing changed
 		insert(e, e);
 	else
-		insert(e, f(expr));
+		insert(e, N::new_(expr));
 }
 
 void ExprSimplify::visit(const ExprChi& e) {
@@ -308,7 +309,9 @@ void ExprSimplify::visit(const ExprApply& e) {
 }
 
 void ExprSimplify::visit(const ExprPower& e) {
-//	if (fold) {
+// TODO
+
+	//	if (fold) {
 //			const ExprConstant* c=dynamic_cast<const ExprConstant*>(&EXPR);
 //			if (c) {
 //				/* evaluate the constant expression on-the-fly */
@@ -319,28 +322,28 @@ void ExprSimplify::visit(const ExprPower& e) {
 //		mark(e.expr);
 }
 
-void ExprSimplify::visit(const ExprMax& e)   { binary(max,max); }
-void ExprSimplify::visit(const ExprMin& e)   { binary(min,min); }
-void ExprSimplify::visit(const ExprAtan2& e) { binary(atan2,atan2); }
-void ExprSimplify::visit(const ExprMinus& e) { unary(operator-, operator-); }
-void ExprSimplify::visit(const ExprTrans& e) { unary(transpose, transpose); }
-void ExprSimplify::visit(const ExprSign& e)  { unary(sign, sign); }
-void ExprSimplify::visit(const ExprAbs& e)   { unary(abs, abs); }
-void ExprSimplify::visit(const ExprSqr& e)   { unary(sqr, sqr); }
-void ExprSimplify::visit(const ExprSqrt& e)  { unary(sqrt, sqrt); }
-void ExprSimplify::visit(const ExprExp& e)   { unary(exp, exp); }
-void ExprSimplify::visit(const ExprLog& e)   { unary(log, log); }
-void ExprSimplify::visit(const ExprCos& e)   { unary(cos, cos); }
-void ExprSimplify::visit(const ExprSin& e)   { unary(sin, sin); }
-void ExprSimplify::visit(const ExprTan& e)   { unary(tan, tan); }
-void ExprSimplify::visit(const ExprCosh& e)  { unary(cosh, cosh); }
-void ExprSimplify::visit(const ExprSinh& e)  { unary(sinh, sinh); }
-void ExprSimplify::visit(const ExprTanh& e)  { unary(tanh, tanh); }
-void ExprSimplify::visit(const ExprAcos& e)  { unary(acos, acos); }
-void ExprSimplify::visit(const ExprAsin& e)  { unary(asin, asin); }
-void ExprSimplify::visit(const ExprAtan& e)  { unary(atan, atan); }
-void ExprSimplify::visit(const ExprAcosh& e) { unary(acosh, acosh); }
-void ExprSimplify::visit(const ExprAsinh& e) { unary(asinh, asinh); }
-void ExprSimplify::visit(const ExprAtanh& e) { unary(atanh, atanh); }
+void ExprSimplify::visit(const ExprMax& e)   { binary(e,max); }
+void ExprSimplify::visit(const ExprMin& e)   { binary(e,min); }
+void ExprSimplify::visit(const ExprAtan2& e) { binary(e,atan2); }
+void ExprSimplify::visit(const ExprMinus& e) { unary(e,operator-); }
+void ExprSimplify::visit(const ExprTrans& e) { unary(e,transpose); }
+void ExprSimplify::visit(const ExprSign& e)  { unary(e,sign); }
+void ExprSimplify::visit(const ExprAbs& e)   { unary(e,abs); }
+void ExprSimplify::visit(const ExprSqr& e)   { unary(e,sqr); }
+void ExprSimplify::visit(const ExprSqrt& e)  { unary(e,sqrt); }
+void ExprSimplify::visit(const ExprExp& e)   { unary(e,exp); }
+void ExprSimplify::visit(const ExprLog& e)   { unary(e,log); }
+void ExprSimplify::visit(const ExprCos& e)   { unary(e,cos); }
+void ExprSimplify::visit(const ExprSin& e)   { unary(e,sin); }
+void ExprSimplify::visit(const ExprTan& e)   { unary(e,tan); }
+void ExprSimplify::visit(const ExprCosh& e)  { unary(e,cosh); }
+void ExprSimplify::visit(const ExprSinh& e)  { unary(e,sinh); }
+void ExprSimplify::visit(const ExprTanh& e)  { unary(e,tanh); }
+void ExprSimplify::visit(const ExprAcos& e)  { unary(e,acos); }
+void ExprSimplify::visit(const ExprAsin& e)  { unary(e,asin); }
+void ExprSimplify::visit(const ExprAtan& e)  { unary(e,atan); }
+void ExprSimplify::visit(const ExprAcosh& e) { unary(e,acosh); }
+void ExprSimplify::visit(const ExprAsinh& e) { unary(e,asinh); }
+void ExprSimplify::visit(const ExprAtanh& e) { unary(e,atanh); }
 
 } /* namespace ibex */

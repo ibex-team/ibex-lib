@@ -33,7 +33,7 @@ bool varequals(const Array<const ExprSymbol>& arg1, Array<const ExprSymbol>& arg
 	return true;
 }
 
-const ExprNode& ExprCopy::copy(const Array<const ExprSymbol>& old_x, const Array<const ExprNode>& new_x, const ExprNode& y, bool fold_cst) {
+const ExprNode& ExprCopy::copy(const Array<const ExprSymbol>& old_x, const Array<const ExprNode>& new_x, const ExprNode& y) {
 
 	clone.clean();
 

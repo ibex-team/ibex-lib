@@ -12,6 +12,7 @@
 #include "ibex_ExprCopy.h"
 #include "ibex_ExprSubNodes.h"
 #include "ibex_Expr.h"
+#include "ibex_ExprSimplify.h"
 
 using namespace std;
 
@@ -144,7 +145,7 @@ const ExprNode& ExprDiff::gradient(const Array<const ExprSymbol>& old_x, const A
 	//   we had proceeded in the other way around, there would be
 	//   memory leaks).
 
-	const ExprNode& result=ExprCopy().copy(old_x,new_x,df,true);
+	const ExprNode& result=ExprCopy().copy(old_x,new_x,df);
 
 	// ------------------------- CLEANUP -------------------------
 	// cleanup(df,true); // don't! some nodes are shared with y
@@ -179,7 +180,7 @@ const ExprNode& ExprDiff::gradient(const Array<const ExprSymbol>& old_x, const A
 	if (dX.size()>1) delete &df; // delete the Vector node
 
 	//cout << "   ---> grad:" << result << endl;
-	return result;
+	return ExprSimplify().simplify(result);
 }
 
 void ExprDiff::visit(const ExprNode& e) {
