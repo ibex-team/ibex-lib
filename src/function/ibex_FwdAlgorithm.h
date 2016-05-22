@@ -23,7 +23,10 @@ namespace ibex {
 class FwdAlgorithm {
 
 	/** TO BE DEFINED (by the subclass) */
-	void index_fwd(int x, int y);
+	void idx_fwd(int x, int y);
+
+	/** TO BE DEFINED (by the subclass) */
+	void idx_cp_fwd(int x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
 	void symbol_fwd(int y);

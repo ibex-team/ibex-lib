@@ -99,18 +99,8 @@ ExprDomainFactory<D>::~ExprDomainFactory() {
 
 template<class D>
 TemplateDomain<D>* ExprDomainFactory<D>::init(const ExprIndex& e, TemplateDomain<D>& d_expr) {
-	switch (e.expr.type()) {
-	case Dim::SCALAR:
-		return new TemplateDomain<D>(d_expr.i());
-		break;
-	case Dim::ROW_VECTOR:
-	case Dim::COL_VECTOR:
-		return new TemplateDomain<D>(d_expr.v()[e.index]);
-		break;
-	default:
-		return new TemplateDomain<D>(d_expr.m()[e.index],true);
-		break;
-	}
+	TemplateDomain<D> d(d_expr[e.index]); // Depending on the type of index, can be a reference or a copy.
+	return new TemplateDomain<D>(d,d.is_reference);
 }
 
 template<class D>
