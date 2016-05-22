@@ -48,7 +48,7 @@ public:
 class S_Cst : public Scope::S_Object {
 public:
 
-	S_Cst(const Domain* domain) : node(NULL), cst(*domain) { }
+	S_Cst(const Domain& domain) : node(NULL), cst(domain) { }
 
 	// see add_cst
 	S_Cst(const Dim& d) : node(NULL), cst(Dim::scalar()) { }
@@ -117,8 +117,8 @@ public:
 class S_Entity : public Scope::S_Object {
 public:
 
-	S_Entity(const char* name, const Dim* dim, const Domain* value) : symbol(NULL), d(*dim) {
-		init_symbol_domain(name, *((Domain*) d), *value);
+	S_Entity(const char* name, const Dim* dim, const Domain& value) : symbol(NULL), d(*dim) {
+		init_symbol_domain(name, (Domain&) d, value);
 	}
 
 	void bind(const ExprSymbol& node) { symbol = &node; }
@@ -130,7 +130,7 @@ public:
 	void print(ostream& os) const { os << "entity"; }
 
 	const ExprSymbol* symbol;
-	const Domain* d;
+	const Domain d;
 
 private:
 	S_Entity(const S_Entity& e) : symbol(e.symbol), d(e.d) {  }
@@ -181,10 +181,10 @@ void Scope::add_cst(const char* id, const Domain& domain) {
 	cst.push_back(id);
 }
 
-void Scope::add_cst(const char* id, const Dim* dim, const Domain* dom) {
+void Scope::add_cst(const char* id, const Dim* dim, const Domain& dom) {
 	S_Cst* c=new S_Cst(*dim);
 	tab.insert_new(id, c);
-	init_symbol_domain(id, c->cst, *dom);
+	init_symbol_domain(id, c->cst, dom);
 }
 
 void Scope::bind_cst_node(const char* id, const ExprConstant& node) {
@@ -211,7 +211,7 @@ void Scope::add_func_tmp_symbol(const char* id, const P_ExprNode* expr) {
 	tab.insert_new(id, new S_FuncTmp(expr));
 }
 
-void Scope::add_var(const char* id, const Dim* d, const Domain* domain) {
+void Scope::add_var(const char* id, const Dim* d, const Domain& domain) {
 	tab.insert_new(id, new S_Entity(id,d,domain));
 	vars.push_back(id);
 }
@@ -251,11 +251,11 @@ const P_ExprNode& Scope::get_func_tmp_expr(const char* id) const {
 	return *((const S_FuncTmp&) s).expr;
 }
 
-std::pair<const ExprSymbol*,const Domain*> Scope::get_entity(const char* id) const {
+std::pair<const ExprSymbol*,const Domain*> Scope::get_var(const char* id) const {
 	const S_Object& o=*tab[id];
 	assert(o.token()==TK_ENTITY);
 	const S_Entity& s=(const S_Entity&) o;
-	return std::pair<const ExprSymbol*,const Domain*>(s.symbol,s.d);
+	return std::pair<const ExprSymbol*,const Domain*>(s.symbol,&s.d);
 }
 
 /*

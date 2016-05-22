@@ -13,8 +13,8 @@
 #include "ibex_P_NumConstraint.h"
 #include "ibex_Function.h"
 #include "ibex_P_ExprGenerator.h"
-#include "ibex_ConstantGenerator.h"
 #include "ibex_Expr2DAG.h"
+#include "ibex_P_Source.h"
 
 using namespace std;
 

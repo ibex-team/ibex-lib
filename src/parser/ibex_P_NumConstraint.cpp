@@ -17,7 +17,7 @@ namespace ibex {
 namespace parser {
 
 P_OneConstraint::P_OneConstraint(const P_ExprNode* left, CmpOp op, const P_ExprNode* right) :
-		expr((right->lab->is_const() && right->lab->domain().is_zero())? *left : (*left)-(*right)), op(op) {
+		expr((right->lab->is_const() && right->lab->domain().is_zero())? *left : (const P_ExprNode&) ((*left)-(*right))), op(op) {
 
 	if (right->lab->is_const() && right->lab->domain().is_zero()) {
 		delete right;
@@ -25,7 +25,7 @@ P_OneConstraint::P_OneConstraint(const P_ExprNode* left, CmpOp op, const P_ExprN
 }
 
 P_OneConstraint::~P_OneConstraint() {
-	delete expr;
+	delete &expr;
 }
 
 P_ConstraintList::P_ConstraintList(vector<P_NumConstraint*>* _ctrs) : ctrs(*_ctrs) {
@@ -40,7 +40,7 @@ P_ConstraintList::~P_ConstraintList() {
 }
 
 P_ConstraintLoop::P_ConstraintLoop(const char* iter, const P_ExprNode* first_value, const P_ExprNode* last_value, vector<P_NumConstraint*>* ctrs) :
-		 iter(strdup(iter)), first_value(*first_value), last_value(*last_value), ctrs(*ctrs) {
+		 iter(strdup(iter)), first_value(*first_value), last_value(*last_value), ctrs(ctrs) {
 
 }
 

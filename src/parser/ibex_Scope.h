@@ -40,10 +40,10 @@ public:
 
 	/*------------- addition of new symbols in the current scope -----------*/
 	/** Add a constant */
-	void add_cst(const char* id, const Domain* domain);
+	void add_cst(const char* id, const Domain& domain);
 
 	/** Add a constant */
-	void add_cst(const char* id, const Dim* d, const Domain* dom);
+	void add_cst(const char* id, const Dim* d, const Domain& dom);
 
 	/** Remove a constant (constants can be overridden
 	 * by local variables in functions)*/
@@ -59,7 +59,7 @@ public:
 	void add_func_tmp_symbol(const char* tmp_symbol, const P_ExprNode* expr);
 
 	/** Add a variable symbol. */
-	void add_var(const char* id, const Dim* d, const Domain* d);
+	void add_var(const char* id, const Dim* dim, const Domain& d);
 
 	/** Add an (uninitialized) iterator. */
 	void add_iterator(const char* id);

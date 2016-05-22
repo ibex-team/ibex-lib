@@ -12,16 +12,14 @@
 #include "ibex_P_ExprPrinter.h"
 #include "ibex_P_ExprGenerator.h"
 
+#include <sstream>
+
 extern void ibexerror (const std::string& msg);
 
 using namespace std;
 
 namespace ibex {
 namespace parser {
-
-void p_print(const P_ExprNode& e) {
-	P_ExprPrinter(cout,e);
-}
 
 P_ExprNode::~P_ExprNode() {
 	// Works because it is a tree, not a DAG
@@ -31,6 +29,12 @@ P_ExprNode::~P_ExprNode() {
 	}
 	delete lab;
 }
+
+ostream& operator<<(ostream& os, const P_ExprNode& e) {
+	P_ExprPrinter p(os,e);
+	return os;
+}
+
 
 P_ExprWithIndex::P_ExprWithIndex(const P_ExprNode& expr, const P_ExprNode& single_idx, bool style) :
 		P_ExprNode(EXPR_WITH_IDX,expr,single_idx), matlab_style(style) {
@@ -107,7 +111,7 @@ const P_ExprNode* apply(Function& f, const P_ExprNode* expr) {
 	}
 }
 
-const P_ExprNode* apply(Function& f, const vector<const P_ExprNode*>* args) {
+const P_ExprNode* apply(Function& f, const std::vector<const P_ExprNode*>* args) {
 	unsigned int n=f.nb_arg();
 	if (n!=args->size()) {
 		stringstream s;
@@ -115,12 +119,7 @@ const P_ExprNode* apply(Function& f, const vector<const P_ExprNode*>* args) {
 		ibexerror(s.str());
 		return (*args)[0]; // just to avoid a "warning control reaches end of non-void function"
 	} else {
-		try {
-			return new P_ExprNode(P_ExprNode::APPLY,*args);
-		} catch(DimException& e) {
-			ibexerror(e.message());
-			return (*args)[0]; // just to avoid a "warning control reaches end of non-void function"
-		}
+		return new P_ExprNode(P_ExprNode::APPLY,*args);
 	}
 }
 

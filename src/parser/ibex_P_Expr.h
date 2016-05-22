@@ -11,10 +11,12 @@
 #ifndef __IBEX_PARSER_EXPR_H__
 #define __IBEX_PARSER_EXPR_H__
 
-#include <vector>
 #include "ibex_Domain.h"
+#include "ibex_Function.h"
+
 #include "ibex_P_ExprVisitor.h"
-#include "ibex_Entity.h"
+
+#include <vector>
 #include <cassert>
 
 namespace ibex {
@@ -78,7 +80,12 @@ public:
 
 	P_ExprNode(operation op, const P_ExprNode& arg1, const P_ExprNode& arg2, const P_ExprNode& arg3) : op(op), lab(NULL) { }
 
-	P_ExprNode(operation op, const Array<const P_ExprNode>& arg) : op(op), arg(arg), lab(NULL) { }
+	P_ExprNode(operation op, const std::vector<const P_ExprNode*>& vec) : op(op), arg(vec.size()), lab(NULL) {
+		int i=0;
+		for (std::vector<const P_ExprNode*>::const_iterator it=vec.begin(); it!=vec.end(); it++) {
+			arg.set_ref(i++,**it);
+		}
+	}
 
 	virtual ~P_ExprNode();
 
@@ -218,10 +225,10 @@ public:
 
 	virtual void acceptVisitor(P_ExprVisitor& v) const { v.visit(*this); }
 
-	Function& f;
+	const Function& f;
 };
 
-void p_print(const P_ExprNode& e);
+std::ostream& operator<<(std::ostream& os, const P_ExprNode&);
 
 const P_ExprNode* apply(Function& f, const P_ExprNode* expr);
 
@@ -250,11 +257,11 @@ inline const P_ExprNode* expr_with_index(const P_ExprNode* expr, const P_ExprNod
 	return new P_ExprWithIndex(*expr, *idx1, *idx2, matlab);
 }
 
-inline const P_ExprNode* row_vec(const Array<const P_ExprNode>* args) {
+inline const P_ExprNode* row_vec(const std::vector<const P_ExprNode*>* args) {
 	return new P_ExprNode(P_ExprNode::ROW_VEC,*args);
 }
 
-inline const P_ExprNode* col_vec(const Array<const P_ExprNode>* args) {
+inline const P_ExprNode* col_vec(const std::vector<const P_ExprNode*>* args) {
 	return new P_ExprNode(P_ExprNode::COL_VEC,*args);
 }
 
@@ -262,27 +269,27 @@ inline const P_ExprNode* infinity() {
 	return new P_ExprNode(P_ExprNode::INFTY);
 }
 
-inline const P_ExprNode* operator+(const P_ExprNode* left, const P_ExprNode* right) {
-	return new P_ExprNode(P_ExprNode::ADD,*left,*right);
+inline const P_ExprNode* operator+(const P_ExprNode& left, const P_ExprNode& right) {
+	return new P_ExprNode(P_ExprNode::ADD,left,right);
 }
 
-inline const P_ExprNode* operator-(const P_ExprNode* left, const P_ExprNode* right) {
-	return new P_ExprNode(P_ExprNode::SUB,*left,*right);
+inline const P_ExprNode* operator-(const P_ExprNode& left, const P_ExprNode& right) {
+	return new P_ExprNode(P_ExprNode::SUB,left,right);
 }
 
-inline const P_ExprNode* operator*(const P_ExprNode* left, const P_ExprNode* right) {
-	return new P_ExprNode(P_ExprNode::MUL,*left,*right);
+inline const P_ExprNode* operator*(const P_ExprNode& left, const P_ExprNode& right) {
+	return new P_ExprNode(P_ExprNode::MUL,left,right);
 }
 
-inline const P_ExprNode* operator/(const P_ExprNode* *left, const P_ExprNode* right) {
-	return new P_ExprNode(P_ExprNode::DIV,*left,*right);
+inline const P_ExprNode* operator/(const P_ExprNode& left, const P_ExprNode& right) {
+	return new P_ExprNode(P_ExprNode::DIV,left,right);
 }
 
-inline const P_ExprNode* max(const Array<const P_ExprNode>* args) {
+inline const P_ExprNode* max(const std::vector<const P_ExprNode*>* args) {
 	return new P_ExprNode(P_ExprNode::MAX,*args);
 }
 
-inline const P_ExprNode* min(const Array<const P_ExprNode>* args) {
+inline const P_ExprNode* min(const std::vector<const P_ExprNode*>* args) {
 	return new P_ExprNode(P_ExprNode::MIN,*args);
 }
 
@@ -362,8 +369,8 @@ inline const P_ExprNode* atanh(const P_ExprNode* exp) {
 	return new P_ExprNode(P_ExprNode::ATANH,*exp);
 }
 
-inline const P_ExprNode* operator-(const P_ExprNode* exp) {
-	return new P_ExprNode(P_ExprNode::MINUS,*exp);
+inline const P_ExprNode* operator-(const P_ExprNode& exp) {
+	return new P_ExprNode(P_ExprNode::MINUS,exp);
 }
 
 inline const P_ExprNode* transpose(const P_ExprNode* exp) {

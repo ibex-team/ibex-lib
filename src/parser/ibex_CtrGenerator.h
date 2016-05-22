@@ -19,7 +19,6 @@
 #include "ibex_P_Expr.h"
 #include "ibex_Expr.h"
 #include "ibex_Function.h"
-#include "ibex_P_Source.h"
 
 namespace ibex {
 
@@ -29,6 +28,7 @@ class P_NumConstraint;
 class P_OneConstraint;
 class P_ConstraintList;
 class P_ConstraintLoop;
+class P_Source;
 
 class CtrGenerator {
 public:

@@ -9,7 +9,6 @@
 //============================================================================
 
 #include "ibex_P_ExprGenerator.h"
-#include "ibex_ConstantGenerator.h"
 #include "ibex_SyntaxError.h"
 #include "ibex_Exception.h"
 #include "ibex_Expr.h"

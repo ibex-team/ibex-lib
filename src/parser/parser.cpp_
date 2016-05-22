@@ -16,12 +16,12 @@
 #include "ibex_Array.h"
 #include "ibex_System.h"
 #include "ibex_String.h"
-#include "ibex_DimException.h"
+#include "ibex_ExprCopy.h"
+#include "ibex_Dim.h"
 #include "ibex_SyntaxError.h"
 #include "ibex_P_Expr.h"
 #include "ibex_P_NumConstraint.h"
 #include "ibex_MainGenerator.h"
-#include "ibex_ConstantGenerator.h"
 #include "ibex_P_ExprGenerator.h"
 #include "ibex_Exception.h"
 #include "ibex_P_Source.h"
@@ -99,11 +99,12 @@ void begin_choco() {
 	begin();
 
 	// ----- generate all the variables {i} -----
-	Domain x(Dim::scalar());
+	Dim dim=Dim::scalar();
+	Domain x(dim);
 	x.i()=Interval::ALL_REALS;
 	for (int i=0; i<system->nb_var; i++) {
 		char* name=append_index("\0",'{','}',i);
-		scopes().top().add_var(name,&Dim::scalar(),&x);
+		scopes().top().add_var(name,&dim,x);
 		free(name);
 	}
 	// ------------------------------------------
@@ -118,7 +119,7 @@ void begin_function() {
 }
 
 void end_system() {
-	MainGenerator().generate(source(),*system);
+	MainGenerator().generate(scopes().top(),source(),*system);
 	source().cleanup();
 	// TODO: we have to cleanup the data in case of Syntax Error
 	// this probably requires a kind of garbage collector during
@@ -126,7 +127,7 @@ void end_system() {
 }
 
 void end_choco() {
-	MainGenerator().generate(source(),*system);
+	MainGenerator().generate(scopes().top(),source(),*system);
 	source().cleanup();
 	// TODO: see end_system()
 }
