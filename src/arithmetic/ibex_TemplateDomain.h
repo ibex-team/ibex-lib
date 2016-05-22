@@ -7,10 +7,11 @@
  *
  * Author(s)   : Gilles Chabert
  * Created     : Apr 03, 2012
+ * Last Update : May 20, 2016
  * ---------------------------------------------------------------------------- */
 
-#ifndef __IBEX_TENSOR_H__
-#define __IBEX_TENSOR_H__
+#ifndef __IBEX_TEMPLATE_DOMAIN_H__
+#define __IBEX_TEMPLATE_DOMAIN_H__
 
 #include "ibex_Dim.h"
 #include "ibex_DoubleIndex.h"
@@ -101,8 +102,13 @@ public:
 	/**
 	 * \brief Return the ith component of *this.
 	 *
-	 * Creates a domain that points to the ith component of the internal domain.
+	 * Creates a domain that points to the internal domain **if possible**.
+	 * Otherwise, perform a copy. Check the value of is_reference on the result.
+	 *
+	 * \see DoubleIndex::domain_ref.
 	 */
+	TemplateDomain operator[](const DoubleIndex& index);
+
 	const TemplateDomain operator[](const DoubleIndex& index) const;
 
 	/**
@@ -119,6 +125,11 @@ public:
 	 * \brief Intersect the domain with another domain.
 	 */
 	TemplateDomain& operator&=(const TemplateDomain<D>& d);
+
+	/**
+	 * \brief Load a part of a domain from another domain
+	 */
+	void put(int i, int j,const TemplateDomain<D>& d);
 
 	/**
 	 * \brief Equality operator
@@ -457,6 +468,54 @@ const TemplateDomain<D> TemplateDomain<D>::operator[](int ii) const {
 }
 
 template<class D>
+TemplateDomain<D> TemplateDomain<D>::operator[](const DoubleIndex& idx) {
+	if (idx.domain_ref()) {
+		if (idx.all())
+			return TemplateDomain<D>(*this,true);
+		else
+			switch (dim.type()) {
+			case Dim::ROW_VECTOR:
+				return TemplateDomain<D>(v()[idx.col()]);
+			case Dim::COL_VECTOR:
+				return TemplateDomain<D>(v()[idx.row()]);
+			default:
+				if (!idx.one_col())
+					return TemplateDomain<D>(m()[idx.row()],true);
+				else
+					return TemplateDomain<D>(m()[idx.row()][idx.col()]);
+				break;
+			}
+	} else {
+		TemplateDomain<D> d(dim.index_dim(idx));
+		switch (dim.type()) {
+		case Dim::ROW_VECTOR:
+			d.v()=v().subvector(idx.first_col(),idx.last_col());
+			break;
+		case Dim::COL_VECTOR:
+			d.v()=v().subvector(idx.first_row(),idx.last_row());
+			break;
+		default:
+			switch (d.dim.type()) {
+			case Dim::ROW_VECTOR :
+				d.v()=m().row(idx.row()).subvector(idx.first_col(),idx.last_col());
+				break;
+			case Dim::COL_VECTOR:
+				d.v()=m().col(idx.col()).subvector(idx.first_row(),idx.last_row());
+				break;
+			default:
+				d.m()=m().submatrix(idx.first_row(),idx.last_row(),idx.first_col(),idx.last_col());
+			}
+		}
+		return d;
+	}
+}
+
+template<class D>
+const TemplateDomain<D> TemplateDomain<D>::operator[](const DoubleIndex& idx) const {
+	return ((TemplateDomain<D>&) *this)[idx];
+}
+
+template<class D>
 TemplateDomain<D>::~TemplateDomain() {
 	if (!is_reference) {
 		switch(dim.type()) {
@@ -490,6 +549,41 @@ TemplateDomain<D>& TemplateDomain<D>::operator&=(const TemplateDomain<D>& d) {
 	case Dim::MATRIX:       m()&=d.m(); break;
 	}
 	return *this;
+}
+
+template<class D>
+void TemplateDomain<D>::put(int ii, int j, const TemplateDomain<D>& d) {
+	switch(dim.type()) {
+	case Dim::SCALAR:
+		i()=d.i();
+		break;
+	case Dim::ROW_VECTOR:
+		if (d.dim.is_scalar()) v()[j]=d.i();
+		else v().put(j,d.v());
+		break;
+	case Dim::COL_VECTOR:
+		if (d.dim.is_scalar()) v()[ii]=d.i();
+		else v().put(ii,d.v());
+		break;
+	case Dim::MATRIX:
+		switch(d.dim.type()) {
+		case Dim::SCALAR:
+			m()[ii][j]=d.i();
+			break;
+		case Dim::ROW_VECTOR:
+			m()[ii].put(j,d.v());
+			break;
+		case Dim::COL_VECTOR:
+		{
+			IntervalMatrix tmp(d.dim.vec_size(),1);
+			m().put(ii,j,tmp);
+			break;
+		}
+		case Dim::MATRIX:
+			m().put(ii,j,d.m());
+			break;
+		}
+	}
 }
 
 template<class D>
@@ -1023,4 +1117,4 @@ TemplateDomain<D> atanh(const TemplateDomain<D>& d) { unary_func(atanh); }
 
 } // end namespace
 
-#endif // __IBEX_DOMAIN_H__
+#endif // __IBEX_TEMPLATE_DOMAIN_H__

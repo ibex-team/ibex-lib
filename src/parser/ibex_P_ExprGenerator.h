@@ -26,7 +26,7 @@ namespace parser {
 
 class ExprGenerator : public virtual P_ExprVisitor {
 public:
-	ExprGenerator(const Scope& scope);
+	ExprGenerator();
 
 	const Domain& generate_cst(const P_ExprNode& y);
 
@@ -34,7 +34,7 @@ public:
 
 	double generate_dbl(const P_ExprNode& y);
 
-	const ExprNode& generate(const Array<const ExprSymbol>& x, const P_ExprNode& y);
+	const ExprNode& generate(const P_ExprNode& y);
 
 protected:
 	void generate();

@@ -17,7 +17,6 @@
 extern int TK_CONSTANT;
 
 extern const int TK_FUNC_SYMBOL;
-extern const int TK_FUNC_INP_SYMBOL;
 extern const int TK_FUNC_RET_SYMBOL;
 extern const int TK_FUNC_TMP_SYMBOL;
 
@@ -45,7 +44,7 @@ public:
 	virtual void print(ostream& os) const=0;
 };
 
-class S_Cst : public Scope::S_Object {
+class Scope::S_Cst : public Scope::S_Object {
 public:
 
 	S_Cst(const Domain& domain) : node(NULL), cst(domain) { }
@@ -74,7 +73,7 @@ private:
 	S_Cst(const S_Cst& c) : node(c.node), cst(c.cst,true) { }
 };
 
-class S_Func : public Scope::S_Object {
+class Scope::S_Func : public Scope::S_Object {
 public:
 	S_Func(Function* f) : f(f) { }
 
@@ -87,21 +86,7 @@ public:
 	Function* f;
 };
 
-class S_FuncInput : public Scope::S_Object {
-public:
-
-	S_FuncInput(const ExprSymbol* symbol) : symbol(symbol) { }
-
-	S_Object* copy() const { return new S_FuncInput(symbol); }
-
-	int token() const { return TK_FUNC_INP_SYMBOL; }
-
-	void print(ostream& os) const { os << "function input"; }
-
-	const ExprSymbol* symbol;
-};
-
-class S_FuncTmp : public Scope::S_Object {
+class Scope::S_FuncTmp : public Scope::S_Object {
 public:
 	S_FuncTmp(const P_ExprNode* expr) : expr(expr) { }
 
@@ -114,14 +99,12 @@ public:
 	const P_ExprNode* expr;
 };
 
-class S_Entity : public Scope::S_Object {
+class Scope::S_Entity : public Scope::S_Object {
 public:
 
-	S_Entity(const char* name, const Dim* dim, const Domain& value) : symbol(NULL), d(*dim) {
+	S_Entity(const char* name, const Dim* dim, const Domain& value) : symbol(ExprSymbol::new_(name,*dim)), d(*dim) {
 		init_symbol_domain(name, (Domain&) d, value);
 	}
-
-	void bind(const ExprSymbol& node) { symbol = &node; }
 
 	S_Object* copy() const { return new S_Entity(*this); }
 
@@ -129,14 +112,14 @@ public:
 
 	void print(ostream& os) const { os << "entity"; }
 
-	const ExprSymbol* symbol;
+	const ExprSymbol& symbol;
 	const Domain d;
 
 private:
 	S_Entity(const S_Entity& e) : symbol(e.symbol), d(e.d) {  }
 };
 
-class S_Iterator : public Scope::S_Object {
+class Scope::S_Iterator : public Scope::S_Object {
 public:
 
 	S_Iterator(int value) : value(value) { }
@@ -203,23 +186,20 @@ void Scope::add_func(const char* id, Function* f) {
 	tab.insert_new(id, new S_Func(f));
 }
 
-void Scope::add_func_input(const char* id, const ExprSymbol* symbol) {
-	tab.insert_new(id, new S_FuncInput(symbol));
-}
-
 void Scope::add_func_tmp_symbol(const char* id, const P_ExprNode* expr) {
 	tab.insert_new(id, new S_FuncTmp(expr));
 }
 
-void Scope::add_var(const char* id, const Dim* d, const Domain& domain) {
-	tab.insert_new(id, new S_Entity(id,d,domain));
-	vars.push_back(id);
+void Scope::add_var(const char* id, const Dim* dim) {
+	Domain d(Dim::scalar());
+	d.i()=Interval::ALL_REALS;
+	add_var(id,dim,d);
 }
 
-void Scope::bind_var_node(const char* id, const ExprSymbol& node) {
-	const S_Object& s=*tab[id];
-	assert(s.token()==TK_ENTITY);
-	((S_Entity&) s).bind(node);
+void Scope::add_var(const char* id, const Dim* d, const Domain& domain) {
+	S_Entity* s = new S_Entity(id,d,domain);
+	tab.insert_new(id,s);
+	vars.push_back(s);
 }
 
 void Scope::add_iterator(const char* id) {
@@ -239,12 +219,6 @@ Function& Scope::get_func(const char* id) {
 	return *((const S_Func&) s).f;
 }
 
-const ExprSymbol& Scope::get_func_input_symbol(const char* id) const {
-	const S_Object& s=*tab[id];
-	assert(s.token()==TK_FUNC_INP_SYMBOL);
-	return *((const S_FuncInput&) s).symbol;
-}
-
 const P_ExprNode& Scope::get_func_tmp_expr(const char* id) const {
 	const S_Object& s=*tab[id];
 	assert(s.token()==TK_FUNC_TMP_SYMBOL);
@@ -255,12 +229,31 @@ std::pair<const ExprSymbol*,const Domain*> Scope::get_var(const char* id) const 
 	const S_Object& o=*tab[id];
 	assert(o.token()==TK_ENTITY);
 	const S_Entity& s=(const S_Entity&) o;
-	return std::pair<const ExprSymbol*,const Domain*>(s.symbol,&s.d);
+	return std::pair<const ExprSymbol*,const Domain*>(&s.symbol,&s.d);
 }
+
+const char* Scope::var(int i) const {
+	return vars[i]->symbol.name;
+}
+
+Array<const Domain> Scope::var_domains() const {
+	Array<const Domain> d(vars.size());
+	for (int i=0; i<vars.size(); i++)
+		d.set_ref(i,vars[i]->d);
+	return d;
+}
+
+Array<const ExprSymbol> Scope::var_symbols() const {
+	Array<const ExprSymbol> x(vars.size());
+	for (int i=0; i<vars.size(); i++)
+		x.set_ref(i,vars[i]->symbol);
+	return x;
+}
+
 
 /*
 const Scope::S_Iterator& Scope::get_iterator(const char* id) const {
-	const S_Object& s=*tab[id];
+	const S_Object& s=*tab[id];std::pair<const ExprSymbol*,const Domain
 	assert(s.token()!=TK_ITERATOR);
 	return (const S_Iterator&) s;
 }*/

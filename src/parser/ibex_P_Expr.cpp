@@ -30,6 +30,10 @@ P_ExprNode::~P_ExprNode() {
 	delete lab;
 }
 
+const ExprNode& P_ExprNode::generate() const {
+	return ExprGenerator().generate(*this);
+}
+
 ostream& operator<<(ostream& os, const P_ExprNode& e) {
 	P_ExprPrinter p(os,e);
 	return os;
@@ -89,8 +93,8 @@ P_ExprConstant::P_ExprConstant(const Domain& d) : P_ExprNode(CST), value(d) {
 
 }
 
-P_ExprApply::P_ExprApply(const Function& f, const Array<const P_ExprNode>* args) :
-		P_ExprNode(APPLY,*args), f(f) {
+P_ExprApply::P_ExprApply(const Function& f, const vector<const P_ExprNode*>& args) :
+		P_ExprNode(APPLY,args), f(f) {
 
 }
 

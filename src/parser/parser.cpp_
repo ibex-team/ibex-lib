@@ -119,7 +119,7 @@ void begin_function() {
 }
 
 void end_system() {
-	MainGenerator().generate(scopes().top(),source(),*system);
+	MainGenerator().generate(source(),*system);
 	source().cleanup();
 	// TODO: we have to cleanup the data in case of Syntax Error
 	// this probably requires a kind of garbage collector during
@@ -127,7 +127,7 @@ void end_system() {
 }
 
 void end_choco() {
-	MainGenerator().generate(scopes().top(),source(),*system);
+	MainGenerator().generate(source(),*system);
 	source().cleanup();
 	// TODO: see end_system()
 }
@@ -149,15 +149,15 @@ void end_function() {
 }
 
 int _2int(const P_ExprNode& expr) {
-	return ExprGenerator(scopes().top()).generate_int(expr);
+	return ExprGenerator().generate_int(expr);
 }
 
 double _2dbl(const P_ExprNode& expr) {
-	return ExprGenerator(scopes().top()).generate_dbl(expr);
+	return ExprGenerator().generate_dbl(expr);
 }
 
 Domain _2domain(const P_ExprNode& expr) {
-	return ExprGenerator(scopes().top()).generate_cst(expr);
+	return ExprGenerator().generate_cst(expr);
 }
 
 void init_symbol_domain(const char* destname, Domain& dest, const Domain& src) {

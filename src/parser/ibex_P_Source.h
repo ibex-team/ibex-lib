@@ -25,6 +25,9 @@ namespace parser {
  */
 class P_Source {
 public:
+
+	P_Source();
+
 	/**
 	 * Delete the variables symbols.
 	 *
@@ -32,23 +35,13 @@ public:
 	 */
 	void cleanup();
 
-	P_Source();
-
-	/** Variable symbols */
-//	std::vector<const ExprSymbol*> vars;
-
-//	std::vector<const char*> vars;
-//
-//	/** Constant symbols */
-//	std::vector<const char*> cst;
-
 	/** The functions */
 	std::vector<Function*> func;
 
 	/** The goal (NULL if none (pure satisfaction problem)) */
 	const P_ExprNode* goal;
 
-	/** The constraints */
+	/** The constraints (NULL if none (pure optimization problem)) */
 	P_ConstraintList* ctrs;
 };
 

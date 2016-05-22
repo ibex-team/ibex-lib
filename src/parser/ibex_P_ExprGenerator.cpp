@@ -15,15 +15,17 @@
 
 using namespace std;
 
+extern stack<ibex::parser::Scope>& scopes();
+
 namespace ibex {
 
 namespace parser {
 
-Label::~Label() { }
-
 class LabelNode : public Label {
 public:
 	LabelNode(const ExprNode* node) : _node(node) { }
+
+	virtual ~LabelNode() { }
 
 	virtual const ExprNode& node() const { return *_node; }
 
@@ -71,16 +73,16 @@ public:
 	}
 
 	virtual const ExprNode& node() const {
-		if (!node) {
+		if (!cst) {
 			if (num_type!=OTHER)
 				throw SyntaxError("Unexpected infinity symbol \"oo\"");
 
 			// The final node domain is *not* a reference to
 			// the constant domain: all objects created
 			// during parsing can be safely deleted
-			node = new ExprConstant::new_(_domain, false);
+			cst = new ExprConstant::new_(_domain, false);
 		}
-		return *node;
+		return *cst;
 	}
 
 	virtual bool is_const() const { return true; }
@@ -118,7 +120,7 @@ double to_double(const Domain& d) {
 	return d.i().mid();
 }
 
-ExprGenerator::ExprGenerator(const Scope& scope) : scope(scope) {
+ExprGenerator::ExprGenerator() : scope(scopes().top()) {
 
 }
 
@@ -136,12 +138,7 @@ double ExprGenerator::generate_dbl(const P_ExprNode& y) {
 	return to_double(generate_cst(y));
 }
 
-const ExprNode& ExprGenerator::generate(const Array<const ExprSymbol>& x, const P_ExprNode& y) {
-
-	for (int i=0; i<n; i++) {
-		scope.bind_var_node(scope.vars[i], x[i]);
-	}
-
+const ExprNode& ExprGenerator::generate(const P_ExprNode& y) {
 	// create the nodes for the constants symbols
 	// by default, all constants are used (see destruction below)
 	int m=scope.cst.size();
@@ -205,7 +202,7 @@ void ExprGenerator::visit(const P_ExprNode& e) {
 		try {
 			switch(e.op) {
 			case P_ExprNode::INFTY:      e.lab=new LabelConst::pos_infinity(); break;
-			case P_ExprNode::VAR_SYMBOL: e.lab=new LabelNode(scope.get_entity(((P_ExprVarSymbol&) e).name).first); break;
+			case P_ExprNode::VAR_SYMBOL: e.lab=new LabelNode(scope.get_var(((P_ExprVarSymbol&) e).name).first); break;
 			case P_ExprNode::CST_SYMBOL: e.lab=new LabelConst(scope.get_cst(((P_ExprCstSymbol&) e).name),true); break;
 			case P_ExprNode::CST:        e.lab=new LabelConst(((P_ExprConstant&) e).value,true); break;
 			case P_ExprNode::ITER:       e.lab=new LabelConst(scope.get_iter_value(((P_ExprIter&) e).name)); break;

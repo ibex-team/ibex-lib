@@ -125,7 +125,7 @@ Dim Dim::index_dim(const DoubleIndex& idx) const {
 		if (idx.all_cols())
 			return *this;
 		else if (idx.one_col()) {
-			switch(type) {
+			switch(type()) {
 			case MATRIX: return col_vec(nb_rows());
 			case COL_VECTOR: return *this;
 			case ROW_VECTOR:
@@ -137,7 +137,7 @@ Dim Dim::index_dim(const DoubleIndex& idx) const {
 		}
 	} else if (idx.one_row()) {
 		if (idx.all_cols()) {
-			switch(type) {
+			switch(type()) {
 			case MATRIX: return row_vec(nb_cols());
 			case ROW_VECTOR: return *this;
 			case COL_VECTOR:

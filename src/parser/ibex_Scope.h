@@ -52,11 +52,11 @@ public:
 	/** Add a function. */
 	void add_func(const char* id, Function* f);
 
-	/** Add an argument of a function. */
-	void add_func_input(const char* input_symbol, const ExprSymbol* symbol);
-
 	/** Add a local variable in a function. */
 	void add_func_tmp_symbol(const char* tmp_symbol, const P_ExprNode* expr);
+
+	/** Add a variable symbol (domain is (-oo,oo)x...). */
+	void add_var(const char* id, const Dim* dim);
 
 	/** Add a variable symbol. */
 	void add_var(const char* id, const Dim* dim, const Domain& d);
@@ -75,17 +75,20 @@ public:
 	/* Return the function */
 	Function& get_func(const char* id);
 
-	/* Return the input symbol of a function */
-	const ExprSymbol& get_func_input_symbol(const char* id) const;
-
 	/* Return the expression bound to a tmp symbol in a function */
 	const P_ExprNode& get_func_tmp_expr(const char* id) const;
 
 	/* Return the symbol attached to a string */
 	std::pair<const ExprSymbol*,const Domain*> get_var(const char* id) const;
 
-	/* Bind an ExprNode object to a variable symbol */
-	void bind_var_node(const char* id, const ExprSymbol&);
+	/** Name of the ith variable (for CHOCO) */
+	const char* var(int i) const;
+
+	/** All the variable domains (in declaration order). */
+	Array<const Domain> var_domains() const;
+
+	/** All the variable symbols (in declaration order). */
+	Array<const ExprSymbol> var_symbols() const;
 
 	/* Return the value of the iterator */
 	int get_iter_value(const char* id) const;
@@ -104,15 +107,20 @@ public:
 	/* Return if id is the symbol of an interator */
 	bool is_iter_symbol(const char* id) const;
 
-	/* classes used to contain objects bound to symbols */
-	class S_Object;
-
-	/** All the variable symbols (in declaration order). */
-	std::vector<const char*> vars;
-
 	/** All the constant symbols (in declaration order).*/
 	std::vector<const char*> cst;
+
 private:
+	/* classes used to contain objects bound to symbols */
+	class S_Object;
+	class S_Entity;
+	class S_Cst;
+	class S_Func;
+	class S_FuncTmp;
+	class S_Iterator;
+
+	/** All the variables (in declaration order).*/
+	std::vector<S_Entity*> vars;
 
 	friend std::ostream& operator<<(std::ostream& os, const Scope& scope);
 

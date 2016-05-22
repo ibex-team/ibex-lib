@@ -35,6 +35,8 @@ public:
 	/** \brief Uninitialized object */
 	DoubleIndex();
 
+	DoubleIndex(const Dim& d, int first_row, int last_row, int first_col, int last_col);
+
 	DoubleIndex(const DoubleIndex&);
 	long long hash() const;
 	int row() const;
@@ -45,6 +47,7 @@ public:
 	int last_col() const;
 	int nb_rows() const;
 	int nb_cols() const;
+	bool one_elt() const;
 	bool one_row() const;
 	bool one_col() const;
 	bool all_rows() const;
@@ -53,9 +56,13 @@ public:
 	bool operator==(const DoubleIndex& idx) const;
 	bool operator!=(const DoubleIndex& idx) const;
 
-private:
-	DoubleIndex(const Dim& d, int first_row, int last_row, int first_col, int last_col);
+	/**
+	 * \brief True a domain with this index can be a reference
+	 */
+	bool domain_ref() const;
 	Dim dim;
+
+private:
 	int r1, r2, c1, c2;
 };
 
@@ -139,6 +146,7 @@ inline int DoubleIndex::last_row() const  { return r2; }
 inline int DoubleIndex::last_col() const  { return c2; }
 inline int DoubleIndex::nb_rows() const   { return r2-r1+1; }
 inline int DoubleIndex::nb_cols() const   { return c2-c1+1; }
+inline bool DoubleIndex::one_elt() const  { return one_row() && one_col(); }
 inline bool DoubleIndex::one_row() const  { return r1==r2; }
 inline bool DoubleIndex::one_col() const  { return c1==c2; }
 inline bool DoubleIndex::all_rows() const { return r1==0 && r2==dim.nb_rows()-1; }
@@ -148,30 +156,7 @@ inline bool DoubleIndex::operator==(const DoubleIndex& idx) const {
 	return dim==idx.dim && r1==idx.r1 && r2==idx.r2 && c1==idx.c1 && c2==idx.c2;
 }
 inline bool DoubleIndex::operator!=(const DoubleIndex& idx) const { return !(*this==idx); }
-
-inline std::ostream& operator<<(std::ostream& os, const DoubleIndex idx) {
-	if (idx.all()) return os;
-
-	os << "(";
-	switch (idx.dim.type) {
-	case Dim::ROW_VECTOR:
-		if (idx.one_col()) return os << idx.first_col();
-		else return os << idx.first_col() << ":" << idx.last_col();
-	case Dim::COL_VECTOR:
-		if (idx.one_row()) return os << idx.first_row();
-		else return os << idx.first_row() << ":" << idx.last_row();
-	default:
-		assert(idx.dim.is_matrix());
-		if (idx.all_rows()) os << ":";
-		else if (idx.one_row()) os << idx.first_row();
-		else os << idx.first_row() << ":" << idx.last_row();
-		os << ",";
-		if (idx.all_cols()) os << ":";
-		else if (idx.one_col()) os << idx.first_col();
-		else os << idx.first_col() << ":" << idx.last_col();
-	}
-	return os << ")";
-}
+inline bool DoubleIndex::domain_ref() const { return all() || (one_row() && (all_cols() || one_col())); }
 
 } /* namespace ibex */
 

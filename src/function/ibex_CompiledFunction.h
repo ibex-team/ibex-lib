@@ -160,8 +160,8 @@ void CompiledFunction::forward(const V& algo) const {
 
 	for (int i=n-1; i>=0; i--) {
 		switch(code[i]) {
-		case IDX:    ((V&) algo).index_fwd  (args[i][0], i); break;
-		case IDX_CP: ((V&) algo).index_cp_fwd(args[i][0], i); break;
+		case IDX:    ((V&) algo).idx_fwd    (args[i][0], i); break;
+		case IDX_CP: ((V&) algo).idx_cp_fwd (args[i][0], i); break;
 		case VEC:    ((V&) algo).vector_fwd (args[i], i); break;
 		case SYM:    ((V&) algo).symbol_fwd (i); break;
 		case CST:    ((V&) algo).cst_fwd    (i); break;

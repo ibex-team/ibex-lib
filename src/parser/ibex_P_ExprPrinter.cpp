@@ -51,7 +51,7 @@ void P_ExprPrinter::visit(const P_ExprNode& e) {
 	case P_ExprNode::MAX:			os << "max";   print_arg_list(e);  break;
 	case P_ExprNode::MIN:			os << "min";   print_arg_list(e);  break;
 	case P_ExprNode::ATAN2:         os << "atan2"; print_arg_list(e);  break;
-	case P_ExprNode::POWER:         visit(e.arg[0]); os << "^" << visit(e.arg[1]); break;
+	case P_ExprNode::POWER:         visit(e.arg[0]); os << "^"; visit(e.arg[1]); break;
 	case P_ExprNode::MINUS:         os << "-" ; visit(e.arg[0]);       break;
 	case P_ExprNode::TRANS:         print_arg_list(e); os << "'";      break;
 	case P_ExprNode::SIGN:          os << "sign";  print_arg_list(e);  break;

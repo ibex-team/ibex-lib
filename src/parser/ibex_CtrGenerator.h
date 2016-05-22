@@ -14,7 +14,7 @@
 #include <vector>
 #include <stack>
 #include <utility>
-#include "ibex_Scope.h"
+
 #include "ibex_NumConstraint.h"
 #include "ibex_P_Expr.h"
 #include "ibex_Expr.h"
@@ -32,21 +32,18 @@ class P_Source;
 
 class CtrGenerator {
 public:
-	void generate(std::stack<Scope>& scopes, const P_Source& source, std::vector<NumConstraint*>& dest);
+	std::vector<ExprCtr*> generate(const P_ConstraintList& ctrs);
 
 	void visit(const P_NumConstraint& c);
 	void visit(const P_OneConstraint& c);
 	void visit(const P_ConstraintList& l);
 	void visit(const P_ConstraintLoop& l);
 
-
 protected:
-
-	std::stack<Scope>& scopes;
 
 	P_Source& source;
 
-	std::vector<NumConstraint*>& ctrs;
+	std::vector<ExprCtr*> ctrs;
 
 };
 

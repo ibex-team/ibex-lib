@@ -15,22 +15,20 @@
 #include "ibex_P_ExprGenerator.h"
 #include "ibex_Expr2DAG.h"
 #include "ibex_P_Source.h"
+#include "ibex_Scope.h"
 
 using namespace std;
+
+extern stack<ibex::parser::Scope>& scopes();
 
 namespace ibex {
 namespace parser {
 
-void CtrGenerator::generate(std::stack<Scope>& scopes, const P_Source& source,
-		std::vector<NumConstraint*>& dest) : scopes(scopes), source(source), ctrs(dest) {
+std::vector<ExprCtr*> CtrGenerator::generate(const P_ConstraintList& ctrs) {
 
-	assert(dest.empty());
+	visit(ctrs);
 
-	scopes.push(Scope()); // a fresh new scope! (needed otherwise scopes.top() is NULL -> fix issue #36)
-
-	visit(*source.ctrs);
-*
-	scopes.pop();
+	return this->ctrs;
 }
 
 void CtrGenerator::visit(const P_NumConstraint& c) {
@@ -38,15 +36,6 @@ void CtrGenerator::visit(const P_NumConstraint& c) {
 }
 
 void CtrGenerator::visit(const P_OneConstraint& c) {
-
-	// create the nodes for the variables
-	int n=source.vars.size();
-	Array<const ExprSymbol> vars(n);
-	for (int i=0; i<n; i++) {
-		vars.set_ref(i,ExprSymbol::new_(source.vars[i], scopes.top().get_var(source.vars[i]).second->dim));
-	}
-
-	const ExprNode& e=ExprGenerator(scopes.top()).generate(vars, c.expr);
 
 //	Array<const ExprSymbol> dest_vars2(n);
 //	varcopy(vars,dest_vars2);
@@ -57,7 +46,7 @@ void CtrGenerator::visit(const P_OneConstraint& c) {
 
 //	ctrs->push_back(new NumConstraint(dest_vars2, ExprCtr(e2,c.op)));
 
-	ctrs.push_back(new NumConstraint(vars, ExprCtr(e,c.op)));
+	ctrs.push_back(new ExprCtr(c.expr.generate(),c.op));
 }
 
 void CtrGenerator::visit(const P_ConstraintList& list) {
@@ -69,21 +58,18 @@ void CtrGenerator::visit(const P_ConstraintList& list) {
 void CtrGenerator::visit(const P_ConstraintLoop& loop) {
 	const char* name     = loop.iter;
 
-	int begin=ExprGenerator(scopes.top()).generate_int(loop.first_value);
-	int end=ExprGenerator(scopes.top()).generate_int(loop.last_value);
+	int begin=_2int(loop.first_value);
+	int end=_2int(loop.last_value);
 
-	if (!scopes.empty())
-		scopes.push(scopes.top());
-	else
-		scopes.push(Scope());
+	scopes().push(scopes().top());
 
-	scopes.top().add_iterator(name);
+	scopes().top().add_iterator(name);
 
 	for (int i=begin; i<=end; i++) {
-		scopes.top().set_iter_value(name,i);
+		scopes().top().set_iter_value(name,i);
 		visit(loop.ctrs);
 	}
-	scopes.pop();
+	scopes().pop();
 }
 
 

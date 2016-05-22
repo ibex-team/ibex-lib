@@ -91,9 +91,12 @@ public:
 
 	virtual void acceptVisitor(P_ExprVisitor& v) const { v.visit(*this); }
 
+	// Generate the expression with the current scope.
+	const ExprNode& generate() const;
+
 	operation op;
 	Array<const P_ExprNode> arg;
-	Label* lab;
+	mutable Label* lab;
 };
 
 /**
@@ -221,7 +224,7 @@ public:
  */
 class P_ExprApply : public P_ExprNode {
 public:
-	P_ExprApply(const Function& f, const Array<const P_ExprNode>* args);
+	P_ExprApply(const Function& f, const std::vector<const P_ExprNode*>& args);
 
 	virtual void acceptVisitor(P_ExprVisitor& v) const { v.visit(*this); }
 
