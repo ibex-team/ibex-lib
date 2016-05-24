@@ -68,9 +68,14 @@ public:
 	}
 
 	// Label of a constant symbol.
-	LabelConst(std::pair<const ExprConstant*, const Domain*>& p) : _domain(*p.second,true), num_type(OTHER), cst(p.first) {
+//	LabelConst(std::pair<const ExprConstant*, const Domain*>& p) : _domain(*p.second,true), num_type(OTHER), cst(p.first) {
+//
+//	}
+//
+	LabelConst(const ExprConstant& node) : _domain(node.get(),true), num_type(OTHER), cst(&node) {
 
 	}
+
 
 	virtual const ExprNode& node() const {
 		if (!cst) {
@@ -80,7 +85,7 @@ public:
 			// The final node domain is *not* a reference to
 			// the constant domain: all objects created
 			// during parsing can be safely deleted
-			cst = new ExprConstant::new_(_domain, false);
+			cst = &ExprConstant::new_(_domain, false);
 		}
 		return *cst;
 	}
@@ -139,26 +144,26 @@ double ExprGenerator::generate_dbl(const P_ExprNode& y) {
 }
 
 const ExprNode& ExprGenerator::generate(const P_ExprNode& y) {
-	// create the nodes for the constants symbols
-	// by default, all constants are used (see destruction below)
-	int m=scope.cst.size();
-	Array<const ExprConstant> csts(m);
-	for (int i=0; i<m; i++) {
-		const char* id=scope.cst[i];
-		// Domains passed by copy
-		csts.set_ref(i,ExprConstant::new_(*scope.get_cst(id).second));
-		scope.bind_cst_node(id, csts[i]);
-	}
+//	// create the nodes for the constants symbols
+//	// by default, all constants are used (see destruction below)
+//	int m=scope.cst.size();
+//	Array<const ExprConstant> csts(m);
+//	for (int i=0; i<m; i++) {
+//		const char* id=scope.cst[i];
+//		// Domains passed by copy
+//		csts.set_ref(i,ExprConstant::new_(*scope.get_cst(id).second));
+//		scope.bind_cst_node(id, csts[i]);
+//	}
 
 	visit(y);
 
 	// destroy unused constants
-	for (int i=0; i<m; i++) {
-		if (csts[i].fathers.is_empty() // no father
-				&& (&csts[i]!=&(y.lab->node())) // and not root node
-		)
-			delete &csts[i];
-	}
+//	for (int i=0; i<m; i++) {
+//		if (csts[i].fathers.is_empty() // no father
+//				&& (&csts[i]!=&(y.lab->node())) // and not root node
+//		)
+//			delete &csts[i];
+//	}
 
 	return y.lab->node();
 }

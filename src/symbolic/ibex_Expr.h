@@ -119,6 +119,9 @@ public:
 	/** Return the type of this subexpression. */
 	Dim::Type type() const;
 
+	/** Simplify the expression. */
+	const ExprNode& simplify() const;
+
 	/** Indexing */
 	const ExprIndex& operator[](int i) const;
 
@@ -210,11 +213,9 @@ public:
 	bool indexed_symbol() const;
 
 	/**
-	 * \brief The symbol and the shift (in the domain)
-	 *
-	 * \return <NULL,-1> if this node is not an indexed symbol.
+	 * \brief The components of the symbol that are used.
 	 */
-	std::pair<const ExprSymbol*, int> symbol_shift() const;
+	std::pair<const ExprSymbol*, bool**> symbol_mask() const;
 
 	static const ExprIndex& new_(const ExprNode& subexpr, const DoubleIndex& index);
 
@@ -471,6 +472,8 @@ public:
 
 	/* Create a new symbol. The string \a name is duplicated. */
 	static const ExprSymbol& new_(const char* name, const Dim& dim=Dim::scalar());
+
+	bool** mask() const;
 
 private:
 	friend class Variable;

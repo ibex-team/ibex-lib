@@ -12,6 +12,7 @@
 #include "ibex_Expr.h"
 #include "ibex_Function.h"
 #include "ibex_ExprPrinter.h"
+#include "ibex_ExprSimplify.h"
 #include "ibex_ExprSubNodes.h"
 #include "ibex_ExprSize.h"
 #include "ibex_ExprCmp.h"
@@ -56,6 +57,10 @@ bool ExprNode::operator!=(const ExprNode& e) const {
 	return !(*this==e);
 }
 
+const ExprNode& ExprNode::simplify() const {
+	return ExprSimplify().simplify(*this);
+}
+
 void cleanup(const Array<const ExprNode>& expr, bool delete_symbols) {
 	ExprSubNodes nodes(expr);
 
@@ -81,32 +86,63 @@ bool ExprIndex::indexed_symbol() const {
 	return expr_index->indexed_symbol();
 }
 
-pair<const ExprSymbol*, int> ExprIndex::symbol_shift() const {
+bool** ExprSymbol::mask() const {
+	int n=dim.nb_rows();
+	int m=dim.nb_cols();
+	bool **mask=new bool*[n];
+	for (int i=0; i<n; i++) {
+		mask[i]=new bool[m];
+		for (int j=0; j<m; j++)
+			mask[i][j]=true;
+	}
+	return mask;
+}
 
-	int expr_shift;
+pair<const ExprSymbol*, bool**> ExprIndex::symbol_mask() const {
+	bool** mask;
 
 	const ExprSymbol* symbol=dynamic_cast<const ExprSymbol*>(&expr);
 
-	if (symbol)
-		expr_shift=0;
-	else {
+	int n=expr.dim.nb_rows();
+	int m=expr.dim.nb_cols();
+
+	if (symbol) {
+		mask=symbol->mask();
+	} else {
 		const ExprIndex* expr_index=dynamic_cast<const ExprIndex*>(&expr);
-		if (!expr_index) return pair<const ExprSymbol*, int>(NULL,-1);
+		if (!expr_index) return pair<const ExprSymbol*, bool**>(NULL,NULL);
 		else {
-			pair<const ExprSymbol*, int> p = expr_index->symbol_shift();
+			pair<const ExprSymbol*, bool**> p = expr_index->symbol_mask();
 			symbol=p.first;
-			expr_shift=p.second;
+			mask=p.second;
 		}
 	}
 
-	/**
-	 *
-	 * TODO
-	 * TODO
-	 * TODO
-	 *
-	 */
-	return pair<const ExprSymbol*, int>(symbol, expr_shift + 0*dim.size());
+	// Find the first element in the mask which is "true".
+	// This delimits the portion of the matrix that corresponds
+	// to the sub-expression.
+	int r=0;
+	int c=0;
+	while (!mask[r][c]) {
+		c++;
+		if (c==symbol->dim.nb_cols()) {
+			r++;
+			c=0;
+		}
+		assert(r<symbol->dim.nb_rows());
+	}
+
+	int i=0;
+	for (; i<index.first_row(); i++)
+		for (int j=0; j<m; j++) mask[r+i][c+j]=false;
+	for (; i<=index.last_row(); i++) {
+		for (int j=0; j<index.first_col(); j++) mask[r+i][c+j]=false;
+		for (int j=index.last_col()+1; j<m; j++) mask[r+i][c+j]=false;
+	}
+	for (; i<n; i++)
+		for (int j=0; j<m; j++) mask[r+i][c+j]=false;
+
+	return pair<const ExprSymbol*, bool**>(symbol, mask);
 }
 
 ExprNAryOp::ExprNAryOp(const Array<const ExprNode>& _args, const Dim& dim) :

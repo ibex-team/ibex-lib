@@ -66,11 +66,11 @@ public:
 
 	/*------------- get data associated to symbols in the current scope -----------*/
 
-	/* Bind an ExprNode object to a constant symbol */
-	void bind_cst_node(const char* id, const ExprConstant&);
+//	/* Bind an ExprNode object to a constant symbol */
+//	void bind_cst_node(const char* id, const ExprConstant&);
 
 	/* Return the constant */
-	std::pair<const ExprConstant*, const Domain*> get_cst(const char* id) const;
+	const ExprConstant& get_cst(const char* id) const;
 
 	/* Return the function */
 	Function& get_func(const char* id);

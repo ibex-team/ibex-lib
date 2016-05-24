@@ -16,6 +16,7 @@
 #include "ibex_Expr2DAG.h"
 #include "ibex_P_Source.h"
 #include "ibex_Scope.h"
+#include "parser.cpp_"
 
 using namespace std;
 

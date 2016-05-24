@@ -13,6 +13,7 @@
 #include "ibex_CtrGenerator.h"
 #include "ibex_P_ExprGenerator.h"
 #include "ibex_Scope.h"
+#include "ibex_SystemFactory.h"
 
 #include <utility>
 #include <stack>

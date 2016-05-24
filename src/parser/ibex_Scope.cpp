@@ -47,12 +47,9 @@ public:
 class Scope::S_Cst : public Scope::S_Object {
 public:
 
-	S_Cst(const Domain& domain) : node(NULL), cst(domain) { }
+	S_Cst(const Domain& domain) : node(ExprConstant::new_(domain)), cst(domain) { }
 
-	// see add_cst
-	S_Cst(const Dim& d) : node(NULL), cst(Dim::scalar()) { }
-
-	void bind(const ExprConstant& c) { node = &c; }
+//	void bind(const ExprConstant& c) { node = &c; }
 
 	S_Object* copy() const { return new S_Cst(*this); }
 
@@ -60,7 +57,7 @@ public:
 
 	void print(ostream& os) const { os << "constant " << cst; }
 
-	const ExprConstant* node;
+	const ExprConstant& node;
 	Domain cst;
 
 private:
@@ -165,16 +162,17 @@ void Scope::add_cst(const char* id, const Domain& domain) {
 }
 
 void Scope::add_cst(const char* id, const Dim* dim, const Domain& dom) {
-	S_Cst* c=new S_Cst(*dim);
-	tab.insert_new(id, c);
-	init_symbol_domain(id, c->cst, dom);
+	Domain tmp(*dim);
+	init_symbol_domain(id, tmp, dom);
+
+	tab.insert_new(id, new S_Cst(tmp));
 }
 
-void Scope::bind_cst_node(const char* id, const ExprConstant& node) {
-	const S_Object& s=*tab[id];
-	assert(s.token()==TK_CONSTANT);
-	((S_Cst&) s).bind(node);
-}
+//void Scope::bind_cst_node(const char* id, const ExprConstant& node) {
+//	const S_Object& s=*tab[id];
+//	assert(s.token()==TK_CONSTANT);
+//	((S_Cst&) s).bind(node);
+//}
 
 void Scope::rem_cst(const char* id) {
 	assert(tab[id]->token()==TK_CONSTANT);
@@ -206,11 +204,13 @@ void Scope::add_iterator(const char* id) {
 	tab.insert_new(id, new S_Iterator(-1));
 }
 
-std::pair<const ExprConstant*, const Domain*> Scope::get_cst(const char* id) const {
+//std::pair<const ExprConstant*, const Domain*> Scope::get_cst(const char* id) const {
+const ExprConstant& Scope::get_cst(const char* id) const {
 	const S_Object& o=*tab[id];
 	assert(o.token()==TK_CONSTANT);
 	const S_Cst& s=(const S_Cst&) o;
-	return std::pair<const ExprConstant*,const Domain*>(s.node,&s.cst);
+	//return std::pair<const ExprConstant*,const Domain*>(s.node,&s.cst);
+	return s.node;
 }
 
 Function& Scope::get_func(const char* id) {
