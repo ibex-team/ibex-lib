@@ -84,6 +84,9 @@ public:
 	/** Name of the ith variable (for CHOCO) */
 	const char* var(int i) const;
 
+	/** Number of variables. */
+	int nb_var() const;
+
 	/** All the variable domains (in declaration order). */
 	Array<const Domain> var_domains() const;
 

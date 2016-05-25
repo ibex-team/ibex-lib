@@ -40,9 +40,6 @@ public:
 	void visit(const P_ConstraintLoop& l);
 
 protected:
-
-	P_Source& source;
-
 	std::vector<ExprCtr*> ctrs;
 
 };

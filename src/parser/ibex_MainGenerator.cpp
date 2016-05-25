@@ -31,7 +31,7 @@ void MainGenerator::generate(const P_Source& source, System& sys) {
 	SystemFactory fac;
 
 	//================= generate the variables & domains =====================
-	int n=scopes().top().vars.size();
+	int n=scopes().top().nb_var();
 	int input_size=0;
 
 	fac.add_var(scopes().top().var_symbols());

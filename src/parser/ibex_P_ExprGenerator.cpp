@@ -47,12 +47,12 @@ public:
 
 	// This constant cannot be represented by a Domain
 	// object because (+oo,+oo) is automatically replaced by the empty set.
-	static LabelConst pos_infinity() {
-		return LabelConst(POS_INF);
+	static LabelConst* pos_infinity() {
+		return new LabelConst(POS_INF);
 	}
 
-	static LabelConst neg_infinity() {
-		return LabelConst(NEG_INF);
+	static LabelConst* neg_infinity() {
+		return new LabelConst(NEG_INF);
 	}
 
 	LabelConst(int v) : _domain(Dim::scalar()), num_type(OTHER), cst(NULL) {
@@ -85,7 +85,7 @@ public:
 			// The final node domain is *not* a reference to
 			// the constant domain: all objects created
 			// during parsing can be safely deleted
-			cst = &ExprConstant::new_(_domain, false);
+			((LabelConst*) this)->cst = &ExprConstant::new_(_domain, false);
 		}
 		return *cst;
 	}
@@ -191,12 +191,12 @@ void ExprGenerator::visit(const P_ExprNode& e) {
 
 		if (e.op==P_ExprNode::MINUS) {
 			LabelConst& c=*((LabelConst*) e.arg[0].lab);
-			switch(c.number_type) {
+			switch(c.num_type) {
 			case LabelConst::POS_INF:
-				e.lab = new LabelConst::neg_infinity();
+				e.lab = LabelConst::neg_infinity();
 				break;
 			case LabelConst::NEG_INF:
-				e.lab = new LabelConst::pos_infinity();
+				e.lab = LabelConst::pos_infinity();
 				break;
 			default:
 				e.lab = new LabelConst(-arg_cst[0]);
@@ -206,9 +206,9 @@ void ExprGenerator::visit(const P_ExprNode& e) {
 
 		try {
 			switch(e.op) {
-			case P_ExprNode::INFTY:      e.lab=new LabelConst::pos_infinity(); break;
+			case P_ExprNode::INFTY:      e.lab=LabelConst::pos_infinity(); break;
 			case P_ExprNode::VAR_SYMBOL: e.lab=new LabelNode(scope.get_var(((P_ExprVarSymbol&) e).name).first); break;
-			case P_ExprNode::CST_SYMBOL: e.lab=new LabelConst(scope.get_cst(((P_ExprCstSymbol&) e).name),true); break;
+			case P_ExprNode::CST_SYMBOL: e.lab=new LabelConst(scope.get_cst(((P_ExprCstSymbol&) e).name)); break;
 			case P_ExprNode::CST:        e.lab=new LabelConst(((P_ExprConstant&) e).value,true); break;
 			case P_ExprNode::ITER:       e.lab=new LabelConst(scope.get_iter_value(((P_ExprIter&) e).name)); break;
 			case P_ExprNode::IDX:
@@ -484,9 +484,10 @@ void ExprGenerator::visit(const P_ExprWithIndex& e) {
 			visit_index(expr.dim(), e.arg[1], e.arg[2], e.matlab_style);
 
 	if (expr.is_const()) {
-		e.lab = new LabelConst(expr.domain()[idx],true);
+		Domain d=expr.domain()[idx];
+		e.lab = new LabelConst(d,d.is_reference);
 	} else {
-		e.lab = new LabelNode(new ExprIndex(expr.node(),idx));
+		e.lab = new LabelNode(&ExprIndex::new_(expr.node(),idx));
 	}
 }
 

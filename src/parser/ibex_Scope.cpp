@@ -236,6 +236,10 @@ const char* Scope::var(int i) const {
 	return vars[i]->symbol.name;
 }
 
+int Scope::nb_var() const {
+	return vars.size();
+}
+
 Array<const Domain> Scope::var_domains() const {
 	Array<const Domain> d(vars.size());
 	for (int i=0; i<vars.size(); i++)
