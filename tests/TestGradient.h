@@ -36,6 +36,7 @@ public:
 		CPPUNIT_TEST(dist);
 		CPPUNIT_TEST(jac01);
 		CPPUNIT_TEST(jac02);
+		CPPUNIT_TEST(jac03);
 		CPPUNIT_TEST(hansen01);
 		CPPUNIT_TEST(mulVV);
 		CPPUNIT_TEST(transpose01);
@@ -54,6 +55,7 @@ public:
 	void dist();
 	void jac01();
 	void jac02();
+	void jac03();
 	void hansen01();
 
 	void mulVV();

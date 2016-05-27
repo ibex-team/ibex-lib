@@ -67,6 +67,10 @@ void Function::jacobian(const IntervalVector& x, IntervalMatrix& J) const {
 	// by calling just once the forward phase on f itself
 	for (int i=0; i<image_dim(); i++) {
 		(*this)[i].gradient(x,J[i]);
+		if (J[i].is_empty()) {
+			J.set_empty();
+			return;
+		}
 	}
 }
 
