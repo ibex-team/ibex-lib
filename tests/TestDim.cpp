@@ -32,7 +32,7 @@ void TestDim::scalar() {
 
 }
 
-void TestDim::test02() {
+void TestDim::row_vec() {
 	Dim d(Dim::row_vec(3));
 	CPPUNIT_ASSERT(d.nb_rows()==1);
 	CPPUNIT_ASSERT(d.nb_cols()==3);
@@ -47,7 +47,7 @@ void TestDim::test02() {
 	CPPUNIT_ASSERT((Dim::scalar()=d)==d);
 }
 
-void TestDim::test03() {
+void TestDim::matrix() {
 	Dim d(Dim::matrix(2,3));
 	CPPUNIT_ASSERT(d.nb_rows()==2);
 	CPPUNIT_ASSERT(d.nb_cols()==3);
@@ -191,9 +191,7 @@ void TestDim::mul() {
 	CPPUNIT_ASSERT      (mul_dim(mat33,mat32)==mat32);
 	CPPUNIT_ASSERT_THROW(mul_dim(mat33,mat23),DimException);
 	CPPUNIT_ASSERT      (mul_dim(mat33,mat33)==mat33);
-
 }
-
 
 void TestDim::vec() {
 	Dim sca;
@@ -231,9 +229,40 @@ void TestDim::vec() {
 	CPPUNIT_ASSERT      (vec_dim(Array<const Dim>(col2,mat22),true)==mat23);
 	CPPUNIT_ASSERT_THROW(vec_dim(Array<const Dim>(col2,mat22),false),DimException);
 	CPPUNIT_ASSERT      (vec_dim(Array<const Dim>(col2,mat22,col2),true)==Dim::matrix(2,4));
-
-
 }
 
+void TestDim::index() {
+	Dim sca;
+	Dim row2(Dim::row_vec(2));
+	Dim row3(Dim::row_vec(3));
+	Dim col2(Dim::col_vec(2));
+	Dim col3(Dim::col_vec(3));
+	Dim mat22(Dim::matrix(2,2));
+	Dim mat32(Dim::matrix(3,2));
+	Dim mat23(Dim::matrix(2,3));
+	Dim mat33(Dim::matrix(3,3));
+
+	CPPUNIT_ASSERT      (sca.index_dim(DoubleIndex::one_elt(sca,0,0))==sca);
+
+	CPPUNIT_ASSERT      (row3.index_dim(DoubleIndex::one_elt(row3,0,0))==sca);
+	CPPUNIT_ASSERT      (row3.index_dim(DoubleIndex::one_row(row3,0))==row3);
+	CPPUNIT_ASSERT      (row3.index_dim(DoubleIndex::rows(row3,0,1))==row2);
+
+	CPPUNIT_ASSERT      (col3.index_dim(DoubleIndex::one_elt(col3,0,0))==sca);
+	CPPUNIT_ASSERT      (col3.index_dim(DoubleIndex::one_col(col3,0))==col3);
+	CPPUNIT_ASSERT      (col3.index_dim(DoubleIndex::cols(col3,0,1))==col2);
+
+	CPPUNIT_ASSERT      (mat23.index_dim(DoubleIndex::one_elt(mat23,0,0))==sca);
+	CPPUNIT_ASSERT      (mat23.index_dim(DoubleIndex::one_row(mat23,0))==col3);
+	CPPUNIT_ASSERT      (mat23.index_dim(DoubleIndex::one_col(mat23,0))==row2);
+	CPPUNIT_ASSERT      (mat23.index_dim(DoubleIndex::cols(mat23,0,1))==mat22);
+	CPPUNIT_ASSERT      (mat23.index_dim(DoubleIndex::subrow(mat23,0,0,1))==row2);
+	CPPUNIT_ASSERT      (mat23.index_dim(DoubleIndex::all(mat23))==mat23);
+
+	CPPUNIT_ASSERT      (mat32.index_dim(DoubleIndex::subcol(mat23,0,1,0))==col2);
+
+	CPPUNIT_ASSERT      (mat33.index_dim(DoubleIndex::rows(mat33,0,1))==mat23);
+	CPPUNIT_ASSERT      (mat33.index_dim(DoubleIndex::cols(mat33,0,1))==mat32);
+}
 
 } // end namespace

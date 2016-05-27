@@ -108,21 +108,23 @@ public:
 	 */
 	Dim transpose_dim() const;
 
-	/**
+
+//	Dim index_dim() const;
+
+	/*
 	 * \brief Add an index to *this
 	 *
 	 * Compute the dimension of the expression obtained
 	 * by indexing an expression whose dimension is *this.
 	 */
-//	Dim index_dim() const;
-
 	Dim index_dim(const DoubleIndex& idx) const;
-	/**
+
+	/*
 	 * \brief Maximal index.
 	 *
 	 * Return the greatest i such that indexing by i is valid.
 	 */
-	int max_index() const;
+//	int max_index() const;
 
 	/*
 	 * Compute the starting position of x[i] in a flat array

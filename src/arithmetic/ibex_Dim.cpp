@@ -160,11 +160,11 @@ Dim Dim::index_dim(const DoubleIndex& idx) const {
 	}
 }
 
-int Dim::max_index() const {
-	if (is_scalar()) return 0;
-	else if (is_vector()) return vec_size()-1;
-	else return nb_rows()-1;
-}
+//int Dim::max_index() const {
+//	if (is_scalar()) return 0;
+//	else if (is_vector()) return vec_size()-1;
+//	else return nb_rows()-1;
+//}
 
 Dim Dim::transpose_dim() const {
 	switch (type()) {

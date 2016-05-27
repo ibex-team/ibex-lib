@@ -7,6 +7,7 @@
  *
  * Author(s)   : Gilles Chabert
  * Created     : Mar 2, 2012
+ * Last Update : May 25, 2016
  * ---------------------------------------------------------------------------- */
 
 #ifndef __TEST_DIM_H__
@@ -25,19 +26,22 @@ public:
 
 	CPPUNIT_TEST_SUITE(TestDim);
 	CPPUNIT_TEST(scalar);
-	CPPUNIT_TEST(test02);
-	CPPUNIT_TEST(test03);
+	CPPUNIT_TEST(row_vec);
+	CPPUNIT_TEST(col_vec);
 	CPPUNIT_TEST(add);
 	CPPUNIT_TEST(mul);
 	CPPUNIT_TEST(vec);
+	CPPUNIT_TEST(index);
 	CPPUNIT_TEST_SUITE_END();
 
 	void scalar();
-	void test02();
-	void test03();
+	void row_vec();
+	void col_vec();
+	void matrix();
 	void add();
 	void mul();
 	void vec();
+	void index();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestDim);
