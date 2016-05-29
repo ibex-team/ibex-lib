@@ -148,18 +148,6 @@ void end_function() {
 	// TODO: see end_system()
 }
 
-int _2int(const P_ExprNode& expr) {
-	return ExprGenerator().generate_int(expr);
-}
-
-double _2dbl(const P_ExprNode& expr) {
-	return ExprGenerator().generate_dbl(expr);
-}
-
-Domain _2domain(const P_ExprNode& expr) {
-	return ExprGenerator().generate_cst(expr);
-}
-
 void init_symbol_domain(const char* destname, Domain& dest, const Domain& src) {
 	if (src.dim==dest.dim) {
 		dest=src;

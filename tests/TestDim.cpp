@@ -11,8 +11,6 @@
 
 #include "TestDim.h"
 #include "ibex_Dim.h"
-#include "ibex_DimException.h"
-
 using namespace std;
 
 namespace ibex {
@@ -42,7 +40,6 @@ void TestDim::row_vec() {
 	CPPUNIT_ASSERT(d.is_vector());
 	CPPUNIT_ASSERT(!d.is_matrix());
 	CPPUNIT_ASSERT(d.type()==Dim::ROW_VECTOR);
-	CPPUNIT_ASSERT(d.index_dim()==Dim::scalar());
 	CPPUNIT_ASSERT(Dim(d)==d);
 	CPPUNIT_ASSERT((Dim::scalar()=d)==d);
 }
@@ -57,8 +54,6 @@ void TestDim::matrix() {
 	CPPUNIT_ASSERT(d.is_matrix());
 	CPPUNIT_ASSERT(d.type()==Dim::MATRIX);
 
-	CPPUNIT_ASSERT(d.index_dim()==Dim::row_vec(3));
-	CPPUNIT_ASSERT(d.index_dim().type()==Dim::ROW_VECTOR);
 	CPPUNIT_ASSERT(Dim(d)==d);
 	CPPUNIT_ASSERT((Dim::scalar()=d)==d);
 }

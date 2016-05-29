@@ -33,11 +33,14 @@ public:
 	CPPUNIT_TEST(index_mat_row);
 	CPPUNIT_TEST(index_mat_subcol);
 	CPPUNIT_TEST(index_mat_col);
+	CPPUNIT_TEST(index_mat_rows);
+	CPPUNIT_TEST(index_mat_cols);
 	CPPUNIT_TEST(index_mat_submat);
 	CPPUNIT_TEST_SUITE_END();
 
-	void setUp();
-	void tearDown();
+public:
+	virtual void setUp();
+	virtual void tearDown();
 
 	void row_vec();
 	void col_vec();
@@ -51,6 +54,8 @@ public:
 	void index_mat_row();
 	void index_mat_subcol();
 	void index_mat_col();
+	void index_mat_rows();
+	void index_mat_cols();
 	void index_mat_submat();
 
 private:

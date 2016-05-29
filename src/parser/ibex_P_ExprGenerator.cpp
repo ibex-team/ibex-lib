@@ -129,7 +129,7 @@ ExprGenerator::ExprGenerator() : scope(scopes().top()) {
 
 }
 
-const Domain& ExprGenerator::generate_cst(const P_ExprNode& y) {
+Domain ExprGenerator::generate_cst(const P_ExprNode& y) {
 	visit(y);
 
 	return y.lab->domain();
@@ -413,7 +413,7 @@ pair<int,int> ExprGenerator::visit_index_tmp(const Dim& dim, const P_ExprNode& i
 		assert(idx.arg.size()==1);
 		visit(idx.arg[0]);
 		assert(idx.arg[0].lab->is_const());
-		i1=i2=i1=to_integer(idx.arg[0].lab->domain());
+		i1=i2=to_integer(idx.arg[0].lab->domain());
 		if (matlab_style) { i1--; i2--; }
 		break;
 	default:

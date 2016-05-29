@@ -24,56 +24,55 @@ class TestIntervalMatrix : public CppUnit::TestFixture {
 public:
 
 	CPPUNIT_TEST_SUITE(TestIntervalMatrix);
-	
 
-		CPPUNIT_TEST(eq01);
-		CPPUNIT_TEST(eq02);
-		CPPUNIT_TEST(eq03);
-		CPPUNIT_TEST(eq04);
+	CPPUNIT_TEST(eq01);
+	CPPUNIT_TEST(eq02);
+	CPPUNIT_TEST(eq03);
+	CPPUNIT_TEST(eq04);
 
-		CPPUNIT_TEST(cons01);
-		CPPUNIT_TEST(cons02);
-		CPPUNIT_TEST(cons03);
-		CPPUNIT_TEST(cons04);
+	CPPUNIT_TEST(cons01);
+	CPPUNIT_TEST(cons02);
+	CPPUNIT_TEST(cons03);
+	CPPUNIT_TEST(cons04);
 
-		CPPUNIT_TEST(empty01);
-		CPPUNIT_TEST(is_empty01);
-		CPPUNIT_TEST(is_empty02);
-		CPPUNIT_TEST(set_empty01);
+	CPPUNIT_TEST(empty01);
+	CPPUNIT_TEST(is_empty01);
+	CPPUNIT_TEST(is_empty02);
+	CPPUNIT_TEST(set_empty01);
 
-		CPPUNIT_TEST(inter01);
-		CPPUNIT_TEST(inter02);
-		CPPUNIT_TEST(inter03);
+	CPPUNIT_TEST(inter01);
+	CPPUNIT_TEST(inter02);
+	CPPUNIT_TEST(inter03);
 
-		CPPUNIT_TEST(set_col01);
+	CPPUNIT_TEST(set_col01);
 
-		CPPUNIT_TEST(rows01);
-		CPPUNIT_TEST(rows02);
-		CPPUNIT_TEST(rows03);
+	CPPUNIT_TEST(rows01);
+	CPPUNIT_TEST(rows02);
+	CPPUNIT_TEST(rows03);
 
-		CPPUNIT_TEST(cols01);
-		CPPUNIT_TEST(cols02);
-		CPPUNIT_TEST(cols03);
-		CPPUNIT_TEST(cols04);
-		CPPUNIT_TEST(cols05);
+	CPPUNIT_TEST(cols01);
+	CPPUNIT_TEST(cols02);
+	CPPUNIT_TEST(cols03);
+	CPPUNIT_TEST(cols04);
+	CPPUNIT_TEST(cols05);
 
-		CPPUNIT_TEST(resize01);
-		CPPUNIT_TEST(resize02);
-		CPPUNIT_TEST(resize03);
+	CPPUNIT_TEST(resize01);
+	CPPUNIT_TEST(resize02);
+	CPPUNIT_TEST(resize03);
 
-		CPPUNIT_TEST(minus01);
-		CPPUNIT_TEST(minus02);
+	CPPUNIT_TEST(minus01);
+	CPPUNIT_TEST(minus02);
 
-		CPPUNIT_TEST(add01);
-		CPPUNIT_TEST(add02);
+	CPPUNIT_TEST(add01);
+	CPPUNIT_TEST(add02);
 
-		CPPUNIT_TEST(sub01);
-		CPPUNIT_TEST(sub02);
+	CPPUNIT_TEST(sub01);
+	CPPUNIT_TEST(sub02);
 
-		CPPUNIT_TEST(mul01);
-		CPPUNIT_TEST(mul02);
+	CPPUNIT_TEST(mul01);
+	CPPUNIT_TEST(mul02);
 
-		CPPUNIT_TEST(put01);
+	CPPUNIT_TEST(put01);
 	CPPUNIT_TEST_SUITE_END();
 
 	// test:

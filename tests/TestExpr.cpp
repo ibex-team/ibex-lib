@@ -35,6 +35,14 @@ static bool checkExpr(const ExprNode& node, const char* expr) {
 	return strcmp(s.str().c_str(),expr)==0;
 }
 
+bool TestExpr::same_mask(int n, int m, bool* m1, bool** m2) {
+	for (int i=0; i<n; i++)
+		for (int j=0; j<m; i++)
+			if (m1[i*m+j]!=m2[i][j]) return false;
+
+	return true;
+}
+
 void TestExpr::symbol() {
 	const ExprSymbol& x=ExprSymbol::new_("x");
 	Function f(x,x);
@@ -44,7 +52,7 @@ void TestExpr::symbol() {
 	CPPUNIT_ASSERT(x.key==0);
 	CPPUNIT_ASSERT(strcmp(x.name,"x")==0);
 	CPPUNIT_ASSERT(x.size==1);
-	//CPPUNIT_ASSERT(x.deco.d->dim==x.dim);
+	//CPPUNIT_ASSERT(x.deco.d-	bool same_mask(int, int, bool**,bool**);>dim==x.dim);
 	CPPUNIT_ASSERT(x.fathers.size()==0);
 	CPPUNIT_ASSERT(!x.is_zero());
 	CPPUNIT_ASSERT(x.type()==Dim::SCALAR);
@@ -395,7 +403,6 @@ void TestExpr::index01() {
 	const ExprSymbol& x=ExprSymbol::new_("x",Dim::matrix(3,4));
 	const ExprIndex& e=x[1];
 	Function f(x,e);
-
 	CPPUNIT_ASSERT(e.f==&f);
 	//CPPUNIT_ASSERT(e.deco.d->dim==e.dim);
 	CPPUNIT_ASSERT(e.dim==Dim::row_vec(4));
@@ -404,8 +411,10 @@ void TestExpr::index01() {
 	CPPUNIT_ASSERT(e.type()==Dim::ROW_VECTOR);
 	CPPUNIT_ASSERT(checkExpr(e,"x[1]"));
 	CPPUNIT_ASSERT(e.indexed_symbol());
-	CPPUNIT_ASSERT(e.symbol_shift().first==&x);
-	CPPUNIT_ASSERT(e.symbol_shift().second==4);
+	pair<const ExprSymbol*, bool**> p=e.symbol_mask();
+	CPPUNIT_ASSERT(p.first==&x);
+	bool mask[3][4]={{false,false,false,false},{true,true,true,true},{false,false,false,false}};
+	CPPUNIT_ASSERT(same_mask(3,4,(bool*) mask,p.second));
 }
 
 void TestExpr::index02() {
@@ -420,16 +429,21 @@ void TestExpr::index02() {
 	CPPUNIT_ASSERT(e.type()==Dim::SCALAR);
 	CPPUNIT_ASSERT(checkExpr(e,"x[1][1]"));
 	CPPUNIT_ASSERT(e.indexed_symbol());
-	CPPUNIT_ASSERT(e.symbol_shift().first==&x);
-	CPPUNIT_ASSERT(e.symbol_shift().second==5);
+
+	pair<const ExprSymbol*, bool**> p=e.symbol_mask();
+	CPPUNIT_ASSERT(p.first==&x);
+	bool mask[3][4]={{false,false,false,false},{false,true,false,false},{false,false,false,false}};
+	CPPUNIT_ASSERT(same_mask(3,4,(bool*) mask,p.second));
 }
 
 void TestExpr::index03() {
 	const ExprSymbol& x=ExprSymbol::new_("x",Dim::matrix(3,4));
 	const ExprIndex& e=x[2][1];
 	CPPUNIT_ASSERT(e.indexed_symbol());
-	CPPUNIT_ASSERT(e.symbol_shift().first==&x);
-	CPPUNIT_ASSERT(e.symbol_shift().second==9);
+	pair<const ExprSymbol*, bool**> p=e.symbol_mask();
+	CPPUNIT_ASSERT(p.first==&x);
+	bool mask[3][4]={{false,false,false,false},{false,false,false,false},{false,true,false,false}};
+	CPPUNIT_ASSERT(same_mask(3,4,(bool*) mask,p.second));
 }
 
 void TestExpr::apply01() {

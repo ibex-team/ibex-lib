@@ -16,7 +16,6 @@
 #include "ibex_Expr2DAG.h"
 #include "ibex_P_Source.h"
 #include "ibex_Scope.h"
-#include "parser.cpp_"
 
 using namespace std;
 
@@ -59,8 +58,8 @@ void CtrGenerator::visit(const P_ConstraintList& list) {
 void CtrGenerator::visit(const P_ConstraintLoop& loop) {
 	const char* name     = loop.iter;
 
-	int begin=_2int(loop.first_value);
-	int end=_2int(loop.last_value);
+	int begin=loop.first_value._2int();
+	int end=loop.last_value._2int();
 
 	scopes().push(scopes().top());
 

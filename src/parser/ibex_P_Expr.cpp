@@ -34,6 +34,18 @@ const ExprNode& P_ExprNode::generate() const {
 	return ExprGenerator().generate(*this);
 }
 
+int P_ExprNode::_2int() const {
+	return ExprGenerator().generate_int(*this);
+}
+
+double P_ExprNode::_2dbl() const {
+	return ExprGenerator().generate_dbl(*this);
+}
+
+Domain P_ExprNode::_2domain() const {
+	return ExprGenerator().generate_cst(*this);
+}
+
 ostream& operator<<(ostream& os, const P_ExprNode& e) {
 	P_ExprPrinter p(os,e);
 	return os;

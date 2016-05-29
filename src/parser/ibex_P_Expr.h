@@ -94,6 +94,12 @@ public:
 	// Generate the expression with the current scope.
 	const ExprNode& generate() const;
 
+	int _2int() const;
+
+	double _2dbl() const;
+
+	Domain _2domain() const;
+
 	operation op;
 	Array<const P_ExprNode> arg;
 	mutable Label* lab;

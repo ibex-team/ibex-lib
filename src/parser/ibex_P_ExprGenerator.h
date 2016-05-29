@@ -28,7 +28,7 @@ class ExprGenerator : public virtual P_ExprVisitor {
 public:
 	ExprGenerator();
 
-	const Domain& generate_cst(const P_ExprNode& y);
+	Domain generate_cst(const P_ExprNode& y);
 
 	int generate_int(const P_ExprNode& y);
 
