@@ -34,7 +34,7 @@ void P_ExprPrinter::visit(const P_ExprNode& e) {
 	case P_ExprNode::INFTY:			os << "oo";     break;
 	case P_ExprNode::VAR_SYMBOL: 	os << ((const P_ExprVarSymbol&) e).name; break;
 	case P_ExprNode::CST_SYMBOL: 	os << ((const P_ExprCstSymbol&) e).name; break;
-	case P_ExprNode::CST: 			e.acceptVisitor(*this); break;
+	case P_ExprNode::CST: 			os << ((const P_ExprConstant&) e).value; break;
 	case P_ExprNode::ITER: 			os << ((const P_ExprIter&) e).name; break;
 	case P_ExprNode::IDX:			visit(e.arg[0]); break;
 	case P_ExprNode::IDX_RANGE:		visit(e.arg[0]); os << ":"; visit(e.arg[1]); break;

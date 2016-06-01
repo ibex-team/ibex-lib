@@ -25,7 +25,6 @@ public:
 
 	const ExprNode& simplify(const ExprNode& e);
 
-	virtual ~ExprSimplify();
 protected:
 	void visit(const ExprIndex& i);
 	void visit(const ExprSymbol& x);

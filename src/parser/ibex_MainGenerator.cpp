@@ -20,20 +20,17 @@
 
 using namespace std;
 
-extern stack<ibex::parser::Scope>& scopes();
-
 namespace ibex {
 
 namespace parser {
+
+extern stack<Scope>& scopes();
 
 void MainGenerator::generate(const P_Source& source, System& sys) {
 
 	SystemFactory fac;
 
 	//================= generate the variables & domains =====================
-	int n=scopes().top().nb_var();
-	int input_size=0;
-
 	fac.add_var(scopes().top().var_symbols());
 
 	//============== generate the goal function (if any) =================
@@ -45,16 +42,10 @@ void MainGenerator::generate(const P_Source& source, System& sys) {
 	if (source.ctrs!=NULL) {
 
 		//================= generate the constraints =====================
-		// we cannot generate first the global function f and
-		// then each constraint with (f[i] op 0) because
-		// a constraint can be vector or matrix valued.
-		// so we do the contrary: we generate first the constraints,
-		// and build f with the components of all constraints' functions.
-		// ----> SystemFactory
-
 		vector<ExprCtr*> ctrs = CtrGenerator().generate(*source.ctrs);
 
 		for (vector<ExprCtr*>::const_iterator it=ctrs.begin(); it!=ctrs.end(); it++) {
+			cout << "[parser] copy of ctr:" << **it << endl;
 			fac.add_ctr(**it);
 		}
 	}
@@ -62,7 +53,7 @@ void MainGenerator::generate(const P_Source& source, System& sys) {
 	sys.init(fac);
 
 	//================= set the domains =====================
-	sys.box.resize(input_size);
+	sys.box.resize(sys.nb_var);
 	load(sys.box, scopes().top().var_domains());
 
 	//================= add the external functions ===========

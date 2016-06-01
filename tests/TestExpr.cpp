@@ -37,7 +37,7 @@ static bool checkExpr(const ExprNode& node, const char* expr) {
 
 bool TestExpr::same_mask(int n, int m, bool* m1, bool** m2) {
 	for (int i=0; i<n; i++)
-		for (int j=0; j<m; i++)
+		for (int j=0; j<m; j++)
 			if (m1[i*m+j]!=m2[i][j]) return false;
 
 	return true;
@@ -409,11 +409,16 @@ void TestExpr::index01() {
 	CPPUNIT_ASSERT(e.height==1);
 	CPPUNIT_ASSERT(e.size==2);
 	CPPUNIT_ASSERT(e.type()==Dim::ROW_VECTOR);
-	CPPUNIT_ASSERT(checkExpr(e,"x[1]"));
+	CPPUNIT_ASSERT(checkExpr(e,"x(1,:)"));
 	CPPUNIT_ASSERT(e.indexed_symbol());
 	pair<const ExprSymbol*, bool**> p=e.symbol_mask();
 	CPPUNIT_ASSERT(p.first==&x);
 	bool mask[3][4]={{false,false,false,false},{true,true,true,true},{false,false,false,false}};
+//	for (int i=0; i<3; i++) {
+//		for (int j=0; j<4; j++)
+//			cout << p.second[i][j] << " ";
+//		cout << endl;
+//	}
 	CPPUNIT_ASSERT(same_mask(3,4,(bool*) mask,p.second));
 }
 
@@ -427,7 +432,7 @@ void TestExpr::index02() {
 	CPPUNIT_ASSERT(e.height==2);
 	CPPUNIT_ASSERT(e.size==3);
 	CPPUNIT_ASSERT(e.type()==Dim::SCALAR);
-	CPPUNIT_ASSERT(checkExpr(e,"x[1][1]"));
+	CPPUNIT_ASSERT(checkExpr(e,"x(1,:)(1)"));
 	CPPUNIT_ASSERT(e.indexed_symbol());
 
 	pair<const ExprSymbol*, bool**> p=e.symbol_mask();
@@ -438,13 +443,28 @@ void TestExpr::index02() {
 
 void TestExpr::index03() {
 	const ExprSymbol& x=ExprSymbol::new_("x",Dim::matrix(3,4));
-	const ExprIndex& e=x[2][1];
+	const ExprIndex& e=x[DoubleIndex::one_elt(x.dim,2,1)];
 	CPPUNIT_ASSERT(e.indexed_symbol());
+	CPPUNIT_ASSERT(checkExpr(e,"x(2,1)"));
 	pair<const ExprSymbol*, bool**> p=e.symbol_mask();
 	CPPUNIT_ASSERT(p.first==&x);
 	bool mask[3][4]={{false,false,false,false},{false,false,false,false},{false,true,false,false}};
 	CPPUNIT_ASSERT(same_mask(3,4,(bool*) mask,p.second));
 }
+
+void TestExpr::index04() {
+	const ExprSymbol& x=ExprSymbol::new_("x",Dim::matrix(3,4));
+	const ExprIndex& tmp=x[DoubleIndex::submatrix(x.dim,1,2,1,4)];
+	const ExprIndex& e=tmp[DoubleIndex::submatrix(x.dim,0,1,2,3)];
+	CPPUNIT_ASSERT(e.indexed_symbol());
+	pair<const ExprSymbol*, bool**> p=e.symbol_mask();
+	CPPUNIT_ASSERT(p.first==&x);
+	bool mask[3][4]={{false,false,false,false},
+			         {false,false, true, true},
+					 {false,false, true, true}};
+	CPPUNIT_ASSERT(same_mask(3,4,(bool*) mask,p.second));
+}
+
 
 void TestExpr::apply01() {
 	const ExprSymbol& x=ExprSymbol::new_("x");

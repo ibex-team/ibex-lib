@@ -52,7 +52,7 @@ public:
 	/* ====================================== Forward =================================== */
 
 	inline void idx_fwd(int , int ) { /* nothing to do */ }
-	       void idx_cp_fwd(int , int);
+	       void idx_cp_fwd(int , int y)       { g[y].clear(); }
 	       void vector_fwd(int* x, int y);
 	       void cst_fwd(int y)                { g[y].clear(); }
 	       void symbol_fwd(int y)             { g[y].clear(); }

@@ -164,7 +164,7 @@ void init_symbol_domain(const char* destname, Domain& dest, const Domain& src) {
 		stringstream s;
 		s << "Symbol \"" << destname << "\"";
 
-		if (dest.dim.is_vector() && src.dim.is_vector()) {
+		if (dest.dim.type()==Dim::ROW_VECTOR && src.dim.type()==Dim::COL_VECTOR && dest.dim.vec_size()==src.dim.vec_size()) {
 			s << " is a column vector and is initialized with a row vector";
 			s << " (you have probably used \",\" instead of \";\" in the constant vector)";
 			ibexerror(s.str());

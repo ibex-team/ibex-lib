@@ -194,6 +194,12 @@ void System::init(const SystemFactory& fac) {
 		ctrs.set_ref(i,*(fac.ctrs[i]));
 
 	// =========== init main function
+	// we cannot generate first the global function f and
+	// then each constraint with (f[i] op 0) because
+	// a constraint can be vector or matrix valued.
+	// so we do the contrary: we generate first the constraints,
+	// and build f with the components of all constraints' functions.
+
 	init_f_from_ctrs();
 }
 

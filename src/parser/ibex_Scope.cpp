@@ -163,8 +163,8 @@ void Scope::add_cst(const char* id, const Domain& domain) {
 
 void Scope::add_cst(const char* id, const Dim* dim, const Domain& dom) {
 	Domain tmp(*dim);
+	//cout << "[parser] add cst " << id << "=" << dom.dim << "<>" << *dim << endl;
 	init_symbol_domain(id, tmp, dom);
-
 	tab.insert_new(id, new S_Cst(tmp));
 }
 
@@ -192,6 +192,7 @@ void Scope::add_var(const char* id, const Dim* dim) {
 	Domain d(Dim::scalar());
 	d.i()=Interval::ALL_REALS;
 	add_var(id,dim,d);
+	//cout << "[parser] add var " << id << endl;
 }
 
 void Scope::add_var(const char* id, const Dim* d, const Domain& domain) {
@@ -242,14 +243,14 @@ int Scope::nb_var() const {
 
 Array<const Domain> Scope::var_domains() const {
 	Array<const Domain> d(vars.size());
-	for (int i=0; i<vars.size(); i++)
+	for (unsigned int i=0; i<vars.size(); i++)
 		d.set_ref(i,vars[i]->d);
 	return d;
 }
 
 Array<const ExprSymbol> Scope::var_symbols() const {
 	Array<const ExprSymbol> x(vars.size());
-	for (int i=0; i<vars.size(); i++)
+	for (unsigned int i=0; i<vars.size(); i++)
 		x.set_ref(i,vars[i]->symbol);
 	return x;
 }

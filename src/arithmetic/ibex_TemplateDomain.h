@@ -692,7 +692,7 @@ bool TemplateDomain<D>::is_zero() const {
 	case Dim::SCALAR:     return i()==Interval::ZERO; break;
 	case Dim::ROW_VECTOR:
 	case Dim::COL_VECTOR: return v().is_zero(); break;
-	case Dim::MATRIX:     return m().is_zero(); break;
+	default:              return m().is_zero(); break;
 	}
 }
 

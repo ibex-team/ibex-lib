@@ -183,11 +183,14 @@ public:
 	/**
 	 * \brief Get the message of this exception
 	 */
-	std::string message() { return msg; }
+	const std::string& message() const { return msg; }
 
 private:
 	std::string msg;
 };
+
+
+std::ostream& operator<< (std::ostream& os, const DimException& e);
 
 /** \ingroup arithmetic */
 /*@{*/

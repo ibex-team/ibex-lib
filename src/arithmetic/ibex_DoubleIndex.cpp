@@ -20,11 +20,13 @@ std::ostream& operator<<(std::ostream& os, const DoubleIndex idx) {
 	os << "(";
 	switch (idx.dim.type()) {
 	case Dim::ROW_VECTOR:
-		if (idx.one_col()) return os << idx.first_col();
-		else return os << idx.first_col() << ":" << idx.last_col();
+		if (idx.one_col()) os << idx.first_col();
+		else os << idx.first_col() << ":" << idx.last_col();
+		break;
 	case Dim::COL_VECTOR:
-		if (idx.one_row()) return os << idx.first_row();
-		else return os << idx.first_row() << ":" << idx.last_row();
+		if (idx.one_row()) os << idx.first_row();
+		else os << idx.first_row() << ":" << idx.last_row();
+		break;
 	default:
 		assert(idx.dim.is_matrix());
 		if (idx.all_rows()) os << ":";

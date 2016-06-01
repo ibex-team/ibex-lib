@@ -19,6 +19,8 @@
 #include <vector>
 #include <cassert>
 
+extern int ibex_lineno;
+
 namespace ibex {
 
 class ExprNode;
@@ -72,15 +74,15 @@ public:
 		INF, MID, SUP  // deprecated??
 	} operation;
 
-	P_ExprNode(operation op) : op(op), lab(NULL) { }
+	P_ExprNode(operation op) : op(op), lab(NULL), line(ibex_lineno) { }
 
-	P_ExprNode(operation op, const P_ExprNode& arg1) : op(op), lab(NULL) { }
+	P_ExprNode(operation op, const P_ExprNode& arg1) : op(op), arg(arg1), lab(NULL), line(ibex_lineno) { }
 
-	P_ExprNode(operation op, const P_ExprNode& arg1, const P_ExprNode& arg2) : op(op), arg(arg1,arg2), lab(NULL) { }
+	P_ExprNode(operation op, const P_ExprNode& arg1, const P_ExprNode& arg2) : op(op), arg(arg1,arg2), lab(NULL), line(ibex_lineno) { }
 
-	P_ExprNode(operation op, const P_ExprNode& arg1, const P_ExprNode& arg2, const P_ExprNode& arg3) : op(op), lab(NULL) { }
+	P_ExprNode(operation op, const P_ExprNode& arg1, const P_ExprNode& arg2, const P_ExprNode& arg3) : op(op), arg(arg1,arg2,arg3), lab(NULL), line(ibex_lineno) { }
 
-	P_ExprNode(operation op, const std::vector<const P_ExprNode*>& vec) : op(op), arg(vec.size()), lab(NULL) {
+	P_ExprNode(operation op, const std::vector<const P_ExprNode*>& vec) : op(op), arg(vec.size()), lab(NULL), line(ibex_lineno) {
 		int i=0;
 		for (std::vector<const P_ExprNode*>::const_iterator it=vec.begin(); it!=vec.end(); it++) {
 			arg.set_ref(i++,**it);
@@ -103,6 +105,7 @@ public:
 	operation op;
 	Array<const P_ExprNode> arg;
 	mutable Label* lab;
+	int line;
 };
 
 /**

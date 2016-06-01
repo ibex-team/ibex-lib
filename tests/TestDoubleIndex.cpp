@@ -43,6 +43,54 @@ void TestDoubleIndex::matrix_one_elt() {
 	CPPUNIT_ASSERT(i.dim==d);
 }
 
+void TestDoubleIndex::matrix_sub_row() {
+	int r=1;
+	int c1=1;
+	int c2=2;
+	Dim d=Dim::matrix(2,3);
+	DoubleIndex i=DoubleIndex::subrow(d,r,c1,c2);
+
+	CPPUNIT_ASSERT(DoubleIndex::submatrix(d,r,r,c1,c2)==i);
+	CPPUNIT_ASSERT(!i.all());
+	CPPUNIT_ASSERT(!i.all_cols());
+	CPPUNIT_ASSERT(!i.all_rows());
+	CPPUNIT_ASSERT(!i.domain_ref());
+	CPPUNIT_ASSERT(i.first_col()==c1);
+	CPPUNIT_ASSERT(i.first_row()==r);
+	CPPUNIT_ASSERT(i.last_col()==c2);
+	CPPUNIT_ASSERT(i.last_row()==r);
+	CPPUNIT_ASSERT(i.nb_cols()==c2-c1+1);
+	CPPUNIT_ASSERT(i.nb_rows()==1);
+	CPPUNIT_ASSERT(!i.one_col());
+	CPPUNIT_ASSERT(!i.one_elt());
+	CPPUNIT_ASSERT(i.one_row());
+	CPPUNIT_ASSERT(i.row()==r);
+	CPPUNIT_ASSERT(i.dim==d);
+}
+
+void TestDoubleIndex::matrix_sub_col() {
+	int c=1,r1=0,r2=1;
+	Dim d=Dim::matrix(3,2);
+	DoubleIndex i=DoubleIndex::subcol(d,r1,r2,c);
+
+	CPPUNIT_ASSERT(DoubleIndex::submatrix(d,r1,r2,c,c)==i);
+	CPPUNIT_ASSERT(!i.all());
+	CPPUNIT_ASSERT(!i.all_cols());
+	CPPUNIT_ASSERT(!i.all_rows());
+	CPPUNIT_ASSERT(!i.domain_ref());
+	CPPUNIT_ASSERT(i.first_col()==c);
+	CPPUNIT_ASSERT(i.first_row()==r1);
+	CPPUNIT_ASSERT(i.last_col()==c);
+	CPPUNIT_ASSERT(i.last_row()==r2);
+	CPPUNIT_ASSERT(i.nb_cols()==1);
+	CPPUNIT_ASSERT(i.nb_rows()==r2-r1+1);
+	CPPUNIT_ASSERT(i.one_col());
+	CPPUNIT_ASSERT(!i.one_elt());
+	CPPUNIT_ASSERT(!i.one_row());
+	CPPUNIT_ASSERT(i.col()==c);
+	CPPUNIT_ASSERT(i.dim==d);
+}
+
 void TestDoubleIndex::matrix_one_row() {
 	int r=1;
 	Dim d=Dim::matrix(2,3);

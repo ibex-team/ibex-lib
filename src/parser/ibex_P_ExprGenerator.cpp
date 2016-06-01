@@ -13,13 +13,15 @@
 #include "ibex_Exception.h"
 #include "ibex_Expr.h"
 
-using namespace std;
+#include <sstream>
 
-extern stack<ibex::parser::Scope>& scopes();
+using namespace std;
 
 namespace ibex {
 
 namespace parser {
+
+extern stack<Scope>& scopes();
 
 class LabelNode : public Label {
 public:
@@ -78,14 +80,17 @@ public:
 
 
 	virtual const ExprNode& node() const {
-		if (!cst) {
+
+		if (cst==NULL) {
 			if (num_type!=OTHER)
 				throw SyntaxError("Unexpected infinity symbol \"oo\"");
 
 			// The final node domain is *not* a reference to
 			// the constant domain: all objects created
 			// during parsing can be safely deleted
+
 			((LabelConst*) this)->cst = &ExprConstant::new_(_domain, false);
+
 		}
 		return *cst;
 	}
@@ -140,7 +145,16 @@ int ExprGenerator::generate_int(const P_ExprNode& y) {
 }
 
 double ExprGenerator::generate_dbl(const P_ExprNode& y) {
-	return to_double(generate_cst(y));
+	Domain d=generate_cst(y);
+
+	switch(((LabelConst*) y.lab)->num_type) {
+	case LabelConst::NEG_INF:
+		return NEG_INFINITY;
+	case LabelConst::POS_INF:
+		return POS_INFINITY;
+	default:
+		return to_double(d);
+	}
 }
 
 const ExprNode& ExprGenerator::generate(const P_ExprNode& y) {
@@ -184,7 +198,7 @@ void ExprGenerator::visit(const P_ExprNode& e) {
 	for (int i=0; i<e.arg.size(); i++) {
 		visit(e.arg[i]);
 		all_cst = all_cst && (e.arg[i].lab->is_const());
-		arg_cst.set_ref(i,e.arg[i].lab->domain());
+		if (all_cst) arg_cst.set_ref(i,e.arg[i].lab->domain());
 	}
 
 	if (all_cst) {
@@ -257,8 +271,8 @@ void ExprGenerator::visit(const P_ExprNode& e) {
 				if (!arg_cst[0].dim.is_scalar()) throw DimException("\"sup\" expects an interval as argument");
 				e.lab=new LabelConst(arg_cst[0].i().ub()); break;
 			}
-		} catch(DimException& e) {
-			throw SyntaxError(e.message());
+		} catch(DimException& exc) {
+			throw SyntaxError(exc.message(),NULL,e.line);
 		}
 		return;
 	}
@@ -320,8 +334,8 @@ void ExprGenerator::visit(const P_ExprNode& e) {
 		case P_ExprNode::SUP:    throw SyntaxError("\"sup\" operator requires constant interval"); break;
 		}
 		e.lab = new LabelNode(node);
-	} catch(DimException& e) {
-		throw SyntaxError(e.message());
+	} catch(DimException& exc) {
+		throw SyntaxError(exc.message(),NULL,e.line);
 	}
 }
 
@@ -408,6 +422,8 @@ pair<int,int> ExprGenerator::visit_index_tmp(const Dim& dim, const P_ExprNode& i
 		i1=to_integer(idx.arg[0].lab->domain());
 		i2=to_integer(idx.arg[1].lab->domain());
 		if (matlab_style) { i1--; i2--; }
+		if (i1<0 || i2<0)
+			throw SyntaxError("negative index. Note: indices in Matlab-style (using parenthesis like in \"x(i)\") start from 1 (not 0).");
 		break;
 	case P_ExprNode::IDX :
 		assert(idx.arg.size()==1);
@@ -415,12 +431,12 @@ pair<int,int> ExprGenerator::visit_index_tmp(const Dim& dim, const P_ExprNode& i
 		assert(idx.arg[0].lab->is_const());
 		i1=i2=to_integer(idx.arg[0].lab->domain());
 		if (matlab_style) { i1--; i2--; }
+		if (i1<0)
+			throw SyntaxError("negative index. Note: indices in Matlab-style (using parenthesis like in \"x(i)\") start from 1 (not 0).");
 		break;
 	default:
 		assert(false);
 	}
-	if (i1<0 || i2<0)
-		throw SyntaxError("negative index. Note: indices in Matlab-style (using parenthesis like in \"x(i)\") start from 1 (not 0).");
 
 	return pair<int,int>(i1,i2);
 }
@@ -437,7 +453,7 @@ DoubleIndex ExprGenerator::visit_index(const Dim& dim, const P_ExprNode& idx1, b
 	} else if (p.second==p.first) {
 		return DoubleIndex::one_index(dim,p.first);
 	} else {
-		if (dim.is_matrix())
+		if (dim.nb_rows()>1)
 			return DoubleIndex::rows(dim,p.first,p.second);
 		else
 			return DoubleIndex::cols(dim,p.first,p.second);
@@ -453,9 +469,9 @@ DoubleIndex ExprGenerator::visit_index(const Dim& dim, const P_ExprNode& idx1, c
 		if (c.first==-1)
 			return DoubleIndex::all(dim);
 		else if (c.first==c.second)
-			return DoubleIndex::cols(dim,c.first,c.second);
-		else
 			return DoubleIndex::one_col(dim,c.first);
+		else
+			return DoubleIndex::cols(dim,c.first,c.second);
 	} else if (r.first==r.second) {
 		if (c.first==-1)
 			return DoubleIndex::one_row(dim,r.first);

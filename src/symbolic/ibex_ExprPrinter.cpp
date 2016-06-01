@@ -31,7 +31,7 @@ void ExprPrinter::visit(const ExprNode& e) {
 }
 
 void ExprPrinter::visit(const ExprIndex& e) {
-	(*os) << e.expr << "[" << e.index << "]";
+	(*os) << e.expr << e.index;
 }
 
 void ExprPrinter::visit(const ExprSymbol& e) {

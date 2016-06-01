@@ -94,7 +94,7 @@ const ExprNode& ExprSimplify::get(const ExprNode& e, const DoubleIndex& idx2) {
 	}
 
 	CLONE_VEC& v=*(idx_clones[e]);
-	int i=0;
+	unsigned int i=0;
 	while (i<v.size() && v[i].first!=idx2)
 		i++;
 	if (i==v.size()) { // idx2 not found in the clone list
@@ -111,7 +111,7 @@ const ExprNode& ExprSimplify::get(const ExprNode& e, const DoubleIndex& idx2) {
 void ExprSimplify::visit(const ExprVector& e) {
 
 	vector<const ExprNode*> res;
-	int i=0;
+	unsigned int i=0;
 	bool all_cst=true;
 	bool all_same=true;
 

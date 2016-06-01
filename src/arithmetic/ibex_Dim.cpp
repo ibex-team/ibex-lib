@@ -212,7 +212,11 @@ int Dim::index_num(int this_num, int index) const {
 */
 
 std::ostream& operator<<(std::ostream& os, const Dim& d) {
-  return os << d.nb_rows() << ", " << d.nb_cols();
+  return os << d.nb_rows() << "x" << d.nb_cols();
 }
 
+std::ostream& operator<< (std::ostream& os, const DimException& e) {
+  os << "Dimension mismatch: " << e.message();
+  return os;
+}
 } // namespace ibex

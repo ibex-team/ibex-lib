@@ -109,7 +109,7 @@ inline DoubleIndex DoubleIndex::all(const Dim& d) {
 }
 
 inline DoubleIndex DoubleIndex::one_index(const Dim& dim, int i) {
-	if (dim.is_matrix())
+	if (dim.nb_rows()>1)
 		return one_row(dim,i);
 	else
 		// A single index i with a row vector
@@ -121,7 +121,7 @@ inline DoubleIndex::DoubleIndex() : dim(Dim::scalar()), r1(-1), r2(-1), c1(-1), 
 }
 
 inline DoubleIndex::DoubleIndex(const Dim& d, int i1, int i2, int j1, int j2) :
-	dim(d), r1(i2), r2(i2), c1(j1), c2(j2) {
+	dim(d), r1(i1), r2(i2), c1(j1), c2(j2) {
 
 	if (i2>=d.nb_rows() || j2>=d.nb_cols())
 		throw DimException("DoubleIndex: index out of bounds");

@@ -17,12 +17,15 @@
 #include "ibex_P_Source.h"
 #include "ibex_Scope.h"
 
+#include <sstream>
+
 using namespace std;
 
-extern stack<ibex::parser::Scope>& scopes();
-
 namespace ibex {
+
 namespace parser {
+
+extern stack<Scope>& scopes();
 
 std::vector<ExprCtr*> CtrGenerator::generate(const P_ConstraintList& ctrs) {
 
@@ -46,7 +49,13 @@ void CtrGenerator::visit(const P_OneConstraint& c) {
 
 //	ctrs->push_back(new NumConstraint(dest_vars2, ExprCtr(e2,c.op)));
 
-	ctrs.push_back(new ExprCtr(c.expr.generate(),c.op));
+	try {
+		ExprCtr* e=new ExprCtr(c.expr.generate(),c.op);
+		//cout << "[parser] generated ctr: " << *e << endl;
+		ctrs.push_back(e);
+	} catch(DimException& e) {
+		throw SyntaxError(e.message(),NULL,c.expr.line);
+	}
 }
 
 void CtrGenerator::visit(const P_ConstraintList& list) {
