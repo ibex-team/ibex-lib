@@ -169,7 +169,7 @@ const ExprVector& ExprVector::new_(const Array<const ExprNode>& components, bool
 }
 
 ExprVector::ExprVector(const Array<const ExprNode>& comp, bool in_row) :
-		ExprNAryOp(comp, vec_dim(dims(comp),in_row)) {
+		ExprNAryOp(comp, vec_dim(dims(comp),in_row)), in_row(in_row) {
 }
 
 const ExprChi& ExprChi::new_(const Array<const ExprNode>& args) {
