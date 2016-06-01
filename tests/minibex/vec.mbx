@@ -58,6 +58,5 @@ constraints
  ((xm22;(xs1,xs2)),(xcv3))=cm32;
  ( ((xrv2;(xs1,xs2)),(xcv2)) ; (xs1,xs2))=cm32;
  
-  
  
 end
