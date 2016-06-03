@@ -79,9 +79,8 @@
 
 		DIRECT_INTERVAL(void) : inf(0), sup(0), isEmpty(true) {}
 		DIRECT_INTERVAL(double a, double b) {
-			if (a==POS_INFINITY || b==NEG_INFINITY)
+			if (a>=POS_INFINITY || b<=NEG_INFINITY || a>b )
 			                 {inf = 0; sup = 0; isEmpty=true; }
-			else if  (a>=b)  {inf = b; sup = a; isEmpty=false;}
 			else             {inf = a; sup = b; isEmpty=false;}
 		}
 
@@ -906,11 +905,11 @@ inline Interval::Interval() : itv(NEG_INFINITY, POS_INFINITY) {
 }
 
 inline Interval::Interval(double a, double b) : itv(a,b) {
-	if (a==POS_INFINITY || b==NEG_INFINITY || a>b) *this=EMPTY_SET;
+	if (a>=POS_INFINITY || b<=NEG_INFINITY || a>b) *this=EMPTY_SET;
 }
 
 inline Interval::Interval(double a) : itv(a,a) {
-	if (a==NEG_INFINITY || a==POS_INFINITY) *this=EMPTY_SET;
+	if (a<=NEG_INFINITY || a>=POS_INFINITY) *this=EMPTY_SET;
 }
 
 inline bool Interval::operator==(const Interval& x) const {
@@ -918,12 +917,13 @@ inline bool Interval::operator==(const Interval& x) const {
 }
 
 inline Interval& Interval::operator=(double x) {
-	if (x==NEG_INFINITY || x==POS_INFINITY)
+	if (x<=NEG_INFINITY || x>=POS_INFINITY)
 		*this=EMPTY_SET;
 	else
 		itv = x;
 	return *this;
 }
+
 
 
 inline Interval& Interval::operator=(const Interval& x) {
@@ -960,9 +960,9 @@ inline bool Interval::is_bisectable() const {
 
 inline double Interval::rel_distance(const Interval& x) const {
 	  double d=distance(*this,x);
-	  if (d==POS_INFINITY) return 1;
+	  if (d>=POS_INFINITY) return 1;
 	  double D=diam();
-	  return (D==0 || D==POS_INFINITY) ? 0.0 : (d/D); // if diam(this)=infinity here, necessarily d=0
+	  return (D==0 || D>=POS_INFINITY) ? 0.0 : (d/D); // if diam(this)=infinity here, necessarily d=0
 }
 
 inline double distance(const Interval &x1, const Interval &x2) {
@@ -971,20 +971,20 @@ inline double distance(const Interval &x1, const Interval &x2) {
 
     if (x2.is_empty()) return x1.rad();
 
-    if (x1.lb()==NEG_INFINITY) {
+    if (x1.lb()<=NEG_INFINITY) {
     	if (x2.lb()!=NEG_INFINITY)
     		return POS_INFINITY;
-    	else if (x1.ub()==POS_INFINITY) {
-    		if (x2.ub()==POS_INFINITY) return 0.0;
+    	else if (x1.ub()>=POS_INFINITY) {
+    		if (x2.ub()>=POS_INFINITY) return 0.0;
     		else return POS_INFINITY;
     	}
-    	else if (x2.ub()==POS_INFINITY) return POS_INFINITY;
+    	else if (x2.ub()>=POS_INFINITY) return POS_INFINITY;
     	else return fabs(x1.ub()-x2.ub());
     }
-    else if (x1.ub()==POS_INFINITY) {
+    else if (x1.ub()>=POS_INFINITY) {
     	if (x2.ub()!=POS_INFINITY)
     		return POS_INFINITY;
-    	else if (x2.lb()==NEG_INFINITY)
+    	else if (x2.lb()<=NEG_INFINITY)
     		return POS_INFINITY;
     	else return fabs(x1.lb()-x2.lb());
     }

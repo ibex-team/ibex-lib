@@ -54,7 +54,7 @@ inline Interval& Interval::operator=(const FI_INTERVAL& x) {
 }
 
 inline Interval& Interval::operator+=(double d) {
-	if (d==POS_INFINITY || d==NEG_INFINITY)
+	if (d>=POS_INFINITY || d<=NEG_INFINITY)
 		set_empty();
 	else
 		itv+=d;
@@ -62,7 +62,7 @@ inline Interval& Interval::operator+=(double d) {
 }
 
 inline Interval& Interval::operator-=(double d) {
-	if (d==POS_INFINITY || d==NEG_INFINITY)
+	if (d>=POS_INFINITY || d<=NEG_INFINITY)
 		set_empty();
 	else
 		itv-=d;
@@ -71,7 +71,7 @@ inline Interval& Interval::operator-=(double d) {
 }
 
 inline Interval& Interval::operator*=(double d) {
-	if (d==POS_INFINITY || d==NEG_INFINITY)
+	if (d>=POS_INFINITY || d<=NEG_INFINITY)
 		set_empty();
 	else
 		*this*=Interval(d);
@@ -79,7 +79,7 @@ inline Interval& Interval::operator*=(double d) {
 }
 
 inline Interval& Interval::operator/=(double d) {
-	if (d==POS_INFINITY || d==NEG_INFINITY)
+	if (d>=POS_INFINITY || d<=NEG_INFINITY)
 		set_empty();
 	else{
 		*this/=Interval(d);
@@ -111,12 +111,12 @@ inline Interval& Interval::operator*=(const Interval& y) {
 
 	if ((a==0 && b==0) || (c==0 && d==0)) { *this=Interval(0.0,0.0); return *this; }
 
-	if (((a<0) && (b>0)) && (c==NEG_INFINITY || d==POS_INFINITY)) { *this=Interval(NEG_INFINITY, POS_INFINITY); return *this; }
+	if (((a<0) && (b>0)) && (c<=NEG_INFINITY || d>=POS_INFINITY)) { *this=Interval(NEG_INFINITY, POS_INFINITY); return *this; }
 
-	if (((c<0) && (d>0)) && (a==NEG_INFINITY || b==POS_INFINITY)) { *this=Interval(NEG_INFINITY, POS_INFINITY); return *this; }
+	if (((c<0) && (d>0)) && (a<=NEG_INFINITY || b>=POS_INFINITY)) { *this=Interval(NEG_INFINITY, POS_INFINITY); return *this; }
 
 	// [-inf, _] x [_ 0] ou [0,_] x [_, +inf]
-	if (((a==NEG_INFINITY) && (d==0)) || ((d==POS_INFINITY) && (a==0))) {
+	if (((a<=NEG_INFINITY) && (d==0)) || ((d>=POS_INFINITY) && (a==0))) {
 		if ((b<=0) || (c>=0)) { *this=Interval(0.0, POS_INFINITY); return *this; }
 		else {
 			r = FI_INTERVAL(b)*FI_INTERVAL(c);
@@ -126,7 +126,7 @@ inline Interval& Interval::operator*=(const Interval& y) {
 	}
 
 	// [-inf, _] x [0, _] ou [0, _] x [-inf, _]
-	if (((a==NEG_INFINITY) && (c==0)) || ((c==NEG_INFINITY) && (a==0))) {
+	if (((a<=NEG_INFINITY) && (c==0)) || ((c<=NEG_INFINITY) && (a==0))) {
 		if ((b<=0) || (d<=0)) { *this=Interval(NEG_INFINITY, 0.0); return *this; }
 		else {
 			r = FI_INTERVAL(b)*FI_INTERVAL(d);
@@ -136,7 +136,7 @@ inline Interval& Interval::operator*=(const Interval& y) {
 	}
 
 	// [_,0] x [-inf, _] ou [_, +inf] x [0,_]
-	if (((c==NEG_INFINITY) && (b==0)) || ((b==POS_INFINITY) && (c==0))) {
+	if (((c<=NEG_INFINITY) && (b==0)) || ((b>=POS_INFINITY) && (c==0))) {
 		if ((d<=0) || (a>=0)) { *this=Interval(0.0, POS_INFINITY); return *this; }
 		else {
 			r = FI_INTERVAL(a)*FI_INTERVAL(d);
@@ -146,7 +146,7 @@ inline Interval& Interval::operator*=(const Interval& y) {
 	}
 
 	// [_, +inf] x [_,0] ou [_,0] x [_, +inf]
-	if (((b==POS_INFINITY) && (d==0)) || ((d==POS_INFINITY) && (b==0))) {
+	if (((b>=POS_INFINITY) && (d==0)) || ((d>=POS_INFINITY) && (b==0))) {
 		if ((a>=0) || (c>=0)) { *this=Interval(NEG_INFINITY, 0.0); return *this; }
 		else {
 			r = FI_INTERVAL(a)*FI_INTERVAL(c);
@@ -262,10 +262,10 @@ inline double Interval::ub() const {
 }
 
 inline double Interval::mid() const {
-	if (itv.inf()==NEG_INFINITY)
-		if (itv.sup()==POS_INFINITY) return 0;
+	if (itv.inf()<=NEG_INFINITY)
+		if (itv.sup()>=POS_INFINITY) return 0;
 		else return -DBL_MAX;
-	else if (itv.sup()==POS_INFINITY) return DBL_MAX;
+	else if (itv.sup()>=POS_INFINITY) return DBL_MAX;
 	else {
 		double m=itv.mid();
 		if (m<itv.inf()) m=itv.inf(); // watch dog
@@ -284,7 +284,7 @@ inline bool Interval::is_degenerated() const {
 
 inline bool Interval::is_unbounded() const {
 	if (is_empty()) return false;
-	return lb()==NEG_INFINITY || ub()==POS_INFINITY;
+	return lb()<=NEG_INFINITY || ub()>=POS_INFINITY;
 }
 
 
@@ -316,21 +316,21 @@ inline double hausdorff(const Interval &x1, const Interval &x2) {
 }
 
 inline Interval operator+(const Interval& x, double d) {
-	if(d==NEG_INFINITY || d==POS_INFINITY)
+	if(d<=NEG_INFINITY || d>=POS_INFINITY)
 		return Interval::EMPTY_SET;
 	else
 		return x.itv+d;
 }
 
 inline Interval operator-(const Interval& x, double d) {
-	if(d==NEG_INFINITY || d==POS_INFINITY)
+	if(d<=NEG_INFINITY || d>=POS_INFINITY)
 		return Interval::EMPTY_SET;
 	else
 		return x.itv-d;
 }
 
 inline Interval operator*(const Interval& x, double d) {
-	if(d==NEG_INFINITY || d==POS_INFINITY)
+	if(d<=NEG_INFINITY || d>=POS_INFINITY)
 		return Interval::EMPTY_SET;
 	else {
 		Interval res(d);
@@ -339,7 +339,7 @@ inline Interval operator*(const Interval& x, double d) {
 }
 
 inline Interval operator/(const Interval& x, double d) {
-	if(d==NEG_INFINITY || d==POS_INFINITY)
+	if(d<=NEG_INFINITY || d>=POS_INFINITY)
 		return Interval::EMPTY_SET;
 	else{
 		Interval res(x);
@@ -348,21 +348,21 @@ inline Interval operator/(const Interval& x, double d) {
 }
 
 inline Interval operator+(double d,const Interval& x) {
-	if(d==NEG_INFINITY || d==POS_INFINITY)
+	if(d<=NEG_INFINITY || d>=POS_INFINITY)
 		return Interval::EMPTY_SET;
 	else
 		return d+x.itv;
 }
 
 inline Interval operator-(double d, const Interval& x) {
-	if(d==NEG_INFINITY || d==POS_INFINITY)
+	if(d<=NEG_INFINITY || d>=POS_INFINITY)
 		return Interval::EMPTY_SET;
 	else
 		return d-x.itv;
 }
 
 inline Interval operator*(double d, const Interval& x) {
-	if(d==NEG_INFINITY || d==POS_INFINITY)
+	if(d<=NEG_INFINITY || d>=POS_INFINITY)
 		return Interval::EMPTY_SET;
 	else {
 		Interval res(d);
@@ -371,7 +371,7 @@ inline Interval operator*(double d, const Interval& x) {
 }
 
 inline Interval operator/(double d, const Interval& x) {
-	if(d==NEG_INFINITY || d==POS_INFINITY)
+	if(d<=NEG_INFINITY || d>=POS_INFINITY)
 		return Interval::EMPTY_SET;
 	else{
 		Interval res(d);
@@ -417,7 +417,7 @@ inline Interval pow(const Interval& x, int n) {
 }
 
 inline Interval pow(const Interval &x, double d) {
-	if(d==NEG_INFINITY || d==POS_INFINITY)
+	if(d<=NEG_INFINITY || d>=POS_INFINITY)
 		return Interval::EMPTY_SET;
 	else if (d==0)
 		return Interval::ONE;
@@ -601,7 +601,7 @@ inline bool bwd_trigo(const Interval& y, Interval& x, int ftype) {
 
 	if (period_0.is_empty()) { x.set_empty(); return false; }
 
-	if (x.lb()==NEG_INFINITY || x.ub()==POS_INFINITY) return true; // infinity of periods
+	if (x.lb()<=NEG_INFINITY || x.ub()>=POS_INFINITY) return true; // infinity of periods
 
 	switch (ftype) {
 	case COS :

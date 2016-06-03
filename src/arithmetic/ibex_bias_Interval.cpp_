@@ -24,10 +24,10 @@ namespace ibex {
 // always included in the executable code.
 static int ___IGNORE__ = (init(), 0);
 
-const Interval Interval::EMPTY_SET(NEG_INFINITY, NEG_INFINITY);
-const Interval Interval::ALL_REALS(NEG_INFINITY, POS_INFINITY);
-const Interval Interval::NEG_REALS(NEG_INFINITY, 0.0);
-const Interval Interval::POS_REALS(0.0, POS_INFINITY);
+const Interval Interval::EMPTY_SET((::INTERVAL(BiasNegInf)));
+const Interval Interval::ALL_REALS(BiasNegInf, BiasPosInf);
+const Interval Interval::NEG_REALS(BiasNegInf, 0.0);
+const Interval Interval::POS_REALS(0.0, BiasPosInf);
 const Interval Interval::ZERO(0.0);
 const Interval Interval::ONE(1.0);
 const Interval Interval::PI(3.14159265358979323846, Succ(3.14159265358979323846));
