@@ -502,11 +502,6 @@ template<class T> inline void ___set_empty(AffineMainMatrix<T>& m)      { m.set_
 namespace ibex {
 
 template<class T>
-inline AffineMainMatrix<T>::~AffineMainMatrix<T>() {
-	delete[] _M;
-}
-
-template<class T>
 inline AffineMainMatrix<T> AffineMainMatrix<T>::empty(int m, int n) {
 	AffineMainMatrix<T>  res(m, n);
 	res.set_empty();
