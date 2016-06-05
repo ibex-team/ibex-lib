@@ -1,5 +1,5 @@
 /* ============================================================================
- * D Y N I B E X - Definition of the Affine2 class based on fAFFull version 1
+ * D Y N I B E X - Definition of the Affine3 class based on fAFFull version 1
  * ============================================================================
  * Copyright   : ENSTA ParisTech
  * License     : This program can be distributed under the terms of the GNU LGPL.
@@ -10,8 +10,8 @@
  * Sponsored   : This research benefited from the support of the "Chair Complex Systems Engineering - Ecole Polytechnique, THALES, DGA, FX, DASSAULT AVIATION, DCNS Research, ENSTA ParisTech, Telecom ParisTech, Fondation ParisTech and FDO ENSTA"
  * ---------------------------------------------------------------------------- */
 
-#ifndef IBEX_AFFINE2_FAFFULLI_H_
-#define IBEX_AFFINE2_FAFFULLI_H_
+#ifndef IBEX_AFFINE3_FAFFULLI_H_
+#define IBEX_AFFINE3_FAFFULLI_H_
 
 #include "ibex_Interval.h"
 
@@ -19,12 +19,12 @@
 
 namespace ibex {
 
-template<class T>  class Affine2Main;
+template<class T>  class AffineMain;
 
   class AF_fAFFullI {
 
 
-    friend class Affine2Main<AF_fAFFullI>;
+    friend class AffineMain<AF_fAFFullI>;
     //    friend std::ostream& operator<<(std::ostream& os, const Affine2Main<AF_fAFFullI>&  x);
 
     static unsigned long int _counter;
@@ -70,4 +70,4 @@ template<class T>  class Affine2Main;
 
 
 
-#endif /* IBEX_AFFINE2_FAFFULL_H_ */
+#endif /* IBEX_AFFINE3_FAFFULL_H_ */

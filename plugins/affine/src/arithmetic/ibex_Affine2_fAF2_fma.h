@@ -27,12 +27,12 @@
 
 namespace ibex {
 
-template<class T>  class Affine2Main;
+template<class T>  class AffineMain;
 
 class AF_fAF2_fma {
 
 
-	friend class Affine2Main<AF_fAF2_fma>;
+	friend class AffineMain<AF_fAF2_fma>;
 
 private:
 	/**

@@ -14,7 +14,7 @@
 
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
-#include "ibex_Affine2.h"
+#include "ibex_Affine.h"
 #include "utils.h"
 
 using namespace ibex;
@@ -74,7 +74,7 @@ public:
 
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestAffine2<AF_Linear>);
+CPPUNIT_TEST_SUITE_REGISTRATION(TestAffine2<AF_Other>);
 
 
 //#include "TestAffine2.cpp"

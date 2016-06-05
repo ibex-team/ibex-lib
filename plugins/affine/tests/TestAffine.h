@@ -15,7 +15,7 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include "ibex_Interval.h"
-#include "ibex_Affine2.h"
+#include "ibex_Affine.h"
 #include "utils.h"
 #include <string>
 #include <iostream>
@@ -133,7 +133,7 @@ public:
 
 	typedef enum { EQUALITY, INCLUSION, INCLUSION_TIGHT, INTERSECTION } comp_t;
 
-	bool compare_results (comp_t c, Interval r, Affine2Main<T>  a) ;
+	bool compare_results (comp_t c, Interval r, AffineMain<T>  a) ;
 
 
 	void test01();
@@ -239,7 +239,7 @@ public:
 	void test101();
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestAffine<AF_fAFFullI>);
+CPPUNIT_TEST_SUITE_REGISTRATION(TestAffine<AF_Default>);
 
 //#include "TestAffine.cpp"
 

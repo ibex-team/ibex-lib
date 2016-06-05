@@ -17,11 +17,11 @@
 
 namespace ibex {
 
-template<class T>  class Affine2Main;
+template<class T>  class AffineMain;
 
 class AF_iAF {
 
-	friend class Affine2Main<AF_iAF>;
+	friend class AffineMain<AF_iAF>;
 
 private:
 

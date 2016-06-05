@@ -12,8 +12,8 @@
 #define __IBEX_AFFINE2_EVAL_H__
 
 #include "ibex_Function.h"
-#include "ibex_Affine2Matrix.h"
-#include "ibex_Affine2Domain.h"
+#include "ibex_AffineMatrix.h"
+#include "ibex_AffineDomain.h"
 #include "ibex_FwdAlgorithm.h"
 #include "ibex_ExprDomain.h"
 #include "ibex_NodeMap.h"
@@ -47,7 +47,7 @@ public:
 	/**
 	 * \brief Run the forward algorithm on the box \a box and return the result as an Affine2 domain.
 	 */
-	TemplateDomain<Affine2Main<T> >& eval(const Affine2MainVector<T>& af);
+	TemplateDomain<AffineMain<T> >& eval(const AffineMainVector<T>& af);
 
 	void index_fwd (int  x, int y);
 	void vector_fwd(int* x, int y);
@@ -98,7 +98,7 @@ public:
 
 	const Function& f;
 	ExprDomain d;
-	ExprTemplateDomain<Affine2Main<T> > af2;
+	ExprTemplateDomain<AffineMain<T> > af2;
 
 protected:
 
@@ -110,12 +110,12 @@ protected:
 	/**
 	 * \brief Run the forward algorithm on the box \a box.
 	 */
-	void forward(const Affine2MainVector<T>& box);
+	void forward(const AffineMainVector<T>& box);
 
 	/**
 	 * \brief Run the forward algorithm with input domains.
 	 */
-	void forward(const Array<const Domain>& argD, const Array<const TemplateDomain<Affine2Main<T> > >& argDAF2);
+	void forward(const Array<const Domain>& argD, const Array<const TemplateDomain<AffineMain<T> > >& argDAF2);
 
 	/**
 	 * Since there is no affine evaluator in the Function class,
@@ -149,13 +149,13 @@ inline Domain& Affine2Eval<T>::eval(const IntervalVector& box) {
 }
 
 template<class T>
-inline TemplateDomain<Affine2Main<T> >& Affine2Eval<T>::eval(const Affine2MainVector<T>& box) {
+inline TemplateDomain<AffineMain<T> >& Affine2Eval<T>::eval(const AffineMainVector<T>& box) {
 	forward(box);
 	return *af2.top;
 }
 
 template<class T>
-inline void Affine2Eval<T>::forward(const Array<const Domain>& argD, const Array<const TemplateDomain<Affine2Main<T> > >& argDAF2) {
+inline void Affine2Eval<T>::forward(const Array<const Domain>& argD, const Array<const TemplateDomain<AffineMain<T> > >& argDAF2) {
 
 	d.write_arg_domains(argD);
 	af2.write_arg_domains(argDAF2);
@@ -172,14 +172,14 @@ inline void Affine2Eval<T>::forward(const Array<const Domain>& argD, const Array
 template<class T>
 inline void Affine2Eval<T>::forward(const IntervalVector& box) {
 	d.write_arg_domains(box);
-	af2.write_arg_domains(Affine2MainVector<T>(box,true));
+	af2.write_arg_domains(AffineMainVector<T>(box,true));
 
 	// TODO: should manage empty result! (see Eval.cpp)
 	f.forward<Affine2Eval<T> >(*this);
 }
 
 template<class T>
-inline void Affine2Eval<T>::forward(const Affine2MainVector<T>& box) {
+inline void Affine2Eval<T>::forward(const AffineMainVector<T>& box) {
 
 	d.write_arg_domains(box.itv());
 	af2.write_arg_domains(box);
@@ -198,18 +198,18 @@ inline void Affine2Eval<T>::cst_fwd(int y) {
 	const ExprConstant& c = (const ExprConstant&) f.node(y);
 	switch (c.type()) {
 	case Dim::SCALAR:      {
-		af2[y].i() = Affine2Main<T>(c.get_value());
+		af2[y].i() = AffineMain<T>(c.get_value());
 		d[y].i() = c.get_value();
 		break;
 	}
 	case Dim::ROW_VECTOR:
 	case Dim::COL_VECTOR: {
-		af2[y].v() = Affine2MainVector<T>(c.get_vector_value(),false);
+		af2[y].v() = AffineMainVector<T>(c.get_vector_value(),false);
 		d[y].v() = c.get_vector_value();
 		break;
 	}
 	case Dim::MATRIX: {
-		af2[y].m() = Affine2MainMatrix<T>(c.get_matrix_value());
+		af2[y].m() = AffineMainMatrix<T>(c.get_matrix_value());
 		d[y].m() = c.get_matrix_value();
 		break;
 	}
@@ -249,19 +249,19 @@ inline void Affine2Eval<T>::div_fwd(int x1, int x2, int y) {
 template<class T>
 inline void Affine2Eval<T>::max_fwd(int x1, int x2, int y) {
 	d[y].i()= max(d[x1].i(),d[x2].i());
-	af2[y].i() = Affine2Main<T>(d[y].i());
+	af2[y].i() = AffineMain<T>(d[y].i());
 }
 
 template<class T>
 inline void Affine2Eval<T>::min_fwd(int x1, int x2, int y) {
 	d[y].i() = min(d[x1].i(),d[x2].i());
-	af2[y].i()= Affine2Main<T>( d[y].i());
+	af2[y].i()= AffineMain<T>( d[y].i());
 }
 
 template<class T>
 inline void Affine2Eval<T>::atan2_fwd(int x1, int x2, int y) {
 	d[y].i() = atan2(d[x1].i(),d[x2].i());
-	af2[y].i()= Affine2Main<T>(d[y].i());
+	af2[y].i()= AffineMain<T>(d[y].i());
 }
 
 template<class T>
@@ -369,19 +369,19 @@ inline void Affine2Eval<T>::atan_fwd(int x, int y) {
 template<class T>
 inline void Affine2Eval<T>::acosh_fwd(int x, int y) {
 	d[y].i()=acosh(d[x].i());
-	af2[y].i()= Affine2Main<T>(d[y].i());
+	af2[y].i()= AffineMain<T>(d[y].i());
 }
 
 template<class T>
 inline void Affine2Eval<T>::asinh_fwd(int x, int y) {
 	d[y].i()=asinh(d[x].i());
-	af2[y].i()= Affine2Main<T>(d[y].i());
+	af2[y].i()= AffineMain<T>(d[y].i());
 }
 
 template<class T>
 inline void Affine2Eval<T>::atanh_fwd(int x, int y) {
 	d[y].i()=atanh(d[x].i());
-	af2[y].i()= Affine2Main<T>(d[y].i());
+	af2[y].i()= AffineMain<T>(d[y].i());
 }
 
 template<class T>
@@ -469,7 +469,7 @@ inline void Affine2Eval<T>::apply_fwd(int* x, int y) {
 	assert(&a.func!=&f); // recursive calls not allowed
 
 	Array<const Domain> d2(a.func.nb_arg());
-	Array<const TemplateDomain<Affine2Main<T> > > af22(a.func.nb_arg());
+	Array<const TemplateDomain<AffineMain<T> > > af22(a.func.nb_arg());
 
 	for (int i=0; i<a.func.nb_arg(); i++) {
 		d2.set_ref(i,d[x[i]]);

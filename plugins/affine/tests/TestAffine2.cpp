@@ -1113,7 +1113,7 @@ void TestAffine2<T>::test_tanh() {
 
 template<class T>
 bool TestAffine2<T>::check_af2 (Function& f, Interval& I){
-	Affine2Main<T> faa;
+	AffineMain<T> faa;
 	Interval itv2;
 	Interval itv;
 
@@ -1167,7 +1167,7 @@ template<class T>
 bool TestAffine2<T>::check_af2 (Function& f, IntervalVector& I){
 
 
-	Affine2Main<T> faa;
+	AffineMain<T> faa;
 	Interval itv;
 	Interval itv2;
 

@@ -1,5 +1,5 @@
 /* ============================================================================
- * I B E X - Affine2Domain definition
+ * I B E X - AffineDomain definition
  * ============================================================================
  * License     : This program can be distributed under the terms of the GNU LGPL.
  *               See the file COPYING.LESSER.
@@ -9,8 +9,8 @@
  * Created     : March 08, 2013
  * ---------------------------------------------------------------------------- */
 
-#ifndef __IBEX_AFFINE2_DOMAIN_H__
-#define __IBEX_AFFINE2_DOMAIN_H__
+#ifndef __IBEX_AFFINE_DOMAIN_H__
+#define __IBEX_AFFINE_DOMAIN_H__
 
 #include <stdexcept>
 #include "ibex_TemplateDomain.h"
@@ -31,7 +31,7 @@ namespace ibex {
  *
  */
 typedef TemplateDomain<Affine2>   Affine2Domain;
-typedef TemplateDomain<AffineLin> AffineLinDomain;
+typedef TemplateDomain<Affine3> Affine3Domain;
 
 
 template<>
@@ -72,28 +72,28 @@ inline TemplateDomain<Affine2> atanh(const TemplateDomain<Affine2>& d) {
 
 
 template<>
-inline TemplateDomain<AffineLin>& TemplateDomain<AffineLin>::operator&=(const TemplateDomain<AffineLin>& ) {
+inline TemplateDomain<Affine3>& TemplateDomain<Affine3>::operator&=(const TemplateDomain<Affine3>& ) {
 	/* intersection is forbidden with affine forms */
         throw std::logic_error("intersection is forbidden with affine forms");
 }
 
 
 template<>
-inline TemplateDomain<AffineLin> atan2(const TemplateDomain<AffineLin>& d1, const TemplateDomain<AffineLin>& ) {
+inline TemplateDomain<Affine3> atan2(const TemplateDomain<Affine3>& d1, const TemplateDomain<Affine3>& ) {
 	/* atan2 is not implemented yet with affine forms */
 	not_implemented("atan2 with affine forms");
 	return d1;
 }
 
 template<>
-inline TemplateDomain<AffineLin> acosh(const TemplateDomain<AffineLin>& d) {
+inline TemplateDomain<Affine3> acosh(const TemplateDomain<Affine3>& d) {
 	/* acosh is not implemented yet with affine forms */
 	not_implemented("acosh with affine forms");
 	return d;
 }
 
 template<>
-inline TemplateDomain<AffineLin> asinh(const TemplateDomain<AffineLin>& d) {
+inline TemplateDomain<Affine3> asinh(const TemplateDomain<Affine3>& d) {
 	/* asinh is not implemented yet with affine forms */
 	not_implemented("asinh with affine forms");
 	return d;
@@ -101,7 +101,7 @@ inline TemplateDomain<AffineLin> asinh(const TemplateDomain<AffineLin>& d) {
 
 
 template<>
-inline TemplateDomain<AffineLin> atanh(const TemplateDomain<AffineLin>& d) {
+inline TemplateDomain<Affine3> atanh(const TemplateDomain<Affine3>& d) {
 	/* atanh is not implemented yet with affine forms */
 	not_implemented("atanh with affine forms");
 	return d;
@@ -109,4 +109,4 @@ inline TemplateDomain<AffineLin> atanh(const TemplateDomain<AffineLin>& d) {
 
 } // end namespace
 
-#endif /* __IBEX_AFFINE2_DOMAIN_H__ */
+#endif /* __IBEX_AFFINE_DOMAIN_H__ */

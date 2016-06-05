@@ -1,5 +1,5 @@
 /* ============================================================================
- * D Y N I B E X - Definition of the Affine2 class based on fAFFull version 1
+ * D Y N I B E X - Definition of the Affine3 class based on fAFFull version 1
  * ============================================================================
  * Copyright   : ENSTA ParisTech
  * License     : This program can be distributed under the terms of the GNU LGPL.
@@ -9,8 +9,8 @@
  * Created     : Jul 18, 2014
  * Sponsored   : This research benefited from the support of the "Chair Complex Systems Engineering - Ecole Polytechnique, THALES, DGA, FX, DASSAULT AVIATION, DCNS Research, ENSTA ParisTech, Telecom ParisTech, Fondation ParisTech and FDO ENSTA"
  * ---------------------------------------------------------------------------- */
-#include "ibex_Affine2_fAFFullI.h"
-#include "ibex_Affine2.h"
+#include "ibex_Affine3_fAFFullI.h"
+#include "ibex_Affine.h"
 #include <iomanip>
 
 namespace ibex {
@@ -22,7 +22,7 @@ unsigned long int AF_fAFFullI::_counter = 1;
 bool noise_null (const std::pair<int,double> value) { return (value.second >= 0)&&(value.second <= 0.0); }
 
 template<>
-Affine2Main<AF_fAFFullI>& Affine2Main<AF_fAFFullI>::operator=(const Interval& x) {
+AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::operator=(const Interval& x) {
 	_elt._garbage = Interval(0.0); //
 	if (x.is_empty()) {
 		_n = -1;
@@ -70,13 +70,13 @@ Affine2Main<AF_fAFFullI>& Affine2Main<AF_fAFFullI>::operator=(const Interval& x)
 
 
 template<>
-Affine2Main<AF_fAFFullI>::Affine2Main() :
+AffineMain<AF_fAFFullI>::AffineMain() :
 _n		(-2		),
 _elt	(0.0, std::list<std::pair<int,double> >(), Interval(0.0))	{
 }
 
 template<>
-Affine2Main<AF_fAFFullI>::Affine2Main(int n, int m, const Interval& itv) :
+AffineMain<AF_fAFFullI>::AffineMain(int n, int m, const Interval& itv) :
 _n 		(1),
 _elt	(0.0, std::list<std::pair<int,double> >(), Interval(0.0))
 {
@@ -87,7 +87,7 @@ _elt	(0.0, std::list<std::pair<int,double> >(), Interval(0.0))
 
 
 template<>
-Affine2Main<AF_fAFFullI>::Affine2Main(const double d) :
+AffineMain<AF_fAFFullI>::AffineMain(const double d) :
 _n 		(1),
 _elt	(0.0, std::list<std::pair<int,double> >(), Interval(0.0)) {
 	if (fabs(d)<POS_INFINITY) {
@@ -103,7 +103,7 @@ _elt	(0.0, std::list<std::pair<int,double> >(), Interval(0.0)) {
 
 
 template<>
-Affine2Main<AF_fAFFullI>::Affine2Main(const Interval & itv):
+AffineMain<AF_fAFFullI>::AffineMain(const Interval & itv):
 _n 		(1),
 _elt	(0.0,std::list<std::pair<int,double> >(),Interval(0.0)) {
 	*this = itv;
@@ -111,7 +111,7 @@ _elt	(0.0,std::list<std::pair<int,double> >(),Interval(0.0)) {
 
 
 template<>
-Affine2Main<AF_fAFFullI>::Affine2Main(const Affine2Main<AF_fAFFullI>& x) :
+AffineMain<AF_fAFFullI>::AffineMain(const AffineMain<AF_fAFFullI>& x) :
 _n		(x._n),
 _elt	(x._elt._center, std::list<std::pair<int,double> >(),x._elt._garbage) {
 	if (!x._elt._rays.empty())
@@ -126,7 +126,7 @@ _elt	(x._elt._center, std::list<std::pair<int,double> >(),x._elt._garbage) {
 
 
 template<>
-double Affine2Main<AF_fAFFullI>::val(int i) const{
+double AffineMain<AF_fAFFullI>::val(int i) const{
 	assert((0<=i) && (((unsigned int)i)<=AF_fAFFullI::_counter));
 	if (i == 0) return _elt._center;
 	if (!_elt._rays.empty()) {
@@ -140,14 +140,14 @@ double Affine2Main<AF_fAFFullI>::val(int i) const{
 }
 
 template<>
-double Affine2Main<AF_fAFFullI>::err() const{
+double AffineMain<AF_fAFFullI>::err() const{
 	return _elt._garbage.rad();
 }
 
 
 
 template<>
-int Affine2Main<AF_fAFFullI>::size() const {
+int AffineMain<AF_fAFFullI>::size() const {
 	if (!_elt._rays.empty())
 	{
 		std::pair<int,double> p = _elt._rays.back();
@@ -159,7 +159,7 @@ int Affine2Main<AF_fAFFullI>::size() const {
 }
 
 template<>
-const Interval Affine2Main<AF_fAFFullI>::itv() const {
+const Interval AffineMain<AF_fAFFullI>::itv() const {
 
 	if (is_actif()) {
 		Interval res(_elt._center);
@@ -187,13 +187,13 @@ const Interval Affine2Main<AF_fAFFullI>::itv() const {
 }
 
 template<>
-double Affine2Main<AF_fAFFullI>::mid() const{
+double AffineMain<AF_fAFFullI>::mid() const{
 	return (is_actif()) ? _elt._center : itv().mid();
 }
 
 
 template<>
-std::ostream& operator<<(std::ostream& os, const Affine2Main<AF_fAFFullI>& x) {
+std::ostream& operator<<(std::ostream& os, const AffineMain<AF_fAFFullI>& x) {
 	os << std::setprecision(15) << x.itv() << " : ";
 	if (x.is_actif()) {
 		os << x.val(0);
@@ -214,7 +214,7 @@ std::ostream& operator<<(std::ostream& os, const Affine2Main<AF_fAFFullI>& x) {
 
 
 template<>
-Affine2Main<AF_fAFFullI>& Affine2Main<AF_fAFFullI>::operator=(const Affine2Main<AF_fAFFullI>& x) {
+AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::operator=(const AffineMain<AF_fAFFullI>& x) {
 	if (this != &x) {
 		_n = x._n;
 		_elt._center = x._elt._center;
@@ -233,7 +233,7 @@ Affine2Main<AF_fAFFullI>& Affine2Main<AF_fAFFullI>::operator=(const Affine2Main<
 }
 
 template<>
-Affine2Main<AF_fAFFullI>& Affine2Main<AF_fAFFullI>::operator=(double d) {
+AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::operator=(double d) {
 	_elt._garbage = Interval(0.0);
 	if (!_elt._rays.empty()) {
 		_elt._rays.clear();
@@ -258,8 +258,8 @@ Affine2Main<AF_fAFFullI>& Affine2Main<AF_fAFFullI>::operator=(double d) {
 
 /** \brief Return (-x) */
 template<>
-Affine2Main<AF_fAFFullI> Affine2Main<AF_fAFFullI>::operator-() const {
-	Affine2Main<AF_fAFFullI> res;
+AffineMain<AF_fAFFullI> AffineMain<AF_fAFFullI>::operator-() const {
+	AffineMain<AF_fAFFullI> res;
 	res._n = _n;
 	res._elt._center = -_elt._center;
 	res._elt._garbage = -_elt._garbage;
@@ -273,7 +273,7 @@ Affine2Main<AF_fAFFullI> Affine2Main<AF_fAFFullI>::operator-() const {
 }
 
 template<>
-Affine2Main<AF_fAFFullI>& Affine2Main<AF_fAFFullI>::saxpy(double alpha, const Affine2Main<AF_fAFFullI>& y, double beta, double ddelta, bool B1, bool B2, bool B3, bool B4) {
+AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::saxpy(double alpha, const AffineMain<AF_fAFFullI>& y, double beta, double ddelta, bool B1, bool B2, bool B3, bool B4) {
 	// std::cout << "saxpy IN " << alpha << " x " << *this << " + " << y << " + "<< beta << " +error " << ddelta << " / "<< B1 << B2 << B3 << B4 << std::endl;
 	Interval roundoff_error(0.,0.);
 	Interval intermediate(0.,0.);
@@ -440,25 +440,25 @@ Affine2Main<AF_fAFFullI>& Affine2Main<AF_fAFFullI>::saxpy(double alpha, const Af
 
 
 template<>
-Affine2Main<AF_fAFFullI>& Affine2Main<AF_fAFFullI>::operator*=(const Affine2Main<AF_fAFFullI>& y) {
+AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::operator*=(const AffineMain<AF_fAFFullI>& y) {
 	// std::cout << "in *= "<< *this <<std::endl;
 	// std::cout << "in *= "<< y <<std::endl;
 
 	if (is_actif() && (y.is_actif())) {
 
-		Affine2Main<AF_fAFFullI> ax(*this);
-		Affine2Main<AF_fAFFullI> ay(y);
+		AffineMain<AF_fAFFullI> ax(*this);
+		AffineMain<AF_fAFFullI> ay(y);
 		Interval ity = y.itv() - y._elt._center;
 		//std::cout << "ity : " << ity << std::endl;
 
 		double y0 = y._elt._center;
 
-		Affine2Main<AF_fAFFullI> temp1 = y*(this->_elt._center);
+		AffineMain<AF_fAFFullI> temp1 = y*(this->_elt._center);
 		ax._elt._center = 0.0;
 		Interval itx = ax.itv();
 		//std::cout << "itx : " << itx << std::endl;
 
-		Affine2Main<AF_fAFFullI> temp2 = ax*(y0);
+		AffineMain<AF_fAFFullI> temp2 = ax*(y0);
 
 		itx *= ity;
 		//std::cout << "itx*ity : " << itx << std::endl;
@@ -475,7 +475,7 @@ Affine2Main<AF_fAFFullI>& Affine2Main<AF_fAFFullI>::operator*=(const Affine2Main
 
 
 template<>
-Affine2Main<AF_fAFFullI>& Affine2Main<AF_fAFFullI>::operator*=(const Interval& y) {
+AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::operator*=(const Interval& y) {
 
 	//*this *= Affine2Main<AF_fAFFullI>(y);
 	if (	(!is_actif())||
@@ -484,7 +484,7 @@ Affine2Main<AF_fAFFullI>& Affine2Main<AF_fAFFullI>::operator*=(const Interval& y
 		*this = itv()*y;
 
 	} else {
-		*this *= Affine2Main<AF_fAFFullI>(y);
+		*this *= AffineMain<AF_fAFFullI>(y);
 	}
 
 
@@ -492,7 +492,7 @@ Affine2Main<AF_fAFFullI>& Affine2Main<AF_fAFFullI>::operator*=(const Interval& y
 }
 
 template<>
-Affine2Main<AF_fAFFullI>& Affine2Main<AF_fAFFullI>::operator+=(const Interval& y) {
+AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::operator+=(const Interval& y) {
 
 	if (	(!is_actif())||
 			y.is_empty()||
@@ -501,7 +501,7 @@ Affine2Main<AF_fAFFullI>& Affine2Main<AF_fAFFullI>::operator+=(const Interval& y
 
 	} else {
 		//std::cout << "+=(y)" << y << std::endl;
-		*this += Affine2Main<AF_fAFFullI>(y);
+		*this += AffineMain<AF_fAFFullI>(y);
 
 	}
 
@@ -510,7 +510,7 @@ Affine2Main<AF_fAFFullI>& Affine2Main<AF_fAFFullI>::operator+=(const Interval& y
 }
 
 template<>
-Affine2Main<AF_fAFFullI>& Affine2Main<AF_fAFFullI>::sqr(const Interval itv) {
+AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::sqr(const Interval itv) {
 
 	if (	(!is_actif())||
 			itv.is_empty()||
@@ -519,7 +519,7 @@ Affine2Main<AF_fAFFullI>& Affine2Main<AF_fAFFullI>::sqr(const Interval itv) {
 		*this = pow(itv,2);
 
 	} else  {
-		Affine2Main<AF_fAFFullI> ax(*this);
+		AffineMain<AF_fAFFullI> ax(*this);
 		//std::cout << "sqr of " << itv << std::endl;
 		*this = pow(ax,Interval(2),itv);
 	}
@@ -532,7 +532,7 @@ Affine2Main<AF_fAFFullI>& Affine2Main<AF_fAFFullI>::sqr(const Interval itv) {
 
 
 template<>
-void Affine2Main<AF_fAFFullI>::compact(double tol){
+void AffineMain<AF_fAFFullI>::compact(double tol){
 	Interval pmOne(-1.0, 1.0);
 
 	if (!_elt._rays.empty()) {

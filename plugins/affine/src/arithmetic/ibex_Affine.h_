@@ -1,5 +1,5 @@
 /* ============================================================================
- * I B E X - ibex_Affine2.h_
+ * I B E X - ibex_Affine.h_
  * ============================================================================
  * License     : This program can be distributed under the terms of the GNU LGPL.
  *               See the file COPYING.LESSER.
@@ -11,14 +11,15 @@
  * ---------------------------------------------------------------------------- */
 
 
-#ifndef IBEX_AFFINE2_H2_
-#define IBEX_AFFINE2_H2_
+#ifndef IBEX_AFFINE_H2_
+#define IBEX_AFFINE_H2_
 
+#include "ibex_Affine.h"
 
 namespace ibex {
 
 template<class T>
-inline std::ostream& operator<<(std::ostream& os, const Affine2Main<T>& x) {
+inline std::ostream& operator<<(std::ostream& os, const AffineMain<T>& x) {
 	{
 		os << x.itv() << " : ";
 		if (x.is_actif()) {
@@ -38,7 +39,7 @@ inline std::ostream& operator<<(std::ostream& os, const Affine2Main<T>& x) {
 
 // debut linChebyshev
 template<class T>
-inline Affine2Main<T>& Affine2Main<T>::linChebyshev(Affine2_expr num, const Interval itv) {
+inline AffineMain<T>& AffineMain<T>::linChebyshev(Affine2_expr num, const Interval itv) {
 	//  std::cout << "linChebyshev IN itv= "<<itv << " x =  "<< *this << num<< std::endl;
 
 	Interval res_itv;
@@ -136,7 +137,7 @@ inline Affine2Main<T>& Affine2Main<T>::linChebyshev(Affine2_expr num, const Inte
 			t2 = (band-beta).ub();
 			ddelta = (t1>t2)? t1 : t2;
 
-			saxpy(alpha, Affine2Main<T>(), beta, ddelta, true,false,true,true);
+			saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
 			break;
 		}
 		case AF_EXP : {
@@ -162,7 +163,7 @@ inline Affine2Main<T>& Affine2Main<T>::linChebyshev(Affine2_expr num, const Inte
 				t2 = (band-beta).ub();
 				ddelta = (t1>t2)? t1 : t2;
 
-				saxpy(alpha, Affine2Main<T>(), beta, ddelta, true,false,true,true);
+				saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
 			}
 
 			break;
@@ -186,7 +187,7 @@ inline Affine2Main<T>& Affine2Main<T>::linChebyshev(Affine2_expr num, const Inte
 			t2 = (band -beta).ub();
 			ddelta = (t1>t2)? t1 : t2;
 
-			saxpy(alpha, Affine2Main<T>(), beta, ddelta, true,false,true,true);
+			saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
 			break;
 		}
 		case AF_INV : {
@@ -213,7 +214,7 @@ inline Affine2Main<T>& Affine2Main<T>::linChebyshev(Affine2_expr num, const Inte
 				ddelta = (t1>t2)? t1 : t2;
 
 				if (itv.lb()<0.0) beta = -beta;
-				saxpy(alpha, Affine2Main<T>(), beta, ddelta, true,false,true,true);
+				saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
 			}
 			break;
 		}
@@ -238,7 +239,7 @@ inline Affine2Main<T>& Affine2Main<T>::linChebyshev(Affine2_expr num, const Inte
 			t2 = (band -beta).ub();
 			ddelta = (t1>t2)? t1 : t2;
 
-			saxpy(alpha, Affine2Main<T>(), beta, ddelta, true,false,true,true);
+			saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
 			break;
 		}
 		case AF_ABS : {
@@ -246,7 +247,7 @@ inline Affine2Main<T>& Affine2Main<T>::linChebyshev(Affine2_expr num, const Inte
 				break;
 			}
 			else if (itv.ub()<=0) {
-				*this = (-Affine2Main<T>(*this));
+				*this = (-AffineMain<T>(*this));
 			}
 			else {
 				dmm = res_itv;
@@ -267,7 +268,7 @@ inline Affine2Main<T>& Affine2Main<T>::linChebyshev(Affine2_expr num, const Inte
 				t2 = (band -beta).ub();
 				ddelta = (t1>t2)? t1 : t2;
 
-				saxpy(alpha, Affine2Main<T>(), beta, ddelta, true,false,true,true);
+				saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
 			}
 			break;
 		}
@@ -401,7 +402,7 @@ inline Affine2Main<T>& Affine2Main<T>::linChebyshev(Affine2_expr num, const Inte
 				break;
 			}
 
-			saxpy(alpha, Affine2Main<T>(), beta, ddelta, true,false,true,true);
+			saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
 			break;
 		}
 
@@ -566,7 +567,7 @@ inline Affine2Main<T>& Affine2Main<T>::linChebyshev(Affine2_expr num, const Inte
 				break;
 			}
 
-			saxpy(alpha, Affine2Main<T>(), beta, ddelta, true,false,true,true);
+			saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
 			break;
 		}
 		default : {
@@ -584,7 +585,7 @@ inline Affine2Main<T>& Affine2Main<T>::linChebyshev(Affine2_expr num, const Inte
 
 
 template<class T>
-inline Affine2Main<T>& Affine2Main<T>::power(int n, const Interval itv) {
+inline AffineMain<T>& AffineMain<T>::power(int n, const Interval itv) {
 	//	std::cout << "in power "<<std::endl;
 
 	// Particular case
@@ -640,7 +641,7 @@ inline Affine2Main<T>& Affine2Main<T>::power(int n, const Interval itv) {
 			t2 = (band - beta).ub();
 			ddelta = (t1 > t2) ? t1 : t2;
 
-			saxpy(alpha, Affine2Main<T>(), beta, ddelta, true, false, true, true);
+			saxpy(alpha, AffineMain<T>(), beta, ddelta, true, false, true, true);
 
 		} else {
 			// for _itv = [a,b]
@@ -691,7 +692,7 @@ inline Affine2Main<T>& Affine2Main<T>::power(int n, const Interval itv) {
 				if (t1 > ddelta) ddelta= t1 ;
 			}
 
-			saxpy(alpha, Affine2Main<T>(), beta, ddelta, true, false, true, true);
+			saxpy(alpha, AffineMain<T>(), beta, ddelta, true, false, true, true);
 		}
 
 	}
@@ -700,22 +701,22 @@ inline Affine2Main<T>& Affine2Main<T>::power(int n, const Interval itv) {
 }
 
 template<class T>
-inline Affine2Main<T> pow(const Affine2Main<T>& x, int n, const Interval itv) { 	// std::cout << "in pow "<<std::endl;
+inline AffineMain<T> pow(const AffineMain<T>& x, int n, const Interval itv) { 	// std::cout << "in pow "<<std::endl;
 	if (n == 0)
-		return Affine2Main<T>(1.0);
+		return AffineMain<T>(1.0);
 	else if (n == 1)
-		return Affine2Main<T>(x);
+		return AffineMain<T>(x);
 	else if (n == 2)
 		return sqr(x,itv);
 	else if (n<0)
-		return inv(Affine2Main<T>(x).power(-n,itv),pow(itv,-n));
+		return inv(AffineMain<T>(x).power(-n,itv),pow(itv,-n));
 	else
-		return Affine2Main<T>(x).power(n,itv);
+		return AffineMain<T>(x).power(n,itv);
 }
 
 
 template<class T>
-inline Affine2Main<T> pow(const Affine2Main<T>& x, double d, const Interval itv) {
+inline AffineMain<T> pow(const AffineMain<T>& x, double d, const Interval itv) {
 	if ( ((int) (d)) == d) {
 		return pow(x, (int) (d),itv);
 	} else if (d<0) {
@@ -727,13 +728,13 @@ inline Affine2Main<T> pow(const Affine2Main<T>& x, double d, const Interval itv)
 
 
 template<class T>
-inline Affine2Main<T> root(const Affine2Main<T>& x, int n, const Interval itv) {
+inline AffineMain<T> root(const AffineMain<T>& x, int n, const Interval itv) {
 
-	if (x.is_empty()) return Affine2Main<T>(Interval::EMPTY_SET);
-	else if (n==0) return Affine2Main<T>(Interval::ONE);
+	if (x.is_empty()) return AffineMain<T>(Interval::EMPTY_SET);
+	else if (n==0) return AffineMain<T>(Interval::ONE);
 	else if (n==1) return x;
 	else if (n<0) return inv(root(x,-n,itv),root(itv,-n));
-	else if (x.is_degenerated()) return Affine2Main<T>(pow(Interval(x.val(0)),1.0/n));
+	else if (x.is_degenerated()) return AffineMain<T>(pow(Interval(x.val(0)),1.0/n));
 	else if (n % 2 == 0) return pow(x, Interval::ONE/n,itv); // the negative part of x should be removed
 	else if (0 <= itv.lb()) return  pow(x, Interval::ONE/n,itv);
 	else if (itv.ub() <= 0) return  -pow(-x, Interval::ONE/n,-itv);
@@ -742,7 +743,7 @@ inline Affine2Main<T> root(const Affine2Main<T>& x, int n, const Interval itv) {
 		//ibex_error("warning: Affine2Main ROOT non completely well implemented yet");
 		//		y=pow(x,e) |  // the negative part of x should be removed
 		//	    (-pow(-x,e)); // the positive part of x should be removed
-		return Affine2Main<T>( pow(x, Interval::ONE/n,itv)| (-pow(-x,Interval::ONE/n,-itv)));  // BE CAREFULL the result of this union is an INTERVAL, so y lost all its affine form
+		return AffineMain<T>( pow(x, Interval::ONE/n,itv)| (-pow(-x,Interval::ONE/n,-itv)));  // BE CAREFULL the result of this union is an INTERVAL, so y lost all its affine form
 	}
 
 }
@@ -750,13 +751,13 @@ inline Affine2Main<T> root(const Affine2Main<T>& x, int n, const Interval itv) {
 
 
 template<class T>
-inline Affine2Main<T> sign(const Affine2Main<T>&, const Interval itv) {
+inline AffineMain<T> sign(const AffineMain<T>&, const Interval itv) {
 	if (itv.lb() > 0) {
-		return Affine2Main<T>(1.0);
+		return AffineMain<T>(1.0);
 	} else if (itv.ub() < 0) {
-		return Affine2Main<T>(-1.0);
+		return AffineMain<T>(-1.0);
 	} else {
-		return Affine2Main<T>(Interval(-1.0, 1.0));
+		return AffineMain<T>(Interval(-1.0, 1.0));
 	}
 }
 
@@ -766,10 +767,10 @@ inline Affine2Main<T> sign(const Affine2Main<T>&, const Interval itv) {
 
 
 template<>
-inline Affine2Main<AF_No>& Affine2Main<AF_No>::linChebyshev(Affine2_expr num, const Interval itv);
+inline AffineMain<AF_No>& AffineMain<AF_No>::linChebyshev(Affine2_expr num, const Interval itv);
 
 template<>
-inline Affine2Main<AF_No>& Affine2Main<AF_No>::power(int n, const Interval itv);
+inline AffineMain<AF_No>& AffineMain<AF_No>::power(int n, const Interval itv);
 
 
 
@@ -1053,7 +1054,7 @@ Affine2Main<T>& Affine2Main<T>::linMinRange(Affine2_expr num, const Interval itv
 
 
 
-#endif /* IBEX_Affine2_H2_ */
+#endif /* IBEX_Affine_H2_ */
 
 
 

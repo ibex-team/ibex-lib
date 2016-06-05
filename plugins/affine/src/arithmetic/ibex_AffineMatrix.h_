@@ -18,27 +18,27 @@ namespace ibex {
 
 
 template<class T>
-Affine2MainMatrix<T>::Affine2MainMatrix() : _nb_rows(0), _nb_cols(0), _M(NULL) {
+AffineMainMatrix<T>::AffineMainMatrix() : _nb_rows(0), _nb_cols(0), _M(NULL) {
 
 }
 
 template<class T>
-Affine2MainMatrix<T>::Affine2MainMatrix(int nb_rows1, int nb_cols1) : _nb_rows(nb_rows1), _nb_cols(nb_cols1) {
+AffineMainMatrix<T>::AffineMainMatrix(int nb_rows1, int nb_cols1) : _nb_rows(nb_rows1), _nb_cols(nb_cols1) {
 	assert(nb_rows1>0);
 	assert(nb_cols1>0);
 
-	_M = new Affine2MainVector<T>[_nb_rows];
+	_M = new AffineMainVector<T>[_nb_rows];
 	for (int i=0; i<_nb_rows; i++) {
 		_M[i].resize(_nb_cols);
 	}
 }
 
 template<class T>
-Affine2MainMatrix<T>::Affine2MainMatrix(int nb_rows1, int nb_cols1, const Affine2Main<T>& x) : _nb_rows(nb_rows1), _nb_cols(nb_cols1) {
+AffineMainMatrix<T>::AffineMainMatrix(int nb_rows1, int nb_cols1, const AffineMain<T>& x) : _nb_rows(nb_rows1), _nb_cols(nb_cols1) {
 	assert(nb_rows1>0);
 	assert(nb_cols1>0);
 
-	_M = new Affine2MainVector<T>[_nb_rows];
+	_M = new AffineMainVector<T>[_nb_rows];
 	for (int i=0; i<_nb_rows; i++) {
 		_M[i].resize(_nb_cols);
 		for (int j=0; j<_nb_cols; j++) _M[i]._vec[j]=x;
@@ -48,40 +48,40 @@ Affine2MainMatrix<T>::Affine2MainMatrix(int nb_rows1, int nb_cols1, const Affine
 
 
 template<class T>
-Affine2MainMatrix<T>::Affine2MainMatrix(int m, int n, double bounds[][2]) : _nb_rows(m), _nb_cols(n) {
+AffineMainMatrix<T>::AffineMainMatrix(int m, int n, double bounds[][2]) : _nb_rows(m), _nb_cols(n) {
 	assert(m>0);
 	assert(n>0);
 		int k=0; // counter for "bounds"
-		_M = new Affine2MainVector<T>[_nb_rows];
+		_M = new AffineMainVector<T>[_nb_rows];
 		for (int i=0; i<_nb_rows; i++) {
 			_M[i].resize(_nb_cols);
 			for (int j=0; j<_nb_cols; j++) {
-				_M[i]._vec[j]=Affine2Main<T>(Interval(bounds[k][0],bounds[k][1]));
+				_M[i]._vec[j]=AffineMain<T>(Interval(bounds[k][0],bounds[k][1]));
 				k++;
 			}
 		}
 }
 
 template<class T>
-Affine2MainMatrix<T>::Affine2MainMatrix(const Affine2MainMatrix<T>& m) : _nb_rows(m.nb_rows()), _nb_cols(m.nb_cols()){
-	_M = new Affine2MainVector<T>[_nb_rows];
+AffineMainMatrix<T>::AffineMainMatrix(const AffineMainMatrix<T>& m) : _nb_rows(m.nb_rows()), _nb_cols(m.nb_cols()){
+	_M = new AffineMainVector<T>[_nb_rows];
 
 	for (int i=0; i<_nb_rows; i++) {
 		_M[i].resize(_nb_cols);
-		for (int j=0; j<_nb_cols; j++) _M[i]._vec[j]=Affine2Main<T>(m[i][j]);
+		for (int j=0; j<_nb_cols; j++) _M[i]._vec[j]=AffineMain<T>(m[i][j]);
 	}
 
 }
 
 
 template<class T>
-Affine2MainMatrix<T>::Affine2MainMatrix(const IntervalMatrix& m) : _nb_rows(m.nb_rows()), _nb_cols(m.nb_cols()){
-	_M = new Affine2MainVector<T>[_nb_rows];
+AffineMainMatrix<T>::AffineMainMatrix(const IntervalMatrix& m) : _nb_rows(m.nb_rows()), _nb_cols(m.nb_cols()){
+	_M = new AffineMainVector<T>[_nb_rows];
 	int k=0; // counter for "bounds"
 	for (int i=0; i<_nb_rows; i++) {
 		_M[i].resize(_nb_cols);
 		for (int j=0; j<_nb_cols; j++)  {
-			_M[i]._vec[j]=Affine2Main<T>(m[i][j]);
+			_M[i]._vec[j]=AffineMain<T>(m[i][j]);
 			k++;
 		}
 	}
@@ -89,35 +89,35 @@ Affine2MainMatrix<T>::Affine2MainMatrix(const IntervalMatrix& m) : _nb_rows(m.nb
 
 
 template<class T>
-Affine2MainMatrix<T>::Affine2MainMatrix(const Matrix& m) : _nb_rows(m.nb_rows()), _nb_cols(m.nb_cols()){
-	_M = new Affine2MainVector<T>[_nb_rows];
+AffineMainMatrix<T>::AffineMainMatrix(const Matrix& m) : _nb_rows(m.nb_rows()), _nb_cols(m.nb_cols()){
+	_M = new AffineMainVector<T>[_nb_rows];
 	for (int i=0; i<_nb_rows; i++) {
 		_M[i].resize(_nb_cols);
 		for (int j=0; j<_nb_cols; j++) {
-			_M[i]._vec[j]=Affine2Main<T>(m[i][j]);
+			_M[i]._vec[j]=AffineMain<T>(m[i][j]);
 		}
 	}
 }
 
 template<class T>
-Affine2MainMatrix<T>::~Affine2MainMatrix() {
+AffineMainMatrix<T>::~AffineMainMatrix() {
 	if (_M!=NULL) delete[] _M;
 }
 
 template<class T>
-Affine2MainMatrix<T>& Affine2MainMatrix<T>::operator=(const Affine2MainMatrix<T>& x) {
+AffineMainMatrix<T>& AffineMainMatrix<T>::operator=(const AffineMainMatrix<T>& x) {
 	//resize(x.nb_rows(), x.nb_cols());
 	return _assignM(*this,x);
 }
 
 template<class T>
-Affine2MainMatrix<T>& Affine2MainMatrix<T>::operator=(const IntervalMatrix& x) {
+AffineMainMatrix<T>& AffineMainMatrix<T>::operator=(const IntervalMatrix& x) {
 	//resize(x.nb_rows(), x.nb_cols());
 	return _assignM(*this,x);
 }
 
 template<class T>
-IntervalMatrix Affine2MainMatrix<T>::itv() const {
+IntervalMatrix AffineMainMatrix<T>::itv() const {
 	assert(!is_empty());
 	IntervalMatrix intm(nb_rows(),nb_cols());
 	for (int i = 0; i < nb_rows(); i++) {
@@ -130,42 +130,42 @@ IntervalMatrix Affine2MainMatrix<T>::itv() const {
 
 
 template<class T>
-void Affine2MainMatrix<T>::init(const Affine2Main<T>& x) {
+void AffineMainMatrix<T>::init(const AffineMain<T>& x) {
 	for (int i=0; i<nb_rows(); i++)
 		(*this)[i].init(x);
 }
 
 template<class T>
-void Affine2MainMatrix<T>::init(const Interval& x) {
+void AffineMainMatrix<T>::init(const Interval& x) {
 	for (int i=0; i<nb_rows(); i++) {
 		for (int j = 0; i < nb_cols(); i++) {
-			(*this)[i][j] = Affine2Main<T>(x);
+			(*this)[i][j] = AffineMain<T>(x);
 		}
 	}
 }
 
 template<class T>
-bool Affine2MainMatrix<T>::operator==(const Affine2MainMatrix<T>& m) const {
+bool AffineMainMatrix<T>::operator==(const AffineMainMatrix<T>& m) const {
 	return _equalsM(*this,m);
 }
 
 template<class T>
-bool Affine2MainMatrix<T>::operator==(const IntervalMatrix& m) const {
+bool AffineMainMatrix<T>::operator==(const IntervalMatrix& m) const {
 	return _equalsM(*this,m);
 }
 
 template<class T>
-void Affine2MainMatrix<T>::resize(int nb_rows1, int nb_cols1) {
+void AffineMainMatrix<T>::resize(int nb_rows1, int nb_cols1) {
 	assert(nb_rows1>0);
 	assert(nb_cols1>0);
 	assert((_M==NULL && _nb_rows==0) || (_nb_rows!=0 && _M!=NULL));
 
 	if (nb_rows1==_nb_rows && nb_cols1==_nb_cols) return;
 
-	Affine2MainVector<T>* M2;
+	AffineMainVector<T>* M2;
 
 	if (nb_rows1!=_nb_rows)
-		M2 = new Affine2MainVector<T>[nb_rows1];
+		M2 = new AffineMainVector<T>[nb_rows1];
 	else
 		M2 = _M;
 
@@ -186,23 +186,23 @@ void Affine2MainMatrix<T>::resize(int nb_rows1, int nb_cols1) {
 }
 
 template<class T>
-Affine2MainMatrix<T> Affine2MainMatrix<T>::submatrix(int row_start_index, int row_end_index,	int col_start_index, int col_end_index) {
+AffineMainMatrix<T> AffineMainMatrix<T>::submatrix(int row_start_index, int row_end_index,	int col_start_index, int col_end_index) {
 	return _submatrix(*this,row_start_index,row_end_index,col_start_index,col_end_index);
 }
 
 template<class T>
-Affine2MainMatrix<T> Affine2MainMatrix<T>::transpose() const {
+AffineMainMatrix<T> AffineMainMatrix<T>::transpose() const {
 	return _transpose(*this);
 }
 
 template<class T>
-Affine2MainVector<T> Affine2MainMatrix<T>::col(int j) const {
+AffineMainVector<T> AffineMainMatrix<T>::col(int j) const {
 //	return _col<Affine2MainMatrix<T>,Affine2MainVector<T> >(*this,j);
 	{
 		assert(!is_empty());
 		assert(j>=0 && j<nb_cols());
 
-		Affine2MainVector<T> res(nb_rows());
+		AffineMainVector<T> res(nb_rows());
 		for (int i=0; i<nb_rows(); i++)
 			res[i]=_M[i][j];
 		return res;
@@ -210,12 +210,12 @@ Affine2MainVector<T> Affine2MainMatrix<T>::col(int j) const {
 }
 
 template<class T>
-void Affine2MainMatrix<T>::set_col(int col1, const Affine2MainVector<T>& v) {
+void AffineMainMatrix<T>::set_col(int col1, const AffineMainVector<T>& v) {
 	_set_col(*this,col1,v);
 }
 
 template<class T>
-Affine2MainMatrix<T>& Affine2MainMatrix<T>::inflate(double rad) {
+AffineMainMatrix<T>& AffineMainMatrix<T>::inflate(double rad) {
 	// see comment in Affine2MainVector<T>::inflate
 	if (is_empty())
 		return *this;
@@ -228,7 +228,7 @@ Affine2MainMatrix<T>& Affine2MainMatrix<T>::inflate(double rad) {
 }
 
 template<class T>
-IntervalMatrix operator&(const Affine2MainMatrix<T>& x, const Affine2MainMatrix<T>& y) {
+IntervalMatrix operator&(const AffineMainMatrix<T>& x, const AffineMainMatrix<T>& y) {
 	assert(x.nb_rows()==y.nb_rows());
 	assert(x.nb_cols()==y.nb_cols());
 
@@ -247,7 +247,7 @@ IntervalMatrix operator&(const Affine2MainMatrix<T>& x, const Affine2MainMatrix<
 }
 
 template<class T>
-IntervalMatrix operator&(const Affine2MainMatrix<T>& x, const IntervalMatrix& y) {
+IntervalMatrix operator&(const AffineMainMatrix<T>& x, const IntervalMatrix& y) {
 	assert(x.nb_rows()==y.nb_rows());
 	assert(x.nb_cols()==y.nb_cols());
 
@@ -266,7 +266,7 @@ IntervalMatrix operator&(const Affine2MainMatrix<T>& x, const IntervalMatrix& y)
 }
 
 template<class T>
-IntervalMatrix operator|(const Affine2MainMatrix<T>& x,	const Affine2MainMatrix<T>& y) {
+IntervalMatrix operator|(const AffineMainMatrix<T>& x,	const AffineMainMatrix<T>& y) {
 	assert(x.nb_rows()==y.nb_rows());
 	assert(x.nb_cols()==y.nb_cols());
 
@@ -285,7 +285,7 @@ IntervalMatrix operator|(const Affine2MainMatrix<T>& x,	const Affine2MainMatrix<
 }
 
 template<class T>
-IntervalMatrix operator|(const Affine2MainMatrix<T>& x,	const IntervalMatrix& y) {
+IntervalMatrix operator|(const AffineMainMatrix<T>& x,	const IntervalMatrix& y) {
 	assert(x.nb_rows()==y.nb_rows());
 	assert(x.nb_cols()==y.nb_cols());
 
@@ -305,11 +305,11 @@ IntervalMatrix operator|(const Affine2MainMatrix<T>& x,	const IntervalMatrix& y)
 
 
 template<class T>
-Affine2MainMatrix<T> operator*(const Affine2Main<T>& x, const Matrix& m) {
+AffineMainMatrix<T> operator*(const AffineMain<T>& x, const Matrix& m) {
 	if (x.is_empty()) {
-		return Affine2MainMatrix<T>::empty(m.nb_rows(),m.nb_cols());
+		return AffineMainMatrix<T>::empty(m.nb_rows(),m.nb_cols());
 	}
-	Affine2MainMatrix<T>  res(m.nb_rows(),m.nb_cols(),x);
+	AffineMainMatrix<T>  res(m.nb_rows(),m.nb_cols(),x);
 	for (int i=0; i<m.nb_rows(); i++) {
 		for (int j= 0;j<m.nb_cols();j++){
 		res[i][j] *= m[i][j];
@@ -319,11 +319,11 @@ Affine2MainMatrix<T> operator*(const Affine2Main<T>& x, const Matrix& m) {
 }
 
 template<class T>
-Affine2MainMatrix<T> operator*(const Affine2Main<T>& x, const IntervalMatrix& m) {
+AffineMainMatrix<T> operator*(const AffineMain<T>& x, const IntervalMatrix& m) {
 	if (x.is_empty()||m.is_empty()) {
-		return Affine2MainMatrix<T>::empty(m.nb_rows(),m.nb_cols());
+		return AffineMainMatrix<T>::empty(m.nb_rows(),m.nb_cols());
 	}
-	Affine2MainMatrix<T>  res(m.nb_rows(),m.nb_cols(),x);
+	AffineMainMatrix<T>  res(m.nb_rows(),m.nb_cols(),x);
 	for (int i=0; i<m.nb_rows(); i++) {
 		for (int j= 0;j<m.nb_cols();j++){
 		res[i][j] *= m[i][j];
@@ -333,7 +333,7 @@ Affine2MainMatrix<T> operator*(const Affine2Main<T>& x, const IntervalMatrix& m)
 }
 
 template<class T>
-std::ostream& operator<<(std::ostream& os, const Affine2MainMatrix<T>& m) {
+std::ostream& operator<<(std::ostream& os, const AffineMainMatrix<T>& m) {
 	return _displayM(os, m);
 }
 
