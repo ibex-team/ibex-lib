@@ -451,7 +451,7 @@ inline AffineMainVector<T> AffineMainVector<T>::empty(int n) {
 }
 
 template<class T>
-inline AffineMainVector<T>::~Affine2MainVector<T>() {
+inline AffineMainVector<T>::~AffineMainVector<T>() {
 	delete[] _vec;
 }
 
