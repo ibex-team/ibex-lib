@@ -17,8 +17,6 @@ def configure (conf):
 	
 	# add AFFINE plugin include directory
 	conf.env.append_unique("INCLUDES","../../plugins/affine-extended/src/arithmetic")
-	conf.env.append_unique("INCLUDES","../../plugins/affine-extended/src/function")
-	conf.env.append_unique("INCLUDES","../../plugins/affine-extended/src/numeric")
 	
 def build (bld):
 		
@@ -35,5 +33,3 @@ def build (bld):
 	# Add information in ibex_Setting
 	bld.env.settings['_IBEX_WITH_AFFINE_EXTENDED_']='1'
 	
-	INCDIR  = "${PREFIX}/include/ibex"	
-	bld.install_files (INCDIR, bld.path.ant_glob ("src/**/ibex_*.h_"))
