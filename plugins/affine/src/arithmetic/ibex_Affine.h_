@@ -763,16 +763,6 @@ inline AffineMain<T> sign(const AffineMain<T>&, const Interval itv) {
 
 
 
-// Specialization
-
-
-template<>
-inline AffineMain<AF_No>& AffineMain<AF_No>::linChebyshev(Affine2_expr num, const Interval itv);
-
-template<>
-inline AffineMain<AF_No>& AffineMain<AF_No>::power(int n, const Interval itv);
-
-
 
 /*
 // debut linMinRange  NOT USE !!!!
@@ -1044,6 +1034,34 @@ Affine2Main<T>& Affine2Main<T>::linMinRange(Affine2_expr num, const Interval itv
 
 
 */
+
+
+
+// Specialization
+
+
+
+template<>
+int AffineMain<AF_fAFFullI>::size() const;
+
+template<>
+AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::operator+=(const Interval& x);
+
+
+template<>
+std::ostream& operator<<(std::ostream& os, const AffineMain<AF_fAFFullI>& x);
+
+
+
+#ifdef _IBEX_WITH_AFFINE_EXTENDED_
+
+template<>
+inline AffineMain<AF_No>& AffineMain<AF_No>::linChebyshev(Affine2_expr num, const Interval& itv);
+
+template<>
+inline AffineMain<AF_No>& AffineMain<AF_No>::power(int n, const Interval& itv);
+
+#endif
 
 
 

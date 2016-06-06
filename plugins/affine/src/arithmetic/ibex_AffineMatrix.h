@@ -27,7 +27,7 @@ namespace ibex {
 
 
 typedef AffineMainMatrix<AF_Default> Affine2Matrix;
-typedef AffineMainMatrix<AF_Other> AffineLinMatrix;
+typedef AffineMainMatrix<AF_Other> 	 Affine3Matrix;
 
 template<class T=AF_Default>
 class AffineMainMatrix {

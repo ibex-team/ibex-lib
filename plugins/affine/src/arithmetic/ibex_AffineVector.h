@@ -18,7 +18,7 @@
 #include "ibex_IntervalMatrix.h"
 #include "ibex_Vector.h"
 #include "ibex_Matrix.h"
-#include "ibex_Affine2.h"
+#include "ibex_Affine.h"
 
 namespace ibex {
 
@@ -35,7 +35,7 @@ template<class T> class AffineMainMatrix;
  */
 
 typedef AffineMainVector<AF_Default> Affine2Vector;
-typedef AffineMainVector<AF_Other> AffineLinVector;
+typedef AffineMainVector<AF_Other> Affine3Vector;
 
 template<class T=AF_Default>
 class AffineMainVector {

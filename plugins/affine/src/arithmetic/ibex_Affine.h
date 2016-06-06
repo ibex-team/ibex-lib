@@ -17,14 +17,20 @@
 #include <cassert>
 #include "ibex_Exception.h"
 
-#include "ibex_Affine2_fAF1.h"
+
 #include "ibex_Affine2_fAF2.h"
+#include "ibex_Affine3_fAFFullI.h"
+
+
+#ifdef _IBEX_WITH_AFFINE_EXTENDED_
+
+#include "ibex_Affine2_fAF1.h"
 #include "ibex_Affine2_iAF.h"
 #include "ibex_Affine2_fAF2_fma.h"
 #include "ibex_Affine2_sAF.h"
 #include "ibex_Affine2_No.h"
-#include "ibex_Affine3_fAFFullI.h"
 
+#endif
 
 namespace ibex {
 
