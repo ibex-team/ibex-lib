@@ -128,11 +128,6 @@ def configure (conf):
 	# Disable rounding interval
 	if (conf.options.WITH_STANDALONE):
 		conf.env.WITHOUT_ROUNDING =True 
-	
-	##################################################################################################
-	# Enalble pluggin optim if the pluggin optim_minimax is used
-	if (conf.options.WITH_OPTIMMINMAX):
-		conf.options.WITH_OPTIM =True 
 
 	##################################################################################################
 	# Bison / Flex

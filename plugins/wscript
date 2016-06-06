@@ -13,6 +13,14 @@ def get_plugins(path):
 	return map(basename,folders)
 
 def configure (conf):
+
+	
+	##################################################################################################
+	# Enalble pluggin optim if the pluggin optim_minimax is used
+	if (conf.options.WITH_OPTIM_MINMAX):
+		conf.options.WITH_OPTIM =True 
+
+
 	#store the list of plugins in the environment
 	#conf.env['plugins']=get_plugins(conf.path)
 	plugins=get_plugins(conf.path)

@@ -6,36 +6,31 @@ import os, sys
 from waflib import Logs
 
 def options (opt):
-	opt.add_option ("--with-optim-MinMax", action="store_true", dest="WITH_OPTIMMINMAX",
+	opt.add_option ("--with-optim-MinMax", action="store_true", dest="WITH_OPTIM_MINMAX",
 			help = "install IbexMiniMax plugin")	
 	
 def configure (conf):
-	conf.env.WITH_OPTIMMINMAX = conf.options.WITH_OPTIMMINMAX
+	conf.env.WITH_OPTIM_MINMAX = conf.options.WITH_OPTIM_MINMAX
 		
 	Logs.pprint ("BLUE", "Configure IbexMinMax plugin")
 	
-	# import utilities
-	sys.path.append(conf.srcnode.abspath())
-	import ibexutils
 
-	# add include directories
-	conf.env.INCLUDES.extend(["../../plugins/optim_minmax/src/%s" % p for p in "tools strategy".split()])
 		 
+	# add IbexMiniMax plugin include directory
+	conf.env.append_unique("INCLUDES","../../plugins/optim-MinMax/src/tools")
+	conf.env.append_unique("INCLUDES","../../plugins/optim-MinMax/src/strategy")
 
 	
 def build (bld):
 
-	if not bld.env.WITH_OPTIMMINMAX: 
+	if not bld.env.WITH_OPTIM_MINMAX: 
 		return
 		
 	Logs.pprint ("BLUE", "Build IbexMinMax plugin")
-	
-	# import utilities
-	sys.path.append(bld.srcnode.abspath())
-	import ibexutils
-	
+
 	# add sources
 	bld.env.IBEX_SRC.extend(bld.path.ant_glob ("src/**/ibex_*.cpp"))
 	# add headers
 	bld.env.IBEX_HDR.extend(bld.path.ant_glob ("src/**/ibex_*.h"))
+
 
