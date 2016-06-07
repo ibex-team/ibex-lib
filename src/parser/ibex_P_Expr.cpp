@@ -105,37 +105,24 @@ P_ExprConstant::P_ExprConstant(const Domain& d) : P_ExprNode(CST), value(d) {
 
 }
 
-P_ExprApply::P_ExprApply(const Function& f, const vector<const P_ExprNode*>& args) :
+P_ExprApply::P_ExprApply(const Function& f, const Array<const P_ExprNode>& args) :
 		P_ExprNode(APPLY,args), f(f) {
-
 }
 
-const P_ExprNode* apply(Function& f, const P_ExprNode* expr) {
+const P_ExprNode* apply(Function& f, const Array<const P_ExprNode>& args) {
 	int n=f.nb_arg();
-	if (n!=1) {
-		stringstream s;
-		s << "function " << f.name << " expects 1 argument";
-		ibexerror(s.str());
-		return expr; // just to avoid a "warning control reaches end of non-void function"
-	} else {
-		try {
-			return new P_ExprNode(P_ExprNode::APPLY,*expr);
-		} catch(DimException& e) {
-			ibexerror(e.message());
-			return expr; // just to avoid a "warning control reaches end of non-void function"
-		}
-	}
-}
-
-const P_ExprNode* apply(Function& f, const std::vector<const P_ExprNode*>* args) {
-	unsigned int n=f.nb_arg();
-	if (n!=args->size()) {
+	if (n!=args.size()) {
 		stringstream s;
 		s << "function " << f.name << " expects " << n << " argument" << (n>1? "s":"");
 		ibexerror(s.str());
-		return (*args)[0]; // just to avoid a "warning control reaches end of non-void function"
+		return &args[0]; // just to avoid a "warning control reaches end of non-void function"
 	} else {
-		return new P_ExprNode(P_ExprNode::APPLY,*args);
+		try {
+			return new P_ExprApply(f,args);
+		} catch(DimException& e) {
+			ibexerror(e.message());
+			return &args[0]; // just to avoid a "warning control reaches end of non-void function"
+		}
 	}
 }
 

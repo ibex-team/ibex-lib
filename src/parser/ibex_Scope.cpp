@@ -182,6 +182,7 @@ void Scope::rem_cst(const char* id) {
 
 void Scope::add_func(const char* id, Function* f) {
 	tab.insert_new(id, new S_Func(f));
+	//cout << "[parser] add function " << *f << endl;
 }
 
 void Scope::add_func_tmp_symbol(const char* id, const P_ExprNode* expr) {

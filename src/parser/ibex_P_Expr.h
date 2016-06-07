@@ -82,12 +82,14 @@ public:
 
 	P_ExprNode(operation op, const P_ExprNode& arg1, const P_ExprNode& arg2, const P_ExprNode& arg3) : op(op), arg(arg1,arg2,arg3), lab(NULL), line(ibex_lineno) { }
 
-	P_ExprNode(operation op, const std::vector<const P_ExprNode*>& vec) : op(op), arg(vec.size()), lab(NULL), line(ibex_lineno) {
-		int i=0;
-		for (std::vector<const P_ExprNode*>::const_iterator it=vec.begin(); it!=vec.end(); it++) {
-			arg.set_ref(i++,**it);
-		}
-	}
+	P_ExprNode(operation op, const Array<const P_ExprNode>& arg) : op(op), arg(arg), lab(NULL), line(ibex_lineno) { }
+
+//	P_ExprNode(operation op, const std::vector<const P_ExprNode*>& vec) : op(op), arg(vec.size()), lab(NULL), line(ibex_lineno) {
+//		int i=0;
+//		for (std::vector<const P_ExprNode*>::const_iterator it=vec.begin(); it!=vec.end(); it++) {
+//			arg.set_ref(i++,**it);
+//		}
+//	}
 
 	virtual ~P_ExprNode();
 
@@ -233,7 +235,7 @@ public:
  */
 class P_ExprApply : public P_ExprNode {
 public:
-	P_ExprApply(const Function& f, const std::vector<const P_ExprNode*>& args);
+	P_ExprApply(const Function& f, const Array<const P_ExprNode>& args);
 
 	virtual void acceptVisitor(P_ExprVisitor& v) const { v.visit(*this); }
 
@@ -242,10 +244,7 @@ public:
 
 std::ostream& operator<<(std::ostream& os, const P_ExprNode&);
 
-const P_ExprNode* apply(Function& f, const P_ExprNode* expr);
-
-const P_ExprNode* apply(Function& f, const std::vector<const P_ExprNode*>* args);
-
+const P_ExprNode* apply(Function& f, const Array<const P_ExprNode>& args);
 
 /*================================== inline implementations ========================================*/
 

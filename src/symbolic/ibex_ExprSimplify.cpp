@@ -124,7 +124,7 @@ void ExprSimplify::visit(const ExprVector& e) {
 				int last_col=idx.last_col()-c;
 				DoubleIndex e_idx=DoubleIndex(e.arg(i).dim,
 						idx.first_row(), idx.last_row(),
-						first_col<0? 0 : first_col, last_col>n? n : last_col);
+						first_col<0? 0 : first_col, last_col>=n? n-1 : last_col);
 				res.push_back(&get(e.arg(i),e_idx));
 				all_cst &= is_cst(*res.back());
 				all_same &= (res.back()==&e.arg(i));
@@ -141,7 +141,7 @@ void ExprSimplify::visit(const ExprVector& e) {
 			if (first_row<n) { // can be negative
 				int last_row=idx.last_row()-r;
 				DoubleIndex e_idx=DoubleIndex(e.arg(i).dim,
-						first_row<0? 0 : first_row, last_row>n? n : last_row,
+						first_row<0? 0 : first_row, last_row>=n? n-1 : last_row,
 						idx.first_col(), idx.last_col());
 				res.push_back(&get(e.arg(i),e_idx));
 				all_cst &= is_cst(*res.back());

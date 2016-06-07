@@ -20,22 +20,22 @@ std::ostream& operator<<(std::ostream& os, const DoubleIndex idx) {
 	os << "(";
 	switch (idx.dim.type()) {
 	case Dim::ROW_VECTOR:
-		if (idx.one_col()) os << idx.first_col();
-		else os << idx.first_col() << ":" << idx.last_col();
+		if (idx.one_col()) os << idx.first_col()+1;
+		else os << idx.first_col()+1 << ":" << idx.last_col()+1;
 		break;
 	case Dim::COL_VECTOR:
-		if (idx.one_row()) os << idx.first_row();
-		else os << idx.first_row() << ":" << idx.last_row();
+		if (idx.one_row()) os << idx.first_row()+1;
+		else os << idx.first_row()+1 << ":" << idx.last_row()+1;
 		break;
 	default:
 		assert(idx.dim.is_matrix());
 		if (idx.all_rows()) os << ":";
-		else if (idx.one_row()) os << idx.first_row();
-		else os << idx.first_row() << ":" << idx.last_row();
+		else if (idx.one_row()) os << idx.first_row()+1;
+		else os << idx.first_row()+1 << ":" << idx.last_row()+1;
 		os << ",";
 		if (idx.all_cols()) os << ":";
-		else if (idx.one_col()) os << idx.first_col();
-		else os << idx.first_col() << ":" << idx.last_col();
+		else if (idx.one_col()) os << idx.first_col()+1;
+		else os << idx.first_col()+1 << ":" << idx.last_col()+1;
 	}
 	return os << ")";
 }
