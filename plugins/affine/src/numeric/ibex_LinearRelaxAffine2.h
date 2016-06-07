@@ -13,7 +13,7 @@
 
 #include "ibex_System.h"
 #include "ibex_LinearRelax.h"
-#include "ibex_Affine2Eval.h"
+#include "ibex_AffineEval.h"
 
 #include <vector>
 
@@ -64,12 +64,12 @@ private:
 	/**
 	 * \brief Affine evaluator for the goal function (if any)
 	 */
-	Affine2Eval<AF_Default>* goal_af_evl;
+	AffineEval<AF_Default>* goal_af_evl;
 
 	/**
 	 * \brief Affine evaluators for the constraints functions
 	 */
-	Affine2Eval<AF_Default>** ctr_af_evl;
+	AffineEval<AF_Default>** ctr_af_evl;
 };
 
 } // end namespace ibex

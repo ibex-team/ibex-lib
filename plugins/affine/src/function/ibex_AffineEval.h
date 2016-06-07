@@ -1,5 +1,5 @@
 /* ============================================================================
- * I B E X - Evaluation of Affine2 forms
+ * I B E X - Evaluation of Affine forms
  * ============================================================================
  * License     : This program can be distributed under the terms of the GNU LGPL.
  *               See the file COPYING.LESSER.
@@ -8,15 +8,15 @@
  * Created     : April 08, 2013
  * ---------------------------------------------------------------------------- */
 
-#ifndef __IBEX_AFFINE2_EVAL_H__
-#define __IBEX_AFFINE2_EVAL_H__
+#ifndef __IBEX_AFFINE_EVAL_H__
+#define __IBEX_AFFINE_EVAL_H__
 
 #include "ibex_Function.h"
 #include "ibex_AffineMatrix.h"
 #include "ibex_AffineDomain.h"
 #include "ibex_FwdAlgorithm.h"
-#include "ibex_ExprDomain.h"
-#include "ibex_NodeMap.h"
+#include "ibex_Domain.h"
+
 
 namespace ibex {
 
@@ -26,18 +26,18 @@ namespace ibex {
  * \brief Evaluate a function with affine form.
  */
 template<class T>
-class Affine2Eval : public FwdAlgorithm {
+class AffineEval : public FwdAlgorithm {
 
 public:
 	/**
 	 * \brief Build an Affine evaluator for f.
 	 */
-	Affine2Eval(const Function& f);
+	AffineEval(const Function& f);
 
 	/**
 	 * \brief Delete this.
 	 */
-	~Affine2Eval();
+	~AffineEval();
 
 	/**
 	 * \brief Run the forward algorithm on the box \a box and return the result as an interval domain.
@@ -122,40 +122,43 @@ protected:
 	 * we store here all the evaluators of the called functions
 	 * (this avoids to create this object at each evaluation).
 	 */
-	NodeMap<Affine2Eval<T>*> apply_eval;
+	NodeMap<AffineEval<T>*> apply_eval;
 };
+
+typedef AffineEval<AF_Default> Affine2Eval;
+typedef AffineEval<AF_Other>  Affine3Eval;
 
 /* ============================================================================
  	 	 	 	 	 	 	 implementation
   ============================================================================*/
 
 template<class T>
-inline Affine2Eval<T>::Affine2Eval(const Function& f) : f(f), d(f), af2(f) {
+inline AffineEval<T>::AffineEval(const Function& f) : f(f), d(f), af2(f) {
 
 }
 
 template<class T>
-inline Affine2Eval<T>::~Affine2Eval() {
+inline AffineEval<T>::~AffineEval() {
 
-	for (typename IBEX_NODE_MAP(Affine2Eval<T>*)::iterator it=apply_eval.begin(); it!=apply_eval.end(); it++) {
+	for (typename IBEX_NODE_MAP(AffineEval<T>*)::iterator it=apply_eval.begin(); it!=apply_eval.end(); it++) {
 		delete it->second;
 	}
 }
 
 template<class T>
-inline Domain& Affine2Eval<T>::eval(const IntervalVector& box) {
+inline Domain& AffineEval<T>::eval(const IntervalVector& box) {
 	forward(box);
 	return *d.top;
 }
 
 template<class T>
-inline TemplateDomain<AffineMain<T> >& Affine2Eval<T>::eval(const AffineMainVector<T>& box) {
+inline TemplateDomain<AffineMain<T> >& AffineEval<T>::eval(const AffineMainVector<T>& box) {
 	forward(box);
 	return *af2.top;
 }
 
 template<class T>
-inline void Affine2Eval<T>::forward(const Array<const Domain>& argD, const Array<const TemplateDomain<AffineMain<T> > >& argDAF2) {
+inline void AffineEval<T>::forward(const Array<const Domain>& argD, const Array<const TemplateDomain<AffineMain<T> > >& argDAF2) {
 
 	d.write_arg_domains(argD);
 	af2.write_arg_domains(argDAF2);
@@ -166,35 +169,35 @@ inline void Affine2Eval<T>::forward(const Array<const Domain>& argD, const Array
 //			std::cout << "arg[" << i << "]=" << f.arg_domains[i] << std::endl;
 //		}
 
-	f.forward<Affine2Eval<T> >(*this);
+	f.forward<AffineEval<T> >(*this);
 }
 
 template<class T>
-inline void Affine2Eval<T>::forward(const IntervalVector& box) {
+inline void AffineEval<T>::forward(const IntervalVector& box) {
 	d.write_arg_domains(box);
 	af2.write_arg_domains(AffineMainVector<T>(box,true));
 
 	// TODO: should manage empty result! (see Eval.cpp)
-	f.forward<Affine2Eval<T> >(*this);
+	f.forward<AffineEval<T> >(*this);
 }
 
 template<class T>
-inline void Affine2Eval<T>::forward(const AffineMainVector<T>& box) {
+inline void AffineEval<T>::forward(const AffineMainVector<T>& box) {
 
 	d.write_arg_domains(box.itv());
 	af2.write_arg_domains(box);
 
-	f.forward<Affine2Eval<T> >(*this);
+	f.forward<AffineEval<T> >(*this);
 }
 
 template<class T>
-inline void Affine2Eval<T>::index_fwd(int, int ) { /* nothing to do */ }
+inline void AffineEval<T>::index_fwd(int, int ) { /* nothing to do */ }
 
 template<class T>
-inline void Affine2Eval<T>::symbol_fwd(int) { /* nothing to do */ }
+inline void AffineEval<T>::symbol_fwd(int) { /* nothing to do */ }
 
 template<class T>
-inline void Affine2Eval<T>::cst_fwd(int y) {
+inline void AffineEval<T>::cst_fwd(int y) {
 	const ExprConstant& c = (const ExprConstant&) f.node(y);
 	switch (c.type()) {
 	case Dim::SCALAR:      {
@@ -217,251 +220,253 @@ inline void Affine2Eval<T>::cst_fwd(int y) {
 }
 
 template<class T>
-inline void Affine2Eval<T>::chi_fwd(int x1, int x2, int x3, int y) {
+inline void AffineEval<T>::chi_fwd(int x1, int x2, int x3, int y) {
 	af2[y].i()=chi(d[x1].i(),af2[x2].i(),af2[x3].i());
 	d[y].i()  =chi(d[x1].i(),d[x2].i(),d[x3].i());
 }
 
 template<class T>
-inline void Affine2Eval<T>::add_fwd(int x1, int x2, int y) {
+inline void AffineEval<T>::add_fwd(int x1, int x2, int y) {
 	af2[y].i()=af2[x1].i()+af2[x2].i();
 	d[y].i()=(af2[y].i().itv() & (d[x1].i()+d[x2].i()));
 }
 
 template<class T>
-inline void Affine2Eval<T>::mul_fwd(int x1, int x2, int y) {
+inline void AffineEval<T>::mul_fwd(int x1, int x2, int y) {
 	af2[y].i()=af2[x1].i()*af2[x2].i();
 	d[y].i()=(af2[y].i().itv() & (d[x1].i()*d[x2].i()));
 }
 
 template<class T>
-inline void Affine2Eval<T>::sub_fwd(int x1, int x2, int y) {
+inline void AffineEval<T>::sub_fwd(int x1, int x2, int y) {
 	af2[y].i()=af2[x1].i()-af2[x2].i();
 	d[y].i()=(af2[y].i().itv() & (d[x1].i()-d[x2].i()));
 }
 
 template<class T>
-inline void Affine2Eval<T>::div_fwd(int x1, int x2, int y) {
-	af2[y].i()=af2[x1].i()*inv(af2[x2].i(),d[x2].i());
+inline void AffineEval<T>::div_fwd(int x1, int x2, int y) {
+	af2[y].i()=af2[x2].i();
+	af2[y].i().Ainv(d[x2].i());
+	af2[y].i() *= af2[x1].i();
 	d[y].i()=(af2[y].i().itv() & (d[x1].i()/d[x2].i()));
 }
 
 template<class T>
-inline void Affine2Eval<T>::max_fwd(int x1, int x2, int y) {
+inline void AffineEval<T>::max_fwd(int x1, int x2, int y) {
 	d[y].i()= max(d[x1].i(),d[x2].i());
 	af2[y].i() = AffineMain<T>(d[y].i());
 }
 
 template<class T>
-inline void Affine2Eval<T>::min_fwd(int x1, int x2, int y) {
+inline void AffineEval<T>::min_fwd(int x1, int x2, int y) {
 	d[y].i() = min(d[x1].i(),d[x2].i());
 	af2[y].i()= AffineMain<T>( d[y].i());
 }
 
 template<class T>
-inline void Affine2Eval<T>::atan2_fwd(int x1, int x2, int y) {
+inline void AffineEval<T>::atan2_fwd(int x1, int x2, int y) {
 	d[y].i() = atan2(d[x1].i(),d[x2].i());
 	af2[y].i()= AffineMain<T>(d[y].i());
 }
 
 template<class T>
-inline void Affine2Eval<T>::minus_fwd(int x, int y) {
+inline void AffineEval<T>::minus_fwd(int x, int y) {
 	af2[y].i()=-af2[x].i();
 	d[y].i()=(af2[y].i().itv() & (-d[x].i()));
 }
 
 template<class T>
-inline void Affine2Eval<T>::sign_fwd(int x, int y) {
-	af2[y].i()=sign(af2[x].i(),d[x].i());
-	d[y].i()=(af2[y].i().itv() & sign(d[x].i()));
+inline void AffineEval<T>::sign_fwd(int x, int y) {
+	d[y].i()=sign(d[x].i());
+	af2[y].i()=d[y].i();
 }
 
 template<class T>
-inline void Affine2Eval<T>::abs_fwd(int x, int y) {
-	af2[y].i()=abs(af2[x].i(),d[x].i());
+inline void AffineEval<T>::abs_fwd(int x, int y) {
+	af2[y].i()=AffineMain<T>(af2[x].i()).Aabs(d[x].i());
 	d[y].i()=(af2[y].i().itv() & abs(d[x].i()));
 }
 
 template<class T>
-inline void Affine2Eval<T>::power_fwd(int x, int y, int p) {
-	af2[y].i()=pow(af2[x].i(),p,d[x].i());
+inline void AffineEval<T>::power_fwd(int x, int y, int p) {
+	af2[y].i()=AffineMain<T>(af2[x].i()).Apow(p,d[x].i());
 	d[y].i()=(af2[y].i().itv() & pow(d[x].i(),p));
 }
 
 template<class T>
-inline void Affine2Eval<T>::sqr_fwd(int x, int y) {
-	af2[y].i()=sqr(af2[x].i(),d[x].i());
+inline void AffineEval<T>::sqr_fwd(int x, int y) {
+	af2[y].i()=AffineMain<T>(af2[x].i()).Asqr(d[x].i());
 	d[y].i()=(af2[y].i().itv() & sqr(d[x].i()));
 }
 
 template<class T>
-inline void Affine2Eval<T>::sqrt_fwd(int x, int y) {
-	af2[y].i()=sqrt(af2[x].i(),d[x].i());
+inline void AffineEval<T>::sqrt_fwd(int x, int y) {
+	af2[y].i()=AffineMain<T>(af2[x].i()).Asqrt(d[x].i());
 	d[y].i()=(af2[y].i().itv() & sqrt(d[x].i()));
 }
 
 template<class T>
-inline void Affine2Eval<T>::exp_fwd(int x, int y) {
-	af2[y].i()=exp(af2[x].i(),d[x].i());
+inline void AffineEval<T>::exp_fwd(int x, int y) {
+	af2[y].i()=AffineMain<T>(af2[x].i()).Aexp(d[x].i());
 	d[y].i()=(af2[y].i().itv() & exp(d[x].i()));
 }
 
 template<class T>
-inline void Affine2Eval<T>::log_fwd(int x, int y) {
-	af2[y].i()=log(af2[x].i(),d[x].i());
+inline void AffineEval<T>::log_fwd(int x, int y) {
+	af2[y].i()=AffineMain<T>(af2[x].i()).Alog(d[x].i());
 	d[y].i()=(af2[y].i().itv() & log(d[x].i()));
 }
 
 template<class T>
-inline void Affine2Eval<T>::cos_fwd(int x, int y) {
-	af2[y].i()=cos(af2[x].i(),d[x].i());
+inline void AffineEval<T>::cos_fwd(int x, int y) {
+	af2[y].i()=AffineMain<T>(af2[x].i()).Acos(d[x].i());
 	d[y].i()=(af2[y].i().itv() & cos(d[x].i()));
 }
 
 template<class T>
-inline void Affine2Eval<T>::sin_fwd(int x, int y) {
-	af2[y].i()=sin(af2[x].i(),d[x].i());
+inline void AffineEval<T>::sin_fwd(int x, int y) {
+	af2[y].i()=AffineMain<T>(af2[x].i()).Asin(d[x].i());
 	d[y].i()=(af2[y].i().itv() & sin(d[x].i()));
 }
 
 template<class T>
-inline void Affine2Eval<T>::tan_fwd(int x, int y) {
-	af2[y].i()=tan(af2[x].i(),d[x].i());
+inline void AffineEval<T>::tan_fwd(int x, int y) {
+	af2[y].i()=AffineMain<T>(af2[x].i()).Atan(d[x].i());
 	d[y].i()=(af2[y].i().itv() & tan(d[x].i()));
 }
 
 template<class T>
-inline void Affine2Eval<T>::cosh_fwd(int x, int y) {
-	af2[y].i()=cosh(af2[x].i(),d[x].i());
+inline void AffineEval<T>::cosh_fwd(int x, int y) {
+	af2[y].i()=AffineMain<T>(af2[x].i()).Acosh(d[x].i());
 	d[y].i()=(af2[y].i().itv() & cosh(d[x].i()));
 }
 
 template<class T>
-inline void Affine2Eval<T>::sinh_fwd(int x, int y) {
-	af2[y].i()=sinh(af2[x].i(),d[x].i());
+inline void AffineEval<T>::sinh_fwd(int x, int y) {
+	af2[y].i()=AffineMain<T>(af2[x].i()).Asinh(d[x].i());
 	d[y].i()=(af2[y].i().itv() & sinh(d[x].i()));
 }
 
 template<class T>
-inline void Affine2Eval<T>::tanh_fwd(int x, int y) {
-	af2[y].i()=tanh(af2[x].i(),d[x].i());
+inline void AffineEval<T>::tanh_fwd(int x, int y) {
+	af2[y].i()=AffineMain<T>(af2[x].i()).Atanh(d[x].i());
 	d[y].i()=(af2[y].i().itv() & tanh(d[x].i()));
 }
 
 template<class T>
-inline void Affine2Eval<T>::acos_fwd(int x, int y) {
-	af2[y].i()=acos(af2[x].i(),d[x].i());
+inline void AffineEval<T>::acos_fwd(int x, int y) {
+	af2[y].i()=AffineMain<T>(af2[x].i()).Aacos(d[x].i());
 	d[y].i()=(af2[y].i().itv() & acos(d[x].i()));
 }
 
 template<class T>
-inline void Affine2Eval<T>::asin_fwd(int x, int y) {
-	af2[y].i()=asin(af2[x].i(),d[x].i());
+inline void AffineEval<T>::asin_fwd(int x, int y) {
+	af2[y].i()=AffineMain<T>(af2[x].i()).Aasin(d[x].i());
 	d[y].i()=(af2[y].i().itv() & asin(d[x].i()));
 }
 
 template<class T>
-inline void Affine2Eval<T>::atan_fwd(int x, int y) {
-	af2[y].i()=atan(af2[x].i(),d[x].i());
+inline void AffineEval<T>::atan_fwd(int x, int y) {
+	af2[y].i()=AffineMain<T>(af2[x].i()).Aatan(d[x].i());
 	d[y].i()=(af2[y].i().itv() & atan(d[x].i()));
 }
 
 template<class T>
-inline void Affine2Eval<T>::acosh_fwd(int x, int y) {
+inline void AffineEval<T>::acosh_fwd(int x, int y) {
 	d[y].i()=acosh(d[x].i());
 	af2[y].i()= AffineMain<T>(d[y].i());
 }
 
 template<class T>
-inline void Affine2Eval<T>::asinh_fwd(int x, int y) {
+inline void AffineEval<T>::asinh_fwd(int x, int y) {
 	d[y].i()=asinh(d[x].i());
 	af2[y].i()= AffineMain<T>(d[y].i());
 }
 
 template<class T>
-inline void Affine2Eval<T>::atanh_fwd(int x, int y) {
+inline void AffineEval<T>::atanh_fwd(int x, int y) {
 	d[y].i()=atanh(d[x].i());
 	af2[y].i()= AffineMain<T>(d[y].i());
 }
 
 template<class T>
-inline void Affine2Eval<T>::trans_V_fwd(int x, int y) {
+inline void AffineEval<T>::trans_V_fwd(int x, int y) {
 	af2[y].v()=af2[x].v();
 	d[y].v()=d[x].v();
 }
 
 template<class T>
-inline void Affine2Eval<T>::trans_M_fwd(int x, int y) {
+inline void AffineEval<T>::trans_M_fwd(int x, int y) {
 	af2[y].m()=af2[x].m().transpose();
 	d[y].m()=d[x].m().transpose();
 }
 
 template<class T>
-inline void Affine2Eval<T>::add_V_fwd(int x1, int x2, int y) {
+inline void AffineEval<T>::add_V_fwd(int x1, int x2, int y) {
 	af2[y].v()=af2[x1].v()+af2[x2].v();
 	d[y].v()=(af2[y].v().itv() & (d[x1].v()+d[x2].v()));
 }
 
 template<class T>
-inline void Affine2Eval<T>::add_M_fwd(int x1, int x2, int y) {
+inline void AffineEval<T>::add_M_fwd(int x1, int x2, int y) {
 	af2[y].m()=af2[x1].m()+af2[x2].m();
 	d[y].m()=(af2[y].m().itv());
 	d[y].m() &= (d[x1].m()+d[x2].m());
 }
 
 template<class T>
-inline void Affine2Eval<T>::mul_SV_fwd(int x1, int x2, int y) {
+inline void AffineEval<T>::mul_SV_fwd(int x1, int x2, int y) {
 	af2[y].v()=af2[x1].i()*af2[x2].v();
 	d[y].v()=(af2[y].v().itv() & (d[x1].i()*d[x2].v()));
 }
 
 template<class T>
-inline void Affine2Eval<T>::mul_SM_fwd(int x1, int x2, int y) {
+inline void AffineEval<T>::mul_SM_fwd(int x1, int x2, int y) {
 	af2[y].m()=af2[x1].i()*af2[x2].m();
 	d[y].m()=(af2[y].m().itv());
 	d[y].m() &= (d[x1].i()*d[x2].m());
 }
 
 template<class T>
-inline void Affine2Eval<T>::mul_VV_fwd(int x1, int x2, int y) {
+inline void AffineEval<T>::mul_VV_fwd(int x1, int x2, int y) {
 	af2[y].i()=af2[x1].v()*af2[x2].v();
 	d[y].i()=(af2[y].i().itv() & (d[x1].v()*d[x2].v()));
 }
 
 template<class T>
-inline void Affine2Eval<T>::mul_MV_fwd(int x1, int x2, int y) {
+inline void AffineEval<T>::mul_MV_fwd(int x1, int x2, int y) {
 	af2[y].v()=af2[x1].m()*af2[x2].v();
 	d[y].v()=(af2[y].v().itv() & (d[x1].m()*d[x2].v()));
 }
 
 template<class T>
-inline void Affine2Eval<T>::mul_VM_fwd(int x1, int x2, int y) {
+inline void AffineEval<T>::mul_VM_fwd(int x1, int x2, int y) {
 	af2[y].v()=af2[x1].v()*af2[x2].m();
 	d[y].v()=(af2[y].v().itv() & (d[x1].v()*d[x2].m()));
 }
 
 template<class T>
-inline void Affine2Eval<T>::mul_MM_fwd(int x1, int x2, int y) {
+inline void AffineEval<T>::mul_MM_fwd(int x1, int x2, int y) {
 	af2[y].m()=af2[x1].m()*af2[x2].m();
 	d[y].m()=(af2[y].m().itv()) ;
 	d[y].m() &=  (d[x1].m()*d[x2].m());
 }
 
 template<class T>
-inline void Affine2Eval<T>::sub_V_fwd(int x1, int x2, int y) {
+inline void AffineEval<T>::sub_V_fwd(int x1, int x2, int y) {
 	af2[y].v()=af2[x1].v()-af2[x2].v();
 	d[y].v()=(af2[y].v().itv() & (d[x1].v()-d[x2].v()));
 }
 
 template<class T>
-inline void Affine2Eval<T>::sub_M_fwd(int x1, int x2, int y) {
+inline void AffineEval<T>::sub_M_fwd(int x1, int x2, int y) {
 	af2[y].m()=af2[x1].m()-af2[x2].m();
 	d[y].m() = af2[y].m().itv();
 	d[y].m() &= (d[x1].m()-d[x2].m());
 }
 
 template<class T>
-inline void Affine2Eval<T>::apply_fwd(int* x, int y) {
+inline void AffineEval<T>::apply_fwd(int* x, int y) {
 	assert(dynamic_cast<const ExprApply*> (&f.node(y)));
 
 	const ExprApply& a = (const ExprApply&) f.node(y);
@@ -476,9 +481,9 @@ inline void Affine2Eval<T>::apply_fwd(int* x, int y) {
 		af22.set_ref(i,af2[x[i]]);
 	}
 
-	Affine2Eval<T> *func_eval;
+	AffineEval<T> *func_eval;
 	if (!apply_eval.found(a)) {
-		func_eval=new Affine2Eval<T>(a.func);
+		func_eval=new AffineEval<T>(a.func);
 		apply_eval.insert(a,func_eval);
 	} else {
 		func_eval=apply_eval[a];
@@ -491,7 +496,7 @@ inline void Affine2Eval<T>::apply_fwd(int* x, int y) {
 }
 
 template<class T>
-inline void Affine2Eval<T>::vector_fwd(int *x, int y) {
+inline void AffineEval<T>::vector_fwd(int *x, int y) {
 	assert(dynamic_cast<const ExprVector*>(&(f.node(y))));
 
 	const ExprVector& v = (const ExprVector&) f.node(y);
@@ -520,4 +525,4 @@ inline void Affine2Eval<T>::vector_fwd(int *x, int y) {
 } // namespace ibex
 
 
-#endif /* __IBEX_AFFINE2_EVAL_H__ */
+#endif /* __IBEX_AFFINE_EVAL_H__ */

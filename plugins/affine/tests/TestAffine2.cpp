@@ -1119,7 +1119,7 @@ bool TestAffine2<T>::check_af2 (Function& f, Interval& I){
 
 	itv2 =f.eval(IntervalVector(1,I));
 
-	Affine2Eval<T> eval_af(f);
+	AffineEval<T> eval_af(f);
 	itv = eval_af.eval(IntervalVector(1,I)).i();
 
 	faa = eval_af.af2.top->i();
@@ -1173,7 +1173,7 @@ bool TestAffine2<T>::check_af2 (Function& f, IntervalVector& I){
 
 	itv2 =f.eval(I);
 
-	Affine2Eval<T> eval_af(f);
+	AffineEval<T> eval_af(f);
 	itv = eval_af.eval(IntervalVector(1,I)).i();
 
 	faa = eval_af.af2.top->i();

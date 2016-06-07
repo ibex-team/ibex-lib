@@ -17,14 +17,14 @@ namespace ibex {
 LinearRelaxAffine2::LinearRelaxAffine2(const System& sys1) :
 				LinearRelax(sys1), sys(sys1),
 				goal_af_evl(NULL),
-				ctr_af_evl(new Affine2Eval<AF_Default>*[sys1.nb_ctr]) {
+				ctr_af_evl(new AffineEval<AF_Default>*[sys1.nb_ctr]) {
 
 	if (sys1.goal) {
-		goal_af_evl = new Affine2Eval<AF_Default>(*sys1.goal);
+		goal_af_evl = new AffineEval<AF_Default>(*sys1.goal);
 	}
 
 	for (int i = 0; i < sys.nb_ctr; i++) {
-		ctr_af_evl[i] = new Affine2Eval<AF_Default>(sys.ctrs[i].f);
+		ctr_af_evl[i] = new AffineEval<AF_Default>(sys.ctrs[i].f);
 	}
 }
 

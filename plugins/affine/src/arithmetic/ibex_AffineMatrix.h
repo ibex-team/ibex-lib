@@ -483,6 +483,9 @@ AffineMainMatrix<T> abs(const AffineMainMatrix<T>& m);
 template<class T>
 std::ostream& operator<<(std::ostream& os, const AffineMainMatrix<T>&);
 
+
+
+
 /*@}*/
 
 

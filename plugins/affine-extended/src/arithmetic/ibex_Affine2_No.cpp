@@ -506,7 +506,7 @@ AffineMain<AF_No>& AffineMain<AF_No>::sqr(const Interval itv) {
 
 // debut linChebyshev
 template<>
-AffineMain<AF_No>& AffineMain<AF_No>::linChebyshev(Affine2_expr num, const Interval itv) {
+AffineMain<AF_No>& AffineMain<AF_No>::linChebyshev(Affine2_expr num, const Interval& itv) {
 	//  std::cout << "linChebyshev IN itv= "<<itv << " x =  "<< *this << num<< std::endl;
 
 	Interval res_itv;

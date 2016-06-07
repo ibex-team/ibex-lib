@@ -29,8 +29,9 @@ int main() {
 		I[1] = Interval(1, 3);
 		Interval fi = ff.eval(I);
 		cout << fi << endl;
-		Affine2 faa;
-		ff.eval_affine2(I, faa);
+		Affine2Eval eval_af(ff);
+		eval_af.eval(I).i();
+		Affine2 faa = eval_af.af2.top->i();
 		cout << faa << endl;
 
 //		Function lininf(x, faa.val(0)-faa.err().ub() + faa.val(1)*(2*x[0]-(I[0].lb()+I[0].ub()))/(I[0].diam()) + faa.val(2)*(2*x[1]-(I[1].lb()+I[1].ub()))/(I[1].diam())) ;
@@ -58,10 +59,10 @@ int main() {
 		Function c_inf(x, x2, lininf(x, x2) - ff(x, x2));
 		Function c_sup(x, x2, ff(x, x2) - linsup(x, x2));
 
-		CtcFwdBwd ct1(c_inf, GT, AFFINE2_MODE);   // HC4revise Algorithm with Affine2 in the forward step.
+		CtcFwdBwd ct1(c_inf, GT);   // HC4revise Algorithm in the forward step.
 		CtcFixPoint ft1(ct1, 0.001);
 
-		CtcFwdBwd ct2(c_sup, GT, AFFINE2_MODE);  // HC4revise Algorithm with Affine2 in the forward step.
+		CtcFwdBwd ct2(c_sup, GT);  // HC4revise Algorithm in the forward step.
 		CtcFixPoint ft2(ct2, 0.001);
 
 		LargestFirst bbb(0.001);

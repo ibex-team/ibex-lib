@@ -1,5 +1,5 @@
 /* ============================================================================
- * I B E X - ibex_Affine2Eval.cpp
+ * I B E X - ibex_AffineEval.cpp
  * ============================================================================
  * License     : This program can be distributed under the terms of the GNU LGPL.
  *               See the file COPYING.LESSER.
@@ -9,7 +9,7 @@
  * ---------------------------------------------------------------------------- */
 
 
-#include "ibex_Affine2Eval.h"
+#include "ibex_AffineEval.h"
 #include "ibex_Function.h"
 //#include <stdio.h>
 

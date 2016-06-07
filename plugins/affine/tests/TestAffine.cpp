@@ -1006,7 +1006,7 @@ void TestAffine<T>::test101()   {
 	AffineMainVector<T> va(v,true);
 
 	IntervalVector res = ydot.eval_vector(v);
-	Affine2Eval<T> eval_af2(ydot);
+	AffineEval<T> eval_af2(ydot);
 	AffineMainVector<T> resa = eval_af2.eval(va).v();
 
 	for (int j = 0; j < 3; ++j) {

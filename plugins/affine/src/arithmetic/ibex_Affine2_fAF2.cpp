@@ -239,20 +239,15 @@ AffineMain<AF_fAF2>& AffineMain<AF_fAF2>::operator=(double d) {
 
 
 
-/** \brief Return (-x) */
 template<>
-AffineMain<AF_fAF2> AffineMain<AF_fAF2>::operator-() const {
-	AffineMain<AF_fAF2> res;
-	res._n = _n;
-	res._elt._err = _elt._err;
+AffineMain<AF_fAF2>& AffineMain<AF_fAF2>::Aneg() {
 	if (is_actif()) {
-		res._elt._val = new double[_n+1];
 		for (int i = 0; i <= _n; i++) {
-			res._elt._val[i] = (-_elt._val[i]);
+			_elt._val[i] = (-_elt._val[i]);
 		}
 
 	}
-	return res;
+	return *this;
 }
 
 
@@ -593,7 +588,7 @@ AffineMain<AF_fAF2>& AffineMain<AF_fAF2>::operator*=(const Interval& y) {
 
 
 template<>
-AffineMain<AF_fAF2>& AffineMain<AF_fAF2>::sqr(const Interval itv) {
+AffineMain<AF_fAF2>& AffineMain<AF_fAF2>::Asqr(const Interval& itv) {
 //	std::cout << "in sqr "<<std::endl;
 
 	bool b = (!(itv.is_empty()||itv.is_unbounded()));

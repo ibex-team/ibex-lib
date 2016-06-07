@@ -258,18 +258,16 @@ AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::operator=(double d) {
 
 /** \brief Return (-x) */
 template<>
-AffineMain<AF_fAFFullI> AffineMain<AF_fAFFullI>::operator-() const {
-	AffineMain<AF_fAFFullI> res;
-	res._n = _n;
-	res._elt._center = -_elt._center;
-	res._elt._garbage = -_elt._garbage;
+AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::Aneg() {
+	_elt._center = -_elt._center;
+	_elt._garbage = -_elt._garbage;
 	if (!_elt._rays.empty()) {
-		std::list<std::pair<int,double> >::const_iterator it = _elt._rays.begin();
+		std::list<std::pair<int,double> >::iterator it = _elt._rays.begin();
 		for (; it != _elt._rays.end(); ++it) {
-			res._elt._rays.push_back (std::pair<int,double>(it->first,-it->second));
+			it->second = -(it->second);
 		}
 	}
-	return res;
+	return *this;
 }
 
 template<>
@@ -510,7 +508,7 @@ AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::operator+=(const Interval& y) 
 }
 
 template<>
-AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::sqr(const Interval itv) {
+AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::Asqr(const Interval& itv) {
 
 	if (	(!is_actif())||
 			itv.is_empty()||
@@ -519,9 +517,7 @@ AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::sqr(const Interval itv) {
 		*this = pow(itv,2);
 
 	} else  {
-		AffineMain<AF_fAFFullI> ax(*this);
-		//std::cout << "sqr of " << itv << std::endl;
-		*this = pow(ax,Interval(2),itv);
+		this->Apow(Interval(2),itv);
 	}
 
 	//	std::cout << "out sqr "<<std::endl;
