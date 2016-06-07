@@ -224,6 +224,7 @@ public:
 	 * \brief Set a row.
 	 */
 	void set_row(int row, const AffineMainVector<T>& v);
+	void set_row(int row, const IntervalVector& v);
 
 
 	/**
@@ -544,7 +545,7 @@ inline const AffineMainVector<T>& AffineMainMatrix<T>::operator[](int i) const {
 
 template<class T>
 inline void AffineMainMatrix<T>::clear() {
-	init(0);
+	init(Interval::ZERO);
 }
 
 template<class T>
@@ -576,6 +577,13 @@ inline AffineMainMatrix<T> AffineMainMatrix<T>::cols(int start_index, int end_in
 
 template<class T>
 inline void AffineMainMatrix<T>::set_row(int row1, const AffineMainVector<T>& v1) {
+	assert(row1>=0 && row1<nb_rows());
+	assert(nb_cols()==v1.size());
+	_M[row1]=v1;
+}
+
+template<class T>
+inline void AffineMainMatrix<T>::set_row(int row1, const IntervalVector& v1) {
 	assert(row1>=0 && row1<nb_rows());
 	assert(nb_cols()==v1.size());
 	_M[row1]=v1;

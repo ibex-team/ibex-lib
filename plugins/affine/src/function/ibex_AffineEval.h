@@ -175,7 +175,7 @@ inline void AffineEval<T>::forward(const Array<const Domain>& argD, const Array<
 template<class T>
 inline void AffineEval<T>::forward(const IntervalVector& box) {
 	d.write_arg_domains(box);
-	af2.write_arg_domains(AffineMainVector<T>(box,true));
+	af2.write_arg_domains(AffineMainVector<T>(box));
 
 	// TODO: should manage empty result! (see Eval.cpp)
 	f.forward<AffineEval<T> >(*this);
@@ -201,18 +201,18 @@ inline void AffineEval<T>::cst_fwd(int y) {
 	const ExprConstant& c = (const ExprConstant&) f.node(y);
 	switch (c.type()) {
 	case Dim::SCALAR:      {
-		af2[y].i() = AffineMain<T>(c.get_value());
+		af2[y].i() = c.get_value();
 		d[y].i() = c.get_value();
 		break;
 	}
 	case Dim::ROW_VECTOR:
 	case Dim::COL_VECTOR: {
-		af2[y].v() = AffineMainVector<T>(c.get_vector_value(),false);
+		af2[y].v() = c.get_vector_value();
 		d[y].v() = c.get_vector_value();
 		break;
 	}
 	case Dim::MATRIX: {
-		af2[y].m() = AffineMainMatrix<T>(c.get_matrix_value());
+		af2[y].m() = c.get_matrix_value();
 		d[y].m() = c.get_matrix_value();
 		break;
 	}

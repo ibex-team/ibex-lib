@@ -30,7 +30,7 @@ namespace ibex {
  * </ul>
  *
  */
-typedef TemplateDomain<Affine2>   Affine2Domain;
+typedef TemplateDomain<Affine2> Affine2Domain;
 typedef TemplateDomain<Affine3> Affine3Domain;
 
 

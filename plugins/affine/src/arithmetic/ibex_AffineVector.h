@@ -63,7 +63,7 @@ public:
 	 *  else Affine2(\a n,i+1,\a x) }.
 	 * \pre n>0
 	 */
-	AffineMainVector(int n, const Interval& x, bool b =false);
+	AffineMainVector(int n, const Interval& x);
 
 	/**
 	 * \brief  Create \a n Affine2MainVector of dimension \a n with
@@ -91,7 +91,7 @@ public:
 	 * \param bounds an nx2 array of doubles
 	 * \pre n>0
 	 */
-	AffineMainVector(int n, double  bounds[][2], bool b =false);
+	AffineMainVector(int n, double  bounds[][2]);
 
 	/**
 	 * \brief Create \a x.size Affine2MainVector of dimension \a x.size with
@@ -99,7 +99,7 @@ public:
 	 * if !(\a b) Affine2(x[i])
 	 * else  Affine2(x.size(), i+1,x[i])
 	 */
-	explicit AffineMainVector(const IntervalVector& x, bool b =false);
+	explicit AffineMainVector(const IntervalVector& x);
 
 	/**
 	 * \brief Create the degenerated Affine2MainVector x
@@ -165,7 +165,7 @@ public:
 	 *
 	 * \note Emptiness is "overridden".
 	 */
-	void init(const Interval& x, bool b =false);
+	void init(const Interval& x);
 
 	/**
 	 * \brief Set all the elements to x
@@ -474,7 +474,7 @@ inline AffineMain<T>& AffineMainVector<T>::operator[](int i) {
 
 template<class T>
 inline void AffineMainVector<T>::clear() {
-	init(0);
+	init(Interval::ZERO);
 }
 
 template<class T>

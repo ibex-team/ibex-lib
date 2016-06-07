@@ -100,7 +100,7 @@ AffineMain<AF_fAF1>::AffineMain(const double d) :
 		_elt._val[0] = d;
 	} else {
         _n=-1;
-         _elt._err = Interval(d);
+        _elt._err = Interval(d);
 	}
 }
 

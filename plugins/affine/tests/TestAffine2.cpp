@@ -17,7 +17,7 @@
 #include "ibex_CellStack.h"
 #include "ibex_Solver.h"
 
-#include "ibex_Affine2Eval.h"
+#include "ibex_AffineEval.h"
 //using namespace std;
 
 template<class T>

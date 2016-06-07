@@ -321,7 +321,8 @@ std::ostream& operator<<(std::ostream& os, const AffineMain<T>&  x);
 template<class T>
 inline AffineMain<T> AffineMain<T>::operator-() const {
 	AffineMain<T> res(*this);
-	return res->Aneg();
+	res.Aneg();
+	return res;
 }
 
 /** \brief AF[x]_1+AF[x]_2. */
@@ -874,7 +875,8 @@ inline AffineMain<T> inv(const AffineMain<T>& x){
 }
 template<class T>
 inline AffineMain<T>& AffineMain<T>::Ainv(const Interval& itv){
-	return *this->linChebyshev(AF_INV, itv);
+	this->linChebyshev(AF_INV, itv);
+	return *this;
 }
 
 
@@ -890,7 +892,8 @@ inline AffineMain<T> sqrt(const AffineMain<T>& x){
 }
 template<class T>
 inline AffineMain<T>& AffineMain<T>::Asqrt(const Interval& itv){
-	return *this->linChebyshev(AF_SQRT, itv);
+	this->linChebyshev(AF_SQRT, itv);
+	return *this;
 }
 
 
@@ -900,7 +903,8 @@ inline AffineMain<T> exp(const AffineMain<T>& x){
 }
 template<class T>
 inline AffineMain<T>& AffineMain<T>::Aexp(const Interval& itv){
-	return *this->linChebyshev(AF_EXP,itv);
+	this->linChebyshev(AF_EXP,itv);
+	return *this;
 }
 
 

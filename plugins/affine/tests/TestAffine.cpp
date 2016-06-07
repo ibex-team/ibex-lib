@@ -11,7 +11,7 @@
  * ---------------------------------------------------------------------------- */
 
 #include "TestAffine.h"
-#include "ibex_Affine2Eval.h"
+#include "ibex_AffineEval.h"
 
 template<class T>
 bool TestAffine<T>::compare_results (comp_t c, Interval r, AffineMain<T>  a) {
@@ -19,16 +19,17 @@ bool TestAffine<T>::compare_results (comp_t c, Interval r, AffineMain<T>  a) {
 	Interval tmp;
 	switch (c) {
 	case EQUALITY:
-		if (ra != r) {
-			return false;
-		}
-		else {
+		if (ra == r) {
 			return true;
+		} else if (r.is_subset(ra) && ra.is_subset(r.inflate(abs(r).ub()*1.e-14)) ) {
+			return true;
+		} else {
+			return false;
 		}
 		break;
 
 	case INCLUSION:
-		if (! r.is_subset (ra)) {
+		if (! r.is_subset(ra)) {
 			return false;
 		}
 		else {
@@ -37,7 +38,11 @@ bool TestAffine<T>::compare_results (comp_t c, Interval r, AffineMain<T>  a) {
 		break;
 
 	case INCLUSION_TIGHT:
-		if (! ra.is_subset (r)) {
+		if (! ra.is_subset(r)) {
+			std::cout.precision(20);
+			std::cout<<"Affine:  "<<a<<std::endl;
+			std::cout<<"AffineI: "<<ra<<std::endl;
+			std::cout<<"Interval:"<<r<<std::endl;
 			return false;
 		}
 		else {
@@ -67,28 +72,28 @@ bool TestAffine<T>::compare_results (comp_t c, Interval r, AffineMain<T>  a) {
 template<class T>
 void TestAffine<T>::test01(){
 	Interval x(-1, 1);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	CPPUNIT_ASSERT(compare_results (EQUALITY, x, ax));
 }
 
 template<class T>
 void TestAffine<T>::test02() {
 	Interval x(-1, 2.13);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	CPPUNIT_ASSERT(compare_results (INCLUSION, x, ax));
 }
 
 template<class T>
 void TestAffine<T>::test03()  {
 	Interval x(5, 7.43);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	CPPUNIT_ASSERT(compare_results (INCLUSION, x, ax));
 }
 
 template<class T>
 void TestAffine<T>::test04()  {
 	Interval x(-15, -7.45);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	CPPUNIT_ASSERT(compare_results (INCLUSION, x, ax));
 }
 
@@ -96,7 +101,7 @@ void TestAffine<T>::test04()  {
 template<class T>
 void TestAffine<T>::test05()  {
 	Interval x(1.0, 2.0);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	x = x + 1.0;
 	ax = ax + 1.0;
 	CPPUNIT_ASSERT(compare_results (EQUALITY, x, ax));
@@ -105,7 +110,7 @@ void TestAffine<T>::test05()  {
 template<class T>
 void TestAffine<T>::test06()  {
 	Interval x(1, 2);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	x = x + 0.0;
 	ax = ax + 0.0;
 	CPPUNIT_ASSERT(compare_results (EQUALITY, x, ax));
@@ -114,7 +119,7 @@ void TestAffine<T>::test06()  {
 template<class T>
 void TestAffine<T>::test07()  {
 	Interval x(1, 2);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	x = x + 3.14;
 	ax = ax + 3.14;
 	CPPUNIT_ASSERT(compare_results (INCLUSION, x, ax));
@@ -123,7 +128,7 @@ void TestAffine<T>::test07()  {
 template<class T>
 void TestAffine<T>::test08()  {
 	Interval x(-5, -2);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	x = x + 3.14;
 	ax = ax + 3.14;
 	CPPUNIT_ASSERT(compare_results (INCLUSION, x, ax));
@@ -132,7 +137,7 @@ void TestAffine<T>::test08()  {
 template<class T>
 void TestAffine<T>::test09()  {
 	Interval x(-5, 4);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	x = x + 3.14;
 	ax = ax + 3.14;
 	CPPUNIT_ASSERT(compare_results (INCLUSION, x, ax));
@@ -143,7 +148,7 @@ void TestAffine<T>::test09()  {
 template<class T>
 void TestAffine<T>::test10()  {
 	Interval x(1, 2);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	x = x - 1.0;
 	ax = ax - 1.0;
 	CPPUNIT_ASSERT(compare_results (INCLUSION, x, ax));
@@ -152,7 +157,7 @@ void TestAffine<T>::test10()  {
 template<class T>
 void TestAffine<T>::test11()   {
 	Interval x(1, 2);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	x = x - 0.0;
 	ax = ax - 0.0;
 	CPPUNIT_ASSERT(compare_results (EQUALITY, x, ax));
@@ -161,7 +166,7 @@ void TestAffine<T>::test11()   {
 template<class T>
 void TestAffine<T>::test12()   {
 	Interval x(1, 2);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	x = x - 3.14;
 	ax = ax - 3.14;
 	CPPUNIT_ASSERT(compare_results (INCLUSION, x, ax));
@@ -170,7 +175,7 @@ void TestAffine<T>::test12()   {
 template<class T>
 void TestAffine<T>::test13() {
 	Interval x(-5, -2);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	x = x - 3.14;
 	ax = ax - 3.14;
 	CPPUNIT_ASSERT(compare_results (INCLUSION, x, ax));
@@ -179,7 +184,7 @@ void TestAffine<T>::test13() {
 template<class T>
 void TestAffine<T>::test14() {
 	Interval x(-5, 4);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	x = x - 3.14;
 	ax = ax - 3.14;
 	CPPUNIT_ASSERT(compare_results (INCLUSION, x, ax));
@@ -191,7 +196,7 @@ void TestAffine<T>::test14() {
 template<class T>
 void TestAffine<T>::test15()  {
 	Interval x(1, 2);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	x = x * 1.0;
 	ax = ax * 1.0;
 	CPPUNIT_ASSERT(compare_results (EQUALITY, x, ax));
@@ -200,7 +205,7 @@ void TestAffine<T>::test15()  {
 template<class T>
 void TestAffine<T>::test16()   {
 	Interval x(1, 2);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	x = x * 0.0;
 	ax = ax * 0.0;
 	CPPUNIT_ASSERT(compare_results (EQUALITY, x, ax));
@@ -210,7 +215,7 @@ void TestAffine<T>::test16()   {
 template<class T>
 void TestAffine<T>::test17()   {
 	Interval x(1, 2);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	x = x * 3.14;
 	ax = ax * 3.14;
 	CPPUNIT_ASSERT(compare_results (INCLUSION, x, ax));
@@ -219,7 +224,7 @@ void TestAffine<T>::test17()   {
 template<class T>
 void TestAffine<T>::test18()   {
 	Interval x(-5, -2);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	x = x * 3.14;
 	ax = ax * 3.14;
 	CPPUNIT_ASSERT(compare_results (INCLUSION, x, ax));
@@ -228,7 +233,7 @@ void TestAffine<T>::test18()   {
 template<class T>
 void TestAffine<T>::test19()   {
 	Interval x(-5, 4);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	x = x * 3.14;
 	ax = ax * 3.14;
 	CPPUNIT_ASSERT(compare_results (INCLUSION, x, ax));
@@ -239,7 +244,7 @@ void TestAffine<T>::test19()   {
 template<class T>
 void TestAffine<T>::test20()   {
 	Interval x(1, 2);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	x = x / 1.0;
 	ax = ax / 1.0;
 	CPPUNIT_ASSERT(compare_results (EQUALITY, x, ax));
@@ -248,7 +253,7 @@ void TestAffine<T>::test20()   {
 template<class T>
 void TestAffine<T>::test21()   {
 	Interval x(1, 2);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	x = x / 3.14;
 	ax = ax / 3.14;
 	CPPUNIT_ASSERT(compare_results (INCLUSION, x, ax));
@@ -257,7 +262,7 @@ void TestAffine<T>::test21()   {
 template<class T>
 void TestAffine<T>::test22()   {
 	Interval x(-5, -2);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	x = x / 3.14;
 	ax = ax / 3.14;
 	CPPUNIT_ASSERT(compare_results (INCLUSION, x, ax));
@@ -266,7 +271,7 @@ void TestAffine<T>::test22()   {
 template<class T>
 void TestAffine<T>::test23()  {
 	Interval x(-5, 4);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	x = x / 3.14;
 	ax = ax / 3.14;
 	CPPUNIT_ASSERT(compare_results (INCLUSION, x, ax));
@@ -279,7 +284,7 @@ void TestAffine<T>::test23()  {
 template<class T>
 void TestAffine<T>::test24()  {
 	Interval x(1, 2);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	Interval prod(1.0, 1.0);
 	x = x + prod;
 	ax = ax + prod;
@@ -289,7 +294,7 @@ void TestAffine<T>::test24()  {
 template<class T>
 void TestAffine<T>::test25()  {
 	Interval x(1, 2);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	Interval prod(0.0, 0.0);
 	x = x + prod;
 	ax = ax + prod;
@@ -299,7 +304,7 @@ void TestAffine<T>::test25()  {
 template<class T>
 void TestAffine<T>::test26()   {
 	Interval x(1, 2);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	Interval prod(-1.0, 1.0);
 	x = x + prod;
 	ax = ax + prod;
@@ -309,7 +314,7 @@ void TestAffine<T>::test26()   {
 template<class T>
 void TestAffine<T>::test27()  {
 	Interval x(1, 2);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	Interval prod(-1.7, 1.7);
 	x = x + prod;
 	ax = ax + prod;
@@ -319,7 +324,7 @@ void TestAffine<T>::test27()  {
 template<class T>
 void TestAffine<T>::test28()  {
 	Interval x(1, 2);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	Interval prod(-1.08, 1.7);
 	x = x + prod;
 	ax = ax + prod;
@@ -332,7 +337,7 @@ void TestAffine<T>::test28()  {
 template<class T>
 void TestAffine<T>::test29()   {
 	Interval x(1, 2);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	Interval prod(1.0, 1.0);
 	x = x * prod;
 	ax = ax * prod;
@@ -342,7 +347,7 @@ void TestAffine<T>::test29()   {
 template<class T>
 void TestAffine<T>::test30()  {
 	Interval x(1, 2);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	Interval prod(0.0, 0.0);
 	x = x * prod;
 	ax = ax * prod;
@@ -352,7 +357,7 @@ void TestAffine<T>::test30()  {
 template<class T>
 void TestAffine<T>::test31()  {
 	Interval x(1, 2);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	Interval prod(-1.0, 1.0);
 	x = x * prod;
 	ax = ax * prod;
@@ -362,7 +367,7 @@ void TestAffine<T>::test31()  {
 template<class T>
 void TestAffine<T>::test32()   {
 	Interval x(1, 2);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	Interval prod(-1.7, 1.7);
 	x = x * prod;
 	ax = ax * prod;
@@ -372,7 +377,7 @@ void TestAffine<T>::test32()   {
 template<class T>
 void TestAffine<T>::test33()   {
 	Interval x(1, 2);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	Interval prod(-1.08, 1.7);
 	x = x * prod;
 	ax = ax * prod;
@@ -384,7 +389,7 @@ void TestAffine<T>::test33()   {
 template<class T>
 void TestAffine<T>::test34()   {
 	Interval x(1, 2);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	AffineMain<T> ay = ax;
 	CPPUNIT_ASSERT(compare_results (EQUALITY, x, ax));
 }
@@ -393,7 +398,7 @@ void TestAffine<T>::test34()   {
 template<class T>
 void TestAffine<T>::test35()   {
 	Interval x(-11.3, -4.3);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	AffineMain<T> ay = ax;
 	CPPUNIT_ASSERT(compare_results (EQUALITY, x, ax));
 }
@@ -401,7 +406,7 @@ void TestAffine<T>::test35()   {
 template<class T>
 void TestAffine<T>::test36()   {
 	Interval x(-11.3, 4.3);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	AffineMain<T> ay = ax;
 	CPPUNIT_ASSERT(compare_results (INCLUSION, x, ax));
 }
@@ -409,7 +414,7 @@ void TestAffine<T>::test36()   {
 template<class T>
 void TestAffine<T>::test37()   {
 	Interval x(0, 4.3);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	AffineMain<T> ay = ax;
 	CPPUNIT_ASSERT(compare_results (INCLUSION, x, ax));
 }
@@ -420,7 +425,7 @@ void TestAffine<T>::test37()   {
 template<class T>
 void TestAffine<T>::test38()   {
 	Interval x(1.57, 2.23);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	ax += x;
 	x += x;
 	CPPUNIT_ASSERT(compare_results (INCLUSION, x, ax));
@@ -430,7 +435,7 @@ void TestAffine<T>::test38()   {
 template<class T>
 void TestAffine<T>::test39()  {
 	Interval x(-11.3, -4.3);
-	AffineMain<T> ax(x);
+	AffineMain<T> ax (1,1,x);
 	ax += x;
 	x += x;
 	CPPUNIT_ASSERT(compare_results (INCLUSION, x, ax));
@@ -439,7 +444,7 @@ void TestAffine<T>::test39()  {
 template<class T>
 void TestAffine<T>::test49()  {
 	Interval x(-11.3, 4.3);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	ax += x;
 	x += x;
 	CPPUNIT_ASSERT(compare_results (INCLUSION, x, ax));
@@ -448,7 +453,7 @@ void TestAffine<T>::test49()  {
 template<class T>
 void TestAffine<T>::test50()  {
 	Interval x(0, 4.3);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	ax += x;
 	x += x;
 	CPPUNIT_ASSERT(compare_results (INCLUSION, x, ax));
@@ -458,7 +463,7 @@ void TestAffine<T>::test50()  {
 template<class T>
 void TestAffine<T>::test51()   {
 	Interval x(1.57, 2.23);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	ax *= x;
 	x *= x;
 	CPPUNIT_ASSERT(compare_results (INCLUSION, x, ax));
@@ -468,7 +473,7 @@ void TestAffine<T>::test51()   {
 template<class T>
 void TestAffine<T>::test52()  {
 	Interval x(-11.3, -4.3);
-	AffineMain<T> ax(x);
+	AffineMain<T> ax (1,1,x);
 	ax *= x;
 	x *= x;
 	CPPUNIT_ASSERT(compare_results (INCLUSION, x, ax));
@@ -477,7 +482,7 @@ void TestAffine<T>::test52()  {
 template<class T>
 void TestAffine<T>::test53()  {
 	Interval x(-11.3, 4.3);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	ax *= x;
 	x *= x;
 	CPPUNIT_ASSERT(compare_results (INCLUSION, x, ax));
@@ -486,7 +491,7 @@ void TestAffine<T>::test53()  {
 template<class T>
 void TestAffine<T>::test54()  {
 	Interval x(0, 4.3);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	ax *= x;
 	x *= x;
 	CPPUNIT_ASSERT(compare_results (INCLUSION, x, ax));
@@ -499,7 +504,7 @@ void TestAffine<T>::test54()  {
 template<class T>
 void TestAffine<T>::test55()  {
 	Interval x(1,2);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	ax += 3.14159;
 	x += 3.14159;
 	CPPUNIT_ASSERT(compare_results (INCLUSION, x, ax));
@@ -509,7 +514,7 @@ void TestAffine<T>::test55()  {
 template<class T>
 void TestAffine<T>::test56()  {
 	Interval x(-11.3, -4.3);
-	AffineMain<T> ax(x);
+	AffineMain<T> ax (1,1,x);
 	ax += 3.14159;
 	x += 3.14159;
 	CPPUNIT_ASSERT(compare_results (INCLUSION, x, ax));
@@ -518,7 +523,7 @@ void TestAffine<T>::test56()  {
 template<class T>
 void TestAffine<T>::test57()   {
 	Interval x(-11.3, 4.3);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	ax += 3.14159;
 	x += 3.14159;
 	CPPUNIT_ASSERT(compare_results (INCLUSION, x, ax));
@@ -527,7 +532,7 @@ void TestAffine<T>::test57()   {
 template<class T>
 void TestAffine<T>::test58()  {
 	Interval x(0, 4.3);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	ax += 3.14159;
 	x += 3.14159;
 	CPPUNIT_ASSERT(compare_results (INCLUSION, x, ax));
@@ -536,7 +541,7 @@ void TestAffine<T>::test58()  {
 template<class T>
 void TestAffine<T>::test59()  {
 	Interval x(0, 4.31);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	ax += 0.;
 	x += 0.;
 	CPPUNIT_ASSERT(compare_results (INCLUSION, x, ax));
@@ -546,7 +551,7 @@ void TestAffine<T>::test59()  {
 template<class T>
 void TestAffine<T>::test60()  {
 	Interval x(1.57, 2.23);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	ax *= 1.;
 	x *= 1.;
 	CPPUNIT_ASSERT(compare_results (EQUALITY, x, ax));
@@ -555,7 +560,7 @@ void TestAffine<T>::test60()  {
 template<class T>
 void TestAffine<T>::test61()  {
 	Interval x(1.57, 2.23);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	ax *= 0.;
 	x *= 0.;
 	CPPUNIT_ASSERT(compare_results (EQUALITY, x, ax));
@@ -564,7 +569,7 @@ void TestAffine<T>::test61()  {
 template<class T>
 void TestAffine<T>::test62()  {
 	Interval x(1.57, 2.23);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	ax *= 3.14159;
 	x *= 3.14159;
 	CPPUNIT_ASSERT(compare_results (INCLUSION, x, ax));
@@ -574,7 +579,7 @@ void TestAffine<T>::test62()  {
 template<class T>
 void TestAffine<T>::test63()  {
 	Interval x(-11.3, -4.3);
-	AffineMain<T> ax(x);
+	AffineMain<T> ax (1,1,x);
 	ax *= 3.14159;
 	x *= 3.14159;
 	CPPUNIT_ASSERT(compare_results (INCLUSION, x, ax));
@@ -583,7 +588,7 @@ void TestAffine<T>::test63()  {
 template<class T>
 void TestAffine<T>::test64()   {
 	Interval x(-11.3, 4.3);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	ax *= 3.14159;
 	x *= 3.14159;
 	CPPUNIT_ASSERT(compare_results (INCLUSION, x, ax));
@@ -592,7 +597,7 @@ void TestAffine<T>::test64()   {
 template<class T>
 void TestAffine<T>::test65()   {
 	Interval x(0, 4.3);
-	AffineMain<T> ax (x);
+	AffineMain<T> ax (1,1,x);
 	ax *= 3.14159;
 	x *= 3.14159;
 	CPPUNIT_ASSERT(compare_results (INCLUSION, x, ax));
@@ -604,37 +609,37 @@ void TestAffine<T>::test65()   {
 template<class T>
 void TestAffine<T>::test66() {
 	Interval x(1.2,4.5);
-	AffineMain<T> ax(x);
+	AffineMain<T> ax1(2,1,x);
 	Interval y(3.77,7.2);
-	AffineMain<T> ay(y);
-	CPPUNIT_ASSERT(compare_results (INCLUSION, x+y, ax+ay));
+	AffineMain<T> ax2(2,2,y);
+	CPPUNIT_ASSERT(compare_results (INCLUSION, x+y, ax1+ax2));
 }
 
 template<class T>
 void TestAffine<T>::test67()  {
 	Interval x(1.2,4.5);
-	AffineMain<T> ax(x);
+	AffineMain<T> ax1(2,1,x);
 	Interval y(-7.2,-3.77);
-	AffineMain<T> ay(y);
-	CPPUNIT_ASSERT(compare_results (INCLUSION, x+y, ax+ay));
+	AffineMain<T> ax2(2,2,y);
+	CPPUNIT_ASSERT(compare_results (INCLUSION, x+y, ax1+ax2));
 }
 
 template<class T>
 void TestAffine<T>::test68()   {
 	Interval x(1.2,4.5);
-	AffineMain<T> ax(x);
+	AffineMain<T> ax1(2,1,x);
 	Interval y(-3.77,7.2);
-	AffineMain<T> ay(y);
-	CPPUNIT_ASSERT(compare_results (INCLUSION, x+y, ax+ay));
+	AffineMain<T> ax2(2,2,y);
+	CPPUNIT_ASSERT(compare_results (INCLUSION, x+y, ax1+ax2));
 }
 
 template<class T>
 void TestAffine<T>::test69()  {
 	Interval x(1.2,4.5);
-	AffineMain<T> ax(x);
+	AffineMain<T> ax1(2,1,x);
 	Interval y(0,7.2);
-	AffineMain<T> ay(y);
-	compare_results (INCLUSION, x+y, ax+ay);
+	AffineMain<T> ax2(2,2,y);
+	compare_results (INCLUSION, x+y, ax1+ax2);
 }
 
 // Subtraction
@@ -642,37 +647,37 @@ void TestAffine<T>::test69()  {
 template<class T>
 void TestAffine<T>::test70()   {
 	Interval x(1.2,4.5);
-	AffineMain<T> ax(x);
+	AffineMain<T> ax1(2,1,x);
 	Interval y(3.77,7.2);
-	AffineMain<T> ay(y);
-	CPPUNIT_ASSERT(compare_results (INCLUSION, x-y, ax-ay));
+	AffineMain<T> ax2(2,2,y);
+	CPPUNIT_ASSERT(compare_results (INCLUSION, x-y, ax1-ax2));
 }
 
 template<class T>
 void TestAffine<T>::test71()   {
 	Interval x(1.2,4.5);
-	AffineMain<T> ax(x);
+	AffineMain<T> ax1(2,1,x);
 	Interval y(-7.2,-3.77);
-	AffineMain<T> ay(y);
-	compare_results (INCLUSION, x-y, ax-ay);
+	AffineMain<T> ax2(2,2,y);
+	compare_results (INCLUSION, x-y, ax1-ax2);
 }
 
 template<class T>
 void TestAffine<T>::test72()  {
 	Interval x(1.2,4.5);
-	AffineMain<T> ax(x);
+	AffineMain<T> ax1(2,1,x);
 	Interval y(-3.77,7.2);
-	AffineMain<T> ay(y);
-	compare_results (INCLUSION, x-y, ax-ay);
+	AffineMain<T> ax2(2,2,y);
+	compare_results (INCLUSION, x-y, ax1-ax2);
 }
 
 template<class T>
 void TestAffine<T>::test73()  {
 	Interval x(1.2,4.5);
-	AffineMain<T> ax(x);
+	AffineMain<T> ax1(2,1,x);
 	Interval y(0,7.2);
-	AffineMain<T> ay(y);
-	CPPUNIT_ASSERT(compare_results (INCLUSION, x-y,  ax-ay));;
+	AffineMain<T> ax2(2,2,y);
+	CPPUNIT_ASSERT(compare_results (INCLUSION, x-y,  ax1-ax2));;
 }
 
 // Multiplication
@@ -681,37 +686,37 @@ void TestAffine<T>::test73()  {
 template<class T>
 void TestAffine<T>::test74()   {
 	Interval x(1.2,4.5);
-	AffineMain<T> ax(x);
+	AffineMain<T> ax1(2,1,x);
 	Interval y(3.77,7.2);
-	AffineMain<T> ay(y);
-	CPPUNIT_ASSERT(compare_results (INCLUSION, x*y,  ax*ay));;
+	AffineMain<T> ax2(2,2,y);
+	CPPUNIT_ASSERT(compare_results (INCLUSION, x*y,  ax1*ax2));;
 }
 
 template<class T>
 void TestAffine<T>::test75()  {
 	Interval x(1.2,4.5);
-	AffineMain<T> ax(x);
+	AffineMain<T> ax1(2,1,x);
 	Interval y(-7.2,-3.77);
-	AffineMain<T> ay(y);
-	CPPUNIT_ASSERT(compare_results (INCLUSION, x*y,  ax*ay));;
+	AffineMain<T> ax2(2,2,y);
+	CPPUNIT_ASSERT(compare_results (INCLUSION, x*y,  ax1*ax2));;
 }
 
 template<class T>
 void TestAffine<T>::test76()  {
 	Interval x(1.2,4.5);
-	AffineMain<T> ax(x);
+	AffineMain<T> ax1(2,1,x);
 	Interval y(-3.77,7.2);
-	AffineMain<T> ay(y);
-	CPPUNIT_ASSERT(compare_results (INCLUSION, x*y,  ax*ay));;
+	AffineMain<T> ax2(2,2,y);
+	CPPUNIT_ASSERT(compare_results (INCLUSION, x*y,  ax1*ax2));;
 }
 
 template<class T>
 void TestAffine<T>::test77()  {
 	Interval x(1.2,4.5);
-	AffineMain<T> ax(x);
+	AffineMain<T> ax1(2,1,x);
 	Interval y(0,7.2);
-	AffineMain<T> ay(y);
-	CPPUNIT_ASSERT(compare_results (INCLUSION, x*y,  ax*ay));;
+	AffineMain<T> ax2(2,2,y);
+	CPPUNIT_ASSERT(compare_results (INCLUSION, x*y,  ax1*ax2));;
 }
 
 // Division
@@ -719,37 +724,37 @@ void TestAffine<T>::test77()  {
 template<class T>
 void TestAffine<T>::test78()  {
 	Interval x(1.2,4.5);
-	AffineMain<T> ax(x);
+	AffineMain<T> ax1(2,1,x);
 	Interval y(3.77,7.2);
-	AffineMain<T> ay(y);
-	CPPUNIT_ASSERT(compare_results (INCLUSION, x/y,  ax/ay));;
+	AffineMain<T> ax2(2,2,y);
+	CPPUNIT_ASSERT(compare_results (INCLUSION, x/y,  ax1/ax2));;
 }
 
 template<class T>
 void TestAffine<T>::test79()  {
 	Interval x(1.2,4.5);
-	AffineMain<T> ax(x);
+	AffineMain<T> ax1(2,1,x);
 	Interval y(-7.2,-3.77);
-	AffineMain<T> ay(y);
-	CPPUNIT_ASSERT(compare_results (INCLUSION, x/y,  ax/ay));;
+	AffineMain<T> ax2(2,2,y);
+	CPPUNIT_ASSERT(compare_results (INCLUSION, x/y,  ax1/ax2));;
 }
 
 template<class T>
 void TestAffine<T>::test80()   {
 	Interval x(1.2,4.5);
-	AffineMain<T> ax(x);
+	AffineMain<T> ax1(2,1,x);
 	Interval y(-3.77,7.2);
-	AffineMain<T> ay(y);
-	CPPUNIT_ASSERT(compare_results (INCLUSION, x/y,  ax/ay));;
+	AffineMain<T> ax2(2,2,y);
+	CPPUNIT_ASSERT(compare_results (INCLUSION, x/y,  ax1/ax2));;
 }
 
 template<class T>
 void TestAffine<T>::test81()  {
 	Interval x(1.2,4.5);
-	AffineMain<T> ax(x);
+	AffineMain<T> ax1(2,1,x);
 	Interval y(0,7.2);
-	AffineMain<T> ay(y);
-	CPPUNIT_ASSERT(compare_results (INCLUSION, x/y,  ax/ay));;
+	AffineMain<T> ax2(2,2,y);
+	CPPUNIT_ASSERT(compare_results (INCLUSION, x/y,  ax1/ax2));;
 }
 
 /* ********************************************** */
@@ -758,101 +763,101 @@ void TestAffine<T>::test81()  {
 template<class T>
 void TestAffine<T>::test82()  {
 	Interval x(1.2,4.5);
-	AffineMain<T> ax(x);
+	AffineMain<T> ax1(2,1,x);
 	Interval y(3.77,7.2);
-	AffineMain<T> ay(y);
-	ax += ay;
+	AffineMain<T> ax2(2,2,y);
+	ax1 += ax2;
 	x += y;
-	CPPUNIT_ASSERT(compare_results (INCLUSION,  x,  ax));;
+	CPPUNIT_ASSERT(compare_results (INCLUSION,  x,  ax1));;
 }
 
 template<class T>
 void TestAffine<T>::test83()  {
 	Interval x(1.2,4.5);
-	AffineMain<T> ax(x);
+	AffineMain<T> ax1(2,1,x);
 	Interval y(-7.2,-3.77);
-	AffineMain<T> ay(y);
-	ax += ay;
+	AffineMain<T> ax2(2,2,y);
+	ax1 += ax2;
 	x += y;
-	CPPUNIT_ASSERT(compare_results (INCLUSION,  x,  ax));;
+	CPPUNIT_ASSERT(compare_results (INCLUSION,  x,  ax1));;
 }
 
 template<class T>
 void TestAffine<T>::test84()  {
 	Interval x(1.2,4.5);
-	AffineMain<T> ax(x);
+	AffineMain<T> ax1(2,1,x);
 	Interval y(-3.77,7.2);
-	AffineMain<T> ay(y);
-	ax += ay;
+	AffineMain<T> ax2(2,2,y);
+	ax1 += ax2;
 	x += y;
-	CPPUNIT_ASSERT(compare_results (INCLUSION,  x,  ax));;
+	CPPUNIT_ASSERT(compare_results (INCLUSION,  x,  ax1));;
 }
 
 template<class T>
 void TestAffine<T>::test85()   {
 	Interval x(1.2,4.5);
-	AffineMain<T> ax(x);
+	AffineMain<T> ax1(2,1,x);
 	Interval y(0,7.2);
-	AffineMain<T> ay(y);
-	ax += ay;
+	AffineMain<T> ax2(2,2,y);
+	ax1 += ax2;
 	x += y;
-	CPPUNIT_ASSERT(compare_results (INCLUSION,  x,  ax));;
+	CPPUNIT_ASSERT(compare_results (INCLUSION,  x,  ax1));;
 }
 
 // Assign-multiplication with affine forms
 template<class T>
 void TestAffine<T>::test86() {
 	Interval x(1.2,4.5);
-	AffineMain<T> ax(x);
+	AffineMain<T> ax1(2,1,x);
 	Interval y(3.77,7.2);
-	AffineMain<T> ay(y);
-	ax *= ay;
+	AffineMain<T> ax2(2,2,y);
+	ax1 *= ax2;
 	x *= y;
-	CPPUNIT_ASSERT(compare_results (INCLUSION,  x,  ax));;
+	CPPUNIT_ASSERT(compare_results (INCLUSION,  x,  ax1));;
 }
 
 template<class T>
 void TestAffine<T>::test87() {
 	Interval x(1.2,4.5);
-	AffineMain<T> ax(x);
+	AffineMain<T> ax1(2,1,x);
 	Interval y(-7.2,-3.77);
-	AffineMain<T> ay(y);
-	ax *= ay;
+	AffineMain<T> ax2(2,2,y);
+	ax1 *= ax2;
 	x *= y;
-	CPPUNIT_ASSERT(compare_results (INCLUSION,  x,  ax));;
+	CPPUNIT_ASSERT(compare_results (INCLUSION,  x,  ax1));;
 }
 
 template<class T>
 void TestAffine<T>::test88() {
 	Interval x(1.2,4.5);
-	AffineMain<T> ax(x);
+	AffineMain<T> ax1(2,1,x);
 	Interval y(-3.77,7.2);
-	AffineMain<T> ay(y);
-	ax *= ay;
+	AffineMain<T> ax2(2,2,y);
+	ax1 *= ax2;
 	x *= y;
-	CPPUNIT_ASSERT(compare_results (INCLUSION,  x,  ax));;
+	CPPUNIT_ASSERT(compare_results (INCLUSION,  x,  ax1));;
 }
 
 template<class T>
 void TestAffine<T>::test89() {
 	Interval x(1.2,4.5);
-	AffineMain<T> ax(x);
+	AffineMain<T> ax1(2,1,x);
 	Interval y(0,7.2);
-	AffineMain<T> ay(y);
-	ax *= ay;
+	AffineMain<T> ax2(2,2,y);
+	ax1 *= ax2;
 	x *= y;
-	CPPUNIT_ASSERT(compare_results (INCLUSION,  x,  ax));;
+	CPPUNIT_ASSERT(compare_results (INCLUSION,  x,  ax1));;
 }
 
 /* **************************** */
 template<class T>
 void TestAffine<T>::test90() {
 	Interval x(92.4,1909.3);
-	AffineMain<T> ax(x);
+	AffineMain<T> ax1(2,1,x);
 	Interval y(92.4,1909.3);
-	AffineMain<T> ay(y);
+	AffineMain<T> ax2(2,2,y);
 	Interval res = x - y;
-	AffineMain<T> resa = ax - ay;
+	AffineMain<T> resa = ax1 - ax2;
 	CPPUNIT_ASSERT(compare_results (INCLUSION, res,  resa));;
 }
 
@@ -860,7 +865,7 @@ void TestAffine<T>::test90() {
 template<class T>
 void TestAffine<T>::test91() {
 	Interval x(92.4,1909.3);
-	AffineMain<T> ax(x);
+	AffineMain<T> ax (1,1,x);
 	Interval res = x - x;
 	AffineMain<T> resa = ax - ax;
 	CPPUNIT_ASSERT(compare_results (INCLUSION_TIGHT, res,  resa));;
@@ -869,7 +874,7 @@ void TestAffine<T>::test91() {
 template<class T>
 void TestAffine<T>::test92() {
 	Interval x(-92.4,-10.3);
-	AffineMain<T> ax(x);
+	AffineMain<T> ax (1,1,x);
 	Interval res = x - x;
 	AffineMain<T> resa = ax - ax;
 	CPPUNIT_ASSERT(compare_results (INCLUSION_TIGHT, res,  resa));;
@@ -878,7 +883,7 @@ void TestAffine<T>::test92() {
 template<class T>
 void TestAffine<T>::test93() {
 	Interval x(-92.4, 10.3);
-	AffineMain<T> ax(x);
+	AffineMain<T> ax (1,1,x);
 	Interval res = x - x;
 	AffineMain<T> resa = ax - ax;
 	CPPUNIT_ASSERT(compare_results (INCLUSION_TIGHT, res,  resa));;
@@ -887,7 +892,7 @@ void TestAffine<T>::test93() {
 template<class T>
 void TestAffine<T>::test94() {
 	Interval x(0.0, 10.3);
-	AffineMain<T> ax(x);
+	AffineMain<T> ax (1,1,x);
 	Interval res = x - x;
 	AffineMain<T> resa = ax - ax;
 	CPPUNIT_ASSERT(compare_results (INCLUSION_TIGHT, res,  resa));;
@@ -899,7 +904,7 @@ void TestAffine<T>::test95() {
 
 	int iter = 1000;
 	Interval x(1.3,78.4);
-	AffineMain<T> ax(x);
+	AffineMain<T> ax (1,1,x);
 	for (int i=0; i < iter; i++)
 	{
 		//cout << "ax : "<< ax << endl;
@@ -914,7 +919,7 @@ template<class T>
 void TestAffine<T>::test96()  {
 	int iter = 1000;
 	Interval x(-78.4,-1.3);
-	AffineMain<T> ax(x);
+	AffineMain<T> ax (1,1,x);
 	for (int i=0;i < iter;i++)
 	{
 		//cout << "ax : "<< ax << endl;
@@ -928,7 +933,7 @@ template<class T>
 void TestAffine<T>::test97() {
 	int iter = 1000;
 	Interval x(-1.3,78.4);
-	AffineMain<T> ax(x);
+	AffineMain<T> ax (1,1,x);
 	for (int i=0;i < iter; i++)
 	{
 		//cout << "ax : "<< ax << endl;
@@ -942,7 +947,7 @@ template<class T>
 void TestAffine<T>::test98()   {
 	int iter = 1000;
 	Interval x(0.,78.4);
-	AffineMain<T> ax(x);
+	AffineMain<T> ax (1,1,x);
 	for (int i=0;i < iter;i++)
 	{
 		//cout << "ax : "<< ax << endl;
@@ -959,7 +964,7 @@ void TestAffine<T>::test98()   {
 template<class T>
 void TestAffine<T>::test99()   {
 	Interval x(10,11);
-	AffineMain<T> ax(x);
+	AffineMain<T> ax (1,1,x);
 	for (int i=0;i < 1;i++)
 	{
 		ax = sqrt(ax);
@@ -975,7 +980,7 @@ void TestAffine<T>::test99()   {
 template<class T>
 void TestAffine<T>::test100()   {
 	Interval x(3,21);
-	AffineMain<T> ax(x);
+	AffineMain<T> ax (1,1,x);
 	for (int i=0;i < 1;i++)
 	{
 		ax = 1/ax;
@@ -1003,7 +1008,7 @@ void TestAffine<T>::test101()   {
 	v[0] = Interval(-1, 1);
 	v[1] = Interval(2, 3);
 	v[2] = Interval(-4,-4);
-	AffineMainVector<T> va(v,true);
+	AffineMainVector<T> va(v);
 
 	IntervalVector res = ydot.eval_vector(v);
 	AffineEval<T> eval_af2(ydot);
