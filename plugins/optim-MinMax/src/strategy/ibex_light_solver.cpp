@@ -115,19 +115,16 @@ Interval light_solver::optimize(Heap<y_heap_elem> * y_heap,IntervalVector* x_box
 ////                cout<<"xy_box before max_ctc contraction: "<<xy_box<<endl;
 //                max_ctc.contract(xy_box); // contract xy_box w.r.t lower than best max constraint, /!\ xy_box contracted! => x box of xy_box may have be contracted, must keep this result!
 ////                cout<<"xy_box after max_ctc contraction: "<<xy_box<<endl;
-//                if(xy_box.subvector(0,x_box->size()-1).is_empty()) { // there are no x in x_box such as exists y in y_box, f(x,y)<best_max
+//                if(xy_box.is_empty()) { // there are no x in x_box such as exists y in y_box, f(x,y)<best_max
 ////                    cout<<"lsolve: null contraction rejection *********************"<<endl;
 //                    delete subcells[j];
-//                    if(j==0)
-//                        delete subcells[j+1];
-//                    return Interval::EMPTY_SET;
-
+//                    continue;
 //                }
 //                else
 //                    xy_box_ctc.operator &=(xy_box); // result of contraction w.r.t the two constraints: best max and xy constraints
 //            }
 //            else
-//                if(ctc_xy_inv == NULL)
+//                if(ctc_xy_inv != NULL)
 //                    max_ctc.contract(xy_box_ctc); // cannot keep x contraction as it is not certified that xy constraint is respected forall x and y in xy_box, xy_box_ctc contracted instead
 //            if(xy_box_ctc.is_empty()) { // not point (x,y) in xy_box such as both constraints are respected
 ////                cout<<"lsolve: xy_box_ctc empty"<<endl;

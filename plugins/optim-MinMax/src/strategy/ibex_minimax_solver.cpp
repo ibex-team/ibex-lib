@@ -13,6 +13,7 @@ void minimax_solver::solve(IntervalVector x_box_ini, IntervalVector y_box_ini, d
     y_heap_ini.push(y_ini); // push element in y_heap, y_heap is initialized
 
     //****** x_heap initialization ********
+//    Heap<x_heap_elem> x_heap = init_x_heap(x_box_ini,y_heap_ini);
     x_heap_costflb x_heap_costfunc;
     Heap<x_heap_elem> x_heap(x_heap_costfunc);
     x_heap_elem *x_ini = new x_heap_elem(x_box_ini,y_heap_ini,Interval::ALL_REALS);
@@ -26,10 +27,10 @@ void minimax_solver::solve(IntervalVector x_box_ini, IntervalVector y_box_ini, d
     pair<x_heap_elem*,x_heap_elem*> subcells_pair;
     unsigned nb_iter(10);
     double min_prec_light_solver(prec_y);
-    Vector midp(x_box_ini.size());
-    IntervalVector midp_int(x_box_ini.size()),box_mem(x_box_ini.size());
+    IntervalVector midp(x_box_ini.size());
     Interval resmidp;
-    Vector best_sol(x_box_ini.size());
+    IntervalVector best_sol(x_box_ini.size());
+    IntervalVector box_mem(x_box_ini.size());
     double init_vol = x_box_ini.volume(),vol_rejected(0);
     bool min_prec_reached(false),midpoint_hit(true);
     IntervalVector max_y(y_box_ini.size());
@@ -49,9 +50,6 @@ void minimax_solver::solve(IntervalVector x_box_ini, IntervalVector y_box_ini, d
         subcells_pair = x_cell_tmp->bisect(subboxes.first,subboxes.second);
         x_subcells[0] = subcells_pair.first;
         x_subcells[1] = subcells_pair.second;
-//        cout<<"boxes after bissection: "<<x_subcells[0]->box<<" and "<<x_subcells[1]->box<<endl;
-
-//        cout<<"bisection ok"<<endl;
         for(unsigned i=0;i<2;i++) { // run through the 2 subcells
             //***************** contraction w.r.t constraint on x ****************
             box_mem = x_subcells[i]->box;
@@ -70,19 +68,10 @@ void minimax_solver::solve(IntervalVector x_box_ini, IntervalVector y_box_ini, d
                     cout<<"loup : "<<loup<<" get for point: x = "<<best_sol<<" y = "<<max_y<<" uplo: "<<uplo<< " volume rejected: "<<vol_rejected/init_vol*100<<endl;
                 }
             }
-//            else
-//                cout<<"no contraction done"<<endl;
             //************ evaluation of f(x,y_heap) *****************
-
-            double ratio(0);
-            for(unsigned r=0;r<x_box_ini.size();r++)
-                ratio += (x_subcells[i]->box[r]).diam()/(x_box_ini[r]).diam();
-            min_prec_light_solver = ratio/y_box_ini.volume()>prec_y?ratio/(10*y_box_ini.volume()):prec_y;
-            nb_iter = 10;
-//            cout<<"start light solver"<<endl;
+            min_prec_light_solver = compute_min_prec(x_box_ini,x_subcells[i]->box,y_box_ini,prec_y);
+            nb_iter = choose_nbiter(false);
             x_subcells[i]->fmax = lsolve.optimize(&(x_subcells[i]->y_heap),&(x_subcells[i]->box),objective_function,nb_iter,loup,x_subcells[i]->fmax,min_prec_light_solver);
-//            cout<<"light solver pass for box"<<endl;
-//            cout<<"lsolve pass, res found: "<<x_subcells[i]->fmax<<endl;
             if(x_subcells[i]->fmax == Interval::EMPTY_SET) { // certified that x box does not contains the solution
                 vol_rejected += x_subcells[i]->box.volume();
                 x_subcells[i]->y_heap.flush();
@@ -91,29 +80,12 @@ void minimax_solver::solve(IntervalVector x_box_ini, IntervalVector y_box_ini, d
                 continue;
             }
             //************* midpoint evaluation ****************
-            midp = x_subcells[i]->box.mid(); // get midpoint of x box,
-            midp_int = IntervalVector(midp);
-            if(x_ctc_inv != 0)
+            midp = get_feasible_point(x_subcells[i]->box);
+            if(!midp.is_empty())
             {
-                x_ctc_inv->contract(midp_int); // check if midpoint verity the constraint on x
-                if(midp_int.is_empty()) { //midp does not verify x constraint
-                    midpoint_hit = true;
-                }
-                else
-                    midpoint_hit = false;
-            }
-            if(midpoint_hit)
-            {
-//                cout<<"midpoint hit!"<<endl;
                 Heap<y_heap_elem> heap_copy(x_subcells[i]->y_heap); // need to copy the heap for midpoint eval so the y_heap of x box is not modify
-                nb_iter = 100000000;   // need to be great enough so the minimum precision on y is reached
-//                cout<<"start light solver midpoint"<<endl;
-                midp_int = IntervalVector(midp);
-//                if(heap_copy.empty())
-//                    cout<<"Critical error: midpoint eval with empty heap"<<endl;
-                resmidp = lsolve.optimize(&(heap_copy),&(midp_int),objective_function,nb_iter,loup,x_subcells[i]->fmax,prec_y); // eval maxf(midp,heap_copy), go to minimum prec on y to get a thin enclosure
-//                cout<<"light solver pass for midpoint"<<endl;
-//                cout<<" res found for midp "<<midp<<" : "<<resmidp<<endl;
+                nb_iter = choose_nbiter(true);   // need to be great enough so the minimum precision on y is reached
+                resmidp = lsolve.optimize(&(heap_copy),&(midp),objective_function,nb_iter,loup,x_subcells[i]->fmax,prec_y); // eval maxf(midp,heap_copy), go to minimum prec on y to get a thin enclosure
 
                 if(resmidp != Interval::EMPTY_SET && resmidp.ub()<loup) { // update best current solution
                     loup = resmidp.ub();
@@ -141,3 +113,52 @@ void minimax_solver::solve(IntervalVector x_box_ini, IntervalVector y_box_ini, d
         cout<<"minimum precision on x has been reached"<<endl;
     cout<<"result found in "<<Timer::VIRTUAL_TIMELAPSE()<<endl;
 }
+
+Heap<y_heap_elem> minimax_solver::init_y_heap(const IntervalVector& box) {
+    y_heap_costfub y_heap_costfunc; // element sorted w.r.t upper bound of objectif function evaluation
+    Heap<y_heap_elem> y_heap_ini(y_heap_costfunc);  // y heap /!\ This heap will be copy, cannot used DoubleHeap until a copy function is available
+    y_heap_elem* y_ini = new y_heap_elem(box,Interval::ALL_REALS,0); // first cell of y heap
+    y_heap_ini.push(y_ini); // push element in y_heap, y_heap is initialized
+    return y_heap_ini;
+}
+
+Heap<x_heap_elem> minimax_solver::init_x_heap(const IntervalVector& box,Heap<y_heap_elem> y_heap_ini) {
+    x_heap_costflb x_heap_costfunc;
+    Heap<x_heap_elem> x_heap(x_heap_costfunc);
+    x_heap_elem *x_ini = new x_heap_elem(box,y_heap_ini,Interval::ALL_REALS);
+    x_heap.push(x_ini);
+    return x_heap;
+}
+
+double minimax_solver::compute_min_prec(const IntervalVector& x_box_ini, const IntervalVector& x_box,const IntervalVector& y_box_ini,double prec_y) {
+    double ratio(0);
+    for(unsigned r=0;r<x_box_ini.size();r++)
+        ratio += (x_box_ini[r]).diam()/(x_box[r]).diam();
+    return ratio/y_box_ini.volume()>prec_y?ratio/(10*y_box_ini.volume()):prec_y;
+}
+
+double minimax_solver::choose_nbiter(bool midpoint_eval) {
+    if(!midpoint_eval)
+        return 10;
+    else
+        return 1000000000;
+}
+
+IntervalVector minimax_solver::get_feasible_point(const IntervalVector& x_box) {
+    Vector midp = x_box.mid(); // get midpoint of x box,
+    IntervalVector midp_int = IntervalVector(midp);
+    if(x_ctc_inv != 0)
+    {
+        x_ctc_inv->contract(midp_int); // check if midpoint verity the constraint on x
+        if(midp_int.is_empty()) { //midp does not verify x constraint
+            return IntervalVector(midp);
+        }
+        else
+           return IntervalVector(1,Interval::EMPTY_SET);
+    }
+    else
+        return IntervalVector(midp);
+}
+
+
+

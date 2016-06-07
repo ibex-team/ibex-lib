@@ -27,6 +27,13 @@ public:
      *            -stop_prec: stop criterion
      * */
     void solve(IntervalVector x_ini,IntervalVector y_ini,double prec_x,double prec_y,double stop_prec);
+private:
+    Heap<y_heap_elem> init_y_heap(const IntervalVector& box);
+    Heap<x_heap_elem> init_x_heap(const IntervalVector& box,Heap<y_heap_elem> y_heap_ini);
+    double compute_min_prec(const IntervalVector& x_box_ini, const IntervalVector& x_box,const IntervalVector& y_box_ini,double prec_y);
+    double choose_nbiter(bool midpoint_eval);
+    IntervalVector get_feasible_point(const IntervalVector& x_box);
+
 };
 
 
