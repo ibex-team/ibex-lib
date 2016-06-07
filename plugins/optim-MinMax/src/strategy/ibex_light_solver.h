@@ -33,9 +33,13 @@ public:
      *         -best_max: minimum found for max(f), best current solution
      *         -fmax: enclosure of max(f(x_box),y_heap), this result is inherited from early computation with a box containing x_box
      *         -min_prec: minimum size of boxes in y_heap
+     *         -is_midp: true if optimize run with x midpoint eval, false else
      * */
-    Interval optimize(Heap<y_heap_elem> * y_heap, IntervalVector *x_box,Function * objective_function, unsigned nb_iter,double best_max,Interval fmax, double min_prec);
+    Interval optimize(Heap<y_heap_elem> * y_heap, IntervalVector *x_box,Function * objective_function, unsigned nb_iter,double best_max,Interval fmax, double min_prec,bool is_midp);
 
+    /* contract xy_box and xy_box_ctc w.r.t max_ctc contractor
+     * */
+    void contract_best_max_cst( Ctc* max_ctc,IntervalVector* xy_box,IntervalVector* xy_box_ctc,y_heap_elem* elem);
 };
 
 /* returns a box composed of x_box(not modified) and the middle of y_box, needed for midpoint evaluation
@@ -44,5 +48,12 @@ public:
  */
 IntervalVector get_mid_y(const IntervalVector& xy_box,const IntervalVector& y_box);
 
+/* set y part of xy_box with y_box
+ * */
+void init_xy_box(IntervalVector* xy_box,const IntervalVector & y_box);
+
+/* add elements of Heap_save into y_heap
+ * */
+void fill_y_heap(Heap<y_heap_elem>* y_heap,vector<y_heap_elem*>* Heap_save);
 
 #endif

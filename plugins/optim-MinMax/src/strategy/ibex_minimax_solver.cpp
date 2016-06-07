@@ -71,7 +71,7 @@ void minimax_solver::solve(IntervalVector x_box_ini, IntervalVector y_box_ini, d
             //************ evaluation of f(x,y_heap) *****************
             min_prec_light_solver = compute_min_prec(x_box_ini,x_subcells[i]->box,y_box_ini,prec_y);
             nb_iter = choose_nbiter(false);
-            x_subcells[i]->fmax = lsolve.optimize(&(x_subcells[i]->y_heap),&(x_subcells[i]->box),objective_function,nb_iter,loup,x_subcells[i]->fmax,min_prec_light_solver);
+            x_subcells[i]->fmax = lsolve.optimize(&(x_subcells[i]->y_heap),&(x_subcells[i]->box),objective_function,nb_iter,loup,x_subcells[i]->fmax,min_prec_light_solver,false);
             if(x_subcells[i]->fmax == Interval::EMPTY_SET) { // certified that x box does not contains the solution
                 vol_rejected += x_subcells[i]->box.volume();
                 x_subcells[i]->y_heap.flush();
@@ -85,7 +85,7 @@ void minimax_solver::solve(IntervalVector x_box_ini, IntervalVector y_box_ini, d
             {
                 Heap<y_heap_elem> heap_copy(x_subcells[i]->y_heap); // need to copy the heap for midpoint eval so the y_heap of x box is not modify
                 nb_iter = choose_nbiter(true);   // need to be great enough so the minimum precision on y is reached
-                resmidp = lsolve.optimize(&(heap_copy),&(midp),objective_function,nb_iter,loup,x_subcells[i]->fmax,prec_y); // eval maxf(midp,heap_copy), go to minimum prec on y to get a thin enclosure
+                resmidp = lsolve.optimize(&(heap_copy),&(midp),objective_function,nb_iter,loup,x_subcells[i]->fmax,prec_y,true); // eval maxf(midp,heap_copy), go to minimum prec on y to get a thin enclosure
 
                 if(resmidp != Interval::EMPTY_SET && resmidp.ub()<loup) { // update best current solution
                     loup = resmidp.ub();
