@@ -9,6 +9,7 @@
 #include "ibex_Ctc.h"
 #include "ibex_CtcFwdBwd.h"
 #include "ibex_LargestFirst.h"
+#include "ibex_NormalizedSystem.h"
 
 
 using namespace std;
@@ -16,12 +17,12 @@ using namespace ibex;
 
 class light_solver{
 public:
-    Ctc *ctc_xy; // contractor relative to constraints on x and y
-    Ctc *ctc_xy_inv; // contractor relative to the inverse of constraints on x and y
+    Ctc * ctc_xy; //contractor for constraints on xy
+    NormalizedSystem *y_sys; // contractor relative to constraints on x and y
     double abs_min_prec; // absolute minimum prec bissection on y
 
     /* Constructor*/
-    light_solver(Ctc * ctc_xy,Ctc * ctc_xy_inv);
+    light_solver(Ctc * ctc_xy,NormalizedSystem *y_sys);
 
     /* returns an enclosure of the maximum of the objective function: max f(x,y)
      * modifies y_heap inherited from father box
@@ -40,6 +41,14 @@ public:
     /* contract xy_box and xy_box_ctc w.r.t max_ctc contractor
      * */
     void contract_best_max_cst( Ctc* max_ctc,IntervalVector* xy_box,IntervalVector* xy_box_ctc,y_heap_elem* elem);
+
+    /* return a feasible point in y_box w.r.t constraints on xy
+     *  */
+    IntervalVector get_feasible_point(const IntervalVector& xy_box,y_heap_elem * elem);
+
+    /* return 0 if box is non feasible w.r.t constraints on xy, 1 if not known, 2 if box is entierly feasible
+     * */
+    int check_constraints(const IntervalVector& box);
 };
 
 /* returns a box composed of x_box(not modified) and the middle of y_box, needed for midpoint evaluation

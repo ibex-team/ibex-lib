@@ -15,6 +15,7 @@ protected:
     IntervalVector box;
     Heap<y_heap_elem> y_heap; // y_heap inherited from father of box
     Interval fmax; // enclosure of maximum of the objective function
+    double pu;
 
     x_heap_elem(IntervalVector box,Heap<y_heap_elem> heap,Interval fmax);
     pair<x_heap_elem*,x_heap_elem*> bisect(IntervalVector box1,IntervalVector box2);

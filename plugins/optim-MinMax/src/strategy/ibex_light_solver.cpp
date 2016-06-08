@@ -2,7 +2,7 @@
 
 
 
-light_solver::light_solver(Ctc * ctc_xy,Ctc * ctc_xy_inv): ctc_xy(ctc_xy),ctc_xy_inv(ctc_xy_inv)
+light_solver::light_solver(Ctc * ctc_xy,NormalizedSystem *y_sys): ctc_xy(ctc_xy),y_sys(y_sys)
 {}
 
 
@@ -28,7 +28,7 @@ Interval light_solver::optimize(Heap<y_heap_elem> * y_heap,IntervalVector* x_box
     LargestFirst lf; // bissector
     pair<y_heap_elem*,y_heap_elem*> subcells_pair;
     y_heap_elem *subcells[2];
-    IntervalVector mid_y_box(xy_box.size()),mid_y_box_cp(xy_box.size());
+    IntervalVector mid_y_box(xy_box.size());
     Interval midres;
     double uplo(fmax.lb()),loup(fmax.ub());
     bool midp_hit(false);// true if at least 1 y found such as constraint xy is respected
@@ -48,7 +48,9 @@ Interval light_solver::optimize(Heap<y_heap_elem> * y_heap,IntervalVector* x_box
         for(unsigned j=0;j<=1;j++) { // deals with the two subcells
             init_xy_box(&xy_box,subcells[j]->box);
             xy_box_ctc = xy_box;
-            if(ctc_xy != 0) // there is a constraint on x and y
+            if(check_constraints(subcells[j]->box)==2)
+                subcells[j]->pu=1;
+            if(ctc_xy != 0 && subcells[j]->pu != 1) // there is a constraint on x and y
             {
                 ctc_xy->contract(xy_box_ctc);
                 if(xy_box_ctc.is_empty()) { // constraint on x and y not respected, move on.
@@ -57,12 +59,9 @@ Interval light_solver::optimize(Heap<y_heap_elem> * y_heap,IntervalVector* x_box
                 }
             }
             //mid point test (TO DO: replace with local optim to find a better point than midpoint)
-            mid_y_box = get_mid_y(xy_box,subcells[j]->box); // get the box (x,mid(y))
-            if( (ctc_xy_inv!=NULL) && (subcells[j]->pu != 1)) { // constraint on xy exist and is not proved to be satisfied
-                 mid_y_box_cp = mid_y_box;
-                ctc_xy_inv->contract(mid_y_box_cp);
-            }
-            if(ctc_xy_inv == NULL || mid_y_box_cp.is_empty() || (subcells[j]->pu == 1)) {// x y constraint respected for all x and mid(y), mid_y_box is a candidate for evaluation
+
+            mid_y_box = get_feasible_point(xy_box,subcells[j]);
+            if(ctc_xy == NULL || !mid_y_box.is_empty() || (subcells[j]->pu == 1)) {// x y constraint respected for all x and mid(y), mid_y_box is a candidate for evaluation
                 midp_hit = true;
                 midres = objective_function->eval(mid_y_box);
                 if (midres.lb()>best_max ) { // exists y such as constraint is respected and f(x,y)>best max, x does not contains the solution
@@ -76,15 +75,6 @@ Interval light_solver::optimize(Heap<y_heap_elem> * y_heap,IntervalVector* x_box
                     uplo = midres.lb();
                 }
             }
-            //*********** this part may be not needed, check if all xy box respect constraint, if so no need to contract subboxes of xy later *********
-            if(ctc_xy_inv!=NULL && (subcells[j]->pu != 1)) { // constraint on xy exist and is not proved to be satisfied
-                xy_box_cp = xy_box;
-                ctc_xy_inv->contract(xy_box_cp);
-                if(xy_box_cp.is_empty())
-                    subcells[j]->pu =1;
-
-            }
-            //*****************************************
 
             //************ part below add a contraction w.r.t f(x,y)<best_max, this part may not be efficient on every problem ******************************
 
@@ -135,6 +125,30 @@ void light_solver::contract_best_max_cst(Ctc* max_ctc,IntervalVector* xy_box,Int
     else
         max_ctc->contract(*xy_box_ctc); // cannot keep x contraction as it is not certified that xy constraint is respected forall x and y in xy_box, xy_box_ctc contracted instead
     return;
+}
+
+IntervalVector light_solver::get_feasible_point(const IntervalVector& xy_box,y_heap_elem * elem) {
+    IntervalVector mid_y_box = get_mid_y(xy_box,elem->box); // get the box (x,mid(y))
+    if( (y_sys!=0) && (elem->pu != 1)) { // constraint on xy exist and is not proved to be satisfied
+        int res = check_constraints(mid_y_box);
+        if(res == 0 ||res == 1)
+            return IntervalVector(1,Interval::EMPTY_SET);
+    }
+    return mid_y_box;
+}
+
+int light_solver::check_constraints(const IntervalVector& box) {
+    int res(2);
+    Interval int_res;
+    for(unsigned i=0;i<y_sys->func.size();i++) {
+        int_res =  y_sys->func[i].eval(box);
+        if(int_res.lb()>=0)
+            return 0;
+        else if(int_res.ub()>=0)
+            res = 1;
+    }
+    return res;
+
 }
 
 
