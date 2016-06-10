@@ -305,17 +305,16 @@ void ExprSimplify::visit(const ExprApply& e) {
 }
 
 void ExprSimplify::visit(const ExprPower& e) {
-// TODO
 
-	//	if (fold) {
-//			const ExprConstant* c=dynamic_cast<const ExprConstant*>(&EXPR);
-//			if (c) {
-//				/* evaluate the constant expression on-the-fly */
-//				clone.insert(e, &ExprConstant::new_(pow(c->get(),e.expon)));
-//				return;
-//			}
-//		}
-//		mark(e.expr);
+	const ExprNode& expr=get(e.expr, idx);
+
+	if (is_cst(expr))
+		/* evaluate the constant expression on-the-fly */
+		insert(e, ExprConstant::new_(pow(to_cst(expr),e.expon)));
+	else if (&e.expr == &expr)  // if nothing changed
+		insert(e, e);
+	else
+		insert(e, ExprPower::new_(expr,e.expon));
 }
 
 void ExprSimplify::visit(const ExprMax& e)   { binary(e,max); }
