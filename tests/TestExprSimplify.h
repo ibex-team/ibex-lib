@@ -30,8 +30,11 @@ public:
 	CPPUNIT_TEST(mul_zero);
 	CPPUNIT_TEST(mul_one);
 	CPPUNIT_TEST(div_one);
-	CPPUNIT_TEST(index_var);
+	CPPUNIT_TEST(index_var1);
+	CPPUNIT_TEST(index_var2);
+	CPPUNIT_TEST(index_var3);
 	CPPUNIT_TEST(index_add);
+	CPPUNIT_TEST(index_transpose);
 
 	CPPUNIT_TEST_SUITE_END();
 
@@ -41,8 +44,11 @@ public:
 	void mul_zero();
 	void mul_one();
 	void div_one();
-	void index_var();
+	void index_var1();
+	void index_var2();
+	void index_var3();
 	void index_add();
+	void index_transpose();
 
 };
 

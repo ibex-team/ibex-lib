@@ -322,7 +322,21 @@ void ExprSimplify::visit(const ExprMax& e)   { binary(e,max); }
 void ExprSimplify::visit(const ExprMin& e)   { binary(e,min); }
 void ExprSimplify::visit(const ExprAtan2& e) { binary(e,atan2); }
 void ExprSimplify::visit(const ExprMinus& e) { unary(e,operator-); }
-void ExprSimplify::visit(const ExprTrans& e) { unary(e,transpose); }
+
+void ExprSimplify::visit(const ExprTrans& e) {
+	const ExprNode& expr=get(e.expr, idx.transpose());
+
+	if (is_cst(expr))
+		/* evaluate the constant expression on-the-fly */
+		insert(e, ExprConstant::new_(transpose(to_cst(expr))));
+	else if (expr.dim.is_scalar())
+		insert(e,expr);
+	else if (&e.expr == &expr)  // if nothing changed
+		insert(e, e);
+	else
+		insert(e, ExprTrans::new_(expr));
+}
+
 void ExprSimplify::visit(const ExprSign& e)  { unary(e,sign); }
 void ExprSimplify::visit(const ExprAbs& e)   { unary(e,abs); }
 void ExprSimplify::visit(const ExprSqr& e)   { unary(e,sqr); }

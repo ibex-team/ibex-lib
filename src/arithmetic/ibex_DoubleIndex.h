@@ -38,6 +38,9 @@ public:
 	DoubleIndex(const Dim& d, int first_row, int last_row, int first_col, int last_col);
 
 	DoubleIndex(const DoubleIndex&);
+
+	DoubleIndex transpose() const;
+
 	long long hash() const;
 	int row() const;
 	int col() const;
@@ -132,6 +135,10 @@ inline DoubleIndex::DoubleIndex(const Dim& d, int i1, int i2, int j1, int j2) :
 inline DoubleIndex::DoubleIndex(const DoubleIndex& idx) :
 		// note: C++ would do it implicitly.
 		dim(idx.dim), r1(idx.r1), r2(idx.r2), c1(idx.c1), c2(idx.c2) {
+}
+
+inline DoubleIndex DoubleIndex::transpose() const {
+	return DoubleIndex(dim.transpose_dim(), c1,c2,r1,r2);
 }
 
 inline long long DoubleIndex::hash() const {

@@ -131,8 +131,6 @@ void TestParser::const_var_idx() {
 		CPPUNIT_ASSERT(sys.box.subvector(i,i+5)==IntervalVector(6,Interval::NEG_REALS));
 		i+=6;
 
-		cout << sys << endl;
-
 	} catch(SyntaxError& e) {
 		cout << e << endl;
 		CPPUNIT_ASSERT(false);
