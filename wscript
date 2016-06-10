@@ -90,7 +90,7 @@ def configure (conf):
 		conf.define ("NDEBUG", 1)
 	for f in flags.split():
 		if conf.check_cxx (cxxflags = f, mandatory = False):
-			env.append_unique ("CXXFLAGS", f)
+			env.append_unique ("CXXFLAGS_IBEX_DEPS", f)
 
 	# build as shared lib
 	if conf.options.ENABLE_SHARED:
