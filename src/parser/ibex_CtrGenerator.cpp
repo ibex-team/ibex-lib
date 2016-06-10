@@ -50,7 +50,7 @@ void CtrGenerator::visit(const P_OneConstraint& c) {
 //	ctrs->push_back(new NumConstraint(dest_vars2, ExprCtr(e2,c.op)));
 
 	try {
-		ExprCtr* e=new ExprCtr(c.expr.generate(),c.op);
+		ExprCtr* e=new ExprCtr(c.expr.generate().simplify(),c.op);
 		//cout << "[parser] generated ctr: " << *e << endl;
 		ctrs.push_back(e);
 	} catch(DimException& e) {

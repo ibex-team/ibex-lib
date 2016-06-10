@@ -136,8 +136,13 @@ ExprGenerator::ExprGenerator() : scope(scopes().top()) {
 
 Domain ExprGenerator::generate_cst(const P_ExprNode& y) {
 	visit(y);
+	Domain d=y.lab->domain();
 
-	return y.lab->domain();
+	// cleanup important in case of the same expression
+	// evaluated several times in different context
+	// (iterator values changing)
+	y.cleanup();
+	return d;
 }
 
 int ExprGenerator::generate_int(const P_ExprNode& y) {
@@ -145,16 +150,22 @@ int ExprGenerator::generate_int(const P_ExprNode& y) {
 }
 
 double ExprGenerator::generate_dbl(const P_ExprNode& y) {
-	Domain d=generate_cst(y);
+	visit(y);
+	const Domain& d=y.lab->domain();
+	double value;
 
 	switch(((LabelConst*) y.lab)->num_type) {
 	case LabelConst::NEG_INF:
-		return NEG_INFINITY;
+		value=NEG_INFINITY;
+		break;
 	case LabelConst::POS_INF:
-		return POS_INFINITY;
+		value=POS_INFINITY;
+		break;
 	default:
-		return to_double(d);
+		value=to_double(d);
 	}
+	y.cleanup();
+	return value;
 }
 
 const ExprNode& ExprGenerator::generate(const P_ExprNode& y) {
@@ -170,6 +181,12 @@ const ExprNode& ExprGenerator::generate(const P_ExprNode& y) {
 //	}
 
 	visit(y);
+	const ExprNode& e=y.lab->node();
+
+	// cleanup important in case of the same expression
+	// evaluated several times in different context
+	// (iterator values changing)
+	y.cleanup();
 
 	// destroy unused constants
 //	for (int i=0; i<m; i++) {
@@ -179,7 +196,7 @@ const ExprNode& ExprGenerator::generate(const P_ExprNode& y) {
 //			delete &csts[i];
 //	}
 
-	return y.lab->node();
+	return e;
 }
 
 void ExprGenerator::visit(const P_ExprNode& e) {

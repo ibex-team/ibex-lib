@@ -167,15 +167,11 @@ void ExprSimplify::visit(const ExprVector& e) {
 }
 
 void ExprSimplify::visit(const ExprIndex& e) {
-	DoubleIndex e_idx;
-	if (!idx.all()) {
-		assert(e.index.all_cols());
-		assert(idx.all_rows());
-		e_idx=DoubleIndex(e.expr.dim,e.index.first_row(),e.index.last_row(),
-				idx.first_col(),idx.last_col());
-	} else {
-		e_idx=e.index;
-	}
+	DoubleIndex e_idx=DoubleIndex(e.expr.dim,
+			e.index.first_row()+idx.first_row(),
+			e.index.first_row()+idx.last_row(),
+			e.index.first_col()+idx.first_col(),
+			e.index.first_col()+idx.last_col());
 
 	insert(e, get(e.expr,e_idx));
 }

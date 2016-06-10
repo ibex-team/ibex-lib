@@ -27,11 +27,18 @@ P_ExprNode::~P_ExprNode() {
 	for (int i=0; i<arg.size(); i++) {
 		delete &arg[i];
 	}
-	delete lab;
 }
 
 const ExprNode& P_ExprNode::generate() const {
 	return ExprGenerator().generate(*this);
+}
+
+void P_ExprNode::cleanup() const {
+	for (int i=0; i<arg.size(); i++) {
+		arg[i].cleanup();
+	}
+	delete lab;
+	lab=NULL;
 }
 
 int P_ExprNode::_2int() const {

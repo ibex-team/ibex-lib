@@ -256,6 +256,7 @@ void TestParser::loop01() {
 		double b = 2;
 		int c=0;
 		double error=1e-15;
+
 		for (int i=1;i<=3;i++) {
 		    for (int j=1; j<=i; j++) {
 
@@ -267,10 +268,13 @@ void TestParser::loop01() {
 		    }
 
 		    for (int j=1; j<=i; j++) {
-		    	const ExprSub& sub=(const ExprSub&) sys.ctrs[c++].f.expr();
-		    	const ExprConstant& cst=(const ExprConstant&) sub.right;
-		    	CPPUNIT_ASSERT_DOUBLES_EQUAL(i+j-b,cst.get_value().mid(),error);
-
+		    	if (i+j-b==0) {
+		    		CPPUNIT_ASSERT(sameExpr(sys.ctrs[c++].f.expr(),"x"));
+		    	} else {
+		    		const ExprSub& sub=(const ExprSub&) sys.ctrs[c++].f.expr();
+		    		const ExprConstant& cst=(const ExprConstant&) sub.right;
+		    		CPPUNIT_ASSERT_DOUBLES_EQUAL(i+j-b,cst.get_value().mid(),error);
+		    	}
 		    }
 		}
 

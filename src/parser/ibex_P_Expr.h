@@ -98,6 +98,9 @@ public:
 	// Generate the expression with the current scope.
 	const ExprNode& generate() const;
 
+	// destroy labels recursively
+	void cleanup() const;
+
 	int _2int() const;
 
 	double _2dbl() const;
