@@ -109,6 +109,10 @@ void Function::hansen_matrix(const IntervalVector& box, IntervalMatrix& H) const
 		//var=tab[i];
 		x[var]=box[var];
 		jacobian(x,J);
+                if (J.is_empty()) {
+                    H.set_empty();
+                    return;
+                }
 		H.set_col(var,J.col(var));
 	}
 
@@ -132,6 +136,10 @@ void Function::hansen_matrix(const IntervalVector& box, IntervalMatrix& H, const
 		//var=tab[i];
 		x[var]=var_box[var];
 		jacobian(set.full_box(x,param_box),J,set);
+                if (J.is_empty()) {
+                    H.set_empty();
+                    return;
+                }
 		H.set_col(var,J.col(var));
 	}
 }
