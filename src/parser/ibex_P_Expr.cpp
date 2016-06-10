@@ -34,6 +34,7 @@ const ExprNode& P_ExprNode::generate() const {
 }
 
 void P_ExprNode::cleanup() const {
+	if (lab==NULL) return;
 	for (int i=0; i<arg.size(); i++) {
 		arg[i].cleanup();
 	}
@@ -92,6 +93,14 @@ P_ExprCstSymbol::P_ExprCstSymbol(const char* name) :
 
 
 P_ExprCstSymbol::~P_ExprCstSymbol() {
+	free((char*) name);
+}
+
+P_ExprTmpSymbol::P_ExprTmpSymbol(const char* name) :
+				P_ExprNode(TMP_SYMBOL), name(strdup(name)) { }
+
+
+P_ExprTmpSymbol::~P_ExprTmpSymbol() {
 	free((char*) name);
 }
 

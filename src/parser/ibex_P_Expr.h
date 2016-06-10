@@ -59,6 +59,7 @@ public:
 		INFTY,		   // infinity constant
 		VAR_SYMBOL,    // variable symbol
 		CST_SYMBOL,    // constant symbol
+		TMP_SYMBOL,    // function temporary symbol
 		CST,           // numeric constant
 		ITER,          // iterator symbol
 		IDX,           // one index (i)
@@ -180,6 +181,21 @@ public:
 	P_ExprCstSymbol(const char* name);
 
 	~P_ExprCstSymbol();
+
+	virtual void acceptVisitor(P_ExprVisitor& v) const { v.visit(*this); }
+
+	const char* name;
+};
+
+/**
+ * \brief Function temporary symbol
+ */
+class P_ExprTmpSymbol : public P_ExprNode {
+public:
+
+	P_ExprTmpSymbol(const char* name);
+
+	~P_ExprTmpSymbol();
 
 	virtual void acceptVisitor(P_ExprVisitor& v) const { v.visit(*this); }
 

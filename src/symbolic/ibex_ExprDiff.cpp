@@ -194,51 +194,50 @@ void ExprDiff::visit(const ExprIndex& i) {
 		return;
 	}
 
-	Array<const ExprNode> row_vec;
-	int c=0; // argument counter for the row vector
+	vector<const ExprNode*> row_vec;
 
-	int n=i.dim.nb_rows();
+	int n=i.expr.dim.nb_rows();
 	int m=i.index.first_col();
 
 	if (m>0) { // fill with zeros the left part of the matrix expression
 		// will be automatically transformed to a vector (if n=1) or a scalar (n=m=1)
-		row_vec.set_ref(c++, ExprConstant::new_matrix(Matrix::zeros(n,m)));
+		row_vec.push_back(&ExprConstant::new_matrix(Matrix::zeros(n,m)));
 	}
 
-	int r=0; // argument counter for the column vector
 	n=i.index.first_row();
 	m=i.index.nb_cols();
 
-	Array<const ExprNode> col_vec;
+	vector<const ExprNode*> col_vec;
 	if (n>0) { // fill with zeros on the top
 		// will be automatically transformed to a vector (if n=1) or a scalar (n=m=1)
-		col_vec.set_ref(r++, ExprConstant::new_matrix(Matrix::zeros(n,m)));
+		col_vec.push_back(&ExprConstant::new_matrix(Matrix::zeros(n,m)));
 	}
 
-	col_vec.set_ref(r++,*(grad[i]));
+	col_vec.push_back(grad[i]);
 
-	n=i.dim.nb_rows() - i.index.last_row() -1;
+	n=i.expr.dim.nb_rows() - i.index.last_row() -1;
 	if (n>0) { // fill with zeros on the right
-		col_vec.set_ref(r++, ExprConstant::new_matrix(Matrix::zeros(n,m)));
+		col_vec.push_back(&ExprConstant::new_matrix(Matrix::zeros(n,m)));
 	}
 
-	if (col_vec.size()==0) {
+	if (col_vec.size()==1) {
 		assert(i.index.all_rows());
-		row_vec.set_ref(c++, col_vec[0]);
+		row_vec.push_back(col_vec.back());
 	} else {
-		row_vec.set_ref(c++, ExprVector::new_(col_vec,false));
+		row_vec.push_back(&ExprVector::new_(col_vec,false));
 	}
 
-	m=i.dim.nb_cols() - i.index.last_col() -1;
+	n=i.expr.dim.nb_rows();
+	m=i.expr.dim.nb_cols() - i.index.last_col() -1;
 	if (m>0) { // fill with zeros on the bottom
-		row_vec.set_ref(r++, ExprConstant::new_matrix(Matrix::zeros(n,m)));
+		row_vec.push_back(&ExprConstant::new_matrix(Matrix::zeros(n,m)));
 	}
 
-	if (row_vec.size()==0) {
+	if (row_vec.size()==1) {
 		assert(i.index.all_cols());
-		add_grad_expr(i,row_vec[0]);
+		add_grad_expr(i.expr,*row_vec.back());
 	} else {
-		add_grad_expr(i, ExprVector::new_(row_vec,true));
+		add_grad_expr(i.expr, ExprVector::new_(row_vec,true));
 	}
 }
 

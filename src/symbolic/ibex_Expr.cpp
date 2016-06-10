@@ -156,7 +156,9 @@ ExprNAryOp::ExprNAryOp(const Array<const ExprNode>& _args, const Dim& dim) :
 
 static Array<const Dim> dims(const Array<const ExprNode>& comp) {
 	Array<const Dim> a(comp.size());
-	for (int i=0; i<comp.size(); i++) a.set_ref(i,comp[i].dim);
+	for (int i=0; i<comp.size(); i++) {
+		a.set_ref(i,comp[i].dim);
+	}
 	return a;
 }
 

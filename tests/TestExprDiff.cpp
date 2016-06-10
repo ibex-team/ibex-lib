@@ -37,6 +37,7 @@ void TestExprDiff::poly01() {
 	const ExprVector* v=dynamic_cast<const ExprVector*>(&df.expr());
 	CPPUNIT_ASSERT(v);
 	CPPUNIT_ASSERT(v->dim.type()==Dim::ROW_VECTOR);
+
 	CPPUNIT_ASSERT(sameExpr(v->arg(0),"((2*x)+(2*y))")
 			|| sameExpr(v->arg(0),"((2*y)+(2*x))")
 			||sameExpr(v->arg(0),"(([2,2]*x)+(2*y))")
@@ -46,9 +47,10 @@ void TestExprDiff::poly01() {
 			|| sameExpr(v->arg(0),"((2*x)+([2,2]*y))")
 			|| sameExpr(v->arg(0),"(([2,2]*x)+([2,2]*y))"));
 	CPPUNIT_ASSERT(sameExpr(v->arg(1),"((2*x)+(3*y^2))")
-			||sameExpr(v->arg(1),"(([2,2]*x)+([3,3]*y^2))")
-			||sameExpr(v->arg(1),"((2*x)+([3,3]*y^2))")
-			||sameExpr(v->arg(1),"(([2,2]*x)+(3*y^2))"));
+			|| sameExpr(v->arg(1),"(([2,2]*x)+([3,3]*y^2))")
+			|| sameExpr(v->arg(1),"((2*x)+([3,3]*y^2))")
+			|| sameExpr(v->arg(1),"(([2,2]*x)+(3*y^2))")
+	        || sameExpr(v->arg(1),"((x*2)+(3*y^2))"));
 }
 
 void TestExprDiff::one_var_one_func() {
@@ -65,6 +67,7 @@ void TestExprDiff::vec01() {
 	Variable x(4,"x");
 	Function f(x,x[0]+x[3]);
 	Function df(f,Function::DIFF);
+
 	const ExprConstant* c=dynamic_cast<const ExprConstant*>(&df.expr());
 	CPPUNIT_ASSERT(c);
 	CPPUNIT_ASSERT(c->dim.type()==Dim::ROW_VECTOR);
@@ -91,6 +94,7 @@ void TestExprDiff::vec03() {
 	const ExprNode& vec1=ExprVector::new_(_vec1,false);
 	Function f(x,vec1[1]);
 	Function df(f,Function::DIFF);
+	cout << df << endl;
 	const ExprConstant* c=dynamic_cast<const ExprConstant*>(&df.expr());
 	CPPUNIT_ASSERT(c);
 	CPPUNIT_ASSERT(c->dim.type()==Dim::ROW_VECTOR);

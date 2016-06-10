@@ -65,14 +65,20 @@ const ExprNode& ExprSimplify::simplify(const ExprNode& e) {
 	ExprSubNodes old_nodes(e);
 	ExprSubNodes new_nodes(result);
 
+	NodeMap<bool> all_nodes;
+
 	for (IBEX_NODE_MAP(CLONE_VEC*)::const_iterator it=idx_clones.begin();
 			it!=idx_clones.end(); it++) {
-
 		for (CLONE_VEC::const_iterator it2=it->second->begin(); it2!=it->second->end(); it2++) {
-			if (!old_nodes.found(*it2->second) && !new_nodes.found(*it2->second))
-				delete it2->second;
+			if (!all_nodes.found(*it2->second))
+				all_nodes.insert(*it2->second,true);
 		}
 		delete it->second;
+	}
+
+	for (IBEX_NODE_MAP(bool)::const_iterator it=all_nodes.begin(); it!=all_nodes.end(); it++) {
+		if (!old_nodes.found(*it->first) && !new_nodes.found(*it->first))
+				delete it->first;
 	}
 
 	idx_clones.clean();
