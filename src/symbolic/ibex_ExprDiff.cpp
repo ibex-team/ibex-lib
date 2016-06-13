@@ -256,17 +256,21 @@ void ExprDiff::visit(const ExprVector& e) {
 	for (int i=0; i<e.nb_args; i++) {
 		if (e.row_vector()) {
 			n=e.arg(i).dim.nb_cols();
-			idx=DoubleIndex::cols(e.dim,0,n-1);
+			idx=DoubleIndex::cols(e.dim,j,j+n-1);
 		} else  {
 			n=e.arg(i).dim.nb_rows();
-			idx=DoubleIndex::rows(e.dim,0,n-1);
+			idx=DoubleIndex::rows(e.dim,j,j+n-1);
 		}
 		j+=n;
+		//cout << "i=" << i << " idx=" << idx << " grad[idx]=" << (*grad[e])[idx] << endl;
 		add_grad_expr(e.arg(i), (*grad[e])[idx]); // needs a call to simplify
 	}
 }
 
 void ExprDiff::visit(const ExprApply& e) {
+
+	/* ******* TODO:old code ********/
+
 	const Function& df=e.func.diff();
 	int k=0;
 	const ExprNode& gradf=df(e.args);
