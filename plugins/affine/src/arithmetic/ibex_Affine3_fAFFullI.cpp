@@ -256,19 +256,54 @@ AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::operator=(double d) {
 
 
 
-/** \brief Return (-x) */
+/**
+ * Code for the particular case:
+ * if the affine form is actif, _n>1  and _n is the size of the affine form
+ * if the set is degenerate, _n = 0 or itv().diam()< AF_EC
+ * if the set is empty, _n = -1
+ * if the set is ]-oo,+oo[, _n = -2 and _ err=]-oo,+oo[
+ * if the set is [a, +oo[ , _n = -3 and _err = [a, +oo[
+ * if the set is ]-oo, a] , _n = -4 and _err = ]-oo, a]
+ *
+ */
+
 template<>
 AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::Aneg() {
-	_elt._center = -_elt._center;
-	_elt._garbage = -_elt._garbage;
-	if (!_elt._rays.empty()) {
-		std::list<std::pair<int,double> >::iterator it = _elt._rays.begin();
-		for (; it != _elt._rays.end(); ++it) {
-			it->second = -(it->second);
+	if (is_actif()) {
+		_elt._center = -_elt._center;
+		_elt._garbage = -_elt._garbage;
+		if (!_elt._rays.empty()) {
+			std::list<std::pair<int,double> >::iterator it = _elt._rays.begin();
+			for (; it != _elt._rays.end(); ++it) {
+				it->second = -(it->second);
+			}
+		}
+	}
+	else {
+		switch(_n) {
+		case -2 : {
+			_elt._center=0;
+			_n = -3;
+			break;
+		}
+		case -3 : {
+			if (_elt._center<0) _elt._center=0;
+			break;
+		}
+		case -4 : {
+			if (_elt._center<0) {
+				_elt._center= -_elt._center;
+			} else {
+				_elt._center = 0;
+			}
+			_n = -3;
+			break;
+		}
 		}
 	}
 	return *this;
 }
+
 
 template<>
 AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::saxpy(double alpha, const AffineMain<AF_fAFFullI>& y, double beta, double ddelta, bool B1, bool B2, bool B3, bool B4) {

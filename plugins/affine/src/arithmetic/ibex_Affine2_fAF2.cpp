@@ -239,6 +239,17 @@ AffineMain<AF_fAF2>& AffineMain<AF_fAF2>::operator=(double d) {
 
 
 
+/**
+ * Code for the particular case:
+ * if the affine form is actif, _n>1  and _n is the size of the affine form
+ * if the set is degenerate, _n = 0 or itv().diam()< AF_EC
+ * if the set is empty, _n = -1
+ * if the set is ]-oo,+oo[, _n = -2 and _ err=]-oo,+oo[
+ * if the set is [a, +oo[ , _n = -3 and _err = [a, +oo[
+ * if the set is ]-oo, a] , _n = -4 and _err = ]-oo, a]
+ *
+ */
+
 template<>
 AffineMain<AF_fAF2>& AffineMain<AF_fAF2>::Aneg() {
 	if (is_actif()) {
@@ -246,6 +257,28 @@ AffineMain<AF_fAF2>& AffineMain<AF_fAF2>::Aneg() {
 			_elt._val[i] = (-_elt._val[i]);
 		}
 
+	}
+	else {
+		switch(_n) {
+		case -2 : {
+			_elt._err=0;
+			_n = -3;
+			break;
+		}
+		case -3 : {
+			if (_elt._err<0) _elt._err=0;
+			break;
+		}
+		case -4 : {
+			if (_elt._err<0) {
+				_elt._err= -_elt._err;
+			} else {
+				_elt._err = 0;
+			}
+			_n = -3;
+			break;
+		}
+		}
 	}
 	return *this;
 }

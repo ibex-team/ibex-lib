@@ -74,6 +74,7 @@ public:
 
 };
 
+CPPUNIT_TEST_SUITE_REGISTRATION(TestAffine2<AF_Default>);
 CPPUNIT_TEST_SUITE_REGISTRATION(TestAffine2<AF_Other>);
 
 

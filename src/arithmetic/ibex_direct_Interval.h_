@@ -367,7 +367,7 @@ inline bool Interval::is_degenerated() const {
 
 inline bool Interval::is_unbounded() const {
 	if (is_empty()) return false;
-	return lb()==NEG_INFINITY || ub()==POS_INFINITY;
+	return lb()<=NEG_INFINITY || ub()>=POS_INFINITY;
 }
 
 inline double Interval::diam() const {

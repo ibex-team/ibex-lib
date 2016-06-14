@@ -1110,25 +1110,51 @@ void TestAffine2<T>::test_tanh() {
 
 
 
+template<class T>
+bool TestAffine2<T>::check_af2 (Function& f, IntervalVector& I){
+	return check_af2(f,I[0]);
+}
 
 template<class T>
 bool TestAffine2<T>::check_af2 (Function& f, Interval& I){
+	double n = 100; // number of try
 	AffineMain<T> faa;
 	Interval itv2;
 	Interval itv;
 
+	AffineEval<T> eval_af(f);
+
+	if (!((I.is_unbounded())||(I.is_degenerated())||(!I.is_bisectable())||(I.is_empty()))){
+	for (double ii= I.lb(); ii<I.ub(); ii += I.diam()/n) {
+		itv2 =f.eval(IntervalVector(1,Interval(ii)));
+
+		itv = eval_af.eval(IntervalVector(1,Interval(ii))).i();
+
+		faa = eval_af.af2.top->i();
+
+		if (!(itv2.is_subset(faa.itv())))
+		{
+			std::cout  << " DEP = "<< ii<< "  "  << f<< std::endl;
+			std::cout  << " RES = "<< itv2 << " /// "<< itv << " ///// " << faa << std::endl;
+	//		std::cout  << " RES = "<< itv2 << " ///// " << faa << std::endl;
+
+			return false;
+		}
+	}
+	}
+
+
 	itv2 =f.eval(IntervalVector(1,I));
 
-	AffineEval<T> eval_af(f);
 	itv = eval_af.eval(IntervalVector(1,I)).i();
 
 	faa = eval_af.af2.top->i();
 
 	if (!(itv2.is_subset(faa.itv())))
 	{
-//		std::cout  << " DEP = "<< I<< "  "  << f<< std::endl;
-//		std::cout  << " RES = "<< itv2 << " /// "<< itv << " ///// " << faa << std::endl;
-	//	std::cout  << " RES = "<< itv2 << " ///// " << faa << std::endl;
+		std::cout  << " DEP = "<< I<< "  "  << f<< std::endl;
+		std::cout  << " RES = "<< itv2 << " /// "<< itv << " ///// " << faa << std::endl;
+//		std::cout  << " RES = "<< itv2 << " ///// " << faa << std::endl;
 
 		return false;
 	}
@@ -1163,58 +1189,4 @@ bool TestAffine2<T>::check_af2 (Function& f, Interval& I){
 
 }
 
-template<class T>
-bool TestAffine2<T>::check_af2 (Function& f, IntervalVector& I){
-
-
-	AffineMain<T> faa;
-	Interval itv;
-	Interval itv2;
-
-	itv2 =f.eval(I);
-
-	AffineEval<T> eval_af(f);
-	itv = eval_af.eval(IntervalVector(1,I)).i();
-
-	faa = eval_af.af2.top->i();
-
-	if (!(itv2.is_subset(faa.itv()))) {
-//		std::cout  << " DEP = "<< I<< "  "  << f<<std::endl;
-//		std::cout  << " RES = "<< itv2 << " /// "<< itv << " ///// " << faa << std::endl;
-		return false;
-	}
-/*	if (faa.size()>0) {
-		Variable x(I.size());
-
-		const ExprNode *e =& (faa.val(0)+faa.val(1)*(2* (x[0])-(I[0].lb()+I[0].ub()))/(I[0].diam()));
-		for (int i=1; i<I.size(); i++) {
-			e =& ((*e) + (faa.val(i+1)*(2*x[i]-(I[i].lb()+I[i].ub()))/(I[i].diam())));
-		}
-		Function lininf(x,*e);
-
-
-		Function linsup(x, lininf(x)+faa.err().lb());
-
-		Function c_inf(x,lininf(x)+faa.err().lb()  -f(x));
-		Function c_sup(x, f(x) -linsup(x));
-
-		CtcFwdBwd ct1(c_inf,GT,AFFINE2_MODE);
-		CtcFixPoint ft1(ct1,0.1);
-
-		CtcFwdBwd ct2(c_sup,GT,AFFINE2_MODE);
-		CtcFixPoint ft2(ct2,0.1);
-
-		LargestFirst bbb;
-		CellStack ccc;
-		Solver sol1(ft1,bbb, ccc, 0.1 );
-		Solver sol2(ft2,bbb, ccc, 0.1 );
-
-		std::cout<< " PAVING = "<< I.max_diam()<< " ///  " << sol1.solve(I).size() << " et "<<sol2.solve(I).size() << std::endl;
-		//return ((sol1.solve(I).empty()) && (sol2.solve(I).empty()));
-	}
-*/
-
-	return true;
-
-}
 

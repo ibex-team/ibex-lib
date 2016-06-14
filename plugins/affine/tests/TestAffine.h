@@ -240,6 +240,7 @@ public:
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestAffine<AF_Default>);
+CPPUNIT_TEST_SUITE_REGISTRATION(TestAffine<AF_Other>);
 
 //#include "TestAffine.cpp"
 

@@ -59,12 +59,17 @@ typedef AffineMain<AF_Other>  Affine3;
 
 template<class T=AF_Default>
 class AffineMain {
+public:
+
+	typedef enum {
+		AF_Default, AF_Chebyshev, AF_MinRange
+	} Affine_Mode; // ...etc...
+
+
+	static void change_mode(Affine_Mode tt=AF_Default);
 
 private:
 
-	typedef enum {
-		AF_SQRT, AF_EXP, AF_LOG, AF_INV, AF_COS, AF_SIN, AF_TAN, AF_ABS,AF_ACOS, AF_ASIN, AF_ATAN, AF_COSH, AF_SINH, AF_TANH
-	} Affine2_expr; // ...etc...
 
 
 	/** \brief tolerance for default compact procedure  */
@@ -72,6 +77,8 @@ private:
 	static const double AF_EM;
 	static const double AF_EC;
 	static const double AF_EE;
+
+	static bool mode;
 
 	/**
 	 * Code for the particular case:
@@ -106,10 +113,9 @@ private:
 	/**
 	 *\brief compute the chebyshev linearization of an unary operator
 	 */
-	AffineMain& linChebyshev(Affine2_expr num, const Interval& itv);
+	//AffineMain& linChebyshev(Affine2_expr num, const Interval& itv);
 
 public:
-
 
 
 	/** \brief Create an empty affine form. */
@@ -295,6 +301,16 @@ public:
 	AffineMain&  Aabs(const Interval& itv);
 
 
+
+	AffineMain&  Ainv_CH(const Interval& itv);
+	AffineMain&  Asqrt_CH(const Interval& itv);
+	AffineMain&  Aexp_CH(const Interval& itv);
+	AffineMain&  Alog_CH(const Interval& itv);
+
+	AffineMain&  Ainv_MR(const Interval& itv);
+	AffineMain&  Asqrt_MR(const Interval& itv);
+	AffineMain&  Aexp_MR(const Interval& itv);
+	AffineMain&  Alog_MR(const Interval& itv);
 
 	typedef AffineMain<T> SCALAR;
 	typedef AffineMainVector<T> VECTOR;
@@ -578,8 +594,6 @@ AffineMain<T> chi(const AffineMain<T>&  a,const AffineMain<T>&  b,const Interval
 /*============================================ inline implementation ============================================ */
 
 
-#include "ibex_Affine.h_"
-
 
 namespace ibex {
 
@@ -588,10 +602,26 @@ template<class T> const double AffineMain<T>::AF_COMPAC_Tol = 1.e-6;
 template<class T> const double AffineMain<T>::AF_EM = __builtin_powi(2.0, -51);
 template<class T> const double AffineMain<T>::AF_EC = __builtin_powi(2.0, -55);
 template<class T> const double AffineMain<T>::AF_EE = 2.0;
+template<class T> bool AffineMain<T>::mode=true;
+
 
 
 template<class T>
-inline void AffineMain<T>::compact(){ compact(AF_COMPAC_Tol); }
+inline void AffineMain<T>::change_mode(Affine_Mode tt) {
+	switch(tt) {
+	case AF_Default:
+	case AF_Chebyshev: {
+		mode =true;
+		break;
+	}
+	case AF_MinRange:
+		mode =false;
+		break;
+	}
+}
+
+template<class T>
+inline void AffineMain<T>::compact(){	compact(AF_COMPAC_Tol); }
 
 
 template<class T>
@@ -749,7 +779,7 @@ inline AffineMain<T>& AffineMain<T>::operator-=(const AffineMain<T>& x){
 
 template<class T>
 inline AffineMain<T>& AffineMain<T>::operator/=(const AffineMain<T>& x){
-	return *this *= (AffineMain<T>(x).linChebyshev(AF_INV, x.itv()));
+	return *this *= (AffineMain<T>(x).Ainv(x.itv()));
 }
 
 template<class T>
@@ -873,51 +903,26 @@ template<class T>
 inline AffineMain<T> inv(const AffineMain<T>& x){
 	return AffineMain<T>(x).Ainv(x.itv());
 }
-template<class T>
-inline AffineMain<T>& AffineMain<T>::Ainv(const Interval& itv){
-	this->linChebyshev(AF_INV, itv);
-	return *this;
-}
-
 
 template<class T>
 inline AffineMain<T> sqr(const AffineMain<T>& x){
 	return AffineMain<T>(x).Asqr(x.itv());
 }
 
-
 template<class T>
 inline AffineMain<T> sqrt(const AffineMain<T>& x){
 	return AffineMain<T>(x).Asqrt(x.itv());
 }
-template<class T>
-inline AffineMain<T>& AffineMain<T>::Asqrt(const Interval& itv){
-	this->linChebyshev(AF_SQRT, itv);
-	return *this;
-}
-
 
 template<class T>
 inline AffineMain<T> exp(const AffineMain<T>& x){
 	return AffineMain<T>(x).Aexp(x.itv());
 }
-template<class T>
-inline AffineMain<T>& AffineMain<T>::Aexp(const Interval& itv){
-	this->linChebyshev(AF_EXP,itv);
-	return *this;
-}
-
 
 template<class T>
 inline AffineMain<T> log(const AffineMain<T>& x){
 	return AffineMain<T>(x).Alog(x.itv());
 }
-template<class T>
-inline AffineMain<T>& AffineMain<T>::Alog(const Interval& itv){
-	this->linChebyshev(AF_LOG,itv);
-	return *this;
-}
-
 
 template<class T>
 inline AffineMain<T> pow(const AffineMain<T>& x, int n) {
@@ -936,127 +941,60 @@ template<class T>
 inline AffineMain<T> pow(const AffineMain<T> &x, const AffineMain<T> &y){
 	return AffineMain<T>(x).Apow(y.itv(),x.itv());
 }
-template<class T>
-inline AffineMain<T>& AffineMain<T>::Apow(const Interval &y, const Interval& itvx){
-	// return exp(y * log(x));
-	this->linChebyshev(AF_LOG, itvx);
-	*this *= y;
-	this->linChebyshev(AF_EXP, (y*log(itvx)));
-	return *this;
-}
-
 
 template<class T>
 inline AffineMain<T> root(const AffineMain<T>& x, int n) {
 	return AffineMain<T>(x).Aroot(n,x.itv());
 }
 
-
 template<class T>
 inline AffineMain<T> cos(const AffineMain<T>& x){
 	return AffineMain<T>(x).Acos(x.itv());
 }
-template<class T>
-inline AffineMain<T>& AffineMain<T>::Acos(const Interval& itv){
-	this->linChebyshev(AF_COS, itv);
-	return *this;
-}
-
 
 template<class T>
 inline AffineMain<T> sin(const AffineMain<T>& x){
 	return AffineMain<T>(x).Asin(x.itv());
-}
-template<class T>
-inline AffineMain<T>& AffineMain<T>::Asin(const Interval& itv){
-	this->linChebyshev(AF_SIN,itv);
-	return *this;
 }
 
 template<class T>
 inline AffineMain<T> tan(const AffineMain<T>& x){
 	return AffineMain<T>(x).Atan(x.itv());
 }
-template<class T>
-inline AffineMain<T>& AffineMain<T>::Atan(const Interval& itv){
-	this->linChebyshev(AF_TAN,itv);
-	return *this;
-}
-
 
 template<class T>
 inline AffineMain<T> acos(const AffineMain<T>& x){
 	return AffineMain<T>(x).Aacos(x.itv());
 }
-template<class T>
-inline AffineMain<T>& AffineMain<T>::Aacos(const Interval& itv){
-	this->linChebyshev(AF_ACOS, itv);
-	return *this;
-}
-
 
 template<class T>
 inline AffineMain<T> asin(const AffineMain<T>& x){
 	return AffineMain<T>(x).Aasin(x.itv());
 }
-template<class T>
-inline AffineMain<T>& AffineMain<T>::Aasin(const Interval& itv){
-	this->linChebyshev(AF_ASIN, itv);
-	return *this;
-}
-
 
 template<class T>
 inline AffineMain<T> atan(const AffineMain<T>& x){
 	return AffineMain<T>(x).Aatan(x.itv());
 }
-template<class T>
-inline AffineMain<T>& AffineMain<T>::Aatan(const Interval& itv){
-	this->linChebyshev(AF_ATAN, itv);
-	return *this;
-}
-
 
 template<class T>
 inline AffineMain<T> cosh(const AffineMain<T>& x){
 	return AffineMain<T>(x).Acosh(x.itv());
-}
-template<class T>
-inline AffineMain<T>& AffineMain<T>::Acosh(const Interval& itv){
-	this->linChebyshev(AF_COSH, itv);
-	return *this;
 }
 
 template<class T>
 inline AffineMain<T> sinh(const AffineMain<T>& x){
 	return AffineMain<T>(x).Asinh(x.itv());
 }
-template<class T>
-inline AffineMain<T>& AffineMain<T>::Asinh(const Interval& itv){
-	this->linChebyshev(AF_SINH, itv);
-	return *this;
-}
-
 
 template<class T>
 inline AffineMain<T> tanh(const AffineMain<T>& x){
 	return AffineMain<T>(x).Atanh(x.itv());
 }
-template<class T>
-inline AffineMain<T>& AffineMain<T>::Atanh(const Interval& itv){
-	this->linChebyshev(AF_TANH, itv);
-	return *this;
-}
-
 
 template<class T>
 inline AffineMain<T> abs(const AffineMain<T> &x){
 	return AffineMain<T>(x).Aabs(x.itv());
-}
-template<class T>
-inline AffineMain<T>& AffineMain<T>::Aabs(const Interval& itv){
-	this->linChebyshev(AF_ABS, itv);
-	return *this;
 }
 
 
@@ -1140,6 +1078,8 @@ inline AffineMain<T> chi(const Interval&  a,const AffineMain<T>&  b,const Affine
 
 
 
+
+#include "ibex_Affine.h_"
 
 #endif /* IBEX_Affine_H_ */
 
