@@ -39,6 +39,8 @@ public:
 
 	ExprTemplateDomain(const Function& f);
 
+	~ExprTemplateDomain();
+
 	// Why my compiler forces me to redeclare these functions?
 	// ------------------------------------------------------
 	const TemplateDomain<D>& operator[](int i) const;
@@ -85,6 +87,8 @@ public:
 	 */
 	void read_arg_domains(typename D::VECTOR& box) const;
 
+private:
+	ExprTemplateDomain(const ExprTemplateDomain&); // forbidden
 };
 
 typedef ExprTemplateDomain<Interval> ExprDomain;
@@ -139,6 +143,13 @@ TemplateDomain<D>* ExprDomainFactory<D>::init(const ExprTrans& e, TemplateDomain
 template<class D>
 inline ExprTemplateDomain<D>::ExprTemplateDomain(const Function& f) : ExprData<TemplateDomain<D> >(f, ExprDomainFactory<D>()) {
 
+}
+
+template<class D>
+inline ExprTemplateDomain<D>::~ExprTemplateDomain() {
+	for (int i=0; i<ExprData<TemplateDomain<D> >::data.size(); i++) {
+		delete &ExprData<TemplateDomain<D> >::data[i];
+	}
 }
 
 template<class D>

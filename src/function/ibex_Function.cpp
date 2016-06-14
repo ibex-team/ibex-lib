@@ -55,6 +55,13 @@ Function::~Function() {
 		free((char*) name);
 		delete[] symbol_index;
 	}
+
+	if (_eval!=NULL) {
+		delete _eval;
+		delete _hc4revise;
+		delete _grad;
+		delete _inhc4revise;
+	}
 }
 
 void Function::jacobian(const IntervalVector& x, IntervalMatrix& J) const {

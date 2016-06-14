@@ -29,9 +29,10 @@ extern stack<Scope>& scopes();
 void MainGenerator::generate(const P_Source& source, System& sys) {
 
 	SystemFactory fac;
+	Array<const ExprSymbol> vars = scopes().top().var_symbols();
 
 	//================= generate the variables & domains =====================
-	fac.add_var(scopes().top().var_symbols());
+	fac.add_var(vars);
 
 	//============== generate the goal function (if any) =================
 	if (source.goal!=NULL) {
@@ -45,11 +46,16 @@ void MainGenerator::generate(const P_Source& source, System& sys) {
 		vector<ExprCtr*> ctrs = CtrGenerator().generate(*source.ctrs);
 
 		for (vector<ExprCtr*>::const_iterator it=ctrs.begin(); it!=ctrs.end(); it++) {
-			fac.add_ctr(**it);
+			fac.add_ctr(**it); // by copy so...
+			delete *it;        // delete the original
 		}
 	}
 
 	sys.init(fac);
+
+	// delete the original variables
+	for (int i=0;i<vars.size(); i++)
+		delete &vars[i];
 
 	//================= set the domains =====================
 	sys.box.resize(sys.nb_var);

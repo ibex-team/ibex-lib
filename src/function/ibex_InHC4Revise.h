@@ -31,7 +31,7 @@ public:
 	ExprDomain& d;
 
 	Eval p_eval;
-	ExprDomain p;
+	ExprDomain& p;
 
 protected:
 	/**
