@@ -507,7 +507,9 @@ void TestExpr::apply03() {
 
 	CPPUNIT_ASSERT(e.height==2);
 	CPPUNIT_ASSERT(e.size==4);
-	CPPUNIT_ASSERT(sameExpr(e,"(f1(x3,x3)-f2(x3,x3))"));
+
+	CPPUNIT_ASSERT(sameExpr(e,"((x3+x3)-(x3*x3))"));
+	//CPPUNIT_ASSERT(sameExpr(e,"(f1(x3,x3)-f2(x3,x3))"));
 }
 
 void TestExpr::subnodes01() {

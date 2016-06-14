@@ -164,7 +164,7 @@ void TestExprDiff::apply03() {
 	// What should we exactly test? Probably requires expression equivalence
 	// operator but this is known to be a difficult task...
 	//	CPPUNIT_ASSERT(sameExpr(dg.expr(),"((2*df((2*x),(3*y))[0]),(3*df((2*x),(3*y))[1]))"));
-	cout << dg << endl;
+
 	//CPPUNIT_ASSERT(sameExpr(dg.expr(),"((df((2*x),(3*y))[0]*2),(df((2*x),(3*y))[1]*3))"));
 	CPPUNIT_ASSERT(sameExpr(dg.expr(),"((2*(3*y)),(3*(2*x)))"));
 
@@ -231,7 +231,8 @@ void TestExprDiff::apply_mul01() {
 	Function h(x2,y2,f(x2,y2)*g(x2,y2));
 	Function dh(h,Function::DIFF);
 
-	CPPUNIT_ASSERT(sameExpr(dh.expr(),"(((df(x,y)[0]*g(x,y))+(dg(x,y)[0]*f(x,y))),((df(x,y)[1]*g(x,y))+(dg(x,y)[1]*f(x,y))))"));
+	CPPUNIT_ASSERT(sameExpr(dh.expr(),"(y,x)"));
+//	CPPUNIT_ASSERT(sameExpr(dh.expr(),"(((df(x,y)[0]*g(x,y))+(dg(x,y)[0]*f(x,y))),((df(x,y)[1]*g(x,y))+(dg(x,y)[1]*f(x,y))))"));
 }
 
 void TestExprDiff::apply_mul02() {

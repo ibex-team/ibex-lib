@@ -40,9 +40,9 @@ void ExprDiff::add_grad_expr(const ExprNode& node, const ExprNode& _expr_) {
 }
 
 const ExprNode& ExprDiff::diff(const Array<const ExprSymbol>& old_x, const Array<const ExprSymbol>& new_x, const ExprNode& y) {
-
+	const ExprNode* result;
 	if (y.dim.is_scalar()) {
-		return gradient(old_x,new_x,y);
+		result=&gradient(old_x,new_x,y);
 	} else if (y.dim.is_vector()) {
 		if (y.dim.type()==Dim::ROW_VECTOR)
 			ibex_warning("differentiation of a function returning a row vector (considered as a column vector)");
@@ -56,10 +56,12 @@ const ExprNode& ExprDiff::diff(const Array<const ExprSymbol>& old_x, const Array
 			a.set_ref(i,gradient(old_x,new_x,argi));
 			delete &argi;
 		}
-		return ExprVector::new_(a,false);
+		result=&ExprVector::new_(a,false);
 	} else {
 		throw ExprDiffException("differentiation of matrix-valued functions");
 	}
+
+	return result->simplify();
 }
 
 const ExprNode& ExprDiff::gradient(const Array<const ExprSymbol>& old_x, const Array<const ExprSymbol>& new_x, const ExprNode& y) {
@@ -180,7 +182,7 @@ const ExprNode& ExprDiff::gradient(const Array<const ExprSymbol>& old_x, const A
 	if (dX.size()>1) delete &df; // delete the Vector node
 
 	//cout << "   ---> grad:" << result << endl;
-	return ExprSimplify().simplify(result);
+	return result;
 }
 
 void ExprDiff::visit(const ExprNode& e) {
