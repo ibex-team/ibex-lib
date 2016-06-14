@@ -94,7 +94,7 @@ void TestExprDiff::vec03() {
 	const ExprNode& vec1=ExprVector::new_(_vec1,false);
 	Function f(x,vec1[1]);
 	Function df(f,Function::DIFF);
-	cout << df << endl;
+
 	const ExprConstant* c=dynamic_cast<const ExprConstant*>(&df.expr());
 	CPPUNIT_ASSERT(c);
 	CPPUNIT_ASSERT(c->dim.type()==Dim::ROW_VECTOR);
@@ -132,12 +132,13 @@ void TestExprDiff::apply01() {
 	Function f(x,sqr(x),"f");
 	Function g(x,f(3*x));
 	Function dg(g,Function::DIFF);
-	CPPUNIT_ASSERT(sameExpr(f.diff().expr(),"(2*x)")
-			||sameExpr(f.diff().expr(),"([2,2]*x)"));
-	CPPUNIT_ASSERT(sameExpr(dg.expr(),"(3*df((3*x)))")
-			||sameExpr(dg.expr(),"([3,3]*df((3*x)))")
-			||sameExpr(dg.expr(),"(df((3*x))*[3,3])")
-			||sameExpr(dg.expr(),"(df((3*x))*3)"));
+//	CPPUNIT_ASSERT(sameExpr(f.diff().expr(),"(2*x)")
+//			||sameExpr(f.diff().expr(),"([2,2]*x)"));
+//	CPPUNIT_ASSERT(sameExpr(dg.expr(),"(3*df((3*x)))")
+//			||sameExpr(dg.expr(),"([3,3]*df((3*x)))")
+//			||sameExpr(dg.expr(),"(df((3*x))*[3,3])")
+//			||sameExpr(dg.expr(),"(df((3*x))*3)"));
+	CPPUNIT_ASSERT(sameExpr(dg.expr(),"(3*(2*(3*x)))"));
 }
 
 void TestExprDiff::apply02() {
@@ -145,10 +146,11 @@ void TestExprDiff::apply02() {
 	Function f(x,sqr(x),"f");
 	Function g(x,3*f(x));
 	Function dg(g,Function::DIFF);
-	CPPUNIT_ASSERT(sameExpr(dg.expr(),"(df(x)*3)")
-			||sameExpr(dg.expr(),"(df(x)*[3,3])")
-			||sameExpr(dg.expr(),"(3*df(x))")
-			||sameExpr(dg.expr(),"([3,3]*df(x))"));
+//	CPPUNIT_ASSERT(sameExpr(dg.expr(),"(df(x)*3)")
+//			||sameExpr(dg.expr(),"(df(x)*[3,3])")
+//			||sameExpr(dg.expr(),"(3*df(x))")
+//			||sameExpr(dg.expr(),"([3,3]*df(x))"));
+	CPPUNIT_ASSERT(sameExpr(dg.expr(),"(6*x)"));
 }
 
 void TestExprDiff::apply03() {
@@ -162,7 +164,9 @@ void TestExprDiff::apply03() {
 	// What should we exactly test? Probably requires expression equivalence
 	// operator but this is known to be a difficult task...
 	//	CPPUNIT_ASSERT(sameExpr(dg.expr(),"((2*df((2*x),(3*y))[0]),(3*df((2*x),(3*y))[1]))"));
-	CPPUNIT_ASSERT(sameExpr(dg.expr(),"((df((2*x),(3*y))[0]*2),(df((2*x),(3*y))[1]*3))"));
+	cout << dg << endl;
+	//CPPUNIT_ASSERT(sameExpr(dg.expr(),"((df((2*x),(3*y))[0]*2),(df((2*x),(3*y))[1]*3))"));
+	CPPUNIT_ASSERT(sameExpr(dg.expr(),"((2*(3*y)),(3*(2*x)))"));
 
 	double _box[][2]={{1,1},{2,2}};
 	double _dg_box[][2]={{12,12},{6,6}};
@@ -194,8 +198,7 @@ void TestExprDiff::vecimg01() {
 	Function df(f,Function::DIFF);
 	const ExprNode& y=df.expr();
 	const ExprConstant* c = dynamic_cast<const ExprConstant*>(&y);
-
-	CPPUNIT_ASSERT(c);
+	CPPUNIT_ASSERT(c!=NULL);
 	CPPUNIT_ASSERT(c->dim.is_vector());
 	IntervalVector v(3,Interval(1.0));
 	check(c->get_vector_value(),v);
