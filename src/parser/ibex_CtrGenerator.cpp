@@ -14,6 +14,7 @@
 #include "ibex_Function.h"
 #include "ibex_P_ExprGenerator.h"
 #include "ibex_ConstantGenerator.h"
+#include "ibex_Expr2DAG.h"
 
 using namespace std;
 
@@ -45,6 +46,15 @@ void CtrGenerator::visit(const P_OneConstraint& c) {
 	varcopy(*src_vars,dest_vars);
 
 	const ExprNode& e=ExprGenerator(scopes.top()).generate(*src_vars, dest_vars, c.expr);
+
+//	Array<const ExprSymbol> dest_vars2(n);
+//	varcopy(*src_vars,dest_vars2);
+//
+//	const ExprNode& e2=Expr2DAG().transform(dest_vars, (const Array<const ExprNode>&) dest_vars2, e);
+//
+//	cleanup(e,true);
+
+//	ctrs->push_back(new NumConstraint(dest_vars2, ExprCtr(e2,c.op)));
 
 	ctrs->push_back(new NumConstraint(dest_vars, ExprCtr(e,c.op)));
 }

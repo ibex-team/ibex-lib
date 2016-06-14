@@ -510,12 +510,6 @@ public:
 	/** Create a \a m x \a n matrix variable named \a name. */
 	Variable(int m, int n, const char* name);
 
-	/** Create a (\a k-sized array of \a m x \a n matrices) variable. */
-	Variable(int k, int m, int n);
-
-	/** Create a (\a k-sized array of \a m x \a n matrices) variable named \a name. */
-	Variable(int k, int m, int n, const char* name);
-
 	/** Delete this. */
 	~Variable();
 
@@ -586,9 +580,6 @@ public:
 	/** Create a matrix constant. */
 	static const ExprConstant& new_matrix(const IntervalMatrix& value);
 
-	/** Create a constant array of matrices. */
-	static const ExprConstant& new_matrix_array(const IntervalMatrixArray& value);
-
 	/** Create a constant from a domain. */
 	static const ExprConstant& new_(const Domain& d, bool reference=false);
 
@@ -607,9 +598,6 @@ public:
 	/** Return the value of the constant iff it is an IntervalMatrix. */
 	const IntervalMatrix& get_matrix_value() const;
 
-	/** Return the value of the constant iff it is an IntervalMatrixArray. */
-	const IntervalMatrixArray& get_matrix_array_value() const;
-
 	/** Return the value of the constant under the form of a domain. */
 	const Domain& get() const;
 
@@ -625,8 +613,6 @@ private:
 	ExprConstant(const IntervalVector& value, bool in_row);
 
 	ExprConstant(const IntervalMatrix& value);
-
-	ExprConstant(const IntervalMatrixArray& value);
 
 	ExprConstant(const Domain& value, bool reference);
 
@@ -1434,9 +1420,6 @@ inline const ExprConstant& ExprConstant::new_vector(const IntervalVector& value,
 inline const ExprConstant& ExprConstant::new_matrix(const IntervalMatrix& value) {
 	return *new ExprConstant(value); }
 
-inline const ExprConstant& ExprConstant::new_matrix_array(const IntervalMatrixArray& value) {
-	return *new ExprConstant(value); }
-
 inline const ExprConstant& ExprConstant::new_(const Domain& value, bool reference) {
 	return *new ExprConstant(value,reference); }
 
@@ -1448,9 +1431,6 @@ inline const IntervalVector& ExprConstant::get_vector_value() const {
 
 inline const IntervalMatrix& ExprConstant::get_matrix_value() const {
 	return value.m(); }
-
-inline const IntervalMatrixArray& ExprConstant::get_matrix_array_value() const {
-	return value.ma(); }
 
 inline const Domain& ExprConstant::get() const {
 	return value; }

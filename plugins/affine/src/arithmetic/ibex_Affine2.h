@@ -30,7 +30,6 @@ namespace ibex {
 
 template<class T> class Affine2MainVector;
 template<class T> class Affine2MainMatrix;
-template<class T> class Affine2MainMatrixArray;
 
 /**
  * \ingroup arithmetic
@@ -288,7 +287,6 @@ public:
 	typedef Affine2Main<T> SCALAR;
 	typedef Affine2MainVector<T> VECTOR;
 	typedef Affine2MainMatrix<T> MATRIX;
-	typedef Affine2MainMatrixArray<T> MATRIX_ARRAY;
 
 };
 

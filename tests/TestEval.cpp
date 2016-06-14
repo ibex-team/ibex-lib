@@ -57,37 +57,26 @@ void TestEval::check_deco(Function& f, const ExprNode& e) {
 		CPPUNIT_ASSERT(dx.i()==Interval(1,2)); // try to read
 		break;
 	case Dim::ROW_VECTOR:
-		{ IntervalVector box(e.dim.dim3);
-		for (int i=0; i<e.dim.dim3; i++) box[i]=Interval(i,i+1);
+		{ IntervalVector box(e.dim.nb_cols());
+		for (int i=0; i<e.dim.nb_cols(); i++) box[i]=Interval(i,i+1);
 		dx.v()=box; // try to write
 		CPPUNIT_ASSERT(dx.v()==box); // try to read
 		}
 		break;
 	case Dim::COL_VECTOR:
-		{ IntervalVector box(e.dim.dim2);
-		for (int i=0; i<e.dim.dim2; i++) box[i]=Interval(i,i+1);
+		{ IntervalVector box(e.dim.nb_rows());
+		for (int i=0; i<e.dim.nb_rows(); i++) box[i]=Interval(i,i+1);
 		dx.v()=box; // try to write
 		CPPUNIT_ASSERT(dx.v()==box); // try to read
 		}
 		break;
 	case Dim::MATRIX:
-		{ IntervalMatrix m(e.dim.dim2,e.dim.dim3);
-		for (int i=0; i<e.dim.dim2; i++)
-			for (int j=0; j<e.dim.dim3; j++)
+		{ IntervalMatrix m(e.dim.nb_rows(),e.dim.nb_cols());
+		for (int i=0; i<e.dim.nb_rows(); i++)
+			for (int j=0; j<e.dim.nb_cols(); j++)
 				m[i][j]=Interval(i,j);
 		dx.m()=m; // try to write
 		CPPUNIT_ASSERT(dx.m()==m); // try to read
-		}
-		break;
-	case Dim::MATRIX_ARRAY:
-		{ IntervalMatrixArray ma(e.dim.dim1, e.dim.dim2,e.dim.dim3);
-		for (int k=0; k<e.dim.dim1; k++)
-			for (int i=0; i<e.dim.dim2; i++)
-				for (int j=0; j<e.dim.dim3; j++)
-					ma[k][i][j]=Interval(i,j);
-		dx.ma()=ma; // try to write
-		for (int k=0; k<e.dim.dim1; k++)
-			CPPUNIT_ASSERT(dx.ma()[k]==ma[k]); // try to read
 		}
 		break;
 	default:
@@ -117,105 +106,6 @@ void TestEval::deco02() {
 	check_deco(f, x);
 	check_deco(f, y);
 	check_deco(f, e);
-}
-
-void TestEval::add01() {
-
-	const ExprSymbol& x = ExprSymbol::new_("x");
-	const ExprSymbol& y = ExprSymbol::new_("y");
-	Function f(x,y,x+y);
-
-	IntervalVector box(2);
-	box[0]=Interval(1,2);
-	box[1]=Interval(3,4);
-
-	Interval res=f.eval(box);
-	//e.f.cf.print<Domain>();
-	//cout << "res=" << res << endl;
-	check(res,Interval(4,6));
-	CPPUNIT_ASSERT(res.is_superset(Interval(4,6)));
-}
-
-void TestEval::add02() {
-
-	const ExprSymbol& x = ExprSymbol::new_("x",Dim::col_vec(3));
-	const ExprSymbol& y = ExprSymbol::new_("y",Dim::col_vec(3));
-	Function f(x,y,x+y);
-
-	double _xy[][2] = { {1,2}, {3,4}, {5,6} ,
-						 {1,1}, {2,2}, {3,3} };
-	IntervalVector xy(6,_xy);
-
-	double _z[][2] = { {2,3}, {5,6}, {8,9} };
-	IntervalVector z(3,_z);
-
-	IntervalVector res=f.eval_vector(xy);
-	//cout << e.f << endl;
-	check(res,z);
-	CPPUNIT_ASSERT(res.is_superset(z));
-}
-
-void TestEval::add03() {
-
-	const ExprSymbol& x = ExprSymbol::new_("x",Dim::row_vec(3));
-	const ExprSymbol& y = ExprSymbol::new_("y",Dim::row_vec(3));
-	Function f(x,y,x+y);
-
-	double _xy[][2] = { {1,2}, {3,4}, {5,6} ,
-						 {1,1}, {2,2}, {3,3} };
-	IntervalVector xy(6,_xy);
-
-	double _z[][2] = { {2,3}, {5,6}, {8,9} };
-	IntervalVector z(3,_z);
-
-	IntervalVector res=f.eval_vector(xy);
-	//cout << e.f << endl;
-	check(res,z);
-	CPPUNIT_ASSERT(res.is_superset(z));
-}
-
-void TestEval::add04() {
-
-	const ExprSymbol& x = ExprSymbol::new_("x",Dim::matrix(2,3));
-	const ExprSymbol& y = ExprSymbol::new_("y",Dim::matrix(2,3));
-	Function f(x,y,x+y);
-
-	double _xy[][2] = { {1,2}, {3,4}, {5,6},
-						{1,1}, {2,2}, {3,3},
-						{1,1}, {2,2}, {3,3},
-						{1,2}, {3,4}, {5,6} };
-	IntervalVector xy(12,_xy);
-
-	double _z[][2] = { {2,3}, {5,6}, {8,9},
-			           {2,3}, {5,6}, {8,9} };
-	IntervalMatrix z(2, 3,_z);
-
-	IntervalMatrix res=f.eval_matrix(xy);
-	//cout << e.f << endl;
-	check(res[0],z[0]);
-	check(res[1],z[1]);
-	CPPUNIT_ASSERT(res.is_superset(z));
-}
-
-void TestEval::mul01() {
-
-	const ExprSymbol& x = ExprSymbol::new_("x",Dim::matrix(2,3));
-	const ExprSymbol& y = ExprSymbol::new_("y",Dim::matrix(3,2));
-	Function f(x,y,x*y);
-
-	IntervalVector xy(12);
-	IntervalMatrix mx=M1();
-	IntervalMatrix my=M2();
-	for (int i=0; i<6; i++) xy[i]=mx[i/3][i%3];
-	for (int i=0; i<6; i++) xy[i+6]=my[i/2][i%2];
-
-	IntervalMatrix mz=mx*my;
-
-	IntervalMatrix res=f.eval_matrix(xy);
-	//cout << e.f << endl;
-	check(res[0],mz[0]);
-	check(res[1],mz[1]);
-	CPPUNIT_ASSERT(res.is_superset(mz));
 }
 
 

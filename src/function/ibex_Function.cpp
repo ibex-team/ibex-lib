@@ -63,8 +63,14 @@ void Function::jacobian(const IntervalVector& x, IntervalMatrix& J) const {
 	assert(J.nb_rows()==image_dim());
 
 	// calculate the gradient of each component of f
+	// TODO: we could take advantage of the DAG structure
+	// by calling just once the forward phase on f itself
 	for (int i=0; i<image_dim(); i++) {
 		(*this)[i].gradient(x,J[i]);
+		if (J[i].is_empty()) {
+			J.set_empty();
+			return;
+		}
 	}
 }
 
@@ -103,6 +109,10 @@ void Function::hansen_matrix(const IntervalVector& box, IntervalMatrix& H) const
 		//var=tab[i];
 		x[var]=box[var];
 		jacobian(x,J);
+                if (J.is_empty()) {
+                    H.set_empty();
+                    return;
+                }
 		H.set_col(var,J.col(var));
 	}
 
@@ -126,6 +136,10 @@ void Function::hansen_matrix(const IntervalVector& box, IntervalMatrix& H, const
 		//var=tab[i];
 		x[var]=var_box[var];
 		jacobian(set.full_box(x,param_box),J,set);
+                if (J.is_empty()) {
+                    H.set_empty();
+                    return;
+                }
 		H.set_col(var,J.col(var));
 	}
 }
@@ -134,7 +148,13 @@ void Function::print(std::ostream& os) const {
 	if (name!=NULL) os << name << ":";
 	os << "(";
 	for (int i=0; i<nb_arg(); i++) {
-		os << arg_name(i);
+		const ExprSymbol& x = arg(i);
+		os << x;
+		if (x.dim.nb_rows()>1) os << '[' << x.dim.nb_rows() << ']';
+		if (x.dim.nb_cols()>1) {
+			if (x.dim.nb_rows()==1) os << "[1]";
+			os << '[' << x.dim.nb_cols() << ']';
+		}
 		if (i<nb_arg()-1) os << ",";
 	}
 	os << ")->" << expr();

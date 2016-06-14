@@ -25,7 +25,6 @@ namespace ibex {
  * <ul><li> a scalar
  *     <li> a vector
  *     <li> a matrix
- *     <li> an array of matrices
  * </ul>
  *
  */
@@ -69,13 +68,6 @@ public:
 	 *  The internal domain will point to \a m.
 	 */
 	explicit TemplateDomain(typename D::MATRIX& m1);
-
-	/**
-	 * \brief Creates a reference to an array of interval matrices.
-	 *
-	 *  The internal domain will point to \a ma.
-	 */
-	explicit TemplateDomain(typename D::MATRIX_ARRAY& ma1);
 
 	/**
 	 * \brief Creates a domain by copy.
@@ -140,11 +132,6 @@ public:
 	typename D::MATRIX& m();
 
 	/**
-	 * \brief Return the domain as an array of matrices.
-	 */
-	typename D::MATRIX_ARRAY& ma();
-
-	/**
 	 * \brief Return the domain as a const interval.
 	 */
 	const typename D::SCALAR& i() const;
@@ -158,11 +145,6 @@ public:
 	 * \brief Return the domain as a matrix.
 	 */
 	const typename D::MATRIX& m() const;
-
-	/**
-	 * \brief Return the domain as an array of matrices.
-	 */
-	inline const typename D::MATRIX_ARRAY& ma() const;
 
 	/**
 	 * \brief True if the domain is empty
@@ -343,11 +325,6 @@ inline TemplateDomain<D>::TemplateDomain(typename D::MATRIX& m1) : dim(Dim::matr
 }
 
 template<class D>
-inline TemplateDomain<D>::TemplateDomain(typename D::MATRIX_ARRAY& ma1) : dim(Dim::matrix_array(ma1.size(),ma1.nb_rows(),ma1.nb_cols())), is_reference(true) {
-	domain = &ma1;
-}
-
-template<class D>
 inline TemplateDomain<D>::TemplateDomain(const TemplateDomain<D>& d, bool is_reference1) : dim(d.dim), is_reference(is_reference1) {
 	if (is_reference1) {
 		domain = d.domain;
@@ -357,7 +334,6 @@ inline TemplateDomain<D>::TemplateDomain(const TemplateDomain<D>& d, bool is_ref
 		case Dim::ROW_VECTOR:
 		case Dim::COL_VECTOR:   domain = new typename D::VECTOR(d.v()); break;
 		case Dim::MATRIX:       domain = new typename D::MATRIX(d.m()); break;
-		case Dim::MATRIX_ARRAY: domain = new typename D::MATRIX_ARRAY(d.ma()); break;
 		}
 	}
 }
@@ -373,9 +349,7 @@ TemplateDomain<D> TemplateDomain<D>::operator[](int ii) {
 	case Dim::SCALAR:       assert(ii==0); return TemplateDomain<D>(this->i());
 	case Dim::ROW_VECTOR:
 	case Dim::COL_VECTOR:   return TemplateDomain<D>(v()[ii]);
-	case Dim::MATRIX:       return TemplateDomain<D>(m()[ii],true);
-	case Dim::MATRIX_ARRAY:
-	default:                return TemplateDomain<D>(ma()[ii]);
+	default:                return TemplateDomain<D>(m()[ii],true);
 	}
 }
 
@@ -392,7 +366,6 @@ TemplateDomain<D>::~TemplateDomain() {
 		case Dim::ROW_VECTOR:
 		case Dim::COL_VECTOR:   delete &v();  break;
 		case Dim::MATRIX:       delete &m();  break;
-		case Dim::MATRIX_ARRAY: delete &ma(); break;
 		}
 	}
 }
@@ -405,7 +378,6 @@ TemplateDomain<D>& TemplateDomain<D>::operator=(const TemplateDomain<D>& d) {
 	case Dim::ROW_VECTOR:
 	case Dim::COL_VECTOR:   v()=d.v(); break;
 	case Dim::MATRIX:       m()=d.m(); break;
-	case Dim::MATRIX_ARRAY: ma()=d.ma(); break;
 	}
 	return *this;
 }
@@ -418,7 +390,6 @@ TemplateDomain<D>& TemplateDomain<D>::operator&=(const TemplateDomain<D>& d) {
 	case Dim::ROW_VECTOR:
 	case Dim::COL_VECTOR:   v()&=d.v(); break;
 	case Dim::MATRIX:       m()&=d.m(); break;
-	case Dim::MATRIX_ARRAY: ma()&=d.ma(); break;
 	}
 	return *this;
 }
@@ -430,9 +401,7 @@ bool TemplateDomain<D>::operator==(const TemplateDomain<D>& d) const {
 	case Dim::SCALAR:       return i()==d.i();
 	case Dim::ROW_VECTOR:
 	case Dim::COL_VECTOR:   return v()==d.v();
-	case Dim::MATRIX:       return m()==d.m();
-	case Dim::MATRIX_ARRAY: return ma()==d.ma();
-	default:                assert(false); return false;
+	default:                return m()==d.m();
 	}
 }
 
@@ -463,13 +432,6 @@ inline typename D::MATRIX& TemplateDomain<D>::m()  {
 }
 
 template<class D>
-inline typename D::MATRIX_ARRAY& TemplateDomain<D>::ma() {
-	assert(domain);
-	assert(dim.type()==Dim::MATRIX_ARRAY);
-	return *(typename D::MATRIX_ARRAY*) domain;
-}
-
-template<class D>
 inline const typename D::SCALAR& TemplateDomain<D>::i() const  {
 	assert(domain);
 	assert(dim.is_scalar());
@@ -491,33 +453,23 @@ inline const typename D::MATRIX& TemplateDomain<D>::m() const  {
 }
 
 template<class D>
-inline const typename D::MATRIX_ARRAY& TemplateDomain<D>::ma() const {
-	assert(domain);
-	assert(dim.type()==Dim::MATRIX_ARRAY);
-	return *(typename D::MATRIX_ARRAY*) domain;
-}
-
-
-template<class D>
 void TemplateDomain<D>::build() {
 	switch(dim.type()) {
 	case Dim::SCALAR:       domain = new typename D::SCALAR(); break;
-	case Dim::ROW_VECTOR:   domain = new typename D::VECTOR(dim.dim3); break;
-	case Dim::COL_VECTOR:   domain = new typename D::VECTOR(dim.dim2); break;
-	case Dim::MATRIX:       domain = new typename D::MATRIX(dim.dim2,dim.dim3); break;
-	case Dim::MATRIX_ARRAY: domain = new typename D::MATRIX_ARRAY(dim.dim1,dim.dim2,dim.dim3); break;
+	case Dim::ROW_VECTOR:   domain = new typename D::VECTOR(dim.nb_cols()); break;
+	case Dim::COL_VECTOR:   domain = new typename D::VECTOR(dim.nb_rows()); break;
+	case Dim::MATRIX:       domain = new typename D::MATRIX(dim.nb_rows(),dim.nb_cols()); break;
 	}
 }
 
 template<class D>
 bool TemplateDomain<D>::is_empty() const {
 	switch (dim.type()) {
-		case Dim::SCALAR:       return i().is_empty(); break;
-		case Dim::ROW_VECTOR:
-		case Dim::COL_VECTOR:   return v().is_empty(); break;
-		case Dim::MATRIX:       return m().is_empty(); break;
-		case Dim::MATRIX_ARRAY: return ma().is_empty(); break;
-		}
+	case Dim::SCALAR:       return i().is_empty(); break;
+	case Dim::ROW_VECTOR:
+	case Dim::COL_VECTOR:   return v().is_empty(); break;
+	default:                return m().is_empty(); break;
+	}
 	assert(false);
 	return false;
 }
@@ -529,7 +481,6 @@ void TemplateDomain<D>::set_empty() {
 		case Dim::ROW_VECTOR:
 		case Dim::COL_VECTOR:   v().set_empty(); break;
 		case Dim::MATRIX:       m().set_empty(); break;
-		case Dim::MATRIX_ARRAY: ma().set_empty(); break;
 		}
 }
 
@@ -540,7 +491,6 @@ void TemplateDomain<D>::clear() {
 	case Dim::ROW_VECTOR:
 	case Dim::COL_VECTOR: v().clear(); break;
 	case Dim::MATRIX:     m().clear(); break;
-	case Dim::MATRIX_ARRAY: for (int i=0; i<dim.dim1; i++) ma()[i].clear(); break;
 	}
 }
 
@@ -551,8 +501,7 @@ std::ostream& operator<<(std::ostream& os,const TemplateDomain<D>& d) {
 		case Dim::ROW_VECTOR:
 		case Dim::COL_VECTOR:   os << d.v(); break;
 		case Dim::MATRIX:       os << d.m(); break;
-		case Dim::MATRIX_ARRAY: os << d.ma(); break;
-		}
+	}
 	return os;
 }
 
@@ -599,8 +548,8 @@ void load(Array<TemplateDomain<D> >& d, const typename D::VECTOR& x, int nb_used
 		case Dim::MATRIX:
 		{
 			typename D::MATRIX& M=d[s].m();
-			for (int k=0; k<dim.dim2; k++)
-				for (int j=0; j<dim.dim3; j++) {
+			for (int k=0; k<dim.nb_rows(); k++)
+				for (int j=0; j<dim.nb_cols(); j++) {
 					if (nb_used==-1 || i==used[u]) {
 						M[k][j]=x[i];
 						u++;
@@ -608,21 +557,6 @@ void load(Array<TemplateDomain<D> >& d, const typename D::VECTOR& x, int nb_used
 					}
 					i++;
 				}
-		}
-		break;
-		case Dim::MATRIX_ARRAY:
-		{
-			typename D::MATRIX_ARRAY& A=d[s].ma();
-			for (int l=0; l<dim.dim1; l++)
-				for (int k=0; k<dim.dim2; k++)
-					for (int j=0; j<dim.dim3; j++) {
-						if (nb_used==-1 || i==used[u]) {
-							A[l][k][j]=x[i];
-							u++;
-							if (u==nb_used) return;
-						}
-						i++;
-					}
 		}
 		break;
 		}
@@ -674,8 +608,8 @@ void load(typename D::VECTOR& x, const Array<TemplateDomain<D> >& d, int nb_used
 		case Dim::MATRIX:
 		{
 			const typename D::MATRIX& M=d[s].m();
-			for (int k=0; k<dim.dim2; k++)
-				for (int j=0; j<dim.dim3; j++) {
+			for (int k=0; k<dim.nb_rows(); k++)
+				for (int j=0; j<dim.nb_cols(); j++) {
 					if (nb_used==-1 || i==used[u]) {
 						x[i]=M[k][j];
 						u++;
@@ -683,21 +617,6 @@ void load(typename D::VECTOR& x, const Array<TemplateDomain<D> >& d, int nb_used
 					}
 					i++;
 				}
-		}
-		break;
-		case Dim::MATRIX_ARRAY:
-		{
-			const typename D::MATRIX_ARRAY& A=d[s].ma();
-			for (int l=0; l<dim.dim1; l++)
-				for (int k=0; k<dim.dim2; k++)
-					for (int j=0; j<dim.dim3; j++) {
-						if (nb_used==-1 || i==used[u]) {
-							x[i]=A[l][k][j];
-							u++;
-							if (u==nb_used) return;
-						}
-						i++;
-					}
 		}
 		break;
 		}
@@ -740,7 +659,7 @@ void load(Array<TemplateDomain<D> >& x, const Array<const TemplateDomain<D> >& y
 			{
 				// note that it is then possible to load a row vector
 				// into a column vector (and this flexibility is desired)
-				for (int j=0; j<dim.dim3; j++) {
+				for (int j=0; j<dim.nb_cols(); j++) {
 					if (i==used[u]) {
 						x[s][j]=y[s][j];
 						u++;
@@ -754,7 +673,7 @@ void load(Array<TemplateDomain<D> >& x, const Array<const TemplateDomain<D> >& y
 			{
 				// note that it is then possible to load a column vector
 				// into a row vector (and this flexibility is desired)
-				for (int j=0; j<dim.dim2; j++) {
+				for (int j=0; j<dim.nb_rows(); j++) {
 					if (i==used[u]) {
 						x[s][j]=y[s][j];
 						u++;
@@ -767,8 +686,8 @@ void load(Array<TemplateDomain<D> >& x, const Array<const TemplateDomain<D> >& y
 
 			case Dim::MATRIX:
 			{
-				for (int k=0; k<dim.dim2; k++)
-					for (int j=0; j<dim.dim3; j++) {
+				for (int k=0; k<dim.nb_rows(); k++)
+					for (int j=0; j<dim.nb_cols(); j++) {
 						if (i==used[u]) {
 							x[s][k][j]=y[s][k][j];
 							u++;
@@ -776,22 +695,6 @@ void load(Array<TemplateDomain<D> >& x, const Array<const TemplateDomain<D> >& y
 						}
 						i++;
 					}
-			}
-			break;
-			case Dim::MATRIX_ARRAY:
-			{
-				for (int l=0; l<dim.dim1; l++)
-					for (int k=0; k<dim.dim2; k++)
-						for (int j=0; j<dim.dim3; j++) {
-							// TODO: are all these temporary D objects
-							// created by [] really safe?
-							if (i==used[u]) {
-								x[s][l][k][j]=y[s][l][k][j];
-								u++;
-								if (u==nb_used) return;
-							}
-							i++;
-						}
 			}
 			break;
 			}
@@ -821,7 +724,6 @@ TemplateDomain<D> operator+(const TemplateDomain<D>& d1, const TemplateDomain<D>
 	case Dim::ROW_VECTOR:
 	case Dim::COL_VECTOR:   d.v()=d1.v()+d2.v(); break;
 	case Dim::MATRIX:       d.m()=d1.m()+d2.m(); break;
-	case Dim::MATRIX_ARRAY: assert(false); break;
 	}
 	return d;
 }
@@ -837,19 +739,18 @@ TemplateDomain<D> operator*(const TemplateDomain<D>& d1, const TemplateDomain<D>
 		case Dim::ROW_VECTOR:
 		case Dim::COL_VECTOR:   d.v()=d1.i()*d2.v(); break;
 		case Dim::MATRIX:       d.m()=d1.i()*d2.m(); break;
-		default:                assert(false); break;
 		}
 	} else if (d1.dim.type()==Dim::ROW_VECTOR) {
 		switch(d2.dim.type()) {
 		case Dim::COL_VECTOR:   d.i()=d1.v()*d2.v(); break;
 		case Dim::MATRIX:       d.v()=d1.v()*d2.m(); break;
-		default: assert(false); break;
+		default: 				assert(false); break;
 		}
 	} else if (d1.dim.type()==Dim::COL_VECTOR) {
 		switch(d2.dim.type()) {
 		case Dim::SCALAR:       d.v()=d2.i()*d1.v(); break;
 		case Dim::ROW_VECTOR:   d.m()=outer_product(d1.v(),d2.v()); break;
-		default: assert(false); break;
+		default: 				assert(false); break;
 		}
 	} else { // MATRIX
 		switch(d2.dim.type()) {
@@ -873,7 +774,6 @@ TemplateDomain<D> operator-(const TemplateDomain<D>& d1, const TemplateDomain<D>
 	case Dim::ROW_VECTOR:
 	case Dim::COL_VECTOR:   d.v()=d1.v()-d2.v(); break;
 	case Dim::MATRIX:       d.m()=d1.m()-d2.m(); break;
-	case Dim::MATRIX_ARRAY: assert(false); break;
 	}
 	return d;
 }
@@ -887,21 +787,19 @@ TemplateDomain<D> operator-(const TemplateDomain<D>& d1) {
 	case Dim::ROW_VECTOR:
 	case Dim::COL_VECTOR:   d.v()=-d1.v(); break;
 	case Dim::MATRIX:       d.m()=-d1.m(); break;
-	case Dim::MATRIX_ARRAY: assert(false); break;
 	}
 	return d;
 }
 
 template<class D>
 TemplateDomain<D> transpose(const TemplateDomain<D>& d1) {
-	TemplateDomain<D> d(Dim(d1.dim.dim1,d1.dim.dim3,d1.dim.dim2));
+	TemplateDomain<D> d(Dim(d1.dim.nb_cols(),d1.dim.nb_rows()));
 
 	switch(d.dim.type()) {
 	case Dim::SCALAR:       d.i()=d1.i(); break;
 	case Dim::ROW_VECTOR:
 	case Dim::COL_VECTOR:   d.v()=d1.v(); break;
 	case Dim::MATRIX:       d.m()=d1.m().transpose(); break;
-	case Dim::MATRIX_ARRAY: assert(false); break;
 	}
 	return d;
 }
@@ -995,7 +893,6 @@ template<class D>
 TemplateDomain<D> asinh(const TemplateDomain<D>& d) { unary_func(asinh); }
 template<class D>
 TemplateDomain<D> atanh(const TemplateDomain<D>& d) { unary_func(atanh); }
-
 
 
 } // end namespace

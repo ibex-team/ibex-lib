@@ -25,6 +25,7 @@ void check(const Interval& y_actual, const Interval& y_expected);
 void check(const IntervalVector& y_actual, const IntervalVector& y_expected);
 bool almost_eq(const Interval& y_actual, const Interval& y_expected, double err);
 bool almost_eq(const IntervalVector& y_actual, const IntervalVector& y_expected, double err);
+bool almost_eq(const IntervalMatrix& y_actual, const IntervalMatrix& y_expected, double err);
 
 extern double ERROR;
 

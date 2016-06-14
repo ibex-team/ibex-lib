@@ -13,7 +13,6 @@
 #define __IBEX_AFFINE2_DOMAIN_H__
 
 #include <stdexcept>
-#include "ibex_Affine2MatrixArray.h"
 #include "ibex_TemplateDomain.h"
 
 namespace ibex {
@@ -28,7 +27,6 @@ namespace ibex {
  * <ul><li> an affine form (#ibex::Affine2)
  *     <li> a vector of affine forms (#ibex::Affine2Vector)
  *     <li> a matrix of affine forms (#ibex::Affine2Matrix)
- *     <li> or an array of affine matrices (#ibex::Affine2MatrixArray)
  * </ul>
  *
  */

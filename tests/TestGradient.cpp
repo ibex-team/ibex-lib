@@ -458,6 +458,17 @@ void TestGradient::jac02() {
 	CPPUNIT_ASSERT(almost_eq(J[29][29],Interval(1,1),error));
 }
 
+
+void TestGradient::jac03() {
+	// fix issue #198
+	Variable x1,x2;
+	Function f(x1,x2,ibex::Return(x1, ibex::asin(x2)));
+	double init_box[][2]={{1, 1}, {1.570796326794893, 1.570796326794901}};
+	IntervalVector box(2,init_box);
+	IntervalMatrix J=f.jacobian(box);
+	CPPUNIT_ASSERT(J.is_empty());
+}
+
 void TestGradient::hansen01() {
 	IntervalMatrix H(30,30);
 	Ponts30 p30;

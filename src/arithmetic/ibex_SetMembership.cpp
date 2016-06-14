@@ -9,7 +9,7 @@
  * Created     : May 13, 2014
  * ---------------------------------------------------------------------------- */
 
-#include "ibex_IntervalMatrixArray.h"
+#include "ibex_IntervalMatrix.h"
 
 namespace ibex {
 
@@ -19,7 +19,6 @@ public:
 	typedef double SCALAR;
 	typedef Vector VECTOR;
 	typedef Matrix MATRIX;
-	typedef MatrixArray MATRIX_ARRAY;
 };
 
 inline bool basic_is_subset(const Interval& x, const Interval& y) {
@@ -120,17 +119,6 @@ inline bool basic_is_disjoint(const Interval& x, const Interval& y) {
         for (int j=0; j<x.nb_cols(); j++) \
           if (!BASIC_COND(x[i][j],y[i][j])) return false; \
     return true; \
-  } \
-  \
-  inline bool BASIC_COND(const S1::MATRIX_ARRAY& x, const S2::MATRIX_ARRAY& y) { \
-	assert(x.size()==y.size()); \
-	assert(x.nb_rows()==y.nb_rows()); \
-	assert(x.nb_cols()==y.nb_cols()); \
-	for (int k=0; k<x.size(); k++) \
-	  for (int i=0; i<x.nb_rows(); i++) \
-        for (int j=0; j<x.nb_cols(); j++) \
-          if (!BASIC_COND(x[k][i][j],y[k][i][j])) return false; \
-    return true; \
   }
 
 #define __IBEX_GENERATE_BASIC_SET_OP_OR__(S1,S2,BASIC_COND) \
@@ -148,17 +136,6 @@ inline bool basic_is_disjoint(const Interval& x, const Interval& y) {
 	for (int i=0; i<x.nb_rows(); i++) \
       for (int j=0; j<x.nb_cols(); j++) \
         if (BASIC_COND(x[i][j],y[i][j])) return true; \
-    return false; \
-  } \
-  \
-  inline bool BASIC_COND(const S1::MATRIX_ARRAY& x, const S2::MATRIX_ARRAY& y) { \
-	assert(x.size()==y.size()); \
-	assert(x.nb_rows()==y.nb_rows()); \
-	assert(x.nb_cols()==y.nb_cols()); \
-	for (int k=0; k<x.size(); k++) \
-	  for (int i=0; i<x.nb_rows(); i++) \
-        for (int j=0; j<x.nb_cols(); j++) \
-          if (BASIC_COND(x[k][i][j],y[k][i][j])) return true; \
     return false; \
   }
 
@@ -183,20 +160,6 @@ inline bool basic_is_disjoint(const Interval& x, const Interval& y) {
           cond *= BASIC_COND(x[i][j],y[i][j]); \
           if (cond==0) return 0; \
       } \
-    return cond; \
-  } \
-  \
-  inline int BASIC_COND(const S1::MATRIX_ARRAY& x, const S2::MATRIX_ARRAY& y) { \
-    assert(x.size()==y.size()); \
-    assert(x.nb_rows()==y.nb_rows()); \
-    assert(x.nb_cols()==y.nb_cols()); \
-    int cond=1; \
-    for (int k=0; k<x.size(); k++) \
-	  for (int i=0; i<x.nb_rows(); i++) \
-        for (int j=0; j<x.nb_cols(); j++) { \
-            cond *= BASIC_COND(x[k][i][j],y[k][i][j]); \
-            if (cond==0) return 0; \
-         } \
     return cond; \
   }
 
@@ -271,8 +234,7 @@ inline bool is_disjoint(const T& x, const S& y) {
   \
   bool Interval::COND(const S2::SCALAR& x) const                  { return ibex::COND(*this,x); } \
   bool IntervalVector::COND(const S2::VECTOR& x) const            { return ibex::COND(*this,x); } \
-  bool IntervalMatrix::COND(const S2::MATRIX& x) const            { return ibex::COND(*this,x); } \
-  bool IntervalMatrixArray::COND(const S2::MATRIX_ARRAY& x) const { return ibex::COND(*this,x); }
+  bool IntervalMatrix::COND(const S2::MATRIX& x) const            { return ibex::COND(*this,x); }
 
 __IBEX_GENERATE_SET_OP__(Interval,is_subset)
 __IBEX_GENERATE_SET_OP__(Interval,is_strict_subset)
@@ -285,74 +247,6 @@ __IBEX_GENERATE_SET_OP__(__Real,interior_contains)
 __IBEX_GENERATE_SET_OP__(Interval,intersects)
 __IBEX_GENERATE_SET_OP__(Interval,overlaps)
 __IBEX_GENERATE_SET_OP__(Interval,is_disjoint)
-
-
-// ====================== Old FILIB wrappers =============================
-
-//inline bool Interval::is_subset(const Interval& x) const {
-//	return itv.subset(x.itv);
-//}
-//
-///*inline bool Interval::is_strict_subset(const Interval& x) const {
-//	return x.itv.interior(itv);
-//}*/
-//
-//inline bool Interval::is_superset(const Interval& x) const {
-//	return itv.superset(x.itv);
-//}
-//
-//
-//inline bool Interval::contains(double d) const {
-//	return itv.contains(d);
-//}
-//
-//inline bool Interval::interior_contains(double d) const {
-//	if (is_empty()) return false;
-//		else return d>lb() && d<ub();
-//}
-//
-//inline bool Interval::is_disjoint(const Interval &x) const {
-//	return itv.disjoint(x.itv);
-//}
-
-// =======================================================================
-
-
-
-// ====================== Old GAOL wrappers =============================
-
-//inline bool Interval::is_subset(const Interval& x) const {
-//	return x.itv.set_contains(itv);
-//}
-//
-///* the semantic of goal does not match
-//inline bool Interval::is_strict_subset(const Interval& x) const {
-//	return x.itv.set_strictly_contains(itv);
-//} */
-//
-//inline bool Interval::is_superset(const Interval& x) const {
-//	return itv.set_contains(x.itv);
-//}
-//
-///* the semantic of goal does not match
-//inline bool Interval::is_strict_superset(const Interval& x) const {
-//	return itv.set_strictly_contains(x.itv);
-//} */
-//
-//inline bool Interval::contains(double d) const {
-//	return itv.set_contains(d);
-//}
-//
-//inline bool Interval::interior_contains(double d) const {
-//	return itv.set_strictly_contains(d);
-//}
-//
-//inline bool Interval::is_disjoint(const Interval &x) const {
-//	return itv.set_disjoint(x.itv);
-//}
-// =======================================================================
-
-
 
 } // namespace ibex
 

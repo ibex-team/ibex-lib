@@ -509,7 +509,7 @@ protected:
 	/**
 	 * \brief Symbolic gradient of the objective
 	 */
-	Function df;
+	Function* df;
 
 	/**
 	 * \brief Computes and returns  the value ymax (the loup decreased with the precision)

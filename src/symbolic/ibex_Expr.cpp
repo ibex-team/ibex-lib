@@ -207,8 +207,6 @@ Variable::Variable(int n) : symbol(new ExprSymbol(Dim::col_vec(n)))             
 Variable::Variable(int n, const char* name) : symbol(new ExprSymbol(name, Dim::col_vec(n)))                        { variables().insert(*symbol,this); }
 Variable::Variable(int m, int n) : symbol(new ExprSymbol(Dim::matrix(m,n)))                                        { variables().insert(*symbol,this); }
 Variable::Variable(int m, int n, const char* name) : symbol(new ExprSymbol(name, Dim::matrix(m,n)))                { variables().insert(*symbol,this); }
-Variable::Variable(int k, int m, int n) : symbol(new ExprSymbol(Dim::matrix_array(k,m,n)))                         { variables().insert(*symbol,this); }
-Variable::Variable(int k, int m, int n, const char* name) : symbol(new ExprSymbol(name, Dim::matrix_array(k,m,n))) { variables().insert(*symbol,this); }
 
 Variable::~Variable()                                                                                              {
 	variables().erase(*symbol);
@@ -280,13 +278,6 @@ Matrix::operator const ExprConstant&() const {
 
 IntervalMatrix::operator const ExprConstant&() const {
 	return ExprConstant::new_matrix(*this);
-}
-
-ExprConstant::ExprConstant(const IntervalMatrixArray& ma)
-  : ExprLeaf(Dim::matrix_array(ma.size(),ma.nb_rows(),ma.nb_cols())),
-    value(Dim::matrix_array(ma.size(),ma.nb_rows(),ma.nb_cols())) {
-
-	value.ma() = ma;
 }
 
 ExprConstant::ExprConstant(const Domain& d, bool reference) : ExprLeaf(d.dim), value(d,reference) {

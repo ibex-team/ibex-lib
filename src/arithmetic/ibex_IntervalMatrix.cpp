@@ -177,7 +177,7 @@ void IntervalMatrix::resize(int nb_rows1, int nb_cols1) {
 		}
 	}
 
-	if (M!=NULL && nb_rows1!=_nb_rows) delete[] M; // M=NULL only in IntervalMatrixArray
+	if (M!=NULL && nb_rows1!=_nb_rows) delete[] M; // should not happen (default constructor being private)
 	M=M2;
 	_nb_rows = nb_rows1;
 	_nb_cols = nb_cols1;

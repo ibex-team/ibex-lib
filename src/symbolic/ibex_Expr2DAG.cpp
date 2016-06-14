@@ -28,11 +28,14 @@ const ExprNode& Expr2DAG::transform(const Array<const ExprSymbol>& old_x, const 
 	int h=0; // height in the DAG
 
 	// then we copy the constants
-	while (nodes[i].height==h) {
+	while (i>=0 && nodes[i].height==h) {
 		const ExprConstant* c=dynamic_cast<const ExprConstant*>(&nodes[i]);
 		if (c) peer.insert(nodes[i], (const ExprNode*) &c->copy());
 		i--;
 	}
+
+	if (i==-1)
+		return *peer[nodes[0]];
 
 	// we proceed by "level", where a level corresponds
 	// to a height "h" in the expression.

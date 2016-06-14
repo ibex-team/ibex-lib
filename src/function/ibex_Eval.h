@@ -125,7 +125,6 @@ inline void Eval::cst_fwd(int y) {
 	case Dim::ROW_VECTOR:
 	case Dim::COL_VECTOR:   d[y].v() = c.get_vector_value();  break;
 	case Dim::MATRIX:       d[y].m() = c.get_matrix_value();  break;
-	case Dim::MATRIX_ARRAY: assert(false); /* impossible */ break;
 	}
 }
 

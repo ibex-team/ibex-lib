@@ -34,7 +34,7 @@ ExprSplitOcc::ExprSplitOcc(const Array<const ExprSymbol>& x, const ExprNode& y) 
 
 		s->nb_clones=0; // by default
 
-		if (x[i].dim.type()==Dim::MATRIX || x[i].dim.type()==Dim::MATRIX_ARRAY)
+		if (x[i].dim.type()==Dim::MATRIX)
 			not_implemented("occurrence splitting with matrix symbols");
 
 		if (x[i].fathers.size()==0) {

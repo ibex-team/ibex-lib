@@ -107,11 +107,8 @@ TemplateDomain<D>* ExprDomainFactory<D>::init(const ExprIndex& e, TemplateDomain
 	case Dim::COL_VECTOR:
 		return new TemplateDomain<D>(d_expr.v()[e.index]);
 		break;
-	case Dim::MATRIX:
+	default:
 		return new TemplateDomain<D>(d_expr.m()[e.index],true);
-		break;
-	default: // Dim::MATRIX_ARRAY:
-		return new TemplateDomain<D>(d_expr.ma()[e.index]);
 		break;
 	}
 }

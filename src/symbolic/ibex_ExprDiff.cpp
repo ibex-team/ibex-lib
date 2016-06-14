@@ -56,7 +56,7 @@ const ExprNode& ExprDiff::diff(const Array<const ExprSymbol>& old_x, const Array
 	if (y.dim.is_scalar()) {
 		return gradient(old_x,new_x,y);
 	} else if (y.dim.is_vector()) {
-		if (y.dim.dim3>1)
+		if (y.dim.nb_cols()>1)
 			ibex_warning("differentiation of a function returning a row vector (considered as a column vector)");
 
 		const ExprVector* vec=dynamic_cast<const ExprVector*>(&y); // TODO: not correct, ex: Function f("x","y","2*(x,y)");
@@ -142,7 +142,7 @@ const ExprNode& ExprDiff::gradient(const Array<const ExprSymbol>& old_x, const A
 				grad.insert(v, &zeros(v.dim.vec_size(), v.dim.type()==Dim::ROW_VECTOR));
 				break;
 			case Dim::MATRIX:
-				grad.insert(v, &zeros(v.dim.dim2,v.dim.dim3));
+				grad.insert(v, &zeros(v.dim.nb_rows(),v.dim.nb_cols()));
 				break;
 			default:
 				throw ExprDiffException("diff with matrix arrays");
@@ -173,10 +173,10 @@ const ExprNode& ExprDiff::gradient(const Array<const ExprSymbol>& old_x, const A
 			    	assert(dynamic_cast<const ExprVector*>(grad[old_x[i]]));
 			    	const ExprVector& vec = * ((const ExprVector*) grad[old_x[i]]);
 
-			    	for (int j2=0; j2<old_x[i].dim.dim2; j2++) {
+			    	for (int j2=0; j2<old_x[i].dim.nb_rows(); j2++) {
 			    		const ExprVector* vec2=dynamic_cast<const ExprVector*>(&(vec.arg(j2)));
 
-			    		for (int j3=0; j3<old_x[i].dim.dim3; j3++)
+			    		for (int j3=0; j3<old_x[i].dim.nb_cols(); j3++)
 			    			if (vec2)
 			    				dX.set_ref(k++, vec2->arg(j3));
 			    			else
@@ -257,10 +257,6 @@ void ExprDiff::visit(const ExprIndex& i) {
 		return;
 	}
 
-	if (i.expr.dim.type()==Dim::MATRIX_ARRAY) {
-		throw ExprDiffException("diff with matrix arrays");
-	}
-
 	int n = i.expr.dim.max_index()+1;
 
 	// we will build a new vector from scratch
@@ -292,7 +288,7 @@ void ExprDiff::visit(const ExprIndex& i) {
 				if (i.expr.dim.is_vector())
 					new_comp.set_ref(j, ExprConstant::new_scalar(0));
 				else
-					new_comp.set_ref(j, zeros(i.expr.dim.dim2,true));
+					new_comp.set_ref(j, zeros(i.expr.dim.nb_rows(),true));
 			else
 				new_comp.set_ref(i.index, *(grad[i]));
 		}
@@ -371,8 +367,8 @@ void ExprDiff::visit(const ExprApply& e) {
 			// to the i^th argument of the gradient (see visit(ExprVector&).
 //			const ExprVector* vec=dynamic_cast<const ExprVector*>(&e.arg(i));
 //			if (vec!=NULL) {
-//				int m=e.arg(i).dim.dim2;
-//				int n=e.arg(i).dim.dim3;
+//				int m=e.arg(i).dim.nb_rows();
+//				int n=e.arg(i).dim.nb_cols();
 //				if (Array<const ExprNode> rows(m);
 //				for (int i=0; i<m; i++) {
 //					Array<const ExprNode> col(n);

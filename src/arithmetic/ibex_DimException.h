@@ -35,4 +35,5 @@ private:
 };
 
 } // end namespace ibex
+
 #endif // __IBEX_DIM_EXCEPTION_H__

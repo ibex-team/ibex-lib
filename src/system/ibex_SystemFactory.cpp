@@ -145,8 +145,8 @@ void System::init_f_from_ctrs() {
 				image.set_ref(i++,e[k]);
 			break;
 		case Dim::MATRIX:
-			for (int k=0; k<fjd.dim2; k++)
-				for (int l=0; l<fjd.dim3; l++)
+			for (int k=0; k<fjd.nb_rows(); k++)
+				for (int l=0; l<fjd.nb_cols(); l++)
 					image.set_ref(i++,e[k][l]);
 			break;
 		default:
