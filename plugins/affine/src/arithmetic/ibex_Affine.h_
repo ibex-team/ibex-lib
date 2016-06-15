@@ -119,7 +119,11 @@ inline AffineMain<T>& AffineMain<T>::Ainv_CH(const Interval& itv){
 		ddelta = (t1>t2)? t1 : t2;
 
 		if (itv.lb()<0.0) beta = -beta;
-		saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
+
+		*this *= alpha;
+		*this += beta;
+		this->inflate(ddelta);
+		//saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
 
 	}
 
@@ -157,7 +161,10 @@ inline AffineMain<T>& AffineMain<T>::Asqrt_CH(const Interval& itv){
 		t2 = (band-beta).ub();
 		ddelta = (t1>t2)? t1 : t2;
 
-		saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
+		*this *= alpha;
+		*this += beta;
+		this->inflate(ddelta);
+		//saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
 
 
 	}
@@ -191,7 +198,10 @@ inline AffineMain<T>& AffineMain<T>::Aexp_CH(const Interval& itv){
 		t2 = (band-beta).ub();
 		ddelta = (t1>t2)? t1 : t2;
 
-		saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
+		*this *= alpha;
+		*this += beta;
+		this->inflate(ddelta);
+		//saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
 
 	}
 	return *this;
@@ -225,7 +235,10 @@ inline AffineMain<T>& AffineMain<T>::Alog_CH(const Interval& itv){
 		t2 = (band -beta).ub();
 		ddelta = (t1>t2)? t1 : t2;
 
-		saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
+		*this *= alpha;
+		*this += beta;
+		this->inflate(ddelta);
+		//saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
 
 
 	}
@@ -312,7 +325,10 @@ inline AffineMain<T>& AffineMain<T>::Acos(const Interval& itv){
 			i++;
 		}
 
-		saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
+		*this *= alpha;
+		*this += beta;
+		this->inflate(ddelta);
+		//saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
 
 
 	}
@@ -390,7 +406,10 @@ inline AffineMain<T>& AffineMain<T>::Asin(const Interval& itv){
 			i++;
 		}
 
-		saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
+		*this *= alpha;
+		*this += beta;
+		this->inflate(ddelta);
+		//saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
 
 
 	}
@@ -473,7 +492,10 @@ inline AffineMain<T>& AffineMain<T>::Atan(const Interval& itv){
 			i++;
 		}
 
-		saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
+		*this *= alpha;
+		*this += beta;
+		this->inflate(ddelta);
+		//saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
 
 
 	}
@@ -539,7 +561,10 @@ inline AffineMain<T>& AffineMain<T>::Aacos(const Interval& itv){
 			if (t1>ddelta)  ddelta= t1;
 		}
 
-		saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
+		*this *= alpha;
+		*this += beta;
+		this->inflate(ddelta);
+		//saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
 
 	}
 	return *this;
@@ -606,7 +631,10 @@ inline AffineMain<T>& AffineMain<T>::Aasin(const Interval& itv){
 			if (t1>ddelta)  ddelta= t1;
 		}
 
-		saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
+		*this *= alpha;
+		*this += beta;
+		this->inflate(ddelta);
+		//saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
 
 	}
 	return *this;
@@ -671,7 +699,10 @@ inline AffineMain<T>& AffineMain<T>::Aatan(const Interval& itv){
 			if (t1>ddelta)  ddelta= t1;
 		}
 
-		saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
+		*this *= alpha;
+		*this += beta;
+		this->inflate(ddelta);
+		//saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
 
 	}
 	return *this;
@@ -706,7 +737,10 @@ inline AffineMain<T>& AffineMain<T>::Acosh(const Interval& itv){
 		t2 = (band -beta).ub();
 		ddelta = (t1>t2)? t1 : t2;
 
-		saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
+		*this *= alpha;
+		*this += beta;
+		this->inflate(ddelta);
+		//saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
 
 
 	}
@@ -772,7 +806,10 @@ inline AffineMain<T>& AffineMain<T>::Asinh(const Interval& itv){
 			if (t1>ddelta)  ddelta= t1;
 		}
 
-		saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
+		*this *= alpha;
+		*this += beta;
+		this->inflate(ddelta);
+		//saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
 
 
 	}
@@ -839,7 +876,10 @@ inline AffineMain<T>& AffineMain<T>::Atanh(const Interval& itv){
 			if (t1>ddelta)  ddelta= t1;
 		}
 
-		saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
+		*this *= alpha;
+		*this += beta;
+		this->inflate(ddelta);
+		//saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
 
 	}
 	return *this;
@@ -879,7 +919,10 @@ inline AffineMain<T>& AffineMain<T>::Aabs(const Interval& itv){
 		t2 = (band -beta).ub();
 		ddelta = (t1>t2)? t1 : t2;
 
-		saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
+		*this *= alpha;
+		*this += beta;
+		this->inflate(ddelta);
+		//saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
 
 
 	}
@@ -948,7 +991,10 @@ inline AffineMain<T>& AffineMain<T>::Apow(int n, const Interval& itv) {
 			t2 = (band - beta).ub();
 			ddelta = (t1 > t2) ? t1 : t2;
 
-			saxpy(alpha, AffineMain<T>(), beta, ddelta, true, false, true, true);
+			*this *= alpha;
+			*this += beta;
+			this->inflate(ddelta);
+			//saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
 
 		} else {
 			// for _itv = [a,b]
@@ -999,7 +1045,10 @@ inline AffineMain<T>& AffineMain<T>::Apow(int n, const Interval& itv) {
 				if (t1 > ddelta) ddelta= t1 ;
 			}
 
-			saxpy(alpha, AffineMain<T>(), beta, ddelta, true, false, true, true);
+			*this *= alpha;
+			*this += beta;
+			this->inflate(ddelta);
+			//saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
 		}
 
 	}
@@ -1050,8 +1099,10 @@ inline AffineMain<T>& AffineMain<T>::Aroot(int n, const Interval& itv) {
 
 }
 
-
+//////////////////////////////////////////////////////////////////////////////////
 // MinRange Formula
+
+
 /// for _itv = [a,b]
 //if f increase,
 // alpha = f'(a)
@@ -1116,7 +1167,10 @@ inline AffineMain<T>& AffineMain<T>::Asqrt_MR(const Interval& itv) {
 		t2 = (band-beta).ub();
 		ddelta = (t1>t2)? t1 : t2;
 
-		saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
+		*this *= alpha;
+		*this += beta;
+		this->inflate(ddelta);
+		//saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
 
 	}
 	return *this;
@@ -1163,7 +1217,10 @@ AffineMain<T>& AffineMain<T>::Aexp_MR(const Interval& itv) {
 			t2 = (band-beta).ub();
 			ddelta = (t1>t2)? t1 : t2;
 
-			saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
+			*this *= alpha;
+			*this += beta;
+			this->inflate(ddelta);
+			//saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
 		}
 
 
@@ -1218,7 +1275,10 @@ AffineMain<T>& AffineMain<T>::Alog_MR(const Interval& itv) {
 			t2 = (band-beta).ub();
 			ddelta = (t1>t2)? t1 : t2;
 
-			saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
+			*this *= alpha;
+			*this += beta;
+			this->inflate(ddelta);
+			//saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
 
 		//}
 
@@ -1269,7 +1329,10 @@ AffineMain<T>& AffineMain<T>::Ainv_MR(const Interval& itv) {
 
 		if (itv.lb()<0.0) beta = -beta;
 
-		saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
+		*this *= alpha;
+		*this += beta;
+		this->inflate(ddelta);
+		//saxpy(alpha, AffineMain<T>(), beta, ddelta, true,false,true,true);
 
 	}
 	return *this;

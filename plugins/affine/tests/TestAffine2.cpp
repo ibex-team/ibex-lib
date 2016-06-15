@@ -1124,25 +1124,25 @@ bool TestAffine2<T>::check_af2 (Function& f, Interval& I){
 
 	AffineEval<T> eval_af(f);
 
-	if (!((I.is_unbounded())||(I.is_degenerated())||(!I.is_bisectable())||(I.is_empty()))){
-	for (double ii= I.lb(); ii<I.ub(); ii += I.diam()/n) {
-		itv2 =f.eval(IntervalVector(1,Interval(ii)));
+/*	if (!((I.is_unbounded())||(I.is_degenerated())||(!I.is_bisectable())||(I.is_empty()))){
+		for (double ii= I.lb(); ii<I.ub(); ii += I.diam()/n) {
+			itv2 =f.eval(IntervalVector(1,Interval(ii)));
 
-		itv = eval_af.eval(IntervalVector(1,Interval(ii))).i();
+			itv = eval_af.eval(IntervalVector(1,Interval(ii))).i();
 
-		faa = eval_af.af2.top->i();
+			faa = eval_af.af2.top->i();
 
-		if (!(itv2.is_subset(faa.itv())))
-		{
-			std::cout  << " DEP = "<< ii<< "  "  << f<< std::endl;
-			std::cout  << " RES = "<< itv2 << " /// "<< itv << " ///// " << faa << std::endl;
-	//		std::cout  << " RES = "<< itv2 << " ///// " << faa << std::endl;
+			if (!(itv2.is_subset(faa.itv())))
+			{
+				std::cout  << " DEP = "<< ii<< "  "  << f<< std::endl;
+				std::cout  << " RES = "<< itv2 << " /// "<< itv << " ///// " << faa << std::endl;
+				//		std::cout  << " RES = "<< itv2 << " ///// " << faa << std::endl;
 
-			return false;
+				return false;
+			}
 		}
 	}
-	}
-
+*/
 
 	itv2 =f.eval(IntervalVector(1,I));
 
@@ -1152,8 +1152,8 @@ bool TestAffine2<T>::check_af2 (Function& f, Interval& I){
 
 	if (!(itv2.is_subset(faa.itv())))
 	{
-		std::cout  << " DEP = "<< I<< "  "  << f<< std::endl;
-		std::cout  << " RES = "<< itv2 << " /// "<< itv << " ///// " << faa << std::endl;
+//		std::cout  << " DEP = "<< I<< "  "  << f<< std::endl;
+//		std::cout  << " RES = "<< itv2 << " /// "<< itv << " ///// " << faa << std::endl;
 //		std::cout  << " RES = "<< itv2 << " ///// " << faa << std::endl;
 
 		return false;

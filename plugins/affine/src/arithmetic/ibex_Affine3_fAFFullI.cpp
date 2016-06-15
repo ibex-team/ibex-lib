@@ -305,164 +305,191 @@ AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::Aneg() {
 }
 
 
+
+
 template<>
-AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::saxpy(double alpha, const AffineMain<AF_fAFFullI>& y, double beta, double ddelta, bool B1, bool B2, bool B3, bool B4) {
+AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::operator*=(double alpha) {
 	// std::cout << "saxpy IN " << alpha << " x " << *this << " + " << y << " + "<< beta << " +error " << ddelta << " / "<< B1 << B2 << B3 << B4 << std::endl;
 	Interval roundoff_error(0.,0.);
 	Interval intermediate(0.,0.);
 
 	double temp, ttt, sss, eee;
-	int i;
 	//	std::cout << "in saxpy alpha=" << alpha  <<  "  beta= " <<  beta <<   "  delta = " << ddelta   << std::endl;
 	if (is_actif()) {
-		if (B1) {  // multiply by a scalar alpha
-			//std::cout << "B1" << std::endl;
-			if (alpha >= 0.0 && alpha <= 0) {
-				_n = 0;
-				_elt._center = 0.0;
-				_elt._rays.clear();
+		//std::cout << "B1" << std::endl;
+		if (alpha >= 0.0 && alpha <= 0) {
+			_n = 0;
+			_elt._center = 0.0;
+			_elt._rays.clear();
+			_elt._garbage = Interval(0.0);
+		}
+		else if ((fabs(alpha)) < POS_INFINITY) {
+			// Computation step for the center
+			intermediate = Interval(_elt._center) * alpha;
+			_elt._center = intermediate.mid();
+			roundoff_error += intermediate.rad();
+
+			_elt._garbage *= alpha;
+
+			// Computation step for the rays
+			if (!_elt._rays.empty()) {
+				std::list<std::pair<int,double> >::iterator it =  _elt._rays.begin();
+				for (; it != _elt._rays.end(); ++it) {
+					intermediate = Interval (it -> second) * alpha;
+					it -> second = intermediate.ub(); // Check if it true
+				}
+			}
+
+			_elt._garbage += roundoff_error * Interval(-1,1);
+			if (_elt._garbage.rad() > maTol) {
+				std::pair<int,double> pcumul(AF_fAFFullI::_counter++, _elt._garbage.rad());
+				_elt._rays.push_back(pcumul);
 				_elt._garbage = Interval(0.0);
 			}
-			else if ((fabs(alpha)) < POS_INFINITY) {
-				// Computation step for the center
-				intermediate = Interval(_elt._center) * alpha;
-				_elt._center = intermediate.mid();
-				roundoff_error += intermediate.rad();
+		} else {
+			*this = itv()*alpha;
+		}
+	} else {
+		*this = itv()* alpha;
+	}
+	_elt._rays.remove_if(noise_null);
 
-				_elt._garbage *= alpha;
+	return *this;
+}
 
-				// Computation step for the rays
-				if (!_elt._rays.empty()) {
-					std::list<std::pair<int,double> >::iterator it =  _elt._rays.begin();
-					for (; it != _elt._rays.end(); ++it) {
-						intermediate = Interval (it -> second) * alpha;
-						it -> second = intermediate.ub(); // Check if it true
-					}
+
+
+
+template<>
+AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::operator+=( const AffineMain<AF_fAFFullI>& y) {
+	// std::cout << "saxpy IN " << alpha << " x " << *this << " + " << y << " + "<< beta << " +error " << ddelta << " / "<< B1 << B2 << B3 << B4 << std::endl;
+	Interval roundoff_error(0.,0.);
+	Interval intermediate(0.,0.);
+
+	double temp, ttt, sss, eee;
+	//	std::cout << "in saxpy alpha=" << alpha  <<  "  beta= " <<  beta <<   "  delta = " << ddelta   << std::endl;
+	if (is_actif() && y.is_actif()) {
+		// Computation step for the center
+		intermediate = Interval(_elt._center) + y._elt._center;
+		_elt._center = intermediate.mid();
+		roundoff_error += intermediate.rad();
+
+		_elt._garbage += y._elt._garbage;
+
+		// Computation step for the rays
+		if (_elt._rays.empty())	{
+			if (!y._elt._rays.empty())	{
+				std::list<std::pair<int,double> >::const_iterator ity = y._elt._rays.begin();
+				for (; ity != y._elt._rays.end(); ++ity)	{
+					_elt._rays.push_back(std::pair<int,double>(ity->first,ity->second));
 				}
 			}
-			else {
-				*this = itv()*alpha;
-			}
-		}
+		} else if (/*!_elt._rays.empty() &&*/ !y._elt._rays.empty()) {
+			std::list<std::pair<int,double> >::iterator it =  _elt._rays.begin();
+			std::list<std::pair<int,double> >::const_iterator ity =  y._elt._rays.begin();
 
-		if (B2) {  // add a affine2 form y
-			//std::cout << "B2" << std::endl;
-			if (y.is_actif()) {
-				// Computation step for the center
-				intermediate = Interval(_elt._center) + y._elt._center;
-				_elt._center = intermediate.mid();
-				roundoff_error += intermediate.rad();
-
-				_elt._garbage += y._elt._garbage;
-
-				// Computation step for the rays
-				if (_elt._rays.empty())
-				{
-					if (!y._elt._rays.empty())
-					{
-						std::list<std::pair<int,double> >::const_iterator ity = y._elt._rays.begin();
-						for (; ity != y._elt._rays.end(); ++ity)
-						{
-							_elt._rays.push_back(std::pair<int,double>(ity->first,ity->second));
-						}
-					}
+			while ((ity != y._elt._rays.end()) || (it != _elt._rays.end()))		{
+				if (ity == y._elt._rays.end()) { //y is finished : stop
+					break;
 				}
-				else if (/*!_elt._rays.empty() &&*/ !y._elt._rays.empty()) {
-					std::list<std::pair<int,double> >::iterator it =  _elt._rays.begin();
-					std::list<std::pair<int,double> >::const_iterator ity =  y._elt._rays.begin();
-
-
-					while ((ity != y._elt._rays.end()) || (it != _elt._rays.end()))
-					{
-						if (ity == y._elt._rays.end()) //y is finished : stop
-						{
-							break;
-						}
-						else if (it == _elt._rays.end()) //x is finished : we push y
-						{
-							std::pair<int,double> py(ity->first,ity->second );
-							_elt._rays.insert(it, py);
-							ity++;
-						}
-						else if (it -> first == ity -> first) //same noise term : add
-						{
-							intermediate = Interval(it -> second) + ity -> second;
-							it -> second = intermediate.ub();
-							it++;
-							ity++;
-						}
-						else if (it -> first < ity -> first)  //noise of y after current x noise : x++
-						{
-							it++;
-						}
-						else  //noise of y before current x noise : add y before x
-						{
-							std::pair<int,double> py(ity->first,ity->second );
-							_elt._rays.insert(it, py);
-							ity++;
-						}
-					}
-
+				else if (it == _elt._rays.end()) { //x is finished : we push y
+					std::pair<int,double> py(ity->first,ity->second );
+					_elt._rays.insert(it, py);
+					ity++;
 				}
-
-			}
-			else { // y is not a valid affine2 form. So we add y.itv() such as an interval
-				*this = itv()+y.itv();
-			}
-		}
-
-		if (B3) {  //add a constant beta
-			//std::cout << "B3" << std::endl;
-			if ((fabs(beta))<POS_INFINITY) {
-
-				intermediate = Interval(_elt._center) + beta;
-				_elt._center = intermediate.mid();
-				roundoff_error += intermediate.rad();
-
-			}
-			else {
-				/* should return ENTIRE? */
-				*this = itv()+beta;
-			}
-		}
-		if (B4) {  // add an error  ddelta
-			//std::cout << "B4" << std::endl;
-			if ((fabs(ddelta))<POS_INFINITY) {
-				//double error = ddelta;
-				std::pair<int,double> pdelta(AF_fAFFullI::_counter++, ddelta);
-				_elt._rays.push_back(pdelta);
-			}
-			else {
-				Interval temp = itv()+Interval(-1,1)*ddelta;
-				_elt._center = temp.mid();
-				std::pair<int,double> p(AF_fAFFullI::_counter++, temp.rad());
-				_elt._rays.push_back(p);
+				else if (it -> first == ity -> first) { //same noise term : add
+					intermediate = Interval(it -> second) + ity -> second;
+					it -> second = intermediate.ub();
+					it++;
+					ity++;
+				}
+				else if (it -> first < ity -> first) { //noise of y after current x noise : x++
+					it++;
+				}
+				else  { //noise of y before current x noise : add y before x
+					std::pair<int,double> py(ity->first,ity->second );
+					_elt._rays.insert(it, py);
+					ity++;
+				}
 			}
 		}
 
 		_elt._garbage += roundoff_error * Interval(-1,1);
-		if (_elt._garbage.rad() > maTol)
-		{
+		if (_elt._garbage.rad() > maTol) {
 			std::pair<int,double> pcumul(AF_fAFFullI::_counter++, _elt._garbage.rad());
 			_elt._rays.push_back(pcumul);
 			_elt._garbage = Interval(0.0);
 		}
 
 	} else {
+		*this = itv()+ y.itv();
+	}
 
-		if (B1) {  //scalar alpha
-			*this = itv()* alpha;
+	_elt._rays.remove_if(noise_null);
+
+	return *this;
+}
+
+
+template<>
+AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::operator+=(double beta) {
+	// std::cout << "saxpy IN " << alpha << " x " << *this << " + " << y << " + "<< beta << " +error " << ddelta << " / "<< B1 << B2 << B3 << B4 << std::endl;
+	Interval roundoff_error(0.,0.);
+	Interval intermediate(0.,0.);
+
+	//	std::cout << "in saxpy alpha=" << alpha  <<  "  beta= " <<  beta <<   "  delta = " << ddelta   << std::endl;
+	if (is_actif() && (fabs(beta))<POS_INFINITY) {
+
+		intermediate = Interval(_elt._center) + beta;
+		_elt._center = intermediate.mid();
+		roundoff_error += intermediate.rad();
+
+		_elt._garbage += roundoff_error * Interval(-1,1);
+		if (_elt._garbage.rad() > maTol) {
+			std::pair<int,double> pcumul(AF_fAFFullI::_counter++, _elt._garbage.rad());
+			_elt._rays.push_back(pcumul);
+			_elt._garbage = Interval(0.0);
 		}
-		if (B2) {  // add y
-			*this = itv()+ y.itv();
+
+	} else {
+		*this = itv()+ beta;
+		//	std::cout << " saxpy OUT x= "<< *this<<std::endl;
+	}
+
+	_elt._rays.remove_if(noise_null);
+
+	return *this;
+}
+
+
+template<>
+AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::inflate(double ddelta) {
+	// std::cout << "saxpy IN " << alpha << " x " << *this << " + " << y << " + "<< beta << " +error " << ddelta << " / "<< B1 << B2 << B3 << B4 << std::endl;
+	Interval roundoff_error(0.,0.);
+	//	std::cout << "in saxpy alpha=" << alpha  <<  "  beta= " <<  beta <<   "  delta = " << ddelta   << std::endl;
+	if (is_actif()) {
+		//std::cout << "B4" << std::endl;
+		if ((fabs(ddelta))<POS_INFINITY) {
+			//double error = ddelta;
+			std::pair<int,double> pdelta(AF_fAFFullI::_counter++, ddelta);
+			_elt._rays.push_back(pdelta);
 		}
-		if (B3) {  //constant beta
-			*this = itv()+ beta;
+		else {
+			Interval temp = itv()+Interval(-1,1)*ddelta;
+			_elt._center = temp.mid();
+			std::pair<int,double> p(AF_fAFFullI::_counter++, temp.rad());
+			_elt._rays.push_back(p);
 		}
-		if (B4) {  // error  delta
-			*this = itv()+Interval(-1,1)*ddelta;
+
+		_elt._garbage += roundoff_error * Interval(-1,1);
+		if (_elt._garbage.rad() > maTol) {
+			std::pair<int,double> pcumul(AF_fAFFullI::_counter++, _elt._garbage.rad());
+			_elt._rays.push_back(pcumul);
+			_elt._garbage = Interval(0.0);
 		}
-		//}
+
+	} else {
+		*this = itv()+Interval(-1,1)*ddelta;
 		//	std::cout << " saxpy OUT x= "<< *this<<std::endl;
 	}
 
