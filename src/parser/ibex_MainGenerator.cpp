@@ -36,7 +36,9 @@ void MainGenerator::generate(const P_Source& source, System& sys) {
 
 	//============== generate the goal function (if any) =================
 	if (source.goal!=NULL) {
-		fac.add_goal(source.goal->generate());
+		const ExprNode& goal=source.goal->generate();
+		fac.add_goal(goal);
+		cleanup(goal,false); // delete the original goal
 	}
 
 	// ============== case of unconstrained optimization ===========
@@ -47,7 +49,8 @@ void MainGenerator::generate(const P_Source& source, System& sys) {
 
 		for (vector<ExprCtr*>::const_iterator it=ctrs.begin(); it!=ctrs.end(); it++) {
 			fac.add_ctr(**it); // by copy so...
-			delete *it;        // delete the original
+			cleanup((*it)->e,false); // delete the original expression
+			delete *it;              // and constraint
 		}
 	}
 

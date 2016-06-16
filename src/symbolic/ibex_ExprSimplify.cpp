@@ -76,9 +76,18 @@ const ExprNode& ExprSimplify::simplify(const ExprNode& e) {
 		delete it->second;
 	}
 
+	/** auto-cleanup................ */
+	for (int i=0; i<old_nodes.size(); i++) {
+		if (!all_nodes.found(old_nodes[i]))
+			all_nodes.insert(old_nodes[i],true);
+	}
+	/*...............................*/
+
 	for (IBEX_NODE_MAP(bool)::const_iterator it=all_nodes.begin(); it!=all_nodes.end(); it++) {
-		if (!old_nodes.found(*it->first) && !new_nodes.found(*it->first))
-				delete it->first;
+		if (/* auto-cleanup, so remove this ----> !old_nodes.found(*it->first) && */
+			!dynamic_cast<const ExprSymbol*>(it->first) && !new_nodes.found(*it->first)) {
+			delete it->first;
+		}
 	}
 
 	idx_clones.clean();
