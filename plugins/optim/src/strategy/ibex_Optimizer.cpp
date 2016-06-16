@@ -122,6 +122,7 @@ Optimizer::~Optimizer() {
 	}
 	buffer.flush();
 	if (equs) delete equs;
+	if (df) delete df;
 	delete mylp;
 	delete lr;
 	delete &buffer.cost1();
