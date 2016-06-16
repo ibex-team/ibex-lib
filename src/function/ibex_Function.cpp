@@ -74,6 +74,10 @@ void Function::jacobian(const IntervalVector& x, IntervalMatrix& J) const {
 	// by calling just once the forward phase on f itself
 	for (int i=0; i<image_dim(); i++) {
 		(*this)[i].gradient(x,J[i]);
+		if (J[i].is_empty()) {
+			J.set_empty();
+			return;
+		}
 	}
 }
 
@@ -112,6 +116,10 @@ void Function::hansen_matrix(const IntervalVector& box, IntervalMatrix& H) const
 		//var=tab[i];
 		x[var]=box[var];
 		jacobian(x,J);
+                if (J.is_empty()) {
+                    H.set_empty();
+                    return;
+                }
 		H.set_col(var,J.col(var));
 	}
 
@@ -135,6 +143,10 @@ void Function::hansen_matrix(const IntervalVector& box, IntervalMatrix& H, const
 		//var=tab[i];
 		x[var]=var_box[var];
 		jacobian(set.full_box(x,param_box),J,set);
+                if (J.is_empty()) {
+                    H.set_empty();
+                    return;
+                }
 		H.set_col(var,J.col(var));
 	}
 }
