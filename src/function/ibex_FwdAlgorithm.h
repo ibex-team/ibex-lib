@@ -21,6 +21,7 @@ namespace ibex {
  * \brief Interface for forward algorithms.
  */
 class FwdAlgorithm {
+protected:
 
 	/** TO BE DEFINED (by the subclass) */
 	void idx_fwd(int x, int y);
