@@ -37,7 +37,7 @@ bool is_identity(const ExprNode& e) {
 		case Dim::SCALAR:     return d.i()==Interval::ONE;
 		case Dim::ROW_VECTOR:
 		case Dim::COL_VECTOR: return false;
-		case Dim::MATRIX:     return d.m()==Matrix::eye(d.dim.nb_rows());
+		default:              return d.m()==Matrix::eye(d.dim.nb_rows());
 		}
 	} else {
 		return false;
@@ -240,8 +240,16 @@ void ExprSimplify::visit(const ExprSub& e) {
 }
 
 void ExprSimplify::visit(const ExprMul& e) {
-	DoubleIndex l_idx=DoubleIndex::rows(e.left.dim,idx.first_row(),idx.last_row());
-	DoubleIndex r_idx=DoubleIndex::cols(e.right.dim,idx.first_col(),idx.last_col());
+	DoubleIndex l_idx;
+	DoubleIndex r_idx;
+
+	if (e.left.dim.is_scalar()) {
+		l_idx=DoubleIndex::all(e.left.dim);
+		r_idx=idx;
+	} else {
+		l_idx=DoubleIndex::rows(e.left.dim,idx.first_row(),idx.last_row());
+		r_idx=DoubleIndex::cols(e.right.dim,idx.first_col(),idx.last_col());
+	}
 
 	const ExprNode& l=get(e.left, l_idx);
 	const ExprNode& r=get(e.right, r_idx);

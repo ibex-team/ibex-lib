@@ -219,6 +219,14 @@ void TestExprDiff::vecimg02() {
 	CPPUNIT_ASSERT(c->get_matrix_value()==mat);
 }
 
+void TestExprDiff::mul01() {
+	Variable x("x");
+	const ExprVector& v1=ExprVector::new_(x,x,true);
+	const ExprVector& v2=ExprVector::new_(x,Interval(2,2),false);
+	Function f(x,v1*v2);
+	Function df(f,Function::DIFF);
+	CPPUNIT_ASSERT(sameExpr(df.expr(),"((x+2)+x)"));
+}
 
 void TestExprDiff::apply_mul01() {
 	Variable x,y;
