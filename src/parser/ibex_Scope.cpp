@@ -157,15 +157,17 @@ Scope::~Scope() {
 
 
 void Scope::add_cst(const char* id, const Domain& domain) {
-	tab.insert_new(id, new S_Cst(domain));
-	cst.push_back(id);
+	//cout << "[parser] add cst " << id << "=" << domain << endl;
+	const char* id_copy=tab.insert_new(id, new S_Cst(domain));
+	cst.push_back(id_copy);
 }
 
 void Scope::add_cst(const char* id, const Dim* dim, const Domain& dom) {
 	Domain tmp(*dim);
 	//cout << "[parser] add cst " << id << "=" << dom.dim << "<>" << *dim << endl;
 	init_symbol_domain(id, tmp, dom);
-	tab.insert_new(id, new S_Cst(tmp));
+	const char* id_copy=tab.insert_new(id, new S_Cst(tmp));
+	cst.push_back(id_copy);
 }
 
 //void Scope::bind_cst_node(const char* id, const ExprConstant& node) {
@@ -176,6 +178,7 @@ void Scope::add_cst(const char* id, const Dim* dim, const Domain& dom) {
 
 void Scope::rem_cst(const char* id) {
 	assert(tab[id]->token()==TK_CONSTANT);
+	delete &get_cst(id);
 	delete tab[id];
 	tab.erase(id);
 }

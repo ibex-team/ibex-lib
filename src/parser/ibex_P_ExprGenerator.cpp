@@ -247,8 +247,8 @@ void ExprGenerator::visit(const P_ExprNode& e) {
 					e.lab = new LabelNode(&e2.lab->node());
 				}
 				break;
-			case P_ExprNode::CST:        e.lab=new LabelConst(((P_ExprConstant&) e).value,true); break;
-			case P_ExprNode::ITER:       e.lab=new LabelConst(scope.get_iter_value(((P_ExprIter&) e).name)); break;
+			case P_ExprNode::CST:     e.lab=new LabelConst(((P_ExprConstant&) e).value,true); break;
+			case P_ExprNode::ITER:    e.lab=new LabelConst(scope.get_iter_value(((P_ExprIter&) e).name)); break;
 			case P_ExprNode::IDX:
 			case P_ExprNode::IDX_RANGE:
 			case P_ExprNode::IDX_ALL:
@@ -462,6 +462,15 @@ pair<int,int> ExprGenerator::visit_index_tmp(const Dim& dim, const P_ExprNode& i
 	default:
 		assert(false);
 	}
+
+	/**
+	 * To be clean, we should create a LabeNode subclass
+	 * that contains the returned pair. Meanwhile, we
+	 * have to create a dummy label so that
+	 * the cleanup will not consider this node as already visited
+	 * (and delete properly the labels of the index/indices).
+	 */
+	idx.lab = new LabelConst(0); // dummy
 
 	return pair<int,int>(i1,i2);
 }

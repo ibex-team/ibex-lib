@@ -311,25 +311,26 @@ void ExprSimplify::unary(const N& e, Domain (*fcst)(const Domain&)) {
 		insert(e, N::new_(expr));
 }
 
+// Implemented by Soonho
 void ExprSimplify::visit(const ExprChi& e) {
 	const ExprNode& arg0=get(e.args[0], idx);
-        if (arg0.dim.is_scalar() && is_cst(arg0)) {
-            // soonho: I am not sure whether `arg0.dim.is_scalar()` is necessary here..
-            auto const c = to_cst(arg0).i();
-            if (c.lb() > 0) {
-                // if c > 0, chi(c, arg1, arg2) reduces to arg1
-                const ExprNode& arg1=get(e.args[1], idx);
-                insert(e, arg1);
-                return;
-            } else if (c.ub() <= 0) {
-                // if c <= 0, chi(c, arg1, arg2) reduces to arg2
-                const ExprNode& arg2=get(e.args[2], idx);
-                insert(e, arg2);
-                return;
-            }
-        } else {
-            insert(e, e);
-        }
+	if (is_cst(arg0)) {
+		assert(arg0.dim.is_scalar());
+		const Interval& c = to_cst(arg0).i();
+		if (c.lb() > 0) {
+			// if c > 0, chi(c, arg1, arg2) reduces to arg1
+			const ExprNode& arg1=get(e.args[1], idx);
+			insert(e, arg1);
+			return;
+		} else if (c.ub() <= 0) {
+			// if c <= 0, chi(c, arg1, arg2) reduces to arg2
+			const ExprNode& arg2=get(e.args[2], idx);
+			insert(e, arg2);
+			return;
+		}
+	} else {
+		insert(e, e);
+	}
 }
 
 void ExprSimplify::visit(const ExprApply& e) {
