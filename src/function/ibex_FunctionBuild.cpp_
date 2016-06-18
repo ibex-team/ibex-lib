@@ -437,7 +437,7 @@ void Function::generate_comp() {
 				Array<const ExprSymbol> x(nb_arg());
 				varcopy(symbs,x);
 				const ExprIndex& yij_tmp=expr()[DoubleIndex::one_elt(expr().dim,i,j)];
-				const ExprNode& yij=ExprCopy().copy(symbs, x, yij_tmp);
+				const ExprNode& yij=ExprCopy().copy(symbs, x, yij_tmp).simplify();
 				delete &yij_tmp;
 				Function* fij=new Function(x,yij);
 				const ExprConstant* c=dynamic_cast<const ExprConstant*>(&(fij->expr()));
