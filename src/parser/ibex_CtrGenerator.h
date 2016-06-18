@@ -14,11 +14,11 @@
 #include <vector>
 #include <stack>
 #include <utility>
-#include "ibex_Scope.h"
+
 #include "ibex_NumConstraint.h"
+#include "ibex_P_Expr.h"
 #include "ibex_Expr.h"
 #include "ibex_Function.h"
-
 
 namespace ibex {
 
@@ -28,23 +28,19 @@ class P_NumConstraint;
 class P_OneConstraint;
 class P_ConstraintList;
 class P_ConstraintLoop;
+class P_Source;
 
 class CtrGenerator {
 public:
-	void generate(const Array<const ExprSymbol>& src_vars, const P_ConstraintList& src, std::vector<NumConstraint*>& dest);
+	std::vector<ExprCtr*> generate(const P_ConstraintList& ctrs);
 
 	void visit(const P_NumConstraint& c);
 	void visit(const P_OneConstraint& c);
 	void visit(const P_ConstraintList& l);
 	void visit(const P_ConstraintLoop& l);
 
-
 protected:
-	const Array<const ExprSymbol>* src_vars;
-	const Array<const ExprSymbol>* res_vars;
-	std::vector<NumConstraint*>* ctrs;
-
-	std::stack<Scope> scopes;
+	std::vector<ExprCtr*> ctrs;
 
 };
 

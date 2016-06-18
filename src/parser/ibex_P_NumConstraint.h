@@ -30,7 +30,7 @@ public:
 
 class P_OneConstraint : public P_NumConstraint {
 public:
-	P_OneConstraint(const ExprNode& left, CmpOp op, const ExprNode& right);
+	P_OneConstraint(const P_ExprNode* left, CmpOp op, const P_ExprNode* right);
 
 	void acceptVisitor(CtrGenerator& g) const {
 		g.visit(*this);
@@ -41,13 +41,13 @@ public:
 	 */
 	~P_OneConstraint();
 
-	const ExprNode& expr;
+	const P_ExprNode& expr;
 	CmpOp op;
 };
 
 class P_ConstraintList : public P_NumConstraint {
 public:
-	P_ConstraintList(std::vector<P_NumConstraint*>& ctrs);
+	P_ConstraintList(std::vector<P_NumConstraint*>* ctrs);
 
 	void acceptVisitor(CtrGenerator& g) const {
 		g.visit(*this);
@@ -64,7 +64,7 @@ public:
 
 class P_ConstraintLoop : public P_NumConstraint {
 public:
-	P_ConstraintLoop(const char* iter, const ExprNode& first_value, const ExprNode& last_value, std::vector<P_NumConstraint*>& ctrs);
+	P_ConstraintLoop(const char* iter, const P_ExprNode* first_value, const P_ExprNode* last_value, std::vector<P_NumConstraint*>* ctrs);
 
 	void acceptVisitor(CtrGenerator& g) const {
 		g.visit(*this);
@@ -76,12 +76,13 @@ public:
 	~P_ConstraintLoop();
 
 	const char* iter;
-	const ExprNode& first_value;
-	const ExprNode& last_value;
+	const P_ExprNode& first_value;
+	const P_ExprNode& last_value;
 
 	P_ConstraintList ctrs;
 };
 
 } // end namespace parser
 } // end namespace ibex
+
 #endif // __IBEX_PARSER_NUM_CONSTRAINT_H__

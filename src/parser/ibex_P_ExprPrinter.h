@@ -24,17 +24,17 @@ namespace parser {
 #pragma clang diagnostic ignored "-Woverloaded-virtual"
 #endif
 
-class P_ExprPrinter : private ExprPrinter, public virtual P_ExprVisitor {
+class P_ExprPrinter : public virtual P_ExprVisitor {
 public:
-	void print(std::ostream& os, const ExprNode& e);
+	P_ExprPrinter(std::ostream& os, const P_ExprNode& e);
 
 protected:
-	void visit(const ExprNode& e);
-	void visit(const P_ExprPower&);
-	void visit(const P_ExprIndex&);
-	void visit(const ExprConstantRef&);
-	void visit(const ExprIter&);
-	void visit(const ExprInfinity&);
+	void visit(const P_ExprNode& e);
+	void visit(const P_ExprWithIndex&);
+
+	void print_arg_list(const P_ExprNode&, bool);
+
+	std::ostream& os;
 };
 
 #ifdef __clang__

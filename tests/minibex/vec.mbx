@@ -1,0 +1,65 @@
+constants 
+ cs1=1;
+ cs2=2;
+ cs3=3;
+ ccv2[2]=(0; 1);
+ ccv3[3]=(0; 1; 2);
+ crv2[1][2]=(0, 1);
+ crv3[1][3]=(0, 1, 2);
+ cm22[2][2]=((0, 1); (2, 3));
+ cm23[2][3]=((0, 1, 2); (3, 4, 5));
+ cm32[3][2]=((0, 1); (2, 3); (4, 5));
+ cm33[3][3]=(cm32, ccv3);
+ 
+variables
+ xs1,xs2,xs3;
+ xcv2[2];
+ xcv3[3];
+ xrv2[1][2];
+ xrv3[1][3];
+ xm22[2][2]; 
+ xm23[2][3];
+ xm32[3][2];
+ xm33[3][3];
+ 
+constraints
+
+ xcv3=(cs1;cs2;cs3); 
+ xcv3=(ccv2;cs1);
+ xcv3=((cs1;cs2);cs3);
+ xcv3=((cs1;3.0);cs3);
+  
+ (xs1;xs2;xs3)=ccv3;
+ (xcv2;xs3)=ccv3;
+ ((xs1;xs2);xs3)=ccv3;
+ 
+ xrv3=(cs1,cs2,cs3);
+ xrv3=(crv2,cs1);
+ xrv3=((cs1,cs2),cs3);
+
+ (xs1,xs2,xs3)=crv3;
+ (xrv2,xs3)=crv3;
+ ((xs1,xs2),xs3)=crv3;
+
+ // mix var/cst left/right side 
+ (xs1;cs2;xs3)=(cs1;xs2;cs3);
+ ((xs1;cs2);xs3)=(cs1;(xs2;cs3));
+  
+ xm32=(ccv3,ccv3);
+ xm32=((ccv2;cs1),(ccv2;cs2));
+ xm32=(cm22;crv2);
+ xm32=(crv2;crv2;crv2);
+ xm32=(crv2;(crv2;crv2));
+
+ (xcv3,xcv3)=cm32;
+ ((xcv2;xs1),(xcv2;xs2))=cm32;
+ (xm22;xrv2)=cm32;
+ (xrv2;xrv2;xrv2)=cm32;
+ (xrv2;(xrv2;xrv2))=cm32;
+ 
+ xm33=((cm22;(cs1,cs2)),(ccv3));
+ xm33=( ((crv2;(cs1,cs2)),(ccv2)) ; (cs1,cs2,cs3));
+ ((xm22;(xs1,xs2)),(xcv3))=cm33;
+ ( ((xrv2;(xs1,xs2)),(xcv2)) ; (xs1,xs2,xs3))=cm33;
+ 
+end

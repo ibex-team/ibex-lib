@@ -10,9 +10,10 @@
  * ---------------------------------------------------------------------------- */
 
 #include <sstream>
-#include "ibex_Dim.h"
-#include "ibex_DimException.h"
 #include <cassert>
+
+#include "ibex_Dim.h"
+#include "ibex_DoubleIndex.h"
 
 using std::stringstream;
 
@@ -110,19 +111,60 @@ Dim vec_dim(const Array<const Dim>& comp, bool in_a_row) {
 	throw DimException("impossible to form a vector with heterogeneous components");
 }
 
-Dim Dim::index_dim() const {
+//Dim Dim::index_dim() const {
+//
+//  if (nb_rows()==1 || nb_cols()==1) // vector or scalar
+//	  return scalar();
+//  else // matrix
+//	  return row_vec(nb_cols()); // return a row vector
+//}
 
-  if (nb_rows()==1 || nb_cols()==1) // vector or scalar
-	  return scalar();
-  else // matrix
-	  return row_vec(nb_cols()); // return a row vector
+Dim Dim::index_dim(const DoubleIndex& idx) const {
+
+	if (idx.all_rows()) {
+		if (idx.all_cols())
+			return *this;
+		else if (idx.one_col()) {
+			switch(type()) {
+			case MATRIX: return col_vec(nb_rows());
+			case COL_VECTOR: return *this;
+			case ROW_VECTOR:
+			case SCALAR: return scalar();
+			}
+		} else {
+			if (is_matrix()) return matrix(nb_rows(),idx.nb_cols());
+			else             return row_vec(idx.nb_cols());
+		}
+	} else if (idx.one_row()) {
+		if (idx.all_cols()) {
+			switch(type()) {
+			case MATRIX: return row_vec(nb_cols());
+			case ROW_VECTOR: return *this;
+			case COL_VECTOR:
+			case SCALAR: return scalar();
+			}
+		} else if (idx.one_col())
+			return scalar();
+		else
+			return row_vec(idx.nb_cols());
+	} else {
+		if (idx.all_cols()) {
+			if (is_matrix()) return matrix(idx.nb_rows(),nb_cols());
+			else             return col_vec(idx.nb_rows());
+		}
+		if (idx.one_col()) {
+			return col_vec(idx.nb_rows());
+		} else {
+			return matrix(idx.nb_rows(),idx.nb_cols());
+		}
+	}
 }
 
-int Dim::max_index() const {
-	if (is_scalar()) return 0;
-	else if (is_vector()) return vec_size()-1;
-	else return nb_rows()-1;
-}
+//int Dim::max_index() const {
+//	if (is_scalar()) return 0;
+//	else if (is_vector()) return vec_size()-1;
+//	else return nb_rows()-1;
+//}
 
 Dim Dim::transpose_dim() const {
 	switch (type()) {
@@ -170,7 +212,11 @@ int Dim::index_num(int this_num, int index) const {
 */
 
 std::ostream& operator<<(std::ostream& os, const Dim& d) {
-  return os << d.nb_rows() << ", " << d.nb_cols();
+  return os << d.nb_rows() << "x" << d.nb_cols();
 }
 
+std::ostream& operator<< (std::ostream& os, const DimException& e) {
+  os << "Dimension mismatch: " << e.message();
+  return os;
+}
 } // namespace ibex

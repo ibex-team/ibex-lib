@@ -38,6 +38,7 @@ public:
 	CPPUNIT_TEST(cst_grad);
 	CPPUNIT_TEST(vecimg01);
 	CPPUNIT_TEST(vecimg02);
+	CPPUNIT_TEST(mul01);
 	CPPUNIT_TEST(apply_mul01);
 	CPPUNIT_TEST_SUITE_END();
 
@@ -74,6 +75,9 @@ public:
 
 	// (x,y) -> (x,y,x)
 	void vecimg02();
+
+	// V*V
+	void mul01();
 
 	// void (x,y) -> f(x,y)*f(y,x) with f(x,y)=x
 	void apply_mul01();

@@ -103,7 +103,7 @@ void Expr2DAG::visit_unary(const T& e) {
 }
 
 void Expr2DAG::visit(const ExprNode& e) { e.acceptVisitor(*this); }
-void Expr2DAG::visit(const ExprIndex& i) { }
+void Expr2DAG::visit(const ExprIndex& i) { /* TODO: nothing here?? */ }
 
 void Expr2DAG::visit(const ExprNAryOp& e)   { e.acceptVisitor(*this); } // (useless so far)
 void Expr2DAG::visit(const ExprLeaf& e)     { e.acceptVisitor(*this); } // (useless so far)

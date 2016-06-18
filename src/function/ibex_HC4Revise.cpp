@@ -78,6 +78,14 @@ bool HC4Revise::backward(const Domain& y) {
 	//std::cout << "backward:" << std::endl; f.cf.print();
 }
 
+void HC4Revise::idx_cp_bwd(int x, int y) {
+	assert(dynamic_cast<const ExprIndex*> (&f.node(y)));
+
+	const ExprIndex& e = (const ExprIndex&) f.node(y);
+
+	d[x].put(e.index.first_row(), e.index.first_col(), d[y]);
+}
+
 void HC4Revise::apply_bwd(int* x, int y) {
 	assert(dynamic_cast<const ExprApply*> (&f.node(y)));
 

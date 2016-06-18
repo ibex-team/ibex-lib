@@ -104,6 +104,14 @@ void Gradient::vector_fwd(int* x, int y) {
 		g[y].m().clear();
 }
 
+void Gradient::idx_cp_bwd(int x, int y) {
+	assert(dynamic_cast<const ExprIndex*> (&f.node(y)));
+
+	const ExprIndex& e = (const ExprIndex&) f.node(y);
+
+	g[x].put(e.index.first_row(), e.index.first_col(), g[y]);
+}
+
 void Gradient::vector_bwd(int* x, int y) {
 	assert(dynamic_cast<const ExprVector*>(&(f.node(y))));
 

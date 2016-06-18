@@ -83,7 +83,8 @@ protected:
 	ExprDomain& d;
 
 public: // because called from CompiledFunction
-	inline void index_bwd  (int, int)          { /* nothing to do */ }
+	inline void idx_bwd    (int, int)          { /* nothing to do */ }
+	       void idx_cp_bwd (int, int);
 	       void vector_bwd (int* x, int y);
 	inline void symbol_bwd (int)                 { /* nothing to do */ }
 	inline void cst_bwd    (int)                 { /* nothing to do */ }
