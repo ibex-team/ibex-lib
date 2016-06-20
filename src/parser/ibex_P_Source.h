@@ -12,7 +12,7 @@
 #define __IBEX_PARSER_SOURCE_H__
 
 #include <vector>
-#include "ibex_P_Expr.h"
+#include "ibex_Expr.h"
 #include "ibex_P_NumConstraint.h"
 #include "ibex_Function.h"
 
@@ -25,25 +25,23 @@ namespace parser {
  */
 class P_Source {
 public:
+
+	P_Source();
+
 	/**
-	 * Delete the vars, sybs, eprs, ctrs.
+	 * Delete the variables symbols.
 	 *
 	 * Not the functions (transmitted by reference to P_Result).
 	 */
 	void cleanup();
 
-	P_Source();
-
-	/** The "entities" */
-	std::vector<Entity*> vars;
-
 	/** The functions */
 	std::vector<Function*> func;
 
 	/** The goal (NULL if none (pure satisfaction problem)) */
-	const ExprNode* goal;
+	const P_ExprNode* goal;
 
-	/** The constraints */
+	/** The constraints (NULL if none (pure optimization problem)) */
 	P_ConstraintList* ctrs;
 };
 

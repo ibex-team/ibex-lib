@@ -39,143 +39,102 @@ void TestParser::var01() {
 	CPPUNIT_ASSERT(sys.ctrs[0].op==GEQ);
 }
 
-void TestParser::const01() {
+void TestParser::const_var_idx() {
+	int n=18;
 	try {
-		System sys("quimper/const01.qpr");
-		check(sys.box[0],Interval(3.14159));
-		sys.box.init(Interval::ALL_REALS);
-		CtcFwdBwd c0(sys.ctrs[0]);
-		c0.contract(sys.box);
-		CPPUNIT_ASSERT(sys.box[0]==Interval::ZERO);
+		System sys("minibex/const_var_idx.mbx");
+		CPPUNIT_ASSERT(sys.args.size()==n);
+		int i=0;
+		CPPUNIT_ASSERT(strcmp(sys.args[i++].name,"xs")==0);
+		CPPUNIT_ASSERT(strcmp(sys.args[i++].name,"xs_1")==0);
+		CPPUNIT_ASSERT(strcmp(sys.args[i++].name,"xs_2")==0);
+		CPPUNIT_ASSERT(strcmp(sys.args[i++].name,"xs_3")==0);
+		CPPUNIT_ASSERT(strcmp(sys.args[i++].name,"xs_4")==0);
+		CPPUNIT_ASSERT(strcmp(sys.args[i++].name,"xcv2")==0);
+		CPPUNIT_ASSERT(strcmp(sys.args[i++].name,"xcv2_1")==0);
+		CPPUNIT_ASSERT(strcmp(sys.args[i++].name,"xcv2_2")==0);
+		CPPUNIT_ASSERT(strcmp(sys.args[i++].name,"xcv3")==0);
+		CPPUNIT_ASSERT(strcmp(sys.args[i++].name,"xrv3")==0);
+		CPPUNIT_ASSERT(strcmp(sys.args[i++].name,"xrv3_1")==0);
+		CPPUNIT_ASSERT(strcmp(sys.args[i++].name,"xrv3_2")==0);
+		CPPUNIT_ASSERT(strcmp(sys.args[i++].name,"xm22")==0);
+		CPPUNIT_ASSERT(strcmp(sys.args[i++].name,"xm23")==0);
+		CPPUNIT_ASSERT(strcmp(sys.args[i++].name,"xm23_1")==0);
+		CPPUNIT_ASSERT(strcmp(sys.args[i++].name,"xm23_2")==0);
+		CPPUNIT_ASSERT(strcmp(sys.args[i++].name,"xm23_3")==0);
+		CPPUNIT_ASSERT(strcmp(sys.args[i++].name,"xm32")==0);
+		i=0;
+		CPPUNIT_ASSERT(sys.args[i++].dim.is_scalar());
+		CPPUNIT_ASSERT(sys.args[i++].dim.is_scalar());
+		CPPUNIT_ASSERT(sys.args[i++].dim.is_scalar());
+		CPPUNIT_ASSERT(sys.args[i++].dim.is_scalar());
+		CPPUNIT_ASSERT(sys.args[i++].dim.is_scalar());
+		CPPUNIT_ASSERT(sys.args[i++].dim==Dim::col_vec(2));
+		CPPUNIT_ASSERT(sys.args[i++].dim==Dim::col_vec(2));
+		CPPUNIT_ASSERT(sys.args[i++].dim==Dim::col_vec(2));
+		CPPUNIT_ASSERT(sys.args[i++].dim==Dim::col_vec(3));
+		CPPUNIT_ASSERT(sys.args[i++].dim==Dim::row_vec(3));
+		CPPUNIT_ASSERT(sys.args[i++].dim==Dim::row_vec(3));
+		CPPUNIT_ASSERT(sys.args[i++].dim==Dim::row_vec(3));
+		CPPUNIT_ASSERT(sys.args[i++].dim==Dim::matrix(2,2));
+		CPPUNIT_ASSERT(sys.args[i++].dim==Dim::matrix(2,3));
+		CPPUNIT_ASSERT(sys.args[i++].dim==Dim::matrix(2,3));
+		CPPUNIT_ASSERT(sys.args[i++].dim==Dim::matrix(2,3));
+		CPPUNIT_ASSERT(sys.args[i++].dim==Dim::matrix(2,3));
+		CPPUNIT_ASSERT(sys.args[i++].dim==Dim::matrix(3,2));
+		i=0;
+		CPPUNIT_ASSERT(sys.box[i++]==Interval::ALL_REALS);
+		CPPUNIT_ASSERT(sys.box[i++]==Interval(0,1));
+		CPPUNIT_ASSERT(sys.box[i++]==Interval::NEG_REALS);
+		CPPUNIT_ASSERT(sys.box[i++]==Interval::POS_REALS);
+		CPPUNIT_ASSERT(sys.box[i++]==3.14);
+
+		CPPUNIT_ASSERT(sys.box[i++]==Interval::ALL_REALS);
+		CPPUNIT_ASSERT(sys.box[i++]==Interval::ALL_REALS);
+		CPPUNIT_ASSERT(sys.box[i++]==Interval(0,1));
+		CPPUNIT_ASSERT(sys.box[i++]==Interval(0,2));
+		CPPUNIT_ASSERT(sys.box[i++]==Interval(0,0));
+		CPPUNIT_ASSERT(sys.box[i++]==Interval(1,1));
+
+		// xcv3
+		CPPUNIT_ASSERT(sys.box.subvector(i,i+2)==IntervalVector(3,Interval::ALL_REALS));
+		i+=3;
+
+		CPPUNIT_ASSERT(sys.box.subvector(i,i+2)==IntervalVector(3,Interval::ALL_REALS));
+		i+=3;
+		CPPUNIT_ASSERT(sys.box[i++]==Interval(0,1));
+		CPPUNIT_ASSERT(sys.box[i++]==Interval(0,2));
+		CPPUNIT_ASSERT(sys.box[i++]==Interval(0,3));
+		CPPUNIT_ASSERT(sys.box[i++]==Interval::ZERO);
+		CPPUNIT_ASSERT(sys.box[i++]==Interval::ONE);
+		CPPUNIT_ASSERT(sys.box[i++]==Interval(2,2));
+
+		// xm22
+		CPPUNIT_ASSERT(sys.box.subvector(i,i+3)==IntervalVector(4,Interval::ALL_REALS));
+		i+=4;
+		CPPUNIT_ASSERT(sys.box.subvector(i,i+5)==IntervalVector(6,Interval::ALL_REALS));
+		i+=6;
+		CPPUNIT_ASSERT(sys.box.subvector(i,i+5)==IntervalVector(6,Interval::NEG_REALS));
+		i+=6;
+		CPPUNIT_ASSERT(sys.box[i++]==Interval::POS_REALS);
+		CPPUNIT_ASSERT(sys.box[i++]==Interval::ZERO);
+		CPPUNIT_ASSERT(sys.box[i++]==Interval(0,1));
+		CPPUNIT_ASSERT(sys.box[i++]==Interval(0,1));
+		CPPUNIT_ASSERT(sys.box[i++]==Interval::ZERO);
+		CPPUNIT_ASSERT(sys.box[i++]==Interval::NEG_REALS);
+		CPPUNIT_ASSERT(sys.box[i++]==0);
+		CPPUNIT_ASSERT(sys.box[i++]==1);
+		CPPUNIT_ASSERT(sys.box[i++]==2);
+		CPPUNIT_ASSERT(sys.box[i++]==3);
+		CPPUNIT_ASSERT(sys.box[i++]==4);
+		CPPUNIT_ASSERT(sys.box[i++]==5);
+		CPPUNIT_ASSERT(sys.box.subvector(i,i+5)==IntervalVector(6,Interval::NEG_REALS));
+		i+=6;
+
 	} catch(SyntaxError& e) {
 		cout << e << endl;
 		CPPUNIT_ASSERT(false);
 	}
-}
-
-void TestParser::const02() {
-	try {
-		System sys("quimper/const02.qpr");
-		double _box[3][2]={{0,0},{1,1},{2,2}};
-		IntervalVector box(3,_box);
-		check(sys.box,box);
-		sys.box.init(Interval::ALL_REALS);
-		CtcFwdBwd c0(sys.ctrs[0]);
-		c0.contract(sys.box);
-		CPPUNIT_ASSERT(sys.box[0]==Interval::ZERO);
-	} catch(SyntaxError& e) {
-		cout << e << endl;
-		CPPUNIT_ASSERT(false);
-	}
-}
-
-void TestParser::const03() {
-	try {
-		System sys("quimper/const03.qpr");
-		double _m[6][2]={{0,0},{1,1},{2,2},
-				{3,3},{4,4},{5,5}};
-		IntervalVector box(6,_m);
-		check(sys.box,box);
-
-		sys.box.init(Interval::ALL_REALS);
-		CtcFwdBwd(sys.ctrs[0]).contract(sys.box);
-		check(sys.box[0],Interval::ZERO);
-		check(sys.box[1],Interval::ALL_REALS);
-
-		sys.box.init(Interval::ALL_REALS);
-		CtcFwdBwd(sys.ctrs[1]).contract(sys.box);
-		IntervalVector zero(3);
-		zero.init(0);
-		check(sys.box.subvector(0,2),zero);
-
-	} catch(SyntaxError& e) {
-		cout << e << endl;
-		CPPUNIT_ASSERT(false);
-	}
-}
-
-void TestParser::const04() {
-	try {
-		System sys("quimper/const04.qpr");
-		double _m[6][2]={{0,0},{3,3},{1,1},
-				         {4,4},{2,2},{5,5}};
-		IntervalVector box(6,_m);
-		check(sys.box,box);
-	} catch(SyntaxError& e) {
-		cout << e << endl;
-		CPPUNIT_ASSERT(false);
-	}
-}
-
-void TestParser::const05() {
-	try {
-		System sys("quimper/const05.qpr");
-		double _m[6][2]={{0,0},{3,3},{1,1},
-				         {4,4},{2,2},{5,5}};
-		IntervalVector box(6,_m);
-		check(sys.box,box.inflate(0.1));
-	} catch(SyntaxError& e) {
-		cout << e << endl;
-		CPPUNIT_ASSERT(false);
-	}
-}
-
-void TestParser::const06() {
-	try {
-		System sys("quimper/const06.qpr");
-		check(sys.box[0],Interval(1.0,POS_INFINITY));
-		check(sys.box[1],Interval(NEG_INFINITY,0));
-		check(sys.box[2],Interval::ALL_REALS);
-	} catch(SyntaxError& e) {
-		cout << e << endl;
-		CPPUNIT_ASSERT(false);
-	}
-}
-
-void TestParser::const07() {
-//	try {
-//		System sys("quimper/const07.qpr");
-//
-//		double _m1[6][2]={{0,0},{1,1},{2,2},
-//				{3,3},{4,4},{5,5}};
-//		IntervalVector box1(6,_m1);
-//		double _m2[6][2]={{6,6},{7,7},{8,8},
-//				{9,9},{10,10},{11,11}};
-//		IntervalVector box2(6,_m2);
-//		check(sys.box.subvector(0,5), box1);
-//		check(sys.box.subvector(6,11), box2);
-//		sys.box.init(Interval::ALL_REALS);
-//
-//		CtcFwdBwd c0(sys.ctrs[0]);
-//		c0.contract(sys.box);
-//		CPPUNIT_ASSERT(!sys.box.is_empty());
-//		IntervalVector zero(6);
-//		zero.init(0);
-//
-//		CtcFwdBwd c1(sys.ctrs[1]);
-//		sys.box[5]=Interval::ALL_REALS;
-//		c1.contract(sys.box);
-//		CPPUNIT_ASSERT(!sys.box.is_empty());
-//		check(sys.box[5],Interval(1,1));
-//
-//		CtcFwdBwd c2(sys.ctrs[2]);
-//		sys.box.init(Interval::ALL_REALS);
-//		c2.contract(sys.box);
-//		CPPUNIT_ASSERT(!sys.box.is_empty());
-//		check(sys.box[5],Interval(1,1));
-//
-//		CtcFwdBwd c3(sys.ctrs[3]);
-//		sys.box.init(Interval::ALL_REALS);
-//		c3.contract(sys.box);
-//		CPPUNIT_ASSERT(!sys.box.is_empty());
-//		double _c21[][2]={{6,6},{7,7},{8,8}};
-//		IntervalVector c21(3,_c21);
-//		check(sys.box.subvector(3,5),c21);
-//
-//	} catch(SyntaxError& e) {
-//		cout << e << endl;
-//		CPPUNIT_ASSERT(false);
-//	}
 }
 
 void TestParser::const08() {
@@ -295,6 +254,7 @@ void TestParser::loop01() {
 		double b = 2;
 		int c=0;
 		double error=1e-15;
+
 		for (int i=1;i<=3;i++) {
 		    for (int j=1; j<=i; j++) {
 
@@ -306,10 +266,13 @@ void TestParser::loop01() {
 		    }
 
 		    for (int j=1; j<=i; j++) {
-		    	const ExprSub& sub=(const ExprSub&) sys.ctrs[c++].f.expr();
-		    	const ExprConstant& cst=(const ExprConstant&) sub.right;
-		    	CPPUNIT_ASSERT_DOUBLES_EQUAL(i+j-b,cst.get_value().mid(),error);
-
+		    	if (i+j-b==0) {
+		    		CPPUNIT_ASSERT(sameExpr(sys.ctrs[c++].f.expr(),"x"));
+		    	} else {
+		    		const ExprSub& sub=(const ExprSub&) sys.ctrs[c++].f.expr();
+		    		const ExprConstant& cst=(const ExprConstant&) sub.right;
+		    		CPPUNIT_ASSERT_DOUBLES_EQUAL(i+j-b,cst.get_value().mid(),error);
+		    	}
 		    }
 		}
 

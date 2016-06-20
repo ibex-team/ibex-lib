@@ -8,8 +8,8 @@
 // Last Update : Jun 12, 2012
 //============================================================================
 
-#include "ibex_ParserSource.h"
 #include "ibex_Expr.h"
+#include "ibex_P_Source.h"
 
 using namespace std;
 
@@ -21,22 +21,16 @@ P_Source::P_Source() : goal(NULL), ctrs(NULL) {
 }
 
 void P_Source::cleanup() {
-	func.clear();
 
-	if (goal) ibex::cleanup(*goal,false);
+	if (goal) delete goal;
 
 	if (ctrs) // may be NULL if only a single function is loaded
 		      // or if the system is unconstrained.
 		delete ctrs; // will recursively delete all the constraints
-	                 // but not the symbols
-
-	for (vector<Entity*>::iterator it=vars.begin(); it!=vars.end(); it++) {
-		delete (ExprSymbol*) &((*it)->symbol);
-		delete *it;
-	}
-	vars.clear();
 
 	// important! re-init to NULL for the next file to be parsed:
+
+	func.clear(); // Auxiliary functions are not destroyed!
 
 	goal=NULL;
 	ctrs=NULL;

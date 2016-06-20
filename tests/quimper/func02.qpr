@@ -17,17 +17,9 @@ end
 constraints
  x2=f1(x1);
  x2=f2(x1);
- x2=f3(x1);
-  
- x2=f1(x1');
- x2=f2(x1');
  x2=f3(x1');
-
- x2=f1(z1);
- x2=f2(z1);
- x2=f3(z1);
-
+ 
  x2=f1(z1');
  x2=f2(z1');
- x2=f3(z1');
+ x2=f3(z1);
 end

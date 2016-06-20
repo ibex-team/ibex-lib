@@ -140,6 +140,15 @@ void TestIntervalVector::subvector05() {
 	CPPUNIT_ASSERT(IntervalVector(3,_x).subvector(0,2)==IntervalVector(3,_x));
 }
 
+void TestIntervalVector::subvector06() {
+	CPPUNIT_ASSERT(IntervalVector::empty(3).subvector(1,2).is_empty());
+}
+
+void TestIntervalVector::cart_prod01() {
+	CPPUNIT_ASSERT(cart_prod(IntervalVector(3,_x),IntervalVector::empty(3)).is_empty());
+	CPPUNIT_ASSERT(cart_prod(IntervalVector::empty(3),IntervalVector(3,_x)).is_empty());
+}
+
 void TestIntervalVector::inter01() {
 	double _x1[][2]={{0,2},{4,6}};
 	double _x2[][2]={{1,3},{5,7}};

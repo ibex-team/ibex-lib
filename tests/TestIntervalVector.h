@@ -47,6 +47,10 @@ public:
 		CPPUNIT_TEST(subvector03);
 		CPPUNIT_TEST(subvector04);
 		CPPUNIT_TEST(subvector05);
+		CPPUNIT_TEST(subvector06);
+
+		CPPUNIT_TEST(cart_prod01);
+
 
 		CPPUNIT_TEST(inter01);
 		CPPUNIT_TEST(inter02);
@@ -164,6 +168,9 @@ public:
 	void subvector03();
 	void subvector04();
 	void subvector05();
+	void subvector06();
+
+	void cart_prod01();
 
 	// test:
 	//   operator&=(const IntervalVector& x)

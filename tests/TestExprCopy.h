@@ -23,9 +23,7 @@ class TestExprCopy : public CppUnit::TestFixture {
 public:
 
 	CPPUNIT_TEST_SUITE(TestExprCopy);
-	
-
-		CPPUNIT_TEST(index_copy01);
+	CPPUNIT_TEST(index_copy01);
 	CPPUNIT_TEST_SUITE_END();
 
 	// case where the vector is a constant vector

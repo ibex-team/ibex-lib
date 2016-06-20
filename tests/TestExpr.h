@@ -123,6 +123,9 @@ public:
 
 	// row vector variable + (column) vector constant
 	void bug81();
+
+private:
+	bool same_mask(int, int, bool*, bool**);
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestExpr);

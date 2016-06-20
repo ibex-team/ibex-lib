@@ -23,38 +23,25 @@ class TestParser : public CppUnit::TestFixture {
 public:
 
 	CPPUNIT_TEST_SUITE(TestParser);
-	
-		CPPUNIT_TEST(var01);
 
-		CPPUNIT_TEST(const01);
-		CPPUNIT_TEST(const02);
-		CPPUNIT_TEST(const03);
-		CPPUNIT_TEST(const04);
-		CPPUNIT_TEST(const05);
-		CPPUNIT_TEST(const06);
-		CPPUNIT_TEST(const07);
-		CPPUNIT_TEST(const08);
+	CPPUNIT_TEST(var01);
 
-		CPPUNIT_TEST(ponts);
-		CPPUNIT_TEST(choco01);
-		CPPUNIT_TEST(func01);
-		CPPUNIT_TEST(func02);
-		CPPUNIT_TEST(func03);
-		CPPUNIT_TEST(loop01);
+	CPPUNIT_TEST(const_var_idx);
 
-		CPPUNIT_TEST(nary_max);
-		//		CPPUNIT_TEST(error01);
+	CPPUNIT_TEST(ponts);
+	CPPUNIT_TEST(choco01);
+	CPPUNIT_TEST(func01);
+	CPPUNIT_TEST(func02);
+	CPPUNIT_TEST(func03);
+	CPPUNIT_TEST(loop01);
+
+	CPPUNIT_TEST(nary_max);
+	//		CPPUNIT_TEST(error01);
 	CPPUNIT_TEST_SUITE_END();
 
 	void var01();
 
-	void const01();
-	void const02();
-	void const03();
-	void const04();
-	void const05();
-	void const06();
-	void const07();
+	void const_var_idx();
 	// test hexadecimal constant
 	void const08();
 

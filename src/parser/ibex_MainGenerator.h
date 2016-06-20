@@ -11,8 +11,8 @@
 #ifndef __IBEX_MAIN_GENERATOR_H__
 #define __IBEX_MAIN_GENERATOR_H__
 
+#include "ibex_P_Source.h"
 #include "ibex_System.h"
-#include "ibex_ParserSource.h"
 
 namespace ibex {
 
@@ -21,6 +21,12 @@ namespace parser {
 class MainGenerator {
 public:
 	void generate(const P_Source& source, System& result);
+
+private:
+	// to cleanup all expressions (that are copied by the factory)
+	// we store them in a garbage. Note: they shared variables *and*
+	// symbolic constants, whence this structure.
+	void add_garbage(NodeMap<bool>& garbage, const ExprNode& e);
 };
 
 } // end namespace parser
