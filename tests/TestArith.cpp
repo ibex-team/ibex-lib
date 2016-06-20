@@ -260,6 +260,16 @@ void TestArith::log03() { check(log(Interval::POS_REALS), Interval::ALL_REALS); 
 void TestArith::log04() { check(log(Interval::NEG_REALS), Interval::EMPTY_SET); }
 void TestArith::log05() { check(log(Interval(1,2)),       Interval(0,::log(2))); }
 void TestArith::log06() { check(log(Interval(-1,1)),      Interval(NEG_INFINITY,0)); }
+void TestArith::log07() { check(log(Interval(0,ibex::next_float(0.0))), Interval(NEG_INFINITY,::log(ibex::next_float(0.0)))); }
+void TestArith::log08() { check(log(Interval(0,1)),       Interval(NEG_INFINITY,0)); }
+
+void TestArith::exp01() { check(exp(Interval::EMPTY_SET), Interval::EMPTY_SET); }
+void TestArith::exp02() { check(exp(Interval::ALL_REALS), Interval::POS_REALS); }
+void TestArith::exp03() { check(exp(Interval::POS_REALS), Interval(1,POS_INFINITY)); }
+void TestArith::exp04() { check(exp(Interval::NEG_REALS), Interval(0,1)); }
+void TestArith::exp05() { check(exp(Interval(0,2)),       Interval(1,::exp(2))); }
+void TestArith::exp06() { check(exp(Interval(-1,1)),      Interval(::exp(-1),::exp(1))); }
+void TestArith::exp07() { check(exp(Interval(1.e100,1.e111)),Interval::EMPTY_SET); }
 
 void TestArith::sin01() { check_trigo(Interval::ALL_REALS, Interval(-1,1)); }
 void TestArith::sin02() { check_trigo(Interval::EMPTY_SET, Interval::EMPTY_SET); }

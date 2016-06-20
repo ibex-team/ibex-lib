@@ -872,7 +872,7 @@ bool bwd_imod(Interval& x, Interval& y, const double& p);
 #include "ibex_Interval_gaol.h_"
 #else
 #ifdef _IBEX_WITH_BIAS_
-#include "ibex_Interva_biasl.h_"
+#include "ibex_Interval_bias.h_"
 #else
 #ifdef _IBEX_WITH_FILIB_
 #include "ibex_Interval_filib.h_"
