@@ -17,6 +17,7 @@
 
 namespace ibex {
 
+
 /**
  * \ingroup symbolic
  *
@@ -56,10 +57,6 @@ public:
 protected:
 	void visit(const ExprNode& e);
 	void visit(const ExprIndex& i);
-	void visit(const ExprNAryOp& e);
-	void visit(const ExprLeaf& e);
-	void visit(const ExprBinaryOp& b);
-	void visit(const ExprUnaryOp& u);
 	void visit(const ExprSymbol& x);
 	void visit(const ExprConstant& c);
 	void visit(const ExprVector& e);

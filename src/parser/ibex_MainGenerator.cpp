@@ -9,99 +9,88 @@
 //============================================================================
 
 #include "ibex_MainGenerator.h"
+#include "ibex_ExprCopy.h"
 #include "ibex_CtrGenerator.h"
 #include "ibex_P_ExprGenerator.h"
+#include "ibex_Scope.h"
+#include "ibex_SystemFactory.h"
 
 #include <utility>
+#include <stack>
 
 using namespace std;
-extern void ibexerror (const std::string& msg);
 
 namespace ibex {
 
 namespace parser {
 
-void MainGenerator::generate(const P_Source& source, System& result) {
+extern stack<Scope>& scopes();
 
-	//================= generate the functions =====================
-	result.func.resize(source.func.size());
-	int i=0;
-	for (vector<Function*>::const_iterator it=source.func.begin(); it!=source.func.end(); it++) {
-		result.func.set_ref(i++,**it);
-	}
+void MainGenerator::add_garbage(NodeMap<bool>& garbage, const ExprNode& e) {
+	ExprSubNodes nodes(e);
+	for (int i=0; i<nodes.size(); i++)
+		if (!garbage.found(nodes[i]))
+			garbage.insert(nodes[i],true);
+}
+
+void MainGenerator::generate(const P_Source& source, System& sys) {
+
+	SystemFactory fac;
+	Array<const ExprSymbol> vars = scopes().top().var_symbols();
 
 	//================= generate the variables & domains =====================
-	int n=source.vars.size();
-	int input_size=0;
+	fac.add_var(vars);
 
-	result.args.resize(n);
-	Array<const ExprSymbol> srcvars(n);
-
-	Array<const Domain> domains(n);
-
-	i=0;
-	for (vector<Entity*>::const_iterator it=source.vars.begin(); it<source.vars.end(); it++) {
-		const Entity& x=**it;
-		if (x.type==Entity::EPR) result.eprs.push_back(i);
-		else if (x.type==Entity::SYB) result.sybs.push_back(i);
-		srcvars.set_ref(i,x.symbol);
-		result.args.set_ref(i,ExprSymbol::new_(x.symbol.name, x.symbol.dim));
-		domains.set_ref(i,x.domain);
-		i++;
-		input_size+=x.symbol.dim.size();
-	}
-	assert(i==n);
-
-	(int&) result.nb_var = input_size;
-
-	//================= generate the domain =====================
-	result.box.resize(input_size);
-	load(result.box, domains);
-	Scope scope;
+	NodeMap<bool> garbage;
 
 	//============== generate the goal function (if any) =================
-	if (source.goal==NULL) result.goal=NULL;
-	else {
-		// we must create a copy of the array of variables srcvars
-		// for the objective function (nodes cannot be shared by
-		// two different functions)
-		Array<const ExprSymbol> objvars(n);
-
-		varcopy(result.args, objvars); // TODO: should we remove eprs and sybs from the objective variables?
-		const ExprNode& goal=ExprGenerator(Scope()).generate(srcvars, objvars, *source.goal);
-		result.goal = new Function(objvars, goal, "goal");
-	}
-
-	// ============== case of unconstrained optimization ===========
-	if (source.ctrs==NULL) {
-		(int&) result.nb_ctr = 0;
-		return;
+	if (source.goal!=NULL) {
+		const ExprNode& goal=source.goal->generate();
+		fac.add_goal(goal);
+		add_garbage(garbage,goal);
 	}
 
 	//================= generate the constraints =====================
-	// we cannot generate first the global function f and
-	// then each constraint with (f[i] op 0) because
-	// a constraint can be vector or matrix valued.
-	// so we do the contrary: we generate first the constraints,
-	// and build f with the components of all constraints' functions.
 
-	vector<NumConstraint*> ctrs; // tmp
-	CtrGenerator().generate(srcvars, *source.ctrs, ctrs);
+	if (source.ctrs!=NULL) { // not in case of unconstrained optimization
 
-	int m=ctrs.size();
-	result.ctrs.resize(m);
-	i=0;
-	(int&) result.nb_ctr = 0;
-	for (vector<NumConstraint*>::const_iterator it=ctrs.begin(); it!=ctrs.end(); it++) {
-		result.ctrs.set_ref(i,**it);
-		i++;
-		((int&) result.nb_ctr) += (*it)->f.image_dim();
+		vector<ExprCtr*> ctrs = CtrGenerator().generate(*source.ctrs);
+
+		for (vector<ExprCtr*>::const_iterator it=ctrs.begin(); it!=ctrs.end(); it++) {
+			fac.add_ctr(**it); // by copy so...
+			add_garbage(garbage,(*it)->e);
+			delete *it;
+		}
 	}
 
+	sys.init(fac);
 
-	//================= generate the global function =====================
+	// add the original variables in the garbage
+	// (in case some are not used)
+	for (int i=0;i<vars.size(); i++)
+		add_garbage(garbage, vars[i]);
 
-	result.init_f_from_ctrs();
+	// same for constants
+	for (std::vector<const char*>::const_iterator it=scopes().top().cst.begin(); it!=scopes().top().cst.end(); it++) {
+		//cout << "[parser] remove cst " << *it << endl;
+		add_garbage(garbage, scopes().top().get_cst(*it));
+	}
+
+	//================= set the domains =====================
+	sys.box.resize(sys.nb_var);
+	load(sys.box, scopes().top().var_domains());
+
+	//================= add the external functions ===========
+	sys.func.resize(source.func.size());
+	int i=0;
+	for (vector<Function*>::const_iterator it=source.func.begin(); it!=source.func.end(); it++) {
+		sys.func.set_ref(i++,**it);
+	}
+
+	//==================== *** cleanup *** ====================
+	for (IBEX_NODE_MAP(bool)::const_iterator it=garbage.begin(); it!=garbage.end(); it++) {
+		delete it->first;
+	}
 }
 
 } // end namespace parser

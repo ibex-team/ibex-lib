@@ -53,14 +53,18 @@ public:
 		}
 		ctc.clear();
 
+		if (bsc) delete bsc;
+		if (buffer) delete buffer;
+		if (relax) delete relax;
+		// warning! LinearRelaxXTaylor uses system in its destructor.
+		// delete it before systems.
+
 		for (vector<System*>::iterator it=sys.begin(); it!=sys.end(); it++) {
 			delete *it;
 		}
 		sys.clear();
 
-		if (bsc) delete bsc;
-		if (buffer) delete buffer;
-		//if (relax) delete relax;
+
 	}
 
 };

@@ -678,7 +678,9 @@ inline void IntervalMatrix::clear() {
 }
 
 inline void IntervalMatrix::set_empty() {
-	(*this)[0].set_empty();
+	for (int i=0; i<nb_rows(); i++)
+		for (int j=0; j<nb_cols(); j++)
+			(*this)[i][j]=Interval::EMPTY_SET;
 }
 
 inline IntervalVector& IntervalMatrix::row(int i) {

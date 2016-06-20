@@ -13,11 +13,14 @@
 
 #include <iostream>
 #include "ibex_P_Expr.h"
+#include "ibex_Expr.h"
 #include "ibex_SymbolMap.h"
 
 namespace ibex {
 
 namespace parser {
+
+class P_ExprConstant;
 
 class Scope {
 
@@ -40,7 +43,7 @@ public:
 	void add_cst(const char* id, const Domain& domain);
 
 	/** Add a constant */
-	void add_cst(const char* id, const Dim& d, const Domain& dom);
+	void add_cst(const char* id, const Dim* d, const Domain& dom);
 
 	/** Remove a constant (constants can be overridden
 	 * by local variables in functions)*/
@@ -49,33 +52,46 @@ public:
 	/** Add a function. */
 	void add_func(const char* id, Function* f);
 
-	/** Add an argument of a function. */
-	void add_func_input(const char* input_symbol, const ExprSymbol* symbol);
-
 	/** Add a local variable in a function. */
-	void add_func_tmp_symbol(const char* tmp_symbol, const ExprNode* expr);
+	void add_func_tmp_symbol(const char* tmp_symbol, const P_ExprNode* expr);
 
-	/** Add a var, a syb or an epr */
-	void add_entity(const char* id, const Entity* e);
+	/** Add a variable symbol (domain is (-oo,oo)x...). */
+	void add_var(const char* id, const Dim* dim);
+
+	/** Add a variable symbol. */
+	void add_var(const char* id, const Dim* dim, const Domain& d);
 
 	/** Add an (uninitialized) iterator. */
 	void add_iterator(const char* id);
 
 	/*------------- get data associated to symbols in the current scope -----------*/
+
+//	/* Bind an ExprNode object to a constant symbol */
+//	void bind_cst_node(const char* id, const ExprConstant&);
+
 	/* Return the constant */
-	const Domain& get_cst(const char* id) const;
+	const ExprConstant& get_cst(const char* id) const;
 
 	/* Return the function */
 	Function& get_func(const char* id);
 
-	/* Return the input symbol of a function */
-	const ExprSymbol& get_func_input_symbol(const char* id) const;
-
 	/* Return the expression bound to a tmp symbol in a function */
-	const ExprNode& get_func_tmp_expr(const char* id) const;
+	const P_ExprNode& get_func_tmp_expr(const char* id) const;
 
-	/* Return the entity attached to a symbol */
-	const Entity& get_entity(const char* id) const;
+	/* Return the symbol attached to a string */
+	std::pair<const ExprSymbol*,const Domain*> get_var(const char* id) const;
+
+	/** Name of the ith variable (for CHOCO) */
+	const char* var(int i) const;
+
+	/** Number of variables. */
+	int nb_var() const;
+
+	/** All the variable domains (in declaration order). */
+	Array<const Domain> var_domains() const;
+
+	/** All the variable symbols (in declaration order). */
+	Array<const ExprSymbol> var_symbols() const;
 
 	/* Return the value of the iterator */
 	int get_iter_value(const char* id) const;
@@ -94,10 +110,20 @@ public:
 	/* Return if id is the symbol of an interator */
 	bool is_iter_symbol(const char* id) const;
 
-	/* classes used to contain objects bound to symbols */
-	class S_Object;
+	/** All the constant symbols (in declaration order).*/
+	std::vector<const char*> cst;
 
 private:
+	/* classes used to contain objects bound to symbols */
+	class S_Object;
+	class S_Entity;
+	class S_Cst;
+	class S_Func;
+	class S_FuncTmp;
+	class S_Iterator;
+
+	/** All the variables (in declaration order).*/
+	std::vector<S_Entity*> vars;
 
 	friend std::ostream& operator<<(std::ostream& os, const Scope& scope);
 

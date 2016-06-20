@@ -49,7 +49,7 @@ inline M _submatrix(const M& m, int row_start_index, int row_end_index, int col_
 	assert(col_start_index>=0 && col_start_index<m.nb_cols());
 	assert(col_end_index>=0 && col_end_index<m.nb_cols());
 	assert(col_start_index<=col_end_index);
-	assert(!___is_empty(m));
+	//assert(!___is_empty(m));
 
 	M sub(row_end_index-row_start_index+1, col_end_index-col_start_index+1);
 	//cout << "m=" << (row_end_index-row_start_index+1) << "n=" << (col_end_index-col_start_index+1) << endl;

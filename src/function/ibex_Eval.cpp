@@ -62,6 +62,15 @@ Domain& Eval::eval(const IntervalVector& box) {
 	return *d.top;
 }
 
+
+void Eval::idx_cp_fwd(int x, int y) {
+	assert(dynamic_cast<const ExprIndex*> (&f.node(y)));
+
+	const ExprIndex& e = (const ExprIndex&) f.node(y);
+
+	d[y] = d[x][e.index];
+}
+
 void Eval::apply_fwd(int* x, int y) {
 	assert(dynamic_cast<const ExprApply*> (&f.node(y)));
 
