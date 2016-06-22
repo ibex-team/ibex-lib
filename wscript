@@ -22,7 +22,7 @@ def options (opt):
 	waflib.Tools.compiler_c.c_compiler["win32"].remove ("msvc")
 	waflib.Tools.compiler_cxx.cxx_compiler["win32"].remove ("msvc")
 
-	opt.load ("compiler_cxx compiler_cc javaw")
+	opt.load ("compiler_cxx compiler_c javaw")
 
 	opt.add_option ("--enable-shared", action="store_true", dest="ENABLE_SHARED",
 			help = "build ibex as a shared library")
@@ -71,8 +71,8 @@ def configure (conf):
 
 
 	env = conf.env
-	conf.load ('compiler_cxx compiler_cc bison')
-	conf.load ('flex', '.')
+	conf.load ('compiler_cxx compiler_c bison')
+	conf.load ('flex')
 	
 	conf.env.LIBDIR = conf.env['PREFIX'] + '/lib'
 
