@@ -19,6 +19,7 @@
 #include "ibex_P_Expr.h"
 #include "ibex_Expr.h"
 #include "ibex_Function.h"
+#include "ibex_ExprSimplify.h"
 
 namespace ibex {
 
@@ -32,6 +33,8 @@ class P_Source;
 
 class CtrGenerator {
 public:
+	CtrGenerator();
+
 	std::vector<ExprCtr*> generate(const P_ConstraintList& ctrs);
 
 	void visit(const P_NumConstraint& c);
@@ -40,6 +43,7 @@ public:
 	void visit(const P_ConstraintLoop& l);
 
 protected:
+	ExprSimplify s;
 	std::vector<ExprCtr*> ctrs;
 
 };

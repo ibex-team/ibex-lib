@@ -22,6 +22,30 @@ bool is_cst(const ExprNode& e) {
 	return dynamic_cast<const ExprConstant*>(&e)!=NULL;
 }
 
+bool is_mul(const ExprNode& e) {
+	return dynamic_cast<const ExprMul*>(&e)!=NULL;
+}
+
+bool is_add(const ExprNode& e) {
+	return dynamic_cast<const ExprAdd*>(&e)!=NULL;
+}
+
+bool is_sub(const ExprNode& e) {
+	return dynamic_cast<const ExprSub*>(&e)!=NULL;
+}
+
+const ExprNode& left(const ExprNode& e) {
+	const ExprBinaryOp* b=dynamic_cast<const ExprBinaryOp*>(&e);
+	assert(b);
+	return b->left;
+}
+
+const ExprNode& right(const ExprNode& e) {
+	const ExprBinaryOp* b=dynamic_cast<const ExprBinaryOp*>(&e);
+	assert(b);
+	return b->right;
+}
+
 const Domain& to_cst(const ExprNode& e) {
 	const ExprConstant* c=dynamic_cast<const ExprConstant*>(&e);
 	assert(c);
@@ -85,7 +109,9 @@ const ExprNode& ExprSimplify::simplify(const ExprNode& e) {
 
 	for (IBEX_NODE_MAP(bool)::const_iterator it=all_nodes.begin(); it!=all_nodes.end(); it++) {
 		if (/* auto-cleanup, so remove this ----> !old_nodes.found(*it->first) && */
-			!dynamic_cast<const ExprSymbol*>(it->first) && !new_nodes.found(*it->first)) {
+			!dynamic_cast<const ExprSymbol*>(it->first) &&
+			!new_nodes.found(*it->first) &&
+			!lock.found(*it->first)) {
 			delete it->first;
 		}
 	}
@@ -206,40 +232,191 @@ void ExprSimplify::visit(const ExprConstant& c) {
 		insert(c,ExprConstant::new_(c.get()[idx]));
 }
 
-void ExprSimplify::visit(const ExprAdd& e) {
+
+void ExprSimplify::visit_add_sub(const ExprBinaryOp& e, bool sign) {
 
 	const ExprNode& l=get(e.left, idx);
 	const ExprNode& r=get(e.right, idx);
 
-	if (is_cst(l) && to_cst(l).is_zero())
-		insert(e, r);
-	else if (is_cst(r) && to_cst(r).is_zero())
-		insert(e, l);
-	else if (is_cst(l) && is_cst(r))
-		insert(e, ExprConstant::new_(to_cst(l)+to_cst(r)));
-	else if ((&l == &e.left) && (&r == &e.right))  // nothing changed
-		insert(e, e);
-	else
-		insert(e, l+r);
+	// We try now to simplify addition/subtraction in cascade.
+	// For example, (1+x)-(2-y) will become (3+(x-y)).
+	// ==========================================================
+	// Analyse the left subexpression
+	// ==========================================================
+	const ExprNode*   el;   // the non-const part on the left side (NULL if none)
+	bool lsign;             // the sign of the latter
+	const ExprConstant* cl; // the const part on the left side (NULL if none)
+
+	if (is_cst(l)) {
+		el=NULL;
+		cl=dynamic_cast<const ExprConstant*>(&l);
+		lsign=true;
+	}
+
+	// ========== should be uncommented but couter-productive??
+/*	else if ((is_add(l) || is_sub(l)) && is_cst(right(l))) {
+		el=&left(l);
+		// cst always on the right (see why below)
+		cl=dynamic_cast<const ExprConstant*>(&(right(l)));
+		lsign=is_add(l);
+	} */
+
+	else {
+		el=&l;
+		cl=NULL;
+		lsign=true; // (ignored)
+	}
+	// ==========================================================
+
+	// ==========================================================
+	// Analyse the right subexpression
+	// ==========================================================
+	const ExprNode*   er;
+	bool rsign;
+	const ExprConstant* cr;
+
+	if (is_cst(r)) {
+		er=NULL;
+		cr=dynamic_cast<const ExprConstant*>(&r);
+		rsign=sign;
+	}
+	// ========== should be uncommented but couter-productive??
+/*	else if ((is_add(r) || is_sub(r)) && is_cst(right(r))) {
+		er=&left(r);
+		cr=dynamic_cast<const ExprConstant*>(&(right(r))); // cst always on the right (see why below)
+		rsign = (sign && is_add(r)) || (!sign && is_sub(r));
+	}*/
+
+	else {
+		er=&r;
+		cr=NULL;
+		rsign=true; // ignore
+	}
+
+	// ==========================================================
+	// Calculate the global constant in the current expression
+	// ==========================================================
+	const ExprConstant* cfinal; // NULL if none or =O
+
+	// cst_sign allows to keep the objects cl/cr
+	// when one of them is NULL.
+	// Ex: if we have (x-1)+y, we produce
+	///   (x+y)-(1) --> constant "1" preserved (final_sign==false)
+	// instead of
+	//    (x+y)+(-1) --> new constant "-1".
+	bool cst_sign=true;
+
+	if (cl) {
+		if (cr) {
+			if (cr->is_zero())      { cfinal=cl; cst_sign=lsign; }
+			else if (cl->is_zero()) { cfinal=cr; cst_sign=rsign; }
+			else
+				if (lsign)
+					if (rsign)        cfinal=&ExprConstant::new_(cl->get()+cr->get());
+					else              cfinal=&ExprConstant::new_(cl->get()-cr->get());
+				else
+					if (rsign)        cfinal=&ExprConstant::new_(cr->get()-cl->get());
+					else              cfinal=&ExprConstant::new_(-cl->get()-cr->get());
+		} else                      { cfinal=cl; cst_sign=lsign; }
+	}
+	else if (cr)                    { cfinal=cr; cst_sign=rsign; }
+	else {
+		// no constants at all ----> no simplification
+		if ((&l == &e.left) && (&r == &e.right))  // nothing changed
+			insert(e, e);
+		else if (sign)
+			insert(e, l+r);
+		else
+			insert(e,l-r);
+		return;
+	}
+
+	if (cfinal->is_zero() && cfinal!=cr && cfinal!=cl) { // may happen, ex: (1+x)+(-1+x)
+		delete cfinal;  // because results from a call to "ExprConstant::new_"
+		cfinal=NULL;
+	}
+
+
+	// ==========================================================
+	// Calculate the global non-const part in the current expression
+	// ==========================================================
+	const ExprNode* efinal;
+	bool expr_sign=true;
+
+	if (el)
+		if (er)
+			if (sign) efinal=&(*el+*er);
+			else      efinal=&(*el-*er);
+		else          efinal=el;
+	else if (er)    { efinal=er; expr_sign=sign; }
+	else              efinal=NULL;
+
+	// ==========================================================
+	// Generate the final expression
+	// ==========================================================
+	if (!cfinal || cfinal->is_zero()) {
+		if (!efinal) { // happens in these cases: 0+0 or 0-0
+			if (!cfinal) {
+				Domain d(e.dim.index_dim(idx)); d.clear();
+				insert(e,ExprConstant::new_(d));
+			} else
+				insert(e,*cfinal);
+		}
+		else if (expr_sign) insert(e,*efinal);
+		else insert(e,-(*efinal));
+	} else {
+		if (!efinal)
+			if (cst_sign) insert(e,*cfinal);
+			else
+				// we have two options here.
+				//
+				// 1- keep a reference to the constant object
+				// (better if it is big in memory):
+				//
+				insert(e,-(*cfinal));
+				//
+				// 2- precompute the opposite value:
+				// (note: no memory leak because cfinal==cl or cr)
+				//insert(e,ExprConstant::new_(-(cfinal->get())));
+		else
+			// always put the constant on the right side
+			// for further constant factorization
+			if (expr_sign)
+				if (cst_sign) insert(e,(*efinal)+(*cfinal));
+				else          insert(e,(*efinal)-(*cfinal));
+			else
+				// note: the next expression is better than
+				// (*cfinal)-(*efinal) in order to keep
+				// the "constant on the right" idiom
+
+				// ========== should be the first option but couter-productive??
+				if (cst_sign)
+					//insert(e,(-*efinal)+(*cfinal));
+					insert(e,(*cfinal)-(*efinal));
+
+				// note: the next expression is better than
+		        // (-(*efinal + *cfinal)) in order to keep
+		        // the "constant on the right" idiom
+
+				// ========== should be the first option but couter-productive??
+				else
+					// insert(e,(-*efinal)-(*cfinal));
+					insert(e,-(*efinal + *cfinal));
+	}
+}
+
+void ExprSimplify::visit(const ExprAdd& e) {
+
+	visit_add_sub(e,true);
 }
 
 void ExprSimplify::visit(const ExprSub& e) {
-	const ExprNode& l=get(e.left, idx);
-	const ExprNode& r=get(e.right, idx);
 
-	if (is_cst(l) && to_cst(l).is_zero())
-		insert(e, -r);
-	else if (is_cst(r) && to_cst(r).is_zero())
-		insert(e, l);
-	else if (is_cst(l) && is_cst(r))
-		insert(e, ExprConstant::new_(to_cst(l)-to_cst(r)));
-	else if ((&l == &e.left) && (&r == &e.right))  // nothing changed
-		insert(e, e);
-	else
-		insert(e, l-r);
+	visit_add_sub(e,false);
 }
 
 void ExprSimplify::visit(const ExprMul& e) {
+
 	DoubleIndex l_idx;
 	DoubleIndex r_idx;
 
@@ -258,12 +435,46 @@ void ExprSimplify::visit(const ExprMul& e) {
 		insert(e, r);
 	else if (is_identity(r) || (is_cst(l) && to_cst(l).is_zero()))
 		insert(e, l);
-	else if (is_cst(l) && is_cst(r))
-		insert(e, ExprConstant::new_(to_cst(l)*to_cst(r)));
-	else if ((&l == &e.left) && (&r == &e.right))  // nothing changed
-		insert(e, e);
-	else
-		insert(e, l*r);
+	else if (is_cst(l)) {
+		if (is_cst(r))
+			insert(e, ExprConstant::new_(to_cst(l)*to_cst(r)));
+
+		// ========== should be uncommented but couter-productive??
+		/*		else if (is_mul(r) && is_cst(left(r)))
+			// note: l and left(r) and right(r) may not be scalar.
+			insert(e, ExprConstant::new_(to_cst(l)*to_cst(left(r)))*(right(r)));
+		 */
+
+		else if ((&l == &e.left) && (&r == &e.right))  // nothing changed
+			insert(e, e);
+		else
+			insert(e, l*r);
+	}
+	else if (is_mul(l) && is_cst(left(l))) {
+
+		// ========== should be uncommented but couter-productive??
+		/*	if (is_cst(r) && r.dim.is_scalar())
+			// note: left(l) and right(l) may not be scalar.
+			insert(e, ExprConstant::new_(to_cst(r)*to_cst(left(l)))*(right(l)));
+		else if (is_mul(r) && is_cst(left(r)) && left(r).dim.is_scalar())
+			// note: left(l), right(l), right(r) may not be scalar.
+			insert(e, ExprConstant::new_(to_cst(left(r))*to_cst(left(l)))*(right(l)*right(r)));
+		else*/
+			// always put the constant on the left side
+			// (to apply the previous cases upstream)
+			insert(e, left(l)*(right(l)*r));
+	}
+	else {
+		if (is_cst(r) && r.dim.is_scalar())
+		// always put the constant on the left side for further constant factorization
+			insert(e, r*l);
+		else if (is_mul(r) && is_cst(left(r)) && left(r).dim.is_scalar())
+			insert(e, left(r)*(l*right(r)));
+		else if ((&l == &e.left) && (&r == &e.right))  // nothing changed
+			insert(e, e);
+		else
+			insert(e, l*r);
+	}
 }
 
 void ExprSimplify::visit(const ExprDiv& e) {
@@ -271,7 +482,9 @@ void ExprSimplify::visit(const ExprDiv& e) {
 	const ExprNode& l=get(e.left, idx);
 	const ExprNode& r=get(e.right, idx);
 
-	if (is_identity(r))
+	if (is_cst(l) && to_cst(l).is_zero())
+		insert(e, l);
+	else if (is_identity(r))
 		insert(e, l);
 	else if (is_cst(l) && is_cst(r))
 		insert(e, ExprConstant::new_(to_cst(l)/to_cst(r)));

@@ -31,6 +31,15 @@ public:
 	 */
 	const ExprNode& simplify(const ExprNode& e);
 
+
+	/*
+	 * If some nodes should not be removed although they
+	 * do not belong to the simplified expression, add
+	 * them in this map. (note: this is a kind of hack,
+	 * a better solution could be found).
+	 */
+	NodeMap<bool> lock;
+
 protected:
 	void visit(const ExprIndex& i);
 	void visit(const ExprSymbol& x);
@@ -77,6 +86,8 @@ protected:
 	void unary(const N& e, Domain (*fcst)(const Domain&));
 	template<class N>
 	void binary(const N& e, Domain (*fcst)(const Domain&,const Domain&));
+
+	void visit_add_sub(const ExprBinaryOp& e, bool sign);
 
 //	void unary_copy(const ExprUnaryOp& e, const ExprNode& (*func)(const ExprNode&));
 //	void binary_copy(const ExprBinaryOp& e, const ExprNode& (*func2)(const ExprNode&, const ExprNode&));

@@ -164,6 +164,7 @@ decl_fnc      : TK_FUNCTION                     { scopes().push(Scope(scopes().t
                 fnc_code
                 TK_RETURN expr semicolon_opt
                 TK_END                          { 
+                								  // TODO: simplify the expression (beware of constants that should be "locked")
                 								  Function* f=new Function(scopes().top().var_symbols(),$9->generate(),$3);        
                                                   scopes().pop();
                                                   scopes().top().add_func($3,f);
