@@ -15,6 +15,7 @@
 #include <stack>
 #include "ibex_Heap.h" // just for the declaration of CostFunc<T>
 
+
 namespace ibex {
 
 template<class T> class HeapNode;
@@ -55,6 +56,12 @@ public:
 	 * \param id                       - the identifier of this heap.
 	 */
 	SharedHeap(CostFunc<T>& cost, bool update_cost_when_sorting, int id);
+
+    /** copy constructor **/
+
+    std::pair<SharedHeap<T> *,std::vector<HeapElt<T>*> *> copy_sheap(int nb_crit);
+
+
 
 	/** \brief Delete this. */
 	virtual  ~SharedHeap();
@@ -200,6 +207,10 @@ private:
 
 	/** Create a node from an element and the father node. */
 	explicit HeapNode(HeapElt<T>* elt, HeapNode<T>* father=NULL);
+    
+    /** Copy the heap **/
+    void copy_tree(HeapNode<T> * node,std::vector<HeapElt<T>*> * elm_vect,int heap_id,int nb_crit);
+
 
 	/** Delete the node and all its sons */
 	//~HeapNode() ;
@@ -257,6 +268,9 @@ private:
 	/** Create an HeapElt with a data and two criteria */
 	explicit HeapElt(T* data, double crit_1, double crit_2);
 
+    /** Copy constructor **/
+    HeapElt(const HeapElt& eltcopy,int nb_crit);
+
 	/** Delete the element */
 	~HeapElt() ;
 
@@ -294,6 +308,24 @@ private:
 template<class T>
 SharedHeap<T>::SharedHeap(CostFunc<T>& cost, bool update_cost, int id) : nb_nodes(0), costf(cost), heap_id(id), root(NULL), update_cost_when_sorting(update_cost) {
 
+}
+
+template<class T>
+std::pair<SharedHeap<T> *,std::vector<HeapElt<T>*> *> SharedHeap<T>::copy_sheap(int nb_crit){
+    SharedHeap<T>* new_heap = new SharedHeap(costf,update_cost_when_sorting,heap_id);
+    new_heap->nb_nodes = nb_nodes;
+    std::vector<HeapElt<T>*> * elm_vect;
+    if(root =! NULL) {
+        HeapElt<T> * elt = new HeapElt<T>(*root->elt);
+        new_heap->root = new HeapNode<T>(elt);
+    }
+    elm_vect->push_back(new_heap->root->elt);
+    new_heap->root->copy_tree(root,elm_vect,heap_id,nb_crit);
+
+    std::pair<SharedHeap<T> *,std::vector<HeapElt<T>*> *> rtrn;
+    rtrn.first = new_heap;
+    rtrn.second = elm_vect;
+    return rtrn;
 }
 
 template<class T>
@@ -575,6 +607,25 @@ HeapNode<T>::HeapNode(HeapElt<T>* elt, HeapNode<T>* father): elt(elt), right(NUL
 //}
 
 template<class T>
+void HeapNode<T>::copy_tree(HeapNode<T> * node,std::vector<HeapElt<T>*> * elm_vect,int heap_id,int nb_crit){
+    HeapElt<T>* elem;
+    if(node->left != NULL){
+        elem = new HeapElt<T>(*node->left->elt,nb_crit);
+        elm_vect->push_back(elem);
+        left = new HeapNode<T>(elem,this);
+        elem->holder[heap_id] = left;
+        left->copy_tree(node->left,elm_vect,heap_id,nb_crit);
+    }
+    if(node->right != NULL){
+        elem = new HeapElt<T>(*node->right->elt,nb_crit);
+        right = new HeapNode<T>(elem,this);
+        elm_vect->push_back(elem);
+        elem->holder[heap_id] = right;
+        right->copy_tree(node->right,elm_vect,heap_id,nb_crit);
+    }
+}
+
+template<class T>
 bool HeapNode<T>::is_sup(HeapNode<T>* node, int heap_id) const {
 	return elt->is_sup(node->elt->crit[heap_id],heap_id);
 }
@@ -617,6 +668,13 @@ HeapElt<T>::HeapElt(T* data, double crit_1, double crit_2) : data(data), /*nb_he
 	crit[1] = crit_2;
 	holder[0] = NULL;
 	holder[1] = NULL;
+}
+
+template<class T>
+HeapElt<T>::HeapElt(const HeapElt& eltcopy,int nb_crit):crit(new double[nb_crit]),holder(new HeapNode<T>*[nb_crit]) {
+    for(unsigned i=0;i<nb_crit;i++)
+        crit[i] = *(eltcopy.crit)[i];
+    data = new T(*(eltcopy.data));
 }
 
 template<class T>

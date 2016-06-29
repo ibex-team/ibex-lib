@@ -35,6 +35,8 @@ public:
 	 */
 	DoubleHeap(CostFunc<T>& cost1, bool update_cost1_when_sorting, CostFunc<T>& cost2, bool update_cost2_when_sorting, int critpr=50);
 
+    /** copy constructor **/
+    DoubleHeap(const DoubleHeap& dhcp);
 	/**
 	 * \brief Flush the buffer.
 	 *
@@ -163,6 +165,20 @@ DoubleHeap<T>::DoubleHeap(CostFunc<T>& cost1, bool update_cost1_when_sorting, Co
 		 nb_nodes(0), heap1(new SharedHeap<T>(cost1,update_cost1_when_sorting,0)),
 		              heap2(new SharedHeap<T>(cost2,update_cost2_when_sorting,1)),
 		              critpr(critpr), current_heap_id(0) {
+
+}
+
+template<class T>
+DoubleHeap<T>::DoubleHeap(const DoubleHeap &dhcp):critpr(dhcp.critpr),current_heap_id(dhcp.current_heap_id),nb_nodes(dhcp.nb_nodes) {
+std::pair<SharedHeap<T> *,std::vector<HeapElt<T>*> *> p;
+    p= dhcp.heap1->copy_sheap(2);
+    heap1 = p.first;
+    heap2 = new SharedHeap<T>(dhcp.heap2->costf,dhcp.heap2->update_cost_when_sorting,dhcp.heap2->heap_id);
+    while(!p.second->empty()) {
+        heap2->push_elt(p.second->back());
+        p.second->pop_back();
+    }
+
 
 }
 
