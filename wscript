@@ -41,6 +41,9 @@ def options (opt):
 
 	opt.add_option ("--with-filib",   action="store", type="string", dest="FILIB_PATH",
 			help = "location of the Filib lib")
+
+	opt.add_option ("--with-cxsc",   action="store", type="string", dest="CXSC_PATH",
+			help = "location of the CXSC lib")
 	
 	opt.add_option ("--without-rounding", action="store_true", dest="WITHOUT_ROUNDING",
 			help = "do not use a reliable interval")

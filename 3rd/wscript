@@ -41,6 +41,7 @@ def configure (conf):
 	with_bias = conf.options.BIAS_PATH
 	with_gaol = conf.options.GAOL_PATH
 	with_filib = conf.options.FILIB_PATH
+	with_cxsc = conf.options.CXSC_PATH
 	
 	def join (path, *k):
 		return os.path.abspath (os.path.join (os.path.expanduser (path), *k)) if path else None
@@ -61,16 +62,16 @@ def configure (conf):
 	
 	if conf.env.WITHOUT_ROUNDING:
 		with_any = False
-		for w in with_bias, with_gaol, with_filib:
+		for w in with_bias, with_gaol, with_filib, with_cxsc:
 			if w is not None:
-					conf.fatal ("cannot use --with-gaol/--with-bias/--with-filib with the option --without-rounding")
+					conf.fatal ("cannot use --with-gaol/--with-bias/--with-filib/--with-cxsc with the option --without-rounding")
 		conf.env.INTERVAL_LIB = "DIRECT"
 		conf.env.append_unique ("CXXFLAGS_IBEX_DEPS", ["-frounding-math","-ffloat-store"])
 		Logs.pprint ("BLUE","The rounding mode of the Interval arithmetic is disable.")
 		
 	else :
 		with_any = False
-		for w in with_bias, with_gaol, with_filib:
+		for w in with_bias, with_gaol, with_filib, with_cxsc:
 			if w is not None:
 				if with_any:
 					conf.fatal ("cannot use --with-gaol/--with-bias/--with-filib together")
@@ -91,7 +92,18 @@ def configure (conf):
 					conf.env.append_unique ("CXXFLAGS_IBEX_DEPS", ["-msse2", "-mfpmath=sse"])
 					
 				Logs.pprint ("BLUE","The Interval arithmetic is the installed version of FILIB")
+				
 	
+		if not with_any:
+			# try to find CXSC
+			has_h = conf.check_cxx (header_name	= "interval.hpp",mandatory=False)
+			has_l = conf.check_cxx (lib = ["cxsc"],	uselib_store = "IBEX_DEPS",mandatory=False)
+			
+			if (has_h and has_l):
+				with_any = True
+				conf.env.INTERVAL_LIB = "CXSC"
+				Logs.pprint ("BLUE","The Interval arithmetic is the installed version of CXSC")
+		
 		if not with_any:
 			# try to find GAOL
 			has_h = conf.check_cxx (header_name = ["gaol/gaol.h", "gaol/gaol_interval.h"],mandatory=False)
@@ -140,7 +152,21 @@ def configure (conf):
 		kw = {"libpath": join (with_bias, "lib")} if with_bias else {}
 		conf.check_cxx (lib = ["Profil", "Bias", "lr"],
 				uselib_store = "IBEX_DEPS", **kw)
+	
+	if with_cxsc is not None:
+		# build with CXSC
+		conf.env.INTERVAL_LIB = "CXSC"
 
+		if with_cxsc:
+			conf.env.append_unique ("INCLUDES", join (with_cxsc, "include"))
+			conf.env.append_unique ("INCLUDES_IBEX_DEPS", join (with_cxsc, "include"))
+
+		conf.check_cxx (header_name	= "interval.hpp")
+
+		kw = {"libpath": join (with_cxsc, "lib")} if with_cxsc else {}
+		conf.check_cxx (lib = ["cxsc"],
+				uselib_store = "IBEX_DEPS", **kw)
+    
 	elif with_filib is not None:
 		# build with filib
 

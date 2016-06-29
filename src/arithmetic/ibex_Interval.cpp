@@ -13,6 +13,9 @@
 #include <float.h>
 #include <cassert>
 
+#ifdef _IBEX_WITH_CXSC_
+#include "ibex_Interval_cxsc.cpp_"
+#else
 #ifdef _IBEX_WITH_GAOL_
 #include "ibex_Interval_gaol.cpp_"
 #else
@@ -24,6 +27,7 @@
 #else
 #ifdef _IBEX_WITH_DIRECT_
 #include "ibex_Interval_direct.cpp_"
+#endif
 #endif
 #endif
 #endif

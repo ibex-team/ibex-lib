@@ -23,9 +23,17 @@
 #include "ibex_Setting.h"
 /* ======================================================= */
 
+#ifdef _IBEX_WITH_CXSC_
+	#include "interval.hpp"
+#undef ZERO
+#undef UP
+	/** \brief POS_INFINITY: double representation of +oo */
+	#define POS_INFINITY (cxsc::_double(cxsc::Infinity))
 
+	/** \brief NEG_INFINITY: double representation of -oo */
+	#define NEG_INFINITY (-(cxsc::_double(cxsc::Infinity)))
 
-
+#else
 #ifdef _IBEX_WITH_GAOL_
 	extern "C" {
 	  //#include "gdtoaimp.h"
@@ -95,6 +103,7 @@
 		}
 	};
 
+#endif
 #endif
 #endif
 #endif
@@ -518,6 +527,13 @@ class Interval {
     operator const ExprConstant&() const;
 
 //private:
+#ifdef _IBEX_WITH_CXSC_
+    /* \brief Wrap the gaol-interval [x]. */
+    Interval(const cxsc::interval& x);
+    /* \brief Assign this to the gaol-interval [x]. */
+    Interval& operator=(const cxsc::interval& x);
+    cxsc::interval itv;
+#else
 #ifdef _IBEX_WITH_GAOL_
     /* \brief Wrap the gaol-interval [x]. */
     Interval(const gaol::interval& x);
@@ -551,6 +567,7 @@ class Interval {
     Interval& operator=(const DIRECT_INTERVAL& x);
 
     DIRECT_INTERVAL itv;
+#endif
 #endif
 #endif
 #endif
@@ -867,7 +884,9 @@ bool bwd_integer(Interval& x);
 bool bwd_imod(Interval& x, Interval& y, const double& p);
 
 } // end namespace ibex
-
+#ifdef _IBEX_WITH_CXSC_
+#include "ibex_Interval_cxsc.h_"
+#else
 #ifdef _IBEX_WITH_GAOL_
 #include "ibex_Interval_gaol.h_"
 #else
@@ -879,6 +898,7 @@ bool bwd_imod(Interval& x, Interval& y, const double& p);
 #else
 #ifdef _IBEX_WITH_DIRECT_
 #include "ibex_Interval_direct.h_"
+#endif
 #endif
 #endif
 #endif
@@ -991,6 +1011,9 @@ inline double distance(const Interval &x1, const Interval &x2) {
     else if (x2.is_unbounded())
     	return POS_INFINITY;
     else
+#ifdef _IBEX_WITH_CXSC_
+    	return fabs(x1.lb()-x2.lb()) <fabs(x1.ub()-x2.ub()) ? fabs(x1.ub()-x2.ub()) : fabs(x1.lb()-x2.lb()) ;
+#else
 #ifdef _IBEX_WITH_GAOL_
     	return hausdorff(x1,x2);
 #else
@@ -1002,6 +1025,7 @@ inline double distance(const Interval &x1, const Interval &x2) {
 #else
 #ifdef _IBEX_WITH_DIRECT_
     	return fabs(x1.lb()-x2.lb()) <fabs(x1.ub()-x2.ub()) ? fabs(x1.ub()-x2.ub()) : fabs(x1.lb()-x2.lb()) ;
+#endif
 #endif
 #endif
 #endif
