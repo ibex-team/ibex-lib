@@ -252,15 +252,12 @@ void ExprSimplify::visit_add_sub(const ExprBinaryOp& e, bool sign) {
 		cl=dynamic_cast<const ExprConstant*>(&l);
 		lsign=true;
 	}
-
-	// ========== should be uncommented but couter-productive??
 	else if ((is_add(l) || is_sub(l)) && is_cst(right(l))) {
 		el=&left(l);
 		// cst always on the right (see why below)
 		cl=dynamic_cast<const ExprConstant*>(&(right(l)));
 		lsign=is_add(l);
 	}
-
 	else {
 		el=&l;
 		cl=NULL;
@@ -280,13 +277,11 @@ void ExprSimplify::visit_add_sub(const ExprBinaryOp& e, bool sign) {
 		cr=dynamic_cast<const ExprConstant*>(&r);
 		rsign=sign;
 	}
-	// ========== should be uncommented but couter-productive??
 	else if ((is_add(r) || is_sub(r)) && is_cst(right(r))) {
 		er=&left(r);
 		cr=dynamic_cast<const ExprConstant*>(&(right(r))); // cst always on the right (see why below)
 		rsign = (sign && is_add(r)) || (!sign && is_sub(r));
 	}
-
 	else {
 		er=&r;
 		cr=NULL;
@@ -373,11 +368,11 @@ void ExprSimplify::visit_add_sub(const ExprBinaryOp& e, bool sign) {
 				// 1- keep a reference to the constant object
 				// (better if it is big in memory):
 				//
-				insert(e,-(*cfinal));
+				//insert(e,-(*cfinal));
 				//
 				// 2- precompute the opposite value:
 				// (note: no memory leak because cfinal==cl or cr)
-				//insert(e,ExprConstant::new_(-(cfinal->get())));
+				insert(e,ExprConstant::new_(-(cfinal->get())));
 		else
 			// always put the constant on the right side
 			// for further constant factorization
@@ -389,7 +384,6 @@ void ExprSimplify::visit_add_sub(const ExprBinaryOp& e, bool sign) {
 				// (*cfinal)-(*efinal) in order to keep
 				// the "constant on the right" idiom
 
-				// ========== should be the first option but couter-productive??
 				if (cst_sign)
 					insert(e,(-*efinal)+(*cfinal));
 					//insert(e,(*cfinal)-(*efinal));
@@ -397,8 +391,6 @@ void ExprSimplify::visit_add_sub(const ExprBinaryOp& e, bool sign) {
 				// note: the next expression is better than
 		        // (-(*efinal + *cfinal)) in order to keep
 		        // the "constant on the right" idiom
-
-				// ========== should be the first option but couter-productive??
 				else
 					insert(e,(-*efinal)-(*cfinal));
 					//insert(e,-(*efinal + *cfinal));
@@ -438,21 +430,15 @@ void ExprSimplify::visit(const ExprMul& e) {
 	else if (is_cst(l)) {
 		if (is_cst(r))
 			insert(e, ExprConstant::new_(to_cst(l)*to_cst(r)));
-
-		// ========== should be uncommented but couter-productive??
 		else if (is_mul(r) && is_cst(left(r)))
 			// note: l and left(r) and right(r) may not be scalar.
 			insert(e, ExprConstant::new_(to_cst(l)*to_cst(left(r)))*(right(r)));
-
-
 		else if ((&l == &e.left) && (&r == &e.right))  // nothing changed
 			insert(e, e);
 		else
 			insert(e, l*r);
 	}
 	else if (is_mul(l) && is_cst(left(l))) {
-
-		// ========== should be uncommented but couter-productive??
 		if (is_cst(r) && r.dim.is_scalar())
 			// note: left(l) and right(l) may not be scalar.
 			insert(e, ExprConstant::new_(to_cst(r)*to_cst(left(l)))*(right(l)));
