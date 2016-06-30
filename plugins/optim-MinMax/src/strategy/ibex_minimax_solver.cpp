@@ -8,8 +8,9 @@ void minimax_solver::solve(IntervalVector x_box_ini, IntervalVector y_box_ini, d
 
     cout<<"start init"<<endl;
     // ***** y_heap initialization ********
-    y_heap_costfub y_heap_costfunc; // element sorted w.r.t upper bound of objectif function evaluation
-    Heap<y_heap_elem> y_heap_ini(y_heap_costfunc);  // y heap /!\ This heap will be copy, cannot used DoubleHeap until a copy function is available
+    y_heap_costfub y_heap_costfunc1; // element sorted w.r.t upper bound of objectif function evaluation
+    y_heap_costflb y_heap_costfunc2; // element sorted w.r.t lower bound of objectif function evaluation
+    DoubleHeap<y_heap_elem> y_heap_ini(y_heap_costfunc1,false,y_heap_costfunc2,false);  // y heap /!\ This heap will be copy, cannot used DoubleHeap until a copy function is available
     y_heap_elem* y_ini = new y_heap_elem(y_box_ini,Interval::ALL_REALS,0); // first cell of y heap
     y_heap_ini.push(y_ini); // push element in y_heap, y_heap is initialized
 
@@ -86,14 +87,14 @@ void minimax_solver::solve(IntervalVector x_box_ini, IntervalVector y_box_ini, d
             midp = get_feasible_point(x_subcells[i]);
             if(!midp.is_empty())
             {
-                Heap<y_heap_elem> heap_copy(x_subcells[i]->y_heap); // need to copy the heap for midpoint eval so the y_heap of x box is not modify
+                DoubleHeap<y_heap_elem> heap_copy(x_subcells[i]->y_heap); // need to copy the heap for midpoint eval so the y_heap of x box is not modify
                 nb_iter = choose_nbiter(true);   // need to be great enough so the minimum precision on y is reached
                 resmidp = lsolve.optimize(&(heap_copy),&(midp),x_sys->goal,nb_iter,loup,x_subcells[i]->fmax,prec_y,true); // eval maxf(midp,heap_copy), go to minimum prec on y to get a thin enclosure
 
                 if(resmidp != Interval::EMPTY_SET && resmidp.ub()<loup) { // update best current solution
                     loup = resmidp.ub();
                     best_sol = midp;
-                    max_y = heap_copy.top()->box;
+                    max_y = heap_copy.top1()->box;
                     cout<<"loup : "<<loup<<" get for point: x = "<<best_sol<<" y = "<<max_y<<" uplo: "<<uplo<< " volume rejected: "<<vol_rejected/init_vol*100<<endl;
                 }
                 heap_copy.flush(); // delete copy of the heap, no more use after the computation of max f(midp,heap_copy)
@@ -125,7 +126,7 @@ Heap<y_heap_elem> minimax_solver::init_y_heap(const IntervalVector& box) {
     return y_heap_ini;
 }
 
-Heap<x_heap_elem> minimax_solver::init_x_heap(const IntervalVector& box,Heap<y_heap_elem> y_heap_ini) {
+Heap<x_heap_elem> minimax_solver::init_x_heap(const IntervalVector& box,DoubleHeap<y_heap_elem> y_heap_ini) {
     x_heap_costflb x_heap_costfunc;
     Heap<x_heap_elem> x_heap(x_heap_costfunc);
     x_heap_elem *x_ini = new x_heap_elem(box,y_heap_ini,Interval::ALL_REALS);
@@ -160,8 +161,8 @@ IntervalVector minimax_solver::get_feasible_point(x_heap_elem * elem) {
 int minimax_solver::check_constraints(const IntervalVector& box) {
     int res(2);
     Interval int_res;
-    for(unsigned i=0;i<x_sys->func.size();i++) {
-        int_res = x_sys->func[i].eval(box);
+    for(unsigned i=0;i<x_sys->ctrs.size();i++) {
+        int_res = x_sys->ctrs[i].f.eval(box);
         if(int_res.lb()>=0)
             return 0;
         else if(int_res.ub()>=0)

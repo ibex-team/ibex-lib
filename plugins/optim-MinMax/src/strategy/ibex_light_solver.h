@@ -10,6 +10,7 @@
 #include "ibex_CtcFwdBwd.h"
 #include "ibex_LargestFirst.h"
 #include "ibex_NormalizedSystem.h"
+#include "ibex_DoubleHeap.h"
 
 
 using namespace std;
@@ -36,7 +37,7 @@ public:
      *         -min_prec: minimum size of boxes in y_heap
      *         -is_midp: true if optimize run with x midpoint eval, false else
      * */
-    Interval optimize(Heap<y_heap_elem> * y_heap, IntervalVector *x_box,Function * objective_function, unsigned nb_iter,double best_max,Interval fmax, double min_prec,bool is_midp);
+    Interval optimize(DoubleHeap<y_heap_elem> * y_heap, IntervalVector *x_box,Function * objective_function, unsigned nb_iter,double best_max,Interval fmax, double min_prec,bool is_midp);
 
     /* contract xy_box and xy_box_ctc w.r.t max_ctc contractor
      * */
@@ -63,6 +64,6 @@ void init_xy_box(IntervalVector* xy_box,const IntervalVector & y_box);
 
 /* add elements of Heap_save into y_heap
  * */
-void fill_y_heap(Heap<y_heap_elem>* y_heap,vector<y_heap_elem*>* Heap_save);
+void fill_y_heap(DoubleHeap<y_heap_elem>* y_heap,vector<y_heap_elem*>* Heap_save);
 
 #endif

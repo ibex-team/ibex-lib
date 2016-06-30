@@ -315,16 +315,12 @@ std::pair<SharedHeap<T> *,std::vector<HeapElt<T>*> *> SharedHeap<T>::copy_sheap(
     SharedHeap<T>* new_heap = new SharedHeap(costf,update_cost_when_sorting,heap_id);
     new_heap->nb_nodes = nb_nodes;
     std::vector<HeapElt<T>*> * elm_vect = new std::vector<HeapElt<T>*>() ;
-    std::cout<<"about to copy root"<<std::endl;
     if(root != NULL) {
         HeapElt<T> * elt = new HeapElt<T>(*root->elt,nb_crit);
         new_heap->root = new HeapNode<T>(elt);
         elt->holder[new_heap->heap_id] = new_heap->root;
     }
-    std::cout<<"root created"<<std::endl;
     elm_vect->push_back(new_heap->root->elt);
-    std::cout<<"elt holder 0: "<<new_heap->root->elt->holder[0]<<"elt holder 1: "<<new_heap->root->elt->holder[1]<<std::endl;
-    std::cout<<"apply copy_tree to root"<<std::endl;
     new_heap->root->copy_tree(root,elm_vect,heap_id,nb_crit);
 
     std::pair<SharedHeap<T> *,std::vector<HeapElt<T>*> *> rtrn;

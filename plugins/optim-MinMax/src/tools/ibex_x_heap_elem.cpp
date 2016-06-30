@@ -1,7 +1,8 @@
 #include "ibex_x_heap_elem.h"
 
 
-x_heap_elem::x_heap_elem(IntervalVector box,Heap<y_heap_elem> heap,Interval fmax) :box(box),y_heap(heap),fmax(fmax),pu(0)
+
+x_heap_elem::x_heap_elem(IntervalVector box,DoubleHeap<y_heap_elem> heap,Interval fmax) :box(box),y_heap(heap),fmax(fmax),pu(0)
 {}
 
 

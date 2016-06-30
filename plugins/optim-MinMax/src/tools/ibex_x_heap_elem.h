@@ -4,6 +4,7 @@
 #include "ibex_IntervalVector.h"
 #include "ibex_CellCostFunc.h"
 #include "ibex_y_heap_elem.h"
+#include "ibex_DoubleHeap.h"
 
 using namespace ibex;
 using namespace std;
@@ -13,11 +14,11 @@ friend class minimax_solver;
 friend class x_heap_costflb;
 protected:
     IntervalVector box;
-    Heap<y_heap_elem> y_heap; // y_heap inherited from father of box
+    DoubleHeap<y_heap_elem> y_heap; // y_heap inherited from father of box
     Interval fmax; // enclosure of maximum of the objective function
     double pu;
 
-    x_heap_elem(IntervalVector box,Heap<y_heap_elem> heap,Interval fmax);
+    x_heap_elem(IntervalVector box,DoubleHeap<y_heap_elem> heap,Interval fmax);
     pair<x_heap_elem*,x_heap_elem*> bisect(IntervalVector box1,IntervalVector box2);
 };
 

@@ -170,20 +170,15 @@ DoubleHeap<T>::DoubleHeap(CostFunc<T>& cost1, bool update_cost1_when_sorting, Co
 
 template<class T>
 DoubleHeap<T>::DoubleHeap(const DoubleHeap &dhcp):critpr(dhcp.critpr),current_heap_id(dhcp.current_heap_id),nb_nodes(dhcp.nb_nodes) {
-    std::cout<<"in the copy constructor..."<<std::endl;
-std::pair<SharedHeap<T> *,std::vector<HeapElt<T>*> *> p;
+    std::pair<SharedHeap<T> *,std::vector<HeapElt<T>*> *> p;
     p= dhcp.heap1->copy_sheap(2);
-    std::cout<<"copy heap done"<<std::endl;
     heap1 = p.first;
     heap2 = new SharedHeap<T>(dhcp.heap2->costf,dhcp.heap2->update_cost_when_sorting,dhcp.heap2->heap_id);
     while(!p.second->empty()) {
-        std::cout<<"elt holder 0: "<<p.second->back()->holder[0]<<" elt holder 1: "<<p.second->back()->holder[1]<<std::endl;
         heap2->push_elt(p.second->back());
-        std::cout<<"elt holder 0: "<<p.second->back()->holder[0]<<" elt holder 1: "<<p.second->back()->holder[1]<<std::endl;
         p.second->pop_back();
     }
-
-
+    delete p.second;
 }
 
 template<class T>

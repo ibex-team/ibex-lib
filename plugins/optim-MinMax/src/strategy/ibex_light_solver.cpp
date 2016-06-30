@@ -2,16 +2,17 @@
 
 
 
+
 light_solver::light_solver(Ctc * ctc_xy,NormalizedSystem *y_sys): ctc_xy(ctc_xy),y_sys(y_sys)
 {}
 
 
-Interval light_solver::optimize(Heap<y_heap_elem> * y_heap,IntervalVector* x_box,Function * objective_function, unsigned nb_iter,double best_max,Interval fmax, double min_prec,bool is_midp) {
+Interval light_solver::optimize(DoubleHeap<y_heap_elem> * y_heap,IntervalVector* x_box,Function * objective_function, unsigned nb_iter,double best_max,Interval fmax, double min_prec,bool is_midp) {
 
 //    if(y_heap->empty())
 //        return Interval::EMPTY_SET;
 //    cout<<"lsolve: start function optimize"<<endl;
-    IntervalVector xy_box(x_box->size()+y_heap->top()->box.size());
+    IntervalVector xy_box(x_box->size()+y_heap->top1()->box.size());
     IntervalVector xy_box_ctc(xy_box); // box that will be contracted when dealing with best max constraint and xy constraint, needed to get back the original x box when dealing with another y box
     IntervalVector xy_box_cp(xy_box); // use for contraction w.r.t ctc_xy_inv, check is constraint respected for all x y without loosing the original box
     for(unsigned i =0;i<x_box->size();i++) // initialize box containing x and y
@@ -39,7 +40,7 @@ Interval light_solver::optimize(Heap<y_heap_elem> * y_heap,IntervalVector* x_box
         if(y_heap->empty()){ // no more element in the list, happen if all elements of y_heap have reached min_prec
             break;
         }
-        tmp_cell = y_heap->pop();
+        tmp_cell = y_heap->pop1();
         pair<IntervalVector,IntervalVector> subboxes = lf.bisect(tmp_cell->box);
         subcells_pair = tmp_cell->bisect(subboxes.first,subboxes.second);// bisect tmp_cell into 2 subcells
         subcells[0] = subcells_pair.first;
@@ -48,8 +49,9 @@ Interval light_solver::optimize(Heap<y_heap_elem> * y_heap,IntervalVector* x_box
         for(unsigned j=0;j<=1;j++) { // deals with the two subcells
             init_xy_box(&xy_box,subcells[j]->box);
             xy_box_ctc = xy_box;
-            if(check_constraints(subcells[j]->box)==2)
+            if(check_constraints(xy_box)==2) {
                 subcells[j]->pu=1;
+            }
             if(ctc_xy != 0 && subcells[j]->pu != 1) // there is a constraint on x and y
             {
                 ctc_xy->contract(xy_box_ctc);
@@ -105,10 +107,10 @@ Interval light_solver::optimize(Heap<y_heap_elem> * y_heap,IntervalVector* x_box
         return Interval::EMPTY_SET;
 
 
-    loup = y_heap->top()->pf.ub(); // get the upper bound of max f(x,y_heap)
+    loup = y_heap->top1()->pf.ub(); // get the upper bound of max f(x,y_heap)
+    if(uplo<y_heap->top2()->pf.lb())
+        uplo = y_heap->top2()->pf.lb();
 
-//    if(!is_midp) // no midpoint eval on x
-//        *x_box = xy_box.subvector(0,x_box->size()-1); // update x_box
     return Interval(uplo,loup);
 
 }
@@ -140,8 +142,8 @@ IntervalVector light_solver::get_feasible_point(const IntervalVector& xy_box,y_h
 int light_solver::check_constraints(const IntervalVector& box) {
     int res(2);
     Interval int_res;
-    for(unsigned i=0;i<y_sys->func.size();i++) {
-        int_res =  y_sys->func[i].eval(box);
+    for(unsigned i=0;i<y_sys->ctrs.size();i++) {
+        int_res =  y_sys->ctrs[i].f.eval(box);
         if(int_res.lb()>=0)
             return 0;
         else if(int_res.ub()>=0)
@@ -167,7 +169,7 @@ void init_xy_box(IntervalVector* xy_box,const IntervalVector & y_box) {
         (*xy_box)[k+(xy_box->size()-y_box.size())] = y_box[k];
 }
 
-void fill_y_heap(Heap<y_heap_elem>* y_heap,vector<y_heap_elem*>* Heap_save) {
+void fill_y_heap(DoubleHeap<y_heap_elem>* y_heap,vector<y_heap_elem*>* Heap_save) {
     y_heap_elem* tmp_cell;
     while(!Heap_save->empty()) { // push all boxes of heap_save in y_heap
         tmp_cell = Heap_save->back();
