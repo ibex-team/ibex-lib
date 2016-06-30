@@ -138,7 +138,7 @@ void TestExprDiff::apply01() {
 //			||sameExpr(dg.expr(),"([3,3]*df((3*x)))")
 //			||sameExpr(dg.expr(),"(df((3*x))*[3,3])")
 //			||sameExpr(dg.expr(),"(df((3*x))*3)"));
-	CPPUNIT_ASSERT(sameExpr(dg.expr(),"(3*(2*(3*x)))"));
+	CPPUNIT_ASSERT(sameExpr(dg.expr(),"(18*x)"));
 }
 
 void TestExprDiff::apply02() {
@@ -166,7 +166,7 @@ void TestExprDiff::apply03() {
 	//	CPPUNIT_ASSERT(sameExpr(dg.expr(),"((2*df((2*x),(3*y))[0]),(3*df((2*x),(3*y))[1]))"));
 
 	//CPPUNIT_ASSERT(sameExpr(dg.expr(),"((df((2*x),(3*y))[0]*2),(df((2*x),(3*y))[1]*3))"));
-	CPPUNIT_ASSERT(sameExpr(dg.expr(),"((2*(3*y)),(3*(2*x)))"));
+	CPPUNIT_ASSERT(sameExpr(dg.expr(),"((6*y),(6*x))"));
 
 	double _box[][2]={{1,1},{2,2}};
 	double _dg_box[][2]={{12,12},{6,6}};
@@ -225,7 +225,8 @@ void TestExprDiff::mul01() {
 	const ExprVector& v2=ExprVector::new_(x,Interval(2,2),false);
 	Function f(x,v1*v2);
 	Function df(f,Function::DIFF);
-	CPPUNIT_ASSERT(sameExpr(df.expr(),"((x+2)+x)"));
+	//CPPUNIT_ASSERT(sameExpr(df.expr(),"((x+2)+x)"));
+	CPPUNIT_ASSERT(sameExpr(df.expr(),"((x+x)+2)"));
 }
 
 void TestExprDiff::apply_mul01() {

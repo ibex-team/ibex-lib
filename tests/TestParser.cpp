@@ -260,6 +260,8 @@ void TestParser::loop01() {
 
 		      for (int k=j; k<=i; k++) {
 		    	  const ExprSub& sub=(const ExprSub&) sys.ctrs[c++].f.expr();
+
+		    	  // note: ExprSimplify will move constant on the right side
 		    	  const ExprConstant& cst=(const ExprConstant&) sub.right;
 		    	  CPPUNIT_ASSERT_DOUBLES_EQUAL(a+i+j*k,cst.get_value().mid(),error);
 		      }
@@ -270,6 +272,8 @@ void TestParser::loop01() {
 		    		CPPUNIT_ASSERT(sameExpr(sys.ctrs[c++].f.expr(),"x"));
 		    	} else {
 		    		const ExprSub& sub=(const ExprSub&) sys.ctrs[c++].f.expr();
+
+		    		 // note: ExprSimplify will move constant on the right side
 		    		const ExprConstant& cst=(const ExprConstant&) sub.right;
 		    		CPPUNIT_ASSERT_DOUBLES_EQUAL(i+j-b,cst.get_value().mid(),error);
 		    	}
