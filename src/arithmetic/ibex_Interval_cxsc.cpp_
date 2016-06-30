@@ -27,11 +27,9 @@ const Interval Interval::POS_REALS(cxsc::interval(0.0, (cxsc::Infinity)));
 const Interval Interval::ZERO(cxsc::interval(cxsc::real(0.0)));
 const Interval Interval::ONE(cxsc::interval(cxsc::real(1.0)));
 
-const Interval Interval::PI(cxsc::Pi_interval);
-	
-const Interval Interval::TWO_PI (cxsc::Pi2_interval);
-
-const Interval Interval::HALF_PI(cxsc::Pid2_interval);
+const Interval Interval::PI(cxsc::interval((7074237752028440.0 / 2251799813685248.0),cxsc::succ(7074237752028440.0 / 2251799813685248.0)));
+const Interval Interval::TWO_PI (cxsc::interval((7074237752028440.0 / 1125899906842624.0),cxsc::succ(7074237752028440.0 / 1125899906842624.0)));
+const Interval Interval::HALF_PI(cxsc::interval((7074237752028440.0 / 4503599627370496.0),cxsc::succ(7074237752028440.0 / 4503599627370496.0)));
 
 
 std::ostream& operator<<(std::ostream& os, const Interval& x) {

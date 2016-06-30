@@ -45,69 +45,76 @@ inline void fpu_round_zero() {
 }
 
 inline Interval::Interval(const cxsc::interval & x)  {
-	try {
-		this->itv = x;
-	} catch (cxsc::ERROR_INTERVAL_EMPTY_INTERVAL& ) {
+	if (cxsc::IsEmpty(x)) {
 		this->itv = cxsc::_unchecked_interval(2.0,1.0);
+	} else {
+		this->itv = x;
 	}
 }
 
 inline Interval& Interval::operator=(const cxsc::interval& x) {
-	try {
-		this->itv = x;
-	} catch (cxsc::ERROR_INTERVAL_EMPTY_INTERVAL& ) {
+	if (cxsc::IsEmpty(x)) {
 		this->itv = cxsc::_unchecked_interval(2.0,1.0);
+	} else {
+		this->itv = x;
 	}
 	return *this;
 }
 
 inline Interval& Interval::operator+=(double d) {
-	if (d>=POS_INFINITY || d<=NEG_INFINITY)
-		set_empty();
-	else
-		itv+=d;
+	if (!is_empty()) {
+		if (d>=POS_INFINITY || d<=NEG_INFINITY)
+			set_empty();
+		else
+			itv+=d;
+	}
 	return *this;
 }
 
 inline Interval& Interval::operator-=(double d) {
-	if (d>=POS_INFINITY || d<=NEG_INFINITY)
-		set_empty();
-	else
-		itv-=d;
+	if (!is_empty()) {
+		if (d>=POS_INFINITY || d<=NEG_INFINITY)
+			set_empty();
+		else
+			itv-=d;
+	}
 	return *this;
 
 }
 
 inline Interval& Interval::operator*=(double d) {
-	if (d>=POS_INFINITY || d<=NEG_INFINITY)
-		set_empty();
-	else
-		*this*=Interval(d);
+	if (!is_empty()) {
+		if (d>=POS_INFINITY || d<=NEG_INFINITY)
+			set_empty();
+		else
+			*this*=Interval(d);
+	}
 	return *this;
 }
 
 inline Interval& Interval::operator/=(double d) {
-	if (d>=POS_INFINITY || d<=NEG_INFINITY)
-		set_empty();
-	else{
-		*this/=Interval(d);
+	if (!is_empty()) {
+		if (d>=POS_INFINITY || d<=NEG_INFINITY)
+			set_empty();
+		else
+			*this/=Interval(d);
 	}
 	return *this;
 }
 
 inline Interval& Interval::operator+=(const Interval& x) {
-	try {
+	if (!is_empty() && !x.is_empty()) {
 		itv+=x.itv;
-	} catch (cxsc::ERROR_INTERVAL_EMPTY_INTERVAL& ) {
+	} else {
 		set_empty();
 	}
 	return *this;
 }
 
 inline Interval& Interval::operator-=(const Interval& x) {
-	try {
+	if (!is_empty() && !x.is_empty()) {
 		itv-=x.itv;
-	} catch (cxsc::ERROR_INTERVAL_EMPTY_INTERVAL& ) {
+	} else {
 		set_empty();
 	}
 	return *this;
@@ -115,66 +122,64 @@ inline Interval& Interval::operator-=(const Interval& x) {
 
 inline Interval& Interval::operator*=(const Interval& y) {
 
-	cxsc::interval r;
 
 	if (is_empty()) return *this;
-	if (y.is_empty()) { *this=Interval::EMPTY_SET; return *this; }
-	try {
+	if (y.is_empty()) { set_empty(); return *this; }
 
-		const cxsc::real& a(lb());
-		const cxsc::real& b(ub());
-		const cxsc::real& c(y.lb());
-		const cxsc::real& d(y.ub());
 
-		if ((a==0 && b==0) || (c==0 && d==0)) { *this=Interval(0.0,0.0); return *this; }
+	cxsc::interval r;
+	const cxsc::real& a(lb());
+	const cxsc::real& b(ub());
+	const cxsc::real& c(y.lb());
+	const cxsc::real& d(y.ub());
 
-		if (((a<0) && (b>0)) && (c<=NEG_INFINITY || d>=POS_INFINITY)) { *this=Interval(NEG_INFINITY, POS_INFINITY); return *this; }
+	if ((a==0 && b==0) || (c==0 && d==0)) { *this=Interval(0.0,0.0); return *this; }
 
-		if (((c<0) && (d>0)) && (a<=NEG_INFINITY || b>=POS_INFINITY)) { *this=Interval(NEG_INFINITY, POS_INFINITY); return *this; }
+	if (((a<0) && (b>0)) && (c<=NEG_INFINITY || d>=POS_INFINITY)) { *this=Interval(NEG_INFINITY, POS_INFINITY); return *this; }
 
-		// [-inf, _] x [_ 0] ou [0,_] x [_, +inf]
-		if (((a<=NEG_INFINITY) && (d==0)) || ((d>=POS_INFINITY) && (a==0))) {
-			if ((b<=0) || (c>=0)) { *this=Interval(0.0, POS_INFINITY); return *this; }
-			else {
-				r = cxsc::interval(b)*cxsc::interval(c);
-				*this=Interval(cxsc::_double(cxsc::Inf(r)), POS_INFINITY);
-				return *this;
-			}
+	if (((c<0) && (d>0)) && (a<=NEG_INFINITY || b>=POS_INFINITY)) { *this=Interval(NEG_INFINITY, POS_INFINITY); return *this; }
+
+	// [-inf, _] x [_ 0] ou [0,_] x [_, +inf]
+	if (((a<=NEG_INFINITY) && (d==0)) || ((d>=POS_INFINITY) && (a==0))) {
+		if ((b<=0) || (c>=0)) { *this=Interval(0.0, POS_INFINITY); return *this; }
+		else {
+			r = cxsc::interval(b)*cxsc::interval(c);
+			*this=Interval(cxsc::_double(cxsc::Inf(r)), POS_INFINITY);
+			return *this;
 		}
-
-		// [-inf, _] x [0, _] ou [0, _] x [-inf, _]
-		if (((a<=NEG_INFINITY) && (c==0)) || ((c<=NEG_INFINITY) && (a==0))) {
-			if ((b<=0) || (d<=0)) { *this=Interval(NEG_INFINITY, 0.0); return *this; }
-			else {
-				r = cxsc::interval(b)*cxsc::interval(d);
-				*this=Interval(NEG_INFINITY, cxsc::_double(cxsc::Sup(r)));
-				return *this;
-			}
-		}
-
-		// [_,0] x [-inf, _] ou [_, +inf] x [0,_]
-		if (((c<=NEG_INFINITY) && (b==0)) || ((b>=POS_INFINITY) && (c==0))) {
-			if ((d<=0) || (a>=0)) { *this=Interval(0.0, POS_INFINITY); return *this; }
-			else {
-				r = cxsc::interval(a)*cxsc::interval(d);
-				*this=Interval(cxsc::_double(cxsc::Inf(r)), POS_INFINITY);
-				return *this;
-			}
-		}
-
-		// [_, +inf] x [_,0] ou [_,0] x [_, +inf]
-		if (((b>=POS_INFINITY) && (d==0)) || ((d>=POS_INFINITY) && (b==0))) {
-			if ((a>=0) || (c>=0)) { *this=Interval(NEG_INFINITY, 0.0); return *this; }
-			else {
-				r = cxsc::interval(a)*cxsc::interval(c);
-				*this=Interval(NEG_INFINITY, cxsc::_double(cxsc::Sup(r)));
-				return *this;
-			}
-		}
-		*this= itv*y.itv;
-	} catch (cxsc::ERROR_INTERVAL_EMPTY_INTERVAL& ) {
-		set_empty();
 	}
+
+	// [-inf, _] x [0, _] ou [0, _] x [-inf, _]
+	if (((a<=NEG_INFINITY) && (c==0)) || ((c<=NEG_INFINITY) && (a==0))) {
+		if ((b<=0) || (d<=0)) { *this=Interval(NEG_INFINITY, 0.0); return *this; }
+		else {
+			r = cxsc::interval(b)*cxsc::interval(d);
+			*this=Interval(NEG_INFINITY, cxsc::_double(cxsc::Sup(r)));
+			return *this;
+		}
+	}
+
+	// [_,0] x [-inf, _] ou [_, +inf] x [0,_]
+	if (((c<=NEG_INFINITY) && (b==0)) || ((b>=POS_INFINITY) && (c==0))) {
+		if ((d<=0) || (a>=0)) { *this=Interval(0.0, POS_INFINITY); return *this; }
+		else {
+			r = cxsc::interval(a)*cxsc::interval(d);
+			*this=Interval(cxsc::_double(cxsc::Inf(r)), POS_INFINITY);
+			return *this;
+		}
+	}
+
+	// [_, +inf] x [_,0] ou [_,0] x [_, +inf]
+	if (((b>=POS_INFINITY) && (d==0)) || ((d>=POS_INFINITY) && (b==0))) {
+		if ((a>=0) || (c>=0)) { *this=Interval(NEG_INFINITY, 0.0); return *this; }
+		else {
+			r = cxsc::interval(a)*cxsc::interval(c);
+			*this=Interval(NEG_INFINITY, cxsc::_double(cxsc::Sup(r)));
+			return *this;
+		}
+	}
+	*this= itv*y.itv;
+
 	return *this;
 }
 
@@ -182,69 +187,66 @@ inline Interval& Interval::operator*=(const Interval& y) {
 inline Interval& Interval::operator/=(const Interval& y) {
 
 	if (is_empty()) return *this;
-	if (y.is_empty()) { *this=Interval::EMPTY_SET; return *this; }
-	try {
-		const cxsc::real& a(lb());
-		const cxsc::real& b(ub());
-		const cxsc::real& c(y.lb());
-		const cxsc::real& d(y.ub());
+	if (y.is_empty()) { set_empty(); return *this; }
 
-		cxsc::interval r;
+	const cxsc::real& a(lb());
+	const cxsc::real& b(ub());
+	const cxsc::real& c(y.lb());
+	const cxsc::real& d(y.ub());
 
-		if (c==0 && d==0) {
-			*this=Interval::EMPTY_SET;
-			return *this;
-		}
+	cxsc::interval r;
 
-		if (a==0 && b==0) {
-			// TODO: 0/0 can also be 1...
-			return *this;
-		}
-
-		if (c>0 || d<0) {
-			*this= itv / y.itv;
-			return *this;
-		}
-
-		if ((b<=0) && d==0) {
-			r = cxsc::interval(b) / cxsc::interval(c);
-			*this=Interval(cxsc::_double(cxsc::Inf(r)), POS_INFINITY);
-			return *this;
-		}
-
-		if (b<=0 && c<0 && d<0) {
-			*this=Interval(NEG_INFINITY, POS_INFINITY);
-			return *this;
-		}
-
-		if (b<=0 && c==0) {
-			r = cxsc::interval(b) / cxsc::interval(d);
-			*this=Interval(NEG_INFINITY, cxsc::_double(cxsc::Sup(r)));
-			return *this;
-		}
-
-		if (a>=0 && d==0) {
-			r = cxsc::interval(a) / cxsc::interval(c);
-			*this=Interval(NEG_INFINITY, cxsc::_double(cxsc::Sup(r)));
-			return *this;
-		}
-
-		if (a>=0 && c<0 && d>0) {
-			*this=Interval(NEG_INFINITY, POS_INFINITY);
-			return *this;
-		}
-
-		if (a>=0 && c==0) {
-			r = cxsc::interval(a) / cxsc::interval(d);
-			*this=Interval(cxsc::_double(cxsc::Inf(r)), POS_INFINITY);
-			return *this;
-		}
-
-		*this=Interval(NEG_INFINITY, POS_INFINITY); // a<0<b et c<=0<=d
-
-	} catch (cxsc::ERROR_INTERVAL_EMPTY_INTERVAL& ) {
-		set_empty();
+	if (c==0 && d==0) {
+		*this=Interval::EMPTY_SET;
+		return *this;
 	}
+
+	if (a==0 && b==0) {
+		// TODO: 0/0 can also be 1...
+		return *this;
+	}
+
+	if (c>0 || d<0) {
+		*this= itv / y.itv;
+		return *this;
+	}
+
+	if ((b<=0) && d==0) {
+		r = cxsc::interval(b) / cxsc::interval(c);
+		*this=Interval(cxsc::_double(cxsc::Inf(r)), POS_INFINITY);
+		return *this;
+	}
+
+	if (b<=0 && c<0 && d<0) {
+		*this=Interval(NEG_INFINITY, POS_INFINITY);
+		return *this;
+	}
+
+	if (b<=0 && c==0) {
+		r = cxsc::interval(b) / cxsc::interval(d);
+		*this=Interval(NEG_INFINITY, cxsc::_double(cxsc::Sup(r)));
+		return *this;
+	}
+
+	if (a>=0 && d==0) {
+		r = cxsc::interval(a) / cxsc::interval(c);
+		*this=Interval(NEG_INFINITY, cxsc::_double(cxsc::Sup(r)));
+		return *this;
+	}
+
+	if (a>=0 && c<0 && d>0) {
+		*this=Interval(NEG_INFINITY, POS_INFINITY);
+		return *this;
+	}
+
+	if (a>=0 && c==0) {
+		r = cxsc::interval(a) / cxsc::interval(d);
+		*this=Interval(cxsc::_double(cxsc::Inf(r)), POS_INFINITY);
+		return *this;
+	}
+
+	*this=Interval(NEG_INFINITY, POS_INFINITY); // a<0<b et c<=0<=d
+
 	return *this;
 
 }
@@ -254,7 +256,7 @@ inline Interval& Interval::operator/=(const Interval& y) {
 }*/
 
 inline Interval Interval:: operator-() const {
-	if (this->is_empty())
+	if (is_empty())
 		return Interval::EMPTY_SET;
 	else {
 		return Interval(-itv);
@@ -272,20 +274,25 @@ inline void Interval::set_empty() {
 }
 
 inline Interval& Interval::operator&=(const Interval& x) {
-	try {
-		itv &= x.itv;
-	} catch (cxsc::ERROR_INTERVAL_EMPTY_INTERVAL& ) {
+	if (is_empty())
+		*this=x;
+	else if (x.is_empty())
+		return *this;
+	else if ((this->lb()>x.ub())||(x.lb()>this->ub()))
 		set_empty();
-	}
+	else
+		itv &= x.itv;
+
 	return *this;
+
 }
 
 inline Interval& Interval::operator|=(const Interval& x) {
-	try {
+	if (is_empty())
+		itv = x.itv;
+	else if (!x.is_empty())
 		itv |= x.itv;
-	} catch (cxsc::ERROR_INTERVAL_EMPTY_INTERVAL& ) {
-		set_empty();
-	}
+
 	return *this;
 }
 
@@ -338,154 +345,132 @@ inline double Interval::mag() const {
 	return  (fabs(lb())> fabs(ub())) ? fabs(lb()) : fabs(ub());
 }
 
+
 inline Interval operator&(const Interval& x1, const Interval& x2) {
-	try {
+	if ((!x1.is_empty()) && (!x2.is_empty()) && (x1.lb()<x2.ub()) && (x2.lb()<x1.ub())) {
 		return (x1.itv & x2.itv);
-	} catch (cxsc::ERROR_INTERVAL_EMPTY_INTERVAL& ) {
+	} else
 		return Interval::EMPTY_SET;
-	}
 }
 
 
 inline Interval operator|(const Interval& x1, const Interval& x2) {
 	if (x1.is_empty()) return x2;
 	if (x2.is_empty()) return x1;
-	try {
-		return (x1.itv | x2.itv);
-	} catch (cxsc::ERROR_INTERVAL_EMPTY_INTERVAL& ) {
-		return Interval::EMPTY_SET;
-	}
+	return (x1.itv | x2.itv);
 }
 
 
 inline Interval operator+(const Interval& x, double d) {
-	try {
-		if(x.is_empty() || d<=NEG_INFINITY || d>=POS_INFINITY)
-			return Interval::EMPTY_SET;
-		else
-			return Interval(x.itv+cxsc::real(d));
-	} catch (cxsc::ERROR_INTERVAL_EMPTY_INTERVAL& ) {
+	if (!(x.is_empty() || d<=NEG_INFINITY || d>=POS_INFINITY)) {
+		return Interval(x.itv+cxsc::real(d));
+	} else
 		return Interval::EMPTY_SET;
-	}
 }
 
 inline Interval operator-(const Interval& x, double d) {
-	try {
-		if(x.is_empty() || d<=NEG_INFINITY || d>=POS_INFINITY)
-			return Interval::EMPTY_SET;
-		else
-			return Interval(x.itv-cxsc::real(d));
-	} catch (cxsc::ERROR_INTERVAL_EMPTY_INTERVAL& ) {
+	if (!(x.is_empty() || d<=NEG_INFINITY || d>=POS_INFINITY)) {
+		return Interval(x.itv-cxsc::real(d));
+	} else
 		return Interval::EMPTY_SET;
-	}
 }
 
 inline Interval operator*(const Interval& x, double d) {
-	try {
-		if(x.is_empty() || d<=NEG_INFINITY || d>=POS_INFINITY)
-			return Interval::EMPTY_SET;
-		else {
-			Interval res(d);
-			return res*=x;
-		}
-	} catch (cxsc::ERROR_INTERVAL_EMPTY_INTERVAL& ) {
+	if (!(x.is_empty() || d<=NEG_INFINITY || d>=POS_INFINITY)) {
+		Interval res(d);
+		return res*=x;
+	} else
 		return Interval::EMPTY_SET;
-	}
 }
 
 inline Interval operator/(const Interval& x, double d) {
-	try {
-		if(x.is_empty() || d<=NEG_INFINITY || d>=POS_INFINITY)
-			return Interval::EMPTY_SET;
-		else{
-			Interval res(x);
-			return res/=Interval(d);
-		}
-	} catch (cxsc::ERROR_INTERVAL_EMPTY_INTERVAL& ) {
+	if (!(x.is_empty() || d<=NEG_INFINITY || d>=POS_INFINITY)) {
+		Interval res(x);
+		return res/=Interval(d);
+	} else
 		return Interval::EMPTY_SET;
-	}
 }
 
 inline Interval operator+(double d,const Interval& x) {
-	try {
-		if(x.is_empty() || d<=NEG_INFINITY || d>=POS_INFINITY)
-			return Interval::EMPTY_SET;
-		else
-			return Interval(cxsc::real(d)+x.itv);
-
-	} catch (cxsc::ERROR_INTERVAL_EMPTY_INTERVAL& ) {
+	if (!(x.is_empty() || d<=NEG_INFINITY || d>=POS_INFINITY)) {
+		return Interval(cxsc::real(d)+x.itv);
+	} else
 		return Interval::EMPTY_SET;
-	}
 }
 
 inline Interval operator-(double d, const Interval& x) {
-	try {
-		if(x.is_empty() || d<=NEG_INFINITY || d>=POS_INFINITY)
-			return Interval::EMPTY_SET;
-		else
-			return Interval(cxsc::real(d)-x.itv);
-
-	} catch (cxsc::ERROR_INTERVAL_EMPTY_INTERVAL& ) {
+	if (!(x.is_empty() || d<=NEG_INFINITY || d>=POS_INFINITY)) {
+		return Interval(cxsc::real(d)-x.itv);
+	} else
 		return Interval::EMPTY_SET;
-	}
 }
 
 inline Interval operator*(double d, const Interval& x) {
-	try{
-		if(x.is_empty() || d<=NEG_INFINITY || d>=POS_INFINITY)
-			return Interval::EMPTY_SET;
-		else {
-			Interval res(d);
-			return res*=x;
-		}
-	} catch (cxsc::ERROR_INTERVAL_EMPTY_INTERVAL& ) {
+	if (!(x.is_empty() || d<=NEG_INFINITY || d>=POS_INFINITY)) {
+		Interval res(d);
+		return res*=x;
+	} else
 		return Interval::EMPTY_SET;
-	}
 }
 
 inline Interval operator/(double d, const Interval& x) {
-	try  {
-		if(x.is_empty() || d<=NEG_INFINITY || d>=POS_INFINITY)
-			return Interval::EMPTY_SET;
-		else{
-			Interval res(d);
-			return res/=x;
-		}
-	} catch (cxsc::ERROR_INTERVAL_EMPTY_INTERVAL& ) {
+	if (!((x.is_empty() || d<=NEG_INFINITY || d>=POS_INFINITY))) {
+		Interval res(d);
+		return res/=x;
+	} else
 		return Interval::EMPTY_SET;
-	}
 }
 
 inline Interval operator+(const Interval& x1, const Interval& x2) {
-	return Interval(x1.itv+x2.itv);
+	if (!(x1.is_empty()||x2.is_empty()))
+		return Interval(x1.itv+x2.itv);
+	else
+		return Interval::EMPTY_SET;
 }
 
 inline Interval operator-(const Interval& x1, const Interval& x2) {
+	if (!(x1.is_empty()||x2.is_empty()))
 	return Interval(x1.itv-x2.itv);
+	else
+		return Interval::EMPTY_SET;
 }
 
 inline Interval operator*(const Interval& x1, const Interval& x2) {
-	Interval res(x1);
-	return res*=x2;
+	if (!(x1.is_empty()||x2.is_empty())) {
+		Interval res(x1);
+		return res*=x2;
+	} else
+		return Interval::EMPTY_SET;
 }
 
 inline Interval operator/(const Interval& x1, const Interval& x2) {
+	if (!(x1.is_empty()||x2.is_empty())) {
 	Interval res(x1);
 	return res/=Interval(x2);
+	} else
+		return Interval::EMPTY_SET;
 }
 
 inline Interval sqr(const Interval& x) {
-	return Interval(cxsc::sqr(x.itv));
+	if (!(x.is_empty()) )
+		return Interval(cxsc::sqr(x.itv));
+	else
+		return  Interval::EMPTY_SET;
 }
 
 inline Interval sqrt(const Interval& x) {
-	Interval res(cxsc::sqrt(x.itv));
-	if (res.lb()<0) res &= Interval::POS_REALS;
-	return res;
+	if (!(x.is_empty()) ) {
+		Interval res(cxsc::sqrt(x.itv));
+		if (res.lb()<0) res &= Interval::POS_REALS;
+		return res;
+	} else
+		return  Interval::EMPTY_SET;
 }
 
 inline Interval pow(const Interval& x, int n) {
-	if (n==0)
+	if (x.is_empty())
+		return  Interval::EMPTY_SET;
+	else if (n==0)
 		return Interval::ONE;
 	else if (n<0)
 		return 1.0/Interval(cxsc::power(x.itv,-n));
@@ -494,7 +479,7 @@ inline Interval pow(const Interval& x, int n) {
 }
 
 inline Interval pow(const Interval &x, double d) {
-	if(d<=NEG_INFINITY || d>=POS_INFINITY)
+	if (x.is_empty()||d<=NEG_INFINITY || d>=POS_INFINITY)
 		return Interval::EMPTY_SET;
 	else if (d==0)
 		return Interval::ONE;
@@ -505,7 +490,10 @@ inline Interval pow(const Interval &x, double d) {
 }
 
 inline Interval pow(const Interval &x, const Interval &y) {
-	return Interval(cxsc::pow(x.itv, y.itv));
+	if (x.is_empty())
+		return  Interval::EMPTY_SET;
+	else
+		return Interval(cxsc::pow(x.itv, y.itv));
 }
 
 
@@ -530,66 +518,132 @@ inline Interval root(const Interval& x, int n) {
 
 
 inline Interval exp(const Interval& x) {
-	return Interval(cxsc::exp(x.itv));
+	if (x.is_empty())
+		return  Interval::EMPTY_SET;
+	else
+		return Interval(cxsc::exp(x.itv));
 }
 
 inline Interval log(const Interval& x) {
-	if (x.ub()<=0) // filib returns (-oo,-DBL_MAX) if x.ub()==0, instead of EMPTY_SET
+	if (x.is_empty() || x.ub()<=0)
 		return Interval::EMPTY_SET;
-	else 
-		return Interval(cxsc::ln(x.itv));
+	else if (x.lb()<=0) {
+		if (x.ub()>=POS_INFINITY)
+			return Interval::ALL_REALS;
+		else
+			return Interval(cxsc::_unchecked_interval(-cxsc::Infinity,cxsc::succ(cxsc::ln(cxsc::Sup(x.itv)))));
+	}
+	else {
+		if (x.ub()>=POS_INFINITY)
+			return Interval(cxsc::_unchecked_interval(cxsc::pred(cxsc::ln(cxsc::Inf(x.itv))),cxsc::Infinity));
+		else
+			return Interval(cxsc::ln(x.itv));
+	}
 }
 
 inline Interval cos(const Interval& x) {
-	return Interval(cxsc::cos(x.itv));
+	if (x.is_empty())
+		return  Interval::EMPTY_SET;
+	else
+		return Interval(cxsc::cos(x.itv));
 }
 
 inline Interval sin(const Interval& x) {
-	return Interval(cxsc::sin(x.itv));
+	if (x.is_empty())
+		return  Interval::EMPTY_SET;
+	else
+		return Interval(cxsc::sin(x.itv));
 }
 
 inline Interval tan(const Interval& x) {
-	return Interval(cxsc::tan(x.itv));
+	if (x.is_empty())
+		return  Interval::EMPTY_SET;
+	else
+		return Interval(cxsc::tan(x.itv));
 }
 
 inline Interval acos(const Interval& x) {
+	if (x.is_empty())
+		return  Interval::EMPTY_SET;
+	else
+
 	return Interval(cxsc::acos(x.itv));
 }
 
 inline Interval asin(const Interval& x) {
-	return Interval(cxsc::asin(x.itv));
+	if (x.is_empty())
+		return  Interval::EMPTY_SET;
+	else
+		return Interval(cxsc::asin(x.itv));
 }
 
 inline Interval atan(const Interval& x) {
-	return Interval(cxsc::atan(x.itv));
+	if (x.is_empty())
+		return  Interval::EMPTY_SET;
+	else
+		return Interval(cxsc::atan(x.itv));
 }
 
 inline Interval cosh(const Interval& x) {
-	return Interval(cxsc::cosh(x.itv));
+	if (x.is_empty())
+		return  Interval::EMPTY_SET;
+	else
+		return Interval(cxsc::cosh(x.itv));
 }
 
 inline Interval sinh(const Interval& x) {
-	return Interval(cxsc::sinh(x.itv));
+	if (x.is_empty())
+		return  Interval::EMPTY_SET;
+	else
+		return Interval(cxsc::sinh(x.itv));
 }
 
 inline Interval tanh(const Interval& x) {
-	return Interval(cxsc::tanh(x.itv));
+	if (x.is_empty())
+		return  Interval::EMPTY_SET;
+	else
+		return Interval(cxsc::tanh(x.itv));
 }
 
 inline Interval acosh(const Interval& x) {
-	return Interval(cxsc::acosh(x.itv));
+	Interval r = x & Interval(1,POS_INFINITY);
+	if (r.is_empty())
+		return  Interval::EMPTY_SET;
+	else if (r.ub()>= POS_INFINITY)
+		return Interval(cxsc::interval(cxsc::pred(cxsc::acosh(cxsc::Inf(r.itv))),cxsc::Infinity));
+	else
+		return Interval(cxsc::acosh(r.itv));
 }
 
 inline Interval asinh(const Interval& x) {
-	return Interval(cxsc::asinh(x.itv));
+	if (x.is_empty())
+		return  Interval::EMPTY_SET;
+	else if (x.ub()>=POS_INFINITY) {
+		if (x.lb()<=NEG_INFINITY)
+			return Interval::ALL_REALS;
+		else
+			return Interval(cxsc::interval(cxsc::pred(cxsc::asinh(cxsc::Inf(x.itv))),cxsc::Infinity));
+	}
+	else
+		if (x.lb()<=NEG_INFINITY)
+			return Interval(cxsc::interval(-cxsc::Infinity,cxsc::succ(cxsc::asinh(cxsc::Sup(x.itv)))));
+		else
+			return Interval(cxsc::asinh(x.itv));
 }
 
 inline Interval atanh(const Interval& x) {
-	return Interval(cxsc::atanh(x.itv));
+	Interval r = x & Interval(-1,1);
+	if (r.is_empty())
+		return  Interval::EMPTY_SET;
+	else
+		return Interval(cxsc::atanh(r.itv));
 }
 
 inline Interval abs(const Interval &x) {
-	return Interval(cxsc::abs(x.itv));
+	if (x.is_empty())
+		return  Interval::EMPTY_SET;
+	else
+		return Interval(cxsc::abs(x.itv));
 }
 
 
@@ -604,7 +658,10 @@ inline Interval min(const Interval& x, const Interval& y) {
 }
 
 inline Interval integer(const Interval& x) {
-	return Interval(std::ceil(x.lb()),std::floor(x.ub()));
+	if (x.is_empty())
+		return  Interval::EMPTY_SET;
+	else
+		return Interval(std::ceil(x.lb()),std::floor(x.ub()));
 }
 
 inline bool bwd_mul(const Interval& y, Interval& x1, Interval& x2) {
