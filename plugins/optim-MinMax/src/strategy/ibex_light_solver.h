@@ -18,7 +18,7 @@ using namespace ibex;
 class light_solver{
 public:
     Ctc * ctc_xy; //contractor for constraints on xy
-    NormalizedSystem *y_sys; // contractor relative to constraints on x and y
+    NormalizedSystem *y_sys; // contains constraints on x and y
     double abs_min_prec; // absolute minimum prec bissection on y
 
     /* Constructor*/

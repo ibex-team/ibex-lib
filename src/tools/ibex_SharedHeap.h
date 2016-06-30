@@ -314,12 +314,17 @@ template<class T>
 std::pair<SharedHeap<T> *,std::vector<HeapElt<T>*> *> SharedHeap<T>::copy_sheap(int nb_crit){
     SharedHeap<T>* new_heap = new SharedHeap(costf,update_cost_when_sorting,heap_id);
     new_heap->nb_nodes = nb_nodes;
-    std::vector<HeapElt<T>*> * elm_vect;
-    if(root =! NULL) {
-        HeapElt<T> * elt = new HeapElt<T>(*root->elt);
+    std::vector<HeapElt<T>*> * elm_vect = new std::vector<HeapElt<T>*>() ;
+    std::cout<<"about to copy root"<<std::endl;
+    if(root != NULL) {
+        HeapElt<T> * elt = new HeapElt<T>(*root->elt,nb_crit);
         new_heap->root = new HeapNode<T>(elt);
+        elt->holder[new_heap->heap_id] = new_heap->root;
     }
+    std::cout<<"root created"<<std::endl;
     elm_vect->push_back(new_heap->root->elt);
+    std::cout<<"elt holder 0: "<<new_heap->root->elt->holder[0]<<"elt holder 1: "<<new_heap->root->elt->holder[1]<<std::endl;
+    std::cout<<"apply copy_tree to root"<<std::endl;
     new_heap->root->copy_tree(root,elm_vect,heap_id,nb_crit);
 
     std::pair<SharedHeap<T> *,std::vector<HeapElt<T>*> *> rtrn;
@@ -418,7 +423,7 @@ void SharedHeap<T>::push_elt(HeapElt<T>* elt) {
 		if (nb_nodes%2==0)	{ pt->left =tmp; }
 		else 				{ pt->right=tmp; }
 
-		percolate_up(tmp);
+                percolate_up(tmp);
 	}
 }
 
@@ -672,8 +677,10 @@ HeapElt<T>::HeapElt(T* data, double crit_1, double crit_2) : data(data), /*nb_he
 
 template<class T>
 HeapElt<T>::HeapElt(const HeapElt& eltcopy,int nb_crit):crit(new double[nb_crit]),holder(new HeapNode<T>*[nb_crit]) {
-    for(unsigned i=0;i<nb_crit;i++)
-        crit[i] = *(eltcopy.crit)[i];
+    for(unsigned i=0;i<nb_crit;i++){
+        (crit[i]) = (eltcopy.crit)[i];
+        holder[i] = NULL;
+    }
     data = new T(*(eltcopy.data));
 }
 

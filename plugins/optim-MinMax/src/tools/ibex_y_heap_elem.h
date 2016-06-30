@@ -32,4 +32,9 @@ public:
 
 };
 
+class y_heap_costflb : public CostFunc<y_heap_elem> { // element are sorted from the lowest lb of the evaluation of the objective function to the greatest
+public:
+    virtual double cost(const y_heap_elem& elem) const;
+};
+
 #endif

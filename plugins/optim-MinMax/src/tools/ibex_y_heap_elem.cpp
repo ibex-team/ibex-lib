@@ -24,3 +24,7 @@ pair<y_heap_elem*,y_heap_elem*> y_heap_elem::bisect(IntervalVector box1,Interval
 double y_heap_costfub::cost(const y_heap_elem& elem) const {
     return  -elem.pf.ub();
 }
+
+double y_heap_costflb::cost(const y_heap_elem& elem) const {
+    return  elem.pf.lb();
+}
