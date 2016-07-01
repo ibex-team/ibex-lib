@@ -23,6 +23,7 @@ void minimax_solver::solve(IntervalVector x_box_ini, IntervalVector y_box_ini, d
 
     //************** algo variables **************
     double uplo(NEG_INFINITY),loup(POS_INFINITY); // upper and lower bound enclosure of minimum value initialization
+    double minprec_uplo(POS_INFINITY);
     LargestFirst lf;
     x_heap_elem *x_cell_tmp;
     x_heap_elem *x_subcells[2];
@@ -46,7 +47,7 @@ void minimax_solver::solve(IntervalVector x_box_ini, IntervalVector y_box_ini, d
         }
 
         x_cell_tmp = x_heap.pop();
-        if(!min_prec_reached)
+        if(!min_prec_reached || ((minprec_uplo<x_cell_tmp->fmax.lb())&&min_prec_reached))
             uplo = x_cell_tmp->fmax.lb();
         pair<IntervalVector,IntervalVector> subboxes = lf.bisect(x_cell_tmp->box);
         subcells_pair = x_cell_tmp->bisect(subboxes.first,subboxes.second);
@@ -100,9 +101,17 @@ void minimax_solver::solve(IntervalVector x_box_ini, IntervalVector y_box_ini, d
                 heap_copy.flush(); // delete copy of the heap, no more use after the computation of max f(midp,heap_copy)
             }
             if(x_subcells[i]->box.max_diam()<prec_x) {
+                nb_iter = choose_nbiter(true);   // need to be great enough so the minimum precision on y is reached
+                cout<<"fmax ini: "<<x_subcells[i]->fmax<<endl;
+                x_subcells[i]->fmax = lsolve.optimize(&(x_subcells[i]->y_heap),&(midp),x_sys->goal,nb_iter,loup,x_subcells[i]->fmax,prec_y,false); // eval maxf(midp,heap_copy), go to minimum prec on y to get a thin enclosure
+                if(x_subcells[i]->fmax.is_empty()){
+                    if(minprec_uplo>x_subcells[i]->fmax.lb())
+                        minprec_uplo = x_subcells[i]->fmax.lb();
+                }
+
                 x_subcells[i]->y_heap.flush(); // may not be implemented in the destructor of Heap
                 delete x_subcells[i];
-                cout<<"minprec reached! "<<endl;
+                cout<<"minprec reached! "<<" box: "<<x_subcells[i]->box<<" eval full prec: "<<x_subcells[i]->fmax <<endl;
                 cout<<"loup : "<<loup<<" get for point: x = "<<best_sol<<" y = "<<max_y<<" uplo: "<<uplo<< " volume rejected: "<<vol_rejected/init_vol*100<<endl;
                 min_prec_reached = true;
             }

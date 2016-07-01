@@ -80,11 +80,11 @@ Interval light_solver::optimize(DoubleHeap<y_heap_elem> * y_heap,IntervalVector*
 
             //************ part below add a contraction w.r.t f(x,y)<best_max, this part may not be efficient on every problem ******************************
 
-            contract_best_max_cst(&max_ctc,&xy_box,&xy_box_ctc,subcells[j]);
-            if(xy_box.is_empty()||xy_box_ctc.is_empty()) { // there are no x in x_box such as exists y in y_box, f(x,y)<best_max || no point (x,y) in xy_box such as both constraints are respected
-                delete subcells[j];
-                continue;
-            }
+//            contract_best_max_cst(&max_ctc,&xy_box,&xy_box_ctc,subcells[j]);
+//            if(xy_box.is_empty()||xy_box_ctc.is_empty()) { // there are no x in x_box such as exists y in y_box, f(x,y)<best_max || no point (x,y) in xy_box such as both constraints are respected
+//                delete subcells[j];
+//                continue;
+//            }
             //********************************************
 
             subcells[j]->pf = objective_function->eval(xy_box_ctc); // objective function evaluation
