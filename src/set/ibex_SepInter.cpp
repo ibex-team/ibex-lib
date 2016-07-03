@@ -1,5 +1,5 @@
 //============================================================================
-//                                  I B E X                                   
+//                                  I B E X
 // File        : Intersection of separators
 // Author      : Benoit Desrochers
 // Copyright   : ENSTA Bretagne (France)
@@ -13,18 +13,18 @@
 
 namespace ibex {
 
-SepInter::SepInter(const Array<Sep>& list) : Sep(), list(list) {
+SepInter::SepInter(const Array<Sep>& list) : Sep(list[0].nb_var), list(list) {
 }
 
-SepInter::SepInter(Sep& s1, Sep& s2) : Sep(), list(Array<Sep>(s1,s2)) {
-
-}
-
-SepInter::SepInter(Sep& s1, Sep& s2, Sep& s3) : Sep(), list(Array<Sep>(s1,s2,s3)) {
+SepInter::SepInter(Sep& s1, Sep& s2) : Sep(s1.nb_var), list(Array<Sep>(s1,s2)) {
 
 }
 
-SepInter::SepInter(Sep &s1, Sep &s2, Sep &s3, Sep &s4) : Sep(), list(Array<Sep>(s1,s2,s3,s4))
+SepInter::SepInter(Sep& s1, Sep& s2, Sep& s3) : Sep(s1.nb_var), list(Array<Sep>(s1,s2,s3)) {
+
+}
+
+SepInter::SepInter(Sep &s1, Sep &s2, Sep &s3, Sep &s4) : Sep(s1.nb_var), list(Array<Sep>(s1,s2,s3,s4))
 {
 
 }

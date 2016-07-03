@@ -55,20 +55,22 @@ namespace ibex {
 class Sep {
 
 public:
-
-	Sep();
-
 	/**
-     * \brief Separate a box in two sub-boxes.
-     *
-     * \param x_in  - As input: the initial box. As output:
-     *                result of the first ("inner") contraction
-     * \param x_out - As input: the initial box. As output:
-     *                the result of the second ("outer") contraction
-     *
-     * Precondition: x_in and x_out must be the same boxes.
+	 * \brief Build a separatot for n-dimensional boxes
 	 */
-    virtual void separate(IntervalVector& x_in, IntervalVector& x_out) = 0;
+	Sep(int nb_var);
+
+  /**
+   * \brief Separate a box in two sub-boxes.
+   *
+   * \param x_in  - As input: the initial box. As output:
+   *                result of the first ("inner") contraction
+   * \param x_out - As input: the initial box. As output:
+   *                the result of the second ("outer") contraction
+   *
+   * Precondition: x_in and x_out must be the same boxes.
+	 */
+  virtual void separate(IntervalVector& x_in, IntervalVector& x_out) = 0;
 
 	/**
 	 * \brief Contract a set with this separator.
@@ -103,15 +105,20 @@ public:
 	/**
 	 * \brief Delete *this.
 	 */
-    virtual ~Sep();
+  virtual ~Sep();
 
-    // Get current status of the 1st contraction
-    // (Used by SetBisect & SetLeaf)
-    BoolInterval status1() const;
+   /**
+	 * \brief The number of variables this contractor works with.
+	 */
+	const int nb_var;
 
-    // Get current status of the 2nd contraction
-    // (Used by SetBisect & SetLeaf)
-    BoolInterval status2() const;
+  // Get current status of the 1st contraction
+  // (Used by SetBisect & SetLeaf)
+  BoolInterval status1() const;
+
+  // Get current status of the 2nd contraction
+  // (Used by SetBisect & SetLeaf)
+  BoolInterval status2() const;
 
 private:
 
@@ -122,6 +129,8 @@ private:
 /* ============================================================================
  	 	 	 	 	 	 	 inline implementation
   ============================================================================*/
+
+inline Sep::Sep(int n) : nb_var(n), _status1(YES), _status2(NO) { }
 
 inline Sep::~Sep() { }
 
