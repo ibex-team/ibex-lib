@@ -1,5 +1,5 @@
 //============================================================================
-//                                  I B E X                                   
+//                                  I B E X
 // File        : ibex_SepNot.cpp
 // Author      : Gilles Chabert
 // Copyright   : Ecole des Mines de Nantes (France)
@@ -11,7 +11,7 @@
 
 namespace ibex {
 
-SepNot::SepNot(Sep& sep) : sep(sep) {
+SepNot::SepNot(Sep& sep) : Sep(sep.nb_var), sep(sep) {
 
 }
 
