@@ -12,6 +12,7 @@
 
 // fix isatty call for MSVC
 #ifdef _WIN32
+#include <io.h>
 #define isatty _isatty
 #endif
 
