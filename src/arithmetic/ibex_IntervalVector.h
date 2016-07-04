@@ -27,9 +27,6 @@ namespace ibex {
 
 class IntervalMatrix; // declared only for friendship
 
-#ifdef _IBEX_WITH_AFFINE_
-template<class T>  class AffineMainVector; // declared only for friendship
-#endif
 
 /**
  * \ingroup arithmetic
@@ -543,14 +540,6 @@ public:
      * \brief Cast the vector to an expression
      */
 	operator const ExprConstant&() const;
-
-#ifdef _IBEX_WITH_AFFINE_
-	template<class T>
-	IntervalVector& operator=(const AffineMainVector<T>& x);
-
-	template<class T>
-	IntervalVector(const AffineMainVector<T>& x) ;
-#endif
 
 private:
 	friend class IntervalMatrix;

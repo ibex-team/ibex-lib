@@ -130,6 +130,7 @@ Dim Dim::index_dim(const DoubleIndex& idx) const {
 			case COL_VECTOR: return *this;
 			case ROW_VECTOR:
 			case SCALAR: return scalar();
+			default: ibex_error("index_dim: the object is not a scalar, nor an vector nor a matrix");
 			}
 		} else {
 			if (is_matrix()) return matrix(nb_rows(),idx.nb_cols());
@@ -142,6 +143,7 @@ Dim Dim::index_dim(const DoubleIndex& idx) const {
 			case ROW_VECTOR: return *this;
 			case COL_VECTOR:
 			case SCALAR: return scalar();
+			default: ibex_error("index_dim: the object is not a scalar, nor an vector nor a matrix");
 			}
 		} else if (idx.one_col())
 			return scalar();
@@ -172,6 +174,7 @@ Dim Dim::transpose_dim() const {
 	case ROW_VECTOR:   return col_vec(vec_size());
 	case COL_VECTOR:   return row_vec(vec_size());
 	case MATRIX:       return matrix(nb_cols(),nb_rows());
+	default: ibex_error("transpose_dim: the object is not a scalar, nor an vector nor a matrix");
 	}
 }
 

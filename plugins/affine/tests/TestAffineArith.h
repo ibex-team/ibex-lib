@@ -9,8 +9,8 @@
  * ---------------------------------------------------------------------------- */
 
 
-#ifndef __TEST_AFFINE_H__
-#define __TEST_AFFINE_H__
+#ifndef __TEST_AFFINE_ARITH_H__
+#define __TEST_AFFINE_ARITH_H__
 
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
@@ -25,9 +25,9 @@
 using namespace ibex;
 
 template<class T>
-class TestAffine : public CppUnit::TestFixture {
+class TestAffineArith : public CppUnit::TestFixture {
 public:
-	CPPUNIT_TEST_SUITE(TestAffine<T>);
+	CPPUNIT_TEST_SUITE(TestAffineArith<T>);
 	CPPUNIT_TEST(test01);
 	CPPUNIT_TEST(test02);
 	CPPUNIT_TEST(test03);
@@ -239,9 +239,9 @@ public:
 	void test101();
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestAffine<AF_Default>);
-CPPUNIT_TEST_SUITE_REGISTRATION(TestAffine<AF_Other>);
+CPPUNIT_TEST_SUITE_REGISTRATION(TestAffineArith<AF_Default>);
+CPPUNIT_TEST_SUITE_REGISTRATION(TestAffineArith<AF_Other>);
 
-//#include "TestAffine.cpp"
+//#include "TestAffineArith.cpp"
 
 #endif

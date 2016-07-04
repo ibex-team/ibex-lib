@@ -12,13 +12,15 @@
 #ifndef IBEX_AFFINE2_FAF2_H_
 #define IBEX_AFFINE2_FAF2_H_
 
-
-
-	#include <math.h>
+#include <math.h>
 #ifndef _MSC_VER
-	#ifdef __FP_FAST_FMA || FP_FAST_FMA
+	#ifdef __FP_FAST_FMA
 		#define IBEX_FMA
 	#endif
+	#ifdef FP_FAST_FMA
+		#define IBEX_FMA
+	#endif
+
 #else
 #if (_MSC_VER >= 1800)
 	#define IBEX_FMA

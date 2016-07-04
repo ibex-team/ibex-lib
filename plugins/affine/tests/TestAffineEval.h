@@ -20,9 +20,9 @@
 using namespace ibex;
 
 template<class T>
-class TestAffine2 : public CppUnit::TestFixture {
+class TestAffineEval : public CppUnit::TestFixture {
 public:
-	CPPUNIT_TEST_SUITE(TestAffine2<T>);
+	CPPUNIT_TEST_SUITE(TestAffineEval<T>);
 	CPPUNIT_TEST(test_sqrt);
 	CPPUNIT_TEST(test_exp);
 	CPPUNIT_TEST(test_log);
@@ -74,10 +74,10 @@ public:
 
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestAffine2<AF_Default>);
-CPPUNIT_TEST_SUITE_REGISTRATION(TestAffine2<AF_Other>);
+CPPUNIT_TEST_SUITE_REGISTRATION(TestAffineEval<AF_Default>);
+CPPUNIT_TEST_SUITE_REGISTRATION(TestAffineEval<AF_Other>);
 
 
-//#include "TestAffine2.cpp"
+//#include "TestAffineEval.cpp"
 
 #endif

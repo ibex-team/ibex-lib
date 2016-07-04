@@ -286,10 +286,7 @@ AffineMain<AF_fAF2>& AffineMain<AF_fAF2>::Aneg() {
 
 template<>
 AffineMain<AF_fAF2>& AffineMain<AF_fAF2>::operator*=(double alpha) {
-	//std::cout << "saxpy IN " << alpha << " x " << *this << " + " << y << " + "<< beta << " +error " << ddelta << " / "<< B1 << B2 << B3 << B4 << std::endl;
 	double temp, ttt, sss, eee;
-	int i;
-	//	std::cout << "in saxpy alpha=" << alpha  <<  "  beta= " <<  beta <<   "  delta = " << ddelta   << std::endl;
 	if (is_actif()) {  // multiply by a scalar alpha
 		if (alpha==0.0) {
 			for (int i=0; i<=_n;i++) {
@@ -573,18 +570,13 @@ AffineMain<AF_fAF2>& AffineMain<AF_fAF2>::operator*=(const AffineMain<AF_fAF2>& 
 			}
 		}
 
-	} else if (is_actif()) { // y is not a valid affine2 form. So we add y.itv() such as an interval
-		*this *= y.itv();
-	} else if (y.is_actif()) {
-		Interval tmp = itv();
-		*this = y;
-		*this *= tmp;
-	} else {
-		*this = itv() * y.itv();
+	} else { // y or x is not a valid affine2 form. So we add y.itv() such as an interval
+		*this = (itv() * y.itv());
 	}
 
 	return *this;
 }
+
 
 
 
@@ -604,12 +596,10 @@ AffineMain<AF_fAF2>& AffineMain<AF_fAF2>::operator*=(const Interval& y) {
 
 
 
-
 template<>
 AffineMain<AF_fAF2>& AffineMain<AF_fAF2>::Asqr(const Interval& itv) {
 //	std::cout << "in sqr "<<std::endl;
 
-	bool b = (!(itv.is_empty()||itv.is_unbounded()));
 	if (	(!is_actif())||
 			itv.is_empty()||
 			itv.is_unbounded()||

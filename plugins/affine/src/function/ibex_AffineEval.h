@@ -49,7 +49,8 @@ public:
 	 */
 	TemplateDomain<AffineMain<T> >& eval(const AffineMainVector<T>& af);
 
-	void index_fwd (int  x, int y);
+	void idx_cp_fwd (int x, int y);
+	void idx_fwd (int  x, int y);
 	void vector_fwd(int* x, int y);
 	void cst_fwd   (int y);
 	void symbol_fwd(int y);
@@ -191,7 +192,18 @@ inline void AffineEval<T>::forward(const AffineMainVector<T>& box) {
 }
 
 template<class T>
-inline void AffineEval<T>::index_fwd(int, int ) { /* nothing to do */ }
+inline void AffineEval<T>::idx_fwd(int, int ) { /* nothing to do */ }
+
+
+template<class T>
+void AffineEval<T>::idx_cp_fwd(int x, int y) {
+	assert(dynamic_cast<const ExprIndex*> (&f.node(y)));
+
+	const ExprIndex& e = (const ExprIndex&) f.node(y);
+
+	d[y] = d[x][e.index];
+	af2[y] = af2[x][e.index];
+}
 
 template<class T>
 inline void AffineEval<T>::symbol_fwd(int) { /* nothing to do */ }

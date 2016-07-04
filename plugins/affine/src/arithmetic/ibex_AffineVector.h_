@@ -17,19 +17,6 @@
 
 namespace ibex {
 
-template<class T>
-IntervalVector& IntervalVector::operator=(const AffineMainVector<T>& x) {
-	resize(x.size()); // see issue #10
-	for (int i = 0; i < size(); i++){
-		vec[i] = x[i].itv();
-	}
-	return *this;
-}
-
-template<class T>
-IntervalVector::IntervalVector(const AffineMainVector<T>& x) : n(x.size()), vec(new Interval[x.size()]) {
-	for (int i=0; i<n; i++) vec[i]=x[i].itv();
-}
 
 
 template<class T>

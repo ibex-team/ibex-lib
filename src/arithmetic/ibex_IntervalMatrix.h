@@ -19,9 +19,6 @@
 
 namespace ibex {
 
-#ifdef _IBEX_WITH_AFFINE_
-template<class T>  class AffineMainMatrix;
-#endif
 
 /**
  * \ingroup arithmetic
@@ -447,10 +444,6 @@ public:
     operator const ExprConstant&() const;
 
 
-#ifdef _IBEX_WITH_AFFINE_
-	template<class T>
-	IntervalMatrix& operator=(const AffineMainMatrix<T>& x);
-#endif
 
 private:
 

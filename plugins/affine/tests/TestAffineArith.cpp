@@ -10,11 +10,11 @@
  * Sponsored   : This research benefited from the support of the "Chair Complex Systems Engineering - Ecole Polytechnique, THALES, DGA, FX, DASSAULT AVIATION, DCNS Research, ENSTA ParisTech, Telecom ParisTech, Fondation ParisTech and FDO ENSTA"
  * ---------------------------------------------------------------------------- */
 
-#include "TestAffine.h"
+#include "TestAffineArith.h"
 #include "ibex_AffineEval.h"
 
 template<class T>
-bool TestAffine<T>::compare_results (comp_t c, Interval r, AffineMain<T>  a) {
+bool TestAffineArith<T>::compare_results (comp_t c, Interval r, AffineMain<T>  a) {
 	Interval ra = a.itv();
 	Interval tmp;
 	switch (c) {
@@ -70,28 +70,28 @@ bool TestAffine<T>::compare_results (comp_t c, Interval r, AffineMain<T>  a) {
 
 
 template<class T>
-void TestAffine<T>::test01(){
+void TestAffineArith<T>::test01(){
 	Interval x(-1, 1);
 	AffineMain<T> ax (1,1,x);
 	CPPUNIT_ASSERT(compare_results (EQUALITY, x, ax));
 }
 
 template<class T>
-void TestAffine<T>::test02() {
+void TestAffineArith<T>::test02() {
 	Interval x(-1, 2.13);
 	AffineMain<T> ax (1,1,x);
 	CPPUNIT_ASSERT(compare_results (INCLUSION, x, ax));
 }
 
 template<class T>
-void TestAffine<T>::test03()  {
+void TestAffineArith<T>::test03()  {
 	Interval x(5, 7.43);
 	AffineMain<T> ax (1,1,x);
 	CPPUNIT_ASSERT(compare_results (INCLUSION, x, ax));
 }
 
 template<class T>
-void TestAffine<T>::test04()  {
+void TestAffineArith<T>::test04()  {
 	Interval x(-15, -7.45);
 	AffineMain<T> ax (1,1,x);
 	CPPUNIT_ASSERT(compare_results (INCLUSION, x, ax));
@@ -99,7 +99,7 @@ void TestAffine<T>::test04()  {
 
 // Float addition
 template<class T>
-void TestAffine<T>::test05()  {
+void TestAffineArith<T>::test05()  {
 	Interval x(1.0, 2.0);
 	AffineMain<T> ax (1,1,x);
 	x = x + 1.0;
@@ -108,7 +108,7 @@ void TestAffine<T>::test05()  {
 }
 
 template<class T>
-void TestAffine<T>::test06()  {
+void TestAffineArith<T>::test06()  {
 	Interval x(1, 2);
 	AffineMain<T> ax (1,1,x);
 	x = x + 0.0;
@@ -117,7 +117,7 @@ void TestAffine<T>::test06()  {
 }
 
 template<class T>
-void TestAffine<T>::test07()  {
+void TestAffineArith<T>::test07()  {
 	Interval x(1, 2);
 	AffineMain<T> ax (1,1,x);
 	x = x + 3.14;
@@ -126,7 +126,7 @@ void TestAffine<T>::test07()  {
 }
 
 template<class T>
-void TestAffine<T>::test08()  {
+void TestAffineArith<T>::test08()  {
 	Interval x(-5, -2);
 	AffineMain<T> ax (1,1,x);
 	x = x + 3.14;
@@ -135,7 +135,7 @@ void TestAffine<T>::test08()  {
 }
 
 template<class T>
-void TestAffine<T>::test09()  {
+void TestAffineArith<T>::test09()  {
 	Interval x(-5, 4);
 	AffineMain<T> ax (1,1,x);
 	x = x + 3.14;
@@ -146,7 +146,7 @@ void TestAffine<T>::test09()  {
 // Float subtraction
 
 template<class T>
-void TestAffine<T>::test10()  {
+void TestAffineArith<T>::test10()  {
 	Interval x(1, 2);
 	AffineMain<T> ax (1,1,x);
 	x = x - 1.0;
@@ -155,7 +155,7 @@ void TestAffine<T>::test10()  {
 }
 
 template<class T>
-void TestAffine<T>::test11()   {
+void TestAffineArith<T>::test11()   {
 	Interval x(1, 2);
 	AffineMain<T> ax (1,1,x);
 	x = x - 0.0;
@@ -164,7 +164,7 @@ void TestAffine<T>::test11()   {
 }
 
 template<class T>
-void TestAffine<T>::test12()   {
+void TestAffineArith<T>::test12()   {
 	Interval x(1, 2);
 	AffineMain<T> ax (1,1,x);
 	x = x - 3.14;
@@ -173,7 +173,7 @@ void TestAffine<T>::test12()   {
 }
 
 template<class T>
-void TestAffine<T>::test13() {
+void TestAffineArith<T>::test13() {
 	Interval x(-5, -2);
 	AffineMain<T> ax (1,1,x);
 	x = x - 3.14;
@@ -182,7 +182,7 @@ void TestAffine<T>::test13() {
 }
 
 template<class T>
-void TestAffine<T>::test14() {
+void TestAffineArith<T>::test14() {
 	Interval x(-5, 4);
 	AffineMain<T> ax (1,1,x);
 	x = x - 3.14;
@@ -194,7 +194,7 @@ void TestAffine<T>::test14() {
 // Scalar multiplication
 
 template<class T>
-void TestAffine<T>::test15()  {
+void TestAffineArith<T>::test15()  {
 	Interval x(1, 2);
 	AffineMain<T> ax (1,1,x);
 	x = x * 1.0;
@@ -203,7 +203,7 @@ void TestAffine<T>::test15()  {
 }
 
 template<class T>
-void TestAffine<T>::test16()   {
+void TestAffineArith<T>::test16()   {
 	Interval x(1, 2);
 	AffineMain<T> ax (1,1,x);
 	x = x * 0.0;
@@ -213,7 +213,7 @@ void TestAffine<T>::test16()   {
 
 
 template<class T>
-void TestAffine<T>::test17()   {
+void TestAffineArith<T>::test17()   {
 	Interval x(1, 2);
 	AffineMain<T> ax (1,1,x);
 	x = x * 3.14;
@@ -222,7 +222,7 @@ void TestAffine<T>::test17()   {
 }
 
 template<class T>
-void TestAffine<T>::test18()   {
+void TestAffineArith<T>::test18()   {
 	Interval x(-5, -2);
 	AffineMain<T> ax (1,1,x);
 	x = x * 3.14;
@@ -231,7 +231,7 @@ void TestAffine<T>::test18()   {
 }
 
 template<class T>
-void TestAffine<T>::test19()   {
+void TestAffineArith<T>::test19()   {
 	Interval x(-5, 4);
 	AffineMain<T> ax (1,1,x);
 	x = x * 3.14;
@@ -242,7 +242,7 @@ void TestAffine<T>::test19()   {
 // Float division
 
 template<class T>
-void TestAffine<T>::test20()   {
+void TestAffineArith<T>::test20()   {
 	Interval x(1, 2);
 	AffineMain<T> ax (1,1,x);
 	x = x / 1.0;
@@ -251,7 +251,7 @@ void TestAffine<T>::test20()   {
 }
 
 template<class T>
-void TestAffine<T>::test21()   {
+void TestAffineArith<T>::test21()   {
 	Interval x(1, 2);
 	AffineMain<T> ax (1,1,x);
 	x = x / 3.14;
@@ -260,7 +260,7 @@ void TestAffine<T>::test21()   {
 }
 
 template<class T>
-void TestAffine<T>::test22()   {
+void TestAffineArith<T>::test22()   {
 	Interval x(-5, -2);
 	AffineMain<T> ax (1,1,x);
 	x = x / 3.14;
@@ -269,7 +269,7 @@ void TestAffine<T>::test22()   {
 }
 
 template<class T>
-void TestAffine<T>::test23()  {
+void TestAffineArith<T>::test23()  {
 	Interval x(-5, 4);
 	AffineMain<T> ax (1,1,x);
 	x = x / 3.14;
@@ -282,7 +282,7 @@ void TestAffine<T>::test23()  {
 // Interval addition
 
 template<class T>
-void TestAffine<T>::test24()  {
+void TestAffineArith<T>::test24()  {
 	Interval x(1, 2);
 	AffineMain<T> ax (1,1,x);
 	Interval prod(1.0, 1.0);
@@ -292,7 +292,7 @@ void TestAffine<T>::test24()  {
 }
 
 template<class T>
-void TestAffine<T>::test25()  {
+void TestAffineArith<T>::test25()  {
 	Interval x(1, 2);
 	AffineMain<T> ax (1,1,x);
 	Interval prod(0.0, 0.0);
@@ -302,7 +302,7 @@ void TestAffine<T>::test25()  {
 }
 
 template<class T>
-void TestAffine<T>::test26()   {
+void TestAffineArith<T>::test26()   {
 	Interval x(1, 2);
 	AffineMain<T> ax (1,1,x);
 	Interval prod(-1.0, 1.0);
@@ -312,7 +312,7 @@ void TestAffine<T>::test26()   {
 }
 
 template<class T>
-void TestAffine<T>::test27()  {
+void TestAffineArith<T>::test27()  {
 	Interval x(1, 2);
 	AffineMain<T> ax (1,1,x);
 	Interval prod(-1.7, 1.7);
@@ -322,7 +322,7 @@ void TestAffine<T>::test27()  {
 }
 
 template<class T>
-void TestAffine<T>::test28()  {
+void TestAffineArith<T>::test28()  {
 	Interval x(1, 2);
 	AffineMain<T> ax (1,1,x);
 	Interval prod(-1.08, 1.7);
@@ -335,7 +335,7 @@ void TestAffine<T>::test28()  {
 // Interval multiplication
 
 template<class T>
-void TestAffine<T>::test29()   {
+void TestAffineArith<T>::test29()   {
 	Interval x(1, 2);
 	AffineMain<T> ax (1,1,x);
 	Interval prod(1.0, 1.0);
@@ -345,7 +345,7 @@ void TestAffine<T>::test29()   {
 }
 
 template<class T>
-void TestAffine<T>::test30()  {
+void TestAffineArith<T>::test30()  {
 	Interval x(1, 2);
 	AffineMain<T> ax (1,1,x);
 	Interval prod(0.0, 0.0);
@@ -355,7 +355,7 @@ void TestAffine<T>::test30()  {
 }
 
 template<class T>
-void TestAffine<T>::test31()  {
+void TestAffineArith<T>::test31()  {
 	Interval x(1, 2);
 	AffineMain<T> ax (1,1,x);
 	Interval prod(-1.0, 1.0);
@@ -365,7 +365,7 @@ void TestAffine<T>::test31()  {
 }
 
 template<class T>
-void TestAffine<T>::test32()   {
+void TestAffineArith<T>::test32()   {
 	Interval x(1, 2);
 	AffineMain<T> ax (1,1,x);
 	Interval prod(-1.7, 1.7);
@@ -375,7 +375,7 @@ void TestAffine<T>::test32()   {
 }
 
 template<class T>
-void TestAffine<T>::test33()   {
+void TestAffineArith<T>::test33()   {
 	Interval x(1, 2);
 	AffineMain<T> ax (1,1,x);
 	Interval prod(-1.08, 1.7);
@@ -387,7 +387,7 @@ void TestAffine<T>::test33()   {
 
 /* ********************************************** */
 template<class T>
-void TestAffine<T>::test34()   {
+void TestAffineArith<T>::test34()   {
 	Interval x(1, 2);
 	AffineMain<T> ax (1,1,x);
 	AffineMain<T> ay = ax;
@@ -396,7 +396,7 @@ void TestAffine<T>::test34()   {
 
 
 template<class T>
-void TestAffine<T>::test35()   {
+void TestAffineArith<T>::test35()   {
 	Interval x(-11.3, -4.3);
 	AffineMain<T> ax (1,1,x);
 	AffineMain<T> ay = ax;
@@ -404,7 +404,7 @@ void TestAffine<T>::test35()   {
 }
 
 template<class T>
-void TestAffine<T>::test36()   {
+void TestAffineArith<T>::test36()   {
 	Interval x(-11.3, 4.3);
 	AffineMain<T> ax (1,1,x);
 	AffineMain<T> ay = ax;
@@ -412,7 +412,7 @@ void TestAffine<T>::test36()   {
 }
 
 template<class T>
-void TestAffine<T>::test37()   {
+void TestAffineArith<T>::test37()   {
 	Interval x(0, 4.3);
 	AffineMain<T> ax (1,1,x);
 	AffineMain<T> ay = ax;
@@ -423,7 +423,7 @@ void TestAffine<T>::test37()   {
 
 // Assign-addition with interval
 template<class T>
-void TestAffine<T>::test38()   {
+void TestAffineArith<T>::test38()   {
 	Interval x(1.57, 2.23);
 	AffineMain<T> ax (1,1,x);
 	ax += x;
@@ -433,7 +433,7 @@ void TestAffine<T>::test38()   {
 
 
 template<class T>
-void TestAffine<T>::test39()  {
+void TestAffineArith<T>::test39()  {
 	Interval x(-11.3, -4.3);
 	AffineMain<T> ax (1,1,x);
 	ax += x;
@@ -442,7 +442,7 @@ void TestAffine<T>::test39()  {
 }
 
 template<class T>
-void TestAffine<T>::test49()  {
+void TestAffineArith<T>::test49()  {
 	Interval x(-11.3, 4.3);
 	AffineMain<T> ax (1,1,x);
 	ax += x;
@@ -451,7 +451,7 @@ void TestAffine<T>::test49()  {
 }
 
 template<class T>
-void TestAffine<T>::test50()  {
+void TestAffineArith<T>::test50()  {
 	Interval x(0, 4.3);
 	AffineMain<T> ax (1,1,x);
 	ax += x;
@@ -461,7 +461,7 @@ void TestAffine<T>::test50()  {
 
 // Assign-multiplication with interval
 template<class T>
-void TestAffine<T>::test51()   {
+void TestAffineArith<T>::test51()   {
 	Interval x(1.57, 2.23);
 	AffineMain<T> ax (1,1,x);
 	ax *= x;
@@ -471,7 +471,7 @@ void TestAffine<T>::test51()   {
 
 
 template<class T>
-void TestAffine<T>::test52()  {
+void TestAffineArith<T>::test52()  {
 	Interval x(-11.3, -4.3);
 	AffineMain<T> ax (1,1,x);
 	ax *= x;
@@ -480,7 +480,7 @@ void TestAffine<T>::test52()  {
 }
 
 template<class T>
-void TestAffine<T>::test53()  {
+void TestAffineArith<T>::test53()  {
 	Interval x(-11.3, 4.3);
 	AffineMain<T> ax (1,1,x);
 	ax *= x;
@@ -489,7 +489,7 @@ void TestAffine<T>::test53()  {
 }
 
 template<class T>
-void TestAffine<T>::test54()  {
+void TestAffineArith<T>::test54()  {
 	Interval x(0, 4.3);
 	AffineMain<T> ax (1,1,x);
 	ax *= x;
@@ -502,7 +502,7 @@ void TestAffine<T>::test54()  {
 
 // Assign-addition with float
 template<class T>
-void TestAffine<T>::test55()  {
+void TestAffineArith<T>::test55()  {
 	Interval x(1,2);
 	AffineMain<T> ax (1,1,x);
 	ax += 3.14159;
@@ -512,7 +512,7 @@ void TestAffine<T>::test55()  {
 
 
 template<class T>
-void TestAffine<T>::test56()  {
+void TestAffineArith<T>::test56()  {
 	Interval x(-11.3, -4.3);
 	AffineMain<T> ax (1,1,x);
 	ax += 3.14159;
@@ -521,7 +521,7 @@ void TestAffine<T>::test56()  {
 }
 
 template<class T>
-void TestAffine<T>::test57()   {
+void TestAffineArith<T>::test57()   {
 	Interval x(-11.3, 4.3);
 	AffineMain<T> ax (1,1,x);
 	ax += 3.14159;
@@ -530,7 +530,7 @@ void TestAffine<T>::test57()   {
 }
 
 template<class T>
-void TestAffine<T>::test58()  {
+void TestAffineArith<T>::test58()  {
 	Interval x(0, 4.3);
 	AffineMain<T> ax (1,1,x);
 	ax += 3.14159;
@@ -539,7 +539,7 @@ void TestAffine<T>::test58()  {
 }
 
 template<class T>
-void TestAffine<T>::test59()  {
+void TestAffineArith<T>::test59()  {
 	Interval x(0, 4.31);
 	AffineMain<T> ax (1,1,x);
 	ax += 0.;
@@ -549,7 +549,7 @@ void TestAffine<T>::test59()  {
 
 // Assign-multiplication with float
 template<class T>
-void TestAffine<T>::test60()  {
+void TestAffineArith<T>::test60()  {
 	Interval x(1.57, 2.23);
 	AffineMain<T> ax (1,1,x);
 	ax *= 1.;
@@ -558,7 +558,7 @@ void TestAffine<T>::test60()  {
 }
 
 template<class T>
-void TestAffine<T>::test61()  {
+void TestAffineArith<T>::test61()  {
 	Interval x(1.57, 2.23);
 	AffineMain<T> ax (1,1,x);
 	ax *= 0.;
@@ -567,7 +567,7 @@ void TestAffine<T>::test61()  {
 }
 
 template<class T>
-void TestAffine<T>::test62()  {
+void TestAffineArith<T>::test62()  {
 	Interval x(1.57, 2.23);
 	AffineMain<T> ax (1,1,x);
 	ax *= 3.14159;
@@ -577,7 +577,7 @@ void TestAffine<T>::test62()  {
 
 
 template<class T>
-void TestAffine<T>::test63()  {
+void TestAffineArith<T>::test63()  {
 	Interval x(-11.3, -4.3);
 	AffineMain<T> ax (1,1,x);
 	ax *= 3.14159;
@@ -586,7 +586,7 @@ void TestAffine<T>::test63()  {
 }
 
 template<class T>
-void TestAffine<T>::test64()   {
+void TestAffineArith<T>::test64()   {
 	Interval x(-11.3, 4.3);
 	AffineMain<T> ax (1,1,x);
 	ax *= 3.14159;
@@ -595,7 +595,7 @@ void TestAffine<T>::test64()   {
 }
 
 template<class T>
-void TestAffine<T>::test65()   {
+void TestAffineArith<T>::test65()   {
 	Interval x(0, 4.3);
 	AffineMain<T> ax (1,1,x);
 	ax *= 3.14159;
@@ -607,7 +607,7 @@ void TestAffine<T>::test65()   {
 
 // Addition
 template<class T>
-void TestAffine<T>::test66() {
+void TestAffineArith<T>::test66() {
 	Interval x(1.2,4.5);
 	AffineMain<T> ax1(2,1,x);
 	Interval y(3.77,7.2);
@@ -616,7 +616,7 @@ void TestAffine<T>::test66() {
 }
 
 template<class T>
-void TestAffine<T>::test67()  {
+void TestAffineArith<T>::test67()  {
 	Interval x(1.2,4.5);
 	AffineMain<T> ax1(2,1,x);
 	Interval y(-7.2,-3.77);
@@ -625,7 +625,7 @@ void TestAffine<T>::test67()  {
 }
 
 template<class T>
-void TestAffine<T>::test68()   {
+void TestAffineArith<T>::test68()   {
 	Interval x(1.2,4.5);
 	AffineMain<T> ax1(2,1,x);
 	Interval y(-3.77,7.2);
@@ -634,7 +634,7 @@ void TestAffine<T>::test68()   {
 }
 
 template<class T>
-void TestAffine<T>::test69()  {
+void TestAffineArith<T>::test69()  {
 	Interval x(1.2,4.5);
 	AffineMain<T> ax1(2,1,x);
 	Interval y(0,7.2);
@@ -645,7 +645,7 @@ void TestAffine<T>::test69()  {
 // Subtraction
 
 template<class T>
-void TestAffine<T>::test70()   {
+void TestAffineArith<T>::test70()   {
 	Interval x(1.2,4.5);
 	AffineMain<T> ax1(2,1,x);
 	Interval y(3.77,7.2);
@@ -654,7 +654,7 @@ void TestAffine<T>::test70()   {
 }
 
 template<class T>
-void TestAffine<T>::test71()   {
+void TestAffineArith<T>::test71()   {
 	Interval x(1.2,4.5);
 	AffineMain<T> ax1(2,1,x);
 	Interval y(-7.2,-3.77);
@@ -663,7 +663,7 @@ void TestAffine<T>::test71()   {
 }
 
 template<class T>
-void TestAffine<T>::test72()  {
+void TestAffineArith<T>::test72()  {
 	Interval x(1.2,4.5);
 	AffineMain<T> ax1(2,1,x);
 	Interval y(-3.77,7.2);
@@ -672,7 +672,7 @@ void TestAffine<T>::test72()  {
 }
 
 template<class T>
-void TestAffine<T>::test73()  {
+void TestAffineArith<T>::test73()  {
 	Interval x(1.2,4.5);
 	AffineMain<T> ax1(2,1,x);
 	Interval y(0,7.2);
@@ -684,7 +684,7 @@ void TestAffine<T>::test73()  {
 
 
 template<class T>
-void TestAffine<T>::test74()   {
+void TestAffineArith<T>::test74()   {
 	Interval x(1.2,4.5);
 	AffineMain<T> ax1(2,1,x);
 	Interval y(3.77,7.2);
@@ -693,7 +693,7 @@ void TestAffine<T>::test74()   {
 }
 
 template<class T>
-void TestAffine<T>::test75()  {
+void TestAffineArith<T>::test75()  {
 	Interval x(1.2,4.5);
 	AffineMain<T> ax1(2,1,x);
 	Interval y(-7.2,-3.77);
@@ -702,7 +702,7 @@ void TestAffine<T>::test75()  {
 }
 
 template<class T>
-void TestAffine<T>::test76()  {
+void TestAffineArith<T>::test76()  {
 	Interval x(1.2,4.5);
 	AffineMain<T> ax1(2,1,x);
 	Interval y(-3.77,7.2);
@@ -711,7 +711,7 @@ void TestAffine<T>::test76()  {
 }
 
 template<class T>
-void TestAffine<T>::test77()  {
+void TestAffineArith<T>::test77()  {
 	Interval x(1.2,4.5);
 	AffineMain<T> ax1(2,1,x);
 	Interval y(0,7.2);
@@ -722,7 +722,7 @@ void TestAffine<T>::test77()  {
 // Division
 
 template<class T>
-void TestAffine<T>::test78()  {
+void TestAffineArith<T>::test78()  {
 	Interval x(1.2,4.5);
 	AffineMain<T> ax1(2,1,x);
 	Interval y(3.77,7.2);
@@ -731,7 +731,7 @@ void TestAffine<T>::test78()  {
 }
 
 template<class T>
-void TestAffine<T>::test79()  {
+void TestAffineArith<T>::test79()  {
 	Interval x(1.2,4.5);
 	AffineMain<T> ax1(2,1,x);
 	Interval y(-7.2,-3.77);
@@ -740,7 +740,7 @@ void TestAffine<T>::test79()  {
 }
 
 template<class T>
-void TestAffine<T>::test80()   {
+void TestAffineArith<T>::test80()   {
 	Interval x(1.2,4.5);
 	AffineMain<T> ax1(2,1,x);
 	Interval y(-3.77,7.2);
@@ -749,7 +749,7 @@ void TestAffine<T>::test80()   {
 }
 
 template<class T>
-void TestAffine<T>::test81()  {
+void TestAffineArith<T>::test81()  {
 	Interval x(1.2,4.5);
 	AffineMain<T> ax1(2,1,x);
 	Interval y(0,7.2);
@@ -761,7 +761,7 @@ void TestAffine<T>::test81()  {
 
 // Assign-addition with affine forms
 template<class T>
-void TestAffine<T>::test82()  {
+void TestAffineArith<T>::test82()  {
 	Interval x(1.2,4.5);
 	AffineMain<T> ax1(2,1,x);
 	Interval y(3.77,7.2);
@@ -772,7 +772,7 @@ void TestAffine<T>::test82()  {
 }
 
 template<class T>
-void TestAffine<T>::test83()  {
+void TestAffineArith<T>::test83()  {
 	Interval x(1.2,4.5);
 	AffineMain<T> ax1(2,1,x);
 	Interval y(-7.2,-3.77);
@@ -783,7 +783,7 @@ void TestAffine<T>::test83()  {
 }
 
 template<class T>
-void TestAffine<T>::test84()  {
+void TestAffineArith<T>::test84()  {
 	Interval x(1.2,4.5);
 	AffineMain<T> ax1(2,1,x);
 	Interval y(-3.77,7.2);
@@ -794,7 +794,7 @@ void TestAffine<T>::test84()  {
 }
 
 template<class T>
-void TestAffine<T>::test85()   {
+void TestAffineArith<T>::test85()   {
 	Interval x(1.2,4.5);
 	AffineMain<T> ax1(2,1,x);
 	Interval y(0,7.2);
@@ -806,7 +806,7 @@ void TestAffine<T>::test85()   {
 
 // Assign-multiplication with affine forms
 template<class T>
-void TestAffine<T>::test86() {
+void TestAffineArith<T>::test86() {
 	Interval x(1.2,4.5);
 	AffineMain<T> ax1(2,1,x);
 	Interval y(3.77,7.2);
@@ -817,7 +817,7 @@ void TestAffine<T>::test86() {
 }
 
 template<class T>
-void TestAffine<T>::test87() {
+void TestAffineArith<T>::test87() {
 	Interval x(1.2,4.5);
 	AffineMain<T> ax1(2,1,x);
 	Interval y(-7.2,-3.77);
@@ -828,7 +828,7 @@ void TestAffine<T>::test87() {
 }
 
 template<class T>
-void TestAffine<T>::test88() {
+void TestAffineArith<T>::test88() {
 	Interval x(1.2,4.5);
 	AffineMain<T> ax1(2,1,x);
 	Interval y(-3.77,7.2);
@@ -839,7 +839,7 @@ void TestAffine<T>::test88() {
 }
 
 template<class T>
-void TestAffine<T>::test89() {
+void TestAffineArith<T>::test89() {
 	Interval x(1.2,4.5);
 	AffineMain<T> ax1(2,1,x);
 	Interval y(0,7.2);
@@ -851,7 +851,7 @@ void TestAffine<T>::test89() {
 
 /* **************************** */
 template<class T>
-void TestAffine<T>::test90() {
+void TestAffineArith<T>::test90() {
 	Interval x(92.4,1909.3);
 	AffineMain<T> ax1(2,1,x);
 	Interval y(92.4,1909.3);
@@ -863,7 +863,7 @@ void TestAffine<T>::test90() {
 
 
 template<class T>
-void TestAffine<T>::test91() {
+void TestAffineArith<T>::test91() {
 	Interval x(92.4,1909.3);
 	AffineMain<T> ax (1,1,x);
 	Interval res = x - x;
@@ -872,7 +872,7 @@ void TestAffine<T>::test91() {
 }
 
 template<class T>
-void TestAffine<T>::test92() {
+void TestAffineArith<T>::test92() {
 	Interval x(-92.4,-10.3);
 	AffineMain<T> ax (1,1,x);
 	Interval res = x - x;
@@ -881,7 +881,7 @@ void TestAffine<T>::test92() {
 }
 
 template<class T>
-void TestAffine<T>::test93() {
+void TestAffineArith<T>::test93() {
 	Interval x(-92.4, 10.3);
 	AffineMain<T> ax (1,1,x);
 	Interval res = x - x;
@@ -890,7 +890,7 @@ void TestAffine<T>::test93() {
 }
 
 template<class T>
-void TestAffine<T>::test94() {
+void TestAffineArith<T>::test94() {
 	Interval x(0.0, 10.3);
 	AffineMain<T> ax (1,1,x);
 	Interval res = x - x;
@@ -900,7 +900,7 @@ void TestAffine<T>::test94() {
 
 /* **************************** */
 template<class T>
-void TestAffine<T>::test95() {
+void TestAffineArith<T>::test95() {
 
 	int iter = 1000;
 	Interval x(1.3,78.4);
@@ -916,7 +916,7 @@ void TestAffine<T>::test95() {
 }
 
 template<class T>
-void TestAffine<T>::test96()  {
+void TestAffineArith<T>::test96()  {
 	int iter = 1000;
 	Interval x(-78.4,-1.3);
 	AffineMain<T> ax (1,1,x);
@@ -930,7 +930,7 @@ void TestAffine<T>::test96()  {
 }
 
 template<class T>
-void TestAffine<T>::test97() {
+void TestAffineArith<T>::test97() {
 	int iter = 1000;
 	Interval x(-1.3,78.4);
 	AffineMain<T> ax (1,1,x);
@@ -944,7 +944,7 @@ void TestAffine<T>::test97() {
 }
 
 template<class T>
-void TestAffine<T>::test98()   {
+void TestAffineArith<T>::test98()   {
 	int iter = 1000;
 	Interval x(0.,78.4);
 	AffineMain<T> ax (1,1,x);
@@ -962,7 +962,7 @@ void TestAffine<T>::test98()   {
 /* ********************* */
 //test of sqrt
 template<class T>
-void TestAffine<T>::test99()   {
+void TestAffineArith<T>::test99()   {
 	Interval x(10,11);
 	AffineMain<T> ax (1,1,x);
 	for (int i=0;i < 1;i++)
@@ -978,7 +978,7 @@ void TestAffine<T>::test99()   {
 /* ********************* */
 //test of 1/x
 template<class T>
-void TestAffine<T>::test100()   {
+void TestAffineArith<T>::test100()   {
 	Interval x(3,21);
 	AffineMain<T> ax (1,1,x);
 	for (int i=0;i < 1;i++)
@@ -994,7 +994,7 @@ void TestAffine<T>::test100()   {
 
 /* ********************* */
 template<class T>
-void TestAffine<T>::test101()   {
+void TestAffineArith<T>::test101()   {
 	Variable yd(3);
 	Interval sigma(10.0);
 	Interval rho(28.0);

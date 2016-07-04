@@ -26,7 +26,6 @@
 
 #include "ibex_Affine2_fAF1.h"
 #include "ibex_Affine2_iAF.h"
-#include "ibex_Affine2_fAF2_fma.h"
 #include "ibex_Affine2_sAF.h"
 #include "ibex_Affine2_No.h"
 
@@ -603,23 +602,6 @@ inline void AffineMain<T>::change_mode(Affine_Mode tt) {
 
 template<class T>
 inline void AffineMain<T>::compact(){	compact(AF_COMPAC_Tol); }
-
-
-template<class T>
-inline Interval& Interval::operator&=(const AffineMain<T>& x) {
-	return (*this &= x.itv());
-}
-
-template<class T>
-inline Interval& Interval::operator|=(const AffineMain<T>& x) {
-	return (*this |= x.itv());
-}
-
-template<class T>
-inline Interval& Interval::operator=(const AffineMain<T>& x) {
-	return (*this = x.itv());
-}
-
 
 template<class T>
 inline Interval operator&(const AffineMain<T>& x1, const AffineMain<T>& x2) {

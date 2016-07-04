@@ -114,9 +114,6 @@ class IntervalVector;
 class IntervalMatrix;
 class ExprConstant;
 
-#ifdef _IBEX_WITH_AFFINE_
-template<class T>  class AffineMain;
-#endif
 
 /** \defgroup arithmetic Interval Arithmetic */
 
@@ -561,18 +558,6 @@ class Interval {
 #endif
 #endif
 
-#ifdef _IBEX_WITH_AFFINE_
-
-	template<class T>
-	Interval& operator&=(const AffineMain<T>& x);
-
-	template<class T>
-	Interval& operator|=(const AffineMain<T>& x);
-
-	template<class T>
-	Interval& operator=(const AffineMain<T>& x);
-
-#endif
 
 };
 

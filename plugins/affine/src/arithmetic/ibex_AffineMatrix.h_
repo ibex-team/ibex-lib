@@ -16,13 +16,6 @@
 
 namespace ibex {
 
-template<class T>
-IntervalMatrix& IntervalMatrix::operator=(const AffineMainMatrix<T>& x) {
-	resize(x.nb_rows(), x.nb_cols());
-	for (int i=0; i<nb_rows(); i++)
-		(*this)[i] = x[i];
-	return *this;
-}
 
 
 template<class T>

@@ -520,13 +520,7 @@ AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::operator*=(const AffineMain<AF
 
 		*this = temp1+temp2+itx;
 
-	} else if (is_actif()) { // y is not a valid affine2 form. So we add y.itv() such as an interval
-		*this *= y.itv();
-	} else if (y.is_actif()) {
-		Interval tmp = itv();
-		*this = y;
-		*this *= tmp;
-	} else {
+	} else { // y is not a valid affine2 form. So we add y.itv() such as an interval
 		*this = itv() * y.itv();
 	}
 

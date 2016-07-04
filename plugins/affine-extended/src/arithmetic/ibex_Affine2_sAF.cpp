@@ -463,13 +463,7 @@ AffineMain<AF_sAF>& AffineMain<AF_sAF>::operator*=(const AffineMain<AF_sAF>& y) 
 			}
 		}
 
-	} else if (is_actif()) { // y is not a valid affine2 form. So we add y.itv() such as an interval
-		*this *= y.itv();
-	} else if (y.is_actif()) {
-		Interval tmp = itv();
-		*this = y;
-		*this *= tmp;
-	} else {
+	} else { // y is not a valid affine2 form. So we add y.itv() such as an interval
 		*this = itv()*y.itv();
 	}
 
@@ -496,7 +490,6 @@ template<>
 AffineMain<AF_sAF>& AffineMain<AF_sAF>::Asqr(const Interval& itv) {
 //	std::cout << "in sqr "<<std::endl;
 
-	bool b = (!(itv.is_empty()||itv.is_unbounded()));
 	if (	(!is_actif())||
 			itv.is_empty()||
 			itv.is_unbounded()||

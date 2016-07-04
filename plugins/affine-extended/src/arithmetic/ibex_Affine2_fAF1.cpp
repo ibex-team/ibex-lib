@@ -248,7 +248,7 @@ AffineMain<AF_fAF1> AffineMain<AF_fAF1>::operator-() const {
 
 template<>
 AffineMain<AF_fAF1>& AffineMain<AF_fAF1>::operator*=(double alpha) {
-	double temp, ttt, sss;
+	double  ttt, sss;
 	if (is_actif()) {
 		if (alpha==0.0) {
 			for (int i=0; i<=_n;i++) {
@@ -470,14 +470,7 @@ AffineMain<AF_fAF1>& AffineMain<AF_fAF1>::operator*=(const AffineMain<AF_fAF1>& 
 			}
 		}
 
-
-	} else if (is_actif()) { // y is not a valid affine2 form. So we add y.itv() such as an interval
-		*this *= y.itv();
-	} else if (y.is_actif()) {
-		Interval tmp = itv();
-		*this = y;
-		*this *= tmp;
-	} else {
+	} else { // y is not a valid affine2 form. So we add y.itv() such as an interval
 		*this = itv() * y.itv();
 	}
 //	std::cout << "out *= "<<std::endl;
@@ -498,6 +491,7 @@ AffineMain<AF_fAF1>& AffineMain<AF_fAF1>::operator*=(const Interval& y) {
 	}
 	return *this;
 }
+
 
 
 template<>

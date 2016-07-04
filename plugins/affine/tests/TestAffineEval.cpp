@@ -8,7 +8,7 @@
  * Created     : April 08, 2013
  * ---------------------------------------------------------------------------- */
 
-#include "TestAffine2.h"
+#include "TestAffineEval.h"
 
 #include "ibex_Function.h"
 #include "ibex_CtcFwdBwd.h"
@@ -21,7 +21,7 @@
 //using namespace std;
 
 template<class T>
-void TestAffine2<T>::test01() {
+void TestAffineEval<T>::test01() {
 	Variable x(2);
 	Function f(x,x[0]*pow(x[1],2)+exp(x[1]*x[0]));
 	IntervalVector itv(2,Interval(1,2));
@@ -30,7 +30,7 @@ void TestAffine2<T>::test01() {
 }
 
 template<class T>
-void TestAffine2<T>::test02() {
+void TestAffineEval<T>::test02() {
 	Variable x;
 	Function f(x,cosh(x)-x);
 	IntervalVector itv(1,Interval(1,2));
@@ -39,7 +39,7 @@ void TestAffine2<T>::test02() {
 }
 
 template<class T>
-void TestAffine2<T>::test_pow2() {
+void TestAffineEval<T>::test_pow2() {
 	Variable x;
 	Interval itv;
 	Function f(x,pow(x,2));
@@ -68,7 +68,7 @@ void TestAffine2<T>::test_pow2() {
 }
 
 template<class T>
-void TestAffine2<T>::test_pow4() {
+void TestAffineEval<T>::test_pow4() {
 	Variable x;
 	Interval itv;
 	Function f(x,pow(x,4));
@@ -99,7 +99,7 @@ void TestAffine2<T>::test_pow4() {
 
 
 template<class T>
-void TestAffine2<T>::test_pow5() {
+void TestAffineEval<T>::test_pow5() {
 	Variable x;
 	Interval itv;
 	Function f(x,pow(x,5));
@@ -220,7 +220,7 @@ void TestAffine2<T>::test_root5() {
 */
 
 template<class T>
-void TestAffine2<T>::test_powINT1() {
+void TestAffineEval<T>::test_powINT1() {
 	Variable x;
 	Interval itv;
 	Function f(x,pow(x,Interval(2,3)));
@@ -249,7 +249,7 @@ void TestAffine2<T>::test_powINT1() {
 }
 
 template<class T>
-void TestAffine2<T>::test_powINT2() {
+void TestAffineEval<T>::test_powINT2() {
 	Variable x;
 	Interval itv;
 	Function f(x,pow(x,Interval(-2,3)));
@@ -279,7 +279,7 @@ void TestAffine2<T>::test_powINT2() {
 
 
 template<class T>
-void TestAffine2<T>::test_sqrt() {
+void TestAffineEval<T>::test_sqrt() {
 	Variable x;
 	Interval itv;
 	Function f(x,sqrt(x));
@@ -308,7 +308,7 @@ void TestAffine2<T>::test_sqrt() {
 }
 
 template<class T>
-void TestAffine2<T>::test_exp() {
+void TestAffineEval<T>::test_exp() {
 	Variable x;
 	Interval itv;
 	Function f(x,exp(x));
@@ -347,7 +347,7 @@ void TestAffine2<T>::test_exp() {
 }
 
 template<class T>
-void TestAffine2<T>::test_log() {
+void TestAffineEval<T>::test_log() {
 	Variable x;
 	Interval itv;
 	Function f(x,log(x));
@@ -386,7 +386,7 @@ void TestAffine2<T>::test_log() {
 }
 
 template<class T>
-void TestAffine2<T>::test_inv() {
+void TestAffineEval<T>::test_inv() {
 	Variable x;
 	Interval itv;
 	Function f(x,1.0/x);
@@ -427,7 +427,7 @@ void TestAffine2<T>::test_inv() {
 }
 
 template<class T>
-void TestAffine2<T>::test_cos() {
+void TestAffineEval<T>::test_cos() {
 	Variable x;
 	Interval itv;
 	Function f(x,cos(x));
@@ -517,7 +517,7 @@ void TestAffine2<T>::test_cos() {
 }
 
 template<class T>
-void TestAffine2<T>::test_sin() {
+void TestAffineEval<T>::test_sin() {
 	Variable x;
 	Interval itv;
 	Function f(x,sin(x));
@@ -604,7 +604,7 @@ void TestAffine2<T>::test_sin() {
 }
 
 template<class T>
-void TestAffine2<T>::test_tan() {
+void TestAffineEval<T>::test_tan() {
 	Variable x;
 	Interval itv;
 	Function f(x,tan(x));
@@ -689,7 +689,7 @@ void TestAffine2<T>::test_tan() {
 }
 
 template<class T>
-void TestAffine2<T>::test_abs() {
+void TestAffineEval<T>::test_abs() {
 	Variable x;
 	Interval itv;
 	Function f(x,abs(x));
@@ -723,7 +723,7 @@ void TestAffine2<T>::test_abs() {
 }
 
 template<class T>
-void TestAffine2<T>::test_acos() {
+void TestAffineEval<T>::test_acos() {
 	Variable x;
 	Interval itv;
 	Function f(x,acos(x));
@@ -819,7 +819,7 @@ void TestAffine2<T>::test_acos() {
 }
 
 template<class T>
-void TestAffine2<T>::test_asin() {
+void TestAffineEval<T>::test_asin() {
 	Variable x;
 	Interval itv;
 	Function f(x,asin(x));
@@ -915,7 +915,7 @@ void TestAffine2<T>::test_asin() {
 }
 
 template<class T>
-void TestAffine2<T>::test_atan() {
+void TestAffineEval<T>::test_atan() {
 	Variable x;
 	Interval itv;
 	Function f(x,atan(x));
@@ -1005,7 +1005,7 @@ void TestAffine2<T>::test_atan() {
 }
 
 template<class T>
-void TestAffine2<T>::test_cosh() {
+void TestAffineEval<T>::test_cosh() {
 	Variable x;
 	Interval itv;
 	Function f(x,cosh(x));
@@ -1039,7 +1039,7 @@ void TestAffine2<T>::test_cosh() {
 }
 
 template<class T>
-void TestAffine2<T>::test_sinh() {
+void TestAffineEval<T>::test_sinh() {
 	Variable x;
 	Interval itv;
 	Function f(x,sinh(x));
@@ -1075,7 +1075,7 @@ void TestAffine2<T>::test_sinh() {
 
 
 template<class T>
-void TestAffine2<T>::test_tanh() {
+void TestAffineEval<T>::test_tanh() {
 	Variable x;
 	Interval itv;
 	Function f(x,tanh(x));
@@ -1111,12 +1111,12 @@ void TestAffine2<T>::test_tanh() {
 
 
 template<class T>
-bool TestAffine2<T>::check_af2 (Function& f, IntervalVector& I){
+bool TestAffineEval<T>::check_af2 (Function& f, IntervalVector& I){
 	return check_af2(f,I[0]);
 }
 
 template<class T>
-bool TestAffine2<T>::check_af2 (Function& f, Interval& I){
+bool TestAffineEval<T>::check_af2 (Function& f, Interval& I){
 	double n = 100; // number of try
 	AffineMain<T> faa;
 	Interval itv2;
