@@ -14,13 +14,14 @@
 
 
 
-#ifndef _MSC_VER
-	#define IBEX_FMA
 	#include <math.h>
+#ifndef _MSC_VER
+	#ifdef __FP_FAST_FMA || FP_FAST_FMA
+		#define IBEX_FMA
+	#endif
 #else
 #if (_MSC_VER >= 1800)
 	#define IBEX_FMA
-	#include <math.h>
 #endif
 #endif
 
@@ -105,7 +106,7 @@ inline double AF_fAF2::twoProd(double x, double y, double *r_1)
 {
 #ifdef IBEX_FMA
 	*r_1 = (x * y);
-	return fma(x,y,-(*r_1));
+	return std::fma(x,y,-(*r_1));
 #else
 
 	int SHIFT_POW = 27; //  53 / 2 for double precision.
