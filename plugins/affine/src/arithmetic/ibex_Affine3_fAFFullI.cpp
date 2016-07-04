@@ -309,12 +309,9 @@ AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::Aneg() {
 
 template<>
 AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::operator*=(double alpha) {
-	// std::cout << "saxpy IN " << alpha << " x " << *this << " + " << y << " + "<< beta << " +error " << ddelta << " / "<< B1 << B2 << B3 << B4 << std::endl;
 	Interval roundoff_error(0.,0.);
 	Interval intermediate(0.,0.);
 
-	double temp, ttt, sss, eee;
-	//	std::cout << "in saxpy alpha=" << alpha  <<  "  beta= " <<  beta <<   "  delta = " << ddelta   << std::endl;
 	if (is_actif()) {
 		//std::cout << "B1" << std::endl;
 		if (alpha >= 0.0 && alpha <= 0) {
@@ -362,12 +359,9 @@ AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::operator*=(double alpha) {
 
 template<>
 AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::operator+=( const AffineMain<AF_fAFFullI>& y) {
-	// std::cout << "saxpy IN " << alpha << " x " << *this << " + " << y << " + "<< beta << " +error " << ddelta << " / "<< B1 << B2 << B3 << B4 << std::endl;
 	Interval roundoff_error(0.,0.);
 	Interval intermediate(0.,0.);
 
-	double temp, ttt, sss, eee;
-	//	std::cout << "in saxpy alpha=" << alpha  <<  "  beta= " <<  beta <<   "  delta = " << ddelta   << std::endl;
 	if (is_actif() && y.is_actif()) {
 		// Computation step for the center
 		intermediate = Interval(_elt._center) + y._elt._center;
@@ -421,8 +415,14 @@ AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::operator+=( const AffineMain<A
 			_elt._garbage = Interval(0.0);
 		}
 
+	} else if (is_actif()) { // y is not a valid affine2 form. So we add y.itv() such as an interval
+		*this += y.itv();
+	} else if (y.is_actif()) {
+		Interval tmp = itv();
+		*this = y;
+		*this += tmp;
 	} else {
-		*this = itv()+ y.itv();
+		*this = itv() + y.itv();
 	}
 
 	_elt._rays.remove_if(noise_null);
@@ -433,11 +433,9 @@ AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::operator+=( const AffineMain<A
 
 template<>
 AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::operator+=(double beta) {
-	// std::cout << "saxpy IN " << alpha << " x " << *this << " + " << y << " + "<< beta << " +error " << ddelta << " / "<< B1 << B2 << B3 << B4 << std::endl;
 	Interval roundoff_error(0.,0.);
 	Interval intermediate(0.,0.);
 
-	//	std::cout << "in saxpy alpha=" << alpha  <<  "  beta= " <<  beta <<   "  delta = " << ddelta   << std::endl;
 	if (is_actif() && (fabs(beta))<POS_INFINITY) {
 
 		intermediate = Interval(_elt._center) + beta;
@@ -453,7 +451,6 @@ AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::operator+=(double beta) {
 
 	} else {
 		*this = itv()+ beta;
-		//	std::cout << " saxpy OUT x= "<< *this<<std::endl;
 	}
 
 	_elt._rays.remove_if(noise_null);
@@ -464,9 +461,8 @@ AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::operator+=(double beta) {
 
 template<>
 AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::inflate(double ddelta) {
-	// std::cout << "saxpy IN " << alpha << " x " << *this << " + " << y << " + "<< beta << " +error " << ddelta << " / "<< B1 << B2 << B3 << B4 << std::endl;
 	Interval roundoff_error(0.,0.);
-	//	std::cout << "in saxpy alpha=" << alpha  <<  "  beta= " <<  beta <<   "  delta = " << ddelta   << std::endl;
+
 	if (is_actif()) {
 		//std::cout << "B4" << std::endl;
 		if ((fabs(ddelta))<POS_INFINITY) {
@@ -490,7 +486,6 @@ AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::inflate(double ddelta) {
 
 	} else {
 		*this = itv()+Interval(-1,1)*ddelta;
-		//	std::cout << " saxpy OUT x= "<< *this<<std::endl;
 	}
 
 	_elt._rays.remove_if(noise_null);
@@ -525,10 +520,15 @@ AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::operator*=(const AffineMain<AF
 
 		*this = temp1+temp2+itx;
 
+	} else if (is_actif()) { // y is not a valid affine2 form. So we add y.itv() such as an interval
+		*this *= y.itv();
+	} else if (y.is_actif()) {
+		Interval tmp = itv();
+		*this = y;
+		*this *= tmp;
 	} else {
-		*this = itv()*y.itv();
+		*this = itv() * y.itv();
 	}
-	// //	std::cout << "out *= "<< *this<<std::endl;
 
 	return *this;
 }
@@ -546,8 +546,6 @@ AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::operator*=(const Interval& y) 
 	} else {
 		*this *= AffineMain<AF_fAFFullI>(y);
 	}
-
-
 	return *this;
 }
 

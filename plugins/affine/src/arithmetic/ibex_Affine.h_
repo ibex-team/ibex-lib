@@ -1341,7 +1341,7 @@ AffineMain<T>& AffineMain<T>::Ainv_MR(const Interval& itv) {
 
 
 
-
+/////////////////////////////////////////////////////////
 // Specialization
 
 
@@ -1352,7 +1352,6 @@ int AffineMain<AF_fAFFullI>::size() const;
 template<>
 AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::operator+=(const Interval& x);
 
-
 template<>
 std::ostream& operator<<(std::ostream& os, const AffineMain<AF_fAFFullI>& x);
 
@@ -1361,10 +1360,7 @@ std::ostream& operator<<(std::ostream& os, const AffineMain<AF_fAFFullI>& x);
 #ifdef _IBEX_WITH_AFFINE_EXTENDED_
 
 template<>
-inline AffineMain<AF_No>& AffineMain<AF_No>::linChebyshev(Affine2_expr num, const Interval& itv);
-
-template<>
-inline AffineMain<AF_No>& AffineMain<AF_No>::power(int n, const Interval& itv);
+inline AffineMain<AF_No>& AffineMain<AF_No>::Apow(int n, const Interval& itv);
 
 #endif
 
