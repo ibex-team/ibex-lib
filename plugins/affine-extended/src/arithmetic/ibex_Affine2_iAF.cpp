@@ -233,18 +233,26 @@ AffineMain<AF_iAF>& AffineMain<AF_iAF>::operator=(double d) {
 
 /** \brief Return (-x) */
 template<>
-AffineMain<AF_iAF> AffineMain<AF_iAF>::operator-() const {
-	AffineMain<AF_iAF> res;
-	res._n = _n;
-	res._elt._err = _elt._err;
+AffineMain<AF_iAF>& AffineMain<AF_iAF>::Aneg() {
 	if (is_actif()) {
-		res._elt._val = new Interval[_n+1];
 		for (int i = 0; i <= _n; i++) {
-			res._elt._val[i] = (-_elt._val[i]);
+			_elt._val[i] = (-_elt._val[i]);
 		}
-
+	} else {
+		switch(_n) {
+		case -3 : {
+			_elt._err=-_elt._err;
+			_n = -4;
+			break;
+		}
+		case -4 : {
+			_elt._err= -_elt._err;
+			_n = -3;
+			break;
+		}
+		}
 	}
-	return res;
+	return *this;
 }
 
 

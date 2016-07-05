@@ -1360,7 +1360,7 @@ std::ostream& operator<<(std::ostream& os, const AffineMain<AF_fAFFullI>& x);
 #ifdef _IBEX_WITH_AFFINE_EXTENDED_
 
 template<>
-inline AffineMain<AF_No>& AffineMain<AF_No>::Apow(int n, const Interval& itv);
+AffineMain<AF_No>& AffineMain<AF_No>::Apow(int n, const Interval& itv);
 
 #endif
 

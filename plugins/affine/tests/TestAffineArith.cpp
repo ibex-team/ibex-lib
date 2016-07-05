@@ -26,7 +26,6 @@ bool TestAffineArith<T>::compare_results (comp_t c, Interval r, AffineMain<T>  a
 		} else {
 			return false;
 		}
-		break;
 
 	case INCLUSION:
 		if (! r.is_subset(ra)) {
@@ -35,8 +34,6 @@ bool TestAffineArith<T>::compare_results (comp_t c, Interval r, AffineMain<T>  a
 		else {
 			return true;
 		}
-		break;
-
 	case INCLUSION_TIGHT:
 		if (! ra.is_subset(r)) {
 			std::cout.precision(20);
@@ -48,8 +45,6 @@ bool TestAffineArith<T>::compare_results (comp_t c, Interval r, AffineMain<T>  a
 		else {
 			return true;
 		}
-		break;
-
 
 	case INTERSECTION:
 		tmp = ra & r;
@@ -59,7 +54,6 @@ bool TestAffineArith<T>::compare_results (comp_t c, Interval r, AffineMain<T>  a
 		else {
 			return true;
 		}
-		break;
 
 	default:
 		return false;

@@ -278,24 +278,15 @@ AffineMain<AF_fAFFullI>& AffineMain<AF_fAFFullI>::Aneg() {
 				it->second = -(it->second);
 			}
 		}
-	}
-	else {
+	} else {
 		switch(_n) {
-		case -2 : {
-			_elt._center=0;
-			_n = -3;
-			break;
-		}
 		case -3 : {
-			if (_elt._center<0) _elt._center=0;
+			_elt._center=-_elt._center;
+			_n = -4;
 			break;
 		}
 		case -4 : {
-			if (_elt._center<0) {
-				_elt._center= -_elt._center;
-			} else {
-				_elt._center = 0;
-			}
+			_elt._center= -_elt._center;
 			_n = -3;
 			break;
 		}

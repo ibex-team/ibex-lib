@@ -258,21 +258,13 @@ AffineMain<AF_fAF2>& AffineMain<AF_fAF2>::Aneg() {
 		}
 	} else {
 		switch(_n) {
-		case -2 : {
-			_elt._err=0;
-			_n = -3;
-			break;
-		}
 		case -3 : {
-			if (_elt._err<0) _elt._err=0;
+			_elt._err=-_elt._err;
+			_n = -4;
 			break;
 		}
 		case -4 : {
-			if (_elt._err<0) {
-				_elt._err= -_elt._err;
-			} else {
-				_elt._err = 0;
-			}
+			_elt._err= -_elt._err;
 			_n = -3;
 			break;
 		}
