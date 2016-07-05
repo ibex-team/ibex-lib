@@ -112,8 +112,8 @@ void TestArith::float02() { CPPUNIT_ASSERT(0 > previous_float(0)); }
 void TestArith::float03() { CPPUNIT_ASSERT( 1 < next_float(1)); }
 void TestArith::float04() { CPPUNIT_ASSERT(1 > previous_float(1)); }
 void TestArith::float05() { CPPUNIT_ASSERT( POS_INFINITY == next_float(POS_INFINITY)); }
-void TestArith::float06() { CPPUNIT_ASSERT( NEG_INFINITY == next_float(NEG_INFINITY)); }
-void TestArith::float07() { CPPUNIT_ASSERT( POS_INFINITY == previous_float(POS_INFINITY)); }
+void TestArith::float06() { CPPUNIT_ASSERT( -DBL_MAX == next_float(NEG_INFINITY)); }
+void TestArith::float07() { CPPUNIT_ASSERT( DBL_MAX == previous_float(POS_INFINITY)); }
 void TestArith::float08() { CPPUNIT_ASSERT( NEG_INFINITY == previous_float(NEG_INFINITY)); }
 void TestArith::float09() { CPPUNIT_ASSERT( POS_INFINITY == next_float(DBL_MAX)); }
 void TestArith::float10() { CPPUNIT_ASSERT( NEG_INFINITY == previous_float(-DBL_MAX)); }
