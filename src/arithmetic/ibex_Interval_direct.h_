@@ -43,13 +43,13 @@ inline double next_float_mod(double x) {
 }
 
 inline double previous_float(double x) {
-	if (x>= POS_INFINITY || x<=NEG_INFINITY)	return x;
+	if (x==NEG_INFINITY)	return x;
 	else if (x==0) return -DBL_MIN;
 	else return previous_float_mod( x);
 }
 
 inline double next_float(double x) {
-	if (x>= POS_INFINITY || x<=NEG_INFINITY)	return x;
+	if (x==POS_INFINITY)	return x;
 	else if (x==0) return DBL_MIN;
 	else return next_float_mod( x);
 }
@@ -64,7 +64,7 @@ inline Interval& Interval::operator=(const DIRECT_INTERVAL& x) {
 
 inline Interval& Interval::operator+=(double d) {
 	if (!is_empty()) {
-		if (d<=NEG_INFINITY || d>=POS_INFINITY) set_empty();
+		if (d==NEG_INFINITY || d==POS_INFINITY) set_empty();
 		else if (d!=0)  *this=Interval(DIRECT_INTERVAL(previous_float_mod(lb()+d),next_float_mod(ub()+d)));
 	}
 	return *this;
@@ -72,7 +72,7 @@ inline Interval& Interval::operator+=(double d) {
 
 inline Interval& Interval::operator-=(double d) {
 	if (!is_empty()) {
-		if (d<=NEG_INFINITY || d>=POS_INFINITY) set_empty();
+		if (d==NEG_INFINITY || d==POS_INFINITY) set_empty();
 		else if (d!=0) *this=Interval(DIRECT_INTERVAL(previous_float_mod(lb()-d),next_float_mod(ub()-d)));
 	}
 	return *this;
@@ -135,12 +135,12 @@ inline Interval& Interval::operator*=(const Interval& y) {
 
 	if ((a==0 && b==0) || (c==0 && d==0)) { *this=Interval(0.0); return *this; }
 
-	if (((a<0) && (b>0)) && (c<=NEG_INFINITY || d>=POS_INFINITY)) { *this=Interval(NEG_INFINITY, POS_INFINITY); return *this; }
+	if (((a<0) && (b>0)) && (c==NEG_INFINITY || d==POS_INFINITY)) { *this=Interval(NEG_INFINITY, POS_INFINITY); return *this; }
 
-	if (((c<0) && (d>0)) && (a<=NEG_INFINITY || b>=POS_INFINITY)) { *this=Interval(NEG_INFINITY, POS_INFINITY); return *this; }
+	if (((c<0) && (d>0)) && (a==NEG_INFINITY || b==POS_INFINITY)) { *this=Interval(NEG_INFINITY, POS_INFINITY); return *this; }
 
 	// [-inf, _] x [_ 0] ou [0,_] x [_, +inf]
-	if (((a<=NEG_INFINITY) && (d==0)) || ((d>=POS_INFINITY) && (a==0))) {
+	if (((a==NEG_INFINITY) && (d==0)) || ((d==POS_INFINITY) && (a==0))) {
 		if ((b<=0) || (c>=0)) { *this=Interval(0.0, POS_INFINITY); return *this; }
 		else {
 			*this=Interval(previous_float_mod(b*c), POS_INFINITY);
@@ -149,7 +149,7 @@ inline Interval& Interval::operator*=(const Interval& y) {
 	}
 
 	// [-inf, _] x [0, _] ou [0, _] x [-inf, _]
-	if (((a<=NEG_INFINITY) && (c==0)) || ((c<=NEG_INFINITY) && (a==0))) {
+	if (((a==NEG_INFINITY) && (c==0)) || ((c==NEG_INFINITY) && (a==0))) {
 		if ((b<=0) || (d<=0)) { *this=Interval(NEG_INFINITY, 0.0); return *this; }
 		else {
 			*this=Interval(NEG_INFINITY,next_float_mod(b*d));
@@ -158,7 +158,7 @@ inline Interval& Interval::operator*=(const Interval& y) {
 	}
 
 	// [_,0] x [-inf, _] ou [_, +inf] x [0,_]
-	if (((c<=NEG_INFINITY) && (b==0)) || ((b>=POS_INFINITY) && (c==0))) {
+	if (((c==NEG_INFINITY) && (b==0)) || ((b==POS_INFINITY) && (c==0))) {
 		if ((d<=0) || (a>=0)) { *this=Interval(0.0, POS_INFINITY); return *this; }
 		else {
 			*this=Interval(previous_float_mod(a*d), POS_INFINITY);
@@ -167,7 +167,7 @@ inline Interval& Interval::operator*=(const Interval& y) {
 	}
 
 	// [_, +inf] x [_,0] ou [_,0] x [_, +inf]
-	if (((b>=POS_INFINITY) && (d==0)) || ((d>=POS_INFINITY) && (b==0))) {
+	if (((b==POS_INFINITY) && (d==0)) || ((d==POS_INFINITY) && (b==0))) {
 		if ((a>=0) || (c>=0)) { *this=Interval(NEG_INFINITY, 0.0); return *this; }
 		else {
 			*this=Interval(NEG_INFINITY, next_float_mod(a*c));
@@ -339,10 +339,10 @@ inline double Interval::ub() const {
 }
 
 inline double Interval::mid() const {
-	if (lb()<=NEG_INFINITY)
-		if (ub()>=POS_INFINITY) return 0;
+	if (lb()==NEG_INFINITY)
+		if (ub()==POS_INFINITY) return 0;
 		else return -DBL_MAX;
-	else if (ub()>=POS_INFINITY) return DBL_MAX;
+	else if (ub()==POS_INFINITY) return DBL_MAX;
 	else if (lb()==0) {
 		if (ub()==DBL_MIN) return 0;
 		else return ub()/2;
@@ -369,7 +369,7 @@ inline bool Interval::is_degenerated() const {
 
 inline bool Interval::is_unbounded() const {
 	if (is_empty()) return false;
-	return lb()<=NEG_INFINITY || ub()>=POS_INFINITY;
+	return lb()==NEG_INFINITY || ub()==POS_INFINITY;
 }
 
 inline double Interval::diam() const {
@@ -400,7 +400,7 @@ inline Interval operator|(const Interval& x1, const Interval& x2) {
 
 inline Interval operator+(const Interval& x, double d) {
 	if (x.is_empty()) return x;
-	else if (d<=NEG_INFINITY || d>=POS_INFINITY) return Interval::EMPTY_SET;
+	else if (d==NEG_INFINITY || d==POS_INFINITY) return Interval::EMPTY_SET;
 	else {
 		Interval r(x);
 		r += d;
@@ -411,7 +411,7 @@ inline Interval operator+(const Interval& x, double d) {
 
 inline Interval operator-(const Interval& x, double d) {
 	if (x.is_empty()) return x;
-		else if (d<=NEG_INFINITY || d>=POS_INFINITY) return Interval::EMPTY_SET;
+		else if (d==NEG_INFINITY || d==POS_INFINITY) return Interval::EMPTY_SET;
 	else {
 		Interval r(x);
 		r -= d;
@@ -421,7 +421,7 @@ inline Interval operator-(const Interval& x, double d) {
 
 inline Interval operator*(const Interval& x, double d) {
 	if (x.is_empty()) return x;
-		else if (d<=NEG_INFINITY || d>=POS_INFINITY) return Interval::EMPTY_SET;
+		else if (d==NEG_INFINITY || d==POS_INFINITY) return Interval::EMPTY_SET;
 	else {
 		Interval r(x);
 		r *= d;
@@ -431,7 +431,7 @@ inline Interval operator*(const Interval& x, double d) {
 
 inline Interval operator/(const Interval& x, double d) {
 	if (x.is_empty()) return x;
-		else if (d<=NEG_INFINITY || d>=POS_INFINITY) return Interval::EMPTY_SET;
+		else if (d==NEG_INFINITY || d==POS_INFINITY) return Interval::EMPTY_SET;
 	else {
 		Interval r(x);
 		r /= d;
@@ -445,7 +445,7 @@ inline Interval operator+(double d,const Interval& x) {
 
 inline Interval operator-(double d, const Interval& x) {
 	if (x.is_empty()) return x;
-		else if (d<=NEG_INFINITY || d>=POS_INFINITY) return Interval::EMPTY_SET;
+		else if (d==NEG_INFINITY || d==POS_INFINITY) return Interval::EMPTY_SET;
 	else {
 		Interval r(d);
 		r -= x;
@@ -459,7 +459,7 @@ inline Interval operator*(double d, const Interval& x) {
 
 inline Interval operator/(double d, const Interval& x) {
 	/*if (x.is_empty()) return x;
-	else if (d==0 || d<=NEG_INFINITY || d>=POS_INFINITY) return Interval::EMPTY_SET;
+	else if (d==0 || d==NEG_INFINITY || d==POS_INFINITY) return Interval::EMPTY_SET;
 	else*/
 	return Interval(d)/x.itv;
 }
@@ -550,7 +550,7 @@ inline Interval pow(const Interval& x, int n) {
 }
 
 inline Interval pow(const Interval& x, double d) {
-	if(d<=NEG_INFINITY || d>=POS_INFINITY)
+	if(d==NEG_INFINITY || d==POS_INFINITY)
 		return Interval::EMPTY_SET;
 	else if (d==0)
 		return Interval::ONE;
@@ -588,7 +588,7 @@ inline Interval exp(const Interval& x) {
 	if (x.is_empty()) return Interval::EMPTY_SET;
 	else if (::exp(x.lb())>= DBL_MAX)
 		return Interval(DBL_MAX,POS_INFINITY);
-	else if (::exp(x.ub())>= POS_INFINITY)
+	else if (::exp(x.ub())==POS_INFINITY)
 		return Interval(previous_float_mod(::exp(x.lb())),POS_INFINITY);
 	else return Interval(DIRECT_INTERVAL(previous_float_mod(::exp(x.lb())),next_float_mod(::exp(x.ub()))));
 }
@@ -678,11 +678,11 @@ inline Interval tan(const Interval& x) {
 
 inline Interval cosh(const Interval& x) {
 	if (x.is_empty()) return Interval::EMPTY_SET;
-	else if (x.ub()>=POS_INFINITY) {
+	else if (x.ub()==POS_INFINITY) {
 		if (x.lb()<=0) return Interval(1,POS_INFINITY);
 		else return Interval((::cosh(x.lb())),POS_INFINITY);
 	}
-	else if (x.lb()<=NEG_INFINITY) {
+	else if (x.lb()==NEG_INFINITY) {
 		if (x.ub()>=0) return Interval(1,POS_INFINITY);
 		else return Interval((::cosh(x.ub())),POS_INFINITY);
 	}
@@ -716,11 +716,11 @@ inline Interval atan(const Interval& x) {
 
 inline Interval sinh(const Interval& x) {
 	if (x.is_empty()) return Interval::EMPTY_SET;
-	else if (x.lb()<=NEG_INFINITY) {
-		if (x.ub()>=POS_INFINITY) return Interval::ALL_REALS;
+	else if (x.lb()==NEG_INFINITY) {
+		if (x.ub()==POS_INFINITY) return Interval::ALL_REALS;
 		else return Interval(NEG_INFINITY, next_float_mod(::sinh(x.ub())));
 	}
-	else if (x.ub()>=POS_INFINITY)
+	else if (x.ub()==POS_INFINITY)
 		return Interval(::sinh(x.lb()),POS_INFINITY);
 	else
 		return Interval(DIRECT_INTERVAL(previous_float_mod(::sinh(x.lb())), next_float_mod(::sinh(x.ub()))));
@@ -729,13 +729,13 @@ inline Interval sinh(const Interval& x) {
 inline Interval tanh(const Interval& x) {
 	if (x.is_empty()) return Interval::EMPTY_SET;
 
-	if (x.lb()<=NEG_INFINITY) {
-		if (x.ub()>=POS_INFINITY) return Interval(-1, 1);
+	if (x.lb()==NEG_INFINITY) {
+		if (x.ub()==POS_INFINITY) return Interval(-1, 1);
 		else {
 			return Interval(-1,next_float_mod(::tanh(x.ub())));
 		}
 	} else {
-		if (x.ub()>=POS_INFINITY) {
+		if (x.ub()==POS_INFINITY) {
 			return Interval(::tanh(x.lb()),1);
 		}
 		else {
@@ -755,13 +755,13 @@ inline Interval acosh(const Interval& x) {
 inline Interval asinh(const Interval& x) {
 	if (x.is_empty()) return Interval::EMPTY_SET;
 
-	if (x.lb()<=NEG_INFINITY) {
-		if (x.ub()>=POS_INFINITY) return Interval::ALL_REALS;
+	if (x.lb()==NEG_INFINITY) {
+		if (x.ub()==POS_INFINITY) return Interval::ALL_REALS;
 		else {
 			return Interval(NEG_INFINITY, ::asinh(x.ub()));
 		}
 	} else {
-		if (x.ub()>=POS_INFINITY) {
+		if (x.ub()==POS_INFINITY) {
 			return Interval(::asinh(x.lb()),POS_INFINITY);
 		}
 		else {
@@ -816,8 +816,8 @@ inline Interval min(const Interval& x, const Interval& y) {
 
 inline Interval integer(const Interval& x) {
 	if (x.is_empty()) return Interval::EMPTY_SET;
-	double l=x.lb()<=NEG_INFINITY? NEG_INFINITY : ceil(x.lb());
-	double r=x.ub()>=POS_INFINITY? POS_INFINITY : floor(x.ub());
+	double l=x.lb()==NEG_INFINITY? NEG_INFINITY : ceil(x.lb());
+	double r=x.ub()==POS_INFINITY? POS_INFINITY : floor(x.ub());
 	if (l>r) return Interval::EMPTY_SET;
 	else return Interval(l,r);
 }
@@ -898,7 +898,7 @@ inline bool bwd_trigo(const Interval& y, Interval& x, int ftype) {
 
 	if (period_0.is_empty()) { x.set_empty(); return false; }
 
-	if (x.lb()<=NEG_INFINITY || x.ub()>=POS_INFINITY) return true; // infinity of periods
+	if (x.lb()==NEG_INFINITY || x.ub()==POS_INFINITY) return true; // infinity of periods
 
 	switch (ftype) {
 	case COS :
