@@ -21,12 +21,9 @@
 #include "ibex_Matrix.h"
 #include "ibex_Array.h"
 
-
-
 namespace ibex {
 
 class IntervalMatrix; // declared only for friendship
-
 
 /**
  * \ingroup arithmetic

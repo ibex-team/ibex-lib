@@ -79,9 +79,8 @@
 
 		DIRECT_INTERVAL(void) : inf(0), sup(0), isEmpty(true) {}
 		DIRECT_INTERVAL(double a, double b) {
-			if (a==POS_INFINITY || b==NEG_INFINITY)
+			if (a==POS_INFINITY || b==NEG_INFINITY || a>b )
 			                 {inf = 0; sup = 0; isEmpty=true; }
-			else if  (a>=b)  {inf = b; sup = a; isEmpty=false;}
 			else             {inf = a; sup = b; isEmpty=false;}
 		}
 
@@ -113,7 +112,6 @@ namespace ibex {
 class IntervalVector;
 class IntervalMatrix;
 class ExprConstant;
-
 
 /** \defgroup arithmetic Interval Arithmetic */
 
@@ -557,8 +555,6 @@ class Interval {
 #endif
 #endif
 #endif
-
-
 };
 
 /** \ingroup arithmetic */
@@ -927,6 +923,7 @@ inline Interval& Interval::operator=(double x) {
 		itv = x;
 	return *this;
 }
+
 
 
 inline Interval& Interval::operator=(const Interval& x) {
