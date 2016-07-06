@@ -1,77 +1,67 @@
 /* ============================================================================
- * I B E X - Implementation of the Interval class without rounding
+ * I B E X - Implementation of the Interval class based on Profil/BIAS
  * ============================================================================
  * Copyright   : Ecole des Mines de Nantes (FRANCE)
  * License     : This program can be distributed under the terms of the GNU LGPL.
  *               See the file COPYING.LESSER.
  *
- * Author(s)   : Jordan Ninin
- * Created     : Jan 28, 2015
+ * Author(s)   : Gilles Chabert
+ * Created     : Dec 23, 2011
+ * Modified by : Gilles Trombettoni, Bertrand Neveu
  * ---------------------------------------------------------------------------- */
 
-#ifndef _IBEX_DIRECT_INTERVAL_H_
-#define _IBEX_DIRECT_INTERVAL_H_
+#ifndef _IBEX_BIAS_INTERVAL_H_
+#define _IBEX_BIAS_INTERVAL_H_
 
-
-#include "ibex_Exception.h"
-#include <cassert>
+#include "Functions.h"
 #include <float.h>
-#include <iostream>
-#include <cmath>
+#include <cassert>
+#include "BIAS/BiasF.h"
 #include <climits>
 
 namespace ibex {
 
 inline void fpu_round_down() {
+	BiasRoundDown();
 }
 
 inline void fpu_round_up() {
+	BiasRoundUp();
 }
 
 inline void fpu_round_near() {
-}
-
-
-inline double previous_float_mod(double x) {
-	if (x<0) return (1.0+DBL_EPSILON)*x;
-	else return (1.0-DBL_EPSILON)*x;
-}
-
-inline double next_float_mod(double x) {
-	if (x<0) return (1.0-DBL_EPSILON)*x;
-	else return (1.0+DBL_EPSILON)*x;
+	BiasRoundNear();
 }
 
 inline double previous_float(double x) {
-	if (x==0) return -DBL_MIN;
-	else return previous_float_mod( x);
+	return Pred(x);
 }
 
 inline double next_float(double x) {
-	if (x==0) return DBL_MIN;
-	else return next_float_mod( x);
+	return Succ(x);
 }
-inline Interval::Interval(const DIRECT_INTERVAL& x) : itv(x) {
+
+inline Interval::Interval(const INTERVAL& x) : itv(x) {
 
 }
 
-inline Interval& Interval::operator=(const DIRECT_INTERVAL& x) {
+inline Interval& Interval::operator=(const INTERVAL& x) {
 	this->itv = x;
 	return *this;
 }
 
 inline Interval& Interval::operator+=(double d) {
 	if (!is_empty()) {
-		if (d==NEG_INFINITY || d==POS_INFINITY) set_empty();
-		else if (d!=0)  *this=Interval(DIRECT_INTERVAL(previous_float_mod(lb()+d),next_float_mod(ub()+d)));
+		if (d==NEG_INFINITY || d==POS_INFINITY) *this=EMPTY_SET;
+		else itv+=d;
 	}
 	return *this;
 }
 
 inline Interval& Interval::operator-=(double d) {
 	if (!is_empty()) {
-		if (d==NEG_INFINITY || d==POS_INFINITY) set_empty();
-		else if (d!=0) *this=Interval(DIRECT_INTERVAL(previous_float_mod(lb()-d),next_float_mod(ub()-d)));
+		if (d==NEG_INFINITY || d==POS_INFINITY) *this=EMPTY_SET;
+		else itv-=d;
 	}
 	return *this;
 }
@@ -86,25 +76,14 @@ inline Interval& Interval::operator/=(double d) {
 
 inline Interval& Interval::operator+=(const Interval& x) {
 	if (is_empty()) return *this;
-	else if (x.is_empty()) {
-		set_empty();
-		return *this; }
-	else {
-		*this=Interval(DIRECT_INTERVAL(previous_float_mod(lb()+x.lb()),next_float_mod(ub()+x.ub())));
-		return *this;
-	}
+	else if (x.is_empty()) { *this=Interval::EMPTY_SET; return *this; }
+	else { itv+=x.itv; return *this; }
 }
 
 inline Interval& Interval::operator-=(const Interval& x) {
 	if (is_empty()) return *this;
-	else if (x.is_empty()) {
-		set_empty();
-		return *this;
-	}
-	else {
-		*this=Interval(DIRECT_INTERVAL(previous_float_mod(lb()-x.ub()),next_float_mod(ub()-x.lb())));
-		return *this;
-	}
+	else if (x.is_empty()) { *this=Interval::EMPTY_SET; return *this; }
+	else { itv-=x.itv; return *this; }
 }
 
 /*
@@ -122,16 +101,17 @@ inline Interval& Interval::operator-=(const Interval& x) {
  *  </ul> */
 inline Interval& Interval::operator*=(const Interval& y) {
 
+	INTERVAL r;
 
 	if (is_empty()) return *this;
 	if (y.is_empty()) { *this=Interval::EMPTY_SET; return *this; }
 
-	const double& a(lb());
-	const double& b(ub());
-	const double& c(y.lb());
-	const double& d(y.ub());
+	const REAL& a(lb());
+	const REAL& b(ub());
+	const REAL& c(y.lb());
+	const REAL& d(y.ub());
 
-	if ((a==0 && b==0) || (c==0 && d==0)) { *this=Interval(0.0); return *this; }
+	if ((a==0 && b==0) || (c==0 && d==0)) { *this=Interval(0.0,0.0); return *this; }
 
 	if (((a<0) && (b>0)) && (c==NEG_INFINITY || d==POS_INFINITY)) { *this=Interval(NEG_INFINITY, POS_INFINITY); return *this; }
 
@@ -141,7 +121,8 @@ inline Interval& Interval::operator*=(const Interval& y) {
 	if (((a==NEG_INFINITY) && (d==0)) || ((d==POS_INFINITY) && (a==0))) {
 		if ((b<=0) || (c>=0)) { *this=Interval(0.0, POS_INFINITY); return *this; }
 		else {
-			*this=Interval(previous_float_mod(b*c), POS_INFINITY);
+			BiasMulII (Bias(r), Bias(INTERVAL(b)), Bias(INTERVAL(c)));
+			*this=Interval(Inf(r), POS_INFINITY);
 			return *this;
 		}
 	}
@@ -150,7 +131,8 @@ inline Interval& Interval::operator*=(const Interval& y) {
 	if (((a==NEG_INFINITY) && (c==0)) || ((c==NEG_INFINITY) && (a==0))) {
 		if ((b<=0) || (d<=0)) { *this=Interval(NEG_INFINITY, 0.0); return *this; }
 		else {
-			*this=Interval(NEG_INFINITY,next_float_mod(b*d));
+			BiasMulII (Bias(r), Bias(INTERVAL(b)), Bias(INTERVAL(d)));
+			*this=Interval(NEG_INFINITY, Sup(r));
 			return *this;
 		}
 	}
@@ -159,7 +141,8 @@ inline Interval& Interval::operator*=(const Interval& y) {
 	if (((c==NEG_INFINITY) && (b==0)) || ((b==POS_INFINITY) && (c==0))) {
 		if ((d<=0) || (a>=0)) { *this=Interval(0.0, POS_INFINITY); return *this; }
 		else {
-			*this=Interval(previous_float_mod(a*d), POS_INFINITY);
+			BiasMulII (Bias(r), Bias(INTERVAL(a)), Bias(INTERVAL(d)));
+			*this=Interval(Inf(r), POS_INFINITY);
 			return *this;
 		}
 	}
@@ -168,35 +151,14 @@ inline Interval& Interval::operator*=(const Interval& y) {
 	if (((b==POS_INFINITY) && (d==0)) || ((d==POS_INFINITY) && (b==0))) {
 		if ((a>=0) || (c>=0)) { *this=Interval(NEG_INFINITY, 0.0); return *this; }
 		else {
-			*this=Interval(NEG_INFINITY, next_float_mod(a*c));
+			BiasMulII (Bias(r), Bias(INTERVAL(a)), Bias(INTERVAL(c)));
+			*this=Interval(NEG_INFINITY, Sup(r));
 			return *this;
 		}
 	}
 
-	if (a>=0)	{
-		if  (c>=0) {
-			*this= Interval(DIRECT_INTERVAL(previous_float_mod(a*c),next_float_mod(b*d)));
-		}
-		else {
-			if  (d<=0) *this=Interval(DIRECT_INTERVAL(previous_float_mod(b*c),next_float_mod(a*d)));
-			else *this=  Interval(DIRECT_INTERVAL(previous_float_mod(b*c),next_float_mod(b*d)));
-		}
-	} else {
-		if (b<=0)	{
-			if  (c>=0) *this=Interval(DIRECT_INTERVAL(previous_float_mod(a*d),next_float_mod(b*c)));
-			else if (d<=0) *this=Interval(DIRECT_INTERVAL(previous_float_mod(b*d),next_float_mod(a*c)));
-			else *this=Interval(DIRECT_INTERVAL(previous_float_mod(a*d),next_float_mod(a*c)));
-		} else {
-			if (c>=0) *this=Interval(DIRECT_INTERVAL(previous_float_mod(a*d),next_float_mod(b*d)));
-			else if (d<=0) *this=Interval(DIRECT_INTERVAL(previous_float_mod(b*c),next_float_mod(a*c)));
-			else {
-				*this=Interval( DIRECT_INTERVAL(
-						previous_float_mod((a*d<b*c) ? a*d : b*c ),
-						next_float_mod((a*c<b*d) ? b*d : a*c)));
-			}
-		}
-
-	}
+	BiasMulII (Bias(r), Bias(itv), Bias(y.itv));
+	*this=r;
 	return *this;
 }
 
@@ -205,11 +167,12 @@ inline Interval& Interval::operator/=(const Interval& y) {
 	if (is_empty()) return *this;
 	if (y.is_empty()) { *this=Interval::EMPTY_SET; return *this; }
 
-	const double& a(lb());
-	const double& b(ub());
-	const double& c(y.lb());
-	const double& d(y.ub());
+	const REAL& a(lb());
+	const REAL& b(ub());
+	const REAL& c(y.lb());
+	const REAL& d(y.ub());
 
+	INTERVAL r;
 
 	if (c==0 && d==0) {
 		*this=Interval::EMPTY_SET;
@@ -221,34 +184,15 @@ inline Interval& Interval::operator/=(const Interval& y) {
 		return *this;
 	}
 
-	if (c> 0)	{
-		if    (a>=0)  {
-			*this= Interval(DIRECT_INTERVAL(previous_float_mod(a/d), next_float_mod(b/c)));
-		}
-		else if (b<0)  {
-			*this= Interval(DIRECT_INTERVAL(previous_float_mod(a/c), next_float_mod(b/d)));
-		}
-		else  {
-			*this= Interval(DIRECT_INTERVAL(previous_float_mod(a/c), next_float_mod(b/c)));
-		}
-		return *this;
-	}
-
-	if (d<0)	{
-		if (a>=0) {
-			*this= Interval(DIRECT_INTERVAL(previous_float_mod(b/d), next_float_mod(a/c)));
-		}
-		else if (b<0)  {
-			*this= Interval(DIRECT_INTERVAL(previous_float_mod(b/c), next_float_mod(a/d)));
-		}
-		else {
-			*this= Interval(DIRECT_INTERVAL(previous_float_mod(b/d), next_float_mod(a/d)));
-		}
+	if (c>0 || d<0) {
+		BiasDivII (Bias(r), Bias(itv), Bias(y.itv));
+		*this=r;
 		return *this;
 	}
 
 	if ((b<=0) && d==0) {
-		*this=Interval(previous_float_mod(b/c), POS_INFINITY);
+		BiasDivII (Bias(r), Bias(INTERVAL(b)), Bias(INTERVAL(c)));
+		*this=Interval(Inf(r), POS_INFINITY);
 		return *this;
 	}
 
@@ -258,12 +202,14 @@ inline Interval& Interval::operator/=(const Interval& y) {
 	}
 
 	if (b<=0 && c==0) {
-		*this=Interval(NEG_INFINITY, next_float_mod(b/d));
+		BiasDivII (Bias(r), Bias(INTERVAL(b)), Bias(INTERVAL(d)));
+		*this=Interval(NEG_INFINITY, Sup(r));
 		return *this;
 	}
 
 	if (a>=0 && d==0) {
-		*this=Interval(NEG_INFINITY, next_float_mod(a/c));
+		BiasDivII (Bias(r), Bias(INTERVAL(a)), Bias(INTERVAL(c)));
+		*this=Interval(NEG_INFINITY, Sup(r));
 		return *this;
 	}
 
@@ -273,7 +219,8 @@ inline Interval& Interval::operator/=(const Interval& y) {
 	}
 
 	if (a>=0 && c==0) {
-		*this=Interval(previous_float_mod(a/d), POS_INFINITY);
+		BiasDivII (Bias(r), Bias(INTERVAL(a)), Bias(INTERVAL(d)));
+		*this=Interval(Inf(r), POS_INFINITY);
 		return *this;
 	}
 
@@ -283,7 +230,7 @@ inline Interval& Interval::operator/=(const Interval& y) {
 
 inline Interval Interval:: operator-() const {
 	if (is_empty()) return *this;
-	return Interval(DIRECT_INTERVAL(-ub(),-lb()));
+	return -itv;
 }
 
 inline Interval& Interval::div2_inter(const Interval& x, const Interval& y) {
@@ -298,67 +245,46 @@ inline void Interval::set_empty() {
 }
 
 inline Interval& Interval::operator&=(const Interval& x) {
-
 	if (is_empty()) return *this;
 	if (x.is_empty()) { set_empty(); return *this; }
 
-	if ((this->lb()>x.ub())||(x.lb()>this->ub())) {
-		set_empty();
-		return *this;
-	}
-	DIRECT_INTERVAL r(0);
-	if (this->lb()<=x.lb()) r.inf=x.lb(); else r.inf=this->lb();
-	if (this->ub()>=x.ub()) r.sup=x.ub(); else r.sup=this->ub();
-	this->itv=r;
-
+	INTERVAL tmp;
+	if (Intersection(tmp, itv, x.itv)) itv = tmp;
+	else set_empty();
 	return *this;
-
 }
 
 inline Interval& Interval::operator|=(const Interval& x) {
-
-	if (is_empty()) { *this=x;	return *this; }
-	if (x.is_empty()) return *this;
-
-	DIRECT_INTERVAL r(0);
-	if (this->lb()<=x.lb()) r.inf=this->lb(); else r.inf=x.lb();
-	if (this->ub()>=x.ub()) r.sup=this->ub(); else r.sup=x.ub();
-	this->itv=r;
-
+	if (!x.is_empty()) {
+		if (is_empty()) itv = x.itv;
+		else itv = Hull(itv, x.itv);
+	}
 	return *this;
 }
 
 inline double Interval::lb() const {
-	return itv.inf;
+	return Inf(itv);
 }
 
 inline double Interval::ub() const {
-	return itv.sup;
+	return Sup(itv);
 }
 
 inline double Interval::mid() const {
-	if (lb()==NEG_INFINITY)
-		if (ub()==POS_INFINITY) return 0;
+	if (Inf(itv)==NEG_INFINITY)
+		if (Sup(itv)==POS_INFINITY) return 0;
 		else return -DBL_MAX;
-	else if (ub()==POS_INFINITY) return DBL_MAX;
-	else if (lb()==0) {
-		if (ub()==DBL_MIN) return 0;
-		else return ub()/2;
-	}
-	else if (ub()==0) {
-		if (lb()==-DBL_MIN) return 0;
-		else return lb()/2;
-	}
+	else if (Sup(itv)==POS_INFINITY) return DBL_MAX;
 	else {
-		double m=((lb()+ub())/2);
-		if (m<lb()) m=lb(); // watch dog
-		else if (m>ub()) m=ub();
+		double m=Mid(itv);
+		if (m<Inf(itv)) m=Inf(itv); // watch dog
+		else if (m>Sup(itv)) m=Sup(itv);
 		return m;
 	}
 }
 
 inline bool Interval::is_empty() const {
-	return itv.isEmpty; //*this==EMPTY_SET;
+	return (ub()==NEG_INFINITY || lb()==POS_INFINITY); //*this==EMPTY_SET;
 }
 
 inline bool Interval::is_degenerated() const {
@@ -367,74 +293,57 @@ inline bool Interval::is_degenerated() const {
 
 inline bool Interval::is_unbounded() const {
 	if (is_empty()) return false;
-	return lb()<=NEG_INFINITY || ub()>=POS_INFINITY;
+	return lb()==NEG_INFINITY || ub()==POS_INFINITY;
 }
 
 inline double Interval::diam() const {
-	return is_empty()? 0: (is_unbounded()? POS_INFINITY : ((itv.sup-itv.inf)));
+	return is_empty()? 0: (is_unbounded()? POS_INFINITY : Diam(itv));
 }
 
 inline double Interval::mig() const {
-	if (lb()>0)      return lb();
-	else if (ub()<0) return -ub();
-	else             return 0;
+	return Mig(itv);
 }
 
 inline double Interval::mag() const {
-    return  (fabs(lb())> fabs(ub())) ? fabs(lb()) : fabs(ub());
+	return Abs(itv);
 }
 
 inline Interval operator&(const Interval& x1, const Interval& x2) {
-	Interval res(x1);
-	res &= x2;
-	return res;
+	INTERVAL res;
+	if (x1.is_empty() || x2.is_empty() || !Intersection(res, x1.itv, x2.itv))
+		return Interval::EMPTY_SET;
+	else
+		return res;
 }
 
 inline Interval operator|(const Interval& x1, const Interval& x2) {
-	Interval res(x1);
-	res |= x2;
-	return res;
+	if (x1.is_empty()) return x2;
+	if (x2.is_empty()) return x1;
+	return Hull(x1.itv,x2.itv);
 }
 
 inline Interval operator+(const Interval& x, double d) {
 	if (x.is_empty()) return x;
-	else if (d==NEG_INFINITY || d==POS_INFINITY) return Interval::EMPTY_SET;
-	else {
-		Interval r(x);
-		r += d;
-		return r;
-	}
+		else if (d==NEG_INFINITY || d==POS_INFINITY) return Interval::EMPTY_SET;
+	else return x.itv+d;
 }
-
 
 inline Interval operator-(const Interval& x, double d) {
 	if (x.is_empty()) return x;
-		else if (d==NEG_INFINITY || d==POS_INFINITY) return Interval::EMPTY_SET;
-	else {
-		Interval r(x);
-		r -= d;
-		return r;
-	}
+	else if (d==NEG_INFINITY || d==POS_INFINITY) return Interval::EMPTY_SET;
+	else return x.itv-d;
 }
 
 inline Interval operator*(const Interval& x, double d) {
 	if (x.is_empty()) return x;
-		else if (d==NEG_INFINITY || d==POS_INFINITY) return Interval::EMPTY_SET;
-	else {
-		Interval r(x);
-		r *= d;
-		return r;
-	}
+	else if (d==NEG_INFINITY || d==POS_INFINITY) return Interval::EMPTY_SET;
+	else return x.itv*d;
 }
 
 inline Interval operator/(const Interval& x, double d) {
 	if (x.is_empty()) return x;
-		else if (d==NEG_INFINITY || d==POS_INFINITY) return Interval::EMPTY_SET;
-	else {
-		Interval r(x);
-		r /= d;
-		return r;
-	}
+	else if (d==0 || d==NEG_INFINITY || d==POS_INFINITY) return Interval::EMPTY_SET;
+	else return x.itv/INTERVAL(d);
 }
 
 inline Interval operator+(double d,const Interval& x) {
@@ -443,12 +352,8 @@ inline Interval operator+(double d,const Interval& x) {
 
 inline Interval operator-(double d, const Interval& x) {
 	if (x.is_empty()) return x;
-		else if (d==NEG_INFINITY || d==POS_INFINITY) return Interval::EMPTY_SET;
-	else {
-		Interval r(d);
-		r -= x;
-		return r;
-	}
+	else if (d==NEG_INFINITY || d==POS_INFINITY) return Interval::EMPTY_SET;
+	else return d-x.itv;
 }
 
 inline Interval operator*(double d, const Interval& x) {
@@ -465,21 +370,15 @@ inline Interval operator/(double d, const Interval& x) {
 inline Interval operator+(const Interval& x1, const Interval& x2) {
 	if (x1.is_empty() || x2.is_empty())
 		return Interval::EMPTY_SET;
-	else {
-		Interval r(x1);
-		r += x2;
-		return r;
-	}
+	else
+		return x1.itv+x2.itv;
 }
 
 inline Interval operator-(const Interval& x1, const Interval& x2) {
 	if (x1.is_empty() || x2.is_empty())
 		return Interval::EMPTY_SET;
-	else{
-		Interval r(x1);
-		r -= x2;
-		return r;
-	}
+	else
+		return x1.itv-x2.itv;
 }
 
 /*
@@ -505,234 +404,228 @@ inline Interval operator/(const Interval& x, const Interval& y) {
 
 inline Interval sqr(const Interval& x) {
 	if (x.is_empty()) return Interval::EMPTY_SET;
-	else {
-		double a1=x.lb(), a2=x.ub();
-		if ((a1>=0)||(a2<=0))   return Interval(DIRECT_INTERVAL(previous_float_mod(a1*a1),next_float_mod(a2*a2)));
-		if (fabs(a1)>fabs(a2))  return Interval(0,next_float_mod(a1*a1));
-		else                    return Interval(0,next_float_mod(a2*a2));
-	}
+	else return Sqr(x.itv);
 }
 
 inline Interval sqrt(const Interval& x) {
 	if (x.is_empty()) return Interval::EMPTY_SET;
+
+	INTERVAL r;
+
 	if (x.ub()<0) return Interval::EMPTY_SET;
-	if (x.lb()>=0)  return (Interval(previous_float_mod(::sqrt(x.lb())),next_float_mod(::sqrt(x.ub()))));
-	else return (Interval(0,next_float_mod(::sqrt(x.ub()))));
+	else {
+		if (x.lb()<0) {
+			BiasSqrt (Bias(r), Bias(INTERVAL(0.0, x.ub())));
+			return r;
+		}
+		else {
+			BiasSqrt (Bias(r), Bias(x.itv));
+			return r;
+		}
+	}
 }
 
 inline Interval pow(const Interval& x, int n) {
 	if (x.is_empty()) return Interval::EMPTY_SET;
-	else if (n==0)	  return Interval::ONE;
-	else if (n<0)	  return 1.0/pow(x,-n);
-	else if (n==1)	  return x;
+	else if (n==0)	return Interval::ONE;
+	else if (n<0)	return 1.0/pow(x,-n);
+	else if (n==1)	return x;
 	else if (n%2!=0) {
 	// there are bugs with negative x
 	// such as Power([-2,3],3)->[-18,27])
-		if (x.ub()<0)
-			return -pow(-x,n);
-		else if (x.lb()<0)
-			return Interval(DIRECT_INTERVAL(previous_float_mod(-(::pow(-x.lb(),n))),next_float_mod(::pow(x.ub(),n))));
-		else
-			return Interval(DIRECT_INTERVAL(previous_float_mod((::pow(x.lb(),n))),next_float_mod((::pow(x.ub(),n)))));
+		if (x.ub()<0) return -Power(-x.itv,n);
+		else if (x.lb()<0) return Interval(Inf(-Power(INTERVAL(-x.lb(),-x.lb()),n)),
+										   Sup( Power(INTERVAL(x.ub(), x.ub()),n)));
+		else return Power(x.itv,n);
 	}
-	else {
-		double a1, a2;
-		if (fabs(x.lb())> fabs(x.ub())) {
-			a1 = x.ub() ; a2 = x.lb();
-		} else {
-			a1 = x.lb() ; a2 = x.ub();
-		}
-		if (a1*a2<0) return Interval(0,::pow(a2,n));
-		else return Interval(DIRECT_INTERVAL(previous_float_mod(::pow(a1,n)),next_float_mod(::pow(a2,n))));
-	}
+	else return Power(x.itv,n);
 }
 
 inline Interval pow(const Interval& x, double d) {
-	if(d==NEG_INFINITY || d==POS_INFINITY)
-		return Interval::EMPTY_SET;
-	else if (d==0)
-		return Interval::ONE;
-	else if (d<0)
-		return 1.0/pow(x,-d);
-	else
-		return pow(x,Interval(d));
+	if (x.is_empty()) return Interval::EMPTY_SET;
+	else return Power(x.itv,d);
 }
 
 inline Interval pow(const Interval &x, const Interval &y) {
 	if (x.is_empty()) return Interval::EMPTY_SET;
-	else return exp(y * log(x));
+	else return Power(x.itv,y.itv);
 }
 
-inline Interval root(const Interval& x, int den) {
+inline Interval root(const Interval& x, int n) {
 	if (x.is_empty()) return Interval::EMPTY_SET;
-	if (den>0) {
-		double a1, a2;
-		if (x.lb()> x.ub()) {
-			a1 = x.ub() ; a2 = x.lb();
-		} else {
-			a1 = x.lb() ; a2 = x.ub();
-		}
-		double m=den;
-		if (a1*a2<=0)
-			return Interval(DIRECT_INTERVAL(previous_float_mod(-::pow(fabs(a1),1/m)),next_float_mod(::pow(a2,1/m))));
-		if (a1>0) return Interval(DIRECT_INTERVAL(previous_float_mod(::pow(a1,1/m)),next_float_mod(::pow(a2,1/m))));
-		else return Interval(DIRECT_INTERVAL(previous_float_mod(-::pow(fabs(a1),1/m)),next_float_mod(-::pow(fabs(a2),1/m))));
 
+	INTERVAL r;
+
+	if (x.lb()==0 && x.ub()==0) return Interval::ZERO;
+	if (n==0) return Interval::ONE;
+	if (n<0) return 1.0/root(x,-n);
+	if (n==1) return x;
+	// odd root
+	if (n%2==0) {
+		if (x.ub()<0)
+			return Interval::EMPTY_SET;
+		else
+			if (x.lb()<0) {
+				BiasRoot(Bias(r), Bias(INTERVAL(0.0, x.ub())), n);
+				return r;
+			} else {
+				BiasRoot(Bias(r), Bias(x.itv), n);
+				return r;
+			}
+	} else {
+		// even root
+		if (x.lb()>=0) {
+			BiasRoot(Bias(r), Bias(x.itv), n);
+			return r;
+		}
+		if (x.ub()<=0) {
+			BiasRoot(Bias(r), Bias(-x.itv), n);
+			return -r;
+		}
+		INTERVAL r2;
+		BiasRoot(Bias(r), Bias(INTERVAL(0,-x.lb())), n);
+		BiasRoot(Bias(r2), Bias(INTERVAL(0,+x.ub())), n);
+
+		return Interval(-Sup(r), Sup(r2));
 	}
-	else return Interval(1.0)/root(x,-den);
 }
 
 inline Interval exp(const Interval& x) {
 	if (x.is_empty()) return Interval::EMPTY_SET;
-	else return Interval(DIRECT_INTERVAL(previous_float_mod(::exp(x.lb())),next_float_mod(::exp(x.ub()))));
+	else if (::exp(x.lb())==POS_INFINITY) return Interval(DBL_MAX,POS_INFINITY);
+	else if (::exp(x.ub())==POS_INFINITY) {
+		INTERVAL r;
+		BiasExp(Bias(r), Bias(INTERVAL(x.lb())));
+		return Interval(Inf(r),POS_INFINITY);
+	}
+	else return Exp(x.itv);
 }
 
 inline Interval log(const Interval& x) {
-	if (x.is_empty()) return Interval::EMPTY_SET;
-
-	if (x.ub()<=0)
+	if (x.is_empty() || x.ub()<0)
 		return Interval::EMPTY_SET;
-	else {
-		Interval b(abs(x));
-		if (x.lb()<0) return Interval(NEG_INFINITY,next_float_mod(::log(x.ub())));
-		return Interval(DIRECT_INTERVAL(previous_float_mod(::log(b.lb())),next_float_mod(::log(b.ub()))));
+	else if (x.ub() == 0)
+		return Interval(NEG_INFINITY,-DBL_MAX);
+	else if (x.lb()<=0) {
+		INTERVAL r;
+		BiasLog (Bias(r), Bias(INTERVAL(x.ub())));
+		return Interval(NEG_INFINITY, Sup(r));
+	} else {
+		INTERVAL r;
+		BiasLog (Bias(r), Bias(x.itv));
+		return r;
 	}
 }
 
+
 inline Interval cos(const Interval& x) {
 	if (x.is_empty()) return Interval::EMPTY_SET;
-	else return sin(x+Interval::HALF_PI);
+	else return Cos(x.itv);
 }
 
 inline Interval sin(const Interval& x) {
 	if (x.is_empty()) return Interval::EMPTY_SET;
-    if (x.ub()==x.lb()) return Interval(::sin(x.lb()));
-    if (x.diam()>Interval::TWO_PI.lb()) return (Interval(-1,1));
-
-    Interval b;
-    //  b = Modulo(x,Interval::TWO_PI.lb());
-    if ((x.lb()>=0)&&(x.lb()<Interval::TWO_PI.ub())) {
-    	b= x;
-    } else {
-    	int k = (long)floorl((x.lb()/Interval::TWO_PI.ub()));
-    	double offset = Interval::TWO_PI.ub() * k;
-    	b =Interval(x.lb()-offset,x.ub()-offset);
-    }
-
-    double sin1,sin2,r1,r2;
-    sin1=::sin(b.lb());   sin2=::sin(b.ub());
-    if ((b.lb() < 3*Interval::HALF_PI.ub())&&(b.ub() > 3*Interval::HALF_PI.ub())) r1=-1.0;
-    else if ((b.lb() < 7*Interval::HALF_PI.ub())&&(b.ub() > 7*Interval::HALF_PI.ub())) r1=-1.0;
-    else r1=((sin1 < sin2)? sin1 : sin2);
-    if ((b.lb() < Interval::HALF_PI.ub())&&(b.ub() > Interval::HALF_PI.ub())) r2=1.0;
-    else if ((b.lb() < 5*Interval::HALF_PI.ub())&&(b.ub() > 5*Interval::HALF_PI.ub())) r2=1.0;
-    else r2=((sin1 > sin2)? sin1 : sin2);
-    return (Interval(-1,1) & Interval(DIRECT_INTERVAL(previous_float_mod(r1),next_float_mod(r2))));
+	else return Sin(x.itv);
 }
 
 inline Interval tan(const Interval& x) {
 	if (x.is_empty()) return Interval::EMPTY_SET;
 
-    if (x.ub()==x.lb()) {
-    	if (x.lb()==Interval::HALF_PI.ub()||x.lb()==-Interval::HALF_PI.ub()) {
-    		return Interval::ALL_REALS;
-    	}
-    	return Interval(::tan(x.lb()));
-    }
-    if (x.diam()>Interval::PI.lb()) return Interval::ALL_REALS;
+	INTERVAL r;
 
-    Interval b;
-    //  b = Modulo(x,Interval::PI.lb());
-    if ((x.lb()>=0)&&(x.lb()<Interval::PI.ub())) {
-    	b= x;
-    } else {
-    	int k = (long)floorl((x.lb()/Interval::PI.ub()));
-    	double offset = Interval::PI.ub() * k;
-    	b =Interval(x.lb()-offset,x.ub()-offset);
-    }
+	Interval nb_period = (x+INTERVAL((x.lb()<0?-1:1)*Interval::PI.lb()/2.0,(x.ub()<0?-1:1)*Interval::PI.ub()/2.0))/Interval::PI;
+	if (nb_period.is_unbounded() ||
+		(((int) nb_period.lb())< ((int) nb_period.ub()))) return Interval(NEG_INFINITY, POS_INFINITY);
 
-    // degenerated case
-    if (b.ub()==b.lb()) {
-    	if (b.lb()==Interval::HALF_PI.ub()||b.lb()==-Interval::HALF_PI.ub()) {
-    		return Interval::ALL_REALS;
-    	}
-    	else return Interval(::tan(b.lb()));
-    }
-    // particular case
-    if (b.lb()<=Interval::HALF_PI.ub() && Interval::HALF_PI.ub()<=b.ub() )
-    	return Interval::ALL_REALS;
-    if (b.lb()<=-Interval::HALF_PI.lb() && -Interval::HALF_PI.lb()<=b.ub() )
-    	return Interval::ALL_REALS;
+	BiasTan (Bias(r), Bias(x.itv));
+	return r;
+}
 
-    // general case
-    return Interval(DIRECT_INTERVAL(previous_float_mod(::tan(b.lb())), next_float_mod(::tan(b.ub()))));
+inline Interval acos(const Interval& x) {
+	if (x.is_empty()) return Interval::EMPTY_SET;
 
+	INTERVAL r;
+
+	if (x.ub()<-1.0 || x.lb()>1.0)
+		return Interval::EMPTY_SET;
+	else {
+		bool minus1=x.lb()<=-1;
+		bool plus1=x.ub()>=1;
+		BiasArcCos(Bias(r), Bias(INTERVAL(minus1?-1:x.lb(), plus1?1:x.ub())));
+		return Interval(plus1?0.0:Inf(r), minus1?Interval::PI.ub():Sup(r));
+	}
+
+}
+
+inline Interval asin(const Interval& x) {
+	if (x.is_empty()) return Interval::EMPTY_SET;
+
+	INTERVAL r;
+
+	if (x.ub()<-1.0 || x.lb()>1.0)
+		return Interval::EMPTY_SET;
+	else {
+		bool minus1=x.lb()<-1;
+		bool plus1=x.ub()>1;
+		BiasArcSin(Bias(r), Bias(INTERVAL(minus1?-1:x.lb(), plus1?1:x.ub())));
+		return Interval(minus1?(-Interval::HALF_PI).lb():Inf(r), plus1?Interval::HALF_PI.ub():Sup(r));
+	}
+}
+
+inline Interval atan(const Interval& x) {
+	if (x.is_empty()) return Interval::EMPTY_SET;
+	else return ArcTan(x.itv);
 }
 
 inline Interval cosh(const Interval& x) {
 	if (x.is_empty()) return Interval::EMPTY_SET;
 	else if (x.ub()==POS_INFINITY) {
 		if (x.lb()<=0) return Interval(1,POS_INFINITY);
-		else return Interval((::cosh(x.lb())),POS_INFINITY);
+		else return Interval(Inf(Cosh(x.lb())),POS_INFINITY);
 	}
 	else if (x.lb()==NEG_INFINITY) {
 		if (x.ub()>=0) return Interval(1,POS_INFINITY);
-		else return Interval((::cosh(x.ub())),POS_INFINITY);
+		else return Interval(Inf(Cosh(x.ub())),POS_INFINITY);
 	}
 	else if (x.lb()>=0)
-		return Interval(DIRECT_INTERVAL((::cosh(x.lb())),next_float_mod(::cosh(x.ub()))));
+		return Interval(Inf(Cosh(x.lb())),Sup(Cosh(x.ub())));
 	else if (x.ub()<=0)
-		return Interval(DIRECT_INTERVAL((::cosh(x.ub())),next_float_mod(::cosh(x.lb()))));
+		return Interval(Inf(Cosh(x.ub())),Sup(Cosh(x.lb())));
 	else
-		return ((fabs(x.lb())> fabs(x.ub())) ? Interval(1,next_float_mod(::cosh(x.lb()))) :Interval(1,next_float_mod(::cosh(x.ub()))));
-}
-
-inline Interval acos(const Interval& x) {
-	if (x.is_empty()||x.ub()<-1.0 || x.lb()>1.0) return Interval::EMPTY_SET;
-	else {
-		return Interval(DIRECT_INTERVAL((x.ub()>=1)? 0.0 : previous_float_mod(::acos(x.ub())), (x.lb()<=-1) ? Interval::PI.ub() : next_float_mod(::acos(x.lb()))));
-	}
-
-}
-
-inline Interval asin(const Interval& x) {
-	if (x.is_empty()||x.ub()<-1.0 || x.lb()>1.0) return Interval::EMPTY_SET;
-	else {
-		return Interval(DIRECT_INTERVAL((x.lb()<-1)? (-Interval::HALF_PI).lb() : previous_float_mod(::asin(x.lb())), (x.ub()>1) ? Interval::HALF_PI.ub() : next_float_mod(::asin(x.ub()))));
-	}
-}
-
-inline Interval atan(const Interval& x) {
-	if (x.is_empty()) return Interval::EMPTY_SET;
-	else return Interval(DIRECT_INTERVAL(previous_float_mod(::atan(x.lb())), next_float_mod(::atan(x.ub()))));
+		return ((fabs(x.lb())> fabs(x.ub())) ? Interval(1,Sup(Cosh(x.lb()))) :Interval(1,Sup(Cosh(x.ub()))));
 }
 
 inline Interval sinh(const Interval& x) {
 	if (x.is_empty()) return Interval::EMPTY_SET;
 	else if (x.lb()==NEG_INFINITY) {
 		if (x.ub()==POS_INFINITY) return Interval::ALL_REALS;
-		else return Interval(NEG_INFINITY, next_float_mod(::sinh(x.ub())));
+		else return Interval(NEG_INFINITY,Sup(Sinh(x.ub())));
 	}
 	else if (x.ub()==POS_INFINITY)
-		return Interval(::sinh(x.lb()),POS_INFINITY);
+		return Interval(Inf(Sinh(x.lb())),POS_INFINITY);
 	else
-		return Interval(DIRECT_INTERVAL(previous_float_mod(::sinh(x.lb())), next_float_mod(::sinh(x.ub()))));
+		return Sinh(x.itv);
 }
 
 inline Interval tanh(const Interval& x) {
 	if (x.is_empty()) return Interval::EMPTY_SET;
 
-	if (x.lb()==NEG_INFINITY) {
+	INTERVAL r;
+
+	if (x.lb()==NEG_INFINITY)
 		if (x.ub()==POS_INFINITY) return Interval(-1, 1);
 		else {
-			return Interval(-1,next_float_mod(::tanh(x.ub())));
+			BiasTanh (Bias(r), Bias(INTERVAL(x.ub())));
+			return Interval(-1,Sup(r));
 		}
-	} else {
+	else {
 		if (x.ub()==POS_INFINITY) {
-			return Interval(::tanh(x.lb()),1);
+			BiasTanh (Bias(r), Bias(INTERVAL(x.lb())));
+			return Interval(Inf(r),1);
 		}
 		else {
-			return  Interval(-1, 1) & Interval(DIRECT_INTERVAL(previous_float_mod(::tanh(x.lb())), next_float_mod(::tanh(x.ub()))));
+			BiasTanh (Bias(r), Bias(x.itv));
+			return r;
 		}
 	}
 }
@@ -741,24 +634,31 @@ inline Interval acosh(const Interval& x) {
 	if (x.is_empty()) return Interval::EMPTY_SET;
 	if (x.ub()<1.0) return Interval::EMPTY_SET;
 
-	return Interval(DIRECT_INTERVAL(previous_float_mod(::acosh((x.lb()<1) ? 1 : x.lb())),next_float_mod(::acosh(x.ub()))));
+
+	INTERVAL r;
+
+	BiasArCosh (Bias(r), Bias(INTERVAL(x.lb()<1?1:x.lb(),x.ub())));
+	return r;
 
 }
 
 inline Interval asinh(const Interval& x) {
 	if (x.is_empty()) return Interval::EMPTY_SET;
-
-	if (x.lb()==NEG_INFINITY) {
+	INTERVAL r;
+	if (x.lb()==NEG_INFINITY)
 		if (x.ub()==POS_INFINITY) return Interval::ALL_REALS;
 		else {
-			return Interval(NEG_INFINITY, ::asinh(x.ub()));
+			BiasArSinh (Bias(r), Bias(INTERVAL(x.ub())));
+			return Interval(NEG_INFINITY,Sup(r));
 		}
-	} else {
+	else {
 		if (x.ub()==POS_INFINITY) {
-			return Interval(::asinh(x.lb()),POS_INFINITY);
+			BiasArSinh (Bias(r), Bias(INTERVAL(x.lb())));
+			return Interval(Inf(r),POS_INFINITY);
 		}
 		else {
-			return Interval(DIRECT_INTERVAL(previous_float_mod(::asinh(x.lb())),next_float_mod(::asinh(x.ub()))));
+			BiasArSinh (Bias(r), Bias(x.itv));
+			return r;
 		}
 	}
 }
@@ -766,35 +666,31 @@ inline Interval asinh(const Interval& x) {
 inline Interval atanh(const Interval& x) {
 	if (x.is_empty()) return Interval::EMPTY_SET;
 
+	INTERVAL r;
 
 	if (x.ub()<-1.0 || x.lb()>1.0)
 		return Interval::EMPTY_SET;
-	else {
-		if (x.lb()<=-1) {
+	else
+		if (x.lb()<=-1)
 			if (x.ub()>=1)
-				return Interval::ALL_REALS;
+				return Interval(NEG_INFINITY, POS_INFINITY);
 			else {
-				return Interval(NEG_INFINITY,next_float_mod(::atanh(x.ub())));
+				BiasArTanh(Bias(r), Bias(INTERVAL(x.ub())));
+				return Interval(NEG_INFINITY,Sup(r));
 			}
-		} else {
+		else
 			if (x.ub()>=1) {
-				return Interval(::atanh(x.lb()), POS_INFINITY);
-			} else {
-				return Interval(DIRECT_INTERVAL(previous_float_mod(::atanh(x.lb())),next_float_mod(::atanh(x.ub()))));
+				BiasArTanh(Bias(r), Bias(INTERVAL(x.lb())));
+				return Interval(Inf(r), POS_INFINITY);
 			}
-		}
-	}
 
+	BiasArTanh (Bias(r), Bias(x.itv));
+	return r;
 }
 
 inline Interval abs(const Interval &x) {
 	if (x.is_empty()) return Interval::EMPTY_SET;
-	else {
-		double a1=x.lb(), a2=x.ub();
-		if ((a1>=0)||(a2<=0))   return Interval(DIRECT_INTERVAL(fabs(a1),fabs(a2)));
-		if (fabs(a1)>fabs(a2))  return Interval(0,fabs(a1));
-		else                    return Interval(0,fabs(a2));
-	}
+	else return IAbs(x.itv);
 }
 
 inline Interval max(const Interval& x, const Interval& y) {
@@ -809,15 +705,15 @@ inline Interval min(const Interval& x, const Interval& y) {
 
 inline Interval integer(const Interval& x) {
 	if (x.is_empty()) return Interval::EMPTY_SET;
-	double l= (x.lb()<=NEG_INFINITY? NEG_INFINITY : ceil(x.lb()));
-	double r= (x.ub()>=POS_INFINITY? POS_INFINITY : floor(x.ub()));
+	double l=x.lb()==NEG_INFINITY? NEG_INFINITY : ceil(x.lb());
+	double r=x.ub()==POS_INFINITY? POS_INFINITY : floor(x.ub());
 	if (l>r) return Interval::EMPTY_SET;
 	else return Interval(l,r);
 }
 
 inline bool bwd_mul(const Interval& y, Interval& x1, Interval& x2) {
 	if (y.contains(0)) {
-		if (!x2.contains(0))                           // if y and x2 contains 0, x1 can be any double number.
+		if (!x2.contains(0))                           // if y and x2 contains 0, x1 can be any real number.
 			if (x1.div2_inter(y,x2).is_empty()) { x2.set_empty(); return false; }  // otherwise y=x1*x2 => x1=y/x2
 		if (x1.contains(0)) return true;
 		if (x2.div2_inter(y,x1).is_empty()) { x1.set_empty(); return false; }
@@ -860,7 +756,7 @@ inline bool bwd_pow(const Interval& y, int expon, Interval& x) {
 }
 
 inline bool bwd_pow(const Interval& , Interval& , Interval& ) {
-	not_implemented("warning: bwd_power(y,x1,x2) (with x1 and x2 intervals) not implemented yet with DIRECT");
+	not_implemented("warning: bwd_power(y,x1,x2) (with x1 and x2 intervals) not implemented yet with BIAS");
 	return true;
 }
 
@@ -994,4 +890,4 @@ inline bool bwd_abs(const Interval& y,  Interval& x) {
 
 } // end namespace
 
-#endif /* _IBEX_BIAS_DIRECT_INTERVAL_H_ */
+#endif /* _IBEX_BIAS_INTERVAL_H_ */

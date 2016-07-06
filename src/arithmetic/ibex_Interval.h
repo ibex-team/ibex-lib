@@ -869,16 +869,16 @@ bool bwd_imod(Interval& x, Interval& y, const double& p);
 } // end namespace ibex
 
 #ifdef _IBEX_WITH_GAOL_
-#include "ibex_gaol_Interval.h_"
+#include "ibex_Interval_gaol.h_"
 #else
 #ifdef _IBEX_WITH_BIAS_
-#include "ibex_bias_Interval.h_"
+#include "ibex_Interval_bias.h_"
 #else
 #ifdef _IBEX_WITH_FILIB_
-#include "ibex_filib_Interval.h_"
+#include "ibex_Interval_filib.h_"
 #else
 #ifdef _IBEX_WITH_DIRECT_
-#include "ibex_direct_Interval.h_"
+#include "ibex_Interval_direct.h_"
 #endif
 #endif
 #endif
