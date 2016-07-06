@@ -133,7 +133,6 @@ def configure (conf):
 
 		if with_bias:
 			conf.env.append_unique ("INCLUDES", join (with_bias, "include"))
-			conf.env.append_unique ("INCLUDES_IBEX_DEPS", join (with_bias, "include"))
 
 		conf.check_cxx (header_name	= "BIAS/BiasF.h")
 
@@ -150,7 +149,6 @@ def configure (conf):
 
 		if with_filib:
 			conf.env.append_unique ("INCLUDES", join (with_filib, "include"))
-			conf.env.append_unique ("INCLUDES_IBEX_DEPS", join (with_filib, "include"))
 
 		has_h = conf.check_cxx (
 				header_name	= "interval/interval.hpp",
@@ -181,7 +179,6 @@ def configure (conf):
 		conf.switch_to_32bits()
 		if with_gaol:
 			conf.env.append_unique ("INCLUDES", join (with_gaol, "include"))
-			conf.env.append_unique ("INCLUDES_IBEX_DEPS", join (with_gaol, "include"))
 			
 		mandatory = bool (with_gaol)
 
