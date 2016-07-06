@@ -12,29 +12,30 @@
 #ifndef __TEST_CTC_DOUBLEHEAP_H__
 #define __TEST_CTC_DOUBLEHEAP_H__
 
-#include "cpptest.h"
-#include "utils.h"
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
 #include "ibex_DoubleHeap.h"
+#include "utils.h"
+
 
 namespace ibex {
 
+class TestDoubleHeap : public CppUnit::TestFixture {
 
-class TestDoubleHeap : public TestIbex {
 public:
-	TestDoubleHeap() {
 
-		TEST_ADD(TestDoubleHeap::test01);
-		TEST_ADD(TestDoubleHeap::test02);
-                TEST_ADD(TestDoubleHeap::test03);
-	}
-
+	CPPUNIT_TEST_SUITE(TestDoubleHeap);
+	CPPUNIT_TEST(test01);
+	CPPUNIT_TEST(test02);
+	CPPUNIT_TEST(test03);
+	CPPUNIT_TEST_SUITE_END();
 
 	void test01();
 	void test02();
-        void test03();
+	void test03();
 };
 
-
+CPPUNIT_TEST_SUITE_REGISTRATION(TestDoubleHeap);
 
 
 } // namespace ibex
