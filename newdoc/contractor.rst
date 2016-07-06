@@ -221,7 +221,7 @@ If:
   \exists [x]\in\mathbb{IR}^n,\exists [y]\in\mathbb{IR}^n, \quad \forall j\!\neq\!i \ [x]_j=[y]_j \wedge
   \left\{\begin{array}{l}
   C([x])_i\neq[x]_i \vee\\
-  C([y])_i\neq[y]_j \vee\\
+  C([y])_i\neq[y]_i \vee\\
   \exists j\!\neq\!i \ C([x])_j\neq C([y])_j
   \end{array}\right.
 
