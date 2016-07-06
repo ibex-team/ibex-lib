@@ -79,9 +79,8 @@
 
 		DIRECT_INTERVAL(void) : inf(0), sup(0), isEmpty(true) {}
 		DIRECT_INTERVAL(double a, double b) {
-			if (a==POS_INFINITY || b==NEG_INFINITY)
+			if (a==POS_INFINITY || b==NEG_INFINITY || a>b )
 			                 {inf = 0; sup = 0; isEmpty=true; }
-			else if  (a>=b)  {inf = b; sup = a; isEmpty=false;}
 			else             {inf = a; sup = b; isEmpty=false;}
 		}
 
@@ -870,16 +869,16 @@ bool bwd_imod(Interval& x, Interval& y, const double& p);
 } // end namespace ibex
 
 #ifdef _IBEX_WITH_GAOL_
-#include "ibex_gaol_Interval.h_"
+#include "ibex_Interval_gaol.h_"
 #else
 #ifdef _IBEX_WITH_BIAS_
-#include "ibex_bias_Interval.h_"
+#include "ibex_Interval_bias.h_"
 #else
 #ifdef _IBEX_WITH_FILIB_
-#include "ibex_filib_Interval.h_"
+#include "ibex_Interval_filib.h_"
 #else
 #ifdef _IBEX_WITH_DIRECT_
-#include "ibex_direct_Interval.h_"
+#include "ibex_Interval_direct.h_"
 #endif
 #endif
 #endif
@@ -924,6 +923,7 @@ inline Interval& Interval::operator=(double x) {
 		itv = x;
 	return *this;
 }
+
 
 
 inline Interval& Interval::operator=(const Interval& x) {

@@ -25,6 +25,17 @@ public:
 
 	CPPUNIT_TEST_SUITE(TestArith);
 	
+		CPPUNIT_TEST(float01);
+		CPPUNIT_TEST(float02);
+		CPPUNIT_TEST(float03);
+		CPPUNIT_TEST(float04);
+		CPPUNIT_TEST(float05);
+		CPPUNIT_TEST(float06);
+		CPPUNIT_TEST(float07);
+		CPPUNIT_TEST(float08);
+		CPPUNIT_TEST(float09);
+		CPPUNIT_TEST(float10);
+
 
 		CPPUNIT_TEST(minus01);
 		CPPUNIT_TEST(minus02);
@@ -42,6 +53,12 @@ public:
 		CPPUNIT_TEST(add09);
 		CPPUNIT_TEST(add10);
 		CPPUNIT_TEST(add11);
+		CPPUNIT_TEST(add12);
+		CPPUNIT_TEST(add13);
+		CPPUNIT_TEST(add14);
+		CPPUNIT_TEST(add15);
+		CPPUNIT_TEST(add16);
+		CPPUNIT_TEST(add17);
 
 		CPPUNIT_TEST(mul01);
 		CPPUNIT_TEST(mul02);
@@ -103,6 +120,21 @@ public:
 		CPPUNIT_TEST(log04);
 		CPPUNIT_TEST(log05);
 		CPPUNIT_TEST(log06);
+		CPPUNIT_TEST(log07);
+		CPPUNIT_TEST(log08);
+		CPPUNIT_TEST(log09);
+		CPPUNIT_TEST(log10);
+		CPPUNIT_TEST(log11);
+
+		CPPUNIT_TEST(exp01);
+		CPPUNIT_TEST(exp02);
+		CPPUNIT_TEST(exp03);
+		CPPUNIT_TEST(exp04);
+		CPPUNIT_TEST(exp05);
+		CPPUNIT_TEST(exp06);
+		CPPUNIT_TEST(exp07);
+		CPPUNIT_TEST(exp08);
+		CPPUNIT_TEST(exp09);
 
 		CPPUNIT_TEST(sin01);
 		CPPUNIT_TEST(sin02);
@@ -317,6 +349,21 @@ public:
 		CPPUNIT_TEST(bwd_imod_08);
 	CPPUNIT_TEST_SUITE_END();
 private:
+	/* test:
+	 * =======
+	 * previous_float(double x)
+	 * next_float(double x)
+	 */
+	void float01();
+	void float02();
+	void float03();
+	void float04();
+	void float05();
+	void float06();
+	void float07();
+	void float08();
+	void float09();
+	void float10();
 
 	/* test: operator&=(const Interval& x) */
 	void minus01();
@@ -348,6 +395,12 @@ private:
 	void add09();
 	void add10();
 	void add11();
+	void add12();
+	void add13();
+	void add14();
+	void add15();
+	void add16();
+	void add17();
 
 	/* test:
 	 * =======
@@ -432,6 +485,21 @@ private:
 	void log04();
 	void log05();
 	void log06();
+	void log07();
+	void log08();
+	void log09();
+	void log10();
+	void log11();
+
+	void exp01();
+	void exp02();
+	void exp03();
+	void exp04();
+	void exp05();
+	void exp06();
+	void exp07();
+	void exp08();
+	void exp09();
 
 	/* test:
 	 * sin
@@ -482,6 +550,7 @@ private:
 	void sqrt03();
 	void sqrt04();
 	void sqrt05();
+	void sqrt06();
 
 	void sinh01();
 	void sinh02();
