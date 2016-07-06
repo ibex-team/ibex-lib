@@ -7,7 +7,7 @@
 // Created     : May 21, 2015
 //============================================================================
 
-#include "TestQInter.h"
+#include "TestQInter2.h"
 #include "ibex_Function.h"
 #include "ibex_QInter2.h"
 
