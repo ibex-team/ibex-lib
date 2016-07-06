@@ -7,7 +7,7 @@ from distutils.version import LooseVersion
 from waflib import Logs, Scripting
 
 # the following two variables are used by the target "waf dist"
-VERSION="2.1.12"
+VERSION="2.3.0"
 APPNAME='ibex-lib'
 
 top = '.'
