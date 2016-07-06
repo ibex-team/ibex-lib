@@ -163,7 +163,7 @@ void TestDoubleHeap::test02() {
         CPPUNIT_ASSERT(h.size()==0);
 }
 
-void test03() {
+void TestDoubleHeap::test03() {
 
     int nb= 10;
     TestCostFunc2 costf2;
@@ -178,9 +178,9 @@ void test03() {
 
     DoubleHeap<Interval> newh(h);
 
-    while (h.nb_nodes > 0) {
-        CPPUNIT_ASSERT(*h.top1 == *newh.top1);
-        CPPUNIT_ASSERT(*h.top2 == *newh.top2);
+    while (h.size() > 0) {
+        CPPUNIT_ASSERT(h.top1() == newh.top1());
+        CPPUNIT_ASSERT(h.top2() == newh.top2());
         h.pop1();
         newh.pop1();
 
