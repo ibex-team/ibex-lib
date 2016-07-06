@@ -129,8 +129,7 @@ Dim Dim::index_dim(const DoubleIndex& idx) const {
 			case MATRIX: return col_vec(nb_rows());
 			case COL_VECTOR: return *this;
 			case ROW_VECTOR:
-			case SCALAR:
-			default: return scalar();
+			case SCALAR: return scalar();
 			}
 		} else {
 			if (is_matrix()) return matrix(nb_rows(),idx.nb_cols());
@@ -142,8 +141,7 @@ Dim Dim::index_dim(const DoubleIndex& idx) const {
 			case MATRIX: return row_vec(nb_cols());
 			case ROW_VECTOR: return *this;
 			case COL_VECTOR:
-			case SCALAR:
-			default: return scalar();
+			case SCALAR: return scalar();
 			}
 		} else if (idx.one_col())
 			return scalar();
@@ -170,11 +168,10 @@ Dim Dim::index_dim(const DoubleIndex& idx) const {
 
 Dim Dim::transpose_dim() const {
 	switch (type()) {
+	case SCALAR:       return scalar();
 	case ROW_VECTOR:   return col_vec(vec_size());
 	case COL_VECTOR:   return row_vec(vec_size());
 	case MATRIX:       return matrix(nb_cols(),nb_rows());
-	case SCALAR:
-	default:       return scalar();
 	}
 }
 
