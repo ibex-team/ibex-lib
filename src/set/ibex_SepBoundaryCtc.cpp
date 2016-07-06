@@ -1,5 +1,5 @@
 //============================================================================
-//                                  I B E X                                   
+//                                  I B E X
 // File        : ibex_SepBoundaryCtc.h
 // Author      : Gilles Chabert, Benoit Desrochers
 // Copyright   : Ecole des Mines de Nantes (France)
@@ -14,7 +14,7 @@ namespace ibex {
 
 const int SepBoundaryCtc::NB_SAMPLES = 1;
 
-SepBoundaryCtc::SepBoundaryCtc(Ctc& _ctc_boundary, Pdc& _is_inside) : ctc_boundary(_ctc_boundary), is_inside(_is_inside) {
+SepBoundaryCtc::SepBoundaryCtc(Ctc& _ctc_boundary, Pdc& _is_inside) : Sep(_is_inside.nb_var), ctc_boundary(_ctc_boundary), is_inside(_is_inside) {
 
 }
 
