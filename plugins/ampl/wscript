@@ -68,7 +68,15 @@ def configure (conf):
 		conf.env.append_unique ("LIB_IBEX_DEPS", ["amplsolver","dl"])
 
 		conf.find_program ("make")
-		cmd = "./configurehere "
+		amplcflag = "-O "
+		
+		if  (conf.env.INTERVAL_LIB is "GAOL") :
+			amplcflag += " -DNo_dtoa -m32 "
+               
+		if conf.env.ENABLE_SHARED :
+			amplcflag += " -fpic "
+
+		cmd = "CFLAGS=\""+amplcflag+ "\" ./configurehere "
 
 		if conf.exec_command (cmd, cwd=ampl_dir.abspath(), stdout=None, stderr=None):
 			conf.fatal ("Failed to configure AMPL (%s)" % cmd)
@@ -95,10 +103,11 @@ def build (bld):
 		path = bld.path.get_bld().find_dir (bld.env.AMPL).abspath()
 
 		with ibexutils.subdir (path):
-			if  (bld.env["INTERVAL_LIB"] is "GAOL") :
-				cmd = ["clean"] if bld.cmd in ("clean", "uninstall") else ["CFLAGS=-DNo_dtoa -m32"]
-			else:
-				cmd = ["clean"] if bld.cmd in ("clean", "uninstall") else []
+			cmd = []
+			if bld.cmd in ("clean", "uninstall") :
+				cmd = ["clean"] 
+			elif bld.env.ENABLE_SHARED :
+				cmd =["shared"]
 			
 			if bld.exec_command (
 				[bld.env.MAKE, "-j", str(bld.options.jobs)] + cmd,
@@ -111,9 +120,13 @@ def build (bld):
 			if bld.cmd=="install":
 				if not os.path.exists(bld.env.LIBDIR):
 					os.makedirs(bld.env.LIBDIR)
-				shutil.copyfile(os.path.join(path,"libamplsolver.a"),os.path.join(bld.env.LIBDIR,"libamplsolver.a"))
+				if bld.env.ENABLE_SHARED :
+					shutil.copyfile(os.path.join(path,"libamplsolver.so"),os.path.join(bld.env.LIBDIR,"libamplsolver.so"))
+				else :
+					shutil.copyfile(os.path.join(path,"libamplsolver.a"),os.path.join(bld.env.LIBDIR,"libamplsolver.a"))
 			elif  bld.cmd in ("clean", "uninstall"):
 				os.remove(os.path.join(bld.env.LIBDIR,"libamplsolver.a"))
+				os.remove(os.path.join(bld.env.LIBDIR,"libamplsolver.so"))
 
 		bld.variant = ""
 
