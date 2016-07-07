@@ -279,13 +279,13 @@ void TestArith::check_trigo(const Interval& x, const Interval& sin_x_expected) {
 void TestArith::log01() { check(log(Interval::EMPTY_SET), Interval::EMPTY_SET); }
 void TestArith::log02() { check(log(Interval::ALL_REALS), Interval::ALL_REALS); }
 void TestArith::log03() { check(log(Interval::POS_REALS), Interval::ALL_REALS); }
-void TestArith::log04() { check(log(Interval::NEG_REALS),  Interval(NEG_INFINITY,-DBL_MAX)); }
+void TestArith::log04() { check(log(Interval::NEG_REALS),  Interval::EMPTY_SET); /*Interval(NEG_INFINITY,-DBL_MAX));*/ }
 void TestArith::log05() { check(log(Interval(1,2)),       Interval(0,::log(2))); }
 void TestArith::log06() { check(log(Interval(-1,1)),      Interval(NEG_INFINITY,0)); }
 void TestArith::log07() { CPPUNIT_ASSERT((log(Interval(0,next_float(0)))).ub()> -744.5); }
 void TestArith::log08() { check(log(Interval(0,1)),       Interval(NEG_INFINITY,0)); }
 void TestArith::log09() { check(log(Interval(1,POS_INFINITY)), Interval::POS_REALS); }
-void TestArith::log10() { check(log(Interval(0)), Interval(NEG_INFINITY,-DBL_MAX)); }
+void TestArith::log10() { check(log(Interval(0)), Interval::EMPTY_SET); /* Interval(NEG_INFINITY,-DBL_MAX)); */ }
 void TestArith::log11() { check(log(Interval(-2,-1)), Interval::EMPTY_SET); }
 
 void TestArith::exp01() { check(exp(Interval::EMPTY_SET), Interval::EMPTY_SET); }

@@ -586,19 +586,20 @@ inline Interval root(const Interval& x, int den) {
 
 inline Interval exp(const Interval& x) {
 	if (x.is_empty()) return Interval::EMPTY_SET;
+
+	// [gch] This block is unecessary I think
 	else if (::exp(x.lb())>= DBL_MAX)
 		return Interval(DBL_MAX,POS_INFINITY);
 	else if (::exp(x.ub())==POS_INFINITY)
 		return Interval(previous_float_mod(::exp(x.lb())),POS_INFINITY);
+	// =======================================
+
 	else return Interval(DIRECT_INTERVAL(previous_float_mod(::exp(x.lb())),next_float_mod(::exp(x.ub()))));
 }
 
 inline Interval log(const Interval& x) {
-	if (x.is_empty()) return Interval::EMPTY_SET;
-	else if (x.ub()<0) // filib returns (-oo,-DBL_MAX) if x.ub()==0, instead of EMPTY_SET
+	if (x.is_empty() || x.ub()<=0)
 		return Interval::EMPTY_SET;
-	else if (x.ub() == 0)
-		return Interval(NEG_INFINITY,-DBL_MAX);
 	else {
 		Interval b(abs(x));
 		if (x.lb()<0) return Interval(NEG_INFINITY,next_float_mod(::log(x.ub())));

@@ -19,7 +19,6 @@
 
 namespace ibex {
 
-
 /**
  * \ingroup arithmetic
  *
@@ -442,8 +441,6 @@ public:
      * \brief Cast the matrix to an expression
      */
     operator const ExprConstant&() const;
-
-
 
 private:
 

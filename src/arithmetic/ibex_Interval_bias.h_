@@ -502,10 +502,8 @@ inline Interval exp(const Interval& x) {
 }
 
 inline Interval log(const Interval& x) {
-	if (x.is_empty() || x.ub()<0)
+	if (x.is_empty() || x.ub()<=0)
 		return Interval::EMPTY_SET;
-	else if (x.ub() == 0)
-		return Interval(NEG_INFINITY,-DBL_MAX);
 	else if (x.lb()<=0) {
 		INTERVAL r;
 		BiasLog (Bias(r), Bias(INTERVAL(x.ub())));

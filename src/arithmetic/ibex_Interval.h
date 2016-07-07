@@ -65,7 +65,9 @@
 	#define IBEX_NAN filib::primitive::compose(0,0x7FF,1 << 19,0)
 #else
 #ifdef _IBEX_WITH_DIRECT_
-
+	// TODO: [gch] 1.0/0.0 is ugly, why not using
+	// std::numeric_limits<T>::infinity()
+	// instead?
 	/** \brief NEG_INFINITY: double representation of -oo */
 	#define NEG_INFINITY (-(1.0/0.0))
 	/** \brief POS_INFINITY: double representation of +oo */
