@@ -9,13 +9,13 @@
  * ---------------------------------------------------------------------------- */
 
 
-#ifndef __TEST_AFFINE_H__
-#define __TEST_AFFINE_H__
+#ifndef __TEST_AFFINE_ARITH_H__
+#define __TEST_AFFINE_ARITH_H__
 
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include "ibex_Interval.h"
-#include "ibex_Affine2.h"
+#include "ibex_Affine.h"
 #include "utils.h"
 #include <string>
 #include <iostream>
@@ -25,9 +25,9 @@
 using namespace ibex;
 
 template<class T>
-class TestAffine : public CppUnit::TestFixture {
+class TestAffineArith : public CppUnit::TestFixture {
 public:
-	CPPUNIT_TEST_SUITE(TestAffine<T>);
+	CPPUNIT_TEST_SUITE(TestAffineArith<T>);
 	CPPUNIT_TEST(test01);
 	CPPUNIT_TEST(test02);
 	CPPUNIT_TEST(test03);
@@ -133,7 +133,7 @@ public:
 
 	typedef enum { EQUALITY, INCLUSION, INCLUSION_TIGHT, INTERSECTION } comp_t;
 
-	bool compare_results (comp_t c, Interval r, Affine2Main<T>  a) ;
+	bool compare_results (comp_t c, Interval r, AffineMain<T>  a) ;
 
 
 	void test01();
@@ -239,8 +239,19 @@ public:
 	void test101();
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestAffine<AF_fAFFullI>);
+CPPUNIT_TEST_SUITE_REGISTRATION(TestAffineArith<AF_Default>);
+CPPUNIT_TEST_SUITE_REGISTRATION(TestAffineArith<AF_Other>);
 
-//#include "TestAffine.cpp"
+#ifdef _IBEX_WITH_AFFINE_EXTENDED_
+
+CPPUNIT_TEST_SUITE_REGISTRATION(TestAffineArith<AF_fAF2>);
+CPPUNIT_TEST_SUITE_REGISTRATION(TestAffineArith<AF_fAFFullI>);
+CPPUNIT_TEST_SUITE_REGISTRATION(TestAffineArith<AF_iAF>);
+CPPUNIT_TEST_SUITE_REGISTRATION(TestAffineArith<AF_fAF1>);
+CPPUNIT_TEST_SUITE_REGISTRATION(TestAffineArith<AF_No>);
+CPPUNIT_TEST_SUITE_REGISTRATION(TestAffineArith<AF_sAF>);
+
+#endif
+//#include "TestAffineArith.cpp"
 
 #endif

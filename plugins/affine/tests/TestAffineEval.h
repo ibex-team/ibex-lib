@@ -14,15 +14,15 @@
 
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
-#include "ibex_Affine2.h"
+#include "ibex_Affine.h"
 #include "utils.h"
 
 using namespace ibex;
 
 template<class T>
-class TestAffine2 : public CppUnit::TestFixture {
+class TestAffineEval : public CppUnit::TestFixture {
 public:
-	CPPUNIT_TEST_SUITE(TestAffine2<T>);
+	CPPUNIT_TEST_SUITE(TestAffineEval<T>);
 	CPPUNIT_TEST(test_sqrt);
 	CPPUNIT_TEST(test_exp);
 	CPPUNIT_TEST(test_log);
@@ -74,9 +74,22 @@ public:
 
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION(TestAffine2<AF_Linear>);
+CPPUNIT_TEST_SUITE_REGISTRATION(TestAffineEval<AF_Default>);
+CPPUNIT_TEST_SUITE_REGISTRATION(TestAffineEval<AF_Other>);
 
 
-//#include "TestAffine2.cpp"
+
+#ifdef _IBEX_WITH_AFFINE_EXTENDED_
+
+CPPUNIT_TEST_SUITE_REGISTRATION(TestAffineEval<AF_fAF2>);
+CPPUNIT_TEST_SUITE_REGISTRATION(TestAffineEval<AF_fAFFullI>);
+CPPUNIT_TEST_SUITE_REGISTRATION(TestAffineEval<AF_iAF>);
+CPPUNIT_TEST_SUITE_REGISTRATION(TestAffineEval<AF_fAF1>);
+CPPUNIT_TEST_SUITE_REGISTRATION(TestAffineEval<AF_No>);
+CPPUNIT_TEST_SUITE_REGISTRATION(TestAffineEval<AF_sAF>);
+
+#endif
+
+//#include "TestAffineEval.cpp"
 
 #endif

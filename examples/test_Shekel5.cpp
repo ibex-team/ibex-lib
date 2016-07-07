@@ -65,12 +65,12 @@ int main() {
 	{
 		double time=0;
 		Timer::start();
-		Affine2Main<AF_No> x[4];
+		AffineMain<AF_No> x[4];
 		for (int l=0; l<4;l++){
-			x[l]= Affine2Main<AF_No>(4,l+1,Interval(4));
+			x[l]= AffineMain<AF_No>(4,l+1,Interval(4));
 		}
 
-		Affine2Main<AF_No> f, z;
+		AffineMain<AF_No> f, z;
 		for (int k =0; k<n; k++){
 			f= 0;
 			for (int i=0; i<5; i++) {
@@ -83,17 +83,17 @@ int main() {
 		}
 		Timer::stop();
 		time+= Timer::VIRTUAL_TIMELAPSE();
-		cout<< "Affine2 No Rounding: " << time << " s" << endl;
+		cout<< "Affine No Rounding: " << time << " s" << endl;
 	}
 	{
 		double time=0;
 		Timer::start();
-		Affine2Main<AF_sAF> x[4];
+		AffineMain<AF_sAF> x[4];
 		for (int l=0; l<4;l++){
-			x[l]= Affine2Main<AF_sAF>(4,l+1,Interval(4));
+			x[l]= AffineMain<AF_sAF>(4,l+1,Interval(4));
 		}
 
-		Affine2Main<AF_sAF> f, z;
+		AffineMain<AF_sAF> f, z;
 		for (int k =0; k<n; k++){
 			f= 0;
 			for (int i=0; i<5; i++) {
@@ -106,17 +106,17 @@ int main() {
 		}
 		Timer::stop();
 		time+= Timer::VIRTUAL_TIMELAPSE();
-		cout<< "Affine2 sAF: " << time << " s" << endl;
+		cout<< "Affine sAF: " << time << " s" << endl;
 	}
 	{
 		double time=0;
 		Timer::start();
-		Affine2Main<AF_iAF> x[4];
+		AffineMain<AF_iAF> x[4];
 		for (int l=0; l<4;l++){
-			x[l]= Affine2Main<AF_iAF>(4,l+1,Interval(4));
+			x[l]= AffineMain<AF_iAF>(4,l+1,Interval(4));
 		}
 
-		Affine2Main<AF_iAF> f, z;
+		AffineMain<AF_iAF> f, z;
 		for (int k =0; k<n; k++){
 			f= 0;
 			for (int i=0; i<5; i++) {
@@ -129,42 +129,18 @@ int main() {
 		}
 		Timer::stop();
 		time+= Timer::VIRTUAL_TIMELAPSE();
-		cout<< "Affine2 iAF: " << time << " s" << endl;
-	}
-
-	{
-		double time=0;
-		Timer::start();
-		Affine2Main<AF_fAF1> x[4];
-		for (int l=0; l<4;l++){
-			x[l]= Affine2Main<AF_fAF1>(4,l+1,Interval(4));
-		}
-
-		Affine2Main<AF_fAF1> f, z;
-		for (int k =0; k<n; k++){
-			f= 0;
-			for (int i=0; i<5; i++) {
-				z= 0;
-				for (int j=0; j<4; j++) {
-					z += pow((x[j]-a[i][j]),2);
-				}
-				f -= 1/(z+c[i]);
-			}
-		}
-		Timer::stop();
-		time+= Timer::VIRTUAL_TIMELAPSE();
-		cout<< "Affine2 fAF version 1: " << time << " s" << endl;
+		cout<< "Affine iAF: " << time << " s" << endl;
 	}
 
 	{
 		double time=0;
 		Timer::start();
-		Affine2Main<AF_fAF2> x[4];
+		AffineMain<AF_fAF1> x[4];
 		for (int l=0; l<4;l++){
-			x[l]= Affine2Main<AF_fAF2>(4,l+1,Interval(4));
+			x[l]= AffineMain<AF_fAF1>(4,l+1,Interval(4));
 		}
 
-		Affine2Main<AF_fAF2> f, z;
+		AffineMain<AF_fAF1> f, z;
 		for (int k =0; k<n; k++){
 			f= 0;
 			for (int i=0; i<5; i++) {
@@ -177,18 +153,18 @@ int main() {
 		}
 		Timer::stop();
 		time+= Timer::VIRTUAL_TIMELAPSE();
-		cout<< "Affine2 fAF version 2: " << time << " s" << endl;
+		cout<< "Affine fAF version 1: " << time << " s" << endl;
 	}
 
 	{
 		double time=0;
 		Timer::start();
-		Affine2Main<AF_fAF2_fma> x[4];
+		AffineMain<AF_fAF2> x[4];
 		for (int l=0; l<4;l++){
-			x[l]= Affine2Main<AF_fAF2_fma>(4,l+1,Interval(4));
+			x[l]= AffineMain<AF_fAF2>(4,l+1,Interval(4));
 		}
 
-		Affine2Main<AF_fAF2_fma> f, z;
+		AffineMain<AF_fAF2> f, z;
 		for (int k =0; k<n; k++){
 			f= 0;
 			for (int i=0; i<5; i++) {
@@ -201,7 +177,31 @@ int main() {
 		}
 		Timer::stop();
 		time+= Timer::VIRTUAL_TIMELAPSE();
-		cout<< "Affine2 fAF version 2 with fma option: " << time << " s" << endl;
+		cout<< "Affine fAF version 2: " << time << " s" << endl;
+	}
+
+	{
+		double time=0;
+		Timer::start();
+		AffineMain<AF_fAF2_fma> x[4];
+		for (int l=0; l<4;l++){
+			x[l]= AffineMain<AF_fAF2_fma>(4,l+1,Interval(4));
+		}
+
+		AffineMain<AF_fAF2_fma> f, z;
+		for (int k =0; k<n; k++){
+			f= 0;
+			for (int i=0; i<5; i++) {
+				z= 0;
+				for (int j=0; j<4; j++) {
+					z += pow((x[j]-a[i][j]),2);
+				}
+				f -= 1/(z+c[i]);
+			}
+		}
+		Timer::stop();
+		time+= Timer::VIRTUAL_TIMELAPSE();
+		cout<< "Affine fAF version 2 with fma option: " << time << " s" << endl;
 	}
 
 	cout<< "-----------------------------------------------------------" << endl;
@@ -229,12 +229,12 @@ int main() {
 	{
 		double time=0;
 		Timer::start();
-		Affine2Main<AF_No> x[4];
+		AffineMain<AF_No> x[4];
 		for (int l=0; l<4;l++){
-			x[l]= Affine2Main<AF_No>(4,l+1,Interval(3.9,4.1));
+			x[l]= AffineMain<AF_No>(4,l+1,Interval(3.9,4.1));
 		}
 
-		Affine2Main<AF_No> f, z;
+		AffineMain<AF_No> f, z;
 		for (int k =0; k<n; k++){
 			f= 0;
 			for (int i=0; i<5; i++) {
@@ -247,17 +247,17 @@ int main() {
 		}
 		Timer::stop();
 		time+= Timer::VIRTUAL_TIMELAPSE();
-		cout<< "Affine2 No Rounding: " << time << " s, eval = "<< f << endl;
+		cout<< "Affine No Rounding: " << time << " s, eval = "<< f << endl;
 	}
 	{
 		double time=0;
 		Timer::start();
-		Affine2Main<AF_sAF> x[4];
+		AffineMain<AF_sAF> x[4];
 		for (int l=0; l<4;l++){
-			x[l]= Affine2Main<AF_sAF>(4,l+1,Interval(3.9,4.1));
+			x[l]= AffineMain<AF_sAF>(4,l+1,Interval(3.9,4.1));
 		}
 
-		Affine2Main<AF_sAF> f, z;
+		AffineMain<AF_sAF> f, z;
 		for (int k =0; k<n; k++){
 			f= 0;
 			for (int i=0; i<5; i++) {
@@ -270,17 +270,17 @@ int main() {
 		}
 		Timer::stop();
 		time+= Timer::VIRTUAL_TIMELAPSE();
-		cout<< "Affine2 sAF: " << time << " s, eval = "<< f << endl;
+		cout<< "Affine sAF: " << time << " s, eval = "<< f << endl;
 	}
 	{
 		double time=0;
 		Timer::start();
-		Affine2Main<AF_iAF> x[4];
+		AffineMain<AF_iAF> x[4];
 		for (int l=0; l<4;l++){
-			x[l]= Affine2Main<AF_iAF>(4,l+1,Interval(3.9,4.1));
+			x[l]= AffineMain<AF_iAF>(4,l+1,Interval(3.9,4.1));
 		}
 
-		Affine2Main<AF_iAF> f, z;
+		AffineMain<AF_iAF> f, z;
 		for (int k =0; k<n; k++){
 			f= 0;
 			for (int i=0; i<5; i++) {
@@ -293,42 +293,18 @@ int main() {
 		}
 		Timer::stop();
 		time+= Timer::VIRTUAL_TIMELAPSE();
-		cout<< "Affine2 iAF: " << time << " s, eval = "<< f << endl;
-	}
-
-	{
-		double time=0;
-		Timer::start();
-		Affine2Main<AF_fAF1> x[4];
-		for (int l=0; l<4;l++){
-			x[l]= Affine2Main<AF_fAF1>(4,l+1,Interval(3.9,4.1));
-		}
-
-		Affine2Main<AF_fAF1> f, z;
-		for (int k =0; k<n; k++){
-			f= 0;
-			for (int i=0; i<5; i++) {
-				z= 0;
-				for (int j=0; j<4; j++) {
-					z += pow((x[j]-a[i][j]),2);
-				}
-				f -= 1/(z+c[i]);
-			}
-		}
-		Timer::stop();
-		time+= Timer::VIRTUAL_TIMELAPSE();
-		cout<< "Affine2 fAF version 1: " << time << " s, eval = "<< f << endl;
+		cout<< "Affine iAF: " << time << " s, eval = "<< f << endl;
 	}
 
 	{
 		double time=0;
 		Timer::start();
-		Affine2Main<AF_fAF2> x[4];
+		AffineMain<AF_fAF1> x[4];
 		for (int l=0; l<4;l++){
-			x[l]= Affine2Main<AF_fAF2>(4,l+1,Interval(3.9,4.1));
+			x[l]= AffineMain<AF_fAF1>(4,l+1,Interval(3.9,4.1));
 		}
 
-		Affine2Main<AF_fAF2> f, z;
+		AffineMain<AF_fAF1> f, z;
 		for (int k =0; k<n; k++){
 			f= 0;
 			for (int i=0; i<5; i++) {
@@ -341,18 +317,18 @@ int main() {
 		}
 		Timer::stop();
 		time+= Timer::VIRTUAL_TIMELAPSE();
-		cout<< "Affine2 fAF version 2: " << time << " s, eval = "<< f << endl;
+		cout<< "Affine fAF version 1: " << time << " s, eval = "<< f << endl;
 	}
 
 	{
 		double time=0;
 		Timer::start();
-		Affine2Main<AF_fAF2_fma> x[4];
+		AffineMain<AF_fAF2> x[4];
 		for (int l=0; l<4;l++){
-			x[l]= Affine2Main<AF_fAF2_fma>(4,l+1,Interval(3.9,4.1));
+			x[l]= AffineMain<AF_fAF2>(4,l+1,Interval(3.9,4.1));
 		}
 
-		Affine2Main<AF_fAF2_fma> f, z;
+		AffineMain<AF_fAF2> f, z;
 		for (int k =0; k<n; k++){
 			f= 0;
 			for (int i=0; i<5; i++) {
@@ -365,7 +341,31 @@ int main() {
 		}
 		Timer::stop();
 		time+= Timer::VIRTUAL_TIMELAPSE();
-		cout<< "Affine2 fAF version 2 with fma option: " << time << " s, eval = "<< f << endl;
+		cout<< "Affine fAF version 2: " << time << " s, eval = "<< f << endl;
+	}
+
+	{
+		double time=0;
+		Timer::start();
+		AffineMain<AF_fAF2_fma> x[4];
+		for (int l=0; l<4;l++){
+			x[l]= AffineMain<AF_fAF2_fma>(4,l+1,Interval(3.9,4.1));
+		}
+
+		AffineMain<AF_fAF2_fma> f, z;
+		for (int k =0; k<n; k++){
+			f= 0;
+			for (int i=0; i<5; i++) {
+				z= 0;
+				for (int j=0; j<4; j++) {
+					z += pow((x[j]-a[i][j]),2);
+				}
+				f -= 1/(z+c[i]);
+			}
+		}
+		Timer::stop();
+		time+= Timer::VIRTUAL_TIMELAPSE();
+		cout<< "Affine fAF version 2 with fma option: " << time << " s, eval = "<< f << endl;
 	}
 
 

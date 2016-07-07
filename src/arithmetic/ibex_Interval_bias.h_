@@ -284,7 +284,7 @@ inline double Interval::mid() const {
 }
 
 inline bool Interval::is_empty() const {
-	return ub()==NEG_INFINITY; //*this==EMPTY_SET;
+	return (ub()==NEG_INFINITY || lb()==POS_INFINITY); //*this==EMPTY_SET;
 }
 
 inline bool Interval::is_degenerated() const {
@@ -492,27 +492,31 @@ inline Interval root(const Interval& x, int n) {
 
 inline Interval exp(const Interval& x) {
 	if (x.is_empty()) return Interval::EMPTY_SET;
+	else if (::exp(x.lb())==POS_INFINITY) return Interval(DBL_MAX,POS_INFINITY);
+	else if (::exp(x.ub())==POS_INFINITY) {
+		INTERVAL r;
+		BiasExp(Bias(r), Bias(INTERVAL(x.lb())));
+		return Interval(Inf(r),POS_INFINITY);
+	}
 	else return Exp(x.itv);
 }
 
 inline Interval log(const Interval& x) {
-	if (x.is_empty()) return Interval::EMPTY_SET;
-
-	INTERVAL r;
-
-	if (x.ub()<=0)
-		return Interval::EMPTY_SET; // REM: maybe should compute [-inf, -inf] with [_,0]
-	else {
-		if (x.lb()<=0) {
-			BiasLog (Bias(r), Bias(INTERVAL(x.ub())));
-			return Interval(NEG_INFINITY, Sup(r));
-		}
-		else {
-			BiasLog (Bias(r), Bias(x.itv));
-			return r;
-		}
+	if (x.is_empty() || x.ub()<0)
+		return Interval::EMPTY_SET;
+	else if (x.ub() == 0)
+		return Interval(NEG_INFINITY,-DBL_MAX);
+	else if (x.lb()<=0) {
+		INTERVAL r;
+		BiasLog (Bias(r), Bias(INTERVAL(x.ub())));
+		return Interval(NEG_INFINITY, Sup(r));
+	} else {
+		INTERVAL r;
+		BiasLog (Bias(r), Bias(x.itv));
+		return r;
 	}
 }
+
 
 inline Interval cos(const Interval& x) {
 	if (x.is_empty()) return Interval::EMPTY_SET;
