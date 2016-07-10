@@ -285,11 +285,18 @@ inline Interval pow(const Interval &x, const Interval &y) {
 }
 
 inline Interval root(const Interval& x, int n) {
-	Interval res;
-	if (n>=0)
-		res=gaol::nth_root(x.itv,n);
-	else
-		res=1.0/gaol::nth_root(x.itv,-n);
+
+	// get the root of the positive part (gaol does
+	// not consider negative values to be in the definition
+	// domain of the root function)
+	gaol::interval res = gaol::nth_root(x.itv,n>=0? n : -n);
+
+	if (n%2==1 && x.lb()<0) {
+		res |= -gaol::nth_root(-x.itv,n>=0? n : -n);
+	}
+
+	if (n<0) res = 1.0/res;
+
 	fpu_round_up();
 	return res;
 }

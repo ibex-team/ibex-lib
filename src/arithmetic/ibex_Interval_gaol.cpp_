@@ -18,7 +18,12 @@ namespace ibex {
  * It is very unsafe to define the interval constants as follows
  * because of the "static initialization order fiasco".
  *
+ *
+//#if GAOL_MAJOR_VERSION==4
+//const Interval Interval::EMPTY_SET(gaol::interval::emptyset());
+//#else
 //const Interval Interval::EMPTY_SET(gaol::interval::emptyset);
+//#endif
 //const Interval Interval::ALL_REALS(gaol::interval::universe);
 //const Interval Interval::NEG_REALS(gaol::interval::negative);
 //const Interval Interval::POS_REALS(gaol::interval::positive);
