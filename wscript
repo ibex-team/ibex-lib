@@ -52,24 +52,6 @@ def options (opt):
 
 def configure (conf):
 
-	def switch_to_32bits():
-		env = conf.env
-		if env.DEST_CPU == "x86_64":
-			if env.COMPILER_CC == "gcc" and env.COMPILER_CXX == "g++":
-				# fall-back to 32bits
-				Logs.pprint ("YELLOW", "Warning: x86_64 is not supported with GAOL, we will build IBEX for i386 instead")
-				
-				for var in ("CFLAGS", "LINKFLAGS", "CXXFLAGS","CXXFLAGS_IBEX_DEPS"):
-					env.append_unique (var, "-m32")
-
-				conf.check_cc (cflags = "-m32")
-				conf.check_cxx (cxxflags = "-m32")
-			else:
-				conf.fatal ("64bit platform are not supported")
-
-	conf.switch_to_32bits = switch_to_32bits
-
-
 	env = conf.env
 	conf.load ('compiler_cxx compiler_c bison')
 	conf.load ('flex')
@@ -77,10 +59,6 @@ def configure (conf):
 	conf.env.LIBDIR = conf.env['PREFIX'] + '/lib'
 
 	env.VERSION = VERSION
-
-	# GAOL cannot be built on 64-bit cpu
-	if conf.options.GAOL_PATH is not None:
-		switch_to_32bits()
 
 	# optimised compilation flags
 	if conf.options.DEBUG:

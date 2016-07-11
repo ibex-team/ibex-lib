@@ -99,7 +99,6 @@ def configure (conf):
 			
 			if (has_h and has_l):
 				with_any = True
-				conf.switch_to_32bits()
 				conf.env.INTERVAL_LIB = "GAOL"
 				Logs.pprint ("BLUE","The Interval arithmetic is the installed version of GAOL")
 				
@@ -178,7 +177,6 @@ def configure (conf):
 		conf.env.INTERVAL_LIB = "GAOL"
 
 		mandatory = bool (with_gaol)
-		conf.switch_to_32bits()
 		if with_gaol:
 			conf.env.append_unique ("INCLUDES", join (with_gaol, "include"))
 			conf.env.append_unique ("INCLUDES_IBEX_DEPS", join (with_gaol, "include"))
@@ -217,7 +215,6 @@ def configure (conf):
 		conf.env.GAOL = "gaol-3.1.1"
 
 		conf.load ("compiler_cxx compiler_cc")
-		conf.switch_to_32bits()
 
 		# check if we need to build gdtoa and/or mathlib
 		if use_shlib():
@@ -379,7 +376,6 @@ def configure (conf):
 		gdtoa_includes = conf.env.GDTOA
 
 		conf.load ("compiler_cxx compiler_cc")
-		conf.switch_to_32bits()
 
 		use_shlib()
 
@@ -401,7 +397,6 @@ def configure (conf):
 		conf.env.MATHLIB = "mathlib-2.0.0" if platform != "darwin" else "mathlib-lion"
 		
 		conf.load ("compiler_cxx compiler_cc")
-		conf.switch_to_32bits()
 
 		use_shlib()
 
