@@ -141,6 +141,8 @@ IntervalVector light_solver::get_feasible_point(const IntervalVector& xy_box,y_h
 
 int light_solver::check_constraints(const IntervalVector& box) {
     int res(2);
+    if(y_sys == NULL)
+        return res;
     Interval int_res;
     for(unsigned i=0;i<y_sys->ctrs.size();i++) {
         int_res =  y_sys->ctrs[i].f.eval(box);

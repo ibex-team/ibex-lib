@@ -179,8 +179,8 @@ void TestDoubleHeap::test03() {
     DoubleHeap<Interval> newh(h);
 
     while (h.size() > 0) {
-        CPPUNIT_ASSERT(h.top1() == newh.top1());
-        CPPUNIT_ASSERT(h.top2() == newh.top2());
+        CPPUNIT_ASSERT(*h.top1() == *newh.top1());
+        CPPUNIT_ASSERT(*h.top2() == *newh.top2());
         h.pop1();
         newh.pop1();
 
