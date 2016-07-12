@@ -39,6 +39,7 @@ def build (bld):
 	@bld.rule (
 		target = "ibex_Setting.h",
 		vars   = ["INTERVAL_LIB"],
+		always = True,
 		name   = "ibex_Setting_h_init"  
 	)
 	def _(tsk):
