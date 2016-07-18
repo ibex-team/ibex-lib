@@ -1,7 +1,13 @@
 language: C
-os:
-  - linux
-  - osx
+
+matrix:
+  include:
+    - os: linux
+      compiler: gcc
+    - os: osx
+      compiler: clang
+      osx_image: xcode7.3
+
 matrix:
   allow_failures: # temporary
     - os: osx
