@@ -1,17 +1,29 @@
-language: python
-python:
-  - "2.7"
-# 
+language: C
+os:
+  - linux
+  - osx
+matrix:
+  allow_failures: # temporary
+    - os: osx
+
+# only works on linux
+addons:
+  apt:
+    packages:
+      - python
+      - flex
+      - bison
+      - libcppunit-dev
+
+# need this to install dependencies on osx
 before_install:
-  - sudo apt-get update -q
-  - sudo apt-get install -y --force-yes python2.7 flex bison gcc g++ libcppunit-dev pkg-config coinor-libclp-dev 
-# command to install dependencies
+  - if [ "$TRAVIS_OS_NAME" = "osx" ] ; then brew update ; brew install python flex bison cppunit; fi
+
 install: 
   - cd plugins/optim/; tar xvf soplex-1.7.1.tar && cd soplex-1.7.1 && make install && cd ../../..
   - ./waf configure --with-optim --with-soplex=$PWD/plugins/optim/soplex-1.7.1 --with-affine
   - sudo ./waf install
   - export PKG_CONFIG_PATH=/usr/local/share/pkgconfig/
-#  - cd tests/ && make utest && cd ..
   - cd tests/ && make utest && cd ..
   - cd plugins/optim/tests/ && make nonreg && cd ../../..
 
