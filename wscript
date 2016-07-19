@@ -155,12 +155,12 @@ def build (bld):
 		bld.recurse ("plugins src")
 
 		if bld.env.INSTALL_3RD:
-			incnode = bld.bldnode.make_node("3rd").make_node("include")
+			incnode = bld.bldnode.find_node("3rd").find_node("include")
 			incfiles = incnode.ant_glob ("**")
 			bld.install_files (bld.env.INCDIR_3RD, incfiles, cwd = incnode,
 				relative_trick = True)
 
-			libnode = bld.bldnode.make_node("3rd").make_node("lib")
+			libnode = bld.bldnode.find_node("3rd").find_node("lib")
 			libfiles = libnode.ant_glob ("**")
 			bld.install_files (bld.env.LIBDIR_3RD, libfiles, cwd = libnode,
 				relative_trick = True)
