@@ -56,7 +56,7 @@ def options (opt):
 	help_string += " (default value is " + str(default_interval_lib) + ")"
 
 	# add the option --with-interval-lib
-	opt.add_option ("--with-interval-lib", action="store", dest="XX_INTERVAL_LIB",
+	opt.add_option ("--with-interval-lib", action="store", dest="INTERVAL_LIB",
                   choices = list_of_interval_lib_plugin,
 									default = default_interval_lib, help = help_string)
 
@@ -121,9 +121,9 @@ def configure (conf):
 	conf.env.append_unique ("LIBPATH", ["src"])
 
 	# recurse on the interval library directory
-	# TODO assert conf.options.XX_INTERVAL_LIB is not None or fatal.error
-	conf.msg ("Library for interval arithmetic", conf.options.XX_INTERVAL_LIB)
-	itvlib_dir = ITVLIB_PLUGIN_PREFIX + conf.options.XX_INTERVAL_LIB
+	# TODO assert conf.options.INTERVAL_LIB is not None or fatal.error
+	conf.msg ("Library for interval arithmetic", conf.options.INTERVAL_LIB)
+	itvlib_dir = ITVLIB_PLUGIN_PREFIX + conf.options.INTERVAL_LIB
 	conf.recurse (os.path.join(PLUGINS_DIR, itvlib_dir))
 
 	# set settings to the empty dict (everything put in this dict will be written

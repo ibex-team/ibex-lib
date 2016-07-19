@@ -20,7 +20,7 @@ def options (opt):
 def configure (conf):
 	# If this configure is called, it means that the library was chosen, so no
 	# tests are needed, let's configure it.
-	conf.env["XX_INTERVAL_LIB"] = "GAOL"
+	conf.env["INTERVAL_LIB"] = "GAOL"
 	if conf.options.GAOL_PATH != "":
 		gaol_dir = conf.options.GAOL_PATH
 		conf.msg ("Using library gaol from", gaol_dir)

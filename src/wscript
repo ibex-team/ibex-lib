@@ -29,8 +29,8 @@ def configure (conf):
 	conf.env.settings['_IBEX_RELEASE_'] = "\""+conf.env['VERSION']+"\""
 
 	# Add info on the interval library used to the settings
-	conf.env.settings['_IBEX_WITH_%s_' % conf.env['XX_INTERVAL_LIB']] = "1"
-	conf.env.settings['_INTERVAL_LIB_'] = "\""+conf.env['XX_INTERVAL_LIB']+"\""
+	conf.env.settings['_IBEX_WITH_%s_' % conf.env['INTERVAL_LIB']] = "1"
+	conf.env.settings['_INTERVAL_LIB_'] = "\""+conf.env['INTERVAL_LIB']+"\""
 
 	# Generate header file containing Ibex settings
 	bldnode = conf.path.get_bld()
