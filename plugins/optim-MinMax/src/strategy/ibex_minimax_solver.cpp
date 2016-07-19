@@ -104,7 +104,8 @@ void minimax_solver::solve(IntervalVector x_box_ini, IntervalVector y_box_ini, d
                 nb_iter = choose_nbiter(true);   // need to be great enough so the minimum precision on y is reached
                 cout<<"fmax ini: "<<x_subcells[i]->fmax<<endl;
                 x_subcells[i]->fmax = lsolve.optimize(&(x_subcells[i]->y_heap),&(midp),x_sys->goal,nb_iter,loup,x_subcells[i]->fmax,prec_y,false); // eval maxf(midp,heap_copy), go to minimum prec on y to get a thin enclosure
-                if(x_subcells[i]->fmax.is_empty()){
+                cout<<"fmax min prec: "<<x_subcells[i]->fmax<<endl;
+                if(!x_subcells[i]->fmax.is_empty()){
                     if(minprec_uplo>x_subcells[i]->fmax.lb())
                         minprec_uplo = x_subcells[i]->fmax.lb();
                 }

@@ -88,6 +88,12 @@ Interval light_solver::optimize(DoubleHeap<y_heap_elem> * y_heap,IntervalVector*
             //********************************************
 
             subcells[j]->pf = objective_function->eval(xy_box_ctc); // objective function evaluation
+            if((subcells[j]->pf.lb()>best_max) && (subcells[j]->pu == 1)){ // box verified condition and eval is above best max, x box does not contains the solution
+                delete subcells[j];
+                if(j==0)
+                    delete subcells[j+1]; // have to delete the other subcell, it is not in y_heap hence will not be deleted when flushing y_heap in minimax_solver
+                return Interval::EMPTY_SET; // no need to go further, x_box does not contains the solution
+            }
             if(subcells[j]->pf.ub()<uplo) {  // y_box cannot contains max f(x,y)
                 delete subcells[j];
                 continue;
@@ -108,8 +114,12 @@ Interval light_solver::optimize(DoubleHeap<y_heap_elem> * y_heap,IntervalVector*
 
 
     loup = y_heap->top1()->pf.ub(); // get the upper bound of max f(x,y_heap)
-    if(uplo<y_heap->top2()->pf.lb())
+
+    if(uplo<y_heap->top2()->pf.lb()) // no midpoint verified the constraints, get a inferior bound from the second heap
         uplo = y_heap->top2()->pf.lb();
+
+    if(uplo>best_max)
+        return Interval::EMPTY_SET;
 
     return Interval(uplo,loup);
 
