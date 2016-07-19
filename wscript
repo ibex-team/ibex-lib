@@ -13,7 +13,6 @@ top = '.'
 out = '__build__'
 
 ITVLIB_PLUGIN_PREFIX = "interval_lib_"
-PLUGINS_DIR = "plugins"
 
 ######################
 ###### options #######
@@ -35,7 +34,7 @@ def options (opt):
 			help = "enable debugging")
 
 	# get the list of all possible interval library
-	plugin_node = opt.path.make_node(PLUGINS_DIR)
+	plugin_node = opt.path.make_node("plugins")
 	libdir = plugin_node.ant_glob(ITVLIB_PLUGIN_PREFIX+"*", dir=True, src=False)
 	libdir = [ os.path.basename(str(d)) for d in libdir ]
 	list_of_interval_lib_plugin = [ d[len(ITVLIB_PLUGIN_PREFIX):] for d in libdir]
@@ -57,18 +56,18 @@ def options (opt):
 
 	# add the option --with-interval-lib
 	opt.add_option ("--with-interval-lib", action="store", dest="INTERVAL_LIB",
-                  choices = list_of_interval_lib_plugin,
+									choices = list_of_interval_lib_plugin,
 									default = default_interval_lib, help = help_string)
 
 	# recurse on plugins directory
-	opt.recurse(PLUGINS_DIR)
+	opt.recurse("plugins")
 
 ######################
 ##### configure ######
 ######################
 def configure (conf):
 	conf.load ('compiler_cxx compiler_c bison flex')
-	
+
 	conf.prepare_env(conf.env)
 
 	# Set LIBDIR and INCDIR, set them in env and put them in *_IBEX_DEPS
@@ -84,12 +83,8 @@ def configure (conf):
 	# Did we used 3rd party software ? If true we need to install them.
 	conf.env.INSTALL_3RD = False
 
-	## TODO (or already done by prepare_env ?)
-	# conf.add_os_flags(CXXFLAGS) and for other environment variables
-
-	# set opt.env.PLUGINS_DIR (or the node ??? to "plugins")
+	# Set env variable with the prefix of plugins which handle interval arithmetic
 	conf.env.ITVLIB_PLUGIN_PREFIX = ITVLIB_PLUGIN_PREFIX
-	# set opt.env.BUILD_DIR
 
 	# put useful variables in conf.env
 	conf.env.VERSION = VERSION
@@ -132,7 +127,7 @@ def configure (conf):
 		conf.fatal ("No interval library is available.")
 	conf.msg ("Library for interval arithmetic", conf.options.INTERVAL_LIB)
 	itvlib_dir = ITVLIB_PLUGIN_PREFIX + conf.options.INTERVAL_LIB
-	conf.recurse (os.path.join(PLUGINS_DIR, itvlib_dir))
+	conf.recurse (os.path.join("plugins", itvlib_dir))
 
 	# Add info on the interval library used to the settings
 	conf.env.settings['_IBEX_WITH_%s_' % conf.env['INTERVAL_LIB']] = "1"
@@ -180,7 +175,7 @@ def distclean (ctx):
 ####### dist #########
 ######################
 def dist (ctx):
-  files_patterns = "wscript benchs/** src/** examples/** waf"
-  files_patterns += " COPYING.LESSER LICENSE ibexutils.py"
-  files_patterns += " plugins/wscript plugins/interval_lib_gaol/"
-  ctx.files = ctx.path.ant_glob(files_patterns)
+	files_patterns = "wscript benchs/** src/** examples/** waf"
+	files_patterns += " COPYING.LESSER LICENSE ibexutils.py"
+	files_patterns += " plugins/wscript plugins/interval_lib_gaol/"
+	ctx.files = ctx.path.ant_glob(files_patterns)

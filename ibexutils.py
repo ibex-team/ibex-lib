@@ -7,7 +7,7 @@ from waflib.Configure import conf, WAF_CONFIG_LOG
 def get_dirlist (node):
 	folders = node.ant_glob('*',dir=True,src=False)
 	return [ os.path.basename(str(f)) for f in folders ]
-	
+
 def archive_name_without_suffix (archive):
 	suffixes = [".tar.gz", ".tgz", ".tar" ]
 	if any(archive.endswith (suffix) for suffix in suffixes):
@@ -23,7 +23,7 @@ def extract_archive (conf, archive_path, name, destdir):
 	path = os.path.join (destdir, name)
 
 	conf.start_msg("Extracting %s" % os.path.basename(archive_path))
-	
+
 	if not os.path.isdir (path): # if not already extracted
 		# extract the sources
 		os.makedirs (path)
@@ -47,7 +47,7 @@ def extract_archive (conf, archive_path, name, destdir):
 def unpack_archive (src_dir_node, name, filename = None, dest_dir_node = None):
 	if not dest_dir_node:
 		dest_dir_node = src_dir_node
-		
+
 
 	src_dir = src_dir_node.abspath()
 
@@ -55,7 +55,7 @@ def unpack_archive (src_dir_node, name, filename = None, dest_dir_node = None):
 
 	# path is the destination folder where the file is extracted 
 	path = os.path.join (dest_dir, name)
-	
+
 	if not os.path.isdir (path): # if not already extracted
 		# extract the sources
 		os.makedirs (path)
@@ -65,11 +65,11 @@ def unpack_archive (src_dir_node, name, filename = None, dest_dir_node = None):
 
 		Logs.pprint ("NORMAL", "Unpacking %s" % filename)
 		t = tarfile.open (os.path.join (src_dir, filename))
-		
+
 		t.extractall (dest_dir)
-	
+
 	node = dest_dir_node.find_dir (name)
-	
+
 	assert node
 	return node
 

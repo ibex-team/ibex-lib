@@ -5,12 +5,15 @@ import ibexutils
 import shutil, os
 
 def configure (conf):
-	# add all subdirectories of "ibex/src" in the includes
+	# Add all subdirectories of the 'src' directory in srcnode and bldnode in the
+	# includes
 	subdir = ibexutils.get_dirlist (conf.path)
-	abspath_src = conf.srcnode.abspath()
+	snode = conf.srcnode.make_node ("src")
+	bnode = conf.bldnode.make_node ("src")
 	for p in subdir:
-	  conf.env.append_unique ("INCLUDES", os.path.join(abspath_src, "src", p))
-	
+		conf.env.append_unique ("INCLUDES", snode.make_node(p).abspath())
+		conf.env.append_unique ("INCLUDES", bnode.make_node(p).abspath())
+
 	# Set env variable containing the list of all ibex source files (by looking
 	# recursively for all files ending with '.cpp' or '.yc' o '.l')
 	ibex_src = conf.path.ant_glob ("**/*.(cpp|yc|l)")
@@ -38,7 +41,7 @@ def configure (conf):
 		value = conf.env.settings[key]
 		setting_node.write("#define " + key + " " + value + "\n", flags="a")
 	setting_node.write("#endif\n", flags = "a")
-	
+
 	# Generate the main ibex header which includes all the others headers
 	header_filename = "ibex.h"
 	header_node = bldnode.make_node (header_filename)
@@ -57,18 +60,14 @@ def configure (conf):
 	conf.env.append_unique ("INCLUDES", setting_node.parent.abspath())
 
 def build (bld):
-
-	# add "__build__/src/parser" in the includes, this is where parser.tab.hh is stored
-	bld.env.append_unique("INCLUDES", os.path.join(bld.bldnode.abspath(),"src/parser"))
-	
 	# c++ compilation of main lib
 	tg_ibex = (bld.shlib if bld.env.ENABLE_SHARED else bld.stlib) (
 		target = "ibex",
 		use  = bld.env.IBEX_DEPS,
 		source = bld.env.IBEX_SRC,
 		install_path = bld.env.LIBDIR,
-    lib = bld.env.IBEX_LIBS
-	)	
+		lib = bld.env.IBEX_LIBS
+	)
 
 	# install headers
 	bld.install_files (bld.env.INCDIR, bld.env.IBEX_HDR)
@@ -90,7 +89,7 @@ def build (bld):
 			source = "../plugins/java/src/ibex_Java.cpp",
 			use = "JAVA ibex",
 			install_path = bld.env.LIBDIR,
-		)	
+		)
 
 	# pkg-config file
 	@bld.rule (
@@ -109,7 +108,7 @@ def build (bld):
 		outstr += "\nName: ibex\n"
 		outstr += "Description: A C++ library for interval-based algorithm design\n"
 		outstr += "Version: %s\n" % task.env.VERSION
-		
+
 		outstr += "Cflags:"
 		for d in task.env.INCLUDES_IBEX_DEPS:
 			if os.path.isabs (d):
