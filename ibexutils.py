@@ -28,8 +28,9 @@ def extract_archive (conf, archive_path, name, destdir):
 		# extract the sources
 		os.makedirs (path)
 
-		t = tarfile.open (os.path.join (archive_path))
+		t = tarfile.open (archive_path)
 		t.extractall (destdir)
+		t.close()
 		conf.end_msg("done")
 	else:
 		conf.end_msg("destination already exists", color = 'YELLOW')

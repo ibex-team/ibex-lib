@@ -1,0 +1,57 @@
+#! /usr/bin/env python
+# encoding: utf-8
+
+import ibexutils
+import os, sys
+from waflib import Logs
+
+######################
+###### options #######
+######################
+def options (opt):
+	grp_name = "Filib options (when --with-interval-lib=filib is used)"
+	grp = opt.add_option_group (grp_name)
+	grp.add_option ("--filib-dir", action="store", type="string", dest="FILIB_PATH", default = "", help = "location of the Filib lib and include directories (by default use the one in 3rd directory)")
+	grp.add_option ("--disable-sse2", action="store_true", dest="DISABLE_SSE2", default = False, help = "do not use SSE2 optimizations")
+
+######################
+##### configure ######
+######################
+def configure (conf):
+	# If this configure is called, it means that the library was chosen, so no
+	# tests are needed, let's configure it.
+	conf.env["INTERVAL_LIB"] = "FILIB"
+	if conf.options.FILIB_PATH != "":
+		filib_dir = conf.options.FILIB_PATH
+		conf.msg ("Using library filib from", filib_dir)
+		filib_include = os.path.join (filib_dir, "include")
+		filib_lib = os.path.join (filib_dir, "lib")
+		conf.env.append_unique ("INCLUDES_IBEX_DEPS", filib_include)
+		conf.env.append_unique ("LIBPATH_IBEX_DEPS", filib_lib)
+	else:
+		conf.msg ("Using library filib from", "3rd/ subdirectory")
+		filib_archive = "filibsrc-3.0.2.2.tar.gz"
+		filib_ret = conf.configure_3rd_party_with_autotools (filib_archive)
+		filib_include, filib_lib = filib_ret
+		conf.env.append_unique ("INCLUDES_IBEX_DEPS", conf.env.INCDIR_3RD)
+		conf.env.append_unique ("LIBPATH_IBEX_DEPS", conf.env.LIBDIR_3RD)
+		conf.env.INSTALL_3RD = True
+
+	conf.env.append_unique ("INCLUDES", filib_include)
+	conf.env.append_unique ("LIBPATH", filib_lib)
+
+	# Test that the installation of filib worked or that filib can be found
+	# with conf.options.FILIB_PATH.
+	conf.check_cxx (header_name = "interval/interval.hpp", uselib_store="FILIB")
+	conf.check_cxx (lib = "prim", uselib_store = "FILIB")
+	conf.env.append_unique ("IBEX_DEPS", ["FILIB"])
+	conf.env.prepend_value ("LIB_IBEX_DEPS", "prim")
+
+	# XXX: Why are these flags necessary ?
+	for f in ["-frounding-math", "-ffloat-store"]:
+		conf.check_cxx (cxxflags=f, uselib_store="IBEX_DEPS")
+	# Add SSE2 flags if not explicitely disabled and if supported
+	if not conf.options.DISABLE_SSE2:
+		f = ["-msse2", "-mfpmath=sse"]
+		conf.check_cxx (cxxflags=f, uselib_store="IBEX_DEPS", mandatory = False)
+
