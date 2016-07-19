@@ -45,5 +45,4 @@ def build (bld):
 	# Add information in ibex_Setting
 	bld.env.settings['_IBEX_WITH_AFFINE_']='1'
 	
-	INCDIR  = "${PREFIX}/include/ibex"	
-	bld.install_files (INCDIR, bld.path.ant_glob ("src/**/ibex_*.h_"))
+	bld.install_files (bld.env.INCDIR, bld.path.ant_glob ("src/**/ibex_*.h_"))

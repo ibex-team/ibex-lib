@@ -1,0 +1,107 @@
+#! /usr/bin/env python
+# encoding: utf-8
+
+import ibexutils
+import os, sys
+from waflib import Logs
+
+######################
+###### options #######
+######################
+def options (opt):
+	grp_name = "Gaol options (when --with-interval-lib=gaol is used)"
+	grp = opt.add_option_group (grp_name)
+	grp.add_option ("--gaol-dir", action="store", type="string", dest="GAOL_PATH", default = "", help = "location of the Gaol lib and include directories (by default use the one in 3rd directory)")
+	grp.add_option ("--mathlib-dir", action="store", type="string", dest="MATHLIB_PATH", default = "", help = "location of the Mathlib/ultim lib and include directories (by default use the one in 3rd directory)")
+
+######################
+##### configure ######
+######################
+def configure (conf):
+	# If this configure is called, it means that the library was chosen, so no
+	# tests are needed, let's configure it.
+	conf.env["XX_INTERVAL_LIB"] = "GAOL"
+	if conf.options.GAOL_PATH != "":
+		gaol_dir = conf.options.GAOL_PATH
+		conf.msg ("Using library gaol from", gaol_dir)
+		if conf.options.MATHLIB_PATH != "":
+			Logs.warn ("Option --mathlib-dir is not used when --gaol-dir is given")
+		gaol_include = os.path.join (gaol_dir, "include")
+		gaol_lib = os.path.join (gaol_dir, "lib")
+		conf.env.append_unique ("INCLUDES_IBEX_DEPS", gaol_include)
+		conf.env.append_unique ("LIBPATH_IBEX_DEPS", gaol_lib)
+	else:
+		conf.msg ("Using library gaol from", "3rd/ subdirectory")
+		# First, deal with mathlib/libultim
+		if conf.options.MATHLIB_PATH != "":
+			mathlib_dir = conf.options.MATHLIB_PATH
+			conf.msg("Using library mathlib/ultim from", mathlib_dir)
+			mathlib_include = os.path.join (mathlib_dir, "include")
+			mathlib_lib = os.path.join (mathlib_dir, "lib")
+			conf.env.append_unique ("INCLUDES_IBEX_DEPS", mathlib_include)
+			conf.env.append_unique ("LIBPATH_IBEX_DEPS", mathlib_lib)
+		else:
+			conf.msg("Using library mathlib/ultim from", "3rd/ subdirectory")
+			mathlib_archive = "mathlib-2.1.0.tar.gz"
+			mathlib_ret = conf.configure_3rd_party_with_autotools (mathlib_archive)
+			mathlib_include, mathlib_lib = mathlib_ret
+			conf.env.append_unique ("INCLUDES_IBEX_DEPS", conf.env.INCDIR_3RD)
+			conf.env.append_unique ("LIBPATH_IBEX_DEPS", conf.env.LIBDIR_3RD)
+			conf.env.INSTALL_3RD = True
+
+		conf.env.append_unique ("INCLUDES", mathlib_include)
+		conf.env.append_unique ("LIBPATH", mathlib_lib)
+
+		# Test that the installation of mathlib worked or that mathlib can be found
+		# with conf.options.MATHLIB_PATH
+		conf.check_cxx (header_name = "MathLib.h", uselib_store="MATHLIB")
+		conf.check_cxx (lib = "ultim", uselib_store="MATHLIB")
+		conf.env.append_unique ("IBEX_DEPS", ["MATHLIB"])
+		conf.env.prepend_value ("LIB_IBEX_DEPS", ["ultim"])
+
+		# Then, deal with gaol
+		gaol_archive = "gaol-4.2.0.tar.gz"
+		args = "--with-mathlib-include=%s" % mathlib_include
+		args += " --with-mathlib-lib=%s" % mathlib_lib
+		gaol_ret = conf.configure_3rd_party_with_autotools (gaol_archive, args)
+		gaol_include, gaol_lib = gaol_ret
+		conf.env.append_unique ("INCLUDES_IBEX_DEPS", conf.env.INCDIR_3RD)
+		conf.env.append_unique ("LIBPATH_IBEX_DEPS", conf.env.LIBDIR_3RD)
+		conf.env.INSTALL_3RD = True
+
+	conf.env.append_unique ("INCLUDES", gaol_include)
+	conf.env.append_unique ("LIBPATH", gaol_lib)
+
+	# Test that gdtoa can be found (it should be installed by gaol)
+	conf.check_cxx (header_name = "gdtoa/gdtoa.h", uselib_store="GDTOA")
+	conf.check_cxx (lib = "gdtoa", uselib_store="GDTOA")
+	conf.env.append_unique ("IBEX_DEPS", ["GDTOA"])
+	conf.env.prepend_value ("LIB_IBEX_DEPS", ["gdtoa"])
+
+	# Test that the installation of gaol worked or that gaol can be found
+	# with conf.options.GAOL_PATH. We also test if we need to add sse2 or sse3
+	# flags.
+	D = {"header_name": "gaol/gaol.h", "mandatory": False, "errmsg": "no",
+				"uselib_store": "GAOL"}
+	ret = conf.check_cxx (**D)
+	if not ret:
+		D["cxxflags"] = "-msse2"
+		D["msg"] = "Checking for header "+D["header_name"]+" with "+D["cxxflags"]
+		ret = conf.check_cxx (**D)
+	if not ret:
+		D["cxxflags"] = "-msse3"
+		D["msg"] = "Checking for header "+D["header_name"]+" with "+D["cxxflags"]
+		ret = conf.check_cxx (**D)
+	if not ret:
+		conf.fatal ("Cannot find C++ flags to add to use gaol/gaol.h")
+	conf.check_cxx (header_name = "gaol/gaol_interval.h", uselib_store = "GAOL")
+	conf.check_cxx (lib = "gaol", uselib_store="GAOL")
+	conf.env.append_unique ("IBEX_DEPS", ["GAOL"])
+	conf.env.prepend_value ("LIB_IBEX_DEPS", ["gaol"])
+	conf.env.append_unique ("CXXFLAGS_IBEX_DEPS", conf.env.CXXFLAGS_GAOL)
+
+######################
+####### build ########
+######################
+def build (bld):
+	pass
