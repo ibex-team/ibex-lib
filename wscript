@@ -148,9 +148,14 @@ def configure (conf):
 ######################
 def build (bld):
 	if bld.cmd == "clean":
-		### XXX FIXME
-		print "Do not clean"
-		sys.exit (0) # XXX FIXME
+		# We only remove 'src' directory in the build tree. If we let waf take care
+		# of the clean process, it would remove also the '3rd' directory. We do not
+		# want that because it contains libraries generated during configure. We
+		# also need to keep ibex_Setting.h and ibex.h in the 'src' directory.
+		keep_patterns = "src/ibex_Setting.h src/ibex.h"
+		for f in bld.bldnode.ant_glob("src/**", excl=keep_patterns, dir=True):
+			f.delete()
+		sys.exit (0) # We exit now or else waf call its internal 'clean' function
 	else:
 		bld.recurse ("plugins src")
 
