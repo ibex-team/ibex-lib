@@ -165,21 +165,10 @@ def distclean (ctx):
 	ctx.recurse ("3rd")
 
 ######################
-######################
 ####### dist #########
 ######################
 def dist (ctx):
-	# do not include 3rd/* subdirectories when building the archive
-	get_files_orig = ctx.get_files
-	def get_files():
-		def is_not_3rd_subdir (node):
-			rel_path = node.path_from (ctx.path.find_dir ("3rd"))
-			if rel_path.startswith (".."):
-				return True
-			else:
-				# exclude subdirectories in 3rd
-				return not os.sep in rel_path
-
-		return list(filter (is_not_3rd_subdir, get_files_orig()))
-	ctx.get_files = get_files
-		
+  files_patterns = "wscript benchs/** src/** examples/** waf"
+  files_patterns += " COPYING.LESSER LICENSE ibexutils.py"
+  files_patterns += " plugins/wscript plugins/interval_lib_gaol/"
+  ctx.files = ctx.path.ant_glob(files_patterns)

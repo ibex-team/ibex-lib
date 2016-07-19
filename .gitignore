@@ -25,14 +25,15 @@
 .settings
 .project
 
+# python generated files
+*.pyc
+
 # waf generated stuff
 .waf*
 .lock-waf*
 __build__
-flex.pyc
 
 # ibex generated obj
-3rd
 lib
 include
 share
