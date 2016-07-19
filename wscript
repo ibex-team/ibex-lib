@@ -120,15 +120,23 @@ def configure (conf):
 	# add src to libpath
 	conf.env.append_unique ("LIBPATH", ["src"])
 
+	# set settings to the empty dict (everything put in this dict will be written
+	# in the settings header)
+	conf.env.settings = {}
+
+	# Add release version to the settings
+	conf.env.settings['_IBEX_RELEASE_'] = "\""+conf.env['VERSION']+"\""
+
 	# recurse on the interval library directory
-	# TODO assert conf.options.INTERVAL_LIB is not None or fatal.error
+	if conf.options.INTERVAL_LIB is None:
+		conf.fatal ("No interval library is available.")
 	conf.msg ("Library for interval arithmetic", conf.options.INTERVAL_LIB)
 	itvlib_dir = ITVLIB_PLUGIN_PREFIX + conf.options.INTERVAL_LIB
 	conf.recurse (os.path.join(PLUGINS_DIR, itvlib_dir))
 
-	# set settings to the empty dict (everything put in this dict will be written
-	# in the settings header)
-	conf.env.settings = {}
+	# Add info on the interval library used to the settings
+	conf.env.settings['_IBEX_WITH_%s_' % conf.env['INTERVAL_LIB']] = "1"
+	conf.env.settings['_INTERVAL_LIB_'] = "\""+conf.env['INTERVAL_LIB']+"\""
 
 	# recurse
 	conf.recurse ("plugins src")
@@ -162,7 +170,6 @@ def build (bld):
 ######################
 def distclean (ctx):
 	Scripting.distclean (ctx) # remove the build directory
-	ctx.recurse ("3rd")
 
 ######################
 ####### dist #########
