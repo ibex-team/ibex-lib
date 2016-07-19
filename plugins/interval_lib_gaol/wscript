@@ -99,9 +99,3 @@ def configure (conf):
 	conf.env.append_unique ("IBEX_DEPS", ["GAOL"])
 	conf.env.prepend_value ("LIB_IBEX_DEPS", ["gaol"])
 	conf.env.append_unique ("CXXFLAGS_IBEX_DEPS", conf.env.CXXFLAGS_GAOL)
-
-######################
-####### build ########
-######################
-def build (bld):
-	pass
