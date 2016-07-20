@@ -17,8 +17,8 @@ def options (opt):
 ##### configure ######
 ######################
 def configure (conf):
-	# If this configure is called, it means that the library was chosen, so no
-	# tests are needed, let's configure it.
+	if conf.env["INTERVAL_LIB"]:
+		conf.fatal ("Trying to configure a second library for interval arithmetic")
 	conf.env["INTERVAL_LIB"] = "BIAS"
 	if conf.options.BIAS_PATH != "":
 		bias_dir = conf.options.BIAS_PATH
