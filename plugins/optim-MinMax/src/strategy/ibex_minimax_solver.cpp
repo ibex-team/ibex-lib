@@ -160,7 +160,7 @@ double minimax_solver::choose_nbiter(bool midpoint_eval) {
 
 IntervalVector minimax_solver::get_feasible_point(x_heap_elem * elem) {
     Vector mid_x = elem->box.mid(); // get the box (x,mid(y))
-    if( (!x_sys->func.is_empty()) && (elem->pu != 1)) { // constraint on xy exist and is not proved to be satisfied
+    if( (!x_sys->ctrs.is_empty()) && (elem->pu != 1)) { // constraint on xy exist and is not proved to be satisfied
         int res = check_constraints(mid_x);
         if(res==0 || res==1)
             return IntervalVector(1,Interval::EMPTY_SET);
