@@ -166,12 +166,6 @@ def build (bld):
 				relative_trick = True)
 
 ######################
-##### distclean  #####
-######################
-def distclean (ctx):
-	Scripting.distclean (ctx) # remove the build directory
-
-######################
 ####### dist #########
 ######################
 def dist (ctx):
