@@ -1,0 +1,96 @@
+#! /usr/bin/env python
+# encoding: utf-8
+
+import os
+from waflib import Logs
+from waflib.Tools import waf_unit_test
+
+######################
+##### configure ######
+######################
+def configure (conf):
+	conf.load("waf_unit_test")
+
+	# cppunit is needed to run the tests but we set mandatory=False because the
+	# tests are not mandatory.
+	conf.check_cxx (header_name="cppunit/Test.h", uselib_store="CPPUNIT",
+				mandatory=False)
+	conf.check_cxx (lib="cppunit", uselib_store="CPPUNIT", mandatory=False)
+
+	# Set env variable containing the list of all test source files (by looking
+	# recursively for all files ending with '.cpp')
+	test_src = conf.path.ant_glob ("**/*.cpp")
+	test_src =[ f.path_from (conf.path) for f in test_src ]
+	conf.env.append_unique ('TEST_SRC', test_src)
+
+# function called after the tests are run for pretty printing the results
+def utest_format_output (tst):
+	# The logger is freed at the end of the utest function but the tasks are
+	# performed afterwards, so we recreate the logger.
+	logfile = os.path.join (tst.bldnode.abspath(), "utest_run.log")
+	tst.logger = Logs.make_logger (logfile, "utest_run")
+
+	lst = getattr(tst, 'utest_results', [])
+	nfailed = 0
+	for (f, code, out, err) in lst:
+		tst.start_msg (os.path.basename (f))
+		if code:
+			tst.end_msg ("Failed", color="RED")
+			nfailed += 1
+			msg = os.linesep
+			msg += "Test '%s' failed with return code %s" %(os.path.basename(f), code)
+			msg += os.linesep
+			if err:
+				msg += "stderr:" + os.linesep
+				for l in err.decode('utf-8').splitlines(True):
+					msg += "  " + l
+			if out:
+				msg += "stdout:" + os.linesep
+				for l in out.decode('utf-8').splitlines(True):
+					msg += "  " + l
+		else:
+			tst.end_msg ("Passed")
+			
+	if nfailed:
+		msg += "Error: %d test%s failed" % (nfailed, "s" if nfailed > 1 else "")
+		tst.fatal (msg)
+	else:
+		Logs.pprint ("GREEN", "All tests passed")
+
+	Logs.free_logger (tst.logger)
+	tst.logger = None
+
+######################
+####### utest ########
+######################
+def utest (tst):
+	if tst.env.HAVE_CPPUNIT:
+
+		# Using pkg-config to retrieve info on ibex (assume './waf install' was run)
+		kwargs = {"package": "ibex", "args": "--cflags --libs",
+					"uselib_store": "TESTS", "mandatory": False}
+		b = tst.check_cfg (**kwargs)
+		if not b:
+			# add to the environnement the path where ibex.pc should be installed
+			ibex_pc_install_path = os.path.join(tst.env.PREFIX, "share", "pkgconfig")
+			if tst.env.env == []:
+				tst.env.env = {}
+			tst.env.env["PKG_CONFIG_PATH"] = ibex_pc_install_path
+			b = tst.check_cfg (**kwargs)
+			if not b:
+				tst.fatal ("Could not find ibex configuration via pkg-config, did you run './waf install' first ?")
+			else:
+				Logs.warn ("You should add the path '%s' to your PKG_CONFIG_PATH" % ibex_pc_install_path)
+
+		# always run the tests
+		tst.options.all_tests = True
+
+		# define SRCDIR_TESTS
+		defines = "SRCDIR_TESTS=\"%s\"" % tst.path.abspath()
+
+		t = tst.program (features="test", source=tst.env.TEST_SRC, target="utest",
+								 use=["TESTS", "CPPUNIT"], defines=defines)
+
+		tst.add_post_fun (utest_format_output)
+	else:
+		tst.fatal ("Cannot run the tests without cppunit (not found at configure)")

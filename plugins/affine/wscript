@@ -1,48 +1,57 @@
 #! /usr/bin/env python
 # encoding: utf-8
 
-from waflib import Logs
-
+######################
+###### options #######
+######################
 def options (opt):
 	opt.add_option ("--with-affine", action="store_true", dest="WITH_AFFINE",
 			help = "Use Affine Arithmetic plugin")
 
+######################
+##### configure ######
+######################
 def configure (conf):
-	conf.env.WITH_AFFINE = conf.options.WITH_AFFINE
-		
+	# The affine plugin is enabled if --with-affine or --with-affine-extended
+	# options are used.
+	if conf.options.WITH_AFFINE or conf.options.WITH_AFFINE_EXTEND:
+		conf.env.WITH_AFFINE = True
+
 	if not conf.env.WITH_AFFINE: 
 		return
-	
-	Logs.pprint ("BLUE", "Configure the Affine Arithmetic plugin")
-	
+
+	conf.msg ("plugin Affine Arithmetic", "enabled")
+	conf.env.append_unique ("IBEX_PLUGIN_USE_LIST", "AFFINE")
+
+	# Add information in ibex_Setting
+	conf.setting_define ("WITH_AFFINE", 1)
+
+	conf.start_msg ("Will use LinearRelaxAffine class")
 	if not conf.options.WITH_OPTIM:
-		Logs.pprint ("YELLOW", "Warning: The LinearRelaxAffine class (part of option --with-affine) will not be generated (requires --with-optim).")
+		conf.end_msg ("no (need --with-optim)", color = "YELLOW")
+		excl = "src/**/numeric" # exclude everything from the src/numeric subdir
+	else:
+		conf.end_msg ("yes (--with optim is used)")
+		excl = ""
 
 	# add AFFINE plugin include directory
-	conf.env.append_unique("INCLUDES","../../plugins/affine/src/arithmetic")
-	conf.env.append_unique("INCLUDES","../../plugins/affine/src/function")
-	conf.env.append_unique("INCLUDES","../../plugins/affine/src/numeric")
-	
-def build (bld):
-		
-	if not bld.env.WITH_AFFINE: 
-		return
-	
-	Logs.pprint ("BLUE", "Build the Affine Arithmetic plugin")
+	for f in conf.path.ant_glob ("src/**", dir = True, src = False, excl = excl):
+		conf.env.append_unique("INCLUDES_AFFINE", f.abspath())
 
-	# LinearRelaxAffine requires the LinearRelax base class from the optim plugin.
-	if bld.env.WITH_OPTIM:
-		# add AFFINE plugin sources
-		bld.env.IBEX_SRC.extend(bld.path.ant_glob ("src/**/ibex_*.cpp"))
-		# add AFFINE plugin headers
-		bld.env.IBEX_HDR.extend(bld.path.ant_glob ("src/**/ibex_*.h"))
-	else:
-		# add AFFINE plugin sources (no LinearRelaxAffine2)
-		bld.env.IBEX_SRC.extend(bld.path.ant_glob ("src/**/ibex_*.cpp", excl="src/numeric/ibex_LinearRelaxAffine2.*"))
-		# add AFFINE plugin headers (no LinearRelaxAffine2)
-		bld.env.IBEX_HDR.extend(bld.path.ant_glob ("src/**/ibex_*.h", excl="src/numeric/ibex_LinearRelaxAffine2.*"))
-	
-	# Add information in ibex_Setting
-	bld.env.settings['_IBEX_WITH_AFFINE_']='1'
-	
-	bld.install_files (bld.env.INCDIR, bld.path.ant_glob ("src/**/ibex_*.h_"))
+	# The build and install steps will be done from the main src/wscript script so
+	# we need to give path relative to the main src directory
+	mainsrc = conf.srcnode.make_node ("src")
+
+	# add AFFINE headers
+	for f in conf.path.ant_glob ("src/**/ibex_*.h", excl = excl):
+		conf.env.append_unique ("IBEX_HDR", f.path_from (mainsrc))
+
+	# add AFFINE source files
+	for f in conf.path.ant_glob ("src/**/ibex_*.cpp", excl = excl):
+		conf.env.append_unique ("IBEX_SRC", f.path_from (mainsrc))
+
+######################
+####### build ########
+######################
+def build (bld):
+	pass # nothing to do, everything is done in the main src/wscript script

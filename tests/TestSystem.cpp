@@ -98,7 +98,7 @@ void TestSystem::factory01() {
 
 
 void TestSystem::factory02() {
-	System sys("quimper/unconstrained.qpr");
+	System sys(SRCDIR_TESTS "/quimper/unconstrained.qpr");
 
 	CPPUNIT_ASSERT(sys.nb_ctr==0);
 	CPPUNIT_ASSERT(sys.nb_var==2);
@@ -134,7 +134,7 @@ void TestSystem::copy01() {
 }
 
 void TestSystem::copy02() {
-	System _sys("quimper/unconstrained.qpr");
+	System _sys(SRCDIR_TESTS "/quimper/unconstrained.qpr");
 	System sys(_sys, System::COPY);
 
 	CPPUNIT_ASSERT(sys.nb_ctr==0);
@@ -213,7 +213,7 @@ void TestSystem::extend01() {
 }
 
 void TestSystem::extend02() {
-	System _sys("quimper/unconstrained.qpr");
+	System _sys(SRCDIR_TESTS "/quimper/unconstrained.qpr");
 	ExtendedSystem sys(_sys);
 
 	CPPUNIT_ASSERT(sys.nb_ctr==1);
@@ -349,8 +349,8 @@ void TestSystem::merge03() {
 
 
 void TestSystem::merge04() {
-	System sys1("../benchs/benchs-optim/coconutbenchmark-library1/bearing.bch");
-	System sys2("../benchs/benchs-satisfaction/benchs-coprin/I5.bch");
+	System sys1(SRCDIR_TESTS "/../benchs/benchs-optim/coconutbenchmark-library1/bearing.bch");
+	System sys2(SRCDIR_TESTS "/../benchs/benchs-satisfaction/benchs-coprin/I5.bch");
 	System sys3(sys1,sys2);
 	CPPUNIT_ASSERT(strcmp(sys3.args[0].name,"x1")==0);
 	CPPUNIT_ASSERT(strcmp(sys3.args[4].name,"x6")==0);

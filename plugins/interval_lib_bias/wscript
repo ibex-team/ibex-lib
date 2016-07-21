@@ -20,19 +20,22 @@ def configure (conf):
 	if conf.env["INTERVAL_LIB"]:
 		conf.fatal ("Trying to configure a second library for interval arithmetic")
 	conf.env["INTERVAL_LIB"] = "BIAS"
-	if conf.options.BIAS_PATH != "":
-		bias_dir = conf.options.BIAS_PATH
+
+	bias_dir = conf.options.BIAS_PATH
+
+	if bias_dir:
 		conf.msg ("Using library bias from", bias_dir)
 		bias_include = os.path.join (bias_dir, "include")
 		bias_lib = os.path.join (bias_dir, "lib")
-		conf.env.append_unique ("INCLUDES", bias_include)
-		conf.env.append_unique ("LIBPATH", bias_lib)
 		conf.env.append_unique ("INCLUDES_IBEX_DEPS", bias_include)
 		conf.env.append_unique ("LIBPATH_IBEX_DEPS", bias_lib)
+	else:
+		bias_include = ""
+		bias_lib = ""
 
-	# Test that bias can be found
-	conf.check_cxx (header_name = "BIAS/BiasF.h", uselib_store="BIAS")
+	# Looking for Bias header and library (in fact libraries Profil, Bias and lr)
+	conf.check_cxx (header_name = "BIAS/BiasF.h", includes = bias_include,
+		use = [ "IBEX", "ITV_LIB" ], uselib_store = "ITV_LIB")
 	biaslibs = ["Profil", "Bias", "lr"]
-	conf.check_cxx (lib = biaslibs, uselib_store = "BIAS")
-	conf.env.append_unique ("IBEX_DEPS", ["BIAS"])
-	conf.env.prepend_value ("LIB_IBEX_DEPS", biaslibs)
+	conf.check_cxx (lib = biaslibs, libpath = bias_lib,
+		use = [ "IBEX", "ITV_LIB" ], uselib_store = "ITV_LIB")

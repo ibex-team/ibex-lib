@@ -21,7 +21,7 @@ using namespace std;
 namespace ibex {
 
 void TestParser::var01() {
-	System sys("quimper/var01.qpr");
+	System sys(SRCDIR_TESTS "/quimper/var01.qpr");
 	CPPUNIT_ASSERT(sys.func.is_empty());
 	CPPUNIT_ASSERT(sys.args.size()==1);
 	CPPUNIT_ASSERT(strcmp(sys.args[0].name,"x")==0);
@@ -42,7 +42,7 @@ void TestParser::var01() {
 void TestParser::const_var_idx() {
 	int n=18;
 	try {
-		System sys("minibex/const_var_idx.mbx");
+		System sys(SRCDIR_TESTS "/minibex/const_var_idx.mbx");
 		CPPUNIT_ASSERT(sys.args.size()==n);
 		int i=0;
 		CPPUNIT_ASSERT(strcmp(sys.args[i++].name,"xs")==0);
@@ -150,7 +150,7 @@ void TestParser::const08() {
 
 void TestParser::func01() {
 	try {
-		Function f("quimper/func01.qpr");
+		Function f(SRCDIR_TESTS "/quimper/func01.qpr");
 
 		CPPUNIT_ASSERT(strcmp(f.name,"foo")==0);
 		CPPUNIT_ASSERT(f.nb_arg()==1);
@@ -165,7 +165,7 @@ void TestParser::func01() {
 
 void TestParser::func02() {
 	try {
-		System sys("quimper/func02.qpr");
+		System sys(SRCDIR_TESTS "/quimper/func02.qpr");
 
 		//cout << "sys nb ctr=" << sys.nb_ctr << endl;
 		//CPPUNIT_ASSERT(sys.nb_ctr==12);
@@ -196,7 +196,7 @@ void TestParser::func02() {
 
 void TestParser::func03() {
 	try {
-		Function f("quimper/func03.qpr");
+		Function f(SRCDIR_TESTS "/quimper/func03.qpr");
 
 		CPPUNIT_ASSERT(strcmp(f.name,"f")==0);
 		CPPUNIT_ASSERT(f.nb_arg()==10);
@@ -207,7 +207,7 @@ void TestParser::func03() {
 }
 
 void TestParser::ponts() {
-	System sys("quimper/ponts.qpr");
+	System sys(SRCDIR_TESTS "/quimper/ponts.qpr");
 	Ponts30 sys2;
 	CPPUNIT_ASSERT(sys.func.is_empty());
 	CPPUNIT_ASSERT(sys.args.size()==30);
@@ -249,7 +249,7 @@ void TestParser::choco01() {
 
 void TestParser::loop01() {
 	try {
-		System sys("quimper/loop01.qpr");
+		System sys(SRCDIR_TESTS "/quimper/loop01.qpr");
 		double a = 1;
 		double b = 2;
 		int c=0;
@@ -286,7 +286,7 @@ void TestParser::loop01() {
 }
 
 void TestParser::error01() {
-	CPPUNIT_ASSERT_THROW(System("quimper/error01.qpr"),SyntaxError);
+	CPPUNIT_ASSERT_THROW(System(SRCDIR_TESTS "/quimper/error01.qpr"),SyntaxError);
 }
 
 void TestParser::nary_max() {

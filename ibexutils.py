@@ -1,12 +1,28 @@
-import os, tarfile, functools, sys
+import os, tarfile, functools, sys, shutil
 
 from waflib import Logs, Errors, Utils
-from waflib.Configure import conf, WAF_CONFIG_LOG
+from waflib.Configure import conf, ConfigurationContext
 
 # not @Configure.conf because, the function is also called by 'options'
 def get_dirlist (node):
 	folders = node.ant_glob('*',dir=True,src=False)
 	return [ os.path.basename(str(f)) for f in folders ]
+
+@conf
+def setting_define (conf, key, val, key_format = "_IBEX_%s_", **kwargs):
+	conf.setenv ("setting")
+	conf.define (key_format % key, val, **kwargs)
+	conf.setenv("")
+
+@conf
+def write_setting_header (conf, **kwargs):
+	conf.setenv ("setting")
+	conf.write_config_header (**kwargs)
+	bak = conf.env.cfg_files
+	conf.setenv("")
+	conf.env.append_unique ("cfg_files", bak)
+	conf.all_envs.pop("setting", None)
+
 
 def archive_name_without_suffix (archive):
 	suffixes = [".tar.gz", ".tgz", ".tar" ]
@@ -24,55 +40,19 @@ def extract_archive (conf, archive_path, name, destdir):
 
 	conf.start_msg("Extracting %s" % os.path.basename(archive_path))
 
-	if not os.path.isdir (path): # if not already extracted
-		# extract the sources
-		os.makedirs (path)
+	if os.path.isdir (path): # if output directory already exists, remove it
+		shutil.rmtree (path, ignore_errors = True)
 
-		t = tarfile.open (archive_path)
-		t.extractall (destdir)
-		t.close()
-		conf.end_msg("done")
-	else:
-		conf.end_msg("destination already exists", color = 'YELLOW')
+	# extract the sources
+	os.makedirs (path)
+
+	t = tarfile.open (archive_path)
+	t.extractall (destdir)
+	t.close()
+
+	conf.end_msg("done")
 
 	return path
-
-# Parameters:
-# - src_dir_node  : source directory: where the archive is located
-# - name          : name of the directory where the file will be extracted
-# - filename      : filename of the archive (in src_dir)
-# - dest_dir_node : destination directory. If None, the file is extracted in src_dir
-# 
-# Return         : the node of the directory where the file has been extracted
-#
-def unpack_archive (src_dir_node, name, filename = None, dest_dir_node = None):
-	if not dest_dir_node:
-		dest_dir_node = src_dir_node
-
-
-	src_dir = src_dir_node.abspath()
-
-	dest_dir = dest_dir_node.abspath()
-
-	# path is the destination folder where the file is extracted 
-	path = os.path.join (dest_dir, name)
-
-	if not os.path.isdir (path): # if not already extracted
-		# extract the sources
-		os.makedirs (path)
-
-		if not filename:
-			filename = "%s.tar.gz" % name
-
-		Logs.pprint ("NORMAL", "Unpacking %s" % filename)
-		t = tarfile.open (os.path.join (src_dir, filename))
-
-		t.extractall (dest_dir)
-
-	node = dest_dir_node.find_dir (name)
-
-	assert node
-	return node
 
 # convert path from windows format to format compatible with mingw.
 # Ex: C:\path/to/dir becomes /c/path/to/dir
@@ -85,12 +65,12 @@ def convert_path_win2msys (path):
 @conf
 def configure_3rd_party_with_autotools (conf, archive_name, conf_args = ""):
 	name = archive_name_without_suffix (archive_name)
-	Logs.pprint ("BLUE", "Starting configuration for %s"%name)
-	conf.to_log ("="*40 + "\nStarting configuration for %s\n"%name + "="*40)
+	Logs.pprint ("BLUE", "Starting installation of %s"%name)
+	conf.to_log ((" Starting installation of %s " % name).center (80, "="))
 
 	cur_dir = os.path.abspath(str(conf.path))
 	archive_path = os.path.join (cur_dir, "3rd", archive_name)
-	destnode = conf.bldnode.make_node("3rd")
+	destnode = conf.bldnode.find_or_declare ("3rd")
 	destdir = os.path.abspath(str(destnode))
 
 	# Install everything in build directory, in '3rd' subdirectory (the 'lib' and
@@ -132,6 +112,26 @@ def configure_3rd_party_with_autotools (conf, archive_name, conf_args = ""):
 			print e
 			conf.fatal ("failed to %s %s (%s)" % (stage, name, cmd))
 
-	conf.to_log ("="*40 + "\nConfiguration for %s: done\n"%name + "="*40)
+	conf.to_log ((" Installation of %s: done " % name).center (80, "="))
 
 	return incdir, libdir
+
+# Add verbose wrapper around pre_recurse and post_recurse methods of
+# ConfigurationContext class, in order to a a more verbose output.
+def verbose_pre_recurse (f):
+	def fun (ctx, node):
+		Logs.pprint ("BLUE", "Starting configure from ./%s" % node.srcpath ())
+		f (ctx, node)
+	fun.__name__ = f.__name__
+	return fun
+
+ConfigurationContext.pre_recurse = verbose_pre_recurse (ConfigurationContext.pre_recurse)
+
+def verbose_post_recurse (f):
+	def fun (ctx, node):
+		Logs.pprint ("BLUE", "Leaving configure from ./%s" % node.srcpath ())
+		f (ctx, node)
+	fun.__name__ = f.__name__
+	return fun
+
+ConfigurationContext.post_recurse = verbose_post_recurse (ConfigurationContext.post_recurse)
