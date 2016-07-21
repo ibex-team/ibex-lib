@@ -137,6 +137,7 @@ void TestParser::const_var_idx() {
 	}
 }
 
+#ifdef HAVE_FMEMOPEN
 void TestParser::const08() {
 	const char* code="function f(x)\n  return #3fb999999999999a;end";
 	FILE *fin = fmemopen((char*) code, strlen(code), "r");
@@ -147,6 +148,7 @@ void TestParser::const08() {
 	CPPUNIT_ASSERT(c!=NULL);
 	CPPUNIT_ASSERT(c->get_value().mid()==x);
 }
+#endif
 
 void TestParser::func01() {
 	try {

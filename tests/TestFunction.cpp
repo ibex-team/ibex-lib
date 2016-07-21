@@ -451,6 +451,7 @@ void TestFunction::minibex01() {
 	CPPUNIT_ASSERT(strcmp(m.c_str(),"function f(x,y)\n  _tmp_0_ = (x+y);\n  return (_tmp_0_+_tmp_0_);\nend")==0);
 }
 
+#ifdef HAVE_FMEMOPEN
 void TestFunction::minibex02() {
 	Variable x("x"),y("y");
 	const ExprNode& e1=x+y;
@@ -479,6 +480,7 @@ void TestFunction::minibex03() {
 	m = f2.minibex();
 	CPPUNIT_ASSERT(strcmp(m.c_str(),"function f(x[2][3])\n  return (x+((0 , 1 , 2) ; (3 , 4 , 5)));\nend")==0);
 }
+#endif
 
 void TestFunction::issue43() {
 	Variable x("x"),y("y");

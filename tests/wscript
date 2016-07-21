@@ -17,6 +17,10 @@ def configure (conf):
 				mandatory=False)
 	conf.check_cxx (lib="cppunit", uselib_store="CPPUNIT", mandatory=False)
 
+	# Looking for fmemopen
+	conf.check_cxx (function_name = "fmemopen", header_name = "stdio.h",
+			mandatory = False)
+
 	# Set env variable containing the list of all test source files (by looking
 	# recursively for all files ending with '.cpp')
 	test_src = conf.path.ant_glob ("**/*.cpp")
