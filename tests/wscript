@@ -23,6 +23,9 @@ def configure (conf):
 	test_src =[ f.path_from (conf.path) for f in test_src ]
 	conf.env.append_unique ('TEST_SRC', test_src)
 
+	# Add current directory to list of INCLUDES for TESTS
+	conf.env.append_unique ("INCLUDES_TESTS", conf.path.abspath ())
+
 # function called after the tests are run for pretty printing the results
 def utest_format_output (tst):
 	# The logger is freed at the end of the utest function but the tasks are
@@ -32,12 +35,13 @@ def utest_format_output (tst):
 
 	lst = getattr(tst, 'utest_results', [])
 	nfailed = 0
+	msg = ""
 	for (f, code, out, err) in lst:
 		tst.start_msg (os.path.basename (f))
 		if code:
 			tst.end_msg ("Failed", color="RED")
 			nfailed += 1
-			msg = os.linesep
+			msg += os.linesep
 			msg += "Test '%s' failed with return code %s" %(os.path.basename(f), code)
 			msg += os.linesep
 			if err:
@@ -88,9 +92,24 @@ def utest (tst):
 		# define SRCDIR_TESTS
 		defines = "SRCDIR_TESTS=\"%s\"" % tst.path.abspath()
 
-		t = tst.program (features="test", source=tst.env.TEST_SRC, target="utest",
-								 use=["TESTS", "CPPUNIT"], defines=defines)
-
+		# Use own function for reporting test results
 		tst.add_post_fun (utest_format_output)
+
+		# split in two: the real tests (starting with "Test") and the utils files
+		def split_fun (f):
+			return os.path.basename (f).startswith("Test")
+
+		base_src = [ f for f in tst.env.TEST_SRC if not split_fun (f) ]
+		test_src = [ f for f in tst.env.TEST_SRC if split_fun (f) ]
+
+		tst (features = "cxx", source = base_src, target="utest_base",
+				use=["TESTS", "CPPUNIT"], defines = defines)
+
+		for f in test_src:
+			basename = os.path.basename (f)
+			name = basename[4:-4] # Remove "Test" at the beginning, ".cpp" at the end
+			tst.program (features="test", source= f, target="utest_" + name,
+									use=["TESTS", "CPPUNIT", "utest_base"], defines = defines)
+
 	else:
 		tst.fatal ("Cannot run the tests without cppunit (not found at configure)")

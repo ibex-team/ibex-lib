@@ -38,18 +38,30 @@ def configure (conf):
 	for f in conf.path.ant_glob ("src/**", dir = True, src = False, excl = excl):
 		conf.env.append_unique("INCLUDES_AFFINE", f.abspath())
 
-	# The build and install steps will be done from the main src/wscript script so
+	# The build and install steps will be run from the main src/wscript script so
 	# we need to give path relative to the main src directory
 	mainsrc = conf.srcnode.make_node ("src")
 
 	# add AFFINE headers
-	for f in conf.path.ant_glob ("src/**/ibex_*.h", excl = excl):
+	for f in conf.path.ant_glob ("src/**/ibex_*.h src/**/ibex_*.h_", excl = excl):
 		conf.env.append_unique ("IBEX_HDR", f.path_from (mainsrc))
 
 	# add AFFINE source files
 	for f in conf.path.ant_glob ("src/**/ibex_*.cpp", excl = excl):
 		conf.env.append_unique ("IBEX_SRC", f.path_from (mainsrc))
 
+	# The utest step will be run from the main tests/wscript script so we need to
+	# give path relative to the main tests directory
+	maintests = conf.srcnode.make_node ("tests")
+
+	# add AFFINE test files
+	for f in conf.path.ant_glob ("tests/**/*.cpp"):
+		conf.env.append_unique ('TEST_SRC', f.path_from (maintests))
+
+	# Add affine/tests directory to list of INCLUDES for TESTS
+	testsnode = conf.path.make_node ("tests")
+	conf.env.append_unique ("INCLUDES_TESTS", testsnode.abspath ())
+	
 ######################
 ####### build ########
 ######################
