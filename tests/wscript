@@ -94,6 +94,7 @@ def utest (tst):
 	if tst.env.HAVE_CPPUNIT:
 
 		# Using pkg-config to retrieve info on ibex (assume './waf install' was run)
+		env_env_bak = tst.env.env
 		kwargs = {"package": "ibex", "args": "--cflags --libs",
 					"uselib_store": "TESTS", "mandatory": False}
 		b = tst.check_cfg (**kwargs)
@@ -108,6 +109,7 @@ def utest (tst):
 				tst.fatal ("Could not find ibex configuration via pkg-config, did you run './waf install' first ?")
 			else:
 				Logs.warn ("You should add the path '%s' to your PKG_CONFIG_PATH" % ibex_pc_install_path)
+		tst.env.env = env_env_bak
 
 		# always run the tests
 		tst.options.all_tests = True
