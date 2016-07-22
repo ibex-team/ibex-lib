@@ -1,0 +1,9 @@
+prefix=@PREFIX@
+includedir=@INCDIR@
+libdir=@LIBDIR@
+
+Name: ibex
+Description: A C++ library for interval-based algorithm design
+Version: @VERSION@
+Cflags: @INCLUDES@ @CXXFLAGS@
+Libs: @LIBPATH@ -libex @LIBS@

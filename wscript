@@ -168,6 +168,19 @@ def build (bld):
 	else:
 		bld.recurse ("plugins src")
 
+		# Generate ibex.pc, the pkg-config file
+		bld (features = "subst", source = "ibex.pc.in", target = "ibex.pc",
+				install_path = "${PREFIX}/share/pkgconfig",
+				INCDIR = bld.env.INCDIR.replace(bld.env.PREFIX, "${prefix}"),
+				LIBDIR = bld.env.LIBDIR.replace(bld.env.PREFIX, "${prefix}"),
+				INCLUDES = " ".join(["-I" + i.replace (bld.env.INCDIR, "${includedir}")
+										for i in bld.env.INCLUDES_IBEX_DEPS]),
+				CXXFLAGS = bld.env.CXXFLAGS_IBEX_DEPS,
+				LIBPATH = " ".join(["-L" + i.replace (bld.env.LIBDIR, "${libdir}")
+										for i in bld.env.LIBPATH_IBEX_DEPS]),
+				LIBS = " ".join(["-l" + l for l in reversed(bld.env.LIB_IBEX_DEPS)])
+		)
+
 		# install ibex main header and header with settings
 		bld.install_files (bld.env.INCDIR, bld.env.ibex_header)
 		bld.install_files (bld.env.INCDIR_HDR, bld.env.ibex_header_setting)
