@@ -9,7 +9,7 @@ from waflib import Logs
 ###### options #######
 ######################
 def options (opt):
-	grp_name = "Filib options (when --with-interval-lib=filib is used)"
+	grp_name = "Filib options (when --interval-lib=filib is used)"
 	grp = opt.add_option_group (grp_name)
 	grp.add_option ("--filib-dir", action="store", type="string", dest="FILIB_PATH", default = "", help = "location of the Filib lib and include directories (by default use the one in 3rd directory)")
 	grp.add_option ("--disable-sse2", action="store_true", dest="DISABLE_SSE2", default = False, help = "do not use SSE2 optimizations")

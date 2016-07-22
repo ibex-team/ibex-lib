@@ -52,12 +52,12 @@ def options (opt):
 	else: # use the first of the list as default
 		default_interval_lib = list_of_interval_lib_plugin[0]
 
-	# help string for --with-interval-lib command line option
-	help_string = "Possible values are: " + ", ".join(list_of_interval_lib_plugin)
-	help_string += " (default value is " + str(default_interval_lib) + ")"
+	# help string for --interval-lib command line option
+	help_string = "Possible values: " + ", ".join(list_of_interval_lib_plugin)
+	help_string += " [default: " + str(default_interval_lib) + "]"
 
-	# add the option --with-interval-lib
-	opt.add_option ("--with-interval-lib", action="store", dest="INTERVAL_LIB",
+	# add the option --interval-lib
+	opt.add_option ("--interval-lib", action="store", dest="INTERVAL_LIB",
 									choices = list_of_interval_lib_plugin,
 									default = default_interval_lib, help = help_string)
 

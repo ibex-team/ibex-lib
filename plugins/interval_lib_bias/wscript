@@ -9,7 +9,7 @@ from waflib import Logs
 ###### options #######
 ######################
 def options (opt):
-	grp_name = "Profil/Bias options (when --with-interval-lib=bias is used)"
+	grp_name = "Profil/Bias options (when --interval-lib=bias is used)"
 	grp = opt.add_option_group (grp_name)
 	grp.add_option ("--bias-dir", action="store", type="string", dest="BIAS_PATH", default = "", help = "location of the Profil/Bias lib and include directories")
 

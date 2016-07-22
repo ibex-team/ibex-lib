@@ -9,7 +9,7 @@ from waflib import Logs
 ###### options #######
 ######################
 def options (opt):
-	grp_name = "Gaol options (when --with-interval-lib=gaol is used)"
+	grp_name = "Gaol options (when --interval-lib=gaol is used)"
 	grp = opt.add_option_group (grp_name)
 	grp.add_option ("--gaol-dir", action="store", type="string", dest="GAOL_PATH", default = "", help = "location of the Gaol lib and include directories (by default use the one in 3rd directory)")
 	grp.add_option ("--mathlib-dir", action="store", type="string", dest="MATHLIB_PATH", default = "", help = "location of the Mathlib/ultim lib and include directories (by default use the one in 3rd directory)")
