@@ -23,6 +23,17 @@ def write_setting_header (conf, **kwargs):
 	conf.env.append_unique ("cfg_files", bak)
 	conf.all_envs.pop("setting", None)
 
+@conf
+def append_unique_lib_store (conf, dest_store, src_store):
+	prefix_list = [ "LIB", "LIBPATH", "STLIB", "STLIBPATH", "LINKFLAGS" ]
+	prefix_list += [ "RPATH", "CFLAGS", "CXXFLAGS", "DFLAGS", "INCLUDES" ]
+	prefix_list += [ "CXXDEPS", "CCDEPS", "LINKDEPS", "DEFINES", "FRAMEWORK" ]
+	prefix_list += [ "FRAMEWORKPATH", "ARCH" ]
+	for prefix in prefix_list:
+		src = "%s_%s" % (prefix, src_store)
+		dest = "%s_%s" % (prefix, dest_store)
+		if conf.env[src]:
+			conf.env.append_unique (dest, conf.env[src])
 
 def archive_name_without_suffix (archive):
 	suffixes = [".tar.gz", ".tgz", ".tar" ]
@@ -63,7 +74,8 @@ def convert_path_win2msys (path):
 	return "/%s%s" % (drv[0], path.replace("\\", "/"))
 
 @conf
-def configure_3rd_party_with_autotools (conf, archive_name, conf_args = ""):
+def configure_3rd_party_with_autotools (conf, archive_name, conf_args = "",
+			without_configure = False):
 	name = archive_name_without_suffix (archive_name)
 	Logs.pprint ("BLUE", "Starting installation of %s"%name)
 	conf.to_log ((" Starting installation of %s " % name).center (80, "="))
@@ -101,7 +113,11 @@ def configure_3rd_party_with_autotools (conf, archive_name, conf_args = ""):
 		cmd_make = conf.env.MAKE
 		cmd_install = conf.env.MAKE + ["install"]
 
-	stages=[(cmd_conf, "configure"), (cmd_make, "make"), (cmd_install, "install")]
+	if without_configure:
+		stages = []
+	else:
+		stages = [ (cmd_conf, "configure") ]
+	stages += [ (cmd_make, "make"), (cmd_install, "install") ]
 	for cmd, stage in stages:
 		conf.start_msg("Calling %s" % stage)
 		try: 
