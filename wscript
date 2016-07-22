@@ -175,7 +175,7 @@ def build (bld):
 				LIBDIR = bld.env.LIBDIR.replace(bld.env.PREFIX, "${prefix}"),
 				INCLUDES = " ".join(["-I" + i.replace (bld.env.INCDIR, "${includedir}")
 										for i in bld.env.INCLUDES_IBEX_DEPS]),
-				CXXFLAGS = bld.env.CXXFLAGS_IBEX_DEPS,
+				CXXFLAGS = " ".join(bld.env.CXXFLAGS_IBEX_DEPS),
 				LIBPATH = " ".join(["-L" + i.replace (bld.env.LIBDIR, "${libdir}")
 										for i in bld.env.LIBPATH_IBEX_DEPS]),
 				LIBS = " ".join(["-l" + l for l in reversed(bld.env.LIB_IBEX_DEPS)])
