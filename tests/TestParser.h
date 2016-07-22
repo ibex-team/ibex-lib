@@ -38,6 +38,7 @@ public:
 	CPPUNIT_TEST(func02);
 	CPPUNIT_TEST(func03);
 	CPPUNIT_TEST(loop01);
+	CPPUNIT_TEST(const08);
 
 	CPPUNIT_TEST(nary_max);
 	//		CPPUNIT_TEST(error01);

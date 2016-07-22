@@ -25,10 +25,16 @@ def configure (conf):
 	# recursively for all files ending with '.cpp')
 	test_src = conf.path.ant_glob ("**/*.cpp")
 	test_src =[ f.path_from (conf.path) for f in test_src ]
-	conf.env.append_unique ('TEST_SRC', test_src)
+	conf.env.append_unique ("TEST_SRC", test_src)
 
 	# Add current directory to list of INCLUDES for TESTS
 	conf.env.append_unique ("INCLUDES_TESTS", conf.path.abspath ())
+
+  # if fmemopen is not available, use implementation from tests/3rd/fmemopen
+	if not conf.env.HAVE_FMEMOPEN:
+		conf.env.append_unique ("TEST_SRC", "3rd/fmemopen/fmemopen.c")
+		conf.env.append_unique ("INCLUDES_TESTS",
+				os.path.join (conf.path.abspath (), "3rd", "fmemopen"))
 
 # function called after the tests are run for pretty printing the results
 def utest_format_output (tst):
