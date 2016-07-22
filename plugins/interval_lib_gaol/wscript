@@ -86,3 +86,9 @@ def configure (conf):
 		use = [ "IBEX", "ITV_LIB" ], uselib_store = "ITV_LIB")
 	conf.check_cxx (lib = "gaol", libpath = gaol_lib,
 		use = [ "IBEX", "ITV_LIB" ], uselib_store = "ITV_LIB")
+
+	# We need to reverse the order of the lib because check_cxx append the new lib
+	# and the order in which we check for the lib is the opposite order needed by
+	# the linker (last libraries should resolve undefined references from previous
+	# libraries).
+	conf.env["LIB_ITV_LIB"].reverse()

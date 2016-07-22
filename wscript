@@ -134,7 +134,7 @@ def configure (conf):
 	conf.recurse ("plugins src tests")
 
 	# If we used a 3rd party library, add the install path (for *.pc file)
-	if conf.env.INSTALL_3RD:
+	if conf.env.INSTALL_3RD: # It may not be necessary but it costs nothing
 		conf.env.append_unique ("INCLUDES_IBEX_DEPS", conf.env.INCDIR_3RD)
 		conf.env.append_unique ("LIBPATH_IBEX_DEPS", conf.env.LIBDIR_3RD)
 
@@ -178,7 +178,7 @@ def build (bld):
 				CXXFLAGS = " ".join(bld.env.CXXFLAGS_IBEX_DEPS),
 				LIBPATH = " ".join(["-L" + i.replace (bld.env.LIBDIR, "${libdir}")
 										for i in bld.env.LIBPATH_IBEX_DEPS]),
-				LIBS = " ".join(["-l" + l for l in reversed(bld.env.LIB_IBEX_DEPS)])
+				LIBS = " ".join(["-l" + l for l in bld.env.LIB_IBEX_DEPS])
 		)
 
 		# install ibex main header and header with settings
