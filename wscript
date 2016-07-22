@@ -151,25 +151,25 @@ def configure (conf):
 			headers = True, guard = "__IBEX_H__", remove = False)
 	del conf.env.include_key
 
+	# In order for './waf clean' not to remove everything in subdirectory 3rd of
+	# the build tree, we put every file of this subdirectory in cfg_files (those
+	# files are not deleted by clean). In order not to pollute the current env,
+	# we put then in a new one called "3rd".
+	node_3rd = conf.bldnode.find_node ("3rd")
+	if not node_3rd is None: # does this subdirectory exists ?
+		conf.setenv ("3rd")
+		for f in node_3rd.ant_glob("**"):
+			conf.env.append_unique ("cfg_files", f.abspath())
+		conf.setenv("")
+
 ######################
 ####### build ########
 ######################
 def build (bld):
-	if bld.cmd == "clean":
-		# We only remove 'src' directory in the build tree. If we let waf take care
-		# of the clean process, it would remove also the '3rd' directory. We do not
-		# want that because it contains libraries generated during configure. We
-		# also need to keep ibex_Setting.h and ibex.h in the 'src' directory.
-		keep_patterns = ""
-		clean_patterns = "src/** tests/**"
-		for f in bld.bldnode.ant_glob(clean_patterns, excl=keep_patterns, dir=True):
-			f.delete()
-		sys.exit (0) # We exit now or else waf call its internal 'clean' function
-	else:
-		bld.recurse ("plugins src")
+	bld.recurse ("plugins src")
 
-		# Generate ibex.pc, the pkg-config file
-		bld (features = "subst", source = "ibex.pc.in", target = "ibex.pc",
+	# Generate ibex.pc, the pkg-config file
+	bld (features = "subst", source = "ibex.pc.in", target = "ibex.pc",
 				install_path = "${PREFIX}/share/pkgconfig",
 				INCDIR = bld.env.INCDIR.replace(bld.env.PREFIX, "${prefix}"),
 				LIBDIR = bld.env.LIBDIR.replace(bld.env.PREFIX, "${prefix}"),
@@ -181,20 +181,20 @@ def build (bld):
 				LIBS = " ".join(["-l" + l for l in bld.env.LIB_IBEX_DEPS])
 		)
 
-		# install ibex main header and header with settings
-		bld.install_files (bld.env.INCDIR, bld.env.ibex_header)
-		bld.install_files (bld.env.INCDIR_HDR, bld.env.ibex_header_setting)
+	# Install ibex main header and header with settings
+	bld.install_files (bld.env.INCDIR, bld.env.ibex_header)
+	bld.install_files (bld.env.INCDIR_HDR, bld.env.ibex_header_setting)
 
-		if bld.env.INSTALL_3RD:
-			incnode = bld.bldnode.find_node("3rd").find_node("include")
-			incfiles = incnode.ant_glob ("**")
-			bld.install_files (bld.env.INCDIR_3RD, incfiles, cwd = incnode,
-				relative_trick = True)
+	if bld.env.INSTALL_3RD:
+		incnode = bld.bldnode.find_node("3rd").find_node("include")
+		incfiles = incnode.ant_glob ("**")
+		bld.install_files (bld.env.INCDIR_3RD, incfiles, cwd = incnode,
+			relative_trick = True)
 
-			libnode = bld.bldnode.find_node("3rd").find_node("lib")
-			libfiles = libnode.ant_glob ("**")
-			bld.install_files (bld.env.LIBDIR_3RD, libfiles, cwd = libnode,
-				relative_trick = True)
+		libnode = bld.bldnode.find_node("3rd").find_node("lib")
+		libfiles = libnode.ant_glob ("**")
+		bld.install_files (bld.env.LIBDIR_3RD, libfiles, cwd = libnode,
+			relative_trick = True)
 
 ######################
 ####### dist #########
