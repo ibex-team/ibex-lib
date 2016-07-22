@@ -45,30 +45,43 @@ def utest_format_output (tst):
 
 	lst = getattr(tst, 'utest_results', [])
 	nfailed = 0
+	ntot = 0
 	msg = ""
 	for (f, code, out, err) in lst:
 		tst.start_msg (os.path.basename (f))
 		if code:
-			tst.end_msg ("Failed", color="RED")
-			nfailed += 1
 			msg += os.linesep
 			msg += "Test '%s' failed with return code %s" %(os.path.basename(f), code)
 			msg += os.linesep
-			if err:
-				msg += "stderr:" + os.linesep
-				for l in err.decode('utf-8').splitlines(True):
-					msg += "  " + l
-			if out:
-				msg += "stdout:" + os.linesep
-				for l in out.decode('utf-8').splitlines(True):
-					msg += "  " + l
+			msg += "stderr:" + os.linesep
+			for l in err.decode('utf-8').splitlines(True):
+				msg += "  " + l
+			msg += "stdout:" + os.linesep
+			for l in out.decode('utf-8').splitlines(True):
+				msg += "  " + l
+			for l in out.decode('utf-8').splitlines(True):
+				if l.startswith ("Run"):
+					data = l.split()
+					n = int(data[1])
+					nf = int(data[3]) + int(data[5])
+					tst.end_msg ("%d/%d" % (n-nf,n), color="RED")
 		else:
-			tst.end_msg ("Passed")
+			for l in out.decode('utf-8').splitlines(True):
+				if l.startswith ("OK"):
+					n = int(l.split()[1][1:])
+					nf = 0
+					tst.end_msg ("%d/%d" % (n, n))
+					break
+		ntot += n
+		nfailed += nf
 			
+	tst.msg ("=========", "=========", color = "NORMAL")
 	if nfailed:
-		msg += "Error: %d test%s failed" % (nfailed, "s" if nfailed > 1 else "")
-		tst.fatal (msg)
+		tst.msg ("All tests", "%d/%d" % (ntot-nfailed, ntot), color = "RED")
+		h = "Error: %s test%s failed" % (nfailed, "s" if nfailed > 1 else "")
+		tst.fatal (h + os.linesep + msg)
 	else:
+		tst.msg ("All tests", "%d/%d" % (ntot-nfailed, ntot), "GREEN")
 		Logs.pprint ("GREEN", "All tests passed")
 
 	Logs.free_logger (tst.logger)
