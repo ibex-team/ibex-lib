@@ -5,6 +5,67 @@ import os
 from waflib import Logs
 from waflib.Tools import waf_unit_test
 
+# function called after the tests are run for pretty printing the results
+def utest_format_output (tst):
+	# The logger is freed at the end of the utest function but the tasks are
+	# performed afterwards, so we recreate the logger.
+	logfile = os.path.join (tst.bldnode.abspath(), "utest_run.log")
+	tst.logger = Logs.make_logger (logfile, "utest_run")
+
+	def format_out (stream, name):
+		s = name + ":" + os.linesep
+		for l in stream.decode('utf-8').splitlines(True):
+			s += "  " + l
+		return s
+
+	def parse_output (stream):
+		for l in stream.decode('utf-8').splitlines(True):
+			if l.startswith ("Run"):
+				data = l.split()
+				return (int(data[1]), int(data[3]) + int(data[5]))
+			elif l.startswith ("OK"):
+				return (int(l.split()[1][1:]), 0)
+		return (None, None)
+
+	lst = sorted (getattr(tst, 'utest_results', []), key = lambda x:x[0])
+	nfailed = 0
+	ntot = 0
+	errmsg = ""
+	for (f, ret, stdout, stderr) in lst:
+		name = os.path.basename (f)
+		tst.start_msg (name)
+		(n, nf) = parse_output (stdout)
+		if ret:
+			errmsg += os.linesep
+			errmsg += "Test '%s' failed with return code %s" %(name, ret)
+			errmsg += os.linesep
+			errmsg += format_out (stderr, "stderr") + format_out (stdout, "stdout")
+
+		if n is None: # An error occurs: could not parse the output
+			if ret:
+				tst.end_msg ("Error: program failure !", color = "RED")
+				ntot += 1
+				nfailed += 1
+			else:
+				tst.end_msg ("Could not parse the output", color = "YELLOW")
+				Logs.warn (format_out(stderr, "stderr") + format_out(stdout, "stdout"))
+		else:
+			tst.end_msg ("%d/%d" % (n-nf,n), color=("RED" if nf else "GREEN"))
+			ntot += n
+			nfailed += nf
+
+	tst.msg ("=========", "=========", color = "NORMAL")
+	if nfailed:
+		tst.msg ("All tests", "%d/%d" % (ntot-nfailed, ntot), color = "RED")
+		h = "Error: %s test%s failed" % (nfailed, "s" if nfailed > 1 else "")
+		tst.fatal (h + os.linesep + errmsg)
+	else:
+		tst.msg ("All tests", "%d/%d" % (ntot-nfailed, ntot), "GREEN")
+		Logs.info ("All tests passed")
+
+	Logs.free_logger (tst.logger)
+	tst.logger = None
+
 ######################
 ##### configure ######
 ######################
@@ -35,57 +96,6 @@ def configure (conf):
 		conf.env.append_unique ("TEST_SRC", "3rd/fmemopen/fmemopen.c")
 		conf.env.append_unique ("INCLUDES_TESTS",
 				os.path.join (conf.path.abspath (), "3rd", "fmemopen"))
-
-# function called after the tests are run for pretty printing the results
-def utest_format_output (tst):
-	# The logger is freed at the end of the utest function but the tasks are
-	# performed afterwards, so we recreate the logger.
-	logfile = os.path.join (tst.bldnode.abspath(), "utest_run.log")
-	tst.logger = Logs.make_logger (logfile, "utest_run")
-
-	lst = getattr(tst, 'utest_results', [])
-	nfailed = 0
-	ntot = 0
-	msg = ""
-	for (f, code, out, err) in lst:
-		tst.start_msg (os.path.basename (f))
-		if code:
-			msg += os.linesep
-			msg += "Test '%s' failed with return code %s" %(os.path.basename(f), code)
-			msg += os.linesep
-			msg += "stderr:" + os.linesep
-			for l in err.decode('utf-8').splitlines(True):
-				msg += "  " + l
-			msg += "stdout:" + os.linesep
-			for l in out.decode('utf-8').splitlines(True):
-				msg += "  " + l
-			for l in out.decode('utf-8').splitlines(True):
-				if l.startswith ("Run"):
-					data = l.split()
-					n = int(data[1])
-					nf = int(data[3]) + int(data[5])
-					tst.end_msg ("%d/%d" % (n-nf,n), color="RED")
-		else:
-			for l in out.decode('utf-8').splitlines(True):
-				if l.startswith ("OK"):
-					n = int(l.split()[1][1:])
-					nf = 0
-					tst.end_msg ("%d/%d" % (n, n))
-					break
-		ntot += n
-		nfailed += nf
-			
-	tst.msg ("=========", "=========", color = "NORMAL")
-	if nfailed:
-		tst.msg ("All tests", "%d/%d" % (ntot-nfailed, ntot), color = "RED")
-		h = "Error: %s test%s failed" % (nfailed, "s" if nfailed > 1 else "")
-		tst.fatal (h + os.linesep + msg)
-	else:
-		tst.msg ("All tests", "%d/%d" % (ntot-nfailed, ntot), "GREEN")
-		Logs.pprint ("GREEN", "All tests passed")
-
-	Logs.free_logger (tst.logger)
-	tst.logger = None
 
 ######################
 ####### utest ########
@@ -131,8 +141,10 @@ def utest (tst):
 				use=["TESTS", "CPPUNIT"], defines = defines)
 
 		for f in test_src:
-			basename = os.path.basename (f)
+			dirname, basename = os.path.split (f)
 			name = basename[4:-4] # Remove "Test" at the beginning, ".cpp" at the end
+			if dirname:
+				name = os.path.basename (os.path.dirname (dirname)) + "_" + name
 			tst.program (features="test", source= f, target="utest_" + name,
 									use=["TESTS", "CPPUNIT", "utest_base"], defines = defines)
 
