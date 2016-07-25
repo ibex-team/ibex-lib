@@ -34,7 +34,7 @@ def configure (conf):
 		conf.msg ("Using library filib from", "3rd/ subdirectory")
 		filib_archive = "filibsrc-3.0.2.2.tar.gz"
 		filib_ret = conf.configure_3rd_party_with_autotools (filib_archive)
-		filib_include, filib_lib = filib_ret
+		_, filib_include, filib_lib = filib_ret
 		conf.env.INSTALL_3RD = True
 
 	# Looking for filib header and library (called prim)

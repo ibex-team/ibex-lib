@@ -35,7 +35,7 @@ def configure (conf):
 		conf.msg("Using library mathlib/ultim from", "3rd/ subdirectory")
 		mathlib_archive = "mathlib-2.1.0.tar.gz"
 		mathlib_ret = conf.configure_3rd_party_with_autotools (mathlib_archive)
-		mathlib_include, mathlib_lib = mathlib_ret
+		_, mathlib_include, mathlib_lib = mathlib_ret
 		conf.env.INSTALL_3RD = True
 
 	# Looking for mathlib header and library (called ultim)
@@ -55,8 +55,9 @@ def configure (conf):
 		gaol_archive = "gaol-4.2.0.tar.gz"
 		args = "--with-mathlib-include=%s" % mathlib_include
 		args += " --with-mathlib-lib=%s" % mathlib_lib
-		gaol_ret = conf.configure_3rd_party_with_autotools (gaol_archive, args)
-		gaol_include, gaol_lib = gaol_ret
+		gaol_ret = conf.configure_3rd_party_with_autotools (gaol_archive,
+				conf_args = args)
+		_, gaol_include, gaol_lib = gaol_ret
 		conf.env.INSTALL_3RD = True
 
 	# Looking for gdtoa header and library (it should be provided gaol)

@@ -45,9 +45,9 @@ def archive_name_without_suffix (archive):
 		conf.fatal ("Cannot handle archive %s (based on its suffix)" % archive)
 
 @conf
-def extract_archive (conf, archive_path, name, destdir):
+def extract_archive (conf, archive_path, name, destnode):
 	# path is the destination folder where the file will be extracted 
-	path = os.path.join (destdir, name)
+	path = os.path.join (destnode.abspath (), name)
 
 	conf.start_msg("Extracting %s" % os.path.basename(archive_path))
 
@@ -58,7 +58,7 @@ def extract_archive (conf, archive_path, name, destdir):
 	os.makedirs (path)
 
 	t = tarfile.open (archive_path)
-	t.extractall (destdir)
+	t.extractall (destnode.abspath ())
 	t.close()
 
 	conf.end_msg("done")
@@ -74,24 +74,22 @@ def convert_path_win2msys (path):
 	return "/%s%s" % (drv[0], path.replace("\\", "/"))
 
 @conf
-def configure_3rd_party_with_autotools (conf, archive_name, conf_args = "",
-			without_configure = False):
+def configure_3rd_party_with_autotools (conf, archive_name,
+			without_configure=False, without_make_install=False, conf_args = "",):
 	name = archive_name_without_suffix (archive_name)
 	Logs.pprint ("BLUE", "Starting installation of %s"%name)
 	conf.to_log ((" Starting installation of %s " % name).center (80, "="))
 
-	cur_dir = os.path.abspath(str(conf.path))
-	archive_path = os.path.join (cur_dir, "3rd", archive_name)
+	archive_path = os.path.join (conf.path.abspath (), "3rd", archive_name)
 	destnode = conf.bldnode.find_or_declare ("3rd")
-	destdir = os.path.abspath(str(destnode))
 
 	# Install everything in build directory, in '3rd' subdirectory (the 'lib' and
 	# 'include' directory can be copied in conf.env.PREFIX when ./waf install is
 	# called, if needed)
-	incdir = os.path.join (destdir, "include")
-	libdir = os.path.join (destdir, "lib")
+	incdir = destnode.find_or_declare ("include").abspath()
+	libdir = destnode.find_or_declare ("lib").abspath()
 
-	libsrcdir = conf.extract_archive (archive_path, name, destdir)
+	srcdir = conf.extract_archive (archive_path, name, destnode)
 
 	conf.find_program ("make")
 
@@ -102,26 +100,27 @@ def configure_3rd_party_with_autotools (conf, archive_name, conf_args = "",
 		conf_args += " --enable-static --disable-shared"
 
 	if Utils.is_win32:
-		conf_args += " --prefix=%s" % convert_path_win2msys (destdir)
+		conf_args += " --prefix=%s" % convert_path_win2msys (destnode.abspth ())
 		conf.find_program ("sh")
 		cmd_conf = [conf.env.SH, "-c", "./configure %s"%conf_args]
 		cmd_make = [conf.env.SH, "-c", conf.env.MAKE]
 		cmd_install = [conf.env.SH, "-c", conf.env.MAKE + ["install"]]
 	else:
-		conf_args += " --prefix=%s" % destdir
+		conf_args += " --prefix=%s" % destnode.abspath ()
 		cmd_conf =	"./configure %s" % (conf_args)
 		cmd_make = conf.env.MAKE
 		cmd_install = conf.env.MAKE + ["install"]
 
-	if without_configure:
-		stages = []
-	else:
-		stages = [ (cmd_conf, "configure") ]
-	stages += [ (cmd_make, "make"), (cmd_install, "install") ]
+	stages = []
+	if not without_configure:
+		stages += [ (cmd_conf, "configure") ]
+	stages += [ (cmd_make, "make") ]
+	if not without_make_install:
+		stages += [ (cmd_install, "install") ]
 	for cmd, stage in stages:
 		conf.start_msg("Calling %s" % stage)
 		try: 
-			out = conf.cmd_and_log (cmd, cwd=libsrcdir)
+			out = conf.cmd_and_log (cmd, cwd=srcdir)
 			conf.end_msg("done")
 		except Errors.WafError as e:
 			conf.end_msg("failed", color="RED")
@@ -130,7 +129,7 @@ def configure_3rd_party_with_autotools (conf, archive_name, conf_args = "",
 
 	conf.to_log ((" Installation of %s: done " % name).center (80, "="))
 
-	return incdir, libdir
+	return srcdir, incdir, libdir
 
 # Add verbose wrapper around pre_recurse and post_recurse methods of
 # ConfigurationContext class, in order to a a more verbose output.
