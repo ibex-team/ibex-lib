@@ -23,18 +23,6 @@ def write_setting_header (conf, **kwargs):
 	conf.env.append_unique ("cfg_files", bak)
 	conf.all_envs.pop("setting", None)
 
-@conf
-def append_unique_lib_store (conf, dest_store, src_store):
-	prefix_list = [ "LIB", "LIBPATH", "STLIB", "STLIBPATH", "LINKFLAGS" ]
-	prefix_list += [ "RPATH", "CFLAGS", "CXXFLAGS", "DFLAGS", "INCLUDES" ]
-	prefix_list += [ "CXXDEPS", "CCDEPS", "LINKDEPS", "DEFINES", "FRAMEWORK" ]
-	prefix_list += [ "FRAMEWORKPATH", "ARCH" ]
-	for prefix in prefix_list:
-		src = "%s_%s" % (prefix, src_store)
-		dest = "%s_%s" % (prefix, dest_store)
-		if conf.env[src]:
-			conf.env.append_unique (dest, conf.env[src])
-
 def archive_name_without_suffix (archive):
 	suffixes = [".tar.gz", ".tgz", ".tar" ]
 	if any(archive.endswith (suffix) for suffix in suffixes):
