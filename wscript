@@ -3,7 +3,7 @@
 
 import os, sys
 from distutils.version import LooseVersion
-from waflib import Scripting, Logs
+from waflib import Scripting, Logs, Options
 from waflib.Build import BuildContext
 
 # The following variable is used to build ibex.pc and by "waf dist"
@@ -204,6 +204,13 @@ def dist (ctx):
 	files_patterns += " COPYING.LESSER LICENSE ibexutils.py"
 	files_patterns += " plugins/wscript plugins/interval_lib_gaol/"
 	ctx.files = ctx.path.ant_glob(files_patterns)
+
+######################
+####### check ########
+######################
+def check (ctx):
+	'''run build, install and utest'''
+	Options.commands = [ "build", "install", "utest" ] + Options.commands
 
 ######################
 ####### utest ########
