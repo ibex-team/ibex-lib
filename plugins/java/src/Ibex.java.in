@@ -1,3 +1,5 @@
+package @PACKAGE@;
+
 public class Ibex {
 
 	/* A contraction is considered as

@@ -1,44 +1,43 @@
-#! /usr/bin/env python
+#!/usr/bin/env python
 # encoding: utf-8
 
-import os, tarfile #, functools
+import os
 
-from waflib import Logs
-
+######################
+###### options #######
+######################
 def options (opt):
 	opt.add_option ("--with-jni", action="store_true", dest="WITH_JNI",
 			help = "enable the compilation of the JNI adapter (note: your JAVA_HOME environment variable must be properly set if you want to use this option)")
+	opt.add_option ("--with-java-package", action="store", type="string",
+			dest="JAVA_PACKAGE", default="ibex",
+			help="name of the java package to be build (default is ibex)")
 
-	opt.add_option ("--with-java-package", action="store", type="string", dest="JAVA_PACKAGE",
-			default="ibex", help="name of the java package to be build (default is ibex)")
-
-
+######################
+##### configure ######
+######################
 def configure (conf):
 	conf.env.WITH_JNI = conf.options.WITH_JNI
 	
 	if not conf.env.WITH_JNI: 
 		return
+	conf.start_msg ("JNI plugin")
+	if not conf.env.WITH_JNI:
+		conf.end_msg ("not used")
+		return
 	
+	conf.end_msg ("enabled")
+
 	if not conf.env.ENABLE_SHARED:
 		conf.fatal ("To install the Java plugin, you must set the option --enable-shared")	
     	
-	Logs.pprint ("BLUE", "Configure the java plugin")
-	
-	java_home = os.environ.get("JAVA_HOME")
-	
-	if java_home:
-		conf.env["JAVA_HOME"] = [java_home]
-	
-	conf.load ('javaw', funs = [])
-
+	# Load java tools and detect binaries and headers
+	conf.load ("javaw")
+	pathdir = os.path.dirname(conf.env.JAVAC[0])
+	conf.find_program ("javah", var = "JAVAH", path_list = pathdir)
 	conf.check_jni_headers()
 
-	conf.msg ("Checking for java sdk", java_home)
-	del conf.env["JAVAC"]
-	conf.find_program (os.path.join (java_home, "bin", "javac"), var = "JAVAC")
-	conf.find_program (os.path.join (java_home, "bin", "javah"), var = "JAVAH")
-	conf.find_program (os.path.join (java_home, "bin", "jar"),   var = "JAR")
-
+	# Set java package name
 	conf.env.JAVA_PACKAGE = conf.options.JAVA_PACKAGE
 
 	if conf.env.DEST_OS == "win32":
@@ -47,85 +46,80 @@ def configure (conf):
 		#   http://stackoverflow.com/questions/8063842/mingw32-g-and-stdcall-suffix1
 		conf.env.append_unique ("LINKFLAGS_JAVA", "-Wl,--kill-at")
 
-	JAVA_SIGNATURE = conf.env.JAVA_PACKAGE.replace (".", "_")
-#	fin_cpp=open(os.path.join(conf.path.abspath(),"src","ibex_Java.cpp_"), 'r')
-#	fout=open(os.path.join(conf.path.abspath(),"src","ibex_Java.cpp"), 'w')
-#	fout.write("#include <jni.h>\n")
-#	fout.write(fin_cpp.read().replace ("Java_", "Java_%s_" % JAVA_SIGNATURE))
+	# Set important env variables about Java build
+	conf.env.JAVA_INSTALLDIR = os.path.join (conf.env.PREFIX, "share", "java")
+	conf.env.JAVA_SIGNATURE = conf.env.JAVA_PACKAGE.replace (".", "_")
+	
+	# Define rule for compiling with javac
+	conf.env.JAVAC_RULE = "${JAVAC} -cp ${CLASSPATH} -d ${OUTDIR} ${JAVACFLAGS} ${SRC}"
 
+	# Define rule for compiling with jar
+	conf.env.JAR_RULE = "${JAR} ${JARCREATE} ${TGT} ${SRC}"
+	conf.env.JARCREATE = "cf"
+
+	# Define rule for compiling with javah
+	conf.env.JAVAH_RULE = "${JAVAH} -jni -cp ${CLASSPATH} -o ${TGT} ${SRC}"
+
+######################
+####### build ########
+######################
 def build (bld):
-
 	if not bld.env.WITH_JNI:
 			return
 	
-	Logs.pprint ("BLUE", "Build the java plugin")
-				
-	JAVADIR        = "${PREFIX}/share/java"
-	JAVA_PACKAGE   = bld.env.JAVA_PACKAGE
-	JAVA_SIGNATURE = JAVA_PACKAGE.replace (".", "_")
-	JAVA_PATH      = JAVA_PACKAGE.replace (".", "/")
-	
-#	bld.env.GLOBAL_DEPS = bld.env.GLOBAL_DEPS + " JAVA"
-	
-	@bld.rule (
+	java_ibex_header = "src/%s_Ibex.h" % bld.env.JAVA_SIGNATURE
+	path = bld.env.JAVA_PACKAGE.replace (".", os.path.sep)
+	java_ibex_class_path = os.path.join ("src", path, "Ibex.class")
+
+	# Generate src/ibex_Java.cpp from src/ibex_Java.cpp.in (need JAVA_SIGNATURE)
+	bld (
+		features = "subst",
+		source = "src/ibex_Java.cpp.in",
 		target = "src/ibex_Java.cpp",
-		source = "src/ibex_Java.cpp_",
-		vars = ["JAVA_PACKAGE"],
+		SIGNATURE = bld.env.JAVA_SIGNATURE
 	)
-	def _(tsk):
-		tsk.outputs[0].write (
-			"// This file is generated from %s.\n"
-			'#include "%s_Ibex.h_"\n%s'
-			% (tsk.inputs[0].name, JAVA_SIGNATURE, 
-			tsk.inputs[0].read().replace ("Java_", "Java_%s_" % JAVA_SIGNATURE)
-		)
-		
-		)
 
-
-	#add plugin sources
-#	bld.env.IBEX_SRC.extend(bld.path.ant_glob ("src/ibex_Java.cpp"))
-
-	for (name, snippet) in (
-		("Ibex", "package %s;\n" % JAVA_PACKAGE),
-		("Test", "import %s.Ibex;\n" % JAVA_PACKAGE),
-	):
-		@bld.rule (
-		target = "src/%s.java" % name,
-		source = "src/%s.java_" % name,
-		vars = ["JAVA_PACKAGE"],
-		snippet = snippet,
-		)
-		def _(tsk):
-			tsk.outputs[0].write (
-				"// This file is generated from %s.\n"
-				"%s\n%s"
-				% (tsk.inputs[0].name, tsk.generator.snippet, tsk.inputs[0].read()))
-
+	# Generate src/Ibex.java from src/Ibex.java.in (need bld.env.JAVA_PACKAGE)
 	bld (
-		target = "src/%s/Ibex.class" % JAVA_PATH,
+		features = "subst",
+		source = "src/Ibex.java.in",
+		target = "src/Ibex.java",
+		PACKAGE = bld.env.JAVA_PACKAGE
+	)
+	
+	bld.env.CLASSPATH = bld.path.make_node("src").get_bld().abspath()
+	bld.env.OUTDIR = bld.env.CLASSPATH
+
+	# Compile src/Ibex.java into Ibex.class with javac
+	bld (
 		source = "src/Ibex.java",
-		rule   = "${JAVAC} -d plugins/java/src ${SRC}"
+		target = java_ibex_class_path,
+		rule   = bld.env.JAVAC_RULE,
 	)
 
+	# Generate C++ header with javah
 	bld (
-		target = "src/Test.class",
-		source = "src/Test.java",
-		rule   = "${JAVAC} -d plugins/java/src -cp plugins/java/src ${SRC}",
-		after  = "src/%s/Ibex.class" % JAVA_PATH,
+		target = java_ibex_header,
+		# This is a hack: the real source of the rule is java_ibex_class_path, but
+		# I do not know to do the conversion in the rule from ${SRC} to the class
+		# name needed by javah. So i use after to register the dependency and
+		# replace directly ${SRC} in the rule by the correct class name.
+		after = java_ibex_class_path,
+		rule = bld.env.JAVAH_RULE.replace("${SRC}", bld.env.JAVA_PACKAGE + ".Ibex")
 	)
 
+	# Generate jar
 	bld (
-		target = "src/%s_Ibex.h_" % JAVA_SIGNATURE,
-		source = "src/%s/Ibex.class" % JAVA_PATH,
-		rule   = "${JAVAH} -jni -classpath plugins/java/src -o ${TGT} %s.Ibex" % JAVA_PACKAGE
+		source = java_ibex_class_path,
+		target = bld.env.JAVA_PACKAGE + ".jar",
+		rule = bld.env.JAR_RULE,
+		install_path = bld.env.JAVA_INSTALLDIR,
 	)
 
-	bld (
-		target = "%s.jar" % JAVA_PACKAGE,
-		source = "src/%s/Ibex.class" % JAVA_PATH,
-		rule = "${JAR} cf ${TGT} plugins/java/src/%s/Ibex.class" % JAVA_PATH,
-		install_path = JAVADIR,
+	# Generate shared library
+	bld.shlib (
+		target = "ibex-java",
+		source = "src/ibex_Java.cpp",
+		use = [ "JAVA", "ibex", java_ibex_header ],
+		install_path = bld.env.LIBDIR,
 	)
-
-
