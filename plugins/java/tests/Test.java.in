@@ -1,4 +1,4 @@
-import @PACKAGE@.Ibex;
+import @JAVA_PACKAGE@.Ibex;
 
 
 class Test {

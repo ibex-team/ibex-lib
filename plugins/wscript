@@ -36,3 +36,12 @@ def build (bld):
 	#call "build" for each plugin (not all subdir, cf comments for configure)
 	plugins = bld.get_plugins ()
 	bld.recurse (plugins)
+
+######################
+####### utest ########
+######################
+def utest (tst):
+	# Call "utest" for each plugin (not all subdir, cf comments for configure).
+	# Plugin may not have tests so we add "mandatory = False"
+	plugins = tst.get_plugins ()
+	tst.recurse (plugins, mandatory = False)

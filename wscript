@@ -219,7 +219,7 @@ def utest (tst):
 	'''run the unitary tests'''
 	logfile = os.path.join (tst.bldnode.abspath(), "utest_config.log")
 	tst.logger = Logs.make_logger (logfile, "utest_config")
-	tst.recurse ("tests")
+	tst.recurse ("tests plugins", mandatory = False)
 	Logs.free_logger (tst.logger)
 	tst.logger = None
 

@@ -1,4 +1,4 @@
-import ibex.Ibex;
+import @JAVA_PACKAGE@.Ibex;
 import org.junit.*;
 import org.junit.Test;
 import static org.junit.Assert.*;

@@ -2,6 +2,7 @@
 # encoding: utf-8
 
 import os
+import waf_java_utils
 
 ######################
 ###### options #######
@@ -18,24 +19,21 @@ def options (opt):
 ######################
 def configure (conf):
 	conf.env.WITH_JNI = conf.options.WITH_JNI
-	
+
 	if not conf.env.WITH_JNI: 
 		return
 	conf.start_msg ("JNI plugin")
 	if not conf.env.WITH_JNI:
 		conf.end_msg ("not used")
 		return
-	
+
 	conf.end_msg ("enabled")
 
 	if not conf.env.ENABLE_SHARED:
-		conf.fatal ("To install the Java plugin, you must set the option --enable-shared")	
-    	
-	# Load java tools and detect binaries and headers
-	conf.load ("javaw")
-	pathdir = os.path.dirname(conf.env.JAVAC[0])
-	conf.find_program ("javah", var = "JAVAH", path_list = pathdir)
-	conf.check_jni_headers()
+		conf.fatal ("To install the Java plugin, you must set the option --enable-shared")
+
+	# Load java tools, detect binaries and jni headers
+	conf.load ("waf_java_utils")
 
 	# Set java package name
 	conf.env.JAVA_PACKAGE = conf.options.JAVA_PACKAGE
@@ -49,16 +47,6 @@ def configure (conf):
 	# Set important env variables about Java build
 	conf.env.JAVA_INSTALLDIR = os.path.join (conf.env.PREFIX, "share", "java")
 	conf.env.JAVA_SIGNATURE = conf.env.JAVA_PACKAGE.replace (".", "_")
-	
-	# Define rule for compiling with javac
-	conf.env.JAVAC_RULE = "${JAVAC} -cp ${CLASSPATH} -d ${OUTDIR} ${JAVACFLAGS} ${SRC}"
-
-	# Define rule for compiling with jar
-	conf.env.JAR_RULE = "${JAR} ${JARCREATE} ${TGT} ${SRC}"
-	conf.env.JARCREATE = "cf"
-
-	# Define rule for compiling with javah
-	conf.env.JAVAH_RULE = "${JAVAH} -jni -cp ${CLASSPATH} -o ${TGT} ${SRC}"
 
 ######################
 ####### build ########
@@ -66,53 +54,45 @@ def configure (conf):
 def build (bld):
 	if not bld.env.WITH_JNI:
 			return
-	
-	java_ibex_header = "src/%s_Ibex.h" % bld.env.JAVA_SIGNATURE
-	path = bld.env.JAVA_PACKAGE.replace (".", os.path.sep)
-	java_ibex_class_path = os.path.join ("src", path, "Ibex.class")
 
-	# Generate src/ibex_Java.cpp from src/ibex_Java.cpp.in (need JAVA_SIGNATURE)
-	bld (
-		features = "subst",
-		source = "src/ibex_Java.cpp.in",
-		target = "src/ibex_Java.cpp",
-		SIGNATURE = bld.env.JAVA_SIGNATURE
-	)
+	# Generate src/* from src/*.*.in (need bld.env.JAVA_PACKAGE and
+	# bld.env.JAVA_SIGNATURE)
+	for f in bld.path.ant_glob ("src/**/*.in"):
+		bld (
+			features = "subst",
+			source = f,
+			target = f.change_ext ("", ".in"),
+		)
 
-	# Generate src/Ibex.java from src/Ibex.java.in (need bld.env.JAVA_PACKAGE)
-	bld (
-		features = "subst",
-		source = "src/Ibex.java.in",
-		target = "src/Ibex.java",
-		PACKAGE = bld.env.JAVA_PACKAGE
-	)
-	
-	bld.env.CLASSPATH = bld.path.make_node("src").get_bld().abspath()
-	bld.env.OUTDIR = bld.env.CLASSPATH
+	# Set CLASSPATH for JAVA
+	java_bld = bld.path.get_bld()
+	bld.env.append_unique ("CLASSPATH_JAVA", java_bld.abspath())
+	bld.env.append_unique ("CLASSPATH_JAVA", java_bld.make_node("src").abspath())
 
 	# Compile src/Ibex.java into Ibex.class with javac
+	path = bld.env.JAVA_PACKAGE.replace (".", os.path.sep)
+	java_ibex_class = os.path.join (path, "Ibex.class")
 	bld (
+		features = "myjavac",
 		source = "src/Ibex.java",
-		target = java_ibex_class_path,
-		rule   = bld.env.JAVAC_RULE,
+		target = java_ibex_class,
+		use = ["JAVA"],
 	)
 
 	# Generate C++ header with javah
+	java_ibex_header = "src/%s_Ibex.h" % bld.env.JAVA_SIGNATURE
 	bld (
+		features = "myjavah",
+		source = java_ibex_class,
 		target = java_ibex_header,
-		# This is a hack: the real source of the rule is java_ibex_class_path, but
-		# I do not know to do the conversion in the rule from ${SRC} to the class
-		# name needed by javah. So i use after to register the dependency and
-		# replace directly ${SRC} in the rule by the correct class name.
-		after = java_ibex_class_path,
-		rule = bld.env.JAVAH_RULE.replace("${SRC}", bld.env.JAVA_PACKAGE + ".Ibex")
+		use = ["JAVA"],
 	)
 
 	# Generate jar
 	bld (
-		source = java_ibex_class_path,
+		features = "myjar",
+		source = java_ibex_class,
 		target = bld.env.JAVA_PACKAGE + ".jar",
-		rule = bld.env.JAR_RULE,
 		install_path = bld.env.JAVA_INSTALLDIR,
 	)
 
@@ -122,4 +102,48 @@ def build (bld):
 		source = "src/ibex_Java.cpp",
 		use = [ "JAVA", "ibex", java_ibex_header ],
 		install_path = bld.env.LIBDIR,
+	)
+
+######################
+####### utest ########
+######################
+def utest (tst):
+	if not tst.env.WITH_JNI:
+			return
+
+	# Generate tests/* from tests/*.in (need bld.env.JAVA_PACKAGE)
+	for f in tst.path.ant_glob ("tests/**/*.in"):
+		tst (
+			features = "subst",
+			source = f,
+			target = f.change_ext ("", ".in"),
+		)
+
+	# Add to LD_LIBRARY_PATH the path to the install directory of libs
+	tst.env.append_unique ("LD_LIBRARY_PATH_JAVA_TESTS", tst.env.LIBDIR)
+
+	# Add to CLASSPATH the path to the needed jar archive
+	ibexjar = os.path.join (tst.env.JAVA_INSTALLDIR, tst.env.JAVA_PACKAGE + ".jar")
+	tst.env.append_unique ("CLASSPATH_JAVA_TESTS", ibexjar)
+	java_tst = tst.path.find_node ("tests").abspath()
+	for jar in [ "junit-4.11.jar", "hamcrest-core-1.3.jar" ]:
+		tst.env.append_unique ("CLASSPATH_JAVA_TESTS", os.path.join (java_tst, jar))
+
+	# Compile src/Test.java into Test.class with javac and run the test
+	tst (
+		features = "myjavac javatest",
+		source = "tests/Test.java",
+		target = "tests/Test.class",
+		outdir = "tests",
+		use = ["JAVA_TESTS"],
+	)
+
+	# Compile src/IbexTest.java into IbexTest.class with javac and run the test
+	tst (
+		features = "myjavac javatest",
+		source = "tests/IbexTest.java",
+		target = "tests/IbexTest.class",
+		outdir = "tests",
+		use = ["JAVA_TESTS"],
+		classname_extra = "org.junit.runner.JUnitCore"
 	)

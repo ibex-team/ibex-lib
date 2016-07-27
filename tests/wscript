@@ -23,6 +23,9 @@ def utest_format_output (tst):
 			if l.startswith ("Run"):
 				data = l.split()
 				return (int(data[1]), int(data[3]) + int(data[5]))
+			if l.startswith ("Tests run"):
+				data = l.split()
+				return (int(data[2][:-1]), int(data[4]))
 			elif l.startswith ("OK"):
 				return (int(l.split()[1][1:]), 0)
 		return (None, None)
