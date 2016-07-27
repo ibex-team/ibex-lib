@@ -210,7 +210,7 @@ def dist (ctx):
 ######################
 def check (ctx):
 	'''run build, install and utest'''
-	Options.commands = [ "build", "install", "utest" ] + Options.commands
+	Options.commands = [ "build", "install", "clean", "utest" ] + Options.commands
 
 ######################
 ####### utest ########
