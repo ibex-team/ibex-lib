@@ -20,8 +20,6 @@ def options (opt):
 def configure (conf):
 	conf.env.WITH_JNI = conf.options.WITH_JNI
 
-	if not conf.env.WITH_JNI: 
-		return
 	conf.start_msg ("JNI plugin")
 	if not conf.env.WITH_JNI:
 		conf.end_msg ("not used")

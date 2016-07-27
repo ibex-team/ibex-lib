@@ -30,10 +30,13 @@ def configure (conf):
 	conf.env.WITH_OPTIM = conf.options.WITH_OPTIM
 	conf.env.OPTIM_LIB = conf.options.OPTIM_LIB
 
+	conf.start_msg ("plugin IbexOpt")
 	if not conf.env.WITH_OPTIM:
+		conf.end_msg ("not used")
 		return
 
-	conf.msg ("plugin IbexOpt", "enabled")
+	conf.end_msg ("enabled")
+
 	conf.env.append_unique ("IBEX_PLUGIN_USE_LIST", "OPTIM")
 
 	# Add information in ibex_Setting

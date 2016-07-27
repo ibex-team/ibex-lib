@@ -12,8 +12,12 @@ def options (opt):
 def configure (conf):
 	conf.env.WITH_AMPL = conf.options.WITH_AMPL
 		
+	conf.start_msg ("AMPL plugin")
 	if not conf.env.WITH_AMPL: 
+		conf.end_msg ("not used")
 		return
+
+	conf.end_msg ("enabled")
 	
 	##################################################################################################
 	# AMPL plugin is disable on Window

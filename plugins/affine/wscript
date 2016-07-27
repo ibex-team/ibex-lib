@@ -17,8 +17,12 @@ def configure (conf):
 	if conf.options.WITH_AFFINE or conf.options.WITH_AFFINE_EXTEND:
 		conf.env.WITH_AFFINE = True
 
+	conf.start_msg ("plugin Affine Arithmetic")
 	if not conf.env.WITH_AFFINE: 
+		conf.end_msg ("not used")
 		return
+
+	conf.end_msg ("enabled")
 
 	conf.msg ("plugin Affine Arithmetic", "enabled")
 	conf.env.append_unique ("IBEX_PLUGIN_USE_LIST", "AFFINE")

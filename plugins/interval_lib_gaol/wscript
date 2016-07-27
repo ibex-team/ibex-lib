@@ -3,7 +3,6 @@
 
 import ibexutils
 import os, sys
-from waflib import Logs
 
 ######################
 ###### options #######

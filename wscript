@@ -119,6 +119,7 @@ def configure (conf):
 	# recurse on the interval library directory
 	if conf.options.INTERVAL_LIB is None:
 		conf.fatal ("No interval library is available.")
+	Logs.pprint ("BLUE", "Configuration of the library for interval arithmetic")
 	conf.msg ("Library for interval arithmetic", conf.options.INTERVAL_LIB)
 	itvlib_dir = ITVLIB_PLUGIN_PREFIX + conf.options.INTERVAL_LIB
 	conf.recurse (os.path.join("plugins", itvlib_dir))
@@ -131,7 +132,12 @@ def configure (conf):
 	conf.setting_define("INTERVAL_LIB", conf.env["INTERVAL_LIB"])
 
 	# recurse
-	conf.recurse ("plugins src tests")
+	Logs.pprint ("BLUE", "Configuration of the plugins")
+	conf.recurse ("plugins")
+	Logs.pprint ("BLUE", "Configuration of the src directory")
+	conf.recurse ("src")
+	Logs.pprint ("BLUE", "Configuration of the tests")
+	conf.recurse ("tests")
 
 	# If we used a 3rd party library, add the install path (for *.pc file)
 	if conf.env.INSTALL_3RD: # It may not be necessary but it costs nothing

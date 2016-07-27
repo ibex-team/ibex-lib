@@ -14,10 +14,13 @@ def options (opt):
 def configure (conf):
 	conf.env.WITH_AFFINE_EXTEND = conf.options.WITH_AFFINE_EXTEND
 		
+	conf.start_msg ("plugin Affine Extended Arithmetic")
 	if not conf.env.WITH_AFFINE_EXTEND: 
+		conf.end_msg ("not used")
 		return
+
+	conf.end_msg ("enabled")
 	
-	conf.msg ("plugin Affine Extended Arithmetic", "enabled")
 	conf.env.append_unique ("IBEX_PLUGIN_USE_LIST", "AFFINE_EXTENDED")
 
 	# Add information in ibex_Setting

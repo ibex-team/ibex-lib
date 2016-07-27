@@ -123,7 +123,8 @@ def configure_3rd_party_with_autotools (conf, archive_name,
 # ConfigurationContext class, in order to a a more verbose output.
 def verbose_pre_recurse (f):
 	def fun (ctx, node):
-		Logs.pprint ("BLUE", "Starting configure from ./%s" % node.srcpath ())
+		if Logs.verbose:
+			Logs.pprint ("BLUE", "Starting configure from ./%s" % node.srcpath ())
 		f (ctx, node)
 	fun.__name__ = f.__name__
 	return fun
@@ -132,7 +133,8 @@ ConfigurationContext.pre_recurse = verbose_pre_recurse (ConfigurationContext.pre
 
 def verbose_post_recurse (f):
 	def fun (ctx, node):
-		Logs.pprint ("BLUE", "Leaving configure from ./%s" % node.srcpath ())
+		if Logs.verbose:
+			Logs.pprint ("BLUE", "Leaving configure from ./%s" % node.srcpath ())
 		f (ctx, node)
 	fun.__name__ = f.__name__
 	return fun

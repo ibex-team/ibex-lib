@@ -2,9 +2,8 @@
 # encoding: utf-8
 
 import ibexutils
-import os, tarfile #, functools
 
-from waflib import Logs, Configure
+from waflib import Configure
 
 @Configure.conf
 def get_plugins (conf):
