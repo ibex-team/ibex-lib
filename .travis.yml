@@ -24,16 +24,12 @@ before_install:
   - if [ "$TRAVIS_OS_NAME" = "osx" ] ; then brew update ; brew install python flex bison cppunit; fi
 
 install: 
-  - cd plugins/optim/; tar xvf soplex-1.7.1.tar && cd soplex-1.7.1 && make install && cd ../../..
-  - ./waf configure --with-optim --with-soplex=$PWD/plugins/optim/soplex-1.7.1 --with-affine
-  - sudo ./waf install
-  - export PKG_CONFIG_PATH=/usr/local/share/pkgconfig/
-  - cd tests/ && make utest && cd ..
-  - cd plugins/optim/tests/ && make nonreg && cd ../../..
+  - ./waf configure --prefix=$HOME --with-optim --optim-lib=soplex --with-affine-extended
+  - ./waf build install clean
 
 # command to run tests
+# TODO: add nonreg tests
 script:  
+  - ./waf utest
 #  - __build__/examples/optimizer04 benchs/benchs-optim/coconutbenchmark-library1/ex8_5_2.bch acidhc4 compo smearsumrel 1.e-8 1.e-8 100 1
-  - cd tests/ && ./utest && cd ..
-#  - cd plugins/optim/tests/ && ./nonreg nonreg-travis-soplex-filib.res && cd ../../..
 
