@@ -1,4 +1,4 @@
---- gaol-4.2.0/configure.orig	2016-07-28 11:30:03.886905588 +0200
+--- gaol-4.2.0/configure	2016-07-28 11:30:03.886905588 +0200
 +++ gaol-4.2.0/configure	2016-07-28 11:30:17.054905199 +0200
 @@ -18044,7 +18044,7 @@
  fi
@@ -9,7 +9,7 @@
  do :
    as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
  ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
---- gaol-4.2.0/gaol/gaol_configuration.h.in.orig	2016-07-28 11:32:56.598900485 +0200
+--- gaol-4.2.0/gaol/gaol_configuration.h.in	2016-07-28 11:32:56.598900485 +0200
 +++ gaol-4.2.0/gaol/gaol_configuration.h.in	2016-07-28 11:30:53.298904129 +0200
 @@ -72,6 +72,9 @@
  /* Define to 1 if you have the `finite' function. */
@@ -21,21 +21,16 @@
  /* Define to 1 if you have the <float.h> header file. */
  #undef HAVE_FLOAT_H
  
---- gaol-4.2.0/gaol/gaol_port.h.orig	2016-07-28 13:51:17.602655218 +0200
+--- gaol-4.2.0/gaol/gaol_port.h	2016-07-28 13:51:17.602655218 +0200
 +++ gaol-4.2.0/gaol/gaol_port.h	2016-07-28 13:50:40.446656316 +0200
-@@ -193,11 +193,15 @@
+@@ -193,7 +193,9 @@
     */
    INLINE int is_finite(double d)
    {
-+#if HAVE_ISFINITE
+-#if HAVE_FINITE
++#if HAVE_ISFINITE || defined (isfinite) /* often isfinite is a macro */
 +    return isfinite(d);
-+#else
- #if HAVE_FINITE
++#elif HAVE_FINITE
      return finite(d);
  #else
      return (d==d && d!=GAOL_INFINITY && d!=-GAOL_INFINITY);
- #endif
-+#endif
-   }
- 
- 
