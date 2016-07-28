@@ -25,7 +25,7 @@ before_install:
 
 # TODO add --affine when tests are fixed
 install: 
-  - ./waf configure --prefix=$HOME --with-optim --optim-lib=soplex -v -v -v || cat __build__/config.log
+  - ./waf configure --prefix=$HOME --with-optim --optim-lib=soplex
   - ./waf build install clean
 
 # command to run tests
@@ -34,3 +34,5 @@ script:
   - ./waf utest
 #  - __build__/examples/optimizer04 benchs/benchs-optim/coconutbenchmark-library1/ex8_5_2.bch acidhc4 compo smearsumrel 1.e-8 1.e-8 100 1
 
+after_failure:
+  - cat __build__/*.log
