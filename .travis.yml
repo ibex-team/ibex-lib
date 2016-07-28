@@ -4,15 +4,20 @@ matrix:
   include:
     - os: linux
       compiler: gcc
+      env: TEST_INTERVAL_LIB=gaol
+    - os: linux
+      compiler: gcc
+      env: TEST_INTERVAL_LIB=filib
     - os: osx
       compiler: clang
       osx_image: xcode7.3
+      env: TEST_INTERVAL_LIB=gaol
+    - os: osx
+      compiler: clang
+      osx_image: xcode7.3
+      env: TEST_INTERVAL_LIB=filib
   allow_failures: # temporary
     - os: osx
-
-env:
-  - TEST_INTERVAL_LIB=gaol
-  - TEST_INTERVAL_LIB=filib
 
 # only works on linux
 addons:
