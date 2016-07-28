@@ -36,6 +36,7 @@ def archive_name_without_suffix (archive):
 
 @conf
 def apply_patch (conf, name):
+	conf.msg ("Applying patch", name)
 	patch_file = os.path.join (conf.path.abspath(), name)
 	p = patch.fromfile (patch_file)
 	if not p.apply (root = conf.bldnode.make_node ("3rd").abspath()):
