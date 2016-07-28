@@ -55,7 +55,7 @@ def configure (conf):
 		args = "--with-mathlib-include=%s" % mathlib_include
 		args += " --with-mathlib-lib=%s" % mathlib_lib
 		gaol_ret = conf.configure_3rd_party_with_autotools (gaol_archive,
-				conf_args = args, patches = [ "3rd/gaol-4.2.0.patch" ])
+				conf_args = args)
 		_, gaol_include, gaol_lib = gaol_ret
 		conf.env.INSTALL_3RD = True
 

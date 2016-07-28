@@ -35,12 +35,11 @@ def archive_name_without_suffix (archive):
 		conf.fatal ("Cannot handle archive %s (based on its suffix)" % archive)
 
 @conf
-def apply_patch (conf, name):
-	conf.msg ("Applying patch", name)
-	patch_file = os.path.join (conf.path.abspath(), name)
-	p = patch.fromfile (patch_file)
+def apply_patch (conf, patch_abspath):
+	conf.msg ("Applying patch", os.path.basename (patch_abspath))
+	p = patch.fromfile (patch_abspath)
 	if not p.apply (root = conf.bldnode.make_node ("3rd").abspath()):
-		conf.fatal ("Cannot apply patch %s" % patch_file)
+		conf.fatal ("Cannot apply patch %s" % patch_abspath)
 
 @conf
 def extract_archive (conf, archive_path, name, destnode):
@@ -73,8 +72,7 @@ def convert_path_win2msys (path):
 
 @conf
 def configure_3rd_party_with_autotools (conf, archive_name,
-			without_configure=False, without_make_install=False, conf_args = "",
-			patches = []):
+			without_configure=False, without_make_install=False, conf_args = ""):
 	name = archive_name_without_suffix (archive_name)
 	Logs.pprint ("BLUE", "Starting installation of %s"%name)
 	conf.to_log ((" Starting installation of %s " % name).center (80, "="))
@@ -92,9 +90,13 @@ def configure_3rd_party_with_autotools (conf, archive_name,
 
 	conf.find_program ("make")
 
-	# Apply patches
-	for p in patches:
-		conf.apply_patch (p)
+	# Apply patches 
+	patch_ant_glob = "3rd/%s.all.all*patch" % name
+	patch_ant_glob += " 3rd/%s.%s.all*patch" % (name, sys.platform)
+	patch_ant_glob += " 3rd/%s.all.%s*patch" % (name, conf.env.CC_NAME)
+	patch_ant_glob += " 3rd/%s.%s.%s*patch" % (name,sys.platform,conf.env.CC_NAME)
+	for p in conf.path.ant_glob (patch_ant_glob):
+		conf.apply_patch (p.abspath())
 
 	# Built shared library, if ibex is built as a shared library.
 	if conf.env.ENABLE_SHARED:
