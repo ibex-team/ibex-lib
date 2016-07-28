@@ -1,0 +1,10 @@
+--- gaol-4.2.0/gaol/gaol_interval.h	2016-07-28 10:11:07.667045528 +0200
++++ gaol-4.2.0/gaol/gaol_interval.h	2016-07-28 10:11:38.535044616 +0200
+@@ -32,6 +32,7 @@
+ 
+ #include <cmath>
+ #include <iosfwd>
++#include <ios> /* for std::streamsize, patch from ibex */
+ #include <string>
+ #include <limits>
+ #include "gaol/gaol_config.h"
