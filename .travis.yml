@@ -10,14 +10,15 @@ matrix:
       env: TEST_INTERVAL_LIB=filib
     - os: osx
       compiler: clang
+      osx_image: xcode7.3
       env: TEST_INTERVAL_LIB=gaol
-    - os: osx
-      compiler: clang
-      env: TEST_INTERVAL_LIB=filib
+    # disable for now
+    #- os: osx
+    #  compiler: gcc
+    #  env: TEST_INTERVAL_LIB=filib
   allow_failures: # temporary
     - os: osx
 
-osx_image: xcode7.3
 
 # only works on linux
 addons:
@@ -42,9 +43,6 @@ install:
 script:  
   - ./waf utest
 #  - __build__/examples/optimizer04 benchs/benchs-optim/coconutbenchmark-library1/ex8_5_2.bch acidhc4 compo smearsumrel 1.e-8 1.e-8 100 1
-
-after_success: # temporary
-  - cat __build__/*.log
 
 after_failure:
   - cat __build__/*.log
