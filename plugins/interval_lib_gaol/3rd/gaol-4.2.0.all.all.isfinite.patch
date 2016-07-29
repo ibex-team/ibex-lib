@@ -22,8 +22,19 @@
  #undef HAVE_FLOAT_H
  
 --- gaol-4.2.0/gaol/gaol_port.h	2016-07-28 13:51:17.602655218 +0200
-+++ gaol-4.2.0/gaol/gaol_port.h	2016-07-28 13:50:40.446656316 +0200
-@@ -193,7 +193,9 @@
++++ gaol-4.2.0/gaol/gaol_port.h	2016-07-29 09:14:49.260391277 +0200
+@@ -37,9 +37,7 @@
+ #include "gaol/gaol_config.h"
+ #include "gaol/gaol_limits.h"
+ 
+-#if HAVE_FINITE
+-#  include <cmath>
+-#endif
++#include <cmath>
+ 
+ // Alignment on an 'nbytes' bytes boundary
+ #if defined(_MSC_VER)
+@@ -193,7 +191,9 @@
     */
    INLINE int is_finite(double d)
    {
