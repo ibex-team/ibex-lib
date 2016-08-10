@@ -35,8 +35,8 @@ public:
 
 		// do not initialize variables with sys.f.args
 		// since f may be uninitialized (unconstrained problem)
-		add_var(sys.args);
-		add_var(y);
+		add_var(sys.args,sys.box);
+		add_var(y,IntervalVector(1,sys.goal->eval(sys.box)));
 
 		// first, add goal(x)<=y.
 		if (sys.goal)  {
@@ -45,6 +45,9 @@ public:
 			const ExprNode& goal_expr=ExprCopy().copy(sys.goal->args(), sys.args, sys.goal->expr())-y;
 			add_ctr(ExprCtr(goal_expr,EQ));
 			cleanup(goal_expr, false);
+
+			const ExprNode& tmp=y;
+			add_goal(tmp);
 		}
 
 

@@ -38,6 +38,7 @@ public:
 	 * 	until the system is built.
 	 */
 	void add_var(const ExprSymbol& v);
+	void add_var(const ExprSymbol& v, const IntervalVector& init_box);
 
 	/**
 	 * \brief Add all variables.
@@ -46,6 +47,8 @@ public:
 	 * 	until the system is built.
 	 */
 	void add_var(const Array<const ExprSymbol>& a);
+	void add_var(const Array<const ExprSymbol>& a, const IntervalVector& box);
+	void add_var(const Array<const ExprSymbol>& a, const Array<const IntervalVector>& init_boxes);
 
 	/**
 	 * \brief Add a goal function (by copy)
@@ -93,12 +96,20 @@ protected:
 
 	Function* goal;
 
+	// initial bound of the variable
+	IntervalVector 	bound_init;
+	std::vector<IntervalVector> tmp_bound;
+
 	// temporary arguments
 	std::vector<const ExprSymbol*> tmp_args;
 	// definitive arguments
 	Array<const ExprSymbol>* args;
 
 	std::vector<NumConstraint*> ctrs;
+
+private:
+
+	void init_arg_bound();
 };
 
 
