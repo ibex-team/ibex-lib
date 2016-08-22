@@ -119,7 +119,7 @@ def configure (conf):
 	conf.env.append_unique ("BISONFLAGS", ["--name-prefix=ibex", "--report=all", "--file-prefix=parser"])
 	conf.env.append_unique ("FLEXFLAGS", "-Pibex")
 
-	# recurse on the interval library directory
+	# Recurse on the interval library directory.
 	if conf.options.INTERVAL_LIB is None:
 		conf.fatal ("No interval library is available.")
 	Logs.pprint ("BLUE", "Configuration of the library for interval arithmetic")
@@ -127,11 +127,26 @@ def configure (conf):
 	itvlib_dir = ITVLIB_PLUGIN_PREFIX + conf.options.INTERVAL_LIB
 	conf.recurse (os.path.join("plugins", itvlib_dir))
 	# Copy in _IBEX_DEPS some important variables from _ITV_LIB
+	# The plugin must use the store ITV_LIB (uselib_store argument with
+	# conf.check* functions).
 	conf.env.append_unique ("CXXFLAGS_IBEX_DEPS", conf.env.CXXFLAGS_ITV_LIB)
 	conf.env.append_unique ("LIB_IBEX_DEPS", conf.env.LIB_ITV_LIB)
+	# The following variables must be defined in env by the plugin called to
+	# handle the library for interval arithmetic.
+	for var in ["INTERVAL_LIB", "IBEX_INTERVAL_LIB_WRAPPER_CPP",
+        "IBEX_INTERVAL_LIB_WRAPPER_H", "IBEX_INTERVAL_LIB_INCLUDES",
+        "IBEX_INTERVAL_LIB_NEG_INFINITY", "IBEX_INTERVAL_LIB_POS_INFINITY",
+        "IBEX_INTERVAL_LIB_EXTRA_DEFINES",
+        "IBEX_INTERVAL_LIB_ITV_EXTRA", "IBEX_INTERVAL_LIB_ITV_WRAP",
+        "IBEX_INTERVAL_LIB_ITV_ASSIGN", "IBEX_INTERVAL_LIB_ITV_DEF",
+        "IBEX_INTERVAL_LIB_DISTANCE"]:
+		if not conf.env[var]:
+			conf.fatal ("%s must be defined in env by the plugin %s"%(var,itvlib_dir))
+	if isinstance (conf.env.IBEX_INTERVAL_LIB_INCLUDES, list):
+		l = [ "#include \"%s\"" % s for s in conf.env.IBEX_INTERVAL_LIB_INCLUDES ]
+		conf.env.IBEX_INTERVAL_LIB_INCLUDES  = os.linesep.join (l)
 
 	# Add info on the interval library used to the settings
-	conf.setting_define("WITH_" + conf.env["INTERVAL_LIB"], 1)
 	conf.setting_define("INTERVAL_LIB", conf.env["INTERVAL_LIB"])
 
 	# recurse

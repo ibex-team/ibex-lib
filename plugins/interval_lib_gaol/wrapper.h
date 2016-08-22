@@ -1,17 +1,3 @@
-/* ============================================================================
- * I B E X - Implementation of the Interval class based on Gaol
- * ============================================================================
- * Copyright   : Ecole des Mines de Nantes (FRANCE)
- * License     : This program can be distributed under the terms of the GNU LGPL.
- *               See the file COPYING.LESSER.
- *
- * Author(s)   : Gilles Chabert
- * Created     : Dec 23, 2011
- * ---------------------------------------------------------------------------- */
-
-#ifndef _IBEX_GAOL_INTERVAL_H_
-#define _IBEX_GAOL_INTERVAL_H_
-
 #include "ibex_Exception.h"
 
 namespace ibex {
@@ -480,5 +466,3 @@ inline bool bwd_abs(const Interval& y,  Interval& x) {
 }
 
 } // end namespace ibex
-
-#endif // _IBEX_GAOL_INTERVAL_H_

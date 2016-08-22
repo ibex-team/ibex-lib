@@ -1,18 +1,3 @@
-/* ============================================================================
- * I B E X - Implementation of the Interval class based on Profil/BIAS
- * ============================================================================
- * Copyright   : Ecole des Mines de Nantes (FRANCE)
- * License     : This program can be distributed under the terms of the GNU LGPL.
- *               See the file COPYING.LESSER.
- *
- * Author(s)   : Gilles Chabert
- * Created     : Dec 23, 2011
- * Modified by : Gilles Trombettoni, Bertrand Neveu
- * ---------------------------------------------------------------------------- */
-
-#ifndef _IBEX_BIAS_INTERVAL_H_
-#define _IBEX_BIAS_INTERVAL_H_
-
 #include "Functions.h"
 #include <float.h>
 #include <cassert>
@@ -885,7 +870,3 @@ inline bool bwd_abs(const Interval& y,  Interval& x) {
 	x &= x1 | x2;
 	return !x.is_empty();
 }
-
-} // end namespace
-
-#endif /* _IBEX_BIAS_INTERVAL_H_ */

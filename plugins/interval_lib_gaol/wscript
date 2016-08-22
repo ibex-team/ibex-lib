@@ -92,3 +92,18 @@ def configure (conf):
 	# the linker (last libraries should resolve undefined references from previous
 	# libraries).
 	conf.env["LIB_ITV_LIB"].reverse()
+
+	# Define needed variables
+	cpp_wrapper_node = conf.path.make_node ("wrapper.cpp")
+	h_wrapper_node = conf.path.make_node ("wrapper.h")
+	conf.env.IBEX_INTERVAL_LIB_WRAPPER_CPP = cpp_wrapper_node.read()
+	conf.env.IBEX_INTERVAL_LIB_WRAPPER_H = h_wrapper_node.read()
+	conf.env.IBEX_INTERVAL_LIB_INCLUDES = [ "gaol/gaol.h","gaol/gaol_interval.h" ]
+	conf.env.IBEX_INTERVAL_LIB_EXTRA_DEFINES = "/* */"
+	conf.env.IBEX_INTERVAL_LIB_NEG_INFINITY = "(-GAOL_INFINITY)"
+	conf.env.IBEX_INTERVAL_LIB_POS_INFINITY = "GAOL_INFINITY"
+	conf.env.IBEX_INTERVAL_LIB_ITV_EXTRA = "/* */"
+	conf.env.IBEX_INTERVAL_LIB_ITV_WRAP = "Interval(const gaol::interval& x);"
+	conf.env.IBEX_INTERVAL_LIB_ITV_ASSIGN = "Interval& operator=(const gaol::interval& x);"
+	conf.env.IBEX_INTERVAL_LIB_ITV_DEF = "gaol::interval itv;"
+	conf.env.IBEX_INTERVAL_LIB_DISTANCE = "hausdorff(x1,x2);"

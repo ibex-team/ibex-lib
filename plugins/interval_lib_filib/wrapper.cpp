@@ -1,14 +1,3 @@
-/* ============================================================================
- * I B E X - Implementation of the Interval class based on Profil/BIAS
- * ============================================================================
- * Copyright   : Ecole des Mines de Nantes (FRANCE)
- * License     : This program can be distributed under the terms of the GNU LGPL.
- *               See the file COPYING.LESSER.
- *
- * Author(s)   : Jordan Ninin
- * Created     : Jan 9, 2013
- * ---------------------------------------------------------------------------- */
-
 static void init() {
 	filib::fp_traits<FI_BASE>::setup();
 }
@@ -70,4 +59,3 @@ std::ostream& operator<<(std::ostream& os, const Interval& x) {
 }
 
 } // end namespace
-

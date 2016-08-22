@@ -1,15 +1,3 @@
-/* ============================================================================
- * I B E X - Implementation of the Interval class whitout rounding
- * ============================================================================
- * Copyright   : Ecole des Mines de Nantes (FRANCE)
- * License     : This program can be distributed under the terms of the GNU LGPL.
- *               See the file COPYING.LESSER.
- *
- * Author(s)   : Jordan Ninin
- * Created     : Jan 28, 2015
- * ---------------------------------------------------------------------------- */
-
-
 namespace ibex {
 
 
@@ -32,4 +20,3 @@ std::ostream& operator<<(std::ostream& os, const Interval& x) {
 }
 
 } // end namespace
-

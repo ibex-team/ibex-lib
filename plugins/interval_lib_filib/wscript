@@ -52,3 +52,24 @@ def configure (conf):
 		f = ["-msse2", "-mfpmath=sse"]
 		conf.check_cxx (cxxflags = f, uselib_store = "ITV_LIB", mandatory = False)
 
+	# Define needed variables
+	cpp_wrapper_node = conf.path.make_node ("wrapper.cpp")
+	h_wrapper_node = conf.path.make_node ("wrapper.h")
+	conf.env.IBEX_INTERVAL_LIB_WRAPPER_CPP = cpp_wrapper_node.read()
+	conf.env.IBEX_INTERVAL_LIB_WRAPPER_H = h_wrapper_node.read()
+	conf.env.IBEX_INTERVAL_LIB_INCLUDES = [ "interval/interval.hpp" ]
+	conf.env.IBEX_INTERVAL_LIB_EXTRA_DEFINES = """
+/* simplify instantiation */
+#define FI_BASE double
+#define FI_ROUNDING filib::native_switched
+#define FI_MODE filib::i_mode_extended_flag
+/** \\brief IBEX_NAN: <double> representation of NaN */
+#define IBEX_NAN filib::primitive::compose(0,0x7FF,1 << 19,0)
+"""
+	conf.env.IBEX_INTERVAL_LIB_NEG_INFINITY = "filib::primitive::compose(1,0x7FF,0,0)"
+	conf.env.IBEX_INTERVAL_LIB_POS_INFINITY = "filib::primitive::compose(0,0x7FF,0,0)"
+	conf.env.IBEX_INTERVAL_LIB_ITV_EXTRA = "typedef filib::interval<FI_BASE,FI_ROUNDING,FI_MODE> FI_INTERVAL;"
+	conf.env.IBEX_INTERVAL_LIB_ITV_WRAP = "Interval(const FI_INTERVAL& x);"
+	conf.env.IBEX_INTERVAL_LIB_ITV_ASSIGN = "Interval& operator=(const FI_INTERVAL& x);"
+	conf.env.IBEX_INTERVAL_LIB_ITV_DEF = "FI_INTERVAL itv;"
+	conf.env.IBEX_INTERVAL_LIB_DISTANCE = "x1.itv.dist(x2.itv);"

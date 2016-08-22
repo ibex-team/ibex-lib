@@ -1,18 +1,3 @@
-/* ============================================================================
- * I B E X - Implementation of the Interval class without rounding
- * ============================================================================
- * Copyright   : Ecole des Mines de Nantes (FRANCE)
- * License     : This program can be distributed under the terms of the GNU LGPL.
- *               See the file COPYING.LESSER.
- *
- * Author(s)   : Jordan Ninin
- * Created     : Jan 28, 2015
- * ---------------------------------------------------------------------------- */
-
-#ifndef _IBEX_DIRECT_INTERVAL_H_
-#define _IBEX_DIRECT_INTERVAL_H_
-
-
 #include "ibex_Exception.h"
 #include <cassert>
 #include <float.h>
@@ -1001,5 +986,3 @@ inline bool bwd_abs(const Interval& y,  Interval& x) {
 }
 
 } // end namespace
-
-#endif /* _IBEX_BIAS_DIRECT_INTERVAL_H_ */
