@@ -17,6 +17,182 @@ using namespace std;
 namespace ibex {
 
 #define ERROR 1e-10
+
+void TestDomain::setUp() {
+	int r=5;
+	int c=4;
+	m = new Domain(Dim::matrix(r,c));
+	for (int i=0; i<r; i++)
+		for (int j=0; j<c; j++)
+			m->m()[i][j]=i*c+j;
+
+	rv = new Domain(Dim::row_vec(r));
+	for (int i=0; i<r; i++)
+		rv->v()[i] = i;
+
+	cv = new Domain(Dim::col_vec(c));
+	for (int i=0; i<c; i++)
+		cv->v()[i] = i;
+}
+
+void TestDomain::tearDown() {
+	delete cv;
+	delete rv;
+	delete m;
+}
+
+void TestDomain::row_vec() {
+	Interval x1=rv->v()[0];
+	IntervalVector x2(rv->v().subvector(1,3));
+	Interval x3=rv->v()[4];
+
+	Domain d1(x1);
+	Domain d2(x2,true);
+	Domain d3(x3);
+	Array<const Domain> args(d1,d2,d3);
+	Domain d(args,true);
+	CPPUNIT_ASSERT(d==*rv);
+}
+
+void TestDomain::col_vec() {
+	Interval x1=cv->v()[0];
+	IntervalVector x2(cv->v().subvector(1,3));
+	Interval x3=cv->v()[4];
+
+	Domain d1(x1);
+	Domain d2(x2,false);
+	Domain d3(x3);
+	Array<const Domain> args(d1,d2,d3);
+	Domain d(args,false);
+	CPPUNIT_ASSERT(d==*cv);
+}
+
+void TestDomain::matrix_01() {;
+	IntervalVector x1=m->m().row(0);
+	IntervalMatrix x2(m->m().rows(1,m->dim.nb_rows()-2));
+	IntervalVector x3=m->m().row(m->dim.nb_rows()-1);
+
+	Domain d1(x1,true);
+	Domain d2(x2);
+	Domain d3(x3,true);
+	Array<const Domain> args(d1,d2,d3);
+	Domain d(args,false);
+	CPPUNIT_ASSERT(d==*m);
+}
+
+void TestDomain::matrix_02() {;
+	IntervalVector x1=m->m().row(0);
+	IntervalMatrix x2(m->m().rows(1,m->dim.nb_cols()-2));
+	IntervalVector x3=m->m().row(m->dim.nb_cols()-1);
+
+	Domain d1(x1,false);
+	Domain d2(x2);
+	Domain d3(x3,false);
+	Array<const Domain> args(d1,d2,d3);
+	Domain d(args,true);
+	CPPUNIT_ASSERT(d==*m);
+}
+
+void TestDomain::index_vec_elt() {
+
+	int c=1;
+	DoubleIndex idx=DoubleIndex::one_elt(rv->dim,0,c);
+	Domain d2=(*rv)[idx];
+	CPPUNIT_ASSERT(d2.dim==Dim::scalar());
+	CPPUNIT_ASSERT(d2.i()==rv->v()[c]);
+	CPPUNIT_ASSERT(d2.is_reference);
+}
+
+void TestDomain::index_vec_subrow() {
+	int c1=1,c2=3;
+	DoubleIndex idx=DoubleIndex::subrow(rv->dim,0,c1,c2);
+	Domain d2=(*rv)[idx];
+	CPPUNIT_ASSERT(d2.dim==Dim::row_vec(c2-c1+1));
+	CPPUNIT_ASSERT(!d2.is_reference);
+	CPPUNIT_ASSERT(d2.v()==rv->v().subvector(c1,c2));
+}
+
+void TestDomain::index_vec_subcol() {
+	int r1=1,r2=3;
+	DoubleIndex idx=DoubleIndex::subcol(cv->dim,r1,r2,0);
+	Domain d2=(*cv)[idx];
+	CPPUNIT_ASSERT(d2.dim==Dim::col_vec(r2-r1+1));
+	CPPUNIT_ASSERT(!d2.is_reference);
+	CPPUNIT_ASSERT(d2.v()==cv->v().subvector(r1,r2));
+}
+
+void TestDomain::index_mat_elt() {
+	int r=1, c=0;
+	DoubleIndex idx=DoubleIndex::one_elt(m->dim,r,c);
+	Domain d2=(*m)[idx];
+	CPPUNIT_ASSERT(d2.dim==Dim::scalar());
+	CPPUNIT_ASSERT(d2.i()==m->m()[r][c]);
+	CPPUNIT_ASSERT(d2.is_reference);
+}
+
+void TestDomain::index_mat_subrow() {
+	int r=1,c1=1,c2=3;
+	DoubleIndex idx=DoubleIndex::subrow(m->dim,r,c1,c2);
+	Domain d2=(*m)[idx];
+	CPPUNIT_ASSERT(d2.dim==Dim::row_vec(c2-c1+1));
+	CPPUNIT_ASSERT(!d2.is_reference);
+	CPPUNIT_ASSERT(d2.v()==m->m().row(r).subvector(c1,c2));
+}
+
+void TestDomain::index_mat_row() {
+	int r=1;
+	DoubleIndex idx=DoubleIndex::one_row(m->dim,r);
+	Domain d2=(*m)[idx];
+	CPPUNIT_ASSERT(d2.dim==Dim::row_vec(m->dim.nb_cols()));
+	CPPUNIT_ASSERT(d2.is_reference);
+	CPPUNIT_ASSERT(d2.v()==m->m().row(r));
+}
+
+void TestDomain::index_mat_subcol() {
+	int c=1,r1=1,r2=3;
+	DoubleIndex idx=DoubleIndex::subcol(m->dim,r1,r2,c);
+	Domain d2=(*m)[idx];
+	CPPUNIT_ASSERT(d2.dim==Dim::col_vec(r2-r1+1));
+	CPPUNIT_ASSERT(!d2.is_reference);
+	CPPUNIT_ASSERT(d2.v()==m->m().col(c).subvector(r1,r2));
+}
+
+void TestDomain::index_mat_col() {
+	int c=1;
+	DoubleIndex idx=DoubleIndex::one_col(m->dim,c);
+	Domain d2=(*m)[idx];
+	CPPUNIT_ASSERT(d2.dim==Dim::col_vec(m->dim.nb_rows()));
+	CPPUNIT_ASSERT(!d2.is_reference);
+	CPPUNIT_ASSERT(d2.v()==m->m().col(c));
+}
+
+void TestDomain::index_mat_rows() {
+	int r1=1,r2=3;
+	DoubleIndex idx=DoubleIndex::rows(m->dim,r1,r2);
+	Domain d2=(*m)[idx];
+	CPPUNIT_ASSERT(d2.dim==Dim::matrix(r2-r1+1,m->dim.nb_cols()));
+	CPPUNIT_ASSERT(!d2.is_reference);
+	CPPUNIT_ASSERT(d2.m()==m->m().rows(r1,r2));
+}
+
+void TestDomain::index_mat_cols() {
+	int c1=1,c2=3;
+	DoubleIndex idx=DoubleIndex::cols(m->dim,c1,c2);
+	Domain d2=(*m)[idx];
+	CPPUNIT_ASSERT(d2.dim==Dim::matrix(m->dim.nb_rows(),c2-c1+1));
+	CPPUNIT_ASSERT(!d2.is_reference);
+	CPPUNIT_ASSERT(d2.m()==m->m().cols(c1,c2));
+}
+
+void TestDomain::index_mat_submat() {
+	int r1=1,r2=2,c1=0,c2=1;
+	DoubleIndex idx=DoubleIndex::submatrix(m->dim,r1,r2,c1,c2);
+	Domain d2=(*m)[idx];
+	CPPUNIT_ASSERT(d2.dim==Dim::matrix(r2-r1+1,c2-c1+1));
+	CPPUNIT_ASSERT(!d2.is_reference);
+	CPPUNIT_ASSERT(d2.m()==m->m().submatrix(r1,r2,c1,c2));
+}
+
 /*
 static IntervalVector v0() {
 	double vec0[][2] = { {0,3}, {0,4}, {0,5} };

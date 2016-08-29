@@ -393,7 +393,7 @@ void TestFunction::apply01() {
 	Interval c(1,1);
 	Variable z("z");
 	Function f2(z,f(z,c));
-	CPPUNIT_ASSERT(sameExpr(f2.expr(),"f(z,1)"));
+	CPPUNIT_ASSERT(sameExpr(f2.expr(),"(z+1)"));
 }
 
 void TestFunction::from_string01() {
@@ -424,7 +424,7 @@ void TestFunction::from_string03() {
 		CPPUNIT_ASSERT(f.nb_arg()==2);
 		CPPUNIT_ASSERT(f.arg(0).dim.nb_rows()==2);
 		CPPUNIT_ASSERT(f.arg(1).dim.nb_cols()==3);
-		CPPUNIT_ASSERT(sameExpr(f.expr(),"(x[0]+y[1])"));
+		CPPUNIT_ASSERT(sameExpr(f.expr(),"(x(1)+y(2))"));
 	} catch(SyntaxError& e) {
 		CPPUNIT_ASSERT(false);
 	}

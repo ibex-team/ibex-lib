@@ -10,6 +10,9 @@
 
 #include "ibex_P_Expr.h"
 #include "ibex_P_ExprPrinter.h"
+#include "ibex_P_ExprGenerator.h"
+
+#include <sstream>
 
 extern void ibexerror (const std::string& msg);
 
@@ -18,71 +21,128 @@ using namespace std;
 namespace ibex {
 namespace parser {
 
-void p_print(const ExprNode& e) {
-	P_ExprPrinter().print(cout,e);
+P_ExprNode::~P_ExprNode() {
+	// Works because it is a tree, not a DAG
+	// (compare with cleanup(ExprNode&)).
+	for (int i=0; i<arg.size(); i++) {
+		delete &arg[i];
+	}
 }
 
-P_ExprPower::P_ExprPower(const ExprNode& expr, const ExprNode& expon) : ExprBinaryOp(expr,expon,expr.dim) {
-	if (!expr.dim.is_scalar()) ibexerror("cannot raise a non-scalar value to some power");
-	if (!expon.dim.is_scalar()) ibexerror("cannot raise a value to a non-scalar power");
+const ExprNode& P_ExprNode::generate() const {
+	return ExprGenerator().generate(*this);
+}
+
+void P_ExprNode::cleanup() const {
+	if (lab==NULL) return;
+	for (int i=0; i<arg.size(); i++) {
+		arg[i].cleanup();
+	}
+	delete lab;
+	lab=NULL;
+}
+
+int P_ExprNode::_2int() const {
+	return ExprGenerator().generate_int(*this);
+}
+
+double P_ExprNode::_2dbl() const {
+	return ExprGenerator().generate_dbl(*this);
+}
+
+Domain P_ExprNode::_2domain() const {
+	return ExprGenerator().generate_cst(*this);
+}
+
+ostream& operator<<(ostream& os, const P_ExprNode& e) {
+	P_ExprPrinter p(os,e);
+	return os;
+}
+
+
+P_ExprWithIndex::P_ExprWithIndex(const P_ExprNode& expr, const P_ExprNode& single_idx, bool style) :
+		P_ExprNode(EXPR_WITH_IDX,expr,single_idx), matlab_style(style) {
+}
+
+P_ExprWithIndex::P_ExprWithIndex(const P_ExprNode& expr, const P_ExprNode& row, const P_ExprNode& col, bool style) :
+		P_ExprNode(EXPR_WITH_IDX,expr,row,col), matlab_style(style) {
+}
+
+P_ExprPower::P_ExprPower(const P_ExprNode& expr, const P_ExprNode& power) :
+		P_ExprNode(POWER,expr,power) {
+}
+
+P_ExprIter::P_ExprIter(const char* name) : P_ExprNode(ITER), name(strdup(name)) {
 
 }
 
-void P_ExprPower::acceptVisitor(ExprVisitor& v) const {
-	P_ExprVisitor* v2=dynamic_cast<P_ExprVisitor*>(&v);
-	if (v2) v2->visit(*this);
-	else v.visit(*this);
-}
-
-P_ExprIndex::P_ExprIndex(const ExprNode& expr, const ExprNode& index, bool style) : ExprBinaryOp(expr,index,expr.dim.index_dim()),
-		matlab_style(style) {
-
-}
-
-void P_ExprIndex::acceptVisitor(ExprVisitor& v) const {
-	P_ExprVisitor* v2=dynamic_cast<P_ExprVisitor*>(&v);
-	if (v2) v2->visit(*this);
-	else v.visit(*this);
-}
-
-ExprIter::ExprIter(const char* name) : ExprLeaf(Dim()), name(strdup(name)) {
-
-}
-
-ExprIter::~ExprIter() {
+P_ExprIter::~P_ExprIter() {
 	free((char*) name);
 }
 
-void ExprIter::acceptVisitor(ExprVisitor& v) const {
-	P_ExprVisitor* v2=dynamic_cast<P_ExprVisitor*>(&v);
-	if (v2) v2->visit(*this);
-	else v.visit(*this); // as a leaf. May happen, e.g., with ExprReset called by bin_size
-	// (for calculating the size of the DAG x[y])
+P_ExprVarSymbol::P_ExprVarSymbol(const char* name) :
+				P_ExprNode(VAR_SYMBOL), name(strdup(name)) { }
+
+
+P_ExprVarSymbol::~P_ExprVarSymbol() {
+	free((char*) name);
 }
 
-ExprInfinity::ExprInfinity() : ExprLeaf(Dim::scalar()) {
+P_ExprCstSymbol::P_ExprCstSymbol(const char* name) :
+				P_ExprNode(CST_SYMBOL), name(strdup(name)) { }
+
+
+P_ExprCstSymbol::~P_ExprCstSymbol() {
+	free((char*) name);
+}
+
+P_ExprTmpSymbol::P_ExprTmpSymbol(const char* name) :
+				P_ExprNode(TMP_SYMBOL), name(strdup(name)) { }
+
+
+P_ExprTmpSymbol::~P_ExprTmpSymbol() {
+	free((char*) name);
+}
+
+P_ExprConstant::P_ExprConstant(int x) : P_ExprNode(CST), value(Dim::scalar()) {
+	value.i()=(double) x;
+}
+
+P_ExprConstant::P_ExprConstant(const Interval& x) : P_ExprNode(CST), value(Dim::scalar()) {
+	value.i()=x;
+}
+
+
+P_ExprConstant::P_ExprConstant(double x) : P_ExprNode(CST), value(Dim::scalar()) {
+	value.i()=x;
+}
+
+P_ExprConstant::P_ExprConstant(const Domain& d) : P_ExprNode(CST), value(d) {
 
 }
 
-void ExprInfinity::acceptVisitor(ExprVisitor& v) const {
-	P_ExprVisitor* v2=dynamic_cast<P_ExprVisitor*>(&v);
-	if (v2) v2->visit(*this);
-	else v.visit(*this); // as a leaf.
+P_ExprApply::P_ExprApply(const Function& f, const Array<const P_ExprNode>& args) :
+		P_ExprNode(APPLY,args), f(f) {
 }
 
-ExprConstantRef::ExprConstantRef(const Domain& d) : ExprLeaf(d.dim), value(d,true) {
-
+const P_ExprNode* apply(Function& f, const Array<const P_ExprNode>& args) {
+	int n=f.nb_arg();
+	if (n!=args.size()) {
+		stringstream s;
+		s << "function " << f.name << " expects " << n << " argument" << (n>1? "s":"");
+		ibexerror(s.str());
+		return &args[0]; // just to avoid a "warning control reaches end of non-void function"
+	} else {
+		try {
+			return new P_ExprApply(f,args);
+		} catch(DimException& e) {
+			ibexerror(e.message());
+			return &args[0]; // just to avoid a "warning control reaches end of non-void function"
+		}
+	}
 }
 
-void ExprConstantRef::acceptVisitor(ExprVisitor& v) const {
-	P_ExprVisitor* v2=dynamic_cast<P_ExprVisitor*>(&v);
-	if (v2) v2->visit(*this);
-	else v.visit(*this); // as a leaf.
-}
-
-//ExprEntity::ExprEntity(const Entity& e, int line) : ExprNode(0,1,e.dim), entity(e), line(line) {
-//
-//}
 
 } // end namespace parser
+
 } // end namespace ibex

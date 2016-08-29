@@ -25,7 +25,8 @@ void TestNumConstraint::build_from_string01() {
 	try {
 	NumConstraint c("x","x+1<=2");
 
-	CPPUNIT_ASSERT(sameExpr(c.f.expr(),"((x+1)-2)"));
+//	CPPUNIT_ASSERT(sameExpr(c.f.expr(),"((x+1)-2)"));
+	CPPUNIT_ASSERT(sameExpr(c.f.expr(),"(x+-1)"));
 	CPPUNIT_ASSERT(c.op==LEQ);
 
 	} catch(SyntaxError&) {

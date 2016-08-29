@@ -25,15 +25,43 @@ class TestDomain : public CppUnit::TestFixture {
 public:
 
 	CPPUNIT_TEST_SUITE(TestDomain);
-	
-/*
-		CPPUNIT_TEST(cons01);
-		CPPUNIT_TEST(scal01);
-		CPPUNIT_TEST(vector01);
-		CPPUNIT_TEST(matrix01);
-		CPPUNIT_TEST(mix01);
-		*/
+	CPPUNIT_TEST(index_vec_elt);
+	CPPUNIT_TEST(index_vec_subrow);
+	CPPUNIT_TEST(index_vec_subcol);
+	CPPUNIT_TEST(index_mat_elt);
+	CPPUNIT_TEST(index_mat_subrow);
+	CPPUNIT_TEST(index_mat_row);
+	CPPUNIT_TEST(index_mat_subcol);
+	CPPUNIT_TEST(index_mat_col);
+	CPPUNIT_TEST(index_mat_rows);
+	CPPUNIT_TEST(index_mat_cols);
+	CPPUNIT_TEST(index_mat_submat);
 	CPPUNIT_TEST_SUITE_END();
+
+public:
+	virtual void setUp();
+	virtual void tearDown();
+
+	void row_vec();
+	void col_vec();
+	void matrix_01();
+	void matrix_02();
+	void index_vec_elt();
+	void index_vec_subrow();
+	void index_vec_subcol();
+	void index_mat_elt();
+	void index_mat_subrow();
+	void index_mat_row();
+	void index_mat_subcol();
+	void index_mat_col();
+	void index_mat_rows();
+	void index_mat_cols();
+	void index_mat_submat();
+
+private:
+	Domain *rv; // row vec
+	Domain *cv; // col vec
+	Domain *m; // matrix
 
 	// test: Domain()
 /*	void cons01();
@@ -47,6 +75,6 @@ public:
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestDomain);
 
-
 } // namespace ibex
+
 #endif // __TEST_DOMAIN_H__

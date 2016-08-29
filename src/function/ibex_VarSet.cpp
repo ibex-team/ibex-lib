@@ -8,6 +8,7 @@
 //============================================================================
 
 #include "ibex_VarSet.h"
+#include <sstream>
 
 using namespace std;
 
@@ -93,32 +94,45 @@ void VarSet::init(Function& f, const Array<const ExprNode>& x, bool var) {
 		int shift=0; // by default (if x[i] is a symbol)
 
 		const ExprSymbol* symbol = dynamic_cast<const ExprSymbol*>(&x[i]);
-
-		if (!symbol) {
+		bool** mask;
+		if (symbol) {
+			mask=symbol->mask();
+		} else {
 			const ExprIndex* index = dynamic_cast<const ExprIndex*>(&x[i]);
 			if (!index) ibex_error("VarSet: not a symbol");
 
-			pair<const ExprSymbol*,int> p= index->symbol_shift();
+			pair<const ExprSymbol*,bool**> p= index->symbol_mask();
 			symbol=p.first;
-			shift=p.second;
+			mask=p.second;
 
-			if (shift==-1) ibex_error("VarSet: not a symbol");
+			if (mask==NULL) ibex_error("VarSet: not a symbol");
 		}
 
 		int j=0;
 		while (j<f.nb_arg() && strcmp(f.arg(j).name,symbol->name)!=0) j++;
 
-		if (j<f.nb_arg()) {   // y[i] found in the arguments of f
-			for (int k=0; k<x[i].dim.size(); k++) {
-				if (var) {
-					vars.add(f.symbol_index[j]+shift+k); //  --> marked as a variable
-					((int&) nb_var)++;
-				} else {
-					vars.remove(f.symbol_index[j]+shift+k); //  --> marked as a parameter
-					((int&) nb_var)--;
+		if (j>=f.nb_arg()) {   // y[i] found in the arguments of f
+			stringstream s;
+			s << x[i] << " is not an argument of the function";
+			ibex_error(s.str().c_str());
+		}
+		for (int r=0; r<symbol->dim.nb_rows(); r++) {
+			for (int c=0; c<symbol->dim.nb_cols(); c++) {
+				if (mask[r][c]) {
+					int k=f.symbol_index[j]+(r*symbol->dim.nb_cols())+c;
+					if (var)  {
+						vars.add(k);  //  --> marked as a variable
+						((int&) nb_var)++;
+					}
+					else {
+						vars.remove(k);   //  --> marked as a parameter
+						((int&) nb_var)--;
+					}
 				}
 			}
+			delete[] mask[r];
 		}
+		delete[] mask;
 	}
 
 	(int&) nb_param = f.nb_var() - nb_var;

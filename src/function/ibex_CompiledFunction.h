@@ -68,7 +68,9 @@ public:
 
 protected:
 	typedef enum {
-		IDX, VEC, SYM, CST, APPLY, CHI,
+		IDX,    // index with reference
+		IDX_CP, // index with copy
+		VEC, SYM, CST, APPLY, CHI,
 		ADD, MUL, SUB, DIV, MAX, MIN, ATAN2,
 		MINUS, TRANS_V, TRANS_M, SIGN, ABS, POWER,
 		SQR, SQRT, EXP, LOG,
@@ -158,7 +160,8 @@ void CompiledFunction::forward(const V& algo) const {
 
 	for (int i=n-1; i>=0; i--) {
 		switch(code[i]) {
-		case IDX:    ((V&) algo).index_fwd  (args[i][0], i); break;
+		case IDX:    ((V&) algo).idx_fwd    (args[i][0], i); break;
+		case IDX_CP: ((V&) algo).idx_cp_fwd (args[i][0], i); break;
 		case VEC:    ((V&) algo).vector_fwd (args[i], i); break;
 		case SYM:    ((V&) algo).symbol_fwd (i); break;
 		case CST:    ((V&) algo).cst_fwd    (i); break;
@@ -215,7 +218,8 @@ void CompiledFunction::backward(const V& algo) const {
 
 	for (int i=0; i<n; i++) {
 		switch(code[i]) {
-		case IDX:    ((V&) algo).index_bwd  (args[i][0], i); break;
+		case IDX:    ((V&) algo).idx_bwd    (args[i][0], i); break;
+		case IDX_CP: ((V&) algo).idx_cp_bwd (args[i][0], i); break;
 		case VEC:    ((V&) algo).vector_bwd (args[i], i); break;
 		case SYM:    ((V&) algo).symbol_bwd (i); break;
 		case CST:    ((V&) algo).cst_bwd    (i); break;

@@ -17,8 +17,11 @@
 #include <cassert>
 
 #include "ibex_Array.h"
+#include "ibex_Exception.h"
 
 namespace ibex {
+
+class DoubleIndex;
 
 /**
  * \ingroup arithmetic
@@ -105,20 +108,23 @@ public:
 	 */
 	Dim transpose_dim() const;
 
-	/**
+
+//	Dim index_dim() const;
+
+	/*
 	 * \brief Add an index to *this
 	 *
 	 * Compute the dimension of the expression obtained
 	 * by indexing an expression whose dimension is *this.
 	 */
-	Dim index_dim() const;
+	Dim index_dim(const DoubleIndex& idx) const;
 
-	/**
+	/*
 	 * \brief Maximal index.
 	 *
 	 * Return the greatest i such that indexing by i is valid.
 	 */
-	int max_index() const;
+//	int max_index() const;
 
 	/*
 	 * Compute the starting position of x[i] in a flat array
@@ -136,7 +142,6 @@ public:
 	Dim(int dim2, int dim3);
 
 private:
-
 	/**
 	 * The number of i such that x[i][0] or x[i] is a valid
 	 * expression, where x is resp. a matrix
@@ -164,6 +169,28 @@ public:
 	bool cst_vec;
 };
 
+/**
+ * \ingroup arithmetic
+ *
+ * \brief Thrown when dimensions in matrix/vector operations are not correct
+ *
+ */
+class DimException : public Exception {
+public:
+
+	DimException(std::string message1) : msg(message1) { }
+
+	/**
+	 * \brief Get the message of this exception
+	 */
+	const std::string& message() const { return msg; }
+
+private:
+	std::string msg;
+};
+
+
+std::ostream& operator<< (std::ostream& os, const DimException& e);
 
 /** \ingroup arithmetic */
 /*@{*/

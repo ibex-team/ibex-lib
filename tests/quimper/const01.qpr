@@ -1,9 +1,0 @@
-constants 
- c=3.14159;
- 
-variables
- x in c;
- 
-constraints
- x=0;
-end

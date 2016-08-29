@@ -31,7 +31,7 @@ public:
 	ExprDomain& d;
 
 	Eval p_eval;
-	ExprDomain p;
+	ExprDomain& p;
 
 protected:
 	/**
@@ -46,7 +46,8 @@ public: // because called from CompiledFunction
 
 	inline void symbol_bwd (int)                  { /* nothing to do */ }
 	inline void cst_bwd    (int y)                  { /* TODO: improve this. */ if (d[y]!=((const ExprConstant&) f.nodes[y]).get()) throw EmptyBoxException(); }
-	inline void index_bwd  (int , int)           { /* nothing to do */ }
+	inline void idx_bwd    (int , int)           { /* nothing to do */ }
+	       void idx_cp_bwd (int , int);
 	       void vector_bwd (int* , int)          { not_implemented("Inner projection of \"vector\""); }
 	inline void apply_bwd  (int* x, int y);
         inline void chi_bwd    (int , int , int ,int) { not_implemented("Inner projection of \"chi\""); }

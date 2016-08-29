@@ -7,7 +7,7 @@ from distutils.version import LooseVersion
 from waflib import Logs, Scripting
 
 # the following two variables are used by the target "waf dist"
-VERSION="2.1.12"
+VERSION="2.3.0"
 APPNAME='ibex-lib'
 
 top = '.'
@@ -22,7 +22,7 @@ def options (opt):
 	waflib.Tools.compiler_c.c_compiler["win32"].remove ("msvc")
 	waflib.Tools.compiler_cxx.cxx_compiler["win32"].remove ("msvc")
 
-	opt.load ("compiler_cxx compiler_cc javaw")
+	opt.load ("compiler_cxx compiler_c javaw")
 
 	opt.add_option ("--enable-shared", action="store_true", dest="ENABLE_SHARED",
 			help = "build ibex as a shared library")
@@ -59,7 +59,7 @@ def configure (conf):
 				# fall-back to 32bits
 				Logs.pprint ("YELLOW", "Warning: x86_64 is not supported with GAOL, we will build IBEX for i386 instead")
 				
-				for var in ("CFLAGS", "LINKFLAGS", "CXXFLAGS"):
+				for var in ("CFLAGS", "LINKFLAGS", "CXXFLAGS","CXXFLAGS_IBEX_DEPS"):
 					env.append_unique (var, "-m32")
 
 				conf.check_cc (cflags = "-m32")
@@ -71,8 +71,8 @@ def configure (conf):
 
 
 	env = conf.env
-	conf.load ('compiler_cxx compiler_cc bison')
-	conf.load ('flex', '.')
+	conf.load ('compiler_cxx compiler_c bison')
+	conf.load ('flex')
 	
 	conf.env.LIBDIR = conf.env['PREFIX'] + '/lib'
 
@@ -84,9 +84,10 @@ def configure (conf):
 
 	# optimised compilation flags
 	if conf.options.DEBUG:
-		flags = "-O0 -g -pg -Wall -Wno-unknown-pragmas -Wno-unused-variable -fmessage-length=0 --no-undefined"
+		flags = "-O0 -g -pg -Wall -Wno-unknown-pragmas -Wno-unused-variable -fmessage-length=0 "
+		conf.define ("DEBUG", 1)
 	else:
-		flags = "-O3 -Wno-deprecated --no-undefined"
+		flags = "-O3"
 		conf.define ("NDEBUG", 1)
 	for f in flags.split():
 		if conf.check_cxx (cxxflags = f, mandatory = False):

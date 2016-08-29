@@ -24,7 +24,10 @@ class BwdAlgorithm {
 
 protected:
 	/** TO BE DEFINED (by the subclass) */
-	void index_bwd(const ExprIndex&, int x, int y);
+	void idx_bwd(const ExprIndex&, int x, int y);
+
+	/** TO BE DEFINED (by the subclass) */
+	void idx_cp_bwd(const ExprIndex&, int x, int y);
 
 	/** TO BE DEFINED (by the subclass) */
 	void vector_bwd(const ExprVector&, int* x, int y);

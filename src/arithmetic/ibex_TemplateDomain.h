@@ -7,12 +7,14 @@
  *
  * Author(s)   : Gilles Chabert
  * Created     : Apr 03, 2012
+ * Last Update : May 20, 2016
  * ---------------------------------------------------------------------------- */
 
-#ifndef __IBEX_TENSOR_H__
-#define __IBEX_TENSOR_H__
+#ifndef __IBEX_TEMPLATE_DOMAIN_H__
+#define __IBEX_TEMPLATE_DOMAIN_H__
 
 #include "ibex_Dim.h"
+#include "ibex_DoubleIndex.h"
 
 namespace ibex {
 
@@ -78,6 +80,12 @@ public:
 	TemplateDomain(const TemplateDomain<D>& d, bool is_reference1=false);
 
 	/**
+	 * \brief Creates a domain (by copy) as a vector of other domains.
+	 *
+	 */
+	TemplateDomain(const Array<const TemplateDomain<D> >& args, bool row_vec);
+
+	/**
 	 * \brief Return the ith component of *this.
 	 *
 	 * Creates a domain that points to the ith component of the internal domain.
@@ -90,6 +98,18 @@ public:
 	 * Creates a domain that points to the ith component of the internal domain.
 	 */
 	const TemplateDomain operator[](int index) const;
+
+	/**
+	 * \brief Return the ith component of *this.
+	 *
+	 * Creates a domain that points to the internal domain **if possible**.
+	 * Otherwise, perform a copy. Check the value of is_reference on the result.
+	 *
+	 * \see DoubleIndex::domain_ref.
+	 */
+	TemplateDomain operator[](const DoubleIndex& index);
+
+	const TemplateDomain operator[](const DoubleIndex& index) const;
 
 	/**
 	 * \brief Delete *this.
@@ -105,6 +125,11 @@ public:
 	 * \brief Intersect the domain with another domain.
 	 */
 	TemplateDomain& operator&=(const TemplateDomain<D>& d);
+
+	/**
+	 * \brief Load a part of a domain from another domain
+	 */
+	void put(int i, int j,const TemplateDomain<D>& d);
 
 	/**
 	 * \brief Equality operator
@@ -161,6 +186,9 @@ public:
 	 */
 	void clear();
 
+	/** Return true if either 0, the null vector or the null matrix. */
+	bool is_zero() const;
+
 private:
 
 	TemplateDomain();
@@ -214,87 +242,123 @@ void load(Array<TemplateDomain<D> >& x, const Array<TemplateDomain<D> >& y, int 
 /** Add two domains. */
 template<class D>
 TemplateDomain<D> operator+(const TemplateDomain<D>& d1, const TemplateDomain<D>& d2);
+
 /** Multiply two domains. */
 template<class D>
 TemplateDomain<D> operator*(const TemplateDomain<D>& d1, const TemplateDomain<D>& d2);
+
 /** Subtract two domains. */
 template<class D>
 TemplateDomain<D> operator-(const TemplateDomain<D>& d1, const TemplateDomain<D>& d2);
+
 /** Divide two domains. */
 template<class D>
 TemplateDomain<D> operator/(const TemplateDomain<D>& d1, const TemplateDomain<D>& d2);
+
 /** Max of two domains. */
 template<class D>
 TemplateDomain<D> max(const TemplateDomain<D>& d1, const TemplateDomain<D>& d2);
+
 /** Min of two domains. */
 template<class D>
 TemplateDomain<D> min(const TemplateDomain<D>& d1, const TemplateDomain<D>& d2);
+
+/** Max of n domains. */
+template<class D>
+TemplateDomain<D> max(const Array<const TemplateDomain<D> >& args);
+
+/** Min of n domains. */
+template<class D>
+TemplateDomain<D> min(const Array<const TemplateDomain<D> >& args);
+
 /** Atan2 of two domains. */
 template<class D>
 TemplateDomain<D> atan2(const TemplateDomain<D>& d1, const TemplateDomain<D>& d2);
+
 /** Opposite of a domain. */
 template<class D>
 TemplateDomain<D> operator-(const TemplateDomain<D>& d1);
+
 /** Transpose. */
 template<class D>
 TemplateDomain<D> transpose(const TemplateDomain<D>& d1);
+
 /** Sign. */
 template<class D>
 TemplateDomain<D> sign(const TemplateDomain<D>& d1);
+
 /** Absolute value. */
 template<class D>
 TemplateDomain<D> abs(const TemplateDomain<D>& d);
+
 /** Raise a domain to the power \a p. */
 template<class D>
 TemplateDomain<D> pow(const TemplateDomain<D>& d, int p);
+
 /** Raise a domain to the power \a p. */
 template<class D>
 TemplateDomain<D> pow(const TemplateDomain<D>& d, const TemplateDomain<D>& p);
+
 /** Square of a domain. */
 template<class D>
 TemplateDomain<D> sqr(const TemplateDomain<D>& d);
+
 /** Square root of a domain. */
 template<class D>
 TemplateDomain<D> sqrt(const TemplateDomain<D>& d);
+
 /** Exponential. */
 template<class D>
 TemplateDomain<D> exp(const TemplateDomain<D>& d);
+
 /** Logarithm. */
 template<class D>
 TemplateDomain<D> log(const TemplateDomain<D>& d);
+
 /** Cosine. */
 template<class D>
 TemplateDomain<D> cos(const TemplateDomain<D>& d);
+
 /** Sine. */
 template<class D>
 TemplateDomain<D> sin(const TemplateDomain<D>& d);
+
 /** Tangent. */
 template<class D>
 TemplateDomain<D> tan(const TemplateDomain<D>& d);
+
 /** Arccosine. */
 template<class D>
 TemplateDomain<D> acos(const TemplateDomain<D>& d);
+
 /** Arcsine. */
 template<class D>
 TemplateDomain<D> asin(const TemplateDomain<D>& d);
+
 /** Arctangent. */
 template<class D>
 TemplateDomain<D> atan(const TemplateDomain<D>& d);
+
 /** Hyperbolic cosine. */
 template<class D>
 TemplateDomain<D> cosh(const TemplateDomain<D>& d);
+
 /** Hyperbolic sine. */
 template<class D>
 TemplateDomain<D> sinh(const TemplateDomain<D>& d);
+
 /** Hyperbolic tangent. */
 template<class D>
 TemplateDomain<D> tanh(const TemplateDomain<D>& d);
+
 /** Hyperbolic arccosine. */
 template<class D>
 TemplateDomain<D> acosh(const TemplateDomain<D>& d);
+
 /** Hyperbolic arcsine. */
 template<class D>
 TemplateDomain<D> asinh(const TemplateDomain<D>& d);
+
 /** Hyperbolic arctangent. */
 template<class D>
 TemplateDomain<D> atanh(const TemplateDomain<D>& d);
@@ -339,6 +403,51 @@ inline TemplateDomain<D>::TemplateDomain(const TemplateDomain<D>& d, bool is_ref
 }
 
 template<class D>
+inline TemplateDomain<D>::TemplateDomain(const Array<const TemplateDomain<D> >& arg, bool row_vec) : dim(Dim::scalar() /* TMP */), is_reference(false), domain(NULL) {
+
+	Array<const Dim> dims(arg.size());
+	for (int i=0; i<arg.size(); i++) {
+		dims.set_ref(i,arg[i].dim);
+	}
+
+	(Dim&) dim = vec_dim(dims,row_vec);
+
+	switch (dim.type()) {
+	case Dim::SCALAR:       domain = new typename D::SCALAR(); break;
+	case Dim::ROW_VECTOR:
+	case Dim::COL_VECTOR:   domain = new typename D::VECTOR(dim.vec_size()); break;
+	case Dim::MATRIX:       domain = new typename D::MATRIX(dim.nb_rows(),dim.nb_cols()); break;
+	}
+
+	if (dim.is_matrix()) {
+		int r=0;
+		int c=0;
+		for (int i=0; i<arg.size(); i++) {
+			if (dims[i].is_matrix())
+				m().put(r,c,arg[i].m());
+			else
+				m().put(r,c,arg[i].v(),!row_vec);
+			if (row_vec)
+				c+=dims[i].nb_cols();
+			else
+				r+=dims[i].nb_rows();
+		}
+	} else if (dim.is_vector()) {
+		int k=0;
+		for (int i=0; i<arg.size(); i++) {
+			if (dims[i].is_vector())
+				v().put(k,arg[i].v());
+			else
+				v()[k]=arg[i].i();
+			k+=dims[i].vec_size();
+		}
+	} else {
+		this->i()=arg[0].i();
+	}
+}
+
+
+template<class D>
 inline TemplateDomain<D>::TemplateDomain() : dim(), is_reference(false), domain(NULL) {
 
 }
@@ -356,6 +465,54 @@ TemplateDomain<D> TemplateDomain<D>::operator[](int ii) {
 template<class D>
 const TemplateDomain<D> TemplateDomain<D>::operator[](int ii) const {
 	return ((TemplateDomain<D>&) *this)[ii];
+}
+
+template<class D>
+TemplateDomain<D> TemplateDomain<D>::operator[](const DoubleIndex& idx) {
+	if (idx.domain_ref()) {
+		if (idx.all())
+			return TemplateDomain<D>(*this,true);
+		else
+			switch (dim.type()) {
+			case Dim::ROW_VECTOR:
+				return TemplateDomain<D>(v()[idx.col()]);
+			case Dim::COL_VECTOR:
+				return TemplateDomain<D>(v()[idx.row()]);
+			default:
+				if (!idx.one_col())
+					return TemplateDomain<D>(m()[idx.row()],true);
+				else
+					return TemplateDomain<D>(m()[idx.row()][idx.col()]);
+				break;
+			}
+	} else {
+		TemplateDomain<D> d(dim.index_dim(idx));
+		switch (dim.type()) {
+		case Dim::ROW_VECTOR:
+			d.v()=v().subvector(idx.first_col(),idx.last_col());
+			break;
+		case Dim::COL_VECTOR:
+			d.v()=v().subvector(idx.first_row(),idx.last_row());
+			break;
+		default:
+			switch (d.dim.type()) {
+			case Dim::ROW_VECTOR :
+				d.v()=m().row(idx.row()).subvector(idx.first_col(),idx.last_col());
+				break;
+			case Dim::COL_VECTOR:
+				d.v()=m().col(idx.col()).subvector(idx.first_row(),idx.last_row());
+				break;
+			default:
+				d.m()=m().submatrix(idx.first_row(),idx.last_row(),idx.first_col(),idx.last_col());
+			}
+		}
+		return d;
+	}
+}
+
+template<class D>
+const TemplateDomain<D> TemplateDomain<D>::operator[](const DoubleIndex& idx) const {
+	return ((TemplateDomain<D>&) *this)[idx];
 }
 
 template<class D>
@@ -392,6 +549,41 @@ TemplateDomain<D>& TemplateDomain<D>::operator&=(const TemplateDomain<D>& d) {
 	case Dim::MATRIX:       m()&=d.m(); break;
 	}
 	return *this;
+}
+
+template<class D>
+void TemplateDomain<D>::put(int ii, int j, const TemplateDomain<D>& d) {
+	switch(dim.type()) {
+	case Dim::SCALAR:
+		i()=d.i();
+		break;
+	case Dim::ROW_VECTOR:
+		if (d.dim.is_scalar()) v()[j]=d.i();
+		else v().put(j,d.v());
+		break;
+	case Dim::COL_VECTOR:
+		if (d.dim.is_scalar()) v()[ii]=d.i();
+		else v().put(ii,d.v());
+		break;
+	case Dim::MATRIX:
+		switch(d.dim.type()) {
+		case Dim::SCALAR:
+			m()[ii][j]=d.i();
+			break;
+		case Dim::ROW_VECTOR:
+			m()[ii].put(j,d.v());
+			break;
+		case Dim::COL_VECTOR:
+		{
+			IntervalMatrix tmp(d.dim.vec_size(),1);
+			m().put(ii,j,tmp);
+			break;
+		}
+		case Dim::MATRIX:
+			m().put(ii,j,d.m());
+			break;
+		}
+	}
 }
 
 template<class D>
@@ -491,6 +683,16 @@ void TemplateDomain<D>::clear() {
 	case Dim::ROW_VECTOR:
 	case Dim::COL_VECTOR: v().clear(); break;
 	case Dim::MATRIX:     m().clear(); break;
+	}
+}
+
+template<class D>
+bool TemplateDomain<D>::is_zero() const {
+	switch(dim.type()) {
+	case Dim::SCALAR:     return i()==Interval::ZERO; break;
+	case Dim::ROW_VECTOR:
+	case Dim::COL_VECTOR: return v().is_zero(); break;
+	default:              return m().is_zero(); break;
 	}
 }
 
@@ -837,13 +1039,13 @@ TemplateDomain<D> pow(const TemplateDomain<D>& d1, const TemplateDomain<D>& p) {
 /* ======================== pure scalar functions ===================== */
 
 #define unary_func(f) \
-	assert(d.dim.is_scalar()); \
+	if (!d.dim.is_scalar()) throw DimException("Scalar argument expected"); \
 	TemplateDomain<D> d2(Dim::scalar()); \
 	d2.i()=f(d.i()); \
 	return d2;
 
 #define binary_func(f) \
-	assert(d1.dim.is_scalar() && d2.dim.is_scalar()); \
+	if(!d1.dim.is_scalar() || !d2.dim.is_scalar()) throw DimException("Scalar arguments expected"); \
 	TemplateDomain<D> d3(Dim::scalar()); \
 	d3.i()=f(d1.i(),d2.i()); \
 	return d3;
@@ -856,6 +1058,24 @@ template<class D>
 TemplateDomain<D> min(const TemplateDomain<D>& d1, const TemplateDomain<D>& d2)        { binary_func(min); }
 template<class D>
 TemplateDomain<D> atan2(const TemplateDomain<D>& d1, const TemplateDomain<D>& d2)      { binary_func(atan2); }
+
+template<class D>
+TemplateDomain<D> max(const Array<const TemplateDomain<D> >& args) {
+	TemplateDomain<D> _max(Dim::scalar());
+	_max.i()=args[0].i();
+	for (int i=1; i<args.size(); i++)
+		_max.i() = max(_max.i(),args[i].i());
+	return _max;
+}
+
+template<class D>
+TemplateDomain<D> min(const Array<const TemplateDomain<D> >& args) {
+	TemplateDomain<D> _min(Dim::scalar());
+	_min.i()=args[0].i();
+	for (int i=1; i<args.size(); i++)
+		_min.i() = min(_min.i(),args[i].i());
+	return _min;
+}
 
 template<class D>
 TemplateDomain<D> sign(const TemplateDomain<D>& d)  { unary_func(sign); }
@@ -897,4 +1117,4 @@ TemplateDomain<D> atanh(const TemplateDomain<D>& d) { unary_func(atanh); }
 
 } // end namespace
 
-#endif // __IBEX_DOMAIN_H__
+#endif // __IBEX_TEMPLATE_DOMAIN_H__

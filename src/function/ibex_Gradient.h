@@ -51,7 +51,8 @@ public:
 
 	/* ====================================== Forward =================================== */
 
-	inline void index_fwd(int , int ) { /* nothing to do */ }
+	inline void idx_fwd(int , int ) { /* nothing to do */ }
+	       void idx_cp_fwd(int , int y)       { g[y].clear(); }
 	       void vector_fwd(int* x, int y);
 	       void cst_fwd(int y)                { g[y].clear(); }
 	       void symbol_fwd(int y)             { g[y].clear(); }
@@ -99,7 +100,8 @@ public:
 
 	/* ====================================== Backward =================================== */
 
-	       void index_bwd  (int, int) { }
+	inline void idx_bwd    (int, int) { }
+	       void idx_cp_bwd (int, int);
 	       void vector_bwd (int* x, int y);
 	inline void symbol_bwd (int) { /*cout << "symbol bwd=" << g[y].v() << endl;*/ /* nothing to do */ }
 	inline void cst_bwd    (int) { /* nothing to do */ }

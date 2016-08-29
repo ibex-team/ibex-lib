@@ -14,16 +14,16 @@
 #include <cassert>
 
 #ifdef _IBEX_WITH_GAOL_
-#include "ibex_gaol_Interval.cpp_"
+#include "ibex_Interval_gaol.cpp_"
 #else
 #ifdef _IBEX_WITH_BIAS_
-#include "ibex_bias_Interval.cpp_"
+#include "ibex_Interval_bias.cpp_"
 #else
 #ifdef _IBEX_WITH_FILIB_
-#include "ibex_filib_Interval.cpp_"
+#include "ibex_Interval_filib.cpp_"
 #else
 #ifdef _IBEX_WITH_DIRECT_
-#include "ibex_direct_Interval.cpp_"
+#include "ibex_Interval_direct.cpp_"
 #endif
 #endif
 #endif
