@@ -169,7 +169,7 @@ DoubleHeap<T>::DoubleHeap(CostFunc<T>& cost1, bool update_cost1_when_sorting, Co
 }
 
 template<class T>
-DoubleHeap<T>::DoubleHeap(const DoubleHeap &dhcp):critpr(dhcp.critpr),current_heap_id(dhcp.current_heap_id),nb_nodes(dhcp.nb_nodes) {
+DoubleHeap<T>::DoubleHeap(const DoubleHeap &dhcp):nb_nodes(dhcp.nb_nodes),heap1(NULL),heap2(NULL),critpr(dhcp.critpr),current_heap_id(dhcp.current_heap_id) {
     std::pair<SharedHeap<T> *,std::vector<HeapElt<T>*> *> p;
     p= dhcp.heap1->copy_sheap(2);
     heap1 = p.first;

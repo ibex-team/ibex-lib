@@ -53,6 +53,8 @@ void minimax_solver::solve(IntervalVector x_box_ini, IntervalVector y_box_ini, d
         subcells_pair = x_cell_tmp->bisect(subboxes.first,subboxes.second);
         x_subcells[0] = subcells_pair.first;
         x_subcells[1] = subcells_pair.second;
+        delete x_cell_tmp;
+
         for(unsigned i=0;i<2;i++) { // run through the 2 subcells
             //***************** contraction w.r.t constraint on x ****************
             box_mem = x_subcells[i]->box;
@@ -146,7 +148,7 @@ Heap<x_heap_elem> minimax_solver::init_x_heap(const IntervalVector& box,DoubleHe
 
 double minimax_solver::compute_min_prec(const IntervalVector& x_box_ini, const IntervalVector& x_box,const IntervalVector& y_box_ini,double prec_y) {
     double ratio(0);
-    for(unsigned r=0;r<x_box_ini.size();r++)
+    for(int r=0;r<x_box_ini.size();r++)
         ratio += (x_box_ini[r]).diam()/(x_box[r]).diam();
     return ratio/y_box_ini.volume()>prec_y?ratio/(10*y_box_ini.volume()):prec_y;
 }
@@ -171,7 +173,7 @@ IntervalVector minimax_solver::get_feasible_point(x_heap_elem * elem) {
 int minimax_solver::check_constraints(const IntervalVector& box) {
     int res(2);
     Interval int_res;
-    for(unsigned i=0;i<x_sys->ctrs.size();i++) {
+    for(int i=0;i<x_sys->ctrs.size();i++) {
         int_res = x_sys->ctrs[i].f.eval(box);
         if(int_res.lb()>=0)
             return 0;

@@ -15,7 +15,7 @@ Interval light_solver::optimize(DoubleHeap<y_heap_elem> * y_heap,IntervalVector*
     IntervalVector xy_box(x_box->size()+y_heap->top1()->box.size());
     IntervalVector xy_box_ctc(xy_box); // box that will be contracted when dealing with best max constraint and xy constraint, needed to get back the original x box when dealing with another y box
     IntervalVector xy_box_cp(xy_box); // use for contraction w.r.t ctc_xy_inv, check is constraint respected for all x y without loosing the original box
-    for(unsigned i =0;i<x_box->size();i++) // initialize box containing x and y
+    for(int i =0;i<x_box->size();i++) // initialize box containing x and y
         xy_box[i] = (*x_box)[i];
 
 
@@ -45,6 +45,7 @@ Interval light_solver::optimize(DoubleHeap<y_heap_elem> * y_heap,IntervalVector*
         subcells_pair = tmp_cell->bisect(subboxes.first,subboxes.second);// bisect tmp_cell into 2 subcells
         subcells[0] = subcells_pair.first;
         subcells[1] = subcells_pair.second;
+        delete tmp_cell;
 
         for(unsigned j=0;j<=1;j++) { // deals with the two subcells
             init_xy_box(&xy_box,subcells[j]->box);
@@ -154,7 +155,7 @@ int light_solver::check_constraints(const IntervalVector& box) {
     if(y_sys == NULL)
         return res;
     Interval int_res;
-    for(unsigned i=0;i<y_sys->ctrs.size();i++) {
+    for(int i=0;i<y_sys->ctrs.size();i++) {
         int_res =  y_sys->ctrs[i].f.eval(box);
         if(int_res.lb()>=0)
             return 0;
@@ -170,14 +171,14 @@ int light_solver::check_constraints(const IntervalVector& box) {
 IntervalVector get_mid_y(const IntervalVector& xy_box,const IntervalVector& y_box) { // returns the cast of box x and mid of box y
     Vector y_mid = y_box.mid();
     IntervalVector res(xy_box);
-    for(unsigned i=0;i<y_box.size();i++) {
+    for(int i=0;i<y_box.size();i++) {
         res[xy_box.size()-y_box.size()+i] = Interval(y_mid[i]);
     }
     return res;
 }
 
 void init_xy_box(IntervalVector* xy_box,const IntervalVector & y_box) {
-    for(unsigned k = 0;k<y_box.size();k++) // update current y box in the xy_box
+    for(int k = 0;k<y_box.size();k++) // update current y box in the xy_box
         (*xy_box)[k+(xy_box->size()-y_box.size())] = y_box[k];
 }
 
