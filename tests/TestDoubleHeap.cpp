@@ -57,12 +57,12 @@ void TestDoubleHeap::test01() {
         CPPUNIT_ASSERT(h.minimum1()==1);
         CPPUNIT_ASSERT(h.minimum2()==1);
 
-        h.pop1();
-        h.pop1();
+        delete h.pop1();
+        delete  h.pop1();
         CPPUNIT_ASSERT(h.minimum1()==5);
         CPPUNIT_ASSERT(h.minimum2()==2);
 
-        h.pop2();
+        delete h.pop2();
         CPPUNIT_ASSERT(h.minimum1()==5);
         CPPUNIT_ASSERT(h.minimum2()==4);
 
@@ -70,8 +70,8 @@ void TestDoubleHeap::test01() {
         CPPUNIT_ASSERT(h.minimum1()==5);
         CPPUNIT_ASSERT(h.minimum2()==5);
 
-        h.pop2();
-        h.pop2();
+        delete h.pop2();
+        delete h.pop2();
         CPPUNIT_ASSERT(h.minimum1()==9);
         CPPUNIT_ASSERT(h.minimum2()==9);
 
@@ -86,12 +86,12 @@ void TestDoubleHeap::test01() {
         CPPUNIT_ASSERT(h.minimum2()==9);
         CPPUNIT_ASSERT(h.size()==5);
 
-        h.pop1();
+        delete h.pop1();
         CPPUNIT_ASSERT(h.minimum1()==1);
         CPPUNIT_ASSERT(h.minimum2()==9);
         CPPUNIT_ASSERT(h.size()==4);
 
-        h.pop2();
+        delete h.pop2();
         CPPUNIT_ASSERT(h.minimum1()==1);
         CPPUNIT_ASSERT(h.minimum2()==10);
         CPPUNIT_ASSERT(h.size()==3);
@@ -117,12 +117,12 @@ void TestDoubleHeap::test02() {
         CPPUNIT_ASSERT(h.minimum1()==1);
         CPPUNIT_ASSERT(h.minimum2()==20);
 
-        h.pop2();
-        h.pop2();
+        delete h.pop2();
+        delete h.pop2();
         CPPUNIT_ASSERT(h.minimum1()==2);
         CPPUNIT_ASSERT(h.minimum2()==100);
 
-        h.pop1();
+        delete h.pop1();
         CPPUNIT_ASSERT(h.minimum1()==4);
         CPPUNIT_ASSERT(h.minimum2()==100);
 
@@ -134,8 +134,8 @@ void TestDoubleHeap::test02() {
         CPPUNIT_ASSERT(h.size()==4);
 
 
-        h.pop2();
-        h.pop2();
+        delete h.pop2();
+        delete h.pop2();
         CPPUNIT_ASSERT(h.minimum1()==4);
         CPPUNIT_ASSERT(h.minimum2()==8000);
         CPPUNIT_ASSERT(h.size()==2);
@@ -149,12 +149,12 @@ void TestDoubleHeap::test02() {
         CPPUNIT_ASSERT(h.minimum2()==1100);
         CPPUNIT_ASSERT(h.size()==6);
 
-        h.pop1();
+        delete h.pop1();
         CPPUNIT_ASSERT(h.minimum1()==6);
         CPPUNIT_ASSERT(h.minimum2()==1100);
         CPPUNIT_ASSERT(h.size()==5);
 
-        h.pop2();
+        delete h.pop2();
         CPPUNIT_ASSERT(h.minimum1()==6);
         CPPUNIT_ASSERT(h.minimum2()==1200);
         CPPUNIT_ASSERT(h.size()==4);
@@ -181,10 +181,11 @@ void TestDoubleHeap::test03() {
     while (h.size() > 0) {
         CPPUNIT_ASSERT(*h.top1() == *newh.top1());
         CPPUNIT_ASSERT(*h.top2() == *newh.top2());
-        h.pop1();
-        newh.pop1();
+        delete h.pop1();
+        delete newh.pop1();
 
     }
+
 }
 
 

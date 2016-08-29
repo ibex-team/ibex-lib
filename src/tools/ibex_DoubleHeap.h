@@ -183,8 +183,10 @@ DoubleHeap<T>::DoubleHeap(const DoubleHeap &dhcp):critpr(dhcp.critpr),current_he
 
 template<class T>
 DoubleHeap<T>::~DoubleHeap() {
+	flush();
 	if (heap1) delete heap1;
 	if (heap2) delete heap2;
+
 }
 
 template<class T>

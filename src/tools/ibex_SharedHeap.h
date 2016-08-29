@@ -269,7 +269,7 @@ private:
 	explicit HeapElt(T* data, double crit_1, double crit_2);
 
     /** Copy constructor **/
-    HeapElt(const HeapElt& eltcopy,int nb_crit);
+	explicit HeapElt(const HeapElt& eltcopy,int nb_crit);
 
 	/** Delete the element */
 	~HeapElt() ;
@@ -316,13 +316,13 @@ std::pair<SharedHeap<T> *,std::vector<HeapElt<T>*> *> SharedHeap<T>::copy_sheap(
     new_heap->nb_nodes = nb_nodes;
     std::vector<HeapElt<T>*> * elm_vect = new std::vector<HeapElt<T>*>() ;
     if(root != NULL) {
-        HeapElt<T> * elt = new HeapElt<T>(*root->elt,nb_crit);
+        HeapElt<T> * elt = new HeapElt<T>(*(root->elt),nb_crit);
         new_heap->root = new HeapNode<T>(elt);
         elt->holder[new_heap->heap_id] = new_heap->root;
-    }
-    elm_vect->push_back(new_heap->root->elt);
-    new_heap->root->copy_tree(root,elm_vect,heap_id,nb_crit);
 
+        elm_vect->push_back(new_heap->root->elt);
+        new_heap->root->copy_tree(root,elm_vect,heap_id,nb_crit);
+    }
     std::pair<SharedHeap<T> *,std::vector<HeapElt<T>*> *> rtrn;
     rtrn.first = new_heap;
     rtrn.second = elm_vect;
@@ -331,9 +331,10 @@ std::pair<SharedHeap<T> *,std::vector<HeapElt<T>*> *> SharedHeap<T>::copy_sheap(
 
 template<class T>
 SharedHeap<T>::~SharedHeap() {
-	if (root) delete root; 	// warning: delete all sub-nodes
+	if (root) delete root; 	// warning: NOT delete all sub-nodes
 	root = NULL;
 }
+
 
 template<class T>
 inline double SharedHeap<T>::minimum() const {
@@ -611,14 +612,14 @@ template<class T>
 void HeapNode<T>::copy_tree(HeapNode<T> * node,std::vector<HeapElt<T>*> * elm_vect,int heap_id,int nb_crit){
     HeapElt<T>* elem;
     if(node->left != NULL){
-        elem = new HeapElt<T>(*node->left->elt,nb_crit);
+        elem = new HeapElt<T>(*(node->left->elt),nb_crit);
         elm_vect->push_back(elem);
         left = new HeapNode<T>(elem,this);
         elem->holder[heap_id] = left;
         left->copy_tree(node->left,elm_vect,heap_id,nb_crit);
     }
     if(node->right != NULL){
-        elem = new HeapElt<T>(*node->right->elt,nb_crit);
+        elem = new HeapElt<T>(*(node->right->elt),nb_crit);
         right = new HeapNode<T>(elem,this);
         elm_vect->push_back(elem);
         elem->holder[heap_id] = right;
