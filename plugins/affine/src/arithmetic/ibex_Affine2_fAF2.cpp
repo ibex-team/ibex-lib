@@ -319,6 +319,8 @@ AffineMain<AF_fAF2>& AffineMain<AF_fAF2>::operator*=(double alpha) {
 
 template<>
 AffineMain<AF_fAF2>& AffineMain<AF_fAF2>::operator+=(const AffineMain<AF_fAF2>& y) {
+	//std::cout << "IN  += "<<std::endl<< *this << std::endl<<y << std::endl;
+
 	double temp, ttt, sss, eee;
 	if (is_actif() && y.is_actif()) {
 		if (_n==y.size()) {
@@ -362,6 +364,7 @@ AffineMain<AF_fAF2>& AffineMain<AF_fAF2>::operator+=(const AffineMain<AF_fAF2>& 
 	} else {
 		*this = itv() + y.itv();
 	}
+	//std::cout << "OUT += "<<std::endl<< *this  << std::endl;
 	return *this;
 }
 
@@ -421,7 +424,7 @@ AffineMain<AF_fAF2>& AffineMain<AF_fAF2>::inflate(double ddelta) {
 
 template<>
 AffineMain<AF_fAF2>& AffineMain<AF_fAF2>::operator*=(const AffineMain<AF_fAF2>& y) {
-	//	std::cout << "in *= "<< *this <<std::endl;
+	//std::cout << "IN  *= "<<std::endl<< *this << std::endl<<y << std::endl;
 
 	if (is_actif() && (y.is_actif())) {
 
@@ -566,6 +569,7 @@ AffineMain<AF_fAF2>& AffineMain<AF_fAF2>::operator*=(const AffineMain<AF_fAF2>& 
 		*this = (itv() * y.itv());
 	}
 
+	//std::cout << "OUT *= "<<std::endl<< *this << std::endl;
 	return *this;
 }
 
