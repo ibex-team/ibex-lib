@@ -58,12 +58,14 @@ void SystemFactory::add_var(const Array<const ExprSymbol>& a, const IntervalVect
 	tmp_bound.push_back(box);
 }
 
+/*
 void SystemFactory::add_var(const Array<const ExprSymbol>& a, const Array<const IntervalVector>& init_boxes) {
 	if (goal || !ctrs.empty()) ibex_error("cannot add a variable to a system after a constraint (or the goal function)");
 
 	for (int i=0; i<a.size(); i++)
 		add_var(a[i],init_boxes[i]);
 }
+*/
 
 void SystemFactory::init_arg_bound() {
 	if (!args) args = new Array<const ExprSymbol>(tmp_args);

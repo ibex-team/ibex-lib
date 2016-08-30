@@ -48,7 +48,7 @@ public:
 	 */
 	void add_var(const Array<const ExprSymbol>& a);
 	void add_var(const Array<const ExprSymbol>& a, const IntervalVector& box);
-	void add_var(const Array<const ExprSymbol>& a, const Array<const IntervalVector>& init_boxes);
+	//void add_var(const Array<const ExprSymbol>& a, const Array<const IntervalVector>& init_boxes);
 
 	/**
 	 * \brief Add a goal function (by copy)
