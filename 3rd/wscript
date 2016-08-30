@@ -453,7 +453,7 @@ def configure (conf):
 	if conf.env.BUILD_FILIB:
 		log_start ("FILIB")
 		conf.env.FILIB = "filibsrc"
-		filib_dir = extract (conf.env.FILIB, "filibsrc-3.0.2.2.tar.gz")
+		filib_dir = extract (conf.env.FILIB, "filibsrc-3.0.2.3.tar.gz")
 
 		ibex_append_path ("INCLUDES", os.path.join(conf.srcnode.abspath(),"3rd", conf.env.FILIB))
 		ibex_append_path ("LIBPATH", os.path.join (filib_dir.abspath(), "libprim", ".libs"))
