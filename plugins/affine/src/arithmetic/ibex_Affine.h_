@@ -29,7 +29,7 @@ inline std::ostream& operator<<(std::ostream& os, const AffineMain<T>& x) {
 			}
 			os << " + " << x.err() << " [-1,1] ";
 		} else {
-			os << "Affine2Main form not Activate ";
+			os << "AffineMain form not Activate ";
 		}
 		return os;
 

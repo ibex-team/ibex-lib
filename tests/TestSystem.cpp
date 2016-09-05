@@ -194,7 +194,8 @@ void TestSystem::extend01() {
 	CPPUNIT_ASSERT(sys.args[0].dim==Dim::col_vec(3));
 	CPPUNIT_ASSERT(sys.args[1].dim==Dim::scalar());
 	CPPUNIT_ASSERT(sys.args[2].dim==Dim::scalar());
-	CPPUNIT_ASSERT(sys.goal==NULL);
+	CPPUNIT_ASSERT(sameExpr(sys.goal->expr(),"__goal__"));
+	//CPPUNIT_ASSERT(sys.goal==NULL);
 
 	CPPUNIT_ASSERT(sys.box.size()==5);
 
@@ -218,7 +219,8 @@ void TestSystem::extend02() {
 
 	CPPUNIT_ASSERT(sys.nb_ctr==1);
 	CPPUNIT_ASSERT(sys.nb_var==3);
-	CPPUNIT_ASSERT(sys.goal==NULL);
+	CPPUNIT_ASSERT(sameExpr(sys.goal->expr(),"__goal__"));
+	//CPPUNIT_ASSERT(sys.goal==NULL);
 	CPPUNIT_ASSERT(sys.ctrs.size()==1);
 	CPPUNIT_ASSERT(sys.f.nb_arg()==3);
 	CPPUNIT_ASSERT(sys.f.nb_var()==3);
