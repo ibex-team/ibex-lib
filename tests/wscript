@@ -143,13 +143,20 @@ def utest (tst):
 		tst (features = "cxx", source = base_src, target="utest_base",
 				use=["TESTS", "CPPUNIT"], defines = defines)
 
+		kwargs = {"features": "test",
+							"use": ["TESTS", "CPPUNIT", "utest_base"],
+							"defines": defines}
+		if tst.env.ENABLE_SHARED:
+			kwargs["rpath"] = ":".join(tst.env.LIBPATH_TESTS)
+
 		for f in test_src:
 			dirname, basename = os.path.split (f)
 			name = basename[4:-4] # Remove "Test" at the beginning, ".cpp" at the end
 			if dirname:
 				name = os.path.basename (os.path.dirname (dirname)) + "_" + name
-			tst.program (features="test", source= f, target="utest_" + name,
-									use=["TESTS", "CPPUNIT", "utest_base"], defines = defines)
+			kwargs["source"] = f
+			kwargs["target"] = "utest_" + name
+			tst.program (**kwargs)
 
 	else:
 		tst.fatal ("Cannot run the tests without cppunit (not found at configure)")
