@@ -92,7 +92,6 @@ def myjar_feature (self):
 			basedir = self.path.get_bld ().make_node (basedir)
 	else:
 		basedir = self.path.get_bld()
-	print basedir
 	if not basedir:
 		self.bld.fatal ("Could not find the basedir %r for %r"%(self.basedir, self))
 

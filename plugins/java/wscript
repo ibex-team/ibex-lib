@@ -95,10 +95,15 @@ def build (bld):
 	)
 
 	# Generate shared library
+	if bld.env.INSTALL_3RD:
+		rpath = bld.env.LIBDIR + ":" + bld.env.LIBDIR_3RD
+	else:
+		rpath = bld.env.LIBDIR
 	bld.shlib (
 		target = "ibex-java",
 		source = "src/ibex_Java.cpp",
 		use = [ "JAVA", "ibex", java_ibex_header ],
+		rpath = rpath,
 		install_path = bld.env.LIBDIR,
 	)
 
