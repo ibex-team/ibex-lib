@@ -500,7 +500,7 @@ template<class T> inline void ___set_empty(AffineMainMatrix<T>& m)      { m.set_
 
 } // end namespace ibex
 
-#include "ibex_LinearArith.h_"
+#include "ibex_LinearArith.h"
 #include "ibex_AffineMatrix.h_"
 
 namespace ibex {

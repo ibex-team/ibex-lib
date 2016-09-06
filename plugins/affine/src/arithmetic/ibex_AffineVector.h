@@ -439,7 +439,7 @@ template<class T> inline void ___set_empty(AffineMainVector<T>& v)      { v.set_
 
 } // end namespace ibex
 
-#include "ibex_LinearArith.h_"
+#include "ibex_LinearArith.h"
 #include "ibex_AffineVector.h_"
 
 namespace ibex {

@@ -633,7 +633,7 @@ inline void ___set_empty(IntervalMatrix& m) { m.set_empty(); }
 
 } // end namespace ibex
 
-#include "ibex_LinearArith.h_"
+#include "ibex_LinearArith.h"
 
 namespace ibex {
 
