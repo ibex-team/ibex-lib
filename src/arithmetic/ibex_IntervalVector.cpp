@@ -18,7 +18,7 @@
 #include <algorithm>
 
 
-#include "ibex_TemplateVector.h_"
+#include "ibex_TemplateVector.h"
 
 namespace ibex {
 

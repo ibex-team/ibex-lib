@@ -12,7 +12,7 @@
 #define __IBEX_AFFINE2_MATRIX_H2__
 
 
-#include "ibex_TemplateMatrix.h_"
+#include "ibex_TemplateMatrix.h"
 
 namespace ibex {
 

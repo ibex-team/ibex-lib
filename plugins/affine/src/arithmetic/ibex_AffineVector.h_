@@ -13,7 +13,7 @@
 #define __IBEX_AFFINE_VECTOR_H2__
 
 #include "ibex_AffineVector.h"
-#include "ibex_TemplateVector.h_"
+#include "ibex_TemplateVector.h"
 
 namespace ibex {
 
