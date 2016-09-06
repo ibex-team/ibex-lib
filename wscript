@@ -84,6 +84,7 @@ def configure (conf):
 	conf.env.append_unique ("INCLUDES_IBEX_DEPS", conf.env.INCDIR_HDR)
 	conf.env.INCDIR_3RD = os.path.join (conf.env.INCDIR_HDR, "3rd")
 	conf.env.LIBDIR_3RD = os.path.join (conf.env.LIBDIR, "ibex", "3rd")
+	conf.env.PKGDIR = os.path.join (conf.env.PREFIX, "share", "pkgconfig")
 
 	# Add 'build' node to INCLUDES_IBEX (for generated headers)
 	conf.env.append_unique ("INCLUDES_IBEX", conf.bldnode.abspath())
@@ -194,7 +195,7 @@ def build (bld):
 
 	# Generate ibex.pc, the pkg-config file
 	bld (features = "subst", source = "ibex.pc.in", target = "ibex.pc",
-				install_path = "${PREFIX}/share/pkgconfig",
+				install_path = bld.env.PKGDIR,
 				INCDIR = bld.env.INCDIR.replace(bld.env.PREFIX, "${prefix}"),
 				LIBDIR = bld.env.LIBDIR.replace(bld.env.PREFIX, "${prefix}"),
 				INCLUDES = " ".join(["-I" + i.replace (bld.env.INCDIR, "${includedir}")

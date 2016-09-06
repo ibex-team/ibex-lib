@@ -2,7 +2,7 @@
 # encoding: utf-8
 
 import os
-from waflib import Logs
+from waflib import Logs, Errors
 from waflib.Tools import waf_unit_test
 
 # function called after the tests are run for pretty printing the results
@@ -105,24 +105,25 @@ def configure (conf):
 ######################
 def utest (tst):
 	if tst.env.HAVE_CPPUNIT:
+		env_bak = tst.env.env
+		tst.env.env = tst.env.env if tst.env.env else {}
+
+		# Set PKG_CONFIG_PATH if it does not contain tst.env.PKGDIR
+		pkg_path = os.getenv ("PKG_CONFIG_PATH", "").split (":")
+		if not tst.env.PKGDIR in pkg_path:
+			Logs.warn ("You should add '%s' to your PKG_CONFIG_PATH" % tst.env.PKGDIR)
+			pkg_path.append (tst.env.PKGDIR)
+		tst.env.env["PKG_CONFIG_PATH"] = ":".join (pkg_path)
 
 		# Using pkg-config to retrieve info on ibex (assume './waf install' was run)
-		env_env_bak = tst.env.env
-		kwargs = {"package": "ibex", "args": "--cflags --libs",
-					"uselib_store": "TESTS", "mandatory": False}
-		b = tst.check_cfg (**kwargs)
-		if not b:
-			# add to the environnement the path where ibex.pc should be installed
-			ibex_pc_install_path = os.path.join(tst.env.PREFIX, "share", "pkgconfig")
-			if tst.env.env == []:
-				tst.env.env = {}
-			tst.env.env["PKG_CONFIG_PATH"] = ibex_pc_install_path
-			b = tst.check_cfg (**kwargs)
-			if not b:
-				tst.fatal ("Could not find ibex configuration via pkg-config, did you run './waf install' first ?")
-			else:
-				Logs.warn ("You should add the path '%s' to your PKG_CONFIG_PATH" % ibex_pc_install_path)
-		tst.env.env = env_env_bak
+		try:
+			tst.check_cfg (package="ibex",args="--cflags --libs",uselib_store="TESTS")
+		except Errors.WafError:
+			tst.fatal ("Could not find ibex configuration via pkg-config.\n"
+								 "Did you run './waf install' first ?")
+
+		# reset env
+		tst.env.env = env_bak
 
 		# always run the tests
 		tst.options.all_tests = True
