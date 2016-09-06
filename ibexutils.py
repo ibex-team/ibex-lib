@@ -108,12 +108,12 @@ def configure_3rd_party_with_autotools (conf, archive_name,
 		conf_args += " --prefix=%s" % convert_path_win2msys (destnode.abspth ())
 		conf.find_program ("sh")
 		cmd_conf = [conf.env.SH, "-c", "./configure %s"%conf_args]
-		cmd_make = [conf.env.SH, "-c", conf.env.MAKE]
+		cmd_make = [conf.env.SH, "-c", conf.env.MAKE + ["-j%d"%conf.options.jobs]]
 		cmd_install = [conf.env.SH, "-c", conf.env.MAKE + ["install"]]
 	else:
 		conf_args += " --prefix=%s" % destnode.abspath ()
 		cmd_conf =	"./configure %s" % (conf_args)
-		cmd_make = conf.env.MAKE
+		cmd_make = conf.env.MAKE + ["-j%d"%conf.options.jobs]
 		cmd_install = conf.env.MAKE + ["install"]
 
 	stages = []
