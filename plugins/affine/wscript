@@ -47,7 +47,7 @@ def configure (conf):
 	mainsrc = conf.srcnode.make_node ("src")
 
 	# add AFFINE headers
-	for f in conf.path.ant_glob ("src/**/ibex_*.h src/**/ibex_*.h_", excl = excl):
+	for f in conf.path.ant_glob ("src/**/ibex_*.h", excl = excl):
 		conf.env.append_unique ("IBEX_HDR", f.path_from (mainsrc))
 
 	# add AFFINE source files

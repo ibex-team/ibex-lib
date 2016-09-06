@@ -22,9 +22,9 @@ def configure (conf):
 	conf.env.append_unique ('IBEX_SRC', ibex_src)
 
 	# Set env variable containing the list of all ibex headers (by looking
-	# recursively for all files starting with 'ibex_' and ending with '.h' or
-	# '.h_')
-	ibex_hdr = conf.path.ant_glob ("**/ibex_*.h **/ibex_*.h.in **/ibex_*.h_")
+	# recursively for all files starting with 'ibex_' and ending with '.h' or with
+	# '.h.in')
+	ibex_hdr = conf.path.ant_glob ("**/ibex_*.h **/ibex_*.h.in")
 	ibex_hdr =[ f.path_from (conf.path) for f in ibex_hdr ]
 	conf.env.append_unique ('IBEX_HDR', ibex_hdr)
 

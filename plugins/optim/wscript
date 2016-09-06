@@ -218,7 +218,7 @@ def configure (conf):
 	mainsrc = conf.srcnode.make_node ("src")
 
 	# add OPTIM headers
-	for f in conf.path.ant_glob ("src/**/ibex_*.h src/**/ibex_*.h_"):
+	for f in conf.path.ant_glob ("src/**/ibex_*.h"):
 		conf.env.append_unique ("IBEX_HDR", f.path_from (mainsrc))
 
 	# add OPTIM source files
