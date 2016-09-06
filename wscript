@@ -172,6 +172,8 @@ def configure (conf):
 	conf.env.ibex_header = "ibex.h"
 	conf.env.include_key = [ conf.env.ibex_header_setting ]
 	conf.env.include_key += [ os.path.basename(h) for h in conf.env.IBEX_HDR ]
+	conf.env.include_key = [ h[:-3] if h.endswith(".in") else h
+                                            for h in conf.env.include_key ]
 	conf.write_config_header (conf.env.ibex_header, defines = False, top = True,
 			headers = True, guard = "__IBEX_H__", remove = False)
 	del conf.env.include_key
