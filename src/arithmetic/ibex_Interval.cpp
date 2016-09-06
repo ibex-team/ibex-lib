@@ -263,9 +263,9 @@ int Interval::diff(const Interval& y, Interval& c1, Interval& c2) const {
 	y.complementary(c1,c2);
 	c1 &= *this;
 	int res=2;
-	if (c1.is_degenerated()) { c1=Interval::EMPTY_SET; res--; }
+	if (!is_degenerated() && c1.is_degenerated()) { c1=Interval::EMPTY_SET; res--; }
 	c2 &= *this;
-	if (c2.is_degenerated()) { c2=Interval::EMPTY_SET; res--; }
+	if (!is_degenerated() && c2.is_degenerated()) { c2=Interval::EMPTY_SET; res--; }
 
 	if (c1.is_empty()) {
 		c1=c2;

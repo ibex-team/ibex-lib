@@ -149,12 +149,14 @@ int IntervalVector::diff(const IntervalVector& y, IntervalVector*& result) const
 	const int nn=size();
 	IntervalVector x=*this;
 	IntervalVector *tmp = new IntervalVector[2*nn]; // in the worst case, there is 2n boxes
+	IntervalVector z=x & y;
 	Interval c1, c2;
 	int b=0;
-	if (y.is_empty()) {
+
+	if (z.is_empty()) {
 		tmp[b].resize(nn);
 		tmp[b]=x; // copy of this
-		b++;
+		if (!x.is_empty()) b++;
 	} else {
 		for (int var=0; var<nn; var++) {
 
@@ -174,12 +176,12 @@ int IntervalVector::diff(const IntervalVector& y, IntervalVector*& result) const
 					v[var]=c2;
 					for (int i=var+1; i<nn; i++) v[i]=x[i];
 				}
-                                x[var] &= y[var];
+				x[var] = z[var];
 			}
 		}
 	}
 
-	if (b==0) {
+	if (b==0) { // happens when x \subset y
 		result = new IntervalVector[1];
 		result[0].resize(nn);
 		result[0].set_empty();

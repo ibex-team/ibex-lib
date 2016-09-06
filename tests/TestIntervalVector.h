@@ -127,6 +127,7 @@ public:
 		CPPUNIT_TEST(diff03);
 		CPPUNIT_TEST(diff04);
 		CPPUNIT_TEST(diff05);
+		CPPUNIT_TEST(issue228);
 
 		CPPUNIT_TEST(random01);
 		CPPUNIT_TEST(random02);
@@ -280,6 +281,7 @@ public:
 	void diff03();
 	void diff04();
 	void diff05();
+	void issue228();
 
 	// test: random() const
 	void random01();

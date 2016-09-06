@@ -748,6 +748,24 @@ void TestIntervalVector::diff05() {
 
 }
 
+void TestIntervalVector::issue228() {
+	double _b[][2]={{-1,-0.99},{-1,1},{-1,1}};
+	IntervalVector b1(3,_b);
+
+	double _b2[][2]={{0,2},{0,2},{0,2}};
+	IntervalVector b2(3,_b2);
+
+	IntervalVector* c;
+
+	int n=b1.diff(b2,c);
+
+	CPPUNIT_ASSERT(n==1);
+	CPPUNIT_ASSERT(c[0]==b1);
+
+	delete[] c;
+
+}
+
 void TestIntervalVector::random01() {
 	double _b[][2]={{0,1},{0,1}};
 	IntervalVector b(2,_b);
