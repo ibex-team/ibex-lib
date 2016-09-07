@@ -153,7 +153,7 @@ int IntervalVector::diff(const IntervalVector& y, IntervalVector*& result) const
 	Interval c1, c2;
 	int b=0;
 
-	if (z.is_empty()) {
+	if (z.is_flat()) { // includes the case of empty intersection
 		tmp[b].resize(nn);
 		tmp[b]=x; // copy of this
 		if (!x.is_empty()) b++;
@@ -162,6 +162,7 @@ int IntervalVector::diff(const IntervalVector& y, IntervalVector*& result) const
 
 			x[var].diff(y[var],c1,c2);
 
+			//std::cout << x[var] << " diff " << y[var] << "=" << c1  << " and " << c2 << std::endl;
 			if (!c1.is_empty()) {
 				tmp[b].resize(nn);
 				IntervalVector& v=tmp[b++];
