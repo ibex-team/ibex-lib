@@ -128,6 +128,34 @@ public:
 	CPPUNIT_TEST(diff05);
 	CPPUNIT_TEST(diff06);
 	CPPUNIT_TEST(diff07);
+	CPPUNIT_TEST(diff08);
+	CPPUNIT_TEST(diff09);
+	CPPUNIT_TEST(diff10);
+	CPPUNIT_TEST(diff11);
+	CPPUNIT_TEST(diff12);
+	CPPUNIT_TEST(diff13);
+	CPPUNIT_TEST(diff14);
+	CPPUNIT_TEST(diff15);
+	CPPUNIT_TEST(diff16);
+	CPPUNIT_TEST(diff17);
+	CPPUNIT_TEST(diff18);
+	CPPUNIT_TEST(diff19);
+	CPPUNIT_TEST(diff20);
+	CPPUNIT_TEST(diff21);
+	CPPUNIT_TEST(diff22);
+	CPPUNIT_TEST(diff23);
+	CPPUNIT_TEST(diff24);
+	CPPUNIT_TEST(diff25);
+	CPPUNIT_TEST(diff26);
+	CPPUNIT_TEST(diff27);
+	CPPUNIT_TEST(diff28);
+	CPPUNIT_TEST(diff29);
+	CPPUNIT_TEST(diff30);
+	CPPUNIT_TEST(diff31);
+	CPPUNIT_TEST(diff32);
+	CPPUNIT_TEST(diff33);
+	CPPUNIT_TEST(diff34);
+
 	CPPUNIT_TEST(issue228);
 
 	CPPUNIT_TEST(random01);
@@ -278,13 +306,80 @@ public:
 	void compl02();
 
 	// test: diff(const IntervalVector& y, IntervalVector*& result) const
+
+	// [-2,2]x[-2,2]x[-2,2] \ empty
 	void diff01();
+	// \empty \ [-2,2]x[-2,2]x[-2,2]
 	void diff02();
+	// [-2,2]x[-2,2]x[-2,2] \ [-2,2]x[3,4]x[-2,2]
 	void diff03();
+
+	// one test with x thick and y flat should be enough
+	// [-2,2]x[-2,2]x[-2,2] \ [-1,1]x[-1,-1]x[-1,1]
 	void diff04();
+	// [-2,2]x[-2,2]x[-2,2] \ [-1,1]x[-1,1]x[-1,1]
 	void diff05();
+	// [-2,2]x[-2,2]x[-2,2] \ [-1,1]x[-1,1]x[-2,1]
 	void diff06();
+	// [-2,2]x[-2,2]x[-2,2] \ [-1,1]x[-1,1]x[-2,2]
 	void diff07();
+	// [-2,2]x[-2,2]x[-2,2] \ [-1,1]x[-2,1]x[-1,1]
+	void diff08();
+	// [-2,2]x[-2,2]x[-2,2] \ [-1,1]x[-2,2]x[-1,1]
+	void diff09();
+	// [-2,2]x[-2,2]x[-2,2] \ [-2,1]x[-1,1]x[-1,1]
+	void diff10();
+	// [-2,2]x[-2,2]x[-2,2] \ [-2,2]x[-1,2]x[-1,1]
+	void diff11();
+
+	// [-2,2]x[-2,2]x[-2,2] \ [-1,1]x[-2,1]x[-2,1]
+	void diff12();
+	// [-2,2]x[-2,2]x[-2,2] \ [-1,1]x[-2,1]x[-2,2]
+	void diff13();
+	// [-2,2]x[-2,2]x[-2,2] \ [-2,1]x[-1,1]x[-2,1]
+	void diff14();
+	// [-2,2]x[-2,2]x[-2,2] \ [-2,1]x[-1,1]x[-2,2]
+	void diff15();
+	// [-2,2]x[-2,2]x[-2,2] \ [-2,1]x[-2,1]x[-1,1]
+	void diff16();
+	// [-2,2]x[-2,2]x[-2,2] \ [-2,1]x[-2,2]x[-1,1]
+	void diff17();
+
+	// [-2,2]x[-2,2]x[-2,2] \ [-2,1]x[-2,1]x[-2,1]
+	void diff18();
+	// [-2,2]x[-2,2]x[-2,2] \ [-2,1]x[-2,1]x[-2,2]
+	void diff19();
+	// [-2,2]x[-2,2]x[-2,2] \ [-2,1]x[-2,2]x[-2,1]
+	void diff20();
+	// [-2,2]x[-2,2]x[-2,2] \ [-2,2]x[-2,1]x[-2,1]
+	void diff21();
+
+	// [-2,2]x[-2,2]x[-2,2] \ [-2,1]x[-2,2]x[-2,2]
+	void diff22();
+	// [-2,2]x[-2,2]x[-2,2] \ [-2,2]x[-2,2]x[-2,1]
+	void diff23();
+	// [-2,2]x[-2,2]x[-2,2] \ [-2,2]x[-2,1]x[-2,2]
+	void diff24();
+	// [-2,2]x[-2,2]x[-2,2] \ [-2,2]x[-2,2]x[-2,2]
+	void diff25();
+
+	void diff26();
+	void diff27();
+	void diff28();
+	void diff29();
+
+	// [0,0]x[-2,2]x[-2,2] \ [0,0]x[-1,-1]x[-1,1]
+	void diff30();
+	// [0,0]x[0,0]x[-2,2] \ [0,0]x[0,0]x[-1,1]
+	void diff31();
+	// [0,0]x[-2,2]x[0,0] \ [0,0]x[-1,1]x[0,0]
+	void diff32();
+
+	// [-2,2]x[0,0]x[0,0] \ [-1,1]x[0,0]x[0,0]
+	void diff33();
+	// [0,0]x[-2,2]x[-2,2] \ [-1,-1]x[-1,-1]x[-1,1]
+	void diff34();
+
 	void issue228();
 
 	// test: random() const
@@ -292,7 +387,7 @@ public:
 	void random02();
 
 private:
-
+	bool test_diff(int n, double x[][2], double y[][2], int m, double z[][2], bool debug=false);
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestIntervalVector);

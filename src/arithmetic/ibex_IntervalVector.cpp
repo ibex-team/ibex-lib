@@ -151,9 +151,19 @@ int IntervalVector::diff(const IntervalVector& y, IntervalVector*& result) const
 	IntervalVector *tmp = new IntervalVector[2*nn]; // in the worst case, there is 2n boxes
 	IntervalVector z=x & y;
 	Interval c1, c2;
+	bool return_x=z.is_empty();
+
+	// check if in one dimension y is flat and x not,
+	// in which case the diff returns also x directly
+	if (!return_x) {
+		for (int i=0; i<nn; i++) {
+			if (y[i].is_degenerated() && !x[i].is_degenerated()) { return_x=true; break; }
+		}
+	}
+
 	int b=0;
 
-	if (z.is_flat()) { // includes the case of empty intersection
+	if (return_x) { // includes the case of empty intersection
 		tmp[b].resize(nn);
 		tmp[b]=x; // copy of this
 		if (!x.is_empty()) b++;
