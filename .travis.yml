@@ -4,21 +4,25 @@ matrix:
   include:
     - os: linux
       compiler: gcc
-      env: TEST_INTERVAL_LIB=gaol
+      env:
+        - TEST_INTERVAL_LIB=gaol
+        - STATIC_OR_SHARED=
     - os: linux
       compiler: gcc
-      env: TEST_INTERVAL_LIB=filib
+      env:
+        - TEST_INTERVAL_LIB=gaol
+        - STATIC_OR_SHARED=--enable-shared
+    - os: linux
+      compiler: gcc
+      env:
+        - TEST_INTERVAL_LIB=filib
+        - STATIC_OR_SHARED=
     - os: osx
       compiler: clang
       osx_image: xcode7.3
-      env: TEST_INTERVAL_LIB=gaol
-    # disable for now
-    #- os: osx
-    #  compiler: gcc
-    #  env: TEST_INTERVAL_LIB=filib
-  allow_failures: # temporary
-    - os: osx
-
+      env:
+        - TEST_INTERVAL_LIB=gaol
+        - STATIC_OR_SHARED=
 
 # only works on linux
 addons:
@@ -35,7 +39,7 @@ before_install:
 
 # TODO add --affine when tests are fixed
 install: 
-  - ./waf configure --prefix=$HOME --interval-lib=${TEST_INTERVAL_LIB} --with-optim --optim-lib=soplex || cat __build__/*.log
+  - ./waf configure --prefix=$HOME ${STATIC_OR_SHARED} --interval-lib=${TEST_INTERVAL_LIB} --with-optim --optim-lib=soplex || cat __build__/*.log
   - ./waf build install clean
 
 # command to run tests
