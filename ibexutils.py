@@ -1,4 +1,4 @@
-import os, tarfile, functools, sys, shutil
+import os, tarfile, functools, sys, shutil, copy
 
 from waflib import Logs, Errors, Utils
 from waflib.Configure import conf, ConfigurationContext
@@ -98,11 +98,14 @@ def configure_3rd_party_with_autotools (conf, archive_name,
 	for p in conf.path.ant_glob (patch_ant_glob):
 		conf.apply_patch (p.abspath())
 
-	# Built shared library, if ibex is built as a shared library.
+	# always build static library, even if ibex is built as a shared library.
+	conf_args += " --enable-static --disable-shared"
+
 	if conf.env.ENABLE_SHARED:
-		conf_args += " --enable-shared --disable-static"
-	else:
-		conf_args += " --enable-static --disable-shared"
+		cflags = os.getenv("CFLAGS", "")
+		cxxflags = os.getenv("CXXFLAGS", "")
+		os.environ["CFLAGS"] = cflags + " ".join(conf.env.CFLAGS_cshlib)
+		os.environ["CXXFLAGS"] = cxxflags+" "+" ".join(conf.env.CXXFLAGS_cxxshlib)
 
 	if Utils.is_win32:
 		conf_args += " --prefix=%s" % convert_path_win2msys (destnode.abspth ())
@@ -112,7 +115,7 @@ def configure_3rd_party_with_autotools (conf, archive_name,
 		cmd_install = [conf.env.SH, "-c", conf.env.MAKE + ["install"]]
 	else:
 		conf_args += " --prefix=%s" % destnode.abspath ()
-		cmd_conf =	"./configure %s" % (conf_args)
+		cmd_conf = "./configure %s" % (conf_args)
 		cmd_make = conf.env.MAKE + ["-j%d"%conf.options.jobs]
 		cmd_install = conf.env.MAKE + ["install"]
 
@@ -125,7 +128,7 @@ def configure_3rd_party_with_autotools (conf, archive_name,
 	for cmd, stage in stages:
 		conf.start_msg("Calling %s" % stage)
 		try: 
-			out = conf.cmd_and_log (cmd, cwd=srcdir)
+			out = conf.cmd_and_log (cmd, cwd=srcdir, env=os.environ)
 			conf.end_msg("done")
 		except Errors.WafError as e:
 			conf.end_msg("failed", color="RED")
@@ -133,6 +136,10 @@ def configure_3rd_party_with_autotools (conf, archive_name,
 			conf.fatal ("failed to %s %s (%s)" % (stage, name, cmd))
 
 	conf.to_log ((" Installation of %s: done " % name).center (80, "="))
+
+	if conf.env.ENABLE_SHARED:
+		os.environ["CFLAGS"] = cflags
+		os.environ["CXXFLAGS"] = cxxflags
 
 	return srcdir, incdir, libdir
 
