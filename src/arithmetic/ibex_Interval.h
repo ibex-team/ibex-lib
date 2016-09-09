@@ -214,6 +214,15 @@ class Interval {
      */
     Interval& inflate(double rad);
 
+	/**
+	 * \brief Absolute and relative inflation.
+	 *
+	 * [x] <- mid[x] + delta*([x]-mid[x]) + chi*[-1,+1]
+	 *
+	 * \return *this.
+	 */
+	Interval& inflate(double delta, double chi);
+
     /** \brief Lower bound.
      *
      * Return the lower bound of *this. */
@@ -937,6 +946,13 @@ inline Interval& Interval::inflate(double radd) {
 	(*this) += Interval(-radd,radd);
 	return *this;
 }
+
+inline Interval& Interval::inflate(double delta, double chi) {
+	double m=mid();
+	(*this) = m + delta*(*this-m)+Interval(-chi,chi);
+	return *this;
+}
+
 
 inline bool Interval::operator!=(const Interval& x) const {
 	return !(*this==x);

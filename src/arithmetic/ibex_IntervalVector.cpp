@@ -270,7 +270,15 @@ bool bwd_mul(const Interval& z, IntervalVector& x, IntervalVector& y) {
 	return true;
 }
 
+IntervalVector& IntervalVector::inflate(double delta, double chi) {
+	if (is_empty()) return *this;
+	for (int i=0; i<size(); i++) {
+		vec[i].inflate(delta,chi);
+	}
+	return *this;
+}
 
+// why inflate is template?
 IntervalVector& IntervalVector::inflate(double rad1)                              { return _inflate(*this,rad1); }
 IntervalVector  IntervalVector::subvector(int start_index, int end_index) const   { return _subvector(*this,start_index,end_index); }
 void            IntervalVector::put(int start_index, const IntervalVector& x)     { _put(*this, start_index, x); }
