@@ -24,7 +24,6 @@ def configure (conf):
 
 	conf.end_msg ("enabled")
 
-	conf.msg ("plugin Affine Arithmetic", "enabled")
 	conf.env.append_unique ("IBEX_PLUGIN_USE_LIST", "AFFINE")
 
 	# Add information in ibex_Setting
