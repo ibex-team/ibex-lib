@@ -47,6 +47,7 @@ public:
 
 protected:
 	IntervalVector _solution;
+	IntervalVector _unicity_box_ignored;
 	bool inflating;
 };
 

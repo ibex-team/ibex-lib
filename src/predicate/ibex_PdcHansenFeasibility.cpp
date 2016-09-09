@@ -15,7 +15,7 @@
 
 namespace ibex {
 
-PdcHansenFeasibility::PdcHansenFeasibility(Function& f, bool inflating) : Pdc(f.nb_var()), f(f), _solution(f.nb_var()), inflating(inflating) {
+PdcHansenFeasibility::PdcHansenFeasibility(Function& f, bool inflating) : Pdc(f.nb_var()), f(f), _solution(f.nb_var()), _unicity_box_ignored(f.nb_var()), inflating(inflating) {
 
 }
 
@@ -60,11 +60,8 @@ BoolInterval PdcHansenFeasibility::test(const IntervalVector& box) {
 	IntervalVector savebox(box2);
 
 	if (inflating) {
-		if (inflating_newton(f,vars,box2)) {
-			_solution = box2;
+		if (inflating_newton(f,vars,box2,_solution,_unicity_box_ignored)) {
 			res = YES;
-		} else {
-			_solution.set_empty();
 		}
 	}
 	else {

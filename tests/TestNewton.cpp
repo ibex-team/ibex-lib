@@ -107,9 +107,33 @@ void TestNewton::inflating_newton01() {
 	IntervalVector box(30,BOX2);
 	box += error;
 	IntervalVector expected(30,BOX2);
-	bool ret=inflating_newton(*p30.f,box);
+	IntervalVector _ignore_(30);
+	IntervalVector sol(30);
+	bool ret=inflating_newton(*p30.f,box,sol,_ignore_);
 	CPPUNIT_ASSERT(ret);
-	CPPUNIT_ASSERT(almost_eq(box,expected,1e-10));
+
+	CPPUNIT_ASSERT(almost_eq(sol,expected,1e-10));
+}
+
+void TestNewton::inflating_newton02() {
+	Variable x,y,z;
+	Function f(x,y,z,sqr(x)+sqr(y)+sqr(z)-1);
+	double _x0[][2]={{-0.1,0.1},{-0.1,0.1},{1.,1.}};
+	IntervalVector x0(3,_x0);
+	VarSet vars(f,z);
+	IntervalVector box_unicity(3);
+	IntervalVector box_existence(3);
+
+	inflating_newton(f,vars,x0,box_existence,box_unicity);
+
+	CPPUNIT_ASSERT(box_unicity.is_superset(box_existence));
+	CPPUNIT_ASSERT(box_unicity.is_superset(box_existence));
+	// the solution must contain the max (1.0) and the min
+	// that is, the solution obtained at one corner of the parameter
+	// box, like (-0.1,-0.1) which is ~ 7/5*sqrt(2)
+	CPPUNIT_ASSERT(box_existence[2].contains(1.0));
+	CPPUNIT_ASSERT(box_existence[2].is_superset(7.0/(5*sqrt(Interval(2.0)))));
+
 }
 
 void TestNewton::ctc_parameter01() {
