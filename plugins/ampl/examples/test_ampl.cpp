@@ -10,12 +10,15 @@
 
 #include "ibex.h"
 
+#ifndef _IBEX_WITH_AMPL_
+#error "You need the plugin AMPL to run this example."
+#endif
+
 using namespace std;
 using namespace ibex;
 
 int main(int argc, char** argv) {
 
-#ifdef _IBEX_WITH_AMPL_
 	cout<<"begin"<< endl;
 	AmplInterface interface(argv[1]);
 	cout<<"creation ok"<< endl;
@@ -40,7 +43,6 @@ int main(int argc, char** argv) {
 	cout<<ext_sys2<<endl;
 
 */
-#endif
 
 	return 0;
 
