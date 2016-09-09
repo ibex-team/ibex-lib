@@ -4,11 +4,6 @@ BINS=$(SRCS:.cpp=)
 CXXFLAGS := $(shell pkg-config --cflags ibex) 
 LIBS	 := $(shell pkg-config --libs  ibex)
 
-ROOT_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
-
-CXXFLAGS := $(CXXFLAGS) -I../../../examples
-CXXFLAGS := $(CXXFLAGS) -DIBEX_BENCHS_DIR=\"${ROOT_DIR}/../../../benchs\"
-
 ifeq ($(DEBUG), yes)
 CXXFLAGS := $(CXXFLAGS) -O0 -g -pg -Wall
 else

@@ -11,6 +11,14 @@
 
 #include "ibex.h"
 
+#ifndef _IBEX_WITH_OPTIM_
+#error "You need the plugin Optim to run this example."
+#endif
+
+#ifndef IBEX_BENCHS_DIR
+  #define IBEX_BENCHS_DIR "../../../benchs"
+#endif
+
 using namespace std;
 using namespace ibex;
 
@@ -23,7 +31,7 @@ int main() {
 	{
 	//! [start-call-solver]
 	/* Build a system of equations from the file */
-	System system("../benchs/benchs-satisfaction/benchlib2/kolev36.bch");
+	System system(IBEX_BENCHS_DIR "/benchs-satisfaction/benchlib2/kolev36.bch");
 
 	/* Build a default solver for the system and with a precision set to 1e-07 */
 	DefaultSolver solver(system,1e-07);
@@ -40,7 +48,7 @@ int main() {
 	{
 	//! [start-call-optim]
 	/* Build a constrained optimization problem from the file */
-	System sys("../benchs/benchs-optim/coconutbenchmark-library1/ex3_1_3.bch");
+	System sys(IBEX_BENCHS_DIR "/benchs-optim/coconutbenchmark-library1/ex3_1_3.bch");
 
 	/* Build a default optimizer with a precision set to 1e-07 for both x and f(x) */
 	DefaultOptimizer o(sys,1e-07,1e-07);
@@ -634,7 +642,7 @@ int main() {
 	{
 	//! [strat-default-solver]
 
-	System system("../benchs/benchs-satisfaction/benchlib2/kolev36.bch");
+	System system(IBEX_BENCHS_DIR "/benchs-satisfaction/benchlib2/kolev36.bch");
 
 	double prec=1e-7; // precision
 
@@ -684,7 +692,7 @@ int main() {
 	{
 	//! [strat-default-optimizer]
 
-	System system("../benchs/benchs-optim/coconutbenchmark-library1/ex3_1_3.bch");
+	System system(IBEX_BENCHS_DIR "/benchs-optim/coconutbenchmark-library1/ex3_1_3.bch");
 
 	double prec=1e-7; // precision
 

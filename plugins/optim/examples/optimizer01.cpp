@@ -11,46 +11,36 @@
 
 #include "ibex.h"
 
+#ifndef _IBEX_WITH_OPTIM_
+#error "You need the plugin Optim to run this example."
+#endif
+
 using namespace std;
 using namespace ibex;
-int main(int argc, char** argv){
 
-	// Example #19
+int main() {
+
+	// Example #18
 	// ------------------------------------------------
-	// Optimizer (with a system loaded from a file)
+	// Optimizer (with an hard-coded function)
 	//
 
-         // Load a problem to optimize
-	// --------------------------
-	try {
+	Variable x,y;
 
-	if (argc<2) {
-		cerr << "usage: optimizer02 [filename]" << endl;
-		exit(1);
-	}
+	SystemFactory fac;
+	fac.add_var(x);
+	fac.add_var(y);
+	fac.add_goal(x+y);
+	fac.add_ctr(sqr(x)+sqr(y)<=1);
 
-	System sys(argv[1]);
+	System sys(fac);
 
-	RoundRobin rr(Optimizer::default_prec);
+	DefaultOptimizer o(sys,0.001,0.001);
 
-	ExtendedSystem ext(sys);
+	IntervalVector box(2);
 
-	CtcHC4 ctc(ext.ctrs);
+	o.optimize(box);
 
-
-	// =============================================================
-
-	Optimizer o(sys,ctc,rr);
-	//o.in_HC4_flag=false;
-    //o.trace=true;
-	o.optimize(sys.box);
 	o.report();
-
 	return 0;
-	}
-
-
-	catch(ibex::SyntaxError& e) {
-	  cout << e << endl;
-	}
 }

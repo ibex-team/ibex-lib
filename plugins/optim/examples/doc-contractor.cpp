@@ -13,6 +13,14 @@
 #include "vibes.cpp"
 #include <fstream>
 
+#ifndef _IBEX_WITH_OPTIM_
+#error "You need the plugin Optim to run this example."
+#endif
+
+#ifndef IBEX_BENCHS_DIR
+  #define IBEX_BENCHS_DIR "../../../benchs"
+#endif
+
 using namespace std;
 using namespace ibex;
 
@@ -258,7 +266,7 @@ int main() {
 	//! [ctc-propag-2-C]
 
 	// Load a system of constraints
-	System sys("../benchs/benchs-satisfaction/benchs-coprin/DiscreteBoundary-0100.bch");
+	System sys(IBEX_BENCHS_DIR "/benchs-satisfaction/benchs-coprin/DiscreteBoundary-0100.bch");
 
 	// The array of contractors we will use
 	Array<Ctc> ctc(sys.nb_ctr);
@@ -310,7 +318,7 @@ int main() {
 	{
 	output << "! [ctc-input-output-O]" << endl;
 	// Load a system of constraints
-	System sys("../benchs/benchs-satisfaction/benchs-coprin/DiscreteBoundary-0100.bch");
+	System sys(IBEX_BENCHS_DIR "/benchs-satisfaction/benchs-coprin/DiscreteBoundary-0100.bch");
 
 	// The array of contractors we will use
 	Array<Ctc> ctc(sys.nb_ctr);
@@ -344,7 +352,7 @@ int main() {
 	//! [ctc-hc4-C]
 
 	// Load a system of equations
-	System sys("../benchs/benchs-satisfaction/benchlib2/hayes1.bch");
+	System sys(IBEX_BENCHS_DIR "/benchs-satisfaction/benchlib2/hayes1.bch");
 	// Create the HC4 propagation loop with this system
 	CtcHC4 hc4(sys);
 
