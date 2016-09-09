@@ -113,8 +113,13 @@ def configure (conf):
 		conf.check_cxx(cxxflags=f, use="IBEX", mandatory=False, uselib_store="IBEX")
 
 	# Build as shared lib is asked
+	conf.start_msg ("Ibex will be built as a")
 	if conf.options.ENABLE_SHARED:
 		conf.env.ENABLE_SHARED = True
+		conf.end_msg ("shared library")
+	else:
+		conf.end_msg ("static library")
+
 
 	# Bison / Flex
 	conf.env.append_unique ("BISONFLAGS", ["--name-prefix=ibex", "--report=all", "--file-prefix=parser"])
