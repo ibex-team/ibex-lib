@@ -10,6 +10,10 @@
 
 #include "ibex.h"
 
+#ifndef _IBEX_WITH_AFFINE_EXTENDED_
+#error "You need the plugin Affine Extended to run this example."
+#endif
+
 using namespace std;
 using namespace ibex;
 
