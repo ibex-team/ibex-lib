@@ -113,6 +113,11 @@ public:
 	VarSet(int total, const BitSet& x, bool var=true);
 
 	/**
+	 * \brief Copy constructor.
+	 */
+	VarSet(const VarSet& v);
+
+	/**
 	 * \brief Extend the box to a "full box" with the parameters
 	 */
 	IntervalVector full_box(const IntervalVector& var_box, const IntervalVector& param_box) const;
@@ -161,6 +166,8 @@ protected:
 
 	void init(Function& f, const Array<const ExprNode>& x, bool var);
 };
+
+std::ostream& operator<<(std::ostream& os, const VarSet& v);
 
 } // namespace ibex
 
