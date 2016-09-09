@@ -22,6 +22,9 @@ def configure (conf):
 	conf.end_msg ("enabled")
 	conf.env.append_unique ("IBEX_PLUGIN_USE_LIST", "PARAM_ESTIM")
 	
+	# Add information in ibex_Setting
+	conf.setting_define ("WITH_PARAM_ESTIM", 1)
+
 	# add PARAM_ESTIM plugin include directory
 	for f in conf.path.ant_glob ("src/** src", dir = True, src = False):
 		conf.env.append_unique("INCLUDES_PARAM_ESTIM", f.abspath())

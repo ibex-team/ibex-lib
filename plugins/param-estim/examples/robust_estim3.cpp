@@ -5,6 +5,10 @@
 #include <fstream>
 #include <ctime>
 
+#ifndef _IBEX_WITH_PARAM_ESTIM_
+#error "You need the plugin Param Estim to run this example."
+#endif
+
 using namespace std;
 using namespace ibex;
 

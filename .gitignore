@@ -43,7 +43,7 @@ newdoc/_build
 *~
 
 # files in examples
-examples/
-!examples/*cpp
-!examples/makefile
+**/examples/*
+!**/examples/*cpp
+!**/examples/makefile
 
