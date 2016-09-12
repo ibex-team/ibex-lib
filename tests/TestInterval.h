@@ -23,147 +23,164 @@ class TestInterval : public CppUnit::TestFixture {
 public:
 
 	CPPUNIT_TEST_SUITE(TestInterval);
-	
-		CPPUNIT_TEST(cons01);
-		CPPUNIT_TEST(cons02);
-		CPPUNIT_TEST(cons03);
-		CPPUNIT_TEST(cons04);
-		CPPUNIT_TEST(cons05);
 
-		CPPUNIT_TEST(eq01);
-		CPPUNIT_TEST(eq02);
-		CPPUNIT_TEST(eq03);
-		CPPUNIT_TEST(eq04);
-		CPPUNIT_TEST(eq05);
-		CPPUNIT_TEST(eq06);
-		CPPUNIT_TEST(eq07);
-		CPPUNIT_TEST(eq08);
+	CPPUNIT_TEST(cons01);
+	CPPUNIT_TEST(cons02);
+	CPPUNIT_TEST(cons03);
+	CPPUNIT_TEST(cons04);
+	CPPUNIT_TEST(cons05);
 
-		CPPUNIT_TEST(set_empty01);
-		CPPUNIT_TEST(set_empty02);
+	CPPUNIT_TEST(eq01);
+	CPPUNIT_TEST(eq02);
+	CPPUNIT_TEST(eq03);
+	CPPUNIT_TEST(eq04);
+	CPPUNIT_TEST(eq05);
+	CPPUNIT_TEST(eq06);
+	CPPUNIT_TEST(eq07);
+	CPPUNIT_TEST(eq08);
 
-		CPPUNIT_TEST(inter01);
-		CPPUNIT_TEST(inter02);
-		CPPUNIT_TEST(inter03);
-		CPPUNIT_TEST(inter04);
-		CPPUNIT_TEST(inter05);
-		CPPUNIT_TEST(inter06);
+	CPPUNIT_TEST(set_empty01);
+	CPPUNIT_TEST(set_empty02);
 
-		CPPUNIT_TEST(hull01);
-		CPPUNIT_TEST(hull02);
-		CPPUNIT_TEST(hull03);
+	CPPUNIT_TEST(inter01);
+	CPPUNIT_TEST(inter02);
+	CPPUNIT_TEST(inter03);
+	CPPUNIT_TEST(inter04);
+	CPPUNIT_TEST(inter05);
+	CPPUNIT_TEST(inter06);
 
-		CPPUNIT_TEST(getters01);
-		CPPUNIT_TEST(getters02);
-		CPPUNIT_TEST(getters03);
-		CPPUNIT_TEST(getters04);
-		CPPUNIT_TEST(getters05);
-		CPPUNIT_TEST(getters06);
+	CPPUNIT_TEST(hull01);
+	CPPUNIT_TEST(hull02);
+	CPPUNIT_TEST(hull03);
 
-		CPPUNIT_TEST(distance01);
-		CPPUNIT_TEST(distance02);
-		CPPUNIT_TEST(distance03);
-		CPPUNIT_TEST(distance04);
-		CPPUNIT_TEST(distance05);
-		CPPUNIT_TEST(distance06);
-		CPPUNIT_TEST(distance07);
-		CPPUNIT_TEST(distance08);
-		CPPUNIT_TEST(distance09);
-		CPPUNIT_TEST(distance10);
-		CPPUNIT_TEST(distance11);
-		CPPUNIT_TEST(distance12);
-		CPPUNIT_TEST(distance13);
-		CPPUNIT_TEST(distance14);
-		CPPUNIT_TEST(distance15);
-		CPPUNIT_TEST(distance15b);
-		CPPUNIT_TEST(distance16);
-		CPPUNIT_TEST(distance17);
-		CPPUNIT_TEST(distance18);
-		CPPUNIT_TEST(distance19);
-		CPPUNIT_TEST(distance20);
-		CPPUNIT_TEST(distance21);
-		CPPUNIT_TEST(distance22);
-		CPPUNIT_TEST(distance23);
+	CPPUNIT_TEST(getters01);
+	CPPUNIT_TEST(getters02);
+	CPPUNIT_TEST(getters03);
+	CPPUNIT_TEST(getters04);
+	CPPUNIT_TEST(getters05);
+	CPPUNIT_TEST(getters06);
 
-		CPPUNIT_TEST(rel_distance01);
-		CPPUNIT_TEST(rel_distance02);
-		CPPUNIT_TEST(rel_distance03);
-		CPPUNIT_TEST(rel_distance04);
-		CPPUNIT_TEST(rel_distance05);
-		CPPUNIT_TEST(rel_distance06);
-		CPPUNIT_TEST(rel_distance07);
-		CPPUNIT_TEST(rel_distance08);
-		CPPUNIT_TEST(rel_distance09);
-		CPPUNIT_TEST(rel_distance10);
-		CPPUNIT_TEST(rel_distance11);
-		CPPUNIT_TEST(rel_distance12);
-		CPPUNIT_TEST(rel_distance13);
-		CPPUNIT_TEST(rel_distance14);
-		CPPUNIT_TEST(rel_distance15);
-		CPPUNIT_TEST(rel_distance16);
-		CPPUNIT_TEST(rel_distance17);
-		CPPUNIT_TEST(rel_distance18);
-		CPPUNIT_TEST(rel_distance19);
-		CPPUNIT_TEST(rel_distance20);
-		CPPUNIT_TEST(rel_distance21);
+	CPPUNIT_TEST(distance01);
+	CPPUNIT_TEST(distance02);
+	CPPUNIT_TEST(distance03);
+	CPPUNIT_TEST(distance04);
+	CPPUNIT_TEST(distance05);
+	CPPUNIT_TEST(distance06);
+	CPPUNIT_TEST(distance07);
+	CPPUNIT_TEST(distance08);
+	CPPUNIT_TEST(distance09);
+	CPPUNIT_TEST(distance10);
+	CPPUNIT_TEST(distance11);
+	CPPUNIT_TEST(distance12);
+	CPPUNIT_TEST(distance13);
+	CPPUNIT_TEST(distance14);
+	CPPUNIT_TEST(distance15);
+	CPPUNIT_TEST(distance15b);
+	CPPUNIT_TEST(distance16);
+	CPPUNIT_TEST(distance17);
+	CPPUNIT_TEST(distance18);
+	CPPUNIT_TEST(distance19);
+	CPPUNIT_TEST(distance20);
+	CPPUNIT_TEST(distance21);
+	CPPUNIT_TEST(distance22);
+	CPPUNIT_TEST(distance23);
 
-	    CPPUNIT_TEST(is_subset01);
-	    CPPUNIT_TEST(is_subset02);
-	    CPPUNIT_TEST(is_strict_interior_subset01);
-	    CPPUNIT_TEST(is_strict_interior_subset02);
-	    CPPUNIT_TEST(is_strict_interior_subset03);
-	    CPPUNIT_TEST(is_superset01);
-	    CPPUNIT_TEST(is_superset02);
-	    CPPUNIT_TEST(is_strict_superset01);
-	    CPPUNIT_TEST(is_strict_superset02);
-	    CPPUNIT_TEST(is_strict_superset03);
-	    CPPUNIT_TEST(contains01);
-	    CPPUNIT_TEST(contains02);
-	    CPPUNIT_TEST(interior_contains01);
-	    CPPUNIT_TEST(interior_contains02);
-	    CPPUNIT_TEST(is_disjoint01);
-	    CPPUNIT_TEST(is_disjoint02);
-	    CPPUNIT_TEST(is_empty01);
-	    CPPUNIT_TEST(is_empty02);
-	    CPPUNIT_TEST(is_degenerated01);
-	    CPPUNIT_TEST(is_degenerated02);
-	    CPPUNIT_TEST(is_unbounded01);
-	    CPPUNIT_TEST(is_unbounded02);
-	    CPPUNIT_TEST(is_unbounded03);
-	    CPPUNIT_TEST(is_unbounded04);
+	CPPUNIT_TEST(rel_distance01);
+	CPPUNIT_TEST(rel_distance02);
+	CPPUNIT_TEST(rel_distance03);
+	CPPUNIT_TEST(rel_distance04);
+	CPPUNIT_TEST(rel_distance05);
+	CPPUNIT_TEST(rel_distance06);
+	CPPUNIT_TEST(rel_distance07);
+	CPPUNIT_TEST(rel_distance08);
+	CPPUNIT_TEST(rel_distance09);
+	CPPUNIT_TEST(rel_distance10);
+	CPPUNIT_TEST(rel_distance11);
+	CPPUNIT_TEST(rel_distance12);
+	CPPUNIT_TEST(rel_distance13);
+	CPPUNIT_TEST(rel_distance14);
+	CPPUNIT_TEST(rel_distance15);
+	CPPUNIT_TEST(rel_distance16);
+	CPPUNIT_TEST(rel_distance17);
+	CPPUNIT_TEST(rel_distance18);
+	CPPUNIT_TEST(rel_distance19);
+	CPPUNIT_TEST(rel_distance20);
+	CPPUNIT_TEST(rel_distance21);
 
-		CPPUNIT_TEST(is_bisectable01);
-		CPPUNIT_TEST(is_bisectable02);
-		CPPUNIT_TEST(is_bisectable03);
-		CPPUNIT_TEST(is_bisectable04);
-		CPPUNIT_TEST(is_bisectable05);
-		CPPUNIT_TEST(is_bisectable06);
-		CPPUNIT_TEST(is_bisectable07);
-		CPPUNIT_TEST(is_bisectable08);
-		CPPUNIT_TEST(is_bisectable09);
-		CPPUNIT_TEST(is_bisectable10);
+	CPPUNIT_TEST(is_subset01);
+	CPPUNIT_TEST(is_subset02);
+	CPPUNIT_TEST(is_strict_interior_subset01);
+	CPPUNIT_TEST(is_strict_interior_subset02);
+	CPPUNIT_TEST(is_strict_interior_subset03);
+	CPPUNIT_TEST(is_superset01);
+	CPPUNIT_TEST(is_superset02);
+	CPPUNIT_TEST(is_strict_superset01);
+	CPPUNIT_TEST(is_strict_superset02);
+	CPPUNIT_TEST(is_strict_superset03);
+	CPPUNIT_TEST(contains01);
+	CPPUNIT_TEST(contains02);
+	CPPUNIT_TEST(interior_contains01);
+	CPPUNIT_TEST(interior_contains02);
+	CPPUNIT_TEST(is_disjoint01);
+	CPPUNIT_TEST(is_disjoint02);
+	CPPUNIT_TEST(is_empty01);
+	CPPUNIT_TEST(is_empty02);
+	CPPUNIT_TEST(is_degenerated01);
+	CPPUNIT_TEST(is_degenerated02);
+	CPPUNIT_TEST(is_unbounded01);
+	CPPUNIT_TEST(is_unbounded02);
+	CPPUNIT_TEST(is_unbounded03);
+	CPPUNIT_TEST(is_unbounded04);
 
-		CPPUNIT_TEST(integer01);
-		CPPUNIT_TEST(integer02);
-		CPPUNIT_TEST(integer03);
-		CPPUNIT_TEST(integer04);
-		CPPUNIT_TEST(integer05);
-		CPPUNIT_TEST(integer06);
-		CPPUNIT_TEST(integer07);
-		CPPUNIT_TEST(integer08);
+	CPPUNIT_TEST(is_bisectable01);
+	CPPUNIT_TEST(is_bisectable02);
+	CPPUNIT_TEST(is_bisectable03);
+	CPPUNIT_TEST(is_bisectable04);
+	CPPUNIT_TEST(is_bisectable05);
+	CPPUNIT_TEST(is_bisectable06);
+	CPPUNIT_TEST(is_bisectable07);
+	CPPUNIT_TEST(is_bisectable08);
+	CPPUNIT_TEST(is_bisectable09);
+	CPPUNIT_TEST(is_bisectable10);
 
-		CPPUNIT_TEST(mid01);
-		CPPUNIT_TEST(mid02);
-		CPPUNIT_TEST(mid03);
-		CPPUNIT_TEST(mid04);
-		CPPUNIT_TEST(mid05);
-		CPPUNIT_TEST(mid06);
-		CPPUNIT_TEST(mid07);
-		CPPUNIT_TEST(mid08);
+	CPPUNIT_TEST(integer01);
+	CPPUNIT_TEST(integer02);
+	CPPUNIT_TEST(integer03);
+	CPPUNIT_TEST(integer04);
+	CPPUNIT_TEST(integer05);
+	CPPUNIT_TEST(integer06);
+	CPPUNIT_TEST(integer07);
+	CPPUNIT_TEST(integer08);
 
-	    CPPUNIT_TEST(delta01);
-	    CPPUNIT_TEST(delta02);
-	    CPPUNIT_TEST(delta03);
+	CPPUNIT_TEST(mid01);
+	CPPUNIT_TEST(mid02);
+	CPPUNIT_TEST(mid03);
+	CPPUNIT_TEST(mid04);
+	CPPUNIT_TEST(mid05);
+	CPPUNIT_TEST(mid06);
+	CPPUNIT_TEST(mid07);
+	CPPUNIT_TEST(mid08);
+
+	CPPUNIT_TEST(delta01);
+	CPPUNIT_TEST(delta02);
+	CPPUNIT_TEST(delta03);
+
+	CPPUNIT_TEST(diff01);
+	CPPUNIT_TEST(diff02);
+	CPPUNIT_TEST(diff03);
+	CPPUNIT_TEST(diff04);
+	CPPUNIT_TEST(diff05);
+	CPPUNIT_TEST(diff06);
+	CPPUNIT_TEST(diff07);
+	CPPUNIT_TEST(diff08);
+	CPPUNIT_TEST(diff09);
+	CPPUNIT_TEST(diff10);
+	CPPUNIT_TEST(diff11);
+	CPPUNIT_TEST(diff12);
+	CPPUNIT_TEST(diff13);
+	CPPUNIT_TEST(diff14);
+	CPPUNIT_TEST(diff15);
+
 	CPPUNIT_TEST_SUITE_END();
 private:
 
@@ -363,6 +380,37 @@ private:
 	void delta01();
 	void delta02();
 	void delta03();
+
+	// [0,0] \ [0,0]
+	void diff01();
+	// [0,0] \ [1,2]
+	void diff02();
+	// [0,0] \ [0,1]
+	void diff03();
+	// [0,0] \ empty
+	void diff04();
+	// empty \ [0,0]
+	void diff05();
+	// [0,1] \ [0,1]
+	void diff06();
+	// [0,1] \ empty
+	void diff07();
+	// [0,1] \ [1,2]
+	void diff08();
+	// [0,1] \ [-1,1]
+	void diff09();
+	// [0,1] \ [0,0]
+	void diff10();
+	// [0,1] \ [1,1]
+	void diff11();
+	// [0,1] \ [2,3]
+	void diff12();
+	// [0,3] \ [1,2]
+	void diff13();
+	// [0,2] \ [1,4]
+	void diff14();
+	// [0,2] \ [-1,1]
+	void diff15();
 
 	void check_eq(const Interval& x, const Interval& y, bool);
 	void check_hull(const Interval& x, const Interval& z, const Interval& y_expected);
