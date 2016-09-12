@@ -178,7 +178,7 @@ def configure (conf):
 
 	#######################################################################
 	elif conf.env.OPTIM_LIB == "cplex":
-		cplex_dir = conf.options.cPLEX_PATH
+		cplex_dir = conf.options.CPLEX_PATH
 		if cplex_dir:
 			cplex_include = os.path.join (cplex_dir, "include")
 			cplex_lib = os.path.join (cplex_dir, "lib")
