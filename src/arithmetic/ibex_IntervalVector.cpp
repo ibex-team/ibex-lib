@@ -157,7 +157,7 @@ int IntervalVector::diff(const IntervalVector& y, IntervalVector*& result) const
 	// in which case the diff returns also x directly
 	if (!return_x) {
 		for (int i=0; i<nn; i++) {
-			if (y[i].is_degenerated() && !x[i].is_degenerated()) { return_x=true; break; }
+			if (z[i].is_degenerated() && !x[i].is_degenerated()) { return_x=true; break; }
 		}
 	}
 
