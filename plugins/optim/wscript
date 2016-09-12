@@ -49,8 +49,11 @@ def configure (conf):
 		clp_dir = conf.options.CLP_PATH
 		if clp_dir:
 			clp_include = os.path.join (clp_dir, "include")
+			# Cpl install everything in coin directory
+			coin_include = os.path.join (clp_include, "coin")
 			clp_lib = os.path.join (clp_dir, "lib")
 			conf.env.append_unique ("INCLUDES_IBEX_DEPS", clp_include)
+			conf.env.append_unique ("INCLUDES_IBEX_DEPS", coin_include)
 			conf.env.append_unique ("LIBPATH_IBEX_DEPS", clp_lib)
 		else:
 			clp_include = ""
@@ -61,6 +64,8 @@ def configure (conf):
 				"uselib_store": "OPTIM" }
 
 		env_env_bak = conf.env.env
+
+		from_3rd = False # boolean, does clp comes from 3rd subdirectory
 
 		# If --clp-path is given, we run the loop only one time with mandatory=true
 		# because we must find the header and library for clp. If the option is not
@@ -80,7 +85,8 @@ def configure (conf):
 			has_clp = conf.check_cfg (**clp_kwargs)
 
 			if has_clp: # Clp was found
-				break
+				if from_3rd:
+					conf.env.append_unique ("LIB_3RD_LIST", conf.env.LIB_OPTIM)
 			else:
 				# We necessarily have mandatory = False, or else conf.check_cfg () would
 				# have failed.
@@ -91,6 +97,7 @@ def configure (conf):
 							conf_args = args)
 				_, clp_include, clp_lib = clp_ret
 				conf.env.INSTALL_3RD = True
+				from_3rd = True
 				# Cpl install everything in coin directory
 				conf.env.append_unique ("INCLUDES_IBEX_DEPS",
 																os.path.join (conf.env.INCDIR_3RD, "coin"))
@@ -122,6 +129,8 @@ def configure (conf):
 		soplex_lib_kwargs = { "lib": lib_with_z, "use": ["IBEX", "OPTIM"],
 					"uselib_store": "OPTIM" }
 
+		from_3rd = False # boolean, does soplex comes from 3rd subdirectory
+
 		# If --soplex-path is given, we run the loop only one time with
 		# mandatory=true because we must find the header and library for soplex. If
 		# the option is not given, we run the loop twice: the first time we try to
@@ -146,7 +155,8 @@ def configure (conf):
 				soplex_lib_kwargs["lib"] = lib_with_z
 
 			if has_h_soplex and has_lib_soplex: # soplex was found
-				break
+				if from_3rd:
+					conf.env.append_unique ("LIB_3RD_LIST", conf.env.LIB_OPTIM)
 			else:
 				# We necessarily have mandatory = False, or else conf.check_cxx () would
 				# have failed.
@@ -156,6 +166,7 @@ def configure (conf):
 						without_configure = True, without_make_install = True)
 				soplex_srcdir, soplex_include, soplex_lib = soplex_ret
 				conf.env.INSTALL_3RD = True
+				from_3rd = True
 				# The 'make install' of soplex 1.7.1 is buggy, we do it ourself
 				if not os.path.exists (soplex_include):
 					os.makedirs (soplex_include)
@@ -207,7 +218,15 @@ def configure (conf):
 
 	# Put every _OPTIM variables in _IBEX_DEPS (for ibex.pc)
 	conf.env.append_unique ("CXXFLAGS_IBEX_DEPS", conf.env.CXXFLAGS_OPTIM)
-	conf.env.append_unique ("LIB_IBEX_DEPS", conf.env.LIB_OPTIM)
+	if conf.env.ENABLE_SHARED:
+		# if shared lib is used, 3rd party libs are compiled as static lib with
+		# -fPIC and are contained in libibex
+		for lib in conf.env.LIB_OPTIM:
+			if not lib in conf.env.LIB_3RD_LIST:
+				conf.env.append_unique ("LIB_IBEX_DEPS", lib)
+	else:
+		conf.env.append_unique ("LIB_IBEX_DEPS", conf.env.LIB_OPTIM)
+
 
 	# add OPTIM plugin include directory
 	for f in conf.path.ant_glob ("src/**", dir = True, src = False):

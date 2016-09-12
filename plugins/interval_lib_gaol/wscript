@@ -36,6 +36,7 @@ def configure (conf):
 		mathlib_ret = conf.configure_3rd_party_with_autotools (mathlib_archive)
 		_, mathlib_include, mathlib_lib = mathlib_ret
 		conf.env.INSTALL_3RD = True
+		conf.env.append_unique ("LIB_3RD_LIST", "ultim")
 
 	# Looking for mathlib header and library (called ultim)
 	conf.check_cxx (header_name = "MathLib.h", includes = mathlib_include,
@@ -58,6 +59,7 @@ def configure (conf):
 				conf_args = args)
 		_, gaol_include, gaol_lib = gaol_ret
 		conf.env.INSTALL_3RD = True
+		conf.env.append_unique ("LIB_3RD_LIST", [ "gdtoa", "gaol" ] )
 
 	# Looking for gdtoa header and library (it should be provided gaol)
 	conf.check_cxx (header_name = "gdtoa/gdtoa.h", includes = gaol_include,

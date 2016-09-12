@@ -9,3 +9,14 @@
              return false;
          m_lineno++;
 
+--- soplex-1.7.1/Makefile	2016-09-12 14:29:39.702843260 +0200
++++ soplex-1.7.1/Makefile	2016-09-12 14:29:44.387020171 +0200
+@@ -67,7 +67,7 @@
+ LIBBUILD_o	=	$(AR_o)
+ LIBBUILDFLAGS	=       $(ARFLAGS)
+ 
+-CPPFLAGS	=	-Isrc
++CPPFLAGS	=	-Isrc -fPIC
+ CXXFLAGS	=	
+ BINOFLAGS	=	
+ LIBOFLAGS	=	

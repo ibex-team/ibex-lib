@@ -136,7 +136,15 @@ def configure (conf):
 	# The plugin must use the store ITV_LIB (uselib_store argument with
 	# conf.check* functions).
 	conf.env.append_unique ("CXXFLAGS_IBEX_DEPS", conf.env.CXXFLAGS_ITV_LIB)
-	conf.env.append_unique ("LIB_IBEX_DEPS", conf.env.LIB_ITV_LIB)
+	if conf.env.ENABLE_SHARED:
+		# if shared lib is used, 3rd party libs are compiled as static lib with
+		# -fPIC and are contained in libibex
+		for lib in conf.env.LIB_ITV_LIB:
+			if not lib in conf.env.LIB_3RD_LIST:
+				conf.env.append_unique ("LIB_IBEX_DEPS", lib)
+	else:
+		conf.env.append_unique ("LIB_IBEX_DEPS", conf.env.LIB_ITV_LIB)
+
 	# The following variables must be defined in env by the plugin called to
 	# handle the library for interval arithmetic.
 	for var in ["INTERVAL_LIB", "IBEX_INTERVAL_LIB_WRAPPER_CPP",
@@ -166,7 +174,10 @@ def configure (conf):
 	# If we used a 3rd party library, add the install path (for *.pc file)
 	if conf.env.INSTALL_3RD: # It may not be necessary but it costs nothing
 		conf.env.append_unique ("INCLUDES_IBEX_DEPS", conf.env.INCDIR_3RD)
-		conf.env.append_unique ("LIBPATH_IBEX_DEPS", conf.env.LIBDIR_3RD)
+		# if shared lib is used, we only depends on libibex (3rd party libs are
+		# compiled as static lib with -fPIC and are contained in libibex)
+		if not conf.env.ENABLE_SHARED:
+			conf.env.append_unique ("LIBPATH_IBEX_DEPS", conf.env.LIBDIR_3RD)
 
 	# Generate header file containing Ibex settings
 	conf.env.ibex_header_setting = "ibex_Setting.h"
