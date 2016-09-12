@@ -151,8 +151,10 @@ def utest (tst):
 		if tst.env.ENABLE_SHARED:
 			# add in rpath if not in LD_LIBRARY_PATH
 			ld_lib_path = os.getenv ("LD_LIBRARY_PATH", "").split (":")
-			kwargs["rpath"] = ":".join([ p for p in tst.env.LIBPATH_TESTS
-																				if not p in ld_lib_path])
+			lib_for_rpath = [p for p in tst.env.LIBPATH_TESTS if not p in ld_lib_path]
+			kwargs["rpath"] = ":".join(lib_for_rpath)
+			for path in lib_for_rpath: 
+				Logs.warn ("You should add '%s' to your LD_LIBRARY_PATH" % path)
 
 		for f in test_src:
 			dirname, basename = os.path.split (f)
