@@ -134,6 +134,12 @@ bool inflating_newton(const Function& f, const VarSet* vars, const IntervalVecto
 	assert(f.image_dim()==n);
 	assert(full_box.size()==f.nb_var());
 
+	if (full_box.is_empty()) {
+		box_existence.set_empty();
+		box_unicity.set_empty();
+		return false;
+	}
+
 	int k=0;
 	bool success=false;
 
@@ -199,6 +205,9 @@ bool inflating_newton(const Function& f, const VarSet* vars, const IntervalVecto
 		IntervalVector box2=mid-y;
 
 		if (box2.is_subset(box)) {
+
+			assert(!box2.is_empty());
+
 			if (!success) { // to get the largest unicity box, we do this
 				            // only when the first contraction occurs
 				if (vars) vars->set_var_box(box_unicity,box2);
