@@ -108,7 +108,7 @@ def configure_3rd_party_with_autotools (conf, archive_name,
 		os.environ["CXXFLAGS"] = cxxflags+" "+" ".join(conf.env.CXXFLAGS_cxxshlib)
 
 	if Utils.is_win32:
-		conf_args += " --prefix=%s" % convert_path_win2msys (destnode.abspth ())
+		conf_args += " --prefix=%s" % convert_path_win2msys (destnode.abspath ())
 		conf.find_program ("sh")
 		cmd_conf = [conf.env.SH, "-c", "./configure %s"%conf_args]
 		cmd_make = [conf.env.SH, "-c", conf.env.MAKE + ["-j%d"%conf.options.jobs]]
