@@ -2,11 +2,11 @@
 
 
 
-x_heap_elem::x_heap_elem(IntervalVector box,DoubleHeap<y_heap_elem> heap,Interval fmax) :box(box),y_heap(heap),fmax(fmax),pu(0)
+x_heap_elem::x_heap_elem(const IntervalVector& box,const DoubleHeap<y_heap_elem>& heap,const Interval& fmax) :box(box),y_heap(heap),fmax(fmax),pu(0)
 {}
 
 
-pair<x_heap_elem*,x_heap_elem*> x_heap_elem::bisect(IntervalVector box1,IntervalVector box2) {
+pair<x_heap_elem*,x_heap_elem*> x_heap_elem::bisect(const IntervalVector& box1,const IntervalVector& box2) {
 
     x_heap_elem * elem1 = new x_heap_elem(box1,y_heap,fmax);
     elem1->pu = pu;

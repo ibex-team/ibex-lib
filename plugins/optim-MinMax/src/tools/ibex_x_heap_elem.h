@@ -18,8 +18,8 @@ protected:
     Interval fmax; // enclosure of maximum of the objective function
     double pu;
 
-    x_heap_elem(IntervalVector box,DoubleHeap<y_heap_elem> heap,Interval fmax);
-    pair<x_heap_elem*,x_heap_elem*> bisect(IntervalVector box1,IntervalVector box2);
+    x_heap_elem(const IntervalVector& box,const DoubleHeap<y_heap_elem>& heap,const Interval& fmax);
+    pair<x_heap_elem*,x_heap_elem*> bisect(const IntervalVector& box1,const IntervalVector& box2);
 };
 
 class x_heap_costflb : public CostFunc<x_heap_elem> { // element are sorted from the lowest lb of the evaluation of the objective function to the greatest

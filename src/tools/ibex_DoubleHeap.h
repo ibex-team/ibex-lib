@@ -36,7 +36,7 @@ public:
 	DoubleHeap(CostFunc<T>& cost1, bool update_cost1_when_sorting, CostFunc<T>& cost2, bool update_cost2_when_sorting, int critpr=50);
 
     /** copy constructor **/
-    DoubleHeap(const DoubleHeap& dhcp);
+    explicit DoubleHeap(const DoubleHeap& dhcp);
 	/**
 	 * \brief Flush the buffer.
 	 *
@@ -155,6 +155,12 @@ protected:
 	void erase_subnodes(HeapNode<T>* node, bool percolate);
 
 	std::ostream& print(std::ostream& os) const;
+
+private:
+
+	void flush_subnodes1(HeapNode<T>* node) ;
+	void flush_subnodes2(HeapNode<T>* node) ;
+
 };
 
 
@@ -192,11 +198,30 @@ DoubleHeap<T>::~DoubleHeap() {
 template<class T>
 void DoubleHeap<T>::flush() {
 	if (nb_nodes>0) {
-		erase_subnodes(heap1->root,false);
+		flush_subnodes1(heap1->root);
 		heap1->nb_nodes=0;
 		heap1->root=NULL;
+		flush_subnodes2(heap2->root);
+		heap2->nb_nodes=0;
+		heap2->root=NULL;
 		nb_nodes=0;
 	}
+}
+template<class T>
+void DoubleHeap<T>::flush_subnodes1(HeapNode<T>* node) {
+	if (node->left)	flush_subnodes1(node->left);
+	if (node->right) flush_subnodes1(node->right);
+
+	delete node;
+}
+
+
+template<class T>
+void DoubleHeap<T>::flush_subnodes2(HeapNode<T>* node) {
+	if (node->left)	flush_subnodes2(node->left);
+	if (node->right) flush_subnodes2(node->right);
+	delete node->elt;
+	delete node;
 }
 
 template<class T>
