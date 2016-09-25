@@ -1,7 +1,7 @@
 #include "ibex_minimax_solver.h"
 
 
-minimax_solver::minimax_solver(Ctc *x_ctc,Ctc *xy_ctc,NormalizedSystem * x_sys,NormalizedSystem * y_sys):x_ctc(x_ctc),x_sys(x_sys),lsolve(light_solver(xy_ctc,y_sys))
+minimax_solver::minimax_solver(Ctc& x_ctc,Ctc& xy_ctc,NormalizedSystem& x_sys,NormalizedSystem& y_sys):x_ctc(x_ctc),x_sys(x_sys),lsolve(light_solver(xy_ctc,y_sys))
 {};
 
 void minimax_solver::solve(IntervalVector x_box_ini, IntervalVector y_box_ini, double prec_x, double prec_y, double stop_prec) {
@@ -62,7 +62,7 @@ void minimax_solver::solve(IntervalVector x_box_ini, IntervalVector y_box_ini, d
                 x_subcells[i]->pu=1;
             if(x_ctc != 0 && x_subcells[i]->pu != 1)
             {
-                x_ctc->contract(x_subcells[i]->box);
+                x_ctc.contract(x_subcells[i]->box);
                 if(x_subcells[i]->box.is_empty()) {
                     vol_rejected += x_subcells[i]->box.volume();
                     x_subcells[i]->y_heap.flush();
@@ -78,7 +78,7 @@ void minimax_solver::solve(IntervalVector x_box_ini, IntervalVector y_box_ini, d
             //************ evaluation of f(x,y_heap) *****************
             min_prec_light_solver = compute_min_prec(x_box_ini,x_subcells[i]->box,y_box_ini,prec_y);
             nb_iter = choose_nbiter(false);
-            x_subcells[i]->fmax = lsolve.optimize(&(x_subcells[i]->y_heap),&(x_subcells[i]->box),x_sys->goal,nb_iter,loup,x_subcells[i]->fmax,min_prec_light_solver,false);
+            x_subcells[i]->fmax = lsolve.optimize(x_subcells[i]->y_heap,x_subcells[i]->box,x_sys->goal,nb_iter,loup,x_subcells[i]->fmax,min_prec_light_solver,false);
             if(x_subcells[i]->fmax == Interval::EMPTY_SET) { // certified that x box does not contains the solution
                 vol_rejected += x_subcells[i]->box.volume();
                 x_subcells[i]->y_heap.flush();

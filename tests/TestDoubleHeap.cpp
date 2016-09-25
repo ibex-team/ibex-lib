@@ -96,8 +96,8 @@ void TestDoubleHeap::test01() {
         CPPUNIT_ASSERT(h.minimum2()==10);
         CPPUNIT_ASSERT(h.size()==3);
 
-        h.flush();
-        CPPUNIT_ASSERT(h.size()==0);
+        //h.flush();
+        //CPPUNIT_ASSERT(h.size()==0);
 }
 
 

@@ -17,7 +17,7 @@ public:
     double  pu;
 
     y_heap_elem(const IntervalVector& box,const Interval& pf,double  pu);
-    y_heap_elem(const y_heap_elem& original);
+    explicit y_heap_elem(const y_heap_elem& original);
     pair<y_heap_elem*,y_heap_elem*> bisect(const IntervalVector& box1,const IntervalVector& box2);
 };
 

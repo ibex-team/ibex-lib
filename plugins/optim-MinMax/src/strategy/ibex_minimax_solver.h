@@ -11,12 +11,12 @@ using namespace std;
 class minimax_solver {
 
 public:
-    Ctc* x_ctc; // contractor w.r.t constraint on x
-    NormalizedSystem * x_sys; // contains cst on x and objective function
+    Ctc& x_ctc; // contractor w.r.t constraint on x
+    NormalizedSystem& x_sys; // contains cst on x and objective function
     light_solver lsolve;
 
     /* Constructor*/
-    minimax_solver(Ctc *x_ctc,Ctc *xy_ctc,NormalizedSystem * x_sys,NormalizedSystem * y_sys);
+    minimax_solver(Ctc& x_ctc,Ctc& xy_ctc,NormalizedSystem& x_sys,NormalizedSystem& y_sys);
 
     /* Runs a B&B like algorithm
      * arguments: -x_ini: initial x box
