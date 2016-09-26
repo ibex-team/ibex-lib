@@ -28,6 +28,7 @@ public:
 	 */
 	OptimData();
 
+
 	/**
 	 * \brief Delete *this.
 	 */
@@ -68,7 +69,16 @@ public:
 
 protected:
 
-	OptimData(const OptimData&);
+	/**
+	 * \brief Constructor by copy.
+	 */
+	explicit OptimData(const OptimData& e);
+
+	/**
+	 * \brief Create a copy
+	 */
+	Backtrackable* copy(){ return new OptimData(*this);};
+
 };
 
 } // end namespace ibex

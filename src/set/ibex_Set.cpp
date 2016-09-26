@@ -232,6 +232,7 @@ class NodeAndDist : public Backtrackable {
 public:
 	NodeAndDist() : node(NULL), dist(-1) { }
 
+
 	NodeAndDist(SetNode* _node) : node(_node), dist(-1) { }
 
 	/**
@@ -258,6 +259,12 @@ public:
 
 	SetNode* node;
 	double dist;
+
+protected:
+
+	explicit NodeAndDist(const NodeAndDist& e) : node(e.node), dist(e.dist) { } // TODO JN: Chabs, can you check it?
+	Backtrackable* copy() {return new NodeAndDist(*this);};
+
 };
 
 /**

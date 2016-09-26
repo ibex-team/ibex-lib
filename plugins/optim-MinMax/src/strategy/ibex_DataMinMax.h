@@ -23,16 +23,6 @@ namespace ibex {
  */
 class DataMinMax : public Backtrackable {
 
-protected:
-
-	DataMinMax(const DataMinMax& e);
-
-	/**
-	 * Cost function of the heap to store the element of the light solver
-	 */
-	static CellCostPFub y_heap_costf1;
-	static CellCostPFlb y_heap_costf2;
-
 public:
 	/**
 	 * \brief Constructor for the root node (followed by a call to init_root).
@@ -67,6 +57,24 @@ public:
 	 */
     DoubleHeap<Cell> y_heap;
 
+
+protected:
+
+	/**
+	 * Cost function of the heap to store the element of the light solver
+	 */
+	static CellCostPFub y_heap_costf1;
+	static CellCostPFlb y_heap_costf2;
+
+	/**
+	 * \brief Constructor by copy.
+	 */
+	explicit DataMinMax(const DataMinMax& e);
+
+	/**
+	 * \brief Create a copy
+	 */
+	Backtrackable* copy(){ return new DataMinMax(*this);};
 
 };
 

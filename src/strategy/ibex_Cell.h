@@ -48,6 +48,12 @@ public:
 	Cell(const IntervalVector& box);
 
 	/**
+	 * \brief Constructor by copy.
+	 *
+	 */
+	explicit Cell (const Cell& e);
+
+	/**
 	 * \brief Bisect this cell.
 	 *
 	 * The box of the first (resp. second) cell is \a left (resp. \a right).

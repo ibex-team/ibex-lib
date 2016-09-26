@@ -141,6 +141,12 @@ public:
 	}
 
 	int var;
+
+protected:
+
+	explicit BisectedVar(const BisectedVar& e) : var(e.var) { }
+	Backtrackable* copy(){ return new BisectedVar(*this);};
+
 };
 
 

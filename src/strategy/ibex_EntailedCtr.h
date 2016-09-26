@@ -28,6 +28,8 @@ public:
 	 */
 	EntailedCtr();
 
+
+
 	/**
 	 * \brief Mark the constraints as not entailed (by default).
 	 *
@@ -87,6 +89,11 @@ public:
 
 
 protected:
+	/**
+	 * \brief Constructor by copy.
+	 */
+	explicit EntailedCtr( const EntailedCtr& e);
+
 	const System* orig_sys;
 	const NormalizedSystem* norm_sys;
 
@@ -97,9 +104,13 @@ protected:
 	bool *orig_entailed;
 	bool *norm_entailed;
 
-	EntailedCtr(const EntailedCtr&);
-
 	friend std::ostream& operator<<(std::ostream& os, const EntailedCtr&);
+
+
+	/**
+	 * \brief Create a copy
+	 */
+	Backtrackable* copy() { return new EntailedCtr(*this); };
 };
 
 
