@@ -126,11 +126,22 @@ public:
 	void init(const Interval& x);
 
 	/**
-	 * \brief Add [-rad,+rad] to all the components of *this.
+	 * \brief Absolute inflation.
+	 *
+	 * Add [-rad,+rad] to all the components of *this.
 	 *
 	 * \return *this.
 	 */
 	IntervalVector& inflate(double rad);
+
+	/**
+	 * \brief Absolute and relative inflation.
+	 *
+	 * [x] <- mid[x] + delta*([x]-mid[x]) + chi*[-1,+1]
+	 *
+	 * \return *this.
+	 */
+	IntervalVector& inflate(double delta, double chi);
 
 	/**
 	 * \brief Resize this IntervalVector.

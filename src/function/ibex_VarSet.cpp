@@ -75,6 +75,10 @@ VarSet::VarSet(int total, const BitSet& x, bool var) :
 		vars.setminus_with(x);
 }
 
+VarSet::VarSet(const VarSet& v) : nb_var(v.nb_var), nb_param(v.nb_param) {
+	vars.clone(v.vars);
+}
+
 void VarSet::init(Function& f, const Array<const ExprNode>& x, bool var) {
 	assert(x.size()>0);
 	assert(f.nb_var()>x.size());
@@ -212,6 +216,13 @@ void VarSet::set_param_box(IntervalVector& full_box, const IntervalVector& param
 			if (!vars[i]) full_box[i]=param_box[j++];
 		}
 	}
+}
+
+std::ostream& operator<<(std::ostream& os, const VarSet& v) {
+	for (int i=0; i<v.nb_var+v.nb_param; i++) {
+		os << (v.vars[i] ? 'v' : 'p') << ' ';
+	}
+	return os;
 }
 
 

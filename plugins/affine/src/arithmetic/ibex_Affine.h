@@ -695,21 +695,11 @@ inline bool AffineMain<T>::is_unbounded() const{
 	return ((-1>_n)&&(_n>-5));
 }
 
-//template<class T>
-//inline AffineMain<T>& AffineMain<T>::operator+=(double d){
-//	return saxpy(1.0, AffineMain<T>(), d, 0.0, false, false, true, false);
-//}
-
 template<class T>
 inline AffineMain<T>& AffineMain<T>::operator-=(double d){
 	*this += (-d);
 	return *this;
 }
-
-//template<class T>
-//inline AffineMain<T>& AffineMain<T>::operator*=(double d){
-//	return saxpy(d, AffineMain<T>(), 0.0, 0.0, true, false, false, false);
-//}
 
 template<class T>
 inline 	AffineMain<T>& AffineMain<T>::operator/=(double d) {
@@ -718,8 +708,14 @@ inline 	AffineMain<T>& AffineMain<T>::operator/=(double d) {
 
 template<class T>
 inline AffineMain<T>& AffineMain<T>::operator+=(const Interval& x){
-	*this += x.mid();
-	this->inflate(x.rad());
+	if ( x.is_empty()) {
+		*this = Interval::EMPTY_SET;
+	} else if (x.is_unbounded() || (!is_actif())) {
+		*this = this->itv() + x;
+	} else {
+		*this += x.mid();
+		this->inflate(x.rad());
+	}
 	return *this;
 }
 

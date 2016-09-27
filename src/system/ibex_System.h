@@ -25,7 +25,6 @@ class MainGenerator;
 }
 
 class SystemFactory;
-class AmplInterface;
 
 /**
  * \defgroup system Systems
@@ -44,11 +43,6 @@ class AmplInterface;
  */
 class System {
 public:
-
-	/**
-	 * \brief Build a system with a AMPL model.
-	*/
-	System(const AmplInterface& ampl);
 
 	/**
 	 * \brief Build a system with a factory.

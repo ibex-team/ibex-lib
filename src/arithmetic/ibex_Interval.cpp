@@ -260,11 +260,26 @@ int Interval::complementary(Interval& c1, Interval& c2) const {
 }
 
 int Interval::diff(const Interval& y, Interval& c1, Interval& c2) const {
+	const Interval& x=*this;
+
+	if (x.is_degenerated()) { // specific treatment to avoid overestimation of complementary
+		// the following test allows to return EMPTY when x is a bound of y (e.g., x=0 and y=0 or y=[0,1])
+		if (x.is_empty() || y.contains(x.lb())) {
+			c1.set_empty();
+			c2.set_empty();
+			return 0;
+		} else {
+			c1=x;
+			c2.set_empty();
+			return 1;
+		}
+	}
+
 	y.complementary(c1,c2);
-	c1 &= *this;
+	c1 &= x;
 	int res=2;
 	if (c1.is_degenerated()) { c1=Interval::EMPTY_SET; res--; }
-	c2 &= *this;
+	c2 &= x;
 	if (c2.is_degenerated()) { c2=Interval::EMPTY_SET; res--; }
 
 	if (c1.is_empty()) {

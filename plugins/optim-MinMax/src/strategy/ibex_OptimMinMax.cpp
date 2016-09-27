@@ -174,7 +174,7 @@ double OptimMiniMax::choose_nbiter(bool midpoint_eval) {
 
 IntervalVector OptimMiniMax::get_feasible_point(Cell * elem) {
 	Vector mid_x = elem->box.mid(); // get the box (x,mid(y))
-	if( (!x_sys.ctrs.is_empty()) && (elem->get<DataMinMax>().pu != 1)) { // constraint on xy exist and is not proved to be satisfied
+	if( (x_sys.nb_ctr >0 ) && (elem->get<DataMinMax>().pu != 1)) { // constraint on xy exist and is not proved to be satisfied
 		int res = check_constraints(mid_x);
 		if(res==0 || res==1)
 			return IntervalVector(1,Interval::EMPTY_SET);
@@ -184,7 +184,7 @@ IntervalVector OptimMiniMax::get_feasible_point(Cell * elem) {
 
 int OptimMiniMax::check_constraints(const IntervalVector& box) {
 	int res =2;
-	for(int i=0;i<x_sys.ctrs.size();i++) {
+	for(int i=0;i<x_sys.nb_ctr;i++) {
 		Interval int_res = x_sys.ctrs[i].f.eval(box);
 		if(int_res.lb()>=0)
 			return 0;

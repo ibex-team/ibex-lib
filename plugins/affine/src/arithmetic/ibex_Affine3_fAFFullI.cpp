@@ -207,7 +207,7 @@ std::ostream& operator<<(std::ostream& os, const AffineMain<AF_fAFFullI>& x) {
 		// Check that err() is a centered intervall
 		os << " + " << x.err() << "[-1,1]";
 	} else {
-		os << "Affine2Main form not Activate ";
+		os << "Affine3 form not Activate ";
 	}
 	return os;
 }

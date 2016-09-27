@@ -369,3 +369,94 @@ void TestInterval::delta03() {
 	//cout << "delta=" << x.delta(x) << endl;
 	CPPUNIT_ASSERT(x.delta(x)==0);
 }
+
+void TestInterval::diff01() {
+	Interval c1,c2;
+	Interval::ZERO.diff(Interval::ZERO,c1,c2);
+	CPPUNIT_ASSERT(c1.is_empty() && c2.is_empty());
+ }
+
+
+void TestInterval::diff02() {
+	Interval c1,c2;
+	Interval(0,0).diff(Interval(1,2),c1,c2);
+	CPPUNIT_ASSERT(c1==Interval::ZERO && c2.is_empty());
+}
+
+void TestInterval::diff03() {
+	Interval c1,c2;
+	Interval(0,0).diff(Interval(0,1),c1,c2);
+	CPPUNIT_ASSERT(c1.is_empty() && c2.is_empty());
+}
+
+void TestInterval::diff04() {
+	Interval c1,c2;
+	Interval(0,0).diff(Interval::EMPTY_SET,c1,c2);
+	CPPUNIT_ASSERT(c1==Interval::ZERO && c2.is_empty());
+}
+
+void TestInterval::diff05() {
+	Interval c1,c2;
+	Interval::EMPTY_SET.diff(Interval::ZERO,c1,c2);
+	CPPUNIT_ASSERT(c1.is_empty() && c2.is_empty());
+}
+
+void TestInterval::diff06() {
+	Interval c1,c2;
+	Interval(0,1).diff(Interval(0,1),c1,c2);
+	CPPUNIT_ASSERT(c1.is_empty() && c2.is_empty());
+}
+
+void TestInterval::diff07() {
+	Interval c1,c2;
+	Interval(0,1).diff(Interval::EMPTY_SET,c1,c2);
+	CPPUNIT_ASSERT(c1==Interval(0,1) && c2.is_empty());
+}
+
+void TestInterval::diff08() {
+	Interval c1,c2;
+	Interval(0,1).diff(Interval(1,2),c1,c2);
+	CPPUNIT_ASSERT(c1==Interval(0,1) && c2.is_empty());
+}
+
+void TestInterval::diff09() {
+	Interval c1,c2;
+	Interval(0,1).diff(Interval(-1,1),c1,c2);
+	CPPUNIT_ASSERT(c1.is_empty() && c2.is_empty());
+}
+
+void TestInterval::diff10() {
+	Interval c1,c2;
+	Interval(0,1).diff(Interval(0,0),c1,c2);
+	CPPUNIT_ASSERT(c1==Interval(0,1) && c2.is_empty());
+}
+
+void TestInterval::diff11() {
+	Interval c1,c2;
+	Interval(0,1).diff(Interval(1,1),c1,c2);
+	CPPUNIT_ASSERT(c1==Interval(0,1) && c2.is_empty());
+}
+
+void TestInterval::diff12() {
+	Interval c1,c2;
+	Interval(0,1).diff(Interval(2,3),c1,c2);
+	CPPUNIT_ASSERT(c1==Interval(0,1) && c2.is_empty());
+}
+
+void TestInterval::diff13() {
+	Interval c1,c2;
+	Interval(0,3).diff(Interval(1,2),c1,c2);
+	CPPUNIT_ASSERT(c1==Interval(0,1) && c2==Interval(2,3));
+}
+
+void TestInterval::diff14() {
+	Interval c1,c2;
+	Interval(0,2).diff(Interval(1,4),c1,c2);
+	CPPUNIT_ASSERT(c1==Interval(0,1) && c2.is_empty());
+}
+
+void TestInterval::diff15() {
+	Interval c1,c2;
+	Interval(0,2).diff(Interval(-1,1),c1,c2);
+	CPPUNIT_ASSERT(c1==Interval(1,2) && c2.is_empty());
+}

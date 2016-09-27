@@ -649,103 +649,336 @@ void TestIntervalVector::compl02() {
 	delete[] c;
 }
 
-/** b\b = emptyset */
+bool TestIntervalVector::test_diff(int n, double _x[][2], double _y[][2], int m, double _z[][2], bool debug) {
+	IntervalVector x(n,_x);
+	IntervalVector y(n,_y);
+	IntervalMatrix mz(m,n,_z);
+	IntervalVector* c;
+	int nn=x.diff(y,c);
+	if (debug) {
+		cout << x << " diff " << y << " gives:" << endl;
+		for (int i=0; i<nn; i++) {
+			cout << c[i] << endl;
+		}
+		cout << "==================================\n";
+	}
+	if (nn!=m) return false;
+	for (int i=0; i<nn; i++) {
+		if (c[i]!=mz[i]) {
+			if (debug) cout << "i=" << i << c[i] << "!=" << mz[i] << endl;
+			delete[] c;
+			return false;
+		}
+	}
+	delete[] c;
+	return true;
+}
+
+
 void TestIntervalVector::diff01() {
-	double _b[][2]={{0,1},{0,1}};
-	IntervalVector b(2,_b);
+	double x[][2]= {{-2,2},{-2,2},{-2,2}};
 	IntervalVector* c;
-	int n=b.diff(b,c);
-
-	CPPUNIT_ASSERT(n==0);
-
-	CPPUNIT_ASSERT(c[0].size()==2);
-	CPPUNIT_ASSERT(c[0].is_empty());
-
+	IntervalVector _x(3,x);
+	CPPUNIT_ASSERT(_x.diff(IntervalVector::empty(3),c)==1);
+	CPPUNIT_ASSERT(c[0]==_x);
 	delete[] c;
 }
 
-/** b\emptyset = b */
 void TestIntervalVector::diff02() {
-	double _b[][2]={{0,1},{0,1}};
-	IntervalVector b(2,_b);
+	double y[][2]= {{-2,2},{-2,2},{-2,2}};
 	IntervalVector* c;
-
-	int n=b.diff(IntervalVector::empty(2),c);
-
-	CPPUNIT_ASSERT(n==1);
-	CPPUNIT_ASSERT(c[0].size()==2);
-	CPPUNIT_ASSERT(c[0]==b);
-
+	CPPUNIT_ASSERT(IntervalVector::empty(3).diff(IntervalVector(3,y),c)==0);
 	delete[] c;
 }
 
-/**
- * [-7,7]x[-7,7]  \ [-5,5]x[-5,5] =
- *  {  [-7,-5[x[-7,7] ; ]5,7]x[-7,7]  ; [-5,5]x[-7,-5[ ; [-5,5]x]5,7] }
- */
 void TestIntervalVector::diff03() {
-	double _b1[][2]={{-7,7},{-7,7}};
-	double _b2[][2]={{-5,5},{-5,5}};
-	IntervalVector b1(2,_b1);
-	IntervalVector b2(2,_b2);
-	IntervalVector* c;
-
-	int n=b1.diff(b2,c);
-
-	CPPUNIT_ASSERT (n==4);
-
-	double _b3[][2]={{-7,-5}, {-7, 7}};
-	double _b4[][2]={{ 5, 7}, {-7, 7}};
-	double _b5[][2]={{-5, 5}, {-7,-5}};
-	double _b6[][2]={{-5, 5}, { 5, 7}};
-	IntervalVector b3(2,_b3);
-	IntervalVector b4(2,_b4);
-	IntervalVector b5(2,_b5);
-	IntervalVector b6(2,_b6);
-
-	CPPUNIT_ASSERT(c[0]==b3);
-	CPPUNIT_ASSERT(c[1]==b4);
-	CPPUNIT_ASSERT(c[2]==b5);
-	CPPUNIT_ASSERT(c[3]==b6);
-
-	delete[] c;
+	double x[][2]= {{-2,2},{-2,2},{-2,2}};
+	double y[][2]= {{-1,1},{3,4},{-1,1}};
+	double z[][2]= {{-2,2},{-2,2},{-2,2}};
+	CPPUNIT_ASSERT(test_diff(3,x,y,1,z));
 }
 
-/**
- * [-7,7]x[-7,7]  \ [-7,7]x[-7,5] =
- *  {  [-7,7]x]5,7] }
- */
 void TestIntervalVector::diff04() {
-	double _b1[][2]={{-7,7},{-7,7}};
-	double _b2[][2]={{-7,7},{-7,5}};
-	IntervalVector b1(2,_b1);
-	IntervalVector b2(2,_b2);
-	IntervalVector* c;
-
-	int n=b1.diff(b2,c);
-
-	CPPUNIT_ASSERT (n==1);
-
-	double _b3[][2]={{-7,7}, {5, 7}};
-	IntervalVector b3(2,_b3);
-
-	CPPUNIT_ASSERT(c[0]==b3);
-
-	delete[] c;
-
+	double x[][2]= {{-2,2},{-2,2},{-2,2}};
+	double y[][2]= {{-1,1},{-1,-1},{-1,1}};
+	double z[][2]= {{-2,2},{-2,2},{-2,2}};
+	CPPUNIT_ASSERT(test_diff(3,x,y,1,z));
 }
 
 void TestIntervalVector::diff05() {
-	double _b[][2]={{0,1},{0,1}};
-	IntervalVector b(2,_b);
+	double x[][2]= {{-2,2},{-2,2},{-2,2}};
+	double y[][2]= {{-1,1},{-1,1},{-1,1}};
+	double z[][2]= {{-2,-1},{-2,2},{-2,2},
+			        {1,2},{-2,2},{-2,2},
+					{-1,1},{-2,-1},{-2,2},
+					{-1,1},{1,2},{-2,2},
+					{-1,1},{-1,1},{-2,-1},
+					{-1,1},{-1,1},{1,2}};
+	CPPUNIT_ASSERT(test_diff(3,x,y,6,z));
+}
+
+void TestIntervalVector::diff06() {
+	double x[][2]= {{-2,2},{-2,2},{-2,2}};
+	double y[][2]= {{-1,1},{-1,1},{-2,1}};
+	double z[][2]= {{-2,-1},{-2,2},{-2,2},
+			        {1,2},{-2,2},{-2,2},
+					{-1,1},{-2,-1},{-2,2},
+					{-1,1},{1,2},{-2,2},
+					{-1,1},{-1,1},{1,2}};
+	CPPUNIT_ASSERT(test_diff(3,x,y,5,z));
+}
+
+void TestIntervalVector::diff07() {
+	double x[][2]= {{-2,2},{-2,2},{-2,2}};
+	double y[][2]= {{-1,1},{-1,1},{-2,2}};
+	double z[][2]= {{-2,-1},{-2,2},{-2,2},
+			        {1,2},{-2,2},{-2,2},
+					{-1,1},{-2,-1},{-2,2},
+					{-1,1},{1,2},{-2,2}};
+	CPPUNIT_ASSERT(test_diff(3,x,y,4,z));
+}
+
+void TestIntervalVector::diff08() {
+	double x[][2]= {{-2,2},{-2,2},{-2,2}};
+	double y[][2]= {{-1,1},{-2,1},{-1,1}};
+	double z[][2]= {{-2,-1},{-2,2},{-2,2},
+			        {1,2},{-2,2},{-2,2},
+					{-1,1},{1,2},{-2,2},
+					{-1,1},{-2,1},{-2,-1},
+					{-1,1},{-2,1},{1,2}};
+	CPPUNIT_ASSERT(test_diff(3,x,y,5,z));
+}
+
+void TestIntervalVector::diff09() {
+	double x[][2]= {{-2,2},{-2,2},{-2,2}};
+	double y[][2]= {{-1,1},{-2,2},{-1,1}};
+	double z[][2]= {{-2,-1},{-2,2},{-2,2},
+			        {1,2},{-2,2},{-2,2},
+					{-1,1},{-2,2},{-2,-1},
+					{-1,1},{-2,2},{1,2}};
+	CPPUNIT_ASSERT(test_diff(3,x,y,4,z));
+}
+
+void TestIntervalVector::diff10() {
+	double x[][2]= {{-2,2},{-2,2},{-2,2}};
+	double y[][2]= {{-2,1},{-1,1},{-1,1}};
+	double z[][2]= {{1,2},{-2,2},{-2,2},
+					{-2,1},{-2,-1},{-2,2},
+					{-2,1},{1,2},{-2,2},
+					{-2,1},{-1,1},{-2,-1},
+					{-2,1},{-1,1},{1,2}};
+	CPPUNIT_ASSERT(test_diff(3,x,y,5,z));
+}
+
+void TestIntervalVector::diff11() {
+	double x[][2]= {{-2,2},{-2,2},{-2,2}};
+	double y[][2]= {{-2,2},{-1,2},{-1,1}};
+	double z[][2]= {{-2,2},{-2,-1},{-2,2},
+					{-2,2},{-1,2},{-2,-1},
+					{-2,2},{-1,2},{1,2}};
+	CPPUNIT_ASSERT(test_diff(3,x,y,3,z));
+}
+
+void TestIntervalVector::diff12() {
+	double x[][2]= {{-2,2},{-2,2},{-2,2}};
+	double y[][2]= {{-1,1},{-2,1},{-2,1}};
+	double z[][2]= {{-2,-1},{-2,2},{-2,2},
+			        {1,2},{-2,2},{-2,2},
+					{-1,1},{1,2},{-2,2},
+					{-1,1},{-2,1},{1,2}};
+	CPPUNIT_ASSERT(test_diff(3,x,y,4,z));
+}
+
+void TestIntervalVector::diff13() {
+	double x[][2]= {{-2,2},{-2,2},{-2,2}};
+	double y[][2]= {{-1,1},{-2,1},{-2,2}};
+	double z[][2]= {{-2,-1},{-2,2},{-2,2},
+			        {1,2},{-2,2},{-2,2},
+					{-1,1},{1,2},{-2,2}};
+	CPPUNIT_ASSERT(test_diff(3,x,y,3,z));
+}
+
+void TestIntervalVector::diff14() {
+	double x[][2]= {{-2,2},{-2,2},{-2,2}};
+	double y[][2]= {{-2,1},{-1,1},{-2,1}};
+	double z[][2]= {{1,2},{-2,2},{-2,2},
+					{-2,1},{-2,-1},{-2,2},
+					{-2,1},{1,2},{-2,2},
+					{-2,1},{-1,1},{1,2}};
+	CPPUNIT_ASSERT(test_diff(3,x,y,4,z));
+}
+
+void TestIntervalVector::diff15() {
+	double x[][2]= {{-2,2},{-2,2},{-2,2}};
+	double y[][2]= {{-2,1},{-1,1},{-2,2}};
+	double z[][2]= {{1,2},{-2,2},{-2,2},
+					{-2,1},{-2,-1},{-2,2},
+					{-2,1},{1,2},{-2,2}};
+	CPPUNIT_ASSERT(test_diff(3,x,y,3,z));
+}
+
+void TestIntervalVector::diff16() {
+	double x[][2]= {{-2,2},{-2,2},{-2,2}};
+	double y[][2]= {{-2,1},{-2,1},{-1,1}};
+	double z[][2]= {{1,2},{-2,2},{-2,2},
+					{-2,1},{1,2},{-2,2},
+					{-2,1},{-2,1},{-2,-1},
+					{-2,1},{-2,1},{1,2}};
+	CPPUNIT_ASSERT(test_diff(3,x,y,4,z));
+}
+
+void TestIntervalVector::diff17() {
+	double x[][2]= {{-2,2},{-2,2},{-2,2}};
+	double y[][2]= {{-2,1},{-2,2},{-1,1}};
+	double z[][2]= {{1,2},{-2,2},{-2,2},
+					{-2,1},{-2,2},{-2,-1},
+					{-2,1},{-2,2},{1,2}};
+	CPPUNIT_ASSERT(test_diff(3,x,y,3,z));
+}
+
+void TestIntervalVector::diff18() {
+	double x[][2]= {{-2,2},{-2,2},{-2,2}};
+	double y[][2]= {{-2,1},{-2,1},{-2,1}};
+	double z[][2]= {{1,2},{-2,2},{-2,2},
+					{-2,1},{1,2},{-2,2},
+					{-2,1},{-2,1},{1,2}};
+	CPPUNIT_ASSERT(test_diff(3,x,y,3,z));
+}
+
+void TestIntervalVector::diff19() {
+	double x[][2]= {{-2,2},{-2,2},{-2,2}};
+	double y[][2]= {{-2,1},{-2,1},{-2,2}};
+	double z[][2]= {{1,2},{-2,2},{-2,2},
+					{-2,1},{1,2},{-2,2}};
+	CPPUNIT_ASSERT(test_diff(3,x,y,2,z));
+}
+
+void TestIntervalVector::diff20() {
+	double x[][2]= {{-2,2},{-2,2},{-2,2}};
+	double y[][2]= {{-2,1},{-2,2},{-2,1}};
+	double z[][2]= {{1,2},{-2,2},{-2,2},
+					{-2,1},{-2,2},{1,2}};
+	CPPUNIT_ASSERT(test_diff(3,x,y,2,z));
+}
+
+void TestIntervalVector::diff21() {
+	double x[][2]= {{-2,2},{-2,2},{-2,2}};
+	double y[][2]= {{-2,2},{-2,1},{-2,1}};
+
+	double z[][2]= {{-2,2},{1,2},{-2,2},
+					{-2,2},{-2,1},{1,2}};
+	CPPUNIT_ASSERT(test_diff(3,x,y,2,z));
+}
+
+void TestIntervalVector::diff22() {
+	double x[][2]= {{-2,2},{-2,2},{-2,2}};
+	double y[][2]= {{-2,1},{-2,2},{-2,2}};
+	double z[][2]= {{1,2},{-2,2},{-2,2}};
+	CPPUNIT_ASSERT(test_diff(3,x,y,1,z));
+}
+
+void TestIntervalVector::diff23() {
+	double x[][2]= {{-2,2},{-2,2},{-2,2}};
+	double y[][2]= {{-2,2},{-2,2},{-2,1}};
+	double z[][2]= {{-2,2},{-2,2},{1,2}};
+	CPPUNIT_ASSERT(test_diff(3,x,y,1,z));
+}
+
+void TestIntervalVector::diff24() {
+	double x[][2]= {{-2,2},{-2,2},{-2,2}};
+	double y[][2]= {{-2,2},{-2,1},{-2,2}};
+	double z[][2]= {{-2,2},{1,2},{-2,2}};
+	CPPUNIT_ASSERT(test_diff(3,x,y,1,z));
+}
+
+void TestIntervalVector::diff25() {
+	double x[][2]= {{-2,2},{-2,2},{-2,2}};
+	double y[][2]= {{-2,2},{-2,2},{-2,2}};
 	IntervalVector* c;
-
-	int n=IntervalVector::empty(2).diff(b,c);
-
-	CPPUNIT_ASSERT(n==0);
-
+	CPPUNIT_ASSERT(IntervalVector(3,x).diff(IntervalVector(3,y),c)==0);
 	delete[] c;
+}
 
+void TestIntervalVector::diff26() {
+
+}
+
+void TestIntervalVector::diff27() {
+
+}
+
+void TestIntervalVector::diff28() {
+
+}
+
+void TestIntervalVector::diff29() {
+
+}
+
+
+void TestIntervalVector::diff30() {
+	double x[][2]= {{0,0},{-2,2},{-2,2}};
+	double y[][2]= {{0,0},{-1,1},{-1,1}};
+	double z[][2]= {{0,0},{-2,-1},{-2,2},
+			        {0,0},{1,2},{-2,2},
+					{0,0},{-1,1},{-2,-1},
+					{0,0},{-1,1},{1,2}};
+	CPPUNIT_ASSERT(test_diff(3,x,y,4,z));
+}
+
+void TestIntervalVector::diff31() {
+	double x[][2]= {{0,0},{0,0},{-2,2}};
+	double y[][2]= {{0,0},{0,0},{-1,1}};
+	double z[][2]= {{0,0},{0,0},{-2,-1},
+			        {0,0},{0,0},{1,2}};
+	CPPUNIT_ASSERT(test_diff(3,x,y,2,z));
+}
+
+void TestIntervalVector::diff32() {
+	double x[][2]= {{0,0},{-2,2},{0,0}};
+	double y[][2]= {{0,0},{-1,1},{0,0}};
+	double z[][2]= {{0,0},{-2,-1},{0,0},
+			        {0,0},{1,2},{0,0}};
+	CPPUNIT_ASSERT(test_diff(3,x,y,2,z));
+}
+
+void TestIntervalVector::diff33() {
+	double x[][2]= {{-2,2},{0,0},{0,0}};
+	double y[][2]= {{-1,1},{0,0},{0,0}};
+	double z[][2]= {{-2,-1},{0,0},{0,0},
+			        {1,2},{0,0},{0,0}};
+	CPPUNIT_ASSERT(test_diff(3,x,y,2,z));
+}
+
+void TestIntervalVector::diff34() {
+	double x[][2]= {{0,0},{-2,2},{-2,2}};
+	double y[][2]= {{-1,1},{-1,1},{-1,1}};
+	double z[][2]= {{0,0},{-2,-1},{-2,2},
+			        {0,0},{1,2},{-2,2},
+					{0,0},{-1,1},{-2,-1},
+					{0,0},{-1,1},{1,2}};
+	CPPUNIT_ASSERT(test_diff(3,x,y,4,z));
+}
+
+void TestIntervalVector::diff35() {
+	double x[][2]= {{-2,2},{-2,2},{-2,2}};
+	double y[][2]= {{2,4},{-2,2},{-2,2}};
+	double z[][2]= {{-2,2},{-2,2},{-2,2}};
+	CPPUNIT_ASSERT(test_diff(3,x,y,1,z));
+}
+
+void TestIntervalVector::diff36() {
+	double x[][2]= {{-2,2},{-2,2},{-2,2}};
+	double y[][2]= {{2,4},{-1,1},{-1,1}};
+	double z[][2]= {{-2,2},{-2,2},{-2,2}};
+	CPPUNIT_ASSERT(test_diff(3,x,y,1,z));
+}
+
+void TestIntervalVector::issue228() {
+	double x[][2]= {{-1,-1},{-1,1},{-1,1}};
+	double y[][2]= {{0,2},{0,2},{0,2}};
+	double z[][2]= {{-1,-1},{-1,1},{-1,1}};
+	CPPUNIT_ASSERT(test_diff(3,x,y,1,z));
 }
 
 void TestIntervalVector::random01() {

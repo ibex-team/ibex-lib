@@ -85,7 +85,8 @@ bool newton(const Function& f, const VarSet* vars, IntervalVector& full_box, dou
 
 			if (y.is_empty()) {
 				reducted=true;
-				box.set_empty();
+				if (vars) full_box.set_empty();
+				else box.set_empty();
 				break;
 			}
 		} catch (LinearException& ) {
@@ -97,7 +98,8 @@ bool newton(const Function& f, const VarSet* vars, IntervalVector& full_box, dou
 
 		if ((box2 &= box).is_empty()) {
 			reducted=true;
-			box.set_empty();
+			if (vars) full_box.set_empty();
+			else box.set_empty();
 			break;
 		}
 		gain = box.maxdelta(box2);
@@ -127,7 +129,7 @@ bool newton(const Function& f, const VarSet& vars, IntervalVector& full_box, dou
 	return newton(f,&vars,full_box,prec,ratio_gauss_seidel);
 }
 
-bool inflating_newton(const Function& f, const VarSet* vars, IntervalVector& full_box, int k_max, double mu_max, double delta, double chi) {
+bool inflating_newton(const Function& f, const VarSet* vars, const IntervalVector& full_box, IntervalVector& box_existence, IntervalVector& box_unicity, int k_max, double mu_max, double delta, double chi) {
 	int n=vars ? vars->nb_var : f.nb_var();
 	assert(f.image_dim()==n);
 	assert(full_box.size()==f.nb_var());
@@ -142,17 +144,31 @@ bool inflating_newton(const Function& f, const VarSet* vars, IntervalVector& ful
 	IntervalVector mid(n);
 	IntervalVector Fmid(n);
 
-	IntervalVector& box = vars ? *new IntervalVector(vars->var_box(full_box)) : full_box;
+	IntervalVector box = vars ? vars->var_box(full_box) : full_box;
 	IntervalVector& full_mid = vars ? *new IntervalVector(full_box) : mid;
+
+	// Warning: box_existence is used to store the full box of the
+	// current iteration (that is, param_box x box)
+	// It will eventually (at return) be the
+	// existence box in case of success. Nothing is proven inside
+	// box_existence until success==true in the loop (note: inflation
+	// stops when success is true and existence is thus preserved
+	// until the end)
+	box_existence = full_box;
+
+	// Just to quickly initialize the domains of parameters
+	box_unicity = full_box;
 
 	y1 = box.mid();
 
 	while (k<k_max) {
 
+		//cout << "current box=" << box << endl << endl;
+
 		if (vars)
-			f.hansen_matrix(full_box, J, *vars);
+			f.hansen_matrix(box_existence, J, *vars);
 		else
-			f.hansen_matrix(full_box, J);
+			f.hansen_matrix(box_existence, J);
 
 		if (J.is_empty()) break;
 
@@ -183,31 +199,44 @@ bool inflating_newton(const Function& f, const VarSet* vars, IntervalVector& ful
 		IntervalVector box2=mid-y;
 
 		if (box2.is_subset(box)) {
+			if (!success) { // to get the largest unicity box, we do this
+				            // only when the first contraction occurs
+				if (vars) vars->set_var_box(box_unicity,box2);
+				else box_unicity = box2;
+			}
 			success=true;  // we don't return now, to let the box being contracted more
 		}
 
-		box = box2;
+		box = success? box2 : box2.inflate(delta,chi);
+
 		k++;
 
-		if (vars) vars->set_var_box(full_box,box);
+		// we update box_existence inside the loop because
+		// the Jacobian has to be recalculated on the current
+		// full box at each iteration
+		if (vars) vars->set_var_box(box_existence,box);
+		else box_existence = box;
 
 	}
 
 	if (vars) {
-		delete &box;
 		delete &full_mid;
 	}
 
+	if (!success) {
+		box_existence.set_empty();
+		box_unicity.set_empty();
+	}
 	return success;
 }
 
 
-bool inflating_newton(const Function& f, IntervalVector& box, int k_max, double mu_max, double delta, double chi) {
-	return inflating_newton(f,NULL,box,k_max,mu_max,delta,chi);
+bool inflating_newton(const Function& f, const IntervalVector& full_box, IntervalVector& box_existence, IntervalVector& box_unicity, int k_max, double mu_max, double delta, double chi) {
+	return inflating_newton(f,NULL,full_box,box_existence,box_unicity,k_max,mu_max,delta,chi);
 }
 
-bool inflating_newton(const Function& f, const VarSet& vars, IntervalVector& full_box, int k_max, double mu_max, double delta, double chi) {
-	return inflating_newton(f,&vars,full_box,k_max,mu_max,delta,chi);
+bool inflating_newton(const Function& f, const VarSet& vars, const IntervalVector& full_box, IntervalVector& box_unicity, IntervalVector& box_existence, int k_max, double mu_max, double delta, double chi) {
+	return inflating_newton(f,&vars,full_box,box_unicity,box_existence,k_max,mu_max,delta,chi);
 }
 
 } // end namespace ibex
