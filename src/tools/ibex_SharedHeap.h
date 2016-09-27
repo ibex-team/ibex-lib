@@ -57,12 +57,6 @@ public:
 	 */
 	SharedHeap(CostFunc<T>& cost, bool update_cost_when_sorting, int id);
 
-    /** copy constructor **/
-
-    std::pair<SharedHeap<T> *,std::vector<HeapElt<T>*> *> copy_sheap(int nb_crit);
-
-
-
 	/** \brief Delete this. */
 	virtual  ~SharedHeap();
 
@@ -183,6 +177,10 @@ protected:
 	 */
 	bool heap_state();
 
+    /** copy constructor **/
+    std::pair<SharedHeap<T> *,std::vector<HeapElt<T>*> *> copy_sheap(int nb_crit);
+
+
 private:
 
 	/** Used in the sort function (proceed by recursivity) */
@@ -208,10 +206,6 @@ private:
 	/** Create a node from an element and the father node. */
 	explicit HeapNode(HeapElt<T>* elt, HeapNode<T>* father=NULL);
     
-    /** Copy the heap **/
-    void copy_tree(HeapNode<T> * node,std::vector<HeapElt<T>*> * elm_vect,int heap_id,int nb_crit);
-
-
 	/** Delete the node and all its sons */
 	//~HeapNode() ;
 
@@ -241,6 +235,9 @@ private:
 
 	template<class U>
 	friend std::ostream& operator<<(std::ostream& os, const SharedHeap<U>& heap);
+
+    /** Copy the heap **/
+    void copy_tree(HeapNode<T> * node,std::vector<HeapElt<T>*> * elm_vect,int heap_id,int nb_crit);
 
 };
 

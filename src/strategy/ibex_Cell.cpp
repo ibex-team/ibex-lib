@@ -22,8 +22,8 @@ int id_count=0;
 	 assert(id_count<ULONG_MAX);
 }
 
- Cell::Cell(const Cell& e) : box(e.box), id(id_count++)  {
- 	for (IBEXMAP(Backtrackable*)::iterator it=e.data.begin(); it!=e.data.end(); it++) {
+ Cell::Cell(Cell& e) : box(e.box), id(id_count++)  {
+ 	for ( IBEXMAP(Backtrackable*)::iterator it=e.data.begin(); it!=e.data.end(); it++) {
  		data.insert_new(it->first, it->second->copy());
  	}
  }

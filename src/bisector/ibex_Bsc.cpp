@@ -30,8 +30,9 @@ Bsc::Bsc(const Vector& prec) : _prec(prec) {
 		if (prec[i]<=0) ibex_error("precision must be a nonnegative number");
 }
 
-pair<IntervalVector,IntervalVector> Bsc::bisect(Cell& cell) {
-	return bisect(cell.box);
+pair<Cell*,Cell*> Bsc::bisect(Cell& cell) {
+	pair<IntervalVector,IntervalVector> boxes=this->bisect(cell.box);
+	return cell.bisect(boxes.first,boxes.second);
 }
 
 void Bsc::add_backtrackable(Cell& root) {
