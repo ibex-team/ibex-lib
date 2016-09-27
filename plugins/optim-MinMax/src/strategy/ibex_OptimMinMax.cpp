@@ -41,7 +41,7 @@ void OptimMiniMax::solve(const IntervalVector& x_box_ini1, const IntervalVector&
 	minprec_uplo= POS_INFINITY;
 
 	Cell *x_cell;
-	unsigned nb_iter= 10;
+	int nb_iter= 10;
 	double min_prec_light_solver=prec_y;
 
 
@@ -159,7 +159,7 @@ void  OptimMiniMax::handle_cell(Cell * x_cell, double prec_x, double prec_y) {
 
 
 double OptimMiniMax::compute_min_prec( const IntervalVector& x_box,double prec_y) {
-	double ratio(0);
+	double ratio = 0;
 	for(int r=0;r<x_box_init.size();r++)
 		ratio += (x_box_init[r]).diam()/(x_box[r]).diam();
 	return ratio/y_box_init.volume()>prec_y?ratio/(10*y_box_init.volume()):prec_y;
@@ -183,10 +183,9 @@ IntervalVector OptimMiniMax::get_feasible_point(Cell * elem) {
 }
 
 int OptimMiniMax::check_constraints(const IntervalVector& box) {
-	int res(2);
-	Interval int_res;
+	int res =2;
 	for(int i=0;i<x_sys.ctrs.size();i++) {
-		int_res = x_sys.ctrs[i].f.eval(box);
+		Interval int_res = x_sys.ctrs[i].f.eval(box);
 		if(int_res.lb()>=0)
 			return 0;
 		else if(int_res.ub()>=0)

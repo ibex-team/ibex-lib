@@ -158,7 +158,7 @@ void LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell, double min_prec
 	}
 
 	if (data_y->pf.lb() < res.lb()) { // because data->pf.lb() can be updates by an evaluation at the midpoint
-		data_y->pf =res;
+		data_y->pf = res;
 	}  else {
 		data_y->pf = Interval(data_y->pf.lb(),res.ub()); // we keep the previous lower bound (perhaps found with a feasible solution)
 	}
