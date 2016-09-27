@@ -6,8 +6,8 @@
 // Created     : Oct 18, 2014
 //============================================================================
 
-#ifndef __IBEX_OPTIM_DATA_H__
-#define __IBEX_OPTIM_DATA_H__
+#ifndef __IBEX_DATA_MINMAX__
+#define __IBEX_DATA_MINMAX__
 
 #include "ibex_Backtrackable.h"
 #include "ibex_Interval.h"
@@ -63,7 +63,7 @@ protected:
 	/**
 	 * Cost function of the heap to store the element of the light solver
 	 */
-	static CellCostPFub y_heap_costf1;
+	static CellCostMaxPFub y_heap_costf1;
 	static CellCostPFlb y_heap_costf2;
 
 	/**
@@ -79,7 +79,7 @@ protected:
 };
 
 
-class x_heap_costflb : public CostFunc<Cell> { // element are sorted from the lowest lb of the evaluation of the objective function to the greatest
+class CostFuncFmaxlb : public CostFunc<Cell> { // element are sorted from the lowest lb of the evaluation of the objective function to the greatest
 public:
 
 	/**
@@ -101,4 +101,4 @@ public:
 
 
 } // end namespace ibex
-#endif // __IBEX_OPTIM_DATA_H__
+#endif // __IBEX_DATA_MINMAX_H__
