@@ -44,7 +44,7 @@ private:
     NormalizedSystem& x_sys; // contains cst on x and objective function
     LightOptimMinMax lsolve;
     Bsc* bsc;
-    CostFuncFmaxlb x_heap_costfunc;
+    CellCostFmaxlb x_heap_costfunc;
     IntervalVector x_box_init;
     IntervalVector y_box_init;
 

@@ -7,7 +7,7 @@ namespace ibex {
 
 OptimMiniMax::OptimMiniMax(NormalizedSystem& x_sys,NormalizedSystem& xy_sys, Ctc& x_ctc,Ctc& xy_ctc):
 	loup(POS_INFINITY), uplo(NEG_INFINITY), minprec_uplo(POS_INFINITY), best_sol(x_sys.nb_var), x_heap(x_heap_costfunc),
-	x_ctc(x_ctc),x_sys(x_sys),lsolve(LightOptimMinMax(xy_ctc,xy_sys)), bsc(new LargestFirst()),
+	x_ctc(x_ctc),x_sys(x_sys),lsolve(xy_sys,xy_ctc), bsc(new LargestFirst()),
 	x_box_init(x_sys.nb_var), y_box_init(xy_sys.nb_var-x_sys.nb_var) {
 };
 

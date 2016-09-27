@@ -27,12 +27,12 @@ DataMinMax::~DataMinMax() {
 }
 
 
-double CostFuncFmaxlb::cost(const Cell& elem) const {
+double CellCostFmaxlb::cost(const Cell& elem) const {
     return elem.get<DataMinMax>().fmax.lb();
 }
 
 
-void CostFuncFmaxlb::add_backtrackable(Cell& root) {
+void CellCostFmaxlb::add_backtrackable(Cell& root) {
 	root.add<DataMinMax>();
 }
 

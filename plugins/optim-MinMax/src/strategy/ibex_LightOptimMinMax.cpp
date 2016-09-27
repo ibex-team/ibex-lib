@@ -134,8 +134,8 @@ void LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell, double min_prec
 		else if(midres.lb()>data_y->pf.lb()) { // found y such as xy constraint is respected
 			// TODO	 to check		// il faut faire un contract de y_heap
 			data_x->y_heap.contract(midres.lb()); // to check
-			data_y->pf.lb() = midres.lb();
-			data_x->fmax.lb() =  midres.lb(); // yes we found a feasible solution for all x
+			data_y->pf = Interval(midres.lb(),data_y->pf.ub());
+			data_x->fmax = Interval(midres.lb(),data_x->fmax.ub());; // yes we found a feasible solution for all x
 		}
 	}
 
@@ -160,7 +160,7 @@ void LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell, double min_prec
 	if (data_y->pf.lb() < res.lb()) { // because data->pf.lb() can be updates by an evaluation at the midpoint
 		data_y->pf =res;
 	}  else {
-		data_y->pf.ub() = res.ub(); // we keep the previous lower bound (perhaps found with a feasible solution)
+		data_y->pf = Interval(data_y->pf.lb(),res.ub()); // we keep the previous lower bound (perhaps found with a feasible solution)
 	}
 
 	// check if it is possible to find a better solution than those already found on x

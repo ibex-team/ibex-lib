@@ -79,7 +79,7 @@ protected:
 };
 
 
-class CostFuncFmaxlb : public CostFunc<Cell> { // element are sorted from the lowest lb of the evaluation of the objective function to the greatest
+class CellCostFmaxlb : public CostFunc<Cell> { // element are sorted from the lowest lb of the evaluation of the objective function to the greatest
 public:
 
 	/**
