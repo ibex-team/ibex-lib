@@ -118,6 +118,11 @@ public:
 	VarSet(const VarSet& v);
 
 	/**
+	 * \brief Assignment (erases everything)
+	 */
+	VarSet& operator=(const VarSet& v);
+
+	/**
 	 * \brief Extend the box to a "full box" with the parameters
 	 */
 	IntervalVector full_box(const IntervalVector& var_box, const IntervalVector& param_box) const;
