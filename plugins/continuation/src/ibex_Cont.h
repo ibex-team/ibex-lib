@@ -99,7 +99,7 @@ protected:
 	 *
 	 * TODO: avoid copy in return?
 	 */
-	ContCell choose(const IntervalVector& x, double h);
+	ContCell choose(const ContCell::Facet* x_facet, const IntervalVector& x, double h);
 
 	/**
 	 * \brief Add a new cell in the continuation.
@@ -115,10 +115,10 @@ protected:
 	/**
 	 * Finds a solution of f(x)=0 in one of the remaining facets.
 	 *
-	 * If no solution is found, x is set to the empty vector.
-	 * Otherwise, returns the new value of "h"
+	 * If no solution is found, x is set to the empty vector and returns <NULL,NULL>.
+	 * Otherwise, returns the cell/facet where x has been found.
 	 */
-	double find_solution_in_cells(IntervalVector& x);
+	std::pair<ContCell*,ContCell::Facet*> find_solution_in_cells(IntervalVector& x);
 
 	/**
 	 * When it is neither possible to find a solution in a facet

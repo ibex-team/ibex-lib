@@ -124,18 +124,31 @@ public:
 	static int total_facet_count();
 
 //protected:
+
+	class Facet {
+	public:
+		Facet(int p, bool sign, const IntervalVector& facet);
+		/**
+		 * Parameter number
+		 *
+		 * Warning: not to be confused with the dimension) */
+		int p;
+		bool sign;
+		IntervalVector facet;
+	};
+
 	friend std::ostream& operator<<(std::ostream& os, const ContCell& cell);
 
 	/** \brief Facets of the existence box (the existence box is unused so far)
 	 *
 	 * This list contains the facets "alive" (the ones necessary to pursue the
 	 * continuation). */
-    std::list<IntervalVector> facets;
+    std::list<Facet> facets;
 
 	static int __total_facet_count;
 
-	/** Build the facets of the box "box" and stores them */
-	void create_facets(const IntervalVector& box, const IntervalVector& domain, const VarSet& vars, std::list<IntervalVector>& liv);
+	/** Build the facets of the existence box and stores them */
+	void create_facets(const IntervalVector& box, const IntervalVector& domain);
 };
 
 /** Streams out the cell */
@@ -150,7 +163,7 @@ inline int ContCell::nb_facets() const {
 }
 
 inline IntervalVector ContCell::pop_front_facet() {
-	IntervalVector facet=facets.front();
+	IntervalVector facet=facets.front().facet;
 	facets.pop_front();
 	__total_facet_count--;
 	return facet;

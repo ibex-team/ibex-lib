@@ -23,24 +23,24 @@ namespace ibex {
 int ContCell::__total_facet_count=0;
 
 ContCell::ContCell(const IntervalVector& box_existence, const IntervalVector& box_unicity, const IntervalVector& domain, const VarSet& vars) : box(box_unicity), vars(vars), h(vars.param_box(box_unicity).max_diam()) {
-	create_facets(box_existence,domain,vars,facets);
+	create_facets(box_existence,domain);
 	__total_facet_count += facets.size();
 }
 
 void ContCell::diff(const IntervalVector& box, Function& f) {
 	ContCell& cell=*this;
 	if (box.intersects(cell.box)) {
-		for (list<IntervalVector>::iterator it=cell.facets.begin(); it!=cell.facets.end(); ) {
+		for (list<Facet>::iterator it=cell.facets.begin(); it!=cell.facets.end(); ) {
 			IntervalVector* result;
 			//cout << "[diff] params:" << vars.param_box(*it) << " and " << vars.param_box(box) << endl;
 			//cout << "       vars:" << vars.var_box(*it) << " and " << vars.var_box(box) << endl;
 
 			// We force the diff to split first the parameters.
 			// So we reorder the dimensions so that parameters appear first.
-			IntervalVector reordered_facet=cart_prod(vars.param_box(*it), vars.var_box(*it));
+			IntervalVector reordered_facet=cart_prod(vars.param_box(it->facet), vars.var_box(it->facet));
 			IntervalVector reordered_box=cart_prod(vars.param_box(box), vars.var_box(box));
 
-//			IntervalVector reordered_facet=cart_prod(vars.var_box(*it), vars.param_box(*it));
+//			IntervalVector reordered_facet=cart_prod(vars.var_box(it->facet), vars.param_box(it->facet));
 //			IntervalVector reordered_box=cart_prod(vars.var_box(box), vars.param_box(box));
 
 			int nb_boxes=reordered_facet.diff(reordered_box,result);
@@ -59,7 +59,7 @@ void ContCell::diff(const IntervalVector& box, Function& f) {
 						ctc.contract(residu);
 					}
 					if (!residu.is_empty()) {
-						cell.facets.push_front(residu);
+						cell.facets.push_front(Facet(it->p, it->sign, residu));
 						__total_facet_count++;
 					}
 					//cout << "         " << residu << endl;
@@ -96,11 +96,13 @@ void ContCell::diff(const IntervalVector& box, Function& f) {
 //	}
 //
 //}
+ContCell::Facet::Facet(int p, bool sign, const IntervalVector& facet) : p(p), sign(sign), facet(facet) {
 
+}
 
-void ContCell::create_facets(const IntervalVector& box, const IntervalVector& domain, const VarSet& vars, list<IntervalVector>& liv) {
+void ContCell::create_facets(const IntervalVector& box, const IntervalVector& domain) {
 
-	assert(liv.empty());
+	assert(facets.empty());
 	IntervalVector x=vars.var_box(box);
 	IntervalVector facet(x);
 	int m=vars.nb_param;
@@ -110,19 +112,19 @@ void ContCell::create_facets(const IntervalVector& box, const IntervalVector& do
 		p[i]=pi.lb();
 		facet=vars.full_box(x,p) & domain;
 		if (!facet.is_empty()) {
-			liv.push_back(vars.full_box(x,p));
+			facets.push_back(Facet(i,false,vars.full_box(x,p)));
 		}
 		p[i]=pi.ub();
 		facet=vars.full_box(x,p) & domain;
 		if (!facet.is_empty()) {
-			liv.push_back(vars.full_box(x,p));
+			facets.push_back(Facet(i,true,vars.full_box(x,p)));
 		}
 	}
 }
 
 void ContCell::contract_facets(Ctc& ctc) {
-	for (list<IntervalVector>::iterator it=facets.begin(); it!=facets.end(); it++) {
-		ctc.contract(*it);
+	for (list<Facet>::iterator it=facets.begin(); it!=facets.end(); it++) {
+		ctc.contract(it->facet);
 	}
 }
 
@@ -131,7 +133,7 @@ void ContCell::find_solution_in_facets(Function& f, IntervalVector& x) {
 
 	while (!facets.empty()) {
 		//cout << "[find_solution] try next facet" << endl;
-		x = find_solution(f, facets.front(), vars);
+		x = find_solution(f, facets.front().facet, vars);
 		// No solution in the facet => remove the facet
 		if (x.is_empty()) {
 			facets.pop_front();
@@ -143,10 +145,10 @@ void ContCell::find_solution_in_facets(Function& f, IntervalVector& x) {
 }
 
 void ContCell::check_no_facet_contains(const IntervalVector& x) {
-	for (list<IntervalVector>::const_iterator it=facets.begin(); it!=facets.end(); it++) {
-		if (it->intersects(x)) {
+	for (list<Facet>::const_iterator it=facets.begin(); it!=facets.end(); it++) {
+		if (it->facet.intersects(x)) {
 			cerr << "Error: a facet still contains x=" << x << endl;
-			cerr << "facet=" << *it << endl;
+			cerr << "facet=" << it->facet << endl;
 			exit(1);
 		}
 	}
@@ -156,8 +158,8 @@ ostream& operator<<(ostream& os, const ContCell& cell) {
 	os << "\u250C\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500	\n";
 	os << "\u2502Unicity box=" << cell.box << endl;
 	os << "\u2502" << cell.facets.size() << " facets:" << endl;
-	for (list<IntervalVector>::const_iterator it=cell.facets.begin(); it!=cell.facets.end(); it++) {
-		os << "\u2502  " << *it << endl;
+	for (list<ContCell::Facet>::const_iterator it=cell.facets.begin(); it!=cell.facets.end(); it++) {
+		os << "\u2502  " << it->facet << endl;
 	}
 	os << "\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500	\n";
 	return os;

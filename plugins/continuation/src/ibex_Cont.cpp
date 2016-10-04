@@ -92,13 +92,15 @@ void Cont::start(IntervalVector x, double h, int kmax) {
 			x.put(n-g->image_dim(),g->eval_vector(x));
 	}
 
+	pair<ContCell*,ContCell::Facet*> p(NULL,NULL);
+
 	do {
 
 		try {
 			//cout << "solution=" << x << endl;
 
 			// Build a cell around the current solution x
-			ContCell new_cell=choose(x,h);
+			ContCell new_cell=choose(p.second,x,h);
 			//cout << "new cell:" << new_cell.box << endl;
 
 			// Intersects the list of existing cells
@@ -130,15 +132,21 @@ void Cont::start(IntervalVector x, double h, int kmax) {
 		if (!l.empty()) cout << "(" << l.back().vars << ")";
 		cout << endl;
 
-		h=find_solution_in_cells(x);
-		h*=1+0.001*(RNG::rand(0,1)-0.5);
+		p=find_solution_in_cells(x);
 
-		int i=0;
+		if (!x.is_empty()) {
+			h=p.first->h*beta;
+			h*=1+0.001*(RNG::rand(0,1)-0.5);
+		}
+
+//		int i=0;
 //		for (list<ContCell>::const_iterator it=l.begin(); it!=l.end(); it++)
 //			//cout << "Cell n°" << i++ << endl << *it << endl;
 //			cout << it->nb_facets() << " "; //
 //		cout << endl;
+
 		iteration++;
+
 	} while ((kmax==-1 || iteration<kmax) && !l.empty());
 }
 
@@ -177,7 +185,7 @@ void Cont::diff(ContCell& ivb) {
 		l.push_back(ivb);
 }
 
-ContCell Cont::choose(const IntervalVector& x, double h) {
+ContCell Cont::choose(const ContCell::Facet* x_facet, const IntervalVector& x, double h) {
 	IntervalVector x_box(m);
 	IntervalVector p_box(n-m);
 	IntervalVector p_box_h(n-m);
@@ -204,7 +212,13 @@ ContCell Cont::choose(const IntervalVector& x, double h) {
 			vars=get_vars(f, x.mid(), forced_params);
 			x_box=vars.var_box(x);
 			p_box=vars.param_box(x);
-			p_box_h = p_box + IntervalVector(vars.nb_param,Interval(-h,h));
+
+			IntervalVector shift(vars.nb_param,Interval(-h,h));
+			// avoid overlapping by shifting
+			if (x_facet!=NULL)
+				shift[x_facet->p] = h*(x_facet->sign? Interval(-0.01,1.99) : Interval(-1.99,0.01));
+
+			p_box_h = p_box + shift;
 			box=vars.full_box(x_box, p_box_h);
 
 			success=inflating_newton(f,vars,box,box_existence,box_unicity);
@@ -262,7 +276,7 @@ ContCell Cont::choose(const IntervalVector& x, double h) {
 	throw ChooseFail();
 }
 
-double Cont::find_solution_in_cells(IntervalVector& x) {
+pair<ContCell*,ContCell::Facet*> Cont::find_solution_in_cells(IntervalVector& x) {
 	x.set_empty(); // by default
 
 	int i=0; // count the cells (for debug)
@@ -281,19 +295,19 @@ double Cont::find_solution_in_cells(IntervalVector& x) {
 				l_empty_facets.push_back(cell);
 				remove_next_cell();
 			} else {
-				return cell.h*beta;
+				return pair<ContCell*,ContCell::Facet*>(&cell,&cell.facets.front());
 			}
 		} catch(FindSolutionFail&) {
 			// Try to remove the facet using inflating Newton
 			IntervalVector facet2(x.size());
 			IntervalVector _ignore_(x.size());
-			bool success=inflating_newton(f,cell.vars,cell.facets.front(),facet2,_ignore_);
+			bool success=inflating_newton(f,cell.vars,cell.facets.front().facet,facet2,_ignore_);
 
 			if (success) {
 
-				cell.facets.front() &= facet2;
+				cell.facets.front().facet &= facet2;
 
-				if (cell.facets.front().is_empty()) {
+				if (cell.facets.front().facet.is_empty()) {
 					cell.pop_front_facet();
 					continue;
 				}
@@ -305,7 +319,7 @@ double Cont::find_solution_in_cells(IntervalVector& x) {
 		i++;
 	}
 
-	return -1;
+	return pair<ContCell*,ContCell::Facet*>(NULL,NULL);
 }
 
 void Cont::move_facet_to_fails(bool choose) {
@@ -334,7 +348,7 @@ void Cont::check_no_facet_contains(const IntervalVector& x) {
 	}
 }
 
-void Cont::cells_to_mathematica(const list<ContCell>& l, const std::string& filename) const {
+void Cont::cells_to_mathematica(const list<ContCell>& l, const string& filename) const {
     ofstream file (filename.c_str());
     file << '{';
     int count=0;
@@ -372,7 +386,7 @@ void Cont::boxes_to_mathematica(const list<IntervalVector>& l, const string& fil
     file.close();
 }
 
-void Cont::to_mathematica(const std::string& basename) const {
+void Cont::to_mathematica(const string& basename) const {
     cells_to_mathematica(l_empty_facets,basename+".txt");
     boxes_to_mathematica(l_choose_failed_facets,basename+"-choose-failed.txt");
     boxes_to_mathematica(l_find_solution_failed_facets,basename+"-find-failed.txt");
@@ -380,10 +394,12 @@ void Cont::to_mathematica(const std::string& basename) const {
 
     list<IntervalVector> todo_facets;
     for (list<ContCell>::const_iterator it=l.begin(); it!=l.end(); it++) {
-    	todo_facets.insert(todo_facets.end(), it->facets.begin(), it->facets.end());
+    	for (list<ContCell::Facet>::const_iterator it2=it->facets.begin(); it2!=it->facets.end(); it2++) {
+    		todo_facets.push_back(it2->facet); //(todo_facets.end(), it->facets.begin(), it->facets.end());
+    	}
     }
 
     boxes_to_mathematica(todo_facets,basename+"-todo-facets.txt");
 }
 
-} /* namespace ibex */
+} // namespace ibex
