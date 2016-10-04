@@ -114,13 +114,13 @@ void Cont::start(IntervalVector x, double h, int kmax) {
 		h=find_solution_in_cells(x);
 
 		cout << "k=" << iteration << " ";
-		cout << "#cells=" << l.size() << " ";
-		cout << "#empty=" << l_empty_facets.size() << " ";
+		cout << "#todo=" << l.size() << " ";
+		cout << "#done=" << l_empty_facets.size() << " ";
 		cout << "#failed=(" << l_choose_failed_facets.size() << ", ";
 		cout <<                l_find_solution_failed_facets.size() << ") ";
 		cout << "#facets=" << ContCell::total_facet_count() << " ";
-		cout << "h=" << h << endl;
-
+		cout << "h=" << h << " ";
+		cout << "(" << l.back().vars << ")" << endl;
 		int i=0;
 //		for (list<ContCell>::const_iterator it=l.begin(); it!=l.end(); it++)
 //			//cout << "Cell n°" << i++ << endl << *it << endl;

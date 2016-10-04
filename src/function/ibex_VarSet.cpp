@@ -227,7 +227,8 @@ void VarSet::set_param_box(IntervalVector& full_box, const IntervalVector& param
 
 std::ostream& operator<<(std::ostream& os, const VarSet& v) {
 	for (int i=0; i<v.nb_var+v.nb_param; i++) {
-		os << (v.vars[i] ? 'v' : 'p') << ' ';
+		if (i>0) os << ' ';
+		os << (v.vars[i] ? 'v' : 'p');
 	}
 	return os;
 }
