@@ -192,6 +192,8 @@ public:
 	std::list<IntervalVector> l_find_solution_failed_facets;
 
 protected:
+	double choose_time, find_time, diff_time;
+
 	// Either the first or the last cell, depending on the heuristic
 	ContCell& next_cell();
 

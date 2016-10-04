@@ -53,17 +53,17 @@ Function* Cont::merge(Function &f, Function& g) {
 	return new Function(x,ExprVector::new_(fg,false));
 }
 
-Cont::Cont(Function &f, Function &g, double h_min, double alpha, double beta) : n(f.nb_var()+g.image_dim()), m(f.image_dim()+g.image_dim()), f(*merge(f,g)), domain(this->f.nb_var()), g(&g), h_min(h_min), alpha(alpha), beta(beta), dfs(false) {
+Cont::Cont(Function &f, Function &g, double h_min, double alpha, double beta) : dfs(false), n(f.nb_var()+g.image_dim()), m(f.image_dim()+g.image_dim()), f(*merge(f,g)), g(&g), domain(this->f.nb_var()), h_min(h_min), alpha(alpha), beta(beta) {
 
 	for (int i=0; i<g.image_dim(); i++)
 		domain[f.nb_var()+i] = Interval::NEG_REALS;
 }
 
-Cont::Cont(Function &f, const IntervalVector& domain, double h_min, double alpha, double beta) : n(f.nb_var()), m(f.image_dim()), f(f), g(NULL), domain(domain), h_min(h_min), alpha(alpha), beta(beta), dfs(false) {
+Cont::Cont(Function &f, const IntervalVector& domain, double h_min, double alpha, double beta) : dfs(false), n(f.nb_var()), m(f.image_dim()), f(f), g(NULL), domain(domain), h_min(h_min), alpha(alpha), beta(beta) {
 
 }
 
-Cont::Cont(Function &f, double h_min, double alpha, double beta) : n(f.nb_var()), m(f.image_dim()), f(f), domain(f.nb_var(),Interval::ALL_REALS), g(NULL), h_min(h_min), alpha(alpha), beta(beta), dfs(false) {
+Cont::Cont(Function &f, double h_min, double alpha, double beta) : dfs(false), n(f.nb_var()), m(f.image_dim()), f(f), g(NULL), domain(f.nb_var(),Interval::ALL_REALS), h_min(h_min), alpha(alpha), beta(beta) {
 
 }
 
@@ -93,19 +93,27 @@ void Cont::start(IntervalVector x, double h, int kmax) {
 	}
 
 	pair<ContCell*,ContCell::Facet*> p(NULL,NULL);
+	choose_time=0;
+	find_time=0;
+	diff_time=0;
 
 	do {
 
 		try {
 			//cout << "solution=" << x << endl;
-
+			Timer::start();
 			// Build a cell around the current solution x
 			ContCell new_cell=choose(p.second,x,h);
 			//cout << "new cell:" << new_cell.box << endl;
+			Timer::stop();
+			choose_time+=Timer::VIRTUAL_TIMELAPSE();
 
 			// Intersects the list of existing cells
 			// with the current cell and vice-versa
+			Timer::start();
 			diff(new_cell);
+			Timer::stop();
+			diff_time+=Timer::VIRTUAL_TIMELAPSE();
 
 			// assert
 			check_no_facet_contains(x);
@@ -122,19 +130,20 @@ void Cont::start(IntervalVector x, double h, int kmax) {
 		// cell in turn and search in all its facets.
 		// Some facets may be discarded and some cells may be moved
 		// to l_empty_facets or l_solution_find_fail_facets.
-        if(iteration%100==0) {
-            cout << "k=" << iteration << " ";
-            cout << "#todo=" << l.size() << " ";
-            cout << "#done=" << l_empty_facets.size() << " ";
-            cout << "#failed=(" << l_choose_failed_facets.size() << ", ";
-            cout <<                l_find_solution_failed_facets.size() << ") ";
-            cout << "#facets=" << ContCell::total_facet_count() << " (" << (double) ContCell::total_facet_count() / (double)l.size() << ") ";
-            cout << "h=" << h << " ";
-            if (!l.empty()) cout << "(" << l.back().vars << ")";
-            cout << endl;
-        }
+		cout << "k=" << iteration << " ";
+		cout << "#todo=" << l.size() << " ";
+		cout << "#done=" << l_empty_facets.size() << " ";
+		cout << "#failed=(" << l_choose_failed_facets.size() << ", ";
+		cout <<                l_find_solution_failed_facets.size() << ") ";
+		cout << "#facets=" << ContCell::total_facet_count() << " ";
+		cout << "h=" << h << " ";
+		if (!l.empty()) cout << "(" << l.back().vars << ")";
+		cout << " t=(" << choose_time << "," << diff_time << "," << find_time << ")" << endl;
 
+		Timer::start();
 		p=find_solution_in_cells(x);
+		Timer::stop();
+		find_time+=Timer::VIRTUAL_TIMELAPSE();
 
 		if (!x.is_empty()) {
 			h=p.first->h*beta;
