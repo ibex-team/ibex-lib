@@ -156,8 +156,13 @@ IntervalVector find_solution(Function& f, IntervalVector& facet, const VarSet& v
 				}
 
 				pair<IntervalVector,IntervalVector> _pair=p.bisect(p.extr_diam_index(false));
-				s.push(_pair.first);
-				s.push(_pair.second);
+			//	if (iter % 2==0) {
+					s.push(_pair.first);
+					s.push(_pair.second);
+//				} else {
+//					s.push(_pair.second);
+//					s.push(_pair.first);
+//				}
 			}
 
 		}

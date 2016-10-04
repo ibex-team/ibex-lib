@@ -76,6 +76,14 @@ public:
 	void to_mathematica(const std::string& basename) const;
 
 
+	/**
+	 * \brief Cell choice heuristic.
+	 *
+	 * If true, performs a depth-first search. Otherwise, a
+	 * breadth-first search. By default: false.
+	 */
+	bool dfs;
+
 	static int iteration;
 
 protected:
@@ -183,6 +191,11 @@ public:
 	 * not contain a solution (FindSolutionFail). */
 	std::list<IntervalVector> l_find_solution_failed_facets;
 
+protected:
+	// Either the first or the last cell, depending on the heuristic
+	ContCell& next_cell();
+
+	void remove_next_cell();
 };
 
 } /* namespace ibex */

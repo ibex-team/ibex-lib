@@ -53,18 +53,27 @@ Function* Cont::merge(Function &f, Function& g) {
 	return new Function(x,ExprVector::new_(fg,false));
 }
 
-Cont::Cont(Function &f, Function &g, double h_min, double alpha, double beta) : n(f.nb_var()+g.image_dim()), m(f.image_dim()+g.image_dim()), f(*merge(f,g)), domain(this->f.nb_var()), g(&g), h_min(h_min), alpha(alpha), beta(beta) {
+Cont::Cont(Function &f, Function &g, double h_min, double alpha, double beta) : n(f.nb_var()+g.image_dim()), m(f.image_dim()+g.image_dim()), f(*merge(f,g)), domain(this->f.nb_var()), g(&g), h_min(h_min), alpha(alpha), beta(beta), dfs(false) {
 
 	for (int i=0; i<g.image_dim(); i++)
 		domain[f.nb_var()+i] = Interval::NEG_REALS;
 }
 
-Cont::Cont(Function &f, const IntervalVector& domain, double h_min, double alpha, double beta) : n(f.nb_var()), m(f.image_dim()), f(f), g(NULL), domain(domain), h_min(h_min), alpha(alpha), beta(beta) {
+Cont::Cont(Function &f, const IntervalVector& domain, double h_min, double alpha, double beta) : n(f.nb_var()), m(f.image_dim()), f(f), g(NULL), domain(domain), h_min(h_min), alpha(alpha), beta(beta), dfs(false) {
 
 }
 
-Cont::Cont(Function &f, double h_min, double alpha, double beta) : n(f.nb_var()), m(f.image_dim()), f(f), domain(f.nb_var(),Interval::ALL_REALS), g(NULL), h_min(h_min), alpha(alpha), beta(beta) {
+Cont::Cont(Function &f, double h_min, double alpha, double beta) : n(f.nb_var()), m(f.image_dim()), f(f), domain(f.nb_var(),Interval::ALL_REALS), g(NULL), h_min(h_min), alpha(alpha), beta(beta), dfs(false) {
 
+}
+
+ContCell& Cont::next_cell() {
+	return dfs? l.back() : l.front();
+}
+
+void Cont::remove_next_cell() {
+	if (dfs) l.pop_back();
+	else l.pop_front();
 }
 
 Cont::~Cont() {
@@ -111,8 +120,6 @@ void Cont::start(IntervalVector x, double h, int kmax) {
 		// cell in turn and search in all its facets.
 		// Some facets may be discarded and some cells may be moved
 		// to l_empty_facets or l_solution_find_fail_facets.
-		h=find_solution_in_cells(x);
-
 		cout << "k=" << iteration << " ";
 		cout << "#todo=" << l.size() << " ";
 		cout << "#done=" << l_empty_facets.size() << " ";
@@ -120,7 +127,12 @@ void Cont::start(IntervalVector x, double h, int kmax) {
 		cout <<                l_find_solution_failed_facets.size() << ") ";
 		cout << "#facets=" << ContCell::total_facet_count() << " ";
 		cout << "h=" << h << " ";
-		cout << "(" << l.back().vars << ")" << endl;
+		if (!l.empty()) cout << "(" << l.back().vars << ")";
+		cout << endl;
+
+		h=find_solution_in_cells(x);
+		h*=1+0.001*(RNG::rand(0,1)-0.5);
+
 		int i=0;
 //		for (list<ContCell>::const_iterator it=l.begin(); it!=l.end(); it++)
 //			//cout << "Cell n°" << i++ << endl << *it << endl;
@@ -259,7 +271,7 @@ double Cont::find_solution_in_cells(IntervalVector& x) {
 
 		//cout << "[find_solution] lookup in cell n°" << i << endl;
 
-		ContCell& cell=l.front();
+		ContCell& cell=next_cell();
 
 		try {
 			cell.find_solution_in_facets(f,x);
@@ -267,9 +279,9 @@ double Cont::find_solution_in_cells(IntervalVector& x) {
 			// No solution in all the remaining facets => remove the cell
 			if (x.is_empty()) {
 				l_empty_facets.push_back(cell);
-				l.pop_front();
+				remove_next_cell();
 			} else {
-				return l.front().h*beta;
+				return cell.h*beta;
 			}
 		} catch(FindSolutionFail&) {
 			// Try to remove the facet using inflating Newton
@@ -282,7 +294,7 @@ double Cont::find_solution_in_cells(IntervalVector& x) {
 				cell.facets.front() &= facet2;
 
 				if (cell.facets.front().is_empty()) {
-					l.front().pop_front_facet();
+					cell.pop_front_facet();
 					continue;
 				}
 			}
@@ -303,14 +315,16 @@ void Cont::move_facet_to_fails(bool choose) {
 		exit(1);
 	}
 
-	if (choose)
-		l_choose_failed_facets.push_back(l.front().pop_front_facet());
-	else
-		l_find_solution_failed_facets.push_back(l.front().pop_front_facet());
+	ContCell& cell=next_cell();
 
-	if (l.front().empty_facets()) {
-		l_empty_facets.push_back(l.front());
-		l.pop_front();
+	if (choose)
+		l_choose_failed_facets.push_back(cell.pop_front_facet());
+	else
+		l_find_solution_failed_facets.push_back(cell.pop_front_facet());
+
+	if (cell.empty_facets()) {
+		l_empty_facets.push_back(cell);
+		remove_next_cell();
 	}
 }
 
@@ -337,7 +351,6 @@ void Cont::cells_to_mathematica(const list<ContCell>& l, const std::string& file
     }
     file << '}' << '\n';
     file.close();
-    cout << "#boites=" << count << endl;
 }
 
 void Cont::boxes_to_mathematica(const list<IntervalVector>& l, const string& filename) const {
@@ -357,7 +370,6 @@ void Cont::boxes_to_mathematica(const list<IntervalVector>& l, const string& fil
     }
     file << '}' << '\n';
     file.close();
-    cout << "#boites=" << count << endl;
 }
 
 void Cont::to_mathematica(const std::string& basename) const {
