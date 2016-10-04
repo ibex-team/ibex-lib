@@ -99,6 +99,25 @@ public:
 
 };
 
+class CellCostFmaxub : public CostFunc<Cell> { // element are sorted from the lowest lb of the evaluation of the objective function to the greatest
+public:
+
+	/**
+	 * \brief Return the cost associated to "data"
+	 */
+	virtual double cost(const Cell& elem) const;
+
+	/**
+	 * \brief Add backtrackable data required by this cost function
+	 *
+	 * This function is called for the root cell (before a
+	 * strategy is executed).
+	 *
+	 * Does nothing by default.
+	 */
+     virtual void add_backtrackable(Cell& root);
+
+};
 
 } // end namespace ibex
 #endif // __IBEX_DATA_MINMAX_H__

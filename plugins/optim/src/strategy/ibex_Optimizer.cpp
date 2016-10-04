@@ -52,7 +52,7 @@ Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, double prec,
 		double goal_rel_prec, double goal_abs_prec, int sample_size, double equ_eps,
 		bool rigor,  int critpr,CellCostFunc::criterion crit2) :
 				Optim( *new CellDoubleHeap(*new CellCostVarLB(n), *CellCostFunc::get_cost(crit2, n), critpr),// first buffer with LB, second buffer with ct (default UB))
-						prec, goal_rel_prec, goal_abs_prec, sample_size, equ_eps),
+						prec, goal_rel_prec, goal_abs_prec, sample_size),
                 				user_sys(user_sys), sys(user_sys,equ_eps),
                 				n(user_sys.nb_var), m(sys.nb_ctr) /* (warning: not user_sys.nb_ctr) */,
                 				ext_sys(user_sys,equ_eps),

@@ -21,7 +21,7 @@ const double Optim::default_loup_tolerance = 0.1;
 
 
 Optim::Optim (CellDoubleHeap& buffer,  double prec,
-		double goal_rel_prec, double goal_abs_prec, int sample_size, double equ_eps) :
+		double goal_rel_prec, double goal_abs_prec, int sample_size) :
                 				buffer(buffer),
                 				prec(prec), goal_rel_prec(goal_rel_prec), goal_abs_prec(goal_abs_prec),
                 				sample_size(sample_size), trace(false),

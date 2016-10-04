@@ -36,4 +36,14 @@ void CellCostFmaxlb::add_backtrackable(Cell& root) {
 	root.add<DataMinMax>();
 }
 
+
+double CellCostFmaxub::cost(const Cell& elem) const {
+    return elem.get<DataMinMax>().fmax.ub();
+}
+
+
+void CellCostFmaxub::add_backtrackable(Cell& root) {
+	root.add<DataMinMax>();
+}
+
 } // end namespace ibex

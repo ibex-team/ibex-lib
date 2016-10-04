@@ -5,17 +5,19 @@
 
 namespace ibex {
 
-OptimMiniMax::OptimMiniMax(NormalizedSystem& x_sys,NormalizedSystem& xy_sys, Ctc& x_ctc,Ctc& xy_ctc):
-	loup(POS_INFINITY), uplo(NEG_INFINITY), minprec_uplo(POS_INFINITY), best_sol(x_sys.nb_var), x_heap(x_heap_costfunc),
-	x_ctc(x_ctc),x_sys(x_sys),lsolve(xy_sys,xy_ctc), bsc(new LargestFirst()),
-	x_box_init(x_sys.nb_var), y_box_init(xy_sys.nb_var-x_sys.nb_var) {
+OptimMiniMax::OptimMiniMax(NormalizedSystem& x_sys,NormalizedSystem& xy_sys, Ctc& x_ctc,Ctc& xy_ctc,double prec_x,double prec_y,double goal_rel_prec):
+		Optim( *new CellDoubleHeap(*new CellCostFmaxlb(), *new CellCostFmaxub()),
+				prec_x, goal_rel_prec, goal_rel_prec), // attention meme precision en relatif et en absolue
+	x_ctc(x_ctc),x_sys(x_sys),lsolve(xy_sys,xy_ctc, prec_y),
+	bsc(new LargestFirst()),
+	x_box_init(x_sys.box), y_box_init(xy_sys.box.subvector(x_sys.nb_var, xy_sys.nb_var)) {
 };
 
 OptimMiniMax::~OptimMiniMax() {
 	delete bsc;
 }
 
-void OptimMiniMax::solve(const IntervalVector& x_box_ini1, const IntervalVector& y_box_ini1, double prec_x, double prec_y, double stop_prec) {
+void OptimMiniMax::optimize(const IntervalVector& x_box_ini1, const IntervalVector& y_box_ini1) {
 
 	std::cout<<"start init"<<std::endl;
 
@@ -26,12 +28,14 @@ void OptimMiniMax::solve(const IntervalVector& x_box_ini1, const IntervalVector&
 	Cell * root = new Cell(x_box_init);
 	bsc->add_backtrackable(*root);
 	lsolve.add_backtrackable(*root,y_box_init);
-	x_heap_costfunc.add_backtrackable(*root);
+	buffer.cost1().add_backtrackable(*root);
+	buffer.cost2().add_backtrackable(*root);
+
 
 
 	//****** x_heap initialization ********
-	x_heap.flush();
-	x_heap.push(root);
+	buffer.flush();
+	buffer.push(root);
 
 
 	//************** algo variables **************
@@ -47,9 +51,9 @@ void OptimMiniMax::solve(const IntervalVector& x_box_ini1, const IntervalVector&
 
 	std::cout<<"initialization ok"<<std::endl;
 	Timer::start();
-	while((!x_heap.empty()) &&(loup-uplo<stop_prec)) { // stop criterion reached
+	while((!buffer.empty()) &&(loup-uplo<stop_prec)) { // stop criterion reached
 
-		x_cell = x_heap.pop();
+		x_cell = buffer.pop();
 
 		// TODO je ne sais pas trop ce que ca fait
 		//if(!min_prec_reached || ((minprec_uplo < x_cell->get<DataMinMax>().fmax.lb()) && min_prec_reached))
@@ -61,13 +65,14 @@ void OptimMiniMax::solve(const IntervalVector& x_box_ini1, const IntervalVector&
 
 
 		handle_cell(subcells_pair.first,prec_x,prec_y);
-		if (subcells_pair.first) x_heap.push(subcells_pair.first);
+		if (subcells_pair.first) buffer.push(subcells_pair.first);
 
 		handle_cell(subcells_pair.second,prec_x,prec_y);
-		if (subcells_pair.second) x_heap.push(subcells_pair.second);
+		if (subcells_pair.second) buffer.push(subcells_pair.second);
+
 	}
 	Timer::stop();
-	x_heap.flush();
+	buffer.flush();
 	std::cout<<"loup : "<<loup<<" get for point: "<<best_sol<<" uplo: "<<uplo<<std::endl; // " volume rejected: "<<vol_rejected/init_vol*100<<endl;
 	//if(min_prec_reached)
 	//    cout<<"minimum precision on x has been reached"<<endl;
@@ -127,6 +132,7 @@ void  OptimMiniMax::handle_cell(Cell * x_cell, double prec_x, double prec_y) {
 		if(x_copy && resmidp.ub()<loup) { // update best current solution
 			loup = resmidp.ub();
 			best_sol = midp;
+			buffer.contract(loup);
 			//max_y = heap_copy.top1()->box;
 			//cout<<"loup : "<<loup<<" get for point: x = "<<best_sol<<" y = "<<max_y<<" uplo: "<<uplo<< " volume rejected: "<<vol_rejected/init_vol*100<<endl;
 		}
@@ -165,7 +171,7 @@ double OptimMiniMax::compute_min_prec( const IntervalVector& x_box,double prec_y
 	return ratio/y_box_init.volume()>prec_y?ratio/(10*y_box_init.volume()):prec_y;
 }
 
-double OptimMiniMax::choose_nbiter(bool midpoint_eval) {
+int OptimMiniMax::choose_nbiter(bool midpoint_eval) {
 	if(!midpoint_eval)
 		return 10;
 	else

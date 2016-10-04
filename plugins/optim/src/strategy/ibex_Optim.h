@@ -27,7 +27,7 @@ public:
 
 	Optim( CellDoubleHeap& buffer, double prec=default_prec,
 			double goal_rel_prec=default_goal_rel_prec, double goal_abs_prec=default_goal_abs_prec,
-			  int sample_size=default_sample_size, double equ_eps=default_equ_eps);
+			  int sample_size=default_sample_size);
 
 	/**
 	 * \brief Delete *this.

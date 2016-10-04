@@ -119,7 +119,7 @@ void LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell, double min_prec
 	//mid point test (TO DO: replace with local optim to find a better point than midpoint)
 	IntervalVector mid_y_box = get_feasible_point(x_cell,y_cell);
 
-	if( !mid_y_box.is_empty() || (data_y->pu == 1)) {
+	if (!(mid_y_box.is_empty())) {
 		// x y constraint respected for all x and mid(y), mid_y_box is a candidate for evaluation
 		//midp_hit = true; <- JN:what is the variable?
 		Interval midres = xy_sys.goal->eval(mid_y_box);
