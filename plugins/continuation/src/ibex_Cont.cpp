@@ -122,15 +122,17 @@ void Cont::start(IntervalVector x, double h, int kmax) {
 		// cell in turn and search in all its facets.
 		// Some facets may be discarded and some cells may be moved
 		// to l_empty_facets or l_solution_find_fail_facets.
-		cout << "k=" << iteration << " ";
-		cout << "#todo=" << l.size() << " ";
-		cout << "#done=" << l_empty_facets.size() << " ";
-		cout << "#failed=(" << l_choose_failed_facets.size() << ", ";
-		cout <<                l_find_solution_failed_facets.size() << ") ";
-		cout << "#facets=" << ContCell::total_facet_count() << " ";
-		cout << "h=" << h << " ";
-		if (!l.empty()) cout << "(" << l.back().vars << ")";
-		cout << endl;
+        if(iteration%100==0) {
+            cout << "k=" << iteration << " ";
+            cout << "#todo=" << l.size() << " ";
+            cout << "#done=" << l_empty_facets.size() << " ";
+            cout << "#failed=(" << l_choose_failed_facets.size() << ", ";
+            cout <<                l_find_solution_failed_facets.size() << ") ";
+            cout << "#facets=" << ContCell::total_facet_count() << " (" << (double) ContCell::total_facet_count() / (double)l.size() << ") ";
+            cout << "h=" << h << " ";
+            if (!l.empty()) cout << "(" << l.back().vars << ")";
+            cout << endl;
+        }
 
 		p=find_solution_in_cells(x);
 
