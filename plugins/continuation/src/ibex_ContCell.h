@@ -121,6 +121,11 @@ public:
 	 *
 	 */
 	const double h;
+
+	long int id;
+
+	static int id_counter;
+
 	/**
 	 * \brief
 	 */

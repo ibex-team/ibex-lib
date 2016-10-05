@@ -20,9 +20,10 @@ using namespace std;
 
 namespace ibex {
 
+int ContCell::id_counter=0;
 int ContCell::__total_facet_count=0;
 
-ContCell::ContCell(const IntervalVector& box_existence, const IntervalVector& box_unicity, const IntervalVector& domain, const VarSet& vars) : box(box_unicity), box_existence(box_existence), vars(vars), h(vars.param_box(box_unicity).max_diam()) {
+ContCell::ContCell(const IntervalVector& box_existence, const IntervalVector& box_unicity, const IntervalVector& domain, const VarSet& vars) : box(box_unicity), box_existence(box_existence), vars(vars), h(vars.param_box(box_unicity).max_diam()), id(id_counter++) {
 	create_facets(box_existence,domain);
 	__total_facet_count += facets.size();
 }

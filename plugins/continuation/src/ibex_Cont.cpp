@@ -174,7 +174,7 @@ void Cont::start(IntervalVector x, double h, int kmax) {
 
 		if (!x.is_empty()) {
 			h=p.first->h*beta;
-			h*=1+0.001*(RNG::rand(0,1)-0.5);
+			//h*=1+0.001*(RNG::rand(0,1)-0.5);
 		}
 
 //		int i=0;

@@ -20,22 +20,39 @@
 #include <ciso646> // just to initialize _LIBCPP_VERSION
 #ifdef _LIBCPP_VERSION
 #include <unordered_map>
-#define IBEX_NEIGHBORHOOD std::unordered_map<ContCell*,std::list<ContCell*> >
+#define HASH std::hash
+#define IBEX_NEIGHBORHOOD std::unordered_map<ContCell*,std::list<ContCell*>,hash_cont_cell,same_cont_cell>
 #else
 #include <tr1/unordered_map>
-#define IBEX_NEIGHBORHOOD std::tr1::unordered_map<ContCell*,std::list<ContCell*> >
+#define HASH std::tr1::hash
+#define IBEX_NEIGHBORHOOD std::tr1::unordered_map<ContCell*,std::list<ContCell*>,hash_cont_cell,same_cont_cell>
 #endif
 #else
 #if (_MSC_VER >= 1600)
 #include <unordered_map>
-#define IBEX_NEIGHBORHOOD std::unordered_map<ContCell*,std::list<ContCell*> >
+#define HASH std::hash
+#define IBEX_NEIGHBORHOOD std::unordered_map<ContCell*,std::list<ContCell*>,hash_cont_cell,same_cont_cell>
 #else
 #include <unordered_map>
-#define IBEX_NEIGHBORHOOD std::tr1::unordered_map<ContCell*,std::list<ContCell*> >
+#define HASH std::tr1::hash
+#define IBEX_NEIGHBORHOOD std::tr1::unordered_map<ContCell*,std::list<ContCell*>,hash_cont_cell,same_cont_cell>
 #endif // (_MSC_VER >= 1600)
 #endif
 
 namespace ibex {
+
+
+struct same_cont_cell {
+	bool operator() (const ContCell* cell1, const ContCell* cell2) const {
+		return cell1->id == cell2->id;
+	}
+};
+
+struct hash_cont_cell {
+	unsigned long operator()(const ContCell* cell) const {
+		 return HASH<long>()(cell->id);
+	}
+};
 
 /**
  * \brief Structure representing the continuation of a manifold f=0 ^ g<=0.
