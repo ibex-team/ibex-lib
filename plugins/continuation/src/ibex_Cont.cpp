@@ -28,7 +28,7 @@ class ChooseFail : public Exception { };
 void Cont::add_to_neighbors(ContCell* cell){
 	list<ContCell*> neighbors;
 
-	for(std::tr1::unordered_map<ContCell*,std::list<ContCell*> >::iterator it=neighborhood.begin(); it!=neighborhood.end(); it++){
+	for(IBEX_NEIGHBORHOOD::iterator it=neighborhood.begin(); it!=neighborhood.end(); it++){
 		if(cell->box_existence.intersects(it->first->box_existence)) {
 			neighbors.push_back(it->first);
 			it->second.push_back(cell);
@@ -94,7 +94,7 @@ Cont::~Cont() {
 	if (g!=NULL) delete &f;
 
 	// Destroy all the cells
-	for(std::tr1::unordered_map<ContCell*,std::list<ContCell*> >::iterator it=neighborhood.begin(); it!=neighborhood.end(); it++){
+	for(IBEX_NEIGHBORHOOD::iterator it=neighborhood.begin(); it!=neighborhood.end(); it++){
 		delete it->first;
 	}
 }

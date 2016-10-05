@@ -20,22 +20,18 @@
 #include <ciso646> // just to initialize _LIBCPP_VERSION
 #ifdef _LIBCPP_VERSION
 #include <unordered_map>
-#define HASH std::hash
-//#define IBEX_NODE_MAP(T) std::unordered_map<const ExprNode*,T,hash_node,same_node>
+#define IBEX_NEIGHBORHOOD std::unordered_map<ContCell*,std::list<ContCell*> >
 #else
 #include <tr1/unordered_map>
-#define HASH std::tr1::hash
-//#define IBEX_NODE_MAP(T) std::tr1::unordered_map<const ExprNode*,T,hash_node,same_node>
+#define IBEX_NEIGHBORHOOD std::tr1::unordered_map<ContCell*,std::list<ContCell*> >
 #endif
 #else
 #if (_MSC_VER >= 1600)
 #include <unordered_map>
-#define HASH std::hash
-//#define IBEX_NODE_MAP(T) std::unordered_map<const ExprNode*,T,hash_node,same_node>
+#define IBEX_NEIGHBORHOOD std::unordered_map<ContCell*,std::list<ContCell*> >
 #else
 #include <unordered_map>
-#define HASH std::tr1::hash
-//#define IBEX_NODE_MAP(T) std::tr1::unordered_map<const ExprNode*,T,hash_node,same_node>
+#define IBEX_NEIGHBORHOOD std::tr1::unordered_map<ContCell*,std::list<ContCell*> >
 #endif // (_MSC_VER >= 1600)
 #endif
 
@@ -219,7 +215,7 @@ public:
 	std::list<IntervalVector> l_find_solution_failed_facets;
     
     /** Maps a cell to the list of its neighbors */
-    std::tr1::unordered_map<ContCell*,std::list<ContCell*> > neighborhood;
+	IBEX_NEIGHBORHOOD neighborhood;
 
 protected:
 	double choose_time, find_time, diff_time, neighborhood_time;
