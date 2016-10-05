@@ -102,6 +102,7 @@ Cont::~Cont() {
 void Cont::start(IntervalVector x, double h, int kmax) {
 
 	iteration=0; // count the iterations
+	RNG::srand(1);
 
 	if (g!=NULL) {
 		x.resize(n);
