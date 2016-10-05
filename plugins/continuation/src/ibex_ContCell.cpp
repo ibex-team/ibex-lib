@@ -36,29 +36,39 @@ void ContCell::diff(const IntervalVector& box, Function& f) {
 			//cout << "[diff] params:" << vars.param_box(*it) << " and " << vars.param_box(box) << endl;
 			//cout << "       vars:" << vars.var_box(*it) << " and " << vars.var_box(box) << endl;
 
+			if (!it->facet.overlaps(box)) { it++; continue; }
+
 			// We force the diff to split first the parameters.
 			// So we reorder the dimensions so that parameters appear first.
-			IntervalVector reordered_facet=cart_prod(vars.param_box(it->facet), vars.var_box(it->facet));
-			IntervalVector reordered_box=cart_prod(vars.param_box(box), vars.var_box(box));
+//			IntervalVector reordered_facet=cart_prod(vars.param_box(it->facet), vars.var_box(it->facet));
+//			IntervalVector reordered_box=cart_prod(vars.param_box(box), vars.var_box(box));
 
 //			IntervalVector reordered_facet=cart_prod(vars.var_box(it->facet), vars.param_box(it->facet));
 //			IntervalVector reordered_box=cart_prod(vars.var_box(box), vars.param_box(box));
 
+			IntervalVector reordered_facet=vars.param_box(it->facet);
+			IntervalVector reordered_box=vars.param_box(box);
+
 			int nb_boxes=reordered_facet.diff(reordered_box,result);
 			if (nb_boxes>0) {
+				IntervalVector residu(it->facet); //box.size());
 				for (int i=0; i<nb_boxes; i++) {
-					IntervalVector residu(box.size());
-					vars.set_param_box(residu,result[i].subvector(0,vars.nb_param-1));
-					vars.set_var_box(residu,result[i].subvector(vars.nb_param,box.size()-1));
+
+//					vars.set_param_box(residu,result[i].subvector(0,vars.nb_param-1));
+//					vars.set_var_box(residu,result[i].subvector(vars.nb_param,box.size()-1));
 
 //					vars.set_var_box(residu,result[i].subvector(0,vars.nb_var-1));
 //					vars.set_param_box(residu,result[i].subvector(vars.nb_var,box.size()-1));
 
-					if (nb_boxes>1 || (residu!=box)) {
-						// Contract the new boxes immediately
-						CtcParamNewton ctc(f,vars);
-						ctc.contract(residu);
-					}
+					vars.set_param_box(residu,result[i]);
+					//vars.set_var_box(residu,result[i].subvector(vars.nb_param,box.size()-1));
+
+//
+//					if (nb_boxes>1 || (residu!=box)) {
+//						// Contract the new boxes immediately
+//						CtcParamNewton ctc(f,vars);
+//						ctc.contract(residu);
+//					}
 					if (!residu.is_empty()) {
 						cell.facets.push_front(Facet(it->p, it->sign, residu));
 						__total_facet_count++;
