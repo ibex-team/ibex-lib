@@ -25,19 +25,19 @@ int Cont::iteration = 0;
 class ChooseFail : public Exception { };
 
 
-    void Cont::add_to_neighbors(ContCell* cell){
-        list<ContCell*> neighbors;
-        
-        for(auto it=neighborhood.begin(); it!=neighborhood.end(); it++){
-            if(cell->box_existence.intersects(it->first->box_existence)){
-                neighbors.push_back(it->first);
-                it->second.push_back(cell);
-            }
-        }
-        
-        neighborhood.insert(make_pair(cell,neighbors));
-    }
-    
+void Cont::add_to_neighbors(ContCell* cell){
+	list<ContCell*> neighbors;
+
+	for(std::tr1::unordered_map<ContCell*,std::list<ContCell*> >::iterator it=neighborhood.begin(); it!=neighborhood.end(); it++){
+		if(cell->box_existence.intersects(it->first->box_existence)) {
+			neighbors.push_back(it->first);
+			it->second.push_back(cell);
+		}
+	}
+
+	neighborhood.insert(make_pair(cell,neighbors));
+}
+
 
 Function* Cont::merge(Function &f, Function& g) {
 	int N=f.nb_arg();
@@ -81,7 +81,7 @@ Cont::Cont(Function &f, double h_min, double alpha, double beta) : dfs(false), n
 
 }
 
-ContCell& Cont::next_cell() {
+ContCell* Cont::next_cell() {
 	return dfs? l.back() : l.front();
 }
 
@@ -92,6 +92,11 @@ void Cont::remove_next_cell() {
 
 Cont::~Cont() {
 	if (g!=NULL) delete &f;
+
+	// Destroy all the cells
+	for(std::tr1::unordered_map<ContCell*,std::list<ContCell*> >::iterator it=neighborhood.begin(); it!=neighborhood.end(); it++){
+		delete it->first;
+	}
 }
 
 void Cont::start(IntervalVector x, double h, int kmax) {
@@ -107,6 +112,7 @@ void Cont::start(IntervalVector x, double h, int kmax) {
 	}
 
 	pair<ContCell*,ContCell::Facet*> p(NULL,NULL);
+
 	choose_time=0;
 	find_time=0;
 	diff_time=0;
@@ -118,7 +124,7 @@ void Cont::start(IntervalVector x, double h, int kmax) {
 			//cout << "solution=" << x << endl;
 			Timer::start();
 			// Build a cell around the current solution x
-			ContCell* new_cell= new ContCell(choose(p.second,x,h));
+			ContCell* new_cell=choose(p.second,x,h);
 			//cout << "new cell:" << new_cell.box << endl;
 			Timer::stop();
 			choose_time+=Timer::VIRTUAL_TIMELAPSE();
@@ -131,7 +137,7 @@ void Cont::start(IntervalVector x, double h, int kmax) {
 			// Intersects the list of existing cells
 			// with the current cell and vice-versa
 			Timer::start();
-			diff(*new_cell);
+			diff(new_cell);
 			Timer::stop();
 			diff_time+=Timer::VIRTUAL_TIMELAPSE();
 
@@ -157,7 +163,7 @@ void Cont::start(IntervalVector x, double h, int kmax) {
 		cout <<                l_find_solution_failed_facets.size() << ") ";
 		cout << "#facets=" << ContCell::total_facet_count() << " ";
 		cout << "h=" << h << " ";
-		if (!l.empty()) cout << "(" << l.back().vars << ")";
+		if (!l.empty()) cout << "(" << l.back()->vars << ")";
 		cout << " t=(" << choose_time << "," << diff_time << "," << find_time << "," << neighborhood_time << ")" << endl;
 
 		Timer::start();
@@ -181,25 +187,25 @@ void Cont::start(IntervalVector x, double h, int kmax) {
 	} while ((kmax==-1 || iteration<kmax) && !l.empty());
 }
 
-void Cont::diff(ContCell& ivb) {
-	for (list<ContCell>::iterator it=l.begin(); it!=l.end(); ) {
-		it->diff(ivb.box,f);
-		ivb.diff(it->box,f);
+void Cont::diff(ContCell* new_cell) {
+	for (list<ContCell*>::iterator it=l.begin(); it!=l.end(); ) {
+		(*it)->diff(new_cell->box,f);
+		new_cell->diff((*it)->box,f);
 
-		if (it->empty_facets()) { // move the cell to the list without facets
+		if ((*it)->empty_facets()) { // move the cell to the list without facets
 			l_empty_facets.push_back(*it);
 			it=l.erase(it); // it points to the next element
 		} else it++;
 	}
 
-	for (list<ContCell>::iterator it=l_empty_facets.begin(); it!=l_empty_facets.end(); it++) {
-		ivb.diff(it->box,f);
+	for (list<ContCell*>::iterator it=l_empty_facets.begin(); it!=l_empty_facets.end(); it++) {
+		new_cell->diff((*it)->box,f);
 	}
 
 	// Try to remove cells in the solution-find-fail list
 	for (list<IntervalVector>::iterator it=l_find_solution_failed_facets.begin(); it!=l_find_solution_failed_facets.end(); ) {
 		IntervalVector* result;
-		int nb_boxes=it->diff(ivb.box,result);
+		int nb_boxes=it->diff(new_cell->box,result);
 		if (nb_boxes>0) {
 			for (int i=0; i<nb_boxes; i++) {
 				l_find_solution_failed_facets.push_front(result[i]);
@@ -210,13 +216,13 @@ void Cont::diff(ContCell& ivb) {
 	}
 
 	// Choose where to store the new cell
-	if (ivb.empty_facets())
-		l_empty_facets.push_back(ivb);
+	if (new_cell->empty_facets())
+		l_empty_facets.push_back(new_cell);
 	else
-		l.push_back(ivb);
+		l.push_back(new_cell);
 }
 
-ContCell Cont::choose(const ContCell::Facet* x_facet, const IntervalVector& x, double h) {
+ContCell* Cont::choose(const ContCell::Facet* x_facet, const IntervalVector& x, double h) {
 	IntervalVector x_box(m);
 	IntervalVector p_box(n-m);
 	IntervalVector p_box_h(n-m);
@@ -245,7 +251,8 @@ ContCell Cont::choose(const ContCell::Facet* x_facet, const IntervalVector& x, d
 			p_box=vars.param_box(x);
 
 			IntervalVector shift(vars.nb_param,Interval(-h,h));
-			// avoid overlapping by shifting
+
+			// minimize overlapping with the x-cell by shifting
 			if (x_facet!=NULL)
 				shift[x_facet->p] = h*(x_facet->sign? Interval(-0.01,1.99) : Interval(-1.99,0.01));
 
@@ -284,11 +291,11 @@ ContCell Cont::choose(const ContCell::Facet* x_facet, const IntervalVector& x, d
 			}
 
 			if (correct_params) {
-				ContCell cell(box_existence,box_unicity,domain,vars);
+				ContCell* cell = new ContCell(box_existence,box_unicity,domain,vars);
 
 				// Contract each facet separately
 				CtcParamNewton ctc(f,vars);
-				cell.contract_facets(ctc);
+				cell->contract_facets(ctc);
 
 				return cell;
 			} else {
@@ -316,30 +323,30 @@ pair<ContCell*,ContCell::Facet*> Cont::find_solution_in_cells(IntervalVector& x)
 
 		//cout << "[find_solution] lookup in cell n°" << i << endl;
 
-		ContCell& cell=next_cell();
+		ContCell* cell=next_cell();
 
 		try {
-			cell.find_solution_in_facets(f,x);
+			cell->find_solution_in_facets(f,x);
 
 			// No solution in all the remaining facets => remove the cell
 			if (x.is_empty()) {
 				l_empty_facets.push_back(cell);
 				remove_next_cell();
 			} else {
-				return pair<ContCell*,ContCell::Facet*>(&cell,&cell.facets.front());
+				return pair<ContCell*,ContCell::Facet*>(cell,&cell->facets.front());
 			}
 		} catch(FindSolutionFail&) {
 			// Try to remove the facet using inflating Newton
 			IntervalVector facet2(x.size());
 			IntervalVector _ignore_(x.size());
-			bool success=inflating_newton(f,cell.vars,cell.facets.front().facet,facet2,_ignore_);
+			bool success=inflating_newton(f,cell->vars,cell->facets.front().facet,facet2,_ignore_);
 
 			if (success) {
 
-				cell.facets.front().facet &= facet2;
+				cell->facets.front().facet &= facet2;
 
-				if (cell.facets.front().facet.is_empty()) {
-					cell.pop_front_facet();
+				if (cell->facets.front().facet.is_empty()) {
+					cell->pop_front_facet();
 					continue;
 				}
 			}
@@ -360,33 +367,33 @@ void Cont::move_facet_to_fails(bool choose) {
 		exit(1);
 	}
 
-	ContCell& cell=next_cell();
+	ContCell* cell=next_cell();
 
 	if (choose)
-		l_choose_failed_facets.push_back(cell.pop_front_facet());
+		l_choose_failed_facets.push_back(cell->pop_front_facet());
 	else
-		l_find_solution_failed_facets.push_back(cell.pop_front_facet());
+		l_find_solution_failed_facets.push_back(cell->pop_front_facet());
 
-	if (cell.empty_facets()) {
+	if (cell->empty_facets()) {
 		l_empty_facets.push_back(cell);
 		remove_next_cell();
 	}
 }
 
 void Cont::check_no_facet_contains(const IntervalVector& x) {
-	for (list<ContCell>::iterator it=l.begin(); it!=l.end(); it++) {
-		it->check_no_facet_contains(x);
+	for (list<ContCell*>::iterator it=l.begin(); it!=l.end(); it++) {
+		(*it)->check_no_facet_contains(x);
 	}
 }
 
-void Cont::cells_to_mathematica(const list<ContCell>& l, const string& filename) const {
+void Cont::cells_to_mathematica(const list<ContCell*>& l, const string& filename) const {
     ofstream file (filename.c_str());
     file << '{';
     int count=0;
-    for (list<ContCell>::const_iterator it=l.begin(); it!=l.end(); it++) {
+    for (list<ContCell*>::const_iterator it=l.begin(); it!=l.end(); it++) {
         if (it!=l.begin()) file << ',';
         file << '{';
-        const IntervalVector& box=it->box;
+        const IntervalVector& box=(*it)->box;
         for (int j=0; j<box.size(); j++) {
             file << '{' << box[j].lb() << ',' << box[j].ub() << '}';
             if (j<box.size()-1) file << ',';
@@ -424,8 +431,8 @@ void Cont::to_mathematica(const string& basename) const {
     cells_to_mathematica(l,basename+"-todo.txt");
 
     list<IntervalVector> todo_facets;
-    for (list<ContCell>::const_iterator it=l.begin(); it!=l.end(); it++) {
-    	for (list<ContCell::Facet>::const_iterator it2=it->facets.begin(); it2!=it->facets.end(); it2++) {
+    for (list<ContCell*>::const_iterator it=l.begin(); it!=l.end(); it++) {
+    	for (list<ContCell::Facet>::const_iterator it2=(*it)->facets.begin(); it2!=(*it)->facets.end(); it2++) {
     		todo_facets.push_back(it2->facet); //(todo_facets.end(), it->facets.begin(), it->facets.end());
     	}
     }

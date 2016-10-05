@@ -16,6 +16,28 @@
 #include "ibex_ContCell.h"
 
 #include <list>
+#ifdef __GNUC__
+#include <ciso646> // just to initialize _LIBCPP_VERSION
+#ifdef _LIBCPP_VERSION
+#include <unordered_map>
+#define HASH std::hash
+//#define IBEX_NODE_MAP(T) std::unordered_map<const ExprNode*,T,hash_node,same_node>
+#else
+#include <tr1/unordered_map>
+#define HASH std::tr1::hash
+//#define IBEX_NODE_MAP(T) std::tr1::unordered_map<const ExprNode*,T,hash_node,same_node>
+#endif
+#else
+#if (_MSC_VER >= 1600)
+#include <unordered_map>
+#define HASH std::hash
+//#define IBEX_NODE_MAP(T) std::unordered_map<const ExprNode*,T,hash_node,same_node>
+#else
+#include <unordered_map>
+#define HASH std::tr1::hash
+//#define IBEX_NODE_MAP(T) std::tr1::unordered_map<const ExprNode*,T,hash_node,same_node>
+#endif // (_MSC_VER >= 1600)
+#endif
 
 namespace ibex {
 
@@ -86,7 +108,7 @@ public:
 
 	static int iteration;
 
-protected:
+//protected:
 
 	friend class TestCont;
 
@@ -96,10 +118,8 @@ protected:
 	 * \param x - a (very small) box proven to contain a solution.
 	 * \param h - the parameter width we first try with. The procedure
 	 *            decreases h by beta until it succeeds.
-	 *
-	 * TODO: avoid copy in return?
 	 */
-	ContCell choose(const ContCell::Facet* x_facet, const IntervalVector& x, double h);
+	ContCell* choose(const ContCell::Facet* x_facet, const IntervalVector& x, double h);
 
 	/**
 	 * \brief Add a new cell in the continuation.
@@ -110,7 +130,7 @@ protected:
 	 *    b- the new cell and all the existing facets
 	 * 2- Store the new_cell (in the appropriate list, either l or l_empty_facets).
 	 */
-	void diff(ContCell& new_cell);
+	void diff(ContCell* new_cell);
 
 	/**
 	 * Finds a solution of f(x)=0 in one of the remaining facets.
@@ -138,7 +158,7 @@ protected:
 	 *
 	 * TODO: for the moment, we print unicity boxes (instead of existence?)
 	 */
-	void cells_to_mathematica(const std::list<ContCell>& l, const std::string& filename) const;
+	void cells_to_mathematica(const std::list<ContCell*>& l, const std::string& filename) const;
 
 	/**
 	 * Send a list of boxes to Mathematica.
@@ -185,27 +205,27 @@ public:
 	const double beta;
 
 	/** List of cells with at least one facet alive. */
-	std::list<ContCell> l;
+	std::list<ContCell*> l;
 
 	/** List of cells with no more facets alive. */
-	std::list<ContCell> l_empty_facets;
+	std::list<ContCell*> l_empty_facets;
 
-	/** List of cells that could neither be removed nor continuated
+	/** List of facets that could neither be removed nor continuated
 	 * and which contains a solution (ChooseFail). */
 	std::list<IntervalVector> l_choose_failed_facets;
 
-	/** List of cells that could not be continuated and may
+	/** List of facets that could not be continuated and may
 	 * not contain a solution (FindSolutionFail). */
 	std::list<IntervalVector> l_find_solution_failed_facets;
     
     /** Maps a cell to the list of its neighbors */
-    std::unordered_map<ContCell*,std::list<ContCell*> > neighborhood;
+    std::tr1::unordered_map<ContCell*,std::list<ContCell*> > neighborhood;
 
 protected:
 	double choose_time, find_time, diff_time, neighborhood_time;
 
 	// Either the first or the last cell, depending on the heuristic
-	ContCell& next_cell();
+	ContCell* next_cell();
 
 	void remove_next_cell();
 };

@@ -32,8 +32,14 @@ int main() {
 
     Cont cont(f, domain, 1e-3, 0.5, 1.1);
 
-    cont.start(start_sol,1);
+    cont.start(start_sol,1,80);
 
+    cout << cont.neighborhood.size() << endl;
+
+    for(std::tr1::unordered_map<ContCell*,std::list<ContCell*> >::iterator it=cont.neighborhood.begin(); it!=cont.neighborhood.end(); it++){
+    	cout << it->second.size() << " ";
+    }
+    cout << endl;
 	cont.to_mathematica("data/3rpr");
 
 }
