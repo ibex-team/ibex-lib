@@ -23,14 +23,14 @@ namespace ibex {
 int ContCell::id_counter=0;
 int ContCell::__total_facet_count=0;
 
-ContCell::ContCell(const IntervalVector& box_existence, const IntervalVector& box_unicity, const IntervalVector& domain, const VarSet& vars) : box(box_unicity), box_existence(box_existence), vars(vars), h(vars.param_box(box_unicity).max_diam()), id(id_counter++) {
-	create_facets(box_existence,domain);
+ContCell::ContCell(const IntervalVector& existence_box, const IntervalVector& unicity_box, const IntervalVector& domain, const VarSet& vars) : unicity_box(unicity_box), existence_box(existence_box), vars(vars), h(vars.param_box(unicity_box).max_diam()), id(id_counter++) {
+	create_facets(domain);
 	__total_facet_count += facets.size();
 }
 
 void ContCell::diff(const IntervalVector& box, Function& f) {
 	ContCell& cell=*this;
-	if (box.intersects(cell.box)) {
+	if (box.intersects(cell.unicity_box)) {
 		for (list<Facet>::iterator it=cell.facets.begin(); it!=cell.facets.end(); ) {
 			IntervalVector* result;
 			//cout << "[diff] params:" << vars.param_box(*it) << " and " << vars.param_box(box) << endl;
@@ -97,18 +97,19 @@ void ContCell::diff(const IntervalVector& box, Function& f) {
 //	}
 //
 //}
+
 ContCell::Facet::Facet(int p, bool sign, const IntervalVector& facet) : p(p), sign(sign), facet(facet) {
 
 }
 
-void ContCell::create_facets(const IntervalVector& box, const IntervalVector& domain) {
+void ContCell::create_facets(const IntervalVector& domain) {
 
 	assert(facets.empty());
-	IntervalVector x=vars.var_box(box);
+	IntervalVector x=vars.var_box(existence_box);
 	IntervalVector facet(x);
 	int m=vars.nb_param;
 	for (int i=0; i<m; i++) {
-		IntervalVector p=vars.param_box(box);
+		IntervalVector p=vars.param_box(existence_box);
 		Interval pi=p[i];
 		p[i]=pi.lb();
 		facet=vars.full_box(x,p) & domain;
@@ -157,7 +158,7 @@ void ContCell::check_no_facet_contains(const IntervalVector& x) {
 
 ostream& operator<<(ostream& os, const ContCell& cell) {
 	os << "\u250C\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500	\n";
-	os << "\u2502Unicity box=" << cell.box << endl;
+	os << "\u2502Unicity box=" << cell.unicity_box << endl;
 	os << "\u2502" << cell.facets.size() << " facets:" << endl;
 	for (list<ContCell::Facet>::const_iterator it=cell.facets.begin(); it!=cell.facets.end(); it++) {
 		os << "\u2502  " << it->facet << endl;

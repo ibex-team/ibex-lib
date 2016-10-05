@@ -29,7 +29,7 @@ void Cont::add_to_neighbors(ContCell* cell){
 	list<ContCell*> neighbors;
 
 	for(IBEX_NEIGHBORHOOD::iterator it=neighborhood.begin(); it!=neighborhood.end(); it++){
-		if(cell->box_existence.intersects(it->first->box_existence)) {
+		if(cell->existence_box.intersects(it->first->existence_box)) {
 			neighbors.push_back(it->first);
 			it->second.push_back(cell);
 		}
@@ -189,24 +189,27 @@ void Cont::start(IntervalVector x, double h, int kmax) {
 }
 
 void Cont::diff(ContCell* new_cell) {
-	for (list<ContCell*>::iterator it=l.begin(); it!=l.end(); ) {
-		(*it)->diff(new_cell->box,f);
-		new_cell->diff((*it)->box,f);
+	for (list<ContCell*>::iterator it=neighborhood[new_cell].begin(); it!=neighborhood[new_cell].end(); ) {
+		new_cell->diff((*it)->unicity_box,f);
 
-		if ((*it)->empty_facets()) { // move the cell to the list without facets
-			l_empty_facets.push_back(*it);
-			it=l.erase(it); // it points to the next element
+		if (!(*it)->empty_facets()) {
+			(*it)->diff(new_cell->unicity_box,f);
+
+			if ((*it)->empty_facets()) { // move the cell to the list without facets
+				l_empty_facets.push_back(*it);
+				it=l.erase(it); // it points to the next element
+			} else it++;
 		} else it++;
 	}
 
-	for (list<ContCell*>::iterator it=l_empty_facets.begin(); it!=l_empty_facets.end(); it++) {
-		new_cell->diff((*it)->box,f);
-	}
+//	for (list<ContCell*>::iterator it=l_empty_facets.begin(); it!=l_empty_facets.end(); it++) {
+//		new_cell->diff((*it)->box,f);
+//	}
 
 	// Try to remove cells in the solution-find-fail list
 	for (list<IntervalVector>::iterator it=l_find_solution_failed_facets.begin(); it!=l_find_solution_failed_facets.end(); ) {
 		IntervalVector* result;
-		int nb_boxes=it->diff(new_cell->box,result);
+		int nb_boxes=it->diff(new_cell->unicity_box,result);
 		if (nb_boxes>0) {
 			for (int i=0; i<nb_boxes; i++) {
 				l_find_solution_failed_facets.push_front(result[i]);
@@ -394,7 +397,7 @@ void Cont::cells_to_mathematica(const list<ContCell*>& l, const string& filename
     for (list<ContCell*>::const_iterator it=l.begin(); it!=l.end(); it++) {
         if (it!=l.begin()) file << ',';
         file << '{';
-        const IntervalVector& box=(*it)->box;
+        const IntervalVector& box=(*it)->unicity_box;
         for (int j=0; j<box.size(); j++) {
             file << '{' << box[j].lb() << ',' << box[j].ub() << '}';
             if (j<box.size()-1) file << ',';

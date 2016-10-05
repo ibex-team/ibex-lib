@@ -48,7 +48,7 @@ public:
 	 *
 	 * Only the facets inside "domain" are built.
 	 */
-	ContCell(const IntervalVector& box_existence, const IntervalVector& box_unicity, const IntervalVector& domain, const VarSet& vars);
+	ContCell(const IntervalVector& existence_box, const IntervalVector& unicity_box, const IntervalVector& domain, const VarSet& vars);
 
 	/**
 	 * \brief Remove a box from the cell (update the facets).
@@ -108,26 +108,22 @@ public:
 //    const std::list<IntervalVector>& get_facets() const;
 
 	/** \brief The unicity box */
-    IntervalVector box;
+    IntervalVector unicity_box;
 
     /** \brief The existence box, smaller than the unicity box */
-	IntervalVector box_existence;
+	IntervalVector existence_box;
 
     /** \brief Variable sets (used to find a solution) */
 	const VarSet vars;
 
-	/**
-	 * \brief The greatest diameter of the parameters domains
-	 *
-	 */
+	/** \brief The greatest diameter of the parameters domains */
 	const double h;
 
+	/** \brief Unique identifier of the cell (for hashing) */
 	long int id;
 
-	static int id_counter;
-
 	/**
-	 * \brief
+	 * \brief Number of facets created since program has started.
 	 */
 	static int total_facet_count();
 
@@ -135,28 +131,44 @@ public:
 
 	class Facet {
 	public:
-		Facet(int p, bool sign, const IntervalVector& facet);
 		/**
-		 * Parameter number
+		 * \brief Build a facet
+		 * \param p     - the parameter number
+		 * \param sign  - true (resp. false) if p is set to its upper (resp. lower) bound
+		 * \param facet - the facet
+		 */
+		Facet(int p, bool sign, const IntervalVector& facet);
+
+		/**
+		 * \brief Parameter number
 		 *
 		 * Warning: not to be confused with the dimension) */
 		int p;
+
+		/** \brief true=upper bound, false=lower bound */
 		bool sign;
+
+		/** \brief the facet */
 		IntervalVector facet;
 	};
 
 	friend std::ostream& operator<<(std::ostream& os, const ContCell& cell);
 
-	/** \brief Facets of the existence box (the existence box is unused so far)
+	/**
+	 * \brief Facets of the existence box.
 	 *
 	 * This list contains the facets "alive" (the ones necessary to pursue the
 	 * continuation). */
     std::list<Facet> facets;
 
+protected:
+
+	static int id_counter;
+
 	static int __total_facet_count;
 
 	/** Build the facets of the existence box and stores them */
-	void create_facets(const IntervalVector& box, const IntervalVector& domain);
+	void create_facets(const IntervalVector& domain);
 };
 
 /** Streams out the cell */
