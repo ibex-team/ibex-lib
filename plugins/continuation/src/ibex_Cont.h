@@ -149,6 +149,13 @@ protected:
 	 * Merge g into f introducing slack variables
 	 */
 	static Function* merge(Function &f, Function& g);
+    
+    /**
+     * adds a cell to the neighbors structure:
+     * maintains existing and new cells neighborhoods
+     */
+    void add_to_neighbors(ContCell* cell);
+    
 
 public:
 	/** Number of variables (of the final problem, that is,
@@ -190,9 +197,12 @@ public:
 	/** List of cells that could not be continuated and may
 	 * not contain a solution (FindSolutionFail). */
 	std::list<IntervalVector> l_find_solution_failed_facets;
+    
+    /** Maps a cell to the list of its neighbors */
+    std::unordered_map<ContCell*,std::list<ContCell*> > neighborhood;
 
 protected:
-	double choose_time, find_time, diff_time;
+	double choose_time, find_time, diff_time, neighborhood_time;
 
 	// Either the first or the last cell, depending on the heuristic
 	ContCell& next_cell();

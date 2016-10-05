@@ -25,6 +25,20 @@ int Cont::iteration = 0;
 class ChooseFail : public Exception { };
 
 
+    void Cont::add_to_neighbors(ContCell* cell){
+        list<ContCell*> neighbors;
+        
+        for(auto it=neighborhood.begin(); it!=neighborhood.end(); it++){
+            if(cell->box_existence.intersects(it->first->box_existence)){
+                neighbors.push_back(it->first);
+                it->second.push_back(cell);
+            }
+        }
+        
+        neighborhood.insert(make_pair(cell,neighbors));
+    }
+    
+
 Function* Cont::merge(Function &f, Function& g) {
 	int N=f.nb_arg();
 
@@ -96,6 +110,7 @@ void Cont::start(IntervalVector x, double h, int kmax) {
 	choose_time=0;
 	find_time=0;
 	diff_time=0;
+    neighborhood_time=0;
 
 	do {
 
@@ -103,15 +118,20 @@ void Cont::start(IntervalVector x, double h, int kmax) {
 			//cout << "solution=" << x << endl;
 			Timer::start();
 			// Build a cell around the current solution x
-			ContCell new_cell=choose(p.second,x,h);
+			ContCell* new_cell= new ContCell(choose(p.second,x,h));
 			//cout << "new cell:" << new_cell.box << endl;
 			Timer::stop();
 			choose_time+=Timer::VIRTUAL_TIMELAPSE();
+            
+            Timer::start();
+            add_to_neighbors(new_cell);
+            Timer::stop();
+            neighborhood_time+=Timer::VIRTUAL_TIMELAPSE();
 
 			// Intersects the list of existing cells
 			// with the current cell and vice-versa
 			Timer::start();
-			diff(new_cell);
+			diff(*new_cell);
 			Timer::stop();
 			diff_time+=Timer::VIRTUAL_TIMELAPSE();
 
@@ -138,7 +158,7 @@ void Cont::start(IntervalVector x, double h, int kmax) {
 		cout << "#facets=" << ContCell::total_facet_count() << " ";
 		cout << "h=" << h << " ";
 		if (!l.empty()) cout << "(" << l.back().vars << ")";
-		cout << " t=(" << choose_time << "," << diff_time << "," << find_time << ")" << endl;
+		cout << " t=(" << choose_time << "," << diff_time << "," << find_time << "," << neighborhood_time << ")" << endl;
 
 		Timer::start();
 		p=find_solution_in_cells(x);

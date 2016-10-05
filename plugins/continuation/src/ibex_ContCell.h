@@ -110,6 +110,9 @@ public:
 	/** \brief The unicity box */
     IntervalVector box;
 
+    /** \brief The existence box, smaller than the unicity box */
+	IntervalVector box_existence;
+
     /** \brief Variable sets (used to find a solution) */
 	const VarSet vars;
 
