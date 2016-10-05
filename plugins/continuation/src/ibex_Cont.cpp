@@ -25,11 +25,11 @@ int Cont::iteration = 0;
 class ChooseFail : public Exception { };
 
 
-void Cont::add_to_neighbors(ContCell* cell){
+void Cont::add_to_neighbors(ContCell* cell) {
 	list<ContCell*> neighbors;
 
 	for(IBEX_NEIGHBORHOOD::iterator it=neighborhood.begin(); it!=neighborhood.end(); it++){
-		if(cell->existence_box.intersects(it->first->existence_box)) {
+		if(cell->unicity_box.intersects(it->first->unicity_box)) {
 			neighbors.push_back(it->first);
 			it->second.push_back(cell);
 		}
@@ -38,6 +38,14 @@ void Cont::add_to_neighbors(ContCell* cell){
 	neighborhood.insert(make_pair(cell,neighbors));
 }
 
+//void Cont::update_neighbors(ContCell* cell) {
+//	for(IBEX_NEIGHBORHOOD::iterator it=neighborhood.begin(); it!=neighborhood.end(); it++){
+//		if(cell->existence_box.intersects(it->first->existence_box)) {
+//			neighbors.push_back(it->first);
+//			it->second.push_back(cell);
+//		}
+//	}
+//}
 
 Function* Cont::merge(Function &f, Function& g) {
 	int N=f.nb_arg();
@@ -189,7 +197,11 @@ void Cont::start(IntervalVector x, double h, int kmax) {
 }
 
 void Cont::diff(ContCell* new_cell) {
-	for (list<ContCell*>::iterator it=neighborhood[new_cell].begin(); it!=neighborhood[new_cell].end(); ) {
+
+	// No: we can't erase in l using iterators in neighorhood[new_cell] !
+	//	for (list<ContCell*>::iterator it=neighborhood[new_cell].begin(); it!=neighborhood[new_cell].end(); ) {
+
+	for (list<ContCell*>::iterator it=l.begin(); it!=l.end(); ) {
 		new_cell->diff((*it)->unicity_box,f);
 
 		if (!(*it)->empty_facets()) {
@@ -202,9 +214,9 @@ void Cont::diff(ContCell* new_cell) {
 		} else it++;
 	}
 
-//	for (list<ContCell*>::iterator it=l_empty_facets.begin(); it!=l_empty_facets.end(); it++) {
-//		new_cell->diff((*it)->box,f);
-//	}
+	for (list<ContCell*>::iterator it=l_empty_facets.begin(); it!=l_empty_facets.end(); it++) {
+		new_cell->diff((*it)->unicity_box,f);
+	}
 
 	// Try to remove cells in the solution-find-fail list
 	for (list<IntervalVector>::iterator it=l_find_solution_failed_facets.begin(); it!=l_find_solution_failed_facets.end(); ) {

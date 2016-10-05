@@ -189,6 +189,13 @@ public:
      */
     void add_to_neighbors(ContCell* cell);
     
+    /**
+     * \brief Update the neighbors of an existing cell
+     *
+     * To be called after the facets of the cell are
+     * filtered
+     */
+    //void update_neighbors(ContCell* cell);
 
 public:
 	/** Number of variables (of the final problem, that is,
