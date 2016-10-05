@@ -36,7 +36,7 @@ int main() {
 
     cout << cont.neighborhood.size() << endl;
 
-    for(std::tr1::unordered_map<ContCell*,std::list<ContCell*> >::iterator it=cont.neighborhood.begin(); it!=cont.neighborhood.end(); it++){
+    for(IBEX_NEIGHBORHOOD::iterator it=cont.neighborhood.begin(); it!=cont.neighborhood.end(); it++){
     	cout << it->second.size() << " ";
     }
     cout << endl;
