@@ -56,7 +56,7 @@ public:
 	 * A facet which intersects the box may be split into smaller boxes representing
 	 * the set difference.
 	 */
-	void diff(const IntervalVector& box, Function& f);
+	void diff(const IntervalVector& box, Function& f, const VarSet& box_vars);
 
 	/**
 	 * \brief Add a facet

@@ -202,10 +202,10 @@ void Cont::diff(ContCell* new_cell) {
 	//	for (list<ContCell*>::iterator it=neighborhood[new_cell].begin(); it!=neighborhood[new_cell].end(); ) {
 
 	for (list<ContCell*>::iterator it=l.begin(); it!=l.end(); ) {
-		new_cell->diff((*it)->unicity_box,f);
+		new_cell->diff((*it)->unicity_box,f,(*it)->vars);
 
 		if (!(*it)->empty_facets()) {
-			(*it)->diff(new_cell->unicity_box,f);
+			(*it)->diff(new_cell->unicity_box,f,new_cell->vars);
 
 			if ((*it)->empty_facets()) { // move the cell to the list without facets
 				l_empty_facets.push_back(*it);
@@ -215,7 +215,7 @@ void Cont::diff(ContCell* new_cell) {
 	}
 
 	for (list<ContCell*>::iterator it=l_empty_facets.begin(); it!=l_empty_facets.end(); it++) {
-		new_cell->diff((*it)->unicity_box,f);
+		new_cell->diff((*it)->unicity_box,f,(*it)->vars);
 	}
 
 	// Try to remove cells in the solution-find-fail list
