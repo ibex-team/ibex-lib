@@ -191,6 +191,7 @@ void  OptimMiniMax::handle_cell(Cell * x_cell) {
 
 		if(x_copy && resmidp.ub()<loup) { // update best current solution
 			loup = resmidp.ub();
+			loup_changed = true;
 			loup_point = midp.mid().subvector(0,x_box_init.size()-1);
 			buffer.contract(loup);
 			//max_y = heap_copy.top1()->box;
