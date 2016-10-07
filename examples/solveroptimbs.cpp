@@ -113,7 +113,7 @@ int main(int argc, char** argv){
 	// hc4 inside xnewton loop
 	CtcHC4 hc44xn (sys->ctrs,0.01,false);
 
-
+	/*
 	CtcMohc mohc(sys->ctrs,0.01,false, 0.01, CtcMohc::default_univ_newton_min_width, taumohc);
 	CtcMohc mohc4cid(sys->ctrs,mohc.active_mono_proc,0.1,true, 0.1, CtcMohc::default_univ_newton_min_width);
 	
@@ -123,17 +123,18 @@ int main(int argc, char** argv){
     CtcMohcRevise::_opt=(mohc_active_components>>2) & 1;
     CtcMohcRevise::_og=(mohc_active_components>>1) & 1;
     CtcMohcRevise::_mohc2=(mohc_active_components>>0) & 1;
-    
+	*/
 	
 
 	// The 3BCID contractor on all variables (component of the contractor when filtering == "3bcidhc4")
 	Ctc3BCid c3bcidhc4(sys->nb_var,hc44cid);
 	// hc4 followed by 3bcidhc4 : the actual contractor used when filtering == "3bcidhc4"
+	
 	CtcCompo hc43bcidhc4 (hc4, c3bcidhc4);
-
+	/*
 	Ctc3BCid c3bcidmohc(sys->nb_var,mohc4cid);
 	CtcCompo mohcc3bcidmohc(mohc,c3bcidmohc);
-
+	*/
 	// The 3BCID contractor on the objective only (component of the contractor when filtering == "3bcidobjhc4")
 	//Ctc3BCid c3bcidobjhc4(hc44cid,10,1,1);
 	// hc4 followed by 3bcidobjhc4 : the actual contractor used when filtering == "3bcidobjhc4"
@@ -146,9 +147,10 @@ int main(int argc, char** argv){
 	// hc4 followed by acidhc4 : the actual contractor used when filtering == "acidhc4"
 	CtcCompo hc4acidhc4 (hc4, acidhc4);
 
+	/*
 	CtcAcid acidmohc(*sys,mohc4cid,(type=="optim"));
 	CtcCompo mohcacidmohc(mohc,acidmohc);
-
+	*/
 
 
 	Ctc* ctc;
@@ -163,12 +165,14 @@ int main(int argc, char** argv){
 	//else if
 	  //(filtering =="3bcidobjhc4")
 	  //ctc= &hc43bcidobjhc4;
+	/*
 	else if (filtering=="mohc")
 	  ctc=&mohc;
 	else if (filtering=="acidmohc")
 	  ctc=&mohcacidmohc;
 	else if (filtering=="3bcidmohc")
 	  ctc=&mohcc3bcidmohc;
+	*/
 	else {cout << filtering <<  " is not an implemented  contraction  mode "  << endl; return -1;}
 
     CtcNewton* ctcnewton=NULL;

@@ -57,7 +57,7 @@ void Optimizer::read_ext_box(const IntervalVector& ext_box, IntervalVector& box)
 
   Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, CellBuffer& buffer, double prec,
 		double goal_rel_prec, double goal_abs_prec, int sample_size, double equ_eps,
-<<<<<<< HEAD:src/strategy/ibex_Optimizer.cpp
+		       //<<<<<<< HEAD:src/strategy/ibex_Optimizer.cpp
 		bool rigor) :
     user_sys(user_sys), sys(user_sys,equ_eps),
     n(user_sys.nb_var), m(sys.nb_ctr) /* (warning: not user_sys.nb_ctr) */,
@@ -82,8 +82,9 @@ void Optimizer::read_ext_box(const IntervalVector& ext_box, IntervalVector& box)
 		cerr << "Warning: symbolic differentiation of the goal function has failed ==> first-order contraction disabled" << endl;
 		df = NULL;
     }
-=======
+
     /*
+=======
 		bool rigor,  int critpr,CellCostFunc::criterion crit2) :
   user_sys(user_sys), sys(user_sys,equ_eps),
 	n(user_sys.nb_var), m(sys.nb_ctr) // (warning: not user_sys.nb_ctr) 
