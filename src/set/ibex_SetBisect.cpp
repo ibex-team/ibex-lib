@@ -111,12 +111,13 @@ SetNode* SetBisect::inter(bool iset, const IntervalVector& nodebox, Sep& sep, do
 
 	sep.separate(box1,box2);
 
-	SetNode* this2;
+	SetNode* this2=this;
 
-	if (iset) this2=this->contract_no_diff(YES, nodebox, box1);
-	else this2=this;
+	if ((iset && sep.status1()!=MAYBE) || sep.status1()==NO)
+		this2=this2->contract_no_diff(sep.status1(), nodebox, box1);
 
-	this2=this2->contract_no_diff(NO, nodebox, box2);
+	if ((iset && sep.status2()!=MAYBE) || sep.status2()==NO)
+		this2=this2->contract_no_diff(sep.status2(), nodebox, box2);
 
 	if (box1.is_empty() || box2.is_empty() || this2->is_leaf()) return this2;
 

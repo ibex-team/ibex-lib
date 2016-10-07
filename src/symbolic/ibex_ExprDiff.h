@@ -17,6 +17,24 @@
 
 namespace ibex {
 
+
+/**
+ * \ingroup symbolic
+ *
+ * \brief Thrown when differentiation failed.
+ *
+ * Not all expressions are currently differentiable with Ibex.
+ * This is the case for expressions with matrix/vector operations.
+ */
+class ExprDiffException : public Exception {
+public:
+	ExprDiffException(const std::string& msg);
+	std::string msg;
+};
+
+
+std::ostream& operator<< (std::ostream& os, const ExprDiffException& e);
+
 /**
  * \ingroup symbolic
  *
@@ -39,10 +57,6 @@ public:
 protected:
 	void visit(const ExprNode& e);
 	void visit(const ExprIndex& i);
-	void visit(const ExprNAryOp& e);
-	void visit(const ExprLeaf& e);
-	void visit(const ExprBinaryOp& b);
-	void visit(const ExprUnaryOp& u);
 	void visit(const ExprSymbol& x);
 	void visit(const ExprConstant& c);
 	void visit(const ExprVector& e);

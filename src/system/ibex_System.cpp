@@ -71,8 +71,16 @@ System::System(const System& sys1, const System& sys2) : nb_var(0), nb_ctr(0), f
 std::ostream& operator<<(std::ostream& os, const System& sys) {
 
 	os << "variables: " << endl << "  ";
-	for (int i=0; i<sys.args.size(); i++)
-		os << sys.args[i] << " ";
+	for (int i=0; i<sys.args.size(); i++) {
+		const ExprSymbol& x = sys.args[i];
+		os << x;
+		if (x.dim.nb_rows()>1) os << '[' << x.dim.nb_rows() << ']';
+		if (x.dim.nb_cols()>1) {
+			if (x.dim.nb_rows()==1) os << "[1]";
+			os << '[' << x.dim.nb_cols() << ']';
+		}
+		if (i<sys.args.size()-1) os << ", ";
+	}
 	os << endl;
 
 	os << "goal: " << endl;

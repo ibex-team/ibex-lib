@@ -15,105 +15,119 @@
 #include <iostream> // for ostream
 #include <utility>  // for pair
 #include <cassert>
+
 #include "ibex_Array.h"
+#include "ibex_Exception.h"
 
 namespace ibex {
+
+class DoubleIndex;
 
 /**
  * \ingroup arithmetic
  *
- * \brief Dimensions (of a mathematical value)
+ * \brief Dimensions (of a mathematical value/expression)
  *
- * All mathematical expressions are considered as 3-dimensional vectors.
+ * The dimension of all mathematical expressions are 2-dimensional vectors.
  * The "value" of the ith dimension means the number of valid expressions obtained by indexing in this dimension.
- * The values of the three dimensions are represented by the fields dim1, dim2 and dim3. Let x be an expression.
- * If x is scalar, dim1=1, dim2=1, dim3=1.
- * If x is a row vector of 2 components, dim1=1, dim2=1, dim3=2.
- * If x is a 2x3 matrix, dim1=1, dim2=2, dim3=3.
- * If x is a column vector of 2 elements, then dim1=1, dim2=2 and dim3=1.
- *  If x is an array of 4 matrices which are 2x3matrices then dim1=4, dim2=2 and dim3=3.
+ * The values of the two dimensions are represented by nb_rows() and nb_cols().
  *
- * <p>
- * A combination like dim1=1 dim2=1 and dim3=2 is invalid (we cannot represent array of vectors. we use matrices
- * instead).
+ * Examples:
+ *   Let x be an expression.
+ *   If x is a scalar,                      x.nb_rows()=1, x.nb_cols()=1.
+ *   If x is a row vector of 2 elements,    x.nb_rows()=1, x.nb_cols()=2.
+ *   If x is a 2x3 matrix,                  x.nb_rows()=2, x.nb_cols()=3.
+ *   If x is a column vector of 2 elements, x.nb_rows()=2, x.nb_cols()=1.
  *
  */
 class Dim {
 public:
 
-	/** \brief Build the dimension of a scalar (1,1,1) */
+	/** \brief Build the dimension of a scalar. */
 	Dim();
 
-	/** \brief Build the dimension of a scalar (1,1,1) */
+	/** \brief Build the dimension of a scalar. */
 	static Dim scalar();
 
-	/** \brief Build the dimension of a row vector (1,1,n) */
+	/** \brief Build the dimension of a row vector of size n. */
 	static Dim row_vec(int n);
 
-	/** \brief Build the dimension of a col vector (1,n,1) */
+	/** \brief Build the dimension of a column vector of size n. */
 	static Dim col_vec(int n);
 
-	/** \brief Build the dimension of a matrix (1,m,n) */
+	/** \brief Build the dimension of a matrix m*n. */
 	static Dim matrix(int m, int n);
 
-	/** \brief Build the dimension of a matrix array (k,m,n) */
-	static Dim matrix_array(int k, int m, int n);
+	/** The 4 different types of "Dim" objects. */
+	typedef enum { SCALAR, ROW_VECTOR, COL_VECTOR, MATRIX } Type;
 
-	/** The 4 different types of "Dim" objects */
-	typedef enum { SCALAR, ROW_VECTOR, COL_VECTOR, MATRIX, MATRIX_ARRAY } Type;
-
-	/** \brief Return the type of this object */
+	/** \brief Return the type of this object. */
 	Type type() const;
 
-	/** \brief Return the total number of components */
-	inline int size()  const;
+	/** \brief Return the total number of components. */
+	inline int size() const;
 
-	/** \brief True if this is a scalar. */
+	/** \brief True if *this is a scalar. */
 	bool is_scalar() const;
 
-	/** \brief True if this is either a row or column vector. */
+	/** \brief True if *this is either a row or column vector. */
 	bool is_vector() const;
 
-	/** \brief True if this is either a matrix. */
+	/** \brief True if *this is a matrix. */
 	bool is_matrix() const;
 
-	/** \brief If *this is a vector, return the dimension.
+	/**
+	 * \brief If *this is a vector, return the dimension.
 	 *
 	 * This dimension corresponds to dim2 (in case of column vector)
-	 * or dim3 (in case of row vector)
+	 * or dim3 (in case of row vector).
 	 */
 	int vec_size() const;
 
-	/** \brief True if the three dimensions match */
+	/**
+	 * \brief The number of rows
+	 */
+	int nb_rows() const;
+
+	/**
+	 * \brief The number of columns
+	 */
+	int nb_cols() const;
+
+	/** \brief True if the three dimensions match with d. */
 	bool operator==(const Dim& d) const;
 
-	/** \brief True if one the dimensions does not match */
+	/** \brief True if one of the dimensions does not match with d. */
 	bool operator!=(const Dim& d) const;
 
 	/**
 	 * \brief Transpose *this.
 	 *
 	 * Compute the dimension of an expression obtained
-	 * by indexing an expression whose dimension is *this.
+	 * by transposing an expression whose dimension is *this.
 	 */
 	Dim transpose_dim() const;
 
-	/**
+
+//	Dim index_dim() const;
+
+	/*
 	 * \brief Add an index to *this
 	 *
-	 * Compute the dimension of the transpose expression obtained
+	 * Compute the dimension of the expression obtained
 	 * by indexing an expression whose dimension is *this.
 	 */
-	Dim index_dim() const;
+	Dim index_dim(const DoubleIndex& idx) const;
 
-	/**
+	/*
 	 * \brief Maximal index.
 	 *
 	 * Return the greatest i such that indexing by i is valid.
 	 */
-	int max_index() const;
+//	int max_index() const;
 
-	/* Compute the starting position of x[i] in a flat array
+	/*
+	 * Compute the starting position of x[i] in a flat array
 	 * that starts from \a this_num, and representing all elements
 	 * x[i][j][k] (resp. x[i][j], x[i]) if *this is an array-of-matrix
 	 * (resp. matrix, vector), in lexicographic order.
@@ -123,25 +137,28 @@ public:
 
 	//std::pair<int, struct Dim> index_info(int base_num, int index1, int index2, int index3) const;
 
-	/** The number of i such that x[i][1][1] is a valid expression,
-	 * where x is an array-of-matrix expression. */
-	int dim1;
-
-	/** The number of i such that x[1][i][1], x[i][1] or x[i] is a valid
-	 * expression, where x is resp. an array-of-matrix, a matrix
-	 * or a column vector expression. */
-	int dim2;
-
-	/** The number of i such that x[1][1][i], x[1][i] or x[i] is a
-	 * valid (scalar) expression, where x is resp. an array-of-matrix,
-	 * a matrix or a row vector expression. */
-	int dim3;
 
 	/** \brief Build the three-dimensional structure. */
-	Dim(int dim1, int dim2, int dim3);
+	Dim(int dim2, int dim3);
+
+private:
+	/**
+	 * The number of i such that x[i][0] or x[i] is a valid
+	 * expression, where x is resp. a matrix
+	 * or a column vector expression.
+	 */
+	int dim2;
 
 	/**
-	 * \brief True if this is the dimension of a constant vector.
+	 * The number of i such that x[i][0] or x[i] is a
+	 * valid (scalar) expression, where x is resp. a matrix
+	 * or a row vector expression.
+	 */
+	int dim3;
+
+public:
+	/**
+	 * \brief True if *this is the dimension of a constant vector.
 	 *
 	 * The dimension of a constant vector (IntervalVector) is a column
 	 * vector by default. This means that it may be automatically
@@ -150,15 +167,36 @@ public:
 	 * This field is always set to false by default.
 	 */
 	bool cst_vec;
-
 };
 
+/**
+ * \ingroup arithmetic
+ *
+ * \brief Thrown when dimensions in matrix/vector operations are not correct
+ *
+ */
+class DimException : public Exception {
+public:
+
+	DimException(std::string message1) : msg(message1) { }
+
+	/**
+	 * \brief Get the message of this exception
+	 */
+	const std::string& message() const { return msg; }
+
+private:
+	std::string msg;
+};
+
+
+std::ostream& operator<< (std::ostream& os, const DimException& e);
 
 /** \ingroup arithmetic */
 /*@{*/
 
 /**
- * Return the dimension of a sum
+ * \brief Return the dimension of a sum.
  *
  * This is not as simple as "l" or "r" because
  * constant vectors (IntervalVector) are always
@@ -167,68 +205,66 @@ public:
  * vectors (so this function can modify "cst_vec" in
  * l or r).
  *
- * If l and r are both cst_vec (possible with expressions built from the parser)
+ * If l and r are both cst_vec (possible with expressions
+ * built from the parser)
  * then the result is also a cst_vec.
  */
 Dim add_dim(Dim& l, Dim& r);
 
 /**
- * Return the dimension of a product (left*right)
+ * \brief Return the dimension of a product (left*right).
  */
 Dim mul_dim(const Dim& l, const Dim& r);
 
 /**
- * Return the dimension of a vector
+ * \brief Return the dimension of a vector.
  */
 Dim vec_dim(const Array<const Dim>& comp, bool in_a_row);
+
+/**
+ * \brief Streams out a dimension.
+ */
+std::ostream& operator<<(std::ostream&, const Dim&);
 
 /*@}*/
 
 /*================================== inline implementations ========================================*/
 
-inline Dim::Dim() : dim1(1), dim2(1), dim3(1), cst_vec(false) {
+inline Dim::Dim() : dim2(1), dim3(1), cst_vec(false) {
 
 }
 
 inline Dim Dim::scalar() {
-	return Dim(1,1,1);
+	return Dim(1,1);
 }
 
 inline Dim Dim::row_vec(int n) {
 	if (n==1) return Dim::scalar();
-	else      return Dim(1,1,n);
+	else      return Dim(1,n);
 }
 
 inline Dim Dim::col_vec(int n) {
 	if (n==1) return Dim::scalar();
-	else      return Dim(1,n,1);
+	else      return Dim(n,1);
 }
 
 inline Dim Dim::matrix(int m, int n) {
 	if (m==1)      return Dim::row_vec(n);
 	else if (n==1) return Dim::col_vec(m);
-	else           return Dim(1,m,n);
-}
-
-inline Dim Dim::matrix_array(int k, int m, int n) {
-	if (k==1) return Dim::matrix(m,n);
-	else      return Dim(k,m,n);
+	else           return Dim(m,n);
 }
 
 inline Dim::Type Dim::type() const {
-	if (dim1==1)
-		if (dim2==1)
-			if (dim3==1) return SCALAR;
-			else return ROW_VECTOR;
-		else
-			if (dim3==1) return COL_VECTOR;
-			else return MATRIX;
+	if (dim2==1)
+		if (dim3==1) return SCALAR;
+		else return ROW_VECTOR;
 	else
-		return MATRIX_ARRAY;
+		if (dim3==1) return COL_VECTOR;
+		else return MATRIX;
 }
 
 inline int Dim::size()  const {
-	return dim1*dim2*dim3;
+	return dim2*dim3;
 }
 
 inline bool Dim::is_scalar() const {
@@ -246,21 +282,25 @@ inline bool Dim::is_matrix() const {
 }
 
 inline int Dim::vec_size() const {
-	assert(is_vector());
 	return dim2==1? dim3 : dim2;
 }
 
+inline int Dim::nb_rows() const {
+	return dim2;
+}
+
+inline int Dim::nb_cols() const {
+	return dim3;
+}
+
 inline bool Dim::operator==(const Dim& d) const {
-	return dim1==d.dim1 && dim2==d.dim2 && dim3==d.dim3;
+	return dim2==d.dim2 && dim3==d.dim3;
 }
 
 inline bool Dim::operator!=(const Dim& d) const {
 	return !(*this==d);
 }
 
-/** \ingroup arithmetic
- * \brief Streams out a dimension */
-std::ostream& operator<<(std::ostream&, const Dim&);
 
 } // namespace ibex
 

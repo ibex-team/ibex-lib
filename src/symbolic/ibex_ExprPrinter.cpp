@@ -10,14 +10,19 @@
  * ---------------------------------------------------------------------------- */
 
 #include <cassert>
+#include <stdint.h>
 #include "ibex_ExprPrinter.h"
 #include "ibex_Expr.h"
 #include "ibex_Function.h"
 
+using namespace std;
+
 namespace ibex {
 
-void ExprPrinter::print(std::ostream& os, const ExprNode& e) {
+void ExprPrinter::print(std::ostream& os, const ExprNode& e, bool human) {
 	this->os = &os;
+	this->human = human;
+
 	visit(e);
 }
 
@@ -26,7 +31,7 @@ void ExprPrinter::visit(const ExprNode& e) {
 }
 
 void ExprPrinter::visit(const ExprIndex& e) {
-	(*os) << e.expr << "[" << e.index << "]";
+	(*os) << e.expr << e.index;
 }
 
 void ExprPrinter::visit(const ExprSymbol& e) {
@@ -35,17 +40,18 @@ void ExprPrinter::visit(const ExprSymbol& e) {
 
 void ExprPrinter::visit(const ExprConstant& e) {
 	switch (e.type()) {
-	case Dim::SCALAR: {
-		const Interval& x=e.get_value();
-		if (x.is_degenerated())
-			(*os) <<  x.mid();
-		else
-			(*os) << x;
-
-	} break;
-	case Dim::COL_VECTOR: (*os) << e.get_vector_value(); break;
-	case Dim::ROW_VECTOR: (*os) << e.get_vector_value() << "'"; break;
-	case Dim::MATRIX:     (*os) << e.get_matrix_value(); break;
+	case Dim::SCALAR:
+		print_itv(e.get_value());
+		break;
+	case Dim::COL_VECTOR:
+		print_itv_vec(e.get_vector_value(),false);
+		break;
+	case Dim::ROW_VECTOR:
+		print_itv_vec(e.get_vector_value(),true);
+		break;
+	case Dim::MATRIX:
+		print_itv_mat(e.get_matrix_value());
+		break;
 	default: assert(false); break;
 	}
 }
@@ -66,6 +72,10 @@ void ExprPrinter::visit(const ExprBinaryOp& e) {
 	assert(false);
 }
 
+/**
+ * Note: it is important to respect here the Minibex syntax
+ * for function serialization.
+ */
 void ExprPrinter::visit(const ExprVector& e) {
 	(*os) << "(";
 	for (int i=0; i<e.length(); i++) {
@@ -124,6 +134,58 @@ void ExprPrinter::visit(const ExprAcosh& e) {(*os) << "acosh("; visit(e.expr); (
 void ExprPrinter::visit(const ExprAsinh& e) {(*os) << "asinh("; visit(e.expr); (*os) << ")";}
 void ExprPrinter::visit(const ExprAtanh& e) {(*os) << "atanh("; visit(e.expr); (*os) << ")";}
 
+void ExprPrinter::print_dbl(double x) {
+	if (human)
+		(*os) << x;
+	else {
+		assert(sizeof(double)==8);
+		uint64_t u;
+		memcpy(&u, &x, 8);
+		(*os) << '#' << std::hex << u;
+	}
+}
+
+void ExprPrinter::print_itv(const Interval& x) {
+	if (x.is_empty())
+		(*os) << "(empty)";
+	else if (x.is_degenerated())
+		print_dbl(x.mid());
+	else if (x.lb()==NEG_INFINITY) {
+		if (x.ub()==POS_INFINITY)
+			// note: we could also use hexa representation of +/- infinity...
+			(*os) << "[-oo,+oo]";
+		else {
+			(*os) << "[-oo,";
+			print_dbl(x.ub());
+			(*os)<< ']';
+		}
+	} else {
+		if (x.lb()==NEG_INFINITY) {
+			(*os) << '[';
+			print_dbl(x.lb());
+			(*os) << ",+oo]";
+		} else
+		(*os) << x;
+	}
+}
+
+void ExprPrinter::print_itv_vec(const IntervalVector& v, bool in_row) {
+	(*os) << '(';
+	for (int i=0; i<v.size(); i++) {
+		print_itv(v[i]);
+		if (i<v.size()-1) (*os) << (in_row ? " , " : " ; ");
+	}
+	(*os) << ')';
+}
+
+void ExprPrinter::print_itv_mat(const IntervalMatrix& m) {
+	(*os) << '(';
+	for (int i=0; i<m.nb_rows(); i++) {
+		print_itv_vec(m.row(i), true);
+		if (i<m.nb_rows()-1) (*os) << " ; ";
+	}
+	(*os) << ')';
+}
 } // end ibex namespace
 
 

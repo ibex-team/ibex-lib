@@ -215,4 +215,79 @@ int main() {
   vibes::endDrawing();
   }
 
+  {
+  vibes::beginDrawing ();
+  vibes::newFigure("set-contract");
+
+  //! [set-contract-1-C]
+
+  double eps=0.01;
+
+  // create the set with one of the constraints
+  NumConstraint c("x","y","x^2+y^2<=25");
+  Set set(c,eps);
+
+  // create the second constraint
+  NumConstraint c2("x","y","x^2+y^2>=16");
+  // create a separator for this constraint
+  SepFwdBwd sep(c2);
+  // contract the set with the separator
+  sep.contract(set,eps);
+
+  //! [set-contract-1-C]
+
+  ToVibes to_vibes(10);
+  set.visit(to_vibes);
+  vibes::endDrawing();
+  }
+
+  {
+  vibes::beginDrawing ();
+  vibes::newFigure("set-interval");
+
+  //! [set-interval-C]
+
+  double eps=0.001;
+
+  // Create the distance function between (x,y)
+  // and the point (cos(alpha),sin(alpha))
+  Variable x,y,alpha;
+  Function f(x,y,alpha,sqr(x-cos(alpha))+sqr(y-sin(alpha)));
+
+  // Build the initial box
+  IntervalVector box(2);
+  box[0]=Interval(-2,2);
+  box[1]=Interval(-2,2);
+
+  // Create the initial i-set [emptyset,[box]]
+  SetInterval set(box);
+
+  NumConstraint ctr(x,y,sqr(x)+sqr(y)<=4);
+  // Create a separator for the i-set [emptyset,ctr]
+  // Initially, the i-set is [ctr,ctr]
+  SepFwdBwd sep(ctr);
+
+  // We set the status of the first contraction to
+  // "maybe" so that the i-set associated to the separator becomes [emptyset,ctr]
+  // We contract the set with the separator, i.e.,
+  // we compute [emptyset,[box]] & [emptyset,ctr]
+  sep.contract(set,eps,MAYBE,NO);
+
+  // Number of points
+  int n=8;
+
+  for (int i=0; i<n; i++) {
+    NumConstraint ctr(x,y,f(x,y,i*2*Interval::PI/n)<=0.04);
+    SepFwdBwd sep(ctr);
+    // We set the status of the second contraction to
+    // "maybe" so that the i-set associated to the separator becomes [ctr,R^n]
+    sep.contract(set,eps,YES,MAYBE);
+  }
+  //! [set-interval-C]
+
+  ToVibes to_vibes(2);
+  set.visit(to_vibes);
+  vibes::drawEllipse(0,0,1.0,1.0,0,"k");
+  vibes::endDrawing();
+}
 }

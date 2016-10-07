@@ -18,6 +18,8 @@
 
 namespace ibex {
 
+class System;
+
 /**
  * \ingroup symbolic
  *
@@ -34,7 +36,7 @@ public:
 	/**
 	 * \brief Build a constraint.
 	 */
-	NumConstraint(Fnc& f, CmpOp op=EQ, bool own_f=false);
+	NumConstraint(Function& f, CmpOp op=EQ, bool own_f=false);
 
 	/**
 	 * \brief Build a constraint c(x).
@@ -144,6 +146,11 @@ public:
 	NumConstraint(const Array<const ExprSymbol>& x, const ExprCtr& c);
 
 	/**
+	 * \brief Create a constraint from a Minibex input file.
+	 */
+	NumConstraint(const char* filename);
+
+	/**
 	 * \brief Creates a constraint c(x1).
 	 *
 	 * The parameter x1 may not only contain the name
@@ -247,6 +254,8 @@ private:
 	bool own_f;
 
 	void build_from_string(const Array<const char*>& x, const char* c);
+
+	void build_from_system(const System& sys);
 };
 
 std::ostream& operator<<(std::ostream&, const NumConstraint&);
@@ -256,10 +265,7 @@ std::ostream& operator<<(std::ostream&, const NumConstraint&);
  	 	 	 	 	 	 	 inline implementation
   ============================================================================*/
 
-inline NumConstraint::NumConstraint(Fnc& f, CmpOp op, bool own_f) : f((Function&) f), op(op), own_f(own_f) {
-	//TODO: allow Fnc
-	assert(dynamic_cast<Function*>(&f)!=NULL);
-}
+inline NumConstraint::NumConstraint(Function& f, CmpOp op, bool own_f) : f(f), op(op), own_f(own_f) { }
 
 inline NumConstraint::NumConstraint(const ExprSymbol& x1, const ExprCtr& c) : f(*new Function(x1,c.e)), op(c.op), own_f(true) { }
 inline NumConstraint::NumConstraint(const ExprSymbol& x1, const ExprSymbol& x2, const ExprCtr& c): f(*new Function(x1,x2,c.e)), op(c.op), own_f(true) { }

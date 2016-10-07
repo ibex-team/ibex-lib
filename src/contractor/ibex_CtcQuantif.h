@@ -15,6 +15,7 @@
 #include "ibex_LargestFirst.h"
 #include "ibex_NumConstraint.h"
 #include "ibex_BitSet.h"
+#include "ibex_VarSet.h"
 
 namespace ibex {
 
@@ -36,12 +37,12 @@ public:
 	 * need to appear after the symbols x1...xn in c.
 	 *
 	 * \param c       The constraint
-	 * \param y       The parameters
+	 * \param vars    Structure to separate variables and parameters
 	 * \param y_init  Initial box for the parameters
 	 * \param prec    Bisection precision on the parameters (the contraction involves a
 	 *                bisection process on y)
 	 */
-	CtcQuantif(const NumConstraint& c, const Array<const ExprSymbol>& y, const IntervalVector& y_init, double prec);
+	CtcQuantif(const NumConstraint& c, const VarSet& vars, const IntervalVector& y_init, double prec);
 
 	/**
 	 * \brief Proj-union/Proj-inter operator applied on the contractor c.
@@ -50,13 +51,12 @@ public:
 	 * The constraint is implicitly represented by a contractor.
 	 *
 	 * \param c       The contractor
-	 * \param vars    Indicates whether the ith component handled by the contractor c
-	 *                is a variable (vars[i]==true)or a parameter (vars[i]==false).
+	 * \param vars    Structure to separate variables and parameters
 	 * \param y_init  Initial box for the parameters
 	 * \param prec    Bisection precision on the parameters
 	 * \param own_ctc Boolean which indicate if the ctc mast be destroy with this
 	 */
-	CtcQuantif(Ctc& c, const BitSet& vars, const IntervalVector& y_init, double prec, bool own_ctc=false);
+	CtcQuantif(Ctc& c, const VarSet& vars, const IntervalVector& y_init, double prec, bool own_ctc=false);
 
 	/**
 	 * \brief Delete this.
@@ -84,11 +84,6 @@ protected:
 	const BitSet impact;
 
 	/**
-	 * \brief Number of parameters
-	 */
-	int nb_param;
-
-	/**
 	 * \brief The Contractor.
 	 */
 	Ctc* ctc;
@@ -102,7 +97,7 @@ protected:
 	 * vars[i]=true <=> the ith component is a variable ("x_k")
 	 * Otherwise, the ith component is a parameter ("y_k")
 	 */
-	BitSet vars;
+	VarSet vars;
 
 	/**
 	 * \brief precision
@@ -110,10 +105,6 @@ protected:
 	double prec;
 
 private:
-	/**
-	 * \brief Initialization of contractors with symbols y
-	 */
-	void init(const NumConstraint& ctr, const Array<const ExprSymbol>& y, const IntervalVector& y_init, double prec);
 
 	/* Information for cleanup only */
 	bool _own_ctc;

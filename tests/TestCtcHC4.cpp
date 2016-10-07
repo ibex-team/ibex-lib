@@ -25,7 +25,7 @@ void TestCtcHC4::ponts30() {
 
 	for (int i=0; i<30; i++) {
 		Function* fi=dynamic_cast<Function*>(&((*p30.f)[i]));
-		TEST_ASSERT(fi!=NULL);
+		CPPUNIT_ASSERT(fi!=NULL);
 		ctr[i]=new NumConstraint(*fi,EQ);
 		c[i]=new CtcFwdBwd(*ctr[i]);
 	}
@@ -36,7 +36,7 @@ void TestCtcHC4::ponts30() {
 		//cout << box << endl;
 		//cout << p30.hc4r_box[i] << endl;
 		//c[i]->hc4r.eval.f.cf.print<Domain>();
-		TEST_ASSERT(almost_eq(box, p30.hc4r_box[i],1e-02));
+		CPPUNIT_ASSERT(almost_eq(box, p30.hc4r_box[i],1e-02));
 	}
 	//cout << "after="<< box << endl;
 	box = p30.init_box;
@@ -47,7 +47,7 @@ void TestCtcHC4::ponts30() {
 	box=p30.init_box;
 	hc4.contract(box);
 
-	TEST_ASSERT(almost_eq(box, p30.hc4_box,1e-04));
+	CPPUNIT_ASSERT(almost_eq(box, p30.hc4_box,1e-04));
 
 	for (int i=0; i<30; i++) {
 		delete c[i];

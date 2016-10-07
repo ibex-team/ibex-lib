@@ -51,8 +51,14 @@ public:
 	 * with x=(a,b,c) and f_x=(c+b)-a<br>
 	 * the result is<br>
 	 * [ (c+b)-a , (c+b) , a , b , c ]
+	 *
+	 * \param symb_DFS: if true, DFS order applies among symbols, which implies
+	 *        that all unused symbols appear at the end of the nodes array.
+	 *        If false, the initial ordering (that of x) is respected and all
+	 *        symbols appear at the end of the nodes array.
+	 *
 	 */
-	ExprSubNodes(const Array<const ExprSymbol>& x, const ExprNode& y);
+	ExprSubNodes(const Array<const ExprSymbol>& x, const ExprNode& y, bool symb_DFS=false);
 
 	/**
 	 * \brief Build an uinitialized object (must be followed by a call to #init).
@@ -71,8 +77,10 @@ public:
 
 	/**
 	 * \brief Build *this (as the subnodes of x and f_x).
+	 * \see comments in constructor.
+	 * \note: the parameter symb_DFS has no effect if x is NULL.
 	 */
-	void init(const Array<const ExprSymbol>* x, const Array<const ExprNode>& y);
+	void init(const Array<const ExprSymbol>* x, const Array<const ExprNode>& y, bool symb_DFS);
 
 	/**
 	 * \brief Number of subnodes.
@@ -88,6 +96,14 @@ public:
 	 * True iff e is a subnode.
 	 */
 	bool found(const ExprNode& e) const;
+
+	/**
+	 * \brief Return the rank of a node
+	 *
+	 * This corresponds more or less to the rank of a node in
+	 * a Polish prefix notation of the expression
+	 */
+	int rank(const ExprNode& e) const;
 
 private:
 	const ExprNode** tab;
@@ -111,6 +127,10 @@ inline int ExprSubNodes::size() const {
 
 inline bool ExprSubNodes::found(const ExprNode& e) const {
 	return map.found(e);
+}
+
+inline int ExprSubNodes::rank(const ExprNode& e) const {
+	return map[e];
 }
 
 } // end namespace ibex

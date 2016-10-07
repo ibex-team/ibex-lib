@@ -11,7 +11,8 @@
 #ifndef __IBEX_NEWTON_H__
 #define __IBEX_NEWTON_H__
 
-#include "ibex_Fnc.h"
+#include "ibex_Function.h"
+#include "ibex_VarSet.h"
 
 namespace ibex {
 
@@ -43,9 +44,15 @@ extern double default_gauss_seidel_ratio;
  * The default value is #default_gauss_seidel_ratio (1e-04).
  * \return True if one variable has been reduced by more than \a prec.
  */
-bool newton(const Fnc& f, IntervalVector& box, double prec=default_newton_prec, double gauss_seidel_ratio=default_gauss_seidel_ratio);
+bool newton(const Function& f, IntervalVector& box, double prec=default_newton_prec, double gauss_seidel_ratio=default_gauss_seidel_ratio);
 
-/** \ingroup numeric
+/**
+ * \brief Newton on a subset of variables.
+ */
+bool newton(const Function& f, const VarSet& vars, IntervalVector& full_box, double prec=default_newton_prec, double gauss_seidel_ratio=default_gauss_seidel_ratio);
+
+/**
+ * \ingroup numeric
  *
  * \brief Multivariate Newton operator (inflating).
  *
@@ -58,8 +65,11 @@ bool newton(const Fnc& f, IntervalVector& box, double prec=default_newton_prec, 
  *    [x] <- mid[x] + delta*(rad[x]) + chi*[-1,+1]
  *
  * \param f                 - The function
- * \param box               - Input/output argument. Input: starting box. Output: In case of success, this box is proven to contain a solution.
- *                            Otherwise, nothing can be said.
+ * \param box               - Input argument. The box contains both parameters and variables domains.
+ * \param box_existence     - In case of success, the smallest box found proven to contain a unique solution. Otherwise, empty.
+ *                            The box contains both parameters and variables domains.
+ * \param box_unicity       - In case of success, the largest box found proven to contain a unique solution. Otherwise, empty.
+ *                            The box contains both parameters and variables domains.
  * \param k_max_iteration (optional)
  *                          - maximal number of iterations
  * \param mu_max_divergence (optional)
@@ -75,9 +85,23 @@ bool newton(const Fnc& f, IntervalVector& box, double prec=default_newton_prec, 
  *
  * \return True if it is proven that the output box contains a solution.
  */
-bool inflating_newton(const Fnc& f, IntervalVector& box,
+bool inflating_newton(const Function& f, const IntervalVector& box, IntervalVector& box_existence, IntervalVector& box_unicity,
 		int k_max_iteration=15, double mu_max_divergence=1.0,
 		double delta_relative_inflat=1.1, double chi_absolute_inflat=1e-12);
+
+
+/**
+ * \ingroup numeric
+ *
+ * \brief Multivariate Newton operator (inflating).
+ *
+ * Same function as #ibex::inflating_newton(const Function&, const IntervalVector&, IntervalVector&, IntervalVector&, int, double, double, double)
+ * but with an extra argument "vars" that allows to call Newton on a subset of variables.
+ */
+bool inflating_newton(const Function& f, const VarSet& vars, const IntervalVector& box, IntervalVector& box_existence, IntervalVector& box_unicity,
+		int k_max_iteration=15, double mu_max_divergence=1.0,
+		double delta_relative_inflat=1.1, double chi_absolute_inflat=1e-12);
+
 
 } // end namespace ibex
 #endif // __IBEX_NEWTON_H__

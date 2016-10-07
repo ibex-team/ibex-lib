@@ -27,7 +27,7 @@ class SystemNormalize : public SystemFactory {
 
 		// do not initialize variables with sys.f.args
 		// since f may be uninitialized (unconstrained problem)
-		add_var(sys.args);
+		add_var(sys.args,sys.box);
 
 		if (sys.goal!=NULL) add_goal(*sys.goal);
 

@@ -22,60 +22,16 @@ namespace {
 class ForAllEmptyBox { };
 
 }
-CtcForAll::CtcForAll(const NumConstraint& ctr,  const ExprSymbol& y1, const IntervalVector& init_box, double prec)
- : CtcQuantif(ctr, Array<const ExprSymbol>(y1), init_box, prec) {
+CtcForAll::CtcForAll(const NumConstraint& ctr,  const ExprNode& y, const IntervalVector& init_box, double prec)
+ : CtcQuantif(ctr, VarSet(ctr.f,y,false), init_box, prec) {
 }
 
-CtcForAll::CtcForAll(const NumConstraint& ctr,  const ExprSymbol& y1, const ExprSymbol& y2, const IntervalVector& init_box, double prec)
- : CtcQuantif(ctr, Array<const ExprSymbol>(y1,y2), init_box, prec) {
-}
-
-CtcForAll::CtcForAll(const NumConstraint& ctr,  const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const IntervalVector& init_box, double prec)
- : CtcQuantif(ctr, Array<const ExprSymbol>(y1,y2,y3), init_box, prec) {
-}
-
-CtcForAll::CtcForAll(const NumConstraint& ctr,  const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const IntervalVector& init_box, double prec)
- : CtcQuantif(ctr, Array<const ExprSymbol>(y1,y2,y3,y4), init_box, prec) {
-}
-
-CtcForAll::CtcForAll(const NumConstraint& ctr,  const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const IntervalVector& init_box, double prec)
- : CtcQuantif(ctr, Array<const ExprSymbol>(y1,y2,y3,y4,y5), init_box, prec) {
-}
-
-CtcForAll::CtcForAll(const NumConstraint& ctr,  const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const ExprSymbol& y6, const IntervalVector& init_box, double prec)
- : CtcQuantif(ctr, Array<const ExprSymbol>(y1,y2,y3,y4,y5,y6), init_box, prec) {
-}
-
-CtcForAll::CtcForAll(const NumConstraint& ctr,  const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const ExprSymbol& y6, const ExprSymbol& y7, const IntervalVector& init_box, double prec)
- : CtcQuantif(ctr, Array<const ExprSymbol>(y1,y2,y3,y4,y5,y6,y7), init_box, prec) {
-}
-
-CtcForAll::CtcForAll(const NumConstraint& ctr,  const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const ExprSymbol& y6, const ExprSymbol& y7, const ExprSymbol& y8, const IntervalVector& init_box, double prec)
- : CtcQuantif(ctr, Array<const ExprSymbol>(y1,y2,y3,y4,y5,y6,y7,y8), init_box, prec) {
-}
-
-CtcForAll::CtcForAll(const NumConstraint& ctr,  const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const ExprSymbol& y6, const ExprSymbol& y7, const ExprSymbol& y8, const ExprSymbol& y9, const IntervalVector& init_box, double prec)
- : CtcQuantif(ctr, Array<const ExprSymbol>(y1,y2,y3,y4,y5,y6,y7,y8,y9), init_box, prec) {
-}
-
-CtcForAll::CtcForAll(const NumConstraint& ctr,  const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const ExprSymbol& y6, const ExprSymbol& y7, const ExprSymbol& y8, const ExprSymbol& y9, const ExprSymbol& y10, const IntervalVector& init_box, double prec)
- : CtcQuantif(ctr, Array<const ExprSymbol>(y1,y2,y3,y4,y5,y6,y7,y8,y9,y10), init_box, prec) {
-}
-
-CtcForAll::CtcForAll(const NumConstraint& ctr,  const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const ExprSymbol& y6, const ExprSymbol& y7, const ExprSymbol& y8, const ExprSymbol& y9, const ExprSymbol& y10, const ExprSymbol& y11, const IntervalVector& init_box, double prec)
- : CtcQuantif(ctr, Array<const ExprSymbol>(y1,y2,y3,y4,y5,y6,y7,y8,y9,y10,y11), init_box, prec) {
-}
-
-CtcForAll::CtcForAll(const NumConstraint& ctr,  const ExprSymbol& y1, const ExprSymbol& y2, const ExprSymbol& y3, const ExprSymbol& y4, const ExprSymbol& y5, const ExprSymbol& y6, const ExprSymbol& y7, const ExprSymbol& y8, const ExprSymbol& y9, const ExprSymbol& y10, const ExprSymbol& y11, const ExprSymbol& y12, const IntervalVector& init_box, double prec)
- : CtcQuantif(ctr, Array<const ExprSymbol>(y1,y2,y3,y4,y5,y6,y7,y8,y9,y10,y11,y12), init_box, prec) {
+CtcForAll::CtcForAll(const NumConstraint& ctr, const VarSet& vars, const IntervalVector& init_box, double prec) :
+	CtcQuantif(ctr, vars, init_box, prec) {
 }
 
 CtcForAll::CtcForAll(Ctc& ctc, const BitSet& vars, const IntervalVector& init_box, double prec, bool own_ctc) :
-	CtcQuantif(ctc, vars, init_box, prec, own_ctc) {
-}
-
-CtcForAll::CtcForAll(const NumConstraint& c, const Array<const ExprSymbol>& y, const IntervalVector& y_init, double prec) :
-	CtcQuantif(c, y, y_init, prec) {
+	CtcQuantif(ctc, VarSet(ctc.nb_var,vars,true), init_box, prec, own_ctc) {
 }
 
 void CtcForAll::proceed(IntervalVector& x, const IntervalVector& y, bool& is_inactive) {
@@ -103,7 +59,7 @@ void CtcForAll::proceed(IntervalVector& x, const IntervalVector& y, bool& is_ina
 }
 
 void CtcForAll::contract(IntervalVector& box) {
-	assert(box.size()==Ctc::nb_var);
+	assert(box.size()==vars.nb_var);
 
 	assert(l.empty()); // old?--> when an exception is thrown by this function, l is flushed.
 

@@ -11,6 +11,7 @@
 #include "TestNewton.h"
 #include "Ponts30.h"
 #include "ibex_Newton.h"
+#include "ibex_CtcNewton.h"
 #include "ibex_LinearException.h"
 
 using namespace std;
@@ -87,16 +88,16 @@ void TestNewton::newton01() {
 	IntervalVector box(30,BOX1);
 	try {
 		newton(*p30.f,box);
-		TEST_ASSERT(!box.is_empty());
+		CPPUNIT_ASSERT(!box.is_empty());
 	} catch (LinearException& e) {
 		//cout << "linear exception" << endl;
-		TEST_ASSERT(false);
+		CPPUNIT_ASSERT(false);
 	}
 
 	IntervalVector expected(30,BOX2);
 	//cout << expected << endl << endl << endl;
 	//cout << box << endl;
-	TEST_ASSERT(almost_eq(box,expected,1e-10));
+	CPPUNIT_ASSERT(almost_eq(box,expected,1e-10));
 }
 
 void TestNewton::inflating_newton01() {
@@ -106,9 +107,54 @@ void TestNewton::inflating_newton01() {
 	IntervalVector box(30,BOX2);
 	box += error;
 	IntervalVector expected(30,BOX2);
-	bool ret=inflating_newton(*p30.f,box);
-	TEST_ASSERT(ret);
-	TEST_ASSERT(almost_eq(box,expected,1e-10));
+	IntervalVector _ignore_(30);
+	IntervalVector sol(30);
+	bool ret=inflating_newton(*p30.f,box,sol,_ignore_);
+	CPPUNIT_ASSERT(ret);
+
+	CPPUNIT_ASSERT(almost_eq(sol,expected,1e-10));
 }
 
+void TestNewton::inflating_newton02() {
+	Variable x,y,z;
+	Function f(x,y,z,sqr(x)+sqr(y)+sqr(z)-1);
+	double _x0[][2]={{-0.1,0.1},{-0.1,0.1},{1.,1.}};
+	IntervalVector x0(3,_x0);
+	VarSet vars(f,z);
+	IntervalVector box_unicity(3);
+	IntervalVector box_existence(3);
+
+	inflating_newton(f,vars,x0,box_existence,box_unicity);
+
+	CPPUNIT_ASSERT(box_unicity.is_superset(box_existence));
+	CPPUNIT_ASSERT(box_unicity.is_superset(box_existence));
+	// the solution must contain the max (1.0) and the min
+	// that is, the solution obtained at one corner of the parameter
+	// box, like (-0.1,-0.1) which is ~ 7/5*sqrt(2)
+	CPPUNIT_ASSERT(box_existence[2].contains(1.0));
+	CPPUNIT_ASSERT(box_existence[2].is_superset(7.0/(5*sqrt(Interval(2.0)))));
+
+}
+
+void TestNewton::ctc_parameter01() {
+
+	Variable x,y,z;
+	Function f(x,y,z,Return(sqr(x)+sqr(y)-1+z,x-y-z));
+
+	VarSet vars(f,x,y);
+
+	CtcNewton newton(f,vars,POS_INFINITY);
+
+	double _box[][2] = { {0,1},{0,1},{-0.01,0.01}};
+	IntervalVector box(3,_box);
+
+	newton.contract(box);
+
+	Vector sol(2,(::sqrt(2)/2));
+
+	CPPUNIT_ASSERT(box.subvector(0,1).contains(sol));
+	CPPUNIT_ASSERT(box.min_diam()>0.001);
+	CPPUNIT_ASSERT(box[0].diam()<=0.1);
+	CPPUNIT_ASSERT(box[1].diam()<=0.1);
+}
 } // end namespace ibex

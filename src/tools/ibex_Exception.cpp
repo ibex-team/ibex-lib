@@ -11,6 +11,7 @@
 
 #include "ibex_Exception.h"
 #include <stdlib.h>
+#include <cassert>
 
 using namespace std;
 
@@ -18,6 +19,8 @@ namespace ibex {
 
 void ibex_error(const char* message) {
 	cerr << "error: " << message << endl;
+	//throw std::runtime_error(message); //
+	assert(false); // allow tracing with gdb
 	exit(-1);
 }
 

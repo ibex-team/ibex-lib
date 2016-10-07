@@ -7,33 +7,45 @@
  *
  * Author(s)   : Gilles Chabert
  * Created     : Mar 2, 2012
+ * Last Update : May 25, 2016
  * ---------------------------------------------------------------------------- */
 
 #ifndef __TEST_DIM_H__
 #define __TEST_DIM_H__
 
-#include "cpptest.h"
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
 #include "ibex_Dim.h"
 #include "utils.h"
 
 namespace ibex {
 
-class TestDim : public TestIbex {
+class TestDim : public CppUnit::TestFixture {
 
 public:
-	TestDim() {
 
-		TEST_ADD(TestDim::test01);
-		TEST_ADD(TestDim::test02);
-		TEST_ADD(TestDim::test03);
-		TEST_ADD(TestDim::test04);
-	}
+	CPPUNIT_TEST_SUITE(TestDim);
+	CPPUNIT_TEST(scalar);
+	CPPUNIT_TEST(row_vec);
+	CPPUNIT_TEST(col_vec);
+	CPPUNIT_TEST(add);
+	CPPUNIT_TEST(mul);
+	CPPUNIT_TEST(vec);
+	CPPUNIT_TEST(index);
+	CPPUNIT_TEST_SUITE_END();
 
-	void test01();
-	void test02();
-	void test03();
-	void test04();
+	void scalar();
+	void row_vec();
+	void col_vec();
+	void matrix();
+	void add();
+	void mul();
+	void vec();
+	void index();
 };
 
+CPPUNIT_TEST_SUITE_REGISTRATION(TestDim);
+
 } // namespace ibex
+
 #endif // __TEST_DIM_H__

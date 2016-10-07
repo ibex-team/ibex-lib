@@ -25,6 +25,10 @@ namespace parser {
 extern System* system;
 }
 
+NumConstraint::NumConstraint(const char* filename) : f(*new Function()), op(EQ), own_f(true) {
+	build_from_system(System(filename));
+}
+
 NumConstraint::NumConstraint(const char* x, const char* c) : f(*new Function()), op(EQ), own_f(true) {
 	build_from_string(Array<const char*>(x),c);
 }
@@ -85,20 +89,24 @@ void NumConstraint::build_from_string(const Array<const char*>& _x, const char* 
 		throw e;
 	}
 
-	if (sys->nb_ctr==0) {
-		throw SyntaxError("Empty constraint");
-	}
-	NumConstraint& c0=sys->ctrs[0];
+	build_from_system(*sys);
+	delete sys;
 
-	Array<const ExprSymbol> x(_x.size());
+}
+
+void NumConstraint::build_from_system(const System& sys) {
+	if (sys.nb_ctr==0) {
+		throw SyntaxError("There is no constraint");
+	}
+	NumConstraint& c0=sys.ctrs[0]; // other constraints are ignored
+
+	Array<const ExprSymbol> x(sys.f.nb_arg());
 	varcopy(c0.f.args(),x);
 	const ExprNode& y=ExprCopy().copy(c0.f.args(),x,c0.f.expr());
 
 	f.init(x,y);
 
 	(CmpOp&) op = c0.op;
-
-	delete sys;
 }
 
 #define RETURN(a,b) return pair<const ExprNode*, const Interval*>(a,b)

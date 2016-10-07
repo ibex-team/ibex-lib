@@ -36,17 +36,23 @@ Set::Set(int n, BoolInterval status) : root(new SetLeaf(status)), Rn(n) {
 
 }
 
-Set::Set(const IntervalVector& box, BoolInterval status) : root(new SetLeaf(status)), Rn(box.size()) {
+Set::Set(const IntervalVector& box, BoolInterval status) : root(NULL), Rn(box.size()) {
 
-	IntervalVector inflated=inflate_one_float(box);
+	if (status==YES) { // need to create a boundary around the box
+		IntervalVector inflated=inflate_one_float(box);
 
-	// create the complementary of the box
-	pair<SetNode*,SetLeaf*> p=diff(Rn, inflated, NO, MAYBE, 0);
+		// create the complementary of the box
+		pair<SetNode*,SetLeaf*> p=diff(Rn, inflated, NO, MAYBE, 0);
 
-	// create the boundary around the box
-	p.second->replace_with(diff(inflated, box, MAYBE, YES, 0).first);
+		// create the boundary around the box
+		p.second->replace_with(diff(inflated, box, MAYBE, YES, 0).first);
 
-	root = p.first;
+		root = p.first;
+	} else {
+		pair<SetNode*,SetLeaf*> p=diff(Rn, box, NO, MAYBE, 0);
+
+		root = p.first;
+	}
 }
 
 Set::Set(Function& f, CmpOp op, double eps) : root(new SetLeaf(YES)), Rn(f.nb_var()) {

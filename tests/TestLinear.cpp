@@ -30,13 +30,13 @@ void TestLinear::lu_partial_underctr() {
 	Matrix LU_expected(3,4,_expected);
 	int p[3];
 	real_LU(M,LU_actual,p);
-	TEST_ASSERT(p[0]==2);
-	TEST_ASSERT(p[1]==1);
-	TEST_ASSERT(p[2]==0);
+	CPPUNIT_ASSERT(p[0]==2);
+	CPPUNIT_ASSERT(p[1]==1);
+	CPPUNIT_ASSERT(p[2]==0);
 	// note: 1e-04 corresponds to matlab's display precision
-	TEST_ASSERT(almost_eq(LU_actual.row(0),LU_expected.row(0),1e-04));
-	TEST_ASSERT(almost_eq(LU_actual.row(1),LU_expected.row(1),1e-04));
-	TEST_ASSERT(almost_eq(LU_actual.row(2),LU_expected.row(2),1e-04));
+	CPPUNIT_ASSERT(almost_eq(LU_actual.row(0),LU_expected.row(0),1e-04));
+	CPPUNIT_ASSERT(almost_eq(LU_actual.row(1),LU_expected.row(1),1e-04));
+	CPPUNIT_ASSERT(almost_eq(LU_actual.row(2),LU_expected.row(2),1e-04));
 }
 
 void TestLinear::lu_complete_underctr() {
@@ -56,8 +56,8 @@ void TestLinear::inflating_gauss_seidel01() {
 	IntervalVector x=Vector::zeros(n);
 
 	bool ret=inflating_gauss_seidel(A,b,x);
-	TEST_ASSERT(ret);
-	TEST_ASSERT(sol.rel_distance(x)<0.01);
+	CPPUNIT_ASSERT(ret);
+	CPPUNIT_ASSERT(sol.rel_distance(x)<0.01);
 }
 
 void TestLinear::inflating_gauss_seidel02() {
@@ -73,8 +73,8 @@ void TestLinear::inflating_gauss_seidel02() {
 	IntervalVector x=0.1*Interval(-1,1)*Vector::ones(n);
 
 	bool ret=inflating_gauss_seidel(A,b,x);
-	TEST_ASSERT(ret);
-	TEST_ASSERT(sol.rel_distance(x)<0.01);
+	CPPUNIT_ASSERT(ret);
+	CPPUNIT_ASSERT(sol.rel_distance(x)<0.01);
 }
 
 void TestLinear::inflating_gauss_seidel03() {
@@ -90,7 +90,7 @@ void TestLinear::inflating_gauss_seidel03() {
 	IntervalVector x=0.1*Interval(-1,1)*Vector::ones(n);
 
 	bool ret=inflating_gauss_seidel(A,b,x);
-	TEST_ASSERT(!ret);
+	CPPUNIT_ASSERT(!ret);
 }
 
 } // end namespace ibex

@@ -203,7 +203,7 @@ to the API.
    +------------------+-------------------------------+-------------------------------------------------------+
    | IntervalVector   | x.subvector(i,j)              | Return the subvector of length (j-i+1) starting at    |
    |                  |                               | index i and ending at index j (both included).        |
-   |                  | *(int i, int j)*              | By copy.                                              |
+   |                  | *(int i, int j)*              | By copy. [x] must be **non-empty.**                   |
    +------------------+-------------------------------+-------------------------------------------------------+
    | void             | x.resize(n)                   | Resize the vector. If the vector has been enlarged    |
    |                  |                               | the extra components are set to                       |
@@ -228,7 +228,7 @@ to the API.
    +==================+===============================+=======================================================+
    | int              | m.nb_rows()                   | Number of rows                                        |
    +------------------+-------------------------------+-------------------------------------------------------+
-   | int              | m.nb_columns()                | Number of column                                      |
+   | int              | m.nb_cols()                   | Number of column                                      |
    +------------------+-------------------------------+-------------------------------------------------------+
    | Interval&        | m[i][j]                       | The (i,j)th entry. By reference.                      |
    |                  |                               |                                                       |

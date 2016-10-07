@@ -20,9 +20,226 @@ using namespace std;
 
 namespace ibex {
 
+void TestFunction::setUp() {
+	  symbol_01     = new Function("x","x");
+	  symbol_02     = new Function("x","y", "x");
+	  symbol_vec_01 = new Function("x[2]","x");
+	  symbol_vec_02 = new Function("x[1][2]","x");
+	  symbol_mat_01 = new Function("x[2][3]","x");
+	  add_scalar    = new Function("x","y","x+y");
+	  add_vector_01 = new Function("x[3]","y[3]","x+y");
+	  add_vector_02 = new Function("x[1][3]","y[1][3]","x+y");
+	  add_mat       = new Function("x[2][3]","y[2][3]","x+y");
+	  mul_mat       = new Function("x[2][3]","y[3][2]","x*y");
+	  row_vec       = new Function("x","y[1][3]","(x,y,x)");
+	  col_vec       = new Function("x","y[3]","(x;y;x)");
+}
+
+void TestFunction::tearDown() {
+	delete symbol_01;
+	delete symbol_02;
+	delete symbol_vec_01;
+	delete add_scalar;
+}
+
+bool TestFunction::test_evl(Function* f, const Interval& x_in, const Interval& y_out) {
+	return almost_eq(f->eval(IntervalVector(1,x_in)),y_out, ERROR);
+}
+
+bool TestFunction::test_evl(Function* f, const Interval& x1_in, const Interval& x2_in, const Interval& y_out) {
+	IntervalVector x(2);
+	x[0]=x1_in;
+	x[1]=x2_in;
+	return almost_eq(f->eval(x),y_out, ERROR);
+}
+// ===========================================================================
+//                            PARSER
+// ===========================================================================
+
+void TestFunction::parser_symbol_01() {
+	CPPUNIT_ASSERT(sameExpr(symbol_01->expr(),"x"));
+}
+
+void TestFunction::parser_symbol_02() {
+	CPPUNIT_ASSERT(sameExpr(symbol_02->expr(),"x"));
+}
+
+void TestFunction::parser_symbol_vec_01() {
+	CPPUNIT_ASSERT(sameExpr(symbol_vec_01->expr(),"x"));
+}
+
+void TestFunction::parser_symbol_vec_02() {
+	CPPUNIT_ASSERT(sameExpr(symbol_vec_02->expr(),"x"));
+}
+
+void TestFunction::parser_symbol_mat_01() {
+	CPPUNIT_ASSERT(sameExpr(symbol_mat_01->expr(),"x"));
+}
+
+void TestFunction::parser_add_scalar() {
+	CPPUNIT_ASSERT(sameExpr(add_scalar->expr(),"(x+y)"));
+}
+
+void TestFunction::parser_add_vector_01() {
+	CPPUNIT_ASSERT(sameExpr(add_vector_01->expr(),"(x+y)"));
+}
+
+void TestFunction::parser_add_vector_02() {
+	CPPUNIT_ASSERT(sameExpr(add_vector_02->expr(),"(x+y)"));
+}
+
+void TestFunction::parser_add_mat() {
+	CPPUNIT_ASSERT(sameExpr(add_mat->expr(),"(x+y)"));
+}
+
+void TestFunction::parser_mul_mat() {
+	CPPUNIT_ASSERT(sameExpr(mul_mat->expr(),"(x*y)"));
+}
+
+void TestFunction::parser_row_vec() {
+	CPPUNIT_ASSERT(sameExpr(row_vec->expr(),"(x,y,x)"));
+}
+
+void TestFunction::parser_col_vec() {
+	CPPUNIT_ASSERT(sameExpr(col_vec->expr(),"(x;y;x)"));
+}
+// ===========================================================================
+//                            EVAL
+// ===========================================================================
+
+
+void TestFunction::eval_symbol_01() {
+	CPPUNIT_ASSERT(test_evl(symbol_01,1,1));
+}
+
+void TestFunction::eval_symbol_02() {
+	CPPUNIT_ASSERT(test_evl(symbol_01,1,2,1));
+}
+
+void TestFunction::eval_symbol_vec_01() {
+	IntervalVector x(3);
+	x[0]=1;
+	x[1]=2;
+	x[2]=1;
+	CPPUNIT_ASSERT(almost_eq(symbol_vec_01->eval_vector(x),x,0));
+}
+
+void TestFunction::eval_symbol_vec_02() {
+	IntervalVector x(3);
+	x[0]=1;
+	x[1]=2;
+	x[2]=1;
+	CPPUNIT_ASSERT(almost_eq(symbol_vec_02->eval_vector(x),x,0));
+}
+
+void TestFunction::eval_symbol_mat_01() {
+	double _x[][2] = { {1,2}, {3,4}, {5,6} ,
+			           {1,1}, {2,2}, {3,3} };
+	IntervalMatrix xout(2,3,_x);
+	IntervalVector xin(6,_x);
+	CPPUNIT_ASSERT(almost_eq(symbol_mat_01->eval_matrix(xin),xout,0));
+}
+
+void TestFunction::eval_add_scalar() {
+	CPPUNIT_ASSERT(test_evl(add_scalar,1,2,3));
+	CPPUNIT_ASSERT(test_evl(add_scalar,Interval(1,2),Interval(3,4),Interval(4,6)));
+}
+
+void TestFunction::eval_add_vector_01() {
+	double _xy[][2] = { {1,2}, {3,4}, {5,6} ,
+			            {1,1}, {2,2}, {3,3} };
+	IntervalVector xy(6,_xy);
+
+	double _z[][2] = { {2,3}, {5,6}, {8,9} };
+	IntervalVector z(3,_z);
+
+	IntervalVector res=add_vector_01->eval_vector(xy);
+	CPPUNIT_ASSERT(almost_eq(res,z,ERROR));
+	CPPUNIT_ASSERT(res.is_superset(z));
+}
+
+void TestFunction::eval_add_vector_02() {
+	double _xy[][2] = { {1,2}, {3,4}, {5,6} ,
+			            {1,1}, {2,2}, {3,3} };
+	IntervalVector xy(6,_xy);
+
+	double _z[][2] = { {2,3}, {5,6}, {8,9} };
+	IntervalVector z(3,_z);
+
+	IntervalVector res=add_vector_02->eval_vector(xy);
+	CPPUNIT_ASSERT(almost_eq(res,z,ERROR));
+	CPPUNIT_ASSERT(res.is_superset(z));
+}
+
+void TestFunction::eval_add_mat() {
+	double _xy[][2] = { {1,2}, {3,4}, {5,6},
+			{1,1}, {2,2}, {3,3},
+			{1,1}, {2,2}, {3,3},
+			{1,2}, {3,4}, {5,6} };
+	IntervalVector xy(12,_xy);
+
+	double _z[][2] = { {2,3}, {5,6}, {8,9},
+			{2,3}, {5,6}, {8,9} };
+	IntervalMatrix z(2, 3,_z);
+
+	IntervalMatrix res=add_mat->eval_matrix(xy);
+
+	CPPUNIT_ASSERT(almost_eq(res[0],z[0],ERROR));
+	CPPUNIT_ASSERT(almost_eq(res[1],z[1],ERROR));
+	CPPUNIT_ASSERT(res.is_superset(z));
+}
+
+
+void TestFunction::eval_mul_mat() {
+	double _x[][2]={{0,1},{0,2},{0,3},
+					{-1,0},{-2,0},{-3,0}};
+	IntervalMatrix x(2,3,_x);
+
+	double _y[][2]={{0,1},{-1,0},
+			        {0,2},{-2,0},
+					{0,3},{-3,0}};
+	IntervalMatrix y(3,2,_y);
+
+	IntervalVector xy(12);
+
+	for (int i=0; i<6; i++) xy[i]=x[i/3][i%3];
+	for (int i=0; i<6; i++) xy[i+6]=y[i/2][i%2];
+
+	IntervalMatrix z=x*y;
+
+	IntervalMatrix res=mul_mat->eval_matrix(xy);
+
+	CPPUNIT_ASSERT(almost_eq(res,z,ERROR));
+	CPPUNIT_ASSERT(res.is_superset(z));
+}
+
+void TestFunction::eval_row_vec() {
+	IntervalVector x(1,Interval(1,2));
+	double _y[][2] = { {3,4}, {5,6}, {7,8} };
+	IntervalVector y(3,_y);
+
+	IntervalVector xy = cart_prod(x,y);
+	IntervalVector z  = cart_prod(xy,x);
+	IntervalVector res=row_vec->eval_vector(xy);
+
+	CPPUNIT_ASSERT(almost_eq(res,z,0));
+}
+
+void TestFunction::eval_col_vec() {
+	IntervalVector x(1,Interval(1,2));
+	double _y[][2] = { {3,4}, {5,6}, {7,8} };
+	IntervalVector y(3,_y);
+
+	IntervalVector xy = cart_prod(x,y);
+	IntervalVector z  = cart_prod(xy,x);
+	IntervalVector res=row_vec->eval_vector(xy);
+
+	CPPUNIT_ASSERT(almost_eq(res,z,0));
+}
+
 void TestFunction::build01() {
 	delete new Function();
-	TEST_ASSERT(true);
+	CPPUNIT_ASSERT(true);
 }
 
 void TestFunction::add_symbol() {
@@ -31,15 +248,16 @@ void TestFunction::add_symbol() {
 
 	Function f(x,y,x);
 
-	TEST_ASSERT(f.nb_nodes()==1);
-	TEST_ASSERT(f.nb_arg()==2);
-	TEST_ASSERT(strcmp(f.arg_name(0),"x")==0);
-	TEST_ASSERT(strcmp(f.arg_name(1),"y")==0);
-	TEST_ASSERT(f.used(0));
-	TEST_ASSERT(f.used(0));
-	TEST_ASSERT(!f.used(1));
-	TEST_ASSERT(!f.used(1));
-	TEST_ASSERT(&f.node(0)==&x);
+	CPPUNIT_ASSERT(f.nb_nodes()==2);
+	CPPUNIT_ASSERT(f.nb_arg()==2);
+	CPPUNIT_ASSERT(strcmp(f.arg_name(0),"x")==0);
+	CPPUNIT_ASSERT(strcmp(f.arg_name(1),"y")==0);
+	CPPUNIT_ASSERT(f.used(0));
+	CPPUNIT_ASSERT(f.used(0));
+	CPPUNIT_ASSERT(!f.used(1));
+	CPPUNIT_ASSERT(!f.used(1));
+	CPPUNIT_ASSERT(&f.node(0)==&x);
+	CPPUNIT_ASSERT(&f.node(1)==&y);
 }
 
 void TestFunction::copy() {
@@ -49,21 +267,21 @@ void TestFunction::copy() {
 	Function f(x,A,A*x);
 
 	Function f2(f);
-	TEST_ASSERT(f2.nb_nodes()==3);
-	TEST_ASSERT(f2.nb_arg()==2);
+	CPPUNIT_ASSERT(f2.nb_nodes()==3);
+	CPPUNIT_ASSERT(f2.nb_arg()==2);
 
 	const ExprMul* e2=dynamic_cast<const ExprMul*>(&f2.node(0));
-	TEST_ASSERT(e2!=NULL);
-	TEST_ASSERT(sameExpr(f2.expr(),"(A*x)"));
+	CPPUNIT_ASSERT(e2!=NULL);
+	CPPUNIT_ASSERT(sameExpr(f2.expr(),"(A*x)"));
 
 	const ExprSymbol* A2=dynamic_cast<const ExprSymbol*>(&f2.node(1));
-	TEST_ASSERT(A2!=NULL);
-	TEST_ASSERT(strcmp(A2->name,"A")==0);
-	TEST_ASSERT(A2->dim==A.dim);
+	CPPUNIT_ASSERT(A2!=NULL);
+	CPPUNIT_ASSERT(strcmp(A2->name,"A")==0);
+	CPPUNIT_ASSERT(A2->dim==A.dim);
 
 	const ExprSymbol* x2=dynamic_cast<const ExprSymbol*>(&f2.node(2));
-	TEST_ASSERT(strcmp(x2->name,"x")==0);
-	TEST_ASSERT(x2->dim==x.dim);
+	CPPUNIT_ASSERT(strcmp(x2->name,"x")==0);
+	CPPUNIT_ASSERT(x2->dim==x.dim);
 
 }
 
@@ -81,14 +299,14 @@ void TestFunction::generate_comp01() {
 
 	Function f(x,y,z,e);
 
-	TEST_ASSERT(f[0].nb_arg()==3);
-	TEST_ASSERT(sameExpr(f[0].expr(),"((x+y)-z)"));
+	CPPUNIT_ASSERT(f[0].nb_arg()==3);
+	CPPUNIT_ASSERT(sameExpr(f[0].expr(),"((x+y)-z)"));
 
-	TEST_ASSERT(f[1].nb_arg()==3);
-	TEST_ASSERT(sameExpr(f[1].expr(),"(x*z)"));
+	CPPUNIT_ASSERT(f[1].nb_arg()==3);
+	CPPUNIT_ASSERT(sameExpr(f[1].expr(),"(x*z)"));
 
-	TEST_ASSERT(f[2].nb_arg()==3);
-	TEST_ASSERT(sameExpr(f[2].expr(),"(y-z)"));
+	CPPUNIT_ASSERT(f[2].nb_arg()==3);
+	CPPUNIT_ASSERT(sameExpr(f[2].expr(),"(y-z)"));
 }
 
 void TestFunction::generate_comp02() {
@@ -105,11 +323,11 @@ void TestFunction::generate_comp02() {
 	Function f(x,e);
 
 	const ExprConstant* c=dynamic_cast<const ExprConstant*>(&f[1].expr());
-	TEST_ASSERT(c);
-	TEST_ASSERT(c->get_value()==Interval::ZERO);
+	CPPUNIT_ASSERT(c);
+	CPPUNIT_ASSERT(c->get_value()==Interval::ZERO);
 	c=dynamic_cast<const ExprConstant*>(&f[2].expr());
-	TEST_ASSERT(c);
-	TEST_ASSERT(c->get_value()==Interval::ZERO);
+	CPPUNIT_ASSERT(c);
+	CPPUNIT_ASSERT(c->get_value()==Interval::ZERO);
 }
 
 void TestFunction::used() {
@@ -126,18 +344,18 @@ void TestFunction::used() {
 
 	Function f(x,y,z,e);
 
-	TEST_ASSERT(f[0].nb_used_vars()==3);
-	TEST_ASSERT(f[0].used_var(0)==0);
-	TEST_ASSERT(f[0].used_var(1)==1);
-	TEST_ASSERT(f[0].used_var(2)==2);
+	CPPUNIT_ASSERT(f[0].nb_used_vars()==3);
+	CPPUNIT_ASSERT(f[0].used_var(0)==0);
+	CPPUNIT_ASSERT(f[0].used_var(1)==1);
+	CPPUNIT_ASSERT(f[0].used_var(2)==2);
 
-	TEST_ASSERT(f[1].nb_used_vars()==2);
-	TEST_ASSERT(f[1].used_var(0)==0);
-	TEST_ASSERT(f[1].used_var(1)==2);
+	CPPUNIT_ASSERT(f[1].nb_used_vars()==2);
+	CPPUNIT_ASSERT(f[1].used_var(0)==0);
+	CPPUNIT_ASSERT(f[1].used_var(1)==2);
 
-	TEST_ASSERT(f[2].nb_used_vars()==2);
-	TEST_ASSERT(f[2].used_var(0)==1);
-	TEST_ASSERT(f[2].used_var(1)==2);
+	CPPUNIT_ASSERT(f[2].nb_used_vars()==2);
+	CPPUNIT_ASSERT(f[2].used_var(0)==1);
+	CPPUNIT_ASSERT(f[2].used_var(1)==2);
 }
 
 void TestFunction::used02() {
@@ -146,17 +364,17 @@ void TestFunction::used02() {
 
 	Function f(x,y,x[0]+x[2]-(y[1][1]*y[1][2]));
 
-	TEST_ASSERT(f.used(0));
-	TEST_ASSERT(!f.used(1));
-	TEST_ASSERT(f.used(2));
+	CPPUNIT_ASSERT(f.used(0));
+	CPPUNIT_ASSERT(!f.used(1));
+	CPPUNIT_ASSERT(f.used(2));
 
-	TEST_ASSERT(!f.used(3));
-	TEST_ASSERT(!f.used(4));
-	TEST_ASSERT(!f.used(5));
+	CPPUNIT_ASSERT(!f.used(3));
+	CPPUNIT_ASSERT(!f.used(4));
+	CPPUNIT_ASSERT(!f.used(5));
 
-	TEST_ASSERT(!f.used(6));
-	TEST_ASSERT(f.used(7));
-	TEST_ASSERT(f.used(8));
+	CPPUNIT_ASSERT(!f.used(6));
+	CPPUNIT_ASSERT(f.used(7));
+	CPPUNIT_ASSERT(f.used(8));
 
 }
 
@@ -165,7 +383,7 @@ void TestFunction::numctr01() {
 	Variable y("y");
 	Function f(x,y,x+y);
 	NumConstraint c(f,EQ);
-	TEST_ASSERT(true); // TO DO
+	CPPUNIT_ASSERT(true); // TO DO
 }
 
 void TestFunction::apply01() {
@@ -175,27 +393,27 @@ void TestFunction::apply01() {
 	Interval c(1,1);
 	Variable z("z");
 	Function f2(z,f(z,c));
-	TEST_ASSERT(sameExpr(f2.expr(),"f(z,1)"));
+	CPPUNIT_ASSERT(sameExpr(f2.expr(),"(z+1)"));
 }
 
 void TestFunction::from_string01() {
 	try {
 		Function f("x","sin(x)");
-		TEST_ASSERT(f.nb_arg()==1);
-		TEST_ASSERT(sameExpr(f.expr(),"sin(x)"));
+		CPPUNIT_ASSERT(f.nb_arg()==1);
+		CPPUNIT_ASSERT(sameExpr(f.expr(),"sin(x)"));
 	}
 	catch(SyntaxError& e) {
-		TEST_ASSERT(false);
+		CPPUNIT_ASSERT(false);
 	}
 }
 void TestFunction::from_string02() {
 	try {
 		Function f("x","y","x+y");
 
-		TEST_ASSERT(f.nb_arg()==2);
-		TEST_ASSERT(sameExpr(f.expr(),"(x+y)"));
+		CPPUNIT_ASSERT(f.nb_arg()==2);
+		CPPUNIT_ASSERT(sameExpr(f.expr(),"(x+y)"));
 	} catch(SyntaxError& e) {
-		TEST_ASSERT(false);
+		CPPUNIT_ASSERT(false);
 	}
 }
 
@@ -203,12 +421,12 @@ void TestFunction::from_string03() {
 	try {
 		Function f("x[2]","y[1][3]","x(1)+y(2)");
 
-		TEST_ASSERT(f.nb_arg()==2);
-		TEST_ASSERT(f.arg(0).dim.dim2==2);
-		TEST_ASSERT(f.arg(1).dim.dim3==3);
-		TEST_ASSERT(sameExpr(f.expr(),"(x[0]+y[1])"));
+		CPPUNIT_ASSERT(f.nb_arg()==2);
+		CPPUNIT_ASSERT(f.arg(0).dim.nb_rows()==2);
+		CPPUNIT_ASSERT(f.arg(1).dim.nb_cols()==3);
+		CPPUNIT_ASSERT(sameExpr(f.expr(),"(x(1)+y(2))"));
 	} catch(SyntaxError& e) {
-		TEST_ASSERT(false);
+		CPPUNIT_ASSERT(false);
 	}
 }
 
@@ -216,11 +434,50 @@ void TestFunction::from_string04() {
 	try {
 		Function f("a","b","c","d","e","f","g","h","a+e");
 
-		TEST_ASSERT(f.nb_arg()==8);
-		TEST_ASSERT(sameExpr(f.expr(),"(a+e)"));
+		CPPUNIT_ASSERT(f.nb_arg()==8);
+		CPPUNIT_ASSERT(sameExpr(f.expr(),"(a+e)"));
 	} catch(SyntaxError& e) {
-		TEST_ASSERT(false);
+		CPPUNIT_ASSERT(false);
 	}
+}
+
+void TestFunction::minibex01() {
+	Variable x("x"),y("y");
+	const ExprNode& e1=x+y;
+	const ExprNode& e=e1+e1;
+	Function f(x,y,e,"f");
+	std::string m = f.minibex();
+	char* d=strdup(m.c_str());
+	CPPUNIT_ASSERT(strcmp(m.c_str(),"function f(x,y)\n  _tmp_0_ = (x+y);\n  return (_tmp_0_+_tmp_0_);\nend")==0);
+}
+
+void TestFunction::minibex02() {
+	Variable x("x"),y("y");
+	const ExprNode& e1=x+y;
+	const ExprNode& e=e1+e1;
+	Function f(x,y,e,"f");
+	std::string m = f.minibex();
+
+	FILE *fin = fmemopen((void*) m.c_str(), m.length(), "r");
+	Function f2(fin);
+
+	m = f2.minibex();
+	CPPUNIT_ASSERT(strcmp(m.c_str(),"function f(x,y)\n  _tmp_0_ = (x+y);\n  return (_tmp_0_+_tmp_0_);\nend")==0);
+}
+
+void TestFunction::minibex03() {
+	Variable x(Dim::matrix(2,3),"x");
+	double _m[][2] = {{0,0},{1,1},{2,2},{3,3},{4,4},{5,5}};
+	IntervalMatrix M(2,3,_m);
+	Function f(x,x+M,"f");
+	std::string m = f.minibex();
+	CPPUNIT_ASSERT(strcmp(m.c_str(),"function f(x[2][3])\n  return (x+((0 , 1 , 2) ; (3 , 4 , 5)));\nend")==0);
+
+	FILE *fin = fmemopen((void*) m.c_str(), m.length(), "r");
+	Function f2(fin);
+
+	m = f2.minibex();
+	CPPUNIT_ASSERT(strcmp(m.c_str(),"function f(x[2][3])\n  return (x+((0 , 1 , 2) ; (3 , 4 , 5)));\nend")==0);
 }
 
 void TestFunction::issue43() {

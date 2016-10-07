@@ -6,33 +6,18 @@ from __future__ import with_statement # needed for python 2.5
 import tarfile, os.path, os, re, patch, sys, functools, shutil
 from waflib import Utils, Errors, Logs
 
-def unpack_archive (src_dir_node, name, filename = None):
-	src_dir = src_dir_node.abspath()
-	path = os.path.join (src_dir, name)
-
-	if not os.path.isdir (path):
-		# extract the sources
-		os.makedirs (path)
-
-		if not filename:
-			filename = "%s.tar.gz" % name
-
-		Logs.pprint ("NORMAL", "Unpacking %s" % filename)
-		t = tarfile.open (os.path.join (src_dir, filename))
-		t.extractall (src_dir)
-
-	node = src_dir_node.find_dir (name)
-	assert node
-	return node
-
 def convert_path_win2msys (path):
 	path = os.path.abspath (path)
 	drv, path = os.path.splitdrive (path)
 
 	return "/%s%s" % (drv[0], path.replace("\\", "/"))
 
-
 def configure (conf):
+
+	# import utilities
+	sys.path.append(conf.srcnode.abspath())
+	import ibexutils
+	
 	conf.env.BUILD_GDTOA	= False
 	conf.env.BUILD_MATHLIB	= False
 	
@@ -40,9 +25,7 @@ def configure (conf):
 	conf.env.BUILD_FILIB = False
 	conf.env.BUILD_CLP = False
 	
-	conf.env.BUILD_AMPL = False
-
-	extract = functools.partial (unpack_archive, conf.path)
+	extract = functools.partial (ibexutils.unpack_archive, conf.path)
 
 	ibex_env = conf.env
 	def ibex_append_path (var, p):
@@ -58,11 +41,6 @@ def configure (conf):
 	with_bias = conf.options.BIAS_PATH
 	with_gaol = conf.options.GAOL_PATH
 	with_filib = conf.options.FILIB_PATH
-	
-	with_soplex = conf.options.SOPLEX_PATH
-	with_cplex = conf.options.CPLEX_PATH
-	with_clp = conf.options.CLP_PATH
-	
 	
 	def join (path, *k):
 		return os.path.abspath (os.path.join (os.path.expanduser (path), *k)) if path else None
@@ -112,7 +90,7 @@ def configure (conf):
 				if conf.env.DEST_CPU == "x86" and not conf.options.DISABLE_SSE2:
 					conf.env.append_unique ("CXXFLAGS_IBEX_DEPS", ["-msse2", "-mfpmath=sse"])
 					
-				Logs.pprint ("BLUE","The Interval arithmetic is the installed version of FILIP")
+				Logs.pprint ("BLUE","The Interval arithmetic is the installed version of FILIB")
 	
 		if not with_any:
 			# try to find GAOL
@@ -141,7 +119,7 @@ def configure (conf):
 			# -> will build one if needed
 			if (conf.env.DEST_CPU == "x86_64") or (conf.env.DEST_OS=="win32"):
 				# gaol not working on 64 bit cpu -> use filib instead
-				Logs.pprint ("BLUE","By Default, the Interval arithmetic is FILIP")
+				Logs.pprint ("BLUE","By Default, the Interval arithmetic is FILIB")
 				with_filib = ''
 			else:
 				Logs.pprint ("BLUE","By Default, the Interval arithmetic is GOAL")
@@ -155,6 +133,7 @@ def configure (conf):
 
 		if with_bias:
 			conf.env.append_unique ("INCLUDES", join (with_bias, "include"))
+			conf.env.append_unique ("INCLUDES_IBEX_DEPS", join (with_bias, "include"))
 
 		conf.check_cxx (header_name	= "BIAS/BiasF.h")
 
@@ -171,6 +150,7 @@ def configure (conf):
 
 		if with_filib:
 			conf.env.append_unique ("INCLUDES", join (with_filib, "include"))
+			conf.env.append_unique ("INCLUDES_IBEX_DEPS", join (with_filib, "include"))
 
 		has_h = conf.check_cxx (
 				header_name	= "interval/interval.hpp",
@@ -201,6 +181,7 @@ def configure (conf):
 		conf.switch_to_32bits()
 		if with_gaol:
 			conf.env.append_unique ("INCLUDES", join (with_gaol, "include"))
+			conf.env.append_unique ("INCLUDES_IBEX_DEPS", join (with_gaol, "include"))
 			
 		mandatory = bool (with_gaol)
 
@@ -214,239 +195,7 @@ def configure (conf):
 
 		if not (has_h and has_l):
 			conf.env.BUILD_GAOL = True
-			
-	#####################################################################################################
-	# allow only one linear solver
-	with_any_solver = False
-	for w in with_soplex, with_cplex, with_clp:
-		if w is not None:
-			if with_any_solver:
-				conf.fatal ("cannot use --with-cplex/--with-soplex/--with-clp together")
-			with_any_solver = True
-			
-	if (with_any_solver and  conf.env.WITHOUT_LP):
-		conf.fatal ("cannot use --without-lp and  (--with-cplex/--with-soplex/--with-clp) option")
-	
-	if 	conf.env.WITHOUT_LP:
-		conf.env.LP_LIB = "NOLP"
-	else:	
-		# check if SOPLEX is installed		
-		if not with_any_solver: 
-			has_Soplex_h = conf.check_cxx (header_name	= "soplex.h",mandatory = False)
-			has_Soplexlib =  conf.check_cxx (lib = "soplex", uselib_store = "IBEX_DEPS",
-						libpath = [],
-						mandatory = False,
-						fragment = """
-							#include <soplex.h>
-							int main (int argc, char* argv[]) {
-								soplex::SPxLP lp;
-								lp.read(std::cin);
-								return 0;
-							}
-						""")
-			if not has_Soplexlib:
-				has_Soplexlib = conf.check_cxx (lib = ["soplex", "z"], uselib_store = "IBEX_DEPS",
-						libpath = [],
-						mandatory = False,
-						fragment = """
-							#include <soplex.h>
-							int main (int argc, char* argv[]) {
-								soplex::SPxLP lp;
-								lp.read(std::cin);
-								return 0;
-							}
-						""")
 				
-			if (has_Soplex_h and has_Soplexlib):
-				conf.env.LP_LIB = "SOPLEX"
-				with_any_solver = True
-				Logs.pprint ("BLUE","The Linear Solver is the installed version of SOPLEX")
-			
-			
-		# check if CPLEX is installed		
-		if not with_any_solver: 			
-			has_Cplex_h = conf.check_cxx (header_name	= "ilcplex/cplex.h",mandatory = False)
-			has_Cplexlib =  conf.check_cxx (lib = ["cplex", "pthread"], uselib_store = "IBEX_DEPS",
-							libpath = [],  
-							mandatory = False,
-							fragment = """
-								#include "ilcplex/cplex.h"
-								int main (int argc, char* argv[]) {
-									CPXENVptr  envcplex;
-									CPXLPptr lpcplex;
-									return 0;
-								}
-							""")
-				
-			if (has_Cplex_h and has_Cplexlib):
-				conf.env.LP_LIB = "CPLEX"
-				with_any_solver = True
-				Logs.pprint ("BLUE","The Linear Solver is the installed version of CPLEX")
-				
-		################################		
-		# check if CLP is installed	
-		if not with_any_solver: 
-			has_Clp_h = conf.check_cxx (header_name	= "coin/ClpSimplex.hpp",mandatory = False)
-			has_Clplib = conf.check_cxx (lib = ["Clp","CoinUtils","z","m"], uselib_store = "IBEX_DEPS",
-										libpath = [],
-										fragment = """
-							#include "coin/ClpSimplex.hpp"
-							int main (int argc, char* argv[]) {
-								ClpSimplex 	myclp;
-								myclp.resize(2,2);
-								return 0;
-							} """, mandatory = False)	
-			if not has_Clplib:
-				has_Clplib = conf.check_cxx (lib = ["Clp","CoinUtils","m"], uselib_store = "IBEX_DEPS",
-											libpath = [],
-											fragment = """
-								#include "coin/ClpSimplex.hpp"
-								int main (int argc, char* argv[]) {
-									ClpSimplex 	myclp;
-									myclp.resize(2,2);
-									return 0;
-								} """, mandatory = False)	
-				
-			if (has_Clp_h and has_Clplib):
-				conf.env.LP_LIB = "CLP"
-				with_any_solver = True
-				Logs.pprint ("BLUE","The Linear Solver is the installed version of CLP")
-			
-		# no Linear Solver is install
-		if not with_any_solver: 
-			Logs.pprint ("BLUE","By Default, we install the Linear Solver Clp-1.15.6 from COIN-OR project")
-			conf.env.LP_LIB = "CLP"
-			conf.env.BUILD_CLP = True
-			
-		################################
-		# build with cplex
-		if with_cplex is not None:
-			
-			conf.env.LP_LIB = "CPLEX"
-			conf.msg ("Candidate directory for lib Cplex", with_cplex)
-	
-			conf.env.append_unique ("INCLUDES",  os.path.join (with_cplex, "cplex/include/"))
-			conf.check_cxx (header_name	= "ilcplex/cplex.h")
-			
-			dirtmp1 = os.path.join(with_cplex, "cplex/lib/")
-			for pp in os.listdir(dirtmp1) :
-				dirtmp2= os.path.join (dirtmp1,pp)
-				if (os.path.isdir(dirtmp2)):
-					if (not(conf.check_cxx (lib = ["cplex", "pthread"], uselib_store = "IBEX_DEPS",
-							libpath = [os.path.join(dirtmp2, "static_pic/")],  
-							mandatory = False,
-							fragment = """
-								#include "ilcplex/cplex.h"
-								int main (int argc, char* argv[]) {
-									CPXENVptr  envcplex;
-									CPXLPptr lpcplex;
-									return 0;
-								}
-							"""))):
-						conf.fatal ("cannot link with the Cplex library")			
-			
-			
-			
-		elif with_soplex is not None :
-			# build with soplex
-			conf.env.LP_LIB = "SOPLEX"
-			conf.msg ("Candidate directory for lib Soplex", with_soplex)
-	
-			conf.env.append_unique ("INCLUDES",  os.path.join (with_soplex, "src"))
-			conf.check_cxx (header_name	= "soplex.h")
-	
-			# Try without and with -lz (soplex may be built without zlib)
-			for l in ("soplex", ["soplex", "z"]):
-				if (conf.check_cxx (lib = l, uselib_store = "IBEX_DEPS",
-						libpath = [os.path.join (with_soplex, "lib")],
-						mandatory = False,
-						fragment = """
-							#include <soplex.h>
-							int main (int argc, char* argv[]) {
-								soplex::SPxLP lp;
-								lp.read(std::cin);
-								return 0;
-							}
-						""")):
-					break
-			else:
-				conf.fatal ("cannot link with the Soplex library")
-			
-			
-		elif with_clp is not None :
-			
-			if ((conf.env["INTERVAL_LIB"] is "GAOL") and (conf.env.DEST_CPU == "x86_64")):
-				conf.fatal ("cannot use the Clp linear solver with Gaol on x86_64 processor, please install Soplex or Cplex, or use another Interval library (Filib or Profil/Bias).")
-				
-			# build with Clp
-			conf.env.LP_LIB = "CLP"
-			conf.msg ("Candidate directory for lib Clp", with_clp)
-			mandatory = bool (with_clp)
-			
-			if with_clp:
-				conf.env.append_unique ("INCLUDES", os.path.join (with_clp, "include"))
-				
-			
-			has_Clp = conf.check_cxx (
-					header_name	= "coin/ClpSimplex.hpp",
-					mandatory	= mandatory)
-	
-			has_Clplib_z = conf.check_cxx (lib = ["Clp","CoinUtils","z","m"], uselib_store = "IBEX_DEPS",
-										libpath = [os.path.join (with_clp, "lib")],
-										fragment = """
-							#include "coin/ClpSimplex.hpp"
-							int main (int argc, char* argv[]) {
-								ClpSimplex 	myclp;
-								myclp.resize(2,2);
-								return 0;
-							} """, mandatory = False)	
-			if not has_Clplib_z:
-				has_Clplib = conf.check_cxx (lib = ["Clp","CoinUtils","m"], uselib_store = "IBEX_DEPS",
-											libpath = [os.path.join (with_clp, "lib")],
-											fragment = """
-								#include "coin/ClpSimplex.hpp"
-								int main (int argc, char* argv[]) {
-									ClpSimplex 	myclp;
-									myclp.resize(2,2);
-									return 0;
-								} """, mandatory = False)	
-			else:
-				has_Clplib = True
-				
-			if mandatory and (not (has_Clplib or has_Clplib_z)):
-				conf.fatal ("cannot link with the Clp library")
-				
-			if not (has_Clp and (has_Clplib or has_Clplib_z)):
-				conf.env.BUILD_CLP = True
-
-
-	#####################################################################################################
-	# AMPL configure
-	if conf.env.WITH_AMPL:
-	
-		has_asl = conf.check_cxx (
-				header_name	= "asl.h",
-				mandatory	= False)
-		has_arith = conf.check_cxx (
-				header_name	= "arith.h",
-				mandatory	= False)
-		has_ampl = conf.check_cxx (
-				lib = ["amplsolver"],
-				uselib_store = "IBEX_DEPS",
-				mandatory = False)
-	
-		if not (has_asl and has_arith and has_ampl):
-			if (conf.env.WITH_AMPL):
-				conf.env.BUILD_AMPL = True
-		else:
-			if (not conf.check_cxx (
-				lib = ["dl"],
-				uselib_store = "IBEX_DEPS",
-				mandatory = False
-				) ):
-				conf.fatal ("cannot link with the dl library")
-			
-	
 	#####################################################################################################
 	# common vars for building gaol/gdtoa/mathlib
 	gdtoa_name = "gdtoa-1.0"
@@ -702,11 +451,11 @@ def configure (conf):
 	
 	##################################
 	if conf.env.BUILD_FILIB:
-		log_start ("filib")
+		log_start ("FILIB")
 		conf.env.FILIB = "filibsrc"
 		filib_dir = extract (conf.env.FILIB, "filibsrc-3.0.2.2.tar.gz")
 
-		ibex_append_path ("INCLUDES", conf.env.FILIB)
+		ibex_append_path ("INCLUDES", os.path.join(conf.srcnode.abspath(),"3rd", conf.env.FILIB))
 		ibex_append_path ("LIBPATH", os.path.join (filib_dir.abspath(), "libprim", ".libs"))
 
 		ibex_env.append_unique ("INCLUDES_IBEX_DEPS", os.path.join (conf.env.PREFIX, "include"))
@@ -728,59 +477,15 @@ def configure (conf):
 
 		if conf.exec_command (cmd, cwd=filib_dir.abspath(), stdout=None, stderr=None):
 			conf.fatal ("failed to configure filib (%s)" % cmd)
-
-	##################################
-	# AMPL interface 
-	# BUILD
-	if conf.env.BUILD_AMPL:
-		log_start ("AMPL")
-		conf.env.AMPL="solvers"
-		ampl_dir = extract (conf.env.AMPL, "amplsolvers.tar.gz")
-
-		ibex_append_path ("INCLUDES", conf.env.AMPL)
-		ibex_append_path ("LIBPATH", ampl_dir.abspath())
-
-		ibex_env.append_unique ("INCLUDES_IBEX_DEPS", os.path.join (conf.env.PREFIX, "include"))
-		ibex_env.append_unique ("LIB_IBEX_DEPS", ["amplsolver","dl"])
-
-		conf.find_program ("make")
-		cmd = "./configurehere "
-
-		if conf.exec_command (cmd, cwd=ampl_dir.abspath(), stdout=None, stderr=None):
-			conf.fatal ("failed to configure AMPL (%s)" % cmd)
-	##################################
-	# CLP
-	# BUILD
-	if conf.env.BUILD_CLP:
-		log_start ("CLP")
-		conf.env.CLP="Clp-1.15.6"
-		clp_dir = extract (conf.env.CLP, "Clp-1.15.6.tgz")
-
-		ibex_append_path ("INCLUDES", os.path.join (conf.env.PREFIX, "include"))
-		ibex_append_path ("LIBPATH", os.path.join (conf.env.PREFIX, "lib"))
-
-		ibex_env.append_unique ("INCLUDES_IBEX_DEPS", os.path.join (conf.env.PREFIX, "include"))
-		ibex_env.append_unique ("LIB_IBEX_DEPS", ["Clp","CoinUtils","m"])
-		
-		conf.find_program ("make")
-		shared = "--enable-shared" if conf.env.ENABLE_SHARED else ""
-		
-		if sys.platform == "win32":
-			# mingw build
-			conf.find_program ("sh")
-
-			cmd = [conf.env.SH, "-c",
-				"./configure --quiet --disable-zlib  --disable-bzlib --prefix=%r %s"
-				% (convert_path_win2msys (conf.env.PREFIX), shared)]
-		else:
-			cmd =	"./configure --quiet --disable-zlib --disable-bzlib --prefix=%r %s" % (os.path.abspath (conf.env.PREFIX), shared)
-
-		if conf.exec_command (cmd, cwd=clp_dir.abspath(), stdout=None, stderr=None):
-			conf.fatal ("failed to configure CLP (%s)" % cmd)
 			
 	
 ######################################################################################################
 def build (bld):
+	
+	# import utilities
+	sys.path.append(bld.srcnode.abspath())
+	import ibexutils
+	
 	# installation paths
 	INCDIR = "${PREFIX}/include/ibex"
 	# NOTE: we do not install the 3rd static libs when ibex is built as a shared library
@@ -792,7 +497,7 @@ def build (bld):
 			os.remove (filename)
 
 	src_dir = bld.path.abspath()
-	extract = functools.partial (unpack_archive, bld.path)
+	extract = functools.partial (ibexutils.unpack_archive, bld.path)
 
 	def apply_patch (name):
 		patch_file = os.path.join (src_dir, name)
@@ -944,7 +649,7 @@ def build (bld):
 		bld.variant = "filib"
 		path = bld.path.find_dir (bld.env.FILIB).abspath()
 
-		with subdir (path):
+		with ibexutils.subdir (path):
 			if bld.cmd=="install":
 				cmd = [["install"]]
 			elif bld.cmd in ("uninstall", "clean"): 	
@@ -959,79 +664,18 @@ def build (bld):
 					stdout	= None,
 					stderr	= None,
 				):
-					bld.fatal ("failed to build filib")
+					bld.fatal ("Failed to build FILIB")
 	
 		bld.variant = ""
-	##################################
-	if bld.env["BUILD_AMPL"]:
-		bld.variant = "ampl"
-		path = bld.path.find_dir (bld.env.AMPL).abspath()
 
-		with subdir (path):
-			if  (bld.env["INTERVAL_LIB"] is "GAOL") :
-				cmd = ["clean"] if bld.cmd in ("clean", "uninstall") else ["CFLAGS=-DNo_dtoa -m32"]
-			else:
-				cmd = ["clean"] if bld.cmd in ("clean", "uninstall") else []
-			
-			if bld.exec_command (
-				[bld.env.MAKE, "-j", str(bld.options.jobs)] + cmd,
-				cwd	= path,
-				stdout	= None,
-				stderr	= None,
-			):
-				bld.fatal ("failed to build ampl")
-	
-			if bld.cmd=="install":
-				if not os.path.exists(bld.env.LIBDIR):
-					os.makedirs(bld.env.LIBDIR)
-				shutil.copyfile(os.path.join(path,"libamplsolver.a"),os.path.join(bld.env.LIBDIR,"libamplsolver.a"))
-			elif  bld.cmd in ("clean", "uninstall"):
-				os.remove(os.path.join(bld.env.LIBDIR,"libamplsolver.a"))
-
-		bld.variant = ""
 		
-	##################################
-	if bld.env["BUILD_CLP"]:
-		bld.variant = "Clp"
-		path = bld.path.find_dir (bld.env.CLP).abspath()
-
-		with subdir (path):
-			if bld.cmd in ("install"):
-				cmd = [bld.cmd]
-			else :	
-				cmd = ["clean"] if bld.cmd in ("uninstall", "clean") else ["install"]
-			if bld.exec_command (
-				[bld.env.MAKE, "-j", str(bld.options.jobs)] + cmd,
-				cwd	= path,
-				stdout	= None,
-				stderr	= None,
-			):
-				bld.fatal ("failed to build Clp")
-	
-		bld.variant = ""
-
-
-######################################################################################################
-class subdir:
-	def __init__ (self, name_or_node):
-		self.name = name_or_node.abspath() if hasattr (name_or_node, "abspath") else str (name_or_node)
-
-	def __enter__ (self):
-		Logs.pprint ("BLUE", "Entering %r" % self.name)
-
-	def __exit__ (self, a, b, c):
-		Logs.pprint ("BLUE", "Leaving %r" % self.name)
-
-
-
 def distclean (ctx):
+	sys.path.append(ctx.path.abspath())
+	import ibexutils
+	
 	filib_dir = ctx.path.find_dir ("filibsrc")
 	if filib_dir and os.path.exists (os.path.join (filib_dir.abspath(), "Makefile")):
-		with subdir (filib_dir):
+		with ibexutils.subdir (filib_dir):
 			ctx.exec_command ("make clean && make distclean", cwd = filib_dir.abspath())
 
-	ampl_dir = ctx.path.find_dir ("solvers")
-	if ampl_dir and os.path.exists (os.path.join (ampl_dir.abspath(), "Makefile")):
-		with subdir (ampl_dir):
-			ctx.exec_command ("make clean && make distclean", cwd = ampl_dir.abspath())
 

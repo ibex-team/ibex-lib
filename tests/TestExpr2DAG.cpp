@@ -29,7 +29,7 @@ void TestExpr2DAG::test01() {
 	const ExprNode& e1=((x1+x2)-(x1+x2));
 	const ExprNode& e2 = Expr2DAG().transform(old_x,(Array<const ExprNode> const&) new_x,e1);
 
-	TEST_ASSERT(e1.size==5 && e2.size==4);
+	CPPUNIT_ASSERT(e1.size==5 && e2.size==4);
 
 }
 
@@ -44,7 +44,7 @@ void TestExpr2DAG::test02() {
 	const ExprNode& e1=(exp(x1)-(x1+x2))*exp(x1) + (exp(x1)-(x1+x2));
 	const ExprNode& e2 = Expr2DAG().transform(old_x,(Array<const ExprNode> const&) new_x,e1);
 
-	TEST_ASSERT(e2.size==7);
+	CPPUNIT_ASSERT(e2.size==7);
 
 }
 

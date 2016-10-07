@@ -13,6 +13,7 @@
 #ifndef _IBEX_INTERVAL_H_
 #define _IBEX_INTERVAL_H_
 
+#include <math.h>
 #include "ibex_Exception.h"
 
 /* ========================================================*/
@@ -64,7 +65,9 @@
 	#define IBEX_NAN filib::primitive::compose(0,0x7FF,1 << 19,0)
 #else
 #ifdef _IBEX_WITH_DIRECT_
-
+	// TODO: [gch] 1.0/0.0 is ugly, why not using
+	// std::numeric_limits<T>::infinity()
+	// instead?
 	/** \brief NEG_INFINITY: double representation of -oo */
 	#define NEG_INFINITY (-(1.0/0.0))
 	/** \brief POS_INFINITY: double representation of +oo */
@@ -78,9 +81,8 @@
 
 		DIRECT_INTERVAL(void) : inf(0), sup(0), isEmpty(true) {}
 		DIRECT_INTERVAL(double a, double b) {
-			if (a==POS_INFINITY || b==NEG_INFINITY)
+			if (a==POS_INFINITY || b==NEG_INFINITY || a>b )
 			                 {inf = 0; sup = 0; isEmpty=true; }
-			else if  (a>=b)  {inf = b; sup = a; isEmpty=false;}
 			else             {inf = a; sup = b; isEmpty=false;}
 		}
 
@@ -109,11 +111,8 @@
 
 namespace ibex {
 
-template<class T>  class Affine2Main;
-
 class IntervalVector;
 class IntervalMatrix;
-class IntervalMatrixArray;
 class ExprConstant;
 
 /** \defgroup arithmetic Interval Arithmetic */
@@ -196,11 +195,6 @@ class Interval {
      */
     Interval& operator=(const Interval& x);
 
-    /** \brief Set *this to x.
-     */
-    template<class T>
-    Interval& operator=(const Affine2Main<T>& x);
-
     /** \brief Set *this to d.
      */
     Interval& operator=(double x);
@@ -209,19 +203,9 @@ class Interval {
      * \param x - the interval to compute the intersection with.*/
     Interval& operator&=(const Interval& x);
 
-    /** \brief Intersection of *this and x.
-     * \param x - the affine form to compute the intersection with.*/
-    template<class T>
-    Interval& operator&=( const Affine2Main<T>& x);
-
     /** \brief Union of *this and x.
      * \param x - the interval to compute the hull with.*/
     Interval& operator|=(const Interval& x);
-
-    /** \brief Union of *this and x.
-     * \param x - the affine form to compute the hull with.*/
-    template<class T>
-    Interval& operator|=(const Affine2Main<T>& x);
 
     /**
      * \brief Add [-rad,+rad] to *this.
@@ -229,6 +213,15 @@ class Interval {
      * Return a reference to *this.
      */
     Interval& inflate(double rad);
+
+	/**
+	 * \brief Absolute and relative inflation.
+	 *
+	 * [x] <- mid[x] + delta*([x]-mid[x]) + chi*[-1,+1]
+	 *
+	 * \return *this.
+	 */
+	Interval& inflate(double delta, double chi);
 
     /** \brief Lower bound.
      *
@@ -529,7 +522,6 @@ class Interval {
     typedef Interval SCALAR;
     typedef IntervalVector VECTOR;
     typedef IntervalMatrix MATRIX;
-    typedef IntervalMatrixArray MATRIX_ARRAY;
 
     /**
      * \brief Cast the interval to an expression
@@ -888,16 +880,16 @@ bool bwd_imod(Interval& x, Interval& y, const double& p);
 } // end namespace ibex
 
 #ifdef _IBEX_WITH_GAOL_
-#include "ibex_gaol_Interval.h_"
+#include "ibex_Interval_gaol.h_"
 #else
 #ifdef _IBEX_WITH_BIAS_
-#include "ibex_bias_Interval.h_"
+#include "ibex_Interval_bias.h_"
 #else
 #ifdef _IBEX_WITH_FILIB_
-#include "ibex_filib_Interval.h_"
+#include "ibex_Interval_filib.h_"
 #else
 #ifdef _IBEX_WITH_DIRECT_
-#include "ibex_direct_Interval.h_"
+#include "ibex_Interval_direct.h_"
 #endif
 #endif
 #endif
@@ -909,31 +901,12 @@ bool bwd_imod(Interval& x, Interval& y, const double& p);
 
 namespace ibex {
 
-namespace {
-
 // the following functions are
 // introduced to allow genericity
-inline bool is_empty(double x)                { return false; }
-inline bool is_empty(const Interval& x)       { return x.is_empty(); }
-//inline bool is_empty(const Vector& v)         { return false; }
-//inline bool is_empty(const IntervalVector& v) { return v.is_empty(); }
-//inline bool is_empty(const Matrix& m)         { return false; }
-//inline bool is_empty(const IntervalMatrix& m) { return m.is_empty(); }
-//template<class T> inline bool is_empty(const Affine2Main<T>& x)       { return x.is_empty(); }
-//template<class T> inline bool is_empty(const Affine2MainVector<T>& v) { return v.is_empty(); }
-//template<class T> inline bool is_empty(const Affine2MainMatrix<T>& m) { return m.is_empty(); }
-
-inline void set_empty(double x)          { }
-inline void set_empty(Interval& x)       { x.set_empty(); }
-//inline void set_empty(Vector& v)         { }
-//inline void set_empty(IntervalVector& v) { v.set_empty(); }
-//inline void set_empty(Matrix& m)         { }
-//inline void set_empty(IntervalMatrix& m) { m.set_empty(); }
-//template<class T> inline void set_empty(Affine2Main<T>& x)       { x.set_empty(); }
-//template<class T> inline void set_empty(Affine2MainVector<T>& v) { v.set_empty(); }
-//template<class T> inline void set_empty(Affine2MainMatrix<T>& m) { m.set_empty(); }
-
-}
+inline bool ___is_empty(double)                  { return false; }
+inline bool ___is_empty(const Interval& x)       { return x.is_empty(); }
+inline void ___set_empty(double)            { }
+inline void ___set_empty(Interval& x)       { x.set_empty(); }
 
 inline double abs(double x) {return fabs(x);}
 
@@ -963,6 +936,7 @@ inline Interval& Interval::operator=(double x) {
 }
 
 
+
 inline Interval& Interval::operator=(const Interval& x) {
 	itv = x.itv;
 	return *this;
@@ -972,6 +946,13 @@ inline Interval& Interval::inflate(double radd) {
 	(*this) += Interval(-radd,radd);
 	return *this;
 }
+
+inline Interval& Interval::inflate(double delta, double chi) {
+	double m=mid();
+	(*this) = m + delta*(*this-m)+Interval(-chi,chi);
+	return *this;
+}
+
 
 inline bool Interval::operator!=(const Interval& x) const {
 	return !(*this==x);

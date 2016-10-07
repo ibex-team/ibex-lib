@@ -12,11 +12,10 @@
 #include "ibex_Function.h"
 #include "ibex_Expr.h"
 #include "ibex_Eval.h"
-#include "ibex_Affine2Eval.h"
-#include "ibex_AffineLinEval.h"
 #include "ibex_HC4Revise.h"
 #include "ibex_InHC4Revise.h"
 #include "ibex_Gradient.h"
+#include "ibex_VarSet.h"
 #include "ibex_FunctionBuild.cpp_"
 
 using namespace std;
@@ -24,6 +23,9 @@ using namespace std;
 namespace ibex {
 
 Function::~Function() {
+	if (_used_var!=NULL)
+		delete[] _used_var;
+
 	if (comp!=NULL) {
 		/* warning... if there is only one constraint
 		 * then comp[0] is the same object as f itself!
@@ -49,338 +51,103 @@ Function::~Function() {
 
 	if (df!=NULL) delete df;
 
-	if (name!=NULL) // name==NULL if init/build_from_string was never called.
+	if (name!=NULL) { // name==NULL if init/build_from_string was never called.
 		free((char*) name);
-}
-
-Domain& Function::eval_domain(const IntervalVector& box) const {
-	return Eval().eval(*this,box);
-}
-
-
-Domain& Function::eval_affine2_domain(const IntervalVector& box) const {
-	return Affine2Eval().eval(*this,box);
-}
-
-Affine2Domain& Function::eval_affine2_affinedomain(const Affine2Vector& box) const {
-	return Affine2Eval().eval(*this,box);
-}
-
-Domain& Function::eval_affine2_domain(const IntervalVector& box, Affine2Domain& affine) const {
-	const ExprLabel& res = Affine2Eval().eval_label(*this,box);
-	affine = *res.af2;
-	return *res.d;
-}
-
-Interval Function::eval_affine2(const IntervalVector& box) const {
-	return eval_affine2_domain(box).i();
-}
-
-Affine2 Function::eval_affine2(const Affine2Vector& box) const {
-	return eval_affine2_affinedomain(box).i();
-}
-
-Interval Function::eval_affine2(const IntervalVector& box, Affine2& affine) const {
-	const ExprLabel& res = Affine2Eval().eval_label(*this,box);
-	affine = res.af2->i();
-	return res.d->i();
-}
-
-IntervalVector Function::eval_affine2_vector(const IntervalVector& box) const {
-	const ExprLabel& res = Affine2Eval().eval_label(*this,box);
-	if (expr().dim.is_scalar() ) {
-		return IntervalVector(1,res.d->i());
-	} else {
-		return res.d->v();
+		delete[] symbol_index;
 	}
-}
 
-IntervalVector Function::eval_affine2_vector(const IntervalVector& box, Affine2Vector& affine) const {
-	const ExprLabel& res = Affine2Eval().eval_label(*this,box);
-	if (expr().dim.is_scalar() ) {
-		affine = Affine2Vector(1,res.af2->i());
-		return IntervalVector(1,res.d->i());
-	} else {
-		affine = res.af2->v();
-		return res.d->v();
+	if (_eval!=NULL) {
+		delete _eval;
+		delete _hc4revise;
+		delete _grad;
+		delete _inhc4revise;
 	}
-}
-
-Affine2Vector Function::eval_affine2_vector(const Affine2Vector& box) const {
-	const ExprLabel& res = Affine2Eval().eval_label(*this,box);
-	if (expr().dim.is_scalar() ) {
-		return Affine2Vector(1, res.af2->i());
-	} else {
-		return res.af2->v();
-	}
-}
-
-IntervalMatrix Function::eval_affine2_matrix(const IntervalVector& box) const {
-	const ExprLabel& res = Affine2Eval().eval_label(*this,box);
-
-	switch (expr().dim.type()) {
-	case Dim::SCALAR     : {
-		return IntervalMatrix(1,1,res.d->i());
-	}
-	case Dim::ROW_VECTOR : {
-		IntervalMatrix M(image_dim(),1);
-		M.set_row(0,res.d->v());
-		return M;
-	}
-	case Dim::COL_VECTOR : {
-		IntervalMatrix M(1,image_dim());
-		M.set_col(0,res.d->v());
-		return M;
-	}
-	case Dim::MATRIX: {
-		return res.d->m();
-	}
-	default : {
-		assert(false);
-		return IntervalMatrix::empty(expr().dim.dim2, expr().dim.dim3);
-	}
-	}
-}
-
-IntervalMatrix Function::eval_affine2_matrix(const IntervalVector& box, Affine2Matrix& affine) const {
-	const ExprLabel& res = Affine2Eval().eval_label(*this,box);
-	affine = Affine2Matrix(expr().dim.dim2, expr().dim.dim3);
-
-	switch (expr().dim.type()) {
-	case Dim::SCALAR     : {
-		affine[0][0] = res.af2->i();
-		return IntervalMatrix(1,1,res.d->i());
-	}
-	case Dim::ROW_VECTOR : {
-		affine.set_row(0,res.af2->v());
-		IntervalMatrix M(image_dim(),1);
-		M.set_row(0,res.d->v());
-		return M;
-	}
-	case Dim::COL_VECTOR : {
-		affine.set_col(0,res.af2->v());
-		IntervalMatrix M(1,image_dim());
-		M.set_col(0,res.d->v());
-		return M;
-	}
-	case Dim::MATRIX: {
-		affine = res.af2->m();
-		return res.d->m();
-	}
-	default : {
-		assert(false);
-		return IntervalMatrix::empty(expr().dim.dim2, expr().dim.dim3);
-	}
-	}
-}
-
-
-
-Affine2Matrix Function::eval_affine2_matrix(const Affine2Vector& affine) const {
-	const ExprLabel& res = Affine2Eval().eval_label(*this,affine);
-
-	switch (expr().dim.type()) {
-	case Dim::SCALAR     : {
-		return Affine2Matrix(1,1,res.af2->i());
-	}
-	case Dim::ROW_VECTOR : {
-		Affine2Matrix M(image_dim(),1);
-		M.set_row(0,res.af2->v());
-		return M;
-	}
-	case Dim::COL_VECTOR : {
-		Affine2Matrix M(1,image_dim());
-		M.set_col(0,res.af2->v());
-		return M;
-	}
-	case Dim::MATRIX: {
-		return res.af2->m();
-	}
-	default : {
-		assert(false);
-		return Affine2Matrix::empty(expr().dim.dim2, expr().dim.dim3);
-	}
-	}
-}
-////////////////////////////////
-
-//Domain& Function::eval_affine2_domain(const IntervalVector& box) const {
-//	return AffineLinEval().eval(*this,box);
-//}
-
-AffineLinDomain& Function::eval_affine2_affinedomain(const AffineLinVector& box) const {
-	return AffineLinEval().eval(*this,box);
-}
-
-Domain& Function::eval_affine2_domain(const IntervalVector& box, AffineLinDomain& affine) const {
-	const ExprLabel& res = AffineLinEval().eval_label(*this,box);
-	affine = *res.af_lin;
-	return *res.d;
-}
-
-//Interval Function::eval_affine2(const IntervalVector& box) const {
-//	return eval_affine2_domain(box).i();
-//}
-
-AffineLin Function::eval_affine2(const AffineLinVector& box) const {
-	return eval_affine2_affinedomain(box).i();
-}
-
-Interval Function::eval_affine2(const IntervalVector& box, AffineLin& affine) const {
-	const ExprLabel& res = AffineLinEval().eval_label(*this,box);
-	affine = res.af_lin->i();
-	return res.d->i();
-}
-
-//IntervalVector Function::eval_affine2_vector(const IntervalVector& box) const {
-//	const ExprLabel& res = AffineLinEval().eval_label(*this,box);
-//	if (expr().dim.is_scalar() ) {
-//		return IntervalVector(1,res.d->i());
-//	} else {
-//		return res.d->v();
-//	}
-//}
-
-IntervalVector Function::eval_affine2_vector(const IntervalVector& box, AffineLinVector& affine) const {
-	const ExprLabel& res = AffineLinEval().eval_label(*this,box);
-	if (expr().dim.is_scalar() ) {
-		affine = AffineLinVector(1,res.af_lin->i());
-		return IntervalVector(1,res.d->i());
-	} else {
-		affine = res.af_lin->v();
-		return res.d->v();
-	}
-}
-
-AffineLinVector Function::eval_affine2_vector(const AffineLinVector& box) const {
-	const ExprLabel& res = AffineLinEval().eval_label(*this,box);
-	if (expr().dim.is_scalar() ) {
-		return AffineLinVector(1, res.af_lin->i());
-	} else {
-		return res.af_lin->v();
-	}
-}
-
-//IntervalMatrix Function::eval_affine2_matrix(const IntervalVector& box) const {
-//	const ExprLabel& res = AffineLinEval().eval_label(*this,box);
-//
-//	switch (expr().dim.type()) {
-//	case Dim::SCALAR     : {
-//		return IntervalMatrix(1,1,res.d->i());
-//	}
-//	case Dim::ROW_VECTOR : {
-//		IntervalMatrix M(image_dim(),1);
-//		M.set_row(0,res.d->v());
-//		return M;
-//	}
-//	case Dim::COL_VECTOR : {
-//		IntervalMatrix M(1,image_dim());
-//		M.set_col(0,res.d->v());
-//		return M;
-//	}
-//	case Dim::MATRIX: {
-//		return res.d->m();
-//	}
-//	default : {
-//		assert(false);
-//		return IntervalMatrix::empty(expr().dim.dim2, expr().dim.dim3);
-//	}
-//	}
-//}
-
-IntervalMatrix Function::eval_affine2_matrix(const IntervalVector& box, AffineLinMatrix& affine) const {
-	const ExprLabel& res = AffineLinEval().eval_label(*this,box);
-	affine = AffineLinMatrix(expr().dim.dim2, expr().dim.dim3);
-
-	switch (expr().dim.type()) {
-	case Dim::SCALAR     : {
-		affine[0][0] = res.af_lin->i();
-		return IntervalMatrix(1,1,res.d->i());
-	}
-	case Dim::ROW_VECTOR : {
-		affine.set_row(0,res.af_lin->v());
-		IntervalMatrix M(image_dim(),1);
-		M.set_row(0,res.d->v());
-		return M;
-	}
-	case Dim::COL_VECTOR : {
-		affine.set_col(0,res.af_lin->v());
-		IntervalMatrix M(1,image_dim());
-		M.set_col(0,res.d->v());
-		return M;
-	}
-	case Dim::MATRIX: {
-		affine = res.af_lin->m();
-		return res.d->m();
-	}
-	default : {
-		assert(false);
-		return IntervalMatrix::empty(expr().dim.dim2, expr().dim.dim3);
-	}
-	}
-}
-
-
-
-AffineLinMatrix Function::eval_affine2_matrix(const AffineLinVector& affine) const {
-	const ExprLabel& res = AffineLinEval().eval_label(*this,affine);
-
-	switch (expr().dim.type()) {
-	case Dim::SCALAR     : {
-		return AffineLinMatrix(1,1,res.af_lin->i());
-	}
-	case Dim::ROW_VECTOR : {
-		AffineLinMatrix M(image_dim(),1);
-		M.set_row(0,res.af_lin->v());
-		return M;
-	}
-	case Dim::COL_VECTOR : {
-		AffineLinMatrix M(1,image_dim());
-		M.set_col(0,res.af_lin->v());
-		return M;
-	}
-	case Dim::MATRIX: {
-		return res.af_lin->m();
-	}
-	default : {
-		assert(false);
-		return AffineLinMatrix::empty(expr().dim.dim2, expr().dim.dim3);
-	}
-	}
-}
-
-////////////////////////////////
-
-void Function::backward(const Domain& y, IntervalVector& x) const {
-	HC4Revise().proj(*this,y,x);
-}
-
-void Function::ibwd(const Domain& y, IntervalVector& x) const {
-	InHC4Revise().ibwd(*this,y,x);
-}
-
-void Function::ibwd(const Domain& y, IntervalVector& x, const IntervalVector& xin) const {
-	InHC4Revise().ibwd(*this,y,x,xin);
-}
-
-void Function::gradient(const IntervalVector& x, IntervalVector& g) const {
-	assert(g.size()==nb_var());
-	assert(x.size()==nb_var());
-	Gradient().gradient(*this,x,g);
-//	if (!df) ((Function*) this)->df=new Function(*this,DIFF);
-//	g=df->eval_vector(x);
 }
 
 void Function::jacobian(const IntervalVector& x, IntervalMatrix& J) const {
 	assert(J.nb_cols()==nb_var());
 	assert(x.size()==nb_var());
 	assert(J.nb_rows()==image_dim());
-	assert(expr().deco.d);
-	assert(expr().deco.g);
+
+	// calculate the gradient of each component of f
+	// TODO: we could take advantage of the DAG structure
+	// by calling just once the forward phase on f itself
+	for (int i=0; i<image_dim(); i++) {
+		(*this)[i].gradient(x,J[i]);
+		if (J[i].is_empty()) {
+			J.set_empty();
+			return;
+		}
+	}
+}
+
+void Function::jacobian(const IntervalVector& box, IntervalMatrix& J, const VarSet& set) const {
+
+	assert(J.nb_cols()==set.nb_var);
+	assert(box.size()==nb_var());
+	assert(J.nb_rows()==image_dim());
+
+	IntervalVector g(nb_var());
 
 	// calculate the gradient of each component of f
 	for (int i=0; i<image_dim(); i++) {
-		(*this)[i].gradient(x,J[i]);
+		(*this)[i].gradient(box,g);
+		J.set_row(i,set.var_box(g));
+	}
+}
+
+void Function::hansen_matrix(const IntervalVector& box, IntervalMatrix& H) const {
+	int n=nb_var();
+	int m=image_dim();
+
+	assert(H.nb_cols()==n);
+	assert(box.size()==n);
+	assert(H.nb_rows()==m);
+
+	IntervalVector x=box.mid();
+	IntervalMatrix J(m,n);
+
+	// test!
+//	int tab[box.size()];
+//	box.sort_indices(false,tab);
+//	int var;
+
+	for (int var=0; var<n; var++) {
+		//var=tab[i];
+		x[var]=box[var];
+		jacobian(x,J);
+                if (J.is_empty()) {
+                    H.set_empty();
+                    return;
+                }
+		H.set_col(var,J.col(var));
+	}
+
+}
+
+void Function::hansen_matrix(const IntervalVector& box, IntervalMatrix& H, const VarSet& set) const {
+	int n=set.nb_var;
+	int m=image_dim();
+
+	assert(H.nb_cols()==n);
+	assert(box.size()==nb_var());
+	assert(H.nb_rows()==m);
+
+	IntervalVector var_box=set.var_box(box);
+	IntervalVector param_box=set.param_box(box);
+
+	IntervalVector x=var_box.mid();
+	IntervalMatrix J(m,n);
+
+	for (int var=0; var<n; var++) {
+		//var=tab[i];
+		x[var]=var_box[var];
+		jacobian(set.full_box(x,param_box),J,set);
+                if (J.is_empty()) {
+                    H.set_empty();
+                    return;
+                }
+		H.set_col(var,J.col(var));
 	}
 }
 
@@ -388,84 +155,112 @@ void Function::print(std::ostream& os) const {
 	if (name!=NULL) os << name << ":";
 	os << "(";
 	for (int i=0; i<nb_arg(); i++) {
-		os << arg_name(i);
+		const ExprSymbol& x = arg(i);
+		os << x;
+		if (x.dim.nb_rows()>1) os << '[' << x.dim.nb_rows() << ']';
+		if (x.dim.nb_cols()>1) {
+			if (x.dim.nb_rows()==1) os << "[1]";
+			os << '[' << x.dim.nb_cols() << ']';
+		}
 		if (i<nb_arg()-1) os << ",";
 	}
 	os << ")->" << expr();
 }
 
-const ExprApply& Function::operator()(const ExprNode& arg1) const {
-	return ExprApply::new_(*this,Array<const ExprNode>(arg1));
+const ExprNode& Function::operator()(const ExprNode& arg1) const {
+	//return ExprApply::new_(*this,Array<const ExprNode>(arg1),expr());
+	return ExprCopy().copy(args(),Array<const ExprNode>(arg1),expr());
 }
-const ExprApply& Function::operator()(const ExprNode& arg1, const ExprNode& arg2) const {
-	return ExprApply::new_(*this,Array<const ExprNode>(arg1, arg2));
+const ExprNode& Function::operator()(const ExprNode& arg1, const ExprNode& arg2) const {
+	//return ExprApply::new_(*this,Array<const ExprNode>(arg1, arg2),expr());
+	return ExprCopy().copy(args(),Array<const ExprNode>(arg1, arg2),expr());
 }
-const ExprApply& Function::operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3) const {
-	return ExprApply::new_(*this,Array<const ExprNode>(arg1, arg2, arg3));
+const ExprNode& Function::operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3) const {
+	//return ExprApply::new_(*this,Array<const ExprNode>(arg1, arg2, arg3),expr());
+	return ExprCopy().copy(args(),Array<const ExprNode>(arg1, arg2, arg3),expr());
 }
-const ExprApply& Function::operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4) const {
-	return ExprApply::new_(*this,Array<const ExprNode>(arg1, arg2, arg3, arg4));
+const ExprNode& Function::operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4) const {
+	//return ExprApply::new_(*this,Array<const ExprNode>(arg1, arg2, arg3, arg4),expr());
+	return ExprCopy().copy(args(),Array<const ExprNode>(arg1, arg2, arg3, arg4),expr());
 }
-const ExprApply& Function::operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5) const {
-	return ExprApply::new_(*this,Array<const ExprNode>(arg1, arg2, arg3, arg4, arg5));
+const ExprNode& Function::operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5) const {
+	//return ExprApply::new_(*this,Array<const ExprNode>(arg1, arg2, arg3, arg4, arg5),expr());
+	return ExprCopy().copy(args(),Array<const ExprNode>(arg1, arg2, arg3, arg4, arg5),expr());
 }
-const ExprApply& Function::operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6) const {
-	return ExprApply::new_(*this,Array<const ExprNode>(arg1, arg2, arg3, arg4, arg5, arg6));
+const ExprNode& Function::operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6) const {
+	//return ExprApply::new_(*this,Array<const ExprNode>(arg1, arg2, arg3, arg4, arg5, arg6),expr());
+	return ExprCopy().copy(args(),Array<const ExprNode>(arg1, arg2, arg3, arg4, arg5, arg6),expr());
 }
-const ExprApply& Function::operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7) const {
-	return ExprApply::new_(*this,Array<const ExprNode>(arg1, arg2, arg3, arg4, arg5, arg6, arg7));
+const ExprNode& Function::operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7) const {
+	//return ExprApply::new_(*this,Array<const ExprNode>(arg1, arg2, arg3, arg4, arg5, arg6, arg7),expr());
+	return ExprCopy().copy(args(),Array<const ExprNode>(arg1, arg2, arg3, arg4, arg5, arg6, arg7),expr());
 }
-const ExprApply& Function::operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8) const {
-	return ExprApply::new_(*this,Array<const ExprNode>(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8));
+const ExprNode& Function::operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8) const {
+	//return ExprApply::new_(*this,Array<const ExprNode>(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8),expr());
+	return ExprCopy().copy(args(),Array<const ExprNode>(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8),expr());
 }
-const ExprApply& Function::operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9) const {
-	return ExprApply::new_(*this,Array<const ExprNode>(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9));
+const ExprNode& Function::operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9) const {
+	//return ExprApply::new_(*this,Array<const ExprNode>(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9),expr());
+	return ExprCopy().copy(args(),Array<const ExprNode>(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9),expr());
 }
-const ExprApply& Function::operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10) const {
-	return ExprApply::new_(*this,Array<const ExprNode>(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10));
+const ExprNode& Function::operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10) const {
+	//return ExprApply::new_(*this,Array<const ExprNode>(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10),expr());
+	return ExprCopy().copy(args(),Array<const ExprNode>(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10),expr());
 }
-const ExprApply& Function::operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10, const ExprNode& arg11) const {
-	return ExprApply::new_(*this,Array<const ExprNode>(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11));
+const ExprNode& Function::operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10, const ExprNode& arg11) const {
+	//return ExprApply::new_(*this,Array<const ExprNode>(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11),expr());
+	return ExprCopy().copy(args(),Array<const ExprNode>(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11),expr());
 }
-const ExprApply& Function::operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10, const ExprNode& arg11, const ExprNode& arg12) const {
-	return ExprApply::new_(*this,Array<const ExprNode>(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12));
+const ExprNode& Function::operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10, const ExprNode& arg11, const ExprNode& arg12) const {
+	//return ExprApply::new_(*this,Array<const ExprNode>(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12),expr());
+	return ExprCopy().copy(args(),Array<const ExprNode>(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12),expr());
 }
-const ExprApply& Function::operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10, const ExprNode& arg11, const ExprNode& arg12, const ExprNode& arg13) const {
-	return ExprApply::new_(*this,Array<const ExprNode>(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13));
+const ExprNode& Function::operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10, const ExprNode& arg11, const ExprNode& arg12, const ExprNode& arg13) const {
+	//return ExprApply::new_(*this,Array<const ExprNode>(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13),expr());
+	return ExprCopy().copy(args(),Array<const ExprNode>(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13),expr());
 }
-const ExprApply& Function::operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10, const ExprNode& arg11, const ExprNode& arg12, const ExprNode& arg13, const ExprNode& arg14) const {
-	return ExprApply::new_(*this,Array<const ExprNode>(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14));
+const ExprNode& Function::operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10, const ExprNode& arg11, const ExprNode& arg12, const ExprNode& arg13, const ExprNode& arg14) const {
+	//return ExprApply::new_(*this,Array<const ExprNode>(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14),expr());
+	return ExprCopy().copy(args(),Array<const ExprNode>(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14),expr());
 }
-const ExprApply& Function::operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10, const ExprNode& arg11, const ExprNode& arg12, const ExprNode& arg13, const ExprNode& arg14, const ExprNode& arg15) const {
-	return ExprApply::new_(*this,Array<const ExprNode>(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15));
+const ExprNode& Function::operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10, const ExprNode& arg11, const ExprNode& arg12, const ExprNode& arg13, const ExprNode& arg14, const ExprNode& arg15) const {
+	//return ExprApply::new_(*this,Array<const ExprNode>(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15),expr());
+	return ExprCopy().copy(args(),Array<const ExprNode>(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15),expr());
 }
-const ExprApply& Function::operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10, const ExprNode& arg11, const ExprNode& arg12, const ExprNode& arg13, const ExprNode& arg14, const ExprNode& arg15, const ExprNode& arg16) const {
-	return ExprApply::new_(*this,Array<const ExprNode>(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16));
+const ExprNode& Function::operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10, const ExprNode& arg11, const ExprNode& arg12, const ExprNode& arg13, const ExprNode& arg14, const ExprNode& arg15, const ExprNode& arg16) const {
+	//return ExprApply::new_(*this,Array<const ExprNode>(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16),expr());
+	return ExprCopy().copy(args(),Array<const ExprNode>(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16),expr());
 }
-const ExprApply& Function::operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10, const ExprNode& arg11, const ExprNode& arg12, const ExprNode& arg13, const ExprNode& arg14, const ExprNode& arg15, const ExprNode& arg16, const ExprNode& arg17) const {
-	return ExprApply::new_(*this,Array<const ExprNode>(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17));
+const ExprNode& Function::operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10, const ExprNode& arg11, const ExprNode& arg12, const ExprNode& arg13, const ExprNode& arg14, const ExprNode& arg15, const ExprNode& arg16, const ExprNode& arg17) const {
+	//return ExprApply::new_(*this,Array<const ExprNode>(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17),expr());
+	return ExprCopy().copy(args(),Array<const ExprNode>(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17),expr());
 }
-const ExprApply& Function::operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10, const ExprNode& arg11, const ExprNode& arg12, const ExprNode& arg13, const ExprNode& arg14, const ExprNode& arg15, const ExprNode& arg16, const ExprNode& arg17, const ExprNode& arg18) const {
-	return ExprApply::new_(*this,Array<const ExprNode>(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18));
+const ExprNode& Function::operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10, const ExprNode& arg11, const ExprNode& arg12, const ExprNode& arg13, const ExprNode& arg14, const ExprNode& arg15, const ExprNode& arg16, const ExprNode& arg17, const ExprNode& arg18) const {
+	//return ExprApply::new_(*this,Array<const ExprNode>(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18),expr());
+	return ExprCopy().copy(args(),Array<const ExprNode>(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18),expr());
 }
-const ExprApply& Function::operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10, const ExprNode& arg11, const ExprNode& arg12, const ExprNode& arg13, const ExprNode& arg14, const ExprNode& arg15, const ExprNode& arg16, const ExprNode& arg17, const ExprNode& arg18, const ExprNode& arg19) const {
-	return ExprApply::new_(*this,Array<const ExprNode>(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19));
+const ExprNode& Function::operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10, const ExprNode& arg11, const ExprNode& arg12, const ExprNode& arg13, const ExprNode& arg14, const ExprNode& arg15, const ExprNode& arg16, const ExprNode& arg17, const ExprNode& arg18, const ExprNode& arg19) const {
+	//return ExprApply::new_(*this,Array<const ExprNode>(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19),expr());
+	return ExprCopy().copy(args(),Array<const ExprNode>(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19),expr());
 }
-const ExprApply& Function::operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10, const ExprNode& arg11, const ExprNode& arg12, const ExprNode& arg13, const ExprNode& arg14, const ExprNode& arg15, const ExprNode& arg16, const ExprNode& arg17, const ExprNode& arg18, const ExprNode& arg19, const ExprNode& arg20) const {
-	return ExprApply::new_(*this,Array<const ExprNode>(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20));
+const ExprNode& Function::operator()(const ExprNode& arg1, const ExprNode& arg2, const ExprNode& arg3, const ExprNode& arg4, const ExprNode& arg5, const ExprNode& arg6, const ExprNode& arg7, const ExprNode& arg8, const ExprNode& arg9, const ExprNode& arg10, const ExprNode& arg11, const ExprNode& arg12, const ExprNode& arg13, const ExprNode& arg14, const ExprNode& arg15, const ExprNode& arg16, const ExprNode& arg17, const ExprNode& arg18, const ExprNode& arg19, const ExprNode& arg20) const {
+	//return ExprApply::new_(*this,Array<const ExprNode>(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20),expr());
+	return ExprCopy().copy(args(),Array<const ExprNode>(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20),expr());
 }
 
-const ExprApply& Function::operator()(const vector<const ExprNode*>& arg) const {
+const ExprNode& Function::operator()(const vector<const ExprNode*>& arg) const {
 	Array<const ExprNode> tmp(arg.size());
 	assert(nb_arg()==(int)arg.size());
 	for (unsigned int i=0; i<arg.size(); i++)
 		tmp.set_ref(i,*arg[i]);
-	return ExprApply::new_(*this, tmp);
+	//	return ExprApply::new_(*this, tmp);
+	return ExprCopy().copy(args(),tmp,expr());
 }
 
-const ExprApply& Function::operator()(const Array<const ExprNode>& args) const {
-	assert(nb_arg()==args.size());
-	return ExprApply::new_(*this,args);
+const ExprNode& Function::operator()(const Array<const ExprNode>& new_args) const {
+	assert(nb_arg()==new_args.size());
+//	return ExprApply::new_(*this,args);
+	return ExprCopy().copy(args(),new_args,expr());
 }
 
 #define CONCAT(a,b)         CONCAT_HIDDEN(a,b)

@@ -12,27 +12,42 @@
 #ifndef __TEST_NUM_CONSTRAINT_H__
 #define __TEST_NUM_CONSTRAINT_H__
 
-#include "cpptest.h"
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
 #include "utils.h"
 
 namespace ibex {
 
-class TestNumConstraint : public TestIbex {
+class TestNumConstraint : public CppUnit::TestFixture {
 
 public:
-	TestNumConstraint() {
-		TEST_ADD(TestNumConstraint::build_from_string01);
-		TEST_ADD(TestNumConstraint::build_from_string02);
-		TEST_ADD(TestNumConstraint::is_thick_eq01);
-		TEST_ADD(TestNumConstraint::is_thick_eq02);
-	}
+
+	CPPUNIT_TEST_SUITE(TestNumConstraint);
+
+	CPPUNIT_TEST(build_from_string01);
+	CPPUNIT_TEST(build_from_string02);
+
+	CPPUNIT_TEST(build_from_file01);
+	CPPUNIT_TEST(build_from_file02);
+	CPPUNIT_TEST(is_thick_eq01);
+	CPPUNIT_TEST(is_thick_eq02);
+	
+	CPPUNIT_TEST_SUITE_END();
 
 	void build_from_string01();
 	void build_from_string02();
+	void build_from_file01();
+
+	// check that only the first constraint in the file
+	// is loaded
+	void build_from_file02();
 	void is_thick_eq01();
 	void is_thick_eq02();
 
 };
+
+CPPUNIT_TEST_SUITE_REGISTRATION(TestNumConstraint);
+
 
 } // end namespace
 

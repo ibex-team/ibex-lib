@@ -10,24 +10,22 @@
  * ---------------------------------------------------------------------------- */
 
 #include <sstream>
-#include "ibex_Dim.h"
-#include "ibex_DimException.h"
 #include <cassert>
+
+#include "ibex_Dim.h"
+#include "ibex_DoubleIndex.h"
 
 using std::stringstream;
 
 namespace ibex {
 
 /** Build the three-dimensional structure. */
-Dim::Dim(int dim1_, int dim2_, int dim3_) : dim1(dim1_), dim2(dim2_), dim3(dim3_), cst_vec(false) {
+Dim::Dim(int dim2_, int dim3_) : dim2(dim2_), dim3(dim3_), cst_vec(false) {
 
-	assert(dim1_>0 && dim2_>0 && dim3_>0);
+	assert(dim2_>0 && dim3_>0);
 }
 
 Dim add_dim(Dim& l, Dim& r) {
-	if (l.dim1!=1 || r.dim1!=1)
-		throw DimException("cannot add/subtract a matrix array");
-
 	if (l==r) {
 		if (!l.cst_vec || !r.cst_vec) { // either l or r "fixes" the dimension of the other
 			l.cst_vec=false;
@@ -40,12 +38,12 @@ Dim add_dim(Dim& l, Dim& r) {
 	if (l.is_scalar())
 		throw DimException("cannot add a scalar to a vector/matrix");
 	else if (l.is_vector()) {
-		if (l.dim2==1 && r.cst_vec && l.dim3==r.dim2) {  // row vector + constant vector
+		if (l.nb_rows()==1 && r.cst_vec && l.nb_cols()==r.nb_rows()) {  // row vector + constant vector
 			assert(r.is_vector());
 			r = l;                     // transpose
 			r.cst_vec=false;
 			return l;
-		} else if (r.dim2==1 && l.cst_vec && r.dim3==l.dim2) {
+		} else if (r.nb_rows()==1 && l.cst_vec && r.nb_cols()==l.nb_rows()) {
 			assert(l.is_vector());
 			l = r;                     // transpose
 			r.cst_vec=false;
@@ -59,27 +57,21 @@ Dim add_dim(Dim& l, Dim& r) {
 }
 
 Dim mul_dim(const Dim& l, const Dim& r) {
-	if (l.dim1!=1 || r.dim1!=1)
-		throw DimException("cannot multiply a matrix array");
-
 	if (l.type()==Dim::SCALAR) // scalar multiplication.
 		return r; // cst_vec is maintained.
 	else {
-		if (l.dim3!=r.dim2) {
-			if (l.dim2==r.dim2) {
-				if (r.dim3==1) // dot product
-					return Dim::scalar();
-				else // vector-matrix product
-					return Dim::row_vec(r.dim3);
-			}
+		if (l.nb_cols()!=r.nb_rows()) {
+			if (l.nb_rows()==r.nb_rows() && l.nb_cols()==1 && r.nb_cols()==1) return Dim::scalar(); // dot product of row vectors
+			if (l.nb_cols()==r.nb_cols() && l.nb_rows()==1 && r.nb_rows()==1) return Dim::scalar(); // dot product of column vectors
+
 			throw DimException("mismatched dimensions in matrix multiplication");
 		} else {
-			if (l.dim2==1)
-				if (r.dim3==1) return Dim::scalar();
-				else return Dim::row_vec(r.dim3);
+			if (l.nb_rows()==1)
+				if (r.nb_cols()==1) return Dim::scalar();
+				else return Dim::row_vec(r.nb_cols()); // vector-matrix product
 			else
-				if (r.dim3==1) return Dim::col_vec(l.dim2);
-				else return Dim::matrix(l.dim2,r.dim3);
+				if (r.nb_cols()==1) return Dim::col_vec(l.nb_rows());
+				else return Dim::matrix(l.nb_rows(),r.nb_cols());
 		}
 	}
 }
@@ -91,90 +83,98 @@ Dim vec_dim(const Array<const Dim>& comp, bool in_a_row) {
 
 	const Dim& d=comp[0];
 
-	if (d.is_scalar()) {
-		if (in_a_row) {
-			for (int i=0; i<n; i++)
-				// we could allow concatenation of
-				// row vectors of different size
-				// in a single row vector;
-				// (but not implemented yet)
-				if (comp[i].type()!=Dim::SCALAR) goto error;
-			return Dim::row_vec(n);
+	if (in_a_row) {
+		int row_dim = d.nb_rows(); // the number of rows is fixed
+		int total_cols=0;
+		for (int i=0; i<n; i++) {
+			// we can concatenate row vectors of different size
+			// in a single row vector or matrices/column vectors
+			// with the right number of rows
+			if (comp[i].nb_rows()!=row_dim) goto error;
+			total_cols+=comp[i].nb_cols();
 		}
-		else {
-			for (int i=0; i<n; i++)
-				// we could allow concatenation of
-				// column vectors of different size
-				// in a single column vector;
-				// (but not implemented yet)
-				if (comp[i].type()!=Dim::SCALAR) goto error;
-			return Dim::col_vec(n);
+		return Dim::matrix(row_dim,total_cols);
+	} else {
+		int col_dim = d.nb_cols(); // the number of columns is fixed
+		int total_rows=0;
+		for (int i=0; i<n; i++) {
+			// we can concatenate column vectors of different size
+			// in a single column vector or matrices/row vectors
+			// with the right number of columns
+			if (comp[i].nb_cols()!=col_dim) goto error;
+			total_rows+=comp[i].nb_rows();
 		}
-	} else if (d.is_vector()) {
-		if (in_a_row) {
-			for (int i=0; i<n; i++)
-				// same comment as above: we could also
-				// put matrices with different number of columns
-				// in a row. Not implemented. Only column vectors are accepted
-				if (comp[i].type()!=Dim::COL_VECTOR || comp[i].dim2!=d.dim2) goto error;
-			return Dim::matrix(d.dim2,n);
-		} else {
-			for (int i=0; i<n; i++) {
-				// same comment as above: we could also
-				// put matrices with different number of rows
-				// in column. Not implemented. Only row vectors are accepted
-				if (comp[i].type()!=Dim::ROW_VECTOR || comp[i].dim3!=d.dim3) goto error;
-			}
-			return Dim::matrix(n,d.dim3);
-		}
-	}
-
-	// notice: array of matrix expressions are only used
-	// so far in unvectorizing (for symbols corresponding to matrix arrays)
-	else if (d.type()==Dim::MATRIX) {
-		for (int i=0; i<n; i++)
-			if (comp[i].type()!=Dim::MATRIX || comp[i].dim2!=d.dim2 || comp[i].dim3!=d.dim3) goto error;
-		return Dim::matrix_array(n,d.dim2,d.dim3);
+		return Dim::matrix(total_rows,col_dim);
 	}
 
 	error:
 	throw DimException("impossible to form a vector with heterogeneous components");
 }
 
-Dim Dim::index_dim() const {
+//Dim Dim::index_dim() const {
+//
+//  if (nb_rows()==1 || nb_cols()==1) // vector or scalar
+//	  return scalar();
+//  else // matrix
+//	  return row_vec(nb_cols()); // return a row vector
+//}
 
-  const Dim& dim=*this;
+Dim Dim::index_dim(const DoubleIndex& idx) const {
 
-  if (dim.dim2==1 && dim.dim3==1) {
-	  return Dim::scalar();
-	  // we allow x[1] for x scalar
-	  // old error message -> "Too many subscripts (e.g., a vector symbol cannot be indexed twice)";
-  }
-  if (dim.dim1>1) // array of matrices
-	  return Dim(1,dim.dim2,dim.dim3);
-  else
-	  if (dim.dim2==1 || dim.dim3==1) // vector
-		  return Dim(1,1,1);
-	  else // matrix
-		  return Dim(1,1,dim.dim3); // return a row vector
+	if (idx.all_rows()) {
+		if (idx.all_cols())
+			return *this;
+		else if (idx.one_col()) {
+			switch(type()) {
+			case MATRIX: return col_vec(nb_rows());
+			case COL_VECTOR: return *this;
+			case ROW_VECTOR:
+			case SCALAR: return scalar();
+			default: ibex_error("index_dim: the object is not a scalar, nor an vector nor a matrix");
+			}
+		} else {
+			if (is_matrix()) return matrix(nb_rows(),idx.nb_cols());
+			else             return row_vec(idx.nb_cols());
+		}
+	} else if (idx.one_row()) {
+		if (idx.all_cols()) {
+			switch(type()) {
+			case MATRIX: return row_vec(nb_cols());
+			case ROW_VECTOR: return *this;
+			case COL_VECTOR:
+			case SCALAR: return scalar();
+			default: ibex_error("index_dim: the object is not a scalar, nor an vector nor a matrix");
+			}
+		} else if (idx.one_col())
+			return scalar();
+		else
+			return row_vec(idx.nb_cols());
+	} else {
+		if (idx.all_cols()) {
+			if (is_matrix()) return matrix(idx.nb_rows(),nb_cols());
+			else             return col_vec(idx.nb_rows());
+		}
+		if (idx.one_col()) {
+			return col_vec(idx.nb_rows());
+		} else {
+			return matrix(idx.nb_rows(),idx.nb_cols());
+		}
+	}
 }
 
-int Dim::max_index() const {
-	if (is_scalar()) return 0;
-	else if (is_vector()) return vec_size()-1;
-	else if (type()==MATRIX) return dim2-1;
-	else return dim1-1;
-}
+//int Dim::max_index() const {
+//	if (is_scalar()) return 0;
+//	else if (is_vector()) return vec_size()-1;
+//	else return nb_rows()-1;
+//}
 
 Dim Dim::transpose_dim() const {
 	switch (type()) {
-	case SCALAR:       return *this;
+	case SCALAR:       return scalar();
 	case ROW_VECTOR:   return col_vec(vec_size());
 	case COL_VECTOR:   return row_vec(vec_size());
-	case MATRIX:       return matrix(dim3,dim2);
-	case MATRIX_ARRAY:
-	default:           throw DimException("cannot transpose an array of matrices");
-	                   return *this;
+	case MATRIX:       return matrix(nb_cols(),nb_rows());
+	default: ibex_error("transpose_dim: the object is not a scalar, nor an vector nor a matrix");
 	}
 }
 
@@ -185,10 +185,10 @@ int Dim::index_num(int this_num, int index) const {
 
   if (index<=0) throw DimException("Null index (note: indexes start from 1)");
 
-  if (this->dim3==0) throw DimException("Too many subscripts (e.g., a vector symbol cannot be indexed twice)");
+  if (this->nb_cols()==0) throw DimException("Too many subscripts (e.g., a vector symbol cannot be indexed twice)");
 
-  if (this->dim2==0) {
-    if (index>this->dim3)  {
+  if (this->nb_rows()==0) {
+    if (index>this->nb_cols())  {
       stringstream s;
       s << "Index (" << index << ") exceeds bounds";
       throw DimException(s.str());
@@ -196,26 +196,30 @@ int Dim::index_num(int this_num, int index) const {
     num+=(index-1);
   }
   else if (this->dim1==0) {
-    if (index>this->dim2)  {
+    if (index>this->nb_rows())  {
       stringstream s;
       s << "Index (" << index << ") exceeds bounds";
       throw DimException(s.str());
     }
-    num+=(index-1) * this->dim3;
+    num+=(index-1) * this->nb_cols();
   } else {
     if (index>this->dim1)  {
       stringstream s;
       s << "Index (" << index << ") exceeds bounds";
       throw DimException(s.str());
     }
-    num+=(index-1) * this->dim2 * this->dim3;
+    num+=(index-1) * this->nb_rows() * this->nb_cols();
   }
   return num;
 }
 */
 
 std::ostream& operator<<(std::ostream& os, const Dim& d) {
-  return os << d.dim1 << ", " << d.dim2 << ", " << d.dim3;
+  return os << d.nb_rows() << "x" << d.nb_cols();
 }
 
+std::ostream& operator<< (std::ostream& os, const DimException& e) {
+  os << "Dimension mismatch: " << e.message();
+  return os;
+}
 } // namespace ibex

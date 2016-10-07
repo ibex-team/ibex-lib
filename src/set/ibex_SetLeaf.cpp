@@ -220,20 +220,22 @@ SetNode* SetLeaf::inter(bool iset, const IntervalVector& nodebox, Sep& sep, doub
 	sep.separate(box1,box2);
 
 	if (nodebox.max_diam()<=eps) {
-		if (box1.is_empty()) status=YES;
-		else if (box2.is_empty()) status=NO;
+		if (box1.is_empty()) status=sep.status1();
+		else if (box2.is_empty()) status=sep.status2();
 		else if (!iset) status = MAYBE;
 		return this;
 	}
 
-	pair<SetNode*,SetLeaf*> new_nodes2=diff(nodebox, box1, YES, MAYBE, 0);
+	BoolInterval tmp_leaf2_status = sep.status1()==YES? MAYBE : YES;
+	pair<SetNode*,SetLeaf*> new_nodes2=diff(nodebox, box1, sep.status1(), tmp_leaf2_status, 0);
 
 	SetNode* root2=new_nodes2.first;
 	SetLeaf* leaf2=new_nodes2.second;
 
 	if (leaf2!=NULL) {
 
-		pair<SetNode*,SetLeaf*> new_nodes3=diff(box1, box2, NO, MAYBE, 0);
+		BoolInterval tmp_leaf3_status = sep.status2()==YES? MAYBE : YES;
+		pair<SetNode*,SetLeaf*> new_nodes3=diff(box1, box2, sep.status2(), tmp_leaf3_status, 0);
 
 		SetNode* root3=new_nodes3.first;
 		SetLeaf* leaf3=new_nodes3.second;
@@ -248,21 +250,29 @@ SetNode* SetLeaf::inter(bool iset, const IntervalVector& nodebox, Sep& sep, doub
 		if (leaf3!=NULL) {
 
 			IntervalVector box=box1 & box2;
+			SetNode* root4;
 
-			int var=box.extr_diam_index(false);
-			pair<IntervalVector,IntervalVector> p=box.bisect(var);
-			double pt=p.first[var].ub();
-			assert(box[var].interior_contains(pt));
+			if (box.max_diam()>eps) {
+				int var=box.extr_diam_index(false);
+				pair<IntervalVector,IntervalVector> p=box.bisect(var);
+				double pt=p.first[var].ub();
+				assert(box[var].interior_contains(pt));
 
-			SetNode* left = new SetLeaf(status);
-			SetNode* right = new SetLeaf(status);
+				SetNode* left = new SetLeaf(status);
+				SetNode* right = new SetLeaf(status);
 
-			SetBisect* bis = new SetBisect(var, pt);
-			bis->left = left->inter(iset, p.first, sep, eps);
-			bis->left->father = bis;
-			bis->right = right->inter(iset, p.second, sep, eps);
-			bis->right->father = bis;
-			SetNode* root4=bis->try_merge();
+				SetBisect* bis = new SetBisect(var, pt);
+				bis->left = left->inter(iset, p.first, sep, eps);
+				bis->left->father = bis;
+				bis->right = right->inter(iset, p.second, sep, eps);
+				bis->right->father = bis;
+				root4=bis->try_merge();
+			} else {
+				root4=new SetLeaf(status);
+				root4=root4->inter(iset, box, sep, eps);
+			}
+
+			//TODO : we may have two sons with same status!
 
 			if (leaf3==root2) {
 				delete root2;
@@ -367,6 +377,7 @@ void SetLeaf::print(ostream& os, const IntervalVector& nodebox, int shift) const
 }
 
 void SetLeaf::replace_with(SetNode* node) {
+	if (this==node) return;
 	if (father!=NULL) {
 		if (this==father->left)
 			father->left=node;

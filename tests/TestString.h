@@ -12,24 +12,30 @@
 #ifndef __TEST_STRING_H__
 #define __TEST_STRING_H__
 
-#include "cpptest.h"
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
 #include "ibex_String.h"
 #include "utils.h"
 
 namespace ibex {
 
-class TestString : public TestIbex {
+class TestString : public CppUnit::TestFixture {
 
 public:
-	TestString() {
 
-		TEST_ADD(TestString::test01);
-		TEST_ADD(TestString::test02);
-	}
+	CPPUNIT_TEST_SUITE(TestString);
+	
+
+		CPPUNIT_TEST(test01);
+		CPPUNIT_TEST(test02);
+	CPPUNIT_TEST_SUITE_END();
 
 	void test01();
 	void test02();
 };
+
+CPPUNIT_TEST_SUITE_REGISTRATION(TestString);
+
 
 } // namespace ibex
 #endif // __TEST_STRING_H__

@@ -27,7 +27,7 @@ namespace ibex {
 class Expr2DAG : public virtual ExprVisitor {
 public:
 	/**
-	 * \brief Transform e to a DAG
+	 * \brief Transform y to a DAG
 	 */
 	const ExprNode& transform(const Array<const ExprSymbol>& old_x, const Array<const ExprNode>& new_x, const ExprNode& y);
 

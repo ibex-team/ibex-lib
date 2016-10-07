@@ -62,27 +62,31 @@ ExprSubNodes::ExprSubNodes() : tab(NULL), _size(0) {
 }
 
 ExprSubNodes::ExprSubNodes(const ExprNode& e) {
-	init(NULL, e);
+	init(NULL, e, true);
 }
 
 ExprSubNodes::ExprSubNodes(Array<const ExprNode> exprs) {
-	init(NULL, exprs);
+	init(NULL, exprs, false);
 }
 
-ExprSubNodes::ExprSubNodes(const Array<const ExprSymbol>& args, const ExprNode& e) {
-	init(&args, e);
+ExprSubNodes::ExprSubNodes(const Array<const ExprSymbol>& args, const ExprNode& e, bool var_DFS) {
+	init(&args, e, var_DFS);
 }
 
-void ExprSubNodes::init(const Array<const ExprSymbol>* args, const Array<const ExprNode>& e) {
+void ExprSubNodes::init(const Array<const ExprSymbol>* args, const Array<const ExprNode>& e, bool symb_DFS) {
 
-	ExprNodes en(args);
+	ExprNodes en(symb_DFS? NULL : args);
 
 	for (int i=0; i<e.size(); i++)
 		en.visit(e[i]);
 
-	if (args)
-		for (int i=0; i<args->size(); i++)
-			en.nodes.push_back(&(*args)[i]);
+	if (args) {
+		for (int i=0; i<args->size(); i++) {
+			if (!symb_DFS || (symb_DFS && !en.visited.found((*args)[i]))) {
+				en.nodes.push_back(&(*args)[i]);
+			}
+		}
+	}
 
 	_size=en.nodes.size();
 
@@ -93,7 +97,7 @@ void ExprSubNodes::init(const Array<const ExprSymbol>* args, const Array<const E
 	int i=0;
 
 	// ============ 1st method ============
-	// It apperas that with the problem bearing.bch, the following order
+	// It appears that with the problem bearing.bch, the following order
 	// gives much better results... but we loses
 	// reproducibility (because, by copying an expression,
 	// the ids hence the order changes)

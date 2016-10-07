@@ -32,12 +32,15 @@ The API of Ibex can be broken into three layers:
 
 - An extended (symbolic-numeric) interval calculator
 - A contractor programming library
-- A system solver / global optimizer
+- A system solver / global optimizer (supplied as a plugin since Release 2.2)
 
 Each usage corresponds to a different layer and each layer is built on top of the previous one.
 
-Ibex does not include low-level interval arithmetic. It can be compiled with different existing implementations such as `Gaol`_, `Filib`_ or `Profil/Bias`_. 
-It can also be linked with different linear solvers, `Cplex`_, `Soplex`_ or `CLP`_.
+Ibex does not include low-level interval arithmetic but uses a third library (Ibex is currently 
+automatically compiled either with `Gaol`_ or `Filib`_ , depending on your platform).
+
+.. It can be compiled with different existing implementations such as `Gaol`_, `Filib`_ or `Profil/Bias`_. 
+.. It can also be linked with different linear solvers, `Cplex`_, `Soplex`_ or `CLP`_.
 
 .. _Gaol: http://sourceforge.net/projects/gaol
 .. _Filib: http://www2.math.uni-wuppertal.de/~xsc/software/filib.html
@@ -107,6 +110,5 @@ Ibex contains a variety of built-in operators (HC4, Shaving, ACID, X-newton, q-i
 System solving and global optimization
 --------------------------------------
 
-Finally, Ibex also comes with a default black-box solver and global optimizer for immediate usage.
-See the :ref:`tuto`.
+Finally, Ibex proposes various plugins. In particular, the IbexOpt plugin is dedicated to optimization and system solving and comes with a default black-box solver and global optimizer for immediate usage. See the :ref:`IbexOpt documentation <ibex-opt>`.
 

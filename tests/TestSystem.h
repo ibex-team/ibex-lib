@@ -12,31 +12,34 @@
 #ifndef __TEST_SYSTEM_H__
 #define __TEST_SYSTEM_H__
 
-#include "cpptest.h"
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
 #include "utils.h"
 
 namespace ibex {
 
-class TestSystem : public TestIbex {
+class TestSystem : public CppUnit::TestFixture {
 
 public:
-	TestSystem() {
-		TEST_ADD(TestSystem::factory01);
-		TEST_ADD(TestSystem::factory02);
-		TEST_ADD(TestSystem::copy01);
-		TEST_ADD(TestSystem::copy02);
-		TEST_ADD(TestSystem::ineq_only01);
-		TEST_ADD(TestSystem::eq_only01);
-		TEST_ADD(TestSystem::normalize01);
-//		TEST_ADD(TestSystem::normalize02);
-		TEST_ADD(TestSystem::extend01);
-		TEST_ADD(TestSystem::extend02);
-//		TEST_ADD(TestSystem::extend02);
-		TEST_ADD(TestSystem::merge01);
-		TEST_ADD(TestSystem::merge02);
-		TEST_ADD(TestSystem::merge03);
-		TEST_ADD(TestSystem::merge04);
-	}
+
+	CPPUNIT_TEST_SUITE(TestSystem);
+	
+		CPPUNIT_TEST(factory01);
+		CPPUNIT_TEST(factory02);
+		CPPUNIT_TEST(copy01);
+		CPPUNIT_TEST(copy02);
+		CPPUNIT_TEST(ineq_only01);
+		CPPUNIT_TEST(eq_only01);
+		CPPUNIT_TEST(normalize01);
+//		CPPUNIT_TEST(normalize02);
+		CPPUNIT_TEST(extend01);
+		CPPUNIT_TEST(extend02);
+//		CPPUNIT_TEST(extend02);
+		CPPUNIT_TEST(merge01);
+		CPPUNIT_TEST(merge02);
+		CPPUNIT_TEST(merge03);
+		CPPUNIT_TEST(merge04);
+	CPPUNIT_TEST_SUITE_END();
 
 	void factory01();
 	void factory02();
@@ -54,6 +57,9 @@ public:
 	void merge03();
 	void merge04();
 };
+
+CPPUNIT_TEST_SUITE_REGISTRATION(TestSystem);
+
 
 } // end namespace
 
