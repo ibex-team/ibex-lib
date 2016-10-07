@@ -1,0 +1,55 @@
+
+optim.
+
+pour l'optimiseur  remplacer le 1.e-15  dans ymax 
+(vérifier que c'est mieux)
+
+-  mettre la branche dans le plugin 
+
+code Ignacio 
+
+
+- lsmear ?
+- feasible diving :  passage dans le plugin optim ?
+
+
+----------------------------------------------------------------------------
+
+optimisation gestion  liste points   (1 seul new et delete)  : peut être un peu compliqué.
+
+
+branche courante : finir intégration des différentes méthodes  
+en particulier dans le plugin param-estim   y mettre projF
+
+
+tout mettre dans le plugin  estim-param 
+     stratégies
+     contracteurs
+     combinatoire 
+
+
+
+
+
+
+code Qinter :  l'industrialiser un minimum ...
+question sur solver ?
+     paramétré pour la qinter 
+     duplication de code  ou   modification du solver de base ??
+
+
+
+explications des fichiers ...
+
+idem pour estimparam.
+
+a faire:
+pour les plans, 
+  - separation création des modèles et résolution 
+    -> base de modèles  " nuages de points " 
+
+modèles aléatoires ?
+
+
+pour les cercles : revoir les 2 modélisations Circle et Circle2
+

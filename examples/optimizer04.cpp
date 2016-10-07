@@ -15,6 +15,7 @@ const double default_relax_ratio = 0.2;
 
 using namespace std;
 using namespace ibex;
+
 int main(int argc, char** argv){
 
 
@@ -38,7 +39,7 @@ int main(int argc, char** argv){
 	double timelimit = atof(argv[7]);
 	double eqeps= 1.e-8;
 
-	RNG::srand(1);
+	RNG::srand(atoi(argv[8]));
 
 	// the extended system 
 	ExtendedSystem ext_sys(sys,eqeps);
@@ -104,11 +105,15 @@ int main(int argc, char** argv){
 	cpoints.push_back(LinearRelaxXTaylor::RANDOM_INV);
 
 	LinearRelax* lr;
+
 	if (linearrelaxation=="art")
 	  lr= new LinearRelaxCombo(ext_sys,LinearRelaxCombo::ART);
 	else if  (linearrelaxation=="compo")
 	  lr= new LinearRelaxCombo(ext_sys,LinearRelaxCombo::COMPO);
-	else if (linearrelaxation=="xn")
+	
+	else
+
+	if (linearrelaxation=="xn")
 	  lr= new LinearRelaxXTaylor (ext_sys,cpoints);
 	//	else {cout << linearrelaxation  <<  " is not an implemented  linear relaxation mode "  << endl; return -1;}
 	// fixpoint linear relaxation , hc4  with default fix point ratio 0.2
@@ -136,7 +141,7 @@ int main(int argc, char** argv){
 	cout << " sys.box " << sys.box << endl;
 
 	// the trace 
-	o.trace=1;
+	o.trace=0;
 
 	// the allowed time for search
 	o.timeout=timelimit;

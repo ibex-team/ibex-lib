@@ -79,4 +79,15 @@ void Ctc::contract(Set& set, double eps) {
 }
 
 
+
+ bool Ctc::side_effects() {return _side_effects;}
+
+  void Ctc::enable_side_effects()
+  { //cout << " adding side effects " << endl; 
+    _side_effects=true;}
+
+  void Ctc::disable_side_effects()
+  { //cout << " removing side effects " << endl; 
+    _side_effects=false;}
+
 } // namespace ibex
