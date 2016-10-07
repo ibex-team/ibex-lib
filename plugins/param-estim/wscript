@@ -18,7 +18,7 @@ def configure (conf):
 	# add PARAM_ESTIM plugin include directory
 	conf.env.append_unique("INCLUDES","../../plugins/param-estim/src")
 	conf.env.append_unique("INCLUDES","../../plugins/param-estim/src/cliquer")
-	
+        conf.env.append_unique("INCLUDES","../../plugins/param-estim/src/contractor")
 def build (bld):
 		
 	if not bld.env.WITH_PARAM_ESTIM: 
