@@ -51,13 +51,13 @@ void Optimizer::read_ext_box(const IntervalVector& ext_box, IntervalVector& box)
 Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, double prec,
 		double goal_rel_prec, double goal_abs_prec, int sample_size, double equ_eps,
 		bool rigor,  int critpr,CellCostFunc::criterion crit2) :
-				Optim( *new CellDoubleHeap(*new CellCostVarLB(n), *CellCostFunc::get_cost(crit2, n), critpr),// first buffer with LB, second buffer with ct (default UB))
+				Optim(user_sys.nb_var, *new CellDoubleHeap(*new CellCostVarLB(user_sys.nb_var), *CellCostFunc::get_cost(crit2, user_sys.nb_var), critpr),// first buffer with LB, second buffer with ct (default UB))
 						prec, goal_rel_prec, goal_abs_prec, sample_size),
                 				user_sys(user_sys), sys(user_sys,equ_eps),
-                				n(user_sys.nb_var), m(sys.nb_ctr) /* (warning: not user_sys.nb_ctr) */,
+                				m(sys.nb_ctr) /* (warning: not user_sys.nb_ctr) */,
                 				ext_sys(user_sys,equ_eps),
                 				ctc(ctc),bsc(bsc),
-                				mono_analysis_flag(true), in_HC4_flag(true), trace(false),
+                				mono_analysis_flag(true), in_HC4_flag(true),
                 				pseudo_loup(POS_INFINITY), loup_box(n),
                 				df(NULL), rigor(rigor),
                 				entailed(NULL), nb_simplex(0), nb_rand(0), diam_simplex(0), diam_rand(0), nb_inhc4(0), diam_inhc4(0)  {
@@ -117,6 +117,7 @@ Optimizer::~Optimizer() {
 	delete lr;
 	delete &buffer.cost1();
 	delete &buffer.cost2();
+	delete &buffer;
 	//	delete &(objshaver->ctc);
 	//	delete objshaver;
 }

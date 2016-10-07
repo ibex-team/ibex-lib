@@ -9,6 +9,7 @@
 
 #include "ibex_Optim.h"
 #include <stdio.h>
+#include "ibex_Timer.h"
 
 namespace ibex {
 
@@ -20,9 +21,9 @@ const double Optim::default_equ_eps = 1e-08;
 const double Optim::default_loup_tolerance = 0.1;
 
 
-Optim::Optim (CellDoubleHeap& buffer,  double prec,
+Optim::Optim (int n, CellDoubleHeap& buffer,  double prec,
 		double goal_rel_prec, double goal_abs_prec, int sample_size) :
-                				buffer(buffer),
+                				n(n), buffer(buffer),
                 				prec(prec), goal_rel_prec(goal_rel_prec), goal_abs_prec(goal_abs_prec),
                 				sample_size(sample_size), trace(false),
                 				timeout(1e08), time(0),
@@ -36,7 +37,6 @@ Optim::Optim (CellDoubleHeap& buffer,  double prec,
 
 Optim::~Optim() {
 	buffer.flush();
-	delete buffer;
 }
 
 

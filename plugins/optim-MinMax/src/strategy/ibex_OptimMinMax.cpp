@@ -2,21 +2,26 @@
 #include "ibex_LargestFirst.h"
 #include "ibex_Timer.h"
 #include <stdio.h>
+#include "ibex_DataMinMax.h"
+#include "ibex_NoBisectableVariableException.h"
 
 using namespace std;
 
 namespace ibex {
 
 OptimMiniMax::OptimMiniMax(NormalizedSystem& x_sys,NormalizedSystem& xy_sys, Ctc& x_ctc,Ctc& xy_ctc,double prec_x,double prec_y,double goal_rel_prec):
-		Optim( *new CellDoubleHeap(*new CellCostFmaxlb(), *new CellCostFmaxub()),
+		Optim(x_sys.nb_var, *new CellDoubleHeap(*new CellCostFmaxlb(), *new CellCostFmaxub()),
 				prec_x, goal_rel_prec, goal_rel_prec), // attention meme precision en relatif et en absolue
+	x_box_init(x_sys.box), y_box_init(xy_sys.box.subvector(x_sys.nb_var, xy_sys.nb_var-1)),
 	x_ctc(x_ctc),x_sys(x_sys),lsolve(xy_sys,xy_ctc),
 	bsc(new LargestFirst()),
-	x_box_init(x_sys.box), y_box_init(xy_sys.box.subvector(x_sys.nb_var, xy_sys.nb_var-1)),
 	prec_x(prec_x), prec_y(prec_y) {
 };
 
 OptimMiniMax::~OptimMiniMax() {
+	delete &buffer.cost1();
+	delete &buffer.cost2();
+	delete &buffer;
 	delete bsc;
 }
 
@@ -97,7 +102,7 @@ Optim::Status OptimMiniMax::optimize(const IntervalVector& x_box_ini1, double ob
 						if (trace) cout << " infinite value for the minimum " << endl;
 						break;
 					}
-					if (trace) cout << setprecision(12) << "ymax=" << ymax << " uplo= " <<  uplo<< endl;
+					if (trace) cout <<  "ymax=" << ymax << " uplo= " <<  uplo<< endl;
 				}
 				update_uplo();
 				time_limit_check();

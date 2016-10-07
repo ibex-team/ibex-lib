@@ -3,7 +3,8 @@
 #include "ibex_DataMinMax.h"
 //#include <stdio.h>
 #include "ibex_LargestFirst.h"
-
+#include "ibex_NoBisectableVariableException.h"
+#include "ibex_Timer.h"
 
 namespace ibex{
 
@@ -95,10 +96,8 @@ void LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell) {
 
 	IntervalVector xy_box =init_xy_box(x_cell->box,y_cell->box);
 	// recuperer les data
-	DataMinMax * data_x= &(x_cell->get<DataMinMax>());
-	double best_max =data_x->fmax.ub();
-
-	OptimData *data_y = &(y_cell->get<OptimData>());
+	DataMinMax *data_x = &(x_cell->get<DataMinMax>());
+	OptimData  *data_y = &(y_cell->get<OptimData>());
 
 	// Check the constraints
 	switch(check_constraints(xy_box)){
@@ -177,7 +176,7 @@ void LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell) {
 	}
 
 	// check if it is possible to find a better solution than those already found on x
-	if((data_y->pf.lb()>best_max) && (data_y->pu == 1)){
+	if((data_y->pf.lb() > data_x->fmax.ub()) && (data_y->pu == 1)){
 		// box verified condition and eval is above best max, x box does not contains the solution
 		// I think this case was already check with the mid-point.
 		delete y_cell;

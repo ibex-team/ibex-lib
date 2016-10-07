@@ -58,13 +58,14 @@ public:
     DoubleHeap<Cell> y_heap;
 
 
-protected:
-
 	/**
 	 * Cost function of the heap to store the element of the light solver
 	 */
 	static CellCostMaxPFub y_heap_costf1;
 	static CellCostPFlb y_heap_costf2;
+
+protected:
+
 
 	/**
 	 * \brief Constructor by copy.
@@ -79,8 +80,10 @@ protected:
 };
 
 
-class CellCostFmaxlb : public CostFunc<Cell> { // element are sorted from the lowest lb of the evaluation of the objective function to the greatest
+class CellCostFmaxlb : public CellCostFunc { // element are sorted from the lowest lb of the evaluation of the objective function to the greatest
 public:
+
+	CellCostFmaxlb();
 
 	/**
 	 * \brief Return the cost associated to "data"
@@ -99,9 +102,10 @@ public:
 
 };
 
-class CellCostFmaxub : public CostFunc<Cell> { // element are sorted from the lowest lb of the evaluation of the objective function to the greatest
+class CellCostFmaxub : public CellCostFunc { // element are sorted from the lowest lb of the evaluation of the objective function to the greatest
 public:
 
+	CellCostFmaxub();
 	/**
 	 * \brief Return the cost associated to "data"
 	 */

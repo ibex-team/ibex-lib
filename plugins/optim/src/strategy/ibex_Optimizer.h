@@ -42,7 +42,7 @@ namespace ibex {
  * \remark In all the comments of this class, "loup" means "lowest upper bound" of the criterion f
  * and "uplo" means "uppermost lower bound" of the criterion.
  */
-class Optimizer : Optim {
+class Optimizer : public Optim {
 public:
 	/**
 	 *  \brief Create an optimizer.
@@ -121,8 +121,6 @@ public:
 	 */
 	NormalizedSystem sys;
 
-	/** Number of variables. */
-	const int n;
 
 	/** Number of constraints. */
 	const int m;

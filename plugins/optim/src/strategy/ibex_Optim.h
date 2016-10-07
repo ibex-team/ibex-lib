@@ -25,7 +25,7 @@ namespace ibex {
 class Optim {
 public:
 
-	Optim( CellDoubleHeap& buffer, double prec=default_prec,
+	Optim( int n, CellDoubleHeap& buffer, double prec=default_prec,
 			double goal_rel_prec=default_goal_rel_prec, double goal_abs_prec=default_goal_abs_prec,
 			  int sample_size=default_sample_size);
 
@@ -99,12 +99,16 @@ public:
 	 */
 	void report_perf();
 
+
+	/** Number of variables. */
+	const int n;
+
 	/** Cell buffers.
 	Two buffers are used for node selection. the first one corresponds to minimize  the minimum of the objective estimate,
 	the second one to minimize another criterion (by default the maximum of the objective estimate).
 	The second one is chosen at each node with a probability critpr/100 (default value critpr=50)
 	 */
-	CellDoubleHeap buffer;
+	CellDoubleHeap& buffer;
 
 	/**
 	 * \brief Index of the goal variable y in the extended box.

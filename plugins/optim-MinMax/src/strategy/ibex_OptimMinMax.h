@@ -6,13 +6,12 @@
 #include "ibex_IntervalVector.h"
 #include "ibex_NormalizedSystem.h"
 #include "ibex_LightOptimMinMax.h"
-#include "ibex_DataMinMax.h"
 #include "ibex_Bsc.h"
 #include "ibex_Optim.h"
 
 namespace ibex {
 
-class OptimMiniMax : Optim {
+class OptimMiniMax : public Optim {
 
 public:
 
