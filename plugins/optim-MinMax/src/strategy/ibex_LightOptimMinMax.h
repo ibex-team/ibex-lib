@@ -29,7 +29,7 @@ public:
      *         -min_prec: minimum size of boxes in y_heap
      *         -is_midp: true if optimize run with x midpoint eval, false else
      * */
-    void optimize(Cell* x_cell, int nb_iter, double min_prec);
+    void optimize(Cell* x_cell, int nb_iter, double prec_y);
 
 	/**
 	 * Allows to add the backtrackable data required
@@ -37,12 +37,15 @@ public:
 	 */
     void add_backtrackable(Cell& root, const IntervalVector& y_init);
 
+
+
 private:
     Ctc& ctc_xy; //contractor for constraints on xy
     NormalizedSystem& xy_sys; // contains constraints on x and y
     //double abs_min_prec; // absolute minimum prec bissection on y
     Bsc* bsc; // bissector
     std::vector<Cell*> heap_save;
+    double prec_y;
 
     /* contract xy_box and xy_box_ctc w.r.t max_ctc contractor
      * */
@@ -57,7 +60,7 @@ private:
     int check_constraints(const IntervalVector& xy_box);
 
 
-    void handle_cell( Cell* x_cell, Cell* y_cell, double min_prec);
+    void handle_cell( Cell* x_cell, Cell* y_cell);
 
     /* returns a box composed of x_box(not modified) and the middle of y_box, needed for midpoint evaluation
      * Inputs: -xy_box: whole box

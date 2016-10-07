@@ -3,26 +3,32 @@
 #include "ibex_Timer.h"
 #include <stdio.h>
 
+using namespace std;
+
 namespace ibex {
 
 OptimMiniMax::OptimMiniMax(NormalizedSystem& x_sys,NormalizedSystem& xy_sys, Ctc& x_ctc,Ctc& xy_ctc,double prec_x,double prec_y,double goal_rel_prec):
 		Optim( *new CellDoubleHeap(*new CellCostFmaxlb(), *new CellCostFmaxub()),
 				prec_x, goal_rel_prec, goal_rel_prec), // attention meme precision en relatif et en absolue
-	x_ctc(x_ctc),x_sys(x_sys),lsolve(xy_sys,xy_ctc, prec_y),
+	x_ctc(x_ctc),x_sys(x_sys),lsolve(xy_sys,xy_ctc),
 	bsc(new LargestFirst()),
-	x_box_init(x_sys.box), y_box_init(xy_sys.box.subvector(x_sys.nb_var, xy_sys.nb_var)) {
+	x_box_init(x_sys.box), y_box_init(xy_sys.box.subvector(x_sys.nb_var, xy_sys.nb_var-1)),
+	prec_x(prec_x), prec_y(prec_y) {
 };
 
 OptimMiniMax::~OptimMiniMax() {
 	delete bsc;
 }
 
-void OptimMiniMax::optimize(const IntervalVector& x_box_ini1, const IntervalVector& y_box_ini1) {
+Optim::Status OptimMiniMax::optimize(const IntervalVector& x_box_ini1, double obj_init_bound) {
+	loup=obj_init_bound;
+	buffer.contract(loup);
 
-	std::cout<<"start init"<<std::endl;
+	uplo=NEG_INFINITY;
+	uplo_of_epsboxes=POS_INFINITY;
+
 
 	x_box_init = x_box_ini1;
-	y_box_init = y_box_ini1;
 
 	//****** initialization of the first Cell********
 	Cell * root = new Cell(x_box_init);
@@ -32,57 +38,105 @@ void OptimMiniMax::optimize(const IntervalVector& x_box_ini1, const IntervalVect
 	buffer.cost2().add_backtrackable(*root);
 
 
-
 	//****** x_heap initialization ********
+	nb_cells=0;
 	buffer.flush();
-	buffer.push(root);
 
-
-	//************** algo variables **************
-
-	uplo=NEG_INFINITY;
-	loup= POS_INFINITY; // upper and lower bound enclosure of minimum value initialization
-	minprec_uplo= POS_INFINITY;
-
-	Cell *x_cell;
-	int nb_iter= 10;
-	double min_prec_light_solver=prec_y;
-
-
-	std::cout<<"initialization ok"<<std::endl;
+	// *** initialisation Algo ***
+	loup_changed=false;
+	initial_loup=obj_init_bound;
+	loup_point=x_box_init.mid();
+	time=0;
 	Timer::start();
-	while((!buffer.empty()) &&(loup-uplo<stop_prec)) { // stop criterion reached
 
-		x_cell = buffer.pop();
+	handle_cell(root);
+	if (root) buffer.push(root);
 
-		// TODO je ne sais pas trop ce que ca fait
-		//if(!min_prec_reached || ((minprec_uplo < x_cell->get<DataMinMax>().fmax.lb()) && min_prec_reached))
-		//    uplo = x_cell->get<DataMinMax>().fmax.lb();
+	update_uplo();
 
-		std::pair<Cell*,Cell*> subcells_pair = bsc->bisect(*x_cell);
+	try {
+		while (!buffer.empty()) {
+		  //			if (trace >= 2) cout << " buffer " << buffer << endl;
+		  if (trace >= 2) buffer.print(cout);
+			//		  cout << "buffer size "  << buffer.size() << " " << buffer2.size() << endl;
 
-		delete x_cell;
+			loup_changed=false;
+
+			Cell *c = buffer.pop();
+
+			try {
+				//pair<IntervalVector,IntervalVector> boxes=bsc.bisect(*c);
+				//pair<Cell*,Cell*> new_cells=c->bisect(boxes.first,boxes.second);
+				pair<Cell*,Cell*> new_cells=bsc->bisect(*c);
+				delete c; // deletes the cell.
+
+				handle_cell(new_cells.first);
+				if (new_cells.first) buffer.push(new_cells.first);
+
+				handle_cell(new_cells.second);
+				if (new_cells.second) buffer.push(new_cells.second);
+
+				if (uplo_of_epsboxes == NEG_INFINITY) {
+					cout << " possible infinite minimum " << endl;
+					break;
+				}
+				if (loup_changed) {
+					// In case of a new upper bound (loup_changed == true), all the boxes
+					// with a lower bound greater than (loup - goal_prec) are removed and deleted.
+					// Note: if contraction was before bisection, we could have the problem
+					// that the current cell is removed by contractHeap. See comments in
+					// older version of the code (before revision 284).
+
+					double ymax=compute_ymax();
+
+					buffer.contract(ymax);
+					//cout << " now buffer is contracted and min=" << buffer.minimum() << endl;
 
 
-		handle_cell(subcells_pair.first,prec_x,prec_y);
-		if (subcells_pair.first) buffer.push(subcells_pair.first);
+					if (ymax <= NEG_INFINITY) {
+						if (trace) cout << " infinite value for the minimum " << endl;
+						break;
+					}
+					if (trace) cout << setprecision(12) << "ymax=" << ymax << " uplo= " <<  uplo<< endl;
+				}
+				update_uplo();
+				time_limit_check();
 
-		handle_cell(subcells_pair.second,prec_x,prec_y);
-		if (subcells_pair.second) buffer.push(subcells_pair.second);
+			}
+			catch (NoBisectableVariableException& ) {
+				handle_cell(c);
+				update_uplo_of_epsboxes(c->get<DataMinMax>().fmax.lb());
+				delete c; // deletes the cell.
+				//if (trace>=1) cout << "epsilon-box found: uplo cannot exceed " << uplo_of_epsboxes << endl;
+				update_uplo(); // the heap has changed -> recalculate the uplo
 
+			}
+		}
 	}
-	Timer::stop();
-	buffer.flush();
-	std::cout<<"loup : "<<loup<<" get for point: "<<best_sol<<" uplo: "<<uplo<<std::endl; // " volume rejected: "<<vol_rejected/init_vol*100<<endl;
-	//if(min_prec_reached)
-	//    cout<<"minimum precision on x has been reached"<<endl;
-	std::cout<<"result found in "<<Timer::VIRTUAL_TIMELAPSE()<<std::endl;
+	catch (TimeOutException& ) {
+		return TIME_OUT;
+	}
 
-	// TODO faire des vrais flag de retour
+	Timer::stop();
+	time+= Timer::VIRTUAL_TIMELAPSE();
+
+	if (uplo_of_epsboxes == POS_INFINITY && (loup==POS_INFINITY || (loup==initial_loup && goal_abs_prec==0 && goal_rel_prec==0)))
+		return INFEASIBLE;
+	else if (loup==initial_loup)
+		return NO_FEASIBLE_FOUND;
+	else if (uplo_of_epsboxes == NEG_INFINITY)
+		return UNBOUNDED_OBJ;
+	else
+		return SUCCESS;
 }
 
 
-void  OptimMiniMax::handle_cell(Cell * x_cell, double prec_x, double prec_y) {
+
+
+
+
+
+void  OptimMiniMax::handle_cell(Cell * x_cell) {
 
 	DataMinMax * data_x = &(x_cell->get<DataMinMax>());
 
@@ -106,12 +160,13 @@ void  OptimMiniMax::handle_cell(Cell * x_cell, double prec_x, double prec_y) {
 		 */
 	}
 	//************ evaluation of f(x,y_heap) *****************
-	double min_prec_light_solver = compute_min_prec(x_cell->box,prec_y);
+	double min_prec_light_solver = compute_min_prec(x_cell->box);
 	int nb_iter = choose_nbiter(false);
 	// compute
 	lsolve.optimize(x_cell,nb_iter,min_prec_light_solver);
 
 	if(x_cell==NULL) { // certified that x box does not contains the solution
+		// TODO Trace
 		//vol_rejected += x_cell->box.volume();
 		//x_cell->y_heap.flush();
 		//delete x_cell;
@@ -123,7 +178,7 @@ void  OptimMiniMax::handle_cell(Cell * x_cell, double prec_x, double prec_y) {
 	IntervalVector  midp = get_feasible_point(x_cell);
 	if(!midp.is_empty())    { // we found a feasible point
 		Cell *x_copy = new Cell(*x_cell); // copy of the Cell and the y_heap
-		x_copy->box=midp;
+		x_copy->box=midp; // set the box to the middle of x
 
 		nb_iter = choose_nbiter(true);   // need to be great enough so the minimum precision on y is reached
 		lsolve.optimize(x_copy,nb_iter,min_prec_light_solver); // eval maxf(midp,heap_copy), go to minimum prec on y to get a thin enclosure
@@ -131,7 +186,7 @@ void  OptimMiniMax::handle_cell(Cell * x_cell, double prec_x, double prec_y) {
 
 		if(x_copy && resmidp.ub()<loup) { // update best current solution
 			loup = resmidp.ub();
-			best_sol = midp;
+			loup_point = midp.mid().subvector(0,x_box_init.size()-1);
 			buffer.contract(loup);
 			//max_y = heap_copy.top1()->box;
 			//cout<<"loup : "<<loup<<" get for point: x = "<<best_sol<<" y = "<<max_y<<" uplo: "<<uplo<< " volume rejected: "<<vol_rejected/init_vol*100<<endl;
@@ -149,8 +204,7 @@ void  OptimMiniMax::handle_cell(Cell * x_cell, double prec_x, double prec_y) {
 		//cout<<"fmax min prec: "<<x_cell->fmax<<endl;
 
 		if(x_cell){
-			if(minprec_uplo>x_cell->get<DataMinMax>().fmax.lb())
-				minprec_uplo = x_cell->get<DataMinMax>().fmax.lb();
+			update_uplo_of_epsboxes(data_x->fmax.lb());
 		}
 
 		delete x_cell;
@@ -159,12 +213,14 @@ void  OptimMiniMax::handle_cell(Cell * x_cell, double prec_x, double prec_y) {
 		//cout<<"loup : "<<loup<<" get for point: x = "<<best_sol<<" y = "<<max_y<<" uplo: "<<uplo<< " volume rejected: "<<vol_rejected/init_vol*100<<endl;
 		//min_prec_reached = true;
 	}
+
+
 	return;
 }
 
 
 
-double OptimMiniMax::compute_min_prec( const IntervalVector& x_box,double prec_y) {
+double OptimMiniMax::compute_min_prec( const IntervalVector& x_box) {
 	double ratio = 0;
 	for(int r=0;r<x_box_init.size();r++)
 		ratio += (x_box_init[r]).diam()/(x_box[r]).diam();

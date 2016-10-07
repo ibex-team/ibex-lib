@@ -8,7 +8,7 @@
 namespace ibex{
 
 LightOptimMinMax::LightOptimMinMax(NormalizedSystem& y_sys, Ctc& ctc_xy):
-	ctc_xy(ctc_xy),xy_sys(y_sys), bsc(new LargestFirst()) {
+	ctc_xy(ctc_xy),xy_sys(y_sys), bsc(new LargestFirst()), prec_y(1.e-6)  {
 
 }
 
@@ -17,11 +17,15 @@ void LightOptimMinMax::add_backtrackable(Cell& root, const IntervalVector& y_ini
 	Cell * y_cell = new Cell(y_init);
 	y_cell->add<OptimData>();
 	bsc->add_backtrackable(*y_cell);
-	root.get<DataMinMax>().y_heap.push(y_cell);
+	DataMinMax *data_x = &(root.get<DataMinMax>());
+	data_x->y_heap_costf1.add_backtrackable(*y_cell);
+	data_x->y_heap_costf2.add_backtrackable(*y_cell);
+	data_x->y_heap.push(y_cell);
 }
 
-void LightOptimMinMax::optimize(Cell* x_cell, int nb_iter, double min_prec) {
+void LightOptimMinMax::optimize(Cell* x_cell, int nb_iter, double prec_y1) {
 
+	prec_y = prec_y1;
 	DataMinMax *data_x = &(x_cell->get<DataMinMax>());
 
 	DoubleHeap<Cell> *y_heap = &(data_x->y_heap); // current cell
@@ -33,14 +37,21 @@ void LightOptimMinMax::optimize(Cell* x_cell, int nb_iter, double min_prec) {
 	for(int i = 0; (!y_heap->empty()) && (i<nb_iter) ;i++) {
 
 		Cell * tmp_cell = y_heap->pop1(); // we extract an element according to the first order
-		std::pair<Cell*,Cell*> subcells_pair=bsc->bisect(*tmp_cell);// bisect tmp_cell into 2 subcells
-		delete tmp_cell;
+		try {
+			std::pair<Cell*,Cell*> subcells_pair=bsc->bisect(*tmp_cell);// bisect tmp_cell into 2 subcells
+			delete tmp_cell;
 
-		handle_cell( x_cell, subcells_pair.first, min_prec);
-		if (x_cell==NULL) return;
+			handle_cell( x_cell, subcells_pair.first);
+			if (x_cell==NULL) return;
 
-		handle_cell( x_cell, subcells_pair.second, min_prec);
-		if (x_cell==NULL) return;
+			handle_cell( x_cell, subcells_pair.second);
+			if (x_cell==NULL) return;
+		}
+		catch (NoBisectableVariableException& ) {
+			handle_cell(x_cell,tmp_cell);
+			heap_save.push_back(tmp_cell);
+
+		}
 
 	}
 
@@ -53,36 +64,39 @@ void LightOptimMinMax::optimize(Cell* x_cell, int nb_iter, double min_prec) {
 
 	if(y_heap->empty()){
 		delete x_cell;
+		x_cell=NULL;
 		return ;
 	}
 
 	// Update the lower and upper bound of of "max f(x,y_heap)"
-	double new_fmax_ub = y_heap->top1()->get<DataMinMax>().fmax.ub(); // get the upper bound of max f(x,y_heap)
-	double new_fmax_lb = y_heap->top2()->get<DataMinMax>().fmax.lb(); // get the lower bound of max f(x,y_heap)
+	double new_fmax_ub = y_heap->top1()->get<OptimData>().pf.ub(); // get the upper bound of max f(x,y_heap)
+	double new_fmax_lb = y_heap->top2()->get<OptimData>().pf.lb(); // get the lower bound of max f(x,y_heap)
+// TODO to check: normalement ça ne devrait jamais arriver
+	if (new_fmax_ub< new_fmax_lb) ibex_error("ibex_LightOptimMinMax: error");
 
-	if( new_fmax_ub < data_x->fmax.lb()){
+	Interval new_fmax = data_x->fmax.intersects(Interval(new_fmax_lb, new_fmax_ub));
+
+	if(  new_fmax.is_empty()) {
 		delete x_cell;
 		x_cell =NULL;
 		return ;
+	} else {
+		data_x->fmax = new_fmax;
 	}
-
-	if(data_x->fmax.lb() < new_fmax_lb ) // no midpoint verified the constraints, get a inferior bound from the second heap
-		data_x->fmax = Interval(new_fmax_lb,new_fmax_ub);
-	else
-		data_x->fmax = Interval(data_x->fmax.lb(),new_fmax_ub);
 
 	return;
 }
 
 
 
-void LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell, double min_prec) {
+
+
+void LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell) {
 
 	IntervalVector xy_box =init_xy_box(x_cell->box,y_cell->box);
 	// recuperer les data
 	DataMinMax * data_x= &(x_cell->get<DataMinMax>());
 	double best_max =data_x->fmax.ub();
-	double uplo = data_x->fmax.lb();
 
 	OptimData *data_y = &(y_cell->get<OptimData>());
 
@@ -150,7 +164,6 @@ void LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell, double min_prec
 
 	// Update the lower and upper bound on y
 	Interval res = xy_sys.goal->eval(xy_box); // objective function evaluation
-
 	if(data_x->fmax.lb() < res.ub()) {  // y_box cannot contains max f(x,y)
 		delete y_cell;
 		y_cell =NULL;
@@ -174,12 +187,15 @@ void LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell, double min_prec
 		return ; // no need to go further, x_box does not contains the solution
 	}
 
-
-	if(y_cell->box.max_diam()<min_prec) { // if min prec reached, keep box in Heap_save
+	//*************************************************
+	// store y_cell
+	if (y_cell->box.max_diam()<prec_y) {
 		heap_save.push_back(y_cell);
 	} else {
-		data_x->y_heap.push(y_cell); // add the box  in y_heap
+		data_x->y_heap.push(y_cell);
 	}
+
+
 }
 
 

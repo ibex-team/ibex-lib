@@ -8,6 +8,7 @@
 #include "ibex_LightOptimMinMax.h"
 #include "ibex_DataMinMax.h"
 #include "ibex_Bsc.h"
+#include "ibex_Optim.h"
 
 namespace ibex {
 
@@ -16,7 +17,7 @@ class OptimMiniMax : Optim {
 public:
 
     /* Constructor*/
-    OptimMiniMax(NormalizedSystem& x_sys, NormalizedSystem& xy_sys, Ctc& x_ctc,Ctc& xy_ctc,double prec_x,double prec_y,double stop_prec);
+    OptimMiniMax(NormalizedSystem& x_sys, NormalizedSystem& xy_sys, Ctc& x_ctc,Ctc& xy_ctc,double prec_x,double prec_y, double stop_prec);
 
     /* Runs a B&B like algorithm
      * arguments: -x_ini: initial x box
@@ -50,7 +51,7 @@ public:
 	 *
 	 *         TIMEOUT             time is out.
 	 */
-	virtual Status optimize(const IntervalVector& init_box, double obj_init_bound=POS_INFINITY);
+	Status optimize(const IntervalVector& init_box, double obj_init_bound=POS_INFINITY);
 
 
     /**
@@ -60,8 +61,9 @@ public:
 
     IntervalVector x_box_init;
     IntervalVector y_box_init;
-//TODO
-    void set_prec_y(double prec_y);
+
+    inline void set_prec_y(double prec_y) {this->prec_y = prec_y; }
+    inline void set_prec_x(double prec_x) {this->prec_x = prec_x; }
 
 private:
 
@@ -69,12 +71,14 @@ private:
     NormalizedSystem& x_sys; // contains cst on x and objective function
     LightOptimMinMax lsolve;
     Bsc* bsc;
+    double prec_x;
+    double prec_y;
 
-    double compute_min_prec( const IntervalVector& x_box, double prec_y);
+    double compute_min_prec( const IntervalVector& x_box);
     int choose_nbiter(bool midpoint_eval);
     IntervalVector get_feasible_point(Cell * elem);
     int check_constraints(const IntervalVector& box);
-    void handle_cell(Cell * x_cell, double prec_x, double prec_y);
+    void handle_cell(Cell * x_cell);
 };
 
 
