@@ -1,19 +1,29 @@
 version: build{build}
-#os: Visual Studio 2015
-#clone_folder: C:\projects\ibex-lib
-#test: off
-#configuration:
-#    - Release
-#    # - Debug
+image: Visual Studio 2015
+
+branches:
+  only:
+  - Gaol4
+
 environment:
   matrix:
-    - name: win32
-      platform: mingw
-    - name: win64
-      platform: mingw-w64
+  - platform: x86
+    name: win32
+  - platform: x64
+    name: win64
 
 install:
-  - echo Running install
+  - cmd: echo Running build
+  - cmd: set PATH=%PATH%;C:\MinGW\bin;C:\MinGW\msys\1.0\bin
+  - cmd: mingw-get install msys-base
+  - cmd: mingw-get install msys-dvlpr
+  - cmd: mingw-get update
+  - cmd: mingw-get upgrade
+  - cmd:   python -x %cd%\waf configure
+  - cmd:  python -x %cd%\waf build install clean
 
 build_script:
-  - echo Running build
+  - cmd: echo Running install
+
+on_finish:
+  - cmd: cat C:\projects\ibex-lib\__build__\config.log
