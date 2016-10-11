@@ -38,7 +38,7 @@ public:
      *         -min_prec: minimum size of boxes in y_heap
      *         -is_midp: true if optimize run with x midpoint eval, false else
      * */
-    void optimize(Cell* x_cell, int nb_iter, double prec_y);
+    bool optimize(Cell* x_cell, int nb_iter, double prec_y);
 
 	/**
 	 * Allows to add the backtrackable data required
@@ -70,7 +70,7 @@ private:
     int check_constraints(const IntervalVector& xy_box);
 
 
-    void handle_cell( Cell* x_cell, Cell* y_cell);
+    bool handle_cell( Cell* x_cell, Cell* y_cell);
 
     /* returns a box composed of x_box(not modified) and the middle of y_box, needed for midpoint evaluation
      * Inputs: -xy_box: whole box

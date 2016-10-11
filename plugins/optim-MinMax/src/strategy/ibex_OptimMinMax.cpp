@@ -81,7 +81,7 @@ Optim::Status OptimMinMax::optimize(const IntervalVector& x_box_ini1, double obj
 			try {
 				//pair<IntervalVector,IntervalVector> boxes=bsc.bisect(*c);
 				//pair<Cell*,Cell*> new_cells=c->bisect(boxes.first,boxes.second);
-				pair<Cell*,Cell*> new_cells=bsc->bisect(*c);
+				pair<Cell*,Cell*> new_cells=bsc->bisect_cell(*c);
 				delete c; // deletes the cell.
 
 				handle_cell(new_cells.first);
@@ -116,9 +116,8 @@ Optim::Status OptimMinMax::optimize(const IntervalVector& x_box_ini1, double obj
 
 			}
 			catch (NoBisectableVariableException& ) {
-				handle_cell(c);
-				if (c) update_uplo_of_epsboxes(c->get<DataMinMax>().fmax.lb());
-				delete c; // deletes the cell.
+				bool res=handle_cell(c);
+				if (res) update_uplo_of_epsboxes(c->get<DataMinMax>().fmax.lb());
 				//if (trace>=1) cout << "epsilon-box found: uplo cannot exceed " << uplo_of_epsboxes << endl;
 				update_uplo(); // the heap has changed -> recalculate the uplo
 
@@ -146,7 +145,7 @@ Optim::Status OptimMinMax::optimize(const IntervalVector& x_box_ini1, double obj
 
 
 
-void  OptimMinMax::handle_cell(Cell * x_cell) {
+bool  OptimMinMax::handle_cell(Cell * x_cell) {
 
 	DataMinMax * data_x = &(x_cell->get<DataMinMax>());
 
@@ -155,8 +154,7 @@ void  OptimMinMax::handle_cell(Cell * x_cell) {
 
 	if (data_x->fmax.is_empty()) {
 		delete x_cell;
-		x_cell=NULL;
-		return;
+		return false;
 	}
 
 	//***************** contraction w.r.t constraint on x ****************
@@ -167,9 +165,8 @@ void  OptimMinMax::handle_cell(Cell * x_cell) {
 		if(x_cell->box.is_empty()) {
 			//vol_rejected += x_cell->box.volume();
 			delete x_cell;
-			x_cell =NULL;
 			//cout<<"loup : "<<loup<<" get for point: x = "<<best_sol<<" y = "<<max_y<<" uplo: "<<uplo<< " volume rejected: "<<vol_rejected/init_vol*100<<endl;
-			return ;
+			return false;
 		}
 		/*  TODO faire des options de TRACE
             else if(x_cell->box !=  box_mem) {
@@ -182,15 +179,15 @@ void  OptimMinMax::handle_cell(Cell * x_cell) {
 	double min_prec_light_solver = compute_min_prec(x_cell->box);
 	int nb_iter = choose_nbiter(false);
 	// compute
-	lsolve.optimize(x_cell,nb_iter,min_prec_light_solver);
+	bool res =lsolve.optimize(x_cell,nb_iter,min_prec_light_solver);
 
-	if(x_cell==NULL) { // certified that x box does not contains the solution
+	if(!res) { // certified that x box does not contains the solution
 		// TODO Trace
 		//vol_rejected += x_cell->box.volume();
 		//x_cell->y_heap.flush();
 		//delete x_cell;
 		//cout<<"loup : "<<loup<<" get for point: x = "<<best_sol<<" y = "<<max_y<<" uplo: "<<uplo<< " volume rejected: "<<vol_rejected/init_vol*100<<endl;
-		return;
+		return false;
 	}
 
 	//************* midpoint evaluation ****************
@@ -200,14 +197,14 @@ void  OptimMinMax::handle_cell(Cell * x_cell) {
 		x_copy->box=midp; // set the box to the middle of x
 
 		nb_iter = choose_nbiter(true);   // need to be great enough so the minimum precision on y is reached
-		lsolve.optimize(x_copy,nb_iter,min_prec_light_solver); // eval maxf(midp,heap_copy), go to minimum prec on y to get a thin enclosure
-		if (x_copy) {
+		bool res1 = lsolve.optimize(x_copy,nb_iter,prec_y); // eval maxf(midp,heap_copy), go to minimum prec on y to get a thin enclosure
+		if (res1) {
 			double new_loup = x_copy->get<DataMinMax>().fmax.ub();
 
-			if(x_copy && new_loup<loup) { // update best current solution
+			if(new_loup<loup) { // update best current solution
 				loup = new_loup;
 				loup_changed = true;
-				loup_point = midp.mid().subvector(0,x_box_init.size()-1);
+				loup_point = (midp.mid()).subvector(0,x_box_init.size()-1);
 				data_x->fmax &= Interval(NEG_INFINITY,new_loup);
 				cout << "[mid]"  << " loup update " << loup  << " loup point  " << loup_point << endl;
 				//max_y = heap_copy.top1()->box;
@@ -223,19 +220,18 @@ void  OptimMinMax::handle_cell(Cell * x_cell) {
 		nb_iter = choose_nbiter(true);   // need to be great enough so the minimum precision on y is reached
 
 		//cout<<"fmax ini: "<<x_cell->fmax<<endl;
-		lsolve.optimize(x_cell,nb_iter,prec_y); // eval maxf(midp,heap_copy), go to minimum prec on y to get a thin enclosure
+		bool res =lsolve.optimize(x_cell,nb_iter,prec_y); // eval maxf(midp,heap_copy), go to minimum prec on y to get a thin enclosure
 		//cout<<"fmax min prec: "<<x_cell->fmax<<endl;
 
-		if(x_cell){
+		if(res){
 			update_uplo_of_epsboxes(data_x->fmax.lb());
 		}
 
 		delete x_cell;
-		x_cell =NULL;
 		//cout<<"minprec reached! "<<" box: "<<x_cell->box<<" eval full prec: "<<x_cell->fmax <<endl;
 		//cout<<"loup : "<<loup<<" get for point: x = "<<best_sol<<" y = "<<max_y<<" uplo: "<<uplo<< " volume rejected: "<<vol_rejected/init_vol*100<<endl;
 		//min_prec_reached = true;
-		return;
+		return false;
 	}
 
 	// update optim data of the cell
@@ -243,7 +239,7 @@ void  OptimMinMax::handle_cell(Cell * x_cell) {
 	buffer->push(x_cell);
 	nb_cells++;
 
-	return;
+	return true;
 }
 
 

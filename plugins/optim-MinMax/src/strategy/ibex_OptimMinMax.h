@@ -84,7 +84,7 @@ private:
     int choose_nbiter(bool midpoint_eval);
     IntervalVector get_feasible_point(Cell * elem);
     int check_constraints(const IntervalVector& box);
-    void handle_cell(Cell * x_cell);
+    bool handle_cell(Cell * x_cell);
 };
 
 

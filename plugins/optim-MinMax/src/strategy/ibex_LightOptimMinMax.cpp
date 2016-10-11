@@ -34,7 +34,7 @@ void LightOptimMinMax::add_backtrackable(Cell& root, const IntervalVector& y_ini
 	data_x->y_heap.push(y_cell);
 }
 
-void LightOptimMinMax::optimize(Cell* x_cell, int nb_iter, double prec_y1) {
+bool LightOptimMinMax::optimize(Cell* x_cell, int nb_iter, double prec_y1) {
 
 	prec_y = prec_y1;
 	DataMinMax *data_x = &(x_cell->get<DataMinMax>());
@@ -50,18 +50,18 @@ void LightOptimMinMax::optimize(Cell* x_cell, int nb_iter, double prec_y1) {
 		found_point  = false;
 		Cell * tmp_cell = y_heap->pop1(); // we extract an element according to the first order
 		try {
-			std::pair<Cell*,Cell*> subcells_pair=bsc->bisect(*tmp_cell);// bisect tmp_cell into 2 subcells
+			std::pair<Cell*,Cell*> subcells_pair=bsc->bisect_cell(*tmp_cell);// bisect tmp_cell into 2 subcells
 			delete tmp_cell;
 
-			handle_cell( x_cell, subcells_pair.first);
-			if (x_cell==NULL) return;
+			bool res = handle_cell( x_cell, subcells_pair.first);
+			if (!res) return false;
 
-			handle_cell( x_cell, subcells_pair.second);
-			if (x_cell==NULL) return;
+			res = handle_cell( x_cell, subcells_pair.second);
+			if (!res) return false;
 
 
 			if (found_point) {
-				data_x->y_heap.contract(data_x->fmax.lb()); // to check
+				y_heap->contract(data_x->fmax.lb()); // to check
 			}
 		}
 		catch (NoBisectableVariableException& ) {
@@ -81,8 +81,7 @@ void LightOptimMinMax::optimize(Cell* x_cell, int nb_iter, double prec_y1) {
 
 	if(y_heap->empty()){
 		delete x_cell;
-		x_cell=NULL;
-		return ;
+		return false;
 	}
 
 	// Update the lower and upper bound of of "max f(x,y_heap)"
@@ -95,16 +94,15 @@ void LightOptimMinMax::optimize(Cell* x_cell, int nb_iter, double prec_y1) {
 
 	if(  data_x->fmax.is_empty()) {
 		delete x_cell;
-		x_cell =NULL;
-		return ;
+		return false;
 	}
 
-	return;
+	return true;
 }
 
 
 
-void LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell) {
+bool LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell) {
 
 	IntervalVector xy_box =init_xy_box(x_cell->box,y_cell->box);
 	// recuperer les data
@@ -120,8 +118,7 @@ void LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell) {
 	case 0: { // One constraint is false
 		// constraint on x and y not respected, move on.
 		delete y_cell;
-		y_cell =NULL;
-		return ;
+		return true;
 	}
 	default: // nothing to do
 		break;
@@ -132,8 +129,7 @@ void LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell) {
 		ctc_xy.contract(xy_box);
 		if (xy_box.is_empty()) { // constraint on x and y not respected, move on.
 			delete y_cell;
-			y_cell=NULL;
-			return ;
+			return true;
 		} else {
 			// TODO to check normalement on peut propager la contraction sur le y
 			for (int k=0; k<y_cell->box.size(); k++)
@@ -148,13 +144,11 @@ void LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell) {
 		// x y constraint respected for all x and mid(y), mid_y_box is a candidate for evaluation
 		//midp_hit = true; <- JN:what is the variable?
 		Interval midres = xy_sys.goal->eval(mid_y_box);
-		if (midres.lb()> data_x->fmax.ub() ) {  // midres.lb()> best_max
+		if ( data_x->fmax.ub() < midres.lb() ) {  // midres.lb()> best_max
 			// there exists y such as constraint is respected and f(x,y)>best max, the max on x will be worst than the best known solution
 			delete y_cell;
-			y_cell = NULL;
 			delete x_cell;
-			x_cell = NULL;
-			return; // no need to go further, x_box does not contains the solution
+			return false; // no need to go further, x_box does not contains the solution
 		}
 		else if(midres.lb()>data_y->pf.lb()) { // found y such as xy constraint is respected
 			// TODO	 to check		// il faut faire un contract de y_heap
@@ -179,8 +173,7 @@ void LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell) {
 	data_y->pf &= xy_sys.goal->eval(xy_box); // objective function evaluation
 	if( data_y->pf.is_empty() || data_x->fmax.lb() > data_y->pf.ub()) {  // y_box cannot contains max f(x,y)
 		delete y_cell;
-		y_cell =NULL;
-		return ;
+		return true;
 	}
 
 	// check if it is possible to find a better solution than those already found on x
@@ -188,10 +181,8 @@ void LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell) {
 		// box verified condition and eval is above best max, x box does not contains the solution
 		// I think this case was already check with the mid-point.
 		delete y_cell;
-		y_cell = NULL;
 		delete x_cell;
-		x_cell =NULL;
-		return ; // no need to go further, x_box does not contains the solution
+		return false; // no need to go further, x_box does not contains the solution
 	}
 
 	//*************************************************
@@ -201,6 +192,8 @@ void LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell) {
 	} else {
 		data_x->y_heap.push(y_cell);
 	}
+
+	return true;
 }
 
 
