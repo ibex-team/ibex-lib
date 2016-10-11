@@ -245,17 +245,25 @@ ContCell* Cont::choose(const ContCell::Facet* x_facet, const IntervalVector& x, 
 	IntervalVector box(n);
 	IntervalVector box_unicity(n);
 	IntervalVector box_existence(n);
-	VarSet vars(n,BitSet::empty(n),true); // ignore init values
+	VarSet vars=get_vars(f, x.mid(), BitSet::empty(n));
 
-	vars=get_vars(f, x.mid(), BitSet::empty(n));
 	x_box=vars.var_box(x);
 	p_box=vars.param_box(x);
 
 	// IntervalVector g_box(g? g->image_dim() : 1 /* unused if g==NULL*/);
 
-	bool success;         // have we found a new cell?
+	// Have we found a new cell?
+	bool success;
+
+	// Is this cell valid?
+	// If the cell is inside the domain, it is valid. If the cell crosses the
+	// boundary of the domain, the manifold inside the intersection of the cell
+	// and the domain must be homeomorph to a half-ball.
+	bool valid_cell;
 
 	do {
+
+		valid_cell=true; // by default
 
 		// We need to recalculate variables even when success==false
 		// because the existence box may cross the boundary
@@ -275,9 +283,7 @@ ContCell* Cont::choose(const ContCell::Facet* x_facet, const IntervalVector& x, 
 			success=inflating_newton(f,vars,box,box_existence,box_unicity);
 
 		} catch(SingularMatrixException&) {
-			// May happen if we are near a corner of the bounding domain:
-			// some dimension are forced to be parameter erroneously. In
-			// this case, we have to decrease h.
+			// should not happen
 			success = false;
 		}
 
@@ -291,36 +297,81 @@ ContCell* Cont::choose(const ContCell::Facet* x_facet, const IntervalVector& x, 
                 success=false;
         }*/
 
-		if(success) {
-			bool correct_params=true;  // have we chose correct parameters?
+		// Dimensions that should be parameters (by default: none).
+		BitSet forced_params(BitSet::empty(n));
 
-			// Dimensions that have to be parameters (by default: none).
-			BitSet forced_params(BitSet::empty(n));
+		if(success) { // check if the cell is valid
+
+			// Check if the cell crosses the domain only
+			// in the dimension of parameters.
 
 			// Find dimensions along with the box exceeds domain
-			// and force them to be parameters
+			// and mark them has "should be parameters"
 			for (int i=0; i<n; i++) {
 				if (!box_existence[i].is_subset(domain[i])) {
 					forced_params.add(i);
-					if (vars.vars[i]) correct_params=false;
-				}
-			}
-
-			if (!correct_params) {
-				try {
-					VarSet tmpvars=get_vars(f, x.mid(), forced_params);
-					box=box_existence;
-					IntervalVector box_existence2(n); // ignored
-					IntervalVector box_unicity2(n);   // ignored
-					success=inflating_newton(f,tmpvars,box,box_existence2,box_unicity2);
-				}
-				catch(SingularMatrixException&) {
-					success = false;
+					if (vars.vars[i]) valid_cell=false;
 				}
 			}
 		}
 
-		if (success) {
+		//===================== first test ==========================
+		if (!valid_cell) {
+			// We check the rows of the jacobian matrix of the implicit function.
+			// The rows that correspond to variables that "should be parameters"
+			// must have no component with 0.
+			IntervalMatrix J=f.jacobian(box_existence);
+
+			IntervalMatrix Jp(m,n-m); // Jacobian % parameters
+			IntervalMatrix Jx(m,m);   // Jacobian % variables
+
+			// Intialize Jp and Jx from J
+			for (int i=0; i<m; i++) {
+				Jp.set_row(i,vars.param_box(J.row(i)));
+				Jx.set_row(i,vars.var_box(J.row(i)));
+			}
+			Matrix Jx_mid_inv(m,m);
+			real_inverse(Jx.mid(),Jx_mid_inv);
+
+			// Approximate jacobian of the implicit function
+			// TODO: make it rigorous!
+			IntervalMatrix J_implicit=Jx_mid_inv*Jp;
+
+			valid_cell=true; // by default
+			int v=0;         // index of the ith variable
+			for (int i=0; valid_cell && i<n; i++) {
+				if (vars.vars[i]) {
+					if (forced_params[i]) {
+						for (int j=0; valid_cell && j<n-m; j++) {
+							if (J_implicit[v][j].contains(0)) valid_cell=false;
+						}
+					}
+					v++;
+				}
+			}
+		}
+		//============================================================
+
+		//===================== second test ==========================
+		if (!valid_cell) {
+			try {
+				VarSet tmpvars=get_vars(f, x.mid(), forced_params);
+				box=box_existence;
+				IntervalVector box_existence2(n); // ignored
+				IntervalVector box_unicity2(n);   // ignored
+
+				valid_cell=inflating_newton(f,tmpvars,box,box_existence2,box_unicity2);
+
+			}
+			catch(SingularMatrixException&) {
+				// May happen if we are near a corner of the bounding domain:
+				// some dimension are forced to be parameter erroneously. In
+				// this case, we have to decrease h...
+			}
+		}
+		//============================================================
+
+		if (success && valid_cell) {
 			ContCell* cell = new ContCell(box_existence,box_unicity,domain,vars);
 
 			// Contract each facet separately
