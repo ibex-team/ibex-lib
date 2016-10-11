@@ -22,8 +22,8 @@ int id_count=0;
 	 assert(id_count<ULONG_MAX);
 }
 
- Cell::Cell(Cell& e) : box(e.box), id(id_count++)  {
- 	for ( IBEXMAP(Backtrackable*)::iterator it=e.data.begin(); it!=e.data.end(); it++) {
+ Cell::Cell(const Cell& e) : box(e.box), id(id_count++)  {
+ 	for ( IBEXMAP(Backtrackable*)::const_iterator it=e.data.begin(); it!=e.data.end(); it++) {
  		data.insert_new(it->first, it->second->copy());
  	}
  }
@@ -31,13 +31,10 @@ int id_count=0;
 
 
 std::pair<Cell*,Cell*> Cell::bisect(const IntervalVector& left, const IntervalVector& right) {
-	Cell* cleft = new Cell(left);
-	Cell* cright = new Cell(right);
-	for (IBEXMAP(Backtrackable*)::iterator it=data.begin(); it!=data.end(); it++) {
-		std::pair<Backtrackable*,Backtrackable*> child_data=it->second->down();
-		cleft->data.insert_new(it->first,child_data.first);
-		cright->data.insert_new(it->first,child_data.second);
-	}
+	Cell* cleft = new Cell(*this);
+	Cell* cright = new Cell(*this);
+	cleft->box  = left;
+	cright->box = right;
 	return std::pair<Cell*,Cell*>(cleft,cright);
 }
 

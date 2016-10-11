@@ -51,7 +51,7 @@ public:
 	 * \brief Constructor by copy.
 	 *
 	 */
-	explicit Cell (Cell& e);
+	explicit Cell (const Cell& e);
 
 	/**
 	 * \brief Bisect this cell.
