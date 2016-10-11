@@ -247,8 +247,9 @@ ContCell* Cont::choose(const ContCell::Facet* x_facet, const IntervalVector& x, 
 	IntervalVector box_existence(n);
 	VarSet vars(n,BitSet::empty(n),true); // ignore init values
 
-	// Dimensions that have to be parameters (by default: none).
-	BitSet forced_params(BitSet::empty(n));
+	vars=get_vars(f, x.mid(), BitSet::empty(n));
+	x_box=vars.var_box(x);
+	p_box=vars.param_box(x);
 
 	// IntervalVector g_box(g? g->image_dim() : 1 /* unused if g==NULL*/);
 
@@ -261,10 +262,6 @@ ContCell* Cont::choose(const ContCell::Facet* x_facet, const IntervalVector& x, 
 		// of the domain but the manifold may not.
 
 		try {
-
-			vars=get_vars(f, x.mid(), forced_params);
-			x_box=vars.var_box(x);
-			p_box=vars.param_box(x);
 
 			IntervalVector shift(vars.nb_param,Interval(-h,h));
 
@@ -297,6 +294,9 @@ ContCell* Cont::choose(const ContCell::Facet* x_facet, const IntervalVector& x, 
 		if(success) {
 			bool correct_params=true;  // have we chose correct parameters?
 
+			// Dimensions that have to be parameters (by default: none).
+			BitSet forced_params(BitSet::empty(n));
+
 			// Find dimensions along with the box exceeds domain
 			// and force them to be parameters
 			for (int i=0; i<n; i++) {
@@ -306,24 +306,31 @@ ContCell* Cont::choose(const ContCell::Facet* x_facet, const IntervalVector& x, 
 				}
 			}
 
-			if (correct_params) {
-				ContCell* cell = new ContCell(box_existence,box_unicity,domain,vars);
-
-				// Contract each facet separately
-				CtcParamNewton ctc(f,vars);
-				cell->contract_facets(ctc);
-
-				return cell;
-			} else {
-				// note: we don't change h in this case
+			if (!correct_params) {
+				try {
+					VarSet tmpvars=get_vars(f, x.mid(), forced_params);
+					box=box_existence;
+					IntervalVector box_existence2(n); // ignored
+					IntervalVector box_unicity2(n);   // ignored
+					success=inflating_newton(f,tmpvars,box,box_existence2,box_unicity2);
+				}
+				catch(SingularMatrixException&) {
+					success = false;
+				}
 			}
-		} else {
-			h = alpha*h;
-
-			// No risk of infinite loop because h -> 0
-			forced_params = BitSet::empty(n);
 		}
 
+		if (success) {
+			ContCell* cell = new ContCell(box_existence,box_unicity,domain,vars);
+
+			// Contract each facet separately
+			CtcParamNewton ctc(f,vars);
+			cell->contract_facets(ctc);
+
+			return cell;
+		} else {
+			h = alpha*h;
+		}
 
 	} while(h>=h_min);
 

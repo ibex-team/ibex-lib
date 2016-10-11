@@ -125,12 +125,12 @@ void ContCell::create_facets(const IntervalVector& domain) {
 		p[i]=pi.lb();
 		facet=vars.full_box(x,p) & domain;
 		if (!facet.is_empty()) {
-			facets.push_back(Facet(i,false,vars.full_box(x,p)));
+			facets.push_back(Facet(i,false,facet));
 		}
 		p[i]=pi.ub();
 		facet=vars.full_box(x,p) & domain;
 		if (!facet.is_empty()) {
-			facets.push_back(Facet(i,true,vars.full_box(x,p)));
+			facets.push_back(Facet(i,true,facet));
 		}
 	}
 }
