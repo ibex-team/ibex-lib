@@ -77,7 +77,7 @@ bool Solver::next(std::vector<IntervalVector>& sols) {
 
 			try {
 
-				pair<Cell*,Cell*> new_cells=bsc.bisect(*c);
+				pair<Cell*,Cell*> new_cells=bsc.bisect_cell(*c);
 
 				delete buffer.pop();
 				buffer.push(new_cells.first);

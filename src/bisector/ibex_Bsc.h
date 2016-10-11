@@ -16,8 +16,6 @@
 
 namespace ibex {
 
-class Cell;
-
 /**
  * \defgroup bisector Bisectors
  */
@@ -71,11 +69,6 @@ public:
 	virtual ~Bsc() { }
 
 	/**
-	 * \brief Bisect the current box and return the result.
-	 */
-	virtual std::pair<IntervalVector,IntervalVector> bisect(const IntervalVector& box)=0;
-
-	/**
 	 * \brief Bisect the current cell and return the result.
 	 *
 	 * The information in a cell is e.g., used to get the last bisected variable in case
@@ -83,7 +76,12 @@ public:
 	 * Implementation is <b>optional</b>. By default, this function call bisect(cell.box).
 	 * See #bisect(const IntervalVector&).
 	 */
-	virtual std::pair<Cell*,Cell*> bisect(Cell& cell);
+	std::pair<Cell*,Cell*> bisect_cell(const Cell& cell);
+
+	/**
+	 * \brief Bisect the current box and return the result.
+	 */
+	virtual std::pair<IntervalVector,IntervalVector> bisect(const IntervalVector& box)=0;
 
 	/**
 	 * Allows to add the backtrackable data required
@@ -151,6 +149,12 @@ protected:
 
 
 /*============================================ inline implementation ============================================ */
+
+
+inline std::pair<Cell*,Cell*> Bsc::bisect_cell(const Cell& cell) {
+	std::pair<IntervalVector,IntervalVector> boxes=this->bisect(cell.box);
+	return cell.bisect(boxes.first,boxes.second);
+}
 
 inline bool Bsc::uniform_prec() const {
 	return _prec.size()==1;

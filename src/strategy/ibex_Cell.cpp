@@ -30,7 +30,7 @@ int id_count=0;
 
 
 
-std::pair<Cell*,Cell*> Cell::bisect(const IntervalVector& left, const IntervalVector& right) {
+std::pair<Cell*,Cell*> Cell::bisect(const IntervalVector& left, const IntervalVector& right) const {
 	Cell* cleft = new Cell(*this);
 	Cell* cright = new Cell(*this);
 	cleft->box  = left;

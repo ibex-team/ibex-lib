@@ -45,7 +45,7 @@ public:
 	 *
 	 * \param box - Box (passed by copy).
 	 */
-	Cell(const IntervalVector& box);
+	explicit Cell(const IntervalVector& box);
 
 	/**
 	 * \brief Constructor by copy.
@@ -65,7 +65,7 @@ public:
 	 * bisector class can simply bisect a box into two subboxes, the
 	 * cell bisection has a default implementation in #ibex::Bsc.
 	 */
-	std::pair<Cell*,Cell*> bisect(const IntervalVector& left, const IntervalVector& right);
+	std::pair<Cell*,Cell*> bisect(const IntervalVector& left, const IntervalVector& right) const;
 
 	/**
 	 * \brief Delete *this.
