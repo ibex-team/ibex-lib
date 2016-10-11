@@ -1,9 +1,9 @@
 //============================================================================
 //                                  I B E X                                   
 // File        : ibex_DataMinMax.h
-// Author      : Jordan Ninin, Gilles Chabert
+// Author      : Dominique Monnet, Jordan Ninin
 // License     : See the LICENSE file
-// Created     : Oct 18, 2014
+// Created     : Oct 1, 2016
 //============================================================================
 
 #ifndef __IBEX_DATA_MINMAX__
@@ -102,10 +102,10 @@ public:
 
 };
 
-class CellCostFmaxub : public CellCostFunc { // element are sorted from the lowest lb of the evaluation of the objective function to the greatest
+class CellCostmaxFmaxub : public CellCostFunc { // element are sorted from the lowest lb of the evaluation of the objective function to the greatest
 public:
 
-	CellCostFmaxub();
+	CellCostmaxFmaxub();
 	/**
 	 * \brief Return the cost associated to "data"
 	 */

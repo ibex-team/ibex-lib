@@ -25,7 +25,7 @@ namespace ibex {
 class Optim {
 public:
 
-	Optim( int n, CellDoubleHeap& buffer, double prec=default_prec,
+	Optim( int n, CellDoubleHeap* buffer, double prec=default_prec,
 			double goal_rel_prec=default_goal_rel_prec, double goal_abs_prec=default_goal_abs_prec,
 			  int sample_size=default_sample_size);
 
@@ -108,7 +108,7 @@ public:
 	the second one to minimize another criterion (by default the maximum of the objective estimate).
 	The second one is chosen at each node with a probability critpr/100 (default value critpr=50)
 	 */
-	CellDoubleHeap& buffer;
+	CellDoubleHeap *buffer;
 
 	/**
 	 * \brief Index of the goal variable y in the extended box.
@@ -191,11 +191,6 @@ protected:
 	 * \brief Update the uplo
 	 */
 	void update_uplo();
-
-	/**
-	 * \brief Main procedure for updating the loup.
-	 */
-	bool update_loup(const IntervalVector& box);
 
 	/**
 	 * \brief Computes and returns  the value ymax (the loup decreased with the precision)

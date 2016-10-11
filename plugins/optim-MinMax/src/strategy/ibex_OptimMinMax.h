@@ -1,3 +1,12 @@
+//============================================================================
+//                                  I B E X
+// File        : ibex_OptimMinMax.h
+// Author      : Dominique Monnet, Jordan Ninin
+// License     : See the LICENSE file
+// Created     : Oct 1, 2016
+//============================================================================
+
+
 #ifndef __OPTIM_MINIMAX__
 #define __OPTIM_MINIMAX__
 
@@ -11,12 +20,12 @@
 
 namespace ibex {
 
-class OptimMiniMax : public Optim {
+class OptimMinMax : public Optim {
 
 public:
 
     /* Constructor*/
-    OptimMiniMax(NormalizedSystem& x_sys, NormalizedSystem& xy_sys, Ctc& x_ctc,Ctc& xy_ctc,double prec_x,double prec_y, double stop_prec);
+    OptimMinMax(NormalizedSystem& x_sys, NormalizedSystem& xy_sys, Ctc& x_ctc,Ctc& xy_ctc,double prec_x,double prec_y, double stop_prec);
 
     /* Runs a B&B like algorithm
      * arguments: -x_ini: initial x box
@@ -56,13 +65,12 @@ public:
     /**
      * \brief destructor
      */
-    ~OptimMiniMax();
+    virtual ~OptimMinMax();
 
     IntervalVector x_box_init;
     IntervalVector y_box_init;
 
     inline void set_prec_y(double prec_y) {this->prec_y = prec_y; }
-    inline void set_prec_x(double prec_x) {this->prec_x = prec_x; }
 
 private:
 
@@ -70,7 +78,6 @@ private:
     NormalizedSystem& x_sys; // contains cst on x and objective function
     LightOptimMinMax lsolve;
     Bsc* bsc;
-    double prec_x;
     double prec_y;
 
     double compute_min_prec( const IntervalVector& x_box);

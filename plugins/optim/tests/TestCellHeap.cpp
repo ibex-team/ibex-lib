@@ -54,7 +54,7 @@ void TestCellHeap::test02() {
 
 		h2.push(cell);
 	}
-	h2.pop(); h2.pop();
+	delete h2.pop(); delete h2.pop();
 
 	CPPUNIT_ASSERT(h2.size()==nb-2);
 }

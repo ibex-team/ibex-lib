@@ -1,3 +1,13 @@
+//============================================================================
+//                                  I B E X
+// File        : ibex_LightOptimMinMax.cpp
+// Author      : Dominique Monnet, Jordan Ninin
+// License     : See the LICENSE file
+// Created     : Oct 1, 2016
+//============================================================================
+
+
+
 #include "ibex_LightOptimMinMax.h"
 #include "ibex_OptimData.h"
 #include "ibex_DataMinMax.h"
@@ -9,7 +19,7 @@
 namespace ibex{
 
 LightOptimMinMax::LightOptimMinMax(NormalizedSystem& y_sys, Ctc& ctc_xy):
-	ctc_xy(ctc_xy),xy_sys(y_sys), bsc(new LargestFirst()), prec_y(1.e-6)  {
+	ctc_xy(ctc_xy),xy_sys(y_sys), bsc(new LargestFirst()), prec_y(1.e-6), found_point(false)  {
 
 }
 
@@ -37,6 +47,7 @@ void LightOptimMinMax::optimize(Cell* x_cell, int nb_iter, double prec_y1) {
 
 	for(int i = 0; (!y_heap->empty()) && (i<nb_iter) ;i++) {
 
+		found_point  = false;
 		Cell * tmp_cell = y_heap->pop1(); // we extract an element according to the first order
 		try {
 			std::pair<Cell*,Cell*> subcells_pair=bsc->bisect(*tmp_cell);// bisect tmp_cell into 2 subcells
@@ -47,6 +58,11 @@ void LightOptimMinMax::optimize(Cell* x_cell, int nb_iter, double prec_y1) {
 
 			handle_cell( x_cell, subcells_pair.second);
 			if (x_cell==NULL) return;
+
+
+			if (found_point) {
+				data_x->y_heap.contract(data_x->fmax.lb()); // to check
+			}
 		}
 		catch (NoBisectableVariableException& ) {
 			handle_cell(x_cell,tmp_cell);
@@ -72,23 +88,19 @@ void LightOptimMinMax::optimize(Cell* x_cell, int nb_iter, double prec_y1) {
 	// Update the lower and upper bound of of "max f(x,y_heap)"
 	double new_fmax_ub = y_heap->top1()->get<OptimData>().pf.ub(); // get the upper bound of max f(x,y_heap)
 	double new_fmax_lb = y_heap->top2()->get<OptimData>().pf.lb(); // get the lower bound of max f(x,y_heap)
-// TODO to check: normalement ça ne devrait jamais arriver
-	if (new_fmax_ub< new_fmax_lb) ibex_error("ibex_LightOptimMinMax: error");
 
-	Interval new_fmax = data_x->fmax.intersects(Interval(new_fmax_lb, new_fmax_ub));
+	if (new_fmax_ub< new_fmax_lb) ibex_error("ibex_LightOptimMinMax: error, please report this bug.");
 
-	if(  new_fmax.is_empty()) {
+	data_x->fmax &= Interval(new_fmax_lb, new_fmax_ub);
+
+	if(  data_x->fmax.is_empty()) {
 		delete x_cell;
 		x_cell =NULL;
 		return ;
-	} else {
-		data_x->fmax = new_fmax;
 	}
 
 	return;
 }
-
-
 
 
 
@@ -141,14 +153,16 @@ void LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell) {
 			delete y_cell;
 			y_cell = NULL;
 			delete x_cell;
-			x_cell =NULL;
-			return ; // no need to go further, x_box does not contains the solution
+			x_cell = NULL;
+			return; // no need to go further, x_box does not contains the solution
 		}
 		else if(midres.lb()>data_y->pf.lb()) { // found y such as xy constraint is respected
 			// TODO	 to check		// il faut faire un contract de y_heap
-			data_x->y_heap.contract(midres.lb()); // to check
-			data_y->pf = Interval(midres.lb(),data_y->pf.ub());
-			data_x->fmax = Interval(midres.lb(),data_x->fmax.ub());; // yes we found a feasible solution for all x
+			data_y->pf   &= Interval(midres.lb(),POS_INFINITY);
+			if (data_x->fmax.lb() < midres.lb() ) {
+				found_point = true;
+				data_x->fmax &= Interval(midres.lb(),POS_INFINITY);; // yes we found a feasible solution for all x
+			}
 		}
 	}
 
@@ -162,17 +176,11 @@ void LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell) {
 	//********************************************
 
 	// Update the lower and upper bound on y
-	Interval res = xy_sys.goal->eval(xy_box); // objective function evaluation
-	if(data_x->fmax.lb() < res.ub()) {  // y_box cannot contains max f(x,y)
+	data_y->pf &= xy_sys.goal->eval(xy_box); // objective function evaluation
+	if( data_y->pf.is_empty() || data_x->fmax.lb() > data_y->pf.ub()) {  // y_box cannot contains max f(x,y)
 		delete y_cell;
 		y_cell =NULL;
 		return ;
-	}
-
-	if (data_y->pf.lb() < res.lb()) { // because data->pf.lb() can be updates by an evaluation at the midpoint
-		data_y->pf = res;
-	}  else {
-		data_y->pf = Interval(data_y->pf.lb(),res.ub()); // we keep the previous lower bound (perhaps found with a feasible solution)
 	}
 
 	// check if it is possible to find a better solution than those already found on x
@@ -193,8 +201,6 @@ void LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell) {
 	} else {
 		data_x->y_heap.push(y_cell);
 	}
-
-
 }
 
 

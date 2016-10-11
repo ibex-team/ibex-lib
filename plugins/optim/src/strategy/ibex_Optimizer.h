@@ -231,6 +231,12 @@ protected:
 	bool update_entailed_ctr(const IntervalVector& box);
 
 
+	/**
+	 * \brief Main procedure for updating the loup.
+	 */
+	bool update_loup(const IntervalVector& box);
+
+
 	/*=======================================================================================================*/
 	/*             Functions to update the loup (see ibex_OptimProbing and ibex_OptimSimplex)                */
 	/*=======================================================================================================*/

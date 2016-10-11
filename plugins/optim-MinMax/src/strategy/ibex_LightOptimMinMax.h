@@ -1,3 +1,12 @@
+//============================================================================
+//                                  I B E X
+// File        : ibex_LightOptimMinMax.h
+// Author      : Dominique Monnet, Jordan Ninin
+// License     : See the LICENSE file
+// Created     : Oct 1, 2016
+//============================================================================
+
+
 #ifndef __LIGHT_MINMAX__
 #define __LIGHT_MINMAX__
 
@@ -46,6 +55,7 @@ private:
     Bsc* bsc; // bissector
     std::vector<Cell*> heap_save;
     double prec_y;
+    bool found_point;
 
     /* contract xy_box and xy_box_ctc w.r.t max_ctc contractor
      * */

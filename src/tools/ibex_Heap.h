@@ -57,6 +57,7 @@ public:
 
 	Heap(const Heap& original_heap);
 
+	~Heap() { flush(); }
 	/**
 	 * \brief Flush the buffer.
 	 *

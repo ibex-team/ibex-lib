@@ -51,7 +51,7 @@ void Optimizer::read_ext_box(const IntervalVector& ext_box, IntervalVector& box)
 Optimizer::Optimizer(System& user_sys, Ctc& ctc, Bsc& bsc, double prec,
 		double goal_rel_prec, double goal_abs_prec, int sample_size, double equ_eps,
 		bool rigor,  int critpr,CellCostFunc::criterion crit2) :
-				Optim(user_sys.nb_var, *new CellDoubleHeap(*new CellCostVarLB(user_sys.nb_var), *CellCostFunc::get_cost(crit2, user_sys.nb_var), critpr),// first buffer with LB, second buffer with ct (default UB))
+				Optim(user_sys.nb_var, new CellDoubleHeap(*new CellCostVarLB(user_sys.nb_var), *CellCostFunc::get_cost(crit2, user_sys.nb_var), critpr),// first buffer with LB, second buffer with ct (default UB))
 						prec, goal_rel_prec, goal_abs_prec, sample_size),
                 				user_sys(user_sys), sys(user_sys,equ_eps),
                 				m(sys.nb_ctr) /* (warning: not user_sys.nb_ctr) */,
@@ -110,14 +110,14 @@ Optimizer::~Optimizer() {
 
 		delete is_inside;
 	}
-	buffer.flush();
 	if (equs) delete equs;
 	if (df) delete df;
 	delete mylp;
 	delete lr;
-	delete &buffer.cost1();
-	delete &buffer.cost2();
-	delete &buffer;
+	//buffer->flush();
+	delete &(buffer->cost1());
+	delete &(buffer->cost2());
+	delete buffer;
 	//	delete &(objshaver->ctc);
 	//	delete objshaver;
 }
@@ -169,6 +169,30 @@ bool Optimizer::update_real_loup() {
 	return false;
 }
 
+// 2 methods for searching a better feasible point and a better loup
+
+bool Optimizer::update_loup(const IntervalVector& box) {
+	bool loup_change=false;
+	if (rigor && equs!=NULL) { // a loup point will not be safe (pseudo loup is not the real loup)
+		double old_pseudo_loup=pseudo_loup;
+		if (update_loup_probing(box) && pseudo_loup < old_pseudo_loup + default_loup_tolerance*fabs(loup-pseudo_loup)) {
+			// update pseudo_loup
+			loup_change |= update_real_loup();
+			old_pseudo_loup=pseudo_loup; // because has changed
+		}
+		if (update_loup_simplex(box) && pseudo_loup < old_pseudo_loup + default_loup_tolerance*fabs(loup-pseudo_loup)) {
+			loup_change |= update_real_loup();
+		}
+	} else {
+		loup_change |= update_loup_probing(box); // update pseudo_loup
+		// the loup point is safe: the pseudo loup is the real loup.
+		loup=pseudo_loup;
+		loup_change |= update_loup_simplex(box);  // update pseudo_loup
+		loup = pseudo_loup;
+	}
+	return loup_change;
+
+}
 
 bool Optimizer::update_entailed_ctr(const IntervalVector& box) {
 	for (int j=0; j<m; j++) {
@@ -204,10 +228,10 @@ void Optimizer::handle_cell(Cell& c, const IntervalVector& init_box ){
 		//       objshaver->contract(c.box);
 
 		// we know cost1() does not require OptimData
-		buffer.cost2().set_optim_data(c,sys);
+		buffer->cost2().set_optim_data(c,sys);
 
 		// the cell is put into the 2 heaps
-		buffer.push(&c);
+		buffer->push(&c);
 
 		nb_cells++;
 	}
@@ -328,7 +352,7 @@ void Optimizer::firstorder_contract(IntervalVector& box, const IntervalVector& i
 Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj_init_bound) {
 	loup=obj_init_bound;
 	pseudo_loup=obj_init_bound;
-	buffer.contract(loup);
+	//buffer.contract(loup); // ??JN il y a un flush just apres??
 
 	uplo=NEG_INFINITY;
 	uplo_of_epsboxes=POS_INFINITY;
@@ -339,7 +363,7 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 	nb_rand=0;
 	diam_rand=0;
 
-	buffer.flush();
+	buffer->flush();
 
 	Cell* root=new Cell(IntervalVector(n+1));
 
@@ -349,7 +373,7 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 	bsc.add_backtrackable(*root);
 
 	// add data "pu" and "pf" (if required)
-	buffer.cost2().add_backtrackable(*root);
+	buffer->cost2().add_backtrackable(*root);
 
 	// add data required by optimizer + Fritz John contractor
 	root->add<EntailedCtr>();
@@ -367,21 +391,21 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 	update_uplo();
 
 	try {
-		while (!buffer.empty()) {
+		while (!buffer->empty()) {
 		  //			if (trace >= 2) cout << " buffer " << buffer << endl;
-		  if (trace >= 2) buffer.print(cout);
+		  if (trace >= 2) buffer->print(cout);
 			//		  cout << "buffer size "  << buffer.size() << " " << buffer2.size() << endl;
 
 			loup_changed=false;
 
-			Cell *c = buffer.top();
+			Cell *c = buffer->top();
 
 			try {
 				//pair<IntervalVector,IntervalVector> boxes=bsc.bisect(*c);
 				//pair<Cell*,Cell*> new_cells=c->bisect(boxes.first,boxes.second);
 				pair<Cell*,Cell*> new_cells=bsc.bisect(*c);
 
-				buffer.pop();
+				buffer->pop();
 				delete c; // deletes the cell.
 
 				handle_cell(*new_cells.first, init_box);
@@ -400,7 +424,7 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 
 					double ymax=compute_ymax();
 
-					buffer.contract(ymax);
+					buffer->contract(ymax);
 					//cout << " now buffer is contracted and min=" << buffer.minimum() << endl;
 
 
@@ -416,7 +440,7 @@ Optimizer::Status Optimizer::optimize(const IntervalVector& init_box, double obj
 			}
 			catch (NoBisectableVariableException& ) {
 				update_uplo_of_epsboxes((c->box)[ext_sys.goal_var()].lb());
-				buffer.pop();
+				buffer->pop();
 				delete c; // deletes the cell.
 				//if (trace>=1) cout << "epsilon-box found: uplo cannot exceed " << uplo_of_epsboxes << endl;
 				update_uplo(); // the heap has changed -> recalculate the uplo

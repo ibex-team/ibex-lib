@@ -1,14 +1,18 @@
 //============================================================================
 //                                  I B E X                                   
 // File        : ibex_DataMinMax.cpp
-// Author      : Jordan Ninin
+// Author      : Dominique Monnet, Jordan Ninin
 // License     : See the LICENSE file
-// Created     : Oct 18, 2014
+// Created     : Oct 1, 2016
 //============================================================================
 
 #include "ibex_DataMinMax.h"
 
 namespace ibex {
+
+
+CellCostMaxPFub DataMinMax::y_heap_costf1;
+CellCostPFlb DataMinMax::y_heap_costf2;
 
 DataMinMax::DataMinMax() : fmax(), pu(0), y_heap(y_heap_costf1,false,y_heap_costf2,false) {
 
@@ -37,14 +41,14 @@ void CellCostFmaxlb::add_backtrackable(Cell& root) {
 	root.add<DataMinMax>();
 }
 
-CellCostFmaxub::CellCostFmaxub(): CellCostFunc(false) { }
+CellCostmaxFmaxub::CellCostmaxFmaxub(): CellCostFunc(false) { }
 
-double CellCostFmaxub::cost(const Cell& elem) const {
-    return elem.get<DataMinMax>().fmax.ub();
+double CellCostmaxFmaxub::cost(const Cell& elem) const {
+    return -(elem.get<DataMinMax>().fmax.ub());
 }
 
 
-void CellCostFmaxub::add_backtrackable(Cell& root) {
+void CellCostmaxFmaxub::add_backtrackable(Cell& root) {
 	root.add<DataMinMax>();
 }
 

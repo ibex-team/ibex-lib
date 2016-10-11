@@ -21,7 +21,7 @@ const double Optim::default_equ_eps = 1e-08;
 const double Optim::default_loup_tolerance = 0.1;
 
 
-Optim::Optim (int n, CellDoubleHeap& buffer,  double prec,
+Optim::Optim (int n, CellDoubleHeap* buffer,  double prec,
 		double goal_rel_prec, double goal_abs_prec, int sample_size) :
                 				n(n), buffer(buffer),
                 				prec(prec), goal_rel_prec(goal_rel_prec), goal_abs_prec(goal_abs_prec),
@@ -36,7 +36,6 @@ Optim::Optim (int n, CellDoubleHeap& buffer,  double prec,
 }
 
 Optim::~Optim() {
-	buffer.flush();
 }
 
 
@@ -53,8 +52,8 @@ double Optim::compute_ymax() {
 void Optim::update_uplo() {
 	double new_uplo=POS_INFINITY;
 
-	if (! buffer.empty()) {
-		new_uplo= buffer.minimum();
+	if (! buffer->empty()) {
+		new_uplo= buffer->minimum();
 		if (new_uplo > loup) {
 			std::cout << " loup = " << loup << " new_uplo=" << new_uplo << std::endl;
 			ibex_error("Optim: new_uplo>loup (please report bug)");
@@ -72,7 +71,7 @@ void Optim::update_uplo() {
 		}
 		else uplo= uplo_of_epsboxes;
 	}
-	else if (buffer.empty() && loup != POS_INFINITY) {
+	else if (buffer->empty() && loup != POS_INFINITY) {
 		// empty buffer : new uplo is set to ymax (loup - precision) if a loup has been found
 		new_uplo=compute_ymax(); // not new_uplo=loup, because constraint y <= ymax was enforced
 		//    std::cout << " new uplo buffer empty " << new_uplo << " uplo " << uplo << std::endl;
@@ -111,7 +110,7 @@ void Optim::report() {
 		std::cout << "time limit " << timeout << "s. reached " << std::endl;
 	}
 	// No solution found and optimization stopped with empty buffer  before the required precision is reached => means infeasible problem
-	if (buffer.empty() && uplo_of_epsboxes == POS_INFINITY && (loup==POS_INFINITY || (loup==initial_loup && goal_abs_prec==0 && goal_rel_prec==0))) {
+	if (buffer->empty() && uplo_of_epsboxes == POS_INFINITY && (loup==POS_INFINITY || (loup==initial_loup && goal_abs_prec==0 && goal_rel_prec==0))) {
 		std::cout << " infeasible problem " << std::endl;
 		std::cout << " cpu time used " << time << "s." << std::endl;
 		std::cout << " number of cells " << nb_cells << std::endl;
@@ -176,7 +175,7 @@ void Optim::report_perf() {
 
 	std::cout << (	((rel_prec <= goal_rel_prec)||
 			(abs_prec <= goal_abs_prec)||
-			((buffer.empty() && uplo_of_epsboxes == POS_INFINITY && loup==POS_INFINITY))||
+			((buffer->empty() && uplo_of_epsboxes == POS_INFINITY && loup==POS_INFINITY))||
 			(uplo<-1.e300)
 	)? " T & " : " F & " );
 
