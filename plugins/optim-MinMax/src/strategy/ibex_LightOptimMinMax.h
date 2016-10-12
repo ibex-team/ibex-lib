@@ -26,6 +26,8 @@ public:
     /* Constructor*/
     LightOptimMinMax(NormalizedSystem& y_sys,Ctc& ctc_xy);
 
+    /* Destructor */
+    ~LightOptimMinMax();
     /* returns an enclosure of the maximum of the objective function: max f(x,y)
      * modifies y_heap inherited from father box
      * This function works as a classic B&B algorithm, with an initial stack of box instead of a initial box.

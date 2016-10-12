@@ -45,9 +45,12 @@ void TestOptimMinMax::ex_messine() {
 
 
         OptimMinMax oo(x_sys, xy_sys,x_ctc,xy_ctc,x_prec, y_prec,stop_prec);
+        //oo.trace=1;
         Optim::Status res = oo.optimize(x_ini);
-        oo.trace =1;
-        oo.report();
+        CPPUNIT_ASSERT(res==Optim::SUCCESS);
+        CPPUNIT_ASSERT(oo.loup<=0.524615);
+        CPPUNIT_ASSERT(oo.nb_cells<=355);
+        //oo.report();
 
 }
 /*

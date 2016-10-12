@@ -23,6 +23,10 @@ LightOptimMinMax::LightOptimMinMax(NormalizedSystem& y_sys, Ctc& ctc_xy):  trace
 
 }
 
+LightOptimMinMax::~LightOptimMinMax() {
+	delete bsc;
+}
+
 void LightOptimMinMax::add_backtrackable(Cell& root, const IntervalVector& y_init) {
 	root.add<DataMinMax>();
 	Cell * y_cell = new Cell(y_init);
@@ -59,6 +63,7 @@ bool LightOptimMinMax::optimize(Cell* x_cell, int nb_iter, double prec_y1) {
 
 			bool res = handle_cell( x_cell, subcells_pair.first);
 			if (!res) {
+				delete subcells_pair.second;
 				//std::cout <<"       OUT 1 "<<std::endl;
 				return false;
 			}
@@ -176,6 +181,15 @@ bool LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell) {
 	}
 
 	//************ part below add a contraction w.r.t f(x,y)<best_max, this part may not be efficient on every problem ******************************
+	xy_sys.goal->backward(data_x->fmax,xy_box);
+	if (xy_box.is_empty()) { // constraint on x and y not respected, move on.
+		delete y_cell;
+		return true;
+	} else {
+		// TODO to check normalement on peut propager la contraction sur le y
+		for (int k=0; k<y_cell->box.size(); k++)
+			y_cell->box[k] = xy_box[x_cell->box.size()+k];
+	}
 	// TODO je n'ai pas regarde ceci, mais il me semble que ce n'est plus necessaire
 	//            contract_best_max_cst(&max_ctc,&xy_box,&xy_box_ctc,subcells[j]);
 	//            if(xy_box.is_empty()||xy_box_ctc.is_empty()) { // there are no x in x_box such as exists y in y_box, f(x,y)<best_max || no point (x,y) in xy_box such as both constraints are respected

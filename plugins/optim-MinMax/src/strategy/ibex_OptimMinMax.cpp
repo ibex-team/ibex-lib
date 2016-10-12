@@ -18,7 +18,7 @@ using namespace std;
 namespace ibex {
 
 OptimMinMax::OptimMinMax(NormalizedSystem& x_sys,NormalizedSystem& xy_sys, Ctc& x_ctc,Ctc& xy_ctc,double prec_x,double prec_y,double goal_rel_prec):
-		Optim(x_sys.nb_var, new CellDoubleHeap(*new CellCostFmaxlb(), *new CellCostmaxFmaxub()),
+		Optim(x_sys.nb_var, new CellDoubleHeap(*new CellCostFmaxlb(), *new CellCostFmaxub()),
 				prec_x, goal_rel_prec, goal_rel_prec, 1), // attention meme precision en relatif et en absolue
 	x_box_init(x_sys.box), y_box_init(xy_sys.box.subvector(x_sys.nb_var, xy_sys.nb_var-1)),
 	x_ctc(x_ctc),x_sys(x_sys),lsolve(xy_sys,xy_ctc),
@@ -110,10 +110,13 @@ Optim::Status OptimMinMax::optimize(const IntervalVector& x_box_ini1, double obj
 						if (trace) cout << " infinite value for the minimum " << endl;
 						break;
 					}
-					if (trace) cout <<  "ymax=" << ymax << " uplo= " <<  uplo<< endl;
+					if (trace) cout <<  "iter="<< nb_cells <<",  size_heap="<< buffer->size()<< ",  ymax=" << ymax << ",  uplo= " <<  uplo<< endl;
 				}
 				update_uplo();
 				time_limit_check();
+
+				if (trace && (nb_cells%10000==0)) cout <<  "iter="<< nb_cells <<",  size_heap="<< buffer->size()<< ",  loup=" << loup << ",  uplo= " <<  uplo<< endl;
+
 
 			}
 			catch (NoBisectableVariableException& ) {
@@ -207,8 +210,8 @@ bool  OptimMinMax::handle_cell(Cell * x_cell) {
 			if(new_loup<loup) { // update best current solution
 				loup = new_loup;
 				loup_changed = true;
-				loup_point = (midp.mid()).subvector(0,x_box_init.size()-1);
-				data_x->fmax &= Interval(NEG_INFINITY,new_loup);
+				loup_point = (midp.mid());
+				data_x->fmax &= Interval(NEG_INFINITY,loup);
 				if (trace) cout << "[mid]"  << " loup update " << loup  << " loup point  " << loup_point << endl;
 				//max_y = heap_copy.top1()->box;
 				//cout<<"loup : "<<loup<<" get for point: x = "<<best_sol<<" y = "<<max_y<<" uplo: "<<uplo<< " volume rejected: "<<vol_rejected/init_vol*100<<endl;
