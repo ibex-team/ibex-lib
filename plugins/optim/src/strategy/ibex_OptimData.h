@@ -77,7 +77,7 @@ protected:
 	/**
 	 * \brief Create a copy
 	 */
-	Backtrackable* copy(){ return new OptimData(*this);};
+	Backtrackable* copy() const { return new OptimData(*this);};
 
 };
 

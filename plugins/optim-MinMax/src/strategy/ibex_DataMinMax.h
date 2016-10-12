@@ -75,7 +75,7 @@ protected:
 	/**
 	 * \brief Create a copy
 	 */
-	Backtrackable* copy(){ return new DataMinMax(*this);};
+	Backtrackable* copy() const { return new DataMinMax(*this);};
 
 };
 

@@ -143,7 +143,7 @@ public:
 protected:
 
 	explicit BisectedVar(const BisectedVar& e) : var(e.var) { }
-	Backtrackable* copy(){ return new BisectedVar(*this);};
+	Backtrackable* copy() const { return new BisectedVar(*this);};
 
 };
 

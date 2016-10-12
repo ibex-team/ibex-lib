@@ -15,6 +15,8 @@
 
 namespace ibex {
 
+class Cell;
+
 /**
  * \ingroup strategy
  *
@@ -56,7 +58,7 @@ protected:
 	/**
 	 * \brief Create a copy
 	 */
-	virtual Backtrackable* copy()=0;
+	virtual Backtrackable* copy() const =0;
 
 };
 

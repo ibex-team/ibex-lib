@@ -263,7 +263,7 @@ public:
 protected:
 
 	explicit NodeAndDist(const NodeAndDist& e) : node(e.node), dist(e.dist) { } // TODO JN: Chabs, can you check it?
-	Backtrackable* copy() {return new NodeAndDist(*this);};
+	Backtrackable* copy() const {return new NodeAndDist(*this);};
 
 };
 

@@ -46,12 +46,12 @@ void TestOptimMinMax::ex_messine() {
 
         OptimMinMax oo(x_sys, xy_sys,x_ctc,xy_ctc,x_prec, y_prec,stop_prec);
         Optim::Status res = oo.optimize(x_ini);
-
+        oo.trace =2;
         oo.report();
 
 }
 /*
-//*********** Problems from "A differential evolution approach for solving constrained min–max optimization problems",Segundo, 2012
+//  *********** Problems from "A differential evolution approach for solving constrained min–max optimization problems",Segundo, 2012
 
 void TestOptimMinMax::ex_segundo1() {
 
@@ -187,7 +187,7 @@ void TestOptimMinMax::ex_segundo4() {
         solver.solve(x_ini,y_ini,x_prec,y_prec,stop_prec);
 }
 
-//*********** CDC submission example ***************
+//  *********** CDC submission example ***************
 
 void TestOptimMinMax::ex_cdc() {
     Variable x(3),y(1),kp,ki,kd,u;
@@ -232,7 +232,7 @@ void TestOptimMinMax::ex_cdc() {
 
 }
 
-//*********** Ciscrea directly linearized example ***************
+//  *********** Ciscrea directly linearized example ***************
 
 void TestOptimMinMax::ex_ciscrea() {
     Variable x(4),y(1);
@@ -283,7 +283,7 @@ void TestOptimMinMax::ex_ciscrea() {
     solver.solve(x_ini,y_ini,x_prec,y_prec,stop_prec);
 }
 
-//*********** Ciscrea robust direct linearized example ***************
+//  *********** Ciscrea robust direct linearized example ***************
 
 void TestOptimMinMax::ex_ciscrea_robust() {
     Variable x(4),y(2);
@@ -344,7 +344,7 @@ void TestOptimMinMax::ex_ciscrea_robust() {
     solver.solve(x_ini,y_ini,x_prec,y_prec,stop_prec);
 }
 
-//*********** Hirokazu symbolic example ***************
+//  *********** Hirokazu symbolic example ***************
 
 void TestOptimMinMax::ex_hirokazu() {
     Variable x(2),y(1);
@@ -382,7 +382,7 @@ void TestOptimMinMax::ex_hirokazu() {
     solver.solve(x_ini,y_ini,x_prec,y_prec,stop_prec);
 }
 
-//*********** Fujisaki symbolic example ***************
+//  *********** Fujisaki symbolic example ***************
 
 void TestOptimMinMax::ex_fujisaki() {
     Variable x(6),y(1);
@@ -436,7 +436,7 @@ void TestOptimMinMax::ex_fujisaki() {
     solver.solve(x_ini,y_ini,x_prec,y_prec,stop_prec);
 }
 
-//*********** satellite pid filt example ***************
+//  *********** satellite pid filt example ***************
 
 
 void TestOptimMinMax::ex_satellite() {

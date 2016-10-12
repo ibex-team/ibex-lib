@@ -110,7 +110,7 @@ protected:
 	/**
 	 * \brief Create a copy
 	 */
-	Backtrackable* copy() { return new EntailedCtr(*this); };
+	Backtrackable* copy() const { return new EntailedCtr(*this); };
 };
 
 

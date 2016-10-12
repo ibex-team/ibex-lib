@@ -18,7 +18,7 @@
 
 namespace ibex{
 
-LightOptimMinMax::LightOptimMinMax(NormalizedSystem& y_sys, Ctc& ctc_xy):
+LightOptimMinMax::LightOptimMinMax(NormalizedSystem& y_sys, Ctc& ctc_xy):  trace(false) ,
 	ctc_xy(ctc_xy),xy_sys(y_sys), bsc(new LargestFirst()), prec_y(1.e-6), found_point(false)  {
 
 }
@@ -46,6 +46,8 @@ bool LightOptimMinMax::optimize(Cell* x_cell, int nb_iter, double prec_y1) {
 	//    cout<<"lsolve: contractor ok"<<endl;
 
 	for(int i = 0; (!y_heap->empty()) && (i<nb_iter) ;i++) {
+
+		if (trace >= 3) std::cout<< *y_heap<<std::endl;
 
 		found_point  = false;
 		Cell * tmp_cell = y_heap->pop1(); // we extract an element according to the first order

@@ -35,6 +35,9 @@ OptimMinMax::~OptimMinMax() {
 }
 
 Optim::Status OptimMinMax::optimize(const IntervalVector& x_box_ini1, double obj_init_bound) {
+
+	if (trace) lsolve.trace =trace;
+
 	loup=obj_init_bound;
 
 	uplo=NEG_INFINITY;
@@ -62,7 +65,6 @@ Optim::Status OptimMinMax::optimize(const IntervalVector& x_box_ini1, double obj
 	Timer::start();
 
 	handle_cell(root);
-	if (root) buffer->push(root);
 
 	nb_cells++;
 
@@ -70,8 +72,8 @@ Optim::Status OptimMinMax::optimize(const IntervalVector& x_box_ini1, double obj
 
 	try {
 		while (!buffer->empty()) {
-		  //			if (trace >= 2) cout << " buffer " << buffer << endl;
-		  if (trace >= 2) buffer->print(cout);
+			//			if (trace >= 2) cout << " buffer " << buffer << endl;
+			if (trace >= 2) buffer->print(cout);
 			//		  cout << "buffer size "  << buffer.size() << " " << buffer2.size() << endl;
 
 			loup_changed=false;
@@ -79,7 +81,7 @@ Optim::Status OptimMinMax::optimize(const IntervalVector& x_box_ini1, double obj
 			Cell *c = buffer->pop();
 
 			try {
-				//pair<IntervalVector,IntervalVector> boxes=bsc.bisect(*c);
+				//pair<IntervalVector,IntervalVector> boxes=bsc->bisect(c->box);
 				//pair<Cell*,Cell*> new_cells=c->bisect(boxes.first,boxes.second);
 				pair<Cell*,Cell*> new_cells=bsc->bisect_cell(*c);
 				delete c; // deletes the cell.

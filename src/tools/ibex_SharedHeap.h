@@ -164,6 +164,9 @@ protected:
 	 */
 	HeapNode<T>* get_node(unsigned int i) const;
 
+
+	std::ostream& print(std::ostream& os) const;
+
 	/**
 	 * \brief Streams out the heap
 	 *
@@ -706,15 +709,21 @@ std::ostream& operator<<(std::ostream& os, const HeapNode<T>& node) {
 
 template<class T>
 std::ostream& operator<<(std::ostream& os, const SharedHeap<T>& heap) {
-	if (!heap.root) return os << "(empty heap)";
+		return heap.print(os);
+}
+
+
+template<class T>
+std::ostream& SharedHeap<T>::print(std::ostream& os) const{
+	if (!root) return os << "(empty heap)";
 	os << std::endl;
 	std::stack<std::pair<HeapNode<T>*,int> > s;
-	s.push(std::pair<HeapNode<T>*,int>(heap.root,0));
+	s.push(std::pair<HeapNode<T>*,int>(root,0));
 	while (!s.empty()) {
 		std::pair<HeapNode<T>*,int> p=s.top();
 		s.pop();
 		for (int i=0; i<p.second; i++) os << "   ";
-		os  << (p.first->elt->crit[heap.heap_id]) << std::endl;
+		os  << (p.first->elt->crit[heap_id]) << std::endl;
 		if (p.first->right) s.push(std::pair<HeapNode<T>*,int>(p.first->right,p.second+1));
 		if (p.first->left) s.push(std::pair<HeapNode<T>*,int>(p.first->left,p.second+1));
 	}

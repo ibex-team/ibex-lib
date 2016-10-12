@@ -64,7 +64,7 @@ protected:
 	/**
 	 * \brief Create a copy
 	 */
-	Backtrackable* copy(){ return new Multipliers(*this);};
+	Backtrackable* copy() const { return new Multipliers(*this);};
 
 };
 

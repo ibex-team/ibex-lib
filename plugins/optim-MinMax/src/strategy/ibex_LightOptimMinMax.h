@@ -20,7 +20,7 @@
 
 namespace ibex {
 
-class LightOptimMinMax{
+class LightOptimMinMax {
 public:
 
     /* Constructor*/
@@ -47,6 +47,8 @@ public:
     void add_backtrackable(Cell& root, const IntervalVector& y_init);
 
 
+
+    int trace;
 
 private:
     Ctc& ctc_xy; //contractor for constraints on xy

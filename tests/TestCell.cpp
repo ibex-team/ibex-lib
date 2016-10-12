@@ -59,7 +59,6 @@ void TestCell::test02() {
     NormalizedSystem sys(fac);
 
 	root->add<EntailedCtr>();
-	//root->add<Multipliers>();
 	EntailedCtr * entailed = &root->get<EntailedCtr>();
 	entailed->init_root(sys,sys);
 	entailed->original(1) = true;
