@@ -24,7 +24,7 @@ namespace ibex {
 void TestOptimMinMax::ex_messine() {
         double x_prec = 1e-6;
         double y_prec = 1e-4;
-        double stop_prec = 1e-3;
+        double stop_prec = 1e-2;
 
         Variable x(2),y(2);
         IntervalVector x_ini(2,Interval(-10,10));
@@ -46,7 +46,7 @@ void TestOptimMinMax::ex_messine() {
 
         OptimMinMax oo(x_sys, xy_sys,x_ctc,xy_ctc,x_prec, y_prec,stop_prec);
         Optim::Status res = oo.optimize(x_ini);
-        oo.trace =2;
+        oo.trace =1;
         oo.report();
 
 }

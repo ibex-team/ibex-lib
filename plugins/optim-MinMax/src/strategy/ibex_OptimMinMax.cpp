@@ -24,7 +24,6 @@ OptimMinMax::OptimMinMax(NormalizedSystem& x_sys,NormalizedSystem& xy_sys, Ctc& 
 	x_ctc(x_ctc),x_sys(x_sys),lsolve(xy_sys,xy_ctc),
 	bsc(new LargestFirst()),
 	prec_y(prec_y) {
-
 };
 
 OptimMinMax::~OptimMinMax() {
@@ -153,6 +152,7 @@ bool  OptimMinMax::handle_cell(Cell * x_cell) {
 
 	// update the upper bound with the loup
 	data_x->fmax &= Interval(NEG_INFINITY,loup);
+	//std::cout <<" debut "<<data_x->fmax <<std::endl;
 
 	if (data_x->fmax.is_empty()) {
 		delete x_cell;
@@ -182,6 +182,7 @@ bool  OptimMinMax::handle_cell(Cell * x_cell) {
 	int nb_iter = choose_nbiter(false);
 	// compute
 	bool res =lsolve.optimize(x_cell,nb_iter,min_prec_light_solver);
+	//std::cout<<" apres res="<<res<<" bound= "<<data_x->fmax <<std::endl;
 
 	if(!res) { // certified that x box does not contains the solution
 		// TODO Trace
@@ -208,7 +209,7 @@ bool  OptimMinMax::handle_cell(Cell * x_cell) {
 				loup_changed = true;
 				loup_point = (midp.mid()).subvector(0,x_box_init.size()-1);
 				data_x->fmax &= Interval(NEG_INFINITY,new_loup);
-				cout << "[mid]"  << " loup update " << loup  << " loup point  " << loup_point << endl;
+				if (trace) cout << "[mid]"  << " loup update " << loup  << " loup point  " << loup_point << endl;
 				//max_y = heap_copy.top1()->box;
 				//cout<<"loup : "<<loup<<" get for point: x = "<<best_sol<<" y = "<<max_y<<" uplo: "<<uplo<< " volume rejected: "<<vol_rejected/init_vol*100<<endl;
 			}
@@ -241,6 +242,7 @@ bool  OptimMinMax::handle_cell(Cell * x_cell) {
 	buffer->push(x_cell);
 	nb_cells++;
 
+	//std::cout<<" fin "<<data_x->fmax <<std::endl;
 	return true;
 }
 

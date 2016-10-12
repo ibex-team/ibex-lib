@@ -39,6 +39,8 @@ bool LightOptimMinMax::optimize(Cell* x_cell, int nb_iter, double prec_y1) {
 	prec_y = prec_y1;
 	DataMinMax *data_x = &(x_cell->get<DataMinMax>());
 
+	//std::cout <<"    DEB "<<data_x->fmax <<std::endl;
+
 	DoubleHeap<Cell> *y_heap = &(data_x->y_heap); // current cell
 
 	// /!\ Does creating a contractor here cause memory leak ? If so, it must be recreated in the minimax_solver algo only when best_max change to limit the memory leak, and pass it as an argument of this function
@@ -56,10 +58,16 @@ bool LightOptimMinMax::optimize(Cell* x_cell, int nb_iter, double prec_y1) {
 			delete tmp_cell;
 
 			bool res = handle_cell( x_cell, subcells_pair.first);
-			if (!res) return false;
+			if (!res) {
+				//std::cout <<"       OUT 1 "<<std::endl;
+				return false;
+			}
 
 			res = handle_cell( x_cell, subcells_pair.second);
-			if (!res) return false;
+			if (!res) {
+				//std::cout <<"       OUT 2 "<<std::endl;
+				return false;
+			}
 
 
 			if (found_point) {
@@ -82,6 +90,7 @@ bool LightOptimMinMax::optimize(Cell* x_cell, int nb_iter, double prec_y1) {
 	fill_y_heap(*y_heap);
 
 	if(y_heap->empty()){
+		//std::cout <<"       OUT 3 "<<std::endl;
 		delete x_cell;
 		return false;
 	}
@@ -95,10 +104,13 @@ bool LightOptimMinMax::optimize(Cell* x_cell, int nb_iter, double prec_y1) {
 	data_x->fmax &= Interval(new_fmax_lb, new_fmax_ub);
 
 	if(  data_x->fmax.is_empty()) {
+		//std::cout <<"       OUT 4 "<<std::endl;
 		delete x_cell;
 		return false;
 	}
 
+
+	//std::cout <<"    FIN "<<data_x->fmax <<std::endl;
 	return true;
 }
 
@@ -150,6 +162,7 @@ bool LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell) {
 			// there exists y such as constraint is respected and f(x,y)>best max, the max on x will be worst than the best known solution
 			delete y_cell;
 			delete x_cell;
+			//std::cout <<"           OUT 6 mid="<<y_cell->box<<std::endl;
 			return false; // no need to go further, x_box does not contains the solution
 		}
 		else if(midres.lb()>data_y->pf.lb()) { // found y such as xy constraint is respected
@@ -184,6 +197,7 @@ bool LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell) {
 		// I think this case was already check with the mid-point.
 		delete y_cell;
 		delete x_cell;
+		//std::cout <<"           OUT 7 "<<std::endl;
 		return false; // no need to go further, x_box does not contains the solution
 	}
 
@@ -219,7 +233,7 @@ void LightOptimMinMax::contract_best_max_cst(Ctc& max_ctc,IntervalVector& xy_box
  */
 
 IntervalVector LightOptimMinMax::get_feasible_point(Cell * x_cell,Cell * y_cell) {
-	IntervalVector mid_y_box = get_mid_y(y_cell->box,x_cell->box); // get the box (x,mid(y))
+	IntervalVector mid_y_box = get_mid_y(x_cell->box,y_cell->box); // get the box (x,mid(y))
 	if((y_cell->get<OptimData>().pu != 1)) { // constraint on xy exist and is not proved to be satisfied
 		int res = check_constraints(mid_y_box);
 		if(res == 0 ||res == 1)
