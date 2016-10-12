@@ -28,7 +28,6 @@ public:
 	 */
 	OptimData();
 
-
 	/**
 	 * \brief Delete *this.
 	 */

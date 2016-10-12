@@ -110,11 +110,11 @@ Optimizer::~Optimizer() {
 
 		delete is_inside;
 	}
+	buffer->flush();
 	if (equs) delete equs;
 	if (df) delete df;
 	delete mylp;
 	delete lr;
-	//buffer->flush();
 	delete &(buffer->cost1());
 	delete &(buffer->cost2());
 	delete buffer;

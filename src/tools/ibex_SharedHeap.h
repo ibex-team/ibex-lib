@@ -15,7 +15,6 @@
 #include <stack>
 #include "ibex_Heap.h" // just for the declaration of CostFunc<T>
 
-
 namespace ibex {
 
 template<class T> class HeapNode;
@@ -208,7 +207,7 @@ private:
 
 	/** Create a node from an element and the father node. */
 	explicit HeapNode(HeapElt<T>* elt, HeapNode<T>* father=NULL);
-    
+
 	/** Delete the node and all its sons */
 	//~HeapNode() ;
 
@@ -335,7 +334,6 @@ SharedHeap<T>::~SharedHeap() {
 	root = NULL;
 }
 
-
 template<class T>
 inline double SharedHeap<T>::minimum() const {
 	return root->elt->crit[heap_id];
@@ -420,7 +418,7 @@ void SharedHeap<T>::push_elt(HeapElt<T>* elt) {
 		if (nb_nodes%2==0)	{ pt->left =tmp; }
 		else 				{ pt->right=tmp; }
 
-                percolate_up(tmp);
+		percolate_up(tmp);
 	}
 }
 
