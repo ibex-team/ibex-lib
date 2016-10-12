@@ -138,7 +138,7 @@ int main(int argc, char** argv){
 	cout << " sys.box " << sys.box << endl;
 
 	// the trace 
-	o.trace=1;
+	o.trace=0;
 
 	// the allowed time for search
 	o.timeout=timelimit;
