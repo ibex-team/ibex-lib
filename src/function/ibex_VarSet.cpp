@@ -79,6 +79,13 @@ VarSet::VarSet(const VarSet& v) : nb_var(v.nb_var), nb_param(v.nb_param) {
 	vars.clone(v.vars);
 }
 
+VarSet& VarSet::operator=(const VarSet& v) {
+	(int&) nb_var=v.nb_var;
+	(int&) nb_param=v.nb_param;
+	vars= v.vars;
+	return *this;
+}
+
 void VarSet::init(Function& f, const Array<const ExprNode>& x, bool var) {
 	assert(x.size()>0);
 	assert(f.nb_var()>x.size());

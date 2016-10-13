@@ -55,6 +55,11 @@ public:
 	void add(T& obj);
 
 	/**
+	 * \brief Concatenate with another array (increments the size)
+	 */
+	void add(const Array<T>& a);
+
+	/**
 	 * \brief Set the ith reference to the object \a obj.
 	 */
 	void set_ref(int i, T& obj);
@@ -266,6 +271,14 @@ template<class T>
 void Array<T>::add(T& obj) {
 	resize(size()+1);
 	set_ref(size()-1,obj);
+}
+
+template<class T>
+void Array<T>::add(const Array<T>& a) {
+	int n=size();
+	resize(n+a.size());
+	for (int i=0; i<a.size(); i++)
+		set_ref(n+i,a[i]);
 }
 
 template<class T>

@@ -134,6 +134,12 @@ bool inflating_newton(const Function& f, const VarSet* vars, const IntervalVecto
 	assert(f.image_dim()==n);
 	assert(full_box.size()==f.nb_var());
 
+	if (full_box.is_empty()) {
+		box_existence.set_empty();
+		box_unicity.set_empty();
+		return false;
+	}
+
 	int k=0;
 	bool success=false;
 
@@ -199,10 +205,44 @@ bool inflating_newton(const Function& f, const VarSet* vars, const IntervalVecto
 		IntervalVector box2=mid-y;
 
 		if (box2.is_subset(box)) {
+
+			assert(!box2.is_empty());
+
 			if (!success) { // to get the largest unicity box, we do this
 				            // only when the first contraction occurs
+
 				if (vars) vars->set_var_box(box_unicity,box2);
 				else box_unicity = box2;
+
+				//=================================================
+				// We now try to enlarge the unicity box as possible
+				// =================================================
+				IntervalVector box2copy=box2;
+
+				bool inflate_ok=true;
+
+				while (inflate_ok) {
+
+					box2copy.inflate(delta,0.0);
+
+					// box_existence is also used inside this iteration
+					// to store the "full box"
+					if (vars) vars->set_var_box(box_existence,box2copy);
+					else box_existence = box2copy;
+
+					newton(f,vars,box_existence,0.0,default_gauss_seidel_ratio);
+
+					if (vars) {
+						if (vars->var_box(box_existence).is_interior_subset(box2))
+							vars->set_var_box(box_unicity,box2copy);
+						else inflate_ok=false;
+					} else {
+						if (box_existence.is_interior_subset(box2))
+							box_unicity = box2copy;
+						else inflate_ok=false;
+					}
+				}
+
 			}
 			success=true;  // we don't return now, to let the box being contracted more
 		}
