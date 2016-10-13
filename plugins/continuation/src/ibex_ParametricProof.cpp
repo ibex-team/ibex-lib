@@ -78,6 +78,8 @@ get_vars(Function& f, const Vector& pt, const BitSet& forced_params) {
 		assert(!(forced_params[j] && _vars[j]));
 	}
 
+	delete [] pr;
+	delete [] pc;
 	return VarSet(f.nb_var(),_vars);
 }
 

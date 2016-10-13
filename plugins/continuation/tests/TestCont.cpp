@@ -31,7 +31,7 @@ void TestCont::test01() {
 	ContCell cell=cont.choose(sol,2.0);
 
 	//cout << "\nResult:\n" << cell << endl;
-	CPPUNIT_ASSERT(cell.box.min_diam()>0.9);
+	CPPUNIT_ASSERT(cell.unicity_box.min_diam()>0.9);
 }
 
 } // end namespace
