@@ -12,7 +12,7 @@
 #define __IBEX_SOLVERQINTER_H__
 
 
-#include "ibex_Solver.h"
+#include "ibex_SolverGen.h"
 #include "ibex_Cell.h"
 #include "ibex_CellBuffer.h"
 #include "ibex_CtcQInter.h"
@@ -43,7 +43,7 @@ Qintersection contractors.
 
 
 
- class SolverQInter : public Solver {
+ class SolverQInter : public SolverGen {
 
  public :
 

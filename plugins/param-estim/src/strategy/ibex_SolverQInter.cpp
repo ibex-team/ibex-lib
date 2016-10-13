@@ -21,7 +21,7 @@ namespace ibex {
 
   
   
- SolverQInter::SolverQInter (Ctc& ctc, Bsc& bsc, CellBuffer& buffer, CtcQInter& ctcq)  : Solver (ctc,bsc,buffer), ctcq(ctcq) ,   bestsolpoint(ctcq.nb_var), initbox(ctcq.nb_var)
+ SolverQInter::SolverQInter (Ctc& ctc, Bsc& bsc, CellBuffer& buffer, CtcQInter& ctcq)  : SolverGen (ctc,bsc,buffer), ctcq(ctcq) ,   bestsolpoint(ctcq.nb_var), initbox(ctcq.nb_var)
  { init();}
   
 
@@ -767,7 +767,7 @@ bool SolverQInter::solution_test0(Cell&  c)  {
   }
 
 void SolverQInter::report_time_limit(){
-  Solver::report_time_limit();
+  SolverGen::report_time_limit();
   
     
     int possin =0;
