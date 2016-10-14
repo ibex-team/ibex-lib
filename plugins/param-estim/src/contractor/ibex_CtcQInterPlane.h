@@ -50,7 +50,7 @@ public:
    int original_obs(int q) ;
  protected :
 
-   double max_diam_threshold(const IntervalVector& box);
+
         void fwdbwd(IntervalVector & box, int iter);
 	//	void init();
         void fwd(IntervalVector & box, int iter);
@@ -92,6 +92,7 @@ public:
    double err_compute( int iter, int k, IntervalVector & box,Affine2& af);
    void compute_affine_evaluation( int i, int iter,  Affine2& af , Interval& af2);
    int affine_threshold();
+   double max_diam_threshold(const IntervalVector& box);
    //   void bwd1(IntervalVector & box, int iter);
 };
 

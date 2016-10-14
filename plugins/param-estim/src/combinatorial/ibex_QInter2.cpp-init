@@ -8,49 +8,19 @@
 // Last Update : Jul 24, 2013
 //============================================================================
 
-#include "ibex_QInter.h"
 #include "ibex_QInter2.h"
 #include "ibex_BitSet.h"
 #include "ibex_Exception.h"
+#include "ibex_KCoreGraph.h"
 
 #include <algorithm>
+
+using namespace std;
 
 bool leftpaircomp (const pair<double,int>& i, const pair<double,int>& j) { return (i.first<j.first); };
 bool rightpaircomp (const pair<double,int>& i, const pair<double,int>& j) { return (i.first>j.first); };
 
 namespace ibex {
-
-
-IntervalVector qintermeth2(const Array<IntervalVector>& _boxes, int q, qintermethod meth){
-
-   int p= _boxes.size();
-   int n = _boxes[0].size();
-   IntervalMatrix boxes(p,n);
-   for (int i=0; i<p; i++)
-     for(int j=0; j<n; j++)
-       boxes[i][j]=_boxes[i][j];
-
-
-   IntervalVector hull_qinter(n);
-   list<int>* points = new list<int> () ;
-   for (int i=0; i<p; i++) points->push_back(i);
-   int qmax= points->size();
-   //   int varbis=-1;
-  switch (meth)
-    //    {case QINTERPROJ : hull_qinter=  qinter_projf(boxes,q,qmax,p,varbis, points,0); break;
-    {case QINTERPROJ : hull_qinter=  qinter_projf(boxes,q,qmax,p,points,0,n); break;
-     case QINTERCORE :  hull_qinter = qinter_coref(boxes,q,p, points,0); break;
-    case QINTERFULL :  hull_qinter= qinter2(boxes,q,p, points); break;
-    case QINTERGRID : hull_qinter= qinter(boxes,q,p,points); break;
-    default : ibex_error("Qinter method : unknown method");
-      }
-
-   delete points;
-   return hull_qinter;
-  }
-
-
-
 
 /* 
  * Bound propagation and nogood recording. Assumes that dimensions are processed in the ascending order and left side first.
@@ -145,30 +115,29 @@ void propagate_no_ub(const Array<IntervalVector>& boxes, IntStack ***dirboxes, i
 /* 
  * Improved q-intersection algorithm.
  */
-
-IntervalVector qinter2(const Array<IntervalVector>& _boxes, int q)
-  { return qintermeth( _boxes,q,QINTERFULL);
-  }
-  
-  //IntervalVector qinter2(const Array<IntervalVector>& _boxes, int q) {
-  IntervalVector qinter2(IntervalMatrix& _boxes, int q,  int p,list<int>* points ) {
+IntervalVector qinter2(const Array<IntervalVector>& _boxes, int q) {
+	
 
 #ifndef _WIN32
 	assert(q>0);
-
+	assert(_boxes.size()>0);
 	int n = _boxes[0].size();
 	
+	/* Remove the empty boxes from the list */
 	
-	//  Put the references of the non empty boxes in the array boxes: some active boxes may be empty
-        //  in the case of a call through cid
-
-
+	int p=0;
+	for (int i=0; i<_boxes.size(); i++) { 
+		if (!_boxes[i].is_empty()) p++;
+	}
+	
+	if (p==0) return IntervalVector::empty(n);
+	
 	Array<IntervalVector> boxes(p);
 	int j=0;
-	for (list<int>::iterator it = points->begin() ; it != points->end(); it++) {
-	  if (!_boxes[*it].is_empty()) boxes.set_ref(j++,_boxes[*it]);
+	for (int i=0; i<_boxes.size(); i++) {
+		if (!_boxes[i].is_empty()) boxes.set_ref(j++,_boxes[i]);
 	}
-
+	
 	/* Create the sets of available boxes for each direction */
 	
 	IntStack ***dirboxes = (IntStack ***)malloc(n*sizeof(IntStack **));

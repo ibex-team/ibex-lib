@@ -510,13 +510,12 @@ int main(int argc, char** argv) {
 	    
 	    if (flist==1)
 	      ctcq = new CtcQInterAffPlane (n,p,m_ctc,linfun,epseq,Q,QINTERPROJ,K);
+	      //	      ctcq = new CtcQInterAffPlane (n,p,m_ctc,linfun,epseq,Q,QINTERCORE,K);
 	    else
-	      ctcq= new  CtcQInterPlane (n,p,m_ctc,linfun,epseq,Q,QINTERPROJ,K);
-	    
-	    //	    CtcQInterPlane ctcq(n,m_ctc1,linfun,epseq,Q,QINTERPROJ,K);
-	    //	    CtcQInterPlane ctcq(n,m_ctc1,linfun,epseq,Q,QINTERCORE,K);
-	    //	    CtcQInterPlane  ctcq(n,m_ctc1,linfun,epseq,Q, QINTERCORE,K );
-	    //	    CtcQInterPlane ctcq(n,m_ctc1,linfun,epseq,Q,QINTERFULL, K);
+	      ctcq= new  
+		//CtcQInterPlane (n,p,m_ctc,linfun,epseq,Q,QINTERPROJ,K);
+		//    	    CtcQInterPlane (n,m_ctc1,linfun,epseq,Q,QINTERCORE,K);	    
+		CtcQInterPlane (n,p,m_ctc1,linfun,epseq,Q,QINTERFULL, K);
 
 	    CtcCompo ctcqf0 (*ctc0,*ctcq);
 	    //	    Ctc3BCid cid(*ctcq,10,1,3);

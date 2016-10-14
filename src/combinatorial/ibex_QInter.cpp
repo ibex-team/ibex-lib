@@ -10,7 +10,7 @@
 
 #include "ibex_QInter.h"
 #include <algorithm>
-
+#include "ibex_QInter2.h"
 using namespace std;
 
 namespace ibex {
@@ -33,7 +33,7 @@ namespace ibex {
   switch (meth)
     //    {case QINTERPROJ : hull_qinter=  qinter_projf(boxes,q,qmax,p,varbis, points,0); break;
     {case QINTERPROJ : hull_qinter=  qinter_projf(boxes,q,qmax,p,points,0,n); break;
-	//	//    case QINTERCORE :  hull_qinter = qinter_coref(boxes,q,p, points,0); break;
+	//    case QINTERCORE :  hull_qinter = qinter_coref(boxes,q,p, points,0); break;
 	//    case QINTERFULL :  hull_qinter= qinter2(boxes,q,p, points); break;
     case QINTERGRID : hull_qinter= qinter(boxes,q,p,points); break;
     default : ibex_error("Qinter method : unknown method");

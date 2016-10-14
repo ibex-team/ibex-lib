@@ -12,6 +12,7 @@
 using namespace std;
 #include "ibex_CtcQInter.h"
 #include "ibex_QInter.h"
+#include "ibex_QInter2.h"
 
 #include<vector>
 #include<algorithm>
@@ -240,9 +241,9 @@ void CtcQInter::point_contract_exact(IntervalVector & box, int iter)
 
 	{//case QINTERPROJ : box=  qinter_projf(*boxes,q,qproj, p,  varbis, points,  n0, n1); break;
 	case QINTERPROJ : box=  qinter_projf(*boxes,q,qproj, p, points,  n0, n1); break;
-	  //	case QINTERCORE :box = qinter_coref(*boxes,q,p, points,n0); break;
-	  //	case QINTERFULL : box =  qinter2(*boxes,q,p, points); break;
-	  //	case QINTERGRID : box= qinter(*boxes,q,p,points); break;
+	case QINTERCORE :box = qinter_coref(*boxes,q,p, points,n0); break;
+	case QINTERFULL : box =  qinter2(*boxes,q,p, points); break;
+	case QINTERGRID : box= qinter(*boxes,q,p,points); break;
 	default : ibex_error("Qinter contract : impossible case");
       }
     //    else box=  qinter_projf(*boxes,q,qproj, p,  varbis, points,  n0, n1);
@@ -255,7 +256,7 @@ void CtcQInter::point_contract_exact(IntervalVector & box, int iter)
   }
 
   void CtcQInter::contract(IntervalVector& box) {
-    
+    //    cout << " debut contract " << endl;
 // p is the number of non empty contract results
     int p=ctc_contract(box);
 
@@ -264,7 +265,7 @@ void CtcQInter::point_contract_exact(IntervalVector & box, int iter)
 
     direct_qintercontract (p, box);
     if (p< qmax) qmax=p;
-   
+    //    cout << " fin  contract " << endl;
   }
 
   int CtcQInter::effective_size(const IntervalVector &box) {return box.size();} 
@@ -273,9 +274,10 @@ void CtcQInter::point_contract_exact(IntervalVector & box, int iter)
 
   void CtcQInter::direct_qintercontract (int& p, IntervalVector & box){
     int p0=p;
-    //    cout << " avant qinter contract " << " p " << p << "  " << box << endl;
+    //    cout << " avant qinter contract " << " p " << p << " max_diam  " << box_maxdiam << box << endl;
     //box=qinter_contract(p, 0, box.size());
     double diam_threshold=0.1;
+
     if (box_maxdiam  < diam_threshold)
 
        box&=qinter_contract(p, 0, effective_size(box));
@@ -338,9 +340,10 @@ void CtcQInter::point_contract_exact(IntervalVector & box, int iter)
 
 int  CtcQInter::ctc_contract(IntervalVector& box)
 {  int p=0;
-   box_maxdiam=max_diam_threshold(box);
+  box_maxdiam=max_diam_threshold(box);
+  //   box_maxdiam=0;
    list<int>::iterator iter = points->begin() ;
-   //   cout << " nb points  " << points->size() <<  " box max diam " << box_maxdiam << endl;
+   // cout << " nb points  " << points->size() <<  " box max diam " << box_maxdiam << endl;
   while (iter != points->end())
     
     { 

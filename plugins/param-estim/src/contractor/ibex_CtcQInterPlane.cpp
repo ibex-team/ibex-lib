@@ -37,8 +37,9 @@ namespace ibex {
     
   }
  
-  // the qinter in initial directions is never called  (useless because fwd check only)
-  double  CtcQInterPlane::max_diam_threshold(const IntervalVector& box) {return 1.0;}
+
+
+
 
   /*
 Interval CtcQInterPlane::fwd(IntervalVector & box, int iter)
@@ -520,6 +521,8 @@ IntervalVector CtcQInterPlane::boxintersection(int* iter){
       mid1[0] = std::sqrt (1 -  std::pow(mid1[1],2) -  std::pow(mid1[2],2));
       IntervalVector mid (mid1);
       if (!(box.contains(mid1)))
+
+ 
 	mid.set_empty();
       //      cout << " mid " << mid << endl;
       return mid;
@@ -830,11 +833,15 @@ int CtcQInterPlane::activepoints_contract_count(IntervalVector& box){
   
   // no need to affine arithmetics : functions err_compute, valmean_compute, and slope_compute use directly linfun
   void CtcQInterAffPlane::compute_affine_evaluation( int i, int iter,  Affine2& af, Interval& af2) {
-    //    cout << " affine evaluation" << endl;
-    }
+   ; }
   
-  int CtcQInterAffPlane::affine_threshold(){return 10;}
+  // the qinter in initial directions is not called  if the gap between the number of posiblr and Q is greater than the threshold 
+    int CtcQInterAffPlane::affine_threshold(){return 10;}
   //  int CtcQInterAffPlane::affine_threshold(){return INT_MAX;}
 
-}
 
+  // the qinter in initial directions is not called  if the threshold is > 0.1
+  double  CtcQInterAffPlane::max_diam_threshold(const IntervalVector& box) {
+    return 1.0;}
+    //return 0.0;}
+}

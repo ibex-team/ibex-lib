@@ -20,8 +20,10 @@
 #include "ibex_KCoreGraph.h"
 #include "ibex_Array.h"
 #include "ibex_IntStack.h"
-
+#include<list>
 namespace ibex {
+
+  IntervalVector qintermeth2(const Array<IntervalVector>& _boxes, int q, qintermethod meth);
 
 /**
  * \ingroup combinatorial
@@ -33,14 +35,14 @@ IntervalVector qinter_projf(const Array<IntervalVector>& _boxes, int q);
  * \ingroup combinatorial
  * \brief Q-intersection - HEURISTIC - k-core filtering + greedy coloring
  */
-IntervalVector qinter_coref(const Array<IntervalVector>& _boxes, int q);
-
+//IntervalVector qinter_coref(const Array<IntervalVector>& _boxes, int q);
+ IntervalVector qinter_coref(IntervalMatrix& _boxes, int q, int& p,list<int>* points , int n0);
 /**
  * \ingroup combinatorial
  * \brief Q-intersection - EXACT - QInter2 : Cliquer-based solver
  */
-IntervalVector qinter2(const Array<IntervalVector>& _boxes, int q);
-
+//IntervalVector qinter2(const Array<IntervalVector>& _boxes, int q);
+ IntervalVector qinter2(IntervalMatrix& _boxes, int q , int p, list<int>* points);
 /**
  * \ingroup combinatorial
  * \brief Checks for nonempty Q-intersection (Cliquer)

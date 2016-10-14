@@ -15,30 +15,26 @@
 using namespace std;
 
 namespace ibex {
-	
+  /*
+inline bool basic_intersects(const Interval& x, const Interval& y) {
+	return x.lb()<=y.ub() && x.ub()>=y.lb();
+}
+  */
 bool leftcompC(const pair<double,int>& i, const pair<double,int>& j) { return (i.first<j.first); }
 bool rightcompC(const pair<double,int>& i, const pair<double,int>& j) { return (i.first>j.first); }
 
-IntervalVector qinter_coref(const Array<IntervalVector>& _boxes, int q) {
+  IntervalVector qinter_coref( IntervalMatrix& _boxes, int q, int& p, list<int>* points, int i0) {
 	
 	assert(q>0);
-	assert(_boxes.size()>0);
-	int n = _boxes[0].size();
-	
-	/* Remove the empty boxes from the list */
-	
-	int p=0;	
-	for (int i=0; i<_boxes.size(); i++) {
-		if (!_boxes[i].is_empty()) p++;
-	}
-	
-	if (p==0) return IntervalVector::empty(n);
+
+	unsigned int n = _boxes[0].size();
 	
 	Array<IntervalVector> boxes(p);
 	int j=0;
-	for (int i=0; i<_boxes.size(); i++) {
-		if (!_boxes[i].is_empty()) boxes.set_ref(j++,_boxes[i]);
+	for (list<int>::iterator it = points->begin() ; it != points->end(); it++) {
+	  if (!_boxes[*it].is_empty()) boxes.set_ref(j++,_boxes[*it]);
 	}
+
 	
 	/* Create the original intersection graph */
 	
@@ -48,70 +44,88 @@ IntervalVector qinter_coref(const Array<IntervalVector>& _boxes, int q) {
 	
 	for (int i=0; i<p; i++) {
 		for (int j=i+1; j<p; j++) {
-			if (boxes[i].intersects(boxes[j])) origin->add_edge(i,j);
+		  if (boxes[i].intersects(boxes[j])) origin->add_edge(i,j);
+		  /*  court circuit inutile
+		  {bool intersect=true;
+		    for (int k=0 ; k<n; k++)
+		      if (!(basic_intersects(boxes[i][k],boxes[j][k]))) {intersect=false; break;}
+		    if(intersect) origin->add_edge(i,j);
+		  }
+		  */
 		}
 	}
 	
 	IntervalVector res(n);
-	res.set_empty();
+
 	
 	/* Perform the initial (q-1)-core filtering */
 	
 	origin->apply_coreness();
 	if (origin->empty()) {
 		delete(origin);
+		res.set_empty();
 		return res;
 	}
 	
+	int p0=p;
+
+	for (int i=0; i<p0; i++) {
+	  if (!(origin->contain(i)))
+	    {boxes[i].set_empty();p--;}
+	}
 	/* For each direction, perform a greedy coloring and keep the left bound of the first box with color q. */
-	
+
 	int b;
 	double lb0,ub0;
-	std::pair<double, int> *x = new std::pair<double, int>[p];
-
-	for (int i=0; i<n; i++) {
+	std::pair<double, int> *x = new pair<double,int>[p];
+	for (int i=i0; i<n; i++) {
 		
 		/* Left bound */
+	  int k=0;
+	  for (int j=0; j<p0; j++) {
+	    if (!(boxes[j].is_empty()))
+	      {x[k] = make_pair(boxes[j][i].lb(),j);k++;}
+	  }
 		
-		for (int j=0; j<p; j++) {
-			x[j] = make_pair(boxes[j][i].lb(),j);
-		}
+	  sort(x,x+p,leftcompC);
 		
-		sort(x,x+p,leftcompC);
+	  b = origin->qcoloring(x, p, q);
 		
-		b = origin->qcoloring(x, p, q);
+	  if (b == -1) {
+	    res.set_empty();
+	    break;
+	  }
 		
-		if (b == -1) {
-			res.set_empty();
-			break;
-		}
+	  lb0 = boxes[b][i].lb();
+	  
 		
-		lb0 = boxes[b][i].lb();
+	  /* Right bound */
+	  k=0;
+	  for (int j=0; j<p0; j++) {
+	    if (!(boxes[j].is_empty()))
+	      {x[k] = make_pair(boxes[j][i].ub(),j);k++;}
+	  }
+	
 		
-		/* Right bound */
+	  sort(x,x+p,rightcompC);
 		
-		for (int j=0; j<p; j++) {
-			x[j] = make_pair(boxes[j][i].ub(),j);
-		}
+	  b = origin->qcoloring(x, p,q);
 		
-		sort(x,x+p,rightcompC);
+	  if (b == -1) {
+	    res.set_empty();
+	    break;
+	  }
 		
-		b = origin->qcoloring(x, p, q);
+	  ub0 = boxes[b][i].ub();
 		
-		if (b == -1) {
-			res.set_empty();
-			break;
-		}
-		
-		ub0 = boxes[b][i].ub();
-		
-		res[i] = Interval(lb0,ub0);
+	  res[i] = Interval(lb0,ub0);
 	}
 	
 	/* Cleanup */
 	delete(origin);
 	delete [] x;
 	return res;
+
 }
 
 } // end namespace ibex
