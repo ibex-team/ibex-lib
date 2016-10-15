@@ -354,16 +354,35 @@ ContCell* Cont::choose(const ContCell::Facet* x_facet, const IntervalVector& x, 
 
 		//===================== second test ==========================
 		if (!valid_cell) {
+
+			valid_cell=true;
+
+			IntervalVector box_existence2(n);
+			IntervalVector box_unicity2(n);   // ignored
+
 			try {
-				VarSet tmpvars=get_vars(f, x.mid(), forced_params);
-				box=box_existence;
-				IntervalVector box_existence2(n); // ignored
-				IntervalVector box_unicity2(n);   // ignored
+				// we fix the dimension of the variables that exceed
+				// their domain to the "crossed" extremity
+				for (int i=0; i<n; i++) {
 
-				valid_cell=inflating_newton(f,tmpvars,box,box_existence2,box_unicity2);
+					if (!box_existence[i].is_subset(domain[i])) {
 
-			}
-			catch(SingularMatrixException&) {
+						box=box_existence & domain;
+
+						if (box_existence[i].lb()<domain[i].lb())
+							box[i]=domain[i].lb();
+						else
+							box[i]=domain[i].ub();
+
+						VarSet tmpvars=get_vars(f, box.mid(), forced_params);
+
+						valid_cell=inflating_newton(f,tmpvars,box,box_existence2,box_unicity2);
+
+						if (!valid_cell) break;
+					}
+				}
+			} catch(SingularMatrixException&) {
+				valid_cell=false;
 				// May happen if we are near a corner of the bounding domain:
 				// some dimension are forced to be parameter erroneously. In
 				// this case, we have to decrease h...
