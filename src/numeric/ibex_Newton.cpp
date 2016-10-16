@@ -275,8 +275,8 @@ bool inflating_newton(const Function& f, const IntervalVector& full_box, Interva
 	return inflating_newton(f,NULL,full_box,box_existence,box_unicity,k_max,mu_max,delta,chi);
 }
 
-bool inflating_newton(const Function& f, const VarSet& vars, const IntervalVector& full_box, IntervalVector& box_unicity, IntervalVector& box_existence, int k_max, double mu_max, double delta, double chi) {
-	return inflating_newton(f,&vars,full_box,box_unicity,box_existence,k_max,mu_max,delta,chi);
+bool inflating_newton(const Function& f, const VarSet& vars, const IntervalVector& full_box, IntervalVector& box_existence, IntervalVector& box_unicity, int k_max, double mu_max, double delta, double chi) {
+	return inflating_newton(f,&vars,full_box,box_existence,box_unicity,k_max,mu_max,delta,chi);
 }
 
 } // end namespace ibex
