@@ -316,40 +316,40 @@ ContCell* Cont::choose(const ContCell::Facet* x_facet, const IntervalVector& x, 
 		}
 
 		//===================== first test ==========================
-		if (!valid_cell) {
-			// We check the rows of the jacobian matrix of the implicit function.
-			// The rows that correspond to variables that "should be parameters"
-			// must have no component with 0.
-			IntervalMatrix J=f.jacobian(box_existence);
-
-			IntervalMatrix Jp(m,n-m); // Jacobian % parameters
-			IntervalMatrix Jx(m,m);   // Jacobian % variables
-
-			// Intialize Jp and Jx from J
-			for (int i=0; i<m; i++) {
-				Jp.set_row(i,vars.param_box(J.row(i)));
-				Jx.set_row(i,vars.var_box(J.row(i)));
-			}
-			Matrix Jx_mid_inv(m,m);
-			real_inverse(Jx.mid(),Jx_mid_inv);
-
-			// Approximate jacobian of the implicit function
-			// TODO: make it rigorous!
-			IntervalMatrix J_implicit=Jx_mid_inv*Jp;
-
-			valid_cell=true; // by default
-			int v=0;         // index of the ith variable
-			for (int i=0; valid_cell && i<n; i++) {
-				if (vars.vars[i]) {
-					if (forced_params[i]) {
-						for (int j=0; valid_cell && j<n-m; j++) {
-							if (J_implicit[v][j].contains(0)) valid_cell=false;
-						}
-					}
-					v++;
-				}
-			}
-		}
+//		if (!valid_cell) {
+//			// We check the rows of the jacobian matrix of the implicit function.
+//			// The rows that correspond to variables that "should be parameters"
+//			// must have no component with 0.
+//			IntervalMatrix J=f.jacobian(box_existence);
+//
+//			IntervalMatrix Jp(m,n-m); // Jacobian % parameters
+//			IntervalMatrix Jx(m,m);   // Jacobian % variables
+//
+//			// Intialize Jp and Jx from J
+//			for (int i=0; i<m; i++) {
+//				Jp.set_row(i,vars.param_box(J.row(i)));
+//				Jx.set_row(i,vars.var_box(J.row(i)));
+//			}
+//			Matrix Jx_mid_inv(m,m);
+//			real_inverse(Jx.mid(),Jx_mid_inv);
+//
+//			// Approximate jacobian of the implicit function
+//			// TODO: make it rigorous!
+//			IntervalMatrix J_implicit=Jx_mid_inv*Jp;
+//
+//			valid_cell=true; // by default
+//			int v=0;         // index of the ith variable
+//			for (int i=0; valid_cell && i<n; i++) {
+//				if (vars.vars[i]) {
+//					if (forced_params[i]) {
+//						for (int j=0; valid_cell && j<n-m; j++) {
+//							if (J_implicit[v][j].contains(0)) valid_cell=false;
+//						}
+//					}
+//					v++;
+//				}
+//			}
+//		}
 		//============================================================
 
 		//===================== second test ==========================
@@ -377,6 +377,10 @@ ContCell* Cont::choose(const ContCell::Facet* x_facet, const IntervalVector& x, 
 						VarSet tmpvars=get_vars(f, box.mid(), forced_params);
 
 						valid_cell=inflating_newton(f,tmpvars,box,box_existence2,box_unicity2);
+
+						for (int j=0; valid_cell && j<n; j++) {
+							valid_cell &= (!tmpvars.vars[j] || box_existence2[j].is_subset(domain[j]));
+						}
 
 						if (!valid_cell) break;
 					}
