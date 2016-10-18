@@ -39,6 +39,9 @@ void TestCell2::test01() {
 	delete c;
 
 	check(new_cells.first->box|new_cells.second->box,copy->box);
+	delete new_cells.first;
+	delete new_cells.second;
+	delete copy;
 
 }
 

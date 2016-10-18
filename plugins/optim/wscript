@@ -73,6 +73,12 @@ def configure (conf):
 	else:	
 		# check if SOPLEX is installed		
 		if not with_any_solver: 
+			# In the source code of soplex, DEBUG is used in an enum (in spxout.h)
+			# which causes the compilation to failed when the macro DEBUG is used.
+			if conf.options.DEBUG:
+				conf.undefine ("DEBUG")
+				conf.define ("DEBUGGING", 1)
+
 			has_Soplex_h = conf.check_cxx (header_name	= "soplex.h",mandatory = False)
 			has_Soplexlib =  conf.check_cxx (lib = "soplex", uselib_store = "IBEX_DEPS",
 						libpath = [],
@@ -102,6 +108,8 @@ def configure (conf):
 				conf.env.LP_LIB = "SOPLEX"
 				with_any_solver = True
 				Logs.pprint ("BLUE","The Linear Solver is the installed version of SOPLEX")
+			if conf.options.DEBUG:
+				conf.define ("DEBUG", 1) # restore DEBUG
 			
 			
 		# check if CPLEX is installed		
@@ -190,6 +198,12 @@ def configure (conf):
 			
 		elif with_soplex is not None :
 			# build with soplex
+			# In the source code of soplex, DEBUG is used in an enum (in spxout.h)
+			# which causes the compilation to failed when the macro DEBUG is used.
+			if conf.options.DEBUG:
+				conf.undefine ("DEBUG")
+				conf.define ("DEBUGGING", 1)
+
 			conf.env.LP_LIB = "SOPLEX"
 			conf.msg ("Candidate directory for lib Soplex", with_soplex)
 	
@@ -213,6 +227,9 @@ def configure (conf):
 					break
 			else:
 				conf.fatal ("cannot link with the Soplex library")
+
+			if conf.options.DEBUG:
+				conf.define ("DEBUG", 1) # restore DEBUG
 			
 			
 		elif with_clp is not None :
