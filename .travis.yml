@@ -39,7 +39,7 @@ addons:
 
 # need this to install dependencies on osx
 before_install:
-  - if [ "$TRAVIS_OS_NAME" = "osx" ] ; then brew update ; brew install python flex bison cppunit; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ] ; then brew update ; brew install flex bison cppunit; fi
 
 # TODO add --affine when tests are fixed
 install: 
