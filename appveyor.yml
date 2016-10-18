@@ -14,13 +14,13 @@ branches:
 
 install:
   - cmd: echo Running build
-  - cmd: echo %PATH%
+  # Temporary
+  - cmd: SET
   - cmd: set PATH=C:\mingw-w64\i686-5.3.0-posix-dwarf-rt_v4-rev0\mingw32\bin;C:\msys64\usr\bin;%PATH%
+  # Temporary
   - cmd: dir C:\mingw-w64\i686-5.3.0-posix-dwarf-rt_v4-rev0\mingw32\bin
+  # Temporary
   - cmd: dir C:\msys64\usr\bin
-  #- cmd: mingw-get install msys-base
-  #- cmd: mingw-get update
-  #- cmd: mingw-get upgrade
   # Work around a problem on appveyor where the default sh is the one from Git
   - cmd: rename "C:\Program Files\Git\usr\bin\sh.exe" "sh-ignored.exe"
   - cmd: python -x %cd%\waf configure
