@@ -15,7 +15,7 @@ branches:
 install:
   - cmd: echo Running build
   - cmd: echo %PATH%
-  - cmd: set PATH=C:\mingw-w64\i686-5.3.0-posix-dwarf-rt_v4-rev0\mingw32\bin;%PATH%
+  - cmd: set PATH=C:\mingw-w64\i686-5.3.0-posix-dwarf-rt_v4-rev0\mingw32\bin;C:\msys64\usr\bin;%PATH%
   - cmd: dir C:\mingw-w64\i686-5.3.0-posix-dwarf-rt_v4-rev0\mingw32\bin
   - cmd: dir C:\msys64\usr\bin
   #- cmd: mingw-get install msys-base
