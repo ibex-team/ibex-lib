@@ -16,11 +16,10 @@ install:
   - cmd: echo Running build
   - cmd: set PATH=%PATH%;C:\MinGW\bin;C:\MinGW\msys\1.0\bin
   - cmd: mingw-get install msys-base
-  - cmd: mingw-get install msys-dvlpr
   - cmd: mingw-get update
   - cmd: mingw-get upgrade
-  - cmd:   python -x %cd%\waf configure
-  - cmd:  python -x %cd%\waf build install clean
+  - cmd: python -x %cd%\waf configure
+  - cmd: python -x %cd%\waf build install clean
 
 build_script:
   - cmd: echo Running install
