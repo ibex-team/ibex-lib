@@ -15,9 +15,13 @@ else
 CXXFLAGS := $(CXXFLAGS) -O3 -DNDEBUG
 endif
 
+EX_WITH_VIBES="doc-contractor"
+VIBES_MSG="INFO: The example $@ uses VIBes to plot data, you need to launch VIBes-viewer before running this test"
+
 all: $(BINS)
 
 % :	%.cpp
+	@case $(EX_WITH_VIBES) in *$@*) echo "$(VIBES_MSG)" ;; esac
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $< $(LIBS)
 
 clean:
