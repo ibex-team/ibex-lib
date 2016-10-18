@@ -96,8 +96,8 @@ void TestDoubleHeap::test01() {
         CPPUNIT_ASSERT(h.minimum2()==10);
         CPPUNIT_ASSERT(h.size()==3);
 
-        //h.flush();
-        //CPPUNIT_ASSERT(h.size()==0);
+        h.flush();
+        CPPUNIT_ASSERT(h.size()==0);
 }
 
 
@@ -164,7 +164,6 @@ void TestDoubleHeap::test02() {
 }
 
 void TestDoubleHeap::test03() {
-
     int nb= 10;
     TestCostFunc2 costf2;
     TestCostFunc3 costf3;
@@ -179,12 +178,39 @@ void TestDoubleHeap::test03() {
     DoubleHeap<Interval> newh(h);
 
     while (h.size() > 0) {
-        CPPUNIT_ASSERT(*h.top1() == *newh.top1());
-        CPPUNIT_ASSERT(*h.top2() == *newh.top2());
-        delete h.pop1();
+        CPPUNIT_ASSERT(h.top1() == newh.top1());
+        CPPUNIT_ASSERT(h.top2() == newh.top2());
+        h.pop1();
         delete newh.pop1();
 
     }
+
+
+}
+
+void TestDoubleHeap::test04() {
+
+    int nb= 10;
+    TestCostFunc2 costf2;
+    TestCostFunc3 costf3;
+
+    DoubleHeap<Interval> h(costf2,false,costf3,true,50);
+
+    for (int i=1; i<=nb ;i++) {
+            if ((i%2)==1) h.push(new Interval(i,2*i));
+            else h.push(new Interval(i,20*i));
+    }
+
+    DoubleHeap<Interval> *newh = h.deepcopy();
+
+    while (h.size() > 0) {
+        CPPUNIT_ASSERT(*h.top1() == *newh->top1());
+        CPPUNIT_ASSERT(*h.top2() == *newh->top2());
+        delete h.pop1();
+        delete newh->pop1();
+
+    }
+    delete newh;
 
 }
 

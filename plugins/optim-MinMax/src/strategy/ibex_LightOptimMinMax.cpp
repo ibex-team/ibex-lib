@@ -35,7 +35,7 @@ void LightOptimMinMax::add_backtrackable(Cell& root, const IntervalVector& y_ini
 	DataMinMax *data_x = &(root.get<DataMinMax>());
 	data_x->y_heap_costf1.add_backtrackable(*y_cell);
 	data_x->y_heap_costf2.add_backtrackable(*y_cell);
-	data_x->y_heap.push(y_cell);
+	data_x->y_heap->push(y_cell);
 }
 
 bool LightOptimMinMax::optimize(Cell* x_cell, int nb_iter, double prec_y1) {
@@ -45,7 +45,7 @@ bool LightOptimMinMax::optimize(Cell* x_cell, int nb_iter, double prec_y1) {
 
 	//std::cout <<"    DEB "<<data_x->fmax <<std::endl;
 
-	DoubleHeap<Cell> *y_heap = &(data_x->y_heap); // current cell
+	DoubleHeap<Cell> *y_heap = data_x->y_heap; // current cell
 
 	// /!\ Does creating a contractor here cause memory leak ? If so, it must be recreated in the minimax_solver algo only when best_max change to limit the memory leak, and pass it as an argument of this function
 	//    CtcFwdBwd max_ctc((*objective_function),Interval(NEG_INFINITY,best_max)); // contract w.r.t "the objective function must be lower than the current best solution best_max"
@@ -220,7 +220,7 @@ bool LightOptimMinMax::handle_cell( Cell* x_cell, Cell*  y_cell) {
 	if (y_cell->box.max_diam()<prec_y) {
 		heap_save.push_back(y_cell);
 	} else {
-		data_x->y_heap.push(y_cell);
+		data_x->y_heap->push(y_cell);
 	}
 
 	return true;

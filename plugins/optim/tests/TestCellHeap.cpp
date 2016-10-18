@@ -220,6 +220,7 @@ void TestCellHeap::test_D03() {
 	delete h1.pop(); delete h1.pop();
 
 	CPPUNIT_ASSERT(h1.size()==((unsigned int)(nb-2)));
+	h1.flush();
 }
 
 
@@ -292,6 +293,8 @@ void TestCellHeap::test_D05() {
 
 	h1.flush();
 	CPPUNIT_ASSERT(h1.size()==0);
+	h2.flush();
+	CPPUNIT_ASSERT(h2.size()==0);
 }
 
 

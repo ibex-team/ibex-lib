@@ -27,6 +27,7 @@ OptimMinMax::OptimMinMax(NormalizedSystem& x_sys,NormalizedSystem& xy_sys, Ctc& 
 };
 
 OptimMinMax::~OptimMinMax() {
+	buffer->flush();
 	delete &(buffer->cost1());
 	delete &(buffer->cost2());
 	delete buffer;

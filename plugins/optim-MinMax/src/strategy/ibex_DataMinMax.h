@@ -55,7 +55,7 @@ public:
 	/**
 	 * y_heap inherited from father of box
 	 */
-    DoubleHeap<Cell> y_heap;
+    DoubleHeap<Cell>* y_heap;
 
 
 	/**
