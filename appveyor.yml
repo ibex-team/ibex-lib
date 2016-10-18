@@ -15,9 +15,18 @@ environment:
 install:
   - cmd: echo Running build
   - cmd: set PATH=%PATH%;C:\MinGW\bin;C:\MinGW\msys\1.0\bin
+  - cmd: dir C:\
+  - cmd: dir C:\mingw-w64
+  - cmd: dir C:\msys64
+  - cmd: dir C:\MinGW\bin
+  - cmd: dir C:\MinGW\msys\1.0\bin
+  - cmd: ls C:\MinGW\bin
+  - cmd: ls C:\MinGW\msys\1.0\bin
   - cmd: mingw-get install msys-base
   - cmd: mingw-get update
   - cmd: mingw-get upgrade
+  # Work around a problem on appveyor where the default sh is the one from Git
+  - cmd: rename "C:\Program Files\Git\usr\bin\sh.exe" "sh-ignored.exe"
   - cmd: python -x %cd%\waf configure
   - cmd: python -x %cd%\waf build install clean
 
