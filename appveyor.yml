@@ -5,26 +5,22 @@ branches:
   only:
   - Gaol4
 
-environment:
-  matrix:
-  - platform: x86
-    name: win32
-  - platform: x64
-    name: win64
+#environment:
+#  matrix:
+#  - platform: x86
+#    name: win32
+#  - platform: x64
+#    name: win64
 
 install:
   - cmd: echo Running build
-  - cmd: set PATH=%PATH%;C:\MinGW\bin;C:\MinGW\msys\1.0\bin
-  - cmd: dir C:\
-  - cmd: dir C:\mingw-w64
-  - cmd: dir C:\msys64
-  - cmd: dir C:\MinGW\bin
-  - cmd: dir C:\MinGW\msys\1.0\bin
-  - cmd: ls C:\MinGW\bin
-  - cmd: ls C:\MinGW\msys\1.0\bin
-  - cmd: mingw-get install msys-base
-  - cmd: mingw-get update
-  - cmd: mingw-get upgrade
+  - cmd: echo %PATH%
+  - cmd: set PATH=C:\mingw-w64\i686-5.3.0-posix-dwarf-rt_v4-rev0\mingw32\bin;%PATH%
+  - cmd: dir C:\mingw-w64\i686-5.3.0-posix-dwarf-rt_v4-rev0\mingw32\bin
+  - cmd: dir C:\msys64\usr\bin
+  #- cmd: mingw-get install msys-base
+  #- cmd: mingw-get update
+  #- cmd: mingw-get upgrade
   # Work around a problem on appveyor where the default sh is the one from Git
   - cmd: rename "C:\Program Files\Git\usr\bin\sh.exe" "sh-ignored.exe"
   - cmd: python -x %cd%\waf configure
