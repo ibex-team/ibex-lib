@@ -26,8 +26,16 @@
 #include "ibex_LPException.h"
 
 #ifdef _IBEX_WITH_SOPLEX_
-#include "soplex.h"
-
+	#ifdef DEBUG
+		#undef DEBUG
+		#ifndef DEBUGGING
+			#define DEBUGGING
+		#endif
+		#include "soplex.h"
+		#define DEBUG
+	#else
+		#include "soplex.h"
+	#endif
 #else
 #ifdef _IBEX_WITH_CPLEX_
 #include "ilcplex/cplex.h"

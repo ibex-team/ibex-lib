@@ -131,6 +131,12 @@ def configure (conf):
 
 		from_3rd = False # boolean, does soplex comes from 3rd subdirectory
 
+		# In the source code of soplex, DEBUG is used in an enum (in spxout.h) which
+		# causes the compilation to failed when the macro DEBUG is used.
+		if conf.options.DEBUG:
+			conf.undefine ("DEBUG")
+			conf.define ("DEBUGGING", 1)
+
 		# If --soplex-path is given, we run the loop only one time with
 		# mandatory=true because we must find the header and library for soplex. If
 		# the option is not given, we run the loop twice: the first time we try to
@@ -182,6 +188,9 @@ def configure (conf):
 					if filename.endswith (".h") and os.path.isfile (fullpath):
 						shutil.copy2 (fullpath, soplex_include)
 				conf.end_msg("done")
+
+		if conf.options.DEBUG:
+			conf.define ("DEBUG", 1) # restore DEBUG
 
 		# Add info on the linear solver library used to the settings
 		conf.setting_define("WITH_SOPLEX", 1)
