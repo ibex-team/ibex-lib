@@ -147,7 +147,7 @@ void propagate_no_ub(const Array<IntervalVector>& boxes, IntStack ***dirboxes, i
  */
 
 IntervalVector qinter2(const Array<IntervalVector>& _boxes, int q)
-  { return qintermeth( _boxes,q,QINTERFULL);
+  { return qintermeth2( _boxes,q,QINTERFULL);
   }
   
   //IntervalVector qinter2(const Array<IntervalVector>& _boxes, int q) {

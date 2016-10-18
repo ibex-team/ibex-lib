@@ -41,7 +41,7 @@ IntervalVector qinter_projf(const Array<IntervalVector>& _boxes, int q);
  * \ingroup combinatorial
  * \brief Q-intersection - EXACT - QInter2 : Cliquer-based solver
  */
-//IntervalVector qinter2(const Array<IntervalVector>& _boxes, int q);
+IntervalVector qinter2(const Array<IntervalVector>& _boxes, int q);
  IntervalVector qinter2(IntervalMatrix& _boxes, int q , int p, list<int>* points);
 /**
  * \ingroup combinatorial

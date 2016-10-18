@@ -79,7 +79,7 @@ int main() {
 	IntervalVector box(N,_box);
 	
 	// The q-intersection of the P contractors
-	CtcQInterProjF ctcq(m_ctc,Q);
+	CtcQInter ctcq(N,m_ctc,Q);
 
 	// Fixpoint
 	CtcFixPoint fix(ctcq);
@@ -90,13 +90,12 @@ int main() {
 	cout << "before =" << box << endl;
 	
 	start = clock();
-
 	if (qinteronly) {
-		ctcq.contract(box);
+	  ctcq.contract(box);
 	} else {
-		fix.contract(box);
+	  fix.contract(box);
 	}
-
+	
 	end = clock();
 	cout << "Result = " << box << endl;
 	cout << "Time : " << ((double)(end)-(double)(start))/CLOCKS_PER_SEC << " seconds" << endl;
