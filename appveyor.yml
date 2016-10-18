@@ -13,15 +13,16 @@ environment:
 install:
   - cmd: echo Running build
   - cmd: SET PROCESSOR_
-  - cmd: set PATH=C:\mingw-w64\i686-5.3.0-posix-dwarf-rt_v4-rev0\mingw32\bin;C:\msys64\usr\bin;%PATH%
-  # Temporary
+  - cmd: MINGW-W64_BASE=C:\mingw-w64\i686-5.3.0-posix-dwarf-rt_v4-rev0
+  - cmd: set PATH=%MINGW-W64_BASE%\mingw32\bin;C:\msys64\usr\bin;%PATH%
+  - cmd: set CPATH=%MINGW-W64_BASE%\mingw32\i686-w64-mingw32\include
+  # { temporary
   - cmd: find C:\mingw-w64\i686-5.3.0-posix-dwarf-rt_v4-rev0\ -name "*fenv.h*"
-  # Temporary
-  - cmd: dir C:\mingw-w64\i686-5.3.0-posix-dwarf-rt_v4-rev0\
-  # Temporary
+  - cmd: find C:\mingw-w64\i686-5.3.0-posix-dwarf-rt_v4-rev0\ -name "*strings.h*"
+  - cmd: dir C:\mingw-w64\i686-5.3.0-posix-dwarf-rt_v4-rev0\mingw32
   - cmd: dir C:\mingw-w64\i686-5.3.0-posix-dwarf-rt_v4-rev0\mingw32\bin
-  # Temporary
   - cmd: dir C:\msys64\usr\bin
+  # temporary }
   # Work around a problem on appveyor where the default sh is the one from Git
   - cmd: rename "C:\Program Files\Git\usr\bin\sh.exe" "sh-ignored.exe"
   - cmd: python -x %cd%\waf configure
