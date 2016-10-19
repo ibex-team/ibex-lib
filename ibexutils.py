@@ -117,8 +117,8 @@ def configure_3rd_party_with_autotools (conf, archive_name,
 			conf.cmd_and_log ([conf.env.SH, "-c", "mv config.guess config.guess.bak"], cwd=srcdir, env=os.environ)
 			conf.cmd_and_log ([conf.env.SH, "-c", "autoreconf -i"], cwd=srcdir, env=os.environ)
 			conf.cmd_and_log ([conf.env.SH, "-c", "ls -lrt"], cwd=srcdir, env=os.environ)
-		cmd_make = [conf.env.SH, "-c", conf.env.MAKE + ["-j%d"%conf.options.jobs]]
-		cmd_install = [conf.env.SH, "-c", conf.env.MAKE + ["install"]]
+		cmd_make = [conf.env.SH, "-c", conf.env.MAKE + [" -j%d"%conf.options.jobs]]
+		cmd_install = [conf.env.SH, "-c", conf.env.MAKE + [" install"]]
 	else:
 		conf_args += " --prefix=%s" % destnode.abspath ()
 		cmd_conf = "./configure %s" % (conf_args)
