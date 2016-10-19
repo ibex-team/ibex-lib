@@ -11,19 +11,9 @@ platform:
 
 install:
   - cmd: echo Running build
-  - cmd: SET
   - cmd: set MINGW-W64_BASE=C:\mingw-w64\i686-5.3.0-posix-dwarf-rt_v4-rev0
   - cmd: set PATH=%MINGW-W64_BASE%\mingw32\bin;C:\msys64\usr\bin;%PATH%
-  # { temporary
-  - cmd: dir %MINGW-W64_BASE%\mingw32
-  - cmd: dir %MINGW-W64_BASE%\mingw32\include
-  - cmd: dir %MINGW-W64_BASE%\mingw32\i686-w64-mingw32\bin
-  - cmd: dir %MINGW-W64_BASE%\mingw32\i686-w64-mingw32\include
-  - cmd: dir %MINGW-W64_BASE%\mingw32\i686-w64-mingw32\lib
-  - cmd: dir %MINGW-W64_BASE%\mingw32\bin
-  - cmd: dir C:\msys64\usr\bin
   - cmd: uname -a
-  # temporary }
   # Work around a problem on appveyor where the default sh is the one from Git
   - cmd: rename "C:\Program Files\Git\usr\bin\sh.exe" "sh-ignored.exe"
   - cmd: python -x %cd%\waf configure

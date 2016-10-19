@@ -110,8 +110,11 @@ def configure_3rd_party_with_autotools (conf, archive_name,
 	if Utils.is_win32:
 		conf_args += " --prefix=%s" % convert_path_win2msys (destnode.abspath ())
 		conf.find_program ("sh")
-		#cmd_conf = [conf.env.SH, "-c", "./configure --build=mingw32 %s"%conf_args]
-		cmd_conf = "configure --build=mingw32 %s" % (conf_args)
+		cmd_conf = [conf.env.SH, "-c", "./configure %s"%conf_args]
+		if not without_configure
+			conf.cmd_and_log ([conf.env.SH, "-c", "mv config.sub config.sub.bak"], cwd=srcdir, env=os.environ)
+			conf.cmd_and_log ([conf.env.SH, "-c", "mv config.guess config.guess.bak"], cwd=srcdir, env=os.environ)
+			conf.cmd_and_log ([conf.env.SH, "-c", "autoreconf -i"], cwd=srcdir, env=os.environ)
 		cmd_make = [conf.env.SH, "-c", conf.env.MAKE + ["-j%d"%conf.options.jobs]]
 		cmd_install = [conf.env.SH, "-c", conf.env.MAKE + ["install"]]
 	else:
