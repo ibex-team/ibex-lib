@@ -20,6 +20,7 @@ install:
   - cmd: dir %MINGW-W64_BASE%\mingw32\i686-w64-mingw32
   - cmd: dir %MINGW-W64_BASE%\mingw32\bin
   - cmd: dir C:\msys64\usr\bin
+  - cmd: uname -a
   # temporary }
   # Work around a problem on appveyor where the default sh is the one from Git
   - cmd: rename "C:\Program Files\Git\usr\bin\sh.exe" "sh-ignored.exe"
