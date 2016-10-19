@@ -110,8 +110,7 @@ def configure_3rd_party_with_autotools (conf, archive_name,
 	if Utils.is_win32:
 		conf_args += " --prefix=%s" % convert_path_win2msys (destnode.abspath ())
 		conf.find_program ("sh")
-		t = convert_path_win2msys ("C:\mingw-w64\i686-5.3.0-posix-dwarf-rt_v4-rev0\mingw32\i686-w64-mingw32\include")
-		cmd_conf = [conf.env.SH, "-c", "./configure %s CFLAGS=\"-I%s\""%(conf_args, t)]
+		cmd_conf = [conf.env.SH, "-c", "./configure %s\""%conf_args]
 		if not without_configure:
 			conf.cmd_and_log ([conf.env.SH, "-c", "mv config.sub config.sub.bak"], cwd=srcdir, env=os.environ)
 			conf.cmd_and_log ([conf.env.SH, "-c", "mv config.guess config.guess.bak"], cwd=srcdir, env=os.environ)
