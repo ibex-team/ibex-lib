@@ -17,7 +17,9 @@ install:
   # { temporary
   - cmd: dir %MINGW-W64_BASE%\mingw32
   - cmd: dir %MINGW-W64_BASE%\mingw32\include
-  - cmd: dir %MINGW-W64_BASE%\mingw32\i686-w64-mingw32
+  - cmd: dir %MINGW-W64_BASE%\mingw32\i686-w64-mingw32\bin
+  - cmd: dir %MINGW-W64_BASE%\mingw32\i686-w64-mingw32\include
+  - cmd: dir %MINGW-W64_BASE%\mingw32\i686-w64-mingw32\lib
   - cmd: dir %MINGW-W64_BASE%\mingw32\bin
   - cmd: dir C:\msys64\usr\bin
   - cmd: uname -a
