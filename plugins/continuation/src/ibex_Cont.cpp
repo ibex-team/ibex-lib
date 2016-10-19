@@ -347,7 +347,7 @@ ContCell* Cont::choose(const ContCell::Facet* x_facet, const IntervalVector& x, 
             for(int i=0; i<wrong_vars.size(); i++)
                 J_implicit_wrong.set_row(i,J_implicit.row(wrong_vars[i]));
 
-            // Tests Jp is full rank uing LU
+            // Tests J_implicit_wrong is full rank uing LU
             int *pr = new int[m];
             int *pc = new int[n];
             valid_cell=true;
