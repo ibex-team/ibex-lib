@@ -16,7 +16,7 @@ install:
   - cmd: uname -a
   # Work around a problem on appveyor where the default sh is the one from Git
   - cmd: rename "C:\Program Files\Git\usr\bin\sh.exe" "sh-ignored.exe"
-  - cmd: python -x %cd%\waf configure
+  - cmd: python -x %cd%\waf configure --interval-lib=filib
   - cmd: python -x %cd%\waf build install clean
 
 build_script:
