@@ -20,7 +20,7 @@ int main() {
     double __start_sol[][2]={{0,0},{0,0},{3,3},{3,3}};
     IntervalVector start_sol(4,__start_sol);
 
-    Cont cont(f, domain, 1e-2, 0.5, 1.1);
+    Cont cont(f, domain, 1e-3, 0.5, 1.1);
 
     cont.start(start_sol);
 
