@@ -25,12 +25,14 @@ public:
 	CPPUNIT_TEST_SUITE(TestParametricProof);
 	CPPUNIT_TEST(get_vars01);
 	CPPUNIT_TEST(find_sol);
-	CPPUNIT_TEST(half_ball01);
+	CPPUNIT_TEST(half_ball_1D);
+	CPPUNIT_TEST(half_ball_2D);
 	CPPUNIT_TEST_SUITE_END();
 
 	void get_vars01();
 	void find_sol();
-	void half_ball01();
+	void half_ball_1D();
+	void half_ball_2D();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestParametricProof);

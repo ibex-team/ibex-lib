@@ -99,7 +99,7 @@ void TestParametricProof::find_sol() {
 
 }
 
-void TestParametricProof::half_ball01() {
+void TestParametricProof::half_ball_1D() {
 
 	IntervalVector p(1,Interval(-1,1));
 	IntervalVector ginf(1,Interval(-1));
@@ -115,16 +115,22 @@ void TestParametricProof::half_ball01() {
 
 }
 
-//void TestParametricProof::half_ball02() {
-//
-//	IntervalVector p(2,Interval(-1,1));
-//	IntervalVector ginf(2,Interval::ZERO);
-//	IntervalMatrix Dg(1,2);
-//	Dg[0][0]=1;
-//	Dg[0][1]=1;
-//	CPPUNIT_ASSERT(is_homeomorph_half_ball(ginf,Dg,p));
-////	check_linearization(const IntervalVector& ginf, const IntervalMatrix& Dg, const IntervalVector& param_box);
-//
-//}
+void TestParametricProof::half_ball_2D() {
+
+	IntervalVector p(2,Interval(-1,1));
+	IntervalVector ginf(2,Interval(-2));
+	IntervalMatrix Dg(1,2);
+	Dg[0][0]=1;
+	Dg[0][1]=1;
+	CPPUNIT_ASSERT(is_homeomorph_half_ball(ginf,Dg,p));
+
+	Dg[0][0]=0.51;
+	Dg[0][1]=0.51;
+	CPPUNIT_ASSERT(is_homeomorph_half_ball(ginf,Dg,p));
+
+	Dg[0][0]=0.49;
+	Dg[0][1]=0.49;
+	CPPUNIT_ASSERT(!is_homeomorph_half_ball(ginf,Dg,p));
+}
 
 } // end namespace
