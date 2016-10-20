@@ -13,7 +13,6 @@
 #include "ibex_Cont.h"
 #include "ibex_ParametricProof.h"
 
-#include "ibex_LinearSolver.h"
 #include "ibex_ExprCopy.h"
 #include "ibex_String.h"
 #include "ibex_Random.h"
@@ -245,47 +244,6 @@ void Cont::diff(ContCell* new_cell) {
 		l.push_back(new_cell);
 }
 
-bool Cont::check_linearization(const IntervalVector& ginf, const IntervalMatrix& Dg, const IntervalVector& param_box) {
-
-	int p=param_box.size();
-	int k=Dg.nb_rows();
-
-	{
-		Matrix Jinf=Dg.lb();
-		Vector pinf=param_box.lb();
-		Vector Jinf_pinf= Jinf * pinf;
-
-		LinearSolver linsolve(p, k);
-		linsolve.initBoundVar(param_box);
-		for (int i=0; i<k; i++) {
-			linsolve.addConstraint(Jinf.row(i),GEQ,Jinf_pinf[i]-ginf[i].lb());
-		}
-
-		Interval opt;
-		LinearSolver::Status_Sol stat = linsolve.run_simplex(param_box, LinearSolver::MINIMIZE, 0, opt,param_box[0].lb());
-		if (stat != LinearSolver::OPTIMAL) return false;
-	}
-
-	{
-		Matrix jsup=Dg.ub();
-		Vector psup=param_box.ub();
-		Vector Jsup_psup= jsup * psup;
-
-		LinearSolver linsolve(p, k);
-		linsolve.initBoundVar(param_box);
-		for (int i=0; i<k; i++) {
-			linsolve.addConstraint(jsup.row(i),LEQ,Jsup_psup[i]-ginf[i].ub());
-		}
-
-		Interval opt;
-		LinearSolver::Status_Sol stat = linsolve.run_simplex(param_box, LinearSolver::MINIMIZE, 0, opt,param_box[0].lb());
-		if (stat != LinearSolver::OPTIMAL) return false;
-	}
-
-	 return true;
-}
-
-
 bool Cont::is_valid_cell_1_old(const IntervalVector& box_existence, const VarSet& vars, const BitSet& forced_params) {
 	// We check the rows of the jacobian matrix of the implicit function.
 	// The rows that correspond to variables that "should be parameters"
@@ -373,11 +331,12 @@ bool Cont::is_valid_cell_1(const IntervalVector& box_existence, const VarSet& va
 
 	// ==================================================================
 	//     Check that the rigorous linearization of the
-	//     implicit function divides the box p in 2^k parts
+	//     constraint g_wrong<=0 in p is homeomorph to a half-ball,
+	//     that is, the implicit function divides the box p in 2^k parts
 	//     where k is the number of "wrong variables". Each part
 	//     corresponds to a fixed signed (+/-) of a component
 	//     of the implicit function.
-	return check_linearization(ginf_wrong, J_implicit_wrong, p);
+	return is_homeomorph_half_ball(ginf_wrong, J_implicit_wrong, p);
 }
 
 bool Cont::is_valid_cell_2(const IntervalVector& box_existence, const VarSet& vars, const BitSet& forced_params) {

@@ -32,12 +32,11 @@ void TestCont::test01() {
 
 	//cout << "\nResult:\n" << *cell << endl;
 
-	// note: much more than 0.4 if we let Newton try
+	// note: much more than 0.3 if we let Newton try
 	// to enlarge the unicity box.
-	CPPUNIT_ASSERT(cell->unicity_box.min_diam()>0.4);
+	CPPUNIT_ASSERT(cell->unicity_box.min_diam()>0.3);
 
 	delete cell;
 }
-
 
 } // end namespace

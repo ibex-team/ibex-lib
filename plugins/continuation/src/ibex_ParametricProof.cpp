@@ -11,11 +11,14 @@
  * ---------------------------------------------------------------------------- */
 
 #include "ibex_ParametricProof.h"
+#include "ibex_Cont.h"
+
 #include "ibex_Newton.h"
 #include "ibex_Linear.h"
-#include "ibex_Cont.h"
-#include <iomanip>
+#include "ibex_LinearSolver.h"
 #include "ibex_CtcFwdBwd.h"
+
+#include <iomanip>
 
 using namespace std;
 
@@ -162,7 +165,7 @@ IntervalVector find_solution(Function& f, IntervalVector& facet, const VarSet& v
 					s.push(_pair.first);
 					s.push(_pair.second);
 //				} else {
-//					s.push(_pair.second);
+//					s.push(_pair#include "ibex_LinearSolver.h".second);
 //					s.push(_pair.first);
 //				}
 			}
@@ -184,6 +187,55 @@ IntervalVector find_solution(Function& f, IntervalVector& facet, const VarSet& v
 			throw FindSolutionFail();
 		}
 	}
+}
+
+bool is_homeomorph_half_ball(const IntervalVector& ginf, const IntervalMatrix& Dg, const IntervalVector& param_box) {
+
+	int p=param_box.size();
+	int k=Dg.nb_rows();
+
+	Vector pinf=param_box.lb();
+
+	{
+		//cout << "Simplex for <=0:" << endl;
+		Matrix Jinf=Dg.lb();
+		Vector Jinf_pinf= Jinf * pinf;
+
+		LinearSolver linsolve(p, k);
+		linsolve.initBoundVar(param_box);
+		for (int i=0; i<k; i++) {
+			//cout << "  add constraint: " << Jinf.row(i) << "*u>=" << (Jinf_pinf[i]-ginf[i].lb()) << endl;
+			linsolve.addConstraint(Jinf.row(i),GEQ,Jinf_pinf[i]-ginf[i].lb());
+		}
+
+		Interval opt(0.0);
+		// note : "-1" just to have a strict minorant of the objective
+		LinearSolver::Status_Sol stat = linsolve.run_simplex(param_box, LinearSolver::MINIMIZE, 0, opt,param_box[0].lb()-1);
+		//cout << "  status=" << stat << endl;
+		if (stat != LinearSolver::OPTIMAL) return false;
+	}
+
+	{
+		//cout << "Simplex for >=0:" << endl;
+		Matrix Jsup=Dg.ub();
+		Vector Jsup_pinf= Jsup * pinf;
+
+		LinearSolver linsolve(p, k);
+		linsolve.initBoundVar(param_box);
+		for (int i=0; i<k; i++) {
+			//cout << "  add constraint: " << Jsup.row(i) << "*u<=" << (Jsup_pinf[i]-ginf[i].ub()) << endl;
+
+			linsolve.addConstraint(Jsup.row(i),LEQ,Jsup_pinf[i]-ginf[i].ub());
+		}
+
+		Interval opt(0.0);
+		// note : "-1" just to have a strict minorant of the objective
+		LinearSolver::Status_Sol stat = linsolve.run_simplex(param_box, LinearSolver::MINIMIZE, 0, opt,param_box[0].lb()-1);
+		//cout << "  status=" << stat << endl;
+		if (stat != LinearSolver::OPTIMAL) return false;
+	}
+
+	 return true;
 }
 
 } // end namespace ibex

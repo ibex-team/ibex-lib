@@ -244,14 +244,14 @@ public:
 	IBEX_NEIGHBORHOOD neighborhood;
 
 protected:
+	friend class TestCont;
+
 	double choose_time, find_time, diff_time, neighborhood_time;
 
 	// Either the first or the last cell, depending on the heuristic
 	ContCell* next_cell();
 
 	void remove_next_cell();
-
-	bool check_linearization(const IntervalVector& ginf, const IntervalMatrix& Dg, const IntervalVector& param_box);
 
 	/* Old test, which checks that there is no zero in the J_implicit_wrong,
 	 * using only J_implicit and forced_params */

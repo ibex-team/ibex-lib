@@ -81,6 +81,9 @@ class FindSolutionFail : public Exception { };
  */
 IntervalVector find_solution(Function& f, IntervalVector& facet, const VarSet& vars);
 
+
+bool is_homeomorph_half_ball(const IntervalVector& ginf, const IntervalMatrix& Dg, const IntervalVector& param_box);
+
 } // end namespace ibex
 
 #endif /* __IBEX_PARAMETRIC_PROOF_H__ */
