@@ -31,40 +31,43 @@ void TestCellDiff::test01() {
 //	cout << cell;
 //	cout << "\nand the box " << box2 << endl;
 
-	cell.diff(box2,f);
+	// note: set everything as parameter
+	// so that the "diff" operates in all
+	// dimensions
+	cell.diff(box2,f,VarSet(3,BitSet::all(3),false));
 
 //	cout << "\n\nResult:" << endl;
 //	cout << cell;
 
 	CPPUNIT_ASSERT(cell.nb_facets()==6);
-	list<IntervalVector>::const_iterator it=cell.facets.begin();
+	list<ContCell::Facet>::const_iterator it=cell.facets.begin();
 
 	double _facet42_in[][2]={{0,1},{1,1},{-0,0}}; // contracted (but not very tight: unicity box)
 	double _facet42_out[][2]={{0,1},{1,1},{-1,0}};
-	CPPUNIT_ASSERT(it->is_superset(IntervalVector(3,_facet42_in)));
-	CPPUNIT_ASSERT(it->is_subset(IntervalVector(3,_facet42_out)));
+	CPPUNIT_ASSERT(it->facet.is_superset(IntervalVector(3,_facet42_in)));
+	CPPUNIT_ASSERT(it->facet.is_subset(IntervalVector(3,_facet42_out)));
 
 	it++;
 	double _facet41[][2]={{-1,0},{1,1},{-1,1}};
-	CPPUNIT_ASSERT(*it==IntervalVector(3,_facet41));
-
-	it++;
-	double _facet3[][2]={{-1,1},{-1,-1},{-1,1}};
-	CPPUNIT_ASSERT(*it==IntervalVector(3,_facet3));
+	CPPUNIT_ASSERT(it->facet==IntervalVector(3,_facet41));
 
 	it++;
 	double _facet22_in[][2]={{1,1},{0,1},{0,0}};  // contracted (but not very tight: unicity box)
 	double _facet22_out[][2]={{1,1},{0,1},{-1,0}};
-	CPPUNIT_ASSERT(it->is_superset(IntervalVector(3,_facet22_in)));
-	CPPUNIT_ASSERT(it->is_subset(IntervalVector(3,_facet22_out)));
+	CPPUNIT_ASSERT(it->facet.is_superset(IntervalVector(3,_facet22_in)));
+	CPPUNIT_ASSERT(it->facet.is_subset(IntervalVector(3,_facet22_out)));
 
 	it++;
 	double _facet21[][2]={{1,1},{-1,0},{-1,1}};
-	CPPUNIT_ASSERT(*it==IntervalVector(3,_facet21));
+	CPPUNIT_ASSERT(it->facet==IntervalVector(3,_facet21));
 
 	it++;
 	double _facet1[][2]={{-1,-1},{-1,1},{-1,1}};
-	CPPUNIT_ASSERT(*it==IntervalVector(3,_facet1));
+	CPPUNIT_ASSERT(it->facet==IntervalVector(3,_facet1));
+
+	it++;
+	double _facet3[][2]={{-1,1},{-1,-1},{-1,1}};
+	CPPUNIT_ASSERT(it->facet==IntervalVector(3,_facet3));
 
 }
 

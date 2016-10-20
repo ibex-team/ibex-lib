@@ -24,9 +24,11 @@ public:
 
 	CPPUNIT_TEST_SUITE(TestCont);
 	CPPUNIT_TEST(test01);
+	//CPPUNIT_TEST(test_check_linearization);
 	CPPUNIT_TEST_SUITE_END();
 
-void test01();
+	void test01();
+	//void test_check_linearization();
 
 };
 

@@ -28,10 +28,16 @@ void TestCont::test01() {
 
 	//cout << "Try to build a cell of parameter width~2.0 around the solution x*=" << sol << endl;
 
-	ContCell cell=cont.choose(sol,2.0);
+	ContCell* cell=cont.choose(NULL,sol,2.0);
 
-	//cout << "\nResult:\n" << cell << endl;
-	CPPUNIT_ASSERT(cell.unicity_box.min_diam()>0.9);
+	//cout << "\nResult:\n" << *cell << endl;
+
+	// note: much more than 0.4 if we let Newton try
+	// to enlarge the unicity box.
+	CPPUNIT_ASSERT(cell->unicity_box.min_diam()>0.4);
+
+	delete cell;
 }
+
 
 } // end namespace
