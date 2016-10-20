@@ -40,6 +40,17 @@ bool newton(const Function& f, const VarSet* vars, IntervalVector& full_box, dou
 	assert(full_box.size()==f.nb_var());
 
 	IntervalMatrix J(m, n);
+
+//	IntervalVector* p=NULL;      // Parameter box
+//	IntervalVector* midp=NULL;   // Parameter box midpoint
+	IntervalMatrix* Jp=NULL;     // Jacobian % parameters
+//
+//	if (vars) {
+//		p=new IntervalVector(vars->param_box(full_box));
+//		midp=new IntervalVector(p->mid());
+		Jp=new IntervalMatrix(n,vars->nb_param);
+//	}
+
 	IntervalVector y(n);
 	IntervalVector y1(n);
 	IntervalVector mid(n);
@@ -54,7 +65,7 @@ bool newton(const Function& f, const VarSet* vars, IntervalVector& full_box, dou
 
 	do {
 		if (vars)
-			f.hansen_matrix(full_box,J,*vars);
+			f.hansen_matrix(full_box,J,*Jp,*vars);
 		else
 			f.hansen_matrix(full_box,J);
 		//		f.jacobian(box,J);
@@ -73,6 +84,12 @@ bool newton(const Function& f, const VarSet* vars, IntervalVector& full_box, dou
 		if (vars) vars->set_var_box(full_mid, mid);
 
 		Fmid = f.eval_vector(full_mid);
+
+		// Use the jacobian % parameters to calculate
+		// a mean-value form for Fmid
+//		if (vars) {
+//			Fmid &= f.eval_vector(vars->full_box(mid,*midp))+(*Jp)*(*p-*midp);
+//		}
 
 		y = mid-box;
 		if (y==y1) break;
@@ -114,6 +131,9 @@ bool newton(const Function& f, const VarSet* vars, IntervalVector& full_box, dou
 	while (gain >= prec);
 
 	if (vars) {
+//		delete p;
+//		delete midp;
+		delete Jp;
 		delete &box;
 		delete &full_mid;
 	}
@@ -143,12 +163,22 @@ bool inflating_newton(const Function& f, const VarSet* vars, const IntervalVecto
 	int k=0;
 	bool success=false;
 
-	IntervalMatrix J2(n, n);
-	IntervalMatrix J(n, n);
+	IntervalVector mid(n);       // Midpoint of the current box
+	IntervalVector Fmid(n);      // Evaluation of f at the midpoint
+	IntervalMatrix J(n, n);	     // Hansen matrix of f % variables
+
+//	IntervalVector* p=NULL;      // Parameter box
+//	IntervalVector* midp=NULL;   // Parameter box midpoint
+	IntervalMatrix* Jp=NULL;     // Jacobian % parameters
+//
+//	if (vars) {
+//		p=new IntervalVector(vars->param_box(full_box));
+//		midp=new IntervalVector(p->mid());
+		Jp=new IntervalMatrix(n,vars->nb_param);
+//	}
+
 	IntervalVector y(n);
 	IntervalVector y1(n);
-	IntervalVector mid(n);
-	IntervalVector Fmid(n);
 
 	IntervalVector box = vars ? vars->var_box(full_box) : full_box;
 	IntervalVector& full_mid = vars ? *new IntervalVector(full_box) : mid;
@@ -172,7 +202,7 @@ bool inflating_newton(const Function& f, const VarSet* vars, const IntervalVecto
 		//cout << "current box=" << box << endl << endl;
 
 		if (vars)
-			f.hansen_matrix(box_existence, J, *vars);
+			f.hansen_matrix(box_existence, J, *Jp, *vars);
 		else
 			f.hansen_matrix(box_existence, J);
 
@@ -183,6 +213,12 @@ bool inflating_newton(const Function& f, const VarSet* vars, const IntervalVecto
 		if (vars) vars->set_var_box(full_mid, mid);
 
 		Fmid=f.eval_vector(full_mid);
+
+		// Use the jacobian % parameters to calculate
+		// a mean-value form for Fmid
+//		if (vars) {
+//			Fmid &= f.eval_vector(vars->full_box(mid,*midp))+(*Jp)*(*p-*midp);
+//		}
 
 		y = mid-box;
 		if (y==y1) break;
@@ -260,6 +296,9 @@ bool inflating_newton(const Function& f, const VarSet* vars, const IntervalVecto
 	}
 
 	if (vars) {
+//		delete p;
+//		delete midp;
+		delete Jp;
 		delete &full_mid;
 	}
 

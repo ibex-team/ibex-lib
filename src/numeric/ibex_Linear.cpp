@@ -165,6 +165,26 @@ void interval_LU(const IntervalMatrix& A, IntervalMatrix& _LU, int* pr, int* pc)
 	LU<Interval,IntervalMatrix>(A,_LU,pr,pc);
 }
 
+bool full_rank(const IntervalMatrix& A) {
+	int *pr = new int[A.nb_rows()]; // ignored
+	int *pc = new int[A.nb_cols()]; // ignored
+	 try {
+		 IntervalMatrix LU(A);
+
+		 interval_LU(A,LU,pr,pc);
+
+		 delete [] pr;
+		 delete [] pc;
+		 return true;
+	 } catch(SingularMatrixException& e) {
+		 // means in particular that we could not extract an
+		 // invertible m*m submatrix
+		 delete [] pr;
+		 delete [] pc;
+		 return false;
+	 }
+}
+
 namespace {
 
 void real_LU_solve(const Matrix& LU, const int* p, const Vector& b, Vector& x) {

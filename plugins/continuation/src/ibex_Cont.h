@@ -16,6 +16,8 @@
 #include "ibex_ContCell.h"
 
 #include <list>
+#include <set>
+
 #ifdef __GNUC__
 #include <ciso646> // just to initialize _LIBCPP_VERSION
 #ifdef _LIBCPP_VERSION
@@ -248,6 +250,17 @@ protected:
 	ContCell* next_cell();
 
 	void remove_next_cell();
+
+	bool check_linearization(const IntervalVector& ginf, const IntervalMatrix& Dg, const IntervalVector& param_box);
+
+	/* Old test, which checks that there is no zero in the J_implicit_wrong,
+	 * using only J_implicit and forced_params */
+	bool is_valid_cell_1_old(const IntervalVector& box_existence, const VarSet& vars, const BitSet& forced_params);
+
+	bool is_valid_cell_1(const IntervalVector& box_existence, const VarSet& vars, const std::vector<int>& wrong_vars);
+
+	bool is_valid_cell_2(const IntervalVector& box_existence, const VarSet& vars, const BitSet& forced_params);
+
 };
 
 } /* namespace ibex */

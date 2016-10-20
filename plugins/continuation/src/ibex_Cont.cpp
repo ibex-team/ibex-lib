@@ -12,7 +12,14 @@
 
 #include "ibex_Cont.h"
 #include "ibex_ParametricProof.h"
-#include "ibex.h"
+
+#include "ibex_LinearSolver.h"
+#include "ibex_ExprCopy.h"
+#include "ibex_String.h"
+#include "ibex_Random.h"
+#include "ibex_Timer.h"
+#include "ibex_Newton.h"
+#include "ibex_Linear.h"
 
 #include <fstream>
 
@@ -238,6 +245,183 @@ void Cont::diff(ContCell* new_cell) {
 		l.push_back(new_cell);
 }
 
+bool Cont::check_linearization(const IntervalVector& ginf, const IntervalMatrix& Dg, const IntervalVector& param_box) {
+
+	int p=param_box.size();
+	int k=Dg.nb_rows();
+
+	{
+		Matrix Jinf=Dg.lb();
+		Vector pinf=param_box.lb();
+		Vector Jinf_pinf= Jinf * pinf;
+
+		LinearSolver linsolve(p, k);
+		linsolve.initBoundVar(param_box);
+		for (int i=0; i<k; i++) {
+			linsolve.addConstraint(Jinf.row(i),GEQ,Jinf_pinf[i]-ginf[i].lb());
+		}
+
+		Interval opt;
+		LinearSolver::Status_Sol stat = linsolve.run_simplex(param_box, LinearSolver::MINIMIZE, 0, opt,param_box[0].lb());
+		if (stat != LinearSolver::OPTIMAL) return false;
+	}
+
+	{
+		Matrix jsup=Dg.ub();
+		Vector psup=param_box.ub();
+		Vector Jsup_psup= jsup * psup;
+
+		LinearSolver linsolve(p, k);
+		linsolve.initBoundVar(param_box);
+		for (int i=0; i<k; i++) {
+			linsolve.addConstraint(jsup.row(i),LEQ,Jsup_psup[i]-ginf[i].ub());
+		}
+
+		Interval opt;
+		LinearSolver::Status_Sol stat = linsolve.run_simplex(param_box, LinearSolver::MINIMIZE, 0, opt,param_box[0].lb());
+		if (stat != LinearSolver::OPTIMAL) return false;
+	}
+
+	 return true;
+}
+
+
+bool Cont::is_valid_cell_1_old(const IntervalVector& box_existence, const VarSet& vars, const BitSet& forced_params) {
+	// We check the rows of the jacobian matrix of the implicit function.
+	// The rows that correspond to variables that "should be parameters"
+	// must have no component with 0.
+
+	IntervalMatrix Jp(m,n-m); // Jacobian % parameters
+	IntervalMatrix Jx(m,m);   // Jacobian % variables
+	f.jacobian(box_existence,Jx,Jp,vars);
+
+	Matrix Jx_mid_inv(m,m);
+	real_inverse(Jx.mid(),Jx_mid_inv);
+
+	// Approximate jacobian of the implicit function
+	// TODO: make it rigorous!
+	IntervalMatrix J_implicit=Jx_mid_inv*Jp;
+
+	int v=0;  // index of the ith variable
+	for (int i=0; i<n; i++) {
+		if (vars.vars[i]) {
+			if (forced_params[i]) {
+				for (int j=0; j<n-m; j++) {
+					if (J_implicit[v][j].contains(0))return false;
+				}
+			}
+			v++;
+		}
+	}
+	return true;
+}
+
+
+bool Cont::is_valid_cell_1(const IntervalVector& box_existence, const VarSet& vars, const vector<int>& wrong_vars) {
+
+	// ========= calculate the Jacobian of the implicit function ===========
+	IntervalMatrix Jp(m,n-m); // Jacobian % parameters
+	IntervalMatrix Jx(m,m);   // Jacobian % variables
+	f.jacobian(box_existence,Jx,Jp,vars);
+
+	Matrix Jx_mid_inv(m,m);
+	real_inverse(Jx.mid(),Jx_mid_inv);
+
+	// Approximate jacobian of the implicit function
+	// TODO: make it rigorous!
+	IntervalMatrix J_implicit=Jx_mid_inv*Jp;
+	// =====================================================================
+
+
+	// ======= Get the submatrix corresponding to "wrong variables" ========
+    IntervalMatrix J_implicit_wrong(wrong_vars.size(),n-m);
+    for(int i=0; i<wrong_vars.size(); i++)
+        J_implicit_wrong.set_row(i,J_implicit.row(wrong_vars[i]));
+
+    // ======= Check that this matrix is full rank =======
+    if (!full_rank(J_implicit_wrong)) return false;
+
+
+//                cout << "x=" << box_existence << endl;
+//                cout << "wrong vars: ";
+//                if(wrong_vars.size()>=1) cout << wrong_vars[0] << " ";
+//                if(wrong_vars.size()>=2) cout << wrong_vars[1] << " ";
+//                if(wrong_vars.size()>=3) cout << wrong_vars[2] << " ";
+//                cout << endl;
+//                cout << J_implicit << endl;
+//                cout << endl;
+//                cout << J_implicit_wrong << endl;
+//                cout << "==================" << endl;
+
+
+    // ==================================================================
+    //     Calculate g(p_inf), the value of the implicit
+    //     function at the lower-left corner of the parameter box
+    // ==================================================================
+    IntervalVector p=vars.param_box(box_existence);
+    IntervalVector x_p_inf=vars.full_box(vars.var_box(box_existence),p.lb());
+    IntervalVector ginf_existence(m);
+    IntervalVector ginf_unicity(m); // will be ignored
+
+    // Calculate g(p_inf) -> solve the system
+	if (!inflating_newton(f,vars,x_p_inf,ginf_existence,ginf_unicity)) return false;
+
+	// ======= Get the subvector corresponding to "wrong variables" ========
+	IntervalVector ginf_wrong(wrong_vars.size());
+	for(int i=0; i<wrong_vars.size(); i++)
+		ginf_wrong[i]=ginf_existence[wrong_vars[i]];
+
+	// ==================================================================
+	//     Check that the rigorous linearization of the
+	//     implicit function divides the box p in 2^k parts
+	//     where k is the number of "wrong variables". Each part
+	//     corresponds to a fixed signed (+/-) of a component
+	//     of the implicit function.
+	return check_linearization(ginf_wrong, J_implicit_wrong, p);
+}
+
+bool Cont::is_valid_cell_2(const IntervalVector& box_existence, const VarSet& vars, const BitSet& forced_params) {
+
+	bool valid_cell=true;
+
+	IntervalVector box_existence2(n);
+	IntervalVector box_unicity2(n);   // ignored
+
+	try {
+		// we fix the dimension of the variables that exceed
+		// their domain to the "crossed" extremity
+		for (int i=0; i<n; i++) {
+
+			if (!box_existence[i].is_subset(domain[i])) {
+
+				IntervalVector box=box_existence & domain;
+
+				if (box_existence[i].lb()<domain[i].lb())
+					box[i]=domain[i].lb();
+				else
+					box[i]=domain[i].ub();
+
+				VarSet tmpvars=get_vars(f, box.mid(), forced_params);
+
+				valid_cell=inflating_newton(f,tmpvars,box,box_existence2,box_unicity2);
+
+				for (int j=0; valid_cell && j<n; j++) {
+					valid_cell &= (!tmpvars.vars[j] || box_existence2[j].is_subset(domain[j]));
+				}
+
+				if (!valid_cell) break;
+			}
+		}
+	} catch(SingularMatrixException&) {
+		valid_cell=false;
+		// May happen if we are near a corner of the bounding domain:
+		// some dimension are forced to be parameter erroneously. In
+		// this case, we have to decrease h...
+	}
+
+	return valid_cell;
+}
+
 ContCell* Cont::choose(const ContCell::Facet* x_facet, const IntervalVector& x, double h) {
 	IntervalVector x_box(m);
 	IntervalVector p_box(n-m);
@@ -299,7 +483,7 @@ ContCell* Cont::choose(const ContCell::Facet* x_facet, const IntervalVector& x, 
 
 		// Dimensions that should be parameters (by default: none).
 		BitSet forced_params(BitSet::empty(n));
-        vector<unsigned int> wrong_vars;
+        vector<int> wrong_vars;
 
 		if(success) { // check if the cell is valid
 
@@ -308,7 +492,7 @@ ContCell* Cont::choose(const ContCell::Facet* x_facet, const IntervalVector& x, 
 
 			// Find dimensions along with the box exceeds domain
 			// and mark them has "should be parameters"
-            unsigned int var_number=0;
+           int var_number=0;
 			for (int i=0; i<n; i++) {
 				if (!box_existence[i].is_subset(domain[i])) {
                     forced_params.add(i);
@@ -321,118 +505,17 @@ ContCell* Cont::choose(const ContCell::Facet* x_facet, const IntervalVector& x, 
 			}
 		}
 
-		//===================== first test ==========================
+//		if (!valid_cell) {
+//			valid_cell = is_valid_cell_1_old(box_existence,vars,forced_params);
+//        }
+
 		if (!valid_cell) {
-			// We check the rows of the jacobian matrix of the implicit function.
-			// The rows that correspond to variables that "should be parameters"
-			// must have no component with 0.
-			IntervalMatrix J=f.jacobian(box_existence);
-
-			IntervalMatrix Jp(m,n-m); // Jacobian % parameters
-			IntervalMatrix Jx(m,m);   // Jacobian % variables
-
-			// Intialize Jp and Jx from J
-			for (int i=0; i<m; i++) {
-				Jp.set_row(i,vars.param_box(J.row(i)));
-				Jx.set_row(i,vars.var_box(J.row(i)));
-			}
-			Matrix Jx_mid_inv(m,m);
-			real_inverse(Jx.mid(),Jx_mid_inv);
-
-			// Approximate jacobian of the implicit function
-			// TODO: make it rigorous!
-			IntervalMatrix J_implicit=Jx_mid_inv*Jp;
-            
-            IntervalMatrix J_implicit_wrong(wrong_vars.size(),n-m);
-            for(int i=0; i<wrong_vars.size(); i++)
-                J_implicit_wrong.set_row(i,J_implicit.row(wrong_vars[i]));
-
-            // Tests J_implicit_wrong is full rank uing LU
-            int *pr = new int[m];
-            int *pc = new int[n];
-            valid_cell=true;
-            try {
-//                cout << "x=" << box_existence << endl;
-//                cout << "wrong vars: ";
-//                if(wrong_vars.size()>=1) cout << wrong_vars[0] << " ";
-//                if(wrong_vars.size()>=2) cout << wrong_vars[1] << " ";
-//                if(wrong_vars.size()>=3) cout << wrong_vars[2] << " ";
-//                cout << endl;
-//                cout << J_implicit << endl;
-//                cout << endl;
-//                cout << J_implicit_wrong << endl;
-//                cout << "==================" << endl;
-                IntervalMatrix LU(m,n-m);
-                interval_LU(J_implicit_wrong,LU,pr,pc);
-            } catch(SingularMatrixException& e) {
-                // means in particular that we could not extract an
-                // invertible m*m submatrix
-                valid_cell=false;
-            }
-            delete [] pr;
-            delete [] pc;
-            
-//=============================================
-// Old test, which checks that there is no zero in the J_implicit_wrong,
-// using only J_implicit and forced_params
-//			valid_cell=true; // by default
-//			int v=0;         // index of the ith variable
-//			for (int i=0; valid_cell && i<n; i++) {
-//				if (vars.vars[i]) {
-//					if (forced_params[i]) {
-//						for (int j=0; valid_cell && j<n-m; j++) {
-//							if (J_implicit[v][j].contains(0)) valid_cell=false;
-//						}
-//					}
-//					v++;
-//				}
-//			}
-//=============================================
-
+			valid_cell = is_valid_cell_1(box_existence,vars,wrong_vars);
         }
 
-        //============================================================
-
-		//===================== second test ==========================
 //		if (!valid_cell) {
-//
-//			valid_cell=true;
-//
-//			IntervalVector box_existence2(n);
-//			IntervalVector box_unicity2(n);   // ignored
-//
-//			try {
-//				// we fix the dimension of the variables that exceed
-//				// their domain to the "crossed" extremity
-//				for (int i=0; i<n; i++) {
-//
-//					if (!box_existence[i].is_subset(domain[i])) {
-//
-//						box=box_existence & domain;
-//
-//						if (box_existence[i].lb()<domain[i].lb())
-//							box[i]=domain[i].lb();
-//						else
-//							box[i]=domain[i].ub();
-//
-//						VarSet tmpvars=get_vars(f, box.mid(), forced_params);
-//
-//						valid_cell=inflating_newton(f,tmpvars,box,box_existence2,box_unicity2);
-//
-//						for (int j=0; valid_cell && j<n; j++) {
-//							valid_cell &= (!tmpvars.vars[j] || box_existence2[j].is_subset(domain[j]));
-//						}
-//
-//						if (!valid_cell) break;
-//					}
-//				}
-//			} catch(SingularMatrixException&) {
-//				valid_cell=false;
-//				// May happen if we are near a corner of the bounding domain:
-//				// some dimension are forced to be parameter erroneously. In
-//				// this case, we have to decrease h...
-//			}
-//		}
+//			valid_cell = is_valid_cell_2(box_existence,vars,forced_params);
+//        }
 		//============================================================
 
 		if (success && valid_cell) {

@@ -71,6 +71,14 @@ void interval_LU(const IntervalMatrix& A, IntervalMatrix& LU, int* p);
 void interval_LU(const IntervalMatrix& A, IntervalMatrix& LU, int* pr, int* pc);
 
 /**
+ * \brief True only if A is full rank.
+ *
+ * If the function returns false, the matrix may be full
+ * rank or not. Nothing is proven.
+ */
+bool full_rank(const IntervalMatrix& A);
+
+/**
  * \ingroup numeric
  *
  * \brief Computes an (approximative) inverse of a real matrix.

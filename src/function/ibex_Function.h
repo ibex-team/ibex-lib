@@ -729,8 +729,11 @@ public:
 	 *
 	 * The function is restricted to some variables, the other (parameters)
 	 * being considered as constants.
+	 *
+	 * \param J_var   - Jacobian w.r.t variables
+	 * \param J_param - Jacobian w.r.t. parameters
 	 */
-	void jacobian(const IntervalVector& full_box, IntervalMatrix& J, const VarSet& set) const;
+	void jacobian(const IntervalVector& full_box, IntervalMatrix& J_var, IntervalMatrix& J_param, const VarSet& set) const;
 
 	/**
 	 * \brief Calculate the Hansen matrix of f
@@ -742,8 +745,12 @@ public:
 	 *
 	 * The function is restricted to some variables, the other (parameters)
 	 * being considered as constants.
+	 *
+	 * \param H_var   - Hansen matrix w.r.t. variables (parameters are interval constants)
+	 * \param J_param - Jacobian w.r.t. parameters (variables are interavl constants).
+	 *                  Note: no more "Hansen scheme" here.
 	 */
-	void hansen_matrix(const IntervalVector& full_box, IntervalMatrix& h, const VarSet& set) const;
+	void hansen_matrix(const IntervalVector& full_box, IntervalMatrix& H_var, IntervalMatrix& J_param, const VarSet& set) const;
 
 	/**
 	 * \brief Contract x w.r.t. f(x)=y.
