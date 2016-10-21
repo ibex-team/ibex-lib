@@ -10,16 +10,29 @@ platform:
   - x64
 
 install:
-  - cmd: echo Running build
+  - cmd: echo %Platform%
   - cmd: set MINGW-W64_BASE=C:\mingw-w64\i686-5.3.0-posix-dwarf-rt_v4-rev0
   - cmd: set PATH=%MINGW-W64_BASE%\mingw32\bin;C:\msys64\usr\bin;%PATH%
   - cmd: uname -a
-  - cmd: python -x %cd%\waf configure --interval-lib=filib
-  - cmd: python -x %cd%\waf build install clean
+  - cmd: pacman --noconfirm -S mingw32/mingw-w64-i686-cppunit
+  - cmd: set CPATH=%CPATH%;C:\msys64\mingw32\include
+  - cmd: set LIBRARY_PATH=%LIBRARY_PATH%;C:\msys64\mingw32\lib
+  - cmd: set PREFIX=%HOMEDRIVE%%HOMEPATH%
 
 build_script:
-  - cmd: echo Running install
-  #- cmd: python -x %cd%\waf utest
+  - cmd: python -x %cd%\waf configure --interval-lib=filib --prefix=%PREFIX%
+  - cmd: python -x %cd%\waf build install clean
 
 on_finish:
   - cmd: cat C:\projects\ibex-lib\__build__\config.log
+
+test_script:
+  - cmd: set PKG_CONFIG_PATH=%PREFIX%\share\pkgconfig
+  # We need to add the path to libcppunit in PATH
+  - cmd: set PATH=%PATH%;C:\msys64\mingw32\bin
+  - cmd: python -x %cd%\waf utest
+
+on_failure:
+  - cmd: cat C:\projects\ibex-lib\__build__\config.log
+  - cmd: cat C:\projects\ibex-lib\__build__\utest_config.log
+  - cmd: cat C:\projects\ibex-lib\__build__\utest_run.log
