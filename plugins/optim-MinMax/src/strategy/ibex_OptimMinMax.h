@@ -60,6 +60,7 @@ public:
 	 *         TIMEOUT             time is out.
 	 */
 	Status optimize(const IntervalVector& init_box, double obj_init_bound=POS_INFINITY);
+	Status optimize();
 
 
     /**
@@ -85,6 +86,7 @@ private:
     IntervalVector get_feasible_point(Cell * elem);
     int check_constraints(const IntervalVector& box);
     bool handle_cell(Cell * x_cell);
+
 };
 
 

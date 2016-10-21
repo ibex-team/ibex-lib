@@ -34,9 +34,16 @@ OptimMinMax::~OptimMinMax() {
 	delete bsc;
 }
 
+Optim::Status OptimMinMax::optimize() {
+	optimize(x_sys.box,POS_INFINITY);
+}
+
+
 Optim::Status OptimMinMax::optimize(const IntervalVector& x_box_ini1, double obj_init_bound) {
 
 	if (trace) lsolve.trace =trace;
+	// we estimate that one iteration is at most 1% of the total time
+	// NOT READY lsolve.timeout=timeout/100;
 
 	loup=obj_init_bound;
 
@@ -181,6 +188,7 @@ bool  OptimMinMax::handle_cell(Cell * x_cell) {
             }
 		 */
 	}
+
 	//************ evaluation of f(x,y_heap) *****************
 	double min_prec_light_solver = compute_min_prec(x_cell->box);
 	int nb_iter = choose_nbiter(false);
@@ -232,9 +240,9 @@ bool  OptimMinMax::handle_cell(Cell * x_cell) {
 
 		if(res){
 			update_uplo_of_epsboxes(data_x->fmax.lb());
+			delete x_cell;
 		}
 
-		delete x_cell;
 		//cout<<"minprec reached! "<<" box: "<<x_cell->box<<" eval full prec: "<<x_cell->fmax <<endl;
 		//cout<<"loup : "<<loup<<" get for point: x = "<<best_sol<<" y = "<<max_y<<" uplo: "<<uplo<< " volume rejected: "<<vol_rejected/init_vol*100<<endl;
 		//min_prec_reached = true;

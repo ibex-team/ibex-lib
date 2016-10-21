@@ -23,34 +23,21 @@ class TestOptimMinMax : public CppUnit::TestFixture {
 public:
 
 	CPPUNIT_TEST_SUITE(TestOptimMinMax);
-	
 
-		CPPUNIT_TEST(ex_messine);
-/*		CPPUNIT_TEST(ex_segundo1);
-		CPPUNIT_TEST(ex_segundo2);
-		CPPUNIT_TEST(ex_segundo3);
-		CPPUNIT_TEST(ex_segundo4);
-		CPPUNIT_TEST(ex_cdc);
-		CPPUNIT_TEST(ex_ciscrea);
-		CPPUNIT_TEST(ex_ciscrea_robust);
-		CPPUNIT_TEST(ex_hirokazu);
-		CPPUNIT_TEST(ex_fujisaki);
-		CPPUNIT_TEST(ex_satellite);
-*/	CPPUNIT_TEST_SUITE_END();
+
+	CPPUNIT_TEST(ex_messine);
+	CPPUNIT_TEST(ex_segundo1);
+	CPPUNIT_TEST(ex_segundo2);
+	CPPUNIT_TEST(ex_segundo3);
+	CPPUNIT_TEST(ex_segundo4);
+	CPPUNIT_TEST_SUITE_END();
 
 
 	void ex_messine();
-/*	void ex_segundo1();
+	void ex_segundo1();
 	void ex_segundo2();
 	void ex_segundo3();
 	void ex_segundo4();
-	void ex_cdc();
-	void ex_ciscrea();
-	void ex_ciscrea_robust();
-	void ex_hirokazu();
-	void ex_fujisaki();
-	void ex_satellite();
-*/
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestOptimMinMax);

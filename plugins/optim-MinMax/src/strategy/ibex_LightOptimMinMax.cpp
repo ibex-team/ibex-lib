@@ -18,8 +18,10 @@
 
 namespace ibex{
 
-LightOptimMinMax::LightOptimMinMax(NormalizedSystem& y_sys, Ctc& ctc_xy):  trace(false) ,
-	ctc_xy(ctc_xy),xy_sys(y_sys), bsc(new LargestFirst()), prec_y(1.e-6), found_point(false)  {
+const double LightOptimMinMax::default_timeout = 60;
+
+LightOptimMinMax::LightOptimMinMax(NormalizedSystem& y_sys, Ctc& ctc_xy):  trace(false) , timeout(default_timeout),
+	ctc_xy(ctc_xy),xy_sys(y_sys), bsc(new LargestFirst()), prec_y(1.e-6), found_point(false), time(0)  {
 
 }
 
@@ -40,6 +42,7 @@ void LightOptimMinMax::add_backtrackable(Cell& root, const IntervalVector& y_ini
 
 bool LightOptimMinMax::optimize(Cell* x_cell, int nb_iter, double prec_y1) {
 
+	found_point  = false;
 	prec_y = prec_y1;
 	DataMinMax *data_x = &(x_cell->get<DataMinMax>());
 
@@ -51,48 +54,75 @@ bool LightOptimMinMax::optimize(Cell* x_cell, int nb_iter, double prec_y1) {
 	//    CtcFwdBwd max_ctc((*objective_function),Interval(NEG_INFINITY,best_max)); // contract w.r.t "the objective function must be lower than the current best solution best_max"
 	//    cout<<"lsolve: contractor ok"<<endl;
 
-	for(int i = 0; (!y_heap->empty()) && (i<nb_iter) ;i++) {
+	// Define the TimeOut of to compute the bounds of x_cell
+	time=0;
+//	Timer::start(); NOT READY
 
-		if (trace >= 3) std::cout<< *y_heap<<std::endl;
+	// ********** contract x_box with ctc_xy***************
+	IntervalVector xy_box = xy_box_hull(x_cell->box);
+	ctc_xy.contract(xy_box);
+	if(xy_box.is_empty()) {
+		delete x_cell;
+		return false;
+	} else {
+		// contract the result on x
+		x_cell->box &= xy_box.subvector(0,x_cell->box.size()-1);
+	}
 
-		found_point  = false;
-		Cell * tmp_cell = y_heap->pop1(); // we extract an element according to the first order
-		try {
-			std::pair<Cell*,Cell*> subcells_pair=bsc->bisect_cell(*tmp_cell);// bisect tmp_cell into 2 subcells
-			delete tmp_cell;
+	// *********** loop ********************
+	try {
+		for(int i = 0; (!y_heap->empty()) && (i<nb_iter) ;i++) {
 
-			bool res = handle_cell( x_cell, subcells_pair.first);
-			if (!res) {
-				delete subcells_pair.second;
-				//std::cout <<"       OUT 1 "<<std::endl;
-				return false;
+			if (trace >= 3) std::cout<< *y_heap<<std::endl;
+
+			Cell * y_cell = y_heap->pop1(); // we extract an element according to the first order
+			try {
+				std::pair<Cell*,Cell*> subcells_pair=bsc->bisect_cell(*y_cell);// bisect tmp_cell into 2 subcells
+				delete y_cell;
+
+				bool res = handle_cell( x_cell, subcells_pair.first);
+				if (!res) { // x_cell has been deleted
+					delete subcells_pair.second;
+					//std::cout <<"       OUT 1 "<<std::endl;
+					return false;
+				}
+
+				res = handle_cell( x_cell, subcells_pair.second);
+				if (!res) { // x_cell has been deleted
+					//std::cout <<"       OUT 2 "<<std::endl;
+					return false;
+				}
+
+				// ** contract not yet
+				//if (found_point) { // a feasible solution has been found
+				//	y_heap->contract(-(data_x->fmax.lb())); // to check
+				//}
 			}
+			catch (NoBisectableVariableException& ) {
+				bool res = handle_cell(x_cell,y_cell);
 
-			res = handle_cell( x_cell, subcells_pair.second);
-			if (!res) {
-				//std::cout <<"       OUT 2 "<<std::endl;
-				return false;
+				if (res) heap_save.push_back(y_cell);
+				else return false;
+
 			}
-
-
-			if (found_point) {
-				y_heap->contract(data_x->fmax.lb()); // to check
-			}
-		}
-		catch (NoBisectableVariableException& ) {
-			handle_cell(x_cell,tmp_cell);
-			heap_save.push_back(tmp_cell);
+//			time_limit_check();
 
 		}
 
 	}
-
+	catch (TimeOutException& ) { }
+//	Timer::stop();
 	/*
 ??    if(is_midp && !midp_hit) // midpoint x eval case: if no y found such as xy constraint respected, cannot keep the result
 ??        return Interval::EMPTY_SET;
 	 */
 	// insert the y_box with a too small diameter (those which were stored in heap_save)
 	fill_y_heap(*y_heap);
+
+	// ** contract y_heap now
+	if (found_point) { // a feasible solution has been found
+		y_heap->contract(-(data_x->fmax.lb())); // to check
+	}
 
 	if(y_heap->empty()){
 		//std::cout <<"       OUT 3 "<<std::endl;
@@ -293,6 +323,15 @@ IntervalVector LightOptimMinMax::init_xy_box(const IntervalVector& x_box,const I
 	return res;
 }
 
+IntervalVector LightOptimMinMax::xy_box_hull(const IntervalVector& x_box) {
+	IntervalVector res(xy_sys.nb_var);
+	for( int k=0 ; k<x_box.size();k++)
+		res[k] = x_box[k];
+	for(int k = x_box.size();k<xy_sys.nb_var;k++) // update current y box in the xy_box
+		res[k] = xy_sys.box[k];
+	return res;
+}
+
 void LightOptimMinMax::fill_y_heap(DoubleHeap<Cell>& y_heap) {
 	Cell* tmp_cell;
 	while(!heap_save.empty()) { // push all boxes of heap_save in y_heap
@@ -301,6 +340,13 @@ void LightOptimMinMax::fill_y_heap(DoubleHeap<Cell>& y_heap) {
 		heap_save.pop_back();
 	}
 	heap_save.clear();
+}
+
+void LightOptimMinMax::time_limit_check () {
+	Timer::stop();
+	time += Timer::VIRTUAL_TIMELAPSE();
+	if (timeout >0 &&  time >=timeout ) throw TimeOutException();
+	Timer::start();
 }
 
 }

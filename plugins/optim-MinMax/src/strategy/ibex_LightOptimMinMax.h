@@ -51,6 +51,7 @@ public:
 
 
     int trace;
+    double timeout;
 
 private:
     Ctc& ctc_xy; //contractor for constraints on xy
@@ -60,7 +61,7 @@ private:
     std::vector<Cell*> heap_save;
     double prec_y;
     bool found_point;
-
+    double time;
     /* contract xy_box and xy_box_ctc w.r.t max_ctc contractor
      * */
 //    void contract_best_max_cst( Ctc* max_ctc,IntervalVector* xy_box,IntervalVector* xy_box_ctc,y_heap_elem* elem);
@@ -86,9 +87,18 @@ private:
      * */
     IntervalVector init_xy_box(const IntervalVector& x_box,const IntervalVector & y_box);
 
+
+    IntervalVector xy_box_hull(const IntervalVector& x_box);
+
     /* add elements of Heap_save into y_heap
      * */
     void fill_y_heap(DoubleHeap<Cell>& y_heap);
+
+
+	/** Default timeout: 60 */
+	static const double default_timeout;
+
+    void time_limit_check ();
 
 };
 
