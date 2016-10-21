@@ -2,8 +2,9 @@
 # encoding: utf-8
 
 import os
-from waflib import Logs, Errors
+from waflib import Logs, Errors, Utils
 from waflib.Tools import waf_unit_test
+import ibexutils
 
 # function called after the tests are run for pretty printing the results
 def utest_format_output (tst):
@@ -12,14 +13,28 @@ def utest_format_output (tst):
 	logfile = os.path.join (tst.bldnode.abspath(), "utest_run.log")
 	tst.logger = Logs.make_logger (logfile, "utest_run")
 
+	def to_unicode (s):
+		r = None
+		if isinstance (s, unicode):
+			r = s
+		else:
+			for f in [ 'ascii', 'cp1251', 'cp1252', 'latin1', 'utf-8' ] :
+				try:
+					r = s.decode(f)
+					break
+				except UnicodeDecodeError:
+					continue
+		assert (not r is None)
+		return r
+
 	def format_out (stream, name):
 		s = name + ":" + os.linesep
-		for l in stream.decode('utf-8').splitlines(True):
+		for l in to_unicode(stream).splitlines(True):
 			s += "  " + l
 		return s
 
 	def parse_output (stream):
-		for l in stream.decode('utf-8').splitlines(True):
+		for l in to_unicode(stream).splitlines(True):
 			if l.startswith ("Run"):
 				data = l.split()
 				return (int(data[1]), int(data[3]) + int(data[5]))
@@ -94,11 +109,17 @@ def configure (conf):
 	# Add current directory to list of INCLUDES for TESTS
 	conf.env.append_unique ("INCLUDES_TESTS", conf.path.abspath ())
 
-  # if fmemopen is not available, use implementation from tests/3rd/fmemopen
+	# if fmemopen is not available, use implementation from tests/3rd/fmemopen
 	if not conf.env.HAVE_FMEMOPEN:
-		conf.env.append_unique ("TEST_SRC", "3rd/fmemopen/fmemopen.c")
-		conf.env.append_unique ("INCLUDES_TESTS",
-				os.path.join (conf.path.abspath (), "3rd", "fmemopen"))
+		if not Utils.is_win32:
+			conf.env.append_unique ("TEST_SRC", "3rd/fmemopen/fmemopen.c")
+			conf.env.append_unique ("INCLUDES_TESTS",
+					os.path.join (conf.path.abspath (), "3rd", "fmemopen"))
+		else:
+			# XXX The workaround does not work on windows. Missing header sys/mman.h
+			# So, for now, we remove the two test files that need fmemopen
+			conf.env.TEST_SRC.remove("TestFunction.cpp")
+			conf.env.TEST_SRC.remove("TestParser.cpp")
 
 ######################
 ####### utest ########
@@ -129,7 +150,8 @@ def utest (tst):
 		tst.options.all_tests = True
 
 		# define SRCDIR_TESTS
-		defines = "SRCDIR_TESTS=\"%s\"" % tst.path.abspath()
+		srcdir = ibexutils.escape_backslash_on_win32 (tst.path.abspath ())
+		defines = "SRCDIR_TESTS=\"%s\"" % srcdir
 
 		# Use own function for reporting test results
 		tst.add_post_fun (utest_format_output)
