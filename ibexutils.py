@@ -70,6 +70,23 @@ def convert_path_win2msys (path):
 
 	return "/%s%s" % (drv[0], path.replace("\\", "/"))
 
+def escape_backslash_on_win32 (s):
+	if Utils.is_win32:
+		return s.replace ("\\", "\\\\")
+	else:
+		return s
+
+@conf
+def path_pc_prefix (conf, path):
+	path = path.replace (conf.env.PREFIX, "${prefix}")
+	return escape_backslash_on_win32 (path)
+
+@conf
+def path_pc (conf, path):
+	path = path.replace (conf.env.INCDIR, "${includedir}")
+	path = path.replace (conf.env.LIBDIR, "${libdir}")
+	return escape_backslash_on_win32 (path)
+
 @conf
 def configure_3rd_party_with_autotools (conf, archive_name,
 			without_configure=False, without_make_install=False, conf_args = ""):
@@ -113,8 +130,6 @@ def configure_3rd_party_with_autotools (conf, archive_name,
 		cmd_conf = [conf.env.SH, "-c", "./configure %s"%conf_args]
 		cmd_rmconfig = [conf.env.SH, "-c", "rm config.sub config.guess"]
 		cmd_reconf = [conf.env.SH, "-c", "autoreconf -i"]
-		#cmd_make = [conf.env.MAKE, "-j%d" % conf.options.jobs]
-		#cmd_install = [conf.env.MAKE, "install"]
 	else:
 		conf_args += " --prefix=%s" % destnode.abspath ()
 		cmd_conf = "./configure %s" % (conf_args)

@@ -5,6 +5,7 @@ import os, sys
 from distutils.version import LooseVersion
 from waflib import Scripting, Logs, Options
 from waflib.Build import BuildContext
+import ibexutils
 
 # The following variable is used to build ibex.pc and by "waf dist"
 VERSION="2.3.0"
@@ -214,12 +215,13 @@ def build (bld):
 	# Generate ibex.pc, the pkg-config file
 	bld (features = "subst", source = "ibex.pc.in", target = "ibex.pc",
 				install_path = bld.env.PKGDIR,
-				INCDIR = bld.env.INCDIR.replace(bld.env.PREFIX, "${prefix}"),
-				LIBDIR = bld.env.LIBDIR.replace(bld.env.PREFIX, "${prefix}"),
-				INCLUDES = " ".join(["-I" + i.replace (bld.env.INCDIR, "${includedir}")
+				PREFIX = ibexutils.escape_backslash_on_win32 (bld.env.PREFIX),
+				INCDIR = bld.path_pc_prefix (bld.env.INCDIR),
+				LIBDIR = bld.path_pc_prefix (bld.env.LIBDIR),
+				INCLUDES = " ".join(["-I" + bld.path_pc (i)
 										for i in bld.env.INCLUDES_IBEX_DEPS]),
 				CXXFLAGS = " ".join(bld.env.CXXFLAGS_IBEX_DEPS),
-				LIBPATH = " ".join(["-L" + i.replace (bld.env.LIBDIR, "${libdir}")
+				LIBPATH = " ".join(["-L" + bld.path_pc (i)
 										for i in bld.env.LIBPATH_IBEX_DEPS]),
 				LIBS = " ".join(["-l" + l for l in bld.env.LIB_IBEX_DEPS])
 		)
