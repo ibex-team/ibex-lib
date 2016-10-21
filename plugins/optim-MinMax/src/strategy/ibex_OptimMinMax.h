@@ -73,6 +73,8 @@ public:
 
     inline void set_prec_y(double prec_y) {this->prec_y = prec_y; }
 
+    int trace_freq;
+
 private:
 
     Ctc& x_ctc; // contractor w.r.t constraint on x

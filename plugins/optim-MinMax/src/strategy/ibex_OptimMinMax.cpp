@@ -20,7 +20,7 @@ namespace ibex {
 OptimMinMax::OptimMinMax(NormalizedSystem& x_sys,NormalizedSystem& xy_sys, Ctc& x_ctc,Ctc& xy_ctc,double prec_x,double prec_y,double goal_rel_prec):
 		Optim(x_sys.nb_var, new CellDoubleHeap(*new CellCostFmaxlb(), *new CellCostFmaxub()),
 				prec_x, goal_rel_prec, goal_rel_prec, 1), // attention meme precision en relatif et en absolue
-	x_box_init(x_sys.box), y_box_init(xy_sys.box.subvector(x_sys.nb_var, xy_sys.nb_var-1)),
+	x_box_init(x_sys.box), y_box_init(xy_sys.box.subvector(x_sys.nb_var, xy_sys.nb_var-1)), trace_freq(10000),
 	x_ctc(x_ctc),x_sys(x_sys),lsolve(xy_sys,xy_ctc),
 	bsc(new LargestFirst()),
 	prec_y(prec_y) {
@@ -82,6 +82,8 @@ Optim::Status OptimMinMax::optimize(const IntervalVector& x_box_ini1, double obj
 			//			if (trace >= 2) cout << " buffer " << buffer << endl;
 			if (trace >= 2) buffer->print(cout);
 			//		  cout << "buffer size "  << buffer.size() << " " << buffer2.size() << endl;
+			if (trace && (nb_cells%trace_freq==0)) cout <<  "iter="<< nb_cells <<",  size_heap="<< buffer->size()<< ",  loup=" << loup << ",  uplo= " <<  uplo<< endl;
+
 
 			loup_changed=false;
 
@@ -122,8 +124,6 @@ Optim::Status OptimMinMax::optimize(const IntervalVector& x_box_ini1, double obj
 				}
 				update_uplo();
 				time_limit_check();
-
-				if (trace && (nb_cells%10000==0)) cout <<  "iter="<< nb_cells <<",  size_heap="<< buffer->size()<< ",  loup=" << loup << ",  uplo= " <<  uplo<< endl;
 
 
 			}
