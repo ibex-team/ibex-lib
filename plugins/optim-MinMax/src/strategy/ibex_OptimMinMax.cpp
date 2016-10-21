@@ -82,7 +82,6 @@ Optim::Status OptimMinMax::optimize(const IntervalVector& x_box_ini1, double obj
 			//			if (trace >= 2) cout << " buffer " << buffer << endl;
 			if (trace >= 2) buffer->print(cout);
 			//		  cout << "buffer size "  << buffer.size() << " " << buffer2.size() << endl;
-			if (trace && (nb_cells%trace_freq==0)) cout <<  "iter="<< nb_cells <<",  size_heap="<< buffer->size()<< ",  loup=" << loup << ",  uplo= " <<  uplo<< endl;
 
 
 			loup_changed=false;
@@ -253,6 +252,8 @@ bool  OptimMinMax::handle_cell(Cell * x_cell) {
 	buffer->cost2().set_optim_data(*x_cell,x_sys);
 	buffer->push(x_cell);
 	nb_cells++;
+
+	if (trace && (nb_cells%trace_freq==0)) cout <<  "iter="<< nb_cells <<",  size_heap="<< buffer->size()<< ",  loup=" << loup << ",  uplo= " <<  uplo<< endl;
 
 	//std::cout<<" fin "<<data_x->fmax <<std::endl;
 	return true;
