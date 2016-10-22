@@ -35,7 +35,7 @@ OptimMinMax::~OptimMinMax() {
 }
 
 Optim::Status OptimMinMax::optimize() {
-	optimize(x_sys.box,POS_INFINITY);
+	return optimize(x_sys.box,POS_INFINITY);
 }
 
 
@@ -43,7 +43,7 @@ Optim::Status OptimMinMax::optimize(const IntervalVector& x_box_ini1, double obj
 
 	if (trace) lsolve.trace =trace;
 	// we estimate that one iteration is at most 1% of the total time
-	// NOT READY lsolve.timeout=timeout/100;
+	lsolve.timeout=timeout/100;
 
 	loup=obj_init_bound;
 
@@ -69,11 +69,10 @@ Optim::Status OptimMinMax::optimize(const IntervalVector& x_box_ini1, double obj
 	initial_loup=obj_init_bound;
 	loup_point=x_box_init.mid();
 	time=0;
+	Timer::reset_time();
 	Timer::start();
 
 	handle_cell(root);
-
-	nb_cells++;
 
 	update_uplo();
 
@@ -81,7 +80,6 @@ Optim::Status OptimMinMax::optimize(const IntervalVector& x_box_ini1, double obj
 		while (!buffer->empty()) {
 			//			if (trace >= 2) cout << " buffer " << buffer << endl;
 			if (trace >= 2) buffer->print(cout);
-			//		  cout << "buffer size "  << buffer.size() << " " << buffer2.size() << endl;
 
 
 			loup_changed=false;
@@ -89,8 +87,6 @@ Optim::Status OptimMinMax::optimize(const IntervalVector& x_box_ini1, double obj
 			Cell *c = buffer->pop();
 
 			try {
-				//pair<IntervalVector,IntervalVector> boxes=bsc->bisect(c->box);
-				//pair<Cell*,Cell*> new_cells=c->bisect(boxes.first,boxes.second);
 				pair<Cell*,Cell*> new_cells=bsc->bisect_cell(*c);
 				delete c; // deletes the cell.
 
@@ -122,8 +118,7 @@ Optim::Status OptimMinMax::optimize(const IntervalVector& x_box_ini1, double obj
 					if (trace) cout <<  "iter="<< nb_cells <<",  size_heap="<< buffer->size()<< ",  ymax=" << ymax << ",  uplo= " <<  uplo<< endl;
 				}
 				update_uplo();
-				time_limit_check();
-
+				Timer::check(timeout);
 
 			}
 			catch (NoBisectableVariableException& ) {
@@ -136,11 +131,13 @@ Optim::Status OptimMinMax::optimize(const IntervalVector& x_box_ini1, double obj
 		}
 	}
 	catch (TimeOutException& ) {
+		Timer::stop();
+		time = Timer::get_time();
 		return TIME_OUT;
 	}
 
 	Timer::stop();
-	time+= Timer::VIRTUAL_TIMELAPSE();
+	time = Timer::get_time();
 
 	if (uplo_of_epsboxes == POS_INFINITY && (loup==POS_INFINITY || (loup==initial_loup && goal_abs_prec==0 && goal_rel_prec==0)))
 		return INFEASIBLE;

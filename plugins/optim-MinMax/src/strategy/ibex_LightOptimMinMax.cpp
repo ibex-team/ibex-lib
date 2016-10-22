@@ -55,8 +55,7 @@ bool LightOptimMinMax::optimize(Cell* x_cell, int nb_iter, double prec_y1) {
 	//    cout<<"lsolve: contractor ok"<<endl;
 
 	// Define the TimeOut of to compute the bounds of x_cell
-	time=0;
-//	Timer::start(); NOT READY
+	time= Timer::get_time();
 
 	// ********** contract x_box with ctc_xy***************
 	IntervalVector xy_box = xy_box_hull(x_cell->box);
@@ -105,13 +104,12 @@ bool LightOptimMinMax::optimize(Cell* x_cell, int nb_iter, double prec_y1) {
 				else return false;
 
 			}
-//			time_limit_check();
+			Timer::check(time+timeout);
 
 		}
 
 	}
 	catch (TimeOutException& ) { }
-//	Timer::stop();
 	/*
 ??    if(is_midp && !midp_hit) // midpoint x eval case: if no y found such as xy constraint respected, cannot keep the result
 ??        return Interval::EMPTY_SET;
@@ -342,11 +340,5 @@ void LightOptimMinMax::fill_y_heap(DoubleHeap<Cell>& y_heap) {
 	heap_save.clear();
 }
 
-void LightOptimMinMax::time_limit_check () {
-	Timer::stop();
-	time += Timer::VIRTUAL_TIMELAPSE();
-	if (timeout >0 &&  time >=timeout ) throw TimeOutException();
-	Timer::start();
-}
 
 }

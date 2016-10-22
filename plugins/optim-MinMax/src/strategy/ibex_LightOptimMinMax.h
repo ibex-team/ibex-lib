@@ -98,7 +98,6 @@ private:
 	/** Default timeout: 60 */
 	static const double default_timeout;
 
-    void time_limit_check ();
 
 };
 

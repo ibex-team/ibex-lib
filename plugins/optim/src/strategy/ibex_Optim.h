@@ -164,6 +164,9 @@ public:
 
 	/** Default tolerance increase ratio for the pseudo-loup. */
 	static const double default_loup_tolerance;
+
+	/** Default Timeout. */
+	static const double default_timeout;
 	/**
 	 * \brief The "loup" (lowest upper bound of the criterion)
 	 *

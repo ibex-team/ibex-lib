@@ -133,6 +133,7 @@ int gettimeofday(struct timeval* tv, struct timezone* tz)
 
 
 
+Timer::Time Timer::local_time = 0;
 Timer::Time Timer::real_lapse;
 Timer::Time Timer::virtual_ulapse;
 Timer::Time Timer::virtual_slapse;
@@ -203,10 +204,12 @@ void Timer::stop( TimerType type )
 }
 
 void Timer::check(double timeout) {
-	if (VIRTUAL_TIMELAPSE()>timeout) throw TimeOutException();
-	//Timer::stop();
-	//time += Timer::VIRTUAL_TIMELAPSE();
-	//if (time >=time_limit) throw TimeOutException();
+	//if (VIRTUAL_TIMELAPSE()>timeout) throw TimeOutException();
+	Timer::stop();
+	local_time += Timer::VIRTUAL_TIMELAPSE();
+	if (local_time >= timeout) throw TimeOutException();
+	Timer::start();
+
 	/*
 if (Timer::RESIDENT_MEMORY() > 100000)
   {cout << "memory limit " << Timer::RESIDENT_MEMORY() << endl;

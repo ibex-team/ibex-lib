@@ -19,6 +19,7 @@ const double Optim::default_goal_abs_prec = 1e-07;
 const int    Optim::default_sample_size = 10;
 const double Optim::default_equ_eps = 1e-08;
 const double Optim::default_loup_tolerance = 0.1;
+const double Optim::default_timeout = 86400; // timeout = 24h
 
 
 Optim::Optim (int n, CellDoubleHeap* buffer,  double prec,
@@ -26,7 +27,7 @@ Optim::Optim (int n, CellDoubleHeap* buffer,  double prec,
                 				n(n), buffer(buffer),
                 				prec(prec), goal_rel_prec(goal_rel_prec), goal_abs_prec(goal_abs_prec),
                 				sample_size(sample_size), trace(false),
-                				timeout(1e08), time(0),
+                				timeout(default_timeout), time(0),
                 				loup(POS_INFINITY),uplo(NEG_INFINITY),
                 				loup_point(n), nb_cells(0),
                 				loup_changed(false),	initial_loup(POS_INFINITY),
