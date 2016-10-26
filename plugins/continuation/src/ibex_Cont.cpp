@@ -323,12 +323,13 @@ bool Cont::is_valid_cell_1(const IntervalVector& box_existence, const VarSet& va
 
     // Calculate g(p_inf) -> solve the system
 	if (!inflating_newton(f,vars,x_p_inf,ginf_existence,ginf_unicity)) return false;
-
+    
 	// ======= Get the subvector corresponding to "wrong variables" ========
 	IntervalVector ginf_wrong(wrong_vars.size());
+    IntervalVector ginf_existence_vars=vars.var_box(ginf_existence);
 	for(int i=0; i<wrong_vars.size(); i++)
-		ginf_wrong[i]=ginf_existence[wrong_vars[i]];
-
+		ginf_wrong[i]=ginf_existence_vars[wrong_vars[i]];
+    
 	// ==================================================================
 	//     Check that the rigorous linearization of the
 	//     constraint g_wrong<=0 in p is homeomorph to a half-ball,
@@ -336,7 +337,9 @@ bool Cont::is_valid_cell_1(const IntervalVector& box_existence, const VarSet& va
 	//     where k is the number of "wrong variables". Each part
 	//     corresponds to a fixed signed (+/-) of a component
 	//     of the implicit function.
-	return is_homeomorph_half_ball(ginf_wrong, J_implicit_wrong, p);
+    bool flag=is_homeomorph_half_ball(ginf_wrong, J_implicit_wrong, p);
+    
+    return flag;
 }
 
 bool Cont::is_valid_cell_2(const IntervalVector& box_existence, const VarSet& vars, const BitSet& forced_params) {
@@ -417,8 +420,8 @@ ContCell* Cont::choose(const ContCell::Facet* x_facet, const IntervalVector& x, 
 			IntervalVector shift(vars.nb_param,Interval(-h,h));
 
 			// minimize overlapping with the x-cell by shifting
-			if (x_facet!=NULL)
-				shift[x_facet->p] = h*(x_facet->sign? Interval(-0.01,1.99) : Interval(-1.99,0.01));
+//			if (x_facet!=NULL)
+//				shift[x_facet->p] = h*(x_facet->sign? Interval(-0.01,1.99) : Interval(-1.99,0.01));
 
 			p_box_h = p_box + shift;
 			box=vars.full_box(x_box, p_box_h);
@@ -454,6 +457,10 @@ ContCell* Cont::choose(const ContCell::Facet* x_facet, const IntervalVector& x, 
            int var_number=0;
 			for (int i=0; i<n; i++) {
 				if (!box_existence[i].is_subset(domain[i])) {
+                    if(domain[i].is_subset(box_existence[i])){
+                        success=false; // two bounds violated for the same variable => abort
+                        break;
+                    }
                     forced_params.add(i);
                     if (vars.vars[i]){
                         valid_cell=false;
@@ -464,19 +471,19 @@ ContCell* Cont::choose(const ContCell::Facet* x_facet, const IntervalVector& x, 
 			}
 		}
 
-//		if (!valid_cell) {
+//		if (success && !valid_cell) {
 //			valid_cell = is_valid_cell_1_old(box_existence,vars,forced_params);
 //        }
 
-		if (!valid_cell) {
+		if (success && !valid_cell) {
 			valid_cell = is_valid_cell_1(box_existence,vars,wrong_vars);
         }
 
-//		if (!valid_cell) {
+//		if (success && !valid_cell) {
 //			valid_cell = is_valid_cell_2(box_existence,vars,forced_params);
 //        }
 		//============================================================
-
+        
 		if (success && valid_cell) {
 			ContCell* cell = new ContCell(box_existence,box_unicity,domain,vars);
 
