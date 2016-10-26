@@ -81,7 +81,14 @@ class FindSolutionFail : public Exception { };
  */
 IntervalVector find_solution(Function& f, IntervalVector& facet, const VarSet& vars);
 
-
+/**
+ * True if the constraint g(x)<=0 inside a box is homeomorph to a half ball.
+ *
+ * Proves that g(x) takes all possible combination of negative and positive signs
+ * inside param_box.
+ * The function can be implicit and satisfies g(x)\in ginf + [Dg]
+ * where ginf=g(param_box.lb())
+ */
 bool is_homeomorph_half_ball(const IntervalVector& ginf, const IntervalMatrix& Dg, const IntervalVector& param_box);
 
 } // end namespace ibex

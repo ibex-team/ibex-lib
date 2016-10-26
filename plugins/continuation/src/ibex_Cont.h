@@ -257,7 +257,7 @@ protected:
 	 * using only J_implicit and forced_params */
 	bool is_valid_cell_1_old(const IntervalVector& box_existence, const VarSet& vars, const BitSet& forced_params);
 
-	bool is_valid_cell_1(const IntervalVector& box_existence, const VarSet& vars, const std::vector<int>& wrong_vars);
+	bool is_valid_cell_1(const IntervalVector& box_existence, const VarSet& vars, const std::vector<std::pair<int,bool> > & wrong_vars);
 
 	bool is_valid_cell_2(const IntervalVector& box_existence, const VarSet& vars, const BitSet& forced_params);
 

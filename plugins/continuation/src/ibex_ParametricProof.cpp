@@ -196,47 +196,47 @@ bool is_homeomorph_half_ball(const IntervalVector& ginf, const IntervalMatrix& D
 
 	Vector pinf=param_box.lb();
 
-//	{
-//		//cout << "Simplex for >= 0:" << endl;
-//		Matrix Jinf=Dg.lb();
-//		Vector Jinf_pinf= Jinf * pinf;
-//
-//		LinearSolver linsolve(p, k);
-//		linsolve.initBoundVar(param_box);
-//		for (int i=0; i<k; i++) {
-//			//cout << "  add constraint: " << Jinf.row(i) << "*u>=" << (Jinf_pinf[i]-ginf[i].lb()) << endl;
-//			linsolve.addConstraint(Jinf.row(i),GEQ,Jinf_pinf[i]-ginf[i].lb());
-//		}
-//
-//		Interval opt(0.0);
-//		// note : "-1" just to have a strict minorant of the objective
-//		LinearSolver::Status_Sol stat = linsolve.run_simplex(param_box, LinearSolver::MINIMIZE, 0, opt,param_box[0].lb()-1);
-//		//cout << "  status=" << stat << endl;
-//        
-//		if (stat != LinearSolver::OPTIMAL) return false;
-//	}
-
 	{
-		//cout << "Simplex for <= 0:" << endl;
-		Matrix Jsup=Dg.ub();
-		Vector Jsup_pinf= Jsup * pinf;
+		//cout << "Simplex for >= 0:" << endl;
+		Matrix Jinf=Dg.lb();
+		Vector Jinf_pinf= Jinf * pinf;
 
 		LinearSolver linsolve(p, k);
 		linsolve.initBoundVar(param_box);
 		for (int i=0; i<k; i++) {
-//			cout << "  add constraint: " << Jsup.row(i) << "*u<=" << (Jsup_pinf[i]-ginf[i].ub()) << endl;
-//            cout << "                  " << param_box << endl;
-//            cout << "                  " << ginf << endl;
-
-			linsolve.addConstraint(Jsup.row(i),LEQ,Jsup_pinf[i]-ginf[i].ub());
+			//cout << "  add constraint: " << Jinf.row(i) << "*u>=" << (Jinf_pinf[i]-ginf[i].lb()) << endl;
+			linsolve.addConstraint(Jinf.row(i),GEQ,Jinf_pinf[i]-ginf[i].lb());
 		}
 
 		Interval opt(0.0);
 		// note : "-1" just to have a strict minorant of the objective
 		LinearSolver::Status_Sol stat = linsolve.run_simplex(param_box, LinearSolver::MINIMIZE, 0, opt,param_box[0].lb()-1);
-//		cout << "  status=" << stat << endl;
-        
+		//cout << "  status=" << stat << endl;
+
 		if (stat != LinearSolver::OPTIMAL) return false;
+	}
+
+	{
+//		//cout << "Simplex for <= 0:" << endl;
+//		Matrix Jsup=Dg.ub();
+//		Vector Jsup_pinf= Jsup * pinf;
+//
+//		LinearSolver linsolve(p, k);
+//		linsolve.initBoundVar(param_box);
+//		for (int i=0; i<k; i++) {
+////			cout << "  add constraint: " << Jsup.row(i) << "*u<=" << (Jsup_pinf[i]-ginf[i].ub()) << endl;
+////            cout << "                  " << param_box << endl;
+////            cout << "                  " << ginf << endl;
+//
+//			linsolve.addConstraint(Jsup.row(i),LEQ,Jsup_pinf[i]-ginf[i].ub());
+//		}
+//
+//		Interval opt(0.0);
+//		// note : "-1" just to have a strict minorant of the objective
+//		LinearSolver::Status_Sol stat = linsolve.run_simplex(param_box, LinearSolver::MINIMIZE, 0, opt,param_box[0].lb()-1);
+////		cout << "  status=" << stat << endl;
+//
+//		if (stat != LinearSolver::OPTIMAL) return false;
 	}
 
 	 return true;

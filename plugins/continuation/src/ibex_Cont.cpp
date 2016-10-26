@@ -265,7 +265,7 @@ bool Cont::is_valid_cell_1_old(const IntervalVector& box_existence, const VarSet
 		if (vars.vars[i]) {
 			if (forced_params[i]) {
 				for (int j=0; j<n-m; j++) {
-					if (J_implicit[v][j].contains(0))return false;
+					if (J_implicit[v][j].contains(0)) return false;
 				}
 			}
 			v++;
@@ -275,7 +275,7 @@ bool Cont::is_valid_cell_1_old(const IntervalVector& box_existence, const VarSet
 }
 
 
-bool Cont::is_valid_cell_1(const IntervalVector& box_existence, const VarSet& vars, const vector<int>& wrong_vars) {
+bool Cont::is_valid_cell_1(const IntervalVector& box_existence, const VarSet& vars, const vector<pair<int,bool> >& wrong_vars) {
 
 	// ========= calculate the Jacobian of the implicit function ===========
 	IntervalMatrix Jp(m,n-m); // Jacobian % parameters
@@ -294,7 +294,7 @@ bool Cont::is_valid_cell_1(const IntervalVector& box_existence, const VarSet& va
 	// ======= Get the submatrix corresponding to "wrong variables" ========
     IntervalMatrix J_implicit_wrong(wrong_vars.size(),n-m);
     for(int i=0; i<wrong_vars.size(); i++)
-        J_implicit_wrong.set_row(i,J_implicit.row(wrong_vars[i]));
+        J_implicit_wrong.set_row(i,J_implicit.row(wrong_vars[i].first));
 
     // ======= Check that this matrix is full rank =======
     if (!full_rank(J_implicit_wrong)) return false;
@@ -327,18 +327,26 @@ bool Cont::is_valid_cell_1(const IntervalVector& box_existence, const VarSet& va
 	// ======= Get the subvector corresponding to "wrong variables" ========
 	IntervalVector ginf_wrong(wrong_vars.size());
     IntervalVector ginf_existence_vars=vars.var_box(ginf_existence);
-	for(int i=0; i<wrong_vars.size(); i++)
-		ginf_wrong[i]=ginf_existence_vars[wrong_vars[i]];
-    
-	// ==================================================================
-	//     Check that the rigorous linearization of the
-	//     constraint g_wrong<=0 in p is homeomorph to a half-ball,
-	//     that is, the implicit function divides the box p in 2^k parts
-	//     where k is the number of "wrong variables". Each part
-	//     corresponds to a fixed signed (+/-) of a component
-	//     of the implicit function.
+    IntervalVector domain_vars=vars.var_box(domain);
+
+    for(int i=0; i<wrong_vars.size(); i++) {
+    	int v=wrong_vars[i].first;
+    	ginf_wrong[i]=ginf_existence_vars[v];
+    	if (wrong_vars[i].second)
+    		ginf_wrong[i] -= domain_vars[v].ub();
+    	else
+    		ginf_wrong[i] -= domain_vars[v].lb();
+    }
+
+    // ==================================================================
+    //     Check that the rigorous linearization of the
+    //     constraint g_wrong<=0 in p is homeomorph to a half-ball,
+    //     that is, the implicit function divides the box p in 2^k parts
+    //     where k is the number of "wrong variables". Each part
+    //     corresponds to a fixed signed (+/-) of a component
+    //     of the implicit function.
     bool flag=is_homeomorph_half_ball(ginf_wrong, J_implicit_wrong, p);
-    
+
     return flag;
 }
 
@@ -445,7 +453,11 @@ ContCell* Cont::choose(const ContCell::Facet* x_facet, const IntervalVector& x, 
 
 		// Dimensions that should be parameters (by default: none).
 		BitSet forced_params(BitSet::empty(n));
-        vector<int> wrong_vars;
+
+		// The indices of variables (among the variables, not all the dimensions)
+        // that violate a bound of the domain + a boolean which indicates the bound
+		// (false=lower bound, true=upper bound)
+		vector<pair<int,bool> > wrong_vars;
 
 		if(success) { // check if the cell is valid
 
@@ -457,14 +469,20 @@ ContCell* Cont::choose(const ContCell::Facet* x_facet, const IntervalVector& x, 
            int var_number=0;
 			for (int i=0; i<n; i++) {
 				if (!box_existence[i].is_subset(domain[i])) {
-                    if(domain[i].is_subset(box_existence[i])){
-                        success=false; // two bounds violated for the same variable => abort
-                        break;
-                    }
                     forced_params.add(i);
-                    if (vars.vars[i]){
-                        valid_cell=false;
-                        wrong_vars.push_back(var_number);
+                    if (vars.vars[i]) {
+                    	if (box_existence[i].lb() < domain[i].lb()) {
+                    		if (box_existence[i].ub() > domain[i].ub()) {
+                    			success=false; // two bounds violated for the same variable => abort
+                    			break;
+                    		} else {
+                    			valid_cell=false;
+                    			wrong_vars.push_back(make_pair(var_number,false));
+                    		}
+                    	} else if (box_existence[i].ub() > domain[i].ub()) {
+                    		valid_cell=false;
+                    		wrong_vars.push_back(make_pair(var_number,true));
+                    	}
                     }
 				}
                 if(vars.vars[i]) var_number++;
