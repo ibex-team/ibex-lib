@@ -45,11 +45,11 @@ bool newton(const Function& f, const VarSet* vars, IntervalVector& full_box, dou
 //	IntervalVector* midp=NULL;   // Parameter box midpoint
 	IntervalMatrix* Jp=NULL;     // Jacobian % parameters
 //
-//	if (vars) {
+	if (vars) {
 //		p=new IntervalVector(vars->param_box(full_box));
 //		midp=new IntervalVector(p->mid());
 		Jp=new IntervalMatrix(n,vars->nb_param);
-//	}
+	}
 
 	IntervalVector y(n);
 	IntervalVector y1(n);
@@ -171,11 +171,11 @@ bool inflating_newton(const Function& f, const VarSet* vars, const IntervalVecto
 //	IntervalVector* midp=NULL;   // Parameter box midpoint
 	IntervalMatrix* Jp=NULL;     // Jacobian % parameters
 //
-//	if (vars) {
+	if (vars) {
 //		p=new IntervalVector(vars->param_box(full_box));
 //		midp=new IntervalVector(p->mid());
 		Jp=new IntervalMatrix(n,vars->nb_param);
-//	}
+	}
 
 	IntervalVector y(n);
 	IntervalVector y1(n);

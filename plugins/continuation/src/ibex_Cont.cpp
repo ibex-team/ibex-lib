@@ -262,7 +262,7 @@ bool Cont::is_valid_cell_1_old(const IntervalVector& box_existence, const VarSet
 
 	int v=0;  // index of the ith variable
 	for (int i=0; i<n; i++) {
-		if (vars.vars[i]) {
+		if (vars.is_var[i]) {
 			if (forced_params[i]) {
 				for (int j=0; j<n-m; j++) {
 					if (J_implicit[v][j].contains(0)) return false;
@@ -287,13 +287,12 @@ bool Cont::is_valid_cell_1(const IntervalVector& box_existence, const VarSet& va
 
 	// Approximate jacobian of the implicit function
 	// TODO: make it rigorous!
-	IntervalMatrix J_implicit=Jx_mid_inv*Jp;
+	IntervalMatrix J_implicit=-Jx_mid_inv*Jp;
 	// =====================================================================
-
 
 	// ======= Get the submatrix corresponding to "wrong variables" ========
     IntervalMatrix J_implicit_wrong(wrong_vars.size(),n-m);
-    for(int i=0; i<wrong_vars.size(); i++)
+    for(unsigned int i=0; i<wrong_vars.size(); i++)
         J_implicit_wrong.set_row(i,J_implicit.row(wrong_vars[i].first));
 
     // ======= Check that this matrix is full rank =======
@@ -326,16 +325,14 @@ bool Cont::is_valid_cell_1(const IntervalVector& box_existence, const VarSet& va
     
 	// ======= Get the subvector corresponding to "wrong variables" ========
 	IntervalVector ginf_wrong(wrong_vars.size());
-    IntervalVector ginf_existence_vars=vars.var_box(ginf_existence);
-    IntervalVector domain_vars=vars.var_box(domain);
 
-    for(int i=0; i<wrong_vars.size(); i++) {
+    for(unsigned int i=0; i<wrong_vars.size(); i++) {
     	int v=wrong_vars[i].first;
-    	ginf_wrong[i]=ginf_existence_vars[v];
+    	ginf_wrong[i]=ginf_existence[vars.var(v)];
     	if (wrong_vars[i].second)
-    		ginf_wrong[i] -= domain_vars[v].ub();
+    		ginf_wrong[i] -= domain[vars.var(v)].ub();
     	else
-    		ginf_wrong[i] -= domain_vars[v].lb();
+    		ginf_wrong[i] -= domain[vars.var(v)].lb();
     }
 
     // ==================================================================
@@ -376,7 +373,7 @@ bool Cont::is_valid_cell_2(const IntervalVector& box_existence, const VarSet& va
 				valid_cell=inflating_newton(f,tmpvars,box,box_existence2,box_unicity2);
 
 				for (int j=0; valid_cell && j<n; j++) {
-					valid_cell &= (!tmpvars.vars[j] || box_existence2[j].is_subset(domain[j]));
+					valid_cell &= (!tmpvars.is_var[j] || box_existence2[j].is_subset(domain[j]));
 				}
 
 				if (!valid_cell) break;
@@ -470,7 +467,7 @@ ContCell* Cont::choose(const ContCell::Facet* x_facet, const IntervalVector& x, 
 			for (int i=0; i<n; i++) {
 				if (!box_existence[i].is_subset(domain[i])) {
                     forced_params.add(i);
-                    if (vars.vars[i]) {
+                    if (vars.is_var[i]) {
                     	if (box_existence[i].lb() < domain[i].lb()) {
                     		if (box_existence[i].ub() > domain[i].ub()) {
                     			success=false; // two bounds violated for the same variable => abort
@@ -485,7 +482,7 @@ ContCell* Cont::choose(const ContCell::Facet* x_facet, const IntervalVector& x, 
                     	}
                     }
 				}
-                if(vars.vars[i]) var_number++;
+                if(vars.is_var[i]) var_number++;
 			}
 		}
 

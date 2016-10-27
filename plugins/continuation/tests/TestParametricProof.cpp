@@ -33,38 +33,38 @@ void TestParametricProof::get_vars01() {
 	//cout << "with forced parameter 0: ";
 	forced.add(0);
 	v=get_vars(f,x,forced);
-	CPPUNIT_ASSERT(v.nb_var==1 && !v.vars[0]);
+	CPPUNIT_ASSERT(v.nb_var==1 && !v.is_var[0]);
 
 	//cout << "with forced parameter 1: ";
 	forced.remove(0);
 	forced.add(1);
 	v=get_vars(f,x,forced);
-	CPPUNIT_ASSERT(v.nb_var==1 && !v.vars[1]);
+	CPPUNIT_ASSERT(v.nb_var==1 && !v.is_var[1]);
 
 	//cout << "with forced parameter 2: ";
 	forced.remove(1);
 	forced.add(2);
 	v=get_vars(f,x,forced);
-	CPPUNIT_ASSERT(v.nb_var==1 && !v.vars[2]);
+	CPPUNIT_ASSERT(v.nb_var==1 && !v.is_var[2]);
 
 	//cout << "with forced parameter 0 and 1: ";
 	forced.remove(2);
 	forced.add(0);
 	forced.add(1);
 	v=get_vars(f,x,forced);
-	CPPUNIT_ASSERT(v.nb_var==1 && v.vars[2]);
+	CPPUNIT_ASSERT(v.nb_var==1 && v.is_var[2]);
 
 	//cout << "with forced parameter 0 and 2: ";
 	forced.remove(1);
 	forced.add(2);
 	v=get_vars(f,x,forced);
-	CPPUNIT_ASSERT(v.nb_var==1 && v.vars[1]);
+	CPPUNIT_ASSERT(v.nb_var==1 && v.is_var[1]);
 
 	//cout << "with forced parameter 1 and 2: ";
 	forced.remove(0);
 	forced.add(1);
 	v=get_vars(f,x,forced);
-	CPPUNIT_ASSERT(v.nb_var==1 && v.vars[0]);
+	CPPUNIT_ASSERT(v.nb_var==1 && v.is_var[0]);
 
 	//cout << "with forced parameters O, 1 and 2: ";
 	forced.add(0);

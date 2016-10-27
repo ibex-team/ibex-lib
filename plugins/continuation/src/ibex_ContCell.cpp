@@ -32,7 +32,7 @@ void ContCell::diff(const IntervalVector& box, Function& f, const VarSet& box_va
 	ContCell& cell=*this;
 	if (box.intersects(cell.unicity_box)) {
 
-		bool same_vars=(((BitSet&) vars.vars)==box_vars.vars);
+		bool same_vars=(((BitSet&) vars.is_var)==box_vars.is_var);
 
 		for (list<Facet>::iterator it=cell.facets.begin(); it!=cell.facets.end(); ) {
 			IntervalVector* result;

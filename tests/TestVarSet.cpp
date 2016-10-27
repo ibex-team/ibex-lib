@@ -24,11 +24,14 @@ void TestVarSet::test01() {
 	IntervalVector y_box(1,Interval(1,2));
 	VarSet set(f,x,z);
 
-	CPPUNIT_ASSERT(set.vars[0]);
-	CPPUNIT_ASSERT(!set.vars[1]);
-	CPPUNIT_ASSERT(set.vars[2]);
+	CPPUNIT_ASSERT(set.is_var[0]);
+	CPPUNIT_ASSERT(!set.is_var[1]);
+	CPPUNIT_ASSERT(set.is_var[2]);
 	CPPUNIT_ASSERT(set.nb_param==1);
 	CPPUNIT_ASSERT(set.nb_var==2);
+	CPPUNIT_ASSERT(set.var(0)==0);
+	CPPUNIT_ASSERT(set.var(1)==2);
+	CPPUNIT_ASSERT(set.param(0)==1);
 
 	IntervalVector x_box(2,Interval(0,1));
 	IntervalVector fullbox=set.full_box(x_box,y_box);
@@ -46,15 +49,22 @@ void TestVarSet::test02() {
 	IntervalVector y_box(3,Interval(1,2));
 	VarSet set(f,x,z);
 
-	CPPUNIT_ASSERT(set.vars[0]);
-	CPPUNIT_ASSERT(set.vars[1]);
-	CPPUNIT_ASSERT(set.vars[2]);
-	CPPUNIT_ASSERT(!set.vars[3]);
-	CPPUNIT_ASSERT(!set.vars[4]);
-	CPPUNIT_ASSERT(!set.vars[5]);
-	CPPUNIT_ASSERT(set.vars[6]);
+	CPPUNIT_ASSERT(set.is_var[0]);
+	CPPUNIT_ASSERT(set.is_var[1]);
+	CPPUNIT_ASSERT(set.is_var[2]);
+	CPPUNIT_ASSERT(!set.is_var[3]);
+	CPPUNIT_ASSERT(!set.is_var[4]);
+	CPPUNIT_ASSERT(!set.is_var[5]);
+	CPPUNIT_ASSERT(set.is_var[6]);
 	CPPUNIT_ASSERT(set.nb_param==3);
 	CPPUNIT_ASSERT(set.nb_var==4);
+	CPPUNIT_ASSERT(set.var(0)==0);
+	CPPUNIT_ASSERT(set.var(1)==1);
+	CPPUNIT_ASSERT(set.var(2)==2);
+	CPPUNIT_ASSERT(set.var(3)==6);
+	CPPUNIT_ASSERT(set.param(0)==3);
+	CPPUNIT_ASSERT(set.param(1)==4);
+	CPPUNIT_ASSERT(set.param(2)==5);
 
 	IntervalVector x_box(4,Interval(0,1));
 	IntervalVector fullbox=set.full_box(x_box,y_box);
@@ -74,15 +84,22 @@ void TestVarSet::test03() {
 	IntervalVector y_box(3,Interval(1,2));
 	VarSet set(f,x[0],x[2],y[0],y[1]);
 
-	CPPUNIT_ASSERT(set.vars[0]);
-	CPPUNIT_ASSERT(!set.vars[1]);
-	CPPUNIT_ASSERT(set.vars[2]);
-	CPPUNIT_ASSERT(set.vars[3]);
-	CPPUNIT_ASSERT(set.vars[4]);
-	CPPUNIT_ASSERT(!set.vars[5]);
-	CPPUNIT_ASSERT(!set.vars[6]);
+	CPPUNIT_ASSERT(set.is_var[0]);
+	CPPUNIT_ASSERT(!set.is_var[1]);
+	CPPUNIT_ASSERT(set.is_var[2]);
+	CPPUNIT_ASSERT(set.is_var[3]);
+	CPPUNIT_ASSERT(set.is_var[4]);
+	CPPUNIT_ASSERT(!set.is_var[5]);
+	CPPUNIT_ASSERT(!set.is_var[6]);
 	CPPUNIT_ASSERT(set.nb_param==3);
 	CPPUNIT_ASSERT(set.nb_var==4);
+	CPPUNIT_ASSERT(set.var(0)==0);
+	CPPUNIT_ASSERT(set.var(1)==2);
+	CPPUNIT_ASSERT(set.var(2)==3);
+	CPPUNIT_ASSERT(set.var(3)==4);
+	CPPUNIT_ASSERT(set.param(0)==1);
+	CPPUNIT_ASSERT(set.param(1)==5);
+	CPPUNIT_ASSERT(set.param(2)==6);
 
 	IntervalVector x_box(4,Interval(0,1));
 	IntervalVector fullbox=set.full_box(x_box,y_box);
@@ -104,12 +121,19 @@ void TestVarSet::test04() {
 	VarSet set(f,x,y[1]);
 
 	int i=0;
-	for (; i<3; i++) CPPUNIT_ASSERT(set.vars[i]);
-	for (; i<10; i++) CPPUNIT_ASSERT(!set.vars[i]);
-	CPPUNIT_ASSERT(set.vars[10]);
+	for (; i<3; i++) {
+		CPPUNIT_ASSERT(set.is_var[i]);
+		CPPUNIT_ASSERT(set.var(i)==i);
+	}
+	for (; i<10; i++) {
+		CPPUNIT_ASSERT(!set.is_var[i]);
+		CPPUNIT_ASSERT(set.param(i-3)==i);
 
-	CPPUNIT_ASSERT(set.nb_param==7);
+	}
+	CPPUNIT_ASSERT(set.is_var[10]);
+	CPPUNIT_ASSERT(set.var(3)==10);
 	CPPUNIT_ASSERT(set.nb_var==4);
+	CPPUNIT_ASSERT(set.nb_param==7);
 
 	IntervalVector x_box(4,Interval(0,1));
 	IntervalVector fullbox=set.full_box(x_box,y_box);
@@ -132,11 +156,24 @@ void TestVarSet::test05() {
 	VarSet set(f,A[0],B[0][0],B[0][2],B[1]);
 
 	int i=0;
-	for (; i<3; i++) CPPUNIT_ASSERT(set.vars[i]);
-	for (; i<6; i++) CPPUNIT_ASSERT(!set.vars[i]);
-	CPPUNIT_ASSERT(set.vars[6]);
-	CPPUNIT_ASSERT(!set.vars[7]);
-	for (i=8; i<11; i++) CPPUNIT_ASSERT(set.vars[i]);
+	int v=0;
+	int p=0;
+	for (; i<3; i++) {
+		CPPUNIT_ASSERT(set.is_var[i]);
+		CPPUNIT_ASSERT(set.var(v++)==i);
+	}
+	for (; i<6; i++) {
+		CPPUNIT_ASSERT(!set.is_var[i]);
+		CPPUNIT_ASSERT(set.param(p++)==i);
+	}
+	CPPUNIT_ASSERT(set.is_var[6]);
+	CPPUNIT_ASSERT(set.var(v++)==6);
+	CPPUNIT_ASSERT(!set.is_var[7]);
+	CPPUNIT_ASSERT(set.param(p++)==7);
+	for (i=8; i<11; i++) {
+		CPPUNIT_ASSERT(set.is_var[i]);
+		CPPUNIT_ASSERT(set.var(v++)==i);
+	}
 
 	CPPUNIT_ASSERT(set.nb_param==4);
 	CPPUNIT_ASSERT(set.nb_var==8);
@@ -166,9 +203,12 @@ void TestVarSet::test06() {
 
 	IntervalVector y_box(1,Interval(1,2));
 
-	CPPUNIT_ASSERT(set.vars[0]);
-	CPPUNIT_ASSERT(!set.vars[1]);
-	CPPUNIT_ASSERT(set.vars[2]);
+	CPPUNIT_ASSERT(set.is_var[0]);
+	CPPUNIT_ASSERT(set.var(0)==0);
+	CPPUNIT_ASSERT(!set.is_var[1]);
+	CPPUNIT_ASSERT(set.param(0)==1);
+	CPPUNIT_ASSERT(set.is_var[2]);
+	CPPUNIT_ASSERT(set.var(1)==2);
 
 	CPPUNIT_ASSERT(set.nb_param==1);
 	CPPUNIT_ASSERT(set.nb_var==2);

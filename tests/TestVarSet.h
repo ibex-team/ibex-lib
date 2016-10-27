@@ -23,14 +23,14 @@ class TestVarSet : public CppUnit::TestFixture {
 public:
 
 	CPPUNIT_TEST_SUITE(TestVarSet);
-	
 
-		CPPUNIT_TEST(test01);
-		CPPUNIT_TEST(test02);
-		CPPUNIT_TEST(test03);
-		CPPUNIT_TEST(test04);
-		CPPUNIT_TEST(test05);
-		CPPUNIT_TEST(test06);
+	CPPUNIT_TEST(test01);
+	CPPUNIT_TEST(test02);
+	CPPUNIT_TEST(test03);
+	CPPUNIT_TEST(test04);
+	CPPUNIT_TEST(test05);
+	CPPUNIT_TEST(test06);
+	
 	CPPUNIT_TEST_SUITE_END();
 
 	void test01();
