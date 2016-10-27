@@ -14,10 +14,6 @@ def get_plugins(path):
 
 def configure (conf):
 	
-	##################################################################################################
-	# Enalble pluggin optim if the pluggin optim_minimax is used
-	if (conf.options.WITH_OPTIM_MINMAX):
-		conf.options.WITH_OPTIM =True 
 
     ##################################################################################################
 	# Enable AFFINE plugin if option --with-affine-extended is enable
