@@ -196,47 +196,59 @@ bool is_homeomorph_half_ball(const IntervalVector& ginf, const IntervalMatrix& D
 
 	Vector pinf=param_box.lb();
 
-	{
-		//cout << "Simplex for >= 0:" << endl;
-		Matrix Jinf=Dg.lb();
-		Vector Jinf_pinf= Jinf * pinf;
+	bool* b=new bool[k]; // counter (to range over all orthants)
+	for (int i=0; i<k; i++) b[i]=false; // start with negative signs
 
-		LinearSolver linsolve(p, k);
+	Matrix Jinf=Dg.lb();
+	Vector Jinf_pinf= Jinf * pinf;
+	Matrix Jsup=Dg.ub();
+	Vector Jsup_pinf= Jsup * pinf;
+
+	LinearSolver linsolve(p, k);
+
+	Interval opt(0.0); // store the optimum (unused)
+
+	bool result=true; // has the test succeed?
+
+	bool over=false; // true after 2^k loops
+
+	while (!over) {
+
 		linsolve.initBoundVar(param_box);
+
 		for (int i=0; i<k; i++) {
-			//cout << "  add constraint: " << Jinf.row(i) << "*u>=" << (Jinf_pinf[i]-ginf[i].lb()) << endl;
-			linsolve.addConstraint(Jinf.row(i),GEQ,Jinf_pinf[i]-ginf[i].lb());
+			if (b[i])
+				//cout << "  add constraint: " << Jinf.row(i) << "*u>=" << (Jinf_pinf[i]-ginf[i].lb()) << endl;
+				linsolve.addConstraint(Jinf.row(i),GEQ,Jinf_pinf[i]-ginf[i].lb());
+			else
+				//cout << "  add constraint: " << Jsup.row(i) << "*u<=" << (Jsup_pinf[i]-ginf[i].ub()) << endl;
+				linsolve.addConstraint(Jsup.row(i),LEQ,Jsup_pinf[i]-ginf[i].ub());
 		}
 
-		Interval opt(0.0);
 		// note : "-1" just to have a strict minorant of the objective
 		LinearSolver::Status_Sol stat = linsolve.run_simplex(param_box, LinearSolver::MINIMIZE, 0, opt,param_box[0].lb()-1);
 		//cout << "  status=" << stat << endl;
 
-		if (stat != LinearSolver::OPTIMAL) return false;
-	}
+		linsolve.cleanConst();
 
-	{
-		//cout << "Simplex for <= 0:" << endl;
-		Matrix Jsup=Dg.ub();
-		Vector Jsup_pinf= Jsup * pinf;
-
-		LinearSolver linsolve(p, k);
-		linsolve.initBoundVar(param_box);
-		for (int i=0; i<k; i++) {
-//			cout << "  add constraint: " << Jsup.row(i) << "*u<=" << (Jsup_pinf[i]-ginf[i].ub()) << endl;
-			linsolve.addConstraint(Jsup.row(i),LEQ,Jsup_pinf[i]-ginf[i].ub());
+		if (stat != LinearSolver::OPTIMAL) {
+			result=false;
+			break;
 		}
 
-		Interval opt(0.0);
-		// note : "-1" just to have a strict minorant of the objective
-		LinearSolver::Status_Sol stat = linsolve.run_simplex(param_box, LinearSolver::MINIMIZE, 0, opt,param_box[0].lb()-1);
-//		cout << "  status=" << stat << endl;
-
-		if (stat != LinearSolver::OPTIMAL) return false;
+		// =========== increment counter ===========
+		int i=k-1; // last digit
+		while (i>=0 && b[i]) { // find next digit to increment
+			b[i]=false; // reset digit
+			i--;
+		}
+		if (i==-1) over=true;
+		else b[i]=true; // increment digit
 	}
 
-	 return true;
+	delete[] b;
+
+	return result;
 }
 
 } // end namespace ibex
