@@ -1067,8 +1067,21 @@ inline Interval atan2(const Interval& y, const Interval& x) {
 	} else {
 		if (y.lb()>=0)
 			return atan(y/x.ub()) | (atan(y/x.lb()) + Interval::PI);
-		else if (y.ub()<=0)
-			return (atan(y/x.lb())-Interval::PI) | atan(y/x.ub());
+		else if (y.ub()<=0){
+			if(x.lb()!=NEG_INFINITY){
+				if(x.ub()!=POS_INFINITY){
+					return (atan(y/x.lb())-Interval::PI) | atan(y/x.ub());
+				}
+				else
+					return (atan(y/x.lb())-Interval::PI) | Interval::ZERO;
+			}
+			else{
+				if(x.ub()!=POS_INFINITY)
+					return (-Interval::PI) | atan(y/x.ub());
+				else
+					return -Interval::PI | Interval::ZERO;
+			}
+		}
 		else
 			return Interval(-1,1)*Interval::PI;
 	}
