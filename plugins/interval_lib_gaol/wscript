@@ -2,7 +2,69 @@
 # encoding: utf-8
 
 import ibexutils
-import os, sys
+import os, sys, shutil
+from waflib import Logs, Utils, Context
+from waflib.Configure import conf
+
+@conf
+def install_mathlib_win32 (conf, archive_name):
+	name = ibexutils.archive_name_without_suffix (archive_name)
+	Logs.pprint ("BLUE", "Starting installation of %s"%name)
+	conf.to_log ((" Starting installation of %s " % name).center (80, "="))
+
+	archive_path = os.path.join (conf.path.abspath (), "3rd", archive_name)
+	destnode = conf.bldnode.make_node ("3rd")
+
+	# Install everything in build directory, in '3rd' subdirectory (the 'lib' and
+	# 'include' directory can be copied in conf.env.PREFIX when ./waf install is
+	# called, if needed)
+	incdir = destnode.find_or_declare ("include").abspath()
+	libdir = destnode.find_or_declare ("lib").abspath()
+
+	srcdir = conf.extract_archive (archive_path, name, destnode)
+
+	# Apply patches
+	conf.apply_all_relevant_patches (name)
+
+	conf.setenv ("mathlib", env = conf.env)
+
+	conf.check_cc (header_name = "fenv.h")
+
+	bld = Context.create_context ("build", top_dir = os.path.join (srcdir, "src"),
+																out_dir = os.path.join (srcdir, "src"))
+	bld.init_dirs()
+	bld.logger = conf.logger
+	bld.all_envs.update(conf.all_envs)
+	bld.env = conf.env
+	bld.targets = '*'
+	bld.conf = conf
+
+	bld.stlib (
+		target = "ultim",
+		source = [ "atnat2.c", "halfulp.c", "mplog.c", "slowexp2.c", "ucot.c",
+							 "upow.c", "atnat.c", "mpa.c", "mpsqrt.c", "slowexp.c",
+							 "uexp2.c", "urem.c", "branred.c", "mpatan2.c", "mptan.c",
+							 "slowlog2.c", "uexp.c", "uroot.c", "doasin.c", "mpatan.c",
+							 "sincos32.c", "slowpow.c", "ulog2.c", "usncs.c", "dosincos.c",
+							 "mpexp.c", "slowcot.c", "uasncs.c", "ulog.c", "utan.c",
+							 "DPChange.c" ]
+	)
+
+	bld.compile ()
+
+	if not os.path.exists (incdir):
+		os.makedirs (incdir)
+	for h in ["mathlib_config.h", "mathlib_config_mingw.h", "MathLib.h"]:
+		shutil.copyfile (os.path.join (srcdir, "src", h), os.path.join (incdir, h))
+
+	if not os.path.exists (libdir):
+		os.makedirs (libdir)
+	l = "libultim.a"
+	shutil.copyfile (os.path.join (srcdir, "src", l), os.path.join (libdir, l))
+
+	conf.setenv ("")
+
+	return srcdir, incdir, libdir
 
 ######################
 ###### options #######
@@ -33,7 +95,10 @@ def configure (conf):
 	else:
 		conf.msg("Using library mathlib/ultim from", "3rd/ subdirectory")
 		mathlib_archive = "mathlib-2.1.0.tar.gz"
-		mathlib_ret = conf.configure_3rd_party_with_autotools (mathlib_archive)
+		if Utils.is_win32:
+			mathlib_ret = conf.install_mathlib_win32 (mathlib_archive)
+		else:
+			mathlib_ret = conf.configure_3rd_party_with_autotools (mathlib_archive)
 		_, mathlib_include, mathlib_lib = mathlib_ret
 		conf.env.INSTALL_3RD = True
 		conf.env.append_unique ("LIB_3RD_LIST", "ultim")
@@ -53,8 +118,12 @@ def configure (conf):
 	else:
 		conf.msg ("Using library gaol from", "3rd/ subdirectory")
 		gaol_archive = "gaol-4.2.0.tar.gz"
-		args = "--with-mathlib-include=%s" % mathlib_include
-		args += " --with-mathlib-lib=%s" % mathlib_lib
+		if Utils.is_win32:
+			args = "--with-mathlib-include=%s" % ibexutils.convert_path_win2msys (mathlib_include)
+			args += " --with-mathlib-lib=%s" % ibexutils.convert_path_win2msys (mathlib_lib)
+		else:
+			args = "--with-mathlib-include=%s" % mathlib_include
+			args += " --with-mathlib-lib=%s" % mathlib_lib
 		gaol_ret = conf.configure_3rd_party_with_autotools (gaol_archive,
 				conf_args = args)
 		_, gaol_include, gaol_lib = gaol_ret
@@ -72,7 +141,10 @@ def configure (conf):
 	D = {"header_name": "gaol/gaol.h", "mandatory": False, "errmsg": "no",
 				"includes": gaol_include, "use": [ "IBEX", "ITV_LIB" ],
 				"uselib_store": "ITV_LIB"}
-	ret = conf.check_cxx (**D)
+	if Utils.is_win32: # on windows we need at least SSE2
+		ret = None
+	else:
+		ret = conf.check_cxx (**D)
 	if not ret:
 		D["cxxflags"] = "-msse2"
 		D["msg"] = "Checking for header "+D["header_name"]+" with "+D["cxxflags"]
