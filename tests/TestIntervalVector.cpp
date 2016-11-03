@@ -960,6 +960,19 @@ void TestIntervalVector::diff34() {
 	CPPUNIT_ASSERT(test_diff(3,x,y,4,z));
 }
 
+void TestIntervalVector::diff35() {
+	double x[][2]= {{-2,2},{-2,2},{-2,2}};
+	double y[][2]= {{2,4},{-2,2},{-2,2}};
+	double z[][2]= {{-2,2},{-2,2},{-2,2}};
+	CPPUNIT_ASSERT(test_diff(3,x,y,1,z));
+}
+
+void TestIntervalVector::diff36() {
+	double x[][2]= {{-2,2},{-2,2},{-2,2}};
+	double y[][2]= {{2,4},{-1,1},{-1,1}};
+	double z[][2]= {{-2,2},{-2,2},{-2,2}};
+	CPPUNIT_ASSERT(test_diff(3,x,y,1,z));
+}
 
 void TestIntervalVector::issue228() {
 	double x[][2]= {{-1,-1},{-1,1},{-1,1}};

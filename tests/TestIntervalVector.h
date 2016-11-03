@@ -155,6 +155,8 @@ public:
 	CPPUNIT_TEST(diff32);
 	CPPUNIT_TEST(diff33);
 	CPPUNIT_TEST(diff34);
+	CPPUNIT_TEST(diff35);
+	CPPUNIT_TEST(diff36);
 
 	CPPUNIT_TEST(issue228);
 
@@ -379,6 +381,12 @@ public:
 	void diff33();
 	// [0,0]x[-2,2]x[-2,2] \ [-1,-1]x[-1,-1]x[-1,1]
 	void diff34();
+
+	// Tangential intersection
+	// [-2,2]x[-2,2]x[-2,2] \ [2,4]x[-2,2]x[-2,2]
+	void diff35();
+	// [-2,2]x[-2,2]x[-2,2] \ [2,4]x[-1,1]x[-1,1]
+	void diff36();
 
 	void issue228();
 
