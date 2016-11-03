@@ -1,0 +1,35 @@
+version: build{build}
+image: Visual Studio 2015
+
+platform:
+  - x86
+
+environment:
+  matrix:
+    - TEST_INTERVAL_LIB: "gaol"
+    - TEST_INTERVAL_LIB: "filib"
+
+install:
+  - cmd: echo %Platform%
+  - cmd: set MINGW-W64_BASE=C:\mingw-w64\i686-5.3.0-posix-dwarf-rt_v4-rev0
+  - cmd: set PATH=%MINGW-W64_BASE%\mingw32\bin;C:\msys64\usr\bin;%PATH%
+  - cmd: uname -a
+  - cmd: pacman --noconfirm -S mingw32/mingw-w64-i686-cppunit
+  - cmd: set CPATH=%CPATH%;C:\msys64\mingw32\include
+  - cmd: set LIBRARY_PATH=%LIBRARY_PATH%;C:\msys64\mingw32\lib
+  - cmd: set PREFIX=%HOMEDRIVE%%HOMEPATH%
+
+build_script:
+  - cmd: python -x %cd%\waf configure --interval-lib=%TEST_INTERVAL_LIB% --prefix=%PREFIX%
+  - cmd: python -x %cd%\waf build install clean
+
+test_script:
+  - cmd: set PKG_CONFIG_PATH=%PREFIX%\share\pkgconfig
+  # We need to add the path to libcppunit in PATH
+  - cmd: set PATH=%PATH%;C:\msys64\mingw32\bin
+  - cmd: python -x %cd%\waf utest
+
+on_failure:
+  - cmd: cat C:\projects\ibex-lib\__build__\config.log
+  - cmd: cat C:\projects\ibex-lib\__build__\utest_config.log
+  - cmd: cat C:\projects\ibex-lib\__build__\utest_run.log

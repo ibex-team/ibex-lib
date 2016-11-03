@@ -24,11 +24,12 @@ public:
 
 	CPPUNIT_TEST_SUITE(TestOptimizer);
 	
-
+#ifndef _IBEX_WITH_NOLP_
 		CPPUNIT_TEST(issue50_1);
 		CPPUNIT_TEST(issue50_2);
 		CPPUNIT_TEST(issue50_3);
 		CPPUNIT_TEST(issue50_4);
+#endif
 	CPPUNIT_TEST_SUITE_END();
 
 	// upperbounding with goal_prec=10% will remove everything (initial loup > true minimum) --> NO_FEASIBLE_FOUND

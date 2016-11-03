@@ -1,46 +1,46 @@
 #! /usr/bin/env python
 # encoding: utf-8
 
-import os, tarfile #, functools
+import ibexutils
 
-from waflib import Logs
+from waflib import Configure
 
-def get_plugins(path):
-	#list all subdirectories
-	folders=path.ant_glob('*',dir=True,src=False)
-	#function that remove the path 
-	def basename(node): return node.path_from(node.parent)
-	return map(basename,folders)
+@Configure.conf
+def get_plugins (conf):
+	plugins = ibexutils.get_dirlist (conf.path)
+	return [p for p in plugins if not p.startswith(conf.env.ITVLIB_PLUGIN_PREFIX)]
 
-def configure (conf):
-    
-    	##################################################################################################
-	# Enable AFFINE plugin if option --with-affine-extended is enable
-	if (conf.options.WITH_AFFINE_EXTEND):
-		conf.options.WITH_AFFINE =True
-  
-	#store the list of plugins in the environment
-	#conf.env['plugins']=get_plugins(conf.path)
-	plugins=get_plugins(conf.path)
-		
-	#call "configure" of each plugin
-	conf.recurse(plugins)
-		
+######################
+###### options #######
+######################
 def options (opt):
-	#call "options" for each plugin
-	plugins=get_plugins(opt.path)
-	opt.recurse(plugins)
+	#call "options" for each surdir
+	subdir = ibexutils.get_dirlist (opt.path)
+	opt.recurse (subdir)
 
+######################
+##### configure ######
+######################
+def configure (conf):
+	#call "configure" of each plugin (not all subdir, because some subdir
+	# correspond to interval libraries and only one is used (configure for this
+	# library is called from top wscript))
+	plugins = conf.get_plugins ()
+	conf.recurse (plugins)
+
+######################
+####### build ########
+######################
 def build (bld):
-	#call "build" for each plugin
-	plugins=get_plugins(bld.path)
-	bld.recurse(plugins)
+	#call "build" for each plugin (not all subdir, cf comments for configure)
+	plugins = bld.get_plugins ()
+	bld.recurse (plugins)
 
-#import importlib # see add_src(..)
-
-# Add sources of each plugin
-#def add_src(bld):
-#	for plugin in bld.env['plugins']
-#		module=importlib.import_module(plugin)
-#		module.add_src(bld)
-
+######################
+####### utest ########
+######################
+def utest (tst):
+	# Call "utest" for each plugin (not all subdir, cf comments for configure).
+	# Plugin may not have tests so we add "mandatory = False"
+	plugins = tst.get_plugins ()
+	tst.recurse (plugins, mandatory = False)
