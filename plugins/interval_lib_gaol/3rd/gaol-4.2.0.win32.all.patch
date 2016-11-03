@@ -1,0 +1,96 @@
+--- gaol-4.2.0/Makefile.am	2016-11-02 18:05:57.775496711 +0100
++++ gaol-4.2.0/Makefile.am	2016-11-02 18:06:07.811889038 +0100
+@@ -23,8 +23,8 @@
+ #------------------------------------------------------------------------------
+ 
+ EXTRA_DIST = BUGS msvc examples
+-SUBDIRS = gdtoa gaol check gdtoa/test
+-DIST_SUBDIRS = gdtoa gaol check doc gdtoa/test
++SUBDIRS = gdtoa gaol gdtoa/test
++DIST_SUBDIRS = gdtoa gaol doc gdtoa/test
+ ACLOCAL_AMFLAGS = -I m4
+ 
+ # Requires automake 1.4
+--- gaol-4.2.0/configure.ac	2016-11-02 16:49:23.515135709 +0100
++++ gaol-4.2.0/configure.ac	2016-11-02 16:49:55.120391000 +0100
+@@ -351,6 +351,11 @@
+           [Define this if your system is a cygwin-based ix86 or compatible])
+ 	AM_CONDITIONAL([IS_CYGWIN_COND],[true])
+ 	;;
++*-*-msys*)
++	AC_DEFINE(IX86_LINUX,1,
++          [Define this if your system is a Linux-based ix86 or compatible])
++	AM_CONDITIONAL([IS_CYGWIN_COND],[false])
++	;;
+ i?86-apple-*)
+ 	AC_DEFINE(IX86_MACOSX,1,
+           [Define this if your system is a Linux-based ix86 or compatible])
+--- gaol-4.2.0/gdtoa/gdtoa.h	2016-11-02 17:41:31.922173915 +0100
++++ gaol-4.2.0/gdtoa/gdtoa.h	2016-11-02 17:42:24.568240369 +0100
+@@ -117,7 +117,7 @@
+ extern char* gdtoa ANSI((FPI *fpi, int be, ULong *bits, int *kindp,
+ 			int mode, int ndigits, int *decpt, char **rve));
+ extern void freedtoa ANSI((char*));
+-#if !IX86_MACOSX
++#if !IX86_MACOSX && !__MINGW32__
+ extern float  strtof ANSI((CONST char *, char **)) __GAOL_THROW();
+ extern double strtod ANSI((CONST char *, char **)) __GAOL_THROW();
+ #endif // IX86_MACOSX
+--- gaol-4.2.0/gaol/gaol_version.h	2016-11-02 17:52:49.176757087 +0100
++++ gaol-4.2.0/gaol/gaol_version.h	2016-11-02 17:53:04.505358760 +0100
+@@ -33,11 +33,7 @@
+ 
+ #if defined (_MSC_VER)
+ # include "gaol/gaol_version_msvc.h"
+-
+-#elif defined (__MINGW32__)
+-// Nothing for now. FIXME!
+-
+-#elif defined (__GNUC__)
++#else
+ # include "gaol/gaol_configuration.h"
+ #endif
+ 
+--- gaol-4.2.0/gaol/gaol_config.h	2016-11-02 17:52:49.176757087 +0100
++++ gaol-4.2.0/gaol/gaol_config.h	2016-11-02 17:53:04.505358760 +0100
+@@ -48,22 +48,7 @@
+ # define INLINE inline
+ # include "gaol/gaol_config_msvc.h"
+ 
+-#elif defined (__MINGW32__)
+-
+-# define GAOL_ERRNO errno
+-# undef PACKAGE
+-# undef VERSION
+-# include "gaol/gaol_config_mingw.h"
+-# ifndef __GAOL_PUBLIC__
+-#  if defined (HAVE_VISIBILITY_OPTIONS)
+-#     define __GAOL_PUBLIC__ __attribute__ ((visibility("default")))
+-#  else
+-#     define __GAOL_PUBLIC__
+-#  endif
+-# endif
+-# define INLINE inline
+-
+-#elif defined (__GNUC__)
++#else
+ # define GAOL_ERRNO errno
+ # undef PACKAGE
+ # undef VERSION
+@@ -77,16 +62,6 @@
+ # endif
+ # define INLINE inline
+ 
+-#else
+-
+-# define GAOL_ERRNO errno
+-# undef PACKAGE
+-# undef VERSION
+-# ifndef __GAOL_PUBLIC__
+-#  define __GAOL_PUBLIC__
+-# endif
+-# define INLINE inline
+-# include "gaol/gaol_configuration.h"
+ #endif
+ 
+ #endif /* __gaol_config_h__ */
