@@ -17,6 +17,16 @@ def setting_define (conf, key, val, key_format = "_IBEX_%s_", **kwargs):
 	conf.setenv("")
 
 @conf
+def apply_all_relevant_patches (conf, name):
+	patch_ant_glob = "3rd/%s.all.all*patch" % name
+	patch_ant_glob += " 3rd/%s.%s.all*patch" % (name, sys.platform)
+	patch_ant_glob += " 3rd/%s.all.%s*patch" % (name, conf.env.CC_NAME)
+	patch_ant_glob += " 3rd/%s.%s.%s*patch" % (name,sys.platform,conf.env.CC_NAME)
+	for p in conf.path.ant_glob (patch_ant_glob):
+		conf.apply_patch (p.abspath())
+
+
+@conf
 def write_setting_header (conf, **kwargs):
 	conf.setenv ("setting")
 	conf.write_config_header (**kwargs)
@@ -108,12 +118,7 @@ def configure_3rd_party_with_autotools (conf, archive_name,
 	conf.find_program ("make")
 
 	# Apply patches 
-	patch_ant_glob = "3rd/%s.all.all*patch" % name
-	patch_ant_glob += " 3rd/%s.%s.all*patch" % (name, sys.platform)
-	patch_ant_glob += " 3rd/%s.all.%s*patch" % (name, conf.env.CC_NAME)
-	patch_ant_glob += " 3rd/%s.%s.%s*patch" % (name,sys.platform,conf.env.CC_NAME)
-	for p in conf.path.ant_glob (patch_ant_glob):
-		conf.apply_patch (p.abspath())
+	conf.apply_all_relevant_patches (name)
 
 	# always build static library, even if ibex is built as a shared library.
 	conf_args += " --enable-static --disable-shared"
