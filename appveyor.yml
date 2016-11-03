@@ -1,13 +1,13 @@
 version: build{build}
 image: Visual Studio 2015
 
-branches:
-  only:
-  - Gaol4
-
 platform:
   - x86
-  - x64
+
+environment:
+  matrix:
+    - TEST_INTERVAL_LIB: "gaol"
+    - TEST_INTERVAL_LIB: "filib"
 
 install:
   - cmd: echo %Platform%
@@ -20,11 +20,8 @@ install:
   - cmd: set PREFIX=%HOMEDRIVE%%HOMEPATH%
 
 build_script:
-  - cmd: python -x %cd%\waf configure --interval-lib=filib --prefix=%PREFIX%
+  - cmd: python -x %cd%\waf configure --interval-lib=%TEST_INTERVAL_LIB% --prefix=%PREFIX%
   - cmd: python -x %cd%\waf build install clean
-
-on_finish:
-  - cmd: cat C:\projects\ibex-lib\__build__\config.log
 
 test_script:
   - cmd: set PKG_CONFIG_PATH=%PREFIX%\share\pkgconfig
