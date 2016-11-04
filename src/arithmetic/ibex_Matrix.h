@@ -155,6 +155,17 @@ public:
 	 */
 	void put(int row_start_index, int col_start_index, const Vector& v, bool row_vec);
 
+        /**
+         * \brief Compute determinant
+         */
+        double det();
+
+
+        /**
+         * \brief True if square matrix
+         */
+        bool is_square();
+
 	/**
      * \brief Set *this to (*this)+m.
      */
@@ -208,6 +219,11 @@ public:
 private:
 
 	Matrix();
+
+        /**
+         * \brief Compute determinant: recursive function
+         */
+        double compute_det();
 
 	int _nb_rows;
 	int _nb_cols;

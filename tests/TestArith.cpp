@@ -181,6 +181,16 @@ void TestArith::mulMM01() {
 	CPPUNIT_ASSERT(M==M_expected);
 }
 
+void TestArith::detMM01() {
+        double _tab[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+        Matrix M1(3,3,_tab);
+        double _res = 0;
+        CPPUNIT_ASSERT(M1.det()==_res);
+
+        Matrix M2(1,2);
+        CPPUNIT_ASSERT(M1.det()==0); //TODO: check error message is returned
+}
+
 void TestArith::div01() { check_div(Interval::EMPTY_SET,         Interval(0,1),               Interval::EMPTY_SET); }
 void TestArith::div02() { check_div(Interval::ZERO,              Interval::ZERO,              Interval::EMPTY_SET); }
 void TestArith::div03() { check_div(Interval(1,2),               Interval::ZERO,              Interval::EMPTY_SET); }

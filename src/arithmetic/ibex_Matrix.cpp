@@ -134,4 +134,40 @@ std::ostream& operator<<(std::ostream& os, const Matrix& m) {
 	return _displayM(os,m);
 }
 
+double Matrix::det(){
+    if (!is_square()) //TODO: return error message
+        return 0;
+    if(_nb_cols ==1 )
+        return M[0][0];
+    else
+        return compute_det();
+}
+
+double Matrix::compute_det(){
+    double res(0);
+    if(_nb_cols ==2)
+        return M[0][0]*M[1][1]-M[1][0]*M[0][1];
+    else {
+        for(int i=0;i<_nb_cols;i++) {
+            Matrix sub(_nb_rows-1,_nb_rows-1);
+            int row_it(0);
+            for(int j=0;j<_nb_rows-1;j++) { //create sub matrix
+                if(j!=i){
+                    sub.set_row(row_it,(this->row(j).subvector(2,_nb_cols-1)));
+                    row_it++;
+                }
+            }
+            if(i%2 == 0)
+                res += M[i][0]*sub.compute_det();
+            else
+                res -= M[i][0]*sub.compute_det();
+        }
+    }
+    return res;
+}
+
+bool Matrix::is_square(){
+    return (_nb_cols == _nb_rows);
+} // namespace ibex
+
 } // namespace ibex
