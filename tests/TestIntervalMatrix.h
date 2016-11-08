@@ -73,6 +73,9 @@ public:
 	CPPUNIT_TEST(mul02);
 
 	CPPUNIT_TEST(put01);
+	CPPUNIT_TEST(rad01);
+	CPPUNIT_TEST(diam01);
+
 	CPPUNIT_TEST_SUITE_END();
 
 	// test:
@@ -167,6 +170,8 @@ public:
 	void mul02();
 
 	void put01();
+	void rad01();
+	void diam01();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestIntervalMatrix);
