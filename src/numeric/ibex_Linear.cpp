@@ -423,5 +423,17 @@ bool is_posdef_sylvester(const IntervalMatrix& A) {
     return true;
 }
 
+bool is_diagonal_dominant(const IntervalMatrix& A) {
+	double s;
+	for (int i=0; i<A.nb_rows(); i++) {
+    	s=0;
+    	for (int j=0; j<A.nb_cols(); j++) {
+    		if (j!=i) s+=A[i][j].mag();
+    	}
+    	if (s>=A[i][i].mig()) return false;
+    }
+    return true;
+}
+
 } // end namespace
 

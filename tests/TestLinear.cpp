@@ -144,8 +144,22 @@ void TestLinear::is_posdef_sylvester01() {
 
 }
 
-void TestLinear::is_posdef_sylvester02() {
+void TestLinear::is_diagonal_dominant01() {
+	int n=10;
+	IntervalMatrix M=Matrix::eye(n);
+	for (int i=0; i<n; i++) {
+		for (int j=0; j<n; j++) {
+			if (i<j) M[i][j]=-1.0/((double) n);
+			else if (i>j) M[i][j]=1.0/((double) n);
+		}
+	}
+	CPPUNIT_ASSERT(is_diagonal_dominant(M));
 
+	M[n-1][n-2]=Interval(0,1.99/((double) n));
+	CPPUNIT_ASSERT(is_diagonal_dominant(M));
+
+	M[n-1][n-2]=Interval(0,2.00/((double) n));
+	CPPUNIT_ASSERT(!is_diagonal_dominant(M));
 }
 
 } // end namespace ibex

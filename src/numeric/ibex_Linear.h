@@ -22,9 +22,10 @@ namespace ibex {
  * \degroup numeric Numerical Algorithms
  */
 
+/** \ingroup numeric */
+/*@{*/
+
 /**
- * \ingroup numeric
- *
  * \brief LU decomposition of a real matrix with partial pivoting
  *
  * \param A - The matrix to decompose.
@@ -44,8 +45,6 @@ namespace ibex {
 void real_LU(const Matrix& A, Matrix& LU, int* p);
 
 /*
- * \ingroup numeric
- *
  * \brief LU decomposition of a real matrix with full pivoting.
  *
  * \param A - The matrix to decompose.
@@ -71,8 +70,6 @@ void interval_LU(const IntervalMatrix& A, IntervalMatrix& LU, int* p);
 void interval_LU(const IntervalMatrix& A, IntervalMatrix& LU, int* pr, int* pc);
 
 /**
- * \ingroup numeric
- *
  * \brief Computes an (approximative) inverse of a real matrix.
  *
  * \param A - The matrix to inverse.
@@ -87,8 +84,6 @@ void interval_LU(const IntervalMatrix& A, IntervalMatrix& LU, int* pr, int* pc);
 void real_inverse(const Matrix& A, Matrix& invA);
 
 /**
- * \ingroup numeric
- *
  * \brief Preconditions system \f$[A]x=[b]\f$.
  *
  * <br> Precondition is made by multiplying [A] and [b]
@@ -105,8 +100,6 @@ void real_inverse(const Matrix& A, Matrix& invA);
 void precond(IntervalMatrix& A, IntervalVector& b);
 
 /**
- * \ingroup numeric
- *
  * \brief Precondition the matrix \f$[A]\f$.
  *
  * <br> Precondition is made by multiplying [A]
@@ -121,8 +114,6 @@ void precond(IntervalMatrix& A, IntervalVector& b);
 void precond(IntervalMatrix& A);
 
 /**
- * \ingroup numeric
- *
  * \brief Gauss-Seidel algorithm.
  *
  * No preconditioning is done.
@@ -140,9 +131,7 @@ void precond(IntervalMatrix& A);
  */
 void gauss_seidel(const IntervalMatrix& A, const IntervalVector& b, IntervalVector& x, double ratio=0.01);
 
-/*
- * \ingroup numeric
- *
+/**
  * \brief Gauss-Seidel algorithm (inflating variant).<br>
  *
  * Compute a non-rigorous approximation of \f$\Sigma([A],[b])\f$
@@ -162,9 +151,7 @@ void gauss_seidel(const IntervalMatrix& A, const IntervalVector& b, IntervalVect
 bool inflating_gauss_seidel(const IntervalMatrix& A, const IntervalVector& b, IntervalVector& x, double min_dist=1e-12, double mu_max_divergence=1.0);
 
 /**
- * \ingroup numeric
- *
- * \brief Hansen-Bliek algorithm
+ * \brief Hansen-Bliek algorithm.
  *
  * Applies Hansen-Bliek algorithm (including midpoint preconditioning).<br>
  * The result is an outer approximation of \f$\Sigma(C[A],C[b])\f$
@@ -185,12 +172,12 @@ bool inflating_gauss_seidel(const IntervalMatrix& A, const IntervalVector& b, In
 void hansen_bliek(const IntervalMatrix& A, const IntervalVector& b, IntervalVector& x);
 
 /**
- * \brief An enclosure of the determinant of A
+ * \brief An enclosure of the determinant of A.
  */
 Interval det(const IntervalMatrix& A);
 
 /**
- * \brief Sylvester's Positive definiteness criterion
+ * \brief Sylvester's Positive definiteness criterion.
  *
  * \return true only if A is positive definite (otherwise,
  *         nothing can be said).
@@ -199,6 +186,17 @@ Interval det(const IntervalMatrix& A);
  */
 bool is_posdef_sylvester(const IntervalMatrix& A);
 
-} // end namespace
+/**
+ * \brief Check diagonal dominance.
+ *
+ * True if the sum of the magnitudes of the off-diagonal
+ * entries in a given row is less than the
+ * mignitude of the diagonal one.
+ */
+bool is_diagonal_dominant(const IntervalMatrix& A);
+
+/*@}*/  // end group numeric
+
+}       // end namespace
 
 #endif // __IBEX_LINEAR_H__

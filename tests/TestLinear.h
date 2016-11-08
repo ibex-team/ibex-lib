@@ -30,7 +30,7 @@ public:
 	CPPUNIT_TEST(det01);
 	CPPUNIT_TEST(det02);
 	CPPUNIT_TEST(is_posdef_sylvester01);
-	CPPUNIT_TEST(is_posdef_sylvester02);
+	CPPUNIT_TEST(is_diagonal_dominant01);
 	CPPUNIT_TEST_SUITE_END();
 
 	void lu_partial_underctr();
@@ -48,7 +48,7 @@ public:
 	void det02();
 
 	void is_posdef_sylvester01();
-	void is_posdef_sylvester02();
+	void is_diagonal_dominant01();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TestLinear);
