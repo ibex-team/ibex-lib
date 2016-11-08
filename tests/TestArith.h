@@ -433,6 +433,7 @@ private:
 	void mul19();
 
 	void mulMM01();
+        void detMM01();
 
 	/* test:
 	 * =======

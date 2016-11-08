@@ -12,7 +12,6 @@
 #include "ibex_Cell.h"
 #include "ibex_Exception.h"
 
-using std::pair;
 
 namespace ibex {
 
@@ -30,9 +29,6 @@ Bsc::Bsc(const Vector& prec) : _prec(prec) {
 		if (prec[i]<=0) ibex_error("precision must be a nonnegative number");
 }
 
-pair<IntervalVector,IntervalVector> Bsc::bisect(Cell& cell) {
-	return bisect(cell.box);
-}
 
 void Bsc::add_backtrackable(Cell& root) {
 	root.add<BisectedVar>();

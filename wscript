@@ -129,7 +129,7 @@ def configure (conf):
 	# Disable rounding interval
 	if (conf.options.WITH_STANDALONE):
 		conf.env.WITHOUT_ROUNDING =True 
-								
+
 	##################################################################################################
 	# Bison / Flex
 	env.append_unique ("BISONFLAGS", ["--name-prefix=ibex", "--report=all", "--file-prefix=parser"])

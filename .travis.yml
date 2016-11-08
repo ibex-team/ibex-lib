@@ -25,7 +25,7 @@ before_install:
 
 install: 
   - cd plugins/optim/; tar xvf soplex-1.7.1.tar && cd soplex-1.7.1 && make install && cd ../../..
-  - ./waf configure --with-optim --with-soplex=$PWD/plugins/optim/soplex-1.7.1 --with-affine 
+  - ./waf configure --with-optim --with-soplex=$PWD/plugins/optim/soplex-1.7.1 --with-affine --with-optim
   - sudo ./waf install
   - export PKG_CONFIG_PATH=/usr/local/share/pkgconfig/
   - cd tests/ && make utest && cd ..
@@ -35,5 +35,5 @@ install:
 script:  
 #  - __build__/examples/optimizer04 benchs/benchs-optim/coconutbenchmark-library1/ex8_5_2.bch acidhc4 compo smearsumrel 1.e-8 1.e-8 100 1
   - cd tests/ && ./utest && cd ..
-#  - cd plugins/optim/tests/ && ./nonreg nonreg-travis-soplex-filib.res && cd ../../..
+  - cd plugins/optim/tests/ && ./nonreg nonreg-travis-soplex-filib.res && cd ../../..
 
