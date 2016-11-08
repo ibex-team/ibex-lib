@@ -8,10 +8,12 @@
 // Last Update : Aug 29, 2013
 //============================================================================
 
-#include <math.h>
-#include <float.h>
 #include "ibex_Linear.h"
 #include "ibex_LinearException.h"
+
+#include <math.h>
+#include <float.h>
+#include <stack>
 
 #define TOO_LARGE 1e30
 #define TOO_SMALL 1e-10
@@ -413,6 +415,97 @@ void hansen_bliek(const IntervalMatrix& A, const IntervalVector& B, IntervalVect
 			else { x.set_empty(); return; }
 		}
 	}
+}
+
+Interval det(const IntervalMatrix& A) {
+	int n=A.nb_cols();
+	if(n!=A.nb_rows())
+		throw NotSquareMatrixException();
+
+	IntervalMatrix LU(A);
+	int *p = new int[n];
+	interval_LU(A,LU,p);
+	Interval res=LU[p[0]][0];
+	for (int i=1; i<n; i++) {
+		res*=LU[p[i]][i];
+	}
+
+	return res;
+}
+
+bool is_posdef_sylvester(const IntervalMatrix& A) {
+    int n = A.nb_cols();
+
+    for (int i=0; i<n-1; i++) {
+        if (det(A.submatrix(0, i, 0, i)).lb()<0) return false;
+    }
+
+    if (det(A).lb()<0) return false;
+
+    return true;
+}
+
+
+/**
+ * Checks one corner of an interval matrix in Rohn's test for
+ * positive definiteness (this function is called recursively
+ * with all corners of the input interval matrix).
+ * \param n The dimension of the matrices.
+ * \param i The index of test.
+ * \param Ac The center matrix.
+ * \param Ad The radius matrix.
+ * \param z The corner vector.
+ * \return true if the matrix is definite positive; false otherwise.
+ */
+
+bool is_posdef_rohn(const IntervalMatrix& A) {
+	int n=A.nb_rows();
+	if (!A.nb_cols()==n) throw NotSquareMatrixException();
+
+	Matrix midA=A.mid();
+	Matrix radA=A.rad();
+	Matrix Tz(n,n);
+
+	// the integer is the position in the vector where the sign
+	// has to be changed.
+	stack<pair<Vector,int> > s;
+
+	// The first index is 1 to break symmetry (the sign of index 0
+	// is always 1).
+	s.push(make_pair(Vector::ones(n),1));
+
+	// initial test with z=(1,...,1)
+	if (!is_posdef_sylvester(midA - radA)) return false;
+
+	while (!s.empty()) {
+		pair<Vector,int> p=s.top();
+		s.pop();
+
+		Vector& v=p.first;
+		int i=p.second;
+
+		if (i<n-1) s.push(make_pair(v,i+1));
+
+		v[i]=-1;
+		Tz=Matrix::diag(v);
+		if (!is_posdef_sylvester(midA - Tz*radA*Tz)) return false;
+
+		if (i<n-1) s.push(make_pair(v,i+1));
+	}
+
+	return true;
+}
+
+bool is_diagonal_dominant(const IntervalMatrix& A) {
+	double s;
+	for (int i=0; i<A.nb_rows(); i++) {
+    	s=0;
+    	for (int j=0; j<A.nb_cols(); j++) {
+    		if (j!=i) s+=A[i][j].mag();
+    	}
+    	if (s>=A[i][i].mig()) return false;
+    }
+    return true;
 }
 
 } // end namespace

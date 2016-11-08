@@ -11,6 +11,7 @@
 
 #include "TestIntervalMatrix.h"
 #include "ibex_IntervalMatrix.h"
+#include "ibex_Random.h"
 #include "utils.h"
 
 using namespace std;
@@ -417,3 +418,22 @@ void TestIntervalMatrix::put01() {
 	CPPUNIT_ASSERT(res==(Matrix(4,4,_expected)));
 }
 
+void TestIntervalMatrix::rad01() {
+	RNG::srand(1);
+	IntervalMatrix M=Matrix::rand(2);
+	Matrix R=M.rad();
+	CPPUNIT_ASSERT(R[0][0]==M[0][0].rad());
+	CPPUNIT_ASSERT(R[0][1]==M[0][1].rad());
+	CPPUNIT_ASSERT(R[1][0]==M[1][0].rad());
+	CPPUNIT_ASSERT(R[1][1]==M[1][1].rad());
+}
+
+void TestIntervalMatrix::diam01() {
+	RNG::srand(1);
+	IntervalMatrix M=Matrix::rand(2);
+	Matrix R=M.diam();
+	CPPUNIT_ASSERT(R[0][0]==M[0][0].diam());
+	CPPUNIT_ASSERT(R[0][1]==M[0][1].diam());
+	CPPUNIT_ASSERT(R[1][0]==M[1][0].diam());
+	CPPUNIT_ASSERT(R[1][1]==M[1][1].diam());
+}

@@ -339,10 +339,23 @@ bool bwd_mul(const IntervalMatrix& y, IntervalMatrix& x1, IntervalMatrix& x2, do
 	return true;
 }
 
+Matrix IntervalMatrix::rad() const {
+	Matrix M(nb_rows(),nb_cols());
+	for (int i=0; i<nb_rows(); i++)
+		for (int j=0; j<nb_cols(); j++)
+			M[i][j]=(*this)[i][j].rad();
+	return M;
+}
+
+Matrix IntervalMatrix::diam() const {
+	Matrix M(nb_rows(),nb_cols());
+	for (int i=0; i<nb_rows(); i++)
+		for (int j=0; j<nb_cols(); j++)
+			M[i][j]=(*this)[i][j].diam();
+	return M;
+}
+
 Matrix	        IntervalMatrix::random(int seed) const                            { return _randomM<IntervalMatrix,IntervalVector>(*this,seed); }
 Matrix	        IntervalMatrix::random() const                                    { return _randomM<IntervalMatrix,IntervalVector>(*this); }
-
-
-
 
 } // namespace ibex
