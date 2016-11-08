@@ -13,16 +13,20 @@
  # Requires automake 1.4
 --- gaol-4.2.0/configure.ac	2016-11-02 16:49:23.515135709 +0100
 +++ gaol-4.2.0/configure.ac	2016-11-02 16:49:55.120391000 +0100
-@@ -351,6 +351,16 @@
+@@ -351,6 +351,20 @@
            [Define this if your system is a cygwin-based ix86 or compatible])
  	AM_CONDITIONAL([IS_CYGWIN_COND],[true])
  	;;
 +*-*-msys*)
++	AC_DEFINE(IX86_LINUX,1,
++          [Define this if your system is a Linux-based ix86 or compatible])
 +	AC_DEFINE(IX86_MINGW,1,
 +          [Define this if your system is a mingw-based ix86 or compatible])
 +	AM_CONDITIONAL([IS_CYGWIN_COND],[false])
 +	;;
 +*-*-mingw*)
++	AC_DEFINE(IX86_LINUX,1,
++          [Define this if your system is a Linux-based ix86 or compatible])
 +	AC_DEFINE(IX86_MINGW,1,
 +          [Define this if your system is a mingw-based ix86 or compatible])
 +	AM_CONDITIONAL([IS_CYGWIN_COND],[false])
