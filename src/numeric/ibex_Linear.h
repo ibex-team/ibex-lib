@@ -183,8 +183,18 @@ Interval det(const IntervalMatrix& A);
  *         nothing can be said).
  *
  * Uses Sylvester's test (positive minor determinants).
+ * Complexity: O(n^3).
  */
 bool is_posdef_sylvester(const IntervalMatrix& A);
+
+/* \brief Rohn's Positive definiteness criterion.
+ *
+ * \see Rohn, J. (1994). Positive definiteness and stability of interval matrices.
+ *      SIAM Journal on Matrix Analysis and Applications, 15(1), 175-184.
+ *
+ * Complexity: O(2^n).
+ */
+bool is_posdef_rohn(const IntervalMatrix& A);
 
 /**
  * \brief Check diagonal dominance.

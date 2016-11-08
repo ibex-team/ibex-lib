@@ -191,6 +191,16 @@ public:
 	bool is_zero() const;
 
 	/**
+	 * \brief Matrix of radii.
+	 */
+	Matrix rad() const;
+
+	/**
+	 * \brief Matrix of diameters.
+	 */
+	Matrix diam() const;
+
+	/**
 	 * \brief True iff this interval matrix is a subset of \a x.
 	 *
 	 * \pre Dimension of \a x must be equal to the dimension of this matrix.
@@ -295,8 +305,6 @@ public:
 	 * \sa #ibex::Interval::is_disjoint(double) const.
 	 */
 	bool is_disjoint(const IntervalMatrix& x) const;
-
-
 
 	/**
 	 * \brief Return a submatrix.

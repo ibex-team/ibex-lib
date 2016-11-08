@@ -103,7 +103,10 @@ void TestLinear::det02() {
 	CPPUNIT_ASSERT_THROW(det(Matrix(1,2)), NotSquareMatrixException);
 }
 
-void TestLinear::is_posdef_sylvester01() {
+namespace {
+
+// Return an orthogonal matrix and its inverse
+pair<IntervalMatrix,IntervalMatrix> orthogonal_matrix() {
 
 	// Create an orthogonal 3x3 matrix
 	// with 3 rotations
@@ -130,18 +133,42 @@ void TestLinear::is_posdef_sylvester01() {
 
 	IntervalMatrix R=R1*R2*R3;
 	IntervalMatrix Rinv=R3.transpose()*R2.transpose()*R1.transpose();
+	return make_pair(R,Rinv);
+}
+
+}
+
+void TestLinear::is_posdef_sylvester01() {
+
+	pair<IntervalMatrix,IntervalMatrix> R=orthogonal_matrix();
 
 	double d[9]={2, 0, 0, 0, 1, 0, 0, 0, 3};
 	Matrix D(3,3,d);
 
-	CPPUNIT_ASSERT(is_posdef_sylvester(R*D*Rinv));
+	CPPUNIT_ASSERT(is_posdef_sylvester(R.first*D*R.second));
 
 	D[1][1]=0.1;
-	CPPUNIT_ASSERT(is_posdef_sylvester(R*D*Rinv));
+	CPPUNIT_ASSERT(is_posdef_sylvester(R.first*D*R.second));
 
 	D[1][1]=-0.1;
-	CPPUNIT_ASSERT(!is_posdef_sylvester(R*D*Rinv));
+	CPPUNIT_ASSERT(!is_posdef_sylvester(R.first*D*R.second));
 
+}
+
+void TestLinear::is_posdef_rohn01() {
+
+	pair<IntervalMatrix,IntervalMatrix> R=orthogonal_matrix();
+
+	double d[9]={2, 0, 0, 0, 1, 0, 0, 0, 3};
+	Matrix D(3,3,d);
+
+	CPPUNIT_ASSERT(is_posdef_rohn(R.first*D*R.second));
+
+	D[1][1]=0.1;
+	CPPUNIT_ASSERT(is_posdef_sylvester(R.first*D*R.second));
+
+	D[1][1]=-0.1;
+	CPPUNIT_ASSERT(!is_posdef_sylvester(R.first*D*R.second));
 }
 
 void TestLinear::is_diagonal_dominant01() {

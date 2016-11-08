@@ -30,6 +30,7 @@ public:
 	CPPUNIT_TEST(det01);
 	CPPUNIT_TEST(det02);
 	CPPUNIT_TEST(is_posdef_sylvester01);
+	CPPUNIT_TEST(is_posdef_rohn01);
 	CPPUNIT_TEST(is_diagonal_dominant01);
 	CPPUNIT_TEST_SUITE_END();
 
@@ -48,6 +49,7 @@ public:
 	void det02();
 
 	void is_posdef_sylvester01();
+	void is_posdef_rohn01();
 	void is_diagonal_dominant01();
 };
 
