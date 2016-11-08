@@ -119,6 +119,7 @@ void precond(IntervalMatrix& A, IntervalVector& b);
  *                                In this case, A and b are not modified.
  */
 void precond(IntervalMatrix& A);
+
 /**
  * \ingroup numeric
  *
@@ -183,6 +184,20 @@ bool inflating_gauss_seidel(const IntervalMatrix& A, const IntervalVector& b, In
  */
 void hansen_bliek(const IntervalMatrix& A, const IntervalVector& b, IntervalVector& x);
 
+/**
+ * \brief An enclosure of the determinant of A
+ */
+Interval det(const IntervalMatrix& A);
+
+/**
+ * \brief Sylvester's Positive definiteness criterion
+ *
+ * \return true only if A is positive definite (otherwise,
+ *         nothing can be said).
+ *
+ * Uses Sylvester's test (positive minor determinants).
+ */
+bool is_posdef_sylvester(const IntervalMatrix& A);
 
 } // end namespace
 

@@ -395,5 +395,33 @@ void hansen_bliek(const IntervalMatrix& A, const IntervalVector& B, IntervalVect
 	}
 }
 
+Interval det(const IntervalMatrix& A) {
+	int n=A.nb_cols();
+	if(n!=A.nb_rows())
+		throw NotSquareMatrixException();
+
+	IntervalMatrix LU(A);
+	int *p = new int[n];
+	interval_LU(A,LU,p);
+	Interval res=LU[p[0]][0];
+	for (int i=1; i<n; i++) {
+		res*=LU[p[i]][i];
+	}
+
+	return res;
+}
+
+bool is_posdef_sylvester(const IntervalMatrix& A) {
+    int n = A.nb_cols();
+
+    for (int i=0; i<n-1; i++) {
+        if (det(A.submatrix(0, i, 0, i)).lb()<0) return false;
+    }
+
+    if (det(A).lb()<0) return false;
+
+    return true;
+}
+
 } // end namespace
 
